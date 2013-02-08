@@ -1,9 +1,7 @@
 README
 ***
 =========
-Python 58
-
-Old version of code used before NSH started AGN development.
+Python 58 is an old version of the code, used before NSH started AGN development.
 
 
 ***
@@ -117,4 +115,4 @@ The philosophy of the directory structure is as follows:
 
 If you are not (foolishly) trying to improve the program, but actually model
 something, one uses the MakePyEnvrion to create a standalone environment
-for running python.  This routine copies the binaries and the b
+for running python.  This routine copies the binaries
