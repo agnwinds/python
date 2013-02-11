@@ -432,7 +432,7 @@ saha (xplasma, ne, t)
 	{
 	  b = xsaha * partition[nion]
 	    * exp (-ion[nion - 1].ip / (BOLTZMANN * t)) / (ne *
-							   partition[nion]);
+							   partition[nion-1]);
 	  if (b > big)
 	    b = big;		//limit step so there is no chance of overflow
 
