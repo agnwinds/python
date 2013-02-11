@@ -146,8 +146,8 @@ calloc_wind (nelem)
     }
   else
     {
-      Log
-	("Allocated %10d bytes for each of %5d elements of      w totaling %10.1f Mb\n",
+      Log_silent
+	("Allocated %10d bytes for each of %5d elements of           w totaling %10.1f Mb\n",
 	 sizeof (wind_dummy), nelem, 1.e-6 * nelem * sizeof (wind_dummy));
     }
 
@@ -169,6 +169,9 @@ calloc_wind (nelem)
 Description:	
 
 Notes:
+
+	This only allocates elements.  It does not populate them
+	with any information.
 
 
 History:
@@ -194,8 +197,8 @@ calloc_plasma (nelem)
     }
   else
     {
-      Log
-	("Allocated %10d bytes for each of %5d elements of plasma totaling %10.1f Mb \n",
+      Log_silent
+	("Allocated %10d bytes for each of %5d elements of      plasma totaling %10.1f Mb \n",
 	 sizeof (plasma_dummy), (nelem + 1),
 	 1.e-6 * (nelem + 1) * sizeof (plasma_dummy));
     }
@@ -212,7 +215,7 @@ calloc_plasma (nelem)
     }
   else
     {
-      Log
+      Log_silent
 	("Allocated %10d bytes for each of %5d elements of photonstore totaling %10.1f Mb \n",
 	 sizeof (photon_store_dummy), (nelem + 1),
 	 1.e-6 * (nelem + 1) * sizeof (photon_store_dummy));
@@ -336,15 +339,17 @@ calloc_macro (nelem)
 {
 
 
-  if (nlevels_macro == 0)
+  if (nlevels_macro == 0 && geo.nmacro == 0)
     {
-      Log ("Allocated no space for macro since nlevels_macro==0\n");
+      geo.nmacro = 0;
+      Log_silent
+	("Allocated no space for macro since nlevels_macro==0 and geo.nmacro==0\n");
       return (0);
     }
 // Allocate one extra element to store data where there is no volume
 
   macromain = (MacroPtr) calloc (sizeof (macro_dummy), (nelem + 1));
-  geo.nplasma = nelem;
+  geo.nmacro = nelem;
 
   if (macromain == NULL)
     {
@@ -352,16 +357,16 @@ calloc_macro (nelem)
 	("There is a problem in allocating memory for the macro structure\n");
       exit (0);
     }
-  else if (nlevels_macro > 0)
+  else if (nlevels_macro > 0 || geo.nmacro > 0)
     {
-      Log
-	("Allocated %10d bytes for each of %5d elements of macro  totaling %10.1f Mb \n",
+      Log_silent
+	("Allocated %10d bytes for each of %5d elements of       macro totaling %10.1f Mb \n",
 	 sizeof (macro_dummy), (nelem + 1),
 	 1.e-6 * (nelem + 1) * sizeof (macro_dummy));
     }
   else
     {
-      Log ("Allocated no space for macro since nlevels_macro==0\n");
+      Log_silent ("Allocated no space for macro since nlevels_macro==0\n");
     }
 
   return (0);

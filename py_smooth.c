@@ -60,7 +60,7 @@
 #include "python.h"
 
 
-#define LINELENGTH 132
+//OLD #define LINELENGTH 132
 #define NW		10000
 
 

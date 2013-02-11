@@ -63,7 +63,7 @@ cylind_ds_in_cell (p)
 
   wind_n_to_ij (n, &ix, &iz);	/*Convert the index n to two dimensions */
 
-  smax = INFINITY;		//initialize smax to a large number
+  smax = VERY_BIG;		//initialize smax to a large number
 
   /* Set up the quadratic equations in the radial rho direction */
 
@@ -271,10 +271,12 @@ cylind_wind_complete (w)
 	05apr	ksl	55d -- Modified to include the determination of whether
 			a cell was completely in the wind or not.  This
 			functionality had been in define_wind.
+	06nov	ksl	58b: Minor modification to use W_ALL_INWIND, etc.
+			instead of hardcoded values
  
 **************************************************************/
 
-#define RESOLUTION   100
+#define RESOLUTION   1000
 
 
 int
@@ -345,16 +347,16 @@ cylind_volumes (w)
 	  /* OK now make the final assignement of nwind and fix the volumes */
 	  if (jj == 0)
 	    {
-	      w[n].inwind = -1;	// The cell is not in the wind
+	      w[n].inwind = W_NOT_INWIND;	// The cell is not in the wind
 	      w[n].vol = 0.0;
 	    }
 	  else if (jj == kk)
 	    {
-	      w[n].inwind = 0;	// All of cell is inwind
+	      w[n].inwind = W_ALL_INWIND;	// All of cell is inwind
 	    }
-	  else			// Some of cell is inwind
+	  else
 	    {
-	      w[n].inwind = 1;
+	      w[n].inwind = W_PART_INWIND;	// Some of cell is inwind
 	      w[n].vol *= fraction;
 	    }
 	}

@@ -20,9 +20,6 @@
 
 #include "python.h"
 
-/* 
-Replaced detail transfer with memcpy for python_40.  
-*/
 int init_stuff_phot = 0;
 size_t sizeofphot;
 
@@ -50,11 +47,6 @@ stuff_phot (pin, pout)
   pout->origin = pin->origin;
   pout->nnscat = pin->nnscat;
 
-//if(init_stuff_phot==0) {
-//sizeofphot=sizeof(pin);
-//init_stuff_phot=1;
-//} 
-//memcpy(pout,pin,sizeof(pin));
 
   return (0);
 }
@@ -96,6 +88,82 @@ comp_phot (p1, p2)
     return (1);
   return (0);
 }
+
+/* phot_hist is designed to record the history of a single photon 
+  bundle, in terms of a series of photon structures that are
+  populated as the photon goes through the grid
+
+  Unless phot_hist_on is true, then this routine is a NOP
+
+090125	ksl	68b -Created to better understand where photon bundles were
+		being absorbed or losing energy in the grid
+*/
+
+int
+phot_hist (p,iswitch)
+     PhotPtr p;
+     int iswitch;
+{
+	if (phot_hist_on == 0) return (0);
+
+  if (iswitch == 0)
+    {
+      n_phot_hist = 0;
+    }
+
+  if (n_phot_hist < MAX_PHOT_HIST)
+    {
+      stuff_phot (p, &xphot_hist[n_phot_hist]);
+      n_phot_hist++;
+    }
+  else
+    {
+      Error
+	("phot_hist: The number of steps %d in phot_hist exceeds MAX_PHOT_HIST\n",
+	 MAX_PHOT_HIST);
+    }
+
+  return (n_phot_hist);
+}
+
+/* The next routine is destigned to update a portion of the PlasmaPtr to reflect where
+ * photons along the line of sight to the observer were absorbed in the wind
+
+
+090211	ksl	Created to store the energy removed photons headed toward the observer
+		by an ion in a particular cell of the wind.
+ */
+
+int phot_history_summarize()
+{
+	int n;
+	PlasmaPtr xplasma;
+	PhotPtr p;
+	double x_old,x_new;
+	int nion;
+
+	p=&xphot_hist[0];
+	xplasma=&plasmamain[wmain[p->grid].nplasma];
+	x_old=p->w;
+
+	for (n=1;n<n_phot_hist;n++){
+		p=&xphot_hist[n];
+		nion=lin_ptr[p->nres]->nion;
+		x_new=p->w*exp(-(p->tau));
+		xplasma->xscatters[nion]+=(x_old-x_new);
+		x_old=x_new; 
+
+		if(xplasma->xscatters[nion]<0.0) {
+			Error("Help me, %d %d Rhonda %d %d\n",n,n_phot_hist,p->grid,wmain[p->grid].nplasma );
+		}
+	}
+		
+
+
+	return(0);
+}
+
+
 
 /*******************************************************
             Space Telescope Science Institute
@@ -202,7 +270,7 @@ ds_to_cone (cc, p)
      direction set the path length to infinity */
 
   if (pp.x[2] * pp.lmn[2] >= 0)
-    s_to_zero = INFINITY;
+    s_to_zero = VERY_BIG;
   else
     s_to_zero = (-pp.x[2] / pp.lmn[2]);
 
@@ -217,7 +285,7 @@ ds_to_cone (cc, p)
 
 /* Calculate the pathlenth along a line of sight defined by
    a photon p to a sphere or radius r centered on the origin.  If
-   the photon does not hit the sphere return a large number INFINITY */
+   the photon does not hit the sphere return a large number VERY_BIG */
 
 double
 ds_to_sphere (r, p)
@@ -242,7 +310,7 @@ both roots were imaginary */
     return (root[i]);		/*Because that implies
 				   the ray hit the sphere */
 
-  return (INFINITY);
+  return (VERY_BIG);
 }
 
 /* This is more generalized routine to find the positive distance to
@@ -271,7 +339,7 @@ ds_to_sphere2 (x, r, p)
     return (root[i]);		/*Because that implies
 				   the ray hit the sphere */
 
-  return (INFINITY);
+  return (VERY_BIG);
 }
 
 /* This solves a simple quadratic (or if a is zero linear equation).  The return is set up
@@ -345,12 +413,12 @@ quadratic (a, b, c, r)
    defined by x=x_v+s lmn_v and the allowed values of s are determined by the equation
 
    (x_v+s lmn_v - x_p)  .  lmn_p=0 where . implies the dot-product.   The routine returns
-   INFINITY if the photon ray does not intersect the plane .
+   VERY_BIG if the photon ray does not intersect the plane .
 
    This routine should be a more general routine than z_plane_intercept, which it replaced at
    some point.
 
-   04aug	ksl	Changed return to +INFINITY if the photon cannot every hit the 
+   04aug	ksl	Changed return to +VERY_BIG if the photon cannot every hit the 
    			plane.
  */
 
@@ -364,7 +432,7 @@ ds_to_plane (pl, p)
 
 
   if ((denom = dot (p->lmn, pl->lmn)) == 0)
-    return (INFINITY);
+    return (VERY_BIG);
 
   vsub (pl->x, p->x, diff);
 

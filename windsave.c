@@ -6,17 +6,22 @@
  Synopsis:
 	wind_save(w,filename)
 	wind_read(filename)
+	spec_save(filename)
+	spec_read(filename)
 
 Arguments:		
+
 
 
 Returns:
  
 Description:	
 	
-	The two routines in this file write and read the wind structure.  		
+	The first two routines in this file write and read the wind structure.  		
+	The second two routines do the same thing for the spectrum structure
 
 Notes:
+
 
 History:
  	98mar	ksl 	Replaced old ascii routine with binary read and write
@@ -27,6 +32,14 @@ History:
 			w inside the routine and have that assigment be durable
 			outside of the subroutine.  Instead we set wmain.
 	06may	ksl	Added read & write statement for plasma structure
+	08mar	ksl	60 - Added read & write statements for macro structure
+	08may	ksl	60a - Fixed write statement for macro structure so not
+			written when no macro atoms
+	08dec	ksl	67c - Added routines to read and write the 
+			spec structure as part of the general effort
+			to allow python to restart. Modified the call to
+			wind_save to eliminate superfluous passing of
+			the wind ptr.
  
 **************************************************************/
 
@@ -39,11 +52,9 @@ History:
 
 #include "python.h"
 
-#define LINELENGTH 132
 
 int
-wind_save (w, filename)
-     WindPtr w;
+wind_save (filename)
      char filename[];
 {
   FILE *fptr, *fopen ();
@@ -59,8 +70,10 @@ wind_save (w, filename)
   sprintf (line, "Version %s\n", VERSION);
   n = fwrite (line, sizeof (line), 1, fptr);
   n += fwrite (&geo, sizeof (geo), 1, fptr);
-  n += fwrite (w, sizeof (wind_dummy), NDIM2, fptr);
+  n += fwrite (wmain, sizeof (wind_dummy), NDIM2, fptr);
   n += fwrite (plasmamain, sizeof (plasma_dummy), NPLASMA, fptr);
+  if (geo.nmacro)
+    n += fwrite (macromain, sizeof (macro_dummy), NPLASMA, fptr);
 
   fclose (fptr);
 
@@ -88,7 +101,7 @@ wind_read (filename)
   n = fread (line, sizeof (line), 1, fptr);
   sscanf (line, "%*s %s", version);
   Log
-    ("Reading Windfile %s created with python version %s with py_wind version %s\n",
+    ("Reading Windfile %s created with python version %s with python version %s\n",
      filename, version, VERSION);
 
   n += fread (&geo, sizeof (geo), 1, fptr);
@@ -105,8 +118,14 @@ wind_read (filename)
   calloc_wind (NDIM2);
   n += fread (wmain, sizeof (wind_dummy), NDIM2, fptr);
 
-  calloc_plasma (NDIM2);
+  calloc_plasma (NPLASMA);
   n += fread (plasmamain, sizeof (plasma_dummy), NPLASMA, fptr);
+
+  if (geo.nmacro > 0)
+    {
+      calloc_macro (NPLASMA);
+      n += fread (macromain, sizeof (macro_dummy), NPLASMA, fptr);
+    }
 
   fclose (fptr);
 
@@ -160,4 +179,73 @@ wind_complete (w)
     }
 
   return (0);
+}
+
+int
+spec_save (filename)
+     char filename[];
+{
+
+  FILE *fptr, *fopen ();
+  char line[LINELENGTH];
+  int n;
+
+  if ((fptr = fopen (filename, "w")) == NULL)
+    {
+      Error ("spec_save: Unable to open %s\n", filename);
+      exit (0);
+    }
+
+  sprintf (line, "Version %s  nspectra %d\n", VERSION, nspectra);
+  n = fwrite (line, sizeof (line), 1, fptr);
+  n += fwrite (s, sizeof (spectrum_dummy), nspectra, fptr);
+  fclose (fptr);
+
+  return (n);
+}
+
+
+int
+spec_read (filename)
+     char filename[];
+{
+  FILE *fptr, *fopen ();
+  int n;
+
+  char line[LINELENGTH];
+  char version[LINELENGTH];
+
+  if ((fptr = fopen (filename, "r")) == NULL)
+    {
+      Error ("spec_read: Unable to open %s\n", filename);
+      exit (0);
+    }
+  n = fread (line, sizeof (line), 1, fptr);
+  sscanf (line, "%*s %s %*s %d", version, &nspectra);
+  Log
+    ("Reading specfile %s with %d spectra created with python version %s with python version %s\n",
+     filename, nspectra, version, VERSION);
+
+
+  /* First allocate space */
+
+  s = calloc (sizeof (spectrum_dummy), nspectra);
+  if (s == NULL)
+    {
+      Error
+	("spectrum_init: Could not allocate memory for %d spectra with %d wavelengths\n",
+	 nspectra, NWAVE);
+      exit (0);
+    }
+
+/* Now read the rest of the file */
+
+  n += fread (s, sizeof (spectrum_dummy), nspectra, fptr);
+
+  fclose (fptr);
+
+  Log ("Read spec structures from specfile %s\n", filename);
+
+  return (n);
+
 }

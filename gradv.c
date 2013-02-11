@@ -155,7 +155,6 @@ the routine is used I believe . ksl
 			claimed that one needs this everywhere.
  */
 
-#define LINELENGTH 132
 int
 dvds_ave ()
 {

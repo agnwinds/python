@@ -61,7 +61,7 @@ bf_estimators_increment (one, p, ds)
   double x, ft;
   double y, yy;
   double exponential, heat_contribution;
-  int n, m, llvl;
+  int n, m, llvl, nn;
   double sigma_phot_topbase ();
   double density;
   double abs_cont;
@@ -80,76 +80,85 @@ bf_estimators_increment (one, p, ds)
   // take as a single "average" value.  
 
 
-  for (n = 0; n < ntop_phot; n++)	// Loop over photoionisation processes. 
-    // This is mostly copied from old radiation.c (SS)
+  /* SS Jul07 - replacing next block to use kap_bf for consistency. */
+  // SS July07 - problems when a packet drifts across a strong continuum edge (e.g. Lyman)
+  // The exponential can blow up (which it shouldn't). Setting it to 1.0 (i.e. behaviour for
+  // exactly on the edge - not clear that this is ideal, but it's better than letting it get
+  // bigger than 1.0. Perhaps need to address more fully by putting a limit to 
+  // propagation distances that will prevent this.
+  for (nn = 0; nn < xplasma->kbf_nuse; nn++)
     {
-      /* This loop forks for macro and simple ions: for macro ions we want to compute in 
-         detail the mc estimators. These are later used to get, amongst other things,
-         the heating rate. For simple ions we want only to record the total
-         heating rate. (SS, Apr 04) */
-      llvl = phot_top[n].nlev;	//identify which is the lower level for this process
+      n = xplasma->kbf_use[nn];
       ft = phot_top[n].freq[0];	//This is the edge frequency (SS)
-      if (freq_av > ft && freq_av < phot_top[n].freq[phot_top[n].np - 1])
+
+      llvl = phot_top[n].nlev;	//Returning lower level = correct (SS)
+
+      density = den_config (xplasma, llvl);
+      if (kap_bf[nn] > 0.0 && (freq_av > ft) && phot_top[n].macro_info == 1
+	  && geo.macro_simple == 0)
 	{
-	  if (phot_top[n].macro_info == 1 && geo.macro_simple == 0)
+	  x = kap_bf[nn] / density;	//this is the cross section
+
+	  /* Now identify which of the BF processes from this level this is. */
+
+	  m = 0;
+	  while (m < config[llvl].n_bfu_jump && config[llvl].bfu_jump[m] != n)
+	    m++;
+
+	  // m should now be the label to identify which of the bf processes from llvl
+	  // this is. Check that it is reasonable
+
+	  if (m > config[llvl].n_bfu_jump - 1)
+	    {
+	      Error
+		("bf_estimators_increment: could not identify bf transition. Abort. \n");
+	      exit (0);
+	    }
+
+	  // Now calculate the contributions and add them on.
+	  weight_of_packet = p->w;
+	  y = weight_of_packet * x * ds;
+	  exponential = y * exp (-(freq_av - ft) / BOLTZMANN / xplasma->t_e);
+	  mplasma->gamma[llvl][m] += y / freq_av;
+	  mplasma->alpha_st[llvl][m] += exponential / freq_av;
+	  mplasma->gamma_e[llvl][m] += y / ft;
+	  mplasma->alpha_st_e[llvl][m] += exponential / ft;
+
+	  /* Now record the contribution to the energy absorbed by macro atoms. */
+	  yy = y * den_config (xplasma, llvl);
+	  mplasma->matom_abs[phot_top[n].uplev] += abs_cont =
+	    yy * ft / freq_av;
+	  xplasma->kpkt_abs += yy - abs_cont;
+	  /* the following is just a check that flags packets that appear to traveled a 
+	     suspiciously large optical depth in the continuum */
+	  if ((yy / weight_of_packet) > 50)
+	    {
+	      Log
+		("bf_estimator_increment: A packet survived an optical depth of %g\n",
+		 yy / weight_of_packet);
+	      Log ("bf_estimator_increment: freq_av %g, ft %g\n", freq_av,
+		   ft);
+	    }
+	}
+      else
+	{
+	  /* Now we are dealing with the heating due to the bf continua of simple ions. No stimulated
+	     recombination is included here. (SS, Apr 04) */
+	  if (density > DENSITY_PHOT_MIN)
 	    {
 	      x = sigma_phot_topbase (&phot_top[n], freq_av);	//this is the cross section
-
-	      /* Now identify which of the BF processes from this level this is. */
-
-	      m = 0;
-	      while (m < config[llvl].n_bfu_jump
-		     && config[llvl].bfu_jump[m] != n)
-		m++;
-
-	      // m should now be the label to identify which of the bf processes from llvl
-	      // this is. Check that it is reasonable
-
-	      if (m > config[llvl].n_bfu_jump - 1)
-		{
-		  Error
-		    ("bf_estimators_increment: could not identify bf transition. Abort. \n");
-		  exit (0);
-		}
-
-	      // Now calculate the contributions and add them on.
 	      weight_of_packet = p->w;
 	      y = weight_of_packet * x * ds;
-	      exponential =
-		y * exp (-(freq_av - ft) / BOLTZMANN / xplasma->t_e);
-	      mplasma->gamma[llvl][m] += y / freq_av;
-	      mplasma->gamma_e[llvl][m] += y / ft;
-	      mplasma->alpha_st[llvl][m] += exponential / freq_av;
-	      mplasma->alpha_st_e[llvl][m] += exponential / ft;
+	      /* Is a factor of two needed here to account for volume above and below the plane?? (SS May04) */
+	      xplasma->heat_photo += heat_contribution = y * density * (1.0 - (ft / freq_av));	///2;// * one->vol ? 
+	      xplasma->heat_tot += heat_contribution;
+	      /* This heat contribution is also the contibution to making k-packets in this volume. So we record it. */
 
-	      /* Now record the contribution to the energy absorbed by macro atoms. */
-	      yy = y * den_config (xplasma, llvl);
-	      mplasma->matom_abs[phot_top[n].uplev] += abs_cont =
-		yy * ft / freq_av;
-	      xplasma->kpkt_abs += yy - abs_cont;
-
-
-	    }
-	  else
-	    {
-	      /* Now we are dealing with the heating due to the bf continua of simple ions. No stimulated
-	         recombination is included here. (SS, Apr 04) */
-	      density = den_config (xplasma, llvl);
-	      if (density > DENSITY_PHOT_MIN)
-		{
-		  x = sigma_phot_topbase (&phot_top[n], freq_av);	//this is the cross section
-		  weight_of_packet = p->w;
-		  y = weight_of_packet * x * ds;
-		  /* Is a factor of two needed here to account for volume above and below the plane?? (SS May04) */
-		  xplasma->heat_photo += heat_contribution = y * density * (1.0 - (ft / freq_av));	///2;// * one->vol ? 
-		  xplasma->heat_tot += heat_contribution;
-		  /* This heat contribution is also the contibution to making k-packets in this volume. So we record it. */
-
-		  xplasma->kpkt_abs += heat_contribution;
-		}
+	      xplasma->kpkt_abs += heat_contribution;
 	    }
 	}
     }
+
 
   /* Now for contribution to heating due to ff processes. (SS, Apr 04) */
 
@@ -164,6 +173,24 @@ bf_estimators_increment (one, p, ds)
   /* This heat contribution is also the contibution to making k-packets in this volume. So we record it. */
 
   xplasma->kpkt_abs += heat_contribution;
+
+  /* Now for contribution to inner shell ionization estimators (SS, Dec 08) */
+  
+  for (n = 0; n < nauger; n++)
+    {
+      ft = augerion[n].freq_t;
+      if (freq_av > ft)
+ 	{
+ 	  printf("Adding a pacjet to AUGER %g \n", freq_av);
+	  
+ 	  weight_of_packet = p->w;
+ 	  x = sigma_phot_verner(&augerion[n], freq_av); //this is the cross section
+ 	  y = weight_of_packet * x * ds;
+	  
+ 	  xplasma->gamma_inshl[n] += y / freq_av / H /one->vol;
+ 	}
+    }
+
 
 
   return (0);
@@ -403,6 +430,20 @@ mc_estimator_normalise (n)
     {
       for (j = 0; j < config[i].n_bfu_jump; j++)
 	{
+	  /*
+	     if (i == 1 && j == 0)
+	     {
+	     if (mplasma->gamma[i][j] == 0)
+	     {
+	     printf("Ba continuum has zero estimator for cell %d\n", one->nplasma);
+	     }
+	     else
+	     {
+	     printf("Ba continuum has %g estimaros for cell %d Previously it was %g.\n",mplasma->gamma[i][j] / H / volume, one->nplasma, mplasma->gamma_old[i][j]);
+	     }
+	     }
+	   */
+
 	  mplasma->gamma_old[i][j] = mplasma->gamma[i][j] / H / volume;	//normalise
 	  mplasma->gamma[i][j] = 0.0;	//re-initialise for next iteration
 	  mplasma->gamma_e_old[i][j] = mplasma->gamma_e[i][j] / H / volume;	//normalise
@@ -534,13 +575,14 @@ mc_estimator_normalise (n)
 		      den_config (xplasma,
 				  line[config[i].bbu_jump[j]].nconfigu));
 	      stimfac = 0.0;
-	      exit (0);
+	      //exit (0);
 	    }
 
 	  //get the line frequency
 	  line_freq = line[config[i].bbu_jump[j]].freq;
 	  mplasma->jbar_old[i][j] =
 	    mplasma->jbar[i][j] * C * stimfac / 4. / PI / volume / line_freq;
+
 	  mplasma->jbar[i][j] = 0.0;
 	}
     }
