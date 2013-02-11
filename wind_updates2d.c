@@ -134,7 +134,6 @@ WindPtr (w);
 	{
 	  wtest = plasmamain[n].ave_freq;
 	  plasmamain[n].ave_freq /= plasmamain[n].j;	/* Normalization to frequency moment */
-	printf("Cell %i E1=%e,E2=%e\n",n,plasmamain[n].j,wtest);
 	  if (sane_check (plasmamain[n].ave_freq))
 	    {
 	      Error ("wind_update: %d ave_freq %e j %e ntot %d\n",
@@ -148,13 +147,6 @@ WindPtr (w);
 	  plasmamain[n].w =
 	    PI * plasmamain[n].j / (STEFAN_BOLTZMANN * trad * trad * trad *
 				    trad);
-
-/* ??? This seems to be a diagnostic Nick added.  Consider deleting */
-	if (nwind > 59 && nwind < 90)
-
-{
-	Log_silent ("WTTTTT %i %e %e %e %e %e %e cell%i\n",geo.wcycle,plasmamain[n].ave_freq,plasmamain[n].j,plasmamain[n].w,trad,w[nwind].vol,w[nwind].x[0],n);
-}
 
 
 	  if (plasmamain[n].w > 1e10)
@@ -204,6 +196,12 @@ WindPtr (w);
 
 
       nh = plasmamain[n].rho * rho2nh;
+
+/* 1110 NSH Normalise IP, which at this point should be the number of photons in a cell by dividing by volume and number density of hydrogen in the cell */
+
+      plasmamain[n].ip /= (C*volume*nh);
+      printf ("NSH Log Ionisation parameter for cell %i = %2.2f\n",n,log10(plasmamain[n].ip));
+
 
       /* If geo.adiabatic is true, then alculate the adiabatic cooling using the current, i.e 
        * previous value of t_e.  Note that this may not be  best way to determien the cooling. 
@@ -635,3 +633,46 @@ wind_rad_summary (w, filename, mode)
 
   return (0);
 }
+
+
+
+
+
+
+
+
+/***********************************************************
+                                       Space Telescope Science Institute
+
+ Synopsis: wind_ip() populates the plasma object ferland_ip which is intended to be an 
+      estimate of the ionization parameter for that cell. It assumes all ionizaing photons
+      are produces from the origin.
+
+Arguments:		
+
+Returns:
+ 
+Description:	
+	
+Notes:
+	There is not much point in calling this until you have propagated a few photons
+History:
+ 	11Oct - NSH Coded to try and provide a 'correct' ionisation parameter for the wind,
+               calculated exactly as per the ionization parameter in hazy1 (eq 5.4)
+
+**************************************************************/
+
+
+   int wind_ip()
+{
+int n;
+  for (n = 0; n < NPLASMA; n++)
+{
+      plasmamain[n].ferland_ip=geo.n_ioniz/(4*PI*C*plasmamain[n].rho*rho2nh*(wmain[plasmamain[n].nwind].x[0]*wmain[plasmamain[n].nwind].x[0]+wmain[plasmamain[n].nwind].x[1]*wmain[plasmamain[n].nwind].x[1]+wmain[plasmamain[n].nwind].x[2]*wmain[plasmamain[n].nwind].x[2]));
+
+     printf ("NSH ferland_ip for cell %i = %e (r=%e nh=%e)\n",n,plasmamain[n].ferland_ip,sqrt((wmain[plasmamain[n].nwind].x[0]*wmain[plasmamain[n].nwind].x[0]+wmain[plasmamain[n].nwind].x[1]*wmain[plasmamain[n].nwind].x[1]+wmain[plasmamain[n].nwind].x[2]*wmain[plasmamain[n].nwind].x[2])),plasmamain[n].rho*rho2nh);
+}
+return(0);
+}
+
+

@@ -135,7 +135,6 @@ bands_init (t, f1, f2, imode, band)
     }
   else if (mode == 2)  /* Traditional cv setup */
     {
-
       band->nbands = 4;
       band->f1[0] = f1;
       band->f2[0] = band->f1[1] = 13.599 / HEV;

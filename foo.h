@@ -131,6 +131,7 @@ double den_config(PlasmaPtr xplasma, int nconf);
 int wind_update(WindPtr (w));
 int wind_rad_init(void);
 int wind_rad_summary(WindPtr w, char filename[], char mode[]);
+int wind_ip(void);
 /* windsave.c */
 int wind_save(char filename[]);
 int wind_read(char filename[]);

@@ -201,7 +201,7 @@ ion_abundances (xplasma, mode)
 
 
 //OLD  Log("NSH Here we about to call one_shot, cell number %i gain %e mode %i t_r %f t_e %f sim_w %e sim_alpha %e logIP %e\n",xplasma->nplasma,xplasma->gain,mode,xplasma->t_r,xplasma->t_e,xplasma->sim_w,xplasma->sim_alpha,log10(xplasma->sim_ip));
-   Log("NSH in this cell, we have %i AGN photons and %i disk photons\n",xplasma->ntot_agn,xplasma->ntot_disk);
+   Log("NSH in this cell, we have %e AGN photons and %e disk photons\n",xplasma->ntot_agn,xplasma->ntot_disk);
 //OLD   Log("NSH in this cell, we have %i photons in our power law band\n",xplasma->nxtot[nx4power]); //This no longer makes sense
 
 
@@ -294,9 +294,12 @@ convergence (xplasma)
     xplasma->techeck = techeck = 1;
 
 //110919 nsh modified line below to inlcude the adiabatic cooling in the check that heating equals cooling
+//111004 nsh further modification to include DR and compton cooling, now moved out of lum_rad
 
   if ((xplasma->converge_hc =
-       fabs (xplasma->heat_tot - (xplasma->lum_rad + xplasma->lum_adiabatic )) / (xplasma->heat_tot +
+       fabs (xplasma->heat_tot - (xplasma->lum_rad + xplasma->lum_adiabatic + xplasma->lum_dr+
+    						      xplasma->lum_comp)) / (xplasma->heat_tot +
+  						      xplasma->lum_comp + xplasma->lum_dr +
 						      xplasma->lum_rad + xplasma->lum_adiabatic)) >
       epsilon)
     xplasma->hccheck = hccheck = 1;
@@ -361,6 +364,7 @@ check_convergence ()
   double xconverge, xconverging;
 
   nconverge = nconverging = ntot = 0;
+  ntr=nte=nhc=0; //NSH 70i zero the counters
 
    for (n = 0; n < NPLASMA; n++)
     {

@@ -256,7 +256,10 @@ sim_pl (nh, t_r, t_e, www, nelem, ne, density, xne, newden, f1, f2)
     }
 
   /* Initialization of fudges complete open lots of files to log the sim factor */
-  fudgefile = fopen ("fudge_summary.out", "a");
+ 
+if (diag_on_off)
+	{
+ fudgefile = fopen ("fudge_summary.out", "a");
   numfile = fopen ("num_summary.out", "a");
   denomfile = fopen ("denom_summary.out", "a");
   ionfile = fopen ("ion_summary.out", "a");
@@ -264,6 +267,10 @@ sim_pl (nh, t_r, t_e, www, nelem, ne, density, xne, newden, f1, f2)
   fprintf (numfile, "Te= %e, Element %s", t_e, ele[nelem].name);
   fprintf (denomfile, "Te= %e, Element %s", t_e, ele[nelem].name);
   fprintf (ionfile, "Te= %e, Element %s", t_e, ele[nelem].name);
+		}
+
+
+
   first = ele[nelem].firstion;	/*first and last identify the postion in the array */
   last = first + (ele[nelem].nions);	/*  So for H which has 2 ions, H1 and H2, first will generally
 					   be 0 and last will be 2 so the for loop below will just be done once for nion = 1 */
@@ -347,7 +354,11 @@ Mode 1 is just recomb to gs by the old method. Mode 2 is recomb to gs plus DR co
 // This is the equation being calculated
 //              sum+=newden[nion]=newden[nion-1]*fudge*(*ne)*density[nion]/density[nion-1]/xne;
     }
-  for (nion = ele[nelem].firstion;
+ 
+if (diag_on_off)
+	{
+
+ for (nion = ele[nelem].firstion;
        nion < (ele[nelem].firstion + ele[nelem].nions); nion++)
     {
       fprintf (fudgefile, ",%e", fudge_store[nion]);
@@ -364,6 +375,8 @@ Mode 1 is just recomb to gs by the old method. Mode 2 is recomb to gs plus DR co
   fclose (numfile);
   fclose (denomfile);
   fclose (ionfile);
+	}
+
 
   a = nh * ele[nelem].abun / sum;	//get the factor to ensure we dont end up with more than the abundance of the element
   for (nion = first; nion < last; nion++)

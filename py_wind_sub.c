@@ -1114,9 +1114,10 @@ a:rdint ("Wind.array.element", &n);
        xplasma->lum_rad / xplasma->heat_tot, (xplasma->lum_rad+xplasma->lum_adiabatic+xplasma->lum_comp+xplasma->lum_dr) / xplasma->heat_tot);
   Log ("Adiabatic cooling %8.2e is %8.2g of total cooling\n", xplasma->lum_adiabatic,xplasma->lum_adiabatic/(xplasma->lum_rad+xplasma->lum_adiabatic));
   /*70g NSH compton and DR cooling are now reported seperately. */
-  Log ("Compton cooling %8.2e is %8.2g of total cooling\n", xplasma->lum_comp,xplasma->lum_comp/(xplasma->lum_rad+xplasma->lum_comp));
-  Log ("DR cooling %8.2e is %8.2g of total cooling\n", xplasma->lum_dr,xplasma->lum_dr/(xplasma->lum_rad+xplasma->lum_dr));
+  Log ("Compton cooling   %8.2e is %8.2g of total cooling\n", xplasma->lum_comp,xplasma->lum_comp/(xplasma->lum_rad+xplasma->lum_comp));
+  Log ("DR cooling        %8.2e is %8.2g of total cooling\n", xplasma->lum_dr,xplasma->lum_dr/(xplasma->lum_rad+xplasma->lum_dr));
   Log ("Number of ionizing photons in cell nioniz %d\n", xplasma->nioniz);
+  Log ("Log Ionization parameter in this cell cell based %4.2f ferland %4.2f\n", log10(xplasma->ip),log10(xplasma->ferland_ip)); //70h NSH computed ionizaion parameter
   Log ("ioniz %8.2e %8.2e %8.2e %8.2e %8.2e\n",
        xplasma->ioniz[0], xplasma->ioniz[1], xplasma->ioniz[2],
        xplasma->ioniz[3], xplasma->ioniz[4]);
@@ -1401,7 +1402,26 @@ IP_summary (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = (plasmamain[nplasma].sim_ip);
+	  aaa[n] = (log10(plasmamain[nplasma].ferland_ip));
+	}
+    }
+  display ("Log Ionisation parameter");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".f_IP");
+      write_array (filename, ochoice);
+
+    }
+
+ for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = (log10(plasmamain[nplasma].ip));
 	}
     }
   display ("Log Ionisation parameter");
@@ -1480,7 +1500,7 @@ phot_split (w, rootname, ochoice)
 	  aaa[n] = (plasmamain[nplasma].ntot_wind);
 	}
     }
-  display ("Photons from different sources");
+  display ("Wind photons in cell");
 
   if (ochoice)
     {
@@ -1531,15 +1551,15 @@ phot_split (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = (plasmamain[nplasma].ntot_wind);
+	  aaa[n] = (plasmamain[nplasma].ntot_star);
 	}
     }
-  display ("Wind photons in cell");
+  display ("Stellar photons in cell");
 
   if (ochoice)
     {
       strcpy (filename, rootname);
-      strcat (filename, ".ntot_wind");
+      strcat (filename, ".ntot_star");
       write_array (filename, ochoice);
 
     }

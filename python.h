@@ -310,6 +310,10 @@ struct geometry
   double compton_torus_tau; 	/* The optical depth through the torus at the height. */
   double compton_torus_te;	/* The initial temperature of the torus */
 
+//70i - nsh 111007 - put lum_ioniz and n_ioniz into the geo structure. This will allow a simple estimate of ionisation parameter to be computed;
+
+  double n_ioniz,lum_ioniz;
+
 // The next set of parameters describe the input datafiles that are read
   char atomic_filename[132];   /* 54e -- The masterfile for the atomic data*/
   char fixed_con_file[132];    /* 54e -- For fixed concentrations, the file specifying concentrations */
@@ -518,11 +522,12 @@ typedef struct plasma {
   int ntot;                     /*Total number of photon passages */
 
  /* NSH 15/4/11 - added some counters to give a rough idea of where photons from various sources are ending up */
-  int ntot_star;
-  int ntot_bl;			
-  int ntot_disk;                /* NSH 15/4/11 Added to count number of photons from the disk in the cell */
-  int ntot_wind;
-  int ntot_agn;                  /* NSH 15/4/11 Added to count number of photons from the AGN in the cell */
+ /* NSH 111005  - changed counters to real variables, that allows us to take account of differening weights of photons */
+  double ntot_star;
+  double ntot_bl;			
+  double ntot_disk;                /* NSH 15/4/11 Added to count number of photons from the disk in the cell */
+  double ntot_wind;
+  double ntot_agn;                  /* NSH 15/4/11 Added to count number of photons from the AGN in the cell */
 
 #define PTYPE_STAR	    0
 #define PTYPE_BL	    1
@@ -570,6 +575,8 @@ typedef struct plasma {
   double sim_w[NXBANDS]; /*This is the computed weight of a PL spectrum in this cell - not the same as the dilution factor */
 //OLD  double sim_e1,sim_e2; /*Sim estimators used to compute alpha and w for a power law spectrum for the cell */
   double sim_ip; /*Ionisation parameter for the cell as defined in Sim etal 2010 */
+  double ferland_ip; /* IP calculaterd from equation 5.4 in hazy1 - assuming allphotons come from 0,0,0 and the wind is transparent */
+  double ip; /*NSH 111004 Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
   //int kpkt_rates_known;
   //COOLSTR kpkt_rates;
 } plasma_dummy, *PlasmaPtr;

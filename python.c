@@ -180,7 +180,7 @@ History:
 
 #include "python.h"
 #define NSPEC	20
-double n_ioniz,lum_ioniz;   //NSH 16/2/2011 these seemed to need to be here to allow photon_checks to communicate the number back to python for readout....
+//old double n_ioniz,lum_ioniz;   //NSH 16/2/2011 these seemed to need to be here to allow photon_checks to communicate the number back to python for readout.... - now put into geo structure to allow other parts of the code to use thme,
 int
 main (argc, argv)
      int argc;
@@ -1488,8 +1488,8 @@ run -- 07jul -- ksl
       ispy_init ("python", geo.wcycle);
 #endif
 
-      n_ioniz = 0.0;
-      lum_ioniz = 0.0;
+      geo.n_ioniz = 0.0;
+      geo.lum_ioniz = 0.0;
       ztot = 0.0;		/* ztot is the luminosity of the disk multipled by the number of cycles, which is used by save_disk_heating */
 
       /* Now execute each subcycle */
@@ -1517,6 +1517,9 @@ run -- 07jul -- ksl
 //OLD70d	printf ("sent to photon_checks freqmin=%e freqmax=%e \n",freqmin,freqmax);
 
 	  photon_checks (p, freqmin, freqmax, "Check before transport");
+
+	 wind_ip ();
+
 
 	  zz = 0.0;
 	  for (nn = 0; nn < NPHOT; nn++)
@@ -1585,7 +1588,7 @@ run -- 07jul -- ksl
 
       Log
 	("!!python: Number of ionizing photons %g lum of ionizing photons %g\n",
-	 n_ioniz, lum_ioniz);
+	 geo.n_ioniz, geo.lum_ioniz);
 
       wind_update (w);
 
@@ -1985,8 +1988,8 @@ photon_checks (p, freqmin, freqmax, comment)
       p[nn].np=nn;    /*  NSH 13/4/11 This is a line to populate the new internal photon pointer */
       if (H * p[nn].freq > ion[0].ip)
 	{
-	  lum_ioniz += p[nn].w;
-	  n_ioniz += p[nn].w / (H * p[nn].freq);
+	  geo.lum_ioniz += p[nn].w;
+	  geo.n_ioniz += p[nn].w / (H * p[nn].freq);
 	}
       if (sane_check (p[nn].freq) != 0 || sane_check (p[nn].w))
 	{

@@ -1132,7 +1132,6 @@ scatter (p, nres, nnscat)
      deactivation process is always the same as the activation process and so
      nothing needs to be done. */
 
-if (p->np==46327) printf ("Here we are in scatter, geo.rt_mode=%i, and nres=%i\n",geo.rt_mode,*nres);
   if (geo.rt_mode == 2)		//check if macro atom method in use
     {
       /* Electron scattering is the simplest to deal with. The co-moving 
