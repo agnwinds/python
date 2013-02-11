@@ -486,8 +486,23 @@ kappa_ff (xplasma, freq)
   double exp ();
   double x1,x2, x3;
 
-  x=x1=xplasma->kappa_ff_factor;
- 
+if (gaunt_n_gsqrd==0) //Maintain old behaviour
+	{
+  	if (nelements > 1)
+    		{
+      		x = x1 =
+		3.692e8 * xplasma->ne * (xplasma->density[1] +
+				 4. * xplasma->density[4]);
+    		}
+  	else
+    		{
+      		x = x1 = 3.692e8 * xplasma->ne * (xplasma->density[1]);
+    		}
+	}
+else
+	{
+   	x=x1=xplasma->kappa_ff_factor;
+	}
   x *= x2 = (1. - exp (-H_OVER_K * freq / xplasma->t_e));
   x /= x3 = (sqrt (xplasma->t_e) * freq * freq * freq);
 
@@ -753,7 +768,7 @@ in the ground state */
 Synopsis: pop_kappa_ff_array populates the multiplicative 	
 		factor used in the FF calculation. This depends only
 		on the densities of ions in the cell, and the electron
-		temperature (which fedes into the gaunt factor) so it
+		temperature (which feeds into the gaunt factor) so it
 		saves time to calculate all this just the once. This
 		is called in python.c, just before the photons are 
 		sent thruogh the wind.

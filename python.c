@@ -1575,7 +1575,9 @@ printf ("NSH GOING TO DISK_INIT\n");
 	  kbf_need (freqmin, freqmax);
 
           /* NSH 22/10/12  This next call populates the prefactor for free free heating for each cell in the plasma array */
-	  pop_kappa_ff_array ();       
+	  /* NSH 4/12/12  Changed so it is only called if we have read in gsqrd data */
+	if (gaunt_n_gsqrd>0)
+	    pop_kappa_ff_array ();       
 
 	  /* Transport the photons through the wind */
 	  trans_phot (w, p, 0);

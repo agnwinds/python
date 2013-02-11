@@ -566,6 +566,7 @@ Note: program uses an integral formula rather than integrating on
 			volume and that is still part of WindPtr
         12sep	nsh	73g - increased the number of ions we will use to all of them!!
 	12sep	nsh	73g - incorporated sutherlands data for gaunt factor
+	12dec	nsh	74b - put in code to cope with the case where gaunt factor data is not read in
 */
 
 double
@@ -574,7 +575,7 @@ total_free (one, t_e, f1, f2)
      double t_e;
      double f1, f2;
 {
-/*  double g_ff_h, g_ff_he NSH 121025 These two variables are no longer required */
+  double g_ff_h, g_ff_he;
   double gaunt;
   double x,sum;
   double gsqrd; /*The scaled inverse temperature experienced by an ion - used to compute the gaunt factor */
@@ -589,34 +590,42 @@ total_free (one, t_e, f1, f2)
     {
       return (0.0);
     }
-//  g_ff_h = g_ff_he = 1.0;
+
 //  gaunt=1.0; /*NSH 120920 - this is a placeholder, we need to calculate the gaunt factor at some point */
-  sum=0.0; /*NSH 120920 - zero the summation over all ions */
+
 //  if (nelements > 1)
 //    {
 /*NSH 120924 - this summation works out the z^2 times number density term for all ions the gaunt factor is calculated for each ion */
-      for (nion = 0; nion < nions; nion++)
+       
+
+    if (gaunt_n_gsqrd==0) //Maintain old behaviour
+	{
+  	g_ff_h = g_ff_he = 1.0;
+	if (nelements > 1)
+    		{
+      		x =
+		BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h +
+					4. * xplasma->density[4] * g_ff_he) /
+		H_OVER_K;
+    		}
+  	else
+    		{
+      		x =
+		BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h) /
+		H_OVER_K;
+    		}
+	}
+    else
+	{
+  	sum=0.0; /*NSH 120920 - zero the summation over all ions */
+	for (nion = 0; nion < nions; nion++)
 		{
 		gsqrd=(ion[nion].z*ion[nion].z*RYD2ERGS)/(BOLTZMANN*t_e);//
 		gaunt=gaunt_ff(gsqrd);
 		sum += xplasma->density[nion] * ion[nion].z * ion[nion].z * gaunt;
 		}
-      x =
-	BREMS_CONSTANT * xplasma->ne * (sum) /  H_OVER_K;
-//    }
-/*  else
-    {
-
-      for (nion = 0; nion < nions; nion++)
-		{
-		gsqrd=(ion[nion].z*ion[nion].z*RYD2ERGS)/(BOLTZMANN*t_e);
-		printf ("GAUNT for t_e=%e and z=%i, gsqrd=%e\n",t_e,ion[nion].z,gsqrd);
-		gaunt=gaunt_ff(gsqrd);
-		sum += xplasma->density[nion] * ion[nion].z * ion[nion].z * gaunt;
-		}
-      x =
-	BREMS_CONSTANT * xplasma->ne * (sum) /  H_OVER_K;
-    }*/
+      	x = BREMS_CONSTANT * xplasma->ne * (sum) /  H_OVER_K;
+	}
 
   x *= sqrt (t_e) * one->vol;
   x *= (exp (-H_OVER_K * f1 / t_e) - exp (-H_OVER_K * f2 / t_e));
@@ -651,6 +660,7 @@ SS Apr 04: added an "if" statement to deal with case where there's only H.
 			plasma
         12sep	nsh	73g - increased the number of ions we will use to all of them!!
 	12sep	nsh	73g - incorporated sutherlands data for gaunt factor
+	12dec	nsh	74b - put code in to allow for the case where gaunt data is not available.
 	
 */
 
@@ -659,7 +669,7 @@ ff (one, t_e, freq)
      WindPtr one;
      double t_e, freq;
 {
-//  double g_ff_h, g_ff_he; NSH 121025 No longer needed
+  double g_ff_h, g_ff_he; 
   double fnu;
   double gsqrd, gaunt, sum;
   int nplasma;
@@ -673,33 +683,34 @@ ff (one, t_e, freq)
   if (t_e < 100.)
     return (0.0);
 
-  /* Use gaunt factor of 1 for now */
 
-//  g_ff_h = g_ff_he = 1.0; NSH 120924 - no longer needed, we compute the gaunt factor.
-
-//  if (nelements > 1)
-//{
-
-      for (nion = 0; nion < nions; nion++)
+  
+    if (gaunt_n_gsqrd==0) //Maintain old behaviour
+	{
+  	g_ff_h = g_ff_he = 1.0;
+	if (nelements > 1)
 		{
-		gsqrd=(ion[nion].z*ion[nion].z*RYD2ERGS)/(BOLTZMANN*t_e);//
+ 		fnu =
+	BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h +
+					4. * xplasma->density[4] * g_ff_he);
+    		}
+  	else
+    		{
+      		fnu = BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h);
+    		}
+	}
+    else
+	{
+	sum=0.0;
+      	for (nion = 0; nion < nions; nion++)
+		{
+		gsqrd=(ion[nion].z*ion[nion].z*RYD2ERGS)/(BOLTZMANN*t_e);
 		gaunt=gaunt_ff(gsqrd);
 		sum += xplasma->density[nion] * ion[nion].z * ion[nion].z * gaunt;
 		}
-      fnu =
-	BREMS_CONSTANT * xplasma->ne * (sum) /  H_OVER_K;
+        fnu = BREMS_CONSTANT * xplasma->ne * (sum) /  H_OVER_K;
+	}
 
-
-
-/*      fnu =
-	BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h +
-					4. * xplasma->density[4] * g_ff_he);*/
-//    }
-/*  else
-    {
-      fnu = BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h);
-    }
-*/
 
   fnu *= exp (-H_OVER_K * freq / t_e) / sqrt (t_e) * one->vol;
 

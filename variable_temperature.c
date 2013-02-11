@@ -68,6 +68,9 @@ variable_temperature (xplasama, mode)  modifies the densities of ions, levels, a
 
   History:
 	2012Feb	nsh	Coded and debugged as part of QSO effort. 
+        1212Dec nsh	Recoded so that the densities are computed in a temporary array, and only 
+			committted to the real density structure once we are sure the code converges.
+	
 
 **************************************************************/
 
@@ -86,15 +89,15 @@ variable_temperature (xplasma, mode)
      int mode;			//   6=correct using dilute blackbody, 7=power law
 {
   int nion; // niterate; moved outside the code so all routines can see it
-  double xnew, xsaha, dne_old;
+  double xnew, xsaha;
   double theta, x;
   double get_ne();
   double t, t_e,t_r, xtemp, nh, xne, xxne, www;
   double a,b;
+  double newden[NIONS]; //NSH 121217 - recoded so density is computed in a temperary array
  // double xip; //ionzation potential of lower ion.
   int nelem,first,last;
-  double *density;
-  double *partition,t_r_part_correct,t_e_part_correct;
+  double t_r_part_correct,t_e_part_correct;
   double sum,big;
   double pi_fudge,recomb_fudge,gs_fudge,tot_fudge; /*The three correction factors for photoionization rate, recombination to ground state, and recombination rate */
   xxxplasma = xplasma;    /*Copy xplasma to local plasma varaible, used to communicate w and alpha to the power law correction routine. NSH 120703 - also used to set the denominator calculated for a given ion for this cell last time round*/
@@ -105,9 +108,18 @@ variable_temperature (xplasma, mode)
   t_r = xplasma->t_r;
   www = xplasma->w;
 //		printf ("HERE WE ARE IN VT t_e=%e, t_r=%e, www=%e\n",t_e,t_r,www);
-  density = xplasma->density;  /* Set the local array density to the density held for the cell */
-  partition = xplasma->partition; /* Set the partition function array to that held for the cell */
-  dne_old=10.0*nh;
+
+
+
+/* Copy the current densities into the temperary array */
+
+  for (nion = 0; nion < nions; nion++)
+	{
+ 	newden[nion]=xplasma->density[nion];
+	}
+
+
+
   /* make an initial estimate of ne based on H alone,  Our guess
      assumes ion[0] is H1.  Note that x below is the fractional
      ionization of H and should vary from 0 to 1
@@ -157,7 +169,7 @@ variable_temperature (xplasma, mode)
 	  	exit (0); 
 		}
 	/* and now we loop over all the ions of this element */
-      	sum = density[first] = 1.0; /* set the density of the first ion of this element to 1.0 - this is (always??) the neutral ion */
+      	sum = newden[first] = 1.0; /* set the density of the first ion of this element to 1.0 - this is (always??) the neutral ion */
       	big = pow (10., 250. / (last - first)); /*make sure that we will not overflow the last ion */
 
       	for (nion = first + 1; nion < last; nion++)  /*nion is the upper ion of the pair, last is one above the actual last ion, so the last ion to be considered is last-1 */
@@ -168,15 +180,15 @@ variable_temperature (xplasma, mode)
 
 /* given this temperature, we need the pair of partition functions for these ions */		
 		partition_functions_2 (xplasma, nion, xtemp, 1); //weight of 1 give us the LTE populations.
-/* and now we need the saha equation linking the two states at our chosen temp NB the partition functionof the electron is included in the SAHA factor*/
+/* and now we need the saha equation linking the two states at our chosen temp NB the partition function of the electron is included in the SAHA factor*/
 		xsaha = SAHA * pow (xtemp, 1.5);
-	  	b = xsaha * partition[nion]
+	  	b = xsaha * xplasma->partition[nion]
 	    	* exp (-ion[nion - 1].ip / (BOLTZMANN * xtemp)) / (xne *
-							   partition[nion-1]);
+							   xplasma->partition[nion-1]);
 //printf ("PART FUNC FOR 	for element %i, ion %i and %i, xtemp= %e is %f and %f\n",ion[nion-1].z,ion[nion-1].istate,ion[nion].istate,xtemp,partition[nion-1],partition[nion]);
-		t_e_part_correct=partition[nion-1]/partition[nion];
+		t_e_part_correct=xplasma->partition[nion-1]/xplasma->partition[nion];
 		partition_functions_2 (xplasma,nion, t_e, 0); //Our only real guess here is that the electron temperature might give a good estimate of the partition function
-		t_e_part_correct*=(partition[nion]/partition[nion-1]);
+		t_e_part_correct*=(xplasma->partition[nion]/xplasma->partition[nion-1]);
 //printf ("PART FUNC FOR 	for element %i, ion %i and %i, dil_tr=%e is %f and %f\n",ion[nion-1].z,ion[nion-1].istate,ion[nion].istate,t_r,partition[nion-1],partition[nion]); 
 //		
 //printf ("PART FUNC FOR 	for element %i, ion %i and %i, t_e=   %e is %f and %f\n",ion[nion-1].z,ion[nion-1].istate,ion[nion].istate,t_e,partition[nion-1],partition[nion]);
@@ -211,9 +223,9 @@ variable_temperature (xplasma, mode)
 		b *= tot_fudge;
 		if (b > big)	 
 	   	b = big;		//limit step so there is no chance of overflow
-	  	a = density[nion - 1] * b;
-	  	sum += density[nion] = a;
-	  	if (density[nion] < 0.0)
+	  	a = newden[nion - 1] * b;
+	  	sum += newden[nion] = a;
+	  	if (newden[nion] < 0.0)
 			{
 	    		mytrap ();
 			}
@@ -223,8 +235,8 @@ variable_temperature (xplasma, mode)
       	a = nh * ele[nelem].abun / sum;   //the scaling factor to get the overall abundance right
       	for (nion = first; nion < last; nion++)
 		{
-	  	density[nion] *= a;  //apply scaling
-	  	sane_check (density[nion]);  //check nothing has gone crazy
+	  	newden[nion] *= a;  //apply scaling
+	  	sane_check (newden[nion]);  //check nothing has gone crazy
 		}
 
       	if (geo.macro_ioniz_mode == 1)
@@ -235,13 +247,13 @@ variable_temperature (xplasma, mode)
       /*Set some floor so future divisions are sensible */
       	for (nion = 0; nion < nions; nion++)
 		{
-	  	if (xplasma->density[nion] < DENSITY_MIN)
-	    		xplasma->density[nion] = DENSITY_MIN;
+	  	if (newden[nion] < DENSITY_MIN)
+	    		newden[nion] = DENSITY_MIN;
 		}
 
       	/* Now determine the new value of ne from the ion abundances */
 	}   //end of loop over elements
-    xnew = get_ne (xplasma->density);	/* determine the electron density for this density distribution */
+    xnew = get_ne (newden);	/* determine the electron density for this density distribution */
 //	printf ("Solver, change in n_e = %e vs FRACTIONAL ERROR of %e in xne of %e\n",fabs ((xne - xnew) / (xnew)) , FRACTIONAL_ERROR,xne);
     if (xnew < DENSITY_MIN)
 	xnew = DENSITY_MIN;	/* fudge to keep a floor on ne */
@@ -261,8 +273,27 @@ variable_temperature (xplasma, mode)
       	return (-1);
     	}
     }
+
+
+/* Finally transfer the calculated densities to the real density array. This is only called if the code
+ has iterated correctly, if not then the real densities will stay the same as last time*/
+
   xplasma->ne = xnew;
-  partition_functions (xplasma, 4); /*WARNING fudge NSH 11/5/14 - this is as a test. We really need a better implementation of partition functions and levels for a power law illuminating spectrum. We found that if we didnt make this call, we would end up with undefined levles - which did really crazy things*/
+  for (nion = 0; nion < nions; nion++)
+    {
+      /* If statement added here to suppress interference with macro populations (SS Apr 04) */
+      if (ion[nion].macro_info == 0 || geo.macro_ioniz_mode == 0
+	  || geo.macro_simple == 1)
+	{
+	  xplasma->density[nion] = newden[nion];
+	}
+    }
+
+
+
+
+
+  partition_functions (xplasma, 4); /*WARNING fudge NSH 11/5/14 - this is as a test. We really need a better implementation of partition functions and levels for a power law illuminating spectrum. We found that if we didnt make this call, we would end up with undefined levels - which did really crazy things*/
   return (0);
 }
 
