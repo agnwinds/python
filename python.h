@@ -104,6 +104,7 @@ int NPHOT;			/* As of python_40, NPHOT must be defined in the main program using
 
 #define SPECTYPE_BB      -1
 #define SPECTYPE_UNIFORM -2
+#define SPECTYPE_POW     -4
 #define SPECTYPE_NONE	 -3
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
@@ -122,7 +123,7 @@ struct geometry
 
   int coord_type, ndim,mdim;      /* The type of geometry and dimensionality of the wind array. 
 				0=1-d spherical, 1=cylindrical, 2 = spherical polar, 3=cylindrical
-				but the z coordiante changes with rho in an attempt to allow for
+				but the z coordinate changes with rho in an attempt to allow for
 				a vertically extended disk....
 				ndim is the dimensionality of the first dimension.  In the CV case
 				it is in the plane of the disk. Mdim is generally along the z axis
@@ -131,8 +132,9 @@ struct geometry
   double rmax, rmax_sq;		/* The maximum distance to which a photon should be followed */
   double mstar, rstar, rstar_sq, tstar, gstar;	/* Basic parameters for the WD */
   double twind;			/* temperature of wind */
-  int binary_system;            /*0--> single star system
+  int system_type;            /*0--> single star system
 				  1--> binary system
+				  2--> AGN
 				  */
   int disk_type;		/*0 --> no disk, 
 				  1 --> a standard disk in xy plane, 
@@ -155,7 +157,7 @@ struct geometry
   double xlog_scale, zlog_scale;	/* Scale factors for setting up a logarithmic grid, the [1,1] cell
 					   will be located at xlog_scale,zlog_scale */
   int star_radiation, disk_radiation;	/* 1 means consider radiation from star, disk,  bl, and/or wind */
-  int bl_radiation, wind_radiation;
+  int bl_radiation, wind_radiation, agn_radiation;
   int matom_radiation;          /* Added by SS Jun 2004: for use in macro atom computations of detailed spectra
 				   - 1 means use emissivities for BOTH macro atom levels and kpkts. 0 means don't
 				   (which is correct for the ionization cycles. */
@@ -204,7 +206,8 @@ struct geometry
   int rt_mode;			/* radiative transfer mode (0=Sobolev,1=simple (used only by balance) */
                                 /* This IS now used by Python - set to 2 for Macro Atom method. Set to 1
 				   for non-Macro Atom methods (SS) */
-  /* The spectral types are SPECTYPE_BB for bb, SPECTYPE_UNIFORM for a uniform spectral distribution, 0 or more from a filelist.
+  /* The spectral types are SPECTYPE_BB for bb, SPECTYPE_UNIFORM for a uniform spectral distribution, 
+   * SPECTYPE_POW for a power law, 0 or more from a filelist.
    * A value of SPECTYPE_NONE indicates no emission is expected from this particular source */
   int star_ion_spectype, star_spectype;	/* The type of spectrum used to create the continuum
 					   for the star in the ionization and final spectrum calculation */
@@ -212,6 +215,8 @@ struct geometry
 					   for the disk in the ionization and final spectrum calculation */
   int bl_ion_spectype, bl_spectype;	/* The type of spectrum used to create the continuum
 					   for the bl in the ionization and final spectrum calculation */
+  int agn_ion_spectype, agn_spectype;	/* The type of spectrum used to create the continuum
+					   for the agn in the ionization and final spectrum calculation */
   char model_list[NCOMPS][LINELENGTH];	/* The file which contains the model names and the associated values for the model */
 
   /* Generic parameters for the wind */
@@ -244,8 +249,12 @@ struct geometry
   double kn_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
 
   /* Parameters describing Castor and Larmors spherical wind */
-  double cl_v_zero, cl_v_infinity, cl_beta;	/* Power law exponenet */
+  double cl_v_zero, cl_v_infinity, cl_beta;	/* Power law exponent */
   double cl_rmin, cl_rmax;
+
+  /* Parameters describing a spherical shell test wind */
+  double shell_vmin, shell_vmax, shell_beta;
+  double shell_rmin, shell_rmax;
 
   /*Parameters defining a corona in a ring above a disk */
   double corona_rmin, corona_rmax;	//the minimum and maximu radius of the corona
@@ -262,8 +271,9 @@ struct geometry
 
   double lum_tot, lum_star, lum_disk, lum_bl, lum_wind;	/* The total luminosities of the disk, star, bl, & wind 
 							   are actually not used in a fundamental way in the program */
+  double lum_agn;   /*The total luminosity of the AGN or point source at the center*/
   double lum_ff, lum_fb, lum_lines;	/* The luminosity of the wind as a result of ff, fb, and line radiation */
-  double f_tot, f_star, f_disk, f_bl, f_wind;	/* The integrated specific L between a freq min and max which are
+  double f_tot, f_star, f_disk, f_bl, f_agn, f_wind;	/* The integrated specific L between a freq min and max which are
 						   used to establish the fraction of photons of various types */
   
   double f_matom, f_kpkt; /*Added by SS Jun 2004 - to be used in computations of detailed spectra - the
@@ -278,6 +288,15 @@ struct geometry
 
   double t_bl;			/*temperature of the boundary layer */
   double weight;		/*weight factor for photons/defined in define_phot */
+
+// The next set of parameters relate to the central source of an AGN
+
+  double alpha_agn;            /*The power law index of a BH at the center of an AGN.  Note that the luminosity
+				 of the agn is elsewhere in the structure
+				*/ 
+  double const_agn;             /*The constant for the Power law, there are lots of ways of defining the PL which is best? */
+  double r_agn;               /* radius of the "photosphere" of the BH in the AGN.  */
+  double d_agn;               /* the distance to the agn - only used in balance to calculate the ioinsation fraction*/
 
 // The next set of parameters describe the input datafiles that are read
   char atomic_filename[132];   /* 54e -- The masterfile for the atomic data*/
@@ -484,6 +503,9 @@ typedef struct plasma {
   int converge_whole, converging;	/* converge_whole=0 if subroutine convergence feels point is converged, converging is an
 				   indicator of whether the program thought the cell is on the way to convergence 0 implies converging */
   double gamma_inshl[NAUGER]; /*MC estimator that will record the inner shell ionization rate - very similar to macro atom-style estimators */
+  double sim_alpha; /*Computed spectral index for a power law spectrum representing this cell */
+  double sim_w; /*This is the computed weight of a PL spectrum in this cell - not the same as the dilution factor */
+  double sim_e1,sim_e2; /*Sim estimators used to compute alpha and w for a power law spectrum for the cell */
   //int kpkt_rates_known;
   //COOLSTR kpkt_rates;
 } plasma_dummy, *PlasmaPtr;
@@ -600,6 +622,7 @@ int size_Jbar_est,  size_gamma_est, size_alpha_est;
 #define PTYPE_BL	    1
 #define PTYPE_DISK          2
 #define PTYPE_WIND	    3
+#define PTYPE_AGN           4 
 
 /* These definitions define the current or final state of a photon.  They are used by
 phot.istat below */
@@ -722,6 +745,8 @@ typedef struct spectrum
 				   <0    -> select only photons whose last position is below the disk */
   double x[3],r;               /* The position and radius of a special region from which to extract spectra  */
   double f[NWAVE];
+  double lf[NWAVE];            /* a second array to hole the extracted spectrum in log units */
+  double lfreq[NWAVE];         /* We need to hold what freqeuncy intervals our logarithmic spectrum has been taken over */
 }
 spectrum_dummy, *SpecPtr;
 

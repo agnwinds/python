@@ -33,7 +33,7 @@
 
 
 /* The next term attempts gloabally to define a minimum density to prevent zero devides in some routines */
-#define DENSITY_MIN		1.e-20
+#define DENSITY_MIN		1.e-100
 /* 
 
    Note that the structure ele array may not be completely filled.  In this structure, the dimension is simply
@@ -248,6 +248,7 @@ typedef struct photoionization
 
 Photoionization xphot[NIONS];
 PhotoionizationPtr xphot_ptr[NIONS]; /* Pointers to xphot in threshold frequency order --57h -- ksl*/
+PhotoionizationPtr xphot_ptr1[NIONS]; /* Pointers to xphot in ion order --57h -- ksl*/
 
 int nxphot;			/*The actual number of ions for which there are VFKY photoionization x-sections */
 double phot_freq_min;		/*The lowest frequency for which photoionization can occur */

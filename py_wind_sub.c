@@ -167,7 +167,13 @@ a:Log ("Input x=0,y=0,z=0 to return to main routine\n");
 }
 
 
-/* A summary of the energy absorbed in a cell */
+/* A summary of the energy absorbed in a cell 
+
+10nov	ksl	What was here previously was bizarre as the filename was
+		being added to all the time and this caused ultimately
+		a segmentation problem
+
+*/
 
 int
 abs_summary (w, rootname, ochoice)
@@ -188,31 +194,43 @@ abs_summary (w, rootname, ochoice)
   printf
     ("Absorption tot=t, lines=l,f=ff,b=fb,h=hydrogen,i=he1,j=he2,z=heavy elements\n");
   rdchar ("Choice", &c);
+
+
+  strcpy (filename, rootname);
+
   switch (c)
     {
     case 't':			/* Total  Absorption */
       strcpy (name, "Total Absorbtion");
+      strcat (filename, "heat_tot");
       break;
     case 'f':			/* ff */
       strcpy (name, "Free Free Absorbtion");
+      strcat (filename, "heat_ff");
       break;
     case 'b':			/* Photoionization */
       strcpy (name, "Total photoionization Heating");
+      strcat (filename, "heat_photo");
       break;
     case 'l':			/* Line  heating */
       strcpy (name, "Resonance Line Heating");
+      strcat (filename, "heat_lines");
       break;
     case 'h':			/* H photoionization */
       strcpy (name, "H  Photoionization Heating");
+      strcat (filename, "heat_h");
       break;
     case 'i':			/* He1 photo */
       strcpy (name, "He I Photoionization Heating");
+      strcat (filename, "heat_he1");
       break;
     case 'j':			/* He2 photo */
       strcpy (name, "He 2 Photoionization Heating");
+      strcat (filename, "heat_he2");
       break;
     case 'z':			/* Metal photo */
       strcpy (name, "Metal Photoionization Heating");
+      strcat (filename, "heat_z");
       break;
     default:
       printf ("Not a valid choice\n");
@@ -220,7 +238,6 @@ abs_summary (w, rootname, ochoice)
     }
 
 
-  strcpy (filename, rootname);
 
   for (n = 0; n < NDIM2; n++)
     {
@@ -233,35 +250,27 @@ abs_summary (w, rootname, ochoice)
 	    case 't':
 	      {			/* Total heating */
 		x = plasmamain[nplasma].heat_tot;
-		strcat (filename, "heat_tot");
 		break;
 	    case 'f':		/* ff heating */
 		x = plasmamain[nplasma].heat_ff;
-		strcat (filename, "heat_ff");
 		break;
 	    case 'b':		/* photoionization heating */
 		x = plasmamain[nplasma].heat_photo;
-		strcat (filename, "heat_photo");
 		break;
 	    case 'l':		/* Line heating */
 		x = plasmamain[nplasma].heat_lines;
-		strcat (filename, "heat_lines");
 		break;
 	    case 'h':		/* H heating */
 		x = plasmamain[nplasma].heat_ion[0];
-		strcat (filename, "heat_h");
 		break;
 	    case 'i':		/* He1 heating */
 		x = plasmamain[nplasma].heat_ion[2];
-		strcat (filename, "heat_he1");
 		break;
 	    case 'j':		/* He2 heating */
 		x = plasmamain[nplasma].heat_ion[3];
-		strcat (filename, "heat_he2");
 		break;
 	    case 'z':		/* Line heating of high z elements */
 		x = plasmamain[nplasma].heat_z;
-		strcat (filename, "heat_z");
 		break;
 	    default:
 		printf ("Not a valid choice\n");
@@ -920,6 +929,8 @@ Notes:
 
 History:
 	080804	ksl	60b -- Added reporting of partition function
+	101106	ksl	69 -- Changed variable name in rdint to make
+			it more obvious what was being discused here.
 
 **************************************************************/
 
@@ -931,11 +942,14 @@ wind_element (w)
   int m, n, i, j, nn, mm;
   int first, last;
   n = 50;
-a:rdint ("element", &n);
+a:rdint ("Wind.array.element", &n);
+
   if (n < 0)
     goto b;
+
   wind_n_to_ij (n, &i, &j);
   xplasma = &plasmamain[w[n].nplasma];
+
   Log ("Element %d (%d,%d)  inwind %d ntot %d nioniz %d nrad %d\n", n, i,
        j, w[n].inwind, xplasma->ntot, xplasma->nioniz, xplasma->nrad);
   Log ("xyz %8.2e %8.2e %8.2e vel %8.2e %8.2e %8.2e\n", w[n].x[0],
@@ -943,6 +957,9 @@ a:rdint ("element", &n);
   Log ("nh %8.2e ne %8.2e t_r %8.2e t_e %8.2e w %8.2e vol %8.2e\n",
        xplasma->rho * rho2nh, xplasma->ne, xplasma->t_r, xplasma->t_e,
        xplasma->w, w[n].vol);
+
+  if (w[n].inwind < 0)
+	  Log("\n# Cell is not inwind, expect all zeros to follow\n\n");
   Log
     ("t_e %8.2e lum_tot  %8.2e lum_lines  %8.2e lum_ff  %8.2e lum_fb     %8.2e %8.2e %8.2e %8.2e %8.2e\n",
      xplasma->t_e, xplasma->lum_rad, xplasma->lum_lines, xplasma->lum_ff,
@@ -999,7 +1016,6 @@ a:rdint ("element", &n);
       if (mm == nions)
 	break;
 
-      //Old      first = ion[mm].first_nlte_level;
       first = ion[mm].first_levden;
       last = first + ion[mm].nlte;
       Log ("ion %3d %3d", ion[mm].z, ion[mm].istate);
@@ -1029,7 +1045,7 @@ tau_h_summary (w, rootname, ochoice)
       aaa[n] = 0;
       if (w[n].vol > 0.0)
 	{
-	  nplasma = plasmamain[n].nplasma;
+	  nplasma = w[n].nplasma;
 	  aaa[n] =
 	    6.e-18 * plasmamain[nplasma].density[0] * pow (w[n].vol, 0.333);
 
@@ -1057,7 +1073,7 @@ coolheat_summary (w, rootname, ochoice)
       aaa[n] = 0;
       if (w[n].vol > 0.0)
 	{
-	  nplasma = plasmamain[n].nplasma;
+	  nplasma = w[n].nplasma;
 	  aaa[n] = plasmamain[nplasma].lum_rad / plasmamain[nplasma].heat_tot;
 
 	}
@@ -1091,7 +1107,7 @@ complete_file_summary (w, root, ochoice)
   ion_summary (w, 14, 4, 0, root, ochoice);
   ion_summary (w, 14, 5, 0, root, ochoice);
 
- /* Before 68c, this is what we printed out */ 
+  /* Before 68c, this is what we printed out */
   ion_summary (w, 6, 3, 1, root, ochoice);
   ion_summary (w, 6, 4, 1, root, ochoice);
   ion_summary (w, 6, 5, 1, root, ochoice);
@@ -1106,7 +1122,7 @@ complete_file_summary (w, root, ochoice)
   ion_summary (w, 14, 4, 1, root, ochoice);
   ion_summary (w, 14, 5, 1, root, ochoice);
 
-  
+
   ion_summary (w, 6, 3, 2, root, ochoice);
   ion_summary (w, 6, 4, 2, root, ochoice);
   ion_summary (w, 6, 5, 2, root, ochoice);
@@ -1121,7 +1137,7 @@ complete_file_summary (w, root, ochoice)
   ion_summary (w, 14, 4, 2, root, ochoice);
   ion_summary (w, 14, 5, 2, root, ochoice);
 
-  
+
   ion_summary (w, 6, 3, 3, root, ochoice);
   ion_summary (w, 6, 4, 3, root, ochoice);
   ion_summary (w, 6, 5, 3, root, ochoice);
@@ -1221,4 +1237,3 @@ inner_shell_summary (w, rootname, ochoice)
   return (0);
 
 }
-

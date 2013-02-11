@@ -319,7 +319,7 @@ return and record an error */
 
 /* Assign the pointers for the cell containing the photon */
 
-  one = &wmain[n];		/* one is the grid cell where the poton is */
+  one = &wmain[n];		/* one is the grid cell where the photon is */
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 

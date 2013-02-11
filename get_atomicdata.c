@@ -552,7 +552,7 @@ ksl 04Apr  ??
 		  if (nlte > 0)
 		    {		// Then we want to consider some of these levels as non-lte
 		      ion[nions].first_levden = nlte_levels;	/* This is the index to into
-								   the levdev aray */
+								   the levden aray */
 		      ion[nions].n_lte_max = nlte;	//Reserve this many elements of levden
 		      nlte_levels += nlte;
 		      if (nlte_levels > NLTE_LEVELS)
@@ -1295,7 +1295,7 @@ for the ionstate.
 				  exit (0);
 				}
 			      ion[config[n].nion].ntop++;
-			      //printf("Accepted Z %d NI %d %d %d (%d %d)\n", z,istate,islp,ilv,n,config[n].nden);
+//			      printf("Accepted Z %d NI %d %d %d (%d %d)\n", z,istate,islp,ilv,n,config[n].nden);
 			      for (n = 0; n < np; n++)
 				{
 				  phot_top[ntop_phot].freq[n] = xe[n] * EV2ERGS / H;	// convert from eV to freqency
@@ -1359,6 +1359,8 @@ for the ionstate.
 				    {
 				      ion[n].phot_info = 0;	/* Mark this ion as using VFKY photo */
 				      ion[n].nxphot = nxphot;
+
+//printf("Ion number %i (element %i in state %i) is reading in VFKY\n",n,ion[n].z,ion[n].istate);
 				      nxphot++;
 				    }
 				  else if (ion[n].phot_info == 1)
@@ -2272,6 +2274,7 @@ index_phot_verner ()
 
   for (n = 0; n < nxphot; n++)
     {
+      xphot_ptr1[n] = &xphot[n];
       xphot_ptr[n] = &xphot[index[n + 1] - 1];
     }
 

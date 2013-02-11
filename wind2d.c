@@ -98,7 +98,7 @@ define_wind ()
 
 
 
-  if (geo.coord_type == SPHERICAL)
+   if (geo.coord_type == SPHERICAL)
     {
       spherical_make_grid (w);
     }
@@ -277,13 +277,12 @@ be optional which variables beyond here are moved to structures othere than Wind
 
   for (n = 0; n < NPLASMA; n++)
     {
-
       nwind = plasmamain[n].nwind;
       stuff_v (w[nwind].xcen, x);
 
       plasmamain[n].rho = model_rho (x);
       plasmamain[n].vol = w[nwind].vol;	// Copy volumes
-
+      plasmamain[n].sim_alpha = geo.alpha_agn; //As an initial guess we assume the whole wind is optically thin and so the spectral index for a PL illumination will be the same everywhere.
 
       nh = plasmamain[n].rho * rho2nh;
       plasmamain[n].t_r = geo.twind;
@@ -292,6 +291,13 @@ be optional which variables beyond here are moved to structures othere than Wind
       plasmamain[n].dt_e_old = 0.0;
       plasmamain[n].dt_e = 0.0;
       plasmamain[n].t_e = plasmamain[n].t_e_old = 0.9 * plasmamain[n].t_r;	//Lucy guess
+
+
+/* Calculate an initial guess for the weight of the PL spectrum (constant / area of a sphere / 4pi) */
+
+      plasmamain[n].sim_w = geo.const_agn / (4.0*PI*(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]));  // constant / area of a sphere
+      plasmamain[n].sim_w /= 4.*PI;   // take account of solid angle
+
       rrstar =
 	1. - (geo.rstar * geo.rstar) / (x[0] * x[0] + x[1] * x[1] +
 					x[2] * x[2]);
@@ -300,9 +306,17 @@ be optional which variables beyond here are moved to structures othere than Wind
 	  plasmamain[n].w = 0.5 * (1 - sqrt (rrstar));
 	}
       else
+	{	
 	plasmamain[n].w = 0.5;	//Modification to allow for possibility that grid point is inside star
-
+	}
+	printf("in wind2d About to decide what to do - geo.ioniz_mode=%i\n",geo.ioniz_mode);
+	printf("For cell %i, at a distance %e from the AGN, alpha=%f, w=%e, nH=%e\n",n,pow((x[0] * x[0] + x[1] * x[1] +
+					x[2] * x[2]),0.5),plasmamain[n].sim_alpha,plasmamain[n].sim_w,nh);
       /* Determine the initial ionizations, either LTE or  fixed_concentrations */
+ //     if (geo.ioniz_mode == 5)     
+  //      {                      // LTE followed by SIM correction factor mode 4 set so it doesnt try a one shot.
+   //       ierr = ion_abundances (&plasmamain[n], 4);
+    //    }
       if (geo.ioniz_mode != 2)
 	{			/* Carry out an LTE determination of the ionization */
 	  ierr = ion_abundances (&plasmamain[n], 1);
@@ -328,7 +342,6 @@ be optional which variables beyond here are moved to structures othere than Wind
 	  plasmamain[n].xscatters[j] = 0;
 	}
     }
-
 
 /* Calculate the the divergence of the wind at the center of each grid cell */
   wind_div_v (w);

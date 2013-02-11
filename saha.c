@@ -117,7 +117,7 @@ nebular_concentrations (xplasma, mode)
   double get_ne ();
   int lucy_mazzali1 ();
   int m;
-  int concentrations (), lucy (), dlucy ();
+  int concentrations (), lucy (), dlucy (), sim_driver ();
 
   if (mode == 0)
     {				// LTE all the way -- uses tr
@@ -140,13 +140,24 @@ nebular_concentrations (xplasma, mode)
 
       partition_functions (xplasma, mode);	// t_r with weights
 
-      m = concentrations (xplasma, 0);	// Saha equation using t_r
+      m = concentrations (xplasma, mode);	// Saha equation using t_r
 
       m = lucy (xplasma);	// Main routine for running LucyMazzali
 
 
     }
+  else if (mode == 5)           /* This is LTE followed by a modification 
+             to allow for a strongly non BB radiation field - after Sim (2008) */
+    {
+	printf("We are in nebular_concentrations, and we are running at mode=%i\n",mode);
+	printf("Heading off to partition_functions\n");
 
+     partition_functions (xplasma, 1);   //lte partition function using t_e and no weights
+	printf("Back from partition_functions, now going to concentrations\n");
+      m = concentrations (xplasma, 3);	// Saha equation using t_e - new mode, in case we need to do something clever
+	printf("Back from concentrations, going into sim_driver, T_e=%e, alpha=%f, w=%e\n",xplasma->t_e,xplasma->sim_alpha,xplasma->sim_w);
+      m = sim_driver (xplasma);
+   }
   else
     {
 // If reached this point the program does not understand what is desired.
@@ -271,6 +282,10 @@ concentrations (xplasma, mode)
     {
       t = sqrt (xplasma->t_e * xplasma->t_r);
     }
+  else if (mode == 3)   //same as mode 1, put in to allow identical control when using Sim modifications to concentrations
+    {
+      t = xplasma->t_e;
+    }
   else
     {
       Error ("Concentrations: Unknown mode %d\n", mode);
@@ -283,6 +298,14 @@ concentrations (xplasma, mode)
   /* make an initial estimate of ne based on H alone,  Our guess
      assumes ion[0] is H1.  Note that x below is the fractional
      ionization of H and should vary from 0 to 1
+
+     Note that in a pure H plasma, the left hand side of the Saha 
+     equation can be written as (x*x*nh*nh)/((1-x)*nh)  and can
+     then be converted into a quadratic.  That is what is done
+     below.  
+
+     Since this is an initial estimate g factors have been ignored
+     in what follows.
    */
 
   if (t < MIN_TEMP)
@@ -304,13 +327,13 @@ concentrations (xplasma, mode)
     xne = 1.e-6;		/* fudge to assure we can actually calculate
 				   xne the first time through the loop */
 
-  /* At this point we have an intial estimate of ne. */
+  /* At this point we have an initial estimate of ne. */
 
 
   niterate = 0;
   while (niterate < MAXITERATIONS)
     {
-
+	Log("Saha Iteration %i, with ne=%e and t=%e\n",niterate,xne,t);
       /* Assuming a value of ne calculate the relative densities of each ion for each element */
 
       saha (xplasma, xne, t);
@@ -425,19 +448,23 @@ saha (xplasma, ne, t)
 	  exit (0);
 	}
 
-      sum = density[first] = 1.;
+      sum = density[first] = 1e-250;
       big = pow (10., 250. / (last - first));
+	big=big*1e6;
 
       for (nion = first + 1; nion < last; nion++)
 	{
 	  b = xsaha * partition[nion]
 	    * exp (-ion[nion - 1].ip / (BOLTZMANN * t)) / (ne *
 							   partition[nion-1]);
-	  if (b > big)
-	    b = big;		//limit step so there is no chance of overflow
 
+//	  if (b > big)
+//	{
+//	Log ("We want the ratio b for nion=%i (%i,%i) to be %e, but it's too big! Setting to %e\n",nion,ion[nion].z,nion-first,b,big);	 
+//	   b = big;		//limit step so there is no chance of overflow
+//	}
 	  a = density[nion - 1] * b;
-
+ //       printf("Relative density of nion=%i (%i,%i) is %e\n",nion,ion[nion].z,nion-first+1,a);
 	  sum += density[nion] = a;
 	  if (density[nion] < 0.0)
 	    mytrap ();

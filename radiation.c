@@ -133,7 +133,7 @@ radiation (p, ds)
   kappa_tot = frac_ff = kappa_ff (xplasma, freq);	/* Add ff opacity */
   frac_tot = frac_z = 0;	/* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
 				   indicate this is all disagnostic and might be removed */
-
+//	printf ("In radiation we have ds=%e, W=%e, nu=%e\n",ds,p->w,p->freq);
 
   if (freq > phot_freq_min)
 
@@ -151,7 +151,6 @@ radiation (p, ds)
 /* Next section is for photoionization with Topbase.  There may be more
 than one x-section associated with an ion, and so one has to keep track
 of the energy that goes into heating electrons carefully.  */
-
 /* Next steps are a way to avoid the loop over photoionization x sections when it should not matter */
       if (DENSITY_PHOT_MIN > 0)	// 57h -- ksl -- 060715
 	{			// Initialize during ionization cycles only
@@ -175,7 +174,7 @@ of the energy that goes into heating electrons carefully.  */
 		    {
 		      kappa_tot += x =
 			sigma_phot_topbase (x_top_ptr, freq) * density;
-
+//		printf("ALERT ALERT ALERT %e, %i\n",kappa_tot,geo.ioniz_or_extract);
 /* I believe most of next steps are totally diagnsitic; it is possible if 
 statement could be deleted entirely 060802 -- ksl */
 		      if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
@@ -495,9 +494,10 @@ sigma_phot_topbase (x_ptr, freq)
   int linterp ();
   int nlast;
 
+  
+
   if (freq < x_ptr->freq[0])
     return (0.0);		// Since this was below threshold
-
   if (freq == x_ptr->f)
     return (x_ptr->sigma);	// Avoid recalculating xsection
 

@@ -90,8 +90,7 @@ get_stellar_wind_params ()
   rddoub ("stellar.wind.acceleration_exponent", &geo.cl_beta);	/* Accleration scale exponent */
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
-
-  geo.wind_rmin = geo.rstar;
+//  geo.wind_rmin = geo.rstar;
   geo.wind_rmax = geo.rmax;
   geo.wind_thetamin = 0.0;
   geo.wind_thetamax = 90. / RADIAN;
@@ -101,7 +100,6 @@ get_stellar_wind_params ()
   geo.wind_rho_max = geo.rmax;
   geo.xlog_scale = 0.3 * geo.rstar;
   geo.zlog_scale = 0.3 * geo.rstar;
-
 
   return (0);
 }
@@ -206,7 +204,7 @@ stellar_rho (x)
 {
   double r, rho, v[3];
   double length (), stellar_velocity ();
-
+	printf("Here we are in stellar rho x=%e,y=%e,z=%e/n",x[0],x[1],x[2]);
   r = length (x);
   if (r < geo.cl_rmin)
     {

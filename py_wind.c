@@ -266,6 +266,7 @@ a:printf
       inner_shell_summary (w, root, ochoice);
       break;
     case 'h':			/*n photo */
+      Log("Don't get discouraged.  This takes a little while!");
       recomb_summary (w, root, ochoice);
       break;
     case 'i':			/* Allow user to display information about ions in the wind */

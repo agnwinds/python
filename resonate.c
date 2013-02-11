@@ -144,7 +144,9 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 
 /* So "phot"  is a photon vector at the far edge of the cell, while p remains the photon 
-   vector at the near edge of the cell, and p_now is the midpoint. */
+   vector at the near edge of the cell, and p_now is the midpoint.  Note that comp_phot
+   compares the position and direction of two photons.  If they are the same, then 
+   it just takes v1 from the old value.  */
 
   if (comp_phot (&cds_phot_old, p))
     {
@@ -154,7 +156,6 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   else
     {
       v1 = cds_v2_old;
-
     }
 
   /* Create phot, a photon at the far side of the cell */
@@ -206,8 +207,9 @@ then the photon frequency will be less. */
 
   if (fabs (dfreq) < EPSILON)
     {
+      vwind_xyz (p, v_inner);
       Error
-	("translate: v same at both sides of cell %d %2g,\n %.2g %.2g %.2g %.2g %.2g %.2g \n",
+	("translate: v same at both sides of cell %d so dfreq is %2g,\n v_inner %.2g %.2g %.2g v_outer %.2g %.2g %.2g \n",
 	 one->nwind, dfreq, v_inner[0], v_inner[1], v_inner[2], v_outer[0],
 	 v_outer[1], v_outer[2]);
       x = -1;

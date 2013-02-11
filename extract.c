@@ -325,7 +325,7 @@ the same resonance again */
 
   if (tau > TAU_MAX)
     istat = P_ABSORB;		/* Check to see if tau already too large */
-  else if (geo.binary_system)
+  else if (geo.system_type==1)  /* Changed 69 to allow for additional system types */
     istat = hit_secondary (pp);	/* Check to see if it hit secondary */
 
  

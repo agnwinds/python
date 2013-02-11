@@ -14,20 +14,37 @@
                 Space Telescope Science Institute
 
 Synopsis:
+
 Python uses a form of stratified sampling in an attempt to assure
 that there are photon bundles at (high, generally) frequencies
 
-This is the routine that initializes the bands.  It is hardwired
-at present for H and He, and so may not be ideal for O VI, C IV,
-or NV.
+This is the routine that initializes the bands.    There are
+a number of possiblilities for setting up the bands
+
 
    
 Arguments:		
-	mode	0	Use temperature to define a single band
+     double t;			A temperature which can be used to set absolute limits on the bands
+     double f1, f2;		frequency limits that can overide any other limits
+     int imode;			A switch used for determining how the bands are to be populated
+     struct xbands *band;	A poointer to the structure that holds the band information
+
+     The currently allow modes are 
+
+	imode	0	Use temperature to define a single band
 		1	Use f1 and f2 to define a single band
 		2	Use t,f1 and f2, and hardwired bands
-			to define multiple bands
+			to define multiple bands which have been
+			tuned to be relevent to CVs and other
+			systems where a hot disk (T_eff of about
+			100,000 K is assumed
+		3	Bands tuned for yso
+		4	Query the user to specify an arbitrary
+			set of bands
 Returns:
+
+	The outputs are passed to other routines through the pointer
+	to xbands.  The routine itself simply returns 0 on success
  
  
 Description:	
@@ -35,10 +52,10 @@ Description:
 		
 Notes:
 
-0812 - In python, bands_init is only called with mode 2. Other diagnostic
-routines, e.g balance make use of the other possibilities.  But we 
-need to address the problem that with attempts to broaden the
-utility of the python, we need more flexibility in to set the bands.
+	10nov - ksl - Some of the choices have checks to see whether the bands
+	that are being set up lie within f1 and f2.  Others do
+	not.  This seems like an error.
+
 
 History:
 	01dec	ksl	python40
@@ -173,7 +190,17 @@ bands_init (t, f1, f2, imode, band)
       printf
 	("Enter band boundaries in increasing eV, and assure they are between lowest and highest energy\n");
 
-      band->f1[0] = f1;
+
+
+
+       rddoub ("Lowest_energy_to_be_considered(eV)", &xx);
+	  band->f1[0] = xx / HEV;
+
+       rddoub ("Highest_energy_to_be_considered(eV)", &xx);
+	  band->f2[band->nbands-1] = xx / HEV;
+
+
+
 
       for (nband = 0; nband < band->nbands - 1; nband++)
 	{
@@ -195,7 +222,7 @@ bands_init (t, f1, f2, imode, band)
 
   else
     {
-      Error ("Init bands: Unknown mode %d\n", mode);
+      Error ("bands_init: Unknown mode %d\n", mode);
       mytrap ();
     }
 

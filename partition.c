@@ -94,6 +94,12 @@ partition_functions (xplasma, mode)
       t = xplasma->t_r;
       weight = xplasma->w;
     }
+  else if (mode == 3)  
+    {
+     //Non LTE calculation with non BB radiation field. Use T_e to get partition functions, same as mode 1-
+      t = xplasma->t_e;
+      weight = 1;
+    }
   else
     {
       Error ("partition_functions: Unknown mode %d\n", mode);

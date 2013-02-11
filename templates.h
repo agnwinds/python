@@ -51,7 +51,7 @@ double get_ne(double density[]);
 /* spectra.c */
 int spectrum_init(double f1, double f2, int nangle, double angle[], double phase[], int scat_select[], int top_bot_select[], int select_extract, double rho_select[], double z_select[], double az_select[], double r_select[]);
 int spectrum_create(PhotPtr p, double f1, double f2, int nangle, int select_extract);
-int spectrum_summary(char filename[], char mode[], int nspecmin, int nspecmax, int select_spectype, double renorm);
+int spectrum_summary(char filename[], char mode[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin);
 /* wind2d.c */
 int define_wind(void);
 int where_in_grid(double x[]);
@@ -141,8 +141,8 @@ int spec_read(char filename[]);
 int extract(WindPtr w, PhotPtr p, int itype);
 int extract_one(WindPtr w, PhotPtr pp, int itype, int nspec);
 /* pdf.c */
-int pdf_init(void);
 int pdf_gen_from_func(PdfPtr pdf, double (*func)(double), double xmin, double xmax, int njumps, double jump[]);
+double gen_array_from_func(double (*func)(double), double xmin, double xmax, int pdfsteps);
 int pdf_gen_from_array(PdfPtr pdf, double x[], double y[], int n_xy, double xmin, double xmax, int njumps, double jump[]);
 double pdf_get_rand(PdfPtr pdf);
 int pdf_limit(PdfPtr pdf, double xmin, double xmax);
@@ -261,6 +261,7 @@ int check_convergence(void);
 int one_shot(PlasmaPtr xplasma, int mode);
 double calc_te(PlasmaPtr xplasma, double tmin, double tmax);
 double zero_emit(double t);
+double sim_alpha_func(double alpha);
 /* ispy.c */
 int ispy_init(char filename[], int icycle);
 int ispy_close(void);
@@ -398,6 +399,24 @@ int set_max_time(char *root, double t);
 int check_time(char *root);
 /* auger_ionization.c */
 int auger_ionization(PlasmaPtr xplasma);
+/* agn.c */
+double agn_init(double r, double lum, double alpha, double freqmin, double freqmax, int ioniz_or_final, double *f);
+double emittance_pow(double freqmin, double freqmax, double lum, double alpha);
+int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
+/* stuart_sim.c */
+int sim_driver(PlasmaPtr xplasma);
+int sim_pl(double nh, double t_r, double t_e, double www, int nelem, double ne, double density[], double xne, double newden[]);
+double xinteg_sim(double t, double f1, double f2, int nion, double max_ratio, double current_ratio);
+double tb_planck(double freq);
+double verner_planck(double freq);
+double tb_pow(double freq);
+double verner_pow(double freq);
+double sim_alphasolve(double ratans, double numin, double numax);
+double sim_w(double en1, double v, double dt, double alpha, double numin, double numax);
+/* balance_gen.c */
+int summary(PlasmaPtr one);
+double line_heating(PlasmaPtr w, PhotPtr p, double ds);
+double sobolev_line_heating(PlasmaPtr w, PhotPtr p, double ds);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

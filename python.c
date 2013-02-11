@@ -178,8 +178,8 @@ History:
 
 
 #include "python.h"
-#define NSPEC	20	//68c moved the defintion here, because NSPEC is not needed by any other routine
-
+#define NSPEC	20		//68c moved the defintion here, because NSPEC is not needed by any other routine
+double n_ioniz,lum_ioniz;   //NSH 16/2/2011 these seemed to need to be here to allow photon_checks to communicate the number back to python for readout....
 int
 main (argc, argv)
      int argc;
@@ -205,7 +205,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   char yesno[20];
   int select_extract, select_spectype;
   double tmax;
-  char root[LINELENGTH], input[LINELENGTH], wspecfile[LINELENGTH],
+  char root[LINELENGTH], input[LINELENGTH], wspecfile[LINELENGTH],lspecfile[LINELENGTH],
     specfile[LINELENGTH], diskfile[LINELENGTH];
   char windradfile[LINELENGTH], windsavefile[LINELENGTH];
   char specsavefile[LINELENGTH];
@@ -214,7 +214,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   char dummy[LINELENGTH];
   char tprofile[LINELENGTH];
   double xbl;
-  double n_ioniz, lum_ioniz;
+//  double n_ioniz, lum_ioniz;   NSH 16/2/2011 These are declared externally.
   int j, nn;
   double zz, zzz, zze, ztot;
   int icheck;
@@ -240,7 +240,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   verbosity = 4;		/* Set the default verbosity to 4.  To get more info raise the verbosity level to a higher number. To
 				   get less set the verbosity to a lower level. */
 
-Log_set_verbosity (verbosity);
+  Log_set_verbosity (verbosity);
 
   /* Parse the command line.  Updated for 67 to allow for switches  - 0811 - ksl  */
 
@@ -287,7 +287,7 @@ Log_set_verbosity (verbosity);
 		  Error ("python: Expected verbosity after -v switch\n");
 		  exit (0);
 		}
-	    Log_set_verbosity (verbosity);
+	      Log_set_verbosity (verbosity);
 	      i++;
 
 	    }
@@ -402,6 +402,8 @@ Log_set_verbosity (verbosity);
   strcpy (basename, root);	//56d -- ksl --Added so filenames could be created by routines as necessary
 
   strcpy (wspecfile, root);
+  strcpy (lspecfile, root);
+   
   strcpy (specfile, root);
   strcpy (windradfile, "python");
   strcpy (windsavefile, root);
@@ -410,6 +412,7 @@ Log_set_verbosity (verbosity);
   strcpy (diskfile, root);
 
   strcat (wspecfile, ".spec_tot");
+  strcat (lspecfile, ".log_spec_tot");
   strcat (specfile, ".spec");
   strcat (windradfile, ".wind_rad");
   strcat (windsavefile, ".wind_save");
@@ -490,13 +493,14 @@ Log_set_verbosity (verbosity);
 
 	}
 
-      else {  /* Read the atomic datafile her, because for the cases where we have read
-		 and old wind files, we also got the atomic data */
+      else
+	{			/* Read the atomic datafile her, because for the cases where we have read
+				   and old wind files, we also got the atomic data */
 
-    rdstr ("Atomic_data", geo.atomic_filename);
-  get_atomic_data (geo.atomic_filename);
+	  rdstr ("Atomic_data", geo.atomic_filename);
+	  get_atomic_data (geo.atomic_filename);
 
-      }
+	}
 
       geo.wcycle = geo.pcycle = 0;
 
@@ -507,7 +511,7 @@ Log_set_verbosity (verbosity);
       Log ("Continuing a previous run of %s \n", root);
       strcpy (old_windsavefile, root);
       strcat (old_windsavefile, ".wind_save");
-      wind_read (old_windsavefile);	/* program would exist if unable to read the file, but we have checked this earlier*/
+      wind_read (old_windsavefile);	/* program would exist if unable to read the file, but we have checked this earlier */
       w = wmain;
       geo.wind_type = 2;	// We read the data from a file
       xsignal (root, "%-20s Read %s\n", "COMMENT", old_windsavefile);
@@ -521,9 +525,6 @@ Log_set_verbosity (verbosity);
 
 
 
-//OLD091105  if (geo.wind_type != 2)
-//OLD091105    rdstr ("Atomic_data", geo.atomic_filename);
-//OLD091105  get_atomic_data (geo.atomic_filename);
 
 /* Get the remainder of the data.  Note that this is done whether or not the windsave file was read in */
 
@@ -585,16 +586,16 @@ Log_set_verbosity (verbosity);
 //080808 - 62 - Ionization section has been cleaned up -- ksl
 
   rdint
-    ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc)",
+    ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc,5=SIM)",
      &geo.ioniz_mode);
 
   if (geo.ioniz_mode == 2)
     {
       rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
     }
-  if (geo.ioniz_mode > 3)
+  if (geo.ioniz_mode == 4 || geo.ioniz_mode > 5)
     {
-      Error ("python not up to date on ionization modes > 3\n");
+      Error ("Unknown ionization mode\n");
       exit (0);
     }
 
@@ -668,15 +669,33 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
       geo.macro_ioniz_mode = 0;
     }
 
-  // Determine what radiation sources there are
+  //  Establish the overall system type  - Added for python_69 to allow qso's have differnet inputs
 
+  rdint ("System_type(0=star+disk,1=star+disk+secondary,2=agn",
+	 &geo.system_type);
+
+  
+  // Determine what radiation sources there are.  Note that most of these values are initilized in init_geo
+  
+  if (geo.system_type!=2) {
   rdint ("Star_radiation(y=1)", &geo.star_radiation);
   rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
   rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
   rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+  geo.agn_radiation=0;
+  }
+  else 
+  {
+  geo.star_radiation=0;
+  rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+  geo.bl_radiation=0;
+  rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+  geo.agn_radiation=1;
+  rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
+  }
 
   if (!geo.star_radiation && !geo.disk_radiation && !geo.bl_radiation
-      && !geo.bl_radiation)
+      && !geo.bl_radiation && !geo.agn_radiation)
     {
       Error ("python: No radiation sources so nothing to do but quit!\n");
       exit (0);
@@ -714,6 +733,11 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 		"Rad_type_for_bl(0=bb,1=models)_to_make_wind",
 		&geo.bl_ion_spectype);
 
+  geo.agn_ion_spectype=3;
+  get_spectype (geo.agn_radiation,
+		"Rad_type_for_agn(0=bb,1=models,3=power_law)_to_make_wind",
+		&geo.agn_ion_spectype);
+
 
   if (geo.wind_type == 2)
     {
@@ -725,27 +749,40 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
     {
 
       /* Describe the basic binary star system */
-      geo.binary_system = 1;
-      rdint ("Overall_system_type(0=single_object,1=binary)",
-	     &geo.binary_system);
 
       geo.mstar /= MSOL;	// Convert to MSOL for ease of data entry
       rddoub ("mstar(msol)", &geo.mstar);
       geo.mstar *= MSOL;
 
+      /* If a BH we want geo.rstar to be at least as large as the last stable orbit for
+       * a non-rotating BH
+       */
+
+      if (geo.system_type==2){
+	      geo.rstar=12.*G*geo.mstar/(C*C);
+      }
+
       rddoub ("rstar(cm)", &geo.rstar);
+
+
+      geo.r_agn=geo.rstar;   /* At present just set geo.r_agn to geo.rstar */
+      if (geo.system_type==2){
+	      geo.diskrad=100.*geo.r_agn;
+      }
+
       geo.rstar_sq = geo.rstar * geo.rstar;
       if (geo.star_radiation)
 	rddoub ("tstar", &geo.tstar);
 
-      if (geo.binary_system)
+
+      if (geo.system_type == 1)
 	{
 
 	  geo.m_sec /= MSOL;	// Convert units for ease of data entry
 	  rddoub ("msec(msol)", &geo.m_sec);
 	  geo.m_sec *= MSOL;
 
-	  geo.period /= 3600.;	// Convert units ro hours for easy of data entry
+	  geo.period /= 3600.;	// Convert units to hours for easy of data entry
 	  rddoub ("period(hr)", &geo.period);
 	  geo.period *= 3600.;	// Put back to cgs immediately                   
 	}
@@ -785,7 +822,7 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 	   * models, e.g. knigge have wind structures that depend on teff.
 	   *
 	   * 080518 - ksl - this is quite confusing.  I understand that the KWD models have
-	   * base velociites that are affected by t_eff, but we have not done anything
+	   * base velocities that are affected by t_eff, but we have not done anything
 	   * yet.  Possible this is a consideration for restart, but I would have guessed
 	   * we recalculated all of that, and in any event this is within the block to
 	   * reset things.  this is likely a problem of some sort
@@ -843,7 +880,38 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 	  geo.t_bl = 0;
 	}
 
+/* Describe the agn */
+
+      if (geo.agn_radiation)
+	{
+	  xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
+
+	  // At present we have set geo.r_agn = geo.rstar, and encouraged the user
+	  // set the default for the radius of the BH to be 6 R_Schwartschild.
+	  // rddoub("R_agn(cm)",&geo.r_agn);
+
+	  rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
+	  Log ("OK, the agn lum will be about %.2e the disk lum\n",
+	       geo.lum_agn / xbl);
+	  geo.alpha_agn=(-1.5);
+	  rddoub ("agn_power_law_index", &geo.alpha_agn);
+/* The next line computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. This is only used in the sim correction factor for the first time through. Afterwards, the photons are used to compute the sim parameters. */
+	  geo.const_agn = geo.lum_agn / (((pow (2.42e18, geo.alpha_agn + 1.)) - pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
+	  Log("AGN Input parameters give a power law constant of %e\n",geo.const_agn);
+	}
+      else
+	{
+	  geo.r_agn=0.0;
+	  geo.lum_agn = 0.0;
+	  geo.alpha_agn = 0.0;
+	  geo.const_agn =0.0;
+	}
+
 /* Describe the wind */
+
+      if (geo.system_type==2) {
+	      geo.rmax=50.*geo.r_agn;
+      }
 
       rddoub ("wind.radmax(cm)", &geo.rmax);
       rddoub ("wind.t.init", &geo.twind);
@@ -952,7 +1020,7 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 
   /* Calculate additonal parameters associated with the binary star system */
 
-  if (geo.binary_system)
+  if (geo.system_type==1)
     binary_basics ();
 
   /* Check that the parameters which have been supplied for the star, disk and boundary layer will
@@ -989,6 +1057,11 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
     Log ("There is a boundary layer which radiates\n");
   else
     Log ("There is no boundary layer\n");
+
+  if (geo.agn_radiation)
+    Log ("There is a BH  which radiates\n");
+  else
+    Log ("There is no BH \n");
 
 /* Describe the spectra which will be extracted and the way it will be extracted */
 
@@ -1032,6 +1105,12 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 		    "Rad_type_for_bl(0=bb,1=models,2=uniform)_in_final_spectrum",
 		    &geo.bl_spectype);
 
+      geo.agn_spectype=3;
+      get_spectype (geo.agn_radiation,
+		    "Rad_type_for_agn(0=bb,1=models,3=power_law)_in_final_spectrum",
+		    &geo.agn_spectype);
+
+
 
       rddoub ("spectrum_wavemin", &swavemin);
       rddoub ("spectrum_wavemax", &swavemax);
@@ -1052,7 +1131,7 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 /* Note: Below here many of the variables which are read in are not currently part of geo stucture */
 
       rdint ("no_observers", &nangles);
- 
+
       if (nangles < 1 || nangles > NSPEC)
 	{
 	  Error ("no_observers %d should not be > %d or <0\n", nangles,
@@ -1189,6 +1268,14 @@ run -- 07jul -- ksl
 
   bands_init (0.0, freqmin, freqmax, -1, &xband);
 
+ //if we have changed min and max in bands_init, we need to make  sure this is reflected in the global frequency bounds//
+
+
+	freqmin=xband.f1[0];
+	freqmax=xband.f2[xband.nbands-1];
+
+
+
 /* Wrap up and save all the inputs */
 
   if (strncmp (root, "mod", 3) == 0)
@@ -1212,9 +1299,9 @@ run -- 07jul -- ksl
 
 
   /* Next line finally defines the wind if this is the initial time this model is being run */
-
   if (geo.wind_type != 2)	// Define the wind and allocate the arrays the first time
-    define_wind ();		// Do not reinit if you want to use old windfile
+    define_wind ();
+			// Do not reinit if you want to use old windfile
 
   w = wmain;
 
@@ -1288,13 +1375,13 @@ run -- 07jul -- ksl
   if (geo.wcycle == wcycles)
     xsignal (root, "%-20s No ionization needed: wcycles(%d)==wcyeles(%d)\n",
 	     "COMMENT", geo.wcycle, geo.wcycles);
-  else 
-  {
-	  geo.pcycle=0;  /* Set the spectrum cycles executed to 0, because 
-			    we are going to modify the wind and hence any
-			    previously calculated spectra must be recreated
-			    */
-  }
+  else
+    {
+      geo.pcycle = 0;		/* Set the spectrum cycles executed to 0, because 
+				   we are going to modify the wind and hence any
+				   previously calculated spectra must be recreated
+				 */
+    }
 
 
   while (geo.wcycle < wcycles)
@@ -1357,9 +1444,9 @@ run -- 07jul -- ksl
 	   * photons_per_cycle is the number of photon bundles which will equal the luminosity; 
 	   * 0 => for ionization calculation 
 	   */
-
+	printf ("sent to define_phot freqmin=%e freqmax=%e \n",freqmin,freqmax);
 	  define_phot (p, freqmin, freqmax, photons_per_cycle, 0, iwind, 1);
-
+	printf ("sent to photon_checks freqmin=%e freqmax=%e \n",freqmin,freqmax);
 	  photon_checks (p, freqmin, freqmax, "Check before transport");
 
 	  zz = 0.0;
@@ -1406,6 +1493,12 @@ run -- 07jul -- ksl
 	  spectrum_create (p, freqmin, freqmax, nangles, select_extract);
 
 
+
+
+
+
+
+
 	}
 
       /* End of the subcycle loop */
@@ -1438,7 +1531,9 @@ run -- 07jul -- ksl
 	   geo.wcycle, timer ());
 
       Log ("Finished creating spectra\n");
-      spectrum_summary (wspecfile, "w", 0, 5, 0, 1.);
+	printf ("%s %s\n",wspecfile,lspecfile);
+      spectrum_summary (wspecfile, "w", 0, 5, 0, 1.,0);
+      spectrum_summary (lspecfile, "w", 0, 5, select_spectype, 1.,1);    /* output the log spectrum */
       phot_gen_sum (photfile, "w");	/* Save info about the way photons are created and absorbed
 					   by the disk */
 
@@ -1522,7 +1617,7 @@ run -- 07jul -- ksl
 
 
   /* the next condition should really when one has nothing more to do */
-  
+
   if (geo.pcycle >= pcycles)
     xsignal (root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n",
 	     "COMMENT", geo.pcycle, geo.pcycles);
@@ -1581,7 +1676,7 @@ run -- 07jul -- ksl
 /* Write out the detailed spectrum each cycle so that one can see the statistics build up! */
       renorm = ((double) (pcycles)) / (geo.pcycle + 1.0);
       spectrum_summary (specfile, "w", 0, nspectra - 1, select_spectype,
-			renorm);
+			renorm,0);
       Log ("Completed spectrum cycle %d :  The elapsed TIME was %f\n",
 	   geo.pcycle, timer ());
 
@@ -1694,6 +1789,8 @@ Notes:
 	are the working units for the program.  This is necessary for consistncy when
 	one tries to restart the program.
 
+	Note that init_geo is set up for CVs and Stars and not AGN
+
 
 History:
  	98dec	ksl	Coded and debugged.  Much of code was copied from old main routine for
@@ -1756,7 +1853,7 @@ init_geo ()
 
 
   strcpy (geo.atomic_filename, "atomic/standard39");
-  strcpy (geo.fixed_con_file, "none");	
+  strcpy (geo.fixed_con_file, "none");
 
   // Note that geo.model_list is initialized through get_spectype 
 
@@ -1788,11 +1885,11 @@ photon_checks (p, freqmin, freqmax, comment)
      double freqmin, freqmax;
 {
   int nnn, nn;
-  double lum_ioniz;
-  int n_ioniz;
+//  double lum_ioniz;  //NSH 16/2/2011 These are now declared externally to alloy python to see them
+//  int n_ioniz;
   int nlabel;
 
-
+//  n_ioniz=0;
   nnn = 0;
   nlabel = 0;
 
@@ -1929,6 +2026,8 @@ get_spectype (yesno, question, spectype)
 	*spectype = SPECTYPE_BB;	// bb
       else if (stype == 2)
 	*spectype = SPECTYPE_UNIFORM;	// uniform
+      else if (stype == 3)
+	*spectype = SPECTYPE_POW;	// power law
       else
 	{
 	  if (geo.wind_type == 2)

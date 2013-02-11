@@ -129,12 +129,41 @@ spherical_make_grid (w)
 	  }
 	else
 	  {			//logarithmic intervals
-
 	    dlogr = (log10 (geo.rmax / geo.rstar)) / (NDIM - 3);
 	    w[n].r = geo.rstar * pow (10., dlogr * (n - 1));
 	    w[n].rcen = 0.5 * geo.rstar * (pow (10., dlogr * (n)) +
 					   pow (10., dlogr * (n - 1)));
+	printf("OLD W.r = %e, w.rcen = %e\n",w[n].r,w[n].rcen);
 	  }
+
+//        w[0].r=geo.rstar;
+//       w[1].r=geo.wind_rmin;
+//	w[2].r=geo.wind_rmax;
+//	w[3].r=geo.wind_rmin+2*(geo.wind_rmax-geo.wind_rmin);
+
+//	w[0].rcen=(w[0].r+w[1].r)/2;
+//	w[1].rcen=(w[1].r+w[2].r)/2;
+//	w[2].rcen=(w[2].r+w[3].r)/2;
+//	w[3].rcen=w[3].r+(w[3].r-w[2].r)/2;
+
+
+
+
+        w[0].r=9.999980e15;
+        w[1].r=1.000000e16;
+	w[2].r=1.000002e16;
+	w[3].r=1.000004e16;
+
+	w[0].rcen=(w[0].r+w[1].r)/2;
+	w[1].rcen=1.000001e16;
+	w[2].rcen=1.000003e16;
+	w[3].rcen=1.000005e16;
+
+
+
+	printf("NEW W.r = %e, w.rcen = %e\n",w[n].r,w[n].rcen);
+
+
 	/* Now calculate the positions of these points in the xz plane.
 	   There is a choice about how one does this.   I have elected
 	   to assume that we want to calculate this at a 45 degree angle.
@@ -523,3 +552,6 @@ spherical_extend_density (w)
   return (0);
 
 }
+
+
+

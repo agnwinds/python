@@ -47,14 +47,18 @@ History:
 #include "atomic.h"
 #include "python.h"
 
+double sim_numin,sim_numax,sim_meanfreq;  // external variables set up so zbrent can solve for alhpa.
+
+
+
 int
 ion_abundances (xplasma, mode)
      PlasmaPtr xplasma;
      int mode;
 {
-  int ireturn;
-
-
+  int ireturn,n;
+  double zbrent(),sim_alpha_func();
+  double alphamin,alphamax;
   if (mode == 0)
     {
 /*on-the-spot approximation using existing t_e.   This routine does not attempt 
@@ -97,6 +101,48 @@ ion_abundances (xplasma, mode)
 /* Convergence check */
       convergence (xplasma);
     }
+  else if (mode == 4)
+    {                            //LTE with SIM correction this is called from define_wind, sim_alpha and sim_w are set to geo values in define_wind
+	ireturn = nebular_concentrations (xplasma, 5);
+    }
+  else if (mode == 5)
+   {       // One shot at updating t_e before calculating densities uwing the SIM correction
+/* Shift values to old */
+
+          // This call is after a photon flight, so we *should* have access to j and ave freq, and so we can calculate proper values for W and alpha
+	// To avoid problems with solving, we need to find a reasonable range of values within which to search for a solution to eq18. A reasonable guess is that it is around the current value....
+	sim_numin=1.24e15;
+	sim_numax=1.21e19;
+	sim_meanfreq=xplasma->ave_freq; 
+
+	alphamin=xplasma->sim_alpha-0.1;
+	alphamax=xplasma->sim_alpha+0.1;
+	while (sim_alpha_func(alphamin)*sim_alpha_func(alphamax)>0.0 )
+		{
+		alphamin=alphamin-1.0;
+		alphamax=alphamax+1.0;
+		}
+
+
+	xplasma->sim_alpha=zbrent(sim_alpha_func,alphamin,alphamax,0.00001);
+
+/*This next line computes the sim weight using an external function. Note that xplasma->j already contains the volume of the cell and a factor of 4pi, so the volume sent to sim_w is set to 1 and j has a factor of 4PI reapplied to it. This means that the equation still works in balance. It may be better to just implement the factor here, rather than bother with an external call.... */
+	xplasma->sim_w=sim_w((xplasma->j)*4*PI,1,1,xplasma->sim_alpha,1.24e15,1.21e19);
+
+
+      xplasma->dt_e_old = xplasma->dt_e;
+      xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;	//Must store this before others
+      xplasma->t_e_old = xplasma->t_e;
+      xplasma->t_r_old = xplasma->t_r;
+      xplasma->lum_rad_old = xplasma->lum_rad;
+
+      ireturn = one_shot (xplasma, mode);
+
+/* Convergence check */
+      convergence (xplasma);
+    }
+
+
   else
     {
       Error
@@ -293,12 +339,16 @@ one_shot (xplasma, mode)
 
   gain = xplasma->gain;
 
+   printf("Here we are in one_shot, gain=%e, mode=%i\n",gain,mode);
+
   te_old = xplasma->t_e;
   te_new = calc_te (xplasma, 0.7 * te_old, 1.3 * te_old);
   xplasma->t_e = (1 - gain) * te_old + gain * te_new;
 
+ //  printf ("EMERGENCY EMERGENCY EMERGENCY - your 1 million K muck up is still at line 301 of ionization\n");
+ // xplasma->t_e=1e6;
   dte = xplasma->dt_e;
-
+  
 //  Log ("One_shot: %10.2f %10.2f %10.2f\n", te_old, te_new, w->t_e);
 
 
@@ -310,7 +360,7 @@ meaning in nebular concentrations.
 
   if (mode == 3)
     mode = 2;
-  else if (mode != 4)
+  else if (mode <= 1 ||  mode >= 6)     /* modification to cope with mode 5 - SIM */
     {
 
       Error ("one_shot: Sorry, Charlie, don't know how to process mode %d\n",
@@ -397,17 +447,22 @@ calc_te (xplasma, tmin, tmax)
   xplasma->t_e = tmax;
   z2 = zero_emit (tmax);
 
+	printf("In calc_te  z1=%e, z2=%e\n",z1,z2); 
   if ((z1 * z2 < 0.0))
     {				// Then the interval is bracketed 
       xplasma->t_e = zbrent (zero_emit, tmin, tmax, 50.);
+	printf("calc_te Bracketed\n");
     }
   else if (fabs (z1) < fabs (z2))
     {
       xplasma->t_e = tmin;
+	printf("calc_te t_e set to tmin coz %e<%e\n",fabs (z1) , fabs (z2));
     }
   else
+    {
     xplasma->t_e = tmax;
-
+	printf("calc_te t_e set to tmax\n");
+	}
   /* With the new temperature in place for the cell, get the correct value of heat_tot.
      SS June  04 */
 
@@ -464,7 +519,7 @@ zero_emit (t)
   /*Original method */
   xxxplasma->t_e = t;
 
-
+	printf("calc_te Heat_tot B4=%e",xxxplasma->heat_tot);
   /* Correct heat_tot for the change in temperature. SS June 04. */
   //macro_pops (xxxplasma, xxxplasma->ne);
   xxxplasma->heat_tot -= xxxplasma->heat_lines_macro;
@@ -483,6 +538,20 @@ zero_emit (t)
   difference =
     xxxplasma->heat_tot - xxxplasma->lum_adiabatic -
     total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);
-
+     printf(" Heat tot AF=%e, Adiabatic=%e, total_emission=%e\n",xxxplasma->heat_tot,xxxplasma->lum_adiabatic,total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG));
   return (difference);
 }
+
+double	
+    sim_alpha_func(alpha)
+	double alpha;
+	{
+	double answer;
+	answer=((alpha+1.)/(alpha+2.))*((pow(sim_numax,(alpha+2.))-pow(sim_numin,(alpha+2.)))/(pow(sim_numax,(alpha+1.))-pow(sim_numin,(alpha+1.)))) ;
+
+	answer = answer - sim_meanfreq;
+	printf("alpha=%f,f1=%e,f2=%e,meanfreq=%e,ans=%e\n",alpha,sim_numin,sim_numax,sim_meanfreq,answer);
+	return (answer);
+	}
+
+
