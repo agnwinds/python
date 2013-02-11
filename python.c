@@ -165,6 +165,7 @@ History:
 	1108	ksl/nsh Adding code to keep track of gross spectra in a cell though xbands,
 			xj and xave_freq.  Just set up the frequence limits here.	
 	1112	ksl	Moved everything associated with frequency bands into bands_init
+	1212	nsh	changed the way DFUDGE is defined.
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -435,9 +436,10 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   NDIM2 = geo.ndim * geo.mdim;
 
 /* dfudge is a parameter that is used to make sure a photon bundle pushes through a cell boundary */
+/* NSH 121219 - now (74b2) defined later on after we know how big the wind will be 
 
   dfudge = 1e5;
-  DFUDGE = dfudge;
+  DFUDGE = dfudge; */
 
 /* End of definition of wind arrays */
 
@@ -1042,9 +1044,9 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
       else if (geo.wind_type == 9)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
 	{
 	  get_shell_wind_params ();
-	  dfudge = (geo.wind_rmax - geo.wind_rmin) / 1000.0;	/*Stop photons getting pushed out of the cell 
-Modified again in python 71b to take account of change in parametrisation of shell wind */
-	  DFUDGE = dfudge;
+/*NSH 121219 moved	  dfudge = (geo.wind_rmax - geo.wind_rmin) / 1000.0;	Stop photons getting pushed out of the cell 
+Modified again in python 71b to take account of change in parametrisation of shell wind 
+	  DFUDGE = dfudge; */
 	}
       else if (geo.wind_type != 2)
 	{
@@ -1069,6 +1071,34 @@ Modified again in python 71b to take account of change in parametrisation of she
 	    }
 	}
     }
+
+/* 121219 NSH Set up DFUDGE to be a value that makes some kind of sense
+given the scale of the wind. Up till py74b2 it was set to be fixed at
+1e5, so we ensure that this is a minimum, so any winds of CV type scale
+will keep the old dfudge, and hopefully look the same. We also need to
+set defudge slightly differently for the shell wind.*/
+
+  if (geo.wind_type==9)
+	{
+	dfudge = (geo.wind_rmax - geo.wind_rmin) / 1000.0;
+	}
+  else
+	{
+	if (geo.rmax / 1.e10 < 1e5)
+		{
+		dfudge=1e5;
+		Log ("DFUDGE set to minimum value of %e\n",DFUDGE);
+		}
+	else
+		{
+		dfudge=geo.rmax/1.e10;
+		Log ("DFUDGE set to %e based on geo.rmax\n",DFUDGE);
+		}
+	}
+
+	DFUDGE=dfudge; //NSH Unsure why exactly this is done this way.
+	
+	
 
 
 

@@ -1,11 +1,13 @@
 README
 ***
 =========
-Precursor is python_74a_ksl 
+Precursor is python_74b
 Changes this version
-python.c - changed call to pop_kappa_ff_array (); so it only occurs if there is data to allow it to work!
-emission.c - changed ff and total_free to allow proper operation if gaunt factor data has not been read in
-radiation.c - changed kappa_ff to allow proper operation if no gaunt factors.
-variable_temperature.c - changed code so density is computed in a copy of the actual array, and changes to the plasma structure only made on proper completion. If the loop searching for n_e fails, then the old densities are retained.
+All sane checks in all files now have an error message associtated with them that reports SUBROUTINE:sane_check <information>
+A lot of files have been modified, but those without any errors associated with sane checks were
+variable_temperature checks on densities 
+thierry.c - few sane checks had errors - but I doubt this file is called very much - seems experimental
+vector.c - there was one sane check without an error, for calculating the length of a vector
+saha.c - checks on densities - this was the original pattern for the vriable_temperatures code, hence the copied lack of errors!
 
 
