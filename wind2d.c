@@ -64,6 +64,8 @@ History:
 			photons were intended to simply fly through these cells.  Also modified to
 			use #define variables, such as W_ALL_INWIND, for describing the type of gridcell.
 	07jul	kls	58f -- Added code to copy volumes from wmain[].vol to plasmamain[].vol
+        12aug   nsh	73d -- Added some code to zero some parameters in the plasma structure used to 
+			try and speed up the pairwise ionization scheme
 
 **************************************************************/
 
@@ -107,7 +109,7 @@ define_wind ()
 
     if (geo.wind_type == 9)    //This is the mode where we want the wind and the grid carefulluy conrolled to allow a very thin shell. We ensure that the coordinate type is spherical. 
     {
-      Log ("We are making a thin shell type grid to match a thin shell wind. This is totally aphysical and should only be used for testing purposes");
+      Log ("We are making a thin shell type grid to match a thin shell wind. This is totally aphysical and should only be used for testing purposes\n");
       shell_make_grid (w);
     }
    else if (geo.coord_type == SPHERICAL)
@@ -307,10 +309,15 @@ be optional which variables beyond here are moved to structures othere than Wind
       stuff_v (w[nwind].xcen, x);
       plasmamain[n].rho = model_rho (x);
       plasmamain[n].vol = w[nwind].vol;	// Copy volumes
+/* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, I've put new things in here to initialise the exponential models */
       for (nn=0;nn<NXBANDS;nn++){
-      	plasmamain[n].sim_alpha[nn] = geo.alpha_agn; //As an initial guess we assume the whole wind is optically thin and so the spectral index for a PL illumination will be the same everywhere.
-      plasmamain[n].sim_w[nn] = geo.const_agn / (4.0*PI*(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]));  // constant / area of a sphere
-      plasmamain[n].sim_w[nn] /= 4.*PI;   // take account of solid angle
+	plasmamain[n].spec_mod_type[nn]=-1; /*NSH 120817 - setting this to a negative numebr means that at the outset, we assume we do not have a suitable model for the cell */
+	plasmamain[n].exp_temp[nn]=geo.tmax; /*NSH 120817 - as an initial guess, set this number to the hottest part of the model - this should define where any exponential dropoff becomes important */
+        plasmamain[n].exp_w[nn]=0.0; /* 120817 Who knows what this should be! */ 
+      	plasmamain[n].pl_alpha[nn] = geo.alpha_agn; //As an initial guess we assume the whole wind is optically thin and so the spectral index for a PL illumination will be the same everywhere.
+ /*     plasmamain[n].pl_w[nn] = geo.const_agn / (4.0*PI*(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]));  // constant / area of a sphere
+      plasmamain[n].pl_w[nn] /= 4.*PI;   // take account of solid angle NSH 120817 removed - if PL not suitable, it will be set to zero anyway, so safe to keep it at zero from the outset!*/
+	plasmamain[n].pl_w[nn]=0.0; 
       }
 
       nh = plasmamain[n].rho * rho2nh;
@@ -358,11 +365,15 @@ be optional which variables beyond here are moved to structures othere than Wind
 	     plasmamain[n].w);
 	}
 
-      /* 68b - Initialize the scatters array
+      /* 68b - Initialize the scatters array 73d - and the pariwise ionization denominator and temperature
        */
 
       for (j = 0; j < NIONS; j++)
 	{
+	  plasmamain[n].PWdenom[j] = 0.0;
+	  plasmamain[n].PWnumer[j] = 0.0;
+          plasmamain[n].PWdtemp[j] = 0.0;
+	  plasmamain[n].PWntemp[j] = 0.0;
 	  plasmamain[n].scatters[j] = 0;
 	  plasmamain[n].xscatters[j] = 0;
 	}

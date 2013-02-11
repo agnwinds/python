@@ -99,9 +99,25 @@
 		{
 		for (i=0 ; i<geo.nxfreq ; i++)  
 			{
-			if (geo.xfreq[i] < freq && freq <= geo.xfreq[i+1])
+			if (geo.xfreq[i] < freq && freq <= geo.xfreq[i+1]) //We have found the correct model band
 				{
-				J=xplasma->sim_w[i]*pow(freq,xplasma->sim_alpha[i]) ;	
+				if (xplasma->spec_mod_type[i] < 0)   //Only bother if we have a model in this band
+					{
+					J=0.0; //THere is no modelin this band, so the best we can do is assume zero J
+					}
+				else if (xplasma->spec_mod_type[i] == SPEC_MOD_PL) //Power law model
+					{
+					J=xplasma->pl_w[i]*pow(freq,xplasma->pl_alpha[i]) ;	
+					}
+				else if (xplasma->spec_mod_type[i] == SPEC_MOD_EXP) //Exponential model
+					{
+					J=xplasma->exp_w[i]*exp((-1*H*freq)/(BOLTZMANN*xplasma->exp_temp[i]));
+					}
+				else
+					{
+					Error ("Ind_comp - unknown spectral model (%i) in band %i\n",xplasma->spec_mod_type[i],i);
+					J=0.0 ;//Something has gone wrong
+					}
 				}
 			}
 		}
@@ -121,6 +137,11 @@
         x=(xplasma->ne)/(MELEC);
 	x*=THOMPSON*alpha*J;
 	x*=1/(2*freq*freq);
+	if (sane_check(x)) 
+		{
+		Error ("Ind_comp - undefined value for Kappa_ind_comp - setting to zero\n");
+		return (0.0);
+		}
 	return (x);
 }
 
@@ -155,7 +176,7 @@
 
 	nplasma=one->nplasma;  //Get the correct plasma cell related to this wind cell
 	xplasma=&plasmamain[nplasma];   //copy the plasma structure for that cell to local variable
-
+	
 	x=16. * PI * THOMPSON * BOLTZMANN / (MELEC * C * C); //Keep all the constants together
         x*=xplasma->ne*one->vol * xplasma->j * t_e; //multiply by the volume (from wind) and j (from plasma) and t_e
 

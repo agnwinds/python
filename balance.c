@@ -36,6 +36,9 @@ History:
 			for VERY_BIG warning.
 	10nov	ksl	69 -- Fixed several small problems and added a good bit
 			of documentation.  The outputs look plausible.
+	12jun	ksl	72 - Restored to "operational" condition.  There
+			is sill work to do to see whather it is actually
+			producing what we want
  
 **************************************************************/
 
@@ -77,7 +80,7 @@ main (argc, argv)
   int radmode;       /* 1=blackbody, 2=powerlaw from agn */
   int i;
   int nelement,nele,z,nn,first,last,m;
-  double tot,agn_ip,rrstar;
+  double tot,agn_ip;
   NPHOT = 100000;
   DENSITY_PHOT_MIN = 1.0e-10; //This turns on photoionization calculations during heating and cooling.
   geo.ioniz_or_extract=1; // Set the overall pointer to tell the code we are in an ionization cycle.
@@ -97,7 +100,7 @@ main (argc, argv)
 
 /* Get the atomic data */
 
-  strcpy (atomic_filename, "atomic/standard39");
+  strcpy (atomic_filename, "atomic/standard73");
   rdstr ("Atomic_data", atomic_filename);
   get_atomic_data (atomic_filename);
   strcpy (geo.atomic_filename, atomic_filename);
@@ -189,6 +192,29 @@ a:  /* This is the return point.  One could replace all this whith some kind of 
   Log ("l=lte(force t_e=t_r w=1),  a=absolute_lte(ions+levels), A=levels\n");
   Log ("b=frequency sampling d=dumb, f=find_te, ,g=go  H=Set heating, D -- modify to detailed rates\n");
   Log ("B=blackbody spectrum(default), P=powerlaw spectrum\n");
+  Log ("Other: a: Force t_r=t_e and LTE level populations, and calculate saha abundances\n");
+  Log ("Other: A: Calculate levels with various options.  Just sets lmode and recaclates partition func and levels\n");
+  Log ("Other  b: Set freqqence sampling frequency_sampling(0=uniform)\n");
+  Log ("Other: B: Setting radiation mode to blackbody");
+  Log("Other:  d: Increment t_e up or down to attempt to match the current value of the heating.\n");
+  Log("Other:  D: Modify the current abundances to produce detail balance, and then recalculate the heating and cooling without modifying the abundances\n");
+  Log("Other:  f: Adjust t_e to balance heating and cooling without changing the abundances\n");
+  Log("Other   g: Adjust t_e and abundances using python's one_shot routine.\n");  
+  Log("Other   G: Calculate ionization fractions as a function of T and W. Remake figure in LK02\n"); 
+  Log("Other   H: Set the total heating\n");
+  Log("Other   I: Run multi_concen\n");
+  Log("Other   j: Calculate abundances and then heating and cooling with current ionization mode, etc. Do not update afterwards\n");
+  Log("Other   l:Force Saha ion abundances and t_e=t_r and weight to 1 and then calculate heating and cooling. (uses python routines)\n");
+  Log("Other   o:  output the ion fractions of a particular element for offline investigation\n");
+  Log("Other   p: Set the line transfer mode mode\n");
+  Log("Other  P: get the parameters for a power law spectrum \n");
+  Log("Other  S:Carry out one calculation of the sim parameter and apply to current densities\n");
+  Log("Other  T: This is just for testing of routines\n");
+        
+
+
+
+
 
   rdchar ("Choice", &choice);
   Log_silent ("Choice %c\n", choice);
@@ -320,10 +346,16 @@ Long and Knigge 2002
 
       if (geo.ioniz_mode == 0)
 	cmode = 3;
+      if (geo.ioniz_mode == 3)
+	cmode = 3; /*NSH 120823 - fixed an oddity that if you *told* balance to run in mode 3, it broke! */
       if (geo.ioniz_mode == 4)
 	cmode = 4;
       if (geo.ioniz_mode == 5)
         cmode = 5;
+      if (geo.ioniz_mode == 6)
+        cmode = 6;
+      if (geo.ioniz_mode == 7)
+        cmode = 7;
       multicycle (&wplasma[0], p, cmode, freq_sampling, radmode);
       break;
 
@@ -345,13 +377,13 @@ Long and Knigge 2002
 	("0=on_the_spot,1=saha,2=fix to std vals, 3=_on_the_spot (with one t update), 4=detailed, 10=same as 3, but ground mult.\n");
       rdint ("ioniz_mode", &geo.ioniz_mode);
       geo.partition_mode = -1;
-
+	
       if (geo.ioniz_mode == 10)	// Use recalc but only ground state multiplicities
 	{
 	  geo.ioniz_mode = 3;
 	  geo.partition_mode = 0;
 	}
-
+     printf ("Ionization mode %d", geo.ioniz_mode);
       Log_silent ("Ionization mode %d", geo.ioniz_mode);
       break;
 
@@ -524,9 +556,12 @@ to case a unless there is an error somewhere */
 
 
 	wplasma[0].w = weight= 0.5*(1-sqrt(1-((geo.r_agn*geo.r_agn)/(geo.d_agn*geo.d_agn)))); 
-	wplasma[0].sim_alpha=alpha_agn;       //Set the alpha for this cell, in this case it is just the global version
-	wplasma[0].sim_w=geo.const_agn/((4.*PI)*(4.*PI*geo.r_agn*geo.r_agn));   //Set the sim w factor for this cell alone. 
-	Log("Input parameters give a BB weight of %e and a SIM weight of %e\n",wplasma[0].w,wplasma[0].sim_w );
+	for(i=0;i<NXBANDS;i++){
+		wplasma[0].pl_alpha[i]=alpha_agn;       //Set the alpha for this cell, in this case it is just the global version
+		wplasma[0].pl_w[i]=geo.const_agn/((4.*PI)*(4.*PI*geo.r_agn*geo.r_agn));   //Set the pl w factor for this cell alone. 
+		i=i+1;
+	}
+	Log("Input parameters give a BB weight of %e and a SIM weight of %e\n",wplasma[0].w,wplasma[0].pl_w );
 	agn_ip=geo.const_agn*(((pow (50000/HEV, geo.alpha_agn + 1.0)) - pow (100/HEV,geo.alpha_agn + 1.0)) /  (geo.alpha_agn + 1.0));
 	agn_ip /= (d_agn*d_agn);
 	agn_ip /= nh;
@@ -568,7 +603,8 @@ to case a unless there is an error somewhere */
     case 'T':			//This is just for testing of routines
         
       //OLD init_bands (t_e, 0.0, 1e50, 1, &xband);
-      bands_init (t_e, 0.0, 1e50, 1, &xband);
+      //Old 120626 bands_init (t_e, 0.0, 1e50, 1, &xband);
+      bands_init (t_e, &xband);
       init_freebound (1e3, 1e6, xband.f1[0], xband.f2[0]);
 
       break;
@@ -633,6 +669,8 @@ Notes:
 	Most of the options are hardcoded.  At some level we should be reluctant to change this
 	since it provides a trail back to Long and Knigge 2002
 
+	In this routine, www is a PlasmaPtr
+
 History:
 	0810	ksl	67- Relooked at routine in effort to 
 			begin studying ionization balance again
@@ -657,11 +695,14 @@ multicycle (www, p, mode, freq_sampling, radmode)
   double agn_ip,lum_agn_50,logip;
 
   double t_rmin, t_rmax, t_rdelt;
+  double lt_rmin,lt_rmax,lt_rdelt;
+  double t_rtemp;
   double ww, w_min, w_max, w_delt;
 
   int n, m, first, last, nn;
+  int i;
 
-
+      printf ("Ionization mode in multicycle %d", mode);
 
   /* cycle in AGN  we vary lum_agn to replicate the ionisation parameters in Sim (2010) */
   
@@ -686,14 +727,22 @@ multicycle (www, p, mode, freq_sampling, radmode)
   	t_rmax = 100000;
   	t_rdelt = 2000;
 
+	lt_rmin = log10(10000.0)*100;
+	lt_rmax = log10(10000.0)*100;
+	lt_rdelt = 1;
+
+
+
   	w_max =-2; 
   	w_min = -2; 
   	w_delt = 0.25;
   	for (ww = w_max; ww >= w_min; ww -= w_delt)	// Note w starts at 1
    		{
       		weight = pow (10, ww);
-      		for (t_r = t_rmin; t_r <= t_rmax; t_r += t_rdelt)
+//      		for (t_r = t_rmin; t_r <= t_rmax; t_r += t_rdelt)
+			for (t_rtemp = lt_rmin; t_rtemp <= lt_rmax; t_rtemp += lt_rdelt)
 			{
+			t_r=pow(10,t_rtemp/100.0);
 	  		www->gain = 0.5;
 	  		www->dt_e_old = 0.0;
 	  		www->dt_e = 0.0;
@@ -702,6 +751,7 @@ multicycle (www, p, mode, freq_sampling, radmode)
 	
   			www->w = weight;
   			www->t_r = t_r;
+			printf ("NSH We are going into cycle, t_r=%f\n",www->t_r);
   			t_e = www->t_e ;
 
 
@@ -723,7 +773,7 @@ multicycle (www, p, mode, freq_sampling, radmode)
 		   		t_r, (ww), t_e, www->heat_tot / www->lum_rad);
 	  		Log ("Mod    %.1f %.0f %.1f %8.0f %5.2g\n", log10 (nh), t_r, (ww),
 	       		t_e, www->heat_tot / www->lum_rad);
-	  		for (nn = 0; nn < 5; nn++)
+	  		for (nn = 0; nn < nelements; nn++)
 	    			{
 	      			first = ele[nn].firstion;
 	      			last = first + ele[nn].nions;
@@ -804,8 +854,11 @@ multicycle (www, p, mode, freq_sampling, radmode)
 //		printf ("We are setting the AGN luminosity to %e",geo.lum_agn);
 		www->w = weight= 0.5*(1-sqrt(1-((geo.r_agn*geo.r_agn)/(geo.d_agn*geo.d_agn))));     /* set the weight for BB type calculations */
 
-		www->sim_w = (geo.const_agn)/((4*PI)*(4.0*PI*geo.d_agn*geo.d_agn)); /* Set the sim_w parameter - added 7/2/11 as part of the effort to get the sim code into python - it needs the ability to have a different weight for each cell */
-		www->sim_alpha = geo.alpha_agn;   /* Set the sim_alpha parameter - added 7/2/11 as part of the effort to get the sim code into python - needs the ability to very alpha for each cell */
+		/* 120626 -- Added loop for new plasma structure */
+		for (i=0;i<NXBANDS;i++){
+			www->pl_w[i] = (geo.const_agn)/((4*PI)*(4.0*PI*geo.d_agn*geo.d_agn)); /* Set the sim_w parameter - added 7/2/11 as part of the effort to get the sim code into python - it needs the ability to have a different weight for each cell */
+			www->pl_alpha[i] = geo.alpha_agn;   /* Set the pl_alpha parameter - added 7/2/11 as part of the effort to get the sim code into python - needs the ability to very alpha for each cell */
+		}
 
 		t_r = t_r+1.;  //makes no difference, but sparks a new whole cycle, so stops using the same old densities from last loop When multicycle was first written, either w or tr would be changed in the loop.
 	  	www->gain = 0.5;

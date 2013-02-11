@@ -185,12 +185,15 @@ WindPtr (w);
 	if (plasmamain[n].nxtot[i] > 0)   /*Check we actually have some photons in the cell in this band */
 		{
 		plasmamain[n].xave_freq[i] /= plasmamain[n].xj[i];   /*Normalise the average frequency */
+		plasmamain[n].xsd_freq[i] /= plasmamain[n].xj[i];  /*Normalise the mean square frequency */
+		plasmamain[n].xsd_freq[i] = sqrt(plasmamain[n].xsd_freq[i] - (plasmamain[n].xave_freq[i] * plasmamain[n].xave_freq[i])); /*Compute standard deviation */
 		plasmamain[n].xj[i] /= (4 * PI * volume);     /*Convert to radiation density */
 		}
 	else
 		{
 		plasmamain[n].xj[i]=0;   /*If no photons, set both radiation estimators to zero */
 		plasmamain[n].xave_freq[i]=0;
+		plasmamain[n].xsd_freq[i]=0; /*NSH 120815 and also the SD ???? */
 		}
 	}
 
@@ -360,28 +363,18 @@ WindPtr (w);
 	
 	if (geo.wind_type == 9)
 		{     
-
+		n = plasmamain[0].nwind;
+	    	for (i=0 ; i<geo.nxfreq ; i++) /*loop over number of bands */	
+			{
+			Log ("Band %i f1 %e f2 %e model %i pl_alpha %f pl_w %e exp_t %e exp_w %e\n",i,geo.xfreq[i],geo.xfreq[i+1],plasmamain[0].spec_mod_type[i],plasmamain[0].pl_alpha[i],plasmamain[0].pl_w[i],plasmamain[0].exp_temp[i],plasmamain[0].exp_w[i]);		
+			}
 		agn_ip=geo.const_agn*(((pow (50000/HEV, geo.alpha_agn + 1.0)) - pow (100/HEV,geo.alpha_agn + 1.0)) /  	(geo.alpha_agn + 1.0));
 		agn_ip /= (w[n].r*w[n].r);
 		agn_ip /= plasmamain[0].rho * rho2nh;
          	Log ("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim 2010)= %e distance= %e volume= %e\n",geo.lum_agn,plasmamain[0].t_e,plasmamain[0].rho * rho2nh,plasmamain[0].ne,geo.alpha_agn,agn_ip,w[n].r,w[n].vol);
          	Log ("OUTPUT IP(cloudy_thoeretical)= %e IP(cloudy_actual)=%e\n",log10(plasmamain[0].ferland_ip),log10(plasmamain[0].ip));
-
- 		
-		n = plasmamain[0].nwind;
-	    	for (i=0 ; i<geo.nxfreq ; i++) /*loop over number of bands */	
-			{
-			Log ("Band %i f1 %e f2 %e alpha %f w %e\n",i,geo.xfreq[i],geo.xfreq[i+1],plasmamain[0].sim_alpha[i],plasmamain[0].sim_w[i]);		
-			}
-
-
-
-  Log
-    ("OUTPUT Absorbed_flux    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e )\n",
-     xsum, psum, fsum, csum, icsum, lsum); //1108 NSH Added commands to report compton heating
-  Log
-    ("OUTPUT Wind_cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e lines %8.2e ) after update\n",
-     asum+geo.lum_comp+geo.lum_dr, geo.lum_fb, geo.lum_ff, geo.lum_comp, geo.lum_dr, geo.lum_lines); //1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons.	
+		Log ("OUTPUT Absorbed_flux    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e )\n", xsum, psum, fsum, csum, icsum, lsum); //1108 NSH Added commands to report compton heating
+  		Log ("OUTPUT Wind_cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e lines %8.2e ) after update\n", asum+geo.lum_comp+geo.lum_dr, geo.lum_fb, geo.lum_ff, geo.lum_comp, geo.lum_dr, geo.lum_lines); //1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons.	
 
 		for (n = 0; n < nelements; n++)
 			{
@@ -467,7 +460,7 @@ wind_rad_init ()
       plasmamain[n].heat_tot = plasmamain[n].heat_ff =
 	plasmamain[n].heat_photo = plasmamain[n].heat_lines = 0.0;
       plasmamain[n].heat_z = 0.0;
-
+      plasmamain[n].max_freq = 0.0; //NSH 120814 Zero the counter which works out the maximum frequency seen in a cell and hence the maximum applicable frequency of the power law estimators.
       plasmamain[n].lum = plasmamain[n].lum_rad = plasmamain[n].lum_lines =
 	plasmamain[n].lum_ff = 0.0;
       plasmamain[n].lum_fb = plasmamain[n].lum_z = 0.0;
@@ -483,6 +476,7 @@ wind_rad_init ()
       for (i=0 ; i<geo.nxfreq ; i++)
 	{
       	plasmamain[n].xj[i] = plasmamain[n].xave_freq[i] = plasmamain[n].nxtot[i] = 0;
+	plasmamain[n].xsd_freq[i] = 0.0; /* NSH 120815 Zero the standard deviation counter */
 	}
 
 

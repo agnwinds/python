@@ -108,15 +108,15 @@ bands_init (imode, band)
   double tmax, freqmin, freqmax;
   double t;			// A temperature which can be used to set absolute limits on the bands
   double f1, f2;		// frequency limits that can overide any other limits
-
+  double fmax;
+  double bbfrac();
 
 
   /* Imported from python.c */
 
   // 59 - Increased to 20,000 A so could go further into NIR 
   freqmin = C / 12000e-8;	/*20000 A */
-
-  tmax = TSTAR;
+  tmax = TSTAR; 
   if (geo.twind > tmax)
     tmax = geo.twind;
   if (geo.tstar > tmax)
@@ -133,7 +133,7 @@ bands_init (imode, band)
     }
   else
     Log ("Maximum frequency %8.2e determined by T %8.2e\n", freqmax, tmax);
-
+  geo.tmax=tmax; /*NSH 120817 NSH made this a global varaible so it is available to the code to make informed guesses as to the possible location of any BB driven exponential dropoff in the spectrum */
   t = tmax;
   f1 = freqmin;
   f2 = freqmax;
@@ -264,7 +264,7 @@ bands_init (imode, band)
 
 
     }
-  else if (mode ==5) /* Set up to compare with cloudy power law table command */
+  else if (mode ==5) /* Set up to compare with cloudy power law table command note that this also sets up the weight and photon index for the PL, to ensure a continuous distribution*/
    {
       rddoub ("Lowest_energy_to_be_considered(eV)", &xx);
 
@@ -330,7 +330,81 @@ for (nband=0;nband<band->nbands;nband++)
 
     }
 
+  else if (mode ==6) //Test for balance to have a really wide frequency range
+	{
+    tmax = geo.tstar;
+	  fmax=tmax*WIEN; //Use wiens law to get peak frequency
+	printf ("We are in mode 6 - tmax=%e, fmax=%e\n",tmax,fmax);
+ /*     band->nbands = 1;
+      band->f1[0] = 1e10; // BB spectrum had dropped to 5e-8 of peak value
+      band->f2[0] = 1e20; //100 fmax is roughly where the BB spectrum gets tiny
+      band->min_fraction[0] = 1.0;
+	printf ("In photon generation, tmax=%e, fmax=%e\n",tmax,fmax);*/
+ 
+    band->nbands=17;
+ 
 
+	band->f1[0] = 1e10;
+	band->f2[0] = band->f1[1] = fmax*0.01;
+	band->f2[1] = band->f1[2] = fmax*0.1;
+	band->f2[2] = band->f1[3] = fmax;
+	band->f2[3] = band->f1[4] = fmax*1.5;	
+	band->f2[4] = band->f1[5] = fmax*2;
+	band->f2[5] = band->f1[6] = fmax*2.5;
+	band->f2[6] = band->f1[7] = fmax*3;
+	band->f2[7] = band->f1[8] = fmax*4;
+	band->f2[8] = band->f1[9] = fmax*6;
+	band->f2[9] = band->f1[10] = fmax*8;
+	band->f2[10] = band->f1[11] = fmax*10;
+	band->f2[11] = band->f1[12] = fmax*12;
+	band->f2[12] = band->f1[13] = fmax*14;
+	band->f2[13] = band->f1[14] = fmax*16;
+	band->f2[14] = band->f1[15] = fmax*18;
+	band->f2[15] = band->f1[16] = fmax*20;
+	band->f2[16]  =1e20;/*	
+	band->f2[6] = band->f1[7] = 3.162e16;
+	band->f2[7] = band->f1[8] = 5.623e16;
+	band->f2[8] = band->f1[9] = 1e17;
+	band->f2[9] = band->f1[10] = 1.778e17;	
+	band->f2[10] = band->f1[11] = 3.162e17;
+	band->f2[11] = band->f1[12] = 5.623e17;
+	band->f2[12] = band->f1[13] = 1e18;
+	band->f2[13] = band->f1[14] = 1.778e18;	
+	band->f2[14] = band->f1[15] = 3.162e18;
+	band->f2[15] = band->f1[16] = 5.623e18;
+	band->f2[16]  		    = 1e19;*/
+
+
+      band->min_fraction[0]=0.1;
+      band->min_fraction[1]=0.1;
+      band->min_fraction[2]=0.1;
+      band->min_fraction[3]=0.05;
+      band->min_fraction[4]=0.05;
+      band->min_fraction[5]=0.05;
+      band->min_fraction[6]=0.05;
+      band->min_fraction[7]=0.05;
+      band->min_fraction[8]=0.05;
+      band->min_fraction[9]=0.05;
+      band->min_fraction[10]=0.05;
+      band->min_fraction[11]=0.05;
+      band->min_fraction[12]=0.05;
+      band->min_fraction[13]=0.05;
+      band->min_fraction[14]=0.05;
+      band->min_fraction[15]=0.05;
+      band->min_fraction[16]=0.05;
+  /*    band->min_fraction[6]=0.0625;
+      band->min_fraction[7]=0.0625;
+      band->min_fraction[8]=0.0625;
+      band->min_fraction[9]=0.0625;
+      band->min_fraction[10]=0.0625;
+      band->min_fraction[11]=0.0625;
+      band->min_fraction[12]=0.0625;
+      band->min_fraction[13]=0.0625;
+      band->min_fraction[14]=0.0625;
+      band->min_fraction[15]=0.0625;
+      band->min_fraction[16]=0.0625;
+	band->min_fraction[0]=1.0;*/
+    }
 
 
 
@@ -397,11 +471,13 @@ freqs_init (freqmin, freqmax)
 {
   int i, n, ngood, good[NXBANDS];
   double xfreq[NXBANDS];
-  int nxfreq;
+  int nxfreq;  
+  double nupeak; //Weins law preak frequency from tstar
+
 
   /* At present set up a single energy band for 2 - 10 keV */
 		/*NSH 70g - bands set up to match the bands we are currently using in the.pf files. This should probably end up tied together in the long run!*/
- nxfreq = 7;
+/* nxfreq = 7;
   xfreq[0] = 1.0 / HEV;
  xfreq[1] = 13.6 / HEV;
 xfreq[2] = 54.42 / HEV;
@@ -409,19 +485,38 @@ xfreq[2] = 54.42 / HEV;
  xfreq[4] = 739. / HEV;
  xfreq[5] = 2000 / HEV;
  xfreq[6] = 10000 / HEV;
- xfreq[7] = 50000 / HEV;
+ xfreq[7] = 50000 / HEV;*/
 
 /* bands to match the cloudy table spectrum - needed to cover all frequencies to let induced compton work OK */
-/*nxfreq = 3;
+/*
+nxfreq = 3;
 xfreq[0]=0.0001/HEV;
 xfreq[1]=2000/HEV;
 xfreq[2]=10000/HEV;
-xfreq[3]=100000000/HEV;*/
+xfreq[3]=100000000/HEV;
+*/
+/* bands try to deal with a blackbody spectrum */
+nupeak=WIEN*geo.tstar;
+printf ("Tstar=%e, Nupeak=%e\n",geo.tstar,nupeak);
+
+nxfreq = 10;
+xfreq[0]=freqmin;
+xfreq[1]=1e15;
+xfreq[2]=3.162e15;
+xfreq[3]=1e16;
+xfreq[4]=3.162e16;
+xfreq[5]=1e17;
+xfreq[6]=3.162e17;
+xfreq[7]=1e18;
+xfreq[8]=3.162e18;
+xfreq[9]=1e19;
+xfreq[10]=freqmax;
 
 
 
 
-  Log("freqs_init: Phostons will be generated between %8.2f (%8.2e) and %8.2f (%8.2e)\n",freqmin*HEV,freqmin,freqmax*HEV,freqmax);
+
+  Log("freqs_init: Photons will be generated between %8.2f (%8.2e) and %8.2f (%8.2e)\n",freqmin*HEV,freqmin,freqmax*HEV,freqmax);
 
   ngood = 0;
   for (i = 0; i < nxfreq; i++)

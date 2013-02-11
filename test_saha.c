@@ -47,24 +47,26 @@ main (argc, argv)
   double fthresh,fmax;
   double alpha_agn,distance,agn_ip,lum_agn,const_agn;
   int lstart,lmax;
-  double temp_func();
+  double temp_func(),trr_rate;
   FILE *fp_h,*fp1_h;
   FILE *fp_he,*fp1_he;
   FILE *fp_c,*fp1_c;
   FILE *fp_n,*fp1_n;
   FILE *fp_o,*fp1_o;
   FILE *fp_fe;
+  FILE *c_trr;
+  FILE *c_prr;
   PlasmaPtr xplasma;
   partition = xplasma->partition; /* Set the partition function array to that held for the cell */
-  temp_start=429.102999;
-  ntemp=1;
+  temp_start=400;
+  ntemp=101;
   tempdiv=100.0;
   nne=1;
-  nh=1e10;
-  weight=1;
+  nh=1e12;
+  weight=0.0001;
   xne=nh;
 
-  strcpy (geo.atomic_filename, "atomic/standard72");
+  strcpy (geo.atomic_filename, "atomic/standard73");
   printf("atomic_filename=%s\n",geo.atomic_filename);
   get_atomic_data (geo.atomic_filename);
 
@@ -154,7 +156,7 @@ fclose(fp_o);
 	} 
  for (j=0;j<nions; j++)
 	{
-	fprintf(fp_o,"Ion %i,%i,%i,%e,%f,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n,",j,ion[j].z,ion[j].istate,ion[j].ip,ion[j].g,ion[j].nmax,ion[j].n_lte_max,ion[j].firstlevel,ion[j].nlevels,ion[j].first_nlte_level,ion[j].first_levden,ion[j].nlte,ion[j].phot_info,ion[j].macro_info,ion[j].ntop_first,ion[j].ntop,ion[j].nxphot,ion[j].lev_type,ion[j].drflag,ion[j].nxdrecomb,ion[j].ntop_ground);
+	fprintf(fp_o,"Ion %i,%i,%i,%e,%f,%i,%i,%i,%i,%i,%i\n",j,ion[j].z,ion[j].istate,ion[j].ip,ion[j].g,ion[j].drflag,drecomb[ion[j].nxdrecomb].type,ion[j].bad_gs_rr_t_flag,ion[j].bad_gs_rr_r_flag,ion[j].total_rrflag,total_rr[ion[j].nxtotalrr].type);
 	} 
   for (j=0;j<nlevels; j++)
 	{
@@ -173,7 +175,7 @@ fclose(fp_o);
 	}
 
   fclose(fp_o);
-
+/*
   fp_o=fopen("O4details.dat","w");
   for (j=20;j<29;j++ ) 
 	{		
@@ -266,7 +268,7 @@ fclose(fp_o);
 
 fclose(fp_o);
 */
-
+/*
   fp_h=fopen("hydrogen_saha.out","w");
   fp1_h=fopen("hydrogen_partition.out","w");
   fp_he=fopen("helium_saha.out","w");
@@ -409,29 +411,32 @@ fclose(fp_o);
   fclose(fp_c);
   fclose(fp_n);
   fclose(fp_o);
-
+*/
 
   fp_h=fopen("hydrogen_lm.out","w");
   fp_he=fopen("helium_lm.out","w");
   fp_c=fopen("carbon_lm.out","w");
   fp_n=fopen("nitrogen_lm.out","w");
   fp_o=fopen("oxygen_lm.out","w");
+  fp_fe=fopen("iron_lm.out","w");
+//  c_trr=fopen("carbon_trr.out","w");
 	fprintf(fp_h,"%i %i\n",ntemp,nne);
 	fprintf(fp_he,"%i %i\n",ntemp,nne);
 	fprintf(fp_c,"%i %i\n",ntemp,nne);
 	fprintf(fp_n,"%i %i\n",ntemp,nne);
 	fprintf(fp_o,"%i %i\n",ntemp,nne);
+	fprintf(fp_fe,"%i %i\n",ntemp,nne);
+//	fprintf(c_trr,"%i %i\n",ntemp,nne);
 
 	temp1=temp_start;
 	for (i=0;i<ntemp;i++)
 		{
 		temp1=temp1+1;
 		temp=pow(10,temp1/tempdiv);
-		temp=20000;
-		plasmamain[0].t_e=temp;
+		plasmamain[0].t_e=temp*0.9;
 		plasmamain[0].t_r=temp;
 		plasmamain[0].w=weight;
-		printf ("WEIGHT=%f\n",weight);
+//		printf ("WEIGHT=%f\n",weight);
   		nebular_concentrations (&plasmamain[0], 2);
 		fprintf(fp_h,"%6.3e %6.3e %6.3e %6.3e\n",temp,plasmamain[0].ne,plasmamain[0].density[0],plasmamain[0].density[1]);
 		fprintf(fp_he,"%e %e",temp,plasmamain[0].ne);		
@@ -440,12 +445,16 @@ fclose(fp_o);
 			fprintf(fp_he," %6.3e",plasmamain[0].density[j]);
 			}
 		fprintf(fp_he,"\n");
-		fprintf(fp_c,"%e %e",temp,plasmamain[0].ne);		
+		fprintf(fp_c,"%e %e",temp,plasmamain[0].ne);
+//		fprintf(c_trr,"%e %e",temp,plasmamain[0].ne);
 		for (j=5;j<12;j++ ) 
-			{		
+			{
+//			trr_rate=badnell_gs_rr (j,temp);
+//			fprintf(c_trr," %6.3e",trr_rate);		
 			fprintf(fp_c," %6.3e",plasmamain[0].density[j]);
 			}
 		fprintf(fp_c,"\n");
+//		fprintf(c_trr," \n");		
 		fprintf(fp_n,"%e %e",temp,plasmamain[0].ne);		
 		for (j=12;j<20;j++ ) 
 			{		
@@ -458,6 +467,12 @@ fclose(fp_o);
 			fprintf(fp_o," %6.3e",plasmamain[0].density[j]);
 			}
 		fprintf(fp_o,"\n");
+		fprintf(fp_fe,"%e %e",temp,plasmamain[0].ne);		
+		for (j=151;j<178;j++ ) 
+			{		
+			fprintf(fp_fe," %6.3e",plasmamain[0].density[j]);
+			}
+		fprintf(fp_fe,"\n");
 		}
 
   fclose(fp_h);
@@ -465,17 +480,21 @@ fclose(fp_o);
   fclose(fp_c);
   fclose(fp_n);
   fclose(fp_o);
+  fclose(fp_fe);
+//  fclose(c_trr);
 
-/*  fp_h=fopen("hydrogen_vt.out","w");
+  fp_h=fopen("hydrogen_vt.out","w");
   fp_he=fopen("helium_vt.out","w");
   fp_c=fopen("carbon_vt.out","w");
   fp_n=fopen("nitrogen_vt.out","w");
   fp_o=fopen("oxygen_vt.out","w");
+  fp_fe=fopen("iron_vt.out","w");
 	fprintf(fp_h,"%i %i\n",ntemp,nne);
 	fprintf(fp_he,"%i %i\n",ntemp,nne);
 	fprintf(fp_c,"%i %i\n",ntemp,nne);
 	fprintf(fp_n,"%i %i\n",ntemp,nne);
 	fprintf(fp_o,"%i %i\n",ntemp,nne);
+	fprintf(fp_fe,"%i %i\n",ntemp,nne);
 
 	temp1=temp_start;
 	for (i=0;i<ntemp;i++)
@@ -483,7 +502,7 @@ fclose(fp_o);
 		temp1=temp1+1;
 		temp=pow(10,temp1/tempdiv);
 		printf ("Temperature = %e\n",temp);
-		plasmamain[0].t_e=temp;
+		plasmamain[0].t_e=temp*0.9;
 		plasmamain[0].t_r=temp;
 		plasmamain[0].w=weight;
 		printf("Going to the new code\n");
@@ -513,6 +532,12 @@ fclose(fp_o);
 			fprintf(fp_o," %6.3e",plasmamain[0].density[j]);
 			}
 		fprintf(fp_o,"\n");
+		fprintf(fp_fe,"%e %e",temp,plasmamain[0].ne);		
+		for (j=151;j<178;j++ ) 
+			{		
+			fprintf(fp_fe," %6.3e",plasmamain[0].density[j]);
+			}
+		fprintf(fp_fe,"\n");
 		}
 
   fclose(fp_h);
@@ -520,6 +545,7 @@ fclose(fp_o);
   fclose(fp_c);
   fclose(fp_n);
   fclose(fp_o);
+  fclose(fp_fe);
 
 
 /*

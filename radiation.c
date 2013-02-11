@@ -90,6 +90,7 @@ History:
 	11aug	nsh	70 changes made to radiation to allow compton cooling to be computed
 	11aug	nsh	70 Changed printout of spectra in selected regions so it is always
 			the midpoint of the wind
+	12may	nsh	72 Added induced compton
 	12jun 	nsh	72 Added lines to write out photon stats to a file dirung diagnostics. This is
 			to allow us to see how well spectra are being modelled by power law W and alpha
 
@@ -132,6 +133,7 @@ radiation (p, ds)
   double weight_of_packet, y;
   int ii,jj;  
 
+
   one = &wmain[p->grid];	/* So one is the grid cell of interest */
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "radiation");
@@ -139,7 +141,6 @@ radiation (p, ds)
   kappa_tot = frac_ff = kappa_ff (xplasma, freq);	/* Add ff opacity */
   kappa_tot += frac_comp = kappa_comp (xplasma, freq);    /* 70 NSH 1108 calculate compton opacity, store it in kappa_comp and also add it to kappa_tot, the total opacity for the photon path */
   kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq, ds, p->w);
-
   frac_tot = frac_z = 0;	/* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
 				   indicate this is all disagnostic and might be removed */
 //	printf ("In radiation we have ds=%e, W=%e, nu=%e\n",ds,p->w,p->freq);
@@ -245,7 +246,7 @@ statement could be deleted entirely 060802 -- ksl */
     }
   tau = kappa_tot * ds;
   w_in = p->w;
-
+if (sane_check(tau)) printf ("CHECKING ff=%e, comp=%e, ind_comp=%e\n",frac_ff,frac_comp,frac_ind_comp);
 /* Calculate the reduction in the w of the photon bundle along with the average
    weight in the cell */
 
@@ -315,12 +316,13 @@ statement could be deleted entirely 060802 -- ksl */
 
 /*photon weight times distance in the shell is proportional to the mean intensity */
   xplasma->j += w_ave * ds;
-
+//	printf ("tau=%e, w_in=%e, w_ave=%e j=%e\n",tau,w_in,w_ave,xplasma->j);
 /* frequency weighted by the weights and distance       in the shell .  See eqn 2 ML93 */
 
   xplasma->ave_freq += p->freq * w_ave * ds;
 
-
+  if (p->freq > xplasma->max_freq)
+	xplasma->max_freq = p->freq;
 
 
 //wind_n_to_if(one->nwind,&ii,&jj);  ??? Not complete. Intended to allow more flexible tracking of photon spectra  ksl 1108
@@ -329,7 +331,7 @@ statement could be deleted entirely 060802 -- ksl */
 //  1.75e16 <     (2*sqrt(one->xcen[0]*one->xcen[0]+one->xcen[1]*one->xcen[1]) - sqrt(one->x[0]*one->x[0]+one->x[1]*one->x[1]))) 
 //	if (geo.wind_type == 9)
 //	if (one->nwind==22)
-  
+//printf ("PHOTON_DETAILS %3d %3d %3d %8.3e %8.3e %8.3e cell%3d wind cell%3d %e %e %e\n",geo.wcycle,ii,jj,p->freq,w_ave,ds,one->nplasma,one->nwind,p->w,w_in,tau);
 
   if (diag_on_off == 1 && ncstat > 0)
 	{
@@ -349,15 +351,19 @@ statement could be deleted entirely 060802 -- ksl */
   /* nxfreq refers to how many frequencies we have defining the bands. So, if we have 5 bands, we have 6 frequencies, 
    * going from xfreq[0] to xfreq[5] Since we are breaking out of the loop when i>=nxfreq, this means the last loop 
    * will be i=nxfreq-1*/
-/* 71 - 111229 - ksl - modified to reflect fact that I have moved nxbands and xreq into the geo structure */
+/* 71 - 111229 - ksl - modified to reflect fact that I have moved nxbands and xfreq into the geo structure */
 
   for (i=0 ; i<geo.nxfreq ; i++)  
 	{
 	if (geo.xfreq[i] < p->freq && p->freq <= geo.xfreq[i+1])
 		{
 		xplasma->xave_freq[i] += p->freq * w_ave * ds;  /*1108 NSH/KSL frequency weighted by weight and distance */
+		xplasma->xsd_freq[i] += p->freq * p->freq * w_ave * ds; /*1208 NSH imput to allow standard deviation to be calculated */
 		xplasma->xj[i] += w_ave * ds;  			/*1108 NSH/KSL photon weight times distance travelled */
 		xplasma->nxtot[i] ++; 				/*1108 NSH increment the frequency banded photon counter */
+
+//			printf ("TESTING w=%e,ds=%f,j=%e, kappatot=%e\n",w_ave,ds,xplasma->xj[i],kappa_tot);
+//			printf ("FF=%e, COMP=%e, INDCOMP=%e\n",frac_ff,frac_comp,frac_ind_comp);
 		}
 	}
 

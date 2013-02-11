@@ -60,11 +60,11 @@ double num_store[NIONS];		// store for the numbnerator of the sim factor (PL)
 double denom_store[NIONS];	// store for the denominator of the sim factor (BB)
 double ion_store[NIONS];
 
-#define SAHA 4.82907e15		/* 2* (2.*PI*MELEC*k)**1.5 / h**3  (Calculated in constants) */
-#define MAXITERATIONS	200
-#define FRACTIONAL_ERROR 0.03
-#define THETAMAX	 1e4
-#define MIN_TEMP         100.
+//#define SAHA 4.82907e15		/* 2* (2.*PI*MELEC*k)**1.5 / h**3  (Calculated in constants) */
+//#define MAXITERATIONS	200
+//#define FRACTIONAL_ERROR 0.03
+//#define THETAMAX	 1e4
+//#define MIN_TEMP         100.  Put into python.h 
 
 #define MIN_FUDGE  1.e-10
 #define MAX_FUDGE  10.
@@ -607,27 +607,27 @@ frequency for the band is greater than the maximum frequency, we dont need to do
 		{
 		  if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j] < fmax && fmax < geo.xfreq[j + 1])	//Case 1
 		    {
-		      xsim_alpha = xxxplasma->sim_alpha[j];
-		      xsim_w = xxxplasma->sim_w[j];
+		      xsim_alpha = xxxplasma->pl_alpha[j];
+		      xsim_w = xxxplasma->pl_w[j];
 		      sim_num += qromb (tb_pow, fthresh, fmax, 1.e-4);
 		    }
 		  else if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j + 1] < fmax)	//case 2 
 		    {
-		      xsim_alpha = xxxplasma->sim_alpha[j];
-		      xsim_w = xxxplasma->sim_w[j];
+		      xsim_alpha = xxxplasma->pl_alpha[j];
+		      xsim_w = xxxplasma->pl_w[j];
 		      sim_num +=
 			qromb (tb_pow, fthresh, geo.xfreq[j + 1], 1.e-4);
 		    }
 		  else if (geo.xfreq[j] > fthresh && geo.xfreq[j] < fmax && fmax < geo.xfreq[j + 1])	//case 3
 		    {
-		      xsim_alpha = xxxplasma->sim_alpha[j];
-		      xsim_w = xxxplasma->sim_w[j];
+		      xsim_alpha = xxxplasma->pl_alpha[j];
+		      xsim_w = xxxplasma->pl_w[j];
 		      sim_num += qromb (tb_pow, geo.xfreq[j], fmax, 1.e-4);
 		    }
 		  else if (geo.xfreq[j] > fthresh && geo.xfreq[j + 1] < fmax)	// case 4
 		    {
-		      xsim_alpha = xxxplasma->sim_alpha[j];
-		      xsim_w = xxxplasma->sim_w[j];
+		      xsim_alpha = xxxplasma->pl_alpha[j];
+		      xsim_w = xxxplasma->pl_w[j];
 		      sim_num +=
 			qromb (tb_pow, geo.xfreq[j], geo.xfreq[j + 1], 1.e-4);
 		    }
@@ -693,27 +693,27 @@ frequency for the band is greater than the maximum frequency, we dont need to do
 	    {
 	      if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j] < fmax && fmax < geo.xfreq[j + 1])	//Case 1
 		{
-		  xsim_alpha = xxxplasma->sim_alpha[j];
-		  xsim_w = xxxplasma->sim_w[j];
+		  xsim_alpha = xxxplasma->pl_alpha[j];
+		  xsim_w = xxxplasma->pl_w[j];
 		  sim_num += qromb (verner_pow, fthresh, fmax, 1.e-4);
 		}
 	      else if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j + 1] < fmax)	//case 2 
 		{
-		  xsim_alpha = xxxplasma->sim_alpha[j];
-		  xsim_w = xxxplasma->sim_w[j];
+		  xsim_alpha = xxxplasma->pl_alpha[j];
+		  xsim_w = xxxplasma->pl_w[j];
 		  sim_num +=
 		    qromb (verner_pow, fthresh, geo.xfreq[j + 1], 1.e-4);
 		}
 	      else if (geo.xfreq[j] > fthresh && geo.xfreq[j] < fmax && fmax < geo.xfreq[j + 1])	//case 3
 		{
-		  xsim_alpha = xxxplasma->sim_alpha[j];
-		  xsim_w = xxxplasma->sim_w[j];
+		  xsim_alpha = xxxplasma->pl_alpha[j];
+		  xsim_w = xxxplasma->pl_w[j];
 		  sim_num += qromb (verner_pow, geo.xfreq[j], fmax, 1.e-4);
 		}
 	      else if (geo.xfreq[j] > fthresh && geo.xfreq[j + 1] < fmax)	// case 4
 		{
-		  xsim_alpha = xxxplasma->sim_alpha[j];
-		  xsim_w = xxxplasma->sim_w[j];
+		  xsim_alpha = xxxplasma->pl_alpha[j];
+		  xsim_w = xxxplasma->pl_w[j];
 		  sim_num +=
 		    qromb (verner_pow, geo.xfreq[j], geo.xfreq[j + 1], 1.e-4);
 		}
@@ -1026,47 +1026,4 @@ sim_alphasolve (ratans, numin, numax)
 
 
 
-/**************************************************************************
-                    Space Telescope Science Institute
 
-
-  Synopsis:  
-
-	NSH 7/2/11 - A little function to evaluate equation 19 in Sim et at (2008)
-	This works out the effective radiative weight in a cell given a value of alpha and other bits.
-
-  Description:	
-
-  Arguments:  (Input via .pf file)		
-
-
-  Returns:
-
-  Notes:
-
-
- 
-
-  History:
-111227	ksl	This routine was written by Nick in 2011, but has very
-		little documentations or explanation
-
- ************************************************************************/
-
-
-double
-sim_w (en1, v, dt, alpha, numin, numax)
-     double en1;		//Sum of energies of photons times frequency times path length in cell
-     double v;			//volume of cell
-     double dt;			//Effective time interval represented by the MC simulation - this gets us from an energy to a power, we already have powers, so this will be one in our formulation (in balance at least...)
-     double alpha;		//Computed spectral index for the cell
-     double numin, numax;	//Range of frequencies we are considering
-{
-  double w;			//the answer
-
-  w = en1 / (4.0 * PI * v * dt);
-  w *= (alpha + 1.0);
-  w /= (pow (numax, (alpha + 1.0)) - pow (numin, (alpha + 1.0)));
-
-  return (w);
-}

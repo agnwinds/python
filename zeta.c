@@ -73,10 +73,8 @@ incorporate a correction factor for dielectronic recombination.
   Returns:
 	zeta, the correction factor to the recombination rates. 
                                                                                                    
-  Notes: When compute_zeta is called, nion is the upper ion in the pair whose abundances are being calculated.
-This means, we need to use nion for the DR coefficient, because nion in this case refers to the rate of recombination of the ionised ion into the less ionised state. This equals zero for the totally ionised ion, since there is no electron to get dielectronic with.
-We need to use nion-1 for integ_fb, since this is computed via the photoionisation rate from the lower ion into the upper ion via the milne relation. 
- 
+  Notes: When compute_zeta is called, nion is the lower ion in the pair whose abundances are being calculated.
+
                                                                                                    
                                                                                                    
                                                                                                    
@@ -86,28 +84,26 @@ We need to use nion-1 for integ_fb, since this is computed via the photoionisati
 				this is to improve the new code for using multiple temperature
 				saha equaions - each equaion needs its own correction factor, 
 				so it makes better code to call it.
+		Jul 2012 NSH - modified to include use of Badnell recombination coefficients
+				to allow dielectronic recombination to be included in the 
+				zeta term
 
                                                                                                    
  ************************************************************************/
 
 double
-compute_zeta (temp, nion, f1, f2, mode)
-     double temp, f1, f2;
+compute_zeta (temp, nion, mode)
+     double temp;
      int  mode, nion;
 {
-  double zeta, alpha_all, alpha_dr, interpfrac;
-  int ihi,ilow,dummy;
+  double zeta, interpfrac, dummy;
+  int ihi,ilow;
 
 #define MIN_FUDGE  1.e-10
 #define MAX_FUDGE  10.
-#define MIN_TEMP         100.
+//#define MIN_TEMP         100. //Put into python.h
 
-
-  if (temp > MIN_TEMP)
-    {
-
-
-      /* get the right place in the ground_frac tables  */
+      /* now get the right place in the ground_frac tables  CK */
       dummy = temp / TMIN - 1.;
       ilow = dummy;		/* have now truncated to integer below */
       ihi = ilow + 1;		/*these are the indeces bracketing the true value */
@@ -125,56 +121,69 @@ compute_zeta (temp, nion, f1, f2, mode)
 	  interpfrac = 1.;
 	}
 
-    }
-  else
-    {
-      Error_silent ("compute_zeta: t too low  temp= %8.2e  \n",
-	    temp);
-      zeta = 0.0;
-      interpfrac = 0.0;
-      ihi = ilow = 0;
-    }
-
- 
 
   if (mode == 1)
     {
       //This is the old method of getting zeta - just from the ground state tables computed by Christian
+
+
+
+
       zeta =
-	ground_frac[nion - 1].frac[ilow] +
-	interpfrac * (ground_frac[nion - 1].frac[ihi] -
-		      ground_frac[nion - 1].frac[ilow]);
+	ground_frac[nion].frac[ilow] +
+	interpfrac * (ground_frac[nion].frac[ihi] -
+		      ground_frac[nion].frac[ilow]);
+//	printf ("for t_e=%f, ilow=%i, ihi=%i, interpfrac=%f, zeta=%f\n",temp,ilow,ihi,interpfrac,zeta);
     }
-  else if (mode == 2)
+  else if (mode == 2) //Best try at full blown zeta including DR, if we have the data, else default to the old way of doing things....
     {
-      /* To kick off with, we'll use the old zeta as a basis. 
-       * We can tehn multiply it by (recomb to all) / (recomb to all + DR). 
-       * Next job will be to compute recomb to ground for all TB ions, and then we can calculate zeta properly for all temperatures
-       * , at least for ions where we have TB x sections - i.e. for each level.
-       */
-      zeta =
-	ground_frac[nion - 1].frac[ilow] +
-	interpfrac * (ground_frac[nion - 1].frac[ihi] -
-		      ground_frac[nion - 1].frac[ilow]);
+	if (ion[nion].istate==ion[nion].z) //We call this with the lower ion in a pair, so if that ion has only one electron, (ie. Carbon 6) then we cannot have DR into this ion, so there will be no DR rate associated with it.
+		{
+		if (ion[nion].total_rrflag==1) //We have total RR data
+			{
+			if (ion[nion].bad_gs_rr_t_flag==1 && ion[nion].bad_gs_rr_r_flag==1) //We have tabulated gs data
+				{
+				zeta= badnell_gs_rr (nion,temp)/total_rrate (nion,temp);
+//				printf ("We have the data, and zeta=%f\n",zeta);
+				}
+			else //We are going to have to integrate
+				{
+				printf ("We do not have tabulated GS data for state %i of element %i\n",ion[nion].istate,ion[nion].z);
+				zeta= milne_gs_rr (nion,temp)/total_rrate (nion,temp);
+				}
+			}
+		else
+			{
+			zeta =ground_frac[nion].frac[ilow] +interpfrac * (ground_frac[nion].frac[ihi] -ground_frac[nion].frac[ilow]);
+//			printf ("We dont have the data and zeta=%f\n",zeta);
+			}
+		}
+	else
+		{
+		if (ion[nion].drflag>0 && ion[nion].total_rrflag==1) //We have the two tabulated rates
+			{
+			compute_dr_coeffs (temp);
+			if  (ion[nion].bad_gs_rr_t_flag==1 && ion[nion].bad_gs_rr_r_flag==1) //We also have tabulated GS data
+				{
+				zeta= badnell_gs_rr (nion,temp)/(total_rrate (nion,temp)+dr_coeffs[nion]);
+				}
+			else //We are going to have to integrate
+				{
+				zeta=milne_gs_rr (nion,temp)/(total_rrate (nion,temp)+dr_coeffs[nion]);
+				}
+			}
+		else
+			{
+			zeta =ground_frac[nion].frac[ilow] +interpfrac * (ground_frac[nion].frac[ihi] -ground_frac[nion].frac[ilow]);
+//			printf ("We dont have the data and zeta=%f\n",zeta);
+			}
+		}
 
-      /* This initiallizes the FB arrays, from temperatures of 1000K to 1e6, from frequencies between 0 and 1e50.  
-       * When these frequency limits are given, they are revised to be more
-       * reasonable in the free_bound routines.
-       */
 
-      init_freebound (1.e3, 1.e6, 0, 1e50);	//This initialises the FB arrays, we will need them to calculate the rates for radiative recombination.
-
-      alpha_all = integ_fb (temp, 0, 1e50, nion - 1, 2);	//This is the rate for recombinations to all states.
-      alpha_dr = dr_coeffs[nion];	//Get the dielectronic recombination coefficient for this ion
-
-      if (alpha_all < 1e-99)
-	{
-	  Error
-	    ("compute_zeta: alpha_all very small value %e (%e) for t of %.1f in element %i in the model?\n", alpha_all, alpha_dr,temp, ion[nion].z);
-	  return (zeta);
-	}
-      zeta *= (alpha_all / (alpha_all + alpha_dr));	//Compute the new value of zeta, corrected for DR.
-
+    }
+  else
+    {
+	Error ("Compute zeta: Unkown mode %i \n",mode);
     }
   return (zeta);
 }

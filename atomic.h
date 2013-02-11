@@ -11,6 +11,7 @@
 #define C   				2.997925e10
 #define G				6.670e-8
 #define BOLTZMANN 			1.38062e-16
+#define WIEN				5.879e10       /* NSH 1208 Wien Disp Const in frequency units */
 #define H_OVER_K			4.799437e-11
 #define STEFAN_BOLTZMANN 		5.6696e-5
 #define THOMPSON			0.66524e-24
@@ -149,6 +150,18 @@ typedef struct ions
  				paper exists for this ion*/
     int nxcpart;	      /* index into the cpart structure to give the location of the cardona2010
 				data for this ion, if it exists */
+    int total_rrflag;	       /* Flag to say wether we have badnell style total radiative rate 
+				coefficients for this ion */
+    int nxtotalrr;		/* index into the bad_t_rr structure to give the location of the
+				Badnell fit coefficient for the total radiative recombination rate for 
+				this ion if it exists */
+    int bad_gs_rr_t_flag;	/* Flag to say wether we have badnell style resolved ground state radiative temperature
+				data for this ion */
+    int bad_gs_rr_r_flag;	 /* Flag to say wether we have badnell style resolved ground state radiative rate 
+				coefficients for this ion*/
+    int nxbadgsrr;		/* index into the bad_gs_rr structure to give the location of the
+				Badnell fit coefficient for the resolved ground state recombination rate for 
+				this ion if it exists */
   
   }
 ion_dummy,*IonPtr;
@@ -385,6 +398,8 @@ typedef struct coolstruct COOLSTR;
 //set up to accept the korista data from the university of strahclyde website.
 
 #define MAX_DR_PARAMS 9  //This is the maximum number of c or e parameters. 
+#define DRTYPE_BADNELL	    0
+#define DRTYPE_SHULL	    1
 int ndrecomb;                //This is the actual number of DR parameters
 
 typedef struct dielectronic_recombination
@@ -393,6 +408,8 @@ typedef struct dielectronic_recombination
 	int nparam;	  //the number of parameters - it varies from ion to ion
 	double c[MAX_DR_PARAMS];   //c parameters
 	double e[MAX_DR_PARAMS];   //e parameters
+	double shull[4];  //schull DR parameters
+	int type;	//defines wether we have a schull type or a badnell type
 } Drecomb, *Drecombptr;
 
 
@@ -411,6 +428,32 @@ typedef struct cardona_partition
 }  Cpart, *Cpartptr;
 
 Cpart cpart[NIONS]; 
+
+#define T_RR_PARAMS 6  //This is the number of parameters. 
+#define RRTYPE_BADNELL	    0
+#define RRTYPE_SHULL	    1
+int n_total_rr;
+typedef struct total_rr
+ {
+	int nion; 	//Internal cross reference to the ion that this refers to
+	double params[T_RR_PARAMS];   /*There are up to six parameters. If the last two are zero, we stillthe 					data in the same way, but they have no effect - NB - 
+				important to zero these!*/
+				/* NSH 23/7/2012 - This array will double up for Shull parameters */
+	int type;	/* NSH 23/7/2012 - What type of parampeters we have for this ion */
+}   Total_rr, *total_rrptr;
+
+Total_rr total_rr[NIONS]; //Set up the structure
+
+#define BAD_GS_RR_PARAMS 19  //This is the number of points in the fit. 
+int n_bad_gs_rr;
+typedef struct badnell_gs_rr
+ {
+	int nion; 	//Internal cross reference to the ion that this refers to
+	double temps[BAD_GS_RR_PARAMS];   //temperatures at which the rate is tabulated
+	double rates[BAD_GS_RR_PARAMS];   //rates corresponding to those temperatures
+}   Bad_gs_rr, *Bad_gs_rrptr;
+
+Bad_gs_rr bad_gs_rr[NIONS]; //Set up the structure
 	
 
 

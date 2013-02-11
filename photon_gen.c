@@ -629,6 +629,7 @@ star_init (r, tstar, freqmin, freqmax, ioniz_or_final, f)
   else
     {
       emit = emittance_bb (freqmin, freqmax, tstar);
+		printf ("BAND from %e to %e at temp %f has flux %e\n",freqmin, freqmax, tstar,emit);
     }
 
   *f = emit;			// Calculate the surface flux between freqmin and freqmax

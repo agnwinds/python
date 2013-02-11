@@ -113,7 +113,26 @@ to match heating and cooling in the wind element! */
     }
   else if (mode == 5)
     {				// One shot at updating t_e before calculating densities using Stuart's power law correction
-		    ireturn=power_abundances(xplasma,mode);
+  ireturn=spectral_estimators(xplasma); //Slight recoding - now this just computes the estimators - this was the code clogging up this mode. Now it looks like the others.
+
+  xplasma->dt_e_old = xplasma->dt_e;
+  xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;	//Must store this before others
+  xplasma->t_e_old = xplasma->t_e;
+  xplasma->t_r_old = xplasma->t_r;
+  xplasma->lum_rad_old = xplasma->lum_rad;
+
+
+ /* Log ("NSH in this cell, we have %e AGN photons and %e disk photons\n",
+       xplasma->ntot_agn, xplasma->ntot_disk); Removed, no longer gives reasonable answers due to banding */
+
+  ireturn = one_shot (xplasma, mode);
+
+
+/* Convergence check */
+  convergence (xplasma);
+
+
+
     }
   else if (mode == 6)
    {
@@ -137,7 +156,21 @@ to match heating and cooling in the wind element! */
    {
 /* Feb 2012 NSH - new for mode 7. KSL has moved a lot of the mechanics that used to be here into
  power_abundances. This, once called, calculates the weight and alpha for each band in this cell. There is a lot of code that was clogging up this routine. Once this is done, one_shot gets called from within that routine. */
-      ireturn = power_abundances(xplasma,mode);
+      ireturn = spectral_estimators(xplasma);  /*Aug 2012 NSH - slight change to help integrate this into balance, power_estimators does the work of getting banded W and alpha. The oneshot gets called. */
+	  xplasma->dt_e_old = xplasma->dt_e;
+  xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;	//Must store this before others
+  xplasma->t_e_old = xplasma->t_e;
+  xplasma->t_r_old = xplasma->t_r;
+  xplasma->lum_rad_old = xplasma->lum_rad;
+
+
+  ireturn = one_shot (xplasma, mode);
+
+
+/* Convergence check */
+  convergence (xplasma);
+
+
    }
 
   else
@@ -368,7 +401,7 @@ one_shot (xplasma, mode)
   double gain;
 
 
-
+printf ("NSH here we are in oneshot - running at mode %i\n",mode);
 
   gain = xplasma->gain;
 

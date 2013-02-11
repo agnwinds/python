@@ -134,6 +134,7 @@ struct geometry
   double rmax, rmax_sq;		/* The maximum distance to which a photon should be followed */
   double mstar, rstar, rstar_sq, tstar, gstar;	/* Basic parameters for the WD */
   double twind;			/* temperature of wind */
+  double tmax;			/*NSH 120817 the maximim temperature of any element of the model - used to help estimate things for an exponential representation of the spectrum in a cell */
   int system_type;            /*0--> single star system
 				  1--> binary system
 				  2--> AGN
@@ -212,7 +213,7 @@ struct geometry
   /* 71 - 111229  - ksl - These are the frequency bands used when caluclation parameters like a power law slope
    * in limited regions.  Moved inside geo becuase we need to know this information in py_wind
    */
-#define  NXBANDS 10             /* the maximum number of bands that can be defined */
+#define  NXBANDS 20             /* the maximum number of bands that can be defined */
 	int nxfreq;    			/* the number of bands actually used */
 	double xfreq[NXBANDS+1];	/* the band limits  */
 
@@ -512,6 +513,16 @@ typedef struct plasma {
   double partition[NIONS];	/*The partition function for each  ion */
   double levden[NLTE_LEVELS];	/*The number density (occupation number?) of a specific level */
 
+  double PWdenom[NIONS];      /*The denominator in the pairwise ionization solver. Sicne this is computed at a temperature 
+				chosen from basic ioinzation proerties to be good for this ion, it should not change
+				very much from cycle to cycle - hence we shold be able to speed up the code by storing 
+				it and refering to it if the temperature has not changed much */
+  double PWdtemp[NIONS];      /*The temperature at which the pairwise denominator was calculated last */
+  double PWnumer[NIONS];	/* The numberator in the pairwise approach. When we are chasing the true density
+				by carying n_e - this value will not change, so we canspeed things up a lot
+				by not recomputing it!*/
+  double PWntemp[NIONS];	/* The temperature at which the stored pairwise numerator was last computed at. This
+				is used in the BB version of the pairwise correction factor */
 
   /* Two new objects in the structure to hol the number of line resonant scatters and the number of electron scatters */
 
@@ -554,6 +565,9 @@ typedef struct plasma {
 #define PTYPE_WIND	    3
 #define PTYPE_AGN           4 
 
+#define SPEC_MOD_PL         1
+#define SPEC_MOD_EXP	    2
+
  /* NSH 15/4/11 - added some counters to give a rough idea of where photons from various sources are ending up */
  /* NSH 111005  - changed counters to real variables, that allows us to take account of differening weights of photons */
   /* ksl - ???? The reason these are doubles if that what Nick did was to truly count the photons, but it is
@@ -581,7 +595,9 @@ typedef struct plasma {
   double j, ave_freq, lum;		/*Respectively mean intensity, intensity_averaged frequency, 
 				   	luminosity and absorbed luminosity of shell */
   double xj[NXBANDS], xave_freq[NXBANDS];   /* 1108 NSH frequency limited versions of j and ave_freq */
+  double xsd_freq[NXBANDS];		/*1208 NSH the standard deviation of the frequency in the band */
   int nxtot[NXBANDS];  			/* 1108 NSH the total number of photon passages in frequency bands */
+  double max_freq;				/*1208 NSH The maximum frequency photon seen in this cell */
   double lum_lines, lum_ff, lum_adiabatic;
   double lum_comp ; 			/* 1108 NSH The compton luminosity of the cell */
   double lum_dr;  			/* 1109 NSH The dielectronic recombination luminosity of the cell */
@@ -606,8 +622,12 @@ typedef struct plasma {
 
   double gamma_inshl[NAUGER]; /*MC estimator that will record the inner shell ionization rate - very similar to macro atom-style estimators */
   /* 1108 Increase sim estimators to cover all of the bands */
-  double sim_alpha[NXBANDS]; /*Computed spectral index for a power law spectrum representing this cell */
-  double sim_w[NXBANDS]; /*This is the computed weight of a PL spectrum in this cell - not the same as the dilution factor */
+  /* 1208 Add parameters for an exponential representation, and a switch to say which we prefer.*/
+  int spec_mod_type[NXBANDS]; /* NSH 120817 A switch to say which type of representation we are using for this band in this cell. Negative means we have no useful representation, 0 means power law, 1 means exponential */ 
+  double pl_alpha[NXBANDS]; /*Computed spectral index for a power law spectrum representing this cell NSH 120817 - changed name from sim_alpha to PL_alpha*/
+  double pl_w[NXBANDS]; /*This is the computed weight of a PL spectrum in this cell - not the same as the dilution factor NSH 120817 - changed name from sim_w to pl_w*/
+  double exp_temp[NXBANDS]; /*NSH 120817 - The effective temperature of an exponential representation of the radiation field in a cell*/
+  double exp_w[NXBANDS]; /*NSH 120817 - The prefector of an exponential representation of the radiation field in a cell*/
 //OLD  double sim_e1,sim_e2; /*Sim estimators used to compute alpha and w for a power law spectrum for the cell */
   double sim_ip; /*Ionisation parameter for the cell as defined in Sim etal 2010 */
   double ferland_ip; /* IP calculaterd from equation 5.4 in hazy1 - assuming allphotons come from 0,0,0 and the wind is transparent */
@@ -750,6 +770,14 @@ phot.istat below */
 /* ??? TMIN appears to be used both for the minimum temperature and for 
    calculating the fraction of recombinations that go to the ground state.  This
    looks like a problem ksl-98jul???? */
+
+
+//These constants are used in the various routines which compute ionization state
+#define SAHA 4.82907e15		/* 2* (2.*PI*MELEC*k)**1.5 / h**3  (Calculated in constants) */
+#define MAXITERATIONS	200 //The number of loops to do to try to converge in ne
+#define FRACTIONAL_ERROR 0.03  //The change in n_e which causes a break out of the loop for ne
+#define THETAMAX	 1e4 //Used in initial calculation of n_e
+#define MIN_TEMP	100. //  ??? this is another minimum temperature - it is used as the minimum tempersture in 
 
 
 #define NDIM_MAX 200
@@ -936,7 +964,7 @@ double z_axis[3];
 /* These are structures associated with frequency limits/s used for photon
 generation and for calculating heating and cooling */
 
-#define NBANDS 10
+#define NBANDS 20
 struct xbands
 {
   double f1[NBANDS],f2[NBANDS];

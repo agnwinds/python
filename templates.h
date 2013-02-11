@@ -6,6 +6,7 @@ double integ_planck_d(double alphamin, double alphamax);
 int init_integ_planck_d(void);
 double planck_d(double alpha);
 double emittance_bb(double freqmin, double freqmax, double t);
+double check_fmax(double fmin, double fmax, double temp);
 /* get_atomicdata.c */
 int get_atomic_data(char masterfile[]);
 int index_lines(void);
@@ -244,6 +245,9 @@ double get_fb(double t, int nion, int narray);
 double xinteg_fb(double t, double f1, double f2, int nion, int fb_choice);
 int fb_save(char filename[]);
 int fb_read(char filename[]);
+double total_rrate(int nion, double T);
+double badnell_gs_rr(int nion, double T);
+double milne_gs_rr(int nion, double T);
 /* diag.c */
 int open_diagfile(void);
 /* sv.c */
@@ -395,9 +399,7 @@ int calloc_macro(int nelem);
 int calloc_estimators(int nelem);
 /* partition.c */
 int partition_functions(PlasmaPtr xplasma, int mode);
-int cardona_part_func(PlasmaPtr xplasma);
 int partition_functions_2(PlasmaPtr xplasma, int xnion, double temp);
-int cardona_part_func_2(PlasmaPtr xplasma, int xnion, double temp);
 /* signal.c */
 int xsignal(char *root, char *format, ...);
 int xsignal_rm(char *root);
@@ -421,13 +423,20 @@ double torus_rho(double x[]);
 double ds_to_cylinder(double rho, struct photon *p);
 double ds_to_torus(PhotPtr pp);
 /* zeta.c */
-double compute_zeta(double temp, int nion, double f1, double f2, int mode);
+double compute_zeta(double temp, int nion, int mode);
 /* dielectronic.c */
 int compute_dr_coeffs(double temp);
 double total_dr(WindPtr one, double t_e);
-/* power.c */
-int power_abundances(PlasmaPtr xplasma, int mode);
-double sim_alpha_func(double alpha);
+/* spectral_estimators.c */
+int spectral_estimators(PlasmaPtr xplasma);
+double pl_alpha_func(double alpha);
+double pl_mean(double alpha, double numin, double numax);
+double pl_w(double j, double alpha, double numin, double numax);
+double pl_stddev(double alpha, double numin, double numax);
+double exp_temp_func(double exp_temp);
+double exp_mean(double exp_temp, double numin, double numax);
+double exp_w(double j, double exp_temp, double numin, double numax);
+double exp_stddev(double exp_temp, double numin, double numax);
 /* power_sub.c */
 int sim_driver(PlasmaPtr xplasma);
 int sim_pl(double nh, double t_r, double t_e, double www, int nelem, double ne, double density[], double xne, double newden[], double f1, double f2);
@@ -437,7 +446,6 @@ double verner_planck(double freq);
 double tb_pow(double freq);
 double verner_pow(double freq);
 double sim_alphasolve(double ratans, double numin, double numax);
-double sim_w(double en1, double v, double dt, double alpha, double numin, double numax);
 /* variable_temperature.c */
 int variable_temperature(PlasmaPtr xplasma, int mode);
 double bb_correct_2(double xtemp, double t_r, double www, int nion);
@@ -447,6 +455,8 @@ double tb_planck1(double freq);
 double verner_planck1(double freq);
 double tb_pow1(double freq);
 double verner_pow1(double freq);
+double verner_exp1(double freq);
+double tb_exp1(double freq);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

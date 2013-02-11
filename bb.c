@@ -36,6 +36,13 @@ init_integ_planck_d() 			performs the integration of the dimensionless bb functi
 					 called onetime. The actuall integration is done with the numerical 
 					 recipes routine "qromb" .
 
+check_fmax(fmin,fmax,temp)		This is a little helper routine written by NSH in August 2012. We
+					were having lots of problems with trying to integrate cross sections
+					x a plack function at temperatures where there is no flux at fmax. This
+					little routine just checks if fmax is going to be more than 100xt/(h/k)
+					which will return tiny numbers for planck, and make qromb return
+					nonsense.
+
 Arguments:		
 
 Returns:
@@ -139,6 +146,7 @@ History:
 	06aug	kls	57h -- Recommented and reorganized the file, so that could complete a partial
 			fix to a problem Sturat had identified.  The partial fix was generating 
 			photons outsde the min and maximum frequency
+	12aug	nsh	73e -- check_fmax written to check qromb calls will work properly.
 
 **************************************************************/
 
@@ -228,7 +236,7 @@ double bb_set[] = {
   0.05, 0.1, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45,
   10.3, 11.3, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0,
   19., 20., 21., 22., 23., 24., 25., 26., 27., 28., 29.
-};
+}; 
 
 
 int error_bb_hi = 0;
@@ -598,8 +606,60 @@ emittance_bb (freqmin, freqmax, t)
   alphamin = H * freqmin / (BOLTZMANN * t);
   alphamax = H * freqmax / (BOLTZMANN * t);
 
-  return (q1 * t * t * t * t * integ_planck_d (alphamin, alphamax));
+ // return (q1 * t * t * t * t * integ_planck_d (alphamin, alphamax)); /*NSH 120813 73e - changed so we simply integrate the dimensionless blackbody function here */
+ // if (alphamax > ALPHAMAX) alphamax=ALPHAMAX;
+ // if (alphamin > ALPHAMAX) return(0.0);
+  return (q1 * t * t * t * t * qromb(planck_d,alphamin,alphamax,1e-7));
+
 }
+
+
+/***********************************************************
+	Southampton University
+
+ Synopsis:
+check_fmax decides wether a maximum frequency requested for an integral is sensible.
+If it is too far off the end of the planck function, qromb will malfunction. We
+just have to set it to a frequency where the BB function is tiny, say where hnu/kT =100.
+At this point the bb function is
+
+
+	
+
+Arguments:		
+
+Returns:
+ 
+Description:	
+We use alphabig to define the place in the BB spectrum where we want to give up
+Notes:
+		
+History:
+	12aug	nsh	written
+**************************************************************/
+
+
+double
+check_fmax (fmin,fmax,temp)
+     double fmin,fmax,temp;
+{     
+     double bblim;
+
+     bblim=ALPHABIG*(temp/H_OVER_K); /*This is the frequency at which the exponent in the planck law will be -100. This will give a *very* small b(nu). */
+      if (bblim < fmax)
+	{
+	fmax=bblim;
+	}
+ 
+  return (fmax);
+
+}
+
+
+
+
+
+
 
 #undef NMAX
 #undef ALPHAMIN

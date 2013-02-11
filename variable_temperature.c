@@ -25,6 +25,7 @@ struct photoionization *xver;	//Verner & Ferland description of a photoionizatio
 struct topbase_phot *xtop;	//Topbase description of a photoionization x-section
 PlasmaPtr xxxplasma;
 double qromb_temp;			//This is a storage variable for the current electron temperature so it is available for qromb calls
+int niterate;			//Make this a variable that all the subroutines cn see, so we can decide if we need to recompute the numerators
 
 
 
@@ -71,11 +72,11 @@ variable_temperature (xplasama, mode)  modifies the densities of ions, levels, a
 **************************************************************/
 
 
-#define SAHA 4.82907e15		/* 2* (2.*PI*MELEC*k)**1.5 / h**3  (Calculated in constants) */
-#define MAXITERATIONS	200
-#define FRACTIONAL_ERROR 0.03
-#define THETAMAX	 1e4
-#define MIN_TEMP         100.
+//#define SAHA 4.82907e15		/* 2* (2.*PI*MELEC*k)**1.5 / h**3  (Calculated in constants) */
+//#define MAXITERATIONS	200
+//#define FRACTIONAL_ERROR 0.03
+//#define THETAMAX	 1e4
+//#define MIN_TEMP         100. //0712 moved into python.h
 
 double xxxne,xip;
 
@@ -84,7 +85,7 @@ variable_temperature (xplasma, mode)
      PlasmaPtr xplasma;
      int mode;			//   6=correct using dilute blackbody, 7=power law
 {
-  int nion, niterate;
+  int nion; // niterate; moved outside the code so all routines can see it
   double xnew, xsaha, dne_old;
   double theta, x;
   double get_ne();
@@ -96,17 +97,17 @@ variable_temperature (xplasma, mode)
   double *partition;
   double sum,big;
   double pi_fudge,recomb_fudge,gs_fudge,tot_fudge; /*The three correction factors for photoionization rate, recombination to ground state, and recombination rate */
-  xxxplasma = xplasma;    /*Copy xplasma to local plasma varaible, used to communicate w and alpha to the power law correction routine. */
+  xxxplasma = xplasma;    /*Copy xplasma to local plasma varaible, used to communicate w and alpha to the power law correction routine. NSH 120703 - also used to set the denominator calculated for a given ion for this cell last time round*/
 
-  dne_old=0.0;
+
   nh = xplasma->rho * rho2nh;	//LTE
   t_e = xplasma->t_e; 
   t_r = xplasma->t_r;
   www = xplasma->w;
+		printf ("HERE WE ARE IN VT t_e=%e, t_r=%e, www=%e\n",t_e,t_r,www);
   density = xplasma->density;  /* Set the local array density to the density held for the cell */
   partition = xplasma->partition; /* Set the partition function array to that held for the cell */
-
-
+  dne_old=10.0*nh;
   /* make an initial estimate of ne based on H alone,  Our guess
      assumes ion[0] is H1.  Note that x below is the fractional
      ionization of H and should vary from 0 to 1
@@ -138,7 +139,6 @@ variable_temperature (xplasma, mode)
   if (xne < 1.e-6)
     xne = xxxne = 1.e-6;	   /* fudge to assure we can actually calculate
 				   xne the first time through the loop */
-
   /* At this point we have an initial estimate of ne. */
 
   niterate = 0;
@@ -164,28 +164,16 @@ variable_temperature (xplasma, mode)
 		{
 		/* now we need to work out the correct temperature to use */
 		xip=ion[nion-1].ip;  //the IP is that from the lower to the upper of the pair
-
 		xtemp=zbrent(temp_func,MIN_TEMP,1e8,10);  //work out correct temperature
-//		xtemp=1e4;
-//		xtemp=(xip/H)/5.879e10; /* 71c use wiens law to calculate a temperature based on ioinzaation threshold of the lower ion which we will be using in a minute to calculate the denominator in the ionization rate correction factor */
-
-//		if (nion==1) printf ("HYDROGEN Best temp for ion %i is %e\n",nion,xtemp);
 
 /* given this temperature, we need the pair of partition functions for these ions */		
-//		partition_functions_2 (xplasma, nion, xtemp);
-		cardona_part_func_2 (xplasma,nion,xtemp);
-//		if (nion==1) printf ("HYDROGEN partition funcions at xtemp=%e are %e %e\n",xtemp,partition[nion-1],partition[nion]);
-//		partition_functions_2 (xplasma, nion, t_e);
-//		if (nion==1) printf ("HYDROGEN partition funcions at t_e=  %e are %e %e\n",t_e,partition[nion-1],partition[nion]);
-//		partition_functions_2 (xplasma, nion, xtemp);
+		partition_functions_2 (xplasma, nion, xtemp);
 
 /* and now we need the saha equation linking the two states at our chosen temp*/
 		xsaha = SAHA * pow (xtemp, 1.5);
 	  	b = xsaha * partition[nion]
 	    	* exp (-ion[nion - 1].ip / (BOLTZMANN * xtemp)) / (xne *
 							   partition[nion-1]);
-//		if (nion==1) printf ("HYDROGEN IP = %e\n",ion[nion - 1].ip/EV2ERGS);
-//		if (nion==1) printf ("HYDROGEN b = %e\n",b);
 
 /* we now correct b to take account of the temperature and photon field 
 		t_r and www give the actual radiation field in the cell, xtemp is the temp we used
@@ -193,37 +181,29 @@ variable_temperature (xplasma, mode)
 
 
 	      	recomb_fudge = sqrt (t_e / xtemp);
-//		if (nion==1) printf ("HYDROGEN t_e = %e xtemp= %e recomb_fudge= %e \n",t_e,xtemp,recomb_fudge);	
-		gs_fudge = compute_zeta (t_e, nion, 1e14, 1e18, 1); /* Calculate the ground state recombination rate correction factor based on the cells true electron temperature. Zeta does the nion-1 bit */
-//		printf ("recombination fudge = %e\n",recomb_fudge);
-//		if (nion==1) printf ("HYDROGEN gs_fudge= %e\n",gs_fudge);	
-
-
          	if (mode == 6) /* Correct the SAHA equation abundance pair using an actual radiation field modelled as a dilute black body */
 			{
-			pi_fudge = bb_correct_2 (xtemp, t_r, www, nion);
-			tot_fudge=pi_fudge*recomb_fudge*(gs_fudge+www*(1-gs_fudge));
+			if (t_r/xtemp <0.2) /*If the true radiation temperature is much lower than the temperature at which the ion is expected to exist, we wont see it, so save time and dont bother calculting correction factors*/
+				{
+				tot_fudge = 0.0;
+	 			}
+			else
+				{
+				pi_fudge = bb_correct_2 (xtemp, t_r, www, nion);
+				gs_fudge = compute_zeta (t_e, nion -1, 2); /* Calculate the ground state recombination rate correction factor based on the cells true electron temperature.  */
+				tot_fudge=pi_fudge*recomb_fudge*(gs_fudge+www*(1-gs_fudge));
+				}
 			}
 		else if (mode == 7) /* correct the SAHA equation abundance pair using an actual radiation field modelled as a broken power law */
 			{
 			pi_fudge = pl_correct_2 (xtemp, nion);
+			gs_fudge = compute_zeta (t_e, nion -1, 2); /* Calculate the ground state recombination rate correction factor based on the cells true electron temperature.  */
 			tot_fudge=pi_fudge*recomb_fudge*gs_fudge;
 			}
 
-// if (nion == 1)
-//	{
-//	printf ("nion=%2i, Z=%i, ion=%i, b=%e, pi=%e, recomb=%e, gs=%e, new=%e, big=%e, t_e=%f, xtemp=%f, ne=%e\n",nion,ion[nion].z,ion[nion].istate,b,pi_fudge,recomb_fudge,gs_fudge,b*tot_fudge,big,t_e,xtemp,xne);
-//}
-
-
 		/* apply correction factors */
-		
 		b *= tot_fudge;
-
-
-
-//		printf ("new ratio = %e\n",b);
-          	if (b > big)	 
+		if (b > big)	 
 	   	b = big;		//limit step so there is no chance of overflow
 	  	a = density[nion - 1] * b;
 	  	sum += density[nion] = a;
@@ -240,8 +220,6 @@ variable_temperature (xplasma, mode)
 	  	density[nion] *= a;  //apply scaling
 	  	sane_check (density[nion]);  //check nothing has gone crazy
 		}
-
-
 
       	if (geo.macro_ioniz_mode == 1)
 		{
@@ -265,8 +243,7 @@ variable_temperature (xplasma, mode)
 	{
 	break;
 	}
-    xne = xxxne = (xnew + xne)/2.;   /*New value of ne */
-
+    xne = xxxne = (xnew+xne)/2.;   /*New value of ne */
     niterate++;
 
 
@@ -333,7 +310,7 @@ bb_correct_2 (xtemp, t_r, www, nion)
   int ion_lower,n;
   double numerator, denominator;
   int ntmin,nvmin;
-  double fthresh,fmax;
+  double fthresh,fmax,fmaxtemp;
 
 
 
@@ -355,7 +332,6 @@ bb_correct_2 (xtemp, t_r, www, nion)
       return (1.0);
     }
 
-
 /*The integration is to correct for photoionization rates from the lower to the upper, so
  all integrals have to be over the lower ion cross section. The integrals use the code in
  power_sub, so the temperature has to be set to an external variable. Annoyingly this is 
@@ -366,12 +342,28 @@ bb_correct_2 (xtemp, t_r, www, nion)
       n = ntmin;
       xtop = &phot_top[n];
       fthresh = xtop->freq[0];
-      fmax = xtop->freq[xtop->np - 1];
-
-      
+      fmaxtemp = xtop->freq[xtop->np - 1];
+      fmax = check_fmax (fthresh,fmaxtemp,xtemp);
+      if (fthresh > fmax)
+	{
+	Error("bb_correct: After checking, fthresh has been set below fmin - we cannot compute denominator\n");
+	q=1.0;
+	return(q);
+	}
 
       qromb_temp=t_r;  //The numerator is for the actual radiation temperature
-      numerator=www*qromb (tb_planck1, fthresh, fmax, 1.e-4); //and is corrected for W
+      
+     if (pow(((t_r-xxxplasma->PWntemp[ion_lower])/xxxplasma->PWntemp[ion_lower]),2)>1e-6)
+	{
+        numerator=www*qromb (tb_planck1, fthresh, fmax, 1.e-4); //and is corrected for W
+        xxxplasma->PWnumer[ion_lower]=numerator;
+	xxxplasma->PWntemp[ion_lower]=t_r;
+	}
+      else
+	{	
+	numerator = xxxplasma->PWnumer[ion_lower];
+	}
+
       if (numerator==0.0)
 	return (0.0); //There is no need to waste time evaluating the denominator
 
@@ -382,27 +374,60 @@ bb_correct_2 (xtemp, t_r, www, nion)
 
 
 
-      denominator=qromb (tb_planck1, fthresh, fmax, 1.e-4);
+      if (pow(((xtemp-xxxplasma->PWdtemp[ion_lower])/xxxplasma->PWdtemp[ion_lower]),2)>1e-6)
+	{
+        denominator=qromb (tb_planck1, fthresh, fmax, 1.e-4);	
+        xxxplasma->PWdenom[ion_lower]=denominator;
+	xxxplasma->PWdtemp[ion_lower]=xtemp;
+	}
+      else
+	{
+	denominator=xxxplasma->PWdenom[ion_lower];
+	}
+
+
     }
  else if (ion[ion_lower].phot_info == 0)  // verner
     {			
       n = nvmin;		//just the ground state ioinzation fraction.
       xver = &xphot[ion[n].nxphot];
       fthresh = xver->freq_t;
-      fmax=xver->freq_max;
-
-
+      fmaxtemp=xver->freq_max;
+      fmax = check_fmax (fthresh,fmaxtemp,xtemp);
+      if (fthresh > fmax)
+	{
+	Error("bb_correct: After checking, fthresh has been set below fmin - we cannot compute denominator\n");
+	q=1.0;
+	return(q);
+	}
       qromb_temp=t_r;
-      numerator = www*qromb (verner_planck1, fthresh, fmax, 1.e-4);
+		
+
+
+     if (pow(((t_r-xxxplasma->PWntemp[ion_lower])/xxxplasma->PWntemp[ion_lower]),2)>1e-6)
+	{
+        numerator = www*qromb (verner_planck1, fthresh, fmax, 1.e-4);
+        xxxplasma->PWnumer[ion_lower]=numerator;
+        xxxplasma->PWntemp[ion_lower]=t_r;
+	}
+      else
+	{
+	numerator = xxxplasma->PWnumer[ion_lower];
+	}
        if (numerator==0.0)
 	return (0.0); //There is no need to waste time evaluating the denominator
       qromb_temp=xtemp;
-
-//	printf ("verner n=%i,nion=%i,temp=%e,fthresh=%e,fmax=%e,hnu=%e,hnu/kt=%e,fmax=%e\n",n,ion_lower,temp,fthresh,fmax,fthresh*H,(fthresh*H)/(temp*BOLTZMANN),5.879e10*temp);
-
-
-
-      denominator = qromb (verner_planck1, fthresh, fmax, 1.e-4);
+      fthresh = xver->freq_t;
+      if (pow(((xtemp-xxxplasma->PWdtemp[ion_lower])/xxxplasma->PWdtemp[ion_lower]),2)>1e-6)
+	{
+        denominator = qromb (verner_planck1, fthresh, fmax, 1.e-4);	
+        xxxplasma->PWdenom[ion_lower]=denominator;
+	xxxplasma->PWdtemp[ion_lower]=xtemp;
+	}
+      else
+	{
+	denominator=xxxplasma->PWdenom[ion_lower];
+	}
     }
 
  else
@@ -423,16 +448,9 @@ bb_correct_2 (xtemp, t_r, www, nion)
       return (q);
     }
 
-  //    if (denominator < 1e-40)
-//	denominator = 1e-40;
-
-
       q = numerator / denominator;
 
-
-     
-
-
+    
   return (q);
 }
 
@@ -482,11 +500,12 @@ temp_func (solv_temp)
   History:
  
 	12feb	NSH	Coded as part of the quasar project
+        12aug   NSH     Added code to allow an ex[ponential model of j to be used.
 
 **************************************************************/
 int pl_correct_err=0;
 double xpl_alpha,xpl_w;
-
+double xexp_temp,xexp_w;
 
 
 double
@@ -498,11 +517,13 @@ pl_correct_2 (xtemp, nion)
   int ion_lower,n,j;
   double numerator, denominator;
   int ntmin,nvmin;
-  double fthresh,fmax;
+  double fthresh,fmax,fmaxtemp;
+  double f1,f2;
+  double exp_qromb,pl_qromb;
 
 
-
-  /* Initialization of fudges complete */
+exp_qromb=1e-4;
+pl_qromb=1e-4;
 
   ion_lower = nion-1;	/*the call uses nion, which is the upper ion in the pair, we are interested in the PI from the lower ion */	
 
@@ -526,124 +547,209 @@ pl_correct_2 (xtemp, nion)
  if (ion[ion_lower].phot_info == 1)  //topbase
     {
       n = ntmin;
-//	printf("for ion_lower=%i, topbase cross section is %i\n",ion_lower,ntmin);
+
       xtop = &phot_top[n];
       fthresh = xtop->freq[0];
-      fmax = xtop->freq[xtop->np - 1];
- //      if (nion==1) printf("HYDROGEN topbase threshold frequency= %e Hz %e ev\n",fthresh,fthresh*HEV);
-//	if (nion==1) printf("HYDROGEN fmax=%e \n",fmax);
-	numerator=0;
-	  for (j = 0; j < geo.nxfreq; j++)	//We loop over all the bands
-	    {
-//		if (nion==1) printf("HYDROGEN band %i runs from %e to %e\n",j,geo.xfreq[j],geo.xfreq[j+1]);
-	      if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j] < fmax && fmax < geo.xfreq[j + 1])	//Case 1- 
-		{
-		  xpl_alpha = xxxplasma->sim_alpha[j];
-		  xpl_w = xxxplasma->sim_w[j];
-//	if (nion==1) printf("HYDROGEN case 1 band %i=%e \n",j,qromb (tb_pow1, fthresh, fmax, 1.e-4));
-//	if (nion==1) printf("HYDROGEN integrating from %e to %e with alpha=%f\n",fthresh, fmax,xpl_alpha);
-		  numerator += qromb (tb_pow1, fthresh, fmax, 1.e-4);
-//	if (nion==1) printf("HYDROGEN numerator= %e \n",numerator);
-		}
-	      else if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j + 1] < fmax)	//case 2 
-		{
-		  xpl_alpha = xxxplasma->sim_alpha[j];
-		  xpl_w = xxxplasma->sim_w[j];
-//	if (nion==1) printf("HYDROGEN case 2 band %i=%e \n",j,qromb (tb_pow1, fthresh, geo.xfreq[j + 1], 1.e-4));
-//	if (nion==1) printf("HYDROGEN integrating from %e to %e with alpha=%f\n",fthresh, geo.xfreq[j + 1],xpl_alpha);
-		  numerator +=
-		    qromb (tb_pow1, fthresh, geo.xfreq[j + 1], 1.e-4);
-//	if (nion==1) printf("HYDROGEN numerator= %e \n",numerator);
-		}
-	      else if (geo.xfreq[j] > fthresh && geo.xfreq[j] < fmax && fmax < geo.xfreq[j + 1])	//case 3
-		{
-		  xpl_alpha = xxxplasma->sim_alpha[j];
-		  xpl_w = xxxplasma->sim_w[j];
-//	if (nion==1) printf("HYDROGEN case 3 band %i=%e \n",j,qromb (tb_pow1, geo.xfreq[j], fmax, 1.e-4));
-//	if (nion==1) printf("HYDROGEN integrating from %e to %e with alpha=%f\n",geo.xfreq[j], fmax,xpl_alpha);
-		  numerator += qromb (tb_pow1, geo.xfreq[j], fmax, 1.e-4);
-//	if (nion==1) printf("HYDROGEN numerator= %e \n",numerator);
-		}
-	      else if (geo.xfreq[j] > fthresh && geo.xfreq[j + 1] < fmax)	// case 4
-		{
-		  xpl_alpha = xxxplasma->sim_alpha[j];
-		  xpl_w = xxxplasma->sim_w[j];
-//	if (nion==1) printf("HYDROGEN case 4 band %i=%e \n",j,qromb (tb_pow1, geo.xfreq[j], geo.xfreq[j + 1], 1.e-4));
-//	if (nion==1) printf("HYDROGEN integrating from %e to %e\n",geo.xfreq[j], geo.xfreq[j + 1]);
-		  numerator +=
-		    qromb (tb_pow1, geo.xfreq[j], geo.xfreq[j + 1], 1.e-4);
-//	if (nion==1) printf("HYDROGEN numerator= %e \n",numerator);
-		}
-	      else		//case 5 - should only be the case where the band is outside the range for the integral.
-		{
-//	if (nion==1) printf("HYDROGEN case 5 band %i=0 \n",j);
-		  numerator += 0;	// Add nothing - bit of a null statement, but makes the code look nice.
-		}
-	    }
+      fmaxtemp = xtop->freq[xtop->np - 1];
+      fmax = check_fmax (fthresh,fmaxtemp,xtemp);
+      if (fthresh > fmax)
+	{
+	Error("pl_correct: After checking, fthresh has been set below fmin - we cannot compute denominator\n");
+	q=1.0;
+	return(q);
+	}
+      numerator=0;
+	  if (niterate==0)  			//first time of iterating this cycle, so calculate the numerator
+              {
+	      for (j = 0; j < geo.nxfreq; j++)	//We loop over all the bands
+	        {
+		xpl_alpha = xxxplasma->pl_alpha[j];
+		xpl_w = xxxplasma->pl_w[j];
+		xexp_temp = xxxplasma->exp_temp[j];
+		xexp_w = xxxplasma->exp_w[j];
+	//	if (ion_lower==0) printf ("BCA IN band %i, we will be using model %i, pl_a=%e, pl_w=%e, (%e-%e) exp_t=%e, exp_w=%e \n",j,xxxplasma->spec_mod_type[j],xxxplasma->pl_alpha[j],xxxplasma->pl_w[j],xxxplasma->pl_w[j]*pow(geo.xfreq[j],xxxplasma->pl_alpha[j]),xxxplasma->pl_w[j]*pow(geo.xfreq[j+1],xxxplasma->pl_alpha[j]),xxxplasma->exp_temp[j],xxxplasma->exp_w[j]);
+                if (xxxplasma->spec_mod_type[j] > 0)   //Only bother doing the integrals if we have a model in this band
+			{
+			f1=geo.xfreq[j];
+			if (geo.xfreq[j+1] > xxxplasma->max_freq && geo.xfreq[j] < xxxplasma->max_freq) //The maximum frequency seen in this cell is in this band, so we cannot safely use the power law estimators right up to the top of the band. Note, we hope that all the weights in bands above this will be zero!
+				{		
+				f2=xxxplasma->max_freq;
+				}
+			else
+				{
+				f2=geo.xfreq[j+1]; //We can safely integrate over the whole band using the estimators for the cell/band 
+				}
+	        	if (f1 < fthresh && fthresh < f2 && f1 < fmax && fmax < f2)	//Case 1- 
+		  		{
+				if (xxxplasma->spec_mod_type[j]==SPEC_MOD_PL) 
+					{
+					numerator += qromb (tb_pow1, fthresh, fmax, 1.e-4); 
+					}
+				else 
+					{
+					numerator += qromb (tb_exp1, fthresh, fmax, exp_qromb);
+//					printf ("BCA BB integrate (1)= %e,num=%e\n",qromb(tb_planck1, fthresh, fmax, 1.e-4),numerator);
+					} 
+		  		}
+	        	else if (f1 < fthresh && fthresh < f2 && f2 < fmax)	//case 2 
+		  		{
+		  		if (xxxplasma->spec_mod_type[j]==SPEC_MOD_PL) 
+					{
+					numerator += qromb (tb_pow1, fthresh, f2, 1.e-4);
+					}
+				else 
+					{
+					numerator += qromb (tb_exp1,  fthresh, f2, exp_qromb);
+//					printf ("BCA BB integrate (2)= %e, num=%e\n",qromb(tb_planck1, fthresh, f2, 1.e-4),numerator);
+					}
+		  		}
+	        	else if (f1 > fthresh && f1 < fmax && fmax < f2)	//case 3
+		  		{
+		  		if (xxxplasma->spec_mod_type[j]==SPEC_MOD_PL) 
+					{
+					numerator += qromb (tb_pow1, f1, fmax, 1.e-4);
+					}
+				else 
+					{
+					numerator += qromb (tb_exp1,  f1, fmax, exp_qromb);
+//					printf ("BCA BB integrate (3)= %e, num=%e\n",qromb(tb_planck1, f1, fmax, 1.e-4),numerator);
+					}
+		  		}
+	        	else if (f1 > fthresh && f2 < fmax)	// case 4
+		  		{
+		  		if (xxxplasma->spec_mod_type[j]==SPEC_MOD_PL) 
+					{
+					numerator += qromb (tb_pow1, f1, f2, 1.e-4);
+					}
+				else 
+					{
+					numerator += qromb (tb_exp1, f1, f2, exp_qromb);
+//					printf ("BCA BB integrate (4)= %e, num=%e\n",qromb(tb_planck1, f1, f2, 1.e-4),numerator);
+					}
+		  		}
+	        	else		//case 5 - should only be the case where the band is outside the range for the integral.
+		  		{
+		  		numerator += 0;	// Add nothing - bit of a null statement, but makes the code look nice.
+		  		}
+//	if (ion_lower==0) printf ("BCA numerator = %e after band %i, which was model %i \n",numerator,j,xxxplasma->spec_mod_type[j]);
+	        	} //End of loop to only integrate in this band if there is power
+		} //End of loop over all bands, at this point we have the numerator
+              xxxplasma->PWnumer[ion_lower]=numerator;   // Store the calculated numerator for this cell - it wont change during one ionization cycle
+	      } //End of if statement to decide if this is the first iteration
+	   else
+	      {
+	      numerator=xxxplasma->PWnumer[ion_lower];   // We are on the second iteration, so use the stored value
+	      }
       if (numerator==0.0)
-	return (0.0); //There is no need to waste time evaluating the denominator
+	    {
+	    return (0.0); //There is no need to waste time evaluating the denominator
+            }
 
       qromb_temp=xtemp; //The denominator is calculated for the LTE rate at our ideal temp. If we get this wrong, then divide by zeros abound!
 
-//	printf ("topbase n=%i,nion=%i,temp=%e,fthresh=%e,fmax=%e,hnu=%e,hnu/kt=%e,fmax=%e\n",n,ion_lower,temp,fthresh,fmax,fthresh*H,(fthresh*H)/(temp*BOLTZMANN),5.879e10*temp);
+      if (pow(((xtemp-xxxplasma->PWdtemp[ion_lower])/xxxplasma->PWdtemp[ion_lower]),2)>1e-6) //If our guess temperature hasnt changed much, use denominator from last time
+	{
+        denominator=qromb (tb_planck1, fthresh, fmax, 1.e-4);
+        xxxplasma->PWdenom[ion_lower]=denominator;
+	xxxplasma->PWdtemp[ion_lower]=xtemp;
+	}
+      else
+	{
+	denominator=xxxplasma->PWdenom[ion_lower];
+	}
 
 
-
-      denominator=qromb (tb_planck1, fthresh, fmax, 1.e-4);
     }
  else if (ion[ion_lower].phot_info == 0)  // verner
     {			
-      n = nvmin;		//just the ground state ioinzation fraction.
+      n = nvmin;		//just the ground state ionization fraction.
+
       xver = &xphot[ion[n].nxphot];
       fthresh = xver->freq_t;
-      fmax=xver->freq_max;
+      fmaxtemp=xver->freq_max;
+      fmax = check_fmax (fthresh,fmaxtemp,xtemp);
+      if (fthresh > fmax)
+	{
+	Error("pl_correct: After checking, fthresh has been set below fmin - we cannot compute denominator\n");
+	q=1.0;
+	return(q);
+	}
+
+
+
+
 
 	numerator=0;
-	  for (j = 0; j < geo.nxfreq; j++)	//We loop over all the bands
-	    {
-	      if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j] < fmax && fmax < geo.xfreq[j + 1])	//Case 1
-		{
-		  xpl_alpha = xxxplasma->sim_alpha[j];
-		  xpl_w = xxxplasma->sim_w[j];
-		  numerator += qromb (verner_pow1, fthresh, fmax, 1.e-4);
-		}
-	      else if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j + 1] < fmax)	//case 2 
-		{
-		  xpl_alpha = xxxplasma->sim_alpha[j];
-		  xpl_w = xxxplasma->sim_w[j];
-		  numerator +=
-		    qromb (verner_pow1, fthresh, geo.xfreq[j + 1], 1.e-4);
-		}
-	      else if (geo.xfreq[j] > fthresh && geo.xfreq[j] < fmax && fmax < geo.xfreq[j + 1])	//case 3
-		{
-		  xpl_alpha = xxxplasma->sim_alpha[j];
-		  xpl_w = xxxplasma->sim_w[j];
-		  numerator += qromb (verner_pow1, geo.xfreq[j], fmax, 1.e-4);
-		}
-	      else if (geo.xfreq[j] > fthresh && geo.xfreq[j + 1] < fmax)	// case 4
-		{
-		  xpl_alpha = xxxplasma->sim_alpha[j];
-		  xpl_w = xxxplasma->sim_w[j];
-		  numerator +=
-		    qromb (verner_pow1, geo.xfreq[j], geo.xfreq[j + 1], 1.e-4);
-		}
-	      else		//case 5 - should only be the case where the band is outside the range for the integral.
-		{
-		  numerator += 0;	// Add nothing - bit of a null statement, but makes the code look nice.
-		}
+	  if (niterate==0)  			//first time of iterating this cycle, so calculate the numerator
+              {
+              for (j = 0; j < geo.nxfreq; j++)	//We loop over all the bands
+		 {
+		 xpl_alpha = xxxplasma->pl_alpha[j]; //Set the variables needed for integration
+		 xpl_w = xxxplasma->pl_w[j];
+		 xexp_temp = xxxplasma->exp_temp[j];
+		 xexp_w = xxxplasma->exp_w[j];
+                 if (xxxplasma->spec_mod_type[j] > 0)   //Only bother doing the integrals if we have a model in this band
+			{
+			f1=geo.xfreq[j];
+			if (geo.xfreq[j+1] > xxxplasma->max_freq && geo.xfreq[j] < xxxplasma->max_freq) //The maximum frequency seen in this cell is in this band, so we cannot safely use the power law estimators right up to the top of the band. Note, we hope that all the weights in bands above this will be zero!
+				{
+				f2=xxxplasma->max_freq;
+				}
+			else
+				{
+				f2=geo.xfreq[j+1]; //We can safely integrate over the whole band using the estimators for the cell/band 
+				}
+	      		if (f1 < fthresh && fthresh < f2 && f1 < fmax && fmax < f2)	//Case 1
+		  		{
+		    		if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL) numerator += qromb (verner_pow1, fthresh, fmax, 1.e-4);
+				else numerator += qromb (verner_exp1, fthresh, fmax, 1.e-4);
+		  		}
+	        	else if (f1 < fthresh && fthresh < f2 && f2 < fmax)	//case 2 
+		  		{
+		    		if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL) numerator += qromb (verner_pow1, fthresh, f2, 1.e-4);
+				else numerator += qromb (verner_exp1, fthresh, f2, 1.e-4);
+		  		}
+	        	else if (f1 > fthresh && f2 < fmax && fmax < f2)	//case 3
+		  		{
+		    		if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL) numerator += qromb (verner_pow1, f1, fmax, 1.e-4);
+				else numerator += qromb (verner_exp1, f1, fmax, 1.e-4);
+		  		}
+	        	else if (f1 > fthresh && f2 < fmax)	// case 4
+		  		{
+		    		if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL) numerator += qromb (verner_pow1, f1, f2, 1.e-4);
+				else numerator += qromb (verner_exp1, f1, f2, 1.e-4);
+		  		}
+	        	else		//case 5 - should only be the case where the band is outside the range for the integral.
+		  		{
+		    		numerator += 0;	// Add nothing - bit of a null statement, but makes the code look nice.
+		  		}
+
+			} //End of if loop to only do any integrations if the band weight is non zero     	
+		}  //End of loop over all the bands, we now have the integration
+            xxxplasma->PWnumer[ion_lower]=numerator;  //Store the numerator fromn this time - it wont change at all during one ionization cycle	 
+	    } //End of if statement to decide if this is the first iteration
+	  else   //we have already done one interation, so we can just use the stored numberator
+            {
+            numerator = xxxplasma->PWnumer[ion_lower];
 	    }
+
        if (numerator==0.0)
 	return (0.0); //There is no need to waste time evaluating the denominator
 /* Denominator is integral at LTE of our chosen temperature. */
 
       qromb_temp=xtemp;
 
-//	printf ("verner n=%i,nion=%i,temp=%e,fthresh=%e,fmax=%e,hnu=%e,hnu/kt=%e,fmax=%e\n",n,ion_lower,temp,fthresh,fmax,fthresh*H,(fthresh*H)/(temp*BOLTZMANN),5.879e10*temp);
-
-
-
-      denominator = qromb (verner_planck1, fthresh, fmax, 1.e-4);
-    }
+     if (pow(((xtemp-xxxplasma->PWdtemp[ion_lower])/xxxplasma->PWdtemp[ion_lower]),2)>1e-6)
+	{
+        denominator = qromb (verner_planck1, fthresh, fmax, 1.e-4);
+        xxxplasma->PWdenom[ion_lower]=denominator;
+	xxxplasma->PWdtemp[ion_lower]=xtemp;
+	}
+      else
+	{
+	denominator=xxxplasma->PWdenom[ion_lower];
+	}
+    }	 //End of if statement for verner cross section
 
  else
     {
@@ -662,16 +768,10 @@ pl_correct_2 (xtemp, nion)
       return (q);
     }
 
+   q = numerator / denominator; /*Just work out the correction factor - hope it isnt infinite! */
 
 
- //     printf ("numerator = %e, denominator = %e\n",numerator,denominator);
-      q = numerator / denominator; /*Just work out the correction factor - hope it isnt infinite! */
 
-//if (nion == 1)
-//	{
-//	printf ("HYDROGEN numerator = %e, denominator = %e, q=%e\n",numerator,denominator,q);
-//}
-     
 
 
   return (q);
@@ -856,5 +956,88 @@ verner_pow1 (freq)
   return (answer);
 }
 
+/**************************************************************************
+                    Space Telescope Science Institute
 
+
+  Synopsis:  
+	verner_exp is the function to allow integration of an exponential photon distribution multiplied by the inoisation cross section
+   	to allow the numerator of the sim correction factor to be calulated for ions with verner cross sections.
+
+  Description:	
+
+  Arguments:  (Input via .pf file)		
+
+
+  Returns:
+
+  Notes:
+
+This is almost identical to code written to compute the sim power law correction. It is copied here to make the coding easier, plus it is likely that it will supplant the earlier code so that can all be deleted.
+
+
+ 
+
+  History:
+
+12Aug NSH - Written as part of the effort to improve the modelling
+ ************************************************************************/
+
+
+double
+verner_exp1 (freq)
+     double freq;
+{
+  double answer;
+
+  answer = xexp_w * exp ((-1.0*H*freq)/(BOLTZMANN*xexp_temp));
+  answer *= sigma_phot (xver, freq);	// and finally multiply by the cross section.
+  answer /= freq;
+  return (answer);
+}
+
+
+
+
+/**************************************************************************
+                    Southampton University
+
+
+  Synopsis:  
+
+  Description:	
+	tb_exp is the function to allow integration of an exponential photon distribution multiplied by the inoisation 
+	cross section
+  	to allow the numerator of the correction factor to be calulated for ions with topbase cross sections.
+
+  Arguments:  
+
+
+  Returns:
+
+ Notes:
+
+This is almost identical to code written to compute the sim power law correction. It is copied here to make the coding easier, plus it is likely that it will supplant the earlier code so that can all be deleted.
+
+
+ 
+
+  History:
+
+12Aug Written by NSH as part of the effort to improve spectral modelling
+ ************************************************************************/
+
+
+
+double
+tb_exp1 (freq)
+     double freq;
+{
+  double answer;
+	
+  answer = xexp_w * exp ((-1.0*H*freq)/(BOLTZMANN*xexp_temp));
+  answer *= sigma_phot_topbase (xtop, freq);	// and finally multiply by the cross section.
+  answer /= freq;
+  return (answer);
+}
 

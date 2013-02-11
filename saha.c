@@ -122,7 +122,7 @@ nebular_concentrations (xplasma, mode)
   double get_ne ();
   int lucy_mazzali1 ();
   int m;
-
+printf ("NSH Here we are in nebular concentrations running at mode %i with t_r=%e, W=%f\n",mode,xplasma->t_r,xplasma->w);
   if (mode == 0)
     {				// LTE all the way -- uses tr
 
@@ -264,11 +264,11 @@ concentrations (xplasma, mode)
 
 
 
-#define SAHA 4.82907e15		/* 2* (2.*PI*MELEC*k)**1.5 / h**3  (Calculated in constants) */
-#define MAXITERATIONS	200
-#define FRACTIONAL_ERROR 0.03
-#define THETAMAX	 1e4
-#define MIN_TEMP         100.
+//#define SAHA 4.82907e15		/* 2* (2.*PI*MELEC*k)**1.5 / h**3  (Calculated in constants) */
+//#define MAXITERATIONS	200
+//#define FRACTIONAL_ERROR 0.03
+//#define THETAMAX	 1e4
+//#define MIN_TEMP         100. NSH 0712 - moved into python.h because this is used in severalpaces
 
 
 int
@@ -673,6 +673,7 @@ lucy (xplasma)
  
 	98may	ksl	Coded as a a separate routine for each element
 	07mar	ksl	Convert warnings to errors to stop many repeads
+	12july 	nsh	Modified to use external code to compute zeta.
 
 **************************************************************/
 
@@ -683,34 +684,34 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
      int nelem;
      double ne, density[], xne, newden[];
 {
-  double fudge, dummy, interpfrac;
+  double fudge;  // dummy, interpfrac; 0712 zeta calculation moved into zeta.c
   double fudge2, q;
   double sum, a;
-  int ilow, ihi;
+//  int ilow, ihi; 0712 nsh zeta moved into subroutine
   int first, last, nion;
   double numerator, denominator;
-
   if (t_r > MIN_TEMP)
     {
       fudge = www * sqrt (t_e / t_r);
 
+//NSH 0712These lines now moved into zeta.c we retain the caculation of sqrt t_e/t_r
       /* now get the right place in the ground_frac tables  CK */
-      dummy = t_e / TMIN - 1.;
-      ilow = dummy;		/* have now truncated to integer below */
-      ihi = ilow + 1;		/*these are the indeces bracketing the true value */
-      interpfrac = (dummy - ilow);	/*this is the interpolation fraction */
-      if (ilow < 0)
-	{
-	  ilow = 0;
-	  ihi = 0;
-	  interpfrac = 1.;
-	}
-      if (ihi > 19)
-	{
-	  ilow = 19;
-	  ihi = 19;
-	  interpfrac = 1.;
-	}
+//      dummy = t_e / TMIN - 1.;
+//      ilow = dummy;		/* have now truncated to integer below */
+//      ihi = ilow + 1;		/*these are the indeces bracketing the true value */
+//      interpfrac = (dummy - ilow);	/*this is the interpolation fraction */
+//      if (ilow < 0)
+//	{
+//	  ilow = 0;
+//	  ihi = 0;
+//	  interpfrac = 1.;
+//	}
+//    if (ihi > 19)
+//	{
+//	  ilow = 19;
+//	  ihi = 19;
+//	  interpfrac = 1.;
+//	}
 
     }
   else
@@ -718,8 +719,8 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
       Error_silent ("lucy_mazzali1: t_r too low www %8.2e t_e %8.2e  t_r %8.2e \n",
 	     www, t_e, t_r);
       fudge = 0.0;
-      interpfrac = 0.0;
-      ihi = ilow = 0;
+//      interpfrac = 0.0;
+//      ihi = ilow = 0;
     }
 
   if (fudge < MIN_FUDGE || MAX_FUDGE < fudge)
@@ -757,10 +758,14 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
       /* now apply the Mazzali and  Lucy fudge, i.e. zeta + w (1-zeta)
          first find fraction of recombinations going directly to
          the ground state for this temperature and ion */
-      fudge2 =
+
+      fudge2 = compute_zeta (t_e, nion-1, 2); /* NSH 1207 - call external function, mode 2 uses chianti and badnell data to try to take account of DR in zeta - if atomic data is not read in, then the old interpolated zeta will be returned */
+    
+
+/* NSH 0712 - Old way of doing it, not moved into routines in zeta.c 
 	ground_frac[nion - 1].frac[ilow] +
 	interpfrac * (ground_frac[nion - 1].frac[ihi] -
-		      ground_frac[nion - 1].frac[ilow]);
+		      ground_frac[nion - 1].frac[ilow]); */
       /*Since nion-1 points at state i-1 (saha: n_i/n_i-1) we want ground_frac[nion-1].
          Note that we NEVER access the last ion for any element in that way
          which is just as well since you can't have recombinations INTO
