@@ -129,11 +129,11 @@ spherical_make_grid (w)
 	  }
 	else
 	  {			//logarithmic intervals
-
 	    dlogr = (log10 (geo.rmax / geo.rstar)) / (NDIM - 3);
 	    w[n].r = geo.rstar * pow (10., dlogr * (n - 1));
 	    w[n].rcen = 0.5 * geo.rstar * (pow (10., dlogr * (n)) +
 					   pow (10., dlogr * (n - 1)));
+	printf("OLD W.r = %e, w.rcen = %e\n",w[n].r,w[n].rcen);
 	  }
 	/* Now calculate the positions of these points in the xz plane.
 	   There is a choice about how one does this.   I have elected
@@ -523,3 +523,78 @@ spherical_extend_density (w)
   return (0);
 
 }
+
+
+/***********************************************************
+               Space Telescope Science Institute
+
+ Synopsis:
+	shell_make_grid defines the cells in a thin shell. One shell inside the shell, one outside and one shell exactly fitting the shell.            
+
+Arguments:		
+	WindPtr w;	The structure which defines the wind in Python
+ 
+Returns:
+ 
+Description:
+
+	In spherical coordinates w runs from 0 to NDIM.  Note that the 
+	centers of the grid cells are defined in the xz plane at a 45 
+	degree angle.  This was done so that one would be in a plausible
+	region of a biconical wind.
+        NSH - Ive chenged it to use 1/root2 rather than sin 45. More accurate.
+
+
+History:
+ 	11feb	nsh	Adapted from spherical_make_grid.c
+	05jun	ksl	56a: Eliminated some superfluous varabiles, and
+			added better comments.
+
+**************************************************************/
+
+
+int
+shell_make_grid (w)
+     WindPtr w;
+{
+int n;
+
+
+        w[0].r=geo.wind_rmin-(geo.wind_rmax-geo.wind_rmin);
+        w[1].r=geo.wind_rmin;
+	w[2].r=geo.wind_rmax;
+	w[3].r=geo.wind_rmax+(geo.wind_rmax-geo.wind_rmin);
+
+
+
+	w[0].rcen=(w[0].r+w[1].r)/2;
+	w[1].rcen=(w[1].r+w[2].r)/2;
+	w[2].rcen=(w[2].r+w[3].r)/2;
+	w[3].rcen=w[2].rcen+(geo.wind_rmax-geo.wind_rmin);
+
+
+
+
+	/* Now calculate the positions of these points in the xz plane.
+	   There is a choice about how one does this.   I have elected
+	   to assume that we want to calculate this at a 45 degree angle.
+	   in the hopes this will be a reasonable portion of the wind in
+	   a biconical flow.
+	 */
+  for (n = 0; n < NDIM; n++)
+	{
+	printf(" W.r = %2.20e, w.rcen = %2.20e\n",w[n].r,w[n].rcen);
+	w[n].x[1] = w[n].xcen[1] = 0.0;
+
+ //Slight change here, using 1/root2 give more accurate results than sin45.
+
+
+	w[n].x[0] = w[n].x[2] = w[n].r / pow(2.0,0.5);
+	w[n].xcen[0] = w[n].xcen[2] = w[n].rcen /pow(2.0,0.5);
+	}
+    
+
+  return (0);
+
+}
+

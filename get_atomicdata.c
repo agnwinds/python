@@ -552,7 +552,7 @@ ksl 04Apr  ??
 		  if (nlte > 0)
 		    {		// Then we want to consider some of these levels as non-lte
 		      ion[nions].first_levden = nlte_levels;	/* This is the index to into
-								   the levdev aray */
+								   the levden aray */
 		      ion[nions].n_lte_max = nlte;	//Reserve this many elements of levden
 		      nlte_levels += nlte;
 		      if (nlte_levels > NLTE_LEVELS)
@@ -1359,6 +1359,8 @@ for the ionstate.
 				    {
 				      ion[n].phot_info = 0;	/* Mark this ion as using VFKY photo */
 				      ion[n].nxphot = nxphot;
+
+
 				      nxphot++;
 				    }
 				  else if (ion[n].phot_info == 1)
@@ -2272,6 +2274,7 @@ index_phot_verner ()
 
   for (n = 0; n < nxphot; n++)
     {
+      xphot_ptr1[n] = &xphot[n];
       xphot_ptr[n] = &xphot[index[n + 1] - 1];
     }
 

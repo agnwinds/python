@@ -124,7 +124,7 @@ Description:
 	will linearly interpolate between two points on the opposite sides of the edge).
 
 Notes:
-	Must be compiles with log.c since it makes use of the "python" logging routines for
+	Must be compiled with log.c since it makes use of the "python" logging routines for
 	errors.
 
 	The fact that these routines start with pdf... is historical and represents a poor
@@ -302,7 +302,6 @@ pdf_gen_from_func (pdf, func, xmin, xmax, njumps, jump)
   while (n < 3)
     {
       delta = gen_array_from_func (func, xmin, xmax, pdfsteps);
-      Log ("delta %.4f pdfsteps %d\n", delta, pdfsteps);
       if (delta < 0.1 / NPDF)
 	break;
       pdfsteps *= 10;
@@ -343,8 +342,11 @@ pdf_gen_from_func (pdf, func, xmin, xmax, njumps, jump)
 
   pdf->x[NPDF] = xmax;
   pdf->y[NPDF] = 1.0;
-  pdf->norm = xstep;		/* The normalizing factor that would convert the function we
-				   have been given into a proper probability density function */
+  pdf->norm=1.;                 /* pdf_gen_from array produces a properly nomalized cdf and so the
+				   normalization is 1.  110629 ksl
+				*/
+//OLD  pdf->norm = xstep;		/* The normalizing factor that would convert the function we
+//OLD				   have been given into a proper probability density function */
 
 /* Calculate the gradients */
   recalc_pdf_from_cdf (pdf);	// 57ib 
@@ -359,14 +361,17 @@ pdf_gen_from_func (pdf, func, xmin, xmax, njumps, jump)
 
 
 /* 
- Generate an array which contains the value of a function from xmin to xmax
 
- This is a routine which is called by pdf_gen_from_func which simply calculates the cumulative
- distribution of the function in equally spaced steps between xmin and xmax.
+gen_array_from_func
 
 
- pdfsteps is the number of steps that are calculated.  The routine returns the largest change
- in the cdf between any two points in the grid.
+This is a routine which is called by pdf_gen_from_func which simply calculates the cumulative
+distribution of the function in equally spaced steps between xmin and xmax.  The CDF is properly
+normalized.
+
+
+pdfsteps is the number of steps that are calculated.  The routine returns the largest change
+in the cdf between any two points in the grid.
 
 Notes:
 
@@ -377,9 +382,14 @@ this would require one to pass both the values of the CDF and the positions wher
 taken.  This would be  not be hard but would require more extensive modifications to pdf_gen_from func than 
 currently.  
 
+11jun	ksl	The name of this function is rather misleading reflecting its history.  At one point
+		it simple generated the value of the function at the various points in the grid.  That
+		is no longer the case, and has led to confusion.  
+
 History
 
 10oct	ksl(python_69)	Coded to enable one to adaptively increase the density of points
+11jun	ksl(69d)	This routine creates a properly normalized CDF.
 
 */
 
@@ -470,7 +480,6 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
 	}
 
     }
-  Log ("OK Knox, here is the maxium %.4f\n", delta);
 
 
   return (delta);
@@ -964,6 +973,16 @@ pdf_get_rand_limit (pdf)
 
 }
 
+/* 
+
+Write the full structure of the cumulattive distribution function to
+a file
+
+110628	ksl	Added lines to write out all of the information contained
+		in the pdf structure in an attempt to debug an error in
+		anisowind
+*/
+
 int
 pdf_to_file (pdf, filename)
      PdfPtr pdf;
@@ -974,9 +993,13 @@ pdf_to_file (pdf, filename)
 
   fptr = fopen (filename, "w");
 
-  fprintf (fptr, "#x y\n");
+  fprintf(fptr,"# limits (portion.to.sample)   %10.4g %10.4g\n",pdf->limit1,pdf->limit2);
+  fprintf(fptr,"# x1 x2  Range(to.be.returned) %10.4g %10.4g\n",pdf->x1,pdf->x2);
+  fprintf(fptr,"# norm   Scale.factor          %10.4g \n",pdf->norm);
+
+  fprintf (fptr, "#x y  1-y d\n");
   for (n = 0; n <= NPDF; n++)
-    fprintf (fptr, "%10.4g	%14.8g (%14.8e)  %10.4g\n", pdf->x[n],
+    fprintf (fptr, "%10.4g	%14.8g %14.8e  %10.4g\n", pdf->x[n],
 	     pdf->y[n], 1. - pdf->y[n], pdf->d[n]);
 
   fclose (fptr);

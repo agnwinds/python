@@ -2299,7 +2299,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   double dot ();
   int wind_n_to_ij (), stuff_v (), where_in_wind (), randvec ();
   int get_random_location ();
-  double rho_test, test;
+  double  test;
   double ztest, dvds, z, tau;
   int nnscat;
   double dvwind_ds (), sobolev ();
@@ -2486,7 +2486,7 @@ photo_gen_matom (p, weight, photstart, nphot)
   double dot ();
   int wind_n_to_ij (), stuff_v (), where_in_wind (), randvec ();
   int emit_matom ();
-  double rho_test, test;
+  double test;
   int upper;
   double ztest, dvds, z, tau;
   int nnscat;

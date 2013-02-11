@@ -378,19 +378,13 @@ one_shot (xplasma, mode)
 
   gain = xplasma->gain;
 
-  printf("NSH Here we are in one_shot, cell number %i gain %e mode %i t_r %f t_e %f sim_w %e sim_alpha %e logIP %e\n",xplasma->nplasma,gain,mode,xplasma->t_r,xplasma->t_e,xplasma->sim_w,xplasma->sim_alpha,log10(xplasma->sim_ip));
-   printf("NSH in this cell, we have %i AGN photons and %i disk photons\n",xplasma->ntot_agn,xplasma->ntot_disk);
   te_old = xplasma->t_e;
   te_new = calc_te (xplasma, 0.7 * te_old, 1.3 * te_old);
-
   xplasma->t_e = (1 - gain) * te_old + gain * te_new;
 
-
- // printf ("EMERGENCY EMERGENCY EMERGENCY - your 1 million K muck up is still at line 301 of ionization\n");
-//  xplasma->t_e=1e6;
   dte = xplasma->dt_e;
   
-//  Log ("One_shot: %10.2f %10.2f %10.2f\n", te_old, te_new, w->t_e);
+  Log ("One_shot: cell %i %13.6f %13.6f mode %i\n", xplasma->nplasma, te_old, te_new, mode);
 
 
 /* Modes in the driving routines are not identical to those in nebular concentrations.
@@ -498,7 +492,7 @@ calc_te (xplasma, tmin, tmax)
     }
   else
     xplasma->t_e = tmax;
-
+	
   /* With the new temperature in place for the cell, get the correct value of heat_tot.
      SS June  04 */
 
@@ -519,6 +513,61 @@ calc_te (xplasma, tmin, tmax)
   return (xplasma->t_e);
 
 }
+
+
+//double
+//calc_te (xplasma, tmin, tmax)
+//     PlasmaPtr xplasma;
+//     double tmin, tmax;
+//{
+//  double heat_tot;
+//  double z1, z2;
+//  int macro_pops ();
+//  xxxplasma = xplasma;
+//  heat_tot = xplasma->heat_tot;
+//  xplasma->t_e = tmin = 1;
+//  z1 = zero_emit (tmin);
+//  xplasma->t_e = tmax = 1e7;
+//  z2 = zero_emit (tmax);
+//
+//	printf("NSH In calc_te  z1%e, z2=%e, tmin=%f, tmax=%f\n",z1,z2,tmin,tmax); 
+//  if ((z1 * z2 < 0.0))
+//    {				// Then the interval is bracketed 
+//      xplasma->t_e = zbrent (zero_emit, tmin, tmax, 50.);
+//	printf("NSH calc_te Bracketed, t_e set to %f\n",xplasma->t_e);
+//    }
+//  else if (fabs (z1) < fabs (z2))
+//    {
+//      xplasma->t_e = tmin;
+//	printf("NSH calc_te t_e set to tmin (%f) coz %e<%e\n",xplasma->t_e,fabs (z1) , //fabs (z2));
+//    }
+//  else
+//    {
+//   xplasma->t_e = tmax;
+//	printf("NSH calc_te t_e set to tmax (%f)\n",xplasma->t_e);
+//	}
+  /* With the new temperature in place for the cell, get the correct value of heat_tot.
+     SS June  04 */
+
+//  xplasma->heat_tot -= xplasma->heat_lines_macro;
+//  xplasma->heat_lines -= xplasma->heat_lines_macro;
+//  xplasma->heat_lines_macro = macro_bb_heating (xplasma, xplasma->t_e);
+//  xplasma->heat_tot += xplasma->heat_lines_macro;
+//  xplasma->heat_lines += xplasma->heat_lines_macro;
+
+//  xplasma->heat_tot -= xplasma->heat_photo_macro;
+//  xplasma->heat_photo -= xplasma->heat_photo_macro;
+//  xplasma->heat_photo_macro = macro_bf_heating (xplasma, xplasma->t_e);
+//  xplasma->heat_tot += xplasma->heat_photo_macro;
+//  xplasma->heat_photo += xplasma->heat_photo_macro;
+
+
+
+//  return (xplasma->t_e);
+
+//
+
+
 
 
 

@@ -88,7 +88,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   int iphot_start;
 
   if (freq_sampling == 0)
-    {				/* Original approach, uniform sampling of entire wavelenght interval, 
+    {				/* Original approach, uniform sampling of entire wavelength interval, 
 				   used for detailed spectrum calculaation */
       if (f1 != f1_old || f2 != f2_old || iwind != iwind_old)
 	{			// The reinitialization is required
@@ -1055,7 +1055,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
 
       if ((nring < 0) || (nring > NRINGS - 2))
 	{
-	  Error ("photon_gen: photon lauch out of bounds. nring = %d\n",
+	  Error ("photon_gen: photon launch out of bounds. nring = %d\n",
 		 nring);
 	  exit (0);
 	}
@@ -1147,8 +1147,13 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
          to moving frame */
       vdisk (p[i].x, v);
       p[i].freq /= (1. - dot (v, p[i].lmn) / C);
-
-
+  /*    if (p[i].freq < freqmin || freqmax < p[i].freq)
+	{
+	  Error_silent
+	    ("photo_gen_disk (after dopler) : phot no. %d freq %g out of range %g %g\n",
+	     i, p[i].freq, freqmin, freqmax);
+	}
+*/
     }
   return (0);
 }

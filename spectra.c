@@ -322,9 +322,10 @@ spectrum_create (p, f1, f2, nangle, select_extract)
      int select_extract;
 
 {
-  int nphot, i, j, k, n;
+  int nphot, i, j, k, k1, n;
   int nspec, spectype;
   double freqmin, freqmax, dfreq;
+  double lfreqmin, lfreqmax, ldfreq;
   double x1;
   int wind_n_to_ij ();
   int mscat, mtopbot;
@@ -334,9 +335,18 @@ spectrum_create (p, f1, f2, nangle, select_extract)
   dfreq = (freqmax - freqmin) / NWAVE;
   nspec = nangle + MSPEC;
 
+/* Lines to set up a logarithmic spectrum */
+
+	lfreqmin=log10(freqmin);
+	lfreqmax=log10(freqmax);
+	ldfreq=(lfreqmax-lfreqmin) / NWAVE;	
+
+
+
+
+
   for (nphot = 0; nphot < NPHOT; nphot++)
     {
-
       if ((j = p[nphot].nscat) < 0 || j > MAXSCAT)
 	nscat[MAXSCAT]++;
       else
@@ -346,7 +356,18 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	nres[MAXSCAT]++;
       else
 	nres[j]++;
+/* lines to work out where we are in a logarithmic spectrum */
+	k1 = (log10(p[nphot].freq) -log10(freqmin)) / ldfreq;
+	if (k1<0) 
+		{
+		k1=0; 
+		}
+	if (k1>NWAVE) 
+		{
+		k1=NWAVE; 
+		}
 
+/* lines to work out where we are in a normal spectrum */
       k = (p[nphot].freq - freqmin) / dfreq;
       if (k < 0)
 	{
@@ -377,6 +398,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
       if ((i = p[nphot].istat) == P_ESCAPE)
 	{
 	  s[0].f[k] += p[nphot].w;	/* emitted spectrum */
+	  s[0].lf[k1] += p[nphot].w;	/* logarithmic emitted spectrum */
 	  s[0].nphot[i]++;
 	  spectype = p[nphot].origin;
 	  if (spectype >= 10)
@@ -384,16 +406,19 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	  if (spectype == PTYPE_STAR || spectype == PTYPE_BL || spectype == PTYPE_AGN)	// Then it came from the bl or the star
 	    {
 	      s[1].f[k] += p[nphot].w;	/* emitted star (+bl) spectrum */
+	      s[1].lf[k1] += p[nphot].w;	/* logarithmic emitted star (+bl) spectrum */
 	      s[1].nphot[i]++;
 	    }
 	  else if (spectype == PTYPE_DISK)	// Then it was a disk photon 
 	    {
 	      s[2].f[k] += p[nphot].w;	/* transmitted disk spectrum */
+	      s[2].lf[k1] += p[nphot].w;	/* logarithmic transmitted disk spectrum */
 	      s[2].nphot[i]++;
 	    }
 	  else if (spectype == PTYPE_WIND)
 	    {
 	      s[3].f[k] += p[nphot].w;	/* wind spectrum */
+	      s[3].lf[k1] += p[nphot].w;	/* logarithmic wind spectrum */
 	      s[3].nphot[i]++;
 	    }
 	  else
@@ -421,6 +446,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 		    {
 		      if (s[n].mmin < x1 && x1 < s[n].mmax)
 			s[n].f[k] += p[nphot].w;
+			s[n].lf[k1] += p[nphot].w;   /* logarithmic spectrum */
 		    }
 
 		}
@@ -429,12 +455,14 @@ spectrum_create (p, f1, f2, nangle, select_extract)
       else if (i == P_HIT_STAR || i == P_HIT_DISK)
 	{
 	  s[4].f[k] += p[nphot].w;	/*absorbed spectrum */
+	  s[4].lf[k1] += p[nphot].w;	/*logarithmic absorbed spectrum */
 	  s[4].nphot[i]++;
 	}
 
       if (j > 0)
 	{
 	  s[5].f[k] += p[nphot].w;	/* j is the number of scatters so this constructs */
+	  s[5].lf[k1] += p[nphot].w;	/* logarithmic j is the number of scatters so this constructs */
 	  if (i < 0 || i > NSTAT - 1)
 	    s[5].nphot[NSTAT - 1]++;
 	  else
@@ -508,7 +536,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 
  Synopsis:
    
-	spectrum_summary(filename,mode,nspecmin,nspecmax,select_spectype,renorm)  
+	spectrum_summary(filename,mode,nspecmin,nspecmax,select_spectype,renorm,loglin)  
 		writes out the spectrum to a file 
 
 Arguments:		
@@ -524,6 +552,7 @@ Arguments:
 				was added to allow one to print out the spectrum at the
 				end of each cycle, rather than the end of the entire
 				calculation.
+	char loglin[]		Are we outputting a log or a linear spectrum
 				
 
 Returns:
@@ -551,14 +580,16 @@ History:
 	02apr	ksl	Added renorm option so that the spectrum will have the
 			same overall "flux" when each incremental spectrum is printed
 			out.
+	10nov   nsh	Added another switch if we are outputting a log or a lin spectrum
 
 **************************************************************/
 
 
 
 int
-spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm)
+spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm, loglin)
      char filename[], mode[];
+     int loglin;          // switch to tell the code if we are outputting a log or a lin
      int nspecmin, nspecmax;
      int select_spectype;
      double renorm;		// parameter used to rescale spectrum as it is building up 
@@ -567,7 +598,8 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm)
   FILE *fopen (), *fptr;
   int i, n;
   char string[LINELENGTH];
-  double freq, freqmin, dfreq;
+  double freq, freqmin, dfreq, freq1;
+  double lfreqmin,lfreqmax,ldfreq;
   double x, dd;
 
 
@@ -616,32 +648,67 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm)
      as a result of the fact that the bb function generate some IR photons */
   dd = 4. * PI * (100. * PC) * (100. * PC);
 
-  freqmin = s[nspecmin].freqmin;
-  dfreq = (s[nspecmin].freqmax - freqmin) / NWAVE;
-  for (i = 1; i < NWAVE - 1; i++)
-    {
-      freq = freqmin + i * dfreq;
-      fprintf (fptr, "%-8e %.3f ", freq, C * 1e8 / freq);
-      for (n = nspecmin; n <= nspecmax; n++)
+  if (loglin==0)
 	{
-	  x = s[n].f[i] * s[n].renorm;
-	  if (select_spectype == 1)
-	    {			/* flambda */
-	      x *= (freq * freq * 1e-8) / (dfreq * dd * C);
-	    }
-	  else if (select_spectype == 2)
-	    {			/*fnu */
-	      x /= (dfreq * dd);
-	    }
-	  fprintf (fptr, " %8.3g", x * renorm);
+  	freqmin = s[nspecmin].freqmin;
+  	dfreq = (s[nspecmin].freqmax - freqmin) / NWAVE;
+  	for (i = 1; i < NWAVE - 1; i++)
+    		{
+      		freq = freqmin + i * dfreq;
+      		fprintf (fptr, "%-8e %.3f ", freq, C * 1e8 / freq);
+      		for (n = nspecmin; n <= nspecmax; n++)
+			{
+	  		x = s[n].f[i] * s[n].renorm;
+	  		if (select_spectype == 1)
+	    			{			/* flambda */
+	      			x *= (freq * freq * 1e-8) / (dfreq * dd * C);
+	    			}
+	  		else if (select_spectype == 2)
+	    			{			/*fnu */
+	      			x /= (dfreq * dd);
+	    			}
+	  		fprintf (fptr, " %8.3g", x * renorm);
+			}
+
+
+      		fprintf (fptr, "\n");
+    		}
 	}
+   else if (loglin==1)
+	{
+	lfreqmin=log10(s[nspecmin].freqmin);
+	freq1=lfreqmin;
+	lfreqmax=log10(s[nspecmin].freqmax);
+	ldfreq=(lfreqmax-lfreqmin)/NWAVE;
+		
+	printf("lfreqmin=%e lfreqmax=%e ldfreq=%e\n",lfreqmin,lfreqmax,ldfreq);
+	for (i = 1; i < NWAVE - 1; i++)
+    		{
+      		freq = pow(10.,(lfreqmin + i * ldfreq));
+		dfreq=freq-freq1;
+      		fprintf (fptr, "%-8e %.3f ", freq, C * 1e8 / freq);
+      		for (n = nspecmin; n <= nspecmax; n++)
+			{
+	  		x = s[n].f[i] * s[n].renorm;
+	  		if (select_spectype == 1)
+	    			{			/* flambda */
+	      			x *= (freq * freq * 1e-8) / (dfreq * dd * C);
+	    			}
+	  		else if (select_spectype == 2)
+	    			{			/*fnu */
+	      			x /= (dfreq * dd);
+	    			}
+	  		fprintf (fptr, " %8.3g", x * renorm);   /* this really shouldn't get called if we are outputting log data */
+			}
 
 
-      fprintf (fptr, "\n");
-    }
-
+      		fprintf (fptr, "\n");
+		freq1=freq;
+    		}
+	}
   fclose (fptr);
 
   return (0);
 
 }
+

@@ -131,9 +131,11 @@ radiation (p, ds)
 
   freq = p->freq;
   kappa_tot = frac_ff = kappa_ff (xplasma, freq);	/* Add ff opacity */
+
+
   frac_tot = frac_z = 0;	/* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
 				   indicate this is all disagnostic and might be removed */
-
+//	printf ("In radiation we have ds=%e, W=%e, nu=%e\n",ds,p->w,p->freq);
 
   if (freq > phot_freq_min)
 
@@ -147,11 +149,9 @@ radiation (p, ds)
 	      frac_ion[nion] = 0;
 	    }
 	}
-
 /* Next section is for photoionization with Topbase.  There may be more
 than one x-section associated with an ion, and so one has to keep track
 of the energy that goes into heating electrons carefully.  */
-
 /* Next steps are a way to avoid the loop over photoionization x sections when it should not matter */
       if (DENSITY_PHOT_MIN > 0)	// 57h -- ksl -- 060715
 	{			// Initialize during ionization cycles only
@@ -162,6 +162,7 @@ of the energy that goes into heating electrons carefully.  */
 	    {
 	      x_top_ptr = phot_top_ptr[n];
 	      ft = x_top_ptr->freq[0];
+//		printf("ft=%e freq=%e \n",ft,freq);
 	      if (ft > freq)
 		break;		// The remaining transitions will have higher thresholds
 	      if (freq < x_top_ptr->freq[x_top_ptr->np - 1])
@@ -170,12 +171,11 @@ of the energy that goes into heating electrons carefully.  */
 
 		  nconf = x_top_ptr->nlev;
 		  density = den_config (xplasma, nconf);
-
 		  if (density > DENSITY_PHOT_MIN)
 		    {
 		      kappa_tot += x =
 			sigma_phot_topbase (x_top_ptr, freq) * density;
-
+//		printf("Freq=%e, lower level=%i, ion=%i sigma=%e\n",freq,nconf,phot_top_ptr[n]->z,sigma_phot_topbase (x_top_ptr, freq));
 /* I believe most of next steps are totally diagnsitic; it is possible if 
 statement could be deleted entirely 060802 -- ksl */
 		      if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
@@ -189,10 +189,14 @@ statement could be deleted entirely 060802 -- ksl */
 			  frac_ion[nion] += z;
 			  kappa_ion[nion] += x;
 			}
-		    }
-		}
 
+		    }
+
+
+		}
+					
 	    }
+
 // Next section is for photoionization of those ions using VFKY values
 
 	  for (n = 0; n < nxphot; n++)
@@ -261,6 +265,25 @@ statement could be deleted entirely 060802 -- ksl */
 /* Update the radiation parameters used ultimately in calculating t_r */
 
   xplasma->ntot++;
+
+
+/* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, and hence get an idea of how 'agny' or 'disky' the cell is. */
+
+
+
+  if (p->origin == 0)
+	xplasma->ntot_star++;
+  else if (p->origin == 1)
+	xplasma->ntot_bl++;
+  else if (p->origin == 2)
+	xplasma->ntot_disk++;
+  else if (p->origin == 3)
+	xplasma->ntot_wind++;
+  else if (p->origin == 4)
+	xplasma->ntot_agn++;
+
+
+
 /*photon weight times distance in the shell is proportional to the mean intensity */
   xplasma->j += w_ave * ds;
 
@@ -312,7 +335,6 @@ statement could be deleted entirely 060802 -- ksl */
     }
 
   /* Now for contribution to inner shell ionization estimators (SS, Dec 08) */
-  
   for (n = 0; n < nauger; n++)
     {
       ft = augerion[n].freq_t;
@@ -495,9 +517,10 @@ sigma_phot_topbase (x_ptr, freq)
   int linterp ();
   int nlast;
 
+  
+
   if (freq < x_ptr->freq[0])
     return (0.0);		// Since this was below threshold
-
   if (freq == x_ptr->f)
     return (x_ptr->sigma);	// Avoid recalculating xsection
 
