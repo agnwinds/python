@@ -6,13 +6,11 @@
 
 #include "atomic.h"
 #include "python.h"
+#include "balance_templates.h"
 
 struct photoionization *sim_xver;	//Verner & Ferland description of a photoionization x-section
 struct topbase_phot *sim_xtop;	//Topbase description of a photoionization x-section
 double sim_te;                  //This is a storage variable for the current electron temperature so it is available for qromb calls
-
-// These are variables need by tb_pow
-PlasmaPtr xxxplasma;
 double weight;                  //This is a storage variable for the current PL geometric weight so it can be used in qromb
 double xsim_alpha;               //This is a storage variable so the value of alpha (PL spectral index) can be used in qromb
 double xsim_w;                  //Storage variable for the sim W factor (either computed from photons going thruogh a cell, or before photon generation it is the power law constant x radiative weight / 4pi */
@@ -40,31 +38,13 @@ sim_driver (xplasma)
   double newden[NIONS];
   double t_r, nh;
   double t_e, www;
-  double f1,f2;
-
-  xxxplasma=xplasma; 
 
   t_r = xplasma->t_r;
   t_e = xplasma->t_e;
   www = weight = xplasma->w;
 
-	if (xplasma->nxtot[nx4power] == 0)
-		{
-		Error("ion_abundances: no photons in band for power law estimators. Using total band");
-		f1=xband.f1[0]; /*NSH 1108 Use the lower bound of the lowest band for sumnumin */
-		f2=xband.f2[xband.nbands-1]; /*NSH 1108 and the upper bound of the upperband for max */
-		}
-	else
-		{
-		f1=xfreq[nx4power];      /*1108 NSH nx4power is defined in python.c, and says which band of radiation estimators we are interested in using the for power law ionisation calculation */
-		f2=xfreq[nx4power+1];
-		}
-
-
-
-
-//OLD  xsim_alpha = xplasma->sim_alpha;  //Set the shared variable to the alpha for the cell.
-//OLD  xsim_w = xplasma->sim_w;  //Set the shared variable to the W for the cell.
+  xsim_alpha = xplasma->sim_alpha;  //Set the shared variable to the alpha for the cell.
+  xsim_w = xplasma->sim_w;  //Set the shared variable to the W for the cell.
 	printf ("We are in sim, t_e=%f, t_r=%f\n",t_e,t_r);
 
 
@@ -89,8 +69,8 @@ sim_driver (xplasma)
     {
       for (nelem = 0; nelem < nelements; nelem++)
 	{
-	 sim_pl (nh, t_r, t_e, www, nelem, xplasma->ne,
-			 xplasma->density, xne, newden, f1, f2);
+	  sim_pl (nh, t_r, t_e, www, nelem, xplasma->ne,
+			 xplasma->density, xne, newden);
 
 	  /* Re solve for the macro atom populations with the current guess for ne */
 	  if (geo.macro_ioniz_mode == 1)
@@ -153,10 +133,10 @@ sim_driver (xplasma)
 
 
 int
-sim_pl (nh, t_r, t_e, www, nelem, ne, density, xne, newden,f1,f2)
+sim_pl (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
      double nh, t_r, t_e, www;
      int nelem;
-     double ne, density[], xne, newden[],f1,f2;
+     double ne, density[], xne, newden[];
 {
   double fudge, dummy, interpfrac;
   double fudge2, q;
@@ -164,10 +144,11 @@ sim_pl (nh, t_r, t_e, www, nelem, ne, density, xne, newden,f1,f2)
   int ilow, ihi;
   int first, last, nion;
   double numerator, denominator;
-  double max_ratio,current_ratio;
+  double f1,f2,max_ratio,current_ratio;
     FILE *fopen(),*fudgefile,*numfile,*denomfile,*ionfile;
 
-
+	f1=1.23e15;
+	f2=1.21e19;
 
 	weight=www;
 
@@ -440,7 +421,7 @@ if we are going to integrate */
 //	printf ("Alert!!!!!!!!  test=%e, current ratio=%e, max_ratio=%e\n",((sim_num*current_ratio)/max_ratio),current_ratio,max_ratio);
 	if (sim_denom < ((sim_num*current_ratio)/max_ratio))
 		{ 
-		Log_silent ("Sim denom of %e is too low, resetting to %e\n",sim_denom,((sim_num*current_ratio)/max_ratio));
+		printf ("Sim denom of %e is too low, resetting to %e\n",sim_denom,((sim_num*current_ratio)/max_ratio));
 		sim_denom = ((sim_num*current_ratio)/max_ratio);
 //		sim_denom = 1e100;
 		}
@@ -502,26 +483,6 @@ tb_pow(freq)
 	double freq;
 {
 	double answer;
-	int i;
-
-	/* Find the correct frequence interval */
-	if (freq<xfreq[0]){
-		return 0.0;
-	}
-	if (freq>xfreq[nxfreq-1]){
-		return 0.0;
-	}
-
-	i=0;
-	while (xfreq[i]<freq){ i++;}
-	i--;
-
-
-	/* Assign the variables */
-	xsim_alpha=xxxplasma->sim_alpha[i];
-	xsim_w=xxxplasma->sim_w[i];
-
-	
 //	printf("we have alpha=%f and w=%e\n",xsim_alpha,xsim_w);
 //	answer=geo.const_agn*(pow(freq,(xsim_alpha-1.0))); 
 //	answer*=weight;//divide by the weight, should normally just be the surface area of a sphere.
@@ -541,31 +502,9 @@ verner_pow(freq)
 	double freq;
 {
 	double answer;		
-	int i;
-
-
-	/* Find the correct frequence interval */
-	if (freq<xfreq[0]){
-		return 0.0;
-	}
-	if (freq>xfreq[nxfreq-1]){
-		return 0.0;
-	}
-
-	i=0;
-	while (xfreq[i]<freq){ i++;}
-	i--;
-
-
-
-	/* Assign the variables */
-	xsim_alpha=xxxplasma->sim_alpha[i];
-	xsim_w=xxxplasma->sim_w[i];
-
 //	answer=geo.const_agn*(pow(freq,(xsim_alpha-1.0)));
 //	answer*=weight;   //divide by the weight, should normally just be the surface area of a sphere.
 //	answer/=(4.0*PI); //divide by 4pi to get a mean intensity ber solid angle.
-
 	answer=xsim_w*(pow(freq,(xsim_alpha-1.0)));
 	answer*=sigma_phot(sim_xver,freq); // and finally multiply by the cross section.
 	return (answer);

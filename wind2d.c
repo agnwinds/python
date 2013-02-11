@@ -71,8 +71,8 @@ History:
 int
 define_wind ()
 {
-  int nn,first,last,m;
   int i, j, n;
+  int nn;
   double nh, rrstar;
   double x[3];
   double mdotbase, mdotwind, rr;
@@ -287,7 +287,11 @@ be optional which variables beyond here are moved to structures othere than Wind
       stuff_v (w[nwind].xcen, x);
       plasmamain[n].rho = model_rho (x);
       plasmamain[n].vol = w[nwind].vol;	// Copy volumes
-      plasmamain[n].sim_alpha = geo.alpha_agn; //As an initial guess we assume the whole wind is optically thin and so the spectral index for a PL illumination will be the same everywhere.
+      for (nn=0;nn<NXBANDS;nn++){
+      	plasmamain[n].sim_alpha[nn] = geo.alpha_agn; //As an initial guess we assume the whole wind is optically thin and so the spectral index for a PL illumination will be the same everywhere.
+      plasmamain[n].sim_w[nn] = geo.const_agn / (4.0*PI*(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]));  // constant / area of a sphere
+      plasmamain[n].sim_w[nn] /= 4.*PI;   // take account of solid angle
+      }
 
       nh = plasmamain[n].rho * rho2nh;
       plasmamain[n].t_r = geo.twind;
@@ -300,8 +304,6 @@ be optional which variables beyond here are moved to structures othere than Wind
 
 /* Calculate an initial guess for the weight of the PL spectrum (constant / area of a sphere / 4pi) */
 
-      plasmamain[n].sim_w = geo.const_agn / (4.0*PI*(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]));  // constant / area of a sphere
-      plasmamain[n].sim_w /= 4.*PI;   // take account of solid angle
 
       rrstar =
 	1. - (geo.rstar * geo.rstar) / (x[0] * x[0] + x[1] * x[1] +

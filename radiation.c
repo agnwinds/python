@@ -87,6 +87,9 @@ History:
 			phase that are not used, allowing control over whether fb opacities
 			are calculated at all, and using frequency ordered pointer arrays
 			to shorten the loops.
+	11aug	nsh	70 changes made to radiation to allow compton cooling to be computed
+	11aug	nsh	70 Changed printout of spectra in selected regions so it is always
+			the midpoint of the wind
 
 **************************************************************/
 
@@ -113,17 +116,18 @@ radiation (p, ds)
 
   double freq;
   double kappa_tot, frac_tot, frac_ff;
-  double frac_z;
+  double frac_z, frac_comp;  /* nsh 1108 added frac_comp - the heating in the cell due to compton heating */
   double kappa_ion[NIONS];
   double frac_ion[NIONS];
   double density, ft, tau, tau2;
   double energy_abs;
-  int n, nion;
+  int n, nion, i; /* nsh 1108 i added as counter for banded j and ave_freq */
   double q, x, z;
   double w_ave, w_in, w_out;
   double den_config ();
   int nconf;
   double weight_of_packet, y;
+  int ii,jj;  
 
   one = &wmain[p->grid];	/* So one is the grid cell of interest */
   xplasma = &plasmamain[one->nplasma];
@@ -131,7 +135,7 @@ radiation (p, ds)
 
   freq = p->freq;
   kappa_tot = frac_ff = kappa_ff (xplasma, freq);	/* Add ff opacity */
-
+  kappa_tot += frac_comp = kappa_comp (xplasma, freq);    /* 70 NSH 1108 calculate compton opacity, store it in kappa_comp and also add it to kappa_tot, the total opacity for the photon path */
 
   frac_tot = frac_z = 0;	/* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
 				   indicate this is all disagnostic and might be removed */
@@ -152,6 +156,7 @@ radiation (p, ds)
 /* Next section is for photoionization with Topbase.  There may be more
 than one x-section associated with an ion, and so one has to keep track
 of the energy that goes into heating electrons carefully.  */
+
 /* Next steps are a way to avoid the loop over photoionization x sections when it should not matter */
       if (DENSITY_PHOT_MIN > 0)	// 57h -- ksl -- 060715
 	{			// Initialize during ionization cycles only
@@ -291,6 +296,32 @@ statement could be deleted entirely 060802 -- ksl */
 
   xplasma->ave_freq += p->freq * w_ave * ds;
 
+
+
+
+//wind_n_to_if(one->nwind,&ii,&jj);  ??? Not complete. Intended to allow more flexible tracking of photon spectra  ksl 1108
+//if ii==ndim/2:  // 110804 - ksl - Adapt to print out a column in the middle no matter what the dimensions
+	if (one->nwind > 59 && one->nwind < 90)
+//  1.75e16 <     (2*sqrt(one->xcen[0]*one->xcen[0]+one->xcen[1]*one->xcen[1]) - sqrt(one->x[0]*one->x[0]+one->x[1]*one->x[1]))) 
+{
+	Log_silent ("TTTTTT %3d %3d %3d %8.3e %8.3e %8.3e cell%3d\n",geo.wcycle,ii,jj,p->freq,w_ave,ds,one->nplasma);
+}
+
+
+/* 1108 NSH  THe next loop updates the banded versions of j and ave_freq */
+
+  for (i=0 ; i<nxfreq ; i++) 
+	{
+	if (xfreq[i] < p->freq && p->freq <= xfreq[i+1])
+		{
+		xplasma->xave_freq[i] += p->freq * w_ave * ds; /*1108 NSH/KSL frequency weighted by weight and distance */
+		xplasma->xj[i] += w_ave * ds;  /*1108 NSH/KSL photon weight times distance travelled */
+		xplasma->nxtot[i] ++; /*1108 NSH increment the frequency banded photon counter */
+		}
+	}
+
+
+
   if (sane_check (xplasma->j) || sane_check (xplasma->ave_freq))
     {
       Error ("radiation: Problem with j %g or ave_freq %g\n", xplasma->j,
@@ -305,6 +336,8 @@ statement could be deleted entirely 060802 -- ksl */
       z = (energy_abs) / kappa_tot;
       xplasma->heat_ff += z * frac_ff;
       xplasma->heat_tot += z * frac_ff;
+      xplasma->heat_comp += z * frac_comp; /* NSH 1108 Calculate the heating in the cell due to compton heating */
+      xplasma->heat_tot += z * frac_comp;  /* NSH 1108 Add the compton heating to the total heating for the cell */
       if (freq > phot_freq_min)
 	//
 //      if (freq > (CR / 100.)) //modified CR to CR/100 - SS June 04

@@ -71,6 +71,8 @@ History:
 			over the entire grid and ultimately eveything here is likely to be
 			contained in the plasma structure.  Therefore here we want to use
 			plasmamain
+	11aug	nsh	70: modifications made to wind_update  and wind_rad_init to incorporate 
+			compton heating and cooling.
 
 
 **************************************************************/
@@ -84,7 +86,7 @@ WindPtr (w);
 {
   int n, i, j;
   double trad, nh;
-  double wtest, xsum, asum, psum, fsum, lsum;
+  double wtest, xsum, asum, psum, fsum, lsum, csum;  //1108 NSH csum added to sum compton heating
   double volume;
   char string[LINELEN];
   double t_r_old, t_e_old, dt_r, dt_e;
@@ -147,6 +149,13 @@ WindPtr (w);
 	    PI * plasmamain[n].j / (STEFAN_BOLTZMANN * trad * trad * trad *
 				    trad);
 
+	if (nwind > 59 && nwind < 90)
+
+{
+	Log_silent ("WTTTTT %i %e %e %e %e %e %e cell%i\n",geo.wcycle,plasmamain[n].ave_freq,plasmamain[n].j,plasmamain[n].w,trad,w[nwind].vol,w[nwind].x[0],n);
+}
+
+
 	  if (plasmamain[n].w > 1e10)
 	    {
 	      Error
@@ -172,6 +181,26 @@ WindPtr (w);
 	    plasmamain[n].t_e = TMIN;
 	  plasmamain[n].w = 0;
 	}
+
+
+/* 1108 NSH/KSL  This loop is to calculate the frequency banded j and ave_freq variables */
+     for (i=0 ; i<nxfreq ; i++) /*loop over number of bands */
+	{
+	if (plasmamain[n].nxtot[i] > 0)   /*Check we actually have some photons in the cell in this band */
+		{
+		plasmamain[n].xave_freq[i] /= plasmamain[n].xj[i];   /*Normalise the average frequency */
+		plasmamain[n].xj[i] /= (4. * PI * volume);     /*Convert to radiation density */
+		}
+	else
+		{
+		plasmamain[n].xj[i]=0;   /*If no photons, set both radiation estimators to zero */
+		plasmamain[n].xave_freq[i]=0;
+		}
+	}
+
+/* 1108 NSH End of loop */
+	
+
 
       nh = plasmamain[n].rho * rho2nh;
 
@@ -249,7 +278,7 @@ WindPtr (w);
 
   /* Check the balance between the absorbed and the emitted flux */
 
-  xsum = psum = lsum = fsum = 0;
+  xsum = psum = lsum = fsum = csum = 0;  //1108 NSH zero the new csum counter for compton heating
 
   for (nplasma = 0; nplasma < NPLASMA; nplasma++)
     {
@@ -271,19 +300,24 @@ WindPtr (w);
       if (sane_check (plasmamain[nplasma].heat_lines_macro))
 	Error ("wind_update: w\[%d}).heat_lines_macro is %e\n", nplasma,
 	       plasmamain[nplasma].heat_lines_macro);
+ /* 1108 NSH extra Sane check for compton heating */
+      if (sane_check (plasmamain[nplasma].heat_comp))
+	Error ("wind_update: w\[%d).heat_comp is %e\n", nplasma,
+	       plasmamain[nplasma].heat_comp);
       xsum += plasmamain[nplasma].heat_tot;
       psum += plasmamain[nplasma].heat_photo;
       fsum += plasmamain[nplasma].heat_ff;
       lsum += plasmamain[nplasma].heat_lines;
+      csum += plasmamain[nplasma].heat_comp; //1108 NSH Increment the compton heating counter
     }
 
   asum = wind_luminosity (0.0, VERY_BIG);
+   Log
+    ("!!wind_update:  Absorbed flux   %8.2e  (photo %8.2e ff %8.2e compton %8.2e lines %8.2e)\n",
+     xsum, psum, fsum, csum, lsum); //1108 NSH Added commands to report compton heating
   Log
-    ("!!wind_update:  Absorbed flux   %8.2e  (photo %8.2e ff %8.2e lines %8.2e)\n",
-     xsum, psum, fsum, lsum);
-  Log
-    ("!!wind_update: Wind luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n",
-     asum, geo.lum_fb, geo.lum_ff, geo.lum_lines);
+    ("!!wind_update: Wind luminosity  %8.2e (recomb %8.2e ff %8.2e compton %8.2e lines %8.2e) after update\n",
+     asum, geo.lum_fb, geo.lum_ff, geo.lum_comp, geo.lum_lines); //1108 NSH added commands to report compton cooling
 
   /* Print out some diagnositics of the changes in the wind update */
   t_r_ave_old /= iave;
@@ -411,8 +445,19 @@ wind_rad_init ()
 	plasmamain[n].lum_ff = 0.0;
       plasmamain[n].lum_fb = plasmamain[n].lum_z = 0.0;
       plasmamain[n].nrad = plasmamain[n].nioniz = 0;
+      plasmamain[n].lum_comp = 0.0; //1108 NSH Zero the compton luminosity for the cell
+      plasmamain[n].heat_comp = 0.0; //1108 NSH Zero the compton heating for the cell
       if (nlevels_macro > 1)
 	macromain[n].kpkt_rates_known = -1;
+
+/* 1108 NSH Loop to zero the frequency banded radiation estimators */
+      for (i=0 ; i<nxfreq ; i++)
+	{
+      	plasmamain[n].xj[i] = plasmamain[n].xave_freq[i] = plasmamain[n].nxtot[i] = 0;
+	}
+
+
+
 
       for (i = 0; i < nions; i++)
 	{

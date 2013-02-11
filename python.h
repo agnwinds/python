@@ -274,6 +274,7 @@ struct geometry
 							   are actually not used in a fundamental way in the program */
   double lum_agn;   /*The total luminosity of the AGN or point source at the center*/
   double lum_ff, lum_fb, lum_lines;	/* The luminosity of the wind as a result of ff, fb, and line radiation */
+  double lum_comp; /*1108 NSH The luminosity of the wind as a result of compton cooling */
   double f_tot, f_star, f_disk, f_bl, f_agn, f_wind;	/* The integrated specific L between a freq min and max which are
 						   used to establish the fraction of photons of various types */
   
@@ -440,6 +441,12 @@ plasma in regions of the geometry that are actually included n the wind
 			interact in a cell.
 */
 
+/* 70 - 1108 - Define wavelengths in which to record gross spectrum in a cell, see also xave_freq and xj in plasma structure */
+#define  NXBANDS 10
+int nxfreq;    // the number of bands actually used
+double xfreq[NXBANDS+1]; 
+int nx4power;  //The band to use for the power law ionization calculations
+
 typedef struct plasma {
   int nwind;                   /*A cross reference to the corresponding cell in the  wind structure*/
   int nplasma;                 /*A self reference to this  in the plasma structure */
@@ -479,6 +486,7 @@ typedef struct plasma {
   double dt_e, dt_e_old;	/*How much t_e changed in the previous iteration */
   double heat_tot, heat_tot_old;	/* heating from all sources */
   double heat_lines, heat_ff;
+  double heat_comp;   /* 1108 NSH The compton heating for the cell */
   double heat_lines_macro, heat_photo_macro; /* bb and bf heating due to macro atoms. Subset of heat_lines 
 						and heat_photo. SS June 04. */
   double heat_photo, heat_z;	/*photoionization heating total and of metals */
@@ -515,7 +523,10 @@ typedef struct plasma {
   double j, ave_freq, lum;	/*Respectively mean intensity, 
 				intensity_averaged frequency, 
 				   luminosity and       absorbed luminosity of shell */
+  double xj[NXBANDS], xave_freq[NXBANDS];   /* 1108 NSH frequency limited versions of j and ave_freq */
+  int nxtot[NXBANDS];  /* 1108 NSH the total number of photon passages in frequency bands */
   double lum_lines, lum_ff, lum_adiabatic;
+  double lum_comp ; /* 1108 NSH The compton luminosity of the cell */
   double lum_fb, lum_z;		/*fb luminosity & fb of metals metals */
   double lum_rad, lum_rad_old;	/* The specfic radiative luminosity in frequencies defined by freqmin
 				   and freqmax.  This will depend on the last call to total_emission */
@@ -528,9 +539,10 @@ typedef struct plasma {
   int converge_whole, converging;	/* converge_whole=0 if subroutine convergence feels point is converged, converging is an
 				   indicator of whether the program thought the cell is on the way to convergence 0 implies converging */
   double gamma_inshl[NAUGER]; /*MC estimator that will record the inner shell ionization rate - very similar to macro atom-style estimators */
-  double sim_alpha; /*Computed spectral index for a power law spectrum representing this cell */
-  double sim_w; /*This is the computed weight of a PL spectrum in this cell - not the same as the dilution factor */
-  double sim_e1,sim_e2; /*Sim estimators used to compute alpha and w for a power law spectrum for the cell */
+  /* 1108 Increase sim estimators to cover all of the bands */
+  double sim_alpha[NXBANDS]; /*Computed spectral index for a power law spectrum representing this cell */
+  double sim_w[NXBANDS]; /*This is the computed weight of a PL spectrum in this cell - not the same as the dilution factor */
+//OLD  double sim_e1,sim_e2; /*Sim estimators used to compute alpha and w for a power law spectrum for the cell */
   double sim_ip; /*Ionisation parameter for the cell as defined in Sim etal 2010 */
   //int kpkt_rates_known;
   //COOLSTR kpkt_rates;

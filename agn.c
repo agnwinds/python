@@ -30,7 +30,6 @@
 #include <stdlib.h>
 #include "atomic.h"
 #include "python.h"
-#include "balance_templates.h"
 
 #include "log.h"
 

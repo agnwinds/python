@@ -21,6 +21,7 @@ History:
 	01oct	ksl	Recombination related routines removed to recomb.c while
 			topbase modifications made.
 	01nov	ksl	Implement pdf functionality for line luminosity spped up
+        11Aug   nsh     Changes to total_emission and wind_luminosity to allow compton heating to be computed
  
 **************************************************************/
 
@@ -56,6 +57,7 @@ History:
 			Note that the call for wind_luminostiy has changed
 			to remove the pointer call.  Ultimately rewrite
 			using plasma structure alone.
+	11aug	nsh	70 Modifications made to incorporate compton cooling
  
 **************************************************************/
 
@@ -63,13 +65,13 @@ double
 wind_luminosity (f1, f2)
      double f1, f2;		/* freqmin and freqmax */
 {
-  double lum, lum_lines, lum_fb, lum_ff;
+  double lum, lum_lines, lum_fb, lum_ff, lum_comp; //1108 NSH Added a new variable for compton cooling
   int n;
   double x;
   int nplasma;
 
 
-  lum = lum_lines = lum_fb = lum_ff = 0;
+  lum = lum_lines = lum_fb = lum_ff = lum_comp = 0; //1108 NSH Zero the new counter
   for (n = 0; n < NDIM2; n++)
     {
       if (wmain[n].vol > 0.0)
@@ -79,6 +81,7 @@ wind_luminosity (f1, f2)
 	  lum_lines += plasmamain[nplasma].lum_lines;
 	  lum_fb += plasmamain[nplasma].lum_fb;
 	  lum_ff += plasmamain[nplasma].lum_ff;
+	  lum_comp += plasmamain[nplasma].lum_comp;  //1108 NSH Increment the new counter by the compton luminosity for that cell.
 	  if (x < 0)
 	    mytrap ();
 	  if (recipes_error != 0)
@@ -94,6 +97,7 @@ wind_luminosity (f1, f2)
   geo.lum_lines = lum_lines;
   geo.lum_fb = lum_fb;
   geo.lum_ff = lum_ff;
+  geo.lum_comp = lum_comp; //1108 NSH The total compton luminosity of the wind is stored in the geo structure
   return (lum);
 }
 
@@ -132,6 +136,7 @@ History:
 			total emission but total cooling.
 	05may	ksl	57+ -- To use plasma structure for most things.  If vol
 			is added to plasma then one can change the call
+	11aug	nsh	70 changes made to allow compton heating to be calculated.
  
  
 **************************************************************/
@@ -157,7 +162,7 @@ total_emission (one, f1, f2)
   if (f2 < f1)
     {
       xplasma->lum_rad = xplasma->lum_lines = xplasma->lum_ff =
-	xplasma->lum_fb = 0;
+	xplasma->lum_fb = xplasma->lum_comp = 0;    //NSH 1108 Zero the new lum_comp variable
     }
   else
     {
@@ -191,7 +196,9 @@ total_emission (one, f1, f2)
 
 
 	}
-
+      /* NSH 1108 - This line calls the function total_comp which returns the compton luminosity for the cell
+	this is then added to lum_rad, the total luminosity of the cell */
+      xplasma->lum_rad += xplasma->lum_comp = total_comp (one, t_e);
     }
 
   return (xplasma->lum_rad);

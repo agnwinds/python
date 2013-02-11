@@ -58,7 +58,7 @@ ion_abundances (xplasma, mode)
 {
   int ireturn,nion,nelem;
   double zbrent(),sim_alpha_func();
-  double alphamin,alphamax,alphatemp,sim_w_temp;
+  double alphamin,alphamax,alphatemp,sim_w_temp,j;
 
 //	printf("NSH here we are in ion_abundances, I think we are running at mode %i\n",mode);
 
@@ -117,12 +117,37 @@ ion_abundances (xplasma, mode)
 	
 
 
-	sim_numin=1.24e15;
-	sim_numax=1.21e19;
-	sim_meanfreq=xplasma->ave_freq; 
+//old	sim_numin=1.24e15;
+//old	sim_numax=1.21e19;
 
-	alphamin=xplasma->sim_alpha-0.1;
-	alphamax=xplasma->sim_alpha+0.1;
+// Start of loop
+//
+
+	   for (nx4power=0;nx4power<nxfreq;nx4power++){
+
+	if (xplasma->nxtot[nx4power] == 0)
+		{
+		Error("ion_abundances: no photons in band for power law estimators. Using total band");
+		sim_numin=xband.f1[0]; /*NSH 1108 Use the lower bound of the lowest band for sumnumin */
+		sim_numax=xband.f2[xband.nbands-1]; /*NSH 1108 and the upper bound of the upperband for max */
+		sim_meanfreq=xplasma->ave_freq; 
+		// j=xplasma->j;
+		j=0; // If there are no photons then our guess is that there is no flux in this band
+		}
+	else
+		{
+		sim_numin=xfreq[nx4power];      /*1108 NSH nx4power is defined in python.c, and says which band of radiation estimators we are interested in using the for power law ionisation calculation */
+		sim_numax=xfreq[nx4power+1];
+		sim_meanfreq=xplasma->xave_freq[nx4power]; 
+		j=xplasma->xj[nx4power];
+		}
+
+	Log ("NSH We are about to calculate w and alpha, j=%10.2e, mean_freq=%10.2e, numin=%10.2e, numax=%10.2e\n",j,sim_meanfreq,sim_numin,sim_numax);
+
+
+	alphamin=xplasma->sim_alpha[nx4power]-0.1; /*1108 NSH ?? this could be a problem. At the moment, it relies on sim_alpha being defined at this point. */
+	alphamax=xplasma->sim_alpha[nx4power]+0.1; /*We should initialise it somewhere so that it *always* has a value, not just when the power law*/
+
 	while (sim_alpha_func(alphamin)*sim_alpha_func(alphamax)>0.0 )
 		{
 		alphamin=alphamin-1.0;
@@ -135,25 +160,27 @@ ion_abundances (xplasma, mode)
 	alphatemp=zbrent(sim_alpha_func,alphamin,alphamax,0.00001);
 
 /*This next line computes the sim weight using an external function. Note that xplasma->j already contains the volume of the cell and a factor of 4pi, so the volume sent to sim_w is set to 1 and j has a factor of 4PI reapplied to it. This means that the equation still works in balance. It may be better to just implement the factor here, rather than bother with an external call.... */
-	sim_w_temp=sim_w((xplasma->j)*4*PI,1,1,xplasma->sim_alpha,sim_numin,sim_numax);
+	sim_w_temp=sim_w(j*4*PI,1,1,alphatemp,sim_numin,sim_numax);
 
-	printf ("NSH We noew have calculated sim_w_temp=%e\n",sim_w_temp);
+	Log ("NSH We now have calculated sim_w_temp=%e\n",sim_w_temp);
         if (sane_check(sim_w_temp))
 		{
 		Error ("New sim parameters unreasonable, using existing parameters. Check number of photons in this cell");
 		}
         else 
 		{
-		xplasma->sim_alpha=alphatemp;
-		xplasma->sim_w=sim_w_temp;
+		xplasma->sim_alpha[nx4power]=alphatemp;
+		xplasma->sim_w[nx4power]=sim_w_temp;
 		}
 
+	Log_silent ("ITTTTT %i %e %e cell%i\n",geo.wcycle,xplasma->sim_alpha,xplasma->sim_w,xplasma->nplasma);
+	  }
+/* At this point we have put all of the fitted alphas and nomalisations into the sim_alpha and sim_w portions of the PlasmaPtr */
 
-
-
-	xplasma->sim_ip=xplasma->sim_w*(((pow (50000/HEV, xplasma->sim_alpha + 1.0)) - pow (100/HEV,xplasma->sim_alpha + 1.0)) /  (xplasma->sim_alpha + 1.0));
-	xplasma->sim_ip *= 16*PI*PI;
-	xplasma->sim_ip /= xplasma->rho * rho2nh;
+// ??? Commenting out ionization parameter for now 1108  - ksl
+//OLD 	xplasma->sim_ip=xplasma->sim_w*(((pow (50000/HEV, xplasma->sim_alpha + 1.0)) - pow (100/HEV,xplasma->sim_alpha + 1.0)) /  (xplasma->sim_alpha + 1.0));
+//OLD 	xplasma->sim_ip *= 16*PI*PI;
+//OLD 	xplasma->sim_ip /= xplasma->rho * rho2nh;
 
 
 
@@ -163,6 +190,13 @@ ion_abundances (xplasma, mode)
       xplasma->t_e_old = xplasma->t_e;
       xplasma->t_r_old = xplasma->t_r;
       xplasma->lum_rad_old = xplasma->lum_rad;
+
+
+  Log("NSH Here we about to call one_shot, cell number %i gain %e mode %i t_r %f t_e %f sim_w %e sim_alpha %e logIP %e\n",xplasma->nplasma,xplasma->gain,mode,xplasma->t_r,xplasma->t_e,xplasma->sim_w,xplasma->sim_alpha,log10(xplasma->sim_ip));
+   Log("NSH in this cell, we have %i AGN photons and %i disk photons\n",xplasma->ntot_agn,xplasma->ntot_disk);
+   Log("NSH in this cell, we have %i photons in our power law band\n",xplasma->nxtot[nx4power]);
+
+
 
        ireturn = one_shot (xplasma, mode);
 
@@ -378,8 +412,7 @@ one_shot (xplasma, mode)
 
   gain = xplasma->gain;
 
-  printf("NSH Here we are in one_shot, cell number %i gain %e mode %i t_r %f t_e %f sim_w %e sim_alpha %e logIP %e\n",xplasma->nplasma,gain,mode,xplasma->t_r,xplasma->t_e,xplasma->sim_w,xplasma->sim_alpha,log10(xplasma->sim_ip));
-   printf("NSH in this cell, we have %i AGN photons and %i disk photons\n",xplasma->ntot_agn,xplasma->ntot_disk);
+
   te_old = xplasma->t_e;
   te_new = calc_te (xplasma, 0.7 * te_old, 1.3 * te_old);
 
@@ -584,10 +617,9 @@ double
 	double alpha;
 	{
 	double answer;
-	answer=((alpha+1.)/(alpha+2.))*((pow(sim_numax,(alpha+2.))-pow(sim_numin,(alpha+2.)))/(pow(sim_numax,(alpha+1.))-pow(sim_numin,(alpha+1.)))) ;
-
+	answer=((alpha+1.)/(alpha+2.))*((pow(sim_numax,(alpha+2.))-pow(sim_numin,(alpha+2.)))/(pow(sim_numax,(alpha+1.))-pow(sim_numin,(alpha+1.)))) ; 
 	answer = answer - sim_meanfreq;
-//	printf("NSH alpha=%f,f1=%e,f2=%e,meanfreq=%e,ans=%e\n",alpha,sim_numin,sim_numax,sim_meanfreq,answer);
+//	printf("NSH alpha=%.3f,f1=%10.2e,f2=%10.2e,meanfreq=%10.2e,ans=%.3f\n",alpha,sim_numin,sim_numax,sim_meanfreq,answer);
 	return (answer);
 	}
 

@@ -162,7 +162,8 @@ History:
 			purpose is to define some arrays in the main routine.  Note that
 			MSPEC still has meaning as the number of spectra of various types
 			that are construced without going through types.
-	
+	1108	ksl/nsh Adding code to keep track of gross spectra in a cell though xbands,
+			xj and xave_freq.  Just set up the frequence limits here.	
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -455,6 +456,20 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   y_axis[0] = y_axis[2] = 0.0;
   z_axis[2] = 1.0;
   z_axis[1] = z_axis[0] = 0.0;
+
+/* Set up frequency bands in which to record the frequency */
+
+/* At present set up a single energy band for 2 - 10 keV */
+nxfreq=6;
+xfreq[0]=13.6/HEV;
+xfreq[1]=54.42/HEV;
+xfreq[2]=392./HEV;
+xfreq[3]=739./HEV;
+xfreq[4]=2000/HEV;
+xfreq[5]=10000/HEV;
+
+/* 1108 NSH Set up a parameter to tell the power law code what estimator band to use */
+nx4power=0; 
 
 
 /* BEGIN GATHERING INPUT DATA */

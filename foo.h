@@ -406,7 +406,7 @@ double emittance_pow(double freqmin, double freqmax, double lum, double alpha);
 int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
 /* stuart_sim.c */
 int sim_driver(PlasmaPtr xplasma);
-int sim_pl(double nh, double t_r, double t_e, double www, int nelem, double ne, double density[], double xne, double newden[]);
+int sim_pl(double nh, double t_r, double t_e, double www, int nelem, double ne, double density[], double xne, double newden[], double f1, double f2);
 double xinteg_sim(double t, double f1, double f2, int nion, double max_ratio, double current_ratio);
 double tb_planck(double freq);
 double verner_planck(double freq);
@@ -419,6 +419,9 @@ int get_shell_wind_params(void);
 double shell_velocity(double x[], double v[]);
 double shell_rho(double x[]);
 int shell_vel_grad(double x[], double velgrad[][3]);
+/* compton.c */
+double kappa_comp(PlasmaPtr xplasma, double freq);
+double total_comp(WindPtr one, double t_e);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

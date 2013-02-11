@@ -185,8 +185,8 @@ bands_init (t, f1, f2, imode, band)
   else if (mode == 4)
     {
       rdint ("Num.of.frequency.bands", &band->nbands);
-      Log ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV, f1);
-      Log ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV, f2);
+      printf ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV, f1);
+      printf ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV, f2);
       printf
 	("Enter band boundaries in increasing eV, and assure they are between lowest and highest energy\n");
 
@@ -194,13 +194,16 @@ bands_init (t, f1, f2, imode, band)
 
 
        rddoub ("Lowest_energy_to_be_considered(eV)", &xx);
-	  band->f1[0] = xx / HEV;
+	  f1 = xx / HEV;
 
        rddoub ("Highest_energy_to_be_considered(eV)", &xx);
-	  band->f2[band->nbands-1] = xx / HEV;
+	  f2 = xx / HEV;
+
+      Log ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV, f1);
+      Log ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV, f2);
 
 
-
+      band->f1[0] = f1;
 
       for (nband = 0; nband < band->nbands - 1; nband++)
 	{
@@ -208,7 +211,7 @@ bands_init (t, f1, f2, imode, band)
 	  band->f2[nband] = band->f1[nband + 1] = xx / HEV;
 
 	}
-      band->f2[nband - 1] = f2;
+      band->f2[nband] = f2;
 
       printf
 	("Enter mimimum fraction of photons in each band.  The total must be < or = to 1\n");
@@ -217,6 +220,12 @@ bands_init (t, f1, f2, imode, band)
 	{
 	  rddoub ("Band.minimum_fraction)", &band->min_fraction[nband]);
 	}
+     for (nband = 0; nband < band->nbands; nband++)
+	{
+	Log("For band %i, f1=%10.3e, f2=%10.3e, frac=%.2f\n",nband,band->f1[nband],band->f2[nband],band->min_fraction[nband]);
+	}
+
+
 
     }
 
