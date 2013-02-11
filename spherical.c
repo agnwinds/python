@@ -558,13 +558,12 @@ Description:
 	centers of the grid cells are defined in the xz plane at a 45 
 	degree angle.  This was done so that one would be in a plausible
 	region of a biconical wind.
-        NSH - Ive chenged it to use 1/root2 rather than sin 45. More accurate.
+        NSH - Ive changed it to use 1/root2 rather than sin 45. More accurate.
 
 
 History:
  	11feb	nsh	Adapted from spherical_make_grid.c
-	05jun	ksl	56a: Eliminated some superfluous varabiles, and
-			added better comments.
+
 
 **************************************************************/
 
@@ -599,10 +598,10 @@ int n;
 	 */
   for (n = 0; n < NDIM; n++)
 	{
-	printf(" W.r = %2.20e, w.rcen = %2.20e\n",w[n].r,w[n].rcen);
+	Log("Cell %i:  inner edge = %2.20e, centre = %2.20e\n",n,w[n].r,w[n].rcen);
 	w[n].x[1] = w[n].xcen[1] = 0.0;
 
- //Slight change here, using 1/root2 give more accurate results than sin45.
+ //NSH Slight change here, using 1/root2 give more accurate results than sin45.
 
 
 	w[n].x[0] = w[n].x[2] = w[n].r / pow(2.0,0.5);

@@ -408,9 +408,6 @@ double emittance_pow(double freqmin, double freqmax, double lum, double alpha);
 int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
 /* shell_wind.c */
 int get_shell_wind_params(void);
-double shell_velocity(double x[], double v[]);
-double shell_rho(double x[]);
-int shell_vel_grad(double x[], double velgrad[][3]);
 /* compton.c */
 double kappa_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);

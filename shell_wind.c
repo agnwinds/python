@@ -34,6 +34,7 @@ Notes:
 
 History:
  	11feb	nsh	Coded as part of the effort to put power laws into python. It allows detailed testing.
+	12jan	nsh	Shell wind rewritten to use existing C+L wind model.
  		
 **************************************************************/
 
@@ -47,6 +48,9 @@ get_shell_wind_params ()
 	double postemp[3];
 	double speedtemp;
 	double cdensity;
+	double shell_vmin,shell_vmax; //Local variables to define shellwind
+	double shell_rmin,shell_rmax; //Local variables to define shellwind
+	double factor;
 	int	i;
 
 
@@ -73,31 +77,48 @@ get_shell_wind_params ()
 
   geo.stellar_wind_mdot = 1.e-6;
   geo.wind_rmin = geo.rstar;
-  geo.shell_rmin = 2.8e9;
-  geo.shell_vmin = 200e5;
-  geo.shell_vmax = 3000e5;
+  geo.cl_beta = 1.0;
+  shell_rmin = geo.cl_rmin = 2.8e9;
+  shell_vmin = geo.cl_v_zero = 200e5;
+  shell_vmax = geo.cl_v_infinity = 3000e5;
 
   geo.stellar_wind_mdot /= MSOL / YR;
-  rddoub ("stellar_wind_mdot(msol/yr)", &geo.stellar_wind_mdot);
+  rddoub ("shell_wind_mdot(msol/yr)", &geo.stellar_wind_mdot);
   geo.stellar_wind_mdot *= MSOL / YR;
 
-  rddoub ("stellar.wind.radmin(cm)", &geo.wind_rmin);	/*Radius where wind begins */
+  rddoub ("shell.wind.radmin(cm)", &geo.wind_rmin);	/*Radius where wind begins */
   if (geo.wind_rmin < geo.rstar)
     {
       Error
-	("get_stellar_wind_params: It is unreasonable to have the wind start inside the star!\n");
+	("get_shell_wind_params: It is unreasonable to have the wind start inside the star!\n");
       Log ("Setting geo.wind_rmin to geo.rstar\n");
       geo.wind_rmin = geo.rstar;
     }
-  geo.shell_rmin = geo.wind_rmin;
+  geo.cl_rmin = shell_rmin = geo.wind_rmin;
 
-  rddoub ("shell.wind_v_at_rmin(cm)", &geo.shell_vmin);	/* Velocity at base of the wind */
-  rddoub ("shell.wind.v_at_rmax(cm)", &geo.shell_vmax);	/* Final speed of wind in units of escape velocity */
-  rddoub ("shell.wind.acceleration_exponent", &geo.shell_beta);	/* Accleration scale exponent */
+
+/*120130 NSH the next two lines have been modified to mean that the wind will end up as a CL wind, but the v_0 and v_infinity will be calulated here from these two variables, which are now local */
+
+  rddoub ("shell.wind_v_at_rmin(cm)", &shell_vmin);	/* Velocity at base of the wind */
+  rddoub ("shell.wind.v_at_rmax(cm)", &shell_vmax);	/* Final speed of wind in units of escape velocity */
+
+/*120130 NSH This line stays as it is */
+  rddoub ("shell.wind.acceleration_exponent", &geo.cl_beta);	/* Accleration scale exponent for a CL wind*/
+  printf ("Geo rmax = %f\n",geo.rmax);
+  shell_rmax = geo.wind_rmax = geo.rmax;
+/*120130 NSH These next lines invert the cl velocity equation to get the cl factors from the local shell factors */
+  geo.cl_v_zero = shell_vmin;
+  factor = pow((1-(geo.wind_rmin/geo.wind_rmax)),geo.cl_beta);
+  geo.cl_v_infinity = (shell_vmax-shell_vmin+shell_vmin*factor)/factor;
+
+
+
+
+
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 //  geo.wind_rmin = geo.rstar;
-  geo.shell_rmax = geo.wind_rmax = geo.rmax;
+
   geo.wind_thetamin = 0.0;
   geo.wind_thetamax = 90. / RADIAN;
 
@@ -109,10 +130,10 @@ get_shell_wind_params ()
 
 
 /* Since this is a diagnostic routine, we will write out some information to check it is doing what we think) */
-
-	dr=(geo.shell_rmax-geo.shell_rmin)/100.0000;
+	printf ("shell rmin=%f shell rmax=%f\n",shell_rmin,shell_rmax);
+	dr=(shell_rmax-shell_rmin)/100.0000;
 	printf("dr= %e, root2= %10.30e\n",dr,pow(2.0,0.5));
-	rmin=geo.shell_rmin-(dr);
+	rmin=shell_rmin-(dr);
 	
 	for (i=0;i<103;i++)
 		{
@@ -120,8 +141,8 @@ get_shell_wind_params ()
 	
 		postemp[0]=postemp[2]=r[i]/pow(2.0,0.5);
 		postemp[1]=0.0;
-		speedtemp=shell_velocity(postemp,vtemp);
-		rhotemp[i]=shell_rho(postemp)*rho2nh;
+		speedtemp=stellar_velocity(postemp,vtemp);
+		rhotemp[i]=stellar_rho(postemp)*rho2nh;
 //		dvtemp[i]=shell_dv(postemp);
 		printf("ring=%i,x=%e,r=%10.30e,speed=%10.20e,density=%10.20e\n",i,r[i]/pow(2.0,0.5),r[i],speedtemp,rhotemp[i]);
 		}
@@ -177,7 +198,7 @@ History:
 			is not the same
  
 **************************************************************/
-
+/* 
 double
 shell_velocity (x, v)
      double x[], v[];
@@ -226,9 +247,10 @@ Notes:
 
 History:
  	11Feb	nsh	Modified from stellar.c portions of the code.
+        12Feb	nsh	Removed - shell_wind now uses spherical wind v and rho
  
 **************************************************************/
-
+/*
 double
 shell_rho (x)
      double x[];
@@ -265,8 +287,8 @@ makes sense.
 NB: Making ds too small can cause roundoff and/or precision errors.
 
         11feb   nsh     very simple modification of stellar_vel_grad to make sure it calls shell_velocity
+        12Feb	nsh	Removed - shell_wind now uses spherical wind v and rho
 
-*/
 int
 shell_vel_grad (x, velgrad)
      double x[], velgrad[][3];
@@ -293,3 +315,4 @@ shell_vel_grad (x, velgrad)
 
   return (0);
 }
+*/

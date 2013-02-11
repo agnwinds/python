@@ -181,6 +181,7 @@ wind_check (www, n)
      WindPtr www;
      int n;
 {
+	printf("Got to wind_check\n");
   int i, j, k, istart, istop;
   if (n < 0)
     {
@@ -228,6 +229,7 @@ wind_check (www, n)
   Log
     ("Wind_check: Punchthrough distance DFUDGE %e www[1].x[2] %e\n",
      DFUDGE, www[1].x[2]);
+	printf ("Finished wind checl\n");
   return (0);
 }
 
@@ -290,7 +292,7 @@ model_velocity (x, v)
     }
   else if (geo.wind_type == 9)
     {
-      speed = shell_velocity (x,v);
+      speed = stellar_velocity (x,v);
     }
   else
     {
@@ -404,7 +406,7 @@ model_rho (x)
     }
   else if (geo.wind_type == 9)
    {
-     rho = shell_rho (x);
+     rho = stellar_rho (x);
    }
   else
     {

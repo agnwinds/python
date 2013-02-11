@@ -204,7 +204,6 @@ stellar_rho (x)
 {
   double r, rho, v[3];
   double length (), stellar_velocity ();
-	printf("Here we are in stellar rho x=%e,y=%e,z=%e/n",x[0],x[1],x[2]);
   r = length (x);
   if (r < geo.cl_rmin)
     {

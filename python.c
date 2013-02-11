@@ -1033,7 +1033,7 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
       else if (geo.wind_type == 9)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
 	{
 	  get_shell_wind_params ();
-	  dfudge = (geo.shell_rmax - geo.shell_rmin) / 1000.0;	//Stop photons getting pushed out of the cell
+	  dfudge = (geo.wind_rmax - geo.wind_rmin) / 1000.0;	//Stop photons getting pushed out of the cell
 	  DFUDGE = dfudge;
 	}
       else if (geo.wind_type != 2)
