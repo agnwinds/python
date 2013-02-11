@@ -117,6 +117,7 @@ radiation (p, ds)
   double freq;
   double kappa_tot, frac_tot, frac_ff;
   double frac_z, frac_comp;  /* nsh 1108 added frac_comp - the heating in the cell due to compton heating */
+  double frac_ind_comp; /* nsh 1205 added frac_ind_comp - the heating due to induced compton heating */
   double kappa_ion[NIONS];
   double frac_ion[NIONS];
   double density, ft, tau, tau2;
@@ -132,10 +133,10 @@ radiation (p, ds)
   one = &wmain[p->grid];	/* So one is the grid cell of interest */
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "radiation");
-
   freq = p->freq;
   kappa_tot = frac_ff = kappa_ff (xplasma, freq);	/* Add ff opacity */
   kappa_tot += frac_comp = kappa_comp (xplasma, freq);    /* 70 NSH 1108 calculate compton opacity, store it in kappa_comp and also add it to kappa_tot, the total opacity for the photon path */
+  kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq, ds, p->w);
 
   frac_tot = frac_z = 0;	/* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
 				   indicate this is all disagnostic and might be removed */
@@ -167,7 +168,6 @@ of the energy that goes into heating electrons carefully.  */
 	    {
 	      x_top_ptr = phot_top_ptr[n];
 	      ft = x_top_ptr->freq[0];
-//		printf("ft=%e freq=%e \n",ft,freq);
 	      if (ft > freq)
 		break;		// The remaining transitions will have higher thresholds
 	      if (freq < x_top_ptr->freq[x_top_ptr->np - 1])
@@ -323,10 +323,13 @@ statement could be deleted entirely 060802 -- ksl */
 
 //wind_n_to_if(one->nwind,&ii,&jj);  ??? Not complete. Intended to allow more flexible tracking of photon spectra  ksl 1108
 //if ii==ndim/2:  // 110804 - ksl - Adapt to print out a column in the middle no matter what the dimensions
-	if (one->nwind > 59 && one->nwind < 90)
+//	if (one->nwind > 59 && one->nwind < 90)
 //  1.75e16 <     (2*sqrt(one->xcen[0]*one->xcen[0]+one->xcen[1]*one->xcen[1]) - sqrt(one->x[0]*one->x[0]+one->x[1]*one->x[1]))) 
+//	if (geo.wind_type == 9)
+	if (one->nwind==22)
+
 {
-	Log_silent ("TTTTTT %3d %3d %3d %8.3e %8.3e %8.3e cell%3d\n",geo.wcycle,ii,jj,p->freq,w_ave,ds,one->nplasma);
+	Log_silent ("PHOTON_DETAILS %3d %3d %3d %8.3e %8.3e %8.3e cell%3d wind cell%3d\n",geo.wcycle,ii,jj,p->freq,w_ave,ds,one->nplasma,one->nwind);
 }
 
 
@@ -366,6 +369,8 @@ statement could be deleted entirely 060802 -- ksl */
       xplasma->heat_tot += z * frac_ff;
       xplasma->heat_comp += z * frac_comp; /* NSH 1108 Calculate the heating in the cell due to compton heating */
       xplasma->heat_tot += z * frac_comp;  /* NSH 1108 Add the compton heating to the total heating for the cell */
+      xplasma->heat_tot += z * frac_ind_comp; /* NSH 1205 Calculate the heating in the celldue to induced compton heating */
+      xplasma->heat_ind_comp += z * frac_ind_comp; /* NSH 1205 Increment the induced compton heating counter for the cell */
       if (freq > phot_freq_min)
 	//
 //      if (freq > (CR / 100.)) //modified CR to CR/100 - SS June 04

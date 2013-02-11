@@ -693,7 +693,7 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm, l
       		fprintf (fptr, "%-8e %.3f ", freq, C * 1e8 / freq);
       		for (n = nspecmin; n <= nspecmax; n++)
 			{
-	  		x = s[n].f[i] * s[n].renorm;
+	  		x = s[n].lf[i] * s[n].renorm;
 	  		if (select_spectype == 1)
 	    			{			/* flambda */
 	      			x *= (freq * freq * 1e-8) / (dfreq * dd * C);

@@ -47,6 +47,7 @@ variable_temperature (xplasama, mode)  modifies the densities of ions, levels, a
   Arguments:		
      PlasmaPtr ww;
      int mode;			// 6=correct using a dilute blackbody
+     				   7=correct using a broken power law spectrum
 
 
   Returns:
@@ -118,7 +119,7 @@ variable_temperature (xplasma, mode)
      Since this is an initial estimate g factors have been ignored
      in what follows.
    */
-
+  //  t_e=7.6753e3;
   if (t_e < MIN_TEMP)
     t_e = MIN_TEMP;		/* fudge to prevent divide by zeros */
 
@@ -165,28 +166,38 @@ variable_temperature (xplasma, mode)
 		xip=ion[nion-1].ip;  //the IP is that from the lower to the upper of the pair
 
 		xtemp=zbrent(temp_func,MIN_TEMP,1e8,10);  //work out correct temperature
-		
+//		xtemp=1e4;
 //		xtemp=(xip/H)/5.879e10; /* 71c use wiens law to calculate a temperature based on ioinzaation threshold of the lower ion which we will be using in a minute to calculate the denominator in the ionization rate correction factor */
 
-//		printf ("Best temp for ion %i is %e\n",nion,xtemp);
+//		if (nion==1) printf ("HYDROGEN Best temp for ion %i is %e\n",nion,xtemp);
 
 /* given this temperature, we need the pair of partition functions for these ions */		
 		partition_functions_2 (xplasma, nion, xtemp);
+
+//		if (nion==1) printf ("HYDROGEN partition funcions at xtemp=%e are %e %e\n",xtemp,partition[nion-1],partition[nion]);
+//		partition_functions_2 (xplasma, nion, t_e);
+//		if (nion==1) printf ("HYDROGEN partition funcions at t_e=  %e are %e %e\n",t_e,partition[nion-1],partition[nion]);
+//		partition_functions_2 (xplasma, nion, xtemp);
 
 /* and now we need the saha equation linking the two states at our chosen temp*/
 		xsaha = SAHA * pow (xtemp, 1.5);
 	  	b = xsaha * partition[nion]
 	    	* exp (-ion[nion - 1].ip / (BOLTZMANN * xtemp)) / (xne *
 							   partition[nion-1]);
+//		if (nion==1) printf ("HYDROGEN IP = %e\n",ion[nion - 1].ip/EV2ERGS);
+//		if (nion==1) printf ("HYDROGEN b = %e\n",b);
 
 /* we now correct b to take account of the temperature and photon field 
 		t_r and www give the actual radiation field in the cell, xtemp is the temp we used
   		t_e is the actual electron temperature of the cell*/
 
 
-	      	recomb_fudge = sqrt (t_e / xtemp);	
+	      	recomb_fudge = sqrt (t_e / xtemp);
+//		if (nion==1) printf ("HYDROGEN t_e = %e xtemp= %e recomb_fudge= %e \n",t_e,xtemp,recomb_fudge);	
 		gs_fudge = compute_zeta (t_e, nion, 1e14, 1e18, 1); /* Calculate the ground state recombination rate correction factor based on the cells true electron temperature. Zeta does the nion-1 bit */
 //		printf ("recombination fudge = %e\n",recomb_fudge);
+//		if (nion==1) printf ("HYDROGEN gs_fudge= %e\n",gs_fudge);	
+
 
          	if (mode == 6) /* Correct the SAHA equation abundance pair using an actual radiation field modelled as a dilute black body */
 			{
@@ -199,8 +210,10 @@ variable_temperature (xplasma, mode)
 			tot_fudge=pi_fudge*recomb_fudge*gs_fudge;
 			}
 
-
-
+// if (nion == 1)
+//	{
+//	printf ("nion=%2i, Z=%i, ion=%i, b=%e, pi=%e, recomb=%e, gs=%e, new=%e, big=%e, t_e=%f, xtemp=%f, ne=%e\n",nion,ion[nion].z,ion[nion].istate,b,pi_fudge,recomb_fudge,gs_fudge,b*tot_fudge,big,t_e,xtemp,xne);
+//}
 
 
 		/* apply correction factors */
@@ -266,6 +279,8 @@ variable_temperature (xplasma, mode)
     	}
     }
   xplasma->ne = xnew;
+  partition_functions (xplasma, 2);
+  levels (xplasma, 2);	/*WARNING fudge NSH 11/5/14 - this is as a test. Wereally need a better implementation of partition functions and levels for a power law illuminating spectrum.*/
   return (0);
 }
 
@@ -315,7 +330,7 @@ bb_correct_2 (xtemp, t_r, www, nion)
      int nion;
 {
   double q;
-  int ion_upper,ion_lower,n;
+  int ion_lower,n;
   double numerator, denominator;
   int ntmin,nvmin;
   double fthresh,fmax;
@@ -325,7 +340,7 @@ bb_correct_2 (xtemp, t_r, www, nion)
   /* Initialization of fudges complete */
 
   ion_lower = nion-1;	/*the call uses nion, which is the upper ion in the pair */
-  ion_upper = nion;	
+
 
   if (-1 < ion_lower && ion_lower < nions)	//Get cross section for this specific ion_number
     {
@@ -349,11 +364,10 @@ bb_correct_2 (xtemp, t_r, www, nion)
  if (ion[ion_lower].phot_info == 1)  //topbase
     {
       n = ntmin;
-
       xtop = &phot_top[n];
       fthresh = xtop->freq[0];
       fmax = xtop->freq[xtop->np - 1];
- 
+
       
 
       qromb_temp=t_r;  //The numerator is for the actual radiation temperature
@@ -376,6 +390,7 @@ bb_correct_2 (xtemp, t_r, www, nion)
       xver = &xphot[ion[n].nxphot];
       fthresh = xver->freq_t;
       fmax=xver->freq_max;
+
 
       qromb_temp=t_r;
       numerator = www*qromb (verner_planck1, fthresh, fmax, 1.e-4);
@@ -412,7 +427,6 @@ bb_correct_2 (xtemp, t_r, www, nion)
 //	denominator = 1e-40;
 
 
- //     printf ("numerator = %e, denominator = %e\n",numerator,denominator);
       q = numerator / denominator;
 
 
@@ -512,42 +526,57 @@ pl_correct_2 (xtemp, nion)
  if (ion[ion_lower].phot_info == 1)  //topbase
     {
       n = ntmin;
-
+//	printf("for ion_lower=%i, topbase cross section is %i\n",ion_lower,ntmin);
       xtop = &phot_top[n];
       fthresh = xtop->freq[0];
       fmax = xtop->freq[xtop->np - 1];
- 
+ //      if (nion==1) printf("HYDROGEN topbase threshold frequency= %e Hz %e ev\n",fthresh,fthresh*HEV);
+//	if (nion==1) printf("HYDROGEN fmax=%e \n",fmax);
 	numerator=0;
 	  for (j = 0; j < geo.nxfreq; j++)	//We loop over all the bands
 	    {
-	      if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j] < fmax && fmax < geo.xfreq[j + 1])	//Case 1
+//		if (nion==1) printf("HYDROGEN band %i runs from %e to %e\n",j,geo.xfreq[j],geo.xfreq[j+1]);
+	      if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j] < fmax && fmax < geo.xfreq[j + 1])	//Case 1- 
 		{
 		  xpl_alpha = xxxplasma->sim_alpha[j];
 		  xpl_w = xxxplasma->sim_w[j];
-		  numerator += qromb (tb_pow1, fthresh, fmax, 1.e-4);
+//	if (nion==1) printf("HYDROGEN case 1 band %i=%e \n",j,qromb (tb_pow1, fthresh, fmax, 1.e-4));
+//	if (nion==1) printf("HYDROGEN integrating from %e to %e with alpha=%f\n",fthresh, fmax,xpl_alpha);
+//		  numerator += qromb (tb_pow1, fthresh, fmax, 1.e-4);
+//	if (nion==1) printf("HYDROGEN numerator= %e \n",numerator);
 		}
 	      else if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j + 1] < fmax)	//case 2 
 		{
 		  xpl_alpha = xxxplasma->sim_alpha[j];
 		  xpl_w = xxxplasma->sim_w[j];
+//	if (nion==1) printf("HYDROGEN case 2 band %i=%e \n",j,qromb (tb_pow1, fthresh, geo.xfreq[j + 1], 1.e-4));
+//	if (nion==1) printf("HYDROGEN integrating from %e to %e with alpha=%f\n",fthresh, geo.xfreq[j + 1],xpl_alpha);
 		  numerator +=
 		    qromb (tb_pow1, fthresh, geo.xfreq[j + 1], 1.e-4);
+//	if (nion==1) printf("HYDROGEN numerator= %e \n",numerator);
 		}
 	      else if (geo.xfreq[j] > fthresh && geo.xfreq[j] < fmax && fmax < geo.xfreq[j + 1])	//case 3
 		{
 		  xpl_alpha = xxxplasma->sim_alpha[j];
 		  xpl_w = xxxplasma->sim_w[j];
+//	if (nion==1) printf("HYDROGEN case 3 band %i=%e \n",j,qromb (tb_pow1, geo.xfreq[j], fmax, 1.e-4));
+//	if (nion==1) printf("HYDROGEN integrating from %e to %e with alpha=%f\n",geo.xfreq[j], fmax,xpl_alpha);
 		  numerator += qromb (tb_pow1, geo.xfreq[j], fmax, 1.e-4);
+//	if (nion==1) printf("HYDROGEN numerator= %e \n",numerator);
 		}
 	      else if (geo.xfreq[j] > fthresh && geo.xfreq[j + 1] < fmax)	// case 4
 		{
 		  xpl_alpha = xxxplasma->sim_alpha[j];
 		  xpl_w = xxxplasma->sim_w[j];
+//	if (nion==1) printf("HYDROGEN case 4 band %i=%e \n",j,qromb (tb_pow1, geo.xfreq[j], geo.xfreq[j + 1], 1.e-4));
+//	if (nion==1) printf("HYDROGEN integrating from %e to %e\n",geo.xfreq[j], geo.xfreq[j + 1]);
 		  numerator +=
 		    qromb (tb_pow1, geo.xfreq[j], geo.xfreq[j + 1], 1.e-4);
+//	if (nion==1) printf("HYDROGEN numerator= %e \n",numerator);
 		}
 	      else		//case 5 - should only be the case where the band is outside the range for the integral.
 		{
+//	if (nion==1) printf("HYDROGEN case 5 band %i=0 \n",j);
 		  numerator += 0;	// Add nothing - bit of a null statement, but makes the code look nice.
 		}
 	    }
@@ -638,7 +667,10 @@ pl_correct_2 (xtemp, nion)
  //     printf ("numerator = %e, denominator = %e\n",numerator,denominator);
       q = numerator / denominator; /*Just work out the correction factor - hope it isnt infinite! */
 
-
+//if (nion == 1)
+//	{
+//	printf ("HYDROGEN numerator = %e, denominator = %e, q=%e\n",numerator,denominator,q);
+//}
      
 
 

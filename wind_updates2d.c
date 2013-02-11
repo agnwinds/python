@@ -73,6 +73,8 @@ History:
 			plasmamain
 	11aug	nsh	70: modifications made to wind_update  and wind_rad_init to incorporate 
 			compton heating and cooling.
+        12apr	nh	72: modifications makde to wind_update and wind_rad_init to incoprorate
+			induced copmton heating.
 
 
 **************************************************************/
@@ -86,7 +88,7 @@ WindPtr (w);
 {
   int n, i, j;
   double trad, nh;
-  double wtest, xsum, asum, psum, fsum, lsum, csum;  //1108 NSH csum added to sum compton heating
+  double wtest, xsum, asum, psum, fsum, lsum, csum, icsum;  /*1108 NSH csum added to sum compton heating 1204 NSH icsum added to sum induced compton heating */
   double volume;
   char string[LINELEN];
   double t_r_old, t_e_old, dt_r, dt_e;
@@ -183,7 +185,7 @@ WindPtr (w);
 	if (plasmamain[n].nxtot[i] > 0)   /*Check we actually have some photons in the cell in this band */
 		{
 		plasmamain[n].xave_freq[i] /= plasmamain[n].xj[i];   /*Normalise the average frequency */
-		plasmamain[n].xj[i] /= (4. * PI * volume);     /*Convert to radiation density */
+		plasmamain[n].xj[i] /= (4 * PI * volume);     /*Convert to radiation density */
 		}
 	else
 		{
@@ -281,7 +283,7 @@ WindPtr (w);
 
   /* Check the balance between the absorbed and the emitted flux */
 
-  xsum = psum = lsum = fsum = csum = 0;  //1108 NSH zero the new csum counter for compton heating
+  xsum = psum = lsum = fsum = csum = icsum = 0;  //1108 NSH zero the new csum counter for compton heating
 
   for (nplasma = 0; nplasma < NPLASMA; nplasma++)
     {
@@ -312,12 +314,13 @@ WindPtr (w);
       fsum += plasmamain[nplasma].heat_ff;
       lsum += plasmamain[nplasma].heat_lines;
       csum += plasmamain[nplasma].heat_comp; //1108 NSH Increment the compton heating counter
+      icsum += plasmamain[nplasma].heat_ind_comp; //1205 NSH Increment the induced compton heating counter
     }
 
   asum = wind_luminosity (0.0, VERY_BIG);
    Log
-    ("!!wind_update: Absorbed flux    %8.2e  (photo %8.2e ff %8.2e compton %8.2e lines %8.2e)\n",
-     xsum, psum, fsum, csum, lsum); //1108 NSH Added commands to report compton heating
+    ("!!wind_update: Absorbed flux    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e)\n",
+     xsum, psum, fsum, csum, icsum, lsum); //1108 NSH Added commands to report compton heating
   Log
     ("!!wind_update: Wind luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n",
      asum, geo.lum_fb, geo.lum_ff, geo.lum_lines); //1108 NSH added commands to report compton cooling 1110 removed, this line now just reports cooling mechanisms that will generate photons
@@ -356,12 +359,30 @@ WindPtr (w);
 
 	
 	if (geo.wind_type == 9)
-		{
-      		n = plasmamain[0].nwind;
+		{     
+
 		agn_ip=geo.const_agn*(((pow (50000/HEV, geo.alpha_agn + 1.0)) - pow (100/HEV,geo.alpha_agn + 1.0)) /  	(geo.alpha_agn + 1.0));
 		agn_ip /= (w[n].r*w[n].r);
 		agn_ip /= plasmamain[0].rho * rho2nh;
-         	Log ("OUTPUT Lum_agn= %e T_e= %e N_h= %e alpha= %f IP(sim 2010)= %e distance= %e\n",geo.lum_agn,plasmamain[0].t_e,plasmamain[0].rho * rho2nh,geo.alpha_agn,agn_ip,w[n].r);
+         	Log ("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim 2010)= %e distance= %e volume= %e\n",geo.lum_agn,plasmamain[0].t_e,plasmamain[0].rho * rho2nh,plasmamain[0].ne,geo.alpha_agn,agn_ip,w[n].r,w[n].vol);
+
+
+ 		
+		n = plasmamain[0].nwind;
+	    	for (i=0 ; i<geo.nxfreq ; i++) /*loop over number of bands */	
+			{
+			Log ("Band %i f1 %e f2 %e alpha %f w %e\n",i,geo.xfreq[i],geo.xfreq[i+1],plasmamain[0].sim_alpha[i],plasmamain[0].sim_w[i]);		
+			}
+
+
+
+  Log
+    ("OUTPUT Absorbed_flux    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e )\n",
+     xsum, psum, fsum, csum, icsum, lsum); //1108 NSH Added commands to report compton heating
+  Log
+    ("OUTPUT Wind_cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e lines %8.2e ) after update\n",
+     asum+geo.lum_comp+geo.lum_dr, geo.lum_fb, geo.lum_ff, geo.lum_comp, geo.lum_dr, geo.lum_lines); //1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons.	
+
 		for (n = 0; n < nelements; n++)
 			{
       			first = ele[n].firstion;
@@ -453,6 +474,7 @@ wind_rad_init ()
       plasmamain[n].nrad = plasmamain[n].nioniz = 0;
       plasmamain[n].lum_comp = 0.0; //1108 NSH Zero the compton luminosity for the cell
       plasmamain[n].heat_comp = 0.0; //1108 NSH Zero the compton heating for the cell
+      plasmamain[n].heat_ind_comp = 0.0; //1108 NSH Zero the induced compton heating for the cell
       if (nlevels_macro > 1)
 	macromain[n].kpkt_rates_known = -1;
 

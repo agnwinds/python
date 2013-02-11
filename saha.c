@@ -150,7 +150,7 @@ nebular_concentrations (xplasma, mode)
 
 
     }
-  else if (mode == 5)           /* This eplicates Sim's (2008) power
+  else if (mode == 5)           /* This replicates Sim's (2008) power
 				   law method for ionization in a non-BB radiation
 				   field.  */
     {
@@ -479,7 +479,6 @@ saha (xplasma, ne, t)
 	  b = xsaha * partition[nion]
 	    * exp (-ion[nion - 1].ip / (BOLTZMANN * t)) / (ne *
 							   partition[nion-1]);
-
 //	  if (b > big && nh < 1e5) this is a line to only modify things if the density is high enough to matter
           if (b > big)	 
 	   b = big;		//limit step so there is no chance of overflow

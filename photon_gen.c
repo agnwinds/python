@@ -105,7 +105,8 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     {				/* Use banding, create photons with different weithst in different wavelength
 				   bands.  this is used for the for ionization calculation where one wants to assure
 				   that you have "enough" photons at high energy */
-      ftot = populate_bands (f1, f2, ioniz_or_final, iwind, &xband);
+	printf ("Going to popultate_bands\n");     
+	 ftot = populate_bands (f1, f2, ioniz_or_final, iwind, &xband);
 
 // Now generate the photons
       iphot_start = 0;
@@ -114,21 +115,23 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
 
 	  if (xband.nphot[n] > 0)
 	    {
-
+		printf ("About to go to xdefine_phot for band %i\n",n);
 /*Reinitialization is required here always because we are changing the frequencies around all the time */
 	      xdefine_phot (xband.f1[n], xband.f2[n], ioniz_or_final,
 			    iwind);
-
+		printf ("Back from xdefine_phot \n");
 	      /* The weight of each photon is designed so that all of the photons add up to the
 	         luminosity of the photosphere.  This implies that photons must be generated in such
 	         a way that it mimics the energy distribution of the star. */
 
 	      geo.weight = (natural_weight) = (ftot) / (nphot_tot);
-
+		printf ("Back from xdefine_phot, weight=%e\n",geo.weight);
+		printf ("%e, %e\n",xband.nat_fraction[n],
+		xband.used_fraction[n]);
 	      xband.weight[n] = weight =
 		natural_weight * xband.nat_fraction[n] /
 		xband.used_fraction[n];
-
+		printf ("About to go to xmake_phot, weight=%e\n",weight);
 	      xmake_phot (p, xband.f1[n], xband.f2[n],
 			  ioniz_or_final, iwind, weight, iphot_start,
 			  xband.nphot[n]);
@@ -294,7 +297,8 @@ calculates the boundaries of the various disk annulae depending on f1 and f2 */
     }
   if (geo.agn_radiation)
   {
-	  agn_init(geo.r_agn,geo.lum_agn,geo.alpha_agn, f1, f2, ioniz_or_final,&geo.f_agn);
+	printf ("Going to agn_init from xdefine_phot\n");
+      agn_init(geo.r_agn,geo.lum_agn,geo.alpha_agn, f1, f2, ioniz_or_final,&geo.f_agn);
   }
 
 /* The choices associated with iwind are

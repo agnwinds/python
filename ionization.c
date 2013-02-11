@@ -380,7 +380,7 @@ one_shot (xplasma, mode)
 
 
   // printf ("EMERGENCY EMERGENCY EMERGENCY - your 1 million K muck up is still at line 301 of ionization\n");
-//  xplasma->t_e=1e6;
+//  xplasma->t_e=2e5;
   dte = xplasma->dt_e;
 
 //  Log ("One_shot: %10.2f %10.2f %10.2f\n", te_old, te_new, w->t_e);
@@ -473,12 +473,26 @@ calc_te (xplasma, tmin, tmax)
   double heat_tot;
   double z1, z2;
   int macro_pops ();
-
+  int n;
+  double temptmin,temptmax,temp,dt,zemtemp;
   /* 110916 - ksl - Note that we assign a plasma pointer here to a fixed structure because
    * we need to call zbrent and we cannot pass the xplasma ptr directly
    */
 
   xxxplasma = xplasma;
+
+   temptmin=1e4;
+   temptmax=1e6;
+   dt=1e3;
+   for (n=0;n<190;n++)
+	{
+	temp=temptmin+(n*dt);
+	zemtemp=zero_emit(temp);
+	}
+
+
+
+
 
   heat_tot = xplasma->heat_tot;
 
@@ -501,8 +515,9 @@ calc_te (xplasma, tmin, tmax)
       xplasma->t_e = tmin;
     }
   else
+   {
     xplasma->t_e = tmax;
-
+}
   /* With the new temperature in place for the cell, get the correct value of heat_tot.
      SS June  04 */
 
@@ -521,7 +536,6 @@ calc_te (xplasma, tmin, tmax)
   xplasma->heat_photo_macro = macro_bf_heating (xplasma, xplasma->t_e);
   xplasma->heat_tot += xplasma->heat_photo_macro;
   xplasma->heat_photo += xplasma->heat_photo_macro;
-
 
 
   return (xplasma->t_e);

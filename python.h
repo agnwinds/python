@@ -106,6 +106,7 @@ int NPHOT;			/* As of python_40, NPHOT must be defined in the main program using
 #define SPECTYPE_BB      -1
 #define SPECTYPE_UNIFORM -2
 #define SPECTYPE_POW     -4
+#define SPECTYPE_CL_TAB  -5 
 #define SPECTYPE_NONE	 -3
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
@@ -282,6 +283,15 @@ struct geometry
   double lum_tot, lum_star, lum_disk, lum_bl, lum_wind;	/* The total luminosities of the disk, star, bl, & wind 
 							   are actually not used in a fundamental way in the program */
   double lum_agn;   /*The total luminosity of the AGN or point source at the center*/
+
+/* The next four variables added by nsh Apr 2012 to allow broken power law to match the cloudy table command */
+  double agn_cltab_low; //break at which the low frequency power law ends
+  double agn_cltab_hi; //break at which the high frequency power law cuts in
+  double agn_cltab_low_alpha; //photon index for the low frequency end
+  double agn_cltab_hi_alpha; //photon index for the high frequency end
+
+
+
   double lum_ff, lum_fb, lum_lines;	/* The luminosity of the wind as a result of ff, fb, and line radiation */
   double lum_comp; /*1108 NSH The luminosity of the wind as a result of compton cooling */
   double lum_dr; /*1109 NSH The luminosity of the wind due to dielectronic recombination */
@@ -530,6 +540,7 @@ typedef struct plasma {
   double heat_tot, heat_tot_old;	/* heating from all sources */
   double heat_lines, heat_ff;
   double heat_comp;   			/* 1108 NSH The compton heating for the cell */
+  double heat_ind_comp;		/* 1205 NSH The induced compton heatingfor the cell */
   double heat_lines_macro, heat_photo_macro; /* bb and bf heating due to macro atoms. Subset of heat_lines 
 						and heat_photo. SS June 04. */
   double heat_photo, heat_z;		/*photoionization heating total and of metals */
@@ -921,13 +932,15 @@ double x_axis[3];
 double y_axis[3];
 double z_axis[3];
 
-/* These are structures associated with frequency limits/bands used for photon
+/* These are structures associated with frequency limits/s used for photon
 generation and for calculating heating and cooling */
 
 #define NBANDS 10
 struct xbands
 {
   double f1[NBANDS],f2[NBANDS];
+  double alpha[NBANDS];
+  double pl_const[NBANDS];
   double min_fraction[NBANDS];
   double nat_fraction[NBANDS];		// The fraction of the accepted luminosity in this band
   double used_fraction[NBANDS];

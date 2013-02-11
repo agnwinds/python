@@ -55,8 +55,72 @@
 	double freq;  // Frequency of the current photon being tracked
 {
 	double x;  // The opacity of the cell by the time we return it.
-	x=(THOMPSON * H)/(MELEC * C * C); //Calculate the constant
+        double alpha; /*The approximate Klein - Nishina cross section computed from equation 6.6 in Hazy 3/10 */
+ 	alpha=1/(1+freq*HRYD*(1.1792e-4+(7.084e-10*freq*HRYD)));
+	x=(THOMPSON * alpha * H)/(MELEC * C * C); //Calculate the constant
 	x*= xplasma->ne * freq; //Multiply by cell electron density and frequency of the packet.
+	return (x);
+}
+
+/**************************************************************************
+                    Space Telescope Science Institute
+
+
+  Synopsis:  kappa_ind_compton computes the opacity in the cell due to induced compton heating.
+
+  Description:	
+
+  Arguments:   xplasma - pointer to the current plasma cell
+		freq - the frequency of the current photon packet being tracked
+
+  Returns:   kappa - the inducd compton opacity for the cell.
+
+  Notes:   This implements the induced compton term in equation 6.5 in cloudy 10.3
+
+  History:
+2011	nsh	Coded as part of the effort to include compton scattering in August 2011 at Southampton.
+
+ ************************************************************************/
+
+
+	double kappa_ind_comp(xplasma,freq,ds,w)
+	PlasmaPtr xplasma;   // Pointer to current plasma cell
+	double freq;  // Frequency of the current photon being tracked
+	double w; // The weight of the photon packet
+	double ds; //The distance the photon travels
+{
+	double x;  // The opacity of the cell by the time we return it.
+        double alpha; /*The approximate Klein - Nishina cross section computed from equation 6.6 in Hazy 3/10 */
+	double J1,J,expo; //The estimated intensity in the cell
+	int i;
+//	J=(4*PI*w*ds)/(C*xplasma->vol); //Calcuate the intensity NSH This works for a thin shell... Why? Dont know.
+
+	if (geo.ioniz_mode==5 || geo.ioniz_mode==7) /*If we are using power law ionization, use PL estimators*/
+		{
+		for (i=0 ; i<geo.nxfreq ; i++)  
+			{
+			if (geo.xfreq[i] < freq && freq <= geo.xfreq[i+1])
+				{
+				J=xplasma->sim_w[i]*pow(freq,xplasma->sim_alpha[i]) ;	
+				}
+			}
+		}
+	else    /*Else, use BB estimator of J */
+		{
+		expo=(H*freq)/(BOLTZMANN*xplasma->t_r);
+		J=(2*H*freq*freq*freq)/(C*C);
+		J*=1/(exp(expo)-1);
+		J*=xplasma->w;
+		}
+
+
+
+
+//	printf("We think ds is %e vol is %e area is %e\n",ds,xplasma->vol,pow((xplasma->vol/(4*PI*ds)),0.5));
+ 	alpha=1/(1+freq*HRYD*(1.1792e-4+(7.084e-10*freq*HRYD))); //KN cross section
+        x=(xplasma->ne)/(MELEC);
+	x*=THOMPSON*alpha*J;
+	x*=1/(2*freq*freq);
 	return (x);
 }
 

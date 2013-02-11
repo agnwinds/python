@@ -66,7 +66,7 @@ To avoid problems with solving, we need to find a reasonable range of values wit
       if (xplasma->nxtot[n] == 0)
 	{
 	  Error
-	    ("power_abundances: no photons in band %d \n",n);
+	    ("power_abundances: no photons in band %d which runs from %10.2e(%8.2fev) to %10.2e(%8.2fev) \n",n,geo.xfreq[n],geo.xfreq[n]*HEV,geo.xfreq[n+1],geo.xfreq[n+1]*HEV);
 	  sim_numin = xband.f1[0];	/*NSH 1108 Use the lower bound of the lowest band for sumnumin */
 	  sim_numax = xband.f2[xband.nbands - 1];	/*NSH 1108 and the upper bound of the upperband for max */
 	  sim_meanfreq = xplasma->ave_freq;
@@ -82,8 +82,8 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 	}
 
       Log
-	("NSH We are about to calculate w and alpha, j=%10.2e, mean_freq=%10.2e, numin=%10.2e, numax=%10.2e, number of photons in band=%i\n",
-	 j, sim_meanfreq, sim_numin, sim_numax, xplasma->nxtot[n]);
+	("NSH We are about to calculate w and alpha, j=%10.2e, mean_freq=%10.2e, numin=%10.2e(%8.2fev), numax=%10.2e(%8.2fev), number of photons in band=%i\n",
+	 j, sim_meanfreq, sim_numin, sim_numin*HEV, sim_numax ,sim_numax*HEV, xplasma->nxtot[n]);
 
 
       /*1108 NSH ?? this could be a problem. At the moment, it relies on sim_alpha being defined at this point. */
@@ -125,7 +125,7 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 	{
 	  xplasma->sim_alpha[n] = alphatemp;
 	  xplasma->sim_w[n] = sim_w_temp;
-	  Log ("NSH in this cell w=%10.2e, alpha=%3.1f\n",xplasma->sim_w[n],xplasma->sim_alpha[n]); /* added in feb 2012 as python 71c to make it easier to see what code is doing as it executes */
+	  Log ("NSH in this cell band %i w=%10.2e, alpha=%3.1f\n",n,xplasma->sim_w[n],xplasma->sim_alpha[n]); /* added in feb 2012 as python 71c to make it easier to see what code is doing as it executes */
 	}
 
     }

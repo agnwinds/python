@@ -7,6 +7,7 @@
 #define H   				6.6262e-27
 #define HC  				1.98587e-16
 #define HEV				4.13620e-15	/* Planck's constant in eV */
+#define HRYD				3.04005e-16     /* NSH 1204 Planck's constant in Rydberg */
 #define C   				2.997925e10
 #define G				6.670e-8
 #define BOLTZMANN 			1.38062e-16

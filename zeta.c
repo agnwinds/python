@@ -159,7 +159,7 @@ compute_zeta (temp, nion, f1, f2, mode)
 
       /* This initiallizes the FB arrays, from temperatures of 1000K to 1e6, from frequencies between 0 and 1e50.  
        * When these frequency limits are given, they are revised to be more
-       * reasonable int he free_bound routines.
+       * reasonable in the free_bound routines.
        */
 
       init_freebound (1.e3, 1.e6, 0, 1e50);	//This initialises the FB arrays, we will need them to calculate the rates for radiative recombination.

@@ -406,11 +406,13 @@ int auger_ionization(PlasmaPtr xplasma);
 /* agn.c */
 double agn_init(double r, double lum, double alpha, double freqmin, double freqmax, int ioniz_or_final, double *f);
 double emittance_pow(double freqmin, double freqmax, double lum, double alpha);
+double emittance_bpow(double freqmin, double freqmax, double lum, double alpha);
 int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
 /* shell_wind.c */
 int get_shell_wind_params(void);
 /* compton.c */
 double kappa_comp(PlasmaPtr xplasma, double freq);
+double kappa_ind_comp(PlasmaPtr xplasma, double freq, double ds, double w);
 double total_comp(WindPtr one, double t_e);
 /* torus.c */
 double torus_rho(double x[]);
@@ -419,7 +421,7 @@ double ds_to_torus(PhotPtr pp);
 /* zeta.c */
 double compute_zeta(double temp, int nion, double f1, double f2, int mode);
 /* dielectronic.c */
-double compute_dr_coeffs(double temp);
+int compute_dr_coeffs(double temp);
 double total_dr(WindPtr one, double t_e);
 /* power.c */
 int power_abundances(PlasmaPtr xplasma, int mode);
@@ -500,4 +502,6 @@ int main(int argc, char *argv[]);
 int one_choice(int choice, char *root, int ochoice);
 int py_wind_help(void);
 /* test_saha.c */
+int main(int argc, char *argv[]);
+/* test_dielectronic.c */
 int main(int argc, char *argv[]);

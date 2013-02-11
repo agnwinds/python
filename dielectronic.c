@@ -73,7 +73,7 @@ temperature split array, and then sample it. Lets see...
                                                                                                    
  ************************************************************************/
 
-double
+int
 compute_dr_coeffs (temp)
      double temp;
 {

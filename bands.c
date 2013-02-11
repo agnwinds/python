@@ -264,7 +264,77 @@ bands_init (imode, band)
 
 
     }
+  else if (mode ==5) /* Set up to compare with cloudy power law table command */
+   {
+      rddoub ("Lowest_energy_to_be_considered(eV)", &xx);
 
+	if (xx>geo.agn_cltab_low)
+	   {
+	   xx=geo.agn_cltab_low/10.0;
+           Log ("Lowest  frequency reset to 1/10 of low frequency break\n");
+            }
+           f1 = xx / HEV;
+      rddoub ("Highest_energy_to_be_considered(eV)", &xx);
+
+	if (xx<geo.agn_cltab_hi)
+	  {
+	  xx=geo.agn_cltab_hi*10.0;
+           Log ("highest  frequency reset to 10x high frequency break\n");
+	    }
+      f2 = xx / HEV;
+      Log ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV, f1);
+      Log ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV, f2);
+
+
+      band->nbands=5;
+      
+      band->f1[0] = (geo.agn_cltab_low/HEV)/1000.0;
+      band->f2[0] = band->f1[1] = (geo.agn_cltab_low/HEV)/100.0;
+      band->f2[1] = band->f1[2] = (geo.agn_cltab_low/HEV)/10.0;
+      band->f2[2] = band->f1[3] = (geo.agn_cltab_low/HEV);
+      band->f2[3] = band->f1[4] = geo.agn_cltab_hi/HEV;
+      band->f2[4] = f2;
+
+	//Set number of photons in each band
+
+      band->min_fraction[0]=0.1;
+      band->min_fraction[1]=0.1;
+      band->min_fraction[2]=0.1;
+      band->min_fraction[3]=0.6;
+      band->min_fraction[4]=0.1;
+
+
+
+     //Set alpha for each band
+
+	band->alpha[0]=geo.agn_cltab_low_alpha;
+	band->alpha[1]=geo.agn_cltab_low_alpha;
+	band->alpha[2]=geo.agn_cltab_low_alpha;
+	band->alpha[3]=geo.alpha_agn;
+        band->alpha[4]=geo.agn_cltab_hi_alpha;
+
+  //Set the constant for each band to ensure continuous distribution
+   
+  band->pl_const[0]=geo.const_agn*pow((band->f2[2]),geo.alpha_agn)/pow((band->f2[2]),band->alpha[0]);
+  band->pl_const[1]=geo.const_agn*pow((band->f2[2]),geo.alpha_agn)/pow((band->f2[2]),band->alpha[0]);
+  band->pl_const[2]=geo.const_agn*pow((band->f2[2]),geo.alpha_agn)/pow((band->f2[2]),band->alpha[0]);
+  band->pl_const[3]=geo.const_agn;
+  band->pl_const[4]=geo.const_agn*pow((band->f2[3]),geo.alpha_agn)/pow((band->f2[3]),band->alpha[4]);
+ 
+
+for (nband=0;nband<band->nbands;nband++)
+	printf ("f1=%e,f2=%e,alpha=%e,const=%e,lum1=%e,lum2=%e\n",band->f1[nband],band->f2[nband],band->alpha[nband],band->pl_const[nband],band->pl_const[nband]*pow(band->f1[nband],band->alpha[nband]),band->pl_const[nband]*pow(band->f2[nband],band->alpha[nband]));
+
+
+
+
+    }
+
+
+
+
+
+  
   else
     {
       Error ("bands_init: Unknown mode %d\n", mode);
@@ -330,15 +400,25 @@ freqs_init (freqmin, freqmax)
   int nxfreq;
 
   /* At present set up a single energy band for 2 - 10 keV */
-  nxfreq = 7;		//NSH 70g - bands set up to match the bands we are currently using in the.pf files. This should probably end up tied together in the long run!
+		//NSH 70g - bands set up to match the bands we are currently using in the.pf files. This should probably end up tied together in the long run!
+  nxfreq = 7;
   xfreq[0] = 1.0 / HEV;
-  xfreq[1] = 13.6 / HEV;
-  xfreq[2] = 54.42 / HEV;
-  xfreq[3] = 392. / HEV;
-  xfreq[4] = 739. / HEV;
-  xfreq[5] = 2000 / HEV;
-  xfreq[6] = 10000 / HEV;
-  xfreq[7] = 50000 / HEV;
+ xfreq[1] = 13.6 / HEV;
+xfreq[2] = 54.42 / HEV;
+ xfreq[3] = 392. / HEV;
+ xfreq[4] = 739. / HEV;
+ xfreq[5] = 2000 / HEV;
+ xfreq[6] = 10000 / HEV;
+ xfreq[7] = 50000 / HEV;
+
+/* bands to match the cloudy table spectrum - needs to cover all frequencies to let induced compton work OK */
+//nxfreq = 2;
+//xfreq[0]=0.0001/HEV;
+//xfreq[1]=2000/HEV;
+//xfreq[2]=100000000/HEV;
+
+
+
 
   Log("freqs_init: Phostons will be generated between %8.2f (%8.2e) and %8.2f (%8.2e)\n",freqmin*HEV,freqmin,freqmax*HEV,freqmax);
 

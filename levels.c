@@ -70,7 +70,6 @@ levels (xplasma, mode)
   double kt;
   double z;
 
-
   if (mode == 0)		// LTE with t_r
     {
       t = xplasma->t_r;
@@ -121,7 +120,6 @@ levels (xplasma, mode)
 	      m_ground = m;	//store the ground state index - allow for gs energy neq 0 (SS) 
 	      nlevden = ion[nion].first_levden;
 	      xplasma->levden[nlevden] = config[m].g / z;	//Assumes first level is ground state
-
 	      for (n = 1; n < ion[nion].nlte; n++)
 		{
 		  m++;

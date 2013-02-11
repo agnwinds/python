@@ -34,7 +34,7 @@ CFLAGS = -g -pg -Wall -I$(INCLUDE) -I$(INCLUDE2)
 LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lkpar -lcfitsio -lgsl -lgslcblas 
 
 #Note that version should be a single string without spaces. 
-VERSION = 71e
+VERSION = 72b
 CHOICE=1             // Compress plasma as much as possible
 # CHOICE=0           //  Keep relation between plasma and wind identical
 
@@ -77,7 +77,7 @@ additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_
 
 prototypes: 
 	cp templates.h templates.h.old
-	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(python_source) ${additional_py_wind_source} test_saha.c > foo.h      
+	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(python_source) ${additional_py_wind_source} test_saha.c test_dielectronic.c > foo.h      
 	cp foo.h templates.h
 
 python: startup  python.o $(python_objects)
@@ -117,6 +117,10 @@ test_pow: test_pow.o pdf.o recipes.o bilinear.o time.o
 
 test_saha: test_saha.o $(python_objects)
 	gcc ${CFLAGS} test_saha.o $(python_objects) $(LDFLAGS) -o test_saha
+		mv $@ $(BIN)
+
+test_dielectronic: test_dielectronic.o $(python_objects)
+	gcc ${CFLAGS} test_dielectronic.o $(python_objects) $(LDFLAGS) -o test_dielectronic
 		mv $@ $(BIN)
 
 t_bilinear:  t_bilinear.o bilinear.o  
