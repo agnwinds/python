@@ -458,6 +458,7 @@ int alpha_summary(WindPtr w, char rootname[], int ochoice);
 int phot_split(WindPtr w, char rootname[], int ochoice);
 int thompson(WindPtr w, char rootname[], int ochoice);
 int nscat_split(WindPtr w, char rootname[], int ochoice);
+int convergence_summary(WindPtr w, char rootname[], int ochoice);
 /* py_wind_ion.c */
 int ion_summary(WindPtr w, int element, int istate, int iswitch, char rootname[], int ochoice);
 int tau_ave_summary(WindPtr w, int element, int istate, double freq, char rootname[], int ochoice);

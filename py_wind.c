@@ -223,6 +223,8 @@ a:printf
   printf
     ("W=wind_regions, D=dvds_ave, X=position summary, M=macro atom info, G=inner shell\n");
   printf
+    ("d=convergence status\n");
+  printf
     ("z=Zoom,u=unZoom,Z=switch to/from raw and yz projected modes, F=Create files, A=Change file write defaults\n");
 
   printf ("EOF=quit\n");
@@ -246,6 +248,9 @@ a:printf
       break;
     case 'C':			/*the ratio cooling to heating */
       coolheat_summary (w, root, ochoice);
+      break;
+    case 'd':
+      convergence_summary (w, root, ochoice);
       break;
     case 'D':			/* dvds summary */
       dvds_summary (w, root, ochoice);

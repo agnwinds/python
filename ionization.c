@@ -289,9 +289,12 @@ convergence (xplasma)
        fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old +
 						 xplasma->t_e)) > epsilon)
     techeck = 1;
+
+//110919 nsh modified line below to inlcude the adiabatic cooling in the check that heating equals cooling
+
   if ((xplasma->converge_hc =
-       fabs (xplasma->heat_tot - xplasma->lum_rad) / (xplasma->heat_tot +
-						      xplasma->lum_rad)) >
+       fabs (xplasma->heat_tot - (xplasma->lum_rad + xplasma->lum_adiabatic )) / (xplasma->heat_tot +
+						      xplasma->lum_rad + xplasma->lum_adiabatic)) >
       epsilon)
     hccheck = 1;
 
@@ -629,11 +632,14 @@ zero_emit (t)
 
   //  difference = (xxxplasma->heat_tot - total_emission (xxxplasma, 0., VERY_BIG));
 
-  /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
+ 
+ /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
    * are testing.  Adiabatic cooling is proportional to temperature
    */
 
-  xxxplasma->lum_adiabatic=adiabatic_cooling(&wmain[xxxplasma->nwind],t);
+
+ xxxplasma->lum_adiabatic=adiabatic_cooling(&wmain[xxxplasma->nwind],t);
+
 
   difference =
     xxxplasma->heat_tot - xxxplasma->lum_adiabatic -

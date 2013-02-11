@@ -211,11 +211,14 @@ WindPtr (w);
        * is not included in updates to the temperature, even if the adiabatic cooling is calculated
        * here. 04nov -- ksl */
       /* 05apr -- ksl -- The index being used was incorrect.  This has been fixed now */
+      /* 11sep -- nsh -- The index for the wind (&w) for adiabatic cooling was incorrect - was being called with the plasma cell rather than the approriate wind cell fixed */
 
       if (geo.adiabatic)
-	plasmamain[n].lum_adiabatic =
-	  adiabatic_cooling (&w[n], plasmamain[n].t_e);
-      else
+// incorrect indexing nsh 110921 plasmamain[n].lum_adiabatic =
+//old	  adiabatic_cooling (&w[n], plasmamain[n].t_e);
+     plasmamain[n].lum_adiabatic =
+	  adiabatic_cooling (&w[nwind], plasmamain[n].t_e);
+	 else
 	plasmamain[n].lum_adiabatic = 0.0;
 
 

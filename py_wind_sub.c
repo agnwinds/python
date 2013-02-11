@@ -966,8 +966,8 @@ a:rdint ("Wind.array.element", &n);
   wind_n_to_ij (n, &i, &j);
   xplasma = &plasmamain[w[n].nplasma];
 
-  Log ("Element %d (%d,%d)  inwind %d ntot %d nioniz %d nrad %d\n", n, i,
-       j, w[n].inwind, xplasma->ntot, xplasma->nioniz, xplasma->nrad);
+  Log ("Element %d (%d,%d)  inwind %d plasma cell %d ntot %d nioniz %d nrad %d\n", n, i,
+       j, w[n].inwind, xplasma->nplasma, xplasma->ntot, xplasma->nioniz, xplasma->nrad);
   Log ("xyz %8.2e %8.2e %8.2e vel %8.2e %8.2e %8.2e\n", w[n].x[0],
        w[n].x[1], w[n].x[2], w[n].v[0], w[n].v[1], w[n].v[2]);
   Log ("nh %8.2e ne %8.2e t_r %8.2e t_e %8.2e w %8.2e vol %8.2e\n",
@@ -981,7 +981,7 @@ a:rdint ("Wind.array.element", &n);
     ("t_e %8.2e lum_tot  %8.2e lum_lines  %8.2e lum_ff  %8.2e lum_fb     %8.2e %8.2e %8.2e %8.2e %8.2e  lum_comp %8.2e\n",
      xplasma->t_e, xplasma->lum_rad, xplasma->lum_lines, xplasma->lum_ff,
      xplasma->lum_fb, xplasma->lum_ion[0], xplasma->lum_ion[2],
-     xplasma->lum_ion[3], xplasma->lum_z),xplasma->lum_comp;
+     xplasma->lum_ion[3], xplasma->lum_z,xplasma->lum_comp);
   Log
     ("t_r %8.2e heat_tot %8.2e heat_lines %8.2e heat_ff %8.2e heat_photo %8.2e %8.2e %8.2e %8.2e %8.2e heat_comp %3.2e\n",
      xplasma->t_r, xplasma->heat_tot, xplasma->heat_lines, xplasma->heat_ff,
@@ -1494,16 +1494,46 @@ nscat_split (w, rootname, ochoice)
 
 
 
-//  if (ochoice)
- //   {
-  //    strcpy (filename, rootname);
-   //   strcat (filename, ".thomp");
-    //  write_array (filename, ochoice);
-//    }
+  if (ochoice)
+    {
+    strcpy (filename, rootname);
+    strcat (filename, ".thomp");
+    write_array (filename, ochoice);
+    }
 
   return (0);
 
 }
 
+int
+convergence_summary (w, rootname, ochoice)
+     WindPtr w;
+     char rootname[];
+     int ochoice;
+{
+  int n;
+  int nplasma;
+  char filename[LINELENGTH];
 
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = plasmamain[nplasma].converge_whole;
+	}
+    }
+  display ("Coonvergence (0=converged)");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".conv");
+      write_array (filename, ochoice);
+    }
+
+  return (0);
+
+}
 
