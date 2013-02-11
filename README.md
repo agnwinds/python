@@ -1,7 +1,7 @@
 README
 ***
 =========
-Python 58 is an old version of the code, used before NSH started AGN development.
+Python 58 is an older version of Python from before the start of AGN development.
 
 
 ***
