@@ -1153,7 +1153,7 @@ run -- 07jul -- ksl
 /* Determine the frequency range which will be used to establish the ionization balance of the wind */
 
   // 59 - Increased to 20,000 A so could go further into NIR 
-  freqmin = C / 20000e-8;	/*20000 A */
+  freqmin = C / 12000e-8;	/*20000 A */
 
   tmax = TSTAR;
   if (geo.twind > tmax)

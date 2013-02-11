@@ -119,10 +119,10 @@ bf_estimators_increment (one, p, ds)
 	  weight_of_packet = p->w;
 	  y = weight_of_packet * x * ds;
 	  exponential = y * exp (-(freq_av - ft) / BOLTZMANN / xplasma->t_e);
-	  mplasma->gamma[llvl][m] += y / freq_av;
-	  mplasma->alpha_st[llvl][m] += exponential / freq_av;
-	  mplasma->gamma_e[llvl][m] += y / ft;
-	  mplasma->alpha_st_e[llvl][m] += exponential / ft;
+	  mplasma->gamma[config[llvl].bfu_indx_first + m] += y / freq_av;
+	  mplasma->alpha_st[config[llvl].bfu_indx_first + m] += exponential / freq_av;
+	  mplasma->gamma_e[config[llvl].bfu_indx_first + m] += y / ft;
+	  mplasma->alpha_st_e[config[llvl].bfu_indx_first + m] += exponential / ft;
 
 	  /* Now record the contribution to the energy absorbed by macro atoms. */
 	  yy = y * den_config (xplasma, llvl);
@@ -321,7 +321,7 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
 
   if (y >= 0)
     {
-      mplasma->jbar[llvl][n] += y;
+      mplasma->jbar[config[llvl].bbu_indx_first + n] += y;
     }
   else
     {
@@ -444,10 +444,10 @@ mc_estimator_normalise (n)
 	     }
 	   */
 
-	  mplasma->gamma_old[i][j] = mplasma->gamma[i][j] / H / volume;	//normalise
-	  mplasma->gamma[i][j] = 0.0;	//re-initialise for next iteration
-	  mplasma->gamma_e_old[i][j] = mplasma->gamma_e[i][j] / H / volume;	//normalise
-	  mplasma->gamma_e[i][j] = 0.0;	//re-initialise for next iteration
+	  mplasma->gamma_old[config[i].bfu_indx_first+j] = mplasma->gamma[config[i].bfu_indx_first+j] / H / volume;	//normalise
+	  mplasma->gamma[config[i].bfu_indx_first+j] = 0.0;	//re-initialise for next iteration
+	  mplasma->gamma_e_old[config[i].bfu_indx_first+j] = mplasma->gamma_e[config[i].bfu_indx_first+j] / H / volume;	//normalise
+	  mplasma->gamma_e[config[i].bfu_indx_first+j] = 0.0;	//re-initialise for next iteration
 
 	  /* For the stimulated recombination parts we need the the
 	     ratio of statistical weights too. 
@@ -458,15 +458,15 @@ mc_estimator_normalise (n)
 	    config[phot_top[config[i].bfu_jump[j]].uplev].g / config[i].g;
 	  //        config[phot_top[config[i].bfu_jump[j]].nlev].g
 
-	  mplasma->alpha_st_old[i][j] =
-	    mplasma->alpha_st[i][j] * stimfac * stat_weight_ratio / H /
+	  mplasma->alpha_st_old[config[i].bfu_indx_first+j] =
+	    mplasma->alpha_st[config[i].bfu_indx_first+j] * stimfac * stat_weight_ratio / H /
 	    volume;
-	  mplasma->alpha_st[i][j] = 0.0;
+	  mplasma->alpha_st[config[i].bfu_indx_first+j] = 0.0;
 
-	  mplasma->alpha_st_e_old[i][j] =
-	    mplasma->alpha_st_e[i][j] * stimfac * stat_weight_ratio / H /
+	  mplasma->alpha_st_e_old[config[i].bfu_indx_first+j] =
+	    mplasma->alpha_st_e[config[i].bfu_indx_first+j] * stimfac * stat_weight_ratio / H /
 	    volume;
-	  mplasma->alpha_st_e[i][j] = 0.0;
+	  mplasma->alpha_st_e[config[i].bfu_indx_first+j] = 0.0;
 
 	  /* For continuua whose edges lie beyond freqmin assume that gamma
 	     is given by a black body. */
@@ -477,13 +477,13 @@ mc_estimator_normalise (n)
 	  if (phot_top[config[i].bfu_jump[j]].freq[0] < 7.5e12
 	      || phot_top[config[i].bfu_jump[j]].freq[0] > 1.2e16)
 	    {
-	      mplasma->gamma_old[i][j] =
+	      mplasma->gamma_old[config[i].bfu_indx_first+j] =
 		get_gamma (&phot_top[config[i].bfu_jump[j]], xplasma);
-	      mplasma->gamma_e_old[i][j] =
+	      mplasma->gamma_e_old[config[i].bfu_indx_first+j] =
 		get_gamma_e (&phot_top[config[i].bfu_jump[j]], xplasma);
-	      mplasma->alpha_st_e_old[i][j] =
+	      mplasma->alpha_st_e_old[config[i].bfu_indx_first+j] =
 		get_alpha_st_e (&phot_top[config[i].bfu_jump[j]], xplasma);
-	      mplasma->alpha_st_old[i][j] =
+	      mplasma->alpha_st_old[config[i].bfu_indx_first+j] =
 		get_alpha_st (&phot_top[config[i].bfu_jump[j]], xplasma);
 	    }
 
@@ -580,10 +580,10 @@ mc_estimator_normalise (n)
 
 	  //get the line frequency
 	  line_freq = line[config[i].bbu_jump[j]].freq;
-	  mplasma->jbar_old[i][j] =
-	    mplasma->jbar[i][j] * C * stimfac / 4. / PI / volume / line_freq;
+	  mplasma->jbar_old[config[i].bbu_indx_first+j] =
+	    mplasma->jbar[config[i].bbu_indx_first+j] * C * stimfac / 4. / PI / volume / line_freq;
 
-	  mplasma->jbar[i][j] = 0.0;
+	  mplasma->jbar[config[i].bbu_indx_first+j] = 0.0;
 	}
     }
 
@@ -687,9 +687,9 @@ total_fb_matoms (xplasma, t_e, f1, f2)
 	      cont_ptr = &phot_top[config[i].bfu_jump[j]];
 	      density = den_config (xplasma, cont_ptr->uplev);
 	      cool_contribution =
-		(mplasma->alpha_st_e_old[i][j] +
+		(mplasma->alpha_st_e_old[config[i].bfu_indx_first + j] +
 		 alpha_sp (cont_ptr, xplasma, 1)
-		 - mplasma->alpha_st_old[i][j]
+		 - mplasma->alpha_st_old[config[i].bfu_indx_first + j]
 		 - alpha_sp (cont_ptr, xplasma, 0))
 		* H * phot_top[config[i].bfu_jump[j]].freq[0] * density *
 		xplasma->ne * wmain[xplasma->nwind].vol;
@@ -932,8 +932,8 @@ macro_bf_heating (xplasma, t_e)
 	  lower_density =
 	    den_config (xplasma, phot_top[config[i].bfu_jump[j]].nlev);
 	  heat_contribution =
-	    (mplasma->gamma_e_old[i][j] -
-	     mplasma->gamma_old[i][j]) * H *
+	    (mplasma->gamma_e_old[config[i].bfu_indx_first + j] -
+	     mplasma->gamma_old[config[i].bfu_indx_first + j]) * H *
 	    phot_top[config[i].bfu_jump[j]].freq[0] * lower_density *
 	    wmain[xplasma->nwind].vol;
 

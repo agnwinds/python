@@ -59,7 +59,7 @@ wind_save (filename)
 {
   FILE *fptr, *fopen ();
   char line[LINELENGTH];
-  int n;
+  int n, m;
 
   if ((fptr = fopen (filename, "w")) == NULL)
     {
@@ -73,7 +73,28 @@ wind_save (filename)
   n += fwrite (wmain, sizeof (wind_dummy), NDIM2, fptr);
   n += fwrite (plasmamain, sizeof (plasma_dummy), NPLASMA, fptr);
   if (geo.nmacro)
-    n += fwrite (macromain, sizeof (macro_dummy), NPLASMA, fptr);
+    {
+      n += fwrite (macromain, sizeof (macro_dummy), NPLASMA, fptr);
+      for (m=0;m<NPLASMA;m++)
+	{
+	  n += fwrite(macromain[m].jbar,sizeof(double),size_Jbar_est, fptr);
+	  n += fwrite(macromain[m].jbar_old,sizeof(double),size_Jbar_est, fptr);
+	  n += fwrite(macromain[m].gamma,sizeof(double),size_gamma_est, fptr);
+	  n += fwrite(macromain[m].gamma_old,sizeof(double),size_gamma_est, fptr);
+	  n += fwrite(macromain[m].gamma_e,sizeof(double),size_gamma_est, fptr);
+	  n += fwrite(macromain[m].gamma_e_old,sizeof(double),size_gamma_est, fptr);
+	  n += fwrite(macromain[m].alpha_st,sizeof(double),size_gamma_est, fptr);
+	  n += fwrite(macromain[m].alpha_st_old,sizeof(double),size_gamma_est, fptr);
+	  n += fwrite(macromain[m].alpha_st_e,sizeof(double),size_gamma_est, fptr);
+	  n += fwrite(macromain[m].alpha_st_e_old,sizeof(double),size_gamma_est, fptr);
+	  n += fwrite(macromain[m].recomb_sp,sizeof(double),size_alpha_est, fptr);
+	  n += fwrite(macromain[m].recomb_sp_e,sizeof(double),size_alpha_est, fptr);
+	  n += fwrite(macromain[m].matom_emiss,sizeof(double),nlevels_macro, fptr);
+	  n += fwrite(macromain[m].matom_abs,sizeof(double),nlevels_macro, fptr);
+	  
+	} 
+
+    }
 
   fclose (fptr);
 
@@ -87,7 +108,7 @@ wind_read (filename)
      char filename[];
 {
   FILE *fptr, *fopen ();
-  int n;
+  int n,m;
   int wind_complete ();
   char line[LINELENGTH];
   char version[LINELENGTH];
@@ -125,6 +146,26 @@ wind_read (filename)
     {
       calloc_macro (NPLASMA);
       n += fread (macromain, sizeof (macro_dummy), NPLASMA, fptr);
+      calloc_estimators (NPLASMA);
+      
+      for (m=0;m<NPLASMA;m++)
+	{
+	  n += fread(macromain[m].jbar,sizeof(double),size_Jbar_est, fptr);
+	  n += fread(macromain[m].jbar_old,sizeof(double),size_Jbar_est, fptr);
+	  n += fread(macromain[m].gamma,sizeof(double),size_gamma_est, fptr);
+	  n += fread(macromain[m].gamma_old,sizeof(double),size_gamma_est, fptr);
+	  n += fread(macromain[m].gamma_e,sizeof(double),size_gamma_est, fptr);
+	  n += fread(macromain[m].gamma_e_old,sizeof(double),size_gamma_est, fptr);
+	  n += fread(macromain[m].alpha_st,sizeof(double),size_gamma_est, fptr);
+	  n += fread(macromain[m].alpha_st_old,sizeof(double),size_gamma_est, fptr);
+	  n += fread(macromain[m].alpha_st_e,sizeof(double),size_gamma_est, fptr);
+	  n += fread(macromain[m].alpha_st_e_old,sizeof(double),size_gamma_est, fptr);
+	  n += fread(macromain[m].recomb_sp,sizeof(double),size_alpha_est, fptr);
+	  n += fread(macromain[m].recomb_sp_e,sizeof(double),size_alpha_est, fptr);
+	  n += fread(macromain[m].matom_emiss,sizeof(double),nlevels_macro, fptr);
+	  n += fread(macromain[m].matom_abs,sizeof(double),nlevels_macro, fptr);
+	}
+
     }
 
   fclose (fptr);

@@ -1188,11 +1188,11 @@ scatter (p, nres, nnscat)
 							 llvl) / xplasma->ne;
 
 	      gamma_twiddle =
-		mplasma->gamma_old[llvl][m] -
-		(mplasma->alpha_st_old[llvl][m] * stim_fact);
+		mplasma->gamma_old[config[llvl].bfu_indx_first + m] -
+		(mplasma->alpha_st_old[config[llvl].bfu_indx_first+m] * stim_fact);
 	      gamma_twiddle_e =
-		mplasma->gamma_e_old[llvl][m] -
-		(mplasma->alpha_st_e_old[llvl][m] * stim_fact);
+		mplasma->gamma_e_old[config[llvl].bfu_indx_first + m] -
+		(mplasma->alpha_st_e_old[config[llvl].bfu_indx_first+m] * stim_fact);
 
 	      // Both gamma_twiddles must be greater that zero if this is going to work. If they 
 	      // are zero then it's probably because this is the first iteration and so the've not

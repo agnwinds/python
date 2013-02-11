@@ -2134,7 +2134,7 @@ or zero so that simple checks of true and false can be used for them */
   if (ntop_phot > 0)
     index_phot_top ();
 
-  return (0);
+ return (0);
 
 }
 

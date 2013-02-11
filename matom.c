@@ -143,6 +143,7 @@ matom (p, nres, escape)
   double pjnorm_known[NLEVELS_MACRO], penorm_known[NLEVELS_MACRO];
   int prbs_known[NLEVELS_MACRO];
 
+
   for (n = 0; n < NLEVELS_MACRO; n++)
     {
       prbs_known[n] = -1;	//flag all as unknown
@@ -198,8 +199,6 @@ not jumping to a new upper level.  I would have guested this was impossible */
       nbbu = config[uplvl].n_bbu_jump;	// number of bb upward jump from this configuration
       nbfd = config[uplvl].n_bfd_jump;	// number of bf downared jumps from this transition
       nbfu = config[uplvl].n_bfu_jump;	// number of bf upward jumps from this transiion
-
-
 
       if (prbs_known[uplvl] != 1)
 	{
@@ -284,7 +283,7 @@ not jumping to a new upper level.  I would have guested this was impossible */
 	      cont_ptr = &phot_top[config[uplvl].bfd_jump[n]];	//pointer to continuum
 	      if (n < 25)
 		{
-		  sp_rec_rate = mplasma->recomb_sp[uplvl][n];	//need this twice so store it
+		  sp_rec_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n];	//need this twice so store it
 		  bf_cont =
 		    (sp_rec_rate + q_recomb (cont_ptr, t_e) * ne) * ne;
 		}
@@ -310,8 +309,6 @@ not jumping to a new upper level.  I would have guested this was impossible */
 	      m++;
 	    }
 
-
-
 	  /* Now upwards jumps. */
 
 	  /* bb */
@@ -325,7 +322,7 @@ not jumping to a new upper level.  I would have guested this was impossible */
 	  for (n = 0; n < nbbu; n++)
 	    {
 	      line_ptr = &line[config[uplvl].bbu_jump[n]];
-	      rad_rate = (b12 (line_ptr) * mplasma->jbar_old[uplvl][n]);
+	      rad_rate = (b12 (line_ptr) * mplasma->jbar_old[config[uplvl].bbu_indx_first + n]);
 	      //jprbs_known[uplvl][m] = jprbs[m] = ((b12 (line_ptr) * mplasma->jbar_old[uplvl][n]) + (q12(line_ptr, t_e) * ne)) * config[uplvl].ex;     //energy of lower state
 	      coll_rate = q12 (line_ptr, t_e);
 	      //                - (den_config (xplasma, uplvl) /
@@ -355,15 +352,15 @@ not jumping to a new upper level.  I would have guested this was impossible */
 	      /* For bf ionization the jump probability is just gamma * energy
 	         gamma is the photoionisation rate. Stimulated recombination also included. */
 	      cont_ptr = &phot_top[config[uplvl].bfu_jump[n]];	//pointer to continuum
-
-	      jprbs_known[uplvl][m] = jprbs[m] = (mplasma->gamma_old[uplvl][n] - (mplasma->alpha_st_old[uplvl][n] * xplasma->ne * den_config (xplasma, cont_ptr->uplev) / den_config (xplasma, cont_ptr->nlev)) + (q_ioniz (cont_ptr, t_e) * ne)) * config[uplvl].ex;	//energy of lower state
+	      
+	      jprbs_known[uplvl][m] = jprbs[m] = (mplasma->gamma_old[config[uplvl].bfu_indx_first + n] - (mplasma->alpha_st_old[config[uplvl].bfu_indx_first+n] * xplasma->ne * den_config (xplasma, cont_ptr->uplev) / den_config (xplasma, cont_ptr->nlev)) + (q_ioniz (cont_ptr, t_e) * ne)) * config[uplvl].ex;	//energy of lower state
 	      if (jprbs[m] < 0.)	//test (can be deleted eventually SS)
 		{
 		  Error ("Negative probability (matom, 6). Abort?\n");
 		  printf
 		    ("mplasma->gamma_old[uplvl][n] %g, (mplasma->alpha_st_old[uplvl][n] * xplasma->ne * den_config (xplasma, cont_ptr->uplev) / den_config (xplasma, cont_ptr->nlev)) %g\n",
-		     mplasma->gamma_old[uplvl][n],
-		     (mplasma->alpha_st_old[uplvl][n] * xplasma->ne *
+		     mplasma->gamma_old[config[uplvl].bfu_indx_first+n],
+		     (mplasma->alpha_st_old[config[uplvl].bfu_indx_first + n] * xplasma->ne *
 		      den_config (xplasma,
 				  cont_ptr->uplev) / den_config (xplasma,
 								 cont_ptr->
@@ -463,6 +460,7 @@ not jumping to a new upper level.  I would have guested this was impossible */
       exit (0);
     }
 
+
   /* If it gets here then an emission has occurred. SS */
   /* Use a running total to decide where event occurs. SS */
 
@@ -523,7 +521,7 @@ not jumping to a new upper level.  I would have guested this was impossible */
 
       cont_ptr = &phot_top[config[uplvl].bfd_jump[n - nbbd]];
 
-      rad_rate = mplasma->recomb_sp[uplvl][n - nbbd];	//again using recomb_sp rather than alpha_sp (SS July 04)
+      rad_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n - nbbd];	//again using recomb_sp rather than alpha_sp (SS July 04)
       coll_rate = q_recomb (cont_ptr, t_e) * ne;
 
       choice = ((rand () + 0.5) / MAXRAND);	// the random number
@@ -551,6 +549,7 @@ not jumping to a new upper level.  I would have guested this was impossible */
 	("Trying to emitt from Macro Atom but no available route (matom). Abort.");
       exit (0);
     }
+
   return (0);
 }
 
@@ -759,6 +758,7 @@ kpkt (p, nres, escape)
   double coll_rate, rad_rate;
   double q_ioniz ();
 
+
   /* For the moment only bf processes are included. Idea is to calculated the cooling
      terms for all the processes and then choose one at random to destroy the k-packet and
      turn it back into a photon bundle. 
@@ -800,7 +800,7 @@ kpkt (p, nres, escape)
 	      upper_density = den_config (xplasma, ulvl);
 	      /* SS July 04 - for macro atoms the recombination coefficients are stored so use the
 	         stored values rathert than recompue them. */
-	      cooling_bf[i] = mplasma->kpkt_rates.cooling_bf[i] = upper_density * H * cont_ptr->freq[0] * (mplasma->recomb_sp_e[ulvl][cont_ptr->down_index]);	// - modified the definition of _sp_e to be the difference
+	      cooling_bf[i] = mplasma->kpkt_rates.cooling_bf[i] = upper_density * H * cont_ptr->freq[0] * (mplasma->recomb_sp_e[config[ulvl].bfd_indx_first + cont_ptr->down_index]);	// - modified the definition of _sp_e to be the difference
 	      //           xplasma->recomb_sp[ulvl][cont_ptr->down_index]);
 	    }
 	  else
@@ -937,7 +937,7 @@ kpkt (p, nres, escape)
 	  Error ("kpkt: A scattering event in cell %d with vol = 0???\n",
 		 one->nwind);
 	  //Diagnostic      return(-1);  //57g -- Cannot diagnose with an exit
-	  exit (0);
+	   exit (0);
 	}
 
 
@@ -1003,7 +1003,6 @@ kpkt (p, nres, escape)
 	      /*Currently this assumed hydrogenic shape cross-section - Improve */
 
 	      /* k-packet is now eliminated. All done. */
-
 	      return (0);
 	    }
 	  else
@@ -1045,7 +1044,6 @@ kpkt (p, nres, escape)
 	      /* When it gets here the packet is back to an
 	         r-packet and the emission mechanism is identified by nres
 	         i.e. that's it finished. (SS, Apr 04). */
-
 	      return (0);
 	    }
 	  else
@@ -1103,7 +1101,6 @@ kpkt (p, nres, escape)
 
 
 	      /* k-packet is now eliminated. All done. */
-
 	      return (0);
 	    }
 	  else
@@ -1520,7 +1517,7 @@ macro_pops (xplasma, xne)
 		      line_ptr = &line[config[index_lvl].bbu_jump[index_bbu]];
 		      rate =
 			b12 (line_ptr) *
-			mplasma->jbar_old[index_lvl][index_bbu];
+			mplasma->jbar_old[config[index_lvl].bbu_indx_first + index_bbu];
 		      rate += q12 (line_ptr, xplasma->t_e) * xne;
 
 		      /* This is the rate out of the level in question. We need to add it
@@ -1591,7 +1588,7 @@ macro_pops (xplasma, xne)
 
 		      cont_ptr =
 			&phot_top[config[index_lvl].bfu_jump[index_bfu]];
-		      rate = mplasma->gamma_old[index_lvl][index_bfu];
+		      rate = mplasma->gamma_old[config[index_lvl].bfu_indx_first+index_bfu];
 		      rate += q_ioniz (cont_ptr, xplasma->t_e) * xne;
 
 		      /* This is the rate out of the level in question. We need to add it
@@ -1612,7 +1609,7 @@ macro_pops (xplasma, xne)
 		         other direction. */
 
 		      rate =
-			mplasma->alpha_st_old[index_lvl][index_bfu] * xne;
+			mplasma->alpha_st_old[config[index_lvl].bfu_indx_first + index_bfu] * xne;
 
 		      rate_matrix[upper][upper] += -1. * rate;
 		      rate_matrix[lower][upper] += rate;
@@ -1629,11 +1626,11 @@ macro_pops (xplasma, xne)
 		      cont_ptr =
 			&phot_top[config[index_lvl].bfd_jump[index_bfd]];
 		      /* Get new values of the recombination rates and store them. */
-		      mplasma->recomb_sp[index_lvl][index_bfd] =
+		      mplasma->recomb_sp[config[index_lvl].bfd_indx_first + index_bfd] =
 			alpha_sp (cont_ptr, xplasma, 0);
-		      mplasma->recomb_sp_e[index_lvl][index_bfd] =
+		      mplasma->recomb_sp_e[config[index_lvl].bfd_indx_first + index_bfd] =
 			alpha_sp (cont_ptr, xplasma, 2);
-		      rate = mplasma->recomb_sp[index_lvl][index_bfd] * xne;
+		      rate = mplasma->recomb_sp[config[index_lvl].bfd_indx_first + index_bfd] * xne;
 		      rate += q_recomb (cont_ptr, xplasma->t_e) * xne * xne;
 
 

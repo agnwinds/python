@@ -226,8 +226,8 @@ config_overview (n, icell)
 	{
 	  //ii=p->bbu_jump[i];
 	  ii = i;
-	  printf (" %3d %8.2e %8.2e\n", ii, (m->jbar[n][ii]),
-		  (m->jbar_old[n][ii]));
+	  printf (" %3d %8.2e %8.2e\n", ii, (m->jbar[config[n].bbu_indx_first + ii]),
+		  (m->jbar_old[config[n].bbu_indx_first + ii]));
 	}
 
       printf ("bbd_jump:\n");
@@ -235,8 +235,8 @@ config_overview (n, icell)
 	{
 	  //                          ii=p->bbd_jump[i];
 	  ii = i;
-	  printf (" %3d %8.2e %8.2e\n", ii, (m->jbar[n][ii]),
-		  (m->jbar_old[n][ii]));
+	  printf (" %3d %8.2e %8.2e\n", ii, (m->jbar[config[n].bbu_indx_first +ii]),
+		  (m->jbar_old[config[n].bbu_indx_first +ii]));
 	}
 
       /* Detailed information on the fb transitions */
@@ -246,11 +246,11 @@ config_overview (n, icell)
 	{
 	  //      ii=p->bfu_jump[i];
 	  ii = i;
-	  printf (" %3d %g %g %g %g %g %g %g %g\n", ii, (m->gamma[n][ii]),
-		  (m->gamma_old[n][ii]), (m->alpha_st[n][ii]),
-		  (m->alpha_st_old[n][ii]), (m->alpha_st_e[n][ii]),
-		  (m->alpha_st_e_old[n][ii]), (m->recomb_sp[n][ii]),
-		  (m->recomb_sp_e[n][ii]));
+	  printf (" %3d %g %g %g %g %g %g %g %g\n", ii, (m->gamma[config[n].bfu_indx_first + ii]),
+		  (m->gamma_old[config[n].bfu_indx_first + ii]), (m->alpha_st[config[n].bfu_indx_first + ii]),
+		  (m->alpha_st_old[config[n].bfu_indx_first + ii]), (m->alpha_st_e[config[n].bfu_indx_first + ii]),
+		  (m->alpha_st_e_old[config[n].bfu_indx_first + ii]), (m->recomb_sp[config[n].bfd_indx_first + ii]),
+		  (m->recomb_sp_e[config[n].bfd_indx_first + ii]));
 	}
 
 
@@ -260,11 +260,11 @@ config_overview (n, icell)
 	{
 	  //      ii=p->bfd_jump[i];
 	  ii = i;
-	  printf (" %3d %g %g %g %g %g %g %g %g\n", ii, (m->gamma[n][ii]),
-		  (m->gamma_old[n][ii]), (m->alpha_st[n][ii]),
-		  (m->alpha_st_old[n][ii]), (m->alpha_st_e[n][ii]),
-		  (m->alpha_st_e_old[n][ii]), (m->recomb_sp[n][ii]),
-		  (m->recomb_sp_e[n][ii]));
+	  printf (" %3d %g %g %g %g %g %g %g %g\n", ii, (m->gamma[config[n].bfu_indx_first + ii]),
+		  (m->gamma_old[config[n].bfu_indx_first + ii]), (m->alpha_st[config[n].bfu_indx_first + ii]),
+		  (m->alpha_st_old[config[n].bfu_indx_first + ii]), (m->alpha_st_e[config[n].bfu_indx_first + ii]),
+		  (m->alpha_st_e_old[config[n].bfu_indx_first + ii]), (m->recomb_sp[config[n].bfd_indx_first + ii]),
+		  (m->recomb_sp_e[config[n].bfd_indx_first + ii]));
 	}
 
 

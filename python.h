@@ -521,30 +521,52 @@ if they exist have lower level numbers than other types of levels.
 
 
 typedef struct macro {
-  double jbar[NLEVELS_MACRO][NBBJUMPS]; /* This will store the Sobolev mean intensity in transitions which is needed 
+  double *jbar;
+  //[NLEVELS_MACRO][NBBJUMPS]; 
+  /* This will store the Sobolev mean intensity in transitions which is needed 
 				       for Macro Atom jumping probabilities. The indexing is by configuration (the 
 				       NLTE_LEVELS) and then by the upward bound-bound jumps from that level 
 				       (the NBBJUMPS) (SS)*/
-  double jbar_old[NLEVELS_MACRO][NBBJUMPS];
+  double *jbar_old;
+  //[NLEVELS_MACRO][NBBJUMPS];
 
-  double gamma[NLEVELS_MACRO][NBFJUMPS]; /* This is similar to the jbar but for bound-free transitions. It records the 
+  double *gamma;
+  //[NLEVELS_MACRO][NBFJUMPS]; 
+  /* This is similar to the jbar but for bound-free transitions. It records the 
 					 appropriate photoionisation rate co-efficient. (SS)*/
-  double gamma_old[NLEVELS_MACRO][NBFJUMPS];
-  double gamma_e[NLEVELS_MACRO][NBFJUMPS]; /* This is Leon's gamma_e: very similar to gamma but energy weighted. Needed
+  double *gamma_old;
+  //[NLEVELS_MACRO][NBFJUMPS];
+  double *gamma_e;
+  //[NLEVELS_MACRO][NBFJUMPS]; 
+  /* This is Leon's gamma_e: very similar to gamma but energy weighted. Needed
 					   for division of photoionisation energy into excitation and k-packets. (SS)*/
-  double gamma_e_old[NLEVELS_MACRO][NBFJUMPS];
+  double *gamma_e_old;
+  //[NLEVELS_MACRO][NBFJUMPS];
 
-  double alpha_st[NLEVELS_MACRO][NBFJUMPS]; /* Same as gamma but for stimulated recombination rather than photoionisation. (SS)*/
-  double alpha_st_old[NLEVELS_MACRO][NBFJUMPS];
-  double alpha_st_e[NLEVELS_MACRO][NBFJUMPS]; /* Same as gamma_e but for stimulated recombination rather than photoionisation. (SS)*/
-  double alpha_st_e_old[NLEVELS_MACRO][NBFJUMPS];
+  double *alpha_st;
+  //[NLEVELS_MACRO][NBFJUMPS]; /* Same as gamma but for stimulated recombination rather than photoionisation. (SS)*/
+  double *alpha_st_old;
+  //[NLEVELS_MACRO][NBFJUMPS];
+  double *alpha_st_e;
+  //[NLEVELS_MACRO][NBFJUMPS]; 
+  /* Same as gamma_e but for stimulated recombination rather than photoionisation. (SS)*/
+  double *alpha_st_e_old;
+  //[NLEVELS_MACRO][NBFJUMPS];
 
-  double recomb_sp[NLEVELS_MACRO][NBFJUMPS]; /* Spontaneous recombination. (SS) */
-  double recomb_sp_e[NLEVELS_MACRO][NBFJUMPS]; /* "e" version of the spontaneous recombination coefficient. (SS) */
+  double *recomb_sp;
+  //[NLEVELS_MACRO][NBFJUMPS]; 
+  /* Spontaneous recombination. (SS) */
+  double *recomb_sp_e;
+  //[NLEVELS_MACRO][NBFJUMPS]; 
+  /* "e" version of the spontaneous recombination coefficient. (SS) */
 
-  double matom_emiss[NLEVELS_MACRO]; /* This is the specific emissivity due to the de-activation of macro atoms in the cell
+  double *matom_emiss;
+  //[NLEVELS_MACRO]; 
+  /* This is the specific emissivity due to the de-activation of macro atoms in the cell
 					in the frequency range that is required for the final spectral synthesis. (SS) */
-  double matom_abs[NLEVELS_MACRO];   /* This is the energy absorbed by the macro atom levels - recorded during the ionization 
+  double *matom_abs;
+  //[NLEVELS_MACRO];  
+  /* This is the energy absorbed by the macro atom levels - recorded during the ionization 
 					cycles and used to get matom_emiss (SS) */
   int kpkt_rates_known;
   COOLSTR kpkt_rates;
@@ -553,6 +575,8 @@ typedef struct macro {
 MacroPtr macromain;
 
 int xxxpdfwind;			// When 1, line luminosity calculates pdf
+
+int size_Jbar_est,  size_gamma_est, size_alpha_est;
 
 // These definitions define a photon type, generally it's origin
 #define PTYPE_STAR	    0

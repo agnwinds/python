@@ -404,46 +404,50 @@ wind_rad_init ()
 
       for (i = 0; i < nlevels_macro; i++)	//57h
 	{
-	  for (njump = 0; njump < NBBJUMPS; njump++)
+	  for (njump = 0; njump < config[i].n_bbu_jump; njump++)
 	    {
-	      macromain[n].jbar[i][njump] = 0.0;	// mean intensity
+	      macromain[n].jbar[config[i].bbu_indx_first + njump] = 0.0;	// mean intensity
 	    }
-	  for (njump = 0; njump < NBFJUMPS; njump++)
+	  for (njump = 0; njump < config[i].n_bfu_jump; njump++)
 	    {
-	      macromain[n].gamma[i][njump] = 0.0;
-	      macromain[n].gamma_e[i][njump] = 0.0;
-	      macromain[n].alpha_st[i][njump] = 0.0;	//stimulated recombination
-	      macromain[n].alpha_st_e[i][njump] = 0.0;
+	      macromain[n].gamma[config[i].bfu_indx_first + njump] = 0.0;
+	      macromain[n].gamma_e[config[i].bfu_indx_first + njump] = 0.0;
+	      macromain[n].alpha_st[config[i].bfd_indx_first + njump] = 0.0;	//stimulated recombination
+	      macromain[n].alpha_st_e[config[i].bfd_indx_first + njump] = 0.0;
+	    }
+	  
 
 	      /* Next block to set spontaneous recombination rates for next iteration. (SS July 04) */
-	      if (njump < config[i].n_bfd_jump && plasmamain[n].t_e > 1.0)
+	  for (njump = 0; njump < config[i].n_bfd_jump; njump++)
+	    {
+	      if (plasmamain[n].t_e > 1.0)
 		{
 		  //04Jul--ksl-modified these calls to reflect changed alpha_sp
-		  macromain[n].recomb_sp[i][njump] =
+		  macromain[n].recomb_sp[config[i].bfd_indx_first + njump] =
 		    alpha_sp (&phot_top[config[i].bfd_jump[njump]],
 			      &plasmamain[n], 0);
-		  macromain[n].recomb_sp_e[i][njump] =
+		  macromain[n].recomb_sp_e[config[i].bfd_indx_first + njump] =
 		    alpha_sp (&phot_top[config[i].bfd_jump[njump]],
 			      &plasmamain[n], 2);
 		}
 	      else
 		{
-		  macromain[n].recomb_sp[i][njump] = 0.0;
-		  macromain[n].recomb_sp_e[i][njump] = 0.0;
+		  macromain[n].recomb_sp[config[i].bfd_indx_first + njump] = 0.0;
+		  macromain[n].recomb_sp_e[config[i].bfd_indx_first + njump] = 0.0;
 		}
-
+	      
 	    }
 	}
-
+      
       for (i = 0; i < ntop_phot; i++)
 	{
-/* 57h -- recomb_simple is only required for we are using a macro atom approach, and only non-zero when
-this particular phot_tob xsection is treated as a simple x-section. Stuart, is this correct?? I've added
-checks so that macro_info is only 0 (false) or true (1), and so the logic of the next section can be 
-simplified.  0608-ksl */
+	  /* 57h -- recomb_simple is only required for we are using a macro atom approach, and only non-zero when
+	     this particular phot_tob xsection is treated as a simple x-section. Stuart, is this correct?? I've added
+	     checks so that macro_info is only 0 (false) or true (1), and so the logic of the next section can be 
+	     simplified.  0608-ksl */
 	  if (geo.macro_simple || phot_top[i].macro_info)
 	    {
-
+	      
 	      plasmamain[n].recomb_simple[i] = 0.0;
 	    }
 	  else
@@ -452,23 +456,23 @@ simplified.  0608-ksl */
 		alpha_sp (&phot_top[i], &plasmamain[n], 2);
 	    }
 	}
-
-
+      
+      
       //zero the emissivities that are needed for the spectral synthesis step.
       plasmamain[n].kpkt_emiss = 0.0;
       plasmamain[n].kpkt_abs = 0.0;
       for (i = 0; i < nlevels_macro; i++)	//57h
 	{
 	  macromain[n].matom_abs[i] = 0.0;
-
+	  
 	  macromain[n].matom_emiss[i] = 0.0;
-
+	  
 	}
-
+      
       /* End of added material. */
     }
-
-
+  
+  
   return (0);
 }
 

@@ -174,6 +174,10 @@ typedef struct configurations
     int bbd_jump[NBBJUMPS];         /* list of downwards bb jumps from this configuration (SS) */
     int bfu_jump[NBFJUMPS];         /* list of upwards bf jumps from this configuration (SS) */
     int bfd_jump[NBFJUMPS];         /* list of downwards bf jumps from this configuration (SS) */
+    int bbu_indx_first;         /* index to first MC estimator for bb jumps from this configuration (SS) */
+    int bfu_indx_first;         /* index to first MC estimator for bf jumps from this configuration (SS) */
+    int bfd_indx_first;         /* index to first rate for downward bf jumps from this configuration (SS) */
+
   }
 config_dummy,*ConfigPtr;
 
