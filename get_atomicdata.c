@@ -312,6 +312,7 @@ get_atomic_data (masterfile)
       ion[n].phot_info = (-1);
       ion[n].macro_info = (-1);	//Initialise - don't know if using Macro Atoms or not: set to -1 (SS)
       ion[n].ntop_first = 0;	// The fact that ntop_first and ntop  are initialized to 0 and not -1 is important 
+      ion[n].ntop_ground = 0;  //NSH 0312 initialize the new pointer for GS cross sections
       ion[n].ntop = 0;
       ion[n].nxphot = (-1);
       ion[n].lev_type = (-1);	// Initialise to indicate we don't know what types of configurations will be read
@@ -905,11 +906,13 @@ a level type has not been established
 			}
 		      else
 			{
+//		printf("Not tracking level %i coz we have more than %i NLTE levels\n",nlevels,ion[n].n_lte_max);
 			  config[nlevels].nden = -1;
 			}
 		    }
 		  else
 		    {
+//			printf("Not tracking level %i coz no nlte levels wanted\n",nlevels);
 		      config[nlevels].nden = -1;
 		    }
 
@@ -1044,7 +1047,6 @@ described as macro-levels. */
 		  config[nlevels].q_num = qqnum;
 		  config[nlevels].g = gg;
 		  config[nlevels].ex = exx;
-
 		  if (ion[n].firstlevel < 0)
 		    {
 		      ion[n].firstlevel = nlevels;
@@ -1269,6 +1271,7 @@ for the ionstate.
 			{	// It's a TOPBASE style photoionization record, beginning with the summary record
 			  sscanf (aline, "%*s %d %d %d %d %le %d\n", &z,
 				  &istate, &islp, &ilv, &exx, &np);
+//			printf ("Read a topbase z=%i, istate=%i, islp=%i, ilv=%i\n",z,istate,islp,ilv);
 			  for (n = 0; n < np; n++)
 			    {	//Read the topbase photoionization records
 			      if (fgets (aline, LINELENGTH, fptr) == NULL)
@@ -1315,11 +1318,18 @@ for the ionstate.
 			      phot_top[ntop_phot].np = np;
 			      phot_top[ntop_phot].nlast = -1;
 			      phot_top[ntop_phot].macro_info = 0;
+/*NSH 0312 - next line sees if the topbase level just read in is the ground state - if it is, the ion structure element ntop_ground is set to that topbase level number */
+			      if (islp==config[ion[config[n].nion].first_nlte_level].isp && 					ilv==config[ion[config[n].nion].first_nlte_level].ilv)
+				{
+				ion[config[n].nion].ntop_ground=ntop_phot;
+				}
+
 
 			      if (ion[config[n].nion].phot_info == -1)
 				{
 				  ion[config[n].nion].phot_info = 1;	/* Mark this ion as using TOPBASE photo */
 				  ion[config[n].nion].ntop_first = ntop_phot;
+
 				}
 			      else if (ion[config[n].nion].phot_info == (0))
 				{
@@ -1331,10 +1341,11 @@ for the ionstate.
 				  exit (0);
 				}
 			      ion[config[n].nion].ntop++;
-			      //printf("Accepted Z %d NI %d %d %d (%d %d)\n", z,istate,islp,ilv,n,config[n].nden);
+//			      printf("Accepted Z %d NI %d %d %d (%d %d) into ntopphot=%i e=%e nu=%e\n", z,istate,islp,ilv,n,config[n].nden,ntop_phot,xe[0],xe[0]*EV2ERGS/H);
 			      for (n = 0; n < np; n++)
 				{
 				  phot_top[ntop_phot].freq[n] = xe[n] * EV2ERGS / H;	// convert from eV to freqency
+
 				  phot_top[ntop_phot].x[n] = xx[n];	// leave cross sections in  CGS
 				}
 			      if (phot_freq_min > phot_top[ntop_phot].freq[0])

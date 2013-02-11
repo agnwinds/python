@@ -361,7 +361,7 @@ WindPtr (w);
 		agn_ip=geo.const_agn*(((pow (50000/HEV, geo.alpha_agn + 1.0)) - pow (100/HEV,geo.alpha_agn + 1.0)) /  	(geo.alpha_agn + 1.0));
 		agn_ip /= (w[n].r*w[n].r);
 		agn_ip /= plasmamain[0].rho * rho2nh;
-         	Log ("OUTPUT Lum_agn= %e T_e= %e N_h= %e alpha= %f W= %e IP= %f distance= %e\n",geo.lum_agn,plasmamain[0].t_e,plasmamain[0].rho * rho2nh,plasmamain[0].sim_alpha,plasmamain[0].sim_w,agn_ip,w[n].r);
+         	Log ("OUTPUT Lum_agn= %e T_e= %e N_h= %e alpha= %f IP(sim 2010)= %e distance= %e\n",geo.lum_agn,plasmamain[0].t_e,plasmamain[0].rho * rho2nh,geo.alpha_agn,agn_ip,w[n].r);
 		for (n = 0; n < nelements; n++)
 			{
       			first = ele[n].firstion;

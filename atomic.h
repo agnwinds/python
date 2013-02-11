@@ -126,6 +126,7 @@ typedef struct ions
 				Note: program will exit if -1 before leaving get_atomicdata
 				 */
     int ntop_first;             /* Internal index into topbase photionization structure */
+    int ntop_ground;		/* NSH 03/12 Index to the ground state topbase photoionization state */
     int ntop;                   /* Number of topbase photoionization cross sections for this ion */
     int nxphot;			/* Internal index into VFKY photionionization structure.  There
 				is only one of these per ion */

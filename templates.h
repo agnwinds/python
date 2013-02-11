@@ -437,7 +437,7 @@ double sim_w(double en1, double v, double dt, double alpha, double numin, double
 /* variable_temperature.c */
 int variable_temperature(PlasmaPtr xplasma, int mode);
 double bb_correct_2(double xtemp, double t_r, double www, int nion);
-double temp_func(double temp);
+double temp_func(double solv_temp);
 double pl_correct_2(double xtemp, int nion);
 double tb_planck1(double freq);
 double verner_planck1(double freq);

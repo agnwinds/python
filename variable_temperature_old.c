@@ -24,7 +24,7 @@
 struct photoionization *xver;	//Verner & Ferland description of a photoionization x-section
 struct topbase_phot *xtop;	//Topbase description of a photoionization x-section
 PlasmaPtr xxxplasma;
-double qromb_temp;			//This is a storage variable for the current electron temperature so it is available for qromb calls
+double temp;			//This is a storage variable for the current electron temperature so it is available for qromb calls
 
 
 
@@ -94,7 +94,7 @@ variable_temperature (xplasma, mode)
   double *density;
   double *partition;
   double sum,big;
-  double pi_fudge,recomb_fudge,gs_fudge,tot_fudge; /*The three correction factors for photoionization rate, recombination to ground state, and recombination rate */
+  double pi_fudge,recomb_fudge,gs_fudge; /*The three correction factors for photoionization rate, recombination to ground state, and recombination rate */
   xxxplasma = xplasma;    /*Copy xplasma to local plasma varaible, used to communicate w and alpha to the power law correction routine. */
 
   dne_old=0.0;
@@ -132,7 +132,7 @@ variable_temperature (xplasma, mode)
       xne = xxne = xxxne = x * nh;
     }
   else
-    xne = xxne = xxxne = nh; /*xxne is just a store so the error can report the starting value of ne. xxxne is the shared variable so the temperature solver routine can access it*/
+    xne = xxne = xxxne = nh;
 
   if (xne < 1.e-6)
     xne = xxxne = 1.e-6;	   /* fudge to assure we can actually calculate
@@ -153,7 +153,7 @@ variable_temperature (xplasma, mode)
 	  	Error
 	    	("variable_temperature: Confusion for element %d with first ion %d and last ion %d\n",
 	     nelem, first, last);
-	  	exit (0); 
+	  	exit (0);
 		}
 	/* and now we loop over all the ions of this element */
       	sum = density[first] = 1.0; /* set the density of the first ion of this element to 1.0 - this is (always??) the neutral ion */
@@ -184,28 +184,27 @@ variable_temperature (xplasma, mode)
   		t_e is the actual electron temperature of the cell*/
 
 
-	      	recomb_fudge = sqrt (t_e / xtemp);	
-		gs_fudge = compute_zeta (t_e, nion, 1e14, 1e18, 1); /* Calculate the ground state recombination rate correction factor based on the cells true electron temperature. Zeta does the nion-1 bit */
+	      	recomb_fudge = sqrt (t_e / xtemp);
 //		printf ("recombination fudge = %e\n",recomb_fudge);
 
          	if (mode == 6) /* Correct the SAHA equation abundance pair using an actual radiation field modelled as a dilute black body */
 			{
 			pi_fudge = bb_correct_2 (xtemp, t_r, www, nion);
-			tot_fudge=pi_fudge*recomb_fudge*(gs_fudge+www*(1-gs_fudge));
 			}
 		else if (mode == 7) /* correct the SAHA equation abundance pair using an actual radiation field modelled as a broken power law */
 			{
 			pi_fudge = pl_correct_2 (xtemp, nion);
-			tot_fudge=pi_fudge*recomb_fudge*gs_fudge;
 			}
 
 
-
-
-
+		gs_fudge = compute_zeta (t_e, nion-1, 1e14, 1e18, 1); /* Calculate the ground state recombination rate correction factor based on the cells true electron temperature */
+		gs_fudge = (gs_fudge + pi_fudge * (1.0 - gs_fudge)); /*this replicates LM formula, there instead of using www, we now use pi_fudge, which would be equal if the temp we use is equal to t_r as in the special case in LM */
+//		printf ("pi fudge = %e\n",pi_fudge);
 		/* apply correction factors */
 		
-		b *= tot_fudge;
+		b *= recomb_fudge;
+		b *= pi_fudge;
+                b *= gs_fudge;
 
 
 
@@ -250,9 +249,11 @@ variable_temperature (xplasma, mode)
 	xnew = DENSITY_MIN;	/* fudge to keep a floor on ne */
     if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6)
 	{
+	printf ("Breaking on iteration %i, with ne=%e\n",niterate,xnew);
 	break;
 	}
-    xne = xxxne = (xnew + xne)/2.;   /*New value of ne */
+    xne =(xnew + xne)/2.;   /*New value of ne */
+
 
     niterate++;
 
@@ -356,13 +357,11 @@ bb_correct_2 (xtemp, t_r, www, nion)
  
       
 
-      qromb_temp=t_r;  //The numerator is for the actual radiation temperature
+      temp=t_r;  //The numerator is for the actual radiation temperature
       numerator=www*qromb (tb_planck1, fthresh, fmax, 1.e-4); //and is corrected for W
-      if (numerator==0.0)
-	return (0.0); //There is no need to waste time evaluating the denominator
 
 
-      qromb_temp=xtemp; //The denominator is calculated for the LTE rate at our ideal temp
+      temp=xtemp; //The denominator is calculated for the LTE rate at our ideal temp
 
 //	printf ("topbase n=%i,nion=%i,temp=%e,fthresh=%e,fmax=%e,hnu=%e,hnu/kt=%e,fmax=%e\n",n,ion_lower,temp,fthresh,fmax,fthresh*H,(fthresh*H)/(temp*BOLTZMANN),5.879e10*temp);
 
@@ -377,11 +376,10 @@ bb_correct_2 (xtemp, t_r, www, nion)
       fthresh = xver->freq_t;
       fmax=xver->freq_max;
 
-      qromb_temp=t_r;
+      temp=t_r;
       numerator = www*qromb (verner_planck1, fthresh, fmax, 1.e-4);
-       if (numerator==0.0)
-	return (0.0); //There is no need to waste time evaluating the denominator
-      qromb_temp=xtemp;
+ 
+      temp=xtemp;
 
 //	printf ("verner n=%i,nion=%i,temp=%e,fthresh=%e,fmax=%e,hnu=%e,hnu/kt=%e,fmax=%e\n",n,ion_lower,temp,fthresh,fmax,fthresh*H,(fthresh*H)/(temp*BOLTZMANN),5.879e10*temp);
 
@@ -427,13 +425,12 @@ bb_correct_2 (xtemp, t_r, www, nion)
 
 
 double
-temp_func (solv_temp)
-     double solv_temp;
+temp_func (temp)
+     double temp;
 {
   double answer;
-//	printf ("xxxne=%e, xip=%e\n",xxxne,xip);
 //	printf ("1=%e,2=%e,3=%e\n",log(4.83e15/xxxne),1.5*log(temp),(xip/(BOLTZMANN*temp)));
-  answer = log(4.83e15/xxxne)+1.5*log(solv_temp)-(xip/(BOLTZMANN*solv_temp));
+  answer = log(4.83e15/xxxne)+1.5*log(temp)-(xip/(BOLTZMANN*temp));
 
   return (answer);
 }
@@ -551,10 +548,9 @@ pl_correct_2 (xtemp, nion)
 		  numerator += 0;	// Add nothing - bit of a null statement, but makes the code look nice.
 		}
 	    }
-      if (numerator==0.0)
-	return (0.0); //There is no need to waste time evaluating the denominator
 
-      qromb_temp=xtemp; //The denominator is calculated for the LTE rate at our ideal temp. If we get this wrong, then divide by zeros abound!
+
+      temp=xtemp; //The denominator is calculated for the LTE rate at our ideal temp. If we get this wrong, then divide by zeros abound!
 
 //	printf ("topbase n=%i,nion=%i,temp=%e,fthresh=%e,fmax=%e,hnu=%e,hnu/kt=%e,fmax=%e\n",n,ion_lower,temp,fthresh,fmax,fthresh*H,(fthresh*H)/(temp*BOLTZMANN),5.879e10*temp);
 
@@ -603,11 +599,10 @@ pl_correct_2 (xtemp, nion)
 		  numerator += 0;	// Add nothing - bit of a null statement, but makes the code look nice.
 		}
 	    }
-       if (numerator==0.0)
-	return (0.0); //There is no need to waste time evaluating the denominator
+ 
 /* Denominator is integral at LTE of our chosen temperature. */
 
-      qromb_temp=xtemp;
+      temp=xtemp;
 
 //	printf ("verner n=%i,nion=%i,temp=%e,fthresh=%e,fmax=%e,hnu=%e,hnu/kt=%e,fmax=%e\n",n,ion_lower,temp,fthresh,fmax,fthresh*H,(fthresh*H)/(temp*BOLTZMANN),5.879e10*temp);
 
@@ -683,7 +678,8 @@ tb_planck1 (freq)
      double freq;
 {
   double answer, bbe;
-  bbe = exp ((H * freq) / (BOLTZMANN * qromb_temp));
+
+  bbe = exp ((H * freq) / (BOLTZMANN * temp));
   answer = (2. * H * pow (freq, 3.)) / (pow (C, 2));
   answer *= (1 / (bbe - 1));
 //      answer*=weight;
@@ -730,7 +726,7 @@ verner_planck1 (freq)
      double freq;
 {
   double answer, bbe;
-  bbe = exp ((H * freq) / (BOLTZMANN * qromb_temp));
+  bbe = exp ((H * freq) / (BOLTZMANN * temp));
   answer = (2. * H * pow (freq, 3.)) / (pow (C, 2));
   answer *= (1 / (bbe - 1));
 //      answer*=weight;
