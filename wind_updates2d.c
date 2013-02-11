@@ -250,10 +250,6 @@ WindPtr (w);
 
   xsum = psum = lsum = fsum = 0;
 
-  // 59a - ksl - Corrected problem with calculating sums that has existed
-  // since tried to reduce the size of the structures.
-  //OLD for (i = 0; i < NDIM2; i++)
-  //OLD   nplasma = w[n].nplasma;
   for (nplasma = 0; nplasma < NPLASMA; nplasma++)
     {
       if (sane_check (plasmamain[nplasma].heat_tot))

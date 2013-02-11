@@ -3,9 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
 #include "atomic.h"
-
 #include "python.h"
 
 /* Notes on spherical coordinates
@@ -47,8 +45,6 @@ History:
  
 **************************************************************/
 
-
-
 double
 spherical_ds_in_cell (p)
      PhotPtr p;
@@ -60,7 +56,6 @@ spherical_ds_in_cell (p)
   int where_in_grid ();
   int quadratic ();
   int radiation ();
-
 
   if ((p->grid = n = where_in_grid (p->x)) < 0)
     {
@@ -76,7 +71,6 @@ spherical_ds_in_cell (p)
   s = ds_to_sphere (wind_x[ix + 1], p);
   if (s < smax)
     smax = s;
-
 
   if (smax <= 0)
     {
@@ -158,8 +152,6 @@ spherical_make_grid (w)
   return (0);
 
 }
-
-
 
 
 
@@ -498,12 +490,10 @@ spherical_extend_density (w)
 {
 
   int j, n, m;
-//OLD  int  k;
-  /* Now we need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
-     In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
-     cell that is just inside (or outside) the wind. 
-
-     *
+  /* 
+  Now we need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
+  In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
+  cell that is just inside (or outside) the wind. 
    */
 
   for (j = 0; j < NDIM2 - 1; j++)
@@ -515,8 +505,6 @@ spherical_extend_density (w)
 	  m = n + 1;
 	  if (w[m].vol > 0)	// Then grid point n is just inside the wind
 	    {			// To extend we copy  copy the densities to the grid cell n
-//OLD         for (k = 0; k < NIONS; k++)
-//OLD           w[n].density[k] = w[m].density[k];
 	      w[n].nplasma = w[m].nplasma;
 
 	    }
@@ -525,9 +513,6 @@ spherical_extend_density (w)
 	      m = n - 1;
 	      if (w[m].vol > 0)	// The grid point is just outside the wind
 		{
-		  // we can copy the densities to the grid cell n
-//OLD             for (k = 0; k < NIONS; k++)
-//OLD               w[n].density[k] = w[m].density[k];
 		  w[n].nplasma = w[m].nplasma;
 
 		}

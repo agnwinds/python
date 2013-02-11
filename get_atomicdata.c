@@ -203,8 +203,8 @@ get_atomic_data (masterfile)
     }
   else
     {
-      Log
-	("Allocated %10d bytes for each of %6d elements of elements totaling %10.0f Mb \n",
+      Log_silent
+	("Allocated %10d bytes for each of %6d elements of   elements totaling %10.0f Mb \n",
 	 sizeof (ele_dummy), NELEMENTS,
 	 1.e-6 * NELEMENTS * sizeof (ele_dummy));
     }
@@ -220,8 +220,8 @@ get_atomic_data (masterfile)
     }
   else
     {
-      Log
-	("Allocated %10d bytes for each of %6d elements of     ions totaling %10.1f Mb \n",
+      Log_silent
+	("Allocated %10d bytes for each of %6d elements of       ions totaling %10.1f Mb \n",
 	 sizeof (ion_dummy), NIONS, 1.e-6 * NIONS * sizeof (ion_dummy));
     }
 
@@ -237,8 +237,8 @@ get_atomic_data (masterfile)
     }
   else
     {
-      Log
-	("Allocated %10d bytes for each of %6d elements of   config totaling %10.1f Mb \n",
+      Log_silent
+	("Allocated %10d bytes for each of %6d elements of     config totaling %10.1f Mb \n",
 	 sizeof (config_dummy), NLEVELS,
 	 1.e-6 * NLEVELS * sizeof (config_dummy));
     }
@@ -256,8 +256,8 @@ get_atomic_data (masterfile)
     }
   else
     {
-      Log
-	("Allocated %10d bytes for each of %6d elements of     line totaling %10.1f Mb \n",
+      Log_silent
+	("Allocated %10d bytes for each of %6d elements of       line totaling %10.1f Mb \n",
 	 sizeof (line_dummy), NLINES, 1.e-6 * NLINES * sizeof (line_dummy));
     }
 
@@ -759,11 +759,11 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
 			   file, lineno);
 		      break;
 		    }
-//  So now we know that this level can be associated with an ion
-//
 
-		  /* Now either set the type of level that will be used for this ion or set it if 
-		   * a level type has not been established
+/*  So now we know that this level can be associated with an ion
+
+Now either set the type of level that will be used for this ion or set it if 
+a level type has not been established
 		   */
 
 		  if (ion[n].lev_type == (-1))
@@ -777,20 +777,6 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
 //OLD                    file, lev_type, n, ion[n].lev_type);
 		      break;
 		    }
-
-//  Now check to see whether we already have too many levels specified for this ion. 
-//  If so, break out
-
-//  We do not want to do this any more!  We want to treat the addition levels as lte levels 
-//OLD             if (ion[n].n_lte_max == ion[n].nlte)
-//OLD               {
-//OLD                 if (DEBUG)
-//OLD                   Error
-//OLD                     ("get_atomic_data: file %s line %d has level exceeding the number reserved for ion[%d]\n",
-//OLD                      file, lineno, n);
-//OLD
-//OLD                 break;
-//OLD               }
 
 /* 
  Now check 1) if it was a LevMacro that there isn't already a LevTop (if there was then 
@@ -893,12 +879,10 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
 
 
 /* Now associate this config with the levden array where appropriate.  The -1 is because ion[].nlte
-is already incremented */
-//  I've moved the assignment up into the previous set of if statemens an now the -1 is not necessary
-//OLD             config[nlevels].nden =
-//OLD               ion[n].first_levden + ion[n].nlte - 1;
+is already incremented 
 
-// 080810 -- 62 -- Also want to treat these as simple levels in cases where we want to sum everything
+080810 -- 62 -- Also want to treat these as simple levels in cases where we want to sum everything
+*/
 
 		  if (ion[n].firstlevel < 0)
 		    {

@@ -637,8 +637,6 @@ p_escape (line_ptr, xplasma)
       || pe_dd != dd || pe_dvds != dvds || pe_w != w || pe_tr != tr)
     {
 
-//OLD      two_level_atom (line_ptr, ne, te, w, tr, dd, &d1, &d2);  //OLD
-
       if (line_ptr->macro_info == 1 && geo.rt_mode == 2
 	  && geo.macro_simple == 0)
 	{

@@ -137,18 +137,10 @@ radiation (p, ds)
 
   if (freq > phot_freq_min)
 
-//  if (freq > (CR / 100.))     // TEST avoiding Balmer lines for speed
-// CR is the Rydberg freqency for H
-// phot_freq_min is calculated in get atomic_data and is the lowest
-// frequency at which any photoionizations can occur
-/* SS June 04: replaces CR with CR/100  makes small difference.
- * However if you make this change, be sure to make it below as well
- */
     {
 
       if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
 	{			// Initialize during ionization cycles only
-	  //OLD  frac_tot = frac_z = 0;
 	  for (nion = 0; nion < nions; nion++)
 	    {
 	      kappa_ion[nion] = 0;

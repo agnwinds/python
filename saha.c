@@ -312,10 +312,6 @@ concentrations (xplasma, mode)
     {
 
       /* Assuming a value of ne calculate the relative densities of each ion for each element */
-//OLD      for (nelem = 0; nelem < nelements; nelem++)
-//OLD   {
-//OLD     saha (xne, nh, t, nelem, xplasma->density);
-//OLD   }
 
       saha (xplasma, xne, t);
 
@@ -874,7 +870,6 @@ fix_concentrations (xplasma, mode)
 
   xplasma->ne = get_ne (xplasma->density);
 
-  //OLD do_partitions (xplasma, 0);
   partition_functions (xplasma, 0);
 
   return (0);

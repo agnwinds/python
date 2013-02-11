@@ -323,11 +323,12 @@ Log_set_verbosity (verbosity);
     }
   else
     {
-      /* We want to restart if a windsave file exists */
+      /* Note that alghough we chekc that we dan open the windsave file, it is not read here.   */
+
       strcpy (windsavefile, root);
       strcat (windsavefile, ".wind_save");
-
       qptr = fopen (windsavefile, "r");
+
       if (qptr != NULL)
 	{
 	  /* Then the file does exist and we can restart */
@@ -424,9 +425,13 @@ Log_set_verbosity (verbosity);
 
   init_geo ();
 
+/* Set the global variables that define the size of the grid as defined in geo.  These are used for convenience */
+
   NDIM = geo.ndim;
   MDIM = geo.mdim;
   NDIM2 = geo.ndim * geo.mdim;
+
+/* dfudge is a parameter that is used to make sure a photon bundle pushes through a cell boundary */
 
   dfudge = 1e5;
   DFUDGE = dfudge;
@@ -435,10 +440,12 @@ Log_set_verbosity (verbosity);
 
 
 /* Initialize variables which are used in the main routine */
+
   wcycles = pcycles = 1;
   photons_per_cycle = 20000;
 
 /* Initialize basis vectors for a cartesian coordinate system */
+
   x_axis[0] = 1.0;
   x_axis[1] = x_axis[2] = 0.0;
   y_axis[1] = 1.0;
@@ -483,6 +490,14 @@ Log_set_verbosity (verbosity);
 
 	}
 
+      else {  /* Read the atomic datafile her, because for the cases where we have read
+		 and old wind files, we also got the atomic data */
+
+    rdstr ("Atomic_data", geo.atomic_filename);
+  get_atomic_data (geo.atomic_filename);
+
+      }
+
       geo.wcycle = geo.pcycle = 0;
 
     }
@@ -492,7 +507,7 @@ Log_set_verbosity (verbosity);
       Log ("Continuing a previous run of %s \n", root);
       strcpy (old_windsavefile, root);
       strcat (old_windsavefile, ".wind_save");
-      wind_read (old_windsavefile);	//program will exit if unable to read the file
+      wind_read (old_windsavefile);	/* program would exist if unable to read the file, but we have checked this earlier*/
       w = wmain;
       geo.wind_type = 2;	// We read the data from a file
       xsignal (root, "%-20s Read %s\n", "COMMENT", old_windsavefile);
@@ -505,14 +520,12 @@ Log_set_verbosity (verbosity);
     }
 
 
-/* Read the atomic data file name if this is not the continuation of an earlier run */
 
-  if (geo.wind_type != 2)
-    rdstr ("Atomic_data", geo.atomic_filename);
+//OLD091105  if (geo.wind_type != 2)
+//OLD091105    rdstr ("Atomic_data", geo.atomic_filename);
+//OLD091105  get_atomic_data (geo.atomic_filename);
 
-  get_atomic_data (geo.atomic_filename);
-
-/* Get the remainder of the data */
+/* Get the remainder of the data.  Note that this is done whether or not the windsave file was read in */
 
   rdint ("photons_per_cycle", &photons_per_cycle);
   NPHOT = photons_per_cycle;	// For now set NPHOT to be be photons/cycle --> subcycles==1
@@ -640,8 +653,7 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
     }
 
 
-/*57h -- Next line added for speed when no macro atoms to prevent bf calculation of
-macro_estimaters.  Is this OK, Stuart??   */
+/*57h -- Next line prevents bf calculation of macro_estimaters when no macro atoms are present.   */
 
   if (nlevels_macro == 0)
     geo.macro_simple = 1;	// Make everything simple if no macro atoms -- 57h
@@ -924,8 +936,6 @@ macro_estimaters.  Is this OK, Stuart??   */
     }
 
 
-// 060908 -- 57h -- fixed a small error in next section in definition of outer windcone
-
   if (geo.wind_thetamax > 0.0)
     {
       windcone[1].dzdr = 1. / tan (geo.wind_thetamax);	// new definition
@@ -982,6 +992,8 @@ macro_estimaters.  Is this OK, Stuart??   */
 
 /* Describe the spectra which will be extracted and the way it will be extracted */
 
+/* First initialise things to semi-reasonable values */
+
   nangles = 4;
   angle[0] = 10;
   angle[1] = 30.;
@@ -1000,6 +1012,8 @@ macro_estimaters.  Is this OK, Stuart??   */
 
   select_extract = 1;
   select_spectype = 1;
+
+/* Completed initialization of this section */
 
   if (pcycles > 0)
     {
@@ -1039,12 +1053,10 @@ macro_estimaters.  Is this OK, Stuart??   */
 
       rdint ("no_observers", &nangles);
  
-//0ld68c      if (nangles < 1 || nangles > NSPEC - MSPEC)
       if (nangles < 1 || nangles > NSPEC)
 	{
 	  Error ("no_observers %d should not be > %d or <0\n", nangles,
 		 NSPEC);
-//OLD68c		 NSPEC - MSPEC);
 	  exit (0);
 	}
 
@@ -1276,6 +1288,13 @@ run -- 07jul -- ksl
   if (geo.wcycle == wcycles)
     xsignal (root, "%-20s No ionization needed: wcycles(%d)==wcyeles(%d)\n",
 	     "COMMENT", geo.wcycle, geo.wcycles);
+  else 
+  {
+	  geo.pcycle=0;  /* Set the spectrum cycles executed to 0, because 
+			    we are going to modify the wind and hence any
+			    previously calculated spectra must be recreated
+			    */
+  }
 
 
   while (geo.wcycle < wcycles)
@@ -1353,7 +1372,7 @@ run -- 07jul -- ksl
 	    ("!!python: Total photon luminosity before transphot %8.2e\n",
 	     zz);
 
-	  ztot += zz;		// Total luminosity in all subcycles, used for calculating disk heating
+	  ztot += zz;		/* Total luminosity in all subcycles, used for calculating disk heating */
 
 	  /* kbf_need determines how many & which bf processes one needs to considere.  It was introduced
 	   * as a way to speed up the program.  It has to be recalculated evey time one changes
@@ -1480,6 +1499,12 @@ run -- 07jul -- ksl
 
 /* XXXX - BEGIN CYCLES TO CREATE THE DETAILED SPECTRUM */
 
+  /* the next section initializes the spectrum array in two cases, for the
+   * standard one where one is calulating the spectrum for the first time
+   * and in the somewhat abnormal case where additional ionization cylcles
+   * were calculated for the wind
+   */
+
   if (geo.pcycle == 0)
     {
       spectrum_init (freqmin, freqmax, nangles, angle, phase, scat_select,
@@ -1496,7 +1521,9 @@ run -- 07jul -- ksl
 
 
 
-  if (geo.pcycle == pcycles)
+  /* the next condition should really when one has nothing more to do */
+  
+  if (geo.pcycle >= pcycles)
     xsignal (root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n",
 	     "COMMENT", geo.pcycle, geo.pcycles);
 
@@ -1506,9 +1533,6 @@ run -- 07jul -- ksl
 
       xsignal (root, "%-20s Starting %d of %d spectral cycle \n", "NOK",
 	       geo.pcycle, pcycles);
-
-
-
 
 #if DEBUG
       ispy_init ("python", geo.pcycle + 1000);
@@ -1524,7 +1548,7 @@ run -- 07jul -- ksl
       else
 	iwind = 0;		/* Create wind photons but do not force reinitialization */
 
-      /* Create the initial photon bundles which need to be trnaported through the wind 
+      /* Create the initial photon bundles which need to be trannsported through the wind 
 
          For the detailed spectra, NPHOT*pcycles is the number of photon bundles which will equal the luminosity, 
          1 implies that detailed spectra, as opposed to the ionization of the wind is being calculated 
@@ -1732,7 +1756,7 @@ init_geo ()
 
 
   strcpy (geo.atomic_filename, "atomic/standard39");
-  strcpy (geo.fixed_con_file, "none");	// 54e
+  strcpy (geo.fixed_con_file, "none");	
 
   // Note that geo.model_list is initialized through get_spectype 
 

@@ -202,7 +202,7 @@ not jumping to a new upper level.  I would have guested this was impossible */
 
       if (prbs_known[uplvl] != 1)
 	{
-	  // Start by setting everything to 0
+	  /* Start by setting everything to 0  */
 
 	  m = 0;		//m counts the total number of possible ways to leave the level
 	  pjnorm = 0.0;		//stores the total jump probability
@@ -231,16 +231,9 @@ not jumping to a new upper level.  I would have guested this was impossible */
 	  for (n = 0; n < nbbd; n++)
 	    {
 	      line_ptr = &line[config[uplvl].bbd_jump[n]];
-	      //bb_cont =
-	      //(a21 (line_ptr) * p_escape (line_ptr, xplasma));// + (q21 (line_ptr, t_e) * ne);
 
 	      rad_rate = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
 	      coll_rate = q21 (line_ptr, t_e);
-	      //                -
-	      //        (den_config
-	      //         (xplasma,
-	      //          line[config[uplvl].bbu_jump[n]].nconfigl) /
-	      //         den_config (xplasma, uplvl) * q12 (line_ptr, t_e));
 
 	      if (coll_rate < 0)
 		{
@@ -323,12 +316,7 @@ not jumping to a new upper level.  I would have guested this was impossible */
 	    {
 	      line_ptr = &line[config[uplvl].bbu_jump[n]];
 	      rad_rate = (b12 (line_ptr) * mplasma->jbar_old[config[uplvl].bbu_indx_first + n]);
-	      //jprbs_known[uplvl][m] = jprbs[m] = ((b12 (line_ptr) * mplasma->jbar_old[uplvl][n]) + (q12(line_ptr, t_e) * ne)) * config[uplvl].ex;     //energy of lower state
 	      coll_rate = q12 (line_ptr, t_e);
-	      //                - (den_config (xplasma, uplvl) /
-	      //           den_config (xplasma,
-	      //                       line[config[uplvl].bbu_jump[n]].nconfigu) *
-	      //           q21 (line_ptr, t_e));
 	      if (coll_rate < 0)
 		{
 		  coll_rate = 0;
@@ -487,8 +475,6 @@ not jumping to a new upper level.  I would have guested this was impossible */
 
       rad_rate = a21 (line_ptr) * p_escape (line_ptr, xplasma);
       coll_rate = q21 (line_ptr, t_e);
-      //        - (den_config (xplasma, line[config[uplvl].bbu_jump[n]].nconfigl) /
-      //           den_config (xplasma, uplvl) * q12 (line_ptr, t_e)) * ne;
       if (coll_rate < 0)
 	{
 	  coll_rate = 0.;
@@ -508,7 +494,6 @@ not jumping to a new upper level.  I would have guested this was impossible */
 	  /* This is now done by returning escape = 0 rather than calling kpkt -- SS June 04 */
 	  *escape = 0;
 
-	  //OLD   kpkt (w, p, nres);
 	  /* That deals with the k-packet and follows the energy until it finds its way 
 	     back to being an r-packet. kpkt will get the frequency of the new r-packet too
 	     (SS) */
@@ -782,9 +767,12 @@ kpkt (p, nres, escape)
   electron_temperature = xplasma->t_e;
 
 
+  /* ksl 091108 - If the kpkt destruction rates for this cell are not known they are calculated here.  This happens
+   * every time the wind is updated or should */
 
   if (mplasma->kpkt_rates_known != 1)
     {
+	/*    Log("Beginning calculation of kpkt_rates: The elapsed TIME is %f\n",timer());  */
       cooling_normalisation = 0.0;
       cooling_bftot = 0.0;
       cooling_bbtot = 0.0;
@@ -795,13 +783,13 @@ kpkt (p, nres, escape)
 	{
 	  cont_ptr = &phot_top[i];
 	  ulvl = cont_ptr->uplev;
+
 	  if (cont_ptr->macro_info == 1 && geo.macro_simple == 0)
 	    {
 	      upper_density = den_config (xplasma, ulvl);
 	      /* SS July 04 - for macro atoms the recombination coefficients are stored so use the
 	         stored values rathert than recompue them. */
-	      cooling_bf[i] = mplasma->kpkt_rates.cooling_bf[i] = upper_density * H * cont_ptr->freq[0] * (mplasma->recomb_sp_e[config[ulvl].bfd_indx_first + cont_ptr->down_index]);	// - modified the definition of _sp_e to be the difference
-	      //           xplasma->recomb_sp[ulvl][cont_ptr->down_index]);
+	      cooling_bf[i] = mplasma->cooling_bf[i] = upper_density * H * cont_ptr->freq[0] * (mplasma->recomb_sp_e[config[ulvl].bfd_indx_first + cont_ptr->down_index]);	// - modified the definition of _sp_e to be the difference
 	    }
 	  else
 	    {
@@ -809,10 +797,9 @@ kpkt (p, nres, escape)
 
 	      /* SS Nov 04 - testing for speed - next line need to go back in. */
 
-	      cooling_bf[i] = mplasma->kpkt_rates.cooling_bf[i] =
+	      cooling_bf[i] = mplasma->cooling_bf[i] =
 		upper_density * H * cont_ptr->freq[0] *
 		(xplasma->recomb_simple[i]);
-	      // cooling_bf[i] = 0;
 	    }
 
 
@@ -830,7 +817,7 @@ kpkt (p, nres, escape)
 		     cont_ptr->z, cont_ptr->istate);
 	      Error ("freq[0] %g\n", cont_ptr->freq[0]);
 	      //      exit(0);
-	      cooling_bf[i] = mplasma->kpkt_rates.cooling_bf[i] = 0.0;
+	      cooling_bf[i] = mplasma->cooling_bf[i] = 0.0;
 	    }
 	  else
 	    {
@@ -843,7 +830,7 @@ kpkt (p, nres, escape)
 	         for simple ions for now.  SS */
 
 	      lower_density = den_config (xplasma, cont_ptr->nlev);
-	      cooling_bf_col[i] = mplasma->kpkt_rates.cooling_bf_col[i] =
+	      cooling_bf_col[i] = mplasma->cooling_bf_col[i] =
 		lower_density * H * cont_ptr->freq[0] * q_ioniz (cont_ptr,
 								 electron_temperature);
 
@@ -854,23 +841,21 @@ kpkt (p, nres, escape)
 	    }
 
 
+	  
 	}
+
+      /* end of loop over ntop_phot */
 
       for (i = 0; i < nlines; i++)
 	{
 	  line_ptr = &line[i];
 	  if (line_ptr->macro_info == 1 && geo.macro_simple == 0)
 	    {			//It's a macro atom line and so the density of the upper level is stored
-	      cooling_bb[i] = mplasma->kpkt_rates.cooling_bb[i] =
+	      cooling_bb[i] = mplasma->cooling_bb[i] =
 		den_config (xplasma, line_ptr->nconfigl) * q12 (line_ptr,
 								electron_temperature)
 		* line_ptr->freq * H;
 
-	      //(den_config (xplasma, line_ptr->nconfigl) * q12 (line_ptr,
-	      //                                               electron_temperature)
-	      // - den_config (xplasma, line_ptr->nconfigu) * q21 (line_ptr,
-	      //                                                 electron_temperature))
-	      //* line_ptr->freq * H;
 	      /* Note that the electron density is not included here -- all cooling rates scale
 	         with the electron density so I've factored it out. */
 	    }
@@ -902,12 +887,13 @@ kpkt (p, nres, escape)
 
 	      cooling_bb[i] *=
 		rad_rate / (rad_rate + (coll_rate * xplasma->ne));
-	      mplasma->kpkt_rates.cooling_bb[i] = cooling_bb[i];
+	      mplasma->cooling_bb[i] = cooling_bb[i];
 	    }
+
 	  if (cooling_bb[i] < 0)
 	    {
 	      //              Error ("kpkt: bb cooling rate negative???");
-	      cooling_bb[i] = mplasma->kpkt_rates.cooling_bb[i] = 0.0;
+	      cooling_bb[i] = mplasma->cooling_bb[i] = 0.0;
 	      //exit (0);
 	    }
 	  else
@@ -917,12 +903,14 @@ kpkt (p, nres, escape)
 	  cooling_normalisation += cooling_bb[i];
 	}
 
+      /* end of loop over nlines  */
+
 
       /* 57+ -- This might be modified later since we "know" that xplasma cannot be for a grid with zero
          volume.  Recall however that vol is part of the windPtr */
       if (one->vol > 0)
 	{
-	  cooling_ff = mplasma->kpkt_rates.cooling_ff =
+	  cooling_ff = mplasma->cooling_ff =
 	    total_free (one, xplasma->t_e, 0.0,
 			VERY_BIG) / one->vol / xplasma->ne;
 	}
@@ -933,7 +921,7 @@ kpkt (p, nres, escape)
 	     rare (~1 photon in a complete run of the code) that I'm not worrying about it for now but it does
 	     indicate a real problem somewhere. */
 
-	  cooling_ff = mplasma->kpkt_rates.cooling_ff = 0.0;
+	  cooling_ff = mplasma->cooling_ff = 0.0;
 	  Error ("kpkt: A scattering event in cell %d with vol = 0???\n",
 		 one->nwind);
 	  //Diagnostic      return(-1);  //57g -- Cannot diagnose with an exit
@@ -951,13 +939,14 @@ kpkt (p, nres, escape)
 	  cooling_normalisation += cooling_ff;
 	}
 
-      mplasma->kpkt_rates.cooling_bbtot = cooling_bbtot;
-      mplasma->kpkt_rates.cooling_bftot = cooling_bftot;
-      mplasma->kpkt_rates.cooling_bf_coltot = cooling_bf_coltot;
-      mplasma->kpkt_rates.cooling_normalisation = cooling_normalisation;
+      mplasma->cooling_bbtot = cooling_bbtot;
+      mplasma->cooling_bftot = cooling_bftot;
+      mplasma->cooling_bf_coltot = cooling_bf_coltot;
+      mplasma->cooling_normalisation = cooling_normalisation;
       mplasma->kpkt_rates_known = 1;
 
 
+	  /*  Log("finished calculation of kpkt_rates: The elapsed TIME is %f\n",timer()); */
     }
 
 
@@ -968,14 +957,14 @@ kpkt (p, nres, escape)
      Choose which process destroys the k-packet with a random number. */
 
   destruction_choice =
-    ((rand () + 0.5) / MAXRAND) * mplasma->kpkt_rates.cooling_normalisation;
+    ((rand () + 0.5) / MAXRAND) * mplasma->cooling_normalisation;
 
 
-  if (destruction_choice < mplasma->kpkt_rates.cooling_bftot)
+  if (destruction_choice < mplasma->cooling_bftot)
     {				//destruction by bf
       for (i = 0; i < ntop_phot; i++)
 	{
-	  if (destruction_choice < mplasma->kpkt_rates.cooling_bf[i])
+	  if (destruction_choice < mplasma->cooling_bf[i])
 	    {
 	      /* Having got here we know that desturction of the k-packet was via the process labelled
 	         by i. Let's just check that i is a sensible number. */
@@ -1008,20 +997,20 @@ kpkt (p, nres, escape)
 	  else
 	    {
 	      destruction_choice =
-		destruction_choice - mplasma->kpkt_rates.cooling_bf[i];
+		destruction_choice - mplasma->cooling_bf[i];
 	    }
 	}
     }
   else if (destruction_choice <
-	   (mplasma->kpkt_rates.cooling_bftot +
-	    mplasma->kpkt_rates.cooling_bbtot))
-    {				//this means that a collisional destruction has occured - this results in 
+	   (mplasma->cooling_bftot +
+	    mplasma->cooling_bbtot))
+    {				//this means that a collisional destruction has occurred - this results in 
       //a macro atom being excited. Choose which macro atom and level to excite
       destruction_choice =
-	destruction_choice - mplasma->kpkt_rates.cooling_bftot;
+	destruction_choice - mplasma->cooling_bftot;
       for (i = 0; i < nlines; i++)
 	{
-	  if (destruction_choice < mplasma->kpkt_rates.cooling_bb[i])
+	  if (destruction_choice < mplasma->cooling_bb[i])
 	    {			//This is the bb collision which removes the k-packet
 	      *nres = line[i].where_in_list;	//label for bb process 
 	      if (line[i].macro_info == 1 && geo.macro_simple == 0)	//line is for a macro atom
@@ -1032,7 +1021,6 @@ kpkt (p, nres, escape)
 
 		  *escape = 0;
 
-		  // OLD   matom (w, p, nres);
 		}
 	      else		//line is not for a macro atom - use simple method
 		{
@@ -1049,14 +1037,14 @@ kpkt (p, nres, escape)
 	  else
 	    {
 	      destruction_choice =
-		destruction_choice - mplasma->kpkt_rates.cooling_bb[i];
+		destruction_choice - mplasma->cooling_bb[i];
 	    }
 	}
     }
   else if (destruction_choice <
-	   (mplasma->kpkt_rates.cooling_bftot +
-	    mplasma->kpkt_rates.cooling_bbtot +
-	    mplasma->kpkt_rates.cooling_ff))
+	   (mplasma->cooling_bftot +
+	    mplasma->cooling_bbtot +
+	    mplasma->cooling_ff))
     {				//this is a ff destruction
 
       /* For the moment I've just set this to work in the frequency range 400000AA up to
@@ -1077,12 +1065,12 @@ kpkt (p, nres, escape)
     {
       /* We want destruction by collisional ionization in a macro atom. */
       destruction_choice =
-	destruction_choice - mplasma->kpkt_rates.cooling_bftot -
-	mplasma->kpkt_rates.cooling_bbtot - mplasma->kpkt_rates.cooling_ff;
+	destruction_choice - mplasma->cooling_bftot -
+	mplasma->cooling_bbtot - mplasma->cooling_ff;
 
       for (i = 0; i < ntop_phot; i++)
 	{
-	  if (destruction_choice < mplasma->kpkt_rates.cooling_bf_col[i])
+	  if (destruction_choice < mplasma->cooling_bf_col[i])
 	    {
 	      /* Having got here we know that destruction of the k-packet was via the process labelled
 	         by i. Let's just check that i is a sensible number. */
@@ -1106,7 +1094,7 @@ kpkt (p, nres, escape)
 	  else
 	    {
 	      destruction_choice =
-		destruction_choice - mplasma->kpkt_rates.cooling_bf_col[i];
+		destruction_choice - mplasma->cooling_bf_col[i];
 	    }
 	}
     }
@@ -1116,8 +1104,8 @@ kpkt (p, nres, escape)
   Error ("matom.c: Failed to select a destruction process in kpkt. Abort.\n");
   Error
     ("matom.c: cooling_bftot %g, cooling_bbtot %g, cooling_ff %g, cooling_bf_coltot %g\n",
-     mplasma->kpkt_rates.cooling_bftot, mplasma->kpkt_rates.cooling_bbtot,
-     mplasma->kpkt_rates.cooling_ff, mplasma->kpkt_rates.cooling_bf_coltot);
+     mplasma->cooling_bftot, mplasma->cooling_bbtot,
+     mplasma->cooling_ff, mplasma->cooling_bf_coltot);
 
   exit (0);
 
@@ -1671,7 +1659,6 @@ macro_pops (xplasma, xne)
 	  //  Error("n_macro_lvl %d \n", n_macro_lvl);
 
 	  /* Replaced inline array allocaation with calloc, which will work with older version of c compilers */
-//OLD     double a_data[n_macro_lvl * n_macro_lvl];
 
 	  a_data =
 	    (double *) calloc (sizeof (rate), n_macro_lvl * n_macro_lvl);
@@ -1823,12 +1810,8 @@ macro_pops (xplasma, xne)
 		this_ion_density * ele[index_element].abun * xplasma->rho *
 		rho2nh;
 
-	      //xplasma->density[index_ion] /= 2;
 
 
-	      // The next line was in so that I could watch the populations on screen.
-	      //printf("Ion %d %g %g %g\n", index_ion, this_ion_density, xplasma->density[index_ion], xne);
-	      //printf(" \n");
 
 	    }
 
@@ -1936,30 +1919,6 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 		      /* It is going to escape as a r-packet that was created by de-activation of a macro atom. 
 		         Therefore, if the frequency is suitable it should be recorded as a macro atom emission event for use in the 
 		         computation of the k-packet emissivity needed for the final spectrum calculation. */
-		      //   if (p->freq > em_rnge.fmin && p->freq < em_rnge.fmax)
-		      //        {
-		      /*We do want to include it. Emissivities are stored by level so we need to identify the upper level
-		         that produced this emission. */
-		      //          if (*nres > (-1) && *nres < NLINES)
-		      //            {
-		      /* It was bb. */
-		      //              upper = lin_ptr[*nres]->nconfigu;
-		      //            }
-		      //  else if (*nres > NLINES)
-		      //    {
-		      /* It was bf. */
-		      //      upper = phot_top[*nres - NLINES - 1].uplev;
-		      //    }
-		      //  else
-		      //    {
-		      //      Error
-		      //        ("macro_gov: cannot identify deactivation nres. Abort.\n");
-		      //      exit (0);
-		      //    }
-		      /* Now record emissivity. */
-		      //w[p->grid].matom_emiss[upper] += p->w;
-		      //w[p->grid].matom_nemiss[upper] += 1;
-		      //}
 		      *which_out = 1;
 		      /* 0803 - ksl - 60 - Added code to modify the photon origin to indicate the packet has been processed
 		         by a macro atom */
@@ -1997,30 +1956,6 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 		      /* It is going to escape as a r-packet that was created by de-activation of a macro atom. 
 		         Therefore, if the frequency is suitable it should be recorded as a macro atom emission event for use in the 
 		         computation of the k-packet emissivity needed for the final spectrum calculation. */
-		      //if (p->freq > em_rnge.fmin && p->freq < em_rnge.fmax)
-		      //{
-		      /*We do want to include it. Emissivities are stored by level so we need to identify the upper level
-		         that produced this emission. */
-		      //  if (*nres > (-1) && *nres < NLINES)
-		      //    {
-		      /* It was bb. */
-		      //      upper = lin_ptr[*nres]->nconfigu;
-		      //    }
-		      //  else if (*nres > NLINES)
-		      //    {
-		      /* It was bf. */
-		      //      upper = phot_top[*nres - NLINES - 1].uplev;
-		      //    }
-		      //  else
-		      //    {
-		      //      Error
-		      //        ("macro_gov: cannot identify deactivation nres. Abort.\n");
-		      //      exit (0);
-		      //    }
-		      /* Now record emissivity. */
-		      //w[p->grid].matom_emiss[upper] += p->w;
-		      //w[p->grid].matom_nemiss[upper] += 1;
-		      //}
 		      *which_out = 1;
 		      /* 0803 - ksl - 60 - Added code to modify the photon origin to indicate the packet has been processed
 		         by a macro atom */
@@ -2054,16 +1989,6 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 	    {
 	      kpkt (p, nres, &escape);
 
-	      //if (escape == 1)
-	      //{
-	      /* It is going to escape as a r-packet that was last a k-packet. Therefore, if the frequency
-	         is suitable it should be recorded as a k-packet emission event for use in the computation of
-	         the k-packet emissivity needed for the final spectrum calculation. */
-	      //if (p->freq > em_rnge.fmin && p->freq < em_rnge.fmax)
-	      // {
-	      //  w[p->grid].kpkt_emiss += p->w;
-	      // }
-	      //}
 	    }
 
 	  matom_or_kpkt = 1;	//if it did not escape then the k-packet must have been 
@@ -2316,7 +2241,6 @@ get_matom_f ()
 			    }
 
 			  ppp.nres = nres;
-			  //ppp.grid = n; Removed by SS May 06
 			  ppp.grid = plasmamain[n].nwind;
 			  ppp.w = 0;
 
@@ -2333,7 +2257,6 @@ get_matom_f ()
 			  nres = -2;	//will do 
 
 			  ppp.nres = nres;
-			  //ppp.grid = n; Removed by SS May 06
 			  ppp.grid = plasmamain[n].nwind;
 			  ppp.w = 0;
 
@@ -2414,7 +2337,6 @@ get_matom_f ()
 		}
 	    }
 	}
-//OLD   }
     }
 
 
@@ -2490,8 +2412,6 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   int nplasma;
 
 
-  // Error ("Calling photo_gen_kpkt - don't want this yet.\n");
-  //exit(0);
 
   photstop = photstart + nphot;
   Log ("photo_gen_kpkt creates nphot %5d photons from %5d to %5d \n", nphot,
@@ -3053,7 +2973,7 @@ emit_matom (w, p, nres, upper)
   else
     {
       Error
-	("Trying to emitt from Macro Atom but no available route (emit_matom). Abort.");
+	("Trying to emit from Macro Atom but no available route (emit_matom). Abort.");
       exit (0);
     }
   return (0);
@@ -3113,54 +3033,3 @@ q_recomb (cont_ptr, electron_temperature)
   return (coeff);
 }
 
-/* 
-
-!! Stuart, in 57h -- I have replaced this routine.  See bb_pdf_get_rand_limit in bb.c
-This routine a number of out of range photons becasue you did not make use of
-pdf->limit1 and 2 to restict the potential frequecies.  Please, check that routine,
-and if you are happy delete this one.  ksl -- 060806
-
-
-
-The following is an alternative to pdf_get_rand_limit that will sample a
-   pdf assuming that the function is cubic rather than linear. Should do better
-   at making a smooth continuum in the IR. 
-
-History
-	06aug	ksl	57h -- This routine has an error in it,  It does not properly
-			limit x to lie between the pdf_limits, and was generating
-			many photons outside the desired energy intervals.  Also
-			while correct at low limit.  It would seem to be horrible
-			for the high T limit, where you are being killed by the
-			exponential.  
-*/
-//OLD57h double
-//OLD57h pdf_get_rand_limit_bbir (pdf)
-//OLD57h      PdfPtr pdf;
-//OLD57h {
-//OLD57h   double x, r;
-//OLD57h   int i;
-//OLD57h   double choice;
-
-//OLD57h   r = rand () / MAXRAND;       /* r must be slightly less than 1 */
-//OLD57h   r = r * pdf->limit2 + (1. - r) * pdf->limit1;
-
-//OLD57h   i = r * NPDF;
-
-//OLD57h   while (pdf->y[i + 1] < r && i < NPDF - 1)
-//OLD57h     i++;
-//OLD57h   while (pdf->y[i] > r && i > 0)
-//OLD57h     i--;
-
-  //  q = (r - pdf->y[i]) / (pdf->y[i + 1] - pdf->y[i]);
-
-  //x = pdf->x[i] * (1. - q) + pdf->x[i + 1] * q;
-
-//OLD57h   choice = rand () / MAXRAND;
-
-//OLD57h   x = choice * pow (pdf->x[i], 3.) + (1. - choice) * pow (pdf->x[i + 1], 3.);
-//OLD57h   x = pow (x, (1. / 3.));
-
-//OLD57h   return (x);
-
-//OLD57h }

@@ -1055,7 +1055,6 @@ History:
                         not required)
                         Also ff is now included: nres = -2 flags ff which leads
                         to creating a k-packet always.
-                        Also cleaned up some "OLD" comments.
         04May   SS      Modifications to allow the macro_simple option (i.e. all
                         ions treated as "simple").
         04Jun   SS      Modifications so simplify the interation of macro atoms and

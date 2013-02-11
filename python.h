@@ -517,6 +517,10 @@ of the code is required.
 0803 -- ksl -- 60 -- The first index is the level, or config  number.  get_atomicdata assures that macro levels, 
 if they exist have lower level numbers than other types of levels.  
 
+0911 -- ksl - 68f -- The structure is allocated in a complicated fashion to minimize the total amount of space
+taken up by the macro structure, particularly when it is written out to disk.  First the basic array structurre
+is allocated (in calloc_macro) and then space for the various arrays contatined in the maccro pointer, like
+jbar are allcoated in calloc_esimators.  
 */
 
 
@@ -568,8 +572,21 @@ typedef struct macro {
   //[NLEVELS_MACRO];  
   /* This is the energy absorbed by the macro atom levels - recorded during the ionization 
 					cycles and used to get matom_emiss (SS) */
+
+// The portion of the macroy structure  is not written out by windsave
   int kpkt_rates_known;
-  COOLSTR kpkt_rates;
+  // COOLSTR kpkt_rates;
+
+double *cooling_bf;
+//  double cooling_bf[NTOP_PHOT];
+ double *cooling_bf_col;
+// double cooling_bf_col[NTOP_PHOT];
+double *cooling_bb;
+// double cooling_bb[NLINES];
+ double cooling_normalisation;
+ double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
+   double cooling_ff;
+
 } macro_dummy, *MacroPtr;
 
 MacroPtr macromain;

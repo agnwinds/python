@@ -361,6 +361,7 @@ int rtheta_volumes(WindPtr w);
 int rtheta_where_in_grid(double x[]);
 int rtheta_get_random_location(int n, double x[]);
 int rtheta_extend_density(WindPtr w);
+int rtheta_is_cell_in_wind(int n);
 /* spherical.c */
 double spherical_ds_in_cell(PhotPtr p);
 int spherical_make_grid(WindPtr w);
@@ -387,6 +388,7 @@ int calloc_wind(int nelem);
 int calloc_plasma(int nelem);
 int check_plasma(PlasmaPtr xplasma, char message[]);
 int calloc_macro(int nelem);
+int calloc_estimators(int nelem);
 /* partition.c */
 int partition_functions(PlasmaPtr xplasma, int mode);
 /* signal.c */

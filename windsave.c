@@ -98,6 +98,8 @@ wind_save (filename)
 
   fclose (fptr);
 
+  Log("wind_write sizes: NPLASMA %d size_Jbar_est %d size_gamma_est %d size_alpha_est %d nlevels_macro %d\n", NPLASMA,size_Jbar_est,size_gamma_est,size_alpha_est,nlevels_macro);
+
   return (n);
 
 }
@@ -126,6 +128,16 @@ wind_read (filename)
      filename, version, VERSION);
 
   n += fread (&geo, sizeof (geo), 1, fptr);
+
+  /* 091105 - ksl - Now read the atomic data file.  This is necessary to do here in order to establish the 
+   * values for the dimensionality of some of the variable length structures, associated 
+   * with macro atoms, especially but likely to be a good idea ovrall
+   */
+
+  get_atomic_data (geo.atomic_filename);
+ 
+
+
 
 /* Now allocate space for the wind array */
 
@@ -164,6 +176,10 @@ wind_read (filename)
 	  n += fread(macromain[m].recomb_sp_e,sizeof(double),size_alpha_est, fptr);
 	  n += fread(macromain[m].matom_emiss,sizeof(double),nlevels_macro, fptr);
 	  n += fread(macromain[m].matom_abs,sizeof(double),nlevels_macro, fptr);
+
+	  /* Force recalculation of kpkt_rates */
+
+	  macromain[m].kpkt_rates_known=0;
 	}
 
     }

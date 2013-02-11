@@ -3,9 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
 #include "atomic.h"
-
 #include "python.h"
 
 /***********************************************************
@@ -338,19 +336,6 @@ rtheta_volumes (w)
 	      jj = kk = RESOLUTION * RESOLUTION;
 	    }
 
-//OLD68c          if (i == NDIM - 1 || j == MDIM - 1)
-//OLD68c            {
-//OLD68c              fraction = 0.0;   /* Force outside edge volues to zero */
-//OLD68c              jj = 0;
-//OLD68c              kk = RESOLUTION * RESOLUTION;
-//OLD68c            }
-//OLD68c
-//OLD68c          else if (i == NDIM - 2 || j == MDIM - 2)
-//OLD68c            {
-//OLD68c              fraction = 0.0;   /* Force outside edge volues to zero */
-//OLD68c              jj = 0;
-//OLD68c              kk = RESOLUTION * RESOLUTION;
-//OLD68c            }
 
 	  else
 	    {			/* The grid cell is PARTIALLY in the wind */

@@ -353,14 +353,16 @@ int nxcol_min, nxcol_max, nxcol_delt;	/*For calculating a frequency range within
 					   be included, see the routine limit_collisions */
 
 
-struct coolstruct
-{
-  double cooling_bf[NTOP_PHOT];
-  double cooling_bf_col[NTOP_PHOT];	
-  double cooling_bb[NLINES];
-  double cooling_normalisation;
-  double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
-  double cooling_ff;
-};
+//091103 ksl deleted coolstruct as not really necessary and in order to reduce the overall size of the MacroPtr array
+// This structure has been put in the overall MacroPtr as individual elements so that icould get it there
+//OLD 091103 struct coolstruct
+//OLD 091103 {
+//OLD 091103   double cooling_bf[NTOP_PHOT];
+//OLD 091103   double cooling_bf_col[NTOP_PHOT];	
+//OLD 091103   double cooling_bb[NLINES];
+//OLD 091103   double cooling_normalisation;
+//OLD 091103   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
+//OLD 091103   double cooling_ff;
+//OLD 091103 };
 
 typedef struct coolstruct COOLSTR;

@@ -62,7 +62,6 @@
 #include "python.h"
 
 
-//OLD #define LINELENGTH 132
 #define NW		10000
 #define NSPEC           20
 

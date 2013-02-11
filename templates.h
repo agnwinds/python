@@ -361,6 +361,7 @@ int rtheta_volumes(WindPtr w);
 int rtheta_where_in_grid(double x[]);
 int rtheta_get_random_location(int n, double x[]);
 int rtheta_extend_density(WindPtr w);
+int rtheta_is_cell_in_wind(int n);
 /* spherical.c */
 double spherical_ds_in_cell(PhotPtr p);
 int spherical_make_grid(WindPtr w);

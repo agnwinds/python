@@ -105,10 +105,6 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     {				/* Use banding, create photons with different weithst in different wavelength
 				   bands.  this is used for the for ionization calculation where one wants to assure
 				   that you have "enough" photons at high energy */
-//OLD      if (xband.nbands == 0)
-//OLD	{
-//OLD	  init_bands (0.0, f1, f2, 2, &xband);
-//OLD	}
       ftot = populate_bands (f1, f2, ioniz_or_final, iwind, &xband);
 
 // Now generate the photons
