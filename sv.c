@@ -37,6 +37,7 @@ History:
  	98dec	ksl	Coded and debugged as part of major change in IO structure required when
  				adding a spherical wind
         080518  ksl     60a - geo should contain only cgs units
+	11aug	ksl	70b - kluge to get better xscale with compton tours
 **************************************************************/
 
 int
@@ -93,6 +94,13 @@ get_sv_wind_params ()
   geo.wind_thetamin = geo.sv_thetamin;
   geo.wind_thetamax = geo.sv_thetamax;
   geo.xlog_scale = geo.sv_rmin;
+
+  /* !! 70b - This change is to accomodate the torus, but it is not obvious this is the
+   * best way to set the scales now. It might be better do do this in make_grid!!  */ 
+  if (geo.compton_torus && geo.compton_torus_rmin < geo.xlog_scale) {
+	  geo.xlog_scale=geo.compton_torus_rmin;
+  }
+
   geo.zlog_scale = 1e7;
 
 /*Now calculate the normalization factor for the wind*/
@@ -109,7 +117,7 @@ get_sv_wind_params ()
 	double sv_velocity(x,v) calulates the v of a Schlossman Vitello wind from a position
 	x
 Arguments:		
-	double x[]		the postion where for the which one desires the velocity
+	double x[]		the postion for which one desires the velocity
 Returns:
 	double v[]		the calculated velocity
 	
@@ -274,7 +282,7 @@ sv_rho (x)
   r = sqrt (x[0] * x[0] + x[1] * x[1]);
   ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == 2)  /* These are corrections for a vertically extended disk */
     {
       xtest[0] = r;		// Define xtest in the +z plane
       xtest[1] = 0;

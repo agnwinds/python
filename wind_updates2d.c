@@ -184,7 +184,7 @@ WindPtr (w);
 
 
 /* 1108 NSH/KSL  This loop is to calculate the frequency banded j and ave_freq variables */
-     for (i=0 ; i<nxfreq ; i++) /*loop over number of bands, well actually loop over the band bumbers, the first band is band 0 and the last is nxfreq-1 (the number of bands-1) We therefore loop until i>=nxfreq, meaning that the last i will be nxfreq-1*/
+     for (i=0 ; i<nxfreq ; i++) /*loop over number of bands */
 	{
 	if (plasmamain[n].nxtot[i] > 0)   /*Check we actually have some photons in the cell in this band */
 		{

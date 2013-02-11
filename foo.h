@@ -59,9 +59,9 @@ int vwind_xyz(PhotPtr p, double v[]);
 int wind_div_v(WindPtr w);
 double rho(WindPtr w, double x[]);
 int mdot_wind(WindPtr w, double z, double rmax);
-int get_random_location(int n, double x[]);
+int get_random_location(int n, int icomp, double x[]);
 int zero_scatters(void);
-int check_corners_inwind(int n);
+int check_corners_inwind(int n, int icomp);
 /* wind.c */
 int where_in_wind(double x[]);
 int wind_check(WindPtr www, int n);
@@ -349,36 +349,36 @@ double elvis_wind_mdot_integral(double r);
 double cylind_ds_in_cell(PhotPtr p);
 int cylind_make_grid(WindPtr w);
 int cylind_wind_complete(WindPtr w);
-int cylind_volumes(WindPtr w);
+int cylind_volumes(WindPtr w, int icomp);
 int cylind_where_in_grid(double x[]);
-int cylind_get_random_location(int n, double x[]);
+int cylind_get_random_location(int n, int icomp, double x[]);
 int cylind_extend_density(WindPtr w);
-int cylind_is_cell_in_wind(int n);
+int cylind_is_cell_in_wind(int n, int icomp);
 /* rtheta.c */
 double rtheta_ds_in_cell(PhotPtr p);
 int rtheta_make_grid(WindPtr w);
 int rtheta_wind_complete(WindPtr w);
-int rtheta_volumes(WindPtr w);
+int rtheta_volumes(WindPtr w, int icomp);
 int rtheta_where_in_grid(double x[]);
-int rtheta_get_random_location(int n, double x[]);
+int rtheta_get_random_location(int n, int icomp, double x[]);
 int rtheta_extend_density(WindPtr w);
-int rtheta_is_cell_in_wind(int n);
+int rtheta_is_cell_in_wind(int n, int icomp);
 /* spherical.c */
 double spherical_ds_in_cell(PhotPtr p);
 int spherical_make_grid(WindPtr w);
 int spherical_wind_complete(WindPtr w);
-int spherical_volumes(WindPtr w);
+int spherical_volumes(WindPtr w, int icomp);
 int spherical_where_in_grid(double x[]);
-int spherical_get_random_location(int n, double x[]);
+int spherical_get_random_location(int n, int icomp, double x[]);
 int spherical_extend_density(WindPtr w);
 int shell_make_grid(WindPtr w);
 /* cylind_var.c */
 double cylvar_ds_in_cell(PhotPtr p);
 int cylvar_make_grid(WindPtr w);
 int cylvar_wind_complete(WindPtr w);
-int cylvar_volumes(WindPtr w);
+int cylvar_volumes(WindPtr w, int icomp);
 int cylvar_where_in_grid(double x[], int ichoice, double *fx, double *fz);
-int cylvar_get_random_location(int n, double x[]);
+int cylvar_get_random_location(int n, int icomp, double x[]);
 int cylvar_extend_density(WindPtr w);
 int cylvar_coord_fraction(int ichoice, double x[], int ii[], double frac[], int *nelem);
 /* bilinear.c */
@@ -422,10 +422,12 @@ int shell_vel_grad(double x[], double velgrad[][3]);
 /* compton.c */
 double kappa_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
-/* dielectronic.c */
-double compute_dr_coeffs(double temp);
+/* torus.c */
+double torus_rho(double x[]);
 /* zeta.c */
 double compute_zeta(double temp, int nion, int ilow, int ihi, double interpfrac, double f1, double f2, int mode);
+/* dielectronic.c */
+double compute_dr_coeffs(double temp);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

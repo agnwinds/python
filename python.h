@@ -300,6 +300,15 @@ struct geometry
   double r_agn;               /* radius of the "photosphere" of the BH in the AGN.  */
   double d_agn;               /* the distance to the agn - only used in balance to calculate the ioinsation fraction*/
 
+// 70b - ksl - 110809  The next set of sources relate to a compton torus that is initially at least just related to AGN
+
+  int compton_torus;		/* 0 if there is no Compton torus; 1 otherwise */
+  double compton_torus_rmin;	/* The minimum radius of the torus */
+  double compton_torus_rmax;	/* The maximum radius of the torus */
+  double compton_torus_zheight; /* The height of the torus. */
+  double compton_torus_tau; 	/* The optical depth through the torus at the height. */
+  double compton_torus_te;	/* The initial temperature of the torus */
+
 // The next set of parameters describe the input datafiles that are read
   char atomic_filename[132];   /* 54e -- The masterfile for the atomic data*/
   char fixed_con_file[132];    /* 54e -- For fixed concentrations, the file specifying concentrations */
@@ -399,8 +408,22 @@ done to make it easier to control the size of the entire structure   06jul-ksl
                             
 
 /* 061104 -- 58b -- ksl -- Added definitions to characterize whether a cell is in the wind. */
-#define W_ALL_INWIND   0	//Entire grid cell is in the wind
+/* 110810 -- ksl - these are assigned to w->inwind, and are used to help determine how photons 
+that go through a cell are treated.  Most of the assignments are based on whether the
+volume in the wind is zero, which is determined in cylind_volumes for the cylindrical wind
+and in correpsonding reoutines elsewehere.  These routines are called from the routine define_wind.
+W_IGNORE is currently set in define_wind itself.  The values of these variables are used
+in translate_in_wind.
+
+Note that where_in_wind has been modified to use some of the same returns.  In general, the idea
+is that if a new component is to be added, it should be added with by with two varialles ALL in whatever
+and PART in whatever, as n and n+1
+*/
+
+#define W_PART_INTORUS 3	//Part of cell is in the torus
+#define W_ALL_INTORUS  2	//Entire grid cell is in the torus
 #define W_PART_INWIND  1	//Part of gridcell is in the wind
+#define W_ALL_INWIND   0	//Entire grid cell is in the wind
 #define W_NOT_INWIND  -1        //None of gridcell is in the wind
 #define W_IGNORE      -2	//Even though the wind may occupy a small part of this cell, assume
 				//photons simply pass through the cell.  This is new in 58b
@@ -424,7 +447,7 @@ typedef struct wind
   double dvds_max, lmn[3];	/*The maximum value of dvds, and the direction in a cell in cylindrical coords */
   double vol;			/* valid volume of this cell (more specifically the volume of one of the
 				   two annular regions that this cell represents). */
-  int inwind;			/* 061104 -- 58b -- ksl -- Moved definitioins of for whether a cell is or is not
+  int inwind;			/* 061104 -- 58b -- ksl -- Moved definitions of for whether a cell is or is not
 				inwind to #define statements above */
 
 }

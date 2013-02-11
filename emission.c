@@ -390,7 +390,9 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       p[n].w = weight;
       /* Determine the position of the photon in the moving frame */
 
-      get_random_location (icell, p[n].x);
+      /* !! ERROR - Need to account for emission from torus if it exists */
+
+      get_random_location (icell, 0, p[n].x);
 
 
       p[n].grid = icell;
