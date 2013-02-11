@@ -92,7 +92,7 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		radiation.o gradv.o phot_util.o anisowind.o resonate.o density.o \
 		matom.o estimators.o yso.o elvis.o photon2d.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
-		stuart_sim.o shell_wind.o
+		stuart_sim.o shell_wind.o compton.o
 
 
 

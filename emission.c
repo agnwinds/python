@@ -13,6 +13,10 @@ Description:
 
 Notes:
 
+	Comment: Some but not all of the calls to routines were changed here
+	when the Plasma structure was introduced.  A general cleanup would
+	make this consistent.  ksl 110805
+
 History:
  	97jun	ksl	Coding on py_wind began.
  	98feb	ksl	Coding of these subroutines began.
@@ -107,8 +111,6 @@ wind_luminosity (f1, f2)
              Space Telescope Science Institute
 
 Synopsis:  total_emission (one, f1, f2) Calculate the total emission of a single cell 
-	in the wind given t_e.  The reason t_e is a variable is so that one can solve 
-	for t_e so that the total_emission will match the total heating
 
 Arguments:		
 
@@ -119,6 +121,16 @@ Description:
 	
 
 Notes:
+	Total emission gives the total enery loss due to photons.  It does
+	not include other coooling sources, e. g. adiabatic expansion.
+
+	It returns the total luminosity, but also stores the luminosity due
+	to various types of emssion, e.g ff, fb, lines, compton into the
+	Plasms cells
+
+	Comment: The call to this routine was changed when PlasmaPtrs
+	were introduced, but it appears that the various routines 
+	that were called were not changed.
 
 History:
 	97	ksl	Coded
@@ -236,7 +248,9 @@ History:
   			if the routine is called it has no effect.  The
   			or more properly, one issue is how to meld adiabatic 
   			cooling with the macro atom approach.
-	06may	ksl	57+ -- Adapted to include plsma structure
+	06may	ksl	57+ -- Adapted to include plasma structure
+	11aug	ksl	70 - Adiabatic cooling returns the cooling but
+			does not store it.
  
  
 **************************************************************/

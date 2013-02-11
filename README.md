@@ -1,5 +1,7 @@
 README
 ***
 =========
-This is what 69f should have been. Use this one as a baseline for python 70
+precursor - python_69g
+This version incorporates cooling and piecewise powerlaw ionization. It has not been tested extensively at this point.
+
 

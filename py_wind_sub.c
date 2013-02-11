@@ -316,7 +316,8 @@ adiabatic_cooling_summary (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  t_e = plasmamain[w[n].nplasma].t_e;
-	  num_recomb (&plasmamain[w[n].nplasma], t_e);
+	  // ksl - I could not determine what the next line was supposed to do
+	  // num_recomb (&plasmamain[w[n].nplasma], t_e);
 	  tot += aaa[n] = adiabatic_cooling (&w[n], t_e);
 	}
     }
@@ -1287,7 +1288,10 @@ IP_summary (w, rootname, ochoice)
 
 
 
-/* A summary of the Sim alpha parameter - might not always be present */
+/* A summary of the Sim alpha parameter - might not always be present.
+
+   1108	ksl	Adapted for new version of banded sim_alpha
+ */
 
 int
 alpha_summary (w, rootname, ochoice)
@@ -1295,9 +1299,12 @@ alpha_summary (w, rootname, ochoice)
      char rootname[];
      int ochoice;
 {
-  int n;
+  int i,n;
   char filename[LINELENGTH];
   int nplasma;
+
+  i=1;
+  rdint("Band number for alpha",&i);
 
   for (n = 0; n < NDIM2; n++)
     {
@@ -1305,7 +1312,7 @@ alpha_summary (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = (plasmamain[nplasma].sim_alpha);
+	  aaa[n] = (plasmamain[nplasma].sim_alpha[i]);
 	}
     }
   display ("Sim alpha in cell");

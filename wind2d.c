@@ -220,36 +220,6 @@ recreated when a windfile is read into the program
 		 i, j, n);
 	    }
 	}
-//Old68c      for (n = 0; n < NDIM2; n++)
-//Old68c        {
-//Old68c          wind_n_to_ij (n, &i, &j);
-//Old68c          if (i < (NDIM - 2) && j < (MDIM - 2))
-//Old68c          if (i < (NDIM - 1) && j < (MDIM - 1))
-//Old68c            {
-//Old68c              n_inwind = 0;
-//Old68c              if (where_in_wind (w[n].x) == 0)
-//Old68c                n_inwind++;
-//Old68c              if (where_in_wind (w[n + 1].x) == 0)
-//Old68c                n_inwind++;
-//Old68c              if (where_in_wind (w[n + MDIM].x) == 0)
-//Old68c                n_inwind++;
-//Old68c              if (where_in_wind (w[n + MDIM + 1].x) == 0)
-//Old68c                n_inwind++;
-//Old68c              if (w[n].vol == 0 && n_inwind > 0)
-//Old68c                {
-//Old68c                  Error
-//Old68c                    ("wind2d: Old Cell %3d (%2d,%2d) has %d corners in wind, but zero volume\n",
-//Old68c                     n, i, j, n_inwind);
-//Old68c                  w[n].inwind = W_IGNORE;
-//Old68c                }
-//Old68c              if (w[n].inwind == W_PART_INWIND && n_inwind == 4)
-//Old68c                {
-//Old68c                  Error
-//Old68c                    ("wind2d: Old Cell %3d (%2d,%2d) has 4 corners in wind, but is only partially in wind\n",
-//Old68c                     i, j, n);
-//Old68c                }
-//Old68c    }
-//Old68c    }
 
     }
 
