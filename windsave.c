@@ -111,6 +111,7 @@ wind_read (filename)
 {
   FILE *fptr, *fopen ();
   int n,m;
+  int wind_complete ();
   char line[LINELENGTH];
   char version[LINELENGTH];
 

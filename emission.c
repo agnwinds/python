@@ -345,32 +345,32 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       while (xlumsum < xlum)
 	{
 //?? 57+ This is not the best way to do this.  We should be able to sum over the plasma structure
-	  if (wmain[icell].vol > 0.0)
+	  if (wmain[icell].vol > 0.0)  //only consider cells with volume greater than zero
 	    {
-	      nplasma = wmain[icell].nplasma;
-	      xlumsum += plasmamain[nplasma].lum_rad;
+	      nplasma = wmain[icell].nplasma; //get the plasma cell in this wind cell
+	      xlumsum += plasmamain[nplasma].lum_rad; /*increment the xlumsum by the lum_rad in this plasma cell - note that due to the way wind_luminosity gets called, this is actually the band limited flux not the luminosity. */
 	    }
-	  icell++;
+	  icell++; /*If we are not yet up to xlum, go to the next cell */
 	}
-      icell--;			/* This is the cell in which the photon must be generated */
+      icell--;			/* We have got up to xlum, so this is the cell in which the photon must be generated */
 
-      nplasma = wmain[icell].nplasma;
+      nplasma = wmain[icell].nplasma; 
 
 
       /* Now generate a single photon in this cell */
 
       /*Get the total luminosity and MORE IMPORTANT populate xcol.pow and other parameters */
-      lum = plasmamain[nplasma].lum_rad;
+      lum = plasmamain[nplasma].lum_rad; /* Whilst this says lum - I'm (nsh) pretty sure this is actually a flux between two frequency limits) */
 
-      xlum = lum * (rand () + 0.5) / (MAXRAND);
+      xlum = lum * (rand () + 0.5) / (MAXRAND);  /*this makes a small test luminosity*/
 
       xlumsum = 0;
 
       p[n].nres = -1;
       p[n].nnscat = 1;
-      if ((xlumsum += plasmamain[nplasma].lum_ff) > xlum)
+      if ((xlumsum += plasmamain[nplasma].lum_ff) > xlum) /*Add the free free luminosity of the cell to the running total. If it is more than our small test luminosity, then we need to make some ff photons */
 	{
-	  p[n].freq = one_ff (&wmain[icell], freqmin, freqmax);
+	  p[n].freq = one_ff (&wmain[icell], freqmin, freqmax);  /*Get the frequency of one ff photon */
 	  if (p[n].freq <= 0.0)
 	    {
 	      Error_silent
@@ -379,20 +379,18 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 	      p[n].freq = 0.0;
 	    }
 	}
-      else if ((xlumsum += plasmamain[nplasma].lum_fb) > xlum)
+      else if ((xlumsum += plasmamain[nplasma].lum_fb) > xlum) /*Do the same for fb */
 	{
 	  p[n].freq = one_fb (&wmain[icell], freqmin, freqmax);
 	}
       else
 	{
-	  p[n].freq = one_line (&wmain[icell], freqmin, freqmax, &p[n].nres);
+	  p[n].freq = one_line (&wmain[icell], freqmin, freqmax, &p[n].nres); /*And fill all the rest of the luminosity up with line photons */
 	}
       p[n].w = weight;
       /* Determine the position of the photon in the moving frame */
 
-      /* !! ERROR - Need to account for emission from torus if it exists */
-
-      get_random_location (icell, 0, p[n].x);
+      get_random_location (icell, p[n].x);
 
 
       p[n].grid = icell;

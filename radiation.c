@@ -308,9 +308,9 @@ statement could be deleted entirely 060802 -- ksl */
 }
 
 
-/* 1108 NSH  THe next loop updates the banded versions of j and ave_freq */
+/* 1108 NSH  THe next loop updates the banded versions of j and ave_freq, note that the lines above still update the parameters for all the photons produced. We are simply controlling which photons are used for the sim powewr law stuff by banding.*/
 
-  for (i=0 ; i<nxfreq ; i++) 
+  for (i=0 ; i<nxfreq ; i++)  /* nxfreq refers to how many frequencies we have defining the bands. So, if we have 5 bands, we have 6 frequencies, going from xfreq[0] to xfreq[5] Since we are breaking out of the loop when i>=nxfreq, this means the last loop will be i=nxfreq-1*/
 	{
 	if (xfreq[i] < p->freq && p->freq <= xfreq[i+1])
 		{

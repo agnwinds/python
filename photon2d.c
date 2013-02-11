@@ -35,7 +35,6 @@ History:
  	98nov	ksl	Modified call to where_in_wind 
 	05apr	ksl	55d -- Minor mod to get more info on problem case
 			of a photon not in wind or grid
-	11aug	ksl	70b - Incorporate mulitple components
 
  
 **************************************************************/
@@ -49,10 +48,11 @@ translate (w, pp, tau_scat, tau, nres)
      int *nres;
 {
   int istat;
+  int where_in_wind (), where_in_grid ();
+  int translate_in_space (), translate_in_wind ();
 
 
-//Old 70b  if (where_in_wind (pp->x) != 0)
-  if (where_in_wind (pp->x) < 0)
+  if (where_in_wind (pp->x) != 0)
     {
       istat = translate_in_space (pp);
     }
@@ -211,7 +211,10 @@ ds_to_wind (pp)
      PhotPtr pp;
 {
   struct photon ptest;
-  double ds, x;
+  double ds, ds_to_cone (), x;
+  double ds_to_sphere ();
+  int where_in_wind ();
+  int move_phot (), stuff_phot ();
 
   stuff_phot (pp, &ptest);
   ds = ds_to_sphere (geo.wind_rmax, &ptest);
@@ -295,6 +298,11 @@ translate_in_wind (w, p, tau_scat, tau, nres)
   int n;
   double smax, s, ds_current;
   int istat;
+  int stuff_phot ();
+  int where_in_grid (), wind_n_to_ij ();
+  int quadratic (), move_phot ();
+  int radiation ();
+  double length ();
   int nplasma;
 
   WindPtr one;

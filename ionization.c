@@ -122,17 +122,19 @@ ion_abundances (xplasma, mode)
 
 // Start of loop
 //
-
-	   for (nx4power=0;nx4power<nxfreq;nx4power++){
+     for (nx4power=0;nx4power<nxfreq;nx4power++) /* We loop over all of the bands, the first band is band number 0, and the last is band nxfreq-1 */
+        {
 
 	if (xplasma->nxtot[nx4power] == 0)
 		{
-		Error("ion_abundances: no photons in band for power law estimators. Using total band");
+		Error("ion_abundances: no photons in band for power law estimators. Using total band\n");
+ 		Log("ion_abundances: no photons in band for power law estimators. Using total band\n");
 		sim_numin=xband.f1[0]; /*NSH 1108 Use the lower bound of the lowest band for sumnumin */
 		sim_numax=xband.f2[xband.nbands-1]; /*NSH 1108 and the upper bound of the upperband for max */
 		sim_meanfreq=xplasma->ave_freq; 
 		// j=xplasma->j;
 		j=0; // If there are no photons then our guess is that there is no flux in this band
+		xplasma->sim_w[nx4power]=0; //We also want to make sure that the weight will be zero, this way we make sure there is no contribution to the ionization balance from this frequency.
 		}
 	else
 		{
@@ -142,7 +144,7 @@ ion_abundances (xplasma, mode)
 		j=xplasma->xj[nx4power];
 		}
 
-	Log ("NSH We are about to calculate w and alpha, j=%10.2e, mean_freq=%10.2e, numin=%10.2e, numax=%10.2e\n",j,sim_meanfreq,sim_numin,sim_numax);
+	Log ("NSH We are about to calculate w and alpha, j=%10.2e, mean_freq=%10.2e, numin=%10.2e, numax=%10.2e, number of photons in band=%i\n",j,sim_meanfreq,sim_numin,sim_numax,xplasma->nxtot[nx4power]);
 
 
 	alphamin=xplasma->sim_alpha[nx4power]-0.1; /*1108 NSH ?? this could be a problem. At the moment, it relies on sim_alpha being defined at this point. */
@@ -159,13 +161,18 @@ ion_abundances (xplasma, mode)
 
 	alphatemp=zbrent(sim_alpha_func,alphamin,alphamax,0.00001);
 
+	if (alphatemp > 3.0) alphatemp=3.0;  //110818 nsh check to stop crazy values for alpha causing problems
+	if (alphatemp < -3.0) alphatemp=-3.0;
+
+
+
 /*This next line computes the sim weight using an external function. Note that xplasma->j already contains the volume of the cell and a factor of 4pi, so the volume sent to sim_w is set to 1 and j has a factor of 4PI reapplied to it. This means that the equation still works in balance. It may be better to just implement the factor here, rather than bother with an external call.... */
 	sim_w_temp=sim_w(j*4*PI,1,1,alphatemp,sim_numin,sim_numax);
 
-	Log ("NSH We now have calculated sim_w_temp=%e\n",sim_w_temp);
+	Log ("NSH We now have calculated sim_w_temp=%e and sim_alpha_temp=%f\n",sim_w_temp,alphatemp);
         if (sane_check(sim_w_temp))
 		{
-		Error ("New sim parameters unreasonable, using existing parameters. Check number of photons in this cell");
+		Error ("New sim parameters unreasonable, using existing parameters. Check number of photons in this cell\n");
 		}
         else 
 		{
@@ -174,6 +181,7 @@ ion_abundances (xplasma, mode)
 		}
 
 	Log_silent ("ITTTTT %i %e %e cell%i\n",geo.wcycle,xplasma->sim_alpha,xplasma->sim_w,xplasma->nplasma);
+	Log ("NSH and after a check, sim_w=%e, and sim_alpha=%f set for band %i\n",xplasma->sim_w[nx4power],xplasma->sim_alpha[nx4power],nx4power);
 	  }
 /* At this point we have put all of the fitted alphas and nomalisations into the sim_alpha and sim_w portions of the PlasmaPtr */
 
@@ -192,9 +200,9 @@ ion_abundances (xplasma, mode)
       xplasma->lum_rad_old = xplasma->lum_rad;
 
 
-  Log("NSH Here we about to call one_shot, cell number %i gain %e mode %i t_r %f t_e %f sim_w %e sim_alpha %e logIP %e\n",xplasma->nplasma,xplasma->gain,mode,xplasma->t_r,xplasma->t_e,xplasma->sim_w,xplasma->sim_alpha,log10(xplasma->sim_ip));
+//OLD  Log("NSH Here we about to call one_shot, cell number %i gain %e mode %i t_r %f t_e %f sim_w %e sim_alpha %e logIP %e\n",xplasma->nplasma,xplasma->gain,mode,xplasma->t_r,xplasma->t_e,xplasma->sim_w,xplasma->sim_alpha,log10(xplasma->sim_ip));
    Log("NSH in this cell, we have %i AGN photons and %i disk photons\n",xplasma->ntot_agn,xplasma->ntot_disk);
-   Log("NSH in this cell, we have %i photons in our power law band\n",xplasma->nxtot[nx4power]);
+//OLD   Log("NSH in this cell, we have %i photons in our power law band\n",xplasma->nxtot[nx4power]); //This no longer makes sense
 
 
 

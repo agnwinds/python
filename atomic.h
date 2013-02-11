@@ -137,7 +137,12 @@ typedef struct ions
 				   	macro_methods are not used
 				   set to  2 if topbase inputs, even if their ar no so-called non-lte
 				   	levels, i.e. levels in the levden array
-    				*/
+    				*/ 
+    int drflag;	        /* The number of dielectronic recombination parameter types read in. 0
+				probably means it has no data. 2 is good, 3 or 1 means an error has taken
+				place - this is trapped in get_atomicdata.c */
+    int nxdrecomb;              /* link into the drecomb structure to give the location of the dielectronic
+                               recombination coefficients for this ion */
   }
 ion_dummy,*IonPtr;
 
@@ -367,3 +372,26 @@ int nxcol_min, nxcol_max, nxcol_delt;	/*For calculating a frequency range within
 //OLD 091103 };
 
 typedef struct coolstruct COOLSTR;
+
+
+//081115 nsh New structure and variables to hold the dielectronic recombination rate data
+//set up to accept the korista data from the university of strahclyde website.
+
+#define MAX_DR_PARAMS 9  //This is the maximum number of c or e parameters. 
+int ndrecomb;                //This is the actual number of DR parameters
+
+typedef struct dielectronic_recombination
+{
+	int nion;        //Internal cross reference to the ion in the ion structure thsat it refers to
+	int nparam;	  //the number of parameters - it varies from ion to ion
+	double c[MAX_DR_PARAMS];   //c parameters
+	double e[MAX_DR_PARAMS];   //e parameters
+} Drecomb, *Drecombptr;
+
+
+Drecomb drecomb[NIONS];  //set up the actual structure
+
+double dr_coeffs[NIONS];    //this will be an array to temprarily store the volumetric dielectronic recombination rate coefficients for the current cell under interest. We may want to make this 2D and store the coefficients for a range of temperatures to interpolate.
+
+
+

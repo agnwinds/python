@@ -238,19 +238,14 @@ spherical_wind_complete (w)
  	05apr	ksl	55d: Adapted from rtheta.c
 	06nov	ksl	58b: Minor modification to use W_ALL_INWIND
 			etc., instead of hardcoded values
-	11aug	ksl	70b Add the ability to find a different 
-			component.  Note that this makes explicit
-			use of the way components are defined,
-			See python.h
  
 **************************************************************/
 #define RESOLUTION   100
 
 
 int
-spherical_volumes (w,icomp)
+spherical_volumes (w)
      WindPtr w;
-     int icomp;
 {
   int i, n;
   double fraction;
@@ -286,7 +281,7 @@ spherical_volumes (w,icomp)
 	    kk = RESOLUTION;
 	  }
 	else
-	  {			/* Determine whether the cell is in the wind */
+	  {			/* Determine whetehr the cell is in the wind */
 	    num = denom = 0;
 	    jj = kk = 0;
 	    dr = (rmax - rmin) / RESOLUTION;
@@ -301,7 +296,7 @@ spherical_volumes (w,icomp)
 		    x[0] = r * sin (theta);
 		    x[1] = 0;
 		    x[2] = r * cos (theta);;
-		    if (where_in_wind (x) == icomp)
+		    if (where_in_wind (x) == 0)
 		      {
 			num += r * r * sin (theta);	/* 0 implies in wind */
 			jj++;
@@ -316,12 +311,10 @@ spherical_volumes (w,icomp)
 	    w[n].vol = 0.0;
 	  }
 	else if (jj == kk)
-	  //OLD 70b w[n].inwind = W_ALL_INWIND;	// The cell is completely in the wind
-	  w[n].inwind = icomp;	// The cell is completely in the wind
+	  w[n].inwind = W_ALL_INWIND;	// The cell is completely in the wind
 	else
 	  {
-	    //OLD 70b w[n].inwind = W_PART_INWIND;	//The cell is partially in the wind
-	    w[n].inwind = icomp+1;	//The cell is partially in the wind
+	    w[n].inwind = W_PART_INWIND;	//The cell is partially in the wind
 	    w[n].vol *= fraction;
 	  }
 
@@ -399,8 +392,7 @@ spherical_where_in_grid (x)
  	spherical_get_random_location
 
  Arguments:		
- 	int n -- Cell in which random position is to be generated
-	int icomp -- The component we want the postion to be generated in
+ 	int n -- Cell in which random poition is to be generated
  Returns:
  	double x -- the position
  Description:	
@@ -412,14 +404,12 @@ spherical_where_in_grid (x)
 
  History:
  	05apr	ksl	55d: Adapted from rtheta.c
-	11aug	ksl	70b - Modified to account for torus
  
 **************************************************************/
 
 int
-spherical_get_random_location (n, icomp,x)
-     int n;			// Cell in which to create position
-     int icomp;			// Component in which to create position
+spherical_get_random_location (n, x)
+     int n;			// Cell in which to create postion
      double x[];		// Returned position
 {
   int i, j;
@@ -433,7 +423,7 @@ spherical_get_random_location (n, icomp,x)
 
   /* Generate a position which is both in the cell and in the wind */
   inwind = -1;
-  while (inwind!=icomp)
+  while (inwind)
     {
       r = (rmin * rmin * rmin) +
 	(rmax * rmax * rmax -

@@ -130,6 +130,7 @@ History:
 			linked to levels for which the density could be calculated.  (Note, that there
 			may be a problem if we decide to use topbase data for ions with 0 nlte levels
 			allowed, i.e. zero levels in which we keep track of the density.  
+        081115  nsh     70 -- added in structures and routines to read in data to implement       				dielectronic recombination.
 **************************************************************/
 
 
@@ -149,6 +150,10 @@ get_atomic_data (masterfile)
 
   char word[LINELENGTH];
   int n, m, i, j;
+  int n1,n2;  //081115 nsh two new counters for DR - use new pointers to avoid any clashes!
+  int nparam; //081115 nsh temperary holder for number of DR parameters
+  double drp[MAX_DR_PARAMS]; //081115 nsh array to hold DR parameters prior to putting into structure
+  int ne,w;  //081115 nsh new variables for DR variables
   int mstart, mstop;
   int nelem;
   double gl, gu;
@@ -295,9 +300,10 @@ get_atomic_data (masterfile)
       ion[n].ntop = 0;
       ion[n].nxphot = (-1);
       ion[n].lev_type = (-1);	// Initialise to indicate we don't know what types of configurations will be read
+      ion[n].drflag = 0;     //Initialise to indicate as far as we know, there are no dielectronic recombination parameters associated with this ion.
     }
 
-  nlevels = nxphot = ntop_phot = nauger = 0;
+  nlevels = nxphot = ntop_phot = nauger = ndrecomb = 0;  //Added counter for DR//
 
   for (i = 0; i < NIONS; i++)
     {
@@ -342,6 +348,18 @@ get_atomic_data (masterfile)
       line[n].el = line[n].eu = 0.0;
       line[n].macro_info = -1;
     }
+
+/* 081115 nsh The following lines initialise the dielectronic recombination structure */
+   for (n = 0; n < NIONS; n++)
+    {
+       drecomb[n].nion = -1;       
+       drecomb[n].nparam = -1;	  //the number of parameters - it varies from ion to ion
+       for (n1 = 0; n1 < MAX_DR_PARAMS; n1++)
+	  {
+	  drecomb[n].c[n1] = 0.0;  
+	  drecomb[n].e[n1] = 0.0; 
+          }
+     }
 
   /*              for (n=0;nions;n++) {
      ground_frac[n].z=-1;
@@ -441,7 +459,10 @@ structure does not have this property! */
 		choice = 'x';	/*It's a collision strength line */
  	      else if (strncmp (word, "InPhot", 6) == 0)
  		choice = 'A';	/*It's an inner shell ionization for Auger effect */
+	      else if (strncmp (word, "DR", 2) == 0)   /* It's a dielectronic recombination file */
+		choice = 'D';
 	      else if (strncmp (word, "*", 1) == 0);	/* It's a continuation so record type remains same */
+
 	      else
 		choice = 'z';	/* Who knows what it is */
 
@@ -1812,6 +1833,82 @@ would like to have simple lines for macro-ions */
 		  break;
 
 
+/* Dielectronic recombination data read in. At the moment, the data we are using comes from the university of strathclyde wewbsite. It is used pretty much as it comes off the website with a couple of changes. The word DR is prepended to each line of data, and any comment lines are prepended with an #. This is the general format:
+
+!DR RATE COEFFICIENT FITS (C)20100430 N. R. BADNELL, DEPARTMENT OF PHYSICS, UNIVERSITY OF STRATHCLYDE, GLASGOW G4 0NG, UK.
+!  Z  N  M  W      C1         C2         C3         C4         C5         C6         C7         C8         C9
+DR  2  1  1  2  5.966E-04  1.613E-04 -2.223E-05
+DR  3  1  1  2  1.276E-04  4.084E-03 -3.058E-05
+DR  4  1  1  2  5.962E-04  1.040E-02 -4.487E-05
+DR  5  1  1  2  6.132E-04  1.918E-02  5.603E-04
+DR  6  1  1  2  1.426E-03  3.046E-02  8.373E-04
+DR  7  1  1  2  2.801E-03  4.362E-02  1.117E-03
+DR  8  1  1  2  4.925E-03  5.837E-02  1.359E-03
+DR  9  1  1  2  7.914E-03  7.387E-02  1.699E-03
+DR 10  1  1  2  1.183E-02  9.011E-02  1.828E-03
+DR 11  1  1  2  1.676E-02  9.873E-02  9.214E-03
+DR 12  1  1  2  2.262E-02  1.216E-01  2.531E-03
+DR 13  1  1  2  3.004E-02  1.306E-01  7.786E-03
+DR 14  1  1  2  3.846E-02  1.491E-01  2.779E-03
+DR 15  1  1  2  4.795E-02  1.559E-01  9.546E-03
+DR 16  1  1  2  6.659E-02  1.762E-01 -6.522E-03
+DR 17  1  1  2  7.078E-02  1.881E-01  2.828E-03
+DR 18  1  1  2  9.249E-02  2.011E-01 -7.153E-03
+
+There is space in the file for up to 9 coefficients, so we have put aside space for that. If we improve the data set in the future, we may need to increase storage */
+
+
+		case 'D':      /* Dielectronic recombination data read in. */
+    			nparam=sscanf(aline,"%*s %d %d %d %d %le %le %le %le %le %le %le %le %le",&z,&ne,&m,&w,&drp[0],&drp[1],&drp[2],&drp[3],&drp[4],&drp[5],&drp[6],&drp[7],&drp[8]);  //split and assign the line
+    		nparam-=4 ;       //take 4 off the nparam to give the number of actual parameters
+    		if (nparam >9 || nparam<1)        //     trap errors - not as robust as usual because there are a varaible number of parameters...
+        		{	  
+			Error ("Something wrong with dielectronic recombination data\n",
+			 file, lineno);
+		        Error ("Get_atomic_data: %s\n", aline);
+		        exit (0);
+			}
+    		if (m==1)         //            only use the data if it refers to ground state
+		  {
+		  istate=z-ne+1;   //         get the traditional ionisation state
+		  for (n=0;n<nions;n++)   //Loop over ions to find the correct place to put the data
+                    {   
+                    if (ion[n].z == z && ion[n].istate==istate)     // this works out which ion we are dealing with
+                         {
+                         if (ion[n].drflag==0)       // this ion has no parameters, so it must be the first time through        
+                              {
+                              drecomb[ndrecomb].nion=n;    //put the ion number into the DR structure
+                              drecomb[ndrecomb].nparam=nparam;   //Put the number of parameters we ware going to read in, into the DR structure so we know what to iterate over later
+			      ion[n].nxdrecomb=ndrecomb;   //put the number of the DR into the ion structure so we can go either way.
+                              for (n1=0;n1<nparam;n1++)
+                                    {
+                                    drecomb[ndrecomb].c[n1]=drp[n1];     //we are getting c parameters
+                                    }
+                              ion[n].drflag++;    //increment the flag by 1. We will do this rather than simply setting it to 1 so we will get errors if we do this more than once....
+                              ndrecomb++ ;        //increment the counter of number of dielectronic recombination parameter sets
+                              }
+                         else if (ion[n].drflag==1)      //                  must be the second time though, so no need to read in all the other things
+                              {
+                              n1=ion[n].nxdrecomb;    //     Get the pointer to the correct bit of the recombination coefficient array. This should already be set from the first time through
+			      for (n2=0;n2<nparam;n2++)
+                                    {
+                                    drecomb[n1].e[n2]=drp[n2];   //           we are getting e parameters
+                                    }
+			      }
+                         else    //if dr flag is not 0 or 1, we have a problem
+                               {
+                               Error ("Dielectronic recombination flag giving odd results\n",file, lineno);
+			       exit(0);
+                               }
+                         }    //close if statement that selects appropriate ion to add data to
+                    }   //close loop over ions
+                  }   //close if statement that selects ground state only
+		  
+		  break;
+			
+
+
+
 		case 'c':	/* It was a comment line so do nothing */
 		  break;
 		case 'z':
@@ -1839,9 +1936,35 @@ would like to have simple lines for macro-ions */
 
 /* OK now summarize the data that has been read*/
 
+
+/* The next lines are temporary to write out DR coefficients for testing 
+  for (n=0;n<nions;n++)
+	{
+	if (ion[n].drflag==0)
+		{
+		printf ("Ion %i (z=%i, state=%i) has no DR coefficients\n",n,ion[n].z,ion[n].istate);
+		}
+	else
+		{
+		n2=ion[n].nxdrecomb;
+		printf ("Ion %i (z=%i, state=%i) has C parameters ",n, ion[n].z,ion[n].istate);
+		for (n1=0;n1<drecomb[n2].nparam;n1++)
+			{
+			printf ("%e ",drecomb[n2].c[n1]);
+			}
+		printf ("and E parameters ");
+		for (n1=0;n1<drecomb[n2].nparam;n1++)
+			{
+			printf ("%e ",drecomb[n2].e[n1]);
+			}
+		printf ("\n");
+		}
+	}
+*/
+
   Log
     ("Data of %3d elements, %3d ions, %5d levels, %5d lines, and %5d topbase records\n",
-     nelements, nions, nlevels, nlines, ntop_phot);
+     nelements, nions, nlevels, nlines,  ntop_phot);
   Log
     ("Macro   %3d elements, %3d ions, %5d levels, %5d lines, and %5d topbase records\n",
      nelements, nions_macro, nlevels_macro, nlines_macro, ntop_phot_macro);
@@ -1849,6 +1972,7 @@ would like to have simple lines for macro-ions */
     ("Simple  %3d elements, %3d ions, %5d levels, %5d lines, and %5d topbase records\n",
      nelements, nions_simple, nlevels_simple, nlines_simple,
      ntop_phot_simple);
+  Log ("We have read in %3d Dielectronic recombination coefficients\n",ndrecomb);  //110818 nsh added a reporting line about dielectronic recombination coefficients
   Log ("The minimum frequency for photoionization is %8.2e\n", phot_freq_min);
 
 

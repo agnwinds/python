@@ -286,9 +286,6 @@ rtheta_wind_complete (w)
 			calculation (and allow one to use a high resolution
 			for the numerical integration when a cell is
 			partially in the wind
-	11aug	ksl	70b -- Added possibility of finding the volumes
-			in multiple components. See python.h for discussion
-			of the relationship betwedn PART and LLL
 
  
 **************************************************************/
@@ -297,9 +294,8 @@ rtheta_wind_complete (w)
 
 
 int
-rtheta_volumes (w,icomp)
+rtheta_volumes (w)
      WindPtr w;
-     int icomp;
 {
   int i, j, n;
   int jj, kk;
@@ -315,8 +311,6 @@ rtheta_volumes (w,icomp)
       for (j = 0; j < MDIM; j++)
 	{
 	  wind_ij_to_n (i, j, &n);
-	   if (w[n].inwind == W_NOT_INWIND)
-		               {
 
 	  rmin = wind_x[i];
 	  rmax = wind_x[i + 1];
@@ -329,7 +323,7 @@ rtheta_volumes (w,icomp)
 				 rmin * rmin * rmin) * (cos (thetamin) -
 							cos (thetamax));
 
-	  n_inwind=rtheta_is_cell_in_wind (n,icomp);
+	  n_inwind=rtheta_is_cell_in_wind (n);
 	  if (n_inwind == W_NOT_INWIND)
 	    {
 	      fraction = 0.0;	/* Force outside edge volues to zero */
@@ -359,7 +353,7 @@ rtheta_volumes (w,icomp)
 		      x[0] = r * sin (theta);
 		      x[1] = 0;
 		      x[2] = r * cos (theta);;
-		      if (where_in_wind (x) == icomp)
+		      if (where_in_wind (x) == 0)
 			{
 			  num += r * r * sin (theta);	/* 0 implies in wind */
 			  jj++;
@@ -377,17 +371,14 @@ rtheta_volumes (w,icomp)
 	      w[n].vol = 0.0;
 	    }
 	  else if (jj == kk)
-	    //OLD 70b w[n].inwind = W_ALL_INWIND;	// The cell is completely in the wind
-	    w[n].inwind = icomp;	// The cell is completely in the wind
+	    w[n].inwind = W_ALL_INWIND;	// The cell is completely in the wind
 	  else
 	    {
-	      //OLD 70b w[n].inwind = W_PART_INWIND;	//The cell is partially in the wind
-	      w[n].inwind = icomp+1;	//The cell is partially in the wind
+	      w[n].inwind = W_PART_INWIND;	//The cell is partially in the wind
 	      w[n].vol *= fraction;
 	    }
 
 
-			       }
 
 
 	}
@@ -466,7 +457,7 @@ rtheta_where_in_grid (x)
                      Space Telescope Science Institute
 
  Synopsis:
- 	rtheta_get_random_location
+ 	cylind_get_random_location
 
  Arguments:		
  	int n -- Cell in which random poition is to be generated
@@ -482,15 +473,12 @@ rtheta_where_in_grid (x)
  History:
 	04aug	ksl	52a -- Moved from where_in_wind as incorporated
 			multiple coordinate systems
-	11aug	ksl	70b - Modifications to incoporate multiple 
-			components
  
 **************************************************************/
 
 int
-rtheta_get_random_location (n, icomp,x)
-     int n;			// Cell in which to create position
-     int icomp;			// The component in which to create position
+rtheta_get_random_location (n, x)
+     int n;			// Cell in which to create postion
      double x[];		// Returned position
 {
   int i, j;
@@ -507,7 +495,7 @@ rtheta_get_random_location (n, icomp,x)
 
   /* Generate a position which is both in the cell and in the wind */
   inwind = -1;
-  while (inwind!=icomp)
+  while (inwind)
     {
       r =
 	sqrt (rmin * rmin +
@@ -623,16 +611,12 @@ It was created to speed up the evaluation of the volumes for the wind.  It
 checks each of the four boundaries of the wind to see whether any portions
 of these are in the wind
 
-	11aug	ksl	Added multiple components.  Note that this makes
-			explicit use of the fact that we expect PART in
-			a component to be 1 greater than ALL in a component,
-			see python.h
+
 */
 
 int
-rtheta_is_cell_in_wind (n,icomp)
+rtheta_is_cell_in_wind (n)
      int n;
-     int icomp;
 {
   int i, j;
   double r, theta;
@@ -652,10 +636,9 @@ rtheta_is_cell_in_wind (n,icomp)
   /* Assume that if all four corners are in the wind that the
    * entire cell is in the wind */
 
-  if (check_corners_inwind (n,icomp) == 4)
+  if (check_corners_inwind (n) == 4)
     {
-      //OLD 70B return (W_ALL_INWIND);
-      return (icomp);
+      return (W_ALL_INWIND);
     }
 
   /* So at this point, we have dealt with the easy cases */
@@ -677,19 +660,16 @@ rtheta_is_cell_in_wind (n,icomp)
     {
       x[0] = rmin * sin (theta);
       x[2] = rmin * cos (theta);;
-
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (x) == 0)
 	{
-	  //OLD 70B return (W_PART_INWIND);
-	  return (icomp+1);
+	  return (W_PART_INWIND);
 	}
 
       x[0] = rmax * sin (theta);
       x[2] = rmax * cos (theta);;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (x) == 0)
 	{
-	  //OLD 70B return (W_PART_INWIND);
-	  return (icomp+1);
+	  return (W_PART_INWIND);
 	}
 
     }
@@ -700,18 +680,16 @@ rtheta_is_cell_in_wind (n,icomp)
     {
       x[0] = r * sin (thetamin);
       x[2] = r * cos (thetamin);;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (x) == 0)
 	{
-	  //OLD 70B return (W_PART_INWIND);
-	  return (icomp+1);
+	  return (W_PART_INWIND);
 	}
 
       x[0] = r * sin (thetamax);
       x[2] = r * cos (thetamax);;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (x) == 0)
 	{
-	  //Old 70b return (W_PART_INWIND);
-	  return (icomp+1);
+	  return (W_PART_INWIND);
 	}
 
     }

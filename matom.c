@@ -2297,7 +2297,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   int n;
   double v[3];
   double dot ();
-  int wind_n_to_ij (), stuff_v (), randvec ();
+  int wind_n_to_ij (), stuff_v (), where_in_wind (), randvec ();
   int get_random_location ();
   double  test;
   double ztest, dvds, z, tau;
@@ -2362,8 +2362,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
       /* Determine the position of the photon in the moving frame */
 
-      /* ! Need to account for possibility that photon is in the torus */
-      get_random_location (icell, 0, p[n].x);
+      get_random_location (icell, p[n].x);
 
       p[n].grid = icell;
 
@@ -2485,7 +2484,7 @@ photo_gen_matom (p, weight, photstart, nphot)
   int n;
   double v[3];
   double dot ();
-  int wind_n_to_ij (), stuff_v (), randvec ();
+  int wind_n_to_ij (), stuff_v (), where_in_wind (), randvec ();
   int emit_matom ();
   double test;
   int upper;
@@ -2573,10 +2572,7 @@ photo_gen_matom (p, weight, photstart, nphot)
       /* The photon frequency is now known. */
 
       /* Determine the position of the photon in the moving frame */
-
-      /* !! ERROR - need to account for posibilyt that photon is in torus */
-
-      get_random_location (icell, 0, p[n].x);
+      get_random_location (icell, p[n].x);
   
       p[n].grid = icell;
 

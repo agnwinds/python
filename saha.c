@@ -155,7 +155,7 @@ nebular_concentrations (xplasma, mode)
      partition_functions (xplasma, 1);   //lte partition function using t_e and no weights
 	printf("NSH Back from partition_functions, now going to concentrations\n");
       m = concentrations (xplasma, 3);	// Saha equation using t_e - new mode, in case we need to do something clever
-	printf("NSH Back from concentrations, going into sim_driver, T_e=%e, alpha=%f, w=%e\n",xplasma->t_e,xplasma->sim_alpha,xplasma->sim_w);
+//OLD NSH this goes wrong now.	printf("NSH Back from concentrations, going into sim_driver, T_e=%e, alpha=%f, w=%e\n",xplasma->t_e,xplasma->sim_alpha,xplasma->sim_w);
       m = sim_driver (xplasma);
    }
   else

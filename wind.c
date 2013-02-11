@@ -26,12 +26,10 @@
 Arguments:		
 	double x[3]	a position
 Returns:
- 	where_in_wind returns 
-	 W_ALL_INTORUS if the photon is in the torus
-	 W_ALL_INWIND if the photon is in the wind, 
+ 	where_in_wind returns 0 if the photon is in the wind, 
  	-1 if it is inside the inner wind cone, and 
  	-2 if it is outside the outer wind cone.
- 	-3 if it is inside the minimum radius for the wind
+ 	-3 if it is inside the minimmum radius for the wind
 	-4 if it is outside the maximum radius for the wind
 	-5 if it is inside the disk
 Description:	
@@ -41,10 +39,6 @@ Notes:
 	It does not tell you whether it is in the grid or not, just whether the photon is
 	between the two wind cones and/or inside minimum or maximum radius of the wind.     
 	It does not update pp->grid
-
-	11Aug. - ksl - it does not look like any of the negative return values are actually utilized
-	anywhere.  It could be that one should return W_NOT_INWIND in all
-	of these cases
 History:
  	97jan   ksl	Coding on python began.
  	98dec	ksl	Modified so the call to where_in_wind involves only
@@ -56,9 +50,6 @@ History:
 			is in the disk, which is now possible
 			if the disk has vertical extent
         04Aug   SS      Minor modification - "else" removed.
-	11Aug	ksl	Allowed for torus, and adapted so that it uses
-			some of the same defined variables as w->inwind
-			
 **************************************************************/
 
 int
@@ -66,13 +57,10 @@ where_in_wind (x)
      double x[];
 {
   double rho, rho_min, rho_max, z;
+//  double length (), zdisk ();
   int ireturn;
 
-  ireturn = W_ALL_INWIND;
-
-  //110814 - Currently geo.wind_rmin is always set to geo.rstar except for models that are 
-  //calculated by others.  Thus we would all the grids to start at rmin.
-
+  ireturn = 0;
 
   /* First check to see if photon is inside star or outside wind */
   if ((z = length (x)) < geo.wind_rmin)
@@ -96,19 +84,10 @@ where_in_wind (x)
 	return (-5);
     }
 
-  /* 70b -ksl - Now check if the position is in the torus.  This check
-    precedes the check to see if the position is in the wind
-  */ 
-
-  if (geo.compton_torus){
-	  if (geo.compton_torus_rmin < rho && rho <geo.compton_torus_rmax && z< geo.compton_torus_zheight) {
-		  return (W_ALL_INTORUS);
-	  }
-  }
- 
+  /* Removed "else" from following line (SS August 04) - above check
+     does not exclude the next two possibilities. */
 
 
-  /* Check if one is inside the inner windcone */
   if (rho < (rho_min = geo.wind_rho_min + z * tan (geo.wind_thetamin)))
     {
       ireturn = (-1);
@@ -338,11 +317,10 @@ model_vgrad (x, v_grad)
 }
 
 /* model_rho calculates the density of the wind in from the flow based on the
-analytic wind models.  This routine is normally only used during the initialization
-of the wind
-History
-04aug	ksl	52--adapted from define_wind in wind2d.c
-11aug	ksl	70b- added call to calculate density in the torus
+ * analytic wind models.  This routine is normally only used during the initialization
+ * of the wind
+ * History
+ * 04aug	ksl	52--adapted from define_wind in wind2d.c
  */
 
 double
@@ -391,13 +369,6 @@ model_rho (x)
       Error ("wind2d: Unknown windtype %d\n", geo.wind_type);
       exit (0);
     }
-
-  /* 70b - as this is written the torus simply overlays the wind */
-
-  if (where_in_wind(x)==W_ALL_INTORUS){
-	  rho=torus_rho(x);
-  }
-
   return (rho);
 
 }

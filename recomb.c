@@ -1063,8 +1063,8 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 if we are going to integrate */
   if (f1 < 3e14)
     f1 = 3e14;			// 10000 Angstroms
-  if (f2 > 3e17)
-    f2 = 3e17;			// 10 Angstroms
+  if (f2 > 3e18)                //110819 nsh needed to increase these values to ensure we get a cross section of some kind for highly ionised ions that we are now seeing in x-ray illuminated nebulas.
+    f2 = 3e18;			// 10 Angstroms
   if (f2 < f1)
     return (0);			// Because either f2 corresponded to something redward of 1000 A or f1 
   // was blueward of 10 Angstroms

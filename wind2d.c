@@ -78,7 +78,6 @@ define_wind ()
   double mdotbase, mdotwind, rr;
   int ierr;
   int n_vol, n_inwind, n_part;
-  int n_comp,n_comp_part;
 
   int nwind;
   int nplasma;
@@ -96,12 +95,6 @@ define_wind ()
 
   calloc_wind (NDIM2);
   w = wmain;
-
-  /* initialize inwind to a known state */
-
-  for (n=0; n<NDIM2; n++){
-	  w[n].inwind= W_NOT_INWIND;
-  }
 
 
 
@@ -166,19 +159,19 @@ recreated when a windfile is read into the program
 
   if (geo.coord_type == SPHERICAL)
     {
-      spherical_volumes (w,W_ALL_INWIND);
+      spherical_volumes (w);
     }
   else if (geo.coord_type == CYLIND)
     {
-      cylind_volumes (w, W_ALL_INWIND);
+      cylind_volumes (w);
     }
   else if (geo.coord_type == RTHETA)
     {
-      rtheta_volumes (w,W_ALL_INWIND);
+      rtheta_volumes (w);
     }
   else if (geo.coord_type == CYLVAR)
     {
-      cylvar_volumes (w,W_ALL_INWIND);
+      cylvar_volumes (w);
     }
   else
     {
@@ -186,44 +179,9 @@ recreated when a windfile is read into the program
 	("wind2d.c: Don't know how to make volumes for coordinate type %d\n",
 	 geo.coord_type);
     }
-
-/* Now check if there is a second component and if so get the volumes for these cells as well */
-
-  if (geo.compton_torus) {
-
-  if (geo.coord_type == SPHERICAL)
-    {
-      spherical_volumes (w,W_ALL_INTORUS);
-    }
-  else if (geo.coord_type == CYLIND)
-    {
-      cylind_volumes (w, W_ALL_INTORUS);
-    }
-  else if (geo.coord_type == RTHETA)
-    {
-      rtheta_volumes (w,W_ALL_INTORUS);
-    }
-  else if (geo.coord_type == CYLVAR)
-    {
-      cylvar_volumes (w,W_ALL_INTORUS);
-    }
-  else
-    {
-      Error
-	("wind2d.c: Don't know how to make volumes for coordinate type %d\n",
-	 geo.coord_type);
-    }
-
-  }
-
-/* The routines above have established the volumes of the cells that are in the wind
- * and also assigned the variables w[].inwind at least insofar as the wind is concerned.
- * We now need to do the same for the torus
- */
 
 
   n_vol = n_inwind = n_part = 0;
-  n_comp=n_comp_part=0;
   for (n = 0; n < NDIM2; n++)
     {
       if (w[n].vol > 0.0)
@@ -232,19 +190,11 @@ recreated when a windfile is read into the program
 	n_inwind++;
       if (w[n].inwind == W_PART_INWIND)
 	n_part++;
-      if (w[n].inwind == W_ALL_INTORUS)
-	n_comp++;
-      if (w[n].inwind == W_PART_INTORUS)
-	n_comp_part++;
     }
 
   Log
     ("wind2d: %3d cells of which %d are in inwind, %d partially in_wind, & %d with pos. vol\n",
      NDIM2, n_inwind, n_part, n_vol);
-
-  if (geo.compton_torus) {
-	  Log("wind2d: cells of which %d are in in the torus , %d partially ini the torus\n",n_comp,n_comp_part);
-  }
 
 /* 56d --Now check the volume calculations for 2d wind models 
    58b --If corners are in the wind, but there is zero_volume then ignore.
@@ -253,7 +203,7 @@ recreated when a windfile is read into the program
     {
       for (n = 0; n < NDIM2; n++)
 	{
-	  n_inwind = check_corners_inwind (n,0);
+	  n_inwind = check_corners_inwind (n);
 	  if (w[n].vol == 0 && n_inwind > 0)
 	    {
 	      wind_n_to_ij (n, &i, &j);
@@ -315,12 +265,6 @@ be optional which variables beyond here are moved to structures othere than Wind
 
       nh = plasmamain[n].rho * rho2nh;
       plasmamain[n].t_r = geo.twind;
-
-      /* 70b - Initialize the temperature in the torus to a different value */
-      if (w[nwind].inwind==W_ALL_INTORUS || w[nwind].inwind==W_PART_INTORUS){
-	      plasmamain[n].t_r = geo.compton_torus_te;
-      }
-
 /* Initialize variables having to do with converence in initial stages */
       plasmamain[n].gain = 0.5;
       plasmamain[n].dt_e_old = 0.0;
@@ -901,7 +845,7 @@ mdot_wind (w, z, rmax)
 
  Synopsis:
 	get_random_location is simply will produce a at a random place in
-	a cell n from component icomp.  
+	a cell n.  
 Arguments:		
 
 Returns:
@@ -911,42 +855,36 @@ Description:
 	routines
 Notes:
 
-	The reason you need the component here is because the boundary
-	of the component may cut through the cell,and you don't want
-	to generate a position outside of the component.
-
 History:
 	04aug	ksl	52a -- created as part of project to allow multiple
 			coordinate systems in python
 	05apr	ksl	55d -- Added spherical option
-	11aug	ksl	70b -- Added option of getting a random location in
-			the torus, or any new component
 
  
 **************************************************************/
 
 int
-get_random_location (n, icomp, x)
+get_random_location (n, x)
      int n;			// Cell in which to create postion
-     int icomp;			// The component we want the position in
      double x[];		// Returned position
 {
+  int cylind_get_random (), rtheta_get_random ();
 
   if (geo.coord_type == CYLIND)
     {
-      cylind_get_random_location (n, icomp,x);
+      cylind_get_random_location (n, x);
     }
   else if (geo.coord_type == RTHETA)
     {
-      rtheta_get_random_location (n, icomp,x);
+      rtheta_get_random_location (n, x);
     }
   else if (geo.coord_type == SPHERICAL)
     {
-      spherical_get_random_location (n, icomp,x);
+      spherical_get_random_location (n, x);
     }
   else if (geo.coord_type == CYLVAR)
     {
-      cylvar_get_random_location (n, icomp,x);
+      cylvar_get_random_location (n, x);
     }
   else
     {
@@ -1007,9 +945,8 @@ History
  */
 
 int
-check_corners_inwind (n,icomp)
+check_corners_inwind (n)
      int n;
-     int icomp;  // check corners for this component
 {
   int n_inwind;
   int i, j;
@@ -1019,13 +956,13 @@ check_corners_inwind (n,icomp)
   n_inwind = 0;
   if (i < (NDIM - 2) && j < (MDIM - 2))
     {
-      if (where_in_wind (wmain[n].x) == icomp)
+      if (where_in_wind (wmain[n].x) == 0)
 	n_inwind++;
-      if (where_in_wind (wmain[n + 1].x) == icomp)
+      if (where_in_wind (wmain[n + 1].x) == 0)
 	n_inwind++;
-      if (where_in_wind (wmain[n + MDIM].x) == icomp)
+      if (where_in_wind (wmain[n + MDIM].x) == 0)
 	n_inwind++;
-      if (where_in_wind (wmain[n + MDIM + 1].x) == icomp)
+      if (where_in_wind (wmain[n + MDIM + 1].x) == 0)
 	n_inwind++;
     }
 

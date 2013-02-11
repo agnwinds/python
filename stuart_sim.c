@@ -48,24 +48,31 @@ sim_driver (xplasma)
   t_e = xplasma->t_e;
   www = weight = xplasma->w;
 
-	if (xplasma->nxtot[nx4power] == 0)
-		{
-		Error("ion_abundances: no photons in band for power law estimators. Using total band");
-		f1=xband.f1[0]; /*NSH 1108 Use the lower bound of the lowest band for sumnumin */
-		f2=xband.f2[xband.nbands-1]; /*NSH 1108 and the upper bound of the upperband for max */
-		}
-	else
-		{
-		f1=xfreq[nx4power];      /*1108 NSH nx4power is defined in python.c, and says which band of radiation estimators we are interested in using the for power law ionisation calculation */
-		f2=xfreq[nx4power+1];
-		}
+  printf ("DDDDDDD We are just going to calculate DR rates\n");
+  compute_dr_coeffs(t_e);   //Populate the dielectronic recombination coefficient array for the electron temperature for this cell. If none have been read in, then they will all be zero, and nothing will happen different.
+  printf ("DDDDDDD and we have returned\n");
+
+
+
+//110819 I think this switch is now redundant, since we use PL estimators for the whole frequency range.
+//old	if (xplasma->nxtot[nx4power] == 0)
+//old		{
+//old		Error("ion_abundances: no photons in band for power law estimators. Using total band");
+		f1=xfreq[0]; /*NSH 1108 Use the lower bound of the power law estimator bands */
+		f2=xfreq[nxfreq]; /*NSH 1108 and the upper bound of the power law estimator bands */
+//old		}
+//old	else
+//old		{
+//old		f1=xfreq[nx4power];      /*1108 NSH nx4power is defined in python.c, and says which band of radiation estimators we are interested in using the for power law ionisation calculation */
+//old		f2=xfreq[nx4power+1];
+//old		}
 
 
 
 
 //OLD  xsim_alpha = xplasma->sim_alpha;  //Set the shared variable to the alpha for the cell.
 //OLD  xsim_w = xplasma->sim_w;  //Set the shared variable to the W for the cell.
-	printf ("We are in sim, t_e=%f, t_r=%f\n",t_e,t_r);
+	printf ("We are in sim, t_e=%f, t_r=%f, f1=%e, f2=%e\n",t_e,t_r,f1,f2);
 
 
   /* Initally assume electron density from the LTE densities */
@@ -91,7 +98,6 @@ sim_driver (xplasma)
 	{
 	 sim_pl (nh, t_r, t_e, www, nelem, xplasma->ne,
 			 xplasma->density, xne, newden, f1, f2);
-
 	  /* Re solve for the macro atom populations with the current guess for ne */
 	  if (geo.macro_ioniz_mode == 1)
 	    {
@@ -171,6 +177,9 @@ sim_pl (nh, t_r, t_e, www, nelem, ne, density, xne, newden,f1,f2)
 
 	weight=www;
 
+
+
+
   if (t_e > MIN_TEMP)
     {
 	fudge=1.;
@@ -192,7 +201,7 @@ sim_pl (nh, t_r, t_e, www, nelem, ne, density, xne, newden,f1,f2)
 	  ihi = 19;
 	  interpfrac = 1.;
 	}
-
+    
     }
 
   else
@@ -223,8 +232,6 @@ sim_pl (nh, t_r, t_e, www, nelem, ne, density, xne, newden,f1,f2)
   last = first + (ele[nelem].nions);	/*  So for H which has 2 ions, H1 and H2, first will generally
 					   be 0 and last will be 2 so the for loop below will just be done once for nion = 1 */
 
-//   printf ("WE are working on element %i (%s), which has %i ions, starting with %i\n",nelem,ele[nelem].name,ele[nelem].nions,ele[nelem].firstion);
-//   printf ("Ion %i is of element %i, and Ion %i is of element %i\n",ele[nelem].firstion,ion[ele[nelem].firstion].z,ele[nelem].firstion+ele[nelem].nions-1,ion[ele[nelem].firstion+ele[nelem].nions-1].z);
 
 	for (nion = ele[nelem].firstion; nion<(ele[nelem].firstion+ ele[nelem].nions); nion++)
 		{
@@ -249,34 +256,29 @@ sim_pl (nh, t_r, t_e, www, nelem, ne, density, xne, newden,f1,f2)
       num_store[last-1]=-1;
       denom_store[last-1]=-1;
       last--;
-    }    
+    }  
 
-//   printf ("We have decided that we need to loop over ions %i (element %i) to %i (element %i)\n",
-//	first,ion[first].z,last-1,ion[last-1].z);
-
-   max_ratio=((ele[nelem].abun*nh)/DENSITY_MIN)/10.0;  //This is the maximum ratio between two ions of the same element
-  sum = newden[first] = 1.;
-	fudge_store[first]=0.0;
-  for (nion = first + 1; nion < last; nion++)   
-    {
-
-//	printf("Going to xinteg_sim with nion=%i, d1=%e and d2=%e\n",nion,density[nion],density[nion-1]);
-	current_ratio=(density[nion]/density[nion-1]);
+    max_ratio=((ele[nelem].abun*nh)/DENSITY_MIN)/10.0;  //This is the maximum ratio between two ions of the same element
+    sum = newden[first] = 1.;
+    fudge_store[first]=0.0;
+    for (nion = first + 1; nion < last; nion++)   
+      {  
+//	printf ("Working on ion %i, with density %e\n",nion,density[nion]); 
+      current_ratio=(density[nion]/density[nion-1]);
       fudge = (xinteg_sim (t_e, f1, f2, nion-1,max_ratio,current_ratio));  //get the sim correction factor, we use the lower ionisartion cross section
-	fudge_store[nion]=fudge;
-	ion_store[nion]=density[nion];
-//	printf("Sim factor for nion=%i,with current densities d1=%e and d2=%e is %e\n",nion,density[nion],density[nion-1],fudge);
-    numerator = newden[nion - 1] * fudge * (ne) * density[nion];
+      fudge_store[nion]=fudge;
+      ion_store[nion]=density[nion];
+      numerator = newden[nion - 1] * fudge * (ne) * density[nion];
       denominator = density[nion - 1] * xne;
       q = numerator / denominator;
-//	printf ("q factor for ion %i of element %i is %e. Num=%e, 1=%e, 2=%e, 3=%e, 4=%e, Denom=%e, 1=%e, 2=%e\n",nion,ion[nion].z,q,numerator, newden[nion - 1] , fudge ,(ne) , density[nion]  ,          denominator,density[nion - 1] ,xne);
       /* find fraction of recombinations going directly to
          the ground state for this temperature and ion */
-      fudge2 =
-	ground_frac[nion - 1].frac[ilow] +
-	interpfrac * (ground_frac[nion - 1].frac[ihi] -
-		      ground_frac[nion - 1].frac[ilow]); 
-
+//old this is the standard calculation of fudge2 (zeta)     fudge2 =
+//	ground_frac[nion - 1].frac[ilow] +
+//	interpfrac * (ground_frac[nion - 1].frac[ihi] -
+//		      ground_frac[nion - 1].frac[ilow]); 
+  
+        fudge2=compute_zeta(t_e,nion,ilow,ihi,interpfrac,f1,f2,2);  /*nsh 110826 This is the new call to compute_zeta, which is a function which incorporates the calculation of the recombination to ground state plus the dielectronic recombination. Mode 1 is just recomb to gs by the old method. Mode 2 is recomb to gs plus DR correction. */
 
 
       /*Since nion-1 points at state i-1 (saha: n_i/n_i-1) we want ground_frac[nion-1].
@@ -330,7 +332,7 @@ xinteg_sim (t, f1, f2, nion,max_ratio,current_ratio)
      double f1, f2,max_ratio,current_ratio;		// The frequencies overwhich to integrate the cross sections
      int nion;			// The ion for which the integrated cross section is calculated
 {
-  int n;
+  int n,j;
   double sim_num,sim_denom,sim_frac;    // The upper and lower part of the fraction used to recalculate the ion fractions
   double fthresh, fmax;
   double den_config ();
@@ -340,7 +342,7 @@ xinteg_sim (t, f1, f2, nion,max_ratio,current_ratio)
   double qromb ();
   double fb_planck (), verner_planck ();
 
-//	printf ("Got here with t=%e,f1=%e,f2=%e,nion=%i,maxratio=%e,current_ratio=%e\n",t, f1, f2, nion,maxratio,current_ratio);
+//	printf ("Got here with t=%e,f1=%e,f2=%e,nion=%i,maxratio=%e,current_ratio=%e\n",t, f1, f2, nion,max_ratio,current_ratio);
 
 
 //	printf("We are in xinteg_sim with ion%i (element%i in state%i). This has a phot info of %i\n",nion,ion[nion].z,ion[nion].istate,ion[nion].phot_info);
@@ -389,7 +391,7 @@ if we are going to integrate */
 	  		fthresh = sim_xtop->freq[0];
 	  		fmax = sim_xtop->freq[sim_xtop->np - 1];	// Argues that this should be part of structure
 	  		if (f1 > fthresh)
-	    			fthresh = f1;
+	    			fthresh = f1;  
 	  		if (f2 < fmax)
 	    			fmax = f2;
 
@@ -397,13 +399,51 @@ if we are going to integrate */
 	  		if (fmax > fthresh)
 				{
 //	printf ("We are going to topbase qromb for ion %i with fthresh=%e and fmax=%e\n",n,fthresh,fmax);
-				sim_num = qromb (tb_pow, fthresh, fmax, 1.e-4);
+// old -we are now going to split this up				sim_num = qromb (tb_pow, fthresh, fmax, 1.e-4);
+		/* for the power law, we need to carry out several seperate integrations since there is no stricture that the power law description of the spectrum is continuous over the frequency boundaries. This seems to cause serious problems in qromb which hangs the code. We must loop over the frequency intervals */
+/* There are five cases we need to consider.
+1: If the current band contains the threshold frequency and the max frequency, we set alpha and w to the values for this band, and integreate from fthresh to fmax.
+2: If the threshold frequency is in the band, but the max frequency isnt, we need to integrate from fthresh to the maximum frequency in the band
+3: If the threshold frequency isnt in the band, but the max frequency is, we need to integrate from the minimum frequency in the band to fmax
+4: If fthresh is less than the min, and fmax is greater than the max for a band, we need to integreate over the whole band. 
+5: If the maximum frequency for this band is less than the threshold frequency, or the minuum frequency for the band is greater than the maximum frequency, we dont need to do anything*/
+		for (j=0;j<nxfreq;j++)  //We loop over all the bands
+			{
+			if       (xfreq[j]<fthresh && fthresh<xfreq[j+1] && xfreq[j]<fmax && fmax<xfreq[j+1])  //Case 1
+				{
+				xsim_alpha=xxxplasma->sim_alpha[j];
+				xsim_w=xxxplasma->sim_w[j];
+				sim_num+=qromb (tb_pow , fthresh, fmax, 1.e-4);
+				}
+			else if (xfreq[j]<fthresh && fthresh<xfreq[j+1] && xfreq[j+1]<fmax) //case 2 
+				{
+				xsim_alpha=xxxplasma->sim_alpha[j];
+				xsim_w=xxxplasma->sim_w[j];
+				sim_num+=qromb (tb_pow , fthresh, xfreq[j+1], 1.e-4);
+				}
+			else if (xfreq[j]>fthresh && xfreq[j]<fmax && fmax<xfreq[j+1]) //case 3
+				{
+				xsim_alpha=xxxplasma->sim_alpha[j];
+				xsim_w=xxxplasma->sim_w[j];
+				sim_num+=qromb (tb_pow , xfreq[j], fmax, 1.e-4);
+				}
+			else if (xfreq[j]>fthresh && xfreq[j+1]<fmax) // case 4
+				{
+				xsim_alpha=xxxplasma->sim_alpha[j];
+				xsim_w=xxxplasma->sim_w[j];
+				sim_num+=qromb (tb_pow , xfreq[j], xfreq[j+1], 1.e-4);
+				}
+			else //case 5 - should only be the case where the band is outside the range for the integral.
+				{
+				sim_num+=0;   // Add nothing - bit of a null statement, but makes the code look nice.
+				}
+			}
 				sim_denom = qromb (tb_planck, fthresh, fmax, 1.e-4);
 				}
 
 
 //	printf ("And we are back in the room with PL=%e and Planck=%e\n",sim_num,sim_denom);
-//	printf ("for this ion, its current density is %e, and the minimum density is %e",density,DENSITY_MIN);
+
 			}
    		}
 // This completes the calculation of those levels for which we have Topbase x-sections, now do Verner
@@ -426,8 +466,46 @@ if we are going to integrate */
 	  if (fmax > fthresh)
 //	printf ("We are going to verner qromb with ion %i, fthresh=%e and fmax=%e\n",n,fthresh,fmax);
 		{
-	    sim_denom = qromb (verner_planck, fthresh, fmax, 1.e-4);
-	    sim_num = qromb (verner_pow, fthresh, fmax, 1.e-4);
+	    	sim_denom = qromb (verner_planck, fthresh, fmax, 1.e-4);
+		/* for the power law, we need to carry out several seperate integrations since there is no stricture that the power law description of the spectrum is continuous over the frequency boundaries. This seems to cause seriousw problems in qromb which hangs the code. We must loop over the drequency intervals */
+/* There are five cases we need to consider.
+1: If the current band contains the threshold frequency and the max frequency, we set alpha and w to the values for this band, and integreate from fthresh to fmax.
+2: If the threshold frequency is in the band, but the max frequency isnt, we need to integrate from fthresh to the maximum frequency in the band
+3: If the threshold frequency isnt in the band, but the max frequency is, we need to integrate from the minimum frequency in the band to fmax
+4: If fthresh is less than the min, and fmax is greater than the max for a band, we need to integreate over the whole band. 
+5: If the maximum frequency for this band is less than the threshold frequency, or the minuum frequency for the band is greater than the maximum frequency, we dont need to do anything*/
+		for (j=0;j<nxfreq;j++)  //We loop over all the bands
+			{
+			if       (xfreq[j]<fthresh && fthresh<xfreq[j+1] && xfreq[j]<fmax && fmax<xfreq[j+1])  //Case 1
+				{
+				xsim_alpha=xxxplasma->sim_alpha[j];
+				xsim_w=xxxplasma->sim_w[j];
+				sim_num+=qromb (verner_pow , fthresh, fmax, 1.e-4);
+				}
+			else if (xfreq[j]<fthresh && fthresh<xfreq[j+1] && xfreq[j+1]<fmax) //case 2 
+				{
+				xsim_alpha=xxxplasma->sim_alpha[j];
+				xsim_w=xxxplasma->sim_w[j];
+				sim_num+=qromb (verner_pow , fthresh, xfreq[j+1], 1.e-4);
+				}
+			else if (xfreq[j]>fthresh && xfreq[j]<fmax && fmax<xfreq[j+1]) //case 3
+				{
+				xsim_alpha=xxxplasma->sim_alpha[j];
+				xsim_w=xxxplasma->sim_w[j];
+				sim_num+=qromb (verner_pow , xfreq[j], fmax, 1.e-4);
+				}
+			else if (xfreq[j]>fthresh && xfreq[j+1]<fmax) // case 4
+				{
+				xsim_alpha=xxxplasma->sim_alpha[j];
+				xsim_w=xxxplasma->sim_w[j];
+				sim_num+=qromb (verner_pow , xfreq[j], xfreq[j+1], 1.e-4);
+				}
+			else //case 5 - should only be the case where the band is outside the range for the integral.
+				{
+				sim_num+=0;   // Add nothing - bit of a null statement, but makes the code look nice.
+				}
+			}
+//old 	    sim_num = qromb (verner_pow, fthresh, fmax, 1.e-4);
 		}
 //	printf ("And we are back in the room with PL=%e and Planck=%e\n",sim_num,sim_denom);
 	}
@@ -502,24 +580,26 @@ tb_pow(freq)
 	double freq;
 {
 	double answer;
-	int i;
+//	int i;
 
-	/* Find the correct frequence interval */
-	if (freq<xfreq[0]){
-		return 0.0;
-	}
-	if (freq>xfreq[nxfreq-1]){
-		return 0.0;
-	}
+	/* Find the correct frequency interval */
+//	if (freq<xfreq[0]){
+//		return 0.0;
+//	}
+//	if (freq>xfreq[nxfreq]){
+//		return 0.0;
+//	}
+//
+//	i=0;
+//	while (xfreq[i]<freq){ i++;}
+//	i--;
 
-	i=0;
-	while (xfreq[i]<freq){ i++;}
-	i--;
+//	i=0;
 
 
 	/* Assign the variables */
-	xsim_alpha=xxxplasma->sim_alpha[i];
-	xsim_w=xxxplasma->sim_w[i];
+//	xsim_alpha=xxxplasma->sim_alpha[i];
+//	xsim_w=xxxplasma->sim_w[i];
 
 	
 //	printf("we have alpha=%f and w=%e\n",xsim_alpha,xsim_w);
@@ -541,26 +621,26 @@ verner_pow(freq)
 	double freq;
 {
 	double answer;		
-	int i;
+//	int i;
 
+//
+	/* Find the correct frequency interval */
+//	if (freq<xfreq[0]){
+//		return 0.0;
+//	}
+//	if (freq>xfreq[nxfreq]){
+//		return 0.0;
+//	}
+//
+//	i=0;
+//	while (xfreq[i]<freq){ i++;}
+//	i--;
 
-	/* Find the correct frequence interval */
-	if (freq<xfreq[0]){
-		return 0.0;
-	}
-	if (freq>xfreq[nxfreq-1]){
-		return 0.0;
-	}
-
-	i=0;
-	while (xfreq[i]<freq){ i++;}
-	i--;
-
-
+//	i=0;
 
 	/* Assign the variables */
-	xsim_alpha=xxxplasma->sim_alpha[i];
-	xsim_w=xxxplasma->sim_w[i];
+//	xsim_alpha=xxxplasma->sim_alpha[i];
+//	xsim_w=xxxplasma->sim_w[i];
 
 //	answer=geo.const_agn*(pow(freq,(xsim_alpha-1.0)));
 //	answer*=weight;   //divide by the weight, should normally just be the surface area of a sphere.
