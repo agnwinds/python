@@ -160,6 +160,101 @@ partition_functions (xplasma, mode)
   return (0);
 }
 
+
+
+/***********************************************************
+                                      Southampton University 
+
+Synopsis:
+	cardona_part_func calculates partition functions using the data presetned in
+		cardona et al 2010.
+
+Arguments:
+	xplasma - the cell under consideration
+
+Returns:
+	
+Description:
+
+
+
+Notes:
+
+	This is experimental code - no mode is used. We may wish to extend it so that it uses 
+	modes, calculates partition function using weghted BB where cardona data is not
+	available etc.
+
+
+History:
+	130612	nsh	72b -- Written as part of the attempt to model AGN.
+			problems with making python agree with cloudy, even
+			in LTE prompted an investigation of wether better 
+			partition function data would help. 
+
+
+**************************************************************/
+
+
+
+int
+cardona_part_func (xplasma)
+     PlasmaPtr xplasma;
+{
+  int nion;
+  double partition ();
+  double t;
+
+  int m;
+  int m_ground;			/* added by SS Jan 05 */
+  double z, kt,x;
+  double N;    /*Total number density */
+  double q,nstar,Ehat,term1,term2,term3;    
+
+
+      t = xplasma->t_e;
+	kt = BOLTZMANN*t;
+	printf ("t=%e,kt=%e\n",t,kt);
+      N=xplasma->rho*rho2nh+xplasma->ne;  /*We will estimate the number density of partitcles in the cell as the sum of hydrogen density and electron density. This could be wrong by a factor of around 2.3/2 */
+ // for (nion = 0; nion < nions; nion++)
+//	{
+ //	N += xplasma->density[nion];  //We need the number density of particles - excessive to do all ions, but accurate!
+	printf ("N=%e\n",N);
+//	}
+ 
+  for (nion = 0; nion < nions; nion++)
+    {
+	printf ("test %i\n",ion[nion].cpartflag);
+      if (ion[nion].cpartflag > 0) //If we have cardona partition functions try this
+	{
+	  m = ion[nion].firstlevel;
+	  m_ground = m;
+	  term1 = config[m].g; /*Assume the first term is just the ground state - this may slightly incorrect if the ground state is a multiplet */
+	printf ("term1=%e\n",term1);
+	  x=(ion[nion].istate/(2.0*PI*BOHR));  /*Our 'level' is actually the ionization state+1, so we dont need to add 1 to get effective Z */
+	  q = sqrt(x)*pow(N,(-1.0/6.0));  /*q*/
+          nstar = (q/2.0)*(1.0+sqrt(1.0+(4.0/q))); /*  N*  */
+	  Ehat = (ion[nion].ip)-((ion[nion].istate*ion[nion].istate*RYD2ERGS)/(nstar*nstar));
+	  term2=cpart[ion[nion].nxcpart].part_G*exp((-1.0*cpart[ion[nion].nxcpart].part_eps)/(t));
+	  term3=(cpart[ion[nion].nxcpart].part_m/3.0)*(pow(nstar,3.0)-343.0)*exp((-1.0*Ehat)/(kt));
+	  z=term1+term2+term3; /* Add all the terms together */
+	printf ("term1=%e,term2=%e,term3=%e,z=%e\n",term1,term2,term3,z);
+	}
+ 
+      else
+	{
+	  z = ion[nion].g; /* This should be done better - we just default to the ground state if no cardona data */
+	}
+
+	printf ("Setting partition function for ion %i to %e\n",nion,z);
+      xplasma->partition[nion] = z;
+		printf ("Partition function for ion %i is %e\n",nion,xplasma->partition[nion]);
+    }
+
+
+  return (0);
+}
+
+
 /***********************************************************
                                        Southampton university
 
@@ -270,3 +365,99 @@ partition_functions_2 (xplasma, xnion, temp)
 
   return (0);
 }
+
+
+
+
+/***********************************************************
+                                      Southampton University 
+
+Synopsis:
+	cardona_part_func_2 calculates partition functions using the data presetned in
+		cardona et al 2010 for a pair of ions. 
+
+Arguments:
+	xplasma - the cell under consideration
+	xnion - the upper ion of the pair
+	temp - the temperature we want to use
+
+Returns:
+	
+Description:
+
+
+
+Notes:
+
+	This is experimental code - no mode is used. We may wish to extend it so that it uses 
+	modes, calculates partition function using weghted BB where cardona data is not
+	available etc.
+
+
+History:
+	130612	nsh	72b -- Written as part of the attempt to model AGN.
+			problems with making python agree with cloudy, even
+			in LTE prompted an investigation of wether better 
+			partition function data would help. 
+
+
+**************************************************************/
+
+
+
+int
+cardona_part_func_2 (xplasma,xnion,temp)
+     PlasmaPtr xplasma;
+	int xnion;
+	float temp;
+{
+  int nion;
+  double partition ();
+
+  int m;
+  int m_ground;			
+  double z, kt,x;
+  double N;    /*Total number density */
+  double q,nstar,Ehat,term1,term2,term3;    
+
+
+ 
+	kt = BOLTZMANN*temp;
+      N=xplasma->rho*rho2nh+xplasma->ne;
+
+	printf ("temp=%e, N=%e\n",temp,N);
+
+ 
+  for (nion = xnion-1; nion < xnion+1; nion++)
+    {
+
+      if (ion[nion].cpartflag > 0) //If we have cardona partition functions try this
+	{
+	  m = ion[nion].firstlevel;
+	  m_ground = m;
+	  //store ground state - in case energy neq 0(SS)
+	  term1 = config[m].g;
+	  //Makes explicit assumption that first level is ground
+	  x=(ion[nion].istate/(2.0*PI*BOHR));  //Our 'level' is actually the ionization state+1
+	  q = sqrt(x)*pow(N,(-1.0/6.0)); 
+          nstar = (q/2.0)*(1.0+sqrt(1.0+(4.0/q)));
+	  Ehat = (ion[nion].ip)-((ion[nion].istate*ion[nion].istate*RYD2ERGS)/(nstar*nstar));
+	  term2=cpart[ion[nion].nxcpart].part_G*exp((-1.0*cpart[ion[nion].nxcpart].part_eps)/(temp));
+	  term3=(cpart[ion[nion].nxcpart].part_m/3.0)*(pow(nstar,3.0)-343.0)*exp((-1.0*Ehat)/(kt));
+	printf ("term1=%e, term2=%e, term3=%e, temp=%e\n",term1,term2,term3,temp);
+	  z=term1+term2+term3;
+	}
+ 
+      else
+	{
+	  z = ion[nion].g;
+	}
+
+
+      xplasma->partition[nion] = z;
+    }
+
+
+  return (0);
+}
+

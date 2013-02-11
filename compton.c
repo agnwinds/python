@@ -91,7 +91,7 @@
 {
 	double x;  // The opacity of the cell by the time we return it.
         double alpha; /*The approximate Klein - Nishina cross section computed from equation 6.6 in Hazy 3/10 */
-	double J1,J,expo; //The estimated intensity in the cell
+	double J,expo; //The estimated intensity in the cell
 	int i;
 //	J=(4*PI*w*ds)/(C*xplasma->vol); //Calcuate the intensity NSH This works for a thin shell... Why? Dont know.
 

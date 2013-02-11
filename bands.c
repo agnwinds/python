@@ -400,8 +400,8 @@ freqs_init (freqmin, freqmax)
   int nxfreq;
 
   /* At present set up a single energy band for 2 - 10 keV */
-		//NSH 70g - bands set up to match the bands we are currently using in the.pf files. This should probably end up tied together in the long run!
-  nxfreq = 7;
+		/*NSH 70g - bands set up to match the bands we are currently using in the.pf files. This should probably end up tied together in the long run!*/
+ nxfreq = 7;
   xfreq[0] = 1.0 / HEV;
  xfreq[1] = 13.6 / HEV;
 xfreq[2] = 54.42 / HEV;
@@ -411,11 +411,12 @@ xfreq[2] = 54.42 / HEV;
  xfreq[6] = 10000 / HEV;
  xfreq[7] = 50000 / HEV;
 
-/* bands to match the cloudy table spectrum - needs to cover all frequencies to let induced compton work OK */
-//nxfreq = 2;
-//xfreq[0]=0.0001/HEV;
-//xfreq[1]=2000/HEV;
-//xfreq[2]=100000000/HEV;
+/* bands to match the cloudy table spectrum - needed to cover all frequencies to let induced compton work OK */
+/*nxfreq = 3;
+xfreq[0]=0.0001/HEV;
+xfreq[1]=2000/HEV;
+xfreq[2]=10000/HEV;
+xfreq[3]=100000000/HEV;*/
 
 
 

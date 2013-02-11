@@ -2000,7 +2000,8 @@ photon_checks (p, freqmin, freqmax, comment)
 //  int n_ioniz;
   int nlabel;
 
-//  n_ioniz=0;
+  geo.n_ioniz=0;
+  geo.lum_ioniz=0.0;
   nnn = 0;
   nlabel = 0;
 
@@ -2061,7 +2062,7 @@ photon_checks (p, freqmin, freqmax, comment)
 	  exit (0);
 	}
     }
-
+	printf ("NSH Geo.n_ioniz=%e\n",geo.n_ioniz);
 #if DEBUG
   if (nnn == 0)
     Log ("photon_checks: All photons passed checks successfully\n");

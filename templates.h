@@ -395,7 +395,9 @@ int calloc_macro(int nelem);
 int calloc_estimators(int nelem);
 /* partition.c */
 int partition_functions(PlasmaPtr xplasma, int mode);
+int cardona_part_func(PlasmaPtr xplasma);
 int partition_functions_2(PlasmaPtr xplasma, int xnion, double temp);
+int cardona_part_func_2(PlasmaPtr xplasma, int xnion, double temp);
 /* signal.c */
 int xsignal(char *root, char *format, ...);
 int xsignal_rm(char *root);

@@ -90,6 +90,8 @@ History:
 	11aug	nsh	70 changes made to radiation to allow compton cooling to be computed
 	11aug	nsh	70 Changed printout of spectra in selected regions so it is always
 			the midpoint of the wind
+	12jun 	nsh	72 Added lines to write out photon stats to a file dirung diagnostics. This is
+			to allow us to see how well spectra are being modelled by power law W and alpha
 
 **************************************************************/
 
@@ -326,11 +328,19 @@ statement could be deleted entirely 060802 -- ksl */
 //	if (one->nwind > 59 && one->nwind < 90)
 //  1.75e16 <     (2*sqrt(one->xcen[0]*one->xcen[0]+one->xcen[1]*one->xcen[1]) - sqrt(one->x[0]*one->x[0]+one->x[1]*one->x[1]))) 
 //	if (geo.wind_type == 9)
-	if (one->nwind==22)
+//	if (one->nwind==22)
+  
 
-{
-	Log_silent ("PHOTON_DETAILS %3d %3d %3d %8.3e %8.3e %8.3e cell%3d wind cell%3d\n",geo.wcycle,ii,jj,p->freq,w_ave,ds,one->nplasma,one->nwind);
-}
+  if (diag_on_off == 1 && ncstat > 0)
+	{
+	for (i=0;i<ncstat;i++)
+		{
+		if (one->nplasma==ncell_stats[i])
+			{
+			fprintf (pstatptr,"PHOTON_DETAILS %3d %3d %3d %8.3e %8.3e %8.3e cell%3d wind cell%3d\n",geo.wcycle,ii,jj,p->freq,w_ave,ds,one->nplasma,one->nwind);
+			}
+		}
+	}
 
 
 /* 1108 NSH  THe next loop updates the banded versions of j and ave_freq, note that the lines above still update 

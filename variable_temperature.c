@@ -85,7 +85,7 @@ variable_temperature (xplasma, mode)
      int mode;			//   6=correct using dilute blackbody, 7=power law
 {
   int nion, niterate;
-  double xnew, xsaha, dne, dne_old;
+  double xnew, xsaha, dne_old;
   double theta, x;
   double get_ne();
   double t, t_e,t_r, xtemp, nh, xne, xxne, www;
@@ -172,8 +172,8 @@ variable_temperature (xplasma, mode)
 //		if (nion==1) printf ("HYDROGEN Best temp for ion %i is %e\n",nion,xtemp);
 
 /* given this temperature, we need the pair of partition functions for these ions */		
-		partition_functions_2 (xplasma, nion, xtemp);
-
+//		partition_functions_2 (xplasma, nion, xtemp);
+		cardona_part_func_2 (xplasma,nion,xtemp);
 //		if (nion==1) printf ("HYDROGEN partition funcions at xtemp=%e are %e %e\n",xtemp,partition[nion-1],partition[nion]);
 //		partition_functions_2 (xplasma, nion, t_e);
 //		if (nion==1) printf ("HYDROGEN partition funcions at t_e=  %e are %e %e\n",t_e,partition[nion-1],partition[nion]);
@@ -542,7 +542,7 @@ pl_correct_2 (xtemp, nion)
 		  xpl_w = xxxplasma->sim_w[j];
 //	if (nion==1) printf("HYDROGEN case 1 band %i=%e \n",j,qromb (tb_pow1, fthresh, fmax, 1.e-4));
 //	if (nion==1) printf("HYDROGEN integrating from %e to %e with alpha=%f\n",fthresh, fmax,xpl_alpha);
-//		  numerator += qromb (tb_pow1, fthresh, fmax, 1.e-4);
+		  numerator += qromb (tb_pow1, fthresh, fmax, 1.e-4);
 //	if (nion==1) printf("HYDROGEN numerator= %e \n",numerator);
 		}
 	      else if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j + 1] < fmax)	//case 2 

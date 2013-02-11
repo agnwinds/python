@@ -912,6 +912,7 @@ char hubeny_list[132];		//Location of listing of files representing hubeny atmos
 FILE *epltptr;     //TEST
 int diag_on_off;  // on is non-zero  //TEST
 
+
 /* These variables are stored or used by the routines for anisotropic scattering */
 /* Allow for the transfer of tau info to scattering routine */
 double tau_x_dvds;		//tau_x_dvds/dvds is the actual tau
@@ -989,3 +990,14 @@ em_rnge;
 
 // 04apr ksl -- made kap_bf external so can be passed around variables
 double kap_bf[NLEVELS];
+
+
+
+// 12jun nsh - some commands to enable photon logging in given cells. There is also a pointer in the geo
+
+FILE *pstatptr;   //NSH 120601 - pointer to a diagnostic file that will contain photon data for given cells
+int cell_phot_stats; //1=do  it, 0=dont do it
+#define  NCSTAT 10 //The maximum number of cells we are going to log
+int ncstat; // the actual number we are going to log
+int ncell_stats[NCSTAT]; //the numbers of the cells we are going to log
+

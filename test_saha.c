@@ -48,24 +48,23 @@ main (argc, argv)
   double alpha_agn,distance,agn_ip,lum_agn,const_agn;
   int lstart,lmax;
   double temp_func();
-  FILE *fp_h;
-  FILE *fp_he;
-  FILE *fp_c;
-  FILE *fp_n;
-  FILE *fp_o;
-  FILE *fp1_o;
+  FILE *fp_h,*fp1_h;
+  FILE *fp_he,*fp1_he;
+  FILE *fp_c,*fp1_c;
+  FILE *fp_n,*fp1_n;
+  FILE *fp_o,*fp1_o;
   FILE *fp_fe;
   PlasmaPtr xplasma;
   partition = xplasma->partition; /* Set the partition function array to that held for the cell */
-  temp_start=299;
-  ntemp=401;
+  temp_start=429.102999;
+  ntemp=1;
   tempdiv=100.0;
   nne=1;
-  nh=1e12;
-  weight=0.01;
+  nh=1e10;
+  weight=1;
   xne=nh;
 
-  strcpy (geo.atomic_filename, "atomic/standard39");
+  strcpy (geo.atomic_filename, "atomic/standard72");
   printf("atomic_filename=%s\n",geo.atomic_filename);
   get_atomic_data (geo.atomic_filename);
 
@@ -269,9 +268,13 @@ fclose(fp_o);
 */
 
   fp_h=fopen("hydrogen_saha.out","w");
+  fp1_h=fopen("hydrogen_partition.out","w");
   fp_he=fopen("helium_saha.out","w");
+  fp1_he=fopen("helium_partition.out","w");
   fp_c=fopen("carbon_saha.out","w");
+  fp1_c=fopen("carbon_partition.out","w");
   fp_n=fopen("nitrogen_saha.out","w");
+  fp1_n=fopen("nitrogen_partition.out","w");
   fp_o=fopen("oxygen_saha.out","w");
   fp1_o=fopen("oxygen_partition.out","w");
 	fprintf(fp_h,"%i %i\n",ntemp,nne);
@@ -279,7 +282,6 @@ fclose(fp_o);
 	fprintf(fp_c,"%i %i\n",ntemp,nne);
 	fprintf(fp_n,"%i %i\n",ntemp,nne);
 	fprintf(fp_o,"%i %i\n",ntemp,nne);
-	fprintf(fp1_o,"%i %i\n",ntemp,nne);
 
 
 
@@ -288,31 +290,42 @@ fclose(fp_o);
 		{
 		temp1++;
 		temp=pow(10,temp1/tempdiv);
+		temp=30000;
 		plasmamain[0].t_e=temp;
   		plasmamain[0].ne=nh;
 		plasmamain[0].t_r=temp;
 		plasmamain[0].w=1;
-		partition_functions (&plasmamain[0], 0);
+		cardona_part_func (&plasmamain[0]);
   		saha (&plasmamain[0],  nh, temp);
 		fprintf(fp_h,"%6.3e %6.3e %6.3e %6.3e\n",temp,plasmamain[0].ne,plasmamain[0].density[0],plasmamain[0].density[1]);
+		fprintf(fp1_h,"%6.3e %6.3e %6.3e %6.3e\n",temp,plasmamain[0].ne,plasmamain[0].partition[0],plasmamain[0].partition[1]);
 		fprintf(fp_he,"%e %e",temp,plasmamain[0].ne);		
+		fprintf(fp1_he,"%e %e",temp,plasmamain[0].ne);		
 		for (j=2;j<5;j++ ) 
 			{		
 			fprintf(fp_he," %6.3e",plasmamain[0].density[j]);
+			fprintf(fp1_he," %6.3e",plasmamain[0].partition[j]);
 			}
 		fprintf(fp_he,"\n");
-		fprintf(fp_c,"%e %e",temp,plasmamain[0].ne);		
+		fprintf(fp1_he,"\n");
+		fprintf(fp_c,"%e %e",temp,plasmamain[0].ne);
+		fprintf(fp1_c,"%e %e",temp,plasmamain[0].ne);				
 		for (j=5;j<12;j++ ) 
 			{		
 			fprintf(fp_c," %6.3e",plasmamain[0].density[j]);
+			fprintf(fp1_c," %6.3e",plasmamain[0].partition[j]);
 			}
 		fprintf(fp_c,"\n");
-		fprintf(fp_n,"%e %e",temp,plasmamain[0].ne);		
+		fprintf(fp1_c,"\n");
+		fprintf(fp_n,"%e %e",temp,plasmamain[0].ne);
+		fprintf(fp1_n,"%e %e",temp,plasmamain[0].ne);				
 		for (j=12;j<20;j++ ) 
 			{		
 			fprintf(fp_n," %6.3e",plasmamain[0].density[j]);
+			fprintf(fp1_n," %6.3e",plasmamain[0].partition[j]);
 			}
 		fprintf(fp_n,"\n");
+		fprintf(fp1_n,"\n");
 		fprintf(fp_o,"%e %e",temp,plasmamain[0].ne);
 		fprintf(fp1_o,"%e %e",temp,plasmamain[0].ne);		
 		for (j=20;j<29;j++ ) 
@@ -326,14 +339,18 @@ fclose(fp_o);
 
 	
   fclose(fp_h);
+  fclose(fp1_h);
   fclose(fp_he);
+  fclose(fp1_he);
   fclose(fp_c);
+  fclose(fp1_c);
   fclose(fp_n);
+  fclose(fp1_n);
   fclose(fp_o);
   fclose(fp1_o);
 
 
-  fp_h=fopen("hydrogen_nc.out","w");
+/* fp_h=fopen("hydrogen_nc.out","w");
   fp_he=fopen("helium_nc.out","w");
   fp_c=fopen("carbon_nc.out","w");
   fp1_o=fopen("carbon_partition.out","w");
@@ -352,7 +369,8 @@ fclose(fp_o);
 		{
 		temp1++;
 		temp=pow(10,temp1/tempdiv);
-		plasmamain[0].t_e=temp*0.9;
+		temp=20000;
+		plasmamain[0].t_e=temp;
 		plasmamain[0].t_r=temp;
 		plasmamain[0].w=weight;
   		nebular_concentrations (&plasmamain[0], 0);
@@ -409,7 +427,8 @@ fclose(fp_o);
 		{
 		temp1=temp1+1;
 		temp=pow(10,temp1/tempdiv);
-		plasmamain[0].t_e=temp*0.9;
+		temp=20000;
+		plasmamain[0].t_e=temp;
 		plasmamain[0].t_r=temp;
 		plasmamain[0].w=weight;
 		printf ("WEIGHT=%f\n",weight);

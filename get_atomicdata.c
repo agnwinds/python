@@ -133,6 +133,8 @@ History:
         081115  nsh     70 -- added in structures and routines to read in data to implement
 			dielectronic recombination.
 	11dec	ksl	71 - Added calls to free memory and reallocate the atomic data structures if one calls this more
+	12jun   nsh	72 - added structures and routines to read in partition function data from 
+			cardona 2010
 			than once
 **************************************************************/
 
@@ -195,6 +197,8 @@ get_atomic_data (masterfile)
   int nn, nl, dumnn, dumnl, dumz, dumistate, n_verner, ion_index, target_index;
   double yield, dumE_th, dumE_0, dumya, dumyw, dumSigma, dumP, arad, etarad;
   double adi, t0di, bdi, t1di;
+  double part_eps; //Temporary storage for partition function epsilon data
+  int J,part_G,part_m; //Temporary storage for partiton function J, G and m data
 
   /* define which files to read as data files */
 
@@ -317,9 +321,11 @@ get_atomic_data (masterfile)
       ion[n].nxphot = (-1);
       ion[n].lev_type = (-1);	// Initialise to indicate we don't know what types of configurations will be read
       ion[n].drflag = 0;     //Initialise to indicate as far as we know, there are no dielectronic recombination parameters associated with this ion.
+      ion[n].cpartflag = 0; //Initialise to indicate this ion has cardona partition function data
+      ion[n].nxcpart = -1;
     }
 
-  nlevels = nxphot = ntop_phot = nauger = ndrecomb = 0;  //Added counter for DR//
+  nlevels = nxphot = ntop_phot = nauger = ndrecomb = ncpart = 0;  //Added counter for DR//
 
   for (i = 0; i < NIONS; i++)
     {
@@ -376,6 +382,19 @@ get_atomic_data (masterfile)
 	  drecomb[n].e[n1] = 0.0; 
           }
      }
+
+/* 0612 nsh The following lines initialise the cardona partition function  structure */
+   for (n = 0; n < NIONS; n++)
+    {
+       cpart[n].nion = -1;       
+       cpart[n].part_eps = -1.0;	//Mean energy term
+	cpart[n].part_G = -1;		//Mean multiplicity term
+	cpart[n].part_m= -1;
+     }
+
+
+
+
 
   /*              for (n=0;nions;n++) {
      ground_frac[n].z=-1;
@@ -477,6 +496,8 @@ structure does not have this property! */
  		choice = 'A';	/*It's an inner shell ionization for Auger effect */
 	      else if (strncmp (word, "DR", 2) == 0)   /* It's a dielectronic recombination file */
 		choice = 'D';
+	      else if (strncmp (word, "CPART", 5) == 0)   /* It's a cardon partition function file */
+		choice = 'P';
 	      else if (strncmp (word, "*", 1) == 0);	/* It's a continuation so record type remains same */
 
 	      else
@@ -1931,9 +1952,53 @@ There is space in the file for up to 9 coefficients, so we have put aside space 
                   }   //close if statement that selects ground state only
 		  
 		  break;
-			
+	
+/* Parametrised partition function data read in. At the moment, the data we are using comes from Cardona et al (2010). The file currently used(paert_cardona.dat) is saved from the internet, with a couple of changes. The word CPART is prepended to each line of data, and any comment lines are prepended with an #. This is the general format:
+
+CPART   1       0       150991.49       278     2
+CPART   2       0       278302.52       556     4
+CPART   2       1       604233.37       278     2
+CPART   3       0       52534.09        124     2
+CPART   3       1       839918.28       299     4
+CPART   3       2       1359687.21      278     2
+CPART   4       0       96994.39        318     7
+CPART   4       1       183127.29       250     2
+
+the first number is the element number, then the ion, then the three parameters */
 
 
+
+
+
+		case 'P':      /* Partition function data */
+		  if (sscanf (aline,"%*s %d %d %le %d %d ",&z,&J ,&part_eps,&part_G,&part_m) != 5)
+			{	  
+			Error ("Something wrong with cardona partition function data\n",
+			 file, lineno); /*Standard error state*/
+		        Error ("Get_atomic_data: %s\n", aline);
+		        exit (0);
+			}
+		istate=J+1;   //
+		  for (n = 0; n < nions; n++)
+		    {
+		      if (ion[n].z == z && ion[n].istate == istate)
+			{	/* Then there is a match */
+			printf ("We have a match n=%i, %i=%i and %i=%i\n",n,ion[n].z,z,ion[n].istate,istate);
+			cpart[ncpart].nion=n;
+			cpart[ncpart].part_eps=part_eps;	//Mean energy term
+			cpart[ncpart].part_G=part_G;		//Mean multiplicity term
+			cpart[ncpart].part_m=part_m;
+			ion[n].cpartflag=1;	            //Set the flag to say we have data for this ion
+			ion[n].nxcpart=ncpart;        //Set the pointer
+			ncpart++;		//increment the pointer
+
+			}
+		    }
+
+
+
+
+		  break;
 
 		case 'c':	/* It was a comment line so do nothing */
 		  break;
@@ -1988,6 +2053,17 @@ There is space in the file for up to 9 coefficients, so we have put aside space 
 	}
 */
 
+	for (n=0;n<nions;n++)
+	{
+	if (ion[n].cpartflag>0)
+	{
+	printf ("Ion %i (z=%i, state=%i has cadona coeffs eps=%f G=%i, m=%i\n",n,ion[n].z,ion[n].istate,cpart[ion[n].nxcpart].part_eps,cpart[ion[n].nxcpart].part_G,cpart[ion[n].nxcpart].part_m);
+	}
+	else
+	{
+	printf ("Ion %i (z=%i, state=%i has no cadona coeffs \n",n,ion[n].z,ion[n].istate);
+	}
+}
   Log
     ("Data of %3d elements, %3d ions, %5d levels, %5d lines, and %5d topbase records\n",
      nelements, nions, nlevels, nlines,  ntop_phot);
@@ -1999,6 +2075,7 @@ There is space in the file for up to 9 coefficients, so we have put aside space 
      nelements, nions_simple, nlevels_simple, nlines_simple,
      ntop_phot_simple);
   Log ("We have read in %3d Dielectronic recombination coefficients\n",ndrecomb);  //110818 nsh added a reporting line about dielectronic recombination coefficients
+  Log ("We have read in %3d Cardona partition functions coefficients\n",ncpart); 
   Log ("The minimum frequency for photoionization is %8.2e\n", phot_freq_min);
 
 

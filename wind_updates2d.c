@@ -365,7 +365,7 @@ WindPtr (w);
 		agn_ip /= (w[n].r*w[n].r);
 		agn_ip /= plasmamain[0].rho * rho2nh;
          	Log ("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim 2010)= %e distance= %e volume= %e\n",geo.lum_agn,plasmamain[0].t_e,plasmamain[0].rho * rho2nh,plasmamain[0].ne,geo.alpha_agn,agn_ip,w[n].r,w[n].vol);
-
+         	Log ("OUTPUT IP(cloudy_thoeretical)= %e IP(cloudy_actual)=%e\n",log10(plasmamain[0].ferland_ip),log10(plasmamain[0].ip));
 
  		
 		n = plasmamain[0].nwind;
@@ -690,11 +690,14 @@ History:
    int wind_ip()
 {
 int n;
+float r;
   for (n = 0; n < NPLASMA; n++)
 {
-      plasmamain[n].ferland_ip=geo.n_ioniz/(4*PI*C*plasmamain[n].rho*rho2nh*(wmain[plasmamain[n].nwind].x[0]*wmain[plasmamain[n].nwind].x[0]+wmain[plasmamain[n].nwind].x[1]*wmain[plasmamain[n].nwind].x[1]+wmain[plasmamain[n].nwind].x[2]*wmain[plasmamain[n].nwind].x[2]));
+r=sqrt((wmain[plasmamain[n].nwind].x[0]*wmain[plasmamain[n].nwind].x[0]+wmain[plasmamain[n].nwind].x[1]*wmain[plasmamain[n].nwind].x[1]+wmain[plasmamain[n].nwind].x[2]*wmain[plasmamain[n].nwind].x[2]));
 
-     printf ("NSH ferland_ip for cell %i = %e (r=%e nh=%e)\n",n,plasmamain[n].ferland_ip,sqrt((wmain[plasmamain[n].nwind].x[0]*wmain[plasmamain[n].nwind].x[0]+wmain[plasmamain[n].nwind].x[1]*wmain[plasmamain[n].nwind].x[1]+wmain[plasmamain[n].nwind].x[2]*wmain[plasmamain[n].nwind].x[2])),plasmamain[n].rho*rho2nh);
+      plasmamain[n].ferland_ip=geo.n_ioniz/(4*PI*C*plasmamain[n].rho*rho2nh*(r*r));
+
+     printf ("NSH ferland_ip for cell %i = %e (r=%e nh=%e nioniz=%e)\n",n,log10(plasmamain[n].ferland_ip),r,plasmamain[n].rho*rho2nh,geo.n_ioniz);
 }
 return(0);
 }
