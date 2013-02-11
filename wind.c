@@ -394,7 +394,7 @@ model_rho (x)
 
   /* 70b - as this is written the torus simply overlays the wind */
 
-  if (where_in_wind(x)==W_ALL_INTORUS){
+  if ((where_in_wind(x)==W_ALL_INTORUS) || (where_in_wind(x)==W_PART_INTORUS)){
 	  rho=torus_rho(x);
   }
 

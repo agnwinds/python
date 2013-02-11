@@ -169,7 +169,7 @@ ion_abundances (xplasma, mode)
 /*This next line computes the sim weight using an external function. Note that xplasma->j already contains the volume of the cell and a factor of 4pi, so the volume sent to sim_w is set to 1 and j has a factor of 4PI reapplied to it. This means that the equation still works in balance. It may be better to just implement the factor here, rather than bother with an external call.... */
 	sim_w_temp=sim_w(j*4*PI,1,1,alphatemp,sim_numin,sim_numax);
 
-	Log ("NSH We now have calculated sim_w_temp=%e and sim_alpha_temp=%f\n",sim_w_temp,alphatemp);
+	// Log ("NSH We now have calculated sim_w_temp=%e and sim_alpha_temp=%f\n",sim_w_temp,alphatemp);
         if (sane_check(sim_w_temp))
 		{
 		Error ("New sim parameters unreasonable, using existing parameters. Check number of photons in this cell\n");
@@ -180,8 +180,8 @@ ion_abundances (xplasma, mode)
 		xplasma->sim_w[nx4power]=sim_w_temp;
 		}
 
-	Log_silent ("ITTTTT %i %e %e cell%i\n",geo.wcycle,xplasma->sim_alpha,xplasma->sim_w,xplasma->nplasma);
-	Log ("NSH and after a check, sim_w=%e, and sim_alpha=%f set for band %i\n",xplasma->sim_w[nx4power],xplasma->sim_alpha[nx4power],nx4power);
+	// Log_silent ("ITTTTT %i %e %e cell%i\n",geo.wcycle,xplasma->sim_alpha,xplasma->sim_w,xplasma->nplasma);
+	// Log ("NSH and after a check, sim_w=%e, and sim_alpha=%f set for band %i\n",xplasma->sim_w[nx4power],xplasma->sim_alpha[nx4power],nx4power);
 	  }
 /* At this point we have put all of the fitted alphas and nomalisations into the sim_alpha and sim_w portions of the PlasmaPtr */
 

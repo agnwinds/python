@@ -582,6 +582,87 @@ electron_summary (w, rootname, ochoice)
 }
 
 
+/* A summary of rho 
+111002	ksl	Added to try to diagnose what was going 
+		on with the torus
+*/
+
+int
+rho_summary (w, rootname, ochoice)
+     WindPtr w;
+     char rootname[];
+     int ochoice;
+{
+  int n;
+  char filename[LINELENGTH];
+  int nplasma;
+
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0.0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = plasmamain[nplasma].rho;
+	}
+    }
+  display ("Rho (gm/cm**3)");
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".rho");
+      write_array (filename, ochoice);
+    }
+  return (0);
+
+}
+
+
+/* A summary of rho 
+
+Note that because of limitations in the way that display 
+works cell numbers greater than 99 are not displayed as
+integers unfortunately
+
+111002	ksl	Added to try to diagnose what was going 
+		on with the torus
+*/
+
+int
+plasma_cell (w, rootname, ochoice)
+     WindPtr w;
+     char rootname[];
+     int ochoice;
+{
+  int n;
+  char filename[LINELENGTH];
+  int nplasma;
+
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0.0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = nplasma;
+	}
+    }
+  display ("Plasma cell number");
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".pnum");
+      write_array (filename, ochoice);
+    }
+  return (0);
+
+}
+
+
+
+
 /* A summary of the average frequency */
 
 int
@@ -609,7 +690,11 @@ freq_summary (w, rootname, ochoice)
 }
 
 
-/* A summary of the number of photons which passed through a cell */
+/* A summary of the number of photons which passed through a cell.
+ *
+ * 111002	ksl	Modified to be able to display photons of
+ * 			various types
+ * */
 
 int
 nphot_summary (w, rootname, ochoice)
@@ -620,6 +705,16 @@ nphot_summary (w, rootname, ochoice)
   int n;
   char filename[LINELENGTH];
   int nplasma;
+  int ichoice;
+  char	string[LINELENGTH];
+
+
+
+  ichoice = 0;
+  while(rdint("nphot(all=0,star=1,bl=2,disk=3,wind=4,agn=5,other=return)",&ichoice)!=EOF){
+	  if (ichoice<0||ichoice>5) {
+		  return(0);
+	  }
 
   for (n = 0; n < NDIM2; n++)
     {
@@ -627,10 +722,36 @@ nphot_summary (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].ntot;
+	  if (ichoice==0){
+	 	 aaa[n] = plasmamain[nplasma].ntot;
+		  strcpy(string,"Nphot tot per cell");
+	  }
+	  else if (ichoice==1) {
+		  aaa[n] = plasmamain[nplasma].ntot_star;
+		  strcpy(string,"Nphot star per cell");
+	  }
+	  else if (ichoice==2) {
+		  aaa[n] = plasmamain[nplasma].ntot_bl;
+		  strcpy(string,"Nphot bl per cell");
+	  }
+	  else if (ichoice==3) {
+		  aaa[n] = plasmamain[nplasma].ntot_disk;
+		  strcpy(string,"Nphot disk per cell");
+	  }
+	  else if (ichoice==4) {
+		  aaa[n] = plasmamain[nplasma].ntot_wind;
+		  strcpy(string,"Nphot wind per cell");
+	  }
+	  else if (ichoice==5) {
+		  aaa[n] = plasmamain[nplasma].ntot_agn;
+		  strcpy(string,"Nphot agn per cell");
+	  }
+	  else {
+		  Error("Unknown choice, try again\n");
+	  }
 	}
     }
-  display ("Nphot per cell");
+  display (string);
 
   if (ochoice)
     {
@@ -639,11 +760,11 @@ nphot_summary (w, rootname, ochoice)
       write_array (filename, ochoice);
 
     }
+    }
   return (0);
 
 
 
-  return (0);
 
 }
 

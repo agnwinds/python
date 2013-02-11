@@ -272,7 +272,8 @@ statement could be deleted entirely 060802 -- ksl */
   xplasma->ntot++;
 
 
-/* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, and hence get an idea of how 'agny' or 'disky' the cell is. */
+/* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, 
+ * and hence get an idea of how 'agny' or 'disky' the cell is. */
 
 
 

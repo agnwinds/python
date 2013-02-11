@@ -329,7 +329,7 @@ plane_l1, plane_sec, plane_m2_far;	/* these all define planes which are perpendi
  * what one might guess.  The cone is defined in the positive z direction but reflected through 
  * the xy plane.  
  * 56d -- Beginning with 56d, ksl has switched to a new definition of cones, that is intended to
- * make it possible to use ds_to_cone easier as part of coordiaate systems.  The new definition
+ * make it possible to use ds_to_cone easier as part of coordianate systems.  The new definition
  * is based on the intersection of the cone with the z axis rather than the intersection with
  * the disk plane.  At present both definitions are used in the program and therefore both shold
  * be defined.  Once the new definition is promulgated through the entire program, and verified
@@ -499,7 +499,7 @@ typedef struct plasma {
   double kpkt_abs;                   /* k-packet equivalent of matom_abs. (SS) */
 
   int kbf_use[NTOP_PHOT];            /* List of the indices of the photoionization processes to be used for kappa_bf. (SS) */
-   int kbf_nuse;                      /* Total number of photoionization processes to be used for kappa_bf. (SS) */
+  int kbf_nuse;                      /* Total number of photoionization processes to be used for kappa_bf. (SS) */
 
 /* End of macro information */
 

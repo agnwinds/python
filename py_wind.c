@@ -77,6 +77,7 @@ History:
 			in the wind.  This reflects a desire to be able to understand
 			better where in the wind ions are "active" in creating the
 			spectrum.
+	111002	ksl	Added rho to one of the options
 
 **************************************************************/
 
@@ -214,16 +215,16 @@ I did not change this now.  Though it could be done.  02apr ksl */
 
 
 a:printf
-    ("\nn=ne,  v=vel,  i=ion info, j=ave_tau, f=ave_freq, p=nphot, S=sim_alpha\n");
+    ("\nn=ne,  R=rho,  v=vel,        i=ion info, j=ave_tau, f=ave_freq, p=nphot, S=sim_alpha\n");
   printf
-    ("r=t_r, t=t_e,  w=rad_weight, s=vol,     l=lum,     C=cooling/heating,  b=adiabatic cooling\n");
+    ("r=t_r, t=t_e,  w=rad_weight,  s=vol,     l=lum,     C=cooling/heating,  b=adiabatic cooling\n");
   printf
-    ("a=abs, c=c4,   g=photo,      h=recomb,  k=tau H,   l=lum,     m=F_rad,   x=total,y=mod_te,\n");
+    ("a=abs, c=c4,   g=photo,       h=recomb,  k=tau H,   l=lum,     m=F_rad, x=total, y=mod_te,\n");
   printf ("o=overview,    e=everything, P=Partial emission meas, I=Ionisation parameter\n");
   printf
-    ("W=wind_regions, D=dvds_ave, X=position summary, M=macro atom info, G=inner shell\n");
+    ("W=wind_region, D=dvds_ave, X=position summary, M=macro atom info, G=inner shell\n");
   printf
-    ("d=convergence status\n");
+    ("d=convergence status  B=PlasmaPtr\n");
   printf
     ("z=Zoom,u=unZoom,Z=switch to/from raw and yz projected modes, F=Create files, A=Change file write defaults\n");
 
@@ -238,10 +239,11 @@ a:printf
     case 'A':			// Change the file defaults
       rdint ("Make_files(0=no,1=original,2=regrid_to_linear)", &ochoice);
       break;
-
-      break;
     case 'b':			/*Adiabatic cooling */
       adiabatic_cooling_summary (w, root, ochoice);
+      break;
+    case 'B':
+      plasma_cell (w, root, ochoice);
       break;
     case 'c':			/*C4 emission */
       line_summary (w, n, istate, root, ochoice);
@@ -345,6 +347,9 @@ a:printf
       break;
     case 'r':			/* Temp summary */
       temp_rad (w, root, ochoice);
+      break;
+    case 'R':                   /* Rho summary */
+      rho_summary (w, root, ochoice);
       break;
     case 's':			/* Volume summary */
       vol_summary (w, root, ochoice);

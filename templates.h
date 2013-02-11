@@ -424,6 +424,8 @@ double kappa_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
 /* torus.c */
 double torus_rho(double x[]);
+double ds_to_cylinder(double rho, struct photon *p);
+double ds_to_torus(PhotPtr pp);
 /* zeta.c */
 double compute_zeta(double temp, int nion, int ilow, int ihi, double interpfrac, double f1, double f2, int mode);
 /* dielectronic.c */

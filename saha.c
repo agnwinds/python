@@ -105,6 +105,8 @@ nebular_concentrations (xplasama, mode)  modifies the densities of ions, levels,
 	080808	ksl	60b -- Removed mode 4 which attempted to carry out detailed balance
 			for H and He and ussd LM for other elements.  (This was carried out
 			in the routine dlucy) This is wholly replaced by the macro atom approach.  
+	11	ksl	Main changes here made by Nick to incorporate the power law approximation
+			to ionization for AGN
 
 
 **************************************************************/
@@ -117,7 +119,6 @@ nebular_concentrations (xplasma, mode)
   double get_ne ();
   int lucy_mazzali1 ();
   int m;
-  int concentrations (), lucy (), dlucy (), sim_driver ();
 
   if (mode == 0)
     {				// LTE all the way -- uses tr
@@ -146,16 +147,22 @@ nebular_concentrations (xplasma, mode)
 
 
     }
-  else if (mode == 5)           /* This is LTE followed by a modification 
-             to allow for a strongly non BB radiation field - after Sim (2008) */
+  else if (mode == 5)           /* This eplicates Sim's (2008) power
+				   law method for ionization in a non-BB radiation
+				   field.  */
     {
 	printf("NSH We are in nebular_concentrations, and we are running at mode=%i\n",mode);
 	printf("NSH Heading off to partition_functions\n");
 
      partition_functions (xplasma, 1);   //lte partition function using t_e and no weights
 	printf("NSH Back from partition_functions, now going to concentrations\n");
-      m = concentrations (xplasma, 3);	// Saha equation using t_e - new mode, in case we need to do something clever
+      m = concentrations (xplasma, 1);	// Saha equation using t_e 
+
+// ksl It is bad practice to create modes which are not different unless you know that is what you are going to do.  Nick
+// please remove this and next line when you see this.
+//OLD ksl      m = concentrations (xplasma, 3);	// Saha equation using t_e - new mode, in case we need to do something clever
 //OLD NSH this goes wrong now.	printf("NSH Back from concentrations, going into sim_driver, T_e=%e, alpha=%f, w=%e\n",xplasma->t_e,xplasma->sim_alpha,xplasma->sim_w);
+
       m = sim_driver (xplasma);
    }
   else
@@ -165,7 +172,6 @@ nebular_concentrations (xplasma, mode)
       exit (0);
 
     }
-
 
 
   return (m);
@@ -282,10 +288,11 @@ concentrations (xplasma, mode)
     {
       t = sqrt (xplasma->t_e * xplasma->t_r);
     }
-  else if (mode == 3)   //same as mode 1, put in to allow identical control when using Sim modifications to concentrations
-    {
-      t = xplasma->t_e;
-    }
+//ksl I removed the next lines.  It is bad practice to needlessly complicate something unless you know one needs to do so
+//OLD ksl  else if (mode == 3)   //same as mode 1, put in to allow identical control when using Sim modifications to concentrations
+//OLD ksl    {
+//OLD ksl      t = xplasma->t_e;
+//OLD ksl    }
   else
     {
       Error ("Concentrations: Unknown mode %d\n", mode);

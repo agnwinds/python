@@ -1,2 +1,2 @@
-#define VERSION  "70etest"
+#define VERSION  "70f"
 #define CHOICE 1 // Compress plasma as much as possible

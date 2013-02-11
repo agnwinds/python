@@ -864,194 +864,199 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 
 /* If diskrad <= geo.rstar set geo.disk_type = 0 to make any disk transparent anyway. */
 
-	  if (geo.diskrad < geo.rstar)
-	    {
-	      Log
-		("Disk radius is less than star radius, so assuming no disk)\n");
-	      geo.disk_type = 0;
-	    }
+  if (geo.diskrad < geo.rstar)
+    {
+      Log
+	("Disk radius is less than star radius, so assuming no disk)\n");
+      geo.disk_type = 0;
+    }
 
-	  if (geo.disk_type == 2)
-	    {			/* Get the additional variables need to describe a vertically extended disk */
-	      rddoub ("disk.z0(fractional.height.at.diskrad)", &geo.disk_z0);
-	      rddoub ("disk.z1(powerlaw.index)", &geo.disk_z1);
-	    }
-	}
+  if (geo.disk_type == 2)
+    {			/* Get the additional variables need to describe a vertically extended disk */
+      rddoub ("disk.z0(fractional.height.at.diskrad)", &geo.disk_z0);
+      rddoub ("disk.z1(powerlaw.index)", &geo.disk_z1);
+    }
+}
 
-      else
-	{			/* There is no disk so set variables accordingly */
-	  geo.disk_radiation = 0;
-	  geo.diskrad = 0;
-	}
+else
+{			/* There is no disk so set variables accordingly */
+  geo.disk_radiation = 0;
+  geo.diskrad = 0;
+}
 
 
 /* Describe the boundary layer */
 
-      if (geo.bl_radiation)
-	{
-	  xbl = geo.lum_bl = 0.5 * G * geo.mstar * geo.disk_mdot / geo.rstar;
+if (geo.bl_radiation)
+{
+  xbl = geo.lum_bl = 0.5 * G * geo.mstar * geo.disk_mdot / geo.rstar;
 
-	  rddoub ("lum_bl(ergs/s)", &geo.lum_bl);
-	  Log ("OK, the bl lum will be about %.2e the disk lum\n",
-	       geo.lum_bl / xbl);
-	  rddoub ("t_bl", &geo.t_bl);
-	}
-      else
-	{
-	  geo.lum_bl = 0;
-	  geo.t_bl = 0;
-	}
+  rddoub ("lum_bl(ergs/s)", &geo.lum_bl);
+  Log ("OK, the bl lum will be about %.2e the disk lum\n",
+       geo.lum_bl / xbl);
+  rddoub ("t_bl", &geo.t_bl);
+}
+else
+{
+  geo.lum_bl = 0;
+  geo.t_bl = 0;
+}
 
 /* Describe the agn */
 
-      if (geo.agn_radiation)
-	{
-	  xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
+if (geo.agn_radiation)
+{
+  xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
 
-	  // At present we have set geo.r_agn = geo.rstar, and encouraged the user
-	  // set the default for the radius of the BH to be 6 R_Schwartschild.
-	  // rddoub("R_agn(cm)",&geo.r_agn);
+  // At present we have set geo.r_agn = geo.rstar, and encouraged the user
+  // set the default for the radius of the BH to be 6 R_Schwartschild.
+  // rddoub("R_agn(cm)",&geo.r_agn);
 
-	  rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
-	  Log ("OK, the agn lum will be about %.2e the disk lum\n",
-	       geo.lum_agn / xbl);
-	  geo.alpha_agn=(-1.5);
-	  rddoub ("agn_power_law_index", &geo.alpha_agn);
+  rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
+  Log ("OK, the agn lum will be about %.2e the disk lum\n",
+       geo.lum_agn / xbl);
+  geo.alpha_agn=(-1.5);
+  rddoub ("agn_power_law_index", &geo.alpha_agn);
 
 /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
- * This is only used in the sim correction factor for the first time through. 
- * Afterwards, the photons are used to compute the sim parameters. */
+* This is only used in the sim correction factor for the first time through. 
+* Afterwards, the photons are used to compute the sim parameters. */
 
-	  geo.const_agn = geo.lum_agn / (((pow (2.42e18, geo.alpha_agn + 1.)) - pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
-	  Log("AGN Input parameters give a power law constant of %e\n",geo.const_agn);
-	}
-      else
-	{
-	  geo.r_agn=0.0;
-	  geo.lum_agn = 0.0;
-	  geo.alpha_agn = 0.0;
-	  geo.const_agn =0.0;
-	}
+  geo.const_agn = geo.lum_agn / (((pow (2.42e18, geo.alpha_agn + 1.)) - pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
+  Log("AGN Input parameters give a power law constant of %e\n",geo.const_agn);
+}
+else
+{
+  geo.r_agn=0.0;
+  geo.lum_agn = 0.0;
+  geo.alpha_agn = 0.0;
+  geo.const_agn =0.0;
+}
 
 /* Describe the Compton torus */
 
 /* 70b - ksl - 1108067 - Here we add parameters for the compton torus or blocking region 
- *
- * Note that the whole flow of this may be a bit odd as it seems as if we have to keep checking for whether
- * we are modelling an agn
- *
- * Note that these calls need to precede the calls below, because we want to keep the compton torus  ???
- * inside the actual wind, or at least that's what ksl believes on 110809.  ???
- */
+*
+* Note that the whole flow of this may be a bit odd as it seems as if we have to keep checking for whether
+* we are modelling an agn
+*
+* Note that these calls need to precede the calls below, because we want to keep the compton torus  ???
+* inside the actual wind, or at least that's what ksl believes on 110809.  ???
+*/
 
-      rdint("Torus(0=no,1=yes)",&geo.compton_torus);
-      if(geo.compton_torus){
-	      rddoub("Torus.rmin(cm)",&geo.compton_torus_rmin);
-	      rddoub("Torus.rmax(cm)",&geo.compton_torus_rmax);
-	      rddoub("Torus.height(cm)",&geo.compton_torus_zheight);
-	      rddoub("Torus.optical_depth",&geo.compton_torus_tau);
-	      rddoub("Torus.tinit",&geo.compton_torus_te);
+rdint("Torus(0=no,1=yes)",&geo.compton_torus);
+if(geo.compton_torus){
+      rddoub("Torus.rmin(cm)",&geo.compton_torus_rmin);
+      rddoub("Torus.rmax(cm)",&geo.compton_torus_rmax);
+      rddoub("Torus.height(cm)",&geo.compton_torus_zheight);
+      rddoub("Torus.optical_depth",&geo.compton_torus_tau);
+      rddoub("Torus.tinit",&geo.compton_torus_te);
+      if (geo.compton_torus_tau<=0)
+      {
+	      geo.compton_torus_tau=0.001;
+	      Error("python: A torus with zero optical depth makes no sense. Setting to %f\n",geo.compton_torus_tau);
       }
+}
 
 /* Describe the wind */
 
-      if (geo.system_type==2) {
-	      geo.rmax=50.*geo.r_agn;
-      }
+if (geo.system_type==2) {
+      geo.rmax=50.*geo.r_agn;
+}
 
-      rddoub ("wind.radmax(cm)", &geo.rmax);
-      rddoub ("wind.t.init", &geo.twind);
+rddoub ("wind.radmax(cm)", &geo.rmax);
+rddoub ("wind.t.init", &geo.twind);
 
-      geo.diskrad_sq = geo.diskrad * geo.diskrad;
+geo.diskrad_sq = geo.diskrad * geo.diskrad;
 
 
-      /* Now get parameters that are specific to a given wind model
+/* Now get parameters that are specific to a given wind model
 
-         Note: When one adds a new model, the only things that should be read in and modified
-         are parameters in geo.  This is in order to preserve the ability to continue a calculation
-         with the same basic wind geometry, without reading in all of the input parameters.  
-       */
+ Note: When one adds a new model, the only things that should be read in and modified
+ are parameters in geo.  This is in order to preserve the ability to continue a calculation
+ with the same basic wind geometry, without reading in all of the input parameters.  
+*/
 
-      if (geo.wind_type == 1)
-	{
-	  get_stellar_wind_params ();
-	}
-      else if (geo.wind_type == 0)
-	{
-	  get_sv_wind_params ();
-	}
-      else if (geo.wind_type == 3)
-	{
-	  get_proga_wind_params ();
-	}
-      else if (geo.wind_type == 4)
-	{
-	  get_corona_params ();
-	}
-      else if (geo.wind_type == 5)
-	{
-	  get_knigge_wind_params ();
-	}
-      else if (geo.wind_type == 6)
-	{
-	  get_thierry_params ();
-	}
-      else if (geo.wind_type == 7)
-	{
-	  get_yso_wind_params ();
-	}
-      else if (geo.wind_type == 8)
-	{
-	  get_elvis_wind_params ();
-	}
-      else if (geo.wind_type == 9)  //NSH 18/2/11 This is a new wind tpye to produce a thin shell.
-        {
-	  get_shell_wind_params ();
-	  dfudge=(geo.shell_rmax-geo.shell_rmin)/1000.0; //Stop photons getting pushed out of the cell
-	  DFUDGE=dfudge;
-        }
-      else if (geo.wind_type != 2)
-	{
-	  Error ("python: Unknown wind type %d\n", geo.wind_type);
-	  exit (0);
-	}
+if (geo.wind_type == 1)
+{
+  get_stellar_wind_params ();
+}
+else if (geo.wind_type == 0)
+{
+  get_sv_wind_params ();
+}
+else if (geo.wind_type == 3)
+{
+  get_proga_wind_params ();
+}
+else if (geo.wind_type == 4)
+{
+  get_corona_params ();
+}
+else if (geo.wind_type == 5)
+{
+  get_knigge_wind_params ();
+}
+else if (geo.wind_type == 6)
+{
+  get_thierry_params ();
+}
+else if (geo.wind_type == 7)
+{
+  get_yso_wind_params ();
+}
+else if (geo.wind_type == 8)
+{
+  get_elvis_wind_params ();
+}
+else if (geo.wind_type == 9)  //NSH 18/2/11 This is a new wind tpye to produce a thin shell.
+{
+  get_shell_wind_params ();
+  dfudge=(geo.shell_rmax-geo.shell_rmin)/1000.0; //Stop photons getting pushed out of the cell
+  DFUDGE=dfudge;
+}
+else if (geo.wind_type != 2)
+{
+  Error ("python: Unknown wind type %d\n", geo.wind_type);
+  exit (0);
+}
 
-    }				// End of block to define a model for the first time
-  else
+}				// End of block to define a model for the first time
+else
+{
+if (geo.disk_type)	/* Then a disk exists and it needs to be described */
+{
+  if (geo.disk_radiation)
     {
-      if (geo.disk_type)	/* Then a disk exists and it needs to be described */
+      rdint
+	("Disk.temperature.profile(0=standard;1=readin)",
+	 &geo.disk_tprofile);
+      if (geo.disk_tprofile == 1)
 	{
-	  if (geo.disk_radiation)
-	    {
-	      rdint
-		("Disk.temperature.profile(0=standard;1=readin)",
-		 &geo.disk_tprofile);
-	      if (geo.disk_tprofile == 1)
-		{
-		  rdstr ("T_profile_file", tprofile);
-		}
-	    }
+	  rdstr ("T_profile_file", tprofile);
 	}
     }
+}
+}
 
 
 
 /* Now define the wind cones generically.  Note that thetamin and
-  thetamax are measured from disk plane, and so if thetamin = 90 one ends
-  up with a cone that is constant in rho.  
-  56d -- ksl -- updated windcone definitions  */
+thetamax are measured from disk plane, and so if thetamin = 90 one ends
+up with a cone that is constant in rho.  
+56d -- ksl -- updated windcone definitions  */
 /* ???? There is some confusion here regarding new and old.  This should be
- * ???? fixed.  ksl
- */
+* ???? fixed.  ksl
+*/
 
 /* geo.wind_thetamin and max are defined in the routines that initialize
-   the various wind models, e. g. get_sv_wind_parameters. These
-   have been called at this point.  
+the various wind models, e. g. get_sv_wind_parameters. These
+have been called at this point.  
 
-   z is the place where the windcone intercepsts the z axis
-   dzdr is the slope */
+z is the place where the windcone intercepsts the z axis
+dzdr is the slope */
 
-  if (geo.wind_thetamin > 0.0)
+if (geo.wind_thetamin > 0.0)
     {
       windcone[0].dzdr = 1. / tan (geo.wind_thetamin);	
       windcone[0].z = (-geo.wind_rho_min / tan (geo.wind_thetamin));	
