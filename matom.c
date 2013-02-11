@@ -11,21 +11,8 @@
 #include <gsl/gsl_matrix.h>
 #include "my_linalg.h"
 
-/*****************************************************************************/
+/*****************************************************************************
 
-/* As for similar routines in recomb.c, in order to use the integrator the 
-   following external structures are used (SS)*/
-
-/* This relates to the alpha_sp routines at the end of this file */
-
-struct topbase_phot *cont_ext_ptr;	//continuum pointer passed externally
-double temp_ext;		//temperature passed externally
-int temp_choice;		//choice of type of calcualation for alpha_sp
-
-// Note this should be moved to be closer to the routines
-
-
-/************************************************************
                                     Imperial College London
 Synopsis:
 	Matom is the core of the implementation of Leon Lucy's Macro Atom
@@ -55,8 +42,6 @@ Description:
 
 Notes: 
 
-SS -- Currently this routine does not include collisional processes. These should be added.
-
 ksl-- There is a lot of arithmetic required to keep track of indices.  I would
 be inclined to figure out a way to avoid this.  One possibility would be to record the
 go_to level in an array when one is calculating the emission probabilities. This would
@@ -64,11 +49,6 @@ make it easier to add new processes, I suspect.
 
 It would be possible to convert the for loop to a while statement.  This would avoid the
 break statement in the middle.  
-
-ksl -- 06aug -- At present, we do not have a way to dynamically allocated the structures
-associated with matom, namely macromain, considerations one might do are documeented
-in gridwind, where macromain is allocated. 
-
 
 History:
           Feb 04  SS   Coding began.
@@ -162,13 +142,6 @@ matom (p, nres, escape)
 
 
   /* The first step is to identify the configuration that has been excited. */
-
-/* ksl -- This approach will not work in a situation where there are extra non-macro lines */
-/* ksl -- bug, I think.  I have run into some situations where the routine goes more than
-max jumpts.  The one time I tracked this it occurred in a situation in which jumps were
-not jumping to a new upper level.  I would have guested this was impossible */
-/* SS Apr 04 -- both these issues should now be sorted out: this routine should never be called
-   for non-macro lines. The bug is fixed. Jumps should always lead to a new level. */
 
 
   if (*nres < NLINES)		//this means that it was a line excitation CHECK
@@ -264,14 +237,6 @@ not jumping to a new upper level.  I would have guested this was impossible */
 	  /* bf */
 	  for (n = 0; n < nbfd; n++)
 	    {
-	      /* For bf recombination the jump probability is alpha_sp * nne * energy where
-	         alpha_sp is the spontaneous recombination rate coeff. This is computed as
-	         needed at the moment - perhaps this is too slow - should compute it and
-	         store it? Stimulated recombination is included as negative photoionisation
-	         (see below) (SS) */
-
-	      /* Calls to alpha_sp are now replaced with use of recomb_sp which is the currently
-	         stored value of alpha_sp. */
 
 	      cont_ptr = &phot_top[config[uplvl].bfd_jump[n]];	//pointer to continuum
 	      if (n < 25)
@@ -354,7 +319,7 @@ not jumping to a new upper level.  I would have guested this was impossible */
 								 cont_ptr->
 								 nlev)));
 		  jprbs_known[uplvl][m] = jprbs[m] = 0.0;
-		  //exit (0);
+
 		}
 	      pjnorm += jprbs[m];
 	      m++;
@@ -391,7 +356,7 @@ not jumping to a new upper level.  I would have guested this was impossible */
 
       /* Use a running total to decide where event occurs. */
       run_tot = 0;
-// Note threshold could be 0 essentially, what keeps n from being -1 after this loop
+
       n = 0;
       threshold = ((rand () + 0.5) / MAXRAND);
       threshold = threshold * pjnorm_known[uplvl_old];
@@ -489,14 +454,11 @@ not jumping to a new upper level.  I would have guested this was impossible */
 	  /* This is the comoving frequency - changed to rest frequency by doppler */
 	}
       else
-	{			/* This is collisional deactivation. In this case a k-packet is created and so it must be processed by
+	{ /* This is collisional deactivation. In this case a k-packet is created and so it must be processed by
 				   the appropriate routine. (SS, Apr04) */
-	  /* This is now done by returning escape = 0 rather than calling kpkt -- SS June 04 */
+	  /* This is done by returning escape = 0 */
 	  *escape = 0;
 
-	  /* That deals with the k-packet and follows the energy until it finds its way 
-	     back to being an r-packet. kpkt will get the frequency of the new r-packet too
-	     (SS) */
 	}
     }
   else if (n < (nbbd + nbfd))
@@ -568,7 +530,17 @@ b12 (line_ptr)
 
   return (b12_a);
 }
+/************************************************************/
 
+
+/* As for similar routines in recomb.c, in order to use the integrator the 
+   following external structures are used (SS)*/
+
+/* This relates to the alpha_sp routines at the end of this file */
+
+struct topbase_phot *cont_ext_ptr;	//continuum pointer passed externally
+double temp_ext;		//temperature passed externally
+int temp_choice;		//choice of type of calcualation for alpha_sp
 
 /*****************************************************************************/
 
@@ -577,13 +549,6 @@ alpha_sp - to govern the calculation of the spontaneous recombination rate.
 
 The rate is given by (4 pi /c2) (gu/gl) (h2/2 pi m k T)^(3/2) 
 times the integral of   a(nu) nu2 exp [(chi- h nu)/kT].
-
-This sort of thing is already evaluated in functions like sigma_phot_topbase but
-not quite as I want it here. So have written new code here rather than altering the 
-other parts of the code. In the future it may be possible to eliminate the older
-parts. (SS)
-
-Modified May 04 (SS) to work for continua of simple elements too.
 
 04jul30	ksl	Modified so that one does not need to have multiple versions
 		of the code depending on how whether the integrand is 
@@ -744,19 +709,16 @@ kpkt (p, nres, escape)
   double q_ioniz ();
 
 
-  /* For the moment only bf processes are included. Idea is to calculated the cooling
+  /* Idea is to calculated the cooling
      terms for all the processes and then choose one at random to destroy the k-packet and
      turn it back into a photon bundle. 
-     The loop here runs over all the bf processes, regardless of whether they are macro or simple
+     The routine considers bound-free, collision excitation and ff
+     emission. */
+
+  /* The loop here runs over all the bf processes, regardless of whether they are macro or simple
      ions. The reason that we can do this is that in the macro atom method stimulated recombination
      has already been considered before creating the k-packet (by the use of gamma-twiddle) in "scatter"
      and so we only have spontaneous recombination to worry about here for ALL cases. */
-
-  /* Apr 04: now adding the possibility of removing k-packets by collisional excitation of a
-     macro atom. To do this there's now a new array "cooling_bb" which has the collisional
-     cooling rate for bb transitions. (SS) */
-
-  /* Apr 04: now adding the possibility of removing k-packets by ff emission. (SS) */
 
 
   one = &wmain[p->grid];
@@ -768,11 +730,10 @@ kpkt (p, nres, escape)
 
 
   /* ksl 091108 - If the kpkt destruction rates for this cell are not known they are calculated here.  This happens
-   * every time the wind is updated or should */
+   * every time the wind is updated */
 
   if (mplasma->kpkt_rates_known != 1)
     {
-	/*    Log("Beginning calculation of kpkt_rates: The elapsed TIME is %f\n",timer());  */
       cooling_normalisation = 0.0;
       cooling_bftot = 0.0;
       cooling_bbtot = 0.0;
@@ -788,14 +749,13 @@ kpkt (p, nres, escape)
 	    {
 	      upper_density = den_config (xplasma, ulvl);
 	      /* SS July 04 - for macro atoms the recombination coefficients are stored so use the
-	         stored values rathert than recompue them. */
-	      cooling_bf[i] = mplasma->cooling_bf[i] = upper_density * H * cont_ptr->freq[0] * (mplasma->recomb_sp_e[config[ulvl].bfd_indx_first + cont_ptr->down_index]);	// - modified the definition of _sp_e to be the difference
+	         stored values rather than recompue them. */
+	      cooling_bf[i] = mplasma->cooling_bf[i] = upper_density * H * cont_ptr->freq[0] * (mplasma->recomb_sp_e[config[ulvl].bfd_indx_first + cont_ptr->down_index]);	
+               // _sp_e is defined as the difference 
 	    }
 	  else
 	    {
 	      upper_density = xplasma->density[cont_ptr->nion + 1];
-
-	      /* SS Nov 04 - testing for speed - next line need to go back in. */
 
 	      cooling_bf[i] = mplasma->cooling_bf[i] =
 		upper_density * H * cont_ptr->freq[0] *
@@ -816,7 +776,6 @@ kpkt (p, nres, escape)
 	      Error ("nlev, z, istate %d %d %d \n", cont_ptr->nlev,
 		     cont_ptr->z, cont_ptr->istate);
 	      Error ("freq[0] %g\n", cont_ptr->freq[0]);
-	      //      exit(0);
 	      cooling_bf[i] = mplasma->cooling_bf[i] = 0.0;
 	    }
 	  else
@@ -892,9 +851,7 @@ kpkt (p, nres, escape)
 
 	  if (cooling_bb[i] < 0)
 	    {
-	      //              Error ("kpkt: bb cooling rate negative???");
 	      cooling_bb[i] = mplasma->cooling_bb[i] = 0.0;
-	      //exit (0);
 	    }
 	  else
 	    {
@@ -921,6 +878,12 @@ kpkt (p, nres, escape)
 	     rare (~1 photon in a complete run of the code) that I'm not worrying about it for now but it does
 	     indicate a real problem somewhere. */
 
+	  /* SS Nov 09: actually I've not seen this problem for a long
+	     time. Don't recall that we ever actually fixed it,
+	     however. Perhaps the improved volume calculations
+	     removed it? We delete this whole "else" if we're sure
+	     volumes are never zero.*/
+
 	  cooling_ff = mplasma->cooling_ff = 0.0;
 	  Error ("kpkt: A scattering event in cell %d with vol = 0???\n",
 		 one->nwind);
@@ -946,7 +909,6 @@ kpkt (p, nres, escape)
       mplasma->kpkt_rates_known = 1;
 
 
-	  /*  Log("finished calculation of kpkt_rates: The elapsed TIME is %f\n",timer()); */
     }
 
 
@@ -1016,7 +978,7 @@ kpkt (p, nres, escape)
 	      if (line[i].macro_info == 1 && geo.macro_simple == 0)	//line is for a macro atom
 		{
 
-		  /* SS June 04 - in this case the escape = 0 flag is now returned to tell macro_gov that
+		  /* escape = 0 flag returned to tell macro_gov that
 		     a macro atom should be excited, rather than making a call to matom here. */
 
 		  *escape = 0;
@@ -1024,7 +986,7 @@ kpkt (p, nres, escape)
 		}
 	      else		//line is not for a macro atom - use simple method
 		{
-		  /* Since the cooling rate now accounts for the scattering fraction we know that if we
+		  /* Since the cooling rate accounts for the scattering fraction we know that if we
 		     get here we want a line emission, not just an excited macro atom. (SS May 04) */
 		  *escape = 1;	//No need for re-exciting a macro atom.
 		  p->freq = line[i].freq;
@@ -1047,11 +1009,10 @@ kpkt (p, nres, escape)
 	    mplasma->cooling_ff))
     {				//this is a ff destruction
 
-      /* For the moment I've just set this to work in the frequency range 400000AA up to
-         twice the He II edge. The range should probably be fixed to something that
-         depends on the current interval freqmin -> freqmax, but at present
-         freqmin and freqmax are not known here - they's need to be passed from "main"
-         somehow. Perhaps they could be made global? (SS, May04). */
+      /* The limits for ff emission are hard-wired: 40 microns ->
+	 twice energy of He II edge. Shouldn't be a problem unless
+	 we're in plasma with temperatures that gives significant ff
+	 emission outside this range. */
 
       *escape = 1;		//we are making an r-packet not exciting a macro atom
 
@@ -1059,7 +1020,7 @@ kpkt (p, nres, escape)
 
       p->freq = one_ff (one, 7.5e12, 2.626e16);	//get frequency of resulting energy packet
 
-      return (0);		//from one_ff
+      return (0);		
     }
   else
     {
@@ -1082,7 +1043,7 @@ kpkt (p, nres, escape)
 		  exit (0);
 		}
 
-	      /* If it gets here, all seems fine. Now set nres for the destruction process. */
+	      /* Now set nres for the destruction process. */
 
 	      *nres = i + NLINES + 1;
 	      *escape = 0;	//collisional ionization makes an excited macro atom
@@ -1174,7 +1135,7 @@ fake_matom_bb (p, nres, escape)
 
   /* Upon calling we know that the upper level of our fake two level macro
      atom is excited. Since it's only two-levels there are no jumping probabilities
-     and the only decision that needs to be made it does it de-excite by an r-packet
+     and the only decision that needs to be made is whether it de-excites by an r-packet
      in the line or a collisionally produced k-packet. To decide this we compute the
      two emission probabilities. rprb is the probability of the r-packet and kprb
      for the k-packet. */
@@ -1219,7 +1180,7 @@ fake_matom_bb (p, nres, escape)
     }
   else
     {
-      /* Rather than calling kpkt here we are now going to return the instruction to macro_gov to
+      /* Return the instruction to macro_gov to
          make a k-packet. */
 
       *escape = 0;
@@ -1325,9 +1286,7 @@ Returns:   Should compute the fractional level populations for
 Description:
 
 
-Notes:   Although it seems to be working, I've not tested this routine
-         carefully yet - SS 27 Apr 04.
-
+Notes:  
          This routine uses a matrix inversion method to get the level populations.
          For now the matrix solver used is the LU decomposition method provided
          by the Gnu Scientific Library (GSL, which is free). This requires the
@@ -1437,8 +1396,6 @@ macro_pops (xplasma, xne)
 		}
 	    }
 
-	  //      Log("n_macro_lvl %d\n", n_macro_lvl);
-
 	  /* We now know how many levels there are and therefore how big the matrix we
 	     need to invert will be. */
 
@@ -1547,26 +1504,7 @@ macro_pops (xplasma, xne)
 		      rate_matrix[lower][upper] += rate;
 		    }
 
-		  /* test for mg II 
-		     next block of lines were a fudge to see the effect of fixing J-substates to Boltzmann eqm for Magnesium 
-		     Currently I've not decided what the right thing to do about this is (clearly the lines below are not suitable to do this in general - and it's not totally clear that we want to... Need to discuss this... SS Sep 08 */
-		  /*
-		     if ((index_lvl == 58) || (index_lvl == 61) ||(index_lvl == 63)||(index_lvl == 66) ||(index_lvl == 68) ||(index_lvl == 70)||(index_lvl == 73))
-		     {
-		     lower = conf_to_matrix[index_lvl];
-		     upper = conf_to_matrix[index_lvl+1];
-		     rate=1.e12;
-		     rate_matrix[lower][lower] += -1. * rate;
-		     rate_matrix[upper][lower] += rate;
-		     rate_matrix[upper][upper] += -1. * rate * config[index_lvl].g / config[index_lvl+1].g;
-		     rate_matrix[lower][upper] += rate* config[index_lvl].g / config[index_lvl+1].g;
-		     }
-		   */
-
-
-
-
-
+		
 
 		  for (index_bfu = 0;
 		       index_bfu < config[index_lvl].n_bfu_jump; index_bfu++)
@@ -1639,7 +1577,7 @@ macro_pops (xplasma, xne)
 	    }
 
 	  /* The rate matrix is now filled up. Since the problem is not closed as it stands, the next
-	     thing is to replace one of the rows of the matrix (say the first row) with the contraint
+	     thing is to replace one of the rows of the matrix (say the first row) with the constraint
 	     that the sum of all the populations is 1.0 (this will let us get population fractions). */
 
 	  for (index_lvl = 0; index_lvl < n_macro_lvl; index_lvl++)
@@ -1652,11 +1590,8 @@ macro_pops (xplasma, xne)
 
 	  /********************************************************************************/
 	  /* The block that follows (down to next line of ***s) is to do the
-	     matix inversion. It uses something called LU decomposition - the
+	     matix inversion. It uses LU decomposition - the
 	     code for doing this is taken from the GSL manual with very few modifications. */
-
-
-	  //  Error("n_macro_lvl %d \n", n_macro_lvl);
 
 	  /* Replaced inline array allocaation with calloc, which will work with older version of c compilers */
 
@@ -1668,9 +1603,7 @@ macro_pops (xplasma, xne)
 	      for (mm = 0; mm < n_macro_lvl; mm++)
 		{
 		  a_data[nn * n_macro_lvl + mm] = rate_matrix[nn][mm];
-		  //Error("a_data, rate_matrix %g %g %d \n", a_data[nn*n_macro_lvl + mm],rate_matrix[nn][mm], nn*n_macro_lvl + mm); 
 		}
-	      //Error ("%g %g %g %g %g %g\n", a_data[nn*n_macro_lvl],a_data[nn*n_macro_lvl+1],a_data[nn*n_macro_lvl+2],a_data[nn*n_macro_lvl+3],a_data[nn*n_macro_lvl+4],a_data[nn*n_macro_lvl+5]); 
 	    }
 
 	  /* Replaced inline array allocaation with calloc, which will work with older version of c compilers */
@@ -1698,12 +1631,6 @@ macro_pops (xplasma, xne)
 	  free (b_data);	//NEWKSL
 
 	  /**********************************************************/
-
-	  //for (nn=0; nn < n_macro_lvl; nn++)
-	  //{
-	  //  Error ("population %d %g \n", nn, gsl_vector_get(populations, nn));
-	  // }
-
 	  /* MC noise can cause population inversions (particularly amongst highly excited states)
 	     which are never a good thing and most likely unphysical.
 	     Therefor let's follow Leon's procedure (Lucy 2003) and remove inversions. */
@@ -1738,13 +1665,6 @@ macro_pops (xplasma, xne)
 		}
 	    }
 
-	  //      for (nn=0; nn < n_macro_lvl; nn++)
-	  // {
-	  //   Error ("population %d %g \n", nn, gsl_vector_get(populations, nn));
-	  //}
-
-
-
 
 	  /* The populations are now known. The populations need to be stored
 	     firstly as ion populations and secondly as fractional
@@ -1769,8 +1689,6 @@ macro_pops (xplasma, xne)
 		  nn++;
 		}
 
-	      //              Log("this ion density %g\n", this_ion_density);
-
 	      /* Write the level populations to the 
 	         levden array. These are fractional level populations within an ion. */
 
@@ -1780,30 +1698,13 @@ macro_pops (xplasma, xne)
 		   index_lvl++)
 		{
 
-		  // The next couple of lines let you see how much the populations are changin on screen if there are in. 
-		  //Error("Delta n / n %g\n",((one->levden[config[index_lvl].nden]) -
-		  //(gsl_vector_get(populations, conf_to_matrix[mm])/this_ion_density))/
-		  //    (one->levden[config[index_lvl].nden]));
-		  //Error("Old Level %d %d %g %g\n", conf_to_matrix[index_lvl], index_lvl, 
-		  //one->levden[config[index_lvl].nden], config[index_lvl].g);
-
-
 		  xplasma->levden[config[index_lvl].nden] =
 		    gsl_vector_get (populations,
 				    conf_to_matrix[index_lvl]) /
 		    this_ion_density;
 
-		  //Log("conf_to_matrix[mm] %d %d\n", conf_to_matrix[mm], mm, index_lvl);
-
-		  //              xplasma->levden[config[index_lvl].nden] /= 2;
-
-
 		  mm++;
 
-
-		  // The next line was in so that I could watch the populations on screen.
-		  //Log("New Level %d %d %g\n", conf_to_matrix[index_lvl], index_lvl, 
-		  //    one->levden[config[index_lvl].nden]);
 		}
 
 	      xplasma->density[index_ion] =
@@ -1819,7 +1720,6 @@ macro_pops (xplasma, xne)
 	}
     }
 
-  //  exit(0);
   return (0);
   /* All done. (SS, Apr 04) */
 }
@@ -1896,7 +1796,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 
   while (escape == 0)
     {
-      if (matom_or_kpkt == 1)	//excite a macro atom - dependig on simple/macro choice call different routines
+      if (matom_or_kpkt == 1)	//excite a macro atom - depending on simple/macro choice call different routines
 	{
 
 	  if (*nres > (-1) && *nres < NLINES && geo.macro_simple == 0
@@ -1975,7 +1875,6 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 
 	  matom_or_kpkt = 2;	//if it did not escape then it must have had a
 	  //de-activation by collision processes -> need a k-packet 
-	  //next
 	}
       else if (matom_or_kpkt == 2)	//deal with a k-packet
 	{
@@ -2126,23 +2025,10 @@ get_matom_f ()
   norm = 0;
   for (n = 0; n < NPLASMA; n++)
     {
-      //      printf("doing n= %d\n",n);
-      //norm = 0.0;
       for (m = 0; m < nlevels_macro; m++)
 	{
-	  /*
-	     if (m == 20)
-	     {
-	     macromain[n].matom_abs[m]=1.0;
-	     }
-	     else
-	     {
-	     macromain[n].matom_abs[m]=0.0;
-	     }
-	   */
 	  norm += macromain[n].matom_abs[m];
 	}
-      //plasmamain[n].kpkt_abs=0.0;
       norm += plasmamain[n].kpkt_abs;
     }
 
@@ -2190,7 +2076,6 @@ get_matom_f ()
 	      kpkt_emit = 0;
 	      if (n_tries_local > 0)
 		{
-		  //              printf("doing plasma cell %d. density %g nne %g t_e %g, t_r %g. ntries_local %d level_index %d\n", n, plasmamain[n].rho, plasmamain[n].ne, plasmamain[n].t_e, plasmamain[n].t_r, n_tries_local, m);
 		  for (ss = 0; ss < n_tries_local; ss++)
 		    {
 		      if (m < nlevels_macro)
@@ -2199,11 +2084,19 @@ get_matom_f ()
 			  /* First find a suitable transition in which to excite the macro atom (to get it
 			     in the correct starting level. */
 
-			  /* ?? Stuart, why is this loop up to nlines, instead of nlines_macro, since we are only dealing with 
-			   * macro_levels here.  It looks like the reason is because you expect n in some cases to 
-			   * correspond to a photoionzation level but surely there are quicker ways to get there
-			   * ksl 04dec.
-			   */
+                          /* As Knox pointed out in an earlier comment
+			     here, the next loop isn't the best way to
+			     do this - however I'm not sure we can
+			     just replace nlines->nlines_macro since
+			     we don't know for sure that the
+			     macro_lines are the first lines in the
+			     array. If this is really a bottle neck we
+			     should set up a quicker way to identify
+			     the level - the purpose is just to set
+			     the macro atom state to the appropriate
+			     upper level so all we need is some way to
+			     tell it which state it should be. */
+
 			  nres = 0;
 			  while ((nres < nlines))
 			    {
@@ -2254,7 +2147,8 @@ get_matom_f ()
 			{
 			  /* kpkt case. */
 
-			  nres = -2;	//will do 
+			  nres = -2;	//will do - just need
+					//something that will tigger kpkt
 
 			  ppp.nres = nres;
 			  ppp.grid = plasmamain[n].nwind;
@@ -2442,8 +2336,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
       pp.freq = 0.0;
       pp.grid = icell;
 
-      /* This following block is a bad way of doing it but it'll do as
-         a quick and dirty test for now. Really kpkt should be modified to 
+      /* This following block is a bad way of doing it - kpkt could be modified to 
          do what we want in a more elegant way. */
 
       test = pp.freq;
@@ -2468,38 +2361,8 @@ photo_gen_kpkt (p, weight, photstart, nphot)
       /* The photon frequency is now known. */
 
       /* Determine the position of the photon in the moving frame */
-/*04aug -- ksl -- 52a -- Replaced next set of lines with coordinate-sytem
- * independent call.  
- */
+
       get_random_location (icell, p[n].x);
-
-      /*04 dec -- The check below should not be needed.  get_random_location already
-       * does this.  The actual check is in where in wind.  I've commented this out
-       * and added an error check that will kill the program if this is wrong. 54b-ksl
-       */
-      if (geo.disk_type == 2)
-	{
-	  rho_test = ((p[n].x[0] * p[n].x[0]) + (p[n].x[1] * p[n].x[1]));
-	  if ((fabs (p[n].x[2]) < zdisk (rho_test))
-	      && (rho_test < geo.diskrad))
-	    {
-	      Error ("kpkt -- Photon created in disk");
-	      exit (0);
-	    }
-
-	}
-
-
-      if (where_in_wind (p[n].x) != 0)
-	{
-	  Error ("phot_gen_kpkt: generated photon not in wind\n");
-	}
-      if (where_in_grid (p[n].x) < 0)
-	{
-	  Error ("phot_gen_kpkt: generated photon not in grid\n");
-	}
-
-
 
       p[n].grid = icell;
 
@@ -2710,35 +2573,7 @@ photo_gen_matom (p, weight, photstart, nphot)
 
       /* Determine the position of the photon in the moving frame */
       get_random_location (icell, p[n].x);
-
-      /*04 dec -- The check below should not be needed.  get_random_location already
-       * does this.  The actual check is in where in wind.  I've commented this out
-       * and added an error check that will kill the program if this is wrong. Check
-       * should be deleted once we are sure as it simply wastes time.  54b-ksl
-       */
-      if (geo.disk_type == 2)
-	{
-	  rho_test = ((p[n].x[0] * p[n].x[0]) + (p[n].x[1] * p[n].x[1]));
-	  if ((fabs (p[n].x[2]) < zdisk (rho_test))
-	      && (rho_test < geo.diskrad))
-	    {
-	      Error ("kpkt -- Photon created in disk");
-	      exit (0);
-	    }
-
-	}
-
-
-
-      if (where_in_wind (p[n].x) != 0)
-	{
-	  Error ("phot_gen_matom: generated photon not in wind\n");
-	}
-      if (where_in_grid (p[n].x) < 0)
-	{
-	  Error ("phot_gen_matom: generated photon not in grid\n");
-	}
-
+  
       p[n].grid = icell;
 
 

@@ -3,7 +3,8 @@ README
 =========
 Precursor - python_68d
 Changes
-Simply makes modifications that were required for portability to 64bit linux platform. These all have to do with vfprintf. The files that were changed are mostly in the kpar routines but signal.c was also affected.
-Note that there may be issues when if one tries to run py_wind on a wind_save file that has been created with a different architecture. This has not yet been fully explored.
+The primary purpose of this version was to reduce the size of the windsave file which for a 30x30 grid and a particular set of macro atoms was 500 Mbytes. The new version reduces the size of the same windsave file to 17Mbytes. Note that the so-called CoolStruc ? has been eliminated and those variables are now allocated directly from MacroMain ? . On restarts, the freebound probabilities for macro atoms are now recalibrated.
+Minor changes to other routines have been made mostly to eliminate very old comments and/or deleted code
+Note - Be sure to dwonlaod the new version of kpar in Python_68e as well.
 
 
