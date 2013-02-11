@@ -936,6 +936,9 @@ Arguments:
 Returns:
 
 Description:
+
+	Note that this routine does not calculate anything.  It
+	simple reports on variables in the wind array.
 	
 		
 Notes:
@@ -973,18 +976,20 @@ a:rdint ("Wind.array.element", &n);
 
   if (w[n].inwind < 0)
 	  Log("\n# Cell is not inwind, expect all zeros to follow\n\n");
+  /*70d - added compton - ksl */
   Log
-    ("t_e %8.2e lum_tot  %8.2e lum_lines  %8.2e lum_ff  %8.2e lum_fb     %8.2e %8.2e %8.2e %8.2e %8.2e\n",
+    ("t_e %8.2e lum_tot  %8.2e lum_lines  %8.2e lum_ff  %8.2e lum_fb     %8.2e %8.2e %8.2e %8.2e %8.2e  lum_comp %8.2e\n",
      xplasma->t_e, xplasma->lum_rad, xplasma->lum_lines, xplasma->lum_ff,
      xplasma->lum_fb, xplasma->lum_ion[0], xplasma->lum_ion[2],
-     xplasma->lum_ion[3], xplasma->lum_z);
+     xplasma->lum_ion[3], xplasma->lum_z),xplasma->lum_comp;
   Log
-    ("t_r %8.2e heat_tot %8.2e heat_lines %8.2e heat_ff %8.2e heat_photo %8.2e %8.2e %8.2e %8.2e %8.2e\n",
+    ("t_r %8.2e heat_tot %8.2e heat_lines %8.2e heat_ff %8.2e heat_photo %8.2e %8.2e %8.2e %8.2e %8.2e heat_comp %3.2e\n",
      xplasma->t_r, xplasma->heat_tot, xplasma->heat_lines, xplasma->heat_ff,
      xplasma->heat_photo, xplasma->heat_ion[0], xplasma->heat_ion[2],
-     xplasma->heat_ion[3], xplasma->heat_z);
-  Log ("The ratio of cooling to heating is %8.2f adiabatic cooling %8.2e\n",
-       xplasma->lum_rad / xplasma->heat_tot, xplasma->lum_adiabatic);
+     xplasma->heat_ion[3], xplasma->heat_z,xplasma->heat_comp);
+  Log ("The ratio of rad (total) cooling to heating is %8.2f (%8.2f) \n",
+       xplasma->lum_rad / xplasma->heat_tot, (xplasma->lum_rad+xplasma->lum_adiabatic) / xplasma->heat_tot);
+  Log ("Adiabatic cooling %8.2e is %8.2g of total cooling\n", xplasma->lum_adiabatic,xplasma->lum_adiabatic/(xplasma->lum_rad+xplasma->lum_adiabatic));
   Log ("Number of ionizing photons in cell nioniz %d\n", xplasma->nioniz);
   Log ("ioniz %8.2e %8.2e %8.2e %8.2e %8.2e\n",
        xplasma->ioniz[0], xplasma->ioniz[1], xplasma->ioniz[2],

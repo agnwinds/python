@@ -149,6 +149,7 @@ WindPtr (w);
 	    PI * plasmamain[n].j / (STEFAN_BOLTZMANN * trad * trad * trad *
 				    trad);
 
+/* ??? This seems to be a diagnostic Nick added.  Consider deleting */
 	if (nwind > 59 && nwind < 90)
 
 {

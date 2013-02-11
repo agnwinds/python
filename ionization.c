@@ -521,13 +521,24 @@ calc_te (xplasma, tmin, tmax)
   double heat_tot;
   double z1, z2;
   int macro_pops ();
+
+  /* 110916 - ksl - Note that we assign a plasma pointer here to a fixed structure because
+   * we need to call zbrent and we cannot pass the xplasma ptr directly
+   */
+
   xxxplasma = xplasma;
+  
   heat_tot = xplasma->heat_tot;
 
   xplasma->t_e = tmin;
   z1 = zero_emit (tmin);
   xplasma->t_e = tmax;
   z2 = zero_emit (tmax);
+
+  /* The way this works is that if we have a situation where the cooling
+   * at tmax and tmin brackets the heating, then we use zbrent to improve
+   * the estimated temperature, but if not we chose the best direction
+   */
 
   if ((z1 * z2 < 0.0))
     {				// Then the interval is bracketed 
@@ -542,6 +553,10 @@ calc_te (xplasma, tmin, tmax)
 
   /* With the new temperature in place for the cell, get the correct value of heat_tot.
      SS June  04 */
+
+  /* ksl - I basically don't undestand what is going on here.  If we start using
+   * macro atoms a lot we need to understand them better ??? - 
+   * Look at zero emit as well 091611 */
 
   xplasma->heat_tot -= xplasma->heat_lines_macro;
   xplasma->heat_lines -= xplasma->heat_lines_macro;
@@ -613,10 +628,18 @@ zero_emit (t)
   xxxplasma->heat_photo += xxxplasma->heat_photo_macro;
 
   //  difference = (xxxplasma->heat_tot - total_emission (xxxplasma, 0., VERY_BIG));
+
+  /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
+   * are testing.  Adiabatic cooling is proportional to temperature
+   */
+
+  xxxplasma->lum_adiabatic=adiabatic_cooling(&wmain[xxxplasma->nwind],t);
+
   difference =
     xxxplasma->heat_tot - xxxplasma->lum_adiabatic -
     total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);
-//     printf("NSH Zero emit returns %e for t_e= %f\n",difference,t);
+
+
   return (difference);
 }
 

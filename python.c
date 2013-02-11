@@ -687,9 +687,10 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
       geo.macro_ioniz_mode = 0;
     }
 
-  //  Establish the overall system type  - Added for python_69 to allow qso's have differnet inputs
+  //  Establish the overall system type  - Added for python_69 to allow qso's have different inputs
+  //  Note - ksl - What happened to the possibility of a true single star with no disk - 110914
 
-  rdint ("System_type(0=star+disk,1=star+disk+secondary,2=agn",
+  rdint ("System_type(0=star,1=binary,2=agn)",
 	 &geo.system_type);
 
   
@@ -1504,9 +1505,10 @@ run -- 07jul -- ksl
 	   * photons_per_cycle is the number of photon bundles which will equal the luminosity; 
 	   * 0 => for ionization calculation 
 	   */
-	printf ("sent to define_phot freqmin=%e freqmax=%e \n",freqmin,freqmax);
-	  define_phot (p, freqmin, freqmax, photons_per_cycle, 0, iwind, 1); 
-	printf ("sent to photon_checks freqmin=%e freqmax=%e \n",freqmin,freqmax);
+//OLD70d	printf ("sent to define_phot freqmin=%e freqmax=%e \n",freqmin,freqmax);
+	define_phot (p, freqmin, freqmax, photons_per_cycle, 0, iwind, 1); 
+//OLD70d	printf ("sent to photon_checks freqmin=%e freqmax=%e \n",freqmin,freqmax);
+
 	  photon_checks (p, freqmin, freqmax, "Check before transport");
 
 	  zz = 0.0;
@@ -1529,7 +1531,6 @@ run -- 07jul -- ksl
 	  kbf_need (freqmin, freqmax);
 
 	  /* Transport the photons through the wind */
-//	printf ("Just going to transphot - photon 46327 has freq=%e, and weight=%e. It is currently at %e,%e,%e in grid cell %i\n",p[46327].freq,p[46327].w,p[46327].x[0],p[46327].x[1],p[46327].x[2],p[46327].grid);
 	  trans_phot (w, p, 0);
 
 	  /*Determine how much energy was absorbed in the wind */
@@ -1580,6 +1581,7 @@ run -- 07jul -- ksl
 	 n_ioniz, lum_ioniz);
 
       wind_update (w);
+
       if (diag_on_off)
 	{
 	  strcpy (dummy, "");
@@ -1593,7 +1595,9 @@ run -- 07jul -- ksl
 	   geo.wcycle, timer ());
 
       Log ("Finished creating spectra\n");
-	printf ("%s %s\n",wspecfile,lspecfile);
+      
+//OLD70d	printf ("%s %s\n",wspecfile,lspecfile);
+
       spectrum_summary (wspecfile, "w", 0, 5, 0, 1.,0);
       spectrum_summary (lspecfile, "w", 0, 5, select_spectype, 1.,1);    /* output the log spectrum */
       phot_gen_sum (photfile, "w");	/* Save info about the way photons are created and absorbed

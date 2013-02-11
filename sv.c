@@ -101,7 +101,14 @@ get_sv_wind_params ()
 	  geo.xlog_scale=geo.compton_torus_rmin;
   }
 
-  geo.zlog_scale = 1e7;
+/*70d - ksl - This change made to give one a chance of being able to do an 
+   agn and a CV with the sv model.  The underlying assumption is that the
+   effective radius provides a good scale factor in the verticla direction.
+   An alternative would be to use sv_rmin.
+ */
+
+//OLD70d  geo.zlog_scale = 1e7;
+geo.zlog_scale = geo.rstar;
 
 /*Now calculate the normalization factor for the wind*/
 
