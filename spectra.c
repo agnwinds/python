@@ -347,7 +347,6 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 
   for (nphot = 0; nphot < NPHOT; nphot++)
     {
-
       if ((j = p[nphot].nscat) < 0 || j > MAXSCAT)
 	nscat[MAXSCAT]++;
       else
@@ -357,7 +356,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	nres[MAXSCAT]++;
       else
 	nres[j]++;
-/* lies to work out where we are in a logarithmic spectrum */
+/* lines to work out where we are in a logarithmic spectrum */
 	k1 = (log10(p[nphot].freq) -log10(freqmin)) / ldfreq;
 	if (k1<0) 
 		{
@@ -590,7 +589,7 @@ History:
 int
 spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm, loglin)
      char filename[], mode[];
-	int loglin;          // switch to tell the code if we are outputting a log or a lin
+     int loglin;          // switch to tell the code if we are outputting a log or a lin
      int nspecmin, nspecmax;
      int select_spectype;
      double renorm;		// parameter used to rescale spectrum as it is building up 

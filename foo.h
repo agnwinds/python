@@ -371,6 +371,7 @@ int spherical_volumes(WindPtr w);
 int spherical_where_in_grid(double x[]);
 int spherical_get_random_location(int n, double x[]);
 int spherical_extend_density(WindPtr w);
+int shell_make_grid(WindPtr w);
 /* cylind_var.c */
 double cylvar_ds_in_cell(PhotPtr p);
 int cylvar_make_grid(WindPtr w);
@@ -413,10 +414,11 @@ double tb_pow(double freq);
 double verner_pow(double freq);
 double sim_alphasolve(double ratans, double numin, double numax);
 double sim_w(double en1, double v, double dt, double alpha, double numin, double numax);
-/* balance_gen.c */
-int summary(PlasmaPtr one);
-double line_heating(PlasmaPtr w, PhotPtr p, double ds);
-double sobolev_line_heating(PlasmaPtr w, PhotPtr p, double ds);
+/* shell_wind.c */
+int get_shell_wind_params(void);
+double shell_velocity(double x[], double v[]);
+double shell_rho(double x[]);
+int shell_vel_grad(double x[], double velgrad[][3]);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
@@ -442,6 +444,11 @@ int complete_file_summary(WindPtr w, char root[], int ochoice);
 int wind_reg_summary(WindPtr w, char rootname[], int ochoice);
 int dvds_summary(WindPtr w, char rootname[], int ochoice);
 int inner_shell_summary(WindPtr w, char rootname[], int ochoice);
+int IP_summary(WindPtr w, char rootname[], int ochoice);
+int alpha_summary(WindPtr w, char rootname[], int ochoice);
+int phot_split(WindPtr w, char rootname[], int ochoice);
+int thompson(WindPtr w, char rootname[], int ochoice);
+int nscat_split(WindPtr w, char rootname[], int ochoice);
 /* py_wind_ion.c */
 int ion_summary(WindPtr w, int element, int istate, int iswitch, char rootname[], int ochoice);
 int tau_ave_summary(WindPtr w, int element, int istate, double freq, char rootname[], int ochoice);
@@ -460,3 +467,6 @@ int config_overview(int n, int icell);
 int depcoef_overview(int icell);
 int copy_plasma(PlasmaPtr x1, PlasmaPtr x2);
 int depcoef_overview_specific(int version, int nconfig, WindPtr w, char rootname[], int ochoice);
+/* py_wind.c */
+int main(int argc, char *argv[]);
+int py_wind_help(void);

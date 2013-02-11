@@ -1055,7 +1055,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
 
       if ((nring < 0) || (nring > NRINGS - 2))
 	{
-	  Error ("photon_gen: photon lauch out of bounds. nring = %d\n",
+	  Error ("photon_gen: photon launch out of bounds. nring = %d\n",
 		 nring);
 	  exit (0);
 	}
@@ -1147,7 +1147,6 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
          to moving frame */
       vdisk (p[i].x, v);
       p[i].freq /= (1. - dot (v, p[i].lmn) / C);
-
   /*    if (p[i].freq < freqmin || freqmax < p[i].freq)
 	{
 	  Error_silent

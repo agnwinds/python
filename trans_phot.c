@@ -98,7 +98,7 @@ trans_phot (w, p, iextract)
 
   for (nphot = 0; nphot < NPHOT; nphot++)
     {
-      //      printf("nphot %d %g\n", nphot, (C/p[nphot].freq)/ANGSTROM);
+ //           printf("nphot %d %g\n", p[nphot].np, (C/p[nphot].freq)/ANGSTROM);
 
       //This is just a watchdog method to tell the user the program is still running
       if (nphot % 10000 == 0)
@@ -130,9 +130,10 @@ trans_phot (w, p, iextract)
 
 
 
-
       stuff_phot (&p[nphot], &pp);
       disk_illum = geo.disk_illum;
+
+
 
       /* The next if statement is executed if we are calculating the detailed spectrum and
        * makes sure we always run extract on the original photon no matter where it was
@@ -184,8 +185,13 @@ trans_phot (w, p, iextract)
          If the photon escapes then we leave the photon at the position of it's last scatter.  In most other cases 
          though we store the final position of the photon. */
 
+if (nphot==46327) printf ("\n");
+	if (nphot==46327) printf ("Going to translate - photon 46327 freq=%e weight=%e. Location=%e,%e,%e in grid cell %i (plasma cell %i)\n",pp.freq,pp.w,pp.x[0],pp.x[1],pp.x[2],pp.grid,w[pp.grid].nplasma);
 
 	  istat = translate (w, &pp, tau_scat, &tau, &nres);
+
+	if (nphot==46327) printf ("Back from translate (istat=%i)- photon 46327 freq=%e weight=%e. Location=%e,%e,%e in grid cell %i (plasma cell %i)\n",istat,pp.freq,pp.w,pp.x[0],pp.x[1],pp.x[2],pp.grid,w[pp.grid].nplasma);
+
 
 /* nres is the resonance at which the photon was stopped.  At present the
 same value is also stored in pp->nres, but I have not yet eliminated 
@@ -195,8 +201,9 @@ it from translate. ?? 02jan ksl */
 
 	  icell++;
 	  istat = walls (&pp, &p[nphot]);
-//pp is where the photon is going, p is where it was
 
+   if (nphot==46327) printf("NSH Back from walls, Photon has istat=%i and is now in cell %i\n",istat,pp.grid);
+//pp is where the photon is going, p is where it was
 
 
 #if DEBUG
@@ -319,6 +326,7 @@ the current version of scattering really does what the old code did for two-leve
 	      nnscat = 0;
 	      nnscat++;
 	      ptr_nres = &nres;
+if (nphot==46327) printf ("Going to scatter\n");
 	      scatter (&pp, ptr_nres, &nnscat);
 	      pp.nscat++;
 
@@ -350,10 +358,9 @@ the current version of scattering really does what the old code did for two-leve
 	      if (nres > -1 && nres < nlines)
 		{
 		  pp.nrscat++;
-/* This next statement writes out the position of every resonanat scattering event to a file */
+/* This next statement writes out the position of every resonant scattering event to a file */
 		  if (diag_on_off)
-		    fprintf (pltptr, "%.2e %.2e %.2e\n", pp.x[0], pp.x[1],
-			     pp.x[2]);
+		    fprintf (pltptr, "Photon %i has resonant scatter at %.2e %.2e %.2e in wind cell %i (grid cell=%i). Freq=%e Weight=%e\n", nphot,pp.x[0], pp.x[1],pp.x[2],wmain[n].nplasma,pp.grid,pp.freq,pp.w);
 
 		  /* 68a - 090124 - ksl - Increment the number of scatters by this ion in this cell */
 		  /* 68c - 090408 - ksl - Changed this to the weight of the photon at the time of the scatter */

@@ -93,7 +93,7 @@ WindPtr (w);
   int nplasma;
   int nwind;
    int first,last,m;
-   double tot,d2_agn,agn_ip;
+   double tot,agn_ip;
   dt_r = dt_e = 0.0;
   iave = 0;
   nmax_r = nmax_e = -1;
@@ -311,33 +311,32 @@ WindPtr (w);
   xtemp_rad (w);
 
 
-
-      n = plasmamain[0].nwind;
-	agn_ip=geo.const_agn*(((pow (50000/HEV, geo.alpha_agn + 1.0)) - pow (100/HEV,geo.alpha_agn + 1.0)) /  	(geo.alpha_agn + 1.0));
-	agn_ip /= (w[n].r*w[n].r);
-	agn_ip /= plasmamain[0].rho * rho2nh;
+/* This next block is to allow the output of data relating to the abundances of ions when python is being tested. We will only want this to run if the wind mode is test */
 
 
-
-
-
-
-         Log ("OUTPUT Lum_agn= %e T_e= %e N_h= %e alpha= %f W= %e IP= %f distance= %e\n",geo.lum_agn,plasmamain[0].t_e,plasmamain[0].rho * rho2nh,plasmamain[0].sim_alpha,plasmamain[0].sim_w,agn_ip,w[n].r);
-	for (n = 0; n < nelements; n++)
+	
+	if (geo.wind_type == 9)
 		{
-      		first = ele[n].firstion;
-      		last = first + ele[n].nions;
-      		Log ("OUTPUT %-5s ", ele[n].name);
-      		tot = 0;
-      		for (m = first; m < last; m++)
-			tot += plasmamain[0].density[m];
-      		for (m = first; m < last; m++)
+      		n = plasmamain[0].nwind;
+		agn_ip=geo.const_agn*(((pow (50000/HEV, geo.alpha_agn + 1.0)) - pow (100/HEV,geo.alpha_agn + 1.0)) /  	(geo.alpha_agn + 1.0));
+		agn_ip /= (w[n].r*w[n].r);
+		agn_ip /= plasmamain[0].rho * rho2nh;
+         	Log ("OUTPUT Lum_agn= %e T_e= %e N_h= %e alpha= %f W= %e IP= %f distance= %e\n",geo.lum_agn,plasmamain[0].t_e,plasmamain[0].rho * rho2nh,plasmamain[0].sim_alpha,plasmamain[0].sim_w,agn_ip,w[n].r);
+		for (n = 0; n < nelements; n++)
 			{
-	  		Log (" %8.2e", plasmamain[0].density[m]/tot);
-			}
-      		Log ("\n");
-    		}
-
+      			first = ele[n].firstion;
+      			last = first + ele[n].nions;
+      			Log ("OUTPUT %-5s ", ele[n].name);
+      			tot = 0;
+      			for (m = first; m < last; m++)
+				tot += plasmamain[0].density[m];
+      			for (m = first; m < last; m++)
+				{
+	  			Log (" %8.2e", plasmamain[0].density[m]/tot);
+				}
+      			Log ("\n");
+    			}
+		}
 
 
 
@@ -402,6 +401,8 @@ wind_rad_init ()
   for (n = 0; n < NPLASMA; n++)
     {
       plasmamain[n].j = plasmamain[n].ave_freq = plasmamain[n].ntot = 0;
+      plasmamain[n].ntot_disk = plasmamain[n].ntot_agn = 0; //NSH 15/4/11 counters to see where photons come from
+      plasmamain[n].ntot_star = plasmamain[n].ntot_bl = plasmamain[n].ntot_wind = 0;
       plasmamain[n].heat_tot = plasmamain[n].heat_ff =
 	plasmamain[n].heat_photo = plasmamain[n].heat_lines = 0.0;
       plasmamain[n].heat_z = 0.0;

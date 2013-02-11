@@ -523,10 +523,10 @@ to case a unless there is an error somewhere */
 
 
 
-	weight=1.0/(4.0*PI*geo.d_agn*geo.d_agn);
+	wplasma[0].w = weight= 0.5*(1-sqrt(1-((geo.r_agn*geo.r_agn)/(geo.d_agn*geo.d_agn)))); 
 	wplasma[0].sim_alpha=alpha_agn;       //Set the alpha for this cell, in this case it is just the global version
-	wplasma[0].sim_w=weight*geo.const_agn/(4.*PI);   //Set the sim w factor for this cell alone. 
-	Log("Input parameters give a power law weight of %e\n",weight);
+	wplasma[0].sim_w=geo.const_agn/((4.*PI)*(4.*PI*geo.r_agn*geo.r_agn));   //Set the sim w factor for this cell alone. 
+	Log("Input parameters give a BB weight of %e and a SIM weight of %e\n",wplasma[0].w,wplasma[0].sim_w );
 	agn_ip=geo.const_agn*(((pow (50000/HEV, geo.alpha_agn + 1.0)) - pow (100/HEV,geo.alpha_agn + 1.0)) /  (geo.alpha_agn + 1.0));
 	agn_ip /= (d_agn*d_agn);
 	agn_ip /= nh;
@@ -706,7 +706,7 @@ multicycle (www, p, mode, freq_sampling, radmode)
 
 
 	  		/* Find the ionization fractions and electron temperature */
-	  		for (n = 0; n <10; n++)
+	  		for (n = 0; n <20; n++)
 	    			{
 	      			Log ("multicycle %d\n", n);
 	      			www->rho = nh / rho2nh;
@@ -767,7 +767,7 @@ multicycle (www, p, mode, freq_sampling, radmode)
 //	printf ("to %e giving IP %e \n",lum_agn_scale*100,agn_ip/(nh*geo.d_agn*geo.d_agn));
 	/* we now know lum_agn_scale, the luminosity required to give an ionisation parameter of 1, we will go between 100 and 10000 */
 		t_r = 30000.;
-	for (logip=2.0 ; logip<=4.01 ; logip+=1.0)
+	for (logip=0.0 ; logip<=5.01 ; logip+=0.1)
 		{
 		fudgefile=fopen ("fudge_summary.out", "a");
 		numfile  = fopen ("num_summary.out", "a");
@@ -802,8 +802,9 @@ multicycle (www, p, mode, freq_sampling, radmode)
 //		printf("logip=%f agn_ip=%e, luminosity=%e\n",logip,agn_ip,lum_agn_scale*agn_ip);
 //		geo.lum_agn=lum_agn_scale*agn_ip;
 //		printf ("We are setting the AGN luminosity to %e",geo.lum_agn);
-		www->w = weight= 1.0/(4.0*PI*geo.d_agn*geo.d_agn);     /* set the weight using geometric factors */ 
-		www->sim_w = (weight*geo.const_agn)/(4*PI);  /* Set the sim_w parameter - added 7/2/11 as part of the effort to get the sim code into python - it needs the ability to have a different weight for each cell */
+		www->w = weight= 0.5*(1-sqrt(1-((geo.r_agn*geo.r_agn)/(geo.d_agn*geo.d_agn))));     /* set the weight for BB type calculations */
+
+		www->sim_w = (geo.const_agn)/((4*PI)*(4.0*PI*geo.d_agn*geo.d_agn)); /* Set the sim_w parameter - added 7/2/11 as part of the effort to get the sim code into python - it needs the ability to have a different weight for each cell */
 		www->sim_alpha = geo.alpha_agn;   /* Set the sim_alpha parameter - added 7/2/11 as part of the effort to get the sim code into python - needs the ability to very alpha for each cell */
 
 		t_r = t_r+1.;  //makes no difference, but sparks a new whole cycle, so stops using the same old densities from last loop When multicycle was first written, either w or tr would be changed in the loop.
@@ -816,9 +817,9 @@ multicycle (www, p, mode, freq_sampling, radmode)
 
 
 	  	/* Find the ionization fractions and electron temperature */
-		for (n = 0; n < 50; n++)
+		for (n = 0; n < 20; n++)
 	    		{
-	      		Log ("multicycle %d\n", n);
+	      		Log ("multicycle %d IP= %f current t_e= %f current t_r= %f\n", n,logip,www->t_e,www->t_r);
 	      		www->rho = nh / rho2nh;
 			printf ("wplasma[0].tr=%f tr=%f\n",www->t_r,t_r);
 			printf ("wplasma[0].w=%f w=%f\n",www->w,weight);

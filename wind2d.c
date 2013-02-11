@@ -98,7 +98,12 @@ define_wind ()
 
 
 
-   if (geo.coord_type == SPHERICAL)
+    if (geo.wind_type == 9)    //This is the mode where we want the wind and the grid carefulluy conrolled to allow a very thin shell. We ensure that the coordinate type is spherical. 
+    {
+      Log ("We are making a thin shell type grid to match a thin shell wind. This is totally aphysical and should only be used for testing purposes");
+      shell_make_grid (w);
+    }
+   else if (geo.coord_type == SPHERICAL)
     {
       spherical_make_grid (w);
     }
@@ -279,7 +284,6 @@ be optional which variables beyond here are moved to structures othere than Wind
     {
       nwind = plasmamain[n].nwind;
       stuff_v (w[nwind].xcen, x);
-
       plasmamain[n].rho = model_rho (x);
       plasmamain[n].vol = w[nwind].vol;	// Copy volumes
       plasmamain[n].sim_alpha = geo.alpha_agn; //As an initial guess we assume the whole wind is optically thin and so the spectral index for a PL illumination will be the same everywhere.
@@ -309,9 +313,8 @@ be optional which variables beyond here are moved to structures othere than Wind
 	{	
 	plasmamain[n].w = 0.5;	//Modification to allow for possibility that grid point is inside star
 	}
-	printf("in wind2d About to decide what to do - geo.ioniz_mode=%i\n",geo.ioniz_mode);
-	printf("For cell %i, at a distance %e from the AGN, alpha=%f, w=%e, nH=%e\n",n,pow((x[0] * x[0] + x[1] * x[1] +
-					x[2] * x[2]),0.5),plasmamain[n].sim_alpha,plasmamain[n].sim_w,nh);
+	printf("For wind cell %i (grid cell=%i) at a distance %e from the AGN, alpha=%f, w=%e, nH=%e, Te=%e, Tr=%e\n",n,nwind,pow((x[0] * x[0] + x[1] * x[1] +
+					x[2] * x[2]),0.5),plasmamain[n].sim_alpha,plasmamain[n].sim_w,nh,plasmamain[n].t_e,plasmamain[n].t_r);
       /* Determine the initial ionizations, either LTE or  fixed_concentrations */
  //     if (geo.ioniz_mode == 5)     
   //      {                      // LTE followed by SIM correction factor mode 4 set so it doesnt try a one shot.

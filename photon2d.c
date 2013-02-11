@@ -54,16 +54,22 @@ translate (w, pp, tau_scat, tau, nres)
 
   if (where_in_wind (pp->x) != 0)
     {
+      if (pp->np==46327) printf ("In translate, and we are in space!!\n");
       istat = translate_in_space (pp);
+
     }
   else if ((pp->grid = where_in_grid (pp->x)) >= 0)
     {
+      if (pp->np==46327) printf ("In translate, and we are in the wind!!\n");
       istat = translate_in_wind (w, pp, tau_scat, tau, nres);
     }
   else
     {
       istat = pp->istat = -1;	/* It's not in the wind and it's not in the grid.  Bummer! */
+
+      if (pp->np==46327) printf ("In translate, and we are in nowhere!!\n");
       Error ("translate: Found photon that was not in wind or grid\n");
+
     }
 
 
@@ -121,6 +127,8 @@ photon hit the star in its passage from pold to the current position */
       pp->istat = P_HIT_STAR;	/* Signifying that photon is hitting star */
     }
   move_phot (pp, ds + DFUDGE);
+
+      if (pp->np==46327) printf ("In translate_in_space, we are going to move the photon %e cm\n",ds+DFUDGE);
   return (pp->istat);
 }
 
@@ -316,12 +324,13 @@ return and record an error */
       return (n);		/* Photon was not in grid */
     }
 
-
 /* Assign the pointers for the cell containing the photon */
 
   one = &wmain[n];		/* one is the grid cell where the photon is */
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
+  
+
 
 
 /* Calculate the maximum distance the photon can travel in the cell */
@@ -399,6 +408,9 @@ error continues to appear, new investigations are required.
   smax += DFUDGE;		/* DFUDGE is to force the photon through the cell boundaries.
 				   Implies that phot is in another cell often.  */
 
+     if (p->np==46327) printf ("In translate_in_wind, we are in grid %i (plasma cell %i). About to move_phot, and the furthest it can go is %e cm\n",n,one->nplasma,smax);
+
+
 /* The next set of limits the distance a photon can travel.  There are 
 a good many photons which travel more than this distance without this 
 limitation, at least in the standard 30 x 30 instantiation.  It does
@@ -420,6 +432,10 @@ radiation, which is the single largest contributer to execution time.*/
 /* Note that ds_current does not alter p in any way at present 02jan ksl */
 
   ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
+
+  if (p->nres < 0)  xplasma->nscat_es++;
+  if (p->nres > 0)  xplasma->nscat_res++;
+
 
 /* OK now we increment the radiation field in the cell, translate the photon and wrap 
    things up If the photon is going to scatter in this cell, radiation also reduces 

@@ -42,6 +42,7 @@ stuff_phot (pin, pout)
   pout->grid = pin->grid;
   pout->origin = pin->origin;
   pout->nnscat = pin->nnscat;
+  pout->np = pin->np;
 
 
   return (0);

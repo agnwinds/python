@@ -149,13 +149,13 @@ nebular_concentrations (xplasma, mode)
   else if (mode == 5)           /* This is LTE followed by a modification 
              to allow for a strongly non BB radiation field - after Sim (2008) */
     {
-	printf("We are in nebular_concentrations, and we are running at mode=%i\n",mode);
-	printf("Heading off to partition_functions\n");
+	printf("NSH We are in nebular_concentrations, and we are running at mode=%i\n",mode);
+	printf("NSH Heading off to partition_functions\n");
 
      partition_functions (xplasma, 1);   //lte partition function using t_e and no weights
-	printf("Back from partition_functions, now going to concentrations\n");
+	printf("NSH Back from partition_functions, now going to concentrations\n");
       m = concentrations (xplasma, 3);	// Saha equation using t_e - new mode, in case we need to do something clever
-	printf("Back from concentrations, going into sim_driver, T_e=%e, alpha=%f, w=%e\n",xplasma->t_e,xplasma->sim_alpha,xplasma->sim_w);
+	printf("NSH Back from concentrations, going into sim_driver, T_e=%e, alpha=%f, w=%e\n",xplasma->t_e,xplasma->sim_alpha,xplasma->sim_w);
       m = sim_driver (xplasma);
    }
   else
@@ -333,7 +333,7 @@ concentrations (xplasma, mode)
   niterate = 0;
   while (niterate < MAXITERATIONS)
     {
-	Log("Saha Iteration %i, with ne=%e and t=%e\n",niterate,xne,t);
+//	Log("Saha Iteration %i, with ne=%e and t=%e\n",niterate,xne,t);
       /* Assuming a value of ne calculate the relative densities of each ion for each element */
 
       saha (xplasma, xne, t);
@@ -458,11 +458,11 @@ saha (xplasma, ne, t)
 	    * exp (-ion[nion - 1].ip / (BOLTZMANN * t)) / (ne *
 							   partition[nion-1]);
 
-//	  if (b > big)
-//	{
+	  if (b > big && nh < 1e5)
+	{
 //	Log ("We want the ratio b for nion=%i (%i,%i) to be %e, but it's too big! Setting to %e\n",nion,ion[nion].z,nion-first,b,big);	 
-//	   b = big;		//limit step so there is no chance of overflow
-//	}
+	   b = big;		//limit step so there is no chance of overflow
+	}
 	  a = density[nion - 1] * b;
  //       printf("Relative density of nion=%i (%i,%i) is %e\n",nion,ion[nion].z,nion-first+1,a);
 	  sum += density[nion] = a;

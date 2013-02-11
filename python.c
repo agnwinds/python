@@ -178,7 +178,7 @@ History:
 
 
 #include "python.h"
-#define NSPEC	20		//68c moved the defintion here, because NSPEC is not needed by any other routine
+#define NSPEC	20
 double n_ioniz,lum_ioniz;   //NSH 16/2/2011 these seemed to need to be here to allow photon_checks to communicate the number back to python for readout....
 int
 main (argc, argv)
@@ -686,7 +686,7 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
   }
   else 
   {
-  geo.star_radiation=0;
+  rdint ("Star_radiation(y=1)", &geo.star_radiation);
   rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
   geo.bl_radiation=0;
   rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
@@ -958,6 +958,12 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 	{
 	  get_elvis_wind_params ();
 	}
+      else if (geo.wind_type == 9)  //NSH 18/2/11 This is a new wind tpye to produce a thin shell.
+        {
+	  get_shell_wind_params ();
+	  dfudge=(geo.shell_rmax-geo.shell_rmin)/1000.0; //Stop photons getting pushed out of the cell
+	  DFUDGE=dfudge;
+        }
       else if (geo.wind_type != 2)
 	{
 	  Error ("python: Unknown wind type %d\n", geo.wind_type);
@@ -1416,6 +1422,8 @@ run -- 07jul -- ksl
 
       wind_rad_init ();		/*Zero the parameters pertaining to the radiation field */
 
+	printf ("GGGGG Are we going to ISPY? Debug=%i\n",DEBUG);
+
 #if DEBUG
       ispy_init ("python", geo.wcycle);
 #endif
@@ -1445,7 +1453,7 @@ run -- 07jul -- ksl
 	   * 0 => for ionization calculation 
 	   */
 	printf ("sent to define_phot freqmin=%e freqmax=%e \n",freqmin,freqmax);
-	  define_phot (p, freqmin, freqmax, photons_per_cycle, 0, iwind, 1);
+	  define_phot (p, freqmin, freqmax, photons_per_cycle, 0, iwind, 1); 
 	printf ("sent to photon_checks freqmin=%e freqmax=%e \n",freqmin,freqmax);
 	  photon_checks (p, freqmin, freqmax, "Check before transport");
 
@@ -1469,7 +1477,7 @@ run -- 07jul -- ksl
 	  kbf_need (freqmin, freqmax);
 
 	  /* Transport the photons through the wind */
-
+	printf ("Just going to transphot - photon 46327 has freq=%e, and weight=%e. It is currently at %e,%e,%e in grid cell %i\n",p[46327].freq,p[46327].w,p[46327].x[0],p[46327].x[1],p[46327].x[2],p[46327].grid);
 	  trans_phot (w, p, 0);
 
 	  /*Determine how much energy was absorbed in the wind */
@@ -1487,6 +1495,8 @@ run -- 07jul -- ksl
 #if DEBUG
 	  wind_rad_summary (w, windradfile, "a");
 #endif
+
+
 
 	  photon_checks (p, freqmin, freqmax, "Check after transport");
 
@@ -1885,7 +1895,7 @@ photon_checks (p, freqmin, freqmax, comment)
      double freqmin, freqmax;
 {
   int nnn, nn;
-//  double lum_ioniz;  //NSH 16/2/2011 These are now declared externally to alloy python to see them
+//  double lum_ioniz;  //NSH 16/2/2011 These are now declared externally to allow python to see them
 //  int n_ioniz;
   int nlabel;
 
@@ -1899,15 +1909,17 @@ photon_checks (p, freqmin, freqmax, comment)
    * if they are disk photons generated right up against one of the frequency
    * limits
    * 04aug--ksl-increased limit from 0.02 to 0.03, e.g from 6000 km/s to 9000 km/s
+   * 11apr--NSH-decreased freqmin to 0.4, to take account of double redshifted photons.
    * shift.
    */
 #if DEBUG
   Log ("photon_checks: %s\n", comment);
 #endif
   freqmax *= (1.8);
-  freqmin *= (0.6);
+  freqmin *= (0.4);
   for (nn = 0; nn < NPHOT; nn++)
     {
+      p[nn].np=nn;    /*  NSH 13/4/11 This is a line to populate the new internal photon pointer */
       if (H * p[nn].freq > ion[0].ip)
 	{
 	  lum_ioniz += p[nn].w;

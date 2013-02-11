@@ -248,7 +248,7 @@ cycle (xplasma, p, nh, t_r, t_e, weight, mode, freq_sampling,radmode)
   double agn_ip;    /* the ionization parameter */
 //  double spec[1000],fmin,fmax,dfreq;
 //  int ipoint;
-  double en1,en2; /*Sim estimators */
+  double en1,en2,trad,mean_freq,energy_density,sim_w_new; /*Sim estimators */
   int n;
 //  FILE *fopen(), *fptr;
   WindPtr one;
@@ -337,10 +337,10 @@ else if (radmode == 2)
     {
     agn_ip=emittance_pow (100/HEV, 50000/HEV,geo.lum_agn,geo.alpha_agn);
 	printf("Calculating heating and cooling - I think the luminosity from 2-10 keV is %e Giving an ionisation parameter of %e\n",geo.lum_agn,agn_ip/(geo.d_agn*geo.d_agn*nh));
-  bands_init (t_r, 1e14,1e19,1,&xband);     /* at the moment we will have one big band */
+  bands_init (t_r, 1.23e15,1.21e19,1,&xband);     /* at the moment we will have one big band */
     agn_weight=emittance_pow (xband.f1[0], xband.f2[0],geo.lum_agn,geo.alpha_agn);
 
-    agn_weight=(agn_weight*weight)/NPHOT;
+    agn_weight=(agn_weight)/(NPHOT*(4.0*PI*geo.d_agn*geo.d_agn));
 	
 	/* This next line will generate the photons */
   photo_gen_agn (p, geo.r_agn, geo.alpha_agn, agn_weight, xband.f1[0], xband.f2[0], -4, 0, NPHOT);
@@ -394,16 +394,35 @@ else if (radmode == 2)
       line_heating (xplasma, &p[n], s);
       radiation (&p[n], s);
     }
+
+
+	if (radmode==2)
+	{
+
 	printf ("E1=%e,E2=%e",en1,en2);
-	printf ("Mean freq=%e\n",en2/en1);
-	xplasma->sim_alpha=sim_alphasolve(en2/en1,1e14,1e19);
+	mean_freq=en2/en1;
+	energy_density=en1/(4*PI*vol);
+	printf ("Mean freq=%e\n",mean_freq);
+	xplasma->sim_alpha=sim_alphasolve(en2/en1,1.23e15,1.21e19);
 	printf("I think alpha=%f\n",xplasma->sim_alpha);
 
 
-	xplasma->sim_w=sim_w(en1,wmain[xplasma->nwind].vol,1,xplasma->sim_alpha,1e14,1e19);
-	printf("W computed as %e compared to current weight used %e \n",xplasma->sim_w,(geo.const_agn*weight)/(4*PI));
 
-	
+	sim_w_new=sim_w(en1,wmain[xplasma->nwind].vol,1,xplasma->sim_alpha,1.23e15,1.21e19);
+	printf("sim W computed as %e compared to current weight used %e \n",sim_w_new,xplasma->sim_w);
+
+        xplasma->sim_w=sim_w_new;
+
+	mean_freq=en2/en1;
+
+//	  trad = xplasma->t_r =
+//	    H * mean_freq / (BOLTZMANN * 3.832);
+//	  xplasma->w =
+//	    PI * energy_density / (STEFAN_BOLTZMANN * trad * trad * trad *
+//				    trad);	
+	}
+
+
 	
 
 /* Now calculate the luminosity for these conditions */

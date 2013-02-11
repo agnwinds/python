@@ -18,6 +18,7 @@ double xsim_w;                  //Storage variable for the sim W factor (either 
 double fudge_store[300];           //this is a store so we can see how the sim fudge factor varies
 double num_store[300];             // store for the numbnerator of the sim factor (PL)
 double denom_store[300];           // store for the denominator of the sim factor (BB)
+double ion_store[300];
 
 #define SAHA 4.82907e15		/* 2* (2.*PI*MELEC*k)**1.5 / h**3  (Calculated in constants) */
 #define MAXITERATIONS	200
@@ -40,10 +41,11 @@ sim_driver (xplasma)
 
   t_r = xplasma->t_r;
   t_e = xplasma->t_e;
-  www = xplasma->w;
+  www = weight = xplasma->w;
 
   xsim_alpha = xplasma->sim_alpha;  //Set the shared variable to the alpha for the cell.
   xsim_w = xplasma->sim_w;  //Set the shared variable to the W for the cell.
+	printf ("We are in sim, t_e=%f, t_r=%f, sim_alpha=%f, sim_w=%e,\n",t_e,t_r,xsim_alpha,xsim_w);
 
 
   /* Initally assume electron density from the LTE densities */
@@ -60,7 +62,7 @@ sim_driver (xplasma)
   nh = xplasma->rho * rho2nh;	//LTE -- Not clear needed at this level
 
 
-	printf("Starting off with ne=%e and nh=%e",xne,nh);
+	printf("Starting off with ne=%e and nh=%e\n",xne,nh);
 
   niterate = 0;
   while (niterate < MAXITERATIONS)
@@ -90,7 +92,7 @@ sim_driver (xplasma)
 	    newden[nion] = DENSITY_MIN;
 	}
       xnew = get_ne (newden);
-//	printf ("current estimate of ne after loop %i=%e\n",niterate,xnew);
+	printf ("current estimate of ne after loop %i=%e\n",niterate,xnew);
       if (xnew < DENSITY_MIN)
 	xnew = DENSITY_MIN;
 
@@ -143,10 +145,10 @@ sim_pl (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
   int first, last, nion;
   double numerator, denominator;
   double f1,f2,max_ratio,current_ratio;
-    FILE *fopen(),*fudgefile,*numfile,*denomfile;
+    FILE *fopen(),*fudgefile,*numfile,*denomfile,*ionfile;
 
-	f1=1e14;
-	f2=1e19;
+	f1=1.23e15;
+	f2=1.21e19;
 
 	weight=www;
 
@@ -189,19 +191,27 @@ sim_pl (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
 	 www, t_e, t_r);
     }
 
-  /* Initialization of fudges complete open lost of files to log the sim factor*/
+  /* Initialization of fudges complete open lots of files to log the sim factor*/
 		fudgefile=fopen ("fudge_summary.out", "a");
 		numfile  = fopen ("num_summary.out", "a");
 		denomfile  = fopen ("denom_summary.out", "a");
+	        ionfile = fopen ("ion_summary.out","a");
 		fprintf (fudgefile,"Te= %e, Element %s",t_e,ele[nelem].name);
 		fprintf (numfile,"Te= %e, Element %s",t_e,ele[nelem].name);
 		fprintf (denomfile,"Te= %e, Element %s",t_e,ele[nelem].name);
+		fprintf (ionfile,"Te= %e, Element %s",t_e,ele[nelem].name);
   first = ele[nelem].firstion;	/*first and last identify the postion in the array */
   last = first + (ele[nelem].nions);	/*  So for H which has 2 ions, H1 and H2, first will generally
 					   be 0 and last will be 2 so the for loop below will just be done once for nion = 1 */
 
 //   printf ("WE are working on element %i (%s), which has %i ions, starting with %i\n",nelem,ele[nelem].name,ele[nelem].nions,ele[nelem].firstion);
 //   printf ("Ion %i is of element %i, and Ion %i is of element %i\n",ele[nelem].firstion,ion[ele[nelem].firstion].z,ele[nelem].firstion+ele[nelem].nions-1,ion[ele[nelem].firstion+ele[nelem].nions-1].z);
+
+	for (nion = ele[nelem].firstion; nion<(ele[nelem].firstion+ ele[nelem].nions); nion++)
+		{
+	ion_store[nion]=density[nion];
+		}
+
 
 
   while (density[first] < 1.1 * DENSITY_MIN)
@@ -226,7 +236,7 @@ sim_pl (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
 //	first,ion[first].z,last-1,ion[last-1].z);
 
    max_ratio=((ele[nelem].abun*nh)/DENSITY_MIN)/10.0;  //This is the maximum ratio between two ions of the same element
-  sum = newden[first] = 1.;
+  sum = newden[first] = 1e-200;   //We need a very large dynamic range to make the sim correction factor work. 
 	fudge_store[first]=0.0;
   for (nion = first + 1; nion < last; nion++)   
     {
@@ -235,6 +245,7 @@ sim_pl (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
 	current_ratio=(density[nion]/density[nion-1]);
       fudge = (xinteg_sim (t_e, f1, f2, nion-1,max_ratio,current_ratio));  //get the sim correction factor, we use the lower ionisartion cross section
 	fudge_store[nion]=fudge;
+	ion_store[nion]=density[nion];
 //	printf("Sim factor for nion=%i,with current densities d1=%e and d2=%e is %e\n",nion,density[nion],density[nion-1],fudge);
     numerator = newden[nion - 1] * fudge * (ne) * density[nion];
       denominator = density[nion - 1] * xne;
@@ -265,14 +276,17 @@ sim_pl (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
 		fprintf (fudgefile,",%e",fudge_store[nion]);
 		fprintf (numfile,",%e",num_store[nion]);
 		fprintf (denomfile,",%e",denom_store[nion]);
+		fprintf (ionfile,",%e",ion_store[nion]);
 		}
 		fprintf (fudgefile,"\n");
 		fprintf (numfile,"\n");
 		fprintf (denomfile,"\n");
+		fprintf (ionfile,"\n");
 
 		fclose (fudgefile);
 		fclose (numfile);
 		fclose (denomfile);
+		fclose (ionfile);
 
   a = nh * ele[nelem].abun / sum;   //get the factor to ensure we dont end up with more than the abundance of the element
   for (nion = first; nion < last; nion++)
@@ -409,6 +423,7 @@ if we are going to integrate */
 		{ 
 		printf ("Sim denom of %e is too low, resetting to %e\n",sim_denom,((sim_num*current_ratio)/max_ratio));
 		sim_denom = ((sim_num*current_ratio)/max_ratio);
+//		sim_denom = 1e100;
 		}
 
 	num_store[nion+1] = sim_num;
@@ -433,6 +448,7 @@ tb_planck(freq)
 	bbe=exp((H*freq)/(BOLTZMANN*sim_te));
 	answer=(2.*H*pow(freq,3.))/(pow(C,2));
  	answer*=(1/(bbe-1));
+//	answer*=weight;
 	answer*=sigma_phot_topbase(sim_xtop,freq);
 	answer/=freq;
 
@@ -451,6 +467,7 @@ verner_planck(freq)
 	bbe=exp((H*freq)/(BOLTZMANN*sim_te));
 	answer=(2.*H*pow(freq,3.))/(pow(C,2));
  	answer*=(1/(bbe-1));
+//	answer*=weight;
 	answer*=sigma_phot(sim_xver,freq);
 	answer/=freq;
 
