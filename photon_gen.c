@@ -629,7 +629,6 @@ star_init (r, tstar, freqmin, freqmax, ioniz_or_final, f)
   else
     {
       emit = emittance_bb (freqmin, freqmax, tstar);
-		printf ("BAND from %e to %e at temp %f has flux %e\n",freqmin, freqmax, tstar,emit);
     }
 
   *f = emit;			// Calculate the surface flux between freqmin and freqmax
@@ -875,6 +874,7 @@ extra factor of two arises because the disk radiates from both of its sides.  */
 	}
       else
 	{
+//	printf ("CALLING EMITTANCE_BB from disk init 1 r=%e\n",r);
 	  emit = emittance_bb (freqmin, freqmax, t);
 	}
 
@@ -907,6 +907,7 @@ extra factor of two arises because the disk radiates from both of its sides.  */
 	}
       else
 	{
+//	printf ("CALLING EMITTANCE_BB from disk init 2 ring r=%e\n",r);
 	  emit = emittance_bb (freqmin, freqmax, t);
 	}
 

@@ -109,7 +109,7 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 
       /*1108 NSH ?? this could be a problem. At the moment, it relies on sim_alpha being defined at this point. */
       /*We should initialise it somewhere so that it *always* has a value, not just when the power law */
-	printf ("NSH We are starting with alpha=%f\n",xplasma->pl_alpha[n]);
+//	printf ("NSH We are starting with alpha=%f\n",xplasma->pl_alpha[n]);
       pl_alpha_min =  - 0.1; /*Lets just start the search around zero*/
       pl_alpha_max =  + 0.1;
 
@@ -118,10 +118,10 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 	  pl_alpha_min = pl_alpha_min - 1.0;
 	  pl_alpha_max = pl_alpha_max + 1.0;
 	}
-	printf ("NSH PL alpha bracketed between %f (%e) and %f (%e)\n",pl_alpha_min,pl_alpha_func(pl_alpha_min),pl_alpha_max,pl_alpha_func(pl_alpha_max));
+//	printf ("NSH PL alpha bracketed between %f (%e) and %f (%e)\n",pl_alpha_min,pl_alpha_func(pl_alpha_min),pl_alpha_max,pl_alpha_func(pl_alpha_max));
       if (sane_check(pl_alpha_func(pl_alpha_min)) || sane_check(pl_alpha_func(pl_alpha_max)))
 	{
-	Error ("Alpha cannot be bracketed in band %i - setting w to zero\n",n);
+	Error ("Alpha cannot be bracketed in band %i cell %i- setting w to zero\n",n,xplasma->nplasma);
 	xplasma->pl_w[n]=0.0;
 	xplasma->pl_alpha[n]=-999.0; //Set this to a value that might let us diagnose the problem
 	plflag=-1; 
@@ -142,12 +142,12 @@ To avoid problems with solving, we need to find a reasonable range of values wit
  * contains the volume of the cell and a factor of 4pi, so the volume sent to sim_w is set to 1 
  * and j has a factor of 4PI reapplied to it. This means that the equation still works in balance. 
  * It may be better to just implement the factor here, rather than bother with an external call.... */
-	printf ("NSH calling pl w with alpha=%f, numin=%e numax=%e\n",pl_alpha_temp,spec_numin,spec_numax);
+//	printf ("NSH calling pl w with alpha=%f, numin=%e numax=%e\n",pl_alpha_temp,spec_numin,spec_numax);
       	pl_w_temp = pl_w (j ,pl_alpha_temp, spec_numin, spec_numax);
 
       	if (sane_check (pl_w_temp))
 		{
-	  	Error
+	  	Error_silent
 	    	("New PL parameters unreasonable, using existing parameters. Check number of photons in this cell\n");
 		plflag=-1; // Dont use this model
 		xplasma->pl_w[n] = 0.0;
@@ -169,7 +169,7 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 	  exp_temp_min = exp_temp_min * 0.9;
 	  exp_temp_max = exp_temp_max * 1.1;
 	}
-	printf ("NSH exp_temp bracketed between %f (%e) and %f (%e)\n",exp_temp_min,exp_temp_func(exp_temp_min),exp_temp_max,exp_temp_func(exp_temp_max));
+//	printf ("NSH exp_temp bracketed between %f (%e) and %f (%e)\n",exp_temp_min,exp_temp_func(exp_temp_min),exp_temp_max,exp_temp_func(exp_temp_max));
       if (sane_check(exp_temp_func(exp_temp_min)) || sane_check(exp_temp_func(exp_temp_max)))
 	{
 	Error ("Exponential temperature cannot be bracketed in band %i - setting w to zero\n",n);
@@ -188,7 +188,7 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 
 	  if (sane_check (exp_w_temp))
 		{
-	  	Error
+	  	Error_silent
 	    	("New exponential parameters unreasonable, using existing parameters. Check number of photons in this cell\n");
 		expflag=-1; //discount an exponential model
 		xplasma->exp_w[n] = 0.0;
@@ -224,6 +224,7 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 	else
 		{
 		xplasma->spec_mod_type[n] = -1; //Oh dear, there is no suitable model
+		Error ("No suitable model in band %i cell %i\n",n,xplasma->nplasma);
 		}
 	Log ("NSH In cell %i, band %i, the best model is %i\n",xplasma->nplasma, n,xplasma->spec_mod_type[n]);
 	}  //End of loop that does things if there are more than zero photons in the band.
@@ -533,7 +534,7 @@ exp_w (j, exp_temp, numin, numax)
 
   Description:	
 
-  Arguments:  (Input via .pf file)		
+  Arguments:  	
 
 
   Returns:
@@ -555,7 +556,6 @@ exp_stddev (exp_temp, numin, numax)
      double numin, numax;	//Range of frequencies we are considering
 {
   double answer;			//the answer
- double integral;  /*This will hold the unscaled integral of jnu from numin to numax */
  double exp1; /* We supply a temperature, but actually we expect the correct function to be of the form e^-hnu/kt, so this will hold -1*h/kt*/
  double emin,emax; /*The exponential evaluated at numin and numax */
  double nmax,nmin; /*The integral is a bit complicated, so we have split it up into value for numin and numax */

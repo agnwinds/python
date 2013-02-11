@@ -689,7 +689,6 @@ total_bb_cooling (xplasma, t_e)
   double coll_rate, rad_rate;
 
   total = 0;			// initialise
-
   for (i = 0; i < nlines; i++)
     {
       line_ptr = &line[i];
@@ -708,7 +707,6 @@ total_bb_cooling (xplasma, t_e)
 	  //The cooling rate is computed using the scattering probability formalism in KSL's notes on Python.
 
 	  two_level_atom (line_ptr, xplasma, &lower_density, &upper_density);
-
 	  coll_rate = q21 (line_ptr, t_e) * xplasma->ne
 	    * (1. - exp (-H_OVER_K * line_ptr->freq / t_e));
 

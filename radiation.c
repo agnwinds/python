@@ -138,6 +138,7 @@ radiation (p, ds)
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "radiation");
   freq = p->freq;
+  
   kappa_tot = frac_ff = kappa_ff (xplasma, freq);	/* Add ff opacity */
   kappa_tot += frac_comp = kappa_comp (xplasma, freq);    /* 70 NSH 1108 calculate compton opacity, store it in kappa_comp and also add it to kappa_tot, the total opacity for the photon path */
   kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq, ds, p->w);
@@ -246,7 +247,10 @@ statement could be deleted entirely 060802 -- ksl */
     }
   tau = kappa_tot * ds;
   w_in = p->w;
-if (sane_check(tau)) printf ("CHECKING ff=%e, comp=%e, ind_comp=%e\n",frac_ff,frac_comp,frac_ind_comp);
+
+if (sane_check(tau)) {
+	Error("Radiation: CHECKING ff=%e, comp=%e, ind_comp=%e\n",frac_ff,frac_comp,frac_ind_comp);
+}
 /* Calculate the reduction in the w of the photon bundle along with the average
    weight in the cell */
 
@@ -265,6 +269,10 @@ if (sane_check(tau)) printf ("CHECKING ff=%e, comp=%e, ind_comp=%e\n",frac_ff,fr
       w_ave = w_in * (1. - 0.5 * tau + 0.1666667 * tau2);
     }
 
+  /*74a_ksl: 121215 -- Added to check on a problem photon */
+  if (sane_check(p->w)){
+		  Error("Radiation: photon weight is %e for tau %e\n",p->w,tau);
+		  }
 
   if (geo.ioniz_or_extract == 0)
     return (0);			// 57h -- ksl -- 060715
@@ -277,7 +285,10 @@ if (sane_check(tau)) printf ("CHECKING ff=%e, comp=%e, ind_comp=%e\n",frac_ff,fr
 
   if (HEV*p->freq > 13.6)
 	{
-  	xplasma->ip+=((w_ave*ds)/(H*p->freq)); /* 70h -- nsh -- 111004 added to try to calculate the IP for the cell. Note that this may well end up not being correct, since the same photon could be counted several times if it is rattling around.... */
+  	xplasma->ip+=((w_ave*ds)/(H*p->freq)); 
+	/* 70h -- nsh -- 111004 added to try to calculate the IP for the cell. Note that 
+	 * this may well end up not being correct, since the same photon could be counted 
+	 * several times if it is rattling around.... */
 	}
 
 /* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, 
@@ -313,12 +324,12 @@ if (sane_check(tau)) printf ("CHECKING ff=%e, comp=%e, ind_comp=%e\n",frac_ff,fr
 	xplasma->ntot_agn++;
 
 
-
 /*photon weight times distance in the shell is proportional to the mean intensity */
   xplasma->j += w_ave * ds;
-//	printf ("tau=%e, w_in=%e, w_ave=%e j=%e\n",tau,w_in,w_ave,xplasma->j);
-/* frequency weighted by the weights and distance       in the shell .  See eqn 2 ML93 */
 
+/* frequency weighted by the weights and distance       in the shell .  See eqn 2 ML93 */
+  xplasma->mean_ds += ds;
+  xplasma->n_ds ++;
   xplasma->ave_freq += p->freq * w_ave * ds;
 
   if (p->freq > xplasma->max_freq)
@@ -347,10 +358,11 @@ if (sane_check(tau)) printf ("CHECKING ff=%e, comp=%e, ind_comp=%e\n",frac_ff,fr
 
 /* 1108 NSH  THe next loop updates the banded versions of j and ave_freq, note that the lines above still update 
  * the parameters for all the photons produced. We are simply controlling which photons are used for the sim powewr 
- * law stuff by banding.*/
-  /* nxfreq refers to how many frequencies we have defining the bands. So, if we have 5 bands, we have 6 frequencies, 
-   * going from xfreq[0] to xfreq[5] Since we are breaking out of the loop when i>=nxfreq, this means the last loop 
-   * will be i=nxfreq-1*/
+ * law stuff by banding.
+ * nxfreq refers to how many frequencies we have defining the bands. So, if we have 5 bands, we have 6 frequencies, 
+ * going from xfreq[0] to xfreq[5] Since we are breaking out of the loop when i>=nxfreq, this means the last loop 
+ * will be i=nxfreq-1*/
+
 /* 71 - 111229 - ksl - modified to reflect fact that I have moved nxbands and xfreq into the geo structure */
 
   for (i=0 ; i<geo.nxfreq ; i++)  
@@ -362,8 +374,6 @@ if (sane_check(tau)) printf ("CHECKING ff=%e, comp=%e, ind_comp=%e\n",frac_ff,fr
 		xplasma->xj[i] += w_ave * ds;  			/*1108 NSH/KSL photon weight times distance travelled */
 		xplasma->nxtot[i] ++; 				/*1108 NSH increment the frequency banded photon counter */
 
-//			printf ("TESTING w=%e,ds=%f,j=%e, kappatot=%e\n",w_ave,ds,xplasma->xj[i],kappa_tot);
-//			printf ("FF=%e, COMP=%e, INDCOMP=%e\n",frac_ff,frac_comp,frac_ind_comp);
 		}
 	}
 
@@ -461,6 +471,8 @@ History:
                         and that He II is the fourth ion.
 	05may	ksl	57+ -- Modified to eliminate WindPtr in favor
 			of PlasmaPtr
+   	12oct	nsh	73 -- Modified to use a prefector summed over all ions, calculated prior
+			to the photon flight
 
 **************************************************************/
 
@@ -472,19 +484,10 @@ kappa_ff (xplasma, freq)
 {
   double x;
   double exp ();
-  double x1, x2, x3;
+  double x1,x2, x3;
 
-  if (nelements > 1)
-    {
-      x = x1 =
-	3.692e8 * xplasma->ne * (xplasma->density[1] +
-				 4. * xplasma->density[4]);
-    }
-  else
-    {
-      x = x1 = 3.692e8 * xplasma->ne * (xplasma->density[1]);
-    }
-
+  x=x1=xplasma->kappa_ff_factor;
+ 
   x *= x2 = (1. - exp (-H_OVER_K * freq / xplasma->t_e));
   x /= x3 = (sqrt (xplasma->t_e) * freq * freq * freq);
 
@@ -742,3 +745,63 @@ in the ground state */
 
 
 }
+
+
+/***********************************************************
+                Southampton University
+
+Synopsis: pop_kappa_ff_array populates the multiplicative 	
+		factor used in the FF calculation. This depends only
+		on the densities of ions in the cell, and the electron
+		temperature (which fedes into the gaunt factor) so it
+		saves time to calculate all this just the once. This
+		is called in python.c, just before the photons are 
+		sent thruogh the wind.
+
+Arguments:		
+
+Returns:
+ 
+Description:	
+
+Notes:
+
+
+History:
+   12oct           nsh     coded 
+   1212	ksl	Added sane check; note that this routine
+   		is poorly documented.  Somewhere this 
+		should be discribed better.  
+ 
+**************************************************************/
+
+
+double
+pop_kappa_ff_array ()
+
+{
+
+double gsqrd,gaunt,sum;
+int i,j;
+
+sum=0.0;
+	for (i=0;i<NPLASMA+1;i++)
+		{
+		for (j=0;j<nions;j++)
+			{
+			gsqrd=(ion[j].z*ion[j].z*RYD2ERGS)/(BOLTZMANN*plasmamain[i].t_e);
+			gaunt=gaunt_ff(gsqrd);
+			sum += plasmamain[i].density[j] * ion[j].z * ion[j].z * gaunt;
+			/* 74a_ksl  Added to diagnose problem with kappa_ff_fact producing NaN */
+			if (sane_check(sum)){
+				Error("pop_kappa_ff_array: sum is %e this is a problem, possible in gaunt %3\n",sum,gaunt);
+			}
+
+			}
+		plasmamain[i].kappa_ff_factor =  plasmamain[i].ne*sum*3.692e8;
+
+		}
+
+  return (0);
+}
+

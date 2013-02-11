@@ -300,8 +300,8 @@ I did not change this now.  Though it could be done.  02apr ksl */
 
 
 
-/* 111126 - Consolodated choice statements into a string that is an external variable so that it can be printed out
- * whenever necessary
+/* 111126 - Consolodated choice statements into a string that is an external variable 
+ * so that it can be printed out whenever necessary.
  */
 
   printf ("%s\n", choice_options);
@@ -311,8 +311,8 @@ I did not change this now.  Though it could be done.  02apr ksl */
   while (c != EOF)
     {
       one_choice (c, root, ochoice);
-      rdchar ("Choice", &c);
       printf ("%s\n", choice_options);
+      rdchar ("Choice", &c);
     }
 
   return (0);

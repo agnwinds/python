@@ -122,7 +122,7 @@ nebular_concentrations (xplasma, mode)
   double get_ne ();
   int lucy_mazzali1 ();
   int m;
-printf ("NSH Here we are in nebular concentrations running at mode %i with t_r=%e, W=%f\n",mode,xplasma->t_r,xplasma->w);
+
   if (mode == 0)
     {				// LTE all the way -- uses tr
 
@@ -176,6 +176,7 @@ printf ("NSH Here we are in nebular concentrations running at mode %i with t_r=%
     {
       m = variable_temperature (xplasma, mode);
     }
+
   else
     {
 // If reached this point the program does not understand what is desired.

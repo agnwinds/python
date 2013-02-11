@@ -727,8 +727,8 @@ multicycle (www, p, mode, freq_sampling, radmode)
   	t_rmax = 100000;
   	t_rdelt = 2000;
 
-	lt_rmin = log10(10000.0)*100;
-	lt_rmax = log10(10000.0)*100;
+	lt_rmin = log10(1000.0)*100;
+	lt_rmax = log10(10000000.0)*100;
 	lt_rdelt = 1;
 
 

@@ -337,7 +337,7 @@ if (radmode == 1)
     {
 //old1206  bands_init (t_r, &xband);
 geo.tstar=t_r; //nsh 1208 put in to ensure we get a reasonable band even if we have a very high t_r.
-bands_init (6, &xband);
+bands_init (7, &xband);
   xbb (p, t_r, weight, xband.f1[0], xband.f2[0], freq_sampling);   
 }
 

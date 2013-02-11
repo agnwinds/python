@@ -34,7 +34,7 @@ CFLAGS = -g -pg -Wall -I$(INCLUDE) -I$(INCLUDE2)
 LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lkpar -lcfitsio -lgsl -lgslcblas 
 
 #Note that version should be a single string without spaces. 
-VERSION = 73e
+VERSION = 74a
 CHOICE=1             // Compress plasma as much as possible
 # CHOICE=0           //  Keep relation between plasma and wind identical
 
@@ -95,7 +95,7 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		matom.o estimators.o yso.o elvis.o photon2d.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
 		spectral_estimators.o power_sub.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
-                variable_temperature.o
+                variable_temperature.o bb.o
 
 
 

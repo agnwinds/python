@@ -117,6 +117,7 @@ lum_lines (one, nmin, nmax)
   for (n = nmin; n < nmax; n++)
     {
       dd = xplasma->density[lin_ptr[n]->nion];
+
       if (dd > LDEN_MIN)
 	{			/* potentially dangerous step to avoid lines with no power */
 	  two_level_atom (lin_ptr[n], xplasma, &d1, &d2);
@@ -196,7 +197,7 @@ pdf_x[m]-1
 
 
 
-#define ECS_CONSTANT 4.773691e16	//(8*PI)/(sqrt(3) *nu_1Rydberg
+#define ECS_CONSTANT 4.773691e16 	//(8*PI)/(sqrt(3) *nu_1Rydberg
 
 /* 
 
@@ -214,6 +215,8 @@ pdf_x[m]-1
 			the same way.
 	01nov	ksl	Add tracking mechanism so if called with same conditions it
 			returns without recalculation
+	12oct	nsh	Added, then commented out approximate gaunt factor given in
+			hazy 2.
 
  */
 struct lines *q21_line_ptr;
@@ -230,6 +233,20 @@ q21 (line_ptr, t)
 
   if (q21_line_ptr != line_ptr || t != q21_t_old)
     {
+
+/*NSH 121024 - the followinglines implement the approximate gaunt factor as described in eq 4.21 in hazy 2*/
+/* NSH 121026 commented out in py74a - not certain that this approximate gaunt factor actually inmproves anything */
+ /*     if (line_ptr->istate == 1) //Neutral
+	{
+	gaunt = ((BOLTZMANN*t)/(H*line_ptr->freq))/10.0;
+	}
+      else
+	{
+	gaunt = 0.2;
+	}*/
+
+
+
       gaunt = 1;
       omega =
 	ECS_CONSTANT * line_ptr->gl * gaunt * line_ptr->f / line_ptr->freq;
@@ -348,6 +365,8 @@ two_level_atom (line_ptr, xplasma, d1, d2)
   double ne, te, w, tr, dd;
   int nion;
 
+
+
   //Check and exit if this routine is called for a macro atom, since this should never happen
 
   if (line_ptr->macro_info == 1 && geo.rt_mode == 2 && geo.macro_simple == 0)
@@ -370,7 +389,6 @@ two_level_atom (line_ptr, xplasma, d1, d2)
     {
       dd *= config[ion[nion].firstlevel].g / xplasma->partition[nion];
     }
-
 
   if (old_line_ptr == line_ptr
       && old_ne == ne
@@ -410,6 +428,7 @@ in the configuration structure. 01dec ksl */
 	      z = w / (exp (H_OVER_K * freq / tr) - 1.);
 	      n2_over_n1 = (c12 + g2_over_g1 * a * z) / (c21 + a * (1. + z));
 	    }
+
 
 	  *d1 = dd;
 	  *d2 = *d1 * n2_over_n1;
@@ -646,6 +665,7 @@ p_escape (line_ptr, xplasma)
 
       tau = (d1 - line_ptr->gl / line_ptr->gu * d2);
       tau *= PI_E2_OVER_M * line_ptr->f / line_ptr->freq / dvds;
+//	printf ("LINE ESCAPE dvds=%e tau=%e\n",dvds,tau);
       if (tau < 1e-6)
 	escape = 1.;
       else if (tau < 10.0)

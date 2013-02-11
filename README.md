@@ -1,16 +1,24 @@
 README
 ***
 =========
-precursor python_72b
-This version contains the experimental code implementing the cardona partition functions and also tracking of photons passing through a given cell and contributing to its spectrum
+Note: error in Gaunt factor!!
+
+precusror - python_73e
+This is intended to be the stable version which is to be used for generating data for the 2012 paper.
 The main changes are:
-atomic.h - a new structure cardon_partition which contains the parameters to calculate the partition functions. There is also an extra member of the nion structure (nxcpart)which points to the correct cardona data. There is also a flag in the ion structure (cpartflag) which says wether or not there are cardona partition functions for this ion.
-bands.c - the bands for the photon tracking are set up here for full runs. They need to be changed to agree with the table command in cloudy!
-diag.c - lines to check for a file "diag_cells.dat" if we are in diagnostics mode. If the file exists, read in a list of cells for which we are going to write out detailed photon stats.
-get_atomicdata.c - lines to read in cardona partition functions. The pointer to this type of data is CPART
-partition.c - two new functions, cardona_part_func and cardona_part_func_2 which calculate the partition functions for the given cell (first case) and a pair of ions (second case - for variable temperature). At the moment, this function is separate from the normal partition functions. If we decide it works. it would make sense to incorporate it into the normal partition functions function, choosing this is data is available, or defaulting to the weighted BB form if not. At the moment, if you call cardona_part_func and have no data for a given ion - it simply uses the ground state.
-python.h 
-- a new file pointer (pstatptr) to hold photon data, a flag (cell_phot_stats) to say wether we are logging photons, an array (ncell_stats[NCSTAT] ? ) which holds the cells we are examining and ncstat - the number of cells we are looking at, up to a maximum of 10.
-radiation.c - lines to write out photon stats
+atomic.h - A structure gaunt_total put in to hold Sutherlands gaunt factors
+bands.c - the usual changes here, since the power law bands are still hardcoded. There are also new modes to try and match the PL bands.
+bb.c - emittance_bb had been changed in 73e to integrate the bb function directly, rather than use tabulated data. This was causing crashes, so changed back in this version.
+emission.c - several changes
+put in a new counter for lum_adiabatic - there were problems with adiabatic cooling that were not picked up bacause it was not being reported
+code put into total_ff and ff to use the sutheralnd gaunt factor data
+a new routine gaunt_ff written to compute the gaunt factor for free free from sutherlands data - it interpolates on gsquared.
+get_atomicdata.c - lines to read in gaunt factor
+levels.c - a new mode to but all levels into ground state - this is an improvement for PL dominated cases but we should really do better
+lines.c - some lines added, and then commented out to implement the approximate gaunt factor to line emission as in hazy 2.This is under development
+partition.c - made it possible to call partition_functions_2 with a weight, this is to allow more flexibility. For the PL_case, we cann with w=0 to force everything into the ground state
+python.c - added ionization options into the question line - set the spectype for the power law to SPECTYPE_POW, rather than defaulting to models, set the innermost stable orbint to 6Rg insead of 12Rg
+python.h - added lum_adiabatic into the geo array to store the total adiabatic cooling of the wind, and also kappa_ff_factor into the plasma structure to calculate the gaunt factor for free free heating, mean_ds also put in to see the mean disatnce travlled by a photon packet in a cell. This will allow one to see if ta cell is effectively optically thin...
+radiation.c - kappa_ff changed to take account of a gaunt factor. There is also a new subroutine put in to calculate the kappa_ff_factor.
 
 

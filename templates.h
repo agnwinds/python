@@ -128,6 +128,7 @@ double sigma_phot(struct photoionization *x_ptr, double freq);
 double sigma_phot_topbase(struct topbase_phot *x_ptr, double freq);
 double sigma_phot_verner(struct innershell *x_ptr, double freq);
 double den_config(PlasmaPtr xplasma, int nconf);
+double pop_kappa_ff_array(void);
 /* wind_updates2d.c */
 int wind_update(WindPtr (w));
 int wind_rad_init(void);
@@ -231,6 +232,7 @@ double one_line(WindPtr one, double freqmin, double freqmax, int *nres);
 double total_free(WindPtr one, double t_e, double f1, double f2);
 double ff(WindPtr one, double t_e, double freq);
 double one_ff(WindPtr one, double f1, double f2);
+double gaunt_ff(double gsquared);
 /* recomb.c */
 double fb_verner_partial(double freq);
 double fb_topbase_partial(double freq);
@@ -399,7 +401,7 @@ int calloc_macro(int nelem);
 int calloc_estimators(int nelem);
 /* partition.c */
 int partition_functions(PlasmaPtr xplasma, int mode);
-int partition_functions_2(PlasmaPtr xplasma, int xnion, double temp);
+int partition_functions_2(PlasmaPtr xplasma, int xnion, double temp, double weight);
 /* signal.c */
 int xsignal(char *root, char *format, ...);
 int xsignal_rm(char *root);

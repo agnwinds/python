@@ -296,6 +296,7 @@ struct geometry
   double lum_ff, lum_fb, lum_lines;	/* The luminosity of the wind as a result of ff, fb, and line radiation */
   double lum_comp; /*1108 NSH The luminosity of the wind as a result of compton cooling */
   double lum_dr; /*1109 NSH The luminosity of the wind due to dielectronic recombination */
+  double lum_adiabatic; /*1209 NSH The cooling of the wind due to adiabatic expansion */
   double f_tot, f_star, f_disk, f_bl, f_agn, f_wind;	/* The integrated specific L between a freq min and max which are
 						   used to establish the fraction of photons of various types */
   
@@ -524,6 +525,8 @@ typedef struct plasma {
   double PWntemp[NIONS];	/* The temperature at which the stored pairwise numerator was last computed at. This
 				is used in the BB version of the pairwise correction factor */
 
+  double kappa_ff_factor;      /* Multiplicative factor for calculating the FF heating for 					a photon. */
+
   /* Two new objects in the structure to hol the number of line resonant scatters and the number of electron scatters */
 
   int nscat_es;
@@ -580,7 +583,8 @@ typedef struct plasma {
   int ntot_disk;                /* NSH 15/4/11 Added to count number of photons from the disk in the cell */
   int ntot_wind;
   int ntot_agn;                  /* NSH 15/4/11 Added to count number of photons from the AGN in the cell */
-
+  double mean_ds;		/* NSH 6/9/12 Added to allow a check that a thin shell is really optcially thin */
+  int n_ds;			/* NSH 6/9/12 Added to allow the mean dsto be computed */
   int nrad;				/* Total number of photons radiated within the cell */
   int nioniz;				/* Total number of photons capable of ionizing H */
   double ioniz[NIONS], recomb[NIONS];	/* Number of ionizations and recombinations for each ion.

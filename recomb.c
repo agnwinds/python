@@ -164,7 +164,6 @@ fb_verner_partial (freq)
 //?? Seems like gn should actually be the multiplicity of the excited and not the ground state ???
   gn = ion[nion].g;		// This is g factor of the ion to which you are recombining
   gion = ion[nion + 1].g;	// Want the g factor of the next ion up
-
   x = sigma_phot (fb_xver, freq);
 // Next expression from Ferland
   partial =
@@ -229,16 +228,17 @@ fb_topbase_partial (freq)
   nion = fb_xtop->nion;
   gn = config[fb_xtop->nlev].g;
   gion = ion[nion + 1].g;	// Want the g factor of the next ion up
-
   x = sigma_phot_topbase (fb_xtop, freq);
 // Now calculate emission using Ferland's expression
+
+
   partial =
     FBEMISS * gn / (2. * gion) * pow (freq * freq / fbt,
 				      1.5) * exp (H_OVER_K *
 						  (fthresh - freq) / fbt) * x;
 // 0=emissivity, 1=heat loss from electrons, 2=photons emissivity
   if (fbfr == 1)
-    partial *= (freq - fthresh) / freq;
+   partial *= (freq - fthresh) / freq;
   else if (fbfr == 2)
     partial /= (H * freq);
 
@@ -409,6 +409,7 @@ total_fb (one, t, f1, f2)
     {
       if (xplasma->density[nion] > DENSITY_PHOT_MIN)
 	{
+
 	  total += xplasma->lum_ion[nion] =
 	    one->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t,
 									    f1,
@@ -1063,8 +1064,8 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
 /* Limit the frequency range to one that is reasonable before integrating */
 
-  if (f1 < 3e14)
-    f1 = 3e14;			// 10000 Angstroms
+  if (f1 < 3e12)
+    f1 = 3e12;			// 10000 Angstroms
   if (f2 > 3e18)                // 110819 nsh increase upper limits to include  highly ionised ions that we are now seeing in x-ray illuminated nebulas.
     f2 = 3e18;			// This is 1 Angstroms  - ksl
   if (f2 < f1)
@@ -1089,6 +1090,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 	  // Now calculate the emissivity as long as fmax exceeds xthreshold and there are ions to recombine
 	  if (fmax > fthresh)
 	    fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
+
 	}
     }
 
@@ -1295,7 +1297,7 @@ string that constitutes VERSION*/
                                        Southampton University
                                                                                                                                       
  Synopsis:
-        bad_t_rr(w,filename)
+        bad_t_rr(nion, T)
                                                                                                                                       
 Arguments:
         ion - ion for which we want a recombination rate - 
@@ -1383,7 +1385,7 @@ total_rrate (nion,T)
                                        Southampton University
                                                                                                                                       
  Synopsis:
-        bad_gs_rr(w,filename)
+        bad_gs_rr(nion,T)
                                                                                                                                       
 Arguments:
         ion - ion for which we want a recombination rate - 
@@ -1401,9 +1403,8 @@ Description:
                                                                                                                                       
         This routine generates a total recombination rate for 
 		a given ion at a given temperature using 
-		badnell type parameters. We simply perform a
-		polynomial interpolation using the polint
-		numerical recipie.
+		badnell type parameters. We simply perform an
+		interpolation 
                                                                                                                                       
 Notes:
 	
@@ -1486,7 +1487,7 @@ for (i=0;i<BAD_GS_RR_PARAMS;i++)
                                        Southampton University
                                                                                                                                       
  Synopsis:
-        bad_gs_rr(w,filename)
+        milne_gs_rr(nion,T)
                                                                                                                                       
 Arguments:
         ion - ion for which we want a recombination rate - 
@@ -1502,11 +1503,9 @@ Returns:
                                                                                                                                       
 Description:
                                                                                                                                       
-        This routine generates a total recombination rate for 
-		a given ion at a given temperature using 
-		badnell type parameters. We simply perform a
-		polynomial interpolation using the polint
-		numerical recipie.
+        This routine generates a GS to GS recombination rate 
+		for those ions we do not have badnell data for - it
+		computed the rate using the milne relation.
                                                                                                                                       
 Notes:
 	

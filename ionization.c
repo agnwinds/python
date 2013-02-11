@@ -156,7 +156,7 @@ to match heating and cooling in the wind element! */
    {
 /* Feb 2012 NSH - new for mode 7. KSL has moved a lot of the mechanics that used to be here into
  power_abundances. This, once called, calculates the weight and alpha for each band in this cell. There is a lot of code that was clogging up this routine. Once this is done, one_shot gets called from within that routine. */
-      ireturn = spectral_estimators(xplasma);  /*Aug 2012 NSH - slight change to help integrate this into balance, power_estimators does the work of getting banded W and alpha. The oneshot gets called. */
+      ireturn = spectral_estimators(xplasma);  /*Aug 2012 NSH - slight change to help integrate this into balance, power_estimators does the work of getting banded W and alpha. Then oneshot gets called. */
 	  xplasma->dt_e_old = xplasma->dt_e;
   xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;	//Must store this before others
   xplasma->t_e_old = xplasma->t_e;
@@ -169,9 +169,8 @@ to match heating and cooling in the wind element! */
 
 /* Convergence check */
   convergence (xplasma);
-
-
    }
+
 
   else
     {
@@ -217,9 +216,13 @@ Description:
 	smaller with cycle and whetehr the difference between
 	heating and cooling is drroping.
 
+	The routine returns a number between 0 and 3, 
+	depending on the number of convergence checks that
+	are passed.  If all convergence tests are pssed
+	then the number returned will be 0
+
 	The routine also adjust the gain which controls how
 	far the electron temperture can change in a cycle.
-
 
 	
 Notes:
@@ -244,6 +247,10 @@ convergence (xplasma)
   xplasma->trcheck = xplasma->techeck = xplasma->hccheck = 0;	//NSH 70g - zero the global variables
   epsilon = 0.05;
 
+  /* Check the fractional change in tempperatature and if is less than 
+   * epsiolong increment trcheck and techeck 
+   */
+
   if ((xplasma->converge_t_r =
        fabs (xplasma->t_r_old - xplasma->t_r) / (xplasma->t_r_old +
 						 xplasma->t_r)) > epsilon)
@@ -256,6 +263,8 @@ convergence (xplasma)
 //110919 nsh modified line below to include the adiabatic cooling in the check that heating equals cooling
 //111004 nsh further modification to include DR and compton cooling, now moved out of lum_rad
 
+  /* Check whether the heating and colling balance to within epsilon and if so set hccheck to 1 */
+
   if ((xplasma->converge_hc =
        fabs (xplasma->heat_tot -
 	     (xplasma->lum_rad + xplasma->lum_adiabatic + xplasma->lum_dr +
@@ -264,12 +273,14 @@ convergence (xplasma)
 				     xplasma->lum_adiabatic)) > epsilon)
     xplasma->hccheck = hccheck = 1;
 
+  /* whole_check is the sum of the temperature checks and the heating check */
+
   xplasma->converge_whole = whole_check = trcheck + techeck + hccheck;
 
   /* Converging is a situation where the change in electron
    * temperature is dropping with time and the cell is oscillating
    * around a temperature.  If that is the case, we drop the 
-   * amount by which the temperature can change in this cyccle
+   * amount by which the temperature can change in this cycle
    */
 
   if (xplasma->dt_e_old * xplasma->dt_e < 0
@@ -412,8 +423,6 @@ printf ("NSH here we are in oneshot - running at mode %i\n",mode);
   xplasma->t_e = (1 - gain) * te_old + gain * te_new;
 
 
-  // printf ("EMERGENCY EMERGENCY EMERGENCY - your 1 million K muck up is still at line 301 of ionization\n");
-//  xplasma->t_e=2e5;
   dte = xplasma->dt_e;
 
 //  Log ("One_shot: %10.2f %10.2f %10.2f\n", te_old, te_new, w->t_e);

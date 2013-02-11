@@ -94,12 +94,18 @@ partition_functions (xplasma, mode)
       t = xplasma->t_r;
       weight = xplasma->w;
     }
-  else if (mode == 3)  
+  else if (mode == 3)  /*NSH 120912 This mode is more or less defunct. When the last vestigies of the mode 3 ionizetion scheme (the original sim PL correction) is removed, this can go too */
     {
-     //Non LTE calculation with non BB radiation field. Use T_e to get partition functions, same as mode 1-
+     //Non LTE calculation with non BB radiation field. Use T_e to get partition functions, same as mode 1- 
       t = xplasma->t_e;
       weight = 1;
     }
+  else if (mode == 4)  /*NSH 120912 This is a test mode, used to set partition functions to ground state only. This is achieved by setting W to 0. At this point, the temperature is a moot point, so lest go with t_e, since this is only going to be called if we are doing a power law calculation */
+    {
+      t = xplasma->t_e;
+      weight = 0;
+    }
+
   else
     {
       Error ("partition_functions: Unknown mode %d\n", mode);
@@ -203,17 +209,19 @@ Notes:
 
 
 History:
-	2012Feb	nsh - began coding	
+	2012Feb	nsh - began coding
+	2012Sep	nsh - added weight as a calling value - this allows one to produce gs only with w=0, or LTE with w=1 or to produce a correction factor with W = the measured value	
 
 **************************************************************/
 
 
 
 int
-partition_functions_2 (xplasma, xnion, temp)
+partition_functions_2 (xplasma, xnion, temp, weight)
      PlasmaPtr xplasma;
      int xnion;	
      double temp;
+     double weight;
 {
   int nion;
   double partition ();
@@ -228,9 +236,9 @@ partition_functions_2 (xplasma, xnion, temp)
 
   for (nion = xnion-1; nion < xnion+1; nion++)
     {
-	
+
       if (ion[nion].nlevels > 0)
-	/*Calculate data on levels using blackbody (unweighted since the calculation is in LTE */
+	//Calculate data on levels using a weighed BB assumption
 	{
 	  m = ion[nion].firstlevel;
 	  m_ground = m;
@@ -242,7 +250,7 @@ partition_functions_2 (xplasma, xnion, temp)
 	    {
 	      m++;
 	      z +=
-		config[m].g *
+		weight * config[m].g *
 		exp ((-config[m].ex + config[m_ground].ex) / kt);
 	    }
 	}
@@ -259,7 +267,7 @@ partition_functions_2 (xplasma, xnion, temp)
 	    {
 	      m++;
 	      z +=
-		config[m].g *
+		weight * config[m].g *
 		exp ((-config[m].ex + config[m_ground].ex) / kt);
 	    }
 	}
@@ -272,6 +280,10 @@ partition_functions_2 (xplasma, xnion, temp)
       xplasma->partition[nion] = z;
 
     }
+
+
+
+
 
 
   return (0);

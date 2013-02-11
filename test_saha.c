@@ -45,7 +45,7 @@ main (argc, argv)
   double ne[11],temp1,nh,xtemp,weight,xsaha,t_r,t_e,temp;
   double b,*partition,recomb_fudge,pi_fudge,gs_fudge,test,integral;
   double fthresh,fmax;
-  double alpha_agn,distance,agn_ip,lum_agn,const_agn;
+  double alpha_agn,distance,agn_ip,lum_agn,const_agn,IPstart,IPstop,IP;
   int lstart,lmax;
   double temp_func(),trr_rate;
   FILE *fp_h,*fp1_h;
@@ -411,7 +411,7 @@ fclose(fp_o);
   fclose(fp_c);
   fclose(fp_n);
   fclose(fp_o);
-*/
+
 
   fp_h=fopen("hydrogen_lm.out","w");
   fp_he=fopen("helium_lm.out","w");
@@ -628,8 +628,95 @@ nh=1e10;
 		fprintf(fp_fe,"\n");
 		}  
 
-
 */
+alpha_agn=-1.2;
+
+IPstart=20;
+IPstop=41;
+lstart=250;
+lmax=450;
+distance=1e11;
+nh=1e5;
+
+  fp_h=fopen("hydrogen_sim.out","w");
+  fp_he=fopen("helium_sim.out","w");
+  fp_c=fopen("carbon_sim.out","w");
+  fp_n=fopen("nitrogen_sim.out","w");
+  fp_o=fopen("oxygen_sim.out","w");
+  fp_fe=fopen("iron_sim.out","w");
+	fprintf(fp_h,"%i\n",lmax-lstart);
+	fprintf(fp_he,"%i\n",lmax-lstart);
+	fprintf(fp_c,"%i\n",lmax-lstart);
+	fprintf(fp_n,"%i\n",lmax-lstart);
+	fprintf(fp_o,"%i\n",lmax-lstart);
+	fprintf(fp_fe,"%i\n",lmax-lstart);
+ 
+		geo.nxfreq=1;
+		geo.xfreq[0]=1e14;
+		geo.xfreq[1]=1e20;
+		plasmamain[0].pl_alpha[0]=alpha_agn;
+		plasmamain[0].spec_mod_type[0]=SPEC_MOD_PL;
+		xband.nbands=1;
+    		xband.f1[0]=1e14;
+		xband.f2[0]=plasmamain[0].max_freq=1e18;
+		plasmamain[0].t_e=1e6;
+		plasmamain[0].t_r=1e6;
+  		plasmamain[0].rho=nh/rho2nh;
+		plasmamain[0].ne=nh;
+
+	for (i=IPstart;i<IPstop;i++)
+		{
+		IP=pow(10.0,i/10.0);
+		lum_agn=(IP*distance*distance*nh);
+		const_agn = lum_agn / (((pow (50000/HEV, alpha_agn + 1.)) - pow (100/HEV, alpha_agn + 1.0)) /
+	   	(alpha_agn + 1.0));
+		printf ("IP=%f, lum_agn=%e, const_agn=%e\n",IP,lum_agn,const_agn);
+		agn_ip=const_agn*(((pow (50000/HEV, alpha_agn + 1.0)) - pow (100/HEV,alpha_agn + 1.0)) /  				(alpha_agn + 1.0));
+		agn_ip /= (distance*distance);
+		agn_ip /= nh;
+		Log("i=%i,Ionisation Parameter=%f\n",i,(agn_ip));
+		
+	
+		plasmamain[0].pl_w[0]=const_agn/((4.*PI)*(4.*PI*distance*distance));
+		printf("weight=%e\n",plasmamain[0].pl_w[0]);
+  		variable_temperature (&plasmamain[0], 7);
+		fprintf(fp_h,"%6.3e %6.3e %6.3e %6.3e\n",agn_ip,plasmamain[0].ne,plasmamain[0].density[0],plasmamain[0].density[1]);
+		fprintf(fp_he,"%e %e",agn_ip,plasmamain[0].ne);		
+		for (j=2;j<5;j++ ) 
+			{		
+			fprintf(fp_he," %6.3e",plasmamain[0].density[j]);
+			}
+		fprintf(fp_he,"\n");
+		fprintf(fp_c,"%e %e",agn_ip,plasmamain[0].ne);		
+		for (j=5;j<12;j++ ) 
+			{		
+			fprintf(fp_c," %6.3e",plasmamain[0].density[j]);
+			}
+		fprintf(fp_c,"\n");
+		fprintf(fp_n,"%e %e",agn_ip,plasmamain[0].ne);		
+		for (j=12;j<20;j++ ) 
+			{		
+			fprintf(fp_n," %6.3e",plasmamain[0].density[j]);
+			}
+		fprintf(fp_n,"\n");
+		fprintf(fp_o,"%e %e",agn_ip,plasmamain[0].ne);		
+		for (j=20;j<29;j++ ) 
+			{		
+			fprintf(fp_o," %6.3e",plasmamain[0].density[j]);
+			}
+		fprintf(fp_o,"\n");
+		fprintf(fp_fe,"%e %e",agn_ip,plasmamain[0].ne);		
+		for (j=151;j<178;j++ ) 
+			{		
+			fprintf(fp_fe," %6.3e",plasmamain[0].density[j]);
+			}
+		fprintf(fp_fe,"\n");
+		}  
+
+
+
+
+
 
 
 

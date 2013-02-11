@@ -205,7 +205,6 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   char yesno[20];
   int select_extract, select_spectype;
-//OLD  double tmax;
   char root[LINELENGTH], input[LINELENGTH], wspecfile[LINELENGTH],
     lspecfile[LINELENGTH], specfile[LINELENGTH], diskfile[LINELENGTH];
   char windradfile[LINELENGTH], windsavefile[LINELENGTH];
@@ -614,14 +613,14 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 /* ??? ksl - Ionization mode 4 apparently does not exist.  This should be fixed */
 
   rdint
-    ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,5=recalc_pow)",
+    ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,5=recalc_pow,6=pairwise_bb,7=pairwise_pow)",
      &geo.ioniz_mode);
 
   if (geo.ioniz_mode == 2)
     {
       rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
     }
-  if (geo.ioniz_mode == 4 || geo.ioniz_mode > 7)
+  if (geo.ioniz_mode == 4 || geo.ioniz_mode > 8) /*NSH CLOUDY test - remove once done*/
     {
       Log ("The allowed ionization modes are 0, 1, 2, 3, 5\n");
       Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
@@ -764,7 +763,7 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 		"Rad_type_for_bl(0=bb,1=models)_to_make_wind",
 		&geo.bl_ion_spectype);
 
-  geo.agn_ion_spectype = 3;
+  geo.agn_ion_spectype = SPECTYPE_POW;
   get_spectype (geo.agn_radiation,
 		"Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table)_to_make_wind",
 		&geo.agn_ion_spectype);
@@ -791,7 +790,7 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 
       if (geo.system_type == 2)
 	{
-	  geo.rstar = 12. * G * geo.mstar / (C * C);
+	  geo.rstar = 6. * G * geo.mstar / (C * C); //correction - ISCO is 6x Rg NSH 121025
 	}
 
       rddoub ("rstar(cm)", &geo.rstar);
@@ -1201,7 +1200,7 @@ Modified again in python 71b to take account of change in parametrisation of she
 		    "Rad_type_for_bl(0=bb,1=models,2=uniform)_in_final_spectrum",
 		    &geo.bl_spectype);
 
-      geo.agn_spectype = 3;
+      geo.agn_spectype = SPECTYPE_POW;
       get_spectype (geo.agn_radiation,
 		    "Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table)_in_final_spectrum",
 		    &geo.agn_spectype);
@@ -1443,7 +1442,7 @@ run -- 07jul -- ksl
  *
  * */
 
-
+printf ("NSH GOING TO DISK_INIT\n");
   disk_init (geo.rstar, geo.diskrad, geo.mstar, geo.disk_mdot, freqmin,
 	     freqmax, 0, &geo.f_disk);
 
@@ -1574,6 +1573,9 @@ run -- 07jul -- ksl
 	   */
 
 	  kbf_need (freqmin, freqmax);
+
+          /* NSH 22/10/12  This next call populates the prefactor for free free heating for each cell in the plasma array */
+	  pop_kappa_ff_array ();       
 
 	  /* Transport the photons through the wind */
 	  trans_phot (w, p, 0);
@@ -2109,6 +2111,7 @@ Notes:
 History:
 	080518	ksl	Coded as part of effort to make models restart more
 			easily, but also simplifies some of the code
+        121025  nsh	added a mode for power law
 
 **************************************************************/
 
@@ -2131,6 +2134,8 @@ get_spectype (yesno, question, spectype)
 	stype = 0;
       else if (*spectype == SPECTYPE_UNIFORM)
 	stype = 2;
+      else if (*spectype == SPECTYPE_POW)
+	stype = 3;
       else
 	stype = 1;
       /* Now get the response */

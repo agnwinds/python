@@ -1693,7 +1693,7 @@ convergence_summary (w, rootname, ochoice)
 	  aaa[n] = plasmamain[nplasma].converge_whole;
 	}
     }
-  display ("Convergence (0=converged)");
+  display ("Convergence (0=converged.  Higher numbers indicate one or more convergence tests failed)");
 
   if (ochoice)
     {

@@ -72,6 +72,7 @@ History:
 	1112	ksl	71 - Moved material that was in python having
 			to do with banding to this point.  Note
 			This breaks the calls that exist in balance
+	1208    nsh     73 - Several new bands
 **************************************************************/
 
 
@@ -344,6 +345,9 @@ for (nband=0;nband<band->nbands;nband++)
     band->nbands=17;
  
 
+
+
+
 	band->f1[0] = 1e10;
 	band->f2[0] = band->f1[1] = fmax*0.01;
 	band->f2[1] = band->f1[2] = fmax*0.1;
@@ -406,9 +410,52 @@ for (nband=0;nband<band->nbands;nband++)
 	band->min_fraction[0]=1.0;*/
     }
 
+  else if (mode ==7) //Test for balance matching the bands we have been using for AGN runs
+	{
+/*      band->nbands = 7;
+      band->f1[0] = 1/HEV;
+      band->f2[0] = band->f1[1] = 13.6 / HEV;
+      band->f2[1] = band->f1[2] = 54.42 / HEV;
+      band->f2[2] = band->f1[3] = 392 / HEV;
+      band->f2[3] = band->f1[4] = 739 / HEV;
+      band->f2[4] = band->f1[5] = 2000 / HEV;
+      band->f2[5] = band->f1[6] = 10000 / HEV;
+      band->f2[6] = 50000/HEV;
+      band->min_fraction[0] = 0.1;
+      band->min_fraction[1] = 0.2;
+      band->min_fraction[2] = 0.2;
+      band->min_fraction[3] = 0.2;
+      band->min_fraction[4] = 0.1;
+      band->min_fraction[5] = 0.1;
+      band->min_fraction[6] = 0.1;*/
+
+      band->nbands = 10;
+      band->f1[0] = 1e14;
+      band->f2[0] = band->f1[1] = 1e15;
+      band->f2[1] = band->f1[2] = 3.162e15;
+      band->f2[2] = band->f1[3] = 1e16;
+      band->f2[3] = band->f1[4] = 3.162e16;
+      band->f2[4] = band->f1[5] = 1e17;
+      band->f2[5] = band->f1[6] = 3.162e17;
+      band->f2[6] = band->f1[7] = 1e18;
+      band->f2[7] = band->f1[8] = 3.162e18;
+      band->f2[8] = band->f1[9] = 1e19;
+      band->f2[9] = 1e20;
+      band->min_fraction[0] = 0.1;
+      band->min_fraction[1] = 0.1;
+      band->min_fraction[2] = 0.1;
+      band->min_fraction[3] = 0.1;
+      band->min_fraction[4] = 0.1;
+      band->min_fraction[5] = 0.1;
+      band->min_fraction[6] = 0.1;
+      band->min_fraction[7] = 0.1;
+      band->min_fraction[8] = 0.1;
+      band->min_fraction[9] = 0.1;
 
 
-  
+
+
+  }
   else
     {
       Error ("bands_init: Unknown mode %d\n", mode);
@@ -423,6 +470,9 @@ for (nband=0;nband<band->nbands;nband++)
 	   band->f1[nband], band->f2[nband], band->min_fraction[nband]);
       Log ("band_init: band %i, eV1=%10.3e, eV2=%10.3e, frac=%.2f\n", nband,
 	   band->f1[nband] * HEV, band->f2[nband] * HEV,
+	   band->min_fraction[nband]);
+      Log ("band_init: band %i, alpha1=%f, alpha2=%f, frac=%.2f\n", nband,
+	   band->f1[nband] * H/(BOLTZMANN*tmax), band->f2[nband] * H/(BOLTZMANN*tmax),
 	   band->min_fraction[nband]);
     }
 
@@ -452,7 +502,7 @@ Description:
 
 		
 Notes:
-	1112 - At presenet everything is hardwired
+	1112 - At present everything is hardwired
 
 
 
@@ -472,7 +522,7 @@ freqs_init (freqmin, freqmax)
   int i, n, ngood, good[NXBANDS];
   double xfreq[NXBANDS];
   int nxfreq;  
-  double nupeak; //Weins law preak frequency from tstar
+//  double nupeak; //Weins law preak frequency from tstar
 
 
   /* At present set up a single energy band for 2 - 10 keV */
@@ -488,20 +538,20 @@ xfreq[2] = 54.42 / HEV;
  xfreq[7] = 50000 / HEV;*/
 
 /* bands to match the cloudy table spectrum - needed to cover all frequencies to let induced compton work OK */
-/*
-nxfreq = 3;
+
+/*nxfreq = 3;
 xfreq[0]=0.0001/HEV;
-xfreq[1]=2000/HEV;
-xfreq[2]=10000/HEV;
-xfreq[3]=100000000/HEV;
-*/
+xfreq[1]=0.136/HEV;
+xfreq[2]=20000/HEV;
+xfreq[3]=100000000/HEV;*/
+
 /* bands try to deal with a blackbody spectrum */
-nupeak=WIEN*geo.tstar;
-printf ("Tstar=%e, Nupeak=%e\n",geo.tstar,nupeak);
+/*nupeak=WIEN*geo.tstar;
+printf ("Tstar=%e, Nupeak=%e\n",geo.tstar,nupeak);*/
 
 nxfreq = 10;
-xfreq[0]=freqmin;
-xfreq[1]=1e15;
+xfreq[0]=freqmin; //We need the whole range to be modelled for induced compton heating to work
+xfreq[1]=1e15;  //This should be below the lowest threshold frequency of any element in our model
 xfreq[2]=3.162e15;
 xfreq[3]=1e16;
 xfreq[4]=3.162e16;
@@ -509,9 +559,8 @@ xfreq[5]=1e17;
 xfreq[6]=3.162e17;
 xfreq[7]=1e18;
 xfreq[8]=3.162e18;
-xfreq[9]=1e19;
+xfreq[9]=1.2e19; //This is the highest frequency defined in our ionization data
 xfreq[10]=freqmax;
-
 
 
 

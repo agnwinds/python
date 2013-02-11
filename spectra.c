@@ -312,6 +312,10 @@ History:
 			both 1-d and 2-d grids simulataneouly.  
 	08mar	ksl	Fixed up spectrum types to account for tracking
 			of photons which had been scattered by the wind
+	1212	ksl	Changed the way dealt with photons which had
+			frequencies which were too low or too high
+			to record the numbers and to give an error
+			only if the numbers seemed large
 **************************************************************/
 
 int
@@ -330,11 +334,15 @@ spectrum_create (p, f1, f2, nangle, select_extract)
   int wind_n_to_ij ();
   int mscat, mtopbot;
   double delta;
+  double nlow,nhigh;
 
   freqmin = f1;
   freqmax = f2;
   dfreq = (freqmax - freqmin) / NWAVE;
   nspec = nangle + MSPEC;
+  nlow=0.0;   // variable to storte the number of photons that have frequencies which are too low
+  nhigh=0.0;  // variable to storte the number of photons that have frequencies which are too high
+  delta=0.0;  // fractional frequency error allowod
 
 /* Lines to set up a logarithmic spectrum */
 
@@ -371,31 +379,33 @@ spectrum_create (p, f1, f2, nangle, select_extract)
       k = (p[nphot].freq - freqmin) / dfreq;
       if (k < 0)
 	{
-/*Because of Doppler shifts the frequency of a photon can be slightly out
- * of the desired range.  Print an error message only if the frequency is
- * so far out of bounds (>3000 km/s) that it suggests a real error.
-*/
-
-  	  delta=0.02;  /* 111211 ksl -  Added a variable so that we could control how tightly to limit the photon boundaries 
-			 It would be possible to calculate what delta should be from the maximum velocity in the disk or wind
-			 */
+//OLD 74a_ksl /*Because of Doppler shifts the frequency of a photon can be slightly out
+//OLD 74a_ksl  * of the desired range.  Print an error message only if the frequency is
+//OLD 74a_ksl  * so far out of bounds (>3000 km/s) that it suggests a real error.
+//OLD 74a_ksl */
+//OLD 74a_ksl 
+//OLD 74a_ksl   	  delta=0.02;  /* 111211 ksl -  Added a variable so that we could control how tightly to limit the photon boundaries 
+//OLD 74a_ksl 			 It would be possible to calculate what delta should be from the maximum velocity in the disk or wind
+//OLD 74a_ksl 		 */
 
 	  if (((1. - p[nphot].freq / freqmin) > delta) && (geo.rt_mode != 2))
-	    Error_silent
-	      ("spectrum_create: photon %6d freq low  %g < %g v %.2e scat %d n res scat %d origin %d\n",
-	       nphot, p[nphot].freq, freqmin,
-	       (1. - p[nphot].freq / freqmin) * 2.99795e5, p[nphot].nscat,
-	       p[nphot].nrscat, p[nphot].origin);
+//OLD 74a_ksl	    Error_silent
+//OLD 74a_ksl	      ("spectrum_create: photon %6d freq low  %g < %g v %.2e scat %d n res scat %d origin %d\n",
+//OLD 74a_ksl	       nphot, p[nphot].freq, freqmin,
+//OLD 74a_ksl	       (1. - p[nphot].freq / freqmin) * 2.99795e5, p[nphot].nscat,
+//OLD 74a_ksl	       p[nphot].nrscat, p[nphot].origin);
+	  nlow=nlow+1;
 	  k = 0;
 	}
       else if (k > NWAVE - 1)
 	{
 	  if (((1. - freqmax / p[nphot].freq) > delta) && (geo.rt_mode != 2))
-	    Error_silent
-	      ("spectrum_create: photon %6d freq high %g > %g v %.2e scat %d  res scat %d origin %d\n",
-	       nphot, p[nphot].freq, freqmax,
-	       (1. - freqmax / p[nphot].freq) * 2.99795e5, p[nphot].nscat,
-	       p[nphot].nrscat, p[nphot].origin);
+//OLD 74a_ksl	    Error_silent
+//OLD 74a_ksl	      ("spectrum_create: photon %6d freq high %g > %g v %.2e scat %d  res scat %d origin %d\n",
+//OLD 74a_ksl	       nphot, p[nphot].freq, freqmax,
+//OLD 74a_ksl	       (1. - freqmax / p[nphot].freq) * 2.99795e5, p[nphot].nscat,
+//OLD 74a_ksl	       p[nphot].nrscat, p[nphot].origin);
+		  nhigh=nhigh+1;
 	  k = NWAVE - 1;
 	}
 
@@ -482,6 +492,12 @@ spectrum_create (p, f1, f2, nangle, select_extract)
     }
 
 
+  if ((nlow/nphot>0.05) || (nhigh/nphot>0.05)) {
+  	Error("spectrum_create: Fraction of photons lost: %4.2f wi/ freq. low, %4.2f w/freq hi\n",nlow/nphot,nhigh/nphot);
+  }
+  else {
+	 Log("spectrum_create: Fraction of photons lost:  %4.2f wi/ freq. low, %4.2f w/freq hi\n",nlow/nphot,nhigh/nphot);
+  }
 
 
   Log ("\nNo. of photons which have scattered n times\n");

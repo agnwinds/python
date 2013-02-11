@@ -94,7 +94,7 @@ variable_temperature (xplasma, mode)
  // double xip; //ionzation potential of lower ion.
   int nelem,first,last;
   double *density;
-  double *partition;
+  double *partition,t_r_part_correct,t_e_part_correct;
   double sum,big;
   double pi_fudge,recomb_fudge,gs_fudge,tot_fudge; /*The three correction factors for photoionization rate, recombination to ground state, and recombination rate */
   xxxplasma = xplasma;    /*Copy xplasma to local plasma varaible, used to communicate w and alpha to the power law correction routine. NSH 120703 - also used to set the denominator calculated for a given ion for this cell last time round*/
@@ -104,7 +104,7 @@ variable_temperature (xplasma, mode)
   t_e = xplasma->t_e; 
   t_r = xplasma->t_r;
   www = xplasma->w;
-		printf ("HERE WE ARE IN VT t_e=%e, t_r=%e, www=%e\n",t_e,t_r,www);
+//		printf ("HERE WE ARE IN VT t_e=%e, t_r=%e, www=%e\n",t_e,t_r,www);
   density = xplasma->density;  /* Set the local array density to the density held for the cell */
   partition = xplasma->partition; /* Set the partition function array to that held for the cell */
   dne_old=10.0*nh;
@@ -167,18 +167,24 @@ variable_temperature (xplasma, mode)
 		xtemp=zbrent(temp_func,MIN_TEMP,1e8,10);  //work out correct temperature
 
 /* given this temperature, we need the pair of partition functions for these ions */		
-		partition_functions_2 (xplasma, nion, xtemp);
-
-/* and now we need the saha equation linking the two states at our chosen temp*/
+		partition_functions_2 (xplasma, nion, xtemp, 1); //weight of 1 give us the LTE populations.
+/* and now we need the saha equation linking the two states at our chosen temp NB the partition functionof the electron is included in the SAHA factor*/
 		xsaha = SAHA * pow (xtemp, 1.5);
 	  	b = xsaha * partition[nion]
 	    	* exp (-ion[nion - 1].ip / (BOLTZMANN * xtemp)) / (xne *
 							   partition[nion-1]);
-
+//printf ("PART FUNC FOR 	for element %i, ion %i and %i, xtemp= %e is %f and %f\n",ion[nion-1].z,ion[nion-1].istate,ion[nion].istate,xtemp,partition[nion-1],partition[nion]);
+		t_e_part_correct=partition[nion-1]/partition[nion];
+		partition_functions_2 (xplasma,nion, t_e, 0); //Our only real guess here is that the electron temperature might give a good estimate of the partition function
+		t_e_part_correct*=(partition[nion]/partition[nion-1]);
+//printf ("PART FUNC FOR 	for element %i, ion %i and %i, dil_tr=%e is %f and %f\n",ion[nion-1].z,ion[nion-1].istate,ion[nion].istate,t_r,partition[nion-1],partition[nion]); 
+//		
+//printf ("PART FUNC FOR 	for element %i, ion %i and %i, t_e=   %e is %f and %f\n",ion[nion-1].z,ion[nion-1].istate,ion[nion].istate,t_e,partition[nion-1],partition[nion]);
+//		t_e_part_correct*=(partition[nion]/partition[nion-1]);
+//		printf ("PART_CORRECT t_r %f for element %i, upper ion %i, xtemp=%e, t_r=%e  \n",t_r_part_correct,ion[nion].z,ion[nion].istate,xtemp,t_r);
 /* we now correct b to take account of the temperature and photon field 
 		t_r and www give the actual radiation field in the cell, xtemp is the temp we used
   		t_e is the actual electron temperature of the cell*/
-
 
 	      	recomb_fudge = sqrt (t_e / xtemp);
          	if (mode == 6) /* Correct the SAHA equation abundance pair using an actual radiation field modelled as a dilute black body */
@@ -198,7 +204,7 @@ variable_temperature (xplasma, mode)
 			{
 			pi_fudge = pl_correct_2 (xtemp, nion);
 			gs_fudge = compute_zeta (t_e, nion -1, 2); /* Calculate the ground state recombination rate correction factor based on the cells true electron temperature.  */
-			tot_fudge=pi_fudge*recomb_fudge*gs_fudge;
+			tot_fudge=pi_fudge*recomb_fudge*gs_fudge*t_e_part_correct;
 			}
 
 		/* apply correction factors */
@@ -236,7 +242,7 @@ variable_temperature (xplasma, mode)
       	/* Now determine the new value of ne from the ion abundances */
 	}   //end of loop over elements
     xnew = get_ne (xplasma->density);	/* determine the electron density for this density distribution */
-
+//	printf ("Solver, change in n_e = %e vs FRACTIONAL ERROR of %e in xne of %e\n",fabs ((xne - xnew) / (xnew)) , FRACTIONAL_ERROR,xne);
     if (xnew < DENSITY_MIN)
 	xnew = DENSITY_MIN;	/* fudge to keep a floor on ne */
     if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6)
@@ -256,8 +262,7 @@ variable_temperature (xplasma, mode)
     	}
     }
   xplasma->ne = xnew;
-  partition_functions (xplasma, 2);
-  levels (xplasma, 2);	/*WARNING fudge NSH 11/5/14 - this is as a test. Wereally need a better implementation of partition functions and levels for a power law illuminating spectrum.*/
+  partition_functions (xplasma, 4); /*WARNING fudge NSH 11/5/14 - this is as a test. We really need a better implementation of partition functions and levels for a power law illuminating spectrum. We found that if we didnt make this call, we would end up with undefined levles - which did really crazy things*/
   return (0);
 }
 
@@ -547,17 +552,10 @@ pl_qromb=1e-4;
  if (ion[ion_lower].phot_info == 1)  //topbase
     {
       n = ntmin;
-
       xtop = &phot_top[n];
       fthresh = xtop->freq[0];
-      fmaxtemp = xtop->freq[xtop->np - 1];
-      fmax = check_fmax (fthresh,fmaxtemp,xtemp);
-      if (fthresh > fmax)
-	{
-	Error("pl_correct: After checking, fthresh has been set below fmin - we cannot compute denominator\n");
-	q=1.0;
-	return(q);
-	}
+      fmax = xtop->freq[xtop->np - 1];
+
       numerator=0;
 	  if (niterate==0)  			//first time of iterating this cycle, so calculate the numerator
               {
@@ -571,14 +569,14 @@ pl_qromb=1e-4;
                 if (xxxplasma->spec_mod_type[j] > 0)   //Only bother doing the integrals if we have a model in this band
 			{
 			f1=geo.xfreq[j];
-			if (geo.xfreq[j+1] > xxxplasma->max_freq && geo.xfreq[j] < xxxplasma->max_freq) //The maximum frequency seen in this cell is in this band, so we cannot safely use the power law estimators right up to the top of the band. Note, we hope that all the weights in bands above this will be zero!
-				{		
-				f2=xxxplasma->max_freq;
-				}
-			else
-				{
+//			if (geo.xfreq[j+1] > xxxplasma->max_freq && geo.xfreq[j] < xxxplasma->max_freq) //The maximum frequency seen in this cell is in this band, so we cannot safely use the power law estimators right up to the top of the band. Note, we hope that all the weights in bands above this will be zero!
+//				{		
+//				f2=xxxplasma->max_freq;
+//				}
+//			else
+//				{
 				f2=geo.xfreq[j+1]; //We can safely integrate over the whole band using the estimators for the cell/band 
-				}
+//				}
 	        	if (f1 < fthresh && fthresh < f2 && f1 < fmax && fmax < f2)	//Case 1- 
 		  		{
 				if (xxxplasma->spec_mod_type[j]==SPEC_MOD_PL) 
@@ -644,7 +642,14 @@ pl_qromb=1e-4;
 	    {
 	    return (0.0); //There is no need to waste time evaluating the denominator
             }
-
+     fmaxtemp = xtop->freq[xtop->np - 1];
+      fmax = check_fmax (fthresh,fmaxtemp,xtemp);
+      if (fthresh > fmax)
+	{
+	Error("pl_correct: After checking, fthresh has been set below fmin - we cannot compute denominator\n");
+	q=1.0;
+	return(q);
+	}
       qromb_temp=xtemp; //The denominator is calculated for the LTE rate at our ideal temp. If we get this wrong, then divide by zeros abound!
 
       if (pow(((xtemp-xxxplasma->PWdtemp[ion_lower])/xxxplasma->PWdtemp[ion_lower]),2)>1e-6) //If our guess temperature hasnt changed much, use denominator from last time
@@ -666,18 +671,9 @@ pl_qromb=1e-4;
 
       xver = &xphot[ion[n].nxphot];
       fthresh = xver->freq_t;
-      fmaxtemp=xver->freq_max;
-      fmax = check_fmax (fthresh,fmaxtemp,xtemp);
-      if (fthresh > fmax)
-	{
-	Error("pl_correct: After checking, fthresh has been set below fmin - we cannot compute denominator\n");
-	q=1.0;
-	return(q);
-	}
+      fmax=xver->freq_max;
 
-
-
-
+//	if (ion[nion].z==26) printf ("VERNER ion%i, integrating from %e to %e \n",ion[nion].istate,fthresh,fmax);
 
 	numerator=0;
 	  if (niterate==0)  			//first time of iterating this cycle, so calculate the numerator
@@ -691,25 +687,32 @@ pl_qromb=1e-4;
                  if (xxxplasma->spec_mod_type[j] > 0)   //Only bother doing the integrals if we have a model in this band
 			{
 			f1=geo.xfreq[j];
-			if (geo.xfreq[j+1] > xxxplasma->max_freq && geo.xfreq[j] < xxxplasma->max_freq) //The maximum frequency seen in this cell is in this band, so we cannot safely use the power law estimators right up to the top of the band. Note, we hope that all the weights in bands above this will be zero!
-				{
-				f2=xxxplasma->max_freq;
-				}
-			else
-				{
+//			if (geo.xfreq[j+1] > xxxplasma->max_freq && geo.xfreq[j] < xxxplasma->max_freq) //The maximum frequency seen in this cell is in this band, so we cannot safely use the power law estimators right up to the top of the band. Note, we hope that all the weights in bands above this will be zero!
+//				{
+//				f2=xxxplasma->max_freq;
+//				}
+//			else
+//				{
 				f2=geo.xfreq[j+1]; //We can safely integrate over the whole band using the estimators for the cell/band 
-				}
+//				}
 	      		if (f1 < fthresh && fthresh < f2 && f1 < fmax && fmax < f2)	//Case 1
 		  		{
-		    		if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL) numerator += qromb (verner_pow1, fthresh, fmax, 1.e-4);
-				else numerator += qromb (verner_exp1, fthresh, fmax, 1.e-4);
+		    		if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL) 
+					{
+					numerator += qromb (verner_pow1, fthresh, fmax, 1.e-4);
+					}
+				else 
+{				
+					numerator += qromb (verner_exp1, fthresh, fmax, 1.e-4);
+					
+					}
 		  		}
 	        	else if (f1 < fthresh && fthresh < f2 && f2 < fmax)	//case 2 
 		  		{
 		    		if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL) numerator += qromb (verner_pow1, fthresh, f2, 1.e-4);
 				else numerator += qromb (verner_exp1, fthresh, f2, 1.e-4);
 		  		}
-	        	else if (f1 > fthresh && f2 < fmax && fmax < f2)	//case 3
+	        	else if (f1 > fthresh && f1 < fmax && fmax < f2)	//case 3 
 		  		{
 		    		if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL) numerator += qromb (verner_pow1, f1, fmax, 1.e-4);
 				else numerator += qromb (verner_exp1, f1, fmax, 1.e-4);
@@ -736,6 +739,18 @@ pl_qromb=1e-4;
        if (numerator==0.0)
 	return (0.0); //There is no need to waste time evaluating the denominator
 /* Denominator is integral at LTE of our chosen temperature. */
+      fmaxtemp=xver->freq_max;
+      fmax = check_fmax (fthresh,fmaxtemp,xtemp);
+	
+      if (fthresh > fmax)
+	{
+	Error("pl_correct: After checking, fthresh has been set below fmin - we cannot compute denominator\n");
+	q=1.0;
+	return(q);
+	}
+
+
+
 
       qromb_temp=xtemp;
 

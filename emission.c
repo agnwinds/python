@@ -64,6 +64,7 @@ History:
 			using plasma structure alone.
 	11aug	nsh	70 Modifications made to incorporate compton cooling
         11sep   nsh     70 Modifications in incorporate DR cooling (very approximate at the moment)
+	12sep	nsh	73 Added a counter for adiabatic luminosity (!)
  
 **************************************************************/
 
@@ -71,14 +72,14 @@ double
 wind_luminosity (f1, f2)
      double f1, f2;		/* freqmin and freqmax */
 {
-  double lum, lum_lines, lum_fb, lum_ff, lum_comp, lum_dr; //1108 NSH Added a new variable for compton cooling
+  double lum, lum_lines, lum_fb, lum_ff, lum_comp, lum_dr, lum_adiab; //1108 NSH Added a new variable for compton cooling
 //1109 NSH Added a new variable for dielectronic cooling
   int n;
   double x;
   int nplasma;
 
 
-  lum = lum_lines = lum_fb = lum_ff = lum_comp = lum_dr = 0; //1108 NSH Zero the new counter 1109 including DR counter
+  lum = lum_lines = lum_fb = lum_ff = lum_comp = lum_dr = lum_adiab = 0; //1108 NSH Zero the new counter 1109 including DR counter
   for (n = 0; n < NDIM2; n++)
     {
       if (wmain[n].vol > 0.0)
@@ -90,6 +91,7 @@ wind_luminosity (f1, f2)
 	  lum_ff += plasmamain[nplasma].lum_ff;
 	  lum_comp += plasmamain[nplasma].lum_comp;  //1108 NSH Increment the new counter by the compton luminosity for that cell.
           lum_dr += plasmamain[nplasma].lum_dr; //1109 NSH Increment the new counter by the DR luminosity for the cell.
+  	  lum_adiab += plasmamain[nplasma].lum_adiabatic;
 	  if (x < 0)
 	    mytrap ();
 	  if (recipes_error != 0)
@@ -107,6 +109,7 @@ wind_luminosity (f1, f2)
   geo.lum_ff = lum_ff;
   geo.lum_comp = lum_comp; //1108 NSH The total compton luminosity of the wind is stored in the geo structure
   geo.lum_dr = lum_dr; //1109 NSH the total DR luminosity of the wind is stored in the geo structure
+  geo.lum_adiabatic = lum_adiab;
   return (lum);
 }
 
@@ -561,6 +564,8 @@ Note: program uses an integral formula rather than integrating on
 			plasma
 	07jul	ksl	58f - This routine requires a WindPtr because we still need the
 			volume and that is still part of WindPtr
+        12sep	nsh	73g - increased the number of ions we will use to all of them!!
+	12sep	nsh	73g - incorporated sutherlands data for gaunt factor
 */
 
 double
@@ -569,35 +574,49 @@ total_free (one, t_e, f1, f2)
      double t_e;
      double f1, f2;
 {
-  double g_ff_h, g_ff_he;
-  double x;
-  int nplasma;
+/*  double g_ff_h, g_ff_he NSH 121025 These two variables are no longer required */
+  double gaunt;
+  double x,sum;
+  double gsqrd; /*The scaled inverse temperature experienced by an ion - used to compute the gaunt factor */
+  int nplasma,nion;
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
-
   if (t_e < 100.)
     return (0.0);
   if (f2 < f1)
     {
       return (0.0);
     }
-  g_ff_h = g_ff_he = 1.0;
+//  g_ff_h = g_ff_he = 1.0;
+//  gaunt=1.0; /*NSH 120920 - this is a placeholder, we need to calculate the gaunt factor at some point */
+  sum=0.0; /*NSH 120920 - zero the summation over all ions */
+//  if (nelements > 1)
+//    {
+/*NSH 120924 - this summation works out the z^2 times number density term for all ions the gaunt factor is calculated for each ion */
+      for (nion = 0; nion < nions; nion++)
+		{
+		gsqrd=(ion[nion].z*ion[nion].z*RYD2ERGS)/(BOLTZMANN*t_e);//
+		gaunt=gaunt_ff(gsqrd);
+		sum += xplasma->density[nion] * ion[nion].z * ion[nion].z * gaunt;
+		}
+      x =
+	BREMS_CONSTANT * xplasma->ne * (sum) /  H_OVER_K;
+//    }
+/*  else
+    {
 
-  if (nelements > 1)
-    {
+      for (nion = 0; nion < nions; nion++)
+		{
+		gsqrd=(ion[nion].z*ion[nion].z*RYD2ERGS)/(BOLTZMANN*t_e);
+		printf ("GAUNT for t_e=%e and z=%i, gsqrd=%e\n",t_e,ion[nion].z,gsqrd);
+		gaunt=gaunt_ff(gsqrd);
+		sum += xplasma->density[nion] * ion[nion].z * ion[nion].z * gaunt;
+		}
       x =
-	BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h +
-					4. * xplasma->density[4] * g_ff_he) /
-	H_OVER_K;
-    }
-  else
-    {
-      x =
-	BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h) /
-	H_OVER_K;
-    }
+	BREMS_CONSTANT * xplasma->ne * (sum) /  H_OVER_K;
+    }*/
 
   x *= sqrt (t_e) * one->vol;
   x *= (exp (-H_OVER_K * f1 / t_e) - exp (-H_OVER_K * f2 / t_e));
@@ -624,12 +643,15 @@ Notes:
 History:
  
 **************************************************************/
-/* Calculate the free-free emissivity in a cell.  Just consider H2+He3 
+/* Calculate the free-free emissivity in a cell.  Just consider H2+He3 EDIT NSH - now do all ions - its fast so why not?
 
 SS Apr 04: added an "if" statement to deal with case where there's only H. 
 	06may	ksl	57+ -- Modified to partially account for plasma structue
 			but a further change will be needed when move volume to
 			plasma
+        12sep	nsh	73g - increased the number of ions we will use to all of them!!
+	12sep	nsh	73g - incorporated sutherlands data for gaunt factor
+	
 */
 
 double
@@ -637,9 +659,11 @@ ff (one, t_e, freq)
      WindPtr one;
      double t_e, freq;
 {
-  double g_ff_h, g_ff_he;
+//  double g_ff_h, g_ff_he; NSH 121025 No longer needed
   double fnu;
+  double gsqrd, gaunt, sum;
   int nplasma;
+  int nion;
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
@@ -651,19 +675,31 @@ ff (one, t_e, freq)
 
   /* Use gaunt factor of 1 for now */
 
-  g_ff_h = g_ff_he = 1.0;
+//  g_ff_h = g_ff_he = 1.0; NSH 120924 - no longer needed, we compute the gaunt factor.
 
-  if (nelements > 1)
-    {
+//  if (nelements > 1)
+//{
+
+      for (nion = 0; nion < nions; nion++)
+		{
+		gsqrd=(ion[nion].z*ion[nion].z*RYD2ERGS)/(BOLTZMANN*t_e);//
+		gaunt=gaunt_ff(gsqrd);
+		sum += xplasma->density[nion] * ion[nion].z * ion[nion].z * gaunt;
+		}
       fnu =
+	BREMS_CONSTANT * xplasma->ne * (sum) /  H_OVER_K;
+
+
+
+/*      fnu =
 	BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h +
-					4. * xplasma->density[4] * g_ff_he);
-    }
-  else
+					4. * xplasma->density[4] * g_ff_he);*/
+//    }
+/*  else
     {
       fnu = BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h);
     }
-
+*/
 
   fnu *= exp (-H_OVER_K * freq / t_e) / sqrt (t_e) * one->vol;
 
@@ -753,3 +789,64 @@ one_ff (one, f1, f2)
   freq = pdf_get_rand (&pdf_ff);
   return (freq);
 }
+
+
+
+
+/***********************************************************
+                Southampton university
+
+Synopsis: gaunt_ff computes the frequency averaged gaunt factor at
+		scaled temperature. It interpolates between the tabulated
+		factors
+
+Arguments:		
+
+Returns:
+ 
+Description:	
+
+Notes:
+
+
+History:
+   12           nsh     coded 
+ 
+**************************************************************/
+
+
+double
+gaunt_ff (gsquared)
+     double gsquared;		/* the gamma squared varaiable */
+{
+  int i,index;
+  double gaunt;
+  double log_g2;
+  double delta; //The log difference between our G2 and the one in the table
+
+log_g2=log10(gsquared); //The data is in log format
+
+	if (log_g2<gaunt_total[0].log_gsqrd || log_g2>gaunt_total[gaunt_n_gsqrd-1].log_gsqrd)
+		{
+//		Error ("gaunt ff - request gsqrd outside range - returning gaunt factor =1\n"); /*Removed this as an error - it happens a lot, and is probably not important! */
+		return (1.0);
+		}
+	for (i=0;i<gaunt_n_gsqrd;i++) /*first find the pair of parameter arrays that bracket our temperature */
+		{
+		if (gaunt_total[i].log_gsqrd <= log_g2 && gaunt_total[i+1].log_gsqrd > log_g2)
+			{
+			index=i; /* the array to use */
+			delta=log_g2-gaunt_total[index].log_gsqrd;
+			}
+		}
+
+	gaunt=gaunt_total[index].gff+delta*(gaunt_total[index].s1+delta*(gaunt_total[index].s2+gaunt_total[index].s3));
+
+
+
+
+
+  return (gaunt);
+}
+
+

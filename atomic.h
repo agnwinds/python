@@ -455,6 +455,16 @@ typedef struct badnell_gs_rr
 
 Bad_gs_rr bad_gs_rr[NIONS]; //Set up the structure
 	
+#define MAX_GAUNT_N_GSQRD 100 //Space set aside for the number of parameters for scaled inverse temperature
 
+int gaunt_n_gsqrd;  //The actual number of scaled temperatures
 
+typedef struct gaunt_total
+  {
+	float log_gsqrd; //The scaled electron temperature squared for this array
+	float gff;	
+	float s1,s2,s3;
+  }     Gaunt_total, *Gaunt_totalptr;
+
+Gaunt_total gaunt_total[MAX_GAUNT_N_GSQRD]; //Set up the structure
 

@@ -137,6 +137,7 @@ History:
 			cardona 2010
 			than once
 	12jul   nsh	73 - added structures and routines to read in badnell style total recombination rate data
+        12sept	nsh	73 - added structures and routines to read in gaunt factor data from sutherland 1997
 **************************************************************/
 
 
@@ -204,6 +205,7 @@ get_atomic_data (masterfile)
   double gstemp[BAD_GS_RR_PARAMS]; //Temporary storage for badnell resolved GS RR rates
   char gsflag,drflag; //Flags to say what part of data is being read in for DR and RR
   double gstmin,gstmax; //The range of temperatures for which all ions have GS RR rates
+  double gsqrdtemp,gfftemp,s1temp,s2temp,s3temp; //Temporary storage for gaunt factors
 
   /* define which files to read as data files */
 
@@ -428,6 +430,18 @@ get_atomic_data (masterfile)
 	gstmin=0.0;
 	gstmax=1e99;
 
+/* 0912 nsh the following lines initialise the sutherland gaunt factors */
+   gaunt_n_gsqrd = 0; //The number of sets of scaled temperatures we have data for
+   for (n=0; n < MAX_GAUNT_N_GSQRD; n++)
+	{	
+	gaunt_total[n].log_gsqrd=0.0;
+	gaunt_total[n].gff=0.0;
+	gaunt_total[n].s1=0.0;
+	gaunt_total[n].s2=0.0;
+	gaunt_total[n].s3=0.0;
+	}
+
+
 
 
   /*              for (n=0;nions;n++) {
@@ -539,6 +553,8 @@ structure does not have this property! */
                 choice = 's' ;
 	      else if (strncmp (word, "BAD_GS_RR",9) == 0) /*Its a badnell resolved ground state RR file */
                 choice = 'G' ;
+     	      else if (strncmp (word, "FF_GAUNT",8) == 0) /*Its a data file giving the temperature averaged gaunt factors from Sutherland (1997)*/
+	        choice = 'g' ;
 	      else if (strncmp (word, "*", 1) == 0);	/* It's a continuation so record type remains same */
 
 	      else
@@ -792,7 +808,6 @@ Col
 
 		case 'N':
 /*  
-
 	080809 - It's a non-lte level, i.e. one for which we are going to calculate populations, at least for some number of these.
 	For these, we have to set aside space in the levden array in the plasma structure.  This is used for topbase
 	photoionization and macro atoms
@@ -1007,6 +1022,7 @@ is already incremented
 		  break;
 
 		case 'n':	// Its an "LTE" level
+
 		  if (sscanf (aline, "%*s %d %d %d %le %le\n", &zz, &iistate, &qnum, &gg, &exx) == 5)	//IT's KURUCZSTYLE
 		    {
 		      istate = iistate;
@@ -1061,7 +1077,8 @@ is already incremented
 		    {
 //OLD                 Error
 //OLD                   ("Get_atomic_data: file %s  Reading lev_type (%d) for ion %d with lev_type (%d). Not allowed\n",
-//OLD                    file, lev_type, n, ion[n].lev_type);
+//OLD                    file, lev_type, n, ion[n].lev_type)
+
 		      break;
 		    }
 //  End section known to be idential to case N
@@ -1333,7 +1350,6 @@ for the ionstate.
 			{	// It's a TOPBASE style photoionization record, beginning with the summary record
 			  sscanf (aline, "%*s %d %d %d %d %le %d\n", &z,
 				  &istate, &islp, &ilv, &exx, &np);
-//			printf ("Read a topbase z=%i, istate=%i, islp=%i, ilv=%i\n",z,istate,islp,ilv);
 			  for (n = 0; n < np; n++)
 			    {	//Read the topbase photoionization records
 			      if (fgets (aline, LINELENGTH, fptr) == NULL)
@@ -1403,7 +1419,6 @@ for the ionstate.
 				  exit (0);
 				}
 			      ion[config[n].nion].ntop++;
-//			      printf("Accepted Z %d NI %d %d %d (%d %d) into ntopphot=%i e=%e nu=%e\n", z,istate,islp,ilv,n,config[n].nden,ntop_phot,xe[0],xe[0]*EV2ERGS/H);
 			      for (n = 0; n < np; n++)
 				{
 				  phot_top[ntop_phot].freq[n] = xe[n] * EV2ERGS / H;	// convert from eV to freqency
@@ -2256,6 +2271,36 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 		    	} //end of loop over ions
 			
 		break ;
+/* NSH 120921 The following are lines to read in temperature averaged gaunt factors from the data of Sutherland (1997). The atomic file is basically unchaned from the data on the website, just with the top few lines commented out, and a label prepended to each line */
+
+		case 'g':
+   			nparam=sscanf(aline,"%*s %le %le %le %le %le",&gsqrdtemp,&gfftemp,&s1temp,&s2temp,&s3temp);  //split and assign the line
+    		if (nparam >5 || nparam<1)        //     trap errors 
+        		{	  
+			Error ("Something wrong with sutherland gaunt data\n");
+		        Error ("Get_atomic_data: %s\n", aline);
+		        exit (0);
+			}
+		if (gaunt_n_gsqrd == 0 || gsqrdtemp > gaunt_total[gaunt_n_gsqrd-1].log_gsqrd) //We will use it if it's our first piece of data or is in order
+			{
+			gaunt_total[gaunt_n_gsqrd].log_gsqrd=gsqrdtemp; //The scaled electron temperature squared for this array
+	 		gaunt_total[gaunt_n_gsqrd].gff=gfftemp;	
+	 		gaunt_total[gaunt_n_gsqrd].s1=s1temp;
+			gaunt_total[gaunt_n_gsqrd].s2=s2temp;
+			gaunt_total[gaunt_n_gsqrd].s3=s3temp;
+			gaunt_n_gsqrd++;
+			}
+		else 
+			{
+			Error ("Something wrong with gaunt data\n");
+			Error ("Get_atomic_data %s\n", aline);
+			exit(0);
+			}
+
+
+
+		break;
+
 
 		case 'c':	/* It was a comment line so do nothing */
 		  break;
@@ -2283,32 +2328,7 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 
 /* OK now summarize the data that has been read*/
 
-
-/* The next lines are temporary to write out DR coefficients for testing 
-  for (n=0;n<nions;n++)
-	{
-	if (ion[n].drflag==0)
-		{
-		printf ("Ion %i (z=%i, state=%i) has no DR coefficients\n",n,ion[n].z,ion[n].istate);
-		}
-	else
-		{
-		n2=ion[n].nxdrecomb;
-		printf ("Ion %i (z=%i, state=%i) has C parameters ",n, ion[n].z,ion[n].istate);
-		for (n1=0;n1<drecomb[n2].nparam;n1++)
-			{
-			printf ("%e ",drecomb[n2].c[n1]);
-			}
-		printf ("and E parameters ");
-		for (n1=0;n1<drecomb[n2].nparam;n1++)
-			{
-			printf ("%e ",drecomb[n2].e[n1]);
-			}
-		printf ("\n");
-		}
-	}
-*/
-
+	
 
 
 
@@ -2326,6 +2346,7 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
   Log ("We have read in %3d Cardona partition functions coefficients\n",ncpart); 
   Log ("We have read in %3d Badnell totl Radiative rate coefficients\n",n_total_rr); 
   Log ("We have read in %3d Badnell GS   Radiative rate coefficients over the temp range %e to %e\n",n_bad_gs_rr,gstmin,gstmax); 
+  Log ("We have read in %3d Scaled electron temperature gaunt factor lines",gaunt_n_gsqrd);
   Log ("The minimum frequency for photoionization is %8.2e\n", phot_freq_min);
 
 

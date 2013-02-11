@@ -119,7 +119,6 @@ dot (a, b)
     {
       Error ("dot:sane_check of x: %d a %f %f %f b %f %f %f\n",
 	     sane_check (x), a[0], a[1], a[2], b[0], b[1], b[2]);
-//      exit (0);
     }
   return (x);
 }
