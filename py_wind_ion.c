@@ -8,7 +8,7 @@
  	
 	ion_summary (w, element, istate, iswitch, rootname, ochoice) calculates and 
 	displays information for a specific element and ionization state.  The information
-	dispaled depends upon the value of iswitch  
+	displayed depends upon the value of iswitch  
 	
 
 Arguments:		
@@ -142,6 +142,9 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
 	      else if (iswitch==2) {
 		      x=plasmamain[nplasma].scatters[nion];
 	      }
+	      else if (iswitch==3) {
+		      x=plasmamain[nplasma].xscatters[nion];
+	      }
       else {
 		  Error("ion_summary : Unknown switch %d \n",iswitch);
 		  exit(0);
@@ -162,6 +165,8 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
 	strcpy (choice, ".ionc");
       else if (iswitch==2) 
 	strcpy (choice, ".ions");
+      else if (iswitch==3) 
+	strcpy (choice, ".iona");
       else {
 		  Error("ion_summary : Unknown switch %d \n",iswitch);
 		  exit(0);

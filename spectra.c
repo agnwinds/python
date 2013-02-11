@@ -567,6 +567,7 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm)
   double x, dd;
 
 
+
   /* Open or reopen a file for writing the spectrum */
   if ((fptr = fopen (filename, "w")) == NULL)
     {
@@ -576,24 +577,36 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm)
 
   /* Check that nspecmin and nspecmax are reasonable */
   if (nspecmin < 0 || nspecmax < 0 || nspecmin > nspecmax
-      || nspecmax > NSPEC - 1)
-    {
+      ) {
       Error
-	("spectrum_summary: nspecmin %d or nspecmax %d not reasonable (NSPEC %d\n",
-	 nspecmin, nspecmax, NSPEC);
+	("spectrum_summary: nspecmin %d or nspecmax %d not reasonable \n",
+	 nspecmin, nspecmax);
       exit (0);
     }
 
   /* Construct and write a header string  for the output file */
   fprintf (fptr, "# Python Version %s\n", VERSION);
-  strcpy (string, "# Freq.        Lambda");
+
+  get_time (string);
+  fprintf (fptr, "# Date	%s\n#  \n", string);
+
+  /* Save all of the parameter file information to the spectrum file */
+
+  rdpar_save (fptr);
+
+
+  /* Write the rest of the header for the spectrum file */
+
+  fprintf (fptr, "# \n# Freq.        Lambda");
+
   for (n = nspecmin; n <= nspecmax; n++)
     {
-      strcat (string, "  ");
-      strncat (string, s[n].name, 15);
+      fprintf(fptr," %8s",s[n].name);
     }
+    
 
-  fprintf (fptr, "%s\n", string);
+  fprintf (fptr, "\n");
+
 
   /* Don't print out the end bins because they include all photons outside the frequency range and there may be some
      as a result of the fact that the bb function generate some IR photons */
@@ -616,8 +629,10 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm)
 	    {			/*fnu */
 	      x /= (dfreq * dd);
 	    }
-	  fprintf (fptr, "%8.3g ", x * renorm);
+	  fprintf (fptr, " %8.3g", x * renorm);
 	}
+
+
       fprintf (fptr, "\n");
     }
 

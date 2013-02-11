@@ -165,7 +165,7 @@ one is odd. We do frequency here but weighting in extract!! */
 	    }
 
 /* 68b - 0902 - ksl - turn phot_history on for the middle spectrum.  Note that we have to wait
- * to actually initialize phot_hist because the photon bundle is rewighted in extract_one */
+ * to actually initialize phot_hist because the photon bundle is reweighted in extract_one */
 
 	  if (phot_history_spectrum==n){
 		  phot_hist_on=1;  // Start recording the history of the photon
@@ -370,6 +370,9 @@ the same resonance again */
 
   if (istat == P_ESCAPE)
     {
+
+      /* This seems very defensive.  Is tau ever less than 0? */
+
       if (!(0 <= tau && tau < 1.e4))
 	Error_silent
 	  ("Warning: extract_one: ignoring very high tau  %8.2e at %g\n",
@@ -377,6 +380,9 @@ the same resonance again */
       else
 	{
 	  k = (pp->freq - s[nspec].freqmin) / s[nspec].dfreq;
+
+	  /* Force the frequency to be in range of that recorded in the spectrum */
+
 	  if (k < 0)
 	    k = 0;
 	  else if (k > NWAVE - 1)
@@ -400,16 +406,17 @@ the same resonance again */
 		  phot_hist_on=0;
 	  }
 
-	  if (diag_on_off && 1530.0 < 2.997925e18 / pp->freq
-	      && 2.997925e18 / pp->freq < 1570.0)
-	    {
-	      fprintf (epltptr,
-		       "f%2d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %6.3f %6.3f %6.3f %7.2f %7.2f %10.3e\n",
-		       nspec, pstart.x[0], pstart.x[1], pstart.x[2],
-		       pp->x[0], pp->x[1], pp->x[2], pp->lmn[0],
-		       pp->lmn[1], pp->lmn[2], 2.997925e18 / pp->freq,
-		       tau, pp->w);
-	    }
+	  //68c  Commented out these steps as no longer likely to ever be used again
+//OLD68c	  if (diag_on_off && 1530.0 < 2.997925e18 / pp->freq
+//OLD68c	      && 2.997925e18 / pp->freq < 1570.0)
+//OLD68c	    {
+//OLD68c	      fprintf (epltptr,
+//OLD68c		       "f%2d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %6.3f %6.3f %6.3f %7.2f %7.2f %10.3e\n",
+//OLD68c		       nspec, pstart.x[0], pstart.x[1], pstart.x[2],
+//OLD68c		       pp->x[0], pp->x[1], pp->x[2], pp->lmn[0],
+//OLD68c		       pp->lmn[1], pp->lmn[2], 2.997925e18 / pp->freq,
+//OLD68c		       tau, pp->w);
+//OLD68c	    }
 
 	}
 

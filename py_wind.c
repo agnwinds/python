@@ -196,7 +196,7 @@ I did not change this now.  Though it could be done.  02apr ksl */
   printf ("Read Atomic data from %s\n", geo.atomic_filename);
 
 
-/* Produce a standard set of output files */
+/* Produce a standard set of output files and exit*/
   if (interactive == 0)
     {
 	zoom (1);  /* This affects the logfile */
@@ -403,9 +403,14 @@ py_wind_help ()
 \n\
 This program reads a wind save file created by python and examine the wind structure\\
 \n\
-	Usage: py_wind [-h] filename \n\
+	Usage: py_wind [-h] [-s] [root] \n\
 \n\
-	where filename is the root name for a wind_save file  \n\
+	where\n\
+		-h 	prints out a short help file and exits (see help routine below) \n\
+		-s	causes certain parameters to be printed out in individual files \n\
+			after which the program exits \n\
+		root	optional root name of wind_save file.  If this is not given, \n\
+			the user is queried for this \n\
 \n\
 ";
 

@@ -356,8 +356,9 @@ the current version of scattering really does what the old code did for two-leve
 			     pp.x[2]);
 
 		  /* 68a - 090124 - ksl - Increment the number of scatters by this ion in this cell */
+		  /* 68c - 090408 - ksl - Changed this to the weight of the photon at the time of the scatter */
 
-		  plasmamain[wmain[n].nplasma].scatters[line[nres].nion]++;
+		  plasmamain[wmain[n].nplasma].scatters[line[nres].nion]+=pp.w;
 
 		  if (geo.rt_mode == 1)	//only do next line for non-macro atom case
 		    {

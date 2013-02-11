@@ -674,7 +674,7 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
     }
   else
     {
-      Error ("lucy_mazzali1: t_r too low www %8.2e t_e %8.2e  t_r %8.2e \n",
+      Error_silent ("lucy_mazzali1: t_r too low www %8.2e t_e %8.2e  t_r %8.2e \n",
 	     www, t_e, t_r);
       fudge = 0.0;
       interpfrac = 0.0;
@@ -683,7 +683,7 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
 
   if (fudge < MIN_FUDGE || MAX_FUDGE < fudge)
     {
-      Error
+      Error_silent
 	("lucy_mazzali1: fudge>10 www %8.2e t_e %8.2e  t_r %8.2e \n",
 	 www, t_e, t_r);
     }

@@ -1077,6 +1077,21 @@ complete_file_summary (w, root, ochoice)
   temp_summary (w, root, ochoice);
   temp_rad (w, root, ochoice);
   electron_summary (w, root, ochoice);
+  ion_summary (w, 6, 3, 0, root, ochoice);
+  ion_summary (w, 6, 4, 0, root, ochoice);
+  ion_summary (w, 6, 5, 0, root, ochoice);
+  ion_summary (w, 7, 4, 0, root, ochoice);
+  ion_summary (w, 7, 5, 0, root, ochoice);
+  ion_summary (w, 7, 6, 0, root, ochoice);
+  ion_summary (w, 8, 4, 0, root, ochoice);
+  ion_summary (w, 8, 5, 0, root, ochoice);
+  ion_summary (w, 8, 6, 0, root, ochoice);
+  ion_summary (w, 8, 7, 0, root, ochoice);
+  ion_summary (w, 14, 3, 0, root, ochoice);
+  ion_summary (w, 14, 4, 0, root, ochoice);
+  ion_summary (w, 14, 5, 0, root, ochoice);
+
+ /* Before 68c, this is what we printed out */ 
   ion_summary (w, 6, 3, 1, root, ochoice);
   ion_summary (w, 6, 4, 1, root, ochoice);
   ion_summary (w, 6, 5, 1, root, ochoice);
@@ -1090,6 +1105,36 @@ complete_file_summary (w, root, ochoice)
   ion_summary (w, 14, 3, 1, root, ochoice);
   ion_summary (w, 14, 4, 1, root, ochoice);
   ion_summary (w, 14, 5, 1, root, ochoice);
+
+  
+  ion_summary (w, 6, 3, 2, root, ochoice);
+  ion_summary (w, 6, 4, 2, root, ochoice);
+  ion_summary (w, 6, 5, 2, root, ochoice);
+  ion_summary (w, 7, 4, 2, root, ochoice);
+  ion_summary (w, 7, 5, 2, root, ochoice);
+  ion_summary (w, 7, 6, 2, root, ochoice);
+  ion_summary (w, 8, 4, 2, root, ochoice);
+  ion_summary (w, 8, 5, 2, root, ochoice);
+  ion_summary (w, 8, 6, 2, root, ochoice);
+  ion_summary (w, 8, 7, 2, root, ochoice);
+  ion_summary (w, 14, 3, 2, root, ochoice);
+  ion_summary (w, 14, 4, 2, root, ochoice);
+  ion_summary (w, 14, 5, 2, root, ochoice);
+
+  
+  ion_summary (w, 6, 3, 3, root, ochoice);
+  ion_summary (w, 6, 4, 3, root, ochoice);
+  ion_summary (w, 6, 5, 3, root, ochoice);
+  ion_summary (w, 7, 4, 3, root, ochoice);
+  ion_summary (w, 7, 5, 3, root, ochoice);
+  ion_summary (w, 7, 6, 3, root, ochoice);
+  ion_summary (w, 8, 4, 3, root, ochoice);
+  ion_summary (w, 8, 5, 3, root, ochoice);
+  ion_summary (w, 8, 6, 3, root, ochoice);
+  ion_summary (w, 8, 7, 3, root, ochoice);
+  ion_summary (w, 14, 3, 3, root, ochoice);
+  ion_summary (w, 14, 4, 3, root, ochoice);
+  ion_summary (w, 14, 5, 3, root, ochoice);
   return (0);
 }
 

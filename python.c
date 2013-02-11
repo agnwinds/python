@@ -155,9 +155,13 @@ History:
 			way one reads information from the .pf file after having read
 			in the windsave files that could be cleaned up.
 	081218	ksl	67c -- Added a switch -h to provide information about usage.
-	000202	ksl	68b -- Added switch -v  to control the level of verbosity.  Updated
+	090202	ksl	68b -- Added switch -v  to control the level of verbosity.  Updated
 			Plasma to allow routine to track scatters and absorption during
 			generation of detailed spectrum
+	090402	ksl	NSPEC has been moved to the main routine, as its only remaining
+			purpose is to define some arrays in the main routine.  Note that
+			MSPEC still has meaning as the number of spectra of various types
+			that are construced without going through types.
 	
  	
  	Look in Readme.c for more text concerning the early history of the program.
@@ -174,6 +178,7 @@ History:
 
 
 #include "python.h"
+#define NSPEC	20	//68c moved the defintion here, because NSPEC is not needed by any other routine
 
 int
 main (argc, argv)
@@ -192,10 +197,10 @@ main (argc, argv)
 /* Next three lines have variables that should be a structure, or possibly we
 should allocate the space for the spectra to avoid all this nonsense.  02feb ksl */
 
-  double angle[NSPEC - 3], phase[NSPEC - 3];
-  int scat_select[NSPEC - 3], top_bot_select[NSPEC - 3];
-  double rho_select[NSPEC - 3], z_select[NSPEC - 3], az_select[NSPEC - 3],
-    r_select[NSPEC - 3];
+  double angle[NSPEC], phase[NSPEC];
+  int scat_select[NSPEC], top_bot_select[NSPEC];
+  double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC],
+    r_select[NSPEC];
 
   char yesno[20];
   int select_extract, select_spectype;
@@ -982,9 +987,9 @@ macro_estimaters.  Is this OK, Stuart??   */
   angle[1] = 30.;
   angle[2] = 60.;
   angle[3] = 80.;
-  for (n = 4; n < NSPEC - 3; n++)
+  for (n = 4; n < NSPEC; n++)
     angle[n] = 45;
-  for (n = 0; n < NSPEC - 3; n++)
+  for (n = 0; n < NSPEC; n++)
     {
       phase[n] = 0.5;
       scat_select[n] = 1000;
@@ -1033,10 +1038,13 @@ macro_estimaters.  Is this OK, Stuart??   */
 /* Note: Below here many of the variables which are read in are not currently part of geo stucture */
 
       rdint ("no_observers", &nangles);
-      if (nangles < 1 || nangles > NSPEC - MSPEC)
+ 
+//0ld68c      if (nangles < 1 || nangles > NSPEC - MSPEC)
+      if (nangles < 1 || nangles > NSPEC)
 	{
 	  Error ("no_observers %d should not be > %d or <0\n", nangles,
-		 NSPEC - MSPEC);
+		 NSPEC);
+//OLD68c		 NSPEC - MSPEC);
 	  exit (0);
 	}
 
@@ -1545,7 +1553,6 @@ run -- 07jul -- ksl
 #endif
 
       spectrum_create (p, freqmin, freqmax, nangles, select_extract);
-//OLD68b - T_e and T_r are not changing during these cycles      xtemp_rad (w);
 
 /* Write out the detailed spectrum each cycle so that one can see the statistics build up! */
       renorm = ((double) (pcycles)) / (geo.pcycle + 1.0);

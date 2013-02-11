@@ -1157,7 +1157,7 @@ for the ionstate.
 			n++;
 		      if (n == nlevels)
 			{
-			  Error
+			  Error_silent
 			    ("get_atomic_data: No configuration found to match upper state for phot. line %d\n",
 			     lineno);
 			  break;	//Need to match the configuration for macro atoms - break if not found.
@@ -1171,7 +1171,7 @@ for the ionstate.
 			m++;
 		      if (m == nlevels)
 			{
-			  Error
+			  Error_silent
 			    ("get_atomic_data: No configuration found to match lower state for phot. line %d\n",
 			     lineno);
 			  break;	//Need to match the configuration for macro atoms - break if not found.
@@ -1596,7 +1596,7 @@ Col
 			n++;
 		      if (n == nlevels)
 			{
-			  Error
+			  Error_silent
 			    ("Get_atomic_data: No configuration found to match lower level of line %d\n",
 			     lineno);
 			  break;
@@ -1609,7 +1609,7 @@ Col
 			m++;
 		      if (m == nlevels)
 			{
-			  Error
+			  Error_silent
 			    ("Get_atomic_data: No configuration found to match upper level of line %d\n",
 			     lineno);
 			  break;

@@ -198,33 +198,53 @@ recreated when a windfile is read into the program
     {
       for (n = 0; n < NDIM2; n++)
 	{
-	  wind_n_to_ij (n, &i, &j);
-	  if (i < (NDIM - 1) && j < (MDIM - 1))
+	  n_inwind = check_corners_inwind (n);
+	  if (w[n].vol == 0 && n_inwind > 0)
 	    {
-	      n_inwind = 0;
-	      if (where_in_wind (w[n].x) == 0)
-		n_inwind++;
-	      if (where_in_wind (w[n + 1].x) == 0)
-		n_inwind++;
-	      if (where_in_wind (w[n + MDIM].x) == 0)
-		n_inwind++;
-	      if (where_in_wind (w[n + MDIM + 1].x) == 0)
-		n_inwind++;
-	      if (w[n].vol == 0 && n_inwind > 0)
-		{
-		  Error
-		    ("wind2d: Cell %d has %d corners in wind, but zero volume\n",
-		     n, n_inwind);
-		  w[n].inwind = W_IGNORE;
-		}
-	      if (w[n].inwind == W_PART_INWIND && n_inwind == 4)
-		{
-		  Error
-		    ("wind2d: Cell %d has 4 corners in wind, but is only partially in wind\n",
-		     n);
-		}
+	      wind_n_to_ij (n, &i, &j);
+	      Error
+		("wind2d: Cell %3d (%2d,%2d) has %d corners in wind, but zero volume\n",
+		 n, i, j, n_inwind);
+	      w[n].inwind = W_IGNORE;
+	    }
+	  if (w[n].inwind == W_PART_INWIND && n_inwind == 4)
+	    {
+	      wind_n_to_ij (n, &i, &j);
+	      Error
+		("wind2d: Cell %3d (%2d,%2d) has 4 corners in wind, but is only partially in wind\n",
+		 i, j, n);
 	    }
 	}
+//Old68c      for (n = 0; n < NDIM2; n++)
+//Old68c        {
+//Old68c          wind_n_to_ij (n, &i, &j);
+//Old68c          if (i < (NDIM - 2) && j < (MDIM - 2))
+//Old68c          if (i < (NDIM - 1) && j < (MDIM - 1))
+//Old68c            {
+//Old68c              n_inwind = 0;
+//Old68c              if (where_in_wind (w[n].x) == 0)
+//Old68c                n_inwind++;
+//Old68c              if (where_in_wind (w[n + 1].x) == 0)
+//Old68c                n_inwind++;
+//Old68c              if (where_in_wind (w[n + MDIM].x) == 0)
+//Old68c                n_inwind++;
+//Old68c              if (where_in_wind (w[n + MDIM + 1].x) == 0)
+//Old68c                n_inwind++;
+//Old68c              if (w[n].vol == 0 && n_inwind > 0)
+//Old68c                {
+//Old68c                  Error
+//Old68c                    ("wind2d: Old Cell %3d (%2d,%2d) has %d corners in wind, but zero volume\n",
+//Old68c                     n, i, j, n_inwind);
+//Old68c                  w[n].inwind = W_IGNORE;
+//Old68c                }
+//Old68c              if (w[n].inwind == W_PART_INWIND && n_inwind == 4)
+//Old68c                {
+//Old68c                  Error
+//Old68c                    ("wind2d: Old Cell %3d (%2d,%2d) has 4 corners in wind, but is only partially in wind\n",
+//Old68c                     i, j, n);
+//Old68c                }
+//Old68c    }
+//Old68c    }
 
     }
 
@@ -240,6 +260,7 @@ recreated when a windfile is read into the program
       NPLASMA = NDIM2;
 
     }
+
   calloc_plasma (NPLASMA);
   xplasma = plasmamain;
   create_maps (CHOICE);		// Populate the maps from plasmamain & wmain
@@ -330,6 +351,7 @@ be optional which variables beyond here are moved to structures othere than Wind
       else
 	plasmamain[i].lum_adiabatic = 0.0;
     }
+
   /* Calculate one over dvds */
   dvds_ave ();
   wind_check (w, -1);		// Check the wind for reasonability
@@ -904,5 +926,62 @@ zero_scatters ()
 	}
     }
 
-  return(0);
+  return (0);
 }
+
+
+/* The next routine checks how many corners of a wind cell
+ * are in the wind
+  
+ This routine returns the number of corners of a wind cell
+ that are in the wind.  It is intended to standardize this
+ check so that one can use such a routin in the volumes
+ calculations.  
+
+Notes:
+
+	It has not been implemented for a spherical (1d)
+	coordinate system.
+
+	The fact that none of the corners of a cell are in
+	the wind is not necessarily a guarantee that the wind
+	does not pass through the cell.  This is not only
+	a theoretical problem, because we generally use
+	a logarithmic spacing for the wind cells and thus
+	the dimensions of the cells get quite large as one
+	gets far from the center.
+	
+	The only way to verify this is to check all four 
+	surfaces of the wind.
+  
+History
+	080403	ksl	68c - Added, or more correctly simply
+			moved code into a separate routine so 
+			could be called from elsewhere
+ */
+
+int
+check_corners_inwind (n)
+     int n;
+{
+  int n_inwind;
+  int i, j;
+
+  wind_n_to_ij (n, &i, &j);
+
+  n_inwind = 0;
+  if (i < (NDIM - 2) && j < (MDIM - 2))
+    {
+      if (where_in_wind (wmain[n].x) == 0)
+	n_inwind++;
+      if (where_in_wind (wmain[n + 1].x) == 0)
+	n_inwind++;
+      if (where_in_wind (wmain[n + MDIM].x) == 0)
+	n_inwind++;
+      if (where_in_wind (wmain[n + MDIM + 1].x) == 0)
+	n_inwind++;
+    }
+
+  return (n_inwind);
+}
+

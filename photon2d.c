@@ -267,10 +267,21 @@ History:
 			we want to ignore a cell because the portion
 			of the volume of that cell is negligibly
 			small
+	09mar	ksl	Provided a capability to count reduce
+			the numbers of errors for a photon
+			going through a region with negligibe
+			volume.  
  
 **************************************************************/
 
+/* 68c - The variable below was added because there were cases where the number
+ * of photons passing through a cell with a neglible volume was becoming
+ * too large and stopping the program.  This is a bandaide since if this
+ * is occurring a lot we should be doing a better job at calculating the
+ * volume
+ */
 
+int neglible_vol_count=0;
 
 int
 translate_in_wind (w, p, tau_scat, tau, nres)
@@ -350,9 +361,11 @@ return and record an error */
     }
   else if (one->inwind == W_IGNORE)
     {
-      Error_silent
-	("translate_in_wind: Photon is in cell %d with negligible volume, moving photon %.2e\n",
-	 n, smax);
+      if ((neglible_vol_count % 100)==0) Error
+	("translate_in_wind: Photon is in cell %d with negligible volume, moving photon %.2e  Occurrences %d\n",
+	 n, smax,neglible_vol_count+1);
+      
+      neglible_vol_count++;
       move_phot (p, smax);
       return (p->istat);
 

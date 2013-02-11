@@ -1,7 +1,3 @@
-
-
-
-
 /* 
 
    This file should contain utilities which can be used to work with photon structues.  It also
@@ -55,6 +51,7 @@ stuff_phot (pin, pout)
 /* 
 Synopsis: move_phot (pp, ds)
 */
+
 int
 move_phot (pp, ds)
      PhotPtr pp;
@@ -129,9 +126,15 @@ phot_hist (p,iswitch)
 /* The next routine is destigned to update a portion of the PlasmaPtr to reflect where
  * photons along the line of sight to the observer were absorbed in the wind
 
+Notes:
 
-090211	ksl	Created to store the energy removed photons headed toward the observer
-		by an ion in a particular cell of the wind.
+As photon is extracted from the wind, tau changes due to scatters and w changes due
+to absorption.  We are just recording how much energy is absorbed by scatterng processes
+here, and so the energy absorbed is the current weight (exp(-tau_before) - exp (-tau_after))
+
+	090211	ksl	Created to store the energy removed photons headed toward the observer
+			by an ion in a particular cell of the wind.
+	0904	ksl	68c - Fixed problem concerning where energy was being stored
  */
 
 int phot_history_summarize()
@@ -139,22 +142,30 @@ int phot_history_summarize()
 	int n;
 	PlasmaPtr xplasma;
 	PhotPtr p;
-	double x_old,x_new;
+	double x;
+	double tau,tau_old;
 	int nion;
 
 	p=&xphot_hist[0];
-	xplasma=&plasmamain[wmain[p->grid].nplasma];
-	x_old=p->w;
+	tau_old=p->tau;
 
 	for (n=1;n<n_phot_hist;n++){
 		p=&xphot_hist[n];
-		nion=lin_ptr[p->nres]->nion;
-		x_new=p->w*exp(-(p->tau));
-		xplasma->xscatters[nion]+=(x_old-x_new);
-		x_old=x_new; 
+
+		tau=p->tau; // tau is tau after the scatter
+
+		nion=lin_ptr[p->nres]->nion; // ion that scattered
+
+		x=p->w * (exp(-tau_old)-exp(-tau)); // energy removed by scatter
+
+		xplasma=&plasmamain[wmain[p->grid].nplasma]; // pointer to plasma cell where scattering occured
+
+		xplasma->xscatters[nion]+=(x);
+
+		tau_old=tau; 
 
 		if(xplasma->xscatters[nion]<0.0) {
-			Error("Help me, %d %d Rhonda %d %d\n",n,n_phot_hist,p->grid,wmain[p->grid].nplasma );
+			Error("phot_history_summarize:  n %d n_phot_hist %d phot_hist %d nplasma %d\n",n,n_phot_hist,p->grid,wmain[p->grid].nplasma );
 		}
 	}
 		

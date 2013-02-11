@@ -372,7 +372,7 @@ cylvar_wind_complete (w)
  
 **************************************************************/
 
-#define RESOLUTION   100
+#define RESOLUTION   1000
 
 
 int
