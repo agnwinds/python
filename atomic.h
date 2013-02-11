@@ -248,7 +248,6 @@ typedef struct photoionization
 
 Photoionization xphot[NIONS];
 PhotoionizationPtr xphot_ptr[NIONS]; /* Pointers to xphot in threshold frequency order --57h -- ksl*/
-PhotoionizationPtr xphot_ptr1[NIONS]; /* Pointers to xphot in ion order --57h -- ksl*/
 
 int nxphot;			/*The actual number of ions for which there are VFKY photoionization x-sections */
 double phot_freq_min;		/*The lowest frequency for which photoionization can occur */

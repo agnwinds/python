@@ -121,8 +121,6 @@ photon hit the star in its passage from pold to the current position */
       pp->istat = P_HIT_STAR;	/* Signifying that photon is hitting star */
     }
   move_phot (pp, ds + DFUDGE);
-
-
   return (pp->istat);
 }
 
@@ -318,13 +316,12 @@ return and record an error */
       return (n);		/* Photon was not in grid */
     }
 
+
 /* Assign the pointers for the cell containing the photon */
 
-  one = &wmain[n];		/* one is the grid cell where the photon is */
+  one = &wmain[n];		/* one is the grid cell where the poton is */
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
-  
-
 
 
 /* Calculate the maximum distance the photon can travel in the cell */
@@ -402,9 +399,6 @@ error continues to appear, new investigations are required.
   smax += DFUDGE;		/* DFUDGE is to force the photon through the cell boundaries.
 				   Implies that phot is in another cell often.  */
 
-
-
-
 /* The next set of limits the distance a photon can travel.  There are 
 a good many photons which travel more than this distance without this 
 limitation, at least in the standard 30 x 30 instantiation.  It does
@@ -426,10 +420,6 @@ radiation, which is the single largest contributer to execution time.*/
 /* Note that ds_current does not alter p in any way at present 02jan ksl */
 
   ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
-
-  if (p->nres < 0)  xplasma->nscat_es++;
-  if (p->nres > 0)  xplasma->nscat_res++;
-
 
 /* OK now we increment the radiation field in the cell, translate the photon and wrap 
    things up If the photon is going to scatter in this cell, radiation also reduces 

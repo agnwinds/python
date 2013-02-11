@@ -47,20 +47,13 @@ History:
 #include "atomic.h"
 #include "python.h"
 
-double sim_numin,sim_numax,sim_meanfreq;  // external variables set up so zbrent can solve for alhpa.
-
-
-
 int
 ion_abundances (xplasma, mode)
      PlasmaPtr xplasma;
      int mode;
 {
-  int ireturn,nion,nelem;
-  double zbrent(),sim_alpha_func();
-  double alphamin,alphamax,alphatemp,sim_w_temp;
+  int ireturn;
 
-//	printf("NSH here we are in ion_abundances, I think we are running at mode %i\n",mode);
 
   if (mode == 0)
     {
@@ -104,84 +97,6 @@ ion_abundances (xplasma, mode)
 /* Convergence check */
       convergence (xplasma);
     }
-  else if (mode == 4)
-    {                            //LTE with SIM correction this is called from define_wind, sim_alpha and sim_w are set to geo values in define_wind. Not sure this is ever called now, we thought it best to set the values to LTE when in define_wind.
-	ireturn = nebular_concentrations (xplasma, 5);
-    }
-  else if (mode == 5)
-   {       // One shot at updating t_e before calculating densities using the SIM correction
-/* Shift values to old */
-
-          // This call is after a photon flight, so we *should* have access to j and ave freq, and so we can calculate proper values for W and alpha
-	// To avoid problems with solving, we need to find a reasonable range of values within which to search for a solution to eq18. A reasonable guess is that it is around the current value....
-	
-
-
-	sim_numin=1.24e15;
-	sim_numax=1.21e19;
-	sim_meanfreq=xplasma->ave_freq; 
-
-	alphamin=xplasma->sim_alpha-0.1;
-	alphamax=xplasma->sim_alpha+0.1;
-	while (sim_alpha_func(alphamin)*sim_alpha_func(alphamax)>0.0 )
-		{
-		alphamin=alphamin-1.0;
-		alphamax=alphamax+1.0;
-		}
-
-
-/* We compute temporary values for sim alpha and sim weight. This will allow us to check that they are sensible before reassigning them */
-
-	alphatemp=zbrent(sim_alpha_func,alphamin,alphamax,0.00001);
-
-/*This next line computes the sim weight using an external function. Note that xplasma->j already contains the volume of the cell and a factor of 4pi, so the volume sent to sim_w is set to 1 and j has a factor of 4PI reapplied to it. This means that the equation still works in balance. It may be better to just implement the factor here, rather than bother with an external call.... */
-	sim_w_temp=sim_w((xplasma->j)*4*PI,1,1,xplasma->sim_alpha,sim_numin,sim_numax);
-
-	printf ("NSH We noew have calculated sim_w_temp=%e\n",sim_w_temp);
-        if (sane_check(sim_w_temp))
-		{
-		Error ("New sim parameters unreasonable, using existing parameters. Check number of photons in this cell");
-		}
-        else 
-		{
-		xplasma->sim_alpha=alphatemp;
-		xplasma->sim_w=sim_w_temp;
-		}
-
-
-
-
-	xplasma->sim_ip=xplasma->sim_w*(((pow (50000/HEV, xplasma->sim_alpha + 1.0)) - pow (100/HEV,xplasma->sim_alpha + 1.0)) /  (xplasma->sim_alpha + 1.0));
-	xplasma->sim_ip *= 16*PI*PI;
-	xplasma->sim_ip /= xplasma->rho * rho2nh;
-
-
-
-
-      xplasma->dt_e_old = xplasma->dt_e;
-      xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;	//Must store this before others
-      xplasma->t_e_old = xplasma->t_e;
-      xplasma->t_r_old = xplasma->t_r;
-      xplasma->lum_rad_old = xplasma->lum_rad;
-
-       ireturn = one_shot (xplasma, mode);
-
-
-	for (nelem = 0; nelem < nelements; nelem++)
-		{      
-		for (nion = ele[nelem].firstion; nion < ele[nelem].firstion+ele[nelem].nions; nion++)
-			{
-//			printf ("For ion number %i of element %i, Ioniz=%e, Recomb=%e, Density=%e\n",nion-ele[nelem].firstion,ion[nion].z       ,xplasma->ioniz[nion],xplasma->recomb[nion],xplasma->density[nion]);
-	}
-}
-
-
-
-/* Convergence check */
-      convergence (xplasma);
-    }
-
-
   else
     {
       Error
@@ -378,18 +293,12 @@ one_shot (xplasma, mode)
 
   gain = xplasma->gain;
 
-   printf("NSH Here we are in one_shot, cell number %i gain %e mode %i t_r %f t_e %f sim_w %e sim_alpha %e logIP %e\n",xplasma->nplasma,gain,mode,xplasma->t_r,xplasma->t_e,xplasma->sim_w,xplasma->sim_alpha,log10(xplasma->sim_ip));
-   printf("NSH in this cell, we have %i AGN photons and %i disk photons\n",xplasma->ntot_agn,xplasma->ntot_disk);
   te_old = xplasma->t_e;
   te_new = calc_te (xplasma, 0.7 * te_old, 1.3 * te_old);
-
   xplasma->t_e = (1 - gain) * te_old + gain * te_new;
 
-
- //  printf ("EMERGENCY EMERGENCY EMERGENCY - your 1 million K muck up is still at line 301 of ionization\n");
- // xplasma->t_e=1e6;
   dte = xplasma->dt_e;
-  
+
 //  Log ("One_shot: %10.2f %10.2f %10.2f\n", te_old, te_new, w->t_e);
 
 
@@ -401,7 +310,7 @@ meaning in nebular concentrations.
 
   if (mode == 3)
     mode = 2;
-  else if (mode <= 1 ||  mode >= 6)     /* modification to cope with mode 5 - SIM */
+  else if (mode != 4)
     {
 
       Error ("one_shot: Sorry, Charlie, don't know how to process mode %d\n",
@@ -521,7 +430,6 @@ calc_te (xplasma, tmin, tmax)
 }
 
 
-
 /* This is just a function which has a zero when total energy loss is equal to total energy gain */
 
 double
@@ -575,20 +483,6 @@ zero_emit (t)
   difference =
     xxxplasma->heat_tot - xxxplasma->lum_adiabatic -
     total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);
-//     printf("NSH Zero emit returns %e for t_e= %f\n",difference,t);
+
   return (difference);
 }
-
-double	
-    sim_alpha_func(alpha)
-	double alpha;
-	{
-	double answer;
-	answer=((alpha+1.)/(alpha+2.))*((pow(sim_numax,(alpha+2.))-pow(sim_numin,(alpha+2.)))/(pow(sim_numax,(alpha+1.))-pow(sim_numin,(alpha+1.)))) ;
-
-	answer = answer - sim_meanfreq;
-//	printf("NSH alpha=%f,f1=%e,f2=%e,meanfreq=%e,ans=%e\n",alpha,sim_numin,sim_numax,sim_meanfreq,answer);
-	return (answer);
-	}
-
-

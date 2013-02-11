@@ -86,11 +86,6 @@ levels (xplasma, mode)
       t = xplasma->t_r;
       weight = xplasma->w;
     }
-  else if (mode == 3)           // non_LTE with SS modification
-    {
-      t = xplasma->t_e;
-      weight = 1;
-    }
   else
     {
       Error ("levels: Could not calculate levels for mode %d\n", mode);

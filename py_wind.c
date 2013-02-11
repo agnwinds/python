@@ -214,12 +214,12 @@ I did not change this now.  Though it could be done.  02apr ksl */
 
 
 a:printf
-    ("\nn=ne,  v=vel,  i=ion info, j=ave_tau, f=ave_freq, p=nphot, S=sim_alpha\n");
+    ("\nn=ne,  v=vel,  i or I=ion info, j=ave_tau, f=ave_freq, p=nphot\n");
   printf
     ("r=t_r, t=t_e,  w=rad_weight, s=vol,     l=lum,     C=cooling/heating,  b=adiabatic cooling\n");
   printf
     ("a=abs, c=c4,   g=photo,      h=recomb,  k=tau H,   l=lum,     m=F_rad,   x=total,y=mod_te,\n");
-  printf ("o=overview,    e=everything, P=Partial emission meas, I=Ionisation parameter\n");
+  printf ("o=overview,    e=everything, P=Partial emission meas\n");
   printf
     ("W=wind_regions, D=dvds_ave, X=position summary, M=macro atom info, G=inner shell\n");
   printf
@@ -270,6 +270,7 @@ a:printf
       recomb_summary (w, root, ochoice);
       break;
     case 'i':			/* Allow user to display information about ions in the wind */
+    case 'I':			/* Allow user to display information about ions in the wind */
 
       rdint("Ion_info_type(0=fraction,1=density,2=scatters,3=abs",&iswitch);
 
@@ -283,9 +284,6 @@ a:printf
 	  rdint ("ion", &istate);
 	  ion_summary (w, n, istate, iswitch, root, ochoice);	// 0 implies ion fractions
 	}
-      break;
-    case 'I':
-      IP_summary(w, root, ochoice);
       break;
 
     case 'j':			/* Calculate the average tau at the center of a cell */
@@ -344,20 +342,11 @@ a:printf
     case 's':			/* Volume summary */
       vol_summary (w, root, ochoice);
       break;
-    case 'S':
-      alpha_summary (w, root, ochoice);
-      break;
     case 't':			/* Temp summary */
       temp_summary (w, root, ochoice);
       break;
-    case 'T':
-      thompson (w, root, ochoice);
-      break;
     case 'v':			/* Velocity summary */
       velocity_summary (w, root, ochoice);
-      break;
-    case 'V':                  /* Split of scatters in the cell between electron and resonant */
-      nscat_split (w, root, ochoice);     
       break;
     case 'w':			/* inten weight summary */
       weight_summary (w, root, ochoice);
@@ -373,9 +362,6 @@ a:printf
       break;
     case 'y':			/* Recalculate temperatures */
       modify_te (w, root, ochoice);
-      break;
-    case 'Y':                 /* Split of photons from different sources */
-      phot_split (w, root, ochoice);
       break;
     case 'z':			/* inspect a specific region */
       zoom (0);

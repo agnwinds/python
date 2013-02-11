@@ -113,6 +113,7 @@ lum_lines (one, nmin, nmax)
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
   t_e = xplasma->t_e;
+
   lum = 0;
   for (n = nmin; n < nmax; n++)
     {
@@ -156,6 +157,7 @@ lum_lines (one, nmin, nmax)
       else
 	lin_ptr[n]->pow = 0;
     }
+
   return (lum);
 }
 
@@ -403,10 +405,12 @@ in the configuration structure. 01dec ksl */
 
 	  if (w < 1.e-6)
 	    {			// Radiation is unimportant
+
 	      n2_over_n1 = c12 / (c21 + a);
 	    }
 	  else
 	    {			//Include effects of stimulated emission
+
 	      z = w / (exp (H_OVER_K * freq / tr) - 1.);
 	      n2_over_n1 = (c12 + g2_over_g1 * a * z) / (c21 + a * (1. + z));
 	    }
@@ -620,6 +624,7 @@ p_escape (line_ptr, xplasma)
   w = xplasma->w;
   dd = xplasma->density[line_ptr->nion];
   dvds = wmain[xplasma->nwind].dvds_ave;
+
 // Band-aid to prevent divide by zero in calculation of tau below
   if (dvds <= 0.0)
     {
@@ -646,14 +651,13 @@ p_escape (line_ptr, xplasma)
 
       tau = (d1 - line_ptr->gl / line_ptr->gu * d2);
       tau *= PI_E2_OVER_M * line_ptr->f / line_ptr->freq / dvds;
+
       if (tau < 1e-6)
 	escape = 1.;
       else if (tau < 10.0)
 	escape = (1. - exp (-tau)) / tau;
       else
 	escape = 1. / tau;
-
-
 
       pe_line_ptr = line_ptr;
       pe_ne = ne;

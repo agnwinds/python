@@ -156,8 +156,6 @@ one photon for each band.*/
       weight = 4. * STEFAN_BOLTZMANN * t * t * t * t * weight / NPHOT;
 
 
-
-
 // Now generate the photons
 
       iphot_start = 0;

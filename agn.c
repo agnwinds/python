@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include "atomic.h"
 #include "python.h"
-#include "balance_templates.h"
+
 
 #include "log.h"
 
@@ -103,12 +103,11 @@ emittance_pow (freqmin, freqmax,lum,alpha)
      double freqmin, freqmax,lum,alpha;
 {
   double constant, emit;
-  /* these are the frequencies over which the power law is defined - currently set to the
- 	equivalent of 2 to 10 keV */
+  /* these are the frequencies over which the power law is defined - currently set to roughly what they 
+     end up as when python is run normally with an accretion disk */
 
-
-#define   XFREQMIN  4.84e17
-#define   XFREQMAX  2.42e18
+#define   XFREQMIN  1e14
+#define   XFREQMAX  1e17
 
   /* first we need to calculate the constant for the power law function */
   constant =

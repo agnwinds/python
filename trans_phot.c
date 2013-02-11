@@ -98,7 +98,7 @@ trans_phot (w, p, iextract)
 
   for (nphot = 0; nphot < NPHOT; nphot++)
     {
- //           printf("nphot %d %g\n", p[nphot].np, (C/p[nphot].freq)/ANGSTROM);
+      //      printf("nphot %d %g\n", nphot, (C/p[nphot].freq)/ANGSTROM);
 
       //This is just a watchdog method to tell the user the program is still running
       if (nphot % 10000 == 0)
@@ -186,7 +186,7 @@ trans_phot (w, p, iextract)
 
 
 	  istat = translate (w, &pp, tau_scat, &tau, &nres);
-//	  printf("Photon=%i,weight=%e,tauscat=%f,nres=%i,istat=%i\n",nphot,p[nphot].w,tau_scat,nres,istat);
+
 /* nres is the resonance at which the photon was stopped.  At present the
 same value is also stored in pp->nres, but I have not yet eliminated 
 it from translate. ?? 02jan ksl */
@@ -350,9 +350,10 @@ the current version of scattering really does what the old code did for two-leve
 	      if (nres > -1 && nres < nlines)
 		{
 		  pp.nrscat++;
-/* This next statement writes out the position of every resonant scattering event to a file */
+/* This next statement writes out the position of every resonanat scattering event to a file */
 		  if (diag_on_off)
-		    fprintf (pltptr, "Photon %i has resonant scatter at %.2e %.2e %.2e in wind cell %i (grid cell=%i). Freq=%e Weight=%e\n", nphot,pp.x[0], pp.x[1],pp.x[2],wmain[n].nplasma,pp.grid,pp.freq,pp.w);
+		    fprintf (pltptr, "%.2e %.2e %.2e\n", pp.x[0], pp.x[1],
+			     pp.x[2]);
 
 		  /* 68a - 090124 - ksl - Increment the number of scatters by this ion in this cell */
 		  /* 68c - 090408 - ksl - Changed this to the weight of the photon at the time of the scatter */

@@ -247,15 +247,10 @@ struct geometry
 //    double kn_v_zero;         /* velocity at base of wind */
   double kn_r_scale, kn_alpha;	/* the scale length and power law exponent for the velocity law */
   double kn_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
-  double kn_v_zero;          /* NSH 19/04/11 - Added in as the multiple of the sound speed to use as the initial velocity */
 
   /* Parameters describing Castor and Larmors spherical wind */
-  double cl_v_zero, cl_v_infinity, cl_beta;	/* Power law exponent */
+  double cl_v_zero, cl_v_infinity, cl_beta;	/* Power law exponenet */
   double cl_rmin, cl_rmax;
-
-  /* Parameters describing a spherical shell test wind */
-  double shell_vmin, shell_vmax, shell_beta;
-  double shell_rmin, shell_rmax;
 
   /*Parameters defining a corona in a ring above a disk */
   double corona_rmin, corona_rmax;	//the minimum and maximu radius of the corona
@@ -295,9 +290,7 @@ struct geometry
   double alpha_agn;            /*The power law index of a BH at the center of an AGN.  Note that the luminosity
 				 of the agn is elsewhere in the structure
 				*/ 
-  double const_agn;             /*The constant for the Power law, there are lots of ways of defining the PL which is best? */
   double r_agn;               /* radius of the "photosphere" of the BH in the AGN.  */
-  double d_agn;               /* the distance to the agn - only used in balance to calculate the ioinsation fraction*/
 
 // The next set of parameters describe the input datafiles that are read
   char atomic_filename[132];   /* 54e -- The masterfile for the atomic data*/
@@ -453,13 +446,6 @@ typedef struct plasma {
   double levden[NLTE_LEVELS];	/*The number density (occupation number?) of a specific level */
 
 
-  /* Two new objects in the structure to hol the number of line resonant scatters and the number of electron scatters */
-
-  int nscat_es;
-  int nscat_res;
-
-
-
   double recomb_simple[NTOP_PHOT]; /* "alpha_e - alpha" (in Leon's notation) for b-f processes in simple atoms. */
 
 /* Begining of macro information */
@@ -483,24 +469,7 @@ typedef struct plasma {
 						and heat_photo. SS June 04. */
   double heat_photo, heat_z;	/*photoionization heating total and of metals */
   double w;			/*The dilution factor of the wind */
-  int ntot;                     /*Total number of photon passages */
-
- /* NSH 15/4/11 - added some counters to give a rough idea of where photons from various sources are ending up */
-  int ntot_star;
-  int ntot_bl;			
-  int ntot_disk;                /* NSH 15/4/11 Added to count number of photons from the disk in the cell */
-  int ntot_wind;
-  int ntot_agn;                  /* NSH 15/4/11 Added to count number of photons from the AGN in the cell */
-
-#define PTYPE_STAR	    0
-#define PTYPE_BL	    1
-#define PTYPE_DISK          2
-#define PTYPE_WIND	    3
-#define PTYPE_AGN           4 
-
-
-
-
+  int ntot;			/*Total number of photon passages */
   int nrad;			/* Total number of photons radiated within the cell */
   int nioniz;			/* Total number of photons capable of ionizing H */
   double ioniz[NIONS], recomb[NIONS];	/* Number of ionizations and recombinations for each ion.
@@ -528,10 +497,6 @@ typedef struct plasma {
   int converge_whole, converging;	/* converge_whole=0 if subroutine convergence feels point is converged, converging is an
 				   indicator of whether the program thought the cell is on the way to convergence 0 implies converging */
   double gamma_inshl[NAUGER]; /*MC estimator that will record the inner shell ionization rate - very similar to macro atom-style estimators */
-  double sim_alpha; /*Computed spectral index for a power law spectrum representing this cell */
-  double sim_w; /*This is the computed weight of a PL spectrum in this cell - not the same as the dilution factor */
-  double sim_e1,sim_e2; /*Sim estimators used to compute alpha and w for a power law spectrum for the cell */
-  double sim_ip; /*Ionisation parameter for the cell as defined in Sim etal 2010 */
   //int kpkt_rates_known;
   //COOLSTR kpkt_rates;
 } plasma_dummy, *PlasmaPtr;
@@ -706,9 +671,6 @@ typedef struct photon
 			scattered it's "origin" may be changed to "wind".  The
 			definitions should be according to PTYPE ... above. 
 			 */
-  int np;             /*NSH 13/4/11 - an internal pointer to the photon number so 
-                         so we can write out details of where the photon goes */
-
 }
 p_dummy, *PhotPtr;
 
@@ -774,8 +736,6 @@ typedef struct spectrum
 				   <0    -> select only photons whose last position is below the disk */
   double x[3],r;               /* The position and radius of a special region from which to extract spectra  */
   double f[NWAVE];
-  double lf[NWAVE];            /* a second array to hole the extracted spectrum in log units */
-  double lfreq[NWAVE];         /* We need to hold what freqeuncy intervals our logarithmic spectrum has been taken over */
 }
 spectrum_dummy, *SpecPtr;
 

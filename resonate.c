@@ -268,8 +268,6 @@ method). If the macro atom method is not used just get kap_bf to 0 and move on).
 
   kap_cont = kap_es + kap_bf_tot + kap_ff;	//total continuum opacity 
 
-
-
 /* Finally begin the loop over the resonances that can interact with the
      photon in the cell */
 
@@ -283,7 +281,6 @@ method). If the macro atom method is not used just get kap_bf to 0 and move on).
 	{			/* this particular line is in resonance */
 	  ds = x * smax;
 
-
 /* Before checking for a resonant scatter, need to check for scattering due to a continuum
 process. */
 	  if (ttau + (kap_cont) * (ds - ds_current) > tau_scat)
@@ -291,7 +288,7 @@ process. */
 	      /* then the photon was scattered by the continuum before reaching the resonance 
 	         Need to randomly select the continumm process which caused the photon to
 	         scatter.  The variable threshold is used for this. */
-		
+
 	      *nres =
 		select_continuum_scattering_process (kap_cont, kap_es,
 						     kap_ff, xplasma);
@@ -299,12 +296,10 @@ process. */
 	      ds_current += (tau_scat - ttau) / (kap_cont);	//distance travelled
 	      ttau = tau_scat;
 	      *tau = ttau;
-//     printf ("NSH Photon %i has scattered by continuum process %i in cell %i after %e cm and now has weight %e and frequency %e\n",p->np,*nres,nplasma,ds_current,p->w,p->freq);
 	      return (ds_current);
 	    }
 	  else
 	    {
-
 	      /* increment tau by the continuum optical depth to this point */
 	      ttau += kap_cont * (ds - ds_current);	/*kap_cont used here rather than kap_es */
 
@@ -347,7 +342,7 @@ process. */
 
 		  ttau+=tau_sobolev =
 		    sobolev (one, p, dd, lin_ptr[nn], dvds);
- //    printf ("NSH Photon %i has enocuntered a resonant line in cell %i after %e cm with tau=%e. Total opacity now %e vs required %e\n",p->np,nplasma,ds_current,tau_sobolev,ttau,tau_scat);
+
 		  /* tau_sobolev now stores the optical depth. This is fed into the next statement for the bb estimator
 		     calculation. SS March 2004 */
 
@@ -394,7 +389,7 @@ process. */
 			    }
 			}
 		    }
-		  /* Completed special calculations for the Macro Atom case */
+		  /* Completed special calculateions for the Macro Atom case */
 
 		  /* 68b - 0902 - The next section is to track where absorption is taking place along the line of sight
 		   * to the observer.  It is probably possibly to simplify some of what is happening here, as we
@@ -420,9 +415,6 @@ process. */
 		  *istat = P_SCAT;
 		  *nres = nn;
 		  *tau = ttau;
-//		printf ("Photon scatters after %e cm\n",ds_current);
-
-
 
 		  return (ds_current);	
 		}
@@ -433,7 +425,7 @@ process. */
 	}
     }
 
- 
+
 
 /* If the photon reaches this point it was not scattered by resonances.  
 ds_current is either 0 if there were no resonances or the postion of the 
@@ -463,7 +455,6 @@ event occurred.  04 apr
       *istat = P_INWIND;
       ttau += kap_cont * (smax - ds_current);	/* kap_es replaced with kap_cont (SS) */
       ds_current = smax;
-//	printf ("Photon has hit a wall\n");
 
     }
 
@@ -970,21 +961,13 @@ doppler (pin, pout, v, nres)
 
 {
   double dot ();
-//  double ftemp;
-// double beta;
 //  double q[3];
-  
+
   if (nres == -1)		//Electron scattering (SS)
     {				/*It was a non-resonant scatter */
       pout->freq =
 	pin->freq * (1 - dot (v, pin->lmn) / C) / (1 -
 						   dot (v, pout->lmn) / C);
-//    beta=(dot (v, pin->lmn) / C);
- //   ftemp=pin->freq*sqrt((1-beta)/(1+beta));
-  //  beta=(dot (v, pout->lmn) / C);
-   // pout->freq=ftemp/sqrt((1-beta)/(1+beta));
-
-
     }
   else if (nres > -1 && nres < nlines)
     {				/* It was a resonant scatter. */
@@ -1132,7 +1115,6 @@ scatter (p, nres, nnscat)
      deactivation process is always the same as the activation process and so
      nothing needs to be done. */
 
-if (p->np==46327) printf ("Here we are in scatter, geo.rt_mode=%i, and nres=%i\n",geo.rt_mode,*nres);
   if (geo.rt_mode == 2)		//check if macro atom method in use
     {
       /* Electron scattering is the simplest to deal with. The co-moving 
@@ -1316,16 +1298,8 @@ if (p->np==46327) printf ("Here we are in scatter, geo.rt_mode=%i, and nres=%i\n
     {
       /*  It was either an electron scatter, bf emission or ff emission so the  distribution is isotropic, 
          or it was a line photon but we want isotropic scattering anyway.  */
-if (p->np==46327) {
-	  vwind_xyz (p, v);
-	printf ("Wind velocity at this point= %e,%e,%e\n",v[0],v[1],v[2]);
-	printf ("Incoming photon velocity= %e,%e,%e\n",p->lmn[0],p->lmn[1],p->lmn[2]);
-	printf ("Incoming relative velocity= %e\n",dot (v, p->lmn));
-        }
       randvec (z_prime, 1.0);	/* Get a new direction for the photon */
       stuff_v (z_prime, p->lmn);
-
-if (p->np==46327) printf ("We have a new velocity %e,%e,%e\n",p->lmn[0],p->lmn[1],p->lmn[2]);
     }
 
   else if (geo.scatter_mode == 1)
@@ -1363,10 +1337,7 @@ if (p->np==46327) printf ("We have a new velocity %e,%e,%e\n",p->lmn[0],p->lmn[1
   //stuff_v (z_prime, p->lmn);
 
   vwind_xyz (p, v);		/* Get the velocity vector for the wind */
-if (p->np==46327) printf ("wind velocity at this point is %e,%e,%e (mod=%e)\n",v[0],v[1],v[2],sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]));
-if (p->np==46327) printf ("Outgoing relative velocity= %e\n",dot (v, p->lmn));
   doppler (&pold, p, v, *nres);	/* Get the final frequency of the photon */
-if (p->np==46327) printf ("after doppler shifting, new frequency is %e and weight is %e this is scatter number %i\n",p->freq,p->w,p->nscat);
 
 /* We estimate velocities by interpolating between the velocities at the edges of the cell based
 on the photon direction.  We have now changed the direction of the photon, and so we may not

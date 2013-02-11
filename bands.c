@@ -190,17 +190,7 @@ bands_init (t, f1, f2, imode, band)
       printf
 	("Enter band boundaries in increasing eV, and assure they are between lowest and highest energy\n");
 
-
-
-
-       rddoub ("Lowest_energy_to_be_considered(eV)", &xx);
-	  band->f1[0] = xx / HEV;
-
-       rddoub ("Highest_energy_to_be_considered(eV)", &xx);
-	  band->f2[band->nbands-1] = xx / HEV;
-
-
-
+      band->f1[0] = f1;
 
       for (nband = 0; nband < band->nbands - 1; nband++)
 	{

@@ -247,10 +247,6 @@ model_velocity (x, v)
     {
       speed = elvis_velocity (x, v);
     }
-  else if (geo.wind_type == 9)
-    {
-      speed = shell_velocity (x,v);
-    }
   else
     {
       Error ("wind: Unknown windtype %d\n", geo.wind_type);
@@ -360,10 +356,6 @@ model_rho (x)
     {
       rho = elvis_rho (x);
     }
-  else if (geo.wind_type == 9)
-   {
-     rho = shell_rho (x);
-   }
   else
     {
       Error ("wind2d: Unknown windtype %d\n", geo.wind_type);

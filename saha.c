@@ -117,7 +117,7 @@ nebular_concentrations (xplasma, mode)
   double get_ne ();
   int lucy_mazzali1 ();
   int m;
-  int concentrations (), lucy (), dlucy (), sim_driver ();
+  int concentrations (), lucy (), dlucy ();
 
   if (mode == 0)
     {				// LTE all the way -- uses tr
@@ -146,18 +146,7 @@ nebular_concentrations (xplasma, mode)
 
 
     }
-  else if (mode == 5)           /* This is LTE followed by a modification 
-             to allow for a strongly non BB radiation field - after Sim (2008) */
-    {
-	printf("NSH We are in nebular_concentrations, and we are running at mode=%i\n",mode);
-	printf("NSH Heading off to partition_functions\n");
 
-     partition_functions (xplasma, 1);   //lte partition function using t_e and no weights
-	printf("NSH Back from partition_functions, now going to concentrations\n");
-      m = concentrations (xplasma, 3);	// Saha equation using t_e - new mode, in case we need to do something clever
-	printf("NSH Back from concentrations, going into sim_driver, T_e=%e, alpha=%f, w=%e\n",xplasma->t_e,xplasma->sim_alpha,xplasma->sim_w);
-      m = sim_driver (xplasma);
-   }
   else
     {
 // If reached this point the program does not understand what is desired.
@@ -282,10 +271,6 @@ concentrations (xplasma, mode)
     {
       t = sqrt (xplasma->t_e * xplasma->t_r);
     }
-  else if (mode == 3)   //same as mode 1, put in to allow identical control when using Sim modifications to concentrations
-    {
-      t = xplasma->t_e;
-    }
   else
     {
       Error ("Concentrations: Unknown mode %d\n", mode);
@@ -333,7 +318,7 @@ concentrations (xplasma, mode)
   niterate = 0;
   while (niterate < MAXITERATIONS)
     {
-//	Log("Saha Iteration %i, with ne=%e and t=%e\n",niterate,xne,t);
+
       /* Assuming a value of ne calculate the relative densities of each ion for each element */
 
       saha (xplasma, xne, t);
@@ -448,12 +433,7 @@ saha (xplasma, ne, t)
 	  exit (0);
 	}
 
-/*    These lines were put in to make sim work properly, ideally there should be a switch so if we are doing things the old way, we keep the old numbers. But, saha doesnt know the mode....
-      sum = density[first] = 1e-250;
-      big = pow (10., 250. / (last - first));
-      big=big*1e6;   */
-
-      sum = density[first] = 1.0;
+      sum = density[first] = 1.;
       big = pow (10., 250. / (last - first));
 
       for (nion = first + 1; nion < last; nion++)
@@ -461,11 +441,11 @@ saha (xplasma, ne, t)
 	  b = xsaha * partition[nion]
 	    * exp (-ion[nion - 1].ip / (BOLTZMANN * t)) / (ne *
 							   partition[nion-1]);
+	  if (b > big)
+	    b = big;		//limit step so there is no chance of overflow
 
-//	  if (b > big && nh < 1e5) this is a line to only modify things if the density is high enough to matter
-          if (b > big)	 
-	   b = big;		//limit step so there is no chance of overflow
 	  a = density[nion - 1] * b;
+
 	  sum += density[nion] = a;
 	  if (density[nion] < 0.0)
 	    mytrap ();

@@ -302,6 +302,7 @@ pdf_gen_from_func (pdf, func, xmin, xmax, njumps, jump)
   while (n < 3)
     {
       delta = gen_array_from_func (func, xmin, xmax, pdfsteps);
+      Log ("delta %.4f pdfsteps %d\n", delta, pdfsteps);
       if (delta < 0.1 / NPDF)
 	break;
       pdfsteps *= 10;
@@ -469,6 +470,7 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
 	}
 
     }
+  Log ("OK Knox, here is the maxium %.4f\n", delta);
 
 
   return (delta);
