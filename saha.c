@@ -140,7 +140,7 @@ nebular_concentrations (xplasma, mode)
 
       partition_functions (xplasma, mode);	// t_r with weights
 
-      m = concentrations (xplasma, mode);	// Saha equation using t_r
+      m = concentrations (xplasma, 0);	// Saha equation using t_r
 
       m = lucy (xplasma);	// Main routine for running LucyMazzali
 
@@ -448,9 +448,13 @@ saha (xplasma, ne, t)
 	  exit (0);
 	}
 
+/*    These lines were put in to make sim work properly, ideally there should be a switch so if we are doing things the old way, we keep the old numbers. But, saha doesnt know the mode....
       sum = density[first] = 1e-250;
       big = pow (10., 250. / (last - first));
-	big=big*1e6;
+      big=big*1e6;   */
+
+      sum = density[first] = 1.0;
+      big = pow (10., 250. / (last - first));
 
       for (nion = first + 1; nion < last; nion++)
 	{
@@ -458,13 +462,10 @@ saha (xplasma, ne, t)
 	    * exp (-ion[nion - 1].ip / (BOLTZMANN * t)) / (ne *
 							   partition[nion-1]);
 
-	  if (b > big && nh < 1e5)
-	{
-//	Log ("We want the ratio b for nion=%i (%i,%i) to be %e, but it's too big! Setting to %e\n",nion,ion[nion].z,nion-first,b,big);	 
+//	  if (b > big && nh < 1e5) this is a line to only modify things if the density is high enough to matter
+          if (b > big)	 
 	   b = big;		//limit step so there is no chance of overflow
-	}
 	  a = density[nion - 1] * b;
- //       printf("Relative density of nion=%i (%i,%i) is %e\n",nion,ion[nion].z,nion-first+1,a);
 	  sum += density[nion] = a;
 	  if (density[nion] < 0.0)
 	    mytrap ();

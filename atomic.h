@@ -13,7 +13,7 @@
 #define H_OVER_K			4.799437e-11
 #define STEFAN_BOLTZMANN 		5.6696e-5
 #define THOMPSON			0.66524e-24
-#define PI  				3.141592653589793238462643
+#define PI  				3.1415927
 #define MELEC 				9.10956e-28
 #define E				4.8035e-10	/* Electric charge in esu */
 #define MPROT 				1.672661e-24
@@ -33,7 +33,7 @@
 
 
 /* The next term attempts gloabally to define a minimum density to prevent zero devides in some routines */
-#define DENSITY_MIN		1.e-100
+#define DENSITY_MIN		1.e-20
 /* 
 
    Note that the structure ele array may not be completely filled.  In this structure, the dimension is simply

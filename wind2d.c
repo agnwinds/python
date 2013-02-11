@@ -71,7 +71,7 @@ History:
 int
 define_wind ()
 {
-
+  int nn,first,last,m;
   int i, j, n;
   double nh, rrstar;
   double x[3];
@@ -282,6 +282,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 
   for (n = 0; n < NPLASMA; n++)
     {
+
       nwind = plasmamain[n].nwind;
       stuff_v (w[nwind].xcen, x);
       plasmamain[n].rho = model_rho (x);
@@ -309,21 +310,14 @@ be optional which variables beyond here are moved to structures othere than Wind
 	{
 	  plasmamain[n].w = 0.5 * (1 - sqrt (rrstar));
 	}
-      else
-	{	
+      else	
 	plasmamain[n].w = 0.5;	//Modification to allow for possibility that grid point is inside star
-	}
-	printf("For wind cell %i (grid cell=%i) at a distance %e from the AGN, alpha=%f, w=%e, nH=%e, Te=%e, Tr=%e\n",n,nwind,pow((x[0] * x[0] + x[1] * x[1] +
-					x[2] * x[2]),0.5),plasmamain[n].sim_alpha,plasmamain[n].sim_w,nh,plasmamain[n].t_e,plasmamain[n].t_r);
+
       /* Determine the initial ionizations, either LTE or  fixed_concentrations */
- //     if (geo.ioniz_mode == 5)     
-  //      {                      // LTE followed by SIM correction factor mode 4 set so it doesnt try a one shot.
-   //       ierr = ion_abundances (&plasmamain[n], 4);
-    //    }
       if (geo.ioniz_mode != 2)
 	{			/* Carry out an LTE determination of the ionization */
 	  ierr = ion_abundances (&plasmamain[n], 1);
-	}
+        }
       else
 	{			/* Set the concentrations to specified values */
 	  ierr = ion_abundances (&plasmamain[n], 2);
@@ -345,6 +339,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 	  plasmamain[n].xscatters[j] = 0;
 	}
     }
+
 
 /* Calculate the the divergence of the wind at the center of each grid cell */
   wind_div_v (w);

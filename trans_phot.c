@@ -130,10 +130,9 @@ trans_phot (w, p, iextract)
 
 
 
+
       stuff_phot (&p[nphot], &pp);
       disk_illum = geo.disk_illum;
-
-
 
       /* The next if statement is executed if we are calculating the detailed spectrum and
        * makes sure we always run extract on the original photon no matter where it was
@@ -185,14 +184,9 @@ trans_phot (w, p, iextract)
          If the photon escapes then we leave the photon at the position of it's last scatter.  In most other cases 
          though we store the final position of the photon. */
 
-if (nphot==46327) printf ("\n");
-	if (nphot==46327) printf ("Going to translate - photon 46327 freq=%e weight=%e. Location=%e,%e,%e in grid cell %i (plasma cell %i)\n",pp.freq,pp.w,pp.x[0],pp.x[1],pp.x[2],pp.grid,w[pp.grid].nplasma);
 
 	  istat = translate (w, &pp, tau_scat, &tau, &nres);
-
-	if (nphot==46327) printf ("Back from translate (istat=%i)- photon 46327 freq=%e weight=%e. Location=%e,%e,%e in grid cell %i (plasma cell %i)\n",istat,pp.freq,pp.w,pp.x[0],pp.x[1],pp.x[2],pp.grid,w[pp.grid].nplasma);
-
-
+//	  printf("Photon=%i,weight=%e,tauscat=%f,nres=%i,istat=%i\n",nphot,p[nphot].w,tau_scat,nres,istat);
 /* nres is the resonance at which the photon was stopped.  At present the
 same value is also stored in pp->nres, but I have not yet eliminated 
 it from translate. ?? 02jan ksl */
@@ -201,9 +195,8 @@ it from translate. ?? 02jan ksl */
 
 	  icell++;
 	  istat = walls (&pp, &p[nphot]);
-
-   if (nphot==46327) printf("NSH Back from walls, Photon has istat=%i and is now in cell %i\n",istat,pp.grid);
 //pp is where the photon is going, p is where it was
+
 
 
 #if DEBUG
@@ -326,7 +319,6 @@ the current version of scattering really does what the old code did for two-leve
 	      nnscat = 0;
 	      nnscat++;
 	      ptr_nres = &nres;
-if (nphot==46327) printf ("Going to scatter\n");
 	      scatter (&pp, ptr_nres, &nnscat);
 	      pp.nscat++;
 

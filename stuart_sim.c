@@ -45,7 +45,7 @@ sim_driver (xplasma)
 
   xsim_alpha = xplasma->sim_alpha;  //Set the shared variable to the alpha for the cell.
   xsim_w = xplasma->sim_w;  //Set the shared variable to the W for the cell.
-	printf ("We are in sim, t_e=%f, t_r=%f, sim_alpha=%f, sim_w=%e,\n",t_e,t_r,xsim_alpha,xsim_w);
+	printf ("We are in sim, t_e=%f, t_r=%f\n",t_e,t_r);
 
 
   /* Initally assume electron density from the LTE densities */
@@ -92,7 +92,7 @@ sim_driver (xplasma)
 	    newden[nion] = DENSITY_MIN;
 	}
       xnew = get_ne (newden);
-	printf ("current estimate of ne after loop %i=%e\n",niterate,xnew);
+//	printf ("current estimate of ne after loop %i=%e\n",niterate,xnew);
       if (xnew < DENSITY_MIN)
 	xnew = DENSITY_MIN;
 
@@ -236,7 +236,7 @@ sim_pl (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
 //	first,ion[first].z,last-1,ion[last-1].z);
 
    max_ratio=((ele[nelem].abun*nh)/DENSITY_MIN)/10.0;  //This is the maximum ratio between two ions of the same element
-  sum = newden[first] = 1e-200;   //We need a very large dynamic range to make the sim correction factor work. 
+  sum = newden[first] = 1.;
 	fudge_store[first]=0.0;
   for (nion = first + 1; nion < last; nion++)   
     {

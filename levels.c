@@ -88,7 +88,7 @@ levels (xplasma, mode)
     }
   else if (mode == 3)           // non_LTE with SS modification
     {
-		t = xplasma->t_e;
+      t = xplasma->t_e;
       weight = 1;
     }
   else

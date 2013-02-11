@@ -17,6 +17,7 @@ History:
  	01mar	ksl	Added this possibility
 	02jan	ksl	Rechecked all of the routines in an atttempt to
 			determine why I do not produce KWD figure 7 well.
+        11may   nsh     Added the option to have a multiple of sound speed as initial velocity
 
  */
 

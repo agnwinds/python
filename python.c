@@ -1422,7 +1422,7 @@ run -- 07jul -- ksl
 
       wind_rad_init ();		/*Zero the parameters pertaining to the radiation field */
 
-	printf ("GGGGG Are we going to ISPY? Debug=%i\n",DEBUG);
+
 
 #if DEBUG
       ispy_init ("python", geo.wcycle);
@@ -1464,7 +1464,7 @@ run -- 07jul -- ksl
 	    }
 
 	  Log
-	    ("!!python: Total photon luminosity before transphot %8.2e\n",
+	    ("!!python: Total photon luminosity before transphot %18.12e\n",
 	     zz);
 
 	  ztot += zz;		/* Total luminosity in all subcycles, used for calculating disk heating */
@@ -1477,7 +1477,7 @@ run -- 07jul -- ksl
 	  kbf_need (freqmin, freqmax);
 
 	  /* Transport the photons through the wind */
-	printf ("Just going to transphot - photon 46327 has freq=%e, and weight=%e. It is currently at %e,%e,%e in grid cell %i\n",p[46327].freq,p[46327].w,p[46327].x[0],p[46327].x[1],p[46327].x[2],p[46327].grid);
+//	printf ("Just going to transphot - photon 46327 has freq=%e, and weight=%e. It is currently at %e,%e,%e in grid cell %i\n",p[46327].freq,p[46327].w,p[46327].x[0],p[46327].x[1],p[46327].x[2],p[46327].grid);
 	  trans_phot (w, p, 0);
 
 	  /*Determine how much energy was absorbed in the wind */
@@ -1489,7 +1489,7 @@ run -- 07jul -- ksl
 		zze += p[nn].w;
 	    }
 	  Log
-	    ("!!python: Total photon luminosity after transphot %8.2e (diff %8.2e). Radiated luminosity %8.2e \n",
+	    ("!!python: Total photon luminosity after transphot %18.12e (diff %18.12e). Radiated luminosity %18.12e \n",
 	     zzz, zzz - zz, zze);
 
 #if DEBUG
@@ -1916,7 +1916,7 @@ photon_checks (p, freqmin, freqmax, comment)
   Log ("photon_checks: %s\n", comment);
 #endif
   freqmax *= (1.8);
-  freqmin *= (0.4);
+  freqmin *= (0.6);
   for (nn = 0; nn < NPHOT; nn++)
     {
       p[nn].np=nn;    /*  NSH 13/4/11 This is a line to populate the new internal photon pointer */
