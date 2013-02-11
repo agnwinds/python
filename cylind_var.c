@@ -368,6 +368,8 @@ cylvar_wind_complete (w)
 	05jul	ksl	56d -- Made the modifications needed.
 	06nov	kls	58b: Minor modifications to use W_ALL_INWIND, etc.
 			instead of hardcoded values
+	11aug	ksl	70b - Added ability to get volumes for multiple
+			components
  
 **************************************************************/
 
@@ -375,8 +377,9 @@ cylvar_wind_complete (w)
 
 
 int
-cylvar_volumes (w)
+cylvar_volumes (w,icomp)
      WindPtr w;
+     int icomp; // The component for which we want the volume
 {
   int i, j, n;
   int jj, kk;
@@ -453,7 +456,7 @@ cylvar_volumes (w)
 		       &f, &g) == 0)
 		    {
 		      kk++;
-		      if (where_in_wind (x) == 0)
+		      if (where_in_wind (x) == W_ALL_INWIND)
 			{
 			  volume += r;
 			  jj++;
@@ -471,11 +474,13 @@ cylvar_volumes (w)
 	    }
 	  else if (jj == kk)
 	    {
-	      w[n].inwind = W_ALL_INWIND;	// All of cell is inwind
+	      //OLD 70b w[n].inwind = W_ALL_INWIND;	// All of cell is inwind
+	      w[n].inwind = icomp;	// All of cell is inwind
 	    }
 	  else
 	    {
-	      w[n].inwind = W_PART_INWIND;	// Some of cell is inwind
+	      //OLD 70b w[n].inwind = W_PART_INWIND;	// Some of cell is inwind
+	      w[n].inwind = icomp+1;	// Some of cell is inwind
 	    }
 	}
     }
@@ -679,7 +684,9 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
  	cylvar_get_random_location
 
  Arguments:		
- 	int n -- Cell in which random poition is to be generated
+ 	int n -- Cell in which random position is to be generated
+	int icomp - Component in which the random position is to
+		be generated
  Returns:
  	double x -- the position
  Description:	
@@ -693,12 +700,15 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
 	05may	ksl	56a -- began modifications starting with same 
 			routine in cylindrical
 	05jul	ksl	56d -- Updated to work for cylvar coords
+	11aug	ksl	70b - Updated to include more than one
+			component
  
 **************************************************************/
 
 int
-cylvar_get_random_location (n, x)
-     int n;			// Cell in which to create postion
+cylvar_get_random_location (n, icomp,x)
+     int n;			// Cell in which to create position
+     int icomp;			// Component in which to create position
      double x[];		// Returned position
 {
   int i, j;
@@ -748,7 +758,7 @@ cylvar_get_random_location (n, x)
 
   /* Generate a position which is both in the cell and in the wind */
   inwind = incell = -1;
-  while (inwind || incell != 0)
+  while (inwind != icomp || incell != 0)
     {
       r =
 	sqrt (rmin * rmin +

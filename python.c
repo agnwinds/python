@@ -215,7 +215,6 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   char dummy[LINELENGTH];
   char tprofile[LINELENGTH];
   double xbl;
-//  double n_ioniz, lum_ioniz;   NSH 16/2/2011 These are declared externally.
   int j, nn;
   double zz, zzz, zze, ztot;
   int icheck;
@@ -484,7 +483,7 @@ nx4power=0;
     {
 
       rdint
-	("Wind_type(0=SV,1=Sphere,2=Previous,3=Proga,4=Corona,5=knigge,6=thierry,7=yso)",
+	("Wind_type(0=SV,1=Sphere,2=Previous,3=Proga,4=Corona,5=knigge,6=thierry,7=yso,8=elvis,9=shell)",
 	 &geo.wind_type);
 
 
@@ -492,7 +491,8 @@ nx4power=0;
 	{
 	  /* This option is for the confusing case where we want to start with
 	   * a previous wind model, but we are going to write the result to a
-	   * new windfile */
+	   * new windfile. In other words it is not a restart where we would overwrite
+	   * the previous wind model.  */
 
 	  strcpy (old_windsavefile, "earlier.run");
 	  rdstr ("Old_windfile(root_only)", old_windsavefile);
@@ -509,7 +509,7 @@ nx4power=0;
 	}
 
       else
-	{			/* Read the atomic datafile her, because for the cases where we have read
+	{			/* Read the atomic datafile here, because for the cases where we have read
 				   and old wind files, we also got the atomic data */
 
 	  rdstr ("Atomic_data", geo.atomic_filename);
@@ -574,7 +574,7 @@ nx4power=0;
     }
 
 
-  if (geo.wind_type != 2)
+  if (geo.wind_type != 2)  
     {
       /* Define the coordinate system for the grid and allocate memory for the wind structure */
       rdint
@@ -599,9 +599,10 @@ nx4power=0;
 
 
 //080808 - 62 - Ionization section has been cleaned up -- ksl
+/* ??? ksl - Ionization mode 4 apparently does not exist.  This should be fixed */
 
   rdint
-    ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc,5=SIM)",
+    ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,5=recalc_pow)",
      &geo.ioniz_mode);
 
   if (geo.ioniz_mode == 2)
@@ -610,7 +611,8 @@ nx4power=0;
     }
   if (geo.ioniz_mode == 4 || geo.ioniz_mode > 5)
     {
-      Error ("Unknown ionization mode\n");
+      Log("The allowed ionization modes are 0, 1, 2, 3, 5\n");
+      Error ("Unknown ionization mode %d\n",geo.ioniz_mode);
       exit (0);
     }
 
@@ -625,7 +627,7 @@ on levels and their multiplicities is taken into account.   */
     ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,6=macro_atoms,7=macro_atoms+aniso.scattering)",
      &geo.line_mode);
 
-/* ?? Next section seems rather a kluge.  Why don't we specifty the underlying variables explicitly 
+/* ?? ksl Next section seems rather a kluge.  Why don't we specifty the underlying variables explicitly 
 It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and geo.macro_simple */
 
   /* For now handle scattering as part of a hidden line transfermode ?? */
@@ -692,16 +694,17 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
   
   // Determine what radiation sources there are.  Note that most of these values are initilized in init_geo
   
-  if (geo.system_type!=2) {
+  if (geo.system_type!=2) {  /* If is a stellar system */
   rdint ("Star_radiation(y=1)", &geo.star_radiation);
   rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
   rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
   rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-  geo.agn_radiation=0;
+  geo.agn_radiation=0;  // So far at least, our star systems don't have a BH
   }
-  else 
+  else   /* If it is an AGN */
   {
-  rdint ("Star_radiation(y=1)", &geo.star_radiation);
+	  geo.star_radiation=0; // 70b - AGN do not have a star at the center */
+  //OLD rdint ("Star_radiation(y=1)", &geo.star_radiation);
   rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
   geo.bl_radiation=0;
   rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
@@ -790,7 +793,9 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 	rddoub ("tstar", &geo.tstar);
 
 
-      if (geo.system_type == 1)
+/* Describe the secondary if that is required */ 
+
+      if (geo.system_type == 1)  /* It's a binary system */
 	{
 
 	  geo.m_sec /= MSOL;	// Convert units for ease of data entry
@@ -910,7 +915,11 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 	       geo.lum_agn / xbl);
 	  geo.alpha_agn=(-1.5);
 	  rddoub ("agn_power_law_index", &geo.alpha_agn);
-/* The next line computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. This is only used in the sim correction factor for the first time through. Afterwards, the photons are used to compute the sim parameters. */
+
+/* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
+ * This is only used in the sim correction factor for the first time through. 
+ * Afterwards, the photons are used to compute the sim parameters. */
+
 	  geo.const_agn = geo.lum_agn / (((pow (2.42e18, geo.alpha_agn + 1.)) - pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
 	  Log("AGN Input parameters give a power law constant of %e\n",geo.const_agn);
 	}
@@ -921,6 +930,26 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 	  geo.alpha_agn = 0.0;
 	  geo.const_agn =0.0;
 	}
+
+/* Describe the Compton torus */
+
+/* 70b - ksl - 1108067 - Here we add parameters for the compton torus or blocking region 
+ *
+ * Note that the whole flow of this may be a bit odd as it seems as if we have to keep checking for whether
+ * we are modelling an agn
+ *
+ * Note that these calls need to precede the calls below, because we want to keep the compton torus  ???
+ * inside the actual wind, or at least that's what ksl believes on 110809.  ???
+ */
+
+      rdint("Torus(0=no,1=yes)",&geo.compton_torus);
+      if(geo.compton_torus){
+	      rddoub("Torus.rmin(cm)",&geo.compton_torus_rmin);
+	      rddoub("Torus.rmax(cm)",&geo.compton_torus_rmax);
+	      rddoub("Torus.height(cm)",&geo.compton_torus_zheight);
+	      rddoub("Torus.optical_depth",&geo.compton_torus_tau);
+	      rddoub("Torus.tinit",&geo.compton_torus_te);
+      }
 
 /* Describe the wind */
 
@@ -1013,27 +1042,34 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
  * ???? fixed.  ksl
  */
 
+/* geo.wind_thetamin and max are defined in the routines that initialize
+   the various wind models, e. g. get_sv_wind_parameters. These
+   have been called at this point.  
+
+   z is the place where the windcone intercepsts the z axis
+   dzdr is the slope */
+
   if (geo.wind_thetamin > 0.0)
     {
-      windcone[0].dzdr = 1. / tan (geo.wind_thetamin);	// new definition
-      windcone[0].z = (-geo.wind_rho_min / tan (geo.wind_thetamin));	// new definition
+      windcone[0].dzdr = 1. / tan (geo.wind_thetamin);	
+      windcone[0].z = (-geo.wind_rho_min / tan (geo.wind_thetamin));	
     }
   else
     {
-      windcone[0].dzdr = VERY_BIG;	// new definition
-      windcone[0].z = -VERY_BIG;;	// new definition
+      windcone[0].dzdr = VERY_BIG;	
+      windcone[0].z = -VERY_BIG;;	
     }
 
 
   if (geo.wind_thetamax > 0.0)
     {
-      windcone[1].dzdr = 1. / tan (geo.wind_thetamax);	// new definition
-      windcone[1].z = (-geo.wind_rho_max / tan (geo.wind_thetamax));	// new definition
+      windcone[1].dzdr = 1. / tan (geo.wind_thetamax);	
+      windcone[1].z = (-geo.wind_rho_max / tan (geo.wind_thetamax));	
     }
   else
     {
-      windcone[1].dzdr = VERY_BIG;	// old definition
-      windcone[1].z = -VERY_BIG;;	// new definition
+      windcone[1].dzdr = VERY_BIG;	
+      windcone[1].z = -VERY_BIG;;
     }
 
 
@@ -1870,7 +1906,7 @@ init_geo ()
   geo.bl_radiation = 0;		/*1 implies boundary layer will radiate */
   geo.wind_radiation = 0;	/* 1 implies wind will radiate */
 
-  geo.disk_type = 1;		/*1 implies existence of a disk for purposes of absorbtion */
+  geo.disk_type = 1;		/*1 implies existence of a disk for purposes of absorption */
   geo.diskrad = 2.4e10;
   geo.disk_mdot = 1.e-8 * MSOL / YR;
 
