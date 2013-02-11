@@ -27,6 +27,11 @@
 111126	ksl	Renamed this routine power_sub.c in partial attempt
 		to spread the blame for this particular approach
 		to calculating the ionization equilibrium
+120127  nsh	Changed the storage arrays fudge_store, num_store
+		denom_store and ion_store to have dimension NIONS 
+		these arrays were overflowing. Only picked up in
+		Jan 12, when in python71 they started overflowing 
+		and zeroing geo.wcycle. 
 
  ************************************************************************/
 
@@ -49,10 +54,11 @@ double weight;			//This is a storage variable for the current PL geometric weigh
 double xsim_alpha;		//This is a storage variable so the value of alpha (PL spectral index) can be used in qromb
 double xsim_w;			//Storage variable for the sim W factor (either computed from photons going thruogh a cell, or before photon generation it is the power law constant x radiative weight / 4pi */
 
-double fudge_store[300];	//this is a store so we can see how the sim fudge factor varies
-double num_store[300];		// store for the numbnerator of the sim factor (PL)
-double denom_store[300];	// store for the denominator of the sim factor (BB)
-double ion_store[300];
+// 120127 NSH changed the dimension of following arrays from 300 to NIONS to prevent overflow
+double fudge_store[NIONS];	//this is a store so we can see how the sim fudge factor varies
+double num_store[NIONS];		// store for the numbnerator of the sim factor (PL)
+double denom_store[NIONS];	// store for the denominator of the sim factor (BB)
+double ion_store[NIONS];
 
 #define SAHA 4.82907e15		/* 2* (2.*PI*MELEC*k)**1.5 / h**3  (Calculated in constants) */
 #define MAXITERATIONS	200
