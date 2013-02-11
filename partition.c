@@ -159,3 +159,114 @@ partition_functions (xplasma, mode)
 
   return (0);
 }
+
+/***********************************************************
+                                       Southampton university
+
+Synopsis:
+	partition_functions_2 calculates the partition functions
+	for a pair of states for a given temperature. This is needed
+	to support the pairwise ioinzation state calculaions where 
+	the saha equation is applied to a pair of states at a
+	useful temperature, then corrected. Part of this is 
+	a requirement to get the partition functions at that 
+	temperature for just tow two states of interest. It is 
+	wasteful to calculate all of the states at each temperature.
+
+Arguments:
+
+	xplasma - the cell we are interested in. Used to communicate back
+		the new partition functions.
+	xnion - the upper ion in the pair we are currently working on
+	temp - the temperature we are using for the saha equation. In the
+		original formulation of partition, this is got from xplasma,
+		in this case we don't want to use the cell temperature.
+
+Returns:
+
+	changes the partition functions of just two ions we are currently working on
+	
+Description:
+
+
+
+Notes:
+
+	There is no need for the weight term in the calculation since this is only called when
+		we are making the assumption that we are in LTE for the saha equation. 
+
+
+
+History:
+	2012Feb	nsh - began coding	
+
+**************************************************************/
+
+
+
+int
+partition_functions_2 (xplasma, xnion, temp)
+     PlasmaPtr xplasma;
+     int xnion;	
+     double temp;
+{
+  int nion;
+  double partition ();
+
+  int n, m;
+  int m_ground;			
+  double z, kt;
+
+ 
+  /* Calculate the partition function for each ion in turn */
+  kt = BOLTZMANN * temp;   
+
+  for (nion = xnion-1; nion < xnion+1; nion++)
+    {
+	
+      if (ion[nion].nlevels > 0)
+	/*Calculate data on levels using blackbody (unweighted since the calculation is in LTE */
+	{
+	  m = ion[nion].firstlevel;
+	  m_ground = m;
+	  //store ground state - in case energy neq 0(SS)
+	  z = config[m].g;
+	  //Makes explicit assumption that first level is ground
+
+	  for (n = 1; n < ion[nion].nlevels; n++)
+	    {
+	      m++;
+	      z +=
+		config[m].g *
+		exp ((-config[m].ex + config[m_ground].ex) / kt);
+	    }
+	}
+      else if (ion[nion].nlte > 0)
+	//Calculate using "non-lte" levels
+	{
+	  m = ion[nion].first_nlte_level;
+	  m_ground = m;
+	  //store ground state - in case energy neq 0(SS)
+	  z = config[m].g;
+	  //This statement makes an explicit assumption that first level is ground
+
+	  for (n = 1; n < ion[nion].nlte; n++)
+	    {
+	      m++;
+	      z +=
+		config[m].g *
+		exp ((-config[m].ex + config[m_ground].ex) / kt);
+	    }
+	}
+      else
+	{
+	  z = ion[nion].g;
+	}
+
+
+      xplasma->partition[nion] = z;
+    }
+
+
+  return (0);
+}

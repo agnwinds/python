@@ -621,7 +621,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
     {
       rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
     }
-  if (geo.ioniz_mode == 4 || geo.ioniz_mode > 5)
+  if (geo.ioniz_mode == 4 || geo.ioniz_mode > 7)
     {
       Log ("The allowed ionization modes are 0, 1, 2, 3, 5\n");
       Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
@@ -1033,7 +1033,8 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
       else if (geo.wind_type == 9)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
 	{
 	  get_shell_wind_params ();
-	  dfudge = (geo.wind_rmax - geo.wind_rmin) / 1000.0;	//Stop photons getting pushed out of the cell
+	  dfudge = (geo.wind_rmax - geo.wind_rmin) / 1000.0;	/*Stop photons getting pushed out of the cell 
+Modified again in python 71b to take account of change in parametrisation of shell wind */
 	  DFUDGE = dfudge;
 	}
       else if (geo.wind_type != 2)

@@ -107,7 +107,7 @@ define_wind ()
 
     if (geo.wind_type == 9)    //This is the mode where we want the wind and the grid carefulluy conrolled to allow a very thin shell. We ensure that the coordinate type is spherical. 
     {
-      Log ("We are making a thin shell type grid to match a thin shell wind. This is totally aphysical and should only be used for testing purposes\n");
+      Log ("We are making a thin shell type grid to match a thin shell wind. This is totally aphysical and should only be used for testing purposes");
       shell_make_grid (w);
     }
    else if (geo.coord_type == SPHERICAL)

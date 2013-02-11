@@ -125,6 +125,7 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 	{
 	  xplasma->sim_alpha[n] = alphatemp;
 	  xplasma->sim_w[n] = sim_w_temp;
+	  Log ("NSH in this cell w=%10.2e, alpha=%3.1f\n",xplasma->sim_w[n],xplasma->sim_alpha[n]); /* added in feb 2012 as python 71c to make it easier to see what code is doing as it executes */
 	}
 
     }
@@ -136,8 +137,8 @@ To avoid problems with solving, we need to find a reasonable range of values wit
   xplasma->lum_rad_old = xplasma->lum_rad;
 
 
-  Log ("NSH in this cell, we have %e AGN photons and %e disk photons\n",
-       xplasma->ntot_agn, xplasma->ntot_disk);
+ /* Log ("NSH in this cell, we have %e AGN photons and %e disk photons\n",
+       xplasma->ntot_agn, xplasma->ntot_disk); Removed, no longer gives reasonable answers due to banding */
 
   ireturn = one_shot (xplasma, mode);
 

@@ -395,6 +395,7 @@ int calloc_macro(int nelem);
 int calloc_estimators(int nelem);
 /* partition.c */
 int partition_functions(PlasmaPtr xplasma, int mode);
+int partition_functions_2(PlasmaPtr xplasma, int xnion, double temp);
 /* signal.c */
 int xsignal(char *root, char *format, ...);
 int xsignal_rm(char *root);
@@ -416,7 +417,7 @@ double torus_rho(double x[]);
 double ds_to_cylinder(double rho, struct photon *p);
 double ds_to_torus(PhotPtr pp);
 /* zeta.c */
-double compute_zeta(double temp, int nion, int ilow, int ihi, double interpfrac, double f1, double f2, int mode);
+double compute_zeta(double temp, int nion, double f1, double f2, int mode);
 /* dielectronic.c */
 double compute_dr_coeffs(double temp);
 double total_dr(WindPtr one, double t_e);
@@ -433,6 +434,15 @@ double tb_pow(double freq);
 double verner_pow(double freq);
 double sim_alphasolve(double ratans, double numin, double numax);
 double sim_w(double en1, double v, double dt, double alpha, double numin, double numax);
+/* variable_temperature.c */
+int variable_temperature(PlasmaPtr xplasma, int mode);
+double bb_correct_2(double xtemp, double t_r, double www, int nion);
+double temp_func(double temp);
+double pl_correct_2(double xtemp, int nion);
+double tb_planck1(double freq);
+double verner_planck1(double freq);
+double tb_pow1(double freq);
+double verner_pow1(double freq);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
@@ -489,3 +499,5 @@ int depcoef_overview_specific(int version, int nconfig, WindPtr w, char rootname
 int main(int argc, char *argv[]);
 int one_choice(int choice, char *root, int ochoice);
 int py_wind_help(void);
+/* test_saha.c */
+int main(int argc, char *argv[]);

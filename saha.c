@@ -107,6 +107,9 @@ nebular_concentrations (xplasama, mode)  modifies the densities of ions, levels,
 			in the routine dlucy) This is wholly replaced by the macro atom approach.  
 	11	ksl	Main changes here made by Nick to incorporate the power law approximation
 			to ionization for AGN
+        12Feb   nsh	More changes made to allow for two new modes - for multiple saha equaions.
+			mode 6 corrects using a dilute blackbody and should be almost the same as the 				LM method
+			mode 7 corrects using a power law spectrum, and show end up supplanting mode 5.
 
 
 **************************************************************/
@@ -151,20 +154,28 @@ nebular_concentrations (xplasma, mode)
 				   law method for ionization in a non-BB radiation
 				   field.  */
     {
-	printf("NSH We are in nebular_concentrations, and we are running at mode=%i\n",mode);
-	printf("NSH Heading off to partition_functions\n");
 
-     partition_functions (xplasma, 1);   //lte partition function using t_e and no weights
-	printf("NSH Back from partition_functions, now going to concentrations\n");
+      partition_functions (xplasma, 1);   //lte partition function using t_e and no weights
+
       m = concentrations (xplasma, 1);	// Saha equation using t_e 
-
-// ksl It is bad practice to create modes which are not different unless you know that is what you are going to do.  Nick
-// please remove this and next line when you see this.
-//OLD ksl      m = concentrations (xplasma, 3);	// Saha equation using t_e - new mode, in case we need to do something clever
-//OLD NSH this goes wrong now.	printf("NSH Back from concentrations, going into sim_driver, T_e=%e, alpha=%f, w=%e\n",xplasma->t_e,xplasma->sim_alpha,xplasma->sim_w);
 
       m = sim_driver (xplasma);
    }
+/* Two new modes, they could proably be combined into one if statement, but having two adds little complexity and allows for other modifications if required. No call to partition functions is required, since this is done on a pairwise basis in the routine. Similarly there is no call to concentrations, since this is also done pairwise inside the routine. */
+  else if (mode == 6)         /* Pairwise calculation of abundances, using a 
+				temperature computed to ensure a reasonable
+				ratio between the two, and then corrected for
+				a dilute blackbody radiation field. */
+    {
+      m = variable_temperature (xplasma, mode);
+    }
+  else if (mode == 7)         /* Pairwise calculation of abundances, using a 
+				temperature computed to ensure a reasonable
+				ratio between the two, and then corrected for
+				a radiation field modelled by a power law*/
+    {
+      m = variable_temperature (xplasma, mode);
+    }
   else
     {
 // If reached this point the program does not understand what is desired.

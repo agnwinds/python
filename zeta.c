@@ -80,17 +80,62 @@ We need to use nion-1 for integ_fb, since this is computed via the photoionisati
                                                                                                    
                                                                                                    
                                                                                                    
-  History:
+ History:	
+		Aug 2011 NSH - coding started to try to incorportate DR into python
+		Feb 2012 NSH - modified to include code to find the interpfrac parameter here
+				this is to improve the new code for using multiple temperature
+				saha equaions - each equaion needs its own correction factor, 
+				so it makes better code to call it.
 
                                                                                                    
  ************************************************************************/
 
 double
-compute_zeta (temp, nion, ilow, ihi, interpfrac, f1, f2, mode)
-     double temp, interpfrac, f1, f2;
-     int ilow, ihi, mode, nion;
+compute_zeta (temp, nion, f1, f2, mode)
+     double temp, f1, f2;
+     int  mode, nion;
 {
-  double zeta, alpha_all, alpha_dr;
+  double zeta, alpha_all, alpha_dr, interpfrac;
+  int ihi,ilow,dummy;
+
+#define MIN_FUDGE  1.e-10
+#define MAX_FUDGE  10.
+#define MIN_TEMP         100.
+
+
+  if (temp > MIN_TEMP)
+    {
+
+
+      /* get the right place in the ground_frac tables  */
+      dummy = temp / TMIN - 1.;
+      ilow = dummy;		/* have now truncated to integer below */
+      ihi = ilow + 1;		/*these are the indeces bracketing the true value */
+      interpfrac = (dummy - ilow);	/*this is the interpolation fraction */
+      if (ilow < 0)
+	{
+	  ilow = 0;
+	  ihi = 0;
+	  interpfrac = 1.;
+	}
+      if (ihi > 19)
+	{
+	  ilow = 19;
+	  ihi = 19;
+	  interpfrac = 1.;
+	}
+
+    }
+  else
+    {
+      Error_silent ("compute_zeta: t too low  temp= %8.2e  \n",
+	    temp);
+      zeta = 0.0;
+      interpfrac = 0.0;
+      ihi = ilow = 0;
+    }
+
+ 
 
   if (mode == 1)
     {

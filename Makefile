@@ -34,7 +34,7 @@ CFLAGS = -g -pg -Wall -I$(INCLUDE) -I$(INCLUDE2)
 LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lkpar -lcfitsio -lgsl -lgslcblas 
 
 #Note that version should be a single string without spaces. 
-VERSION = 71b
+VERSION = 71c
 CHOICE=1             // Compress plasma as much as possible
 # CHOICE=0           //  Keep relation between plasma and wind identical
 
@@ -46,7 +46,7 @@ startup:
 foo: foo.o signal.o time.o
 	gcc ${cfllags} foo.o signal.o time.o ${LDFLAGS}  -o foo
 
-python_objects = bb.o get_atomicdata.o python.o photon2d.o photon_gen.o \
+python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		saha.o spectra.o wind2d.o wind.o  vector.o debug.o recipes.o \
 		trans_phot.o phot_util.o resonate.o radiation.o \
 		wind_updates2d.o windsave.o extract.o pdf.o roche.o random.o \
@@ -57,7 +57,7 @@ python_objects = bb.o get_atomicdata.o python.o photon2d.o photon_gen.o \
 		matom.o estimators.o wind_sum.o yso.o elvis.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o auger_ionization.o \
 		agn.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
-		power.o power_sub.o
+		power.o power_sub.o variable_temperature.o
 
 
 python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
@@ -71,17 +71,17 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		matom.c estimators.c wind_sum.c yso.c elvis.c cylindrical.c rtheta.c spherical.c  \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c auger_ionization.c \
 		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
-		power.c power_sub.c
+		power.c power_sub.c variable_temperature.c
 
-additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c
+additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c 
 
 prototypes: 
 	cp templates.h templates.h.old
-	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(python_source) ${additional_py_wind_source} > foo.h      
+	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(python_source) ${additional_py_wind_source} test_saha.c > foo.h      
 	cp foo.h templates.h
 
-python: startup  $(python_objects)
-	gcc  ${CFLAGS} $(python_objects) $(LDFLAGS) -o python
+python: startup  python.o $(python_objects)
+	gcc  ${CFLAGS} python.o $(python_objects) $(LDFLAGS) -o python
 		cp $@ $(BIN)/py
 		mv $@ $(BIN)/py$(VERSION)
 
@@ -94,7 +94,8 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		radiation.o gradv.o phot_util.o anisowind.o resonate.o density.o \
 		matom.o estimators.o yso.o elvis.o photon2d.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
-		power.o power_sub.o shell_wind.o compton.o torus.o zeta.o dielectronic.o
+		power.o power_sub.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
+                variable_temperature.o
 
 
 
@@ -113,6 +114,10 @@ test_bb: bb.o test_bb.o pdf.o recipes.o bilinear.o time.o
 test_pow: test_pow.o pdf.o recipes.o bilinear.o time.o 
 	gcc  ${CFLAGS} pdf.o test_pow.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_pow
 
+
+test_saha: test_saha.o $(python_objects)
+	gcc ${CFLAGS} test_saha.o $(python_objects) $(LDFLAGS) -o test_saha
+		mv $@ $(BIN)
 
 t_bilinear:  t_bilinear.o bilinear.o  
 	$(CC) $(CFLAGS) t_bilinear.o  bilinear.o  $(LDFLAGS)  -o t_bilinear
@@ -217,6 +222,19 @@ libatomic.a:  get_atomicdata.o atomic.o
 	ranlib libatomic.a
 	mv libatomic.a $(LIB)
 	cp atomic.h  $(INCLUDE)
+
+
+saha_sources = saha_inv.c get_atomicdata.c
+
+startup_saha: startup $(saha_sources)
+	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(saha_sources) > saha_templates.h
+
+saha_inv: saha_inv.o get_atomicdata.c
+	gcc ${CFLAGS} saha_inv.o get_atomicdata.o
+	cp $@ $(BIN)/saha_inv
+	mv $@ $(BIN)/saha_inv$(VERSION)
+
+
 
 
 clean :
