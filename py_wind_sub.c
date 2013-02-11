@@ -706,60 +706,71 @@ nphot_summary (w, rootname, ochoice)
   char filename[LINELENGTH];
   int nplasma;
   int ichoice;
-  char	string[LINELENGTH];
+  char string[LINELENGTH];
 
 
 
   ichoice = 0;
-  while(rdint("nphot(all=0,star=1,bl=2,disk=3,wind=4,agn=5,other=return)",&ichoice)!=EOF){
-	  if (ichoice<0||ichoice>5) {
-		  return(0);
-	  }
-
-  for (n = 0; n < NDIM2; n++)
+  while (rdint
+	 ("nphot(all=0,star=1,bl=2,disk=3,wind=4,agn=5,other=return)",
+	  &ichoice) != EOF)
     {
-      aaa[n] = 0;
-      if (w[n].vol > 0.0)
+      if (ichoice < 0 || ichoice > 5)
 	{
-	  nplasma = w[n].nplasma;
-	  if (ichoice==0){
-	 	 aaa[n] = plasmamain[nplasma].ntot;
-		  strcpy(string,"Nphot tot per cell");
-	  }
-	  else if (ichoice==1) {
-		  aaa[n] = plasmamain[nplasma].ntot_star;
-		  strcpy(string,"Nphot star per cell");
-	  }
-	  else if (ichoice==2) {
-		  aaa[n] = plasmamain[nplasma].ntot_bl;
-		  strcpy(string,"Nphot bl per cell");
-	  }
-	  else if (ichoice==3) {
-		  aaa[n] = plasmamain[nplasma].ntot_disk;
-		  strcpy(string,"Nphot disk per cell");
-	  }
-	  else if (ichoice==4) {
-		  aaa[n] = plasmamain[nplasma].ntot_wind;
-		  strcpy(string,"Nphot wind per cell");
-	  }
-	  else if (ichoice==5) {
-		  aaa[n] = plasmamain[nplasma].ntot_agn;
-		  strcpy(string,"Nphot agn per cell");
-	  }
-	  else {
-		  Error("Unknown choice, try again\n");
-	  }
+	  return (0);
 	}
-    }
-  display (string);
 
-  if (ochoice)
-    {
-      strcpy (filename, rootname);
-      strcat (filename, ".nphot");
-      write_array (filename, ochoice);
+      for (n = 0; n < NDIM2; n++)
+	{
+	  aaa[n] = 0;
+	  if (w[n].vol > 0.0)
+	    {
+	      nplasma = w[n].nplasma;
+	      if (ichoice == 0)
+		{
+		  aaa[n] = plasmamain[nplasma].ntot;
+		  strcpy (string, "Nphot tot per cell");
+		}
+	      else if (ichoice == 1)
+		{
+		  aaa[n] = plasmamain[nplasma].ntot_star;
+		  strcpy (string, "Nphot star per cell");
+		}
+	      else if (ichoice == 2)
+		{
+		  aaa[n] = plasmamain[nplasma].ntot_bl;
+		  strcpy (string, "Nphot bl per cell");
+		}
+	      else if (ichoice == 3)
+		{
+		  aaa[n] = plasmamain[nplasma].ntot_disk;
+		  strcpy (string, "Nphot disk per cell");
+		}
+	      else if (ichoice == 4)
+		{
+		  aaa[n] = plasmamain[nplasma].ntot_wind;
+		  strcpy (string, "Nphot wind per cell");
+		}
+	      else if (ichoice == 5)
+		{
+		  aaa[n] = plasmamain[nplasma].ntot_agn;
+		  strcpy (string, "Nphot agn per cell");
+		}
+	      else
+		{
+		  Error ("Unknown choice, try again\n");
+		}
+	    }
+	}
+      display (string);
 
-    }
+      if (ochoice)
+	{
+	  strcpy (filename, rootname);
+	  strcat (filename, ".nphot");
+	  write_array (filename, ochoice);
+
+	}
     }
   return (0);
 
@@ -1087,19 +1098,21 @@ a:rdint ("Wind.array.element", &n);
   wind_n_to_ij (n, &i, &j);
   xplasma = &plasmamain[w[n].nplasma];
 
-  Log ("Element %d (%d,%d)  inwind %d plasma cell %d ntot %d nioniz %d nrad %d\n", n, i,
-       j, w[n].inwind, xplasma->nplasma, xplasma->ntot, xplasma->nioniz, xplasma->nrad);
-  Log ("xyz %8.2e %8.2e %8.2e vel %8.2e %8.2e %8.2e\n", w[n].x[0],
-       w[n].x[1], w[n].x[2], w[n].v[0], w[n].v[1], w[n].v[2]);
+  Log
+    ("Element %d (%d,%d)  inwind %d plasma cell %d ntot %d nioniz %d nrad %d\n",
+     n, i, j, w[n].inwind, xplasma->nplasma, xplasma->ntot, xplasma->nioniz,
+     xplasma->nrad);
+  Log ("xyz %8.2e %8.2e %8.2e vel %8.2e %8.2e %8.2e\n", w[n].x[0], w[n].x[1],
+       w[n].x[2], w[n].v[0], w[n].v[1], w[n].v[2]);
   Log ("nh %8.2e ne %8.2e t_r %8.2e t_e %8.2e w %8.2e vol %8.2e\n",
        xplasma->rho * rho2nh, xplasma->ne, xplasma->t_r, xplasma->t_e,
        xplasma->w, w[n].vol);
 
   if (w[n].inwind < 0)
-	  Log("\n# Cell is not inwind, expect all zeros to follow\n\n");
+    Log ("\n# Cell is not inwind, expect all zeros to follow\n\n");
   /*70d - added compton - ksl */
   /*70g compton removed from luminosity reporting, it is now a cooling mechanism but does not produce photons
-         DR cooling also added in to report */
+     DR cooling also added in to report */
   Log
     ("t_e %8.2e lum_tot  %8.2e lum_lines  %8.2e lum_ff  %8.2e lum_fb     %8.2e %8.2e %8.2e %8.2e %8.2e  \n",
      xplasma->t_e, xplasma->lum_rad, xplasma->lum_lines, xplasma->lum_ff,
@@ -1109,15 +1122,22 @@ a:rdint ("Wind.array.element", &n);
     ("t_r %8.2e heat_tot %8.2e heat_lines %8.2e heat_ff %8.2e heat_photo %8.2e %8.2e %8.2e %8.2e %8.2e heat_comp %3.2e\n",
      xplasma->t_r, xplasma->heat_tot, xplasma->heat_lines, xplasma->heat_ff,
      xplasma->heat_photo, xplasma->heat_ion[0], xplasma->heat_ion[2],
-     xplasma->heat_ion[3], xplasma->heat_z,xplasma->heat_comp);
+     xplasma->heat_ion[3], xplasma->heat_z, xplasma->heat_comp);
   Log ("The ratio of rad (total) cooling to heating is %8.2f (%8.2f) \n",
-       xplasma->lum_rad / xplasma->heat_tot, (xplasma->lum_rad+xplasma->lum_adiabatic+xplasma->lum_comp+xplasma->lum_dr) / xplasma->heat_tot);
-  Log ("Adiabatic cooling %8.2e is %8.2g of total cooling\n", xplasma->lum_adiabatic,xplasma->lum_adiabatic/(xplasma->lum_rad+xplasma->lum_adiabatic));
+       xplasma->lum_rad / xplasma->heat_tot,
+       (xplasma->lum_rad + xplasma->lum_adiabatic + xplasma->lum_comp +
+	xplasma->lum_dr) / xplasma->heat_tot);
+  Log ("Adiabatic cooling %8.2e is %8.2g of total cooling\n",
+       xplasma->lum_adiabatic,
+       xplasma->lum_adiabatic / (xplasma->lum_rad + xplasma->lum_adiabatic));
   /*70g NSH compton and DR cooling are now reported seperately. */
-  Log ("Compton cooling   %8.2e is %8.2g of total cooling\n", xplasma->lum_comp,xplasma->lum_comp/(xplasma->lum_rad+xplasma->lum_comp));
-  Log ("DR cooling        %8.2e is %8.2g of total cooling\n", xplasma->lum_dr,xplasma->lum_dr/(xplasma->lum_rad+xplasma->lum_dr));
+  Log ("Compton cooling   %8.2e is %8.2g of total cooling\n",
+       xplasma->lum_comp,
+       xplasma->lum_comp / (xplasma->lum_rad + xplasma->lum_comp));
+  Log ("DR cooling        %8.2e is %8.2g of total cooling\n", xplasma->lum_dr,
+       xplasma->lum_dr / (xplasma->lum_rad + xplasma->lum_dr));
   Log ("Number of ionizing photons in cell nioniz %d\n", xplasma->nioniz);
-  Log ("Log Ionization parameter in this cell cell based %4.2f ferland %4.2f\n", log10(xplasma->ip),log10(xplasma->ferland_ip)); //70h NSH computed ionizaion parameter
+  Log ("Log Ionization parameter in this cell cell based %4.2f ferland %4.2f\n", log10 (xplasma->ip), log10 (xplasma->ferland_ip));	//70h NSH computed ionizaion parameter
   Log ("ioniz %8.2e %8.2e %8.2e %8.2e %8.2e\n",
        xplasma->ioniz[0], xplasma->ioniz[1], xplasma->ioniz[2],
        xplasma->ioniz[3], xplasma->ioniz[4]);
@@ -1238,6 +1258,7 @@ complete_file_summary (w, root, ochoice)
   temp_summary (w, root, ochoice);
   temp_rad (w, root, ochoice);
   electron_summary (w, root, ochoice);
+  convergence_summary (w, root, ochoice);
   ion_summary (w, 6, 3, 0, root, ochoice);
   ion_summary (w, 6, 4, 0, root, ochoice);
   ion_summary (w, 6, 5, 0, root, ochoice);
@@ -1296,6 +1317,7 @@ complete_file_summary (w, root, ochoice)
   ion_summary (w, 14, 3, 3, root, ochoice);
   ion_summary (w, 14, 4, 3, root, ochoice);
   ion_summary (w, 14, 5, 3, root, ochoice);
+
   return (0);
 }
 
@@ -1402,7 +1424,7 @@ IP_summary (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = (log10(plasmamain[nplasma].ferland_ip));
+	  aaa[n] = (log10 (plasmamain[nplasma].ferland_ip));
 	}
     }
   display ("Log Ionisation parameter");
@@ -1415,13 +1437,13 @@ IP_summary (w, rootname, ochoice)
 
     }
 
- for (n = 0; n < NDIM2; n++)
+  for (n = 0; n < NDIM2; n++)
     {
       aaa[n] = 0;
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = (log10(plasmamain[nplasma].ip));
+	  aaa[n] = (log10 (plasmamain[nplasma].ip));
 	}
     }
   display ("Log Ionisation parameter");
@@ -1450,12 +1472,12 @@ alpha_summary (w, rootname, ochoice)
      char rootname[];
      int ochoice;
 {
-  int i,n;
+  int i, n;
   char filename[LINELENGTH];
   int nplasma;
 
-  i=1;
-  rdint("Band number for alpha",&i);
+  i = 1;
+  rdint ("Band number for alpha", &i);
 
   for (n = 0; n < NDIM2; n++)
     {
@@ -1585,7 +1607,7 @@ thompson (w, rootname, ochoice)
 	{
 	  nplasma = w[n].nplasma;
 	  ne = plasmamain[nplasma].ne;
-	    aaa[n] = (THOMPSON * ne)*pow(w[n].vol,0.333);
+	  aaa[n] = (THOMPSON * ne) * pow (w[n].vol, 0.333);
 	}
     }
   display ("Thompson optical depths");
@@ -1619,7 +1641,7 @@ nscat_split (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	    aaa[n] = plasmamain[nplasma].nscat_es;
+	  aaa[n] = plasmamain[nplasma].nscat_es;
 	}
     }
   display ("Thompson scatters");
@@ -1630,7 +1652,7 @@ nscat_split (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	    aaa[n] = plasmamain[nplasma].nscat_res;
+	  aaa[n] = plasmamain[nplasma].nscat_res;
 	}
     }
   display ("Resonant scatters");
@@ -1642,9 +1664,9 @@ nscat_split (w, rootname, ochoice)
 
   if (ochoice)
     {
-    strcpy (filename, rootname);
-    strcat (filename, ".thomp");
-    write_array (filename, ochoice);
+      strcpy (filename, rootname);
+      strcat (filename, ".thomp");
+      write_array (filename, ochoice);
     }
 
   return (0);
@@ -1670,7 +1692,7 @@ convergence_summary (w, rootname, ochoice)
 	  aaa[n] = plasmamain[nplasma].converge_whole;
 	}
     }
-  display ("Coonvergence (0=converged)");
+  display ("Convergence (0=converged)");
 
   if (ochoice)
     {
@@ -1683,3 +1705,155 @@ convergence_summary (w, rootname, ochoice)
 
 }
 
+
+/* 
+
+   1112	ksl	Write out arrays of use in evaluating what is going on in convergence of
+   		various models
+*/
+
+int
+convergence_all (w, rootname, ochoice)
+     WindPtr w;
+     char rootname[];
+     int ochoice;
+{
+  int n, m;
+  int nplasma;
+  char filename[LINELENGTH];
+  char word[LINELENGTH];
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = plasmamain[nplasma].converge_whole;
+	}
+    }
+  display ("Convergence (0=converged)");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".conv");
+      write_array (filename, ochoice);
+    }
+
+
+  /* Now write out the number of photons in each band */
+
+  for (m = 0; m < geo.nxfreq; m++)
+    {
+      for (n = 0; n < NDIM2; n++)
+	{
+	  aaa[n] = 0;
+	  if (w[n].vol > 0.0)
+	    {
+	      nplasma = w[n].nplasma;
+	      aaa[n] = plasmamain[nplasma].nxtot[m];
+	    }
+	}
+
+      strcpy (word, "");
+      sprintf (word, ".nxtot%03d", m);
+      display (word);
+
+      if (ochoice)
+	{
+	  strcpy (filename, rootname);
+	  strcat (filename, word);
+	  write_array (filename, ochoice);
+	}
+    }
+
+  if (geo.nxfreq == 0)
+    {
+      printf ("This model does not use bands calculating the ionization\n");
+      return (0);
+    }
+
+
+  /* Now write out the value of xj in each band */
+
+  for (m = 0; m < geo.nxfreq; m++)
+    {
+      for (n = 0; n < NDIM2; n++)
+	{
+	  aaa[n] = 0;
+	  if (w[n].vol > 0.0)
+	    {
+	      nplasma = w[n].nplasma;
+	      aaa[n] = plasmamain[nplasma].xj[m];
+	    }
+	}
+
+      strcpy (word, "");
+      sprintf (word, ".xj%03d", m);
+      display (word);
+
+      if (ochoice)
+	{
+	  strcpy (filename, rootname);
+	  strcat (filename, word);
+	  write_array (filename, ochoice);
+	}
+    }
+
+
+  /* Now write out the value of xave_freq in each band */
+
+  for (m = 0; m < geo.nxfreq; m++)
+    {
+      for (n = 0; n < NDIM2; n++)
+	{
+	  aaa[n] = 0;
+	  if (w[n].vol > 0.0)
+	    {
+	      nplasma = w[n].nplasma;
+	      aaa[n] = plasmamain[nplasma].xave_freq[m];
+	    }
+	}
+
+      strcpy (word, "");
+      sprintf (word, ".xave_freq%03d", m);
+      display (word);
+
+      if (ochoice)
+	{
+	  strcpy (filename, rootname);
+	  strcat (filename, word);
+	  write_array (filename, ochoice);
+	}
+    }
+
+
+  /* Now write out the value of nxtot in each band */
+
+  for (m = 0; m < geo.nxfreq; m++)
+    {
+      for (n = 0; n < NDIM2; n++)
+	{
+	  aaa[n] = 0;
+	  if (w[n].vol > 0.0)
+	    {
+	      nplasma = w[n].nplasma;
+	      aaa[n] = plasmamain[nplasma].nxtot[m];
+	    }
+	}
+
+      strcpy (word, "");
+      sprintf (word, ".nxtot%03d", m);
+      display (word);
+
+      if (ochoice)
+	{
+	  strcpy (filename, rootname);
+	  strcat (filename, word);
+	  write_array (filename, ochoice);
+	}
+    }
+
+  return (0);
+}

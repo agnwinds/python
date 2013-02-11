@@ -206,7 +206,9 @@ History:
 
 	05jul	ksl	Changed call from ds_to_cone to ds_to_cone as
 			added cylvar coord system.  Otherwise routine is
-			currently uncanged.  
+			currently unchanged.  
+	11nov	ksl	Modified to account for elvis wind model with
+			its pillbox at the bottom
  
 **************************************************************/
 
@@ -227,6 +229,8 @@ ds_to_wind (pp)
     ds = x;
   if ((x = ds_to_cone (&windcone[1], &ptest)) < ds)
     ds = x;
+  if (geo.wind_type== 8)
+	  x=ds_to_pillbox(&ptest,geo.sv_rmin,geo.sv_rmax,geo.elvis_offset);
 
   return (ds);
 }

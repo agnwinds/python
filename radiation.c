@@ -279,19 +279,35 @@ statement could be deleted entirely 060802 -- ksl */
 
 /* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, 
  * and hence get an idea of how 'agny' or 'disky' the cell is. */
+/* ksl - 1112 - Fixed this so it records the number of photon bundles and not the total
+ * number of photons.  Also used the PTYPE designations as one should as a matter of 
+ * course
+ */
 
 
 
-  if (p->origin == 0)
-	xplasma->ntot_star+=(w_in/(H*p->freq));
-  else if (p->origin == 1)
-	xplasma->ntot_bl+=(w_in/(H*p->freq));
-  else if (p->origin == 2)
-	xplasma->ntot_disk+=(w_in/(H*p->freq));
-  else if (p->origin == 3)
-	xplasma->ntot_wind+=(w_in/(H*p->freq));
-  else if (p->origin == 4)
-	xplasma->ntot_agn+=(w_in/(H*p->freq));
+//OLD71  if (p->origin == 0)
+//OLD71	xplasma->ntot_star+=(w_in/(H*p->freq));
+//OLD71  else if (p->origin == 1)
+//OLD71	xplasma->ntot_bl+=(w_in/(H*p->freq));
+//OLD71  else if (p->origin == 2)
+//OLD71	xplasma->ntot_disk+=(w_in/(H*p->freq));
+//OLD71  else if (p->origin == 3)
+//OLD71	xplasma->ntot_wind+=(w_in/(H*p->freq));
+//OLD71  else if (p->origin == 4)
+//OLD71	xplasma->ntot_agn+=(w_in/(H*p->freq));
+
+
+  if (p->origin == PTYPE_STAR)
+	xplasma->ntot_star++;
+  else if (p->origin == PTYPE_BL)
+	xplasma->ntot_bl++;
+  else if (p->origin == PTYPE_DISK)
+	xplasma->ntot_disk++;
+  else if (p->origin == PTYPE_WIND)
+	xplasma->ntot_wind++;
+  else if (p->origin == PTYPE_AGN)
+	xplasma->ntot_agn++;
 
 
 
@@ -314,15 +330,21 @@ statement could be deleted entirely 060802 -- ksl */
 }
 
 
-/* 1108 NSH  THe next loop updates the banded versions of j and ave_freq, note that the lines above still update the parameters for all the photons produced. We are simply controlling which photons are used for the sim powewr law stuff by banding.*/
+/* 1108 NSH  THe next loop updates the banded versions of j and ave_freq, note that the lines above still update 
+ * the parameters for all the photons produced. We are simply controlling which photons are used for the sim powewr 
+ * law stuff by banding.*/
+  /* nxfreq refers to how many frequencies we have defining the bands. So, if we have 5 bands, we have 6 frequencies, 
+   * going from xfreq[0] to xfreq[5] Since we are breaking out of the loop when i>=nxfreq, this means the last loop 
+   * will be i=nxfreq-1*/
+/* 71 - 111229 - ksl - modified to reflect fact that I have moved nxbands and xreq into the geo structure */
 
-  for (i=0 ; i<nxfreq ; i++)  /* nxfreq refers to how many frequencies we have defining the bands. So, if we have 5 bands, we have 6 frequencies, going from xfreq[0] to xfreq[5] Since we are breaking out of the loop when i>=nxfreq, this means the last loop will be i=nxfreq-1*/
+  for (i=0 ; i<geo.nxfreq ; i++)  
 	{
-	if (xfreq[i] < p->freq && p->freq <= xfreq[i+1])
+	if (geo.xfreq[i] < p->freq && p->freq <= geo.xfreq[i+1])
 		{
-		xplasma->xave_freq[i] += p->freq * w_ave * ds; /*1108 NSH/KSL frequency weighted by weight and distance */
-		xplasma->xj[i] += w_ave * ds;  /*1108 NSH/KSL photon weight times distance travelled */
-		xplasma->nxtot[i] ++; /*1108 NSH increment the frequency banded photon counter */
+		xplasma->xave_freq[i] += p->freq * w_ave * ds;  /*1108 NSH/KSL frequency weighted by weight and distance */
+		xplasma->xj[i] += w_ave * ds;  			/*1108 NSH/KSL photon weight times distance travelled */
+		xplasma->nxtot[i] ++; 				/*1108 NSH increment the frequency banded photon counter */
 		}
 	}
 

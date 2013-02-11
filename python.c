@@ -10,7 +10,7 @@
  
 Arguments:		
 
-	Usage:  py [-h] [-r] [-t tmax] xxx  or simply py
+	Usage:  py [-h] [-r] [-t time_max] xxx  or simply py
 
 	where xxx is the rootname or full name of a parameter file, e. g. test.pf
 
@@ -19,7 +19,7 @@ Arguments:
 	-h 	to ge this help message
 	-r 	restart a run of the progarm reading the file xxx.windsave
 
-	-t tmax	limit the total time to approximately tmax seconds.  Note that the program checks
+	-t time_max	limit the total time to approximately time_max seconds.  Note that the program checks
 		for this limit somewhat infrequently, usually at the ends of cycles, because it
 		is attempting to save the program outputs so that the program can be restarted with
 		-r if theat is desired.
@@ -164,6 +164,7 @@ History:
 			that are construced without going through types.
 	1108	ksl/nsh Adding code to keep track of gross spectra in a cell though xbands,
 			xj and xave_freq.  Just set up the frequence limits here.	
+	1112	ksl	Moved everything associated with frequency bands into bands_init
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -180,7 +181,6 @@ History:
 
 #include "python.h"
 #define NSPEC	20
-//old double n_ioniz,lum_ioniz;   //NSH 16/2/2011 these seemed to need to be here to allow photon_checks to communicate the number back to python for readout.... - now put into geo structure to allow other parts of the code to use thme,
 int
 main (argc, argv)
      int argc;
@@ -205,9 +205,9 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   char yesno[20];
   int select_extract, select_spectype;
-  double tmax;
-  char root[LINELENGTH], input[LINELENGTH], wspecfile[LINELENGTH],lspecfile[LINELENGTH],
-    specfile[LINELENGTH], diskfile[LINELENGTH];
+//OLD  double tmax;
+  char root[LINELENGTH], input[LINELENGTH], wspecfile[LINELENGTH],
+    lspecfile[LINELENGTH], specfile[LINELENGTH], diskfile[LINELENGTH];
   char windradfile[LINELENGTH], windsavefile[LINELENGTH];
   char specsavefile[LINELENGTH];
   char photfile[LINELENGTH], diagfile[LINELENGTH],
@@ -404,7 +404,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   strcpy (wspecfile, root);
   strcpy (lspecfile, root);
-   
+
   strcpy (specfile, root);
   strcpy (windradfile, "python");
   strcpy (windsavefile, root);
@@ -459,19 +459,22 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
 /* Set up frequency bands in which to record the frequency */
 
-/* At present set up a single energy band for 2 - 10 keV */
-nxfreq=7;   //NSH 70g - bands set up to match the bands we are currently using in the.pf files. This should probably end up tied together in the long run!
-xfreq[0]=1.0/HEV;
-xfreq[1]=13.6/HEV;
-xfreq[2]=54.42/HEV;
-xfreq[3]=392./HEV;
-xfreq[4]=739./HEV;
-xfreq[5]=2000/HEV;
-xfreq[6]=10000/HEV;
-xfreq[7]=50000/HEV;
+/* Next lines have been moved to a new routine freqs_init which is in bands.c so that we can get control of the frequencies we want
+ * to use in calculating the power law model.  This is routine is called near bands_init  below, because that puts these two
+ * things together in one place
+ */
+ 
+//OLD71 /* At present set up a single energy band for 2 - 10 keV */
+//OLD71   nxfreq = 7;			//NSH 70g - bands set up to match the bands we are currently using in the.pf files. This should probably end up tied together in the long run!
+//OLD71   xfreq[0] = 1.0 / HEV;
+//OLD71   xfreq[1] = 13.6 / HEV;
+//OLD71   xfreq[2] = 54.42 / HEV;
+//OLD71   xfreq[3] = 392. / HEV;
+//OLD71   xfreq[4] = 739. / HEV;
+//OLD71   xfreq[5] = 2000 / HEV;
+//OLD71   xfreq[6] = 10000 / HEV;
+//OLD71   xfreq[7] = 50000 / HEV;
 
-/* 1108 NSH Set up a parameter to tell the power law code what estimator band to use */
-nx4power=0; 
 
 
 /* BEGIN GATHERING INPUT DATA */
@@ -504,7 +507,10 @@ nx4power=0;
 
 	  Log
 	    ("Starting a new run from scratch starting with previous windfile");
-	  wind_read (old_windsavefile);	//program will exit if unable to read the file
+	  if (wind_read (old_windsavefile)<0){
+		  Error ("python: Unable to open %s\n", old_windsavefile);	//program will exit if unable to read the file
+		  exit(0);
+	  }
 	  geo.wind_type = 2;	// after wind_read one will have a different wind_type otherwise
 	  w = wmain;
 
@@ -529,7 +535,10 @@ nx4power=0;
       Log ("Continuing a previous run of %s \n", root);
       strcpy (old_windsavefile, root);
       strcat (old_windsavefile, ".wind_save");
-      wind_read (old_windsavefile);	/* program would exist if unable to read the file, but we have checked this earlier */
+      if(wind_read (old_windsavefile)<0){
+		  Error ("python: Unable to open %s\n", old_windsavefile);	//program will exit if unable to read the file
+		  exit(0);
+      }
       w = wmain;
       geo.wind_type = 2;	// We read the data from a file
       xsignal (root, "%-20s Read %s\n", "COMMENT", old_windsavefile);
@@ -577,7 +586,7 @@ nx4power=0;
     }
 
 
-  if (geo.wind_type != 2)  
+  if (geo.wind_type != 2)
     {
       /* Define the coordinate system for the grid and allocate memory for the wind structure */
       rdint
@@ -614,8 +623,8 @@ nx4power=0;
     }
   if (geo.ioniz_mode == 4 || geo.ioniz_mode > 5)
     {
-      Log("The allowed ionization modes are 0, 1, 2, 3, 5\n");
-      Error ("Unknown ionization mode %d\n",geo.ioniz_mode);
+      Log ("The allowed ionization modes are 0, 1, 2, 3, 5\n");
+      Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
       exit (0);
     }
 
@@ -692,29 +701,29 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
   //  Establish the overall system type  - Added for python_69 to allow qso's have different inputs
   //  Note - ksl - What happened to the possibility of a true single star with no disk - 110914
 
-  rdint ("System_type(0=star,1=binary,2=agn)",
-	 &geo.system_type);
+  rdint ("System_type(0=star,1=binary,2=agn)", &geo.system_type);
 
-  
+
   // Determine what radiation sources there are.  Note that most of these values are initilized in init_geo
-  
-  if (geo.system_type!=2) {  /* If is a stellar system */
-  rdint ("Star_radiation(y=1)", &geo.star_radiation);
-  rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-  rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
-  rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-  geo.agn_radiation=0;  // So far at least, our star systems don't have a BH
-  }
-  else   /* If it is an AGN */
-  {
-	  geo.star_radiation=0; // 70b - AGN do not have a star at the center */
-  //OLD rdint ("Star_radiation(y=1)", &geo.star_radiation);
-  rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-  geo.bl_radiation=0;
-  rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-  geo.agn_radiation=1;
-  rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
-  }
+
+  if (geo.system_type != 2)
+    {				/* If is a stellar system */
+      rdint ("Star_radiation(y=1)", &geo.star_radiation);
+      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+      rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
+      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+      geo.agn_radiation = 0;	// So far at least, our star systems don't have a BH
+    }
+  else				/* If it is an AGN */
+    {
+      geo.star_radiation = 0;	// 70b - AGN do not have a star at the center */
+      //OLD rdint ("Star_radiation(y=1)", &geo.star_radiation);
+      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+      geo.bl_radiation = 0;
+      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+      geo.agn_radiation = 1;
+      rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
+    }
 
   if (!geo.star_radiation && !geo.disk_radiation && !geo.bl_radiation
       && !geo.bl_radiation && !geo.agn_radiation)
@@ -755,7 +764,7 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 		"Rad_type_for_bl(0=bb,1=models)_to_make_wind",
 		&geo.bl_ion_spectype);
 
-  geo.agn_ion_spectype=3;
+  geo.agn_ion_spectype = 3;
   get_spectype (geo.agn_radiation,
 		"Rad_type_for_agn(0=bb,1=models,3=power_law)_to_make_wind",
 		&geo.agn_ion_spectype);
@@ -780,26 +789,28 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
        * a non-rotating BH
        */
 
-      if (geo.system_type==2){
-	      geo.rstar=12.*G*geo.mstar/(C*C);
-      }
+      if (geo.system_type == 2)
+	{
+	  geo.rstar = 12. * G * geo.mstar / (C * C);
+	}
 
       rddoub ("rstar(cm)", &geo.rstar);
 
 
-      geo.r_agn=geo.rstar;   /* At present just set geo.r_agn to geo.rstar */
-      if (geo.system_type==2){
-	      geo.diskrad=100.*geo.r_agn;
-      }
+      geo.r_agn = geo.rstar;	/* At present just set geo.r_agn to geo.rstar */
+      if (geo.system_type == 2)
+	{
+	  geo.diskrad = 100. * geo.r_agn;
+	}
 
       geo.rstar_sq = geo.rstar * geo.rstar;
       if (geo.star_radiation)
 	rddoub ("tstar", &geo.tstar);
 
 
-/* Describe the secondary if that is required */ 
+/* Describe the secondary if that is required */
 
-      if (geo.system_type == 1)  /* It's a binary system */
+      if (geo.system_type == 1)	/* It's a binary system */
 	{
 
 	  geo.m_sec /= MSOL;	// Convert units for ease of data entry
@@ -866,74 +877,78 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 
 /* If diskrad <= geo.rstar set geo.disk_type = 0 to make any disk transparent anyway. */
 
-  if (geo.diskrad < geo.rstar)
-    {
-      Log
-	("Disk radius is less than star radius, so assuming no disk)\n");
-      geo.disk_type = 0;
-    }
+	  if (geo.diskrad < geo.rstar)
+	    {
+	      Log
+		("Disk radius is less than star radius, so assuming no disk)\n");
+	      geo.disk_type = 0;
+	    }
 
-  if (geo.disk_type == 2)
-    {			/* Get the additional variables need to describe a vertically extended disk */
-      rddoub ("disk.z0(fractional.height.at.diskrad)", &geo.disk_z0);
-      rddoub ("disk.z1(powerlaw.index)", &geo.disk_z1);
-    }
-}
+	  if (geo.disk_type == 2)
+	    {			/* Get the additional variables need to describe a vertically extended disk */
+	      rddoub ("disk.z0(fractional.height.at.diskrad)", &geo.disk_z0);
+	      rddoub ("disk.z1(powerlaw.index)", &geo.disk_z1);
+	    }
+	}
 
-else
-{			/* There is no disk so set variables accordingly */
-  geo.disk_radiation = 0;
-  geo.diskrad = 0;
-}
+      else
+	{			/* There is no disk so set variables accordingly */
+	  geo.disk_radiation = 0;
+	  geo.diskrad = 0;
+	}
 
 
 /* Describe the boundary layer */
 
-if (geo.bl_radiation)
-{
-  xbl = geo.lum_bl = 0.5 * G * geo.mstar * geo.disk_mdot / geo.rstar;
+      if (geo.bl_radiation)
+	{
+	  xbl = geo.lum_bl = 0.5 * G * geo.mstar * geo.disk_mdot / geo.rstar;
 
-  rddoub ("lum_bl(ergs/s)", &geo.lum_bl);
-  Log ("OK, the bl lum will be about %.2e the disk lum\n",
-       geo.lum_bl / xbl);
-  rddoub ("t_bl", &geo.t_bl);
-}
-else
-{
-  geo.lum_bl = 0;
-  geo.t_bl = 0;
-}
+	  rddoub ("lum_bl(ergs/s)", &geo.lum_bl);
+	  Log ("OK, the bl lum will be about %.2e the disk lum\n",
+	       geo.lum_bl / xbl);
+	  rddoub ("t_bl", &geo.t_bl);
+	}
+      else
+	{
+	  geo.lum_bl = 0;
+	  geo.t_bl = 0;
+	}
 
 /* Describe the agn */
 
-if (geo.agn_radiation)
-{
-  xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
+      if (geo.agn_radiation)
+	{
+	  xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
 
-  // At present we have set geo.r_agn = geo.rstar, and encouraged the user
-  // set the default for the radius of the BH to be 6 R_Schwartschild.
-  // rddoub("R_agn(cm)",&geo.r_agn);
+	  // At present we have set geo.r_agn = geo.rstar, and encouraged the user
+	  // set the default for the radius of the BH to be 6 R_Schwartschild.
+	  // rddoub("R_agn(cm)",&geo.r_agn);
 
-  rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
-  Log ("OK, the agn lum will be about %.2e the disk lum\n",
-       geo.lum_agn / xbl);
-  geo.alpha_agn=(-1.5);
-  rddoub ("agn_power_law_index", &geo.alpha_agn);
+	  rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
+	  Log ("OK, the agn lum will be about %.2e the disk lum\n",
+	       geo.lum_agn / xbl);
+	  geo.alpha_agn = (-1.5);
+	  rddoub ("agn_power_law_index", &geo.alpha_agn);
 
 /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
 * This is only used in the sim correction factor for the first time through. 
 * Afterwards, the photons are used to compute the sim parameters. */
 
-  geo.const_agn = geo.lum_agn / (((pow (2.42e18, geo.alpha_agn + 1.)) - pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
-  Log("AGN Input parameters give a power law constant of %e\n",geo.const_agn);
-}
-else
-{
-  geo.r_agn=0.0;
-  geo.lum_agn = 0.0;
-  geo.alpha_agn = 0.0;
-  geo.const_agn =0.0;
-}
+	  geo.const_agn =
+	    geo.lum_agn /
+	    (((pow (2.42e18, geo.alpha_agn + 1.)) -
+	      pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
+	  Log ("AGN Input parameters give a power law constant of %e\n",
+	       geo.const_agn);
+	}
+      else
+	{
+	  geo.r_agn = 0.0;
+	  geo.lum_agn = 0.0;
+	  geo.alpha_agn = 0.0;
+	  geo.const_agn = 0.0;
+	}
 
 /* Describe the Compton torus */
 
@@ -946,30 +961,34 @@ else
 * inside the actual wind, or at least that's what ksl believes on 110809.  ???
 */
 
-rdint("Torus(0=no,1=yes)",&geo.compton_torus);
-if(geo.compton_torus){
-      rddoub("Torus.rmin(cm)",&geo.compton_torus_rmin);
-      rddoub("Torus.rmax(cm)",&geo.compton_torus_rmax);
-      rddoub("Torus.height(cm)",&geo.compton_torus_zheight);
-      rddoub("Torus.optical_depth",&geo.compton_torus_tau);
-      rddoub("Torus.tinit",&geo.compton_torus_te);
-      if (geo.compton_torus_tau<=0)
-      {
-	      geo.compton_torus_tau=0.001;
-	      Error("python: A torus with zero optical depth makes no sense. Setting to %f\n",geo.compton_torus_tau);
-      }
-}
+      rdint ("Torus(0=no,1=yes)", &geo.compton_torus);
+      if (geo.compton_torus)
+	{
+	  rddoub ("Torus.rmin(cm)", &geo.compton_torus_rmin);
+	  rddoub ("Torus.rmax(cm)", &geo.compton_torus_rmax);
+	  rddoub ("Torus.height(cm)", &geo.compton_torus_zheight);
+	  rddoub ("Torus.optical_depth", &geo.compton_torus_tau);
+	  rddoub ("Torus.tinit", &geo.compton_torus_te);
+	  if (geo.compton_torus_tau <= 0)
+	    {
+	      geo.compton_torus_tau = 0.001;
+	      Error
+		("python: A torus with zero optical depth makes no sense. Setting to %f\n",
+		 geo.compton_torus_tau);
+	    }
+	}
 
 /* Describe the wind */
 
-if (geo.system_type==2) {
-      geo.rmax=50.*geo.r_agn;
-}
+      if (geo.system_type == 2)
+	{
+	  geo.rmax = 50. * geo.r_agn;
+	}
 
-rddoub ("wind.radmax(cm)", &geo.rmax);
-rddoub ("wind.t.init", &geo.twind);
+      rddoub ("wind.radmax(cm)", &geo.rmax);
+      rddoub ("wind.t.init", &geo.twind);
 
-geo.diskrad_sq = geo.diskrad * geo.diskrad;
+      geo.diskrad_sq = geo.diskrad * geo.diskrad;
 
 
 /* Now get parameters that are specific to a given wind model
@@ -979,114 +998,114 @@ geo.diskrad_sq = geo.diskrad * geo.diskrad;
  with the same basic wind geometry, without reading in all of the input parameters.  
 */
 
-if (geo.wind_type == 1)
-{
-  get_stellar_wind_params ();
-}
-else if (geo.wind_type == 0)
-{
-  get_sv_wind_params ();
-}
-else if (geo.wind_type == 3)
-{
-  get_proga_wind_params ();
-}
-else if (geo.wind_type == 4)
-{
-  get_corona_params ();
-}
-else if (geo.wind_type == 5)
-{
-  get_knigge_wind_params ();
-}
-else if (geo.wind_type == 6)
-{
-  get_thierry_params ();
-}
-else if (geo.wind_type == 7)
-{
-  get_yso_wind_params ();
-}
-else if (geo.wind_type == 8)
-{
-  get_elvis_wind_params ();
-}
-else if (geo.wind_type == 9)  //NSH 18/2/11 This is a new wind tpye to produce a thin shell.
-{
-  get_shell_wind_params ();
-  dfudge=(geo.shell_rmax-geo.shell_rmin)/1000.0; //Stop photons getting pushed out of the cell
-  DFUDGE=dfudge;
-}
-else if (geo.wind_type != 2)
-{
-  Error ("python: Unknown wind type %d\n", geo.wind_type);
-  exit (0);
-}
-
-}				// End of block to define a model for the first time
-else
-{
-if (geo.disk_type)	/* Then a disk exists and it needs to be described */
-{
-  if (geo.disk_radiation)
-    {
-      rdint
-	("Disk.temperature.profile(0=standard;1=readin)",
-	 &geo.disk_tprofile);
-      if (geo.disk_tprofile == 1)
+      if (geo.wind_type == 1)
 	{
-	  rdstr ("T_profile_file", tprofile);
+	  get_stellar_wind_params ();
+	}
+      else if (geo.wind_type == 0)
+	{
+	  get_sv_wind_params ();
+	}
+      else if (geo.wind_type == 3)
+	{
+	  get_proga_wind_params ();
+	}
+      else if (geo.wind_type == 4)
+	{
+	  get_corona_params ();
+	}
+      else if (geo.wind_type == 5)
+	{
+	  get_knigge_wind_params ();
+	}
+      else if (geo.wind_type == 6)
+	{
+	  get_thierry_params ();
+	}
+      else if (geo.wind_type == 7)
+	{
+	  get_yso_wind_params ();
+	}
+      else if (geo.wind_type == 8)
+	{
+	  get_elvis_wind_params ();
+	}
+      else if (geo.wind_type == 9)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
+	{
+	  get_shell_wind_params ();
+	  dfudge = (geo.shell_rmax - geo.shell_rmin) / 1000.0;	//Stop photons getting pushed out of the cell
+	  DFUDGE = dfudge;
+	}
+      else if (geo.wind_type != 2)
+	{
+	  Error ("python: Unknown wind type %d\n", geo.wind_type);
+	  exit (0);
+	}
+
+    }				// End of block to define a model for the first time
+  else
+    {
+      if (geo.disk_type)	/* Then a disk exists and it needs to be described */
+	{
+	  if (geo.disk_radiation)
+	    {
+	      rdint
+		("Disk.temperature.profile(0=standard;1=readin)",
+		 &geo.disk_tprofile);
+	      if (geo.disk_tprofile == 1)
+		{
+		  rdstr ("T_profile_file", tprofile);
+		}
+	    }
 	}
     }
-}
-}
 
 
 
-/* Now define the wind cones generically.  Note that thetamin and
-thetamax are measured from disk plane, and so if thetamin = 90 one ends
-up with a cone that is constant in rho.  
-56d -- ksl -- updated windcone definitions  */
-/* ???? There is some confusion here regarding new and old.  This should be
-* ???? fixed.  ksl
-*/
+/* Now define the wind cones generically.  The angles thetamin and
+   thetamax are all defined from the z axis, so that an angle of 0
+   is a flow that is perpeindicular to to the disk and one that is
+   close to 90 degrees will be parallel to the plane of the disk
+   geo.wind_thetamin and max are defined in the routines that initialize
+   the various wind models, e. g. get_sv_wind_parameters. These
+   have been called at this point.  
 
-/* geo.wind_thetamin and max are defined in the routines that initialize
-the various wind models, e. g. get_sv_wind_parameters. These
-have been called at this point.  
+   z is the place where the windcone intercepts the z axis
+   dzdr is the slope 
 
-z is the place where the windcone intercepsts the z axis
-dzdr is the slope */
+   111124 fixed notes on this - ksl 
+   */
 
-if (geo.wind_thetamin > 0.0)
+
+  if (geo.wind_thetamin > 0.0)
     {
-      windcone[0].dzdr = 1. / tan (geo.wind_thetamin);	
-      windcone[0].z = (-geo.wind_rho_min / tan (geo.wind_thetamin));	
+      windcone[0].dzdr = 1. / tan (geo.wind_thetamin);
+      windcone[0].z = (-geo.wind_rho_min / tan (geo.wind_thetamin));
     }
   else
     {
-      windcone[0].dzdr = VERY_BIG;	
-      windcone[0].z = -VERY_BIG;;	
+      windcone[0].dzdr = VERY_BIG;
+      windcone[0].z = -VERY_BIG;;
     }
 
 
   if (geo.wind_thetamax > 0.0)
     {
-      windcone[1].dzdr = 1. / tan (geo.wind_thetamax);	
-      windcone[1].z = (-geo.wind_rho_max / tan (geo.wind_thetamax));	
+      windcone[1].dzdr = 1. / tan (geo.wind_thetamax);
+      windcone[1].z = (-geo.wind_rho_max / tan (geo.wind_thetamax));
     }
   else
     {
-      windcone[1].dzdr = VERY_BIG;	
+      windcone[1].dzdr = VERY_BIG;
       windcone[1].z = -VERY_BIG;;
     }
 
 
   geo.rmax_sq = geo.rmax * geo.rmax;
 
-  /* Calculate additonal parameters associated with the binary star system */
+  /* Calculate additional parameters associated with the binary star system */
 
-  if (geo.system_type==1)
+  if (geo.system_type == 1)
     binary_basics ();
 
   /* Check that the parameters which have been supplied for the star, disk and boundary layer will
@@ -1171,7 +1190,7 @@ if (geo.wind_thetamin > 0.0)
 		    "Rad_type_for_bl(0=bb,1=models,2=uniform)_in_final_spectrum",
 		    &geo.bl_spectype);
 
-      geo.agn_spectype=3;
+      geo.agn_spectype = 3;
       get_spectype (geo.agn_radiation,
 		    "Rad_type_for_agn(0=bb,1=models,3=power_law)_in_final_spectrum",
 		    &geo.agn_spectype);
@@ -1309,36 +1328,41 @@ run -- 07jul -- ksl
 
 /* Determine the frequency range which will be used to establish the ionization balance of the wind */
 
-  // 59 - Increased to 20,000 A so could go further into NIR 
-  freqmin = C / 12000e-8;	/*20000 A */
+//OLD71  // 59 - Increased to 20,000 A so could go further into NIR 
+//OLD71  freqmin = C / 12000e-8;	/*20000 A */
 
-  tmax = TSTAR;
-  if (geo.twind > tmax)
-    tmax = geo.twind;
-  if (geo.tstar > tmax)
-    tmax = geo.tstar;
-  if (geo.t_bl > tmax && geo.lum_bl > 0.0)
-    tmax = geo.t_bl;
-  if ((0.488 * tdisk (geo.mstar, geo.disk_mdot, geo.rstar)) > tmax)
-    tmax = 0.488 * tdisk (geo.mstar, geo.disk_mdot, geo.rstar);
-  freqmax = BOLTZMANN * tmax / H * 10.;
-  if (freqmax < 2.0 * 54.418 / HEV)
-    {
-      Log ("Increasing maximum frequency to twice the Helium edge\n");
-      freqmax = 2.0 * 54.418 / HEV;
-    }
-  else
-    Log ("Maximum frequency %8.2e determined by T %8.2e\n", freqmax, tmax);
+//OLD71  tmax = TSTAR;
+//OLD71  if (geo.twind > tmax)
+//OLD71    tmax = geo.twind;
+//OLD71  if (geo.tstar > tmax)
+//OLD71    tmax = geo.tstar;
+//OLD71  if (geo.t_bl > tmax && geo.lum_bl > 0.0)
+//OLD71    tmax = geo.t_bl;
+//OLD71  if ((0.488 * tdisk (geo.mstar, geo.disk_mdot, geo.rstar)) > tmax)
+//OLD71    tmax = 0.488 * tdisk (geo.mstar, geo.disk_mdot, geo.rstar);
+//OLD71  freqmax = BOLTZMANN * tmax / H * 10.;
+//OLD71  if (freqmax < 2.0 * 54.418 / HEV)
+//OLD71    {
+//OLD71      Log ("Increasing maximum frequency to twice the Helium edge\n");
+//OLD71      freqmax = 2.0 * 54.418 / HEV;
+//OLD71    }
+//OLD71  else
+//OLD71    Log ("Maximum frequency %8.2e determined by T %8.2e\n", freqmax, tmax);
 
   // Note that bands_init asks .pf file or user what kind of banding is desired 
 
-  bands_init (0.0, freqmin, freqmax, -1, &xband);
+//Old71  bands_init (0.0, freqmin, freqmax, -1, &xband);
+//OLD71	bands_init (tmax, freqmin, freqmax, -1, &xband);
+	bands_init (-1, &xband);
 
- //if we have changed min and max in bands_init, we need to make  sure this is reflected in the global frequency bounds//
+/*if we have changed min and max in bands_init, we need to make sure this is reflected in the frequency bounds*/
+  freqmin = xband.f1[0];
+  freqmax = xband.f2[xband.nbands - 1];
 
-
-	freqmin=xband.f1[0];
-	freqmax=xband.f2[xband.nbands-1];
+/* 1112 - 71 - ksl Next routine sets up the frequencies that are used for charactizing the spectrum in a cell
+ * These need to be coordinated with the bands that are set up for spectral gneration
+ */
+	freqs_init(freqmin,freqmax);
 
 
 
@@ -1367,7 +1391,7 @@ run -- 07jul -- ksl
   /* Next line finally defines the wind if this is the initial time this model is being run */
   if (geo.wind_type != 2)	// Define the wind and allocate the arrays the first time
     define_wind ();
-			// Do not reinit if you want to use old windfile
+  // Do not reinit if you want to use old windfile
 
   w = wmain;
 
@@ -1512,13 +1536,13 @@ run -- 07jul -- ksl
 	   * photons_per_cycle is the number of photon bundles which will equal the luminosity; 
 	   * 0 => for ionization calculation 
 	   */
-//OLD70d	printf ("sent to define_phot freqmin=%e freqmax=%e \n",freqmin,freqmax);
-	define_phot (p, freqmin, freqmax, photons_per_cycle, 0, iwind, 1); 
-//OLD70d	printf ("sent to photon_checks freqmin=%e freqmax=%e \n",freqmin,freqmax);
+//OLD70d        printf ("sent to define_phot freqmin=%e freqmax=%e \n",freqmin,freqmax);
+	  define_phot (p, freqmin, freqmax, photons_per_cycle, 0, iwind, 1);
+//OLD70d        printf ("sent to photon_checks freqmin=%e freqmax=%e \n",freqmin,freqmax);
 
 	  photon_checks (p, freqmin, freqmax, "Check before transport");
 
-	 wind_ip ();
+	  wind_ip ();
 
 
 	  zz = 0.0;
@@ -1605,11 +1629,11 @@ run -- 07jul -- ksl
 	   geo.wcycle, timer ());
 
       Log ("Finished creating spectra\n");
-      
-//OLD70d	printf ("%s %s\n",wspecfile,lspecfile);
 
-      spectrum_summary (wspecfile, "w", 0, 5, 0, 1.,0);
-      spectrum_summary (lspecfile, "w", 0, 5, select_spectype, 1.,1);    /* output the log spectrum */
+//OLD70d        printf ("%s %s\n",wspecfile,lspecfile);
+
+      spectrum_summary (wspecfile, "w", 0, 5, 0, 1., 0);
+      spectrum_summary (lspecfile, "w", 0, 5, select_spectype, 1., 1);	/* output the log spectrum */
       phot_gen_sum (photfile, "w");	/* Save info about the way photons are created and absorbed
 					   by the disk */
 
@@ -1752,7 +1776,7 @@ run -- 07jul -- ksl
 /* Write out the detailed spectrum each cycle so that one can see the statistics build up! */
       renorm = ((double) (pcycles)) / (geo.pcycle + 1.0);
       spectrum_summary (specfile, "w", 0, nspectra - 1, select_spectype,
-			renorm,0);
+			renorm, 0);
       Log ("Completed spectrum cycle %d :  The elapsed TIME was %f\n",
 	   geo.pcycle, timer ());
 
@@ -1817,7 +1841,7 @@ help ()
 \n\
 This program simulates radiative transfer in a (biconical) CV, YSO, quasar or (spherical) stellar wind \n\
 \n\
-	Usage:  py [-h] [-r] [-t tmax] xxx  or simply py \n\
+	Usage:  py [-h] [-r] [-t time_max] xxx  or simply py \n\
 \n\
 	where xxx is the rootname or full name of a parameter file, e. g. test.pf \n\
 \n\
@@ -1826,7 +1850,7 @@ This program simulates radiative transfer in a (biconical) CV, YSO, quasar or (s
 	-h 	to ge this help message \n\
 	-r 	restart a run of the progarm reading the file xxx.windsave \n\
 \n\
-	-t tmax	limit the total time to approximately tmax seconds.  Note that the program checks \n\
+	-t time_max	limit the total time to approximately time_max seconds.  Note that the program checks \n\
 		for this limit somewhat infrequently, usually at the ends of cycles, because it \n\
 		is attempting to save the program outputs so that the program can be restarted with \n\
 		-r if that is desired. \n\
@@ -1985,7 +2009,7 @@ photon_checks (p, freqmin, freqmax, comment)
   freqmin *= (0.6);
   for (nn = 0; nn < NPHOT; nn++)
     {
-      p[nn].np=nn;    /*  NSH 13/4/11 This is a line to populate the new internal photon pointer */
+      p[nn].np = nn;		/*  NSH 13/4/11 This is a line to populate the new internal photon pointer */
       if (H * p[nn].freq > ion[0].ip)
 	{
 	  geo.lum_ioniz += p[nn].w;

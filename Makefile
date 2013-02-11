@@ -34,7 +34,7 @@ CFLAGS = -g -pg -Wall -I$(INCLUDE) -I$(INCLUDE2)
 LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lkpar -lcfitsio -lgsl -lgslcblas 
 
 #Note that version should be a single string without spaces. 
-VERSION = 70i
+VERSION = 71
 CHOICE=1             // Compress plasma as much as possible
 # CHOICE=0           //  Keep relation between plasma and wind identical
 
@@ -56,7 +56,8 @@ python_objects = bb.o get_atomicdata.o python.o photon2d.o photon_gen.o \
 		anisowind.o util.o density.o  detail.o bands.o time.o \
 		matom.o estimators.o wind_sum.o yso.o elvis.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o auger_ionization.o \
-		agn.o stuart_sim.o shell_wind.o compton.o torus.o zeta.o dielectronic.o
+		agn.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
+		power.o power_sub.o
 
 
 python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
@@ -69,7 +70,8 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		anisowind.c util.c density.c  detail.c bands.c time.c \
 		matom.c estimators.c wind_sum.c yso.c elvis.c cylindrical.c rtheta.c spherical.c  \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c auger_ionization.c \
-		agn.c stuart_sim.c shell_wind.c compton.c torus.c zeta.c dielectronic.c
+		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
+		power.c power_sub.c
 
 additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c
 
@@ -92,7 +94,7 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		radiation.o gradv.o phot_util.o anisowind.o resonate.o density.o \
 		matom.o estimators.o yso.o elvis.o photon2d.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
-		stuart_sim.o shell_wind.o compton.o torus.o zeta.o dielectronic.o
+		power.o power_sub.o shell_wind.o compton.o torus.o zeta.o dielectronic.o
 
 
 
@@ -178,7 +180,7 @@ py_grid: bb.o get_atomicdata.o py_grid.o photon2d.o photon_gen.o \
 		mv $@ $(BIN)/py_grid$(VERSION)
 
 balance_sources = balance_abso.c balance_bb.c balance.c balance_gen.c balance_sub.c bal_photon2d.c bal_trans_phot.c plane.c \
-		  partition.c agn.c stuart_sim.c
+		  partition.c agn.c power_sub.c
 
 startup_balance: startup $(balance_sources)
 	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(balance_sources) > balance_templates.h
@@ -192,7 +194,7 @@ balance: balance.o balance_sub.o balance_gen.o balance_abso.o \
 		lines.o get_atomicdata.o random.o wind2d.o wind.o   bal_photon2d.o  levels.o  \
 		util.o anisowind.o reposition.o density.o  detail.o bands.o matom.o estimators.o  bilinear.o   \
 		spherical.o cylindrical.o cylind_var.o rtheta.o yso.o elvis.o gridwind.o wind_sum.o \
-		partition.o auger_ionization.o agn.o stuart_sim.o shell_wind.o
+		partition.o auger_ionization.o agn.o power_sub.o shell_wind.o
 	gcc   ${CFLAGS} balance.o balance_sub.o balance_gen.o   balance_abso.o \
 		emission.o recomb.o balance_bb.o gradv.o  detail.o \
 		get_atomicdata.o random.c wind2d.o wind.o  bal_trans_phot.o \
@@ -202,7 +204,7 @@ balance: balance.o balance_sub.o balance_gen.o balance_abso.o \
 		extract.o ispy.o roche.o stellar_wind.o proga.o corona.o disk.o  knigge.o  \
 		util.o anisowind.o reposition.o density.o bands.o matom.o estimators.o bilinear.o \
 		spherical.o cylindrical.o cylind_var.o rtheta.o  yso.o elvis.o   gridwind.o wind_sum.o\
-		partition.o  auger_ionization.o agn.o stuart_sim.o shell_wind.o\
+		partition.o  auger_ionization.o agn.o power_sub.o shell_wind.o\
 		$(LDFLAGS) -o balance
 	cp $@ $(BIN)/balance
 	mv $@ $(BIN)/balance$(VERSION)

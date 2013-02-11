@@ -109,7 +109,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   double v_inner[3], v_outer[3], v1, v2, dvds, dd;
   double v_check[3], vch, vc;
   double dvds1, dvds2;
-  struct photon phot, p_now; 
+  struct photon phot, p_now;
   int init_dvds;
   double kap_bf_tot, kap_ff, kap_cont;
   double tau_sobolev;
@@ -291,7 +291,7 @@ process. */
 	      /* then the photon was scattered by the continuum before reaching the resonance 
 	         Need to randomly select the continumm process which caused the photon to
 	         scatter.  The variable threshold is used for this. */
-		
+
 	      *nres =
 		select_continuum_scattering_process (kap_cont, kap_es,
 						     kap_ff, xplasma);
@@ -345,9 +345,9 @@ process. */
 		  /* Add the line optical depth  Note that one really should translate the photon to this point 
 		     before doing this (?? What is "this"??)as p-> x is being used to calculate direction of the wind */
 
-		  ttau+=tau_sobolev =
+		  ttau += tau_sobolev =
 		    sobolev (one, p, dd, lin_ptr[nn], dvds);
- //    printf ("NSH Photon %i has enocuntered a resonant line in cell %i after %e cm with tau=%e. Total opacity now %e vs required %e\n",p->np,nplasma,ds_current,tau_sobolev,ttau,tau_scat);
+		  //    printf ("NSH Photon %i has enocuntered a resonant line in cell %i after %e cm with tau=%e. Total opacity now %e vs required %e\n",p->np,nplasma,ds_current,tau_sobolev,ttau,tau_scat);
 		  /* tau_sobolev now stores the optical depth. This is fed into the next statement for the bb estimator
 		     calculation. SS March 2004 */
 
@@ -403,11 +403,12 @@ process. */
 		   * of these could be used to store information needed in phot_hist.
 		   */
 
-		  if (phot_hist_on){
-			  p_now.tau=ttau;
-			  p_now.nres=nn;
-			  phot_hist(&p_now,1);
-		  }
+		  if (phot_hist_on)
+		    {
+		      p_now.tau = ttau;
+		      p_now.nres = nn;
+		      phot_hist (&p_now, 1);
+		    }
 
 
 		}
@@ -420,20 +421,20 @@ process. */
 		  *istat = P_SCAT;
 		  *nres = nn;
 		  *tau = ttau;
-//		printf ("Photon scatters after %e cm\n",ds_current);
+//              printf ("Photon scatters after %e cm\n",ds_current);
 
 
 
-		  return (ds_current);	
+		  return (ds_current);
 		}
 
-		 /* End of loop to process an individual resonance */
+	      /* End of loop to process an individual resonance */
 	    }
 	  *tau = ttau;
 	}
     }
 
- 
+
 
 /* If the photon reaches this point it was not scattered by resonances.  
 ds_current is either 0 if there were no resonances or the postion of the 
@@ -463,7 +464,7 @@ event occurred.  04 apr
       *istat = P_INWIND;
       ttau += kap_cont * (smax - ds_current);	/* kap_es replaced with kap_cont (SS) */
       ds_current = smax;
-//	printf ("Photon has hit a wall\n");
+//      printf ("Photon has hit a wall\n");
 
     }
 
@@ -973,16 +974,16 @@ doppler (pin, pout, v, nres)
 //  double ftemp;
 // double beta;
 //  double q[3];
-  
+
   if (nres == -1)		//Electron scattering (SS)
     {				/*It was a non-resonant scatter */
       pout->freq =
 	pin->freq * (1 - dot (v, pin->lmn) / C) / (1 -
 						   dot (v, pout->lmn) / C);
 //    beta=(dot (v, pin->lmn) / C);
- //   ftemp=pin->freq*sqrt((1-beta)/(1+beta));
-  //  beta=(dot (v, pout->lmn) / C);
-   // pout->freq=ftemp/sqrt((1-beta)/(1+beta));
+      //   ftemp=pin->freq*sqrt((1-beta)/(1+beta));
+      //  beta=(dot (v, pout->lmn) / C);
+      // pout->freq=ftemp/sqrt((1-beta)/(1+beta));
 
 
     }
@@ -1117,9 +1118,17 @@ scatter (p, nres, nnscat)
   stuff_phot (p, &pold);
   n = where_in_grid (pold.x);	// Find out where we are
 
+  //71 - 1112 Check added to test out spherical wind models 
+  if (n<0) {
+	  Error("scatter: Trying to scatter a photon in grid cell %d\n",n);
+	  return(-1);
+  }
+
   one = &wmain[p->grid];
   xplasma = &plasmamain[one->nplasma];
-  mplasma = &macromain[xplasma->nplasma];
+  //OLD - did not trap a problem if (xplasma==NULL){
+  //OLD - did not trap a problem 	  Error("Houston, we have a null pointer at %d %d",p->grid,one->nplasma);
+  //OLD - did not trap a problem }
 
   /* On entering this subroutine we know that a photon packet has been 
      absorbed. nres tells us which process absorbed it. There are currently
@@ -1134,6 +1143,24 @@ scatter (p, nres, nnscat)
 
   if (geo.rt_mode == 2)		//check if macro atom method in use
     {
+
+  /* 1112 - 71 - ksl - Moved to avoid trying to reference mplasma if there are no 
+     macro atoms.  This was to fix a segmentation fault that appeared
+     when compiling with a new version of gcc.   It's possible that the error below
+     could occur if we were in a macro atom approach but had no macro atoms.  Need
+     to fix all this up with a thorough review of macro atoms. !!!
+   */
+
+  if (geo.nmacro > 0)
+    {
+      mplasma = &macromain[xplasma->nplasma];
+    }
+  else
+    {
+      mplasma = NULL;
+      Error("Resonate: In macro atom section, but no macro atoms.  Seems very odd\n");
+    }
+
       /* Electron scattering is the simplest to deal with. The co-moving 
          frequency is unchanged so it's just a randomisation of the direction.
          For b-b and b-f processes it is first necessary to determine the
@@ -1207,10 +1234,12 @@ scatter (p, nres, nnscat)
 
 	      gamma_twiddle =
 		mplasma->gamma_old[config[llvl].bfu_indx_first + m] -
-		(mplasma->alpha_st_old[config[llvl].bfu_indx_first+m] * stim_fact);
+		(mplasma->alpha_st_old[config[llvl].bfu_indx_first + m] *
+		 stim_fact);
 	      gamma_twiddle_e =
 		mplasma->gamma_e_old[config[llvl].bfu_indx_first + m] -
-		(mplasma->alpha_st_e_old[config[llvl].bfu_indx_first+m] * stim_fact);
+		(mplasma->alpha_st_e_old[config[llvl].bfu_indx_first + m] *
+		 stim_fact);
 
 	      // Both gamma_twiddles must be greater that zero if this is going to work. If they 
 	      // are zero then it's probably because this is the first iteration and so the've not

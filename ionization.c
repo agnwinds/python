@@ -38,6 +38,10 @@ History:
 			the cleanup of the ionizaton balance routines
 			Also removed option 5, as this was not supported
 			later in the program
+	11nov	ksl	71 - Moved the so-called Sim power law approximation
+			to its own routine to restore this routine to its intent 
+			to be a steering routine and not something with a lot
+			of code particular to one calculation
 **************************************************************/
 
 #include <stdio.h>
@@ -47,7 +51,6 @@ History:
 #include "atomic.h"
 #include "python.h"
 
-double sim_numin,sim_numax,sim_meanfreq;  // external variables set up so zbrent can solve for alhpa.
 
 
 
@@ -56,16 +59,14 @@ ion_abundances (xplasma, mode)
      PlasmaPtr xplasma;
      int mode;
 {
-  int ireturn,nion,nelem;
-  double zbrent(),sim_alpha_func();
-  double alphamin,alphamax,alphatemp,sim_w_temp,j;
+  int ireturn;
 
-//	printf("NSH here we are in ion_abundances, I think we are running at mode %i\n",mode);
+//      printf("NSH here we are in ion_abundances, I think we are running at mode %i\n",mode);
 
   if (mode == 0)
     {
-/*on-the-spot approximation using existing t_e.   This routine does not attempt 
- * to match heating and cooling in the wind element! */
+/* on-the-spot approximation using existing t_e.   This routine does not attempt 
+to match heating and cooling in the wind element! */
 
       if ((ireturn = nebular_concentrations (xplasma, 2)))
 	{
@@ -78,7 +79,7 @@ ion_abundances (xplasma, mode)
     }
   else if (mode == 1)
     {
-      // LTE using t_r  (ksl - checked - 080808
+/* LTE using t_r  (ksl - checked - 080808 */
 
       ireturn = nebular_concentrations (xplasma, 1);
     }
@@ -89,8 +90,7 @@ ion_abundances (xplasma, mode)
     }
   else if (mode == 3)
     {
-/* On the spot, with one_shot at updating t_e before calculating densities
-*/
+/* On the spot, with one_shot at updating t_e before calculating densities */
 
 /* Shift values to old */
       xplasma->dt_e_old = xplasma->dt_e;
@@ -105,125 +105,13 @@ ion_abundances (xplasma, mode)
       convergence (xplasma);
     }
   else if (mode == 4)
-    {                            //LTE with SIM correction this is called from define_wind, sim_alpha and sim_w are set to geo values in define_wind. Not sure this is ever called now, we thought it best to set the values to LTE when in define_wind.
-	ireturn = nebular_concentrations (xplasma, 5);
+    {				//LTE with SIM correction this is called from define_wind, sim_alpha and sim_w are set to geo values in define_wind. Not sure this is ever called now, we thought it best to set the values to LTE when in define_wind.
+      ireturn = nebular_concentrations (xplasma, 5);
     }
   else if (mode == 5)
-   {       // One shot at updating t_e before calculating densities using the SIM correction
-/* Shift values to old */
-
-          // This call is after a photon flight, so we *should* have access to j and ave freq, and so we can calculate proper values for W and alpha
-	// To avoid problems with solving, we need to find a reasonable range of values within which to search for a solution to eq18. A reasonable guess is that it is around the current value....
-	
-
-
-//old	sim_numin=1.24e15;
-//old	sim_numax=1.21e19;
-
-// Start of loop
-//
-     for (nx4power=0;nx4power<nxfreq;nx4power++) /* We loop over all of the bands, the first band is band number 0, and the last is band nxfreq-1 */
-        {
-
-	if (xplasma->nxtot[nx4power] == 0)
-		{
-		Error("ion_abundances: no photons in band for power law estimators. Using total band\n");
- 		Log("ion_abundances: no photons in band for power law estimators. Using total band\n");
-		sim_numin=xband.f1[0]; /*NSH 1108 Use the lower bound of the lowest band for sumnumin */
-		sim_numax=xband.f2[xband.nbands-1]; /*NSH 1108 and the upper bound of the upperband for max */
-		sim_meanfreq=xplasma->ave_freq; 
-		// j=xplasma->j;
-		j=0; // If there are no photons then our guess is that there is no flux in this band
-		xplasma->sim_w[nx4power]=0; //We also want to make sure that the weight will be zero, this way we make sure there is no contribution to the ionization balance from this frequency.
-		}
-	else
-		{
-		sim_numin=xfreq[nx4power];      /*1108 NSH nx4power is defined in python.c, and says which band of radiation estimators we are interested in using the for power law ionisation calculation */
-		sim_numax=xfreq[nx4power+1];
-		sim_meanfreq=xplasma->xave_freq[nx4power]; 
-		j=xplasma->xj[nx4power];
-		}
-
-	Log ("NSH We are about to calculate w and alpha, j=%10.2e, mean_freq=%10.2e, numin=%10.2e, numax=%10.2e, number of photons in band=%i\n",j,sim_meanfreq,sim_numin,sim_numax,xplasma->nxtot[nx4power]);
-
-
-	alphamin=xplasma->sim_alpha[nx4power]-0.1; /*1108 NSH ?? this could be a problem. At the moment, it relies on sim_alpha being defined at this point. */
-	alphamax=xplasma->sim_alpha[nx4power]+0.1; /*We should initialise it somewhere so that it *always* has a value, not just when the power law*/
-
-	while (sim_alpha_func(alphamin)*sim_alpha_func(alphamax)>0.0 )
-		{
-		alphamin=alphamin-1.0;
-		alphamax=alphamax+1.0;
-		}
-
-
-/* We compute temporary values for sim alpha and sim weight. This will allow us to check that they are sensible before reassigning them */
-
-	alphatemp=zbrent(sim_alpha_func,alphamin,alphamax,0.00001);
-
-	if (alphatemp > 3.0) alphatemp=3.0;  //110818 nsh check to stop crazy values for alpha causing problems
-	if (alphatemp < -3.0) alphatemp=-3.0;
-
-
-
-/*This next line computes the sim weight using an external function. Note that xplasma->j already contains the volume of the cell and a factor of 4pi, so the volume sent to sim_w is set to 1 and j has a factor of 4PI reapplied to it. This means that the equation still works in balance. It may be better to just implement the factor here, rather than bother with an external call.... */
-	sim_w_temp=sim_w(j*4*PI,1,1,alphatemp,sim_numin,sim_numax);
-
-	// Log ("NSH We now have calculated sim_w_temp=%e and sim_alpha_temp=%f\n",sim_w_temp,alphatemp);
-        if (sane_check(sim_w_temp))
-		{
-		Error ("New sim parameters unreasonable, using existing parameters. Check number of photons in this cell\n");
-		}
-        else 
-		{
-		xplasma->sim_alpha[nx4power]=alphatemp;
-		xplasma->sim_w[nx4power]=sim_w_temp;
-		}
-
-	// Log_silent ("ITTTTT %i %e %e cell%i\n",geo.wcycle,xplasma->sim_alpha,xplasma->sim_w,xplasma->nplasma);
-	// Log ("NSH and after a check, sim_w=%e, and sim_alpha=%f set for band %i\n",xplasma->sim_w[nx4power],xplasma->sim_alpha[nx4power],nx4power);
-	  }
-/* At this point we have put all of the fitted alphas and nomalisations into the sim_alpha and sim_w portions of the PlasmaPtr */
-
-// ??? Commenting out ionization parameter for now 1108  - ksl
-//OLD 	xplasma->sim_ip=xplasma->sim_w*(((pow (50000/HEV, xplasma->sim_alpha + 1.0)) - pow (100/HEV,xplasma->sim_alpha + 1.0)) /  (xplasma->sim_alpha + 1.0));
-//OLD 	xplasma->sim_ip *= 16*PI*PI;
-//OLD 	xplasma->sim_ip /= xplasma->rho * rho2nh;
-
-
-
-
-      xplasma->dt_e_old = xplasma->dt_e;
-      xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;	//Must store this before others
-      xplasma->t_e_old = xplasma->t_e;
-      xplasma->t_r_old = xplasma->t_r;
-      xplasma->lum_rad_old = xplasma->lum_rad;
-
-
-//OLD  Log("NSH Here we about to call one_shot, cell number %i gain %e mode %i t_r %f t_e %f sim_w %e sim_alpha %e logIP %e\n",xplasma->nplasma,xplasma->gain,mode,xplasma->t_r,xplasma->t_e,xplasma->sim_w,xplasma->sim_alpha,log10(xplasma->sim_ip));
-   Log("NSH in this cell, we have %e AGN photons and %e disk photons\n",xplasma->ntot_agn,xplasma->ntot_disk);
-//OLD   Log("NSH in this cell, we have %i photons in our power law band\n",xplasma->nxtot[nx4power]); //This no longer makes sense
-
-
-
-       ireturn = one_shot (xplasma, mode);
-
-
-	for (nelem = 0; nelem < nelements; nelem++)
-		{      
-		for (nion = ele[nelem].firstion; nion < ele[nelem].firstion+ele[nelem].nions; nion++)
-			{
-//			printf ("For ion number %i of element %i, Ioniz=%e, Recomb=%e, Density=%e\n",nion-ele[nelem].firstion,ion[nion].z       ,xplasma->ioniz[nion],xplasma->recomb[nion],xplasma->density[nion]);
-	}
-}
-
-
-
-/* Convergence check */
-      convergence (xplasma);
+    {				// One shot at updating t_e before calculating densities using Stuart's power law correction
+		    ireturn=power_abundances(xplasma,mode);
     }
-
-
   else
     {
       Error
@@ -232,17 +120,17 @@ ion_abundances (xplasma, mode)
       exit (0);
     }
 
-   /* If we want the Auger effect deal with it now. Initially, this is
-      put in here, right at the end of the ionization calculation -
-      the assumption is that the Auger effect is only for making minor
-      ions so that the ionization balance of the other ions is not
-      affected in an important way. */
- 
-   if (geo.auger_ionization == 1)
-     {
-       auger_ionization(xplasma);
-     }
- 
+  /* If we want the Auger effect deal with it now. Initially, this is
+     put in here, right at the end of the ionization calculation -
+     the assumption is that the Auger effect is only for making minor
+     ions so that the ionization balance of the other ions is not
+     affected in an important way. */
+
+  if (geo.auger_ionization == 1)
+    {
+      auger_ionization (xplasma);
+    }
+
 
   return (ireturn);
 
@@ -252,7 +140,7 @@ ion_abundances (xplasma, mode)
 /***********************************************************
               Space Telescope Science Institute
 
- Synopsis: convergence checks to see whehter a single cell
+ Synopsis: convergence checks to see whether a single cell
 	is or is not converging
 	
  Arguments:		
@@ -261,6 +149,17 @@ ion_abundances (xplasma, mode)
 Returns:
  
 Description:	
+
+	The routine attempts to determine whether a cell is
+	on the track to a final solution by checking whether 
+	the electron and radiation temperatures are getting 
+	smaller with cycle and whetehr the difference between
+	heating and cooling is drroping.
+
+	The routine also adjust the gain which controls how
+	far the electron temperture can change in a cycle.
+
+
 	
 Notes:
 
@@ -270,7 +169,7 @@ History:
 			is likelely that this entire routine
 			will ultimatetely be replaced because
 			everything here should only be in the wind
-        11 sep  nsh     70f: Added lines to track which of the convergence criteria
+        11sep  nsh     70f: Added lines to track which of the convergence criteria
 			in each cell was being met
 **************************************************************/
 int
@@ -281,7 +180,7 @@ convergence (xplasma)
   double epsilon;
 
   trcheck = techeck = hccheck = converging = 0;
-  xplasma->trcheck = xplasma->techeck = xplasma->hccheck = 0; //NSH 70g - zero the global variables
+  xplasma->trcheck = xplasma->techeck = xplasma->hccheck = 0;	//NSH 70g - zero the global variables
   epsilon = 0.05;
 
   if ((xplasma->converge_t_r =
@@ -293,18 +192,24 @@ convergence (xplasma)
 						 xplasma->t_e)) > epsilon)
     xplasma->techeck = techeck = 1;
 
-//110919 nsh modified line below to inlcude the adiabatic cooling in the check that heating equals cooling
+//110919 nsh modified line below to include the adiabatic cooling in the check that heating equals cooling
 //111004 nsh further modification to include DR and compton cooling, now moved out of lum_rad
 
   if ((xplasma->converge_hc =
-       fabs (xplasma->heat_tot - (xplasma->lum_rad + xplasma->lum_adiabatic + xplasma->lum_dr+
-    						      xplasma->lum_comp)) / (xplasma->heat_tot +
-  						      xplasma->lum_comp + xplasma->lum_dr +
-						      xplasma->lum_rad + xplasma->lum_adiabatic)) >
-      epsilon)
+       fabs (xplasma->heat_tot -
+	     (xplasma->lum_rad + xplasma->lum_adiabatic + xplasma->lum_dr +
+	      xplasma->lum_comp)) / (xplasma->heat_tot + xplasma->lum_comp +
+				     xplasma->lum_dr + xplasma->lum_rad +
+				     xplasma->lum_adiabatic)) > epsilon)
     xplasma->hccheck = hccheck = 1;
 
   xplasma->converge_whole = whole_check = trcheck + techeck + hccheck;
+
+  /* Converging is a situation where the change in electron
+   * temperature is dropping with time and the cell is oscillating
+   * around a temperature.  If that is the case, we drop the 
+   * amount by which the temperature can change in this cyccle
+   */
 
   if (xplasma->dt_e_old * xplasma->dt_e < 0
       && fabs (xplasma->dt_e) > fabs (xplasma->dt_e_old))
@@ -360,23 +265,23 @@ check_convergence ()
 {
   int n;
   int nconverge, nconverging, ntot;
-  int nte,ntr,nhc;  //NSH 70g - three new counters for the different convergence criteria
+  int nte, ntr, nhc;		//NSH 70g - three new counters for the different convergence criteria
   double xconverge, xconverging;
 
   nconverge = nconverging = ntot = 0;
-  ntr=nte=nhc=0; //NSH 70i zero the counters
+  ntr = nte = nhc = 0;		//NSH 70i zero the counters
 
-   for (n = 0; n < NPLASMA; n++)
+  for (n = 0; n < NPLASMA; n++)
     {
       ntot++;
       if (plasmamain[n].converge_whole == 0)
 	nconverge++;
-      if (plasmamain[n].trcheck == 0)  //NSH 70g - count up the three individual convergence criteria
-        ntr++;
+      if (plasmamain[n].trcheck == 0)	//NSH 70g - count up the three individual convergence criteria
+	ntr++;
       if (plasmamain[n].techeck == 0)
-        nte++;
+	nte++;
       if (plasmamain[n].hccheck == 0)
-        nhc++;
+	nhc++;
       if (plasmamain[n].converging == 0)
 	nconverging++;
 
@@ -387,8 +292,7 @@ check_convergence ()
   Log
     ("!!Check_converging: %4d (%.3f) converged and %4d (%.3f) converging of %d cells\n",
      nconverge, xconverge, nconverging, xconverging, ntot);
-  Log
-    ("!!Check_convergence_breakdown: t_r %4d t_e %4d hc %4d\n",ntr,nte,nhc);  //NSH 70g split of what is converging
+  Log ("!!Check_convergence_breakdown: t_r %4d t_e %4d hc %4d\n", ntr, nte, nhc);	//NSH 70g split of what is converging
   Log
     ("Summary  convergence %4d %.3f  %4d  %.3f  %d  #  n_converged fraction_converged  converging fraction_converging total cells\n",
      nconverge, xconverge, nconverging, xconverging, ntot);
@@ -447,10 +351,10 @@ one_shot (xplasma, mode)
   xplasma->t_e = (1 - gain) * te_old + gain * te_new;
 
 
- // printf ("EMERGENCY EMERGENCY EMERGENCY - your 1 million K muck up is still at line 301 of ionization\n");
+  // printf ("EMERGENCY EMERGENCY EMERGENCY - your 1 million K muck up is still at line 301 of ionization\n");
 //  xplasma->t_e=1e6;
   dte = xplasma->dt_e;
-  
+
 //  Log ("One_shot: %10.2f %10.2f %10.2f\n", te_old, te_new, w->t_e);
 
 
@@ -462,7 +366,7 @@ meaning in nebular concentrations.
 
   if (mode == 3)
     mode = 2;
-  else if (mode <= 1 ||  mode >= 6)     /* modification to cope with mode 5 - SIM */
+  else if (mode <= 1 || mode >= 6)	/* modification to cope with mode 5 - SIM */
     {
 
       Error ("one_shot: Sorry, Charlie, don't know how to process mode %d\n",
@@ -547,7 +451,7 @@ calc_te (xplasma, tmin, tmax)
    */
 
   xxxplasma = xplasma;
-  
+
   heat_tot = xplasma->heat_tot;
 
   xplasma->t_e = tmin;
@@ -649,44 +553,29 @@ zero_emit (t)
 
   //  difference = (xxxplasma->heat_tot - total_emission (xxxplasma, 0., VERY_BIG));
 
- 
- /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
+
+  /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
    * are testing.  Adiabatic cooling is proportional to temperature
    */
 
 
- xxxplasma->lum_adiabatic=adiabatic_cooling(&wmain[xxxplasma->nwind],t);
+  xxxplasma->lum_adiabatic = adiabatic_cooling (&wmain[xxxplasma->nwind], t);
 
 
- /* difference =
-    xxxplasma->heat_tot - xxxplasma->lum_adiabatic -
-    total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG); */
+  /* difference =
+     xxxplasma->heat_tot - xxxplasma->lum_adiabatic -
+     total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG); */
 
 
- /* 70g - nsh adding this line in next to calculate dielectronic recombination cooling without generating photons */
-	compute_dr_coeffs(t);
-      xxxplasma->lum_dr = total_dr (&wmain[xxxplasma->nwind],t);
+  /* 70g - nsh adding this line in next to calculate dielectronic recombination cooling without generating photons */
+  compute_dr_coeffs (t);
+  xxxplasma->lum_dr = total_dr (&wmain[xxxplasma->nwind], t);
 
 /* 70g compton cooling calculated here to avoid generating photons */
-      xxxplasma->lum_comp = total_comp (&wmain[xxxplasma->nwind],t);
+  xxxplasma->lum_comp = total_comp (&wmain[xxxplasma->nwind], t);
 
-  difference =
-    xxxplasma->heat_tot - xxxplasma->lum_adiabatic - xxxplasma->lum_dr - xxxplasma->lum_comp -
-    total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);   //NSH 1110 - total emission no longer computes compton.
+  difference = xxxplasma->heat_tot - xxxplasma->lum_adiabatic - xxxplasma->lum_dr - xxxplasma->lum_comp - total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);	//NSH 1110 - total emission no longer computes compton.
 
 
   return (difference);
 }
-
-double	
-    sim_alpha_func(alpha)
-	double alpha;
-	{
-	double answer;
-	answer=((alpha+1.)/(alpha+2.))*((pow(sim_numax,(alpha+2.))-pow(sim_numin,(alpha+2.)))/(pow(sim_numax,(alpha+1.))-pow(sim_numin,(alpha+1.)))) ; 
-	answer = answer - sim_meanfreq;
-//	printf("NSH alpha=%.3f,f1=%10.2e,f2=%10.2e,meanfreq=%10.2e,ans=%.3f\n",alpha,sim_numin,sim_numax,sim_meanfreq,answer);
-	return (answer);
-	}
-
-

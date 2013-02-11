@@ -177,7 +177,8 @@ WindPtr (w);
 
 
 /* 1108 NSH/KSL  This loop is to calculate the frequency banded j and ave_freq variables */
-     for (i=0 ; i<nxfreq ; i++) /*loop over number of bands */
+/* 71 - 111279 - ksl - Small modification to reflect the fact that nxfreq has been moved into the geo structure */
+     for (i=0 ; i<geo.nxfreq ; i++) /*loop over number of bands */
 	{
 	if (plasmamain[n].nxtot[i] > 0)   /*Check we actually have some photons in the cell in this band */
 		{
@@ -346,7 +347,7 @@ WindPtr (w);
        (t_r_ave - t_r_ave_old));
 
   check_convergence ();
-/* Sumarize the raditive temperatures (ksl 04 mar)*/
+/* Summarize the raditive temperatures (ksl 04 mar)*/
   xtemp_rad (w);
 
 
@@ -456,7 +457,8 @@ wind_rad_init ()
 	macromain[n].kpkt_rates_known = -1;
 
 /* 1108 NSH Loop to zero the frequency banded radiation estimators */
-      for (i=0 ; i<nxfreq ; i++)
+/* 71 - 111279 - ksl - Small modification to reflect the fact that nxfreq has been moved into the geo structure */
+      for (i=0 ; i<geo.nxfreq ; i++)
 	{
       	plasmamain[n].xj[i] = plasmamain[n].xave_freq[i] = plasmamain[n].nxtot[i] = 0;
 	}

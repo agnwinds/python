@@ -15,8 +15,6 @@ going directly to the ground state. I'm experimenting with moving it out of saha
 since the same factor will be used in both, and I'm going to add in some more options to
 incorporate a correction factor for dielectronic recombination.
 
-
-
                                                                                                    
   Arguments:  
                                                                                                    
@@ -26,10 +24,10 @@ incorporate a correction factor for dielectronic recombination.
   Notes:
                                                                                                    
                                                                                                    
-
                                                                                                    
   History:
 	11aug	nsh	Began work
+	111211	ksl	Began to comment on it
 
                                                                                                    
  ************************************************************************/
@@ -88,33 +86,50 @@ We need to use nion-1 for integ_fb, since this is computed via the photoionisati
  ************************************************************************/
 
 double
-compute_zeta (temp,nion,ilow,ihi,interpfrac,f1,f2,mode)
-     double temp,interpfrac,f1,f2;
-     int ilow,ihi,mode,nion;
+compute_zeta (temp, nion, ilow, ihi, interpfrac, f1, f2, mode)
+     double temp, interpfrac, f1, f2;
+     int ilow, ihi, mode, nion;
 {
-double zeta,alpha_all,alpha_dr;
+  double zeta, alpha_all, alpha_dr;
 
-if (mode==1)
+  if (mode == 1)
+    {
+      //This is the old method of getting zeta - just from the ground state tables computed by Christian
+      zeta =
+	ground_frac[nion - 1].frac[ilow] +
+	interpfrac * (ground_frac[nion - 1].frac[ihi] -
+		      ground_frac[nion - 1].frac[ilow]);
+    }
+  else if (mode == 2)
+    {
+      /* To kick off with, we'll use the old zeta as a basis. 
+       * We can tehn multiply it by (recomb to all) / (recomb to all + DR). 
+       * Next job will be to compute recomb to ground for all TB ions, and then we can calculate zeta properly for all temperatures
+       * , at least for ions where we have TB x sections - i.e. for each level.
+       */
+      zeta =
+	ground_frac[nion - 1].frac[ilow] +
+	interpfrac * (ground_frac[nion - 1].frac[ihi] -
+		      ground_frac[nion - 1].frac[ilow]);
+
+      /* This initiallizes the FB arrays, from temperatures of 1000K to 1e6, from frequencies between 0 and 1e50.  
+       * When these frequency limits are given, they are revised to be more
+       * reasonable int he free_bound routines.
+       */
+
+      init_freebound (1.e3, 1.e6, 0, 1e50);	//This initialises the FB arrays, we will need them to calculate the rates for radiative recombination.
+
+      alpha_all = integ_fb (temp, 0, 1e50, nion - 1, 2);	//This is the rate for recombinations to all states.
+      alpha_dr = dr_coeffs[nion];	//Get the dielectronic recombination coefficient for this ion
+
+      if (alpha_all < 1e-99)
 	{
-	zeta=ground_frac[nion - 1].frac[ilow] + interpfrac * (ground_frac[nion - 1].frac[ihi] -ground_frac[nion - 1].frac[ilow]);   //This is the old method of getting zeta - just from the ground state tables computed by Christian
+	  Error
+	    ("compute_zeta: alpha_all very small value %e (%e) for t of %.1f in element %i in the model?\n", alpha_all, alpha_dr,temp, ion[nion].z);
+	  return (zeta);
 	}
+      zeta *= (alpha_all / (alpha_all + alpha_dr));	//Compute the new value of zeta, corrected for DR.
 
-else if (mode==2)
-	{
-	zeta=ground_frac[nion - 1].frac[ilow] + interpfrac * (ground_frac[nion - 1].frac[ihi] -ground_frac[nion - 1].frac[ilow]); //To kick off with, we'll use the old zeta as a basis. We can tehn multiply it by (recomb to all) / (recomb to all + DR). Next job will be to compute recomb to ground for all TB ions, and then we can calculate zeta properly for all temperatures, at least for ions where we have TB x sections - i.e. for each level.
-	init_freebound (1.e3, 1.e6, 0,1e50);  //This initialises the FB arrays, we will need them to calculate the rates for radiative recombination.
-	alpha_all=integ_fb (temp,0,1e50,nion-1,2);  //This is the rate for recombinations to all states.
-	if (alpha_all <1e-99)
-		{
-		Error ("Compute Zeta: alpha all returned a very small value %e, is element %i in the model?\n",alpha_all,ion[nion].z);
-		alpha_all=1.0e30;   //Set alpha_all to a very large number so zeta will be unaffected by this subroutine
-		}
-	alpha_dr=dr_coeffs[nion];    //Get the dielectronic recombination coefficient for this ion
-	zeta*=(alpha_all/(alpha_all+alpha_dr));  //Compute the new value of zeta, corrected for DR.
-
-	}
-return (zeta);
+    }
+  return (zeta);
 }
-
-
-

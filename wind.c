@@ -58,6 +58,8 @@ History:
         04Aug   SS      Minor modification - "else" removed.
 	11Aug	ksl	Allowed for torus, and adapted so that it uses
 			some of the same defined variables as w->inwind
+	11Nov	ksl	Made changes to attempt to fix errors in the
+			implementation of the Elvis model
 			
 **************************************************************/
 
@@ -103,6 +105,24 @@ where_in_wind (x)
   if (geo.compton_torus){
 	  if (geo.compton_torus_rmin < rho && rho <geo.compton_torus_rmax && z< geo.compton_torus_zheight) {
 		  return (W_ALL_INTORUS);
+	  }
+  }
+
+  /* Now for the elvis wind model, check to see if the position is
+   * inside all of the wind or if it is in the vertical section of the wind
+   *
+   * Note the use of sv_rmax and sv_rmin here, because thise are not the
+   * same as for the windcones gescribed by geo.wind_rmin and geo.wind_rmax
+   * 111124 ksl
+   */
+
+  if (geo.wind_type== 8)
+  {
+	  if (rho < geo.sv_rmin){
+		  return (-1);
+	  }
+	  if (rho < geo.sv_rmax && z < geo.elvis_offset) {
+		  return (W_ALL_INWIND);
 	  }
   }
  

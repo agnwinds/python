@@ -69,6 +69,9 @@ History:
 			purposes had to be updated, as modified 
 			to handle yso and cv type models in same
 			code
+	1112	ksl	71 - Moved material that was in python having
+			to do with banding to this point.  Note
+			This breaks the calls that exist in balance
 **************************************************************/
 
 
@@ -94,9 +97,7 @@ xband;
 
 
 int
-bands_init (t, f1, f2, imode, band)
-     double t;			// A temperature which can be used to set absolute limits on the bands
-     double f1, f2;		// frequency limits that can overide any other limits
+bands_init (imode, band)
      int imode;			// A switch used for determining how the bands are to be populated
      struct xbands *band;
 
@@ -104,8 +105,41 @@ bands_init (t, f1, f2, imode, band)
   int mode;
   int nband;
   double xx;
+  double tmax, freqmin, freqmax;
+  double t;			// A temperature which can be used to set absolute limits on the bands
+  double f1, f2;		// frequency limits that can overide any other limits
 
 
+
+  /* Imported from python.c */
+
+  // 59 - Increased to 20,000 A so could go further into NIR 
+  freqmin = C / 12000e-8;	/*20000 A */
+
+  tmax = TSTAR;
+  if (geo.twind > tmax)
+    tmax = geo.twind;
+  if (geo.tstar > tmax)
+    tmax = geo.tstar;
+  if (geo.t_bl > tmax && geo.lum_bl > 0.0)
+    tmax = geo.t_bl;
+  if ((0.488 * tdisk (geo.mstar, geo.disk_mdot, geo.rstar)) > tmax)
+    tmax = 0.488 * tdisk (geo.mstar, geo.disk_mdot, geo.rstar);
+  freqmax = BOLTZMANN * tmax / H * 10.;
+  if (freqmax < 2.0 * 54.418 / HEV)
+    {
+      Log ("Increasing maximum frequency to twice the Helium edge\n");
+      freqmax = 2.0 * 54.418 / HEV;
+    }
+  else
+    Log ("Maximum frequency %8.2e determined by T %8.2e\n", freqmax, tmax);
+
+  t = tmax;
+  f1 = freqmin;
+  f2 = freqmax;
+
+
+  /* end of import */
 
   if (imode == -1)
     {
@@ -133,7 +167,7 @@ bands_init (t, f1, f2, imode, band)
       band->f2[0] = f2;
       band->min_fraction[0] = 1.0;
     }
-  else if (mode == 2)  /* Traditional cv setup */
+  else if (mode == 2)		/* Traditional cv setup */
     {
       band->nbands = 4;
       band->f1[0] = f1;
@@ -157,7 +191,7 @@ bands_init (t, f1, f2, imode, band)
 	}
 
     }
-  else if (mode == 3)  /* YSO setup */
+  else if (mode == 3)		/* YSO setup */
     {
       band->nbands = 4;
       band->f1[0] = f1;
@@ -184,19 +218,21 @@ bands_init (t, f1, f2, imode, band)
   else if (mode == 4)
     {
       rdint ("Num.of.frequency.bands", &band->nbands);
-      printf ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV, f1);
-      printf ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV, f2);
+      printf ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV,
+	      f1);
+      printf ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV,
+	      f2);
       printf
 	("Enter band boundaries in increasing eV, and assure they are between lowest and highest energy\n");
 
 
 
 
-       rddoub ("Lowest_energy_to_be_considered(eV)", &xx);
-	  f1 = xx / HEV;
+      rddoub ("Lowest_energy_to_be_considered(eV)", &xx);
+      f1 = xx / HEV;
 
-       rddoub ("Highest_energy_to_be_considered(eV)", &xx);
-	  f2 = xx / HEV;
+      rddoub ("Highest_energy_to_be_considered(eV)", &xx);
+      f2 = xx / HEV;
 
       Log ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV, f1);
       Log ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV, f2);
@@ -219,9 +255,10 @@ bands_init (t, f1, f2, imode, band)
 	{
 	  rddoub ("Band.minimum_fraction)", &band->min_fraction[nband]);
 	}
-     for (nband = 0; nband < band->nbands; nband++)
+      for (nband = 0; nband < band->nbands; nband++)
 	{
-	Log("For band %i, f1=%10.3e, f2=%10.3e, frac=%.2f\n",nband,band->f1[nband],band->f2[nband],band->min_fraction[nband]);
+	  Log ("For band %i, f1=%10.3e, f2=%10.3e, frac=%.2f\n", nband,
+	       band->f1[nband], band->f2[nband], band->min_fraction[nband]);
 	}
 
 
@@ -235,5 +272,136 @@ bands_init (t, f1, f2, imode, band)
     }
 
 
+  Log ("band_init: There are %d bands\n", band->nbands);
+  for (nband = 0; nband < band->nbands; nband++)
+    {
+      Log ("band_init: band %i,  f1=%10.3e,  f2=%10.3e, frac=%.2f\n", nband,
+	   band->f1[nband], band->f2[nband], band->min_fraction[nband]);
+      Log ("band_init: band %i, eV1=%10.3e, eV2=%10.3e, frac=%.2f\n", nband,
+	   band->f1[nband] * HEV, band->f2[nband] * HEV,
+	   band->min_fraction[nband]);
+    }
+
+
   return (0);
+}
+
+
+/***********************************************************
+                Space Telescope Science Institute
+
+Synopsis:
+
+	This is the routine where the frequency 
+	boundaries for course spectra are established
+
+
+
+   
+Arguments:		
+
+Returns:
+
+ 
+ 
+Description:	
+
+		
+Notes:
+	1112 - At presenet everything is hardwired
+
+
+
+History:
+	1112	ksl	Moved from main routine here
+	111227	ksl	Smalle modifications to reflect my moving the main
+			variables into the geo.structure so that they 
+			could be read by py_oind
+	111227	ksl	First attempt to limit the frequency intervals to
+			regions where photons are being generated
+**************************************************************/
+
+int
+freqs_init (freqmin, freqmax)
+     double freqmin, freqmax;
+{
+  int i, n, ngood, good[NXBANDS];
+  double xfreq[NXBANDS];
+  int nxfreq;
+
+  /* At present set up a single energy band for 2 - 10 keV */
+  nxfreq = 7;		//NSH 70g - bands set up to match the bands we are currently using in the.pf files. This should probably end up tied together in the long run!
+  xfreq[0] = 1.0 / HEV;
+  xfreq[1] = 13.6 / HEV;
+  xfreq[2] = 54.42 / HEV;
+  xfreq[3] = 392. / HEV;
+  xfreq[4] = 739. / HEV;
+  xfreq[5] = 2000 / HEV;
+  xfreq[6] = 10000 / HEV;
+  xfreq[7] = 50000 / HEV;
+
+  Log("freqs_init: Phostons will be generated between %8.2f (%8.2e) and %8.2f (%8.2e)\n",freqmin*HEV,freqmin,freqmax*HEV,freqmax);
+
+  ngood = 0;
+  for (i = 0; i < nxfreq; i++)
+    {
+	    Log("test: %10.2e %10.2e %10.2e\n",freqmin,freqmax,xfreq[i]);
+      if (freqmin < xfreq[i] && xfreq[i] < freqmax)
+	{
+	  good[i] = 1;
+	  ngood++;
+	}
+      else if (freqmin < xfreq[i + 1] && xfreq[i + 1] < freqmax)
+	{
+	  good[i] = 1;
+	  ngood++;
+	}
+      else
+	{
+	  good[i] = 0;
+	}
+    }
+
+  Log ("freqs_init: Of %d starting intervals, %d will have photons\n", nxfreq,
+       ngood);
+
+  n = 0;
+  for (i = 0; i < nxfreq; i++)
+    {
+      if (good[i] == 1)
+	{
+	  geo.xfreq[n] = xfreq[i];
+	  geo.xfreq[n + 1] = xfreq[i + 1];
+	  n++;
+	}
+    }
+  geo.nxfreq = n;
+
+  /* OK at this point we know at least some photons will be generated in each interval, but we still don't know
+   * that the we are going to have a possibilty of photons throughout the first and last intervals.
+   */
+
+  if (freqmin > geo.xfreq[0])
+    {
+      geo.xfreq[0] = freqmin;
+    }
+
+  Log("test %e %e\n",freqmax , geo.xfreq[geo.nxfreq]);
+  if (freqmax < geo.xfreq[geo.nxfreq])
+    {
+      geo.xfreq[geo.nxfreq] = freqmax;
+    }
+
+
+  Log ("freqs_init: There were %d final intervals\n", geo.nxfreq);
+  for (n = 0; n < geo.nxfreq; n++)
+    {
+      Log ("freqs_init: %8.2f (%8.2e)    %8.2f (%8.2e)  \n",
+	   geo.xfreq[n] * HEV, geo.xfreq[n], geo.xfreq[n + 1] * HEV,
+	   geo.xfreq[n + 1]);
+    }
+
+
+  return (0);
+
 }

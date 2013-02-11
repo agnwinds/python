@@ -721,7 +721,7 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
 
   /* Initialization of fudges complete */
 
-  first = ele[nelem].firstion;	/*first and last identify the postion in the array */
+  first = ele[nelem].firstion;	/*identify the position of the first and last ion in the array */
   last = first + ele[nelem].nions;	/*  So for H which has 2 ions, H1 and H2, first will generally
 					   be 0 and last will be 2 so the for loop below will just be done once for nion = 1 */
 

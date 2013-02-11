@@ -37,7 +37,7 @@ History:
  	98dec	ksl	Coded and debugged as part of major change in IO structure required when
  				adding a spherical wind
         080518  ksl     60a - geo should contain only cgs units
-	11aug	ksl	70b - kluge to get better xscale with compton tours
+	11aug	ksl	70b - kluge to get better xscale with compton torus
 **************************************************************/
 
 int
@@ -168,20 +168,21 @@ sv_velocity (x, v)
   r = sqrt (x[0] * x[0] + x[1] * x[1]);
   ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
 
+  /* Calculate the poloidal distance for a vertically extended disk ksl 111124*/
   if (geo.disk_type == 2)
     {
-      xtest[0] = r;		// Define xtest in the +z plane
+      xtest[0] = r;			// Define xtest in the +z plane
       xtest[1] = 0;
       xtest[2] = fabs (x[2]);
-      ptest.x[0] = rzero;
+      ptest.x[0] = rzero;		// Define ptest to be the footpoint extended to xy plane
       ptest.x[1] = 0.0;
       ptest.x[2] = EPSILON;
       ptest.lmn[0] = sin (theta);	// 56d -- ptest direction is along stream line
       ptest.lmn[1] = 0.0;
       ptest.lmn[2] = cos (theta);
       s = ds_to_disk (&ptest, 1);
-      move_phot (&ptest, s);	// Now test photon is at disk surface
-      vsub (ptest.x, xtest, xtest);
+      move_phot (&ptest, s);		// Now move the test photon to  disk surface
+      vsub (ptest.x, xtest, xtest);	// Poloidal distance is just the distance beteen these two points.
       ldist = length (x);
     }
 
@@ -267,18 +268,18 @@ sv_rho (x)
 {
   double r, rzero, theta;
   double ldist;
-  double sv_find_wind_rzero ();
-  double sv_theta_wind ();
+//  double sv_find_wind_rzero ();
+//  double sv_theta_wind ();
   double dmdot_da;
   double dtheta_drzero, dr_drzero;
 
   double v[3], rho;
-  double sv_velocity ();
-  double sv_find_wind_rzero (), sv_theta_wind ();
+//  double sv_velocity ();
+//  double sv_find_wind_rzero (), sv_theta_wind ();
   struct photon ptest;
   double xtest[3];
   double s;
-  double ds_to_disk ();
+//  double ds_to_disk ();
 
 
   sv_velocity (x, v);
@@ -384,10 +385,15 @@ sv_find_wind_rzero (p)
       return (x);
     }
 
+
   sv_zero_init (p);		/* This initializes the routine sv_zero_r.  It is not
 				   actually needed unless zbrent is called, but it
 				   does allow you to check your answer otherwize
 				 */
+  /* The next lines provide a graceful answer in the case where the
+   * position is actually outside the wind so that rzero returned is
+   * continuous
+   */
 
   rho_min = geo.sv_rmin + z * tan (geo.sv_thetamin);
   rho_max = geo.sv_rmax + z * tan (geo.sv_thetamax);

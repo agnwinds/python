@@ -90,9 +90,9 @@ get_shell_wind_params ()
       geo.wind_rmin = geo.rstar;
     }
   geo.shell_rmin = geo.wind_rmin;
+
   rddoub ("shell.wind_v_at_rmin(cm)", &geo.shell_vmin);	/* Velocity at base of the wind */
   rddoub ("shell.wind.v_at_rmax(cm)", &geo.shell_vmax);	/* Final speed of wind in units of escape velocity */
-
   rddoub ("shell.wind.acceleration_exponent", &geo.shell_beta);	/* Accleration scale exponent */
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
@@ -173,9 +173,8 @@ Notes:
 	are no modifications to this routine if the disk is vertically extended.
 
 History:
- 	98dec	ksl	Coded as part of effort to add a stellar wind option to python
-	04jun	ksl	Caused routine to return 0 velocity at origin to avoid clutter of irrelevant
-			error messages.
+ 	1112	ksl	Adapted by nsh from the same routine for a stellat wind, but the velocity law
+			is not the same
  
 **************************************************************/
 
@@ -193,9 +192,6 @@ shell_velocity (x, v)
       v[2] = 0.0;
       return (0.0);
     }
-
-   
-
 
   if (r <= geo.rstar || r <= geo.shell_rmin)
     speed = geo.shell_vmin;
@@ -282,7 +278,7 @@ shell_vel_grad (x, velgrad)
   int vsub (), stuff_v ();
 
   shell_velocity (x, v0);
-    printf("HELLOOOO IM IN SELL_VEL_GRAD");
+//OLD    printf("HELLOOOO IM IN SELL_VEL_GRAD");
   ds = 1.e7;
   for (i = 0; i < 3; i++)
     {

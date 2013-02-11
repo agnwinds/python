@@ -329,6 +329,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
   double x1;
   int wind_n_to_ij ();
   int mscat, mtopbot;
+  double delta;
 
   freqmin = f1;
   freqmax = f2;
@@ -342,9 +343,6 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	ldfreq=(lfreqmax-lfreqmin) / NWAVE;	
 
 
-
-
-
   for (nphot = 0; nphot < NPHOT; nphot++)
     {
       if ((j = p[nphot].nscat) < 0 || j > MAXSCAT)
@@ -356,6 +354,8 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	nres[MAXSCAT]++;
       else
 	nres[j]++;
+
+/* At some undocumented point, logarithmic frequency intervals were added */
 /* lines to work out where we are in a logarithmic spectrum */
 	k1 = (log10(p[nphot].freq) -log10(freqmin)) / ldfreq;
 	if (k1<0) 
@@ -376,7 +376,11 @@ spectrum_create (p, f1, f2, nangle, select_extract)
  * so far out of bounds (>3000 km/s) that it suggests a real error.
 */
 
-	  if (((1. - p[nphot].freq / freqmin) > 0.01) && (geo.rt_mode != 2))
+  	  delta=0.02;  /* 111211 ksl -  Added a variable so that we could control how tightly to limit the photon boundaries 
+			 It would be possible to calculate what delta should be from the maximum velocity in the disk or wind
+			 */
+
+	  if (((1. - p[nphot].freq / freqmin) > delta) && (geo.rt_mode != 2))
 	    Error_silent
 	      ("spectrum_create: photon %6d freq low  %g < %g v %.2e scat %d n res scat %d origin %d\n",
 	       nphot, p[nphot].freq, freqmin,
@@ -386,7 +390,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	}
       else if (k > NWAVE - 1)
 	{
-	  if (((1. - freqmax / p[nphot].freq) > 0.01) && (geo.rt_mode != 2))
+	  if (((1. - freqmax / p[nphot].freq) > delta) && (geo.rt_mode != 2))
 	    Error_silent
 	      ("spectrum_create: photon %6d freq high %g > %g v %.2e scat %d  res scat %d origin %d\n",
 	       nphot, p[nphot].freq, freqmax,

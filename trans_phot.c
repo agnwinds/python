@@ -57,6 +57,9 @@ History:
 			of disk is now stored in a separate structure.
         04Jun   SS      Small modification to kill photons when necessary during the 
                         spectral cycles of macro atom runs.
+	1112	ksl	Made some changes in the logic to try to trap photons that
+			had somehow escaped the wind to correct a segmenation fault
+			that cropped up in spherical wind models
 
 **************************************************************/
 
@@ -83,6 +86,7 @@ trans_phot (w, p, iextract)
   double get_ion_density ();
   int nnscat;
   int disk_illum;
+  int nerr;
 
 
   n = 0;			// To avoid -O3 warning
@@ -121,7 +125,9 @@ trans_phot (w, p, iextract)
 	      if (p[nphot].nres > -1 && p[nphot].nres < NLINES)
 		{
 		  geo.rt_mode = 1;
-		  scatter (&p[nphot], &p[nphot].nres, &nnscat);
+		  if ((nerr= scatter (&p[nphot], &p[nphot].nres, &nnscat))!=0) {
+				  Error("trans_phot: Bad return from scatter %d at point 1",nerr);
+		  }
 		  geo.rt_mode = 2;
 		}
 	    }
@@ -253,20 +259,29 @@ it from translate. ?? 02jan ksl */
 	    {			/* Cause the photon to scatter and reinitilize */
 
 
-	      if (pp.grid > -1)
-		{
-		  if ((n = where_in_grid (pp.x)) != pp.grid)
-		    {
-/* This error condition happens occassionally.  The reason is that we have added a "push through 
- * distance" to get a photon to move on to the next cell, and have not updated the grid cell 
- * before returning from translate. If one is concerned about this restore some of the lines
- * that can befound in trans_phot in versions up through 54a.  04dec -- ksl
- */
-		      pp.grid = n;
+		    /* 71 - 1112 - ksl - placed this line here to try to avoid an error
+		     * I was seeing in scatter.  I believe the first if statement has
+		     * a loophole that needs to be plugged, when it comes back with avalue of
+		     * n = -1
+		     */
+		    pp.grid=n= where_in_grid(pp.x);
 
-		    }
-		}
-	      else
+//OLD71	      if (pp.grid > -1)
+//OLD71		{
+//OLD71		  if ((n = where_in_grid (pp.x)) != pp.grid)
+//OLD71		    {
+//OLD71/* This error condition happens occassionally.  The reason is that we have added a "push through 
+//OLD71 * distance" to get a photon to move on to the next cell, and have not updated the grid cell 
+//OLD71 * before returning from translate. If one is concerned about this restore some of the lines
+//OLD71 * that can befound in trans_phot in versions up through 54a.  04dec -- ksl
+//OLD71 */
+//OLD71		      pp.grid = n;
+//OLD71
+//OLD71		    }
+//OLD71		}
+//OLD71	      else
+
+		    if (n<0)
 		{
 		  Error
 		    ("trans_phot: Trying to scatter a photon which is not in the wind\n");
@@ -319,7 +334,9 @@ the current version of scattering really does what the old code did for two-leve
 	      nnscat = 0;
 	      nnscat++;
 	      ptr_nres = &nres;
-	      scatter (&pp, ptr_nres, &nnscat);
+		  if ((nerr= scatter (&pp, ptr_nres, &nnscat))!=0) {
+				  Error("trans_phot: Bad return from scatter %d at point 2",nerr);
+		  }
 	      pp.nscat++;
 
 	      /* SS June 04: During the spectrum calculation cycles, photons are thrown away

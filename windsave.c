@@ -104,7 +104,12 @@ wind_save (filename)
 
 }
 
+/*
 
+11dec	ksl	Updated so returns -1 if it cannot open the windsave file.  This
+		was done to enable one to handle missing files differently in
+		different cases
+*/
 int
 wind_read (filename)
      char filename[];
@@ -116,8 +121,7 @@ wind_read (filename)
 
   if ((fptr = fopen (filename, "r")) == NULL)
     {
-      Error ("wind_read: Unable to open %s\n", filename);
-      exit (0);
+	    return(-1); 
     }
 
   n = fread (line, sizeof (line), 1, fptr);

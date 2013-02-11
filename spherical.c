@@ -134,15 +134,21 @@ spherical_make_grid (w)
 	    w[n].rcen = 0.5 * geo.rstar * (pow (10., dlogr * (n)) +
 					   pow (10., dlogr * (n - 1)));
 	printf("OLD W.r = %e, w.rcen = %e\n",w[n].r,w[n].rcen);
+	    dlogr = (log10 (geo.rmax / geo.wind_rmin)) / (NDIM - 3);
+	    w[n].r = geo.wind_rmin * pow (10., dlogr * (n - 1));
+	    w[n].rcen = 0.5 * geo.wind_rmin * (pow (10., dlogr * (n)) +
+					   pow (10., dlogr * (n - 1)));
+	printf("New W.r = %e, w.rcen = %e\n",w[n].r,w[n].rcen);
 	  }
+
 	/* Now calculate the positions of these points in the xz plane.
 	   There is a choice about how one does this.   I have elected
 	   to assume that we want to calculate this at a 45 degree angle.
 	   in the hopes this will be a reasonable portion of the wind in
 	   a biconical flow.
 	 */
-	w[n].x[1] = w[n].xcen[1] = 0.0;
 
+	w[n].x[1] = w[n].xcen[1] = 0.0;
 	w[n].x[0] = w[n].x[2] = w[n].r * sin (PI / 4.);
 	w[n].xcen[0] = w[n].xcen[2] = w[n].rcen * sin (PI / 4.);
 

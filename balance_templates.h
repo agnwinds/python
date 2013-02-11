@@ -46,9 +46,9 @@ int partition_functions(PlasmaPtr xplasma, int mode);
 double agn_init(double r, double lum, double alpha, double freqmin, double freqmax, int ioniz_or_final, double *f);
 double emittance_pow(double freqmin, double freqmax, double lum, double alpha);
 int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
-/* stuart_sim.c */
+/* power_sub.c */
 int sim_driver(PlasmaPtr xplasma);
-int sim_pl(double nh, double t_r, double t_e, double www, int nelem, double ne, double density[], double xne, double newden[]);
+int sim_pl(double nh, double t_r, double t_e, double www, int nelem, double ne, double density[], double xne, double newden[], double f1, double f2);
 double xinteg_sim(double t, double f1, double f2, int nion, double max_ratio, double current_ratio);
 double tb_planck(double freq);
 double verner_planck(double freq);

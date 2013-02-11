@@ -262,7 +262,6 @@ int check_convergence(void);
 int one_shot(PlasmaPtr xplasma, int mode);
 double calc_te(PlasmaPtr xplasma, double tmin, double tmax);
 double zero_emit(double t);
-double sim_alpha_func(double alpha);
 /* ispy.c */
 int ispy_init(char filename[], int icycle);
 int ispy_close(void);
@@ -293,7 +292,8 @@ int detailed_balance(PlasmaPtr xplasma, int nelem, double newden[]);
 int rebalance(double rates_up[], double rates_down[], double fraction[], int ntot);
 int wind_update_after_detailed_balance(PlasmaPtr xplasma, int nelem, double newden[]);
 /* bands.c */
-int bands_init(double t, double f1, double f2, int imode, struct xbands *band);
+int bands_init(int imode, struct xbands *band);
+int freqs_init(double freqmin, double freqmax);
 /* time.c */
 double timer(void);
 int get_time(char curtime[]);
@@ -346,6 +346,7 @@ int elvis_zero_init(double p[]);
 double elvis_zero_r(double r);
 double elvis_theta_wind(double r);
 double elvis_wind_mdot_integral(double r);
+double ds_to_pillbox(PhotPtr pp, double rmin, double rmax, double height);
 /* cylindrical.c */
 double cylind_ds_in_cell(PhotPtr p);
 int cylind_make_grid(WindPtr w);
@@ -405,16 +406,6 @@ int auger_ionization(PlasmaPtr xplasma);
 double agn_init(double r, double lum, double alpha, double freqmin, double freqmax, int ioniz_or_final, double *f);
 double emittance_pow(double freqmin, double freqmax, double lum, double alpha);
 int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
-/* stuart_sim.c */
-int sim_driver(PlasmaPtr xplasma);
-int sim_pl(double nh, double t_r, double t_e, double www, int nelem, double ne, double density[], double xne, double newden[], double f1, double f2);
-double xinteg_sim(double t, double f1, double f2, int nion, double max_ratio, double current_ratio);
-double tb_planck(double freq);
-double verner_planck(double freq);
-double tb_pow(double freq);
-double verner_pow(double freq);
-double sim_alphasolve(double ratans, double numin, double numax);
-double sim_w(double en1, double v, double dt, double alpha, double numin, double numax);
 /* shell_wind.c */
 int get_shell_wind_params(void);
 double shell_velocity(double x[], double v[]);
@@ -432,6 +423,19 @@ double compute_zeta(double temp, int nion, int ilow, int ihi, double interpfrac,
 /* dielectronic.c */
 double compute_dr_coeffs(double temp);
 double total_dr(WindPtr one, double t_e);
+/* power.c */
+int power_abundances(PlasmaPtr xplasma, int mode);
+double sim_alpha_func(double alpha);
+/* power_sub.c */
+int sim_driver(PlasmaPtr xplasma);
+int sim_pl(double nh, double t_r, double t_e, double www, int nelem, double ne, double density[], double xne, double newden[], double f1, double f2);
+double xinteg_sim(double t, double f1, double f2, int nion, double max_ratio, double current_ratio);
+double tb_planck(double freq);
+double verner_planck(double freq);
+double tb_pow(double freq);
+double verner_pow(double freq);
+double sim_alphasolve(double ratans, double numin, double numax);
+double sim_w(double en1, double v, double dt, double alpha, double numin, double numax);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
@@ -465,6 +469,7 @@ int phot_split(WindPtr w, char rootname[], int ochoice);
 int thompson(WindPtr w, char rootname[], int ochoice);
 int nscat_split(WindPtr w, char rootname[], int ochoice);
 int convergence_summary(WindPtr w, char rootname[], int ochoice);
+int convergence_all(WindPtr w, char rootname[], int ochoice);
 /* py_wind_ion.c */
 int ion_summary(WindPtr w, int element, int istate, int iswitch, char rootname[], int ochoice);
 int tau_ave_summary(WindPtr w, int element, int istate, double freq, char rootname[], int ochoice);
@@ -485,4 +490,5 @@ int copy_plasma(PlasmaPtr x1, PlasmaPtr x2);
 int depcoef_overview_specific(int version, int nconfig, WindPtr w, char rootname[], int ochoice);
 /* py_wind.c */
 int main(int argc, char *argv[]);
+int one_choice(int choice, char *root, int ochoice);
 int py_wind_help(void);

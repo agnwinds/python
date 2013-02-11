@@ -90,7 +90,8 @@ get_stellar_wind_params ()
   rddoub ("stellar.wind.acceleration_exponent", &geo.cl_beta);	/* Accleration scale exponent */
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
-  geo.wind_rmin = geo.rstar;
+//OLD71  geo.wind_rmin = geo.rstar;
+  geo.wind_rmin = geo.wind_rmin;  //71 ksl - Not modified this so that we did not waste cells
   geo.wind_rmax = geo.rmax;
   geo.wind_thetamin = 0.0;
   geo.wind_thetamax = 90. / RADIAN;
@@ -159,7 +160,6 @@ stellar_velocity (x, v)
       v[2] = 0.0;
       return (0.0);
     }
-
 
 
   if (r <= geo.rstar || r <= geo.cl_rmin)

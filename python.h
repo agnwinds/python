@@ -90,12 +90,13 @@ int NPHOT;			/* As of python_40, NPHOT must be defined in the main program using
 
  */
 
-/* Definitions of the coordinate system types */
+/* Definitions of the coordinate system types (geo.coord_type) */
 
 #define SPHERICAL		0
 #define CYLIND			1
 #define	RTHETA			2
 #define	CYLVAR                  3
+
 
 /* Definitions of spectral types, which are all negative because when
  * one reads a spectrum from a list of models these are numbered beginning
@@ -206,6 +207,14 @@ struct geometry
   int rt_mode;			/* radiative transfer mode (0=Sobolev,1=simple (used only by balance) */
                                 /* This IS now used by Python - set to 2 for Macro Atom method. Set to 1
 				   for non-Macro Atom methods (SS) */
+
+  /* 71 - 111229  - ksl - These are the frequency bands used when caluclation parameters like a power law slope
+   * in limited regions.  Moved inside geo becuase we need to know this information in py_wind
+   */
+#define  NXBANDS 10             /* the maximum number of bands that can be defined */
+	int nxfreq;    			/* the number of bands actually used */
+	double xfreq[NXBANDS+1];	/* the band limits  */
+
   /* The spectral types are SPECTYPE_BB for bb, SPECTYPE_UNIFORM for a uniform spectral distribution, 
    * SPECTYPE_POW for a power law, 0 or more from a filelist.
    * A value of SPECTYPE_NONE indicates no emission is expected from this particular source */
@@ -324,7 +333,7 @@ geo;
 struct plane
 {
   double x[3];			/* A position included in the plane (usally the "center" */
-  double lmn[3];		/* A unit vector perpindicular to the plane (usuall in the "positive" direction */
+  double lmn[3];		/* A unit vector perpendicular to the plane (usually in the "positive" direction */
 }
 plane_l1, plane_sec, plane_m2_far;	/* these all define planes which are perpendicular to the line of sight from the 
 					   primary to the seconday */
@@ -334,7 +343,7 @@ plane_l1, plane_sec, plane_m2_far;	/* these all define planes which are perpendi
  * what one might guess.  The cone is defined in the positive z direction but reflected through 
  * the xy plane.  
  * 56d -- Beginning with 56d, ksl has switched to a new definition of cones, that is intended to
- * make it possible to use ds_to_cone easier as part of coordianate systems.  The new definition
+ * make it possible to use ds_to_cone easier as part of different coordinate systems.  The new definition
  * is based on the intersection of the cone with the z axis rather than the intersection with
  * the disk plane.  At present both definitions are used in the program and therefore both shold
  * be defined.  Once the new definition is promulgated through the entire program, and verified
@@ -350,7 +359,7 @@ cone_dummy, *ConePtr;
 
 ConePtr cones_rtheta;		/*A ptr to the cones that define the theta directions in rtheta coods*/
 
-struct cone windcone[2];
+struct cone windcone[2];        /* The cones that define the boundary of winds like SV or kwd */
 
 
 
@@ -470,10 +479,16 @@ plasma in regions of the geometry that are actually included n the wind
 */
 
 /* 70 - 1108 - Define wavelengths in which to record gross spectrum in a cell, see also xave_freq and xj in plasma structure */
-#define  NXBANDS 10
-int nxfreq;    // the number of bands actually used
-double xfreq[NXBANDS+1]; 
-int nx4power;  //The band to use for the power law ionization calculations
+/* ksl - It would probably make more sense to define these in the same ways that bands are done for the generation of photons, or to
+ * do both the same way at least.  Choosing to do this in two different ways makes the program confusing. The structure that has
+ * the photon generation is called xband */
+
+//71 - 111229 - Moved into the geo structure so that it would be possible to get this information into py_wind more easily
+//OLD71 #define  NXBANDS 10             /* the maximum number of bands that can be defined */
+//OLD71 int nxfreq;    			/* the number of bands actually used */
+//OLD71 double xfreq[NXBANDS+1];	/* the band limits  */
+
+//OLD - ksl - this shold not be an external variable int nx4power;  //The band to use for the power law ionization calculations
 
 typedef struct plasma {
   int nwind;                   /*A cross reference to the corresponding cell in the  wind structure*/
@@ -509,25 +524,18 @@ typedef struct plasma {
 /* End of macro information */
 
 
-  double t_r, t_r_old;		/*radiation temperature of cell */
-  double t_e, t_e_old;		/*electron temperature of cell */
-  double dt_e, dt_e_old;	/*How much t_e changed in the previous iteration */
+  double t_r, t_r_old;			/*radiation temperature of cell */
+  double t_e, t_e_old;			/*electron temperature of cell */
+  double dt_e, dt_e_old;		/*How much t_e changed in the previous iteration */
   double heat_tot, heat_tot_old;	/* heating from all sources */
   double heat_lines, heat_ff;
-  double heat_comp;   /* 1108 NSH The compton heating for the cell */
+  double heat_comp;   			/* 1108 NSH The compton heating for the cell */
   double heat_lines_macro, heat_photo_macro; /* bb and bf heating due to macro atoms. Subset of heat_lines 
 						and heat_photo. SS June 04. */
-  double heat_photo, heat_z;	/*photoionization heating total and of metals */
-  double w;			/*The dilution factor of the wind */
-  int ntot;                     /*Total number of photon passages */
+  double heat_photo, heat_z;		/*photoionization heating total and of metals */
+  double w;				/*The dilution factor of the wind */
+  int ntot;                     	/*Total number of photon passages */
 
- /* NSH 15/4/11 - added some counters to give a rough idea of where photons from various sources are ending up */
- /* NSH 111005  - changed counters to real variables, that allows us to take account of differening weights of photons */
-  double ntot_star;
-  double ntot_bl;			
-  double ntot_disk;                /* NSH 15/4/11 Added to count number of photons from the disk in the cell */
-  double ntot_wind;
-  double ntot_agn;                  /* NSH 15/4/11 Added to count number of photons from the AGN in the cell */
 
 #define PTYPE_STAR	    0
 #define PTYPE_BL	    1
@@ -535,28 +543,37 @@ typedef struct plasma {
 #define PTYPE_WIND	    3
 #define PTYPE_AGN           4 
 
+ /* NSH 15/4/11 - added some counters to give a rough idea of where photons from various sources are ending up */
+ /* NSH 111005  - changed counters to real variables, that allows us to take account of differening weights of photons */
+  /* ksl - ???? The reason these are doubles if that what Nick did was to truly count the photons, but it is
+   * not clera why that is a good idea.  I have converted them back to mean the number of packets in radiation.c.  It
+   * would be simpler if this was an array rather than individual
+   * variables
+   */
+  int ntot_star;
+  int ntot_bl;			
+  int ntot_disk;                /* NSH 15/4/11 Added to count number of photons from the disk in the cell */
+  int ntot_wind;
+  int ntot_agn;                  /* NSH 15/4/11 Added to count number of photons from the AGN in the cell */
 
-
-
-  int nrad;			/* Total number of photons radiated within the cell */
-  int nioniz;			/* Total number of photons capable of ionizing H */
+  int nrad;				/* Total number of photons radiated within the cell */
+  int nioniz;				/* Total number of photons capable of ionizing H */
   double ioniz[NIONS], recomb[NIONS];	/* Number of ionizations and recombinations for each ion.
 					   The sense is ionization from ion[n], and recombinations 
 					   to each ion[n] */
   int scatters[NIONS];			/* 68b - The number of scatters in this cell for each ion.*/
-  double xscatters[NIONS];	/* 68b - Diagnostic measure of energy scattered out of beam on extract */
-  double heat_ion[NIONS];       /* The amount of energy being transferred to the electron pool
-				   by this ion via photoionization*/
-  double lum_ion[NIONS];       /* The amount of energy being released from the electron pool
-				   by this ion via recombination*/
-  double j, ave_freq, lum;	/*Respectively mean intensity, 
-				intensity_averaged frequency, 
-				   luminosity and       absorbed luminosity of shell */
+  double xscatters[NIONS];		/* 68b - Diagnostic measure of energy scattered out of beam on extract */
+  double heat_ion[NIONS];       	/* The amount of energy being transferred to the electron pool
+				   	by this ion via photoionization*/
+  double lum_ion[NIONS];       		/* The amount of energy being released from the electron pool
+					   by this ion via recombination*/
+  double j, ave_freq, lum;		/*Respectively mean intensity, intensity_averaged frequency, 
+				   	luminosity and absorbed luminosity of shell */
   double xj[NXBANDS], xave_freq[NXBANDS];   /* 1108 NSH frequency limited versions of j and ave_freq */
-  int nxtot[NXBANDS];  /* 1108 NSH the total number of photon passages in frequency bands */
+  int nxtot[NXBANDS];  			/* 1108 NSH the total number of photon passages in frequency bands */
   double lum_lines, lum_ff, lum_adiabatic;
-  double lum_comp ; /* 1108 NSH The compton luminosity of the cell */
-  double lum_dr;  /* 1109 NSH The dielectronic recombination luminosity of the cell */
+  double lum_comp ; 			/* 1108 NSH The compton luminosity of the cell */
+  double lum_dr;  			/* 1109 NSH The dielectronic recombination luminosity of the cell */
   double lum_fb, lum_z;		/*fb luminosity & fb of metals metals */
   double lum_rad, lum_rad_old;	/* The specfic radiative luminosity in frequencies defined by freqmin
 				   and freqmax.  This will depend on the last call to total_emission */
@@ -565,10 +582,17 @@ typedef struct plasma {
   int pdf_x[LPDF];		/* The line numbers of *line_ptr which form the boundaries the luminosity pdf */
   double pdf_y[LPDF];		/* Where the pdf is stored -- values between 0 and 1 */
   double gain;			/* The gain being used in interations of the structure */
-  double converge_t_r, converge_t_e, converge_hc;	/* Three measures of whether the program believes the grid is converged */
-  int trcheck,techeck,hccheck; /* NSH the binary versionf of the convergence checks used to calculate converge_whole */ 
-  int converge_whole, converging;	/* converge_whole=0 if subroutine convergence feels point is converged, converging is an
+  double converge_t_r, converge_t_e, converge_hc;	/* Three measures of whether the program believes the grid is converged.
+ 				The first wo  are the fraction changes in t_r, t_e between this and the last cycle. The third
+			        number is the fraction between heating and cooling divided by the sum of the 2	*/
+  int trcheck,techeck,hccheck; /* NSH the individual convergence checks used to calculate converge_whole.  Each of these values
+ 				is 0 if the fractional change or in the case of the last check error is less than a value, currently
+			       set to 0.05.  ksl 111126	*/ 
+  int converge_whole, converging;	/* converge_whole is the sum of the indvidual convergence checks.  It is 0 if all of the
+					   convergence checks indicated convergence.subroutine convergence feels point is converged, converging is an
 				   indicator of whether the program thought the cell is on the way to convergence 0 implies converging */
+
+
   double gamma_inshl[NAUGER]; /*MC estimator that will record the inner shell ionization rate - very similar to macro atom-style estimators */
   /* 1108 Increase sim estimators to cover all of the bands */
   double sim_alpha[NXBANDS]; /*Computed spectral index for a power law spectrum representing this cell */

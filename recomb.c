@@ -266,7 +266,7 @@ recombinations per second of a particular ion.
 			threshold
 			1- the (reduced) emissivity, e.g. excluding
 			the threshold energy.  This is the energy
-			associated with kinetic energy los
+			associated with kinetic energy loss
 			2- the specific recombination rate.
                                                                                                    
                                                                                                    
@@ -313,22 +313,26 @@ integ_fb (t, f1, f2, nion, fb_choice)
     {
       for (n = 0; n < nfb; n++)
 	{
+		/* See if the frequencies correspond to one previously calculated */
 	  if (f1 == freebound[n].f1 && f2 == freebound[n].f2)
 	    {
 	      fnu = get_fb (t, nion, n);
 	      return (fnu);
 	    }
 	}
+      /* If not calculate it here */
       fnu = xinteg_fb (t, f1, f2, nion, fb_choice);
       return (fnu);
     }
   else if (fb_choice == 2)
     {
+		/* See if the frequencies correspond to one previously calculated */
       if (nfb > 0)
 	{
 	  fnu = get_nrecomb (t, nion);
 	  return (fnu);
 	}
+      /* If not calculate it here */
       fnu = xinteg_fb (t, f1, f2, nion, fb_choice);
       return (fnu);
     }
@@ -1050,7 +1054,6 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
     {
       Error ("integ_fb: %d is unacceptable value of nion\n", nion);
       mytrap ();
-//      exit (0);
       return (0);
     }
 
@@ -1058,16 +1061,14 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
   fbt = t;
   fbfr = fb_choice;
 
-// Place over all limits on the integration interval if they are very large
-/* We need to limit the frequency range to one that is reasonable
-if we are going to integrate */
+/* Limit the frequency range to one that is reasonable before integrating */
+
   if (f1 < 3e14)
     f1 = 3e14;			// 10000 Angstroms
-  if (f2 > 3e18)                //110819 nsh needed to increase these values to ensure we get a cross section of some kind for highly ionised ions that we are now seeing in x-ray illuminated nebulas.
-    f2 = 3e18;			// 10 Angstroms
+  if (f2 > 3e18)                // 110819 nsh increase upper limits to include  highly ionised ions that we are now seeing in x-ray illuminated nebulas.
+    f2 = 3e18;			// This is 1 Angstroms  - ksl
   if (f2 < f1)
-    return (0);			// Because either f2 corresponded to something redward of 1000 A or f1 
-  // was blueward of 10 Angstroms
+    return (0);			/* Because there is nothing to integrate */ 
 
   fnu = 0.0;
 
@@ -1090,7 +1091,8 @@ if we are going to integrate */
 	    fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
 	}
     }
-// This completes the calculation of those levels for which we have Topbase x-sections, now do Verner
+
+/* This completes the calculation of those levels for which we have Topbase x-sections, now do Verner */
 
   for (n = nvmin; n < nvmax; n++)
     {

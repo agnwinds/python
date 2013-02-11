@@ -130,7 +130,10 @@ History:
 			linked to levels for which the density could be calculated.  (Note, that there
 			may be a problem if we decide to use topbase data for ions with 0 nlte levels
 			allowed, i.e. zero levels in which we keep track of the density.  
-        081115  nsh     70 -- added in structures and routines to read in data to implement       				dielectronic recombination.
+        081115  nsh     70 -- added in structures and routines to read in data to implement
+			dielectronic recombination.
+	11dec	ksl	71 - Added calls to free memory and reallocate the atomic data structures if one calls this more
+			than once
 **************************************************************/
 
 
@@ -198,6 +201,9 @@ get_atomic_data (masterfile)
 
 /* Allocate structures for storage of data */
 
+  if (ele!=NULL){
+	  free(ele);
+  }
   ele = (ElemPtr) calloc (sizeof (ele_dummy), NELEMENTS);
 
   if (ele == NULL)
@@ -215,6 +221,9 @@ get_atomic_data (masterfile)
     }
 
 
+  if (ion != NULL){
+	  free(ion);
+  }
   ion = (IonPtr) calloc (sizeof (ion_dummy), NIONS);
 
   if (ion == NULL)
@@ -232,6 +241,9 @@ get_atomic_data (masterfile)
 
 
 
+  if (config!=NULL){
+	  free(config);
+  }
   config = (ConfigPtr) calloc (sizeof (config_dummy), NLEVELS);
 
   if (config == NULL)
@@ -251,6 +263,9 @@ get_atomic_data (masterfile)
 
 
 
+  if (line!=NULL){
+	  free(line);
+  }
   line = (LinePtr) calloc (sizeof (line_dummy), NLINES);
 
   if (line == NULL)
