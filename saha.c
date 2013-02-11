@@ -487,14 +487,18 @@ saha (xplasma, ne, t)
 	  sum += density[nion] = a;
 	  if (density[nion] < 0.0)
 	    mytrap ();
-	  sane_check (sum);
+	  if (sane_check (sum))
+	    Error("saha:sane_check failed for density summation\n");
+
+
 	}
 
       a = nh * ele[nelem].abun / sum;
       for (nion = first; nion < last; nion++)
 	{
 	  density[nion] *= a;
-	  sane_check (density[nion]);
+	  if (sane_check (density[nion]))
+		Error("saha:sane_check failed for density of ion %i\n",nion);
 	}
     }
 

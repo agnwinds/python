@@ -426,7 +426,7 @@ get_rand_exp (alpha_min, alpha_max)
   a=alpha_min+delta_alpha;
 
   if (sane_check(a)){
-	  Error("get_rand_exp: %e %e %e %e %e\n",a,aa,delta_alpha,x,r);
+	  Error("get_rand_exp:sane_check %e %e %e %e %e\n",a,aa,delta_alpha,x,r);
   }
   //OLD 12 nov ksl return (-a);
   return (a);

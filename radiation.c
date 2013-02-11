@@ -249,7 +249,7 @@ statement could be deleted entirely 060802 -- ksl */
   w_in = p->w;
 
 if (sane_check(tau)) {
-	Error("Radiation: CHECKING ff=%e, comp=%e, ind_comp=%e\n",frac_ff,frac_comp,frac_ind_comp);
+	Error("Radiation:sane_check CHECKING ff=%e, comp=%e, ind_comp=%e\n",frac_ff,frac_comp,frac_ind_comp);
 }
 /* Calculate the reduction in the w of the photon bundle along with the average
    weight in the cell */
@@ -271,7 +271,7 @@ if (sane_check(tau)) {
 
   /*74a_ksl: 121215 -- Added to check on a problem photon */
   if (sane_check(p->w)){
-		  Error("Radiation: photon weight is %e for tau %e\n",p->w,tau);
+		  Error("Radiation:sane_check photon weight is %e for tau %e\n",p->w,tau);
 		  }
 
   if (geo.ioniz_or_extract == 0)
@@ -381,7 +381,7 @@ if (sane_check(tau)) {
 
   if (sane_check (xplasma->j) || sane_check (xplasma->ave_freq))
     {
-      Error ("radiation: Problem with j %g or ave_freq %g\n", xplasma->j,
+      Error ("radiation:sane_check Problem with j %g or ave_freq %g\n", xplasma->j,
 	     xplasma->ave_freq);
     }
 
@@ -809,7 +809,7 @@ sum=0.0;
 			sum += plasmamain[i].density[j] * ion[j].z * ion[j].z * gaunt;
 			/* 74a_ksl  Added to diagnose problem with kappa_ff_fact producing NaN */
 			if (sane_check(sum)){
-				Error("pop_kappa_ff_array: sum is %e this is a problem, possible in gaunt %3\n",sum,gaunt);
+				Error("pop_kappa_ff_array:sane_check sum is %e this is a problem, possible in gaunt %3\n",sum,gaunt);
 			}
 
 			}

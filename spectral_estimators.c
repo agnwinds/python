@@ -121,7 +121,7 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 //	printf ("NSH PL alpha bracketed between %f (%e) and %f (%e)\n",pl_alpha_min,pl_alpha_func(pl_alpha_min),pl_alpha_max,pl_alpha_func(pl_alpha_max));
       if (sane_check(pl_alpha_func(pl_alpha_min)) || sane_check(pl_alpha_func(pl_alpha_max)))
 	{
-	Error ("Alpha cannot be bracketed in band %i cell %i- setting w to zero\n",n,xplasma->nplasma);
+	Error ("spectral_estimators:sane_check Alpha cannot be bracketed in band %i cell %i- setting w to zero\n",n,xplasma->nplasma);
 	xplasma->pl_w[n]=0.0;
 	xplasma->pl_alpha[n]=-999.0; //Set this to a value that might let us diagnose the problem
 	plflag=-1; 
@@ -147,8 +147,8 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 
       	if (sane_check (pl_w_temp))
 		{
-	  	Error_silent
-	    	("New PL parameters unreasonable, using existing parameters. Check number of photons in this cell\n");
+	  	Error
+	    	("spectral_estimators:sane_check New PL parameters unreasonable, using existing parameters. Check number of photons in this cell\n");
 		plflag=-1; // Dont use this model
 		xplasma->pl_w[n] = 0.0;
 		xplasma->pl_alpha[n] =-999.0;
@@ -172,7 +172,7 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 //	printf ("NSH exp_temp bracketed between %f (%e) and %f (%e)\n",exp_temp_min,exp_temp_func(exp_temp_min),exp_temp_max,exp_temp_func(exp_temp_max));
       if (sane_check(exp_temp_func(exp_temp_min)) || sane_check(exp_temp_func(exp_temp_max)))
 	{
-	Error ("Exponential temperature cannot be bracketed in band %i - setting w to zero\n",n);
+	Error ("spectral_estimators:sane_check Exponential temperature cannot be bracketed in band %i - setting w to zero\n",n);
 	xplasma->exp_w[n]=0.0;
 	xplasma->exp_temp[n]=-1e99;
 	expflag=-1; //Discount an exponential model
@@ -188,8 +188,8 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 
 	  if (sane_check (exp_w_temp))
 		{
-	  	Error_silent
-	    	("New exponential parameters unreasonable, using existing parameters. Check number of photons in this cell\n");
+	  	Error
+	    	("spectral_estimators:sane_check New exponential parameters unreasonable, using existing parameters. Check number of photons in this cell\n");
 		expflag=-1; //discount an exponential model
 		xplasma->exp_w[n] = 0.0;
 		xplasma->exp_temp[n] = -1e99;

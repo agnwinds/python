@@ -116,7 +116,7 @@ the routine is used I believe . ksl
 
   if (sane_check (dvds))
     {
-      Error ("vgrad: %f\n", dvds);
+      Error ("vgrad:sane_check %f\n", dvds);
     }
   return (dvds);
 

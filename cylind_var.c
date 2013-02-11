@@ -970,7 +970,7 @@ cylvar_coord_fraction (ichoice, x, ii, frac, nelem)
 
   if (sane_check (dr) || sane_check (dz))
     {
-      Error ("coord_frac: dr=%f dz=%f for 2d coords\n", dr, dz);
+      Error ("coord_frac:sane_check dr=%f dz=%f for 2d coords\n", dr, dz);
     }
 
   return (1);

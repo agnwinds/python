@@ -114,7 +114,7 @@ trans_phot (w, p, iextract)
       /* 74a_ksl Check that the weights are real */
 
       if (sane_check(p[nphot].w)){
-	      Error("trans_phot: photon %d has weight %e\n",nphot,p[nphot].w);
+	      Error("trans_phot:sane_check photon %d has weight %e\n",nphot,p[nphot].w);
       }
       /* Next block added by SS Jan 05 - for anisotropic scattering 
          with extract we want to be sure that everything is initialised
@@ -131,14 +131,14 @@ trans_phot (w, p, iextract)
 		  geo.rt_mode = 1;
 		  /*74a_ksl Check to see when a photon weight is becoming unreal */
       		if (sane_check(p[nphot].w)){
-	      		Error("trans_phot: photon %d has weight %e before scatter\n",nphot,p[nphot].w);
+	      		Error("trans_phot:sane_check photon %d has weight %e before scatter\n",nphot,p[nphot].w);
       		}
 		  if ((nerr= scatter (&p[nphot], &p[nphot].nres, &nnscat))!=0) {
 				  Error("trans_phot: Bad return from scatter %d at point 1",nerr);
 		  }
 		  /*74a_ksl Check to see when a photon weight is becoming unreal */
       		if (sane_check(p[nphot].w)){
-	      		Error("trans_phot: photon %d has weight %e aftger scatter\n",nphot,p[nphot].w);
+	      		Error("trans_phot:sane_check photon %d has weight %e aftger scatter\n",nphot,p[nphot].w);
       		}
 		  geo.rt_mode = 2;
 		}
@@ -349,7 +349,7 @@ the current version of scattering really does what the old code did for two-leve
 
 	      /*74a_ksl - Check added to search for error in weights */
       		if (sane_check(pp.w)){
-	      		Error("trans_phot: photon %d has weight %e before scatter\n",nphot,pp.w);
+	      		Error("trans_phot:sane_checl photon %d has weight %e before scatter\n",nphot,pp.w);
       		}
 		  if ((nerr= scatter (&pp, ptr_nres, &nnscat))!=0) {
 				  Error("trans_phot: Bad return from scatter %d at point 2",nerr);
@@ -358,7 +358,7 @@ the current version of scattering really does what the old code did for two-leve
 	      /* 74a_ksl - Check added to search for error in weights */
 
       		if (sane_check(pp.w)){
-	      		Error("trans_phot: photon %d has weight %e after scatter\n",nphot,pp.w);
+	      		Error("trans_phot:sane_check photon %d has weight %e after scatter\n",nphot,pp.w);
       		}
 
 	      /* SS June 04: During the spectrum calculation cycles, photons are thrown away

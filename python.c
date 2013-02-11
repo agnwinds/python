@@ -1772,7 +1772,7 @@ printf ("NSH GOING TO DISK_INIT\n");
 	  if (sane_check (p[icheck].freq))
 	    {
 	      Error
-		("python after define phot: unnatural frequency for photon %d\n",
+		("python after define phot:sane_check unnatural frequency for photon %d\n",
 		 icheck);
 	    }
 	}
@@ -2040,7 +2040,7 @@ photon_checks (p, freqmin, freqmax, comment)
 	      nlabel++;
 	    }
 	  Error
-	    ("photon_checks: %6d %5d %10.4e %10.4e %10.4e %5d w %10.4e sane_check failure\n",
+	    ("photon_checks:sane_check %6d %5d %10.4e %10.4e %10.4e %5d w %10.4e \n",
 	     nn, p[nn].origin, p[nn].freq, freqmin, freqmax, p[nn].w);
 	  p[nn].freq = freqmax;
 	  nnn++;

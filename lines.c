@@ -151,7 +151,7 @@ lum_lines (one, nmin, nmax)
 	    }
 	  if (sane_check (x) != 0)
 	    {
-	      printf ("total_line_emission %e %e\n", x, z);
+	      printf ("total_line_emission:sane_check %e %e\n", x, z);
 	    }
 	}
       else
@@ -589,7 +589,7 @@ scattering_fraction (line_ptr, xplasma)
       if (sane_check (sf))
 	{
 	  Error
-	    ("scattering fraction: sf %8.2e q %8.2e escape %8.2e w %8.2e\n",
+	    ("scattering fraction:sane_check sf %8.2e q %8.2e escape %8.2e w %8.2e\n",
 	     sf, q, escape, w);
 	  mytrap ();
 	}
@@ -716,7 +716,7 @@ line_heat (xplasma, pp, nres)
 
   if (sane_check (sf))
     {
-      Error ("line_heat: scattering fraction %g\n", sf);
+      Error ("line_heat:sane_check scattering fraction %g\n", sf);
     }
   x = pp->w * (1. - sf);
   xplasma->heat_lines += x;

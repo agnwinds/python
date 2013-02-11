@@ -1,11 +1,11 @@
 README
 ***
 =========
-Python 74a not included due to bugs in Gaunt factor read in
+Precursor is python_74a_ksl 
+Changes this version
+python.c - changed call to pop_kappa_ff_array (); so it only occurs if there is data to allow it to work!
+emission.c - changed ff and total_free to allow proper operation if gaunt factor data has not been read in
+radiation.c - changed kappa_ff to allow proper operation if no gaunt factors.
+variable_temperature.c - changed code so density is computed in a copy of the actual array, and changes to the plasma structure only made on proper completion. If the loop searching for n_e fails, then the old densities are retained.
 
-Precursor is python_74a
-This version 
-Fixes the problem of too many photons out of the allowed intervals in spectrum_create
-Changes the way bb photons are create when they are very far from the peak of the spectrum to reduce the possibility of NaN being produced
-Various updates to comments
 

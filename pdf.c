@@ -462,7 +462,7 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
 
   if (sane_check (sum))
     {
-      Error ("pdf_gen_from_func: Sum %f is NaN\n", sum);
+      Error ("pdf_gen_from_func:sane_check Sum %f is NaN\n", sum);
     }
 
   /* Renormalize the array so that this really is a cumulative distribution function */

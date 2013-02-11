@@ -140,7 +140,7 @@ double nsh_lum_metals;
 	  plasmamain[n].ave_freq /= plasmamain[n].j;	/* Normalization to frequency moment */
 	  if (sane_check (plasmamain[n].ave_freq))
 	    {
-	      Error ("wind_update: %d ave_freq %e j %e ntot %d\n",
+	      Error ("wind_update:sane_check %d ave_freq %e j %e ntot %d\n",
 		     n, wtest, plasmamain[n].j, plasmamain[n].ntot);
 	    }
 
@@ -161,7 +161,7 @@ double nsh_lum_metals;
 	    }
 	  if (sane_check (trad) || sane_check (plasmamain[n].w))
 	    {
-	      Error ("wind_update: %d trad %8.2e w %8.2g\n", n, trad,
+	      Error ("wind_update:sane_check %d trad %8.2e w %8.2g\n", n, trad,
 		     plasmamain[n].w);
 	      Error ("wind_update: ave_freq %8.2e j %8.2e\n",
 		     plasmamain[n].ave_freq, plasmamain[n].j);
@@ -293,26 +293,26 @@ double nsh_lum_metals;
   for (nplasma = 0; nplasma < NPLASMA; nplasma++)
     {
       if (sane_check (plasmamain[nplasma].heat_tot))
-	Error ("wind_update: w\[%d).heat_tot is %e\n", nplasma,
+	Error ("wind_update:sane_check w\[%d).heat_tot is %e\n", nplasma,
 	       plasmamain[nplasma].heat_tot);
       if (sane_check (plasmamain[nplasma].heat_photo))
-	Error ("wind_update: w\[%d).heat_photo is %e\n", nplasma,
+	Error ("wind_update:sane_check w\[%d).heat_photo is %e\n", nplasma,
 	       plasmamain[nplasma].heat_photo);
       if (sane_check (plasmamain[nplasma].heat_photo_macro))
-	Error ("wind_update: w\[%d).heat_photo_macro is %e\n", nplasma,
+	Error ("wind_update:sane_check w\[%d).heat_photo_macro is %e\n", nplasma,
 	       plasmamain[nplasma].heat_photo_macro);
       if (sane_check (plasmamain[nplasma].heat_ff))
-	Error ("wind_update: w\[%d).heat_ff is %e\n", nplasma,
+	Error ("wind_update:sane_check w\[%d).heat_ff is %e\n", nplasma,
 	       plasmamain[nplasma].heat_ff);
       if (sane_check (plasmamain[nplasma].heat_lines))
-	Error ("wind_update: w\[%d).heat_lines is %e\n", nplasma,
+	Error ("wind_update:sane_check w\[%d).heat_lines is %e\n", nplasma,
 	       plasmamain[nplasma].heat_lines);
       if (sane_check (plasmamain[nplasma].heat_lines_macro))
-	Error ("wind_update: w\[%d}).heat_lines_macro is %e\n", nplasma,
+	Error ("wind_update:sane_check w\[%d}).heat_lines_macro is %e\n", nplasma,
 	       plasmamain[nplasma].heat_lines_macro);
  /* 1108 NSH extra Sane check for compton heating */
       if (sane_check (plasmamain[nplasma].heat_comp))
-	Error ("wind_update: w\[%d).heat_comp is %e\n", nplasma,
+	Error ("wind_update:sane_check w\[%d).heat_comp is %e\n", nplasma,
 	       plasmamain[nplasma].heat_comp);
       xsum += plasmamain[nplasma].heat_tot;
       psum += plasmamain[nplasma].heat_photo;

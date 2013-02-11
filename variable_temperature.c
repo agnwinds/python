@@ -227,16 +227,19 @@ variable_temperature (xplasma, mode)
 	  	sum += newden[nion] = a;
 	  	if (newden[nion] < 0.0)
 			{
+			Error ("variable_temperature: ion %i has a negative density %e\n",nion,newden[nion]);
 	    		mytrap ();
 			}
-	  	sane_check (sum);
+	  	if (sane_check (sum))
+			Error ("variable_temperature:sane check failed for running density sum=%e, last ion=%i\n",sum,nion);
 		}  //end of loop over ions - we now have a full set of ions for this element
 
       	a = nh * ele[nelem].abun / sum;   //the scaling factor to get the overall abundance right
       	for (nion = first; nion < last; nion++)
 		{
 	  	newden[nion] *= a;  //apply scaling
-	  	sane_check (newden[nion]);  //check nothing has gone crazy
+	  	if (sane_check (newden[nion]))  //check nothing has gone crazy
+			Error ("variable_temperature:sane check failed for density newden=%e, for ion=%i\n",newden[nion],nion);
 		}
 
       	if (geo.macro_ioniz_mode == 1)

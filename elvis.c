@@ -255,7 +255,7 @@ elvis_velocity (x, v)
   speed = (sqrt (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]));
   if (sane_check (speed))
     {
-      Error ("elvis_velocity: x %f %f %f v %f %f %f\n", x[0], x[1], x[2],
+      Error ("elvis_velocity:sane_check x %f %f %f v %f %f %f\n", x[0], x[1], x[2],
 	     v[0], v[1], v[2]);
       Error
 	("elvis_velocity: rzero %f theta %f ldist %f zzz %f v_escape %f vl %f\n",

@@ -115,7 +115,7 @@
 					}
 				else
 					{
-					Error ("Ind_comp - unknown spectral model (%i) in band %i\n",xplasma->spec_mod_type[i],i);
+					Error ("kappa_ind_comp - unknown spectral model (%i) in band %i\n",xplasma->spec_mod_type[i],i);
 					J=0.0 ;//Something has gone wrong
 					}
 				}
@@ -139,7 +139,7 @@
 	x*=1/(2*freq*freq);
 	if (sane_check(x)) 
 		{
-		Error ("Ind_comp - undefined value for Kappa_ind_comp - setting to zero\n");
+		Error ("kappa_ind_comp:sane_check - undefined value for Kappa_ind_comp - setting to zero\n");
 		return (0.0);
 		}
 	return (x);

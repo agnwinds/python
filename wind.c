@@ -200,16 +200,16 @@ wind_check (www, n)
 	{
 	  if (sane_check (www[i].x[j]))
 	    {
-	      Error ("wind_check: www[%d].x[%d] %e\n", i, j, www[i].x[j]);
+	      Error ("wind_check:sane_check www[%d].x[%d] %e\n", i, j, www[i].x[j]);
 	    }
 	  if (sane_check (www[i].xcen[j]))
 	    {
-	      Error ("wind_check: www[%d].xcen[%d] %e\n", i, j,
+	      Error ("wind_check:sane_check www[%d].xcen[%d] %e\n", i, j,
 		     www[i].xcen[j]);
 	    }
 	  if (sane_check (www[i].v[j]))
 	    {
-	      Error ("wind_check: www[%d].v[%d] %e\n", i, j, www[i].v[j]);
+	      Error ("wind_check:sane_check www[%d].v[%d] %e\n", i, j, www[i].v[j]);
 	    }
 	}
       for (j = 0; j < 3; j++)
@@ -218,7 +218,7 @@ wind_check (www, n)
 	    {
 	      if (sane_check (www[i].v_grad[j][k]))
 		{
-		  Error ("wind_check: www[%d].v_grad[%d][%d] %e\n", i, j, k,
+		  Error ("wind_check:sane_check www[%d].v_grad[%d][%d] %e\n", i, j, k,
 			 www[i].v_grad[j][k]);
 		}
 	    }
@@ -277,7 +277,7 @@ model_velocity (x, v)
       if (sane_check (v[0]) || sane_check (v[1]) || sane_check (v[2]))
 	{
 	  Error
-	    ("wind2d: On return from thierry_velocity: x %f %f %f v %f %f %f\n",
+	    ("wind2d:sane_check On return from thierry_velocity: x %f %f %f v %f %f %f\n",
 	     x[0], x[1], x[2], v[0], v[1], v[2]);
 	}
 
@@ -343,7 +343,7 @@ model_vgrad (x, v_grad)
 
       if (sane_check (v1[0]) || sane_check (v1[1]) || sane_check (v1[2]))
 	{
-	  Error ("model_vgrad: dx %f %f %f v0 %f %f %f\n", dx[0], dx[1],
+	  Error ("model_vgrad:sane_check dx %f %f %f v0 %f %f %f\n", dx[0], dx[1],
 		 dx[2], v1[0], v1[1], v1[2]);
 	}
 
