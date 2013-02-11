@@ -430,6 +430,7 @@ double ds_to_torus(PhotPtr pp);
 double compute_zeta(double temp, int nion, int ilow, int ihi, double interpfrac, double f1, double f2, int mode);
 /* dielectronic.c */
 double compute_dr_coeffs(double temp);
+double total_dr(WindPtr one, double t_e);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
@@ -440,6 +441,8 @@ int lum_summary(WindPtr w, char rootname[], int ochoice);
 int photo_summary(WindPtr w, char rootname[], int ochoice);
 int recomb_summary(WindPtr w, char rootname[], int ochoice);
 int electron_summary(WindPtr w, char rootname[], int ochoice);
+int rho_summary(WindPtr w, char rootname[], int ochoice);
+int plasma_cell(WindPtr w, char rootname[], int ochoice);
 int freq_summary(WindPtr w, char rootname[], int ochoice);
 int nphot_summary(WindPtr w, char rootname[], int ochoice);
 int temp_summary(WindPtr w, char rootname[], int ochoice);

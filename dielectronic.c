@@ -69,7 +69,7 @@ temperature split array, and then sample it. Lets see...
                                                                                                    
                                                                                                    
   History:
-	02jul	ksl	Removed all references to the wind cell.
+	11sep	nsh	Written as part of python70 effort to incorporate DR.
                                                                                                    
  ************************************************************************/
 
@@ -98,4 +98,66 @@ for (n=0;n<nions;n++)
 		}
 	}
 return (0);
+}
+
+
+/**************************************************************************
+                    Space Telescope Science Institute
+                                                                                                   
+                                                                                                   
+  Synopsis: total_dr calculates the total luminosity from DR. 
+                                                                                                   
+  Description:
+                                                                                                   
+  Arguments:  
+	pointer to grid cell we are interested in	
+	temperature
+	
+                                                                                                   
+                                                                                                   
+  Returns:
+  	the total luminosity of this cell due to dielectronic recombinaions
+                                                                                                   
+  Notes:
+ 
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  History:
+	11sep	nsh	Written as part of python70 effort to incorporate DR. Initally we are just doing a ROM calculation by multiplying the volumetric rate be the ion density, the electron density and mean eelectron energy.
+                                                                                                   
+ ************************************************************************/
+
+   double total_dr(one,t_e)
+	WindPtr one; 	// Pointer to the current wind cell - we need the cell volume, this is not in the plasma structure
+	double t_e;   	//Current electron temperature of the cell
+{
+	double x;   	//The returned variable
+	double meanv, meanke;  //The mean velocity and kinetic energy of electrons in the cell
+	int nplasma; 	//The cell number in the plasma array
+	PlasmaPtr xplasma;   //pointer to the relevant cell in the plasma structure
+	int n;  //loop pointers
+
+
+	nplasma=one->nplasma;  //Get the correct plasma cell related to this wind cell
+	xplasma=&plasmamain[nplasma];   //copy the plasma structure for that cell to local variable
+	x=0; //zero the luminosity
+
+	meanv=pow((2*BOLTZMANN*t_e/MELEC),0.5);
+	meanke=0.5*MELEC*meanv*meanv;
+
+for (n=0;n<nions;n++)
+	{	
+	if (ion[n].drflag==0)   //We have no DR for this ion.
+		{
+		dr_coeffs[n]=0.0;
+//		printf ("DDDDDD ion %i has no DR coefficients\n",n);
+		}
+	else
+		{	
+		x += one->vol * xplasma->ne * xplasma->density[n] * dr_coeffs[n] * meanke;
+//		printf ("DDDDDD ion %i has DR lum of %e\n",n, one->vol * xplasma->ne * xplasma->density[n] * dr_coeffs[n] * meanke);
+		}
+	}
+return (x);
 }

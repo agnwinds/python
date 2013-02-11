@@ -1316,16 +1316,8 @@ if (p->np==46327) printf ("Here we are in scatter, geo.rt_mode=%i, and nres=%i\n
     {
       /*  It was either an electron scatter, bf emission or ff emission so the  distribution is isotropic, 
          or it was a line photon but we want isotropic scattering anyway.  */
-if (p->np==46327) {
-	  vwind_xyz (p, v);
-	printf ("Wind velocity at this point= %e,%e,%e\n",v[0],v[1],v[2]);
-	printf ("Incoming photon velocity= %e,%e,%e\n",p->lmn[0],p->lmn[1],p->lmn[2]);
-	printf ("Incoming relative velocity= %e\n",dot (v, p->lmn));
-        }
       randvec (z_prime, 1.0);	/* Get a new direction for the photon */
       stuff_v (z_prime, p->lmn);
-
-if (p->np==46327) printf ("We have a new velocity %e,%e,%e\n",p->lmn[0],p->lmn[1],p->lmn[2]);
     }
 
   else if (geo.scatter_mode == 1)
@@ -1363,10 +1355,7 @@ if (p->np==46327) printf ("We have a new velocity %e,%e,%e\n",p->lmn[0],p->lmn[1
   //stuff_v (z_prime, p->lmn);
 
   vwind_xyz (p, v);		/* Get the velocity vector for the wind */
-if (p->np==46327) printf ("wind velocity at this point is %e,%e,%e (mod=%e)\n",v[0],v[1],v[2],sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]));
-if (p->np==46327) printf ("Outgoing relative velocity= %e\n",dot (v, p->lmn));
-  doppler (&pold, p, v, *nres);	/* Get the final frequency of the photon */
-if (p->np==46327) printf ("after doppler shifting, new frequency is %e and weight is %e this is scatter number %i\n",p->freq,p->w,p->nscat);
+
 
 /* We estimate velocities by interpolating between the velocities at the edges of the cell based
 on the photon direction.  We have now changed the direction of the photon, and so we may not

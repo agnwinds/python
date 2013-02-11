@@ -26,6 +26,7 @@ History:
 			topbase modifications made.
 	01nov	ksl	Implement pdf functionality for line luminosity spped up
         11Aug   nsh     Changes to total_emission and wind_luminosity to allow compton heating to be computed
+	11Oct	nsh	Compton heating removed from total_emission, DR cooling added to wind_luminosity
  
 **************************************************************/
 
@@ -62,6 +63,7 @@ History:
 			to remove the pointer call.  Ultimately rewrite
 			using plasma structure alone.
 	11aug	nsh	70 Modifications made to incorporate compton cooling
+        11sep   nsh     70 Modifications in incorporate DR cooling (very approximate at the moment)
  
 **************************************************************/
 
@@ -69,13 +71,14 @@ double
 wind_luminosity (f1, f2)
      double f1, f2;		/* freqmin and freqmax */
 {
-  double lum, lum_lines, lum_fb, lum_ff, lum_comp; //1108 NSH Added a new variable for compton cooling
+  double lum, lum_lines, lum_fb, lum_ff, lum_comp, lum_dr; //1108 NSH Added a new variable for compton cooling
+//1109 NSH Added a new variable for dielectronic cooling
   int n;
   double x;
   int nplasma;
 
 
-  lum = lum_lines = lum_fb = lum_ff = lum_comp = 0; //1108 NSH Zero the new counter
+  lum = lum_lines = lum_fb = lum_ff = lum_comp = lum_dr = 0; //1108 NSH Zero the new counter 1109 including DR counter
   for (n = 0; n < NDIM2; n++)
     {
       if (wmain[n].vol > 0.0)
@@ -86,6 +89,7 @@ wind_luminosity (f1, f2)
 	  lum_fb += plasmamain[nplasma].lum_fb;
 	  lum_ff += plasmamain[nplasma].lum_ff;
 	  lum_comp += plasmamain[nplasma].lum_comp;  //1108 NSH Increment the new counter by the compton luminosity for that cell.
+          lum_dr += plasmamain[nplasma].lum_dr; //1109 NSH Increment the new counter by the DR luminosity for the cell.
 	  if (x < 0)
 	    mytrap ();
 	  if (recipes_error != 0)
@@ -102,6 +106,7 @@ wind_luminosity (f1, f2)
   geo.lum_fb = lum_fb;
   geo.lum_ff = lum_ff;
   geo.lum_comp = lum_comp; //1108 NSH The total compton luminosity of the wind is stored in the geo structure
+  geo.lum_dr = lum_dr; //1109 NSH the total DR luminosity of the wind is stored in the geo structure
   return (lum);
 }
 
@@ -174,7 +179,7 @@ total_emission (one, f1, f2)
   if (f2 < f1)
     {
       xplasma->lum_rad = xplasma->lum_lines = xplasma->lum_ff =
-	xplasma->lum_fb = xplasma->lum_comp = 0;    //NSH 1108 Zero the new lum_comp variable
+	xplasma->lum_fb = 0;    //NSH 1108 Zero the new lum_comp variable NSH 1101 - removed
     }
   else
     {
@@ -209,8 +214,12 @@ total_emission (one, f1, f2)
 
 	}
       /* NSH 1108 - This line calls the function total_comp which returns the compton luminosity for the cell
-	this is then added to lum_rad, the total luminosity of the cell */
-      xplasma->lum_rad += xplasma->lum_comp = total_comp (one, t_e);
+	this is then added to lum_rad, the total luminosity of the cell */  
+      /* NSH 1110 - Ths line has now been commented out. It was adding the compton luminosity to the lum_rad 
+       variable. This was then generating line photons to fill the compton luminosity. We need to do something
+        better, but at the moment, simply removing this line, and putting the calculation of compton luminosity 
+       into calc_te with the adiabatic cooling and the new DR cooling is the way to make things a little more stable */
+ //OLD     xplasma->lum_rad += xplasma->lum_comp = total_comp (one, t_e); 
     }
 
   return (xplasma->lum_rad);

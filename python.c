@@ -460,13 +460,15 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 /* Set up frequency bands in which to record the frequency */
 
 /* At present set up a single energy band for 2 - 10 keV */
-nxfreq=5;   //at the moment, we have 6 frequencies defining 5 bands. In effect, the bands run from band zero to band nxfreq-1
-xfreq[0]=13.6/HEV;
-xfreq[1]=54.42/HEV;
-xfreq[2]=392./HEV;
-xfreq[3]=739./HEV;
-xfreq[4]=2000/HEV;
-xfreq[5]=10000/HEV;
+nxfreq=7;   //NSH 70g - bands set up to match the bands we are currently using in the.pf files. This should probably end up tied together in the long run!
+xfreq[0]=1.0/HEV;
+xfreq[1]=13.6/HEV;
+xfreq[2]=54.42/HEV;
+xfreq[3]=392./HEV;
+xfreq[4]=739./HEV;
+xfreq[5]=2000/HEV;
+xfreq[6]=10000/HEV;
+xfreq[7]=50000/HEV;
 
 /* 1108 NSH Set up a parameter to tell the power law code what estimator band to use */
 nx4power=0; 

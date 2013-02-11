@@ -270,6 +270,8 @@ History:
 			is likelely that this entire routine
 			will ultimatetely be replaced because
 			everything here should only be in the wind
+        11 sep  nsh     70f: Added lines to track which of the convergence criteria
+			in each cell was being met
 **************************************************************/
 int
 convergence (xplasma)
@@ -279,16 +281,17 @@ convergence (xplasma)
   double epsilon;
 
   trcheck = techeck = hccheck = converging = 0;
+  xplasma->trcheck = xplasma->techeck = xplasma->hccheck = 0; //NSH 70g - zero the global variables
   epsilon = 0.05;
 
   if ((xplasma->converge_t_r =
        fabs (xplasma->t_r_old - xplasma->t_r) / (xplasma->t_r_old +
 						 xplasma->t_r)) > epsilon)
-    trcheck = 1;
+    xplasma->trcheck = trcheck = 1;
   if ((xplasma->converge_t_e =
        fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old +
 						 xplasma->t_e)) > epsilon)
-    techeck = 1;
+    xplasma->techeck = techeck = 1;
 
 //110919 nsh modified line below to inlcude the adiabatic cooling in the check that heating equals cooling
 
@@ -296,7 +299,7 @@ convergence (xplasma)
        fabs (xplasma->heat_tot - (xplasma->lum_rad + xplasma->lum_adiabatic )) / (xplasma->heat_tot +
 						      xplasma->lum_rad + xplasma->lum_adiabatic)) >
       epsilon)
-    hccheck = 1;
+    xplasma->hccheck = hccheck = 1;
 
   xplasma->converge_whole = whole_check = trcheck + techeck + hccheck;
 
@@ -347,21 +350,29 @@ History:
 			Whether something is in the wind or not is
 			now totally determeined by the volume.
         06may	ksl	57+ -- Now using plasma structure
+        11sep   nsh     70e added in lines to write out the split of temperature and luminosity convergence
 **************************************************************/
 int
 check_convergence ()
 {
   int n;
   int nconverge, nconverging, ntot;
+  int nte,ntr,nhc;  //NSH 70g - three new counters for the different convergence criteria
   double xconverge, xconverging;
 
   nconverge = nconverging = ntot = 0;
 
-  for (n = 0; n < NPLASMA; n++)
+   for (n = 0; n < NPLASMA; n++)
     {
       ntot++;
       if (plasmamain[n].converge_whole == 0)
 	nconverge++;
+      if (plasmamain[n].trcheck == 0)  //NSH 70g - count up the three individual convergence criteria
+        ntr++;
+      if (plasmamain[n].techeck == 0)
+        nte++;
+      if (plasmamain[n].hccheck == 0)
+        nhc++;
       if (plasmamain[n].converging == 0)
 	nconverging++;
 
@@ -372,6 +383,8 @@ check_convergence ()
   Log
     ("!!Check_converging: %4d (%.3f) converged and %4d (%.3f) converging of %d cells\n",
      nconverge, xconverge, nconverging, xconverging, ntot);
+  Log
+    ("!!Check_convergence_breakdown: t_r %4d t_e %4d hc %4d\n",ntr,nte,nhc);  //NSH 70g split of what is converging
   Log
     ("Summary  convergence %4d %.3f  %4d  %.3f  %d  #  n_converged fraction_converged  converging fraction_converging total cells\n",
      nconverge, xconverge, nconverging, xconverging, ntot);
@@ -641,9 +654,21 @@ zero_emit (t)
  xxxplasma->lum_adiabatic=adiabatic_cooling(&wmain[xxxplasma->nwind],t);
 
 
-  difference =
+ /* difference =
     xxxplasma->heat_tot - xxxplasma->lum_adiabatic -
-    total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);
+    total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG); */
+
+
+ /* 70g - nsh adding this line in next to calculate dielectronic recombination cooling without generating photons */
+	compute_dr_coeffs(t);
+      xxxplasma->lum_dr = total_dr (&wmain[xxxplasma->nwind],t);
+
+/* 70g compton cooling calculated here to avoid generating photons */
+      xxxplasma->lum_comp = total_comp (&wmain[xxxplasma->nwind],t);
+
+  difference =
+    xxxplasma->heat_tot - xxxplasma->lum_adiabatic - xxxplasma->lum_dr - xxxplasma->lum_comp -
+    total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);   //NSH 1110 - total emission no longer computes compton.
 
 
   return (difference);

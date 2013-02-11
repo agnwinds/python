@@ -275,6 +275,7 @@ struct geometry
   double lum_agn;   /*The total luminosity of the AGN or point source at the center*/
   double lum_ff, lum_fb, lum_lines;	/* The luminosity of the wind as a result of ff, fb, and line radiation */
   double lum_comp; /*1108 NSH The luminosity of the wind as a result of compton cooling */
+  double lum_dr; /*1109 NSH The luminosity of the wind due to dielectronic recombination */
   double f_tot, f_star, f_disk, f_bl, f_agn, f_wind;	/* The integrated specific L between a freq min and max which are
 						   used to establish the fraction of photons of various types */
   
@@ -550,6 +551,7 @@ typedef struct plasma {
   int nxtot[NXBANDS];  /* 1108 NSH the total number of photon passages in frequency bands */
   double lum_lines, lum_ff, lum_adiabatic;
   double lum_comp ; /* 1108 NSH The compton luminosity of the cell */
+  double lum_dr;  /* 1109 NSH The dielectronic recombination luminosity of the cell */
   double lum_fb, lum_z;		/*fb luminosity & fb of metals metals */
   double lum_rad, lum_rad_old;	/* The specfic radiative luminosity in frequencies defined by freqmin
 				   and freqmax.  This will depend on the last call to total_emission */
@@ -559,6 +561,7 @@ typedef struct plasma {
   double pdf_y[LPDF];		/* Where the pdf is stored -- values between 0 and 1 */
   double gain;			/* The gain being used in interations of the structure */
   double converge_t_r, converge_t_e, converge_hc;	/* Three measures of whether the program believes the grid is converged */
+  int trcheck,techeck,hccheck; /* NSH the binary versionf of the convergence checks used to calculate converge_whole */ 
   int converge_whole, converging;	/* converge_whole=0 if subroutine convergence feels point is converged, converging is an
 				   indicator of whether the program thought the cell is on the way to convergence 0 implies converging */
   double gamma_inshl[NAUGER]; /*MC estimator that will record the inner shell ionization rate - very similar to macro atom-style estimators */

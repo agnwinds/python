@@ -317,11 +317,14 @@ WindPtr (w);
 
   asum = wind_luminosity (0.0, VERY_BIG);
    Log
-    ("!!wind_update:  Absorbed flux   %8.2e  (photo %8.2e ff %8.2e compton %8.2e lines %8.2e)\n",
+    ("!!wind_update: Absorbed flux    %8.2e  (photo %8.2e ff %8.2e compton %8.2e lines %8.2e)\n",
      xsum, psum, fsum, csum, lsum); //1108 NSH Added commands to report compton heating
   Log
-    ("!!wind_update: Wind luminosity  %8.2e (recomb %8.2e ff %8.2e compton %8.2e lines %8.2e) after update\n",
-     asum, geo.lum_fb, geo.lum_ff, geo.lum_comp, geo.lum_lines); //1108 NSH added commands to report compton cooling
+    ("!!wind_update: Wind luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n",
+     asum, geo.lum_fb, geo.lum_ff, geo.lum_lines); //1108 NSH added commands to report compton cooling 1110 removed, this line now just reports cooling mechanisms that will generate photons
+  Log
+    ("!!wind_update: Wind cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e lines %8.2e) after update\n",
+     asum+geo.lum_comp+geo.lum_dr, geo.lum_fb, geo.lum_ff, geo.lum_comp, geo.lum_dr, geo.lum_lines); //1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons.
 
   /* Print out some diagnositics of the changes in the wind update */
   t_r_ave_old /= iave;
