@@ -702,6 +702,11 @@ int n;
 float r;
   for (n = 0; n < NPLASMA; n++)
 {
+r=sqrt((wmain[plasmamain[n].nwind].xcen[0]*wmain[plasmamain[n].nwind].xcen[0]+wmain[plasmamain[n].nwind].xcen[1]*wmain[plasmamain[n].nwind].xcen[1]+wmain[plasmamain[n].nwind].xcen[2]*wmain[plasmamain[n].nwind].xcen[2]));
+
+      plasmamain[n].ferland_ip=geo.n_ioniz/(4*PI*C*plasmamain[n].rho*rho2nh*(r*r));
+
+     printf ("NSH log(ferland_ip) for cell %i = %e (r=%e nh=%e nioniz=%e)\n",n,log10(plasmamain[n].ferland_ip),r,plasmamain[n].rho*rho2nh,geo.n_ioniz);
 r=sqrt((wmain[plasmamain[n].nwind].x[0]*wmain[plasmamain[n].nwind].x[0]+wmain[plasmamain[n].nwind].x[1]*wmain[plasmamain[n].nwind].x[1]+wmain[plasmamain[n].nwind].x[2]*wmain[plasmamain[n].nwind].x[2]));
 
       plasmamain[n].ferland_ip=geo.n_ioniz/(4*PI*C*plasmamain[n].rho*rho2nh*(r*r));

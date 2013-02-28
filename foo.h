@@ -420,6 +420,7 @@ int get_shell_wind_params(void);
 double kappa_comp(PlasmaPtr xplasma, double freq);
 double kappa_ind_comp(PlasmaPtr xplasma, double freq, double ds, double w);
 double total_comp(WindPtr one, double t_e);
+double klein_nishina(double nu);
 /* torus.c */
 double torus_rho(double x[]);
 double ds_to_cylinder(double rho, struct photon *p);
@@ -488,6 +489,7 @@ int dvds_summary(WindPtr w, char rootname[], int ochoice);
 int inner_shell_summary(WindPtr w, char rootname[], int ochoice);
 int IP_summary(WindPtr w, char rootname[], int ochoice);
 int alpha_summary(WindPtr w, char rootname[], int ochoice);
+int J_summary(WindPtr w, char rootname[], int ochoice);
 int phot_split(WindPtr w, char rootname[], int ochoice);
 int thompson(WindPtr w, char rootname[], int ochoice);
 int nscat_split(WindPtr w, char rootname[], int ochoice);
