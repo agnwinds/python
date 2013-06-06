@@ -100,7 +100,7 @@ feb 2013 - nsh - approximate KN cross section replaced by correct value
 	double J,expo; //The estimated intensity in the cell
 	int i;
 //	J=(4*PI*w*ds)/(C*xplasma->vol); //Calcuate the intensity NSH This works for a thin shell... Why? Dont know.
-
+	J=0.0; /* NSH 130605 to remove o3 compile error */
 	if (geo.ioniz_mode==5 || geo.ioniz_mode==7) /*If we are using power law ionization, use PL estimators*/
 		{
 		for (i=0 ; i<geo.nxfreq ; i++)  
@@ -223,12 +223,10 @@ feb 2013 - nsh - approximate KN cross section replaced by correct value
 	double x1, x2, x3, x4;  //variables to store intermediate results.
 	double kn; // the final cross section
 
+	kn=THOMPSON; /* NSH 130605 to remove o3 compile error */
+	x1=x2=x3=x4=0.0; /* NSH 130605 to remove o3 compile error */
 	x=(H*nu)/(MELEC*C*C);
-	if (x < 0.0001)	
-		{
-		kn=THOMPSON;
-		}
-	else
+	if (x > 0.0001)	
 		{
 		x1=1.+x;
 		x2=1.+(2.*x);

@@ -835,7 +835,10 @@ gaunt_ff (gsquared)
   double log_g2;
   double delta; //The log difference between our G2 and the one in the table
 
-log_g2=log10(gsquared); //The data is in log format
+  delta=0.0; /* NSH 130605 to remove o3 compile error */
+  index=0; /* NSH 130605 to remove o3 compile error */
+
+  log_g2=log10(gsquared); //The data is in log format
 
 	if (log_g2<gaunt_total[0].log_gsqrd || log_g2>gaunt_total[gaunt_n_gsqrd-1].log_gsqrd)
 		{

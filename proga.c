@@ -174,7 +174,7 @@ get_proga ()
 
   if (proga_ptr == NULL)
     {
-      printf
+     Error
 	("There is a problem in allocating memory for the proga structure\n");
       exit (0);
     }
@@ -182,7 +182,7 @@ get_proga ()
   rdstr ("Proga_radii_file", rfile);
   if ((fptr = fopen (rfile, "r")) == NULL)
     {
-      printf ("Could not open %s\n", rfile);
+      Error ("Could not open %s\n", rfile);
       exit (0);
     }
 
@@ -191,19 +191,18 @@ get_proga ()
     {
       sscanf (aline, "%d %*d %lf", &i, &r); /*NSH 130322 - minor mod here - it is actually the second value which is the centre of the cell, where the data is defined so we ignore the first*/
       proga_r[i] = r;
- //     printf ("PROGA read in radius=%e\n",r);
       if (i > iproga_r)
 	iproga_r = i;
     }
 
   iproga_r = i;
-  printf ("Read %d values from grid_r.dat\n", i);
+  Log ("Read %d values from grid_r.dat\n", i);
   fclose (fptr);
 
   rdstr ("Proga_theta_file", thetafile);
   if ((fptr = fopen (thetafile, "r")) == NULL)
     {
-      printf ("Could not open %s\n", thetafile);
+      Error ("Could not open %s\n", thetafile);
       exit (0);
     }
 
@@ -215,6 +214,7 @@ This allows one to disregard theta cells which contain thdisk in Daniels model *
 
 
   i = 0;
+  j_theta_disk=0; /* NSH 130605 to remove o3 compile error */
   while (fgets (aline, LINE, fptr) != NULL)
     {
       sscanf (aline, "%d %*d %lf", &i, &theta); /*NSH 130322 - minor mod here - it is actually the second value which is the centre of the cell, where the data is defined so we ignore the first */
@@ -222,20 +222,20 @@ This allows one to disregard theta cells which contain thdisk in Daniels model *
       if (proga_theta[i] > theta_disk && proga_theta[i-1] < theta_disk)
 		{
 		j_theta_disk=i-1;
-		printf ("current theta - %f > theta_disk - %f so setting j_theta_disk=%i\n",theta,theta_disk,j_theta_disk);
+		Log ("current theta - %f > theta_disk - %f so setting j_theta_disk=%i\n",theta,theta_disk,j_theta_disk);
       i++;
 		}
     }
 
   iproga_theta = i;
-  printf ("Read %d values from %s\n", i, thetafile);
+  Log ("Read %d values from %s\n", i, thetafile);
   fclose (fptr);
 
 
   rdstr ("Proga_data_file", datafile);
   if ((fptr = fopen (datafile, "r")) == NULL)
     {
-      printf ("Could not open %s\n", datafile);
+      Error ("Could not open %s\n", datafile);
       exit (0);
     }
 
@@ -269,7 +269,7 @@ This allows one to disregard theta cells which contain thdisk in Daniels model *
 	}
     }
 
-  printf ("Read %d values from model %s\n", k, datafile);
+  Log ("Read %d values from model %s\n", k, datafile);
   k = 82 * MAXPROGA + 19;
 
 	

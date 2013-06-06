@@ -781,7 +781,6 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 		"Rad_type_for_bl(0=bb,1=models)_to_make_wind",
 		&geo.bl_ion_spectype);
 
-  geo.agn_ion_spectype = SPECTYPE_POW;
   get_spectype (geo.agn_radiation,
 		"Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table)_to_make_wind",
 		&geo.agn_ion_spectype);
@@ -1248,7 +1247,7 @@ set defudge slightly differently for the shell wind.*/
 
       geo.agn_spectype = SPECTYPE_POW;
       get_spectype (geo.agn_radiation,
-		    "Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table)_in_final_spectrum",
+		    "Rad_type_for_agn(3=power_law,4=cloudy_table)_in_final_spectrum",
 		    &geo.agn_spectype);
 
 
@@ -2005,6 +2004,7 @@ init_geo ()
   geo.star_ion_spectype = geo.star_spectype
     = geo.disk_ion_spectype = geo.disk_spectype
     = geo.bl_ion_spectype = geo.bl_spectype = SPECTYPE_BB;
+  geo.agn_ion_spectype = SPECTYPE_POW; // 130605 - nsh - moved from python.c
 
   geo.log_linear = 0;		/* Set intervals to be logarithmic */
 

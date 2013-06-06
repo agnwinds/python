@@ -103,6 +103,9 @@ compute_zeta (temp, nion, mode)
 #define MAX_FUDGE  10.
 //#define MIN_TEMP         100. //Put into python.h
 
+      zeta=0.0; /* NSH 130605 to remove o3 compile error */
+
+
       /* now get the right place in the ground_frac tables  CK */
       dummy = temp / TMIN - 1.;
       ilow = dummy;		/* have now truncated to integer below */

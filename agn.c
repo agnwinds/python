@@ -170,7 +170,9 @@ emittance_bpow (freqmin, freqmax,lum,alpha)
 
 #define   XFREQMIN  4.84e17
 #define   XFREQMAX  2.42e18
-
+  f1=freqmin;/* NSH - 130506 added to reomve 03 compile errors */
+  f2=freqmax;/* NSH - 130506 added to reomve 03 compile errors */
+  e1=e2=e3=0.0; /* NSH - 130506 added to reomve 03 compile errors */
   /* first we need to calculate the constant for the 2-10 kev power law function */
   constant =
     lum / (((pow (XFREQMAX, alpha + 1.)) - pow (XFREQMIN, alpha + 1.0)) /
@@ -309,6 +311,10 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
   double plaw ();
   int randvec (), randvcos ();
   double zdisk ();
+
+  t=alpha; /* NSH 130605, this is a slightly odd statmenent, put in to avoid 03 compilation errors, but stemming from the odd behaviour that one can give the AGN a themal spectral type, and the alpha parameter is then used to transmit the temperature. */
+
+
   if ((iend = istart + nphot) > NPHOT)
     {
       Error ("photo_gen_agn: iend %d > NPHOT %d\n", iend, NPHOT);
@@ -353,7 +359,6 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
 
       if (spectype == SPECTYPE_BB)
 	{
-	  t = alpha;
 	  p[i].freq = planck (t, freqmin, freqmax);
 	}
       else if (spectype == SPECTYPE_UNIFORM)

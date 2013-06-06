@@ -50,7 +50,6 @@ int
 spectral_estimators (xplasma)
      PlasmaPtr xplasma;
 {
-  int ireturn;
   double pl_alpha_min, pl_alpha_max, pl_alpha_temp, pl_w_temp, j;
   double exp_temp_min,exp_temp_max; /*120817 the 'temperature' range we are going to search for an effective temperature for the exponential model */
   double  exp_temp_temp, exp_w_temp; /*120817 the temporary values for temperature and weight of the exponential model */  
@@ -232,7 +231,7 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 
  
 
-  return (ireturn);
+  return (0);
 
 }
 

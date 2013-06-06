@@ -92,7 +92,7 @@ variable_temperature (xplasma, mode)
   double xnew, xsaha;
   double theta, x;
   double get_ne();
-  double t, t_e,t_r, xtemp, nh, xne, xxne, www;
+  double t_e,t_r, xtemp, nh, xne, xxne, www;
   double a,b;
   double newden[NIONS]; //NSH 121217 - recoded so density is computed in a temperary array
  // double xip; //ionzation potential of lower ion.
@@ -175,6 +175,7 @@ variable_temperature (xplasma, mode)
 
       	for (nion = first + 1; nion < last; nion++)  /*nion is the upper ion of the pair, last is one above the actual last ion, so the last ion to be considered is last-1 */
 		{
+		tot_fudge=0.0; /* NSH 130605 to remove o3 compile error */
 		/* now we need to work out the correct temperature to use */
 		xip=ion[nion-1].ip;  //the IP is that from the lower to the upper of the pair
 		xtemp=zbrent(temp_func,MIN_TEMP,1e8,10);  //work out correct temperature
@@ -218,6 +219,11 @@ variable_temperature (xplasma, mode)
 			pi_fudge = pl_correct_2 (xtemp, nion);
 			gs_fudge = compute_zeta (t_e, nion -1, 2); /* Calculate the ground state recombination rate correction factor based on the cells true electron temperature.  */
 			tot_fudge=pi_fudge*recomb_fudge*gs_fudge*t_e_part_correct;
+			}
+		else
+			{
+			Error ("variable_temperature: unknown mode %d\n",mode);
+			exit (0);
 			}
 
 		/* apply correction factors */
@@ -272,7 +278,7 @@ variable_temperature (xplasma, mode)
     if (niterate == MAXITERATIONS)
     	{
       	Error ("variable_temperature: failed to converge t %.2g nh %.2g xnew %.2g\n",
-	     t, nh, xnew);
+	     t_e, nh, xnew);
       	Error ("variable_temperature: xxne %e theta %e\n", xxne, theta);
       	return (-1);
     	}

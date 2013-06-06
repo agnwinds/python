@@ -133,7 +133,7 @@ radiation (p, ds)
   double weight_of_packet, y;
   int ii,jj;  
 
-
+  ii=jj=0; /* NSH 130605 to remove o3 compile error */
   one = &wmain[p->grid];	/* So one is the grid cell of interest */
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "radiation");

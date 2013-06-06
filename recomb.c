@@ -1336,6 +1336,8 @@ total_rrate (nion,T)
   double  rrA, rrB, rrT0, rrT1, rrC, rrT2;  //The parameters
   double term1, term2, term3; //Some temporary parameters to make calculation simpler
 
+ 
+  rate=0.0; /* NSH 130605 to remove o3 compile error */
 
   if (ion[nion].total_rrflag != 1)
 	{
@@ -1424,6 +1426,9 @@ badnell_gs_rr (nion,T)
 	double rate,drdt,dt;
 	int i,imin,imax;
 	double rates[BAD_GS_RR_PARAMS],temps[BAD_GS_RR_PARAMS];
+
+
+  imin=imax=0; /* NSH 130605 to remove o3 compile error */
 
 
   if (ion[nion].bad_gs_rr_t_flag != 1 && ion[nion].bad_gs_rr_r_flag != 1 )
@@ -1524,6 +1529,9 @@ milne_gs_rr (nion,T)
 	double rate;
 	int ntmin,nvmin,n;
 	double fthresh,fmax,dnu;
+
+	rate=0.0; /* NSH 130605 to remove o3 compile error */
+	
 
 			fbt=T;
 			fbfr = 2;

@@ -3,20 +3,21 @@ README
 ***
 =========
 
-#Python 75a
+THIS IS JM'S BRANCH
 
-* Precursor - python_75
-* This is mainly improvements to the proga routines, and a couple of other little fixes
-Changes this version
-* bb.c - removed an unused variable x
-* proga.c - 
-added some comments, 
-corrected a minor bug so that the values of density etc are read in from the column that represent the centre of a zeus cell,  
- Added a little routine (proga_temp) which uses the internal energy to compute the temperature of a cell - very useful as a better initial guess and also for other tests.
-* spectra.c - corrected curly brackets to actually (finally) zero the log spectra
-* variable_temperature.c - commented out a line defining a currently unused variable.
-* wind.c - added a test to try and avoid the case where some architcetures (iridis) take a very long time to compute if a photon is in the wind when geo.wind_thetamax is equal to pi/2. Now, if this is close to thetamax, (within 1e-6 radians), the photon is assumed to be in the wind, and the test involving tan(thetamax) is not carried out.
-* wind2d.c - added code to use the zeus temperature as an initial guess for the wind if we are reading in a proga model
+HE IS TESTING GIT!
+
+
+#Python 74b4
+
+This is the README file for Python74b4. 
+
+* Precursor is python_74b1 
+* this papers over the bug NSH121214_2 by increasing DFUDGE to a larger value for large models.
+changes this version
+* python.c - dfudge now set to 1e5cm or rmax/1e10, whichever is larger.
+
+Note that the proper GitHub site will contain versions 68-74b1 of python as well- but this is just a test version for the moment.
 
 ***
 ==========
