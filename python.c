@@ -171,6 +171,10 @@ History:
 			that we should make NPHOT a long integer- at the moment I have not done 
 			this and simply comverted to double before calling define_phot (otherwise 
 			I believe rdint would have to be redone for long integers).
+	1304	ksl	75 rewrote the fix above to use a long, instead of double.  
+			This has plenty of range.  Notge that there is no need to make NPHOT
+			a long, as suggested above.  We do not expect it to exceed 2e9,
+			although some kind of error check might be reasonble.
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -197,7 +201,8 @@ main (argc, argv)
 
   int i, wcycles, pcycles;
   double freqmin, freqmax;
-  double swavemin, swavemax, renorm, nphot_to_define;
+  double swavemin, swavemax, renorm; 
+  long nphot_to_define;
   int n, nangles, photons_per_cycle, subcycles;
   int iwind;
 
@@ -730,7 +735,6 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
   else				/* If it is an AGN */
     {
       geo.star_radiation = 0;	// 70b - AGN do not have a star at the center */
-      //OLD rdint ("Star_radiation(y=1)", &geo.star_radiation);
       rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
       geo.bl_radiation = 0;
       rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
@@ -1484,7 +1488,7 @@ run -- 07jul -- ksl
  *
  * */
 
-printf ("NSH GOING TO DISK_INIT\n");
+
   disk_init (geo.rstar, geo.diskrad, geo.mstar, geo.disk_mdot, freqmin,
 	     freqmax, 0, &geo.f_disk);
 
@@ -1503,6 +1507,7 @@ printf ("NSH GOING TO DISK_INIT\n");
 
   xsignal (root, "%-20s Finished initialization for %s\n", "NOK", root);
   check_time (root);
+
 
 /* XXXX - THE CALCULATION OF THE IONIZATION OF THE WIND */
 
@@ -1535,7 +1540,7 @@ printf ("NSH GOING TO DISK_INIT\n");
 
       Log ("!!Python: Begining cycle %d of %d for defining wind\n",
 	   geo.wcycle, wcycles);
-
+      Log_flush();  /*NSH June 13 Added call to flush logfile */
 
       /* Initialize all of the arrays, etc, that need initialization for each cycle
        */
@@ -1592,7 +1597,12 @@ printf ("NSH GOING TO DISK_INIT\n");
 
 
 	  /* JM 130306 need to convert photons_per_cycle to double precision for define_phot */
-          nphot_to_define=(double) photons_per_cycle;
+	  /* ksl 130410 - This is needed here not because we expect photons per cycle to 
+	   * exceed the size of an integer, but because of the call to define phot in the
+	   * spectrum cyecle, which can exceed this
+	   */
+
+          nphot_to_define=(long) photons_per_cycle;
 
 	  define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
 
@@ -1612,7 +1622,7 @@ printf ("NSH GOING TO DISK_INIT\n");
 	  Log
 	    ("!!python: Total photon luminosity before transphot %18.12e\n",
 	     zz);
-
+          Log_flush();  /*NSH June 13 Added call to flush logfile */
 	  ztot += zz;		/* Total luminosity in all subcycles, used for calculating disk heating */
 
 	  /* kbf_need determines how many & which bf processes one needs to considere.  It was introduced
@@ -1700,8 +1710,8 @@ printf ("NSH GOING TO DISK_INIT\n");
       phot_gen_sum (photfile, "w");	/* Save info about the way photons are created and absorbed
 					   by the disk */
 
-      /* Save everything after each cycle and prepare for the next cycle */
-      geo.wcycle++;
+      /* Save everything after each cycle and prepare for the next cycle 
+	 JM1304: moved geo.wcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
 
       wind_save (windsavefile);
       Log ("Saved wind structure in %s after cycle %d\n", windsavefile,
@@ -1709,8 +1719,11 @@ printf ("NSH GOING TO DISK_INIT\n");
 
       xsignal (root, "%-20s Finished %d of %d ionization cycle \n", "OK",
 	       geo.wcycle, wcycles);
+      
+      geo.wcycle++;	//Increment ionisation cycles
+      
       check_time (root);
-
+      Log_flush();  /*NSH June 13 Added call to flush logfile */
 
     }				// End of Cycle loop
 
@@ -1798,7 +1811,7 @@ printf ("NSH GOING TO DISK_INIT\n");
 
       Log ("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle,
 	   pcycles);
-
+      Log_flush();  /*NSH June 13 Added call to flush logfile */
       if (!geo.wind_radiation)
 	iwind = -1;		/* Do not generate photons from wind */
       else if (geo.pcycle == 0)
@@ -1815,7 +1828,7 @@ printf ("NSH GOING TO DISK_INIT\n");
 
        */
 
-      nphot_to_define= (double) NPHOT * (double) pcycles; 
+      nphot_to_define= (long) NPHOT * (long) pcycles; 
       define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);
 
       for (icheck = 0; icheck < NPHOT; icheck++)
@@ -1846,13 +1859,16 @@ printf ("NSH GOING TO DISK_INIT\n");
       Log ("Completed spectrum cycle %3d :  The elapsed TIME was %f\n",
 	   geo.pcycle, timer ());
 
-      wind_save (windsavefile);	// This is only needed to update pcycle
+      wind_save (windsavefile);		// This is only needed to update pcycle
       spec_save (specsavefile);
-      geo.pcycle++;		// Increment the spectal cycles
-
+	
+      /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
 
       xsignal (root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK",
 	       geo.pcycle, pcycles);
+
+      geo.pcycle++;		// Increment the spectral cycles
+
       check_time (root);
     }
 
@@ -2232,7 +2248,7 @@ get_spectype (yesno, question, spectype)
                                        Space Telescope Science Institute
 
  Synopsis:
-	The next couple od routines are for recording information about photons/energy impinging
+	The next couple of routines are for recording information about photons/energy impinging
 	on the disk, which is stored in a disk structure called qdisk.
 
 	qdisk_init() just initializes the structure (once the disk structue has been initialized.

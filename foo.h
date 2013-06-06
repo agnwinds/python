@@ -31,7 +31,7 @@ double ds_to_wind(PhotPtr pp);
 int translate_in_wind(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nres);
 int walls(PhotPtr p, PhotPtr pold);
 /* photon_gen.c */
-int define_phot(PhotPtr p, double f1, double f2, double nphot_tot, int ioniz_or_final, int iwind, int freq_sampling);
+int define_phot(PhotPtr p, double f1, double f2, long nphot_tot, int ioniz_or_final, int iwind, int freq_sampling);
 double populate_bands(double f1, double f2, int ioniz_or_final, int iwind, struct xbands *band);
 int xdefine_phot(double f1, double f2, int ioniz_or_final, int iwind);
 int xmake_phot(PhotPtr p, double f1, double f2, int ioniz_or_final, int iwind, double weight, int iphot_start, int nphotons);
@@ -179,6 +179,7 @@ int get_proga_wind_params(void);
 int get_proga(void);
 double proga_velocity(double x[], double v[]);
 double proga_rho(double x[]);
+double proga_temp(double x[]);
 /* corona.c */
 int get_corona_params(void);
 double corona_velocity(double x[], double v[]);

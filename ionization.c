@@ -368,6 +368,7 @@ check_convergence ()
   Log
     ("Summary  convergence %4d %.3f  %4d  %.3f  %d  #  n_converged fraction_converged  converging fraction_converging total cells\n",
      nconverge, xconverge, nconverging, xconverging, ntot);
+  Log_flush();  /*NSH June 13 Added call to flush logfile */
   return (0);
 }
 
