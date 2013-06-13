@@ -1,23 +1,15 @@
 
-README 
+#README 
 ***
 =========
 
-THIS IS JM'S BRANCH
-
-HE IS TESTING GIT!
-
-
 #Python 74b4
 
-This is the README file for Python74b4. 
+This is the README file for Python75c. 
 
-* Precursor is python_74b1 
-* this papers over the bug NSH121214_2 by increasing DFUDGE to a larger value for large models.
-changes this version
-* python.c - dfudge now set to 1e5cm or rmax/1e10, whichever is larger.
-
-Note that the proper GitHub site will contain versions 68-74b1 of python as well- but this is just a test version for the moment.
+* Precursor is python_75b 
+* Minor but important bugfix - moved geo.wcycle++ command to before wind_save at end of ionization cycle.
+* Another very minor bugfix, changed the lines where the dfudge parameter is reported to actually report it correctly!
 
 ***
 ==========

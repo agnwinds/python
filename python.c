@@ -1102,12 +1102,12 @@ set defudge slightly differently for the shell wind.*/
 	if (geo.rmax / 1.e10 < 1e5)
 		{
 		dfudge=1e5;
-		Log ("DFUDGE set to minimum value of %e\n",DFUDGE);
+		Log ("DFUDGE set to minimum value of %e\n",dfudge);
 		}
 	else
 		{
 		dfudge=geo.rmax/1.e10;
-		Log ("DFUDGE set to %e based on geo.rmax\n",DFUDGE);
+		Log ("DFUDGE set to %e based on geo.rmax\n",dfudge);
 		}
 	}
 
@@ -1711,15 +1711,19 @@ run -- 07jul -- ksl
 
       /* Save everything after each cycle and prepare for the next cycle 
 	 JM1304: moved geo.wcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
+      /* NSH1306 - moved geo.wcycle++ back, but moved the log and xsignal statements */  
 
-      wind_save (windsavefile);
       Log ("Saved wind structure in %s after cycle %d\n", windsavefile,
 	   geo.wcycle);
 
       xsignal (root, "%-20s Finished %d of %d ionization cycle \n", "OK",
 	       geo.wcycle, wcycles);
-      
       geo.wcycle++;	//Increment ionisation cycles
+
+      wind_save (windsavefile);
+ 
+      
+
       
       check_time (root);
       Log_flush();  /*NSH June 13 Added call to flush logfile */

@@ -390,7 +390,6 @@ double nsh_lum_metals;
   		Log ("OUTPUT Wind_line_cooling(ergs-1cm-3)  HHe %8.2e Metals %8.2e\n",nsh_lum_hhe/w[n].vol, nsh_lum_metals/w[n].vol);
 	  	Log ("OUTPUT Balance      Cooling=%8.2e Heating=%8.2e Lum=%8.2e T_e=%e after update\n", asum+geo.lum_comp+geo.lum_dr+geo.lum_adiabatic, xsum,asum,plasmamain[0].t_e); //1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons.
 
-
 		for (n = 0; n < nelements; n++)
 			{
       			first = ele[n].firstion;
