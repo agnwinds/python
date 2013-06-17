@@ -55,12 +55,15 @@ xtemp_rad (w)
 
   /* py_wind_delta can be used to subsample the array */
   py_wind_delta = 1;
-  if (MDIM>30) py_wind_delta=1+MDIM/30; 
+  if (MDIM > 30)
+    py_wind_delta = 1 + MDIM / 30;
 
 
-  if (geo.coord_type != 1) {
-	  Log("Warning: Since coord type is not cylindrical, next print out may look odd\n");
-  }
+  if (geo.coord_type != 1)
+    {
+      Log
+	("Warning: Since coord type is not cylindrical, next print out may look odd\n");
+    }
 
   Log ("\n T rad\n");
 

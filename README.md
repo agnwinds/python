@@ -3,16 +3,12 @@ README
 ***
 =========
 
-#Python 75d
+#Python 75e
 
-This is the README file for Python75d. 
+This is the README file for Python75e. 
 
 * Precursor is python_75d 
-* Minor bugfix plus a new py_wind option
-
-Changes this version:
-* wind2d.c - removed a stray command setting t_r in the wind to the value read in from the parameter file. This was stopping the command that set the wind temperature to the proga temperature in the relevant wind mode
-* py_wind and py_wind_sub - new command H - writes out all heating and cooling mehchanisms to allow plots to be generated showing the dominant mechanisms.
+* This version should be identical to 75e except that GNU indent has been run on it
 
 ***
 ==========

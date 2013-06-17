@@ -1536,8 +1536,8 @@ J_summary (w, rootname, ochoice)
 	}
     }
   display ("J in cell");
-	printf ("i=%i",i);
-	sprintf(number,"%i",i);
+  printf ("i=%i", i);
+  sprintf (number, "%i", i);
   if (ochoice)
     {
       strcpy (filename, rootname);
@@ -1746,7 +1746,8 @@ convergence_summary (w, rootname, ochoice)
 	  aaa[n] = plasmamain[nplasma].converge_whole;
 	}
     }
-  display ("Convergence (0=converged.  Higher numbers indicate one or more convergence tests failed)");
+  display
+    ("Convergence (0=converged.  Higher numbers indicate one or more convergence tests failed)");
 
   if (ochoice)
     {
@@ -2053,7 +2054,7 @@ heatcool_summary (w, rootname, ochoice)
       write_array (filename, ochoice);
     }
 
-  
+
 
   for (n = 0; n < NDIM2; n++)
     {
@@ -2073,7 +2074,7 @@ heatcool_summary (w, rootname, ochoice)
       write_array (filename, ochoice);
     }
 
- for (n = 0; n < NDIM2; n++)
+  for (n = 0; n < NDIM2; n++)
     {
       aaa[n] = 0;
       if (w[n].vol > 0.0)
@@ -2091,7 +2092,7 @@ heatcool_summary (w, rootname, ochoice)
       write_array (filename, ochoice);
     }
 
-for (n = 0; n < NDIM2; n++)
+  for (n = 0; n < NDIM2; n++)
     {
       aaa[n] = 0;
       if (w[n].vol > 0.0)
@@ -2109,7 +2110,7 @@ for (n = 0; n < NDIM2; n++)
       write_array (filename, ochoice);
     }
 
-for (n = 0; n < NDIM2; n++)
+  for (n = 0; n < NDIM2; n++)
     {
       aaa[n] = 0;
       if (w[n].vol > 0.0)
@@ -2127,7 +2128,7 @@ for (n = 0; n < NDIM2; n++)
       write_array (filename, ochoice);
     }
 
-for (n = 0; n < NDIM2; n++)
+  for (n = 0; n < NDIM2; n++)
     {
       aaa[n] = 0;
       if (w[n].vol > 0.0)
@@ -2145,13 +2146,16 @@ for (n = 0; n < NDIM2; n++)
       write_array (filename, ochoice);
     }
 
-for (n = 0; n < NDIM2; n++)
+  for (n = 0; n < NDIM2; n++)
     {
       aaa[n] = 0;
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].lum_fb + plasmamain[nplasma].lum_dr + plasmamain[nplasma].lum_comp + plasmamain[nplasma].lum_ff + plasmamain[nplasma].lum_adiabatic + plasmamain[nplasma].lum_lines;
+	  aaa[n] =
+	    plasmamain[nplasma].lum_fb + plasmamain[nplasma].lum_dr +
+	    plasmamain[nplasma].lum_comp + plasmamain[nplasma].lum_ff +
+	    plasmamain[nplasma].lum_adiabatic + plasmamain[nplasma].lum_lines;
 	}
     }
   display ("Total Luminosity");
@@ -2164,4 +2168,3 @@ for (n = 0; n < NDIM2; n++)
     }
   return (0);
 }
-

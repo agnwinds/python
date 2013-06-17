@@ -51,7 +51,7 @@ teff (t, x)
   int n;
 
 
-  q=0.0; /* NSH 130605 to remove o3 compile error */
+  q = 0.0;			/* NSH 130605 to remove o3 compile error */
 
 
   if (x < 1)

@@ -77,7 +77,7 @@ get_knigge_wind_params ()
   geo.kn_dratio = dmin = 0.5 * sqrt (geo.diskrad / geo.rstar);	/* Center of collimation in units of the WD 
 								   radius. The value set here is for the minimum collimation, see KWD95.  The coefficient 0.5 is 
 								   approximate */
-  geo.kn_v_zero = 1.0;          /* NSH 19/04/11 New parameter - multiple of sound speed to be used as initial velocity of wind */
+  geo.kn_v_zero = 1.0;		/* NSH 19/04/11 New parameter - multiple of sound speed to be used as initial velocity of wind */
 
 /* There is confusion in various papers concerning whether to use d or d/dmin.  In KWD95, d/dmin was
 used but in later papers, e.g KD97 d in WD radii was used.  I believe d is more natural and so will use it, 
@@ -88,8 +88,8 @@ As now represented geo.kn_dratio is the distance to the focus point in stellar r
 
 */
   rddoub ("kn.d", &geo.kn_dratio);
-  Log_silent ("dmin = %f so the ratio d/dmin here is %f  (%.2e %.2e) \n", dmin,
-       geo.kn_dratio / dmin, geo.diskrad, geo.rstar);
+  Log_silent ("dmin = %f so the ratio d/dmin here is %f  (%.2e %.2e) \n",
+	      dmin, geo.kn_dratio / dmin, geo.diskrad, geo.rstar);
 
 
   rddoub ("kn.mdot_r_exponent", &geo.kn_lambda);	/* Mass loss rate exponent */
@@ -292,7 +292,7 @@ the poloidal velocity at the inner edge of the wind. It is there for continuity 
     v_escape = sqrt (2. * G * geo.mstar / rzero);
 
   vzero = kn_vzero (rzero);
-  vzero *= geo.kn_v_zero;     /*NSH 19/4/11 Multiply sound speed by new multiplyer to allow faster velocity at base of wind */
+  vzero *= geo.kn_v_zero;	/*NSH 19/4/11 Multiply sound speed by new multiplyer to allow faster velocity at base of wind */
 
 /* 578 -- 06oct -- ksl -- The next lines are modified to allow one to create a SV style
 velocity law if kn_v_infinity is less than 0 */
