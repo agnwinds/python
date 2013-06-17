@@ -404,6 +404,9 @@ one_choice (choice, root, ochoice)
       Log ("Don't get discouraged.  This takes a little while!");
       recomb_summary (wmain, root, ochoice);
       break;
+    case 'H':			/* heating and cooling mechanisms breakdown */
+      heatcool_summary (wmain, root, ochoice);
+      break;
     case 'i':			/* Allow user to display information about ions in the wind */
 
       rdint ("Ion_info_type(0=fraction,1=density,2=scatters,3=abs", &iswitch);

@@ -336,7 +336,6 @@ be optional which variables beyond here are moved to structures othere than Wind
 
 
 
-      plasmamain[n].t_r = geo.twind;
 
       /* 70b - Initialize the temperature in the torus to a different value */
       if (w[nwind].inwind==W_ALL_INTORUS || w[nwind].inwind==W_PART_INTORUS){

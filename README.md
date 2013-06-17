@@ -1,15 +1,18 @@
 
-#README 
+README 
 ***
 =========
 
-#Python 74b4
+#Python 75d
 
-This is the README file for Python75c. 
+This is the README file for Python75d. 
 
-* Precursor is python_75b 
-* Minor but important bugfix - moved geo.wcycle++ command to before wind_save at end of ionization cycle.
-* Another very minor bugfix, changed the lines where the dfudge parameter is reported to actually report it correctly!
+* Precursor is python_75d 
+* Minor bugfix plus a new py_wind option
+
+Changes this version:
+* wind2d.c - removed a stray command setting t_r in the wind to the value read in from the parameter file. This was stopping the command that set the wind temperature to the proga temperature in the relevant wind mode
+* py_wind and py_wind_sub - new command H - writes out all heating and cooling mehchanisms to allow plots to be generated showing the dominant mechanisms.
 
 ***
 ==========
