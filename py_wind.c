@@ -126,6 +126,7 @@ char *choice_options = "\n\
    o=overview,    e=everything, P=Partial emission meas, I=Ionisation parameter\n\
    W=wind_region, D=dvds_ave, X=position summary, M=macro atom info, G=inner shell\n\
    d=convergence status  E=convergence_all_info   B=PlasmaPtr  J=Radiation density\n\
+   H=All Heating and Cooling mechanisms in one shot  O=Spectral model parameters\n\
    z=Zoom,u=unZoom,Z=switch to/from raw and yz projected modes, F=Create files, A=Change file write defaults\n\
    N=new.windfile q=quit (preferred over EOF)\n";
 
@@ -486,6 +487,9 @@ one_choice (choice, root, ochoice)
       break;
     case 'o':			/* overview */
       overview (wmain, root);
+      break;
+    case 'O':			/* spectral model parameters */
+      model_bands (wmain, root, ochoice);
       break;
     case 'p':			/* nphot summary */
       nphot_summary (wmain, root, ochoice);

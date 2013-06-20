@@ -255,7 +255,7 @@ This allows one to disregard theta cells which contain thdisk in Daniels model *
 /*	 if (rho > 1e-12)		//Cap on density - we have more RT stuff than Zeus, so the density can be too high ???
 		{ 
 		rho=1e-12;
-	  		}*///This mod was used during NSHs trip in 2013 to generate some of the data then. 
+	  	  	  		}*///This mod was used during NSHs trip in 2013 to generate some of the data then. 
 	  if (proga_theta[j] < theta_disk)
 	    {
 	      proga_ptr[i * MAXPROGA + j].rho = rho;

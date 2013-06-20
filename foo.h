@@ -548,6 +548,8 @@ int thompson (WindPtr w, char rootname[], int ochoice);
 int nscat_split (WindPtr w, char rootname[], int ochoice);
 int convergence_summary (WindPtr w, char rootname[], int ochoice);
 int convergence_all (WindPtr w, char rootname[], int ochoice);
+int model_bands (WindPtr w, char rootname[], int ochoice);
+int heatcool_summary (WindPtr w, char rootname[], int ochoice);
 /* py_wind_ion.c */
 int ion_summary (WindPtr w, int element, int istate, int iswitch,
 		 char rootname[], int ochoice);

@@ -1773,10 +1773,66 @@ convergence_all (w, rootname, ochoice)
      char rootname[];
      int ochoice;
 {
-  int n, m;
+  int n;
   int nplasma;
   char filename[LINELENGTH];
-  char word[LINELENGTH];
+
+
+
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = plasmamain[nplasma].converge_t_e;
+	}
+    }
+  display ("t_e Convergence (0=converged)");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".conv_te");
+      write_array (filename, ochoice);
+    }
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = plasmamain[nplasma].converge_hc;
+	}
+    }
+  display ("hc Convergence (0=converged)");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".conv_hc");
+      write_array (filename, ochoice);
+    }
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = plasmamain[nplasma].converge_t_r;
+	}
+    }
+  display ("t_r Convergence (0=converged)");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".conv_tr");
+      write_array (filename, ochoice);
+    }
 
   for (n = 0; n < NDIM2; n++)
     {
@@ -1792,12 +1848,31 @@ convergence_all (w, rootname, ochoice)
   if (ochoice)
     {
       strcpy (filename, rootname);
-      strcat (filename, ".conv");
+      strcat (filename, ".conv_whole");
       write_array (filename, ochoice);
     }
 
 
-  /* Now write out the number of photons in each band */
+  return (0);
+}
+
+/* 
+
+   1306	nsh	Write out information pertaining to the models used in each cell/frequency band
+*/
+
+int
+model_bands (w, rootname, ochoice)
+     WindPtr w;
+     char rootname[];
+     int ochoice;
+{
+  int n, m;
+  int nplasma;
+  char filename[LINELENGTH];
+  char word[LINELENGTH];
+
+
 
   for (m = 0; m < geo.nxfreq; m++)
     {
