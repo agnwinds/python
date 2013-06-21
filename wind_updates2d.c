@@ -75,6 +75,8 @@ History:
 			compton heating and cooling.
         12apr	nh	72: modifications makde to wind_update and wind_rad_init to incoprorate
 			induced copmton heating.
+        130621  jm      76: added lines to store luminosities from ionization cycles in geo and plasma
+			structure to solve windsave bug
 
 
 **************************************************************/
@@ -327,7 +329,7 @@ WindPtr (w);
 
       /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
          cycles in the windsavefile even if the spectral cycles are run */
-      plasmamain[nplasma].lum_ioniz = plasmamain[nplasma].lum_tot;
+      plasmamain[nplasma].lum_ioniz = plasmamain[nplasma].lum;
       plasmamain[nplasma].lum_ff_ioniz = plasmamain[nplasma].lum_ff;
       plasmamain[nplasma].lum_fb_ioniz = plasmamain[nplasma].lum_fb;
       plasmamain[nplasma].lum_z_ioniz = plasmamain[nplasma].lum_z;

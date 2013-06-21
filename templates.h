@@ -225,7 +225,7 @@ int line_heat(PlasmaPtr xplasma, PhotPtr pp, int nres);
 double one_continuum(int spectype, double t, double g, double freqmin, double freqmax);
 double emittance_continuum(int spectype, double freqmin, double freqmax, double t, double g);
 /* emission.c */
-double wind_luminosity(double f1, double f2, int ioniz_or_final);
+double wind_luminosity(double f1, double f2);
 double total_emission(WindPtr one, double f1, double f2);
 double adiabatic_cooling(WindPtr one, double t);
 int photo_gen_wind(PhotPtr p, double weight, double freqmin, double freqmax, int photstart, int nphot);
