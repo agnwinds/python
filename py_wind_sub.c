@@ -95,7 +95,7 @@ overview (w, rootname)
      WindPtr w;
      char rootname[];
 {
-  double lum, wind_luminosity ();
+  //double lum, wind_luminosity (); JM130621: shouldn't really call this here
   int n;
   double heating, lines, ff, photo;
 
@@ -110,7 +110,7 @@ overview (w, rootname)
     }
   /* lum = wind_luminosity (0., 1.e20); JM130621: shouldn't really call this here. windsave bug fix means
      we should trust what is in the geo structure */
-  Log (" Total emission %8.2e heating %8.2e\n", lum, heating);
+  Log (" Total emission %8.2e heating %8.2e\n", geo.lum_ioniz, heating);
   Log ("    ff emission %8.2e heating %8.2e\n", geo.lum_ff_ioniz, ff);
   Log ("    fb emission %8.2e heating %8.2e\n", geo.lum_fb_ioniz, photo);
   Log ("  line emission %8.2e heating %8.2e\n", geo.lum_lines_ioniz, lines);
