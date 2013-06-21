@@ -617,6 +617,16 @@ typedef struct plasma
   double lum_fb, lum_z;		/*fb luminosity & fb of metals metals */
   double lum_rad, lum_rad_old;	/* The specfic radiative luminosity in frequencies defined by freqmin
 				   and freqmax.  This will depend on the last call to total_emission */
+
+
+  double lum_lines_ioniz, lum_ff_ioniz, lum_adiabatic_ioniz;
+  double lum_comp_ioniz;		/* 1108 NSH The compton luminosity of the cell */
+  double lum_dr_ioniz;		/* 1109 NSH The dielectronic recombination luminosity of the cell */
+  double lum_fb_ioniz, lum_z_ioniz;		/*fb luminosity & fb of metals metals */
+  double lum_rad_ioniz, lum_rad_old_ioniz;	/* The specfic radiative luminosity in frequencies defined by freqmin
+				   and freqmax.  This will depend on the last call to total_emission */
+
+
   double dmo_dt[3];		/*Radiative force of wind */
   int npdf;			/* The number of points actually used in the luminosity pdf */
   int pdf_x[LPDF];		/* The line numbers of *line_ptr which form the boundaries the luminosity pdf */
