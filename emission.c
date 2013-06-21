@@ -69,9 +69,8 @@ History:
 **************************************************************/
 
 double
-wind_luminosity (f1, f2, ioniz_or_final)
+wind_luminosity (f1, f2)
      double f1, f2;		/* freqmin and freqmax */
-     int ioniz_or_final;
 {
   double lum, lum_lines, lum_fb, lum_ff, lum_comp, lum_dr, lum_adiab;	//1108 NSH Added a new variable for compton cooling
 //1109 NSH Added a new variable for dielectronic cooling
@@ -111,18 +110,6 @@ wind_luminosity (f1, f2, ioniz_or_final)
   geo.lum_comp = lum_comp;	//1108 NSH The total compton luminosity of the wind is stored in the geo structure
   geo.lum_dr = lum_dr;		//1109 NSH the total DR luminosity of the wind is stored in the geo structure
   geo.lum_adiabatic = lum_adiab;
-
-  /* JM130621 Bugfix- here we populate the geo structure with a set of variables that are only worked out in the 
-     ionization cycles. This is to avoid the bug caused by saving the windfile in the spectral cycles */
-  if (ioniz_or_final==0)
-  {
-    geo.lum_lines_ioniz = lum_lines;
-    geo.lum_fb_ioniz = lum_fb;
-    geo.lum_ff_ioniz = lum_ff;
-    geo.lum_comp_ioniz = lum_comp;	
-    geo.lum_dr_ioniz = lum_dr;		
-    geo.lum_adiabatic_ioniz = lum_adiab;
-  }
 
   return (lum);
 }
@@ -237,6 +224,7 @@ total_emission (one, f1, f2)
          into calc_te with the adiabatic cooling and the new DR cooling is the way to make things a little more stable */
       //OLD     xplasma->lum_rad += xplasma->lum_comp = total_comp (one, t_e); 
     }
+
 
   return (xplasma->lum_rad);
 
