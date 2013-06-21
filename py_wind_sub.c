@@ -108,11 +108,12 @@ overview (w, rootname)
       photo += plasmamain[n].heat_photo;
       ff += plasmamain[n].heat_ff;
     }
-  lum = wind_luminosity (0., 1.e20);
+  /* lum = wind_luminosity (0., 1.e20); JM130621: shouldn't really call this here. windsave bug fix means
+     we should trust what is in the geo structure */
   Log (" Total emission %8.2e heating %8.2e\n", lum, heating);
-  Log ("    ff emission %8.2e heating %8.2e\n", geo.lum_ff, ff);
-  Log ("    fb emission %8.2e heating %8.2e\n", geo.lum_fb, photo);
-  Log ("  line emission %8.2e heating %8.2e\n", geo.lum_lines, lines);
+  Log ("    ff emission %8.2e heating %8.2e\n", geo.lum_ff_ioniz, ff);
+  Log ("    fb emission %8.2e heating %8.2e\n", geo.lum_fb_ioniz, photo);
+  Log ("  line emission %8.2e heating %8.2e\n", geo.lum_lines_ioniz, lines);
   return (0);
 }
 
@@ -417,19 +418,19 @@ lum_summary (w, rootname, ochoice)
 	  switch (c)
 	    {
 	    case 't':		/* Total luminosity */
-	      x = plasmamain[nplasma].lum_rad;
+	      x = plasmamain[nplasma].lum_rad_ioniz;
 	      break;
 	    case 'r':		/* Radiative energo loss total */
-	      x = plasmamain[nplasma].lum_rad;
+	      x = plasmamain[nplasma].lum_rad_ioniz;
 	      break;
 	    case 'f':		/* Radiative energo loss total */
-	      x = plasmamain[nplasma].lum_ff;
+	      x = plasmamain[nplasma].lum_ff_ioniz;
 	      break;
 	    case 'b':		/* Radiative energo loss total */
-	      x = plasmamain[nplasma].lum_fb;
+	      x = plasmamain[nplasma].lum_fb_ioniz;
 	      break;
 	    case 'l':		/* Line luminosity */
-	      x = plasmamain[nplasma].lum_lines;
+	      x = plasmamain[nplasma].lum_lines_ioniz;
 	      break;
 	    case 'h':		/* H luminosity */
 	      x = plasmamain[nplasma].lum_ion[0];
@@ -441,7 +442,7 @@ lum_summary (w, rootname, ochoice)
 	      x = plasmamain[nplasma].lum_ion[3];
 	      break;
 	    case 'z':		/* Line luminosity */
-	      x = plasmamain[nplasma].lum_z;
+	      x = plasmamain[nplasma].lum_z_ioniz;
 	      break;
 	    default:
 	      printf ("Not a valid choice\n");
