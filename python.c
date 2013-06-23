@@ -1452,31 +1452,8 @@ run -- 07jul -- ksl
 
 /* Determine the frequency range which will be used to establish the ionization balance of the wind */
 
-//OLD71  // 59 - Increased to 20,000 A so could go further into NIR 
-//OLD71  freqmin = C / 12000e-8;        /*20000 A */
-
-//OLD71  tmax = TSTAR;
-//OLD71  if (geo.twind > tmax)
-//OLD71    tmax = geo.twind;
-//OLD71  if (geo.tstar > tmax)
-//OLD71    tmax = geo.tstar;
-//OLD71  if (geo.t_bl > tmax && geo.lum_bl > 0.0)
-//OLD71    tmax = geo.t_bl;
-//OLD71  if ((0.488 * tdisk (geo.mstar, geo.disk_mdot, geo.rstar)) > tmax)
-//OLD71    tmax = 0.488 * tdisk (geo.mstar, geo.disk_mdot, geo.rstar);
-//OLD71  freqmax = BOLTZMANN * tmax / H * 10.;
-//OLD71  if (freqmax < 2.0 * 54.418 / HEV)
-//OLD71    {
-//OLD71      Log ("Increasing maximum frequency to twice the Helium edge\n");
-//OLD71      freqmax = 2.0 * 54.418 / HEV;
-//OLD71    }
-//OLD71  else
-//OLD71    Log ("Maximum frequency %8.2e determined by T %8.2e\n", freqmax, tmax);
-
   // Note that bands_init asks .pf file or user what kind of banding is desired 
 
-//Old71  bands_init (0.0, freqmin, freqmax, -1, &xband);
-//OLD71 bands_init (tmax, freqmin, freqmax, -1, &xband);
   bands_init (-1, &xband);
 
 /*if we have changed min and max in bands_init, we need to make sure this is reflected in the frequency bounds*/
@@ -1661,7 +1638,6 @@ run -- 07jul -- ksl
 	   * photons_per_cycle is the number of photon bundles which will equal the luminosity; 
 	   * 0 => for ionization calculation 
 	   */
-//OLD70d        printf ("sent to define_phot freqmin=%e freqmax=%e \n",freqmin,freqmax);
 
 
 	  /* JM 130306 need to convert photons_per_cycle to double precision for define_phot */
@@ -1674,7 +1650,6 @@ run -- 07jul -- ksl
 
 	  define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
 
-//OLD70d        printf ("sent to photon_checks freqmin=%e freqmax=%e \n",freqmin,freqmax);
 
 	  photon_checks (p, freqmin, freqmax, "Check before transport");
 
@@ -1771,7 +1746,6 @@ run -- 07jul -- ksl
 
       Log ("Finished creating spectra\n");
 
-//OLD70d        printf ("%s %s\n",wspecfile,lspecfile);
 
       spectrum_summary (wspecfile, "w", 0, 5, 0, 1., 0);
       spectrum_summary (lspecfile, "w", 0, 5, 0, 1., 1);	/* output the log spectrum */
