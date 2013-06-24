@@ -342,7 +342,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 
 
   photstop = photstart + nphot;
-  Log ("photo_gen_wind creates nphot %5d photons from %5d to %5d \n", nphot,
+  Log_silent ("photo_gen_wind creates nphot %5d photons from %5d to %5d \n", nphot,
        photstart, photstop);
 
   for (n = photstart; n < photstop; n++)
