@@ -582,7 +582,7 @@ printf ("Tstar=%e, Nupeak=%e\n",geo.tstar,nupeak);*/
   ngood = 0;
   for (i = 0; i < nxfreq; i++)
     {
-      Log ("test: %10.2e %10.2e %10.2e\n", freqmin, freqmax, xfreq[i]);
+//      Log ("freqs_init: %10.2e %10.2e %10.2e\n", freqmin, freqmax, xfreq[i]);
       if (freqmin < xfreq[i] && xfreq[i] < freqmax)
 	{
 	  good[i] = 1;

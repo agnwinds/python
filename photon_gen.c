@@ -462,7 +462,7 @@ python 40 but it is not really what one wants.
 
 
   Log
-    ("photon_gen: weight %6.2e nphotons %d ndisk %d nwind %d nstar %d nagn %d \n",
+    ("photon_gen: weight %6.2e nphotons %d ndisk %6d nwind %6d nstar %6d npow %d \n",
      weight, nphotons, ndisk, nwind, nstar, nagn);
 
   /* Generate photons from the star, the bl, the wind and then from the disk */

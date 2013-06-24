@@ -359,7 +359,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
 	    }
 	}
     }
-  printf ("Alpha=%f\n", alpha);
+//ksl1306  printf ("Alpha=%f\n", alpha);
 
 
   for (i = istart; i < iend; i++)
