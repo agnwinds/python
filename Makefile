@@ -21,16 +21,18 @@ LIB = ../../lib
 LIB2 = ../../gsl/lib
 BIN = ../../bin
 
+ifeq ($(D),1)
 # use pg when you want to use gprof the profiler
-FFLAGS = -g -pg   
-CFLAGS = -g -pg -Wall -I$(INCLUDE) -I$(INCLUDE2)  
- 
-
-
-
+# to use profiler make with arguments "make D=1 python" 
+# this can be altered to whatever is best
+	FFLAGS = -g -pg   
+	CFLAGS = -g -pg -Wall -I$(INCLUDE) -I$(INCLUDE2)  
+else
 # Use this for large runs
-#   CFLAGS = -O3 -Wall -I$(INCLUDE)  -I$(INCLUDE2)
-#   FFLAGS =     
+	CFLAGS = -O3 -Wall -I$(INCLUDE)  -I$(INCLUDE2)
+	FFLAGS =     
+endif
+
 
 # next LIne for debugging when concerned about memory problems
 # LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lkpar -lcfitsio -lgsl -lgslcblas ../../duma_2_5_3/libduma.a -lpthread
@@ -85,6 +87,11 @@ prototypes:
 
 python: startup  python.o $(python_objects)
 	gcc  ${CFLAGS} python.o $(python_objects) $(LDFLAGS) -o python
+		cp $@ $(BIN)/py
+		mv $@ $(BIN)/py$(VERSION)
+
+gpython: startup  python.o $(python_objects)
+	gcc  ${CFLAGS_DEBUG} python.o $(python_objects) $(LDFLAGS) -o python
 		cp $@ $(BIN)/py
 		mv $@ $(BIN)/py$(VERSION)
 
