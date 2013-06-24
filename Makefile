@@ -90,12 +90,6 @@ python: startup  python.o $(python_objects)
 		cp $@ $(BIN)/py
 		mv $@ $(BIN)/py$(VERSION)
 
-gpython: startup  python.o $(python_objects)
-	gcc  ${CFLAGS_DEBUG} python.o $(python_objects) $(LDFLAGS) -o python
-		cp $@ $(BIN)/py
-		mv $@ $(BIN)/py$(VERSION)
-
-
 py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
 		emission.o recomb.o util.o detail.o \
 		pdf.o random.o recipes.o saha.o \
