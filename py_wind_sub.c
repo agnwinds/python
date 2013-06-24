@@ -1122,8 +1122,8 @@ a:rdint ("Wind.array.element", &n);
      DR cooling also added in to report */
   Log
     ("t_e %8.2e lum_tot  %8.2e lum_lines  %8.2e lum_ff  %8.2e lum_fb     %8.2e %8.2e %8.2e %8.2e %8.2e  \n",
-     xplasma->t_e, xplasma->lum_rad, xplasma->lum_lines, xplasma->lum_ff,
-     xplasma->lum_fb, xplasma->lum_ion[0], xplasma->lum_ion[2],
+     xplasma->t_e, xplasma->lum_rad_ioniz, xplasma->lum_lines_ioniz, xplasma->lum_ff_ioniz,
+     xplasma->lum_fb_ioniz, xplasma->lum_ion[0], xplasma->lum_ion[2],
      xplasma->lum_ion[3], xplasma->lum_z);
   Log
     ("t_r %8.2e heat_tot %8.2e heat_lines %8.2e heat_ff %8.2e heat_photo %8.2e %8.2e %8.2e %8.2e %8.2e heat_comp %3.2e\n",
@@ -1131,18 +1131,18 @@ a:rdint ("Wind.array.element", &n);
      xplasma->heat_photo, xplasma->heat_ion[0], xplasma->heat_ion[2],
      xplasma->heat_ion[3], xplasma->heat_z, xplasma->heat_comp);
   Log ("The ratio of rad (total) cooling to heating is %8.2f (%8.2f) \n",
-       xplasma->lum_rad / xplasma->heat_tot,
-       (xplasma->lum_rad + xplasma->lum_adiabatic + xplasma->lum_comp +
-	xplasma->lum_dr) / xplasma->heat_tot);
+       xplasma->lum_rad_ioniz / xplasma->heat_tot,
+       (xplasma->lum_rad_ioniz + xplasma->lum_adiabatic_ioniz + xplasma->lum_comp_ioniz +
+	xplasma->lum_dr_ioniz) / xplasma->heat_tot);
   Log ("Adiabatic cooling %8.2e is %8.2g of total cooling\n",
-       xplasma->lum_adiabatic,
-       xplasma->lum_adiabatic / (xplasma->lum_rad + xplasma->lum_adiabatic));
+       xplasma->lum_adiabatic_ioniz,
+       xplasma->lum_adiabatic_ioniz / (xplasma->lum_rad + xplasma->lum_adiabatic));
   /*70g NSH compton and DR cooling are now reported seperately. */
   Log ("Compton cooling   %8.2e is %8.2g of total cooling\n",
-       xplasma->lum_comp,
-       xplasma->lum_comp / (xplasma->lum_rad + xplasma->lum_comp));
-  Log ("DR cooling        %8.2e is %8.2g of total cooling\n", xplasma->lum_dr,
-       xplasma->lum_dr / (xplasma->lum_rad + xplasma->lum_dr));
+       xplasma->lum_comp_ioniz,
+       xplasma->lum_comp_ioniz / (xplasma->lum_rad_ioniz + xplasma->lum_comp_ioniz));
+  Log ("DR cooling        %8.2e is %8.2g of total cooling\n", xplasma->lum_dr_ioniz,
+       xplasma->lum_dr_ioniz / (xplasma->lum_rad_ioniz + xplasma->lum_dr_ioniz));
   Log ("Number of ionizing photons in cell nioniz %d\n", xplasma->nioniz);
   Log ("Log Ionization parameter in this cell cell based %4.2f ferland %4.2f\n", log10 (xplasma->ip), log10 (xplasma->ferland_ip));	//70h NSH computed ionizaion parameter
   Log ("ioniz %8.2e %8.2e %8.2e %8.2e %8.2e\n",
@@ -1253,7 +1253,7 @@ coolheat_summary (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].lum_rad / plasmamain[nplasma].heat_tot;
+	  aaa[n] = plasmamain[nplasma].lum_rad_ioniz / plasmamain[nplasma].heat_tot;
 
 	}
     }
@@ -2130,7 +2130,7 @@ x=wind_luminosity(0.0,1e20);
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].lum_lines;
+	  aaa[n] = plasmamain[nplasma].lum_lines_ioniz;
 	}
     }
   display ("Line Luminosity");
@@ -2150,7 +2150,7 @@ x=wind_luminosity(0.0,1e20);
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].lum_adiabatic;
+	  aaa[n] = plasmamain[nplasma].lum_adiabatic_ioniz;
 	}
     }
   display ("Adiabatic Luminosity");
@@ -2168,7 +2168,7 @@ x=wind_luminosity(0.0,1e20);
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].lum_ff;
+	  aaa[n] = plasmamain[nplasma].lum_ff_ioniz;
 	}
     }
   display ("Free Free Luminosity");
@@ -2186,7 +2186,7 @@ x=wind_luminosity(0.0,1e20);
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].lum_comp;
+	  aaa[n] = plasmamain[nplasma].lum_comp_ioniz;
 	}
     }
   display ("Compton Luminosity");
@@ -2204,7 +2204,7 @@ x=wind_luminosity(0.0,1e20);
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].lum_dr;
+	  aaa[n] = plasmamain[nplasma].lum_dr_ioniz;
 	}
     }
   display ("DR Luminosity");
@@ -2222,7 +2222,7 @@ x=wind_luminosity(0.0,1e20);
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].lum_fb;
+	  aaa[n] = plasmamain[nplasma].lum_fb_ioniz;
 	}
     }
   display ("FB Luminosity");
@@ -2245,9 +2245,9 @@ x=wind_luminosity(0.0,1e20);
 	{
 	  nplasma = w[n].nplasma;
 	  aaa[n] =
-	    plasmamain[nplasma].lum_fb + plasmamain[nplasma].lum_dr +
-	    plasmamain[nplasma].lum_comp + plasmamain[nplasma].lum_ff +
-	    plasmamain[nplasma].lum_adiabatic + plasmamain[nplasma].lum_lines;
+	    plasmamain[nplasma].lum_fb_ioniz + plasmamain[nplasma].lum_dr_ioniz +
+	    plasmamain[nplasma].lum_comp_ioniz + plasmamain[nplasma].lum_ff_ioniz +
+	    plasmamain[nplasma].lum_adiabatic_ioniz + plasmamain[nplasma].lum_lines_ioniz;
 	}
     }
   display ("Total Luminosity");
