@@ -285,7 +285,9 @@ abs_summary (w, rootname, ochoice)
     }
 
   display (name);
-  Log ("Component heating %8.3e\n", xtot * py_wind_delta);
+  /* Log ("Component heating %8.3e\n", xtot * py_wind_delta);
+     JM130624 v76: Removed py_wind_delta term as gives too high heating */
+  Log ("Component heating %8.3e\n", xtot);
 
   if (ochoice)
     {
@@ -456,7 +458,9 @@ lum_summary (w, rootname, ochoice)
 
   display (name);
 
-  Log ("Luminosity total %8.3e\n", xtot * py_wind_delta);
+  /* Log ("Luminosity total %8.3e\n", xtot * py_wind_delta);
+     JM130624 v76: Removed py_wind_delta term as gives too high heating */
+  Log ("Luminosity total %8.3e\n", xtot);
 
   if (ochoice)
     {
