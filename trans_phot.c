@@ -117,7 +117,7 @@ trans_phot (w, p, iextract)
       //130306 - ksl since we don't really care what the frequencies are any more
       if (nphot % 50000 == 0)
 	//OLD 130624 printf ("Photon %7d of %7d or %6.3f per cent \n", nphot, NPHOT,
-	fprintf (stderr, "\rPhoton %7d of %7d or %6.3f per cent", nphot, NPHOT,
+	fprintf (stderr, "\rPhoton %7d of %7d or %6.3f per cent ", nphot, NPHOT,
 		nphot * 100. / NPHOT);
       Log_flush ();		/*NSH June 13 Added call to flush logfile */
 
