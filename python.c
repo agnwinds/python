@@ -1744,7 +1744,7 @@ run -- 07jul -- ksl
       Log ("Completed ionization cycle %d :  The elapsed TIME was %f\n",
 	   geo.wcycle, timer ());
 
-      Log ("Finished creating spectra\n");
+      Log_silent ("Finished creating spectra\n");
 
 
       spectrum_summary (wspecfile, "w", 0, 5, 0, 1., 0);
@@ -1756,7 +1756,7 @@ run -- 07jul -- ksl
          JM1304: moved geo.wcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
       /* NSH1306 - moved geo.wcycle++ back, but moved the log and xsignal statements */
 
-      Log ("Saved wind structure in %s after cycle %d\n", windsavefile,
+      Log_silent ("Saved wind structure in %s after cycle %d\n", windsavefile,
 	   geo.wcycle);
 
       xsignal (root, "%-20s Finished %d of %d ionization cycle \n", "OK",
