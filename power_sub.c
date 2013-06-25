@@ -113,9 +113,9 @@ sim_driver (xplasma)
   t_e = xplasma->t_e;
   www = weight = xplasma->w;
 
-  printf ("DDDDDDD We are just going to calculate DR rates\n");
+//OLD  printf ("DDDDDDD We are just going to calculate DR rates\n");
   compute_dr_coeffs (t_e);	//Populate the dielectronic recombination coefficient array for the electron temperature for this cell. If none have been read in, then they will all be zero, and nothing will happen different.
-  printf ("DDDDDDD and we have returned\n");
+//OLD  printf ("DDDDDDD and we have returned\n");
 
 
 
@@ -123,7 +123,7 @@ sim_driver (xplasma)
   f1 = geo.xfreq[0];		/*NSH 1108 Use the lower bound of the power law estimator bands */
   f2 = geo.xfreq[geo.nxfreq];	/*NSH 1108 and the upper bound of the power law estimator bands */
 
-  Log ("sim_driver: t_e=%f, t_r=%f, f1=%e, f2=%e\n", t_e, t_r, f1, f2);
+  Log_silent ("sim_driver: t_e=%f, t_r=%f, f1=%e, f2=%e\n", t_e, t_r, f1, f2);
 
 
   /* Initally assume electron density from the LTE densities */
@@ -495,6 +495,8 @@ Mode 1 is just recomb to gs by the old method. Mode 2 is recomb to gs plus DR co
 111229	ksl	Minor modifications reflecting the fact that nxbands, xfreq has been moved into
 		goe structure.  Added a counter to turn off the error message about missing
 		photoionization data.
+1306	ksl	Modified loop which calculates numberator so that it checks to see if a band
+		has any weight.  If the answer is no, it cannot contribute.  
 
  ************************************************************************/
 
@@ -509,12 +511,9 @@ xinteg_sim (t, f1, f2, nion, max_ratio, current_ratio)
   int n, j;
   double sim_num, sim_denom, sim_frac;	// The upper and lower part of the fraction used to recalculate the ion fractions
   double fthresh, fmax;
-//  double den_config ();
-//  double sigma_phot (), sigma_phot_topbase ();
   int ntmin, ntmax;		// These are the Topbase photo-ionization levels that are used
   int nvmin, nvmax;		// These are the limits on the Verland x-sections
   double qromb ();
-//  double fb_planck (), verner_planck ();
 
 
   if (-1 < nion && nion < nions)	//Get cross section for this specific ion_number
@@ -523,7 +522,6 @@ xinteg_sim (t, f1, f2, nion, max_ratio, current_ratio)
       ntmax = ntmin + ion[nion].ntop;
       nvmin = nion;
       nvmax = nvmin + 1;
-//;     printf ("For ion %i, the first topbase level is %i, and the first verner level is %i\n",nion,ion[nion].ntop_first,nvmin);
     }
   else				// Get the total emissivity
     {
@@ -574,7 +572,6 @@ Note - ksl - It is not clear why this is necessary, we have already defined the 
 
 	  if (fmax > fthresh)
 	    {
-//      printf ("We are going to topbase qromb for ion %i with fthresh=%e and fmax=%e\n",n,fthresh,fmax);
 // old -we are now going to split this up                               sim_num = qromb (tb_pow, fthresh, fmax, 1.e-4);
 /* for the power law, we need to carry out several seperate integrations since there is 
  * no stricture that the power law description of the spectrum is continuous over the 
@@ -605,42 +602,42 @@ frequency for the band is greater than the maximum frequency, we dont need to do
 
 	      for (j = 0; j < geo.nxfreq; j++)	//We loop over all the bands
 		{
+		      xsim_w = xxxplasma->pl_w[j];
+		      if (xsim_w==0){
+			      // there is nothing to add if w is zero 
+			      continue;
+		      }
+
+		      xsim_alpha = xxxplasma->pl_alpha[j];
 		  if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j] < fmax && fmax < geo.xfreq[j + 1])	//Case 1
 		    {
-		      xsim_alpha = xxxplasma->pl_alpha[j];
-		      xsim_w = xxxplasma->pl_w[j];
 		      sim_num += qromb (tb_pow, fthresh, fmax, 1.e-4);
 		    }
 		  else if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j + 1] < fmax)	//case 2 
 		    {
-		      xsim_alpha = xxxplasma->pl_alpha[j];
-		      xsim_w = xxxplasma->pl_w[j];
 		      sim_num +=
 			qromb (tb_pow, fthresh, geo.xfreq[j + 1], 1.e-4);
 		    }
 		  else if (geo.xfreq[j] > fthresh && geo.xfreq[j] < fmax && fmax < geo.xfreq[j + 1])	//case 3
 		    {
-		      xsim_alpha = xxxplasma->pl_alpha[j];
-		      xsim_w = xxxplasma->pl_w[j];
 		      sim_num += qromb (tb_pow, geo.xfreq[j], fmax, 1.e-4);
 		    }
 		  else if (geo.xfreq[j] > fthresh && geo.xfreq[j + 1] < fmax)	// case 4
 		    {
-		      xsim_alpha = xxxplasma->pl_alpha[j];
-		      xsim_w = xxxplasma->pl_w[j];
 		      sim_num +=
 			qromb (tb_pow, geo.xfreq[j], geo.xfreq[j + 1], 1.e-4);
 		    }
+		  /* Delete next section as it is just a waste of time
 		  else		//case 5 - should only be the case where the band is outside the range for the integral.
 		    {
 		      sim_num += 0;	// Add nothing - bit of a null statement, but makes the code look nice.
 		    }
+		   */
 		}
 	      sim_denom = qromb (tb_planck, fthresh, fmax, 1.e-4);
 	    }
 
 
-//      printf ("And we are back in the room with PL=%e and Planck=%e\n",sim_num,sim_denom);
 
 	}
     }
@@ -653,18 +650,15 @@ frequency for the band is greater than the maximum frequency, we dont need to do
       n = nvmin;		//just the ground state ioinzation fraction.
       sim_xver = &xphot[ion[n].nxphot];
       fthresh = sim_xver->freq_t;
-//      printf("XXXXXXXXX fthresh=%e\n",fthresh);
 
       fmax = sim_xver->freq_max;	//So at this point these are the maximal allowable
       if (f1 > fthresh)
 	fthresh = f1;		//So move fthresh up, if f1 was greater than this
       if (f2 < fmax)		//Move fmax down if we wanted a narrower range
 	fmax = f2;
-//      printf("We want to do verner, with fmax=%e and fthresh=%e",fmax,fthresh);
 
 // Now integrate only if its in allowable range  && there are ions to recombine
       if (fmax > fthresh)
-//      printf ("We are going to verner qromb with ion %i, fthresh=%e and fmax=%e\n",n,fthresh,fmax);
 	{
 	  sim_denom = qromb (verner_planck, fthresh, fmax, 1.e-4);
 	  /* for the power law, we need to carry out several seperate integrations since there is no stricture that the power law description of the spectrum is continuous over the frequency boundaries. This seems to cause seriousw problems in qromb which hangs the code. We must loop over the drequency intervals */
@@ -691,36 +685,37 @@ frequency for the band is greater than the maximum frequency, we dont need to do
 
 	  for (j = 0; j < geo.nxfreq; j++)	//We loop over all the bands
 	    {
+	      xsim_w = xxxplasma->pl_w[j];
+	      if (xsim_w == 0)
+		{
+		  // Then this band cannot contribute to the numerator
+		  continue;
+		}
+	      xsim_alpha = xxxplasma->pl_alpha[j];
 	      if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j] < fmax && fmax < geo.xfreq[j + 1])	//Case 1
 		{
-		  xsim_alpha = xxxplasma->pl_alpha[j];
-		  xsim_w = xxxplasma->pl_w[j];
 		  sim_num += qromb (verner_pow, fthresh, fmax, 1.e-4);
 		}
 	      else if (geo.xfreq[j] < fthresh && fthresh < geo.xfreq[j + 1] && geo.xfreq[j + 1] < fmax)	//case 2 
 		{
-		  xsim_alpha = xxxplasma->pl_alpha[j];
-		  xsim_w = xxxplasma->pl_w[j];
 		  sim_num +=
 		    qromb (verner_pow, fthresh, geo.xfreq[j + 1], 1.e-4);
 		}
 	      else if (geo.xfreq[j] > fthresh && geo.xfreq[j] < fmax && fmax < geo.xfreq[j + 1])	//case 3
 		{
-		  xsim_alpha = xxxplasma->pl_alpha[j];
-		  xsim_w = xxxplasma->pl_w[j];
 		  sim_num += qromb (verner_pow, geo.xfreq[j], fmax, 1.e-4);
 		}
 	      else if (geo.xfreq[j] > fthresh && geo.xfreq[j + 1] < fmax)	// case 4
 		{
-		  xsim_alpha = xxxplasma->pl_alpha[j];
-		  xsim_w = xxxplasma->pl_w[j];
 		  sim_num +=
 		    qromb (verner_pow, geo.xfreq[j], geo.xfreq[j + 1], 1.e-4);
 		}
-	      else		//case 5 - should only be the case where the band is outside the range for the integral.
-		{
-		  sim_num += 0;	// Add nothing - bit of a null statement, but makes the code look nice.
-		}
+	      /* The next lines do not do antying so why include them 
+	         else           //case 5 - should only be the case where the band is outside the range for the integral.
+	         {
+	         sim_num += 0;  // Add nothing - bit of a null statement, but makes the code look nice.
+	         }
+	       */
 	    }
 	}
     }
@@ -801,7 +796,6 @@ tb_planck (freq)
   bbe = exp ((H * freq) / (BOLTZMANN * sim_te));
   answer = (2. * H * pow (freq, 3.)) / (pow (C, 2));
   answer *= (1 / (bbe - 1));
-//      answer*=weight;
   answer *= sigma_phot_topbase (sim_xtop, freq);
   answer /= freq;
 
@@ -967,6 +961,7 @@ verner_pow (freq)
   History:
 NSH 7/2/11	Coded
 111227	ksl	Added standard documentation header to encourage more systematic documentation
+1206	ksl	Eliminated print statments
 
  ************************************************************************/
 
@@ -985,17 +980,18 @@ sim_alphasolve (ratans, numin, numax)
   alpha = -0.2;
 // Set a value of error that gets the loop running
   error = 10.;
-  printf ("Solving with ratans=%e, numin=%e, numax=%e\n", ratans, numin,
-	  numax);
-  printf ("Just out of interest, for alpha=-0.2, we get %e\n",
-	  ((alpha + 1) / (alpha + 2)) * ((pow (numax, (alpha + 2)) -
-					  pow (numin,
-					       (alpha + 2))) / (pow (numax,
-								     (alpha +
-								      1)) -
-								pow (numin,
-								     (alpha +
-								      1)))));
+//Old  printf ("Solving with ratans=%e, numin=%e, numax=%e\n", ratans, numin,
+//Old	  numax);
+//Old  printf ("Just out of interest, for alpha=-0.2, we get %e\n",
+//Old	  ((alpha + 1) / (alpha + 2)) * ((pow (numax, (alpha + 2)) -
+//Old					  pow (numin,
+//Old					       (alpha + 2))) / (pow (numax,
+//Old								     (alpha +
+//Old								      1)) -
+//Old								pow (numin,
+//Old								     (alpha +
+//Old								      1)))));
+
   while (error > 0.001)
     {
 // Work out a mid point
@@ -1018,9 +1014,9 @@ sim_alphasolve (ratans, numin, numax)
 // If actual answer is above ratmin, our solution is in the upper half
 	alphamin = alphamid;
       error = fabs (alphamax - alphamin);
-      printf
-	("Searching for answer, alphamin=%f, alphamax=%f, error=%f, current answer=%e \n",
-	 alphamin, alphamax, error, ratmid);
+//OLD      printf
+//OLD	("Searching for answer, alphamin=%f, alphamax=%f, error=%f, current answer=%e \n",
+//OLD	 alphamin, alphamax, error, ratmid);
     }
 // If we get here, we must have converged.
   return (alphamid);

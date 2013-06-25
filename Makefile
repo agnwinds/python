@@ -1,5 +1,10 @@
 # This is the makefile for the python related programs
 #
+# usage      make [D=1] python
+#
+# Adding D=1 causes the routine to be run in a way that profiling and ddd can be used.
+# Otherwise the run will be optimized to run as fast as possible
+#
 # History
 # 05jan	ksl	54f  Modified Makefile so that the Version number is automatically
 # 		copied to version.h  Also fixed so that one does not need to put
@@ -10,6 +15,7 @@
 # 		with gsl after we went to Redhat Enterprise at the Institute, and
 # 		so that Stuart and I could standardise on the distribution.
 # 08jul	ksl	Removed pfop from routines so no need to complile with g77
+# 13jun jm      Added capability to switch to use debugger routne
 CC = gcc
 FC = g77
 # FC = gfortran
