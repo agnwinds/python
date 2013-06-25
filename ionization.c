@@ -64,7 +64,6 @@ ion_abundances (xplasma, mode)
 {
   int ireturn;
 
-//      printf("NSH here we are in ion_abundances, I think we are running at mode %i\n",mode);
 
   if (mode == 0)
     {
@@ -413,7 +412,6 @@ one_shot (xplasma, mode)
   double gain;
 
 
-//OLD printf ("NSH here we are in oneshot - running at mode %i\n",mode);
 
   gain = xplasma->gain;
 
@@ -643,8 +641,8 @@ zero_emit (t)
    * are testing.  Adiabatic cooling is proportional to temperature
    */
 
-
-  xxxplasma->lum_adiabatic = adiabatic_cooling (&wmain[xxxplasma->nwind], t);
+  if (geo.adiabatic)
+    xxxplasma->lum_adiabatic = adiabatic_cooling (&wmain[xxxplasma->nwind], t);
 
 
   /* difference =

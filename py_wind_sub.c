@@ -95,7 +95,7 @@ overview (w, rootname)
      WindPtr w;
      char rootname[];
 {
-  double lum, wind_luminosity ();
+  //double lum, wind_luminosity (); JM130621: shouldn't really call this here
   int n;
   double heating, lines, ff, photo;
 
@@ -108,11 +108,12 @@ overview (w, rootname)
       photo += plasmamain[n].heat_photo;
       ff += plasmamain[n].heat_ff;
     }
-  lum = wind_luminosity (0., 1.e20);
-  Log (" Total emission %8.2e heating %8.2e\n", lum, heating);
-  Log ("    ff emission %8.2e heating %8.2e\n", geo.lum_ff, ff);
-  Log ("    fb emission %8.2e heating %8.2e\n", geo.lum_fb, photo);
-  Log ("  line emission %8.2e heating %8.2e\n", geo.lum_lines, lines);
+  /* lum = wind_luminosity (0., 1.e20); JM130621: shouldn't really call this here. windsave bug fix means
+     we should trust what is in the geo structure */
+  Log (" Total emission %8.2e heating %8.2e\n", geo.lum_ioniz, heating);
+  Log ("    ff emission %8.2e heating %8.2e\n", geo.lum_ff_ioniz, ff);
+  Log ("    fb emission %8.2e heating %8.2e\n", geo.lum_fb_ioniz, photo);
+  Log ("  line emission %8.2e heating %8.2e\n", geo.lum_lines_ioniz, lines);
   return (0);
 }
 
@@ -284,7 +285,9 @@ abs_summary (w, rootname, ochoice)
     }
 
   display (name);
-  Log ("Component heating %8.3e\n", xtot * py_wind_delta);
+  /* Log ("Component heating %8.3e\n", xtot * py_wind_delta);
+     JM130624 v76: Removed py_wind_delta term as gives too high heating */
+  Log ("Component heating %8.3e\n", xtot);
 
   if (ochoice)
     {
@@ -417,19 +420,19 @@ lum_summary (w, rootname, ochoice)
 	  switch (c)
 	    {
 	    case 't':		/* Total luminosity */
-	      x = plasmamain[nplasma].lum_rad;
+	      x = plasmamain[nplasma].lum_rad_ioniz;
 	      break;
 	    case 'r':		/* Radiative energo loss total */
-	      x = plasmamain[nplasma].lum_rad;
+	      x = plasmamain[nplasma].lum_rad_ioniz;
 	      break;
 	    case 'f':		/* Radiative energo loss total */
-	      x = plasmamain[nplasma].lum_ff;
+	      x = plasmamain[nplasma].lum_ff_ioniz;
 	      break;
 	    case 'b':		/* Radiative energo loss total */
-	      x = plasmamain[nplasma].lum_fb;
+	      x = plasmamain[nplasma].lum_fb_ioniz;
 	      break;
 	    case 'l':		/* Line luminosity */
-	      x = plasmamain[nplasma].lum_lines;
+	      x = plasmamain[nplasma].lum_lines_ioniz;
 	      break;
 	    case 'h':		/* H luminosity */
 	      x = plasmamain[nplasma].lum_ion[0];
@@ -441,7 +444,7 @@ lum_summary (w, rootname, ochoice)
 	      x = plasmamain[nplasma].lum_ion[3];
 	      break;
 	    case 'z':		/* Line luminosity */
-	      x = plasmamain[nplasma].lum_z;
+	      x = plasmamain[nplasma].lum_z_ioniz;
 	      break;
 	    default:
 	      printf ("Not a valid choice\n");
@@ -455,7 +458,9 @@ lum_summary (w, rootname, ochoice)
 
   display (name);
 
-  Log ("Luminosity total %8.3e\n", xtot * py_wind_delta);
+  /* Log ("Luminosity total %8.3e\n", xtot * py_wind_delta);
+     JM130624 v76: Removed py_wind_delta term as gives too high heating */
+  Log ("Luminosity total %8.3e\n", xtot);
 
   if (ochoice)
     {
@@ -1117,8 +1122,8 @@ a:rdint ("Wind.array.element", &n);
      DR cooling also added in to report */
   Log
     ("t_e %8.2e lum_tot  %8.2e lum_lines  %8.2e lum_ff  %8.2e lum_fb     %8.2e %8.2e %8.2e %8.2e %8.2e  \n",
-     xplasma->t_e, xplasma->lum_rad, xplasma->lum_lines, xplasma->lum_ff,
-     xplasma->lum_fb, xplasma->lum_ion[0], xplasma->lum_ion[2],
+     xplasma->t_e, xplasma->lum_rad_ioniz, xplasma->lum_lines_ioniz, xplasma->lum_ff_ioniz,
+     xplasma->lum_fb_ioniz, xplasma->lum_ion[0], xplasma->lum_ion[2],
      xplasma->lum_ion[3], xplasma->lum_z);
   Log
     ("t_r %8.2e heat_tot %8.2e heat_lines %8.2e heat_ff %8.2e heat_photo %8.2e %8.2e %8.2e %8.2e %8.2e heat_comp %3.2e\n",
@@ -1126,18 +1131,18 @@ a:rdint ("Wind.array.element", &n);
      xplasma->heat_photo, xplasma->heat_ion[0], xplasma->heat_ion[2],
      xplasma->heat_ion[3], xplasma->heat_z, xplasma->heat_comp);
   Log ("The ratio of rad (total) cooling to heating is %8.2f (%8.2f) \n",
-       xplasma->lum_rad / xplasma->heat_tot,
-       (xplasma->lum_rad + xplasma->lum_adiabatic + xplasma->lum_comp +
-	xplasma->lum_dr) / xplasma->heat_tot);
+       xplasma->lum_rad_ioniz / xplasma->heat_tot,
+       (xplasma->lum_rad_ioniz + xplasma->lum_adiabatic_ioniz + xplasma->lum_comp_ioniz +
+	xplasma->lum_dr_ioniz) / xplasma->heat_tot);
   Log ("Adiabatic cooling %8.2e is %8.2g of total cooling\n",
-       xplasma->lum_adiabatic,
-       xplasma->lum_adiabatic / (xplasma->lum_rad + xplasma->lum_adiabatic));
+       xplasma->lum_adiabatic_ioniz,
+       xplasma->lum_adiabatic_ioniz / (xplasma->lum_rad + xplasma->lum_adiabatic));
   /*70g NSH compton and DR cooling are now reported seperately. */
   Log ("Compton cooling   %8.2e is %8.2g of total cooling\n",
-       xplasma->lum_comp,
-       xplasma->lum_comp / (xplasma->lum_rad + xplasma->lum_comp));
-  Log ("DR cooling        %8.2e is %8.2g of total cooling\n", xplasma->lum_dr,
-       xplasma->lum_dr / (xplasma->lum_rad + xplasma->lum_dr));
+       xplasma->lum_comp_ioniz,
+       xplasma->lum_comp_ioniz / (xplasma->lum_rad_ioniz + xplasma->lum_comp_ioniz));
+  Log ("DR cooling        %8.2e is %8.2g of total cooling\n", xplasma->lum_dr_ioniz,
+       xplasma->lum_dr_ioniz / (xplasma->lum_rad_ioniz + xplasma->lum_dr_ioniz));
   Log ("Number of ionizing photons in cell nioniz %d\n", xplasma->nioniz);
   Log ("Log Ionization parameter in this cell cell based %4.2f ferland %4.2f\n", log10 (xplasma->ip), log10 (xplasma->ferland_ip));	//70h NSH computed ionizaion parameter
   Log ("ioniz %8.2e %8.2e %8.2e %8.2e %8.2e\n",
@@ -1192,6 +1197,13 @@ a:rdint ("Wind.array.element", &n);
       mm++;
     }
 
+  Log ("Spectral model details:\n");
+  for (nn = 0; nn < geo.nxfreq; nn++)
+    {
+      Log ("numin= %8.2e numax= %8.2e Model= %d PL_w= %8.2e PL_alpha= %8.2e Exp_w= %8.2e EXP_temp= %8.2e\n",geo.xfreq[nn],geo.xfreq[nn+1],xplasma->spec_mod_type[nn],xplasma->pl_w[nn],xplasma->pl_alpha[nn],xplasma->exp_w[nn],xplasma->exp_temp[nn]);
+    }
+
+
   goto a;
 
 b:return (0);
@@ -1241,7 +1253,7 @@ coolheat_summary (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].lum_rad / plasmamain[nplasma].heat_tot;
+	  aaa[n] = plasmamain[nplasma].lum_rad_ioniz / plasmamain[nplasma].heat_tot;
 
 	}
     }
@@ -1773,12 +1785,68 @@ convergence_all (w, rootname, ochoice)
      char rootname[];
      int ochoice;
 {
-  int n, m;
+  int n;
   int nplasma;
   char filename[LINELENGTH];
-  char word[LINELENGTH];
+
+
+ 
 
   for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = plasmamain[nplasma].converge_t_e;
+	}
+    }
+  display ("t_e Convergence (0=converged)");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".conv_te");
+      write_array (filename, ochoice);
+    }
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = plasmamain[nplasma].converge_hc;
+	}
+    }
+  display ("hc Convergence (0=converged)");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".conv_hc");
+      write_array (filename, ochoice);
+    }
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = plasmamain[nplasma].converge_t_r;
+	}
+    }
+  display ("t_r Convergence (0=converged)");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".conv_tr");
+      write_array (filename, ochoice);
+    }
+
+ for (n = 0; n < NDIM2; n++)
     {
       aaa[n] = 0;
       if (w[n].vol > 0.0)
@@ -1792,12 +1860,31 @@ convergence_all (w, rootname, ochoice)
   if (ochoice)
     {
       strcpy (filename, rootname);
-      strcat (filename, ".conv");
+      strcat (filename, ".conv_whole");
       write_array (filename, ochoice);
     }
 
 
-  /* Now write out the number of photons in each band */
+  return (0);
+}
+
+/* 
+
+   1306	nsh	Write out information pertaining to the models used in each cell/frequency band
+*/
+  
+int
+model_bands (w, rootname, ochoice)
+     WindPtr w;
+     char rootname[];
+     int ochoice;
+{
+  int n, m;
+  int nplasma;
+  char filename[LINELENGTH];
+  char word[LINELENGTH];
+
+
 
   for (m = 0; m < geo.nxfreq; m++)
     {
@@ -1925,8 +2012,9 @@ heatcool_summary (w, rootname, ochoice)
   int n;
   int nplasma;
   char filename[LINELENGTH];
+	float x;
 
-
+x=wind_luminosity(0.0,1e20);
 
   for (n = 0; n < NDIM2; n++)
     {
@@ -2042,7 +2130,7 @@ heatcool_summary (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].lum_lines;
+	  aaa[n] = plasmamain[nplasma].lum_lines_ioniz;
 	}
     }
   display ("Line Luminosity");
@@ -2062,7 +2150,7 @@ heatcool_summary (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].lum_adiabatic;
+	  aaa[n] = plasmamain[nplasma].lum_adiabatic_ioniz;
 	}
     }
   display ("Adiabatic Luminosity");
@@ -2080,7 +2168,7 @@ heatcool_summary (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].lum_ff;
+	  aaa[n] = plasmamain[nplasma].lum_ff_ioniz;
 	}
     }
   display ("Free Free Luminosity");
@@ -2098,7 +2186,7 @@ heatcool_summary (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].lum_comp;
+	  aaa[n] = plasmamain[nplasma].lum_comp_ioniz;
 	}
     }
   display ("Compton Luminosity");
@@ -2116,7 +2204,7 @@ heatcool_summary (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].lum_dr;
+	  aaa[n] = plasmamain[nplasma].lum_dr_ioniz;
 	}
     }
   display ("DR Luminosity");
@@ -2134,7 +2222,7 @@ heatcool_summary (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = plasmamain[nplasma].lum_fb;
+	  aaa[n] = plasmamain[nplasma].lum_fb_ioniz;
 	}
     }
   display ("FB Luminosity");
@@ -2146,6 +2234,10 @@ heatcool_summary (w, rootname, ochoice)
       write_array (filename, ochoice);
     }
 
+
+
+
+
   for (n = 0; n < NDIM2; n++)
     {
       aaa[n] = 0;
@@ -2153,9 +2245,9 @@ heatcool_summary (w, rootname, ochoice)
 	{
 	  nplasma = w[n].nplasma;
 	  aaa[n] =
-	    plasmamain[nplasma].lum_fb + plasmamain[nplasma].lum_dr +
-	    plasmamain[nplasma].lum_comp + plasmamain[nplasma].lum_ff +
-	    plasmamain[nplasma].lum_adiabatic + plasmamain[nplasma].lum_lines;
+	    plasmamain[nplasma].lum_fb_ioniz + plasmamain[nplasma].lum_dr_ioniz +
+	    plasmamain[nplasma].lum_comp_ioniz + plasmamain[nplasma].lum_ff_ioniz +
+	    plasmamain[nplasma].lum_adiabatic_ioniz + plasmamain[nplasma].lum_lines_ioniz;
 	}
     }
   display ("Total Luminosity");

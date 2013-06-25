@@ -517,9 +517,13 @@ wind_n_to_ij (n, i, j)
     {
       *i = n;
       *j = 0;
-      Error
+/*  130624 - ksl - Removed this error as it program appears to be working as intended
+ *  and there are times when this routine should be called for spherical models
+ *  since we basically still have a 2d grid in this case      
+       Error
 	("Warning: wind_n_to_ij being called for spherical coordinates %d \n",
 	 n);
+*/
     }
   *i = n / MDIM;
   *j = n - (*i) * MDIM;
