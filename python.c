@@ -627,10 +627,13 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
 
 //080808 - 62 - Ionization section has been cleaned up -- ksl
-/* ??? ksl - Ionization mode 4 apparently does not exist.  This should be fixed */
+/* ??? ksl - Acoording to line 110 of ioniztion. option 4 is LTE with SIM_correction.  It would be good to
+ * know what this is actually.   Note that pairwise is the appraoch which cboses between pairwise_bb, and pairwise_pow.
+ * Normally, any of the pairwise options should force use of a banding option with a broad set of bands
+ */
 
   rdint
-    ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,5=recalc_pow,6=pairwise_bb,7=pairwise_pow)",
+    ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,5=pairwise,6=pairwise_bb,7=pairwise_pow)",
      &geo.ioniz_mode);
 
   if (geo.ioniz_mode == 2)

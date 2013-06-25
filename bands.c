@@ -116,7 +116,6 @@ bands_init (imode, band)
   double t;			// A temperature which can be used to set absolute limits on the bands
   double f1, f2;		// frequency limits that can overide any other limits
   double fmax;
-//  double bbfrac ();
   double f1_log, f2_log, df;
   int ii;
 
@@ -150,7 +149,7 @@ bands_init (imode, band)
     {
       mode = 2;
       rdint
-	("Photon.sampling.approach(0=T,1=(f1,f2),2=cv,3=yso,4=user_defined,5=cloudy_test,6=wide,7=AGN),",
+	("Photon.sampling.approach(0=T,1=(f1,f2),2=cv,3=yso,4=user_defined,5=cloudy_test,6=wide,7=AGN,8=logarithmic)",
 	 &mode);
     }
   else
@@ -160,6 +159,7 @@ bands_init (imode, band)
 
   if (mode == 0)
     {
+  /* Mode 0 is sets a single band based on the temperature given */
       band->nbands = 1;
       band->f1[0] = BOLTZMANN * t / H * 0.05;
       band->f2[0] = BOLTZMANN * t / H * 20.;
@@ -167,6 +167,7 @@ bands_init (imode, band)
     }
   else if (mode == 1)
     {
+	    /* Mode 1 sets a single wide band defined by f1 and f2 */
       band->nbands = 1;
       band->f1[0] = f1;
       band->f2[0] = f2;
