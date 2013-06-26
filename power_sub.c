@@ -123,7 +123,7 @@ sim_driver (xplasma)
   f1 = geo.xfreq[0];		/*NSH 1108 Use the lower bound of the power law estimator bands */
   f2 = geo.xfreq[geo.nxfreq];	/*NSH 1108 and the upper bound of the power law estimator bands */
 
-  Log_silent ("sim_driver: t_e=%f, t_r=%f, f1=%e, f2=%e\n", t_e, t_r, f1, f2);
+  Log_silent ("sim_driver: t_e=%7.1f, t_r=%7.1f, f1=%8.2e, f2=%8.2e\n", t_e, t_r, f1, f2);
 
 
   /* Initally assume electron density from the LTE densities */
