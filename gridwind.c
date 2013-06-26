@@ -590,7 +590,7 @@ calloc_estimators (nelem)
 	  exit (0);
 	}
 
-      if (macromain[n].recomb_sp != NULL)
+      /*if (macromain[n].recomb_sp != NULL)
 	{
 	  free (macromain[n].recomb_sp);
 	}*/
