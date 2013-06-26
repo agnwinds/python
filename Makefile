@@ -68,7 +68,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		matom.o estimators.o wind_sum.o yso.o elvis.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o auger_ionization.o \
 		agn.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
-		spectral_estimators.o power_sub.o variable_temperature.o
+		spectral_estimators.o variable_temperature.o
 
 
 python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
@@ -82,7 +82,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		matom.c estimators.c wind_sum.c yso.c elvis.c cylindrical.c rtheta.c spherical.c  \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c auger_ionization.c \
 		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
-		spectral_estimators.c power_sub.c variable_temperature.c
+		spectral_estimators.c variable_temperature.c
 
 additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c 
 
@@ -104,7 +104,7 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		radiation.o gradv.o phot_util.o anisowind.o resonate.o density.o \
 		matom.o estimators.o yso.o elvis.o photon2d.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
-		spectral_estimators.o power_sub.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
+		spectral_estimators.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
                 variable_temperature.o bb.o
 
 
@@ -199,7 +199,7 @@ py_grid: bb.o get_atomicdata.o py_grid.o photon2d.o photon_gen.o \
 		mv $@ $(BIN)/py_grid$(VERSION)
 
 balance_sources = balance_abso.c balance_bb.c balance.c balance_gen.c balance_sub.c bal_photon2d.c bal_trans_phot.c plane.c \
-		  partition.c agn.c power_sub.c compton.c torus.c spectral_estimators.c dielectronic.c variable_temperature.c  zeta.c
+		  partition.c agn.c compton.c torus.c spectral_estimators.c dielectronic.c variable_temperature.c  zeta.c
 
 startup_balance: startup $(balance_sources)
 	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(balance_sources) > balance_templates.h
@@ -213,7 +213,7 @@ balance: balance.o balance_sub.o balance_gen.o balance_abso.o \
 		lines.o get_atomicdata.o random.o wind2d.o wind.o   bal_photon2d.o  levels.o  \
 		util.o anisowind.o reposition.o density.o  detail.o bands.o matom.o estimators.o  bilinear.o   \
 		spherical.o cylindrical.o cylind_var.o rtheta.o yso.o elvis.o gridwind.o wind_sum.o \
-		partition.o auger_ionization.o agn.o power_sub.o shell_wind.o compton.o torus.o spectral_estimators.o \
+		partition.o auger_ionization.o agn.o shell_wind.o compton.o torus.o spectral_estimators.o \
 		dielectronic.o variable_temperature.o zeta.o
 	gcc   ${CFLAGS} balance.o balance_sub.o balance_gen.o   balance_abso.o \
 		emission.o recomb.o balance_bb.o gradv.o  detail.o \
@@ -224,7 +224,7 @@ balance: balance.o balance_sub.o balance_gen.o balance_abso.o \
 		extract.o ispy.o roche.o stellar_wind.o proga.o corona.o disk.o  knigge.o  \
 		util.o anisowind.o reposition.o density.o bands.o matom.o estimators.o bilinear.o \
 		spherical.o cylindrical.o cylind_var.o rtheta.o  yso.o elvis.o   gridwind.o wind_sum.o\
-		partition.o  auger_ionization.o agn.o power_sub.o shell_wind.o torus.o compton.o spectral_estimators.o\
+		partition.o  auger_ionization.o agn.o shell_wind.o torus.o compton.o spectral_estimators.o\
 		dielectronic.o  variable_temperature.o zeta.o \
 		$(LDFLAGS) -o balance
 	cp $@ $(BIN)/balance

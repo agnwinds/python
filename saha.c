@@ -150,17 +150,18 @@ nebular_concentrations (xplasma, mode)
 
 
     }
-  else if (mode == 5)		/* This replicates Sim's (2008) power
+ // else if (mode == 5)		NSH 130626 - mode removed		
+				/* This replicates Sim's (2008) power
 				   law method for ionization in a non-BB radiation
 				   field.  */
-    {
+ //   {
 
-      partition_functions (xplasma, 1);	//lte partition function using t_e and no weights
+ //     partition_functions (xplasma, 1);	//lte partition function using t_e and no weights
 
-      m = concentrations (xplasma, 1);	// Saha equation using t_e 
+ //     m = concentrations (xplasma, 1);	// Saha equation using t_e 
 
-      m = sim_driver (xplasma);
-    }
+ //     m = sim_driver (xplasma);
+ //   }
 /* Two new modes, they could proably be combined into one if statement, but having two adds little complexity and allows for other modifications if required. No call to partition functions is required, since this is done on a pairwise basis in the routine. Similarly there is no call to concentrations, since this is also done pairwise inside the routine. */
   else if (mode == 6)		/* Pairwise calculation of abundances, using a 
 				   temperature computed to ensure a reasonable
