@@ -1780,7 +1780,7 @@ run -- 07jul -- ksl
       MPI_Reduce(redhelper, redhelper2, size_of_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
       if (rank_global == 0)
 	{
-	  Log("Zeroth thread successfully received the normalised the estimators. About to broadcast.\n");
+	  Log("Zeroth thread successfully received the normalised estimators. About to broadcast.\n");
 	}
       
       MPI_Bcast(redhelper2, size_of_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -1808,23 +1808,25 @@ run -- 07jul -- ksl
 
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
 	{
+	  iredhelper[mpi_i] = plasmamain[mpi_i].ntot;
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
-	      iredhelper[mpi_i+(mpi_j)*NPLASMA] = plasmamain[mpi_i].nxtot[mpi_j];
+	      iredhelper[mpi_i+(1+mpi_j)*NPLASMA] = plasmamain[mpi_i].nxtot[mpi_j];
 	    }
 	}
       MPI_Reduce(iredhelper, iredhelper2, size_of_helpers, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
       if (rank_global == 0)
 	{
-	  Log("Zeroth thread successfully received the normalised the integer sum. About to broadcast.\n");
+	  Log("Zeroth thread successfully received the integer sum. About to broadcast.\n");
 	}
       
       MPI_Bcast(iredhelper2, size_of_helpers, MPI_INT, 0, MPI_COMM_WORLD);
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
 	{
+	  plasmamain[mpi_i].ntot=iredhelper2[mpi_i];
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
-	      plasmamain[mpi_i].nxtot[mpi_j] = iredhelper2[mpi_i+(mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].nxtot[mpi_j] = iredhelper2[mpi_i+(1+mpi_j)*NPLASMA];
 	    }
 	}
   
@@ -2059,13 +2061,54 @@ run -- 07jul -- ksl
 
 /* Write out the detailed spectrum each cycle so that one can see the statistics build up! */
       renorm = ((double) (pcycles)) / (geo.pcycle + 1.0);
+
+      /* Do an MPI reducde to get the spectra all gathered to the master thread */
+#ifdef MPI_ON
+
+      for (mpi_i = 0; mpi_i < NWAVE; mpi_i++)
+	{
+	  for (mpi_j=0; mpi_j < nspectra; mpi_j++)
+	    {
+	      redhelper[mpi_i*nspectra + mpi_j]=s[mpi_j].f[mpi_i]/ np_mpi_global;
+	      redhelper[mpi_i*nspectra + mpi_j + (NWAVE*nspectra)]=s[mpi_j].lf[mpi_i]/ np_mpi_global;
+	    }
+	}
+
+      MPI_Reduce(redhelper, redhelper2, size_of_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+      MPI_Bcast(redhelper2, size_of_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+      for (mpi_i = 0; mpi_i < NWAVE; mpi_i++)
+	{
+	  for (mpi_j=0; mpi_j < nspectra; mpi_j++)
+	    {
+	      s[mpi_j].f[mpi_i] = redhelper2[mpi_i*nspectra + mpi_j];
+	      s[mpi_j].lf[mpi_i] = redhelper2[mpi_i*nspectra + mpi_j + (NWAVE*nspectra)];
+	    }
+	}
+      MPI_Barrier(MPI_COMM_WORLD);
+#endif
+
+#ifdef MPI_ON
+      if (rank_global == 0)
+      {
+#endif
       spectrum_summary (specfile, "w", 0, nspectra - 1, select_spectype,
 			renorm, 0);
+#ifdef MPI_ON
+      }
+#endif
       Log ("Completed spectrum cycle %3d :  The elapsed TIME was %f\n",
 	   geo.pcycle, timer ());
 
+#ifdef MPI_ON
+      if (rank_global == 0)
+      {
+#endif
       wind_save (windsavefile);	// This is only needed to update pcycle
       spec_save (specsavefile);
+#ifdef MPI_ON
+      }
+#endif
 
       /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
 
@@ -2084,7 +2127,15 @@ run -- 07jul -- ksl
 
 /* 57h - 07jul -- ksl -- Write out the freebound information */
 
+#ifdef MPI_ON
+   if (rank_global == 0)
+   {
+#endif
   fb_save ("recomb.save");
+#ifdef MPI_ON
+   }
+#endif
+
 
 /* Finally done */
 
