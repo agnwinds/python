@@ -1582,7 +1582,7 @@ run -- 07jul -- ksl
 
 #ifdef MPI_ON
   /* Since the wind is now set up can allocate sufficiently big arrays to help with the MPI reductions */
-  size_of_helpers = (10+NXBANDS)*NPLASMA+12*NWAVE;
+  size_of_helpers = (10+NXBANDS)*NPLASMA+(nangles+MSPEC)*NWAVE;
   redhelper = calloc (sizeof (double), size_of_helpers); 
   redhelper2 = calloc (sizeof (double), size_of_helpers); 
   iredhelper = calloc (sizeof (int), size_of_helpers); 
