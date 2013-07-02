@@ -57,7 +57,7 @@ CHOICE=1             // Compress plasma as much as possible
 # CHOICE=0           //  Keep relation between plasma and wind identical
 
 startup:
-	@echo 'YOU ARE COMPILING FOR' $(PRINT_VAR) $(lastword $(MAKECMDGOALS))
+	@echo 'YOU ARE COMPILING FOR' $(PRINT_VAR)
 	echo "#define VERSION " \"$(VERSION)\" > version.h
 	echo "#define CHOICE"   $(CHOICE) >> version.h
 
@@ -103,7 +103,7 @@ python: startup  python.o $(python_objects)
 		cp $@ $(BIN)/py
 		mv $@ $(BIN)/py$(VERSION)
 
-#This line is jsut so you can use make python D for debugging
+#This line is jsut so you can use make D python for debugging
 D:	
 	@echo 'Debugging Mode'
 
