@@ -1,14 +1,23 @@
 
-README 
+#Python 76 README 
 ***
 =========
 
-#Python 75e
+This is the README file for Python76
 
-This is the README file for Python75e. 
-
-* Precursor is python_75d 
-* This version should be identical to 75e except that GNU indent has been run on it
+* Precursor is python_75e 
+* This is a pre-parallelisation version from the June meeting
+Coding changes:
+* Bugfixes
+	* no. 11 PYWIND MALLOC MATOM BUG: Fixed by removing free statements in gridwind.c
+	* no. 16 SPHERICAL POLAR RTHETA BUG: Fixed by KSL, see bug report
+		* changes to rtheta.c to stop negative z problem
+	* no. 9 WINDSAVE BUG: new variables in geo and palsma structure so correct luminosities written out in pywind
+		* involved changes to py_wind_sub, wind_updates and python.h
+* Changed how watchdog timer prints to screen
+* general code cleanup and minimising command line writing
+* Updated bands.c to add a new mode in bands_init which allows in a general fashion to set bands logarithmically. This is band mode 8.
+* makefile edited to use debug option if compiled with D=1 option (e.g. make D=1 python)
 
 ***
 ==========
@@ -18,7 +27,7 @@ This is the README file for Python75e.
 You can download the required structure under the structure branch. e.g.
 git clone https://github.com/agnwinds/python.git -b structure
 or simply click on the 'zip' button!
-
+THIS DOESN'T WORK YET!
 
 
 Releases of progs can be found under [tags](https://github.com/agnwinds/python/tags "Wiki").

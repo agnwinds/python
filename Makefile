@@ -16,7 +16,7 @@
 # 		so that Stuart and I could standardise on the distribution.
 # 08jul	ksl	Removed pfop from routines so no need to complile with g77
 # 13jun jm      Added capability to switch to use debugger routne
-CC = gcc
+CC = mpicc
 FC = g77
 # FC = gfortran
 
@@ -32,10 +32,10 @@ ifeq ($(D),1)
 # to use profiler make with arguments "make D=1 python" 
 # this can be altered to whatever is best
 	FFLAGS = -g -pg   
-	CFLAGS = -g -pg -Wall -I$(INCLUDE) -I$(INCLUDE2)  
+	CFLAGS = -g -pg -Wall -I$(INCLUDE) -I$(INCLUDE2) -DMPI_ON
 else
 # Use this for large runs
-	CFLAGS = -O3 -Wall -I$(INCLUDE)  -I$(INCLUDE2)
+	CFLAGS = -O3 -Wall -I$(INCLUDE)  -I$(INCLUDE2) -DMPI_ON
 	FFLAGS =     
 endif
 
@@ -55,7 +55,7 @@ startup:
 
 
 foo: foo.o signal.o time.o
-	gcc ${cfllags} foo.o signal.o time.o ${LDFLAGS}  -o foo
+	mpicc ${cfllags} foo.o signal.o time.o ${LDFLAGS}  -o foo
 
 python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		saha.o spectra.o wind2d.o wind.o  vector.o debug.o recipes.o \
@@ -92,7 +92,7 @@ prototypes:
 	cp foo.h templates.h
 
 python: startup  python.o $(python_objects)
-	gcc  ${CFLAGS} python.o $(python_objects) $(LDFLAGS) -o python
+	mpicc  ${CFLAGS} python.o $(python_objects) $(LDFLAGS) -o python
 		cp $@ $(BIN)/py
 		mv $@ $(BIN)/py$(VERSION)
 
@@ -110,7 +110,7 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 
 
 py_wind: startup $(py_wind_objects)
-	gcc $(CFLAGS) $(py_wind_objects) $(LDFLAGS) -o py_wind
+	mpicc $(CFLAGS) $(py_wind_objects) $(LDFLAGS) -o py_wind
 	cp $@ $(BIN)
 	mv $@ $(BIN)/py_wind$(VERSION)
 
@@ -119,18 +119,18 @@ py_smooth: py_smooth.o
 		mv $@ $(BIN)
 
 test_bb: bb.o test_bb.o pdf.o recipes.o bilinear.o time.o 
-	gcc  ${CFLAGS} bb.o pdf.o test_bb.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_bb
+	mpicc  ${CFLAGS} bb.o pdf.o test_bb.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_bb
 	
 test_pow: test_pow.o pdf.o recipes.o bilinear.o time.o 
-	gcc  ${CFLAGS} pdf.o test_pow.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_pow
+	mpicc  ${CFLAGS} pdf.o test_pow.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_pow
 
 
 test_saha: test_saha.o $(python_objects)
-	gcc ${CFLAGS} test_saha.o $(python_objects) $(LDFLAGS) -o test_saha
+	mpicc ${CFLAGS} test_saha.o $(python_objects) $(LDFLAGS) -o test_saha
 		mv $@ $(BIN)
 
 test_dielectronic: test_dielectronic.o $(python_objects)
-	gcc ${CFLAGS} test_dielectronic.o $(python_objects) $(LDFLAGS) -o test_dielectronic
+	mpicc ${CFLAGS} test_dielectronic.o $(python_objects) $(LDFLAGS) -o test_dielectronic
 		mv $@ $(BIN)
 
 t_bilinear:  t_bilinear.o bilinear.o  
@@ -153,7 +153,7 @@ py_ray: bb.o get_atomicdata.o py_ray.o photon2d.o photon_gen.o \
 		density.o  detail.o  bands.o \
 		yso.o elvis.o cylindrical.o rtheta.o \
 		matom.o estimators.o wind_sum.o
-	gcc  ${CFLAGS} py_ray.o get_atomicdata.o photon2d.o photon_gen.o \
+	mpicc  ${CFLAGS} py_ray.o get_atomicdata.o photon2d.o photon_gen.o \
 		bb.o detail.o \
 		saha.o spectra.o wind2d.o wind.o  vector.o debug.o recipes.o \
 		trans_phot.o phot_util.o resonate.o radiation.o \
@@ -182,7 +182,7 @@ py_grid: bb.o get_atomicdata.o py_grid.o photon2d.o photon_gen.o \
 		yso.o elvis.o cylindrical.o rtheta.o \
 		matom.o estimators.o wind_sum.o \
 		density.o bands.o detail.o 
-	gcc  ${CFLAGS} py_grid.o get_atomicdata.o photon2d.o photon_gen.o \
+	mpicc  ${CFLAGS} py_grid.o get_atomicdata.o photon2d.o photon_gen.o \
 		bb.o\
 		saha.o spectra.o wind2d.o wind.o  vector.o debug.o recipes.o \
 		trans_phot.o phot_util.o resonate.o radiation.o \
@@ -215,7 +215,7 @@ balance: balance.o balance_sub.o balance_gen.o balance_abso.o \
 		spherical.o cylindrical.o cylind_var.o rtheta.o yso.o elvis.o gridwind.o wind_sum.o \
 		partition.o auger_ionization.o agn.o shell_wind.o compton.o torus.o spectral_estimators.o \
 		dielectronic.o variable_temperature.o zeta.o
-	gcc   ${CFLAGS} balance.o balance_sub.o balance_gen.o   balance_abso.o \
+	mpicc   ${CFLAGS} balance.o balance_sub.o balance_gen.o   balance_abso.o \
 		emission.o recomb.o balance_bb.o gradv.o  detail.o \
 		get_atomicdata.o random.c wind2d.o wind.o  bal_trans_phot.o \
 		bb.o pdf.o sv.o vector.o wind_updates2d.o windsave.o \
@@ -246,7 +246,7 @@ startup_saha: startup $(saha_sources)
 	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(saha_sources) > saha_templates.h
 
 saha_inv: saha_inv.o get_atomicdata.c
-	gcc ${CFLAGS} saha_inv.o get_atomicdata.o
+	mpicc ${CFLAGS} saha_inv.o get_atomicdata.o
 	cp $@ $(BIN)/saha_inv
 	mv $@ $(BIN)/saha_inv$(VERSION)
 
