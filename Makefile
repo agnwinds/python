@@ -1,8 +1,8 @@
 # This is the makefile for the python related programs
 #
-# usage      make [D=1] python
+# usage      make [D] python
 #
-# Adding D=1 causes the routine to be run in a way that profiling and ddd can be used.
+# Adding D causes the routine to be run in a way that profiling and ddd can be used.
 # Otherwise the run will be optimized to run as fast as possible
 #
 # History
@@ -32,7 +32,7 @@ LIB = ../../lib
 LIB2 = ../../gsl/lib
 BIN = ../../bin
 
-ifeq ($(D),1)
+ifeq (D,$(firstword $(MAKECMDGOALS)))
 # use pg when you want to use gprof the profiler
 # to use profiler make with arguments "make D=1 python" 
 # this can be altered to whatever is best
@@ -57,11 +57,9 @@ CHOICE=1             // Compress plasma as much as possible
 # CHOICE=0           //  Keep relation between plasma and wind identical
 
 startup:
-	@echo 'YOU ARE COMPILING FOR' $(PRINT_VAR)
-	
+	@echo 'YOU ARE COMPILING FOR' $(PRINT_VAR) $(lastword $(MAKECMDGOALS))
 	echo "#define VERSION " \"$(VERSION)\" > version.h
 	echo "#define CHOICE"   $(CHOICE) >> version.h
-
 
 foo: foo.o signal.o time.o
 	mpicc ${cfllags} foo.o signal.o time.o ${LDFLAGS}  -o foo
@@ -104,6 +102,10 @@ python: startup  python.o $(python_objects)
 	mpicc  ${CFLAGS} python.o $(python_objects) $(LDFLAGS) -o python
 		cp $@ $(BIN)/py
 		mv $@ $(BIN)/py$(VERSION)
+
+#This line is jsut so you can use make python D for debugging
+D:	
+	@echo 'Debugging Mode'
 
 py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
 		emission.o recomb.o util.o detail.o \
@@ -258,8 +260,6 @@ saha_inv: saha_inv.o get_atomicdata.c
 	mpicc ${CFLAGS} saha_inv.o get_atomicdata.o
 	cp $@ $(BIN)/saha_inv
 	mv $@ $(BIN)/saha_inv$(VERSION)
-
-
 
 
 clean :
