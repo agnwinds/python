@@ -16,6 +16,11 @@
 # 		so that Stuart and I could standardise on the distribution.
 # 08jul	ksl	Removed pfop from routines so no need to complile with g77
 # 13jun jm      Added capability to switch to use debugger routne
+#
+# 13jun jm/ss	SS added parallel flag -DMPI_ON and mpicc wrapper for gcc
+#		is now used as C compiler
+
+#MPICC is now default compiler- currently code will not compile with gcc
 CC = mpicc
 FC = g77
 # FC = gfortran
@@ -33,14 +38,16 @@ ifeq ($(D),1)
 # this can be altered to whatever is best
 	FFLAGS = -g -pg   
 	CFLAGS = -g -pg -Wall -I$(INCLUDE) -I$(INCLUDE2) -DMPI_ON
+	PRINT_VAR = DEBUGGING, -g -pg -Wall flags
 else
 # Use this for large runs
 	CFLAGS = -O3 -Wall -I$(INCLUDE)  -I$(INCLUDE2) -DMPI_ON
 	FFLAGS =     
+        PRINT_VAR = LARGE RUNS, -03 -Wall flags
 endif
 
 
-# next LIne for debugging when concerned about memory problems
+# next line for debugging when concerned about memory problems
 # LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lkpar -lcfitsio -lgsl -lgslcblas ../../duma_2_5_3/libduma.a -lpthread
 LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lkpar -lcfitsio -lgsl -lgslcblas 
 
@@ -50,6 +57,8 @@ CHOICE=1             // Compress plasma as much as possible
 # CHOICE=0           //  Keep relation between plasma and wind identical
 
 startup:
+	@echo 'YOU ARE COMPILING FOR' $(PRINT_VAR)
+	
 	echo "#define VERSION " \"$(VERSION)\" > version.h
 	echo "#define CHOICE"   $(CHOICE) >> version.h
 
