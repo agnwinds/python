@@ -441,15 +441,6 @@ double exp_temp_func(double exp_temp);
 double exp_mean(double exp_temp, double numin, double numax);
 double exp_w(double j, double exp_temp, double numin, double numax);
 double exp_stddev(double exp_temp, double numin, double numax);
-/* power_sub.c */
-int sim_driver(PlasmaPtr xplasma);
-int sim_pl(double nh, double t_r, double t_e, double www, int nelem, double ne, double density[], double xne, double newden[], double f1, double f2);
-double xinteg_sim(double t, double f1, double f2, int nion, double max_ratio, double current_ratio);
-double tb_planck(double freq);
-double verner_planck(double freq);
-double tb_pow(double freq);
-double verner_pow(double freq);
-double sim_alphasolve(double ratans, double numin, double numax);
 /* variable_temperature.c */
 int variable_temperature(PlasmaPtr xplasma, int mode);
 double bb_correct_2(double xtemp, double t_r, double www, int nion);

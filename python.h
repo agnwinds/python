@@ -1,3 +1,6 @@
+#include "mpi.h"
+int np_mpi_global;               /// Global variable which holds the number of MPI processes
+int rank_global; 
 
 #define DEBUG 				0	/* 0 means do not debug */
 int verbosity;			/* verbosity level. 0 low, 10 is high */
@@ -603,7 +606,7 @@ typedef struct plasma
   int scatters[NIONS];		/* 68b - The number of scatters in this cell for each ion. */
   double xscatters[NIONS];	/* 68b - Diagnostic measure of energy scattered out of beam on extract */
   double heat_ion[NIONS];	/* The amount of energy being transferred to the electron pool
-				   by this ion via photoionization */
+				   sby this ion via photoionization */
   double lum_ion[NIONS];	/* The amount of energy being released from the electron pool
 				   by this ion via recombination */
   double j, ave_freq, lum;	/*Respectively mean intensity, intensity_averaged frequency, 

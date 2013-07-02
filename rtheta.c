@@ -456,7 +456,7 @@ rtheta_where_in_grid (x)
   theta = acos ((fabs (x[2] / r))) * RADIAN;
 
   /* Check to see if x is outside the region of the calculation */
-  if (r > wind_x[MDIM - 1])
+  if (r > wind_x[NDIM - 1])
     {
       return (-2);		/* x is outside grid */
     }
