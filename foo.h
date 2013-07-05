@@ -180,6 +180,8 @@ int get_proga(void);
 double proga_velocity(double x[], double v[]);
 double proga_rho(double x[]);
 double proga_temp(double x[]);
+int rtheta_make_zeus_grid(WindPtr w);
+int rtheta_zeus_volumes(WindPtr w);
 /* corona.c */
 int get_corona_params(void);
 double corona_velocity(double x[], double v[]);
