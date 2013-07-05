@@ -249,7 +249,9 @@ rtheta_wind_complete (w)
      have adoped a "rectangular" grid of points.  Note that rectangular does not mean equally spaced. */
 
   for (i = 0; i < NDIM; i++)
+	{
     wind_x[i] = w[i * MDIM].r;
+}
   for (j = 0; j < MDIM; j++)
     wind_z[j] = w[j].theta;
   for (i = 0; i < NDIM - 1; i++)
@@ -400,8 +402,6 @@ rtheta_volumes (w, icomp)
 
 
 	    }
-
-
 	}
     }
 
@@ -456,7 +456,8 @@ rtheta_where_in_grid (x)
   theta = acos ((fabs (x[2] / r))) * RADIAN;
 
   /* Check to see if x is outside the region of the calculation */
-  if (r > wind_x[NDIM - 1])
+//  if (r > wind_x[MDIM - 1])  /* ERROR NSH 130626 - wind_x has NDIM members, so this check fails every time if the grid is not square! (/
+    if (r > wind_x[NDIM - 1])  /* Fixed version */
     {
       return (-2);		/* x is outside grid */
     }
