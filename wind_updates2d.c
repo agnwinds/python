@@ -262,7 +262,9 @@ WindPtr (w);
 	plasmamain[n].lum_adiabatic = 0.0;
 
 
-
+	plasmamain[n].heat_tot += (-1.0*plasmamain[n].lum_adiabatic);
+	if (plasmamain[n].heat_tot < 0.0)
+		Error ("wind_update: Plasma cell %i has negative heating following adiabatic effects\n",n);
 
       /* Calculate the densities in various ways depending on the ioniz_mode */
 
@@ -617,7 +619,7 @@ WindPtr (w);
       if (sane_check (plasmamain[nplasma].heat_comp))
 	Error ("wind_update:sane_check w\[%d).heat_comp is %e\n", nplasma,
 	       plasmamain[nplasma].heat_comp);
-      xsum += plasmamain[nplasma].heat_tot;
+      xsum += plasmamain[nplasma].heat_tot - plasmamain[nplasma].lum_adiabatic; //130705 - adiabatic cooling now put in as a negative heating effect
       psum += plasmamain[nplasma].heat_photo;
       fsum += plasmamain[nplasma].heat_ff;
       lsum += plasmamain[nplasma].heat_lines;
@@ -661,8 +663,9 @@ WindPtr (w);
 
   asum = wind_luminosity (0.0, VERY_BIG);
   Log ("!!wind_update: Absorbed flux    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e)\n", xsum, psum, fsum, csum, icsum, lsum);	//1108 NSH Added commands to report compton heating
-  Log ("!!wind_update: Wind luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n", asum, geo.lum_fb, geo.lum_ff, geo.lum_lines);	//1108 NSH added commands to report compton cooling 1110 removed, this line now just reports cooling mechanisms that will generate photons
-  Log ("!!wind_update: Wind cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e adiabatic %8.2e lines %8.2e) after update\n", asum + geo.lum_comp + geo.lum_dr + geo.lum_adiabatic, geo.lum_fb, geo.lum_ff, geo.lum_comp, geo.lum_dr, geo.lum_adiabatic, geo.lum_lines);	//1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons.
+ Log ("!!wind_update: Wind heating    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e adiabatic %8.2e)\n", xsum, psum, fsum, csum, icsum, lsum, geo.lum_adiabatic);	//1306 Added line to split out absorbed flux from wind heating
+   Log ("!!wind_update: Wind luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n", asum, geo.lum_fb, geo.lum_ff, geo.lum_lines);	//1108 NSH added commands to report compton cooling 1110 removed, this line now just reports cooling mechanisms that will generate photons
+  Log ("!!wind_update: Wind cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e lines %8.2e) after update\n", asum + geo.lum_comp + geo.lum_dr, geo.lum_fb, geo.lum_ff, geo.lum_comp, geo.lum_dr, geo.lum_lines);	//1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons. 1307 NSH - removed adiabatic cooling from this side - it is how treated in the heating side.
 
   /* Print out some diagnositics of the changes in the wind update */
   t_r_ave_old /= iave;

@@ -522,14 +522,14 @@ calc_te (xplasma, tmin, tmax)
 
   xxxplasma = xplasma;
 
-  temptmin = 1e4;
+/*  temptmin = 1e4;    NSH 130705  Debugging lines, not needed all the time!
   temptmax = 1e6;
   dt = 1e3;
   for (n = 0; n < 190; n++)
     {
       temp = temptmin + (n * dt);
       zemtemp = zero_emit (temp);
-    }
+    }*/ 
 
 
 
@@ -640,9 +640,10 @@ zero_emit (t)
   /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
    * are testing.  Adiabatic cooling is proportional to temperature
    */
+/* 76 - NSH - removed adiabtic cooling from this part of the routine. It is now added in to the heating */
+  //if (geo.adiabatic)
+ //   xxxplasma->lum_adiabatic = adiabatic_cooling (&wmain[xxxplasma->nwind], t);
 
-  if (geo.adiabatic)
-    xxxplasma->lum_adiabatic = adiabatic_cooling (&wmain[xxxplasma->nwind], t);
 
 
   /* difference =
