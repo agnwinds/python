@@ -110,29 +110,29 @@ to match heating and cooling in the wind element! */
     {				//LTE with SIM correction this is called from define_wind, sim_alpha and sim_w are set to geo values in define_wind. Not sure this is ever called now, we thought it best to set the values to LTE when in define_wind.
       ireturn = nebular_concentrations (xplasma, 5);
     }
-  else if (mode == 5)
-    {				// One shot at updating t_e before calculating densities using Stuart's power law correction
-      ireturn = spectral_estimators (xplasma);	//Slight recoding - now this just computes the estimators - this was the code clogging up this mode. Now it looks like the others.
+ // else if (mode == 5)     NSH 130626 removed mode
+ //   {				// One shot at updating t_e before calculating densities using Stuart's power law correction
+ //     ireturn = spectral_estimators (xplasma);	//Slight recoding - now this just computes the estimators - this was the code clogging up this mode. Now it looks like the others.
 
-      xplasma->dt_e_old = xplasma->dt_e;
-      xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;	//Must store this before others
-      xplasma->t_e_old = xplasma->t_e;
-      xplasma->t_r_old = xplasma->t_r;
-      xplasma->lum_rad_old = xplasma->lum_rad;
+ //     xplasma->dt_e_old = xplasma->dt_e;
+ //     xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;	//Must store this before others
+ //     xplasma->t_e_old = xplasma->t_e;
+ //     xplasma->t_r_old = xplasma->t_r;
+ //     xplasma->lum_rad_old = xplasma->lum_rad;
 
 
       /* Log ("NSH in this cell, we have %e AGN photons and %e disk photons\n",
          xplasma->ntot_agn, xplasma->ntot_disk); Removed, no longer gives reasonable answers due to banding */
 
-      ireturn = one_shot (xplasma, mode);
+   //   ireturn = one_shot (xplasma, mode);
 
 
 /* Convergence check */
-      convergence (xplasma);
+    //  convergence (xplasma);
 
 
 
-    }
+  //  }
   else if (mode == 6)
     {
       /* Feb 2012 new for mode 6. New abundances have been computed using pairwise Saha equation
@@ -435,7 +435,7 @@ meaning in nebular concentrations.
 
   if (mode == 3)
     mode = 2;
-  else if (mode <= 1 || mode >= 8)	/* modification to cope with mode 5 - SIM + two new modes in Feb 2012 */
+  else if (mode <= 1 || mode ==5 || mode >= 8)	/* modification to cope with mode 5 - SIM + two new modes in Feb 2012  + mode 5 now removed*/
     {
 
       Error ("one_shot: Sorry, Charlie, don't know how to process mode %d\n",

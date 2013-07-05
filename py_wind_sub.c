@@ -942,12 +942,12 @@ velocity_summary (w, rootname, ochoice)
 	    }
 	  if (ichoice == 1)
 	    {
-	      strcat (filename, ".vrho");
+	      strcat (filename, ".vx");
 	      write_array (filename, ochoice);
 	    }
 	  if (ichoice == 2)
 	    {
-	      strcat (filename, ".vtheta");
+	      strcat (filename, ".vy");
 	      write_array (filename, ochoice);
 	    }
 	  if (ichoice == 3)
