@@ -48,4 +48,5 @@ History:
 1301 -- JM -- The data is now all in one folder (data). atomic data has the form 
 	 atomic/atomicxx/standardxx where xx is two numbers.
 
-1307 -- JM -- data folder still the same. standardxx now in top level directory
+1307 -- JM -- data folder still the same. standardxx now in top level directory,
+	addresses bug #13
