@@ -1,0 +1,7 @@
+#This is a standard atomic data set for a 20 level hydrogen model
+#that can be treated with or without the full macro atom formalism.
+atomic/atomic_h20/h20_elem_ions.py
+atomic/atomic_h20/h20_levels.py
+atomic/atomic_h20/h20_lines.py
+atomic/atomic_h20/h20_phot.py
+atomic/atomic_h20/recomb.data
