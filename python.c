@@ -254,6 +254,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &np_mpi);
+    printf("JM MPION\n");
   #else
     my_rank = 0;
     np_mpi=1;
@@ -261,7 +262,9 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   
   np_mpi_global = np_mpi;              /// Global variable which holds the number of MPI processes
   rank_global = my_rank;   /// Global variable which holds the rank of the active MPI process
-  
+
+  Log_set_mpi_rank(my_rank);	// communicates my_rank to kpar
+
   printf("Thread %d starting.\n", my_rank);
 
   opar_stat = 0;		/* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 

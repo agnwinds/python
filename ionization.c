@@ -514,22 +514,26 @@ calc_te (xplasma, tmin, tmax)
   double heat_tot;
   double z1, z2;
   int macro_pops ();
-  int n;
-  double temptmin, temptmax, temp, dt, zemtemp;
+
+/* int n;		JM130716 variables for NSH debugging below
+ * double temptmin, temptmax, temp, dt, zemtemp; 
+ */ 		
+
   /* 110916 - ksl - Note that we assign a plasma pointer here to a fixed structure because
    * we need to call zbrent and we cannot pass the xplasma ptr directly
    */
 
   xxxplasma = xplasma;
 
-/*  temptmin = 1e4;    NSH 130705  Debugging lines, not needed all the time!
+/*temptmin = 1e4;    NSH 130705  Debugging lines, not needed all the time!
   temptmax = 1e6;
   dt = 1e3;
   for (n = 0; n < 190; n++)
     {
       temp = temptmin + (n * dt);
       zemtemp = zero_emit (temp);
-    }*/ 
+    }
+*/ 
 
 
 
