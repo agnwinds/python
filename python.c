@@ -254,7 +254,6 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &np_mpi);
-    printf("JM MPION\n");
   #else
     my_rank = 0;
     np_mpi=1;
