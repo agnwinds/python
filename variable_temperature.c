@@ -108,9 +108,6 @@ variable_temperature (xplasma, mode)
   t_e = xplasma->t_e;
   t_r = xplasma->t_r;
   www = xplasma->w;
-//              printf ("HERE WE ARE IN VT t_e=%e, t_r=%e, www=%e\n",t_e,t_r,www);
-
-
 
 /* Copy the current densities into the temperary array */
 
@@ -190,17 +187,17 @@ variable_temperature (xplasma, mode)
 								   partition
 								   [nion -
 								    1]);
-//printf ("PART FUNC FOR        for element %i, ion %i and %i, xtemp= %e is %f and %f\n",ion[nion-1].z,ion[nion-1].istate,ion[nion].istate,xtemp,partition[nion-1],partition[nion]);
+//Log ("PART FUNC FOR        for element %i, ion %i and %i, xtemp= %e is %f and %f\n",ion[nion-1].z,ion[nion-1].istate,ion[nion].istate,xtemp,partition[nion-1],partition[nion]);
 	      t_e_part_correct =
 		xplasma->partition[nion - 1] / xplasma->partition[nion];
 	      partition_functions_2 (xplasma, nion, t_e, 0);	//Our only real guess here is that the electron temperature might give a good estimate of the partition function
 	      t_e_part_correct *=
 		(xplasma->partition[nion] / xplasma->partition[nion - 1]);
-//printf ("PART FUNC FOR        for element %i, ion %i and %i, dil_tr=%e is %f and %f\n",ion[nion-1].z,ion[nion-1].istate,ion[nion].istate,t_r,partition[nion-1],partition[nion]); 
+//Log ("PART FUNC FOR        for element %i, ion %i and %i, dil_tr=%e is %f and %f\n",ion[nion-1].z,ion[nion-1].istate,ion[nion].istate,t_r,partition[nion-1],partition[nion]); 
 //              
-//printf ("PART FUNC FOR        for element %i, ion %i and %i, t_e=   %e is %f and %f\n",ion[nion-1].z,ion[nion-1].istate,ion[nion].istate,t_e,partition[nion-1],partition[nion]);
+//Log ("PART FUNC FOR        for element %i, ion %i and %i, t_e=   %e is %f and %f\n",ion[nion-1].z,ion[nion-1].istate,ion[nion].istate,t_e,partition[nion-1],partition[nion]);
 //              t_e_part_correct*=(partition[nion]/partition[nion-1]);
-//              printf ("PART_CORRECT t_r %f for element %i, upper ion %i, xtemp=%e, t_r=%e  \n",t_r_part_correct,ion[nion].z,ion[nion].istate,xtemp,t_r);
+//              Log ("PART_CORRECT t_r %f for element %i, upper ion %i, xtemp=%e, t_r=%e  \n",t_r_part_correct,ion[nion].z,ion[nion].istate,xtemp,t_r);
 /* we now correct b to take account of the temperature and photon field 
 		t_r and www give the actual radiation field in the cell, xtemp is the temp we used
   		t_e is the actual electron temperature of the cell*/
@@ -278,7 +275,7 @@ variable_temperature (xplasma, mode)
 	  /* Now determine the new value of ne from the ion abundances */
 	}			//end of loop over elements
       xnew = get_ne (newden);	/* determine the electron density for this density distribution */
-//      printf ("Solver, change in n_e = %e vs FRACTIONAL ERROR of %e in xne of %e\n",fabs ((xne - xnew) / (xnew)) , FRACTIONAL_ERROR,xne);
+//      Log ("Solver, change in n_e = %e vs FRACTIONAL ERROR of %e in xne of %e\n",fabs ((xne - xnew) / (xnew)) , FRACTIONAL_ERROR,xne);
       if (xnew < DENSITY_MIN)
 	xnew = DENSITY_MIN;	/* fudge to keep a floor on ne */
       if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6)
@@ -435,7 +432,7 @@ bb_correct_2 (xtemp, t_r, www, nion)
 
       qromb_temp = xtemp;	//The denominator is calculated for the LTE rate at our ideal temp
 
-//      printf ("topbase n=%i,nion=%i,temp=%e,fthresh=%e,fmax=%e,hnu=%e,hnu/kt=%e,fmax=%e\n",n,ion_lower,temp,fthresh,fmax,fthresh*H,(fthresh*H)/(temp*BOLTZMANN),5.879e10*temp);
+//      Log ("topbase n=%i,nion=%i,temp=%e,fthresh=%e,fmax=%e,hnu=%e,hnu/kt=%e,fmax=%e\n",n,ion_lower,temp,fthresh,fmax,fthresh*H,(fthresh*H)/(temp*BOLTZMANN),5.879e10*temp);
 
 
 
@@ -541,8 +538,8 @@ temp_func (solv_temp)
      double solv_temp;
 {
   double answer;
-//      printf ("xxxne=%e, xip=%e\n",xxxne,xip);
-//      printf ("1=%e,2=%e,3=%e\n",log(4.83e15/xxxne),1.5*log(temp),(xip/(BOLTZMANN*temp)));
+//      Log ("xxxne=%e, xip=%e\n",xxxne,xip);
+//      Log ("1=%e,2=%e,3=%e\n",log(4.83e15/xxxne),1.5*log(temp),(xip/(BOLTZMANN*temp)));
   answer =
     log (4.83e15 / xxxne) + 1.5 * log (solv_temp) -
     (xip / (BOLTZMANN * solv_temp));
@@ -640,7 +637,7 @@ pl_correct_2 (xtemp, nion)
 	      xpl_w = xxxplasma->pl_w[j];
 	      xexp_temp = xxxplasma->exp_temp[j];
 	      xexp_w = xxxplasma->exp_w[j];
-	      //      if (ion_lower==0) printf ("BCA IN band %i, we will be using model %i, pl_a=%e, pl_w=%e, (%e-%e) exp_t=%e, exp_w=%e \n",j,xxxplasma->spec_mod_type[j],xxxplasma->pl_alpha[j],xxxplasma->pl_w[j],xxxplasma->pl_w[j]*pow(geo.xfreq[j],xxxplasma->pl_alpha[j]),xxxplasma->pl_w[j]*pow(geo.xfreq[j+1],xxxplasma->pl_alpha[j]),xxxplasma->exp_temp[j],xxxplasma->exp_w[j]);
+	      //      if (ion_lower==0) Log ("BCA IN band %i, we will be using model %i, pl_a=%e, pl_w=%e, (%e-%e) exp_t=%e, exp_w=%e \n",j,xxxplasma->spec_mod_type[j],xxxplasma->pl_alpha[j],xxxplasma->pl_w[j],xxxplasma->pl_w[j]*pow(geo.xfreq[j],xxxplasma->pl_alpha[j]),xxxplasma->pl_w[j]*pow(geo.xfreq[j+1],xxxplasma->pl_alpha[j]),xxxplasma->exp_temp[j],xxxplasma->exp_w[j]);
 	      if (xxxplasma->spec_mod_type[j] > 0)	//Only bother doing the integrals if we have a model in this band
 		{
 		  f1 = geo.xfreq[j];
@@ -662,7 +659,7 @@ pl_correct_2 (xtemp, nion)
 			{
 			  numerator +=
 			    qromb (tb_exp1, fthresh, fmax, exp_qromb);
-//                                      printf ("BCA BB integrate (1)= %e,num=%e\n",qromb(tb_planck1, fthresh, fmax, 1.e-4),numerator);
+//                                      Log ("BCA BB integrate (1)= %e,num=%e\n",qromb(tb_planck1, fthresh, fmax, 1.e-4),numerator);
 			}
 		    }
 		  else if (f1 < fthresh && fthresh < f2 && f2 < fmax)	//case 2 
@@ -675,7 +672,7 @@ pl_correct_2 (xtemp, nion)
 			{
 			  numerator +=
 			    qromb (tb_exp1, fthresh, f2, exp_qromb);
-//                                      printf ("BCA BB integrate (2)= %e, num=%e\n",qromb(tb_planck1, fthresh, f2, 1.e-4),numerator);
+//                                      Log ("BCA BB integrate (2)= %e, num=%e\n",qromb(tb_planck1, fthresh, f2, 1.e-4),numerator);
 			}
 		    }
 		  else if (f1 > fthresh && f1 < fmax && fmax < f2)	//case 3
@@ -687,7 +684,7 @@ pl_correct_2 (xtemp, nion)
 		      else
 			{
 			  numerator += qromb (tb_exp1, f1, fmax, exp_qromb);
-//                                      printf ("BCA BB integrate (3)= %e, num=%e\n",qromb(tb_planck1, f1, fmax, 1.e-4),numerator);
+//                                      Log ("BCA BB integrate (3)= %e, num=%e\n",qromb(tb_planck1, f1, fmax, 1.e-4),numerator);
 			}
 		    }
 		  else if (f1 > fthresh && f2 < fmax)	// case 4
@@ -699,14 +696,14 @@ pl_correct_2 (xtemp, nion)
 		      else
 			{
 			  numerator += qromb (tb_exp1, f1, f2, exp_qromb);
-//                                      printf ("BCA BB integrate (4)= %e, num=%e\n",qromb(tb_planck1, f1, f2, 1.e-4),numerator);
+//                                      Log ("BCA BB integrate (4)= %e, num=%e\n",qromb(tb_planck1, f1, f2, 1.e-4),numerator);
 			}
 		    }
 		  else		//case 5 - should only be the case where the band is outside the range for the integral.
 		    {
 		      numerator += 0;	// Add nothing - bit of a null statement, but makes the code look nice.
 		    }
-//      if (ion_lower==0) printf ("BCA numerator = %e after band %i, which was model %i \n",numerator,j,xxxplasma->spec_mod_type[j]);
+//      if (ion_lower==0) Log ("BCA numerator = %e after band %i, which was model %i \n",numerator,j,xxxplasma->spec_mod_type[j]);
 		}		//End of loop to only integrate in this band if there is power
 	    }			//End of loop over all bands, at this point we have the numerator
 	  xxxplasma->PWnumer[ion_lower] = numerator;	// Store the calculated numerator for this cell - it wont change during one ionization cycle
@@ -751,7 +748,7 @@ pl_correct_2 (xtemp, nion)
       fthresh = xver->freq_t;
       fmax = xver->freq_max;
 
-//      if (ion[nion].z==26) printf ("VERNER ion%i, integrating from %e to %e \n",ion[nion].istate,fthresh,fmax);
+//      if (ion[nion].z==26) Log ("VERNER ion%i, integrating from %e to %e \n",ion[nion].istate,fthresh,fmax);
 
       numerator = 0;
       if (niterate == 0)	//first time of iterating this cycle, so calculate the numerator

@@ -124,7 +124,7 @@ read_thierry (infile)
 /* Open the input file.  Exit if it is not opened successfully */
   if ((fptr = fopen (infile, "r")) == NULL)
     {
-      printf ("Failed to open file %s\n", infile);
+      Log ("Failed to open file %s\n", infile);
       exit (0);
     }
 
@@ -133,17 +133,17 @@ read_thierry (infile)
     {
       sscanf (line, "%s", firstword);
       mchar = strlen (line);
-      printf ("%s totol chars %d\n", firstword, mchar);
+      Log ("%s totol chars %d\n", firstword, mchar);
 
       if (strncmp (firstword, "ND:", 3) == 0)
 	{
-	  printf ("Got ND points\n");
+	  Log ("Got ND points\n");
 	  sscanf (line, "%*s %d", &xstar.nd);
 
 	}
       if (strncmp (firstword, "Radius", 3) == 0)
 	{
-	  printf ("Got radius\n");
+	  Log ("Got radius\n");
 	  thierry_read_set (fptr, array, xstar.nd);
 	  for (i = 0; i < xstar.nd; i++)
 	    xstar.r[i] = 1e10 * array[i];	// Convert to cm
@@ -151,21 +151,21 @@ read_thierry (infile)
 
       if (strncmp (firstword, "Velocity", 3) == 0)
 	{
-	  printf ("Got vel\n");
+	  Log ("Got vel\n");
 	  thierry_read_set (fptr, array, xstar.nd);
 	  for (i = 0; i < xstar.nd; i++)
 	    xstar.v[i] = 1e5 * array[i];	// Convert to cm/s
 	}
       if (strncmp (firstword, "Mass", 3) == 0)
 	{
-	  printf ("Got rho\n");
+	  Log ("Got rho\n");
 	  thierry_read_set (fptr, array, xstar.nd);
 	  for (i = 0; i < xstar.nd; i++)
 	    xstar.rho[i] = array[i];
 	}
       if (strncmp (firstword, "Temperature", 3) == 0)
 	{
-	  printf ("Got t\n");
+	  Log ("Got t\n");
 	  thierry_read_set (fptr, array, xstar.nd);
 	  for (i = 0; i < xstar.nd; i++)
 	    xstar.t[i] = 1e4 * array[i];	// Convert to degrees
@@ -204,7 +204,7 @@ thierry_read_set (fptr, array, nd)
       if ((j = i % 8) == 0)
 	{
 	  fgets (line, 132, fptr);
-	  printf ("%s\n", line);
+	  Log ("%s\n", line);
 	  sscanf (line, "%le %le %le %le %le %le %le %le", &a[0], &a[1],
 		  &a[2], &a[3], &a[4], &a[5], &a[6], &a[7]);
 	}
@@ -297,18 +297,18 @@ thierry_velocity (x, v)
   if (sane_check (z))
     {
       Error ("thierry_velocity:sane_check failed for z=%f\n", z);
-      printf ("%f\n", z);
+      Log ("%f\n", z);
       z = x[0] * x[0] + x[1] * x[1] + x[2] * x[2];
-      printf ("%f\n", z);
+      Log ("%f\n", z);
     }
   r = length (x);
 
   if (sane_check (r))
     {
       Error ("thierry_velocity:sane_check failed for r(1)=%f\n", r);
-      printf ("%f\n", r);
+      Log ("%f\n", r);
       r = length (x);
-      printf ("%f\n", r);
+      Log ("%f\n", r);
     };
 
   if (r == 0)

@@ -242,7 +242,7 @@ WindPtr (w);
 /* 1110 NSH Normalise IP, which at this point should be the number of photons in a cell by dividing by volume and number density of hydrogen in the cell */
 
       plasmamain[n].ip /= (C * volume * nh);
-//OLD      printf ("NSH Log Ionisation parameter for cell %i = %2.2f\n",n,log10(plasmamain[n].ip));
+//OLD      Log ("NSH Log Ionisation parameter for cell %i = %2.2f\n",n,log10(plasmamain[n].ip));
 
 
       /* If geo.adiabatic is true, then alculate the adiabatic cooling using the current, i.e 
@@ -422,9 +422,7 @@ WindPtr (w);
 	  for (n_mpi2 = 0; n_mpi2 < num_comm; n_mpi2++)
 	    {
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &n, 1, MPI_INT, MPI_COMM_WORLD);
-	      //printf(" I am %d; n is %d. %d %d\n", rank_global, n, n_mpi2, num_comm);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].nwind, 1, MPI_INT, MPI_COMM_WORLD);
-	      //printf("one worked\n");
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].nplasma, 1, MPI_INT, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].ne, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].rho, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -1066,7 +1064,7 @@ wind_ip ()
       plasmamain[n].ferland_ip =
 	geo.n_ioniz / (4 * PI * C * plasmamain[n].rho * rho2nh * (r * r));
 
-//OLD     printf ("NSH log(ferland_ip) for cell %i = %e (r=%e nh=%e nioniz=%e)\n",n,log10(plasmamain[n].ferland_ip),r,plasmamain[n].rho*rho2nh,geo.n_ioniz);
+//OLD     Log ("NSH log(ferland_ip) for cell %i = %e (r=%e nh=%e nioniz=%e)\n",n,log10(plasmamain[n].ferland_ip),r,plasmamain[n].rho*rho2nh,geo.n_ioniz);
       r =
 	sqrt ((wmain[plasmamain[n].nwind].x[0] *
 	       wmain[plasmamain[n].nwind].x[0] +
@@ -1078,7 +1076,7 @@ wind_ip ()
       plasmamain[n].ferland_ip =
 	geo.n_ioniz / (4 * PI * C * plasmamain[n].rho * rho2nh * (r * r));
 
-//OLD     printf ("NSH log(ferland_ip) for cell %i = %e (r=%e nh=%e nioniz=%e)\n",n,log10(plasmamain[n].ferland_ip),r,plasmamain[n].rho*rho2nh,geo.n_ioniz);
+//OLD     Log  ("NSH log(ferland_ip) for cell %i = %e (r=%e nh=%e nioniz=%e)\n",n,log10(plasmamain[n].ferland_ip),r,plasmamain[n].rho*rho2nh,geo.n_ioniz);
     }
   return (0);
 }

@@ -34,7 +34,7 @@ BIN = ../../bin
 
 ifeq (D,$(firstword $(MAKECMDGOALS)))
 # use pg when you want to use gprof the profiler
-# to use profiler make with arguments "make D=1 python" 
+# to use profiler make with arguments "make D python" 
 # this can be altered to whatever is best
 	FFLAGS = -g -pg   
 	CFLAGS = -g -pg -Wall -I$(INCLUDE) -I$(INCLUDE2) -DMPI_ON

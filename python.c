@@ -305,7 +305,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	    }
 	  if (strcmp (argv[i], "-r") == 0)
 	    {
-	      printf ("Restarting %s\n", root);
+	      Log ("Restarting %s\n", root);
 	      restart_stat = 1;
 	    }
 	  else if (strcmp (argv[i], "-t") == 0)
@@ -2398,7 +2398,7 @@ photon_checks (p, freqmin, freqmax, comment)
 	  exit (0);
 	}
     }
-  printf ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
+  Log ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
 #if DEBUG
   if (nnn == 0)
     Log ("photon_checks: All photons passed checks successfully\n");
