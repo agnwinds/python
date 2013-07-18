@@ -312,7 +312,7 @@ matom (p, nres, escape)
 	      if (jprbs[m] < 0.)	//test (can be deleted eventually SS)
 		{
 		  Error ("Negative probability (matom, 6). Abort?\n");
-		  printf
+		  Log
 		    ("mplasma->gamma_old[uplvl][n] %g, (mplasma->alpha_st_old[uplvl][n] * xplasma->ne * den_config (xplasma, cont_ptr->uplev) / den_config (xplasma, cont_ptr->nlev)) %g\n",
 		     mplasma->gamma_old[config[uplvl].bfu_indx_first + n],
 		     (mplasma->alpha_st_old[config[uplvl].bfu_indx_first +

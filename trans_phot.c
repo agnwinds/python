@@ -107,6 +107,10 @@ trans_phot (w, p, iextract)
    * \n.  NOte that I also increased the interval where items are bing printed out to 50,000, so 
    * this would be a bit less active
    */
+  /* 130718 -- jm -for the moment I've changed this back, as we agreed that printing to 
+   * stderr was bad practice.
+   */
+  
   
   Log("\n");
 
@@ -116,9 +120,10 @@ trans_phot (w, p, iextract)
       //This is just a watchdog method to tell the user the program is still running
       //130306 - ksl since we don't really care what the frequencies are any more
       if (nphot % 50000 == 0)
-	//OLD 130624 Log ("Photon %7d of %7d or %6.3f per cent \n", nphot, NPHOT,
-	fprintf (stderr, "\rPhoton %7d of %7d or %6.3f per cent ", nphot, NPHOT,
+	//OLD 130718 fprintf (stderr, "\rPhoton %7d of %7d or %6.3f per cent ", nphot, NPHOT,
+        Log ("Photon %7d of %7d or %6.3f per cent \n", nphot, NPHOT,
 		nphot * 100. / NPHOT);
+
       Log_flush ();		/*NSH June 13 Added call to flush logfile */
 
       /* 74a_ksl Check that the weights are real */

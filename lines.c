@@ -151,7 +151,7 @@ lum_lines (one, nmin, nmax)
 	    }
 	  if (sane_check (x) != 0)
 	    {
-	      printf ("total_line_emission:sane_check %e %e\n", x, z);
+	      Log ("total_line_emission:sane_check %e %e\n", x, z);
 	    }
 	}
       else
