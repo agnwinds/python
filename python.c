@@ -453,8 +453,12 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   strcpy (windradfile, "python");
   strcpy (windsavefile, root);
   strcpy (specsavefile, root);
-  strcpy (photfile, "python");
-  strcpy (diskfile, root);
+
+  /* 130722 JM we now save python.phot and disk.diag files under diag_root folder */
+  strcpy (photfile, diagfolder);
+  strcpy (diskfile, diagfolder);
+  strcat (photfile, "python");
+  strcat (diskfile, root);
 
   strcat (wspecfile, ".spec_tot");
   strcat (lspecfile, ".log_spec_tot");
@@ -2147,8 +2151,13 @@ run -- 07jul -- ksl
 
 
 /* Finally done */
-
+#ifdef MPION
+  sprintf (dummy,"End of program, Thread %d only",my_rank);   // added so we make clear these are just errors for thread n	
+  error_summary (dummy);	// Summarize the errors that were recorded by the program
+  Log ("Run py_error.py for full error report.\n")
+#else
   error_summary ("End of program");	// Summarize the errors that were recorded by the program
+#endif
 
 
   #ifdef MPI_ON
