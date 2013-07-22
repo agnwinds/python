@@ -263,13 +263,16 @@ convergence (xplasma)
 //111004 nsh further modification to include DR and compton cooling, now moved out of lum_rad
 
   /* Check whether the heating and colling balance to within epsilon and if so set hccheck to 1 */
+ /* 130722 added a fabs to the bottom, since it is now conceivable that this could be negative if 
+   lum_adiabatic is large and negative - and hence heating */
 
-  if ((xplasma->converge_hc =
+/* NSH 130711 - also changed to have fabs on top and bottom, since heating can now be negative!) */
+if ((xplasma->converge_hc =
        fabs (xplasma->heat_tot -
-	     (xplasma->lum_rad + xplasma->lum_adiabatic + xplasma->lum_dr +
-	      xplasma->lum_comp)) / (xplasma->heat_tot + xplasma->lum_comp +
-				     xplasma->lum_dr + xplasma->lum_rad +
-				     xplasma->lum_adiabatic)) > epsilon)
+	     (xplasma->lum_adiabatic + xplasma->lum_rad + xplasma->lum_dr +
+	      xplasma->lum_comp)) / fabs(xplasma->heat_tot + xplasma->lum_comp +
+				     xplasma->lum_adiabatic +
+				     xplasma->lum_dr + xplasma->lum_rad )) > epsilon)
     xplasma->hccheck = hccheck = 1;
 
   /* whole_check is the sum of the temperature checks and the heating check */
@@ -422,6 +425,8 @@ one_shot (xplasma, mode)
   xplasma->t_e = (1 - gain) * te_old + gain * te_new;
 
 
+/* NSH 130722 - NOTE - at this stage, the cooling terms are still those computed from the 'ideal' t_e, not the new t_e - this may be worth investigatiing. */
+
   dte = xplasma->dt_e;
 
 //  Log ("One_shot: %10.2f %10.2f %10.2f\n", te_old, te_new, w->t_e);
@@ -514,30 +519,13 @@ calc_te (xplasma, tmin, tmax)
   double heat_tot;
   double z1, z2;
   int macro_pops ();
-
-/* int n;		JM130716 variables for NSH debugging below
- * double temptmin, temptmax, temp, dt, zemtemp; 
- */ 		
+		
 
   /* 110916 - ksl - Note that we assign a plasma pointer here to a fixed structure because
    * we need to call zbrent and we cannot pass the xplasma ptr directly
    */
 
   xxxplasma = xplasma;
-
-/*temptmin = 1e4;    NSH 130705  Debugging lines, not needed all the time!
-  temptmax = 1e6;
-  dt = 1e3;
-  for (n = 0; n < 190; n++)
-    {
-      temp = temptmin + (n * dt);
-      zemtemp = zero_emit (temp);
-    }
-*/ 
-
-
-
-
 
   heat_tot = xplasma->heat_tot;
 
@@ -641,13 +629,21 @@ zero_emit (t)
   //  difference = (xxxplasma->heat_tot - total_emission (xxxplasma, 0., VERY_BIG));
 
 
-  /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
+   /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
    * are testing.  Adiabatic cooling is proportional to temperature
    */
-/* 76 - NSH - removed adiabtic cooling from this part of the routine. It is now added in to the heating */
-  //if (geo.adiabatic)
- //   xxxplasma->lum_adiabatic = adiabatic_cooling (&wmain[xxxplasma->nwind], t);
 
+  if (geo.adiabatic)
+     {
+     if (wmain[xxxplasma->nwind].div_v >= 0.0) //This is the case where we have adiabatic cooling - we want to retain the old behaviour, so we use the 'test' temperature to compute it. If div_v is less than zero, we don't do anything here, and so the existing value of adiabatic cooling is used - this was computed in wind_updates2d before the call to ion_abundances.
+	{	     
+	xxxplasma->lum_adiabatic = adiabatic_cooling (&wmain[xxxplasma->nwind], t);
+	}     
+     }
+   else 
+     {
+     xxxplasma->lum_adiabatic=0.0; 
+     }
 
 
   /* difference =
@@ -662,7 +658,9 @@ zero_emit (t)
 /* 70g compton cooling calculated here to avoid generating photons */
   xxxplasma->lum_comp = total_comp (&wmain[xxxplasma->nwind], t);
 
-  difference = xxxplasma->heat_tot - xxxplasma->lum_adiabatic - xxxplasma->lum_dr - xxxplasma->lum_comp - total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);	//NSH 1110 - total emission no longer computes compton.
+  difference = xxxplasma->heat_tot - xxxplasma->lum_adiabatic - xxxplasma->lum_dr - xxxplasma->lum_comp - total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);	//NSH 1110 - total emission no longer computes compton.*/
+
+
 
 
   return (difference);
