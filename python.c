@@ -227,7 +227,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   char windradfile[LINELENGTH], windsavefile[LINELENGTH];
   char specsavefile[LINELENGTH];
   char photfile[LINELENGTH], diagfile[LINELENGTH],
-    old_windsavefile[LINELENGTH];
+    old_windsavefile[LINELENGTH], diagfolder[LINELENGTH];
   char dummy[LINELENGTH];
   char tprofile[LINELENGTH];
   double xbl;
@@ -249,6 +249,8 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   double *redhelper, *redhelper2;
   int *iredhelper, *iredhelper2;
   int size_of_helpers;
+
+  int mkdir();
 
   #ifdef MPI_ON
     MPI_Init(&argc, &argv);
@@ -341,8 +343,13 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
       strcpy (dummy, argv[argc - 1]);
       get_root (root, dummy);
-      sprintf(dummy,"_%d.diag",my_rank);
-      strcpy (diagfile, root);
+
+      /* JM130722 we now store diag files in a subdirectory if in parallel*/
+      sprintf(diagfolder,"diag_%s/",root);
+      mkdir(diagfolder, 0777);
+      strcpy (diagfile,diagfolder);
+      sprintf(dummy,"_%d.diag",my_rank);	
+      strcat (diagfile, root);
       strcat (diagfile, dummy);
 
 
