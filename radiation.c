@@ -144,7 +144,6 @@ radiation (p, ds)
   kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq, ds, p->w);
   frac_tot = frac_z = 0;	/* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
 				   indicate this is all disagnostic and might be removed */
-//      printf ("In radiation we have ds=%e, W=%e, nu=%e\n",ds,p->w,p->freq);
 
   if (freq > phot_freq_min)
 
@@ -184,7 +183,6 @@ of the energy that goes into heating electrons carefully.  */
 		    {
 		      kappa_tot += x =
 			sigma_phot_topbase (x_top_ptr, freq) * density;
-//              printf("Freq=%e, lower level=%i, ion=%i sigma=%e\n",freq,nconf,phot_top_ptr[n]->z,sigma_phot_topbase (x_top_ptr, freq));
 /* I believe most of next steps are totally diagnsitic; it is possible if 
 statement could be deleted entirely 060802 -- ksl */
 		      if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
@@ -338,15 +336,6 @@ statement could be deleted entirely 060802 -- ksl */
 
   if (p->freq > xplasma->max_freq)
     xplasma->max_freq = p->freq;
-
-
-//wind_n_to_if(one->nwind,&ii,&jj);  ??? Not complete. Intended to allow more flexible tracking of photon spectra  ksl 1108
-//if ii==ndim/2:  // 110804 - ksl - Adapt to print out a column in the middle no matter what the dimensions
-//      if (one->nwind > 59 && one->nwind < 90)
-//  1.75e16 <     (2*sqrt(one->xcen[0]*one->xcen[0]+one->xcen[1]*one->xcen[1]) - sqrt(one->x[0]*one->x[0]+one->x[1]*one->x[1]))) 
-//      if (geo.wind_type == 9)
-//      if (one->nwind==22)
-//printf ("PHOTON_DETAILS %3d %3d %3d %8.3e %8.3e %8.3e cell%3d wind cell%3d %e %e %e\n",geo.wcycle,ii,jj,p->freq,w_ave,ds,one->nplasma,one->nwind,p->w,w_in,tau);
 
   if (diag_on_off == 1 && ncstat > 0)
     {
@@ -805,28 +794,37 @@ pop_kappa_ff_array ()
   double gsqrd, gaunt, sum;
   int i, j;
 
-  sum = 0.0;
+
   for (i = 0; i < NPLASMA + 1; i++)
     {
-      for (j = 0; j < nions; j++)
+    sum = 0.0;
+    for (j = 0; j < nions; j++)
 	{
-	  gsqrd =
-	    (ion[j].z * ion[j].z * RYD2ERGS) / (BOLTZMANN *
+	if (ion[j].istate != 1) //The neutral ion does not contribute
+		{
+	gsqrd =
+	    ((ion[j].istate-1) * (ion[j].istate-1) * RYD2ERGS) / (BOLTZMANN *
 						plasmamain[i].t_e);
-	  gaunt = gaunt_ff (gsqrd);
-	  sum += plasmamain[i].density[j] * ion[j].z * ion[j].z * gaunt;
+	gaunt = gaunt_ff (gsqrd);
+	sum += plasmamain[i].density[j] * (ion[j].istate-1) * (ion[j].istate-1) * gaunt;
 	  /* 74a_ksl  Added to diagnose problem with kappa_ff_fact producing NaN */
-	  if (sane_check (sum))
+        if (sane_check (sum))
 	    {
 	      Error
 		("pop_kappa_ff_array:sane_check sum is %e this is a problem, possible in gaunt %3\n",
 		 sum, gaunt);
 	    }
+		}
+	else
+		{
+		sum+=0.0;//add nothing to the sum if we have a neutral ion
+		}
 
 	}
       plasmamain[i].kappa_ff_factor = plasmamain[i].ne * sum * 3.692e8;
-
-    }
+}
 
   return (0);
 }
+
+
