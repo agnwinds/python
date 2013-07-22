@@ -30,6 +30,8 @@ double dfudge;			// This is the push-through distance
 double DFUDGE;
 #define VCHECK	1.e6		// The maximum allowable error in calculation of the velocity in calculate_ds
 
+
+
 /* 57h -- Changed several defined variables to numbers to allow one to vary them 
 in the process of running the code */
 double SMAX_FRAC;		/* In translate_in_wind, a limit is placed on the maximum distance a
@@ -299,6 +301,7 @@ struct geometry
   double lum_comp;		/*1108 NSH The luminosity of the wind as a result of compton cooling */
   double lum_dr;		/*1109 NSH The luminosity of the wind due to dielectronic recombination */
   double lum_adiabatic;		/*1209 NSH The cooling of the wind due to adiabatic expansion */
+  double heat_adiabatic;		/*1307 NSH The heating of the wind due to adiabatic heating - split out from lum_adiabatic to get an accurate idea of whether it is important */
   double f_tot, f_star, f_disk, f_bl, f_agn, f_wind;	/* The integrated specific L between a freq min and max which are
 							   used to establish the fraction of photons of various types */
 
