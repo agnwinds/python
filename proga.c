@@ -122,7 +122,7 @@ get_proga_wind_params ()
 
 
   Log
-    ("Creating a wind model for a Cataclysmic Variable using a Proga Calc\n");
+    ("Creating a wind model using a Proga Zeus Calc\n");
 
   get_proga ();
  // geo.wind_rmin = 8.7e8;	/*Radius where wind begins */
@@ -139,11 +139,11 @@ get_proga_wind_params ()
   geo.wind_rmin = proga_r_edge[0+IGHOST];
    
   geo.wind_rmax = geo.rmax = proga_r_edge[iproga_r]+proga_dr_edge[iproga_r]; //Set the outer edge of the wind to the outer edge of the final defined cell
-  printf ("rmax=%e\n",geo.rmax);
+  Log ("rmax=%e\n",geo.rmax);
   geo.wind_rho_min = 0.0;  //Set wind_rmin 0.0, otherwise wind cones dont work properly 
-  printf ("rho_min=%e\n",geo.wind_rho_min);
+  Log ("rho_min=%e\n",geo.wind_rho_min);
   geo.wind_rho_max = geo.rmax;  //This is the outer edge of the
-  printf ("rho_max=%e\n",geo.wind_rho_max);
+  Log ("rho_max=%e\n",geo.wind_rho_max);
   geo.wind_thetamin = proga_theta_edge[0+IGHOST];
 
 
@@ -244,7 +244,7 @@ This allows one to disregard theta cells which contain the disk in Daniels model
   rddoub ("Proga_thetamax(degrees)", &proga_thetamax);
 
   proga_thetamax=proga_thetamax/RADIAN;
-  printf ("PROGA we will be using data down to theta=%e (%f degrees)\n",proga_thetamax,proga_thetamax*RADIAN);
+//  printf ("PROGA we will be using data down to theta=%e (%f degrees)\n",proga_thetamax,proga_thetamax*RADIAN);
 
 
   j_proga_thetamax = 0;		/* NSH 130605 to remove o3 compile error */
@@ -265,7 +265,7 @@ This allows one to disregard theta cells which contain the disk in Daniels model
     }
   if (j_proga_thetamax==0 || j_proga_thetamax==i-1)
 	{
-	printf ("PROGA j_proga_thetamax never bracketed, using all data\n");
+	Log ("PROGA j_proga_thetamax never bracketed, using all data\n");
 	iproga_theta=i;
 	geo.wind_thetamax=90. / RADIAN;
 	proga_thetamax=90.0/RADIAN;
@@ -556,7 +556,7 @@ proga_rho (x)
 
   if (r > proga_r_cent[iproga_r])
     {
-      printf (" r outside proga grid\n");
+      Log (" r outside proga grid in proga_rho\n");
       rrho = 1.e-23;
       return (rrho);
     }
@@ -651,7 +651,7 @@ proga_temp (x)
 
   if (r > proga_r_cent[iproga_r])
     {
-      printf (" r outside proga grid\n");
+      Log (" r outside proga grid in proga_temp\n");
       temp = 1e4;
       return (temp);
     }

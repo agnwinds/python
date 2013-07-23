@@ -299,7 +299,6 @@ process. */
 	      ds_current += (tau_scat - ttau) / (kap_cont);	//distance travelled
 	      ttau = tau_scat;
 	      *tau = ttau;
-//     printf ("NSH Photon %i has scattered by continuum process %i in cell %i after %e cm and now has weight %e and frequency %e\n",p->np,*nres,nplasma,ds_current,p->w,p->freq);
 	      return (ds_current);
 	    }
 	  else
@@ -347,7 +346,7 @@ process. */
 
 		  ttau += tau_sobolev =
 		    sobolev (one, p, dd, lin_ptr[nn], dvds);
-		  //    printf ("NSH Photon %i has enocuntered a resonant line in cell %i after %e cm with tau=%e. Total opacity now %e vs required %e\n",p->np,nplasma,ds_current,tau_sobolev,ttau,tau_scat);
+
 		  /* tau_sobolev now stores the optical depth. This is fed into the next statement for the bb estimator
 		     calculation. SS March 2004 */
 
@@ -421,7 +420,7 @@ process. */
 		  *istat = P_SCAT;
 		  *nres = nn;
 		  *tau = ttau;
-//              printf ("Photon scatters after %e cm\n",ds_current);
+
 
 
 
@@ -464,7 +463,6 @@ event occurred.  04 apr
       *istat = P_INWIND;
       ttau += kap_cont * (smax - ds_current);	/* kap_es replaced with kap_cont (SS) */
       ds_current = smax;
-//      printf ("Photon has hit a wall\n");
 
     }
 

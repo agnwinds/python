@@ -337,7 +337,7 @@ bands_init (imode, band)
 
 
       for (nband = 0; nband < band->nbands; nband++)
-	printf ("f1=%e,f2=%e,alpha=%e,const=%e,lum1=%e,lum2=%e\n",
+	Log ("f1=%e,f2=%e,alpha=%e,const=%e,lum1=%e,lum2=%e\n",
 		band->f1[nband], band->f2[nband], band->alpha[nband],
 		band->pl_const[nband],
 		band->pl_const[nband] * pow (band->f1[nband],
@@ -354,8 +354,6 @@ bands_init (imode, band)
     {
       tmax = geo.tstar;
       fmax = tmax * WIEN;	//Use wiens law to get peak frequency
-      printf ("We are in mode 6 - tmax=%e, fmax=%e\n", tmax, fmax);
-
       band->nbands = 17;
 
 
