@@ -175,8 +175,10 @@ History:
 			This has plenty of range.  Notge that there is no need to make NPHOT
 			a long, as suggested above.  We do not expect it to exceed 2e9,
 			although some kind of error check might be reasonble.
-	1306	ksl	Modified to allow a pwoer law component to a stellar spectrum.  Made
+	1306	ksl	Modified to allow a power law component to a stellar spectrum.  Made
 			some changes use DEF variables instead of numbers to make choices
+	1307	jm	SS Parallelized Python in June 2013, for release 76a. I have now introduced
+			slightly altered reporting to allow more succinct reporting in parallel mode.
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -227,7 +229,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   char windradfile[LINELENGTH], windsavefile[LINELENGTH];
   char specsavefile[LINELENGTH];
   char photfile[LINELENGTH], diagfile[LINELENGTH],
-    old_windsavefile[LINELENGTH];
+    old_windsavefile[LINELENGTH], diagfolder[LINELENGTH];
   char dummy[LINELENGTH];
   char tprofile[LINELENGTH];
   double xbl;
@@ -250,6 +252,8 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   int *iredhelper, *iredhelper2;
   int size_of_helpers;
 
+  int mkdir();
+
   #ifdef MPI_ON
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
@@ -264,8 +268,6 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   Log_set_mpi_rank(my_rank);	// communicates my_rank to kpar
 
-  printf("Thread %d starting.\n", my_rank);
-
   opar_stat = 0;		/* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
 				   the assumption is that we are reading from the command line */
   restart_stat = 0;		/* 67 -ksl - 08nov - Assume initially that these is a new run from scratch, and not 
@@ -279,6 +281,10 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 				   get less set the verbosity to a lower level. */
 
   Log_set_verbosity (verbosity);
+
+
+  Log_parallel ("Thread %d starting.\n", my_rank); //JM130723 moved this after verbosity switch
+
 
   /* Parse the command line.  Updated for 67 to allow for switches  - 0811 - ksl  */
 
@@ -341,8 +347,13 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
       strcpy (dummy, argv[argc - 1]);
       get_root (root, dummy);
-      sprintf(dummy,"_%d.diag",my_rank);
-      strcpy (diagfile, root);
+
+      /* JM130722 we now store diag files in a subdirectory if in parallel*/
+      sprintf(diagfolder,"diag_%s/",root);
+      mkdir(diagfolder, 0777);
+      strcpy (diagfile,diagfolder);
+      sprintf(dummy,"_%d.diag",my_rank);	
+      strcat (diagfile, root);
       strcat (diagfile, dummy);
 
 
@@ -390,7 +401,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   /* Start logging of errors and comments */
 
   Log ("!!Python Version %s \n", VERSION);	//54f -- ksl -- Now read from version.h
-  Log ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
+  Log_parallel ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
 
   /* Set the maximum time if it was defined */
   if (time_max > 0)
@@ -404,7 +415,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   if (strncmp (root, "dummy", 5) == 0)
     {
-      printf
+      Log
 	("Proceeding to create rdpar file in dummy.pf, but will not run prog\n");
     }
   else if (strncmp (root, "stdin", 5) == 0
@@ -412,7 +423,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	   || strlen (root) == 0)
     {
       strcpy (root, "mod");
-      printf
+      Log
 	("Proceeding in interactive mode\n Output files will have rootname mod\n");
     }
   else
@@ -422,11 +433,11 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
       if ((opar_stat = opar (input)) == 2)
 	{
-	  printf ("Reading data from file %s\n", input);
+	  Log ("Reading data from file %s\n", input);
 	}
       else
 	{
-	  printf ("Creating a new parameter file %s\n", input);
+	  Log ("Creating a new parameter file %s\n", input);
 	}
 
     }
@@ -446,8 +457,12 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   strcpy (windradfile, "python");
   strcpy (windsavefile, root);
   strcpy (specsavefile, root);
-  strcpy (photfile, "python");
-  strcpy (diskfile, root);
+
+  /* 130722 JM we now save python.phot and disk.diag files under diag_root folder */
+  strcpy (photfile, diagfolder);
+  strcpy (diskfile, diagfolder);
+  strcat (photfile, "python");
+  strcat (diskfile, root);
 
   strcat (wspecfile, ".spec_tot");
   strcat (lspecfile, ".log_spec_tot");
@@ -1782,7 +1797,7 @@ run -- 07jul -- ksl
       MPI_Reduce(redhelper, redhelper2, size_of_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
       if (rank_global == 0)
 	{
-	  Log("Zeroth thread successfully received the normalised estimators. About to broadcast.\n");
+	  Log_parallel("Zeroth thread successfully received the normalised estimators. About to broadcast.\n");
 	}
       
       MPI_Bcast(redhelper2, size_of_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -1804,7 +1819,7 @@ run -- 07jul -- ksl
 	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(9+NXBANDS*2+mpi_j)*NPLASMA];
 	    }
 	}
-      Log("Thread %d happy after broadcast.\n", rank_global);
+      Log_parallel("Thread %d happy after broadcast.\n", rank_global);
 
       MPI_Barrier(MPI_COMM_WORLD);
 
@@ -1819,7 +1834,7 @@ run -- 07jul -- ksl
       MPI_Reduce(iredhelper, iredhelper2, size_of_helpers, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
       if (rank_global == 0)
 	{
-	  Log("Zeroth thread successfully received the integer sum. About to broadcast.\n");
+	  Log_parallel("Zeroth thread successfully received the integer sum. About to broadcast.\n");
 	}
       
       MPI_Bcast(iredhelper2, size_of_helpers, MPI_INT, 0, MPI_COMM_WORLD);
@@ -2140,12 +2155,18 @@ run -- 07jul -- ksl
 
 
 /* Finally done */
-
+#ifdef MPION
+  sprintf (dummy,"End of program, Thread %d only",my_rank);   // added so we make clear these are just errors for thread ngit status	
+  error_summary (dummy);	// Summarize the errors that were recorded by the program
+  Log ("Run py_error.py for full error report.\n")
+#else
   error_summary ("End of program");	// Summarize the errors that were recorded by the program
+#endif
 
 
   #ifdef MPI_ON
     MPI_Finalize();
+    Log_parallel("Thread %d Finalized. All done\n", my_rank);
   #endif  
 
 
