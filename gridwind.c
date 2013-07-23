@@ -367,7 +367,7 @@ calloc_macro (nelem)
 
   if (nlevels_macro == 0 && geo.nmacro == 0)
     {
-      //OLD71 - line is redundnat geo.nmacro = 0;
+      
       Log
 	("calloc_macro: Allocated no space for macro since nlevels_macro==0 and geo.nmacro==0\n");
       return (0);
@@ -376,6 +376,7 @@ calloc_macro (nelem)
     {
       free (macromain);
     }
+
   //Allocate one extra element to store data where there is no volume
 
   macromain = (MacroPtr) calloc (sizeof (macro_dummy), (nelem + 1));
@@ -439,12 +440,10 @@ calloc_estimators (nelem)
   //Allocate one extra element to store data where there is no volume
 
 
-
-
-  // printf("nlevels_macro %d\n", nlevels_macro);
   size_Jbar_est = 0;
   size_gamma_est = 0;
   size_alpha_est = 0;
+
   for (n = 0; n < nlevels_macro; n++)
     {
       Log

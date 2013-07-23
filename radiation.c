@@ -426,10 +426,10 @@ statement could be deleted entirely 060802 -- ksl */
   for (n = 0; n < nauger; n++)
     {
       ft = augerion[n].freq_t;
-      //printf("Auger tests: %g %g %g\n", augerion[n].freq_t, freq, p->freq);
+      //Log("Auger tests: %g %g %g\n", augerion[n].freq_t, freq, p->freq);
       if (p->freq > ft)
 	{
-	  //      printf("Adding a packet to AUGER via radiation %g \n", freq);
+	  //      Log("Adding a packet to AUGER via radiation %g \n", freq);
 
 	  weight_of_packet = w_ave;
 	  x = sigma_phot_verner (&augerion[n], freq);	//this is the cross section

@@ -292,7 +292,6 @@ pl_alpha_func (alpha)
   double answer;
 
   answer = pl_mean (alpha, spec_numin, spec_numax) - spec_numean;
-  //    printf("NSH alpha=%.3f,f1=%10.2e,f2=%10.2e,meanfreq=%10.2e,ans=%e\n",alpha,spec_numin,spec_numax,spec_numean,answer);
   return (answer);
 }
 
