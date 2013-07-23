@@ -266,8 +266,6 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   Log_set_mpi_rank(my_rank);	// communicates my_rank to kpar
 
-  Log_parallel ("Thread %d starting.\n", my_rank);
-
   opar_stat = 0;		/* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
 				   the assumption is that we are reading from the command line */
   restart_stat = 0;		/* 67 -ksl - 08nov - Assume initially that these is a new run from scratch, and not 
@@ -281,6 +279,10 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 				   get less set the verbosity to a lower level. */
 
   Log_set_verbosity (verbosity);
+
+
+  Log_parallel ("Thread %d starting.\n", my_rank); //JM130723 moved this after verbosity switch
+
 
   /* Parse the command line.  Updated for 67 to allow for switches  - 0811 - ksl  */
 
@@ -2162,7 +2164,7 @@ run -- 07jul -- ksl
 
   #ifdef MPI_ON
     MPI_Finalize();
-    Log_parallel("Threads Finalized. All done\n");
+    Log_parallel("Thread %d Finalized. All done\n", my_rank);
   #endif  
 
 
