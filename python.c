@@ -266,7 +266,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   Log_set_mpi_rank(my_rank);	// communicates my_rank to kpar
 
-  printf("Thread %d starting.\n", my_rank);
+  Log_parallel ("Thread %d starting.\n", my_rank);
 
   opar_stat = 0;		/* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
 				   the assumption is that we are reading from the command line */
@@ -397,7 +397,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   /* Start logging of errors and comments */
 
   Log ("!!Python Version %s \n", VERSION);	//54f -- ksl -- Now read from version.h
-  Log ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
+  Log_parallel ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
 
   /* Set the maximum time if it was defined */
   if (time_max > 0)
@@ -411,7 +411,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   if (strncmp (root, "dummy", 5) == 0)
     {
-      printf
+      Log
 	("Proceeding to create rdpar file in dummy.pf, but will not run prog\n");
     }
   else if (strncmp (root, "stdin", 5) == 0
@@ -419,7 +419,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	   || strlen (root) == 0)
     {
       strcpy (root, "mod");
-      printf
+      Log
 	("Proceeding in interactive mode\n Output files will have rootname mod\n");
     }
   else
@@ -429,11 +429,11 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
       if ((opar_stat = opar (input)) == 2)
 	{
-	  printf ("Reading data from file %s\n", input);
+	  Log ("Reading data from file %s\n", input);
 	}
       else
 	{
-	  printf ("Creating a new parameter file %s\n", input);
+	  Log ("Creating a new parameter file %s\n", input);
 	}
 
     }
@@ -1793,7 +1793,7 @@ run -- 07jul -- ksl
       MPI_Reduce(redhelper, redhelper2, size_of_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
       if (rank_global == 0)
 	{
-	  Log("Zeroth thread successfully received the normalised estimators. About to broadcast.\n");
+	  Log_parallel("Zeroth thread successfully received the normalised estimators. About to broadcast.\n");
 	}
       
       MPI_Bcast(redhelper2, size_of_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -1815,7 +1815,7 @@ run -- 07jul -- ksl
 	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(9+NXBANDS*2+mpi_j)*NPLASMA];
 	    }
 	}
-      Log("Thread %d happy after broadcast.\n", rank_global);
+      Log_parallel("Thread %d happy after broadcast.\n", rank_global);
 
       MPI_Barrier(MPI_COMM_WORLD);
 
@@ -1830,7 +1830,7 @@ run -- 07jul -- ksl
       MPI_Reduce(iredhelper, iredhelper2, size_of_helpers, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
       if (rank_global == 0)
 	{
-	  Log("Zeroth thread successfully received the integer sum. About to broadcast.\n");
+	  Log_parallel("Zeroth thread successfully received the integer sum. About to broadcast.\n");
 	}
       
       MPI_Bcast(iredhelper2, size_of_helpers, MPI_INT, 0, MPI_COMM_WORLD);
@@ -2152,7 +2152,7 @@ run -- 07jul -- ksl
 
 /* Finally done */
 #ifdef MPION
-  sprintf (dummy,"End of program, Thread %d only",my_rank);   // added so we make clear these are just errors for thread n	
+  sprintf (dummy,"End of program, Thread %d only",my_rank);   // added so we make clear these are just errors for thread ngit status	
   error_summary (dummy);	// Summarize the errors that were recorded by the program
   Log ("Run py_error.py for full error report.\n")
 #else
@@ -2162,6 +2162,7 @@ run -- 07jul -- ksl
 
   #ifdef MPI_ON
     MPI_Finalize();
+    Log_parallel("Threads Finalized. All done\n");
   #endif  
 
 
