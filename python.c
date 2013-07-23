@@ -175,8 +175,10 @@ History:
 			This has plenty of range.  Notge that there is no need to make NPHOT
 			a long, as suggested above.  We do not expect it to exceed 2e9,
 			although some kind of error check might be reasonble.
-	1306	ksl	Modified to allow a pwoer law component to a stellar spectrum.  Made
+	1306	ksl	Modified to allow a power law component to a stellar spectrum.  Made
 			some changes use DEF variables instead of numbers to make choices
+	1307	jm	SS Parallelized Python in June 2013, for release 76a. I have now introduced
+			slightly altered reporting to allow more succinct reporting in parallel mode.
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
