@@ -207,11 +207,12 @@ then the photon frequency will be less. */
 
   if (fabs (dfreq) < EPSILON)
     {
-      vwind_xyz (p, v_inner);
       Error
-	("translate: v same at both sides of cell %d so dfreq is %2g,\n v_inner %.2g %.2g %.2g v_outer %.2g %.2g %.2g \n",
+	("translate: v same at both sides of cell %d\n",one->nwind); /*NSH 130724 shortened error statement, was causing issues with formatting */
+
+/* so dfreq is %2g,\n v_inner %.2g %.2g %.2g v_outer %.2g %.2g %.2g \n",
 	 one->nwind, dfreq, v_inner[0], v_inner[1], v_inner[2], v_outer[0],
-	 v_outer[1], v_outer[2]);
+	 v_outer[1], v_outer[2]); This is the part of the above error statement cut out */
       x = -1;
       return (smax);		// This is not really the best thing to do, but it avoids disaster below
 
