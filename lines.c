@@ -665,7 +665,7 @@ p_escape (line_ptr, xplasma)
 
       tau = (d1 - line_ptr->gl / line_ptr->gu * d2);
       tau *= PI_E2_OVER_M * line_ptr->f / line_ptr->freq / dvds;
-//      printf ("LINE ESCAPE dvds=%e tau=%e\n",dvds,tau);
+
       if (tau < 1e-6)
 	escape = 1.;
       else if (tau < 10.0)

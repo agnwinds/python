@@ -207,17 +207,15 @@ get_hub (t, g, w, flux)
   int i, iglo, ighi;
   int get_allmodels ();
 
-//printf("find t, g %f %f\n",t,g);
-
 /* If this is the first time the subroutine is called, it reads
 all the models */
 
   if (igethublist < 0)
     {
       get_allmodels (hubeny_list);
-      printf ("hub Read all input models \n");
-      printf ("hub t %f %f\n", hub_tmin, hub_tmax);
-      printf ("hub g %f %f\n", hub_gmin, hub_gmax);
+      Log ("hub Read all input models \n");
+      Log ("hub t %f %f\n", hub_tmin, hub_tmax);
+      Log ("hub g %f %f\n", hub_gmin, hub_gmax);
     }
 
   igethublist = 1;
@@ -248,7 +246,7 @@ with what weights */
     {
       dt = model[i].t - t;
 #if DEBUG
-      printf ("dt mod.t t %.2g %.2g %.2g\n", dt, model[i].t, t);
+      Log ("dt mod.t t %.2g %.2g %.2g\n", dt, model[i].t, t);
 #endif
       if (dt >= 0 && dt < dthi)
 	{
@@ -265,7 +263,7 @@ with what weights */
   wthi = (1. - wtlo);
 
 #if DEBUG
-  printf ("thi tlo %.2g %.2g %.2g %.2g\n", thi, tlo, wtlo, wthi);
+  Log ("thi tlo %.2g %.2g %.2g %.2g\n", thi, tlo, wtlo, wthi);
 #endif
 
 /* So now we have defined thi and tlo.  We now
@@ -284,7 +282,7 @@ at tlow and thi*/
 
 	  dg = model[i].g - g;
 #if DEBUG
-	  printf ("match tlo: %d %f %f %f\n", i, model[i].t, model[i].g, dg);
+	  Log ("match tlo: %d %f %f %f\n", i, model[i].t, model[i].g, dg);
 #endif
 	  if (dg >= 0 && dg < dghi)
 	    {
@@ -302,7 +300,7 @@ at tlow and thi*/
     }
 
 #if DEBUG
-  printf ("low T glo ghi iglo ighi %.2lg %.2lg %d %d %.2lg %.2lg\n", glo, ghi,
+  Log ("low T glo ghi iglo ighi %.2lg %.2lg %d %d %.2lg %.2lg\n", glo, ghi,
 	  iglo, ighi, dghi, dglo);
 #endif
 
@@ -322,7 +320,7 @@ at tlow and thi*/
 	  fluxtlo[i] = whi * model[ighi].flux[i] + wlo * model[iglo].flux[i];
 	}
 #if DEBUG
-      printf ("weight glo: ig lo-hi w lo-hi %d %d %f %f\n", iglo, ighi, wlo,
+      Log ("weight glo: ig lo-hi w lo-hi %d %d %f %f\n", iglo, ighi, wlo,
 	      whi);
 #endif
 
@@ -338,7 +336,7 @@ at tlow and thi*/
 	  dg = model[i].g - g;
 
 #if DEBUG
-	  printf ("match thi: %d %f %f %f\n", i, model[i].t, model[i].g, dg);
+	  Log ("match thi: %d %f %f %f\n", i, model[i].t, model[i].g, dg);
 #endif
 	  if (dg >= 0 && dg < dghi)
 	    {
@@ -355,7 +353,7 @@ at tlow and thi*/
 	}
     }
 #if DEBUG
-  printf ("hi T glo ghi iglo ighi %.2lg %.2lf %d %d %.2lg %.2lg\n", glo, ghi,
+  Log ("hi T glo ghi iglo ighi %.2lg %.2lf %d %d %.2lg %.2lg\n", glo, ghi,
 	  iglo, ighi, dghi, dglo);
 #endif
   if (ghi == glo)
@@ -374,7 +372,7 @@ at tlow and thi*/
 	  fluxthi[i] = whi * model[ighi].flux[i] + wlo * model[iglo].flux[i];
 	}
 #if DEBUG
-      printf ("weight hi T ig lo-hi w lo-hi %d %d %f %f\n", iglo, ighi, wlo,
+      Log ("weight hi T ig lo-hi w lo-hi %d %d %f %f\n", iglo, ighi, wlo,
 	      whi);
 #endif
 
@@ -412,13 +410,13 @@ get_allmodels (filename)
 
 
 /* Create the complete name to the file */
-  printf ("Index of models being used in %s  \n", filename);
+  Log ("Index of models being used in %s  \n", filename);
 
 /* Now read in the models which exist */
 
   if ((iptr = fopen (filename, "r")) == NULL)
     {
-      fprintf (stderr, "Error opening file %s\n", filename);
+      fLog (stderr, "Error opening file %s\n", filename);
       exit (1);
     }
 
@@ -428,7 +426,7 @@ get_allmodels (filename)
     }
   else
     {
-      fprintf (stderr, "help: Unexpected EOF\n");
+      fLog (stderr, "help: Unexpected EOF\n");
       exit (0);
     }
 
@@ -439,7 +437,7 @@ get_allmodels (filename)
     }
   else
     {
-      fprintf (stderr, "help: Unexpected EOF\n");
+      fLog (stderr, "help: Unexpected EOF\n");
       exit (0);
     }
 
@@ -448,11 +446,11 @@ get_allmodels (filename)
   while ((fgets (line, LINELEN, iptr)) != NULL)
     {
       sscanf (line, "%s %lf %lf", fname, &t, &g);
-      sprintf (name, "%s", fname);
+      sLog (name, "%s", fname);
 
       if (t < hub_tmin || t > hub_tmax || g < hub_gmin || g > hub_gmax)
 	{
-	  fprintf (stderr, "Model %s %g %g out of range and ignored\n", fname,
+	  fLog (stderr, "Model %s %g %g out of range and ignored\n", fname,
 		   t, g);
 	}
       else
@@ -462,7 +460,7 @@ get_allmodels (filename)
 	  strcpy (model[nmod].name, name);
 
 
-	  printf ("Reading model %d %s %f %f\n",
+	  Log ("Reading model %d %s %f %f\n",
 		  nmod, model[nmod].name, model[nmod].t, g);
 
 /* now read the model */
@@ -470,7 +468,7 @@ get_allmodels (filename)
 
 	  if ((jptr = fopen (name, "r")) == NULL)
 	    {
-	      fprintf (stderr, "Error trying to open %s\n", model[nmod].name);
+	      fLog (stderr, "Error trying to open %s\n", model[nmod].name);
 	      exit (1);
 	    }
 
@@ -485,7 +483,7 @@ get_allmodels (filename)
 		  sscanf (line, "%lf %lf", &w[nw], &f[nw]);
 		  nw++;
 #if DEBUG
-		  printf ("ret from fgets %lf %lf\n", w[nw], f[nw]);
+		  Log ("ret from fgets %lf %lf\n", w[nw], f[nw]);
 #endif
 		}
 
@@ -501,7 +499,7 @@ get_allmodels (filename)
 	    }
 	  if (nmod > 0 && nwav != nw)
 	    {
-	      fprintf (stderr,
+	      fLog (stderr,
 		       "Error: File %s did had %d waves instead of %d\n",
 		       name, nw, nwav);
 	      exit (1);
@@ -510,7 +508,7 @@ get_allmodels (filename)
 	    model[nmod].flux[kkk] = f[kkk];
 #if DEBUG
 	  for (kkk = 0; kkk < nwav; kkk++)
-	    printf ("%lf %lf\n", w[kkk], f[kkk]);
+	    Log ("%lf %lf\n", w[kkk], f[kkk]);
 #endif
 	  nmod++;
 	}

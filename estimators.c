@@ -176,7 +176,7 @@ bf_estimators_increment (one, p, ds)
       ft = augerion[n].freq_t;
       if (freq_av > ft)
 	{
-	  printf ("Adding a pacjet to AUGER %g \n", freq_av);
+	  Log ("estimators: Adding a packet to AUGER %g \n", freq_av);
 
 	  weight_of_packet = p->w;
 	  x = sigma_phot_verner (&augerion[n], freq_av);	//this is the cross section
@@ -502,9 +502,8 @@ mc_estimator_normalise (n)
 	      Error
 		("stimfac %g, i %d, line[config[i].bbu_jump[j]].nconfigu %d\n",
 		 stimfac, i, line[config[i].bbu_jump[j]].nconfigu);
-	      printf (" %g %g \n", den_config (xplasma, i),
-		      den_config (xplasma,
-				  line[config[i].bbu_jump[j]].nconfigu));
+	      Log ("estimators: den_config (xplasma, i) %g  den_config (xplasma, line[config[i].bbu_jump[j]].nconfigu) %g \n", 
+                    den_config (xplasma, i), den_config (xplasma, line[config[i].bbu_jump[j]].nconfigu));
 	      stimfac = 0.0;
 	      //exit (0);
 	    }

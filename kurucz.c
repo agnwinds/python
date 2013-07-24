@@ -206,7 +206,7 @@ kurucz (model, wavelength, flux)
       return (NOK);
     }
 #if DEBUG
-  printf ("wave_k %lf %lf %lf\n", wavelength[1], wavelength[100],
+  Log ("wave_k %lf %lf %lf\n", wavelength[1], wavelength[100],
 	  wavelength[500]);
 #endif
 
@@ -229,7 +229,7 @@ kurucz (model, wavelength, flux)
     }
 
 #if DEBUG
-  printf ("flux_k %f %f %f\n", flux[1], flux[100], flux[500]);
+  Log ("flux_k %f %f %f\n", flux[1], flux[100], flux[500]);
 #endif
 
   fclose (fptr);
