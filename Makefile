@@ -1,9 +1,10 @@
 # This is the makefile for the python related programs
 #
-# usage      make [D] python
+# usage      make [CC=...] [D] python
 #
 # Adding D causes the routine to be run in a way that profiling and ddd can be used.
-# Otherwise the run will be optimized to run as fast as possible
+# Otherwise the run will be optimized to run as fast as possible. CC is an option to choose
+# a different compiler other than mpicc.
 #
 # History
 # 05jan	ksl	54f  Modified Makefile so that the Version number is automatically
@@ -19,11 +20,22 @@
 #
 # 13jun jm/ss	SS added parallel flag -DMPI_ON and mpicc wrapper for gcc
 #		is now used as C compiler
+# 13jul jm	can now compiled with gcc using 'make CC=gcc python'
+
 
 #MPICC is now default compiler- currently code will not compile with gcc
 CC = mpicc
+# CC = gcc	can use GCC either from command line or by uncommenting this
 FC = g77
 # FC = gfortran
+
+
+#this is so that the -DMPI_ON flag is only used if you are compiling with mpicc
+ifeq (mpicc, $(CC))
+	MPI_FLAG = -DMPI_ON
+else
+	MPI_FLAG =
+endif
 
 INCLUDE = ../../include
 INCLUDE2 = ../../gsl/include
@@ -35,13 +47,13 @@ BIN = ../../bin
 ifeq (D,$(firstword $(MAKECMDGOALS)))
 # use pg when you want to use gprof the profiler
 # to use profiler make with arguments "make D python" 
-# this can be altered to whatever is best
+# this can be altered to whatever is best	
+	CFLAGS = -g -pg -Wall -I$(INCLUDE) -I$(INCLUDE2) $(MPI_FLAG)
 	FFLAGS = -g -pg   
-	CFLAGS = -g -pg -Wall -I$(INCLUDE) -I$(INCLUDE2) -DMPI_ON
 	PRINT_VAR = DEBUGGING, -g -pg -Wall flags
 else
 # Use this for large runs
-	CFLAGS = -O3 -Wall -I$(INCLUDE)  -I$(INCLUDE2) -DMPI_ON
+	CFLAGS = -O3 -Wall -I$(INCLUDE)  -I$(INCLUDE2) $(MPI_FLAG)
 	FFLAGS =     
         PRINT_VAR = LARGE RUNS, -03 -Wall flags
 endif
@@ -58,11 +70,12 @@ CHOICE=1             // Compress plasma as much as possible
 
 startup:
 	@echo 'YOU ARE COMPILING FOR' $(PRINT_VAR)
+	@echo 'MPI_FLAG=' $(MPI_FLAG)
 	echo "#define VERSION " \"$(VERSION)\" > version.h
 	echo "#define CHOICE"   $(CHOICE) >> version.h
 
 foo: foo.o signal.o time.o
-	mpicc ${cfllags} foo.o signal.o time.o ${LDFLAGS}  -o foo
+	$(CC) ${cfllags} foo.o signal.o time.o ${LDFLAGS}  -o foo
 
 python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		saha.o spectra.o wind2d.o wind.o  vector.o debug.o recipes.o \
@@ -99,7 +112,7 @@ prototypes:
 	cp foo.h templates.h
 
 python: startup  python.o $(python_objects)
-	mpicc  ${CFLAGS} python.o $(python_objects) $(LDFLAGS) -o python
+	$(CC)  ${CFLAGS} python.o $(python_objects) $(LDFLAGS) -o python
 		cp $@ $(BIN)/py
 		mv $@ $(BIN)/py$(VERSION)
 
@@ -130,18 +143,18 @@ py_smooth: py_smooth.o
 		mv $@ $(BIN)
 
 test_bb: bb.o test_bb.o pdf.o recipes.o bilinear.o time.o 
-	mpicc  ${CFLAGS} bb.o pdf.o test_bb.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_bb
+	$(CC)  ${CFLAGS} bb.o pdf.o test_bb.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_bb
 	
 test_pow: test_pow.o pdf.o recipes.o bilinear.o time.o 
-	mpicc  ${CFLAGS} pdf.o test_pow.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_pow
+	$(CC)  ${CFLAGS} pdf.o test_pow.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_pow
 
 
 test_saha: test_saha.o $(python_objects)
-	mpicc ${CFLAGS} test_saha.o $(python_objects) $(LDFLAGS) -o test_saha
+	$(CC) ${CFLAGS} test_saha.o $(python_objects) $(LDFLAGS) -o test_saha
 		mv $@ $(BIN)
 
 test_dielectronic: test_dielectronic.o $(python_objects)
-	mpicc ${CFLAGS} test_dielectronic.o $(python_objects) $(LDFLAGS) -o test_dielectronic
+	$(CC) ${CFLAGS} test_dielectronic.o $(python_objects) $(LDFLAGS) -o test_dielectronic
 		mv $@ $(BIN)
 
 t_bilinear:  t_bilinear.o bilinear.o  
@@ -164,7 +177,7 @@ py_ray: bb.o get_atomicdata.o py_ray.o photon2d.o photon_gen.o \
 		density.o  detail.o  bands.o \
 		yso.o elvis.o cylindrical.o rtheta.o \
 		matom.o estimators.o wind_sum.o
-	mpicc  ${CFLAGS} py_ray.o get_atomicdata.o photon2d.o photon_gen.o \
+	$(CC)  ${CFLAGS} py_ray.o get_atomicdata.o photon2d.o photon_gen.o \
 		bb.o detail.o \
 		saha.o spectra.o wind2d.o wind.o  vector.o debug.o recipes.o \
 		trans_phot.o phot_util.o resonate.o radiation.o \
@@ -193,7 +206,7 @@ py_grid: bb.o get_atomicdata.o py_grid.o photon2d.o photon_gen.o \
 		yso.o elvis.o cylindrical.o rtheta.o \
 		matom.o estimators.o wind_sum.o \
 		density.o bands.o detail.o 
-	mpicc  ${CFLAGS} py_grid.o get_atomicdata.o photon2d.o photon_gen.o \
+	$(CC)  ${CFLAGS} py_grid.o get_atomicdata.o photon2d.o photon_gen.o \
 		bb.o\
 		saha.o spectra.o wind2d.o wind.o  vector.o debug.o recipes.o \
 		trans_phot.o phot_util.o resonate.o radiation.o \
@@ -226,7 +239,7 @@ balance: balance.o balance_sub.o balance_gen.o balance_abso.o \
 		spherical.o cylindrical.o cylind_var.o rtheta.o yso.o elvis.o gridwind.o wind_sum.o \
 		partition.o auger_ionization.o agn.o shell_wind.o compton.o torus.o spectral_estimators.o \
 		dielectronic.o variable_temperature.o zeta.o
-	mpicc   ${CFLAGS} balance.o balance_sub.o balance_gen.o   balance_abso.o \
+	$(CC)   ${CFLAGS} balance.o balance_sub.o balance_gen.o   balance_abso.o \
 		emission.o recomb.o balance_bb.o gradv.o  detail.o \
 		get_atomicdata.o random.c wind2d.o wind.o  bal_trans_phot.o \
 		bb.o pdf.o sv.o vector.o wind_updates2d.o windsave.o \
@@ -257,7 +270,7 @@ startup_saha: startup $(saha_sources)
 	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(saha_sources) > saha_templates.h
 
 saha_inv: saha_inv.o get_atomicdata.c
-	mpicc ${CFLAGS} saha_inv.o get_atomicdata.o
+	$(CC) ${CFLAGS} saha_inv.o get_atomicdata.o
 	cp $@ $(BIN)/saha_inv
 	mv $@ $(BIN)/saha_inv$(VERSION)
 
