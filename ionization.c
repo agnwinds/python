@@ -257,14 +257,20 @@ convergence (xplasma)
   if (xplasma->t_e < TMAX)
 	{
   	if ((xplasma->converge_t_e =
-       	fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old +
+       		fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old +
 						 xplasma->t_e)) > epsilon)
-    	xplasma->techeck = techeck = 1;
+    		xplasma->techeck = techeck = 1;
+	if ((xplasma->converge_hc =
+       		fabs (xplasma->heat_tot -
+	     	(xplasma->lum_adiabatic + xplasma->lum_rad + xplasma->lum_dr +
+	      	xplasma->lum_comp)) / fabs(xplasma->heat_tot + xplasma->lum_comp +
+				     xplasma->lum_adiabatic +
+				     xplasma->lum_dr + xplasma->lum_rad )) > epsilon)
+    		xplasma->hccheck = hccheck = 1;
 	}
   else //If the cell has reached the maximum temperature
 	{
-	xplasma->converge_t_e=0; //we say it has converged
-	xplasma->techeck = techeck = 2; //we mark it as overlimit
+	xplasma->techeck = xplasma->hccheck = 2; //we mark it as overlimit
 	}
 
 //110919 nsh modified line below to include the adiabatic cooling in the check that heating equals cooling
@@ -275,14 +281,8 @@ convergence (xplasma)
    lum_adiabatic is large and negative - and hence heating */
 
 /* NSH 130711 - also changed to have fabs on top and bottom, since heating can now be negative!) */
-if ((xplasma->converge_hc =
-       fabs (xplasma->heat_tot -
-	     (xplasma->lum_adiabatic + xplasma->lum_rad + xplasma->lum_dr +
-	      xplasma->lum_comp)) / fabs(xplasma->heat_tot + xplasma->lum_comp +
-				     xplasma->lum_adiabatic +
-				     xplasma->lum_dr + xplasma->lum_rad )) > epsilon)
-    xplasma->hccheck = hccheck = 1;
 
+/* NSH 130725 - moved the hc check to be within the if statement about overtemp - we cannot expect hc to converge if we are hitting the maximum temperature */
   /* whole_check is the sum of the temperature checks and the heating check */
 
   xplasma->converge_whole = whole_check = trcheck + techeck + hccheck;
@@ -377,7 +377,7 @@ check_convergence ()
   Log
     ("!!Check_converging: %4d (%.3f) converged and %4d (%.3f) converging of %d cells\n",
      nconverge, xconverge, nconverging, xconverging, ntot);
-  Log ("!!Check_convergence_breakdown: t_r %4d t_e(real) %4d t_e(maxed) %4d hc %4d d\n", ntr, nte, nmax, nhc);	//NSH 70g split of what is converging
+  Log ("!!Check_convergence_breakdown: t_r %4d t_e(real) %4d t_e(maxed) %4d hc(real) %4d d\n", ntr, nte, nmax, nhc);	//NSH 70g split of what is converging
   Log
     ("Summary  convergence %4d %.3f  %4d  %.3f  %d  #  n_converged fraction_converged  converging fraction_converging total cells\n",
      nconverge, xconverge, nconverging, xconverging, ntot);
