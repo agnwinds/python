@@ -245,12 +245,15 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   double time_max;		// The maximum time the program is allowed to run before halting
   double lstar;                 // The luminosity of the star, iv it exists
 
-  int my_rank;
-  int np_mpi;
+  int my_rank;		// these two variables are used regardless of parallel mode
+  int np_mpi;		// rank and number of processes, 0 and 1 in non-parallel
+
+#ifdef MPI_ON
   int mpi_i, mpi_j;
   double *redhelper, *redhelper2;
   int *iredhelper, *iredhelper2;
   int size_of_helpers;
+#endif
 
   int mkdir();
 

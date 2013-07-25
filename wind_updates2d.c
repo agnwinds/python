@@ -104,8 +104,9 @@ WindPtr (w);
   double tot, agn_ip;
   double nsh_lum_hhe;
   double nsh_lum_metals;
+  int my_nmin, my_nmax;	//Note that these variables are still used even without MPI on
 #ifdef MPI_ON
-  int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2, my_nmin, my_nmax;
+  int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
   int size_of_commbuffer;
   char *commbuffer;
   size_of_commbuffer = 8 * (12*NIONS + NLTE_LEVELS + 2*NTOP_PHOT + 10*NXBANDS + 2*LPDF + NAUGER + 100)*(floor(NPLASMA/np_mpi_global)+1);
@@ -119,7 +120,8 @@ WindPtr (w);
   t_r_ave_old = t_r_ave = t_e_ave_old = t_e_ave = 0.0;
 
 
-  /* For MPI parallelisation, the following loop will be distributed over mutiple tasks. */
+  /* For MPI parallelisation, the following loop will be distributed over mutiple tasks. 
+     Note that these variables are still used even without MPI on */
   my_nmin = 0;
   my_nmax = NPLASMA;
 #ifdef MPI_ON
