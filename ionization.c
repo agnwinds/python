@@ -254,10 +254,18 @@ convergence (xplasma)
        fabs (xplasma->t_r_old - xplasma->t_r) / (xplasma->t_r_old +
 						 xplasma->t_r)) > epsilon)
     xplasma->trcheck = trcheck = 1;
-  if ((xplasma->converge_t_e =
-       fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old +
+  if (xplasma->t_e < TMAX)
+	{
+  	if ((xplasma->converge_t_e =
+       	fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old +
 						 xplasma->t_e)) > epsilon)
-    xplasma->techeck = techeck = 1;
+    	xplasma->techeck = techeck = 1;
+	}
+  else //If the cell has reached the maximum temperature
+	{
+	xplasma->converge_t_e=0; //we say it has converged
+	xplasma->techeck = techeck = 2; //we mark it as overlimit
+	}
 
 //110919 nsh modified line below to include the adiabatic cooling in the check that heating equals cooling
 //111004 nsh further modification to include DR and compton cooling, now moved out of lum_rad
@@ -340,10 +348,11 @@ check_convergence ()
   int n;
   int nconverge, nconverging, ntot;
   int nte, ntr, nhc;		//NSH 70g - three new counters for the different convergence criteria
+  int nmax;			//NSH 130725 - counter for cells which are marked as converged, but over temp
   double xconverge, xconverging;
 
   nconverge = nconverging = ntot = 0;
-  ntr = nte = nhc = 0;		//NSH 70i zero the counters
+  ntr = nte = nhc = nmax = 0;		//NSH 70i zero the counters
 
   for (n = 0; n < NPLASMA; n++)
     {
@@ -356,6 +365,8 @@ check_convergence ()
 	nte++;
       if (plasmamain[n].hccheck == 0)
 	nhc++;
+      if (plasmamain[n].techeck == 2)
+	nmax++;
       if (plasmamain[n].converging == 0)
 	nconverging++;
 
@@ -366,7 +377,7 @@ check_convergence ()
   Log
     ("!!Check_converging: %4d (%.3f) converged and %4d (%.3f) converging of %d cells\n",
      nconverge, xconverge, nconverging, xconverging, ntot);
-  Log ("!!Check_convergence_breakdown: t_r %4d t_e %4d hc %4d\n", ntr, nte, nhc);	//NSH 70g split of what is converging
+  Log ("!!Check_convergence_breakdown: t_r %4d t_e(real) %4d t_e(maxed) %4d hc %4d d\n", ntr, nte, nmax, nhc);	//NSH 70g split of what is converging
   Log
     ("Summary  convergence %4d %.3f  %4d  %.3f  %d  #  n_converged fraction_converged  converging fraction_converging total cells\n",
      nconverge, xconverge, nconverging, xconverging, ntot);
@@ -414,12 +425,12 @@ one_shot (xplasma, mode)
 
 {
   double te_old, te_new, dte;
-  double gain,max_temp;
+  double gain;
 
 
 
   gain = xplasma->gain;
-max_temp=1e8;
+
 
   te_old = xplasma->t_e;
   te_new = calc_te (xplasma, 0.7 * te_old, 1.3 * te_old);
@@ -428,6 +439,10 @@ max_temp=1e8;
 
 
 /* NSH 130722 - NOTE - at this stage, the cooling terms are still those computed from the 'ideal' t_e, not the new t_e - this may be worth investigatiing. */
+  if (xplasma->t_e > TMAX)
+	{	
+	xplasma->t_e = TMAX;
+	}
 
   dte = xplasma->dt_e;
 
