@@ -405,6 +405,8 @@ History:
 
 **************************************************************/
 
+
+
 int
 one_shot (xplasma, mode)
      PlasmaPtr xplasma;
@@ -412,12 +414,12 @@ one_shot (xplasma, mode)
 
 {
   double te_old, te_new, dte;
-  double gain;
+  double gain,max_temp;
 
 
 
   gain = xplasma->gain;
-
+max_temp=1e8;
 
   te_old = xplasma->t_e;
   te_new = calc_te (xplasma, 0.7 * te_old, 1.3 * te_old);
