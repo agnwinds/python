@@ -53,11 +53,11 @@ spectral_estimators (xplasma)
   double pl_alpha_min, pl_alpha_max, pl_alpha_temp, pl_w_temp, j;
   double exp_temp_min, exp_temp_max;	/*120817 the 'temperature' range we are going to search for an effective temperature for the exponential model */
   double exp_temp_temp, exp_w_temp;	/*120817 the temporary values for temperature and weight of the exponential model */
-  int n;
+  int n,n1;
   double pl_sd, exp_sd;		/*120817 Computed standard decviations for two models for comparison with true value */
   double ALPHAMAX = 20.0;	/*120817 Something to make it a bit more obvious as to what values of the powerlaw exponent we consider reasonable */
   int plflag, expflag;		/*120817 Two flags to say if we have a reasonable PL or EXP model, set to 1 initially, -1 means there has been some failure that means we must not use this model, +1 means it is OK */
-
+  double genmin,genmax;
 
 /* This call is after a photon flight, so we *should* have access to j and ave freq, and so we can calculate proper values for W and alpha
 To avoid problems with solving, we need to find a reasonable range of values within which to search for a solution to eq18. A reasonable guess is that it is around the current value....
@@ -65,24 +65,48 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 
 
 
+for (n1 =0; n<xband.nbands; n++)
+	{
+	if (xband.nphot[n] > 0)
+	 	{
+		genmin = xband.f1[n]; //the first band with any photons will get set to 
+		break;
+		}
+	}
+
+for (n1 =xband.nbands-1; n>-1; n--)
+	{
+	if (xband.nphot[n] > 0) 
+		{
+		genmax = xband.f2[n]; //the first band going down will define the highest freq
+		break;
+		}
+	}
+
+
 /* We loop over all of the bands, the first band is band number 0, and the last is band nxfreq-1 */
 /* 71 - 111229 - ksl - Small modification to reflect moving nxfreq, etc in the geo structure */
   for (n = 0; n < geo.nxfreq; n++)
 
     {
+
       plflag = expflag = 1;	//Both potential models are in the running
       if (xplasma->nxtot[n] == 0)
-	{
-	  Error
-	    ("power_abundances: no photons in band %d which runs from %10.2e(%8.2fev) to %10.2e(%8.2fev) \n",
-	     n, geo.xfreq[n], geo.xfreq[n] * HEV, geo.xfreq[n + 1],
-	     geo.xfreq[n + 1] * HEV);
-	  xplasma->pl_w[n] = 0;	//We also want to make sure that the weight will be zero, this way we make sure there is no contribution to the ionization balance from this frequency.
-	  xplasma->pl_alpha[n] = 999.9;	//Give alpha a value that will show up as an error
-	  xplasma->exp_w[n] = 0.0;	//Make sure that w is zero, s no chance of mucking up ionization balance
-	  xplasma->exp_temp[n] = 1e99;	//Give temp a value that will show up as an error
-	  xplasma->spec_mod_type[n] = -1;	//This tells the code that we have failed to model the spectrum in this band/cell/
-	}
+		{
+	  	if (geo.xfreq[n] > genmax || geo.xfreq[n+1] < genmin) /*The band is outside where photons ere generated, so not very surprisoing that there are no photons - just generate a log */
+		  	{
+			Log_silent("power_abundances: no photons in band %d which runs from %10.2e(%8.2fev) to %10.2e(%8.2fev) \n",n, geo.xfreq[n], geo.xfreq[n] * HEV, geo.xfreq[n + 1],geo.xfreq[n + 1] * HEV);
+			}
+		  else
+			{
+			Error("power_abundances: no photons in band %d which runs from %10.2e(%8.2fev) to %10.2e(%8.2fev) \n",n, geo.xfreq[n], geo.xfreq[n] * HEV, geo.xfreq[n + 1],geo.xfreq[n + 1] * HEV);
+			}
+	  	xplasma->pl_w[n] = 0;	//We also want to make sure that the weight will be zero, this way we make sure there is no contribution to the ionization balance from this frequency.
+	  	xplasma->pl_alpha[n] = 999.9;	//Give alpha a value that will show up as an error
+	  	xplasma->exp_w[n] = 0.0;	//Make sure that w is zero, s no chance of mucking up ionization balance
+	  	xplasma->exp_temp[n] = 1e99;	//Give temp a value that will show up as an error
+	  	xplasma->spec_mod_type[n] = -1;	//This tells the code that we have failed to model the spectrum in this band/cell/
+		}
       else
 	{
 	  spec_numin = geo.xfreq[n];	/*1108 NSH n is defined in python.c, and says which band of radiation estimators we are interested in using the for power law ionisation calculation */
@@ -118,11 +142,13 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 	      pl_alpha_min = pl_alpha_min - 1.0;
 	      pl_alpha_max = pl_alpha_max + 1.0;
 	    }
-	  if (sane_check (pl_alpha_func (pl_alpha_min))
-	      || sane_check (pl_alpha_func (pl_alpha_max)))
+
+
+	  if (finite(pl_alpha_func(pl_alpha_min))!=0
+	      || finite(pl_alpha_func (pl_alpha_min))!=0)
 	    {
-	      Error
-		("spectral_estimators:sane_check Alpha cannot be bracketed in band %i cell %i- setting w to zero\n",
+	      Log_silent
+		("spectral_estimators: Alpha cannot be bracketed in band %i cell %i- setting w to zero\n",
 		 n, xplasma->nplasma);
 	      xplasma->pl_w[n] = 0.0;
 	      xplasma->pl_alpha[n] = -999.0;	//Set this to a value that might let us diagnose the problem
@@ -147,9 +173,9 @@ To avoid problems with solving, we need to find a reasonable range of values wit
  * It may be better to just implement the factor here, rather than bother with an external call.... */
 	      pl_w_temp = pl_w (j, pl_alpha_temp, spec_numin, spec_numax);
 
-	      if (sane_check (pl_w_temp))
+	      if ((finite(pl_w_temp))!=0)
 		{
-		  Error
+		  Log_silent
 		    ("spectral_estimators:sane_check New PL parameters unreasonable, using existing parameters. Check number of photons in this cell\n");
 		  plflag = -1;	// Dont use this model
 		  xplasma->pl_w[n] = 0.0;
@@ -172,11 +198,11 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 	      exp_temp_min = exp_temp_min * 0.9;
 	      exp_temp_max = exp_temp_max * 1.1;
 	    }
-	  if (sane_check (exp_temp_func (exp_temp_min))
-	      || sane_check (exp_temp_func (exp_temp_max)))
+	  if (finite(exp_temp_func (exp_temp_min))!=0
+	      || finite(exp_temp_func (exp_temp_max))!=0)
 	    {
-	      Error
-		("spectral_estimators:sane_check Exponential temperature cannot be bracketed in band %i - setting w to zero\n",
+	      Log_silent
+		("spectral_estimators: Exponential temperature cannot be bracketed in band %i - setting w to zero\n",
 		 n);
 	      xplasma->exp_w[n] = 0.0;
 	      xplasma->exp_temp[n] = -1e99;
@@ -191,9 +217,9 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 	      exp_w_temp = exp_w (j, exp_temp_temp, spec_numin, spec_numax);	/* Calculate the weight */
 
 
-	      if (sane_check (exp_w_temp))
+	      if ((finite (exp_w_temp))!=0)
 		{
-		  Error
+		  Log_silent
 		    ("spectral_estimators:sane_check New exponential parameters unreasonable, using existing parameters. Check number of photons in this cell\n");
 		  expflag = -1;	//discount an exponential model
 		  xplasma->exp_w[n] = 0.0;
@@ -239,7 +265,7 @@ To avoid problems with solving, we need to find a reasonable range of values wit
 	  else
 	    {
 	      xplasma->spec_mod_type[n] = -1;	//Oh dear, there is no suitable model
-	      Error ("No suitable model in band %i cell %i\n", n,
+	      Log_silent ("No suitable model in band %i cell %i\n", n,
 		     xplasma->nplasma);
 	    }
 	  Log_silent ("NSH In cell %i, band %i, the best model is %i\n",
