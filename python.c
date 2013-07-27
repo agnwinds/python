@@ -179,6 +179,9 @@ History:
 			some changes use DEF variables instead of numbers to make choices
 	1307	jm	SS Parallelized Python in June 2013, for release 76a. I have now introduced
 			slightly altered reporting to allow more succinct reporting in parallel mode.
+	1307	ksl	Removed the Thierry & Hubeny O-star models as an option from the code.
+			This was never tested, and never really used.  Knox no longer even has the 
+			models.
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -1155,7 +1158,10 @@ Afterwards, the photons are used to compute the sim parameters. */
 	}
       else if (geo.wind_type == 6)
 	{
-	  get_thierry_params ();
+		Error("python: geo.wind_type=6 thierry O star models has been removed from code\n");
+		exit (0);
+
+
 	}
       else if (geo.wind_type == 7)
 	{

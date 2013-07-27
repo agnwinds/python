@@ -289,14 +289,9 @@ model_velocity (x, v)
   else if (geo.wind_type == 6)
     {
 
-      speed = xthierry_velocity (x, v);	// spline estimate added 02jan
-
-      if (sane_check (v[0]) || sane_check (v[1]) || sane_check (v[2]))
-	{
-	  Error
-	    ("wind2d:sane_check On return from thierry_velocity: x %f %f %f v %f %f %f\n",
-	     x[0], x[1], x[2], v[0], v[1], v[2]);
-	}
+      //1307 - ksl - Removed this unused option from the code 
+      Error("wind: Thierry O star models (geo.wind_type 6) have bben removed from the code\n");
+      exit(0);
 
     }
   else if (geo.wind_type == 7)
@@ -411,7 +406,9 @@ model_rho (x)
     }
   else if (geo.wind_type == 6)
     {
-      rho = thierry_rho (x);
+      //1307 - ksl - Removed this unused option from the code 
+      Error("wind: Thierry O star models (geo.wind_type 6) have bben removed from the code\n");
+      exit(0);
     }
   else if (geo.wind_type == 7)
     {
