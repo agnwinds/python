@@ -63,6 +63,9 @@ spectral_estimators (xplasma)
 To avoid problems with solving, we need to find a reasonable range of values within which to search for a solution to eq18. A reasonable guess is that it is around the current value....
 */
 
+genmax=xband.f1[0];
+genmax=xband.f2[xband.nbands-1];
+
 
 
 for (n1 =0; n<xband.nbands; n++)
