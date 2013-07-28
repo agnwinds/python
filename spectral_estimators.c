@@ -85,7 +85,7 @@ for (n1 =xband.nbands-1; n>-1; n--)
 		break;
 		}
 	}
-
+Log ("Spectral estimators - we expect photons from %e to %e Hz\n",genmin,genmax);
 
 /* We loop over all of the bands, the first band is band number 0, and the last is band nxfreq-1 */
 /* 71 - 111229 - ksl - Small modification to reflect moving nxfreq, etc in the geo structure */
@@ -98,11 +98,11 @@ for (n1 =xband.nbands-1; n>-1; n--)
 		{
 	  	if (geo.xfreq[n] > genmax || geo.xfreq[n+1] < genmin) /*The band is outside where photons ere generated, so not very surprisoing that there are no photons - just generate a log */
 		  	{
-			Log_silent("power_abundances: no photons in band %d which runs from %10.2e(%8.2fev) to %10.2e(%8.2fev) \n",n, geo.xfreq[n], geo.xfreq[n] * HEV, geo.xfreq[n + 1],geo.xfreq[n + 1] * HEV);
+			Log("spectral_estimators: no photons in band %d which runs from %10.2e(%8.2fev) to %10.2e(%8.2fev) but we werent expecting any \n",n, geo.xfreq[n], geo.xfreq[n] * HEV, geo.xfreq[n + 1],geo.xfreq[n + 1] * HEV);
 			}
 		  else
 			{
-			Error("power_abundances: no photons in band %d which runs from %10.2e(%8.2fev) to %10.2e(%8.2fev) \n",n, geo.xfreq[n], geo.xfreq[n] * HEV, geo.xfreq[n + 1],geo.xfreq[n + 1] * HEV);
+			Error("spectral_estimators: no photons in band %d which runs from %10.2e(%8.2fev) to %10.2e(%8.2fev) and we were expecting some\n",n, geo.xfreq[n], geo.xfreq[n] * HEV, geo.xfreq[n + 1],geo.xfreq[n + 1] * HEV);
 			}
 	  	xplasma->pl_w[n] = 0;	//We also want to make sure that the weight will be zero, this way we make sure there is no contribution to the ionization balance from this frequency.
 	  	xplasma->pl_alpha[n] = 999.9;	//Give alpha a value that will show up as an error
