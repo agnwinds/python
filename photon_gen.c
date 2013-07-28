@@ -90,7 +90,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   double ftot;
   int n,n1;
   int iphot_start;
-  int genmin,genmax;
+  float genmin,genmax;
 
 
   if (freq_sampling == 0)
@@ -113,12 +113,12 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
 				   that you have "enough" photons at high energy */
       ftot = populate_bands (f1, f2, ioniz_or_final, iwind, &xband);
 
-genmax=xband.f1[0];
+genmin=xband.f1[0];
 genmax=xband.f2[xband.nbands-1];
 
 for (n1 =0; n1<xband.nbands; n1++)
 	{
-	Log ("Band %i has %i photons",n1,xband.nphot[n1]);
+	Log ("Band %i has %i photons\n",n1,xband.nphot[n1]);
 	if (xband.nphot[n1] > 0)
 	 	{
 		genmin = xband.f1[n1]; //the first band with any photons will get set to 
@@ -128,7 +128,7 @@ for (n1 =0; n1<xband.nbands; n1++)
 
 for (n1 =xband.nbands-1; n1>-1; n1--)
 	{
-	Log ("Band %i has %i photons",n1,xband.nphot[n1]);
+	Log ("Band %i has %i photons\n",n1,xband.nphot[n1]);
 	if (xband.nphot[n1] > 0) 
 		{
 		genmax = xband.f2[n1]; //the first band going down will define the highest freq

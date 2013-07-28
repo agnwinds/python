@@ -98,7 +98,7 @@ Log ("Spectral estimators - we expect photons from %e to %e Hz\n",genmin,genmax)
       plflag = expflag = 1;	//Both potential models are in the running
       if (xplasma->nxtot[n] == 0)
 		{
-	  	if (geo.xfreq[n] > genmax || geo.xfreq[n+1] < genmin) /*The band is outside where photons ere generated, so not very surprisoing that there are no photons - just generate a log */
+	  	if (geo.xfreq[n] >= genmax || geo.xfreq[n+1] <= genmin) /*The band is outside where photons ere generated, so not very surprisoing that there are no photons - just generate a log */
 		  	{
 			Log("spectral_estimators: no photons in band %d which runs from %10.2e(%8.2fev) to %10.2e(%8.2fev) but we werent expecting any \n",n, geo.xfreq[n], geo.xfreq[n] * HEV, geo.xfreq[n + 1],geo.xfreq[n + 1] * HEV);
 			}
