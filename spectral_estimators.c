@@ -68,20 +68,20 @@ genmax=xband.f2[xband.nbands-1];
 
 
 
-for (n1 =0; n<xband.nbands; n++)
+for (n1 =0; n1<xband.nbands; n1++)
 	{
-	if (xband.nphot[n] > 0)
+	if (xband.nphot[n1] > 0)
 	 	{
-		genmin = xband.f1[n]; //the first band with any photons will get set to 
+		genmin = xband.f1[n1]; //the first band with any photons will get set to 
 		break;
 		}
 	}
 
-for (n1 =xband.nbands-1; n>-1; n--)
+for (n1 =xband.nbands-1; n1>-1; n1--)
 	{
-	if (xband.nphot[n] > 0) 
+	if (xband.nphot[n1] > 0) 
 		{
-		genmax = xband.f2[n]; //the first band going down will define the highest freq
+		genmax = xband.f2[n1]; //the first band going down will define the highest freq
 		break;
 		}
 	}
