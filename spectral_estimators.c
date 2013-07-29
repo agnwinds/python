@@ -150,8 +150,8 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	    }
 
 
-	  if (finite(pl_alpha_func(pl_alpha_min))!=0
-	      || finite(pl_alpha_func (pl_alpha_max))!=0)
+	  if (finite(pl_alpha_func(pl_alpha_min))==0
+	      || finite(pl_alpha_func (pl_alpha_max))==0)
 	    {
 	      Log
 		("spectral_estimators: Alpha cannot be bracketed (%e %e)in band %i cell %i- setting w to zero\n",
@@ -179,7 +179,7 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
  * It may be better to just implement the factor here, rather than bother with an external call.... */
 	      pl_w_temp = pl_w (j, pl_alpha_temp, spec_numin, spec_numax);
 
-	      if ((finite(pl_w_temp))!=0)
+	      if ((finite(pl_w_temp))==0)
 		{
 		  Log
 		    ("spectral_estimators:sane_check New PL parameters (%e) unreasonable, using existing parameters. Check number of photons in this cell\n",pl_w_temp);
@@ -204,8 +204,8 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	      exp_temp_min = exp_temp_min * 0.9;
 	      exp_temp_max = exp_temp_max * 1.1;
 	    }
-	  if (finite(exp_temp_func (exp_temp_min))!=0
-	      || finite(exp_temp_func (exp_temp_max))!=0)
+	  if (finite(exp_temp_func (exp_temp_min))==0
+	      || finite(exp_temp_func (exp_temp_max))==0)
 	    {
 	      Log
 		("spectral_estimators: Exponential temperature cannot be bracketed (%e %e) in band %i - setting w to zero\n",
@@ -223,7 +223,7 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	      exp_w_temp = exp_w (j, exp_temp_temp, spec_numin, spec_numax);	/* Calculate the weight */
 
 
-	      if ((finite (exp_w_temp))!=0)
+	      if ((finite (exp_w_temp))==0)
 		{
 		  Log
 		    ("spectral_estimators:sane_check New exponential parameters (%e) unreasonable, using existing parameters. Check number of photons in this cell\n",exp_w_temp);
