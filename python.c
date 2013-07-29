@@ -1797,6 +1797,7 @@ run -- 07jul -- ksl
 	      redhelper[mpi_i+(9+mpi_j)*NPLASMA] = plasmamain[mpi_i].xj[mpi_j]/ np_mpi_global;
 	      redhelper[mpi_i+(9+NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j]/ np_mpi_global;
 	      redhelper[mpi_i+(9+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
+		printf ("TEST cell %i band%i SD=%e\n",mpi_i,mpi_j,plasmamain[mpi_i].xsd_freq[mpi_j]);
 	    }
 	}
 
@@ -1826,6 +1827,7 @@ run -- 07jul -- ksl
 	      plasmamain[mpi_i].xj[mpi_j]=redhelper2[mpi_i+(9+mpi_j)*NPLASMA];
 	      plasmamain[mpi_i].xave_freq[mpi_j]=redhelper2[mpi_i+(9+NXBANDS+mpi_j)*NPLASMA];
 	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(9+NXBANDS*2+mpi_j)*NPLASMA];
+		printf ("TEST2 cell %i band%i SD=%e\n",mpi_i,mpi_j,plasmamain[mpi_i].xsd_freq[mpi_j]);
 	    }
 	}
       Log_parallel("Thread %d happy after broadcast.\n", rank_global);
