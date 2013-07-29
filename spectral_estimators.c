@@ -31,6 +31,10 @@ History:
         120817  nsh     Changed many things to allow for an exponential model
 			to be produced. Changed name of code to spec_estimators
 			and changed file it is stored in to spectral_estimators.c
+	130729	nsh	Changed some sane checks that were generating hugh numbers 
+			errors, when they were just checking for reasonbleness.
+			Also, changed the way the code deals with no photons in	
+			band. Now only an error if we actually generate photons there!
 
 **************************************************************/
 
@@ -70,7 +74,6 @@ genmax=xband.f2[xband.nbands-1];
 
 for (n1 =0; n1<xband.nbands; n1++)
 	{
-	Log ("Band %i has %i photons",n1,xband.nphot[n1]);
 	if (xband.nphot[n1] > 0)
 	 	{
 		genmin = xband.f1[n1]; //the first band with any photons will get set to 
@@ -80,14 +83,12 @@ for (n1 =0; n1<xband.nbands; n1++)
 
 for (n1 =xband.nbands-1; n1>-1; n1--)
 	{
-	Log ("Band %i has %i photons",n1,xband.nphot[n1]);
 	if (xband.nphot[n1] > 0) 
 		{
 		genmax = xband.f2[n1]; //the first band going down will define the highest freq
 		break;
 		}
 	}
-Log ("Spectral estimators - we expect photons from %e to %e Hz\n",genmin,genmax);
 
 /* We loop over all of the bands, the first band is band number 0, and the last is band nxfreq-1 */
 /* 71 - 111229 - ksl - Small modification to reflect moving nxfreq, etc in the geo structure */
@@ -100,11 +101,11 @@ Log ("Spectral estimators - we expect photons from %e to %e Hz\n",genmin,genmax)
 		{
 	  	if (geo.xfreq[n] >= genmax || geo.xfreq[n+1] <= genmin) /*The band is outside where photons ere generated, so not very surprisoing that there are no photons - just generate a log */
 		  	{
-			Log("spectral_estimators: no photons in band %d which runs from %10.2e(%8.2fev) to %10.2e(%8.2fev) but we werent expecting any \n",n, geo.xfreq[n], geo.xfreq[n] * HEV, geo.xfreq[n + 1],geo.xfreq[n + 1] * HEV);
+			Log_silent("spectral_estimators: no photons in band %d which runs from %10.2e(%8.2fev) to %10.2e(%8.2fev) but we werent expecting any \n",n, geo.xfreq[n], geo.xfreq[n] * HEV, geo.xfreq[n + 1],geo.xfreq[n + 1] * HEV);
 			}
 		  else
 			{
-			Error("spectral_estimators: no photons in band %d which runs from %10.2e(%8.2fev) to %10.2e(%8.2fev) and we were expecting some\n",n, geo.xfreq[n], geo.xfreq[n] * HEV, geo.xfreq[n + 1],geo.xfreq[n + 1] * HEV);
+			Log("spectral_estimators: no photons in band %d which runs from %10.2e(%8.2fev) to %10.2e(%8.2fev) and we were expecting some\n",n, geo.xfreq[n], geo.xfreq[n] * HEV, geo.xfreq[n + 1],geo.xfreq[n + 1] * HEV);
 			}
 	  	xplasma->pl_w[n] = 0;	//We also want to make sure that the weight will be zero, this way we make sure there is no contribution to the ionization balance from this frequency.
 	  	xplasma->pl_alpha[n] = 999.9;	//Give alpha a value that will show up as an error
@@ -269,8 +270,8 @@ Log ("Spectral estimators - we expect photons from %e to %e Hz\n",genmin,genmax)
 	    }
 	  else
 	    {
-	      xplasma->spec_mod_type[n] = -1;	//Oh dear, there is no suitable model
-	      Log_silent ("No suitable model in band %i cell %i\n", n,
+	      xplasma->spec_mod_type[n] = -1;	//Oh dear, there is no suitable model - this should be an error
+	      Error ("No suitable model in band %i cell %i\n", n,
 		     xplasma->nplasma);
 	    }
 	  Log_silent ("NSH In cell %i, band %i, the best model is %i\n",
