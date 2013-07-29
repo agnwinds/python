@@ -250,6 +250,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
 #ifdef MPI_ON
   int mpi_i, mpi_j;
+  double *maxfreqhelper,*maxfreqhelper2;
   double *redhelper, *redhelper2;
   int *iredhelper, *iredhelper2;
   int size_of_helpers;
@@ -1603,6 +1604,8 @@ run -- 07jul -- ksl
 #ifdef MPI_ON
   /* Since the wind is now set up can allocate sufficiently big arrays to help with the MPI reductions */
   size_of_helpers = (10+NXBANDS)*NPLASMA+(nangles+MSPEC)*NWAVE;
+  maxfreqhelper = calloc (sizeof(double),NPLASMA);
+  maxfreqhelper2 = calloc (sizeof(double),NPLASMA);
   redhelper = calloc (sizeof (double), size_of_helpers); 
   redhelper2 = calloc (sizeof (double), size_of_helpers); 
   iredhelper = calloc (sizeof (int), size_of_helpers); 
@@ -1779,6 +1782,7 @@ run -- 07jul -- ksl
       
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
 	{
+ 	  maxfreqhelper[mpi_i] = plasmamain[mpi_i].max_freq;
 	  redhelper[mpi_i] = plasmamain[mpi_i].j/ np_mpi_global;
 	  redhelper[mpi_i+NPLASMA] = plasmamain[mpi_i].ave_freq/ np_mpi_global;
 	  redhelper[mpi_i+2*NPLASMA] = plasmamain[mpi_i].lum/ np_mpi_global;
@@ -1796,7 +1800,7 @@ run -- 07jul -- ksl
 	    }
 	}
 
-     
+      MPI_Reduce(maxfreqhelper, maxfreqhelper2, NPLASMA, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
       MPI_Reduce(redhelper, redhelper2, size_of_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
       if (rank_global == 0)
 	{
@@ -1804,8 +1808,10 @@ run -- 07jul -- ksl
 	}
       
       MPI_Bcast(redhelper2, size_of_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(maxfreqhelper2, NPLASMA, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
 	{
+  	  plasmamain[mpi_i].max_freq = maxfreqhelper2[mpi_i];
 	  plasmamain[mpi_i].j = redhelper2[mpi_i];
 	  plasmamain[mpi_i].ave_freq = redhelper2[mpi_i+NPLASMA];
 	  plasmamain[mpi_i].lum = redhelper2[mpi_i+2*NPLASMA];
