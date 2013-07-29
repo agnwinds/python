@@ -101,7 +101,7 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 		{
 	  	if (geo.xfreq[n] >= genmax || geo.xfreq[n+1] <= genmin) /*The band is outside where photons ere generated, so not very surprisoing that there are no photons - just generate a log */
 		  	{
-			Log_silent("spectral_estimators: no photons in band %d which runs from %10.2e(%8.2fev) to %10.2e(%8.2fev) but we werent expecting any \n",n, geo.xfreq[n], geo.xfreq[n] * HEV, geo.xfreq[n + 1],geo.xfreq[n + 1] * HEV);
+			Log("spectral_estimators: no photons in band %d which runs from %10.2e(%8.2fev) to %10.2e(%8.2fev) but we werent expecting any \n",n, geo.xfreq[n], geo.xfreq[n] * HEV, geo.xfreq[n + 1],geo.xfreq[n + 1] * HEV);
 			}
 		  else
 			{
@@ -118,7 +118,7 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	  spec_numin = geo.xfreq[n];	/*1108 NSH n is defined in python.c, and says which band of radiation estimators we are interested in using the for power law ionisation calculation */
 	  if (xplasma->max_freq < geo.xfreq[n + 1])
 	    {
-	      Log_silent
+	      Log
 		("NSH resetting max frequency of band %i from %e to %e due to lack of photons\n",
 		 n, geo.xfreq[n + 1], xplasma->max_freq);
 	      spec_numax = xplasma->max_freq;
@@ -131,7 +131,7 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	  j = xplasma->xj[n];
 
 
-	  Log_silent
+	  Log
 	    ("NSH We are about to calculate w and alpha, j=%10.2e, mean_freq=%10.2e, numin=%10.2e(%8.2fev), numax=%10.2e(%8.2fev), number of photons in band=%i\n",
 	     j, spec_numean, spec_numin, spec_numin * HEV, spec_numax,
 	     spec_numax * HEV, xplasma->nxtot[n]);
@@ -151,11 +151,11 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 
 
 	  if (finite(pl_alpha_func(pl_alpha_min))!=0
-	      || finite(pl_alpha_func (pl_alpha_min))!=0)
+	      || finite(pl_alpha_func (pl_alpha_max))!=0)
 	    {
-	      Log_silent
-		("spectral_estimators: Alpha cannot be bracketed in band %i cell %i- setting w to zero\n",
-		 n, xplasma->nplasma);
+	      Log
+		("spectral_estimators: Alpha cannot be bracketed (%e %e)in band %i cell %i- setting w to zero\n",
+		 pl_alpha_min,pl_alpha_max,n, xplasma->nplasma);
 	      xplasma->pl_w[n] = 0.0;
 	      xplasma->pl_alpha[n] = -999.0;	//Set this to a value that might let us diagnose the problem
 	      plflag = -1;
@@ -181,8 +181,8 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 
 	      if ((finite(pl_w_temp))!=0)
 		{
-		  Log_silent
-		    ("spectral_estimators:sane_check New PL parameters unreasonable, using existing parameters. Check number of photons in this cell\n");
+		  Log
+		    ("spectral_estimators:sane_check New PL parameters (%e) unreasonable, using existing parameters. Check number of photons in this cell\n",pl_w_temp);
 		  plflag = -1;	// Dont use this model
 		  xplasma->pl_w[n] = 0.0;
 		  xplasma->pl_alpha[n] = -999.0;
@@ -207,9 +207,9 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	  if (finite(exp_temp_func (exp_temp_min))!=0
 	      || finite(exp_temp_func (exp_temp_max))!=0)
 	    {
-	      Log_silent
-		("spectral_estimators: Exponential temperature cannot be bracketed in band %i - setting w to zero\n",
-		 n);
+	      Log
+		("spectral_estimators: Exponential temperature cannot be bracketed (%e %e) in band %i - setting w to zero\n",
+		 exp_temp_min,exp_temp_max,n);
 	      xplasma->exp_w[n] = 0.0;
 	      xplasma->exp_temp[n] = -1e99;
 	      expflag = -1;	//Discount an exponential model
@@ -225,8 +225,8 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 
 	      if ((finite (exp_w_temp))!=0)
 		{
-		  Log_silent
-		    ("spectral_estimators:sane_check New exponential parameters unreasonable, using existing parameters. Check number of photons in this cell\n");
+		  Log
+		    ("spectral_estimators:sane_check New exponential parameters (%e) unreasonable, using existing parameters. Check number of photons in this cell\n",exp_w_temp);
 		  expflag = -1;	//discount an exponential model
 		  xplasma->exp_w[n] = 0.0;
 		  xplasma->exp_temp[n] = -1e99;
@@ -240,11 +240,11 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 
 	  exp_sd = exp_stddev (xplasma->exp_temp[n], spec_numin, spec_numax);
 	  pl_sd = pl_stddev (xplasma->pl_alpha[n], spec_numin, spec_numax);
-	  Log_silent
+	  Log
 	    ("NSH in this cell band %i PL estimators are w=%10.2e, alpha=%5.3f giving sd=%e compared to %e\n",
 	     n, xplasma->pl_w[n], xplasma->pl_alpha[n], pl_sd,
 	     xplasma->xsd_freq[n]);
-	  Log_silent
+	  Log
 	    ("NSH in this cell band %i exp estimators are w=%10.2e, temp=%10.2e giving sd=%e compared to %e\n",
 	     n, xplasma->exp_w[n], xplasma->exp_temp[n], exp_sd,
 	     xplasma->xsd_freq[n]);
@@ -274,7 +274,7 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	      Error ("No suitable model in band %i cell %i\n", n,
 		     xplasma->nplasma);
 	    }
-	  Log_silent ("NSH In cell %i, band %i, the best model is %i\n",
+	  Log ("NSH In cell %i, band %i, the best model is %i\n",
 		      xplasma->nplasma, n, xplasma->spec_mod_type[n]);
 	}			//End of loop that does things if there are more than zero photons in the band.
     }				//End of loop over bands 
