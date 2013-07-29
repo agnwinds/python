@@ -1,4 +1,7 @@
+#ifdef MPI_ON
 #include "mpi.h"
+#endif 
+
 int np_mpi_global;               /// Global variable which holds the number of MPI processes
 int rank_global; 
 

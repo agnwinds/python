@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <atomic.h>
+#include "atomic.h"
 #include <math.h>
 #include "recipes.h"
 #include "log.h"
