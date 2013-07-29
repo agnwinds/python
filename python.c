@@ -1603,7 +1603,11 @@ run -- 07jul -- ksl
 
 #ifdef MPI_ON
   /* Since the wind is now set up can allocate sufficiently big arrays to help with the MPI reductions */
-  size_of_helpers = (10+NXBANDS)*NPLASMA+(nangles+MSPEC)*NWAVE;
+ // size_of_helpers = (10+NXBANDS)*NPLASMA+(nangles+MSPEC)*NWAVE;
+    size_of_helpers = NPLASMA+(9+2*NXBANDS+NXBANDS)*NPLASMA + (nangles+MSPEC)*NWAVE;
+
+
+Log ("TEST size_of_helpers =%i\n",size_of_helpers);
   maxfreqhelper = calloc (sizeof(double),NPLASMA);
   maxfreqhelper2 = calloc (sizeof(double),NPLASMA);
   redhelper = calloc (sizeof (double), size_of_helpers); 
@@ -1794,10 +1798,6 @@ run -- 07jul -- ksl
 	  redhelper[mpi_i+8*NPLASMA] = plasmamain[mpi_i].heat_photo/ np_mpi_global;
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
-	if (rank_global ==0)
-		{
-	Log ("TEST0 j=%i, ave=%i, sd=%i\n",mpi_i+(9+mpi_j)*NPLASMA,mpi_i+(9+NXBANDS+mpi_j)*NPLASMA,mpi_i+(9+2*NXBANDS+mpi_j)*NPLASMA);
-		}
 	      redhelper[mpi_i+(9+mpi_j)*NPLASMA] = plasmamain[mpi_i].xj[mpi_j]/ np_mpi_global;
 	      redhelper[mpi_i+(9+NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j]/ np_mpi_global;
 	      redhelper[mpi_i+(9+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
@@ -1832,10 +1832,6 @@ run -- 07jul -- ksl
 	  plasmamain[mpi_i].heat_photo = redhelper2[mpi_i+8*NPLASMA];
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
-	if (rank_global ==0)
-		{
-	Log ("TEST1.5 j=%i, ave=%i, sd=%i\n",mpi_i+(9+mpi_j)*NPLASMA,mpi_i+(9+NXBANDS+mpi_j)*NPLASMA,mpi_i+(9+2*NXBANDS+mpi_j)*NPLASMA);
-		}
 	      plasmamain[mpi_i].xj[mpi_j]=redhelper2[mpi_i+(9+mpi_j)*NPLASMA];
 	      plasmamain[mpi_i].xave_freq[mpi_j]=redhelper2[mpi_i+(9+NXBANDS+mpi_j)*NPLASMA];
 	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(9+NXBANDS*2+mpi_j)*NPLASMA];
