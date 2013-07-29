@@ -222,7 +222,10 @@ WindPtr (w);
 /* 71 - 111279 - ksl - Small modification to reflect the fact that nxfreq has been moved into the geo structure */
       for (i = 0; i < geo.nxfreq; i++)	/*loop over number of bands */
 	{
-	Log_parallel("CALC SD cell %i band %i nphot=%i av=%e j=%e sdfreq=%e volume=%e\n",n,i,plasmamain[n].nxtot[i],plasmamain[n].xave_freq[i],plasmamain[n].xj[i],plasmamain[n].xsd_freq[i],volume);
+      if (rank_global == 0)
+	{
+	Log("CALC SD cell %i band %i nphot=%i av=%e j=%e sdfreq=%e volume=%e\n",n,i,plasmamain[n].nxtot[i],plasmamain[n].xave_freq[i],plasmamain[n].xj[i],plasmamain[n].xsd_freq[i],volume);
+}
 	  if (plasmamain[n].nxtot[i] > 0)	/*Check we actually have some photons in the cell in this band */
 	    {
 
