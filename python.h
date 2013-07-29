@@ -5,7 +5,7 @@ int rank_global;
 #define DEBUG 				0	/* 0 means do not debug */
 int verbosity;			/* verbosity level. 0 low, 10 is high */
 
-#include "log.h"
+//#include "log.h"	no longer needed as kpar encorporated into python
 
 /* In python_43 the assignment of the WindPtr size has been moved from a fixed
 value determined by values in python.h to a values which are adjustable from
