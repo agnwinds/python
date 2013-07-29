@@ -252,7 +252,7 @@ Log (char *format, ...)
 
   if (log_verbosity < SHOW_LOG) 
 	  return(0);
-  printf("TEST\n");
+
   va_start (ap, format);
   va_copy (ap2,ap);  /* ap is not necessarily preserved by vprintf */
 
