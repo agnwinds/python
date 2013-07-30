@@ -1607,7 +1607,6 @@ run -- 07jul -- ksl
     size_of_helpers = NPLASMA+(9+2*NXBANDS+NXBANDS)*NPLASMA + (nangles+MSPEC)*NWAVE;
 
 
-Log ("TEST size_of_helpers =%i\n",size_of_helpers);
   maxfreqhelper = calloc (sizeof(double),NPLASMA);
   maxfreqhelper2 = calloc (sizeof(double),NPLASMA);
   redhelper = calloc (sizeof (double), size_of_helpers); 
@@ -1801,11 +1800,6 @@ Log ("TEST size_of_helpers =%i\n",size_of_helpers);
 	      redhelper[mpi_i+(9+mpi_j)*NPLASMA] = plasmamain[mpi_i].xj[mpi_j]/ np_mpi_global;
 	      redhelper[mpi_i+(9+NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j]/ np_mpi_global;
 	      redhelper[mpi_i+(9+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
-      if (rank_global == 0)
-	{
-	  Log("TEST cell %i band %i SD=%e\n",mpi_i,mpi_j,plasmamain[mpi_i].xsd_freq[mpi_j]);
-	}
-
 	    }
 	}
 
@@ -1837,13 +1831,6 @@ Log ("TEST size_of_helpers =%i\n",size_of_helpers);
 	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(9+NXBANDS*2+mpi_j)*NPLASMA];
 
 	      redhelper[mpi_i+(9+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
-
-
-      if (rank_global == 0)
-	{
-	  Log("TEST2 cell %i band%i SD=%e\n",mpi_i,mpi_j,plasmamain[mpi_i].xsd_freq[mpi_j]);
-	}
-
 	    }
 	}
       Log_parallel("Thread %d happy after broadcast.\n", rank_global);
