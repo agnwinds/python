@@ -1445,7 +1445,7 @@ IP_summary (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = (log10 (plasmamain[nplasma].ferland_ip));
+	  aaa[n] = ((plasmamain[nplasma].ferland_ip));
 	}
     }
   display ("Log Ionization parameter (Ferland)");
@@ -1464,7 +1464,7 @@ IP_summary (w, rootname, ochoice)
       if (w[n].vol > 0.0)
 	{
 	  nplasma = w[n].nplasma;
-	  aaa[n] = (log10 (plasmamain[nplasma].ip));
+	  aaa[n] = ((plasmamain[nplasma].ip));
 	}
     }
   display ("Log Ionization parameter");

@@ -253,7 +253,8 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   double *maxfreqhelper,*maxfreqhelper2;
   double *redhelper, *redhelper2;
   int *iredhelper, *iredhelper2;
-  int size_of_helpers;
+ // int size_of_helpers;
+  int plasma_double_helpers,plasma_int_helpers,ioniz_spec_helpers,spec_spec_helpers;
 #endif
 
   int mkdir();
@@ -1602,17 +1603,27 @@ run -- 07jul -- ksl
   check_time (root);
 
 #ifdef MPI_ON
-  /* Since the wind is now set up can allocate sufficiently big arrays to help with the MPI reductions */
- // size_of_helpers = (10+NXBANDS)*NPLASMA+(nangles+MSPEC)*NWAVE;
-    size_of_helpers = NPLASMA+(9+2*NXBANDS+NXBANDS)*NPLASMA + (nangles+MSPEC)*NWAVE;
+//   Since the wind is now set up can allocate sufficiently big arrays to help with the MPI reductions 
+  
+
+    plasma_double_helpers = (10+3*NXBANDS)*NPLASMA; //The size of the helper array for doubles. We transmit 10 numbers for each cell, plus three arrays, each of length NXBANDS
+    plasma_int_helpers = (6+NXBANDS)*NPLASMA; //The size of the helper array for integers. We transmit 6 numbers for each cell, plus one array of length NXBANDS
+    ioniz_spec_helpers = 2*MSPEC*NWAVE; //we need space for log and lin spectra for MSPEC XNWAVE
+    spec_spec_helpers = (NWAVE*nspectra); //We need space for NWAVE wavelengths for nspectra
 
 
-  maxfreqhelper = calloc (sizeof(double),NPLASMA);
-  maxfreqhelper2 = calloc (sizeof(double),NPLASMA);
-  redhelper = calloc (sizeof (double), size_of_helpers); 
-  redhelper2 = calloc (sizeof (double), size_of_helpers); 
-  iredhelper = calloc (sizeof (int), size_of_helpers); 
-  iredhelper2 = calloc (sizeof (int), size_of_helpers); 
+
+ //   size_of_helpers = NPLASMA+(10+2*NXBANDS+NXBANDS)*NPLASMA + (nangles+MSPEC)*NWAVE;
+
+
+
+
+ // maxfreqhelper = calloc (sizeof(double),NPLASMA);
+//  maxfreqhelper2 = calloc (sizeof(double),NPLASMA);
+//  redhelper = calloc (sizeof (double), size_of_helpers); 
+//  redhelper2 = calloc (sizeof (double), size_of_helpers); 
+//  iredhelper = calloc (sizeof (int), size_of_helpers); 
+//  iredhelper2 = calloc (sizeof (int), size_of_helpers); 
 #endif
 
 /* XXXX - THE CALCULATION OF THE IONIZATION OF THE WIND */
@@ -1779,6 +1790,16 @@ run -- 07jul -- ksl
       /* End of the subcycle loop */
       /* At this point we should communicate all the useful infomation that has been accummulated on differenet MPI tasks */
 #ifdef MPI_ON
+
+ 
+    maxfreqhelper = calloc (sizeof(double),NPLASMA); 
+    maxfreqhelper2 = calloc (sizeof(double),NPLASMA);
+    redhelper = calloc (sizeof (double), plasma_double_helpers); 
+    redhelper2 = calloc (sizeof (double), plasma_double_helpers); 
+    iredhelper = calloc (sizeof (int), plasma_int_helpers); 
+    iredhelper2 = calloc (sizeof (int), plasma_int_helpers); 
+
+
       MPI_Barrier(MPI_COMM_WORLD);
       /// the following blocks gather all the estimators to the zeroth (Master) thread
 
@@ -1795,22 +1816,23 @@ run -- 07jul -- ksl
 	  redhelper[mpi_i+6*NPLASMA] = plasmamain[mpi_i].heat_comp/ np_mpi_global;
 	  redhelper[mpi_i+7*NPLASMA] = plasmamain[mpi_i].heat_ind_comp/ np_mpi_global;
 	  redhelper[mpi_i+8*NPLASMA] = plasmamain[mpi_i].heat_photo/ np_mpi_global;
+          redhelper[mpi_i+9*NPLASMA] = plasmamain[mpi_i].ip / np_mpi_global;
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
-	      redhelper[mpi_i+(9+mpi_j)*NPLASMA] = plasmamain[mpi_i].xj[mpi_j]/ np_mpi_global;
-	      redhelper[mpi_i+(9+NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j]/ np_mpi_global;
-	      redhelper[mpi_i+(9+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
+	      redhelper[mpi_i+(10+mpi_j)*NPLASMA] = plasmamain[mpi_i].xj[mpi_j]/ np_mpi_global;
+	      redhelper[mpi_i+(10+NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j]/ np_mpi_global;
+	      redhelper[mpi_i+(10+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
 	    }
 	}
 
       MPI_Reduce(maxfreqhelper, maxfreqhelper2, NPLASMA, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
-      MPI_Reduce(redhelper, redhelper2, size_of_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+      MPI_Reduce(redhelper, redhelper2, plasma_double_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
       if (rank_global == 0)
 	{
 	  Log_parallel("Zeroth thread successfully received the normalised estimators. About to broadcast.\n");
 	}
       
-      MPI_Bcast(redhelper2, size_of_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(redhelper2, plasma_double_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       MPI_Bcast(maxfreqhelper2, NPLASMA, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
 	{
@@ -1824,13 +1846,12 @@ run -- 07jul -- ksl
 	  plasmamain[mpi_i].heat_comp = redhelper2[mpi_i+6*NPLASMA];
 	  plasmamain[mpi_i].heat_ind_comp = redhelper2[mpi_i+7*NPLASMA];
 	  plasmamain[mpi_i].heat_photo = redhelper2[mpi_i+8*NPLASMA];
+          plasmamain[mpi_i].ip = redhelper2[mpi_i+9*NPLASMA];
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
-	      plasmamain[mpi_i].xj[mpi_j]=redhelper2[mpi_i+(9+mpi_j)*NPLASMA];
-	      plasmamain[mpi_i].xave_freq[mpi_j]=redhelper2[mpi_i+(9+NXBANDS+mpi_j)*NPLASMA];
-	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(9+NXBANDS*2+mpi_j)*NPLASMA];
-
-	      redhelper[mpi_i+(9+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
+	      plasmamain[mpi_i].xj[mpi_j]=redhelper2[mpi_i+(10+mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].xave_freq[mpi_j]=redhelper2[mpi_i+(10+NXBANDS+mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(10+NXBANDS*2+mpi_j)*NPLASMA];
 	    }
 	}
       Log_parallel("Thread %d happy after broadcast.\n", rank_global);
@@ -1840,18 +1861,23 @@ run -- 07jul -- ksl
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
 	{
 	  iredhelper[mpi_i] = plasmamain[mpi_i].ntot;
+	  iredhelper[mpi_i+NPLASMA] = plasmamain[mpi_i].ntot_star;
+	  iredhelper[mpi_i+2*NPLASMA] = plasmamain[mpi_i].ntot_bl;
+	  iredhelper[mpi_i+3*NPLASMA] = plasmamain[mpi_i].ntot_disk;
+	  iredhelper[mpi_i+4*NPLASMA] = plasmamain[mpi_i].ntot_wind;
+	  iredhelper[mpi_i+5*NPLASMA] = plasmamain[mpi_i].ntot_agn;
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
-	      iredhelper[mpi_i+(1+mpi_j)*NPLASMA] = plasmamain[mpi_i].nxtot[mpi_j];
+	      iredhelper[mpi_i+(6+mpi_j)*NPLASMA] = plasmamain[mpi_i].nxtot[mpi_j];
 	    }
 	}
-      MPI_Reduce(iredhelper, iredhelper2, size_of_helpers, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+      MPI_Reduce(iredhelper, iredhelper2, plasma_int_helpers, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
       if (rank_global == 0)
 	{
 	  Log_parallel("Zeroth thread successfully received the integer sum. About to broadcast.\n");
 	}
       
-      MPI_Bcast(iredhelper2, size_of_helpers, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(iredhelper2, plasma_int_helpers, MPI_INT, 0, MPI_COMM_WORLD);
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
 	{
 	  plasmamain[mpi_i].ntot=iredhelper2[mpi_i];
@@ -1861,7 +1887,12 @@ run -- 07jul -- ksl
 	    }
 	}
   
-
+	free (maxfreqhelper);
+    	free (maxfreqhelper2);
+    	free (redhelper);
+    	free (redhelper2); 
+    	free (iredhelper);
+    	free (iredhelper2);
 
 
 #endif
@@ -1907,27 +1938,36 @@ run -- 07jul -- ksl
       /* Do an MPI reducde to get the spectra all gathered to the master thread */
 #ifdef MPI_ON
 
+
+    redhelper = calloc (sizeof (double), ioniz_spec_helpers); 
+    redhelper2 = calloc (sizeof (double), ioniz_spec_helpers); 
+    
+
       for (mpi_i = 0; mpi_i < NWAVE; mpi_i++)
 	{
-	  for (mpi_j=0; mpi_j < 5; mpi_j++)
+	  for (mpi_j=0; mpi_j < MSPEC; mpi_j++)
 	    {
-	      redhelper[mpi_i*6 + mpi_j]=s[mpi_j].f[mpi_i]/ np_mpi_global;
-	      redhelper[mpi_i*6 + mpi_j + (NWAVE*6)]=s[mpi_j].lf[mpi_i]/ np_mpi_global;
+	      redhelper[mpi_i*MSPEC + mpi_j]=s[mpi_j].f[mpi_i]/ np_mpi_global;
+	      redhelper[mpi_i*MSPEC + mpi_j + (NWAVE*MSPEC)]=s[mpi_j].lf[mpi_i]/ np_mpi_global;
 	    }
 	}
 
-      MPI_Reduce(redhelper, redhelper2, 12*NWAVE, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-      MPI_Bcast(redhelper2, 12*NWAVE, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Reduce(redhelper, redhelper2, ioniz_spec_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+      MPI_Bcast(redhelper2, ioniz_spec_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
       for (mpi_i = 0; mpi_i < NWAVE; mpi_i++)
 	{
-	  for (mpi_j=0; mpi_j < 6; mpi_j++)
+	  for (mpi_j=0; mpi_j < MSPEC; mpi_j++)
 	    {
-	      s[mpi_j].f[mpi_i] = redhelper2[mpi_i*6 + mpi_j];
-	      s[mpi_j].lf[mpi_i] = redhelper2[mpi_i*6 + mpi_j + (NWAVE*6)];
+	      s[mpi_j].f[mpi_i] = redhelper2[mpi_i*MSPEC + mpi_j];
+	      s[mpi_j].lf[mpi_i] = redhelper2[mpi_i*MSPEC + mpi_j + (NWAVE*MSPEC)];
 	    }
 	}
       MPI_Barrier(MPI_COMM_WORLD);
+
+	free(redhelper);
+	free(redhelper2);
+
 #endif
 
 #ifdef MPI_ON
@@ -2093,30 +2133,37 @@ run -- 07jul -- ksl
 /* Write out the detailed spectrum each cycle so that one can see the statistics build up! */
       renorm = ((double) (pcycles)) / (geo.pcycle + 1.0);
 
-      /* Do an MPI reducde to get the spectra all gathered to the master thread */
+      /* Do an MPI reduce to get the spectra all gathered to the master thread */
 #ifdef MPI_ON
+
+ //   spec_spec_helpers = (nangles+MSPEC)*NWAVE;
+    redhelper = calloc (sizeof (double), spec_spec_helpers); 
+    redhelper2 = calloc (sizeof (double), spec_spec_helpers); 
+
+
 
       for (mpi_i = 0; mpi_i < NWAVE; mpi_i++)
 	{
 	  for (mpi_j=0; mpi_j < nspectra; mpi_j++)
 	    {
 	      redhelper[mpi_i*nspectra + mpi_j]=s[mpi_j].f[mpi_i]/ np_mpi_global;
-	      redhelper[mpi_i*nspectra + mpi_j + (NWAVE*nspectra)]=s[mpi_j].lf[mpi_i]/ np_mpi_global;
 	    }
 	}
 
-      MPI_Reduce(redhelper, redhelper2, size_of_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-      MPI_Bcast(redhelper2, size_of_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Reduce(redhelper, redhelper2, spec_spec_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+      MPI_Bcast(redhelper2, spec_spec_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
       for (mpi_i = 0; mpi_i < NWAVE; mpi_i++)
 	{
 	  for (mpi_j=0; mpi_j < nspectra; mpi_j++)
 	    {
 	      s[mpi_j].f[mpi_i] = redhelper2[mpi_i*nspectra + mpi_j];
-	      s[mpi_j].lf[mpi_i] = redhelper2[mpi_i*nspectra + mpi_j + (NWAVE*nspectra)];
 	    }
 	}
       MPI_Barrier(MPI_COMM_WORLD);
+
+	free(redhelper);
+	free(redhelper2);
 #endif
 
 #ifdef MPI_ON
