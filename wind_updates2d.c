@@ -121,7 +121,7 @@ WindPtr (w);
 
 
   /* For MPI parallelisation, the following loop will be distributed over mutiple tasks. 
-     Note that these variables are still used even without MPI on */
+     Note that the mynmim and mynmax variables are still used even without MPI on */
   my_nmin = 0;
   my_nmax = NPLASMA;
 #ifdef MPI_ON
@@ -255,12 +255,13 @@ WindPtr (w);
        * previous value of t_e.  Note that this may not be  best way to determien the cooling. 
        * Changes made here should also be reflected in wind2d.c.  At present, adiabatic colling
        * is not included in updates to the temperature, even if the adiabatic cooling is calculated
-       * here. 04nov -- ksl */
-      /* 05apr -- ksl -- The index being used was incorrect.  This has been fixed now */
-      /* 11sep -- nsh -- The index for the wind (&w) for adiabatic cooling was incorrect - was being called with the plasma cell rather than the approriate wind cell fixed */
+       * here. 04nov -- ksl 
+       * 05apr -- ksl -- The index being used was incorrect.  This has been fixed now 
+       * 11sep -- nsh -- The index for the wind (&w) for adiabatic cooling was incorrect - 
+       * was being called with the plasma cell rather than the approriate wind cell fixed */
 
       if (geo.adiabatic)
-// incorrect indexing nsh 110921 plasmamain[n].lum_adiabatic =
+//incorrect indexing nsh 110921 plasmamain[n].lum_adiabatic =
 //old     adiabatic_cooling (&w[n], plasmamain[n].t_e);
 	plasmamain[n].lum_adiabatic =
 	  adiabatic_cooling (&w[nwind], plasmamain[n].t_e);
@@ -661,10 +662,27 @@ WindPtr (w);
 
 
   asum = wind_luminosity (0.0, VERY_BIG);
-  Log ("!!wind_update: Absorbed flux    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e)\n", xsum, psum, fsum, csum, icsum, lsum);	//1108 NSH Added commands to report compton heating
- Log ("!!wind_update: Wind heating    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e adiabatic %8.2e)\n", xsum+geo.heat_adiabatic, psum, fsum, csum, icsum, lsum, geo.heat_adiabatic);	//1306 Added line to split out absorbed flux from wind heating
-   Log ("!!wind_update: Wind luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n", asum, geo.lum_fb, geo.lum_ff, geo.lum_lines);	//1108 NSH added commands to report compton cooling 1110 removed, this line now just reports cooling mechanisms that will generate photons
-  Log ("!!wind_update: Wind cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e lines %8.2e adiabatic %8.2e) after update\n", asum + geo.lum_comp + geo.lum_dr + geo.lum_adiabatic, geo.lum_fb, geo.lum_ff, geo.lum_comp, geo.lum_dr, geo.lum_lines, geo.lum_adiabatic);	//1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons. 
+
+
+  /* 1108 NSH Added commands to report compton heating */
+  Log ("!!wind_update: Absorbed flux    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e)\n", 
+        xsum, psum, fsum, csum, icsum, lsum);
+	
+  /* 1306 Added line to split out absorbed flux from wind heating */
+  Log ("!!wind_update: Wind heating    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e adiabatic %8.2e)\n", 
+        xsum+geo.heat_adiabatic, psum, fsum, csum, icsum, lsum, geo.heat_adiabatic);
+	
+  /* 1108 NSH added commands to report compton cooling 1110 removed, 
+   * this line now just reports cooling mechanisms that will generate photons */
+  Log ("!!wind_update: Wind luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n", 
+        asum, geo.lum_fb, geo.lum_ff, geo.lum_lines);	
+
+  /* 1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons. */
+  Log ("!!wind_update: Wind cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e lines %8.2e adiabatic %8.2e) after update\n", 
+        asum + geo.lum_comp + geo.lum_dr + geo.lum_adiabatic, geo.lum_fb, geo.lum_ff, geo.lum_comp, 
+        geo.lum_dr, geo.lum_lines, geo.lum_adiabatic);	
+
+
 
   /* Print out some diagnositics of the changes in the wind update */
   t_r_ave_old /= iave;
@@ -692,9 +710,11 @@ WindPtr (w);
   xtemp_rad (w);
 
 
-/* This next block is to allow the output of data relating to the abundances of ions when python is being tested. We will only want this to run if the wind mode is test */
 
 
+/* This next block is to allow the output of data relating to the abundances of ions when python is being tested
+ * with thin shell mode.We will only want this to run if the wind mode is 9, for test or thin shell mode.
+ */
 
   if (geo.wind_type == 9)
     {
@@ -725,16 +745,28 @@ WindPtr (w);
 	  pow (100 / HEV, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
       agn_ip /= (w[n].r * w[n].r);
       agn_ip /= plasmamain[0].rho * rho2nh;
+
+      /* Report luminosities, IP and other diagnositic quantities */
       Log
 	("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim_2010)= %e Meaured_IP(cloudy)= %e distance= %e volume= %e mean_ds=%e\n",
 	 geo.lum_agn, plasmamain[0].t_e, plasmamain[0].rho * rho2nh,
 	 plasmamain[0].ne, geo.alpha_agn, agn_ip, plasmamain[0].ip, w[n].r,
 	 w[n].vol, plasmamain[0].mean_ds / plasmamain[0].n_ds);
-      Log ("OUTPUT Absorbed_flux(ergs-1cm-3)    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e )\n", xsum / w[n].vol, psum / w[n].vol, fsum / w[n].vol, csum / w[n].vol, icsum / w[n].vol, lsum / w[n].vol);	//1108 NSH Added commands to report compton heating
-      Log ("OUTPUT Wind_cooling(ergs-1cm-3)     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e adiabatic %8.2e lines %8.2e ) after update\n", (asum + geo.lum_comp + geo.lum_dr + geo.lum_adiabatic) / w[n].vol, geo.lum_fb / w[n].vol, geo.lum_ff / w[n].vol, geo.lum_comp / w[n].vol, geo.lum_dr / w[n].vol, geo.lum_adiabatic / w[n].vol, geo.lum_lines / w[n].vol);	//1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons.
+
+      /* 1108 NSH Added commands to report compton heating */
+      Log ("OUTPUT Absorbed_flux(ergs-1cm-3)    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e )\n", 
+            xsum / w[n].vol, psum / w[n].vol, fsum / w[n].vol, csum / w[n].vol, icsum / w[n].vol, lsum / w[n].vol);	
+
+      /* 1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons.*/
+      Log ("OUTPUT Wind_cooling(ergs-1cm-3)     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e adiabatic %8.2e lines %8.2e ) after update\n",
+           (asum + geo.lum_comp + geo.lum_dr + geo.lum_adiabatic) / w[n].vol, geo.lum_fb / w[n].vol, geo.lum_ff / w[n].vol, 
+           geo.lum_comp / w[n].vol, geo.lum_dr / w[n].vol, geo.lum_adiabatic / w[n].vol, geo.lum_lines / w[n].vol);	
+
       Log ("OUTPUT Wind_line_cooling(ergs-1cm-3)  HHe %8.2e Metals %8.2e\n",
 	   nsh_lum_hhe / w[n].vol, nsh_lum_metals / w[n].vol);
-      Log ("OUTPUT Balance      Cooling=%8.2e Heating=%8.2e Lum=%8.2e T_e=%e after update\n", asum + geo.lum_comp + geo.lum_dr + geo.lum_adiabatic, xsum, asum, plasmamain[0].t_e);	//1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons.
+
+    /* 1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons. */
+      Log ("OUTPUT Balance      Cooling=%8.2e Heating=%8.2e Lum=%8.2e T_e=%e after update\n", asum + geo.lum_comp + geo.lum_dr + geo.lum_adiabatic, xsum, asum, plasmamain[0].t_e);	
 
       for (n = 0; n < nelements; n++)
 	{
