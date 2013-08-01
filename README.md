@@ -17,11 +17,12 @@ This is the README file for Python76b
 		* Fixed errors in the calculation of gaunt factors
 		* Error in Z in Sutherland data gives wrong f-f- heating for nenautral H regions
 		* Error in reset of array pop_kappa_ff_array() gives too high f-f heating
-		* Error as we use freq ave gaunt factor ratehr than freq dependent- order 1 problem
 	* #23 printf statements in code- largely dealt with
 	* Bug fix in rtheta.c check which fails when grid not square due to incorrect MDIM, NDIM order
 	* #28 wrong collisional deactivation rate in matom()
-
+	* #31 incorrect loop in bf_estimators_increment which reporting wrong matom heating
+	* Incorrect helper array sizes in python.c- this is a fairly major change in terms of lines of code
+	
 * makefile syntax edited to make D python for debugging mode
 
 * Code improvements / enhancements
@@ -29,11 +30,13 @@ This is the README file for Python76b
 	* changes to ionization.c and wind_updates2d.c to move adiabatic cooling from part of the temperature dependant cooling into the 'fixed' heating side
 	* Minor change to py_wind_sub, velocity components now correctly written to x,y,z files rather than rho, theta, z files. Also py_wind_write now outputs x and z coordinates to 4 dp, which permits r theta grids to be properly described
 	* Changes to the 'e' option in pywind, to get it to report all heating and cooling mechanisms correctly
+	* maximum temperature implemented in ionization.c for proga models
+	* 
 
 * Files changed:
 	* too many to list
 	* major changes in
-		* rtheta.c, python.c, 
+		* rtheta.c, python.c, ionization.c
 
 ***
 
