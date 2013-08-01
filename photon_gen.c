@@ -462,8 +462,8 @@ python 40 but it is not really what one wants.
 
 
   Log
-    ("photon_gen: weight %6.2e nphotons %d ndisk %6d nwind %6d nstar %6d npow %d \n",
-     weight, nphotons, ndisk, nwind, nstar, nagn);
+    ("photon_gen: band %6.2e to %6.2e weight %6.2e nphotons %d ndisk %6d nwind %6d nstar %6d npow %d \n",
+     f1,f2,weight, nphotons, ndisk, nwind, nstar, nagn);
 
   /* Generate photons from the star, the bl, the wind and then from the disk */
   /* Now adding generation from kpkts and macro atoms too (SS June 04) */

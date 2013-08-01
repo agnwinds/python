@@ -224,10 +224,12 @@ WindPtr (w);
 	{
 	  if (plasmamain[n].nxtot[i] > 0)	/*Check we actually have some photons in the cell in this band */
 	    {
+
 	      plasmamain[n].xave_freq[i] /= plasmamain[n].xj[i];	/*Normalise the average frequency */
 	      plasmamain[n].xsd_freq[i] /= plasmamain[n].xj[i];	/*Normalise the mean square frequency */
 	      plasmamain[n].xsd_freq[i] = sqrt (plasmamain[n].xsd_freq[i] - (plasmamain[n].xave_freq[i] * plasmamain[n].xave_freq[i]));	/*Compute standard deviation */
 	      plasmamain[n].xj[i] /= (4 * PI * volume);	/*Convert to radiation density */
+
 	    }
 	  else
 	    {

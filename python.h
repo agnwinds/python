@@ -648,10 +648,12 @@ typedef struct plasma
 							   number is the fraction between heating and cooling divided by the sum of the 2       */
   int trcheck, techeck, hccheck;	/* NSH the individual convergence checks used to calculate converge_whole.  Each of these values
 					   is 0 if the fractional change or in the case of the last check error is less than a value, currently
-					   set to 0.05.  ksl 111126      */
+					   set to 0.05.  ksl 111126   
+NSH 130725 - this number is now also used to say if the cell is over temperature - it is set to 2 in this case   */
   int converge_whole, converging;	/* converge_whole is the sum of the indvidual convergence checks.  It is 0 if all of the
 					   convergence checks indicated convergence.subroutine convergence feels point is converged, converging is an
 					   indicator of whether the program thought the cell is on the way to convergence 0 implies converging */
+
 
 
   double gamma_inshl[NAUGER];	/*MC estimator that will record the inner shell ionization rate - very similar to macro atom-style estimators */
@@ -806,6 +808,8 @@ phot.istat below */
 /* ??? TMIN appears to be used both for the minimum temperature and for 
    calculating the fraction of recombinations that go to the ground state.  This
    looks like a problem ksl-98jul???? */
+
+#define TMAX    5e8/*NSH 130725 - this is the maximum temperature permitted - this was introduced following problems with adaibatically heated cells increasing forever. The value was suggested by DP as a sensible compton teperature for the PK05/P05 Zeus models.*/
 
 
 //These constants are used in the various routines which compute ionization state
