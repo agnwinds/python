@@ -181,7 +181,8 @@ History:
 			slightly altered reporting to allow more succinct reporting in parallel mode.
 	1307	ksl	Removed the Thierry & Hubeny O-star models as an option from the code.
 			This was never tested, and never really used.  Knox no longer even has the 
-			models.
+			models.  Note that Stuart is replacing this with a homologous expansion
+			model
  	
  	Look in Readme.c for more text concerning the early history of the program.
 

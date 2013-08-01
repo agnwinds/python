@@ -21,6 +21,7 @@
 # 13jun jm/ss	SS added parallel flag -DMPI_ON and mpicc wrapper for gcc
 #		is now used as C compiler
 # 13jul jm	can now compiled with gcc using 'make CC=gcc python'
+# 13jul jm	kpar is now integrated into python and compiled here
 
 
 #MPICC is now default compiler- currently code will not compile with gcc
@@ -61,7 +62,9 @@ endif
 
 # next line for debugging when concerned about memory problems
 # LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lkpar -lcfitsio -lgsl -lgslcblas ../../duma_2_5_3/libduma.a -lpthread
-LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lkpar -lcfitsio -lgsl -lgslcblas 
+# next line if you want to use kpar as a library, rather than as source below
+# LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lkpar -lcfitsio -lgsl -lgslcblas 
+LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lcfitsio -lgsl -lgslcblas 
 
 #Note that version should be a single string without spaces. 
 VERSION = 76b_dev
@@ -88,7 +91,8 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		matom.o estimators.o wind_sum.o yso.o elvis.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o auger_ionization.o \
 		agn.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
-		spectral_estimators.o variable_temperature.o
+		spectral_estimators.o variable_temperature.o log.o \
+		lineio.o rdpar.o 
 
 
 python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
@@ -102,7 +106,8 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		matom.c estimators.c wind_sum.c yso.c elvis.c cylindrical.c rtheta.c spherical.c  \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c auger_ionization.c \
 		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
-		spectral_estimators.c variable_temperature.c
+		spectral_estimators.c variable_temperature.c log.c \
+		lineio.c rdpar.c
 
 additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c 
 
@@ -129,7 +134,7 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		matom.o estimators.o yso.o elvis.o photon2d.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
 		spectral_estimators.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
-                variable_temperature.o bb.o
+                variable_temperature.o bb.o rdpar.o log.o
 
 
 
