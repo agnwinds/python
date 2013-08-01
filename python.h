@@ -860,7 +860,7 @@ p_dummy, *PhotPtr;
  * then photon histories will be attempted.
  */
 
-#define MAX_PHOT_HIST	1000
+#define MAX_PHOT_HIST	100000
 int n_phot_hist, phot_hist_on, phot_history_spectrum;
 struct photon xphot_hist[MAX_PHOT_HIST];
 

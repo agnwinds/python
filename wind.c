@@ -288,11 +288,7 @@ model_velocity (x, v)
     }
   else if (geo.wind_type == 6)
     {
-
-      //1307 - ksl - Removed this unused option from the code 
-      Error("wind: Thierry O star models (geo.wind_type 6) have bben removed from the code\n");
-      exit(0);
-
+      speed = homologous_velocity (x, v);
     }
   else if (geo.wind_type == 7)
     {
@@ -406,9 +402,7 @@ model_rho (x)
     }
   else if (geo.wind_type == 6)
     {
-      //1307 - ksl - Removed this unused option from the code 
-      Error("wind: Thierry O star models (geo.wind_type 6) have bben removed from the code\n");
-      exit(0);
+      rho = homologous_rho (x);
     }
   else if (geo.wind_type == 7)
     {

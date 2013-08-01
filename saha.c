@@ -491,7 +491,9 @@ saha (xplasma, ne, t)
 	    mytrap ();
 	  if (sane_check (sum))
 	    Error ("saha:sane_check failed for density summation\n");
-
+	  
+	  //	  printf("element %d ion %d part fn. %g %g\n", ion[nion].z, ion[nion].istate, partition[nion], partition[nion-1]);
+  
 
 	}
 

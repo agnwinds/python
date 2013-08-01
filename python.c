@@ -534,7 +534,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
 
       rdint
-	("Wind_type(0=SV,1=Sphere,2=Previous,3=Proga,4=Corona,5=knigge,6=thierry,7=yso,8=elvis,9=shell)",
+	("Wind_type(0=SV,1=Sphere,2=Previous,3=Proga,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell)",
 	 &geo.wind_type);
 
 
@@ -1158,10 +1158,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 	}
       else if (geo.wind_type == 6)
 	{
-		Error("python: geo.wind_type=6 thierry O star models has been removed from code\n");
-		exit (0);
-
-
+	  get_homologous_params ();
 	}
       else if (geo.wind_type == 7)
 	{

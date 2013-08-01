@@ -205,5 +205,8 @@ compute_zeta (temp, nion, mode)
     {
       Error ("Compute zeta: Unkown mode %i \n", mode);
     }
+
+  //printf("element %d ion %d zeta %g\n", ion[nion].z, ion[nion].istate, zeta);
+
   return (zeta);
 }
