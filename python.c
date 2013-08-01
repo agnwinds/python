@@ -1609,11 +1609,6 @@ run -- 07jul -- ksl
 #ifdef MPI_ON
 //   Since the wind is now set up can allocate sufficiently big arrays to help with the MPI reductions 
 
-
-printf ("TEST NXBANDS=%i, NPLASMA=%i, MSPEC=%i, NWAVE=%i, nspectra=%i\n",NXBANDS,NPLASMA,MSPEC,NWAVE,nangles+MSPEC);
-
-printf ("ORIGINAL=%i OLD NEW=%i NEW=%i\n",(10+NXBANDS)*NPLASMA+(nangles+MSPEC)*NWAVE,NPLASMA+(10+2*NXBANDS+NXBANDS)*NPLASMA + (nangles+MSPEC)*NWAVE,(10+3*NXBANDS)*NPLASMA);
-
     plasma_double_helpers = (10+3*NXBANDS)*NPLASMA; //The size of the helper array for doubles. We transmit 10 numbers for each cell, plus three arrays, each of length NXBANDS
     plasma_int_helpers = (6+NXBANDS)*NPLASMA; //The size of the helper array for integers. We transmit 6 numbers for each cell, plus one array of length NXBANDS
     ioniz_spec_helpers = 2*MSPEC*NWAVE; //we need space for log and lin spectra for MSPEC XNWAVE
@@ -1799,7 +1794,6 @@ printf ("ORIGINAL=%i OLD NEW=%i NEW=%i\n",(10+NXBANDS)*NPLASMA+(nangles+MSPEC)*N
       /* End of the subcycle loop */
       /* At this point we should communicate all the useful infomation that has been accummulated on differenet MPI tasks */
 #ifdef MPI_ON
-	Log ("AAAAA test=%e\n",plasmamain[NPLASMA-1].xsd_freq[1]);
  
     maxfreqhelper = calloc (sizeof(double),NPLASMA); 
     maxfreqhelper2 = calloc (sizeof(double),NPLASMA);
@@ -1909,9 +1903,6 @@ printf ("ORIGINAL=%i OLD NEW=%i NEW=%i\n",(10+NXBANDS)*NPLASMA+(nangles+MSPEC)*N
     	free (iredhelper);
     	free (iredhelper2);
 
-
-	Log ("BBBBB test=%e\n",plasmamain[NPLASMA-1].xsd_freq[1]);
-Log_flush();
 
 #endif
 
