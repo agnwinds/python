@@ -11,7 +11,7 @@
                                        Space Telescope Science Institute
 
  Synopsis:
-	get_stellar_wind_params gets input data which is necessary for a homologous expansion law
+	get_homologous_params gets input data which is necessary for a homologous expansion law
    		v(r)= r / t0
 
 Arguments:		
@@ -19,7 +19,7 @@ Arguments:
 Returns:
  
 Description:	
-	The parameters, geo.cl...,  obtained here are only used in the routines in homolgous.c
+	The parameters, geo.cl...,  obtained here are only used in the routines in homologous.c
 	which calculate the velocity and density of the wind during the initialization process.
 	Other portions of the structure, geo defined here are more general purpose.
 
@@ -144,7 +144,7 @@ homologous_velocity (x, v)
 		Space Telescope Science Institute
 
  Synopsis:
-	double homolgous_rho(x) calculates the density of an stellar_wind at a position x
+	double homologous_rho(x) calculates the density of an stellar_wind at a position x
 Arguments:		
 	double x[]	the position where for the which one desires the density
 Returns:
