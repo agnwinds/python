@@ -240,7 +240,7 @@ klein_nishina (nu)
       x4 *= x1 / (x * x * x);
       x4 = x4 + x3 / (2. * x);
       x4 = x4 - (1 + 3. * x) / (x2 * x2);
-      kn *= 0.75 * THOMPSON * x4;
+      kn *= 0.75 * x4;
     }
 
   return (kn);
