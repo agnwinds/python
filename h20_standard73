@@ -1,0 +1,16 @@
+#This is a standard atomic data set for a 20 level hydrogen model
+#and lines/continua of other elements from the usual standard 73 set.
+#It be treated with or without the full macro atom formalism for hydrogen only.
+data/atomic_macro/h20_standard39_elem_ions.py
+data/atomic_macro/h20_levels.py
+data/atomic_macro/h20_lines.py
+data/atomic_macro/h20_phot.py
+data/atomic73/topbase_levels_hhe.py
+data/atomic73/topbase_levels_cno.py
+data/atomic73/levels_ver.py
+data/atomic73/lines_linked_ver.py
+data/atomic73/excited.py
+data/atomic73/recomb.data
+data/atomic73/topbase_he1_phot.py
+data/atomic73/topbase_he2_phot.py
+data/atomic73/topbase_cno_phot.py
