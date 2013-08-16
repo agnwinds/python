@@ -565,7 +565,7 @@ scattering_fraction (line_ptr, xplasma)
 //Populate variable from previous calling structure
   ne = xplasma->ne;
   te = xplasma->t_e;
-  tr = xplasma->t_e;
+  tr = xplasma->t_r;	//JM1308 in pre 76b versions this was incorrectly set to xplasma->t_e
   w = xplasma->w;
   dvds = wmain[xplasma->nwind].dvds_ave;
   dd = xplasma->density[line_ptr->nion];
@@ -635,7 +635,7 @@ p_escape (line_ptr, xplasma)
 //Populate variable from previous calling structure
   ne = xplasma->ne;
   te = xplasma->t_e;
-  tr = xplasma->t_e;
+  tr = xplasma->t_r;	//JM1308 in pre 76b versions this was incorrectly set to xplasma->t_e
   w = xplasma->w;
   dd = xplasma->density[line_ptr->nion];
   dvds = wmain[xplasma->nwind].dvds_ave;
