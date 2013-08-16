@@ -272,8 +272,10 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
     np_mpi=1;
   #endif
   
-  np_mpi_global = np_mpi;              /// Global variable which holds the number of MPI processes
+  np_mpi_global = np_mpi;              /// Glob al variable which holds the number of MPI processes
   rank_global = my_rank;   /// Global variable which holds the rank of the active MPI process
+
+  Log_set_mpi_rank(my_rank, np_mpi);	// communicates my_rank to kpar
 
 
   opar_stat = 0;		/* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
@@ -289,8 +291,6 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 				   get less set the verbosity to a lower level. */
 
 
-  /* Intialise_kpar is a routine which  
-  Log_set_mpi_rank(my_rank, np_mpi);	// communicates my_rank to kpar
   Log_set_verbosity (verbosity);
 
 
