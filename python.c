@@ -2189,6 +2189,15 @@ run -- 07jul -- ksl
       Log ("Completed spectrum cycle %3d :  The elapsed TIME was %f\n",
 	   geo.pcycle, timer ());
 
+
+
+      /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
+
+      xsignal (root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK",
+	       geo.pcycle, pcycles);
+
+      geo.pcycle++;		// Increment the spectral cycles
+
 #ifdef MPI_ON
       if (rank_global == 0)
       {
@@ -2198,14 +2207,6 @@ run -- 07jul -- ksl
 #ifdef MPI_ON
       }
 #endif
-
-      /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
-
-      xsignal (root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK",
-	       geo.pcycle, pcycles);
-
-      geo.pcycle++;		// Increment the spectral cycles
-
       check_time (root);
     }
 
