@@ -199,9 +199,50 @@ rtheta_make_grid (w)
 
 	}
     }
+  rtheta_make_cones(w);
+  /* OK finished successfuly */
+  return (0);
+	}
+
+
+
+
+/***********************************************************
+                                       Space Telescope Science Institute
+
+ Synopsis:
+	rtheta_make_cones defines the wind cones that are needed to calculate ds in a cell              
+
+Arguments:		
+	WindPtr w;	The structure which defines the wind in Python
+ 
+Returns:
+ 
+Description:
+
+	This subroutine defines the edges of the wind
+
+
+History:
+	13Aug	nsh	76b- Broken this small routine out of rtheta_make_grid
+			in order to allow proga.c to use the same commands,
+			This was also to fix issue41 whereby a model with
+			an rtheta grid could not be restarted. This was because
+			these commands are only called when the initial
+			model is set up - and the cones structure is not saved.
+			
+
+**************************************************************/
 
 
   /* Now set up the wind cones that are needed for calclating ds in a cell */
+
+int
+rtheta_make_cones (w)
+     WindPtr w;
+{
+  int  n;
+
 
   cones_rtheta = (ConePtr) calloc (sizeof (cone_dummy), MDIM);
   if (cones_rtheta == NULL)
@@ -219,10 +260,13 @@ rtheta_make_grid (w)
       cones_rtheta[n].dzdr = 1. / tan (w[n].theta / RADIAN);	// New definition
     }
 
-  /* OK finished successfuly */
-  return (0);
 
-}
+  return (0);
+	}
+
+
+
+
 
 
 

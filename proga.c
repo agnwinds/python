@@ -816,6 +816,8 @@ for (i = 0; i < MDIM; i++)
 
   /* Now set up the wind cones that are needed for calclating ds in a cell */
 
+
+/*
   cones_rtheta = (ConePtr) calloc (sizeof (cone_dummy), MDIM);
   if (cones_rtheta == NULL)
     {
@@ -831,7 +833,8 @@ for (i = 0; i < MDIM; i++)
       cones_rtheta[n].z = 0.0;
       cones_rtheta[n].dzdr = 1. / tan (w[n].theta / RADIAN);	// New definition
     }
-
+*/
+  rtheta_make_cones(w); //NSH 130821 broken out into a seperate routine
 
 
 

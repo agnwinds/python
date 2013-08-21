@@ -174,6 +174,10 @@ int get_stellar_wind_params(void);
 double stellar_velocity(double x[], double v[]);
 double stellar_rho(double x[]);
 int stellar_vel_grad(double x[], double velgrad[][3]);
+/* homologous.c */
+int get_homologous_params(void);
+double homologous_velocity(double x[], double v[]);
+double homologous_rho(double x[]);
 /* proga.c */
 int get_proga_wind_params(void);
 int get_proga(void);
@@ -359,6 +363,7 @@ int cylind_is_cell_in_wind(int n, int icomp);
 /* rtheta.c */
 double rtheta_ds_in_cell(PhotPtr p);
 int rtheta_make_grid(WindPtr w);
+int rtheta_make_cones(WindPtr w);
 int rtheta_wind_complete(WindPtr w);
 int rtheta_volumes(WindPtr w, int icomp);
 int rtheta_where_in_grid(double x[]);

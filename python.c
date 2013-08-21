@@ -1272,6 +1272,13 @@ set defudge slightly differently for the shell wind.*/
       windcone[1].z = -VERY_BIG;;
     }
 
+/*NSH 130821 broken out into a seperate routine added these lines to fix bug41, where
+the cones are never defined for an rtheta grid if the model is restarted */
+
+  if (geo.coord_type==RTHETA) //We need to generate an rtheta wind cone
+    {
+  rtheta_make_cones(w);
+    }
 
   geo.rmax_sq = geo.rmax * geo.rmax;
 
