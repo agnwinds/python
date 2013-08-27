@@ -1,6 +1,7 @@
 ## this is the set of data files to use for supernova models
 data/atomic73/elem_ions_ver_sn.py
-data/atomic73/topbase_levels_hhe.py
+data/atomic73/topbase_levels_h.py
+data/atomic73/topbase_levels_he.py
 data/atomic73/topbase_levels_cno.py
 data/atomic73/levels_kur.py
 data/atomic73/lines_linked_kur.py
