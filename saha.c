@@ -353,14 +353,21 @@ concentrations (xplasma, mode)
   niterate = 0;
   while (niterate < MAXITERATIONS)
     {
-//      Log("Saha Iteration %i, with ne=%e and t=%e\n",niterate,xne,t);
+
       /* Assuming a value of ne calculate the relative densities of each ion for each element */
+      /* JM 1308 -- Here we  actually populate the plasma structure with saha abundances. In Lucy Mazzali mode, 
+	 we apply a correction to these abundances. Note that in macro atom mode this call should 
+	 really only happen before the first ionization cycle */	
 
       saha (xplasma, xne, t);
+
 
       /* New (SS Apr 04) call the routine that will replace the macro atoms ionization fractions and
          level populations with those computed with the Monte Carlo estimators. geo.macro_iniz_mode
          controls the use of macro_pops. */
+      /* M 1308 -- At the moment, the escape probabilities in macro_pops are calculated using saha ion densities
+	 which is wrong. Fortunately, macro_pops is called again in lucy() and converges on the correct v
+	 value, but this should be fixed. */
 
       if (geo.macro_ioniz_mode == 1)
 	{
@@ -406,10 +413,13 @@ concentrations (xplasma, mode)
 
   Synopsis:   
 
-   Calculate the saha densities for all of the ions in a single
-   cell.
+   	Calculate the saha densities for all of the ions in a single
+   	cell. Note that this routine populates the actual xplasma structure
+   	with saha abundances.
   
-  Arguments:		
+  Arguments:
+	xplasma, ne, t
+	the plasma cell to populate, the electron density and the temperature	
 
 
   Returns:
@@ -582,17 +592,29 @@ lucy (xplasma)
     {
       for (nelem = 0; nelem < nelements; nelem++)
 	{
+
+	  /* JM1308 -- Here we apply the lucy/mazzali correction factors to the saha abundances
+	     which are contained in xplasma. These corrected abundances are copied to newden, which
+	     is transferred over to xplasma when we converge on ne */
+
 	  lucy_mazzali1 (nh, t_r, t_e, www, nelem, xplasma->ne,
 			 xplasma->density, xne, newden);
 
 	  /* Re solve for the macro atom populations with the current guess for ne */
+          /* JM1308 -- note that unlike lucy mazzali above, here we actually modify the xplasma
+	     structure for those ions which are being treated as macro ions. This means that the
+	     the newden array will contain wrong values for these particular macro ions, but due
+             to the if loop at the end of this subroutine they are never passed to xplasma */
 	  if (geo.macro_ioniz_mode == 1)
 	    {
 	      macro_pops (xplasma, xne);
 	    }
+
 	}
+
       for (nion = 0; nion < nions; nion++)
 	{
+
 	  /* if the ion is being treated by macro_pops then use the populations just computed */
 	  if ((ion[nion].macro_info == 1) && (geo.macro_simple == 0)
 	      && (geo.macro_ioniz_mode == 1))
@@ -612,7 +634,7 @@ lucy (xplasma)
       if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6)
 	break;
 
-      /* else star another iteration of the main loop */
+      /* else start another iteration of the main loop */
       xne = (xnew + xne) / 2.;	/* Make a new estimate of xne */
       niterate++;
     }
