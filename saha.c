@@ -142,9 +142,21 @@ nebular_concentrations (xplasma, mode)
   else if (mode == 2)		// This is the standard LM method
     {
 
-      partition_functions (xplasma, mode);	// t_r with weights
+
+      partition_functions (xplasma, mode);	// calculate partition functions, using t_r with weights
+
+      /* JM 1308 -- concentrations then populates xplasma with saha abundances. 
+	 in macro atom mode it also call macro_pops, which is done incorrectly, 
+	 the escape probabilities are calculated with saha ion densities each time,
+	 because saha() repopulates xplasma in each cycle. */
 
       m = concentrations (xplasma, 0);	// Saha equation using t_r
+
+      /* JM 1308 -- lucy then applies the lucy mazzali correction factors to the saha abundances. 
+	 in macro atom mode it also call macro_pops which is done correctly in this case, as lucy_mazzali, 
+	 which is called in lucy, does repopulate xplasma like saha does. This means that in this mode,
+	 it doesn't actually matter that concentrations does macro level populations wrong, as that is 
+         corrected here. It should be sorted veyr soon, however. */
 
       m = lucy (xplasma);	// Main routine for running LucyMazzali
 
@@ -162,7 +174,13 @@ nebular_concentrations (xplasma, mode)
 
  //     m = sim_driver (xplasma);
  //   }
-/* Two new modes, they could proably be combined into one if statement, but having two adds little complexity and allows for other modifications if required. No call to partition functions is required, since this is done on a pairwise basis in the routine. Similarly there is no call to concentrations, since this is also done pairwise inside the routine. */
+
+  /* Two new modes, they could proably be combined into one if statement, but having 
+     two adds little complexity and allows for other   modifications if required. No 
+     call to partition functions is required, since this is done on a pairwise basis 
+     in the routine. Similarly there is no call to concentrations, since this is also 
+     done pairwise inside the routine. */
+
   else if (mode == 6)		/* Pairwise calculation of abundances, using a 
 				   temperature computed to ensure a reasonable
 				   ratio between the two, and then corrected for
@@ -170,6 +188,7 @@ nebular_concentrations (xplasma, mode)
     {
       m = variable_temperature (xplasma, mode);
     }
+
   else if (mode == 7)		/* Pairwise calculation of abundances, using a 
 				   temperature computed to ensure a reasonable
 				   ratio between the two, and then corrected for
@@ -365,9 +384,9 @@ concentrations (xplasma, mode)
       /* New (SS Apr 04) call the routine that will replace the macro atoms ionization fractions and
          level populations with those computed with the Monte Carlo estimators. geo.macro_iniz_mode
          controls the use of macro_pops. */
-      /* M 1308 -- At the moment, the escape probabilities in macro_pops are calculated using saha ion densities
-	 which is wrong. Fortunately, macro_pops is called again in lucy() and converges on the correct v
-	 value, but this should be fixed. */
+      /* JM 1308 -- At the moment, the escape probabilities in macro_pops are calculated using saha ion 
+	 densities which is wrong. Fortunately, macro_pops is called again in lucy() and converges on the 
+         correct value, but this should be fixed. I am not sure if it even needs to be called at all. */
 
       if (geo.macro_ioniz_mode == 1)
 	{
@@ -414,8 +433,7 @@ concentrations (xplasma, mode)
   Synopsis:   
 
    	Calculate the saha densities for all of the ions in a single
-   	cell. Note that this routine populates the actual xplasma structure
-   	with saha abundances.
+   	cell. 
   
   Arguments:
 	xplasma, ne, t
@@ -429,9 +447,12 @@ concentrations (xplasma, mode)
  
   Notes:
 
-  080808 - In the new version of this routine, all of the partition
-  functions are assumed to have been calculated before entering
-  the routine.
+  	080808 - In the new version of this routine, all of the partition
+  	functions are assumed to have been calculated before entering
+  	the routine.
+	
+	Note that this routine populates the actual xplasma structure
+   	with saha abundances.
 
 
   History:
@@ -526,23 +547,32 @@ saha (xplasma, ne, t)
                                        Space Telescope Science Institute
 
   Synopsis:   
+	lucy() applied the Lucy Mazzali correction factors to the saha abundances
+	contained in xplasma. It thus assumes that saha() has been called before it, 
+	in the concentrations routine.
 
-  
-  Arguments:		
+	Note that lucy also applied the macro_pops routine, and required that the 
+	ne convergence criteria is rigorous enough that the macro atom level populations
+	converge on the correct values.
 
+  Arguments:
+	xplasma, the plasma pointer for the cell in question		
 
   Returns:
+	iterates on ne to return the corrected lucy mazzali abundances and an improved
+	ne value.
  	
   Description:	
 
  
   Notes:
 
-Concentrations should have been called before this routine is executed.
+	Concentrations should have been called before this routine is executed.
 
-Procedurally, the routine is analogous to concentrations()
+	Procedurally, the routine is analogous to concentrations()
 
   History:
+
 	02jun	ksl	Made separate routine, removing it from nebular concentrations
         04Apr   SS      If statement added to stop this routine from changing macro atom
 	                populations.
@@ -605,6 +635,7 @@ lucy (xplasma)
 	     structure for those ions which are being treated as macro ions. This means that the
 	     the newden array will contain wrong values for these particular macro ions, but due
              to the if loop at the end of this subroutine they are never passed to xplasma */
+
 	  if (geo.macro_ioniz_mode == 1)
 	    {
 	      macro_pops (xplasma, xne);
@@ -662,6 +693,10 @@ lucy (xplasma)
     }
   return (0);
 }
+
+
+
+
 
 /***********************************************************
                                        Space Telescope Science Institute
