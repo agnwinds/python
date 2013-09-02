@@ -174,12 +174,18 @@ int get_stellar_wind_params(void);
 double stellar_velocity(double x[], double v[]);
 double stellar_rho(double x[]);
 int stellar_vel_grad(double x[], double velgrad[][3]);
+/* homologous.c */
+int get_homologous_params(void);
+double homologous_velocity(double x[], double v[]);
+double homologous_rho(double x[]);
 /* proga.c */
 int get_proga_wind_params(void);
 int get_proga(void);
 double proga_velocity(double x[], double v[]);
 double proga_rho(double x[]);
 double proga_temp(double x[]);
+int rtheta_make_zeus_grid(WindPtr w);
+int rtheta_zeus_volumes(WindPtr w);
 /* corona.c */
 int get_corona_params(void);
 double corona_velocity(double x[], double v[]);
@@ -191,15 +197,6 @@ double kn_rho(double x[]);
 double kn_vzero(double r);
 double kn_wind_mdot_integral(double r);
 double kn_rho_zero(double r);
-/* thierry.c */
-int get_thierry_params(void);
-int read_thierry(char infile[]);
-int thierry_read_set(FILE *fptr, double array[], int nd);
-double xthierry_velocity(double x[], double v[]);
-double thierry_velocity(double x[], double v[]);
-int thierry_vel_grad(double x[], double velgrad[][3]);
-double thierry_rho(double x[]);
-double xthierry_rho(double x[]);
 /* disk.c */
 double tdisk(double m, double mdot, double r);
 double teff(double t, double x);
@@ -366,6 +363,7 @@ int cylind_is_cell_in_wind(int n, int icomp);
 /* rtheta.c */
 double rtheta_ds_in_cell(PhotPtr p);
 int rtheta_make_grid(WindPtr w);
+int rtheta_make_cones(WindPtr w);
 int rtheta_wind_complete(WindPtr w);
 int rtheta_volumes(WindPtr w, int icomp);
 int rtheta_where_in_grid(double x[]);
@@ -452,6 +450,45 @@ double tb_pow1(double freq);
 double verner_pow1(double freq);
 double verner_exp1(double freq);
 double tb_exp1(double freq);
+/* log.c */
+int Log_init(char *filename);
+int Log_append(char *filename);
+int Log_close(void);
+int Log_set_verbosity(int vlevel);
+int Log_print_max(int print_max);
+int Log_quit_after_n_errors(int n);
+int Log(char *format, ...);
+int Log_silent(char *format, ...);
+int Error(char *format, ...);
+int Error_silent(char *format, ...);
+int Shout(char *format, ...);
+int sane_check(double x);
+int mytrap(void);
+int error_count(char *format);
+int error_summary(char *message);
+int Log_flush(void);
+int Log_set_mpi_rank(int rank, int n_mpi);
+int Log_parallel(char *format, ...);
+/* lineio.c */
+int get_line(FILE *fptr, char line[]);
+/* rdpar.c */
+int opar(char filename[]);
+int restart_par(int doit);
+int cpar(char filename[]);
+int rdpar_init(void);
+int string_process(char question[], char dummy[]);
+int rdpar_store_record(char *name, char *value);
+int rdpar_save(FILE *file_ptr);
+int message(char string[]);
+int rdstr(char question[], char answer[]);
+int rdchar(char question[], char *answer);
+int rdint(char question[], int *answer);
+int rdflo(char question[], float *answer);
+int rddoub(char question[], double *answer);
+int rdline(char question[], char answer[]);
+int get_root(char root[], char total[]);
+int rdpar_set_mpi_rank(int rank);
+int rdpar_set_verbose(int vlevel);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

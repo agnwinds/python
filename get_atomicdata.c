@@ -989,13 +989,11 @@ a level type has not been established
 			}
 		      else
 			{
-//              printf("Not tracking level %i coz we have more than %i NLTE levels\n",nlevels,ion[n].n_lte_max);
 			  config[nlevels].nden = -1;
 			}
 		    }
 		  else
 		    {
-//                      printf("Not tracking level %i coz no nlte levels wanted\n",nlevels);
 		      config[nlevels].nden = -1;
 		    }
 
@@ -1541,7 +1539,6 @@ for the ionstate.
 		      Error ("Get_atomic_data: %s\n", aline);
 		      exit (0);
 		    }
-		  //              printf("%d %d %d %d %le %le %le\n",z,istate,nn,nl,yield, arad, etarad);
 		  if (nauger < NAUGER)
 		    {
 		      if ((vptr =
@@ -1991,10 +1988,8 @@ would like to have simple lines for macro-ions */
 		    {
 		      if (ion[n].z == z && ion[n].istate == istate)	// this works out which ion we are dealing with
 			{
-//                      printf ("We have a match, z=%i, istate=%i %c %i\n",z,istate,drflag,nparam);
 			  if (ion[n].drflag == 0)	//This is the first time we have dealt with this ion
 			    {
-//                              printf ("Setting some data\n");
 			      drecomb[ndrecomb].nion = n;	//put the ion number into the DR structure
 			      drecomb[ndrecomb].nparam = nparam;	//Put the number of parameters we ware going to read in, into the DR structure so we know what to iterate over later
 			      ion[n].nxdrecomb = ndrecomb;	//put the number of the DR into the ion                            
@@ -2007,7 +2002,6 @@ would like to have simple lines for macro-ions */
 			    {
 
 			      n1 = ion[n].nxdrecomb;	//     Get the pointer to the correct bit of the recombination coefficient array. This should already be set from the first time through
-			      // printf ("E parameter %i\n",n1);
 			      for (n2 = 0; n2 < nparam; n2++)
 				{
 				  drecomb[n1].e[n2] = drp[n2];	//we are getting e parameters
@@ -2018,7 +2012,6 @@ would like to have simple lines for macro-ions */
 			  else if (drflag == 'C')	//                  must be the second time though, so no need to read in all the other things
 			    {
 			      n1 = ion[n].nxdrecomb;	//     Get the pointer to the correct bit of the recombination coefficient array. This should already be set from the first time through
-			      //              printf ("C parameter %i\n",n1);
 			      for (n2 = 0; n2 < nparam; n2++)
 				{
 				  drecomb[n1].c[n2] = drp[n2];	//           we are getting e parameters
@@ -2050,10 +2043,8 @@ would like to have simple lines for macro-ions */
 		    {
 		      if (ion[n].z == z && ion[n].istate == istate)	// this works out which ion we are dealing with
 			{
-//                      printf ("We have a match, z=%i, istate=%i %c %i\n",z,istate,drflag,nparam);
 			  if (ion[n].drflag == 0)	//This is the first time we have dealt with this ion
 			    {
-//                              printf ("Setting some data\n");
 			      drecomb[ndrecomb].nion = n;	//put the ion number into the DR structure
 			      drecomb[ndrecomb].nparam = nparam;	//Put the number of parameters we ware going to read in, into the DR structure so we know what to iterate over later
 			      ion[n].nxdrecomb = ndrecomb;	//put the number of the DR into the ion                            
@@ -2063,7 +2054,6 @@ would like to have simple lines for macro-ions */
 
 			    }
 			  n1 = ion[n].nxdrecomb;	//     Get the pointer to the correct bit of the recombination coefficient array. This should already be set from the first time through
-//                              printf ("Shull parameter %i\n",n1);
 			  for (n2 = 0; n2 < nparam; n2++)
 			    {
 			      drecomb[n1].shull[n2] = drp[n2];	//we are getting e parameters
@@ -2130,9 +2120,7 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 		case 'T':	/*Badnell type total raditive rate coefficients read in */
 
 		  nparam = sscanf (aline, "%*s %d %d %d %le %le %le %le %le %le", &z, &ne, &w, &btrr[0], &btrr[1], &btrr[2], &btrr[3], &btrr[4], &btrr[5]);	//split and assign the line
-//              printf ("We have %i parameters\n",nparam);
 		  nparam -= 3;	//take 4 off the nparam to give the number of actual parameters
-//              printf("We have a badnell type RR with %i parameters\n",nparam);
 		  if (nparam > 6 || nparam < 1)	//     trap errors - not as robust as usual because there are a varaible number of parameters...
 		    {
 		      Error ("Something wrong with badnell total RR data\n",
@@ -2183,9 +2171,7 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 
 		case 's':
 		  nparam = sscanf (aline, "%*s %d %d %le %le ", &z, &ne, &btrr[0], &btrr[1]);	//split and assign the line
-//              printf ("We have %i parameters\n",nparam);
 		  nparam -= 2;	//take 4 off the nparam to give the number of actual parameters
-//              printf("We have a shull type RR with %i parameters\n",nparam);
 		  if (nparam > 6 || nparam < 1)	//     trap errors - not as robust as usual because there are a varaible number of parameters...
 		    {
 		      Error ("Something wrong with shull total RR data\n",
@@ -2398,7 +2384,7 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
   Log
     ("We have read in %3d Badnell GS   Radiative rate coefficients over the temp range %e to %e\n",
      n_bad_gs_rr, gstmin, gstmax);
-  Log ("We have read in %3d Scaled electron temperature gaunt factor lines",
+  Log ("We have read in %3d Scaled electron temperature frequency averaged gaunt factors\n",
        gaunt_n_gsqrd);
   Log ("The minimum frequency for photoionization is %8.2e\n", phot_freq_min);
 

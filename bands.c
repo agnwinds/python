@@ -224,11 +224,11 @@ bands_init (imode, band)
   else if (mode == 4)
     {
       rdint ("Num.of.frequency.bands", &band->nbands);
-      printf ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV,
+      Log ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV,
 	      f1);
-      printf ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV,
+      Log ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV,
 	      f2);
-      printf
+      Log
 	("Enter band boundaries in increasing eV, and assure they are between lowest and highest energy\n");
 
 
@@ -252,7 +252,7 @@ bands_init (imode, band)
 	}
       band->f2[nband] = f2;
 
-      printf
+      Log
 	("Enter mimimum fraction of photons in each band.  The total must be < or = to 1\n");
 
       for (nband = 0; nband < band->nbands; nband++)
@@ -337,7 +337,7 @@ bands_init (imode, band)
 
 
       for (nband = 0; nband < band->nbands; nband++)
-	printf ("f1=%e,f2=%e,alpha=%e,const=%e,lum1=%e,lum2=%e\n",
+	Log ("f1=%e,f2=%e,alpha=%e,const=%e,lum1=%e,lum2=%e\n",
 		band->f1[nband], band->f2[nband], band->alpha[nband],
 		band->pl_const[nband],
 		band->pl_const[nband] * pow (band->f1[nband],
@@ -354,8 +354,6 @@ bands_init (imode, band)
     {
       tmax = geo.tstar;
       fmax = tmax * WIEN;	//Use wiens law to get peak frequency
-      printf ("We are in mode 6 - tmax=%e, fmax=%e\n", tmax, fmax);
-
       band->nbands = 17;
 
 
@@ -429,9 +427,9 @@ bands_init (imode, band)
     }
   else if (mode == 8)		/* 1306 - ksl - Generaglized method to set up logarithmic bands */
     {
-      printf ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV,
+      Log("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV,
 	      f1);
-      printf ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV,
+      Log ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV,
 	      f2);
 
       band->nbands = 5;

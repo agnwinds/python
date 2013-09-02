@@ -143,11 +143,6 @@ kappa_ind_comp (xplasma, freq, ds, w)
     }
 
 
-
-
-//      printf("We think ds is %e vol is %e area is %e\n",ds,xplasma->vol,pow((xplasma->vol/(4*PI*ds)),0.5));
-//      alpha1=THOMPSON/(1+freq*HRYD*(1.1792e-4+(7.084e-10*freq*HRYD))); //KN cross section NSH 130214 - approximate
-
   sigma = klein_nishina (freq);	//NSH 130214 - full KN formula
 
 
@@ -245,7 +240,7 @@ klein_nishina (nu)
       x4 *= x1 / (x * x * x);
       x4 = x4 + x3 / (2. * x);
       x4 = x4 - (1 + 3. * x) / (x2 * x2);
-      kn *= 0.75 * THOMPSON * x4;
+      kn *= 0.75 * x4;
     }
 
   return (kn);

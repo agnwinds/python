@@ -175,8 +175,14 @@ History:
 			This has plenty of range.  Notge that there is no need to make NPHOT
 			a long, as suggested above.  We do not expect it to exceed 2e9,
 			although some kind of error check might be reasonble.
-	1306	ksl	Modified to allow a pwoer law component to a stellar spectrum.  Made
+	1306	ksl	Modified to allow a power law component to a stellar spectrum.  Made
 			some changes use DEF variables instead of numbers to make choices
+	1307	jm	SS Parallelized Python in June 2013, for release 76a. I have now introduced
+			slightly altered reporting to allow more succinct reporting in parallel mode.
+	1307	ksl	Removed the Thierry & Hubeny O-star models as an option from the code.
+			This was never tested, and never really used.  Knox no longer even has the 
+			models.  Note that Stuart is replacing this with a homologous expansion
+			model
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -227,7 +233,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   char windradfile[LINELENGTH], windsavefile[LINELENGTH];
   char specsavefile[LINELENGTH];
   char photfile[LINELENGTH], diagfile[LINELENGTH],
-    old_windsavefile[LINELENGTH];
+    old_windsavefile[LINELENGTH], diagfolder[LINELENGTH];
   char dummy[LINELENGTH];
   char tprofile[LINELENGTH];
   double xbl;
@@ -243,12 +249,19 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   double time_max;		// The maximum time the program is allowed to run before halting
   double lstar;                 // The luminosity of the star, iv it exists
 
-  int my_rank;
-  int np_mpi;
+  int my_rank;		// these two variables are used regardless of parallel mode
+  int np_mpi;		// rank and number of processes, 0 and 1 in non-parallel
+
+#ifdef MPI_ON
   int mpi_i, mpi_j;
+  double *maxfreqhelper,*maxfreqhelper2;
   double *redhelper, *redhelper2;
   int *iredhelper, *iredhelper2;
-  int size_of_helpers;
+ // int size_of_helpers;
+  int plasma_double_helpers,plasma_int_helpers,ioniz_spec_helpers,spec_spec_helpers;
+#endif
+
+  int mkdir();
 
   #ifdef MPI_ON
     MPI_Init(&argc, &argv);
@@ -259,10 +272,11 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
     np_mpi=1;
   #endif
   
-  np_mpi_global = np_mpi;              /// Global variable which holds the number of MPI processes
+  np_mpi_global = np_mpi;              /// Glob al variable which holds the number of MPI processes
   rank_global = my_rank;   /// Global variable which holds the rank of the active MPI process
-  
-  printf("Thread %d starting.\n", my_rank);
+
+  Log_set_mpi_rank(my_rank, np_mpi);	// communicates my_rank to kpar
+
 
   opar_stat = 0;		/* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
 				   the assumption is that we are reading from the command line */
@@ -276,7 +290,12 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   verbosity = 4;		/* Set the default verbosity to 4.  To get more info raise the verbosity level to a higher number. To
 				   get less set the verbosity to a lower level. */
 
+
   Log_set_verbosity (verbosity);
+
+
+  Log_parallel ("Thread %d starting.\n", my_rank); //JM130723 moved this after verbosity switch
+
 
   /* Parse the command line.  Updated for 67 to allow for switches  - 0811 - ksl  */
 
@@ -303,7 +322,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	    }
 	  if (strcmp (argv[i], "-r") == 0)
 	    {
-	      printf ("Restarting %s\n", root);
+	      Log ("Restarting %s\n", root);
 	      restart_stat = 1;
 	    }
 	  else if (strcmp (argv[i], "-t") == 0)
@@ -339,8 +358,13 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
       strcpy (dummy, argv[argc - 1]);
       get_root (root, dummy);
-      sprintf(dummy,"_%d.diag",my_rank);
-      strcpy (diagfile, root);
+
+      /* JM130722 we now store diag files in a subdirectory if in parallel*/
+      sprintf(diagfolder,"diag_%s/",root);
+      mkdir(diagfolder, 0777);
+      strcpy (diagfile,diagfolder);
+      sprintf(dummy,"_%d.diag",my_rank);	
+      strcat (diagfile, root);
       strcat (diagfile, dummy);
 
 
@@ -388,7 +412,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   /* Start logging of errors and comments */
 
   Log ("!!Python Version %s \n", VERSION);	//54f -- ksl -- Now read from version.h
-  Log ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
+  Log_parallel ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
 
   /* Set the maximum time if it was defined */
   if (time_max > 0)
@@ -402,7 +426,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   if (strncmp (root, "dummy", 5) == 0)
     {
-      printf
+      Log
 	("Proceeding to create rdpar file in dummy.pf, but will not run prog\n");
     }
   else if (strncmp (root, "stdin", 5) == 0
@@ -410,7 +434,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	   || strlen (root) == 0)
     {
       strcpy (root, "mod");
-      printf
+      Log
 	("Proceeding in interactive mode\n Output files will have rootname mod\n");
     }
   else
@@ -420,11 +444,11 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
       if ((opar_stat = opar (input)) == 2)
 	{
-	  printf ("Reading data from file %s\n", input);
+	  Log ("Reading data from file %s\n", input);
 	}
       else
 	{
-	  printf ("Creating a new parameter file %s\n", input);
+	  Log ("Creating a new parameter file %s\n", input);
 	}
 
     }
@@ -444,8 +468,12 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   strcpy (windradfile, "python");
   strcpy (windsavefile, root);
   strcpy (specsavefile, root);
-  strcpy (photfile, "python");
-  strcpy (diskfile, root);
+
+  /* 130722 JM we now save python.phot and disk.diag files under diag_root folder */
+  strcpy (photfile, diagfolder);
+  strcpy (diskfile, diagfolder);
+  strcat (photfile, "python");
+  strcat (diskfile, root);
 
   strcat (wspecfile, ".spec_tot");
   strcat (lspecfile, ".log_spec_tot");
@@ -511,7 +539,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
 
       rdint
-	("Wind_type(0=SV,1=Sphere,2=Previous,3=Proga,4=Corona,5=knigge,6=thierry,7=yso,8=elvis,9=shell)",
+	("Wind_type(0=SV,1=Sphere,2=Previous,3=Proga,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell)",
 	 &geo.wind_type);
 
 
@@ -1135,7 +1163,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 	}
       else if (geo.wind_type == 6)
 	{
-	  get_thierry_params ();
+	  get_homologous_params ();
 	}
       else if (geo.wind_type == 7)
 	{
@@ -1244,6 +1272,13 @@ set defudge slightly differently for the shell wind.*/
       windcone[1].z = -VERY_BIG;;
     }
 
+/*NSH 130821 broken out into a seperate routine added these lines to fix bug41, where
+the cones are never defined for an rtheta grid if the model is restarted */
+
+  if (geo.coord_type==RTHETA) //We need to generate an rtheta wind cone
+    {
+  rtheta_make_cones(w);
+    }
 
   geo.rmax_sq = geo.rmax * geo.rmax;
 
@@ -1581,12 +1616,27 @@ run -- 07jul -- ksl
   check_time (root);
 
 #ifdef MPI_ON
-  /* Since the wind is now set up can allocate sufficiently big arrays to help with the MPI reductions */
-  size_of_helpers = (10+NXBANDS)*NPLASMA+(nangles+MSPEC)*NWAVE;
-  redhelper = calloc (sizeof (double), size_of_helpers); 
-  redhelper2 = calloc (sizeof (double), size_of_helpers); 
-  iredhelper = calloc (sizeof (int), size_of_helpers); 
-  iredhelper2 = calloc (sizeof (int), size_of_helpers); 
+//   Since the wind is now set up can allocate sufficiently big arrays to help with the MPI reductions 
+
+    plasma_double_helpers = (10+3*NXBANDS)*NPLASMA; //The size of the helper array for doubles. We transmit 10 numbers for each cell, plus three arrays, each of length NXBANDS
+    plasma_int_helpers = (6+NXBANDS)*NPLASMA; //The size of the helper array for integers. We transmit 6 numbers for each cell, plus one array of length NXBANDS
+    ioniz_spec_helpers = 2*MSPEC*NWAVE; //we need space for log and lin spectra for MSPEC XNWAVE
+
+    spec_spec_helpers = (NWAVE*(MSPEC+nangles)); //We need space for NWAVE wavelengths for nspectra, which will eventually equal nangles + MSPEC
+
+
+
+ //   size_of_helpers = NPLASMA+(10+2*NXBANDS+NXBANDS)*NPLASMA + (nangles+MSPEC)*NWAVE;
+
+
+
+
+ // maxfreqhelper = calloc (sizeof(double),NPLASMA);
+//  maxfreqhelper2 = calloc (sizeof(double),NPLASMA);
+//  redhelper = calloc (sizeof (double), size_of_helpers); 
+//  redhelper2 = calloc (sizeof (double), size_of_helpers); 
+//  iredhelper = calloc (sizeof (int), size_of_helpers); 
+//  iredhelper2 = calloc (sizeof (int), size_of_helpers); 
 #endif
 
 /* XXXX - THE CALCULATION OF THE IONIZATION OF THE WIND */
@@ -1753,12 +1803,22 @@ run -- 07jul -- ksl
       /* End of the subcycle loop */
       /* At this point we should communicate all the useful infomation that has been accummulated on differenet MPI tasks */
 #ifdef MPI_ON
+ 
+    maxfreqhelper = calloc (sizeof(double),NPLASMA); 
+    maxfreqhelper2 = calloc (sizeof(double),NPLASMA);
+    redhelper = calloc (sizeof (double), plasma_double_helpers); 
+    redhelper2 = calloc (sizeof (double), plasma_double_helpers); 
+    iredhelper = calloc (sizeof (int), plasma_int_helpers); 
+    iredhelper2 = calloc (sizeof (int), plasma_int_helpers); 
+
+
       MPI_Barrier(MPI_COMM_WORLD);
       /// the following blocks gather all the estimators to the zeroth (Master) thread
 
       
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
 	{
+ 	  maxfreqhelper[mpi_i] = plasmamain[mpi_i].max_freq;
 	  redhelper[mpi_i] = plasmamain[mpi_i].j/ np_mpi_global;
 	  redhelper[mpi_i+NPLASMA] = plasmamain[mpi_i].ave_freq/ np_mpi_global;
 	  redhelper[mpi_i+2*NPLASMA] = plasmamain[mpi_i].lum/ np_mpi_global;
@@ -1768,24 +1828,28 @@ run -- 07jul -- ksl
 	  redhelper[mpi_i+6*NPLASMA] = plasmamain[mpi_i].heat_comp/ np_mpi_global;
 	  redhelper[mpi_i+7*NPLASMA] = plasmamain[mpi_i].heat_ind_comp/ np_mpi_global;
 	  redhelper[mpi_i+8*NPLASMA] = plasmamain[mpi_i].heat_photo/ np_mpi_global;
+          redhelper[mpi_i+9*NPLASMA] = plasmamain[mpi_i].ip / np_mpi_global;
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
-	      redhelper[mpi_i+(9+mpi_j)*NPLASMA] = plasmamain[mpi_i].xj[mpi_j]/ np_mpi_global;
-	      redhelper[mpi_i+(9+NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j]/ np_mpi_global;
-	      redhelper[mpi_i+(9+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
+	      redhelper[mpi_i+(10+mpi_j)*NPLASMA] = plasmamain[mpi_i].xj[mpi_j]/ np_mpi_global;
+	      redhelper[mpi_i+(10+NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j]/ np_mpi_global;
+	      redhelper[mpi_i+(10+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
 	    }
 	}
 
-     
-      MPI_Reduce(redhelper, redhelper2, size_of_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+      MPI_Reduce(maxfreqhelper, maxfreqhelper2, NPLASMA, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+      MPI_Reduce(redhelper, redhelper2, plasma_double_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
       if (rank_global == 0)
 	{
-	  Log("Zeroth thread successfully received the normalised estimators. About to broadcast.\n");
+
+	  Log_parallel("Zeroth thread successfully received the normalised estimators. About to broadcast.\n");
 	}
       
-      MPI_Bcast(redhelper2, size_of_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(redhelper2, plasma_double_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(maxfreqhelper2, NPLASMA, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
 	{
+  	  plasmamain[mpi_i].max_freq = maxfreqhelper2[mpi_i];
 	  plasmamain[mpi_i].j = redhelper2[mpi_i];
 	  plasmamain[mpi_i].ave_freq = redhelper2[mpi_i+NPLASMA];
 	  plasmamain[mpi_i].lum = redhelper2[mpi_i+2*NPLASMA];
@@ -1795,42 +1859,58 @@ run -- 07jul -- ksl
 	  plasmamain[mpi_i].heat_comp = redhelper2[mpi_i+6*NPLASMA];
 	  plasmamain[mpi_i].heat_ind_comp = redhelper2[mpi_i+7*NPLASMA];
 	  plasmamain[mpi_i].heat_photo = redhelper2[mpi_i+8*NPLASMA];
+          plasmamain[mpi_i].ip = redhelper2[mpi_i+9*NPLASMA];
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
-	      plasmamain[mpi_i].xj[mpi_j]=redhelper2[mpi_i+(9+mpi_j)*NPLASMA];
-	      plasmamain[mpi_i].xave_freq[mpi_j]=redhelper2[mpi_i+(9+NXBANDS+mpi_j)*NPLASMA];
-	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(9+NXBANDS*2+mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].xj[mpi_j]=redhelper2[mpi_i+(10+mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].xave_freq[mpi_j]=redhelper2[mpi_i+(10+NXBANDS+mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(10+NXBANDS*2+mpi_j)*NPLASMA];
 	    }
 	}
-      Log("Thread %d happy after broadcast.\n", rank_global);
+      Log_parallel("Thread %d happy after broadcast.\n", rank_global);
 
       MPI_Barrier(MPI_COMM_WORLD);
 
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
 	{
 	  iredhelper[mpi_i] = plasmamain[mpi_i].ntot;
+	  iredhelper[mpi_i+NPLASMA] = plasmamain[mpi_i].ntot_star;
+	  iredhelper[mpi_i+2*NPLASMA] = plasmamain[mpi_i].ntot_bl;
+	  iredhelper[mpi_i+3*NPLASMA] = plasmamain[mpi_i].ntot_disk;
+	  iredhelper[mpi_i+4*NPLASMA] = plasmamain[mpi_i].ntot_wind;
+	  iredhelper[mpi_i+5*NPLASMA] = plasmamain[mpi_i].ntot_agn;
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
-	      iredhelper[mpi_i+(1+mpi_j)*NPLASMA] = plasmamain[mpi_i].nxtot[mpi_j];
+	      iredhelper[mpi_i+(6+mpi_j)*NPLASMA] = plasmamain[mpi_i].nxtot[mpi_j];
 	    }
 	}
-      MPI_Reduce(iredhelper, iredhelper2, size_of_helpers, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+      MPI_Reduce(iredhelper, iredhelper2, plasma_int_helpers, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
       if (rank_global == 0)
 	{
-	  Log("Zeroth thread successfully received the integer sum. About to broadcast.\n");
+	  Log_parallel("Zeroth thread successfully received the integer sum. About to broadcast.\n");
 	}
       
-      MPI_Bcast(iredhelper2, size_of_helpers, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(iredhelper2, plasma_int_helpers, MPI_INT, 0, MPI_COMM_WORLD);
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
 	{
-	  plasmamain[mpi_i].ntot=iredhelper2[mpi_i];
+	  plasmamain[mpi_i].ntot = iredhelper[mpi_i];
+	  plasmamain[mpi_i].ntot_star = iredhelper[mpi_i+NPLASMA]; 
+	  plasmamain[mpi_i].ntot_bl = iredhelper[mpi_i+2*NPLASMA];
+	  plasmamain[mpi_i].ntot_disk = iredhelper[mpi_i+3*NPLASMA]; 
+	  plasmamain[mpi_i].ntot_wind = iredhelper[mpi_i+4*NPLASMA];
+	  plasmamain[mpi_i].ntot_agn = iredhelper[mpi_i+5*NPLASMA];
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
-	      plasmamain[mpi_i].nxtot[mpi_j] = iredhelper2[mpi_i+(1+mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].nxtot[mpi_j] = iredhelper2[mpi_i+(6+mpi_j)*NPLASMA];
 	    }
 	}
   
-
+	free (maxfreqhelper);
+    	free (maxfreqhelper2);
+    	free (redhelper);
+    	free (redhelper2); 
+    	free (iredhelper);
+    	free (iredhelper2);
 
 
 #endif
@@ -1876,27 +1956,36 @@ run -- 07jul -- ksl
       /* Do an MPI reducde to get the spectra all gathered to the master thread */
 #ifdef MPI_ON
 
+
+    redhelper = calloc (sizeof (double), ioniz_spec_helpers); 
+    redhelper2 = calloc (sizeof (double), ioniz_spec_helpers); 
+    
+
       for (mpi_i = 0; mpi_i < NWAVE; mpi_i++)
 	{
-	  for (mpi_j=0; mpi_j < 5; mpi_j++)
+	  for (mpi_j=0; mpi_j < MSPEC; mpi_j++)
 	    {
-	      redhelper[mpi_i*6 + mpi_j]=s[mpi_j].f[mpi_i]/ np_mpi_global;
-	      redhelper[mpi_i*6 + mpi_j + (NWAVE*6)]=s[mpi_j].lf[mpi_i]/ np_mpi_global;
+	      redhelper[mpi_i*MSPEC + mpi_j]=s[mpi_j].f[mpi_i]/ np_mpi_global;
+	      redhelper[mpi_i*MSPEC + mpi_j + (NWAVE*MSPEC)]=s[mpi_j].lf[mpi_i]/ np_mpi_global;
 	    }
 	}
 
-      MPI_Reduce(redhelper, redhelper2, 12*NWAVE, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-      MPI_Bcast(redhelper2, 12*NWAVE, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Reduce(redhelper, redhelper2, ioniz_spec_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+      MPI_Bcast(redhelper2, ioniz_spec_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
       for (mpi_i = 0; mpi_i < NWAVE; mpi_i++)
 	{
-	  for (mpi_j=0; mpi_j < 6; mpi_j++)
+	  for (mpi_j=0; mpi_j < MSPEC; mpi_j++)
 	    {
-	      s[mpi_j].f[mpi_i] = redhelper2[mpi_i*6 + mpi_j];
-	      s[mpi_j].lf[mpi_i] = redhelper2[mpi_i*6 + mpi_j + (NWAVE*6)];
+	      s[mpi_j].f[mpi_i] = redhelper2[mpi_i*MSPEC + mpi_j];
+	      s[mpi_j].lf[mpi_i] = redhelper2[mpi_i*MSPEC + mpi_j + (NWAVE*MSPEC)];
 	    }
 	}
       MPI_Barrier(MPI_COMM_WORLD);
+
+	free(redhelper);
+	free(redhelper2);
+
 #endif
 
 #ifdef MPI_ON
@@ -2062,30 +2151,37 @@ run -- 07jul -- ksl
 /* Write out the detailed spectrum each cycle so that one can see the statistics build up! */
       renorm = ((double) (pcycles)) / (geo.pcycle + 1.0);
 
-      /* Do an MPI reducde to get the spectra all gathered to the master thread */
+      /* Do an MPI reduce to get the spectra all gathered to the master thread */
 #ifdef MPI_ON
+
+ //   spec_spec_helpers = (nangles+MSPEC)*NWAVE;
+    redhelper = calloc (sizeof (double), spec_spec_helpers); 
+    redhelper2 = calloc (sizeof (double), spec_spec_helpers); 
+
+
 
       for (mpi_i = 0; mpi_i < NWAVE; mpi_i++)
 	{
 	  for (mpi_j=0; mpi_j < nspectra; mpi_j++)
 	    {
 	      redhelper[mpi_i*nspectra + mpi_j]=s[mpi_j].f[mpi_i]/ np_mpi_global;
-	      redhelper[mpi_i*nspectra + mpi_j + (NWAVE*nspectra)]=s[mpi_j].lf[mpi_i]/ np_mpi_global;
 	    }
 	}
 
-      MPI_Reduce(redhelper, redhelper2, size_of_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-      MPI_Bcast(redhelper2, size_of_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Reduce(redhelper, redhelper2, spec_spec_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+      MPI_Bcast(redhelper2, spec_spec_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
       for (mpi_i = 0; mpi_i < NWAVE; mpi_i++)
 	{
 	  for (mpi_j=0; mpi_j < nspectra; mpi_j++)
 	    {
 	      s[mpi_j].f[mpi_i] = redhelper2[mpi_i*nspectra + mpi_j];
-	      s[mpi_j].lf[mpi_i] = redhelper2[mpi_i*nspectra + mpi_j + (NWAVE*nspectra)];
 	    }
 	}
       MPI_Barrier(MPI_COMM_WORLD);
+
+	free(redhelper);
+	free(redhelper2);
 #endif
 
 #ifdef MPI_ON
@@ -2100,6 +2196,15 @@ run -- 07jul -- ksl
       Log ("Completed spectrum cycle %3d :  The elapsed TIME was %f\n",
 	   geo.pcycle, timer ());
 
+
+
+      /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
+
+      xsignal (root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK",
+	       geo.pcycle, pcycles);
+
+      geo.pcycle++;		// Increment the spectral cycles
+
 #ifdef MPI_ON
       if (rank_global == 0)
       {
@@ -2109,14 +2214,6 @@ run -- 07jul -- ksl
 #ifdef MPI_ON
       }
 #endif
-
-      /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
-
-      xsignal (root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK",
-	       geo.pcycle, pcycles);
-
-      geo.pcycle++;		// Increment the spectral cycles
-
       check_time (root);
     }
 
@@ -2138,12 +2235,18 @@ run -- 07jul -- ksl
 
 
 /* Finally done */
-
+#ifdef MPION
+  sprintf (dummy,"End of program, Thread %d only",my_rank);   // added so we make clear these are just errors for thread ngit status	
+  error_summary (dummy);	// Summarize the errors that were recorded by the program
+  Log ("Run py_error.py for full error report.\n")
+#else
   error_summary ("End of program");	// Summarize the errors that were recorded by the program
+#endif
 
 
   #ifdef MPI_ON
     MPI_Finalize();
+    Log_parallel("Thread %d Finalized. All done\n", my_rank);
   #endif  
 
 
@@ -2396,7 +2499,7 @@ photon_checks (p, freqmin, freqmax, comment)
 	  exit (0);
 	}
     }
-  printf ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
+  Log ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
 #if DEBUG
   if (nnn == 0)
     Log ("photon_checks: All photons passed checks successfully\n");

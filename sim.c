@@ -26,17 +26,17 @@ sim_pl (xplasma)
   t_e = xplasma->t_e;
   weight = xplasma->w;
 
-/*printf("We have %i elements",nelements);
+/*Log("We have %i elements",nelements);
 
 /*  for (nion = 0; nion < nions; nion++)
     {
 	pow_integ=integ_vkpl(x_ptr,freq1,freq2);
-	printf("the integral is %e",pow_integ);
+	Log("the integral is %e",pow_integ);
     }
 */
-  printf ("weight = %e", weight);
-  printf ("t_e=%e", t_e);
-  printf ("We got to the new code OK - nothing here tho\n");
+  Log ("weight = %e", weight);
+  Log ("t_e=%e", t_e);
+  Log ("We got to the new code OK - nothing here tho\n");
 
 
 
