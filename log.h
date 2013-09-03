@@ -1,3 +1,5 @@
+/* lineio.c */
+int get_line(FILE *fptr, char line[]);
 /* rdpar.c */
 int opar(char filename[]);
 int restart_par(int doit);
@@ -35,5 +37,3 @@ int error_summary(char *message);
 int Log_flush(void);
 int Log_set_mpi_rank(int rank, int n_mpi);
 int Log_parallel(char *format, ...);
-/* lineio.c */
-int get_line(FILE *fptr, char line[]);

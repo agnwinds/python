@@ -80,6 +80,9 @@ startup:
 foo: foo.o signal.o time.o
 	$(CC) ${cfllags} foo.o signal.o time.o ${LDFLAGS}  -o foo
 
+
+# these are the objects required for compiltion of python
+# note that the kpar_source is now separate from this
 python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		saha.o spectra.o wind2d.o wind.o  vector.o debug.o recipes.o \
 		trans_phot.o phot_util.o resonate.o radiation.o \
@@ -91,8 +94,8 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		matom.o estimators.o wind_sum.o yso.o elvis.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o auger_ionization.o \
 		agn.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
-		spectral_estimators.o variable_temperature.o log.o \
-		lineio.o rdpar.o matom_diag.o
+		spectral_estimators.o variable_temperature.o matom_diag.o \
+		log.o lineio.o rdpar.o
 
 
 python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
@@ -106,18 +109,22 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		matom.c estimators.c wind_sum.c yso.c elvis.c cylindrical.c rtheta.c spherical.c  \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c auger_ionization.c \
 		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
-		spectral_estimators.c variable_temperature.c log.c \
-		lineio.c rdpar.c matom_diag.c
+		spectral_estimators.c variable_temperature.c matom_diag.c
 
-additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c 
+# kpar_source is now declared seaprately from python_source so that the file log.h 
+# can be made using cproto
+kpar_source = lineio.c rdpar.c log.c 
+
+additional_cpy_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c 
 
 prototypes: 
 	cp templates.h templates.h.old
-	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(python_source) ${additional_py_wind_source} test_saha.c test_dielectronic.c > foo.h      
+	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(python_source) ${additional_py_wind_source} test_saha.c test_dielectronic.c > foo.h  
 	cp foo.h templates.h
+	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(kpar_source) > log.h 
 
 python: startup  python.o $(python_objects)
-	$(CC)  ${CFLAGS} python.o $(python_objects) $(LDFLAGS) -o python
+	$(CC)  ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
 		cp $@ $(BIN)/py
 		mv $@ $(BIN)/py$(VERSION)
 
