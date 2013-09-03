@@ -2047,9 +2047,19 @@ get_matom_f ()
       norm += plasmamain[n].kpkt_abs;
     }
 
+  Log("Calculating macro atom emissivites- this might take a while...\n");
 
   for (n = 0; n < NPLASMA; n++)
     {
+
+
+      /* JM 1309 -- this line is just a log statement which tracks progress, as this section
+	 can take a long time */	
+      if (n % 50 == 0)
+	Log("Calculating macro atom emissivity for macro atom %7d of %7d or %6.3f per cent\n", n, NPLASMA,
+		n * 100. / NPLASMA);
+
+
       for (m = 0; m < nlevels_macro + 1; m++)
 	{
 	  if ((m == nlevels_macro && plasmamain[n].kpkt_abs > 0)

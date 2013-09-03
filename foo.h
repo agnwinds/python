@@ -489,6 +489,8 @@ int rdline(char question[], char answer[]);
 int get_root(char root[], char total[]);
 int rdpar_set_mpi_rank(int rank);
 int rdpar_set_verbose(int vlevel);
+/* matom_diag.c */
+int matom_emiss_report(void);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

@@ -67,7 +67,7 @@ endif
 LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lcfitsio -lgsl -lgslcblas 
 
 #Note that version should be a single string without spaces. 
-VERSION = 76b_dev
+VERSION = 76c_dev
 CHOICE=1             // Compress plasma as much as possible
 # CHOICE=0           //  Keep relation between plasma and wind identical
 
@@ -92,7 +92,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o auger_ionization.o \
 		agn.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
 		spectral_estimators.o variable_temperature.o log.o \
-		lineio.o rdpar.o 
+		lineio.o rdpar.o matom_diag.o
 
 
 python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
@@ -107,7 +107,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c auger_ionization.c \
 		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
 		spectral_estimators.c variable_temperature.c log.c \
-		lineio.c rdpar.c
+		lineio.c rdpar.c matom_diag.c
 
 additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c 
 
