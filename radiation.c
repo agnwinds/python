@@ -557,8 +557,13 @@ sigma_phot (x_ptr, freq)
       /* This was line fixed by CK in 1998 Jul */
       f1 = (x - 1.0) * (x - 1.0) + x_ptr->yw * x_ptr->yw;
 
-      f2 = pow (y, 0.5 * x_ptr->p - 5.5);
-      f3 = pow (1.0 + sqrt (y / x_ptr->ya), -x_ptr->p);
+ //     f2 = pow (y, 0.5 * x_ptr->p - 5.5);
+      f2=exp((0.5 * x_ptr->p - 5.5)*log(y));
+
+//     f3 = pow (1.0 + sqrt (y / x_ptr->ya), -x_ptr->p);
+	f3 = exp(( -x_ptr->p)*log((1.0 + sqrt (y / x_ptr->ya))));
+
+
       xsection = x_ptr->sigma * f1 * f2 * f3;	// the photoinization xsection
 
 /* Store crossesction for future use */
@@ -626,9 +631,9 @@ sigma_phot_topbase (x_ptr, freq)
       if ((fbot = x_ptr->freq[nlast]) < freq
 	  && freq < (ftop = x_ptr->freq[nlast + 1]))
 	{
-	  frac = (freq - fbot) / (ftop - fbot);
+	  frac = (log(freq) - log(fbot)) / (log(ftop) - log(fbot));
 	  xsection =
-	    (1. - frac) * x_ptr->x[nlast] + frac * x_ptr->x[nlast + 1];
+	    exp((1. - frac) * log(x_ptr->x[nlast]) + frac * log(x_ptr->x[nlast + 1]));
 	  //Store the results
 	  x_ptr->sigma = xsection;
 	  x_ptr->f = freq;
@@ -639,7 +644,8 @@ sigma_phot_topbase (x_ptr, freq)
 /* If got to here, have to go the whole hog in calculating the x-section */
   nmax = x_ptr->np;
   x_ptr->nlast =
-    linterp (freq, &x_ptr->freq[0], &x_ptr->x[0], nmax, &xsection);
+    linterp (freq, &x_ptr->freq[0], &x_ptr->x[0], nmax, &xsection,1); //call linterp in log space
+
 
   //Store the results
   x_ptr->sigma = xsection;

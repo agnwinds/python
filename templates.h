@@ -283,8 +283,8 @@ double vrandwind(double x);
 double reweightwind(PhotPtr p);
 int make_pdf_randwind(double tau);
 /* util.c */
-int fraction(double value, double array[], int npts, int *ival, double *f);
-int linterp(double x, double xarray[], double yarray[], int xdim, double *y);
+int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
+int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);
 int coord_fraction(int ichoice, double x[], int ii[], double frac[], int *nelem);
 int where_in_2dcell(int ichoice, double x[], int n, double *fx, double *fz);
 int wind_n_to_ij(int n, int *i, int *j);
@@ -455,4 +455,3 @@ int matom_emiss_report(void);
 /* test_saha.c */
 int main(int argc, char *argv[]);
 /* test_dielectronic.c */
-int main(int argc, char *argv[]);
