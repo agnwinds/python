@@ -70,6 +70,8 @@ variable_temperature (xplasama, mode)  modifies the densities of ions, levels, a
 	2012Feb	nsh	Coded and debugged as part of QSO effort. 
         1212Dec nsh	Recoded so that the densities are computed in a temporary array, and only 
 			committted to the real density structure once we are sure the code converges.
+	2013Sep nsh	ground state fudge computed at the start, and stored in an array rather
+			than contiunually recomputing it - sometimes it is expensive.
 	
 
 **************************************************************/
@@ -100,7 +102,9 @@ variable_temperature (xplasma, mode)
 //  double t_r_part_correct, NSH 130401 - this variable no longer used in 75. It may come back tho!
   double t_e_part_correct;
   double sum, big;
-  double pi_fudge, recomb_fudge, gs_fudge, tot_fudge;	/*The three correction factors for photoionization rate, recombination to ground state, and recombination rate */
+  double pi_fudge, recomb_fudge, tot_fudge;	/*Two of the correction factors for photoionization rate, and recombination rate */
+  double gs_fudge[NIONS]; /*It can be expensive to calculate this, and it only depends on t_e - which is fixed for a run. So 
+//			calculate it once, and store it in a temporary array */
   xxxplasma = xplasma;		/*Copy xplasma to local plasma varaible, used to communicate w and alpha to the power law correction routine. NSH 120703 - also used to set the denominator calculated for a given ion for this cell last time round */
 
 
@@ -109,11 +113,15 @@ variable_temperature (xplasma, mode)
   t_r = xplasma->t_r;
   www = xplasma->w;
 
-/* Copy the current densities into the temperary array */
+/* Copy the current densities into the temporary array */
 
   for (nion = 0; nion < nions; nion++)
     {
       newden[nion] = xplasma->density[nion];
+      if (ion[nion].istate != 1)   //Here we populate the recombination to ground state fudge. No recombination fudge for the neutral ion
+	{
+	gs_fudge[nion]=compute_zeta (t_e, nion - 1, 2); //We call with nion-1, so when we address the array, we will want to ask for nion
+	}
     }
 
 
@@ -212,18 +220,18 @@ variable_temperature (xplasma, mode)
 		  else
 		    {
 		      pi_fudge = bb_correct_2 (xtemp, t_r, www, nion);
-		      gs_fudge = compute_zeta (t_e, nion - 1, 2);	/* Calculate the ground state recombination rate correction factor based on the cells true electron temperature.  */
+//		      gs_fudge = compute_zeta (t_e, nion - 1, 2);	/* Calculate the ground state recombination rate correction factor based on the cells true electron temperature. NSH 130905 - replaced with a call at the top of the subroutine */
 		      tot_fudge =
-			pi_fudge * recomb_fudge * (gs_fudge +
-						   www * (1 - gs_fudge));
+			pi_fudge * recomb_fudge * (gs_fudge[nion] +
+						   www * (1 - gs_fudge[nion]));
 		    }
 		}
 	      else if (mode == 7)	/* correct the SAHA equation abundance pair using an actual radiation field modelled as a broken power law */
 		{
 		  pi_fudge = pl_correct_2 (xtemp, nion);
-		  gs_fudge = compute_zeta (t_e, nion - 1, 2);	/* Calculate the ground state recombination rate correction factor based on the cells true electron temperature.  */
+//		  gs_fudge = compute_zeta (t_e, nion - 1, 2);	/* Calculate the ground state recombination rate correction factor based on the cells true electron temperature.   NSH 130905 - replaced with a call at the top of the subroutine */*/
 		  tot_fudge =
-		    pi_fudge * recomb_fudge * gs_fudge * t_e_part_correct;
+		    pi_fudge * recomb_fudge * gs_fudge[nion] * t_e_part_correct;
 		}
 	      else
 		{
@@ -627,7 +635,6 @@ pl_correct_2 (xtemp, nion)
       xtop = &phot_top[n];
       fthresh = xtop->freq[0];
       fmax = xtop->freq[xtop->np - 1];
-
       numerator = 0;
       if (niterate == 0)	//first time of iterating this cycle, so calculate the numerator
 	{
