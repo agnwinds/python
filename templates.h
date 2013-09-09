@@ -15,6 +15,7 @@ int index_phot_verner(void);
 int index_collisions(void);
 void indexx(int n, float arrin[], int indx[]);
 int limit_lines(double freqmin, double freqmax);
+int tabulate_verner(void);
 /* python.c */
 int main(int argc, char *argv[]);
 int help(void);
@@ -445,10 +446,7 @@ double bb_correct_2(double xtemp, double t_r, double www, int nion);
 double temp_func(double solv_temp);
 double pl_correct_2(double xtemp, int nion);
 double tb_planck1(double freq);
-double verner_planck1(double freq);
 double tb_pow1(double freq);
-double verner_pow1(double freq);
-double verner_exp1(double freq);
 double tb_exp1(double freq);
 /* matom_diag.c */
 int matom_emiss_report(void);
