@@ -185,6 +185,7 @@ History:
 			model
 	1308	nsh	Added a call to generate rtheta wind cones - issue #41
 	1309	nsh	Changed the loop around where disk parameters are read in - issue #44
+	1309	nsh	Added commands to write out warning summary - relating to issue #47
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -2240,9 +2241,11 @@ run -- 07jul -- ksl
 #ifdef MPION
   sprintf (dummy,"End of program, Thread %d only",my_rank);   // added so we make clear these are just errors for thread ngit status	
   error_summary (dummy);	// Summarize the errors that were recorded by the program
+  warning_summary (dummy);	// Summarize the warnings that were recorded by the program
   Log ("Run py_error.py for full error report.\n")
 #else
   error_summary ("End of program");	// Summarize the errors that were recorded by the program
+  warning_summary ("End of program");	// Summarize the warnings that were recorded by the program
 #endif
 
 
