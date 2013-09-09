@@ -585,7 +585,9 @@ temp_func (solv_temp)
   History:
  
 	12feb	NSH	Coded as part of the quasar project
-        12aug   NSH     Added code to allow an ex[ponential model of j to be used.
+        12aug   NSH     Added code to allow an exponential model of j to be used.
+	13sep	NSH	Reversed commenting out of lines that check for maximum frequency and 
+			reset integration limits - unsure why this was ever commented out!
 
 **************************************************************/
 int pl_correct_err = 0;
@@ -648,14 +650,15 @@ pl_correct_2 (xtemp, nion)
 	      if (xxxplasma->spec_mod_type[j] > 0)	//Only bother doing the integrals if we have a model in this band
 		{
 		  f1 = geo.xfreq[j];
-//                      if (geo.xfreq[j+1] > xxxplasma->max_freq && geo.xfreq[j] < xxxplasma->max_freq) //The maximum frequency seen in this cell is in this band, so we cannot safely use the power law estimators right up to the top of the band. Note, we hope that all the weights in bands above this will be zero!
-//                              {               
-//                              f2=xxxplasma->max_freq;
-//                              }
-//                      else
-//                              {
+                      if (geo.xfreq[j+1] > xxxplasma->max_freq && geo.xfreq[j] < xxxplasma->max_freq) //The maximum frequency seen in this cell is in this band, so we cannot safely use the power law estimators right up to the top of the band. Note, we hope that all the weights in bands above this will be zero!
+/* NSH 130909 - this loop was commented out at some point in the past - I cannt recall why, but the lines are now reinstated - if they cause a problem - refer back to issue #50! */
+                              {               
+                              f2=xxxplasma->max_freq;
+                              }
+                      else
+                              {
 		  f2 = geo.xfreq[j + 1];	//We can safely integrate over the whole band using the estimators for the cell/band 
-//                              }
+                              }
 		  if (f1 < fthresh && fthresh < f2 && f1 < fmax && fmax < f2)	//Case 1- 
 		    {
 		      if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL)
