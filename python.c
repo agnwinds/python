@@ -184,6 +184,7 @@ History:
 			models.  Note that Stuart is replacing this with a homologous expansion
 			model
 	1308	nsh	Added a call to generate rtheta wind cones - issue #41
+	1309	nsh	Changed the loop around where disk parameters are read in - issue #44
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -916,8 +917,8 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 	 &geo.disk_type);
       if (geo.disk_type)	/* Then a disk exists and it needs to be described */
 	{
-	  if (geo.disk_radiation)
-	    {
+//	  if (geo.disk_radiation) /*NSH 130906 - Commented out this if loop. It was causing problems with restart - bug #44
+//	    {
 	      geo.disk_mdot /= (MSOL / YR);	// Convert to msol/yr to simplify input
 	      rddoub ("disk.mdot(msol/yr)", &geo.disk_mdot);
 	      geo.disk_mdot *= (MSOL / YR);
@@ -932,12 +933,12 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 		{
 		  rdstr ("T_profile_file", tprofile);
 		}
-	    }
-	  else
-	    {
-	      geo.disk_mdot = 0;
-	      disk_illum = 0;
-	    }
+//	    }
+//	  else
+//	    {
+//	      geo.disk_mdot = 0;
+//	      disk_illum = 0;
+//	    }
 
 	  /* 04aug ksl ??? Until everything is initialized we need to stick to a simple disk, 
 	     while teff is being set up..  This is because some of the
