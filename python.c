@@ -183,6 +183,7 @@ History:
 			This was never tested, and never really used.  Knox no longer even has the 
 			models.  Note that Stuart is replacing this with a homologous expansion
 			model
+	1308	nsh	Added a call to generate rtheta wind cones - issue #41
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -1275,9 +1276,9 @@ set defudge slightly differently for the shell wind.*/
 /*NSH 130821 broken out into a seperate routine added these lines to fix bug41, where
 the cones are never defined for an rtheta grid if the model is restarted */
 
-  if (geo.coord_type==RTHETA) //We need to generate an rtheta wind cone
+if (geo.coord_type==RTHETA && geo.wind_type==2) //We need to generate an rtheta wind cone if we are restarting
     {
-  rtheta_make_cones(w);
+  rtheta_make_cones(wmain);
     }
 
   geo.rmax_sq = geo.rmax * geo.rmax;
