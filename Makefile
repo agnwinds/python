@@ -115,7 +115,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 # can be made using cproto
 kpar_source = lineio.c rdpar.c log.c 
 
-additional_cpy_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c 
+additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c 
 
 prototypes: 
 	cp templates.h templates.h.old
