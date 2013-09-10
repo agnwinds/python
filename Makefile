@@ -119,7 +119,7 @@ additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_
 
 prototypes: 
 	cp templates.h templates.h.old
-	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(python_source) ${additional_py_wind_source} test_saha.c test_dielectronic.c > foo.h  
+	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(python_source) ${additional_py_wind_source} test_saha.c  > foo.h  
 	cp foo.h templates.h
 	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(kpar_source) > log.h 
 
