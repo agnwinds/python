@@ -323,12 +323,12 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	    {
 	      help ();
 	    }
-	  if (strcmp (argv[i], "-r") == 0)
+	  else if (strcmp (argv[i], "-r") == 0)
 	    {
 	      Log ("Restarting %s\n", root);
 	      restart_stat = 1;
 	    }
-	  if (strcmp (argv[i], "-s") == 0)
+	  else if (strcmp (argv[i], "-s") == 0)
 	    {
 	      Log ("Restarting spectra %s\n", root);
 	      restart_stat = 2;
