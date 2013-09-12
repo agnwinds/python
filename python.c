@@ -328,12 +328,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	      Log ("Restarting %s\n", root);
 	      restart_stat = 1;
 	    }
-	  else if (strcmp (argv[i], "-s") == 0)
-	    {
-	      Log ("Restarting spectra %s\n", root);
-	      restart_stat = 2;
-	    }
-	  else if (strcmp (argv[i], "-t") == 0)
+	  if (strcmp (argv[i], "-t") == 0)
 	    {
 	      if (sscanf (argv[i + 1], "%lf", &time_max) != 1)
 		{
@@ -589,7 +584,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
     }
 
-  else	if (restart_stat == 1)		/* We want to continue a previous run in the normal sense*/
+  else	if (restart_stat == 1)		/* We want to continue a previous run*/
     {
       Log ("Continuing a previous run of %s \n", root);
       strcpy (old_windsavefile, root);
@@ -609,21 +604,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	  xsignal (root, "%-20s Read %s\n", "COMMENT", specsavefile);
 	}
     }
-  else	if (restart_stat == 2)		/* We want to force a spectrum restart*/
-    {
-      Log ("Continuing a previous run of %s \n", root);
-      strcpy (old_windsavefile, root);
-      strcat (old_windsavefile, ".wind_save");
-      if (wind_read (old_windsavefile) < 0)
-	{
-	  Error ("python: Unable to open %s\n", old_windsavefile);	//program will exit if unable to read the file
-	  exit (0);
-	}
-      w = wmain;
-      geo.wind_type = 2;	// We read the data from a file
-      xsignal (root, "%-20s Read %s\n", "COMMENT", old_windsavefile);
-      geo.pcycle = 0;   //We reset the number of spectral cycles to zero
-    }
+
 
 
 
