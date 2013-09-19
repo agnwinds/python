@@ -489,8 +489,10 @@ saha (xplasma, ne, t)
   for (nelem = 0; nelem < nelements; nelem++)
     {
       first = ele[nelem].firstion;	/*first and last identify the position in the array */
+
       last = first + ele[nelem].nions;	/*  So for H which has 2 ions, H1 and H2, first will generally
 					   be 0 and last will be 2 so the for loop below will just be done once for nion = 1 */
+
       if (first < 0 || first >= nions || last < 0 || last > nions)
 	{
 	  Error
@@ -499,7 +501,8 @@ saha (xplasma, ne, t)
 	  exit (0);
 	}
 
-/*    These lines were put in to make sim work properly, ideally there should be a switch so if we are doing things the old way, we keep the old numbers. But, saha doesnt know the mode....
+/*    These lines were put in to make sim work properly, ideally there should be a switch so 
+      if we are doing things the old way, we keep the old numbers. But, saha doesnt know the mode....
       sum = density[first] = 1e-250;
       big = pow (10., 250. / (last - first));
       big=big*1e6;   */
@@ -508,32 +511,53 @@ saha (xplasma, ne, t)
       big = pow (10., 250. / (last - first));
 
       for (nion = first + 1; nion < last; nion++)
-	{
-	  b = xsaha * partition[nion]
-	    * exp (-ion[nion - 1].ip / (BOLTZMANN * t)) / (ne *
+	{ 
+
+	  /* JM 1309 -- this next if statement is to ensure that saha densities are only calculated if the 
+             ion in question is not a macro ion. Otherwise, this will affect the escape 
+             probabilities that are calculated in macro_pops. The exception to this is prior
+             to the first ionization cycle when we need to populate saha densities as a first guess */
+
+          if ((ion[nion].macro_info == 0) || (geo.macro_ioniz_mode == 0))
+            {
+	      b = xsaha * partition[nion]
+	          * exp (-ion[nion - 1].ip / (BOLTZMANN * t)) / (ne *
 							   partition[nion -
 								     1]);
 //        if (b > big && nh < 1e5) this is a line to only modify things if the density is high enough to matter
-	  if (b > big)
-	    b = big;		//limit step so there is no chance of overflow
-	  a = density[nion - 1] * b;
-	  sum += density[nion] = a;
-	  if (density[nion] < 0.0)
-	    mytrap ();
-	  if (sane_check (sum))
-	    Error ("saha:sane_check failed for density summation\n");
-	  
-	  //	  printf("element %d ion %d part fn. %g %g\n", ion[nion].z, ion[nion].istate, partition[nion], partition[nion-1]);
-  
+	      if (b > big)
+	        b = big;		//limit step so there is no chance of overflow
 
+	      a = density[nion - 1] * b;
+
+	      sum += density[nion] = a;
+  
+	      if (density[nion] < 0.0)
+	        mytrap ();
+
+	      if (sane_check (sum))
+	        Error ("saha:sane_check failed for density summation\n");
+  
+            }
 	}
 
       a = nh * ele[nelem].abun / sum;
+
       for (nion = first; nion < last; nion++)
 	{
-	  density[nion] *= a;
-	  if (sane_check (density[nion]))
-	    Error ("saha:sane_check failed for density of ion %i\n", nion);
+
+          /* JM 1309 -- this next if statement is to ensure that saha densities are only calculated if the 
+             ion in question is not a macro ion. Otherwise, this will affect the escape 
+             probabilities that are calculated in macro_pops. The exception to this is prior
+             to the first ionization cycle when we need to populate saha densities as a first guess */
+
+          if ((ion[nion].macro_info == 0) || (geo.macro_ioniz_mode == 0))
+            {
+
+	      density[nion] *= a;
+	      if (sane_check (density[nion]))
+	        Error ("saha:sane_check failed for density of ion %i\n", nion);
+            }    
 	}
     }
 
