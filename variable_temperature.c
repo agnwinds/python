@@ -273,12 +273,21 @@ variable_temperature (xplasma, mode)
 	      macro_pops (xplasma, xne);
 	    }
 
-	  /*Set some floor so future divisions are sensible */
 	  for (nion = 0; nion < nions; nion++)
-	    {
-	      if (newden[nion] < DENSITY_MIN)
-		newden[nion] = DENSITY_MIN;
-	    }
+            {
+
+            /* if the ion is being treated by macro_pops then use the populations just computed 
+               JM1309 -- this was missing prior to python 76c */
+            if ((ion[nion].macro_info == 1) && (geo.macro_simple == 0)
+               && (geo.macro_ioniz_mode == 1))
+              {
+                newden[nion] = xplasma->density[nion];
+              }
+
+            /*Set some floor so future divisions are sensible */
+            if (newden[nion] < DENSITY_MIN)
+              newden[nion] = DENSITY_MIN;
+            }
 
 	  /* Now determine the new value of ne from the ion abundances */
 	}			//end of loop over elements
