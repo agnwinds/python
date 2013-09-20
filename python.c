@@ -328,7 +328,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	      Log ("Restarting %s\n", root);
 	      restart_stat = 1;
 	    }
-	  if (strcmp (argv[i], "-t") == 0)
+	  else if (strcmp (argv[i], "-t") == 0)
 	    {
 	      if (sscanf (argv[i + 1], "%lf", &time_max) != 1)
 		{
