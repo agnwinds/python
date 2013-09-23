@@ -35,10 +35,10 @@ matom_emiss_report ()
   double emiss_sum, abs_sum;
 
   /* Cycle over macro atom levels and log emissivities */
-  emiss_sum = 0.0;
-  abs_sum = 0.0;
 
   for (m = 0; m < nlevels_macro + 1; m++)
+    emiss_sum = 0.0;
+    abs_sum = 0.0;
     {
       for (n = 0; n < NPLASMA; n++)
 	{
