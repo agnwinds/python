@@ -125,8 +125,12 @@ WindPtr (w);
   my_nmin = 0;
   my_nmax = NPLASMA;
 #ifdef MPI_ON
-  num_mpi_cells = floor(NPLASMA/np_mpi_global);
-  num_mpi_extra = NPLASMA - (np_mpi_global*num_mpi_cells);
+  num_mpi_cells = floor(NPLASMA/np_mpi_global);  // divide the cells between the threads
+  num_mpi_extra = NPLASMA - (np_mpi_global*num_mpi_cells);  // the remainder from the above division
+  
+  /* this next loop splits the cells up between the threads. The remainder cells, num_mpi_extra,
+     are dealt with by all threads with rank_global less than the number of extra cell taking one
+     extra cell on */
   if (rank_global < num_mpi_extra)
     {
       my_nmin = rank_global*(num_mpi_cells+1);
