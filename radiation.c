@@ -141,7 +141,7 @@ radiation (p, ds)
 
   kappa_tot = frac_ff = kappa_ff (xplasma, freq);	/* Add ff opacity */
   kappa_tot += frac_comp = kappa_comp (xplasma, freq);	/* 70 NSH 1108 calculate compton opacity, store it in kappa_comp and also add it to kappa_tot, the total opacity for the photon path */
-  kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq, ds, p->w);
+  kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq);
   frac_tot = frac_z = 0;	/* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
 				   indicate this is all disagnostic and might be removed */
 

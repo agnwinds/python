@@ -172,14 +172,37 @@ bf_estimators_increment (one, p, ds)
   /* Now for contribution to heating due to ff processes. (SS, Apr 04) */
 
   weight_of_packet = p->w;
+
   y = weight_of_packet * kappa_ff (xplasma, freq_av) * ds;
 
-  xplasma->heat_ff += heat_contribution = y;
-  xplasma->heat_tot += heat_contribution;
+  xplasma->heat_ff += heat_contribution = y;	// record ff hea	
+  
+
+  /* Now for contribution to heating due to compton processes. (JM, Sep 013) */
+  
+  y = weight_of_packet * kappa_comp (xplasma, freq_av) * ds;
+  
+  xplasma->heat_comp += y;	// record the compton heating
+  heat_contribution += y;	// add compton to the heat contribution
+ 
+  
+  /* Now for contribution to heating due to induced compton processes. (JM, Sep 013) */
+
+  y = weight_of_packet * kappa_ind_comp (xplasma, freq_av) * ds;
+  
+  xplasma->heat_ind_comp += y;          // record the induced compton heating
+  heat_contribution += y;               // add induced compton to the heat contribution
+  
+ 
+ 
+  xplasma->heat_tot += heat_contribution;	// heat contribution is the contribution from compton, ind comp and ff processes
+
+
 
   /* This heat contribution is also the contibution to making k-packets in this volume. So we record it. */
 
   xplasma->kpkt_abs += heat_contribution;
+
 
   /* Now for contribution to inner shell ionization estimators (SS, Dec 08) */
 

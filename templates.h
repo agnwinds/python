@@ -418,7 +418,7 @@ int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, d
 int get_shell_wind_params(void);
 /* compton.c */
 double kappa_comp(PlasmaPtr xplasma, double freq);
-double kappa_ind_comp(PlasmaPtr xplasma, double freq, double ds, double w);
+double kappa_ind_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
 double klein_nishina(double nu);
 /* torus.c */
@@ -511,4 +511,3 @@ int one_choice(int choice, char *root, int ochoice);
 int py_wind_help(void);
 /* test_saha.c */
 int main(int argc, char *argv[]);
-/* test_dielectronic.c */
