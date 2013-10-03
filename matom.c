@@ -206,7 +206,7 @@ matom (p, nres, escape)
 	      line_ptr = &line[config[uplvl].bbd_jump[n]];
 
 	      rad_rate = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
-	      coll_rate = q21 (line_ptr, t_e);
+	      coll_rate = q21 (line_ptr, t_e);	// this is multiplied by ne below
 
 	      if (coll_rate < 0)
 		{
@@ -283,11 +283,14 @@ matom (p, nres, escape)
 	      rad_rate =
 		(b12 (line_ptr) *
 		 mplasma->jbar_old[config[uplvl].bbu_indx_first + n]);
-	      coll_rate = q12 (line_ptr, t_e);
+
+	      coll_rate = q12 (line_ptr, t_e);	// this is multiplied by ne below
+
 	      if (coll_rate < 0)
 		{
 		  coll_rate = 0;
 		}
+
 	      jprbs_known[uplvl][m] = jprbs[m] = ((rad_rate) + (coll_rate * ne)) * config[uplvl].ex;	//energy of lower state
 
 
@@ -442,6 +445,7 @@ matom (p, nres, escape)
       line_ptr = &line[config[uplvl].bbd_jump[n]];	//pointer for the bb transition
 
       rad_rate = a21 (line_ptr) * p_escape (line_ptr, xplasma);
+
       /* JM130716 in some old versions the coll_rate was set incorrectly here- 
          it needs to be multiplied by electron density */
       coll_rate = q21 (line_ptr, t_e) * ne;
@@ -833,6 +837,8 @@ kpkt (p, nres, escape)
 
 	      two_level_atom (line_ptr, xplasma, &lower_density,
 			      &upper_density);
+
+	      /* the collisional rate is multiplied by ne later */
 	      coll_rate =
 		q21 (line_ptr,
 		     electron_temperature) * (1. -

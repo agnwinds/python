@@ -61,7 +61,7 @@ bf_estimators_increment (one, p, ds)
   double x, ft;
   double y, yy;
   double exponential, heat_contribution;
-  int n, m, llvl, nn;
+  int n, m, llvl, nn, i;
   double sigma_phot_topbase ();
   double density;
   double abs_cont;
@@ -78,6 +78,24 @@ bf_estimators_increment (one, p, ds)
   freq_av = p->freq;
   // the continuum neglect variation of frequency along path and
   // take as a single "average" value.  
+
+  /* JM -- 1310 -- the loop below is if the user requires extra diagnostics and
+     has provided a file diag_cells.dat to store photons stats for cells they have specified
+  */
+  if (diag_on_off == 1 && ncstat > 0)
+    {
+      for (i = 0; i < ncstat; i++)
+	{
+          /* check if the cell is in the specified list */
+	  if (one->nplasma == ncell_stats[i])
+	    {
+	      fprintf (pstatptr,
+		       "PHOTON_DETAILS %3d %8.3e %8.3e %8.3e cell%3d wind cell%3d\n",
+		       geo.wcycle, p->freq, p->w, ds, one->nplasma,
+		       one->nwind);
+	    }
+	}
+    }
 
 
   for (nn = 0; nn < xplasma->kbf_nuse; nn++)
