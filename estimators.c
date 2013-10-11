@@ -97,6 +97,45 @@ bf_estimators_increment (one, p, ds)
 	}
     }
 
+  /*photon weight times distance in the shell is proportional to the mean intensity */
+  xplasma->j += p->w * ds;
+
+  /* frequency weighted by the weights and distance in the shell .  See eqn 2 ML93 */
+  xplasma->mean_ds += ds;
+  xplasma->n_ds++;
+  xplasma->ave_freq += p->freq * p->w * ds;
+
+  if (p->freq > xplasma->max_freq)	// check if photon frequency exceeds maximum frequency
+    xplasma->max_freq = p->freq;
+
+  /* 1310 JM -- The next loop updates the banded versions of j and ave_freq, analogously to routine inradiation
+     nxfreq refers to how many frequencies we have defining the bands. So, if we have 5 bands, we have 6 frequencies, 
+     going from xfreq[0] to xfreq[5] Since we are breaking out of the loop when i>=nxfreq, this means the last loop 
+     will be i=nxfreq-1 */
+
+  /* note that here we can use the photon weight and don't need to calculate anm attenuated average weight
+     as energy packets are indisivible in macro atom mode */
+
+  for (i = 0; i < geo.nxfreq; i++)
+    {
+      if (geo.xfreq[i] < p->freq && p->freq <= geo.xfreq[i + 1])
+	{
+	  xplasma->xave_freq[i] += p->freq * p->w * ds;	/* 1310 JM -- frequency weighted by weight and distance */
+	  xplasma->xsd_freq[i] += p->freq * p->freq * p->w * ds;	/* 1310 JM -- input to allow standard deviation to be calculated */
+	  xplasma->xj[i] += p->w * ds;	/* 1310 JM -- photon weight times distance travelled */
+	  xplasma->nxtot[i]++;	/* 1310 JM -- increment the frequency banded photon counter */
+
+	}
+    }
+
+  /* check that j and ave freq give sensible numbers */
+  if (sane_check (xplasma->j) || sane_check (xplasma->ave_freq))
+    {
+      Error ("radiation:sane_check Problem with j %g or ave_freq %g\n",
+	     xplasma->j, xplasma->ave_freq);
+    }
+
+
 
   for (nn = 0; nn < xplasma->kbf_nuse; nn++)
     {
