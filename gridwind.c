@@ -428,7 +428,7 @@ int
 calloc_estimators (nelem)
      int nelem;
 {
-  int n;
+  int n, i, j;
 
   if (nlevels_macro == 0 && geo.nmacro == 0)
     {
@@ -690,5 +690,48 @@ calloc_estimators (nelem)
       Log_silent ("Allocated no space for macro since nlevels_macro==0\n");
     }
 
+   for (i=0; i < NLEVELS_MACRO; i++)
+      {
+      last_pjnorm_known[i] = UPLVL_UNKNOWN;
+      last_penorm_known[i] = UPLVL_UNKNOWN;
+      known[i] = -1;
+      for (j = 0; j < 2 * (NBBJUMPS + NBFJUMPS); j++)
+	{
+	  last_eprbs_known[i][j] = UPLVL_UNKNOWN;
+	  last_jprbs_known[i][j] = UPLVL_UNKNOWN;
+	}
+    }
+
+   n_high_density = 0;
+   for (n = 0; n < NPLASMA; n++)
+     {
+       if 
+
+
+
+
+
   return (0);
 }
+
+
+
+
+int
+calloc_jumping (nelem_track, array_track)
+     int nelem;
+     
+{
+  macro_jumping = (JumpingPtr) calloc (sizeof (jumping_dummy), (nelem + 1))
+  for (n = 0; n < nlevels_macro; n++)
+    {
+      Log
+	("calloc_estimators: level %d has n_bbu_jump %d  n_bbd_jump %d n_bfu_jump %d n_bfd_jump %d\n",
+	 n, config[n].n_bbu_jump, config[n].n_bbd_jump, config[n].n_bfu_jump,
+	 config[n].n_bfd_jump);
+    }
+  
+  
+
+
+

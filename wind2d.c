@@ -346,6 +346,14 @@ be optional which variables beyond here are moved to structures othere than Wind
 
       nh = plasmamain[n].rho * rho2nh;
 
+     /* if the density is sufficiently high then we want to track this cell in macro atom mode and record 
+        its jumping probabilities */
+     if (nh > 1.0e13)
+       {
+         matom_track_cells[n_to_track] = n;
+         n_to_track += 1;
+       }
+
 /* NSH 130530 Next few lines allow the use of the temperature which can be computed from Zeus models to be used as an initial guess for the wind temperature */
       if (geo.wind_type == 3)
 	{
@@ -356,7 +364,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 	  plasmamain[n].t_r = geo.twind;
 	}
 
-
+ 
 
 
       /* 70b - Initialize the temperature in the torus to a different value */
@@ -416,6 +424,13 @@ be optional which variables beyond here are moved to structures othere than Wind
 	  plasmamain[n].xscatters[j] = 0;
 	}
     }
+
+/* now dynamically allocate space for the number of cells we have decided to track in macro atom mode */
+  if (geo.rt_mode = 2)
+    {
+      calloc_jumping (n_to_track,  matom_track_cells);
+    }
+      
 
 
 /* Calculate the the divergence of the wind at the center of each grid cell */
