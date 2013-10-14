@@ -2,6 +2,7 @@
 #include "mpi.h"
 #endif 
 
+int count;
 int np_mpi_global;               /// Global variable which holds the number of MPI processes
 int rank_global; 
 

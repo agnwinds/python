@@ -367,7 +367,7 @@ calloc_macro (nelem)
 
   if (nlevels_macro == 0 && geo.nmacro == 0)
     {
-      
+
       Log
 	("calloc_macro: Allocated no space for macro since nlevels_macro==0 and geo.nmacro==0\n");
       return (0);
@@ -469,10 +469,10 @@ calloc_estimators (nelem)
   for (n = 0; n < nelem; n++)
     {
       /* JM130625: Commented out free statements due to PYWIND MALLOC MATOM BUG
-	 if (macromain[n].jbar != NULL)
-	{
-	  free (macromain[n].jbar);
-	}*/
+         if (macromain[n].jbar != NULL)
+         {
+         free (macromain[n].jbar);
+         } */
       if ((macromain[n].jbar =
 	   calloc (sizeof (double), size_Jbar_est)) == NULL)
 	{
@@ -482,9 +482,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].jbar_old != NULL)
-	{
-	  free (macromain[n].jbar_old);
-	}*/
+         {
+         free (macromain[n].jbar_old);
+         } */
       if ((macromain[n].jbar_old =
 	   calloc (sizeof (double), size_Jbar_est)) == NULL)
 	{
@@ -494,9 +494,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].gamma != NULL)
-	{
-	  free (macromain[n].gamma);
-	}*/
+         {
+         free (macromain[n].gamma);
+         } */
       if ((macromain[n].gamma =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -506,9 +506,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].gamma_old != NULL)
-	{
-	  free (macromain[n].gamma_old);
-	}*/
+         {
+         free (macromain[n].gamma_old);
+         } */
       if ((macromain[n].gamma_old =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -518,9 +518,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].gamma_e != NULL)
-	{
-	  free (macromain[n].gamma_e);
-	}*/
+         {
+         free (macromain[n].gamma_e);
+         } */
       if ((macromain[n].gamma_e =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -530,9 +530,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].gamma_e_old != NULL)
-	{
-	  free (macromain[n].gamma_e_old);
-	}*/
+         {
+         free (macromain[n].gamma_e_old);
+         } */
       if ((macromain[n].gamma_e_old =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -542,9 +542,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].alpha_st != NULL)
-	{
-	  free (macromain[n].alpha_st);
-	}*/
+         {
+         free (macromain[n].alpha_st);
+         } */
       if ((macromain[n].alpha_st =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -554,9 +554,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].alpha_st_old != NULL)
-	{
-	  free (macromain[n].alpha_st_old);
-	}*/
+         {
+         free (macromain[n].alpha_st_old);
+         } */
       if ((macromain[n].alpha_st_old =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -566,9 +566,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].alpha_st_e != NULL)
-	{
-	  free (macromain[n].alpha_st_e);
-	}*/
+         {
+         free (macromain[n].alpha_st_e);
+         } */
       if ((macromain[n].alpha_st_e =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -578,9 +578,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].alpha_st_e_old)
-	{
-	  free (macromain[n].alpha_st_e_old);
-	}*/
+         {
+         free (macromain[n].alpha_st_e_old);
+         } */
       if ((macromain[n].alpha_st_e_old =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -590,9 +590,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].recomb_sp != NULL)
-	{
-	  free (macromain[n].recomb_sp);
-	}*/
+         {
+         free (macromain[n].recomb_sp);
+         } */
       if ((macromain[n].recomb_sp =
 	   calloc (sizeof (double), size_alpha_est)) == NULL)
 	{
@@ -602,9 +602,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].recomb_sp_e != NULL)
-	{
-	  free (macromain[n].recomb_sp_e);
-	}*/
+         {
+         free (macromain[n].recomb_sp_e);
+         } */
       if ((macromain[n].recomb_sp_e =
 	   calloc (sizeof (double), size_alpha_est)) == NULL)
 	{
@@ -614,9 +614,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].matom_emiss != NULL)
-	{
-	  free (macromain[n].matom_emiss);
-	}*/
+         {
+         free (macromain[n].matom_emiss);
+         } */
       if ((macromain[n].matom_emiss =
 	   calloc (sizeof (double), nlevels_macro)) == NULL)
 	{
@@ -626,9 +626,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].matom_abs != NULL)
-	{
-	  free (macromain[n].matom_abs);
-	}*/
+         {
+         free (macromain[n].matom_abs);
+         } */
       if ((macromain[n].matom_abs =
 	   calloc (sizeof (double), nlevels_macro)) == NULL)
 	{
@@ -639,9 +639,9 @@ calloc_estimators (nelem)
 
       /* Added ksl 091103 59e */
       /*if (macromain[n].cooling_bf != NULL)
-	{
-	  free (macromain[n].cooling_bf);
-	}*/
+         {
+         free (macromain[n].cooling_bf);
+         } */
       if ((macromain[n].cooling_bf =
 	   calloc (sizeof (double), ntop_phot)) == NULL)
 	{
@@ -651,9 +651,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].cooling_bf_col != NULL)
-	{
-	  free (macromain[n].cooling_bf_col);
-	}*/
+         {
+         free (macromain[n].cooling_bf_col);
+         } */
       if ((macromain[n].cooling_bf_col =
 	   calloc (sizeof (double), ntop_phot)) == NULL)
 	{
@@ -663,9 +663,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].cooling_bb != NULL)
-	{
-	  free (macromain[n].cooling_bb);
-	}*/
+         {
+         free (macromain[n].cooling_bb);
+         } */
       if ((macromain[n].cooling_bb =
 	   calloc (sizeof (double), nlines)) == NULL)
 	{
@@ -690,8 +690,14 @@ calloc_estimators (nelem)
       Log_silent ("Allocated no space for macro since nlevels_macro==0\n");
     }
 
-   for (i=0; i < NLEVELS_MACRO; i++)
-      {
+
+  /* These arrays are transition probabilities for the last macro atom the photon hit.
+     We store these to prevemtnt problems with very very long k->A*->k chains
+     This loops simply sets the values in the arrays of the probabilities we store
+     to -999 (UPLVL_UNKNOWN) i.e. flags every probability as unknown */
+  last_nplasma = -1;
+  for (i = 0; i < NLEVELS_MACRO; i++)
+    {
       last_pjnorm_known[i] = UPLVL_UNKNOWN;
       last_penorm_known[i] = UPLVL_UNKNOWN;
       known[i] = -1;
@@ -702,10 +708,10 @@ calloc_estimators (nelem)
 	}
     }
 
-   n_high_density = 0;
-   for (n = 0; n < NPLASMA; n++)
+  /*n_high_density = 0;
+     for (n = 0; n < NPLASMA; n++)
      {
-       if 
+     if */
 
 
 
@@ -717,21 +723,16 @@ calloc_estimators (nelem)
 
 
 
-int
+/*int
 calloc_jumping (nelem_track, array_track)
      int nelem;
-     
+
 {
   macro_jumping = (JumpingPtr) calloc (sizeof (jumping_dummy), (nelem + 1))
-  for (n = 0; n < nlevels_macro; n++)
+    for (n = 0; n < nlevels_macro; n++)
     {
       Log
 	("calloc_estimators: level %d has n_bbu_jump %d  n_bbd_jump %d n_bfu_jump %d n_bfd_jump %d\n",
 	 n, config[n].n_bbu_jump, config[n].n_bbd_jump, config[n].n_bfu_jump,
 	 config[n].n_bfd_jump);
-    }
-  
-  
-
-
-
+    }*/
