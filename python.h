@@ -621,6 +621,7 @@ typedef struct plasma
   double j, ave_freq, lum;	/*Respectively mean intensity, intensity_averaged frequency, 
 				   luminosity and absorbed luminosity of shell */
   double xj[NXBANDS], xave_freq[NXBANDS];	/* 1108 NSH frequency limited versions of j and ave_freq */
+  double j_direct,j_scatt; /* 1309 NSH mean intensity due to direct photons and scattered photons */
   double xsd_freq[NXBANDS];	/*1208 NSH the standard deviation of the frequency in the band */
   int nxtot[NXBANDS];		/* 1108 NSH the total number of photon passages in frequency bands */
   double max_freq;		/*1208 NSH The maximum frequency photon seen in this cell */

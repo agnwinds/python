@@ -109,7 +109,7 @@ WindPtr (w);
   int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
   int size_of_commbuffer;
   char *commbuffer;
-  size_of_commbuffer = 8 * (12*NIONS + NLTE_LEVELS + 2*NTOP_PHOT + 10*NXBANDS + 2*LPDF + NAUGER + 100)*(floor(NPLASMA/np_mpi_global)+1);
+  size_of_commbuffer = 8 * (12*NIONS + NLTE_LEVELS + 2*NTOP_PHOT + 10*NXBANDS + 2*LPDF + NAUGER + 102)*(floor(NPLASMA/np_mpi_global)+1);
       
   commbuffer = (char *) malloc(size_of_commbuffer*sizeof(char));
       
@@ -125,12 +125,8 @@ WindPtr (w);
   my_nmin = 0;
   my_nmax = NPLASMA;
 #ifdef MPI_ON
-  num_mpi_cells = floor(NPLASMA/np_mpi_global);  // divide the cells between the threads
-  num_mpi_extra = NPLASMA - (np_mpi_global*num_mpi_cells);  // the remainder from the above division
-  
-  /* this next loop splits the cells up between the threads. The remainder cells, num_mpi_extra,
-     are dealt with by all threads with rank_global less than the number of extra cell taking one
-     extra cell on */
+  num_mpi_cells = floor(NPLASMA/np_mpi_global);
+  num_mpi_extra = NPLASMA - (np_mpi_global*num_mpi_cells);
   if (rank_global < num_mpi_extra)
     {
       my_nmin = rank_global*(num_mpi_cells+1);
@@ -187,6 +183,10 @@ WindPtr (w);
 	    }
 
 	  plasmamain[n].j /= (4. * PI * volume);	//Factor of 2 has been removed from this line (SS, May04)
+	  plasmamain[n].j_direct /= (4. * PI * volume);
+	  plasmamain[n].j_scatt /= (4. * PI * volume);
+
+
 
 	  trad = plasmamain[n].t_r =
 	    H * plasmamain[n].ave_freq / (BOLTZMANN * 3.832);
@@ -213,7 +213,7 @@ WindPtr (w);
       else
 	{			// It is not clear what to do with no photons in a cell
 
-	  plasmamain[n].j = 0;
+	  plasmamain[n].j = plasmamain[n].j_direct = plasmamain[n].j_scatt = 0;
 	  trad = plasmamain[n].t_r;
 	  plasmamain[n].t_e *= 0.7;
 	  if (plasmamain[n].t_e < TMIN)
@@ -358,6 +358,8 @@ WindPtr (w);
 	      MPI_Pack(plasmamain[n].heat_ion, NIONS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(plasmamain[n].lum_ion, NIONS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].j, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+	      MPI_Pack(&plasmamain[n].j_direct, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+	      MPI_Pack(&plasmamain[n].j_scatt, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].ave_freq, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].lum, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(plasmamain[n].xj, NXBANDS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -481,6 +483,8 @@ WindPtr (w);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, plasmamain[n].heat_ion, NIONS, MPI_DOUBLE, MPI_COMM_WORLD);	  
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, plasmamain[n].lum_ion, NIONS, MPI_DOUBLE, MPI_COMM_WORLD);	  
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].j, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].j_direct, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].j_scatt, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].ave_freq, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, plasmamain[n].xj, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);	  
@@ -851,6 +855,7 @@ wind_rad_init ()
   for (n = 0; n < NPLASMA; n++)
     {
       plasmamain[n].j = plasmamain[n].ave_freq = plasmamain[n].ntot = 0;
+      plasmamain[n].j_direct = plasmamain[n].j_scatt = 0,0;  //NSH 1309 zero j banded by number of scatters
       plasmamain[n].mean_ds = 0.0;
       plasmamain[n].n_ds = 0;
       plasmamain[n].ntot_disk = plasmamain[n].ntot_agn = 0;	//NSH 15/4/11 counters to see where photons come from
