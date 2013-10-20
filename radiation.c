@@ -329,6 +329,17 @@ statement could be deleted entirely 060802 -- ksl */
 /*photon weight times distance in the shell is proportional to the mean intensity */
   xplasma->j += w_ave * ds;
 
+  if (p->nscat == 0)
+	{
+  	xplasma->j_direct += w_ave * ds;
+	}
+  else
+	{
+	xplasma->j_scatt += w_ave * ds;
+	}
+
+
+
 /* frequency weighted by the weights and distance       in the shell .  See eqn 2 ML93 */
   xplasma->mean_ds += ds;
   xplasma->n_ds++;
