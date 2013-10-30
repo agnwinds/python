@@ -689,6 +689,7 @@ History:
           July04  SS   Modified to use recomb_sp(_e) rather than alpha_sp(_e) to speed up.
 	06may	ksl	57+ -- Modified to use new plasma array.  Eliminated passing
 			entire w array
+	131030	JM 		-- Added adiabatic cooling as possible kpkt destruction choice
           
 ************************************************************/
 
@@ -704,6 +705,7 @@ kpkt (p, nres, escape)
   double cooling_bf[NTOP_PHOT];
   double cooling_bf_col[NTOP_PHOT];	//collisional cooling in bf transitions
   double cooling_bb[NLINES];
+  double cooling_adiabatic;
   struct topbase_phot *cont_ptr;
   struct lines *line_ptr;
   double cooling_normalisation;
@@ -918,11 +920,29 @@ kpkt (p, nres, escape)
 	  cooling_normalisation += cooling_ff;
 	}
 
+
+
+      /* JM -- 1310 -- we now want to add adiabatic cooling as another way of destroying kpkts
+         this should have already been calculated and stored in the plasma structure. Note that 
+         adiabatic cooling does not depend on type of macro atom excited */
+
+      cooling_adiabatic = xplasma->lum_adiabatic;
+
+      if (cooling_adiabatic < 0)
+        {
+          Warning("kpkt: Adiabatic cooling negative!\n");
+        }
+
+      cooling_normalisation += cooling_adiabatic;
+
+
       mplasma->cooling_bbtot = cooling_bbtot;
       mplasma->cooling_bftot = cooling_bftot;
       mplasma->cooling_bf_coltot = cooling_bf_coltot;
       mplasma->cooling_normalisation = cooling_normalisation;
       mplasma->kpkt_rates_known = 1;
+
+      
 
 
     }
@@ -1035,6 +1055,22 @@ kpkt (p, nres, escape)
 
       return (0);
     }
+
+
+  /* JM 1310 -- added loop to check if destruction occurs via adiabatic cooling */
+  else if (destruction_choice <
+	   (mplasma->cooling_bftot +
+	    mplasma->cooling_bbtot + mplasma->cooling_ff + xplasma->lum_adiabatic))
+    {
+
+      *escape = 1;		// we want to escape but set photon weight to zero
+      *nres = -2;		
+      p->w = 0.0;		// JM131030 set photon weight to zero as energy is taken up in adiabatic expansion
+
+      return (0);
+    }
+
+
   else
     {
       /* We want destruction by collisional ionization in a macro atom. */
@@ -1077,9 +1113,9 @@ kpkt (p, nres, escape)
 
   Error ("matom.c: Failed to select a destruction process in kpkt. Abort.\n");
   Error
-    ("matom.c: cooling_bftot %g, cooling_bbtot %g, cooling_ff %g, cooling_bf_coltot %g\n",
+    ("matom.c: cooling_bftot %g, cooling_bbtot %g, cooling_ff %g, cooling_bf_coltot %g cooling_adiabatic %g\n",
      mplasma->cooling_bftot, mplasma->cooling_bbtot,
-     mplasma->cooling_ff, mplasma->cooling_bf_coltot);
+     mplasma->cooling_ff, mplasma->cooling_bf_coltot, xplasma->lum_adiabatic);
 
   exit (0);
 
@@ -2082,6 +2118,7 @@ get_matom_f ()
   my_nmax = NPLASMA;
 
 #ifdef MPI_ON
+
   num_mpi_cells = floor(NPLASMA/np_mpi_global);  // divide the cells between the threads
   num_mpi_extra = NPLASMA - (np_mpi_global*num_mpi_cells);  // the remainder from the above division
   
@@ -2098,7 +2135,6 @@ get_matom_f ()
       my_nmax = num_mpi_extra*(num_mpi_cells+1) + (rank_global-num_mpi_extra+1)*(num_mpi_cells);
     }
   ndo = my_nmax-my_nmin;
- 
 
   Log_parallel
     ("Thread %d is calculating macro atom emissivities for macro atoms %d to %d\n",
