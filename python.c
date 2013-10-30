@@ -2405,7 +2405,7 @@ init_geo ()
   geo.t_bl = 100000.;
 
 
-  strcpy (geo.atomic_filename, "atomic/standard39");
+  strcpy (geo.atomic_filename, "data/standard73");
   strcpy (geo.fixed_con_file, "none");
 
   // Note that geo.model_list is initialized through get_spectype 
