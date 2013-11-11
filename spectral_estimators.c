@@ -4,8 +4,10 @@
                                        Space Telescope Science Institute
 
  Synopsis:
- 	Compute the abundances baset on the power law approximation
-	use by Stuart in one of his early AGN papers.
+ 	The routines in this file are all associated with the process of
+	modelling the spectrum in a cell. It uses the mean frequency to
+	find a power law model and an exponential model. It then uses
+	the standard deviation to decide which is best.
 	
  Arguments:		
 	WindPtr w;
@@ -114,13 +116,14 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
   for (n = 0; n < geo.nxfreq; n++)
 
     {
+	Log ("Starting out band %i in cell %i. mean=%e, sd=%e, minfreq=%e, maxfreq=%e, nphot=%i\n",n,xplasma->nplasma,xplasma->xave_freq[n],xplasma->xsd_freq[n],xplasma->fmin[n],xplasma->fmax[n],xplasma->nxtot[n]);
 
       plflag = expflag = 1;	//Both potential models are in the running
       if (xplasma->nxtot[n] <= 1) /*Catch the situation where there are only 1 or 0 photons in a band - we cannt reasonably try to model this situation*/ 
 		{
 	  	if (geo.xfreq[n] >= genmax || geo.xfreq[n+1] <= genmin) /*The band is outside where photons were generated, so not very surprising that there are no photons - just generate a log */
 		  	{
-			Log_silent("spectral_estimators: too few photons (1 or 0) in cell %d band %d but we weren't expecting any \n",n, geo.xfreq[n], geo.xfreq[n] * HEV, geo.xfreq[n + 1],geo.xfreq[n + 1] * HEV); //This is just a log, clearly it is not a problem//
+			Log("spectral_estimators: too few photons (1 or 0) in cell %d band %d but we weren't expecting any \n",xplasma->nplasma,n); //This is just a log, clearly it is not a problem//
 			}
 		else
 			{
@@ -169,7 +172,7 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	  dfreq = (geo.xfreq[n+1] - geo.xfreq[n])  / sqrt(xplasma->nxtot[n]); //This is a measure of the spacing between photons on average
 	  if ((xplasma->fmin[n] - geo.xfreq[n]) < dfreq)
 		{
-//		Log("Resetting lower band limit in band %d cell %d coz %e < %e\n",n,xplasma->nplasma,(xplasma->fmin[n] - geo.xfreq[n]) ,dfreq);
+		Log("Resetting lower band limit in band %d cell %d coz %e < %e\n",n,xplasma->nplasma,(xplasma->fmin[n] - geo.xfreq[n]) ,dfreq);
 		spec_numin = xplasma->fmin[n] = geo.xfreq[n];
 		}
 	  else
@@ -178,7 +181,7 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 		}
 	  if ((geo.xfreq[n+1] - xplasma->fmax[n]) < dfreq)
 		{
-//		Log("Resetting upper band limit in band %d cell %d coz %e < %e\n",n,xplasma->nplasma,(geo.xfreq[n+1] - xplasma->fmax[n]) , dfreq);
+		Log("Resetting upper band limit in band %d cell %d coz %e < %e\n",n,xplasma->nplasma,(geo.xfreq[n+1] - xplasma->fmax[n]) , dfreq);
 		spec_numax = xplasma->fmax[n] = geo.xfreq[n+1];
 		}
 	  else
