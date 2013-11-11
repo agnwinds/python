@@ -823,6 +823,31 @@ phot.istat below */
 #define THETAMAX	 1e4	//Used in initial calculation of n_e
 #define MIN_TEMP	100.	//  ??? this is another minimum temperature - it is used as the minimum tempersture in
 
+/* MACRO_TRACKING_DENSITY isthe minumum density above which we keep track 
+   of probabilities for a given macro atom. This is in order to prevent k->A*->k
+   chains causing performance problems.
+   MAX_MACRO_TRACKS is the maximum number of cells to track */
+#define MACRO_TRACKING_DENSITY 1e13	
+#define MAX_MACRO_TRACKS 100
+
+/* jumps_store is the structure which stores macro atom probabilities
+   for macro atoms in dense regions of the wind. These arrays
+   are dynamically allocated in calloc_jumping. It is indexed
+   by cell, element, initial level, final level, in that order
+   e.g. jump_store[nplasma][nelem].jprbs[uplvl][i]  */
+   
+typedef struct jumping_store
+{
+  double *jprbs;		// array of jumping probabilities
+  double *eprbs;		// array of emission probabilities
+  double *jprbs_norm;	// array of jumping normalisation
+  double *eprbs_norm;	// array of emission normalisation
+  int nplasma[MAX_MACRO_TRACKS];
+} jumping_dummy, *JumpingPtr;  
+
+JumpingPtr jumps_store;
+
+
 
 #define NDIM_MAX 500
 double wind_x[NDIM_MAX], wind_z[NDIM_MAX];	/* These define the edges of the cells in the x and z directions */

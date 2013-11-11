@@ -723,16 +723,72 @@ calloc_estimators (nelem)
 
 
 
-/*int
+/***********************************************************
+                                       Space Telescope Science Institute
+
+ Synopsis:
+	calloc_jumping  allocates space to store jumping probabilities
+
+Arguments:		
+	nelem_track;			The number of macro atoms to track
+	array_track;			The array storing the plasma cell numbers
+						of the macro atoms to track
+ 
+Returns:
+ 
+Description:
+	This routine is designed to store transition probabilities for macro atoms
+	in dense parts of the wind in order to stop the performance problems
+	associated with k->A*->k chains. These problems are detailed under bug report 
+	#54, "Performance problems with CV macro models".
+		
+Notes:
+
+History:
+	131111 -- JM		Coding began
+              
+***********************************************************/
+
+int
 calloc_jumping (nelem_track, array_track)
-     int nelem;
+     int nelem_track;
+     int array_track[MAX_MACRO_TRACKS];
 
 {
-  macro_jumping = (JumpingPtr) calloc (sizeof (jumping_dummy), (nelem + 1))
-    for (n = 0; n < nlevels_macro; n++)
+  int n;
+  
+  jumps_store = (JumpingPtr) calloc (sizeof (jumping_dummy), (nelem_track + 1));
+  for (n = 0; n < nlevels_macro; n++)
     {
       Log
 	("calloc_estimators: level %d has n_bbu_jump %d  n_bbd_jump %d n_bfu_jump %d n_bfd_jump %d\n",
 	 n, config[n].n_bbu_jump, config[n].n_bbd_jump, config[n].n_bfu_jump,
 	 config[n].n_bfd_jump);
+    }
+    
+    
+    /*  macromain = (MacroPtr) calloc (sizeof (macro_dummy), (nelem + 1));
+  geo.nmacro = nelem;
+
+  if (macromain == NULL)
+    {
+      Error
+	("calloc_macro: There is a problem in allocating memory for the macro structure\n");
+      exit (0);
+    }
+  else if (nlevels_macro > 0 || geo.nmacro > 0)
+    {
+      Log
+	("Allocated %10d bytes for each of %5d elements of       macro totaling %10.1f Mb \n",
+	 sizeof (macro_dummy), (nelem + 1),
+	 1.e-6 * (nelem + 1) * sizeof (macro_dummy));
     }*/
+  return (0);
+}
+    
+    
+    
+    
+    
+    
+    

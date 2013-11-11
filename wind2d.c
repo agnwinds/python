@@ -88,6 +88,7 @@ define_wind ()
 
   int nwind;
   int nplasma;
+  int n_to_track, matom_track_cells[MAX_MACRO_TRACKS];	// JM 131111 index and array for tracking macro atom probabilities
 
   WindPtr w;
   PlasmaPtr xplasma;
@@ -128,13 +129,13 @@ define_wind ()
     }
   else if (geo.coord_type == RTHETA)
     {
-      if (geo.wind_type == 3) //13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates
-      	{
-	rtheta_make_zeus_grid (w);
-      	}
+      if (geo.wind_type == 3)	//13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates
+	{
+	  rtheta_make_zeus_grid (w);
+	}
       else
 	{
-        rtheta_make_grid (w);
+	  rtheta_make_grid (w);
 	}
     }
   else if (geo.coord_type == CYLVAR)
@@ -187,13 +188,13 @@ recreated when a windfile is read into the program
     }
   else if (geo.coord_type == RTHETA)
     {
-      if (geo.wind_type == 3) //13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates We dont need to work out if cells are in the wind, they are known to be in the wind.
-      	{
-	rtheta_zeus_volumes (w);
-      	}
+      if (geo.wind_type == 3)	//13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates We dont need to work out if cells are in the wind, they are known to be in the wind.
+	{
+	  rtheta_zeus_volumes (w);
+	}
       else
 	{
-        rtheta_volumes (w, W_ALL_INWIND);
+	  rtheta_volumes (w, W_ALL_INWIND);
 	}
     }
   else if (geo.coord_type == CYLVAR)
@@ -326,7 +327,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 
   for (n = 0; n < NPLASMA; n++)
     {
-	
+
       nwind = plasmamain[n].nwind;
       stuff_v (w[nwind].xcen, x);
       plasmamain[n].rho = model_rho (x);
@@ -347,29 +348,37 @@ be optional which variables beyond here are moved to structures othere than Wind
       nh = plasmamain[n].rho * rho2nh;
 
 
-     /* JM 131016 -- If we are in macro atom mode and the density is sufficiently high 
-        then we want to track this cell in macro atom mode and record jumping probabilities */
-     if (geo.rt_mode == 2)
-       {
-       if ( nh > MACRO_TRACKING_DENSITY )	// initially I set this to 1e13
-         {
-           matom_track_cells[n_to_track] = n;	// add the plasma number to an array
-           n_to_track += 1;			// increment the count of cells we are tracking
-         }
-       }
+      /* JM 131016 -- If we are in macro atom mode and the density is sufficiently high 
+         then we want to track this cell in macro atom mode and record jumping probabilities */
+      n_to_track = 0;
+      if (geo.rt_mode == 2)
+	{
+	  if (nh > MACRO_TRACKING_DENSITY && n_to_track < MAX_MACRO_TRACKS)	// initially I set this to 1e13
+	    {
+	      matom_track_cells[n_to_track] = n;	// add the plasma number to an array
+	      n_to_track += 1;	// increment the count of cells we are tracking
+	    }
+	  else if (nh > MACRO_TRACKING_DENSITY
+		   && n_to_track < MAX_MACRO_TRACKS)
+	    {
+	      Warning
+		("wind2d macro atom tracking: plasma cell %i has density %8.4e > %8.4e, but already tracking too many macro atoms!\n",
+		 n, nh, MACRO_TRACKING_DENSITY);
+	    }
+	}
 
 
 /* NSH 130530 Next few lines allow the use of the temperature which can be computed from Zeus models to be used as an initial guess for the wind temperature */
       if (geo.wind_type == 3)
 	{
-	  plasmamain[n].t_r = proga_temp (x)/0.9; //This is a kluge, it means that we get the temperature we expect, if we read in a temperature from a zeus file - otherwise it is multiplies by 0.9 //
+	  plasmamain[n].t_r = proga_temp (x) / 0.9;	//This is a kluge, it means that we get the temperature we expect, if we read in a temperature from a zeus file - otherwise it is multiplies by 0.9 //
 	}
       else
 	{
 	  plasmamain[n].t_r = geo.twind;
 	}
 
- 
+
 
 
       /* 70b - Initialize the temperature in the torus to a different value */
@@ -431,11 +440,11 @@ be optional which variables beyond here are moved to structures othere than Wind
     }
 
 /* now dynamically allocate space for the number of cells we have decided to track in macro atom mode */
-  if (geo.rt_mode = 2)
+  if (geo.rt_mode == 2)
     {
-      calloc_jumping (n_to_track,  matom_track_cells);
+      calloc_jumping (n_to_track, matom_track_cells);
     }
-      
+
 
 
 /* Calculate the the divergence of the wind at the center of each grid cell */

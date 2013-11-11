@@ -399,6 +399,7 @@ int calloc_plasma(int nelem);
 int check_plasma(PlasmaPtr xplasma, char message[]);
 int calloc_macro(int nelem);
 int calloc_estimators(int nelem);
+int calloc_jumping(int nelem_track, int array_track[100]);
 /* partition.c */
 int partition_functions(PlasmaPtr xplasma, int mode);
 int partition_functions_2(PlasmaPtr xplasma, int xnion, double temp, double weight);
