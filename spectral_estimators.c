@@ -172,7 +172,7 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	  dfreq = (geo.xfreq[n+1] - geo.xfreq[n])  / sqrt(xplasma->nxtot[n]); //This is a measure of the spacing between photons on average
 	  if ((xplasma->fmin[n] - geo.xfreq[n]) < dfreq)
 		{
-		Log("Resetting lower band limit in band %d cell %d coz %e < %e\n",n,xplasma->nplasma,(xplasma->fmin[n] - geo.xfreq[n]) ,dfreq);
+		Log("Resetting lower band limit to %e in band %d cell %d coz %e < %e\n",geo.xfreq[n],n,xplasma->nplasma,(xplasma->fmin[n] - geo.xfreq[n]) ,dfreq);
 		spec_numin = xplasma->fmin[n] = geo.xfreq[n];
 		}
 	  else
@@ -181,7 +181,7 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 		}
 	  if ((geo.xfreq[n+1] - xplasma->fmax[n]) < dfreq)
 		{
-		Log("Resetting upper band limit in band %d cell %d coz %e < %e\n",n,xplasma->nplasma,(geo.xfreq[n+1] - xplasma->fmax[n]) , dfreq);
+		Log("Resetting upper band limit to %e in band %d cell %d coz %e < %e\n",geo.xfreq[n+1],n,xplasma->nplasma,(geo.xfreq[n+1] - xplasma->fmax[n]) , dfreq);
 		spec_numax = xplasma->fmax[n] = geo.xfreq[n+1];
 		}
 	  else
