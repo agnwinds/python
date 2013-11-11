@@ -116,14 +116,14 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
   for (n = 0; n < geo.nxfreq; n++)
 
     {
-	Log ("Starting out band %i in cell %i. mean=%e, sd=%e, minfreq=%e, maxfreq=%e, nphot=%i\n",n,xplasma->nplasma,xplasma->xave_freq[n],xplasma->xsd_freq[n],xplasma->fmin[n],xplasma->fmax[n],xplasma->nxtot[n]);
+	Log_silent ("Starting out band %i in cell %i. mean=%e, sd=%e, minfreq=%e, maxfreq=%e, nphot=%i\n",n,xplasma->nplasma,xplasma->xave_freq[n],xplasma->xsd_freq[n],xplasma->fmin[n],xplasma->fmax[n],xplasma->nxtot[n]);
 
       plflag = expflag = 1;	//Both potential models are in the running
       if (xplasma->nxtot[n] <= 1) /*Catch the situation where there are only 1 or 0 photons in a band - we cannt reasonably try to model this situation*/ 
 		{
 	  	if (geo.xfreq[n] >= genmax || geo.xfreq[n+1] <= genmin) /*The band is outside where photons were generated, so not very surprising that there are no photons - just generate a log */
 		  	{
-			Log("spectral_estimators: too few photons (1 or 0) in cell %d band %d but we weren't expecting any \n",xplasma->nplasma,n); //This is just a log, clearly it is not a problem//
+			Log_silent("spectral_estimators: too few photons (1 or 0) in cell %d band %d but we weren't expecting any \n",xplasma->nplasma,n); //This is just a log, clearly it is not a problem//
 			}
 		else
 			{
@@ -137,10 +137,9 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	  	xplasma->exp_temp[n] = 1e99;	//Give temp a value that will show up as an error
 	  	xplasma->spec_mod_type[n] = -1;	//This tells the code that we have failed to model the spectrum in this band/cell/
 		}
-      else if (fabs(xplasma->fmax[n]-xplasma->fmin[n]) < xplasma->fmax[n]/1000.0) /*If all the photons in the cell are concentrated in a tiny range then we will also not expect to make a sensible model - this check could be reviewed later if lots of warning are produced */
+      else if (xplasma->fmax[n]==xplasma->fmin[n]) /*If all the photons in the cell are concentrated in a tiny range then we will also not expect to make a sensible model - this check could be reviewed later if lots of warning are produced */
 		{
-		printf ("abs test %e %e\n",fabs(xplasma->fmax[n]-xplasma->fmin[n]),(xplasma->fmax[n]-xplasma->fmin[n]));
-		Warning("spectral_estimators: photons cover a tiny frequency range in cell %d band %d\n",xplasma->nplasma,n); /*Flag as a warning, so one can see if it is an issue */
+		Warning("spectral_estimators: multiple photons but only one frequency seen in %d band %d\n",xplasma->nplasma,n); /*Flag as a warning, so one can see if it is an issue */
                 xplasma->pl_log_w[n] = -999; //A very tiny weight
 	  	xplasma->pl_alpha[n] = 999.9;	//Give alpha a value that will show up as an error
 	  	xplasma->exp_w[n] = 0.0;	//Make sure that w is zero, s no chance of mucking up ionization balance
@@ -169,25 +168,25 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 /* NSH 131107 The next lines check and assign band limits. If the min/max frequency in a cell is within (fmax-fmin)/(sqrt(nphot)) of the end of
  a band, we say that the photons fill the band to that end - i.e. the fact we didnt see the minimum frequency is just because of photon numbers. */
 
-//	  dfreq = (geo.xfreq[n+1] - geo.xfreq[n])  / sqrt(xplasma->nxtot[n]); //This is a measure of the spacing between photons on average
-//	  if ((xplasma->fmin[n] - geo.xfreq[n]) < dfreq)
-//		{
-//		Log("Resetting lower band limit to %e in band %d cell %d coz %e < %e\n",geo.xfreq[n],n,xplasma->nplasma,(xplasma->fmin[n] - geo.xfreq[n]) ,dfreq);
-//		spec_numin = xplasma->fmin[n] = geo.xfreq[n];
-//		}
-//	  else
-//		{		
+	  dfreq = (geo.xfreq[n+1] - geo.xfreq[n])  / sqrt(xplasma->nxtot[n]); //This is a measure of the spacing between photons on average
+	  if ((xplasma->fmin[n] - geo.xfreq[n]) < dfreq)
+		{
+		Log_silent("Resetting lower band limit to %e in band %d cell %d coz %e < %e\n",geo.xfreq[n],n,xplasma->nplasma,(xplasma->fmin[n] - geo.xfreq[n]) ,dfreq);
+		spec_numin = xplasma->fmin[n] = geo.xfreq[n];
+		}
+	  else
+		{		
 		spec_numin = xplasma->fmin[n];
-//		}
-//	  if ((geo.xfreq[n+1] - xplasma->fmax[n]) < dfreq)
-//		{
-//		Log("Resetting upper band limit to %e in band %d cell %d coz %e < %e\n",geo.xfreq[n+1],n,xplasma->nplasma,(geo.xfreq[n+1] - xplasma->fmax[n]) , dfreq);
-//		spec_numax = xplasma->fmax[n] = geo.xfreq[n+1];
-//		}
-//	  else
-//		{		
+		}
+	  if ((geo.xfreq[n+1] - xplasma->fmax[n]) < dfreq)
+		{
+		Log_silent("Resetting upper band limit to %e in band %d cell %d coz %e < %e\n",geo.xfreq[n+1],n,xplasma->nplasma,(geo.xfreq[n+1] - xplasma->fmax[n]) , dfreq);
+		spec_numax = xplasma->fmax[n] = geo.xfreq[n+1];
+		}
+	  else
+		{		
 		spec_numax = xplasma->fmax[n];
-//		}
+		}
 	  lspec_numax = log10(spec_numax);	  
 	  lspec_numin = log10(spec_numin);
 	  spec_numean = xplasma->xave_freq[n];
@@ -235,10 +234,10 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 
 	      pl_alpha_temp =
 		zbrent (pl_alpha_func_log, pl_alpha_min, pl_alpha_max, 0.00001);
-	      if (pl_alpha_temp > ALPHAMAX)
-		pl_alpha_temp = ALPHAMAX;	//110818 nsh check to stop crazy values for alpha causing problems
-	      if (pl_alpha_temp < -1. * ALPHAMAX)
-		pl_alpha_temp = -1. * ALPHAMAX;
+//	      if (pl_alpha_temp > ALPHAMAX)
+//		pl_alpha_temp = ALPHAMAX;	//110818 nsh check to stop crazy values for alpha causing problems
+//	      if (pl_alpha_temp < -1. * ALPHAMAX)
+//		pl_alpha_temp = -1. * ALPHAMAX;
 
 /*This next line computes the PL weight using an external function. Note that xplasma->j already 
  * contains the volume of the cell and a factor of 4pi, so the volume sent to sim_w is set to 1 
@@ -326,11 +325,11 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 
 	  exp_sd = exp_stddev (xplasma->exp_temp[n], spec_numin, spec_numax);
 	  pl_sd = pl_log_stddev (xplasma->pl_alpha[n], lspec_numin, lspec_numax);
-	  Log_silent
+	  Log
 	    ("NSH in this cell %i band %i PL estimators are log(w)=%10.2e, alpha=%5.3f giving sd=%e compared to %e\n",
 	     xplasma->nplasma, n, xplasma->pl_log_w[n], xplasma->pl_alpha[n], pl_sd,
 	     xplasma->xsd_freq[n]);
-	  Log_silent
+	  Log
 	    ("NSH in this cell %i band %i exp estimators are w=%10.2e, temp=%10.2e giving sd=%e compared to %e\n",
 	     xplasma->nplasma, n, xplasma->exp_w[n], xplasma->exp_temp[n], exp_sd,
 	     xplasma->xsd_freq[n]);
@@ -360,7 +359,7 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	      Warning ("No suitable model in band %i cell %i (nphot=%i fmin=%e fmax=%e)\n", n,
 		     xplasma->nplasma,xplasma->nxtot[n],xplasma->fmin[n],xplasma->fmax[n]);
 	    }
-	  Log_silent ("NSH In cell %i, band %i, the best model is %i\n",
+	  Log ("NSH In cell %i, band %i, the best model is %i\n",
 		      xplasma->nplasma, n, xplasma->spec_mod_type[n]);
 	}			//End of loop that does things if there are more than zero photons in the band.
     }				//End of loop over bands 
