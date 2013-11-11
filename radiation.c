@@ -380,7 +380,15 @@ statement could be deleted entirely 060802 -- ksl */
 	  xplasma->xsd_freq[i] += p->freq * p->freq * w_ave * ds;	/*1208 NSH imput to allow standard deviation to be calculated */
 	  xplasma->xj[i] += w_ave * ds;	/*1108 NSH/KSL photon weight times distance travelled */
 	  xplasma->nxtot[i]++;	/*1108 NSH increment the frequency banded photon counter */
-
+/* 1311 NSH lines added below to work out the range of frequencies within a band where photons have been seen */
+	  if (p->freq < xplasma->fmin[i])
+		{
+		xplasma->fmin[i]=p->freq;
+		}
+	  if (p->freq > xplasma->fmax[i]) 
+		{
+		xplasma->fmax[i]=p->freq;
+		}
 	}
     }
 

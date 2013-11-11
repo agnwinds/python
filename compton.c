@@ -123,7 +123,9 @@ kappa_ind_comp (xplasma, freq)
 
 	      else if (xplasma->spec_mod_type[i] == SPEC_MOD_PL)	//Power law model
 		{
-		  J = xplasma->pl_w[i] * pow (freq, xplasma->pl_alpha[i]);
+//		  J = xplasma->pl_w[i] * pow (freq, xplasma->pl_alpha[i]);
+		  J = pow(10,(xplasma->pl_log_w[i]+log10(freq)*xplasma->pl_alpha[i]));
+//		Log ("KAPPA IND COMP J=%e from logw_%e, alpha=%e\n",J,xplasma->pl_log_w[i],xplasma->pl_alpha[i]);
 		}
 
 	      else if (xplasma->spec_mod_type[i] == SPEC_MOD_EXP)	//Exponential model

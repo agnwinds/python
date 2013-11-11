@@ -258,6 +258,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 #ifdef MPI_ON
   int mpi_i, mpi_j;
   double *maxfreqhelper,*maxfreqhelper2;
+  double *maxbandfreqhelper,*maxbandfreqhelper2,*minbandfreqhelper,*minbandfreqhelper2;
   double *redhelper, *redhelper2;
   int *iredhelper, *iredhelper2;
  // int size_of_helpers;
@@ -1805,10 +1806,21 @@ run -- 07jul -- ksl
 
       /* End of the subcycle loop */
       /* At this point we should communicate all the useful infomation that has been accummulated on differenet MPI tasks */
+
+for (i=0;i<NXBANDS;i++) 
+	{
+	Log ("Band %i before runs from %e to %e\n",i,plasmamain[11].fmin[i],plasmamain[11].fmax[i]);
+	}
+
+
 #ifdef MPI_ON
  
     maxfreqhelper = calloc (sizeof(double),NPLASMA); 
     maxfreqhelper2 = calloc (sizeof(double),NPLASMA);
+    maxbandfreqhelper = calloc (sizeof(double),NPLASMA*NXBANDS); 
+    maxbandfreqhelper2 = calloc (sizeof(double),NPLASMA*NXBANDS);
+    minbandfreqhelper = calloc (sizeof(double),NPLASMA*NXBANDS); 
+    minbandfreqhelper2 = calloc (sizeof(double),NPLASMA*NXBANDS);
     redhelper = calloc (sizeof (double), plasma_double_helpers); 
     redhelper2 = calloc (sizeof (double), plasma_double_helpers); 
     iredhelper = calloc (sizeof (int), plasma_int_helpers); 
@@ -1837,9 +1849,14 @@ run -- 07jul -- ksl
 	      redhelper[mpi_i+(10+mpi_j)*NPLASMA] = plasmamain[mpi_i].xj[mpi_j]/ np_mpi_global;
 	      redhelper[mpi_i+(10+NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j]/ np_mpi_global;
 	      redhelper[mpi_i+(10+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
+	      maxbandfreqhelper[mpi_i*NXBANDS+mpi_j] = plasmamain[mpi_i].fmax[mpi_j];
+	      minbandfreqhelper[mpi_i*NXBANDS+mpi_j] = plasmamain[mpi_i].fmin[mpi_j];
+
 	    }
 	}
 
+      MPI_Reduce(minbandfreqhelper, minbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+      MPI_Reduce(maxbandfreqhelper, maxbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
       MPI_Reduce(maxfreqhelper, maxfreqhelper2, NPLASMA, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
       MPI_Reduce(redhelper, redhelper2, plasma_double_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
       if (rank_global == 0)
@@ -1850,6 +1867,10 @@ run -- 07jul -- ksl
       
       MPI_Bcast(redhelper2, plasma_double_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       MPI_Bcast(maxfreqhelper2, NPLASMA, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(minbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(maxbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
 	{
   	  plasmamain[mpi_i].max_freq = maxfreqhelper2[mpi_i];
@@ -1868,6 +1889,8 @@ run -- 07jul -- ksl
 	      plasmamain[mpi_i].xj[mpi_j]=redhelper2[mpi_i+(10+mpi_j)*NPLASMA];
 	      plasmamain[mpi_i].xave_freq[mpi_j]=redhelper2[mpi_i+(10+NXBANDS+mpi_j)*NPLASMA];
 	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(10+NXBANDS*2+mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].fmax[mpi_j] = maxbandfreqhelper2[mpi_i*NXBANDS+mpi_j];
+	      plasmamain[mpi_i].fmin[mpi_j] = minbandfreqhelper2[mpi_i*NXBANDS+mpi_j];
 	    }
 	}
       Log_parallel("Thread %d happy after broadcast.\n", rank_global);
@@ -1910,6 +1933,10 @@ run -- 07jul -- ksl
   
 	free (maxfreqhelper);
     	free (maxfreqhelper2);
+ 	free (maxbandfreqhelper);
+ 	free (maxbandfreqhelper2);
+ 	free (minbandfreqhelper);
+ 	free (minbandfreqhelper2);
     	free (redhelper);
     	free (redhelper2); 
     	free (iredhelper);
@@ -1917,6 +1944,11 @@ run -- 07jul -- ksl
 
 
 #endif
+
+for (i=0;i<NXBANDS;i++) 
+	{
+	Log ("Band %i after runs from %e to %e\n",i,plasmamain[11].fmin[i],plasmamain[11].fmax[i]);
+	}
 
 #if DEBUG
       ispy_close ();

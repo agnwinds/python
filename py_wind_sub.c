@@ -1207,8 +1207,8 @@ a:rdint ("Wind.array.element", &n);
   Log ("Spectral model details:\n");
   for (nn = 0; nn < geo.nxfreq; nn++)
     {
-      Log ("numin= %8.2e numax= %8.2e Model= %d PL_w= %8.2e PL_alpha= %8.2e Exp_w= %8.2e EXP_temp= %8.2e\n",geo.xfreq[nn],geo.xfreq[nn+1],xplasma->spec_mod_type[nn],xplasma->pl_w[nn],xplasma->pl_alpha[nn],xplasma->exp_w[nn],xplasma->exp_temp[nn]);
-    }
+      Log ("numin= %8.2e (%8.2e) numax= %8.2e (%8.2e) Model= %2d PL_log_w= %9.2e PL_alpha= %9.2e Exp_w= %9.2e EXP_temp= %9.2e\n",xplasma->fmin[nn],geo.xfreq[nn],xplasma->fmax[nn],geo.xfreq[nn+1],xplasma->spec_mod_type[nn],xplasma->pl_log_w[nn],xplasma->pl_alpha[nn],xplasma->exp_w[nn],xplasma->exp_temp[nn]);
+}    
 
 
   goto a;

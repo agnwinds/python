@@ -341,7 +341,8 @@ be optional which variables beyond here are moved to structures othere than Wind
 	  plasmamain[n].pl_alpha[nn] = geo.alpha_agn;	//As an initial guess we assume the whole wind is optically thin and so the spectral index for a PL illumination will be the same everywhere.
 	  /*     plasmamain[n].pl_w[nn] = geo.const_agn / (4.0*PI*(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]));  // constant / area of a sphere
 	     plasmamain[n].pl_w[nn] /= 4.*PI;   // take account of solid angle NSH 120817 removed - if PL not suitable, it will be set to zero anyway, so safe to keep it at zero from the outset! */
-	  plasmamain[n].pl_w[nn] = 0.0;
+//	  plasmamain[n].pl_w[nn] = 0.0;
+	  plasmamain[n].pl_log_w[nn] = 0.0;
 	}
 
       nh = plasmamain[n].rho * rho2nh;

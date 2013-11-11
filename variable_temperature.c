@@ -626,7 +626,7 @@ temp_func (solv_temp)
 
 **************************************************************/
 int pl_correct_err = 0;
-double xpl_alpha, xpl_w;
+double xpl_alpha, xpl_w, xpl_logw;
 double xexp_temp, xexp_w;
 
 
@@ -701,12 +701,14 @@ pl_correct_2 (xtemp, nion)
       for (j = 0; j < geo.nxfreq; j++)	//We loop over all the bands
 	{
 	  xpl_alpha = xxxplasma->pl_alpha[j];
-	  xpl_w = xxxplasma->pl_w[j];
+//	  xpl_w = xxxplasma->pl_w[j];
+	  xpl_logw = xxxplasma->pl_log_w[j];
 	  xexp_temp = xxxplasma->exp_temp[j];
 	  xexp_w = xxxplasma->exp_w[j];
 	  if (xxxplasma->spec_mod_type[j] > 0)	//Only bother doing the integrals if we have a model in this band
 	    {
-	      f1 = geo.xfreq[j];
+//	      f1 = geo.xfreq[j];
+	      f1 = xxxplasma->fmin[j];
 	      if (geo.xfreq[j + 1] > xxxplasma->max_freq && geo.xfreq[j] < xxxplasma->max_freq)	//The maximum frequency seen in this cell is in this band, so we cannot safely use the power law estimators right up to the top of the band. Note, we hope that all the weights in bands above this will be zero!
 /* NSH 130909 - this loop was commented out at some point in the past - I cannt recall why, but the lines are now reinstated - if they cause a problem - refer back to issue #50! */
 		{
@@ -714,13 +716,15 @@ pl_correct_2 (xtemp, nion)
 		}
 	      else
 		{
-		  f2 = geo.xfreq[j + 1];	//We can safely integrate over the whole band using the estimators for the cell/band 
+//		  f2 = geo.xfreq[j + 1];	//We can safely integrate over the whole band using the estimators for the cell/band 
+		  f2= xxxplasma->fmax[j];
 		}
 	      if (f1 < fthresh && fthresh < f2 && f1 < fmax && fmax < f2)	//Case 1- 
 		{
 		  if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL)
 		    {
-		      numerator += qromb (tb_pow1, fthresh, fmax, pl_qromb);
+//		      numerator += qromb (tb_pow1, fthresh, fmax, pl_qromb);
+		      numerator += qromb (tb_logpow1, fthresh, fmax, pl_qromb);
 		    }
 		  else
 		    {
@@ -731,7 +735,8 @@ pl_correct_2 (xtemp, nion)
 		{
 		  if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL)
 		    {
-		      numerator += qromb (tb_pow1, fthresh, f2, pl_qromb);
+//		      numerator += qromb (tb_pow1, fthresh, f2, pl_qromb);		      
+		      numerator += qromb (tb_logpow1, fthresh, f2, pl_qromb);
 		    }
 		  else
 		    {
@@ -742,7 +747,8 @@ pl_correct_2 (xtemp, nion)
 		{
 		  if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL)
 		    {
-		      numerator += qromb (tb_pow1, f1, fmax, pl_qromb);
+//		      numerator += qromb (tb_pow1, f1, fmax, pl_qromb);
+		      numerator += qromb (tb_logpow1, f1, fmax, pl_qromb);
 		    }
 		  else
 		    {
@@ -753,7 +759,8 @@ pl_correct_2 (xtemp, nion)
 		{
 		  if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL)
 		    {
-		      numerator += qromb (tb_pow1, f1, f2, pl_qromb);
+//		      numerator += qromb (tb_pow1, f1, f2, pl_qromb);
+		      numerator += qromb (tb_logpow1, f1, f2, pl_qromb);
 		    }
 		  else
 		    {
@@ -943,6 +950,23 @@ tb_pow1 (freq)
   double answer;
 
   answer = xpl_w * (pow (freq, (xpl_alpha - 1.0)));
+  answer *= sigma_phot_topbase (xtop, freq);	// and finally multiply by the cross section.
+
+  return (answer);
+}
+
+
+double
+tb_logpow1 (freq)
+     double freq;
+{
+  double answer;
+
+//  answer = xpl_w * (pow (freq, (xpl_alpha - 1.0)));
+
+  answer = pow(10,xpl_logw+(xpl_alpha-1.0)*log10(freq));
+
+
   answer *= sigma_phot_topbase (xtop, freq);	// and finally multiply by the cross section.
 
   return (answer);

@@ -432,10 +432,10 @@ int compute_dr_coeffs(double temp);
 double total_dr(WindPtr one, double t_e);
 /* spectral_estimators.c */
 int spectral_estimators(PlasmaPtr xplasma);
-double pl_alpha_func(double alpha);
-double pl_mean(double alpha, double numin, double numax);
-double pl_w(double j, double alpha, double numin, double numax);
-double pl_stddev(double alpha, double numin, double numax);
+double pl_alpha_func_log(double alpha);
+double pl_logmean(double alpha, double lnumin, double lnumax);
+double pl_log_w(double j, double alpha, double lnumin, double lnumax);
+double pl_log_stddev(double alpha, double lnumin, double lnumax);
 double exp_temp_func(double exp_temp);
 double exp_mean(double exp_temp, double numin, double numax);
 double exp_w(double j, double exp_temp, double numin, double numax);
@@ -447,6 +447,7 @@ double temp_func(double solv_temp);
 double pl_correct_2(double xtemp, int nion);
 double tb_planck1(double freq);
 double tb_pow1(double freq);
+double tb_logpow1(double freq);
 double tb_exp1(double freq);
 /* matom_diag.c */
 int matom_emiss_report(void);
