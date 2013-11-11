@@ -169,25 +169,25 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 /* NSH 131107 The next lines check and assign band limits. If the min/max frequency in a cell is within (fmax-fmin)/(sqrt(nphot)) of the end of
  a band, we say that the photons fill the band to that end - i.e. the fact we didnt see the minimum frequency is just because of photon numbers. */
 
-	  dfreq = (geo.xfreq[n+1] - geo.xfreq[n])  / sqrt(xplasma->nxtot[n]); //This is a measure of the spacing between photons on average
-	  if ((xplasma->fmin[n] - geo.xfreq[n]) < dfreq)
-		{
-		Log("Resetting lower band limit to %e in band %d cell %d coz %e < %e\n",geo.xfreq[n],n,xplasma->nplasma,(xplasma->fmin[n] - geo.xfreq[n]) ,dfreq);
-		spec_numin = xplasma->fmin[n] = geo.xfreq[n];
-		}
-	  else
-		{		
+//	  dfreq = (geo.xfreq[n+1] - geo.xfreq[n])  / sqrt(xplasma->nxtot[n]); //This is a measure of the spacing between photons on average
+//	  if ((xplasma->fmin[n] - geo.xfreq[n]) < dfreq)
+//		{
+//		Log("Resetting lower band limit to %e in band %d cell %d coz %e < %e\n",geo.xfreq[n],n,xplasma->nplasma,(xplasma->fmin[n] - geo.xfreq[n]) ,dfreq);
+//		spec_numin = xplasma->fmin[n] = geo.xfreq[n];
+//		}
+//	  else
+//		{		
 		spec_numin = xplasma->fmin[n];
-		}
-	  if ((geo.xfreq[n+1] - xplasma->fmax[n]) < dfreq)
-		{
-		Log("Resetting upper band limit to %e in band %d cell %d coz %e < %e\n",geo.xfreq[n+1],n,xplasma->nplasma,(geo.xfreq[n+1] - xplasma->fmax[n]) , dfreq);
-		spec_numax = xplasma->fmax[n] = geo.xfreq[n+1];
-		}
-	  else
-		{		
+//		}
+//	  if ((geo.xfreq[n+1] - xplasma->fmax[n]) < dfreq)
+//		{
+//		Log("Resetting upper band limit to %e in band %d cell %d coz %e < %e\n",geo.xfreq[n+1],n,xplasma->nplasma,(geo.xfreq[n+1] - xplasma->fmax[n]) , dfreq);
+//		spec_numax = xplasma->fmax[n] = geo.xfreq[n+1];
+//		}
+//	  else
+//		{		
 		spec_numax = xplasma->fmax[n];
-		}
+//		}
 	  lspec_numax = log10(spec_numax);	  
 	  lspec_numin = log10(spec_numin);
 	  spec_numean = xplasma->xave_freq[n];
