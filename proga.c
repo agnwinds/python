@@ -336,7 +336,7 @@ if (ithetamax<iproga_theta)
 //        proga_ptr[k].v[2]);
   fclose (fptr);
 
-
+printf ("coordtype=%i\n",geo.coord_type);
  /* We need to reset the grid dimensions to those we have just read in, if we are going to try and match coordinates */
    if (geo.coord_type == RTHETA)
 	{
