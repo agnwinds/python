@@ -341,6 +341,7 @@ if (ithetamax<iproga_theta)
    if (geo.coord_type == RTHETA)
 	{
    NDIM = geo.ndim = iproga_r-IGHOST+3; //We need an inner cell to bridge the star and the indisde of the wind, and an outer cell
+printf ("BLAH geo.ndim = %i iproga_r = %i, IGHOST = %i\n",geo.ndim,iproga_r,IGHOST);
    MDIM = geo.mdim = iproga_theta-IGHOST+2; //We need one outer cell
 	}
 
