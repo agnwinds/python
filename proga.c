@@ -178,7 +178,7 @@ get_proga ()
   double rho;
   double theta,theta_edge,dtheta,dtheta_edge;
   double vr, vtheta, vphi, energy;
-  int irmax,ithetamax;
+  int irmax,ithetamax,itest;
 
 /*Write something into the file name strings */
   strcpy (rfile, "grid1_r_big.dat");
@@ -212,7 +212,12 @@ get_proga ()
   
   while (fgets (aline, LINE, fptr) != NULL)
     {
-      sscanf (aline, "%d %lf %lf %lf %lf", &i, &r_edge, &r, &dr_edge, &dr);	/*NSH 130322 - minor mod here - it is actually the second value which is the centre of the cell, where the data is defined so we ignore the first */
+      itest = sscanf (aline, "%d %lf %lf %lf %lf", &i, &r_edge, &r, &dr_edge, &dr);	/*NSH 130322 - minor mod here - it is actually the second value which is the centre of the cell, where the data is defined so we ignore the first */
+      if (itest != 5) //We have an line which does not match what we expect, so quit
+	{
+	Error("proga.c radius file improperly formatted\n");
+	exit (0);
+	}
       proga_r_edge[i] = r_edge;
       proga_r_cent[i] = r;
       proga_dr_edge[i] = dr_edge;
@@ -250,7 +255,12 @@ This allows one to disregard theta cells which contain the disk in Daniels model
   j_proga_thetamax = 0;		/* NSH 130605 to remove o3 compile error */
   while (fgets (aline, LINE, fptr) != NULL)
     {
-      sscanf (aline, "%d %lf %lf %lf %lf", &i, &theta_edge, &theta, &dtheta_edge, &dtheta);	/*NSH 130322 - minor mod here - it is actually the second value which is the centre of the cell, where the data is defined so we ignore the first */
+      itest = sscanf (aline, "%d %lf %lf %lf %lf", &i, &theta_edge, &theta, &dtheta_edge, &dtheta);	/*NSH 130322 - minor mod here - it is actually the second value which is the centre of the cell, where the data is defined so we ignore the first */
+      if (itest != 5) //We have an line which does not match what we expect, so quit
+	{
+	Error("proga.c theta file improperly formatted\n");
+	exit (0);
+	}
       proga_theta_cent[i] = theta;
       proga_theta_edge[i] = theta_edge;
       proga_dtheta_edge[i] = dtheta_edge;
@@ -311,11 +321,11 @@ This allows one to disregard theta cells which contain the disk in Daniels model
 	}
 
     }
-//	printf ("PROGA Maximum r cell with data=%i (iproga_r=%i)\n",irmax,iproga_r);
-//	printf ("PROGA Maximum theta cell with data=%i (iproga_theta=%i)\n",ithetamax,iproga_theta);
+	printf ("PROGA Maximum r cell with data=%i (iproga_r=%i)\n",irmax,iproga_r);
+	printf ("PROGA Maximum theta cell with data=%i (iproga_theta=%i)\n",ithetamax,iproga_theta);
 if (irmax<iproga_r)
 	{
-//	printf ("PROGA Maximum r cell with data=%i (iproga_r=%i)\n",irmax,iproga_r);
+	printf ("PROGA Maximum r cell with data=%i (iproga_r=%i) - resetting\n",irmax,iproga_r);
 	iproga_r=irmax;
 	}
 if (ithetamax<iproga_theta)
