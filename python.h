@@ -842,7 +842,7 @@ typedef struct jumping_store
   double *eprbs;		// array of emission probabilities
   double *jprbs_norm;	// array of jumping normalisation
   double *eprbs_norm;	// array of emission normalisation
-  int nplasma[MAX_MACRO_TRACKS];
+  int nplasma;
 } jumping_dummy, *JumpingPtr;  
 
 JumpingPtr jumps_store;
