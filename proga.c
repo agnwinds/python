@@ -300,7 +300,8 @@ This allows one to disregard theta cells which contain the disk in Daniels model
 
 
   k = 0;
-  irmax=ithetamax=0; //Zero counters to check all cells actually have data
+  irmax=0;
+  ithetamax=0; //Zero counters to check all cells actually have data
 
   while (fgets (aline, LINE, fptr) != NULL)
     {
@@ -308,7 +309,7 @@ This allows one to disregard theta cells which contain the disk in Daniels model
 	{
 	  sscanf (aline, "%d %d %lf %lf %lf %lf %lf", &i, &j, &rho, &vr,
 		  &vtheta, &vphi, &energy);
-	printf ("i=%i j=%i\n",i,j);
+	printf ("i=%i irmax=%i j=%i\n",i,irmax,j);
 	if (i>irmax) 
 		{
 		printf ("%i > %i, so resetting max irmax\n",i,irmax);
