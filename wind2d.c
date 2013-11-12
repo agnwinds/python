@@ -323,7 +323,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 
 
 /* Now calculate parameters that need to be calculated at the center of the grid cell */
-
+  n_to_track = 0;
 
   for (n = 0; n < NPLASMA; n++)
     {
@@ -350,22 +350,35 @@ be optional which variables beyond here are moved to structures othere than Wind
 
       /* JM 131016 -- If we are in macro atom mode and the density is sufficiently high 
          then we want to track this cell in macro atom mode and record jumping probabilities */
-      n_to_track = 0;
       if (geo.rt_mode == 2)
 	{
-	  if (nh > MACRO_TRACKING_DENSITY && n_to_track < MAX_MACRO_TRACKS)	// initially I set this to 1e13
+
+	  if (nh > MACRO_TRACKING_DENSITY && n_to_track < MAX_MACRO_TRACKS)	// initially I set this density to 1e13
 	    {
+	    
 	      matom_track_cells[n_to_track] = n;	// add the plasma number to an array
-	      n_to_track += 1;	// increment the count of cells we are tracking
+	      
+	      macromain[n].stored = 1;
+	      
+	      n_to_track++;	// increment the count of cells we are tracking
+	      
 	    }
+	    
 	  else if (nh > MACRO_TRACKING_DENSITY
 		   && n_to_track < MAX_MACRO_TRACKS)
 	    {
 	      Warning
 		("wind2d macro atom tracking: plasma cell %i has density %8.4e > %8.4e, but already tracking too many macro atoms!\n",
 		 n, nh, MACRO_TRACKING_DENSITY);
+		   macromain[n].stored=0;
+	    }
+	  else
+	    {
+	    macromain[n].stored=0;
 	    }
 	}
+
+
 
 
 /* NSH 130530 Next few lines allow the use of the temperature which can be computed from Zeus models to be used as an initial guess for the wind temperature */
@@ -442,6 +455,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 /* now dynamically allocate space for the number of cells we have decided to track in macro atom mode */
   if (geo.rt_mode == 2)
     {
+      Log("%i macro atoms have nh higher than %8.2e, so tracking MA probabilities\n", n_to_track, MACRO_TRACKING_DENSITY);
       calloc_jumping (n_to_track, matom_track_cells);
     }
 

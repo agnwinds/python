@@ -776,6 +776,7 @@ typedef struct macro
   double cooling_normalisation;
   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
   double cooling_ff;
+  int stored;
 
 } macro_dummy, *MacroPtr;
 
@@ -784,6 +785,7 @@ MacroPtr macromain;
 int xxxpdfwind;			// When 1, line luminosity calculates pdf
 
 int size_Jbar_est, size_gamma_est, size_alpha_est;
+int size_prbs, size_norm, size_track;
 
 // These definitions define a photon type, generally it's origin
 #define PTYPE_STAR	    0
@@ -838,11 +840,12 @@ phot.istat below */
    
 typedef struct jumping_store
 {
-  double *jprbs;		// array of jumping probabilities
-  double *eprbs;		// array of emission probabilities
+  double (*jprbs) [ 2 * (NBBJUMPS + NBFJUMPS)];		// array of jumping probabilities
+  double (*eprbs) [ 2 * (NBBJUMPS + NBFJUMPS)];		// array of emission probabilities
   double *jprbs_norm;	// array of jumping normalisation
   double *eprbs_norm;	// array of emission normalisation
   int nplasma;
+  int known;
 } jumping_dummy, *JumpingPtr;  
 
 JumpingPtr jumps_store;

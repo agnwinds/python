@@ -694,7 +694,7 @@ calloc_estimators (nelem)
      We store these to prevemtnt problems with very very long k->A*->k chains
      This loops simply sets the values in the arrays of the probabilities we store
      to -999 (UPLVL_UNKNOWN) i.e. flags every probability as unknown */
-  last_nplasma = -1;
+  /*last_nplasma = -1;
   for (i = 0; i < NLEVELS_MACRO; i++)
     {
       last_pjnorm_known[i] = UPLVL_UNKNOWN;
@@ -706,7 +706,7 @@ calloc_estimators (nelem)
 	  last_jprbs_known[i][j] = UPLVL_UNKNOWN;
 	}
     }
-
+  */
   /*n_high_density = 0;
      for (n = 0; n < NPLASMA; n++)
      {
@@ -754,18 +754,21 @@ calloc_jumping (nelem_track, array_track)
      int array_track[MAX_MACRO_TRACKS];
 
 {
-  int n;
+  int n, i, njumps;
   
-  jumps_store = (JumpingPtr) calloc (sizeof (jumping_dummy), (nelem_track + 1));
+
+  jumps_store =
+    (JumpingPtr) calloc (sizeof (jumping_dummy), (nelem_track + 1));
+
   for (n = 0; n < nlevels_macro; n++)
     {
       Log
-	("calloc_estimators: level %d has n_bbu_jump %d  n_bbd_jump %d n_bfu_jump %d n_bfd_jump %d\n",
+	("calloc_jumping: level %d has n_bbu_jump %d  n_bbd_jump %d n_bfu_jump %d n_bfd_jump %d\n",
 	 n, config[n].n_bbu_jump, config[n].n_bbd_jump, config[n].n_bfu_jump,
 	 config[n].n_bfd_jump);
     }
-    
-   
+
+
 
   if (jumps_store == NULL)
     {
@@ -776,79 +779,82 @@ calloc_jumping (nelem_track, array_track)
   else if (nlevels_macro > 0 || geo.nmacro > 0)
     {
       Log
-	("Allocated %10d bytes for each of %5d elements of       macro totaling %10.1f Mb \n",
-	 sizeof (jumping_dummy), (nelem + 1),
-	 1.e-6 * (nelem + 1) * sizeof (macro_dummy));
+	("Allocated %10d bytes for each of %5d elements of jumps_store totaling %10.1f Mb \n",
+	 sizeof (jumping_dummy), (nelem_track + 1),
+	 1.e-6 * (nelem_track + 1) * sizeof (jumping_dummy));
     }
 
+  
+  //size_prbs = 0;
+  
+  /*for (n = 0; n < nlevels_macro; n++ )
+  {
+    njumps = config[n].n_bbd_jump + config[n].n_bfd_jump + config[n].n_bfu_jump + config[n].n_bbu_jump;
+    size_prbs += njumps;
+  }*/
+  
+  size_norm = nlevels_macro;
+  size_prbs = nlevels_macro;
+  size_track = nelem_track;
 
-  for (i=0; i < nelem_track; i++)
+
+
+  for (i = 0; i < nelem_track; i++)
+
     {
-    n = array_track [i];
-    
-    if ((jumps_store[n].eprbs =
+      n = array_track[i];
+      jumps_store[i].nplasma = n;
+
+      if ((jumps_store[i].eprbs =
 	   calloc (sizeof (double), size_prbs)) == NULL)
-      {
-        Error
-  	  ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
-	    exit (0);
-      }
-    
-    if ((jumps_store[n].jprbs =
-	   calloc (sizeof (double), size_prbs)) == NULL)
-      {
-        Error
-	  ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
-	    exit (0);
-      }
-    
-    if ((jumps_store[n].eprbs_norm =
-	   calloc (sizeof (double), size_norm)) == NULL)
-      {
-        Error
-	  ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
-	    exit (0);
-      }
-    
-    if ((jumps_store[n].jprbs_norm =
-	   calloc (sizeof (double), size_norm)) == NULL)
-      {
-        Error
-	  ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
-	    exit (0);
-      }
-    if ((jumps_store[n].jprbs_norm =
-	   calloc (sizeof (double), size_tracks)) == NULL)
-      {
-        Error
-  	  ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
+	{
+	  Error
+	    ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
 	  exit (0);
-      }
+	}
+
+      if ((jumps_store[i].jprbs =
+	   calloc (sizeof (double), size_prbs)) == NULL)
+	{
+	  Error
+	    ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
+	  exit (0);
+	}
+
+      if ((jumps_store[i].eprbs_norm =
+	   calloc (sizeof (double), size_norm)) == NULL)
+	{
+	  Error
+	    ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
+	  exit (0);
+	}
+
+      if ((jumps_store[i].jprbs_norm =
+	   calloc (sizeof (double), size_norm)) == NULL)
+	{
+	  Error
+	    ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
+	  exit (0);
+	}
+	
     }
 
 
-    
+
   if (nlevels_macro > 0 || geo.nmacro > 0)
     {
       Log_silent
 	("Allocated %10.1f Mb for MA jumping probs \n",
-	 1.e-6 * (nelem + 1) * (2. * size_prbs + 2. * size_norm +
-				size_tracks) * sizeof (double));
+	 1.e-6 * (nelem_track + 1) * (2. * size_prbs + 2. * size_norm) * sizeof (double));
     }
+    
   else
     {
       Log_silent ("Allocated no space for macro since nlevels_macro==0\n");
-    }  
+    }
 
 
 
-    
+
   return (0);
 }
-    
-    
-    
-    
-    
-    
-    
