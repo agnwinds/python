@@ -1,5 +1,4 @@
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -766,23 +765,84 @@ calloc_jumping (nelem_track, array_track)
 	 config[n].n_bfd_jump);
     }
     
-    
-    /*  macromain = (MacroPtr) calloc (sizeof (macro_dummy), (nelem + 1));
-  geo.nmacro = nelem;
+   
 
-  if (macromain == NULL)
+  if (jumps_store == NULL)
     {
       Error
-	("calloc_macro: There is a problem in allocating memory for the macro structure\n");
+	("calloc_jumping: There is a problem in allocating memory for the jump structure\n");
       exit (0);
     }
   else if (nlevels_macro > 0 || geo.nmacro > 0)
     {
       Log
 	("Allocated %10d bytes for each of %5d elements of       macro totaling %10.1f Mb \n",
-	 sizeof (macro_dummy), (nelem + 1),
+	 sizeof (jumping_dummy), (nelem + 1),
 	 1.e-6 * (nelem + 1) * sizeof (macro_dummy));
-    }*/
+    }
+
+
+  for (i=0; i < nelem_track; i++)
+    {
+    n = array_track [i];
+    
+    if ((jumps_store[n].eprbs =
+	   calloc (sizeof (double), size_prbs)) == NULL)
+      {
+        Error
+  	  ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
+	    exit (0);
+      }
+    
+    if ((jumps_store[n].jprbs =
+	   calloc (sizeof (double), size_prbs)) == NULL)
+      {
+        Error
+	  ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
+	    exit (0);
+      }
+    
+    if ((jumps_store[n].eprbs_norm =
+	   calloc (sizeof (double), size_norm)) == NULL)
+      {
+        Error
+	  ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
+	    exit (0);
+      }
+    
+    if ((jumps_store[n].jprbs_norm =
+	   calloc (sizeof (double), size_norm)) == NULL)
+      {
+        Error
+	  ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
+	    exit (0);
+      }
+    if ((jumps_store[n].jprbs_norm =
+	   calloc (sizeof (double), size_tracks)) == NULL)
+      {
+        Error
+  	  ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
+	  exit (0);
+      }
+    }
+
+
+    
+  if (nlevels_macro > 0 || geo.nmacro > 0)
+    {
+      Log_silent
+	("Allocated %10.1f Mb for MA jumping probs \n",
+	 1.e-6 * (nelem + 1) * (2. * size_prbs + 2. * size_norm +
+				size_tracks) * sizeof (double));
+    }
+  else
+    {
+      Log_silent ("Allocated no space for macro since nlevels_macro==0\n");
+    }  
+
+
+
+    
   return (0);
 }
     
