@@ -308,6 +308,7 @@ This allows one to disregard theta cells which contain the disk in Daniels model
 	{
 	  sscanf (aline, "%d %d %lf %lf %lf %lf %lf", &i, &j, &rho, &vr,
 		  &vtheta, &vphi, &energy);
+	printf ("i=%i j=%i\n",i,j);
 	if (i>irmax) 
 		{
 		printf ("%i > %i, so resetting max irmax\n",i,irmax);
