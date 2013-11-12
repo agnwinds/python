@@ -99,7 +99,7 @@ define_wind ()
   NDIM = ndim = geo.ndim;
   MDIM = mdim = geo.mdim;
   NDIM2 = NDIM * MDIM;
-
+printf ("BLAH NDIM=%i, MDIM=%i, NDIM2=%i\n",NDIM,MDIM,NDIM2);
   calloc_wind (NDIM2);
   w = wmain;
 
@@ -242,7 +242,7 @@ recreated when a windfile is read into the program
  * We now need to do the same for the torus
  */
 
-
+printf ("BLAH NDIM2=%i\n",NDIM2);
   n_vol = n_inwind = n_part = 0;
   n_comp = n_comp_part = 0;
   for (n = 0; n < NDIM2; n++)
