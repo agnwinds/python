@@ -215,7 +215,7 @@ get_proga ()
       itest = sscanf (aline, "%d %lf %lf %lf %lf", &i, &r_edge, &r, &dr_edge, &dr);	/*NSH 130322 - minor mod here - it is actually the second value which is the centre of the cell, where the data is defined so we ignore the first */
       if (itest != 5) //We have an line which does not match what we expect, so quit
 	{
-	Error("proga.c radius file improperly formatted\n");
+	Error("proga.c radius file improperly formatted, check for headers and footers\n");
 	exit (0);
 	}
       proga_r_edge[i] = r_edge;
@@ -258,7 +258,7 @@ This allows one to disregard theta cells which contain the disk in Daniels model
       itest = sscanf (aline, "%d %lf %lf %lf %lf", &i, &theta_edge, &theta, &dtheta_edge, &dtheta);	/*NSH 130322 - minor mod here - it is actually the second value which is the centre of the cell, where the data is defined so we ignore the first */
       if (itest != 5) //We have an line which does not match what we expect, so quit
 	{
-	Error("proga.c theta file improperly formatted\n");
+	Error("proga.c theta file improperly formatted - check for headers and footers\n");
 	exit (0);
 	}
       proga_theta_cent[i] = theta;
@@ -305,26 +305,29 @@ This allows one to disregard theta cells which contain the disk in Daniels model
 
   while (fgets (aline, LINE, fptr) != NULL)
     {
-      if (aline[0] != '#')
-	{
-	  sscanf (aline, "%d %d %lf %lf %lf %lf %lf", &i, &j, &rho, &vr,
-		  &vtheta, &vphi, &energy);
-	printf ("i=%i irmax=%i j=%i\n",i,irmax,j);
-	if (i>irmax) 
+      	itest=sscanf (aline, "%d %d %lf %lf %lf %lf %lf", &i, &j, &rho, &vr, &vtheta, &vphi, &energy);
+      	if (itest==7)
 		{
-		printf ("%i > %i, so resetting max irmax\n",i,irmax);
-		irmax=i;
-	}
-	if (j>ithetamax) ithetamax=j;
+		if (i>irmax) 
+			{
+			printf ("%i > %i, so resetting max irmax\n",i,irmax);
+			irmax=i;
+			}
+		if (j>ithetamax) ithetamax=j;
 /* NSH 130327 - for the time being, if theta is in the disk, replace with the last
  density above the disk */
-	  proga_ptr[i * MAXPROGA + j].temp = ((2.0 / 3.0) * energy) / ((rho / MPROT) * BOLTZMANN);	//Work out the temperature from the internal energy
-          proga_ptr[i * MAXPROGA + j].rho = rho;
-	  proga_ptr[i * MAXPROGA + j].v[0] = vr;
-	  proga_ptr[i * MAXPROGA + j].v[1] = vtheta;
-	  proga_ptr[i * MAXPROGA + j].v[2] = vphi;
-	  k++;
-	}
+	  	proga_ptr[i * MAXPROGA + j].temp = ((2.0 / 3.0) * energy) / ((rho / MPROT) * BOLTZMANN);	//Work out the temperature from the internal energy
+          	proga_ptr[i * MAXPROGA + j].rho = rho;
+	  	proga_ptr[i * MAXPROGA + j].v[0] = vr;
+	  	proga_ptr[i * MAXPROGA + j].v[1] = vtheta;
+	  	proga_ptr[i * MAXPROGA + j].v[2] = vphi;
+	  	k++;
+		}
+	else
+		{
+		Error("Proga data file not correctly formatted - check for headers and footers\n");
+		exit(0);
+		}
 
     }
 	printf ("PROGA Maximum r cell with data=%i (iproga_r=%i)\n",irmax,iproga_r);
