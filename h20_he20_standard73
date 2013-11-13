@@ -6,9 +6,9 @@ data/atomic_macro/h20_he20_standard73_elem_ions.py
 data/atomic_macro/h20_levels.py
 data/atomic_macro/h20_lines.py
 data/atomic_macro/h20_phot.py
-atomic/he20_levels.py
-atomic/he20_lines.py
-atomic/he20_phot.py
+data/atomic_macro/he20_levels.py
+data/atomic_macro/he20_lines.py
+data/atomic_macro/he20_phot.py
 #then read the non macro atom data for all except hydrogen and helium
 data/atomic73/topbase_levels_cno.py
 data/atomic73/topbase_levels_fe.py
