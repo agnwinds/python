@@ -831,6 +831,7 @@ phot.istat below */
    MAX_MACRO_TRACKS is the maximum number of cells to track */
 #define MACRO_TRACKING_DENSITY 1e13	
 #define MAX_MACRO_TRACKS 100
+int n_macro_tracking;
 
 /* jumps_store is the structure which stores macro atom probabilities
    for macro atoms in dense regions of the wind. These arrays
@@ -845,7 +846,7 @@ typedef struct jumping_store
   double *jprbs_norm;	// array of jumping normalisation
   double *eprbs_norm;	// array of emission normalisation
   int nplasma;
-  int known;
+  int known[NLEVELS_MACRO];
 } jumping_dummy, *JumpingPtr;  
 
 JumpingPtr jumps_store;

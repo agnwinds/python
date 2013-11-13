@@ -752,9 +752,8 @@ int
 calloc_jumping (nelem_track, array_track)
      int nelem_track;
      int array_track[MAX_MACRO_TRACKS];
-
 {
-  int n, i, njumps;
+  int n, i, njumps, j;
   
 
   jumps_store =
@@ -804,6 +803,10 @@ calloc_jumping (nelem_track, array_track)
     {
       n = array_track[i];
       jumps_store[i].nplasma = n;
+    for (j = 0; j < nlevels_macro; j++)
+      {
+        jumps_store[i].known[j] =0;
+      }
 
       if ((jumps_store[i].eprbs =
 	   calloc (sizeof (double), size_prbs)) == NULL)

@@ -85,10 +85,11 @@ define_wind ()
   int ierr;
   int n_vol, n_inwind, n_part;
   int n_comp, n_comp_part;
+  
+  int macro_track[MAX_MACRO_TRACKS];
 
   int nwind;
   int nplasma;
-  int n_to_track, matom_track_cells[MAX_MACRO_TRACKS];	// JM 131111 index and array for tracking macro atom probabilities
 
   WindPtr w;
   PlasmaPtr xplasma;
@@ -323,7 +324,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 
 
 /* Now calculate parameters that need to be calculated at the center of the grid cell */
-  n_to_track = 0;
+  n_macro_tracking = 0;
 
   for (n = 0; n < NPLASMA; n++)
     {
@@ -353,19 +354,19 @@ be optional which variables beyond here are moved to structures othere than Wind
       if (geo.rt_mode == 2)
 	{
 
-	  if (nh > MACRO_TRACKING_DENSITY && n_to_track < MAX_MACRO_TRACKS)	// initially I set this density to 1e13
+	  if (nh > MACRO_TRACKING_DENSITY && n_macro_tracking <= MAX_MACRO_TRACKS)	// initially I set this density to 1e13
 	    {
-	    
-	      matom_track_cells[n_to_track] = n;	// add the plasma number to an array
 	      
 	      macromain[n].stored = 1;
 	      
-	      n_to_track++;	// increment the count of cells we are tracking
+	      macro_track[n_macro_tracking] = n;
+	      
+	      n_macro_tracking++;	// increment the count of cells we are tracking
 	      
 	    }
 	    
 	  else if (nh > MACRO_TRACKING_DENSITY
-		   && n_to_track < MAX_MACRO_TRACKS)
+		   && n_macro_tracking > MAX_MACRO_TRACKS)
 	    {
 	      Warning
 		("wind2d macro atom tracking: plasma cell %i has density %8.4e > %8.4e, but already tracking too many macro atoms!\n",
@@ -455,8 +456,8 @@ be optional which variables beyond here are moved to structures othere than Wind
 /* now dynamically allocate space for the number of cells we have decided to track in macro atom mode */
   if (geo.rt_mode == 2)
     {
-      Log("%i macro atoms have nh higher than %8.2e, so tracking MA probabilities\n", n_to_track, MACRO_TRACKING_DENSITY);
-      calloc_jumping (n_to_track, matom_track_cells);
+      Log("%i macro atoms have nh higher than %8.2e, so tracking MA probabilities\n", n_macro_tracking, MACRO_TRACKING_DENSITY);
+      calloc_jumping (n_macro_tracking, macro_track);
     }
 
 

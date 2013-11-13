@@ -91,7 +91,10 @@ History:
 			derivative routiens were not called at all.  Note that at present
 			the macroatom case is quite slow, due to what is happening in
 			matom.  I am suspicious that it could be speeded up a lot.
-        07jul     SS    Experimenting with retaining jumping/emission probabilities to save time.
+    07jul   SS    Experimenting with retaining jumping/emission probabilities to save time.
+    13nov 	JM	  In order to stop CV performance problems related to k->A*->k chains,
+    				  storing probabilities for up to 100 cells in dense regions of the wind.
+    						
 
 ************************************************************/
 
@@ -131,28 +134,64 @@ matom (p, nres, escape)
   check_plasma (xplasma, "matom");
 
   mplasma = &macromain[xplasma->nplasma];
-  
-  
-  for ( n=0; n < MAX_MACRO_TRACKS; n++)
+
+
+  /* if this is one of the macro atoms flagged for storing, then 
+     get storing index and find out if we know the probabilities */
+     
+  if (mplasma->stored == 1)
     {
-      if (jumps_store[n].nplasma == one->nplasma) 
-        store_index = n;
-    } 
-    
-    
-  for (n = 0; n < NLEVELS_MACRO; n++)
-    {
-      if ( macromain[one->nplasma].stored == 1)
-        {
-          if (jumps_store[store_index].known == 1) 
-            prbs_known[n] = 1;		//probs are stored, flag as known
-          else
-            prbs_known[n] = -1;		//flag all as unknown
-        }
-      else  
-        prbs_known[n] = -1;		//flag all as unknown
+        
+      for (n = 0; n < n_macro_tracking; n++)
+	{
+	  if (jumps_store[n].nplasma == one->nplasma)
+	    store_index = n;
+	}	
+
+
+    	/* conduct some checks */
+      if (jumps_store[store_index].nplasma != one->nplasma)
+	{
+	  Error
+	    ("matom.c: Problem nplasma %i does not match stored index %i, Exiting.\n",
+	     one->nplasma, jumps_store[store_index].nplasma);
+	  exit (0);
+	}
+
+      if (store_index > n_macro_tracking)
+	{
+	  Error ("matom.c: store_index %i > ntracking %i, Exiting.\n",
+		 store_index, n_macro_tracking);
+	  exit (0);
+	}
+	
+	
+    /* set probabilities for all levels to known if we know them */
+      for (n = 0; n < nlevels_macro; n++)
+	{
+
+
+	  if (jumps_store[store_index].known == 1)
+	    prbs_known[n] = 1;		//probs are stored, flag as known
+
+	  else
+	    prbs_known[n] = -1;		//we want to store, but haven't calculated yet, flag all as unknown
+
+	}
     }
-    
+
+  
+  /* if this is not one of the macro atoms flagged for storing, then set all prbs to unknown */
+  else
+    {
+      for (n = 0; n < nlevels_macro; n++)
+	{
+	  prbs_known[n] = -1;	//flag all as unknown
+	}
+    }
+
+
+
 
 
   t_e = xplasma->t_e;		//electron temperature 
@@ -190,8 +229,18 @@ matom (p, nres, escape)
       nbbu = config[uplvl].n_bbu_jump;	// number of bb upward jump from this configuration
       nbfd = config[uplvl].n_bfd_jump;	// number of bf downward jumps from this transition
       nbfu = config[uplvl].n_bfu_jump;	// number of bf upward jumps from this transiion
+      
+      
+    if (prbs_known[uplvl] == 1 && macromain[one->nplasma].stored == 1 && jumps_store[store_index].known[uplvl] == 1)
+	{
+	  pjnorm_known[uplvl] = jumps_store[store_index].jprbs_norm[uplvl];
+	  penorm_known[uplvl] = jumps_store[store_index].eprbs_norm[uplvl];
 
-      if (prbs_known[uplvl] != 1)
+	  m = nbbd + nbfd + nbbu + nbfu;
+	}
+	
+
+      else if (prbs_known[uplvl] != 1)
 	{
 	  /* Start by setting everything to 0  */
 
@@ -340,8 +389,7 @@ matom (p, nres, escape)
 					    n] * xplasma->ne *
 		      den_config (xplasma,
 				  cont_ptr->uplev) / den_config (xplasma,
-								 cont_ptr->
-								 nlev)));
+								 cont_ptr->nlev)));
 		  jprbs_known[uplvl][m] = jprbs[m] = 0.0;
 
 		}
@@ -352,32 +400,28 @@ matom (p, nres, escape)
 	  pjnorm_known[uplvl] = pjnorm;
 	  penorm_known[uplvl] = penorm;
 	  prbs_known[uplvl] = 1;
-	  
+
 	  if (macromain[one->nplasma].stored == 1)
 	    {
-          jumps_store[store_index].jprbs_norm[uplvl] = pjnorm_known[uplvl];
-          jumps_store[store_index].eprbs_norm[uplvl] = penorm_known[uplvl];
-          for (n = 0; n < m; n++)
-	      {
-	        jumps_store[store_index].jprbs[uplvl][n] = jprbs_known[uplvl][n];
-	        jumps_store[store_index].eprbs[uplvl][n] = eprbs_known[uplvl][n];
-          }
-        }
-	}
-	
-	else if ( prbs_known[uplvl] == 1 && macromain[one->nplasma].stored == 1 )
-	  {
-	    pjnorm_known[uplvl] = jumps_store[store_index].jprbs_norm[uplvl];
-	    penorm_known[uplvl] = jumps_store[store_index].eprbs_norm[uplvl];
 	    
-	    for (n = 0; n < nbbd + nbfd + nbbu + nbfu; n++)
-	      {
-	        jprbs_known[uplvl][n] = jumps_store[store_index].jprbs[uplvl][n];
-	        eprbs_known[uplvl][n] = jumps_store[store_index].eprbs[uplvl][n];
-          }
-        m = n;
-      }
-      
+	      jumps_store[store_index].jprbs_norm[uplvl] =
+		pjnorm_known[uplvl];
+	      jumps_store[store_index].eprbs_norm[uplvl] =
+		penorm_known[uplvl];
+		
+	      for (n = 0; n < m; n++)
+		{
+		  jumps_store[store_index].jprbs[uplvl][n] =
+		    jprbs_known[uplvl][n];
+		  jumps_store[store_index].eprbs[uplvl][n] =
+		    eprbs_known[uplvl][n];
+		}
+		
+		jumps_store[store_index].known[uplvl] = 1;
+		
+	    }
+	}		// end of if statement if prbs_known == -1
+
       /* Probabilities of jumping (j) and emission (e) are now known. The normalisation factor pnorm has
          also been recorded. the integer m now gives the total number of possibilities too. 
          now select what happens next. Start by choosing the random threshold value at which the
@@ -407,10 +451,22 @@ matom (p, nres, escape)
       n = 0;
       threshold = ((rand () + 0.5) / MAXRAND);
       threshold = threshold * pjnorm_known[uplvl_old];
-      while (run_tot < threshold)
+
+      if (prbs_known[uplvl] == 1 && macromain[one->nplasma].stored == 1)
 	{
-	  run_tot += jprbs_known[uplvl_old][n];
-	  n++;
+	  while (run_tot < threshold)
+	    {
+	      run_tot += jumps_store[store_index].jprbs[uplvl_old][n];
+	      n++;
+	    }
+	}
+      else
+	{
+	  while (run_tot < threshold)
+	    {
+	      run_tot += jprbs_known[uplvl_old][n];
+	      n++;
+	    }
 	}
       // This added to prevent case where theshold is essentially 0. It is already checked that the jumping probability is not zero
       if (n > 0)
@@ -468,11 +524,28 @@ matom (p, nres, escape)
   n = 0;
   threshold = ((rand () + 0.5) / MAXRAND);
   threshold = threshold * penorm_known[uplvl];	//normalise to total emission prob.
-  while (run_tot < threshold)
+
+
+  if (prbs_known[uplvl] == 1 && macromain[one->nplasma].stored == 1)
     {
-      run_tot += eprbs_known[uplvl][n];
-      n++;
+      while (run_tot < threshold)
+	{
+	  run_tot += jumps_store[store_index].eprbs[uplvl][n];
+	  n++;
+	}
     }
+  else
+    {
+      while (run_tot < threshold)
+	{
+	  run_tot += eprbs_known[uplvl][n];
+	  n++;
+	}
+    }
+
+
+
+
   n = n - 1;
   /* n now identifies the jump that occurs - now set nres for the return value. */
   if (n < nbbd)
@@ -1592,9 +1665,9 @@ macro_pops (xplasma, xne)
 		         other direction. */
 
 		      rate =
-			mplasma->
-			alpha_st_old[config[index_lvl].bfu_indx_first +
-				     index_bfu] * xne;
+			mplasma->alpha_st_old[config[index_lvl].
+					      bfu_indx_first +
+					      index_bfu] * xne;
 
 		      rate_matrix[upper][upper] += -1. * rate;
 		      rate_matrix[lower][upper] += rate;
@@ -2123,23 +2196,28 @@ get_matom_f ()
   my_nmax = NPLASMA;
 
 #ifdef MPI_ON
-  num_mpi_cells = floor(NPLASMA/np_mpi_global);  // divide the cells between the threads
-  num_mpi_extra = NPLASMA - (np_mpi_global*num_mpi_cells);  // the remainder from the above division
-  
+  num_mpi_cells = floor (NPLASMA / np_mpi_global);	// divide the cells between the threads
+  num_mpi_extra = NPLASMA - (np_mpi_global * num_mpi_cells);	// the remainder from the above division
+
   /* this next loop splits the cells up between the threads. All threads with 
      rank_global<num_mpi_extra deal with one extra cell to account for the remainder */
   if (rank_global < num_mpi_extra)
     {
-      my_nmin = rank_global*(num_mpi_cells+1);
-      my_nmax = (rank_global+1)*(num_mpi_cells+1);     
+      my_nmin = rank_global * (num_mpi_cells + 1);
+      my_nmax = (rank_global + 1) * (num_mpi_cells + 1);
     }
   else
     {
-      my_nmin = num_mpi_extra*(num_mpi_cells+1) + (rank_global-num_mpi_extra)*(num_mpi_cells);
-      my_nmax = num_mpi_extra*(num_mpi_cells+1) + (rank_global-num_mpi_extra+1)*(num_mpi_cells);
+      my_nmin =
+	num_mpi_extra * (num_mpi_cells + 1) + (rank_global -
+					       num_mpi_extra) *
+	(num_mpi_cells);
+      my_nmax =
+	num_mpi_extra * (num_mpi_cells + 1) + (rank_global - num_mpi_extra +
+					       1) * (num_mpi_cells);
     }
-  ndo = my_nmax-my_nmin;
- 
+  ndo = my_nmax - my_nmin;
+
 
   Log_parallel
     ("Thread %d is calculating macro atom emissivities for macro atoms %d to %d\n",
@@ -2367,7 +2445,7 @@ get_matom_f ()
 
 
   /*This is the end of the update loop that is parallelised. We now need to exchange data between the tasks.
-    This is done much the same way as in wind_update */
+     This is done much the same way as in wind_update */
 #ifdef MPI_ON
   for (n_mpi = 0; n_mpi < np_mpi_global; n_mpi++)
     {
