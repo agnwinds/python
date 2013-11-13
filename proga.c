@@ -310,7 +310,6 @@ This allows one to disregard theta cells which contain the disk in Daniels model
 		{
 		if (i>irmax) 
 			{
-			printf ("%i > %i, so resetting max irmax\n",i,irmax);
 			irmax=i;
 			}
 		if (j>ithetamax) ithetamax=j;
@@ -330,11 +329,11 @@ This allows one to disregard theta cells which contain the disk in Daniels model
 		}
 
     }
-	printf ("PROGA Maximum r cell with data=%i (iproga_r=%i)\n",irmax,iproga_r);
-	printf ("PROGA Maximum theta cell with data=%i (iproga_theta=%i)\n",ithetamax,iproga_theta);
+//	Log ("PROGA Maximum r cell with data=%i (iproga_r=%i)\n",irmax,iproga_r);
+//	Log ("PROGA Maximum theta cell with data=%i (iproga_theta=%i)\n",ithetamax,iproga_theta);
 if (irmax<iproga_r)
 	{
-	printf ("PROGA Maximum r cell with data=%i (iproga_r=%i) - resetting\n",irmax,iproga_r);
+//	Log ("PROGA Maximum r cell with data=%i (iproga_r=%i) - resetting\n",irmax,iproga_r);
 	iproga_r=irmax;
 	}
 if (ithetamax<iproga_theta)
@@ -355,12 +354,10 @@ if (ithetamax<iproga_theta)
 //        proga_ptr[k].v[2]);
   fclose (fptr);
 
-printf ("coordtype=%i\n",geo.coord_type);
  /* We need to reset the grid dimensions to those we have just read in, if we are going to try and match coordinates */
    if (geo.coord_type == RTHETA)
 	{
    NDIM = geo.ndim = iproga_r-IGHOST+3; //We need an inner cell to bridge the star and the indisde of the wind, and an outer cell
-printf ("BLAH geo.ndim = %i iproga_r = %i, IGHOST = %i\n",geo.ndim,iproga_r,IGHOST);
    MDIM = geo.mdim = iproga_theta-IGHOST+2; //We need one outer cell
 	}
 

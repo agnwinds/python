@@ -1097,10 +1097,16 @@ wind_element (w)
   int m, n, i, j, nn, mm;
   int first, last;
   n = 50;
-a:rdint ("Wind.array.element", &n);
+a: printf("There are %i wind elements in this model\n",NDIM2);
+rdint ("Wind.array.element", &n);
 
   if (n < 0)
     goto b;
+  else if (n > NDIM2)
+	{
+	printf("No, there are %i wind elements, not %i\n",NDIM2,n);
+	goto a;
+	}
 
   wind_n_to_ij (n, &i, &j);
   xplasma = &plasmamain[w[n].nplasma];
