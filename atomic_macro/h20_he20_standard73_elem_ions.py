@@ -1,4 +1,4 @@
-# Top level element/ion file for the 20 level H macro atom + all other simple
+# Top level element/ion file for the 20 level H macro atom and He + all other simple
 # ions from standard73.
 #
 # Elemental abundances from Verner, Barthel & Tytler 1994 A&AS, 108,287
@@ -8,13 +8,13 @@
 # Source Verner, Barthel & Tytler 1994 A&AS 108, 287
 Element    1    H   12.00     1.007940
 Element    2   He   10.99     4.002602
-# Element    3   Li    3.31     6.941000
-# Element    4   Be    1.42     9.012182
-# Element    5    B    2.88    10.811000
+#Element    3   Li    3.31     6.941000
+#Element    4   Be    1.42     9.012182
+#Element    5    B    2.88    10.811000
 Element    6    C    8.56    12.011000
 Element    7    N    8.05    14.006740
 Element    8    O    8.93    15.999400
-# Element    9    F    4.48    18.998403
+#Element    9    F    4.48    18.998403
 Element   10   Ne    8.09    20.179700
 Element   11   Na    6.31    22.989768
 Element   12   Mg    7.58    24.305000
@@ -26,14 +26,14 @@ Element   16    S    7.27    32.066000
 Element   18   Ar    6.56    39.948000
 #Element   19    K    5.13    39.098300
 Element   20   Ca    6.34    40.078000
-# Element   21   Sc    3.09    44.955910
-# Element   22   Ti    4.93    47.880000
-# Element   23    V    4.02    50.941500
-# Element   24   Cr    5.68    51.996100
-# Element   25   Mn    5.53    54.938050
+#Element   21   Sc    3.09    44.955910
+#Element   22   Ti    4.93    47.880000
+#Element   23    V    4.02    50.941500
+#Element   24   Cr    5.68    51.996100
+#Element   25   Mn    5.53    54.938050
 Element   26   Fe    7.51    55.847000
 # Element   27   Co    4.91    58.933200
-# Element   28   Ni    6.25    58.690000
+#Element   28   Ni    6.25    58.690000
 # Element   29   Cu    4.27    63.546000
 # Element   30   Zn    4.65    65.390000
 # Element   31   Ga    3.13    69.723000
@@ -98,12 +98,12 @@ Element   26   Fe    7.51    55.847000
 
 
 IonM    H   1   1   2   13.59900   20  20     1s(2S_{1/2})
-IonM    H   1   2   1 1.0000e+20    1   1     Bare
+IonM    H   1   2   2 1.0000e+20    1   1     Bare
  
-IonV   He   2   1   1   24.58800 1000   5     1s^2(1S_0) 
-IonV   He   2   2   2   54.41800 1000   5     1s(2S_{1/2}) 
-IonV   He   2   3   1 1.0000e+20   0   0     Bare 
-
+IonM   He   2   1   1   24.58800   11  11     1s^2(1S_0) 
+IonM   He   2   2   2   54.41800   10  10     1s(2S_{1/2}) 
+IonM   He   2   3   1 1.0000e+20   1   1      Bare 
+ 
 IonV   Li   3   1   2    5.39200 1000   0     1s^22s(2S_{1/2}) 
 IonV   Li   3   2   1   75.64100 1000   0     1s^2(1S_0) 
 IonV   Li   3   3   2  122.45500 1000   0     1s(2S_{1/2}) 
