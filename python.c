@@ -1807,10 +1807,7 @@ run -- 07jul -- ksl
       /* End of the subcycle loop */
       /* At this point we should communicate all the useful infomation that has been accummulated on differenet MPI tasks */
 
-for (i=0;i<NXBANDS;i++) 
-	{
-	Log ("Band %i before runs from %e to %e\n",i,plasmamain[11].fmin[i],plasmamain[11].fmax[i]);
-	}
+
 
 
 #ifdef MPI_ON
@@ -1945,10 +1942,7 @@ for (i=0;i<NXBANDS;i++)
 
 #endif
 
-for (i=0;i<NXBANDS;i++) 
-	{
-	Log ("Band %i after runs from %e to %e\n",i,plasmamain[11].fmin[i],plasmamain[11].fmax[i]);
-	}
+
 
 #if DEBUG
       ispy_close ();

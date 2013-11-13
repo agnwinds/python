@@ -115,7 +115,11 @@ kappa_ind_comp (xplasma, freq)
 	{
 	  if (geo.xfreq[i] < freq && freq <= geo.xfreq[i + 1])	//We have found the correct model band
 	    {
-
+	      if (freq < xplasma->fmin[i] || freq > xplasma->fmax[i]) //The spectral model is not defined for the frequency in question
+		{
+		Warning ("kappa_ind_comp: frequency of photon is outside frequency range of spectral model in cell %i band %i\n",xplasma->nplasma,i);
+		return(0.0);
+		}
 	      if (xplasma->spec_mod_type[i] < 0)	//Only bother if we have a model in this band
 		{
 		  J = 0.0;	//THere is no modelin this band, so the best we can do is assume zero J
@@ -162,7 +166,7 @@ kappa_ind_comp (xplasma, freq)
   x *= sigma * J;		// NSH 130214 factor of THOMPSON removed, since alpha is now the actual compton cross section
   x *= 1 / (2 * freq * freq);
 
-  if (sane_check (x))
+  if (sane_check (x)) //For some reason we have a problem
     {
       Error
 	("kappa_ind_comp:sane_check - undefined value for Kappa_ind_comp - setting to zero\n");

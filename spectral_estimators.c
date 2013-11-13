@@ -79,7 +79,7 @@ spectral_estimators (xplasma)
   double exp_temp_temp, exp_w_temp;	/*120817 the temporary values for temperature and weight of the exponential model */
   int n,n1;
   double pl_sd, exp_sd;		/*120817 Computed standard deviations for two models for comparison with true value */
-  double ALPHAMAX = 200.0;	/*120817 Something to make it a bit more obvious as to what values of the powerlaw exponent we consider reasonable */
+//  double ALPHAMAX = 200.0;	/*120817 Something to make it a bit more obvious as to what values of the powerlaw exponent we consider reasonable */
   int plflag, expflag;		/*120817 Two flags to say if we have a reasonable PL or EXP model, set to 1 initially, -1 means there has been some failure that means we must not use this model, +1 means it is OK */
   double genmin,genmax;
   double dfreq; /* NSH 130711 - a number to help work out if we have fully filled a band */
@@ -275,10 +275,9 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	    {
 	      if ((H * spec_numax) < (100.0 * BOLTZMANN * exp_temp_min * 0.9)) /*In this case we are going to get errors since the temperature is too to give a result in the exponential, and we will divide by zero */
 		{
-		printf("%e < %e so reducing T to %e\n",H*spec_numax,100.0 * BOLTZMANN * exp_temp_min * 0.9,exp_temp_min * 0.9); 
-		exp_temp_min = exp_temp_min * 0.9;
+		exp_temp_min = exp_temp_min * 0.9; //Reduce the mininmum temperature, only if we will not end up with problems 
 		}
-	      exp_temp_max = exp_temp_max * 1.1;
+	      	exp_temp_max = exp_temp_max * 1.1; //The maximum temperature can go up forever with no fear of numerical problems
 	    }
 	  if (finite(exp_temp_func (exp_temp_min))==0
 	      || finite(exp_temp_func (exp_temp_max))==0)
@@ -325,11 +324,11 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 
 	  exp_sd = exp_stddev (xplasma->exp_temp[n], spec_numin, spec_numax);
 	  pl_sd = pl_log_stddev (xplasma->pl_alpha[n], lspec_numin, lspec_numax);
-	  Log
+	  Log_silent
 	    ("NSH in this cell %i band %i PL estimators are log(w)=%10.2e, alpha=%5.3f giving sd=%e compared to %e\n",
 	     xplasma->nplasma, n, xplasma->pl_log_w[n], xplasma->pl_alpha[n], pl_sd,
 	     xplasma->xsd_freq[n]);
-	  Log
+	  Log_silent
 	    ("NSH in this cell %i band %i exp estimators are w=%10.2e, temp=%10.2e giving sd=%e compared to %e\n",
 	     xplasma->nplasma, n, xplasma->exp_w[n], xplasma->exp_temp[n], exp_sd,
 	     xplasma->xsd_freq[n]);
@@ -359,7 +358,7 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	      Warning ("No suitable model in band %i cell %i (nphot=%i fmin=%e fmax=%e)\n", n,
 		     xplasma->nplasma,xplasma->nxtot[n],xplasma->fmin[n],xplasma->fmax[n]);
 	    }
-	  Log ("NSH In cell %i, band %i, the best model is %i\n",
+	  Log_silent ("NSH In cell %i, band %i, the best model is %i\n",
 		      xplasma->nplasma, n, xplasma->spec_mod_type[n]);
 	}			//End of loop that does things if there are more than zero photons in the band.
     }				//End of loop over bands 
