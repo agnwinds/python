@@ -888,8 +888,6 @@ wind_rad_init ()
 	  plasmamain[n].xsd_freq[i] = 0.0;	/* NSH 120815 Zero the standard deviation counter */
           plasmamain[n].fmin[i] = geo.xfreq[i+1]; /* Set the minium frequency to the max frequency in the band */
           plasmamain[n].fmax[i] = geo.xfreq[i]; /* Set the maximum frequency to the min frequency in the band */
-          plasmamain[n].fmin_mod[i] = geo.xfreq[i+1]; /* Set the minium model frequency to the max frequency in the band */
-          plasmamain[n].fmax_mod[i] = geo.xfreq[i]; /* Set the maximum model frequency to the min frequency in the band */
 	}
 
 

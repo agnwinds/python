@@ -137,7 +137,7 @@ kappa_ind_comp (xplasma, freq)
 			}
 		else /*We have a spectral model, but it doesnt apply to the frequency in question. clearly this is a slightly odd situation, where last time we didnt get a photon of this frequency, but this time we did. Still this should only happen in very sparse cells, so induced compton is unlikely to be important in such cells. We generate a warning, just so we can see if this is happening a lot*/
 			{
-			Warning ("kappa_ind_comp: frequency of photon is outside frequency range of spectral model in cell %i band %i\n",xplasma->nplasma,i); //This is unlikely to happen very often, but if it does, we should probably know about it
+			Warning ("kappa_ind_comp: frequency of photon (%e) is outside frequency range (%e - %e) of spectral model in cell %i band %i\n",freq,xplasma->fmin_mod[i],xplasma->fmax_mod[i],xplasma->nplasma,i); //This is unlikely to happen very often, but if it does, we should probably know about it
 			J = 0.0; //We 
 			}
 		}
