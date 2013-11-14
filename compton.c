@@ -111,6 +111,8 @@ kappa_ind_comp (xplasma, freq)
 
   if (geo.ioniz_mode == 5 || geo.ioniz_mode == 7)	/*If we are using power law ionization, use PL estimators */
     {
+      if (geo.wcycle > 0) /* there is only any point in worrying if we have had at least one cycle otherwise there is no model */
+      {
       for (i = 0; i < geo.nxfreq; i++)
 	{
 	  if (geo.xfreq[i] < freq && freq <= geo.xfreq[i + 1])	//We have found the correct model band
@@ -150,6 +152,11 @@ kappa_ind_comp (xplasma, freq)
 	    }
 	}
     }
+	else //We have not completed an ionization cycle, so no chance of a model
+	{
+	J=0.0;
+	}
+}
 
   else				/*Else, use BB estimator of J */
     {
