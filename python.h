@@ -832,7 +832,7 @@ phot.istat below */
 #define MACRO_TRACKING_DENSITY 1e13	
 #define MAX_MACRO_TRACKS 100
 int n_macro_tracking;
-
+int countit;
 /* jumps_store is the structure which stores macro atom probabilities
    for macro atoms in dense regions of the wind. These arrays
    are dynamically allocated in calloc_jumping. It is indexed
@@ -850,6 +850,19 @@ typedef struct jumping_store
 } jumping_dummy, *JumpingPtr;  
 
 JumpingPtr jumps_store;
+
+typedef struct last
+{
+  double (*jprbs) [ 2 * (NBBJUMPS + NBFJUMPS)];		// array of jumping probabilities
+  double (*eprbs) [ 2 * (NBBJUMPS + NBFJUMPS)];		// array of emission probabilities
+  double *jprbs_norm;	// array of jumping normalisation
+  double *eprbs_norm;	// array of emission normalisation
+  int nplasma;
+  int known[NLEVELS_MACRO];
+} last_dummy, *LastMatomPtr;
+
+
+LastMatomPtr last_matom;
 
 
 

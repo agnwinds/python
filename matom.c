@@ -50,6 +50,19 @@ make it easier to add new processes, I suspect.
 It would be possible to convert the for loop to a while statement.  This would avoid the
 break statement in the middle.  
 
+JM -- A quick note on the probability storing here, as it's a little hard to follow.
+Stuart had already implemented a technique where we store probabilities as long as the macro atom
+remains activated. This means that if you go 4->3->4 for example, you don't have to recalculate 
+the probabilities. 
+
+My new lines of code (1311) are designed to solve a different problem, where
+we were getting performance problems in dense regions of the wind in CV models
+(bug report #54). This is due to k->A*->k chains in these regions, and there are two possible
+approaches-- 1) store probabilities for dense cells, which are stored through the entire 
+ionization cycle, and 2) store probabilities from the last macro atom, as a k-packet
+cannot change cell without an intermediate r-packet. The first of these is implemented but
+not fully tested.
+
 History:
           Feb 04  SS   Coding began.
           Mar 04  SS   Minor changes made (based on comments from ksl)
@@ -128,15 +141,40 @@ matom (p, nres, escape)
 
 
 
-
   one = &wmain[p->grid];	//This is to identify the grid cell in which we are
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "matom");
 
+
   mplasma = &macromain[xplasma->nplasma];
 
+  t_e = xplasma->t_e;		//electron temperature 
+  ne = xplasma->ne;		//electron number density
 
-  /* if this is one of the macro atoms flagged for storing, then 
+
+  /* The first step is to identify the configuration that has been excited. */
+
+
+  if (*nres < NLINES)		//this means that it was a line excitation CHECK
+    {
+      uplvl = lin_ptr[*nres]->nconfigu;
+
+    }
+  else if (*nres > NLINES)	//this means it was photoionisation
+    {
+      uplvl = phot_top[*nres - NLINES - 1].uplev;
+    }
+  else
+    {
+      Error ("matom: upper level not identified. nres = %d\n", *nres);
+      exit (0);
+    }
+
+
+
+
+
+  /* JM 1311 -- if this is one of the macro atoms flagged for storing, then 
      get storing index and find out if we know the probabilities */
      
   if (mplasma->stored == 1)
@@ -171,7 +209,7 @@ matom (p, nres, escape)
 	{
 
 
-	  if (jumps_store[store_index].known == 1)
+	  if (jumps_store[store_index].known[n] == 1)
 	    prbs_known[n] = 1;		//probs are stored, flag as known
 
 	  else
@@ -179,14 +217,24 @@ matom (p, nres, escape)
 
 	}
     }
-
-  
-  /* if this is not one of the macro atoms flagged for storing, then set all prbs to unknown */
+    
+  /* if this is not one of the macro atoms flagged for storing, but was the last matom, 
+     then find out which prbs were worked out before */
+  else if (last_matom->nplasma == one->nplasma)
+    {
+      for (n = 0; n < nlevels_macro; n++)
+	{
+	  prbs_known[n] = last_matom->known[n];				//flag all as known or unknown
+	}
+	}
+	
+  /* if this is not one of the macro atoms flagged for storing or the last one, then set all prbs to unknown */
   else
     {
       for (n = 0; n < nlevels_macro; n++)
 	{
-	  prbs_known[n] = -1;	//flag all as unknown
+	  prbs_known[n] = -1;				//flag all as unknown
+	  last_matom->known[n] = -1; 		//flag all last as unknown
 	}
     }
 
@@ -194,27 +242,6 @@ matom (p, nres, escape)
 
 
 
-  t_e = xplasma->t_e;		//electron temperature 
-  ne = xplasma->ne;		//electron number density
-
-
-  /* The first step is to identify the configuration that has been excited. */
-
-
-  if (*nres < NLINES)		//this means that it was a line excitation CHECK
-    {
-      uplvl = lin_ptr[*nres]->nconfigu;
-
-    }
-  else if (*nres > NLINES)	//this means it was photoionisation
-    {
-      uplvl = phot_top[*nres - NLINES - 1].uplev;
-    }
-  else
-    {
-      Error ("matom: upper level not identified. nres = %d\n", *nres);
-      exit (0);
-    }
 
   /* Now follows the main loop to govern the macro atom jumps. Keeps jumping until
      an emission occurs (at which point it breaks). */
@@ -231,19 +258,27 @@ matom (p, nres, escape)
       nbfu = config[uplvl].n_bfu_jump;	// number of bf upward jumps from this transiion
       
       
-    if (prbs_known[uplvl] == 1 && macromain[one->nplasma].stored == 1 && jumps_store[store_index].known[uplvl] == 1)
+    if (prbs_known[uplvl] == 1 && mplasma->stored == 1 && jumps_store[store_index].known[uplvl] == 1)
 	{
 	  pjnorm_known[uplvl] = jumps_store[store_index].jprbs_norm[uplvl];
 	  penorm_known[uplvl] = jumps_store[store_index].eprbs_norm[uplvl];
-
+      Log("First, mplasma->stored %i lastknown %i jstoreknown %i np %i nplasma %i njumps %i, uplvl %i, uplvl_old %i\n",  
+           mplasma->stored, last_matom->known[uplvl], store_index, p->np, one->nplasma, njumps, uplvl, uplvl_old);
 	  m = nbbd + nbfd + nbbu + nbfu;
 	}
 	
+	else if (prbs_known[uplvl] == 1 && last_matom->nplasma == one->nplasma && last_matom->known[uplvl] == 1)
+	{
+	  pjnorm_known[uplvl] = last_matom->jprbs_norm[uplvl];
+	  penorm_known[uplvl] = last_matom->eprbs_norm[uplvl];
+	  Log("Second\n");
+	}
 
-      else if (prbs_known[uplvl] != 1)
+    else if (prbs_known[uplvl] != 1)
 	{
 	  /* Start by setting everything to 0  */
-
+      Log("Third, mplasma->stored %i lastknown %i jstoreknown %i np %i nplasma %i njumps %i, uplvl %i, uplvl_old %i\n", 
+           mplasma->stored, last_matom->known[uplvl], store_index, p->np, one->nplasma, njumps, uplvl, uplvl_old);
 	  m = 0;		//m counts the total number of possible ways to leave the level
 	  pjnorm = 0.0;		//stores the total jump probability
 	  penorm = 0.0;		//stores the total emission probability
@@ -401,9 +436,13 @@ matom (p, nres, escape)
 	  penorm_known[uplvl] = penorm;
 	  prbs_known[uplvl] = 1;
 
-	  if (macromain[one->nplasma].stored == 1)
+
+      /* JM 1311 -- loop added to store probabilities in dense cells */
+	  if (mplasma->stored == 1)
 	    {
-	    
+	    /* check if this is one of the high density cells we want to track.
+	       If it is, then store the probabilities and normalisations for this
+	       level (uplvl) */
 	      jumps_store[store_index].jprbs_norm[uplvl] =
 		pjnorm_known[uplvl];
 	      jumps_store[store_index].eprbs_norm[uplvl] =
@@ -417,10 +456,30 @@ matom (p, nres, escape)
 		    eprbs_known[uplvl][n];
 		}
 		
+		/* set the flag for this level and cell to known */
 		jumps_store[store_index].known[uplvl] = 1;
 		
 	    }
+	    
+      /* store probabilities in case we activate this macro atom again */
+	  last_matom->jprbs_norm[uplvl] =
+		pjnorm_known[uplvl];
+	  last_matom->eprbs_norm[uplvl] =
+		penorm_known[uplvl];
+		
+	  for (n = 0; n < m; n++)
+		{
+		  last_matom->jprbs[uplvl][n] =
+		    jprbs_known[uplvl][n];
+		  last_matom->eprbs[uplvl][n] =
+		    eprbs_known[uplvl][n];
+		}
+		
+		last_matom->known[uplvl] = 1;
+	    
 	}		// end of if statement if prbs_known == -1
+	
+	
 
       /* Probabilities of jumping (j) and emission (e) are now known. The normalisation factor pnorm has
          also been recorded. the integer m now gives the total number of possibilities too. 
@@ -452,7 +511,9 @@ matom (p, nres, escape)
       threshold = ((rand () + 0.5) / MAXRAND);
       threshold = threshold * pjnorm_known[uplvl_old];
 
-      if (prbs_known[uplvl] == 1 && macromain[one->nplasma].stored == 1)
+
+    /* JM 1311 -- check if this cell probability is known and stored */     
+    if (prbs_known[uplvl_old] == 1 && mplasma->stored == 1)
 	{
 	  while (run_tot < threshold)
 	    {
@@ -460,6 +521,16 @@ matom (p, nres, escape)
 	      n++;
 	    }
 	}
+	
+	else if (prbs_known[uplvl_old] == 1 && last_matom->nplasma == one->nplasma && last_matom->known[uplvl_old] == 1)
+    {
+      while (run_tot < threshold)
+	{
+	  run_tot += last_matom->jprbs[uplvl_old][n];
+	  n++;
+	}
+    }
+    
       else
 	{
 	  while (run_tot < threshold)
@@ -526,11 +597,21 @@ matom (p, nres, escape)
   threshold = threshold * penorm_known[uplvl];	//normalise to total emission prob.
 
 
-  if (prbs_known[uplvl] == 1 && macromain[one->nplasma].stored == 1)
+
+  /* JM 1311 -- check if this cell probability is known and stored */
+  if (prbs_known[uplvl] == 1 && mplasma->stored == 1)
     {
       while (run_tot < threshold)
 	{
 	  run_tot += jumps_store[store_index].eprbs[uplvl][n];
+	  n++;
+	}
+    }
+  else if (prbs_known[uplvl] == 1 && last_matom->nplasma == one->nplasma && last_matom->known[uplvl] == 1)
+    {
+      while (run_tot < threshold)
+	{
+	  run_tot += last_matom->eprbs[uplvl][n];
 	  n++;
 	}
     }

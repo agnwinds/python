@@ -758,7 +758,11 @@ calloc_jumping (nelem_track, array_track)
 
   jumps_store =
     (JumpingPtr) calloc (sizeof (jumping_dummy), (nelem_track + 1));
-
+    
+  last_matom = 
+    (LastMatomPtr) calloc (sizeof (last_dummy), (2));
+    
+    
   for (n = 0; n < nlevels_macro; n++)
     {
       Log
@@ -795,6 +799,7 @@ calloc_jumping (nelem_track, array_track)
   size_norm = nlevels_macro;
   size_prbs = nlevels_macro;
   size_track = nelem_track;
+  countit=0;
 
 
 
@@ -843,7 +848,6 @@ calloc_jumping (nelem_track, array_track)
     }
 
 
-
   if (nlevels_macro > 0 || geo.nmacro > 0)
     {
       Log_silent
@@ -858,6 +862,51 @@ calloc_jumping (nelem_track, array_track)
 
 
 
+    if ((last_matom->eprbs =
+	   calloc (sizeof (double), size_prbs)) == NULL)
+	{
+	  Error
+	    ("calloc_jumping: Error in allocating memory for last_matom structure\n");
+	  exit (0);
+	}
+
+      if ((last_matom->jprbs =
+	   calloc (sizeof (double), size_prbs)) == NULL)
+	{
+	  Error
+	    ("calloc_jumping: Error in allocating memory for last_matom structure\n");
+	  exit (0);
+	}
+
+      if ((last_matom->eprbs_norm =
+	   calloc (sizeof (double), size_norm)) == NULL)
+	{
+	  Error
+	    ("calloc_jumping: Error in allocating memory for last_matom structure\n");
+	  exit (0);
+	}
+
+      if ((last_matom->jprbs_norm =
+	   calloc (sizeof (double), size_norm)) == NULL)
+	{
+	  Error
+	    ("calloc_jumping: Error in allocating memory for last_matom structure\n");
+	  exit (0);
+	}
+	
+	last_matom->nplasma = -999;
+	
+	for (j = 0; j < nlevels_macro; j++)
+      {
+        last_matom->known[j] =0;
+      }
+
+    if (nlevels_macro > 0 || geo.nmacro > 0)
+    {
+      Log_silent
+	("Allocated %10.1f Mb for MA jumping probs \n",
+	 1.e-6 * (1) * (2. * size_prbs + 2. * size_norm) * sizeof (double));
+    }
 
   return (0);
 }
