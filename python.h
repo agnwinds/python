@@ -622,8 +622,10 @@ typedef struct plasma
   double j, ave_freq, lum;	/*Respectively mean intensity, intensity_averaged frequency, 
 				   luminosity and absorbed luminosity of shell */
   double xj[NXBANDS], xave_freq[NXBANDS];	/* 1108 NSH frequency limited versions of j and ave_freq */
-  double fmin[NXBANDS];	/* the minimum freqneucy photon seen in a band */
-  double fmax[NXBANDS];	/* the maximum frequency photon seen in a band */
+  double fmin[NXBANDS];	/* the minimum freqneucy photon seen in a band - this is incremented during photon flight */
+  double fmax[NXBANDS];	/* the maximum frequency photon seen in a band - this is incremented during photon flight */
+  double fmin_mod[NXBANDS];	/* the minimum freqneucy that the model should be applied for */
+  double fmax_mod[NXBANDS];	/* the maximum frequency that the model should be applied for */
 
 
 

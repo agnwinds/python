@@ -171,8 +171,7 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	  dfreq = (geo.xfreq[n+1] - geo.xfreq[n])  / sqrt(xplasma->nxtot[n]); //This is a measure of the spacing between photons on average
 	  if ((xplasma->fmin[n] - geo.xfreq[n]) < dfreq)
 		{
-		Log_silent("Resetting lower band limit to %e in band %d cell %d coz %e < %e\n",geo.xfreq[n],n,xplasma->nplasma,(xplasma->fmin[n] - geo.xfreq[n]) ,dfreq);
-		spec_numin = xplasma->fmin[n] = geo.xfreq[n];
+		spec_numin = geo.xfreq[n];
 		}
 	  else
 		{		
@@ -180,13 +179,14 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 		}
 	  if ((geo.xfreq[n+1] - xplasma->fmax[n]) < dfreq)
 		{
-		Log_silent("Resetting upper band limit to %e in band %d cell %d coz %e < %e\n",geo.xfreq[n+1],n,xplasma->nplasma,(geo.xfreq[n+1] - xplasma->fmax[n]) , dfreq);
-		spec_numax = xplasma->fmax[n] = geo.xfreq[n+1];
+		spec_numax = geo.xfreq[n+1];
 		}
 	  else
 		{		
 		spec_numax = xplasma->fmax[n];
 		}
+	  xplasma->fmin_mod[n]=spec_numin; //This is the low frequency limit of any model we might make
+	  xplasma->fmax_mod[n]=spec_numax; //This is the high frequency limit of any model we might make
 	  lspec_numax = log10(spec_numax);	  
 	  lspec_numin = log10(spec_numin);
 	  spec_numean = xplasma->xave_freq[n];
@@ -357,6 +357,8 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	      xplasma->spec_mod_type[n] = -1;	//Oh dear, there is no suitable model - this should be an error
 	      Warning ("No suitable model in band %i cell %i (nphot=%i fmin=%e fmax=%e)\n", n,
 		     xplasma->nplasma,xplasma->nxtot[n],xplasma->fmin[n],xplasma->fmax[n]);
+	  xplasma->fmin_mod[n]=spec_numax; //We will set the applicable frequency bands for the model to values that will cause errors if the model is used
+	  xplasma->fmax_mod[n]=spec_numin; 
 	    }
 	  Log_silent ("NSH In cell %i, band %i, the best model is %i\n",
 		      xplasma->nplasma, n, xplasma->spec_mod_type[n]);

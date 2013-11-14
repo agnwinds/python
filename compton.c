@@ -115,37 +115,38 @@ kappa_ind_comp (xplasma, freq)
 	{
 	  if (geo.xfreq[i] < freq && freq <= geo.xfreq[i + 1])	//We have found the correct model band
 	    {
-	      if (freq < xplasma->fmin[i] || freq > xplasma->fmax[i]) //The spectral model is not defined for the frequency in question
+	      if (xplasma->spec_mod_type[i] > 0)	//Only bother if we have a model in this band
 		{
-		Warning ("kappa_ind_comp: frequency of photon is outside frequency range of spectral model in cell %i band %i\n",xplasma->nplasma,i);
-		return(0.0);
+	        if (freq > xplasma->fmin_mod[i] && freq < xplasma->fmax_mod[i]) //The spectral model is defined for the frequency in question
+			{
+			if (xplasma->spec_mod_type[i] == SPEC_MOD_PL)	//Power law model
+				{				
+				J = pow(10,(xplasma->pl_log_w[i]+log10(freq)*xplasma->pl_alpha[i]));
+				}
+			else if (xplasma->spec_mod_type[i] == SPEC_MOD_EXP)	//Exponential model
+				{
+		  		J = xplasma->exp_w[i] * exp ((-1 * H * freq) / (BOLTZMANN * xplasma->exp_temp[i]));
+				}
+			else
+				{
+		  		Error("kappa_ind_comp - unknown spectral model (%i) in band %i\n",xplasma->spec_mod_type[i], i);
+		  		J = 0.0;	//Something has gone wrong
+				}
+			}
+		else /*We have a spectral model, but it doesnt apply to the frequency in question. clearly this is a slightly odd situation, where last time we didnt get a photon of this frequency, but this time we did. Still this should only happen in very sparse cells, so induced compton is unlikely to be important in such cells. We generate a warning, just so we can see if this is happening a lot*/
+			{
+			Warning ("kappa_ind_comp: frequency of photon is outside frequency range of spectral model in cell %i band %i\n",xplasma->nplasma,i); //This is unlikely to happen very often, but if it does, we should probably know about it
+			J = 0.0; //We 
+			}
 		}
-	      if (xplasma->spec_mod_type[i] < 0)	//Only bother if we have a model in this band
-		{
-		  J = 0.0;	//THere is no modelin this band, so the best we can do is assume zero J
+	     else /* There is no model in this band - this should not happen very often  */
+		{	
+		J = 0.0;	//THere is no modelin this band, so the best we can do is assume zero J
+		Warning ("kappa_ind_comp: no model exists in cell %i band %i\n",xplasma->nplasma,i); //This is unlikely to happen very often, but if it does, we should probably know about it
 		}
 
-	      else if (xplasma->spec_mod_type[i] == SPEC_MOD_PL)	//Power law model
-		{
-//		  J = xplasma->pl_w[i] * pow (freq, xplasma->pl_alpha[i]);
-		  J = pow(10,(xplasma->pl_log_w[i]+log10(freq)*xplasma->pl_alpha[i]));
-//		Log ("KAPPA IND COMP J=%e from logw_%e, alpha=%e\n",J,xplasma->pl_log_w[i],xplasma->pl_alpha[i]);
-		}
 
-	      else if (xplasma->spec_mod_type[i] == SPEC_MOD_EXP)	//Exponential model
-		{
-		  J =
-		    xplasma->exp_w[i] * exp ((-1 * H * freq) /
-					     (BOLTZMANN *
-					      xplasma->exp_temp[i]));
-		}
-	      else
-		{
-		  Error
-		    ("kappa_ind_comp - unknown spectral model (%i) in band %i\n",
-		     xplasma->spec_mod_type[i], i);
-		  J = 0.0;	//Something has gone wrong
-		}
+
 	    }
 	}
     }

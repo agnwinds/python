@@ -109,7 +109,7 @@ WindPtr (w);
   int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
   int size_of_commbuffer;
   char *commbuffer;
-  size_of_commbuffer = 8 * (12*NIONS + NLTE_LEVELS + 2*NTOP_PHOT + 10*NXBANDS + 2*LPDF + NAUGER + 102)*(floor(NPLASMA/np_mpi_global)+1);
+  size_of_commbuffer = 8 * (12*NIONS + NLTE_LEVELS + 2*NTOP_PHOT + 12*NXBANDS + 2*LPDF + NAUGER + 102)*(floor(NPLASMA/np_mpi_global)+1);
       
   commbuffer = (char *) malloc(size_of_commbuffer*sizeof(char));
       
@@ -404,6 +404,8 @@ WindPtr (w);
 	      MPI_Pack(plasmamain[n].pl_log_w, NXBANDS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(plasmamain[n].exp_temp, NXBANDS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(plasmamain[n].exp_w, NXBANDS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+	      MPI_Pack(plasmamain[n].fmin_mod, NXBANDS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+	      MPI_Pack(plasmamain[n].fmax_mod, NXBANDS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].sim_ip, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].ferland_ip, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].ip, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -529,6 +531,8 @@ WindPtr (w);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, plasmamain[n].pl_log_w, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, plasmamain[n].exp_temp, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, plasmamain[n].exp_w, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
+	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, plasmamain[n].fmin_mod, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
+	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, plasmamain[n].fmax_mod, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].sim_ip, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].ferland_ip, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].ip, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -883,7 +887,9 @@ wind_rad_init ()
 	    plasmamain[n].nxtot[i] = 0;
 	  plasmamain[n].xsd_freq[i] = 0.0;	/* NSH 120815 Zero the standard deviation counter */
           plasmamain[n].fmin[i] = geo.xfreq[i+1]; /* Set the minium frequency to the max frequency in the band */
-          plasmamain[n].fmax[i] = geo.xfreq[i]; /* Set the minium frequency to the max frequency in the band */
+          plasmamain[n].fmax[i] = geo.xfreq[i]; /* Set the maximum frequency to the min frequency in the band */
+          plasmamain[n].fmin_mod[i] = geo.xfreq[i+1]; /* Set the minium model frequency to the max frequency in the band */
+          plasmamain[n].fmax_mod[i] = geo.xfreq[i]; /* Set the maximum model frequency to the min frequency in the band */
 	}
 
 
