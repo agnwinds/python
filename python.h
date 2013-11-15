@@ -2,6 +2,7 @@
 #include "mpi.h"
 #endif 
 
+int count;
 int np_mpi_global;               /// Global variable which holds the number of MPI processes
 int rank_global; 
 
@@ -776,6 +777,7 @@ typedef struct macro
   double cooling_normalisation;
   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
   double cooling_ff;
+  int stored;
 
 } macro_dummy, *MacroPtr;
 
@@ -784,6 +786,7 @@ MacroPtr macromain;
 int xxxpdfwind;			// When 1, line luminosity calculates pdf
 
 int size_Jbar_est, size_gamma_est, size_alpha_est;
+int size_prbs, size_norm, size_track;
 
 // These definitions define a photon type, generally it's origin
 #define PTYPE_STAR	    0
@@ -822,6 +825,40 @@ phot.istat below */
 #define FRACTIONAL_ERROR 0.03	//The change in n_e which causes a break out of the loop for ne
 #define THETAMAX	 1e4	//Used in initial calculation of n_e
 #define MIN_TEMP	100.	//  ??? this is another minimum temperature - it is used as the minimum tempersture in
+
+/* MACRO_TRACKING_DENSITY isthe minumum density above which we keep track 
+   of probabilities for a given macro atom. This is in order to prevent k->A*->k
+   chains causing performance problems.
+   MAX_MACRO_TRACKS is the maximum number of cells to track */
+#define MACRO_TRACKING_DENSITY 1e13	
+#define MAX_MACRO_TRACKS 100
+int n_macro_tracking;
+int countit;
+/* jumps_store is the structure which stores macro atom probabilities
+   for macro atoms in dense regions of the wind. These arrays
+   are dynamically allocated in calloc_jumping. It is indexed
+   by cell, element, initial level, final level, in that order
+   e.g. jump_store[nplasma][nelem].jprbs[uplvl][i]  */
+   
+typedef struct jumping_store
+{
+  /* jumping arrays are arrays containing pointers to 2nd dimension of the array */
+  double (*jprbs) [ 2 * (NBBJUMPS + NBFJUMPS)];		// array of jumping probabilities
+  double (*eprbs) [ 2 * (NBBJUMPS + NBFJUMPS)];		// array of emission probabilities
+  double *jprbs_norm;	// array of jumping normalisation
+  double *eprbs_norm;	// array of emission normalisation
+  int nplasma;
+  int known[NLEVELS_MACRO];
+} jumping_dummy, *JumpingPtr;  
+
+JumpingPtr jumps_store;
+
+/* last_matom is similar to jumping store, but will only store 
+   for the last macro atom we were in */
+JumpingPtr last_matom;
+
+
+
 
 
 #define NDIM_MAX 500

@@ -85,6 +85,8 @@ define_wind ()
   int ierr;
   int n_vol, n_inwind, n_part;
   int n_comp, n_comp_part;
+  
+  int macro_track[MAX_MACRO_TRACKS];
 
   int nwind;
   int nplasma;
@@ -128,13 +130,13 @@ define_wind ()
     }
   else if (geo.coord_type == RTHETA)
     {
-      if (geo.wind_type == 3) //13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates
-      	{
-	rtheta_make_zeus_grid (w);
-      	}
+      if (geo.wind_type == 3)	//13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates
+	{
+	  rtheta_make_zeus_grid (w);
+	}
       else
 	{
-        rtheta_make_grid (w);
+	  rtheta_make_grid (w);
 	}
     }
   else if (geo.coord_type == CYLVAR)
@@ -187,13 +189,13 @@ recreated when a windfile is read into the program
     }
   else if (geo.coord_type == RTHETA)
     {
-      if (geo.wind_type == 3) //13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates We dont need to work out if cells are in the wind, they are known to be in the wind.
-      	{
-	rtheta_zeus_volumes (w);
-      	}
+      if (geo.wind_type == 3)	//13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates We dont need to work out if cells are in the wind, they are known to be in the wind.
+	{
+	  rtheta_zeus_volumes (w);
+	}
       else
 	{
-        rtheta_volumes (w, W_ALL_INWIND);
+	  rtheta_volumes (w, W_ALL_INWIND);
 	}
     }
   else if (geo.coord_type == CYLVAR)
@@ -322,11 +324,11 @@ be optional which variables beyond here are moved to structures othere than Wind
 
 
 /* Now calculate parameters that need to be calculated at the center of the grid cell */
-
+  n_macro_tracking = 0;
 
   for (n = 0; n < NPLASMA; n++)
     {
-	
+
       nwind = plasmamain[n].nwind;
       stuff_v (w[nwind].xcen, x);
       plasmamain[n].rho = model_rho (x);
@@ -346,10 +348,44 @@ be optional which variables beyond here are moved to structures othere than Wind
 
       nh = plasmamain[n].rho * rho2nh;
 
+
+      /* JM 131016 -- If we are in macro atom mode and the density is sufficiently high 
+         then we want to track this cell in macro atom mode and record jumping probabilities */
+      if (geo.rt_mode == 2)
+	{
+
+	  if (nh > MACRO_TRACKING_DENSITY && n_macro_tracking <= MAX_MACRO_TRACKS)	// initially I set this density to 1e13
+	    {
+	      
+	      macromain[n].stored = 1;
+	      
+	      macro_track[n_macro_tracking] = n;
+	      
+	      n_macro_tracking++;	// increment the count of cells we are tracking
+	      
+	    }
+	    
+	  else if (nh > MACRO_TRACKING_DENSITY
+		   && n_macro_tracking > MAX_MACRO_TRACKS)
+	    {
+	      Warning
+		("wind2d macro atom tracking: plasma cell %i has density %8.4e > %8.4e, but already tracking too many macro atoms!\n",
+		 n, nh, MACRO_TRACKING_DENSITY);
+		   macromain[n].stored=0;
+	    }
+	  else
+	    {
+	    macromain[n].stored=0;
+	    }
+	}
+
+
+
+
 /* NSH 130530 Next few lines allow the use of the temperature which can be computed from Zeus models to be used as an initial guess for the wind temperature */
       if (geo.wind_type == 3)
 	{
-	  plasmamain[n].t_r = proga_temp (x)/0.9; //This is a kluge, it means that we get the temperature we expect, if we read in a temperature from a zeus file - otherwise it is multiplies by 0.9 //
+	  plasmamain[n].t_r = proga_temp (x) / 0.9;	//This is a kluge, it means that we get the temperature we expect, if we read in a temperature from a zeus file - otherwise it is multiplies by 0.9 //
 	}
       else
 	{
@@ -416,6 +452,14 @@ be optional which variables beyond here are moved to structures othere than Wind
 	  plasmamain[n].xscatters[j] = 0;
 	}
     }
+
+/* now dynamically allocate space for the number of cells we have decided to track in macro atom mode */
+  if (geo.rt_mode == 2)
+    {
+      Log("%i macro atoms have nh higher than %8.2e, so tracking MA probabilities\n", n_macro_tracking, MACRO_TRACKING_DENSITY);
+      calloc_jumping (n_macro_tracking, macro_track);
+    }
+
 
 
 /* Calculate the the divergence of the wind at the center of each grid cell */

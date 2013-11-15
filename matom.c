@@ -50,6 +50,19 @@ make it easier to add new processes, I suspect.
 It would be possible to convert the for loop to a while statement.  This would avoid the
 break statement in the middle.  
 
+JM -- A quick note on the probability storing here, as it's a little hard to follow.
+Stuart had already implemented a technique where we store probabilities as long as the macro atom
+remains activated. This means that if you go 4->3->4 for example, you don't have to recalculate 
+the probabilities. 
+
+My new lines of code (1311) are designed to solve a different problem, where
+we were getting performance problems in dense regions of the wind in CV models
+(bug report #54). This is due to k->A*->k chains in these regions, and there are two possible
+approaches-- 1) store probabilities for dense cells, which are stored through the entire 
+ionization cycle, and 2) store probabilities from the last macro atom, as a k-packet
+cannot change cell without an intermediate r-packet. The first of these is implemented but
+not fully tested.
+
 History:
           Feb 04  SS   Coding began.
           Mar 04  SS   Minor changes made (based on comments from ksl)
@@ -91,7 +104,10 @@ History:
 			derivative routiens were not called at all.  Note that at present
 			the macroatom case is quite slow, due to what is happening in
 			matom.  I am suspicious that it could be speeded up a lot.
-        07jul     SS    Experimenting with retaining jumping/emission probabilities to save time.
+    07jul   SS    Experimenting with retaining jumping/emission probabilities to save time.
+    13nov 	JM	  In order to stop CV performance problems related to k->A*->k chains,
+    				  storing probabilities for up to 100 cells in dense regions of the wind.
+    						
 
 ************************************************************/
 
@@ -109,7 +125,7 @@ matom (p, nres, escape)
   double pjnorm, penorm;
   double threshold, run_tot;
   double sp_rec_rate;
-  int n, m;
+  int n, m, store_index;
   int njumps;
   int nbbd, nbbu, nbfd, nbfu;
   double t_e, ne;
@@ -124,18 +140,13 @@ matom (p, nres, escape)
   int prbs_known[NLEVELS_MACRO];
 
 
-  for (n = 0; n < NLEVELS_MACRO; n++)
-    {
-      prbs_known[n] = -1;	//flag all as unknown
-    }
-
 
   one = &wmain[p->grid];	//This is to identify the grid cell in which we are
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "matom");
 
-  mplasma = &macromain[xplasma->nplasma];
 
+  mplasma = &macromain[xplasma->nplasma];
 
   t_e = xplasma->t_e;		//electron temperature 
   ne = xplasma->ne;		//electron number density
@@ -159,6 +170,79 @@ matom (p, nres, escape)
       exit (0);
     }
 
+
+
+
+
+  /* JM 1311 -- if this is one of the macro atoms flagged for storing, then 
+     get storing index and find out if we know the probabilities */
+     
+  if (mplasma->stored == 1)
+    {
+        
+      for (n = 0; n < n_macro_tracking; n++)
+	{
+	  if (jumps_store[n].nplasma == one->nplasma)
+	    store_index = n;
+	}	
+
+
+    	/* conduct some checks */
+      if (jumps_store[store_index].nplasma != one->nplasma)
+	{
+	  Error
+	    ("matom.c: Problem nplasma %i does not match stored index %i, Exiting.\n",
+	     one->nplasma, jumps_store[store_index].nplasma);
+	  exit (0);
+	}
+
+      if (store_index > n_macro_tracking)
+	{
+	  Error ("matom.c: store_index %i > ntracking %i, Exiting.\n",
+		 store_index, n_macro_tracking);
+	  exit (0);
+	}
+	
+	
+    /* set probabilities for all levels to known if we know them */
+      for (n = 0; n < nlevels_macro; n++)
+	{
+
+
+	  if (jumps_store[store_index].known[n] == 1)
+	    prbs_known[n] = 1;		//probs are stored, flag as known
+
+	  else
+	    prbs_known[n] = -1;		//we want to store, but haven't calculated yet, flag all as unknown
+
+	}
+    }
+    
+  /* if this is not one of the macro atoms flagged for storing, but was the last matom, 
+     then find out which prbs were worked out before */
+  else if (last_matom->nplasma == one->nplasma)
+    {
+      for (n = 0; n < nlevels_macro; n++)
+	{
+	  prbs_known[n] = last_matom->known[n];				//flag all as known or unknown
+	}
+	}
+	
+  /* if this is not one of the macro atoms flagged for storing or the last one, then set all prbs to unknown */
+  else
+    {
+      for (n = 0; n < nlevels_macro; n++)
+	{
+	  prbs_known[n] = -1;				//flag all as unknown
+	  last_matom->known[n] = -1; 		//flag all last as unknown
+	}
+    }
+
+
+
+
+
+
   /* Now follows the main loop to govern the macro atom jumps. Keeps jumping until
      an emission occurs (at which point it breaks). */
 
@@ -172,11 +256,29 @@ matom (p, nres, escape)
       nbbu = config[uplvl].n_bbu_jump;	// number of bb upward jump from this configuration
       nbfd = config[uplvl].n_bfd_jump;	// number of bf downward jumps from this transition
       nbfu = config[uplvl].n_bfu_jump;	// number of bf upward jumps from this transiion
+      
+      
+    if (prbs_known[uplvl] == 1 && mplasma->stored == 1 && jumps_store[store_index].known[uplvl] == 1)
+	{
+	  pjnorm_known[uplvl] = jumps_store[store_index].jprbs_norm[uplvl];
+	  penorm_known[uplvl] = jumps_store[store_index].eprbs_norm[uplvl];
+      Log("First, mplasma->stored %i lastknown %i jstoreknown %i np %i nplasma %i njumps %i, uplvl %i, uplvl_old %i\n",  
+           mplasma->stored, last_matom->known[uplvl], store_index, p->np, one->nplasma, njumps, uplvl, uplvl_old);
+	  m = nbbd + nbfd + nbbu + nbfu;
+	}
+	
+	else if (prbs_known[uplvl] == 1 && last_matom->nplasma == one->nplasma && last_matom->known[uplvl] == 1)
+	{
+	  pjnorm_known[uplvl] = last_matom->jprbs_norm[uplvl];
+	  penorm_known[uplvl] = last_matom->eprbs_norm[uplvl];
+	  Log("Second\n");
+	}
 
-      if (prbs_known[uplvl] != 1)
+    else if (prbs_known[uplvl] != 1)
 	{
 	  /* Start by setting everything to 0  */
-
+      Log("Third, mplasma->stored %i lastknown %i jstoreknown %i np %i nplasma %i njumps %i, uplvl %i, uplvl_old %i\n", 
+           mplasma->stored, last_matom->known[uplvl], store_index, p->np, one->nplasma, njumps, uplvl, uplvl_old);
 	  m = 0;		//m counts the total number of possible ways to leave the level
 	  pjnorm = 0.0;		//stores the total jump probability
 	  penorm = 0.0;		//stores the total emission probability
@@ -322,8 +424,7 @@ matom (p, nres, escape)
 					    n] * xplasma->ne *
 		      den_config (xplasma,
 				  cont_ptr->uplev) / den_config (xplasma,
-								 cont_ptr->
-								 nlev)));
+								 cont_ptr->nlev)));
 		  jprbs_known[uplvl][m] = jprbs[m] = 0.0;
 
 		}
@@ -335,7 +436,50 @@ matom (p, nres, escape)
 	  penorm_known[uplvl] = penorm;
 	  prbs_known[uplvl] = 1;
 
-	}
+
+      /* JM 1311 -- loop added to store probabilities in dense cells */
+	  if (mplasma->stored == 1)
+	    {
+	    /* check if this is one of the high density cells we want to track.
+	       If it is, then store the probabilities and normalisations for this
+	       level (uplvl) */
+	      jumps_store[store_index].jprbs_norm[uplvl] =
+		pjnorm_known[uplvl];
+	      jumps_store[store_index].eprbs_norm[uplvl] =
+		penorm_known[uplvl];
+		
+	      for (n = 0; n < m; n++)
+		{
+		  jumps_store[store_index].jprbs[uplvl][n] =
+		    jprbs_known[uplvl][n];
+		  jumps_store[store_index].eprbs[uplvl][n] =
+		    eprbs_known[uplvl][n];
+		}
+		
+		/* set the flag for this level and cell to known */
+		jumps_store[store_index].known[uplvl] = 1;
+		
+	    }
+	    
+      /* store probabilities in case we activate this macro atom again */
+	  last_matom->jprbs_norm[uplvl] =
+		pjnorm_known[uplvl];
+	  last_matom->eprbs_norm[uplvl] =
+		penorm_known[uplvl];
+		
+	  for (n = 0; n < m; n++)
+		{
+		  last_matom->jprbs[uplvl][n] =
+		    jprbs_known[uplvl][n];
+		  last_matom->eprbs[uplvl][n] =
+		    eprbs_known[uplvl][n];
+		}
+		
+		last_matom->known[uplvl] = 1;
+	    
+	}		// end of if statement if prbs_known == -1
+	
+	
 
       /* Probabilities of jumping (j) and emission (e) are now known. The normalisation factor pnorm has
          also been recorded. the integer m now gives the total number of possibilities too. 
@@ -366,10 +510,34 @@ matom (p, nres, escape)
       n = 0;
       threshold = ((rand () + 0.5) / MAXRAND);
       threshold = threshold * pjnorm_known[uplvl_old];
+
+
+    /* JM 1311 -- check if this cell probability is known and stored */     
+    if (prbs_known[uplvl_old] == 1 && mplasma->stored == 1)
+	{
+	  while (run_tot < threshold)
+	    {
+	      run_tot += jumps_store[store_index].jprbs[uplvl_old][n];
+	      n++;
+	    }
+	}
+	
+	else if (prbs_known[uplvl_old] == 1 && last_matom->nplasma == one->nplasma && last_matom->known[uplvl_old] == 1)
+    {
       while (run_tot < threshold)
 	{
-	  run_tot += jprbs_known[uplvl_old][n];
+	  run_tot += last_matom->jprbs[uplvl_old][n];
 	  n++;
+	}
+    }
+    
+      else
+	{
+	  while (run_tot < threshold)
+	    {
+	      run_tot += jprbs_known[uplvl_old][n];
+	      n++;
+	    }
 	}
       // This added to prevent case where theshold is essentially 0. It is already checked that the jumping probability is not zero
       if (n > 0)
@@ -427,11 +595,38 @@ matom (p, nres, escape)
   n = 0;
   threshold = ((rand () + 0.5) / MAXRAND);
   threshold = threshold * penorm_known[uplvl];	//normalise to total emission prob.
-  while (run_tot < threshold)
+
+
+
+  /* JM 1311 -- check if this cell probability is known and stored */
+  if (prbs_known[uplvl] == 1 && mplasma->stored == 1)
     {
-      run_tot += eprbs_known[uplvl][n];
-      n++;
+      while (run_tot < threshold)
+	{
+	  run_tot += jumps_store[store_index].eprbs[uplvl][n];
+	  n++;
+	}
     }
+  else if (prbs_known[uplvl] == 1 && last_matom->nplasma == one->nplasma && last_matom->known[uplvl] == 1)
+    {
+      while (run_tot < threshold)
+	{
+	  run_tot += last_matom->eprbs[uplvl][n];
+	  n++;
+	}
+    }
+  else
+    {
+      while (run_tot < threshold)
+	{
+	  run_tot += eprbs_known[uplvl][n];
+	  n++;
+	}
+    }
+
+
+
+
   n = n - 1;
   /* n now identifies the jump that occurs - now set nres for the return value. */
   if (n < nbbd)
@@ -1551,9 +1746,9 @@ macro_pops (xplasma, xne)
 		         other direction. */
 
 		      rate =
-			mplasma->
-			alpha_st_old[config[index_lvl].bfu_indx_first +
-				     index_bfu] * xne;
+			mplasma->alpha_st_old[config[index_lvl].
+					      bfu_indx_first +
+					      index_bfu] * xne;
 
 		      rate_matrix[upper][upper] += -1. * rate;
 		      rate_matrix[lower][upper] += rate;
@@ -2082,23 +2277,28 @@ get_matom_f ()
   my_nmax = NPLASMA;
 
 #ifdef MPI_ON
-  num_mpi_cells = floor(NPLASMA/np_mpi_global);  // divide the cells between the threads
-  num_mpi_extra = NPLASMA - (np_mpi_global*num_mpi_cells);  // the remainder from the above division
-  
+  num_mpi_cells = floor (NPLASMA / np_mpi_global);	// divide the cells between the threads
+  num_mpi_extra = NPLASMA - (np_mpi_global * num_mpi_cells);	// the remainder from the above division
+
   /* this next loop splits the cells up between the threads. All threads with 
      rank_global<num_mpi_extra deal with one extra cell to account for the remainder */
   if (rank_global < num_mpi_extra)
     {
-      my_nmin = rank_global*(num_mpi_cells+1);
-      my_nmax = (rank_global+1)*(num_mpi_cells+1);     
+      my_nmin = rank_global * (num_mpi_cells + 1);
+      my_nmax = (rank_global + 1) * (num_mpi_cells + 1);
     }
   else
     {
-      my_nmin = num_mpi_extra*(num_mpi_cells+1) + (rank_global-num_mpi_extra)*(num_mpi_cells);
-      my_nmax = num_mpi_extra*(num_mpi_cells+1) + (rank_global-num_mpi_extra+1)*(num_mpi_cells);
+      my_nmin =
+	num_mpi_extra * (num_mpi_cells + 1) + (rank_global -
+					       num_mpi_extra) *
+	(num_mpi_cells);
+      my_nmax =
+	num_mpi_extra * (num_mpi_cells + 1) + (rank_global - num_mpi_extra +
+					       1) * (num_mpi_cells);
     }
-  ndo = my_nmax-my_nmin;
- 
+  ndo = my_nmax - my_nmin;
+
 
   Log_parallel
     ("Thread %d is calculating macro atom emissivities for macro atoms %d to %d\n",
@@ -2326,7 +2526,7 @@ get_matom_f ()
 
 
   /*This is the end of the update loop that is parallelised. We now need to exchange data between the tasks.
-    This is done much the same way as in wind_update */
+     This is done much the same way as in wind_update */
 #ifdef MPI_ON
   for (n_mpi = 0; n_mpi < np_mpi_global; n_mpi++)
     {

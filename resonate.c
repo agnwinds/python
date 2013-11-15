@@ -905,7 +905,7 @@ calls to two_level atom
   tau_x_dvds = PI_E2_OVER_M * xden_ion * lptr->f / (lptr->freq);
   tau = tau_x_dvds / dvds;
 
-  return (tau);
+  return (0);
 }
 
 

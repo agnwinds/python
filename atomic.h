@@ -75,6 +75,7 @@ int nauger;			/*Actual number of innershell edges for which autoionization is to
 
 
 
+
 typedef struct elements
 {				/* Element contains physical parameters that apply to element as a whole and 
 				   provides and index to the atomic data */

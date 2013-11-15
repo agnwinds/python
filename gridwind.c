@@ -1,5 +1,4 @@
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -367,7 +366,7 @@ calloc_macro (nelem)
 
   if (nlevels_macro == 0 && geo.nmacro == 0)
     {
-      
+
       Log
 	("calloc_macro: Allocated no space for macro since nlevels_macro==0 and geo.nmacro==0\n");
       return (0);
@@ -469,10 +468,10 @@ calloc_estimators (nelem)
   for (n = 0; n < nelem; n++)
     {
       /* JM130625: Commented out free statements due to PYWIND MALLOC MATOM BUG
-	 if (macromain[n].jbar != NULL)
-	{
-	  free (macromain[n].jbar);
-	}*/
+         if (macromain[n].jbar != NULL)
+         {
+         free (macromain[n].jbar);
+         } */
       if ((macromain[n].jbar =
 	   calloc (sizeof (double), size_Jbar_est)) == NULL)
 	{
@@ -482,9 +481,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].jbar_old != NULL)
-	{
-	  free (macromain[n].jbar_old);
-	}*/
+         {
+         free (macromain[n].jbar_old);
+         } */
       if ((macromain[n].jbar_old =
 	   calloc (sizeof (double), size_Jbar_est)) == NULL)
 	{
@@ -494,9 +493,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].gamma != NULL)
-	{
-	  free (macromain[n].gamma);
-	}*/
+         {
+         free (macromain[n].gamma);
+         } */
       if ((macromain[n].gamma =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -506,9 +505,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].gamma_old != NULL)
-	{
-	  free (macromain[n].gamma_old);
-	}*/
+         {
+         free (macromain[n].gamma_old);
+         } */
       if ((macromain[n].gamma_old =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -518,9 +517,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].gamma_e != NULL)
-	{
-	  free (macromain[n].gamma_e);
-	}*/
+         {
+         free (macromain[n].gamma_e);
+         } */
       if ((macromain[n].gamma_e =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -530,9 +529,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].gamma_e_old != NULL)
-	{
-	  free (macromain[n].gamma_e_old);
-	}*/
+         {
+         free (macromain[n].gamma_e_old);
+         } */
       if ((macromain[n].gamma_e_old =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -542,9 +541,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].alpha_st != NULL)
-	{
-	  free (macromain[n].alpha_st);
-	}*/
+         {
+         free (macromain[n].alpha_st);
+         } */
       if ((macromain[n].alpha_st =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -554,9 +553,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].alpha_st_old != NULL)
-	{
-	  free (macromain[n].alpha_st_old);
-	}*/
+         {
+         free (macromain[n].alpha_st_old);
+         } */
       if ((macromain[n].alpha_st_old =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -566,9 +565,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].alpha_st_e != NULL)
-	{
-	  free (macromain[n].alpha_st_e);
-	}*/
+         {
+         free (macromain[n].alpha_st_e);
+         } */
       if ((macromain[n].alpha_st_e =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -578,9 +577,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].alpha_st_e_old)
-	{
-	  free (macromain[n].alpha_st_e_old);
-	}*/
+         {
+         free (macromain[n].alpha_st_e_old);
+         } */
       if ((macromain[n].alpha_st_e_old =
 	   calloc (sizeof (double), size_gamma_est)) == NULL)
 	{
@@ -590,9 +589,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].recomb_sp != NULL)
-	{
-	  free (macromain[n].recomb_sp);
-	}*/
+         {
+         free (macromain[n].recomb_sp);
+         } */
       if ((macromain[n].recomb_sp =
 	   calloc (sizeof (double), size_alpha_est)) == NULL)
 	{
@@ -602,9 +601,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].recomb_sp_e != NULL)
-	{
-	  free (macromain[n].recomb_sp_e);
-	}*/
+         {
+         free (macromain[n].recomb_sp_e);
+         } */
       if ((macromain[n].recomb_sp_e =
 	   calloc (sizeof (double), size_alpha_est)) == NULL)
 	{
@@ -614,9 +613,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].matom_emiss != NULL)
-	{
-	  free (macromain[n].matom_emiss);
-	}*/
+         {
+         free (macromain[n].matom_emiss);
+         } */
       if ((macromain[n].matom_emiss =
 	   calloc (sizeof (double), nlevels_macro)) == NULL)
 	{
@@ -626,9 +625,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].matom_abs != NULL)
-	{
-	  free (macromain[n].matom_abs);
-	}*/
+         {
+         free (macromain[n].matom_abs);
+         } */
       if ((macromain[n].matom_abs =
 	   calloc (sizeof (double), nlevels_macro)) == NULL)
 	{
@@ -639,9 +638,9 @@ calloc_estimators (nelem)
 
       /* Added ksl 091103 59e */
       /*if (macromain[n].cooling_bf != NULL)
-	{
-	  free (macromain[n].cooling_bf);
-	}*/
+         {
+         free (macromain[n].cooling_bf);
+         } */
       if ((macromain[n].cooling_bf =
 	   calloc (sizeof (double), ntop_phot)) == NULL)
 	{
@@ -651,9 +650,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].cooling_bf_col != NULL)
-	{
-	  free (macromain[n].cooling_bf_col);
-	}*/
+         {
+         free (macromain[n].cooling_bf_col);
+         } */
       if ((macromain[n].cooling_bf_col =
 	   calloc (sizeof (double), ntop_phot)) == NULL)
 	{
@@ -663,9 +662,9 @@ calloc_estimators (nelem)
 	}
 
       /*if (macromain[n].cooling_bb != NULL)
-	{
-	  free (macromain[n].cooling_bb);
-	}*/
+         {
+         free (macromain[n].cooling_bb);
+         } */
       if ((macromain[n].cooling_bb =
 	   calloc (sizeof (double), nlines)) == NULL)
 	{
@@ -690,5 +689,229 @@ calloc_estimators (nelem)
       Log_silent ("Allocated no space for macro since nlevels_macro==0\n");
     }
 
+
+
   return (0);
+}
+
+
+
+
+/***********************************************************
+                                       Space Telescope Science Institute
+
+ Synopsis:
+	calloc_jumping  allocates space to store jumping probabilities
+
+Arguments:		
+	nelem_track;			The number of macro atoms to track
+	array_track;			The array storing the plasma cell numbers
+						of the macro atoms to track
+ 
+Returns:
+ 
+Description:
+	This routine is designed to allocate memory to store transition probabilities for macro atoms
+	in dense parts of the wind in order to stop the performance problems
+	associated with k->A*->k chains. These problems are detailed under bug report 
+	#54, "Performance problems with CV macro models".
+		
+Notes:
+
+History:
+	131111 -- JM		Coding began
+              
+***********************************************************/
+
+int
+calloc_jumping (nelem_track, array_track)
+     int nelem_track;
+     int array_track[MAX_MACRO_TRACKS];
+{
+  int n, i, j;
+
+
+  /* allocate memory for the structures themselves, defined in python.h */
+  jumps_store =
+    (JumpingPtr) calloc (sizeof (jumping_dummy), (nelem_track + 1));
+
+  last_matom = (JumpingPtr) calloc (sizeof (jumping_dummy), (2));
+
+
+  for (n = 0; n < nlevels_macro; n++)
+    {
+      Log
+	("calloc_jumping: level %d has n_bbu_jump %d  n_bbd_jump %d n_bfu_jump %d n_bfd_jump %d\n",
+	 n, config[n].n_bbu_jump, config[n].n_bbd_jump, config[n].n_bfu_jump,
+	 config[n].n_bfd_jump);
+    }
+
+
+
+  if (jumps_store == NULL)
+    {
+      Error
+	("calloc_jumping: There is a problem in allocating memory for the jumps_store structure\n");
+      exit (0);
+    }
+  else if (nlevels_macro > 0 || geo.nmacro > 0)
+    {
+      Log
+	("Allocated %10d bytes for each of %5d elements of jumps_store totaling %10.1f Mb \n",
+	 sizeof (jumping_dummy), (nelem_track + 1),
+	 1.e-6 * (nelem_track + 1) * sizeof (jumping_dummy));
+    }
+
+  if (last_matom == NULL)
+    {
+      Error
+	("calloc_jumping: There is a problem in allocating memory for the last_matom structure\n");
+      exit (0);
+    }
+  else if (nlevels_macro > 0 || geo.nmacro > 0)
+    {
+      Log
+	("Allocated %10d bytes for each of %5d elements of last_matom totaling %10.1f Mb \n",
+	 sizeof (jumping_dummy), (2), 1.e-6 * (2) * sizeof (jumping_dummy));
+    }
+
+
+
+
+  /* sizes for memory allocation of the arrays */
+  size_norm = nlevels_macro;
+  size_prbs = nlevels_macro;
+  size_track = nelem_track;
+  countit = 0;
+
+
+
+
+  /* loop over the number of macro atoms we are tracking in dense regions */
+  for (i = 0; i < nelem_track; i++)
+
+    {
+      /* record the plasma cell of the macro atom we are tracking */
+      n = array_track[i];
+      jumps_store[i].nplasma = n;
+
+      /* set all probabilities to unknown initially */
+      for (j = 0; j < nlevels_macro; j++)
+	{
+	  jumps_store[i].known[j] = 0;
+	}
+
+
+      /* now allocate memory for the eprbs, jprbs and normalisation arrays */
+      if ((jumps_store[i].eprbs =
+	   calloc (sizeof (double), size_prbs)) == NULL)
+	{
+	  Error
+	    ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
+	  exit (0);
+	}
+
+      if ((jumps_store[i].jprbs =
+	   calloc (sizeof (double), size_prbs)) == NULL)
+	{
+	  Error
+	    ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
+	  exit (0);
+	}
+
+      if ((jumps_store[i].eprbs_norm =
+	   calloc (sizeof (double), size_norm)) == NULL)
+	{
+	  Error
+	    ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
+	  exit (0);
+	}
+
+      if ((jumps_store[i].jprbs_norm =
+	   calloc (sizeof (double), size_norm)) == NULL)
+	{
+	  Error
+	    ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
+	  exit (0);
+	}
+
+    }				// end of loop over n_elem_track
+
+
+  /* record space allocated for jumps_store prbs arrays */
+  if (nelem_track > 0)
+    {
+      Log_silent
+	("Allocated %10.1f Mb for MA jumping probs \n",
+	 1.e-6 * (nelem_track + 1) * (2. * size_prbs +
+				      2. * size_norm) * sizeof (double));
+    }
+  else
+    {
+      Log_silent
+	("Allocated no space for jumps_store probs since n to track==0\n");
+    }
+
+
+
+
+
+  /* allocate memory for the last_matom probability arrays */
+  if ((last_matom->eprbs = calloc (sizeof (double), size_prbs)) == NULL)
+    {
+      Error
+	("calloc_jumping: Error in allocating memory for last_matom structure\n");
+      exit (0);
+    }
+
+  if ((last_matom->jprbs = calloc (sizeof (double), size_prbs)) == NULL)
+    {
+      Error
+	("calloc_jumping: Error in allocating memory for last_matom structure\n");
+      exit (0);
+    }
+
+  if ((last_matom->eprbs_norm = calloc (sizeof (double), size_norm)) == NULL)
+    {
+      Error
+	("calloc_jumping: Error in allocating memory for last_matom structure\n");
+      exit (0);
+    }
+
+  if ((last_matom->jprbs_norm = calloc (sizeof (double), size_norm)) == NULL)
+    {
+      Error
+	("calloc_jumping: Error in allocating memory for last_matom structure\n");
+      exit (0);
+    }
+
+
+  /* set nplasma to some impossible number -- there is no last matom at first! */
+  last_matom->nplasma = -999;
+
+  /* set all levels to unknown */
+  for (j = 0; j < nlevels_macro; j++)
+    {
+      last_matom->known[j] = 0;
+    }
+
+
+  /* record space allocated for last_matom prbs arrays */
+  if (nlevels_macro > 0 || geo.nmacro > 0)
+    {
+      Log_silent
+	("Allocated %10.1f Mb for last_matom jumping probs \n",
+	 1.e-6 * (2) * (2. * size_prbs + 2. * size_norm) * sizeof (double));
+    }
+  else
+    {
+      Log_silent
+	("Allocated no space for last_matom probs since nlevels_macro==0\n");
+    }
+
+
+  /* memory alocated, all done here */
+
+  return (0);
+
 }
