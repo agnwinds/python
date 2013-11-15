@@ -74,14 +74,6 @@ int nlines_macro;		/* Actual number of Macro Atom lines that were read in.  New 
 int nauger;			/*Actual number of innershell edges for which autoionization is to be computed */
 
 
-#define UPLVL_UNKNOWN -999	// flag for if upper level for this macro atom has not been calculated
-double last_jprbs_known[NLEVELS_MACRO][2 * (NBBJUMPS + NBFJUMPS)];
-double last_eprbs_known[NLEVELS_MACRO][2 * (NBBJUMPS + NBFJUMPS)];
-double last_pjnorm_known[NLEVELS_MACRO];
-double last_penorm_known[NLEVELS_MACRO];
-int known[NLEVELS_MACRO]; 
-int last_nplasma;				// number of macro atom
-
 
 
 typedef struct elements

@@ -427,7 +427,7 @@ int
 calloc_estimators (nelem)
      int nelem;
 {
-  int n, i, j;
+  int n;
 
   if (nlevels_macro == 0 && geo.nmacro == 0)
     {
@@ -690,31 +690,6 @@ calloc_estimators (nelem)
     }
 
 
-  /* These arrays are transition probabilities for the last macro atom the photon hit.
-     We store these to prevemtnt problems with very very long k->A*->k chains
-     This loops simply sets the values in the arrays of the probabilities we store
-     to -999 (UPLVL_UNKNOWN) i.e. flags every probability as unknown */
-  /*last_nplasma = -1;
-  for (i = 0; i < NLEVELS_MACRO; i++)
-    {
-      last_pjnorm_known[i] = UPLVL_UNKNOWN;
-      last_penorm_known[i] = UPLVL_UNKNOWN;
-      known[i] = -1;
-      for (j = 0; j < 2 * (NBBJUMPS + NBFJUMPS); j++)
-	{
-	  last_eprbs_known[i][j] = UPLVL_UNKNOWN;
-	  last_jprbs_known[i][j] = UPLVL_UNKNOWN;
-	}
-    }
-  */
-  /*n_high_density = 0;
-     for (n = 0; n < NPLASMA; n++)
-     {
-     if */
-
-
-
-
 
   return (0);
 }
@@ -736,7 +711,7 @@ Arguments:
 Returns:
  
 Description:
-	This routine is designed to store transition probabilities for macro atoms
+	This routine is designed to allocate memory to store transition probabilities for macro atoms
 	in dense parts of the wind in order to stop the performance problems
 	associated with k->A*->k chains. These problems are detailed under bug report 
 	#54, "Performance problems with CV macro models".
@@ -753,16 +728,17 @@ calloc_jumping (nelem_track, array_track)
      int nelem_track;
      int array_track[MAX_MACRO_TRACKS];
 {
-  int n, i, njumps, j;
+  int n, i, j;
   
 
+  /* allocate memory for the structures themselves, defined in python.h */
   jumps_store =
     (JumpingPtr) calloc (sizeof (jumping_dummy), (nelem_track + 1));
     
   last_matom = 
-    (LastMatomPtr) calloc (sizeof (jumping_dummy), (2));
+    (JumpingPtr) calloc (sizeof (jumping_dummy), (2));
     
-    
+  
   for (n = 0; n < nlevels_macro; n++)
     {
       Log
@@ -776,7 +752,7 @@ calloc_jumping (nelem_track, array_track)
   if (jumps_store == NULL)
     {
       Error
-	("calloc_jumping: There is a problem in allocating memory for the jump structure\n");
+	("calloc_jumping: There is a problem in allocating memory for the jumps_store structure\n");
       exit (0);
     }
   else if (nlevels_macro > 0 || geo.nmacro > 0)
@@ -786,9 +762,25 @@ calloc_jumping (nelem_track, array_track)
 	 sizeof (jumping_dummy), (nelem_track + 1),
 	 1.e-6 * (nelem_track + 1) * sizeof (jumping_dummy));
     }
+    
+  if (last_matom == NULL)
+    {
+      Error
+	("calloc_jumping: There is a problem in allocating memory for the last_matom structure\n");
+      exit (0);
+    }
+  else if (nlevels_macro > 0 || geo.nmacro > 0)
+    {
+      Log
+	("Allocated %10d bytes for each of %5d elements of last_matom totaling %10.1f Mb \n",
+	 sizeof (jumping_dummy), (2),
+	 1.e-6 * (2) * sizeof (jumping_dummy));
+    }  
 
-  
-  /* sizes for mrmory allocation of the arrays */
+
+
+
+  /* sizes for memory allocation of the arrays */
   size_norm = nlevels_macro;
   size_prbs = nlevels_macro;
   size_track = nelem_track;
@@ -796,16 +788,23 @@ calloc_jumping (nelem_track, array_track)
 
 
 
+
+  /* loop over the number of macro atoms we are tracking in dense regions */
   for (i = 0; i < nelem_track; i++)
 
     {
+      /* record the plasma cell of the macro atom we are tracking */
       n = array_track[i];
       jumps_store[i].nplasma = n;
+      
+    /* set all probabilities to unknown initially */
     for (j = 0; j < nlevels_macro; j++)
       {
         jumps_store[i].known[j] =0;
       }
 
+
+    /* now allocate memory for the eprbs, jprbs and normalisation arrays */
       if ((jumps_store[i].eprbs =
 	   calloc (sizeof (double), size_prbs)) == NULL)
 	{
@@ -838,23 +837,26 @@ calloc_jumping (nelem_track, array_track)
 	  exit (0);
 	}
 	
-    }
+    } // end of loop over n_elem_track
 
 
+  /* record space allocated for jumps_store prbs arrays */
   if (nelem_track > 0)
     {
       Log_silent
 	("Allocated %10.1f Mb for MA jumping probs \n",
 	 1.e-6 * (nelem_track + 1) * (2. * size_prbs + 2. * size_norm) * sizeof (double));
-    }
-    
+    }   
   else
     {
-      Log_silent ("Allocated no space for jumps since n to track==0\n");
+      Log_silent ("Allocated no space for jumps_store probs since n to track==0\n");
     }
 
 
 
+
+
+    /* allocate memory for the last_matom probability arrays */
     if ((last_matom->eprbs =
 	   calloc (sizeof (double), size_prbs)) == NULL)
 	{
@@ -887,19 +889,32 @@ calloc_jumping (nelem_track, array_track)
 	  exit (0);
 	}
 	
+	
+	/* set nplasma to some impossible number -- there is no last matom at first! */
 	last_matom->nplasma = -999;
 	
+	/* set all levels to unknown */
 	for (j = 0; j < nlevels_macro; j++)
       {
-        last_matom->known[j] =0;
+        last_matom->known[j] = 0;
       }
 
+
+    /* record space allocated for last_matom prbs arrays */
     if (nlevels_macro > 0 || geo.nmacro > 0)
     {
       Log_silent
-	("Allocated %10.1f Mb for MA jumping probs \n",
-	 1.e-6 * (1) * (2. * size_prbs + 2. * size_norm) * sizeof (double));
+	("Allocated %10.1f Mb for last_matom jumping probs \n",
+	 1.e-6 * (2) * (2. * size_prbs + 2. * size_norm) * sizeof (double));
+    }
+      else
+    {
+      Log_silent ("Allocated no space for last_matom probs since nlevels_macro==0\n");
     }
 
+
+  /* memory alocated, all done here */
+
   return (0);
+  
 }
