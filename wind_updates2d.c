@@ -790,7 +790,29 @@ WindPtr (w);
 
 
 
+  /* JM 131115 -- Finally, we want to set all the stored macro atom 
+     probabilities to unknown. Related to bugfix for #54 */
+  if (geo.rt_mode == 2)
+    {
+      /* m is the level index */
+      for (m = 0; m < nlevels_macro; m++)
+	{
 
+	  /* first set each level m to unknown for 
+	     each of the n matoms we are tracking */
+	  for (n = 0; n < n_macro_tracking; n++)
+	    {
+	      jumps_store[n].known[m] = 0;	// n is the number of the matom we are tracking 
+	    }
+
+	  /* then set the last_matom known values to zero */
+	  last_matom->known[m] = 0;
+	}
+
+      /* set nplasma to some impossible number -- there is no last matom at first! */
+      last_matom->nplasma = -999;
+      
+    }
 
 
 

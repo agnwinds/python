@@ -729,16 +729,15 @@ calloc_jumping (nelem_track, array_track)
      int array_track[MAX_MACRO_TRACKS];
 {
   int n, i, j;
-  
+
 
   /* allocate memory for the structures themselves, defined in python.h */
   jumps_store =
     (JumpingPtr) calloc (sizeof (jumping_dummy), (nelem_track + 1));
-    
-  last_matom = 
-    (JumpingPtr) calloc (sizeof (jumping_dummy), (2));
-    
-  
+
+  last_matom = (JumpingPtr) calloc (sizeof (jumping_dummy), (2));
+
+
   for (n = 0; n < nlevels_macro; n++)
     {
       Log
@@ -762,7 +761,7 @@ calloc_jumping (nelem_track, array_track)
 	 sizeof (jumping_dummy), (nelem_track + 1),
 	 1.e-6 * (nelem_track + 1) * sizeof (jumping_dummy));
     }
-    
+
   if (last_matom == NULL)
     {
       Error
@@ -773,9 +772,8 @@ calloc_jumping (nelem_track, array_track)
     {
       Log
 	("Allocated %10d bytes for each of %5d elements of last_matom totaling %10.1f Mb \n",
-	 sizeof (jumping_dummy), (2),
-	 1.e-6 * (2) * sizeof (jumping_dummy));
-    }  
+	 sizeof (jumping_dummy), (2), 1.e-6 * (2) * sizeof (jumping_dummy));
+    }
 
 
 
@@ -784,7 +782,7 @@ calloc_jumping (nelem_track, array_track)
   size_norm = nlevels_macro;
   size_prbs = nlevels_macro;
   size_track = nelem_track;
-  countit=0;
+  countit = 0;
 
 
 
@@ -796,15 +794,15 @@ calloc_jumping (nelem_track, array_track)
       /* record the plasma cell of the macro atom we are tracking */
       n = array_track[i];
       jumps_store[i].nplasma = n;
-      
-    /* set all probabilities to unknown initially */
-    for (j = 0; j < nlevels_macro; j++)
-      {
-        jumps_store[i].known[j] =0;
-      }
+
+      /* set all probabilities to unknown initially */
+      for (j = 0; j < nlevels_macro; j++)
+	{
+	  jumps_store[i].known[j] = 0;
+	}
 
 
-    /* now allocate memory for the eprbs, jprbs and normalisation arrays */
+      /* now allocate memory for the eprbs, jprbs and normalisation arrays */
       if ((jumps_store[i].eprbs =
 	   calloc (sizeof (double), size_prbs)) == NULL)
 	{
@@ -836,8 +834,8 @@ calloc_jumping (nelem_track, array_track)
 	    ("calloc_jumping: Error in allocating memory for jump elements of structure\n");
 	  exit (0);
 	}
-	
-    } // end of loop over n_elem_track
+
+    }				// end of loop over n_elem_track
 
 
   /* record space allocated for jumps_store prbs arrays */
@@ -845,76 +843,75 @@ calloc_jumping (nelem_track, array_track)
     {
       Log_silent
 	("Allocated %10.1f Mb for MA jumping probs \n",
-	 1.e-6 * (nelem_track + 1) * (2. * size_prbs + 2. * size_norm) * sizeof (double));
-    }   
+	 1.e-6 * (nelem_track + 1) * (2. * size_prbs +
+				      2. * size_norm) * sizeof (double));
+    }
   else
     {
-      Log_silent ("Allocated no space for jumps_store probs since n to track==0\n");
+      Log_silent
+	("Allocated no space for jumps_store probs since n to track==0\n");
     }
 
 
 
 
 
-    /* allocate memory for the last_matom probability arrays */
-    if ((last_matom->eprbs =
-	   calloc (sizeof (double), size_prbs)) == NULL)
-	{
-	  Error
-	    ("calloc_jumping: Error in allocating memory for last_matom structure\n");
-	  exit (0);
-	}
+  /* allocate memory for the last_matom probability arrays */
+  if ((last_matom->eprbs = calloc (sizeof (double), size_prbs)) == NULL)
+    {
+      Error
+	("calloc_jumping: Error in allocating memory for last_matom structure\n");
+      exit (0);
+    }
 
-      if ((last_matom->jprbs =
-	   calloc (sizeof (double), size_prbs)) == NULL)
-	{
-	  Error
-	    ("calloc_jumping: Error in allocating memory for last_matom structure\n");
-	  exit (0);
-	}
+  if ((last_matom->jprbs = calloc (sizeof (double), size_prbs)) == NULL)
+    {
+      Error
+	("calloc_jumping: Error in allocating memory for last_matom structure\n");
+      exit (0);
+    }
 
-      if ((last_matom->eprbs_norm =
-	   calloc (sizeof (double), size_norm)) == NULL)
-	{
-	  Error
-	    ("calloc_jumping: Error in allocating memory for last_matom structure\n");
-	  exit (0);
-	}
+  if ((last_matom->eprbs_norm = calloc (sizeof (double), size_norm)) == NULL)
+    {
+      Error
+	("calloc_jumping: Error in allocating memory for last_matom structure\n");
+      exit (0);
+    }
 
-      if ((last_matom->jprbs_norm =
-	   calloc (sizeof (double), size_norm)) == NULL)
-	{
-	  Error
-	    ("calloc_jumping: Error in allocating memory for last_matom structure\n");
-	  exit (0);
-	}
-	
-	
-	/* set nplasma to some impossible number -- there is no last matom at first! */
-	last_matom->nplasma = -999;
-	
-	/* set all levels to unknown */
-	for (j = 0; j < nlevels_macro; j++)
-      {
-        last_matom->known[j] = 0;
-      }
+  if ((last_matom->jprbs_norm = calloc (sizeof (double), size_norm)) == NULL)
+    {
+      Error
+	("calloc_jumping: Error in allocating memory for last_matom structure\n");
+      exit (0);
+    }
 
 
-    /* record space allocated for last_matom prbs arrays */
-    if (nlevels_macro > 0 || geo.nmacro > 0)
+  /* set nplasma to some impossible number -- there is no last matom at first! */
+  last_matom->nplasma = -999;
+
+  /* set all levels to unknown */
+  for (j = 0; j < nlevels_macro; j++)
+    {
+      last_matom->known[j] = 0;
+    }
+
+
+  /* record space allocated for last_matom prbs arrays */
+  if (nlevels_macro > 0 || geo.nmacro > 0)
     {
       Log_silent
 	("Allocated %10.1f Mb for last_matom jumping probs \n",
 	 1.e-6 * (2) * (2. * size_prbs + 2. * size_norm) * sizeof (double));
     }
-      else
+  else
     {
-      Log_silent ("Allocated no space for last_matom probs since nlevels_macro==0\n");
+      Log_silent
+	("Allocated no space for last_matom probs since nlevels_macro==0\n");
     }
 
 
   /* memory alocated, all done here */
 
   return (0);
-  
+
 }
