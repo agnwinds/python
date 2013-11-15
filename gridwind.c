@@ -760,7 +760,7 @@ calloc_jumping (nelem_track, array_track)
     (JumpingPtr) calloc (sizeof (jumping_dummy), (nelem_track + 1));
     
   last_matom = 
-    (LastMatomPtr) calloc (sizeof (last_dummy), (2));
+    (LastMatomPtr) calloc (sizeof (jumping_dummy), (2));
     
     
   for (n = 0; n < nlevels_macro; n++)
@@ -788,14 +788,7 @@ calloc_jumping (nelem_track, array_track)
     }
 
   
-  //size_prbs = 0;
-  
-  /*for (n = 0; n < nlevels_macro; n++ )
-  {
-    njumps = config[n].n_bbd_jump + config[n].n_bfd_jump + config[n].n_bfu_jump + config[n].n_bbu_jump;
-    size_prbs += njumps;
-  }*/
-  
+  /* sizes for mrmory allocation of the arrays */
   size_norm = nlevels_macro;
   size_prbs = nlevels_macro;
   size_track = nelem_track;
@@ -848,7 +841,7 @@ calloc_jumping (nelem_track, array_track)
     }
 
 
-  if (nlevels_macro > 0 || geo.nmacro > 0)
+  if (nelem_track > 0)
     {
       Log_silent
 	("Allocated %10.1f Mb for MA jumping probs \n",
@@ -857,7 +850,7 @@ calloc_jumping (nelem_track, array_track)
     
   else
     {
-      Log_silent ("Allocated no space for macro since nlevels_macro==0\n");
+      Log_silent ("Allocated no space for jumps since n to track==0\n");
     }
 
 

@@ -841,6 +841,7 @@ int countit;
    
 typedef struct jumping_store
 {
+  /* jumping arrays are arrays containing pointers to 2nd dimension of the array */
   double (*jprbs) [ 2 * (NBBJUMPS + NBFJUMPS)];		// array of jumping probabilities
   double (*eprbs) [ 2 * (NBBJUMPS + NBFJUMPS)];		// array of emission probabilities
   double *jprbs_norm;	// array of jumping normalisation
@@ -851,18 +852,11 @@ typedef struct jumping_store
 
 JumpingPtr jumps_store;
 
-typedef struct last
-{
-  double (*jprbs) [ 2 * (NBBJUMPS + NBFJUMPS)];		// array of jumping probabilities
-  double (*eprbs) [ 2 * (NBBJUMPS + NBFJUMPS)];		// array of emission probabilities
-  double *jprbs_norm;	// array of jumping normalisation
-  double *eprbs_norm;	// array of emission normalisation
-  int nplasma;
-  int known[NLEVELS_MACRO];
-} last_dummy, *LastMatomPtr;
+/* last_matom is similar to jumping store, but will only store 
+   for the last macro atom we were in */
+JumpingPtr last_matom;
 
 
-LastMatomPtr last_matom;
 
 
 
