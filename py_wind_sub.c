@@ -679,6 +679,7 @@ freq_summary (w, rootname, ochoice)
      int ochoice;
 {
   int n;
+  char filename[LINELENGTH];
   int nplasma;
 
   for (n = 0; n < NDIM2; n++)
@@ -691,6 +692,13 @@ freq_summary (w, rootname, ochoice)
 	}
     }
   display ("Average freqency");
+      if (ochoice)
+	{
+	  strcpy (filename, rootname);
+	  strcat (filename, ".ave_freq");
+	  write_array (filename, ochoice);
+
+	}
 
   return (0);
 
@@ -1571,6 +1579,77 @@ J_summary (w, rootname, ochoice)
       write_array (filename, ochoice);
 
     }
+  return (0);
+
+}
+
+
+int
+J_scat_summary (w, rootname, ochoice)
+    WindPtr w;
+     char rootname[];
+     int ochoice;
+{
+  int  n;
+  char filename[LINELENGTH];
+  int nplasma;
+
+
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = (plasmamain[nplasma].j);
+	}
+    }
+  display ("J in cell");
+ 
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".J_tot");
+      write_array (filename, ochoice);
+    }
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = (plasmamain[nplasma].j_direct);
+	}
+    }
+  display ("J in cell from direct photons");
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".J_direct");
+      write_array (filename, ochoice);
+    }
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = (plasmamain[nplasma].j_scatt);
+	}
+    }
+  display ("J in cell from scattered photons");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".J_scatt");
+      write_array (filename, ochoice);
+    }
+
+
   return (0);
 
 }
