@@ -2401,6 +2401,8 @@ get_matom_f ()
 
 
   /* this next loop just corrects lum to be the correct summed value in parallel mode */
+  lum = 0.0;   // need to rezero, fixes segfault bug #59 
+
   for (n = 0; n < NPLASMA; n++)
     {
 
