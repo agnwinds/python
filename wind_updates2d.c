@@ -252,6 +252,8 @@ WindPtr (w);
 /* 1110 NSH Normalise IP, which at this point should be the number of photons in a cell by dividing by volume and number density of hydrogen in the cell */
 
       plasmamain[n].ip /= (C * volume * nh);
+      plasmamain[n].ip_direct /= (C * volume * nh);
+      plasmamain[n].ip_scatt /= (C * volume * nh);
 //OLD      Log ("NSH Log Ionisation parameter for cell %i = %2.2f\n",n,log10(plasmamain[n].ip));
 
 
@@ -409,6 +411,8 @@ WindPtr (w);
 	      MPI_Pack(&plasmamain[n].sim_ip, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].ferland_ip, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].ip, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+	      MPI_Pack(&plasmamain[n].ip_direct, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+	      MPI_Pack(&plasmamain[n].ip_scatt, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&t_r_old, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&t_e_old, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&t_r_ave_old, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -536,6 +540,8 @@ WindPtr (w);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].sim_ip, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].ferland_ip, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].ip, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].ip_direct, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].ip_scatt, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &t_r_old, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &t_e_old, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &t_r_ave_old, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -860,6 +866,8 @@ wind_rad_init ()
     {
       plasmamain[n].j = plasmamain[n].ave_freq = plasmamain[n].ntot = 0;
       plasmamain[n].j_direct = plasmamain[n].j_scatt = 0,0;  //NSH 1309 zero j banded by number of scatters
+      plasmamain[n].ip = 0.0;
+      plasmamain[n].ip_direct = plasmamain[n].ip_scatt = 0.0;
       plasmamain[n].mean_ds = 0.0;
       plasmamain[n].n_ds = 0;
       plasmamain[n].ntot_disk = plasmamain[n].ntot_agn = 0;	//NSH 15/4/11 counters to see where photons come from

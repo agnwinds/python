@@ -288,6 +288,17 @@ statement could be deleted entirely 060802 -- ksl */
   if (HEV * p->freq > 13.6)
     {
       xplasma->ip += ((w_ave * ds) / (H * p->freq));
+ if (p->nscat == 0)
+	{
+  	xplasma->ip_direct += ((w_ave * ds) / (H * p->freq));
+	}
+  else
+	{
+	xplasma->ip_scatt += ((w_ave * ds) / (H * p->freq));
+	}
+
+
+
       /* 70h -- nsh -- 111004 added to try to calculate the IP for the cell. Note that 
        * this may well end up not being correct, since the same photon could be counted 
        * several times if it is rattling around.... */
