@@ -1448,7 +1448,7 @@ IP_summary (w, rootname, ochoice)
 	  aaa[n] = ((plasmamain[nplasma].ferland_ip));
 	}
     }
-  display ("Log Ionization parameter (Ferland)");
+  display ("Ionization parameter (Ferland)");
 
   if (ochoice)
     {
@@ -1467,7 +1467,7 @@ IP_summary (w, rootname, ochoice)
 	  aaa[n] = ((plasmamain[nplasma].ip));
 	}
     }
-  display ("Log Ionization parameter");
+  display ("Ionization parameter");
 
   if (ochoice)
     {
