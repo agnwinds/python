@@ -1622,7 +1622,7 @@ run -- 07jul -- ksl
 #ifdef MPI_ON
 //   Since the wind is now set up can allocate sufficiently big arrays to help with the MPI reductions 
 
-    plasma_double_helpers = (10+3*NXBANDS)*NPLASMA; //The size of the helper array for doubles. We transmit 10 numbers for each cell, plus three arrays, each of length NXBANDS
+    plasma_double_helpers = (14+3*NXBANDS)*NPLASMA; //The size of the helper array for doubles. We transmit 10 numbers for each cell, plus three arrays, each of length NXBANDS
     plasma_int_helpers = (6+NXBANDS)*NPLASMA; //The size of the helper array for integers. We transmit 6 numbers for each cell, plus one array of length NXBANDS
     ioniz_spec_helpers = 2*MSPEC*NWAVE; //we need space for log and lin spectra for MSPEC XNWAVE
 
@@ -1841,11 +1841,15 @@ run -- 07jul -- ksl
 	  redhelper[mpi_i+7*NPLASMA] = plasmamain[mpi_i].heat_ind_comp/ np_mpi_global;
 	  redhelper[mpi_i+8*NPLASMA] = plasmamain[mpi_i].heat_photo/ np_mpi_global;
           redhelper[mpi_i+9*NPLASMA] = plasmamain[mpi_i].ip / np_mpi_global;
+          redhelper[mpi_i+10*NPLASMA] = plasmamain[mpi_i].j_direct / np_mpi_global;
+          redhelper[mpi_i+11*NPLASMA] = plasmamain[mpi_i].j_scatt / np_mpi_global;
+          redhelper[mpi_i+12*NPLASMA] = plasmamain[mpi_i].ip_direct / np_mpi_global;
+          redhelper[mpi_i+13*NPLASMA] = plasmamain[mpi_i].ip_scatt / np_mpi_global;
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
-	      redhelper[mpi_i+(10+mpi_j)*NPLASMA] = plasmamain[mpi_i].xj[mpi_j]/ np_mpi_global;
-	      redhelper[mpi_i+(10+NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j]/ np_mpi_global;
-	      redhelper[mpi_i+(10+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
+	      redhelper[mpi_i+(14+mpi_j)*NPLASMA] = plasmamain[mpi_i].xj[mpi_j]/ np_mpi_global;
+	      redhelper[mpi_i+(14+NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j]/ np_mpi_global;
+	      redhelper[mpi_i+(14+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
 	      maxbandfreqhelper[mpi_i*NXBANDS+mpi_j] = plasmamain[mpi_i].fmax[mpi_j];
 	      minbandfreqhelper[mpi_i*NXBANDS+mpi_j] = plasmamain[mpi_i].fmin[mpi_j];
 
@@ -1881,11 +1885,15 @@ run -- 07jul -- ksl
 	  plasmamain[mpi_i].heat_ind_comp = redhelper2[mpi_i+7*NPLASMA];
 	  plasmamain[mpi_i].heat_photo = redhelper2[mpi_i+8*NPLASMA];
           plasmamain[mpi_i].ip = redhelper2[mpi_i+9*NPLASMA];
+          plasmamain[mpi_i].j_direct = redhelper2[mpi_i+10*NPLASMA];
+          plasmamain[mpi_i].j_scatt = redhelper2[mpi_i+11*NPLASMA];
+          plasmamain[mpi_i].ip_direct = redhelper2[mpi_i+12*NPLASMA];
+          plasmamain[mpi_i].ip_scatt = redhelper2[mpi_i+13*NPLASMA];
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
-	      plasmamain[mpi_i].xj[mpi_j]=redhelper2[mpi_i+(10+mpi_j)*NPLASMA];
-	      plasmamain[mpi_i].xave_freq[mpi_j]=redhelper2[mpi_i+(10+NXBANDS+mpi_j)*NPLASMA];
-	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(10+NXBANDS*2+mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].xj[mpi_j]=redhelper2[mpi_i+(14+mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].xave_freq[mpi_j]=redhelper2[mpi_i+(14+NXBANDS+mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(14+NXBANDS*2+mpi_j)*NPLASMA];
 	      plasmamain[mpi_i].fmax[mpi_j] = maxbandfreqhelper2[mpi_i*NXBANDS+mpi_j];
 	      plasmamain[mpi_i].fmin[mpi_j] = minbandfreqhelper2[mpi_i*NXBANDS+mpi_j];
 	    }

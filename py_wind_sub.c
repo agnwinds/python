@@ -1490,6 +1490,48 @@ IP_summary (w, rootname, ochoice)
       write_array (filename, ochoice);
 
     }
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = ((plasmamain[nplasma].ip_direct));
+	}
+    }
+  display ("Log Ionization parameter (direct)");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".IP_direct");
+      write_array (filename, ochoice);
+
+    }
+
+ for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = ((plasmamain[nplasma].ip_scatt));
+	}
+    }
+  display ("Log Ionization parameter (scattered)");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".IP_scatt");
+      write_array (filename, ochoice);
+
+    }
+
+
+
+
   return (0);
 
 }

@@ -481,6 +481,7 @@ int inner_shell_summary(WindPtr w, char rootname[], int ochoice);
 int IP_summary(WindPtr w, char rootname[], int ochoice);
 int alpha_summary(WindPtr w, char rootname[], int ochoice);
 int J_summary(WindPtr w, char rootname[], int ochoice);
+int J_scat_summary(WindPtr w, char rootname[], int ochoice);
 int phot_split(WindPtr w, char rootname[], int ochoice);
 int thompson(WindPtr w, char rootname[], int ochoice);
 int nscat_split(WindPtr w, char rootname[], int ochoice);
