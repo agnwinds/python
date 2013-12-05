@@ -356,6 +356,11 @@ one_choice (choice, root, ochoice)
 
   iswitch = 0;
 
+  /* JM 1312 --initialise variables to avoid compilation warnings */
+  istate = 0;
+  n = 0;
+
+
   switch (choice)
     {
     case 'a':			/* Energy absorbed */

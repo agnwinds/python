@@ -600,6 +600,19 @@ int level_escapeoverview (nlev, w, rootname, ochoice)
 
   display(name);
 
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".lev");
+
+      sprintf (lname, "%d", nlev);
+      strcat (filename, lname);
+
+      strcat (filename, "_esc");
+      write_array (filename, ochoice);
+
+    }
+
   return (0);
 
 }
