@@ -1,4 +1,4 @@
-PhotTopS  1  1 200    13     1.000000  50
+PhotTopS  1  1 200    1     13.605698  50
 PhotTop     13.605698 6.304e-18
 PhotTop     16.627193 3.679e-18
 PhotTop     19.648689 2.327e-18
@@ -49,7 +49,7 @@ PhotTop     152.594482 5.188e-21
 PhotTop     155.615982 4.877e-21
 PhotTop     158.637466 4.589e-21
 PhotTop     161.658966 4.316e-21
-PhotTopS  1  1 200    3     2.000000  50
+PhotTopS  1  1 200    2     3.401424  50
 PhotTop     3.401424 1.478e-17
 PhotTop     4.156798 9.675e-18
 PhotTop     4.912172 6.722e-18
@@ -100,7 +100,7 @@ PhotTop     38.148613 3.776e-20
 PhotTop     38.903988 3.573e-20
 PhotTop     39.659359 3.384e-20
 PhotTop     40.414734 3.203e-20
-PhotTopS  1  1 200    1     3.000000  50
+PhotTopS  1  1 200    3     1.511743  50
 PhotTop     1.511743 2.518e-17
 PhotTop     1.847464 1.670e-17
 PhotTop     2.183186 1.178e-17
@@ -151,7 +151,7 @@ PhotTop     16.954941 9.760e-20
 PhotTop     17.290663 9.276e-20
 PhotTop     17.626385 8.823e-20
 PhotTop     17.962107 8.388e-20
-PhotTopS  1  1 200    0     4.000000  50
+PhotTopS  1  1 200    4     0.850356  50
 PhotTop     0.850356 3.730e-17
 PhotTop     1.039200 2.473e-17
 PhotTop     1.228043 1.748e-17
@@ -202,7 +202,7 @@ PhotTop     9.537154 1.737e-19
 PhotTop     9.725997 1.656e-19
 PhotTop     9.914841 1.579e-19
 PhotTop     10.103684 1.506e-19
-PhotTopS  1  1 200    0     5.000000  50
+PhotTopS  1  1 200    5     0.544228  50
 PhotTop     0.544228 5.100e-17
 PhotTop     0.665088 3.372e-17
 PhotTop     0.785948 2.381e-17
@@ -253,7 +253,7 @@ PhotTop     6.103779 2.589e-19
 PhotTop     6.224639 2.472e-19
 PhotTop     6.345499 2.362e-19
 PhotTop     6.466358 2.256e-19
-PhotTopS  1  1 200    0     6.000000  50
+PhotTopS  1  1 200    6     0.377936  50
 PhotTop     0.377936 6.616e-17
 PhotTop     0.461867 4.362e-17
 PhotTop     0.545797 3.074e-17
@@ -304,7 +304,7 @@ PhotTop     4.238736 3.496e-19
 PhotTop     4.322666 3.342e-19
 PhotTop     4.406596 3.197e-19
 PhotTop     4.490527 3.058e-19
-PhotTopS  1  1 200    0     7.000000  50
+PhotTopS  1  1 200    7     0.277668  50
 PhotTop     0.277668 8.271e-17
 PhotTop     0.339331 5.437e-17
 PhotTop     0.400994 3.824e-17
@@ -355,7 +355,7 @@ PhotTop     3.114173 4.446e-19
 PhotTop     3.175836 4.253e-19
 PhotTop     3.237499 4.072e-19
 PhotTop     3.299163 3.898e-19
-PhotTopS  1  1 200    0     8.000000  50
+PhotTopS  1  1 200    8     0.212589  50
 PhotTop     0.212589 1.006e-16
 PhotTop     0.259800 6.594e-17
 PhotTop     0.307011 4.629e-17
@@ -406,7 +406,7 @@ PhotTop     2.384289 5.432e-19
 PhotTop     2.431499 5.200e-19
 PhotTop     2.478710 4.981e-19
 PhotTop     2.525921 4.770e-19
-PhotTopS  1  1 200    0     9.000000  50
+PhotTopS  1  1 200    9     0.167972  50
 PhotTop     0.167972 1.197e-16
 PhotTop     0.205274 7.830e-17
 PhotTop     0.242577 5.487e-17
@@ -457,7 +457,7 @@ PhotTop     1.883883 6.453e-19
 PhotTop     1.921185 6.179e-19
 PhotTop     1.958488 5.921e-19
 PhotTop     1.995790 5.672e-19
-PhotTopS  1  1 200    0     10.000000  50
+PhotTopS  1  1 200    10     0.136057  50
 PhotTop     0.136057 1.401e-16
 PhotTop     0.166272 9.142e-17
 PhotTop     0.196487 6.396e-17
@@ -508,7 +508,7 @@ PhotTop     1.525945 7.508e-19
 PhotTop     1.556160 7.191e-19
 PhotTop     1.586375 6.892e-19
 PhotTop     1.616590 6.604e-19
-PhotTopS  1  1 211    3     1.000000  50
+PhotTopS  1  1 211    1     3.401424  50
 PhotTop     3.401424 1.355e-17
 PhotTop     4.156798 7.298e-18
 PhotTop     4.912172 4.310e-18
@@ -559,7 +559,7 @@ PhotTop     38.148613 3.292e-21
 PhotTop     38.903988 3.056e-21
 PhotTop     39.659359 2.839e-21
 PhotTop     40.414734 2.635e-21
-PhotTopS  1  1 211    1     2.000000  50
+PhotTopS  1  1 211    2     1.511743  50
 PhotTop     1.511743 2.604e-17
 PhotTop     1.847464 1.585e-17
 PhotTop     2.183186 1.032e-17
@@ -610,7 +610,7 @@ PhotTop     16.954941 2.000e-20
 PhotTop     17.290663 1.869e-20
 PhotTop     17.626385 1.748e-20
 PhotTop     17.962107 1.633e-20
-PhotTopS  1  1 211    0     3.000000  50
+PhotTopS  1  1 211    3     0.850356  50
 PhotTop     0.850356 3.942e-17
 PhotTop     1.039200 2.497e-17
 PhotTop     1.228043 1.689e-17
@@ -661,7 +661,7 @@ PhotTop     9.537154 5.739e-20
 PhotTop     9.725997 5.389e-20
 PhotTop     9.914841 5.066e-20
 PhotTop     10.103684 4.758e-20
-PhotTopS  1  1 211    0     4.000000  50
+PhotTopS  1  1 211    4     0.544228  50
 PhotTop     0.544228 5.401e-17
 PhotTop     0.665088 3.476e-17
 PhotTop     0.785948 2.389e-17
@@ -712,7 +712,7 @@ PhotTop     6.103779 1.160e-19
 PhotTop     6.224639 1.093e-19
 PhotTop     6.345499 1.032e-19
 PhotTop     6.466358 9.732e-20
-PhotTopS  1  1 211    0     5.000000  50
+PhotTopS  1  1 211    5     0.377936  50
 PhotTop     0.377936 6.986e-17
 PhotTop     0.461867 4.528e-17
 PhotTop     0.545797 3.136e-17
@@ -763,7 +763,7 @@ PhotTop     4.238736 1.926e-19
 PhotTop     4.322666 1.821e-19
 PhotTop     4.406596 1.724e-19
 PhotTop     4.490527 1.631e-19
-PhotTopS  1  1 211    0     6.000000  50
+PhotTopS  1  1 211    6     0.277668  50
 PhotTop     0.277668 8.698e-17
 PhotTop     0.339331 5.654e-17
 PhotTop     0.400994 3.930e-17
@@ -814,7 +814,7 @@ PhotTop     3.114173 2.830e-19
 PhotTop     3.175836 2.683e-19
 PhotTop     3.237499 2.547e-19
 PhotTop     3.299163 2.415e-19
-PhotTopS  1  1 211    0     7.000000  50
+PhotTopS  1  1 211    7     0.212589  50
 PhotTop     0.212589 1.053e-16
 PhotTop     0.259800 6.853e-17
 PhotTop     0.307011 4.772e-17
@@ -865,7 +865,7 @@ PhotTop     2.384289 3.839e-19
 PhotTop     2.431499 3.647e-19
 PhotTop     2.478710 3.468e-19
 PhotTop     2.525921 3.296e-19
-PhotTopS  1  1 211    0     8.000000  50
+PhotTopS  1  1 211    8     0.167972  50
 PhotTop     0.167972 1.249e-16
 PhotTop     0.205274 8.126e-17
 PhotTop     0.242577 5.661e-17
@@ -916,7 +916,7 @@ PhotTop     1.883883 4.926e-19
 PhotTop     1.921185 4.687e-19
 PhotTop     1.958488 4.463e-19
 PhotTop     1.995790 4.248e-19
-PhotTopS  1  1 211    0     9.000000  50
+PhotTopS  1  1 211    9     0.136057  50
 PhotTop     0.136057 1.456e-16
 PhotTop     0.166272 9.469e-17
 PhotTop     0.196487 6.598e-17
@@ -967,7 +967,7 @@ PhotTop     1.525945 6.073e-19
 PhotTop     1.556160 5.785e-19
 PhotTop     1.586375 5.515e-19
 PhotTop     1.616590 5.256e-19
-PhotTopS  1  1 220    1     1.000000  50
+PhotTopS  1  1 220    1     1.511743  50
 PhotTop     1.511743 1.809e-17
 PhotTop     1.847464 9.023e-18
 PhotTop     2.183186 4.977e-18
@@ -1018,7 +1018,7 @@ PhotTop     16.954941 1.223e-21
 PhotTop     17.290663 1.120e-21
 PhotTop     17.626385 1.027e-21
 PhotTop     17.962107 9.402e-22
-PhotTopS  1  1 220    0     2.000000  50
+PhotTopS  1  1 220    2     0.850356  50
 PhotTop     0.850356 3.576e-17
 PhotTop     1.039200 2.023e-17
 PhotTop     1.228043 1.236e-17
@@ -1069,7 +1069,7 @@ PhotTop     9.537154 7.880e-21
 PhotTop     9.725997 7.265e-21
 PhotTop     9.914841 6.705e-21
 PhotTop     10.103684 6.179e-21
-PhotTopS  1  1 220    0     3.000000  50
+PhotTopS  1  1 220    3     0.544228  50
 PhotTop     0.544228 5.346e-17
 PhotTop     0.665088 3.207e-17
 PhotTop     0.785948 2.062e-17
@@ -1120,7 +1120,7 @@ PhotTop     6.103779 2.567e-20
 PhotTop     6.224639 2.380e-20
 PhotTop     6.345499 2.209e-20
 PhotTop     6.466358 2.047e-20
-PhotTopS  1  1 220    0     4.000000  50
+PhotTopS  1  1 220    4     0.377936  50
 PhotTop     0.377936 7.168e-17
 PhotTop     0.461867 4.433e-17
 PhotTop     0.545797 2.933e-17
@@ -1171,7 +1171,7 @@ PhotTop     4.238736 5.913e-20
 PhotTop     4.322666 5.508e-20
 PhotTop     4.406596 5.136e-20
 PhotTop     4.490527 4.783e-20
-PhotTopS  1  1 220    0     5.000000  50
+PhotTopS  1  1 220    5     0.277668  50
 PhotTop     0.277668 9.066e-17
 PhotTop     0.339331 5.704e-17
 PhotTop     0.400994 3.839e-17
@@ -1222,7 +1222,7 @@ PhotTop     3.114173 1.104e-19
 PhotTop     3.175836 1.032e-19
 PhotTop     3.237499 9.662e-20
 PhotTop     3.299163 9.035e-20
-PhotTopS  1  1 220    0     6.000000  50
+PhotTopS  1  1 220    6     0.212589  50
 PhotTop     0.212589 1.105e-16
 PhotTop     0.259800 7.027e-17
 PhotTop     0.307011 4.779e-17
@@ -1273,7 +1273,7 @@ PhotTop     2.384289 1.794e-19
 PhotTop     2.431499 1.683e-19
 PhotTop     2.478710 1.580e-19
 PhotTop     2.525921 1.483e-19
-PhotTopS  1  1 220    0     7.000000  50
+PhotTopS  1  1 220    7     0.167972  50
 PhotTop     0.167972 1.314e-16
 PhotTop     0.205274 8.405e-17
 PhotTop     0.242577 5.754e-17
@@ -1324,7 +1324,7 @@ PhotTop     1.883883 2.646e-19
 PhotTop     1.921185 2.490e-19
 PhotTop     1.958488 2.345e-19
 PhotTop     1.995790 2.207e-19
-PhotTopS  1  1 220    0     8.000000  50
+PhotTopS  1  1 220    8     0.136057  50
 PhotTop     0.136057 1.532e-16
 PhotTop     0.166272 9.839e-17
 PhotTop     0.196487 6.766e-17
@@ -1375,7 +1375,7 @@ PhotTop     1.525945 3.641e-19
 PhotTop     1.556160 3.434e-19
 PhotTop     1.586375 3.242e-19
 PhotTop     1.616590 3.059e-19
-PhotTopS  1  1 231    0     1.000000  50
+PhotTopS  1  1 231    1     0.850356  50
 PhotTop     0.850356 1.908e-17
 PhotTop     1.039200 8.852e-18
 PhotTop     1.228043 4.577e-18
@@ -1426,7 +1426,7 @@ PhotTop     9.537154 3.760e-22
 PhotTop     9.725997 3.399e-22
 PhotTop     9.914841 3.077e-22
 PhotTop     10.103684 2.778e-22
-PhotTopS  1  1 231    0     2.000000  50
+PhotTopS  1  1 231    2     0.544228  50
 PhotTop     0.544228 4.099e-17
 PhotTop     0.665088 2.160e-17
 PhotTop     0.785948 1.238e-17
@@ -1477,7 +1477,7 @@ PhotTop     6.103779 2.660e-21
 PhotTop     6.224639 2.421e-21
 PhotTop     6.345499 2.206e-21
 PhotTop     6.466358 2.005e-21
-PhotTopS  1  1 231    0     3.000000  50
+PhotTopS  1  1 231    3     0.377936  50
 PhotTop     0.377936 6.337e-17
 PhotTop     0.461867 3.584e-17
 PhotTop     0.545797 2.184e-17
@@ -1528,7 +1528,7 @@ PhotTop     4.238736 9.741e-21
 PhotTop     4.322666 8.916e-21
 PhotTop     4.406596 8.171e-21
 PhotTop     4.490527 7.473e-21
-PhotTopS  1  1 231    0     4.000000  50
+PhotTopS  1  1 231    4     0.277668  50
 PhotTop     0.277668 8.602e-17
 PhotTop     0.339331 5.075e-17
 PhotTop     0.400994 3.213e-17
@@ -1579,7 +1579,7 @@ PhotTop     3.114173 2.522e-20
 PhotTop     3.175836 2.320e-20
 PhotTop     3.237499 2.136e-20
 PhotTop     3.299163 1.964e-20
-PhotTopS  1  1 231    0     5.000000  50
+PhotTopS  1  1 231    5     0.212589  50
 PhotTop     0.212589 1.090e-16
 PhotTop     0.259800 6.608e-17
 PhotTop     0.307011 4.290e-17
@@ -1630,7 +1630,7 @@ PhotTop     2.384289 5.245e-20
 PhotTop     2.431499 4.847e-20
 PhotTop     2.478710 4.484e-20
 PhotTop     2.525921 4.142e-20
-PhotTopS  1  1 231    0     6.000000  50
+PhotTopS  1  1 231    6     0.167972  50
 PhotTop     0.167972 1.326e-16
 PhotTop     0.205274 8.178e-17
 PhotTop     0.242577 5.402e-17
@@ -1681,7 +1681,7 @@ PhotTop     1.883883 9.391e-20
 PhotTop     1.921185 8.714e-20
 PhotTop     1.958488 8.094e-20
 PhotTop     1.995790 7.506e-20
-PhotTopS  1  1 231    0     7.000000  50
+PhotTopS  1  1 231    7     0.136057  50
 PhotTop     0.136057 1.568e-16
 PhotTop     0.166272 9.788e-17
 PhotTop     0.196487 6.543e-17
@@ -1732,7 +1732,7 @@ PhotTop     1.525945 1.510e-19
 PhotTop     1.556160 1.406e-19
 PhotTop     1.586375 1.310e-19
 PhotTop     1.616590 1.219e-19
-PhotTopS  1  1 240    0     1.000000  50
+PhotTopS  1  1 240    1     0.544228  50
 PhotTop     0.544228 1.752e-17
 PhotTop     0.665088 7.569e-18
 PhotTop     0.785948 3.673e-18
@@ -1783,7 +1783,7 @@ PhotTop     6.103779 1.018e-22
 PhotTop     6.224639 9.086e-23
 PhotTop     6.345499 8.121e-23
 PhotTop     6.466358 7.232e-23
-PhotTopS  1  1 240    0     2.000000  50
+PhotTopS  1  1 240    2     0.377936  50
 PhotTop     0.377936 4.138e-17
 PhotTop     0.461867 2.033e-17
 PhotTop     0.545797 1.094e-17
@@ -1834,7 +1834,7 @@ PhotTop     4.238736 7.963e-22
 PhotTop     4.322666 7.152e-22
 PhotTop     4.406596 6.434e-22
 PhotTop     4.490527 5.769e-22
-PhotTopS  1  1 240    0     3.000000  50
+PhotTopS  1  1 240    3     0.277668  50
 PhotTop     0.277668 6.743e-17
 PhotTop     0.339331 3.586e-17
 PhotTop     0.400994 2.065e-17
@@ -1885,7 +1885,7 @@ PhotTop     3.114173 3.250e-21
 PhotTop     3.175836 2.937e-21
 PhotTop     3.237499 2.657e-21
 PhotTop     3.299163 2.397e-21
-PhotTopS  1  1 240    0     4.000000  50
+PhotTopS  1  1 240    4     0.212589  50
 PhotTop     0.212589 9.433e-17
 PhotTop     0.259800 5.282e-17
 PhotTop     0.307011 3.186e-17
@@ -1936,7 +1936,7 @@ PhotTop     2.384289 9.357e-21
 PhotTop     2.431499 8.499e-21
 PhotTop     2.478710 7.731e-21
 PhotTop     2.525921 7.014e-21
-PhotTopS  1  1 240    0     5.000000  50
+PhotTopS  1  1 240    5     0.167972  50
 PhotTop     0.167972 1.217e-16
 PhotTop     0.205274 7.058e-17
 PhotTop     0.242577 4.396e-17
@@ -1987,7 +1987,7 @@ PhotTop     1.883883 2.150e-20
 PhotTop     1.921185 1.963e-20
 PhotTop     1.958488 1.794e-20
 PhotTop     1.995790 1.636e-20
-PhotTopS  1  1 240    0     6.000000  50
+PhotTopS  1  1 240    6     0.136057  50
 PhotTop     0.136057 1.494e-16
 PhotTop     0.166272 8.885e-17
 PhotTop     0.196487 5.665e-17
@@ -2038,7 +2038,7 @@ PhotTop     1.525945 4.220e-20
 PhotTop     1.556160 3.869e-20
 PhotTop     1.586375 3.551e-20
 PhotTop     1.616590 3.253e-20
-PhotTopS  1  1 251    0     1.000000  50
+PhotTopS  1  1 251    1     0.377936  50
 PhotTop     0.377936 1.467e-17
 PhotTop     0.461867 5.910e-18
 PhotTop     0.545797 2.693e-18
@@ -2089,7 +2089,7 @@ PhotTop     4.238736 2.529e-23
 PhotTop     4.322666 2.227e-23
 PhotTop     4.406596 1.966e-23
 PhotTop     4.490527 1.726e-23
-PhotTopS  1  1 251    0     2.000000  50
+PhotTopS  1  1 251    2     0.277668  50
 PhotTop     0.277668 3.810e-17
 PhotTop     0.339331 1.745e-17
 PhotTop     0.400994 8.827e-18
@@ -2140,7 +2140,7 @@ PhotTop     3.114173 2.180e-22
 PhotTop     3.175836 1.933e-22
 PhotTop     3.237499 1.717e-22
 PhotTop     3.299163 1.518e-22
-PhotTopS  1  1 251    0     3.000000  50
+PhotTopS  1  1 251    3     0.212589  50
 PhotTop     0.212589 6.592e-17
 PhotTop     0.259800 3.290e-17
 PhotTop     0.307011 1.789e-17
@@ -2191,7 +2191,7 @@ PhotTop     2.384289 9.834e-22
 PhotTop     2.431499 8.771e-22
 PhotTop     2.478710 7.836e-22
 PhotTop     2.525921 6.973e-22
-PhotTopS  1  1 251    0     4.000000  50
+PhotTopS  1  1 251    4     0.167972  50
 PhotTop     0.167972 9.592e-17
 PhotTop     0.205274 5.079e-17
 PhotTop     0.242577 2.909e-17
@@ -2242,7 +2242,7 @@ PhotTop     1.883883 3.119e-21
 PhotTop     1.921185 2.797e-21
 PhotTop     1.958488 2.512e-21
 PhotTop     1.995790 2.249e-21
-PhotTopS  1  1 251    0     5.000000  50
+PhotTopS  1  1 251    5     0.136057  50
 PhotTop     0.136057 1.271e-16
 PhotTop     0.166272 7.020e-17
 PhotTop     0.196487 4.178e-17
@@ -2293,7 +2293,7 @@ PhotTop     1.525945 7.855e-21
 PhotTop     1.556160 7.082e-21
 PhotTop     1.586375 6.393e-21
 PhotTop     1.616590 5.754e-21
-PhotTopS  1  1 260    0     1.000000  50
+PhotTopS  1  1 260    1     0.277668  50
 PhotTop     0.277668 1.152e-17
 PhotTop     0.339331 4.329e-18
 PhotTop     0.400994 1.853e-18
@@ -2344,7 +2344,7 @@ PhotTop     3.114173 5.902e-24
 PhotTop     3.175836 5.131e-24
 PhotTop     3.237499 4.469e-24
 PhotTop     3.299163 3.870e-24
-PhotTopS  1  1 260    0     2.000000  50
+PhotTopS  1  1 260    2     0.212589  50
 PhotTop     0.212589 3.275e-17
 PhotTop     0.259800 1.400e-17
 PhotTop     0.307011 6.649e-18
@@ -2395,7 +2395,7 @@ PhotTop     2.384289 5.578e-23
 PhotTop     2.431499 4.882e-23
 PhotTop     2.478710 4.280e-23
 PhotTop     2.525921 3.732e-23
-PhotTopS  1  1 260    0     3.000000  50
+PhotTopS  1  1 260    3     0.167972  50
 PhotTop     0.167972 6.028e-17
 PhotTop     0.205274 2.820e-17
 PhotTop     0.242577 1.446e-17
@@ -2446,7 +2446,7 @@ PhotTop     1.883883 2.759e-22
 PhotTop     1.921185 2.429e-22
 PhotTop     1.958488 2.142e-22
 PhotTop     1.995790 1.880e-22
-PhotTopS  1  1 260    0     4.000000  50
+PhotTopS  1  1 260    4     0.136057  50
 PhotTop     0.136057 9.164e-17
 PhotTop     0.166272 4.577e-17
 PhotTop     0.196487 2.484e-17
@@ -2497,7 +2497,7 @@ PhotTop     1.525945 9.563e-22
 PhotTop     1.556160 8.468e-22
 PhotTop     1.586375 7.511e-22
 PhotTop     1.616590 6.632e-22
-PhotTopS  1  1 271    0     1.000000  50
+PhotTopS  1  1 271    1     0.212589  50
 PhotTop     0.212589 8.626e-18
 PhotTop     0.259800 3.022e-18
 PhotTop     0.307011 1.215e-18
@@ -2548,7 +2548,7 @@ PhotTop     2.384289 1.315e-24
 PhotTop     2.431499 1.128e-24
 PhotTop     2.478710 9.704e-25
 PhotTop     2.525921 8.282e-25
-PhotTopS  1  1 271    0     2.000000  50
+PhotTopS  1  1 271    2     0.167972  50
 PhotTop     0.167972 2.669e-17
 PhotTop     0.205274 1.064e-17
 PhotTop     0.242577 4.750e-18
@@ -2599,7 +2599,7 @@ PhotTop     1.883883 1.354e-23
 PhotTop     1.921185 1.170e-23
 PhotTop     1.958488 1.012e-23
 PhotTop     1.995790 8.705e-24
-PhotTopS  1  1 271    0     3.000000  50
+PhotTopS  1  1 271    3     0.136057  50
 PhotTop     0.136057 5.224e-17
 PhotTop     0.166272 2.289e-17
 PhotTop     0.196487 1.106e-17
@@ -2650,7 +2650,7 @@ PhotTop     1.525945 7.290e-23
 PhotTop     1.556160 6.337e-23
 PhotTop     1.586375 5.518e-23
 PhotTop     1.616590 4.776e-23
-PhotTopS  1  1 280    0     1.000000  50
+PhotTopS  1  1 280    1     0.167972  50
 PhotTop     0.167972 6.222e-18
 PhotTop     0.205274 2.034e-18
 PhotTop     0.242577 7.683e-19
@@ -2701,7 +2701,7 @@ PhotTop     1.883883 2.824e-25
 PhotTop     1.921185 2.393e-25
 PhotTop     1.958488 2.031e-25
 PhotTop     1.995790 1.709e-25
-PhotTopS  1  1 280    0     2.000000  50
+PhotTopS  1  1 280    2     0.136057  50
 PhotTop     0.136057 2.085e-17
 PhotTop     0.166272 7.757e-18
 PhotTop     0.196487 3.253e-18
@@ -2752,7 +2752,7 @@ PhotTop     1.525945 3.153e-24
 PhotTop     1.556160 2.688e-24
 PhotTop     1.586375 2.297e-24
 PhotTop     1.616590 1.947e-24
-PhotTopS  1  1 291    0     1.000000  50
+PhotTopS  1  1 291    1     0.136057  50
 PhotTop     0.136057 4.357e-18
 PhotTop     0.166272 1.329e-18
 PhotTop     0.196487 4.718e-19
