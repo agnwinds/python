@@ -87,6 +87,7 @@ kappa_comp (xplasma, freq)
 2011	nsh	Coded as part of the effort to include compton scattering in August 2011 at Southampton.
 feb 2013 - nsh - approximate KN cross section replaced by correct value
 1309 	JM	Removed w and ds as arguments as no longer required
+1312	NSH	Recoded to use the new exponential and power law models.
 
  ************************************************************************/
 

@@ -284,7 +284,11 @@ statement could be deleted entirely 060802 -- ksl */
 
   xplasma->ntot++;
 
-
+/* NSH 131213 slight change to the line computing IP, we now split out direct and scattered - this was 
+mainly for the progha_13 work, but is of general interest */
+      /* 70h -- nsh -- 111004 added to try to calculate the IP for the cell. Note that 
+       * this may well end up not being correct, since the same photon could be counted 
+       * several times if it is rattling around.... */
   if (HEV * p->freq > 13.6)
     {
       xplasma->ip += ((w_ave * ds) / (H * p->freq));
@@ -296,12 +300,6 @@ statement could be deleted entirely 060802 -- ksl */
 	{
 	xplasma->ip_scatt += ((w_ave * ds) / (H * p->freq));
 	}
-
-
-
-      /* 70h -- nsh -- 111004 added to try to calculate the IP for the cell. Note that 
-       * this may well end up not being correct, since the same photon could be counted 
-       * several times if it is rattling around.... */
     }
 
 /* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, 

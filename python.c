@@ -186,6 +186,10 @@ History:
 	1308	nsh	Added a call to generate rtheta wind cones - issue #41
 	1309	nsh	Changed the loop around where disk parameters are read in - issue #44
 	1309	nsh	Added commands to write out warning summary - relating to issue #47
+  	1312	nsh	Added a new parameter file command to turn off heating and cooling mechanisms
+			at the moment it only does adiabatc
+			Also some modifications to the parallel communiactions to deal with some new
+			plasma variabales, and the min and max frequency photons seen in bands.
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -258,7 +262,10 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
 #ifdef MPI_ON
   int mpi_i, mpi_j;
-  double *maxfreqhelper,*maxfreqhelper2;
+
+
+  double *maxfreqhelper,*maxfreqhelper2; 
+/*NSH 131213 the next line introduces new helper arrays for the max and min frequencies in bands */
   double *maxbandfreqhelper,*maxbandfreqhelper2,*minbandfreqhelper,*minbandfreqhelper2;
   double *redhelper, *redhelper2;
   int *iredhelper, *iredhelper2;
@@ -1832,6 +1839,7 @@ run -- 07jul -- ksl
  
     maxfreqhelper = calloc (sizeof(double),NPLASMA); 
     maxfreqhelper2 = calloc (sizeof(double),NPLASMA);
+/* NSH 131213 - allocate memory for the band limited max and min frequencies */
     maxbandfreqhelper = calloc (sizeof(double),NPLASMA*NXBANDS); 
     maxbandfreqhelper2 = calloc (sizeof(double),NPLASMA*NXBANDS);
     minbandfreqhelper = calloc (sizeof(double),NPLASMA*NXBANDS); 
@@ -1868,12 +1876,13 @@ run -- 07jul -- ksl
 	      redhelper[mpi_i+(14+mpi_j)*NPLASMA] = plasmamain[mpi_i].xj[mpi_j]/ np_mpi_global;
 	      redhelper[mpi_i+(14+NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j]/ np_mpi_global;
 	      redhelper[mpi_i+(14+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
+/* 131213 NSH populate the band limited min and max frequency arrays */
 	      maxbandfreqhelper[mpi_i*NXBANDS+mpi_j] = plasmamain[mpi_i].fmax[mpi_j];
 	      minbandfreqhelper[mpi_i*NXBANDS+mpi_j] = plasmamain[mpi_i].fmin[mpi_j];
 
 	    }
 	}
-
+/* 131213 NSH communiate the min and max band frequencies these use MPI_MIN or MPI_MAX */ 
       MPI_Reduce(minbandfreqhelper, minbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
       MPI_Reduce(maxbandfreqhelper, maxbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
       MPI_Reduce(maxfreqhelper, maxfreqhelper2, NPLASMA, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
@@ -1886,6 +1895,7 @@ run -- 07jul -- ksl
       
       MPI_Bcast(redhelper2, plasma_double_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       MPI_Bcast(maxfreqhelper2, NPLASMA, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+/* 131213 NSH Send out the global min and max band limited frequencies to all threads */
       MPI_Bcast(minbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       MPI_Bcast(maxbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
@@ -1912,6 +1922,7 @@ run -- 07jul -- ksl
 	      plasmamain[mpi_i].xj[mpi_j]=redhelper2[mpi_i+(14+mpi_j)*NPLASMA];
 	      plasmamain[mpi_i].xave_freq[mpi_j]=redhelper2[mpi_i+(14+NXBANDS+mpi_j)*NPLASMA];
 	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(14+NXBANDS*2+mpi_j)*NPLASMA];
+/* 131213 NSH And unpack the min and max banded frequencies to the plasma array */ 
 	      plasmamain[mpi_i].fmax[mpi_j] = maxbandfreqhelper2[mpi_i*NXBANDS+mpi_j];
 	      plasmamain[mpi_i].fmin[mpi_j] = minbandfreqhelper2[mpi_i*NXBANDS+mpi_j];
 	    }

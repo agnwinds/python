@@ -325,9 +325,16 @@ adiabatic_cooling_summary (w, rootname, ochoice)
 	}
     }
 
-
+if (geo.adiabatic==1)
+	{
   display ("Adiabatic cooling");
   Log ("The total adiabatic cooling is %8.2g\n", tot);
+	}
+else
+	{
+  display ("This is only potential adiabatic cooling - it was switched off in the model");
+  Log ("The total adiabatic cooling is %8.2g\n", tot);
+	}
 
   if (ochoice)
     {

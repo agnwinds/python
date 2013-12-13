@@ -79,6 +79,7 @@ History:
 			structure to solve windsave bug
    	13jul	nsh	76: added lines to deal with the case when adiacaitc cooling becomes heating in
 			complex wind geometries
+	13nov	nsh	77: Some changes in the parallel communications for new variables.
 
 
 **************************************************************/
@@ -851,6 +852,7 @@ History:
 	06jul	ksl	57+ -- Added to changes to allow for a separate macro structure
 	06aug	ksl	57h -- Additional changes to allow for the fact that marcomain
 			is not created at all if no macro atoms.
+	13dec	nsh	77 zero various new plasma variables
 
 **************************************************************/
 

@@ -294,7 +294,7 @@ cylvar_wind_complete (w)
   double drho, dz;
 
   /* First define the windcones for each cell */
-printf ("NDIM=%i, MDIM=%i\n",NDIM,MDIM);
+
   for (i = 0; i < NDIM - 1; i++)
     {
       for (j = 0; j < MDIM - 1; j++)

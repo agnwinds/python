@@ -68,8 +68,9 @@ History:
 			try and speed up the pairwise ionization scheme
 	13may	nsh	added code to use temprature computed from internal energy in a
 			zeus file as a first guess for temperature in a proga type model
-	13sep	nsh	small change to avoid the muliplicatoin by 0.9 (lucy guess) from giving us the wropng
-			zeus temperature.
+	13sep	nsh	small change to avoid the muliplicatoin by 0.9 (lucy guess) from giving us the 				wrong zeus temperature.
+	13nov	nsh	changes to take account of log formulation of power law
+			also initialise the min and max frequencies seen in a band.
 
 **************************************************************/
 

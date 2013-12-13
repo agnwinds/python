@@ -623,6 +623,8 @@ temp_func (solv_temp)
 	13sep	NSH	Reversed commenting out of lines that check for maximum frequency and 
 			reset integration limits - unsure why this was ever commented out!
 	13sep	NSH	Changed to always use the topbase style of data - verner data is now tabulated.
+	13nov	NSH	Changed to use the new log version of PL, also the min and max frequencies in 
+			a band are used to decide the applicability of a model.
 
 **************************************************************/
 int pl_correct_err = 0;
@@ -939,21 +941,23 @@ This is almost identical to code written to compute the sim power law correction
   History:
 
 12Feb NSH - written as part of the varaible temperature effort.
+13Nov NSH - changed to work in logspace - and name changed.
  ************************************************************************/
 
 
+/* This is the old non-log version */
+//double
+//tb_pow1 (freq)
+//     double freq;
+//{
+//  double answer;
+//
+//  answer = xpl_w * (pow (freq, (xpl_alpha - 1.0)));
+//  answer *= sigma_phot_topbase (xtop, freq);	// and finally multiply by the cross section.
+//
+//  return (answer);
+//}
 
-double
-tb_pow1 (freq)
-     double freq;
-{
-  double answer;
-
-  answer = xpl_w * (pow (freq, (xpl_alpha - 1.0)));
-  answer *= sigma_phot_topbase (xtop, freq);	// and finally multiply by the cross section.
-
-  return (answer);
-}
 
 
 double
