@@ -325,9 +325,16 @@ adiabatic_cooling_summary (w, rootname, ochoice)
 	}
     }
 
-
+if (geo.adiabatic==1)
+	{
   display ("Adiabatic cooling");
   Log ("The total adiabatic cooling is %8.2g\n", tot);
+	}
+else
+	{
+  display ("This is only potential adiabatic cooling - it was switched off in the model");
+  Log ("The total adiabatic cooling is %8.2g\n", tot);
+	}
 
   if (ochoice)
     {
@@ -679,6 +686,7 @@ freq_summary (w, rootname, ochoice)
      int ochoice;
 {
   int n;
+  char filename[LINELENGTH];
   int nplasma;
 
   for (n = 0; n < NDIM2; n++)
@@ -691,6 +699,13 @@ freq_summary (w, rootname, ochoice)
 	}
     }
   display ("Average freqency");
+      if (ochoice)
+	{
+	  strcpy (filename, rootname);
+	  strcat (filename, ".ave_freq");
+	  write_array (filename, ochoice);
+
+	}
 
   return (0);
 
@@ -1097,10 +1112,16 @@ wind_element (w)
   int m, n, i, j, nn, mm;
   int first, last;
   n = 50;
-a:rdint ("Wind.array.element", &n);
+a: printf("There are %i wind elements in this model\n",NDIM2);
+rdint ("Wind.array.element", &n);
 
   if (n < 0)
     goto b;
+  else if (n > NDIM2)
+	{
+	printf("No, there are %i wind elements, not %i\n",NDIM2,n);
+	goto a;
+	}
 
   wind_n_to_ij (n, &i, &j);
   xplasma = &plasmamain[w[n].nplasma];
@@ -1207,8 +1228,8 @@ a:rdint ("Wind.array.element", &n);
   Log ("Spectral model details:\n");
   for (nn = 0; nn < geo.nxfreq; nn++)
     {
-      Log ("numin= %8.2e numax= %8.2e Model= %d PL_w= %8.2e PL_alpha= %8.2e Exp_w= %8.2e EXP_temp= %8.2e\n",geo.xfreq[nn],geo.xfreq[nn+1],xplasma->spec_mod_type[nn],xplasma->pl_w[nn],xplasma->pl_alpha[nn],xplasma->exp_w[nn],xplasma->exp_temp[nn]);
-    }
+      Log ("numin= %8.2e (%8.2e) numax= %8.2e (%8.2e) Model= %2d PL_log_w= %9.2e PL_alpha= %9.2e Exp_w= %9.2e EXP_temp= %9.2e\n",xplasma->fmin[nn],geo.xfreq[nn],xplasma->fmax[nn],geo.xfreq[nn+1],xplasma->spec_mod_type[nn],xplasma->pl_log_w[nn],xplasma->pl_alpha[nn],xplasma->exp_w[nn],xplasma->exp_temp[nn]);
+}    
 
 
   goto a;
@@ -1476,6 +1497,48 @@ IP_summary (w, rootname, ochoice)
       write_array (filename, ochoice);
 
     }
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = ((plasmamain[nplasma].ip_direct));
+	}
+    }
+  display ("Log Ionization parameter (direct)");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".IP_direct");
+      write_array (filename, ochoice);
+
+    }
+
+ for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = ((plasmamain[nplasma].ip_scatt));
+	}
+    }
+  display ("Log Ionization parameter (scattered)");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".IP_scatt");
+      write_array (filename, ochoice);
+
+    }
+
+
+
+
   return (0);
 
 }
@@ -1565,6 +1628,77 @@ J_summary (w, rootname, ochoice)
       write_array (filename, ochoice);
 
     }
+  return (0);
+
+}
+
+
+int
+J_scat_summary (w, rootname, ochoice)
+    WindPtr w;
+     char rootname[];
+     int ochoice;
+{
+  int  n;
+  char filename[LINELENGTH];
+  int nplasma;
+
+
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = (plasmamain[nplasma].j);
+	}
+    }
+  display ("J in cell");
+ 
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".J_tot");
+      write_array (filename, ochoice);
+    }
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = (plasmamain[nplasma].j_direct);
+	}
+    }
+  display ("J in cell from direct photons");
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".J_direct");
+      write_array (filename, ochoice);
+    }
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+	{
+	  nplasma = w[n].nplasma;
+	  aaa[n] = (plasmamain[nplasma].j_scatt);
+	}
+    }
+  display ("J in cell from scattered photons");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".J_scatt");
+      write_array (filename, ochoice);
+    }
+
+
   return (0);
 
 }

@@ -284,13 +284,22 @@ statement could be deleted entirely 060802 -- ksl */
 
   xplasma->ntot++;
 
-
-  if (HEV * p->freq > 13.6)
-    {
-      xplasma->ip += ((w_ave * ds) / (H * p->freq));
+/* NSH 131213 slight change to the line computing IP, we now split out direct and scattered - this was 
+mainly for the progha_13 work, but is of general interest */
       /* 70h -- nsh -- 111004 added to try to calculate the IP for the cell. Note that 
        * this may well end up not being correct, since the same photon could be counted 
        * several times if it is rattling around.... */
+  if (HEV * p->freq > 13.6)
+    {
+      xplasma->ip += ((w_ave * ds) / (H * p->freq));
+ if (p->nscat == 0)
+	{
+  	xplasma->ip_direct += ((w_ave * ds) / (H * p->freq));
+	}
+  else
+	{
+	xplasma->ip_scatt += ((w_ave * ds) / (H * p->freq));
+	}
     }
 
 /* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, 
@@ -380,7 +389,15 @@ statement could be deleted entirely 060802 -- ksl */
 	  xplasma->xsd_freq[i] += p->freq * p->freq * w_ave * ds;	/*1208 NSH imput to allow standard deviation to be calculated */
 	  xplasma->xj[i] += w_ave * ds;	/*1108 NSH/KSL photon weight times distance travelled */
 	  xplasma->nxtot[i]++;	/*1108 NSH increment the frequency banded photon counter */
-
+/* 1311 NSH lines added below to work out the range of frequencies within a band where photons have been seen */
+	  if (p->freq < xplasma->fmin[i])
+		{
+		xplasma->fmin[i]=p->freq;
+		}
+	  if (p->freq > xplasma->fmax[i]) 
+		{
+		xplasma->fmax[i]=p->freq;
+		}
 	}
     }
 
