@@ -446,7 +446,6 @@ double bb_correct_2(double xtemp, double t_r, double www, int nion);
 double temp_func(double solv_temp);
 double pl_correct_2(double xtemp, int nion);
 double tb_planck1(double freq);
-double tb_pow1(double freq);
 double tb_logpow1(double freq);
 double tb_exp1(double freq);
 /* matom_diag.c */
