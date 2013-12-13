@@ -418,10 +418,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
 
 
       /* this last bit is the direction, might need a change */
-//      randvcos (p[i].lmn, p[i].x);
-	p[i].lmn[0]=p[i].x[0]/r  ;
-	p[i].lmn[1]=p[i].x[1]/r  ;
-	p[i].lmn[2]=p[i].x[2]/r  ;
+      randvcos (p[i].lmn, p[i].x);
 
 
   }

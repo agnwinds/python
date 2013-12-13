@@ -220,6 +220,7 @@ main (argc, argv)
   long nphot_to_define;
   int n, nangles, photons_per_cycle, subcycles;
   int iwind;
+  int thermal_opt; /*NSH 131213 - added to control options to turn on and off some heating and cooling mechanisms */
 
 /* Next three lines have variables that should be a structure, or possibly we
 should allocate the space for the spectra to avoid all this nonsense.  02feb ksl */
@@ -756,6 +757,20 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
       geo.scatter_mode = 0;	// isotropic
       geo.rt_mode = 1;		// Not macro atom (SS)
     }
+
+
+  rdint
+    ("Thermal_balance_options(0=everything.on,1=no.adiabatic)",
+     &thermal_opt);
+  if (thermal_opt == 1)
+	{
+	geo.adiabatic=0;
+	}
+  else if (thermal_opt > 1 || thermal_opt < 0)
+	{
+      	Error ("Unknown thermal balance mode %d\n", thermal_opt);
+      	exit (0);
+    	}
 
 
 /*57h -- Next line prevents bf calculation of macro_estimaters when no macro atoms are present.   */
@@ -2400,7 +2415,7 @@ init_geo ()
   geo.ndim = 30;
   geo.mdim = 30;
   geo.disk_z0 = geo.disk_z1 = 0.0;	// 080518 - ksl - moved this up
-  geo.adiabatic = 0;		// Default is now set so that adiabatic cooling is included in the wind
+  geo.adiabatic = 1;		// Default is now set so that adiabatic cooling is included in the wind
   geo.auger_ionization = 1;	//Default is on.
 
 
