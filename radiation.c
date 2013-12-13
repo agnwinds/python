@@ -141,7 +141,7 @@ radiation (p, ds)
 
   kappa_tot = frac_ff = kappa_ff (xplasma, freq);	/* Add ff opacity */
   kappa_tot += frac_comp = kappa_comp (xplasma, freq);	/* 70 NSH 1108 calculate compton opacity, store it in kappa_comp and also add it to kappa_tot, the total opacity for the photon path */
-  kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq, ds, p->w);
+  kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq);
   frac_tot = frac_z = 0;	/* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
 				   indicate this is all disagnostic and might be removed */
 
@@ -284,13 +284,22 @@ statement could be deleted entirely 060802 -- ksl */
 
   xplasma->ntot++;
 
-
-  if (HEV * p->freq > 13.6)
-    {
-      xplasma->ip += ((w_ave * ds) / (H * p->freq));
+/* NSH 131213 slight change to the line computing IP, we now split out direct and scattered - this was 
+mainly for the progha_13 work, but is of general interest */
       /* 70h -- nsh -- 111004 added to try to calculate the IP for the cell. Note that 
        * this may well end up not being correct, since the same photon could be counted 
        * several times if it is rattling around.... */
+  if (HEV * p->freq > 13.6)
+    {
+      xplasma->ip += ((w_ave * ds) / (H * p->freq));
+ if (p->nscat == 0)
+	{
+  	xplasma->ip_direct += ((w_ave * ds) / (H * p->freq));
+	}
+  else
+	{
+	xplasma->ip_scatt += ((w_ave * ds) / (H * p->freq));
+	}
     }
 
 /* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, 
@@ -328,6 +337,17 @@ statement could be deleted entirely 060802 -- ksl */
 
 /*photon weight times distance in the shell is proportional to the mean intensity */
   xplasma->j += w_ave * ds;
+
+  if (p->nscat == 0)
+	{
+  	xplasma->j_direct += w_ave * ds;
+	}
+  else
+	{
+	xplasma->j_scatt += w_ave * ds;
+	}
+
+
 
 /* frequency weighted by the weights and distance       in the shell .  See eqn 2 ML93 */
   xplasma->mean_ds += ds;
@@ -369,7 +389,15 @@ statement could be deleted entirely 060802 -- ksl */
 	  xplasma->xsd_freq[i] += p->freq * p->freq * w_ave * ds;	/*1208 NSH imput to allow standard deviation to be calculated */
 	  xplasma->xj[i] += w_ave * ds;	/*1108 NSH/KSL photon weight times distance travelled */
 	  xplasma->nxtot[i]++;	/*1108 NSH increment the frequency banded photon counter */
-
+/* 1311 NSH lines added below to work out the range of frequencies within a band where photons have been seen */
+	  if (p->freq < xplasma->fmin[i])
+		{
+		xplasma->fmin[i]=p->freq;
+		}
+	  if (p->freq > xplasma->fmax[i]) 
+		{
+		xplasma->fmax[i]=p->freq;
+		}
 	}
     }
 
@@ -557,8 +585,13 @@ sigma_phot (x_ptr, freq)
       /* This was line fixed by CK in 1998 Jul */
       f1 = (x - 1.0) * (x - 1.0) + x_ptr->yw * x_ptr->yw;
 
-      f2 = pow (y, 0.5 * x_ptr->p - 5.5);
-      f3 = pow (1.0 + sqrt (y / x_ptr->ya), -x_ptr->p);
+ //     f2 = pow (y, 0.5 * x_ptr->p - 5.5);
+      f2=exp((0.5 * x_ptr->p - 5.5)*log(y));
+
+//     f3 = pow (1.0 + sqrt (y / x_ptr->ya), -x_ptr->p);
+	f3 = exp(( -x_ptr->p)*log((1.0 + sqrt (y / x_ptr->ya))));
+
+
       xsection = x_ptr->sigma * f1 * f2 * f3;	// the photoinization xsection
 
 /* Store crossesction for future use */
@@ -626,9 +659,9 @@ sigma_phot_topbase (x_ptr, freq)
       if ((fbot = x_ptr->freq[nlast]) < freq
 	  && freq < (ftop = x_ptr->freq[nlast + 1]))
 	{
-	  frac = (freq - fbot) / (ftop - fbot);
+	  frac = (log(freq) - log(fbot)) / (log(ftop) - log(fbot));
 	  xsection =
-	    (1. - frac) * x_ptr->x[nlast] + frac * x_ptr->x[nlast + 1];
+	    exp((1. - frac) * log(x_ptr->x[nlast]) + frac * log(x_ptr->x[nlast + 1]));
 	  //Store the results
 	  x_ptr->sigma = xsection;
 	  x_ptr->f = freq;
@@ -639,7 +672,8 @@ sigma_phot_topbase (x_ptr, freq)
 /* If got to here, have to go the whole hog in calculating the x-section */
   nmax = x_ptr->np;
   x_ptr->nlast =
-    linterp (freq, &x_ptr->freq[0], &x_ptr->x[0], nmax, &xsection);
+    linterp (freq, &x_ptr->freq[0], &x_ptr->x[0], nmax, &xsection,1); //call linterp in log space
+
 
   //Store the results
   x_ptr->sigma = xsection;

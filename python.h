@@ -8,7 +8,10 @@ int rank_global;
 #define DEBUG 				0	/* 0 means do not debug */
 int verbosity;			/* verbosity level. 0 low, 10 is high */
 
-//#include "log.h"	no longer needed as kpar encorporated into python
+/* the functions contained in log., rdpar.c and lineio.c are
+   declare deparately from templates. This is because some functions
+   only use log.h and don't use python.h due to repeated definitions */
+#include "log.h"
 
 /* In python_43 the assignment of the WindPtr size has been moved from a fixed
 value determined by values in python.h to a values which are adjustable from
@@ -224,6 +227,7 @@ struct geometry
 #define  NXBANDS 20		/* the maximum number of bands that can be defined */
   int nxfreq;			/* the number of bands actually used */
   double xfreq[NXBANDS + 1];	/* the band limits  */
+
 
   /* The spectral types are SPECTYPE_BB for bb, SPECTYPE_UNIFORM for a uniform spectral distribution, 
    * SPECTYPE_POW for a power law, 0 or more from a filelist.
@@ -618,6 +622,15 @@ typedef struct plasma
   double j, ave_freq, lum;	/*Respectively mean intensity, intensity_averaged frequency, 
 				   luminosity and absorbed luminosity of shell */
   double xj[NXBANDS], xave_freq[NXBANDS];	/* 1108 NSH frequency limited versions of j and ave_freq */
+  double fmin[NXBANDS];	/* the minimum freqneucy photon seen in a band - this is incremented during photon flight */
+  double fmax[NXBANDS];	/* the maximum frequency photon seen in a band - this is incremented during photon flight */
+  double fmin_mod[NXBANDS];	/* the minimum freqneucy that the model should be applied for */
+  double fmax_mod[NXBANDS];	/* the maximum frequency that the model should be applied for */
+
+
+
+  double j_direct,j_scatt; /* 1309 NSH mean intensity due to direct photons and scattered photons */
+  double ip_direct,ip_scatt; /* 1309 NSH mean intensity due to direct photons and scattered photons */
   double xsd_freq[NXBANDS];	/*1208 NSH the standard deviation of the frequency in the band */
   int nxtot[NXBANDS];		/* 1108 NSH the total number of photon passages in frequency bands */
   double max_freq;		/*1208 NSH The maximum frequency photon seen in this cell */
@@ -661,7 +674,10 @@ NSH 130725 - this number is now also used to say if the cell is over temperature
   /* 1208 Add parameters for an exponential representation, and a switch to say which we prefer. */
   int spec_mod_type[NXBANDS];	/* NSH 120817 A switch to say which type of representation we are using for this band in this cell. Negative means we have no useful representation, 0 means power law, 1 means exponential */
   double pl_alpha[NXBANDS];	/*Computed spectral index for a power law spectrum representing this cell NSH 120817 - changed name from sim_alpha to PL_alpha */
-  double pl_w[NXBANDS];		/*This is the computed weight of a PL spectrum in this cell - not the same as the dilution factor NSH 120817 - changed name from sim_w to pl_w */
+//  double pl_w[NXBANDS];		/*This is the computed weight of a PL spectrum in this cell - not the same as the dilution factor NSH 120817 - changed name from sim_w to pl_w */
+  double pl_log_w[NXBANDS];    /* NSH 131106 - this is the log version of the power law weight. It is in an attempt to allow very large values of alpha to work with the PL spectral model to avoide NAN problems. The pl_w version can be deleted once testing is complete */
+
+
   double exp_temp[NXBANDS];	/*NSH 120817 - The effective temperature of an exponential representation of the radiation field in a cell */
   double exp_w[NXBANDS];	/*NSH 120817 - The prefector of an exponential representation of the radiation field in a cell */
 //OLD  double sim_e1,sim_e2; /*Sim estimators used to compute alpha and w for a power law spectrum for the cell */

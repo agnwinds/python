@@ -961,6 +961,7 @@ on the assumption that the fb information will be reused.
                                                                                                    
                                                                                                    
   History:
+		13sep	nsh	changed call to linterp to reflect new option
                                                                                                    
  ************************************************************************/
 
@@ -973,7 +974,7 @@ get_nrecomb (t, nion)
   int linterp ();
   double x;
 
-  linterp (t, fb_t, xnrecomb[nion], NTEMPS, &x);
+  linterp (t, fb_t, xnrecomb[nion], NTEMPS, &x,0); //Interpolate in linear space
   return (x);
 }
 
@@ -989,7 +990,7 @@ get_fb (t, nion, narray)
   int linterp ();
   double x;
 
-  linterp (t, fb_t, &freebound[narray].emiss[nion][0], NTEMPS, &x);
+  linterp (t, fb_t, &freebound[narray].emiss[nion][0], NTEMPS, &x,0); //Interpolate in linear space
   return (x);
 }
 

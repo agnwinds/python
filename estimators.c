@@ -61,7 +61,7 @@ bf_estimators_increment (one, p, ds)
   double x, ft;
   double y, yy;
   double exponential, heat_contribution;
-  int n, m, llvl, nn;
+  int n, m, llvl, nn, i;
   double sigma_phot_topbase ();
   double density;
   double abs_cont;
@@ -78,6 +78,63 @@ bf_estimators_increment (one, p, ds)
   freq_av = p->freq;
   // the continuum neglect variation of frequency along path and
   // take as a single "average" value.  
+
+  /* JM -- 1310 -- the loop below is if the user requires extra diagnostics and
+     has provided a file diag_cells.dat to store photons stats for cells they have specified
+  */
+  if (diag_on_off == 1 && ncstat > 0)
+    {
+      for (i = 0; i < ncstat; i++)
+	{
+          /* check if the cell is in the specified list */
+	  if (one->nplasma == ncell_stats[i])
+	    {
+	      fprintf (pstatptr,
+		       "PHOTON_DETAILS %3d %8.3e %8.3e %8.3e cell%3d wind cell%3d\n",
+		       geo.wcycle, p->freq, p->w, ds, one->nplasma,
+		       one->nwind);
+	    }
+	}
+    }
+
+  /*photon weight times distance in the shell is proportional to the mean intensity */
+  xplasma->j += p->w * ds;
+
+  /* frequency weighted by the weights and distance in the shell .  See eqn 2 ML93 */
+  xplasma->mean_ds += ds;
+  xplasma->n_ds++;
+  xplasma->ave_freq += p->freq * p->w * ds;
+
+  if (p->freq > xplasma->max_freq)	// check if photon frequency exceeds maximum frequency
+    xplasma->max_freq = p->freq;
+
+  /* 1310 JM -- The next loop updates the banded versions of j and ave_freq, analogously to routine inradiation
+     nxfreq refers to how many frequencies we have defining the bands. So, if we have 5 bands, we have 6 frequencies, 
+     going from xfreq[0] to xfreq[5] Since we are breaking out of the loop when i>=nxfreq, this means the last loop 
+     will be i=nxfreq-1 */
+
+  /* note that here we can use the photon weight and don't need to calculate anm attenuated average weight
+     as energy packets are indisivible in macro atom mode */
+
+  for (i = 0; i < geo.nxfreq; i++)
+    {
+      if (geo.xfreq[i] < p->freq && p->freq <= geo.xfreq[i + 1])
+	{
+	  xplasma->xave_freq[i] += p->freq * p->w * ds;	/* 1310 JM -- frequency weighted by weight and distance */
+	  xplasma->xsd_freq[i] += p->freq * p->freq * p->w * ds;	/* 1310 JM -- input to allow standard deviation to be calculated */
+	  xplasma->xj[i] += p->w * ds;	/* 1310 JM -- photon weight times distance travelled */
+	  xplasma->nxtot[i]++;	/* 1310 JM -- increment the frequency banded photon counter */
+
+	}
+    }
+
+  /* check that j and ave freq give sensible numbers */
+  if (sane_check (xplasma->j) || sane_check (xplasma->ave_freq))
+    {
+      Error ("radiation:sane_check Problem with j %g or ave_freq %g\n",
+	     xplasma->j, xplasma->ave_freq);
+    }
+
 
 
   for (nn = 0; nn < xplasma->kbf_nuse; nn++)
@@ -172,14 +229,37 @@ bf_estimators_increment (one, p, ds)
   /* Now for contribution to heating due to ff processes. (SS, Apr 04) */
 
   weight_of_packet = p->w;
+
   y = weight_of_packet * kappa_ff (xplasma, freq_av) * ds;
 
-  xplasma->heat_ff += heat_contribution = y;
-  xplasma->heat_tot += heat_contribution;
+  xplasma->heat_ff += heat_contribution = y;	// record ff hea	
+  
+
+  /* Now for contribution to heating due to compton processes. (JM, Sep 013) */
+  
+  y = weight_of_packet * kappa_comp (xplasma, freq_av) * ds;
+  
+  xplasma->heat_comp += y;	// record the compton heating
+  heat_contribution += y;	// add compton to the heat contribution
+ 
+  
+  /* Now for contribution to heating due to induced compton processes. (JM, Sep 013) */
+
+  y = weight_of_packet * kappa_ind_comp (xplasma, freq_av) * ds;
+  
+  xplasma->heat_ind_comp += y;          // record the induced compton heating
+  heat_contribution += y;               // add induced compton to the heat contribution
+  
+ 
+ 
+  xplasma->heat_tot += heat_contribution;	// heat contribution is the contribution from compton, ind comp and ff processes
+
+
 
   /* This heat contribution is also the contibution to making k-packets in this volume. So we record it. */
 
   xplasma->kpkt_abs += heat_contribution;
+
 
   /* Now for contribution to inner shell ionization estimators (SS, Dec 08) */
 

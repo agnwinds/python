@@ -68,6 +68,9 @@ History:
 			try and speed up the pairwise ionization scheme
 	13may	nsh	added code to use temprature computed from internal energy in a
 			zeus file as a first guess for temperature in a proga type model
+	13sep	nsh	small change to avoid the muliplicatoin by 0.9 (lucy guess) from giving us the 				wrong zeus temperature.
+	13nov	nsh	changes to take account of log formulation of power law
+			also initialise the min and max frequencies seen in a band.
 
 **************************************************************/
 
@@ -97,7 +100,6 @@ define_wind ()
   NDIM = ndim = geo.ndim;
   MDIM = mdim = geo.mdim;
   NDIM2 = NDIM * MDIM;
-
   calloc_wind (NDIM2);
   w = wmain;
 
@@ -240,7 +242,6 @@ recreated when a windfile is read into the program
  * We now need to do the same for the torus
  */
 
-
   n_vol = n_inwind = n_part = 0;
   n_comp = n_comp_part = 0;
   for (n = 0; n < NDIM2; n++)
@@ -333,13 +334,16 @@ be optional which variables beyond here are moved to structures othere than Wind
 /* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, I've put new things in here to initialise the exponential models */
       for (nn = 0; nn < NXBANDS; nn++)
 	{
-	  plasmamain[n].spec_mod_type[nn] = -1;	/*NSH 120817 - setting this to a negative numebr means that at the outset, we assume we do not have a suitable model for the cell */
+	  plasmamain[n].spec_mod_type[nn] = -1;	/*NSH 120817 - setting this to a negative number means that at the outset, we assume we do not have a suitable model for the cell */
 	  plasmamain[n].exp_temp[nn] = geo.tmax;	/*NSH 120817 - as an initial guess, set this number to the hottest part of the model - this should define where any exponential dropoff becomes important */
 	  plasmamain[n].exp_w[nn] = 0.0;	/* 120817 Who knows what this should be! */
 	  plasmamain[n].pl_alpha[nn] = geo.alpha_agn;	//As an initial guess we assume the whole wind is optically thin and so the spectral index for a PL illumination will be the same everywhere.
 	  /*     plasmamain[n].pl_w[nn] = geo.const_agn / (4.0*PI*(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]));  // constant / area of a sphere
 	     plasmamain[n].pl_w[nn] /= 4.*PI;   // take account of solid angle NSH 120817 removed - if PL not suitable, it will be set to zero anyway, so safe to keep it at zero from the outset! */
-	  plasmamain[n].pl_w[nn] = 0.0;
+//	  plasmamain[n].pl_w[nn] = 0.0;
+	  plasmamain[n].pl_log_w[nn] = -1e99; /*131114 - a tiny weight - just to fill the variable */ 
+          plasmamain[n].fmin_mod[nn] = geo.xfreq[i+1]; /* Set the minium model frequency to the max frequency in the band - means it will never be used which is correct at this time - there is no model */
+          plasmamain[n].fmax_mod[nn] = geo.xfreq[i]; /* Set the maximum model frequency to the min frequency in the band */
 	}
 
       nh = plasmamain[n].rho * rho2nh;
@@ -347,7 +351,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 /* NSH 130530 Next few lines allow the use of the temperature which can be computed from Zeus models to be used as an initial guess for the wind temperature */
       if (geo.wind_type == 3)
 	{
-	  plasmamain[n].t_r = proga_temp (x);
+	  plasmamain[n].t_r = proga_temp (x)/0.9; //This is a kluge, it means that we get the temperature we expect, if we read in a temperature from a zeus file - otherwise it is multiplies by 0.9 //
 	}
       else
 	{

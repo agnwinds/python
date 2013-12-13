@@ -183,6 +183,13 @@ History:
 			This was never tested, and never really used.  Knox no longer even has the 
 			models.  Note that Stuart is replacing this with a homologous expansion
 			model
+	1308	nsh	Added a call to generate rtheta wind cones - issue #41
+	1309	nsh	Changed the loop around where disk parameters are read in - issue #44
+	1309	nsh	Added commands to write out warning summary - relating to issue #47
+  	1312	nsh	Added a new parameter file command to turn off heating and cooling mechanisms
+			at the moment it only does adiabatc
+			Also some modifications to the parallel communiactions to deal with some new
+			plasma variabales, and the min and max frequency photons seen in bands.
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -217,6 +224,7 @@ main (argc, argv)
   long nphot_to_define;
   int n, nangles, photons_per_cycle, subcycles;
   int iwind;
+  int thermal_opt; /*NSH 131213 - added to control options to turn on and off some heating and cooling mechanisms */
 
 /* Next three lines have variables that should be a structure, or possibly we
 should allocate the space for the spectra to avoid all this nonsense.  02feb ksl */
@@ -254,7 +262,11 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
 #ifdef MPI_ON
   int mpi_i, mpi_j;
-  double *maxfreqhelper,*maxfreqhelper2;
+
+
+  double *maxfreqhelper,*maxfreqhelper2; 
+/*NSH 131213 the next line introduces new helper arrays for the max and min frequencies in bands */
+  double *maxbandfreqhelper,*maxbandfreqhelper2,*minbandfreqhelper,*minbandfreqhelper2;
   double *redhelper, *redhelper2;
   int *iredhelper, *iredhelper2;
  // int size_of_helpers;
@@ -320,7 +332,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	    {
 	      help ();
 	    }
-	  if (strcmp (argv[i], "-r") == 0)
+	  else if (strcmp (argv[i], "-r") == 0)
 	    {
 	      Log ("Restarting %s\n", root);
 	      restart_stat = 1;
@@ -581,7 +593,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
     }
 
-  else				/* We want to continue a previous run */
+  else	if (restart_stat == 1)		/* We want to continue a previous run*/
     {
       Log ("Continuing a previous run of %s \n", root);
       strcpy (old_windsavefile, root);
@@ -753,6 +765,23 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
       geo.rt_mode = 1;		// Not macro atom (SS)
     }
 
+thermal_opt = 0; /* NSH 131213 Set the option to zero - the default. The lines allow allow the
+user to turn off mechanisms that affect the thermal balance. Adiabatic is the only one implemented
+to start off with. */
+
+  rdint
+    ("Thermal_balance_options(0=everything.on,1=no.adiabatic)",
+     &thermal_opt);
+  if (thermal_opt == 1)
+	{
+	geo.adiabatic=0;
+	}
+  else if (thermal_opt > 1 || thermal_opt < 0)
+	{
+      	Error ("Unknown thermal balance mode %d\n", thermal_opt);
+      	exit (0);
+    	}
+
 
 /*57h -- Next line prevents bf calculation of macro_estimaters when no macro atoms are present.   */
 
@@ -915,8 +944,8 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 	 &geo.disk_type);
       if (geo.disk_type)	/* Then a disk exists and it needs to be described */
 	{
-	  if (geo.disk_radiation)
-	    {
+//	  if (geo.disk_radiation) /*NSH 130906 - Commented out this if loop. It was causing problems with restart - bug #44
+//	    {
 	      geo.disk_mdot /= (MSOL / YR);	// Convert to msol/yr to simplify input
 	      rddoub ("disk.mdot(msol/yr)", &geo.disk_mdot);
 	      geo.disk_mdot *= (MSOL / YR);
@@ -931,12 +960,12 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
 		{
 		  rdstr ("T_profile_file", tprofile);
 		}
-	    }
-	  else
-	    {
-	      geo.disk_mdot = 0;
-	      disk_illum = 0;
-	    }
+//	    }
+//	  else
+//	    {
+//	      geo.disk_mdot = 0;
+//	      disk_illum = 0;
+//	    }
 
 	  /* 04aug ksl ??? Until everything is initialized we need to stick to a simple disk, 
 	     while teff is being set up..  This is because some of the
@@ -1275,9 +1304,9 @@ set defudge slightly differently for the shell wind.*/
 /*NSH 130821 broken out into a seperate routine added these lines to fix bug41, where
 the cones are never defined for an rtheta grid if the model is restarted */
 
-  if (geo.coord_type==RTHETA) //We need to generate an rtheta wind cone
+if (geo.coord_type==RTHETA && geo.wind_type==2) //We need to generate an rtheta wind cone if we are restarting
     {
-  rtheta_make_cones(w);
+  rtheta_make_cones(wmain);
     }
 
   geo.rmax_sq = geo.rmax * geo.rmax;
@@ -1618,7 +1647,7 @@ run -- 07jul -- ksl
 #ifdef MPI_ON
 //   Since the wind is now set up can allocate sufficiently big arrays to help with the MPI reductions 
 
-    plasma_double_helpers = (10+3*NXBANDS)*NPLASMA; //The size of the helper array for doubles. We transmit 10 numbers for each cell, plus three arrays, each of length NXBANDS
+    plasma_double_helpers = (14+3*NXBANDS)*NPLASMA; //The size of the helper array for doubles. We transmit 10 numbers for each cell, plus three arrays, each of length NXBANDS
     plasma_int_helpers = (6+NXBANDS)*NPLASMA; //The size of the helper array for integers. We transmit 6 numbers for each cell, plus one array of length NXBANDS
     ioniz_spec_helpers = 2*MSPEC*NWAVE; //we need space for log and lin spectra for MSPEC XNWAVE
 
@@ -1802,10 +1831,19 @@ run -- 07jul -- ksl
 
       /* End of the subcycle loop */
       /* At this point we should communicate all the useful infomation that has been accummulated on differenet MPI tasks */
+
+
+
+
 #ifdef MPI_ON
  
     maxfreqhelper = calloc (sizeof(double),NPLASMA); 
     maxfreqhelper2 = calloc (sizeof(double),NPLASMA);
+/* NSH 131213 - allocate memory for the band limited max and min frequencies */
+    maxbandfreqhelper = calloc (sizeof(double),NPLASMA*NXBANDS); 
+    maxbandfreqhelper2 = calloc (sizeof(double),NPLASMA*NXBANDS);
+    minbandfreqhelper = calloc (sizeof(double),NPLASMA*NXBANDS); 
+    minbandfreqhelper2 = calloc (sizeof(double),NPLASMA*NXBANDS);
     redhelper = calloc (sizeof (double), plasma_double_helpers); 
     redhelper2 = calloc (sizeof (double), plasma_double_helpers); 
     iredhelper = calloc (sizeof (int), plasma_int_helpers); 
@@ -1829,14 +1867,24 @@ run -- 07jul -- ksl
 	  redhelper[mpi_i+7*NPLASMA] = plasmamain[mpi_i].heat_ind_comp/ np_mpi_global;
 	  redhelper[mpi_i+8*NPLASMA] = plasmamain[mpi_i].heat_photo/ np_mpi_global;
           redhelper[mpi_i+9*NPLASMA] = plasmamain[mpi_i].ip / np_mpi_global;
+          redhelper[mpi_i+10*NPLASMA] = plasmamain[mpi_i].j_direct / np_mpi_global;
+          redhelper[mpi_i+11*NPLASMA] = plasmamain[mpi_i].j_scatt / np_mpi_global;
+          redhelper[mpi_i+12*NPLASMA] = plasmamain[mpi_i].ip_direct / np_mpi_global;
+          redhelper[mpi_i+13*NPLASMA] = plasmamain[mpi_i].ip_scatt / np_mpi_global;
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
-	      redhelper[mpi_i+(10+mpi_j)*NPLASMA] = plasmamain[mpi_i].xj[mpi_j]/ np_mpi_global;
-	      redhelper[mpi_i+(10+NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j]/ np_mpi_global;
-	      redhelper[mpi_i+(10+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
+	      redhelper[mpi_i+(14+mpi_j)*NPLASMA] = plasmamain[mpi_i].xj[mpi_j]/ np_mpi_global;
+	      redhelper[mpi_i+(14+NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j]/ np_mpi_global;
+	      redhelper[mpi_i+(14+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
+/* 131213 NSH populate the band limited min and max frequency arrays */
+	      maxbandfreqhelper[mpi_i*NXBANDS+mpi_j] = plasmamain[mpi_i].fmax[mpi_j];
+	      minbandfreqhelper[mpi_i*NXBANDS+mpi_j] = plasmamain[mpi_i].fmin[mpi_j];
+
 	    }
 	}
-
+/* 131213 NSH communiate the min and max band frequencies these use MPI_MIN or MPI_MAX */ 
+      MPI_Reduce(minbandfreqhelper, minbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+      MPI_Reduce(maxbandfreqhelper, maxbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
       MPI_Reduce(maxfreqhelper, maxfreqhelper2, NPLASMA, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
       MPI_Reduce(redhelper, redhelper2, plasma_double_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
       if (rank_global == 0)
@@ -1847,6 +1895,11 @@ run -- 07jul -- ksl
       
       MPI_Bcast(redhelper2, plasma_double_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       MPI_Bcast(maxfreqhelper2, NPLASMA, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+/* 131213 NSH Send out the global min and max band limited frequencies to all threads */
+      MPI_Bcast(minbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(maxbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
 	{
   	  plasmamain[mpi_i].max_freq = maxfreqhelper2[mpi_i];
@@ -1860,11 +1913,18 @@ run -- 07jul -- ksl
 	  plasmamain[mpi_i].heat_ind_comp = redhelper2[mpi_i+7*NPLASMA];
 	  plasmamain[mpi_i].heat_photo = redhelper2[mpi_i+8*NPLASMA];
           plasmamain[mpi_i].ip = redhelper2[mpi_i+9*NPLASMA];
+          plasmamain[mpi_i].j_direct = redhelper2[mpi_i+10*NPLASMA];
+          plasmamain[mpi_i].j_scatt = redhelper2[mpi_i+11*NPLASMA];
+          plasmamain[mpi_i].ip_direct = redhelper2[mpi_i+12*NPLASMA];
+          plasmamain[mpi_i].ip_scatt = redhelper2[mpi_i+13*NPLASMA];
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
-	      plasmamain[mpi_i].xj[mpi_j]=redhelper2[mpi_i+(10+mpi_j)*NPLASMA];
-	      plasmamain[mpi_i].xave_freq[mpi_j]=redhelper2[mpi_i+(10+NXBANDS+mpi_j)*NPLASMA];
-	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(10+NXBANDS*2+mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].xj[mpi_j]=redhelper2[mpi_i+(14+mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].xave_freq[mpi_j]=redhelper2[mpi_i+(14+NXBANDS+mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(14+NXBANDS*2+mpi_j)*NPLASMA];
+/* 131213 NSH And unpack the min and max banded frequencies to the plasma array */ 
+	      plasmamain[mpi_i].fmax[mpi_j] = maxbandfreqhelper2[mpi_i*NXBANDS+mpi_j];
+	      plasmamain[mpi_i].fmin[mpi_j] = minbandfreqhelper2[mpi_i*NXBANDS+mpi_j];
 	    }
 	}
       Log_parallel("Thread %d happy after broadcast.\n", rank_global);
@@ -1907,6 +1967,10 @@ run -- 07jul -- ksl
   
 	free (maxfreqhelper);
     	free (maxfreqhelper2);
+ 	free (maxbandfreqhelper);
+ 	free (maxbandfreqhelper2);
+ 	free (minbandfreqhelper);
+ 	free (minbandfreqhelper2);
     	free (redhelper);
     	free (redhelper2); 
     	free (iredhelper);
@@ -1914,6 +1978,8 @@ run -- 07jul -- ksl
 
 
 #endif
+
+
 
 #if DEBUG
       ispy_close ();
@@ -2235,12 +2301,14 @@ run -- 07jul -- ksl
 
 
 /* Finally done */
-#ifdef MPION
+#ifdef MPI_ON
   sprintf (dummy,"End of program, Thread %d only",my_rank);   // added so we make clear these are just errors for thread ngit status	
   error_summary (dummy);	// Summarize the errors that were recorded by the program
-  Log ("Run py_error.py for full error report.\n")
+  warning_summary (dummy);	// Summarize the warnings that were recorded by the program
+  Log ("Run py_error.py for full error report.\n");
 #else
   error_summary ("End of program");	// Summarize the errors that were recorded by the program
+  warning_summary ("End of program");	// Summarize the warnings that were recorded by the program
 #endif
 
 
@@ -2400,7 +2468,7 @@ init_geo ()
   geo.t_bl = 100000.;
 
 
-  strcpy (geo.atomic_filename, "atomic/standard39");
+  strcpy (geo.atomic_filename, "data/standard73");
   strcpy (geo.fixed_con_file, "none");
 
   // Note that geo.model_list is initialized through get_spectype 

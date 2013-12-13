@@ -1,3 +1,5 @@
+/* lineio.c */
+int get_line(FILE *fptr, char line[]);
 /* rdpar.c */
 int opar(char filename[]);
 int restart_par(int doit);
@@ -26,14 +28,15 @@ int Log_quit_after_n_errors(int n);
 int Log(char *format, ...);
 int Log_silent(char *format, ...);
 int Error(char *format, ...);
+int Warning(char *format, ...);
 int Error_silent(char *format, ...);
 int Shout(char *format, ...);
 int sane_check(double x);
 int mytrap(void);
 int error_count(char *format);
+int warning_count(char *format);
 int error_summary(char *message);
+int warning_summary(char *message);
 int Log_flush(void);
 int Log_set_mpi_rank(int rank, int n_mpi);
 int Log_parallel(char *format, ...);
-/* lineio.c */
-int get_line(FILE *fptr, char line[]);

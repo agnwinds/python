@@ -356,6 +356,11 @@ one_choice (choice, root, ochoice)
 
   iswitch = 0;
 
+  /* JM 1312 --initialise variables to avoid compilation warnings */
+  istate = 0;
+  n = 0;
+
+
   switch (choice)
     {
     case 'a':			/* Energy absorbed */
@@ -447,6 +452,9 @@ one_choice (choice, root, ochoice)
       break;
     case 'k':			/* tau at H edge */
       tau_h_summary (wmain, root, ochoice);
+      break;
+    case 'K':			/* cell J split by direct photons and scattered photons */
+      J_scat_summary (wmain, root, ochoice);
       break;
     case 'l':			/* Lum of shell */
       lum_summary (wmain, root, ochoice);

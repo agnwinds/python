@@ -483,6 +483,8 @@ rtheta_volumes (w, icomp)
  History:
 	04aug	ksl	52a -- Adapted from the same routine for cylindrical
 			systems.
+   	13sep	nsh	76b -- Changed calls to fraction to take account of
+			new modes.
  
 **************************************************************/
 
@@ -510,8 +512,8 @@ rtheta_where_in_grid (x)
       return (-1);		/*x is inside grid */
     }
 
-  fraction (r, wind_x, NDIM, &i, &f);
-  fraction (theta, wind_z, MDIM, &j, &f);
+  fraction (r, wind_x, NDIM, &i, &f, 0);
+  fraction (theta, wind_z, MDIM, &j, &f, 0);
 
   /* At this point i,j are just outside the x position */
   wind_ij_to_n (i, j, &n);

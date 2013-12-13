@@ -15,6 +15,7 @@ int index_phot_verner(void);
 int index_collisions(void);
 void indexx(int n, float arrin[], int indx[]);
 int limit_lines(double freqmin, double freqmax);
+int tabulate_verner(void);
 /* python.c */
 int main(int argc, char *argv[]);
 int help(void);
@@ -283,8 +284,8 @@ double vrandwind(double x);
 double reweightwind(PhotPtr p);
 int make_pdf_randwind(double tau);
 /* util.c */
-int fraction(double value, double array[], int npts, int *ival, double *f);
-int linterp(double x, double xarray[], double yarray[], int xdim, double *y);
+int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
+int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);
 int coord_fraction(int ichoice, double x[], int ii[], double frac[], int *nelem);
 int where_in_2dcell(int ichoice, double x[], int n, double *fx, double *fz);
 int wind_n_to_ij(int n, int *i, int *j);
@@ -417,7 +418,7 @@ int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, d
 int get_shell_wind_params(void);
 /* compton.c */
 double kappa_comp(PlasmaPtr xplasma, double freq);
-double kappa_ind_comp(PlasmaPtr xplasma, double freq, double ds, double w);
+double kappa_ind_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
 double klein_nishina(double nu);
 /* torus.c */
@@ -431,10 +432,10 @@ int compute_dr_coeffs(double temp);
 double total_dr(WindPtr one, double t_e);
 /* spectral_estimators.c */
 int spectral_estimators(PlasmaPtr xplasma);
-double pl_alpha_func(double alpha);
-double pl_mean(double alpha, double numin, double numax);
-double pl_w(double j, double alpha, double numin, double numax);
-double pl_stddev(double alpha, double numin, double numax);
+double pl_alpha_func_log(double alpha);
+double pl_logmean(double alpha, double lnumin, double lnumax);
+double pl_log_w(double j, double alpha, double lnumin, double lnumax);
+double pl_log_stddev(double alpha, double lnumin, double lnumax);
 double exp_temp_func(double exp_temp);
 double exp_mean(double exp_temp, double numin, double numax);
 double exp_w(double j, double exp_temp, double numin, double numax);
@@ -445,50 +446,10 @@ double bb_correct_2(double xtemp, double t_r, double www, int nion);
 double temp_func(double solv_temp);
 double pl_correct_2(double xtemp, int nion);
 double tb_planck1(double freq);
-double verner_planck1(double freq);
-double tb_pow1(double freq);
-double verner_pow1(double freq);
-double verner_exp1(double freq);
+double tb_logpow1(double freq);
 double tb_exp1(double freq);
-/* log.c */
-int Log_init(char *filename);
-int Log_append(char *filename);
-int Log_close(void);
-int Log_set_verbosity(int vlevel);
-int Log_print_max(int print_max);
-int Log_quit_after_n_errors(int n);
-int Log(char *format, ...);
-int Log_silent(char *format, ...);
-int Error(char *format, ...);
-int Error_silent(char *format, ...);
-int Shout(char *format, ...);
-int sane_check(double x);
-int mytrap(void);
-int error_count(char *format);
-int error_summary(char *message);
-int Log_flush(void);
-int Log_set_mpi_rank(int rank, int n_mpi);
-int Log_parallel(char *format, ...);
-/* lineio.c */
-int get_line(FILE *fptr, char line[]);
-/* rdpar.c */
-int opar(char filename[]);
-int restart_par(int doit);
-int cpar(char filename[]);
-int rdpar_init(void);
-int string_process(char question[], char dummy[]);
-int rdpar_store_record(char *name, char *value);
-int rdpar_save(FILE *file_ptr);
-int message(char string[]);
-int rdstr(char question[], char answer[]);
-int rdchar(char question[], char *answer);
-int rdint(char question[], int *answer);
-int rdflo(char question[], float *answer);
-int rddoub(char question[], double *answer);
-int rdline(char question[], char answer[]);
-int get_root(char root[], char total[]);
-int rdpar_set_mpi_rank(int rank);
-int rdpar_set_verbose(int vlevel);
+/* matom_diag.c */
+int matom_emiss_report(void);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
@@ -519,6 +480,7 @@ int inner_shell_summary(WindPtr w, char rootname[], int ochoice);
 int IP_summary(WindPtr w, char rootname[], int ochoice);
 int alpha_summary(WindPtr w, char rootname[], int ochoice);
 int J_summary(WindPtr w, char rootname[], int ochoice);
+int J_scat_summary(WindPtr w, char rootname[], int ochoice);
 int phot_split(WindPtr w, char rootname[], int ochoice);
 int thompson(WindPtr w, char rootname[], int ochoice);
 int nscat_split(WindPtr w, char rootname[], int ochoice);
@@ -544,11 +506,11 @@ int config_overview(int n, int icell);
 int depcoef_overview(int icell);
 int copy_plasma(PlasmaPtr x1, PlasmaPtr x2);
 int depcoef_overview_specific(int version, int nconfig, WindPtr w, char rootname[], int ochoice);
+int level_emissoverview(int nlev, WindPtr w, char rootname[], int ochoice);
+int level_escapeoverview(int nlev, WindPtr w, char rootname[], int ochoice);
 /* py_wind.c */
 int main(int argc, char *argv[]);
 int one_choice(int choice, char *root, int ochoice);
 int py_wind_help(void);
 /* test_saha.c */
-int main(int argc, char *argv[]);
-/* test_dielectronic.c */
 int main(int argc, char *argv[]);

@@ -95,9 +95,11 @@ macro_summary (w, rootname, ochoice)
   int icell;
   int choose;
   int version;
+  int nlev;
 
   choose = 0;
-  rdint ("Detailed cell info (0) or specific level info (other)", &choose);
+  nlev = 0;
+  rdint ("Detailed cell info (0), specific level info (1) emissivities (2) Balmer escapes (3)", &choose);
 
   if (choose == 0)
     {
@@ -127,7 +129,7 @@ macro_summary (w, rootname, ochoice)
 		 &nconfig);
 	}
     }
-  else
+  else if (choose == 1)
     {
       nconfig = -1;
       version = 0;
@@ -139,6 +141,24 @@ macro_summary (w, rootname, ochoice)
 	  rdint ("Configuration.Number(-1 to rollup)", &nconfig);
 	}
     }
+  else if (choose == 2)
+  {
+    while (nlev >= 0)
+      {
+        /* JM 1311 -- new loop added to report level emissivities */
+        rdint ("Level emissivity to view (0 - kpkts, -1 - back):", &nlev);
+        level_emissoverview (nlev, w, rootname, ochoice);
+      }
+  }
+  else
+  {
+    while (nlev >= 0)
+      {
+        /* JM 1311 -- new loop added to report level emissivities */
+        rdint ("Upper level escape to view (-1 - back, Halpha = 3):", &nlev);
+        level_escapeoverview (nlev, w, rootname, ochoice);
+      }
+  }
 
 
 
@@ -443,3 +463,157 @@ depcoef_overview_specific (version, nconfig, w, rootname, ochoice)
   return (0);
 
 }
+
+
+
+/* JM 1312 Added new emissivitiy reporting to track e.g. H-alpha emission through wind */
+
+
+int 
+level_emissoverview (nlev, w, rootname, ochoice)
+  int nlev;
+  WindPtr w;
+  char rootname[];
+  int ochoice;
+{
+  int n, nplasma;
+  char name[LINELENGTH], lname[LINELENGTH];
+  char filename[LINELENGTH];
+
+  strcpy (name, "");
+
+  if (nlev != 0)
+    {
+      sprintf (name, "Level emissivities for Level %i", nlev);
+    }
+  else
+    {
+      sprintf (name, "Kpkt emissivities");
+    }
+
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      nplasma = w[n].nplasma;
+
+      if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+        {
+          if (nlev != 0)
+            {
+              aaa[n] = macromain[nplasma].matom_emiss[nlev - 1];
+            }
+          else
+            {
+              aaa[n] = plasmamain[nplasma].kpkt_emiss;
+            }
+        }
+    }
+
+  display(name);
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".lev");
+
+      if (nlev != 0)
+        {
+          sprintf (lname, "%d", nlev);
+          strcat (filename, lname);
+        }
+      else
+        {
+          strcat (filename, "k");
+        }
+
+      strcat (filename, "_emiss");
+      write_array (filename, ochoice);
+
+    }
+
+  return (0);
+}
+
+
+
+
+int level_escapeoverview (nlev, w, rootname, ochoice)
+  int nlev;
+  WindPtr w;
+  char rootname[];
+  int ochoice;
+{
+  PlasmaPtr xplasma;
+  int n, nplasma, nline, found;
+  char name[LINELENGTH], lname[LINELENGTH];
+  char filename[LINELENGTH];
+  double lambda;
+
+  
+  found = 0;
+  nline = 0;
+
+
+
+  /* Find the line in line list */
+  while (found != 1 && nline < nlines)
+  {
+
+    if (lin_ptr[nline]->levl == 2 && lin_ptr[nline]->levu == nlev && 
+       lin_ptr[nline]->z == 1 && lin_ptr[nline]->istate == 1)
+      { 
+        found = 1;
+      }
+
+    nline++; 
+  }
+
+
+  if (nline == nlines)
+    {
+      Error ("level_escapeoverview: Could not find line in linelist\n");
+      exit (0);
+    }
+
+  nline--;
+  
+  lambda = ( C/ lin_ptr[nline]->freq ) * 1e8;
+
+  strcpy (name, "");
+  sprintf (name, "Balmer series P_escapes for Level %i, Lambda %.1f", nlev, lambda);
+
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      nplasma = w[n].nplasma;
+
+      if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+        {
+          xplasma = &plasmamain[nplasma];
+          aaa[n] = p_escape (lin_ptr[nline], xplasma);
+
+          
+        }
+    }
+
+  display(name);
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".lev");
+
+      sprintf (lname, "%d", nlev);
+      strcat (filename, lname);
+
+      strcat (filename, "_esc");
+      write_array (filename, ochoice);
+
+    }
+
+  return (0);
+
+}
+
