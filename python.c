@@ -758,6 +758,9 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
       geo.rt_mode = 1;		// Not macro atom (SS)
     }
 
+thermal_opt = 0; /* NSH 131213 Set the option to zero - the default. The lines allow allow the
+user to turn off mechanisms that affect the thermal balance. Adiabatic is the only one implemented
+to start off with. */
 
   rdint
     ("Thermal_balance_options(0=everything.on,1=no.adiabatic)",
