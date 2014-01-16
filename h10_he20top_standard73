@@ -8,7 +8,7 @@ data/atomic_macro/h10_lines.py
 data/atomic_macro/h10_phot.py
 data/atomic_macro/he_top_levels.py
 data/atomic_macro/he_top_lines.py
-data/atomic_macro/he_top_phot.py
+data/atomic_macro/he_top_phot_macro.py
 #then read the non macro atom data for all except hydrogen and helium
 data/atomic73/topbase_levels_cno.py
 data/atomic73/topbase_levels_fe.py
