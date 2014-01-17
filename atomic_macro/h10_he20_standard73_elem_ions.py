@@ -97,10 +97,10 @@ Element   26   Fe    7.51    55.847000
 # maxlevels and maxnlte set at 30 and 0 respectively are simply place holders
 
 
-IonM    H   1   1   2   13.59900   20  20     1s(2S_{1/2})
+IonM    H   1   1   2   13.59900   10  10     1s(2S_{1/2})
 IonM    H   1   2   2 1.0000e+20    1   1     Bare
  
-IonM   He   2   1   1   24.58800   11  11     1s^2(1S_0) 
+IonM   He   2   1   1   24.58800   53  53     1s^2(1S_0) 
 IonM   He   2   2   2   54.41800   10  10     1s(2S_{1/2}) 
 IonM   He   2   3   1 1.0000e+20   1   1      Bare 
  
