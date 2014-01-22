@@ -1310,7 +1310,7 @@ for the ionstate.
 		      if (config[n].n_bfd_jump > NBFJUMPS)
 			{
 			  Error
-			    ("get_atomic_data: Too many downward b-f jump for ion %s\n",
+			    ("get_atomic_data: Too many downward b-f jump for ion %d\n",
 			     config[n].istate);
 			  exit (0);
 			}
