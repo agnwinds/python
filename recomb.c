@@ -412,7 +412,8 @@ total_fb (one, t, f1, f2)
     return (0);			/* It's too cold to emit */
 
 // Initialize the free_bound structures if that is necessary
-  init_freebound (1.e3, 1.e6, f1, f2); 
+  init_freebound (1.e3, 1.e9, f1, f2); //NSH 140121 increased limit to take account of hot plasmas
+
 
 // Calculate the number of recombinations whenever calculating the fb_luminosities
   num_recomb (xplasma, t);
