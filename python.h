@@ -38,6 +38,7 @@ double DFUDGE;
 
 
 
+
 /* 57h -- Changed several defined variables to numbers to allow one to vary them 
 in the process of running the code */
 double SMAX_FRAC;		/* In translate_in_wind, a limit is placed on the maximum distance a
@@ -1044,6 +1045,8 @@ xband;
 */
 
 #define NTEMPS	30		// The number of temperatures which are stored in each fbstruct
+				/* NSH this was increased from 30 to 50 to take account of 2 extra OOM 
+				intemperature we wanted to have in fb */ 
 #define NFB	10		// The maximum number of frequency intervals for which the fb emission is calculated
 
 struct fbstruc
