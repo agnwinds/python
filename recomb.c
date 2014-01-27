@@ -1059,6 +1059,9 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
   double qromb ();
   double fb_topbase_partial (), fb_verner_partial ();
 
+  dnu=0.0; //Avoid compilation errors.
+
+
   if (-1 < nion && nion < nions)	//Get emissivity for this specific ion_number
     {
       ntmin = ion[nion].ntop_first;
