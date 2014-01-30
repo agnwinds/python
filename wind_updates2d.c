@@ -110,6 +110,8 @@ WindPtr (w);
   int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
   int size_of_commbuffer;
   char *commbuffer;
+
+  /* the commbuffer needs to be larger enough to pack all variables in MPI_Pack and MPI_Unpack routines */
   size_of_commbuffer = 8 * (12*NIONS + NLTE_LEVELS + 2*NTOP_PHOT + 12*NXBANDS + 2*LPDF + NAUGER + 104)*(floor(NPLASMA/np_mpi_global)+1);
       
   commbuffer = (char *) malloc(size_of_commbuffer*sizeof(char));
@@ -128,6 +130,9 @@ WindPtr (w);
 #ifdef MPI_ON
   num_mpi_cells = floor(NPLASMA/np_mpi_global);
   num_mpi_extra = NPLASMA - (np_mpi_global*num_mpi_cells);
+
+  /* this section distributes the remainder over the threads if the cells
+     do not divide evenly by thread */
   if (rank_global < num_mpi_extra)
     {
       my_nmin = rank_global*(num_mpi_cells+1);
@@ -142,30 +147,38 @@ WindPtr (w);
 #endif
 
 
+
+  /* we now know how many cells this thread has to process - note this will be 
+     0-NPLASMA in serial mode */
+
   for (n = my_nmin; n < my_nmax; n++)
     {
-      //#ifdef MPI_ON
-      //Log("Mpi task %d updating plasma cell %d (from total of %d)\n", rank_global, n, NPLASMA);
-      //#endif
+
+
       nwind = plasmamain[n].nwind;
       volume = w[nwind].vol;
+
+
       /* Start with a call to the routine which normalises all the macro atom 
          monte carlo radiation field estimators. It's best to do this first since
          some of the estimators include temperature terms (stimulated correction
          terms) which were included during the monte carlo simulation so we want 
          to be sure that the SAME temperatures are used here. (SS - Mar 2004). */
+
       if (geo.rt_mode == 2 && geo.macro_simple == 0)	//test for macro atoms
-	{
-	  mc_estimator_normalise (nwind);
-	  /* Store some information so one can determine how much the temps are changing */
+	{		
+	  mc_estimator_normalise (nwind);  
 	  macromain[n].kpkt_rates_known = -1;
 	}
 
+      /* Store some information so one can determine how much the temps are changing */
       t_r_old = plasmamain[n].t_r;
       t_e_old = plasmamain[n].t_e;
       t_r_ave_old += plasmamain[n].t_r;
       t_e_ave_old += plasmamain[n].t_e;
       iave++;
+
+
       if (plasmamain[n].ntot < 100)
 	{
 	  Log
@@ -223,8 +236,9 @@ WindPtr (w);
 	}
 
 
-/* 1108 NSH/KSL  This loop is to calculate the frequency banded j and ave_freq variables */
-/* 71 - 111279 - ksl - Small modification to reflect the fact that nxfreq has been moved into the geo structure */
+      /* 1108 NSH/KSL  This loop is to calculate the frequency banded j and ave_freq variables */
+
+      /* 71 - 111279 - ksl - Small modification to reflect the fact that nxfreq has been moved into the geo structure */
       for (i = 0; i < geo.nxfreq; i++)	/*loop over number of bands */
 	{
 	  if (plasmamain[n].nxtot[i] > 0)	/*Check we actually have some photons in the cell in this band */
@@ -255,7 +269,6 @@ WindPtr (w);
       plasmamain[n].ip /= (C * volume * nh);
       plasmamain[n].ip_direct /= (C * volume * nh);
       plasmamain[n].ip_scatt /= (C * volume * nh);
-//OLD      Log ("NSH Log Ionisation parameter for cell %i = %2.2f\n",n,log10(plasmamain[n].ip));
 
 
       /* If geo.adiabatic is true, then alculate the adiabatic cooling using the current, i.e 
@@ -265,21 +278,24 @@ WindPtr (w);
        * here. 04nov -- ksl 
        * 05apr -- ksl -- The index being used was incorrect.  This has been fixed now 
        * 11sep -- nsh -- The index for the wind (&w) for adiabatic cooling was incorrect - 
-       * was being called with the plasma cell rather than the approriate wind cell fixed */
+       * was being called with the plasma cell rather than the approriate wind cell - fixed 
+       * old: adiabatic_cooling (&w[n], plasmamain[n].t_e);
+       */
 
       if (geo.adiabatic)
-//incorrect indexing nsh 110921 plasmamain[n].lum_adiabatic =
-//old     adiabatic_cooling (&w[n], plasmamain[n].t_e);
-	plasmamain[n].lum_adiabatic =
-	  adiabatic_cooling (&w[nwind], plasmamain[n].t_e);
+	plasmamain[n].lum_adiabatic = adiabatic_cooling (&w[nwind], plasmamain[n].t_e);
       else
 	plasmamain[n].lum_adiabatic = 0.0;
+
 
       /* Calculate the densities in various ways depending on the ioniz_mode */
 
       ion_abundances (&plasmamain[n], geo.ioniz_mode);
 
-      //Perform checks to see how much temperatures have changed in this iteration
+
+
+      /* Perform checks to see how much temperatures have changed in this iteration */
+
       if ((fabs (t_r_old - plasmamain[n].t_r)) > fabs (dt_r))
 	{
 	  dt_r = plasmamain[n].t_r - t_r_old;
@@ -293,6 +309,7 @@ WindPtr (w);
       t_r_ave += plasmamain[n].t_r;
       t_e_ave += plasmamain[n].t_e;
     }
+
 
 
   /*This is the end of the update loop that is parallised. We now need to exchange data between the tasks. */
@@ -644,8 +661,10 @@ WindPtr (w);
       lsum += plasmamain[nplasma].heat_lines;
       csum += plasmamain[nplasma].heat_comp;	//1108 NSH Increment the compton heating counter
       icsum += plasmamain[nplasma].heat_ind_comp;	//1205 NSH Increment the induced compton heating counter
+
 // Comment - ksl - Next line generated an inappopriate amount of output in the .diag file
-//OLD           Log ("OUTPUT logIP(cloudy_thoeretical)= %e logIP(cloudy_actual)=%e\n",log10(plasmamain[nplasma].ferland_ip),log10(plasmamain[nplasma].ip)); 
+// OLD           Log ("OUTPUT logIP(cloudy_thoeretical)= %e logIP(cloudy_actual)=%e\n",
+// OLD           log10(plasmamain[nplasma].ferland_ip),log10(plasmamain[nplasma].ip)); 
       
 
 
