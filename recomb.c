@@ -1135,12 +1135,14 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 	  // Now integrate only if its in allowable range  && there are ions to recombine
 	  if (fmax > fthresh)
 //NSH 140120 - this is a test to ensure that the exponential will not go to zero in the integrations 
-     		dnu = 100.0 * (fbt / H_OVER_K);
+		{     		
+		dnu = 100.0 * (fbt / H_OVER_K);
       		if (fthresh + dnu < fmax)
 			{
 	  		fmax = fthresh + dnu;
 			}
-	    fnu += qromb (fb_verner_partial, fthresh, fmax, 1.e-4);
+	        fnu += qromb (fb_verner_partial, fthresh, fmax, 1.e-4);
+		}
 	}
     }
 
