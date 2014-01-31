@@ -73,7 +73,7 @@ double DENSITY_PHOT_MIN;	/* This constant is a minimum density for the purpose o
 #define BETA  				1.0
 #define KAPPA_CONT 			4.
 #define EPSILON  			1.e-6	/* A general purpose fairly small number */
-#define NSTAT 				9
+#define NSTAT 				10    // JM increased this to ten to allow for adiabatic
 #define VMAX                		1.e9
 #define TAU_MAX				20.	/* Sets an upper limit in extract on when
 						   a photon can be assumed to be completely absorbed */
