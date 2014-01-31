@@ -157,7 +157,6 @@ lum_lines (one, nmin, nmax)
       else
 	lin_ptr[n]->pow = 0;
     }
-lum=0.0;
 
 
   return (lum);
