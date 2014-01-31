@@ -76,6 +76,11 @@ in python.h
 			put it into a more readable format.
 	12jul	nsh	73-Subroutine bad_t_rr coded to generate a total
 			recombination rate from badnell type parameters
+	14jan	nsh	77a - Added some checks into the integrals, to ensure
+			we do not attempt to integrate over a range of 
+			frequencies so large that the integrand is zero over
+			an excessive range - hence causing QROMB to return
+			an answer of zero.
                                                                                                    
  ************************************************************************/
 
@@ -170,6 +175,7 @@ fb_verner_partial (freq)
     FBEMISS * gn / (2. * gion) * pow (freq * freq / fbt,
 				      1.5) * exp (H_OVER_K *
 						  (fthresh - freq) / fbt) * x;
+
 // 0=emissivity, 1=heat loss from electrons, 2=photons emissivity
   if (fbfr == 1)
     partial *= (freq - fthresh) / freq;
@@ -236,11 +242,16 @@ fb_topbase_partial (freq)
     FBEMISS * gn / (2. * gion) * pow (freq * freq / fbt,
 				      1.5) * exp (H_OVER_K *
 						  (fthresh - freq) / fbt) * x;
+
+
+
 // 0=emissivity, 1=heat loss from electrons, 2=photons emissivity
   if (fbfr == 1)
     partial *= (freq - fthresh) / freq;
   else if (fbfr == 2)
     partial /= (H * freq);
+
+
 
   return (partial);
 }
@@ -310,6 +321,9 @@ integ_fb (t, f1, f2, nion, fb_choice)
   double fnu;
   double get_fb (), get_nrecomb ();
   int n;
+
+
+
 
   if (fb_choice == 1)
     {
@@ -398,7 +412,8 @@ total_fb (one, t, f1, f2)
     return (0);			/* It's too cold to emit */
 
 // Initialize the free_bound structures if that is necessary
-  init_freebound (1.e3, 1.e6, f1, f2);
+  init_freebound (1.e3, 1.e9, f1, f2); //NSH 140121 increased limit to take account of hot plasmas
+
 
 // Calculate the number of recombinations whenever calculating the fb_luminosities
   num_recomb (xplasma, t);
@@ -857,14 +872,13 @@ init_freebound (t1, t2, f1, f2)
 	}
 
       Log ("init_freebound: Creating recombination coefficients\n");
-
       for (nion = 0; nion < nions; nion++)
 	{
 	  for (j = 0; j < NTEMPS; j++)
 	    {
 	      t = fb_t[j];
-	      xnrecomb[nion][j] = xinteg_fb (t, 0.0, 1.e50, nion, 2);
 
+	      xnrecomb[nion][j] = xinteg_fb (t, 0.0, 1.e50, nion, 2);
 	    }
 	}
     }
@@ -932,7 +946,6 @@ on the assumption that the fb information will be reused.
 	{			//j covers the temps
 	  t = fb_t[j];
 	  freebound[nput].emiss[nion][j] = xinteg_fb (t, f1, f2, nion, 1);
-
 	}
     }
 
@@ -1037,6 +1050,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 {
   int n;
   double fnu;
+  double dnu;  //NSH 140120 - a parameter to allow one to restrict the integration limits.
   double fthresh, fmax;
   double den_config ();
   double sigma_phot (), sigma_phot_topbase ();
@@ -1044,6 +1058,9 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
   int nvmin, nvmax;		// These are the limits on the Verland x-sections
   double qromb ();
   double fb_topbase_partial (), fb_verner_partial ();
+
+  dnu=0.0; //Avoid compilation errors.
+
 
   if (-1 < nion && nion < nions)	//Get emissivity for this specific ion_number
     {
@@ -1090,8 +1107,15 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
 	  // Now calculate the emissivity as long as fmax exceeds xthreshold and there are ions to recombine
 	  if (fmax > fthresh)
-	    fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
-
+                {
+//NSH 140120 - this is a test to ensure that the exponential will not go to zero in the integrations 
+     		dnu = 100.0 * (fbt / H_OVER_K);
+      		if (fthresh + dnu < fmax)
+			{
+	  		fmax = fthresh + dnu;
+			}
+	    	fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
+	    	}
 	}
     }
 
@@ -1110,7 +1134,15 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 	    fmax = f2;
 	  // Now integrate only if its in allowable range  && there are ions to recombine
 	  if (fmax > fthresh)
-	    fnu += qromb (fb_verner_partial, fthresh, fmax, 1.e-4);
+//NSH 140120 - this is a test to ensure that the exponential will not go to zero in the integrations 
+		{     		
+		dnu = 100.0 * (fbt / H_OVER_K);
+      		if (fthresh + dnu < fmax)
+			{
+	  		fmax = fthresh + dnu;
+			}
+	        fnu += qromb (fb_verner_partial, fthresh, fmax, 1.e-4);
+		}
 	}
     }
 

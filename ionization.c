@@ -437,7 +437,6 @@ one_shot (xplasma, mode)
 
   xplasma->t_e = (1 - gain) * te_old + gain * te_new;
 
-
 /* NSH 130722 - NOTE - at this stage, the cooling terms are still those computed from the 'ideal' t_e, not the new t_e - this may be worth investigatiing. */
   if (xplasma->t_e > TMAX)
 	{	

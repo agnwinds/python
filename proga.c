@@ -178,7 +178,7 @@ get_proga ()
   double rho;
   double theta,theta_edge,dtheta,dtheta_edge;
   double vr, vtheta, vphi, energy;
-  int irmax,ithetamax;
+  int irmax,ithetamax,itest;
 
 /*Write something into the file name strings */
   strcpy (rfile, "grid1_r_big.dat");
@@ -212,7 +212,12 @@ get_proga ()
   
   while (fgets (aline, LINE, fptr) != NULL)
     {
-      sscanf (aline, "%d %lf %lf %lf %lf", &i, &r_edge, &r, &dr_edge, &dr);	/*NSH 130322 - minor mod here - it is actually the second value which is the centre of the cell, where the data is defined so we ignore the first */
+      itest = sscanf (aline, "%d %lf %lf %lf %lf", &i, &r_edge, &r, &dr_edge, &dr);	/*NSH 130322 - minor mod here - it is actually the second value which is the centre of the cell, where the data is defined so we ignore the first */
+      if (itest != 5) //We have an line which does not match what we expect, so quit
+	{
+	Error("proga.c radius file improperly formatted, check for headers and footers\n");
+	exit (0);
+	}
       proga_r_edge[i] = r_edge;
       proga_r_cent[i] = r;
       proga_dr_edge[i] = dr_edge;
@@ -250,7 +255,12 @@ This allows one to disregard theta cells which contain the disk in Daniels model
   j_proga_thetamax = 0;		/* NSH 130605 to remove o3 compile error */
   while (fgets (aline, LINE, fptr) != NULL)
     {
-      sscanf (aline, "%d %lf %lf %lf %lf", &i, &theta_edge, &theta, &dtheta_edge, &dtheta);	/*NSH 130322 - minor mod here - it is actually the second value which is the centre of the cell, where the data is defined so we ignore the first */
+      itest = sscanf (aline, "%d %lf %lf %lf %lf", &i, &theta_edge, &theta, &dtheta_edge, &dtheta);	/*NSH 130322 - minor mod here - it is actually the second value which is the centre of the cell, where the data is defined so we ignore the first */
+      if (itest != 5) //We have an line which does not match what we expect, so quit
+	{
+	Error("proga.c theta file improperly formatted - check for headers and footers\n");
+	exit (0);
+	}
       proga_theta_cent[i] = theta;
       proga_theta_edge[i] = theta_edge;
       proga_dtheta_edge[i] = dtheta_edge;
@@ -290,32 +300,40 @@ This allows one to disregard theta cells which contain the disk in Daniels model
 
 
   k = 0;
-  irmax=ithetamax=0; //Zero counters to check all cells actually have data
+  irmax=0;
+  ithetamax=0; //Zero counters to check all cells actually have data
 
   while (fgets (aline, LINE, fptr) != NULL)
     {
-      if (aline[0] != '#')
-	{
-	  sscanf (aline, "%d %d %lf %lf %lf %lf %lf", &i, &j, &rho, &vr,
-		  &vtheta, &vphi, &energy);
-	if (i>irmax) irmax=i;
-	if (j>ithetamax) ithetamax=j;
+      	itest=sscanf (aline, "%d %d %lf %lf %lf %lf %lf", &i, &j, &rho, &vr, &vtheta, &vphi, &energy);
+      	if (itest==7)
+		{
+		if (i>irmax) 
+			{
+			irmax=i;
+			}
+		if (j>ithetamax) ithetamax=j;
 /* NSH 130327 - for the time being, if theta is in the disk, replace with the last
  density above the disk */
-	  proga_ptr[i * MAXPROGA + j].temp = ((2.0 / 3.0) * energy) / ((rho / MPROT) * BOLTZMANN);	//Work out the temperature from the internal energy
-          proga_ptr[i * MAXPROGA + j].rho = rho;
-	  proga_ptr[i * MAXPROGA + j].v[0] = vr;
-	  proga_ptr[i * MAXPROGA + j].v[1] = vtheta;
-	  proga_ptr[i * MAXPROGA + j].v[2] = vphi;
-	  k++;
-	}
+	  	proga_ptr[i * MAXPROGA + j].temp = ((2.0 / 3.0) * energy) / ((rho / MPROT) * BOLTZMANN);	//Work out the temperature from the internal energy
+          	proga_ptr[i * MAXPROGA + j].rho = rho;
+	  	proga_ptr[i * MAXPROGA + j].v[0] = vr;
+	  	proga_ptr[i * MAXPROGA + j].v[1] = vtheta;
+	  	proga_ptr[i * MAXPROGA + j].v[2] = vphi;
+	  	k++;
+		}
+	else
+		{
+		Error("Proga data file not correctly formatted - check for headers and footers\n");
+		exit(0);
+		}
 
     }
-//	printf ("PROGA Maximum r cell with data=%i (iproga_r=%i)\n",irmax,iproga_r);
-//	printf ("PROGA Maximum theta cell with data=%i (iproga_theta=%i)\n",ithetamax,iproga_theta);
+//	Log ("PROGA Maximum r cell with data=%i (iproga_r=%i)\n",irmax,iproga_r);
+//	Log ("PROGA Maximum theta cell with data=%i (iproga_theta=%i)\n",ithetamax,iproga_theta);
 if (irmax<iproga_r)
 	{
-//	printf ("PROGA Maximum r cell with data=%i (iproga_r=%i)\n",irmax,iproga_r);
+//	Log ("PROGA Maximum r cell with data=%i (iproga_r=%i) - resetting\n",irmax,iproga_r);
 	iproga_r=irmax;
 	}
 if (ithetamax<iproga_theta)
@@ -335,7 +353,6 @@ if (ithetamax<iproga_theta)
 //        proga_ptr[k].v[1],
 //        proga_ptr[k].v[2]);
   fclose (fptr);
-
 
  /* We need to reset the grid dimensions to those we have just read in, if we are going to try and match coordinates */
    if (geo.coord_type == RTHETA)

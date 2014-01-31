@@ -419,6 +419,6 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
 
       /* this last bit is the direction, might need a change */
       randvcos (p[i].lmn, p[i].x);
-    }
+   }
   return (0);
 }
