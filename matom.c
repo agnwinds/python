@@ -1067,6 +1067,8 @@ kpkt (p, nres, escape)
       *nres = -2;		
       p->w = 0.0;		// JM131030 set photon weight to zero as energy is taken up in adiabatic expansion
 
+      p->istat = P_ADIABATIC; 	// record that this photon went into a kpkt destruction from adiabatic cooling
+
       return (0);
     }
 

@@ -817,6 +817,7 @@ phot.istat below */
 #define P_TOO_MANY_SCATTERS 4	//in wind after MAXSCAT scatters
 #define P_ERROR             5	//Too many calls to translate without something happening
 #define P_SEC               8	//Photon hit secondary
+#define P_ADIABATIC         9 //records that a photon created a kpkt which was destroyed by adiabatic cooling
 
 #define TMAX_FACTOR			1.5	/*Factor by which t_e can exceed
 						   t_r in order for absorbed to 
