@@ -3033,6 +3033,13 @@ q_ioniz (cont_ptr, electron_temperature)
 
 /* q_recomb. This returns the collisional recombination co-efficient
 Calculated from inverse of q_ioniz.
+
+JM 1301 -- Edited this to avoid need to call q_ioniz and exponential.
+Should improve speed and stability
+
+This equation comes from considering TE and getting the expression
+q_recomb = 2.07e-16 * gl/gu * exp(E/kT) * q_ioniz
+then substituting the above expression for q_ioniz.
 */
 
 double
@@ -3041,15 +3048,15 @@ q_recomb (cont_ptr, electron_temperature)
      double electron_temperature;
 {
   double coeff;
-  double root_etemp;
-  double q_ioniz ();
+  double gaunt;
 
-  root_etemp = sqrt (electron_temperature);
-  coeff = 2.07e-16 / (root_etemp * root_etemp * root_etemp);
-  coeff *= exp (cont_ptr->freq[0] * H_OVER_K / electron_temperature);
+
+  gaunt = 0.1;			//for now - from Mihalas for hydrogen
+
+  coeff = 3.2085e-3  / electron_temperature * gaunt * cont_ptr->x[0];	// normal constants * 1/T times gaunt * cross section
+
+  coeff /= cont_ptr->freq[0] * H_OVER_K;			// divide by h nu / k
   coeff *= config[cont_ptr->nlev].g / config[cont_ptr->uplev].g;
-  coeff *= q_ioniz (cont_ptr, electron_temperature);
-
 
   return (coeff);
 }
