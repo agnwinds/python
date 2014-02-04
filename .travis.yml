@@ -9,10 +9,6 @@ git:
     - cd progs
     - git clone git://github.com/jhmatthews/python.git
 
-branches:
-  only:
-    - dev
-
 install:
     # First make cfitsio library
     - export PYTHON=$TRAVIS_BUILD_DIR
