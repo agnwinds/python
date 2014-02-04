@@ -930,7 +930,11 @@ kpkt (p, nres, escape)
 
       if (cooling_adiabatic < 0)
         {
-          Warning("kpkt: Adiabatic cooling negative!\n");
+          Error("kpkt: Adiabatic cooling negative!\n");
+        }
+      if (geo.adiabatic == 0 && cooling_adiabatic > 0.0)
+        {
+      	  Error("Adiabatic cooling turned off, but non zero in cell %d", xplasma->nplasma);
         }
 
       cooling_normalisation += cooling_adiabatic;
@@ -1063,9 +1067,13 @@ kpkt (p, nres, escape)
 	    mplasma->cooling_bbtot + mplasma->cooling_ff + xplasma->lum_adiabatic))
     {
 
+      if (geo.adiabatic == 0)
+      {
+      	Error("Destroying kpkt by adiabatic cooling even though it is turned off.");
+      }
       *escape = 1;		// we want to escape but set photon weight to zero
       *nres = -2;		
-      p->w = 0.0;		// JM131030 set photon weight to zero as energy is taken up in adiabatic expansion
+      //p->w = 0.0;		// JM131030 set photon weight to zero as energy is taken up in adiabatic expansion
 
       p->istat = P_ADIABATIC; 	// record that this photon went into a kpkt destruction from adiabatic cooling
 

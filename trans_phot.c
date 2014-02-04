@@ -270,6 +270,13 @@ it from translate. ?? 02jan ksl */
 	      break;
 	    }
 
+	  if (istat == P_ADIABATIC)
+	    {
+	  	  /* It created a kpkt which was absorbed by adiabatic cooling */
+	      stuff_phot (&pp, &p[nphot]);
+	      break;
+	    }
+
 	  if (istat == P_HIT_DISK)
 	    {
 	      /* It was absorbed by the disk */
