@@ -921,16 +921,18 @@ kpkt (p, nres, escape)
 	}
 
 
-
       /* JM -- 1310 -- we now want to add adiabatic cooling as another way of destroying kpkts
          this should have already been calculated and stored in the plasma structure. Note that 
          adiabatic cooling does not depend on type of macro atom excited */
 
-      cooling_adiabatic = xplasma->lum_adiabatic;
+      /* note the units here- we divide the total luminosity of the cell by volume and ne to give cooling rate */
+
+      cooling_adiabatic = xplasma->lum_adiabatic / one->vol / xplasma->ne;;
 
       if (cooling_adiabatic < 0)
         {
-          Error("kpkt: Adiabatic cooling negative!\n");
+          Error("kpkt: Adiabatic cooling negative! Abort.\n");
+	      exit (0);
         }
       if (geo.adiabatic == 0 && cooling_adiabatic > 0.0)
         {
@@ -940,14 +942,13 @@ kpkt (p, nres, escape)
       cooling_normalisation += cooling_adiabatic;
 
 
+ 
       mplasma->cooling_bbtot = cooling_bbtot;
       mplasma->cooling_bftot = cooling_bftot;
       mplasma->cooling_bf_coltot = cooling_bf_coltot;
+      mplasma->cooling_adiabatic = cooling_adiabatic;
       mplasma->cooling_normalisation = cooling_normalisation;
       mplasma->kpkt_rates_known = 1;
-
-      
-
 
     }
 
@@ -1064,7 +1065,7 @@ kpkt (p, nres, escape)
   /* JM 1310 -- added loop to check if destruction occurs via adiabatic cooling */
   else if (destruction_choice <
 	   (mplasma->cooling_bftot +
-	    mplasma->cooling_bbtot + mplasma->cooling_ff + xplasma->lum_adiabatic))
+	    mplasma->cooling_bbtot + mplasma->cooling_ff + mplasma->cooling_adiabatic))
     {
 
       if (geo.adiabatic == 0)
@@ -1125,7 +1126,7 @@ kpkt (p, nres, escape)
   Error
     ("matom.c: cooling_bftot %g, cooling_bbtot %g, cooling_ff %g, cooling_bf_coltot %g cooling_adiabatic %g\n",
      mplasma->cooling_bftot, mplasma->cooling_bbtot,
-     mplasma->cooling_ff, mplasma->cooling_bf_coltot, xplasma->lum_adiabatic);
+     mplasma->cooling_ff, mplasma->cooling_bf_coltot, mplasma->cooling_adiabatic);
 
   exit (0);
 

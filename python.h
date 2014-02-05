@@ -789,6 +789,7 @@ typedef struct macro
   double cooling_normalisation;
   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
   double cooling_ff;
+  double cooling_adiabatic;
 
 } macro_dummy, *MacroPtr;
 

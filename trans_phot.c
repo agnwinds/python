@@ -270,12 +270,12 @@ it from translate. ?? 02jan ksl */
 	      break;
 	    }
 
-	  if (istat == P_ADIABATIC)
+	  /*if (istat == P_ADIABATIC)
 	    {
 	  	  /* It created a kpkt which was absorbed by adiabatic cooling */
-	      stuff_phot (&pp, &p[nphot]);
+	      /*stuff_phot (&pp, &p[nphot]);
 	      break;
-	    }
+	    }*/
 
 	  if (istat == P_HIT_DISK)
 	    {
@@ -348,6 +348,7 @@ a problem that needs fixing */
 		    ("trans_phot: Trying to scatter a photon which is not in a cell in the plasma structure\n");
 		  Error ("trans_phot: grid %3d x %8.2e %8.2e %8.2e\n",
 			 pp.grid, pp.x[0], pp.x[1], pp.x[2]);
+		  Log("istat %d\n", pp.istat);
 		  Error ("trans_phot: This photon is effectively lost!\n");
 		  istat = pp.istat = p[nphot].istat = P_ERROR;
 		  stuff_phot (&pp, &p[nphot]);
@@ -362,6 +363,7 @@ a problem that needs fixing */
 		    ("trans_phot: Trying to scatter a photon in a cell with no wind volume\n");
 		  Error ("trans_phot: grid %3d x %8.2e %8.2e %8.2e\n",
 			 pp.grid, pp.x[0], pp.x[1], pp.x[2]);
+		  Log("istat %d\n", pp.istat);
 		  Error ("trans_phot: This photon is effectively lost!\n");
 		  istat = pp.istat = p[nphot].istat = P_ERROR;
 		  stuff_phot (&pp, &p[nphot]);
@@ -495,6 +497,13 @@ been initialized. 02may ksl.  This seems to be OK at present.*/
 	      stuff_phot (&pp, &p[nphot]);
 	      break;
 	    }
+
+	  if (pp.istat == P_ADIABATIC)
+	  {
+	  	istat = pp.istat;
+	  	stuff_phot (&pp, &p[nphot]);
+	  	break;
+	  }
 
 /* This appears partly to be an insurance policy. It is not obvious that for example nscat and nrscat need to be updated */
 	  p[nphot].istat = istat;
