@@ -1087,7 +1087,7 @@ kpkt (p, nres, escape)
       /* We want destruction by collisional ionization in a macro atom. */
       destruction_choice =
 	destruction_choice - mplasma->cooling_bftot -
-	mplasma->cooling_bbtot - mplasma->cooling_ff;
+	mplasma->cooling_bbtot - mplasma->cooling_ff - mplasma->cooling_adiabatic;
 
       for (i = 0; i < ntop_phot; i++)
 	{

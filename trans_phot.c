@@ -270,12 +270,6 @@ it from translate. ?? 02jan ksl */
 	      break;
 	    }
 
-	  /*if (istat == P_ADIABATIC)
-	    {
-	  	  /* It created a kpkt which was absorbed by adiabatic cooling */
-	      /*stuff_phot (&pp, &p[nphot]);
-	      break;
-	    }*/
 
 	  if (istat == P_HIT_DISK)
 	    {
@@ -348,7 +342,6 @@ a problem that needs fixing */
 		    ("trans_phot: Trying to scatter a photon which is not in a cell in the plasma structure\n");
 		  Error ("trans_phot: grid %3d x %8.2e %8.2e %8.2e\n",
 			 pp.grid, pp.x[0], pp.x[1], pp.x[2]);
-		  Log("istat %d\n", pp.istat);
 		  Error ("trans_phot: This photon is effectively lost!\n");
 		  istat = pp.istat = p[nphot].istat = P_ERROR;
 		  stuff_phot (&pp, &p[nphot]);
@@ -500,7 +493,7 @@ been initialized. 02may ksl.  This seems to be OK at present.*/
 
 	  if (pp.istat == P_ADIABATIC)
 	  {
-	  	istat = pp.istat;
+	  	istat = pp.istat = p[nphot].istat = P_ADIABATIC;
 	  	stuff_phot (&pp, &p[nphot]);
 	  	break;
 	  }

@@ -1817,7 +1817,7 @@ run -- 07jul -- ksl
 	    ("!!python: Total photon luminosity after transphot %18.12e (diff %18.12e). Radiated luminosity %18.12e\n",
 	     zzz, zzz - zz, zze);
       if (geo.rt_mode == 2)
-	  Log("Luminosity taken up by adiabatic kpkt destruction %18.12e number of packets%d\n", zz_adiab, nn_adiab);
+	  Log("Luminosity taken up by adiabatic kpkt destruction %18.12e number of packets %d\n", zz_adiab, nn_adiab);
 
 #if DEBUG
 	  wind_rad_summary (w, windradfile, "a");
