@@ -272,8 +272,7 @@ Description:
 Notes:
   JM 1401 -- I've rederived the expression for dv/dT. It follows
         directly from the continuity equation and is indeed equal 
-        to volume * div_v. The remaining question for me is where
-        the factor of 1.5 comes from.
+        to volume * div_v. 
 
         Note also that this function should only be called
         if geo.adiabatic == 1, in which case it populates
@@ -312,7 +311,8 @@ adiabatic_cooling (one, t)
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
-  cooling = 1.5 * xplasma->ne * BOLTZMANN * t * one->vol * one->div_v;
+  //JM 1401 -- here was an old factor of 3/2 which KSL and JM believe to be incorrect. 
+  cooling = xplasma->ne * BOLTZMANN * t * one->vol * one->div_v;
 
   return (cooling);
 }
