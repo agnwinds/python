@@ -73,7 +73,7 @@ double DENSITY_PHOT_MIN;	/* This constant is a minimum density for the purpose o
 #define BETA  				1.0
 #define KAPPA_CONT 			4.
 #define EPSILON  			1.e-6	/* A general purpose fairly small number */
-#define NSTAT 				9
+#define NSTAT 				10    // JM increased this to ten to allow for adiabatic
 #define VMAX                		1.e9
 #define TAU_MAX				20.	/* Sets an upper limit in extract on when
 						   a photon can be assumed to be completely absorbed */
@@ -789,6 +789,7 @@ typedef struct macro
   double cooling_normalisation;
   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
   double cooling_ff;
+  double cooling_adiabatic;
 
 } macro_dummy, *MacroPtr;
 
@@ -817,6 +818,7 @@ phot.istat below */
 #define P_TOO_MANY_SCATTERS 4	//in wind after MAXSCAT scatters
 #define P_ERROR             5	//Too many calls to translate without something happening
 #define P_SEC               8	//Photon hit secondary
+#define P_ADIABATIC         9 //records that a photon created a kpkt which was destroyed by adiabatic cooling
 
 #define TMAX_FACTOR			1.5	/*Factor by which t_e can exceed
 						   t_r in order for absorbed to 

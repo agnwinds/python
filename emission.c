@@ -257,17 +257,20 @@ Synopsis:  adiabatic_cooling (one, t) determines the amount of
 adiabatic cooling in a cell.
 
 Arguments:		
-
+	WindPtr one;	pointer to wind cell
+	double t;		electron temperature
 
 Returns:
  
 Description:	
    Adiabatic cooling is clearly the amount of PdV work done by
-   a fluid element.  The only real question is whether dV is given
-   by the volume * div v
+   a fluid element, per unit time dt. Thus it is equal to P dV/dt.  
+   The only real question is whether dV/dt is given by the volume * div v.
+   div v here is the divergence of the velocity field.
 	
 
 Notes:
+
 
 History:
 	04nov	ksl	Stuart had switched adiabatic cooling off
@@ -301,7 +304,6 @@ adiabatic_cooling (one, t)
   cooling = 1.5 * xplasma->ne * BOLTZMANN * t * one->vol * one->div_v;
 
   return (cooling);
-
 }
 
 
