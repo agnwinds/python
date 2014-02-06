@@ -729,67 +729,62 @@ jbar are allcoated in calloc_esimators.
 typedef struct macro
 {
   double *jbar;
-  //[NLEVELS_MACRO][NBBJUMPS]; 
   /* This will store the Sobolev mean intensity in transitions which is needed 
      for Macro Atom jumping probabilities. The indexing is by configuration (the 
      NLTE_LEVELS) and then by the upward bound-bound jumps from that level 
      (the NBBJUMPS) (SS) */
+
   double *jbar_old;
-  //[NLEVELS_MACRO][NBBJUMPS];
 
   double *gamma;
-  //[NLEVELS_MACRO][NBFJUMPS]; 
   /* This is similar to the jbar but for bound-free transitions. It records the 
      appropriate photoionisation rate co-efficient. (SS) */
+
   double *gamma_old;
-  //[NLEVELS_MACRO][NBFJUMPS];
+
   double *gamma_e;
-  //[NLEVELS_MACRO][NBFJUMPS]; 
   /* This is Leon's gamma_e: very similar to gamma but energy weighted. Needed
      for division of photoionisation energy into excitation and k-packets. (SS) */
+
   double *gamma_e_old;
-  //[NLEVELS_MACRO][NBFJUMPS];
 
   double *alpha_st;
-  //[NLEVELS_MACRO][NBFJUMPS]; /* Same as gamma but for stimulated recombination rather than photoionisation. (SS)*/
+  /* Same as gamma but for stimulated recombination rather than photoionisation. (SS)*/
+
   double *alpha_st_old;
-  //[NLEVELS_MACRO][NBFJUMPS];
+
   double *alpha_st_e;
-  //[NLEVELS_MACRO][NBFJUMPS]; 
   /* Same as gamma_e but for stimulated recombination rather than photoionisation. (SS) */
+
   double *alpha_st_e_old;
-  //[NLEVELS_MACRO][NBFJUMPS];
 
   double *recomb_sp;
-  //[NLEVELS_MACRO][NBFJUMPS]; 
   /* Spontaneous recombination. (SS) */
+
   double *recomb_sp_e;
-  //[NLEVELS_MACRO][NBFJUMPS]; 
   /* "e" version of the spontaneous recombination coefficient. (SS) */
 
   double *matom_emiss;
-  //[NLEVELS_MACRO]; 
   /* This is the specific emissivity due to the de-activation of macro atoms in the cell
      in the frequency range that is required for the final spectral synthesis. (SS) */
-  double *matom_abs;
-  //[NLEVELS_MACRO];  
+
+  double *matom_abs;  
   /* This is the energy absorbed by the macro atom levels - recorded during the ionization 
      cycles and used to get matom_emiss (SS) */
 
-// The portion of the macroy structure  is not written out by windsave
+  /* This portion of the macro structure  is not written out by windsave */
   int kpkt_rates_known;
-  // COOLSTR kpkt_rates;
 
   double *cooling_bf;
-//  double cooling_bf[NTOP_PHOT];
   double *cooling_bf_col;
-// double cooling_bf_col[NTOP_PHOT];
   double *cooling_bb;
-// double cooling_bb[NLINES];
+
+  /* set of cooling rate stores, which are calculated for each macro atom each cycle,
+     and used to select destruction rates for kpkts */
   double cooling_normalisation;
   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
   double cooling_ff;
-  double cooling_adiabatic;
+  double cooling_adiabatic;     // this is just lum_adiabatic / vol / ne
 
 } macro_dummy, *MacroPtr;
 
@@ -836,7 +831,7 @@ phot.istat below */
 #define MAXITERATIONS	200	//The number of loops to do to try to converge in ne
 #define FRACTIONAL_ERROR 0.03	//The change in n_e which causes a break out of the loop for ne
 #define THETAMAX	 1e4	//Used in initial calculation of n_e
-#define MIN_TEMP	100.	//  ??? this is another minimum temperature - it is used as the minimum tempersture in
+#define MIN_TEMP	100.	//  ??? this is another minimum temperature - it is used as the minimum tempersture in (JM -- in what??)
 
 
 #define NDIM_MAX 500
