@@ -1,17 +1,39 @@
+#####################################################################################
+#
+#       James Matthews, University of Southampton
+#                   6 Feb 2014
+#
+# This is the travis yml file which controls the test builds 
+# for Python, the radiative transfer code hosted at https://github.com/agnwinds/python
+#
+# Procedure:
+#       - travis automatically clones the main dev branch of the repository
+#       - we clone the rest of the directory structure into a folder called structure
+#       - note this is different from normal directory layout, but facilitates the build
+#       - Cfitsio and gsl are built
+#       - we then cd into the main build directory and do make test_tr. 
+#   
+#####################################################################################
+
 language: c
+
 compiler:
     - gcc
 
-git:
-    # first we clone the structure directory 
-    - git clone --depth=50 --branch=structure git://github.com/jhmatthews/python.git jhmatthews/python
-    - mkdir progs
-    - cd progs
-    - git clone git://github.com/jhmatthews/python.git
+# only want to run this test when we commit to dev
+branches:
+  only:
+      dev
 
 install:
-    # First make cfitsio library
-    - export PYTHON=$TRAVIS_BUILD_DIR
+    # clone the structure branch into a sub directory
+    - git clone --depth=50 --branch=structure git://github.com/agnwinds/python.git structure
+    - cd structure
+    - export PYTHON=$TRAVIS_BUILD_DIR/structure
+    - echo $PYTHON
+    - echo $PWD
+
+    # make cfitsio library
     - cd software/cfitsio3040
     - ./configure 
     - make
@@ -25,8 +47,13 @@ install:
     - make install
     - make clean
 
+
 script:
-    # now we can make actual source code
-    - cd progs/python
-    - make test
+    - echo $PWD
+    # cd back into right directory for making source code and make using gcc
+    - cd ../../../
+    # these long strings of variables are required because we have a different directory layout to normal
+    - make CC=gcc LIB=structure/lib LIB2=structure/gsl/lib BIN=structure/bin INCLUDE=structure/include INCLUDE2=structure/gsl/include python
+    - make clean
+    - make CC=gcc LIB=structure/lib LIB2=structure/gsl/lib BIN=structure/bin INCLUDE=structure/include INCLUDE2=structure/gsl/include py_wind
     - make clean

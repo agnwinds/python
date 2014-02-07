@@ -1,4 +1,3 @@
-
 # Python
 
 Python is a (confusingly named) Monte Carlo radiative transfer code which uses the Sobolev approximation.
@@ -9,15 +8,15 @@ Python please contact long@stsci.edu.
 
 # Travis Build Status
 
-[![Build Status](https://travis-ci.org/jhmatthews/python.png?branch=dev)](https://travis-ci.org/jhmatthews/python)
+Simple build checks are carried out on Travis. The latest status shows up below:
 
+[![Build Status](https://travis-ci.org/agnwinds/python.png?branch=dev)](https://travis-ci.org/agnwinds/python)
 
 # Getting the radiative transfer code 'Python'
 
 You can download the required structure under the structure branch. e.g.
 git clone https://github.com/agnwinds/python.git -b structure
 or simply click on the 'zip' button!
-THIS DOESN'T WORK YET!
 
 
 Releases of progs can be found under [tags](https://github.com/agnwinds/python/tags "Wiki").
