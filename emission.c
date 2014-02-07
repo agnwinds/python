@@ -253,21 +253,34 @@ total_emission (one, f1, f2)
 /***********************************************************
                                        Space Telescope Science Institute
 
-Synopsis:  adiabatic_cooling (one, t) determines the amount of 
-adiabatic cooling in a cell.
+Synopsis:  
+	adiabatic_cooling (one, t) determines the amount of 
+	adiabatic cooling in a cell, in units of luminosity.
 
 Arguments:		
-
+	WindPtr one;	pointer to wind cell
+	double t;		electron temperature
 
 Returns:
  
 Description:	
    Adiabatic cooling is clearly the amount of PdV work done by
-   a fluid element.  The only real question is whether dV is given
-   by the volume * div v
+   a fluid element, per unit time dt. Thus it is equal to P dV/dt.  
+   The only real question is whether dV/dt is given by the volume * div v.
+   div v here is the divergence of the velocity field.
 	
-
 Notes:
+  JM 1401 -- I've rederived the expression for dv/dT. It follows
+        directly from the continuity equation and is indeed equal 
+        to volume * div_v. 
+
+        Note also that this function should only be called
+        if geo.adiabatic == 1, in which case it populates
+        xplasma->lum_adiabatic. This is used in heating and cooling
+        balance. We also use it as a potential destruction choice for 
+        kpkts in which case the kpkt is thrown away by setting its istat 
+        to P_ADIABATIC.
+
 
 History:
 	04nov	ksl	Stuart had switched adiabatic cooling off
@@ -298,10 +311,10 @@ adiabatic_cooling (one, t)
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
-  cooling = 1.5 * xplasma->ne * BOLTZMANN * t * one->vol * one->div_v;
+  //JM 1401 -- here was an old factor of 3/2 which KSL and JM believe to be incorrect. 
+  cooling = xplasma->ne * BOLTZMANN * t * one->vol * one->div_v;
 
   return (cooling);
-
 }
 
 

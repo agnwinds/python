@@ -247,8 +247,8 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   double xbl;
 
   int j, nn;
-  double zz, zzz, zze, ztot;
-  int icheck;
+  double zz, zzz, zze, ztot, zz_adiab;
+  int icheck, nn_adiab;
   FILE *fopen (), *qptr;
 
   int disk_illum;
@@ -1799,16 +1799,25 @@ run -- 07jul -- ksl
 	  trans_phot (w, p, 0);
 
 	  /*Determine how much energy was absorbed in the wind */
-	  zze = zzz = 0.0;
+	  zze = zzz = zz_adiab = 0.0;
+	  nn_adiab = 0;
 	  for (nn = 0; nn < NPHOT; nn++)
 	    {
 	      zzz += p[nn].w;
 	      if (p[nn].istat == P_ESCAPE)
 		zze += p[nn].w;
+	      if (p[nn].istat == P_ADIABATIC)
+	      {
+		    zz_adiab += p[nn].w;
+		    nn_adiab++;
+		  }
 	    }
+
 	  Log
-	    ("!!python: Total photon luminosity after transphot %18.12e (diff %18.12e). Radiated luminosity %18.12e \n",
+	    ("!!python: Total photon luminosity after transphot %18.12e (diff %18.12e). Radiated luminosity %18.12e\n",
 	     zzz, zzz - zz, zze);
+      if (geo.rt_mode == 2)
+	  Log("Luminosity taken up by adiabatic kpkt destruction %18.12e number of packets %d\n", zz_adiab, nn_adiab);
 
 #if DEBUG
 	  wind_rad_summary (w, windradfile, "a");
