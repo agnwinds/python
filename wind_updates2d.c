@@ -106,6 +106,7 @@ WindPtr (w);
   double nsh_lum_hhe;
   double nsh_lum_metals;
   int my_nmin, my_nmax;	//Note that these variables are still used even without MPI on
+  double par[2]; 		// JM temporary diagnostic
 #ifdef MPI_ON
   int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
   int size_of_commbuffer;
@@ -822,8 +823,16 @@ WindPtr (w);
 	}
     }
 
+  /* JM 1402 -- loop to report on disk structure for reprocessing analysis */
+  for (n = 0; n < NRINGS; n++)
+  {
+    Log("Disk stats: RING %i: r %8.4e t %8.4e heat %8.4e w %8.4e t_hit %8.4e nhit %i g %8.4e\n",
+    	 n, qdisk.r[n], qdisk.t[n], qdisk.heat[n], qdisk.w[n], qdisk.t_hit[n], qdisk.nhit[n], qdisk.g[n]);
+    par[0] = qdisk.t[n];
+    par[1] = qdisk.g[n];
+    i = model (geo.disk_spectype, par);
 
-
+  }
 
 
 
