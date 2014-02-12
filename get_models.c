@@ -552,10 +552,13 @@ even, and so for those cases we want to make sure to calculate the ratio of qs d
 	{
 	  lambda = comp[spectype].xmod.w[j] * 1.e-8;	// Convert lamda to cgs
 
-	  q1 = 1.43883 / (lambda * par[0]);	//  for model desired 
 
-	  tscale = comp[spectype].min[0];
-	  q2 = 1.43883 / (lambda * tscale);	// for model that exists
+    /* 1.43883 here is H*C/k_b -- at this point q1 and q2 are just h*nu/kT */
+
+	  q1 = 1.43883 / (lambda * par[0]);	    //  for model desired 
+
+	  tscale = comp[spectype].min[0];      // lowest temperature model
+	  q2 = 1.43883 / (lambda * tscale);	   // for model that exists
 
 
 	  /* q can be large line below is attempt to keep exponents in range in that case */
