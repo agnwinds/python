@@ -989,6 +989,7 @@ mo_summary (w, rootname, ochoice)
   int n;
   int ichoice;
   char name[LINELENGTH];
+  char filename[LINELENGTH];
   double x;
   PlasmaPtr xplasma;
 
@@ -1033,8 +1034,15 @@ mo_summary (w, rootname, ochoice)
 	  aaa[n] = x;
 	}
       display (name);
+
+  if (ochoice && ichoice == 0)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".f_rad");
+      write_array (filename, ochoice);
     }
 
+  }
   return (0);
 
 }
