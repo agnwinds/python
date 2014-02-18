@@ -793,7 +793,7 @@ wind_div_v (w)
      WindPtr w;
 {
   int icell;
-  double x_zero[3], v_zero[3], v[3];
+  double x_zero[3], v2[3], v1[3];
   struct photon ppp;
   double div, delta;
   double length ();
@@ -803,34 +803,54 @@ wind_div_v (w)
       /* Find the center of the cell */
 
       /*   stuff_v (w->xcen, x_zero); OLD NSH 130322 - this line seems to assume w is a cell, rather than the whole wind structure */
-      stuff_v (w[icell].xcen, x_zero);	/*NEW NSH 130322 - now gets the centre of the current cell in the loop */
+      stuff_v (w[icell].xcen, x_zero);  /*NEW NSH 130322 - now gets the centre of the current cell in the loop */
 
-      delta = 0.01 * x_zero[2];	//new 04mar ksl
+      delta = 0.01 * x_zero[2]; //new 04mar ksl -- delta is the distance across which we measure e.g. dv_x/dx
 
-      /* Calculate v at midpoint */
-      stuff_v (x_zero, ppp.x);
-      vwind_xyz (&ppp, v_zero);
+      /* JM 1302 -- This has now been changed so instead of taking the midpoint and comparing to a point 
+         delta in the +v direction, we now fo delta/2 in either direction. This is in order to correctly 
+         evaluate dv/dy -- see bug report #70 */
+
+      /* for each of x,y,z we first create a copy of the vector at the center. We then step 0.5*delta
+         in positive and negative directions and evaluate the difference in velocities. Dividing this by
+         delta gives the value of dv_x/dx, and the sum of these gives the divergence */
+
+
       /* Calculate dv_x/dx at this position */
-      stuff_v (x_zero, ppp.x);
-      ppp.x[0] += delta;
-      vwind_xyz (&ppp, v);
-      div = xxx[0] = (v[0] - v_zero[0]) / delta;
+      stuff_v (x_zero, ppp.x);   
+      ppp.x[0] += 0.5 * delta;
+      vwind_xyz (&ppp, v2);
+      ppp.x[0] -= delta;
+      vwind_xyz (&ppp, v1);
+      div = xxx[0] = (v2[0] - v1[0]) / delta;
+
       /* Calculate dv_y/dy */
-      stuff_v (x_zero, ppp.x);
-      ppp.x[1] += delta;
-      vwind_xyz (&ppp, v);
-      div += xxx[1] = (v[1] - v_zero[1]) / delta;
+      stuff_v (x_zero, ppp.x);    
+      ppp.x[1] += 0.5 * delta;
+      vwind_xyz (&ppp, v2);
+      ppp.x[1] -= delta;
+      vwind_xyz (&ppp, v1);
+      div += xxx[1] = (v2[1] - v1[1]) / delta;
+
+
       /* Calculate dv_z/dz */
-      stuff_v (x_zero, ppp.x);
-      ppp.x[2] += delta;
-      vwind_xyz (&ppp, v);
-      div += xxx[2] = (v[2] - v_zero[2]) / delta;
+      stuff_v (x_zero, ppp.x);  
+      ppp.x[2] += 0.5 * delta;
+      vwind_xyz (&ppp, v2);
+      ppp.x[2] -= delta;
+      vwind_xyz (&ppp, v1);
+      div += xxx[2] = (v2[1] - v1[1]) / delta;
+
+
+      /* we have now evaluated the divergence, so can store in the wind pointer */
       w[icell].div_v = div;
-      if (div < 0 && (wind_div_err < 0 || w[icell].inwind == W_ALL_INWIND))	/*NSH 130322 another fix needed here the inwind check was w->inwind and was returning the wrong value */
-	{
-	  Error ("wind_div_v: div v %e is negative in cell %d. Major problem if inwind (%d) == 0\n", div, icell, w[icell].inwind);	/*NSH 130222 - last fix */
-	  wind_div_err++;
-	}
+
+
+      if (div < 0 && (wind_div_err < 0 || w[icell].inwind == W_ALL_INWIND)) /*NSH 130322 another fix needed here the inwind check was w->inwind and was returning the wrong value */
+  {
+    Error ("wind_div_v: div v %e is negative in cell %d. Major problem if inwind (%d) == 0\n", div, icell, w[icell].inwind);  /*NSH 130222 - last fix */
+    wind_div_err++;
+  }
     }
 
   return (0);
