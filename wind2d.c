@@ -839,7 +839,7 @@ wind_div_v (w)
       vwind_xyz (&ppp, v2);
       ppp.x[2] -= delta;
       vwind_xyz (&ppp, v1);
-      div += xxx[2] = (v2[1] - v1[1]) / delta;
+      div += xxx[2] = (v2[2] - v1[2]) / delta;
 
 
       /* we have now evaluated the divergence, so can store in the wind pointer */
