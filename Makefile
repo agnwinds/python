@@ -128,8 +128,6 @@ python: startup  python.o $(python_objects)
 		cp $@ $(BIN)/py
 		mv $@ $(BIN)/py$(VERSION)
 
-
-
 #This line is jsut so you can use make D python for debugging
 D:	
 	@echo 'Debugging Mode'
@@ -144,18 +142,6 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
 		spectral_estimators.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
                 variable_temperature.o bb.o rdpar.o log.o
-
-
-
-# test is the makefile command executed by travis build check
-test: startup  python.o $(python_objects)
-	gcc  ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
-		cp $@ $(BIN)/py
-		mv $@ $(BIN)/py$(VERSION)
-	startup $(py_wind_objects)
-	gcc $(CFLAGS) $(py_wind_objects) $(LDFLAGS) -o py_wind
-		cp $@ $(BIN)
-		mv $@ $(BIN)/py_wind$(VERSION)
 
 
 
