@@ -733,58 +733,61 @@ vwind_xyz (p, v)
                                        Space Telescope Science Institute
 
  Synopsis:
-	wind_div_v calculates the divergence of the velocity at the center of all the grid cells.  
-Arguments:		
+  wind_div_v calculates the divergence of the velocity at the center of all the grid cells.  
+Arguments:    
 
 Returns:
  
-Description:	
-	This is one of the initialization routines for the wind.   
-	Because the routine calls vwind_xyz, one must have previously 
-	populated w[].v.  Also as a result of this fact, the routine 
-	is not tightly tied to the SV prescription.
+Description:  
+  This is one of the initialization routines for the wind.   
+  Because the routine calls vwind_xyz, one must have previously 
+  populated w[].v.  Also as a result of this fact, the routine 
+  is not tightly tied to the SV prescription.
 Notes:
-	It is used to calculated PdV cooling of a grid cell 
+  It is used to calculated PdV cooling of a grid cell 
 
-	The divergence, like othe scalar quantities, does not
-	need to be "rotated" differently in different coordinate
-	systems
+  The divergence, like othe scalar quantities, does not
+  need to be "rotated" differently in different coordinate
+  systems
 
 History:
-	98mar20	ksl	First coded and debugged 
- 	99dec1	ksl	Explicitly typed as integer and made the return 0
-			Previously it was untyped, but returned div/EPSILON
-			which made no sense to me.
-	04mar	ksl	This routine traditionally has generated
-			lots of errors.  One reason for could have beeen
-			that the step size was too large.  So I made this
-			smaller.  But the other reason is that the div v
-			is often calculated outside the wind cone, as in
-			kwd winds.  In those cases, I put an extrapolation
-			of the wind velocity inside the wind cone, but
-			this is not necessarily physical.  If the div v
-			is interpolated this could be wrong.  I have 
-			made some minor modifications though to suppress
-			multiple errors if the div is being calculated
-			outside the wind.
-	05apr	ksl	55d -- Switched to using center positions for
-			this calculation, rather than wind_midx, and 
-			wind_midz.  Basically this was because I wanted
-			to make things as independent of these two 
-			arrays as possible in preparation for allowing
-			more arbitrarily spaced grids.  Furthermore
-			the previously formulatin was incorrect for
-			rtheta components since wind_midz was actually
-			theta.  It was also helpful for spherical models, 
-			since it avoids the necessity of going from 1d to
-			2d specification.
-	13mar	nsh	74b6 -- Several of the calls were addressing the
-			wind as if it was a single cell, however the call
-			to wind_div_v supplies the whole wind structure.
-			calls that looked like w-> have been replaced by
-			w[icell].
-
- 
+  98mar20 ksl First coded and debugged 
+  99dec1  ksl Explicitly typed as integer and made the return 0
+      Previously it was untyped, but returned div/EPSILON
+      which made no sense to me.
+  04mar ksl This routine traditionally has generated
+      lots of errors.  One reason for could have beeen
+      that the step size was too large.  So I made this
+      smaller.  But the other reason is that the div v
+      is often calculated outside the wind cone, as in
+      kwd winds.  In those cases, I put an extrapolation
+      of the wind velocity inside the wind cone, but
+      this is not necessarily physical.  If the div v
+      is interpolated this could be wrong.  I have 
+      made some minor modifications though to suppress
+      multiple errors if the div is being calculated
+      outside the wind.
+  05apr ksl 55d -- Switched to using center positions for
+      this calculation, rather than wind_midx, and 
+      wind_midz.  Basically this was because I wanted
+      to make things as independent of these two 
+      arrays as possible in preparation for allowing
+      more arbitrarily spaced grids.  Furthermore
+      the previously formulatin was incorrect for
+      rtheta components since wind_midz was actually
+      theta.  It was also helpful for spherical models, 
+      since it avoids the necessity of going from 1d to
+      2d specification.
+  13mar nsh 74b6 -- Several of the calls were addressing the
+      wind as if it was a single cell, however the call
+      to wind_div_v supplies the whole wind structure.
+      calls that looked like w-> have been replaced by
+      w[icell].
+  14feb JM -- Fix for Issue #70. Instead of taking the midpoint
+      and stepping ds in the +ve direction, we now step
+      0.5ds in both +ve and -ve. This stops negative values of
+      dvdy appearing in rotationally dominated portions of wind,
+      and in some cases even leading to div_v being negative.
 **************************************************************/
 
 int wind_div_err = (-3);
