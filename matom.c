@@ -927,17 +927,25 @@ kpkt (p, nres, escape)
 
       /* note the units here- we divide the total luminosity of the cell by volume and ne to give cooling rate */
 
-      cooling_adiabatic = xplasma->lum_adiabatic / one->vol / xplasma->ne;;
+      cooling_adiabatic = xplasma->lum_adiabatic / one->vol / xplasma->ne;
 
-      if (cooling_adiabatic < 0)
-        {
-          Error("kpkt: Adiabatic cooling negative! Abort.\n");
-	      exit (0);
-        }
       if (geo.adiabatic == 0 && cooling_adiabatic > 0.0)
         {
       	  Error("Adiabatic cooling turned off, but non zero in cell %d", xplasma->nplasma);
         }
+
+
+      /* JM 1302 -- Negative adiabatic coooling- this used to happen due to issue #70, where we incorrectly calculated dvdy, 
+         but this is now resolved. Now it should only happen for cellspartly in wind, because we don't treat these very well.
+         Now, if cooling_adiabatic < 0 then set it to zero to avoid runs exiting for part in wind cells. */
+      if (cooling_adiabatic < 0)
+        {
+          Error("kpkt: Adiabatic cooling negative! Major problem if inwind (%d) == 0\n",
+          	     one->inwind);
+	      Log ("kpkt: Setting adiabatic kpkt destruction probability to zero for this matom.\n");
+	      cooling_adiabatic = 0.0;
+        }
+
 
       cooling_normalisation += cooling_adiabatic;
 
