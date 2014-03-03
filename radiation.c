@@ -812,7 +812,7 @@ Arguments:
 	xplasma		PlasmaPtr for the cell
 	p 			Photon pointer
 	ds 			ds travelled
-	w 			the weight of the photon. In non macro atom mode,
+	w_ave 		the weight of the photon. In non macro atom mode,
 	            this is an average weight (passed as w_ave), but 
 	            in macro atom mode weights are never reduced (so p->w 
 	            is used).
@@ -833,24 +833,24 @@ History:
  
 **************************************************************/
 
-int update_banded_estimators (xplasma, p, ds, w)
+int update_banded_estimators (xplasma, p, ds, w_ave)
     PlasmaPtr xplasma;
     PhotPtr p;
     double ds;
-    double w;
+    double w_ave;
 {
   int i;
 
   /*photon weight times distance in the shell is proportional to the mean intensity */
-  xplasma->j += w * ds;
+  xplasma->j += w_ave * ds;
 
   if (p->nscat == 0)
 	{
-  	xplasma->j_direct += w * ds;
+  	xplasma->j_direct += w_ave * ds;
 	}
   else
 	{
-	xplasma->j_scatt += w * ds;
+	xplasma->j_scatt += w_ave * ds;
 	}
 
 
@@ -858,7 +858,7 @@ int update_banded_estimators (xplasma, p, ds, w)
 /* frequency weighted by the weights and distance       in the shell .  See eqn 2 ML93 */
   xplasma->mean_ds += ds;
   xplasma->n_ds++;
-  xplasma->ave_freq += p->freq * w * ds;
+  xplasma->ave_freq += p->freq * w_ave * ds;
 
 
 
@@ -877,9 +877,9 @@ int update_banded_estimators (xplasma, p, ds, w)
       if (geo.xfreq[i] < p->freq && p->freq <= geo.xfreq[i + 1])
 	{
 
-	  xplasma->xave_freq[i] += p->freq * w * ds;	/* 1310 JM -- frequency weighted by weight and distance */
-	  xplasma->xsd_freq[i] += p->freq * p->freq * w * ds;	/* 1310 JM -- input to allow standard deviation to be calculated */
-	  xplasma->xj[i] += w * ds;	/* 1310 JM -- photon weight times distance travelled */
+	  xplasma->xave_freq[i] += p->freq * w_ave * ds;	/* 1310 JM -- frequency weighted by weight and distance */
+	  xplasma->xsd_freq[i] += p->freq * p->freq * w_ave * ds;	/* 1310 JM -- input to allow standard deviation to be calculated */
+	  xplasma->xj[i] += w_ave * ds;	/* 1310 JM -- photon weight times distance travelled */
 	  xplasma->nxtot[i]++;	/* 1310 JM -- increment the frequency banded photon counter */
 
       /* 1311 NSH lines added below to work out the range of frequencies within a band where photons have been seen */
@@ -913,15 +913,15 @@ int update_banded_estimators (xplasma, p, ds, w)
 
       /* IP needs to be radiation density in the cell. We sum wcontributions from
          each photon, then it is normalised in wind_update. */
-      xplasma->ip += ((w * ds) / (H * p->freq));
+      xplasma->ip += ((w_ave * ds) / (H * p->freq));
 
       if (p->nscat == 0)
 	{
-	  xplasma->ip_direct += ((w * ds) / (H * p->freq));
+	  xplasma->ip_direct += ((w_ave * ds) / (H * p->freq));
 	}
       else
 	{
-	  xplasma->ip_scatt += ((w * ds) / (H * p->freq));
+	  xplasma->ip_scatt += ((w_ave * ds) / (H * p->freq));
 	}
     }
 
