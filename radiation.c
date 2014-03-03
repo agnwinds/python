@@ -125,7 +125,7 @@ radiation (p, ds)
   double frac_ion[NIONS];
   double density, ft, tau, tau2;
   double energy_abs;
-  int n, nion, i;		/* nsh 1108 i added as counter for banded j and ave_freq */
+  int n, nion;
   double q, x, z;
   double w_ave, w_in, w_out;
   double den_config ();
@@ -284,23 +284,8 @@ statement could be deleted entirely 060802 -- ksl */
 
   xplasma->ntot++;
 
-/* NSH 131213 slight change to the line computing IP, we now split out direct and scattered - this was 
-mainly for the progha_13 work, but is of general interest */
-      /* 70h -- nsh -- 111004 added to try to calculate the IP for the cell. Note that 
-       * this may well end up not being correct, since the same photon could be counted 
-       * several times if it is rattling around.... */
-  if (HEV * p->freq > 13.6)
-    {
-      xplasma->ip += ((w_ave * ds) / (H * p->freq));
- if (p->nscat == 0)
-	{
-  	xplasma->ip_direct += ((w_ave * ds) / (H * p->freq));
-	}
-  else
-	{
-	xplasma->ip_scatt += ((w_ave * ds) / (H * p->freq));
-	}
-    }
+
+
 
 /* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, 
  * and hence get an idea of how 'agny' or 'disky' the cell is. */
@@ -335,72 +320,23 @@ mainly for the progha_13 work, but is of general interest */
     xplasma->ntot_agn++;
 
 
-/*photon weight times distance in the shell is proportional to the mean intensity */
-  xplasma->j += w_ave * ds;
 
-  if (p->nscat == 0)
-	{
-  	xplasma->j_direct += w_ave * ds;
-	}
-  else
-	{
-	xplasma->j_scatt += w_ave * ds;
-	}
-
-
-
-/* frequency weighted by the weights and distance       in the shell .  See eqn 2 ML93 */
-  xplasma->mean_ds += ds;
-  xplasma->n_ds++;
-  xplasma->ave_freq += p->freq * w_ave * ds;
-
-  if (p->freq > xplasma->max_freq)
+  if (p->freq > xplasma->max_freq)  // check if photon frequency exceeds maximum frequency
     xplasma->max_freq = p->freq;
 
+  /* JM -- 1310 -- check if the user requires extra diagnostics and
+     has provided a file diag_cells.dat to store photons stats for cells they have specified
+   */
   if (diag_on_off == 1 && ncstat > 0)
     {
-      for (i = 0; i < ncstat; i++)
-	{
-	  if (one->nplasma == ncell_stats[i])
-	    {
-	      fprintf (pstatptr,
-		       "PHOTON_DETAILS %3d %3d %3d %8.3e %8.3e %8.3e cell%3d wind cell%3d\n",
-		       geo.wcycle, ii, jj, p->freq, w_ave, ds, one->nplasma,
-		       one->nwind);
-	    }
-	}
+      save_photon_stats(one, p, ds); 	// save photon statistics (extra diagnostics)
     }
 
 
-/* 1108 NSH  THe next loop updates the banded versions of j and ave_freq, note that the lines above still update 
- * the parameters for all the photons produced. We are simply controlling which photons are used for the sim powewr 
- * law stuff by banding.
- * nxfreq refers to how many frequencies we have defining the bands. So, if we have 5 bands, we have 6 frequencies, 
- * going from xfreq[0] to xfreq[5] Since we are breaking out of the loop when i>=nxfreq, this means the last loop 
- * will be i=nxfreq-1*/
+  /* JM 1402 -- the banded versions of j, ave_freq etc. are now updated in update_banded_estimators,
+     which also updates the ionization parameters and scattered and direct contributions */
 
-/* 71 - 111229 - ksl - modified to reflect fact that I have moved nxbands and xfreq into the geo structure */
-
-  for (i = 0; i < geo.nxfreq; i++)
-    {
-      if (geo.xfreq[i] < p->freq && p->freq <= geo.xfreq[i + 1])
-	{
-	  xplasma->xave_freq[i] += p->freq * w_ave * ds;	/*1108 NSH/KSL frequency weighted by weight and distance */
-	  xplasma->xsd_freq[i] += p->freq * p->freq * w_ave * ds;	/*1208 NSH imput to allow standard deviation to be calculated */
-	  xplasma->xj[i] += w_ave * ds;	/*1108 NSH/KSL photon weight times distance travelled */
-	  xplasma->nxtot[i]++;	/*1108 NSH increment the frequency banded photon counter */
-/* 1311 NSH lines added below to work out the range of frequencies within a band where photons have been seen */
-	  if (p->freq < xplasma->fmin[i])
-		{
-		xplasma->fmin[i]=p->freq;
-		}
-	  if (p->freq > xplasma->fmax[i]) 
-		{
-		xplasma->fmax[i]=p->freq;
-		}
-	}
-    }
-
+  update_banded_estimators(xplasma, p, ds, w_ave);
 
 
   if (sane_check (xplasma->j) || sane_check (xplasma->ave_freq))
@@ -860,5 +796,191 @@ pop_kappa_ff_array ()
 
   return (0);
 }
+
+
+
+
+/***********************************************************
+                Southampton University
+
+Synopsis: 
+	update_banded_estimators updates the estimators required for
+	mode 7 ionization- the Power law, pairwise, modified saha ionization solver.
+	It also records the values of IP.
+
+Arguments:	
+	xplasma		PlasmaPtr for the cell
+	p 			Photon pointer
+	ds 			ds travelled
+	w_ave 		the weight of the photon. In non macro atom mode,
+	            this is an average weight (passed as w_ave), but 
+	            in macro atom mode weights are never reduced (so p->w 
+	            is used).
+
+Returns:
+	increments the estimators in xplasma
+ 
+Description:	
+	This routine does not contain new code on initial writing, but instead 
+	moves duplicated code from increment_bf_estimators and radiation() 
+	to here, as duplicating code is bad practice.
+
+Notes:
+
+
+History:
+   1402 JM 		Coding began
+ 
+**************************************************************/
+
+int update_banded_estimators (xplasma, p, ds, w_ave)
+    PlasmaPtr xplasma;
+    PhotPtr p;
+    double ds;
+    double w_ave;
+{
+  int i;
+
+  /*photon weight times distance in the shell is proportional to the mean intensity */
+  xplasma->j += w_ave * ds;
+
+  if (p->nscat == 0)
+	{
+  	xplasma->j_direct += w_ave * ds;
+	}
+  else
+	{
+	xplasma->j_scatt += w_ave * ds;
+	}
+
+
+
+/* frequency weighted by the weights and distance       in the shell .  See eqn 2 ML93 */
+  xplasma->mean_ds += ds;
+  xplasma->n_ds++;
+  xplasma->ave_freq += p->freq * w_ave * ds;
+
+
+
+  /* 1310 JM -- The next loop updates the banded versions of j and ave_freq, analogously to routine inradiation
+  nxfreq refers to how many frequencies we have defining the bands. So, if we have 5 bands, we have 6 frequencies, 
+  going from xfreq[0] to xfreq[5] Since we are breaking out of the loop when i>=nxfreq, this means the last loop 
+  will be i=nxfreq-1 */
+
+  /* note that here we can use the photon weight and don't need to calculate anm attenuated average weight
+     as energy packets are indisivible in macro atom mode */
+
+  /* 71 - 111229 - ksl - modified to reflect fact that I have moved nxbands and xfreq into the geo structure */
+
+  for (i = 0; i < geo.nxfreq; i++)
+    {
+      if (geo.xfreq[i] < p->freq && p->freq <= geo.xfreq[i + 1])
+	{
+
+	  xplasma->xave_freq[i] += p->freq * w_ave * ds;	/* 1310 JM -- frequency weighted by weight and distance */
+	  xplasma->xsd_freq[i] += p->freq * p->freq * w_ave * ds;	/* 1310 JM -- input to allow standard deviation to be calculated */
+	  xplasma->xj[i] += w_ave * ds;	/* 1310 JM -- photon weight times distance travelled */
+	  xplasma->nxtot[i]++;	/* 1310 JM -- increment the frequency banded photon counter */
+
+      /* 1311 NSH lines added below to work out the range of frequencies within a band where photons have been seen */
+	  if (p->freq < xplasma->fmin[i])
+		{
+		  xplasma->fmin[i]=p->freq;
+		}
+	  if (p->freq > xplasma->fmax[i]) 
+		{
+		  xplasma->fmax[i]=p->freq;
+		}
+
+	}
+    }
+
+  /* NSH 131213 slight change to the line computing IP, we now split out direct and scattered - this was 
+     mainly for the progha_13 work, but is of general interest */
+  /* 70h -- nsh -- 111004 added to try to calculate the IP for the cell. Note that 
+   * this may well end up not being correct, since the same photon could be counted 
+   * several times if it is rattling around.... */
+
+  /* 1401 JM -- Similarly to the above routines, this is another bit of code added to radiation
+     which originally did not get called in macro atom mode. */
+
+  /* NSH had implemented a scattered and direct contribution to the IP. This doesn't really work 
+     in the same way in macro atoms, so should instead be thought of as 
+     'direct from source' and 'reprocessed' radiation */
+
+  if (HEV * p->freq > 13.6)	// only record if above H ionization edge
+    {
+
+      /* IP needs to be radiation density in the cell. We sum wcontributions from
+         each photon, then it is normalised in wind_update. */
+      xplasma->ip += ((w_ave * ds) / (H * p->freq));
+
+      if (p->nscat == 0)
+	{
+	  xplasma->ip_direct += ((w_ave * ds) / (H * p->freq));
+	}
+      else
+	{
+	  xplasma->ip_scatt += ((w_ave * ds) / (H * p->freq));
+	}
+    }
+
+  return (0);
+}
+
+
+
+
+/***********************************************************
+                Southampton University
+
+Synopsis: 
+	save_photon_stats prints photon statistics to a file
+
+Arguments:	
+	One 		WindPtr for the cell
+	p 			Photon pointer
+	ds 			ds travelled
+
+Returns:
+ 
+Description:
+   the loop below is if the user requires extra diagnostics and
+   has provided a file diag_cells.dat to store photons stats for cells they have specified
+
+Notes:
+   Moved here to save duplicating code between bf_estimators_increment and radiation.
+
+History:
+   1402 JM 		Coding began
+ 
+**************************************************************/
+
+
+int save_photon_stats(one, p, ds)
+    WindPtr one;
+    PhotPtr p;
+    double ds;
+{
+  int i;
+
+  /* JM -- 1310 -- the loop below is if the user requires extra diagnostics and
+     has provided a file diag_cells.dat to store photons stats for cells they have specified
+   */
+
+  for (i = 0; i < ncstat; i++)
+	{
+	  /* check if the cell is in the specified list - ncell_stats is global variable */
+	  if (one->nplasma == ncell_stats[i])
+	    {
+	      fprintf (pstatptr,
+		       "PHOTON_DETAILS %3d %8.3e %8.3e %8.3e cell%3d wind cell%3d\n",
+		       geo.wcycle, p->freq, p->w, ds, one->nplasma,
+		       one->nwind);
+	    }
+	}
+  return (0);
+}
+
 
 
