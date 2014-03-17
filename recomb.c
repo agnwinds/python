@@ -1451,6 +1451,7 @@ Notes:
                                                                                                                                       
 History:
         12jul   nsh     73 -- Began coding
+  	14mar	nsh	77a-- Interpolaion now carried out in log space
 
 	
                                                                                                                                       
@@ -1487,15 +1488,23 @@ badnell_gs_rr (nion, T)
       Log_silent
 	("bad_gs_rr: Requested temp %e is below limit of data for ion %i(Tmin= %e)\n",
 	 T, nion, temps[0]);
-      rate = rates[0];
-    }
+//      rate = rates[0];
+     	imax=1;
+	imin=0;  
+  }
 
   else if (T >= temps[BAD_GS_RR_PARAMS - 1])	//we are above the range of GS data
     {
       Log_silent
 	("bad_gs_rr: Requested temp %e is above limit (%e) of data for ion %i\n",
 	 T, nion, bad_gs_rr[ion[nion].nxbadgsrr].temps[BAD_GS_RR_PARAMS - 1]);
-      rate = rates[BAD_GS_RR_PARAMS - 1];
+ //     rate = rates[BAD_GS_RR_PARAMS - 1];
+	imax=BAD_GS_RR_PARAMS - 1;
+	imin=BAD_GS_RR_PARAMS - 2;
+//We will try to extrapolate.
+
+
+
     }
   else				//We must be within the range of tabulated data
     {
@@ -1507,13 +1516,15 @@ badnell_gs_rr (nion, T)
 	      imax = i + 1;
 	    }
 	}
-      drdt = (rates[imax] - rates[imin]) / (temps[imax] - temps[imin]);
-      dt = (T - temps[imin]);
-      rate = rates[imin] + drdt * dt;
-
-
-
+/* NSH 140313 - changed the following lines to interpolate in log space */
     }
+      drdt = (log10(rates[imax]) - log10(rates[imin])) / (log10(temps[imax]) - log10(temps[imin]));
+      dt = (log10(T) - log10(temps[imin]));
+      rate = pow(10,(log10(rates[imin]) + drdt * dt));
+
+
+
+    
 
 
 

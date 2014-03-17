@@ -61,6 +61,9 @@ kappa_comp (xplasma, freq)
 
 /*	alpha=1/(1+freq*HRYD*(1.1792e-4+(7.084e-10*freq*HRYD))); NSH 130214 This is the approximate way of doing it.*/
 
+ //	sigma=THOMPSON/(1+freq*HRYD*(1.1792e-4+(7.084e-10*freq*HRYD)));
+
+
   sigma = klein_nishina (freq);	//NSH 130214 - full KN formula
 
   x = (sigma * H) / (MELEC * C * C);	//Calculate the constant
