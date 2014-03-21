@@ -158,9 +158,9 @@ compute_zeta (temp, nion, mode)
 
 	      else		//We are going to have to integrate
 		{
-		  Log
-		    ("We do not have tabulated GS data for state %i of element %i\n",
-		     ion[nion].istate, ion[nion].z);
+		  //Log
+		  //  ("We do not have tabulated GS data for state %i of element %i\n",
+		  //   ion[nion].istate, ion[nion].z);
 		  zeta = milne_gs_rr (nion, temp) / total_rrate (nion, temp);
 		}
 	    }
