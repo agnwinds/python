@@ -132,18 +132,48 @@ radiation (p, ds)
   int nconf;
   double weight_of_packet, y;
   int ii, jj;
+  double v_inner[3], v_outer[3], v1, v2;
+  double freq_inner, freq_outer;
+  struct photon phot;
 
   ii = jj = 0;			/* NSH 130605 to remove o3 compile error */
   one = &wmain[p->grid];	/* So one is the grid cell of interest */
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "radiation");
-  freq = p->freq;
+
+  /* JM 140321 -- #73 Bugfix
+     In previous version we were comparing these frequencies in the global rest fram
+     The photon frequency should be shifted to the rest frame of the cell in question
+     We currently take the average of this frequency along ds. In principle
+     this could be improved, so we throw an error if the difference between v1 and v2 is large */
+  
+  /* calculate velocity at original position */
+  vwind_xyz (p, v_inner);			// get velocity vector at new pos
+  v1 = dot (p->lmn, v_inner);		// get direction cosine
+
+  /* Create phot, a photon at the position we are moving to 
+     note that the actual movement of the photon gets done after the call to radiation */
+  stuff_phot (p, &phot);			// copy photon ptr
+  move_phot (&phot, ds);			// move it by ds
+  vwind_xyz (&phot, v_outer);		// get velocity vector at new pos
+  v2 = dot (phot.lmn, v_outer);		// get direction cosine
+
+  /* calculate photon frequencies in rest frame of cell */
+  freq_inner = p->freq * (1. - v1 / C);
+  freq_outer = phot.freq * (1. - v2 / C);
+
+  /* take the average of the frequencies at original position and original+ds */
+  freq = 0.5 * (freq_inner + freq_outer);
+
+
+  
 
   kappa_tot = frac_ff = kappa_ff (xplasma, freq);	/* Add ff opacity */
   kappa_tot += frac_comp = kappa_comp (xplasma, freq);	/* 70 NSH 1108 calculate compton opacity, store it in kappa_comp and also add it to kappa_tot, the total opacity for the photon path */
   kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq);
   frac_tot = frac_z = 0;	/* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
 				   indicate this is all disagnostic and might be removed */
+
 
   if (freq > phot_freq_min)
 
