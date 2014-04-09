@@ -1546,6 +1546,11 @@ macro_pops (xplasma, xne)
 
 		      rate_matrix[lower][lower] += -1. * rate;
 		      rate_matrix[upper][lower] += rate;
+
+		      if (rate < 0.0 || sane_check(rate))
+		      {
+		      	Error("macro_pops: bbu rate is %8.4e in cell/matom %i\n", rate, xplasma->nplasma);
+		      }
 		    }
 
 		  for (index_bbd = 0;
@@ -1571,6 +1576,11 @@ macro_pops (xplasma, xne)
 
 		      rate_matrix[upper][upper] += -1. * rate;
 		      rate_matrix[lower][upper] += rate;
+
+		      if (rate < 0.0 || sane_check(rate))
+		      {
+		      	Error("macro_pops: bbd rate is %8.4e in cell/matom %i\n", rate, xplasma->nplasma);
+		      }
 		    }
 
 
@@ -1601,6 +1611,11 @@ macro_pops (xplasma, xne)
 		      rate_matrix[lower][lower] += -1. * rate;
 		      rate_matrix[upper][lower] += rate;
 
+		      if (rate < 0.0 || sane_check(rate))
+		      {
+		      	Error("macro_pops: bfu rate is %8.4e in cell/matom %i\n", rate, xplasma->nplasma);
+		      }
+
 		      /* Now deal with the stimulated emission. */
 		      /* Lower and upper are the same, but now it contributes in the
 		         other direction. */
@@ -1612,6 +1627,11 @@ macro_pops (xplasma, xne)
 
 		      rate_matrix[upper][upper] += -1. * rate;
 		      rate_matrix[lower][upper] += rate;
+
+		      if (rate < 0.0 || sane_check(rate))
+		      {
+		      	Error("macro_pops: st. recomb rate is %8.4e in cell/matom %i\n", rate, xplasma->nplasma);
+		      }
 
 		    }
 
@@ -1649,6 +1669,11 @@ macro_pops (xplasma, xne)
 
 		      rate_matrix[upper][upper] += -1. * rate;
 		      rate_matrix[lower][upper] += rate;
+
+		      if (rate < 0.0 || sane_check(rate))
+		      {
+		      	Error("macro_pops: bfd rate is %8.4e in cell/matom %i\n", rate, xplasma->nplasma);
+		      }
 		    }
 		}
 	    }
@@ -1762,7 +1787,7 @@ macro_pops (xplasma, xne)
 		   ion[index_ion].first_nlte_level + ion[index_ion].nlte;
 		   index_lvl++)
 		{
-		  this_ion_density += gsl_vector_get (populations, nn);
+		  this_ion_density += gsl_vector_get (populations, conf_to_matrix[index_lvl]);
 		  nn++;
 		}
 
