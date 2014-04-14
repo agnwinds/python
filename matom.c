@@ -1375,7 +1375,8 @@ History:
                        - some treatment of metastables is needed for 
                        doing CNO macro atoms.
 	06may	ksl	57+ -- Modified to reflect plasma structue
-
+    1404 	jm  77a -- Added test to check that populations are solution to rate matrix equation in macro_pops
+                       + more robust erro reporting in general. See pull request #75.
 ************************************************************/
 
 int
