@@ -9,6 +9,7 @@
 #include <gsl/gsl_block.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
+//#include <gsl/gsl_blas.h>
 #include "my_linalg.h"
 
 /*****************************************************************************
@@ -1394,7 +1395,7 @@ macro_pops (xplasma, xne)
   int nn, mm;
   int index_bbu, index_bbd, index_bfu, index_bfd;
   int lower, upper;
-  double this_ion_density;
+  double this_ion_density, level_population;
   double inversion_test;
   double q_ioniz (), q_recomb ();
   int s;			//NEWKSL
@@ -1402,8 +1403,10 @@ macro_pops (xplasma, xne)
   gsl_permutation *p;		//NEWKSL
   gsl_matrix_view m;		//NEWKSL
   gsl_vector_view b;		//NEWKSL
-  gsl_vector *populations;	//NEWKSL
-  int index_fast_col;
+  gsl_vector *populations, *test_vector;	//NEWKSL
+  gsl_matrix *test_matrix;
+  int index_fast_col, ierr;
+  double test_val;
 
   MacroPtr mplasma;
   mplasma = &macromain[xplasma->nplasma];
@@ -1692,8 +1695,10 @@ macro_pops (xplasma, xne)
 
 	  /********************************************************************************/
 	  /* The block that follows (down to next line of ***s) is to do the
-	     matix inversion. It uses LU decomposition - the
-	     code for doing this is taken from the GSL manual with very few modifications. */
+	     matrix inversion. It uses LU decomposition - the code for doing this is 
+	     taken from the GSL manual with very few modifications. */
+	  /* here we solve the matrix equation M x = b, where x is our vector containing
+	     level populations as a fraction w.r.t the whole element */
 
 	  /* Replaced inline array allocaation with calloc, which will work with older version of c compilers */
 
@@ -1708,17 +1713,28 @@ macro_pops (xplasma, xne)
 		}
 	    }
 
-	  /* Replaced inline array allocaation with calloc, which will work with older version of c compilers */
+
+	  /* Replaced inline array allocaation with calloc, which will work with older version of c compilers 
+	     calloc also sets the elements to zero, which is required */
 
 	  b_data = (double *) calloc (sizeof (rate), n_macro_lvl);
+
+	  /* replace the first entry with 1.0- this is part of the normalisation constraint */
 	  b_data[0] = 1.0;
 
+      /* create gsl matrix/vector views of the arrays of rates */
 	  m = gsl_matrix_view_array (a_data, n_macro_lvl, n_macro_lvl);	//KSLNEW
+
+	  /* these are used for testing the solution below */
+	  test_matrix = gsl_matrix_alloc(n_macro_lvl, n_macro_lvl);
+	  test_vector = gsl_vector_alloc (n_macro_lvl);
+
+	  gsl_matrix_memcpy(test_matrix, &m.matrix); 	// create copy for testing 
 
 	  b = gsl_vector_view_array (b_data, n_macro_lvl);	//KSLNEW
 
+	  /* the populations vector will be a gsl vector which stores populations */
 	  populations = gsl_vector_alloc (n_macro_lvl);	//KSLNEW
-
 
 
 	  p = gsl_permutation_alloc (n_macro_lvl);	//NEWKSL
@@ -1729,10 +1745,52 @@ macro_pops (xplasma, xne)
 
 	  gsl_permutation_free (p);
 
-	  free (a_data);	//NEWKSL
-	  free (b_data);	//NEWKSL
 
 	  /**********************************************************/
+
+      /* JM 140414 -- before we clean, we should check that the populations vector we 
+         have just created really is a solution to the matrix equation */
+      
+      /* declaration contained in my_linalg.h, taken from gsl library */
+      ierr = gsl_blas_dgemv(CblasNoTrans, 1.0, test_matrix, populations, 0.0, test_vector);
+
+      if (ierr != 0)
+        {
+      	  Error("macro_pops: bad return when testing matrix solution to rate equations.\n");
+        }
+
+      /* now cycle through and check the solution to y = m * populations really is
+         (1, 0, 0 ... 0) */
+
+      for (mm = 0; mm < n_macro_lvl; mm++)
+        {
+
+          /* get the element of the vector we want to check */
+          test_val = gsl_vector_get (test_vector, mm);
+          
+          if (mm == 0)		// 0th element should be 1
+          {
+      	    if ( (fabs(test_val - 1.0)) > EPSILON)
+      	      Error("macro_pops: test vector has first element = %8.4e, should be 1.0\n",
+      	      	     test_val);    
+          }     
+
+          else 				// all other elements should be zero
+          {
+          	if ( fabs(test_val)  > EPSILON)
+      	      Error("macro_pops: test vector has element %i = %8.4e, should be 0.0\n",
+      	      	     mm, test_val);    
+          }
+        }
+
+        /* free memory */
+        free (a_data);	
+	    free (b_data);	
+	    free (test_vector);
+	    free (test_matrix);
+
+
+
 	  /* MC noise can cause population inversions (particularly amongst highly excited states)
 	     which are never a good thing and most likely unphysical.
 	     Therefor let's follow Leon's procedure (Lucy 2003) and remove inversions. */
@@ -1787,7 +1845,14 @@ macro_pops (xplasma, xne)
 		   ion[index_ion].first_nlte_level + ion[index_ion].nlte;
 		   index_lvl++)
 		{
-		  this_ion_density += gsl_vector_get (populations, conf_to_matrix[index_lvl]);
+		  level_population = gsl_vector_get (populations, conf_to_matrix[index_lvl]);	
+		  this_ion_density += level_population;
+
+		  /* JM 140409 -- add error check for negative populations */
+		  if (level_population < 0.0 || sane_check(level_population))
+		    Error("macro_pops: level %i has frac. pop. %8.4e in cell %i\n", 
+		    	   index_lvl, level_population, xplasma->nplasma);
+
 		  nn++;
 		}
 
@@ -3140,3 +3205,5 @@ q_recomb (cont_ptr, electron_temperature)
 
   return (coeff);
 }
+
+
