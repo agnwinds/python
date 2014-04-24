@@ -1709,17 +1709,6 @@ run -- 07jul -- ksl
 		     top_bot_select, select_extract, rho_select, z_select,
 		     az_select, r_select);
 
-      /* Zero the arrays that store the heating of the disk */
-
-/* 080520 - ksl - There is a conundrum here.  One should really zero out the 
- * quantities below each time the wind structure is updated.  But relatively
- * few photons hit the disk under normal situations, and therefore the statistcs
- * are not very good.  
- */
-      for (n = 0; n < NRINGS; n++)
-	{
-	  qdisk.heat[n] = qdisk.nphot[n] = qdisk.w[n] = qdisk.ave_freq[n] = 0;
-	}
 
       wind_rad_init ();		/*Zero the parameters pertaining to the radiation field */
 
@@ -1764,6 +1753,23 @@ run -- 07jul -- ksl
 	  nphot_to_define = (long) photons_per_cycle;
 
 	  define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
+
+      /* Zero the arrays that store the heating of the disk */
+
+      /* 080520 - ksl - There is a conundrum here.  One should really zero out the 
+       * quantities below each time the wind structure is updated.  But relatively
+       * few photons hit the disk under normal situations, and therefore the statistcs
+       * are not very good.  
+       */
+
+      /* 130213 JM -- previously this was done before define_phot, which meant that
+         the ionization state was never computed with the heated disk */
+
+      for (n = 0; n < NRINGS; n++)
+	{
+	  qdisk.heat[n] = qdisk.nphot[n] = qdisk.w[n] = qdisk.ave_freq[n] = 0;
+	}
+
 
 
 	  photon_checks (p, freqmin, freqmax, "Check before transport");

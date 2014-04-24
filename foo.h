@@ -130,6 +130,8 @@ double sigma_phot_topbase(struct topbase_phot *x_ptr, double freq);
 double sigma_phot_verner(struct innershell *x_ptr, double freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
+int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave);
+int save_photon_stats(WindPtr one, PhotPtr p, double ds);
 /* wind_updates2d.c */
 int wind_update(WindPtr (w));
 int wind_rad_init(void);
@@ -506,6 +508,7 @@ int config_overview(int n, int icell);
 int depcoef_overview(int icell);
 int copy_plasma(PlasmaPtr x1, PlasmaPtr x2);
 int depcoef_overview_specific(int version, int nconfig, WindPtr w, char rootname[], int ochoice);
+int level_popsoverview(int nplasma, WindPtr w, char rootname[], int ochoice);
 int level_emissoverview(int nlev, WindPtr w, char rootname[], int ochoice);
 int level_escapeoverview(int nlev, WindPtr w, char rootname[], int ochoice);
 /* py_wind.c */

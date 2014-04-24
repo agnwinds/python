@@ -898,6 +898,8 @@ extra factor of two arises because the disk radiates from both of its sides.  */
     }
 
   (*ftot) *= q1;
+
+  
   /* If *ftot is 0 in this energy range then all the photons come from the star */
   if ((*ftot) < EPSILON)
     {

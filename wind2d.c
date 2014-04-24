@@ -733,58 +733,61 @@ vwind_xyz (p, v)
                                        Space Telescope Science Institute
 
  Synopsis:
-	wind_div_v calculates the divergence of the velocity at the center of all the grid cells.  
-Arguments:		
+  wind_div_v calculates the divergence of the velocity at the center of all the grid cells.  
+Arguments:    
 
 Returns:
  
-Description:	
-	This is one of the initialization routines for the wind.   
-	Because the routine calls vwind_xyz, one must have previously 
-	populated w[].v.  Also as a result of this fact, the routine 
-	is not tightly tied to the SV prescription.
+Description:  
+  This is one of the initialization routines for the wind.   
+  Because the routine calls vwind_xyz, one must have previously 
+  populated w[].v.  Also as a result of this fact, the routine 
+  is not tightly tied to the SV prescription.
 Notes:
-	It is used to calculated PdV cooling of a grid cell 
+  It is used to calculated PdV cooling of a grid cell 
 
-	The divergence, like othe scalar quantities, does not
-	need to be "rotated" differently in different coordinate
-	systems
+  The divergence, like othe scalar quantities, does not
+  need to be "rotated" differently in different coordinate
+  systems
 
 History:
-	98mar20	ksl	First coded and debugged 
- 	99dec1	ksl	Explicitly typed as integer and made the return 0
-			Previously it was untyped, but returned div/EPSILON
-			which made no sense to me.
-	04mar	ksl	This routine traditionally has generated
-			lots of errors.  One reason for could have beeen
-			that the step size was too large.  So I made this
-			smaller.  But the other reason is that the div v
-			is often calculated outside the wind cone, as in
-			kwd winds.  In those cases, I put an extrapolation
-			of the wind velocity inside the wind cone, but
-			this is not necessarily physical.  If the div v
-			is interpolated this could be wrong.  I have 
-			made some minor modifications though to suppress
-			multiple errors if the div is being calculated
-			outside the wind.
-	05apr	ksl	55d -- Switched to using center positions for
-			this calculation, rather than wind_midx, and 
-			wind_midz.  Basically this was because I wanted
-			to make things as independent of these two 
-			arrays as possible in preparation for allowing
-			more arbitrarily spaced grids.  Furthermore
-			the previously formulatin was incorrect for
-			rtheta components since wind_midz was actually
-			theta.  It was also helpful for spherical models, 
-			since it avoids the necessity of going from 1d to
-			2d specification.
-	13mar	nsh	74b6 -- Several of the calls were addressing the
-			wind as if it was a single cell, however the call
-			to wind_div_v supplies the whole wind structure.
-			calls that looked like w-> have been replaced by
-			w[icell].
-
- 
+  98mar20 ksl First coded and debugged 
+  99dec1  ksl Explicitly typed as integer and made the return 0
+      Previously it was untyped, but returned div/EPSILON
+      which made no sense to me.
+  04mar ksl This routine traditionally has generated
+      lots of errors.  One reason for could have beeen
+      that the step size was too large.  So I made this
+      smaller.  But the other reason is that the div v
+      is often calculated outside the wind cone, as in
+      kwd winds.  In those cases, I put an extrapolation
+      of the wind velocity inside the wind cone, but
+      this is not necessarily physical.  If the div v
+      is interpolated this could be wrong.  I have 
+      made some minor modifications though to suppress
+      multiple errors if the div is being calculated
+      outside the wind.
+  05apr ksl 55d -- Switched to using center positions for
+      this calculation, rather than wind_midx, and 
+      wind_midz.  Basically this was because I wanted
+      to make things as independent of these two 
+      arrays as possible in preparation for allowing
+      more arbitrarily spaced grids.  Furthermore
+      the previously formulatin was incorrect for
+      rtheta components since wind_midz was actually
+      theta.  It was also helpful for spherical models, 
+      since it avoids the necessity of going from 1d to
+      2d specification.
+  13mar nsh 74b6 -- Several of the calls were addressing the
+      wind as if it was a single cell, however the call
+      to wind_div_v supplies the whole wind structure.
+      calls that looked like w-> have been replaced by
+      w[icell].
+  14feb JM -- Fix for Issue #70. Instead of taking the midpoint
+      and stepping ds in the +ve direction, we now step
+      0.5ds in both +ve and -ve. This stops negative values of
+      dvdy appearing in rotationally dominated portions of wind,
+      and in some cases even leading to div_v being negative.
 **************************************************************/
 
 int wind_div_err = (-3);
@@ -793,7 +796,7 @@ wind_div_v (w)
      WindPtr w;
 {
   int icell;
-  double x_zero[3], v_zero[3], v[3];
+  double x_zero[3], v2[3], v1[3];
   struct photon ppp;
   double div, delta;
   double length ();
@@ -803,34 +806,54 @@ wind_div_v (w)
       /* Find the center of the cell */
 
       /*   stuff_v (w->xcen, x_zero); OLD NSH 130322 - this line seems to assume w is a cell, rather than the whole wind structure */
-      stuff_v (w[icell].xcen, x_zero);	/*NEW NSH 130322 - now gets the centre of the current cell in the loop */
+      stuff_v (w[icell].xcen, x_zero);  /*NEW NSH 130322 - now gets the centre of the current cell in the loop */
 
-      delta = 0.01 * x_zero[2];	//new 04mar ksl
+      delta = 0.01 * x_zero[2]; //new 04mar ksl -- delta is the distance across which we measure e.g. dv_x/dx
 
-      /* Calculate v at midpoint */
-      stuff_v (x_zero, ppp.x);
-      vwind_xyz (&ppp, v_zero);
+      /* JM 1302 -- This has now been changed so instead of taking the midpoint and comparing to a point 
+         delta in the +v direction, we now fo delta/2 in either direction. This is in order to correctly 
+         evaluate dv/dy -- see bug report #70 */
+
+      /* for each of x,y,z we first create a copy of the vector at the center. We then step 0.5*delta
+         in positive and negative directions and evaluate the difference in velocities. Dividing this by
+         delta gives the value of dv_x/dx, and the sum of these gives the divergence */
+
+
       /* Calculate dv_x/dx at this position */
-      stuff_v (x_zero, ppp.x);
-      ppp.x[0] += delta;
-      vwind_xyz (&ppp, v);
-      div = xxx[0] = (v[0] - v_zero[0]) / delta;
+      stuff_v (x_zero, ppp.x);   
+      ppp.x[0] += 0.5 * delta;
+      vwind_xyz (&ppp, v2);
+      ppp.x[0] -= delta;
+      vwind_xyz (&ppp, v1);
+      div = xxx[0] = (v2[0] - v1[0]) / delta;
+
       /* Calculate dv_y/dy */
-      stuff_v (x_zero, ppp.x);
-      ppp.x[1] += delta;
-      vwind_xyz (&ppp, v);
-      div += xxx[1] = (v[1] - v_zero[1]) / delta;
+      stuff_v (x_zero, ppp.x);    
+      ppp.x[1] += 0.5 * delta;
+      vwind_xyz (&ppp, v2);
+      ppp.x[1] -= delta;
+      vwind_xyz (&ppp, v1);
+      div += xxx[1] = (v2[1] - v1[1]) / delta;
+
+
       /* Calculate dv_z/dz */
-      stuff_v (x_zero, ppp.x);
-      ppp.x[2] += delta;
-      vwind_xyz (&ppp, v);
-      div += xxx[2] = (v[2] - v_zero[2]) / delta;
+      stuff_v (x_zero, ppp.x);  
+      ppp.x[2] += 0.5 * delta;
+      vwind_xyz (&ppp, v2);
+      ppp.x[2] -= delta;
+      vwind_xyz (&ppp, v1);
+      div += xxx[2] = (v2[2] - v1[2]) / delta;
+
+
+      /* we have now evaluated the divergence, so can store in the wind pointer */
       w[icell].div_v = div;
-      if (div < 0 && (wind_div_err < 0 || w[icell].inwind == W_ALL_INWIND))	/*NSH 130322 another fix needed here the inwind check was w->inwind and was returning the wrong value */
-	{
-	  Error ("wind_div_v: div v %e is negative in cell %d. Major problem if inwind (%d) == 0\n", div, icell, w[icell].inwind);	/*NSH 130222 - last fix */
-	  wind_div_err++;
-	}
+
+
+      if (div < 0 && (wind_div_err < 0 || w[icell].inwind == W_ALL_INWIND)) /*NSH 130322 another fix needed here the inwind check was w->inwind and was returning the wrong value */
+  {
+    Error ("wind_div_v: div v %e is negative in cell %d. Major problem if inwind (%d) == 0\n", div, icell, w[icell].inwind);  /*NSH 130222 - last fix */
+    wind_div_err++;
+  }
     }
 
   return (0);

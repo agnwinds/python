@@ -653,19 +653,18 @@ lucy (xplasma)
 
 	  lucy_mazzali1 (nh, t_r, t_e, www, nelem, xplasma->ne,
 			 xplasma->density, xne, newden);
+  }
 
-	  /* Re solve for the macro atom populations with the current guess for ne */
-          /* JM1308 -- note that unlike lucy mazzali above, here we actually modify the xplasma
-	     structure for those ions which are being treated as macro ions. This means that the
-	     the newden array will contain wrong values for these particular macro ions, but due
-             to the if loop at the end of this subroutine they are never passed to xplasma */
-
+    /* Re solve for the macro atom populations with the current guess for ne */
+    /* JM1308 -- note that unlike lucy mazzali above, here we actually modify the xplasma
+       structure for those ions which are being treated as macro ions. This means that the
+       the newden array will contain wrong values for these particular macro ions, but due
+       to the if loop at the end of this subroutine they are never passed to xplasma */
 	  if (geo.macro_ioniz_mode == 1)
 	    {
 	      macro_pops (xplasma, xne);
 	    }
 
-	}
 
       for (nion = 0; nion < nions; nion++)
 	{

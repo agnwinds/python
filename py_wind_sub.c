@@ -878,6 +878,7 @@ weight_summary (w, rootname, ochoice)
 {
   int n;
   int nplasma;
+  char filename[LINELENGTH];
 
   for (n = 0; n < NDIM2; n++)
     {
@@ -889,6 +890,14 @@ weight_summary (w, rootname, ochoice)
 	}
     }
   display ("Radiative weights");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".w");
+      write_array (filename, ochoice);
+
+    }
 
   return (0);
 
@@ -989,6 +998,7 @@ mo_summary (w, rootname, ochoice)
   int n;
   int ichoice;
   char name[LINELENGTH];
+  char filename[LINELENGTH];
   double x;
   PlasmaPtr xplasma;
 
@@ -1033,8 +1043,15 @@ mo_summary (w, rootname, ochoice)
 	  aaa[n] = x;
 	}
       display (name);
+
+  if (ochoice && ichoice == 0)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".f_rad");
+      write_array (filename, ochoice);
     }
 
+  }
   return (0);
 
 }
@@ -1564,7 +1581,7 @@ alpha_summary (w, rootname, ochoice)
      char rootname[];
      int ochoice;
 {
-  int i, n, m;
+  int n, m;
   char filename[LINELENGTH];
   int nplasma;
   char word[LINELENGTH];
