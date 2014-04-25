@@ -1,12 +1,8 @@
-140303 - ksl
-This is a grid of models calculated for use tiwht Python.  The models are the
-same modles as in the disk06 grid. They use Kurucz models for the basis at 
-low temperature and Hubeny models at higher temperatures (as soon as it became
-possible to calculate Hubeny models).  All of the atmospheres have spectra calculated
-with SysnSpec.  The atomic data used to create the spectra was provided to me by
-Ivan includes more lines, lower wavelenghts than gfall.dat, the kurucz list used 
-to calculate the previous grid.  The final models have been convlved to 
-an instrumental profile with a resultion of 0.5 A.  If one is concerned with spectra 
-with a resulution less than this, then rotin needs to be rerun.
+This is a set of models calculated using Synspec from Kurucz and Hubeny/TLUSTY model atmospheres.
 
-To use this grid NWAVES needs to be set to 28000
+The Kurucz models run from log g 0-5, and T 4000-50000. They can be used using the model file kurucz_d14.ls.
+
+The TLUSTY models run from log g 0-9 and T 4000-150000. They can be used using the model file tlusty_d14.ls.
+
+A Hybrid model can be used in which up to T=50000K you use Kurucz, and beyond that you use TLUSTY. To run this,
+use kur_tlusty_hybrid.ls.
