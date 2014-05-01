@@ -134,6 +134,9 @@ radiation (p, ds)
   int ii, jj;
   double v_inner[3], v_outer[3], v1, v2;
   double freq_inner, freq_outer;
+  double freq_min, freq_max;
+  double frac_path;
+  int n_cross;
   struct photon phot;
 
   ii = jj = 0;			/* NSH 130605 to remove o3 compile error */
@@ -174,7 +177,19 @@ radiation (p, ds)
   kappa_tot += frac_comp = kappa_comp (xplasma, freq);	/* 70 NSH 1108 calculate compton opacity, store it in kappa_comp and also add it to kappa_tot, the total opacity for the photon path */
   kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq);
   frac_tot = frac_z = 0;	/* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
-				                           indicate this is all disagnostic and might be removed */
+				                           indicate this is all diagnostic and might be removed */
+
+  if (freq_outer > freq_inner)
+  {
+  	freq_max = freq_outer;
+  	freq_min = freq_inner;
+  }
+  else
+  {
+  	freq_max = freq_inner;
+  	freq_min = freq_outer;
+  }
+  n_cross = 0;
 
 
   if (freq > phot_freq_min)
@@ -205,8 +220,17 @@ radiation (p, ds)
 	      x_top_ptr = phot_top_ptr[n];
 	      ft = x_top_ptr->freq[0];
 
-	      if (ft > freq)
+	      if (ft > freq_min && ft < freq_max)
+	      {
+	        frac_path = (ft - freq_min) / (freq_max - freq_min);  // then the shifting off the photon causes it to cross an edge. Find out where between fmin and fmax the edge would be 	
+	        n_cross++;
+	      }
+
+	      else if (ft > freq_max)
 		break;		// The remaining transitions will have higher thresholds
+	      
+	      else if (ft < freq_min)
+	    frac_path = 1.0;		// then all frequency along ds are above edge
 
 	      if (freq < x_top_ptr->freq[x_top_ptr->np - 1])
 		{
@@ -218,7 +242,7 @@ radiation (p, ds)
 		  if (density > DENSITY_PHOT_MIN)
 		    {
 		      kappa_tot += x =
-			sigma_phot_topbase (x_top_ptr, freq) * density;
+			sigma_phot_topbase (x_top_ptr, freq) * density * frac_path ;
 
 		      /* I believe most of next steps are totally diagnsitic; it is possible if 
 		         statement could be deleted entirely 060802 -- ksl */
@@ -256,8 +280,17 @@ radiation (p, ds)
 		{		// Avoid ions with topbase x-sections
 		  ft = x_ptr->freq_t;
 
-		  if (ft > freq)
-		    break;	// The remaining transitions will have higher thresholds
+		  	if (ft > freq_min && ft < freq_max)
+	      {
+	        frac_path = (ft - freq_min) / (freq_max - freq_min);  // then the shifting off the photon causes it to cross an edge. Find out where between fmin and fmax the edge would be 	
+	        n_cross++;
+	      }
+	      
+	      else if (ft > freq_max)
+		break;		// The remaining transitions will have higher thresholds
+	      
+	      else if (ft < freq_min)
+	    frac_path = 1.0;		// then all frequency along ds are above edge
 
 		  density =
 		    xplasma->density[nion] * ion[nion].g /
@@ -265,7 +298,7 @@ radiation (p, ds)
 
 		  if (density > DENSITY_PHOT_MIN)
 		    {
-		      kappa_tot += x = sigma_phot (x_ptr, freq) * density;
+		      kappa_tot += x = sigma_phot (x_ptr, freq) * density * frac_path;
 
 		      /* Next if statment down to kappa_ion appers to be totally diagnostic - 060802 -- ksl */
 		      if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
@@ -286,6 +319,8 @@ radiation (p, ds)
 	}
 
     }
+
+    Log("Edges crossed %i, total XS %i\n", n_cross, nxphot + ntop_phot);
 
   /* finished looping over cross-sections to calculate bf opacity 
      we can now reduce weights and record certain estimators */
