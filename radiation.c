@@ -135,8 +135,7 @@ radiation (p, ds)
   double v_inner[3], v_outer[3], v1, v2;
   double freq_inner, freq_outer;
   double freq_min, freq_max;
-  double frac_path;
-  int n_cross;
+  double frac_path, freq_xs;
   struct photon phot;
 
   ii = jj = 0;			/* NSH 130605 to remove o3 compile error */
@@ -189,7 +188,6 @@ radiation (p, ds)
   	freq_max = freq_inner;
   	freq_min = freq_outer;
   }
-  n_cross = 0;
 
 
   if (freq > phot_freq_min)
@@ -222,17 +220,20 @@ radiation (p, ds)
 
 	      if (ft > freq_min && ft < freq_max)
 	      {
-	        frac_path = (ft - freq_min) / (freq_max - freq_min);  // then the shifting off the photon causes it to cross an edge. Find out where between fmin and fmax the edge would be 	
-	        n_cross++;
+	        frac_path = (ft - freq_min) / (freq_max - freq_min);  // then the shifting of the photon causes it to cross an edge. Find out where between fmin and fmax the edge would be 	
+	        freq_xs = 0.5 * (ft + freq_max);
 	      }
 
 	      else if (ft > freq_max)
 		break;		// The remaining transitions will have higher thresholds
 	      
 	      else if (ft < freq_min)
-	    frac_path = 1.0;		// then all frequency along ds are above edge
+	    {
+	      frac_path = 1.0;		// then all frequency along ds are above edge
+	      freq_xs = freq; 		// use the average frequency
+	    }
 
-	      if (freq < x_top_ptr->freq[x_top_ptr->np - 1])
+	      if (freq_xs < x_top_ptr->freq[x_top_ptr->np - 1])
 		{
 		  /*Need the appropriate density at this point. */
 
@@ -250,7 +251,7 @@ radiation (p, ds)
 		      if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
 			{	// Calculate during ionization cycles only
 
-			  frac_tot += z = x * (freq - ft) / freq;
+              frac_tot += z = x * (freq_xs - ft) / freq;
 			  nion = config[nconf].nion;
 
 			  if (nion > 3)
@@ -283,14 +284,17 @@ radiation (p, ds)
 		  	if (ft > freq_min && ft < freq_max)
 	      {
 	        frac_path = (ft - freq_min) / (freq_max - freq_min);  // then the shifting off the photon causes it to cross an edge. Find out where between fmin and fmax the edge would be 	
-	        n_cross++;
+	        freq_xs = 0.5 * (ft + freq_max);
 	      }
 	      
 	      else if (ft > freq_max)
 		break;		// The remaining transitions will have higher thresholds
 	      
 	      else if (ft < freq_min)
-	    frac_path = 1.0;		// then all frequency along ds are above edge
+	    {
+	      frac_path = 1.0;		// then all frequency along ds are above edge
+	      freq_xs = freq; 		// use the average frequency
+	    }
 
 		  density =
 		    xplasma->density[nion] * ion[nion].g /
@@ -304,7 +308,7 @@ radiation (p, ds)
 		      if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
 			{	// Calculate during ionization cycles only
 
-			  frac_tot += z = x * (freq - ft) / freq;
+			  frac_tot += z = x * (freq_xs - ft) / freq;
 
 			  if (nion > 3)
 			    {
@@ -320,7 +324,7 @@ radiation (p, ds)
 
     }
 
-    Log("Edges crossed %i, total XS %i\n", n_cross, nxphot + ntop_phot);
+
 
   /* finished looping over cross-sections to calculate bf opacity 
      we can now reduce weights and record certain estimators */
@@ -441,7 +445,7 @@ radiation (p, ds)
 
 	  /* Calculate the number of photoionizations per unit volume for H and He */
 	  xplasma->nioniz++;
-	  q = (z) / (H * freq * one->vol);
+	  q = (z) / (H * freq_xs * one->vol);
 	  /* So xplasma->ioniz for each species is just 
 	     (energy_abs)*kappa_h/kappa_tot / H*freq / volume
 	     or the number of photons absorbed in this bundle per unit volume by this ion
