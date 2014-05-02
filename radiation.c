@@ -230,7 +230,9 @@ radiation (p, ds)
 
 	      if (ft > freq_min && ft < freq_max)
 		{
-		  frac_path = (ft - freq_min) / (freq_max - freq_min);	// then the shifting of the photon causes it to cross an edge. Find out where between fmin and fmax the edge would be     
+		  /* then the shifting of the photon causes it to cross an edge. 
+		     Find out where between fmin and fmax the edge would be in freq space */   
+		  frac_path = (freq_max - ft) / (freq_max - freq_min);	
 		  freq_xs = 0.5 * (ft + freq_max);
 		}
 
@@ -294,7 +296,9 @@ radiation (p, ds)
 
 		  if (ft > freq_min && ft < freq_max)
 		    {
-		      frac_path = (ft - freq_min) / (freq_max - freq_min);	// then the shifting off the photon causes it to cross an edge. Find out where between fmin and fmax the edge would be    
+		      /* then the shifting of the photon causes it to cross an edge. 
+		         Find out where between fmin and fmax the edge would be in freq space */   
+		      frac_path = (freq_max - ft) / (freq_max - freq_min);	
 		      freq_xs = 0.5 * (ft + freq_max);
 		    }
 
@@ -455,7 +459,8 @@ radiation (p, ds)
 	  xplasma->heat_z += z * frac_z;
 	  xplasma->heat_tot += z * frac_tot;	//All of the photoinization opacities
 
-	  /* Calculate the number of photoionizations per unit volume for H and He */
+	  /* Calculate the number of photoionizations per unit volume for H and He 
+	     JM 1405 changed this to use freq_xs */
 	  xplasma->nioniz++;
 	  q = (z) / (H * freq_xs * one->vol);
 	  /* So xplasma->ioniz for each species is just 
