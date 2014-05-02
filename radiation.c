@@ -93,7 +93,9 @@ History:
 	12may	nsh	72 Added induced compton
 	12jun 	nsh	72 Added lines to write out photon stats to a file dirung diagnostics. This is
 			to allow us to see how well spectra are being modelled by power law W and alpha
-
+	1405    JM corrected error (#73) so that photon frequency is shifted to the rest frame of the 
+	        cell in question. Also added check which checks if a photoionization edge is crossed
+	        along ds.
 **************************************************************/
 
 #include <stdio.h>
@@ -134,6 +136,8 @@ radiation (p, ds)
   int ii, jj;
   double v_inner[3], v_outer[3], v1, v2;
   double freq_inner, freq_outer;
+  double freq_min, freq_max;
+  double frac_path, freq_xs;
   struct photon phot;
 
   ii = jj = 0;			/* NSH 130605 to remove o3 compile error */
@@ -146,17 +150,17 @@ radiation (p, ds)
      The photon frequency should be shifted to the rest frame of the cell in question
      We currently take the average of this frequency along ds. In principle
      this could be improved, so we throw an error if the difference between v1 and v2 is large */
-  
+
   /* calculate velocity at original position */
-  vwind_xyz (p, v_inner);			// get velocity vector at new pos
-  v1 = dot (p->lmn, v_inner);		// get direction cosine
+  vwind_xyz (p, v_inner);	// get velocity vector at new pos
+  v1 = dot (p->lmn, v_inner);	// get direction cosine
 
   /* Create phot, a photon at the position we are moving to 
      note that the actual movement of the photon gets done after the call to radiation */
-  stuff_phot (p, &phot);			// copy photon ptr
-  move_phot (&phot, ds);			// move it by ds
-  vwind_xyz (&phot, v_outer);		// get velocity vector at new pos
-  v2 = dot (phot.lmn, v_outer);		// get direction cosine
+  stuff_phot (p, &phot);	// copy photon ptr
+  move_phot (&phot, ds);	// move it by ds
+  vwind_xyz (&phot, v_outer);	// get velocity vector at new pos
+  v2 = dot (phot.lmn, v_outer);	// get direction cosine
 
   /* calculate photon frequencies in rest frame of cell */
   freq_inner = p->freq * (1. - v1 / C);
@@ -174,7 +178,21 @@ radiation (p, ds)
   kappa_tot += frac_comp = kappa_comp (xplasma, freq);	/* 70 NSH 1108 calculate compton opacity, store it in kappa_comp and also add it to kappa_tot, the total opacity for the photon path */
   kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq);
   frac_tot = frac_z = 0;	/* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
-				                           indicate this is all disagnostic and might be removed */
+				   indicate this is all diagnostic and might be removed */
+
+  /* JM 1405 -- Check which of the frequencies is larger.
+     if freq_max is always larger this can be removed. My checks
+     indicate that it isn't */
+  if (freq_outer > freq_inner)
+    {
+      freq_max = freq_outer;
+      freq_min = freq_inner;
+    }
+  else
+    {
+      freq_max = freq_inner;
+      freq_min = freq_outer;
+    }
 
 
   if (freq > phot_freq_min)
@@ -193,9 +211,14 @@ radiation (p, ds)
          than one x-section associated with an ion, and so one has to keep track
          of the energy that goes into heating electrons carefully.  */
 
+      /* JM 1405 -- I've added a check here that checks if a photoionization edge has been crossed.
+         If it has, then we multiply sigma*density by a factor frac_path, which is equal to the how far along 
+         ds the edge occurs in frequency space  [(ft - freq_min) / (freq_max - freq_min)] */
+
+
       /* Next steps are a way to avoid the loop over photoionization x sections when it should not matter */
       if (DENSITY_PHOT_MIN > 0)	// 57h -- ksl -- 060715
-    {			// Initialize during ionization cycles only
+	{			// Initialize during ionization cycles only
 
 
 	  /* 57h -- 06jul -- ksl -- change loop to use pointers ordered by frequency */
@@ -205,10 +228,25 @@ radiation (p, ds)
 	      x_top_ptr = phot_top_ptr[n];
 	      ft = x_top_ptr->freq[0];
 
-	      if (ft > freq)
+	      if (ft > freq_min && ft < freq_max)
+		{
+		  /* then the shifting of the photon causes it to cross an edge. 
+		     Find out where between fmin and fmax the edge would be in freq space.
+		     freq_xs is freq halfway between the edge and the max freq if an edge gets crossed */    
+		  frac_path = (freq_max - ft) / (freq_max - freq_min);	
+		  freq_xs = 0.5 * (ft + freq_max);
+		}
+
+	      else if (ft > freq_max)
 		break;		// The remaining transitions will have higher thresholds
 
-	      if (freq < x_top_ptr->freq[x_top_ptr->np - 1])
+	      else if (ft < freq_min)
+		{
+		  frac_path = 1.0;	// then all frequency along ds are above edge
+		  freq_xs = freq;	// use the average frequency
+		}
+
+	      if (freq_xs < x_top_ptr->freq[x_top_ptr->np - 1])
 		{
 		  /*Need the appropriate density at this point. */
 
@@ -218,7 +256,8 @@ radiation (p, ds)
 		  if (density > DENSITY_PHOT_MIN)
 		    {
 		      kappa_tot += x =
-			sigma_phot_topbase (x_top_ptr, freq) * density;
+			sigma_phot_topbase (x_top_ptr,
+					    freq_xs) * density * frac_path;
 
 		      /* I believe most of next steps are totally diagnsitic; it is possible if 
 		         statement could be deleted entirely 060802 -- ksl */
@@ -226,7 +265,7 @@ radiation (p, ds)
 		      if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
 			{	// Calculate during ionization cycles only
 
-			  frac_tot += z = x * (freq - ft) / freq;
+			  frac_tot += z = x * (freq_xs - ft) / freq_xs;
 			  nion = config[nconf].nion;
 
 			  if (nion > 3)
@@ -256,8 +295,23 @@ radiation (p, ds)
 		{		// Avoid ions with topbase x-sections
 		  ft = x_ptr->freq_t;
 
-		  if (ft > freq)
+		  if (ft > freq_min && ft < freq_max)
+		    {
+		      /* then the shifting of the photon causes it to cross an edge. 
+		         Find out where between fmin and fmax the edge would be in freq space.
+		         freq_xs is freq halfway between the edge and the max freq if an edge gets crossed */   
+		      frac_path = (freq_max - ft) / (freq_max - freq_min);	
+		      freq_xs = 0.5 * (ft + freq_max);
+		    }
+
+		  else if (ft > freq_max)
 		    break;	// The remaining transitions will have higher thresholds
+
+		  else if (ft < freq_min)
+		    {
+		      frac_path = 1.0;	// then all frequency along ds are above edge
+		      freq_xs = freq;	// use the average frequency
+		    }
 
 		  density =
 		    xplasma->density[nion] * ion[nion].g /
@@ -265,13 +319,14 @@ radiation (p, ds)
 
 		  if (density > DENSITY_PHOT_MIN)
 		    {
-		      kappa_tot += x = sigma_phot (x_ptr, freq) * density;
+		      kappa_tot += x =
+			sigma_phot (x_ptr, freq_xs) * density * frac_path;
 
 		      /* Next if statment down to kappa_ion appers to be totally diagnostic - 060802 -- ksl */
 		      if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
 			{	// Calculate during ionization cycles only
 
-			  frac_tot += z = x * (freq - ft) / freq;
+			  frac_tot += z = x * (freq_xs - ft) / freq_xs;
 
 			  if (nion > 3)
 			    {
@@ -286,6 +341,8 @@ radiation (p, ds)
 	}
 
     }
+
+
 
   /* finished looping over cross-sections to calculate bf opacity 
      we can now reduce weights and record certain estimators */
@@ -404,9 +461,10 @@ radiation (p, ds)
 	  xplasma->heat_z += z * frac_z;
 	  xplasma->heat_tot += z * frac_tot;	//All of the photoinization opacities
 
-	  /* Calculate the number of photoionizations per unit volume for H and He */
+	  /* Calculate the number of photoionizations per unit volume for H and He 
+	     JM 1405 changed this to use freq_xs */
 	  xplasma->nioniz++;
-	  q = (z) / (H * freq * one->vol);
+	  q = (z) / (H * freq_xs * one->vol);
 	  /* So xplasma->ioniz for each species is just 
 	     (energy_abs)*kappa_h/kappa_tot / H*freq / volume
 	     or the number of photons absorbed in this bundle per unit volume by this ion
