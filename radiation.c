@@ -231,7 +231,8 @@ radiation (p, ds)
 	      if (ft > freq_min && ft < freq_max)
 		{
 		  /* then the shifting of the photon causes it to cross an edge. 
-		     Find out where between fmin and fmax the edge would be in freq space */   
+		     Find out where between fmin and fmax the edge would be in freq space.
+		     freq_xs is freq halfway between the edge and the max freq if an edge gets crossed */    
 		  frac_path = (freq_max - ft) / (freq_max - freq_min);	
 		  freq_xs = 0.5 * (ft + freq_max);
 		}
@@ -264,7 +265,7 @@ radiation (p, ds)
 		      if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
 			{	// Calculate during ionization cycles only
 
-			  frac_tot += z = x * (freq_xs - ft) / freq;
+			  frac_tot += z = x * (freq_xs - ft) / freq_xs;
 			  nion = config[nconf].nion;
 
 			  if (nion > 3)
@@ -297,7 +298,8 @@ radiation (p, ds)
 		  if (ft > freq_min && ft < freq_max)
 		    {
 		      /* then the shifting of the photon causes it to cross an edge. 
-		         Find out where between fmin and fmax the edge would be in freq space */   
+		         Find out where between fmin and fmax the edge would be in freq space.
+		         freq_xs is freq halfway between the edge and the max freq if an edge gets crossed */   
 		      frac_path = (freq_max - ft) / (freq_max - freq_min);	
 		      freq_xs = 0.5 * (ft + freq_max);
 		    }
@@ -324,7 +326,7 @@ radiation (p, ds)
 		      if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
 			{	// Calculate during ionization cycles only
 
-			  frac_tot += z = x * (freq_xs - ft) / freq;
+			  frac_tot += z = x * (freq_xs - ft) / freq_xs;
 
 			  if (nion > 3)
 			    {
