@@ -37,7 +37,7 @@ install:
     - cd software/cfitsio3040
     - ./configure 
     - make
-    - mv libcfitsio.a ../../li
+    - mv libcfitsio.a ../../lib
     - make clean
 
     # Then make GSL library
