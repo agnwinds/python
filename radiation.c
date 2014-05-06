@@ -1031,7 +1031,7 @@ mean_intensity (xplasma, freq)
 int i;
 double J;
 double expo;
-
+J=0.0; //Avoid 03 error
 //printf ("Reached mean intensity");
   if (geo.ioniz_mode == 5 || geo.ioniz_mode == 7)	/*If we are using power law ionization, use PL estimators */
     {
