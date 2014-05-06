@@ -172,7 +172,7 @@ kappa_ind_comp (xplasma, freq)
 //      J *= xplasma->w;
 //    }
 
-
+printf (" J now =%e\n",J);
   sigma = klein_nishina (freq);	//NSH 130214 - full KN formula
 
 

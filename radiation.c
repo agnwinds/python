@@ -1025,12 +1025,14 @@ double
 mean_intensity (xplasma, freq)
      PlasmaPtr xplasma;		// Pointer to current plasma cell
      double freq;		// Frequency of the current photon being tracked
+ //    int mode;			// mode 1=use BB if no model, mode 2=never use BB
 
 {
 int i;
 double J;
 double expo;
 
+//printf ("Reached mean intensity");
   if (geo.ioniz_mode == 5 || geo.ioniz_mode == 7)	/*If we are using power law ionization, use PL estimators */
     {
       if (geo.wcycle > 0) /* there is only any point in worrying if we have had at least one cycle otherwise there is no model */
@@ -1076,7 +1078,18 @@ double expo;
     }
 	else //We have not completed an ionization cycle, so no chance of a model
 	{
-	J=0.0;
+//		if (mode==1) //We need a guess, so we use the initial guess of a dilute BB
+//			{
+//			expo = (H * freq) / (BOLTZMANN * xplasma->t_r);
+  //    			J = (2 * H * freq * freq * freq) / (C * C);
+    //  			J *= 1 / (exp (expo) - 1);
+      //			J *= xplasma->w;
+//			}
+//		else  //A guess is not a good idea, so we return zero.
+//			{
+			J=0.0;
+//			}
+
 	}
 }
 
@@ -1087,6 +1100,6 @@ double expo;
       J *= 1 / (exp (expo) - 1);
       J *= xplasma->w;
     }
-
+printf ("TEST J=%e",J);
 return J;
 }

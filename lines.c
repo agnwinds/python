@@ -121,7 +121,6 @@ lum_lines (one, nmin, nmax)
       if (dd > LDEN_MIN)
 	{			/* potentially dangerous step to avoid lines with no power */
 	  two_level_atom (lin_ptr[n], xplasma, &d1, &d2);
-printf ("d1=%e, d2=%e\n",d1,d2);
 	  x = foo1 = lin_ptr[n]->gu / lin_ptr[n]->gl * d1 - d2;
 
 	  z = exp (-H_OVER_K * lin_ptr[n]->freq / t_e);
