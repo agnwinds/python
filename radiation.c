@@ -1032,7 +1032,7 @@ int i;
 double J;
 double expo;
 J=0.0; //Avoid 03 error
-//printf ("Reached mean intensity");
+//printf ("Reached mean intensity geo.wcycle=%i, freq=%e, ");
   if (geo.ioniz_mode == 5 || geo.ioniz_mode == 7)	/*If we are using power law ionization, use PL estimators */
     {
       if (geo.wcycle > 0) /* there is only any point in worrying if we have had at least one cycle otherwise there is no model */
