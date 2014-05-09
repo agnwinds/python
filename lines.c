@@ -420,22 +420,22 @@ in the configuration structure. 01dec ksl */
 	  c21 = ne * q;
 	  c12 = c21 * g2_over_g1 * exp (-H_OVER_K * freq / te);
 
-	  if (w < 1.e-6)
-	    {			// Radiation is unimportant
-	      n2_over_n1 = c12 / (c21 + a);
-	    }
-	  else
-	    {			//Include effects of stimulated emission
-	      z = w / (exp (H_OVER_K * freq / tr) - 1.);
-//	      z=(C*C)/(2.*H*freq*freq*freq);
-	      n2_over_n1 = (c12 + g2_over_g1 * a * z) / (c21 + a * (1. + z));
+//	  if (w < 1.e-6)
+//	    {			// Radiation is unimportant
+//	      n2_over_n1 = c12 / (c21 + a);
+//	    }
+//	  else
+//	    {			//Include effects of stimulated emission
+//	      z = w / (exp (H_OVER_K * freq / tr) - 1.);
+	      z=(C*C)/(2.*H*freq*freq*freq);
+//	      n2_over_n1 = (c12 + g2_over_g1 * a * z) / (c21 + a * (1. + z));
 
-//	   J = mean_intensity (xplasma, freq, 1);/* we call mean intensity with mode 1 - this means we are happy to use the dilute blackbody approximation even if we havent run enough spectral cycles to have a model for J*/
+	   J = mean_intensity (xplasma, freq, 1);/* we call mean intensity with mode 1 - this means we are happy to use the dilute blackbody approximation even if we havent run enough spectral cycles to have a model for J*/
 
-//           n2_over_n1 = (c12 + g2_over_g1 * a * z * J) / (c21 + a*(1. + (J * z)));
+           n2_over_n1 = (c12 + g2_over_g1 * a * z * J) / (c21 + a*(1. + (J * z)));
 
 
-	    }
+//	    }
 
 
 	  *d1 = dd;
