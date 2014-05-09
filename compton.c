@@ -113,7 +113,8 @@ kappa_ind_comp (xplasma, freq)
 
   J = 0.0;			/* NSH 130605 to remove o3 compile error */
 
-  J = mean_intensity (xplasma, freq);
+
+  J = mean_intensity (xplasma, freq, 2); //Obtain a model for the mean intensity - we call this with mode=2, which means that if we have not yet completed a cycle, dont return a dilute blackbody estimate if we are in PL mode.
  
  //if (geo.ioniz_mode == 5 || geo.ioniz_mode == 7)	/*If we are using power law ionization, use PL estimators */
  //   {

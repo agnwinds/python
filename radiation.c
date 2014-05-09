@@ -1022,10 +1022,10 @@ save_photon_stats (one, p, ds)
 }
 
 double
-mean_intensity (xplasma, freq)
+mean_intensity (xplasma, freq, mode)
      PlasmaPtr xplasma;		// Pointer to current plasma cell
      double freq;		// Frequency of the current photon being tracked
- //    int mode;			// mode 1=use BB if no model, mode 2=never use BB
+     int mode;			// mode 1=use BB if no model, mode 2=never use BB
 
 {
 int i;
@@ -1078,17 +1078,17 @@ J=0.0; //Avoid 03 error
     }
 	else //We have not completed an ionization cycle, so no chance of a model
 	{
-//		if (mode==1) //We need a guess, so we use the initial guess of a dilute BB
-//			{
-//			expo = (H * freq) / (BOLTZMANN * xplasma->t_r);
-  //    			J = (2 * H * freq * freq * freq) / (C * C);
-    //  			J *= 1 / (exp (expo) - 1);
-      //			J *= xplasma->w;
-//			}
-//		else  //A guess is not a good idea, so we return zero.
-//			{
+		if (mode==1) //We need a guess, so we use the initial guess of a dilute BB
+			{
+			expo = (H * freq) / (BOLTZMANN * xplasma->t_r);
+      			J = (2 * H * freq * freq * freq) / (C * C);
+      			J *= 1 / (exp (expo) - 1);
+      			J *= xplasma->w;
+			}
+		else  //A guess is not a good idea (i.e. we need the model for induced compton), so we return zero.
+			{
 			J=0.0;
-//			}
+			}
 
 	}
 }
@@ -1100,6 +1100,6 @@ J=0.0; //Avoid 03 error
       J *= 1 / (exp (expo) - 1);
       J *= xplasma->w;
     }
-printf ("TEST J=%e",J);
+//printf ("TEST J=%e",J);
 return J;
 }
