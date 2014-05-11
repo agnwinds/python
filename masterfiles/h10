@@ -1,0 +1,7 @@
+#This is a standard atomic data set for a 10 level hydrogen model
+#that can be treated with or without the full macro atom formalism.
+data/atomic_macro/h10_elem_ions.py
+data/atomic_macro/h10_levels.py
+data/atomic_macro/h10_lines.py
+data/atomic_macro/h10_phot.py
+data/atomic_macro/recomb.data
