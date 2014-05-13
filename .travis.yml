@@ -47,6 +47,11 @@ install:
     - make install
     - make clean
 
+    #Then clone data
+    - cd ../../data
+    - git clone --depth=50 --branch=data git://github.com/agnwinds/python.git .
+
+
 
 script:
     - echo $PWD
