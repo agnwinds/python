@@ -54,7 +54,7 @@ install:
     - git clone --depth=50 --branch=data git://github.com/agnwinds/python.git .
     # cd back into right directory for making source code
     - cd ../../
-    - cp $PYTHON/scripts/setup_scripts/Setup_Py_Dir $PYTHON/bin
+    - cp $PYTHON/py_progs/setup_scripts/Setup_Py_Dir $PYTHON/bin
     - export PATH=$PATH:$PYTHON/bin 
 
 
