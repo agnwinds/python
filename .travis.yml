@@ -47,13 +47,26 @@ install:
     - make install
     - make clean
 
+    #Then clone data
+    - cd ../..
+    - mkdir data
+    - cd data
+    - git clone --depth=50 --branch=data git://github.com/agnwinds/python.git .
+    # cd back into right directory for making source code
+    - cd ../../
+    - cp $PYTHON/py_progs/setup_scripts/Setup_Py_Dir $PYTHON/bin
+    - export PATH=$PATH:$PYTHON/bin 
+
+
 
 script:
     - echo $PWD
-    # cd back into right directory for making source code and make using gcc
-    - cd ../../../
     # these long strings of variables are required because we have a different directory layout to normal
     - make CC=gcc LIB=structure/lib LIB2=structure/gsl/lib BIN=structure/bin INCLUDE=structure/include INCLUDE2=structure/gsl/include python
     - make clean
     - make CC=gcc LIB=structure/lib LIB2=structure/gsl/lib BIN=structure/bin INCLUDE=structure/include INCLUDE2=structure/gsl/include py_wind
     - make clean
+    - cd structure/test_suite/travis 
+    - Setup_Py_Dir
+    - py test1.pf > test1.out
+    - python check_travis_test.py 
