@@ -161,7 +161,18 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select,
   strcpy (s[2].name, "Disk   ");
   strcpy (s[3].name, "Wind   ");
   strcpy (s[4].name, "HitSurf");
-  strcpy (s[5].name, "Scattered");
+
+  /* if we are in macro atom mode and the spectral cycles,  
+     then we want to know how the photons were processed by macro atoms */
+  if (geo.rt_mode == 1 || geo.ioniz_or_extract == 1)
+    strcpy (s[5].name, "Scattered");
+  else
+    {
+      strcpy (s[5].name, "Kpkt");
+      strcpy (s[6].name, "Matom");
+    }
+
+
   for (n = 0; n < MSPEC; n++)
     {
       s[n].lmn[0] = s[n].lmn[1] = s[n].lmn[2] = 0.;
@@ -448,6 +459,34 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	      s[3].lf[k1] += p[nphot].w;	/* logarithmic wind spectrum */
 	      s[3].nphot[i]++;
 	    }
+
+	  /* JM 1405 -- added lines to check if photons have been processed by macro atoms, and how */
+	  else if (spectype == PTYPE_KPKT || spectype == PTYPE_MATOM)
+	    {
+	      if (geo.rt_mode != 2)
+		    Error ("photon of type %i but not in matom mode!\n",
+			   spectype);
+
+	      /* if it came from here, then it is a wind photon too */
+	      s[3].f[k] += p[nphot].w;		/* wind spectrum */
+	      s[3].lf[k1] += p[nphot].w;	/* logarithmic wind spectrum */
+	      s[3].nphot[i]++;
+
+	      if (spectype == PTYPE_KPKT)
+		{
+		  s[5].f[k] += p[nphot].w;		/* k->r spectrum */
+		  s[5].lf[k1] += p[nphot].w;	/* logarithmic wind spectrum */
+		  s[5].nphot[i]++;
+		}
+	      else if (spectype == PTYPE_MATOM)
+		{
+		  s[6].f[k] += p[nphot].w;		/* matom spectrum */
+		  s[6].lf[k1] += p[nphot].w;	/* logarithmic wind spectrum */
+		  s[6].nphot[i]++;
+		}
+	    }
+
+
 	  else
 	    {
 	      Error ("spectrum_create: Unknown photon type %d\n", spectype);
@@ -486,7 +525,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	  s[4].nphot[i]++;
 	}
 
-      if (j > 0)
+      if (j > 0 && geo.rt_mode == 1)
 	{
 	  s[5].f[k] += p[nphot].w;	/* j is the number of scatters so this constructs */
 	  s[5].lf[k1] += p[nphot].w;	/* logarithmic j is the number of scatters so this constructs */
@@ -556,7 +595,8 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 
 
   Log ("Photons contributing to the various spectra\n");
-  Log ("Inwin  Scat  Esc   Star  >nscat  err  Absor  Disk  sec  Adiab(matom)\n");
+  Log
+    ("Inwin  Scat  Esc   Star  >nscat  err  Absor  Disk  sec  Adiab(matom)\n");
   for (n = 0; n < nspectra; n++)
     {
       for (i = 0; i < NSTAT; i++)
@@ -626,8 +666,8 @@ History:
 
 
 int
-spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
-		  loglin)
+spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype,
+		  renorm, loglin)
      char filename[], mode[];
      int loglin;		// switch to tell the code if we are outputting a log or a lin
      int nspecmin, nspecmax;
@@ -722,7 +762,7 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
       ldfreq = (lfreqmax - lfreqmin) / NWAVE;
 
 //OLD      printf ("lfreqmin=%e lfreqmax=%e ldfreq=%e\n", lfreqmin, lfreqmax,
-//OLD	      ldfreq);
+//OLD         ldfreq);
       for (i = 1; i < NWAVE - 1; i++)
 	{
 	  freq = pow (10., (lfreqmin + i * ldfreq));
