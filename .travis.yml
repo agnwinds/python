@@ -48,7 +48,9 @@ install:
     - make clean
 
     #Then clone data
-    - cd ../../data
+    - cd ../..
+    - mkdir data
+    - cd data
     - git clone --depth=50 --branch=data git://github.com/agnwinds/python.git .
 
 
@@ -63,6 +65,7 @@ script:
     - make CC=gcc LIB=structure/lib LIB2=structure/gsl/lib BIN=structure/bin INCLUDE=structure/include INCLUDE2=structure/gsl/include py_wind
     - make clean
     - cd structure/test_suite/travis 
+    - export PYTHON=$TRAVIS_BUILD_DIR/structure
     - Setup_Py_Dir
     - py test1.pf > test1.out
     - python check_travis_test.py 
