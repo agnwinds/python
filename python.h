@@ -902,7 +902,7 @@ basis_cartesian;
 /* NSPEC has been removed from python.h because it was not really needed */
 //0ld68c #define NSPEC                          14
 
-#define MSPEC                            8
+#define MSPEC                            6
 int nspectra;			/* After create_spectrum, the number of elements allocated for s, or 
 				   alternatively the number of spectra one has to work with.  Note that
 				   general s[0],s[1] and s[2] are the escaping, scattered and absorbed photons,
