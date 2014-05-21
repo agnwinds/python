@@ -15,13 +15,13 @@
 #define NDIM	10		// The maximum number of free parameters
 #define NCOMPS	10		//The maximum number of separate components
 #define NPARS	10		//The maximum number of parameters in a component (not all variable)
-#define NMODS   10000 	//The total number of models read in in all components
+#define NMODS   1000 	//The total number of models read in in all components
 #define LINELEN 132
 
 
 //#include      "pdf.h"
 
-//int ncomps;			// The number of components that have been read.  
+int ncomps;			// The number of components that have been read.  
 int nmods_tot;			// The total number of models that have been read in 
 
 
