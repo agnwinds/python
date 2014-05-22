@@ -94,7 +94,7 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select,
      double rho_select[], z_select[], az_select[], r_select[];
 {
   int i, n;
-  int nspec;
+  int nspec, mspec;
   double freqmin, freqmax, dfreq;
   double lfreqmin, lfreqmax, ldfreq;	/* NSH 1302 Min, max and delta for the log spectrum */
   double x1, x2;
@@ -104,7 +104,12 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select,
   freqmax = f2;
   dfreq = (freqmax - freqmin) / NWAVE;
 
-  nspec = nangle + MSPEC;
+  mspec = MSPEC;
+
+  if (geo.rt_mode == 2 && geo.ioniz_or_extract == 0)
+  	mspec++;	// if we are in matom mode we need MSPEC to be MSPEC + 1
+
+  nspec = nangle + mspec;
 
 /* NSH 1302 Lines to set up a logarithmic spectrum */
 
@@ -161,14 +166,25 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select,
   strcpy (s[2].name, "Disk   ");
   strcpy (s[3].name, "Wind   ");
   strcpy (s[4].name, "HitSurf");
-  strcpy (s[5].name, "Scattered");
-  for (n = 0; n < MSPEC; n++)
+
+  /* if we are in macro atom mode and the spectral cycles,  
+     then we want to know how the photons were processed by macro atoms */
+  if (geo.rt_mode == 1 || geo.ioniz_or_extract == 1)
+    strcpy (s[5].name, "Scattered");
+  else
+    {
+      strcpy (s[5].name, "Kpkt");
+      strcpy (s[6].name, "Matom");
+    }
+
+
+  for (n = 0; n < mspec; n++)
     {
       s[n].lmn[0] = s[n].lmn[1] = s[n].lmn[2] = 0.;
       s[n].renorm = 1.0;
     }
 
-  for (n = MSPEC; n < nspec; n++)
+  for (n = mspec; n < nspec; n++)
     {
 /* 
 We want to set up the direction cosines for extractions.  We have to be careful
@@ -181,20 +197,20 @@ disk. The minus sign in the terms associated with phase are to make this happen.
 02feb ksl
 */
 
-      sprintf (s[n].name, "A%02.0f", angle[n - MSPEC]);
+      sprintf (s[n].name, "A%02.0f", angle[n - mspec]);
       s[n].lmn[0] =
-	sin (angle[n - MSPEC] / RADIAN) * cos (-phase[n - MSPEC] * 360. /
+	sin (angle[n - mspec] / RADIAN) * cos (-phase[n - mspec] * 360. /
 					       RADIAN);
       s[n].lmn[1] =
-	sin (angle[n - MSPEC] / RADIAN) * sin (-phase[n - MSPEC] * 360. /
+	sin (angle[n - mspec] / RADIAN) * sin (-phase[n - mspec] * 360. /
 					       RADIAN);
-      s[n].lmn[2] = cos (angle[n - MSPEC] / RADIAN);
-      Log_silent ("Angle %e Angle cosines:%e %e %e\n", angle[n - MSPEC],
+      s[n].lmn[2] = cos (angle[n - mspec] / RADIAN);
+      Log_silent ("Angle %e Angle cosines:%e %e %e\n", angle[n - mspec],
 		  s[n].lmn[0], s[n].lmn[1], s[n].lmn[2]);
 
       /* Initialize variables needed for live or die option */
-      x1 = angle[n - MSPEC] - DANG_LIVE_OR_DIE;
-      x2 = angle[n - MSPEC] + DANG_LIVE_OR_DIE;
+      x1 = angle[n - mspec] - DANG_LIVE_OR_DIE;
+      x2 = angle[n - mspec] + DANG_LIVE_OR_DIE;
       if (x1 < 0.)
 	x1 = 0;
       if (x2 > 180.)
@@ -227,10 +243,10 @@ disk. The minus sign in the terms associated with phase are to make this happen.
 //OLD091125     {                       /*Then conditions
 //OLD091125                        have been place on the phases so update the names */
       strcpy (dummy, "");
-      sprintf (dummy, "P%04.2f", phase[n - MSPEC]);
+      sprintf (dummy, "P%04.2f", phase[n - mspec]);
       strcat (s[n].name, dummy);
 //OLD091125     }
-      s[n].nscat = scat_select[n - MSPEC];
+      s[n].nscat = scat_select[n - mspec];
       if (s[n].nscat < MAXSCAT)
 	{			/* Then conditions have been place on the
 				   number of scatters to be included so update the names */
@@ -243,7 +259,7 @@ disk. The minus sign in the terms associated with phase are to make this happen.
 	    sprintf (dummy, "_sc:>%d", -s[n].nscat);
 	  strcat (s[n].name, dummy);
 	}
-      s[n].top_bot = top_bot_select[n - MSPEC];
+      s[n].top_bot = top_bot_select[n - mspec];
       if (s[n].top_bot != 0)
 	{			/* Then conditions have been placed on the last
 				   location of the photon so update the names */
@@ -256,11 +272,11 @@ disk. The minus sign in the terms associated with phase are to make this happen.
 	    {
 	      sprintf (dummy, "_pos");
 	      s[n].x[0] =
-		rho_select[n - MSPEC] * cos (az_select[n - MSPEC] / RADIAN);
+		rho_select[n - mspec] * cos (az_select[n - mspec] / RADIAN);
 	      s[n].x[1] =
-		rho_select[n - MSPEC] * sin (az_select[n - MSPEC] / RADIAN);
-	      s[n].x[2] = z_select[n - MSPEC];
-	      s[n].r = r_select[n - MSPEC];
+		rho_select[n - mspec] * sin (az_select[n - mspec] / RADIAN);
+	      s[n].x[2] = z_select[n - mspec];
+	      s[n].r = r_select[n - mspec];
 
 	    }
 	  else
@@ -340,7 +356,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 
 {
   int nphot, i, j, k, k1, n;
-  int nspec, spectype;
+  int nspec, spectype, mspec;
   double freqmin, freqmax, dfreq;
   double lfreqmin, lfreqmax, ldfreq;
   double x1;
@@ -349,10 +365,15 @@ spectrum_create (p, f1, f2, nangle, select_extract)
   double delta;
   double nlow, nhigh;
 
+  mspec = MSPEC;
+
+  if (geo.rt_mode == 2 && geo.ioniz_or_extract == 0)
+  	mspec++;	// if we are in matom mode we need MSPEC to be MSPEC + 1
+
   freqmin = f1;
   freqmax = f2;
   dfreq = (freqmax - freqmin) / NWAVE;
-  nspec = nangle + MSPEC;
+  nspec = nangle + mspec;
   nlow = 0.0;			// variable to storte the number of photons that have frequencies which are too low
   nhigh = 0.0;			// variable to storte the number of photons that have frequencies which are too high
   delta = 0.0;			// fractional frequency error allowod
@@ -448,6 +469,34 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	      s[3].lf[k1] += p[nphot].w;	/* logarithmic wind spectrum */
 	      s[3].nphot[i]++;
 	    }
+
+	  /* JM 1405 -- added lines to check if photons have been processed by macro atoms, and how */
+	  else if (spectype == PTYPE_KPKT || spectype == PTYPE_MATOM)
+	    {
+	      if (geo.rt_mode != 2)
+		    Error ("photon of type %i but not in matom mode!\n",
+			   spectype);
+
+	      /* if it came from here, then it is a wind photon too */
+	      s[3].f[k] += p[nphot].w;		/* wind spectrum */
+	      s[3].lf[k1] += p[nphot].w;	/* logarithmic wind spectrum */
+	      s[3].nphot[i]++;
+
+	      if (spectype == PTYPE_KPKT)
+		{
+		  s[5].f[k] += p[nphot].w;		/* k->r spectrum */
+		  s[5].lf[k1] += p[nphot].w;	/* logarithmic wind spectrum */
+		  s[5].nphot[i]++;
+		}
+	      else if (spectype == PTYPE_MATOM)
+		{
+		  s[6].f[k] += p[nphot].w;		/* matom spectrum */
+		  s[6].lf[k1] += p[nphot].w;	/* logarithmic wind spectrum */
+		  s[6].nphot[i]++;
+		}
+	    }
+
+
 	  else
 	    {
 	      Error ("spectrum_create: Unknown photon type %d\n", spectype);
@@ -457,7 +506,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	  if (select_extract == 0)
 	    {
 	      x1 = fabs (p[nphot].lmn[2]);
-	      for (n = MSPEC; n < nspec; n++)
+	      for (n = mspec; n < nspec; n++)
 		{
 		  /* Complicated if statement to allow one to choose whether to construct the spectrum
 		     from all photons or just from photons which have scattered a specific number
@@ -486,7 +535,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	  s[4].nphot[i]++;
 	}
 
-      if (j > 0)
+      if (j > 0 && geo.rt_mode == 1)
 	{
 	  s[5].f[k] += p[nphot].w;	/* j is the number of scatters so this constructs */
 	  s[5].lf[k1] += p[nphot].w;	/* logarithmic j is the number of scatters so this constructs */
@@ -556,7 +605,8 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 
 
   Log ("Photons contributing to the various spectra\n");
-  Log ("Inwin  Scat  Esc   Star  >nscat  err  Absor  Disk  sec  Adiab(matom)\n");
+  Log
+    ("Inwin  Scat  Esc   Star  >nscat  err  Absor  Disk  sec  Adiab(matom)\n");
   for (n = 0; n < nspectra; n++)
     {
       for (i = 0; i < NSTAT; i++)
@@ -626,8 +676,8 @@ History:
 
 
 int
-spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
-		  loglin)
+spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype,
+		  renorm, loglin)
      char filename[], mode[];
      int loglin;		// switch to tell the code if we are outputting a log or a lin
      int nspecmin, nspecmax;
@@ -722,7 +772,7 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
       ldfreq = (lfreqmax - lfreqmin) / NWAVE;
 
 //OLD      printf ("lfreqmin=%e lfreqmax=%e ldfreq=%e\n", lfreqmin, lfreqmax,
-//OLD	      ldfreq);
+//OLD         ldfreq);
       for (i = 1; i < NWAVE - 1; i++)
 	{
 	  freq = pow (10., (lfreqmin + i * ldfreq));

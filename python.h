@@ -586,12 +586,6 @@ typedef struct plasma
   int ntot;			/*Total number of photon passages */
 
 
-#define PTYPE_STAR	    0
-#define PTYPE_BL	    1
-#define PTYPE_DISK          2
-#define PTYPE_WIND	    3
-#define PTYPE_AGN           4
-
 #define SPEC_MOD_PL         1
 #define SPEC_MOD_EXP	    2
 
@@ -800,6 +794,8 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define PTYPE_DISK          2
 #define PTYPE_WIND	    3
 #define PTYPE_AGN           4
+#define PTYPE_KPKT          5
+#define PTYPE_MATOM         6
 
 /* These definitions define the current or final state of a photon.  They are used by
 phot.istat below */
@@ -814,6 +810,7 @@ phot.istat below */
 #define P_ERROR             5	//Too many calls to translate without something happening
 #define P_SEC               8	//Photon hit secondary
 #define P_ADIABATIC         9 //records that a photon created a kpkt which was destroyed by adiabatic cooling
+
 
 #define TMAX_FACTOR			1.5	/*Factor by which t_e can exceed
 						   t_r in order for absorbed to 

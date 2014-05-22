@@ -2767,7 +2767,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
       p[n].istat = 0;
       p[n].tau = p[n].nscat = p[n].nrscat = 0;
-      p[n].origin = PTYPE_WIND;	// Call it a wind photon
+      p[n].origin = PTYPE_KPKT;	// Call it a kpkt photon
 
     }
 
@@ -2977,7 +2977,7 @@ photo_gen_matom (p, weight, photstart, nphot)
 
       p[n].istat = 0;
       p[n].tau = p[n].nscat = p[n].nrscat = 0;
-      p[n].origin = PTYPE_WIND;	// Call it a wind photon
+      p[n].origin = PTYPE_MATOM;	// Call it a macro atom photon
 
     }
 
