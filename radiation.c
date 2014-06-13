@@ -1095,10 +1095,17 @@ J=0.0; //Avoid 03 error
 
   else				/*Else, use BB estimator of J */
     {
+      if (xplasma->w > 1e-6)
+	{
       expo = (H * freq) / (BOLTZMANN * xplasma->t_r);
       J = (2 * H * freq * freq * freq) / (C * C);
       J *= 1 / (exp (expo) - 1);
       J *= xplasma->w;
+	}
+	else
+	{
+	J=0.0;
+	}
     }
 //printf ("TEST J=%e",J);
 return J;
