@@ -1081,9 +1081,13 @@ History:
                         directly but via macro_gov which supervises what the k-packets
                         and r-packets do. Hopefully this make the logic easier to follow.
 
-         04Dec   SS      Added nnscat pointer to call so that the anisotropic thermal
-                         scattering model would work as before for "simple" calculations.
-                         Previously nnscat was always just = 1.
+        04Dec  SS     Added nnscat pointer to call so that the anisotropic thermal
+                        scattering model would work as before for "simple" calculations.
+                        Previously nnscat was always just = 1.
+
+        1406 	JM 		Added normalisation of rejection method for anisotropic scattering
+        				'thermal trapping' model.
+        				See Issue #82.
 
 
 
@@ -1108,6 +1112,7 @@ scatter (p, nres, nnscat)
   int m, llvl, ulvl;
   //new variable for use with thermal trapping model (SS July 04)
   double z, ztest, dvds, tau;
+  double p_norm, tau_norm;
   int ishell;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
@@ -1358,15 +1363,23 @@ scatter (p, nres, nnscat)
     }
   else
     {				//It was a line photon and we want to use the thermal trapping model to choose the output direction
+
+      /* JM 1906 -- added normalisation of the below rejection method. We normalise
+         to the escape probability of along the direction of dvds_max, with a safety net of 
+         20% in case we missed the maximum */
+      tau_norm = sobolev (&wmain[n], p, -1.0, lin_ptr[p->nres], wmain[n].dvds_max);
+      p_norm = (1. - exp (-tau_norm)) / tau_norm;
+
       ztest = 1.0;
       z = 0.0;
       *nnscat = *nnscat - 1;
+
       while (ztest > z)
 	{
 	  *nnscat = *nnscat + 1;
 	  randvec (z_prime, 1.0);	/* Get a new direction for the photon (isotropic */
 	  stuff_v (z_prime, p->lmn);
-	  ztest = (rand () + 0.5) / MAXRAND;
+	  ztest = (rand () + 0.5) / MAXRAND * p_norm * 1.2;		// JM- 1.2 is for 20% safety net
 	  dvds = dvwind_ds (p);
 	  ishell = p->grid;
 	  tau = sobolev (&wmain[ishell], p, -1.0, lin_ptr[p->nres], dvds);
