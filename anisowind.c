@@ -397,3 +397,46 @@ make_pdf_randwind (tau)
 
   return (0);
 }
+
+
+
+
+int 
+randwind_thermal_trapping(p)
+  PhotPtr p;
+{
+  double tau_norm, p_norm;
+  double tau, dvds, z, ztest;
+  int ishell;
+  double z_prime[3];
+  WindPtr one;
+
+  one = &wmain[p->grid];
+
+  tau_norm = sobolev (one, p, -1.0, lin_ptr[p->nres], one->dvds_max);
+  p_norm = (1. - exp (-tau_norm)) / tau_norm;
+
+  ztest = 1.0;
+  z = 0.0;
+  //*nnscat = *nnscat - 1;
+
+   while (ztest > z)
+  {
+    //*nnscat = *nnscat + 1;
+    randvec (z_prime, 1.0); /* Get a new direction for the photon (isotropic */
+    stuff_v (z_prime, p->lmn);
+    ztest = (rand () + 0.5) / MAXRAND * p_norm * 1.2;   // JM- 1.2 is for 20% safety net
+    dvds = dvwind_ds (p);
+    ishell = p->grid;
+    tau = sobolev (one, p, -1.0, lin_ptr[p->nres], dvds);
+    if (tau < 1.0e-5)
+      z = 1.0;
+    else
+      z = (1. - exp (-tau)) / tau;  /* probability to see if it escapes in that direction */
+  }
+
+  return (0);
+}
+
+
+

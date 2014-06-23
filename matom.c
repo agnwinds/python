@@ -2948,23 +2948,7 @@ photo_gen_matom (p, weight, photstart, nphot)
       else if (geo.scatter_mode == 2)
 	{			//It was a line photon and we want the thermal trapping anisotropic model
 
-	  ztest = 1.0;
-	  z = 0.0;
-	  nnscat = 0;
-	  while (ztest > z)
-	    {
-	      nnscat = nnscat + 1;
-	      randvec (p[n].lmn, 1.0);	//Get a new direction
-	      ztest = (rand () + 0.5) / MAXRAND;
-	      dvds = dvwind_ds (&p[n]);	//Here w is entire wind
-	      tau =
-		sobolev (&wmain[icell], &p[n], -1.0, lin_ptr[p[n].nres],
-			 dvds);
-	      if (tau < 1.0e-5)
-		z = 1.0;
-	      else
-		z = (1. - exp (-tau)) / tau;	/* probability to see if it escapes in that direction */
-	    }
+      randwind_thermal_trapping(&p[n]);
 	}
       p[n].nnscat = nnscat;
 
