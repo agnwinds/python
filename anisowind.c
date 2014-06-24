@@ -399,6 +399,35 @@ make_pdf_randwind (tau)
 }
 
 
+/***************************************************************
+                      
+                      University of Southampton
+
+Synopsis:   
+  randwind_thermal_trapping is the routine which chooses
+  a new anisotropic direction in geo.scatter_mode = 2.
+  
+Arguments:   
+
+  
+Returns:
+  0 for success. Also modifies the photon ptr p
+  to reflect new direction (p->lmn). 
+  
+Description:  
+  This routine uses a rejection method to choose a direction
+  so that the probability distribution of directions generated 
+  reflects the probability of escape along each direction in accordance
+  with the sobolev optical DEPTH  
+
+Notes:
+  
+History:
+  1406  Moved code here from photo_gen_matom and scatter to avoid 
+        duplication
+
+
+****************************************************************/
 
 
 int 
@@ -411,24 +440,35 @@ randwind_thermal_trapping(p)
   double z_prime[3];
   WindPtr one;
 
+  /* find the wind pointer for the photon */
   one = &wmain[p->grid];
 
+  /* we want to normalise our rejection method by the escape 
+    probability along the vector of maximum velocity gradient.
+    First find the sobolev optical depth along that vector */
   tau_norm = sobolev (one, p, -1.0, lin_ptr[p->nres], one->dvds_max);
+
+  /* then turn into a probability */
   p_norm = (1. - exp (-tau_norm)) / tau_norm;
 
   ztest = 1.0;
   z = 0.0;
   //*nnscat = *nnscat - 1;
 
+   /* rejection method loop */
    while (ztest > z)
   {
     //*nnscat = *nnscat + 1;
-    randvec (z_prime, 1.0); /* Get a new direction for the photon (isotropic */
-    stuff_v (z_prime, p->lmn);
-    ztest = (rand () + 0.5) / MAXRAND * p_norm * 1.2;   // JM- 1.2 is for 20% safety net
+    randvec (z_prime, 1.0);       /* Get a new direction for the photon (isotropic */
+    stuff_v (z_prime, p->lmn);    // copy to photon pointer
+
+    /* generate random number, normalised by p_norm with a 1.2 for 20% 
+       safety net (as dvds_max is worked out with a sample of directions) */
+    ztest = (rand () + 0.5) / MAXRAND * p_norm * 1.2;   
     dvds = dvwind_ds (p);
     ishell = p->grid;
     tau = sobolev (one, p, -1.0, lin_ptr[p->nres], dvds);
+
     if (tau < 1.0e-5)
       z = 1.0;
     else
