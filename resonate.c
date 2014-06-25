@@ -1110,10 +1110,6 @@ scatter (p, nres, nnscat)
   double prob_kpkt, kpkt_choice;
   double gamma_twiddle, gamma_twiddle_e, stim_fact;
   int m, llvl, ulvl;
-  //new variable for use with thermal trapping model (SS July 04)
-  double z, ztest, dvds, tau;
-  double p_norm, tau_norm;
-  int ishell;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
 

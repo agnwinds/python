@@ -2647,7 +2647,6 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   int wind_n_to_ij (), stuff_v (), randvec ();
   int get_random_location ();
   double test;
-  double ztest, dvds, z, tau;
   int nnscat;
   double dvwind_ds (), sobolev ();
   int nplasma;
@@ -2820,7 +2819,6 @@ photo_gen_matom (p, weight, photstart, nphot)
   int emit_matom ();
   double test;
   int upper;
-  double ztest, dvds, z, tau;
   int nnscat;
   double dvwind_ds (), sobolev ();
   int nplasma;

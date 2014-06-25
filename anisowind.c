@@ -453,12 +453,18 @@ randwind_thermal_trapping(p)
 
   ztest = 1.0;
   z = 0.0;
+
+  /* JM 1406 -- Previously to Python 77a, we used to increment the scatters in the loop 
+     below. We are treating nscat as 'number of resonant zones we interact with',
+     so we don't really want to do this. It was originally done in order to get an 
+     idea of how many scatterings a photon would undergo when escaping the sobolev zone
+  */  
   //*nnscat = *nnscat - 1;
 
    /* rejection method loop */
    while (ztest > z)
   {
-    //*nnscat = *nnscat + 1;
+    //*nnscat = *nnscat + 1; - JM - see above 
     randvec (z_prime, 1.0);       /* Get a new direction for the photon (isotropic */
     stuff_v (z_prime, p->lmn);    // copy to photon pointer
 

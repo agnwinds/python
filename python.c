@@ -723,7 +723,12 @@ on levels and their multiplicities is taken into account.   */
      &geo.line_mode);
 
 /* ?? ksl Next section seems rather a kluge.  Why don't we specifty the underlying variables explicitly 
-It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and geo.macro_simple */
+It also seems likely that we have mixed usage of some things, e.g geo.rt_mode and geo.macro_simple */
+
+/* JM 1406 -- geo.rt_mode and geo.macro_simple control different things. geo.rt_mode controls the radiative
+   transfer and whether or not you are going to use the indivisible packet constraint, so you can have all simple 
+   ions, all macro-atoms or a mix of the two. geo.macro_simple just means one can turn off the full macro atom 
+   treatment and treat everything as 2-level simple ions inside the macro atom formalism */ 
 
   /* For now handle scattering as part of a hidden line transfermode ?? */
   if (geo.line_mode == 4)
@@ -756,9 +761,16 @@ It also seems likely that we have mixed usage of some things, e.g ge.rt_mode and
     {
       geo.scatter_mode = 0;	// isotropic
       geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = 2;
+      geo.rt_mode = 2;		// Identify macro atom treatment i.e. indivisible packets
       geo.macro_simple = 1;	// This is for test runs with all simple ions (SS)
     }
+  else if (geo.line_mode == 9)	// JM 1406 -- new mode, as mode 7, but scatter mode is 1
+    {
+      geo.scatter_mode = 1;	// anisotropic scatter mode 1
+      geo.line_mode = 3;	// Single scattering
+      geo.rt_mode = 2;		// Identify macro atom treatment 
+      geo.macro_simple = 0;	// We don't want the all simple case 
+    }  
   else
     {
       geo.scatter_mode = 0;	// isotropic
