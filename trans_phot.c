@@ -195,6 +195,12 @@ trans_phot (w, p, iextract)
 
 	  stuff_phot (&p[nphot], &pextract);
 	  pextract.w *= p[nphot].nnscat;
+
+	  if ((nphot % 1000 == 0) && pextract.nres < NLINES && pextract.nres > 0)
+	  {
+	  	Log("Weight before %8.4e weight after %8.4e nnscat %i\n", 
+	  		 p[nphot].w, pextract.w, pextract.nnscat);
+	  }
 	  extract (w, &pextract, pextract.origin);
 
 
@@ -465,6 +471,8 @@ been initialized. 02may ksl.  This seems to be OK at present.*/
 	      if (iextract)
 		{
 		  stuff_phot (&pp, &pextract);
+
+		  /* The next line is because later on we */
 		  pextract.w *= nnscat;	// Increase weight to account for number of scatters
 		  extract (w, &pextract, PTYPE_WIND);	// Treat as wind photon for purpose of extraction
 		}

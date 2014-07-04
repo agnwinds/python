@@ -285,7 +285,7 @@ int randwind(PhotPtr p, double lmn[3], double north[3]);
 double vrandwind(double x);
 double reweightwind(PhotPtr p);
 int make_pdf_randwind(double tau);
-int randwind_thermal_trapping(PhotPtr p);
+int randwind_thermal_trapping(PhotPtr p, int nnscat);
 /* util.c */
 int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
 int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);

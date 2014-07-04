@@ -2704,6 +2704,8 @@ photo_gen_kpkt (p, weight, photstart, nphot)
       p[n].freq = pp.freq;
       p[n].nres = nres;
 
+      Log("Return from kpkt, nres = %i\n", nres);
+
       /* The photon frequency is now known. */
 
       /* Determine the position of the photon in the moving frame */
@@ -2733,7 +2735,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
       else if (geo.scatter_mode == 2)
 	{			//It was a line photon and we want the thermal trapping anisotropic model
 
-	  randwind_thermal_trapping(&p[n]);
+	  randwind_thermal_trapping(&p[n], nnscat);
 	}
 
       p[n].nnscat = nnscat;
@@ -2930,7 +2932,7 @@ photo_gen_matom (p, weight, photstart, nphot)
       else if (geo.scatter_mode == 2)
 	{			//It was a line photon and we want the thermal trapping anisotropic model
 
-      randwind_thermal_trapping(&p[n]);
+      randwind_thermal_trapping(&p[n], nnscat);
 	}
       p[n].nnscat = nnscat;
 

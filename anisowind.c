@@ -431,8 +431,9 @@ History:
 
 
 int 
-randwind_thermal_trapping(p)
+randwind_thermal_trapping(p, nnscat)
   PhotPtr p;
+  int nnscat;
 {
   double tau_norm, p_norm;
   double tau, dvds, z, ztest;
@@ -459,14 +460,16 @@ randwind_thermal_trapping(p)
      so we don't really want to do this. It was originally done in order to get an 
      idea of how many scatterings a photon would undergo when escaping the sobolev zone
   */  
-  //*nnscat = *nnscat - 1;
+  nnscat = nnscat - 1;
 
    /* rejection method loop */
    while (ztest > z)
   {
-    //*nnscat = *nnscat + 1; - JM - see above 
+    nnscat = nnscat + 1; //- JM - see above 
     randvec (z_prime, 1.0);       /* Get a new direction for the photon (isotropic */
     stuff_v (z_prime, p->lmn);    // copy to photon pointer
+
+
 
     /* generate random number, normalised by p_norm with a 1.2 for 20% 
        safety net (as dvds_max is worked out with a sample of directions) */
@@ -480,6 +483,10 @@ randwind_thermal_trapping(p)
     else
       z = (1. - exp (-tau)) / tau;  /* probability to see if it escapes in that direction */
   }
+
+  //p->nnscat = nnscat;
+  /* correct nnscat to take account of p_norm */
+  nnscat = nnscat / p_norm;
 
   return (0);
 }
