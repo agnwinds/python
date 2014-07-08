@@ -1363,7 +1363,7 @@ scatter (p, nres, nnscat)
       /* JM 1906 -- added normalisation of the below rejection method. We normalise
          to the escape probability of along the direction of dvds_max, with a safety net of 
          20% in case we missed the maximum */
-      randwind_thermal_trapping(p, *nnscat);
+      randwind_thermal_trapping(p, nnscat);
     }
 
   /* End of modification for thermal trapping model (SS July 04) */

@@ -473,7 +473,7 @@ was a resonant scatter but we want isotropic scattering anyway.  */
 	}
 	  else if (geo.scatter_mode == 2) 
 	{			// It was a line photon and we want anisotropic scattering mode 2
-	  randwind_thermal_trapping (&p[n], nnscat);
+	  randwind_thermal_trapping (&p[n], &nnscat);
 	}
 	p[n].nnscat = nnscat;
 
