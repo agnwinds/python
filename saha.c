@@ -225,7 +225,7 @@ concentrations (xplasma, mode)
   
  Arguments:		
 
-     WindPtr ww;
+     PlasmaPtr xplasma;
      int mode;			//   0=saha using tr, 1=saha using te
 
  Returns:
@@ -320,11 +320,6 @@ concentrations (xplasma, mode)
     {
       t = sqrt (xplasma->t_e * xplasma->t_r);
     }
-//ksl I removed the next lines.  It is bad practice to needlessly complicate something unless you know one needs to do so
-//OLD ksl  else if (mode == 3)   //same as mode 1, put in to allow identical control when using Sim modifications to concentrations
-//OLD ksl    {
-//OLD ksl      t = xplasma->t_e;
-//OLD ksl    }
   else
     {
       Error ("Concentrations: Unknown mode %d\n", mode);
