@@ -8,6 +8,13 @@
 	modelling the spectrum in a cell. It uses the mean frequency to
 	find a power law model and an exponential model. It then uses
 	the standard deviation to decide which is best.
+
+	The main routine is spectral_estimators and it currently attempts
+	to model the spectrum in each band in the cell an exponetial or
+	a power law.  The routine is called from ionization.c
+
+	The results are stored in parameters in the PlasmaPtr structure 
+	in variables, such as spec_mod_type, pl_alpah, pl_log,exp_temp, etc. 
 	
  Arguments:		
 	WindPtr w;

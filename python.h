@@ -518,12 +518,6 @@ plasma in regions of the geometry that are actually included n the wind
  * do both the same way at least.  Choosing to do this in two different ways makes the program confusing. The structure that has
  * the photon generation is called xband */
 
-//71 - 111229 - Moved into the geo structure so that it would be possible to get this information into py_wind more easily
-//OLD71 #define  NXBANDS 10             /* the maximum number of bands that can be defined */
-//OLD71 int nxfreq;                     /* the number of bands actually used */
-//OLD71 double xfreq[NXBANDS+1];        /* the band limits  */
-
-//OLD - ksl - this shold not be an external variable int nx4power;  //The band to use for the power law ionization calculations
 
 typedef struct plasma
 {
@@ -681,7 +675,6 @@ NSH 130725 - this number is now also used to say if the cell is over temperature
 
   double exp_temp[NXBANDS];	/*NSH 120817 - The effective temperature of an exponential representation of the radiation field in a cell */
   double exp_w[NXBANDS];	/*NSH 120817 - The prefector of an exponential representation of the radiation field in a cell */
-//OLD  double sim_e1,sim_e2; /*Sim estimators used to compute alpha and w for a power law spectrum for the cell */
   double sim_ip;		/*Ionisation parameter for the cell as defined in Sim etal 2010 */
   double ferland_ip;		/* IP calculaterd from equation 5.4 in hazy1 - assuming allphotons come from 0,0,0 and the wind is transparent */
   double ip;			/*NSH 111004 Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */

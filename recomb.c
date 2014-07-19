@@ -15,6 +15,7 @@ Calculate the free-bound emissivity of a cell.   This is the emissivity,
 eg ne * ni *enu.  It includes the electron density
 
   Description:
+
 This is the version of the program that used detailed balance to
 calculate the emissivity.  The specific formulation implemented
 is that described most clearly in Hazy, but that comes from
@@ -35,7 +36,7 @@ fb_choice	When an ion recombines there are three possible quantities
 				go into the binding energy of the level
 				to which the electron+ion are recombining)
 			2=the emissivity in photons/unit frequency
-		0 shoulc be used in calculations of the emission spectrum but
+		0 should be used in calculations of the emission spectrum but
 		1 and should be used in energy loss and gain  calculations), while
 	        2 should be used in ion densities and levels
                                                                                                    
@@ -45,7 +46,6 @@ fb_choice	When an ion recombines there are three possible quantities
   Returns:
                                                                                                    
   Notes:
-                                                                                                   
                                                                                                    
 
 For reference here is  the freebound structures that can be used for both the
