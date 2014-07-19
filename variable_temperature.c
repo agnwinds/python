@@ -123,7 +123,10 @@ variable_temperature (xplasma, mode)
     {
       newden[nion] = xplasma->density[nion]; 
 
-      /* Here we populate the recombination to ground state fudge. No recombination fudge for the neutral ion */
+      /* Here we populate the recombination to ground state correction factor used in the LM and Sim ionization
+       * equations.  Mode 2 imples we are include the dielectronic correction. There is no recombination fudge for 
+       * the neutral ion */
+
       if (ion[nion].istate != 1)	
 	{
 	  gs_fudge[nion] = compute_zeta (t_e, nion - 1, 2);	//We call with nion-1, so when we address the array, we will want to ask for nion
@@ -141,10 +144,9 @@ variable_temperature (xplasma, mode)
      then be converted into a quadratic.  That is what is done
      below.  
 
-     Since this is an initial estimate g factors have been ignored
-     in what follows.
+     Since this is an initial estimate, g factors are ignored
+   *
    */
-  //  t_e=7.6753e3;
 
   if (t_e < MIN_TEMP)
     t_e = MIN_TEMP;		/* fudge to prevent divide by zeros */
@@ -163,7 +165,7 @@ variable_temperature (xplasma, mode)
                                   xxxne is the shared variable so the temperature solver routine can access it */
 
   if (xne < 1.e-6)
-    xne = xxxne = 1.e-6;	/* fudge to assure we can actually calculate
+    xne = xxxne = 1.e-6;	/* Set a minimum ne to assure we can calculate
 				   xne the first time through the loop */
 
 
@@ -222,8 +224,6 @@ variable_temperature (xplasma, mode)
 								   [nion -
 								    1]);
 
-// Old log statements
-//Log ("PART FUNC FOR        for element %i, ion %i and %i, xtemp= %e is %f and %f\n",ion[nion-1].z,ion[nion-1].istate,ion[nion].istate,xtemp,partition[nion-1],partition[nion]);
 
 	      t_e_part_correct =
 		xplasma->partition[nion - 1] / xplasma->partition[nion];
@@ -233,15 +233,6 @@ variable_temperature (xplasma, mode)
 
 	      t_e_part_correct *=
 		(xplasma->partition[nion] / xplasma->partition[nion - 1]);
-
-
-// Old log statements
-//Log ("PART FUNC FOR        for element %i, ion %i and %i, dil_tr=%e is %f and %f\n",ion[nion-1].z,ion[nion-1].istate,ion[nion].istate,t_r,partition[nion-1],partition[nion]); 
-//              
-//Log ("PART FUNC FOR        for element %i, ion %i and %i, t_e=   %e is %f and %f\n",ion[nion-1].z,ion[nion-1].istate,ion[nion].istate,t_e,partition[nion-1],partition[nion]);
-//              t_e_part_correct*=(partition[nion]/partition[nion-1]);
-//              Log ("PART_CORRECT t_r %f for element %i, upper ion %i, xtemp=%e, t_r=%e  \n",t_r_part_correct,ion[nion].z,ion[nion].istate,xtemp,t_r);
-
 
 
 	      /* we now correct b to take account of the temperature and photon field 
@@ -267,7 +258,6 @@ variable_temperature (xplasma, mode)
 
 		      pi_fudge = bb_correct_2 (xtemp, t_r, www, nion);
 
-//                    gs_fudge = compute_zeta (t_e, nion - 1, 2);       /* Calculate the ground state recombination rate correction factor based on the cells true electron temperature. NSH 130905 - replaced with a call at the top of the subroutine */
 		      tot_fudge =
 			pi_fudge * recomb_fudge * (gs_fudge[nion] +
 						   www * (1 -
@@ -276,11 +266,11 @@ variable_temperature (xplasma, mode)
 		}
 
               /* correct the SAHA equation abundance pair using an actual radiation field modelled as a broken power law */
+
 	      else if (mode == 7)	
 		{
 		  pi_fudge = pl_correct_2 (xtemp, nion);
 
-//                gs_fudge = compute_zeta (t_e, nion - 1, 2);   /* Calculate the ground state recombination rate correction factor based on the cells true electron temperature.   NSH 130905 - replaced with a call at the top of the subroutine */*/
 
 		  tot_fudge =
 		    pi_fudge * recomb_fudge * gs_fudge[nion] *
@@ -360,7 +350,6 @@ variable_temperature (xplasma, mode)
 
       xnew = get_ne (newden);	/* determine the electron density for this density distribution */
 
-//      Log ("Solver, change in n_e = %e vs FRACTIONAL ERROR of %e in xne of %e\n",fabs ((xne - xnew) / (xnew)) , FRACTIONAL_ERROR,xne);
 
       if (xnew < DENSITY_MIN)
 	xnew = DENSITY_MIN;	/* fudge to keep a floor on ne */
