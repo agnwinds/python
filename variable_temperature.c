@@ -24,8 +24,9 @@
 //struct photoionization *xver; //Verner & Ferland description of a photoionization x-section NSH 13Sep - should not be used any more
 struct topbase_phot *xtop;	//Topbase description of a photoionization x-section 
 PlasmaPtr xxxplasma;
-double qromb_temp;		//This is a storage variable for the current electron temperature so it is available for qromb calls
-int niterate;			//Make this a variable that all the subroutines cn see, so we can decide if we need to recompute the numerators
+double qromb_temp;		// This is a storage variable for the current electron temperature so it is available for qromb calls
+int niterate;			// Make this a variable that all the subroutines cn see, 
+				// so we can decide if we need to recompute the numerators
 
 
 
@@ -64,24 +65,26 @@ variable_temperature (xplasama, mode)  modifies the densities of ions, levels, a
  
   Notes:
 
+  Section 5.3 of Nick's thesis explains the undelying ratinale for the so-called 
+  variable temperature models.  The name of the routine is misleading since 
+  there correctios are made for both a dilute power law and for a dilute bb. 
+
 
 
   History:
 	2012Feb	nsh	Coded and debugged as part of QSO effort. 
-        1212Dec nsh	Recoded so that the densities are computed in a temporary array, and only 
-			committted to the real density structure once we are sure the code converges.
-	2013Sep nsh	ground state fudge computed at the start, and stored in an array rather
+        1212Dec nsh	Recoded so that the densities are computed in a 
+			temporary array, and only 
+			committted to the real density structure once 
+			we are sure the code converges.
+	2013Sep nsh	ground state fudge computed at the start, and 
+			stored in an array rather
 			than contiunually recomputing it - sometimes it is expensive.
 	
 
 **************************************************************/
 
 
-//#define SAHA 4.82907e15               /* 2* (2.*PI*MELEC*k)**1.5 / h**3  (Calculated in constants) */
-//#define MAXITERATIONS 200
-//#define FRACTIONAL_ERROR 0.03
-//#define THETAMAX       1e4
-//#define MIN_TEMP         100. //0712 moved into python.h
 
 double xxxne, xip;
 
@@ -90,7 +93,7 @@ variable_temperature (xplasma, mode)
      PlasmaPtr xplasma;
      int mode;			//   6=correct using dilute blackbody, 7=power law
 {
-  int nion;			// niterate; moved outside the code so all routines can see it
+  int nion;			
   double xnew, xsaha;
   double theta, x;
   double get_ne ();
@@ -107,7 +110,10 @@ variable_temperature (xplasma, mode)
 				   //                 calculate it once, and store it in a temporary array */
 
   /* Copy xplasma to local plasma varaible, used to communicate w and alpha to the power law correction routine. 
-     NSH 120703 - also used to set the  denominator calculated for a given ion for this cell last time round */
+     NSH 120703 - also used to set the  denominator calculated for a given ion for this cell last time round 
+     ksl 1407 - Not obvious why this was done; the next line merely sets xxxplasma to the pointer xplasma.  It
+     does not copy anythin*/
+
   xxxplasma = xplasma;		
 
 
@@ -416,7 +422,8 @@ variable_temperature (xplasma, mode)
 	double xtemp		the temperature at which the saha abundances were calculated
 	double t_r		temperature of the radiation field 
 	double www		dilution factor for the radiation field
-	int nion;		number of the upper ion in the pair for which the correction factor is 					being calculated.
+	int nion;		number of the upper ion in the pair for which the correction factor is
+				being calculated.
 
   Returns:
  	j			the correction factor
