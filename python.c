@@ -2403,7 +2403,7 @@ This program simulates radiative transfer in a (biconical) CV, YSO, quasar or (s
 \n\
 	-h 	to ge this help message \n\
 	-r 	restart a run of the progarm reading the file xxx.windsave \n\
-	-e change the maximum number of errors before quit- don't do this unless you understand
+	-e change the maximum number of errors before quit- don't do this unless you understand\
 	the consequences! \n\
 \n\
 	-t time_max	limit the total time to approximately time_max seconds.  Note that the program checks \n\
