@@ -2331,11 +2331,9 @@ run -- 07jul -- ksl
 #ifdef MPI_ON
   sprintf (dummy,"End of program, Thread %d only",my_rank);   // added so we make clear these are just errors for thread ngit status	
   error_summary (dummy);	// Summarize the errors that were recorded by the program
-  warning_summary (dummy);	// Summarize the warnings that were recorded by the program
   Log ("Run py_error.py for full error report.\n");
 #else
   error_summary ("End of program");	// Summarize the errors that were recorded by the program
-  warning_summary ("End of program");	// Summarize the warnings that were recorded by the program
 #endif
 
 
