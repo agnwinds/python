@@ -65,7 +65,7 @@ ion_abundances (xplasma, mode)
   int ireturn;
 
 
-  if (mode == 0)
+  if (mode == IONMODE_ML93_FIXTE)
     {
 /* on-the-spot approximation using existing t_e.   This routine does not attempt 
 to match heating and cooling in the wind element! */

@@ -835,8 +835,8 @@ phot.istat below */
 #define IONMODE_PAIRWISE_SPECTRALMODEL 7      // pariwise modeled J_nu approach
 
 // and the corresponding modes in nebular_concentrations
-#define NEBULARMODE_TE 0                       // LTE using t_e
-#define NEBULARMODE_TR 1                       // LTE using t_r
+#define NEBULARMODE_TR 0                       // LTE using t_r
+#define NEBULARMODE_TE 1                       // LTE using t_e
 #define NEBULARMODE_ML93 2                     // ML93 using correction
 #define NEBULARMODE_PAIRWISE_ML93 6            // pairwise ML93
 #define NEBULARMODE_PAIRWISE_SPECTRALMODEL 7   // pairwise spectral models
