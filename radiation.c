@@ -1021,6 +1021,35 @@ save_photon_stats (one, p, ds)
   return (0);
 }
 
+/*************************************************************
+Synopsis: 
+	mean_intensity returns a value for the mean intensity 
+
+Arguments:	
+	xplasma 		PlasmaPtr for the cell - supplies spectral model
+	freq 			the frequency at which we want to get a value of J
+	mode 			mode 1=use BB if we have not yet completed a cycle
+				and so dont have a spectral model, mode 2=never use BB
+
+Returns:
+ 
+Description:
+   This subroutine returns a value for the mean intensity J at a 
+   given frequency, using either a dilute blackbody model
+   or a spectral model depending on the value of geo.ioniz_mode. 
+   to avoid code duplication.
+
+Notes:
+   This subroutine was produced
+   when we started to use a spectral model to populaste the upper state of a
+   two level atom, as well as to calculate induced compton heating. This was
+
+History:
+   1407 NSH 		Coding began
+ 
+**************************************************************/
+
+
 double
 mean_intensity (xplasma, freq, mode)
      PlasmaPtr xplasma;		// Pointer to current plasma cell
@@ -1095,17 +1124,10 @@ J=0.0; //Avoid 03 error
 
   else				/*Else, use BB estimator of J */
     {
-      if (xplasma->w > 1e-6)
-	{
       expo = (H * freq) / (BOLTZMANN * xplasma->t_r);
       J = (2 * H * freq * freq * freq) / (C * C);
       J *= 1 / (exp (expo) - 1);
       J *= xplasma->w;
-	}
-	else
-	{
-	J=0.0;
-	}
     }
 //printf ("TEST J=%e",J);
 return J;

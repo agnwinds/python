@@ -340,6 +340,9 @@ a21 (line_ptr)
 	07mar	ksl	58c -- Tried to address problems associated with our 
 			inconsistent treatment of level populations for two
 			level atoms, This is at best a bandaide.
+	14jul	nsh	78 -- changed to allow the use of a computed model for
+			the mean intensity in a cell to calualate influence of radiation
+			on the upper state population of a two level atom.
  */
 
 struct lines *old_line_ptr;
@@ -426,13 +429,13 @@ in the configuration structure. 01dec ksl */
 //	    }
 //	  else
 //	    {			//Include effects of stimulated emission
-	      z = w / (exp (H_OVER_K * freq / tr) - 1.);
-//	      z=(C*C)/(2.*H*freq*freq*freq);
-	      n2_over_n1 = (c12 + g2_over_g1 * a * z) / (c21 + a * (1. + z));
+//	      z = w / (exp (H_OVER_K * freq / tr) - 1.);
+	      z=(C*C)/(2.*H*freq*freq*freq);
+//	      n2_over_n1 = (c12 + g2_over_g1 * a * z) / (c21 + a * (1. + z));
 
-//	   J = mean_intensity (xplasma, freq, 1);/* we call mean intensity with mode 1 - this means we are happy to use the dilute blackbody approximation even if we havent run enough spectral cycles to have a model for J*/
+	   J = mean_intensity (xplasma, freq, 1);/* we call mean intensity with mode 1 - this means we are happy to use the dilute blackbody approximation even if we havent run enough spectral cycles to have a model for J*/
 
-//           n2_over_n1 = (c12 + g2_over_g1 * a * z * J) / (c21 + a*(1. + (J * z)));
+           n2_over_n1 = (c12 + g2_over_g1 * a * z * J) / (c21 + a*(1. + (J * z)));
 
 
 //	    }
