@@ -102,6 +102,7 @@ History:
 	13sep	nsh	Added a new class of reporting - warnings. Things we would like to 
 			know about (no photons in band, no model in band) but do not want 
 			to crash the code.
+  1407 JM removed warning - we would like to throw errors
 
  
 **************************************************************/
@@ -115,7 +116,6 @@ History:
 
 #define LINELENGTH 132
 #define NERROR_MAX 500		// Number of different errors that are recorded
-#define NWARNING_MAX 500	// Number of different warnings that are recorded
 
 /* definitions of what is logged at what verboisty level */
 
@@ -126,12 +126,13 @@ History:
 #define SHOW_LOG_SILENT  	5
 #define SHOW_ERROR_SILENT	5
 
+
 //int n_mpi=1; 		// number of mpi processes, set to one
 int my_rank=0;		// rank of mpi process, set to zero
 
-int log_print_max=100;           // Mximum number of times a single error will be reported.  Note that 
-				// Note that it will still be counted.
-int time_to_quit=1000000;	// Maximum number of times and error can occur before giving up
+int log_print_max=100;           // Maximum number of times a single error will be reported.  
+				                          // Note that it will still be counted.
+int time_to_quit=100000;	// Maximum number of times and error can occur before giving up
 
 typedef struct error_log
 {
@@ -140,11 +141,9 @@ typedef struct error_log
 } error_dummy, *ErrorPtr;
 
 ErrorPtr errorlog;
-ErrorPtr warninglog; //We use exactly the same struture as errors to store warnings
 
 
 int nerrors;
-int nwarnings;
 
 FILE *diagptr;
 int init_log = 0;
@@ -165,19 +164,11 @@ Log_init (filename)
 
   nerrors = 0;
   errorlog = (ErrorPtr) calloc (sizeof (error_dummy), NERROR_MAX);
-  nwarnings = 0;
-  warninglog = (ErrorPtr) calloc (sizeof (error_dummy), NWARNING_MAX);
 
   if (errorlog == NULL)
     {
       printf
 	("There is a problem in allocating memory for the errorlog structure\n");
-      exit (0);
-    }
-  if (warninglog == NULL)
-    {
-      printf
-	("There is a problem in allocating memory for the warninglog structure\n");
       exit (0);
     }
 
@@ -200,8 +191,6 @@ Log_append (filename)
 
   nerrors = 0;
   errorlog = (ErrorPtr) calloc (sizeof (error_dummy), NERROR_MAX);
-  nwarnings = 0;
-  warninglog = (ErrorPtr) calloc (sizeof (error_dummy), NWARNING_MAX);
 
   if (errorlog == NULL)
     {
@@ -219,7 +208,6 @@ Log_close ()
   fclose (diagptr);
   init_log = 0;
   free (errorlog);		// Release the error summary structure
-  free (warninglog);		// Release the warning summary structure
   return (0);
 }
 

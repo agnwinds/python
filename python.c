@@ -259,6 +259,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   int my_rank;		// these two variables are used regardless of parallel mode
   int np_mpi;		// rank and number of processes, 0 and 1 in non-parallel
+  int time_to_quit;
 
 #ifdef MPI_ON
   int mpi_i, mpi_j;
@@ -301,6 +302,8 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   verbosity = 4;		/* Set the default verbosity to 4.  To get more info raise the verbosity level to a higher number. To
 				   get less set the verbosity to a lower level. */
+
+  time_to_quit = 100000;	// Initialise variable
 
 
   Log_set_verbosity (verbosity);
@@ -355,6 +358,17 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 		  exit (0);
 		}
 	      Log_set_verbosity (verbosity);
+	      i++;
+
+	    }
+	  else if (strcmp (argv[i], "-e") == 0)
+	    {
+	      if (sscanf (argv[i + 1], "%d", &time_to_quit) != 1)
+		{
+		  Error ("python: Expected max errors after -e switch\n");
+		  exit (0);
+		}
+	      Log_quit_after_n_errors (time_to_quit);
 	      i++;
 
 	    }
@@ -2389,6 +2403,8 @@ This program simulates radiative transfer in a (biconical) CV, YSO, quasar or (s
 \n\
 	-h 	to ge this help message \n\
 	-r 	restart a run of the progarm reading the file xxx.windsave \n\
+	-e change the maximum number of errors before quit- don't do this unless you understand
+	the consequences! \n\
 \n\
 	-t time_max	limit the total time to approximately time_max seconds.  Note that the program checks \n\
 		for this limit somewhat infrequently, usually at the ends of cycles, because it \n\
