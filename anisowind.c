@@ -397,3 +397,102 @@ make_pdf_randwind (tau)
 
   return (0);
 }
+
+
+/***************************************************************
+                      
+                      University of Southampton
+
+Synopsis:   
+  randwind_thermal_trapping is the routine which chooses
+  a new anisotropic direction in geo.scatter_mode = 2.
+  
+Arguments:   
+
+  
+Returns:
+  0 for success. Also modifies the photon ptr p
+  to reflect new direction (p->lmn), and nnscat, which
+  should be copied to the phoiton structure after calling
+  this routine.
+  
+Description:  
+  This routine uses a rejection method to choose a direction
+  so that the probability distribution of directions generated 
+  reflects the probability of escape along each direction in accordance
+  with the sobolev optical depth. 
+
+Notes:
+  
+History:
+  1406  Moved code here from photo_gen_matom and scatter to avoid 
+        duplication
+
+
+****************************************************************/
+
+
+int 
+randwind_thermal_trapping(p, nnscat)
+  PhotPtr p;
+  int *nnscat;
+{
+  double tau_norm, p_norm;
+  double tau, dvds, z, ztest;
+  int ishell;
+  double z_prime[3];
+  WindPtr one;
+
+  /* find the wind pointer for the photon */
+  one = &wmain[p->grid];
+
+  /* we want to normalise our rejection method by the escape 
+    probability along the vector of maximum velocity gradient.
+    First find the sobolev optical depth along that vector */
+  tau_norm = sobolev (one, p, -1.0, lin_ptr[p->nres], one->dvds_max);
+
+  /* then turn into a probability. Note that we take account of
+     this in trans_phot before calling extract */
+  p_norm = (1. - exp (-tau_norm)) / tau_norm;
+
+  ztest = 1.0;
+  z = 0.0;
+
+  /* JM 1406 -- Previously to Python 77a, we used to increment the scatters in the loop 
+     below. We are treating nscat as 'number of resonant zones we interact with',
+     so we don't really want to do this. It was originally done in order to get an 
+     idea of how many scatterings a photon would undergo when escaping the sobolev zone
+  */  
+  *nnscat = *nnscat - 1;
+
+   /* rejection method loop */
+   while (ztest > z)
+  {
+    *nnscat = *nnscat + 1; //- JM - see above 
+    randvec (z_prime, 1.0);       /* Get a new direction for the photon (isotropic */
+    stuff_v (z_prime, p->lmn);    // copy to photon pointer
+
+
+
+    /* generate random number, normalised by p_norm with a 1.2 for 20% 
+       safety net (as dvds_max is worked out with a sample of directions) */
+    ztest = (rand () + 0.5) / MAXRAND * p_norm * NNSCAT_SAFETY;   
+    dvds = dvwind_ds (p);
+    ishell = p->grid;
+    tau = sobolev (one, p, -1.0, lin_ptr[p->nres], dvds);
+
+    if (tau < 1.0e-5)
+      z = 1.0;
+    else
+      z = (1. - exp (-tau)) / tau;  /* probability to see if it escapes in that direction */
+  }
+  
+  /* one could copy to the photon pointer here, 
+     but for the moment this is done after calling this routine */
+  //p->nnscat = nnscat;
+
+  return (0);
+}
+
+
+

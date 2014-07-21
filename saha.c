@@ -175,7 +175,7 @@ nebular_concentrations (xplasma, mode)
  //     m = sim_driver (xplasma);
  //   }
 
-  /* Two new modes, they could proably be combined into one if statement, but having 
+  /* Two new modes, they could probably be combined into one if statement, but having 
      two adds little complexity and allows for other   modifications if required. No 
      call to partition functions is required, since this is done on a pairwise basis 
      in the routine. Similarly there is no call to concentrations, since this is also 
@@ -225,7 +225,7 @@ concentrations (xplasma, mode)
   
  Arguments:		
 
-     WindPtr ww;
+     PlasmaPtr xplasma;
      int mode;			//   0=saha using tr, 1=saha using te
 
  Returns:
@@ -320,11 +320,6 @@ concentrations (xplasma, mode)
     {
       t = sqrt (xplasma->t_e * xplasma->t_r);
     }
-//ksl I removed the next lines.  It is bad practice to needlessly complicate something unless you know one needs to do so
-//OLD ksl  else if (mode == 3)   //same as mode 1, put in to allow identical control when using Sim modifications to concentrations
-//OLD ksl    {
-//OLD ksl      t = xplasma->t_e;
-//OLD ksl    }
   else
     {
       Error ("Concentrations: Unknown mode %d\n", mode);
@@ -433,7 +428,7 @@ concentrations (xplasma, mode)
   Synopsis:   
 
    	Calculate the saha densities for all of the ions in a single
-   	cell. 
+   	cell (given ne). 
   
   Arguments:
 	xplasma, ne, t
@@ -453,6 +448,9 @@ concentrations (xplasma, mode)
 	
 	Note that this routine populates the actual xplasma structure
    	with saha abundances.
+
+	This routine assumes ne is known.  Iteration to calculate ne
+	takes place in concentrations.
 
 
   History:

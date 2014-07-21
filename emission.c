@@ -369,6 +369,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   double v[3];
   int icell;
   int nplasma;
+  int nnscat;
 
 
   photstop = photstart + nphot;
@@ -450,22 +451,31 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 
 
 
-// Determine the direction of the photon
-// ?? Need to allow for anisotropic emission here
+	  // Determine the direction of the photon
+	  // ?? Need to allow for anisotropic emission here
+      // JM 1406 -- I think there's a mistake here. I believe this should be
+      // if (p[n].nres < 0 || p[n].nres > NLINES || geo.scatter_mode == 0)
+      // to allow for isotropic BF continuum emission
+      nnscat = 1;
       if (p[n].nres < 0 || geo.scatter_mode != 1)
 	{
 /*  It was either an electron scatter so the  distribution is isotropic, or it
 was a resonant scatter but we want isotropic scattering anyway.  */
 	  randvec (p[n].lmn, 1.0);	/* The photon is emitted isotropically */
 	}
-      else
-	{			// It was a line photon and we want anisotropic scattering
+      else if (geo.scatter_mode == 1) 
+	{			// It was a line photon and we want anisotropic scattering mode 1
 
 // -1. forces a full reinitialization of the pdf for anisotropic scattering
-
+      
 	  randwind (&p[n], p[n].lmn, wmain[icell].lmn);
 
 	}
+	  else if (geo.scatter_mode == 2) 
+	{			// It was a line photon and we want anisotropic scattering mode 2
+	  randwind_thermal_trapping (&p[n], &nnscat);
+	}
+	p[n].nnscat = nnscat;
 
 
       /* The next two lines correct the frequency to first order, but do not result in

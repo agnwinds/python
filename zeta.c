@@ -11,9 +11,12 @@ The routines in this file are to do with computing the correction to the saha eq
   Description:
 
 Zeta is the term in lucy and mazzali which corrects for the proportion of recombinations
-going directly to the ground state. I'm experimenting with moving it out of saha and stuart_sim
+going directly to the ground state. 
+
+nsh: I'm experimenting with moving it out of saha and stuart_sim
 since the same factor will be used in both, and I'm going to add in some more options to
 incorporate a correction factor for dielectronic recombination.
+
 
                                                                                                    
   Arguments:  

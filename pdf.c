@@ -526,9 +526,10 @@ History:
 			the error message associated with allowing too few points
 			so that problems with this would be easier to update in
 			future.
+	1405	JM -- Increased PDF array for use with disk14 models
 */
 
-#define PDF_ARRAY  11000
+#define PDF_ARRAY  28000
 
 double pdf_x[PDF_ARRAY], pdf_y[PDF_ARRAY], pdf_z[PDF_ARRAY];
 int pdf_n;

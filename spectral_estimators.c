@@ -8,6 +8,13 @@
 	modelling the spectrum in a cell. It uses the mean frequency to
 	find a power law model and an exponential model. It then uses
 	the standard deviation to decide which is best.
+
+	The main routine is spectral_estimators and it currently attempts
+	to model the spectrum in each band in the cell an exponetial or
+	a power law.  The routine is called from ionization.c
+
+	The results are stored in parameters in the PlasmaPtr structure 
+	in variables, such as spec_mod_type, pl_alpah, pl_log,exp_temp, etc. 
 	
  Arguments:		
 	WindPtr w;
@@ -216,8 +223,8 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	    }
 
 
-	  if (finite(pl_alpha_func_log(pl_alpha_min))==0
-	      || finite(pl_alpha_func_log (pl_alpha_max))==0)
+	  if (isfinite(pl_alpha_func_log(pl_alpha_min))==0
+	      || isfinite(pl_alpha_func_log (pl_alpha_max))==0)
 	    {
 	      Warning
 		("spectral_estimators: Alpha cannot be bracketed (%e %e)in band %i cell %i- setting w to zero\n",
@@ -248,7 +255,7 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 //	      pl_w_temp = pl_w (j, pl_alpha_temp, spec_numin, spec_numax);
               pl_w_temp = pl_log_w (j, pl_alpha_temp, lspec_numin, lspec_numax);
 
-	      if ((finite(pl_w_temp))==0)
+	      if ((isfinite(pl_w_temp))==0)
 		{
 		  Warning
 		    ("spectral_estimators: New PL parameters (%e) unreasonable, using existing parameters. Check number of photons in this cell\n",pl_w_temp); //NSH 131108 - now a warning, this should no longer happen
@@ -279,8 +286,8 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 		}
 	      	exp_temp_max = exp_temp_max * 1.1; //The maximum temperature can go up forever with no fear of numerical problems
 	    }
-	  if (finite(exp_temp_func (exp_temp_min))==0
-	      || finite(exp_temp_func (exp_temp_max))==0)
+	  if (isfinite(exp_temp_func (exp_temp_min))==0
+	      || isfinite(exp_temp_func (exp_temp_max))==0)
 	    {
 	      Warning
 		("spectral_estimators: Exponential temperature cannot be bracketed (%e %e) in band %i - setting w to zero\n",
@@ -307,7 +314,7 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	      exp_w_temp = exp_w (j, exp_temp_temp, spec_numin, spec_numax);	/* Calculate the weight */
 
 
-	      if ((finite (exp_w_temp))==0)
+	      if ((isfinite (exp_w_temp))==0)
 		{
 		  Warning
 		    ("spectral_estimators: New exponential parameters (%e) unreasonable, using existing parameters. Check number of photons in this cell\n",exp_w_temp); //NSH 131108 - now a warning, this should no longer happen

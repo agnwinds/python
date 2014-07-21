@@ -426,7 +426,6 @@ one_shot (xplasma, mode)
 {
   double te_old, te_new, dte;
   double gain;
-//  double zcheck;
 
 
 
@@ -443,10 +442,6 @@ one_shot (xplasma, mode)
 	{	
 	xplasma->t_e = TMAX;
 	}
-
-
-//zcheck = zero_emit (xplasma->t_e);
-
 
   dte = xplasma->dt_e;
 

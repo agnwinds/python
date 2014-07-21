@@ -518,12 +518,6 @@ plasma in regions of the geometry that are actually included n the wind
  * do both the same way at least.  Choosing to do this in two different ways makes the program confusing. The structure that has
  * the photon generation is called xband */
 
-//71 - 111229 - Moved into the geo structure so that it would be possible to get this information into py_wind more easily
-//OLD71 #define  NXBANDS 10             /* the maximum number of bands that can be defined */
-//OLD71 int nxfreq;                     /* the number of bands actually used */
-//OLD71 double xfreq[NXBANDS+1];        /* the band limits  */
-
-//OLD - ksl - this shold not be an external variable int nx4power;  //The band to use for the power law ionization calculations
 
 typedef struct plasma
 {
@@ -681,7 +675,6 @@ NSH 130725 - this number is now also used to say if the cell is over temperature
 
   double exp_temp[NXBANDS];	/*NSH 120817 - The effective temperature of an exponential representation of the radiation field in a cell */
   double exp_w[NXBANDS];	/*NSH 120817 - The prefector of an exponential representation of the radiation field in a cell */
-//OLD  double sim_e1,sim_e2; /*Sim estimators used to compute alpha and w for a power law spectrum for the cell */
   double sim_ip;		/*Ionisation parameter for the cell as defined in Sim etal 2010 */
   double ferland_ip;		/* IP calculaterd from equation 5.4 in hazy1 - assuming allphotons come from 0,0,0 and the wind is transparent */
   double ip;			/*NSH 111004 Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
@@ -829,7 +822,7 @@ phot.istat below */
 //These constants are used in the various routines which compute ionization state
 #define SAHA 4.82907e15		/* 2* (2.*PI*MELEC*k)**1.5 / h**3  (Calculated in constants) */
 #define MAXITERATIONS	200	//The number of loops to do to try to converge in ne
-#define FRACTIONAL_ERROR 0.03	//The change in n_e which causes a break out of the loop for ne
+#define FRACTIONAL_ERROR 1e-12	//The change in n_e which causes a break out of the loop for ne
 #define THETAMAX	 1e4	//Used in initial calculation of n_e
 #define MIN_TEMP	100.	//  ??? this is another minimum temperature - it is used as the minimum tempersture in (JM -- in what??)
 
@@ -874,7 +867,10 @@ typedef struct photon
 }
 p_dummy, *PhotPtr;
 
-
+/* JM 1407 -- This is the safety net by which we normalise the random number generated
+  in the loop in randwind_thermal_trapping. It is also used when we multiply 
+  by nscat in trans_phot during the spectral cycles */
+#define NNSCAT_SAFETY 1.2
 
 /* 68b - ksl - This is a structure in which the history of a single photon bundle can be recorded
  * See phot_util   phot_hist().  It needs to be used carefully.  if phot_hist_on is true
