@@ -700,7 +700,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
     ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,6=pairwise_bb,7=pairwise_pow)",
      &geo.ioniz_mode);
 
-  if (geo.ioniz_mode == 2)
+  if (geo.ioniz_mode == IONMODE_FIXED)
     {
       rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
     }

@@ -70,7 +70,7 @@ ion_abundances (xplasma, mode)
 /* on-the-spot approximation using existing t_e.   This routine does not attempt 
 to match heating and cooling in the wind element! */
 
-      if ((ireturn = nebular_concentrations (xplasma, 2)))
+      if ((ireturn = nebular_concentrations (xplasma, NEBULARMODE_ML93)))
 	{
 	  Error
 	    ("ionization_abundances: nebular_concentrations failed to converge\n");
@@ -79,18 +79,18 @@ to match heating and cooling in the wind element! */
 	     xplasma->j, xplasma->t_e, xplasma->w);
 	}
     }
-  else if (mode == 1)
+  else if (mode == IONMODE_LTE)
     {
 /* LTE using t_r  (ksl - checked - 080808 */
 
-      ireturn = nebular_concentrations (xplasma, 1);
+      ireturn = nebular_concentrations (xplasma, NEBULARMODE_TE);
     }
-  else if (mode == 2)
+  else if (mode == IONMODE_FIXED)
     {				//  Hardwired concentrations
 
       ireturn = fix_concentrations (xplasma, 0);
     }
-  else if (mode == 3)
+  else if (mode == IONMODE_ML93)
     {
 /* On the spot, with one_shot at updating t_e before calculating densities */
 
@@ -133,7 +133,7 @@ to match heating and cooling in the wind element! */
 
 
   //  }
-  else if (mode == 6)
+  else if (mode == IONMODE_PAIRWISE_ML93)
     {
       /* Feb 2012 new for mode 6. New abundances have been computed using pairwise Saha equation
          approach. We can now attempt to balance heating and cooling with the new abundance in the
@@ -151,7 +151,7 @@ to match heating and cooling in the wind element! */
 /* Convergence check */
       convergence (xplasma);
     }
-  else if (mode == 7)
+  else if (mode == IONMODE_PAIRWISE_SPECTRALMODEL)
     {
 /* Feb 2012 NSH - new for mode 7. KSL has moved a lot of the mechanics that used to be here into
  power_abundances. This, once called, calculates the weight and alpha for each band in this cell. There is a lot of code that was clogging up this routine. Once this is done, one_shot gets called from within that routine. */
@@ -454,8 +454,8 @@ at least to define a flag for using one shot, and have the modes take on the
 meaning in nebular concentrations.
 */
 
-  if (mode == 3)
-    mode = 2;
+  if (mode == IONMODE_ML93)
+    mode = NEBULARMODE_ML93;
   else if (mode <= 1 || mode ==5 || mode >= 8)	/* modification to cope with mode 5 - SIM + two new modes in Feb 2012  + mode 5 now removed*/
     {
 
