@@ -1078,3 +1078,118 @@ save_photon_stats (one, p, ds)
     }
   return (0);
 }
+
+
+/*************************************************************
+Synopsis: 
+	mean_intensity returns a value for the mean intensity 
+
+Arguments:	
+	xplasma 		PlasmaPtr for the cell - supplies spectral model
+	freq 			the frequency at which we want to get a value of J
+	mode 			mode 1=use BB if we have not yet completed a cycle
+				and so dont have a spectral model, mode 2=never use BB
+
+Returns:
+ 
+Description:
+   This subroutine returns a value for the mean intensity J at a 
+   given frequency, using either a dilute blackbody model
+   or a spectral model depending on the value of geo.ioniz_mode. 
+   to avoid code duplication.
+
+Notes:
+   This subroutine was produced
+   when we started to use a spectral model to populaste the upper state of a
+   two level atom, as well as to calculate induced compton heating. This was
+
+History:
+   1407 NSH 		Coding began
+ 
+**************************************************************/
+
+
+double
+mean_intensity (xplasma, freq, mode)
+     PlasmaPtr xplasma;		// Pointer to current plasma cell
+     double freq;		// Frequency of the current photon being tracked
+     int mode;			// mode 1=use BB if no model, mode 2=never use BB
+
+{
+int i;
+double J;
+double expo;
+J=0.0; //Avoid 03 error
+//printf ("Reached mean intensity geo.wcycle=%i, freq=%e, ");
+  if (geo.ioniz_mode == 5 || geo.ioniz_mode == 7)	/*If we are using power law ionization, use PL estimators */
+    {
+      if (geo.wcycle > 0) /* there is only any point in worrying if we have had at least one cycle otherwise there is no model */
+      {
+      for (i = 0; i < geo.nxfreq; i++)
+	{
+	  if (geo.xfreq[i] < freq && freq <= geo.xfreq[i + 1])	//We have found the correct model band
+	    {
+	      if (xplasma->spec_mod_type[i] > 0)	//Only bother if we have a model in this band
+		{
+	        if (freq > xplasma->fmin_mod[i] && freq < xplasma->fmax_mod[i]) //The spectral model is defined for the frequency in question
+			{
+			if (xplasma->spec_mod_type[i] == SPEC_MOD_PL)	//Power law model
+				{				
+				J = pow(10,(xplasma->pl_log_w[i]+log10(freq)*xplasma->pl_alpha[i]));
+				}
+			else if (xplasma->spec_mod_type[i] == SPEC_MOD_EXP)	//Exponential model
+				{
+		  		J = xplasma->exp_w[i] * exp ((-1 * H * freq) / (BOLTZMANN * xplasma->exp_temp[i]));
+				}
+			else
+				{
+		  		Error("kappa_ind_comp - unknown spectral model (%i) in band %i\n",xplasma->spec_mod_type[i], i);
+		  		J = 0.0;	//Something has gone wrong
+				}
+			}
+		else /*We have a spectral model, but it doesnt apply to the frequency in question. clearly this is a slightly odd situation, where last time we didnt get a photon of this frequency, but this time we did. Still this should only happen in very sparse cells, so induced compton is unlikely to be important in such cells. We generate a warning, just so we can see if this is happening a lot*/
+			{
+			Error ("kappa_ind_comp: frequency of photon (%e) is outside frequency range (%e - %e) of spectral model in cell %i band %i\n",freq,xplasma->fmin_mod[i],xplasma->fmax_mod[i],xplasma->nplasma,i); //This is unlikely to happen very often, but if it does, we should probably know about it
+			J = 0.0; //We 
+			}
+		}
+	     else /* There is no model in this band - this should not happen very often  */
+		{	
+		J = 0.0;	//THere is no modelin this band, so the best we can do is assume zero J
+		Error ("kappa_ind_comp: no model exists in cell %i band %i\n",xplasma->nplasma,i); //This is unlikely to happen very often, but if it does, we should probably know about it
+		}
+
+
+
+	    }
+	}
+    }
+	else //We have not completed an ionization cycle, so no chance of a model
+	{
+		if (mode==1) //We need a guess, so we use the initial guess of a dilute BB
+			{
+			expo = (H * freq) / (BOLTZMANN * xplasma->t_r);
+      			J = (2 * H * freq * freq * freq) / (C * C);
+      			J *= 1 / (exp (expo) - 1);
+      			J *= xplasma->w;
+			}
+		else  //A guess is not a good idea (i.e. we need the model for induced compton), so we return zero.
+			{
+			J=0.0;
+			}
+
+	}
+}
+
+  else				/*Else, use BB estimator of J */
+    {
+      expo = (H * freq) / (BOLTZMANN * xplasma->t_r);
+      J = (2 * H * freq * freq * freq) / (C * C);
+      J *= 1 / (exp (expo) - 1);
+      J *= xplasma->w;
+    }
+//printf ("TEST J=%e",J);
+return J;
+}
+
+

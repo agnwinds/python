@@ -132,6 +132,7 @@ double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
 int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave);
 int save_photon_stats(WindPtr one, PhotPtr p, double ds);
+double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
 /* wind_updates2d.c */
 int wind_update(WindPtr (w));
 int wind_rad_init(void);
