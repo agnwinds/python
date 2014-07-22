@@ -69,5 +69,5 @@ script:
     - cd structure/test_suite/travis 
     - Setup_Py_Dir
     - py test1 > test1.out
-	- py balmer_test > balmer_test.out
+    - py balmer_test > balmer_test.out
     - python check_travis_test.py 
