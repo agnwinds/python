@@ -121,7 +121,6 @@ lum_lines (one, nmin, nmax)
       if (dd > LDEN_MIN)
 	{			/* potentially dangerous step to avoid lines with no power */
 	  two_level_atom (lin_ptr[n], xplasma, &d1, &d2);
-
 	  x = foo1 = lin_ptr[n]->gu / lin_ptr[n]->gl * d1 - d2;
 
 	  z = exp (-H_OVER_K * lin_ptr[n]->freq / t_e);
@@ -341,6 +340,9 @@ a21 (line_ptr)
 	07mar	ksl	58c -- Tried to address problems associated with our 
 			inconsistent treatment of level populations for two
 			level atoms, This is at best a bandaide.
+	14jul	nsh	78 -- changed to allow the use of a computed model for
+			the mean intensity in a cell to calualate influence of radiation
+			on the upper state population of a two level atom.
  */
 
 struct lines *old_line_ptr;
@@ -366,7 +368,7 @@ two_level_atom (line_ptr, xplasma, d1, d2)
   double xw;
   double ne, te, w, tr, dd;
   int nion;
-
+  double J; //Model of the specific intensity
 
 
   //Check and exit if this routine is called for a macro atom, since this should never happen
@@ -421,15 +423,22 @@ in the configuration structure. 01dec ksl */
 	  c21 = ne * q;
 	  c12 = c21 * g2_over_g1 * exp (-H_OVER_K * freq / te);
 
-	  if (w < 1.e-6)
-	    {			// Radiation is unimportant
-	      n2_over_n1 = c12 / (c21 + a);
-	    }
-	  else
-	    {			//Include effects of stimulated emission
-	      z = w / (exp (H_OVER_K * freq / tr) - 1.);
-	      n2_over_n1 = (c12 + g2_over_g1 * a * z) / (c21 + a * (1. + z));
-	    }
+//	  if (w < 1.e-6) //NSH this if block removed to simplify code - if can be reinstated if runtimes are a problem, but it will need an additional if statement to avoid missing it out if we are using a modelled specific intensity.
+//	    {			// Radiation is unimportant
+//	      n2_over_n1 = c12 / (c21 + a);
+//	    }
+//	  else
+//	    {			//Include effects of stimulated emission
+//	      z = w / (exp (H_OVER_K * freq / tr) - 1.); //original
+	      z=(C*C)/(2.*H*freq*freq*freq); //This is the factor which relates the A coefficient to the b coefficient
+//	      n2_over_n1 = (c12 + g2_over_g1 * a * z) / (c21 + a * (1. + z)); //original
+
+	   J = mean_intensity (xplasma, freq, 1);/* we call mean intensity with mode 1 - this means we are happy to use the dilute blackbody approximation even if we havent run enough spectral cycles to have a model for J*/
+
+           n2_over_n1 = (c12 + g2_over_g1 * a * z * J) / (c21 + a*(1. + (J * z)));  //this equation is equivalent to equation 4.29 in NSH's thesis with the einstein b coefficients replaced by a multiplied by suitable conversion factors from the einstein relations.
+
+
+//	    }
 
 
 	  *d1 = dd;
