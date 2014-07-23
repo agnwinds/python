@@ -2494,7 +2494,7 @@ init_geo ()
   geo.twind = 40000;
   geo.wind_mdot = 1.e-9 * MSOL / YR;
 
-  geo.ioniz_mode = 3;		/* default is on the spot and find the best t */
+  geo.ioniz_mode = IONMODE_ML93;	/* default is on the spot and find the best t */
   geo.line_mode = 3;		/* default is escape probabilites */
 
   geo.star_radiation = 1;	/* 1 implies star will radiate */

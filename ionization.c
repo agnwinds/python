@@ -83,7 +83,7 @@ to match heating and cooling in the wind element! */
     {
 /* LTE using t_r  (ksl - checked - 080808 */
 
-      ireturn = nebular_concentrations (xplasma, NEBULARMODE_TE);
+      ireturn = nebular_concentrations (xplasma, NEBULARMODE_TR);
     }
   else if (mode == IONMODE_FIXED)
     {				//  Hardwired concentrations
