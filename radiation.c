@@ -1147,16 +1147,30 @@ J=0.0; //Avoid 03 error
 		  		J = 0.0;	//Something has gone wrong
 				}
 			}
-		else /*We have a spectral model, but it doesnt apply to the frequency in question. clearly this is a slightly odd situation, where last time we didnt get a photon of this frequency, but this time we did. Still this should only happen in very sparse cells, so induced compton is unlikely to be important in such cells. We generate a warning, just so we can see if this is happening a lot*/
+		else 
 			{
-			Error ("kappa_ind_comp: frequency of photon (%e) is outside frequency range (%e - %e) of spectral model in cell %i band %i\n",freq,xplasma->fmin_mod[i],xplasma->fmax_mod[i],xplasma->nplasma,i); //This is unlikely to happen very often, but if it does, we should probably know about it
-			J = 0.0; //We 
+			/* We have a spectral model, but it doesnt apply to the frequency 
+			   in question. clearly this is a slightly odd situation, where last
+			   time we didnt get a photon of this frequency, but this time we did. 
+			   Still this should only happen in very sparse cells, so induced compton 
+			   is unlikely to be important in such cells. We generate a warning, just 
+			    so we can see if this is happening a lot */	
+			/* JM140723 -- originally we threw an error here. Its commente out due to too
+			   many errors spoiling runs and, more to the point, because you actually expect 
+			   it to happen in a converging run */ 
+			//Error ("kappa_ind_comp: frequency of photon (%e) is outside frequency range (%e - %e) of spectral model in cell %i band %i\n",freq,xplasma->fmin_mod[i],xplasma->fmax_mod[i],xplasma->nplasma,i); //This is unlikely to happen very often, but if it does, we should probably know about it
+			J = 0.0; 
 			}
 		}
 	     else /* There is no model in this band - this should not happen very often  */
 		{	
-		J = 0.0;	//THere is no modelin this band, so the best we can do is assume zero J
-		Error ("kappa_ind_comp: no model exists in cell %i band %i\n",xplasma->nplasma,i); //This is unlikely to happen very often, but if it does, we should probably know about it
+		J = 0.0;	//There is no modelin this band, so the best we can do is assume zero J
+        
+        /* JM140723 -- originally we threw an error here. Its commente out due to too
+			   many errors spoiling runs and, more to the point, because you actually expect 
+			   it to happen in a converging run */
+		//Error ("kappa_ind_comp: no model exists in cell %i band %i\n",xplasma->nplasma,i); 
+		//This is unlikely to happen very often, but if it does, we should probably know about it
 		}
 
 
