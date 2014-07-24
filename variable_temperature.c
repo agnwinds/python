@@ -80,6 +80,7 @@ variable_temperature (xplasama, mode)  modifies the densities of ions, levels, a
 	2013Sep nsh	ground state fudge computed at the start, and 
 			stored in an array rather
 			than contiunually recomputing it - sometimes it is expensive.
+	1407 -- JM -- Added condition to also converge on neutral Hydrogen, see #89
 	
 
 **************************************************************/
@@ -108,6 +109,7 @@ variable_temperature (xplasma, mode)
   double pi_fudge, recomb_fudge, tot_fudge;	/*Two of the correction factors for photoionization rate, and recombination rate */
   double gs_fudge[NIONS];	/*It can be expensive to calculate this, and it only depends on t_e - which is fixed for a run. So 
 				   //                 calculate it once, and store it in a temporary array */
+  double last_h1_den;
 
   /* Copy xplasma to local plasma varaible, used to communicate w and alpha to the power law correction routine. 
      NSH 120703 - also used to set the  denominator calculated for a given ion for this cell last time round 
@@ -178,6 +180,7 @@ variable_temperature (xplasma, mode)
   /* At this point we have an initial estimate of ne. */
 
   niterate = 0;
+  last_h1_den = xplasma->density[0]; /* initial H density for loop condition */
   while (niterate < MAXITERATIONS)
     {
       /* We loop over all elements */
@@ -364,6 +367,7 @@ variable_temperature (xplasma, mode)
 	  break;
 	}
       xne = xxxne = (xnew + xne) / 2.;	/*New value of ne */
+	  last_h1_den = newden[0]; /* record H density for loop condition */
       niterate++;
 
 
