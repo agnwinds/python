@@ -123,7 +123,7 @@ nebular_concentrations (xplasma, mode)
   int lucy_mazzali1 ();
   int m;
 
-  if (mode == 0)
+  if (mode == NEBULARMODE_TR)
     {				// LTE all the way -- uses tr
 
       partition_functions (xplasma, mode);
@@ -131,7 +131,7 @@ nebular_concentrations (xplasma, mode)
       m = concentrations (xplasma, mode);
 
     }
-  else if (mode == 1)
+  else if (mode == NEBULARMODE_TE)
     {				//LTE but uses temperature te
 
       partition_functions (xplasma, mode);
@@ -139,7 +139,7 @@ nebular_concentrations (xplasma, mode)
       m = concentrations (xplasma, mode);
 
     }
-  else if (mode == 2)		// This is the standard LM method
+  else if (mode == NEBULARMODE_ML93)		// This is the standard LM method
     {
 
 
@@ -150,7 +150,7 @@ nebular_concentrations (xplasma, mode)
 	 the escape probabilities are calculated with saha ion densities each time,
 	 because saha() repopulates xplasma in each cycle. */
 
-      m = concentrations (xplasma, 0);	// Saha equation using t_r
+      m = concentrations (xplasma, NEBULARMODE_TR);	// Saha equation using t_r
 
       /* JM 1308 -- lucy then applies the lucy mazzali correction factors to the saha abundances. 
 	 in macro atom mode it also call macro_pops which is done correctly in this case, as lucy_mazzali, 
@@ -181,7 +181,7 @@ nebular_concentrations (xplasma, mode)
      in the routine. Similarly there is no call to concentrations, since this is also 
      done pairwise inside the routine. */
 
-  else if (mode == 6)		/* Pairwise calculation of abundances, using a 
+  else if (mode == NEBULARMODE_PAIRWISE_ML93)		/* Pairwise calculation of abundances, using a 
 				   temperature computed to ensure a reasonable
 				   ratio between the two, and then corrected for
 				   a dilute blackbody radiation field. */
@@ -189,7 +189,7 @@ nebular_concentrations (xplasma, mode)
       m = variable_temperature (xplasma, mode);
     }
 
-  else if (mode == 7)		/* Pairwise calculation of abundances, using a 
+  else if (mode == NEBULARMODE_PAIRWISE_SPECTRALMODEL)		/* Pairwise calculation of abundances, using a 
 				   temperature computed to ensure a reasonable
 				   ratio between the two, and then corrected for
 				   a radiation field modelled by a power law */
@@ -308,15 +308,15 @@ concentrations (xplasma, mode)
   // This needs to be moved up into nebular_concentrations given that we
   // do not want these routines to do mode shifting.
   //
-  if (mode == 0)
+  if (mode == NEBULARMODE_TR)
     {
       t = xplasma->t_r;
     }
-  else if (mode == 1)
+  else if (mode == NEBULARMODE_TE)
     {
       t = xplasma->t_e;
     }
-  else if (mode == 2)
+  else if (mode == NEBULARMODE_ML93)
     {
       t = sqrt (xplasma->t_e * xplasma->t_r);
     }

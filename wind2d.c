@@ -389,13 +389,13 @@ be optional which variables beyond here are moved to structures othere than Wind
 	plasmamain[n].w = 0.5;	//Modification to allow for possibility that grid point is inside star
 
       /* Determine the initial ionizations, either LTE or  fixed_concentrations */
-      if (geo.ioniz_mode != 2)
+      if (geo.ioniz_mode != IONMODE_FIXED)
 	{			/* Carry out an LTE determination of the ionization */
-	  ierr = ion_abundances (&plasmamain[n], 1);
+	  ierr = ion_abundances (&plasmamain[n], IONMODE_LTE);
 	}
       else
 	{			/* Set the concentrations to specified values */
-	  ierr = ion_abundances (&plasmamain[n], 2);
+	  ierr = ion_abundances (&plasmamain[n], IONMODE_FIXED);
 	}
       if (ierr != 0)
 	{
