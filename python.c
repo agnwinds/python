@@ -714,7 +714,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
     ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,6=pairwise_bb,7=pairwise_pow)",
      &geo.ioniz_mode);
 
-  if (geo.ioniz_mode == 2)
+  if (geo.ioniz_mode == IONMODE_FIXED)
     {
       rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
     }
@@ -2494,7 +2494,7 @@ init_geo ()
   geo.twind = 40000;
   geo.wind_mdot = 1.e-9 * MSOL / YR;
 
-  geo.ioniz_mode = 3;		/* default is on the spot and find the best t */
+  geo.ioniz_mode = IONMODE_ML93;	/* default is on the spot and find the best t */
   geo.line_mode = 3;		/* default is escape probabilites */
 
   geo.star_radiation = 1;	/* 1 implies star will radiate */
