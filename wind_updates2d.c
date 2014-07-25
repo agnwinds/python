@@ -589,7 +589,7 @@ WindPtr (w);
 	}
 
     }
-free (commbuffer)
+free (commbuffer);
 #endif
 
 
