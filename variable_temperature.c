@@ -362,7 +362,9 @@ variable_temperature (xplasma, mode)
 
       if (xnew < DENSITY_MIN)
 	xnew = DENSITY_MIN;	/* fudge to keep a floor on ne */
-      if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6)
+      if ( ((fabs ( (xne - xnew) / xnew ) < FRACTIONAL_ERROR) && 
+            (fabs ( (newden[0] - last_h1_den) / newden[0] ) < FRACTIONAL_ERROR) )
+            || xnew < 1.e-6)
 	{
 	  break;
 	}
