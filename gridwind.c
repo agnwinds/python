@@ -728,7 +728,7 @@ calloc_dyn_plasma (nelem)
 {
   int n;
 
-
+printf ("NSH Doing calloc dyn for %i elements\n",nelem);
 
 for (n=0;n<nelem+1;n++)  //We loop over all elements in the plasma array, adding one for an empty cell used for extrapolations.
 	{
@@ -806,7 +806,7 @@ for (n=0;n<nelem+1;n++)  //We loop over all elements in the plasma array, adding
 	}
 }
 
-     Log_silent
+     Log
 	("Allocated %10d bytes for each of %5d elements variable length plasma arrays totaling %10.1f Mb \n",
 	 sizeof (double)*nions*12, (nelem+1),
 	 1.e-6 * (nelem+1 ) * sizeof (double)*nions*12);

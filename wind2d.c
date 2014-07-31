@@ -308,7 +308,6 @@ recreated when a windfile is read into the program
   else				/* Force NPLASMA to equal NDIM2 (for diagnostic reasons) */
     {
       NPLASMA = NDIM2;
-
     }
 
   calloc_plasma (NPLASMA);
