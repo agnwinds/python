@@ -334,7 +334,7 @@ printf ("about to do density\n");
       plasmamain[n].rho = model_rho (x);
 printf ("done density\n");
       plasmamain[n].vol = w[nwind].vol;	// Copy volumes
-
+printf ("done volumes\n");
 /* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, I've put new things in here to initialise the exponential models */
       for (nn = 0; nn < NXBANDS; nn++)
 	{
