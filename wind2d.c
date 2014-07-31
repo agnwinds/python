@@ -71,6 +71,8 @@ History:
 	13sep	nsh	small change to avoid the muliplicatoin by 0.9 (lucy guess) from giving us the 				wrong zeus temperature.
 	13nov	nsh	changes to take account of log formulation of power law
 			also initialise the min and max frequencies seen in a band.
+	14jul	nsh	added call to calloc_dyn_plasma to allocate space for arrays of variable size - currently
+			those with length nion.
 
 **************************************************************/
 
@@ -310,6 +312,7 @@ recreated when a windfile is read into the program
     }
 
   calloc_plasma (NPLASMA);
+  calloc_dyn_plasma (NPLASMA); /*78a NSH 1407 - allocate space for dynamically sized arrays*/
   xplasma = plasmamain;
   create_maps (CHOICE);		// Populate the maps from plasmamain & wmain
 
@@ -408,7 +411,8 @@ be optional which variables beyond here are moved to structures othere than Wind
       /* 68b - Initialize the scatters array 73d - and the pariwise ionization denominator and temperature
        */
 
-      for (j = 0; j < NIONS; j++)
+      for (j = 0; j < nions; j++) /* NSH 1107 - changed this loop to loop over nions rather than NIONS. Dynamic
+	allocation means that these arrays are no longer of length NIONS */
 	{
 	  plasmamain[n].PWdenom[j] = 0.0;
 	  plasmamain[n].PWnumer[j] = 0.0;
@@ -1042,9 +1046,10 @@ zero_scatters ()
 {
   int n, j;
 
-  for (n = 0; n < NPLASMA; n++)
+  for (n = 0; n < NPLASMA; n++) /*NSH 1107 - changed loop to only run over nions to avoid running over the 
+	end of the array after the arry was dynamically allocated in 78a */
     {
-      for (j = 0; j < NIONS; j++)
+      for (j = 0; j < nions; j++)
 	{
 	  plasmamain[n].scatters[j] = 0;
 	}
