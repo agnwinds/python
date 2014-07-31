@@ -728,9 +728,7 @@ calloc_dyn_plasma (nelem)
 {
   int n;
 
-printf ("NSH Doing calloc dyn for %i elements\n",nelem);
-
-for (n=0;n<nelem+2;n++)  //We loop over all elements in the plasma array, adding one for an empty cell used for extrapolations.
+for (n=0;n<nelem+1;n++)  //We loop over all elements in the plasma array, adding one for an empty cell used for extrapolations.
 	{
   	if ((plasmamain[n].density =calloc (sizeof (double), nions)) == NULL)
 	{
