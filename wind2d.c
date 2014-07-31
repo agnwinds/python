@@ -339,26 +339,31 @@ printf ("done volumes\n");
 /* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, I've put new things in here to initialise the exponential models */
       for (nn = 0; nn < NXBANDS; nn++)
 	{
-printf ("Band %i\n",nn);
+printf ("1Band %i\n",nn);
 
 	  plasmamain[n].spec_mod_type[nn] = -1;	/*NSH 120817 - setting this to a negative number means that at the outset, we assume we do not have a suitable model for the cell */
-printf ("Band %i\n",nn);
+printf ("2Band %i\n",nn);
 	  plasmamain[n].exp_temp[nn] = geo.tmax;	/*NSH 120817 - as an initial guess, set this number to the hottest part of the model - this should define where any exponential dropoff becomes important */
-printf ("Band %i\n",nn);
+printf ("3Band %i\n",nn);
 	  plasmamain[n].exp_w[nn] = 0.0;	/* 120817 Who knows what this should be! */
-printf ("Band %i\n",nn);
+printf ("4Band %i\n",nn);
 	  plasmamain[n].pl_alpha[nn] = geo.alpha_agn;	//As an initial guess we assume the whole wind is optically thin and so the spectral index for a PL illumination will be the same everywhere.
-printf ("Band %i\n",nn);
+printf ("5Band %i\n",nn);
 	  /*     plasmamain[n].pl_w[nn] = geo.const_agn / (4.0*PI*(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]));  // constant / area of a sphere
 	     plasmamain[n].pl_w[nn] /= 4.*PI;   // take account of solid angle NSH 120817 removed - if PL not suitable, it will be set to zero anyway, so safe to keep it at zero from the outset! */
 //	  plasmamain[n].pl_w[nn] = 0.0;
 	  plasmamain[n].pl_log_w[nn] = -1e99; /*131114 - a tiny weight - just to fill the variable */ 
-printf ("Band %i\n",nn);
+printf ("6Band %i\n",nn);
           plasmamain[n].fmin_mod[nn] = geo.xfreq[i+1]; /* Set the minium model frequency to the max frequency in the band - means it will never be used which is correct at this time - there is no model */
-printf ("Band %i\n",nn);
+printf ("7Band %i\n",nn);
           plasmamain[n].fmax_mod[nn] = geo.xfreq[i]; /* Set the maximum model frequency to the min frequency in the band */
 	}
 
+printf ("done initialising models\n");
+printf ("done initialising models\n");
+printf ("done initialising models\n");
+printf ("done initialising models\n");
+printf ("done initialising models\n");
 printf ("done initialising models\n");
       nh = plasmamain[n].rho * rho2nh;
 
