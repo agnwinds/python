@@ -330,7 +330,9 @@ be optional which variables beyond here are moved to structures othere than Wind
 	printf ("doing cell %i\n",n);
       nwind = plasmamain[n].nwind;
       stuff_v (w[nwind].xcen, x);
+printf ("about to do density\n");
       plasmamain[n].rho = model_rho (x);
+printf ("done density\n");
       plasmamain[n].vol = w[nwind].vol;	// Copy volumes
 
 /* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, I've put new things in here to initialise the exponential models */
