@@ -214,7 +214,7 @@ calloc_plasma (nelem)
     }
   else
     {
-      Log
+      Log_silent
 	("Allocated %10d bytes for each of %5d elements of      plasma totaling %10.1f Mb \n",
 	 sizeof (plasma_dummy), (nelem + 1),
 	 1.e-6 * (nelem + 1) * sizeof (plasma_dummy));
@@ -806,7 +806,7 @@ for (n=0;n<nelem+1;n++)  //We loop over all elements in the plasma array, adding
 	}
 }
 
-     Log
+     Log_silent
 	("Allocated %10d bytes for each of %5d elements variable length plasma arrays totaling %10.1f Mb \n",
 	 sizeof (double)*nions*12, (nelem+1),
 	 1.e-6 * (nelem+1 ) * sizeof (double)*nions*12);
