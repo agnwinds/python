@@ -338,6 +338,7 @@ printf ("done density\n");
 /* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, I've put new things in here to initialise the exponential models */
       for (nn = 0; nn < NXBANDS; nn++)
 	{
+printf ("Band %i\n",nn);
 	  plasmamain[n].spec_mod_type[nn] = -1;	/*NSH 120817 - setting this to a negative number means that at the outset, we assume we do not have a suitable model for the cell */
 	  plasmamain[n].exp_temp[nn] = geo.tmax;	/*NSH 120817 - as an initial guess, set this number to the hottest part of the model - this should define where any exponential dropoff becomes important */
 	  plasmamain[n].exp_w[nn] = 0.0;	/* 120817 Who knows what this should be! */
