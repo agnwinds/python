@@ -354,6 +354,10 @@ printf ("5Band %i\n",nn);
 //	  plasmamain[n].pl_w[nn] = 0.0;
 	  plasmamain[n].pl_log_w[nn] = -1e99; /*131114 - a tiny weight - just to fill the variable */ 
 printf ("6Band %i\n",nn);
+printf ("i=%i\n",i);
+printf ("xfreq[i+1]=%e\n",geo.xfreq[i+1]);
+printf ("xfreq[i]=%e\n",geo.xfreq[i]);
+
           plasmamain[n].fmin_mod[nn] = geo.xfreq[i+1]; /* Set the minium model frequency to the max frequency in the band - means it will never be used which is correct at this time - there is no model */
 printf ("7Band %i\n",nn);
           plasmamain[n].fmax_mod[nn] = geo.xfreq[i]; /* Set the maximum model frequency to the min frequency in the band */
