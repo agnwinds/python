@@ -281,15 +281,9 @@ concentrations (xplasma, mode)
                         in place of others.
 	06may	ksl	57+ -- Switched to plasma structue wind no volumes
 	07mar	ksl	Convert warnings to errors to stop many writes 
+  1407 -- JM -- Added condition to also converge on neutral Hydrogen, see #89
 **************************************************************/
 
-
-
-//#define SAHA 4.82907e15               /* 2* (2.*PI*MELEC*k)**1.5 / h**3  (Calculated in constants) */
-//#define MAXITERATIONS 200
-//#define FRACTIONAL_ERROR 0.03
-//#define THETAMAX       1e4
-//#define MIN_TEMP         100. NSH 0712 - moved into python.h because this is used in severalpaces
 
 
 int
@@ -301,7 +295,7 @@ concentrations (xplasma, mode)
   double xne, xxne, xnew, xsaha;
   double theta, x;
   double get_ne ();
-  double t, nh;
+  double t, nh, last_h1_den;
   int saha ();
 
 
@@ -365,6 +359,7 @@ concentrations (xplasma, mode)
 
 
   niterate = 0;
+  last_h1_den = xplasma->density[0]; /* initial H density for loop condition */
   while (niterate < MAXITERATIONS)
     {
 
@@ -401,10 +396,13 @@ concentrations (xplasma, mode)
       if (xnew < DENSITY_MIN)
 	xnew = DENSITY_MIN;	/* fudge to keep a floor on ne */
 
-      if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6)
+      if ( ((fabs ( (xne - xnew) / xnew ) < FRACTIONAL_ERROR) && 
+            (fabs ( (xplasma->density[0] - last_h1_den) / xplasma->density[0] ) < FRACTIONAL_ERROR) )
+            || xnew < 1.e-6)
 	break;
 
       xne = (xnew + xne) / 2.;	/* Make a new estimate of xne */
+      last_h1_den = xplasma->density[0]; /* record H density for loop condition */
       niterate++;
     }
 
@@ -601,8 +599,7 @@ saha (xplasma, ne, t)
         04May   SS      "If" statement modified for compatibility with the "macro_simple" option
 	                (i.e. all ions treated as simple).
 	07mar	ksl	Convert warnings to errors to stop many repeads
-
-
+  1407 -- JM -- Added condition to also converge on neutral Hydrogen, see #89
 
 **************************************************************/
 
@@ -618,7 +615,7 @@ lucy (xplasma)
   double xne, xnew;
   double newden[NIONS];
   double t_r, nh;
-  double t_e, www;
+  double t_e, www, last_h1_den;
 
   t_r = xplasma->t_r;
   t_e = xplasma->t_e;
@@ -640,8 +637,10 @@ lucy (xplasma)
 
   /* Begin iteration loop to find ne */
   niterate = 0;
+  last_h1_den = xplasma->density[0]; /* initial H density for loop condition */
   while (niterate < MAXITERATIONS)
     {
+
       for (nelem = 0; nelem < nelements; nelem++)
 	{
 
@@ -683,11 +682,14 @@ lucy (xplasma)
 	xnew = DENSITY_MIN;
 
       /* Check to see whether the search for xne has converged and if so exit loop */
-      if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6)
+      if ( ((fabs ( (xne - xnew) / xnew ) < FRACTIONAL_ERROR) && 
+            (fabs ( (newden[0] - last_h1_den) / newden[0] ) < FRACTIONAL_ERROR) )
+            || xnew < 1.e-6)
 	break;
 
       /* else start another iteration of the main loop */
       xne = (xnew + xne) / 2.;	/* Make a new estimate of xne */
+      last_h1_den = newden[0];  /* record the last H density for loop condition */
       niterate++;
     }
   /* End of main iteration loop */
