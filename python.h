@@ -893,6 +893,10 @@ p_dummy, *PhotPtr;
   by nscat in trans_phot during the spectral cycles */
 #define NNSCAT_SAFETY 1.2
 
+/* minimum value for p_norm */
+#define P_NORM_MIN 1e-15
+
+
 /* 68b - ksl - This is a structure in which the history of a single photon bundle can be recorded
  * See phot_util   phot_hist().  It needs to be used carefully.  if phot_hist_on is true
  * then photon histories will be attempted.

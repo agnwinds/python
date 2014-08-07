@@ -455,6 +455,11 @@ randwind_thermal_trapping(p, nnscat)
      this in trans_phot before calling extract */
   p_norm = (1. - exp (-tau_norm)) / tau_norm;
 
+  /* In an attempt to address issue #95, we set a minimum floor to p_norm of 1e-16
+     set in python.h. This is also applied in trans_phot.c */
+  if (p_norm < P_NORM_MIN)
+    p_norm = P_NORM_MIN; 
+
   ztest = 1.0;
   z = 0.0;
 
