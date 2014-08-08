@@ -447,14 +447,16 @@ double exp_w(double j, double exp_temp, double numin, double numax);
 double exp_stddev(double exp_temp, double numin, double numax);
 /* variable_temperature.c */
 int variable_temperature(PlasmaPtr xplasma, int mode);
-double bb_correct_2(double xtemp, double t_r, double www, int nion);
+double bb_correct_2(double xtemp, int nion, PlasmaPtr xplasma);
 double temp_func(double solv_temp);
-double pl_correct_2(double xtemp, int nion);
+double pl_correct_2(double xtemp, int nion, PlasmaPtr xplasma);
+/* matom_diag.c */
+int matom_emiss_report(void);
+/* pi_rates.c */
+double calc_pi_rate(int ion_lower, PlasmaPtr xplasma, int mode);
 double tb_planck1(double freq);
 double tb_logpow1(double freq);
 double tb_exp1(double freq);
-/* matom_diag.c */
-int matom_emiss_report(void);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

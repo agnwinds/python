@@ -21,10 +21,6 @@
 
 
 
-//struct photoionization *xver; //Verner & Ferland description of a photoionization x-section NSH 13Sep - should not be used any more
-struct topbase_phot *xtop;	//Topbase description of a photoionization x-section 
-PlasmaPtr xxxplasma;
-double qromb_temp;		// This is a storage variable for the current electron temperature so it is available for qromb calls
 int niterate;			// Make this a variable that all the subroutines cn see, 
 				// so we can decide if we need to recompute the numerators
 
@@ -113,8 +109,7 @@ variable_temperature (xplasma, mode)
      NSH 120703 - also used to set the  denominator calculated for a given ion for this cell last time round 
      ksl 1407 - Not obvious why this was done; the next line merely sets xxxplasma to the pointer xplasma.  It
      does not copy anythin*/
-
-  xxxplasma = xplasma;		
+//xxxplasma = xplasma;		
 
 
   nh = xplasma->rho * rho2nh;	//LTE
@@ -262,7 +257,7 @@ variable_temperature (xplasma, mode)
 		  else
 		    {
 
-		      pi_fudge = bb_correct_2 (xtemp, t_r, www, nion);
+		      pi_fudge = bb_correct_2 (xtemp, nion, xplasma);
 
 		      tot_fudge =
 			pi_fudge * recomb_fudge * (gs_fudge[nion] +
@@ -275,7 +270,7 @@ variable_temperature (xplasma, mode)
 
 	      else if (mode == 7)	
 		{
-		  pi_fudge = pl_correct_2 (xtemp, nion);
+		  pi_fudge = pl_correct_2 (xtemp, nion, xplasma);
 
 
 		  tot_fudge =
@@ -447,117 +442,50 @@ variable_temperature (xplasma, mode)
 int bb_correct_err = 0;
 
 double
-bb_correct_2 (xtemp, t_r, www, nion)
-     double t_r, xtemp, www;
+bb_correct_2 (xtemp , nion, xplasma)
+     double xtemp;
      int nion;
+     PlasmaPtr xplasma;
 {
   double q;
-  int ion_lower, n;
-  double numerator, denominator;
-  int ntmin, nvmin;
-  double fthresh, fmax, fmaxtemp;
+  int ion_lower;
+  double numerator, denominator,t_r_store;
 
-
-
-  /* Initialization of fudges complete */
 
   ion_lower = nion - 1;		/*the call uses nion, which is the upper ion in the pair */
 
 
-  if (-1 < ion_lower && ion_lower < nions)	//Get cross section for this specific ion_number
-    {
-      ntmin = ion[ion_lower].ntop_ground;
-      nvmin = ion_lower;
-    }
-  else
-    {
-      Error ("bb_correct_2: %d is unacceptable value of nion\n", ion_lower);
-      mytrap ();
-      exit (0);
-      return (1.0);
-    }
-
-/*The integration is to correct for photoionization rates from the lower to the upper, so
- all integrals have to be over the lower ion cross section. The integrals use the code in
- power_sub, so the temperature has to be set to an external variable. Annoyingly this is 
- called sim_te....*/
-
-  if (ion[ion_lower].phot_info == 1)	//topbase
-    {
-      n = ntmin;
-      xtop = &phot_top[n];	//use the topbase data
-    }
-  else if (ion[ion_lower].phot_info == 0)	// verner
-    {
-      n = nvmin;		//just the ground state ionization fraction.
-      xtop = &xphot_tab[ion[n].nxphot];	//Use the tabuled verner data
-    }
-  else				//no data available
-    {
-      bb_correct_err++;
-      /* 71 - 111229 - ksl - Suppress this error after 100 instances so program does not bomb */
-      if (bb_correct_err < 100)
-	{
-	  Error
-	    ("bb_correct: No photoionization xsections for ion %d (element %d, ion state %d),setting sim_frac to 1\n",
-	     nion, ion[nion].z, ion[nion].istate);
-	}
-      else if (bb_correct_err == 100)
-	{
-	  Error
-	    ("xinteg_sim: Suppressing photoionization xsection error, but more photo xsections are needed in atomic data\n");
-	}
-
-
-      q = 1.;
-      return (q);
-    }
-  fthresh = xtop->freq[0];
-  fmaxtemp = xtop->freq[xtop->np - 1];
-  fmax = check_fmax (fthresh, fmaxtemp, xtemp);
-  if (fthresh > fmax)
-    {
-      Error
-	("bb_correct: After checking, fthresh has been set below fmin - we cannot compute denominator\n");
-      q = 1.0;
-      return (q);
-    }
-
-  qromb_temp = t_r;		//The numerator is for the actual radiation temperature
 
   if (pow
-      (((t_r -
-	 xxxplasma->PWntemp[ion_lower]) / xxxplasma->PWntemp[ion_lower]),
+      (((xplasma->t_r -
+	 xplasma->PWntemp[ion_lower]) / xplasma->PWntemp[ion_lower]),
        2) > 1e-6)
     {
-      numerator = www * qromb (tb_planck1, fthresh, fmax, 1.e-4);	//and is corrected for W
-      xxxplasma->PWnumer[ion_lower] = numerator;
-      xxxplasma->PWntemp[ion_lower] = t_r;
+      numerator = xplasma->w * calc_pi_rate(ion_lower,xplasma,2);	//and is corrected for W
+      xplasma->PWnumer[ion_lower] = numerator;
+      xplasma->PWntemp[ion_lower] = xplasma->t_r;
     }
   else
     {
-      numerator = xxxplasma->PWnumer[ion_lower];
+      numerator = xplasma->PWnumer[ion_lower];
     }
 
   if (numerator == 0.0)
     return (0.0);		//There is no need to waste time evaluating the denominator
 
 
-  qromb_temp = xtemp;		//The denominator is calculated for the LTE rate at our ideal temp
-
-//      Log ("topbase n=%i,nion=%i,temp=%e,fthresh=%e,fmax=%e,hnu=%e,hnu/kt=%e,fmax=%e\n",n,ion_lower,temp,fthresh,fmax,fthresh*H,(fthresh*H)/(temp*BOLTZMANN),5.879e10*temp);
-
-
-
-  if (pow (((xtemp - xxxplasma->PWdtemp[ion_lower]) / xxxplasma->PWdtemp[ion_lower]), 2) > 1e-6)	//Only do this integral if there is a significant change in xtemp
+ if (pow (((xtemp - xplasma->PWdtemp[ion_lower]) / xplasma->PWdtemp[ion_lower]), 2) > 1e-6)	//If our guess temperature hasnt changed much, use denominator from last time
     {
-      denominator = qromb (tb_planck1, fthresh, fmax, 1.e-4);
-      xxxplasma->PWdenom[ion_lower] = denominator;
-      xxxplasma->PWdtemp[ion_lower] = xtemp;	//Store the result
+      t_r_store=xplasma->t_r;
+      xplasma->t_r=xtemp;
+      denominator = calc_pi_rate(ion_lower,xplasma,2);
+      xplasma->t_r=t_r_store;
+      xplasma->PWdenom[ion_lower] = denominator;
+      xplasma->PWdtemp[ion_lower] = xtemp;
     }
   else
     {
-      denominator = xxxplasma->PWdenom[ion_lower];
+      denominator = xplasma->PWdenom[ion_lower];
     }
 
 
@@ -565,25 +493,10 @@ bb_correct_2 (xtemp, t_r, www, nion)
 
 
   return (q);
+
 }
 
-/* This next little bit of code was used to calculate an ideal temperature. This gets a temperature which gives a ratio of n to n+1 of close to 1, but at this temperature, the blackbody function used for the denominator of the correction factor is almost always zero. I've left the routine in, but it doesnt seem to work...*/
 
-
-
-double
-temp_func (solv_temp)
-     double solv_temp;
-{
-  double answer;
-//      Log ("xxxne=%e, xip=%e\n",xxxne,xip);
-//      Log ("1=%e,2=%e,3=%e\n",log(4.83e15/xxxne),1.5*log(temp),(xip/(BOLTZMANN*temp)));
-  answer =
-    log (4.83e15 / xxxne) + 1.5 * log (solv_temp) -
-    (xip / (BOLTZMANN * solv_temp));
-
-  return (answer);
-}
 
 
 /***********************************************************
@@ -621,191 +534,56 @@ temp_func (solv_temp)
 	13sep	NSH	Changed to always use the topbase style of data - verner data is now tabulated.
 	13nov	NSH	Changed to use the new log version of PL, also the min and max frequencies in 
 			a band are used to decide the applicability of a model.
+        14aug	NSH	reorganisation - the PI rate coefficients are now calculated by an external
+			subroutine. For the LTE rate, the guess temperature is communicated via the 
+			plasma variable t_r.
 
 **************************************************************/
-int pl_correct_err = 0;
-double xpl_alpha, xpl_w, xpl_logw;
-double xexp_temp, xexp_w;
-
 
 double
-pl_correct_2 (xtemp, nion)
-     double xtemp;
-     int nion;
+pl_correct_2 (xtemp, nion, xplasma)
+	double xtemp;
+     int nion;     
+     PlasmaPtr xplasma;
 {
   double q;
-  int ion_lower, n, j;
-  double numerator, denominator;
-  int ntmin, nvmin;
-  double fthresh, fmax, fmaxtemp;
-  double f1, f2;
-  double exp_qromb, pl_qromb;
+  int ion_lower;
+  double numerator, denominator, t_r_store;
 
 
-  exp_qromb = 1e-4;
-  pl_qromb = 1e-4;
+
 
   ion_lower = nion - 1;		/*the call uses nion, which is the upper ion in the pair, we are interested in the PI from the lower ion */
 
-  if (-1 < ion_lower && ion_lower < nions)	//Get cross section for this specific ion_number
-    {
-      ntmin = ion[ion_lower].ntop_ground;	/*We only ever use the ground state cross sections. This is for topbase */
-      nvmin = ion_lower;	/*and this is for verner cross sections */
-    }
-  else
-    {
-      Error ("bb_correct_2: %d is unacceptable value of nion\n", ion_lower);
-      mytrap ();
-      exit (0);
-      return (1.0);
-    }
-
-
-/*The integration is to correct for photoionization rates from the lower to the upper, so
- all integrals have to be over the lower ion cross section. The integrals use external functions, so the temperature has to be set to an external variable temp. */
-
-  if (ion[ion_lower].phot_info == 1)	//topbase
-    {
-      n = ntmin;
-      xtop = &phot_top[n];
-    }
-  else if (ion[ion_lower].phot_info == 0)	// verner
-    {
-      n = nvmin;		//just the ground state ionization fraction.
-      xtop = &xphot_tab[ion[n].nxphot];
-    }
-  else
-    {
-      pl_correct_err++;		/* If we get here, there are no cross sections available */
-      if (pl_correct_err < 100)
-	{
-	  Error
-	    ("pl_correct: No photoionization xsections for ion %d (element %d, ion state %d),setting sim_frac to 1\n",
-	     nion, ion[nion].z, ion[nion].istate);
-	}
-      else if (pl_correct_err == 100)
-	{
-	  Error
-	    ("xinteg_sim: Suppressing photoionization xsection error, but more photo xsections are needed in atomic data\n");
-	}
-      q = 1.;			/*This is really bad actually, this will leave the abundances all wrong.... */
-      return (q);
-    }
-  fthresh = xtop->freq[0];
-  fmax = xtop->freq[xtop->np - 1];
-  numerator = 0;
   if (niterate == 0)		//first time of iterating this cycle, so calculate the numerator
     {
-      for (j = 0; j < geo.nxfreq; j++)	//We loop over all the bands
-	{
-	  xpl_alpha = xxxplasma->pl_alpha[j];
-//	  xpl_w = xxxplasma->pl_w[j];
-	  xpl_logw = xxxplasma->pl_log_w[j];
-	  xexp_temp = xxxplasma->exp_temp[j];
-	  xexp_w = xxxplasma->exp_w[j];
-	  if (xxxplasma->spec_mod_type[j] > 0)	//Only bother doing the integrals if we have a model in this band
-	    {
-//	      f1 = geo.xfreq[j];
-	      f1 = xxxplasma->fmin_mod[j]; //NSH 131114 - Set the low frequency limit to the lowest frequency that the model applies to
-//	      if (geo.xfreq[j + 1] > xxxplasma->max_freq && geo.xfreq[j] < xxxplasma->max_freq)	//The maximum frequency seen in this cell is in this band, so we cannot safely use the power law estimators right up to the top of the band. Note, we hope that all the weights in bands above this will be zero!
-/* NSH 130909 - this loop was commented out at some point in the past - I cannt recall why, but the lines are now reinstated - if they cause a problem - refer back to issue #50! */
-//		{
-//		  f2 = xxxplasma->max_freq;
-//		}
-//	      else
-//		{
-//		  f2 = geo.xfreq[j + 1];	//We can safely integrate over the whole band using the estimators for the cell/band 
-		  f2= xxxplasma->fmax_mod[j]; //NSH 131114 - Set the high frequency limit to the highest frequency that the model applies to
-//		}
-	      if (f1 < fthresh && fthresh < f2 && f1 < fmax && fmax < f2)	//Case 1- 
-		{
-		  if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL)
-		    {
-//		      numerator += qromb (tb_pow1, fthresh, fmax, pl_qromb);
-		      numerator += qromb (tb_logpow1, fthresh, fmax, pl_qromb);
-		    }
-		  else
-		    {
-		      numerator += qromb (tb_exp1, fthresh, fmax, exp_qromb);
-		    }
-		}
-	      else if (f1 < fthresh && fthresh < f2 && f2 < fmax)	//case 2 
-		{
-		  if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL)
-		    {
-//		      numerator += qromb (tb_pow1, fthresh, f2, pl_qromb);		      
-		      numerator += qromb (tb_logpow1, fthresh, f2, pl_qromb);
-		    }
-		  else
-		    {
-		      numerator += qromb (tb_exp1, fthresh, f2, exp_qromb);
-		    }
-		}
-	      else if (f1 > fthresh && f1 < fmax && fmax < f2)	//case 3
-		{
-		  if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL)
-		    {
-//		      numerator += qromb (tb_pow1, f1, fmax, pl_qromb);
-		      numerator += qromb (tb_logpow1, f1, fmax, pl_qromb);
-		    }
-		  else
-		    {
-		      numerator += qromb (tb_exp1, f1, fmax, exp_qromb);
-		    }
-		}
-	      else if (f1 > fthresh && f2 < fmax)	// case 4
-		{
-		  if (xxxplasma->spec_mod_type[j] == SPEC_MOD_PL)
-		    {
-//		      numerator += qromb (tb_pow1, f1, f2, pl_qromb);
-		      numerator += qromb (tb_logpow1, f1, f2, pl_qromb);
-		    }
-		  else
-		    {
-		      numerator += qromb (tb_exp1, f1, f2, exp_qromb);
-		    }
-		}
-	      else		//case 5 - should only be the case where the band is outside the range for the integral.
-		{
-		  numerator += 0;	// Add nothing - bit of a null statement, but makes the code look nice.
-		}
-	    }			//End of loop to only integrate in this band if there is power
-	}			//End of loop over all bands, at this point we have the numerator
-      xxxplasma->PWnumer[ion_lower] = numerator;	// Store the calculated numerator for this cell - it wont change during one ionization cycle
+      numerator=calc_pi_rate (ion_lower,xplasma,1); //NSH 0814 - the PI rate is now calculated by an external subroutine
+      xplasma->PWnumer[ion_lower] = numerator;	// Store the calculated numerator for this cell - it wont change during one ionization cycle
     }				//End of if statement to decide if this is the first iteration
   else
     {
-      numerator = xxxplasma->PWnumer[ion_lower];	// We are on the second iteration, so use the stored value
+      numerator = xplasma->PWnumer[ion_lower];	// We are on the second iteration, so use the stored value
     }
   if (numerator == 0.0)
     {
       return (0.0);		//There is no need to waste time evaluating the denominator
     }
-  fmaxtemp = xtop->freq[xtop->np - 1];
-  fmax = check_fmax (fthresh, fmaxtemp, xtemp);
-  if (fthresh > fmax)
-    {
-      Error
-	("pl_correct: After checking, fthresh has been set below fmin - we cannot compute denominator\n");
-      q = 1.0;
-      return (q);
-    }
-  qromb_temp = xtemp;		//The denominator is calculated for the LTE rate at our ideal temp. If we get this wrong, then divide by zeros abound!
 
-  if (pow (((xtemp - xxxplasma->PWdtemp[ion_lower]) / xxxplasma->PWdtemp[ion_lower]), 2) > 1e-6)	//If our guess temperature hasnt changed much, use denominator from last time
+
+  if (pow (((xtemp - xplasma->PWdtemp[ion_lower]) / xplasma->PWdtemp[ion_lower]), 2) > 1e-6)	//If our guess temperature hasnt changed much, use denominator from last time
     {
-      denominator = qromb (tb_planck1, fthresh, fmax, 1.e-4);
-      xxxplasma->PWdenom[ion_lower] = denominator;
-      xxxplasma->PWdtemp[ion_lower] = xtemp;
+      t_r_store=xplasma->t_r; //NSH 0814 - New formulation passes the guess temperature to the PI calculation code via t_r, so store the real t_r for a bit.
+      xplasma->t_r=xtemp;
+      denominator = calc_pi_rate(ion_lower,xplasma,2); //NSH 0814 - the PI rate is now calculated by an external subroutine
+      xplasma->t_r=t_r_store; //NSH 0814 - reassign the real t_r to the structure variable
+      xplasma->PWdenom[ion_lower] = denominator;
+      xplasma->PWdtemp[ion_lower] = xtemp;
     }
   else
     {
-      denominator = xxxplasma->PWdenom[ion_lower];
+      denominator = xplasma->PWdenom[ion_lower];
     }
-
-
-
-  q = numerator / denominator;	/*Just work out the correction factor - hope it isnt infinite! */
+      q = numerator / denominator;	/*Just work out the correction factor - hope it isnt infinite! */
 
 
 
@@ -816,288 +594,46 @@ pl_correct_2 (xtemp, nion)
 
 
 
-/**************************************************************************
-                    Space Telescope Science Institute
 
+/***********************************************************
+                                       Southampton University
 
-  Synopsis:  
+  Synopsis:   
+	temp_func is the function used in zbrent to find an ideal temperature to
+	calculate the LTE abundances in the variable temperature code. This temperature
+	is also then used to compute the denominator of the PI rate correction factor.
+	The equation solved is equation 5.1 in NSHs thesis. The statistical weights are
+	ignored, and n_i/n_i+1 is set equal to 1. Both sides are divided by n_e, and then
+	logs taken. To find where n_i/n_i+1 is equal to 1, we therefore find the zero
+	point of log(constants/ne)+1.5log(temp)-exponent of exponential. This is done
+	using zbrent.
+ 
+  Arguments:		
 
-  Description:	
-
- tb_planck is the function a\nuB\nu and is called by Qromb in order to integrate over the frequency range where the
-   ionisation cross section is significant. This is the function for ions with a topbase cross section NSH 16/12/10 
-
-
-  Arguments:  (Input via .pf file)		
+	double solv_temp		temperature 
 
 
   Returns:
+ 	answer		       	 	answer
+ 	
+ Description:	
 
-  Notes:
+	 
 
-This is almost identical to code written to compute the sim power law correction. It is copied here to make the coding easier, plus it is likely that it will supplant the earlier code so that can all be deleted.
-
-
- 
-
-  History:
-
-12Feb NSH - written as part of the varaible temperature effort.
-
- ************************************************************************/
-
-
-double
-tb_planck1 (freq)
-     double freq;
-{
-  double answer, bbe;
-  bbe = exp ((H * freq) / (BOLTZMANN * qromb_temp));
-  answer = (2. * H * pow (freq, 3.)) / (pow (C, 2));
-  answer *= (1 / (bbe - 1));
-//      answer*=weight;
-  answer *= sigma_phot_topbase (xtop, freq);
-  answer /= freq;
-
-  return (answer);
-}
-
-
-
-
-/**************************************************************************
-                    Space Telescope Science Institute
-
-
-  Synopsis:  
-
-  Description:	
-	verner_planck is the function a\nuB\nu and is called by Qromb in order to integrate over the frequency range where the
-	ionisation cross section is significant. This is the function for ions with a verner cross section NSH 16/12/10 
-
-  Arguments:  
-
-
-  Returns:
-
-  Notes:
-
-This is almost identical to code written to compute the sim power law correction. It is copied here to make the coding easier, plus it is likely that it will supplant the earlier code so that can all be deleted.
-
-
- 
-
-  History:
-
-12Feb NSH - written as part of the varaible temperature effort.
-13Sep	NSH - no longer called as of python76c - all data is in tabulated topbase type format - this can be deleted in time
-
- ************************************************************************/
-
-/*
-double
-verner_planck1 (freq)
-     double freq;
-{
-  double answer, bbe;
-  bbe = exp ((H * freq) / (BOLTZMANN * qromb_temp));
-  answer = (2. * H * pow (freq, 3.)) / (pow (C, 2));
-  answer *= (1 / (bbe - 1));
-//      answer*=weight;
-  answer *= sigma_phot (xver, freq);
-  answer /= freq;
-
-  return (answer);
-}
-*/
-
-/**************************************************************************
-                    Space Telescope Science Institute
-
-
-  Synopsis:  
-
-  Description:	
-	tb_pow is the function to allow integration of a power law photon distribution multiplied by the inoisation 
-	cross section
-  	to allow the numerator of the sim correction factor to be calulated for ions with topbase cross sections.
-
-  Arguments:  
-
-
-  Returns:
-
- Notes:
-
-This is almost identical to code written to compute the sim power law correction. It is copied here to make the coding easier, plus it is likely that it will supplant the earlier code so that can all be deleted.
-
-
- 
-
-  History:
-
-12Feb NSH - written as part of the varaible temperature effort.
-13Nov NSH - changed to work in logspace - and name changed.
- ************************************************************************/
-
-
-/* This is the old non-log version */
-//double
-//tb_pow1 (freq)
-//     double freq;
-//{
-//  double answer;
-//
-//  answer = xpl_w * (pow (freq, (xpl_alpha - 1.0)));
-//  answer *= sigma_phot_topbase (xtop, freq);	// and finally multiply by the cross section.
-//
-//  return (answer);
-//}
+**************************************************************/
 
 
 
 double
-tb_logpow1 (freq)
-     double freq;
+temp_func (solv_temp)
+     double solv_temp;
 {
   double answer;
-
-//  answer = xpl_w * (pow (freq, (xpl_alpha - 1.0)));
-
-  answer = pow(10,xpl_logw+(xpl_alpha-1.0)*log10(freq));
-
-
-  answer *= sigma_phot_topbase (xtop, freq);	// and finally multiply by the cross section.
+  answer =
+    log (4.83e15 / xxxne) + 1.5 * log (solv_temp) -
+    (xip / (BOLTZMANN * solv_temp));
 
   return (answer);
 }
 
 
-
-/**************************************************************************
-                    Space Telescope Science Institute
-
-
-  Synopsis:  
-	verner_pow is the function to allow integration of a power law photon distribution multiplied by the inoisation cross section
-   	to allow the numerator of the sim correction factor to be calulated for ions with verner cross sections.
-
-  Description:	
-
-  Arguments:  (Input via .pf file)		
-
-
-  Returns:
-
-  Notes:
-
-This is almost identical to code written to compute the sim power law correction. It is copied here to make the coding easier, plus it is likely that it will supplant the earlier code so that can all be deleted.
-
-
- 
-
-  History:
-
-12Feb NSH - written as part of the varaible temperature effort.
-13Sep	NSH - no longer called as of python76c - all data is in tabulated topbase type format - this can be deleted in time
- ************************************************************************/
-
-/*
-double
-verner_pow1 (freq)
-     double freq;
-{
-  double answer;
-
-  answer = xpl_w * (pow (freq, (xpl_alpha - 1.0)));
-  answer *= sigma_phot (xver, freq);	// and finally multiply by the cross section.
-
-  return (answer);
-}
-*/
-
-/**************************************************************************
-                    Space Telescope Science Institute
-
-
-  Synopsis:  
-	verner_exp is the function to allow integration of an exponential photon distribution multiplied by the inoisation cross section
-   	to allow the numerator of the sim correction factor to be calulated for ions with verner cross sections.
-
-  Description:	
-
-  Arguments:  (Input via .pf file)		
-
-
-  Returns:
-
-  Notes:
-
-This is almost identical to code written to compute the sim power law correction. It is copied here to make the coding easier, plus it is likely that it will supplant the earlier code so that can all be deleted.
-
-
- 
-
-  History:
-
-12Aug NSH - Written as part of the effort to improve the modelling
-13Sep	NSH - no longer called as of python76c - all data is in tabulated topbase type format - this can be deleted in time
- ************************************************************************/
-
-/*
-double
-verner_exp1 (freq)
-     double freq;
-{
-  double answer;
-
-  answer = xexp_w * exp ((-1.0 * H * freq) / (BOLTZMANN * xexp_temp));
-  answer *= sigma_phot (xver, freq);	// and finally multiply by the cross section.
-  answer /= freq;
-  return (answer);
-}
-*/
-
-
-
-/**************************************************************************
-                    Southampton University
-
-
-  Synopsis:  
-
-  Description:	
-	tb_exp is the function to allow integration of an exponential photon distribution multiplied by the inoisation 
-	cross section
-  	to allow the numerator of the correction factor to be calulated for ions with topbase cross sections.
-
-  Arguments:  
-
-
-  Returns:
-
- Notes:
-
-This is almost identical to code written to compute the sim power law correction. It is copied here to make the coding easier, plus it is likely that it will supplant the earlier code so that can all be deleted.
-
-
- 
-
-  History:
-
-12Aug Written by NSH as part of the effort to improve spectral modelling
- ************************************************************************/
-
-
-
-double
-tb_exp1 (freq)
-     double freq;
-{
-  double answer;
-
-  answer = xexp_w * exp ((-1.0 * H * freq) / (BOLTZMANN * xexp_temp));
-  answer *= sigma_phot_topbase (xtop, freq);	// and finally multiply by the cross section.
-  answer /= freq;
-  return (answer);
-}

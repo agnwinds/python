@@ -97,7 +97,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o auger_ionization.o \
 		agn.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
 		spectral_estimators.o variable_temperature.o matom_diag.o \
-		log.o lineio.o rdpar.o
+		log.o lineio.o rdpar.o pi_rates.o
 
 
 python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
@@ -111,7 +111,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		matom.c estimators.c wind_sum.c yso.c elvis.c cylindrical.c rtheta.c spherical.c  \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c auger_ionization.c \
 		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
-		spectral_estimators.c variable_temperature.c matom_diag.c
+		spectral_estimators.c variable_temperature.c matom_diag.c pi_rates.c
 
 # kpar_source is now declared seaprately from python_source so that the file log.h 
 # can be made using cproto
@@ -252,7 +252,7 @@ balance: balance.o balance_sub.o balance_gen.o balance_abso.o \
 		util.o anisowind.o reposition.o density.o  detail.o bands.o matom.o estimators.o  bilinear.o   \
 		spherical.o cylindrical.o cylind_var.o rtheta.o yso.o elvis.o gridwind.o wind_sum.o \
 		partition.o auger_ionization.o agn.o shell_wind.o compton.o torus.o spectral_estimators.o \
-		dielectronic.o variable_temperature.o zeta.o
+		dielectronic.o variable_temperature.o zeta.o pi_rates.o
 	$(CC)   ${CFLAGS} balance.o balance_sub.o balance_gen.o   balance_abso.o \
 		emission.o recomb.o balance_bb.o gradv.o  detail.o \
 		get_atomicdata.o random.c wind2d.o wind.o  bal_trans_phot.o \
@@ -263,7 +263,7 @@ balance: balance.o balance_sub.o balance_gen.o balance_abso.o \
 		util.o anisowind.o reposition.o density.o bands.o matom.o estimators.o bilinear.o \
 		spherical.o cylindrical.o cylind_var.o rtheta.o  yso.o elvis.o   gridwind.o wind_sum.o\
 		partition.o  auger_ionization.o agn.o shell_wind.o torus.o compton.o spectral_estimators.o\
-		dielectronic.o  variable_temperature.o zeta.o \
+		dielectronic.o  variable_temperature.o zeta.o pi_rates.o\
 		$(LDFLAGS) -o balance
 	cp $@ $(BIN)/balance
 	mv $@ $(BIN)/balance$(VERSION)

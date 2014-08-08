@@ -389,7 +389,6 @@ be optional which variables beyond here are moved to structures othere than Wind
 	}
       else
 	plasmamain[n].w = 0.5;	//Modification to allow for possibility that grid point is inside star
-printf ("about to do initial concentrations\n");
       /* Determine the initial ionizations, either LTE or  fixed_concentrations */
       if (geo.ioniz_mode != IONMODE_FIXED)
 	{			/* Carry out an LTE determination of the ionization */
