@@ -462,15 +462,15 @@ randwind_thermal_trapping(p, nnscat)
 
   ztest = 1.0;
   z = 0.0;
-
-  /* JM 1406 -- Previously to Python 77a, we used to increment the scatters in the loop 
-     below. We are treating nscat as 'number of resonant zones we interact with',
-     so we don't really want to do this. It was originally done in order to get an 
-     idea of how many scatterings a photon would undergo when escaping the sobolev zone
+ 
+  /* JM 1406 -- we increment nnscat here, and it is recorded in the photon
+    structure. This is done because we actuall have to multiply the photon weight 
+    by 1/mean escape probability- which is nnscat. this is done in trans_phot.c
+    before extract is called. Note that we also 
   */  
   *nnscat = *nnscat - 1;
 
-   /* rejection method loop */
+   /* rejection method loop, which chooses direction and also calculated nnscat*/
    while (ztest > z)
   {
     *nnscat = *nnscat + 1; //- JM - see above 
@@ -481,12 +481,12 @@ randwind_thermal_trapping(p, nnscat)
 
     /* generate random number, normalised by p_norm with a 1.2 for 20% 
        safety net (as dvds_max is worked out with a sample of directions) */
-    ztest = (rand () + 0.5) / MAXRAND * p_norm * NNSCAT_SAFETY;   
+    ztest = (rand () + 0.5) / MAXRAND * p_norm;   
     dvds = dvwind_ds (p);
     ishell = p->grid;
     tau = sobolev (one, p, -1.0, lin_ptr[p->nres], dvds);
 
-    z = p_escape_from_tau(tau);  /* probability to see if it escapes in that direction */
+    z = p_escape_from_tau (tau);  /* probability to see if it escapes in that direction */
   }
   
   /* one could copy to the photon pointer here, 

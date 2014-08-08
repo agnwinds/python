@@ -888,10 +888,6 @@ typedef struct photon
 }
 p_dummy, *PhotPtr;
 
-/* JM 1407 -- This is the safety net by which we normalise the random number generated
-  in the loop in randwind_thermal_trapping. It is also used when we multiply 
-  by nscat in trans_phot during the spectral cycles */
-#define NNSCAT_SAFETY 1.2
 
 /* minimum value for tau for p_escape_from_tau function- below this we 
    set to p_escape_ to 1 */
