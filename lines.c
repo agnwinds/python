@@ -698,9 +698,14 @@ p_escape (line_ptr, xplasma)
 }
 
 /* p_escape_from_tau calculates the probability of escape
-   given an actual tau. This is used by p_escape above,
-   which calculated the sobolev escape probability, and 
-   also by the anisotropic scattering routines 
+   given an actual tau. It simple returns the equation
+
+   (1. - exp (-tau)) / tau;
+
+   Except for high and low tau where it returns 1/tau and
+   1.0 respectively. This is used by p_escape above, which 
+   calculates the sobolev escape probability, and 
+   also by the anisotropic scattering routines. 
 
    History:
    1408 JM  Moved here to avoid code duplication
