@@ -893,8 +893,9 @@ p_dummy, *PhotPtr;
   by nscat in trans_phot during the spectral cycles */
 #define NNSCAT_SAFETY 1.2
 
-/* minimum value for p_norm */
-#define P_NORM_MIN 1e-15
+/* minimum value for tau for p_escape_from_tau function- below this we 
+   set to p_escape_ to 1 */
+#define TAU_MIN 1e-6
 
 
 /* 68b - ksl - This is a structure in which the history of a single photon bundle can be recorded

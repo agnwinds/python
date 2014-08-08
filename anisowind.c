@@ -453,12 +453,12 @@ randwind_thermal_trapping(p, nnscat)
 
   /* then turn into a probability. Note that we take account of
      this in trans_phot before calling extract */
-  p_norm = (1. - exp (-tau_norm)) / tau_norm;
+  p_norm = p_escape_from_tau(tau_norm);
 
-  /* In an attempt to address issue #95, we set a minimum floor to p_norm of 1e-16
-     set in python.h. This is also applied in trans_phot.c */
-  if (p_norm < P_NORM_MIN)
-    p_norm = P_NORM_MIN; 
+  /* Throw error if p_norm is 0 */
+  if (p_norm <= 0)
+    Error("randwind_thermal_trapping: p_norm is %8.4e in cell %i",
+           p_norm, one->nplasma);
 
   ztest = 1.0;
   z = 0.0;
@@ -486,10 +486,7 @@ randwind_thermal_trapping(p, nnscat)
     ishell = p->grid;
     tau = sobolev (one, p, -1.0, lin_ptr[p->nres], dvds);
 
-    if (tau < 1.0e-5)
-      z = 1.0;
-    else
-      z = (1. - exp (-tau)) / tau;  /* probability to see if it escapes in that direction */
+    z = p_escape_from_tau(tau);  /* probability to see if it escapes in that direction */
   }
   
   /* one could copy to the photon pointer here, 

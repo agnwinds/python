@@ -212,10 +212,7 @@ trans_phot (w, p, iextract)
 				  wmain[pextract.grid].dvds_max);
 
 	      /* then turn into a probability */
-	      p_norm = NNSCAT_SAFETY * (1. - exp (-tau_norm)) / tau_norm;
-
-	      if (p_norm < P_NORM_MIN)
-            p_norm = P_NORM_MIN;
+          p_norm = p_escape_from_tau(tau_norm);
 	    }
 	  else
 	    {
