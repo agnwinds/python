@@ -466,7 +466,7 @@ randwind_thermal_trapping(p, nnscat)
   /* JM 1406 -- we increment nnscat here, and it is recorded in the photon
     structure. This is done because we actuall have to multiply the photon weight 
     by 1/mean escape probability- which is nnscat. this is done in trans_phot.c
-    before extract is called. Note that we also 
+    before extract is called. 
   */  
   *nnscat = *nnscat - 1;
 
