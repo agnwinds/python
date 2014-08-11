@@ -250,7 +250,7 @@ double xinteg_fb(double t, double f1, double f2, int nion, int fb_choice);
 int fb_save(char filename[]);
 int fb_read(char filename[]);
 double total_rrate(int nion, double T);
-double badnell_gs_rr(int nion, double T);
+double gs_rrate(int nion, double T);
 double milne_gs_rr(int nion, double T);
 /* diag.c */
 int open_diagfile(void);
@@ -447,13 +447,12 @@ double exp_w(double j, double exp_temp, double numin, double numax);
 double exp_stddev(double exp_temp, double numin, double numax);
 /* variable_temperature.c */
 int variable_temperature(PlasmaPtr xplasma, int mode);
-double bb_correct_2(double xtemp, int nion, PlasmaPtr xplasma);
+double pi_correct(double xtemp, int nion, PlasmaPtr xplasma, int mode);
 double temp_func(double solv_temp);
-double pl_correct_2(double xtemp, int nion, PlasmaPtr xplasma);
 /* matom_diag.c */
 int matom_emiss_report(void);
 /* pi_rates.c */
-double calc_pi_rate(int ion_lower, PlasmaPtr xplasma, int mode);
+double calc_pi_rate(int nion, PlasmaPtr xplasma, int mode);
 double tb_planck1(double freq);
 double tb_logpow1(double freq);
 double tb_exp1(double freq);

@@ -9,22 +9,65 @@
 
 struct topbase_phot *xtop;	//Topbase description of a photoionization x-section 
 
-double qromb_temp;  //Temerature used in integrations.
+double qromb_temp;  //Temerature used in integrations - has to be an external variable so
 
 double xpl_alpha, xpl_w, xpl_logw;
 double xexp_temp, xexp_w;
 
 
 
+/***********************************************************
+                                       West Lulworth
+
+  Synopsis:   
+
+int
+calc_pi_rate (nion,xplasma,mode)  calculates the photoionization rarte coefficient for ion	
+				nion, based upon the mean intensity stored in cell xplasma
+				The mode tells the subroutine wether we are modelling the
+				mean intensity as a dilute blackbody (mode2) or as a series
+				of power laws and exponentials (mode1). 
+  
+  Arguments:		
+     ion	nion;		The ion we are interested in - this is the ion which is being
+				photoionized
+     PlasmaPtr xplasma;		The cell in question - note that the details of the model
+				is stored in this structure.
+     int mode;			1 - use a power law and or exponential model for J
+     				2 - use a dilute BB model for J - t_r and w are those 
+				parameters in xplasma
+
+
+  Returns:
+ 	The photioinization rate coefficient for the ion.
+ 	
+  Description:	
+
+
+ 
+  Notes:
+
+  This was created in Summner 2014 in preparation for matrix ionization solver. Previously, this code
+	was contained in two subroutines bb_correct_2 and pl_correct_2.The functoinsality of thses two
+	have ben combined into one - hence the requirement for the mode parameter.
+
+
+
+  History:
+	2014Aug NSH - coded
+
+**************************************************************/
+
+
+
 
 double 
-calc_pi_rate (ion_lower,xplasma,mode)
+calc_pi_rate (nion,xplasma,mode)
 	PlasmaPtr xplasma;
-	int ion_lower;
+	int nion;
 	int mode;
 {
   double q;
-  double xtemp;
   int  n, j;
   double pi_rate;
   int ntmin, nvmin;
@@ -33,19 +76,18 @@ calc_pi_rate (ion_lower,xplasma,mode)
   double exp_qromb, pl_qromb;
 
 
-  xtemp=xplasma->t_r;
   exp_qromb = 1e-4;
   pl_qromb = 1e-4;
 
 
-  if (-1 < ion_lower && ion_lower < nions)	//Get cross section for this specific ion_number
+  if (-1 < nion && nion < nions)	//Get cross section for this specific ion_number
     {
-      ntmin = ion[ion_lower].ntop_ground;	/*We only ever use the ground state cross sections. This is for topbase */
-      nvmin = ion_lower;	/*and this is for verner cross sections */
+      ntmin = ion[nion].ntop_ground;	/*We only ever use the ground state cross sections. This is for topbase */
+      nvmin = nion;	/*and this is for verner cross sections */
     }
   else
     {
-      Error ("calc_pi_rate: %d is unacceptable value of nion\n", ion_lower);
+      Error ("calc_pi_rate: %d is unacceptable value of nion\n", nion);
       mytrap ();
       exit (0);
       return (1.0);
@@ -53,34 +95,22 @@ calc_pi_rate (ion_lower,xplasma,mode)
 
 
 
-  if (ion[ion_lower].phot_info == 1)	//topbase
+  if (ion[nion].phot_info == 1)	//topbase
     {
       n = ntmin;
       xtop = &phot_top[n];
     }
-  else if (ion[ion_lower].phot_info == 0)	// verner
+  else if (ion[nion].phot_info == 0)	// verner
     {
       n = nvmin;		//just the ground state ionization fraction.
       xtop = &xphot_tab[ion[n].nxphot];
     }
   else
     {
-//      pl_correct_err++;		/* If we get here, there are no cross sections available */
-//      if (pl_correct_err < 100)
-//	{
 	  Error
-	    ("calc_pi_rate: No photoionization xsections for ion %d (element %d, ion state %d), setting rate to 0\n",
-	     ion_lower, ion[ion_lower].z, ion[ion_lower].istate);
-	  pi_rate=0;
-	  return (pi_rate);
-//	}
-//      else if (pl_correct_err == 100)
-//	{
-//	  Error
-//	    ("xinteg_sim: Suppressing photoionization xsection error, but more photo xsections are needed in atomic data\n");
-//	}
-//    q = 1.;			/*This is really bad actually, this will leave the abundances all wrong.... */
-//      return (q);
+	    ("calc_pi_rate: No photoionization xsection for ion %d (element %d, ion state %d)\n",
+	     nion, ion[nion].z, ion[nion].istate);
+	  exit(0); /* NSH 1408 I have decided that this is actually a really serous problem - we have no business including an ion for which we have no photoionization data.... */
     }
 
   fthresh = xtop->freq[0];
@@ -155,10 +185,10 @@ if (mode==1) //Modelled version of J
 	}
 
 }
-else if (mode==2)  //planck
+else if (mode==2)  //blackbody mode
 	{
   fmaxtemp = xtop->freq[xtop->np - 1];
-  fmax = check_fmax (fthresh, fmaxtemp, xtemp);
+  fmax = check_fmax (fthresh, fmaxtemp, xplasma->t_r);
   if (fthresh > fmax)
     {
       Error
@@ -166,8 +196,8 @@ else if (mode==2)  //planck
       q = 1.0;
       return (q);
     }
-  qromb_temp = xtemp;		
-  pi_rate = qromb (tb_planck1, fthresh, fmax, 1.e-4);
+  qromb_temp = xplasma->t_r;		
+  pi_rate = xplasma->w * qromb (tb_planck1, fthresh, fmax, 1.e-4);
     }
 
 

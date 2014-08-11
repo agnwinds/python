@@ -1114,7 +1114,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 			{
 	  		fmax = fthresh + dnu;
 			}
-	    	fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
+	    	fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-5);
 	    	}
 	}
     }
@@ -1141,7 +1141,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 			{
 	  		fmax = fthresh + dnu;
 			}
-	        fnu += qromb (fb_verner_partial, fthresh, fmax, 1.e-4);
+	        fnu += qromb (fb_verner_partial, fthresh, fmax, 1.e-5);
 		}
 	}
     }
@@ -1458,25 +1458,28 @@ History:
 **************************************************************/
 
 double
-badnell_gs_rr (nion, T)
+gs_rrate (nion, T)
      int nion;
      double T;
 {
   double rate, drdt, dt;
   int i, imin, imax;
   double rates[BAD_GS_RR_PARAMS], temps[BAD_GS_RR_PARAMS];
+  int ntmin, nvmin, n;
+  double fthresh, fmax, dnu;
 
 
   imin = imax = 0;		/* NSH 130605 to remove o3 compile error */
 
 
-  if (ion[nion].bad_gs_rr_t_flag != 1 && ion[nion].bad_gs_rr_r_flag != 1)
-    {
-      Error ("bad_gs_rr: Insufficient GS_RR parameters for ion %i\n", nion);
-      return (0);
-    }
+//  if (ion[nion].bad_gs_rr_t_flag != 1 && ion[nion].bad_gs_rr_r_flag != 1)
+//    {
+//      Error ("bad_gs_rr: Insufficient GS_RR parameters for ion %i\n", nion);
+//      return (0);
+//    }
 
-
+if (ion[nion].bad_gs_rr_t_flag == 1 && ion[nion].bad_gs_rr_r_flag == 1)	//We have tabulated gs data
+   {
   for (i = 0; i < BAD_GS_RR_PARAMS; i++)
     {
       rates[i] = bad_gs_rr[ion[nion].nxbadgsrr].rates[i];
@@ -1521,7 +1524,46 @@ badnell_gs_rr (nion, T)
       drdt = (log10(rates[imax]) - log10(rates[imin])) / (log10(temps[imax]) - log10(temps[imin]));
       dt = (log10(T) - log10(temps[imin]));
       rate = pow(10,(log10(rates[imin]) + drdt * dt));
+}
+else  //we will need to use the milne relation
+{
+ rate = 0.0;			/* NSH 130605 to remove o3 compile error */
 
+rate=integ_fb (T,3e14,3e19, nion, 2);
+
+
+  fbt = T;
+  fbfr = 2;
+
+  if (ion[nion].phot_info == 1)	//topbase
+    {
+
+      ntmin = ion[nion].ntop_ground;
+      fb_xtop = &phot_top[ntmin];
+      fthresh = fb_xtop->freq[0];
+      fmax = fb_xtop->freq[fb_xtop->np - 1];
+      dnu = 100.0 * (fbt / H_OVER_K);
+      if (fthresh + dnu < fmax)
+	{
+	  fmax = fthresh + dnu;
+	}
+      rate = qromb (fb_topbase_partial, fthresh, fmax, 1e-5);
+    }
+  else if (ion[nion].phot_info == 0)	// verner
+    {
+      nvmin = nion;
+      n = nvmin;
+      fb_xver = &xphot[ion[n].nxphot];
+      fthresh = fb_xver->freq_t;
+      fmax = fb_xver->freq_max;
+      dnu = 100.0 * (fbt / H_OVER_K);
+      if (fthresh + dnu < fmax)
+	{
+	  fmax = fthresh + dnu;
+	}
+      rate = qromb (fb_verner_partial, fthresh, fmax, 1e-5);
+    }
+}
 
 
     

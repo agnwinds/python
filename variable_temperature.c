@@ -105,13 +105,6 @@ variable_temperature (xplasma, mode)
   double gs_fudge[NIONS];	/*It can be expensive to calculate this, and it only depends on t_e - which is fixed for a run. So 
 				   //                 calculate it once, and store it in a temporary array */
 
-  /* Copy xplasma to local plasma varaible, used to communicate w and alpha to the power law correction routine. 
-     NSH 120703 - also used to set the  denominator calculated for a given ion for this cell last time round 
-     ksl 1407 - Not obvious why this was done; the next line merely sets xxxplasma to the pointer xplasma.  It
-     does not copy anythin*/
-//xxxplasma = xplasma;		
-
-
   nh = xplasma->rho * rho2nh;	//LTE
   t_e = xplasma->t_e;
   t_r = xplasma->t_r;
@@ -257,11 +250,11 @@ variable_temperature (xplasma, mode)
 		  else
 		    {
 
-		      pi_fudge = bb_correct_2 (xtemp, nion, xplasma);
+		      pi_fudge = pi_correct (xtemp, nion, xplasma, mode);
 
 		      tot_fudge =
 			pi_fudge * recomb_fudge * (gs_fudge[nion] +
-						   www * (1 -
+						   xplasma->w * (1 -
 							  gs_fudge[nion]));
 		    }
 		}
@@ -270,7 +263,7 @@ variable_temperature (xplasma, mode)
 
 	      else if (mode == 7)	
 		{
-		  pi_fudge = pl_correct_2 (xtemp, nion, xplasma);
+		  pi_fudge = pi_correct (xtemp, nion, xplasma, mode);
 
 
 		  tot_fudge =
@@ -407,18 +400,23 @@ variable_temperature (xplasma, mode)
                                        Southampton University
 
   Synopsis:   
-	bb_correct_2(xtemp, t_r,www,nion) calculates the 
- 	correction factor of the number density of two adjacent levels calculated
+	pi_correct(xtemp,nion,xplasma,mode) calculates the photoionization rate
+ 	correction factor for the number density of two adjacent levels calculated
 	at any temperature. LM is a special case of this where the temperatures
-	are the same. 
+	are the same. Prior to Aug14, this was two routines bb_correct_2 and 
+	pl_correct_2. Removing the calculations of the PI rates to a seperate
+	routine have allowed the two routines to be combined into 1.
  
   Arguments:		
 
 	double xtemp		the temperature at which the saha abundances were calculated
-	double t_r		temperature of the radiation field 
-	double www		dilution factor for the radiation field
 	int nion;		number of the upper ion in the pair for which the correction factor is
 				being calculated.
+	PlasmaStr xplasma	The cell currnently under test - this supplied the code with
+				the parameters of the radiation field in the cell
+	int mode		This is the ionization mode - 6 means we model the specific intensity
+				as a dilute blackbody, 7 means it is modelled as a set of power laws
+				or exponentials
 
   Returns:
  	j			the correction factor
@@ -435,192 +433,81 @@ variable_temperature (xplasma, mode)
 
   History:
  
-	12feb		NSH	Coded as part of the quasar project
+	12feb	NSH	Coded as part of the quasar project
 	13sep	NSH	Changed to always use the topbase style of data - verner data is now tabulated.
+  	14aug	NSH	Code to calculate the PI rate coefficient removed to new subroutine calc_pi_rate
+			as part of the effort to inroduce matrix ionization calculation. This meant that
+			the two old routines have ben combined into 1.
 
 **************************************************************/
 int bb_correct_err = 0;
 
 double
-bb_correct_2 (xtemp , nion, xplasma)
+pi_correct (xtemp , nion, xplasma, mode)
      double xtemp;
      int nion;
      PlasmaPtr xplasma;
+     int mode;
 {
   double q;
   int ion_lower;
-  double numerator, denominator,t_r_store;
+  double numerator, denominator;
+  double w_store,t_r_store;
 
 
+numerator=denominator=0.0;
   ion_lower = nion - 1;		/*the call uses nion, which is the upper ion in the pair */
+				/*This line is required because calc_pi_rate is called with the ion
+				which is being ionized */
 
 
 
-  if (pow
-      (((xplasma->t_r -
-	 xplasma->PWntemp[ion_lower]) / xplasma->PWntemp[ion_lower]),
-       2) > 1e-6)
-    {
-      numerator = xplasma->w * calc_pi_rate(ion_lower,xplasma,2);	//and is corrected for W
-      xplasma->PWnumer[ion_lower] = numerator;
-      xplasma->PWntemp[ion_lower] = xplasma->t_r;
-    }
+ if (niterate == 0)		/*first time of iterating this cycle, so calculate the numerator. This rate only depends on the model of J, which doesnt change during the iteration cycle*/
+    	{
+	if (mode==6)
+		{
+      		numerator = calc_pi_rate(ion_lower,xplasma,2);	/*Call calc_pi_rate with mode 2, which returns the PI rate coeficient*/
+		}
+	else if (mode==7)  /*The mean intensity is modelled as a series of power laws and/or exponentials */
+		{
+		numerator=calc_pi_rate (ion_lower,xplasma,1); /*NSH 0814 - the PI rate is now calculated by an external subroutine. Mode 1 means calulate using a PL/exp model of the mean intensity*/
+		}
+	xplasma->PWnumer[ion_lower] = numerator;	/* Store the calculated numerator for this cell - it wont change during one ionization cycle*/
+    	}				//End of if statement to decide if this is the first iteration
   else
-    {
-      numerator = xplasma->PWnumer[ion_lower];
-    }
-
-  if (numerator == 0.0)
-    return (0.0);		//There is no need to waste time evaluating the denominator
-
-
- if (pow (((xtemp - xplasma->PWdtemp[ion_lower]) / xplasma->PWdtemp[ion_lower]), 2) > 1e-6)	//If our guess temperature hasnt changed much, use denominator from last time
-    {
-      t_r_store=xplasma->t_r;
-      xplasma->t_r=xtemp;
-      denominator = calc_pi_rate(ion_lower,xplasma,2);
-      xplasma->t_r=t_r_store;
-      xplasma->PWdenom[ion_lower] = denominator;
-      xplasma->PWdtemp[ion_lower] = xtemp;
-    }
-  else
-    {
-      denominator = xplasma->PWdenom[ion_lower];
-    }
-
-
-  q = numerator / denominator;
-
-
-  return (q);
-
-}
-
-
-
-
-/***********************************************************
-                                       Southampton University
-
-  Synopsis:   
-	pl_correct_2(xtemp,nion) calculates the 
- 	correction factor of the number density of two adjacent levels calculated
-	at any temperature based upon a true radiation field modelled by a broken power law
- 
-  Arguments:		
-
-	double xtemp		the temperature at which the saha abundances were calculated
-	int nion;		the upper ion in an ion pair for which we want to correction factyor
-
-  Returns:
- 	q		        the correction factor
- 	
- Description:	
-
-	 
-
- 
-  Notes:
-	The weights and alpha values needed for the integrals are communicated to this routine vias xxxplasma, an external varaible which is popullated in the variable_temperature routine.
-	The integrals over power law require individual alphas and w, these are communicated via external variables xpl_alpha and xpl_w.	
-
-
-  History:
- 
-	12feb	NSH	Coded as part of the quasar project
-        12aug   NSH     Added code to allow an exponential model of j to be used.
-	13sep	NSH	Reversed commenting out of lines that check for maximum frequency and 
-			reset integration limits - unsure why this was ever commented out!
-	13sep	NSH	Changed to always use the topbase style of data - verner data is now tabulated.
-	13nov	NSH	Changed to use the new log version of PL, also the min and max frequencies in 
-			a band are used to decide the applicability of a model.
-        14aug	NSH	reorganisation - the PI rate coefficients are now calculated by an external
-			subroutine. For the LTE rate, the guess temperature is communicated via the 
-			plasma variable t_r.
-
-**************************************************************/
-
-double
-pl_correct_2 (xtemp, nion, xplasma)
-	double xtemp;
-     int nion;     
-     PlasmaPtr xplasma;
-{
-  double q;
-  int ion_lower;
-  double numerator, denominator, t_r_store;
-
-
-
-
-  ion_lower = nion - 1;		/*the call uses nion, which is the upper ion in the pair, we are interested in the PI from the lower ion */
-
-  if (niterate == 0)		//first time of iterating this cycle, so calculate the numerator
-    {
-      numerator=calc_pi_rate (ion_lower,xplasma,1); //NSH 0814 - the PI rate is now calculated by an external subroutine
-      xplasma->PWnumer[ion_lower] = numerator;	// Store the calculated numerator for this cell - it wont change during one ionization cycle
-    }				//End of if statement to decide if this is the first iteration
-  else
-    {
-      numerator = xplasma->PWnumer[ion_lower];	// We are on the second iteration, so use the stored value
-    }
-  if (numerator == 0.0)
+    	{
+      	numerator = xplasma->PWnumer[ion_lower];	// We are on the second iteration, so use the stored value
+    	}
+  if (numerator == 0.0) /*There is no PI for this ion*/
     {
       return (0.0);		//There is no need to waste time evaluating the denominator
     }
 
 
-  if (pow (((xtemp - xplasma->PWdtemp[ion_lower]) / xplasma->PWdtemp[ion_lower]), 2) > 1e-6)	//If our guess temperature hasnt changed much, use denominator from last time
+ if (pow (((xtemp - xplasma->PWdtemp[ion_lower]) / xplasma->PWdtemp[ion_lower]), 2) > 1e-6)	//If our guess temperature hasnt changed much, use denominator from last time
     {
-      t_r_store=xplasma->t_r; //NSH 0814 - New formulation passes the guess temperature to the PI calculation code via t_r, so store the real t_r for a bit.
+      t_r_store=xplasma->t_r;	/*calc_pi_rate uses the value of t_r and w in the plasma structure to compute the rate coefficient, so we need to store the actual value of t_r and w so we can substititute our guess temperature and w=1 (to get LTE)*/	
+      w_store=xplasma->w;   
       xplasma->t_r=xtemp;
-      denominator = calc_pi_rate(ion_lower,xplasma,2); //NSH 0814 - the PI rate is now calculated by an external subroutine
-      xplasma->t_r=t_r_store; //NSH 0814 - reassign the real t_r to the structure variable
-      xplasma->PWdenom[ion_lower] = denominator;
-      xplasma->PWdtemp[ion_lower] = xtemp;
+      xplasma->w=1.0;
+      denominator = calc_pi_rate(ion_lower,xplasma,2); /*Now we can call calc_pi_rate, which will now calulate an LTE rate coefficient at our guess temperature */
+      xplasma->t_r=t_r_store; /*Put things back the way they were */
+      xplasma->w=w_store;
+      xplasma->PWdenom[ion_lower] = denominator;  /*Store the LTE rate coefficient for next time*/
+      xplasma->PWdtemp[ion_lower] = xtemp;  	/*And also the temperature at which it was calculated */
     }
   else
     {
-      denominator = xplasma->PWdenom[ion_lower];
+      denominator = xplasma->PWdenom[ion_lower]; /*The temperature hadnt changed much, so use the stored value*/
     }
-      q = numerator / denominator;	/*Just work out the correction factor - hope it isnt infinite! */
 
 
-
+  q = numerator / denominator;  /*This is the PI rate correction factor*/
 
 
   return (q);
+
 }
-
-
-
-
-/***********************************************************
-                                       Southampton University
-
-  Synopsis:   
-	temp_func is the function used in zbrent to find an ideal temperature to
-	calculate the LTE abundances in the variable temperature code. This temperature
-	is also then used to compute the denominator of the PI rate correction factor.
-	The equation solved is equation 5.1 in NSHs thesis. The statistical weights are
-	ignored, and n_i/n_i+1 is set equal to 1. Both sides are divided by n_e, and then
-	logs taken. To find where n_i/n_i+1 is equal to 1, we therefore find the zero
-	point of log(constants/ne)+1.5log(temp)-exponent of exponential. This is done
-	using zbrent.
- 
-  Arguments:		
-
-	double solv_temp		temperature 
-
-
-  Returns:
- 	answer		       	 	answer
- 	
- Description:	
-
-	 
-
-**************************************************************/
 
 
 

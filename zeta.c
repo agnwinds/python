@@ -147,74 +147,45 @@ compute_zeta (temp, nion, mode)
       /* We call this with the lower ion in a pair, so if that ion has only one electron, 
          (ie. Carbon 6) then we cannot have DR into this ion, so there will be no DR rate 
          associated with it. NSH 140317 We also do this if we dont have DR data at all. */	
-      if (ion[nion].istate == ion[nion].z || ion[nion].drflag == 0)	
-	{
+      if (ion[nion].istate == ion[nion].z || ion[nion].drflag == 0)  //Either we dont have DR data, or DR cannot happen	
+	  {
 	  if (ion[nion].total_rrflag == 1)	//We have total RR data
-	    {
-
-	      if (ion[nion].bad_gs_rr_t_flag == 1 && ion[nion].bad_gs_rr_r_flag == 1)	//We have tabulated gs data
-		{
-		  zeta =
-		    badnell_gs_rr (nion, temp) / total_rrate (nion, temp);
-            //Log ("We have all the data, and zeta=%f gs=%e total=%e\n",zeta,badnell_gs_rr (nion, temp),total_rrate (nion, temp));
-		}
-
-	      else		//We are going to have to integrate
-		{
-		  //Log
-		  //  ("We do not have tabulated GS data for state %i of element %i\n",
-		  //   ion[nion].istate, ion[nion].z);
-		  zeta = milne_gs_rr (nion, temp) / total_rrate (nion, temp);
-		}
-	    }
-
-	  else
-	    {
-	      zeta =
-		ground_frac[nion].frac[ilow] +
-		interpfrac * (ground_frac[nion].frac[ihi] -
+	    	{
+	    	zeta = gs_rrate (nion, temp) / total_rrate (nion, temp);
+            	}
+	  
+      	  else        //We dont have total RR data, so we must default back to the old way of doing things
+	        {
+                Error ("Compute zeta: total radiative recombination rate missing for element %i state %i\n",ion[nion].z,ion[nion].istate);
+	        zeta =
+		   ground_frac[nion].frac[ilow] +
+		   interpfrac * (ground_frac[nion].frac[ihi] -
 			      ground_frac[nion].frac[ilow]);
-        //Log ("We dont have the data and zeta=%f\n",zeta);
-	    }
-
-	}
-
-
-      else
-	{
-	  if (ion[nion].drflag > 0 && ion[nion].total_rrflag == 1)	//We have the two tabulated rates
-	    {
-	    //Log ("We have dr and total_rr/n");
-	      compute_dr_coeffs (temp);
-	      if (ion[nion].bad_gs_rr_t_flag == 1 && ion[nion].bad_gs_rr_r_flag == 1)	//We also have tabulated GS data
-		{
-		//Log("We have gs_rr/n");
-		  zeta =
-		    badnell_gs_rr (nion,
-				   temp) / (total_rrate (nion,
-							 temp) +
-					    dr_coeffs[nion]);
 		}
-	      else		//We are going to have to integrate
-		{
-		//Log ("We are ging to have to integrate");
+	}
+      else  //We do have DR data, so we can include this in zeta
+	{
+	  if (ion[nion].drflag > 0 && ion[nion].total_rrflag == 1)	//We have total RR data
+	    {
+	      compute_dr_coeffs (temp);
 		  zeta =
-		    milne_gs_rr (nion,
+		    gs_rrate (nion,
 				 temp) / (total_rrate (nion,
 						       temp) +
 					  dr_coeffs[nion]);
-		}
+		
 	    }
-	  else
+	  else  //We dont have total RR data
             {
+                Error ("Compute zeta: total radiative recombination rate missing for element %i state %i\n",ion[nion].z,ion[nion].istate);
 	      zeta =
 		ground_frac[nion].frac[ilow] +
 		interpfrac * (ground_frac[nion].frac[ihi] -
 			      ground_frac[nion].frac[ilow]);
-                      Log ("We dont have the data and zeta=%f\n",zeta);
 	    }
 	}
-    }
+}
+    
 
 
   /* if we got here then we don't understand the mode and there must be a problem */  
@@ -223,7 +194,6 @@ compute_zeta (temp, nion, mode)
       Error ("Compute zeta: Unkown mode %i \n", mode);
     }
 
-  //printf("element %d ion %d zeta %g\n", ion[nion].z, ion[nion].istate, zeta);
 
   return (zeta);
 }
