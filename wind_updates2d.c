@@ -639,26 +639,26 @@ free (commbuffer);
   for (nplasma = 0; nplasma < NPLASMA; nplasma++)
     {
       if (sane_check (plasmamain[nplasma].heat_tot))
-	Error ("wind_update:sane_check w\[%d).heat_tot is %e\n", nplasma,
+	Error ("wind_update:sane_check w(%d).heat_tot is %e\n", nplasma,
 	       plasmamain[nplasma].heat_tot);
       if (sane_check (plasmamain[nplasma].heat_photo))
-	Error ("wind_update:sane_check w\[%d).heat_photo is %e\n", nplasma,
+	Error ("wind_update:sane_check w(%d).heat_photo is %e\n", nplasma,
 	       plasmamain[nplasma].heat_photo);
       if (sane_check (plasmamain[nplasma].heat_photo_macro))
-	Error ("wind_update:sane_check w\[%d).heat_photo_macro is %e\n",
+	Error ("wind_update:sane_check w(%d).heat_photo_macro is %e\n",
 	       nplasma, plasmamain[nplasma].heat_photo_macro);
       if (sane_check (plasmamain[nplasma].heat_ff))
-	Error ("wind_update:sane_check w\[%d).heat_ff is %e\n", nplasma,
+	Error ("wind_update:sane_check w(%d).heat_ff is %e\n", nplasma,
 	       plasmamain[nplasma].heat_ff);
       if (sane_check (plasmamain[nplasma].heat_lines))
-	Error ("wind_update:sane_check w\[%d).heat_lines is %e\n", nplasma,
+	Error ("wind_update:sane_check w(%d).heat_lines is %e\n", nplasma,
 	       plasmamain[nplasma].heat_lines);
       if (sane_check (plasmamain[nplasma].heat_lines_macro))
-	Error ("wind_update:sane_check w\[%d}).heat_lines_macro is %e\n",
+	Error ("wind_update:sane_check w(%d).heat_lines_macro is %e\n",
 	       nplasma, plasmamain[nplasma].heat_lines_macro);
       /* 1108 NSH extra Sane check for compton heating */
       if (sane_check (plasmamain[nplasma].heat_comp))
-	Error ("wind_update:sane_check w\[%d).heat_comp is %e\n", nplasma,
+	Error ("wind_update:sane_check w(%d).heat_comp is %e\n", nplasma,
 	       plasmamain[nplasma].heat_comp);
       xsum += plasmamain[nplasma].heat_tot;
       psum += plasmamain[nplasma].heat_photo;
@@ -701,6 +701,27 @@ free (commbuffer);
   geo.lum_bl_ioniz = geo.lum_bl;
   geo.lum_wind_ioniz = geo.lum_wind;
   geo.lum_tot_ioniz = geo.lum_tot;
+
+  /* Added this system which counts number of times two situations occur (See #91)
+     We only report these every 100,000 times (one can typically get ) */
+
+  if (nerr_no_Jmodel > 1e5)
+    Log ("wind_update: mean_intensity: %i x10^5 occurrences this cycle of no model exists in a band, in mean intensity\n",
+  	  	      nerr_no_Jmodel / 1e5);
+
+  if (nerr_Jmodel_wrong_freq > 1e5)
+    Log ("wind_update: %i x10^5 occurrences this cycle of photon freq is outside frequency range of spectral model, in mean intensity\n",
+  	  	     nerr_Jmodel_wrong_freq / 1e5);
+
+  if (nerr_Jmodel_wrong_freq > 1e5 || nerr_no_Jmodel > 1e5)
+    {
+      Log ("wind_update: if the above numbers are >10^6 or so there could be a problem\n");
+      Log ("wind_update: check errors in spectral_estimators and low photon warnings in wind_update\n");
+    }
+
+  /* zero the counters which record diagnositcs from mean_intensity */
+  nerr_Jmodel_wrong_freq = 0;
+  nerr_no_Jmodel = 0;
 
 
 

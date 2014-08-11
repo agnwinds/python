@@ -450,6 +450,10 @@ be optional which variables beyond here are moved to structures othere than Wind
   dvds_ave ();
   wind_check (w, -1);		// Check the wind for reasonability
 
+  /* zero the counters which record diagnositcs from mean_intensity */
+  nerr_Jmodel_wrong_freq = 0;
+  nerr_no_Jmodel = 0;
+
 /*
      Check that m_dot is correct.  This calculation is very approximate.  It only calculates mdot
      flowing up through the grid, i.e. any material that leaks out the side will not be counted.  A
