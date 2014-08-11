@@ -704,20 +704,13 @@ free (commbuffer);
 
   /* Added this system which counts number of times two situations occur (See #91)
      We only report these every 100,000 times (one can typically get ) */
+  Log ("wind_update: note, errors from mean intensity can be high in a working model\n");
+  Log ("wind_update: can be a problem with photon numbers if errors from spectral_estimators and low photon number warnings\n");
+  Log ("wind_update: mean_intensity: %i x10^6 occurrences, this cycle, this thread of 'no model exists in a band'\n",
+  	  	      nerr_no_Jmodel / 1e6);
+  Log ("wind_update: mean intensity: %i x10^6 occurrences, this cycle, this thread of 'photon freq is outside frequency range of spectral model'\n",
+  	  	     nerr_Jmodel_wrong_freq / 1e6);
 
-  if (nerr_no_Jmodel > 1e5)
-    Log ("wind_update: mean_intensity: %i x10^5 occurrences this cycle of no model exists in a band, in mean intensity\n",
-  	  	      nerr_no_Jmodel / 1e5);
-
-  if (nerr_Jmodel_wrong_freq > 1e5)
-    Log ("wind_update: %i x10^5 occurrences this cycle of photon freq is outside frequency range of spectral model, in mean intensity\n",
-  	  	     nerr_Jmodel_wrong_freq / 1e5);
-
-  if (nerr_Jmodel_wrong_freq > 1e5 || nerr_no_Jmodel > 1e5)
-    {
-      Log ("wind_update: if the above numbers are >10^6 or so there could be a problem\n");
-      Log ("wind_update: check errors in spectral_estimators and low photon warnings in wind_update\n");
-    }
 
   /* zero the counters which record diagnositcs from mean_intensity */
   nerr_Jmodel_wrong_freq = 0;
