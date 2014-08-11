@@ -712,7 +712,7 @@ free (commbuffer);
   	  	     nerr_Jmodel_wrong_freq / 1e6);
 
 
-  /* zero the counters which record diagnositcs from mean_intensity */
+  /* zero the counters which record diagnositics from mean_intensity */
   nerr_Jmodel_wrong_freq = 0;
   nerr_no_Jmodel = 0;
 
