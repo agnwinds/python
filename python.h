@@ -1103,3 +1103,8 @@ int cell_phot_stats;		//1=do  it, 0=dont do it
 #define  NCSTAT 10		//The maximum number of cells we are going to log
 int ncstat;			// the actual number we are going to log
 int ncell_stats[NCSTAT];	//the numbers of the cells we are going to log
+
+
+/* Added variables which count number of times two situations occur (See #91) */
+int nerr_no_Jmodel;
+int nerr_Jmodel_wrong_freq;
