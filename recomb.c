@@ -1114,7 +1114,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 			{
 	  		fmax = fthresh + dnu;
 			}
-	    	fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-5);
+	    	fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
 	    	}
 	}
     }
@@ -1141,7 +1141,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 			{
 	  		fmax = fthresh + dnu;
 			}
-	        fnu += qromb (fb_verner_partial, fthresh, fmax, 1.e-5);
+	        fnu += qromb (fb_verner_partial, fthresh, fmax, 1.e-4);
 		}
 	}
     }
@@ -1346,7 +1346,9 @@ Description:
                                                                                                                                       
         This routine generates a total recombination rate for 
 		a given ion at a given temperature using 
-		badnell type parameters.
+		badnell or shull type parameters. If these
+		are not presnet, an error is produced but the code
+		soldiers on with a value from the milne relation.
                                                                                                                                       
 Notes:
 	
@@ -1355,6 +1357,9 @@ History:
         12jul   nsh     73 -- Began coding
 	24jul	nsh	73 -- Included the shull coefficients in the chianti database
 	14aug	nsh	78b-- renamed - from bad_t_rr since we dont just use badnell data.
+			Also rewritten to use the milne relation to get a value for the 
+			recombination rate in the absence of data. This is all in preparation
+			for the use of this routine to help populate a recombination rate matrix.
 	
                                                                                                                                       
 **************************************************************/
@@ -1373,11 +1378,9 @@ total_rrate (nion, T)
 
   rate = 0.0;			/* NSH 130605 to remove o3 compile error */
 
-  if (ion[nion].total_rrflag != 1)
-    {
-      Error ("total_rrate: No T_RR parameters for ion %i\n", nion);
-      return (0);
-    }
+
+  if (ion[nion].total_rrflag == 1) /*We have some kind of total radiative rate data*/
+{
   if (total_rr[ion[nion].nxtotalrr].type == RRTYPE_BADNELL)
     {
       rrA = total_rr[ion[nion].nxtotalrr].params[0];
@@ -1413,8 +1416,14 @@ total_rrate (nion, T)
   else
     {
       Error ("total_rrate: unknown parameter type for ion %i\n", nion);
+      exit(0);  /* NSH This is a serious problem! */
     }
-
+}
+  else /*NSH 140812 - We dont have coefficients - in this case we can use xinteg_fb with mode 2 to use the milne relation to obtain a value for this - it is worth throwing an error though, since there rreally should be data for all ions */
+    {
+      Error ("total_rrate: No T_RR parameters for ion %i - using milne relation\n", nion);
+      rate = xinteg_fb (T, 3e12, 3e18, nion, 2);
+    }
 
   return (rate);
 
@@ -1442,7 +1451,7 @@ Returns:
                                                                                                                                       
 Description:
                                                                                                                                       
-        This routine generates a total recombination rate for 
+        This routine generates a recombination rate to the ground state for 
 		a given ion at a given temperature using 
 		badnell type parameters. If these parameters are not
 		available for the given ion - the milne relation is
@@ -1532,11 +1541,9 @@ if (ion[nion].bad_gs_rr_t_flag == 1 && ion[nion].bad_gs_rr_r_flag == 1)	//We hav
       dt = (log10(T) - log10(temps[imin]));
       rate = pow(10,(log10(rates[imin]) + drdt * dt));
 }
-else  //we will need to use the milne relation
+else  //we will need to use the milne relation - NB - this is different from using xinteg_fb because that routine does recombination to all excited levels (at least for topbase ions).
 {
  rate = 0.0;			/* NSH 130605 to remove o3 compile error */
-
-rate=integ_fb (T,3e14,3e19, nion, 2);
 
 
   fbt = T;
@@ -1568,7 +1575,7 @@ rate=integ_fb (T,3e14,3e19, nion, 2);
 	{
 	  fmax = fthresh + dnu;
 	}
-      rate = qromb (fb_verner_partial, fthresh, fmax, 1e-5);
+      rate = qromb (fb_verner_partial, fthresh, fmax, 1.e-5);
     }
 }
 
