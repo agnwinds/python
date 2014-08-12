@@ -1110,6 +1110,7 @@ History:
 **************************************************************/
 
 
+
 double
 mean_intensity (xplasma, freq, mode)
      PlasmaPtr xplasma;		// Pointer to current plasma cell
@@ -1117,84 +1118,91 @@ mean_intensity (xplasma, freq, mode)
      int mode;			// mode 1=use BB if no model, mode 2=never use BB
 
 {
-int i;
-double J;
-double expo;
-J=0.0; //Avoid 03 error
-//printf ("Reached mean intensity geo.wcycle=%i, freq=%e, ");
+  int i;
+  double J;
+  double expo;
+
+  J = 0.0;			// Avoid 03 error
+
+
   if (geo.ioniz_mode == 5 || geo.ioniz_mode == 7)	/*If we are using power law ionization, use PL estimators */
     {
-      if (geo.wcycle > 0) /* there is only any point in worrying if we have had at least one cycle otherwise there is no model */
-      {
-      for (i = 0; i < geo.nxfreq; i++)
+      if (geo.wcycle > 0)	/* there is only any point in worrying if we have had at least one cycle otherwise there is no model */
 	{
-	  if (geo.xfreq[i] < freq && freq <= geo.xfreq[i + 1])	//We have found the correct model band
+	  for (i = 0; i < geo.nxfreq; i++)
 	    {
-	      if (xplasma->spec_mod_type[i] > 0)	//Only bother if we have a model in this band
+	      if (geo.xfreq[i] < freq && freq <= geo.xfreq[i + 1])	//We have found the correct model band
 		{
-	        if (freq > xplasma->fmin_mod[i] && freq < xplasma->fmax_mod[i]) //The spectral model is defined for the frequency in question
+		  if (xplasma->spec_mod_type[i] > 0)	//Only bother if we have a model in this band
+		    {
+
+		      if (freq > xplasma->fmin_mod[i] && freq < xplasma->fmax_mod[i])	//The spectral model is defined for the frequency in question
 			{
-			if (xplasma->spec_mod_type[i] == SPEC_MOD_PL)	//Power law model
-				{				
-				J = pow(10,(xplasma->pl_log_w[i]+log10(freq)*xplasma->pl_alpha[i]));
-				}
-			else if (xplasma->spec_mod_type[i] == SPEC_MOD_EXP)	//Exponential model
-				{
-		  		J = xplasma->exp_w[i] * exp ((-1 * H * freq) / (BOLTZMANN * xplasma->exp_temp[i]));
-				}
-			else
-				{
-		  		Error("kappa_ind_comp - unknown spectral model (%i) in band %i\n",xplasma->spec_mod_type[i], i);
-		  		J = 0.0;	//Something has gone wrong
-				}
+
+			  if (xplasma->spec_mod_type[i] == SPEC_MOD_PL)	//Power law model
+			    {
+			      J = pow (10, (xplasma->pl_log_w[i] + log10 (freq) * xplasma->pl_alpha[i]));
+			    }
+
+			  else if (xplasma->spec_mod_type[i] == SPEC_MOD_EXP)	//Exponential model
+			    {
+			      J = xplasma->exp_w[i] * exp ((-1 * H * freq) / (BOLTZMANN * xplasma->exp_temp[i]));
+			    }
+			  else
+			    {
+			      Error("mean_intensity: unknown spectral model (%i) in band %i\n",
+				         xplasma->spec_mod_type[i], i);
+			      J = 0.0;	//Something has gone wrong
+			    }
 			}
-		else 
+
+		      else
 			{
-			/* We have a spectral model, but it doesnt apply to the frequency 
-			   in question. clearly this is a slightly odd situation, where last
-			   time we didnt get a photon of this frequency, but this time we did. 
-			   Still this should only happen in very sparse cells, so induced compton 
-			   is unlikely to be important in such cells. We generate a warning, just 
-			    so we can see if this is happening a lot */	
-			/* JM140723 -- originally we threw an error here. Its commente out due to too
-			   many errors spoiling runs and, more to the point, because you actually expect 
-			   it to happen in a converging run */ 
-			//Error ("kappa_ind_comp: frequency of photon (%e) is outside frequency range (%e - %e) of spectral model in cell %i band %i\n",freq,xplasma->fmin_mod[i],xplasma->fmax_mod[i],xplasma->nplasma,i); //This is unlikely to happen very often, but if it does, we should probably know about it
-			J = 0.0; 
+			  /* We have a spectral model, but it doesnt apply to the frequency 
+			     in question. clearly this is a slightly odd situation, where last
+			     time we didnt get a photon of this frequency, but this time we did. 
+			     Still this should only happen in very sparse cells, so induced compton 
+			     is unlikely to be important in such cells. We generate a warning, just 
+			     so we can see if this is happening a lot */
+			   J = 0.0;
+
+			  /* JM140723 -- originally we threw an error here. No we count these errors and 
+			     in wind_updates because you actually expect 
+			     it to happen in a converging run */
+			  nerr_Jmodel_wrong_freq++;
 			}
+		    }
+		  else		/* There is no model in this band - this should not happen very often  */
+		    {
+		      J = 0.0;	//There is no model in this band, so the best we can do is assume zero J
+
+		      /* JM140723 -- originally we threw an error here. No we count these errors and 
+			     in wind_updates because you actually expect 
+			     it to happen in a converging run */
+		      nerr_no_Jmodel++;
+		    }
+
+
+
 		}
-	     else /* There is no model in this band - this should not happen very often  */
-		{	
-		J = 0.0;	//There is no modelin this band, so the best we can do is assume zero J
-        
-        /* JM140723 -- originally we threw an error here. Its commente out due to too
-			   many errors spoiling runs and, more to the point, because you actually expect 
-			   it to happen in a converging run */
-		//Error ("kappa_ind_comp: no model exists in cell %i band %i\n",xplasma->nplasma,i); 
-		//This is unlikely to happen very often, but if it does, we should probably know about it
-		}
-
-
-
 	    }
 	}
-    }
-	else //We have not completed an ionization cycle, so no chance of a model
+      else			//We have not completed an ionization cycle, so no chance of a model
 	{
-		if (mode==1) //We need a guess, so we use the initial guess of a dilute BB
-			{
-			expo = (H * freq) / (BOLTZMANN * xplasma->t_r);
-      			J = (2 * H * freq * freq * freq) / (C * C);
-      			J *= 1 / (exp (expo) - 1);
-      			J *= xplasma->w;
-			}
-		else  //A guess is not a good idea (i.e. we need the model for induced compton), so we return zero.
-			{
-			J=0.0;
-			}
+	  if (mode == 1)	//We need a guess, so we use the initial guess of a dilute BB
+	    {
+	      expo = (H * freq) / (BOLTZMANN * xplasma->t_r);
+	      J = (2 * H * freq * freq * freq) / (C * C);
+	      J *= 1 / (exp (expo) - 1);
+	      J *= xplasma->w;
+	    }
+	  else			//A guess is not a good idea (i.e. we need the model for induced compton), so we return zero.
+	    {
+	      J = 0.0;
+	    }
 
 	}
-}
+    }
 
   else				/*Else, use BB estimator of J */
     {
@@ -1203,8 +1211,8 @@ J=0.0; //Avoid 03 error
       J *= 1 / (exp (expo) - 1);
       J *= xplasma->w;
     }
-//printf ("TEST J=%e",J);
-return J;
+
+  return J;
 }
 
 

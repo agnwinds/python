@@ -1330,7 +1330,7 @@ string that constitutes VERSION*/
                                        Southampton University
                                                                                                                                       
  Synopsis:
-        bad_t_rr(nion, T)
+        total_rr(nion, T)
                                                                                                                                       
 Arguments:
         ion - ion for which we want a recombination rate - 
@@ -1354,6 +1354,7 @@ Notes:
 History:
         12jul   nsh     73 -- Began coding
 	24jul	nsh	73 -- Included the shull coefficients in the chianti database
+	14aug	nsh	78b-- renamed - from bad_t_rr since we dont just use badnell data.
 	
                                                                                                                                       
 **************************************************************/
@@ -1425,7 +1426,7 @@ total_rrate (nion, T)
                                        Southampton University
                                                                                                                                       
  Synopsis:
-        bad_gs_rr(nion,T)
+        gs_rr(nion,T)
                                                                                                                                       
 Arguments:
         ion - ion for which we want a recombination rate - 
@@ -1443,8 +1444,9 @@ Description:
                                                                                                                                       
         This routine generates a total recombination rate for 
 		a given ion at a given temperature using 
-		badnell type parameters. We simply perform an
-		interpolation 
+		badnell type parameters. If these parameters are not
+		available for the given ion - the milne relation is
+		used.   
                                                                                                                                       
 Notes:
 	
@@ -1452,6 +1454,11 @@ Notes:
 History:
         12jul   nsh     73 -- Began coding
   	14mar	nsh	77a-- Interpolaion now carried out in log space
+	14aug	nsh	78b-- Renamed to gs_rr from bad_gs_rr and 
+			rewritten to use the milne relation if badnell
+			type paramerters are not available. This allows
+			this code to be used to produce recombination
+			rate coefficients for the matrix ionization scheme.
 
 	
                                                                                                                                       
@@ -1576,86 +1583,3 @@ rate=integ_fb (T,3e14,3e19, nion, 2);
 }
 
 
-/***********************************************************
-                                       Southampton University
-                                                                                                                                      
- Synopsis:
-        milne_gs_rr(nion,T)
-                                                                                                                                      
-Arguments:
-        ion - ion for which we want a recombination rate - 
-		this is the upper state, so the ion which is 
-		doing the recombining, there is no rate for
-		H1(ion0) but there is one for H(ion1)
-	temperature - the temperature we want a rate for
-Returns:
-	rate - the resolved recombination rate for the ground
-		state of this ion recombining into the GS of
-		the lower ion.
-		for this temperature
-                                                                                                                                      
-Description:
-                                                                                                                                      
-        This routine generates a GS to GS recombination rate 
-		for those ions we do not have badnell data for - it
-		computed the rate using the milne relation.
-                                                                                                                                      
-Notes:
-	
-                                                                                                                                      
-History:
-        12jul   nsh     73 -- Began coding
-	
-                                                                                                                                      
-**************************************************************/
-
-double
-milne_gs_rr (nion, T)
-     int nion;
-     double T;
-{
-  double rate;
-  int ntmin, nvmin, n;
-  double fthresh, fmax, dnu;
-
-  rate = 0.0;			/* NSH 130605 to remove o3 compile error */
-
-
-  fbt = T;
-  fbfr = 2;
-
-  if (ion[nion].phot_info == 1)	//topbase
-    {
-      ntmin = ion[nion].ntop_ground;
-      fb_xtop = &phot_top[ntmin];
-      fthresh = fb_xtop->freq[0];
-      fmax = fb_xtop->freq[fb_xtop->np - 1];
-      dnu = 100.0 * (fbt / H_OVER_K);
-      if (fthresh + dnu < fmax)
-	{
-	  fmax = fthresh + dnu;
-	}
-      rate = qromb (fb_topbase_partial, fthresh, fmax, 1e-5);
-    }
-  else if (ion[nion].phot_info == 0)	// verner
-    {
-      nvmin = nion;
-      n = nvmin;
-      fb_xver = &xphot[ion[n].nxphot];
-      fthresh = fb_xver->freq_t;
-      fmax = fb_xver->freq_max;
-      dnu = 100.0 * (fbt / H_OVER_K);
-      if (fthresh + dnu < fmax)
-	{
-	  fmax = fthresh + dnu;
-	}
-      rate = qromb (fb_verner_partial, fthresh, fmax, 1e-5);
-    }
-
-
-
-
-  return (rate);
-
-
-}
