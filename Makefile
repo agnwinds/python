@@ -113,7 +113,7 @@ LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lcfitsio -lgsl -lgslcblas
 
 #Note that version should be a single string without spaces. 
 
-VERSION = 78a
+VERSION = 78b
 
 CHOICE=1             // Compress plasma as much as possible
 # CHOICE=0           //  Keep relation between plasma and wind identical
@@ -143,7 +143,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o auger_ionization.o \
 		agn.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
 		spectral_estimators.o variable_temperature.o matom_diag.o \
-		log.o lineio.o rdpar.o
+		log.o lineio.o rdpar.o pi_rates.o
 
 
 python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
@@ -157,7 +157,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		matom.c estimators.c wind_sum.c yso.c elvis.c cylindrical.c rtheta.c spherical.c  \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c auger_ionization.c \
 		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
-		spectral_estimators.c variable_temperature.c matom_diag.c
+		spectral_estimators.c variable_temperature.c matom_diag.c pi_rates.c
 
 # kpar_source is now declared seaprately from python_source so that the file log.h 
 # can be made using cproto
@@ -189,7 +189,7 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		matom.o estimators.o yso.o elvis.o photon2d.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
 		spectral_estimators.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
-                variable_temperature.o bb.o rdpar.o log.o
+                variable_temperature.o bb.o rdpar.o log.o pi_rates.o
 
 
 
@@ -211,6 +211,10 @@ test_pow: test_pow.o pdf.o recipes.o bilinear.o time.o
 
 test_saha: test_saha.o $(python_objects)
 	$(CC) ${CFLAGS} test_saha.o $(python_objects) $(LDFLAGS) -o test_saha
+		mv $@ $(BIN)
+
+test_matrix: test_matrix.o $(python_objects)
+	$(CC) ${CFLAGS} test_matrix.o $(python_objects) $(LDFLAGS) -o test_matrix
 		mv $@ $(BIN)
 
 test_dielectronic: test_dielectronic.o $(python_objects)
@@ -298,7 +302,7 @@ balance: balance.o balance_sub.o balance_gen.o balance_abso.o \
 		util.o anisowind.o reposition.o density.o  detail.o bands.o matom.o estimators.o  bilinear.o   \
 		spherical.o cylindrical.o cylind_var.o rtheta.o yso.o elvis.o gridwind.o wind_sum.o \
 		partition.o auger_ionization.o agn.o shell_wind.o compton.o torus.o spectral_estimators.o \
-		dielectronic.o variable_temperature.o zeta.o
+		dielectronic.o variable_temperature.o zeta.o pi_rates.o
 	$(CC)   ${CFLAGS} balance.o balance_sub.o balance_gen.o   balance_abso.o \
 		emission.o recomb.o balance_bb.o gradv.o  detail.o \
 		get_atomicdata.o random.c wind2d.o wind.o  bal_trans_phot.o \
@@ -309,7 +313,7 @@ balance: balance.o balance_sub.o balance_gen.o balance_abso.o \
 		util.o anisowind.o reposition.o density.o bands.o matom.o estimators.o bilinear.o \
 		spherical.o cylindrical.o cylind_var.o rtheta.o  yso.o elvis.o   gridwind.o wind_sum.o\
 		partition.o  auger_ionization.o agn.o shell_wind.o torus.o compton.o spectral_estimators.o\
-		dielectronic.o  variable_temperature.o zeta.o \
+		dielectronic.o  variable_temperature.o zeta.o pi_rates.o\
 		$(LDFLAGS) -o balance
 	cp $@ $(BIN)/balance
 	mv $@ $(BIN)/balance$(VERSION)

@@ -441,7 +441,7 @@ get_atomic_data (masterfile)
     }
 
 
-/* 0712 nsh The following lines initialise the badnell total radiative recombination rate structure */
+/* 0712 nsh The following lines initialise the badnell ground state radiative recombination rate structure */
   for (n = 0; n < NIONS; n++)
     {
       bad_gs_rr[n].nion = -1;
@@ -2003,7 +2003,7 @@ would like to have simple lines for macro-ions */
 		    }
 
 		  istate = ne;	//         get the ionisation state we are recombining from
-		  istate--;	//    we will associate the rate with the ion we are recombining to
+
 
 		  for (n = 0; n < nions; n++)	//Loop over ions to find the correct place to put the data
 		    {
@@ -2058,7 +2058,7 @@ would like to have simple lines for macro-ions */
 		    }
 
 		  istate = ne;	//         get the ionisation state we are recombining from
-		  istate--;	//    we will associate the rate with the ion we are recombining to
+
 
 		  for (n = 0; n < nions; n++)	//Loop over ions to find the correct place to put the data
 		    {
@@ -2151,11 +2151,11 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 		    }
 
 		  istate = ne;	//         get the traditional ionisation state
-		  istate--;	//    we will associate the rate with the ion we are recombining to
 		  for (n = 0; n < nions; n++)	//Loop over ions to find the correct place to put the data
 		    {
 		      if (ion[n].z == z && ion[n].istate == istate)	// this works out which ion we are dealing with
 			{
+
 			  if (ion[n].total_rrflag == 0)	// this ion has no parameters, so it must be the first time through        
 			    {
 			      total_rr[n_total_rr].nion = n;	//put the ion number into the bad_t_rr structure
@@ -2202,7 +2202,7 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 		    }
 
 		  istate = ne;	//         get the traditional ionisation state
-		  istate--;	//    we will associate the rate with the ion we are recombining to
+
 		  for (n = 0; n < nions; n++)	//Loop over ions to find the correct place to put the data
 		    {
 		      if (ion[n].z == z && ion[n].istate == istate)	// this works out which ion we are dealing with
@@ -2251,7 +2251,6 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 		      exit (0);
 		    }
 		  istate = z - ne + 1;	//         get the traditional ionisation state
-		  istate--;	//    we will associate the rate with the ion we are recombining to
 		  for (n = 0; n < nions; n++)	//Loop over ions to find the correct place to put the data
 		    {
 		      if (ion[n].z == z && ion[n].istate == istate)	// this works out which ion we are dealing with
