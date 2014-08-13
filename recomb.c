@@ -1419,10 +1419,11 @@ total_rrate (nion, T)
       exit(0);  /* NSH This is a serious problem! */
     }
 }
-  else /*NSH 140812 - We dont have coefficients - in this case we can use xinteg_fb with mode 2 to use the milne relation to obtain a value for this - it is worth throwing an error though, since there rreally should be data for all ions */
+  else /*NSH 140812 - We dont have coefficients - in this case we can use xinteg_fb with mode 2 to use the milne relation to obtain a value for this - it is worth throwing an error though, since there rreally should be data for all ions. xinteg_fb
+is called with the lower ion in the pair, since it uses the photionization cross sectiuon of the lower ion */
     {
       Error ("total_rrate: No T_RR parameters for ion %i - using milne relation\n", nion);
-      rate = xinteg_fb (T, 3e12, 3e18, nion, 2);
+      rate = xinteg_fb (T, 3e12, 3e18, nion-1, 2);
     }
 
   return (rate);
@@ -1543,16 +1544,17 @@ if (ion[nion].bad_gs_rr_t_flag == 1 && ion[nion].bad_gs_rr_r_flag == 1)	//We hav
 }
 else  //we will need to use the milne relation - NB - this is different from using xinteg_fb because that routine does recombination to all excited levels (at least for topbase ions).
 {
+
  rate = 0.0;			/* NSH 130605 to remove o3 compile error */
 
 
   fbt = T;
   fbfr = 2;
 
-  if (ion[nion].phot_info == 1)	//topbase
+  if (ion[nion-1].phot_info == 1)	//topbase
     {
 
-      ntmin = ion[nion].ntop_ground;
+      ntmin = ion[nion-1].ntop_ground;
       fb_xtop = &phot_top[ntmin];
       fthresh = fb_xtop->freq[0];
       fmax = fb_xtop->freq[fb_xtop->np - 1];
@@ -1563,9 +1565,9 @@ else  //we will need to use the milne relation - NB - this is different from usi
 	}
       rate = qromb (fb_topbase_partial, fthresh, fmax, 1e-5);
     }
-  else if (ion[nion].phot_info == 0)	// verner
+  else if (ion[nion-1].phot_info == 0)	// verner
     {
-      nvmin = nion;
+      nvmin = nion-1;
       n = nvmin;
       fb_xver = &xphot[ion[n].nxphot];
       fthresh = fb_xver->freq_t;
