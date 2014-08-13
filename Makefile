@@ -143,7 +143,7 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		matom.o estimators.o yso.o elvis.o photon2d.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
 		spectral_estimators.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
-                variable_temperature.o bb.o rdpar.o log.o
+                variable_temperature.o bb.o rdpar.o log.o pi_rates.o
 
 
 
@@ -165,6 +165,10 @@ test_pow: test_pow.o pdf.o recipes.o bilinear.o time.o
 
 test_saha: test_saha.o $(python_objects)
 	$(CC) ${CFLAGS} test_saha.o $(python_objects) $(LDFLAGS) -o test_saha
+		mv $@ $(BIN)
+
+test_matrix: test_matrix.o $(python_objects)
+	$(CC) ${CFLAGS} test_matrix.o $(python_objects) $(LDFLAGS) -o test_matrix
 		mv $@ $(BIN)
 
 test_dielectronic: test_dielectronic.o $(python_objects)

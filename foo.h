@@ -252,7 +252,6 @@ int fb_save(char filename[]);
 int fb_read(char filename[]);
 double total_rrate(int nion, double T);
 double gs_rrate(int nion, double T);
-double milne_gs_rr(int nion, double T);
 /* diag.c */
 int open_diagfile(void);
 /* sv.c */
