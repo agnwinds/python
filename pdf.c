@@ -239,11 +239,10 @@ pdf_gen_from_func (pdf, func, xmin, xmax, njumps, jump)
   double y;
   int j, m, mm, n;
   int njump_min, njump_max;
-  int idiag, icheck, pdfsteps;
+  int icheck, pdfsteps;
   int pdf_check (), recalc_pdf_from_cdf ();
   double gen_array_from_func (), delta;
 
-  idiag = 0;
   njump_min = njump_max = 0;
   /* Check the input data before proceeding */
   if (xmax <= xmin)
@@ -343,10 +342,7 @@ pdf_gen_from_func (pdf, func, xmin, xmax, njumps, jump)
   pdf->x[NPDF] = xmax;
   pdf->y[NPDF] = 1.0;
   pdf->norm = 1.;		/* pdf_gen_from array produces a properly nomalized cdf and so the
-				   normalization is 1.  110629 ksl
-				 */
-//OLD  pdf->norm = xstep;               /* The normalizing factor that would convert the function we
-//OLD                              have been given into a proper probability density function */
+				           normalization is 1.  110629 ksl */
 
 /* Calculate the gradients */
   recalc_pdf_from_cdf (pdf);	// 57ib 

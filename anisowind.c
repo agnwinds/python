@@ -439,7 +439,6 @@ randwind_thermal_trapping(p, nnscat)
 {
   double tau_norm, p_norm;
   double tau, dvds, z, ztest;
-  int ishell;
   double z_prime[3];
   WindPtr one;
 
@@ -478,12 +477,10 @@ randwind_thermal_trapping(p, nnscat)
     stuff_v (z_prime, p->lmn);    // copy to photon pointer
 
 
-
     /* generate random number, normalised by p_norm with a 1.2 for 20% 
        safety net (as dvds_max is worked out with a sample of directions) */
     ztest = (rand () + 0.5) / MAXRAND * p_norm;   
     dvds = dvwind_ds (p);
-    ishell = p->grid;
     tau = sobolev (one, p, -1.0, lin_ptr[p->nres], dvds);
 
     z = p_escape_from_tau (tau);  /* probability to see if it escapes in that direction */

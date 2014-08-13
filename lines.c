@@ -500,9 +500,6 @@ line_nsigma (line_ptr, xplasma)
      PlasmaPtr xplasma;
 {
   double d1, d2, x;
-  int ion;
-
-  ion = line_ptr->nion;
 
   two_level_atom (line_ptr, xplasma, &d1, &d2);	//xxxx
 
@@ -563,9 +560,7 @@ scattering_fraction (line_ptr, xplasma)
   double a, c, z;
   double sf;
   double ne, te;
-  double dd;			/* density of the relevent ion */
-  double dvds;
-  double w, tr;			/* the radiative weight, and radiation tempeature */
+  double w;			/* the radiative weight, and radiation tempeature */
 
   if (geo.line_mode == 0)
     return (0.0);		//purely absorbing atmosphere
@@ -576,10 +571,7 @@ scattering_fraction (line_ptr, xplasma)
 //Populate variable from previous calling structure
   ne = xplasma->ne;
   te = xplasma->t_e;
-  tr = xplasma->t_r;	//JM1308 in pre 76b versions this was incorrectly set to xplasma->t_e
   w = xplasma->w;
-  dvds = wmain[xplasma->nwind].dvds_ave;
-  dd = xplasma->density[line_ptr->nion];
 
   c = (-H_OVER_K * line_ptr->freq / te);
   a = exp (c);
@@ -748,12 +740,10 @@ line_heat (xplasma, pp, nres)
      PhotPtr pp;
      int nres;
 {
-  double dd, x, sf;
+  double x, sf;
 
 
   check_plasma (xplasma, "line_heat");
-
-  dd = xplasma->density[lin_ptr[nres]->nion];
 
   sf = scattering_fraction (lin_ptr[nres], xplasma);
 

@@ -133,14 +133,12 @@ radiation (p, ds)
   double den_config ();
   int nconf;
   double weight_of_packet, y;
-  int ii, jj;
   double v_inner[3], v_outer[3], v1, v2;
   double freq_inner, freq_outer;
   double freq_min, freq_max;
   double frac_path, freq_xs;
   struct photon phot;
 
-  ii = jj = 0;			/* NSH 130605 to remove o3 compile error */
   one = &wmain[p->grid];	/* So one is the grid cell of interest */
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "radiation");
@@ -464,7 +462,7 @@ radiation (p, ds)
 	  /* Calculate the number of photoionizations per unit volume for H and He 
 	     JM 1405 changed this to use freq_xs */
 	  xplasma->nioniz++;
-	  q = (z) / (H * freq_xs * one->vol);
+	  q = (z) / (H * freq * one->vol);
 	  /* So xplasma->ioniz for each species is just 
 	     (energy_abs)*kappa_h/kappa_tot / H*freq / volume
 	     or the number of photons absorbed in this bundle per unit volume by this ion

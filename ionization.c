@@ -424,7 +424,7 @@ one_shot (xplasma, mode)
      int mode;
 
 {
-  double te_old, te_new, dte;
+  double te_old, te_new;
   double gain;
 
 
@@ -443,10 +443,7 @@ one_shot (xplasma, mode)
 	xplasma->t_e = TMAX;
 	}
 
-  dte = xplasma->dt_e;
-
 //  Log ("One_shot: %10.2f %10.2f %10.2f\n", te_old, te_new, w->t_e);
-
 
 /* Modes in the driving routines are not identical to those in nebular concentrations.
 The next lines are an attempt to mediate this problem.  It might be better internally
@@ -532,7 +529,6 @@ calc_te (xplasma, tmin, tmax)
      PlasmaPtr xplasma;
      double tmin, tmax;
 {
-  double heat_tot;
   double z1, z2;
   int macro_pops ();
 		
@@ -542,8 +538,6 @@ calc_te (xplasma, tmin, tmax)
    */
 
   xxxplasma = xplasma;
-
-  heat_tot = xplasma->heat_tot;
 
   xplasma->t_e = tmin;
   z1 = zero_emit (tmin);

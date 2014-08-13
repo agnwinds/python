@@ -1391,7 +1391,6 @@ macro_pops (xplasma, xne)
   double rate;
   double rate_matrix[NLEVELS_MACRO][NLEVELS_MACRO];
   int radiative_flag[NLEVELS_MACRO][NLEVELS_MACRO];	// 140423 JM flag if two levels are radiatively linked
-  int matrix_to_conf[NLEVELS_MACRO];
   int conf_to_matrix[NLEVELS_MACRO];
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
@@ -1469,7 +1468,6 @@ macro_pops (xplasma, xne)
 		     two arrays here that allow the mapping between these indices to be done easily.
 		   */
 		  conf_to_matrix[index_lvl] = n_macro_lvl;
-		  matrix_to_conf[n_macro_lvl] = index_lvl;
 		  n_macro_lvl++;
 		}
 	    }
@@ -3075,7 +3073,7 @@ emit_matom (w, p, nres, upper)
       if (cont_ptr->freq[0] < em_rnge.fmax)	//means that it may contribute
 	{
 	  sp_rec_rate = alpha_sp (cont_ptr, xplasma, 0);
-	  eprbs[m] = sp_rec_rate * xplasma->ne * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);	//energy difference
+	  eprbs[m] = sp_rec_rate * ne * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);	//energy difference
 	  if (eprbs[m] < 0.)	//test (can be deleted eventually SS)
 	    {
 	      Error ("Negative probability (matom, 4). Abort.");
@@ -3119,7 +3117,7 @@ emit_matom (w, p, nres, upper)
       *nres = config[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
       /* continuua are indicated by nres > NLINES */
       p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0]
-	- (log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e / H_OVER_K);
+	- (log (1. - (rand () + 0.5) / MAXRAND) * t_e / H_OVER_K);
       /* Co-moving frequency - changed to rest frequency by doppler */
       /*Currently this assumed hydrogenic shape cross-section - Improve */
     }

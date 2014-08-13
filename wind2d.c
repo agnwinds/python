@@ -82,7 +82,7 @@ define_wind ()
 {
   int i, j, n;
   int nn;
-  double nh, rrstar;
+  double rrstar;
   double x[3];
   double mdotbase, mdotwind, rr;
   int ierr;
@@ -93,7 +93,6 @@ define_wind ()
   int nplasma;
 
   WindPtr w;
-  PlasmaPtr xplasma;
 
   /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
@@ -312,7 +311,6 @@ recreated when a windfile is read into the program
 
   calloc_plasma (NPLASMA);
   calloc_dyn_plasma (NPLASMA); /*78a NSH 1407 - allocate space for dynamically sized arrays*/
-  xplasma = plasmamain;
   create_maps (CHOICE);		// Populate the maps from plasmamain & wmain
 
   calloc_macro (NPLASMA);
@@ -348,7 +346,6 @@ be optional which variables beyond here are moved to structures othere than Wind
           plasmamain[n].fmax_mod[nn] = 1e-99; /* Set the maximum model frequency to the min frequency in the band */
 	}
 
-      nh = plasmamain[n].rho * rho2nh;
 
 /* NSH 130530 Next few lines allow the use of the temperature which can be computed from Zeus models to be used as an initial guess for the wind temperature */
       if (geo.wind_type == 3)

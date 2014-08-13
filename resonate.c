@@ -614,7 +614,7 @@ kappa_bf (xplasma, freq, macro_all)
   double kap_bf_tot;
   double ft;
   double x;
-  int nconf, nion;
+  int nconf;
   double density;
   int n;
   int nn;
@@ -642,7 +642,6 @@ kappa_bf (xplasma, freq, macro_all)
 	  /*Need the appropriate density at this point. */
 
 	  nconf = phot_top[n].nlev;	//Returning lower level = correct (SS)
-	  nion = config[nconf].nion;
 
 	  density = den_config (xplasma, nconf);	//Need to check what this does (SS)
 
