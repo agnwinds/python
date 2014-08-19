@@ -835,6 +835,9 @@ phot.istat below */
 #define IONMODE_ML93 3                        // Lucy Mazzali
 #define IONMODE_PAIRWISE_ML93 6               // pairwise version of Lucy Mazzali 
 #define IONMODE_PAIRWISE_SPECTRALMODEL 7      // pariwise modeled J_nu approach
+#define IONMODE_MATRIX_BB 8	              // matrix solver BB model
+#define IONMODE_MATRIX_SPECTRALMODEL 9        // matrix solver spectral model
+
 
 // and the corresponding modes in nebular_concentrations
 #define NEBULARMODE_TR 0                       // LTE using t_r
@@ -842,6 +845,8 @@ phot.istat below */
 #define NEBULARMODE_ML93 2                     // ML93 using correction
 #define NEBULARMODE_PAIRWISE_ML93 6            // pairwise ML93
 #define NEBULARMODE_PAIRWISE_SPECTRALMODEL 7   // pairwise spectral models
+#define NEBULARMODE_MATRIX_BB 8	               // matrix solver BB model
+#define NEBULARMODE_MATRIX_SPECTRALMODEL 9     // matrix solver spectral model
 
 
 

@@ -192,14 +192,17 @@ else if (mode==2)  //blackbody mode
   if (fthresh > fmax)
     {
       Error
-	("pl_correct: After checking, fthresh has been set below fmin - we cannot compute denominator\n");
-      q = 1.0;
-      return (q);
+	("pi_rates: temperature too low - ion %i has no PI rate\n",nion);
+      pi_rate = 0.0;
     }
+  else
+   {
   qromb_temp = xplasma->t_r;		
   pi_rate = xplasma->w * qromb (tb_planck1, fthresh, fmax, 1.e-4);
+   }
     }
 
+pi_rate=(4*PI*pi_rate)/H;
 
 return(pi_rate);
 }

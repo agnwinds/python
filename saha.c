@@ -197,6 +197,14 @@ nebular_concentrations (xplasma, mode)
       m = variable_temperature (xplasma, mode);
     }
 
+  else if (mode == NEBULARMODE_MATRIX_BB)
+	{
+	m=matrix_solv(xplasma,mode);
+	}
+  else if(mode == NEBULARMODE_MATRIX_SPECTRALMODEL)
+	{
+	m=matrix_solv(xplasma,mode);
+	}
   else
     {
 // If reached this point the program does not understand what is desired.

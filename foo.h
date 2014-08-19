@@ -456,6 +456,8 @@ double calc_pi_rate(int nion, PlasmaPtr xplasma, int mode);
 double tb_planck1(double freq);
 double tb_logpow1(double freq);
 double tb_exp1(double freq);
+/* matrix_ion.c */
+int matrix_solv(PlasmaPtr xplasma, int mode);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

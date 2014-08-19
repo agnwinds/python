@@ -68,7 +68,7 @@ LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lcfitsio -lgsl -lgslcblas
 
 #Note that version should be a single string without spaces. 
 
-VERSION = 78b
+VERSION = 78b_mat
 
 CHOICE=1             // Compress plasma as much as possible
 # CHOICE=0           //  Keep relation between plasma and wind identical
@@ -97,7 +97,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o auger_ionization.o \
 		agn.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
 		spectral_estimators.o variable_temperature.o matom_diag.o \
-		log.o lineio.o rdpar.o pi_rates.o
+		log.o lineio.o rdpar.o pi_rates.o matrix_ion.o
 
 
 python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
@@ -111,7 +111,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		matom.c estimators.c wind_sum.c yso.c elvis.c cylindrical.c rtheta.c spherical.c  \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c auger_ionization.c \
 		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
-		spectral_estimators.c variable_temperature.c matom_diag.c pi_rates.c
+		spectral_estimators.c variable_temperature.c matom_diag.c pi_rates.c matrix_ion.c
 
 # kpar_source is now declared seaprately from python_source so that the file log.h 
 # can be made using cproto
