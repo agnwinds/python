@@ -413,9 +413,9 @@ for (nn=0;nn<nions;nn++)
       if (niterate == MAXITERATIONS)
 	{
 	  Error
-	    ("variable_temperature: failed to converge t %.2g nh %.2g xnew %.2g\n",
+	    ("matrix_solv: failed to converge t %.2g nh %.2g xnew %.2g\n",
 	     t_e, nh, xnew);
-	  Error ("variable_temperature: xxne %e theta %e\n", xxne, theta);
+	  Error ("matrix_solv: xxne %e theta %e\n", xxne, theta);
 	  return (-1);
 	}
     }

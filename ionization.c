@@ -471,8 +471,8 @@ meaning in nebular concentrations.
 	  Error
 	    ("ionization_on_the_spot: nebular_concentrations failed to converge\n");
 	  Error
-	    ("ionization_on_the_spot: j %8.2e t_e %8.2e t_r %8.2e w %8.2e\n",
-	     xplasma->j, xplasma->t_e, xplasma->w);
+	    ("ionization_on_the_spot: j %8.2e t_e %8.2e t_r %8.2e w %8.2e nphot %i\n",
+	     xplasma->j, xplasma->t_e, xplasma->w, xplasma->ntot);
 	}
       if (xplasma->ne < 0 || VERY_BIG < xplasma->ne)
 	{
