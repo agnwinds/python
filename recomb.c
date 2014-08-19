@@ -1114,7 +1114,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 			{
 	  		fmax = fthresh + dnu;
 			}
-	    	fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
+	    	fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-5);
 	    	}
 	}
     }
@@ -1141,7 +1141,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 			{
 	  		fmax = fthresh + dnu;
 			}
-	        fnu += qromb (fb_verner_partial, fthresh, fmax, 1.e-4);
+	        fnu += qromb (fb_verner_partial, fthresh, fmax, 1.e-5);
 		}
 	}
     }
