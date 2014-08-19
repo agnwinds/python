@@ -75,7 +75,6 @@ double *b_data,*a_data;
   www = xplasma->w;
 
 
-printf ("MATRIX t_e=%e\n",t_e);
 
  /* Copy the current densities into a temporary array */
 
@@ -367,9 +366,9 @@ for (nn=0;nn<nrows;nn++)
           test_val = gsl_vector_get (test_vector, mm);
 
  //         printf ("test_val=%e\n",test_val);
-         if ( (fabs((test_val - b_temp[mm]))/test_val) > EPSILON)
-      	      Error_silent("matrix_solv: test solution fails for row %i %e != %e\n",
-      	      	     mm,test_val,b_temp[mm]);    
+  //       if ( (fabs((test_val - b_temp[mm]))/test_val) > EPSILON)
+  //    	      Error_silent("matrix_solv: test solution fails for row %i %e != %e\n",
+  //    	      	     mm,test_val,b_temp[mm]);    
           }     
 
         /* free memory */
