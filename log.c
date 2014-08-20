@@ -401,6 +401,7 @@ error_count (char *format)
 	{
 	  printf ("Exceeded number of different errors that can be stored\n");
 	  error_summary("Quitting because there are too many differnt types of errors\n");
+	Log_flush(); /*NSH flush the log file so we can see what was going on */
 	  exit(0);
 	}
     }
@@ -412,6 +413,7 @@ error_count (char *format)
 	       format);
       if (n==time_to_quit){
 	      error_summary("Something is drastically wrong for any error to occur so much!\n");
+	Log_flush(); /*NSH flush the log file so we can see what was going on */
 	      exit(0);
       }
     }
