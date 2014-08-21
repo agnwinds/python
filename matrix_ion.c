@@ -73,7 +73,7 @@ double *b_data,*a_data;
   t_e = xplasma->t_e;
   t_r = xplasma->t_r;
   www = xplasma->w;
-
+printf ("nh=%e, t_e=%e t_r=%e\n",nh,t_e,t_r);
 
 
  /* Copy the current densities into a temporary array */
@@ -137,7 +137,7 @@ double *b_data,*a_data;
 
 //printf ("Initial guess at ne=%e\n",xne);
   /* At this point we have an initial estimate of ne. */
-
+//printf ("starting xne=%e\n",xne);
 
   niterate = 0;
   while (niterate < MAXITERATIONS)
@@ -260,7 +260,7 @@ for (nn=0;nn<nions;nn++)
 		}
 	}
 
-
+//printf ("Populated - about to solve\n");
 
 nrows=nions; //This is a placeholder, we may end up removing rows and columns
 
@@ -313,6 +313,7 @@ for (nn=0;nn<nrows;nn++)
 //	printf ("b_data %i = %e \n",nn,b_data[nn]);
 	}
 
+//printf("populated solver matrices\n");
 
 
       /* create gsl matrix/vector views of the arrays of rates */
@@ -364,8 +365,7 @@ for (nn=0;nn<nrows;nn++)
 
           /* get the element of the vector we want to check */
           test_val = gsl_vector_get (test_vector, mm);
-
- //         printf ("test_val=%e\n",test_val);
+ //        printf ("test_val=%e\n",test_val);
   //       if ( (fabs((test_val - b_temp[mm]))/test_val) > EPSILON)
   //    	      Error_silent("matrix_solv: test solution fails for row %i %e != %e\n",
   //    	      	     mm,test_val,b_temp[mm]);    
@@ -398,6 +398,7 @@ for (nn=0;nn<nions;nn++)
 
 
       xnew = get_ne (newden);	/* determine the electron density for this density distribution */
+//printf ("new ne=%e\n",xne);
 //printf ("new electron density is %e old is %e\n",xnew,xne);
 
      if (xnew < DENSITY_MIN)
@@ -415,6 +416,14 @@ for (nn=0;nn<nions;nn++)
 	  Error
 	    ("matrix_solv: failed to converge for cell %i t %.2g nh %.2g xnew %.2g\n",
 	     xplasma->nplasma, t_e, nh, xnew);
+ for (nn = 0; nn < geo.nxfreq; nn++)
+    {
+      Log ("numin= %8.2e (%8.2e) numax= %8.2e (%8.2e) Model= %2d PL_log_w= %9.2e PL_alpha= %9.2e Exp_w= %9.2e EXP_temp= %9.2e\n",xplasma-> fmin_mod[nn],geo.xfreq[nn],xplasma->fmax_mod[nn],geo.xfreq[nn+1],xplasma->spec_mod_type[nn],xplasma->pl_log_w[nn],xplasma->pl_alpha[nn],xplasma->exp_w[nn],xplasma->exp_temp[nn]);
+}    
+
+
+
+
 	  Error ("matrix_solv: xxne %e theta %e\n", xxne, theta);
 	  return (-1);
 	}
