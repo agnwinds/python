@@ -413,8 +413,8 @@ for (nn=0;nn<nions;nn++)
       if (niterate == MAXITERATIONS)
 	{
 	  Error
-	    ("matrix_solv: failed to converge t %.2g nh %.2g xnew %.2g\n",
-	     t_e, nh, xnew);
+	    ("matrix_solv: failed to converge for cell %i t %.2g nh %.2g xnew %.2g\n",
+	     xplasma->nplasma, t_e, nh, xnew);
 	  Error ("matrix_solv: xxne %e theta %e\n", xxne, theta);
 	  return (-1);
 	}
