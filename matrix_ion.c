@@ -105,7 +105,7 @@ printf ("nh=%e, t_e=%e t_r=%e\n",nh,t_e,t_r);
 	   }
       for (nn=0;nn<nelements;nn++)
 	{
-        xden[nn]=0.0;
+  //      xden[nn]=0.0;
 	if (ion[mm].z==ele[nn].z)
 		{
 		xelem[mm]=nn;
@@ -377,10 +377,10 @@ for (nn=0;nn<nrows;nn++)
 	    free (test_vector);
 	    free (test_matrix);
 
-   for (nn=0;nn<nelements;nn++)
-	{
-        xden[nn]=0.0;
-	}
+//   for (nn=0;nn<nelements;nn++)
+//	{
+//        xden[nn]=0.0;
+//	}
 
 for (nn=0;nn<nions;nn++)
 	{
@@ -398,7 +398,7 @@ for (nn=0;nn<nions;nn++)
 
 
       xnew = get_ne (newden);	/* determine the electron density for this density distribution */
-//printf ("new ne=%e\n",xne);
+printf ("new ne=%e\n",xne);
 //printf ("new electron density is %e old is %e\n",xnew,xne);
 
      if (xnew < DENSITY_MIN)
@@ -408,17 +408,18 @@ for (nn=0;nn<nions;nn++)
 	  break;
 	}
       xne = xxxne = (xnew + xne) / 2.;	/*New value of ne */
+
       niterate++;
 
 
       if (niterate == MAXITERATIONS)
 	{
 	  Error
-	    ("matrix_solv: failed to converge for cell %i t %.2g nh %.2g xnew %.2g\n",
+	    ("matrix_solv: failed to converge for cell %i t %e nh %e xnew %e\n",
 	     xplasma->nplasma, t_e, nh, xnew);
  for (nn = 0; nn < geo.nxfreq; nn++)
     {
-      Log ("numin= %8.2e (%8.2e) numax= %8.2e (%8.2e) Model= %2d PL_log_w= %9.2e PL_alpha= %9.2e Exp_w= %9.2e EXP_temp= %9.2e\n",xplasma-> fmin_mod[nn],geo.xfreq[nn],xplasma->fmax_mod[nn],geo.xfreq[nn+1],xplasma->spec_mod_type[nn],xplasma->pl_log_w[nn],xplasma->pl_alpha[nn],xplasma->exp_w[nn],xplasma->exp_temp[nn]);
+      Log ("numin= %e (%e) numax= %e (%e) Model= %2d PL_log_w= %e PL_alpha= %e Exp_w= %e EXP_temp= %e\n",xplasma-> fmin_mod[nn],geo.xfreq[nn],xplasma->fmax_mod[nn],geo.xfreq[nn+1],xplasma->spec_mod_type[nn],xplasma->pl_log_w[nn],xplasma->pl_alpha[nn],xplasma->exp_w[nn],xplasma->exp_temp[nn]);
 }    
 
 
