@@ -135,7 +135,7 @@ printf ("nh=%e, t_e=%e t_r=%e\n",nh,t_e,t_r);
 				   xne the first time through the loop */
 
 
-//printf ("Initial guess at ne=%e\n",xne);
+printf ("Initial guess at ne=%e\n",xne);
   /* At this point we have an initial estimate of ne. */
 //printf ("starting xne=%e\n",xne);
 
