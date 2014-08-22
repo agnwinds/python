@@ -73,7 +73,7 @@ double *b_data,*a_data;
   t_e = xplasma->t_e;
   t_r = xplasma->t_r;
   www = xplasma->w;
-printf ("nh=%e, t_e=%e t_r=%e\n",nh,t_e,t_r);
+//printf ("nh=%e, t_e=%e t_r=%e\n",nh,t_e,t_r);
 
 
  /* Copy the current densities into a temporary array */
@@ -85,16 +85,19 @@ printf ("nh=%e, t_e=%e t_r=%e\n",nh,t_e,t_r);
       if (ion[mm].istate != 1) //We can recombine
 		{
 	  rr_rates[mm]=total_rrate (mm, xplasma->t_e);
+//	printf ("RR_rate %i = %e\n",mm,rr_rates[mm]);
 		}
       if (ion[mm].istate != ion[mm].z+1 ) //we can photoionize
 	  {
 	  if (mode == NEBULARMODE_MATRIX_BB)
 		{
 	  	pi_rates[mm]=calc_pi_rate (mm,xplasma,2);
+
 		}
 	  else if (mode == NEBULARMODE_MATRIX_SPECTRALMODEL)
 		{
 	  	pi_rates[mm]=calc_pi_rate (mm,xplasma,1);
+//		printf ("PI_rate %i = %e\n",mm,pi_rates[mm]);
 		}
   	  else
                 {
@@ -114,28 +117,39 @@ printf ("nh=%e, t_e=%e t_r=%e\n",nh,t_e,t_r);
     }
 
 
-  if (t_e < MIN_TEMP)
-    t_e = MIN_TEMP;		/* fudge to prevent divide by zeros */
 
-  xsaha = SAHA * pow (t_e, 1.5);
+xne = xxne = xxxne = get_ne (newden); /*Best guess for the starting n_e is from the last try! */
 
-  theta = xsaha * exp (-ion[0].ip / (BOLTZMANN * t_e)) / nh;
+ //if (t_e < MIN_TEMP)
+ //   t_e = MIN_TEMP;		/* fudge to prevent divide by zeros */
 
-  if (theta < THETAMAX)
-    {
-      x = (-theta + sqrt (theta * theta + 4 * theta)) / 2.;
-      xne = xxne = xxxne = x * nh;
-    }
-  else
-    xne = xxne = xxxne = nh;	/*xxne is just a store so the error can report the starting value of ne. 
-                                  xxxne is the shared variable so the temperature solver routine can access it */
+//  xsaha = SAHA * pow (t_e, 1.5);
 
-  if (xne < 1.e-6)
-    xne = xxxne = 1.e-6;	/* Set a minimum ne to assure we can calculate
-				   xne the first time through the loop */
+//  theta = xsaha * exp (-ion[0].ip / (BOLTZMANN * t_e)) / nh;
+
+//  if (theta < THETAMAX)
+//    {
+//      x = (-theta + sqrt (theta * theta + 4 * theta)) / 2.;
+//      xne = xxne = xxxne = x * nh;
+//    }
+//  else
+//    xne = xxne = xxxne = nh;	/*xxne is just a store so the error can report the starting value of ne. */
+ 
 
 
-printf ("Initial guess at ne=%e\n",xne);
+                             /*    xxxne is the shared variable so the temperature solver routine can access it */
+
+ // if (xne < 1.e-6)
+ //   xne = xxxne = 1.e-6;	/* Set a minimum ne to assure we can calculate
+	//			   xne the first time through the loop */
+
+
+//printf ("Initial guess at ne=%e\n",xne);
+
+
+
+
+//printf ("Initial guess at ne=%e \n",xne);
   /* At this point we have an initial estimate of ne. */
 //printf ("starting xne=%e\n",xne);
 
@@ -398,7 +412,7 @@ for (nn=0;nn<nions;nn++)
 
 
       xnew = get_ne (newden);	/* determine the electron density for this density distribution */
-printf ("new ne=%e\n",xne);
+//printf ("new ne=%e\n",xne);
 //printf ("new electron density is %e old is %e\n",xnew,xne);
 
      if (xnew < DENSITY_MIN)
