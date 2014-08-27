@@ -458,6 +458,9 @@ double tb_logpow1(double freq);
 double tb_exp1(double freq);
 /* matrix_ion.c */
 int matrix_solv(PlasmaPtr xplasma, int mode);
+/* direct_ion.c */
+int compute_di_coeffs(double T);
+double total_di(WindPtr one, double t_e);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

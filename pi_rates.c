@@ -191,7 +191,7 @@ else if (mode==2)  //blackbody mode
   fmax = check_fmax (fthresh, fmaxtemp, xplasma->t_r);
   if (fthresh > fmax)
     {
-      Error
+      Error_silent
 	("pi_rates: temperature too low - ion %i has no PI rate\n",nion);
       pi_rate = 0.0;
     }

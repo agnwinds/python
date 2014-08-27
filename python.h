@@ -308,6 +308,7 @@ struct geometry
   double lum_ff, lum_fb, lum_lines;	/* The luminosity of the wind as a result of ff, fb, and line radiation */
   double lum_comp;		/*1108 NSH The luminosity of the wind as a result of compton cooling */
   double lum_dr;		/*1109 NSH The luminosity of the wind due to dielectronic recombination */
+  double lum_di;		/*1408 NSH The luminosity of the wind due to direct ionization */
   double lum_adiabatic;		/*1209 NSH The cooling of the wind due to adiabatic expansion */
   double heat_adiabatic;		/*1307 NSH The heating of the wind due to adiabatic heating - split out from lum_adiabatic to get an accurate idea of whether it is important */
   double f_tot, f_star, f_disk, f_bl, f_agn, f_wind;	/* The integrated specific L between a freq min and max which are
@@ -318,6 +319,7 @@ struct geometry
   double lum_ff_ioniz, lum_fb_ioniz, lum_lines_ioniz;	
   double lum_comp_ioniz;		
   double lum_dr_ioniz;		
+  double lum_di_ioniz;		
   double lum_adiabatic_ioniz;	
   double lum_wind_ioniz, lum_star_ioniz, lum_disk_ioniz, lum_bl_ioniz, lum_tot_ioniz;
 
@@ -634,6 +636,7 @@ typedef struct plasma
   double lum_lines, lum_ff, lum_adiabatic;
   double lum_comp;		/* 1108 NSH The compton luminosity of the cell */
   double lum_dr;		/* 1109 NSH The dielectronic recombination luminosity of the cell */
+  double lum_di;		/* 1408 NSH The direct ionization luminosity of the cell */
   double lum_fb, lum_z;		/*fb luminosity & fb of metals metals */
   double lum_rad, lum_rad_old;	/* The specfic radiative luminosity in frequencies defined by freqmin
 				   and freqmax.  This will depend on the last call to total_emission */
@@ -643,6 +646,7 @@ typedef struct plasma
   double lum_lines_ioniz, lum_ff_ioniz, lum_adiabatic_ioniz;
   double lum_comp_ioniz;		/* 1108 NSH The compton luminosity of the cell */
   double lum_dr_ioniz;		/* 1109 NSH The dielectronic recombination luminosity of the cell */
+  double lum_di_ioniz;		/* 1408 NSH The direct ionization luminosity of the cell */
   double lum_fb_ioniz, lum_z_ioniz;		/*fb luminosity & fb of metals metals */
   double lum_rad_ioniz;	/* The specfic radiative luminosity in frequencies defined by freqmin
 				   and freqmax.  This will depend on the last call to total_emission */

@@ -262,10 +262,10 @@ convergence (xplasma)
     		xplasma->techeck = techeck = 1;
 	if ((xplasma->converge_hc =
        		fabs (xplasma->heat_tot -
-	     	(xplasma->lum_adiabatic + xplasma->lum_rad + xplasma->lum_dr +
+	     	(xplasma->lum_adiabatic + xplasma->lum_rad + xplasma->lum_dr + xplasma->lum_di +
 	      	xplasma->lum_comp)) / fabs(xplasma->heat_tot + xplasma->lum_comp +
 				     xplasma->lum_adiabatic +
-				     xplasma->lum_dr + xplasma->lum_rad )) > epsilon)
+				     xplasma->lum_dr + xplasma->lum_di + xplasma->lum_rad )) > epsilon)
     		xplasma->hccheck = hccheck = 1;
 	}
   else //If the cell has reached the maximum temperature
@@ -671,10 +671,15 @@ zero_emit (t)
   compute_dr_coeffs (t);
   xxxplasma->lum_dr = total_dr (&wmain[xxxplasma->nwind], t);
 
+  /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
+
+  xxxplasma->lum_di = total_di (&wmain[xxxplasma->nwind], t);
+
+
 /* 70g compton cooling calculated here to avoid generating photons */
   xxxplasma->lum_comp = total_comp (&wmain[xxxplasma->nwind], t);
 
-  difference = xxxplasma->heat_tot - xxxplasma->lum_adiabatic - xxxplasma->lum_dr - xxxplasma->lum_comp - total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);	//NSH 1110 - total emission no longer computes compton.*/
+  difference = xxxplasma->heat_tot - xxxplasma->lum_adiabatic - xxxplasma->lum_dr - xxxplasma->lum_di - xxxplasma->lum_comp - total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);	//NSH 1110 - total emission no longer computes compton.*/
 
 
 

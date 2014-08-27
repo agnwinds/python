@@ -75,6 +75,10 @@ double *b_data,*a_data;
   www = xplasma->w;
 //printf ("nh=%e, t_e=%e t_r=%e\n",nh,t_e,t_r);
 
+ compute_dr_coeffs (t_e);
+ compute_di_coeffs (t_e);
+
+
 
  /* Copy the current densities into a temporary array */
 
@@ -179,6 +183,10 @@ for (mm = 0; mm<nions; mm++)
 		}
 	}
 
+
+
+
+
 /*Now we populate the elements relating to PI populating a state*/
 
 for (mm =0; mm<nions; mm++)
@@ -191,6 +199,32 @@ for (mm =0; mm<nions; mm++)
 			}
 		}
 	}
+
+/*Now we populate the elements relating to direct ionization depopulating a state*/
+
+
+for (mm = 0; mm<nions; mm++)
+	{
+	if (ion[mm].istate != ion[mm].z+1 && ion[mm].dere_di_flag > 0) //we have electrons and a DI rate
+		{
+		rate_matrix[mm][mm]-=(xne*di_coeffs[mm]);
+		}
+	}
+
+
+/*Now we populate the elements relating to direct ionization populating a state*/
+
+for (mm =0; mm<nions; mm++)
+	{
+	for (nn=0;nn<nions;nn++)
+		{
+		if (mm==nn+1 && ion[nn].istate != ion[nn].z+1 && ion[mm].z==ion[nn].z && ion[nn].dere_di_flag > 0) 
+			{
+			rate_matrix[mm][mm]+=(xne*di_coeffs[nn]);
+			}
+		}
+	}
+
 
 /*Now we populate the elements relating to radiative recomb depopulating a state*/
 		
@@ -218,7 +252,7 @@ for (mm =0; mm<nions; mm++)
 
 /*Now we populate the elements relating to dielectronic recombination depopulating a state*/
 	
- compute_dr_coeffs (t_e);
+
 	
 for (mm = 0; mm<nions; mm++)
 	{

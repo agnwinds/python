@@ -116,7 +116,7 @@ WindPtr (w);
 
   /* the commbuffer needs to be larger enough to pack all variables in MPI_Pack and MPI_Unpack routines NSH 1407 - the 
 NIONS changed to nions for the 12 arrays in plasma that are now dynamically allocated*/
-  size_of_commbuffer = 8 * (12*nions + NLTE_LEVELS + 2*NTOP_PHOT + 12*NXBANDS + 2*LPDF + NAUGER + 104)*(floor(NPLASMA/np_mpi_global)+1);
+  size_of_commbuffer = 8 * (12*nions + NLTE_LEVELS + 2*NTOP_PHOT + 12*NXBANDS + 2*LPDF + NAUGER + 106)*(floor(NPLASMA/np_mpi_global)+1);
       
   commbuffer = (char *) malloc(size_of_commbuffer*sizeof(char));
       
@@ -396,6 +396,7 @@ NIONS changed to nions for the 12 arrays in plasma that are now dynamically allo
 	      MPI_Pack(&plasmamain[n].lum_adiabatic, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].lum_comp, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].lum_dr, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+	      MPI_Pack(&plasmamain[n].lum_di, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].lum_fb, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].lum_z, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].lum_rad, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -406,6 +407,7 @@ NIONS changed to nions for the 12 arrays in plasma that are now dynamically allo
 	      MPI_Pack(&plasmamain[n].lum_adiabatic_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].lum_comp_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].lum_dr_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+	      MPI_Pack(&plasmamain[n].lum_di_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].lum_fb_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].lum_z_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].lum_rad_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -525,6 +527,7 @@ NIONS changed to nions for the 12 arrays in plasma that are now dynamically allo
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_adiabatic, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_comp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_dr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_di, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_fb, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_z, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_rad, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -534,7 +537,9 @@ NIONS changed to nions for the 12 arrays in plasma that are now dynamically allo
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_ff_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_adiabatic_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_comp_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_dr_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_dr_ioniz, 1, MPI_DOUBLE,MPI_COMM_WORLD);
+
+	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_di_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_fb_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_z_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_rad_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -682,6 +687,7 @@ free (commbuffer);
       plasmamain[nplasma].lum_lines_ioniz = plasmamain[nplasma].lum_lines;
       plasmamain[nplasma].lum_comp_ioniz = plasmamain[nplasma].lum_comp;
       plasmamain[nplasma].lum_dr_ioniz = plasmamain[nplasma].lum_dr;
+      plasmamain[nplasma].lum_di_ioniz = plasmamain[nplasma].lum_di;
       plasmamain[nplasma].lum_rad_ioniz = plasmamain[nplasma].lum_rad;
       plasmamain[nplasma].lum_adiabatic_ioniz = plasmamain[nplasma].lum_adiabatic;
 
@@ -695,6 +701,7 @@ free (commbuffer);
   geo.lum_lines_ioniz = geo.lum_lines;
   geo.lum_comp_ioniz = geo.lum_comp;
   geo.lum_dr_ioniz = geo.lum_dr;
+  geo.lum_di_ioniz = geo.lum_di;
   geo.lum_adiabatic_ioniz = geo.lum_adiabatic;
   geo.lum_disk_ioniz = geo.lum_disk;
   geo.lum_star_ioniz = geo.lum_star;
@@ -735,9 +742,9 @@ free (commbuffer);
         asum, geo.lum_fb, geo.lum_ff, geo.lum_lines);	
 
   /* 1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons. */
-  Log ("!!wind_update: Wind cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e lines %8.2e adiabatic %8.2e) after update\n", 
-        asum + geo.lum_comp + geo.lum_dr + geo.lum_adiabatic, geo.lum_fb, geo.lum_ff, geo.lum_comp, 
-        geo.lum_dr, geo.lum_lines, geo.lum_adiabatic);	
+  Log ("!!wind_update: Wind cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e DI %8.2e lines %8.2e adiabatic %8.2e) after update\n", 
+        asum + geo.lum_comp + geo.lum_dr + geo.lum_di + geo.lum_adiabatic, geo.lum_fb, geo.lum_ff, geo.lum_comp, 
+        geo.lum_dr, geo.lum_di, geo.lum_lines, geo.lum_adiabatic);	
 
 
 
@@ -815,15 +822,15 @@ free (commbuffer);
             xsum / w[n].vol, psum / w[n].vol, fsum / w[n].vol, csum / w[n].vol, icsum / w[n].vol, lsum / w[n].vol);	
 
       /* 1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons.*/
-      Log ("OUTPUT Wind_cooling(ergs-1cm-3)     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e adiabatic %8.2e lines %8.2e ) after update\n",
-           (asum + geo.lum_comp + geo.lum_dr + geo.lum_adiabatic) / w[n].vol, geo.lum_fb / w[n].vol, geo.lum_ff / w[n].vol, 
-           geo.lum_comp / w[n].vol, geo.lum_dr / w[n].vol, geo.lum_adiabatic / w[n].vol, geo.lum_lines / w[n].vol);	
+      Log ("OUTPUT Wind_cooling(ergs-1cm-3)     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e DI %8.2e adiabatic %8.2e lines %8.2e ) after update\n",
+           (asum + geo.lum_comp + geo.lum_dr + geo.lum_dr +geo.lum_adiabatic) / w[n].vol, geo.lum_fb / w[n].vol, geo.lum_ff / w[n].vol, 
+           geo.lum_comp / w[n].vol, geo.lum_dr / w[n].vol,  geo.lum_di / w[n].vol,geo.lum_adiabatic / w[n].vol, geo.lum_lines / w[n].vol);	
 
       Log ("OUTPUT Wind_line_cooling(ergs-1cm-3)  HHe %8.2e Metals %8.2e\n",
 	   nsh_lum_hhe / w[n].vol, nsh_lum_metals / w[n].vol);
 
     /* 1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons. */
-      Log ("OUTPUT Balance      Cooling=%8.2e Heating=%8.2e Lum=%8.2e T_e=%e after update\n", asum + geo.lum_comp + geo.lum_dr + geo.lum_adiabatic, xsum, asum, plasmamain[0].t_e);	
+      Log ("OUTPUT Balance      Cooling=%8.2e Heating=%8.2e Lum=%8.2e T_e=%e after update\n", asum + geo.lum_comp + geo.lum_dr + geo.lum_di + geo.lum_adiabatic, xsum, asum, plasmamain[0].t_e);	
 
       for (n = 0; n < nelements; n++)
 	{

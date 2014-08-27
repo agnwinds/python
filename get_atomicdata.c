@@ -144,7 +144,7 @@ History:
 
 
 
-#define LINELENGTH 255
+#define LINELENGTH 400 // NSH 1408 This had to be increased to allow DERE DI data to be read in.
 #define MAXWORDS    20
 
 int
@@ -194,6 +194,8 @@ get_atomic_data (masterfile)
   double xe[NCROSS], xx[NCROSS];
   double a21 ();
   int nlines_simple;
+  int nspline;
+  double tmin;
   int nions_simple, nions_macro;
   int nlevels_simple;
   int ntop_phot_simple, ntop_phot_macro;
@@ -205,7 +207,7 @@ get_atomic_data (masterfile)
   double adi, t0di, bdi, t1di;
   double part_eps;		//Temporary storage for partition function epsilon data
   int J, part_G, part_m;	//Temporary storage for partiton function J, G and m data
-  double gstemp[BAD_GS_RR_PARAMS];	//Temporary storage for badnell resolved GS RR rates
+  double temp[LINELENGTH];	//Temporary storage for data read in off a line this is enogh if every character on the line is a seperate value!
   char gsflag, drflag;		//Flags to say what part of data is being read in for DR and RR
   double gstmin, gstmax;	//The range of temperatures for which all ions have GS RR rates
   double gsqrdtemp, gfftemp, s1temp, s2temp, s3temp;	//Temporary storage for gaunt factors
@@ -342,6 +344,8 @@ get_atomic_data (masterfile)
       ion[n].bad_gs_rr_t_flag = 0;	//Initialise to say this ion has no Badnell ground state recombination data 
       ion[n].bad_gs_rr_r_flag = 0;	//Initialise to say this ion has no Badnell ground state recombination data       
       ion[n].nxbadgsrr = -1;	//Initialise the pointer into the bad_gs_rr structure.
+      ion[n].dere_di_flag = 0; //Initialise to say this ion has no Dere DI rate data
+      ion[n].nxderedi = -1; //Initialise the pointer into the Dere DI rate structure
     }
 
   nlevels = nxphot = ntop_phot = nauger = ndrecomb = ncpart = 0;	//Added counter for DR//
@@ -454,6 +458,25 @@ get_atomic_data (masterfile)
     }
   gstmin = 0.0;
   gstmax = 1e99;
+
+
+/* 0814 nsh The following lines initialise the dere direct ionization rate struture */
+  for (n = 0; n < NIONS; n++)
+    {
+      dere_di_rate[n].nion = -1;
+      dere_di_rate[n].xi = 0.0;
+      dere_di_rate[n].min_temp = 1e99;
+      for (n1 = 0; n1 < DERE_DI_PARAMS; n1++)
+	{
+	  dere_di_rate[n].temps[n1] = 0.0;
+	  dere_di_rate[n].rates[n1] = 0.0;
+	}
+
+    }
+
+
+
+
 
 /* 0912 nsh the following lines initialise the sutherland gaunt factors */
   gaunt_n_gsqrd = 0;		//The number of sets of scaled temperatures we have data for
@@ -581,6 +604,8 @@ structure does not have this property! */
 		choice = 'G';
 	      else if (strncmp (word, "FF_GAUNT", 8) == 0)	/*Its a data file giving the temperature averaged gaunt factors from Sutherland (1997) */
 		choice = 'g';
+		else if (strncmp (word, "DI_DERE", 7) == 0)	/*Its a data file giving direct ionization rates from Dere (2007) */
+		choice = 'd';
 	      else if (strncmp (word, "*", 1) == 0);	/* It's a continuation so record type remains same */
 
 	      else
@@ -2242,7 +2267,7 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 
 
 		case 'G':
-		  nparam = sscanf (aline, "%*s %s %d %d %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le", &gsflag, &z, &ne, &gstemp[0], &gstemp[1], &gstemp[2], &gstemp[3], &gstemp[4], &gstemp[5], &gstemp[6], &gstemp[7], &gstemp[8], &gstemp[9], &gstemp[10], &gstemp[11], &gstemp[12], &gstemp[13], &gstemp[14], &gstemp[15], &gstemp[16], &gstemp[17], &gstemp[18]);	//split and assign the line
+		  nparam = sscanf (aline, "%*s %s %d %d %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le", &gsflag, &z, &ne, &temp[0], &temp[1], &temp[2], &temp[3], &temp[4], &temp[5], &temp[6], &temp[7], &temp[8], &temp[9], &temp[10], &temp[11], &temp[12], &temp[13], &temp[14], &temp[15], &temp[16], &temp[17], &temp[18]);	//split and assign the line
 		  nparam -= 3;	//take 4 off the nparam to give the number of actual parameters
 		  if (nparam > 19 || nparam < 1)	//     trap errors - not as robust as usual because there are a varaible number of parameters...
 		    {
@@ -2266,15 +2291,15 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 			    {
 			      if (ion[n].bad_gs_rr_t_flag == 0)	//and we need a temp line for this ion
 				{
-				  if (gstemp[0] > gstmin)
-				    gstmin = gstemp[0];
-				  if (gstemp[18] < gstmax)
-				    gstmax = gstemp[18];
+				  if (temp[0] > gstmin)
+				    gstmin = temp[0];
+				  if (temp[18] < gstmax)
+				    gstmax = temp[18];
 				  ion[n].bad_gs_rr_t_flag = 1;	//set the flag
 				  for (n1 = 0; n1 < nparam; n1++)
 				    {
 				      bad_gs_rr[ion[n].nxbadgsrr].temps[n1] =
-					gstemp[n1];
+					temp[n1];
 				    }
 				}
 			      else if (ion[n].bad_gs_rr_t_flag == 1)	//we already have a temp line for this ion
@@ -2299,7 +2324,7 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 				  for (n1 = 0; n1 < nparam; n1++)
 				    {
 				      bad_gs_rr[ion[n].nxbadgsrr].rates[n1] =
-					gstemp[n1];
+					temp[n1];
 				    }
 				}
 			      else if (ion[n].bad_gs_rr_r_flag == 1)	//we already have a rate line for this ion
@@ -2350,9 +2375,42 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 		      Error ("Get_atomic_data %s\n", aline);
 		      exit (0);
 		    }
+		  break;
+		case 'd':
+	nparam = sscanf (aline, "%*s %d %d %d %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le", &z, &istate, &nspline, &et, &tmin, &temp[0], &temp[1], &temp[2], &temp[3], &temp[4], &temp[5], &temp[6], &temp[7], &temp[8], &temp[9], &temp[10], &temp[11], &temp[12], &temp[13], &temp[14], &temp[15], &temp[16], &temp[17], &temp[18], &temp[19],&temp[20],&temp[21],&temp[22],&temp[23],&temp[24],&temp[25],&temp[26],&temp[27],&temp[28],&temp[29],&temp[30],&temp[31],&temp[32],&temp[33],&temp[34],&temp[35],&temp[36],&temp[37],&temp[38],&temp[39]);	//split and assign the line
 
+		  if (nparam != 5+(nspline*2))	//     trap errors 
+		    {
+		      Error ("Something wrong with Dere DI data\n");
+		      Error ("Get_atomic_data: %s\n", aline);
+		      exit (0);
+		    }
+		  for (n = 0; n < nions; n++)	//Loop over ions to find the correct place to put the data
+		    {
+		      if (ion[n].z == z && ion[n].istate == istate)	// this works out which ion we are dealing with
+			{
+			  if (ion[n].dere_di_flag == 0)	//This is first set of this type of data for this ion
+			    {
+ion[n].dere_di_flag=1;
+			      dere_di_rate[n_dere_di_rate].nion = n;	//put the ion number into the dere_di_rate structure
+			      ion[n].nxderedi = n_dere_di_rate;	//put the number of the dere_di_rate into the ion structure so we can go either way.
+				dere_di_rate[n_dere_di_rate].xi=et;
+				dere_di_rate[n_dere_di_rate].min_temp=tmin;
+				dere_di_rate[n_dere_di_rate].nspline=nspline;
+				for (n1=0;n1<nspline;n1++)
+					{
+					dere_di_rate[n_dere_di_rate].temps[n1]=temp[n1];
+					dere_di_rate[n_dere_di_rate].rates[n1]=temp[n1+nspline]*1e-6;
 
-
+					}
+			      n_dere_di_rate++;	//increment the counter of number of ground state RR
+			    }
+			else
+				{
+				Error("Get_atomic_data: More than one Dere DI rate for ion %i\n",n);
+				}
+			}
+		    }
 		  break;
 
 
@@ -2401,12 +2459,33 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
        ncpart);
   Log ("We have read in %3d Badnell totl Radiative rate coefficients\n",
        n_total_rr);
+  Log ("We have read in %3d Dere direct ionization rate coefficients\n",
+       n_dere_di_rate);
+
+
   Log
     ("We have read in %3d Badnell GS   Radiative rate coefficients over the temp range %e to %e\n",
      n_bad_gs_rr, gstmin, gstmax);
+
+
+
+
+
   Log ("We have read in %3d Scaled electron temperature frequency averaged gaunt factors\n",
        gaunt_n_gsqrd);
   Log ("The minimum frequency for photoionization is %8.2e\n", phot_freq_min);
+
+/*
+for (i=0;i<nions;i++)
+	{	
+	if (ion[i].dere_di_flag==1)
+		{
+     		n1=ion[i].nxderedi;
+		printf ("We have Dere DI data for element %i state %i %e %e %e %e\n",ion[i].z,ion[i].istate,dere_di_rate[n1].temps[0],dere_di_rate[n1].rates[0],dere_di_rate[n1].temps[dere_di_rate[n1].nspline-1],dere_di_rate[n1].rates[dere_di_rate[n1].nspline-1]);
+		}
+	}
+*/	
+
 
 
 /* Now begin a series of calculations with the data that has been read in in order
@@ -2574,7 +2653,6 @@ or zero so that simple checks of true and false can be used for them */
      bb_max, NBBJUMPS);
 
 /* Now, write the data to a file so you can check it later if you wish */
-
 #if DEBUG
 
   if ((fptr = fopen ("data.out", "w")) == NULL)
@@ -2662,24 +2740,20 @@ or zero so that simple checks of true and false can be used for them */
   /* Finally create frequency ordered pointers to the various portions
    * of the atomic data
    */
-
   /* Index the lines */
   index_lines ();
-
   /* Index the collisions */
   index_collisions ();
-
 /* Index the verner photionization structure by threshold frequecy -- 57h -- 06jul ksl */
 
   if (nxphot > 0)
 	{
     index_phot_verner ();
-tabulate_verner(); //Create a tabulated version of the data
+    tabulate_verner(); //Create a tabulated version of the data
 	}
 /* Index the topbase photoionization structure by threshold freqeuncy */
   if (ntop_phot > 0)
     index_phot_top ();
-
   return (0);
 
 }
@@ -2813,15 +2887,19 @@ index_phot_verner ()
   int *index, ioo;
   int n;
   void indexx ();
-
   /* Allocate memory for some modestly large arrays */
   freqs = calloc (sizeof (foo), nxphot + 2);
   index = calloc (sizeof (ioo), nxphot + 2);
 
   freqs[0] = 0;
+
+
+
   for (n = 0; n < nxphot; n++)
+{
     freqs[n + 1] = xphot[n].freq_t;	/* So filled matrix 
 					   elements run from 1 to nxphot */
+}
 
   indexx (nxphot, freqs, index);	/* Note that this math recipes routine 
 					   expects arrays to run from 1 to nxphot inclusive */
@@ -2905,7 +2983,12 @@ indexx (n, arrin, indx)
 {
   int l, j, ir, indxt, i;
   float q;
-
+/* NSH 1408 - This routine fails in the very odd circumstance that n=1 so we now do a little test here */
+if (n<2)
+	{
+	Log_silent("Nothing for indexx to do! Only one element\n");
+	return;
+	}
   for (j = 1; j <= n; j++)
     indx[j] = j;
   l = (n >> 1) + 1;

@@ -162,6 +162,8 @@ typedef struct ions
   int nxbadgsrr;		/* index into the bad_gs_rr structure to give the location of the
 				   Badnell fit coefficient for the resolved ground state recombination rate for 
 				   this ion if it exists */
+  int dere_di_flag;              /* Flag to say if we have DERE direct ionization data for this ion */
+  int nxderedi;		/* index into the dere direct ionization structure to give the location of the data for this ion */
 
 }
 ion_dummy, *IonPtr;
@@ -465,6 +467,23 @@ typedef struct badnell_gs_rr
 } Bad_gs_rr, *Bad_gs_rrptr;
 
 Bad_gs_rr bad_gs_rr[NIONS];	//Set up the structure
+
+
+#define DERE_DI_PARAMS 20	//This is the maximum number of points in the fit.
+int n_dere_di_rate;
+typedef struct dere_di_rate
+{
+  int nion;			//Internal cross reference to the ion that this refers to
+  int nspline;
+  double temps[DERE_DI_PARAMS];	//temperatures at which the rate is tabulated
+  double rates[DERE_DI_PARAMS];	//rates corresponding to those temperatures
+  double xi;
+  double min_temp;
+} Dere_di_rate, *Dere_di_rateptr;
+
+Dere_di_rate dere_di_rate[NIONS];	//Set up the structure
+
+double di_coeffs[NIONS];  //This is an array to store the dr_coeffs 
 
 #define MAX_GAUNT_N_GSQRD 100	//Space set aside for the number of parameters for scaled inverse temperature
 
