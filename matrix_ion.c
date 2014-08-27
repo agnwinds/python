@@ -220,7 +220,7 @@ for (mm =0; mm<nions; mm++)
 		{
 		if (mm==nn+1 && ion[nn].istate != ion[nn].z+1 && ion[mm].z==ion[nn].z && ion[nn].dere_di_flag > 0) 
 			{
-			rate_matrix[mm][mm]+=(xne*di_coeffs[nn]);
+			rate_matrix[mm][nn]+=(xne*di_coeffs[nn]);
 			}
 		}
 	}
