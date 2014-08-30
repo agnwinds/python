@@ -122,6 +122,12 @@ double *b_data,*a_data;
 
 
 
+  partition_functions (xplasma, 4);	/*WARNING fudge NSH 11/5/14 - this is as a test. 
+                                         We really need a better implementation of partition functions and levels
+                                        for a power law illuminating spectrum. We found that if we didnt make this call, 
+                                        we would end up with undefined levels - which did really crazy things */
+
+
 xne = xxne = xxxne = get_ne (newden); /*Best guess for the starting n_e is from the last try! */
 
  //if (t_e < MIN_TEMP)
@@ -491,7 +497,10 @@ for (nn=0;nn<nions;nn++)
     }
 
 
-
+  partition_functions (xplasma, 4);	/*WARNING fudge NSH 11/5/14 - this is as a test. 
+                                         We really need a better implementation of partition functions and levels
+                                        for a power law illuminating spectrum. We found that if we didnt make this call, 
+                                        we would end up with undefined levels - which did really crazy things */
 
 
 

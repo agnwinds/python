@@ -2113,15 +2113,25 @@ run -- 07jul -- ksl
          JM1304: moved geo.wcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
       /* NSH1306 - moved geo.wcycle++ back, but moved the log and xsignal statements */
 
-      Log_silent ("Saved wind structure in %s after cycle %d\n", windsavefile,
-	   geo.wcycle);
+
 
       xsignal (root, "%-20s Finished %d of %d ionization cycle \n", "OK",
 	       geo.wcycle, wcycles);
-      geo.wcycle++;		//Increment ionisation cycles
+      geo.wcycle++;		/*Increment ionisation cycles - seems out of order, but it doesnt matter because the test is made at the end of the loop..*/
 
+/* NSH 1408 - The wind save command was not inside the ifdef statement, and so many processors tried to access the same file. This is fixed below */
+
+#ifdef MPI_ON
+      if (rank_global == 0)
+      {
+#endif
       wind_save (windsavefile);
-
+      Log_silent ("Saved wind structure in %s after cycle %d\n", windsavefile,
+	   geo.wcycle);
+#ifdef MPI_ON
+      }
+      MPI_Barrier(MPI_COMM_WORLD);
+#endif
 
 
 
