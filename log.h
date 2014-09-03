@@ -37,3 +37,5 @@ int error_summary(char *message);
 int Log_flush(void);
 int Log_set_mpi_rank(int rank, int n_mpi);
 int Log_parallel(char *format, ...);
+int Log_debug(int value);
+int Debug(char *format, ...);

@@ -38,6 +38,14 @@
 
 		int Log_parallel(message)			Log statement for parallel reporting
 
+		int Leg_debug(value)				Turn on logging of Debug statements if value is non-zero
+
+		int Debug( char *format, ...) 			Log an statement to the screen.  This is essentially a 
+								intended to replace a printf statement in situations where
+								one is debugging code.  The use of Debug instead of log
+								means that a future developer should be free to remove the
+								Debug statement from the code
+
 
 Arguments:		
 
@@ -112,7 +120,6 @@ History:
 #include <stdarg.h>
 #include <math.h>
 #include "log.h"
-//#include "mpi.h"
 
 #define LINELENGTH 132
 #define NERROR_MAX 500		// Number of different errors that are recorded
@@ -148,6 +155,7 @@ int nerrors;
 FILE *diagptr;
 int init_log = 0;
 int log_verbosity=5;   // A parameter which can be used to suppress what would normally be logged or printed
+int log_debug=0;	//A parameter which is set to cause Debug commands to be logged
 
 int
 Log_init (filename)
@@ -485,6 +493,44 @@ int Log_parallel(char *format, ...)
 
   result = vprintf (format, ap);
   
+  return (result);
+}
+
+
+/* Set a flag to which cause Debug statements to be logged */
+int Log_debug(value)
+	int value;
+{
+	log_debug=value;
+	return(0);
+}
+
+/* Log a debug statement if the external varialbe log_debug
+ * has been set to a non-zero value
+ */
+
+int
+Debug (char *format, ...)
+{
+  va_list ap,ap2;
+  int result;
+
+  if (log_debug == 0) return(0);
+
+  if (init_log == 0)
+    Log_init ("logfile");
+
+  if (log_verbosity < SHOW_LOG) 
+	  return(0);
+
+  va_start (ap, format);
+  va_copy (ap2,ap); /*NSH 121212 - Line added to allow error logging to work */
+  if (my_rank==0)	// only want to print errors if master thread
+    vprintf ("Debug: ", ap);
+    result = vprintf (format, ap);
+  fprintf (diagptr, "Debug: ");
+  result = vfprintf (diagptr, format, ap2);
+  va_end (ap);
   return (result);
 }
 

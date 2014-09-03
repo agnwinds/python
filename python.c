@@ -16,7 +16,7 @@ Arguments:
 
 	and the switches have the following meanings
 
-	-h 	to ge this help message
+	-h 	to get this help message
 	-r 	restart a run of the progarm reading the file xxx.windsave
 
 	-t time_max	limit the total time to approximately time_max seconds.  Note that the program checks
@@ -28,6 +28,7 @@ Arguments:
 		v to 5 causes the routine to print out all the information which outputs have
 		included previously.  The current default is set to 4 which suppresses Log_silent
 		and Error_silent
+	-d	To have statements from Debug command logged
 
 
 	
@@ -190,6 +191,7 @@ History:
 			at the moment it only does adiabatc
 			Also some modifications to the parallel communiactions to deal with some new
 			plasma variabales, and the min and max frequency photons seen in bands.
+	1409	ksl	Added new switch -d to enable use of a new Debug logging feature
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -372,6 +374,11 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	      i++;
 
 	    }
+	  else if (strcmp (argv[i], "-d") == 0)
+	  {
+		Log_debug(1);
+	  	i++;
+	    }		
 	  else if (strncmp (argv[i], "-", 1) == 0)
 	    {
 	      Error ("python: Unknown switch %s\n", argv[i]);
@@ -654,6 +661,8 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   wcycles = geo.wcycles;
   pcycles = geo.pcycles;
+
+  Debug("Test %d %d \n",wcycles,pcycles);
 
   if (wcycles == 0 && pcycles == 0)
     exit (0);			//There is really nothing to do!
