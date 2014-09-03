@@ -10,7 +10,7 @@
  
 Arguments:		
 
-	Usage:  py [-h] [-r] [-t time_max] xxx  or simply py
+	Usage:  py [-h] [-r] [-d] [-t time_max] xxx  or simply py
 
 	where xxx is the rootname or full name of a parameter file, e. g. test.pf
 
@@ -220,7 +220,9 @@ main (argc, argv)
   WindPtr w;
   PhotPtr p;
 
-  int i, wcycles, pcycles;
+// 140902 - wcycles and pcycles eliminated everywher in favor of using the variables that are in the goe structure
+//  int i, wcycles, pcycles;
+  int i;
   double freqmin, freqmax;
   double swavemin, swavemax, renorm;
   long nphot_to_define;
@@ -531,19 +533,14 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   MDIM = geo.mdim;
   NDIM2 = geo.ndim * geo.mdim;
 
-/* dfudge is a parameter that is used to make sure a photon bundle pushes through a cell boundary */
-/* NSH 121219 - now (74b2) defined later on after we know how big the wind will be 
-
-  dfudge = 1e5;
-  DFUDGE = dfudge; */
-
 /* End of definition of wind arrays */
 
 
 /* Initialize variables which are used in the main routine */
 
-  wcycles = pcycles = 1;
-  photons_per_cycle = 20000;
+//  140902 - ksl - removed unused line in code. wcycles and pcycles are actually set later
+//  wcycles = pcycles = 1;
+  photons_per_cycle = 100000;
 
 /* Initialize basis vectors for a cartesian coordinate system */
 
@@ -610,7 +607,8 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
 	}
 
-      geo.wcycle = geo.pcycle = 0;
+      geo.wcycles = geo.pcycles = 1;
+      geo.wcycle = geo.pcycle = 1;
 
     }
 
@@ -648,6 +646,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
     photons_per_cycle = NPHOT;
   subcycles = photons_per_cycle / NPHOT;
   Log ("Photons_per_cycle adjusted to %d\n", photons_per_cycle);
+
 #ifdef MPI_ON
   Log ("Photons per cycle per MPI task will be %d\n", photons_per_cycle/np_mpi_global);
 
@@ -659,12 +658,10 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   rdint ("spectrum_cycles", &geo.pcycles);
 
-  wcycles = geo.wcycles;
-  pcycles = geo.pcycles;
 
-  Debug("Test %d %d \n",wcycles,pcycles);
+  Debug("Test %d %d \n",geo.wcycles,geo.pcycles);
 
-  if (wcycles == 0 && pcycles == 0)
+  if (geo.wcycles == 0 && geo.pcycles == 0)
     exit (0);			//There is really nothing to do!
 
 /* Allocate the memory for the photon structure now that NPHOT is established */
@@ -1423,7 +1420,7 @@ if (geo.coord_type==RTHETA && geo.wind_type==2) //We need to generate an rtheta 
  * ratiation and then value given to return a spectrum type. The output is not the same 
  * number as one inputs. It's not obvious that this is a good idea. */
 
-  if (pcycles > 0)
+  if (geo.pcycles > 0)
     {
 
       get_spectype (geo.star_radiation,
@@ -1713,7 +1710,7 @@ run -- 07jul -- ksl
 
 /* XXXX - BEGINNING OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
 
-  if (geo.wcycle == wcycles)
+  if (geo.wcycle == geo.wcycles)
     xsignal (root, "%-20s No ionization needed: wcycles(%d)==wcyeles(%d)\n",
 	     "COMMENT", geo.wcycle, geo.wcycles);
   else
@@ -1726,15 +1723,15 @@ run -- 07jul -- ksl
 
   
 
-  while (geo.wcycle < wcycles)
+  while (geo.wcycle < geo.wcycles)
     {				/* This allows you to build up photons in bunches */
 
       xsignal (root, "%-20s Starting %d of %d ionization cycle \n", "NOK",
-	       geo.wcycle, wcycles);
+	       geo.wcycle, geo.wcycles);
 
 
       Log ("!!Python: Begining cycle %d of %d for defining wind\n",
-	   geo.wcycle, wcycles);
+	   geo.wcycle, geo.wcycles);
       Log_flush ();		/*NH June 13 Added call to flush logfile */
 
       /* Initialize all of the arrays, etc, that need initialization for each cycle
@@ -1763,7 +1760,7 @@ run -- 07jul -- ksl
 	{
 	  Log
 	    ("Subcycle %d of %d in Cycle %d of %d for defining wind structure\n",
-	     j, subcycles, geo.wcycle, wcycles);
+	     j, subcycles, geo.wcycle, geo.wcycles);
 
 	  if (!geo.wind_radiation || (geo.wcycle == 0 && geo.wind_type != 2))
 	    iwind = -1;		/* Do not generate photons from wind */
@@ -2124,7 +2121,7 @@ run -- 07jul -- ksl
 
 
       xsignal (root, "%-20s Finished %d of %d ionization cycle \n", "OK",
-	       geo.wcycle, wcycles);
+	       geo.wcycle, geo.wcycles);
       geo.wcycle++;		//Increment ionisation cycles
 
 /* NSH 1408 - The wind save command was not inside the ifdef statement, and so many processors tried to access the same file. This is fixed below */
@@ -2216,23 +2213,23 @@ run -- 07jul -- ksl
 
   /* the next condition should really when one has nothing more to do */
 
-  if (geo.pcycle >= pcycles)
+  if (geo.pcycle >= geo.pcycles)
     xsignal (root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n",
 	     "COMMENT", geo.pcycle, geo.pcycles);
 
 
-  while (geo.pcycle < pcycles)
+  while (geo.pcycle < geo.pcycles)
     {				/* This allows you to build up photons in bunches */
 
       xsignal (root, "%-20s Starting %d of %d spectral cycle \n", "NOK",
-	       geo.pcycle, pcycles);
+	       geo.pcycle, geo.pcycles);
 
 #if DEBUG
       ispy_init ("python", geo.pcycle + 1000);
 #endif
 
       Log ("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle,
-	   pcycles);
+	   geo.pcycles);
       Log_flush ();		/*NSH June 13 Added call to flush logfile */
       if (!geo.wind_radiation)
 	iwind = -1;		/* Do not generate photons from wind */
@@ -2250,7 +2247,7 @@ run -- 07jul -- ksl
 
        */
 
-      nphot_to_define = (long) NPHOT *(long) pcycles;
+      nphot_to_define = (long) NPHOT *(long) geo.pcycles;
       define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);
 
       for (icheck = 0; icheck < NPHOT; icheck++)
@@ -2275,7 +2272,7 @@ run -- 07jul -- ksl
       spectrum_create (p, freqmin, freqmax, nangles, select_extract);
 
 /* Write out the detailed spectrum each cycle so that one can see the statistics build up! */
-      renorm = ((double) (pcycles)) / (geo.pcycle + 1.0);
+      renorm = ((double) (geo.pcycles)) / (geo.pcycle + 1.0);
 
       /* Do an MPI reduce to get the spectra all gathered to the master thread */
 #ifdef MPI_ON
@@ -2327,7 +2324,7 @@ run -- 07jul -- ksl
       /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
 
       xsignal (root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK",
-	       geo.pcycle, pcycles);
+	       geo.pcycle, geo.pcycles);
 
       geo.pcycle++;		// Increment the spectral cycles
 
