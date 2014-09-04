@@ -836,6 +836,7 @@ sobolev (one, p, den_ion, lptr, dvds)
 
   if ((dvds = fabs (dvds)) == 0.0)	// This forces dvds to be positive -- a good thing!
     {
+	    d1=d2=0.;  // Elimiante warning when complied with clang
       tau = VERY_BIG;
       Error ("Sobolev: Surprize tau = VERY_BIG\n");
     }

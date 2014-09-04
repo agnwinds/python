@@ -389,12 +389,17 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	}
 
 
+
       /* The last command line variable is always the .pf file */
 
       strcpy (dummy, argv[argc - 1]);
       get_root (root, dummy);
 
+  /* This completes the parsing of the command line */
+
       /* JM130722 we now store diag files in a subdirectory if in parallel*/
+      /* ksl - I believe this is created in all cases, and that is what we want */
+
       sprintf(diagfolder,"diag_%s/",root);
       mkdir(diagfolder, 0777);
       strcpy (diagfile,diagfolder);
@@ -405,7 +410,6 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
     }
 
-  /* This completes the parsing of the command line */
 
   /* 0811 - ksl - If the restart flag has been set, we check to see if a windsave file exists.  If it doues we will 
      we will restart from that point.  If the windsave file does not exist we will start from scratch */
