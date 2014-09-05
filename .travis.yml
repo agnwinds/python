@@ -66,7 +66,7 @@ script:
     - make clean
     - make CC=gcc LIB=structure/lib LIB2=structure/gsl/lib BIN=structure/bin INCLUDE=structure/include INCLUDE2=structure/gsl/include py_wind
     - make clean
-    - cd structure/test_suite/travis 
+    - cd structure/examples/travis 
     - Setup_Py_Dir
     - py test1 > test1.out
     - py balmer_test > balmer_test.out
