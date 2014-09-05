@@ -84,6 +84,7 @@ History:
          04May   SS     Modifications to allow the macro_simple option. (All ions treated as
                         "simple").
 	06may	ksl	57+ -- To allow for plasma structure.  
+	1409	ksl	Changes to accommodate clumping
 **************************************************************/
 
 struct photon cds_phot_old;
@@ -113,7 +114,6 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   int init_dvds;
   double kap_bf_tot, kap_ff, kap_cont;
   double tau_sobolev;
-  int bb_estimators_increment ();
   WindPtr one, two;
   int check_in_grid;
   int nplasma;
@@ -269,6 +269,11 @@ method). If the macro atom method is not used just get kap_bf to 0 and move on).
 
   kap_cont = kap_es + kap_bf_tot + kap_ff;	//total continuum opacity 
 
+  /* To this point kappa is for the part ot the cell that is filled with material so
+   * we must reduce this to account for the filling factor 1409 - ksl */
+
+  kap_cont*=geo.fill;
+
 
 
 /* Finally begin the loop over the resonances that can interact with the
@@ -345,14 +350,20 @@ process. */
 		  /* Add the line optical depth  Note that one really should translate the photon to this point 
 		     before doing this (?? What is "this"??)as p-> x is being used to calculate direction of the wind */
 
-		  ttau += tau_sobolev =
+
+		tau_sobolev =
 		    sobolev (one, p, dd, lin_ptr[nn], dvds);
 
 		  /* tau_sobolev now stores the optical depth. This is fed into the next statement for the bb estimator
 		     calculation. SS March 2004 */
 
+		/* 140903 Increment ttau allowing for filling factor */
+		  ttau += tau_sobolev*geo.fill;  
+
+
+
 		  /* ksl - ??? 0902 - Stuart it looks to mee as if this is being run in the Macro case even during the 
-		   * exraction cycles.  Could you check. It shouldn't be necessary.  ???
+		   * extraction cycles.  Could you check. It shouldn't be necessary.  ???
 		   */
 
 		  if (geo.rt_mode == 2)	//Macro Atom case (SS)

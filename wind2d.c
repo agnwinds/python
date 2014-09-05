@@ -327,8 +327,9 @@ be optional which variables beyond here are moved to structures othere than Wind
     {
       nwind = plasmamain[n].nwind;
       stuff_v (w[nwind].xcen, x);
-      plasmamain[n].rho = model_rho (x);
-      plasmamain[n].vol = w[nwind].vol;	// Copy volumes
+      /* 140905 - ksl - Next two lines allow for clumping */
+      plasmamain[n].rho = model_rho (x)/geo.fill;
+      plasmamain[n].vol = w[nwind].vol*geo.fill;	// Copy volumes
 /* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, I've put new things in here to initialise the exponential models */
       for (nn = 0; nn < NXBANDS; nn++)
 	{

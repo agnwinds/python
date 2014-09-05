@@ -3,6 +3,7 @@
 #endif 
 
 int np_mpi_global;               /// Global variable which holds the number of MPI processes
+
 int rank_global; 
 
 #define DEBUG 				0	/* 0 means do not debug */
@@ -288,6 +289,8 @@ struct geometry
 
   double corona_vel_frac;	// the radial velocity of the corona in units of the keplerian velocity
 
+/* The filling factior for the wind or corona */
+  double fill;
 /* Initial values for defining wind structure for a planar geometry.  These are currently only used by balance and this
    may not be the best approach generally and depending on where this ends up. Some consolidation is desirable */
   double pl_vol, pl_vmax;
@@ -494,8 +497,9 @@ typedef struct wind
   double div_v;			/*Divergence of v at center of cell */
   double dvds_ave;		/* Average value of dvds */
   double dvds_max, lmn[3];	/*The maximum value of dvds, and the direction in a cell in cylindrical coords */
-  double vol;			/* valid volume of this cell (more specifically the volume of one of the
-				   two annular regions that this cell represents). */
+  double vol;			/* valid volume of this cell (that is the volume of the cell that is considered
+				   to be in the wind.  This differs from the volume in the Plasma structure
+				   where the volume is the volume that is actually filled with material. */
   int inwind;			/* 061104 -- 58b -- ksl -- Moved definitions of for whether a cell is or is not
 				   inwind to #define statements above */
 
@@ -526,9 +530,9 @@ typedef struct plasma
   int nwind;			/*A cross reference to the corresponding cell in the  wind structure */
   int nplasma;			/*A self reference to this  in the plasma structure */
   double ne;			/* electron density in the shell */
-  double rho;			/*density at the center of the cell */
-  double vol;			/* valid volume of this cell (more specifically the volume of one of the
-				   two annular regions that this cell represents). */
+  double rho;			/*density at the center of the cell. For clumped models, this is rho of the clump */
+  double vol;			/* volume of this cell (more specifically the volume  that is filled with material
+				   which can differe from the valid volume of the cell due to clumping. */
   double *density;	/*The number density of a specific ion.  This needs to correspond
 				   to the ion order obtained by get_atomic_data. 78 - changed to dynamic allocation*/
   double *partition;	/*The partition function for each  ion. 78 - changed to dynamic allocation */

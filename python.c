@@ -612,7 +612,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	}
 
       geo.wcycles = geo.pcycles = 1;
-      geo.wcycle = geo.pcycle = 1;
+      geo.wcycle = geo.pcycle = 0;
 
     }
 
@@ -1250,6 +1250,10 @@ Modified again in python 71b to take account of change in parametrisation of she
 	  Error ("python: Unknown wind type %d\n", geo.wind_type);
 	  exit (0);
 	}
+
+      /* Get the filling factor of the wind*/
+      geo.fill=1.;
+      rddoub("wind.filling_factor(1=smooth,<1=clumpted)",&geo.fill);
 
     }				// End of block to define a model for the first time
   else
