@@ -248,7 +248,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
     old_windsavefile[LINELENGTH], diagfolder[LINELENGTH];
   char dummy[LINELENGTH];
   char tprofile[LINELENGTH];
-  double xbl;
+  double x,xbl;
 
   int j, nn;
   double zz, zzz, zze, ztot, zz_adiab;
@@ -451,6 +451,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   /* Start logging of errors and comments */
 
   Log ("!!Python Version %s \n", VERSION);	//54f -- ksl -- Now read from version.h
+  Log ("!!Python is running with %d processors\n", np_mpi_global);
   Log_parallel ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
 
   /* Set the maximum time if it was defined */
@@ -544,7 +545,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
 //  140902 - ksl - removed unused line in code. wcycles and pcycles are actually set later
 //  wcycles = pcycles = 1;
-  photons_per_cycle = 100000;
+//  photons_per_cycle = 100000;
 
 /* Initialize basis vectors for a cartesian coordinate system */
 
@@ -642,8 +643,11 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
 /* Get the remainder of the data.  Note that this is done whether or not the windsave file was read in */
 
-  rdint ("photons_per_cycle", &photons_per_cycle);
-  NPHOT = photons_per_cycle;	// For now set NPHOT to be be photons/cycle --> subcycles==1
+// rddoub ("photons_per_cycle", &photons_per_cycle);
+// 140907 - ksl - Although photons_per_cycle is really an integer, read in as a double so it is easier for input
+  x=100000;
+  rddoub ("photons_per_cycle", &x);
+  NPHOT = photons_per_cycle=x;	// For now set NPHOT to be be photons/cycle --> subcycles==1
 
   photons_per_cycle = (photons_per_cycle / NPHOT) * NPHOT;
   if (photons_per_cycle < NPHOT)
@@ -1169,6 +1173,11 @@ Afterwards, the photons are used to compute the sim parameters. */
 * inside the actual wind, or at least that's what ksl believes on 110809.  ???
 */
 
+/* 140907: ksl - I have effectively commented out any consideration of the compton_torus because it is not
+ * debugged.  But one can continue debugging it by setting the DEBUG variatble to true 
+ */
+      geo.compton_torus=0;
+#if DEBUG
       rdint ("Torus(0=no,1=yes)", &geo.compton_torus);
       if (geo.compton_torus)
 	{
@@ -1185,6 +1194,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 		 geo.compton_torus_tau);
 	    }
 	}
+#endif
 
 /* Describe the wind */
 

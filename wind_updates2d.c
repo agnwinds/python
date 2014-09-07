@@ -726,7 +726,7 @@ free (commbuffer);
         xsum, psum, fsum, csum, icsum, lsum);
 	
   /* 1306 Added line to split out absorbed flux from wind heating */
-  Log ("!!wind_update: Wind heating    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e adiabatic %8.2e)\n", 
+  Log ("!!wind_update: Wind heating     %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e adiabatic %8.2e)\n", 
         xsum+geo.heat_adiabatic, psum, fsum, csum, icsum, lsum, geo.heat_adiabatic);
 	
   /* 1108 NSH added commands to report compton cooling 1110 removed, 
