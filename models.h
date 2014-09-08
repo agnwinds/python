@@ -12,6 +12,7 @@
  /* 1405 JM -- Increased PDF array for use with disk14 models- also removed duplication of ncomps */
 
 #define NWAVES  28000
+// #define NWAVES  2000
 #define NDIM	10		// The maximum number of free parameters
 #define NCOMPS	10		//The maximum number of separate components
 #define NPARS	10		//The maximum number of parameters in a component (not all variable)

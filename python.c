@@ -2063,10 +2063,13 @@ run -- 07jul -- ksl
 
       wind_update (w);
 
+/* In a diagnostic mode save the wind file for each cycle (from thread 0) */
+
       if (diag_on_off)
 	{
 	  strcpy (dummy, "");
 	  sprintf (dummy, "python%02d.wind_save", geo.wcycle);
+
 #ifdef MPI_ON
 	  if (rank_global == 0)
 	  {
@@ -2084,7 +2087,8 @@ run -- 07jul -- ksl
 
       Log_silent ("Finished creating spectra\n");
 
-      /* Do an MPI reducde to get the spectra all gathered to the master thread */
+      /* Do an MPI reduce to get the spectra all gathered to the master thread */
+
 #ifdef MPI_ON
 
 
@@ -2142,7 +2146,9 @@ run -- 07jul -- ksl
 	       geo.wcycle, geo.wcycles);
       geo.wcycle++;		//Increment ionisation cycles
 
-/* NSH 1408 - The wind save command was not inside the ifdef statement, and so many processors tried to access the same file. This is fixed below */
+
+/* NSH 1408 - Save only the windsave file from thread 0, to prevent many processors from writing to the same
+ * file. */
 
 #ifdef MPI_ON
       if (rank_global == 0)
@@ -2160,7 +2166,7 @@ run -- 07jul -- ksl
 
 
       check_time (root);
-      Log_flush ();		/*NSH June 13 Added call to flush logfile */
+      Log_flush ();		/*Flush the logfile */
 
     }				// End of Cycle loop
 
@@ -2672,8 +2678,8 @@ Notes:
 
 	For models we have to handle two cases:
 		A new model.  Here we want to start with a default value and
-			to keep trackof what was entered since it is likely
-			we will want that togeter
+			to keep track of what was entered since it is likely
+			we will want that together
 		The continuation of an old model.  Here we need to expect the
 			same choices as previously
 081026 - Actual routine is still a mess.  
@@ -2694,7 +2700,7 @@ History:
 **************************************************************/
 
 
-char get_spectype_oldname[] = "kurucz91/kurucz91.ls";	/*This is to assure that we read model lists in the same order everytime */
+char get_spectype_oldname[] = "data/kurucz91/kurucz91.ls";	/*This is to assure that we read model lists in the same order everytime */
 int get_spectype_count = 0;
 int
 get_spectype (yesno, question, spectype)
