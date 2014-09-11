@@ -2100,8 +2100,8 @@ run -- 07jul -- ksl
 	{
 	  for (mpi_j=0; mpi_j < MSPEC; mpi_j++)
 	    {
-	      redhelper[mpi_i*MSPEC + mpi_j]=s[mpi_j].f[mpi_i]/ np_mpi_global;
-	      redhelper[mpi_i*MSPEC + mpi_j + (NWAVE*MSPEC)]=s[mpi_j].lf[mpi_i]/ np_mpi_global;
+	      redhelper[mpi_i*MSPEC + mpi_j]=xxspec[mpi_j].f[mpi_i]/ np_mpi_global;
+	      redhelper[mpi_i*MSPEC + mpi_j + (NWAVE*MSPEC)]=xxspec[mpi_j].lf[mpi_i]/ np_mpi_global;
 	    }
 	}
 
@@ -2112,8 +2112,8 @@ run -- 07jul -- ksl
 	{
 	  for (mpi_j=0; mpi_j < MSPEC; mpi_j++)
 	    {
-	      s[mpi_j].f[mpi_i] = redhelper2[mpi_i*MSPEC + mpi_j];
-	      s[mpi_j].lf[mpi_i] = redhelper2[mpi_i*MSPEC + mpi_j + (NWAVE*MSPEC)];
+	      xxspec[mpi_j].f[mpi_i] = redhelper2[mpi_i*MSPEC + mpi_j];
+	      xxspec[mpi_j].lf[mpi_i] = redhelper2[mpi_i*MSPEC + mpi_j + (NWAVE*MSPEC)];
 	    }
 	}
       MPI_Barrier(MPI_COMM_WORLD);
@@ -2311,7 +2311,7 @@ run -- 07jul -- ksl
 	{
 	  for (mpi_j=0; mpi_j < nspectra; mpi_j++)
 	    {
-	      redhelper[mpi_i*nspectra + mpi_j]=s[mpi_j].f[mpi_i]/ np_mpi_global;
+	      redhelper[mpi_i*nspectra + mpi_j]=xxspec[mpi_j].f[mpi_i]/ np_mpi_global;
 	    }
 	}
 
@@ -2322,7 +2322,7 @@ run -- 07jul -- ksl
 	{
 	  for (mpi_j=0; mpi_j < nspectra; mpi_j++)
 	    {
-	      s[mpi_j].f[mpi_i] = redhelper2[mpi_i*nspectra + mpi_j];
+	      xxspec[mpi_j].f[mpi_i] = redhelper2[mpi_i*nspectra + mpi_j];
 	    }
 	}
       MPI_Barrier(MPI_COMM_WORLD);

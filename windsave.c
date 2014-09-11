@@ -367,7 +367,7 @@ spec_save (filename)
 
   sprintf (line, "Version %s  nspectra %d\n", VERSION, nspectra);
   n = fwrite (line, sizeof (line), 1, fptr);
-  n += fwrite (s, sizeof (spectrum_dummy), nspectra, fptr);
+  n += fwrite (xxspec, sizeof (spectrum_dummy), nspectra, fptr);
   fclose (fptr);
 
   return (n);
@@ -398,8 +398,8 @@ spec_read (filename)
 
   /* First allocate space */
 
-  s = calloc (sizeof (spectrum_dummy), nspectra);
-  if (s == NULL)
+  xxspec = calloc (sizeof (spectrum_dummy), nspectra);
+  if (xxspec == NULL)
     {
       Error
 	("spectrum_init: Could not allocate memory for %d spectra with %d wavelengths\n",
@@ -409,7 +409,7 @@ spec_read (filename)
 
 /* Now read the rest of the file */
 
-  n += fread (s, sizeof (spectrum_dummy), nspectra, fptr);
+  n += fread (xxspec, sizeof (spectrum_dummy), nspectra, fptr);
 
   fclose (fptr);
 

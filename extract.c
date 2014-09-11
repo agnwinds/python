@@ -94,7 +94,7 @@ extract (w, p, itype)
 
       yep = 1;			// Start by assuming it is a good photon for extraction
 
-      if ((mscat = s[n].nscat) > 999 || p->nscat == mscat
+      if ((mscat = xxspec[n].nscat) > 999 || p->nscat == mscat
 	  || (mscat < 0 && p->nscat >= (-mscat)))
 	yep = 1;
       else
@@ -102,7 +102,7 @@ extract (w, p, itype)
 
       if (yep)
 	{
-	  if ((mtopbot = s[n].top_bot) == 0)
+	  if ((mtopbot = xxspec[n].top_bot) == 0)
 	    yep = 1;		// Then there are no positional parameters and we are done
 	  else if (mtopbot == -1 && p->x[2] < 0)
 	    yep = 1;
@@ -110,8 +110,8 @@ extract (w, p, itype)
 	    yep = 1;
 	  else if (mtopbot == 2)	// Then to count, the photom must originate within sn.r of sn.x
 	    {
-	      vsub (p->x, s[n].x, xdiff);
-	      if (length (xdiff) > s[n].r)
+	      vsub (p->x, xxspec[n].x, xdiff);
+	      if (length (xdiff) > xxspec[n].r)
 		yep = 0;
 
 	    }
@@ -130,7 +130,7 @@ extract (w, p, itype)
  */
 
 	  stuff_phot (p, &pp);
-	  stuff_v (s[n].lmn, pp.lmn);	/* Stuff new photon direction into pp */
+	  stuff_v (xxspec[n].lmn, pp.lmn);	/* Stuff new photon direction into pp */
 
 /* 
 
@@ -275,12 +275,12 @@ to entering extract */
     {				/* It was an unscattered photon from the star */
       stuff_v (pp->x, x);
       renorm (x, 1.);
-      zz = fabs (dot (x, s[nspec].lmn));
+      zz = fabs (dot (x, xxspec[nspec].lmn));
       pp->w *= zz * (2.0 + 3.0 * zz);	/* Eqn 2.19 Knigge's thesis */
     }
   else if (itype == PTYPE_DISK)
     {				/* It was an unscattered photon from the disk */
-      zz = fabs (s[nspec].lmn[2]);
+      zz = fabs (xxspec[nspec].lmn[2]);
       pp->w *= zz * (2.0 + 3.0 * zz);	/* Eqn 2.19 Knigge's thesis */
     }
   else if (pp->nres > -1 && pp->nres < NLINES)	// added < NLINES condition for macro atoms (SS)
@@ -384,7 +384,7 @@ the same resonance again */
 	   tau, pp->freq);
       else
 	{
-	  k = (pp->freq - s[nspec].freqmin) / s[nspec].dfreq;
+	  k = (pp->freq - xxspec[nspec].freqmin) / xxspec[nspec].dfreq;
 
 	  /* Force the frequency to be in range of that recorded in the spectrum */
 
@@ -398,7 +398,7 @@ the same resonance again */
 	   * of resonance, and so the weight must be reduced by tau
 	   */
 
-	  s[nspec].f[k] += pp->w * exp (-(tau));	//OK increment the spectrum in question
+	  xxspec[nspec].f[k] += pp->w * exp (-(tau));	//OK increment the spectrum in question
 
 
 
@@ -419,7 +419,7 @@ the same resonance again */
 
 
   if (istat > -1 && istat < 9)
-    s[nspec].nphot[istat]++;
+    xxspec[nspec].nphot[istat]++;
   else
     Error
       ("Extract: Abnormal photon %d %8.2e %8.2e %8.2e %8.2e %8.2e %8.2e\n",

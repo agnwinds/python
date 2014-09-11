@@ -964,13 +964,11 @@ typedef struct spectrum
 }
 spectrum_dummy, *SpecPtr;
 
-SpecPtr s;
+/*1409 - ksl - Replaced variable s with xxspec to avoid confusion in case some wanted to use a variable s */
+SpecPtr xxspec;
 
 
 
-/* Note: In python_53a, the ability to project onto a cylindrical coordinate
- * system still does not exist in py_wind.  04nov -- ksl ??
- */
 
 /* Parameters used only by py_wind 
  * py_wind_projecti	0 -> simply print the various parameters without 
