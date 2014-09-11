@@ -65,6 +65,8 @@ History:
 	04aug	ksl	Modified to reflect new spectrum type description
 	13mar	ksl	Changed nphot_tot to long because it is possible
 			for it to exceed the range of a normal integer
+	1409	ksl	Added a loop to record the original weights of all photons
+			created
 
 **************************************************************/
 
@@ -138,6 +140,10 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
 	}
     }
 
+
+  for (n=0;n<nphot_tot;n++){
+	  p[n].w_orig=p[n].w;
+  }
   return (0);
 
 }
@@ -702,10 +708,10 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
 {
   double freqmin, freqmax, dfreq;
   int i, iend;
-  double dot ();
-  double planck ();
-  int randvec (), randvcos ();
-  double zdisk ();
+//OLD1409  double dot ();
+//OLD1409  double planck ();
+//OLD1409  int randvec (), randvcos ();
+//OLD1409  double zdisk ();
   if ((iend = istart + nphot) > NPHOT)
     {
       Error ("photo_gen_star: iend %d > NPHOT %d\n", iend, NPHOT);

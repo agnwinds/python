@@ -78,6 +78,8 @@ History:
 			elimininated some checks which should no longer be needed.
 	05apr	ksl	55d -- Eliminated initialization of shell, since no longer used
 	13feb	nsh	74b5 -- Included lines to initialize the log spectrum
+	1409	ksl	Added another spectrum, the spectrum of generated photons. This
+			is the first spectrum in the structure
 
 **************************************************************/
 
@@ -156,12 +158,13 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select,
 	}
     }
 
-  strcpy (xxspec[0].name, "Emitted");
-  strcpy (xxspec[1].name, "CenSrc");
-  strcpy (xxspec[2].name, "Disk   ");
-  strcpy (xxspec[3].name, "Wind   ");
-  strcpy (xxspec[4].name, "HitSurf");
-  strcpy (xxspec[5].name, "Scattered");
+  strcpy (xxspec[0].name, "Created");
+  strcpy (xxspec[1].name, "Emitted");
+  strcpy (xxspec[2].name, "CenSrc");
+  strcpy (xxspec[3].name, "Disk   ");
+  strcpy (xxspec[4].name, "Wind   ");
+  strcpy (xxspec[5].name, "HitSurf");
+  strcpy (xxspec[6].name, "Scattered");
   for (n = 0; n < MSPEC; n++)
     {
       xxspec[n].lmn[0] = xxspec[n].lmn[1] = xxspec[n].lmn[2] = 0.;
@@ -222,14 +225,9 @@ disk. The minus sign in the terms associated with phase are to make this happen.
 /* 68g - Changed the format of the string describing the spectrum so that it was shorted
  * and so that the phase was always given.  ksl 091125
  */
-      //
-//OLD091125      if (phase[n - MSPEC] > 0.75 || phase[n - MSPEC] < 0.25)
-//OLD091125     {                       /*Then conditions
-//OLD091125                        have been place on the phases so update the names */
       strcpy (dummy, "");
       sprintf (dummy, "P%04.2f", phase[n - MSPEC]);
       strcat (xxspec[n].name, dummy);
-//OLD091125     }
       xxspec[n].nscat = scat_select[n - MSPEC];
       if (xxspec[n].nscat < MAXSCAT)
 	{			/* Then conditions have been place on the
@@ -329,6 +327,12 @@ History:
 			frequencies which were too low or too high
 			to record the numbers and to give an error
 			only if the numbers seemed large
+	1409	ksl	Added code that includes a new spectrum.  The
+			spectrum of generated photons which escape the
+			system.  This spectrum is constructed with 
+			the original weights of the photons.  Photons
+			which hit a hard boudary and destroyed are
+			not recorded.
 **************************************************************/
 
 int
@@ -392,61 +396,46 @@ spectrum_create (p, f1, f2, nangle, select_extract)
       k = (p[nphot].freq - freqmin) / dfreq;
       if (k < 0)
 	{
-//OLD 74a_ksl /*Because of Doppler shifts the frequency of a photon can be slightly out
-//OLD 74a_ksl  * of the desired range.  Print an error message only if the frequency is
-//OLD 74a_ksl  * so far out of bounds (>3000 km/s) that it suggests a real error.
-//OLD 74a_ksl */
-//OLD 74a_ksl 
-//OLD 74a_ksl             delta=0.02;  /* 111211 ksl -  Added a variable so that we could control how tightly to limit the photon boundaries 
-//OLD 74a_ksl                    It would be possible to calculate what delta should be from the maximum velocity in the disk or wind
-//OLD 74a_ksl            */
-
 	  if (((1. - p[nphot].freq / freqmin) > delta) && (geo.rt_mode != 2))
-//OLD 74a_ksl       Error_silent
-//OLD 74a_ksl         ("spectrum_create: photon %6d freq low  %g < %g v %.2e scat %d n res scat %d origin %d\n",
-//OLD 74a_ksl          nphot, p[nphot].freq, freqmin,
-//OLD 74a_ksl          (1. - p[nphot].freq / freqmin) * 2.99795e5, p[nphot].nscat,
-//OLD 74a_ksl          p[nphot].nrscat, p[nphot].origin);
 	    nlow = nlow + 1;
 	  k = 0;
 	}
       else if (k > NWAVE - 1)
 	{
 	  if (((1. - freqmax / p[nphot].freq) > delta) && (geo.rt_mode != 2))
-//OLD 74a_ksl       Error_silent
-//OLD 74a_ksl         ("spectrum_create: photon %6d freq high %g > %g v %.2e scat %d  res scat %d origin %d\n",
-//OLD 74a_ksl          nphot, p[nphot].freq, freqmax,
-//OLD 74a_ksl          (1. - freqmax / p[nphot].freq) * 2.99795e5, p[nphot].nscat,
-//OLD 74a_ksl          p[nphot].nrscat, p[nphot].origin);
 	    nhigh = nhigh + 1;
 	  k = NWAVE - 1;
 	}
 
       if ((i = p[nphot].istat) == P_ESCAPE)
 	{
-	  xxspec[0].f[k] += p[nphot].w;	/* emitted spectrum */
-	  xxspec[0].lf[k1] += p[nphot].w;	/* logarithmic emitted spectrum */
+	  xxspec[0].f[k] += p[nphot].w_orig;	/* emitted spectrum */
+	  xxspec[0].lf[k1] += p[nphot].w_orig;	/* logarithmic emitted spectrum */
 	  xxspec[0].nphot[i]++;
+
+	  xxspec[1].f[k] += p[nphot].w;	/* emitted spectrum */
+	  xxspec[1].lf[k1] += p[nphot].w;	/* logarithmic emitted spectrum */
+	  xxspec[1].nphot[i]++;
 	  spectype = p[nphot].origin;
 	  if (spectype >= 10)
 	    spectype -= 10;
 	  if (spectype == PTYPE_STAR || spectype == PTYPE_BL || spectype == PTYPE_AGN)	// Then it came from the bl or the star
 	    {
-	      xxspec[1].f[k] += p[nphot].w;	/* emitted star (+bl) spectrum */
-	      xxspec[1].lf[k1] += p[nphot].w;	/* logarithmic emitted star (+bl) spectrum */
-	      xxspec[1].nphot[i]++;
+	      xxspec[2].f[k] += p[nphot].w;	/* emitted star (+bl) spectrum */
+	      xxspec[2].lf[k1] += p[nphot].w;	/* logarithmic emitted star (+bl) spectrum */
+	      xxspec[2].nphot[i]++;
 	    }
 	  else if (spectype == PTYPE_DISK)	// Then it was a disk photon 
 	    {
-	      xxspec[2].f[k] += p[nphot].w;	/* transmitted disk spectrum */
-	      xxspec[2].lf[k1] += p[nphot].w;	/* logarithmic transmitted disk spectrum */
-	      xxspec[2].nphot[i]++;
+	      xxspec[3].f[k] += p[nphot].w;	/* transmitted disk spectrum */
+	      xxspec[3].lf[k1] += p[nphot].w;	/* logarithmic transmitted disk spectrum */
+	      xxspec[3].nphot[i]++;
 	    }
 	  else if (spectype == PTYPE_WIND)
 	    {
-	      xxspec[3].f[k] += p[nphot].w;	/* wind spectrum */
-	      xxspec[3].lf[k1] += p[nphot].w;	/* logarithmic wind spectrum */
-	      xxspec[3].nphot[i]++;
+	      xxspec[4].f[k] += p[nphot].w;	/* wind spectrum */
+	      xxspec[4].lf[k1] += p[nphot].w;	/* logarithmic wind spectrum */
+	      xxspec[4].nphot[i]++;
 	    }
 	  else
 	    {
@@ -481,19 +470,19 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	}
       else if (i == P_HIT_STAR || i == P_HIT_DISK)
 	{
-	  xxspec[4].f[k] += p[nphot].w;	/*absorbed spectrum */
-	  xxspec[4].lf[k1] += p[nphot].w;	/*logarithmic absorbed spectrum */
-	  xxspec[4].nphot[i]++;
+	  xxspec[5].f[k] += p[nphot].w;	/*absorbed spectrum */
+	  xxspec[5].lf[k1] += p[nphot].w;	/*logarithmic absorbed spectrum */
+	  xxspec[5].nphot[i]++;
 	}
 
       if (j > 0)
 	{
-	  xxspec[5].f[k] += p[nphot].w;	/* j is the number of scatters so this constructs */
-	  xxspec[5].lf[k1] += p[nphot].w;	/* logarithmic j is the number of scatters so this constructs */
+	  xxspec[6].f[k] += p[nphot].w;	/* j is the number of scatters so this constructs */
+	  xxspec[6].lf[k1] += p[nphot].w;	/* logarithmic j is the number of scatters so this constructs */
 	  if (i < 0 || i > NSTAT - 1)
-	    xxspec[5].nphot[NSTAT - 1]++;
+	    xxspec[6].nphot[NSTAT - 1]++;
 	  else
-	    xxspec[5].nphot[i]++;	/* scattering spectrum */
+	    xxspec[6].nphot[i]++;	/* scattering spectrum */
 	}
 
       if (i < 0 || i > NSTAT - 1)

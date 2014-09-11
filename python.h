@@ -868,7 +868,7 @@ typedef struct photon
   double x[3];			/* Vector containing position of packet */
   double lmn[3];		/*direction cosines of this packet */
   double freq;
-  double w;			/*weight of this packet */
+  double w,w_orig;		/*current and orgingal weight of this packet */
   double tau;
   int istat;			/*status of photon.  See definitions P_INWIND, etc above */
   int nscat;			/*number of scatterings */
@@ -917,17 +917,17 @@ basis_cartesian;
 
 /* The next section defines the spectrum arrays.  The spectrum structure contains
    the selection criteria for each spectrum as well as the array in which to store the
-   spectrum.  The first MSPEC spectra are reserved for the total emitted spectrum, the
-   total spectrum of photons which are scattered and the total spectrum of photons which
-   are absorbed.  The remainder of the spectra pertain to the spectrum as seen from various
-   directions. Note that the space for the spectra are allocated using a calloc statement
-   in spectrum_init*/
+   spectrum.  The first MSPEC spectra are reserved for the total generated spectrum,
+   total emitted spectrum, the total spectrum of photons which are scattered and 
+   the total spectrum of photons which are absorbed.  The remainder of the spectra pertain 
+   to the spectrum as seen from various directions. Note that the space for the spectra 
+   are allocated using a calloc statement in spectrum_init.  1409-ksl-A new spectrum
+   was added.  This will be the first of the spectra.  It is simply the generated spectrum
+   before passing through the wind.  It has the orginal weights as generated.  */
 
 
-/* NSPEC has been removed from python.h because it was not really needed */
-//0ld68c #define NSPEC                          14
 
-#define MSPEC                            6
+#define MSPEC                            7
 int nspectra;			/* After create_spectrum, the number of elements allocated for s, or 
 				   alternatively the number of spectra one has to work with.  Note that
 				   general s[0],s[1] and s[2] are the escaping, scattered and absorbed photons,
