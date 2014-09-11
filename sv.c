@@ -66,8 +66,8 @@ get_sv_wind_params ()
 
   windmin = geo.sv_rmin / geo.rstar;
   windmax = geo.sv_rmax / geo.rstar;
-  rddoub ("sv.diskmin(wd_rad)", &windmin);
-  rddoub ("sv.diskmax(wd_rad)", &windmax);
+  rddoub ("sv.diskmin(units_of_rstar)", &windmin);
+  rddoub ("sv.diskmax(units_of_rstar)", &windmax);
 
 
   geo.sv_rmin = windmin * geo.rstar;
