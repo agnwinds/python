@@ -33,19 +33,38 @@ History:
 
 
 
-/*
- * This routine controls what is displayed on the screen.  There are
- * basically two options, determined by the variable "determine"
- * 
- * If determine==1, then zoom sets up the variables py_wind_min, py_wind_max and
- * py_wind_delta so that the the entire wind is displayed, but it is
- * subsampled in the x direction.
- * 
- * If determine!=1, then a section of the wind is displayed at full resolution
- * 
- * History: 07jul	ksl	Made modifications to allow for the possibility that
- * the wind has fewer than 10 elemetns in the x direction
- */
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+
+	This routine controls what is displayed on the screen.  
+	
+
+  Description:	
+
+	There are basically two options, determined by the variable "determine"
+	If determine==1, then zoom sets up the variables py_wind_min, py_wind_max and
+	py_wind_delta so that the the entire wind is displayed, but it is
+	subsampled in the x direction.
+ 
+	If determine!=1, then a section of the wind is displayed at full resolution
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+ 	07jul	ksl	Made modifications to allow for the possibility that
+ 			the wind has fewer than 10 elemetns in the x direction
+
+ ************************************************************************/
+
 int
 zoom (direction)
      int direction;
@@ -89,7 +108,28 @@ zoom (direction)
 }
 
 
-/* overview */
+
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+
+	overview
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 int
 overview (w, rootname)
      WindPtr w;
@@ -117,8 +157,27 @@ overview (w, rootname)
   return (0);
 }
 
-/* Summary of everything at a given position */
 
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	Summary of everything at a given position 
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 int
 position_summary (w)
      WindPtr w;
@@ -168,14 +227,30 @@ a:Log ("Input x=0,y=0,z=0 to return to main routine\n");
 }
 
 
-/* A summary of the energy absorbed in a cell 
 
-10nov	ksl	What was here previously was bizarre as the filename was
-		being added to all the time and this caused ultimately
-		a segmentation problem
 
-*/
+/**************************************************************************
 
+
+  Synopsis:  
+	A summary of the energy absorbed in a cell 
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+	10nov	ksl	What was here previously was bizarre as the filename was
+			being added to all the time and this caused ultimately
+			a segmentation problem
+
+
+ ************************************************************************/
 int
 abs_summary (w, rootname, ochoice)
      WindPtr w;
@@ -297,7 +372,28 @@ abs_summary (w, rootname, ochoice)
 
 }
 
-/* A summary of adiabatic cooling */
+
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	A summary of adiabatic cooling
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
+
 int
 adiabatic_cooling_summary (w, rootname, ochoice)
      WindPtr w;
@@ -347,10 +443,29 @@ else
 }
 
 
-/* A summary of the lum of a cell.  The routine
- * simply reads variables that are already contained
- * in the plasma structure */
 
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	summary of the lum of a cell.  The routine
+	simply reads variables that are already contained
+	in the plasma structure
+
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 int
 lum_summary (w, rootname, ochoice)
      WindPtr w;
@@ -477,8 +592,27 @@ lum_summary (w, rootname, ochoice)
 
 }
 
-/* A summary of the number of photoionizations in  a cell */
 
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	A summary of the number of photoionizations in  a cell
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 int
 photo_summary (w, rootname, ochoice)
      WindPtr w;
@@ -518,8 +652,27 @@ photo_summary (w, rootname, ochoice)
 
 }
 
-/* A summary of the number of recombinations in  a cell */
 
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	A summary of the number of recombinations in  a cell
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 int
 recomb_summary (w, rootname, ochoice)
      WindPtr w;
@@ -562,7 +715,27 @@ recomb_summary (w, rootname, ochoice)
 }
 
 
-/* A summary of electron densities */
+
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	A summary of electron densities
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 
 int
 electron_summary (w, rootname, ochoice)
@@ -596,11 +769,29 @@ electron_summary (w, rootname, ochoice)
 }
 
 
-/* A summary of rho 
+
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+A summary of rho 
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
 111002	ksl	Added to try to diagnose what was going 
 		on with the torus
-*/
 
+  History:
+
+ ************************************************************************/
 int
 rho_summary (w, rootname, ochoice)
      WindPtr w;
@@ -633,16 +824,33 @@ rho_summary (w, rootname, ochoice)
 }
 
 
-/* A summary of rho 
 
-Note that because of limitations in the way that display 
-works cell numbers greater than 99 are not displayed as
-integers unfortunately
 
-111002	ksl	Added to try to diagnose what was going 
-		on with the torus
-*/
 
+
+/**************************************************************************
+
+
+  Synopsis:  
+	A summary of rho 
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+	Note that because of limitations in the way that display 
+	works cell numbers greater than 99 are not displayed as
+	integers unfortunately
+
+
+  History:
+	111002	ksl	Added to try to diagnose what was going 
+			on with the torus
+
+ ************************************************************************/
 int
 plasma_cell (w, rootname, ochoice)
      WindPtr w;
@@ -677,8 +885,27 @@ plasma_cell (w, rootname, ochoice)
 
 
 
-/* A summary of the average frequency */
 
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	A summary of the average frequency
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 int
 freq_summary (w, rootname, ochoice)
      WindPtr w;
@@ -712,12 +939,29 @@ freq_summary (w, rootname, ochoice)
 }
 
 
-/* A summary of the number of photons which passed through a cell.
- *
- * 111002	ksl	Modified to be able to display photons of
- * 			various types
- * */
 
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	A summary of the number of photons which passed through a cell.
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+	111002	ksl	Modified to be able to display photons of
+ 			various types
+
+ ************************************************************************/
 int
 nphot_summary (w, rootname, ochoice)
      WindPtr w;
@@ -801,8 +1045,27 @@ nphot_summary (w, rootname, ochoice)
 
 }
 
-/* A summary of the temperatures */
 
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	A summary of the electron temperatures
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 int
 temp_summary (w, rootname, ochoice)
      WindPtr w;
@@ -835,6 +1098,24 @@ temp_summary (w, rootname, ochoice)
 }
 
 
+
+/**************************************************************************
+
+
+  Synopsis:  
+	A summary of the radiation temperatures
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 int
 temp_rad (w, rootname, ochoice)
      WindPtr w;
@@ -868,7 +1149,23 @@ temp_rad (w, rootname, ochoice)
 
 }
 
-/* A summary of the radiative weights */
+/**************************************************************************
+
+
+  Synopsis:  
+	A summary of the radiative weights
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 
 int
 weight_summary (w, rootname, ochoice)
@@ -903,8 +1200,27 @@ weight_summary (w, rootname, ochoice)
 
 }
 
-/* A summary of the velocities */
 
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	A summary of the velocities
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 int
 velocity_summary (w, rootname, ochoice)
      WindPtr w;
@@ -987,8 +1303,27 @@ velocity_summary (w, rootname, ochoice)
 }
 
 
-/* A summary of the velocities */
 
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	A summary of the velocities
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 int
 mo_summary (w, rootname, ochoice)
      WindPtr w;
@@ -1056,13 +1391,31 @@ mo_summary (w, rootname, ochoice)
 
 }
 
-/* A summary of the volumes of each cell 
 
+
+/**************************************************************************
+
+
+  Synopsis:  
+	A summary of the volumes of each cell 
+
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
 	080811	ksl	Add lines from Stuart's version of this
 			routine to bring this version into 
 			compliance with it.
-*/
 
+
+
+ ************************************************************************/
 int
 vol_summary (w, rootname, ochoice)
      WindPtr w;
@@ -1255,6 +1608,27 @@ b:return (0);
 
 }
 
+
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	tau_h_summary (w, rootname, ochoice)
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 int
 tau_h_summary (w, rootname, ochoice)
      WindPtr w;
@@ -1281,8 +1655,27 @@ tau_h_summary (w, rootname, ochoice)
 
 }
 
-/* A summary of the volumes of each cell */
 
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	coolheat_summary (w, rootname, ochoice)
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 int
 coolheat_summary (w, rootname, ochoice)
      WindPtr w;
@@ -1308,6 +1701,39 @@ coolheat_summary (w, rootname, ochoice)
 
 }
 
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+
+  complete_file summary produces a standardised set of output files 
+  from the wind_save_file
+
+  Description:	
+
+  At present(1409), we we print temperatures, electron densities,
+  convergence information and ion denisities and fractions for
+  C III, IV, V, 
+  N IV, V, VI
+  O V, VI, VII
+  Si III, IV
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+  1409	ksl	Eliminated several files that were of limited use
+  		to users.  The deleted files are printed out if
+		DEBUG is set.
+
+ ************************************************************************/
 int
 complete_file_summary (w, root, ochoice)
      WindPtr w;
@@ -1332,7 +1758,6 @@ complete_file_summary (w, root, ochoice)
   ion_summary (w, 14, 4, 0, root, ochoice);
   ion_summary (w, 14, 5, 0, root, ochoice);
 
-  /* Before 68c, this is what we printed out */
   ion_summary (w, 6, 3, 1, root, ochoice);
   ion_summary (w, 6, 4, 1, root, ochoice);
   ion_summary (w, 6, 5, 1, root, ochoice);
@@ -1347,7 +1772,7 @@ complete_file_summary (w, root, ochoice)
   ion_summary (w, 14, 4, 1, root, ochoice);
   ion_summary (w, 14, 5, 1, root, ochoice);
 
-
+#if DEBUG
   ion_summary (w, 6, 3, 2, root, ochoice);
   ion_summary (w, 6, 4, 2, root, ochoice);
   ion_summary (w, 6, 5, 2, root, ochoice);
@@ -1376,6 +1801,7 @@ complete_file_summary (w, root, ochoice)
   ion_summary (w, 14, 3, 3, root, ochoice);
   ion_summary (w, 14, 4, 3, root, ochoice);
   ion_summary (w, 14, 5, 3, root, ochoice);
+#endif
 
   return (0);
 }
