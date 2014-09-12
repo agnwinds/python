@@ -85,8 +85,6 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
     nelem++;
 
   strcpy (name, "");
-  sprintf (name, "Element %d (%s) ion %d fractions\n", element,
-	   ele[nelem].name, istate);
 
 
   for (n = 0; n < NDIM2; n++)
@@ -97,6 +95,8 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
 	{
 	  if (iswitch == 0)
 	    {
+  sprintf (name, "Element %d (%s) ion %d fractions\n", element,
+	   ele[nelem].name, istate);
 	      aaa[n] = plasmamain[nplasma].density[nion];
 	      aaa[n] /=
 		((plasmamain[nplasma].density[0] +
@@ -104,14 +104,20 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
 	    }
 	  else if (iswitch == 1)
 	    {
+  sprintf (name, "Element %d (%s) ion %d density\n", element,
+	   ele[nelem].name, istate);
 	      aaa[n] = plasmamain[nplasma].density[nion];
 	    }
 	  else if (iswitch == 2)
 	    {
+  sprintf (name, "Element %d (%s) ion %d  #scatters\n", element,
+	   ele[nelem].name, istate);
 	      aaa[n] = plasmamain[nplasma].scatters[nion];
 	    }
 	  else if (iswitch == 3)
 	    {
+  sprintf (name, "Element %d (%s) ion %d scattered flux\n", element,
+	   ele[nelem].name, istate);
 	      aaa[n] = plasmamain[nplasma].xscatters[nion];
 	    }
 	  else

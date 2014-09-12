@@ -5,6 +5,8 @@
    routines included here should not be tightly tied to a particular wind model.   The one
    exception at present is ds_to_cone which calculates the distance to a bifurcated cone.
 
+   1409 - Added standard headers
+
  */
 
 #include <stdio.h>
@@ -19,6 +21,28 @@
 int init_stuff_phot = 0;
 size_t sizeofphot;
 
+
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+
+  Simply copy one photon bundle into another
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 int
 stuff_phot (pin, pout)
      PhotPtr pin, pout;
@@ -49,9 +73,27 @@ stuff_phot (pin, pout)
 }
 
 
-/* 
-Synopsis: move_phot (pp, ds)
-*/
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+
+  move a photon by a distance ds
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 
 int
 move_phot (pp, ds)
@@ -66,13 +108,27 @@ move_phot (pp, ds)
   return (0);
 }
 
-/* This routine compares two photons to determine whether they have
- the identical position and direction.
 
-History:
+/**************************************************************************
+
+
+  Synopsis:  
+
+	Compares two photons to determine whether they have
+ 	the identical position and direction.
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
 	02jun	ksl	Coded
 
-*/
+ ************************************************************************/
 
 int
 comp_phot (p1, p2)
@@ -87,16 +143,34 @@ comp_phot (p1, p2)
   return (0);
 }
 
-/* phot_hist is designed to record the history of a single photon 
+
+/**************************************************************************
+
+
+  Synopsis:  
+
+  phot_hist is designed to record the history of a single photon 
   bundle, in terms of a series of photon structures that are
   populated as the photon goes through the grid
 
   Unless phot_hist_on is true, then this routine is a NOP
 
-090125	ksl	68b -Created to better understand where photon bundles were
-		being absorbed or losing energy in the grid
-*/
 
+  Description:	
+
+  This is a diagnostic routine only
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+	090125	ksl	68b -Created to better understand where photon bundles were
+			being absorbed or losing energy in the grid
+
+ ************************************************************************/
 int
 phot_hist (p, iswitch)
      PhotPtr p;
@@ -125,19 +199,31 @@ phot_hist (p, iswitch)
   return (n_phot_hist);
 }
 
-/* The next routine is destigned to update a portion of the PlasmaPtr to reflect where
- * photons along the line of sight to the observer were absorbed in the wind
 
-Notes:
+/**************************************************************************
 
-As photon is extracted from the wind, tau changes due to scatters and w changes due
-to absorption.  We are just recording how much energy is absorbed by scatterng processes
-here, and so the energy absorbed is the current weight (exp(-tau_before) - exp (-tau_after))
 
+  Synopsis:  
+	The next routine is destigned to update a portion of the PlasmaPtr to reflect where
+ 	photons along the line of sight to the observer were absorbed in the wind
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+	As photon is extracted from the wind, tau changes due to scatters and w changes due
+	to absorption.  We are just recording how much energy is absorbed by scatterng processes
+	here, and so the energy absorbed is the current weight (exp(-tau_before) - exp (-tau_after))
+
+  History:
 	090211	ksl	Created to store the energy removed photons headed toward the observer
 			by an ion in a particular cell of the wind.
 	0904	ksl	68c - Fixed problem concerning where energy was being stored
- */
+
+ ************************************************************************/
 
 int
 phot_history_summarize ()
@@ -301,10 +387,27 @@ ds_to_cone (cc, p)
 
 }
 
-/* Calculate the pathlenth along a line of sight defined by
-   a photon p to a sphere or radius r centered on the origin.  If
-   the photon does not hit the sphere return a large number VERY_BIG */
 
+/**************************************************************************
+
+
+  Synopsis:  
+
+	Calculate the pathlenth along a line of sight defined by
+	a photon p to a sphere or radius r centered on the origin.  If
+	the photon does not hit the sphere return a large number VERY_BIG
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 double
 ds_to_sphere (r, p)
      double r;
@@ -331,8 +434,27 @@ both roots were imaginary */
   return (VERY_BIG);
 }
 
-/* This is more generalized routine to find the positive distance to
-   a sphere centered at x with radius r */
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	This is more generalized routine to find the positive distance to
+   	a sphere centered at x with radius r
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 
 double
 ds_to_sphere2 (x, r, p)
@@ -360,7 +482,14 @@ ds_to_sphere2 (x, r, p)
   return (VERY_BIG);
 }
 
-/* This solves a simple quadratic (or if a is zero linear equation).  The return is set up
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+ 
+	This solves a simple quadratic (or if a is zero linear equation).  The return is set up
    to make it easy to identify the smallest positive root if one exists.  The routine returns
    a negative number if both roots are negative or imaginary. 
    More specifically 
@@ -368,15 +497,24 @@ ds_to_sphere2 (x, r, p)
          -2 -> both roots are negative or 0
           0 -> the first root is the smallest positive  root 
           1 -> the second root is the smallest positive root
-History
+
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
 	05jul	ksl	56d -- Heretofore roots of 0 were on no insterest, but now that 
 			quadratic is called by bilin, we would like to know about values
 			of zero, specifically.  Since the simplest thing to do was to
 			check both roots in this case, I added a little code to make
 			sure root was defined in all cases.
 
-*/
-
+ ************************************************************************/
 int
 quadratic (a, b, c, r)
      double a, b, c, r[];
@@ -422,23 +560,43 @@ quadratic (a, b, c, r)
 }
 
 
-/* 
- * ds_to_plane calculates the distance of a photon must travel to hit the plane. 
- *
- * Calcululate the distance a photon must travel to hit a plane.  The plane, just for simplicity,
-   is defined as a photon structure since you need both a point and a direction to define it.  
-   A plane can be defined by a position x_p and a normal lmn_p.  If the photon ray is then
-   defined by x=x_v+s lmn_v and the allowed values of s are determined by the equation
 
-   (x_v+s lmn_v - x_p)  .  lmn_p=0 where . implies the dot-product.   The routine returns
-   VERY_BIG if the photon ray does not intersect the plane .
+/**************************************************************************
+
+
+  Synopsis:  
+
+	ds_to_plane calculates the distance of a photon must travel to hit the plane. 
+ 
+
+  Description:	
+
+	Calcululate the distance a photon must travel to hit a plane.  The plane, just for simplicity,
+	is defined as a photon structure since you need both a point and a direction to define it.  
+	A plane can be defined by a position x_p and a normal lmn_p.  If the photon ray is then
+	defined by x=x_v+s lmn_v and the allowed values of s are determined by the equation
+
+	(x_v+s lmn_v - x_p)  .  lmn_p=0 where . implies the dot-product.   The routine returns
+	VERY_BIG if the photon ray does not intersect the plane .
+
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
 
    This routine should be a more general routine than z_plane_intercept, which it replaced at
    some point.
 
+
+  History:
    04aug	ksl	Changed return to +VERY_BIG if the photon cannot every hit the 
    			plane.
- */
+
+
+
+ ************************************************************************/
 
 double
 ds_to_plane (pl, p)
@@ -462,9 +620,29 @@ ds_to_plane (pl, p)
 
 }
 
-/* This routine calculates the distance a photon has to be moved to
-   reach the point of closest approach to a point described by x and also
-   calculates the distance of closest approach (i.e. the impact parameter */
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	This routine calculates the distance a photon has to be moved to
+	reach the point of closest approach to a point described by x and also
+	calculates the distance of closest approach (i.e. the impact parameter).
+
+
+  Description:	
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 
 double
 ds_to_closest_approach (x, p, impact_parameter)
