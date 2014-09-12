@@ -380,8 +380,6 @@ spectrum_create (p, f1, f2, nangle, select_extract)
       else
 	nres[j]++;
 
-/* At some undocumented point, logarithmic frequency intervals were added */
-/* lines to work out where we are in a logarithmic spectrum */
       k1 = (log10 (p[nphot].freq) - log10 (freqmin)) / ldfreq;
       if (k1 < 0)
 	{
@@ -392,7 +390,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	  k1 = NWAVE;
 	}
 
-/* lines to work out where we are in a normal spectrum */
+/* lines to work out where we are in a normal spectrum with linear spacing */
       k = (p[nphot].freq - freqmin) / dfreq;
       if (k < 0)
 	{
@@ -409,7 +407,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 
       if ((i = p[nphot].istat) == P_ESCAPE)
 	{
-	  xxspec[0].f[k] += p[nphot].w_orig;	/* emitted spectrum */
+	  xxspec[0].f[k] += p[nphot].w_orig;	/* emitted spectrum with original weights */
 	  xxspec[0].lf[k1] += p[nphot].w_orig;	/* logarithmic emitted spectrum */
 	  xxspec[0].nphot[i]++;
 
@@ -673,7 +671,7 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
   fprintf (fptr, "\n");
 
 
-  /* Don't print out the end bins because they include all photons outside the frequency range and there may be some
+  /* Ignore the end bins because they include all photons outside the frequency range and there may be some
      as a result of the fact that the bb function generate some IR photons */
   dd = 4. * PI * (100. * PC) * (100. * PC);
 
