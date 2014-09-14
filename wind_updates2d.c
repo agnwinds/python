@@ -114,11 +114,20 @@ WindPtr (w);
   int size_of_commbuffer;
   char *commbuffer;
 
+  /* JM 1409 -- Added for issue #110 to ensure correct reporting in parallel */
+  int nmax_r_temp, nmax_e_temp;
+  double dt_e_temp, dt_r_temp;
+
+
   /* the commbuffer needs to be larger enough to pack all variables in MPI_Pack and MPI_Unpack routines NSH 1407 - the 
-NIONS changed to nions for the 12 arrays in plasma that are now dynamically allocated*/
+  NIONS changed to nions for the 12 arrays in plasma that are now dynamically allocated */
   size_of_commbuffer = 8 * (12*nions + NLTE_LEVELS + 2*NTOP_PHOT + 12*NXBANDS + 2*LPDF + NAUGER + 104)*(floor(NPLASMA/np_mpi_global)+1);
       
   commbuffer = (char *) malloc(size_of_commbuffer*sizeof(char));
+
+  /* JM 1409 -- Initialise parallel only variables */
+  nmax_r_temp = nmax_e_temp = -1;
+  dt_e_temp = dt_r_temp = 0.0;
       
 #endif
   dt_r = dt_e = 0.0;
@@ -150,7 +159,13 @@ NIONS changed to nions for the 12 arrays in plasma that are now dynamically allo
   ndo = my_nmax-my_nmin;
 #endif
 
-
+  /* Before we do anything let's record the average tr and te from the last cycel */
+  /* JM 1409 -- Added for issue #110 to ensure correct reporting in parallel */
+  for (n=0; n<NPLASMA; n++)
+  {
+  	t_r_ave_old += plasmamain[n].t_r;
+    t_e_ave_old += plasmamain[n].t_e;
+  }
 
   /* we now know how many cells this thread has to process - note this will be 
      0-NPLASMA in serial mode */
@@ -178,8 +193,6 @@ NIONS changed to nions for the 12 arrays in plasma that are now dynamically allo
       /* Store some information so one can determine how much the temps are changing */
       t_r_old = plasmamain[n].t_r;
       t_e_old = plasmamain[n].t_e;
-      t_r_ave_old += plasmamain[n].t_r;
-      t_e_ave_old += plasmamain[n].t_e;
       iave++;
 
 
@@ -435,12 +448,10 @@ NIONS changed to nions for the 12 arrays in plasma that are now dynamically allo
 	      MPI_Pack(&plasmamain[n].ip, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].ip_direct, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].ip_scatt, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-	      MPI_Pack(&t_r_old, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-	      MPI_Pack(&t_e_old, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-	      MPI_Pack(&t_r_ave_old, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-	      MPI_Pack(&t_e_ave_old, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-	      MPI_Pack(&iave, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-
+	      MPI_Pack(&dt_e, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+	      MPI_Pack(&dt_r, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+	      MPI_Pack(&nmax_e, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+	      MPI_Pack(&nmax_r, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	    }
 	  
 	  Log("MPI task %d broadcasting plasma update information.\n", rank_global);
@@ -564,29 +575,29 @@ NIONS changed to nions for the 12 arrays in plasma that are now dynamically allo
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].ip, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].ip_direct, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].ip_scatt, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &t_r_old, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &t_e_old, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &t_r_ave_old, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &t_e_ave_old, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &iave, 1, MPI_INT, MPI_COMM_WORLD);
+	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &dt_e_temp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &dt_r_temp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &nmax_e_temp, 1, MPI_INT, MPI_COMM_WORLD);
+	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &nmax_r_temp, 1, MPI_INT, MPI_COMM_WORLD);
 
-	      t_r_ave_old += plasmamain[n].t_r;
-	      t_e_ave_old += plasmamain[n].t_e;
-	      iave++;
+          /* JM 1409 -- Altered for issue #110 to ensure correct reporting in parallel */
+	      if (fabs(dt_e_temp) >= fabs(dt_e))
+	      {
+	      	/* Check if any other threads found a higher maximum for te */
+	      	dt_e = dt_e_temp;
+	      	nmax_e = nmax_e_temp;
+	      }
 
-	      //Perform checks to see how much temperatures have changed in this iteration
-	      if ((fabs (t_r_old - plasmamain[n].t_r)) > fabs (dt_r))
-		{
-		  dt_r = plasmamain[n].t_r - t_r_old;
-		  nmax_r = n;
-		}
-	      if ((fabs (t_e_old - plasmamain[n].t_e)) > fabs (dt_e))
-		{
-		  dt_e = plasmamain[n].t_e - t_e_old;
-		  nmax_e = n;
-		}
+	      if (fabs(dt_r_temp) >= fabs(dt_r))
+	      {
+	      	/* Check if any other threads found a higher maximum for tr */
+	      	dt_r = dt_r_temp;
+	      	nmax_r = nmax_r_temp;
+	      }
+
 	      t_r_ave += plasmamain[n].t_r;
 	      t_e_ave += plasmamain[n].t_e;
+	      iave++;
 	      
 	    }
 
@@ -705,7 +716,7 @@ free (commbuffer);
   /* Added this system which counts number of times two situations occur (See #91)
      We only report these every 100,000 times (one can typically get ) */
   Log ("wind_update: note, errors from mean intensity can be high in a working model\n");
-  Log ("wind_update: can be a problem with photon numbers if errors from spectral_estimators and low photon number warnings\n");
+  Log ("wind_update: can be a problem with photon numbers if there are also errors from spectral_estimators and low photon number warnings\n");
   Log ("wind_update: mean_intensity: %i x10^6 occurrences, this cycle, this thread of 'no model exists in a band'\n",
   	  	      nerr_no_Jmodel / 1e6);
   Log ("wind_update: mean intensity: %i x10^6 occurrences, this cycle, this thread of 'photon freq is outside frequency range of spectral model'\n",
@@ -763,7 +774,7 @@ free (commbuffer);
        (t_r_ave - t_r_ave_old));
 
   check_convergence ();
-/* Summarize the raditive temperatures (ksl 04 mar)*/
+  /* Summarize the radiative temperatures (ksl 04 mar)*/
   xtemp_rad (w);
 
 
