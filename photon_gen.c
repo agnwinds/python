@@ -141,8 +141,8 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     }
 
 
-  for (n=0;n<nphot_tot;n++){
-	  p[n].w_orig=p[n].w;
+  for (n = 0; n < NPHOT; n++){
+	  p[n].w_orig = p[n].w;
   }
   return (0);
 
