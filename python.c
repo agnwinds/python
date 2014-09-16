@@ -1695,28 +1695,17 @@ run -- 07jul -- ksl
   check_time (root);
 
 #ifdef MPI_ON
-//   Since the wind is now set up can allocate sufficiently big arrays to help with the MPI reductions 
+  // Since the wind is now set up can allocate sufficiently big arrays to help with the MPI reductions 
 
-    plasma_double_helpers = (14+3*NXBANDS)*NPLASMA; //The size of the helper array for doubles. We transmit 10 numbers for each cell, plus three arrays, each of length NXBANDS
-    plasma_int_helpers = (6+NXBANDS)*NPLASMA; //The size of the helper array for integers. We transmit 6 numbers for each cell, plus one array of length NXBANDS
-    ioniz_spec_helpers = 2*MSPEC*NWAVE; //we need space for log and lin spectra for MSPEC XNWAVE
+  plasma_double_helpers = (14+3*NXBANDS)*NPLASMA; //The size of the helper array for doubles. We transmit 10 numbers for each cell, plus three arrays, each of length NXBANDS
+  plasma_int_helpers = (6+NXBANDS)*NPLASMA; //The size of the helper array for integers. We transmit 6 numbers for each cell, plus one array of length NXBANDS
+  ioniz_spec_helpers = 2*MSPEC*NWAVE; //we need space for log and lin spectra for MSPEC XNWAVE
 
-    spec_spec_helpers = (NWAVE*(MSPEC+nangles)); //We need space for NWAVE wavelengths for nspectra, which will eventually equal nangles + MSPEC
+  spec_spec_helpers = (NWAVE*(MSPEC+nangles)); //We need space for NWAVE wavelengths for nspectra, which will eventually equal nangles + MSPEC
 
-
-
- //   size_of_helpers = NPLASMA+(10+2*NXBANDS+NXBANDS)*NPLASMA + (nangles+MSPEC)*NWAVE;
-
-
-
-
- // maxfreqhelper = calloc (sizeof(double),NPLASMA);
-//  maxfreqhelper2 = calloc (sizeof(double),NPLASMA);
-//  redhelper = calloc (sizeof (double), size_of_helpers); 
-//  redhelper2 = calloc (sizeof (double), size_of_helpers); 
-//  iredhelper = calloc (sizeof (int), size_of_helpers); 
-//  iredhelper2 = calloc (sizeof (int), size_of_helpers); 
 #endif
+
+
 
 /* XXXX - THE CALCULATION OF THE IONIZATION OF THE WIND */
 
@@ -1898,13 +1887,11 @@ run -- 07jul -- ksl
       /* At this point we should communicate all the useful infomation that has been accummulated on differenet MPI tasks */
 
 
-
-
 #ifdef MPI_ON
  
     maxfreqhelper = calloc (sizeof(double),NPLASMA); 
     maxfreqhelper2 = calloc (sizeof(double),NPLASMA);
-/* NSH 131213 - allocate memory for the band limited max and min frequencies */
+    /* NSH 131213 - allocate memory for the band limited max and min frequencies */
     maxbandfreqhelper = calloc (sizeof(double),NPLASMA*NXBANDS); 
     maxbandfreqhelper2 = calloc (sizeof(double),NPLASMA*NXBANDS);
     minbandfreqhelper = calloc (sizeof(double),NPLASMA*NXBANDS); 
@@ -1915,8 +1902,8 @@ run -- 07jul -- ksl
     iredhelper2 = calloc (sizeof (int), plasma_int_helpers); 
 
 
-      MPI_Barrier(MPI_COMM_WORLD);
-      /// the following blocks gather all the estimators to the zeroth (Master) thread
+    MPI_Barrier(MPI_COMM_WORLD);
+    // the following blocks gather all the estimators to the zeroth (Master) thread
 
       
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
@@ -1931,23 +1918,24 @@ run -- 07jul -- ksl
 	  redhelper[mpi_i+6*NPLASMA] = plasmamain[mpi_i].heat_comp/ np_mpi_global;
 	  redhelper[mpi_i+7*NPLASMA] = plasmamain[mpi_i].heat_ind_comp/ np_mpi_global;
 	  redhelper[mpi_i+8*NPLASMA] = plasmamain[mpi_i].heat_photo/ np_mpi_global;
-          redhelper[mpi_i+9*NPLASMA] = plasmamain[mpi_i].ip / np_mpi_global;
-          redhelper[mpi_i+10*NPLASMA] = plasmamain[mpi_i].j_direct / np_mpi_global;
-          redhelper[mpi_i+11*NPLASMA] = plasmamain[mpi_i].j_scatt / np_mpi_global;
-          redhelper[mpi_i+12*NPLASMA] = plasmamain[mpi_i].ip_direct / np_mpi_global;
-          redhelper[mpi_i+13*NPLASMA] = plasmamain[mpi_i].ip_scatt / np_mpi_global;
+      redhelper[mpi_i+9*NPLASMA] = plasmamain[mpi_i].ip / np_mpi_global;
+      redhelper[mpi_i+10*NPLASMA] = plasmamain[mpi_i].j_direct / np_mpi_global;
+      redhelper[mpi_i+11*NPLASMA] = plasmamain[mpi_i].j_scatt / np_mpi_global;
+      redhelper[mpi_i+12*NPLASMA] = plasmamain[mpi_i].ip_direct / np_mpi_global;
+      redhelper[mpi_i+13*NPLASMA] = plasmamain[mpi_i].ip_scatt / np_mpi_global;
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
 	      redhelper[mpi_i+(14+mpi_j)*NPLASMA] = plasmamain[mpi_i].xj[mpi_j]/ np_mpi_global;
 	      redhelper[mpi_i+(14+NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j]/ np_mpi_global;
 	      redhelper[mpi_i+(14+2*NXBANDS+mpi_j)*NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j]/ np_mpi_global;
-/* 131213 NSH populate the band limited min and max frequency arrays */
+          
+          /* 131213 NSH populate the band limited min and max frequency arrays */
 	      maxbandfreqhelper[mpi_i*NXBANDS+mpi_j] = plasmamain[mpi_i].fmax[mpi_j];
 	      minbandfreqhelper[mpi_i*NXBANDS+mpi_j] = plasmamain[mpi_i].fmin[mpi_j];
 
 	    }
 	}
-/* 131213 NSH communiate the min and max band frequencies these use MPI_MIN or MPI_MAX */ 
+      /* 131213 NSH communiate the min and max band frequencies these use MPI_MIN or MPI_MAX */ 
       MPI_Reduce(minbandfreqhelper, minbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
       MPI_Reduce(maxbandfreqhelper, maxbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
       MPI_Reduce(maxfreqhelper, maxfreqhelper2, NPLASMA, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
@@ -1960,7 +1948,7 @@ run -- 07jul -- ksl
       
       MPI_Bcast(redhelper2, plasma_double_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       MPI_Bcast(maxfreqhelper2, NPLASMA, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-/* 131213 NSH Send out the global min and max band limited frequencies to all threads */
+      /* 131213 NSH Send out the global min and max band limited frequencies to all threads */
       MPI_Bcast(minbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       MPI_Bcast(maxbandfreqhelper2, NPLASMA*NXBANDS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
@@ -1977,17 +1965,18 @@ run -- 07jul -- ksl
 	  plasmamain[mpi_i].heat_comp = redhelper2[mpi_i+6*NPLASMA];
 	  plasmamain[mpi_i].heat_ind_comp = redhelper2[mpi_i+7*NPLASMA];
 	  plasmamain[mpi_i].heat_photo = redhelper2[mpi_i+8*NPLASMA];
-          plasmamain[mpi_i].ip = redhelper2[mpi_i+9*NPLASMA];
-          plasmamain[mpi_i].j_direct = redhelper2[mpi_i+10*NPLASMA];
-          plasmamain[mpi_i].j_scatt = redhelper2[mpi_i+11*NPLASMA];
-          plasmamain[mpi_i].ip_direct = redhelper2[mpi_i+12*NPLASMA];
-          plasmamain[mpi_i].ip_scatt = redhelper2[mpi_i+13*NPLASMA];
+      plasmamain[mpi_i].ip = redhelper2[mpi_i+9*NPLASMA];
+      plasmamain[mpi_i].j_direct = redhelper2[mpi_i+10*NPLASMA];
+      plasmamain[mpi_i].j_scatt = redhelper2[mpi_i+11*NPLASMA];
+      plasmamain[mpi_i].ip_direct = redhelper2[mpi_i+12*NPLASMA];
+      plasmamain[mpi_i].ip_scatt = redhelper2[mpi_i+13*NPLASMA];
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
 	      plasmamain[mpi_i].xj[mpi_j]=redhelper2[mpi_i+(14+mpi_j)*NPLASMA];
 	      plasmamain[mpi_i].xave_freq[mpi_j]=redhelper2[mpi_i+(14+NXBANDS+mpi_j)*NPLASMA];
 	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(14+NXBANDS*2+mpi_j)*NPLASMA];
-/* 131213 NSH And unpack the min and max banded frequencies to the plasma array */ 
+
+          /* 131213 NSH And unpack the min and max banded frequencies to the plasma array */ 
 	      plasmamain[mpi_i].fmax[mpi_j] = maxbandfreqhelper2[mpi_i*NXBANDS+mpi_j];
 	      plasmamain[mpi_i].fmin[mpi_j] = minbandfreqhelper2[mpi_i*NXBANDS+mpi_j];
 	    }
@@ -2031,18 +2020,18 @@ run -- 07jul -- ksl
 	}
   
 	free (maxfreqhelper);
-    	free (maxfreqhelper2);
+    free (maxfreqhelper2);
  	free (maxbandfreqhelper);
  	free (maxbandfreqhelper2);
  	free (minbandfreqhelper);
  	free (minbandfreqhelper2);
-    	free (redhelper);
-    	free (redhelper2); 
-    	free (iredhelper);
-    	free (iredhelper2);
-
+    free (redhelper);
+    free (redhelper2); 
+    free (iredhelper);
+    free (iredhelper2);
 
 #endif
+
 
 
 
@@ -2090,7 +2079,6 @@ run -- 07jul -- ksl
       /* Do an MPI reduce to get the spectra all gathered to the master thread */
 
 #ifdef MPI_ON
-
 
     redhelper = calloc (sizeof (double), ioniz_spec_helpers); 
     redhelper2 = calloc (sizeof (double), ioniz_spec_helpers); 
@@ -2301,10 +2289,8 @@ run -- 07jul -- ksl
       /* Do an MPI reduce to get the spectra all gathered to the master thread */
 #ifdef MPI_ON
 
- //   spec_spec_helpers = (nangles+MSPEC)*NWAVE;
     redhelper = calloc (sizeof (double), spec_spec_helpers); 
     redhelper2 = calloc (sizeof (double), spec_spec_helpers); 
-
 
 
       for (mpi_i = 0; mpi_i < NWAVE; mpi_i++)

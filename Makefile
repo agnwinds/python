@@ -50,7 +50,7 @@ ifeq (mpicc, $(CC))
 	ifeq (gcc, $(MPI_COMPILER))
 		GCCVERSIONGTEQ4 := $(shell expr `gcc -dumpversion | cut -f1-2 -d.` \>= 4.8)
 		ifeq ("$(GCCVERSIONGTEQ4)", "1")
-			EXTRA_FLAGS = -fno-aggressive-loop-optimizations 	# add the flag to EXTRA_FLAGS
+			EXTRA_FLAGS += -fno-aggressive-loop-optimizations 	# add the flag to EXTRA_FLAGS
 			COMPILER_PRINT_STRING += with -fno-aggressive-loop-optimizations
 		endif
 	endif	
@@ -113,7 +113,7 @@ LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lcfitsio -lgsl -lgslcblas
 
 #Note that version should be a single string without spaces. 
 
-VERSION = 78a
+VERSION = 78b_dev
 
 CHOICE=1             // Compress plasma as much as possible
 # CHOICE=0           //  Keep relation between plasma and wind identical
