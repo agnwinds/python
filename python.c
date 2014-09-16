@@ -250,7 +250,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   char tprofile[LINELENGTH];
   double x,xbl;
 
-  int j, nn;
+  int nn;
   double zz, zzz, zze, ztot, zz_adiab;
   int icheck, nn_adiab;
   FILE *fopen (), *qptr;
@@ -1761,10 +1761,8 @@ run -- 07jul -- ksl
 
 	  if (!geo.wind_radiation || (geo.wcycle == 0 && geo.wind_type != 2))
 	    iwind = -1;		/* Do not generate photons from wind */
-	  else if (j == 0)
-	    iwind = 1;		/* Create wind photons and force a reinitialization of wind parms */
 	  else
-	    iwind = 0;		/* Create wind photons but do not force reinitialization */
+	    iwind = 1;		/* Create wind photons and force a reinitialization of wind parms */
 
 	  /* Create the photons that need to be transported through the wind
 	   *
