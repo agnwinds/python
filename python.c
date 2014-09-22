@@ -29,6 +29,7 @@ Arguments:
 		included previously.  The current default is set to 4 which suppresses Log_silent
 		and Error_silent
 	-d	To have statements from Debug command logged
+	-e  Alter the maximum number of errors before the program quits
 
 
 	
