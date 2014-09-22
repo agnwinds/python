@@ -29,6 +29,7 @@ Arguments:
 		included previously.  The current default is set to 4 which suppresses Log_silent
 		and Error_silent
 	-d	To have statements from Debug command logged
+	-e  Alter the maximum number of errors before the program quits
 
 
 	
@@ -226,7 +227,7 @@ main (argc, argv)
   double freqmin, freqmax;
   double swavemin, swavemax, renorm;
   long nphot_to_define;
-  int n, nangles, photons_per_cycle, subcycles;
+  int n, nangles;
   int iwind;
   int thermal_opt; /*NSH 131213 - added to control options to turn on and off some heating and cooling mechanisms */
 
@@ -250,7 +251,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   char tprofile[LINELENGTH];
   double x,xbl;
 
-  int j, nn;
+  int nn;
   double zz, zzz, zze, ztot, zz_adiab;
   int icheck, nn_adiab;
   FILE *fopen (), *qptr;
@@ -643,23 +644,17 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
 /* Get the remainder of the data.  Note that this is done whether or not the windsave file was read in */
 
-// rddoub ("photons_per_cycle", &photons_per_cycle);
-// 140907 - ksl - Although photons_per_cycle is really an integer, read in as a double so it is easier for input
-  x=100000;
-  rddoub ("photons_per_cycle", &x);
-  NPHOT = photons_per_cycle=x;	// For now set NPHOT to be be photons/cycle --> subcycles==1
+  /* 140907 - ksl - Although photons_per_cycle is really an integer, 
+     read in as a double so it is easier for input */
 
-  photons_per_cycle = (photons_per_cycle / NPHOT) * NPHOT;
-  if (photons_per_cycle < NPHOT)
-    photons_per_cycle = NPHOT;
-  subcycles = photons_per_cycle / NPHOT;
-  Log ("Photons_per_cycle adjusted to %d\n", photons_per_cycle);
+  x = 100000;
+  rddoub ("photons_per_cycle", &x);
+  NPHOT = x;	// NPHOT is photons/cycle
 
 #ifdef MPI_ON
-  Log ("Photons per cycle per MPI task will be %d\n", photons_per_cycle/np_mpi_global);
+  Log ("Photons per cycle per MPI task will be %d\n", NPHOT / np_mpi_global);
 
-  NPHOT/=np_mpi_global;
-  photons_per_cycle/=np_mpi_global;
+  NPHOT /= np_mpi_global;
 #endif
 
   rdint ("Ionization_cycles", &geo.wcycles);
@@ -805,22 +800,24 @@ It also seems likely that we have mixed usage of some things, e.g geo.rt_mode an
       geo.rt_mode = 1;		// Not macro atom (SS)
     }
 
-thermal_opt = 0; /* NSH 131213 Set the option to zero - the default. The lines allow allow the
-user to turn off mechanisms that affect the thermal balance. Adiabatic is the only one implemented
-to start off with. */
+  thermal_opt = 0; /* NSH 131213 Set the option to zero - the default. The lines allow allow the
+  user to turn off mechanisms that affect the thermal balance. Adiabatic is the only one implemented
+  to start off with. */
 
   rdint
     ("Thermal_balance_options(0=everything.on,1=no.adiabatic)",
      &thermal_opt);
+
   if (thermal_opt == 1)
 	{
-	geo.adiabatic=0;
+	  geo.adiabatic = 0;
 	}
+
   else if (thermal_opt > 1 || thermal_opt < 0)
 	{
-      	Error ("Unknown thermal balance mode %d\n", thermal_opt);
-      	exit (0);
-    	}
+      Error ("Unknown thermal balance mode %d\n", thermal_opt);
+      exit (0);
+    }
 
 
 /*57h -- Next line prevents bf calculation of macro_estimaters when no macro atoms are present.   */
@@ -1722,10 +1719,10 @@ run -- 07jul -- ksl
 	     "COMMENT", geo.wcycle, geo.wcycles);
   else
     {
-      geo.pcycle = 0;		/* Set the spectrum cycles executed to 0, because 
-				   we are going to modify the wind and hence any
-				   previously calculated spectra must be recreated
-				 */
+      geo.pcycle = 0;  /* Set the spectrum cycles executed to 0, because 
+				          we are going to modify the wind and hence any
+				          previously calculated spectra must be recreated
+				       */
     }
 
   
@@ -1761,24 +1758,16 @@ run -- 07jul -- ksl
       geo.lum_ioniz = 0.0;
       ztot = 0.0;		/* ztot is the luminosity of the disk multipled by the number of cycles, which is used by save_disk_heating */
 
-      /* Now execute each subcycle */
-
-      for (j = 0; j < subcycles; j++)
-	{
-	  Log
-	    ("Subcycle %d of %d in Cycle %d of %d for defining wind structure\n",
-	     j, subcycles, geo.wcycle, geo.wcycles);
+      /* JM 1409 -- We used to execute subcycles here, but these have been removed */
 
 	  if (!geo.wind_radiation || (geo.wcycle == 0 && geo.wind_type != 2))
 	    iwind = -1;		/* Do not generate photons from wind */
-	  else if (j == 0)
-	    iwind = 1;		/* Create wind photons and force a reinitialization of wind parms */
 	  else
-	    iwind = 0;		/* Create wind photons but do not force reinitialization */
+	    iwind = 1;		/* Create wind photons and force a reinitialization of wind parms */
 
 	  /* Create the photons that need to be transported through the wind
 	   *
-	   * photons_per_cycle is the number of photon bundles which will equal the luminosity; 
+	   * NPHOT is the number of photon bundles which will equal the luminosity; 
 	   * 0 => for ionization calculation 
 	   */
 
@@ -1788,8 +1777,9 @@ run -- 07jul -- ksl
 	   * exceed the size of an integer, but because of the call to define phot in the
 	   * spectrum cycle, which can exceed this
 	   */
+	  /* JM 1409 photons_per_cycle has been removed in favour of NPHOT */
 
-	  nphot_to_define = (long) photons_per_cycle;
+	  nphot_to_define = (long) NPHOT;
 
 	  define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
 
@@ -1826,7 +1816,7 @@ run -- 07jul -- ksl
 	    ("!!python: Total photon luminosity before transphot %18.12e\n",
 	     zz);
 	  Log_flush ();		/*NSH June 13 Added call to flush logfile */
-	  ztot += zz;		/* Total luminosity in all subcycles, used for calculating disk heating */
+	  ztot += zz;		/* Total luminosity in all cycles, used for calculating disk heating */
 
 	  /* kbf_need determines how many & which bf processes one needs to considere.  It was introduced
 	   * as a way to speed up the program.  It has to be recalculated evey time one changes
@@ -1876,16 +1866,8 @@ run -- 07jul -- ksl
 
 
 
-
-
-
-
-
-	}
-
-      /* End of the subcycle loop */
-      /* At this point we should communicate all the useful infomation that has been accummulated on differenet MPI tasks */
-
+   /* At this point we should communicate all the useful infomation 
+      that has been accummulated on differenet MPI tasks */
 
 #ifdef MPI_ON
  
@@ -2259,7 +2241,7 @@ run -- 07jul -- ksl
 
        */
 
-      nphot_to_define = (long) NPHOT *(long) geo.pcycles;
+      nphot_to_define = (long) NPHOT * (long) geo.pcycles;
       define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);
 
       for (icheck = 0; icheck < NPHOT; icheck++)

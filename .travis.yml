@@ -42,10 +42,13 @@ install:
 
     # Then make GSL library
     - cd ../../software/gsl-1.15
-    - ./configure --disable-shared --prefix=$PYTHON/gsl
+    - ./configure --disable-shared --prefix=$PYTHON/software/gsl-1.15
     - make
     - make install
     - make clean
+    - mkdir $PYTHON/include/gsl
+    - mv $PYTHON/software/gsl-1.15/include/gsl/* $PYTHON/include/gsl/
+    - mv $PYTHON/software/gsl-1.15/lib/* $PYTHON/lib/
 
     #Then clone data
     - cd ../..

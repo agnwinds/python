@@ -83,22 +83,19 @@ endif
 
 
 INCLUDE = ../../include
-INCLUDE2 = ../../gsl/include
-
 LIB = ../../lib
-LIB2 = ../../gsl/lib
 BIN = ../../bin
 
 ifeq (D,$(firstword $(MAKECMDGOALS)))
 # use pg when you want to use gprof the profiler
 # to use profiler make with arguments "make D python" 
 # this can be altered to whatever is best	
-	CFLAGS = -g -pg -Wall $(EXTRA_FLAGS) -I$(INCLUDE) -I$(INCLUDE2) $(MPI_FLAG)
+	CFLAGS = -g -pg -Wall $(EXTRA_FLAGS) -I$(INCLUDE)$(MPI_FLAG)
 	FFLAGS = -g -pg   
 	PRINT_VAR = DEBUGGING, -g -pg -Wall flags
 else
 # Use this for large runs
-	CFLAGS = -O3 -Wall $(EXTRA_FLAGS) -I$(INCLUDE) -I$(INCLUDE2) $(MPI_FLAG)
+	CFLAGS = -O3 -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG)
 	FFLAGS =         
 	PRINT_VAR = LARGE RUNS, -03 -Wall flags
 endif
@@ -106,10 +103,10 @@ endif
 
 
 # next line for debugging when concerned about memory problems
-# LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lkpar -lcfitsio -lgsl -lgslcblas ../../duma_2_5_3/libduma.a -lpthread
+# LDFLAGS= -L$(LIB)  -lm -lkpar -lcfitsio -lgsl -lgslcblas ../../duma_2_5_3/libduma.a -lpthread
 # next line if you want to use kpar as a library, rather than as source below
-# LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lkpar -lcfitsio -lgsl -lgslcblas 
-LDFLAGS= -L$(LIB) -L$(LIB2)  -lm -lcfitsio -lgsl -lgslcblas 
+# LDFLAGS= -L$(LIB)  -lm -lkpar -lcfitsio -lgsl -lgslcblas 
+LDFLAGS= -L$(LIB) -lm -lcfitsio -lgsl -lgslcblas 
 
 #Note that version should be a single string without spaces. 
 
@@ -167,9 +164,9 @@ additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_
 
 prototypes: 
 	cp templates.h templates.h.old
-	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(python_source) ${additional_py_wind_source} test_saha.c  > foo.h  
+	cproto -I$(INCLUDE) $(python_source) ${additional_py_wind_source} test_saha.c  > foo.h  
 	cp foo.h templates.h
-	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(kpar_source) > log.h 
+	cproto -I$(INCLUDE) $(kpar_source) > log.h 
 
 python: startup  python.o $(python_objects)
 	$(CC)  ${CFLAGS} python.o $(python_objects) $(kpar_objects) $(LDFLAGS) -o python
@@ -286,7 +283,7 @@ balance_sources = balance_abso.c balance_bb.c balance.c balance_gen.c balance_su
 		  partition.c agn.c compton.c torus.c spectral_estimators.c dielectronic.c variable_temperature.c  zeta.c
 
 startup_balance: startup $(balance_sources)
-	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(balance_sources) > balance_templates.h
+	cproto -I$(INCLUDE) $(balance_sources) > balance_templates.h
 
 balance: balance.o balance_sub.o balance_gen.o balance_abso.o \
 		emission.o recomb.o balance_bb.o gradv.o \
@@ -327,7 +324,7 @@ libatomic.a:  get_atomicdata.o atomic.o
 saha_sources = saha_inv.c get_atomicdata.c
 
 startup_saha: startup $(saha_sources)
-	cproto -I$(INCLUDE)  -I$(INCLUDE2) $(saha_sources) > saha_templates.h
+	cproto -I$(INCLUDE) $(saha_sources) > saha_templates.h
 
 saha_inv: saha_inv.o get_atomicdata.c
 	$(CC) ${CFLAGS} saha_inv.o get_atomicdata.o
