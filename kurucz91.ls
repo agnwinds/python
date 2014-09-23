@@ -1,5 +1,3 @@
-3500  50000
-0.0  5.0
 data/kurucz91/fp00t3500g00k2c125.txt         3500          0.0
 data/kurucz91/fp00t3500g05k2c125.txt         3500          0.5
 data/kurucz91/fp00t3500g10k2c125.txt         3500          1.0
