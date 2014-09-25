@@ -123,7 +123,7 @@ get_models (modellist, npars, spectype)
 
 {
   FILE *mptr, *fopen ();
-  char dummy[LINELEN];
+  char dummy[LINELENGTH];
   int n, m, mm, nxpar;
   double xpar[NPARS], xmin[NPARS], xmax[NPARS];
   int get_one_model ();

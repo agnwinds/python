@@ -10,6 +10,7 @@
  */
 
  /* 1405 JM -- Increased PDF array for use with disk14 models- also removed duplication of ncomps */
+/* 1409 JM -- Increased LINELEN to 160 */
 
 #define NWAVES  28000
 // #define NWAVES  2000
@@ -17,7 +18,7 @@
 #define NCOMPS	10		//The maximum number of separate components
 #define NPARS	10		//The maximum number of parameters in a component (not all variable)
 #define NMODS   1000 	//The total number of models read in in all components
-#define LINELEN 132
+#define LINELEN 160   //This should always be the same as LINELENGTH in python.h!
 
 
 //#include      "pdf.h"
@@ -55,7 +56,6 @@ struct ModSum
 }
 comp[NCOMPS];
 
-int ncomps;			//Actual number of components to the current model.  N.B. This is not the number of variables
 
 /* In modsum, current[0] often refers to a normalization.  Therefore for parallism, a set of
 models which really only have one parameter, e.g. T, will store that parmeter in .par[1] */
