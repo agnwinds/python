@@ -12,10 +12,14 @@ Arguments:
 
 	where
 		-h 	prints out a short help file and exits (see help routine below)
-		-s	causes certain parameters to be printed out in individual files
-			after which the program exits
-	 	-d	looks for and cylcles through the diagnostic files printing
-			out all of the ascii files for each diagnostic file
+		-s	causes certain parameters in the windsave file to be printed out 
+			as individual ascii files after which the program exits
+	 	-d	In cases where a windsavefile was made for each ionization 
+			cycle, this prints out ascii files for "certain" parameters
+			for each of the ionization cycles, as well as the ascii files
+			for the final ionization cycle (if windsave files for each
+			ionization cycle were not created then -s and -d are 
+			equivalent).
 		-p parameter file
 			Instead of reading the choices from the command line read them
 			from a parameter file
@@ -27,25 +31,32 @@ Returns:
  
 Description:	
 	
-	Py_wind simply reads and then displays the wind file created by python.  It can
-	select various parameters from the wind and write them to a file so that one
-	can create displays of them.  
+	Py_wind simply reads and then displays portions of the wind file created by python.  
+	It can select various parameters from the wind and it can write them to files so that
+	the variables can be plotted. 
+       
+	The normal mode of running py_wind is to run it interactively.  As you run it interactively
+	the variables you select are displayed ont the screen.  The variables that you display
+	can also be written to files (depending on the answer to the question Make_files) 
 
-	One can enter the commands interactively, which is the usual case, or one can 
-	use a parameter file for the commands.  Note however, that one needs to be 
-	sure that the parameter file responds to requests for choices int he correct order.
-	This can be accomplished by first going through a file interactively.  The results
-	of the interactive section will be stored in py_wind.pf (if you end with a q, and
-	not an EOF response to the choice question)  EOF terminates the program at that point
-	before the command file is written to py_wind.pf
+	The commands that were executed in the interactive will be stored in py_wind.pf (if you end 
+	with a "q", and not an EOF response to the choice question)  EOF terminates the program 
+	at that point before the command file is written to py_wind.pf
 	
-	The file can contain either the original gridding which was used by python, in which 
+	The py_wind.pf file is useful if you want to run the exact same set of commands on another 
+	windfile. You should rename py_wind.pf to something_else.pf and run py_wind on that 
+	data set using the -p something_else.pf option
+
+	The command_line switches -d and -s are intended to produce a standard set of output files sufficient
+	for many purposes.  
+
+	
+Notes:
+
+	The files that are produced  can contain either the original gridding which was used by python, in which 
 	case the file prefix will be "x.", or "z", in which case it will be regridded to a 
 	linear array.  This option is intended so one can create a contour plot more easily.
 
-
-		
-Notes:
 
 History:
  	97jun	ksl	Coding on py_wind began.
@@ -136,7 +147,6 @@ main (argc, argv)
      char *argv[];
 {
 
-//  WindPtr w;
 
   int i;
   int ochoice;
@@ -213,7 +223,6 @@ main (argc, argv)
   strcat (windradfile, ".wind_rad");
   strcat (windsavefile, ".wind_save");
   strcat (photfile, ".phot");
-//  strcat (parfile, ".pf");
 
 
   /* Initialize other variables here */
@@ -259,8 +268,10 @@ I did not change this now.  Though it could be done.  02apr ksl */
     }
   else if (interactive == -1)
     {
-      /* Write the sumary ascii files for all of the diagnostic files 
-       * as well as the original */
+      /* In cases, where the windsave file was written out for 
+       * eaach ionization cycle Write the sumary ascii files 
+       * for each of the ionization cycles as 
+       * as well as the final cycle */
       zoom (1);			/* This affects the logfile */
       ochoice = 1;
       complete_file_summary (wmain, root, ochoice);
@@ -315,6 +326,7 @@ I did not change this now.  Though it could be done.  02apr ksl */
       printf ("%s\n", choice_options);
       rdchar ("Choice", &c);
     }
+
 
   return (0);
 }
