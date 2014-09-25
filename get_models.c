@@ -219,7 +219,7 @@ get_models (modellist, npars, spectype)
 	    }
 
 	  if ((n % 100) == 0)
-	    printf ("Model n %d %s\n", n, mods[n].name);
+	    Log ("Model n %d %s\n", n, mods[n].name);
 	  n++;
 	}
     }
