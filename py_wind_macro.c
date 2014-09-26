@@ -48,7 +48,7 @@ History:
   Synopsis:  
 
   xadiabatic_cooling_summary prints the adiabatic cooling in each cell,
-  and the total adiabatic cooling
+  and the total adiabatic cooling. 
   
   Description:  
 
@@ -178,8 +178,8 @@ macro_summary (w, rootname, ochoice)
     {
       nconfig = -1;
       version = 0;
-      rdint ("Configuration.Number(-1 to rollup)", &nconfig);
       rdint ("Departure coeff (1) or number density (0)", &version);
+      rdint ("Configuration.Number(-1 to rollup)", &nconfig);
       while (nconfig >= 0)
 	{
 	  depcoef_overview_specific (version, nconfig, w, rootname, ochoice);
