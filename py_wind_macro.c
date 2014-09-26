@@ -14,11 +14,13 @@ Arguments:
 Returns:
  
 Description:	
-	
 		
 Notes:
-	There are probably two things that one would like to do: Display everything in a single
-	cell and display 
+	There two things that one would like to do: Display everything in a single
+	cell and display a quantity in each cell.
+
+  Note that level 3 here has index 2- we refer to levels by nconfig, so 0 
+  is the first level.
 
 History:
  	97jun	ksl	Coding on py_wind began.
@@ -28,6 +30,7 @@ History:
 	08aug	ksl	62 - Brought back in line with concurrent changes
 			which ksl had made to some of the
 			routines, e.g do_partitions and saha
+  1312 JM  Coded some new routines to report more information on level emissivities
 	
 
 **************************************************************/
@@ -40,8 +43,24 @@ History:
 #include "python.h"
 
 
+/**************************************************************************
 
-/* A summary of adiabatic cooling */
+  Synopsis:  
+
+  xadiabatic_cooling_summary prints the adiabatic cooling in each cell,
+  and the total adiabatic cooling
+  
+  Description:  
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
 int
 xadiabatic_cooling_summary (w, rootname, ochoice)
      WindPtr w;
@@ -83,7 +102,27 @@ xadiabatic_cooling_summary (w, rootname, ochoice)
 }
 
 
-/* A routine intended to allow one to display information about macro atoms */
+
+
+/**************************************************************************
+
+  Synopsis:  
+
+  macro_summary is a routine intended to allow one to 
+  display information about macro atoms. It is the top level routine
+  for macro information and requires further input from the user.
+  
+  Description:  
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+ ************************************************************************/
+
 int
 macro_summary (w, rootname, ochoice)
      WindPtr w;
@@ -100,7 +139,10 @@ macro_summary (w, rootname, ochoice)
   choose = 0;
   nlev = 0;
   nplasma=0;
-  rdint ("Detailed cell info (0), specific level info (1) emissivities (2) Balmer escapes (3) Pops (4)", &choose);
+
+  /* get input from the user */
+  rdint ("Detailed cell info (0), specific level info (1) \
+          emissivities (2) Balmer escapes (3) Pops (4)", &choose);
 
   if (choose == 0)
     {
@@ -110,10 +152,10 @@ macro_summary (w, rootname, ochoice)
 
 
       ion_overview (icell);
-      /* What configurations are macro atom configurations */
 
+      /* What configurations are macro atom configurations */
       nconfig = -1;
-      rdint ("Configuration.Number(-1 for all b-values; -2 to rollup)",
+      rdint ("Configuration.Number (-1 for all b-values; -2 to rollup)",
 	     &nconfig);
 
       while (nconfig >= -1)
@@ -130,6 +172,8 @@ macro_summary (w, rootname, ochoice)
 		 &nconfig);
 	}
     }
+
+  /* specific level information for each cell */
   else if (choose == 1)
     {
       nconfig = -1;
@@ -142,39 +186,66 @@ macro_summary (w, rootname, ochoice)
 	  rdint ("Configuration.Number(-1 to rollup)", &nconfig);
 	}
     }
+
+
+  /* JM 1311 -- new loop added to report level emissivities for each cell */
   else if (choose == 2)
-  {
-    while (nlev >= 0)
-      {
-        /* JM 1311 -- new loop added to report level emissivities */
-        rdint ("Level emissivity to view (0 - kpkts, -1 - back):", &nlev);
-        level_emissoverview (nlev, w, rootname, ochoice);
-      }
-  }
-else if (choose == 4)
-  {
-    while (nplasma >= 0)
-      {
-        /* JM 1311 -- new loop added to report level emissivities */
-        rdint ("Cell to view (-1 to rollup):", &nplasma);
-        level_popsoverview (nplasma, w, rootname, ochoice);
-      }
-  }
+    {
+      rdint ("Level emissivity to view (0 - kpkts, -1 - back):", &nlev);
+      while (nlev >= 0)
+        {
+          level_emissoverview (nlev, w, rootname, ochoice);
+          rdint ("Level emissivity to view (0 - kpkts, -1 - back):", &nlev);
+        }
+    }
+
+  /* JM 1311 -- new loop added to report level populations in a cell */
+  else if (choose == 4)
+    {
+      rdint ("Cell to view (-1 to rollup):", &nplasma);
+      while (nplasma >= 0)
+        {
+          level_popsoverview (nplasma, w, rootname, ochoice);
+          rdint ("Cell to view (-1 to rollup):", &nplasma);
+        }
+    }
+
+  /* JM 1311 -- new loop added to report escape probabilities 
+     Note this currently only works for Balmer lines */
   else
-  {
-    while (nlev >= 0)
-      {
-        /* JM 1311 -- new loop added to report level emissivities */
-        rdint ("Upper level escape to view (-1 - back, Halpha = 3):", &nlev);
-        level_escapeoverview (nlev, w, rootname, ochoice);
-      }
-  }
+    {
+      rdint ("Upper level escape to view (-1 - back, Halpha = 3):", &nlev);
+      while (nlev >= 0)
+        {
+          level_escapeoverview (nlev, w, rootname, ochoice);
+          rdint ("Upper level escape to view (-1 - back, Halpha = 3):", &nlev);
+        }
+    }
 
 
 
   return (0);
 }
 
+
+/**************************************************************************
+
+  Synopsis:  
+
+  macro_summary is a routine intended to allow one to 
+  display information about macro atoms. It is the top level routine
+  for macro information and requires further input from the user.
+  
+  Description:  
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+ ************************************************************************/
 
 int
 ion_overview (icell)
@@ -195,6 +266,25 @@ ion_overview (icell)
 
   return (p->macro_info);
 }
+
+/**************************************************************************
+
+  Synopsis:  
+
+  macro_summary is a routine intended to allow one to 
+  display information about macro atoms. It is the top level routine
+  for macro information and requires further input from the user.
+  
+  Description:  
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+ ************************************************************************/
 
 int
 config_overview (n, icell)
@@ -317,13 +407,28 @@ config_overview (n, icell)
   return (p->macro_info);
 }
 
-/*********************************************************************************************/
 
-/*
 
-   080812	ksl	62 - Updated to reflect new versions of programs to do 
-   			partition functions and calculate saha densities
-*/
+/**************************************************************************
+
+  Synopsis:  
+
+  depcoef_overview is a routine which prints information about departure 
+  coefficients and level populations in a cell. There is probably a crossover
+  between this and level_popsoverview
+  
+  Description:  
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+        080812  ksl 62 - Updated to reflect new versions of programs to do 
+        partition functions and calculate saha densities
+ ************************************************************************/
 
 int
 depcoef_overview (icell)
@@ -377,15 +482,31 @@ depcoef_overview (icell)
   return (0);
 }
 
-/*********************************************************************************************/
+
+/**************************************************************************
+
+  Synopsis:  
+
+  Routine to copy the necessary parts of a plasma structure for computing 
+  a set of level populations. x1 points to the cell from which data is copied 
+  and x2 points to the cell to which data is copied.
+  
+  Description:  
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+ ************************************************************************/
+
 
 int
 copy_plasma (x1, x2)
      PlasmaPtr x1, x2;
 {
-  /*Routine to copy the necessary parts of a plasma structure for computing a set of level populations.
-     x1 points to the cell from which data is copied and x2 points to the cell to which data is copied */
-
   x2->nwind = x1->nwind;
   x2->nplasma = x1->nplasma;
   x2->ne = x1->ne;
@@ -395,21 +516,37 @@ copy_plasma (x1, x2)
   x2->t_e = x1->t_e;
   x2->w = x1->w;
 
-  /*Note this isn't everything in the cell! Only the things needed to get a set of
-     LTE populations! */
+  /* JM 1409 -- added this for depcoef_overview_specific */
+  x2->partition = x1->partition;
+
+  /* Note this isn't everything in the cell! 
+     Only the things needed for these routines */
 
   return (0);
-
 }
 
-/*********************************************************************************************/
 
 
-/*
 
-   080812	ksl	62 - Updated to reflect new versions of programs to do 
-   			partition functions and calculate saha densities
-*/
+/**************************************************************************
+
+  Synopsis:  
+
+  depcoef_overview_specific gives populations of nconfig in each cell
+  
+  Description:  
+
+  Arguments: 
+    version 0 gives number densities, 1 gives departure coefficients 
+
+  Returns:
+
+  Notes:
+
+  History:
+        080812  ksl 62 - Updated to reflect new versions of programs to do 
+        partition functions and calculate saha densities
+ ************************************************************************/
 
 int
 depcoef_overview_specific (version, nconfig, w, rootname, ochoice)
@@ -471,10 +608,34 @@ depcoef_overview_specific (version, nconfig, w, rootname, ochoice)
     }
 
   return (0);
-
 }
 
-/* new function to print out level populations */
+
+
+
+
+
+/**************************************************************************
+
+  Synopsis:  
+
+  level_popsoverview is a routine which prints information about departure 
+  coefficients and level populations in a cell. There is probably a crossover
+  between this and depcoef_overview 
+  
+  Description:  
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+      1312  JM  Coded
+ ************************************************************************/
+
+
 int 
 level_popsoverview (nplasma, w, rootname, ochoice)
   int nplasma;
@@ -551,7 +712,27 @@ level_popsoverview (nplasma, w, rootname, ochoice)
 
 
 
-/* JM 1312 Added new emissivitiy reporting to track e.g. H-alpha emission through wind */
+/**************************************************************************
+
+  Synopsis:  
+
+  Routine to print level emissivities in each cell.
+  The emissivity is the quantity
+  A21 * n2 * beta_sobolev * nu_21 * H * volume
+  And thus has units of ergs/s
+  
+  Description:  
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+      1312  JM  Coded to track 
+                e.g. H-alpha emission through wind
+ ************************************************************************/
 
 
 int 
@@ -620,6 +801,27 @@ level_emissoverview (nlev, w, rootname, ochoice)
   return (0);
 }
 
+
+
+
+/**************************************************************************
+
+  Synopsis:  
+
+  Routine to print escape probabilities for a given 
+  Balmer line in each cell.
+
+  Description:  
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+      1312  JM  Coded
+ ************************************************************************/
 
 
 
@@ -699,6 +901,5 @@ int level_escapeoverview (nlev, w, rootname, ochoice)
     }
 
   return (0);
-
 }
 
