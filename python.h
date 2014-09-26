@@ -1110,3 +1110,16 @@ int ncell_stats[NCSTAT];	//the numbers of the cells we are going to log
 /* Added variables which count number of times two situations occur (See #91) */
 int nerr_no_Jmodel;
 int nerr_Jmodel_wrong_freq;
+
+
+
+// advanced mode variables
+int iadvanced_mode;
+int reverb_mode;
+int save_cell_stats;
+int ispymode;
+int keep_ioncycle_windsaves;
+int track_resonant_scatters;
+int save_extract_photons;
+int print_windrad_summary;
+#define NMAX_OPTIONS 20

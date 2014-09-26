@@ -156,7 +156,7 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 
 	    }
 
-	  if (diag_on_off && 1545.0 < 2.997925e18 / pp.freq
+	  if (save_extract_photons && 1545.0 < 2.997925e18 / pp.freq
 	      && 2.997925e18 / pp.freq < 1565.0)
 	    {
 	      fprintf (epltptr,
