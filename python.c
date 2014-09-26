@@ -2915,7 +2915,7 @@ int get_advanced_info()
     rdstat = rd_advanced(firstword, &answer, &wordlength, &noptions);
 
     if (rdstat)
-      exit(0);
+      return(0);
 
     Log("%s %8.4e\n", firstword, answer);
 
@@ -2944,14 +2944,14 @@ int get_advanced_info()
 	else if (strncmp ("track_resonant_scatters", firstword, wordlength) == 0)
       {
 	    track_resonant_scatters = answer;
-	    Log("You are recording reverberation mapping data\n");
+	    Log("You are tracking resonant scatters\n");
 	  }
 
     /* would you like keep windsave files for each cycle */
 	else if (strncmp ("keep_ioncycle_windsaves", firstword, wordlength) == 0)
       {
 	    keep_ioncycle_windsaves = answer;
-	    Log("You are recording reverberation mapping data\n");
+	    Log("You are keeping windsave files for each cycle\n");
 	  }
 
 	/* would you like to save data on extract */
