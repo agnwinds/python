@@ -73,7 +73,7 @@ double
 wind_luminosity (f1, f2)
      double f1, f2;		/* freqmin and freqmax */
 {
-  double lum, lum_lines, lum_fb, lum_ff, lum_comp, lum_dr, lum_adiab, heat_adiab;	//1108 NSH Added a new variable for compton cooling
+  double lum, lum_lines, lum_fb, lum_ff, lum_comp, lum_dr, lum_di, lum_adiab, heat_adiab;	//1108 NSH Added a new variable for compton cooling 1408 NSH and for DI cooling
 //1109 NSH Added a new variable for dielectronic cooling
 //1307 NSH Added a new variable to split out negtive adiabatic cooling (i.e. heating).
   int n;
@@ -81,7 +81,7 @@ wind_luminosity (f1, f2)
   int nplasma;
 
 
-  lum = lum_lines = lum_fb = lum_ff = lum_comp = lum_dr = lum_adiab = heat_adiab = 0;	//1108 NSH Zero the new counter 1109 including DR counter
+  lum = lum_lines = lum_fb = lum_ff = lum_comp = lum_dr = lum_di = lum_adiab = heat_adiab = 0;	//1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
   for (n = 0; n < NDIM2; n++)
     {
       if (wmain[n].vol > 0.0)
@@ -93,6 +93,7 @@ wind_luminosity (f1, f2)
 	  lum_ff += plasmamain[nplasma].lum_ff;
 	  lum_comp += plasmamain[nplasma].lum_comp;	//1108 NSH Increment the new counter by the compton luminosity for that cell.
 	  lum_dr += plasmamain[nplasma].lum_dr;	//1109 NSH Increment the new counter by the DR luminosity for the cell.
+	  lum_di += plasmamain[nplasma].lum_di;	//1408 NSH Increment the new counter by the DI luminosity for the cell.
 	  if (geo.adiabatic) //130722 NSH - slight change to allow for adiabatic heating effect - now logged in a new global variable for reporting.
 		{
 		if (plasmamain[nplasma].lum_adiabatic >= 0.0)
@@ -125,6 +126,7 @@ wind_luminosity (f1, f2)
   geo.lum_ff = lum_ff;
   geo.lum_comp = lum_comp;	//1108 NSH The total compton luminosity of the wind is stored in the geo structure
   geo.lum_dr = lum_dr;		//1109 NSH the total DR luminosity of the wind is stored in the geo structure
+  geo.lum_di = lum_di;		//1408 NSH the total DI luminosity of the wind is stored in the geo structure
   geo.lum_adiabatic = lum_adiab;
   geo.heat_adiabatic = heat_adiab;
 

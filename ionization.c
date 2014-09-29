@@ -133,7 +133,7 @@ to match heating and cooling in the wind element! */
 
 
   //  }
-  else if (mode == IONMODE_PAIRWISE_ML93)
+  else if (mode == IONMODE_PAIRWISE_ML93 || mode == IONMODE_MATRIX_BB)
     {
       /* Feb 2012 new for mode 6. New abundances have been computed using pairwise Saha equation
          approach. We can now attempt to balance heating and cooling with the new abundance in the
@@ -151,11 +151,12 @@ to match heating and cooling in the wind element! */
 /* Convergence check */
       convergence (xplasma);
     }
-  else if (mode == IONMODE_PAIRWISE_SPECTRALMODEL)
+  else if (mode == IONMODE_PAIRWISE_SPECTRALMODEL || mode == IONMODE_MATRIX_SPECTRALMODEL)
     {
 /* Feb 2012 NSH - new for mode 7. KSL has moved a lot of the mechanics that used to be here into
  power_abundances. This, once called, calculates the weight and alpha for each band in this cell. There is a lot of code that was clogging up this routine. Once this is done, one_shot gets called from within that routine. */
-      ireturn = spectral_estimators (xplasma);	/*Aug 2012 NSH - slight change to help integrate this into balance, power_estimators does the work of getting banded W and alpha. Then oneshot gets called. */
+
+	ireturn = spectral_estimators (xplasma);	/*Aug 2012 NSH - slight change to help integrate this into balance, power_estimators does the work of getting banded W and alpha. Then oneshot gets called. */
       xplasma->dt_e_old = xplasma->dt_e;
       xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;	//Must store this before others
       xplasma->t_e_old = xplasma->t_e;
@@ -169,7 +170,6 @@ to match heating and cooling in the wind element! */
 /* Convergence check */
       convergence (xplasma);
     }
-
 
   else
     {
@@ -262,10 +262,10 @@ convergence (xplasma)
     		xplasma->techeck = techeck = 1;
 	if ((xplasma->converge_hc =
        		fabs (xplasma->heat_tot -
-	     	(xplasma->lum_adiabatic + xplasma->lum_rad + xplasma->lum_dr +
+	     	(xplasma->lum_adiabatic + xplasma->lum_rad + xplasma->lum_dr + xplasma->lum_di +
 	      	xplasma->lum_comp)) / fabs(xplasma->heat_tot + xplasma->lum_comp +
 				     xplasma->lum_adiabatic +
-				     xplasma->lum_dr + xplasma->lum_rad )) > epsilon)
+				     xplasma->lum_dr + xplasma->lum_di + xplasma->lum_rad )) > epsilon)
     		xplasma->hccheck = hccheck = 1;
 	}
   else //If the cell has reached the maximum temperature
@@ -424,7 +424,7 @@ one_shot (xplasma, mode)
      int mode;
 
 {
-  double te_old, te_new;
+  double te_old, te_new, dte;
   double gain;
 
 
@@ -443,7 +443,10 @@ one_shot (xplasma, mode)
 	xplasma->t_e = TMAX;
 	}
 
+  dte = xplasma->dt_e;
+
 //  Log ("One_shot: %10.2f %10.2f %10.2f\n", te_old, te_new, w->t_e);
+//	xplasma->t_e=10000.0;      
 
 /* Modes in the driving routines are not identical to those in nebular concentrations.
 The next lines are an attempt to mediate this problem.  It might be better internally
@@ -453,7 +456,7 @@ meaning in nebular concentrations.
 
   if (mode == IONMODE_ML93)
     mode = NEBULARMODE_ML93;
-  else if (mode <= 1 || mode ==5 || mode >= 8)	/* modification to cope with mode 5 - SIM + two new modes in Feb 2012  + mode 5 now removed*/
+  else if (mode <= 1 || mode ==5 || mode > 9)	/* modification to cope with mode 5 - SIM + two new modes in Feb 2012  + mode 5 now removed*/
     {
 
       Error ("one_shot: Sorry, Charlie, don't know how to process mode %d\n",
@@ -468,8 +471,8 @@ meaning in nebular concentrations.
 	  Error
 	    ("ionization_on_the_spot: nebular_concentrations failed to converge\n");
 	  Error
-	    ("ionization_on_the_spot: j %8.2e t_e %8.2e t_r %8.2e w %8.2e\n",
-	     xplasma->j, xplasma->t_e, xplasma->w);
+	    ("ionization_on_the_spot: j %8.2e t_e %8.2e t_r %8.2e w %8.2e nphot %i\n",
+	     xplasma->j, xplasma->t_e, xplasma->w, xplasma->ntot);
 	}
       if (xplasma->ne < 0 || VERY_BIG < xplasma->ne)
 	{
@@ -529,6 +532,7 @@ calc_te (xplasma, tmin, tmax)
      PlasmaPtr xplasma;
      double tmin, tmax;
 {
+  double heat_tot;
   double z1, z2;
   int macro_pops ();
 		
@@ -538,6 +542,8 @@ calc_te (xplasma, tmin, tmax)
    */
 
   xxxplasma = xplasma;
+
+  heat_tot = xplasma->heat_tot;
 
   xplasma->t_e = tmin;
   z1 = zero_emit (tmin);
@@ -665,10 +671,15 @@ zero_emit (t)
   compute_dr_coeffs (t);
   xxxplasma->lum_dr = total_dr (&wmain[xxxplasma->nwind], t);
 
+  /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
+
+  xxxplasma->lum_di = total_di (&wmain[xxxplasma->nwind], t);
+
+
 /* 70g compton cooling calculated here to avoid generating photons */
   xxxplasma->lum_comp = total_comp (&wmain[xxxplasma->nwind], t);
 
-  difference = xxxplasma->heat_tot - xxxplasma->lum_adiabatic - xxxplasma->lum_dr - xxxplasma->lum_comp - total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);	//NSH 1110 - total emission no longer computes compton.*/
+  difference = xxxplasma->heat_tot - xxxplasma->lum_adiabatic - xxxplasma->lum_dr - xxxplasma->lum_di - xxxplasma->lum_comp - total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);	//NSH 1110 - total emission no longer computes compton.*/
 
 
 

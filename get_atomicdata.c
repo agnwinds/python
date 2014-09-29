@@ -144,7 +144,7 @@ History:
 
 
 
-#define LINELENGTH 255
+#define LINELENGTH 400
 #define MAXWORDS    20
 
 int
@@ -194,6 +194,8 @@ get_atomic_data (masterfile)
   double xe[NCROSS], xx[NCROSS];
   double a21 ();
   int nlines_simple;
+  int nspline;
+  double tmin;
   int nions_simple, nions_macro;
   int nlevels_simple;
   int ntop_phot_simple, ntop_phot_macro;
@@ -206,6 +208,7 @@ get_atomic_data (masterfile)
   double part_eps;		//Temporary storage for partition function epsilon data
   int J, part_G, part_m;	//Temporary storage for partiton function J, G and m data
   double gstemp[BAD_GS_RR_PARAMS];	//Temporary storage for badnell resolved GS RR rates
+  double temp[LINELENGTH];	//Temporary storage for data read in off a line this is enogh if every character on the
   char gsflag, drflag;		//Flags to say what part of data is being read in for DR and RR
   double gstmin, gstmax;	//The range of temperatures for which all ions have GS RR rates
   double gsqrdtemp, gfftemp, s1temp, s2temp, s3temp;	//Temporary storage for gaunt factors
@@ -342,6 +345,8 @@ get_atomic_data (masterfile)
       ion[n].bad_gs_rr_t_flag = 0;	//Initialise to say this ion has no Badnell ground state recombination data 
       ion[n].bad_gs_rr_r_flag = 0;	//Initialise to say this ion has no Badnell ground state recombination data       
       ion[n].nxbadgsrr = -1;	//Initialise the pointer into the bad_gs_rr structure.
+      ion[n].dere_di_flag = 0; //Initialise to say this ion has no Dere DI rate data
+      ion[n].nxderedi = -1; //Initialise the pointer into the Dere DI rate structure
     }
 
   nlevels = nxphot = ntop_phot = nauger = ndrecomb = ncpart = 0;	//Added counter for DR//
@@ -454,6 +459,23 @@ get_atomic_data (masterfile)
     }
   gstmin = 0.0;
   gstmax = 1e99;
+
+
+/* 0814 nsh The following lines initialise the dere direct ionization rate struture */
+  for (n = 0; n < NIONS; n++)
+    {
+      dere_di_rate[n].nion = -1;
+      dere_di_rate[n].xi = 0.0;
+      dere_di_rate[n].min_temp = 1e99;
+      for (n1 = 0; n1 < DERE_DI_PARAMS; n1++)
+	{
+	  dere_di_rate[n].temps[n1] = 0.0;
+	  dere_di_rate[n].rates[n1] = 0.0;
+	}
+
+    }
+
+
 
 /* 0912 nsh the following lines initialise the sutherland gaunt factors */
   gaunt_n_gsqrd = 0;		//The number of sets of scaled temperatures we have data for
@@ -574,7 +596,8 @@ structure does not have this property! */
 		choice = 'P';
 	      else if (strncmp (word, "RR_BADNL", 8) == 0)	/*Its a badnell type line in the total RR file */
 		choice = 'T';
-
+		else if (strncmp (word, "DI_DERE", 7) == 0)	/*Its a data file giving direct ionization rates from Dere (2007) */
+		choice = 'd';
 	      else if (strncmp (word, "RR_SHULL", 8) == 0)	/*Its a shull type line in the total RR file */
 		choice = 's';
 	      else if (strncmp (word, "BAD_GS_RR", 9) == 0)	/*Its a badnell resolved ground state RR file */
@@ -2356,6 +2379,43 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 
 		  break;
 
+case 'd':
+	nparam = sscanf (aline, "%*s %d %d %d %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le", &z, &istate, &nspline, &et, &tmin, &temp[0], &temp[1], &temp[2], &temp[3], &temp[4], &temp[5], &temp[6], &temp[7], &temp[8], &temp[9], &temp[10], &temp[11], &temp[12], &temp[13], &temp[14], &temp[15], &temp[16], &temp[17], &temp[18], &temp[19],&temp[20],&temp[21],&temp[22],&temp[23],&temp[24],&temp[25],&temp[26],&temp[27],&temp[28],&temp[29],&temp[30],&temp[31],&temp[32],&temp[33],&temp[34],&temp[35],&temp[36],&temp[37],&temp[38],&temp[39]);	//split and assign the line
+
+		  if (nparam != 5+(nspline*2))	//     trap errors 
+		    {
+		      Error ("Something wrong with Dere DI data\n");
+		      Error ("Get_atomic_data: %s\n", aline);
+		      exit (0);
+		    }
+		  for (n = 0; n < nions; n++)	//Loop over ions to find the correct place to put the data
+		    {
+		      if (ion[n].z == z && ion[n].istate == istate)	// this works out which ion we are dealing with
+			{
+			  if (ion[n].dere_di_flag == 0)	//This is first set of this type of data for this ion
+			    {
+ion[n].dere_di_flag=1;
+			      dere_di_rate[n_dere_di_rate].nion = n;	//put the ion number into the dere_di_rate structure
+			      ion[n].nxderedi = n_dere_di_rate;	//put the number of the dere_di_rate into the ion structure so we can go either way.
+				dere_di_rate[n_dere_di_rate].xi=et;
+				dere_di_rate[n_dere_di_rate].min_temp=tmin;
+				dere_di_rate[n_dere_di_rate].nspline=nspline;
+				for (n1=0;n1<nspline;n1++)
+					{
+					dere_di_rate[n_dere_di_rate].temps[n1]=temp[n1];
+					dere_di_rate[n_dere_di_rate].rates[n1]=temp[n1+nspline]*1e-6;
+
+					}
+			      n_dere_di_rate++;	//increment the counter of number of ground state RR
+			    }
+			else
+				{
+				Error("Get_atomic_data: More than one Dere DI rate for ion %i\n",n);
+				}
+			}
+		    }
+		  break;
+
 
 		case 'c':	/* It was a comment line so do nothing */
 		  break;
@@ -2906,6 +2966,12 @@ indexx (n, arrin, indx)
 {
   int l, j, ir, indxt, i;
   float q;
+/* NSH 1408 - This routine fails in the very odd circumstance that n=1 so we now do a little test here */
+if (n<2)
+	{
+	Log_silent("Nothing for indexx to do! Only one element\n");
+	return;
+	}
 
   for (j = 1; j <= n; j++)
     indx[j] = j;

@@ -310,6 +310,7 @@ struct geometry
 
   double lum_ff, lum_fb, lum_lines;	/* The luminosity of the wind as a result of ff, fb, and line radiation */
   double lum_comp;		/*1108 NSH The luminosity of the wind as a result of compton cooling */
+  double lum_di;		/* 1409 NSH The direct ionization luminosity */
   double lum_dr;		/*1109 NSH The luminosity of the wind due to dielectronic recombination */
   double lum_adiabatic;		/*1209 NSH The cooling of the wind due to adiabatic expansion */
   double heat_adiabatic;		/*1307 NSH The heating of the wind due to adiabatic heating - split out from lum_adiabatic to get an accurate idea of whether it is important */
@@ -319,7 +320,8 @@ struct geometry
 /* These variables are copies of the lum variables above, and are only calculated during ionization cycles
    This is a bugfix for JM130621, windsave bug */
   double lum_ff_ioniz, lum_fb_ioniz, lum_lines_ioniz;	
-  double lum_comp_ioniz;		
+  double lum_comp_ioniz;
+  double lum_di_ioniz;		/* 1409 NSH The direct ionization luminosity */		
   double lum_dr_ioniz;		
   double lum_adiabatic_ioniz;	
   double lum_wind_ioniz, lum_star_ioniz, lum_disk_ioniz, lum_bl_ioniz, lum_tot_ioniz;
@@ -637,6 +639,7 @@ typedef struct plasma
   double max_freq;		/*1208 NSH The maximum frequency photon seen in this cell */
   double lum_lines, lum_ff, lum_adiabatic;
   double lum_comp;		/* 1108 NSH The compton luminosity of the cell */
+  double lum_di;		/* 1409 NSH The direct ionization luminosity */
   double lum_dr;		/* 1109 NSH The dielectronic recombination luminosity of the cell */
   double lum_fb, lum_z;		/*fb luminosity & fb of metals metals */
   double lum_rad, lum_rad_old;	/* The specfic radiative luminosity in frequencies defined by freqmin
@@ -646,6 +649,7 @@ typedef struct plasma
   double lum_ioniz;
   double lum_lines_ioniz, lum_ff_ioniz, lum_adiabatic_ioniz;
   double lum_comp_ioniz;		/* 1108 NSH The compton luminosity of the cell */
+  double lum_di_ioniz;		/* 1409 NSH The direct ionization luminosity */
   double lum_dr_ioniz;		/* 1109 NSH The dielectronic recombination luminosity of the cell */
   double lum_fb_ioniz, lum_z_ioniz;		/*fb luminosity & fb of metals metals */
   double lum_rad_ioniz;	/* The specfic radiative luminosity in frequencies defined by freqmin
@@ -839,6 +843,9 @@ phot.istat below */
 #define IONMODE_ML93 3                        // Lucy Mazzali
 #define IONMODE_PAIRWISE_ML93 6               // pairwise version of Lucy Mazzali 
 #define IONMODE_PAIRWISE_SPECTRALMODEL 7      // pariwise modeled J_nu approach
+#define IONMODE_MATRIX_BB 8	              // matrix solver BB model
+#define IONMODE_MATRIX_SPECTRALMODEL 9        // matrix solver spectral model
+
 
 // and the corresponding modes in nebular_concentrations
 #define NEBULARMODE_TR 0                       // LTE using t_r
@@ -846,6 +853,8 @@ phot.istat below */
 #define NEBULARMODE_ML93 2                     // ML93 using correction
 #define NEBULARMODE_PAIRWISE_ML93 6            // pairwise ML93
 #define NEBULARMODE_PAIRWISE_SPECTRALMODEL 7   // pairwise spectral models
+#define NEBULARMODE_MATRIX_BB 8	               // matrix solver BB model
+#define NEBULARMODE_MATRIX_SPECTRALMODEL 9     // matrix solver spectral model
 
 
 
