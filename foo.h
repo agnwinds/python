@@ -456,9 +456,6 @@ double tb_logpow1(double freq);
 double tb_exp1(double freq);
 /* matom_diag.c */
 int matom_emiss_report(void);
-/* direct_ion.c */
-int compute_di_coeffs(double T);
-double total_di(WindPtr one, double t_e);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
