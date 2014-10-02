@@ -1384,6 +1384,7 @@ scatter (p, nres, nnscat)
   //stuff_v (z_prime, p->lmn);
 
   vwind_xyz (p, v);		/* Get the velocity vector for the wind */
+  doppler (&pold, p, v, *nres);
 
 
 /* We estimate velocities by interpolating between the velocities at the edges of the cell based
