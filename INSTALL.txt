@@ -1,0 +1,87 @@
+WIKI AND MORE DETAIL CAN BE FOUND AT
+
+https://github.com/agnwinds/python/wiki
+
+
+### Retrieving the software the first time:
+Python and the various routines associated are set up in a self-contained directory structure. The basic directory structure and the data files that one needs to run Python need to be retrieved (and most likely recompiled).  
+
+
+**If you have git installed:** To obtain the directory structure, simply retrieve it using git as follows to clone the directory structure:
+
+    $ git clone https://github.com/agnwinds/python.git -b structure
+
+You then need to cd to the new directory and set your environment variables
+    
+    $ export PYTHON = /path/to/python/
+    $ cd $PYTHON 
+    $ make install
+    $ make clean            # this can take a while, cleaning gsl is a little laborious
+
+note that export syntax is for bash- for csh use 
+  
+    $ setenv PYTHON /path/to/python/
+
+
+**Without git:** Use the ZIP function under the [structures](https://github.com/agnwinds/python/tree/structure "Structure") branch, and then download .tar.gz versions of the python source under [releases](https://github.com/agnwinds/python/releases).
+
+Once you have a directory /path/to/python/ which contains the structure, place the unpacked tar.gz python source folder under /path/to/python/progs/
+
+    $ export PYTHON = /path/to/python/
+    $ cd $PYTHON 
+    $ make GIT=False install
+    $ make clean
+    $ cd progs/python_xx #replace xx  version you download
+    $ make clean
+    $ make CC=gcc python       # if you want to use mpicc, ignore the CC=gcc
+    $ make clean
+
+Again, for csh use 
+  
+    $ setenv PYTHON /path/to/python/
+
+As you can tell, the git install is simpler!
+
+### Setting up environment variables
+The only environment variables that is needed is to define PYTHON. For bash or sh users simply place the following:
+
+    export PYTHON=/path/to/python/
+
+where $HOME is you would modify $HOME to read something else if you are not installing putting this in your top level directory. You also need to add $PYTHON/bin to your path, e.g::
+
+    PATH = $PATH:$PYTHON/bin
+
+for c shell, use the following commands
+
+    setenv PYTHON /path/to/python/
+    setenv PATH "${PATH}:${PYTHON}"
+
+### Running Python
+
+Once you have added PYTHON to your path, copy the script Setup_Py_Dir to $PYTHON/bin/:
+
+    $ cp $PYTHON/py_progs/setup_scripts/Setup_Py_Dir $PYTHON/bin
+
+Then go to a directory where you want to do a run with parameter file root.pf
+
+    $ Setup_Py_Dir
+    $ py root.pf
+
+The code will now run!
+
+
+### Directory structure
+
+The python directory structure is fairly simple:
+
+* progs: location of source code for various fully debugged version of the code
+* bin: location of excutables
+* data: location for all datafiles. Files that are mainly for reference should be gzipped to save space. Such files are not recreated in
+* bin: The location of the executables. (It is a good idea to put this directory in your path)
+* software: This directory contains libraries which are used in in python that must be recompiled when creating an installation on a new machine, primarily Bill Pence's cfitsio package and the GNU scientific library gsl
+* Example: A directory with a few examples of python runs. (Note that the input files will have changed and so one may not be able to run these examples without some changes in the input files.)
+
+
+
+
+
