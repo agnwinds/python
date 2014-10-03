@@ -25,7 +25,7 @@ branches:
 
 install:
     # first configure
-    - export PYTHON=$TRAVIS_BUILD_DIR/structure
+    - export PYTHON=$TRAVIS_BUILD_DIR
     - export PATH=$PATH:$PYTHON/bin 
     - ./configure
 
