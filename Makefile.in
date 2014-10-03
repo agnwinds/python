@@ -25,6 +25,10 @@ else
 	PRINT_CLONE = 'No git installed- have to obtain release and data manually from releases page on github. Exiting.'
 endif
 
+MAKE_SOURCE = cd $(PYTHON)/source; make python; make py_wind;
+
+
+
 ifeq (True, $(LIBS))
 	INSTALL_CFITSIO = cd $(CFITSIO); ./configure; make; mv libcfitsio.a ../../lib; make clean
 	INSTALL_GSL = cd $(GSL); ./configure --disable-shared --prefix=$(GSL); make; make check 2>&1; make install; make clean; 
@@ -47,18 +51,11 @@ install:
 	$(INSTALL_GSL)
 	$(MOVE_GSL)
 
-	# get atomic data from git
-	@echo 'Installing Atomic data'
-	$(CLONE_DATA)
-
 	
 	#finally, make the latest release
-	@echo 'Making latest release...'
-	@echo $(PRINT_CLONE)
-	$(CLONE_RELEASE)
+	@echo 'Making source code...'
+	$(MAKE_SOURCE)
 
-	@echo 'Copying Setup_Py_dir to scripts directory'
-	cp $(PYTHON)/py_progs/setup_scripts/Setup_Py_Dir $(PYTHON)/bin
 
 	@echo 'all done'
 
@@ -66,4 +63,4 @@ clean:
 	rm -f *.o *~
 	cd $(CFITSIO); make clean
 	cd $(GSL); make clean 
-	cd $(PYTHON)/progs/python; make clean
+	cd $(PYTHON)/source/; make clean
