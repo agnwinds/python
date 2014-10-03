@@ -82,9 +82,9 @@ endif
 
 
 
-INCLUDE = ../../include
-LIB = ../../lib
-BIN = ../../bin
+INCLUDE = ../include
+LIB = ../lib
+BIN = ../bin
 
 ifeq (D,$(firstword $(MAKECMDGOALS)))
 # use pg when you want to use gprof the profiler
@@ -102,8 +102,8 @@ endif
 
 
 
-# next line for debugging when concerned about memory problems
-# LDFLAGS= -L$(LIB)  -lm -lkpar -lcfitsio -lgsl -lgslcblas ../../duma_2_5_3/libduma.a -lpthread
+# next line for debugging when concerned about memory problems and duma installed in python directory
+# LDFLAGS= -L$(LIB)  -lm -lkpar -lcfitsio -lgsl -lgslcblas ../duma_2_5_3/libduma.a -lpthread
 # next line if you want to use kpar as a library, rather than as source below
 # LDFLAGS= -L$(LIB)  -lm -lkpar -lcfitsio -lgsl -lgslcblas 
 LDFLAGS= -L$(LIB) -lm -lcfitsio -lgsl -lgslcblas 
