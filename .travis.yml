@@ -42,9 +42,9 @@ script:
     - echo $PWD
     - cd source/
     - make clean
-    - make py_wind
+    - make CC=gcc py_wind
     - make clean
-    - cd structure/examples/travis 
+    - cd ../examples/travis 
     - Setup_Py_Dir
     - py test1 > test1.out
     - py balmer_test > balmer_test.out
