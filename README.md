@@ -11,16 +11,6 @@ Python please contact long@stsci.edu.
 [![Build Status](https://travis-ci.org/agnwinds/python.png?branch=dev)](https://travis-ci.org/agnwinds/python)
 
 
-## Getting the radiative transfer code 'Python'
-
-You can download the required structure under the structure branch. e.g.
-git clone https://github.com/agnwinds/python.git -b structure
-or simply click on the 'zip' button!
-
-
-Releases of progs can be found under [tags](https://github.com/agnwinds/python/tags "Wiki").
-
-Consult the [wiki](https://github.com/agnwinds/python/wiki/_pages "Wiki") for how to install Python.
 
 
 ## Installation
@@ -64,6 +54,6 @@ and run the code by typing, e.g.
     $ py root.pf
 
 
-Please see the (wiki)[https://github.com/agnwinds/python/wiki/Installing-and-Running-Python] and docs folder for how to use the code.
+Please see the [wiki](https://github.com/agnwinds/python/wiki/Installing-and-Running-Python) and docs folder for how to use the code.
 
 Any comments, email jm8g08@soton.ac.uk or long@stsci.edu.

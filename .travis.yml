@@ -36,7 +36,7 @@ install:
     #Then clone data
     - mkdir data
     - cd data
-    - git clone --depth=50 --branch=data git://github.com/agnwinds/data.git .
+    - git clone --depth=50 git://github.com/agnwinds/data.git .
 
 
 script:
