@@ -8,10 +8,8 @@
 #
 # Procedure:
 #       - travis automatically clones the main dev branch of the repository
-#       - we clone the rest of the directory structure into a folder called structure
-#       - note this is different from normal directory layout, but facilitates the build
-#       - Cfitsio and gsl are built
-#       - we then cd into the main build directory and do make test_tr. 
+#       - we clone the rest the atomic data from the data repository
+#       - we then run some simple test models to check we are reading in data and so on
 #   
 #####################################################################################
 
@@ -26,50 +24,27 @@ branches:
       dev
 
 install:
-    # clone the structure branch into a sub directory
-    - git clone --depth=50 --branch=structure git://github.com/agnwinds/python.git structure
-    - cd structure
-    - export PYTHON=$TRAVIS_BUILD_DIR/structure
-    - echo $PYTHON
-    - echo $PWD
+    # first configure
+    - export PYTHON=$TRAVIS_BUILD_DIR
+    - export PATH=$PATH:$PYTHON/bin 
+    - ./configure
 
-    # make cfitsio library
-    - cd software/cfitsio3040
-    - ./configure 
-    - make
-    - mv libcfitsio.a ../../lib
-    - make clean
-
-    # Then make GSL library
-    - cd ../../software/gsl-1.15
-    - ./configure --disable-shared --prefix=$PYTHON/software/gsl-1.15
-    - make
+    # do installation
     - make install
-    - make clean
-    - mkdir $PYTHON/include/gsl
-    - mv $PYTHON/software/gsl-1.15/include/gsl/* $PYTHON/include/gsl/
-    - mv $PYTHON/software/gsl-1.15/lib/* $PYTHON/lib/
+
 
     #Then clone data
-    - cd ../..
     - mkdir data
-    - cd data
-    - git clone --depth=50 --branch=data git://github.com/agnwinds/python.git .
-    # cd back into right directory for making source code
-    - cd ../../
-    - cp $PYTHON/py_progs/setup_scripts/Setup_Py_Dir $PYTHON/bin
-    - export PATH=$PATH:$PYTHON/bin 
-
+    - git clone --depth=50 git://github.com/agnwinds/data.git data
 
 
 script:
     - echo $PWD
-    # these long strings of variables are required because we have a different directory layout to normal
-    - make CC=gcc LIB=structure/lib LIB2=structure/gsl/lib BIN=structure/bin INCLUDE=structure/include INCLUDE2=structure/gsl/include python
+    - cd source/
     - make clean
-    - make CC=gcc LIB=structure/lib LIB2=structure/gsl/lib BIN=structure/bin INCLUDE=structure/include INCLUDE2=structure/gsl/include py_wind
+    - make CC=gcc py_wind
     - make clean
-    - cd structure/examples/travis 
+    - cd ../examples/travis 
     - Setup_Py_Dir
     - py test1 > test1.out
     - py balmer_test > balmer_test.out

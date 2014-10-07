@@ -6,38 +6,29 @@ It has been developed by Knox Long, Christian Knigge, Stuart Sim, Nick Higginbot
 The code is not yet ready for use and should not be installed yet. If you are interested in using
 Python please contact long@stsci.edu.
 
-# Travis Build Status
-
-Simple build checks are carried out on Travis. The latest status shows up below:
+## Travis Build Status
 
 [![Build Status](https://travis-ci.org/agnwinds/python.png?branch=dev)](https://travis-ci.org/agnwinds/python)
 
 
-# Getting the radiative transfer code 'Python'
 
-You can download the required structure under the structure branch. e.g.
-git clone https://github.com/agnwinds/python.git -b structure
-or simply click on the 'zip' button!
+## Installation
 
+Python and the various routines associated are set up in a self-contained directory structure. The basic directory structure and the data files that one needs to run Python need to be retrieved and compiled. 
 
-Releases of progs can be found under [tags](https://github.com/agnwinds/python/tags "Wiki").
+If you want to obtain a stable (!) release, go to the [Releases](https://github.com/agnwinds/python/releases) page.
 
-Consult the [wiki](https://github.com/agnwinds/python/wiki/_pages "Wiki") for how to install Python.
+If you want to download the latest dev version, you can zip up the git repository by clicking on the zip icon to the right of the GitHub page. Aternatively, you can clone the repository using 
 
+    $ git clone https://github.com/agnwinds/python.git 
 
-# Installation
+If you anticipate contributing to development we suggest Forking the repository and submitting pull requests with any proposed changes.
 
-Python and the various routines associated are set up in a self-contained directory structure. The basic directory structure and the data files that one needs to run Python need to be retrieved (and most likely recompiled).  
-
-
-**If you have git installed:** To obtain the directory structure, simply retrieve it using git as follows to clone the directory structure:
-
-    $ git clone https://github.com/agnwinds/python.git -b structure
-
-You then need to cd to the new directory and set your environment variables
+Once you have the files, you need to cd to the new directory and set your environment variables
     
     $ export PYTHON = /path/to/python/
     $ cd $PYTHON 
+    $ ./configure
     $ make install
     $ make clean
 
@@ -45,26 +36,27 @@ note that export syntax is for bash- for csh use
   
     $ setenv PYTHON /path/to/python/
 
+Atomic data is stored in our [data repository](https://github.com/agnwinds/data) with it's own releases page. one should unzip these files and place them in a $PYTHON/data folder.
 
-**Without git:** Use the ZIP function under the [structures](https://github.com/agnwinds/python/tree/structure "Structure") branch, and then download .tar.gz versions of the python source under [releases](https://github.com/agnwinds/python/releases).
+A development user may want to work on atomic data as part of their work, and pull in changes as they are made, in which case we recommend cloning the data repository:
 
-Once you have a directory /path/to/python/ which contains the structure, place the unpacked tar.gz python source folder under /path/to/python/progs/
+    $ cd $PYTHON; git clone https://github.com/agnwinds/data data
 
-    $ export PYTHON = /path/to/python/
-    $ cd $PYTHON 
-    $ make GIT=False install
-    $ make clean
-    $ cd progs/python_xx #replace xx  version you download
-    $ make clean
-    $ make CC=gcc python       # if you want to use mpicc, ignore the CC=gcc
-    $ make clean
+## Running python
 
-Again, for csh use 
-  
-    $ setenv PYTHON /path/to/python/
+To run python you need to add the following to your $PATH variable:
 
-As you can tell, the git install is simpler!
+    $PYTHON/bin
 
-Please see the (wiki)[https://github.com/agnwinds/python/wiki/Installing-and-Running-Python] for how to use the code.
+You can then setup your symbolic links by running 
+
+    $ Setup_Py_Dir
+
+and run the code by typing, e.g.
+
+    $ py root.pf
+
+
+Please see the [wiki](https://github.com/agnwinds/python/wiki/Installing-and-Running-Python) and docs folder for how to use the code.
 
 Any comments, email jm8g08@soton.ac.uk or long@stsci.edu.
