@@ -86,7 +86,7 @@ bf_estimators_increment (one, p, ds)
   /* JM -- 1310 -- check if the user requires extra diagnostics and
      has provided a file diag_cells.dat to store photons stats for cells they have specified
    */
-  if (save_cell_stats && ncstat > 0)
+  if (modes.save_cell_stats && ncstat > 0)
     {
       save_photon_stats(one, p, ds);  // save photon statistics (extra diagnostics)
     }

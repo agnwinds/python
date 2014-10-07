@@ -43,14 +43,14 @@ open_diagfile ()
   FILE *cellfile;		/*File that may or may not exist, pointing to cells we want to write out photon stats for */
   int cell;			/*Temporary storage of cell to use */
 
-  if (eplinit == 0 && save_extract_photons)
+  if (eplinit == 0 && modes.save_extract_photons)
     {
       epltptr = fopen ("python.ext", "w");
       eplinit = 1;
     }
 
   ncstat = 0;			/*Zero the counter for the number of cells to be tracked */
-  if (pstatinit == 0 && save_cell_stats)		/* Check we havent already done this */
+  if (pstatinit == 0 && modes.save_cell_stats)		/* Check we havent already done this */
     {
       cellfile = fopen ("diag_cells.dat", "r");	/*This is the file containing cells to track */
       if (cellfile != NULL)	/*If there actually *is* a file read it */

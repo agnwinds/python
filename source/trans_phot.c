@@ -94,7 +94,7 @@ trans_phot (w, p, iextract)
 
   /* 05jul -- not clear whether this is needed and why it is different from DEBUG */
 
-  if (track_resonant_scatters && plinit == 0)
+  if (modes.track_resonant_scatters && plinit == 0)
     {
       pltptr = fopen ("python.xyz", "w");
       plinit = 1;
@@ -470,8 +470,9 @@ the current version of scattering really does what the old code did for two-leve
 	      if (nres > -1 && nres < nlines)
 		{
 		  pp.nrscat++;
-/* This next statement writes out the position of every resonant scattering event to a file */
-		  if (track_resonant_scatters)
+		  
+          /* This next statement writes out the position of every resonant scattering event to a file */
+		  if (modes.track_resonant_scatters)
 		    fprintf (pltptr,
 			     "Photon %i has resonant scatter at %.2e %.2e %.2e in wind cell %i (grid cell=%i). Freq=%e Weight=%e\n",
 			     nphot, pp.x[0], pp.x[1], pp.x[2],

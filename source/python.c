@@ -322,6 +322,10 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   restart_stat = 0;
   time_max = -1;
 
+  /* initialise options for advanced mode (all set to 0) */
+  init_advanced_modes();
+
+
   if (argc == 1)
     {
       printf ("Input file (interactive=stdin):");
@@ -379,7 +383,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	    }
 	  else if (strcmp (argv[i], "-d") == 0)
 	  {
-		Log_debug(1);
+		modes.iadvanced = 1;
 	  	i++;
 	    }		
 	  else if (strncmp (argv[i], "-", 1) == 0)
@@ -711,6 +715,20 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	 NDIM_MAX, geo.ndim, geo.mdim);
       exit (0);
     }
+
+
+  /* If we are in advanced then allow the user to modify scale lengths */
+  if (modes.iadvanced)
+  {
+  	rdint ("adjust_grid(0=no,1=yes)", &modes.adjust_grid);
+
+  	if (modes.adjust_grid)
+  	  {
+  	  	rddoub ("geo.xlog_scale", &geo.xlog_scale);
+  	  	if (geo.coord_type)
+  	  	  rddoub ("geo.zlog_scale", &geo.zlog_scale);
+  	  }
+  }
 
 
 //080808 - 62 - Ionization section has been cleaned up -- ksl
@@ -1260,7 +1278,7 @@ Modified again in python 71b to take account of change in parametrisation of she
 
       /* Get the filling factor of the wind*/
       geo.fill=1.;
-      rddoub("wind.filling_factor(1=smooth,<1=clumpted)",&geo.fill);
+      rddoub("wind.filling_factor(1=smooth,<1=clumped)",&geo.fill);
 
     }				// End of block to define a model for the first time
   else
@@ -1604,13 +1622,22 @@ run -- 07jul -- ksl
  */
   freqs_init (freqmin, freqmax);
 
-
-  /* Do we require advanced mode or not */
-  rdint ("Use.advanced.mode(1=yes)", &iadvanced_mode);
-
-  if (iadvanced_mode)
+  
+  if (modes.iadvanced)
     {
-      get_advanced_info();
+      /* do we want debug statements to print */
+      rdint ("Use_Debug_Statements(0=no, 1=yes)", &modes.use_debug);
+
+      if (modes.use_debug)
+      	Log_debug(modes.use_debug);	// communicate that we want to print debug statements
+
+      /* Do we require extra diagnostics or not */
+      rdint ("Extra.diagnostics(0=no, 1=yes) ", &modes.diag_on_off);
+
+      if (modes.diag_on_off)
+        {
+          get_extra_diagnostics();
+        }
     }
 
 
@@ -1646,7 +1673,7 @@ run -- 07jul -- ksl
 
   w = wmain;
 
-  if (save_cell_stats)
+  if (modes.save_cell_stats)
     {
       /* Open a diagnostic file or files.  These are all fixed files */
       open_diagfile ();
@@ -1762,7 +1789,7 @@ run -- 07jul -- ksl
 
 
 
-    if (ispymode)
+    if (modes.ispy)
       ispy_init ("python", geo.wcycle);
 
 
@@ -1866,7 +1893,7 @@ run -- 07jul -- ksl
       if (geo.rt_mode == 2)
 	  Log("Luminosity taken up by adiabatic kpkt destruction %18.12e number of packets %d\n", zz_adiab, nn_adiab);
 
-    if (print_windrad_summary)
+    if (modes.print_windrad_summary)
 	  wind_rad_summary (w, windradfile, "a");
 
 
@@ -2029,7 +2056,7 @@ run -- 07jul -- ksl
 
 
 
-    if (ispymode)
+    if (modes.ispy)
       ispy_close ();
 
 
@@ -2048,7 +2075,7 @@ run -- 07jul -- ksl
 
 /* In a diagnostic mode save the wind file for each cycle (from thread 0) */
 
-      if (keep_ioncycle_windsaves)
+      if (modes.keep_ioncycle_windsaves)
 	{
 	  strcpy (dummy, "");
 	  sprintf (dummy, "python%02d.wind_save", geo.wcycle);
@@ -2230,7 +2257,7 @@ run -- 07jul -- ksl
       xsignal (root, "%-20s Starting %d of %d spectral cycle \n", "NOK",
 	       geo.pcycle, geo.pcycles);
 
-    if (ispymode)
+    if (modes.ispy)
       ispy_init ("python", geo.pcycle + 1000);
 
 
@@ -2529,7 +2556,8 @@ init_geo ()
   geo.t_bl = 100000.;
 
 
-  strcpy (geo.atomic_filename, "data/standard73");
+
+  strcpy (geo.atomic_filename, "data/standard77");
   strcpy (geo.fixed_con_file, "none");
 
   // Note that geo.model_list is initialized through get_spectype 
@@ -2894,8 +2922,24 @@ read_non_standard_disk_profile (tprofile)
 
 
 
+int init_advanced_modes()
+{ 
+  modes.iadvanced = 0;                // this is controlled by the -d flag, global mode control.
+  modes.save_cell_stats = 0;          // want to save photons statistics by cell
+  modes.ispy = 0;                 // want to use the ispy function
+  modes.keep_ioncycle_windsaves = 0;  // want to save wind file each ionization cycle
+  modes.track_resonant_scatters = 0;  // want to track resonant scatters
+  modes.save_extract_photons = 0;     // we want to save details on extracted photons
+  modes.print_windrad_summary = 0;    // we want to print the wind rad summary each cycle
+  modes.adjust_grid = 0;              // the user wants to adjust the grid scale
+  modes.diag_on_off = 0;              // extra diagnostics
 
-int get_advanced_info()
+  return (0);
+}
+
+
+
+int get_extra_diagnostics()
 {
   int wordlength;
   char firstword[LINELENGTH];
@@ -2922,49 +2966,42 @@ int get_advanced_info()
     /* would you like to save cell photon statistics */
 	if (strncmp ("save_cell_statistics", firstword, wordlength) == 0)
 	  {
-	    save_cell_stats = answer;
+	    modes.save_cell_stats = answer;
   	    Log("You are tracking photon statistics by cell\n");
 	  }
 	  
     /* would you like to use ispy mode */
 	else if (strncmp ("ispymode", firstword, wordlength) == 0)
       {
-	    ispymode = answer;
+	    modes.ispy = answer;
 	    Log("ISPY mode is on\n");
-	  }
-
-    /* would you like to turn on use of reverberation mapping */
-	else if (strncmp ("reverberation_mode", firstword, wordlength) == 0)
-      {
-	    reverb_mode = answer;
-	    Log("You are recording reverberation mapping data\n");
 	  }
 
 	/* would you like to track resonant scatters */
 	else if (strncmp ("track_resonant_scatters", firstword, wordlength) == 0)
       {
-	    track_resonant_scatters = answer;
+	    modes.track_resonant_scatters = answer;
 	    Log("You are tracking resonant scatters\n");
 	  }
 
     /* would you like keep windsave files for each cycle */
 	else if (strncmp ("keep_ioncycle_windsaves", firstword, wordlength) == 0)
       {
-	    keep_ioncycle_windsaves = answer;
+	    modes.keep_ioncycle_windsaves = answer;
 	    Log("You are keeping windsave files for each cycle\n");
 	  }
 
 	/* would you like to save data on extract */
 	else if (strncmp ("save_extract_photons", firstword, wordlength) == 0)
       {
-	    save_extract_photons = answer;
+	    modes.save_extract_photons = answer;
 	    Log("You are saving data on extract\n");
 	  }
 
 	/* would you like to print wind_rad_summary*/
 	else if (strncmp ("print_windrad_summary", firstword, wordlength) == 0)
       {
-	    print_windrad_summary = answer;
+	    modes.print_windrad_summary = answer;
 	    Log("You are printing wind_rad_summary\n");
 	  }
 

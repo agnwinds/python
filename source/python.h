@@ -1123,12 +1123,21 @@ int nerr_Jmodel_wrong_freq;
 
 
 // advanced mode variables
-int iadvanced_mode;
-int reverb_mode;
-int save_cell_stats;
-int ispymode;
-int keep_ioncycle_windsaves;
-int track_resonant_scatters;
-int save_extract_photons;
-int print_windrad_summary;
-#define NMAX_OPTIONS 20
+struct advanced_modes
+{
+  /* these are all 0=off, 1=yes */
+  int iadvanced;                // this is controlled by the -d flag, global mode control.
+  int save_cell_stats;          // want to save photons statistics by cell
+  int ispy;                     // want to use the ispy function
+  int keep_ioncycle_windsaves;  // want to save wind file each ionization cycle
+  int track_resonant_scatters;  // want to track resonant scatters
+  int save_extract_photons;     // we want to save details on extracted photons
+  int print_windrad_summary;    // we want to print the wind rad summary each cycle
+  int adjust_grid;              // the user wants to adjust the grid scale
+  int diag_on_off;              // extra diagnostics
+  int use_debug;                // print out debug statements
+}
+modes;
+
+        
+#define NMAX_OPTIONS 20 

@@ -395,7 +395,7 @@ string_process (question, dummy)
       if (fgets (line, LINELEN, rdin_ptr) == NULL)
 	{
 	  printf ("Error: string_proces: Unexpectedly reached EOF\n");
-	  printf ("                      Switching to inteactive mode\n");
+	  printf ("                      Switching to interactive mode\n");
 	  rdpar_stat = 1;
 	  goto b;
 	}
