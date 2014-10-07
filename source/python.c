@@ -2922,6 +2922,7 @@ read_non_standard_disk_profile (tprofile)
 
 
 
+
 int init_advanced_modes()
 { 
   modes.iadvanced = 0;                // this is controlled by the -d flag, global mode control.
@@ -2933,6 +2934,7 @@ int init_advanced_modes()
   modes.print_windrad_summary = 0;    // we want to print the wind rad summary each cycle
   modes.adjust_grid = 0;              // the user wants to adjust the grid scale
   modes.diag_on_off = 0;              // extra diagnostics
+  modes.print_dvds_info = 0;
 
   return (0);
 }
@@ -3003,6 +3005,13 @@ int get_extra_diagnostics()
       {
 	    modes.print_windrad_summary = answer;
 	    Log("You are printing wind_rad_summary\n");
+	  }
+
+	/* would you like to print dvds_info */
+	else if (strncmp ("print_dvds_info", firstword, wordlength) == 0)
+      {
+	    modes.print_dvds_info = answer;
+	    Log("You are printing dvds_info\n");
 	  }
 
     else

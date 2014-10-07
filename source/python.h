@@ -1136,8 +1136,13 @@ struct advanced_modes
   int adjust_grid;              // the user wants to adjust the grid scale
   int diag_on_off;              // extra diagnostics
   int use_debug;                // print out debug statements
+  int print_dvds_info;
 }
 modes;
+
+
+FILE *optr;  //pointer to a diagnostic file that will contain dvds information
+
 
         
 #define NMAX_OPTIONS 20 
