@@ -1556,9 +1556,6 @@ if (geo.coord_type==RTHETA && geo.wind_type==2) //We need to generate an rtheta 
   else
     Log ("OK, basic Monte Carlo spectrum\n");
 
-/* Determine whether to produce additonal diagnostics */
-
-  rdint ("Extra.diagnostics(0=no)", &diag_on_off);
 
 
 /* 57h -- New section of inputs to provide more control over how the program is
@@ -1578,6 +1575,10 @@ run -- 07jul -- ksl
 	      &DENSITY_PHOT_MIN);
       rdint ("Keep.photoabs.during.final.spectrum(1=yes)", &keep_photoabs);
     }
+
+
+
+
 
 /* 081221 - 67c - Establish limits on the frequency intervals to be used by the ionization cycles and 
  * the fraquency bands for stratified sampling.  Changes here were made to allow more control
@@ -1602,6 +1603,17 @@ run -- 07jul -- ksl
  * These need to be coordinated with the bands that are set up for spectral gneration
  */
   freqs_init (freqmin, freqmax);
+
+
+  /* Do we require advanced mode or not */
+  rdint ("Use.advanced.mode(1=yes)", &iadvanced_mode);
+
+  if (iadvanced_mode)
+    {
+      get_advanced_info();
+    }
+
+
 
 
 
@@ -1634,7 +1646,7 @@ run -- 07jul -- ksl
 
   w = wmain;
 
-  if (diag_on_off)
+  if (save_cell_stats)
     {
       /* Open a diagnostic file or files.  These are all fixed files */
       open_diagfile ();
@@ -1750,9 +1762,9 @@ run -- 07jul -- ksl
 
 
 
-#if DEBUG
+    if (ispymode)
       ispy_init ("python", geo.wcycle);
-#endif
+
 
       geo.n_ioniz = 0.0;
       geo.lum_ioniz = 0.0;
@@ -1854,9 +1866,9 @@ run -- 07jul -- ksl
       if (geo.rt_mode == 2)
 	  Log("Luminosity taken up by adiabatic kpkt destruction %18.12e number of packets %d\n", zz_adiab, nn_adiab);
 
-#if DEBUG
+    if (print_windrad_summary)
 	  wind_rad_summary (w, windradfile, "a");
-#endif
+
 
 
 
@@ -2017,9 +2029,9 @@ run -- 07jul -- ksl
 
 
 
-#if DEBUG
+    if (ispymode)
       ispy_close ();
-#endif
+
 
       /* Calculate and store the amount of heating of the disk due to radiation impinging on the disk */
       qdisk_save (diskfile, ztot);
@@ -2036,7 +2048,7 @@ run -- 07jul -- ksl
 
 /* In a diagnostic mode save the wind file for each cycle (from thread 0) */
 
-      if (diag_on_off)
+      if (keep_ioncycle_windsaves)
 	{
 	  strcpy (dummy, "");
 	  sprintf (dummy, "python%02d.wind_save", geo.wcycle);
@@ -2218,9 +2230,9 @@ run -- 07jul -- ksl
       xsignal (root, "%-20s Starting %d of %d spectral cycle \n", "NOK",
 	       geo.pcycle, geo.pcycles);
 
-#if DEBUG
+    if (ispymode)
       ispy_init ("python", geo.pcycle + 1000);
-#endif
+
 
       Log ("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle,
 	   geo.pcycles);
@@ -2878,3 +2890,97 @@ read_non_standard_disk_profile (tprofile)
 
   return (0);
 }
+
+
+
+
+
+int get_advanced_info()
+{
+  int wordlength;
+  char firstword[LINELENGTH];
+  int noptions, rdstat;
+  double answer;
+
+
+  noptions = 0;
+  wordlength = 0;
+  rdstat = 0;
+
+  Log("Advanced mode should only be used if you know what you're doing!\n");
+
+  while (noptions < NMAX_OPTIONS && rdstat == 0)
+  {
+
+    rdstat = rd_advanced(firstword, &answer, &wordlength, &noptions);
+
+    if (rdstat)
+      return(0);
+
+    Log("%s %8.4e\n", firstword, answer);
+
+    /* would you like to save cell photon statistics */
+	if (strncmp ("save_cell_statistics", firstword, wordlength) == 0)
+	  {
+	    save_cell_stats = answer;
+  	    Log("You are tracking photon statistics by cell\n");
+	  }
+	  
+    /* would you like to use ispy mode */
+	else if (strncmp ("ispymode", firstword, wordlength) == 0)
+      {
+	    ispymode = answer;
+	    Log("ISPY mode is on\n");
+	  }
+
+    /* would you like to turn on use of reverberation mapping */
+	else if (strncmp ("reverberation_mode", firstword, wordlength) == 0)
+      {
+	    reverb_mode = answer;
+	    Log("You are recording reverberation mapping data\n");
+	  }
+
+	/* would you like to track resonant scatters */
+	else if (strncmp ("track_resonant_scatters", firstword, wordlength) == 0)
+      {
+	    track_resonant_scatters = answer;
+	    Log("You are tracking resonant scatters\n");
+	  }
+
+    /* would you like keep windsave files for each cycle */
+	else if (strncmp ("keep_ioncycle_windsaves", firstword, wordlength) == 0)
+      {
+	    keep_ioncycle_windsaves = answer;
+	    Log("You are keeping windsave files for each cycle\n");
+	  }
+
+	/* would you like to save data on extract */
+	else if (strncmp ("save_extract_photons", firstword, wordlength) == 0)
+      {
+	    save_extract_photons = answer;
+	    Log("You are saving data on extract\n");
+	  }
+
+	/* would you like to print wind_rad_summary*/
+	else if (strncmp ("print_windrad_summary", firstword, wordlength) == 0)
+      {
+	    print_windrad_summary = answer;
+	    Log("You are printing wind_rad_summary\n");
+	  }
+
+    else
+      {
+      	Error("Didn't understand question %s, continuing!\n", firstword);
+      }
+  }
+
+
+  return 0;
+}
+
+
+
+
+
+
+

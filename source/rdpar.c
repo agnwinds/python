@@ -722,6 +722,39 @@ int rdpar_set_verbose (vlevel)
 	return(0);
 }
 
+int rd_advanced(firstword, answer, wordlength, noptions)
+    char firstword[];
+    double *answer;
+    int *wordlength;
+    int *noptions;
+{ 
+  int nwords;
+  char secondword[LINELEN];
+  char line[LINELEN];
+  char *ccc, *index ();
+  
+  if (fgets (line, LINELEN, rdin_ptr) == NULL)
+  	  {
+	    if (noptions == 0)
+	  	  Error("EOF: No advanced mode options read, but advanced mode on!\n");
+
+	    return(1);
+	  }	
+
+  noptions++;
+
+  nwords = sscanf (line, "%s %s", firstword, secondword);
+
+  if ((ccc = index (firstword, '(')) != NULL)
+	{
+	  *wordlength = (int) (ccc - firstword);
+	}
+
+  sscanf (secondword, "%le", answer);
+
+  return (0); 
+}
+
 
 
 

@@ -18,6 +18,8 @@ int rdline(char question[], char answer[]);
 int get_root(char root[], char total[]);
 int rdpar_set_mpi_rank(int rank);
 int rdpar_set_verbose(int vlevel);
+int rd_advanced(char firstword[], double *answer, int *wordlength, int *noptions);
+int test(int *point);
 /* log.c */
 int Log_init(char *filename);
 int Log_append(char *filename);

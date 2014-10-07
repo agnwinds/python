@@ -417,7 +417,7 @@ radiation (p, ds)
   /* JM -- 1310 -- check if the user requires extra diagnostics and
      has provided a file diag_cells.dat to store photons stats for cells they have specified
    */
-  if (diag_on_off == 1 && ncstat > 0)
+  if (save_cell_stats && ncstat > 0)
     {
       save_photon_stats (one, p, ds);	// save photon statistics (extra diagnostics)
     }
