@@ -36,7 +36,11 @@ note that export syntax is for bash- for csh use
   
     $ setenv PYTHON /path/to/python/
 
-Atomic data is stored in our [data repository](https://github.com/agnwinds/data) with it's own releases page. one should unzip these files and place them in the $PYTHON/data folder.
+Atomic data is stored in our [data repository](https://github.com/agnwinds/data) with it's own releases page. one should unzip these files and place them in a $PYTHON/data folder.
+
+A development user may want to work on atomic data as part of their work, and pull in changes as they are made, in which case we recommend cloning the data repository:
+
+    $ cd $PYTHON; git clone https://github.com/agnwinds/data data
 
 ## Running python
 
