@@ -375,6 +375,8 @@ sane_check (x)
 }
 
 
+/* JM 1410- mytrap is a function that was previously use for debugging. 
+   It is now deprecated in python but you may want to use for tests */
 int
 mytrap ()
 {

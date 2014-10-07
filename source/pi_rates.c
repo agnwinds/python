@@ -88,7 +88,7 @@ calc_pi_rate (nion,xplasma,mode)
   else
     {
       Error ("calc_pi_rate: %d is unacceptable value of nion\n", nion);
-      mytrap ();
+      //mytrap ();  JM 1410 -- mytrap is deprecated
       exit (0);
       return (1.0);
     }

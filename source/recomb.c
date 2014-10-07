@@ -354,7 +354,7 @@ integ_fb (t, f1, f2, nion, fb_choice)
     }
 
   Error ("integ_fb: Unknown fb_choice(%d)\n", fb_choice);
-  mytrap ();
+  //mytrap ();  JM 1410 -- mytrap is deprecated
   exit (0);
 }
 
@@ -1072,7 +1072,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
   else				// Get the total emissivity
     {
       Error ("integ_fb: %d is unacceptable value of nion\n", nion);
-      mytrap ();
+      //mytrap ();  JM 1410 -- mytrap is deprecated
       return (0);
     }
 

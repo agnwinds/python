@@ -588,7 +588,7 @@ rtsafe (funcd, x1, x2, xacc)
 	}
     }
   Error (" Maximum number of iterations exceeded in RTSAFE\n");
-  mytrap ();
+  //mytrap ();
   exit (0);
 }
 
