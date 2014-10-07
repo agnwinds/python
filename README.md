@@ -12,7 +12,6 @@ Python please contact long@stsci.edu.
 
 
 
-
 ## Installation
 
 Python and the various routines associated are set up in a self-contained directory structure. The basic directory structure and the data files that one needs to run Python need to be retrieved and compiled. 
