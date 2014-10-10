@@ -1,4 +1,7 @@
-flatinv.lo: flatinv.c ../config.h ../gsl/gsl_cdf.h
+flatinv.lo: flatinv.c /usr/include/stdc-predef.h ../config.h \
+ ../gsl/gsl_cdf.h
+
+/usr/include/stdc-predef.h:
 
 ../config.h:
 

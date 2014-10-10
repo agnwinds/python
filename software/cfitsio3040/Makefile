@@ -18,7 +18,7 @@
 # testprog targets. See also changes and comments in configure.in
 #
 
-prefix		= /Users/jmatthews/Documents/Python/software/cfitsio3040
+prefix		= /home/swm1n12/python/software/cfitsio3040
 exec_prefix	= ${prefix}
 CFITSIO_PREFIX	= $(prefix)
 CFITSIO_LIB	= $(exec_prefix)/lib
@@ -29,16 +29,16 @@ INSTALL_DIRS	= ${prefix} ${CFITSIO_LIB} ${CFITSIO_LIB}/pkgconfig ${CFITSIO_INCLU
 SHELL =		/bin/sh
 RANLIB =	ranlib
 CC =		cc
-CFLAGS =	-O -O2 -Dg77Fortran -fPIC -fno-common
-FC =		g77
+CFLAGS =	-O -O2 -fPIC
+FC =		
 LDFLAGS =	$(CFLAGS)
-DEFS =		-DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MATH_H=1 -DHAVE_LIMITS_H=1 -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -DHAVE_FTRUNCATE=1 -DHAVE_LONGLONG=1 -DHAVE_SHMEM_SERVICES=1 -DHAVE_UNION_SEMUN=1 -DHAVE_NET_SERVICES=1 
+DEFS =		-DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MATH_H=1 -DHAVE_LIMITS_H=1 -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -DHAVE_FTRUNCATE=1 -DHAVE_LONGLONG=1 -DHAVE_SHMEM_SERVICES=1 -DHAVE_NET_SERVICES=1 
 LIBS =		
 FLEX =		flex
 BISON =		bison
 
-SHLIB_LD =	cc -dynamiclib
-SHLIB_SUFFIX =	.dylib
+SHLIB_LD =	cc -shared
+SHLIB_SUFFIX =	.so
 
 .c.o:
 		$(CC) -c $(CFLAGS) $(DEFS) $<
@@ -56,7 +56,7 @@ CORE_SOURCES = 	buffers.c cfileio.c checksum.c compress.c drvrfile.c drvrmem.c \
 		swapproc.c wcssub.c wcsutil.c imcompress.c quantize.c ricecomp.c \
 		pliocomp.c fits_hcompress.c fits_hdecompress.c
 
-SOURCES = ${CORE_SOURCES} ${FITSIO_SRC}
+SOURCES = ${CORE_SOURCES} 
 
 OBJECTS = 	${SOURCES:.c=.o}
 

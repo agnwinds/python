@@ -1,7 +1,19 @@
-fcmp.lo: fcmp.c ../config.h ../gsl/gsl_sys.h /usr/include/math.h \
-  /usr/include/sys/cdefs.h /usr/include/sys/_symbol_aliasing.h \
-  /usr/include/sys/_posix_availability.h /usr/include/Availability.h \
-  /usr/include/AvailabilityInternal.h
+fcmp.lo: fcmp.c /usr/include/stdc-predef.h ../config.h ../gsl/gsl_sys.h \
+ /usr/include/math.h /usr/include/features.h \
+ /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+ /usr/include/x86_64-linux-gnu/bits/wordsize.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
+ /usr/include/x86_64-linux-gnu/bits/huge_val.h \
+ /usr/include/x86_64-linux-gnu/bits/huge_valf.h \
+ /usr/include/x86_64-linux-gnu/bits/huge_vall.h \
+ /usr/include/x86_64-linux-gnu/bits/inf.h \
+ /usr/include/x86_64-linux-gnu/bits/nan.h \
+ /usr/include/x86_64-linux-gnu/bits/mathdef.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
+ /usr/include/x86_64-linux-gnu/bits/mathinline.h
+
+/usr/include/stdc-predef.h:
 
 ../config.h:
 
@@ -9,12 +21,28 @@ fcmp.lo: fcmp.c ../config.h ../gsl/gsl_sys.h /usr/include/math.h \
 
 /usr/include/math.h:
 
-/usr/include/sys/cdefs.h:
+/usr/include/features.h:
 
-/usr/include/sys/_symbol_aliasing.h:
+/usr/include/x86_64-linux-gnu/sys/cdefs.h:
 
-/usr/include/sys/_posix_availability.h:
+/usr/include/x86_64-linux-gnu/bits/wordsize.h:
 
-/usr/include/Availability.h:
+/usr/include/x86_64-linux-gnu/gnu/stubs.h:
 
-/usr/include/AvailabilityInternal.h:
+/usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
+
+/usr/include/x86_64-linux-gnu/bits/huge_val.h:
+
+/usr/include/x86_64-linux-gnu/bits/huge_valf.h:
+
+/usr/include/x86_64-linux-gnu/bits/huge_vall.h:
+
+/usr/include/x86_64-linux-gnu/bits/inf.h:
+
+/usr/include/x86_64-linux-gnu/bits/nan.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathdef.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathinline.h:

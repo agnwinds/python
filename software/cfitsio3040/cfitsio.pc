@@ -1,4 +1,4 @@
-prefix=/Users/jmatthews/Documents/Python/software/cfitsio3040
+prefix=/home/swm1n12/python/software/cfitsio3040
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
