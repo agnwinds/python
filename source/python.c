@@ -1260,7 +1260,7 @@ Modified again in python 71b to take account of change in parametrisation of she
 
       /* Get the filling factor of the wind*/
       geo.fill=1.;
-      rddoub("wind.filling_factor(1=smooth,<1=clumpted)",&geo.fill);
+      rddoub("wind.filling_factor(1=smooth,<1=clumped)",&geo.fill);
 
     }				// End of block to define a model for the first time
   else
@@ -2517,7 +2517,7 @@ init_geo ()
   geo.t_bl = 100000.;
 
 
-  strcpy (geo.atomic_filename, "data/standard73");
+  strcpy (geo.atomic_filename, "data/standard77");
   strcpy (geo.fixed_con_file, "none");
 
   // Note that geo.model_list is initialized through get_spectype 
@@ -2668,7 +2668,7 @@ History:
 **************************************************************/
 
 
-char get_spectype_oldname[LINELENGTH] = "data/kurucz91/kurucz91.ls";	/*This is to assure that we read model lists in the same order everytime */
+char get_spectype_oldname[LINELENGTH] = "data/kurucz91.ls";	/*This is to assure that we read model lists in the same order everytime */
 int get_spectype_count = 0;
 int
 get_spectype (yesno, question, spectype)

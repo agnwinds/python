@@ -876,8 +876,8 @@ typedef struct photon
 {
   double x[3];			/* Vector containing position of packet */
   double lmn[3];		/*direction cosines of this packet */
-  double freq;
-  double w,w_orig;		/*current and orgingal weight of this packet */
+  double freq, freq_orig;    /* current and original frequency of this packet */
+  double w,w_orig;		       /* current and original weight of this packet */
   double tau;
   int istat;			/*status of photon.  See definitions P_INWIND, etc above */
   int nscat;			/*number of scatterings */
