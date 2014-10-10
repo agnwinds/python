@@ -1,4 +1,4 @@
-#!/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python
+#!/usr/bin/env python 
 #specify your python interpreter path above to run as executable
 
 '''

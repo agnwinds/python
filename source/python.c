@@ -2556,7 +2556,6 @@ init_geo ()
   geo.t_bl = 100000.;
 
 
-
   strcpy (geo.atomic_filename, "data/standard77");
   strcpy (geo.fixed_con_file, "none");
 
@@ -2708,7 +2707,7 @@ History:
 **************************************************************/
 
 
-char get_spectype_oldname[LINELENGTH] = "data/kurucz91/kurucz91.ls";	/*This is to assure that we read model lists in the same order everytime */
+char get_spectype_oldname[LINELENGTH] = "data/kurucz91.ls";	/*This is to assure that we read model lists in the same order everytime */
 int get_spectype_count = 0;
 int
 get_spectype (yesno, question, spectype)

@@ -323,7 +323,7 @@ concentrations (xplasma, mode)
   else
     {
       Error ("Concentrations: Unknown mode %d\n", mode);
-      mytrap ();
+      //mytrap ();  JM 1410 -- mytrap is deprecated
       exit (0);
     }
 
@@ -531,7 +531,8 @@ saha (xplasma, ne, t)
 	      sum += density[nion] = a;
   
 	      if (density[nion] < 0.0)
-	        mytrap ();
+          Error("saha: ion %i has negative density %8.4e", nion, density[nion]);
+	        //mytrap ();  JM 1410 -- mytrap is deprecated
 
 	      if (sane_check (sum))
 	        Error ("saha:sane_check failed for density summation\n");

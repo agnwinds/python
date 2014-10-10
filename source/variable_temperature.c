@@ -302,7 +302,7 @@ variable_temperature (xplasma, mode)
 		  Error
 		    ("variable_temperature: ion %i has a negative density %e\n",
 		     nion, newden[nion]);
-		  mytrap ();
+		  //mytrap ();	JM 1410 -- mytrap is deprecated
 		}
 	      if (sane_check (sum))
 		Error
@@ -472,7 +472,7 @@ bb_correct_2 (xtemp, t_r, www, nion)
   else
     {
       Error ("bb_correct_2: %d is unacceptable value of nion\n", ion_lower);
-      mytrap ();
+      //mytrap ();	JM 1410 -- mytrap is deprecated
       exit (0);
       return (1.0);
     }
@@ -655,7 +655,7 @@ pl_correct_2 (xtemp, nion)
   else
     {
       Error ("bb_correct_2: %d is unacceptable value of nion\n", ion_lower);
-      mytrap ();
+      //mytrap ();	JM 1410 -- mytrap is deprecated
       exit (0);
       return (1.0);
     }

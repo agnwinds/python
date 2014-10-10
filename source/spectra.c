@@ -352,6 +352,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
   int mscat, mtopbot;
   double delta;
   double nlow, nhigh;
+  int k_orig, k1_orig;
 
   freqmin = f1;
   freqmax = f2;
@@ -380,6 +381,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
       else
 	nres[j]++;
 
+    /* find out where we are in log space */
       k1 = (log10 (p[nphot].freq) - log10 (freqmin)) / ldfreq;
       if (k1 < 0)
 	{
@@ -390,7 +392,19 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	  k1 = NWAVE;
 	}
 
-/* lines to work out where we are in a normal spectrum with linear spacing */
+	/* also need to work out where we are for photon's original wavelength */
+      k1_orig = (log10 (p[nphot].freq_orig) - log10 (freqmin)) / ldfreq;
+      if (k1_orig < 0)
+	{
+	  k1_orig = 0;
+	}
+      if (k1_orig > NWAVE)
+	{
+	  k1_orig = NWAVE;
+	}
+
+
+    /* lines to work out where we are in a normal spectrum with linear spacing */
       k = (p[nphot].freq - freqmin) / dfreq;
       if (k < 0)
 	{
@@ -405,12 +419,29 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	  k = NWAVE - 1;
 	}
 
+	/* also need to work out where we are for photon's original wavelength */
+	  k_orig = (p[nphot].freq_orig - freqmin) / dfreq;
+	  if (k_orig < 0)
+	{
+	  if (((1. - p[nphot].freq_orig / freqmin) > delta) && (geo.rt_mode != 2))
+	    nlow = nlow + 1;
+	  k_orig = 0;
+	}
+      else if (k_orig > NWAVE - 1)
+	{
+	  if (((1. - freqmax / p[nphot].freq_orig) > delta) && (geo.rt_mode != 2))
+	    nhigh = nhigh + 1;
+	  k_orig = NWAVE - 1;
+	}
+
+
+    xxspec[0].f[k_orig] += p[nphot].w_orig;	/* created spectrum with original weights and wavelengths */
+	xxspec[0].lf[k1_orig] += p[nphot].w_orig;	/* logarithmic created spectrum */
+	
+
       if ((i = p[nphot].istat) == P_ESCAPE)
 	{
-	  xxspec[0].f[k] += p[nphot].w_orig;	/* emitted spectrum with original weights */
-	  xxspec[0].lf[k1] += p[nphot].w_orig;	/* logarithmic emitted spectrum */
-	  xxspec[0].nphot[i]++;
-
+      xxspec[0].nphot[i]++;
 	  xxspec[1].f[k] += p[nphot].w;	/* emitted spectrum */
 	  xxspec[1].lf[k1] += p[nphot].w;	/* logarithmic emitted spectrum */
 	  xxspec[1].nphot[i]++;
