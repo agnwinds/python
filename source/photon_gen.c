@@ -485,6 +485,9 @@ python 40 but it is not really what one wants.
 
   /* Generate photons from the star, the bl, the wind and then from the disk */
   /* Now adding generation from kpkts and macro atoms too (SS June 04) */
+  
+  int i;		/* SWM 31/7/14 - Zero path lengths for every photon generated */
+  for(i=iphot_start; i<nphot; i++) p[i].path = 0.0;
 
 
   if (geo.star_radiation)

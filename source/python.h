@@ -370,12 +370,12 @@ struct geometry
 geo;
 
 
-struct plane
+typedef struct plane	/*SWM 10-10-14 - Switched to TypeDef */
 {
   double x[3];			/* A position included in the plane (usally the "center" */
   double lmn[3];		/* A unit vector perpendicular to the plane (usually in the "positive" direction */
-}
-plane_l1, plane_sec, plane_m2_far;	/* these all define planes which are perpendicular to the line of sight from the 
+} plane_dummy, *PlanePtr;
+PlanePtr plane_l1, plane_sec, plane_m2_far;	/* these all define planes which are perpendicular to the line of sight from the 
 					   primary to the seconday */
 
 
@@ -879,6 +879,7 @@ typedef struct photon
   double freq, freq_orig;    /* current and original frequency of this packet */
   double w,w_orig;		       /* current and original weight of this packet */
   double tau;
+  double path;			/* SWM 31/7/14 - Total path length travelled by this photon */
   int istat;			/*status of photon.  See definitions P_INWIND, etc above */
   int nscat;			/*number of scatterings */
   int nres;			/*The line number in lin_ptr of last scatter or wind line creation */

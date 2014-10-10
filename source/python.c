@@ -2318,6 +2318,10 @@ run -- 07jul -- ksl
       xsignal (root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK",
 	       geo.pcycle, geo.pcycles);
 
+      /* SWM 2/9/14 - Delay dump */
+      if(geo.pcycle==0) delay_dump_prep(delay_dumpfile, nspectra-1);
+      delay_dump(delay_dumpfile, p, freqmin, freqmax, nspectra-1,"a");
+
       geo.pcycle++;		// Increment the spectral cycles
 
 #ifdef MPI_ON    

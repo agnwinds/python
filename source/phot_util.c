@@ -54,6 +54,7 @@ stuff_phot (pin, pout)
   pout->w = pin->w;
   pout->freq = pin->freq;
   pout->tau = pin->tau;
+  pout->path = pin->path;		/* SWM 31/7/14 - Added */
 
   pout->lmn[0] = pin->lmn[0];
   pout->lmn[1] = pin->lmn[1];
@@ -104,7 +105,7 @@ move_phot (pp, ds)
   pp->x[0] += pp->lmn[0] * ds;
   pp->x[1] += pp->lmn[1] * ds;
   pp->x[2] += pp->lmn[2] * ds;
-
+  pp->path += fabs(ds);					/* SWM 31/7/14 - Added */
   return (0);
 }
 
