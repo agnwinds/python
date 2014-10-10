@@ -247,6 +247,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   char specsavefile[LINELENGTH];
   char photfile[LINELENGTH], diagfile[LINELENGTH],
     old_windsavefile[LINELENGTH], diagfolder[LINELENGTH];
+  char delay_dumpfile[LINELENGTH]; /* SWM 10/10/14 - Added */
   char dummy[LINELENGTH];
   char tprofile[LINELENGTH];
   double x,xbl;
@@ -524,6 +525,10 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   strcat (specsavefile, ".spec_save");
   strcat (photfile, ".phot");
   strcat (diskfile, ".disk.diag");
+  
+  /* SWM 10-10-14 - Added delay dump entry */
+  strcpy (delay_dumpfile, root);
+  strcat (delay_dumpfile, ".delay_dump");
 
 
 /* Provide plausible initial values for the sizes of the wind arrays.  This is desirable

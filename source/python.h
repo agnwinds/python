@@ -375,7 +375,7 @@ typedef struct plane	/*SWM 10-10-14 - Switched to TypeDef */
   double x[3];			/* A position included in the plane (usally the "center" */
   double lmn[3];		/* A unit vector perpendicular to the plane (usually in the "positive" direction */
 } plane_dummy, *PlanePtr;
-PlanePtr plane_l1, plane_sec, plane_m2_far;	/* these all define planes which are perpendicular to the line of sight from the 
+plane_dummy plane_l1, plane_sec, plane_m2_far;	/* these all define planes which are perpendicular to the line of sight from the 
 					   primary to the seconday */
 
 
@@ -969,6 +969,8 @@ typedef struct spectrum
 				   <0    -> select only photons whose last position is below the disk */
   double x[3], r;		/* The position and radius of a special region from which to extract spectra  */
   double f[NWAVE];
+  double delay[NWAVE];		/* SWM 10-10-14 - Added delays */
+  double delay_weight[NWAVE];
   double lf[NWAVE];		/* a second array to hole the extracted spectrum in log units */
   double lfreq[NWAVE];		/* We need to hold what freqeuncy intervals our logarithmic spectrum has been taken over */
 }

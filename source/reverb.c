@@ -98,7 +98,7 @@ int delay_spectrum_summary(filename, mode, nspecmin, nspecmax, select_spectype, 
 	fprintf(fptr, "# \n# Freq.        Lambda");
 	for (n = nspecmin; n <= nspecmax; n++)
 	{
-		fprintf(fptr, "   %8s", s[n].name);
+		fprintf(fptr, "   %8s", xxspec[n].name);
 	}
 	fprintf(fptr, " Weight\n");
 
@@ -109,26 +109,26 @@ int delay_spectrum_summary(filename, mode, nspecmin, nspecmax, select_spectype, 
 
 	if (loglin == 0)
 	{
-		freqmin = s[nspecmin].freqmin;
-		dfreq = (s[nspecmin].freqmax - freqmin) / NWAVE;
+		freqmin = xxspec[nspecmin].freqmin;
+		dfreq = (xxspec[nspecmin].freqmax - freqmin) / NWAVE;
 		for (i = 1; i < NWAVE - 1; i++)
 		{
 			freq = freqmin + i * dfreq;
 			fprintf(fptr, "%-8e %.3f ", freq, C * 1e8 / freq);
 			for (n = nspecmin; n <= nspecmax; n++)
 			{
-				if(s[n].delay[i] == 0.) x = 0;
-				else x = s[n].delay[i] / s[n].delay_weight[i];
-				fprintf(fptr, " %10.5g %10.5g", x * renorm, s[n].f[i]);
+				if(xxspec[n].delay[i] == 0.) x = 0;
+				else x = xxspec[n].delay[i] / xxspec[n].delay_weight[i];
+				fprintf(fptr, " %10.5g %10.5g", x * renorm, xxspec[n].f[i]);
 			}
 			fprintf(fptr, "\n");
 		}
 	}
 	else if (loglin == 1)
 	{
-		lfreqmin = log10(s[nspecmin].freqmin);
+		lfreqmin = log10(xxspec[nspecmin].freqmin);
 		freq1 = lfreqmin;
-		lfreqmax = log10(s[nspecmin].freqmax);
+		lfreqmax = log10(xxspec[nspecmin].freqmax);
 		ldfreq = (lfreqmax - lfreqmin) / NWAVE;
 
 		for (i = 1; i < NWAVE - 1; i++)
@@ -138,8 +138,8 @@ int delay_spectrum_summary(filename, mode, nspecmin, nspecmax, select_spectype, 
 			fprintf(fptr, "%-8e %.3f ", freq, C * 1e8 / freq);
 			for (n = nspecmin; n <= nspecmax; n++)
 			{
-				if(s[n].delay[i] == 0.) x = 0;
-				else x = s[n].delay[i] / s[n].delay_weight[i];
+				if(xxspec[n].delay[i] == 0.) x = 0;
+				else x = xxspec[n].delay[i] / xxspec[n].delay_weight[i];
 				fprintf(fptr, " %10.5g", x * renorm);	/* this really shouldn't get called if we are outputting log data */
 			}
 
@@ -209,7 +209,7 @@ int delay_dump_prep(filename, nspec)
 
 	get_time(string);
 	fprintf(fptr, "# Date	%s\n#  \n", string);
-	fprintf(fptr, "# Spectrum: %s\n", s[nspec].name);
+	fprintf(fptr, "# Spectrum: %s\n", xxspec[nspec].name);
 
 	/* 
 	 * Write the rest of the header for the spectrum file 
@@ -267,11 +267,12 @@ int delay_dump(filename, p, f1, f2, nspec)
 			/* 
 			 * Complicated if statement to allow one to choose whether to construct the spectrum from all photons or just from photons which have scattered a specific number of times.  01apr13--ksl-Modified if statement to change behavior on negative numbers to say that a negative number for mscat implies that you accept any photon with |mscat| or more scatters 
 			 */
-			if (((mscat = s[nspec].nscat) > 999 || p[nphot].nscat == mscat 
+			if (((mscat = xxspec[nspec].nscat) > 999 || p[nphot].nscat == mscat 
 				|| (mscat < 0 && p[nphot].nscat >= (-mscat)))
-				&& ((mtopbot = s[nspec].top_bot) == 0 || (mtopbot * p[nphot].x[2]) > 0))
+				&& ((mtopbot = xxspec[nspec].top_bot) == 0 || (mtopbot * p[nphot].x[2]) > 0))
 			{
-				if (s[nspec].mmin < zangle && zangle < s[nspec].mmax)
+				if (xxspec[nspec].mmin < zangle 
+					&& zangle < xxspec[nspec].mmax)
 				{
 					observer_plane->x[0] = p[nphot].lmn[0]*geo.rmax;
 					observer_plane->x[1] = p[nphot].lmn[1]*geo.rmax;
