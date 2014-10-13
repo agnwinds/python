@@ -1,1 +1,0 @@
-../grid_comp/compare.py
