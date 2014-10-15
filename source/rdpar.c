@@ -695,9 +695,6 @@ get_root (root, total)
 
 
 
-
-
-
 /* JM130717 the next set of routines are designed to clean up the code 
  * in parallel mode
  */
@@ -713,6 +710,10 @@ int rdpar_set_mpi_rank (rank)
 	return(0);
 }
 
+
+/* sets the verbosity level
+ */
+
 int rdpar_set_verbose (vlevel)
 	int vlevel;
 {
@@ -722,7 +723,18 @@ int rdpar_set_verbose (vlevel)
 	return(0);
 }
 
-int rd_advanced(firstword, answer, wordlength, noptions)
+
+
+/* JM 141015 -- rd_extra is a function designed 
+   to help address #111. We want to implement 
+   extra diagnostics which can be supplied at the 
+   end of the file if extra_diagnostics is set to
+   1 in the parameter file. This function is used
+   by get_extra_diagnostics() to do this 
+*/
+
+
+int rd_extra(firstword, answer, wordlength, noptions)
     char firstword[];
     double *answer;
     int *wordlength;

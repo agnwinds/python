@@ -28,7 +28,8 @@ Arguments:
 		v to 5 causes the routine to print out all the information which outputs have
 		included previously.  The current default is set to 4 which suppresses Log_silent
 		and Error_silent
-	-d	To have statements from Debug command logged
+	-d	Enters debug or advanced mode. Allows one to have statements from Debug command 
+	    logged, access extra diagnostics and 
 	-e  Alter the maximum number of errors before the program quits
 
 
@@ -2919,7 +2920,28 @@ read_non_standard_disk_profile (tprofile)
 }
 
 
+/***********************************************************
+				University of Southampton
 
+Synopsis:
+	init_advanced_modes simply initialises the set of 
+	advanced modes stored in the modes structure to a 
+	default value. For now, this is 0 (off).
+
+Arguments:	
+    none	
+
+Returns:
+    just initialises modes which is declared in python.h
+ 
+Description:	
+	
+Notes:
+    see #111 and #120
+
+History:
+    1410 -- JM -- Coded
+**************************************************************/
 
 
 int init_advanced_modes()
@@ -2937,95 +2959,3 @@ int init_advanced_modes()
 
   return (0);
 }
-
-
-
-int get_extra_diagnostics()
-{
-  int wordlength;
-  char firstword[LINELENGTH];
-  int noptions, rdstat;
-  double answer;
-
-
-  noptions = 0;
-  wordlength = 0;
-  rdstat = 0;
-
-  Log("Advanced mode should only be used if you know what you're doing!\n");
-
-  while (noptions < NMAX_OPTIONS && rdstat == 0)
-  {
-
-    rdstat = rd_advanced(firstword, &answer, &wordlength, &noptions);
-
-    if (rdstat)
-      return(0);
-
-    Log("%s %8.4e\n", firstword, answer);
-
-    /* would you like to save cell photon statistics */
-	if (strncmp ("save_cell_statistics", firstword, wordlength) == 0)
-	  {
-	    modes.save_cell_stats = answer;
-  	    Log("You are tracking photon statistics by cell\n");
-	  }
-	  
-    /* would you like to use ispy mode */
-	else if (strncmp ("ispymode", firstword, wordlength) == 0)
-      {
-	    modes.ispy = answer;
-	    Log("ISPY mode is on\n");
-	  }
-
-	/* would you like to track resonant scatters */
-	else if (strncmp ("track_resonant_scatters", firstword, wordlength) == 0)
-      {
-	    modes.track_resonant_scatters = answer;
-	    Log("You are tracking resonant scatters\n");
-	  }
-
-    /* would you like keep windsave files for each cycle */
-	else if (strncmp ("keep_ioncycle_windsaves", firstword, wordlength) == 0)
-      {
-	    modes.keep_ioncycle_windsaves = answer;
-	    Log("You are keeping windsave files for each cycle\n");
-	  }
-
-	/* would you like to save data on extract */
-	else if (strncmp ("save_extract_photons", firstword, wordlength) == 0)
-      {
-	    modes.save_extract_photons = answer;
-	    Log("You are saving data on extract\n");
-	  }
-
-	/* would you like to print wind_rad_summary*/
-	else if (strncmp ("print_windrad_summary", firstword, wordlength) == 0)
-      {
-	    modes.print_windrad_summary = answer;
-	    Log("You are printing wind_rad_summary\n");
-	  }
-
-	/* would you like to print dvds_info */
-	else if (strncmp ("print_dvds_info", firstword, wordlength) == 0)
-      {
-	    modes.print_dvds_info = answer;
-	    Log("You are printing dvds_info\n");
-	  }
-
-    else
-      {
-      	Error("Didn't understand question %s, continuing!\n", firstword);
-      }
-  }
-
-
-  return 0;
-}
-
-
-
-
-
-
-
