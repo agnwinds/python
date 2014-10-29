@@ -395,7 +395,7 @@ string_process (question, dummy)
       if (fgets (line, LINELEN, rdin_ptr) == NULL)
 	{
 	  printf ("Error: string_proces: Unexpectedly reached EOF\n");
-	  printf ("                      Switching to inteactive mode\n");
+	  printf ("                      Switching to interactive mode\n");
 	  rdpar_stat = 1;
 	  goto b;
 	}
@@ -695,9 +695,6 @@ get_root (root, total)
 
 
 
-
-
-
 /* JM130717 the next set of routines are designed to clean up the code 
  * in parallel mode
  */
@@ -713,6 +710,10 @@ int rdpar_set_mpi_rank (rank)
 	return(0);
 }
 
+
+/* sets the verbosity level
+ */
+
 int rdpar_set_verbose (vlevel)
 	int vlevel;
 {
@@ -720,6 +721,50 @@ int rdpar_set_verbose (vlevel)
 	  verbose=0;
        // printf("JM VERB %s\n\n", verbose);
 	return(0);
+}
+
+
+
+/* JM 141015 -- rd_extra is a function designed 
+   to help address #111. We want to implement 
+   extra diagnostics which can be supplied at the 
+   end of the file if extra_diagnostics is set to
+   1 in the parameter file. This function is used
+   by get_extra_diagnostics() to do this 
+*/
+
+
+int rd_extra(firstword, answer, wordlength, noptions)
+    char firstword[];
+    double *answer;
+    int *wordlength;
+    int *noptions;
+{ 
+  int nwords;
+  char secondword[LINELEN];
+  char line[LINELEN];
+  char *ccc, *index ();
+  
+  if (fgets (line, LINELEN, rdin_ptr) == NULL)
+  	  {
+	    if (noptions == 0)
+	  	  Error("EOF: No advanced mode options read, but advanced mode on!\n");
+
+	    return(1);
+	  }	
+
+  noptions++;
+
+  nwords = sscanf (line, "%s %s", firstword, secondword);
+
+  if ((ccc = index (firstword, '(')) != NULL)
+	{
+	  *wordlength = (int) (ccc - firstword);
+	}
+
+  sscanf (secondword, "%le", answer);
+
+  return (0); 
 }
 
 

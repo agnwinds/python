@@ -158,9 +158,13 @@ Log ("geo.wind_rhomax=%e\n",geo.wind_rho_min);
   //      geo.wind_thetamin=20.0/RADIAN;
   //      geo.wind_thetamax=65./RADIAN;
 
-  geo.xlog_scale = 0.3 * geo.rstar;
-  geo.zlog_scale = 0.3 * geo.rstar;
-
+  /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
+  if (modes.adjust_grid == 0)
+    {
+      geo.xlog_scale = 0.3 * geo.rstar;
+      geo.zlog_scale = 0.3 * geo.rstar;
+    }
+    
   return (0);
 }
 

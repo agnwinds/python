@@ -25,6 +25,7 @@ int get_spectype(int yesno, char *question, int *spectype);
 int qdisk_init(void);
 int qdisk_save(char *diskfile, double ztot);
 int read_non_standard_disk_profile(char *tprofile);
+int init_advanced_modes(void);
 /* photon2d.c */
 int translate(WindPtr w, PhotPtr pp, double tau_scat, double *tau, int *nres);
 int translate_in_space(PhotPtr pp);
@@ -131,7 +132,6 @@ double sigma_phot_verner(struct innershell *x_ptr, double freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
 int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave);
-int save_photon_stats(WindPtr one, PhotPtr p, double ds);
 double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
 /* wind_updates2d.c */
 int wind_update(WindPtr (w));
@@ -255,6 +255,8 @@ double badnell_gs_rr(int nion, double T);
 double milne_gs_rr(int nion, double T);
 /* diag.c */
 int open_diagfile(void);
+int get_extra_diagnostics(void);
+int save_photon_stats(WindPtr one, PhotPtr p, double ds);
 /* sv.c */
 int get_sv_wind_params(void);
 double sv_velocity(double x[], double v[]);

@@ -417,7 +417,7 @@ radiation (p, ds)
   /* JM -- 1310 -- check if the user requires extra diagnostics and
      has provided a file diag_cells.dat to store photons stats for cells they have specified
    */
-  if (diag_on_off == 1 && ncstat > 0)
+  if (modes.save_cell_stats && ncstat > 0)
     {
       save_photon_stats (one, p, ds);	// save photon statistics (extra diagnostics)
     }
@@ -1023,60 +1023,7 @@ update_banded_estimators (xplasma, p, ds, w_ave)
 
   return (0);
 }
-
-
-
-
-/***********************************************************
-                Southampton University
-
-Synopsis: 
-	save_photon_stats prints photon statistics to a file
-
-Arguments:	
-	One 		WindPtr for the cell
-	p 			Photon pointer
-	ds 			ds travelled
-
-Returns:
  
-Description:
-   the loop below is if the user requires extra diagnostics and
-   has provided a file diag_cells.dat to store photons stats for cells they have specified
-
-Notes:
-   Moved here to save duplicating code between bf_estimators_increment and radiation.
-
-History:
-   1402 JM 		Coding began
- 
-**************************************************************/
-
-
-int
-save_photon_stats (one, p, ds)
-     WindPtr one;
-     PhotPtr p;
-     double ds;
-{
-  int i;
-
-  /* JM -- 1310 -- the loop below is if the user requires extra diagnostics and
-     has provided a file diag_cells.dat to store photons stats for cells they have specified
-   */
-
-  for (i = 0; i < ncstat; i++)
-    {
-      /* check if the cell is in the specified list - ncell_stats is global variable */
-      if (one->nplasma == ncell_stats[i])
-	{
-	  fprintf (pstatptr,
-		   "PHOTON_DETAILS %3d %8.3e %8.3e %8.3e cell%3d wind cell%3d\n",
-		   geo.wcycle, p->freq, p->w, ds, one->nplasma, one->nwind);
-	}
-    }
-  return (0);
-}
 
 
 /*************************************************************

@@ -1119,3 +1119,30 @@ int ncell_stats[NCSTAT];	//the numbers of the cells we are going to log
 /* Added variables which count number of times two situations occur (See #91) */
 int nerr_no_Jmodel;
 int nerr_Jmodel_wrong_freq;
+
+
+
+// advanced mode variables
+struct advanced_modes
+{
+  /* these are all 0=off, 1=yes */
+  int iadvanced;                // this is controlled by the -d flag, global mode control.
+  int save_cell_stats;          // want to save photons statistics by cell
+  int ispy;                     // want to use the ispy function
+  int keep_ioncycle_windsaves;  // want to save wind file each ionization cycle
+  int track_resonant_scatters;  // want to track resonant scatters
+  int save_extract_photons;     // we want to save details on extracted photons
+  int print_windrad_summary;    // we want to print the wind rad summary each cycle
+  int adjust_grid;              // the user wants to adjust the grid scale
+  int diag_on_off;              // extra diagnostics
+  int use_debug;                // print out debug statements
+  int print_dvds_info;
+}
+modes;
+
+
+FILE *optr;  //pointer to a diagnostic file that will contain dvds information
+
+
+        
+#define NMAX_OPTIONS 20 

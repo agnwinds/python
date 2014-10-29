@@ -28,7 +28,8 @@ Arguments:
 		v to 5 causes the routine to print out all the information which outputs have
 		included previously.  The current default is set to 4 which suppresses Log_silent
 		and Error_silent
-	-d	To have statements from Debug command logged
+	-d	Enters debug or advanced mode. Allows one to have statements from Debug command 
+	    logged, access extra diagnostics and 
 	-e  Alter the maximum number of errors before the program quits
 
 
@@ -322,6 +323,10 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   restart_stat = 0;
   time_max = -1;
 
+  /* initialise options for advanced mode (all set to 0) */
+  init_advanced_modes();
+
+
   if (argc == 1)
     {
       printf ("Input file (interactive=stdin):");
@@ -379,7 +384,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	    }
 	  else if (strcmp (argv[i], "-d") == 0)
 	  {
-		Log_debug(1);
+		modes.iadvanced = 1;
 	  	i++;
 	    }		
 	  else if (strncmp (argv[i], "-", 1) == 0)
@@ -711,6 +716,20 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	 NDIM_MAX, geo.ndim, geo.mdim);
       exit (0);
     }
+
+
+  /* If we are in advanced then allow the user to modify scale lengths */
+  if (modes.iadvanced)
+  {
+  	rdint ("adjust_grid(0=no,1=yes)", &modes.adjust_grid);
+
+  	if (modes.adjust_grid)
+  	  {
+  	  	rddoub ("geo.xlog_scale", &geo.xlog_scale);
+  	  	if (geo.coord_type)
+  	  	  rddoub ("geo.zlog_scale", &geo.zlog_scale);
+  	  }
+  }
 
 
 //080808 - 62 - Ionization section has been cleaned up -- ksl
@@ -1556,9 +1575,6 @@ if (geo.coord_type==RTHETA && geo.wind_type==2) //We need to generate an rtheta 
   else
     Log ("OK, basic Monte Carlo spectrum\n");
 
-/* Determine whether to produce additonal diagnostics */
-
-  rdint ("Extra.diagnostics(0=no)", &diag_on_off);
 
 
 /* 57h -- New section of inputs to provide more control over how the program is
@@ -1578,6 +1594,10 @@ run -- 07jul -- ksl
 	      &DENSITY_PHOT_MIN);
       rdint ("Keep.photoabs.during.final.spectrum(1=yes)", &keep_photoabs);
     }
+
+
+
+
 
 /* 081221 - 67c - Establish limits on the frequency intervals to be used by the ionization cycles and 
  * the fraquency bands for stratified sampling.  Changes here were made to allow more control
@@ -1602,6 +1622,26 @@ run -- 07jul -- ksl
  * These need to be coordinated with the bands that are set up for spectral gneration
  */
   freqs_init (freqmin, freqmax);
+
+  
+  if (modes.iadvanced)
+    {
+      /* do we want debug statements to print */
+      rdint ("Use_Debug_Statements(0=no, 1=yes)", &modes.use_debug);
+
+      if (modes.use_debug)
+      	Log_debug(modes.use_debug);	// communicate that we want to print debug statements
+
+      /* Do we require extra diagnostics or not */
+      rdint ("Extra.diagnostics(0=no, 1=yes) ", &modes.diag_on_off);
+
+      if (modes.diag_on_off)
+        {
+          get_extra_diagnostics();
+        }
+    }
+
+
 
 
 
@@ -1634,7 +1674,7 @@ run -- 07jul -- ksl
 
   w = wmain;
 
-  if (diag_on_off)
+  if (modes.save_cell_stats)
     {
       /* Open a diagnostic file or files.  These are all fixed files */
       open_diagfile ();
@@ -1750,9 +1790,9 @@ run -- 07jul -- ksl
 
 
 
-#if DEBUG
+    if (modes.ispy)
       ispy_init ("python", geo.wcycle);
-#endif
+
 
       geo.n_ioniz = 0.0;
       geo.lum_ioniz = 0.0;
@@ -1854,9 +1894,9 @@ run -- 07jul -- ksl
       if (geo.rt_mode == 2)
 	  Log("Luminosity taken up by adiabatic kpkt destruction %18.12e number of packets %d\n", zz_adiab, nn_adiab);
 
-#if DEBUG
+    if (modes.print_windrad_summary)
 	  wind_rad_summary (w, windradfile, "a");
-#endif
+
 
 
 
@@ -2017,9 +2057,9 @@ run -- 07jul -- ksl
 
 
 
-#if DEBUG
+    if (modes.ispy)
       ispy_close ();
-#endif
+
 
       /* Calculate and store the amount of heating of the disk due to radiation impinging on the disk */
       qdisk_save (diskfile, ztot);
@@ -2036,7 +2076,7 @@ run -- 07jul -- ksl
 
 /* In a diagnostic mode save the wind file for each cycle (from thread 0) */
 
-      if (diag_on_off)
+      if (modes.keep_ioncycle_windsaves)
 	{
 	  strcpy (dummy, "");
 	  sprintf (dummy, "python%02d.wind_save", geo.wcycle);
@@ -2218,9 +2258,9 @@ run -- 07jul -- ksl
       xsignal (root, "%-20s Starting %d of %d spectral cycle \n", "NOK",
 	       geo.pcycle, geo.pcycles);
 
-#if DEBUG
+    if (modes.ispy)
       ispy_init ("python", geo.pcycle + 1000);
-#endif
+
 
       Log ("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle,
 	   geo.pcycles);
@@ -2875,6 +2915,47 @@ read_non_standard_disk_profile (tprofile)
     }
 
   fclose (fptr);
+
+  return (0);
+}
+
+
+/***********************************************************
+				University of Southampton
+
+Synopsis:
+	init_advanced_modes simply initialises the set of 
+	advanced modes stored in the modes structure to a 
+	default value. For now, this is 0 (off).
+
+Arguments:	
+    none	
+
+Returns:
+    just initialises modes which is declared in python.h
+ 
+Description:	
+	
+Notes:
+    see #111 and #120
+
+History:
+    1410 -- JM -- Coded
+**************************************************************/
+
+
+int init_advanced_modes()
+{ 
+  modes.iadvanced = 0;                // this is controlled by the -d flag, global mode control.
+  modes.save_cell_stats = 0;          // want to save photons statistics by cell
+  modes.ispy = 0;                 // want to use the ispy function
+  modes.keep_ioncycle_windsaves = 0;  // want to save wind file each ionization cycle
+  modes.track_resonant_scatters = 0;  // want to track resonant scatters
+  modes.save_extract_photons = 0;     // we want to save details on extracted photons
+  modes.print_windrad_summary = 0;    // we want to print the wind rad summary each cycle
+  modes.adjust_grid = 0;              // the user wants to adjust the grid scale
+  modes.diag_on_off = 0;              // extra diagnostics
+  modes.print_dvds_info = 0;
 
   return (0);
 }
