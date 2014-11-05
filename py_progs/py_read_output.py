@@ -1,15 +1,19 @@
 #!/usr/bin/env python 
 '''
-	University of Southampton -- JM -- 30 September 2013
+	University of Southampton -- JM -- October 2014
 
-				read_output.py
+				py_read_output.py
 
 Synopsis:
-	this enables one to read outputs from the Python radiative transfer code
+	this enables one to read outputs from the Python radiative transfer code.
+    Where possible, we use the astropy.io module to read outputs.
+
+    see 
+    https://github.com/agnwinds/python/wiki/Useful-python-commands-for-reading-and-processing-outputs 
+    for usage
 
 Usage:
 	
-
 Arguments:
 '''
 
@@ -20,14 +24,79 @@ import matplotlib.pyplot as plt
 import subprocess
 
 
-def read_spec_file (filename, new=True):
+has_astropy = True 
+try:
+    from astropy.io import ascii
+except ImportError:
+    has_astropy = False
+
+
+def read_spectrum(filename):
+
+    '''
+    Load data from a spectrum output file from the radiative
+    transfer code Python 
+
+    Parameters
+    ----------
+    filename : file or str
+        File, filename, or generator to read.  If the filename extension is
+        ``.gz`` or ``.bz2``, the file is first decompressed. Note that
+        generators should return byte strings for Python 3k.
     
-    '''reads a Python .spec file and places in specclass array,
-       which is returned'''
+    Returns
+    ----------
+    Success: 
+    spectrum
+        returns a Table of class astropy.table.table.Table
+
+    Failure returns 1
+    '''
+
+    if not '.spec' in filename: 
+        if not '.log_spec_tot' in filename:
+            if not '.spec_tot' in filename:
+                filename = filename + '.spec' # assume user wants the spectrum file if no suffix
+
+    if has_astropy:
+        spectrum = ascii.read(filename)
+        return spectrum 
+
+    else:
+        print "Please install astropy. returning 1"
+        return 1
+
+
+
+def read_spectrum_to_class (filename, new=True):
+    
+    '''
+    reads a Python .spec file and places in specclass array,
+    which is returned
+
+    Parameters
+    ----------
+    filename : file or str
+        File, filename to read.  
+
+    new:
+        True means the Created column exists in the file 
+    
+    Returns
+    ----------
+    Success: 
+    spectrum
+        returns a spectrum class cls.specclass
+
+    Failure returns 1
+    '''
     
     if not '.spec' in filename: 
-        filename = filename + '.spec'
+        if not '.log_spec_tot' in filename:
+            if not '.spec_tot' in filename:
+                filename = filename + '.spec' # assume user wants the spectrum file if no suffix
 
+    # this deals with whether the Created column exists or not
     if new:
         add = 0
     else:
@@ -38,80 +107,191 @@ def read_spec_file (filename, new=True):
     spectrum = cls.specclass ([],[],[],[],[],[],[], [], [], []) 
     
     # first read the file into a temporary storage array
-    spectrum_temp = np.loadtxt (filename, comments ='#', unpack=True)
-    
-    # now set the correct elements of the class to be the temporary array
-    #spectrum.tot = spectrum_temp[0]
-    spectrum.freq = spectrum_temp[0]
-    spectrum.wavelength = spectrum_temp[1]
+    if has_astropy:
+        '''
+        astropy is present, so we'll use the ascii.read 
+        function to read in the file then put in classes 
+        we can possibly deprecate this function but I have
+        scripts which use a class format for the spectrum 
+        so would like to to retain in short term 
+        '''
+        s = ascii.read(filename)
+        spectrum.freq = s["Freq."]
+        spectrum.wavelength = spectrum_temp["Wavelength"]
 
-    if new:
-        spectrum.created = spectrum_temp[2]
+        if new:
+            spectrum.created = s['Created']
 
-    spectrum.emitted = spectrum_temp[3-add]
-    spectrum.censrc = spectrum_temp[4-add]
-    spectrum.disk = spectrum_temp[5-add]
-    spectrum.wind = spectrum_temp[6-add] 
-    spectrum.scattered = spectrum_temp[8-add]
-    spectrum.hitsurf = spectrum_temp[7-add]
-    spectrum.spec = spectrum_temp[9-add:]
-        
-     #finally, return the spectrum class which is a series of named arrays      
-    return spectrum
+        spectrum.emitted = s['Emitted']
+        spectrum.censrc = s['CenSrc']
+        spectrum.disk = s['Disk']
+        spectrum.wind = spectrum_temp['Wind'] 
+        spectrum.scattered = spectrum_temp['Scattered']
+        spectrum.hitsurf = spectrum_temp['HitSurf']
+
+        nangles = len(s.dtype.names) - 9 + add
+        spectrum.spec = np.zeros(nangles)
+
+        for i in range(nangles):
+            spectrum.spec[i] = s[s.dtype.names[9 - add + i]]
 
 
-
-def read_spectot_file (filename, new=True):
-    
-    '''reads a Python .spec_tot file and places in spectotclass array,
-       which is returned'''
-    
-    if not 'spec_tot' in filename: 
-        filename = filename + '.log_spec_tot'
-
-    if new:
-        add = 0
     else:
-        add = 1
-        
+        '''
+        astropy is not present
+        '''
+        print "Please install astropy. returning 1"
+        return 1
     
-    # initialise the spectrum array with blank arrays
-    spectrum = cls.spectotclass ([],[],[],[],[],[],[], [], []) 
-    
-    # first read the file into a temporary storage array
-    spectrum_temp = np.loadtxt (filename, comments ='#', unpack=True)
-    
-    # now set the correct elements of the class to be the temporary array
-    spectrum.freq = spectrum_temp[0]
-    spectrum.wavelength = spectrum_temp[1]
 
-    if new:     # this means the version was post 78a
-        spectrum.created = spectrum_temp[2]
-    spectrum.emitted = spectrum_temp[3-add]
-    spectrum.censrc = spectrum_temp[4-add]
-    spectrum.disk = spectrum_temp[5-add]
-    spectrum.wind = spectrum_temp[6-add] 
-    spectrum.hitsurf = spectrum_temp[7-add]
-    
-    #finally, return the spectrum class which is a series of named arrays    
+
+    #finally, return the spectrum class which is a series of named arrays      
     return spectrum
 
 
+def read_pywind(filename, return_inwind=False, mode="2d"):
+
+    '''
+    read a py_wind output file using np array reshaping and manipulation
+
+    Parameters
+    ----------
+    filename : file or str
+        File, filename to read, e.g. root.ne.dat  
+
+    return_inwind: Bool
+        return the array which tells you whether you
+        are partly, fully or not inwind.
+
+    mode: string 
+        can be used to control different coord systems 
+    
+    Returns
+    ----------
+    x, z, value: Floats 
+        value is the quantity you are concerned with, e.g. ne
+    '''
+
+    if has_astropy == False:
+        print "Please install astropy. returning 1"
+        return 1
+
+    # first, simply load the filename 
+    #d = np.loadtxt(filename, comments="#", dtype = "float", unpack = True)
+    d = ascii.read(filename)
+    
+
+    # our indicies are already stored in the file- we will reshape them in a sec
+    zindices = d["j"]
+    xindices = d["i"]
+
+    # we get the grid size by finding the maximum in the indicies list 99 => 100 size grid
+    zshape = int(np.max(zindices) + 1)
+    xshape = int(np.max(zindices) + 1)
+
+
+    # reshape our indices arrays
+    xindices = xindices.reshape(xshape, zshape)
+    zindices = zindices.reshape(xshape, zshape)
+
+    # now reshape our x,z and value arrays
+    x = d["x"].reshape(xshape, zshape)
+    z = d["z"].reshape(xshape, zshape)
+
+    values = d["var"].reshape(xshape, zshape)
+
+    # these are the values of inwind PYTHON spits out
+    inwind = d["inwind"].reshape(xshape, zshape)
+
+    # create an inwind boolean to use to create mask
+    inwind_bool = (inwind >= 0)
+    mask = (inwind < 0)
+
+    # finally we have our mask, so create the masked array
+    masked_values = np.ma.masked_where ( mask, values )
+
+    #print xshape, zshape, masked_values.shape
+
+    #return the transpose for contour plots.
+    if return_inwind:
+        return x, z, masked_values.T, inwind_bool.T
+    else:
+        return x, z, masked_values.T
+
+
+
+def read_pf(root):
+
+    '''
+    reads a Python .pf file and returns a dictionary
+
+    Parameters
+    ----------
+    root : file or str
+        File, filename to read.  
+
+    new:
+        True means the Created column exists in the file 
+    
+    Returns
+    ----------
+    pf_dict
+        Dictionary object containing parameters in pf file
+    '''
+
+    if not ".pf" in root:
+        root = root + ".pf"
+
+    params, vals = np.loadtxt(root, dtype="string", unpack=True)
+
+    pf_dict = dict()
+
+    old_param = None 
+    old_val = None
+
+    for i in range(len(params)):
+
+
+        # convert if it is a float
+        try:
+            val = float(vals[i])
+
+        except ValueError:
+            val = vals[i]
+
+        if params[i] == old_param:
+
+            if isinstance(pf_dict[params[i]], list):
+                pf_dict[params[i]].append(val)
+
+            else:
+                pf_dict[params[i]] = [old_val, val]
+
+        else:
+            pf_dict[params[i]] = val
+
+        old_param = params[i]
+        old_val = val
+
+
+    return pf_dict
 
 
 
 
-# set some standard parameters for plotting
+
 def setpars():
+    '''
+    set some standard parameters for plotting
+    '''
+    print 'Setting plot parameters for matplotlib.'
+    plt.rcParams['lines.linewidth'] = 1.0
+    plt.rcParams['axes.linewidth'] = 1.3
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = 'Times New Roman'
+    plt.rcParams['text.usetex']='True'
     
-	print 'Setting plot parameters for matplotlib.'
-	plt.rcParams['lines.linewidth'] = 1.0
-	plt.rcParams['axes.linewidth'] = 1.3
-	plt.rcParams['font.family'] = 'serif'
-	plt.rcParams['font.serif'] = 'Times New Roman'
-	plt.rcParams['text.usetex']='True'
-    
-	return 0
+    return 0
 
 
 
@@ -159,7 +339,9 @@ def read_emissivity ( root ):
 
 def thinshell_read ( root ):
     
-    '''Read py_wind output filename for thin shell models with one cell'''
+    '''
+    Read py_wind output filename for thin shell models with one cell
+    '''
     
     inp = open(root, 'r')
     
@@ -174,7 +356,9 @@ def thinshell_read ( root ):
 
 def read_convergence (root ):
 
-	''' check convergence in a file '''
+	''' 
+    check convergence in a diag file
+    '''
 
 	if not "_0.diag" in root:
         	root = root + "_0.diag"
@@ -192,58 +376,3 @@ def read_convergence (root ):
 	final_conv = conv_fraction [-1]
 	return final_conv
 		
-
-
-
-def read_pf(root):
-
-    '''
-    reads in a pf file and places in a dictionary
-    access the number of observers with 
-
-    dict = read_pf(root)
-    nobs = dict["no_observers"]
-    '''
-
-    if not ".pf" in root:
-        root = root + ".pf"
-
-    params, vals = np.loadtxt(root, dtype="string", unpack=True)
-
-    pf_dict = dict()
-
-    old_param = None 
-    old_val = None
-
-    for i in range(len(params)):
-
-
-        # convert if it is a float
-        try:
-            val = float(vals[i])
-
-        except ValueError:
-            val = vals[i]
-
-        if params[i] == old_param:
-
-            if isinstance(pf_dict[params[i]], list):
-                pf_dict[params[i]].append(val)
-
-            else:
-                pf_dict[params[i]] = [old_val, val]
-
-        else:
-            pf_dict[params[i]] = val
-
-        old_param = params[i]
-        old_val = val
-
-
-    return pf_dict
-
-
-
-
-
-
