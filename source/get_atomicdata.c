@@ -141,7 +141,7 @@ History:
 	12jul   nsh	73 - added structures and routines to read in badnell style total recombination rate data
         12sept	nsh	73 - added structures and routines to read in gaunt factor data from sutherland 1997
   14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120. 
-                 Also used modes.write_atomicdata to control if summary is written to file.
+                 Also used write_atomicdata to control if summary is written to file.
 **************************************************************/
 
 
@@ -2637,8 +2637,8 @@ or zero so that simple checks of true and false can be used for them */
      bb_max, NBBJUMPS);
 
 /* Now, write the data to a file so you can check it later if you wish */
-/* JM 1411 -- this is now controlled by one of the -d flag modes */
-  if (modes.write_atomicdata)
+/* JM 1411 -- this is now controlled by one of the -d flag modes, defined in atomic.h */
+  if (write_atomicdata)
     {
 
   if ((fptr = fopen ("data.out", "w")) == NULL)

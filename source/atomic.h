@@ -497,3 +497,7 @@ typedef struct gaunt_total
 } Gaunt_total, *Gaunt_totalptr;
 
 Gaunt_total gaunt_total[MAX_GAUNT_N_GSQRD];	//Set up the structure
+
+/* a variable which controls whether to save a summary of atomic data
+   this is defined in atomic.h, rather than the modes structure */
+int write_atomicdata;

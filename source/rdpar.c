@@ -747,8 +747,8 @@ int rd_extra(firstword, answer, wordlength, noptions)
   
   if (fgets (line, LINELEN, rdin_ptr) == NULL)
   	  {
-	    if (noptions == 0)
-	  	  Error("EOF: No advanced mode options read, but advanced mode on!\n");
+	    if (*noptions == 0)
+	  	  Error("EOF: No extra options read, but extra diagnostics on!\n");
 
 	    return(1);
 	  }	

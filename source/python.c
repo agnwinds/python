@@ -614,6 +614,12 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 				   and old wind files, we also got the atomic data */
 
 	  rdstr ("Atomic_data", geo.atomic_filename);
+      
+      /* read a variable which controls whether to save a summary of atomic data
+         this is defined in atomic.h, rather than the modes structure */
+	  if (modes.iadvanced)	
+	  	rdint ("write_atomicdata", write_atomicdata);	
+
 	  get_atomic_data (geo.atomic_filename);
 
 	}
@@ -2960,7 +2966,8 @@ int init_advanced_modes()
   modes.diag_on_off = 0;              // extra diagnostics
   modes.use_debug = 0;
   modes.print_dvds_info = 0;          // print out information on velocity gradients
-  modes.write_atomicdata = 0;         // print out summary of atomic data 
+  write_atomicdata = 0;               // print out summary of atomic data 
+  //note this is defined in atomic.h, rather than the modes structure 
 
   return (0);
 }
