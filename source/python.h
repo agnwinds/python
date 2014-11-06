@@ -6,7 +6,8 @@ int np_mpi_global;               /// Global variable which holds the number of M
 
 int rank_global; 
 
-#define DEBUG 				0	/* 0 means do not debug */
+// DEBUG is deprecated, see #111, #120
+//#define DEBUG 				0	/* 0 means do not debug */
 int verbosity;			/* verbosity level. 0 low, 10 is high */
 
 /* the functions contained in log., rdpar.c and lineio.c are
@@ -1022,7 +1023,8 @@ char hubeny_list[132];		//Location of listing of files representing hubeny atmos
 // Allow for a diagnostic file 
 
 FILE *epltptr;			//TEST
-int diag_on_off;		// on is non-zero  //TEST
+// diag_on_off is deprecated see #111, #120
+//int diag_on_off;		// on is non-zero  //TEST
 
 
 /* These variables are stored or used by the routines for anisotropic scattering */
@@ -1136,7 +1138,8 @@ struct advanced_modes
   int adjust_grid;              // the user wants to adjust the grid scale
   int diag_on_off;              // extra diagnostics
   int use_debug;                // print out debug statements
-  int print_dvds_info;
+  int print_dvds_info;          // print out information on the velocity gradients
+  int write_atomicdata;         // print out summary of atomic data 
 }
 modes;
 

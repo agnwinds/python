@@ -1731,9 +1731,14 @@ coolheat_summary (w, rootname, ochoice)
 
   1409	ksl	Eliminated several files that were of limited use
   		to users.  The deleted files are printed out if
-		DEBUG is set.
+		  DEBUG is set.
+  1411  JM debug is now deprecated so replaced with FULL_ION_SUMMARTY
 
  ************************************************************************/
+
+#define FULL_ION_SUMMARY 0  
+
+
 int
 complete_file_summary (w, root, ochoice)
      WindPtr w;
@@ -1772,7 +1777,7 @@ complete_file_summary (w, root, ochoice)
   ion_summary (w, 14, 4, 1, root, ochoice);
   ion_summary (w, 14, 5, 1, root, ochoice);
 
-#if DEBUG
+#if FULL_ION_SUMMARY
   ion_summary (w, 6, 3, 2, root, ochoice);
   ion_summary (w, 6, 4, 2, root, ochoice);
   ion_summary (w, 6, 5, 2, root, ochoice);

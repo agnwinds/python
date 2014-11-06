@@ -93,6 +93,7 @@ trans_phot (w, p, iextract)
   n = 0;			// To avoid -O3 warning
 
   /* 05jul -- not clear whether this is needed and why it is different from DEBUG */
+  /* 1411 -- JM -- Debug usage has been altered. See #111, #120 */
 
   if (modes.track_resonant_scatters && plinit == 0)
     {
@@ -288,9 +289,9 @@ it from translate. ?? 02jan ksl */
 
 
 
-#if DEBUG
+    if (modes.ispy)
 	  ispy (&pp, n);
-#endif
+
 
 	  if (istat == -1)
 	    {

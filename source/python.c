@@ -1193,8 +1193,11 @@ Afterwards, the photons are used to compute the sim parameters. */
  * debugged.  But one can continue debugging it by setting the DEBUG variatble to true 
  */
       geo.compton_torus=0;
-#if DEBUG
+
+    /* JM 1411 -- we only ask about the Torus if we've used the -d flag */
+    if (modes.iadvanced)
       rdint ("Torus(0=no,1=yes)", &geo.compton_torus);
+
       if (geo.compton_torus)
 	{
 	  rddoub ("Torus.rmin(cm)", &geo.compton_torus_rmin);
@@ -1210,7 +1213,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 		 geo.compton_torus_tau);
 	    }
 	}
-#endif
+
 
 /* Describe the wind */
 
@@ -1627,13 +1630,13 @@ run -- 07jul -- ksl
   if (modes.iadvanced)
     {
       /* do we want debug statements to print */
-      rdint ("Use_Debug_Statements(0=no, 1=yes)", &modes.use_debug);
+      rdint ("Use_Debug_Statements(0=no,1=yes)", &modes.use_debug);
 
       if (modes.use_debug)
       	Log_debug(modes.use_debug);	// communicate that we want to print debug statements
 
       /* Do we require extra diagnostics or not */
-      rdint ("Extra.diagnostics(0=no, 1=yes) ", &modes.diag_on_off);
+      rdint ("Extra.diagnostics(0=no,1=yes) ", &modes.diag_on_off);
 
       if (modes.diag_on_off)
         {
@@ -2299,9 +2302,9 @@ run -- 07jul -- ksl
 
       trans_phot (w, p, select_extract);
 
-#if DEBUG
+    if (modes.print_windrad_summary)
       wind_rad_summary (w, windradfile, "a");
-#endif
+
 
       spectrum_create (p, freqmin, freqmax, nangles, select_extract);
 
@@ -2608,9 +2611,9 @@ photon_checks (p, freqmin, freqmax, comment)
    * 11apr--NSH-decreased freqmin to 0.4, to take account of double redshifted photons.
    * shift.
    */
-#if DEBUG
-  Log ("photon_checks: %s\n", comment);
-#endif
+
+  Debug ("photon_checks: %s\n", comment);
+
   freqmax *= (1.8);
   freqmin *= (0.6);
   for (nn = 0; nn < NPHOT; nn++)
@@ -2657,10 +2660,10 @@ photon_checks (p, freqmin, freqmax, comment)
 	}
     }
   Log ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
-#if DEBUG
+
   if (nnn == 0)
-    Log ("photon_checks: All photons passed checks successfully\n");
-#endif
+    Debug ("photon_checks: All photons passed checks successfully\n");
+
   return (0);
 }
 
@@ -2948,14 +2951,16 @@ int init_advanced_modes()
 { 
   modes.iadvanced = 0;                // this is controlled by the -d flag, global mode control.
   modes.save_cell_stats = 0;          // want to save photons statistics by cell
-  modes.ispy = 0;                 // want to use the ispy function
+  modes.ispy = 0;                 	  // want to use the ispy function
   modes.keep_ioncycle_windsaves = 0;  // want to save wind file each ionization cycle
   modes.track_resonant_scatters = 0;  // want to track resonant scatters
   modes.save_extract_photons = 0;     // we want to save details on extracted photons
   modes.print_windrad_summary = 0;    // we want to print the wind rad summary each cycle
   modes.adjust_grid = 0;              // the user wants to adjust the grid scale
   modes.diag_on_off = 0;              // extra diagnostics
-  modes.print_dvds_info = 0;
+  modes.use_debug = 0;
+  modes.print_dvds_info = 0;          // print out information on velocity gradients
+  modes.write_atomicdata = 0;         // print out summary of atomic data 
 
   return (0);
 }
