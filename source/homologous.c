@@ -71,8 +71,13 @@ get_homologous_params ()
 /* define the the variables that determine the gridding */
   geo.wind_rho_min = 0;
   geo.wind_rho_max = geo.rmax;
-  geo.xlog_scale = 0.3 * geo.rstar;
-  geo.zlog_scale = 0.3 * geo.rstar;
+
+  /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
+  if (modes.adjust_grid == 0)
+    {
+      geo.xlog_scale = 0.3 * geo.rstar;
+      geo.zlog_scale = 0.3 * geo.rstar;
+    }
 
   return (0);
 }
