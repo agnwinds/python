@@ -207,7 +207,7 @@ trans_phot (w, p, iextract)
 	      /* we normalised our rejection method by the escape 
 	         probability along the vector of maximum velocity gradient.
 	         First find the sobolev optical depth along that vector */
-	      tau_norm = sobolev (&wmain[pextract.grid], &pextract, -1.0,
+	      tau_norm = sobolev (&wmain[pextract.grid], pextract.x, -1.0,
 				  lin_ptr[pextract.nres],
 				  wmain[pextract.grid].dvds_max);
 
@@ -522,7 +522,7 @@ been initialized. 02may ksl.  This seems to be OK at present.*/
 		         probability along the vector of maximum velocity gradient.
 		         First find the sobolev optical depth along that vector */
 		      tau_norm =
-			sobolev (&wmain[pextract.grid], &pextract, -1.0,
+			sobolev (&wmain[pextract.grid], pextract.x, -1.0,
 				 lin_ptr[pextract.nres],
 				 wmain[pextract.grid].dvds_max);
 
