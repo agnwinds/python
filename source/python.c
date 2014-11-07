@@ -26,10 +26,10 @@ Arguments:
 	-v num  determines the amount of information that is printed out.  If num is small, then
 		less information is printed out; if num is large more is printed out.  Setting
 		v to 5 causes the routine to print out all the information which outputs have
-		included previously.  The current default is set to 4 which suppresses Log_silent
+		included previously.  The current default is set to 3 which suppresses Debug, Log_silent
 		and Error_silent
-	-d	Enters debug or advanced mode. Allows one to have statements from Debug command 
-	    logged, access extra diagnostics and 
+	-d	Enters detailed or advanced mode. Allows one to access extra diagnositics and some
+	    other advanced commands
 	-e  Alter the maximum number of errors before the program quits
 
 
