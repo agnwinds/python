@@ -631,6 +631,7 @@ scattering_fraction (line_ptr, xplasma)
    asked to claculate the same escape probability
 
 	06may	ksl	57+ -- Modify for plasma structue
+  1411 JM -- changed to use the sobolev function to calculate tau.
  */
 struct lines *pe_line_ptr;
 double pe_ne, pe_te, pe_dd, pe_dvds, pe_w, pe_tr;

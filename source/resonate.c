@@ -925,6 +925,7 @@ calls to two_level atom
   tau_x_dvds = PI_E2_OVER_M * xden_ion * lptr->f / (lptr->freq);
   tau = tau_x_dvds / dvds;
 
+  /* JM 1411 -- multiply the optical depth by the filling factor */
   tau *= geo.fill;
 
   return (tau);
