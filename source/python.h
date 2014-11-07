@@ -1029,8 +1029,12 @@ FILE *epltptr;			//TEST
 
 /* These variables are stored or used by the routines for anisotropic scattering */
 /* Allow for the transfer of tau info to scattering routine */
-double tau_x_dvds;		//tau_x_dvds/dvds is the actual tau
+
+/* JM 1411 -- tau_x_dvds doesn't appear to be used anywhere, so I've 
+   made it a local variable rather than global */  
+//double tau_x_dvds;		//tau_x_dvds/dvds is the actual tau
 //double tau_scatter_min;               //Set in subroutine scatter for use by extract
+
 struct Pdf pdf_randwind_store[100];
 PdfPtr pdf_randwind;
 struct photon phot_randwind;

@@ -120,7 +120,7 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 int select_continuum_scattering_process(double kap_cont, double kap_es, double kap_ff, PlasmaPtr xplasma);
 double kappa_bf(PlasmaPtr xplasma, double freq, int macro_all);
 int kbf_need(double fmin, double fmax);
-double sobolev(WindPtr one, PhotPtr p, double den_ion, struct lines *lptr, double dvds);
+double sobolev(WindPtr one, double x[], double den_ion, struct lines *lptr, double dvds);
 int doppler(PhotPtr pin, PhotPtr pout, double v[], int nres);
 int scatter(PhotPtr p, int *nres, int *nnscat);
 /* radiation.c */
@@ -298,7 +298,7 @@ int where_in_2dcell(int ichoice, double x[], int n, double *fx, double *fz);
 int wind_n_to_ij(int n, int *i, int *j);
 int wind_ij_to_n(int i, int j, int *n);
 /* density.c */
-double get_ion_density(PhotPtr p, int nion);
+double get_ion_density(double x[], int nion);
 /* detail.c */
 int detailed_balance(PlasmaPtr xplasma, int nelem, double newden[]);
 int rebalance(double rates_up[], double rates_down[], double fraction[], int ntot);
