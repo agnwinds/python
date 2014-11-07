@@ -93,8 +93,9 @@ trans_phot (w, p, iextract)
   n = 0;			// To avoid -O3 warning
 
   /* 05jul -- not clear whether this is needed and why it is different from DEBUG */
+  /* 1411 -- JM -- Debug usage has been altered. See #111, #120 */
 
-  if (diag_on_off && plinit == 0)
+  if (modes.track_resonant_scatters && plinit == 0)
     {
       pltptr = fopen ("python.xyz", "w");
       plinit = 1;
@@ -288,9 +289,9 @@ it from translate. ?? 02jan ksl */
 
 
 
-#if DEBUG
+    if (modes.ispy)
 	  ispy (&pp, n);
-#endif
+
 
 	  if (istat == -1)
 	    {
@@ -470,8 +471,9 @@ the current version of scattering really does what the old code did for two-leve
 	      if (nres > -1 && nres < nlines)
 		{
 		  pp.nrscat++;
-/* This next statement writes out the position of every resonant scattering event to a file */
-		  if (diag_on_off)
+		  
+          /* This next statement writes out the position of every resonant scattering event to a file */
+		  if (modes.track_resonant_scatters)
 		    fprintf (pltptr,
 			     "Photon %i has resonant scatter at %.2e %.2e %.2e in wind cell %i (grid cell=%i). Freq=%e Weight=%e\n",
 			     nphot, pp.x[0], pp.x[1], pp.x[2],

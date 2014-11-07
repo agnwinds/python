@@ -169,18 +169,15 @@ dvds_ave ()
   double dvds_max, lmn[3];
   int n;
   int icell;
-#if DEBUG
-  FILE *fopen (), *optr;	//TEST
-  char filename[LINELENGTH];
-#endif
   double dvds_min, lmn_min[3];	//TEST
+  char filename[LINELENGTH];
 
-
-#if DEBUG
   strcpy (filename, basename);
   strcat (filename, ".dvds.diag");
-  optr = fopen (filename, "w");	//TEST
-#endif
+  if (modes.print_dvds_info)
+    {
+      optr = fopen (filename, "w");	//TEST
+    }
 
   for (icell = 0; icell < NDIM2; icell++)
     {
@@ -243,19 +240,20 @@ dvds_ave ()
       wmain[icell].dvds_max = dvds_max / ds;
       stuff_v (lmn, wmain[icell].lmn);
 
-#if DEBUG
-      fprintf (optr,
-	       "%d %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e \n",
-	       icell, p.x[0], p.x[1], p.x[2], dvds_max / ds,
-	       dvds_min / ds, lmn[0], lmn[1], lmn[2], lmn_min[0],
-	       lmn_min[1], lmn_min[2], dot (lmn, lmn_min));
-#endif
+      if (modes.print_dvds_info) 
+        { 
+          fprintf (optr,
+	         "%d %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e %8.3e \n",
+	         icell, p.x[0], p.x[1], p.x[2], dvds_max / ds,
+	         dvds_min / ds, lmn[0], lmn[1], lmn[2], lmn_min[0],
+	         lmn_min[1], lmn_min[2], dot (lmn, lmn_min));
+        }
 
     }
 
 
-#if DEBUG
-  fclose (optr);
-#endif
+  if (modes.print_dvds_info) 
+    fclose (optr);
+
   return (0);
 }

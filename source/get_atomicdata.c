@@ -9,8 +9,8 @@
 #include "log.h"
 
 
-
-#define DEBUG  0		/* nonzero implies debug */
+// DEBUG is deprecated as described by #111
+//#define DEBUG  0		/* nonzero implies debug */
 
 /***********************************************************
                                        Space Telescope Science Institute
@@ -140,6 +140,8 @@ History:
 			than once
 	12jul   nsh	73 - added structures and routines to read in badnell style total recombination rate data
         12sept	nsh	73 - added structures and routines to read in gaunt factor data from sutherland 1997
+  14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120. 
+                 Also used write_atomicdata to control if summary is written to file.
 **************************************************************/
 
 
@@ -704,8 +706,8 @@ ksl 04Apr  ??
 		    n++;
 		  if (n == nelements)
 		    {
-		      if (DEBUG)
-			Error
+		      
+			Debug
 			  ("get_atomic_data: file %s line %d has ion for unknown element with z %d\n",
 			   file, lineno, z);
 		      break;
@@ -916,8 +918,8 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
 		    n++;
 		  if (n == nions)
 		    {
-		      if (DEBUG)
-			Error
+		      
+			Debug
 			  ("get_atomic_data: file %s line %d has level for unknown ion \n",
 			   file, lineno);
 		      break;
@@ -1104,8 +1106,8 @@ is already incremented
 		    n++;
 		  if (n == nions)
 		    {
-		      if (DEBUG)
-			Error
+		      
+			Debug
 			  ("get_atomic_data: file %s line %d has level for unknown ion \n",
 			   file, lineno);
 		      break;
@@ -1156,8 +1158,8 @@ described as macro-levels. */
 /*  Check whether we already have too many levels specified for this ion. If so, skip */
 		  if (ion[n].nmax == ion[n].nlevels)
 		    {
-		      if (DEBUG)
-			Error
+		      
+      Debug    
 			  ("get_atomic_data: file %s line %d has level exceeding the number allowed for ion[%d]\n",
 			   file, lineno, n);
 
@@ -1428,8 +1430,8 @@ for the ionstate.
 			    n++;
 			  if (n == nlevels)
 			    {
-			      if (DEBUG)
-				Error
+
+				Debug
 				  ("No ion found to match PhotTop data in file %s on line %d. Data ignored.\n",
 				   file, lineno);
 			      break;	// There was no pre-existing ion
@@ -1543,8 +1545,8 @@ for the ionstate.
 				    }
 				  else if (ion[n].phot_info == 1)
 				    {
-				      if (DEBUG)
-					Error
+
+					Debug
 					  ("Get_atomic_data: file %s  Ignoring VFKY photoinization for ion %d with topbase photoionization\n",
 					   file, n);
 				    }
@@ -2635,8 +2637,9 @@ or zero so that simple checks of true and false can be used for them */
      bb_max, NBBJUMPS);
 
 /* Now, write the data to a file so you can check it later if you wish */
-
-#if DEBUG
+/* JM 1411 -- this is now controlled by one of the -d flag modes, defined in atomic.h */
+  if (write_atomicdata)
+    {
 
   if ((fptr = fopen ("data.out", "w")) == NULL)
     {
@@ -2718,7 +2721,9 @@ or zero so that simple checks of true and false can be used for them */
     }
 
   fclose (fptr);
-#endif
+  }  // end of if statement based on modes.write_atomicdata
+
+
 
   /* Finally create frequency ordered pointers to the various portions
    * of the atomic data
