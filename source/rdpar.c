@@ -734,11 +734,10 @@ int rdpar_set_verbose (vlevel)
 */
 
 
-int rd_extra(firstword, answer, wordlength, noptions)
+int rd_extra(firstword, answer, wordlength)
     char firstword[];
     double *answer;
     int *wordlength;
-    int *noptions;
 { 
   int nwords;
   char secondword[LINELEN];
@@ -747,13 +746,8 @@ int rd_extra(firstword, answer, wordlength, noptions)
   
   if (fgets (line, LINELEN, rdin_ptr) == NULL)
   	  {
-	    if (*noptions == 0)
-	  	  Error("EOF: No extra options read, but extra diagnostics on!\n");
-
-	    return(1);
+	    return (1);		// get_extra_diagnostics uses this return value 
 	  }	
-
-  noptions++;
 
   nwords = sscanf (line, "%s %s", firstword, secondword);
 

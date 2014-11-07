@@ -306,7 +306,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 				   is initially set to the lifetime of the universe
 				 */
 
-  verbosity = 4;		/* Set the default verbosity to 4.  To get more info raise the verbosity level to a higher number. To
+  verbosity = 3;		/* Set the default verbosity to 3.  To get more info raise the verbosity level to a higher number. To
 				   get less set the verbosity to a lower level. */
 
   time_to_quit = 100000;	// Initialise variable
@@ -618,7 +618,10 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
       /* read a variable which controls whether to save a summary of atomic data
          this is defined in atomic.h, rather than the modes structure */
 	  if (modes.iadvanced)	
-	  	rdint ("write_atomicdata", write_atomicdata);	
+	  	rdint ("write_atomicdata", &write_atomicdata);	
+
+	  if (write_atomicdata)
+	  	Log("You have opted to save a summary of the atomic data\n");
 
 	  get_atomic_data (geo.atomic_filename);
 
@@ -731,6 +734,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   	if (modes.adjust_grid)
   	  {
+  	  	Log("You have opted to adjust the grid scale lengths\n");
   	  	rddoub ("geo.xlog_scale", &geo.xlog_scale);
   	  	if (geo.coord_type)
   	  	  rddoub ("geo.zlog_scale", &geo.zlog_scale);
@@ -1636,10 +1640,10 @@ run -- 07jul -- ksl
   if (modes.iadvanced)
     {
       /* do we want debug statements to print */
-      rdint ("Use_Debug_Statements(0=no,1=yes)", &modes.use_debug);
+      //rdint ("Use_Debug_Statements(0=no,1=yes)", &modes.use_debug);
 
-      if (modes.use_debug)
-      	Log_debug(modes.use_debug);	// communicate that we want to print debug statements
+      //if (modes.use_debug)
+      //	Log_debug(modes.use_debug);	// communicate that we want to print debug statements
 
       /* Do we require extra diagnostics or not */
       rdint ("Extra.diagnostics(0=no,1=yes) ", &modes.diag_on_off);

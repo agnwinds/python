@@ -143,12 +143,17 @@ int get_extra_diagnostics()
   while (noptions < NMAX_OPTIONS && rdstat == 0)
   {
 
-    rdstat = rd_extra(firstword, &answer, &wordlength, &noptions);
+    rdstat = rd_extra(firstword, &answer, &wordlength);
 
 
     /* if rdstat is 1 we reached EOF, so exit this routine */
     if (rdstat)
-      return(0);
+      {
+      	if (noptions == 0)
+      	  Error("get_extra_diagnostics: EOF: %i options read, but extra diagnostics on!\n", noptions);
+
+        return(0);
+      }
 
     Log("%s %8.4e\n", firstword, answer);
 
@@ -203,8 +208,11 @@ int get_extra_diagnostics()
 
     else
       {
-      	Error("get_extra_diagnostics: didn't understand question %s, continuing!\n", firstword);
+      	Error("get_extra_diagnostics: didn't understand question %s, continuing!\n", firstword); 
+      	noptions--;		// this isn't a real option, so decrement it before we increment it...!
       }
+
+    noptions++;	// increment noptions
   }
 
   return 0;

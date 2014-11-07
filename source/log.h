@@ -18,7 +18,7 @@ int rdline(char question[], char answer[]);
 int get_root(char root[], char total[]);
 int rdpar_set_mpi_rank(int rank);
 int rdpar_set_verbose(int vlevel);
-int rd_extra(char firstword[], double *answer, int *wordlength, int *noptions);
+int rd_extra(char firstword[], double *answer, int *wordlength);
 /* log.c */
 int Log_init(char *filename);
 int Log_append(char *filename);
@@ -38,5 +38,4 @@ int error_summary(char *message);
 int Log_flush(void);
 int Log_set_mpi_rank(int rank, int n_mpi);
 int Log_parallel(char *format, ...);
-int Log_debug(int value);
 int Debug(char *format, ...);
