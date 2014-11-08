@@ -156,7 +156,7 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 
 	    }
 
-	  if (diag_on_off && 1545.0 < 2.997925e18 / pp.freq
+	  if (modes.save_extract_photons && 1545.0 < 2.997925e18 / pp.freq
 	      && 2.997925e18 / pp.freq < 1565.0)
 	    {
 	      fprintf (epltptr,
@@ -312,7 +312,7 @@ have been changed */
 
 	  dvds = dvwind_ds (pp);
 	  ishell = pp->grid;
-	  tau = sobolev (&w[ishell], pp, -1.0, lin_ptr[pp->nres], dvds);
+	  tau = sobolev (&w[ishell], pp->x, -1.0, lin_ptr[pp->nres], dvds);
 	  if (tau > 0.0)
 	    pp->w *= (1. - exp (-tau)) / tau;
 	  tau = 0.0;
