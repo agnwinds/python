@@ -238,7 +238,7 @@ def make_wind_plot(d, fname, var=None, shape=(4,2)):
     	d = r.read_pywind(fname)
 
     if var==None:
-    	var = ["ne", "te", "tr", "IP", "nphot", "v", ]
+    	var = ["ne", "te", "tr", "IP", "nphot", "v", "w", "ionc4"]
 
     nplots = len(var)
 
