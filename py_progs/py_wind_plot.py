@@ -96,6 +96,7 @@ def make_windplot(filename, cmds = standard_cmds, variables = standard_variables
 
 	'''
 	make a four by two wind plot of eight variables 
+	'''
 
 
 

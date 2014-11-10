@@ -16,6 +16,7 @@ Arguments:
 
 Notes: 
 	Not all fo these classes are necessarily used by the plotting routines
+	These are slightly less relevant now we've started using astropy.io.ascii
 '''
 
 
