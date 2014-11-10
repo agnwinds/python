@@ -179,6 +179,9 @@ def read_pywind(filename, return_inwind=False, mode="2d"):
         print "Please install astropy. returning 1"
         return 1
 
+    if not ".complete" in filename:
+        filename = filename + ".complete"
+
     # first, simply load the filename 
     #d = np.loadtxt(filename, comments="#", dtype = "float", unpack = True)
     d = ascii.read(filename)

@@ -202,9 +202,8 @@ def make_spec_plot_from_class(s, fname, smooth_factor = 10, angles = True, compo
 
 
 
-def make_wind_plot(d, fname, var=None, shape=(4,2)):
-
-	'''
+def make_wind_plot(d, fname, var=None, shape=(4,2), axes="log"):
+    '''
     make a wind plot from astropy.table.table.Table object 
 
     Parameters
@@ -224,7 +223,10 @@ def make_wind_plot(d, fname, var=None, shape=(4,2)):
 
     components: Bool 
     	would you like to plot the individual components e.g. Disk Wind 
-    
+
+    axes: str 
+        lin or log axes
+
     Returns
     ----------
     Success returns 0
@@ -232,40 +234,51 @@ def make_wind_plot(d, fname, var=None, shape=(4,2)):
 
     Saves output as "spectrum_%s.png" % (fname)
     '''
-
+    
     if d == None:
-    	util.get_pywind_summary(fname)
-    	d = r.read_pywind(fname)
+        util.get_pywind_summary(fname)
+        d = r.read_pywind(fname)
 
-    if var==None:
-    	var = ["ne", "te", "tr", "IP", "nphot", "v", "w", "ionc4"]
+    if var == None:
+        var = ["ne", "te", "tr", "IP", "nphot", "v", "w", "ionC4"]
+
+    if axes != "lin" and axes != "log":
+        print "Error: didn't understand mode %s, defaulting to log" % axes
+        axes = "log"
 
     nplots = len(var)
 
     # check shape is ok for variables required
     if shape[0] * shape[1] < nplots:
-    	print "Error: shape is less than length of var array"
-    	return 1
+        print "Error: shape is less than length of var array"
+        return 1
 
     if shape[0] * shape[1] > nplots:
-    	print "Warning: shape is more than length of var array"
+        print "Warning: shape is more than length of var array"
 
     p.figure(figsize=(8,12))
 
     # cycle over variables and make plot
     for i in range(nplots):
 
-    	p.subplot(shape[0], shape[1], i+1)
+        p.subplot(shape[0], shape[1], i+1)
 
-    	value_string = var[i]
+        value_string = var[i]
 
-    	x,z,v = r.wind_to_masked(d, value_string)
+        x,z,v = util.wind_to_masked(d, value_string)
 
-    	p.contourf(z,x,np.log10(v))
-    	p.colorbar()
-    	p.title("Log(%s)" % value_string)
+        p.contourf(z,x,np.log10(v))
+        p.colorbar()
+        p.title("Log(%s)" % value_string)
+
+        if axes == "log":
+            # log axes
+            p.semilogy()
+            p.semilogx()
 
     p.savefig("wind_%s.png" % fname)
+
+    return 0
 
 
 

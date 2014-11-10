@@ -3089,19 +3089,21 @@ complete_physical_summary (w, rootname, ochoice)
     strcat (filename, ".complete");
     fptr = fopen (filename, "w");
   }
+  else
+    printf("This mode is recommended purely for file output\n");
 
   /* JM 1411 -- First we have to write out some headers so that 
      astropy can read the output */
 
   printf("n\tnplasma\tinwind\ti\tj\tx\tz\tv\tvx\tvy\tvz\tdvds_ave\tvol\t \
-rho\tne\tte\ttr\tnphot\tw\tave_freq\tconv\tconv_tr\tconv_te\tconv_hc\t \
+rho\tne\tte\ttr\tnphot\tw\tave_freq\tIP\tconv\tconv_tr\tconv_te\tconv_hc\t \
 lum_tot\tlum_rad\tlum_fb\tlum_ff\tlum_lines\tlum_adiabatic\tlum_comp\tlum_dr\t \
 heat_tot\theat_photo\theat_lines\theat_ff\theat_comp\theat_ind_comp\t \
 ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\n");
 
   if (ochoice)
     fprintf(fptr, "n\tnplasma\tinwind\ti\tj\tx\tz\tv\tvx\tvy\tvz\tdvds_ave\tvol\t \
-rho\tne\tte\ttr\tnphot\tw\tave_freq\tconv\tconv_tr\tconv_te\tconv_hc\t \
+rho\tne\tte\ttr\tnphot\tw\tave_freq\tIP\tconv\tconv_tr\tconv_te\tconv_hc\t \
 lum_tot\tlum_rad\tlum_fb\tlum_ff\tlum_lines\tlum_adiabatic\tlum_comp\tlum_dr\t \
 heat_tot\theat_photo\theat_lines\theat_ff\theat_comp\theat_ind_comp\t \
 ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\n");
@@ -3132,13 +3134,13 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
                  w[n].v[2] * w[n].v[2]);
 
     printf("%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
-            %8.4e %8.4e %8.4e %i %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\n",
             n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2], vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol, 
             plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
-            plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].converge_whole, 
+            plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].ip, plasmamain[np].converge_whole, 
             plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
             plasmamain[np].lum_ioniz, plasmamain[np].lum_rad, plasmamain[np].lum_fb, 
             plasmamain[np].lum_ff, plasmamain[np].lum_lines, plasmamain[np].lum_adiabatic, 
@@ -3150,13 +3152,13 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
     
     if (ochoice)
       fprintf(fptr, "%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
-            %8.4e %8.4e %8.4e %i %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\n",
             n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2], vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol,
             plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
-            plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].converge_whole, 
+            plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].ip, plasmamain[np].converge_whole, 
             plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
             plasmamain[np].lum_ioniz, plasmamain[np].lum_rad, plasmamain[np].lum_fb, 
             plasmamain[np].lum_ff, plasmamain[np].lum_lines, plasmamain[np].lum_adiabatic, 
@@ -3172,7 +3174,7 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
 
       printf("%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
             0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
-            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
             0.0 0.0 0.0 0.0 0.0 0.0 \
             0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n",
             n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]);
@@ -3180,7 +3182,7 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
       if (ochoice)
         fprintf(fptr, "%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
             0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
-            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
             0.0 0.0 0.0 0.0 0.0 0.0 \
             0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n",
             n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]);
