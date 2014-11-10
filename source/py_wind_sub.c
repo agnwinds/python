@@ -3037,3 +3037,146 @@ for (n = 0; n < NDIM2; n++)
 
   return (0);
 }
+
+
+
+
+
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+  A summary of the important quantites in a given cell.
+  Primarily used for making easily plots
+
+
+  Description:  
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+  080811  ksl Add lines from Stuart's version of this
+      routine to bring this version into 
+      compliance with it.
+
+
+
+ ************************************************************************/
+int
+complete_physical_summary (w, rootname, ochoice)
+     WindPtr w;
+     char rootname[];
+     int ochoice;
+{
+  int n, np;
+  char filename[LINELENGTH];
+  int he1, he2, he3;
+  int h1, h2, c3, c4, c5;
+  int n5, o6, si4;
+  FILE *fptr, *fopen ();
+
+  if (ochoice)
+  {
+    strcpy (filename, rootname);
+    strcat (filename, ".complete");
+    fptr = fopen (filename, "w");
+  }
+
+  /* JM 1411 -- First we have to write out some headers so that 
+     astropy can read the output */
+
+  printf("n nplasma x z v vx vy vz dvds_ave vol \
+          rho ne te tr nphot w ave_freq conv conv_tr conv_te conv_hc \
+          lum_tot lum_rad lum_fb lum_ff lum_lines lum_adiabatic lum_comp lum_dr \
+          heat_tot heat_photo heat_lines heat_ff heat_comp heat_ind_comp \
+          ionH1 ionH2 ionHe1 ionHe2 ionHe3 ionC3 ionC4 ionC5 ionN5 ionO6 ionSi4\n");
+
+  if (ochoice)
+    fprintf(fptr, "n nplasma x z v vx vy vz dvds_ave vol \
+          rho ne te tr nphot w ave_freq conv conv_tr conv_te conv_hc \
+          lum_tot lum_rad lum_fb lum_ff lum_lines lum_adiabatic lum_comp lum_dr \
+          heat_tot heat_photo heat_lines heat_ff heat_comp heat_ind_comp \
+          ionH1 ionH2 ionHe1 ionHe2 ionHe3 ionC3 ionC4 ionC5 ionN5 ionO6 ionSi4\n");
+
+  h1 = find_ion(1, 1);
+  h1 = find_ion(1, 2);
+  he1 = find_ion(2, 1);
+  he2 = find_ion(2, 2);
+  he3 = find_ion(2, 3);
+  c3 = find_ion(6, 3);
+  c4 = find_ion(6, 4);
+  c5 = find_ion(6, 5);
+  n5 = find_ion(7, 5);
+  o6 = find_ion(8, 6);
+  si4 = find_ion(14, 4);
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      
+      if (w[n].vol > 0.0)
+  {
+    np = w[n].nplasma;
+
+    printf("%i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %i %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\n",
+            n, np, w[n].x[0], w[n].x[1], w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol, 
+            plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
+            plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].converge_whole, 
+            plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
+            plasmamain[np].lum_ioniz, plasmamain[np].lum_rad, plasmamain[np].lum_fb, 
+            plasmamain[np].lum_ff, plasmamain[np].lum_lines, plasmamain[np].lum_adiabatic, 
+            plasmamain[np].lum_comp, plasmamain[np].lum_dr, plasmamain[np].heat_tot, plasmamain[np].heat_photo, 
+            plasmamain[np].heat_lines , plasmamain[np].heat_ff , plasmamain[np].heat_comp, plasmamain[np].heat_ind_comp,
+            plasmamain[np].density[h1], plasmamain[np].density[h2], plasmamain[np].density[he1], plasmamain[np].density[he2],
+            plasmamain[np].density[he3], plasmamain[np].density[c3], plasmamain[np].density[c4], plasmamain[np].density[c5],
+            plasmamain[np].density[n5], plasmamain[np].density[o6], plasmamain[np].density[si4]);
+    
+    if (ochoice)
+      fprintf(fptr, "%i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %i %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\n",
+            n, np, w[n].x[0], w[n].x[2], w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol,
+            plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
+            plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].converge_whole, 
+            plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
+            plasmamain[np].lum_ioniz, plasmamain[np].lum_rad, plasmamain[np].lum_fb, 
+            plasmamain[np].lum_ff, plasmamain[np].lum_lines, plasmamain[np].lum_adiabatic, 
+            plasmamain[np].lum_comp, plasmamain[np].lum_dr, plasmamain[np].heat_tot, plasmamain[np].heat_photo, 
+            plasmamain[np].heat_lines , plasmamain[np].heat_ff , plasmamain[np].heat_comp, plasmamain[np].heat_ind_comp,
+            plasmamain[np].density[h1], plasmamain[np].density[h2], plasmamain[np].density[he1], plasmamain[np].density[he2],
+            plasmamain[np].density[he3], plasmamain[np].density[c3], plasmamain[np].density[c4], plasmamain[np].density[c5],
+            plasmamain[np].density[n5], plasmamain[np].density[o6], plasmamain[np].density[si4]);
+  }
+    }
+
+  return (0);
+
+}
+
+
+
+
+int find_ion(element, istate)
+    int element;
+    int istate;
+{
+  int nion;
+
+  while (nion < nions && !(ion[nion].z == element && ion[nion].istate == istate))
+    nion++;
+
+  return nion;
+}
+
