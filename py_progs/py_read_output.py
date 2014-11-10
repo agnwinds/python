@@ -8,6 +8,9 @@ Synopsis:
 	this enables one to read outputs from the Python radiative transfer code.
     Where possible, we use the astropy.io module to read outputs.
 
+    There are also a number of routines for processing and reshaping various 
+    data formats
+
     see 
     https://github.com/agnwinds/python/wiki/Useful-python-commands-for-reading-and-processing-outputs 
     for usage
@@ -176,47 +179,14 @@ def read_pywind(filename, return_inwind=False, mode="2d"):
         print "Please install astropy. returning 1"
         return 1
 
+    if not ".complete" in filename:
+        filename = filename + ".complete"
+
     # first, simply load the filename 
     #d = np.loadtxt(filename, comments="#", dtype = "float", unpack = True)
     d = ascii.read(filename)
-    
 
-    # our indicies are already stored in the file- we will reshape them in a sec
-    zindices = d["j"]
-    xindices = d["i"]
-
-    # we get the grid size by finding the maximum in the indicies list 99 => 100 size grid
-    zshape = int(np.max(zindices) + 1)
-    xshape = int(np.max(zindices) + 1)
-
-
-    # reshape our indices arrays
-    xindices = xindices.reshape(xshape, zshape)
-    zindices = zindices.reshape(xshape, zshape)
-
-    # now reshape our x,z and value arrays
-    x = d["x"].reshape(xshape, zshape)
-    z = d["z"].reshape(xshape, zshape)
-
-    values = d["var"].reshape(xshape, zshape)
-
-    # these are the values of inwind PYTHON spits out
-    inwind = d["inwind"].reshape(xshape, zshape)
-
-    # create an inwind boolean to use to create mask
-    inwind_bool = (inwind >= 0)
-    mask = (inwind < 0)
-
-    # finally we have our mask, so create the masked array
-    masked_values = np.ma.masked_where ( mask, values )
-
-    #print xshape, zshape, masked_values.shape
-
-    #return the transpose for contour plots.
-    if return_inwind:
-        return x, z, masked_values.T, inwind_bool.T
-    else:
-        return x, z, masked_values.T
+    return d
 
 
 
