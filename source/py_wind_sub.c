@@ -3050,25 +3050,24 @@ for (n = 0; n < NDIM2; n++)
 
   Synopsis:  
   A summary of the important quantites in a given cell.
-  Primarily used for making easily plots
-
+  Primarily used for easily making plots
 
   Description:  
 
-  Arguments:  
+  Arguments:
+    w WindPtr
+    rootname filename of root pf 
+    ochoice whether to save to file  
 
   Returns:
 
   Notes:
 
   History:
-  080811  ksl Add lines from Stuart's version of this
-      routine to bring this version into 
-      compliance with it.
+  1411 JM coded
 
+************************************************************************/
 
-
- ************************************************************************/
 int
 complete_physical_summary (w, rootname, ochoice)
      WindPtr w;
@@ -3080,6 +3079,7 @@ complete_physical_summary (w, rootname, ochoice)
   int he1, he2, he3;
   int h1, h2, c3, c4, c5;
   int n5, o6, si4;
+  double vtot;
   FILE *fptr, *fopen ();
 
   if (ochoice)
@@ -3092,19 +3092,21 @@ complete_physical_summary (w, rootname, ochoice)
   /* JM 1411 -- First we have to write out some headers so that 
      astropy can read the output */
 
-  printf("n nplasma x z v vx vy vz dvds_ave vol \
-          rho ne te tr nphot w ave_freq conv conv_tr conv_te conv_hc \
-          lum_tot lum_rad lum_fb lum_ff lum_lines lum_adiabatic lum_comp lum_dr \
-          heat_tot heat_photo heat_lines heat_ff heat_comp heat_ind_comp \
-          ionH1 ionH2 ionHe1 ionHe2 ionHe3 ionC3 ionC4 ionC5 ionN5 ionO6 ionSi4\n");
+  printf("n\tnplasma\tx\tz\tv\tvx\tvy\tvz\tdvds_ave\tvol\t \
+rho\tne\tte\ttr\tnphot\tw\tave_freq\tconv\tconv_tr\tconv_te\tconv_hc\t \
+lum_tot\tlum_rad\tlum_fb\tlum_ff\tlum_lines\tlum_adiabatic\tlum_comp\tlum_dr\t \
+heat_tot\theat_photo\theat_lines\theat_ff\theat_comp\theat_ind_comp\t \
+ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\n");
 
   if (ochoice)
-    fprintf(fptr, "n nplasma x z v vx vy vz dvds_ave vol \
-          rho ne te tr nphot w ave_freq conv conv_tr conv_te conv_hc \
-          lum_tot lum_rad lum_fb lum_ff lum_lines lum_adiabatic lum_comp lum_dr \
-          heat_tot heat_photo heat_lines heat_ff heat_comp heat_ind_comp \
-          ionH1 ionH2 ionHe1 ionHe2 ionHe3 ionC3 ionC4 ionC5 ionN5 ionO6 ionSi4\n");
+    fprintf(fptr, "n\tnplasma\tx\tz\tv\tvx\tvy\tvz\tdvds_ave\tvol\t \
+rho\tne\tte\ttr\tnphot\tw\tave_freq\tconv\tconv_tr\tconv_te\tconv_hc\t \
+lum_tot\tlum_rad\tlum_fb\tlum_ff\tlum_lines\tlum_adiabatic\tlum_comp\tlum_dr\t \
+heat_tot\theat_photo\theat_lines\theat_ff\theat_comp\theat_ind_comp\t \
+ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\n");
 
+
+  /* find where the main ions lie in the ion list */
   h1 = find_ion(1, 1);
   h1 = find_ion(1, 2);
   he1 = find_ion(2, 1);
@@ -3124,12 +3126,15 @@ complete_physical_summary (w, rootname, ochoice)
   {
     np = w[n].nplasma;
 
-    printf("%i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+    vtot = sqrt (w[n].v[0] * w[n].v[0] + w[n].v[1] * w[n].v[1] +
+                 w[n].v[2] * w[n].v[2]);
+
+    printf("%i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %i %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\n",
-            n, np, w[n].x[0], w[n].x[1], w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol, 
+            n, np, w[n].x[0], w[n].x[1], vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol, 
             plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
             plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].converge_whole, 
             plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
@@ -3142,12 +3147,12 @@ complete_physical_summary (w, rootname, ochoice)
             plasmamain[np].density[n5], plasmamain[np].density[o6], plasmamain[np].density[si4]);
     
     if (ochoice)
-      fprintf(fptr, "%i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+      fprintf(fptr, "%i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %i %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\n",
-            n, np, w[n].x[0], w[n].x[2], w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol,
+            n, np, w[n].x[0], w[n].x[2], vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol,
             plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
             plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].converge_whole, 
             plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
@@ -3166,6 +3171,17 @@ complete_physical_summary (w, rootname, ochoice)
 }
 
 
+/**************************************************************************
+
+
+  Synopsis:  
+  find_ion is a little routine which finds which number ion in the list corresponds
+  to element with istate. e.g. for CIV, element = 6 and istate = 4.
+
+  History:
+  1411 JM coded
+
+************************************************************************/
 
 
 int find_ion(element, istate)
