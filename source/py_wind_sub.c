@@ -3079,6 +3079,7 @@ complete_physical_summary (w, rootname, ochoice)
   int he1, he2, he3;
   int h1, h2, c3, c4, c5;
   int n5, o6, si4;
+  int ii, jj;
   double vtot;
   FILE *fptr, *fopen ();
 
@@ -3121,6 +3122,7 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
 
   for (n = 0; n < NDIM2; n++)
     {
+      wind_n_to_ij (n, &ii, &jj);
       
       if (w[n].vol > 0.0)
   {
@@ -3129,12 +3131,12 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
     vtot = sqrt (w[n].v[0] * w[n].v[0] + w[n].v[1] * w[n].v[1] +
                  w[n].v[2] * w[n].v[2]);
 
-    printf("%i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+    printf("%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %i %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\n",
-            n, np, w[n].x[0], w[n].x[1], vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol, 
+            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2], vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol, 
             plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
             plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].converge_whole, 
             plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
@@ -3147,12 +3149,12 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
             plasmamain[np].density[n5], plasmamain[np].density[o6], plasmamain[np].density[si4]);
     
     if (ochoice)
-      fprintf(fptr, "%i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+      fprintf(fptr, "%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %i %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\n",
-            n, np, w[n].x[0], w[n].x[2], vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol,
+            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2], vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol,
             plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
             plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].converge_whole, 
             plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
@@ -3163,6 +3165,25 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
             plasmamain[np].density[h1], plasmamain[np].density[h2], plasmamain[np].density[he1], plasmamain[np].density[he2],
             plasmamain[np].density[he3], plasmamain[np].density[c3], plasmamain[np].density[c4], plasmamain[np].density[c5],
             plasmamain[np].density[n5], plasmamain[np].density[o6], plasmamain[np].density[si4]);
+  }
+    else
+  {
+      /* if we aren't inwind then print out a load of zeroes */
+
+      printf("%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n",
+            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]);
+
+      if (ochoice)
+        fprintf(fptr, "%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n",
+            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]);
   }
     }
 
