@@ -502,6 +502,8 @@ int convergence_summary(WindPtr w, char rootname[], int ochoice);
 int convergence_all(WindPtr w, char rootname[], int ochoice);
 int model_bands(WindPtr w, char rootname[], int ochoice);
 int heatcool_summary(WindPtr w, char rootname[], int ochoice);
+int complete_physical_summary(WindPtr w, char rootname[], int ochoice);
+int find_ion(int element, int istate);
 /* py_wind_ion.c */
 int ion_summary(WindPtr w, int element, int istate, int iswitch, char rootname[], int ochoice);
 int tau_ave_summary(WindPtr w, int element, int istate, double freq, char rootname[], int ochoice);
