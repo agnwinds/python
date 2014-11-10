@@ -3093,14 +3093,14 @@ complete_physical_summary (w, rootname, ochoice)
   /* JM 1411 -- First we have to write out some headers so that 
      astropy can read the output */
 
-  printf("n\tnplasma\tx\tz\tv\tvx\tvy\tvz\tdvds_ave\tvol\t \
+  printf("n\tnplasma\tinwind\ti\tj\tx\tz\tv\tvx\tvy\tvz\tdvds_ave\tvol\t \
 rho\tne\tte\ttr\tnphot\tw\tave_freq\tconv\tconv_tr\tconv_te\tconv_hc\t \
 lum_tot\tlum_rad\tlum_fb\tlum_ff\tlum_lines\tlum_adiabatic\tlum_comp\tlum_dr\t \
 heat_tot\theat_photo\theat_lines\theat_ff\theat_comp\theat_ind_comp\t \
 ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\n");
 
   if (ochoice)
-    fprintf(fptr, "n\tnplasma\tx\tz\tv\tvx\tvy\tvz\tdvds_ave\tvol\t \
+    fprintf(fptr, "n\tnplasma\tinwind\ti\tj\tx\tz\tv\tvx\tvy\tvz\tdvds_ave\tvol\t \
 rho\tne\tte\ttr\tnphot\tw\tave_freq\tconv\tconv_tr\tconv_te\tconv_hc\t \
 lum_tot\tlum_rad\tlum_fb\tlum_ff\tlum_lines\tlum_adiabatic\tlum_comp\tlum_dr\t \
 heat_tot\theat_photo\theat_lines\theat_ff\theat_comp\theat_ind_comp\t \

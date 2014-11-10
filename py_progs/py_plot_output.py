@@ -1,13 +1,16 @@
 #!/usr/bin/env python 
 '''
-University of Southampton
-James Matthews
-09 October 2014
+	University of Southampton -- JM -- November 2014
 
-py_plot_spectrum.py 
+				py_plot_output.py
 
-py_plot_spectrum.py creates spectrum plots 
-from a file root.pf.
+Synopsis:
+	various plotting routines for making standard plots
+	from Python outputs 
+
+Usage:
+	
+Arguments:
 '''
 
 #import pylab as p 
@@ -15,41 +18,13 @@ import pylab as p
 import py_read_output as r 
 import numpy as np 
 import os, sys
+import py_plot_util as util
 
 has_astropy = True 
 try:
     import astropy
 except ImportError:
     has_astropy = False
-
-def smooth(x,window_len=20,window='hanning'):
-
-	'''smooth data x by a factor with window of length window_len'''
-
-	if x.ndim != 1:
-		raise ValueError, "smooth only accepts 1 dimension arrays."
-
-	if x.size < window_len:
-		raise ValueError, "Input vector needs to be bigger than window size."
-
-	if window_len<3:
-		return x
-
-	if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-		raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
-
-	s=np.r_[2*x[0]-x[window_len-1::-1],x,2*x[-1]-x[-1:-window_len:-1]]
-
-
-	if window == 'flat': #moving average
-		w = np.ones(window_len,'d')
-	else:  
-		w = eval('np.'+window+'(window_len)')
-
-	y=np.convolve(w/w.sum(),s,mode='same')
-
-	return y[window_len:-window_len+1]
-
 
 
 
@@ -112,7 +87,7 @@ def make_spec_plot(s, fname, smooth_factor = 10, angles = True, components = Fal
 
 			p.subplot(ny, nx, i+1)
 
-			p.plot(s["Lambda"], smooth(s[s.dtype.names[ncomponents + i]], window_len = smooth_factor))
+			p.plot(s["Lambda"], util.smooth(s[s.dtype.names[ncomponents + i]], window_len = smooth_factor))
 
 			p.title(s.dtype.names[ncomponents + i])
 			p.xlabel("Wavelength")
@@ -125,13 +100,13 @@ def make_spec_plot(s, fname, smooth_factor = 10, angles = True, components = Fal
 
 		p.figure(figsize=(8,12))
 		p.subplot(211)
-		p.plot(s["Lambda"], smooth(s["Created"], window_len = smooth_factor), label="Created")
-		p.plot(s["Lambda"], smooth(s["Emitted"], window_len = smooth_factor), label="Emitted")
+		p.plot(s["Lambda"], util.smooth(s["Created"], window_len = smooth_factor), label="Created")
+		p.plot(s["Lambda"], util.smooth(s["Emitted"], window_len = smooth_factor), label="Emitted")
 
 		p.subplot(212)
 
 		for i in range(4,9):
-			p.plot(s["Lambda"], smooth(s[s.dtype.names[i]], window_len = smooth_factor), label=s.dtype.names[i])
+			p.plot(s["Lambda"], util.smooth(s[s.dtype.names[i]], window_len = smooth_factor), label=s.dtype.names[i])
 
 		p.xlabel("Wavelength")
 		p.ylabel("Flux")
@@ -194,7 +169,7 @@ def make_spec_plot_from_class(s, fname, smooth_factor = 10, angles = True, compo
 
 			p.subplot(ny, nx, i+1)
 
-			p.plot(s.wavelength, smooth(s.spec[i], window_len = smooth_factor))
+			p.plot(s.wavelength, util.smooth(s.spec[i], window_len = smooth_factor))
 
 			p.xlabel("Wavelength")
 			p.ylabel("Flux")
@@ -206,15 +181,15 @@ def make_spec_plot_from_class(s, fname, smooth_factor = 10, angles = True, compo
 
 		p.figure(figsize=(8,12))
 		p.subplot(211)
-		p.plot(s.wavelength, smooth(s.created, window_len = smooth_factor), label="Created")
-		p.plot(s.wavelength, smooth(s.emitted, window_len = smooth_factor), label="Emitted")
+		p.plot(s.wavelength, util.smooth(s.created, window_len = smooth_factor), label="Created")
+		p.plot(s.wavelength, util.smooth(s.emitted, window_len = smooth_factor), label="Emitted")
 
 		p.subplot(212)
-		p.plot(s.wavelength, smooth(s.censrc, window_len = smooth_factor), label="CenSrc")
-		p.plot(s.wavelength, smooth(s.disk, window_len = smooth_factor), label="Disk")
-		p.plot(s.wavelength, smooth(s.wind, window_len = smooth_factor), label="Wind")
-		p.plot(s.wavelength, smooth(s.hitsurf, window_len = smooth_factor), label="HitSurf")
-		p.plot(s.wavelength, smooth(s.scattered, window_len = smooth_factor), label="Scattered")
+		p.plot(s.wavelength, util.smooth(s.censrc, window_len = smooth_factor), label="CenSrc")
+		p.plot(s.wavelength, util.smooth(s.disk, window_len = smooth_factor), label="Disk")
+		p.plot(s.wavelength, util.smooth(s.wind, window_len = smooth_factor), label="Wind")
+		p.plot(s.wavelength, util.smooth(s.hitsurf, window_len = smooth_factor), label="HitSurf")
+		p.plot(s.wavelength, util.smooth(s.scattered, window_len = smooth_factor), label="Scattered")
 		p.xlabel("Wavelength")
 		p.ylabel("Flux")
 		p.legend()
@@ -223,6 +198,77 @@ def make_spec_plot_from_class(s, fname, smooth_factor = 10, angles = True, compo
 		p.clf()
 
 	return 0
+
+
+
+
+def make_wind_plot(d, fname, var=None, shape=(4,2)):
+
+	'''
+    make a wind plot from astropy.table.table.Table object 
+
+    Parameters
+    ----------
+    d: astropy.table.table.Table
+    	table containing wind data outputted from Python 
+    	if == None then this routine will get the data for you
+
+    fname: str 
+    	filename to save as e.g. sv
+
+    var: array type 
+    	array of string colnames to plot 
+
+    angles: Bool 
+    	Would you like to plot the viewing angle spectra? 
+
+    components: Bool 
+    	would you like to plot the individual components e.g. Disk Wind 
+    
+    Returns
+    ----------
+    Success returns 0
+    Failure returns 1
+
+    Saves output as "spectrum_%s.png" % (fname)
+    '''
+
+    if d == None:
+    	util.get_pywind_summary(fname)
+    	d = r.read_pywind(fname)
+
+    if var==None:
+    	var = ["ne", "te", "tr", "IP", "nphot", "v", ]
+
+    nplots = len(var)
+
+    # check shape is ok for variables required
+    if shape[0] * shape[1] < nplots:
+    	print "Error: shape is less than length of var array"
+    	return 1
+
+    if shape[0] * shape[1] > nplots:
+    	print "Warning: shape is more than length of var array"
+
+    p.figure(figsize=(8,12))
+
+    # cycle over variables and make plot
+    for i in range(nplots):
+
+    	p.subplot(shape[0], shape[1], i+1)
+
+    	value_string = var[i]
+
+    	x,z,v = r.wind_to_masked(d, value_string)
+
+    	p.contourf(z,x,np.log10(v))
+    	p.colorbar()
+    	p.title("Log(%s)" % value_string)
+
+    p.savefig("wind_%s.png" % fname)
+
+
+
 
 
 
