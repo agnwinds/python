@@ -756,7 +756,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
     {
       rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
     }
-  if (geo.ioniz_mode == 4 || geo.ioniz_mode == 5 || geo.ioniz_mode > 8)	/*NSH CLOUDY test - remove once done */
+  if (geo.ioniz_mode == 4 || geo.ioniz_mode == 5 || geo.ioniz_mode > 9)	/*NSH CLOUDY test - remove once done */
     {
       Log ("The allowed ionization modes are 0, 1, 2, 3, 6, 7\n");
       Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
