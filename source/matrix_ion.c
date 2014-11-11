@@ -117,13 +117,13 @@ the numbders in the structure if we believe the results are an improvement on wh
       if (ion[mm].istate != 1) //We can recombine since we are not in the first ionization stage
 		{
 	  rr_rates[mm]=total_rrate (mm, xplasma->t_e);  //radiative recombination rates
+		printf ("Rate matrix rrate %i = %e\n",mm,rr_rates[mm]);
 		}
       if (ion[mm].istate != ion[mm].z+1 ) //we can photoionize, since we are not in the z+1th ionization state (bare)
 	  {
 	  if (mode == NEBULARMODE_MATRIX_BB)
 		{
 	  	pi_rates[mm]=calc_pi_rate (mm,xplasma,2); //PI rate for the BB model
-
 		}
 	  else if (mode == NEBULARMODE_MATRIX_SPECTRALMODEL)
 		{
@@ -172,6 +172,7 @@ a better guess. I've leftin the original code, commented out...  */
 
 xne = xxne = xxxne = get_ne (newden);    //Set n_e to the current value. 
 
+printf ("Setting xne=%e\n",xne);
 /*xne is the current working number
   xxne 
 
