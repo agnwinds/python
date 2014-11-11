@@ -9,8 +9,26 @@ Synopsis:
 	from Python outputs 
 
 Usage:
+    Either import as a module in a python session e.g.
+    import py_plot_output as p 
+
+    or run from the command line e.g. 
+
+    py_plot_output root mode
+
+
 	
 Arguments:
+    root 
+        root filename to analyse
+
+    mode 
+        mode of plotting 
+        wind        plot of common wind quantites
+        ions        plot of common ions 
+        spec        spectrum for different viewing angles
+        spec_comps  components contributing to total spectrum e.g. disk, wind
+        all         make all the above plots
 '''
 
 #import pylab as p 
@@ -282,19 +300,45 @@ def make_wind_plot(d, fname, var=None, shape=(4,2), axes="log"):
 
 
 
+# Next lines permit one to run the routine from the command line
+if __name__ == "__main__":
+    import sys
+
+    ishow='yes'
+    if len(sys.argv)>2:
+        fname = sys.argv[1]
+        mode = sys.argv[2]
+    else:
+        print __doc__
+        sys.exit(1)
+
+    if mode == "spec":
+        s = r.read_spectrum(fname)
+        make_spec_plot(s, fname)
+
+    elif mode == "wind":
+        make_wind_plot(None, fname)
+
+    elif mode == "spec_comps":
+        s = r.read_spectrum(fname)
+        make_spec_plot(s, fname, angles = False, components = True)
+
+    elif mode == "ions":
+        make_wind_plot(None, fname, var = ["ionh1", "ionh2", "ionC3", "ionC4", "ionC5", "ionSi4", "ionN5", "ionO6"])
+
+    elif mode == "all":
+        s = r.read_spectrum(fname)
+        make_spec_plot(s, fname, components = True)
+        make_wind_plot(None, fname)
+        make_wind_plot(None, fname, var = ["ionh1", "ionh2", "ionC3", "ionC4", "ionC5", "ionSi4", "ionN5", "ionO6"])
+
+
+    else:
+        print "didn't understand mode %s" % mode
+        print __doc__
 
 
 
-# try:
-# 	fname = sys.argv[1]
-# except IndexError:
-# 	print '''No filename provided: 
-# usage: py_plot_spectrum filename'''
-# 	sys.exit()
-
-# # s = r.read_spec_file(fname)
-
-# # make_plot(s, components = True)
 
 
 
