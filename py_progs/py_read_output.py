@@ -326,23 +326,27 @@ def thinshell_read ( root ):
 
 def read_convergence (root ):
 
-	''' 
+    ''' 
     check convergence in a diag file
     '''
 
-	if not "_0.diag" in root:
-        	root = root + "_0.diag"
-	conv_fraction = []
-	with open(root, 'r') as searchfile:
-        	for line in searchfile:
+    if not "_0.diag" in root:
+        if not ".out" in root:
+            root = root + "_0.diag"
+    
+    conv_fraction = []
+    
+    with open(root, 'r') as searchfile:
+        for line in searchfile:
 
-           	 	# check if we have a matom_diagnostics line reporting level emissivities
-            		if 'Summary  convergence' in line:
+            # check if we have a matom_diagnostics line reporting level emissivities
+            if 'Summary  convergence' in line:
+
+                data = line.split()
+                conv_fraction.append(float (data[3]))
                 
-                		data = line.split()
-				conv_fraction.append(float (data[3]))
-                print conv_fraction
+    print conv_fraction
 
-	final_conv = conv_fraction [-1]
-	return final_conv
+    final_conv = conv_fraction [-1]
+    return final_conv
 		
