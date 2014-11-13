@@ -1426,6 +1426,13 @@ is called with the lower ion in the pair, since it uses the photionization cross
       rate = xinteg_fb (T, 3e12, 3e18, nion-1, 2);
     }
 
+if (ion[nion].z==7 )
+	{
+	printf ("Element %i stage %i has total RR rate %e\n",ion[nion].z,ion[nion].istate,rate);
+	}
+
+
+
   return (rate);
 
 
@@ -1582,7 +1589,10 @@ else  //we will need to use the milne relation - NB - this is different from usi
 }
 
 
-    
+   if (ion[nion].z==7 )
+	{
+	printf ("Element %i stage %i has GS RR rate %e\n",ion[nion].z,ion[nion].istate,rate);
+	} 
 
 
 

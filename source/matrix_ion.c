@@ -117,7 +117,6 @@ the numbders in the structure if we believe the results are an improvement on wh
       if (ion[mm].istate != 1) //We can recombine since we are not in the first ionization stage
 		{
 	  rr_rates[mm]=total_rrate (mm, xplasma->t_e);  //radiative recombination rates
-		printf ("Rate matrix rrate %i = %e\n",mm,rr_rates[mm]);
 		}
       if (ion[mm].istate != ion[mm].z+1 ) //we can photoionize, since we are not in the z+1th ionization state (bare)
 	  {
@@ -249,6 +248,7 @@ for (mm = 0; mm<nions; mm++)
 	{
 	if (ion[mm].istate != ion[mm].z+1 && ion[mm].dere_di_flag > 0) //we have electrons and a DI rate
 		{
+		printf ("DI rate= %e\n",xne*di_coeffs[mm]);
 		rate_matrix[mm][mm]-=(xne*di_coeffs[mm]);
 		}
 	}
@@ -538,7 +538,7 @@ for (nn=0;nn<nions;nn++)
 	Error ("matrix_solv: xxne %e theta %e\n", xxne, theta);
 	  return (-1); /*If we get to MAXITERATIONS, we return without copying the new populations into plasma*/
 	}
-
+printf ("ne=%e\n",xnew);
     } /*This is the end of the iteration loop */
 
 

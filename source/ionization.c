@@ -668,7 +668,8 @@ zero_emit (t)
 
 
   /* 70g - nsh adding this line in next to calculate dielectronic recombination cooling without generating photons */
-  compute_dr_coeffs (t);
+printf ("Calling from zero_emit\n"); 
+ compute_dr_coeffs (t);
   xxxplasma->lum_dr = total_dr (&wmain[xxxplasma->nwind], t);
 
   /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
