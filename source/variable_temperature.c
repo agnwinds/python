@@ -211,10 +211,7 @@ variable_temperature (xplasma, mode)
 
              /* and now we need the saha equation linking the two states at our chosen temp 
                 NB the partition function of the electron is included in the SAHA factor */
-	if (ion[nion-1].z==7)
-	{
-	printf ("element %i stage %i ip%e\n",ion[nion-1].z,ion[nion-1].istate,ion[nion-1].ip/H);
-}
+
 	      xsaha = SAHA * pow (xtemp, 1.5);
 	      b = xsaha * xplasma->partition[nion]
 		* exp (-ion[nion - 1].ip / (BOLTZMANN * xtemp)) / (xne *
@@ -367,7 +364,6 @@ variable_temperature (xplasma, mode)
 	  Error ("variable_temperature: xxne %e theta %e\n", xxne, theta);
 	  return (-1);
 	}
-printf ("ne=%e\n",xnew);
     }
 
 
