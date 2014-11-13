@@ -27,7 +27,7 @@ Description:
 Notes:
 
 History:
-        01dec	ksl	Coding began, as a result of finding 
+    01dec	ksl	Coding began, as a result of finding 
 			features in output spectra that were 
 			due to a discontinuous dv/ds.
 	02jan	ksl	Fixed problem in which photons below the
@@ -44,6 +44,9 @@ History:
 	06may	ksl	57+ -- There is no point in transferring
 			entire wind to dvwind_ds when we have
 			wmain
+    1411    JM -- use on the fly method for spherical coordinates
+            to avoid problems. This should be improved. See notes
+            below and #118 
 
 **************************************************************/
 
@@ -61,12 +64,12 @@ dvwind_ds (p)
   double x;
 
 
-/* We want the change in velocity along the line of sight, but we
-need to be careful because of the fact that we have elected to 
-combine the upper and lower hemispheres in the wind array.  Since
-we are only concerned with the the scalar dv_ds, the safest thing
-to do is to create a new photon that is only in the upper hemisphere 
-02jan ksl */
+  /* We want the change in velocity along the line of sight, but we
+  need to be careful because of the fact that we have elected to 
+  combine the upper and lower hemispheres in the wind array.  Since
+  we are only concerned with the the scalar dv_ds, the safest thing
+  to do is to create a new photon that is only in the upper hemisphere 
+  02jan ksl */
 
   stuff_phot (p, &pp);
   if (pp.x[2] < 0.0)
@@ -74,50 +77,86 @@ to do is to create a new photon that is only in the upper hemisphere
       pp.x[2] = -pp.x[2];
       pp.lmn[2] = -pp.lmn[2];
     }
+  
+  /* JM 1411 -- ideally, we want to do an interpolation on v_grad here. However, 
+  the interpolation was incorrect in spherical coordinates (see issue #118).
+  For the moment, I've adopted an on the fly method for spherical coordinates.
+  This should be improved by figuring out out how the velocity gradient 
+  tensor ought to be rotated in order to give the right answer for spherical 
+  coordinates */
 
-
-  n = coord_fraction (0, pp.x, nnn, frac, &nelem);
-
-
-  for (j = 0; j < 3; j++)
+  if (geo.coord_type == SPHERICAL)
     {
-      for (k = 0; k < 3; k++)
-	{
-	  x = 0;
-	  for (nn = 0; nn < nelem; nn++)
-	    x += wmain[nnn[nn]].v_grad[j][k] * frac[nn];
+      struct photon pnew;
+      double v1[3], v2[3], diff[3];
+      double ds;
 
-	  v_grad[j][k] = x;
+      /* choose a small distance which is dependent on the cell size */	
+      vsub (pp.x, wmain[pp.grid].x, diff);
+      ds = 0.001 * length(diff);
 
-	}
+      /* calculate the velocity at the position of the photon */
+      /* note we use model velocity, which could potentially be slow,
+      but avoids interpolating (see #118) */
+      model_velocity(pp.x, v1);
+
+      /* copy the photon and move it by ds, and evaluate the velocity
+      at the new point */
+      stuff_phot(&pp, &pnew);
+      move_phot(&pnew, ds);
+      model_velocity(pnew.x, v2);
+
+      /* calculate the relevant gradient */
+      dvds = fabs(dot(v1, pp.lmn) - dot(v2, pp.lmn)) / ds;
     }
-  //
-  // ??? Not clear this is coorrect !!!  for multiple coordinate systems 
-/* v_grad is in cylindrical cordinates, or more precisely intended
-to be azimuthally symmetric.  One could either 
-(a) convert v_grad to cartesian coordinates at the position of the
-photon or (b) 
-convert the photon direction to cylindrical coordinates 
-at the position of the photon. Possibility b is more straightforward
-given the existing code*/
 
-  project_from_xyz_cyl (pp.x, pp.lmn, lmn);
+  else // for non spherical coords we interpolate on v_grad
+    {
 
-  dvds = dot_tensor_vec (v_grad, lmn, dvel_ds);
+      n = coord_fraction (0, pp.x, nnn, frac, &nelem);
 
-/* Note that dvel_ds is also in cylindrical coordinates should it ever be
-needed.
 
-It is not clear that vwind_xyz should not be modified simply to return v
-along the line of sight of the photon as well...since vwind the results are vwind
-are immediately dotted with the photon direction in resonate which is the only place
-the routine is used I believe . ksl
-*/
+      for (j = 0; j < 3; j++)
+        {
+          for (k = 0; k < 3; k++)
+	  {
+	      x = 0;
+	      for (nn = 0; nn < nelem; nn++)
+	        x += wmain[nnn[nn]].v_grad[j][k] * frac[nn];
+
+	      v_grad[j][k] = x;
+
+	  }
+        }
+
+      // ??? Not clear this is correct !!!  for multiple coordinate systems 
+      /* v_grad is in cylindrical cordinates, or more precisely intended
+      to be azimuthally symmetric.  One could either 
+      (a) convert v_grad to cartesian coordinates at the position of the
+      photon or (b) 
+      convert the photon direction to cylindrical coordinates 
+      at the position of the photon. Possibility b is more straightforward
+      given the existing code*/
+
+      project_from_xyz_cyl (pp.x, pp.lmn, lmn);
+
+      dvds = dot_tensor_vec (v_grad, lmn, dvel_ds);
+
+      /* Note that dvel_ds is also in cylindrical coordinates should it ever be
+      needed.
+
+      It is not clear that vwind_xyz should not be modified simply to return v
+      along the line of sight of the photon as well...since vwind the results are vwind
+      are immediately dotted with the photon direction in resonate which is the only place
+      the routine is used I believe . ksl
+      */
+    }
 
   if (sane_check (dvds))
     {
-      Error ("vgrad:sane_check %f\n", dvds);
+      Error ("dvwind_ds: sane_check %f\n", dvds);
     }
+
   return (dvds);
 
 }

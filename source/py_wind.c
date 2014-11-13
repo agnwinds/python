@@ -167,6 +167,9 @@ main (argc, argv)
   interactive = 1;		/* Default to the standard operating mofe for py_wind */
   strcpy (parameter_file, "NONE");
 
+  /* Next command stops Debug statements printing out in py_wind */
+  Log_set_verbosity (3);
+
   if (argc == 1)
     {
       printf ("Root for wind file :");
