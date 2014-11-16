@@ -318,7 +318,6 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   Log_parallel ("Thread %d starting.\n", my_rank); //JM130723 moved this after verbosity switch
 
 
-  /* Parse the command line.  Updated for 67 to allow for switches  - 0811 - ksl  */
 
   restart_stat = 0;
   time_max = -1;
@@ -326,6 +325,8 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   /* initialise options for advanced mode (all set to 0) */
   init_advanced_modes();
 
+
+  /* Parse the command line.  */
 
   if (argc == 1)
     {
@@ -549,9 +550,6 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
 /* Initialize variables which are used in the main routine */
 
-//  140902 - ksl - removed unused line in code. wcycles and pcycles are actually set later
-//  wcycles = pcycles = 1;
-//  photons_per_cycle = 100000;
 
 /* Initialize basis vectors for a cartesian coordinate system */
 
