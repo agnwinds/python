@@ -1536,8 +1536,11 @@ if (geo.coord_type==RTHETA && geo.wind_type==2) //We need to generate an rtheta 
       else
 	Log ("OK, using live or die option\n");
 
-/* Select spectra with certain numbers of scatterings.  See extract 1997 aug 28 ksl */
+/* Select spectra with certain numbers of scatterings.  See extract 1997 aug 28 ksl 
+ * 141116 - ksl The following options are clealy diagnostic and have been relegated to 
+ * advanced commands*/
 
+      if (modes.iadvanced) {
       strcpy (yesno, "n");
       rdstr ("Select_specific_no_of_scatters_in_spectra(y/n)", yesno);
       if (yesno[0] == 'y')
@@ -1570,6 +1573,7 @@ if (geo.coord_type==RTHETA && geo.wind_type==2) //We need to generate an rtheta 
 		}
 	    }
 	}
+	}
     }
 
   /* Select the units of the output spectra.  This is always needed */
@@ -1596,15 +1600,20 @@ run -- 07jul -- ksl
   SMAX_FRAC = 0.5;
   DENSITY_PHOT_MIN = 1.e-10;
   keep_photoabs = 1;
-  rdint ("Use.standard.care.factors(1=yes)", &istandard);
 
-  if (!istandard)
-    {
-      rddoub ("Fractional.distance.photon.may.travel", &SMAX_FRAC);
-      rddoub ("Lowest.ion.density.contributing.to.photoabsorption",
+  /* 141116 - ksl - Made care factors and advanced command as this is clearly somethng that is diagnostic */
+
+  if (modes.iadvanced) {
+  	rdint ("Use.standard.care.factors(1=yes)", &istandard);
+
+  	if (!istandard)
+   	 {
+      		rddoub ("Fractional.distance.photon.may.travel", &SMAX_FRAC);
+      		rddoub ("Lowest.ion.density.contributing.to.photoabsorption",
 	      &DENSITY_PHOT_MIN);
-      rdint ("Keep.photoabs.during.final.spectrum(1=yes)", &keep_photoabs);
+      	rdint ("Keep.photoabs.during.final.spectrum(1=yes)", &keep_photoabs);
     }
+  }
 
 
 
@@ -1637,12 +1646,6 @@ run -- 07jul -- ksl
   
   if (modes.iadvanced)
     {
-      /* do we want debug statements to print */
-      //rdint ("Use_Debug_Statements(0=no,1=yes)", &modes.use_debug);
-
-      //if (modes.use_debug)
-      //	Log_debug(modes.use_debug);	// communicate that we want to print debug statements
-
       /* Do we require extra diagnostics or not */
       rdint ("Extra.diagnostics(0=no,1=yes) ", &modes.diag_on_off);
 
