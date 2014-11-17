@@ -79,7 +79,7 @@ compute_dr_coeffs (temp)
 {
   int n, n1, n2;
   double Adi, Bdi, T0, T1;
-  for (n = 0; n < nions; n++)
+  for (n = 1; n < nions+1; n++)
     {
       if (ion[n].drflag == 0)
 	{
@@ -170,7 +170,7 @@ total_dr (one, t_e)
   meanv = pow ((2 * BOLTZMANN * t_e / MELEC), 0.5);
   meanke = 0.5 * MELEC * meanv * meanv;
 
-  for (n = 0; n < nions; n++)
+  for (n = 1; n < nions+1; n++)
     {
       if (ion[n].drflag == 0)	//We have no DR for this ion.
 	{
@@ -179,8 +179,7 @@ total_dr (one, t_e)
       else
 	{
 	  x +=
-	    one->vol * xplasma->ne * xplasma->density[n +
-						      1] * dr_coeffs[n] *
+	    one->vol * xplasma->ne * xplasma->density[n] * dr_coeffs[n] *
 	    meanke;
 	}
     }
