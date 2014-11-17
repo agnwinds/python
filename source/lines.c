@@ -417,30 +417,19 @@ in the configuration structure. 01dec ksl */
 	  c21 = ne * q;
 	  c12 = c21 * g2_over_g1 * exp (-H_OVER_K * freq / te);
 
-    /* NSH this if block removed to simplify code - it can be reinstated 
-      if runtimes are a problem, but it will need an additional if statement
-      to avoid missing it out if we are using a modelled specific intensity. */
-//	  if (w < 1.e-6) 
+//	  if (w < 1.e-6) //NSH this if block removed to simplify code - if can be reinstated if runtimes are a problem, but it will need an additional if statement to avoid missing it out if we are using a modelled specific intensity.
 //	    {			// Radiation is unimportant
 //	      n2_over_n1 = c12 / (c21 + a);
 //	    }
 //	  else
 //	    {			//Include effects of stimulated emission
 //	      z = w / (exp (H_OVER_K * freq / tr) - 1.); //original
-
-	      z= (C * C) / (2. * H * freq * freq * freq); //This is the factor which relates the A coefficient to the b coefficient
-
+	      z=(C*C)/(2.*H*freq*freq*freq); //This is the factor which relates the A coefficient to the b coefficient
 //	      n2_over_n1 = (c12 + g2_over_g1 * a * z) / (c21 + a * (1. + z)); //original
 
-     /* we call mean intensity with mode 1 - this means we are happy to use the 
-        dilute blackbody approximation even if we havent run enough spectral cycles 
-        to have a model for J */
-	   J = mean_intensity (xplasma, freq, 1);
+	   J = mean_intensity (xplasma, freq, 1);/* we call mean intensity with mode 1 - this means we are happy to use the dilute blackbody approximation even if we havent run enough spectral cycles to have a model for J*/
 
-     /* this equation is equivalent to equation 4.29 in NSH's thesis with the 
-        einstein b coefficients replaced by a multiplied by suitable conversion 
-        factors from the einstein relations. */
-     n2_over_n1 = (c12 + g2_over_g1 * a * z * J) / (c21 + a*(1. + (J * z)));  
+           n2_over_n1 = (c12 + g2_over_g1 * a * z * J) / (c21 + a*(1. + (J * z)));  //this equation is equivalent to equation 4.29 in NSH's thesis with the einstein b coefficients replaced by a multiplied by suitable conversion factors from the einstein relations.
 
 
 //	    }
@@ -451,15 +440,13 @@ in the configuration structure. 01dec ksl */
 
 	}
       else
-	{			// The transition has both levels above the ground state
-
+	{			// The transition has both levels above the ground state       
 /* 
 In the event that both levels are above the ground state, we assume
 that the upper level population is given by an on-the-spot approximation.
 We make the same assumption for the lower level, unless the lower level
 is matastable in which case we set the weight to 1 and force equlibrium 
 */
-
 	  gg = ion[line_ptr->nion].g;
 	  z = w / (exp (line_ptr->eu / (BOLTZMANN * tr)) + w - 1.);
 	  n2_over_ng = line_ptr->gu / gg * z;
@@ -571,7 +558,7 @@ scattering_fraction (struct lines *line_ptr, PlasmaPtr xplasma)
   else if (geo.line_mode == 1)
     return (1.);		//purely scattering atmosphere
 
-  //Populate variable from previous calling structure
+//Populate variable from previous calling structure
   ne = xplasma->ne;
   te = xplasma->t_e;
   w = xplasma->w;
@@ -621,7 +608,6 @@ scattering_fraction (struct lines *line_ptr, PlasmaPtr xplasma)
    asked to claculate the same escape probability
 
 	06may	ksl	57+ -- Modify for plasma structue
-  1411 JM -- changed to use the sobolev function to calculate tau.
  */
 struct lines *pe_line_ptr;
 double pe_ne, pe_te, pe_dd, pe_dvds, pe_w, pe_tr;
@@ -630,13 +616,12 @@ double pe_escape;
 double 
 p_escape (struct lines *line_ptr, PlasmaPtr xplasma)
 {
-  double tau, two_level_atom ();
+  double d1, d2, tau, two_level_atom ();
   double escape;
   double ne, te;
   double dd;			/* density of the relevent ion */
   double dvds;
   double w, tr;			/* the radiative weight, and radiation tempeature */
-  WindPtr one;
 
 //Populate variable from previous calling structure
   ne = xplasma->ne;
@@ -644,10 +629,7 @@ p_escape (struct lines *line_ptr, PlasmaPtr xplasma)
   tr = xplasma->t_r;	//JM1308 in pre 76b versions this was incorrectly set to xplasma->t_e
   w = xplasma->w;
   dd = xplasma->density[line_ptr->nion];
-
-  one = &wmain[xplasma->nwind];
-  dvds = one->dvds_ave;
-
+  dvds = wmain[xplasma->nwind].dvds_ave;
 // Band-aid to prevent divide by zero in calculation of tau below
   if (dvds <= 0.0)
     {
@@ -660,12 +642,24 @@ p_escape (struct lines *line_ptr, PlasmaPtr xplasma)
       || pe_dd != dd || pe_dvds != dvds || pe_w != w || pe_tr != tr)
     {
 
-      /* JM 1411 -- we used to have duplicated code here, but 
-         now we call the sobolev function itself */
-      tau = sobolev (one, one->x, dd, line_ptr, dvds);
+      if (line_ptr->macro_info == 1 && geo.rt_mode == 2
+	  && geo.macro_simple == 0)
+	{
+	  // macro atom case SS
+	  d1 = den_config (xplasma, line_ptr->nconfigl);
+	  d2 = den_config (xplasma, line_ptr->nconfigu);
+	}
+      else
+	{
+	  two_level_atom (line_ptr, xplasma, &d1, &d2);
+	}
+
+      tau = (d1 - line_ptr->gl / line_ptr->gu * d2);
+      tau *= PI_E2_OVER_M * line_ptr->f / line_ptr->freq / dvds;
 
       /* JM 1408 -- moved calculation of p_escape to subroutine below */
       escape = p_escape_from_tau (tau);
+
 
 
       pe_line_ptr = line_ptr;

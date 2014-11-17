@@ -94,9 +94,8 @@ trans_phot (
   n = 0;			// To avoid -O3 warning
 
   /* 05jul -- not clear whether this is needed and why it is different from DEBUG */
-  /* 1411 -- JM -- Debug usage has been altered. See #111, #120 */
 
-  if (modes.track_resonant_scatters && plinit == 0)
+  if (diag_on_off && plinit == 0)
     {
       pltptr = fopen ("python.xyz", "w");
       plinit = 1;
@@ -209,7 +208,7 @@ trans_phot (
 	      /* we normalised our rejection method by the escape 
 	         probability along the vector of maximum velocity gradient.
 	         First find the sobolev optical depth along that vector */
-	      tau_norm = sobolev (&wmain[pextract.grid], pextract.x, -1.0,
+	      tau_norm = sobolev (&wmain[pextract.grid], &pextract, -1.0,
 				  lin_ptr[pextract.nres],
 				  wmain[pextract.grid].dvds_max);
 
@@ -290,9 +289,9 @@ it from translate. ?? 02jan ksl */
 
 
 
-    if (modes.ispy)
+#if DEBUG
 	  ispy (&pp, n);
-
+#endif
 
 	  if (istat == -1)
 	    {
@@ -472,9 +471,8 @@ the current version of scattering really does what the old code did for two-leve
 	      if (nres > -1 && nres < nlines)
 		{
 		  pp.nrscat++;
-		  
-          /* This next statement writes out the position of every resonant scattering event to a file */
-		  if (modes.track_resonant_scatters)
+/* This next statement writes out the position of every resonant scattering event to a file */
+		  if (diag_on_off)
 		    fprintf (pltptr,
 			     "Photon %i has resonant scatter at %.2e %.2e %.2e in wind cell %i (grid cell=%i). Freq=%e Weight=%e\n",
 			     nphot, pp.x[0], pp.x[1], pp.x[2],
@@ -525,7 +523,7 @@ been initialized. 02may ksl.  This seems to be OK at present.*/
 		         probability along the vector of maximum velocity gradient.
 		         First find the sobolev optical depth along that vector */
 		      tau_norm =
-			sobolev (&wmain[pextract.grid], pextract.x, -1.0,
+			sobolev (&wmain[pextract.grid], &pextract, -1.0,
 				 lin_ptr[pextract.nres],
 				 wmain[pextract.grid].dvds_max);
 

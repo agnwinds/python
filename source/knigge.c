@@ -146,12 +146,9 @@ in units of WD radii */
  * edge of the wind
  */
 
-  /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
-  if (modes.adjust_grid == 0)
-    {
-      geo.xlog_scale = geo.rstar;
-      geo.zlog_scale = geo.rstar;
-    }
+  geo.xlog_scale = geo.rstar;
+  geo.zlog_scale = geo.rstar;
+
 
 
 /*Now calculate the normalization factor for the wind*/

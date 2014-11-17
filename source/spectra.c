@@ -673,8 +673,8 @@ spectrum_summary (char filename[], char mode[], int nspecmin, int nspecmax, int 
 
 
   /* Write the rest of the header for the spectrum file */
-  /* JM 1411 -- Removed comment line for column headers, see #122 */
-  fprintf (fptr, "# \nFreq.        Lambda");
+
+  fprintf (fptr, "# \n# Freq.        Lambda");
 
   for (n = nspecmin; n <= nspecmax; n++)
     {

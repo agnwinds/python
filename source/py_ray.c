@@ -400,7 +400,7 @@ original specification of the velocities  */
 
       vwind_xyz (w, &zphot, vz);	// v is the current velocity of the photon
       vlosz = dot (tphot.lmn, vz);	// This is vlos as calulated from the grid
-      density = get_ion_density (zphot.x, nc4);
+      density = get_ion_density (&zphot, nc4);
       massden = kn_rho (zphot.x);
 
 

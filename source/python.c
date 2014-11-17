@@ -26,10 +26,9 @@ Arguments:
 	-v num  determines the amount of information that is printed out.  If num is small, then
 		less information is printed out; if num is large more is printed out.  Setting
 		v to 5 causes the routine to print out all the information which outputs have
-		included previously.  The current default is set to 3 which suppresses Debug, Log_silent
+		included previously.  The current default is set to 4 which suppresses Log_silent
 		and Error_silent
-	-d	Enters detailed or advanced mode. Allows one to access extra diagnositics and some
-	    other advanced commands
+	-d	To have statements from Debug command logged
 	-e  Alter the maximum number of errors before the program quits
 
 
@@ -310,9 +309,10 @@ main (int argc, char *argv[])
 								   the * assumption is that we are reading from the command line */
   restart_stat = 0;				/* 67 -ksl - 08nov - Assume initially that these is a new run from scratch, and not a restart */
   time_max = 13.8e9 * 3.2e7;	/* 67 - ksl - 08nov - The maximum time the program will run without stopping.  This is
-								   initially set to the * lifetime of the universe *
-  verbosity = 3;		/* Set the default verbosity to 3.  To get more info raise the verbosity level to a higher number. To
-				   get less set the verbosity to a lower level. */
+								   initially set to the * lifetime of the universe */
+
+  verbosity = 4;				/* Set the default verbosity to 4.  To get more info raise the verbosity level to a higher
+								   number. To get * less set the verbosity to a lower level. */
 
   time_to_quit = 100000;		// Initialise variable
 
@@ -323,14 +323,13 @@ main (int argc, char *argv[])
   Log_parallel("Thread %d starting.\n", my_rank);	// JM130723 moved this
   // after verbosity switch
 
+
+  /* 
+   * Parse the command line.  Updated for 67 to allow for switches - 0811 - ksl 
+   */
+
   restart_stat = 0;
   time_max = -1;
-
-  /* initialise options for advanced mode (all set to 0) */
-  init_advanced_modes();
-
-
-  /* Parse the command line.  */
 
   if (argc == 1)
   {
@@ -389,14 +388,14 @@ main (int argc, char *argv[])
 	  }
 	  else if (strcmp(argv[i], "-d") == 0)
 	  {
-		modes.iadvanced = 1;
-	  	i++;
-	    }		
-	  else if (strncmp (argv[i], "-", 1) == 0)
-	    {
-	      Error ("python: Unknown switch %s\n", argv[i]);
-	      help ();
-	    }
+		Log_debug(1);
+		i++;
+	  }
+	  else if (strncmp(argv[i], "-", 1) == 0)
+	  {
+		Error("python: Unknown switch %s\n", argv[i]);
+		help();
+	  }
 	}
 
 
@@ -590,6 +589,11 @@ main (int argc, char *argv[])
    * Initialize variables which are used in the main routine 
    */
 
+  // 140902 - ksl - removed unused line in code. wcycles and pcycles are
+  // actually set later
+  // wcycles = pcycles = 1;
+  // photons_per_cycle = 100000;
+
   /* 
    * Initialize basis vectors for a cartesian coordinate system 
    */
@@ -664,17 +668,8 @@ main (int argc, char *argv[])
 	{							/* Read the atomic datafile here, because for the cases where we have read and old wind files,
 								   we also got the atomic data */
 
-	  rdstr ("Atomic_data", geo.atomic_filename);
-      
-      /* read a variable which controls whether to save a summary of atomic data
-         this is defined in atomic.h, rather than the modes structure */
-	  if (modes.iadvanced)	
-	  	rdint ("write_atomicdata", &write_atomicdata);	
-
-	  if (write_atomicdata)
-	  	Log("You have opted to save a summary of the atomic data\n");
-
-	  get_atomic_data (geo.atomic_filename);
+	  rdstr("Atomic_data", geo.atomic_filename);
+	  get_atomic_data(geo.atomic_filename);
 
 	}
 
@@ -782,34 +777,16 @@ main (int argc, char *argv[])
    */
 
   if ((geo.ndim > NDIM_MAX) || (geo.mdim > NDIM_MAX))
-    {
-      Error
-	("NDIM_MAX %d is less than NDIM %d or MDIM %d. Fix in python.h and recompile\n",
-	 NDIM_MAX, geo.ndim, geo.mdim);
-      exit (0);
-    }
-
-
-  /* If we are in advanced then allow the user to modify scale lengths */
-  if (modes.iadvanced)
   {
-  	rdint ("adjust_grid(0=no,1=yes)", &modes.adjust_grid);
-
-  	if (modes.adjust_grid)
-  	  {
-  	  	Log("You have opted to adjust the grid scale lengths\n");
-  	  	rddoub ("geo.xlog_scale", &geo.xlog_scale);
-  	  	if (geo.coord_type)
-  	  	  rddoub ("geo.zlog_scale", &geo.zlog_scale);
-  	  }
+	Error("NDIM_MAX %d is less than NDIM %d or MDIM %d. Fix in python.h and recompile\n", NDIM_MAX, geo.ndim, geo.mdim);
+	exit(0);
   }
-
-
-//080808 - 62 - Ionization section has been cleaned up -- ksl
-/* ??? ksl - Acoording to line 110 of ioniztion. option 4 is LTE with SIM_correction.  It would be good to
- * know what this is actually.   Note that pairwise is the appraoch which cboses between pairwise_bb, and pairwise_pow.
- * Normally, any of the pairwise options should force use of a banding option with a broad set of bands
- */
+  // 080808 - 62 - Ionization section has been cleaned up -- ksl
+  /* 
+   * ??? ksl - Acoording to line 110 of ioniztion. option 4 is LTE with SIM_correction.  It would be good to know what this is actually.
+   * Note that pairwise is the appraoch which cboses between pairwise_bb, and pairwise_pow. Normally, any of the pairwise options should
+   * force use of a banding option with a broad set of bands 
+   */
 
   rdint("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,6=pairwise_bb,7=pairwise_pow)", &geo.ioniz_mode);
 
@@ -1276,27 +1253,25 @@ main (int argc, char *argv[])
 	  geo.const_agn = 0.0;
 	}
 
-/* Describe the Compton torus */
+	/* 
+	 * Describe the Compton torus 
+	 */
 
-/* 70b - ksl - 1108067 - Here we add parameters for the compton torus or blocking region 
-*
-* Note that the whole flow of this may be a bit odd as it seems as if we have to keep checking for whether
-* we are modelling an agn
-*
-* Note that these calls need to precede the calls below, because we want to keep the compton torus  ???
-* inside the actual wind, or at least that's what ksl believes on 110809.  ???
-*/
+	/* 
+	 * 70b - ksl - 1108067 - Here we add parameters for the compton torus or blocking region * * Note that the whole flow of this may
+	 * be a bit odd as it seems as if we have to keep checking for whether * we are modelling an agn * * Note that these calls need to
+	 * precede the calls below, because we want to keep the compton torus ??? * inside the actual wind, or at least that's what ksl
+	 * believes on 110809.  ??? 
+	 */
 
-/* 140907: ksl - I have effectively commented out any consideration of the compton_torus because it is not
- * debugged.  But one can continue debugging it by setting the DEBUG variatble to true 
- */
-      geo.compton_torus=0;
-
-    /* JM 1411 -- we only ask about the Torus if we've used the -d flag */
-    if (modes.iadvanced)
-      rdint ("Torus(0=no,1=yes)", &geo.compton_torus);
-
-      if (geo.compton_torus)
+	/* 
+	 * 140907: ksl - I have effectively commented out any consideration of the compton_torus because it is not debugged.  But one can
+	 * continue debugging it by setting the DEBUG variatble to true 
+	 */
+	geo.compton_torus = 0;
+#if DEBUG
+	rdint("Torus(0=no,1=yes)", &geo.compton_torus);
+	if (geo.compton_torus)
 	{
 	  rddoub("Torus.rmin(cm)", &geo.compton_torus_rmin);
 	  rddoub("Torus.rmax(cm)", &geo.compton_torus_rmax);
@@ -1309,7 +1284,7 @@ main (int argc, char *argv[])
 		Error("python: A torus with zero optical depth makes no sense. Setting to %f\n", geo.compton_torus_tau);
 	  }
 	}
-
+#endif
 
 	/* 
 	 * Describe the wind 
@@ -1644,14 +1619,13 @@ main (int argc, char *argv[])
 	else
 	  Log("OK, using live or die option\n");
 
-/* Select spectra with certain numbers of scatterings.  See extract 1997 aug 28 ksl 
- * 141116 - ksl The following options are clealy diagnostic and have been relegated to 
- * advanced commands*/
+	/* 
+	 * Select spectra with certain numbers of scatterings.  See extract 1997 aug 28 ksl 
+	 */
 
-      if (modes.iadvanced) {
-      strcpy (yesno, "n");
-      rdstr ("Select_specific_no_of_scatters_in_spectra(y/n)", yesno);
-      if (yesno[0] == 'y')
+	strcpy(yesno, "n");
+	rdstr("Select_specific_no_of_scatters_in_spectra(y/n)", yesno);
+	if (yesno[0] == 'y')
 	{
 	  Log("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
 	  for (n = 0; n < nangles; n++)
@@ -1678,8 +1652,7 @@ main (int argc, char *argv[])
 		}
 	  }
 	}
-	}
-    }
+  }
 
   /* 
    * Select the units of the output spectra.  This is always needed 
@@ -1697,6 +1670,12 @@ main (int argc, char *argv[])
   else
 	Log("OK, basic Monte Carlo spectrum\n");
 
+  /* 
+   * Determine whether to produce additonal diagnostics 
+   */
+
+  rdint("Extra.diagnostics(0=no)", &diag_on_off);
+
 
   /* 
    * 57h -- New section of inputs to provide more control over how the program is run -- 07jul -- ksl 
@@ -1706,31 +1685,21 @@ main (int argc, char *argv[])
   SMAX_FRAC = 0.5;
   DENSITY_PHOT_MIN = 1.e-10;
   keep_photoabs = 1;
-  /* 141116 - ksl - Made care factors and advanced command as this is clearly somethng that is diagnostic */
+  rdint("Use.standard.care.factors(1=yes)", &istandard);
 
-  if (modes.iadvanced) {
-  	rdint ("Use.standard.care.factors(1=yes)", &istandard);
-
-  	if (!istandard)
-   	 {
-      		rddoub ("Fractional.distance.photon.may.travel", &SMAX_FRAC);
-      		rddoub ("Lowest.ion.density.contributing.to.photoabsorption",
-	      &DENSITY_PHOT_MIN);
-      	rdint ("Keep.photoabs.during.final.spectrum(1=yes)", &keep_photoabs);
-    }
+  if (!istandard)
+  {
+	rddoub("Fractional.distance.photon.may.travel", &SMAX_FRAC);
+	rddoub("Lowest.ion.density.contributing.to.photoabsorption", &DENSITY_PHOT_MIN);
+	rdint("Keep.photoabs.during.final.spectrum(1=yes)", &keep_photoabs);
   }
 
-
-
-
-
-/* 081221 - 67c - Establish limits on the frequency intervals to be used by the ionization cycles and 
- * the fraquency bands for stratified sampling.  Changes here were made to allow more control
- * over statified sampling, since we have expanded the temperature ranges of the types of systems
- * we would like to calculate.  This section of inputs might logically go earlier in the code, but
- * was put here so it would add on to existing .pf files.  It would be reasonble to consider moving
- * it to a more logical location
- */
+  /* 
+   * 081221 - 67c - Establish limits on the frequency intervals to be used by the ionization cycles and the fraquency bands for
+   * stratified sampling.  Changes here were made to allow more control over statified sampling, since we have expanded the temperature
+   * ranges of the types of systems we would like to calculate.  This section of inputs might logically go earlier in the code, but was
+   * put here so it would add on to existing .pf files.  It would be reasonble to consider moving it to a more logical location 
+   */
 
 
   /* 
@@ -1753,20 +1722,6 @@ main (int argc, char *argv[])
    * coordinated with the bands that are set up for spectral gneration 
    */
   freqs_init(freqmin, freqmax);
-
-  
-  if (modes.iadvanced)
-    {
-      /* Do we require extra diagnostics or not */
-      rdint ("Extra.diagnostics(0=no,1=yes) ", &modes.diag_on_off);
-
-      if (modes.diag_on_off)
-        {
-          get_extra_diagnostics();
-        }
-    }
-
-
 
 
 
@@ -1809,11 +1764,13 @@ main (int argc, char *argv[])
 
   w = wmain;
 
-  if (modes.save_cell_stats)
-    {
-      /* Open a diagnostic file or files.  These are all fixed files */
-      open_diagfile ();
-    }
+  if (diag_on_off)
+  {
+	/* 
+	 * Open a diagnostic file or files.  These are all fixed files 
+	 */
+	open_diagfile();
+  }
 
   /* 
    * initialize the random number generator 
@@ -1940,8 +1897,9 @@ main (int argc, char *argv[])
 
 
 
-    if (modes.ispy)
-      ispy_init ("python", geo.wcycle);
+#if DEBUG
+	ispy_init("python", geo.wcycle);
+#endif
 
 	geo.n_ioniz = 0.0;
 	geo.lum_ioniz = 0.0;
@@ -2057,8 +2015,9 @@ main (int argc, char *argv[])
 	if (geo.rt_mode == 2)
 	  Log("Luminosity taken up by adiabatic kpkt destruction %18.12e number of packets %d\n", zz_adiab, nn_adiab);
 
-    if (modes.print_windrad_summary)
-	  wind_rad_summary (w, windradfile, "a");
+#if DEBUG
+	wind_rad_summary(w, windradfile, "a");
+#endif
 
 
 
@@ -2231,8 +2190,9 @@ main (int argc, char *argv[])
 
 
 
-    if (modes.ispy)
-      ispy_close ();
+#if DEBUG
+	ispy_close();
+#endif
 
 	/* 
 	 * Calculate and store the amount of heating of the disk due to radiation impinging on the disk 
@@ -2255,7 +2215,7 @@ main (int argc, char *argv[])
 	 * In a diagnostic mode save the wind file for each cycle (from thread 0) 
 	 */
 
-      if (modes.keep_ioncycle_windsaves)
+	if (diag_on_off)
 	{
 	  strcpy(dummy, "");
 	  sprintf(dummy, "python%02d.wind_save", geo.wcycle);
@@ -2452,8 +2412,9 @@ main (int argc, char *argv[])
 
 	xsignal(root, "%-20s Starting %d of %d spectral cycle \n", "NOK", geo.pcycle, geo.pcycles);
 
-    if (modes.ispy)
-      ispy_init ("python", geo.pcycle + 1000);
+#if DEBUG
+	ispy_init("python", geo.pcycle + 1000);
+#endif
 
 	Log("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle, geo.pcycles);
 	Log_flush();				/* NSH June 13 Added call to flush logfile */
@@ -2492,8 +2453,9 @@ main (int argc, char *argv[])
 
 	trans_phot(w, p, select_extract);
 
-    if (modes.print_windrad_summary)
-      wind_rad_summary (w, windradfile, "a");
+#if DEBUG
+	wind_rad_summary(w, windradfile, "a");
+#endif
 
 	spectrum_create(p, freqmin, freqmax, nangles, select_extract);
 
@@ -2814,7 +2776,9 @@ photon_checks (PhotPtr p, double freqmin, double freqmax, char *comment)
    * especially if they are disk photons generated right up against one of the frequency limits 04aug--ksl-increased limit from 0.02 to
    * 0.03, e.g from 6000 km/s to 9000 km/s 11apr--NSH-decreased freqmin to 0.4, to take account of double redshifted photons. shift. 
    */
-  Debug ("photon_checks: %s\n", comment);
+#if DEBUG
+  Log("photon_checks: %s\n", comment);
+#endif
   freqmax *= (1.8);
   freqmin *= (0.6);
   for (nn = 0; nn < NPHOT; nn++)
@@ -2853,11 +2817,12 @@ photon_checks (PhotPtr p, double freqmin, double freqmax, char *comment)
 	  Error("photon_checks: Exiting because too many bad photons generated\n");
 	  exit(0);
 	}
-    }
-  Log ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
-
+  }
+  Log("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
+#if DEBUG
   if (nnn == 0)
-    Debug ("photon_checks: All photons passed checks successfully\n");
+	Log("photon_checks: All photons passed checks successfully\n");
+#endif
   return (0);
 }
 
@@ -3119,50 +3084,6 @@ read_non_standard_disk_profile (char *tprofile)
   }
 
   fclose(fptr);
-
-  return (0);
-}
-
-
-/***********************************************************
-				University of Southampton
-
-Synopsis:
-	init_advanced_modes simply initialises the set of 
-	advanced modes stored in the modes structure to a 
-	default value. For now, this is 0 (off).
-
-Arguments:	
-    none	
-
-Returns:
-    just initialises modes which is declared in python.h
- 
-Description:	
-	
-Notes:
-    see #111 and #120
-
-History:
-    1410 -- JM -- Coded
-**************************************************************/
-
-
-int init_advanced_modes()
-{ 
-  modes.iadvanced = 0;                // this is controlled by the -d flag, global mode control.
-  modes.save_cell_stats = 0;          // want to save photons statistics by cell
-  modes.ispy = 0;                 	  // want to use the ispy function
-  modes.keep_ioncycle_windsaves = 0;  // want to save wind file each ionization cycle
-  modes.track_resonant_scatters = 0;  // want to track resonant scatters
-  modes.save_extract_photons = 0;     // we want to save details on extracted photons
-  modes.print_windrad_summary = 0;    // we want to print the wind rad summary each cycle
-  modes.adjust_grid = 0;              // the user wants to adjust the grid scale
-  modes.diag_on_off = 0;              // extra diagnostics
-  modes.use_debug = 0;
-  modes.print_dvds_info = 0;          // print out information on velocity gradients
-  write_atomicdata = 0;               // print out summary of atomic data 
-  //note this is defined in atomic.h, rather than the modes structure 
 
   return (0);
 }

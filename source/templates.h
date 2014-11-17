@@ -25,7 +25,6 @@ int get_spectype(int yesno, char *question, int *spectype);
 int qdisk_init(void);
 int qdisk_save(char *diskfile, double ztot);
 int read_non_standard_disk_profile(char *tprofile);
-int init_advanced_modes(void);
 /* photon2d.c */
 int translate(WindPtr w, PhotPtr pp, double tau_scat, double *tau, int *nres);
 int translate_in_space(PhotPtr pp);
@@ -120,7 +119,7 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 int select_continuum_scattering_process(double kap_cont, double kap_es, double kap_ff, PlasmaPtr xplasma);
 double kappa_bf(PlasmaPtr xplasma, double freq, int macro_all);
 int kbf_need(double fmin, double fmax);
-double sobolev(WindPtr one, double x[], double den_ion, struct lines *lptr, double dvds);
+double sobolev(WindPtr one, PhotPtr p, double den_ion, struct lines *lptr, double dvds);
 int doppler(PhotPtr pin, PhotPtr pout, double v[], int nres);
 int scatter(PhotPtr p, int *nres, int *nnscat);
 /* radiation.c */
@@ -132,6 +131,7 @@ double sigma_phot_verner(struct innershell *x_ptr, double freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
 int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave);
+int save_photon_stats(WindPtr one, PhotPtr p, double ds);
 double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
 /* wind_updates2d.c */
 int wind_update(WindPtr (w));
@@ -255,8 +255,6 @@ double badnell_gs_rr(int nion, double T);
 double milne_gs_rr(int nion, double T);
 /* diag.c */
 int open_diagfile(void);
-int get_extra_diagnostics(void);
-int save_photon_stats(WindPtr one, PhotPtr p, double ds);
 /* sv.c */
 int get_sv_wind_params(void);
 double sv_velocity(double x[], double v[]);
@@ -298,7 +296,7 @@ int where_in_2dcell(int ichoice, double x[], int n, double *fx, double *fz);
 int wind_n_to_ij(int n, int *i, int *j);
 int wind_ij_to_n(int i, int j, int *n);
 /* density.c */
-double get_ion_density(double x[], int nion);
+double get_ion_density(PhotPtr p, int nion);
 /* detail.c */
 int detailed_balance(PlasmaPtr xplasma, int nelem, double newden[]);
 int rebalance(double rates_up[], double rates_down[], double fraction[], int ntot);
@@ -508,8 +506,6 @@ int convergence_summary(WindPtr w, char rootname[], int ochoice);
 int convergence_all(WindPtr w, char rootname[], int ochoice);
 int model_bands(WindPtr w, char rootname[], int ochoice);
 int heatcool_summary(WindPtr w, char rootname[], int ochoice);
-int complete_physical_summary(WindPtr w, char rootname[], int ochoice);
-int find_ion(int element, int istate);
 /* py_wind_ion.c */
 int ion_summary(WindPtr w, int element, int istate, int iswitch, char rootname[], int ochoice);
 int tau_ave_summary(WindPtr w, int element, int istate, double freq, char rootname[], int ochoice);

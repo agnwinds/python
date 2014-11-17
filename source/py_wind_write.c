@@ -146,10 +146,6 @@ are linear, and x otherwise.  This is not particularly transparent ?? ksl */
 
       if (geo.coord_type == SPHERICAL)
 	{
-    
-    /* JM 1411 -- added header for reading with astropy ascii module */
-    fprintf (fptr, "r var inwind i\n");
-
 	  for (i = 0; i < NDIM; i++)
 	    {
 	      fprintf (fptr, "%8.2e %8.2e %3d %3d \n", wmain[i].r, aaa[i],
@@ -158,10 +154,6 @@ are linear, and x otherwise.  This is not particularly transparent ?? ksl */
 	}
       else
 	{
-
-    /* JM 1411 -- added header for reading with astropy ascii module */
-    fprintf (fptr, "x z var inwind i j\n");
-
 	  for (i = 0; i < NDIM2; i++)
 	    {
 	      wind_n_to_ij (i, &ii, &jj);
@@ -206,9 +198,6 @@ are linear, and x otherwise.  This is not particularly transparent ?? ksl */
       fprintf (fptr, "# Resampled outputs\n");
       for (jj = 0; jj < ODIM; jj++)
 	{
-    /* JM 1411 -- added header for reading with astropy ascii module */
-    fprintf (fptr, "r z var\n");
-
 	  z = zmin + (zmax - zmin) * jj / (ODIM - 1);
 	  for (ii = 0; ii < ODIM; ii++)
 	    {
