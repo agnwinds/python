@@ -97,10 +97,7 @@ History:
 ************************************************************/
 
 int
-matom (p, nres, escape)
-     PhotPtr p;
-     int *nres;
-     int *escape;
+matom (PhotPtr p, int *nres, int* escape)
 {
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
@@ -526,9 +523,8 @@ matom (p, nres, escape)
 struct lines *b12_line_ptr;
 double b12_a;
 
-double
-b12 (line_ptr)
-     struct lines *line_ptr;
+double 
+b12 (struct lines *line_ptr)
 {
   double freq;
 
@@ -576,11 +572,8 @@ times the integral of   a(nu) nu2 exp [(chi- h nu)/kT].
 */
 #define ALPHA_SP_CONSTANT 5.79618e-36
 
-double
-alpha_sp (cont_ptr, xplasma, ichoice)
-     struct topbase_phot *cont_ptr;
-     PlasmaPtr xplasma;
-     int ichoice;
+double 
+alpha_sp (struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice)
 {
   double alpha_sp_value;
   double fthresh, flast;
@@ -618,9 +611,8 @@ alpha_sp (cont_ptr, xplasma, ichoice)
 /* alpha_sp_integrand. This returns the integrand for alpha_sp at a chosen
    frequency*/
 
-double
-alpha_sp_integrand (freq)
-     double freq;		//frequency 
+double 
+alpha_sp_integrand (double freq)		//frequency 
 {
   double fthresh;
   double x;
@@ -694,11 +686,8 @@ History:
           
 ************************************************************/
 
-int
-kpkt (p, nres, escape)
-     PhotPtr p;
-     int *nres;
-     int *escape;
+int 
+kpkt (PhotPtr p, int *nres, int *escape)
 {
 
   int i;
@@ -1182,11 +1171,8 @@ History:
 
 ************************************************************/
 
-int
-fake_matom_bb (p, nres, escape)
-     PhotPtr p;
-     int *nres;
-     int *escape;
+int 
+fake_matom_bb (PhotPtr p, int *nres, int *escape)
 {
   double kprb, rprb;
   WindPtr one;
@@ -1308,11 +1294,8 @@ History:
 
 ************************************************************/
 
-int
-fake_matom_bf (p, nres, escape)
-     PhotPtr p;
-     int *nres;
-     int *escape;
+int 
+fake_matom_bf (PhotPtr p, int *nres, int *escape)
 {
   WindPtr one;
   PlasmaPtr xplasma;
@@ -1380,10 +1363,8 @@ History:
     1404  	jm  77a -- Now only clean for population inversions if levels have a radiative transition between them #76
 ************************************************************/
 
-int
-macro_pops (xplasma, xne)
-     PlasmaPtr xplasma;
-     double xne;
+int 
+macro_pops (PlasmaPtr xplasma, double xne)
 {
 
   int index_element, index_ion, index_lvl;
@@ -1967,12 +1948,8 @@ History:
 			processed by a macro atom
 ************************************************************/
 
-int
-macro_gov (p, nres, matom_or_kpkt, which_out)
-     PhotPtr p;
-     int *nres;
-     int matom_or_kpkt;
-     int *which_out;
+int 
+macro_gov (PhotPtr p, int *nres, int matom_or_kpkt, int *which_out)
 
 {
   int escape;			//this tells us when the r-packet is escaping 
@@ -2138,8 +2115,8 @@ History:
 
 ************************************************************/
 
-double
-get_kpkt_f ()
+double 
+get_kpkt_f (void)
 {
   int n;
   double lum;
@@ -2190,8 +2167,8 @@ History:
 
 ************************************************************/
 
-double
-get_matom_f ()
+double 
+get_matom_f (void)
 {
   int n, m;
   int mm, ss;
@@ -2628,11 +2605,8 @@ History:
 			and to elimate passing entrie wind structure
 
 ************************************************************/
-int
-photo_gen_kpkt (p, weight, photstart, nphot)
-     PhotPtr p;
-     double weight;
-     int photstart, nphot;
+int 
+photo_gen_kpkt (PhotPtr p, double weight, int photstart, int nphot)
 {
   int photstop;
   int icell;
@@ -2799,11 +2773,8 @@ History:
 			to this through wmain.
 
 ************************************************************/
-int
-photo_gen_matom (p, weight, photstart, nphot)
-     PhotPtr p;
-     double weight;
-     int photstart, nphot;
+int 
+photo_gen_matom (PhotPtr p, double weight, int photstart, int nphot)
 {
   int photstop;
   int icell;
@@ -2980,12 +2951,8 @@ History:
 
 ************************************************************/
 
-int
-emit_matom (w, p, nres, upper)
-     WindPtr w;
-     PhotPtr p;
-     int *nres;
-     int upper;
+int 
+emit_matom (WindPtr w, PhotPtr p, int *nres, int upper)
 {
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
@@ -3141,10 +3108,8 @@ emit_matom (w, p, nres, upper)
 Calculated following equation 5-79 of Mihalas.
 */
 
-double
-q_ioniz (cont_ptr, electron_temperature)
-     struct topbase_phot *cont_ptr;
-     double electron_temperature;
+double 
+q_ioniz (struct topbase_phot *cont_ptr, double electron_temperature)
 {
   double coeff;
   double gaunt;
@@ -3172,10 +3137,8 @@ q_recomb = 2.07e-16 * gl/gu * exp(E/kT) * q_ioniz
 then substituting the above expression for q_ioniz.
 */
 
-double
-q_recomb (cont_ptr, electron_temperature)
-     struct topbase_phot *cont_ptr;
-     double electron_temperature;
+double 
+q_recomb (struct topbase_phot *cont_ptr, double electron_temperature)
 {
   double coeff;
   double gaunt;

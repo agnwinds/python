@@ -108,10 +108,8 @@ History:
 
 int iicount = 0;
 
-int
-radiation (p, ds)
-     PhotPtr p;
-     double ds;
+int 
+radiation (PhotPtr p, double ds)
 {
   PhotoionizationPtr x_ptr;
   TopPhotPtr x_top_ptr;
@@ -528,10 +526,8 @@ History:
 **************************************************************/
 
 
-double
-kappa_ff (xplasma, freq)
-     PlasmaPtr xplasma;
-     double freq;
+double 
+kappa_ff (PlasmaPtr xplasma, double freq)
 {
   double x;
   double exp ();
@@ -587,10 +583,8 @@ History:
 
 **************************************************************/
 
-double
-sigma_phot (x_ptr, freq)
-     struct photoionization *x_ptr;
-     double freq;
+double 
+sigma_phot (struct photoionization *x_ptr, double freq)
 {
   double ft;
   double x, y;
@@ -662,10 +656,8 @@ History:
 
 **************************************************************/
 
-double
-sigma_phot_topbase (x_ptr, freq)
-     struct topbase_phot *x_ptr;
-     double freq;
+double 
+sigma_phot_topbase (struct topbase_phot *x_ptr, double freq)
 {
   int nmax;
   double xsection;
@@ -730,10 +722,8 @@ sigma_phot_topbase (x_ptr, freq)
  
 **************************************************************/
 
-double
-sigma_phot_verner (x_ptr, freq)
-     struct innershell *x_ptr;
-     double freq;
+double 
+sigma_phot_verner (struct innershell *x_ptr, double freq)
 {
   double ft;
   double y;
@@ -786,10 +776,8 @@ History:
 
 **************************************************************/
 
-double
-den_config (xplasma, nconf)
-     PlasmaPtr xplasma;
-     int nconf;
+double 
+den_config (PlasmaPtr xplasma, int nconf)
 {
   double density;
   int nnlev, nion;
@@ -849,8 +837,8 @@ History:
 **************************************************************/
 
 
-double
-pop_kappa_ff_array ()
+double 
+pop_kappa_ff_array (void)
 {
 
   double gsqrd, gaunt, sum;
@@ -928,12 +916,8 @@ History:
  
 **************************************************************/
 
-int
-update_banded_estimators (xplasma, p, ds, w_ave)
-     PlasmaPtr xplasma;
-     PhotPtr p;
-     double ds;
-     double w_ave;
+int 
+update_banded_estimators (PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave)
 {
   int i;
 
@@ -1053,11 +1037,8 @@ History:
 **************************************************************/
 
 
-int
-save_photon_stats (one, p, ds)
-     WindPtr one;
-     PhotPtr p;
-     double ds;
+int 
+save_photon_stats (WindPtr one, PhotPtr p, double ds)
 {
   int i;
 
@@ -1109,11 +1090,8 @@ History:
 
 
 
-double
-mean_intensity (xplasma, freq, mode)
-     PlasmaPtr xplasma;		// Pointer to current plasma cell
-     double freq;		// Frequency of the current photon being tracked
-     int mode;			// mode 1=use BB if no model, mode 2=never use BB
+double 
+mean_intensity (PlasmaPtr xplasma, double freq, int mode)			// mode 1=use BB if no model, mode 2=never use BB
 
 {
   int i;

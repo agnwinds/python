@@ -28,10 +28,8 @@ History:
 #include <string.h>
 #include <math.h>
 #include "atomic.h"
-int
-main (argc, argv)
-     int argc;
-     char *argv[];
+int 
+main (int argc, char *argv[])
 {
   WindPtr w;
   PhotPtr p;

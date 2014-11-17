@@ -48,12 +48,16 @@ Notes:
 History:
 	14aug	-	Cloned from spectrum_summary by SWM
 **************************************************************/
-int delay_spectrum_summary(filename, mode, nspecmin, nspecmax, select_spectype, renorm, loglin)
-	 char filename[], mode[];
-	 int loglin;				/* switch to tell the code if we are utputting a log or a lin */
-	 int nspecmin, nspecmax;
-	 int select_spectype;
-	 double renorm;				/* parameter used to rescale spectrum as it is building up */
+int 
+delay_spectrum_summary (
+    char filename[],
+    char mode[],
+    int nspecmin,
+    int nspecmax,
+    int select_spectype,
+    double renorm,				/* parameter used to rescale spectrum as it is building up */
+    int loglin				/* switch to tell the code if we are utputting a log or a lin */
+)
 
 {
 	FILE *fopen(), *fptr;
@@ -180,9 +184,8 @@ Notes:
 History:
 	14aug	-	Written by SWM
 ***********************************************************/
-int delay_dump_prep(filename, nspec)
-	char filename[];
-	int nspec;
+int 
+delay_dump_prep (char filename[], int nspec)
 {
 	FILE *fopen(), *fptr;
 	char string[LINELENGTH];
@@ -214,19 +217,16 @@ int delay_dump_prep(filename, nspec)
 	/* 
 	 * Write the rest of the header for the spectrum file 
 	 */
-	fprintf(fptr, "# \n# Freq      Weight   "
+	fprintf(fptr, "# \n# Freq      Wavelength  Weight   "
 			"  Last X       Last Y       Last Z     "
 			"  Last L       Last M       Last N     "
-			"Scatters Delay\n");	
+			"Scatters RScatter Delay\n");	
 	fclose(fptr);
 	return(0);
 }
 
-int delay_dump(filename, p, f1, f2, nspec)
-	PhotPtr p;
-	double f1, f2;
-	int nspec;
-	char filename[];
+int 
+delay_dump (char filename[], PhotPtr p, double f1, double f2, int nspec)
 {
 	FILE *fopen(), *fptr;
 	int nphot, k, mscat, mtopbot;
@@ -282,11 +282,11 @@ int delay_dump(filename, p, f1, f2, nspec)
 					observer_plane->lmn[2] = p[nphot].lmn[2];
 					path = p[nphot].path + ds_to_plane(observer_plane,&p[nphot]);
 						/* SWM 15/8/14 - Added path delay in comparison to photon heading straight from origin to rmax*/
-					fprintf(fptr, "%10.5g %10.5g %+10.5e %+10.5e %+10.5e %+10.5g %+10.5g %+10.5g %3d     %10.5g\n", 
-						p[nphot].freq, p[nphot].w, 
+					fprintf(fptr, "%10.5g %10.5g %10.5g %+10.5e %+10.5e %+10.5e %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g\n", 
+						p[nphot].freq, C * 1e8 / p[nphot].freq, p[nphot].w, 
 						p[nphot].x[0], p[nphot].x[1], p[nphot].x[2], 
 						p[nphot].lmn[0], p[nphot].lmn[1], p[nphot].lmn[2], 
-						p[nphot].nscat, path);
+						p[nphot].nscat, p[nphot].nrscat, path);
 				}
 			}
 		}

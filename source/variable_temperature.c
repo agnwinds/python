@@ -88,10 +88,8 @@ variable_temperature (xplasama, mode)  modifies the densities of ions, levels, a
 
 double xxxne, xip;
 
-int
-variable_temperature (xplasma, mode)
-     PlasmaPtr xplasma;
-     int mode;			//   6=correct using dilute blackbody, 7=power law
+int 
+variable_temperature (PlasmaPtr xplasma, int mode)			//   6=correct using dilute blackbody, 7=power law
 {
   int nion;			
   double xnew, xsaha;
@@ -446,10 +444,8 @@ variable_temperature (xplasma, mode)
 **************************************************************/
 int bb_correct_err = 0;
 
-double
-bb_correct_2 (xtemp, t_r, www, nion)
-     double t_r, xtemp, www;
-     int nion;
+double 
+bb_correct_2 (double xtemp, double t_r, double www, int nion)
 {
   double q;
   int ion_lower, n;
@@ -571,9 +567,8 @@ bb_correct_2 (xtemp, t_r, www, nion)
 
 
 
-double
-temp_func (solv_temp)
-     double solv_temp;
+double 
+temp_func (double solv_temp)
 {
   double answer;
 //      Log ("xxxne=%e, xip=%e\n",xxxne,xip);
@@ -628,10 +623,8 @@ double xpl_alpha, xpl_w, xpl_logw;
 double xexp_temp, xexp_w;
 
 
-double
-pl_correct_2 (xtemp, nion)
-     double xtemp;
-     int nion;
+double 
+pl_correct_2 (double xtemp, int nion)
 {
   double q;
   int ion_lower, n, j;
@@ -847,9 +840,8 @@ This is almost identical to code written to compute the sim power law correction
  ************************************************************************/
 
 
-double
-tb_planck1 (freq)
-     double freq;
+double 
+tb_planck1 (double freq)
 {
   double answer, bbe;
   bbe = exp ((H * freq) / (BOLTZMANN * qromb_temp));
@@ -956,9 +948,8 @@ This is almost identical to code written to compute the sim power law correction
 
 
 
-double
-tb_logpow1 (freq)
-     double freq;
+double 
+tb_logpow1 (double freq)
 {
   double answer;
 
@@ -1090,9 +1081,8 @@ This is almost identical to code written to compute the sim power law correction
 
 
 
-double
-tb_exp1 (freq)
-     double freq;
+double 
+tb_exp1 (double freq)
 {
   double answer;
 

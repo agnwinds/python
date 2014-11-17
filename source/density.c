@@ -37,10 +37,8 @@ History:
 
 
 
-double
-get_ion_density (p, nion)
-     PhotPtr p;
-     int nion;
+double 
+get_ion_density (PhotPtr p, int nion)
 {
   double dd;
   int nn, nnn[4], nelem;

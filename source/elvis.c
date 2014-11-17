@@ -57,8 +57,8 @@ History:
 	 		real code modifications
 **************************************************************/
 
-int
-get_elvis_wind_params ()
+int 
+get_elvis_wind_params (void)
 {
   double windmin, windmax, theta_min, theta_max;
   double qromb (), elvis_wind_mdot_integral ();
@@ -148,9 +148,8 @@ History:
  
 **************************************************************/
 
-double
-elvis_velocity (x, v)
-     double x[], v[];
+double 
+elvis_velocity (double x[], double v[])
 {
   double r, rzero, theta, speed;
   double ldist, zzz, v_escape, vl;
@@ -284,9 +283,8 @@ History:
  
 **************************************************************/
 
-double
-elvis_rho (x)
-     double x[];
+double 
+elvis_rho (double x[])
 {
   double r, rzero, theta;
   double ldist;
@@ -412,9 +410,10 @@ History:
 **************************************************************/
 
 
-double
-elvis_find_wind_rzero (p)
-     double p[];		/* Note that p is a 3 vector and not a photon structure */
+double 
+elvis_find_wind_rzero (
+    double p[]		/* Note that p is a 3 vector and not a photon structure */
+)
 {
   double x, z;
   double elvis_zero_r ();
@@ -495,9 +494,8 @@ History:
 
 double zero_p[3];
 
-int
-elvis_zero_init (p)
-     double p[];
+int 
+elvis_zero_init (double p[])
 {
   stuff_v (p, zero_p);
   zero_p[2] = fabs (zero_p[2]);	/* Required to get correct 
@@ -508,9 +506,8 @@ elvis_zero_init (p)
 /* This routine is used to test whether a guess of r_zero is correct.  If
    you have the answer exactly then elvis_zero_r will return 0 */
 
-double
-elvis_zero_r (r)
-     double r;
+double 
+elvis_zero_r (double r)
 {
   double theta;
   double rho, rho_guess;
@@ -551,9 +548,8 @@ History:
  
 **************************************************************/
 
-double
-elvis_theta_wind (r)
-     double r;
+double 
+elvis_theta_wind (double r)
 {
   double theta;
   if (r <= (geo.sv_rmin + geo.elvis_offset * tan (geo.sv_thetamin)))
@@ -594,9 +590,8 @@ History:
  
 **************************************************************/
 
-double
-elvis_wind_mdot_integral (r)
-     double r;
+double 
+elvis_wind_mdot_integral (double r)
 {
   double x;
   double elvis_theta_wind ();
@@ -655,10 +650,8 @@ History:
  
 **************************************************************/
 
-double
-ds_to_pillbox (pp, rmin, rmax, height)
-     PhotPtr pp;
-     double rmin, rmax, height;
+double 
+ds_to_pillbox (PhotPtr pp, double rmin, double rmax, double height)
 {
 
   struct photon ptest;

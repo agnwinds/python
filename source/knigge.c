@@ -55,8 +55,8 @@ History:
 			has been initialized in cgs units
 **************************************************************/
 
-int
-get_knigge_wind_params ()
+int 
+get_knigge_wind_params (void)
 {
   double kn_wind_mdot_integral ();
   double qromb ();
@@ -231,9 +231,8 @@ History:
 #define kfudge 1.01
 
 
-double
-kn_velocity (x, v)
-     double x[], v[];
+double 
+kn_velocity (double x[], double v[])
 {
   double r, rzero, theta;
   double ldist, zzz, v_escape, vl;
@@ -372,9 +371,8 @@ History:
  
 **************************************************************/
 
-double
-kn_rho (x)
-     double x[];
+double 
+kn_rho (double x[])
 {
   double r, rzero;
   double dd;
@@ -440,9 +438,8 @@ History:
 **************************************************************/
 
 
-double
-kn_vzero (r)
-     double r;
+double 
+kn_vzero (double r)
 {
   double tref, tdisk ();
   double t, teff ();
@@ -480,9 +477,8 @@ History:
  
 **************************************************************/
 
-double
-kn_wind_mdot_integral (r)
-     double r;
+double 
+kn_wind_mdot_integral (double r)
 {
   double tref, tdisk ();
   double t, teff ();
@@ -516,9 +512,8 @@ History:
  
 **************************************************************/
 
-double
-kn_rho_zero (r)
-     double r;
+double 
+kn_rho_zero (double r)
 {
   double tref, tdisk ();
   double t, teff ();

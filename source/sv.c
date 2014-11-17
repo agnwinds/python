@@ -40,8 +40,8 @@ History:
 	11aug	ksl	70b - kluge to get better xscale with compton torus
 **************************************************************/
 
-int
-get_sv_wind_params ()
+int 
+get_sv_wind_params (void)
 {
   double windmin, windmax, theta_min, theta_max;
   double qromb (), sv_wind_mdot_integral ();
@@ -148,9 +148,8 @@ History:
  
 **************************************************************/
 
-double
-sv_velocity (x, v)
-     double x[], v[];
+double 
+sv_velocity (double x[], double v[])
 {
   double r, rzero, theta, speed;
   double ldist, zzz, v_escape, vl;
@@ -263,9 +262,8 @@ History:
  
 **************************************************************/
 
-double
-sv_rho (x)
-     double x[];
+double 
+sv_rho (double x[])
 {
   double r, rzero, theta;
   double ldist;
@@ -365,9 +363,10 @@ History:
 **************************************************************/
 
 
-double
-sv_find_wind_rzero (p)
-     double p[];		/* Note that p is a 3 vector and not a photon structure */
+double 
+sv_find_wind_rzero (
+    double p[]		/* Note that p is a 3 vector and not a photon structure */
+)
 {
   double x, z;
   double sv_zero_r ();
@@ -446,9 +445,8 @@ History:
 
 double zero_p[3];
 
-int
-sv_zero_init (p)
-     double p[];
+int 
+sv_zero_init (double p[])
 {
   stuff_v (p, zero_p);
   zero_p[2] = fabs (zero_p[2]);	/* Required to get correct 
@@ -459,9 +457,8 @@ sv_zero_init (p)
 /* This routine is used to test whether a guess of r_zero is correct.  If
    you have the answer exactly then sv_zero_r will return 0 */
 
-double
-sv_zero_r (r)
-     double r;
+double 
+sv_zero_r (double r)
 {
   double theta;
   double rho, rho_guess;
@@ -504,9 +501,8 @@ History:
  
 **************************************************************/
 
-double
-sv_theta_wind (r)
-     double r;
+double 
+sv_theta_wind (double r)
 {
   double theta;
   if (r <= geo.sv_rmin)
@@ -545,9 +541,8 @@ History:
  
 **************************************************************/
 
-double
-sv_wind_mdot_integral (r)
-     double r;
+double 
+sv_wind_mdot_integral (double r)
 {
   double x;
   double sv_theta_wind ();

@@ -33,10 +33,8 @@ double g1, g2, xne, xip;
 #define SAHA 4.82907e15
 double xip, xxxne, qromb_temp;
 #include "python.h"
-int
-main (argc, argv)
-     int argc;
-     char *argv[];
+int 
+main (int argc, char *argv[])
 {
   WindPtr w;
   PhotPtr p;

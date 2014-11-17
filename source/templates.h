@@ -459,6 +459,15 @@ int matom_emiss_report(void);
 /* direct_ion.c */
 int compute_di_coeffs(double T);
 double total_di(WindPtr one, double t_e);
+/* reverb.c */
+int delay_spectrum_summary(char filename[], char mode[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin);
+int delay_dump_prep(char filename[], int nspec);
+int delay_dump(char filename[], PhotPtr p, double f1, double f2, int nspec);
+/* wind_keplerian.c */
+int get_wind_keplerian_params(void);
+double wind_keplerian_velocity(double x[], double v[]);
+double wind_keplerian_rho(double x[]);
+int wind_keplerian_cyl_volumes(WindPtr w, int icomp);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

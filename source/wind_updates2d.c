@@ -91,9 +91,8 @@ History:
 
 int num_updates = 0;
 
-int
-wind_update (w)
-WindPtr (w);
+int 
+wind_update (WindPtr (w))
 {
   int n, i, j;
   double trad, nh;
@@ -913,8 +912,8 @@ History:
 **************************************************************/
 
 
-int
-wind_rad_init ()
+int 
+wind_rad_init (void)
 {
   int n, i;
   int njump;
@@ -1080,10 +1079,8 @@ History:
 
 int istat_wind_rad_summary = 0;
 
-int
-wind_rad_summary (w, filename, mode)
-     WindPtr w;
-     char filename[], mode[];
+int 
+wind_rad_summary (WindPtr w, char filename[], char mode[])
 {
   FILE *fopen (), *fptr;
   int n;
@@ -1160,8 +1157,8 @@ History:
 **************************************************************/
 
 
-int
-wind_ip ()
+int 
+wind_ip (void)
 {
   int n;
   float r;

@@ -77,8 +77,8 @@ History:
 **************************************************************/
 
 
-int
-define_wind ()
+int 
+define_wind (void)
 {
   int i, j, n;
   int nn;
@@ -184,7 +184,11 @@ recreated when a windfile is read into the program
     }
   else if (geo.coord_type == CYLIND)
     {
-      cylind_volumes (w, W_ALL_INWIND);
+	  if(geo.wind_type == 10) {
+		wind_keplerian_cyl_volumes(w, W_ALL_INWIND);
+	  } else {
+		cylind_volumes (w, W_ALL_INWIND);
+	  }
     }
   else if (geo.coord_type == RTHETA)
     {
@@ -199,7 +203,11 @@ recreated when a windfile is read into the program
     }
   else if (geo.coord_type == CYLVAR)
     {
-      cylvar_volumes (w, W_ALL_INWIND);
+	  if(geo.wind_type == 10) {
+		wind_keplerian_cylvar_volumes(w, W_ALL_INWIND);
+	  } else {
+	    cylvar_volumes (w, W_ALL_INWIND);
+	  }
     }
   else
     {
@@ -283,7 +291,7 @@ recreated when a windfile is read into the program
 	      wind_n_to_ij (n, &i, &j);
 	      Error
 		("wind2d: Cell %3d (%2d,%2d) has %d corners in wind, but zero volume\n",
-		 n, i, j, n_inwind);
+		 n, i, j);
 	      w[n].inwind = W_IGNORE;
 	    }
 	  if (w[n].inwind == W_PART_INWIND && n_inwind == 4)
@@ -352,7 +360,7 @@ be optional which variables beyond here are moved to structures othere than Wind
       if (geo.wind_type == 3)
 	{
 	  plasmamain[n].t_r = proga_temp (x)/0.9; //This is a kluge, it means that we get the temperature we expect, if we read in a temperature from a zeus file - otherwise it is multiplies by 0.9 //
-	}
+	}	
       else
 	{
 	  plasmamain[n].t_r = geo.twind;
@@ -553,9 +561,8 @@ be optional which variables beyond here are moved to structures othere than Wind
 
 int wig_n;
 double wig_x, wig_y, wig_z;
-int
-where_in_grid (x)
-     double x[];
+int 
+where_in_grid (double x[])
 {
   int n;
   double fx, fz;
@@ -658,10 +665,8 @@ History:
 **************************************************************/
 int ierr_vwind = 0;
 
-int
-vwind_xyz (p, v)
-     PhotPtr p;
-     double v[];
+int 
+vwind_xyz (PhotPtr p, double v[])
 {
   int i;
   double rho, r;
@@ -796,9 +801,8 @@ History:
 **************************************************************/
 
 int wind_div_err = (-3);
-int
-wind_div_v (w)
-     WindPtr w;
+int 
+wind_div_v (WindPtr w)
 {
   int icell;
   double x_zero[3], v2[3], v1[3];
@@ -884,10 +888,8 @@ History:
 
 */
 
-double
-rho (w, x)
-     WindPtr w;
-     double x[];
+double 
+rho (WindPtr w, double x[])
 {
   int n, where_in_grid ();
   double dd;
@@ -930,11 +932,8 @@ from 0 to r, and in a sphere of radius r
 */
 
 #define NSTEPS 100
-int
-mdot_wind (w, z, rmax)
-     WindPtr w;
-     double z;			// The height (usually small) above the disk at which mdot will be calculated
-     double rmax;		// The radius at which mdot will be calculated
+int 
+mdot_wind (WindPtr w, double z, double rmax)		// The radius at which mdot will be calculated
 {
   struct photon p;		//needed because vwind_xyz has a call which involves a photon
   double r, dr, rmin;
@@ -1008,11 +1007,8 @@ History:
  
 **************************************************************/
 
-int
-get_random_location (n, icomp, x)
-     int n;			// Cell in which to create postion
-     int icomp;			// The component we want the position in
-     double x[];		// Returned position
+int 
+get_random_location (int n, int icomp, double x[])		// Returned position
 {
 
   if (geo.coord_type == CYLIND)
@@ -1042,8 +1038,8 @@ get_random_location (n, icomp, x)
 }
 
 
-int
-zero_scatters ()
+int 
+zero_scatters (void)
 {
   int n, j;
 
@@ -1090,10 +1086,8 @@ History
 			could be called from elsewhere
  */
 
-int
-check_corners_inwind (n, icomp)
-     int n;
-     int icomp;			// check corners for this component
+int 
+check_corners_inwind (int n, int icomp)			// check corners for this component
 {
   int n_inwind;
   int i, j;

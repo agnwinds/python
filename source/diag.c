@@ -36,8 +36,8 @@ History:
 int eplinit = 0;
 int pstatinit = 0;		/*To say if we have checked to see if we need to log photons */
 
-int
-open_diagfile ()
+int 
+open_diagfile (void)
 {
   FILE *cellfile;		/*File that may or may not exist, pointing to cells we want to write out photon stats for */
   int cell;			/*Temporary storage of cell to use */

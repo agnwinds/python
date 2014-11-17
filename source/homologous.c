@@ -31,8 +31,8 @@ History:
 **************************************************************/
 
 
-int
-get_homologous_params ()
+int 
+get_homologous_params (void)
 {
   Log ("Creating a homolgous wind model\n");
 
@@ -110,9 +110,8 @@ History:
  
 **************************************************************/
 
-double
-homologous_velocity (x, v)
-     double x[], v[];
+double 
+homologous_velocity (double x[], double v[])
 {
   double r, speed;
   double length ();
@@ -161,9 +160,8 @@ History:
  
 **************************************************************/
 
-double
-homologous_rho (x)
-     double x[];
+double 
+homologous_rho (double x[])
 {
   double r, rho, length ();
 

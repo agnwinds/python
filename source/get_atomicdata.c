@@ -147,9 +147,8 @@ History:
 #define LINELENGTH 400
 #define MAXWORDS    20
 
-int
-get_atomic_data (masterfile)
-     char masterfile[];
+int 
+get_atomic_data (char masterfile[])
 {
 
   FILE *fopen (), *fptr, *mptr, *vptr;
@@ -2774,8 +2773,8 @@ arrays that are ordered a useful frequency order.
 			compiler does not allocate a very large stack.
  */
 
-int
-index_lines ()
+int 
+index_lines (void)
 {
   float *freqs, foo;
   int *index, ioo;
@@ -2822,8 +2821,8 @@ index_lines ()
 	01oct	ksl	Adapted from index_lines as part to topbase 
 			addition to python 
 */
-int
-index_phot_top ()
+int 
+index_phot_top (void)
 {
   float *freqs, foo;
   int *index, ioo;
@@ -2867,8 +2866,8 @@ index_phot_top ()
 			part of attempt to speed up the photoionization
 			parts of pthon
 */
-int
-index_phot_verner ()
+int 
+index_phot_verner (void)
 {
   float *freqs, foo;
   int *index, ioo;
@@ -2914,8 +2913,8 @@ index_phot_verner ()
 
  */
 
-int
-index_collisions ()
+int 
+index_collisions (void)
 {
   float *freqs, foo;
   int *index, ioo;
@@ -2959,10 +2958,8 @@ index_collisions ()
 
 /* Numerical recipes routine used by index_lines which in turn is used by get_atomic_data */
 
-void
-indexx (n, arrin, indx)
-     int n, indx[];
-     float arrin[];
+void 
+indexx (int n, float arrin[], int indx[])
 {
   int l, j, ir, indxt, i;
   float q;
@@ -3057,9 +3054,8 @@ History:
 
 
 
-int
-limit_lines (freqmin, freqmax)
-     double freqmin, freqmax;
+int 
+limit_lines (double freqmin, double freqmax)
 {
 
   int nmin, nmax, n;
@@ -3145,8 +3141,8 @@ History:
 
 
 struct photoionization *xver;	//Verner & Ferland description of a photoionization x-section
-int
-tabulate_verner ()
+int 
+tabulate_verner (void)
 {
 
   double f1,f2,dlogf,lf1,lf2,freq;

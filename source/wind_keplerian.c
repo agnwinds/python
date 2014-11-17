@@ -1,11 +1,9 @@
-/* The routines in this file define and summarize the properties of the wind.  The routines here are
-   specific to the SV description of a wind. It is only useful in the 2-d version of the code.
+/* The routines in this file define and summarize the properties of the wind.  The routines here are specific to the SV
+   description of a wind. It is only useful in the 2-d version of the code.
 
-   This file was created in 98apr in order to being to isolate the SV description from the more
-   generic parts of the wind.  Major modifications, mostly moving new code here and
-   creating the remaining subroutines to completely concentrate the sv dependent routines
-   here were made in 98dec.
- */
+   This file was created in 98apr in order to being to isolate the SV description from the more generic parts of the wind.
+   Major modifications, mostly moving new code here and creating the remaining subroutines to completely concentrate the sv
+   dependent routines here were made in 98dec. */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,6 +11,16 @@
 
 #include "atomic.h"
 #include "python.h"
+
+typedef struct wind_keplerian
+{
+	double d_rad_min, d_rad_max;
+	double d_theta_min, d_theta_max;
+	double d_density;
+	double d_temperature;
+	double d_height;
+} wind_keplerian_dummy, *Wind_Keplerian_Ptr;
+Wind_Keplerian_Ptr w_keplerian;
 
 /***********************************************************
                                        Space Telescope Science Institute
@@ -37,93 +45,47 @@ History:
         080518  ksl     60a - geo should contain only cgs units
 	11aug	ksl	70b - kluge to get better xscale with compton torus
 **************************************************************/
-double d_wind_keplerian_density;
-double d_wind_keplerian_temperature;
-
-int
-get_sv_wind_params ()
+int get_wind_keplerian_params(void)
 {
-  double windmin, windmax, theta_min, theta_max;
-  double qromb (), sv_wind_mdot_integral ();
+	double windmin, windmax;
+	w_keplerian = (Wind_Keplerian_Ptr) calloc(sizeof(wind_keplerian_dummy), 1);
 
-  Log ("Creating an SV wind model for a Cataclysmic Variable\n");
+	Log("wind_keplerian: Creating wind for simple Keplerian disk\n");
+	w_keplerian->d_theta_min = 0;
+	w_keplerian->d_theta_max = 0;
+	windmin = 2.8e9 / geo.rstar;
+	windmax = 8.4e9 / geo.rstar;
+	rddoub("wind_keplerian.diskmin(units_of_rstar)", &windmin);
+	rddoub("wind_keplerian.diskmax(units_of_rstar)", &windmax);
+	w_keplerian->d_rad_min = windmin * geo.rstar;
+	w_keplerian->d_rad_max = windmax * geo.rstar;
 
-  geo.wind_mdot /= (MSOL / YR);	// Convert to MSOL/YR for easy of data entry
-  rddoub ("wind.mdot(msol/yr)", &geo.wind_mdot);
-  geo.wind_mdot *= MSOL / YR;
+	rddoub("wind_keplerian.density()", &w_keplerian->d_density);
+	rddoub("wind_keplerian.height()", &w_keplerian->d_height);
+	geo.wind_rmin = geo.rstar;
+	geo.wind_rmax = geo.rmax;
+	geo.wind_rho_min = w_keplerian->d_rad_min;
+	geo.wind_rho_max = w_keplerian->d_rad_max * RADIAN;
+	geo.wind_thetamin = w_keplerian->d_theta_min;
+	geo.wind_thetamax = w_keplerian->d_theta_max;
+	geo.xlog_scale = w_keplerian->d_rad_min;
 
+	/* !! 70b - This change is to accomodate the torus, but it is not obvious this is the best way to set the scales now. It
+	   might be better do do this in make_grid!! */
+	if (geo.compton_torus && geo.compton_torus_rmin < geo.xlog_scale)
+	{
+		geo.xlog_scale = geo.compton_torus_rmin;
+	}
+	geo.zlog_scale = w_keplerian->d_height;
 
-  geo.sv_rmin = 2.8e9;
-  geo.sv_rmax = 8.4e9;
-  geo.sv_thetamin = 20. / RADIAN;
-  geo.sv_thetamax = 65. / RADIAN;
-  geo.sv_gamma = 1.;
-  geo.sv_v_zero = 6e5;		/* velocity at base of wind */
-  geo.sv_r_scale = 7e10;	/*Accleration length scale for wind */
-  geo.sv_alpha = 1.5;		/* Accleration scale exponent */
-  geo.sv_v_infinity = 3;	/* Final speed of wind in units of escape velocity */
-  geo.sv_lambda = 0.0;		/* Mass loss rate exponent */
-
-  windmin = geo.sv_rmin / geo.rstar;
-  windmax = geo.sv_rmax / geo.rstar;
-  rddoub ("sv.diskmin(units_of_rstar)", &windmin);
-  rddoub ("sv.diskmax(units_of_rstar)", &windmax);
-
-
-  geo.sv_rmin = windmin * geo.rstar;
-  geo.sv_rmax = windmax * geo.rstar;
-
-  theta_min = geo.sv_thetamin * RADIAN;
-  theta_max = geo.sv_thetamax * RADIAN;
-  rddoub ("sv.thetamin(deg)", &theta_min);
-  rddoub ("sv.thetamax(deg)", &theta_max);
-  geo.sv_thetamin = theta_min / RADIAN;
-  geo.sv_thetamax = theta_max / RADIAN;
-
-  rddoub ("sv.mdot_r_exponent", &geo.sv_lambda);	/* Mass loss rate exponent */
-  rddoub ("sv.v_infinity(in_units_of_vescape", &geo.sv_v_infinity);	/* Final speed of wind in units of escape velocity */
-
-  rddoub ("sv.acceleration_length(cm)", &geo.sv_r_scale);	/*Accleration length scale for wind */
-  rddoub ("sv.acceleration_exponent", &geo.sv_alpha);	/* Accleration scale exponent */
-/* Assign the generic parameters for the wind the generic parameters of the wind */
-
-  geo.wind_rmin = geo.rstar;
-  geo.wind_rmax = geo.rmax;
-  geo.wind_rho_min = geo.sv_rmin;
-  geo.wind_rho_max = geo.sv_rmax;
-  geo.wind_thetamin = geo.sv_thetamin;
-  geo.wind_thetamax = geo.sv_thetamax;
-  geo.xlog_scale = geo.sv_rmin;
-
-  /* !! 70b - This change is to accomodate the torus, but it is not obvious this is the
-   * best way to set the scales now. It might be better do do this in make_grid!!  */
-  if (geo.compton_torus && geo.compton_torus_rmin < geo.xlog_scale)
-    {
-      geo.xlog_scale = geo.compton_torus_rmin;
-    }
-
-/*70d - ksl - This change made to give one a chance of being able to do an 
-   agn and a CV with the sv model.  The underlying assumption is that the
-   effective radius provides a good scale factor in the verticla direction.
-   An alternative would be to use sv_rmin.
- */
-
-//OLD70d  geo.zlog_scale = 1e7;
-  geo.zlog_scale = geo.rstar;
-
-/*Now calculate the normalization factor for the wind*/
-
-  geo.mdot_norm =
-    qromb (sv_wind_mdot_integral, geo.sv_rmin, geo.sv_rmax, 1e-6);
-  return (0);
+	return (0);
 }
 
 /***********************************************************
                                        Space Telescope Science Institute
 
- Synopsis:
-	double sv_velocity(x,v) calulates the v of a Schlossman Vitello wind from a position
-	x
+Synopsis:
+	double wind_keplerian_velocity(x,v) calulates the keplerian velocity
 Arguments:		
 	double x[]		the postion for which one desires the velocity
 Returns:
@@ -131,45 +93,31 @@ Returns:
 	
 	The amplitude of the velocity is returned 
 	
-Description:	
-		
-Notes:
-
 History:
- 	98dec	ksl	Coded as part of effort to isolate SV portions of the code.
-	01mar	ksl	Moved mdot_norm calculation from sv_rho to get_sv_params() 
-			since it doesn't need to be recalulated every time
-	04aug	ksl	52 -- Modified to allow for s thick disk, and to return
-			the velocity in cartesian rather than cylindrical coords.
-			These are the same if x is in xz plane.
-	04dec	ksl	54a  -- Minor mod to avoid -O3 warning
-	05jul	ksl	56d  -- Corrected error in the direction calculated for
-			ptest
+	12-2014	Cloned from sv_velocity by SWM
  
 **************************************************************/
-
-double wind_keplerian_velocity (double x[], double v[])
+double wind_keplerian_velocity(double x[], double v[])
 {
-  double r, speed;
-  struct photon ptest;
-  double xtest[3];
-  
-  r = sqrt (x[0] * x[0] + x[1] * x[1]);
-  
-  v[0] = 0;
-  if (r > 0)
-    v[1] = sqrt (G * geo.mstar * geo.sv_rmin) / r;
-  else
-    v[1] = 0;
-  v[2] = 0;
+	double r, speed;
+	double xtest[3];
 
-  if (x[1] != 0.0)
-    {
-      project_from_cyl_xyz (x, v, xtest);
-      stuff_v (xtest, v);
-    }
-  speed = (sqrt (v[0] * v[0] + v[1] * v[1]));
-  return (speed);
+	r = sqrt(x[0] * x[0] + x[1] * x[1]);
+
+	v[0] = 0.;
+	v[2] = 0.;
+	if (r > w_keplerian->d_rad_min)
+		v[1] = sqrt(G * geo.mstar * w_keplerian->d_rad_min) / r;
+	else
+		v[1] = 0;
+
+	if (x[1] != 0.0)
+	{
+		project_from_cyl_xyz(x, v, xtest);
+		stuff_v(xtest, v);
+	}
+	speed = (sqrt(v[0] * v[0] + v[1] * v[1]));
+	return (speed);
 }
 
 /***********************************************************
@@ -182,18 +130,195 @@ Arguments:
 Returns:
 	The density at x is returned in gram/cm**3
 	
-Description:	
-		
-Notes:
-	52 -- If the disk is thick, our intention is that the stream lines
-	trace back to the disk, and have the same properties at that radius
-	as they would have had except for a vertical offset.
+**************************************************************/
+double wind_keplerian_rho(double x[])
+{
+	double r = sqrt(x[0] * x[0] + x[1] * x[1]);
+	if (r < w_keplerian->d_rad_min || r > w_keplerian->d_rad_max || x[2] > w_keplerian->d_height)
+		return (0.0);
+	else
+		return (w_keplerian->d_density);
+}
 
-History:
- 	98dec	ksl	Coded as part of effort to isolate SV portions of the code.
+/***********************************************************
+                                       Space Telescope Science Institute
+
+ Synopsis:
+ 	cylind_volume(w) calculates the wind volume of a cylindrical cell
+	allowing for the fact that some cells 
+
+ Arguments:		
+	WindPtr w;    the entire wind
+ Returns:
+
+ Description:
+	This is a brute-froce integration of the volume 
+
+	ksl--04aug--some of the machinations regarding what to to at the 
+	edge of the wind seem bizarre, like a substiture for figuring out
+	what one actually should be doing.  However, volume > 0 is used
+	for making certain choices in the existing code, and so one does
+	need to be careful.  
+	
+		
+ Notes:
+	Where_in grid does not tell you whether the photon is in the wind or not. 
+ History:
+ 	04aug	ksl	52a -- Moved from wind2d
+	04aug	ksl	52a -- Made the weighting of the integration accurate. In 
+			the process, I introduced variables to make the code
+			more readable.
+	05apr	ksl	55d -- Modified to include the determination of whether
+			a cell was completely in the wind or not.  This
+			functionality had been in define_wind.
+	06nov	ksl	58b: Minor modification to use W_ALL_INWIND, etc.
+			instead of hardcoded values
+	09mar	ksl	68c: Modified so that integration is only carried
+			out when the cell is partially in the wind as
+			evidenced by the fact that only some of the
+			corners of the cell are in the wind.  The intent
+			is to avoid wasting time
+	11aug	ksl	Add ability to determine the volume for different
+			components.  See python.h for explanation of
+			relatinship between PART and ALL
  
 **************************************************************/
-double wind_keplerian_rho (double x[])
+#define RESOLUTION   1000				// Resolution for scanning partial disk section at
+
+int wind_keplerian_cyl_volumes(WindPtr w, int icomp)
 {
-  return (d_wind_keplerian_density);
+	int i, j, n;
+	double rmax, rmin;
+	double zmin, zmax;
+
+	for (i = 0; i < NDIM; i++)
+	{
+		for (j = 0; j < MDIM; j++)
+		{
+			wind_ij_to_n(i, j, &n);		// Find wind index, calc wind cell volume
+			if (i == NDIM - 1)
+			{
+				w[n].inwind == W_NOT_INWIND;
+				w[n].vol = 0.0;
+			}
+			else
+			{
+				rmin = wind_x[i];
+				rmax = wind_x[i + 1];
+				zmin = wind_z[j];
+				zmax = wind_z[j + 1];
+				w[n].inwind = W_ALL_INWIND;
+				w[n].vol = 2 * PI * (rmax * rmax - rmin * rmin) * (zmax - zmin);
+			}
+		}
+	}
+
+	return (0);
+}
+
+int wind_keplerian_cylvar_volumes(WindPtr w, int icomp)	// The component for which we want the volume
+{
+	int i, j, n;
+	int jj, kk;
+	double r, z;
+	double rmax, rmin;
+	double zmin, zmax;
+	double dr, dz, x[3];
+	double volume;
+	double f, g;
+	int bilin();
+
+
+	/* Initialize all the volumes to 0 */
+	for (n = 0; n < NDIM2; n++)
+	{
+		w[n].vol = 0;
+		w[n].inwind = W_NOT_INWIND;
+	}
+
+	for (i = 0; i < NDIM - 1; i++)
+	{
+		for (j = 0; j < MDIM - 1; j++)
+		{
+			wind_ij_to_n(i, j, &n);
+
+			/* Encapsulate the grid cell with a rectangle for integrating */
+			rmin = w[n].x[0];
+			if (rmin > w[n + 1].x[0])
+				rmin = w[n + 1].x[0];
+			if (rmin > w[n + MDIM].x[0])
+				rmin = w[n + MDIM].x[0];
+			if (rmin > w[n + MDIM + 1].x[0])
+				rmin = w[n + MDIM + 1].x[0];
+
+			rmax = w[n].x[0];
+			if (rmax < w[n + 1].x[0])
+				rmax = w[n + 1].x[0];
+			if (rmax < w[n + MDIM].x[0])
+				rmax = w[n + MDIM].x[0];
+			if (rmax < w[n + MDIM + 1].x[0])
+				rmax = w[n + MDIM + 1].x[0];
+
+			zmin = w[n].x[2];
+			if (zmin > w[n + 1].x[2])
+				zmin = w[n + 1].x[2];
+			if (zmin > w[n + MDIM].x[2])
+				zmin = w[n + MDIM].x[2];
+			if (zmin > w[n + MDIM + 1].x[2])
+				zmin = w[n + MDIM + 1].x[2];
+
+			zmax = w[n].x[2];
+			if (zmax < w[n + 1].x[2])
+				zmax = w[n + 1].x[2];
+			if (zmax < w[n + MDIM].x[2])
+				zmax = w[n + MDIM].x[2];
+			if (zmax < w[n + MDIM + 1].x[2])
+				zmax = w[n + MDIM + 1].x[2];
+
+
+			volume = 0;
+			jj = kk = 0;
+			dr = (rmax - rmin) / RESOLUTION;
+			dz = (zmax - zmin) / RESOLUTION;
+			for (r = rmin + dr / 2; r < rmax; r += dr)
+			{
+				for (z = zmin + dz / 2; z < zmax; z += dz)
+				{
+					x[0] = r;
+					x[1] = 0;
+					x[2] = z;
+					if (bilin
+							(x, w[i * MDIM + j].x, w[i * MDIM + j + 1].x, w[(i + 1) * MDIM + j].x, w[(i + 1) * MDIM + j + 1].x, &f, &g) == 0)
+					{
+						kk++;
+						if (where_in_wind(x) == W_ALL_INWIND)
+						{
+							volume += r;
+							jj++;
+						}
+					}
+
+				}
+
+			}
+			w[n].vol = 4. * PI * dr * dz * volume;
+			/* OK now make the final assignement of nwind and fix the volumes */
+			if (jj == 0)
+			{
+				w[n].inwind = W_NOT_INWIND;	// The cell is not in the wind
+			}
+			else if (jj == kk)
+			{
+				// OLD 70b w[n].inwind = W_ALL_INWIND; // All of cell is inwind
+				w[n].inwind = icomp;		// All of cell is inwind
+			}
+			else
+			{
+				// OLD 70b w[n].inwind = W_PART_INWIND; // Some of cell is inwind
+				w[n].inwind = icomp + 1;	// Some of cell is inwind
+			}
+		}
+	}
+
+	return (0);
 }
