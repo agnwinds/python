@@ -181,6 +181,7 @@ compute_zeta (temp, nion, mode)
 				 temp) / (total_rrate (nion+1,
 						       temp) +
 					  dr_coeffs[nion+1]);
+
 		
 	    }
 	  else  //We dont have total RR data

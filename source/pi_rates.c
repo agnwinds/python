@@ -118,10 +118,7 @@ calc_pi_rate (nion,xplasma,mode)
   pi_rate = 0;
 
 
-	if (ion[nion].z==7)
-	{
-	printf ("element %i stage %i threshold %e\n",ion[nion].z,ion[nion].istate,fthresh);
-}
+
 
 
 if (mode==1) //Modelled version of J
@@ -208,11 +205,6 @@ else if (mode==2)  //blackbody mode
 pi_rate=(4*PI*pi_rate)/H;
 
 
-
-if (ion[nion].z==7 && mode==1)
-	{
-	printf ("Element %i stage %i has PI rate %e\n",ion[nion].z,ion[nion].istate,pi_rate);
-	}
 
 
 return(pi_rate);

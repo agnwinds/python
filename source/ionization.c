@@ -446,7 +446,7 @@ one_shot (xplasma, mode)
   dte = xplasma->dt_e;
 
 //  Log ("One_shot: %10.2f %10.2f %10.2f\n", te_old, te_new, w->t_e);
-//	xplasma->t_e=10000.0;      
+	xplasma->t_e=10000.0;      
 
 /* Modes in the driving routines are not identical to those in nebular concentrations.
 The next lines are an attempt to mediate this problem.  It might be better internally

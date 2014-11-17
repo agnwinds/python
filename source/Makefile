@@ -212,6 +212,10 @@ test_saha: test_saha.o $(python_objects)
 	$(CC) ${CFLAGS} test_saha.o $(python_objects) $(LDFLAGS) -o test_saha
 		mv $@ $(BIN)
 
+test_matrix: test_matrix.o $(python_objects)
+	$(CC) ${CFLAGS} test_matrix.o $(python_objects) $(LDFLAGS) -o test_matrix
+		mv $@ $(BIN)
+
 test_dielectronic: test_dielectronic.o $(python_objects)
 	$(CC) ${CFLAGS} test_dielectronic.o $(python_objects) $(LDFLAGS) -o test_dielectronic
 		mv $@ $(BIN)

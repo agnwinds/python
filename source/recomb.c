@@ -1426,10 +1426,7 @@ is called with the lower ion in the pair, since it uses the photionization cross
       rate = xinteg_fb (T, 3e12, 3e18, nion-1, 2);
     }
 
-if (ion[nion].z==7 )
-	{
-	printf ("Element %i stage %i has total RR rate %e\n",ion[nion].z,ion[nion].istate,rate);
-	}
+
 
 
 
@@ -1503,7 +1500,11 @@ gs_rrate (nion, T)
 //    }
 
 if (ion[nion].bad_gs_rr_t_flag == 1 && ion[nion].bad_gs_rr_r_flag == 1)	//We have tabulated gs data
+
+//NSH force code to always use milne for a test REMOVE ME!!!
+//if (ion[nion].bad_gs_rr_t_flag == 100 && ion[nion].bad_gs_rr_r_flag == 100)	//We have tabulated gs data
    {
+//printf("We are using the tabulations for GS recomb\n");
   for (i = 0; i < BAD_GS_RR_PARAMS; i++)
     {
       rates[i] = bad_gs_rr[ion[nion].nxbadgsrr].rates[i];
@@ -1551,7 +1552,7 @@ if (ion[nion].bad_gs_rr_t_flag == 1 && ion[nion].bad_gs_rr_r_flag == 1)	//We hav
 }
 else  //we will need to use the milne relation - NB - this is different from using xinteg_fb because that routine does recombination to all excited levels (at least for topbase ions).
 {
-
+//printf("We are using the milne relation for GS recomb\n");
  rate = 0.0;			/* NSH 130605 to remove o3 compile error */
 
 
@@ -1576,6 +1577,11 @@ else  //we will need to use the milne relation - NB - this is different from usi
     {
       nvmin = nion-1;
       n = nvmin;
+
+n = nvmin;		//just the ground state ionization fraction.
+    //  fb_xtop = &xphot_tab[ion[n].nxphot];
+  //    fthresh = fb_xtop->freq[0];
+//      fmax = fb_xtop->freq[fb_xtop->np - 1];
       fb_xver = &xphot[ion[n].nxphot];
       fthresh = fb_xver->freq_t;
       fmax = fb_xver->freq_max;
@@ -1585,14 +1591,12 @@ else  //we will need to use the milne relation - NB - this is different from usi
 	  fmax = fthresh + dnu;
 	}
       rate = qromb (fb_verner_partial, fthresh, fmax, 1.e-5);
+ //     rate = qromb (fb_topbase_partial, fthresh, fmax, 1.e-5);
     }
 }
 
 
-   if (ion[nion].z==7 )
-	{
-	printf ("Element %i stage %i has GS RR rate %e\n",ion[nion].z,ion[nion].istate,rate);
-	} 
+
 
 
 
