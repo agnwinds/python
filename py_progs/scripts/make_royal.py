@@ -1,1 +1,0 @@
-../make_royal/make_royal.py

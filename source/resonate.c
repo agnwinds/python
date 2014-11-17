@@ -325,7 +325,7 @@ process. */
 	      //If the density of the ion is very small we shouldn't have to worry about a resonance, but otherwise
 	      // ?? This seems like an incredibly small number; how can anything this small affect anything ??
 
-	      dd = get_ion_density (&p_now, kkk);
+	      dd = get_ion_density (p_now.x, kkk);
 
 	      if (dd > LDEN_MIN)
 		{
@@ -346,13 +346,13 @@ process. */
 
 
 		tau_sobolev =
-		    sobolev (one, p, dd, lin_ptr[nn], dvds);
+		    sobolev (one, p->x, dd, lin_ptr[nn], dvds);
 
 		  /* tau_sobolev now stores the optical depth. This is fed into the next statement for the bb estimator
 		     calculation. SS March 2004 */
 
 		/* 140903 Increment ttau allowing for filling factor */
-		  ttau += tau_sobolev*geo.fill;  
+		  ttau += tau_sobolev;  
 
 
 
@@ -812,13 +812,20 @@ History:
 	02may	ksl	Added possibility of having sobolev calculate an accurate
 			density
 	06may	ksl	57+ -- Began mods for plasma structure
+	1411 JM Modified to use a general vector x, rather than a PhotPtr
+	1411 JM Included fill factor for microclumping
 
 **************************************************************/
 
-double 
-sobolev (WindPtr one, PhotPtr p, double den_ion, struct lines *lptr, double dvds)
+double
+sobolev (one, x, den_ion, lptr, dvds)
+     WindPtr one;		// This is a single cell in the wind
+     double x[];
+     double den_ion;
+     struct lines *lptr;
+     double dvds;
 {
-  double tau, xden_ion;
+  double tau, xden_ion, tau_x_dvds;
   double two_level_atom (), d1, d2;
   int nion;
   double d_hold;
@@ -830,9 +837,9 @@ sobolev (WindPtr one, PhotPtr p, double den_ion, struct lines *lptr, double dvds
 
   if ((dvds = fabs (dvds)) == 0.0)	// This forces dvds to be positive -- a good thing!
     {
-	    d1=d2=0.;  // Elimiante warning when complied with clang
+	  d1 = d2 = 0.;  // Elimiante warning when complied with clang
       tau = VERY_BIG;
-      Error ("Sobolev: Surprize tau = VERY_BIG\n");
+      Error ("Sobolev: Surprise tau = VERY_BIG\n");
     }
 
   else if (lptr->macro_info == 1 && geo.rt_mode == 2 && geo.macro_simple == 0)
@@ -845,16 +852,16 @@ sobolev (WindPtr one, PhotPtr p, double den_ion, struct lines *lptr, double dvds
   else
     {
       nion = lptr->nion;
+
 /* Next few steps to allow used of better calculation of density of this particular 
 ion which was done above in calculate ds.  It was made necessary by a change in the
 calls to two_level atom
-
-
 */
       d_hold = xplasma->density[nion];	// Store the density of this ion in the cell
+
       if (den_ion < 0)
 	{
-	  xplasma->density[nion] = get_ion_density (p, lptr->nion);	// Forced calculation of density 
+	  xplasma->density[nion] = get_ion_density (x, lptr->nion);	// Forced calculation of density 
 	}
       else
 	{
@@ -878,10 +885,14 @@ calls to two_level atom
          So I'm modyfying this to set tau to zero in such cases, when the populations are vanishingly small anyway. */
       tau_x_dvds = PI_E2_OVER_M * d1 * lptr->f / (lptr->freq);
       tau = tau_x_dvds / dvds;
+
+      tau *= geo.fill;
+
       if (tau > 1.e-3)
 	{
 	  exit (0);
 	}
+
       else
 	{
 	  Error ("sobolev: continuing by setting tau to zero\n");
@@ -889,15 +900,21 @@ calls to two_level atom
 	}
     }
 
-//  tau = PI_E2_OVER_M * xden_ion * lptr->f ;
-//  tau /= (lptr->freq*dvds);
+  //  tau = PI_E2_OVER_M * xden_ion * lptr->f ;
+  //  tau /= (lptr->freq*dvds);
 
-// N.B. tau_x_dvds is an external variable and is used in anisotropic
-// scattering  0902 - ksl - I believe the question here, which has
-// been here for a long time  is whether this is 
-// good programming practice ????
+  // N.B. tau_x_dvds is an external variable and is used in anisotropic
+  // scattering  0902 - ksl - I believe the question here, which has
+  // been here for a long time  is whether this is 
+  // good programming practice ????
+
+  /* JM 1411 -- tau_x_dvds doesn't appear to be used anywhere, so I've 
+     made it a local variable rather than global */  
   tau_x_dvds = PI_E2_OVER_M * xden_ion * lptr->f / (lptr->freq);
   tau = tau_x_dvds / dvds;
+
+  /* JM 1411 -- multiply the optical depth by the filling factor */
+  tau *= geo.fill;
 
   return (tau);
 }

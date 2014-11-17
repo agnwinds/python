@@ -104,8 +104,12 @@ in units of WD radii */
 	geo.diskrad - (zdisk (geo.diskrad) * tan (geo.wind_thetamax));
     }
 
-  geo.xlog_scale = geo.rstar;
-  geo.zlog_scale = 1e7;
+  /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
+  if (modes.adjust_grid == 0)
+    {
+      geo.xlog_scale = geo.rstar;
+      geo.zlog_scale = 1e7;
+    }
 
   return (0);
 }

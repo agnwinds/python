@@ -93,25 +93,33 @@ get_sv_wind_params (void)
   geo.wind_rho_max = geo.sv_rmax;
   geo.wind_thetamin = geo.sv_thetamin;
   geo.wind_thetamax = geo.sv_thetamax;
-  geo.xlog_scale = geo.sv_rmin;
 
-  /* !! 70b - This change is to accomodate the torus, but it is not obvious this is the
-   * best way to set the scales now. It might be better do do this in make_grid!!  */
-  if (geo.compton_torus && geo.compton_torus_rmin < geo.xlog_scale)
+ 
+  /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
+  if (modes.adjust_grid == 0)
     {
-      geo.xlog_scale = geo.compton_torus_rmin;
+      geo.xlog_scale = geo.sv_rmin;
+
+      /* !! 70b - This change is to accomodate the torus, but it is not obvious this is the
+       * best way to set the scales now. It might be better do do this in make_grid!!  */
+      if (geo.compton_torus && geo.compton_torus_rmin < geo.xlog_scale)
+        {
+          geo.xlog_scale = geo.compton_torus_rmin;
+        }
+
+     /*70d - ksl - This change made to give one a chance of being able to do an 
+       agn and a CV with the sv model.  The underlying assumption is that the
+       effective radius provides a good scale factor in the verticla direction.
+       An alternative would be to use sv_rmin.
+     */
+
+     //OLD70d  geo.zlog_scale = 1e7;
+     geo.zlog_scale = geo.rstar;
     }
 
-/*70d - ksl - This change made to give one a chance of being able to do an 
-   agn and a CV with the sv model.  The underlying assumption is that the
-   effective radius provides a good scale factor in the verticla direction.
-   An alternative would be to use sv_rmin.
- */
+  
 
-//OLD70d  geo.zlog_scale = 1e7;
-  geo.zlog_scale = geo.rstar;
-
-/*Now calculate the normalization factor for the wind*/
+  /*Now calculate the normalization factor for the wind*/
 
   geo.mdot_norm =
     qromb (sv_wind_mdot_integral, geo.sv_rmin, geo.sv_rmax, 1e-6);
