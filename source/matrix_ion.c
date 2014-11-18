@@ -68,23 +68,19 @@ int matrix_solv(xplasma,mode)
 	int mode;
 
 {
-int nn,mm,nrows;
-double rate_matrix[nions][nions];
+  int nn,mm,nrows;
+  double rate_matrix[nions][nions];
   double newden[NIONS];
-double nh,t_e,t_r,www;
-double xne,xxne,xxxne;
-double xsaha,x,theta;
+  double nh,t_e,t_r,www;
+  double xne,xxne,xxxne;
+  double xsaha,x,theta;
   int s; /*s is the 'sign' of the permutation - is had the value -1^n where n is the number of permutations. 
 We dont use it anywhere, but in principle it can be used to refine the solution via gsl_linalg_LU_refine */
   double b_temp[nions]; 
-double *b_data,*a_data;
-  gsl_permutation *p;		//NEWKSL
-  gsl_matrix_view m;		//NEWKSL
-  gsl_vector_view b;		//NEWKSL
-  gsl_vector *populations, *test_vector;	//NEWKSL
-  gsl_matrix *test_matrix;
+  double *b_data,*a_data;
+  double *populations;
   int ierr,niterate;
-  double test_val,xnew;
+  double xnew;
   double xden[nelements];
   int xion[nions]; //This array keeps track of what ion is in each line
   int xelem[nions]; //This array keeps track of the element for each ion
@@ -201,169 +197,14 @@ set to 200. We would normally expect to converge much fater than this */
   while (niterate < MAXITERATIONS)
 {
 
-
-/*First we initialise the matrix */
-for (nn = 0; nn < nions; nn++)
-	{
-	  for (mm = 0; mm < nions; mm++)
-	    {
-	      rate_matrix[nn][mm] = 0.0;
-	    }
-	}
+  populate_ion_rate_matrix(xplasma, rate_matrix, pi_rates, rr_rates, b_temp, xne, xelem);
 
 
-/*The next block of loops populate the matrix. For simplicity of reading the code each process has its own loop.
-Some rates actually dont change during each iteration, but those that depend on n_e will. All are dealt with
-together at the moment, but this could be streamlined if it turns out that there is a bottleneck.*/
+    /* The array is now fully populated, and we can begin the process of solving it */
 
-/*Now we populate the elements relating to PI depopulating a state*/
+    nrows=nions; /*This is a placeholder, we may end up removing rows and columns that have no rates (or very low rates) connecting them to other rows. This may improve stability but will need to be done carefully */
 
-
-for (mm = 0; mm<nions; mm++)
-	{
-	if (ion[mm].istate != ion[mm].z+1) //we have electrons
-		{
-		rate_matrix[mm][mm]-=pi_rates[mm];
-		}
-	}
-
-
-/*Now we populate the elements relating to PI populating a state*/
-
-for (mm =0; mm<nions; mm++)
-	{
-	for (nn=0;nn<nions;nn++)
-		{
-		if (mm==nn+1 && ion[nn].istate != ion[nn].z+1 && ion[mm].z==ion[nn].z) 
-			{
-			rate_matrix[mm][nn]+=pi_rates[nn];
-			}
-		}
-	}
-
-/*Now we populate the elements relating to direct ionization depopulating a state*/
-
-for (mm = 0; mm<nions; mm++)
-	{
-	if (ion[mm].istate != ion[mm].z+1 && ion[mm].dere_di_flag > 0) //we have electrons and a DI rate
-		{
-		rate_matrix[mm][mm]-=(xne*di_coeffs[mm]);
-		}
-	}
-
-/*Now we populate the elements relating to direct ionization populating a state - this does depend on the electron 
-density */
-
-for (mm =0; mm<nions; mm++)
-	{
-	for (nn=0;nn<nions;nn++)
-		{
-		if (mm==nn+1 && ion[nn].istate != ion[nn].z+1 && ion[mm].z==ion[nn].z && ion[nn].dere_di_flag > 0) 
-			{
-			rate_matrix[mm][nn]+=(xne*di_coeffs[nn]);
-			}
-		}
-	}
-
-
-/*Now we populate the elements relating to radiative recomb depopulating a state*/
-		
-for (mm = 0; mm<nions; mm++)
-	{
-	if (ion[mm].istate != 1) //we have space for electrons
-		{
-		rate_matrix[mm][mm]-=(xne*rr_rates[mm]);
-		}
-	}
-
-
-/*Now we populate the elements relating to radiative recomb populating a state*/
-
-for (mm =0; mm<nions; mm++)
-	{
-	for (nn=0;nn<nions;nn++)
-		{
-		if (mm==nn-1 && ion[nn].istate != 1 && ion[mm].z==ion[nn].z) 
-			{
-			rate_matrix[mm][nn]+=(xne*rr_rates[nn]);
-			}
-		}
-	}
-
-/*Now we populate the elements relating to dielectronic recombination depopulating a state*/
-	
-
-	
-for (mm = 0; mm<nions; mm++)
-	{
-	if (ion[mm].istate != 1 && ion[mm].drflag > 0) //we have space for electrons
-		{
-		rate_matrix[mm][mm]-=(xne*dr_coeffs[mm]);
-		}
-	}
-
-
-/*Now we populate the elements relating to dielectronic recombination populating a state*/
-
-
-
-for (mm =0; mm<nions; mm++)
-	{
-	for (nn=0;nn<nions;nn++)
-		{
-		if (mm==nn-1 && ion[nn].istate != 1 && ion[mm].z==ion[nn].z && ion[mm].drflag > 0) 
-			{
-			rate_matrix[mm][nn]+=(xne*dr_coeffs[nn]);
-			}
-		}
-	}
-
-
-
-
-
-
-/*Now, we replace the first line for each element with 1's and 0's. This is done because we actually have
-more equations than unknowns. We replace the array elements relating to each ion stage in this element with
-a 1, and all the other array elements (which relate to other elements (in the chemicalsense) with zeros. This
-is equivalent to the equation 1*n1+1*n2+1*n3 = n_total - i.e. the sum of all the partial number densities
-adds up to the total number density for that element.
-This loop also produces the 'b matrix'. This is the right hand side of the matrix equation, and represents
-the total number density for each element. This can be a series of 1's for each row in the matrix relating to 
-the ground state of the repsective element, however one can just use the total number density for that elements
-and then the densities which the solver computes are just the actual number densities for each ion. This does
-mean that different rows are orders of magnitude different, so one can imagine numerical issues. However each
-element is essentially solved for seperately.. Something to watch
-*/
-
-for (nn=0;nn<nions;nn++)
-	{
-	if (ion[nn].istate==1)
-		{
-		b_temp[nn]=nh * ele[xelem[nn]].abun;
-		for (mm=0;mm<nions;mm++)
-			{
-			if (ion[mm].z==ion[nn].z)
-				{
-				rate_matrix[nn][mm]=1.0;
-				}
-			else
-				{
-				rate_matrix[nn][mm]=0.0;
-				}
-			}
-		}
-	else
-		{
-		b_temp[nn]=0.0;
-		}
-	}
-
-/* The array is now fully populated, and we can begin the process of solving it */
-
-nrows=nions; /*This is a placeholder, we may end up removing rows and columns that have no rates (or very low rates) connecting them to other rows. This may improve stability but will need to be done carefully */
-
-/* The solver routine was taken largely wholesale from the matom routine. I have left in most of the original comments, and added a few of my own for clarification */
+    /* The solver routine was taken largely wholesale from the matom routine. I have left in most of the original comments, and added a few of my own for clarification */
 
 
 
@@ -376,11 +217,11 @@ nrows=nions; /*This is a placeholder, we may end up removing rows and columns th
 
 	  /* Replaced inline array allocaation with calloc, which will work with older version of c compilers */
 
-/*This next line produces an array of the correct size to hold the rate matrix */
+    /* This next line produces an array of the correct size to hold the rate matrix */
 	  a_data =
 	    (double *) calloc (sizeof (double), nrows * nrows);
 
-/*We now copy our rate marix into the prepared matrix */
+    /* We now copy our rate matrix into the prepared matrix */
 	  for (mm = 0; mm < nrows; mm++)
 	    {
 	      for (nn = 0; nn < nrows; nn++)
@@ -395,116 +236,58 @@ nrows=nions; /*This is a placeholder, we may end up removing rows and columns th
 	     calloc also sets the elements to zero, which is required */
 
 	  b_data = (double *) calloc (sizeof (double), nrows);
+	  populations = (double *) calloc (sizeof (double), nrows);
 
-/*This b_data column matrix is the total number density for each element, placed into the row which relates to
-the neutral ion. This matches the row in the rate matrix which is just  1 1 1 1  for all stages. NB, we could have
-chosen any line for this.*/
+  /*This b_data column matrix is the total number density for each element, placed into the row which relates to
+  the neutral ion. This matches the row in the rate matrix which is just  1 1 1 1  for all stages. NB, we could have
+  chosen any line for this.*/
 
-for (nn=0;nn<nrows;nn++)
-	{
-	b_data[nn]=b_temp[nn];
-	}
+    for (nn=0;nn<nrows;nn++)
+	  {
+	    b_data[nn]=b_temp[nn];
+	  }
 
+    ierr = solve_matrix(a_data, b_data, nrows, populations);
 
-/* create gsl matrix/vector views of the rate array. */
+    if (ierr != 0)
+	  Error("matrix_solve: bad return from solve_matrix\n");
 
-	  m = gsl_matrix_view_array (a_data, nrows, nrows);	
+	/* free memory */
+    free (a_data);	
+    free (b_data);	
 
-/* these are used for testing the solution below */
+    /* Calculate level populations for macro-atoms */
+    if (geo.macro_ioniz_mode == 1)
+	  {
+	    macro_pops (xplasma, xne);
+	  }
 
-	  test_matrix = gsl_matrix_alloc(nrows,nrows);
-	  test_vector = gsl_vector_alloc (nrows);
+  /*We now have the populations of all the ions stored in the matrix populations. We copy this data into the
+  newden array which will temperarily store all the populations. We wont copy this to the plasma structure 
+  until we are sure thatwe have made things better. We just loop over all ions, and copy. The complexity in the
+  loop is to future proof us against the possibility that there are some ions that are not included in the 
+  matrix scheme becuse there is no route into or out of it.*/
 
-
-
-	  gsl_matrix_memcpy(test_matrix, &m.matrix); 	// create copy of the rate matrix for testing 
-
-	  b = gsl_vector_view_array (b_data, nrows);	//KSLNEW
-
-	  /* the populations vector will be a gsl vector which stores populations */
-
-	  populations = gsl_vector_alloc (nrows);	//KSLNEW
-
-	  p = gsl_permutation_alloc (nrows);	//NEWKSL
-
-  
-
-
-/* p is the permutation array, this is a 1D array which reperesnts the 2D permutation matrix used in LU decomp
-with pivoting.*/
-
-  gsl_permutation * p = gsl_permutation_alloc (nrows);
-
-/*The next line does the heavy lifting, and performs the LU decomposition of the rate matrix. m.matrix contains
-the upper and lower part of the decomposition, the lower part has all 1s on the diagonal, which is not stored,
-hence both L and U fit into m */
-
-  gsl_linalg_LU_decomp (&m.matrix, p, &s);
-
-/*And now the solution, returned in the vector populations, is computed. */ 
-
-  gsl_linalg_LU_solve (&m.matrix, p, &b.vector, populations);
-
-/*We no longer need the permutation matrix - so free up the memory */
-
-  gsl_permutation_free (p);
-
-	  /**********************************************************/
-
-      /* JM 140414 -- before we clean, we should check that the populations vector we 
-         have just created really is a solution to the matrix equation */
-      
-      /* declaration contained in my_linalg.h, taken from gsl library */
-
-/*The following line does the matrix multiplication 
-test_vector = 1.0 * test_matrix * populations
-The CblasNoTrans statement just says we do not do anything to test_matrix, and the 0.0 means we
-do not add a second matrix to the result 
-If the solution has worked, then test_vector should be equal to b_temp */
- 
-      ierr = gsl_blas_dgemv(CblasNoTrans, 1.0, test_matrix, populations, 0.0, test_vector);
-
-      if (ierr != 0)
-        {
-      	  Error_silent("matrix_solv: bad return when testing matrix solution to rate equations.\n");
-        }
-
-      /* now cycle through and check the solution to y = m * populations really is
-         (number density of element1, 0, 0 ... 0) */
-
-      for (mm = 0; mm < nrows; mm++)
-        {
-
-          /* get the element of the vector we want to check */
-          test_val = gsl_vector_get (test_vector, mm);
- //        printf ("test_val=%e\n",test_val);
-  //       if ( (fabs((test_val - b_temp[mm]))/test_val) > EPSILON)
-  //    	      Error_silent("matrix_solv: test solution fails for row %i %e != %e\n",
-  //    	      	     mm,test_val,b_temp[mm]);    
-          }     
-
-        /* free memory */
-        free (a_data);	
-	free (b_data);	
-	free (test_vector);
-	free (test_matrix);
-
-/*We now have the populations of all the ions stored in the matrix populations. We copy this data into the
-newden array which will temperarily store all the populations. We wont copy this to the plasma structure 
-until we are sure thatwe have made things better. We just loop over all ions, and copy. The complexity in the
-loop is to future proof us against the possibility that there are some ions that are not included in the 
-matrix scheme becuse there is no route into or out of it.*/
-
-for (nn=0;nn<nions;nn++)
+  for (nn=0;nn<nions;nn++)
 	{
 	newden[nn]=0.0;  //initialise the arrayelement
+
+	/* if the ion is being treated by macro_pops then use the populations just computed */
+	if ((ion[nn].macro_info == 1) && (geo.macro_simple == 0)
+	      && (geo.macro_ioniz_mode == 1))
+	    {
+	      newden[nn] = xplasma->density[nn];
+	    }
+    
 	for (mm=0;mm<nrows;mm++) //inner loop over the elements of the population array
 		{
 		if (xion[mm]==nn) //if this element contains the population of the ion is question
 			{
-			newden[nn]=(gsl_vector_get (populations, mm)); //get the population
+			newden[nn]= populations[mm]; //get the population
 			}
 		}
+
+
 	if (newden[nn] < DENSITY_MIN)   //this wil also capture the case where population doesnt have a value for this ion
 		newden[nn] = DENSITY_MIN;
 	}
@@ -515,6 +298,8 @@ for (nn=0;nn<nions;nn++)
 
      if (xnew < DENSITY_MIN)
 	xnew = DENSITY_MIN;	/* fudge to keep a floor on ne */
+
+
       if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6) /*We have converged, or have the situation where we have a neutral plasma */
 	{
 	  break; /*Break out of the while loop - we have finished our iterations */
@@ -551,19 +336,327 @@ for (nn=0;nn<nions;nn++)
     }
 
 
-  partition_functions (xplasma, 4);	/*WARNING fudge NSH 11/5/14 - this is as a test. 
-                                         We really need a better implementation of partition functions and levels
+  partition_functions (xplasma, 4);	/*  WARNING fudge NSH 11/5/14 - this is as a test. 
+                                        We really need a better implementation of partition functions and levels
                                         for a power law illuminating spectrum. We found that if we didnt make this call, 
                                         we would end up with undefined levels - which did really crazy things */
 
 
 
-
-
-
-
-return(0);
+  return(0);
 }
 
 
+/***********************************************************
+                                       West Lulworth
 
+  Synopsis:   
+    populate_ion_rate_matrix populates a rate_matrix of shape nions x nions
+    with the pi_rates and rr_rates supplied at the density xne in question.
+
+  
+  Arguments:		
+
+
+  Returns:
+	
+
+ 	
+  Description:
+ 
+  Notes:
+    This routine includes the process of replacing the first row of the matrix with
+    1s in order to make the problem soluble. 
+
+  History:
+	2014Aug JM - moved code here from main routine
+
+**************************************************************/
+
+int populate_ion_rate_matrix(xplasma, rate_matrix, pi_rates, rr_rates, b_temp, xne, xelem)
+    PlasmaPtr xplasma;
+    double rate_matrix[nions][nions];
+    double pi_rates[nions];
+    double rr_rates[nions];
+    double xne;
+    double b_temp[nions];
+    int xelem[nions];
+
+{
+  int nn, mm; 
+  double nh;
+
+  nh = xplasma->rho * rho2nh;	//The number density of hydrogen ions - computed from density
+
+  /*First we initialise the matrix */
+  for (nn = 0; nn < nions; nn++)
+	{
+	  for (mm = 0; mm < nions; mm++)
+	    {
+	      rate_matrix[nn][mm] = 0.0;
+	    }
+	}
+
+
+  /*The next block of loops populate the matrix. For simplicity of reading the code each process has its own loop.
+  Some rates actually dont change during each iteration, but those that depend on n_e will. All are dealt with
+  together at the moment, but this could be streamlined if it turns out that there is a bottleneck.*/
+
+  /*Now we populate the elements relating to PI depopulating a state*/
+
+
+  for (mm = 0; mm<nions; mm++)
+	{
+	  if (ion[mm].istate != ion[mm].z+1) //we have electrons
+		{
+		  rate_matrix[mm][mm] -= pi_rates[mm];
+		}
+	}
+
+
+  /*Now we populate the elements relating to PI populating a state */
+
+  for (mm =0; mm<nions; mm++)
+	{
+	for (nn=0;nn<nions;nn++)
+		{
+
+		if (mm==nn+1 && ion[nn].istate != ion[nn].z+1 && ion[mm].z==ion[nn].z) 
+			{
+			  rate_matrix[mm][nn] += pi_rates[nn];
+			}
+		}
+	}
+
+  /*Now we populate the elements relating to direct ionization depopulating a state*/
+
+  for (mm = 0; mm<nions; mm++)
+	{
+	if (ion[mm].istate != ion[mm].z+1 && ion[mm].dere_di_flag > 0) //we have electrons and a DI rate
+		{
+		  rate_matrix[mm][mm]  -= (xne*di_coeffs[mm]);
+		}
+	}
+
+  /*Now we populate the elements relating to direct ionization populating a state - this does depend on the electron 
+  density */
+
+  for (mm =0; mm<nions; mm++)
+	{
+	for (nn=0;nn<nions;nn++)
+		{
+		if (mm==nn+1 && ion[nn].istate != ion[nn].z+1 && ion[mm].z==ion[nn].z && ion[nn].dere_di_flag > 0) 
+			{
+			rate_matrix[mm][nn]+=(xne*di_coeffs[nn]);
+			}
+		}
+	}
+
+
+  /*Now we populate the elements relating to radiative recomb depopulating a state*/
+		
+  for (mm = 0; mm<nions; mm++)
+	{
+	if (ion[mm].istate != 1) //we have space for electrons
+		{
+		rate_matrix[mm][mm]-=(xne*rr_rates[mm]);
+		}
+	}
+
+
+  /*Now we populate the elements relating to radiative recomb populating a state */
+
+  for (mm =0; mm<nions; mm++)
+	{
+	for (nn=0;nn<nions;nn++)
+		{
+		if (mm==nn-1 && ion[nn].istate != 1 && ion[mm].z==ion[nn].z) 
+			{
+			rate_matrix[mm][nn]  +=  (xne*rr_rates[nn]);
+			}
+		}
+	}
+
+  /* Now we populate the elements relating to dielectronic recombination depopulating a state */
+	
+  for (mm = 0; mm<nions; mm++)
+	{
+	if (ion[mm].istate != 1 && ion[mm].drflag > 0) //we have space for electrons
+		{
+		rate_matrix[mm][mm]  -=  (xne*dr_coeffs[mm]);
+		}
+	}
+
+
+  /* Now we populate the elements relating to dielectronic recombination populating a state */
+
+
+
+  for (mm =0; mm<nions; mm++)
+	{
+	for (nn=0;nn<nions;nn++)
+		{
+		if (mm==nn-1 && ion[nn].istate != 1 && ion[mm].z==ion[nn].z && ion[mm].drflag > 0) 
+			{
+			rate_matrix[mm][nn]+=(xne*dr_coeffs[nn]);
+			}
+		}
+	}
+
+  /*Now, we replace the first line for each element with 1's and 0's. This is done because we actually have
+  more equations than unknowns. We replace the array elements relating to each ion stage in this element with
+  a 1, and all the other array elements (which relate to other elements (in the chemicalsense) with zeros. This
+  is equivalent to the equation 1*n1+1*n2+1*n3 = n_total - i.e. the sum of all the partial number densities
+  adds up to the total number density for that element.
+  This loop also produces the 'b matrix'. This is the right hand side of the matrix equation, and represents
+  the total number density for each element. This can be a series of 1's for each row in the matrix relating to 
+  the ground state of the repsective element, however one can just use the total number density for that elements
+  and then the densities which the solver computes are just the actual number densities for each ion. This does
+  mean that different rows are orders of magnitude different, so one can imagine numerical issues. However each
+  element is essentially solved for seperately.. Something to watch
+  */
+
+for (nn=0;nn<nions;nn++)
+	{
+	if (ion[nn].istate==1)
+		{
+		b_temp[nn]=nh * ele[xelem[nn]].abun;
+		for (mm=0;mm<nions;mm++)
+			{
+			if (ion[mm].z==ion[nn].z)
+				{
+				rate_matrix[nn][mm]=1.0;
+				}
+			else
+				{
+				rate_matrix[nn][mm]=0.0;
+				}
+			}
+		}
+	else
+		{
+		b_temp[nn]=0.0;
+		}
+	}
+  
+  return (0);
+}
+
+/***********************************************************
+                                       AMNH, New York
+
+  Synopsis: 
+    solve_matrix solves the matrix equation A x = b for the vector x.  
+     
+  Arguments:
+    a_data 
+    	1d array of length nrows * nrows, containing entries
+    	for matrix A	
+
+    b_data
+    	1d array of length nrows, containing entries
+    	for vector b
+
+    nrows
+        dimensions of matrices/vectors. Should be consistent
+        with arrays passed to routine.
+
+    populations	 
+    	1d array of length nrows, containing entries
+        for vector x - modified by this routine		
+
+  Returns:
+ 	
+  Description:
+ 
+  Notes:
+    
+  History:
+	2014Aug JM - moved code here from main routine
+
+**************************************************************/
+
+int solve_matrix(a_data, b_data, nrows, x)
+  double *a_data, *b_data;
+  int nrows;
+  double *x;
+{
+  int mm, ierr, s;
+  double test_val;
+  gsl_permutation *p;		//NEWKSL
+  gsl_matrix_view m;		//NEWKSL
+  gsl_vector_view b;		//NEWKSL
+  gsl_vector *test_vector, *populations;	//NEWKSL
+  gsl_matrix *test_matrix;
+
+  ierr = 0;
+  test_val = 0.0;
+
+  /* create gsl matrix/vector views of the arrays of rates */
+  m = gsl_matrix_view_array (a_data, nrows, nrows);	//KSLNEW
+
+  /* these are used for testing the solution below */
+  test_matrix = gsl_matrix_alloc(nrows, nrows);
+  test_vector = gsl_vector_alloc (nrows);
+
+  gsl_matrix_memcpy(test_matrix, &m.matrix); 	// create copy for testing 
+
+  b = gsl_vector_view_array (b_data, nrows);	//KSLNEW
+
+  /* the populations vector will be a gsl vector which stores populations */
+  populations = gsl_vector_alloc (nrows);	//KSLNEW
+
+
+  p = gsl_permutation_alloc (nrows);	//NEWKSL
+
+  gsl_linalg_LU_decomp (&m.matrix, p, &s);
+
+  gsl_linalg_LU_solve (&m.matrix, p, &b.vector, populations);
+
+  gsl_permutation_free (p);
+
+  /* JM 140414 -- before we clean, we should check that the populations vector we 
+         have just created really is a solution to the matrix equation */
+      
+  /* gsl_blas_dgemv declaration contained in my_linalg.h, taken from gsl library */
+  /* The following line does the matrix multiplication 
+             test_vector = 1.0 * test_matrix * populations
+     The CblasNoTrans statement just says we do not do anything to test_matrix, 
+     and the 0.0 means we do not add a second matrix to the result 
+     If the solution has worked, then test_vector should be equal to b_temp */
+
+  ierr = gsl_blas_dgemv(CblasNoTrans, 1.0, test_matrix, populations, 0.0, test_vector);
+
+  if (ierr != 0)
+    {
+  	  Error("solve_matrix: bad return when testing matrix solution to rate equations.\n");
+    }
+
+  /* now cycle through and check the solution to y = m * populations really is
+     (1, 0, 0 ... 0) */
+
+  for (mm = 0; mm < nrows; mm++)
+    {
+
+      /* get the element of the vector we want to check */
+      test_val = gsl_vector_get (test_vector, mm);
+      
+      if ( (fabs((test_val - b_data[mm]))/test_val) > EPSILON)
+        {
+      	  Error("solve_matrix: test solution fails for row %i %e != %e\n",
+      	      	mm, test_val, b_data[mm]);
+      	  ierr = 1;
+      	}
+    }
+
+  /* copy the populations to a normal array */
+  for (mm = 0; mm < nrows; mm++)
+  	x[mm] = gsl_vector_get (populations, mm);
+
+  /* free memory */
+  free (test_vector);
+  free (test_matrix);
+  gsl_vector_free (populations);
+
+  return (ierr);
+}
