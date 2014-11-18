@@ -62,11 +62,11 @@ main (argc, argv)
   ntemp = 101;
   tempdiv = 100.0;
   nne = 1;
-  nh = 1e12;
+  nh = 1e10;
   weight = 0.0001;
   xne = nh;
 
-  strcpy (geo.atomic_filename, "atomic/standard73");
+  strcpy (geo.atomic_filename, "data/standard73");
   printf ("atomic_filename=%s\n", geo.atomic_filename);
   get_atomic_data (geo.atomic_filename);
 
@@ -104,6 +104,7 @@ for (i=-6;i<21;i++)
 
   NPLASMA = 1;
   calloc_plasma (NPLASMA);
+  calloc_dyn_plasma (NPLASMA);
 
   plasmamain[0].rho = nh / rho2nh;
   plasmamain[0].ne = nh;
@@ -411,7 +412,7 @@ fclose(fp_o);
   fclose(fp_c);
   fclose(fp_n);
   fclose(fp_o);
-
+*/
 
   fp_h=fopen("hydrogen_lm.out","w");
   fp_he=fopen("helium_lm.out","w");
@@ -482,6 +483,9 @@ fclose(fp_o);
   fclose(fp_o);
   fclose(fp_fe);
 //  fclose(c_trr);
+
+/*
+
 
   fp_h=fopen("hydrogen_vt.out","w");
   fp_he=fopen("helium_vt.out","w");
@@ -628,7 +632,7 @@ nh=1e10;
 		fprintf(fp_fe,"\n");
 		}  
 
-*/
+
   alpha_agn = -1.2;
 
   IPstart = 20;
@@ -721,7 +725,7 @@ nh=1e10;
     }
 
 
-
+*/
 
 
 

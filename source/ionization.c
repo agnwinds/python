@@ -446,7 +446,7 @@ one_shot (xplasma, mode)
   dte = xplasma->dt_e;
 
 //  Log ("One_shot: %10.2f %10.2f %10.2f\n", te_old, te_new, w->t_e);
-//	xplasma->t_e=10000.0;      
+	xplasma->t_e=10000.0;      
 
 /* Modes in the driving routines are not identical to those in nebular concentrations.
 The next lines are an attempt to mediate this problem.  It might be better internally
@@ -668,7 +668,7 @@ zero_emit (t)
 
 
   /* 70g - nsh adding this line in next to calculate dielectronic recombination cooling without generating photons */
-  compute_dr_coeffs (t);
+ compute_dr_coeffs (t);
   xxxplasma->lum_dr = total_dr (&wmain[xxxplasma->nwind], t);
 
   /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
