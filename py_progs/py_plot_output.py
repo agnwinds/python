@@ -285,7 +285,7 @@ def make_wind_plot(d, fname, var=None, shape=(4,2), axes="log"):
 
         x,z,v = util.wind_to_masked(d, value_string)
 
-        p.contourf(z,x,np.log10(v))
+        p.contourf(z,x,np.log10(v), extend="both")
         p.colorbar()
         p.title("Log(%s)" % value_string)
 
