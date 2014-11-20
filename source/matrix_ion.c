@@ -643,8 +643,8 @@ int solve_matrix(a_data, b_data, nrows, x)
       
       if ( (fabs((test_val - b_data[mm]))/test_val) > EPSILON)
         {
-      	  Error("solve_matrix: test solution fails for row %i %e != %e\n",
-      	      	mm, test_val, b_data[mm]);
+      	  //Error("solve_matrix: test solution fails for row %i %e != %e\n",
+      	  //    	mm, test_val, b_data[mm]);
       	  ierr = 1;
       	}
     }
