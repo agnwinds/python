@@ -401,8 +401,10 @@ concentrations (xplasma, mode)
       /*Set some floor so future divisions are sensible */
       for (nion = 0; nion < nions; nion++)
 	{
-	  if (xplasma->density[nion] < DENSITY_MIN)
+	  if (xplasma->density[nion] < DENSITY_MIN){
 	    xplasma->density[nion] = DENSITY_MIN;
+	    // Debug("Below min %g %g\n",DENSITY_MIN,xplasma->density[nion]);
+	  }
 	}
 
       /* Now determine the new value of ne from the ion abundances */
@@ -420,8 +422,8 @@ concentrations (xplasma, mode)
 
   if (niterate == MAXITERATIONS)
     {
-      Error ("concentrations: failed to converge t %.2g nh %.2g xnew %.2g\n",
-	     t, nh, xnew);
+      Log ("concentrations: failed to converge t %.2g nh %.2g xnew %.2g xne %.2g\n",
+	     t, nh, xnew,xne);
       Error ("concentrations: xxne %e theta %e\n", xxne, theta);
       return (-1);
     }
@@ -488,6 +490,9 @@ saha (xplasma, ne, t)
   double sum, a, b;
   double big;
 
+  double bdiff;
+  int nhigh,nfirst,nlast;
+
   density = xplasma->density;
   partition = xplasma->partition;
 
@@ -515,10 +520,50 @@ saha (xplasma, ne, t)
       big = pow (10., 250. / (last - first));
       big=big*1e6;   */
 
-      sum = density[first] = 1.0;
-      big = pow (10., 250. / (last - first));
+/* locate the dominate ion and the prominent ions.  This is the ion where b is closest to but just greater
+ * than 1 */
 
+      bdiff=1e100;
+      nfirst=first;
+      nlast=last;
+      nhigh=0;
+      sum = density[first] = 0.0;
+
+ 
       for (nion = first + 1; nion < last; nion++)
+	{ 
+
+          if ((ion[nion].macro_info == 0) || (geo.macro_ioniz_mode == 0))
+            {
+	      b = xsaha * partition[nion]
+	          * exp (-ion[nion - 1].ip / (BOLTZMANN * t)) / (ne *
+							   partition[nion -
+								     1]);
+
+	      if ((b>1) && (fabs(b-1.)<bdiff)){
+		      nhigh=nion;
+	      }
+	      if (b>1e10){
+		      nfirst=nion;
+	      }
+	      if (b<1e-10){
+		      nlast=nion;
+	      }
+
+	      density[nion]=0;
+
+	}
+	}
+
+/* end of the identification of the highest ionization state.  At this point
+ * all of the dnesities are 0 and we know what should be most abundant ion */
+
+
+      sum=density[nhigh]=1.;  /* Set the abundance of the most common ion to 1 */
+
+
+
+      for (nion = nhigh + 1; nion < last; nion++)
 	{ 
 
 	  /* JM 1309 -- this next if statement is to ensure that saha densities are only calculated if the 
@@ -532,9 +577,6 @@ saha (xplasma, ne, t)
 	          * exp (-ion[nion - 1].ip / (BOLTZMANN * t)) / (ne *
 							   partition[nion -
 								     1]);
-//        if (b > big && nh < 1e5) this is a line to only modify things if the density is high enough to matter
-	      if (b > big)
-	        b = big;		//limit step so there is no chance of overflow
 
 	      a = density[nion - 1] * b;
 
@@ -549,6 +591,39 @@ saha (xplasma, ne, t)
   
             }
 	}
+
+      // Now do the ions that are below the hightest velocity 1
+      for (nion = nhigh; nion > first; nion--)
+	{ 
+
+	  /* JM 1309 -- this next if statement is to ensure that saha densities are only calculated if the 
+             ion in question is not a macro ion. Otherwise, this will affect the escape 
+             probabilities that are calculated in macro_pops. The exception to this is prior
+             to the first ionization cycle when we need to populate saha densities as a first guess */
+
+          if ((ion[nion].macro_info == 0) || (geo.macro_ioniz_mode == 0))
+            {
+	      b = xsaha * partition[nion]
+	          * exp (-ion[nion - 1].ip / (BOLTZMANN * t)) / (ne *
+							   partition[nion -
+								     1]);
+
+	      a = density[nion] / b;
+
+	      sum += density[nion-1] = a;
+  
+	      if (density[nion-1] < 0.0)
+          Error("saha: ion %i has negative density %8.4e", nion, density[nion]);
+	        //mytrap ();  JM 1410 -- mytrap is deprecated
+
+	      if (sane_check (sum))
+	        Error ("saha:sane_check failed for density summation\n");
+  
+            }
+	}
+
+      // End of calculating the relative abundances
+
 
       a = nh * ele[nelem].abun / sum;
 
@@ -568,6 +643,10 @@ saha (xplasma, ne, t)
 	        Error ("saha:sane_check failed for density of ion %i\n", nion);
             }    
 	}
+
+      if (ele[nelem].z==26){
+	      Log("Saha - Fe\n");
+      }
     }
 
 
@@ -787,6 +866,8 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
   double sum, a;
   int first, last, nion;
   double numerator, denominator;
+  double dmax;
+  int nmax;
 
   if (t_r > MIN_TEMP)
     {
@@ -803,59 +884,43 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
 
   if (fudge < MIN_FUDGE || MAX_FUDGE < fudge)
     {
-      Error_silent
+      Log
 	("lucy_mazzali1: fudge>10 www %8.2e t_e %8.2e  t_r %8.2e \n",
 	 www, t_e, t_r);
     }
 
   /* Initialization of fudges complete */
 
+  if (ele[nelem].z==26) {
+	  Log("Doing Fe\n");
+  }
   first = ele[nelem].firstion;	/*identify the position of the first and last ion in the array */
   last = first + ele[nelem].nions;	/*  So for H which has 2 ions, H1 and H2, first will generally
 					   be 0 and last will be 2 so the for loop below will just be done once for nion = 1 */
 
+  /* Find the maximum density in this interval */
 
-  /* JM 1411 -- the next two while loops check if there are ions low down
-     or high up in the sequence of ions that have negligible density-
-     in which case we don't bother applying the mazzali lucy 
-     scheme to those ions */
+  dmax=density[first];
+  nmax=first;
 
-  /* JM 1411 -- we only want to increment first if 
-     we don't go off the end of the array, see #93 */
-  while (density[first] < 1.1 * DENSITY_MIN && first < last)
-    {
-      newden[first] = DENSITY_MIN;
-      
-      first++;
-      
-      /* if first has been incremented all the way up to last 
-         then this means all ions have negligible densities - 
-         so throw an error */
-      if (first == last)
-        Error("lucy_mazzali1: elem %i has all ions < %8.4e density\n", 
-               nelem, DENSITY_MIN);
-
-    }
-
-  /* JM 1411 -- we only want to decrement last if 
-     we don't go off the end of the array, see #93 */ 
-  while (density[last - 1] < 1.1 * DENSITY_MIN && last > first)
-    {
-      newden[last - 1] = DENSITY_MIN;
-
-      if (last > first)
-        last--;
-    }
+  for(nion=first+1;nion<last;nion++){
+	  if (density[nion]>dmax){
+		  nmax=nion;
+		  dmax=density[nion];
+	  }
+  }
 
 
 
-  sum = newden[first] = 1.;
 
-  for (nion = first + 1; nion < last; nion++)
+  sum = newden[nmax] = 1.;
+
+  for (nion = nmax + 1; nion < last; nion++)
     {
       numerator = newden[nion - 1] * fudge * (ne) * density[nion];
       denominator = density[nion - 1] * xne;
       q = numerator / denominator;
+
 
       /* now apply the Mazzali and  Lucy fudge, i.e. zeta + w (1-zeta)
          first find fraction of recombinations going directly to
@@ -881,10 +946,60 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
       // sum+=newden[nion]=newden[nion-1]*fudge*(*ne)*density[nion]/density[nion-1]/xne;
     }
 
+
+    for (nion = nmax; nion > first+1; nion--)
+	{
+	numerator = fudge * (ne) * density[nion];
+	denominator = density[nion - 1] * xne;
+
+	
+	q = numerator / denominator;
+
+	/* Bandaide */
+
+
+
+
+
+
+      /* now apply the Mazzali and  Lucy fudge, i.e. zeta + w (1-zeta)
+         first find fraction of recombinations going directly to
+         the ground state for this temperature and ion */
+
+      /* NSH 1207 - call external function, mode 2 uses chianti and badnell 
+         data to try to take account of DR in zeta - if atomic data is not read in, 
+         then the old interpolated zeta will be returned */
+
+	fudge2 = compute_zeta (t_e, nion - 1, 2);	
+
+      /* Since nion-1 points at state i-1 (saha: n_i/n_i-1) we want ground_frac[nion-1].
+         Note that we NEVER access the last ion for any element in that way
+         which is just as well since you can't have recombinations INTO
+         a fully ionized state -- The corresponding lines in recombination.out 
+         are just dummies to make reading the data easier */
+
+	fudge2 = fudge2 + www * (1.0 - fudge2);
+      // newden[nion] = fudge2 * newden[nion-1]*q;
+       
+	newden[nion-1] = newden[nion]/(fudge2*q);
+	if (density[nion]<1e-70){
+		newden[nion-1]=0;
+	}
+	sum += newden[nion-1];
+
+      // This is the equation being calculated
+      // sum+=newden[nion]=newden[nion-1]*fudge*(*ne)*density[nion]/density[nion-1]/xne;
+
+	if (ele[nelem].z==26){
+			Debug("test %8.2g %8.2g %8.2g %8.2g %8.2g %8.2g\n",t_e,newden[nion-1],density[nion],density[nion-1],q,fudge2);
+			}
+  }
+
   a = nh * ele[nelem].abun / sum;
 
   for (nion = first; nion < last; nion++)
     newden[nion] *= a;
+
 
 
 
