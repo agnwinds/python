@@ -3241,8 +3241,7 @@ double get_density_or_frac(xplasma,element,istate, frac_choice)
     density /= ele[nelem].abun * nh;
   }
 
-  if (xplasma->nplasma == 2)
-    return (density);
+  return (density);
 }
 
 

@@ -293,7 +293,10 @@ def make_wind_plot(d, fname, var=None, shape=(4,2), axes="log", den_or_frac=0, f
 
         x,z,v = util.wind_to_masked(d, value_string)
 
-        p.contourf(z,x,np.log10(v), extend="both")
+        if "ion" in value_string and den_or_frac==1:
+            p.contourf(z,x,np.log10(v), extend="both", levels=np.arange(-5,0.2,0.2))
+        else:
+            p.contourf(z,x,np.log10(v), extend="both")
         p.colorbar()
         p.title("Log(%s)" % value_string)
 
