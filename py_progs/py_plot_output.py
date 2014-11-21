@@ -220,7 +220,7 @@ def make_spec_plot_from_class(s, fname, smooth_factor = 10, angles = True, compo
 
 
 
-def make_wind_plot(d, fname, var=None, shape=(4,2), axes="log"):
+def make_wind_plot(d, fname, var=None, shape=(4,2), axes="log", den_or_frac=0, fname_prefix="wind", lims=None):
     '''
     make a wind plot from astropy.table.table.Table object 
 
@@ -245,6 +245,14 @@ def make_wind_plot(d, fname, var=None, shape=(4,2), axes="log"):
     axes: str 
         lin or log axes
 
+    den_or_frac: int
+        0 calculate ion densities
+        1 calculate ion fractions
+
+    lims: array-like
+        limits of plot, specified as ((xmin,xmax), (ymin, tmax))
+        can be array or tuple. Default is Nonetype.
+
     Returns
     ----------
     Success returns 0
@@ -254,7 +262,7 @@ def make_wind_plot(d, fname, var=None, shape=(4,2), axes="log"):
     '''
     
     if d == None:
-        util.get_pywind_summary(fname)
+        util.get_pywind_summary(fname, den_or_frac=den_or_frac)
         d = r.read_pywind(fname)
 
     if var == None:
@@ -289,12 +297,16 @@ def make_wind_plot(d, fname, var=None, shape=(4,2), axes="log"):
         p.colorbar()
         p.title("Log(%s)" % value_string)
 
+        if lims != None:
+            p.xlim(lims[0][0], lims[0][1])
+            p.ylim(lims[1][0], lims[1][1])
+
         if axes == "log":
             # log axes
             p.semilogy()
             p.semilogx()
 
-    p.savefig("wind_%s.png" % fname)
+    p.savefig("%s_%s.png" % (fname_prefix, fname))
 
     return 0
 
@@ -324,14 +336,17 @@ if __name__ == "__main__":
         make_spec_plot(s, fname, angles = False, components = True)
 
     elif mode == "ions":
-        make_wind_plot(None, fname, var = ["ionh1", "ionh2", "ionC3", "ionC4", "ionC5", "ionSi4", "ionN5", "ionO6"])
+        make_wind_plot(None, fname, 
+                       var = ["ionh1", "ionh2", "ionC3", "ionC4", "ionC5", "ionSi4", "ionN5", "ionO6"],
+                       fname_prefix="ions", den_or_frac = 1)
 
     elif mode == "all":
         s = r.read_spectrum(fname)
         make_spec_plot(s, fname, components = True)
         make_wind_plot(None, fname)
-        make_wind_plot(None, fname, var = ["ionh1", "ionh2", "ionC3", "ionC4", "ionC5", "ionSi4", "ionN5", "ionO6"])
-
+        make_wind_plot(None, fname, 
+                       var = ["ionh1", "ionh2", "ionC3", "ionC4", "ionC5", "ionSi4", "ionN5", "ionO6"],
+                       fname_prefix="ions", den_or_frac = 1)
 
     else:
         print "didn't understand mode %s" % mode
