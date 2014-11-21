@@ -3241,7 +3241,7 @@ int get_density_or_frac(xplasma,element,istate, frac_choice)
     density /= ele[nelem].abun * nh;
   }
 
-  return nion;
+  return (density);
 }
 
 
