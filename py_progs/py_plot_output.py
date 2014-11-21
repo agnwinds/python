@@ -324,13 +324,13 @@ if __name__ == "__main__":
         make_spec_plot(s, fname, angles = False, components = True)
 
     elif mode == "ions":
-        make_wind_plot(None, fname, var = ["ionh1", "ionh2", "ionC3", "ionC4", "ionC5", "ionSi4", "ionN5", "ionO6"])
+        make_wind_plot(None, fname, var = ["ionH1", "ionH2", "ionC3", "ionC4", "ionC5", "ionSi4", "ionN5", "ionO6"])
 
     elif mode == "all":
         s = r.read_spectrum(fname)
         make_spec_plot(s, fname, components = True)
         make_wind_plot(None, fname)
-        make_wind_plot(None, fname, var = ["ionh1", "ionh2", "ionC3", "ionC4", "ionC5", "ionSi4", "ionN5", "ionO6"])
+        make_wind_plot(None, fname, var = ["ionH1", "ionH2", "ionC3", "ionC4", "ionC5", "ionSi4", "ionN5", "ionO6"])
 
 
     else:
