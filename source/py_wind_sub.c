@@ -3111,7 +3111,7 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
 
   /* find where the main ions lie in the ion list */
   h1 = find_ion(1, 1);
-  h1 = find_ion(1, 2);
+  h2 = find_ion(1, 2);
   he1 = find_ion(2, 1);
   he2 = find_ion(2, 2);
   he3 = find_ion(2, 3);
@@ -3121,6 +3121,8 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
   n5 = find_ion(7, 5);
   o6 = find_ion(8, 6);
   si4 = find_ion(14, 4);
+
+  Debug("Ions are %i %i %i %i %i %i %i %i\n", h1, h2, c3, c4, c5, n5, o6, si4);
 
   for (n = 0; n < NDIM2; n++)
     {
@@ -3133,22 +3135,22 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
     vtot = sqrt (w[n].v[0] * w[n].v[0] + w[n].v[1] * w[n].v[1] +
                  w[n].v[2] * w[n].v[2]);
 
-    printf("%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
-            %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
-            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
-            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
-            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\n",
-            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2], vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol, 
-            plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
-            plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].ip, plasmamain[np].converge_whole, 
-            plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
-            plasmamain[np].lum_ioniz, plasmamain[np].lum_rad, plasmamain[np].lum_fb, 
-            plasmamain[np].lum_ff, plasmamain[np].lum_lines, plasmamain[np].lum_adiabatic, 
-            plasmamain[np].lum_comp, plasmamain[np].lum_dr, plasmamain[np].heat_tot, plasmamain[np].heat_photo, 
-            plasmamain[np].heat_lines , plasmamain[np].heat_ff , plasmamain[np].heat_comp, plasmamain[np].heat_ind_comp,
-            plasmamain[np].density[h1], plasmamain[np].density[h2], plasmamain[np].density[he1], plasmamain[np].density[he2],
-            plasmamain[np].density[he3], plasmamain[np].density[c3], plasmamain[np].density[c4], plasmamain[np].density[c5],
-            plasmamain[np].density[n5], plasmamain[np].density[o6], plasmamain[np].density[si4]);
+    // printf("%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+    //         %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
+    //         %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+    //         %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+    //         %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\n",
+    //         n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2], vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol, 
+    //         plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
+    //         plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].ip, plasmamain[np].converge_whole, 
+    //         plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
+    //         plasmamain[np].lum_ioniz, plasmamain[np].lum_rad, plasmamain[np].lum_fb, 
+    //         plasmamain[np].lum_ff, plasmamain[np].lum_lines, plasmamain[np].lum_adiabatic, 
+    //         plasmamain[np].lum_comp, plasmamain[np].lum_dr, plasmamain[np].heat_tot, plasmamain[np].heat_photo, 
+    //         plasmamain[np].heat_lines , plasmamain[np].heat_ff , plasmamain[np].heat_comp, plasmamain[np].heat_ind_comp,
+    //         plasmamain[np].density[h1], plasmamain[np].density[h2], plasmamain[np].density[he1], plasmamain[np].density[he2],
+    //         plasmamain[np].density[he3], plasmamain[np].density[c3], plasmamain[np].density[c4], plasmamain[np].density[c5],
+    //         plasmamain[np].density[n5], plasmamain[np].density[o6], plasmamain[np].density[si4]);
     
     if (ochoice)
       fprintf(fptr, "%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
@@ -3172,12 +3174,12 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
   {
       /* if we aren't inwind then print out a load of zeroes */
 
-      printf("%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
-            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
-            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
-            0.0 0.0 0.0 0.0 0.0 0.0 \
-            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n",
-            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]);
+      // printf("%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+      //       0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+      //       0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+      //       0.0 0.0 0.0 0.0 0.0 0.0 \
+      //       0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n",
+      //       n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]);
 
       if (ochoice)
         fprintf(fptr, "%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
@@ -3188,6 +3190,10 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
             n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]);
   }
     }
+  
+  if (ochoice)
+    printf("\nSaved summary of physical quantites in %s, use py_read_output.py to read\n",
+          filename);
 
   return (0);
 
@@ -3212,6 +3218,8 @@ int find_ion(element, istate)
     int istate;
 {
   int nion;
+
+  nion = 0;
 
   while (nion < nions && !(ion[nion].z == element && ion[nion].istate == istate))
     nion++;

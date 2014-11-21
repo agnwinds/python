@@ -790,6 +790,9 @@ typedef struct macro
   double cooling_ff;
   double cooling_adiabatic;     // this is just lum_adiabatic / vol / ne
 
+  double lte_pops[NLEVELS_MACRO]; /* a store of LTE level populations for the macro atom. */ 
+  double lte_pops_norm;
+
 } macro_dummy, *MacroPtr;
 
 MacroPtr macromain;
@@ -1153,3 +1156,5 @@ FILE *optr;  //pointer to a diagnostic file that will contain dvds information
 
         
 #define NMAX_OPTIONS 20 
+
+
