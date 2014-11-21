@@ -3114,9 +3114,6 @@ heat_tot\theat_photo\theat_lines\theat_ff\theat_comp\theat_ind_comp\t \
 ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\n");
 
 
-
-  Debug("Ions are %i %i %i %i %i %i %i %i\n", h1, h2, c3, c4, c5, n5, o6, si4);
-
   for (n = 0; n < NDIM2; n++)
     {
       wind_n_to_ij (n, &ii, &jj);
@@ -3128,7 +3125,7 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
     vtot = sqrt (w[n].v[0] * w[n].v[0] + w[n].v[1] * w[n].v[1] +
                  w[n].v[2] * w[n].v[2]);
 
-    xplasma = &plasmamain[np]
+    xplasma = &plasmamain[np];
 
     /* find the density of the main ions (or fractions if frac_choice == 1)*/
     h1den = get_density_or_frac(xplasma,1,1, frac_choice);
@@ -3143,20 +3140,21 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
     o6den =  get_density_or_frac(xplasma,8,6, frac_choice);
     si4den =  get_density_or_frac(xplasma,14,4, frac_choice);
 
-    // printf("%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
-    //         %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
-    //         %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
-    //         %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
-    //         %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\n",
-    //         n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2], vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol, 
-    //         plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
-    //         plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].ip, plasmamain[np].converge_whole, 
-    //         plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
-    //         plasmamain[np].lum_ioniz, plasmamain[np].lum_rad, plasmamain[np].lum_fb, 
-    //         plasmamain[np].lum_ff, plasmamain[np].lum_lines, plasmamain[np].lum_adiabatic, 
-    //         plasmamain[np].lum_comp, plasmamain[np].lum_dr, plasmamain[np].heat_tot, plasmamain[np].heat_photo, 
-    //         plasmamain[np].heat_lines , plasmamain[np].heat_ff , plasmamain[np].heat_comp, plasmamain[np].heat_ind_comp,
-    //         h1den, h2den, he1den, he2den, he3den, c3den, c4den, c5den, n5den, o6den, si4den);
+    /* printf("%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\n",
+            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2], vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol, 
+            plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
+            plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].ip, plasmamain[np].converge_whole, 
+            plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
+            plasmamain[np].lum_ioniz, plasmamain[np].lum_rad, plasmamain[np].lum_fb, 
+            plasmamain[np].lum_ff, plasmamain[np].lum_lines, plasmamain[np].lum_adiabatic, 
+            plasmamain[np].lum_comp, plasmamain[np].lum_dr, plasmamain[np].heat_tot, plasmamain[np].heat_photo, 
+            plasmamain[np].heat_lines , plasmamain[np].heat_ff , plasmamain[np].heat_comp, plasmamain[np].heat_ind_comp,
+            h1den, h2den, he1den, he2den, he3den, c3den, c4den, c5den, n5den, o6den, si4den);
+    */
     
     if (ochoice)
       fprintf(fptr, "%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
@@ -3178,12 +3176,13 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
   {
       /* if we aren't inwind then print out a load of zeroes */
 
-      // printf("%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
-      //       0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
-      //       0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
-      //       0.0 0.0 0.0 0.0 0.0 0.0 \
-      //       0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n",
-      //       n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]);
+      /* printf("%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n",
+            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]);
+      */
 
       if (ochoice)
         fprintf(fptr, "%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
@@ -3225,15 +3224,22 @@ int get_density_or_frac(xplasma,element,istate, frac_choice)
     int frac_choice;
 {
   int nion, nelem;
+  double nh, density;
 
+  /* find the ion and element in the list */
   nion = find_ion(element, istate);
 
   nelem = find_element(element);
 
+  /* get density of ion */
   density = xplasma->density[nion];
 
+  /* we want an ion fraction, not a density, so divide by nh */
   if (frac_choice)
-    density /= ele[nelem].abun;;
+  {
+    nh = xplasma->density[0] + xplasma->density[1];
+    density *= ele[nelem].abun / nh;
+  }
 
   return nion;
 }
