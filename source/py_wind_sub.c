@@ -3217,7 +3217,7 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
 ************************************************************************/
 
 
-int get_density_or_frac(xplasma,element,istate, frac_choice)
+double get_density_or_frac(xplasma,element,istate, frac_choice)
     PlasmaPtr xplasma;
     int element;
     int istate;
@@ -3241,7 +3241,8 @@ int get_density_or_frac(xplasma,element,istate, frac_choice)
     density /= ele[nelem].abun * nh;
   }
 
-  return (density);
+  if (xplasma->nplasma == 2)
+    return (density);
 }
 
 
@@ -3292,7 +3293,7 @@ int find_element(element)
 
   n = 0;
 
-  while (n < nelements && !(ele[n].z == element))
+  while (n < nelements && ele[n].z != element)
     n++;
 
   return n;

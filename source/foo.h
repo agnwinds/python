@@ -500,7 +500,7 @@ int convergence_all(WindPtr w, char rootname[], int ochoice);
 int model_bands(WindPtr w, char rootname[], int ochoice);
 int heatcool_summary(WindPtr w, char rootname[], int ochoice);
 int complete_physical_summary(WindPtr w, char rootname[], int ochoice);
-int get_density_or_frac(PlasmaPtr xplasma, int element, int istate, int frac_choice);
+double get_density_or_frac(PlasmaPtr xplasma, int element, int istate, int frac_choice);
 int find_ion(int element, int istate);
 int find_element(int element);
 /* py_wind_ion.c */
