@@ -62,5 +62,12 @@ install:
 clean: 
 	rm -f *.o *~
 	cd $(CFITSIO); make clean
-	cd $(GSL); make clean 
+	cd $(GSL); make clean;  
+	cd $(PYTHON)/source/; make clean
+
+# runs a more rigorous clean in gsl and cfitsio
+distclean:
+	rm -f *.o *~
+	cd $(CFITSIO); make distclean
+	cd $(GSL); make distclean 
 	cd $(PYTHON)/source/; make clean
