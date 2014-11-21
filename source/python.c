@@ -222,8 +222,6 @@ main (argc, argv)
   WindPtr w;
   PhotPtr p;
 
-// 140902 - wcycles and pcycles eliminated everywher in favor of using the variables that are in the goe structure
-//  int i, wcycles, pcycles;
   int i;
   double freqmin, freqmax;
   double swavemin, swavemax, renorm;
@@ -276,7 +274,6 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   double *maxbandfreqhelper,*maxbandfreqhelper2,*minbandfreqhelper,*minbandfreqhelper2;
   double *redhelper, *redhelper2;
   int *iredhelper, *iredhelper2;
- // int size_of_helpers;
   int plasma_double_helpers,plasma_int_helpers,ioniz_spec_helpers,spec_spec_helpers;
 #endif
 
