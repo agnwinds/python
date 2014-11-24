@@ -1,4 +1,7 @@
 # This is the git ignore for python
+# ignore binaries in bin/ such as e.g. py78a
+bin/py*
+
 # Object files
 *.o
 *.ko
