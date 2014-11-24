@@ -253,9 +253,11 @@ radiation (p, ds)
 
 		  if (density > DENSITY_PHOT_MIN)
 		    {
+
+		      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
 		      kappa_tot += x =
 			sigma_phot_topbase (x_top_ptr,
-					    freq_xs) * density * frac_path;
+					    freq_xs) * density * frac_path * geo.fill;
 
 		      /* I believe most of next steps are totally diagnsitic; it is possible if 
 		         statement could be deleted entirely 060802 -- ksl */
@@ -317,8 +319,10 @@ radiation (p, ds)
 
 		  if (density > DENSITY_PHOT_MIN)
 		    {
+
+		      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
 		      kappa_tot += x =
-			sigma_phot (x_ptr, freq_xs) * density * frac_path;
+			sigma_phot (x_ptr, freq_xs) * density * frac_path * geo.fill;
 
 		      /* Next if statment down to kappa_ion appers to be totally diagnostic - 060802 -- ksl */
 		      if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
@@ -556,6 +560,8 @@ kappa_ff (xplasma, freq)
     }
   x *= x2 = (1. - exp (-H_OVER_K * freq / xplasma->t_e));
   x /= x3 = (sqrt (xplasma->t_e) * freq * freq * freq);
+
+  x *= geo.fill;    // multiply by the filling factor- should cancel with density enhancement
 
   return (x);
 }

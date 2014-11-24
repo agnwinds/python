@@ -68,6 +68,8 @@ kappa_comp (xplasma, freq)
 
   x = (sigma * H) / (MELEC * C * C);	//Calculate the constant
   x *= xplasma->ne * freq;	//Multiply by cell electron density and frequency of the packet.
+
+  x *= geo.fill;    // multiply by the filling factor- should cancel with density enhancement
   return (x);
 }
 
@@ -128,6 +130,8 @@ kappa_ind_comp (xplasma, freq)
   x = (xplasma->ne) / (MELEC);
   x *= sigma * J;		// NSH 130214 factor of THOMPSON removed, since alpha is now the actual compton cross section
   x *= 1 / (2 * freq * freq);
+
+  x *= geo.fill;    // multiply by the filling factor- should cancel with density enhancement
 
   if (sane_check (x)) //For some reason we have a problem
     {

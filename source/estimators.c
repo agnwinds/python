@@ -128,7 +128,7 @@ bf_estimators_increment (one, p, ds)
 
 	  if (phot_top[n].macro_info == 1 && geo.macro_simple == 0)	// it is a macro atom
 	    {
-	      x = kap_bf[nn] / density;	//this is the cross section
+	      x = kap_bf[nn] / (density * geo.fill);	//this is the cross section
 
 	      /* Now identify which of the BF processes from this level this is. */
 
@@ -150,20 +150,29 @@ bf_estimators_increment (one, p, ds)
 	      // Now calculate the contributions and add them on.
 	      weight_of_packet = p->w;
 	      y = weight_of_packet * x * ds;
+
 	      exponential =
 		y * exp (-(freq_av - ft) / BOLTZMANN / xplasma->t_e);
+
 	      mplasma->gamma[config[llvl].bfu_indx_first + m] += y / freq_av;
+
 	      mplasma->alpha_st[config[llvl].bfu_indx_first + m] +=
 		exponential / freq_av;
+
 	      mplasma->gamma_e[config[llvl].bfu_indx_first + m] += y / ft;
+
 	      mplasma->alpha_st_e[config[llvl].bfu_indx_first + m] +=
 		exponential / ft;
 
 	      /* Now record the contribution to the energy absorbed by macro atoms. */
-	      yy = y * den_config (xplasma, llvl);
+        /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
+	      yy = y * den_config (xplasma, llvl) * geo.fill;
+
 	      mplasma->matom_abs[phot_top[n].uplev] += abs_cont =
 		yy * ft / freq_av;
+
 	      xplasma->kpkt_abs += yy - abs_cont;
+
 	      /* the following is just a check that flags packets that appear to travel a 
 	         suspiciously large optical depth in the continuum */
 	      if ((yy / weight_of_packet) > 50)
@@ -186,8 +195,11 @@ bf_estimators_increment (one, p, ds)
 		  weight_of_packet = p->w;
 		  y = weight_of_packet * x * ds;
 
+ 
+      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
 		  xplasma->heat_photo += heat_contribution =
-		    y * density * (1.0 - (ft / freq_av));
+		    y * density * (1.0 - (ft / freq_av)) * geo.fill;
+
 		  xplasma->heat_tot += heat_contribution;
 		  /* This heat contribution is also the contibution to making k-packets in this volume. So we record it. */
 
@@ -196,6 +208,9 @@ bf_estimators_increment (one, p, ds)
 	    }
 	}
     }
+
+  /* JM1411 -- the below processes have the factor geo.fill incorporated directly
+     into the kappa subroutines */
 
   /* Now for contribution to heating due to ff processes. (SS, Apr 04) */
 
