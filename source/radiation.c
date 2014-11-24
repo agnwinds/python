@@ -466,7 +466,7 @@ radiation (p, ds)
 	  /* Calculate the number of photoionizations per unit volume for H and He 
 	     JM 1405 changed this to use freq_xs */
 	  xplasma->nioniz++;
-	  q = (z) / (H * freq * one->vol);
+	  q = (z) / (H * freq * xplasma->vol);
 	  /* So xplasma->ioniz for each species is just 
 	     (energy_abs)*kappa_h/kappa_tot / H*freq / volume
 	     or the number of photons absorbed in this bundle per unit volume by this ion
@@ -494,7 +494,7 @@ radiation (p, ds)
 	  x = sigma_phot_verner (&augerion[n], freq);	//this is the cross section
 	  y = weight_of_packet * x * ds;
 
-	  xplasma->gamma_inshl[n] += y / (freq * H * one->vol);
+	  xplasma->gamma_inshl[n] += y / (freq * H * xplasma->vol);
 	}
     }
 

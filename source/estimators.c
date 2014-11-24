@@ -260,7 +260,7 @@ bf_estimators_increment (one, p, ds)
 	  x = sigma_phot_verner (&augerion[n], freq_av);	//this is the cross section
 	  y = weight_of_packet * x * ds;
 
-	  xplasma->gamma_inshl[n] += y / freq_av / H / one->vol;
+	  xplasma->gamma_inshl[n] += y / freq_av / H / xplasma->vol;
 	}
     }
 
@@ -473,7 +473,8 @@ mc_estimator_normalise (n)
   mplasma = &macromain[xplasma->nplasma];
 
   /* All the estimators need the volume so get that first. */
-  volume = one->vol;
+  /* JM 1411 - changed to use filled volume */
+  volume = xplasma->vol;
 
   /* bf estimators. During the mc calculation the quantity stored
      was weight * cross-section * path-length / frequency.
@@ -703,7 +704,7 @@ total_fb_matoms (xplasma, t_e, f1, f2)
 		 - mplasma->alpha_st_old[config[i].bfu_indx_first + j]
 		 - alpha_sp (cont_ptr, xplasma, 0))
 		* H * phot_top[config[i].bfu_jump[j]].freq[0] * density *
-		xplasma->ne * wmain[xplasma->nwind].vol;
+		xplasma->ne * xplasma->vol;
 
 	      /* Now add the collisional ionization term. */
 	      density = den_config (xplasma, cont_ptr->nlev);
@@ -711,7 +712,7 @@ total_fb_matoms (xplasma, t_e, f1, f2)
 		q_ioniz (cont_ptr,
 			 t_e) * density * xplasma->ne * H *
 		phot_top[config[i].bfu_jump[j]].freq[0] *
-		wmain[xplasma->nwind].vol;
+		xplasma->vol;
 
 	      /* That's the bf cooling contribution. */
 	      total += cool_contribution;
@@ -782,7 +783,7 @@ total_bb_cooling (xplasma, t_e)
 	  lower_density = den_config (xplasma, line_ptr->nconfigl);
 	  cool_contribution =
 	    (lower_density * q12 (line_ptr, t_e)) * xplasma->ne *
-	    wmain[xplasma->nwind].vol * line_ptr->freq * H;
+	    xplasma->vol * line_ptr->freq * H;
 	}
       else
 	{			//It's a simple line - don't know the level populations
@@ -801,7 +802,7 @@ total_bb_cooling (xplasma, t_e)
 	    (lower_density * line_ptr->gu / line_ptr->gl -
 	     upper_density) * coll_rate / (exp (H_OVER_K * line_ptr->freq /
 						t_e) -
-					   1.) * wmain[xplasma->nwind].vol *
+					   1.) * xplasma->vol *
 	    line_ptr->freq * H;
 
 
@@ -850,6 +851,7 @@ History:
           May 04  SS   Corrections made to get energy rather than number of heating events.
           May 04  SS   Macro_simple option added (for all ions to be "simple")
 	06may	ksl	57+ -- Modified for plasma structue.  Note that volume is used
+  1411  JM  changed to use filled volume
           
 ************************************************************/
 
@@ -876,7 +878,7 @@ macro_bb_heating (xplasma, t_e)
 	  heat_contribution =
 	    upper_density * q21 (line_ptr,
 				 t_e) * xplasma->ne *
-	    wmain[xplasma->nwind].vol * line_ptr->freq * H;
+	    xplasma->vol * line_ptr->freq * H;
 	  total += heat_contribution;
 	}
     }
@@ -917,6 +919,7 @@ History:
                      but with the inclusion of three body recombination it makes
                      more sense to put it all in one subroutine.
 	06may	ksl	57+ -- Modified for plama structue
+  1411  JM  changed to use filled volume
           
 ************************************************************/
 
@@ -947,7 +950,7 @@ macro_bf_heating (xplasma, t_e)
 	    (mplasma->gamma_e_old[config[i].bfu_indx_first + j] -
 	     mplasma->gamma_old[config[i].bfu_indx_first + j]) * H *
 	    phot_top[config[i].bfu_jump[j]].freq[0] * lower_density *
-	    wmain[xplasma->nwind].vol;
+	    xplasma->vol;
 
 	  /* Three body recombination part. */
 	  upper_density =
@@ -955,7 +958,7 @@ macro_bf_heating (xplasma, t_e)
 	  heat_contribution +=
 	    q_recomb (&phot_top[config[i].bfu_jump[j]],
 		      t_e) * xplasma->ne * xplasma->ne * H * upper_density *
-	    wmain[xplasma->nwind].vol *
+	    xplasma->vol *
 	    phot_top[config[i].bfu_jump[j]].freq[0];
 
 	  total += heat_contribution;
