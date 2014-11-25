@@ -149,7 +149,7 @@ total_di (one, t_e)
 	{
 
 	  x +=
-	    one->vol * xplasma->ne * xplasma->density[n] * di_coeffs[n] *
+	    xplasma->vol * xplasma->ne * xplasma->density[n] * di_coeffs[n] *
 	    dere_di_rate[ion[n].nxderedi].xi*EV2ERGS;
 //printf ("n=%i V=%e ne=%e rho=%e coeff=%e xi=%e cooling=%e\n",n, V , xplasma->ne , xplasma->density[n] , di_coeffs[n] ,
 //	    dere_di_rate[ion[n].nxderedi].xi*EV2ERGS,x);

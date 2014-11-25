@@ -84,6 +84,7 @@ History:
 			dynamically allocated arrays in plasma structure. Also changed some of the pack
 			and unpack commands for the same reason.
 	14sept	nsh	78b: Changes to deal with the inclusion of direct recombination
+	14nov 	JM 78b: Changed volume to be the filled volume
 
 
 **************************************************************/
@@ -176,7 +177,8 @@ WindPtr (w);
 
 
       nwind = plasmamain[n].nwind;
-      volume = w[nwind].vol;
+      //volume = w[nwind].vol;
+      volume = plasmamain[n].vol; 	// 1411 JM -- we want volume to be the filled volume
 
 
       /* Start with a call to the routine which normalises all the macro atom 
