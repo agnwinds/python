@@ -30,19 +30,23 @@ ion_standard_variables = ["ionh1", "ionhe1", "ionhe2", "ionc4", "ionc5"]
 
 ion_standard_variables
 
-def get_pywind_summary (fname, vers=""):
+def get_pywind_summary (fname, vers="", den_or_frac=0):
 
 	'''
 	run version vers of py_wind on file fname.wind_save
 	and generate the complete wind summary as output
 
 	produce the output fname.complete to read
+
+	if den_or_frac is 1, return fractions, otherwise densities
 	'''
+
+
 
 	if ".complete" not in fname:
 		fname = fname + ".complete"
 
-	cmds = ["1", "1", "q"] # these commands create onefile summary
+	cmds = ["1", "1", den_or_frac, "q"] # these commands create onefile summary
 
 	isys = run_py_wind(fname, vers=vers, cmds=cmds)
 
@@ -62,7 +66,7 @@ def run_py_wind (fname, vers="", cmds=None, ilv=None):
 	np.savetxt("_tempcmd.txt", x, fmt = "%s")
 
 
-	isys = os.system('py_wind'+vers+' '+fname+' < _tempcmd.txt > tempfile &')
+	isys = os.system('py_wind'+vers+' '+fname+' < _tempcmd.txt > tempfile')
 	time.sleep(3)
 
 	# remove temporary file
