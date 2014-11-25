@@ -462,7 +462,9 @@ double tb_planck1(double freq);
 double tb_logpow1(double freq);
 double tb_exp1(double freq);
 /* matrix_ion.c */
-int matrix_solv(PlasmaPtr xplasma, int mode);
+int matrix_ion_populations(PlasmaPtr xplasma, int mode);
+int populate_ion_rate_matrix(PlasmaPtr xplasma, double rate_matrix[nions][nions], double pi_rates[nions], double rr_rates[nions], double b_temp[nions], double xne, int xelem[nions]);
+int solve_matrix(double *a_data, double *b_data, int nrows, double *x);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
