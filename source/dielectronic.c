@@ -179,7 +179,8 @@ total_dr (one, t_e)
       else
 	{
 	  x +=
-	    one->vol * xplasma->ne * xplasma->density[n] * dr_coeffs[n] *
+	    xplasma->vol * xplasma->ne * xplasma->density[n +
+						      1] * dr_coeffs[n] *
 	    meanke;
 	}
     }

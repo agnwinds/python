@@ -317,7 +317,7 @@ have been changed */
 	    pp->w *= (1. - exp (-tau)) / tau;
 	  tau = 0.0;
 	}
-
+	
 /* But in any event we have to reposition wind photons so thath they don't go through
 the same resonance again */
 

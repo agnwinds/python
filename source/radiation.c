@@ -253,9 +253,11 @@ radiation (p, ds)
 
 		  if (density > DENSITY_PHOT_MIN)
 		    {
+
+		      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
 		      kappa_tot += x =
 			sigma_phot_topbase (x_top_ptr,
-					    freq_xs) * density * frac_path;
+					    freq_xs) * density * frac_path * geo.fill;
 
 		      /* I believe most of next steps are totally diagnsitic; it is possible if 
 		         statement could be deleted entirely 060802 -- ksl */
@@ -317,8 +319,10 @@ radiation (p, ds)
 
 		  if (density > DENSITY_PHOT_MIN)
 		    {
+
+		      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
 		      kappa_tot += x =
-			sigma_phot (x_ptr, freq_xs) * density * frac_path;
+			sigma_phot (x_ptr, freq_xs) * density * frac_path * geo.fill;
 
 		      /* Next if statment down to kappa_ion appers to be totally diagnostic - 060802 -- ksl */
 		      if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
@@ -462,7 +466,7 @@ radiation (p, ds)
 	  /* Calculate the number of photoionizations per unit volume for H and He 
 	     JM 1405 changed this to use freq_xs */
 	  xplasma->nioniz++;
-	  q = (z) / (H * freq * one->vol);
+	  q = (z) / (H * freq * xplasma->vol);
 	  /* So xplasma->ioniz for each species is just 
 	     (energy_abs)*kappa_h/kappa_tot / H*freq / volume
 	     or the number of photons absorbed in this bundle per unit volume by this ion
@@ -490,7 +494,7 @@ radiation (p, ds)
 	  x = sigma_phot_verner (&augerion[n], freq);	//this is the cross section
 	  y = weight_of_packet * x * ds;
 
-	  xplasma->gamma_inshl[n] += y / (freq * H * one->vol);
+	  xplasma->gamma_inshl[n] += y / (freq * H * xplasma->vol);
 	}
     }
 
@@ -556,6 +560,8 @@ kappa_ff (xplasma, freq)
     }
   x *= x2 = (1. - exp (-H_OVER_K * freq / xplasma->t_e));
   x /= x3 = (sqrt (xplasma->t_e) * freq * freq * freq);
+
+  x *= geo.fill;    // multiply by the filling factor- should cancel with density enhancement
 
   return (x);
 }
