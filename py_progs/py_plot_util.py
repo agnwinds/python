@@ -19,6 +19,7 @@ import py_read_output as r
 import numpy as np 
 import os, sys
 import time
+ 
 
 standard_cmds = np.array(["1", "n","t", "r","v","1","2","3","-1",\
 						 "I", "i", "1","1","1","2","0","i","0", \
@@ -211,6 +212,35 @@ def smooth(x,window_len=20,window='hanning'):
 	return y[window_len:-window_len+1]
 
 
+def parse_rcparams(fname = "params.rc"):
+
+	'''
+	parse the file params.rc and set values in matplotlib.rcparams
+
+	file should be of format 
+
+	# a comment
+    font.family             :   serif
+    mathtext.fontset        :   custom
+	'''
+
+	import matplotlib as mpl
+
+	f = open(fname, "r")
+
+	for line in f:
+		data = line.split()
 
 
+		if len(data) > 0:
+			if data[0] != "#":	# comments
+
+				if data[1] != ":":
+					print "parse_rcparams: warning: unexpected format for filename %s" % (fname)
+
+
+				mpl.rcParams[data[0]] = data[2]
+
+
+	return 0
 
