@@ -512,8 +512,13 @@ rdstr (char question[], char answer[])
   int query;
   char dummy[LINELEN];
   query = REISSUE;
+
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
+  else
+		restart_par(1);
+  
+
   while (query == REISSUE)
     {
       sprintf (dummy, "%s", answer);
@@ -535,8 +540,12 @@ rdchar (char question[], char *answer)
   int query;
   char dummy[LINELEN];
   query = REISSUE;
+  
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
+  else
+		restart_par(1);
+  
   while (query == REISSUE)
     {
       sprintf (dummy, "%c", *answer);
@@ -557,8 +566,13 @@ rdint (char question[], int *answer)
   int query;
   char dummy[LINELEN];
   query = REISSUE;
+
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
+  else
+		restart_par(1);
+  
+
   while (query == REISSUE)
     {
       sprintf (dummy, "%d", *answer);
@@ -579,8 +593,14 @@ rdflo (char question[], float *answer)
   int query;
   char dummy[LINELEN];
   query = REISSUE;
+  
+  
+  
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
+  else
+		restart_par(1);
+  
   while (query == REISSUE)
     {
       sprintf (dummy, "%g", *answer);
@@ -601,19 +621,25 @@ rddoub (char question[], double *answer)
   int query;
   char dummy[LINELEN];
   query = REISSUE;
+  
+  
+  
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
+  else
+		restart_par(1); 
+  
   while (query == REISSUE)
-    {
-      sprintf (dummy, "%g", *answer);
-      query = string_process (question, dummy);
-      if (query == NORMAL)
 	{
-	  sscanf (dummy, "%le", answer);
-          if (rd_rank==0 && verbose==1)
-	    printf ("%s	  %e\n", question, *answer);
-	}
-    }
+    sprintf (dummy, "%g", *answer);
+    query = string_process (question, dummy);
+    if (query == NORMAL)
+		{
+			sscanf (dummy, "%le", answer);
+      if (rd_rank==0 && verbose==1)
+				printf ("%s	  %e\n", question, *answer);
+		}
+  }
   return (query);
 }
 
@@ -625,6 +651,9 @@ rdline (char question[], char answer[])
   query = REISSUE;
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
+  else
+		restart_par(1);
+  
   while (query == REISSUE)
     {
       sprintf (dummy, "%s", answer);

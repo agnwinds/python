@@ -1,9 +1,6 @@
-/* The routines in this file define and summarize the properties of the wind.  The routines here are specific to the SV
+/* The routines in this file define and summarize the properties of the wind.  The routines here are specific to the simple keplerian
    description of a wind. It is only useful in the 2-d version of the code.
-
-   This file was created in 98apr in order to being to isolate the SV description from the more generic parts of the wind.
-   Major modifications, mostly moving new code here and creating the remaining subroutines to completely concentrate the sv
-   dependent routines here were made in 98dec. */
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,6 +9,10 @@
 #include "atomic.h"
 #include "python.h"
 
+/*
+ * This structure contains the basic config details for the keplerian wind.
+ * It should only be allocated if the keplerian wind is selected.
+ */ 
 typedef struct wind_keplerian
 {
 	double d_rad_min, d_rad_max;
@@ -19,6 +20,8 @@ typedef struct wind_keplerian
 	double d_density;
 	double d_temperature;
 	double d_height;
+	double d_photon_bias;
+	double d_photon_bias_const;
 } wind_keplerian_dummy, *Wind_Keplerian_Ptr;
 Wind_Keplerian_Ptr w_keplerian;
 
@@ -62,6 +65,12 @@ int get_wind_keplerian_params(void)
 
 	rddoub("wind_keplerian.density()", &w_keplerian->d_density);
 	rddoub("wind_keplerian.height()", &w_keplerian->d_height);
+	rddoub("wind_keplerian.photon_bias()", &w_keplerian->d_photon_bias);
+	printf("Bias: %g, density: %g, height: %g\n",
+		w_keplerian->d_photon_bias,w_keplerian->d_density,w_keplerian->d_height);
+	w_keplerian->d_photon_bias_const = w_keplerian->d_photon_bias /
+		(exp(w_keplerian->d_photon_bias)-exp(-w_keplerian->d_photon_bias));
+	
 	geo.wind_rmin = geo.rstar;
 	geo.wind_rmax = geo.rmax;
 	geo.wind_rho_min = w_keplerian->d_rad_min;
@@ -82,7 +91,7 @@ int get_wind_keplerian_params(void)
 }
 
 /***********************************************************
-                                       Space Telescope Science Institute
+University of Southampton
 
 Synopsis:
 	double wind_keplerian_velocity(x,v) calulates the keplerian velocity
@@ -94,22 +103,22 @@ Returns:
 	The amplitude of the velocity is returned 
 	
 History:
-	12-2014	Cloned from sv_velocity by SWM
- 
+	11-2014	Cloned from sv_velocity by SWM
 **************************************************************/
 double wind_keplerian_velocity(double x[], double v[])
 {
 	double r, speed;
 	double xtest[3];
 
-	r = sqrt(x[0] * x[0] + x[1] * x[1]);
+	r = sqrt(x[0] * x[0] + x[1] * x[1]);									//Convert position into radius
 
-	v[0] = 0.;
+	v[0] = 0.;																						//Zero R, Phi components
 	v[2] = 0.;
-	if (r > w_keplerian->d_rad_min)
-		v[1] = sqrt(G * geo.mstar * w_keplerian->d_rad_min) / r;
+	if (r > w_keplerian->d_rad_min && r < w_keplerian->d_rad_max 
+			&& x[2]<w_keplerian->d_height)										//If point is within the wind 
+		v[1] = sqrt(G * geo.mstar / r);											//Simple keplerian Theta component
 	else
-		v[1] = 0;
+		v[1] = 0;																						//Or it's zero
 
 	if (x[1] != 0.0)
 	{
@@ -121,23 +130,25 @@ double wind_keplerian_velocity(double x[], double v[])
 }
 
 /***********************************************************
-                                       Space Telescope Science Institute
+University of Southampton
 
- Synopsis:
-	double sv_rho(x) calculates the density of an sv_wind at a position x
+Synopsis:
+	double wind_keplerian_rho(x) returns a flat density at any x
 Arguments:		
 	double x[]	the position where for the which one desires the denisty
 Returns:
 	The density at x is returned in gram/cm**3
 	
+History:
+	11-2014	Cloned from proga_rho by SWM
 **************************************************************/
 double wind_keplerian_rho(double x[])
 {
-	double r = sqrt(x[0] * x[0] + x[1] * x[1]);
+	double r = sqrt(x[0] * x[0] + x[1] * x[1]);			//Convert position into radius
 	if (r < w_keplerian->d_rad_min || r > w_keplerian->d_rad_max || x[2] > w_keplerian->d_height)
-		return (0.0);
+		return (0.0);																	//If the radius lies outside the wind, zero
 	else
-		return (w_keplerian->d_density);
+		return (w_keplerian->d_density);							//Else return flat value
 }
 
 /***********************************************************
@@ -160,27 +171,9 @@ double wind_keplerian_rho(double x[])
 	for making certain choices in the existing code, and so one does
 	need to be careful.  
 	
-		
- Notes:
-	Where_in grid does not tell you whether the photon is in the wind or not. 
  History:
- 	04aug	ksl	52a -- Moved from wind2d
-	04aug	ksl	52a -- Made the weighting of the integration accurate. In 
-			the process, I introduced variables to make the code
-			more readable.
-	05apr	ksl	55d -- Modified to include the determination of whether
-			a cell was completely in the wind or not.  This
-			functionality had been in define_wind.
-	06nov	ksl	58b: Minor modification to use W_ALL_INWIND, etc.
-			instead of hardcoded values
-	09mar	ksl	68c: Modified so that integration is only carried
-			out when the cell is partially in the wind as
-			evidenced by the fact that only some of the
-			corners of the cell are in the wind.  The intent
-			is to avoid wasting time
-	11aug	ksl	Add ability to determine the volume for different
-			components.  See python.h for explanation of
-			relatinship between PART and ALL
+ 	11-2014	Cloned from wind_cyl volume by SWM
+
  
 **************************************************************/
 #define RESOLUTION   1000				// Resolution for scanning partial disk section at
@@ -212,7 +205,6 @@ int wind_keplerian_cyl_volumes(WindPtr w, int icomp)
 			}
 		}
 	}
-
 	return (0);
 }
 
@@ -321,4 +313,67 @@ int wind_keplerian_cylvar_volumes(WindPtr w, int icomp)	// The component for whi
 	}
 
 	return (0);
+}
+
+
+int
+wind_keplerian_sinvec(
+	PhotPtr pp, 
+	double r)
+{
+	p_biased = rand()/MAXRAND;
+	costheta = 2.*asin(sqrt(p_biased));
+	sintheta = sqrt(1 - costheta*costheta);
+	
+	
+	return(0);
+}
+
+int 	//http://www.nucleonica.net/wiki/images/8/89/MCNPvolI.pdf
+wind_keplerian_randvec(
+	PhotPtr pp, 
+	double r)
+{
+  double costheta, sintheta;
+  double phi, sinphi, cosphi, d_rot;
+	double p_biased;
+
+	double axis_u[3], axis_v[3], x[3];
+
+	double k = w_keplerian->d_photon_bias,
+				 c = w_keplerian->d_photon_bias_const;
+
+  d_rot  = 2. * PI * (rand () / MAXRAND);
+  phi    = 2. * PI * (rand () / MAXRAND);
+  sinphi = sin (phi);
+	cosphi = cos (phi);
+
+	p_biased = rand() / MAXRAND;
+	costheta = log( (k * p_biased / c) + exp(-k))/k;
+	sintheta = sqrt (1. - costheta*costheta);
+
+	x[2] = r * cosphi * sintheta;
+	x[1] = r * sinphi * sintheta;
+	x[0] = r * costheta;
+	
+	axis_u[0] = cos(d_rot);
+	axis_u[1] = sin(d_rot);
+	axis_u[2] = 0.;	
+	axis_v[0] = 0.;
+	axis_v[1] = 0.;
+	axis_v[2] = 1.;
+	
+	struct basis b_rotate;
+	create_basis(axis_u, axis_v, &b_rotate);
+	project_to(&b_rotate, x, pp->x);
+
+	//Adjust weight by relative probality densities (.5 for random, c e^-kt for biased)
+	pp->w *= 0.5 / (c * exp(k*costheta));	
+	return (0);
+}
+
+int
+rand_sign()
+{
+	return ((rand()%2)*2 -1);
 }

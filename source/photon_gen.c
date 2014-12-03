@@ -747,8 +747,10 @@ photo_gen_star (
 	    ("photo_gen_star: phot no. %d freq %g out of range %g %g\n",
 	     i, p[i].freq, freqmin, freqmax);
 	}
-
-      randvec (p[i].x, r);
+	  if(geo.wind_type==10)
+		wind_keplerian_randvec(p[i].x, r);
+	  else  
+		randvec (p[i].x, r);
 
       /* Added by SS August 2004 for finite disk. */
       if (geo.disk_type == 2)

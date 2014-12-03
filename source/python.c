@@ -2407,6 +2407,9 @@ main (int argc, char *argv[])
 	xsignal(root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n", "COMMENT", geo.pcycle, geo.pcycles);
 
 
+  /* SWM - Prep delay dump file */
+  delay_dump_prep(delay_dumpfile, nspectra - 1);
+
   while (geo.pcycle < geo.pcycles)
   {								/* This allows you to build up photons in bunches */
 
@@ -2512,15 +2515,12 @@ main (int argc, char *argv[])
 	/* 
 	 * JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. 
 	 */
-
 	xsignal(root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK", geo.pcycle, geo.pcycles);
 
 	/* 
 	 * SWM 2/9/14 - Delay dump 
 	 */
-	if (geo.pcycle == 0)
-	  delay_dump_prep(delay_dumpfile, nspectra - 1);
-	delay_dump(delay_dumpfile, p, freqmin, freqmax, nspectra - 1);
+	delay_dump(p, NPHOT, nspectra - 1);
 
 	geo.pcycle++;				// Increment the spectral cycles
 
@@ -2536,6 +2536,8 @@ main (int argc, char *argv[])
 #endif
 	check_time(root);
   }
+
+  delay_dump_finish(); // SWM - Finish delay dumping (for extract mode)
 
 
   /* 

@@ -15,7 +15,6 @@
                                     Space Telescope Science Institute
 
 Synopsis:
-  
 	delay_spectrum_summary(filename,mode,nspecmin,nspecmax,select_spectype,renorm,loglin)  
 		writes out the spectrum to a file 
 
@@ -161,15 +160,12 @@ delay_spectrum_summary (
 
 /***********************************************************
 Synopsis:
-  
 	delay_dump(filename, p, f1, f2, nspec)  
 		Calculates the delay for the photons. Cloned from spectra.c
 
 Arguments:		
 	filename		File to output to
 	PhotPtr p		Array of photons (pass global p)
-	double f1		Minimum frequency
-	double f2		Maximum frequency
 	int nspec		Observer spectrum to dump for
 
 Returns:
@@ -184,11 +180,31 @@ Notes:
 History:
 	14aug	-	Written by SWM
 ***********************************************************/
+char delay_dump_file[LINELENGTH];
+int delay_dump_bank_size=1024, delay_dump_bank_curr=0,delay_dump_spec;
+PhotPtr delay_dump_bank;
+
+double
+delay_to_observer(PhotPtr pp)
+{
+	plane_dummy observer;
+	observer.x[0]   = pp->lmn[0]*geo.rmax;
+	observer.x[1]   = pp->lmn[1]*geo.rmax;
+	observer.x[2]   = pp->lmn[2]*geo.rmax;
+	observer.lmn[0] = pp->lmn[0];
+	observer.lmn[1] = pp->lmn[1];
+	observer.lmn[2] = pp->lmn[2];
+	return(pp->path + ds_to_plane(&observer,pp));
+}
+
 int 
 delay_dump_prep (char filename[], int nspec)
 {
 	FILE *fopen(), *fptr;
 	char string[LINELENGTH];
+	
+	strcpy(delay_dump_file,filename);
+	delay_dump_spec=nspec;
 	
 	if ((fptr = fopen(filename, "w")) == NULL)
 	{
@@ -196,9 +212,7 @@ delay_dump_prep (char filename[], int nspec)
 		exit(0);
 	}
 
-	/* 
-	 * Check that nspec is reasonable 
-	 */
+	/* Check that nspec is reasonable */
 	if (nspec < MSPEC)
 	{
 		Error("delay_dump: nspec %d below MSPEC value \n", nspec);
@@ -222,46 +236,39 @@ delay_dump_prep (char filename[], int nspec)
 			"  Last L       Last M       Last N     "
 			"Scatters RScatter Delay\n");	
 	fclose(fptr);
+	delay_dump_bank = (PhotPtr) calloc(sizeof(p_dummy), delay_dump_bank_size);
 	return(0);
 }
 
 int 
-delay_dump (char filename[], PhotPtr p, double f1, double f2, int nspec)
+delay_dump_finish()
+{
+	if(delay_dump_bank_curr>0)
+	{
+		delay_dump(delay_dump_bank,delay_dump_bank_curr-1,delay_dump_spec);
+	}
+	return(0);
+}
+
+int 
+delay_dump (PhotPtr p, int np, int nspec)
 {
 	FILE *fopen(), *fptr;
-	int nphot, k, mscat, mtopbot;
-	double freqmin, freqmax, dfreq;
-	double zangle, path;
+	int nphot, mscat, mtopbot;
+	double zangle;
 
 	/* 
-	 * Open or reopen a file for writing the spectrum 
-	 */
-	
-	if ((fptr = fopen(filename, "a")) == NULL)
+	 * Open a file for writing the spectrum 
+	 */	
+	if ((fptr = fopen(delay_dump_file, "a")) == NULL)
 	{
-		Error("delay_dump: Unable to reopen %s for writing\n", filename);
+		Error("delay_dump: Unable to reopen %s for writing\n", delay_dump_file);
 		exit(0);
 	}
 	
-	freqmin = f1;
-	freqmax = f2;
-	dfreq = (freqmax - freqmin) / NWAVE;
-	
-	PlanePtr observer_plane;	/* SWM */
-	observer_plane = (PlanePtr) malloc(sizeof(plane_dummy));
-	
-	for (nphot = 0; nphot < NPHOT; nphot++)
+	for (nphot = 0; nphot < np; nphot++)
 	{
-		/* 
-		 * lines to work out where we are in a normal spectrum, and snap
-		 * to end bins if we fall outside
-		 */
-		k = (p[nphot].freq - freqmin) / dfreq;
-		if (k < 0) k = 0;
-		else if (k > NWAVE - 1)	k = NWAVE - 1;
-
-
-		if (p[nphot].istat == P_ESCAPE)
+		if (p[nphot].istat == P_ESCAPE && p[nphot].nrscat>0)
 		{
 			zangle = fabs(p[nphot].lmn[2]);
 			/* 
@@ -273,26 +280,28 @@ delay_dump (char filename[], PhotPtr p, double f1, double f2, int nspec)
 			{
 				if (xxspec[nspec].mmin < zangle 
 					&& zangle < xxspec[nspec].mmax)
-				{
-					observer_plane->x[0] = p[nphot].lmn[0]*geo.rmax;
-					observer_plane->x[1] = p[nphot].lmn[1]*geo.rmax;
-					observer_plane->x[2] = p[nphot].lmn[2]*geo.rmax;
-					observer_plane->lmn[0] = p[nphot].lmn[0];
-					observer_plane->lmn[1] = p[nphot].lmn[1];
-					observer_plane->lmn[2] = p[nphot].lmn[2];
-					path = p[nphot].path + ds_to_plane(observer_plane,&p[nphot]);
-						/* SWM 15/8/14 - Added path delay in comparison to photon heading straight from origin to rmax*/
+				{	/* SWM 15/8/14 - Added path delay in comparison to photon heading straight from origin to rmax*/
 					fprintf(fptr, "%10.5g %10.5g %10.5g %+10.5e %+10.5e %+10.5e %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g\n", 
 						p[nphot].freq, C * 1e8 / p[nphot].freq, p[nphot].w, 
 						p[nphot].x[0], p[nphot].x[1], p[nphot].x[2], 
 						p[nphot].lmn[0], p[nphot].lmn[1], p[nphot].lmn[2], 
-						p[nphot].nscat, p[nphot].nrscat, path);
+						p[nphot].nscat, p[nphot].nrscat, delay_to_observer(&p[nphot]));
 				}
 			}
 		}
 	}
-	free(observer_plane); /* SWM */
 	fclose(fptr);
 	return (0);
+}
 
+int 
+delay_dump_single (PhotPtr pp)
+{
+	stuff_phot(pp, &delay_dump_bank[delay_dump_bank_curr]);			//Bank single photon in temp array
+	if(delay_dump_bank_curr++ == delay_dump_bank_size)				//If temp array is full
+	{																//Dump to file, zero array size
+		delay_dump(delay_dump_bank,delay_dump_bank_size,delay_dump_spec);
+		delay_dump_bank_curr=0;
+	}
+	return(0);
 }
