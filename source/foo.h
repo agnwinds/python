@@ -320,7 +320,7 @@ int fake_matom_bf(PhotPtr p, int *nres, int *escape);
 int macro_pops(PlasmaPtr xplasma, double xne);
 int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 double get_kpkt_f(void);
-double get_matom_f(void);
+double get_matom_f(int mode);
 int photo_gen_kpkt(PhotPtr p, double weight, int photstart, int nphot);
 int photo_gen_matom(PhotPtr p, double weight, int photstart, int nphot);
 int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper);
@@ -524,6 +524,7 @@ int depcoef_overview_specific(int version, int nconfig, WindPtr w, char rootname
 int level_popsoverview(int nplasma, WindPtr w, char rootname[], int ochoice);
 int level_emissoverview(int nlev, WindPtr w, char rootname[], int ochoice);
 int level_escapeoverview(int nlev, WindPtr w, char rootname[], int ochoice);
+int level_tauoverview(int nlev, WindPtr w, char rootname[], int ochoice);
 /* py_wind.c */
 int main(int argc, char *argv[]);
 int one_choice(int choice, char *root, int ochoice);

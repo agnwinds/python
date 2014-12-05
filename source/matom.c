@@ -2167,7 +2167,10 @@ Synopsis:
 
 
 Arguments:   
-       WindPtr w                   the ptr to the structure defining the wind
+       mode  variable which controls whether or not we need to compute the
+             emissivities (CALCULATE_MATOM_EMISSIVITIES) or use stored ones
+             because we are restarting a spectral cycle (USE_STORED_MATOM_EMISSIVITIES)
+             see #define statements in python.h and code in xdefine_phot().
 
                                               
 
@@ -2191,7 +2194,8 @@ History:
 ************************************************************/
 
 double
-get_matom_f ()
+get_matom_f (mode)
+    int mode;
 {
   int n, m;
   int mm, ss;
@@ -2203,6 +2207,15 @@ get_matom_f ()
   int nres, which_out;
   int my_nmin, my_nmax;		//These variables are used even if not in parallel mode
 
+
+  if (mode == USE_STORED_MATOM_EMISSIVITIES) 
+    {
+  	  Log("geo.pcycle (%i) > 0, so using saved level emissivities for macro atoms\n", 
+  		   geo.pcycle);
+    }
+
+  else   // we need to compute the emissivities
+    {
 #ifdef MPI_ON
   int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
   int size_of_commbuffer;
@@ -2219,7 +2232,6 @@ get_matom_f ()
 
 
   which_out = 0;
-  lum = 0.0;
   n_tries = 5000000;
   geo.matom_radiation = 0;
   n_tries_local = 0;
@@ -2469,8 +2481,7 @@ get_matom_f ()
 			  macromain[n].matom_emiss[mm] += contribution =
 			    level_emit[mm] * plasmamain[n].kpkt_abs /
 			    n_tries_local;
-			}
-		      lum += contribution;
+			}      
 		    }
 
 		  if (m < nlevels_macro)
@@ -2561,10 +2572,13 @@ get_matom_f ()
 			  MPI_COMM_WORLD);
 	    }
 	}
-    }
+    }  // end of parallelised section
+  #endif	
 
+  } // end of if loop which controls whether to compute the emissivities or not 
 
-  /* this next loop just corrects lum to be the correct summed value in parallel mode */
+  /* this next loop just calculates lum to be the correct summed value in parallel mode */
+  /* if mode == USE_STORED_MATOM_EMISSIVITIES this is all this routine does */
   lum = 0.0;   // need to rezero, fixes segfault bug #59 
 
   for (n = 0; n < NPLASMA; n++)
@@ -2575,9 +2589,6 @@ get_matom_f ()
 	  lum += macromain[n].matom_emiss[mm];
 	}
     }
-#endif
-
-
 
   geo.matom_radiation = 1;
 

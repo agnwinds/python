@@ -142,7 +142,7 @@ macro_summary (w, rootname, ochoice)
 
   /* get input from the user */
   rdint ("Detailed cell info (0), specific level info (1) \
-          emissivities (2) Balmer escapes (3) Pops (4)", &choose);
+emissivities (2) Balmer escapes (3) Pops (4) taus (5)", &choose);
 
   if (choose == 0)
     {
@@ -199,6 +199,18 @@ macro_summary (w, rootname, ochoice)
         }
     }
 
+  /* JM 1311 -- new loop added to report escape probabilities 
+     Note this currently only works for Balmer lines */
+  else if (choose == 3)
+    {
+      rdint ("Upper level escape to view (-1 - back, Halpha = 3):", &nlev);
+      while (nlev >= 0)
+        {
+          level_escapeoverview (nlev, w, rootname, ochoice);
+          rdint ("Upper level escape to view (-1 - back, Halpha = 3):", &nlev);
+        }
+    }
+
   /* JM 1311 -- new loop added to report level populations in a cell */
   else if (choose == 4)
     {
@@ -210,15 +222,15 @@ macro_summary (w, rootname, ochoice)
         }
     }
 
-  /* JM 1311 -- new loop added to report escape probabilities 
+  /* JM 1311 -- new loop added to report taus 
      Note this currently only works for Balmer lines */
-  else
+  else 
     {
-      rdint ("Upper level escape to view (-1 - back, Halpha = 3):", &nlev);
+      rdint ("Upper level tau to view (-1 - back, Halpha = 3):", &nlev);
       while (nlev >= 0)
         {
-          level_escapeoverview (nlev, w, rootname, ochoice);
-          rdint ("Upper level escape to view (-1 - back, Halpha = 3):", &nlev);
+          level_tauoverview (nlev, w, rootname, ochoice);
+          rdint ("Upper level tau to view (-1 - back, Halpha = 3):", &nlev);
         }
     }
 
@@ -903,3 +915,106 @@ int level_escapeoverview (nlev, w, rootname, ochoice)
   return (0);
 }
 
+
+
+
+/**************************************************************************
+
+  Synopsis:  
+
+  Routine to print taus for a given 
+  Balmer line in each cell.
+
+  Description:  
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+      1312  JM  Coded
+ ************************************************************************/
+
+
+
+int level_tauoverview (nlev, w, rootname, ochoice)
+  int nlev;
+  WindPtr w;
+  char rootname[];
+  int ochoice;
+{
+  PlasmaPtr xplasma;
+  WindPtr one;
+  int n, nplasma, nline, found;
+  char name[LINELENGTH], lname[LINELENGTH];
+  char filename[LINELENGTH];
+  double lambda;
+
+  
+  found = 0;
+  nline = 0;
+
+
+
+  /* Find the line in line list */
+  while (found != 1 && nline < nlines)
+  {
+
+    if (lin_ptr[nline]->levl == 2 && lin_ptr[nline]->levu == nlev && 
+       lin_ptr[nline]->z == 1 && lin_ptr[nline]->istate == 1)
+      { 
+        found = 1;
+      }
+
+    nline++; 
+  }
+
+
+  if (nline == nlines)
+    {
+      Error ("level_tauoverview: Could not find line in linelist\n");
+      exit (0);
+    }
+
+  nline--;
+  
+  lambda = ( C/ lin_ptr[nline]->freq ) * 1e8;
+
+  strcpy (name, "");
+  sprintf (name, "Balmer series taus for Level %i, Lambda %.1f", nlev, lambda);
+
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      nplasma = w[n].nplasma;
+
+      if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+        {
+          xplasma = &plasmamain[nplasma];
+          one = &wmain[xplasma->nwind];
+          aaa[n] = sobolev (one, one->x, xplasma->density[lin_ptr[nline]->nion], lin_ptr[nline], one->dvds_ave);
+
+          
+        }
+    }
+
+  display(name);
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".lev");
+
+      sprintf (lname, "%d", nlev);
+      strcat (filename, lname);
+
+      strcat (filename, "_tau");
+      write_array (filename, ochoice);
+
+    }
+
+  return (0);
+}
