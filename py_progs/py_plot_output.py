@@ -264,7 +264,7 @@ def make_wind_plot(d, fname, var=None, shape=(4,2), axes="log", den_or_frac=0, f
     
     if d == None:
         util.get_pywind_summary(fname, den_or_frac=den_or_frac)
-        d = r.read_pywind(fname)
+        d = r.read_pywind_summary(fname)
 
     if var == None:
         var = ["ne", "te", "tr", "IP", "nphot", "v", "w", "ionC4"]

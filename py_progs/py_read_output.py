@@ -25,6 +25,7 @@ import py_classes as cls
 import numpy as np
 import matplotlib.pyplot as plt
 import subprocess
+import py_plot_util as util
 
 
 has_astropy = True 
@@ -152,7 +153,7 @@ def read_spectrum_to_class (filename, new=True):
     return spectrum
 
 
-def read_pywind(filename, return_inwind=False, mode="2d"):
+def read_pywind_summary(filename, return_inwind=False, mode="2d"):
 
     '''
     read a py_wind output file using np array reshaping and manipulation
@@ -171,7 +172,7 @@ def read_pywind(filename, return_inwind=False, mode="2d"):
     
     Returns
     ----------
-    x, z, value: Floats 
+    d: astropy.Table.table.table object
         value is the quantity you are concerned with, e.g. ne
     '''
 
@@ -179,6 +180,7 @@ def read_pywind(filename, return_inwind=False, mode="2d"):
         print "Please install astropy. returning 1"
         return 1
 
+    
     if not ".complete" in filename:
         filename = filename + ".complete"
 
@@ -187,6 +189,42 @@ def read_pywind(filename, return_inwind=False, mode="2d"):
     d = ascii.read(filename)
 
     return d
+
+
+
+def read_pywind(filename, return_inwind=False, mode="2d", complete=True):
+
+    '''
+    read a py_wind output file using np array reshaping and manipulation
+
+    Parameters
+    ----------
+    filename : file or str
+        File, filename to read, e.g. root.ne.dat  
+
+    return_inwind: Bool
+        return the array which tells you whether you
+        are partly, fully or not inwind.
+
+    mode: string 
+        can be used to control different coord systems 
+    
+    Returns
+    ----------
+    x, z, value: masked arrays
+        value is the quantity you are concerned with, e.g. ne
+    '''
+
+    if has_astropy == False:
+        print "Please install astropy. returning 1"
+        return 1
+
+
+    # first, simply load the filename 
+    #d = np.loadtxt(filename, comments="#", dtype = "float", unpack = True)
+    d = ascii.read(filename)
+
+    return util.wind_to_masked(d, "var", return_inwind=return_inwind)
 
 
 
