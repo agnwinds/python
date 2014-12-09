@@ -247,6 +247,7 @@ delay_dump_finish()
 	{
 		delay_dump(delay_dump_bank,delay_dump_bank_curr-1,delay_dump_spec);
 	}
+	free(delay_dump_bank);
 	return(0);
 }
 
@@ -298,10 +299,15 @@ int
 delay_dump_single (PhotPtr pp)
 {
 	stuff_phot(pp, &delay_dump_bank[delay_dump_bank_curr]);			//Bank single photon in temp array
-	if(delay_dump_bank_curr++ == delay_dump_bank_size)				//If temp array is full
+	//printf("Delay Bank: %d/%d\n",delay_dump_bank_curr,delay_dump_bank_size);
+	if(delay_dump_bank_curr == delay_dump_bank_size-1)				//If temp array is full
 	{																//Dump to file, zero array size
 		delay_dump(delay_dump_bank,delay_dump_bank_size,delay_dump_spec);
 		delay_dump_bank_curr=0;
+	}
+	else
+	{
+		delay_dump_bank_curr++;
 	}
 	return(0);
 }

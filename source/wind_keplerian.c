@@ -33,8 +33,7 @@ Wind_Keplerian_Ptr w_keplerian;
 	description of the wind
 Arguments:		
 
-Returns:
- 
+Returns: 
 Description:	
 	The parameters, geo.sv...,  obtained here are only used in the routines in stellar_winds.c
 	which calculate the velocity and density of the wind during the initialization process.
@@ -321,11 +320,22 @@ wind_keplerian_sinvec(
 	PhotPtr pp, 
 	double r)
 {
+	double sintheta, costheta, p_biased;
+	double sinphi, cosphi, phi;
 	p_biased = rand()/MAXRAND;
 	costheta = 2.*asin(sqrt(p_biased));
 	sintheta = sqrt(1 - costheta*costheta);
 	
+	phi    = 2. * PI * (rand () / MAXRAND);
+	sinphi = sin (phi);
+	cosphi = cos (phi);
 	
+	pp->x[2] = r * cosphi * sintheta;
+	pp->x[1] = r * sinphi * sintheta;
+	pp->x[0] = r * costheta;
+
+	pp->w *= 0.5 / (0.5 * sintheta);	
+
 	return(0);
 }
 
@@ -334,18 +344,16 @@ wind_keplerian_randvec(
 	PhotPtr pp, 
 	double r)
 {
-  double costheta, sintheta;
-  double phi, sinphi, cosphi, d_rot;
+	double costheta, sintheta;
+	double phi, sinphi, cosphi, d_rot;
 	double p_biased;
-
 	double axis_u[3], axis_v[3], x[3];
-
 	double k = w_keplerian->d_photon_bias,
-				 c = w_keplerian->d_photon_bias_const;
+		c = w_keplerian->d_photon_bias_const;
 
-  d_rot  = 2. * PI * (rand () / MAXRAND);
-  phi    = 2. * PI * (rand () / MAXRAND);
-  sinphi = sin (phi);
+	d_rot  = 2. * PI * (rand () / MAXRAND);
+	phi    = 2. * PI * (rand () / MAXRAND);
+	sinphi = sin (phi);
 	cosphi = cos (phi);
 
 	p_biased = rand() / MAXRAND;
