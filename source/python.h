@@ -1125,10 +1125,6 @@ int ncell_stats[NCSTAT];	//the numbers of the cells we are going to log
 /* Added variables which count number of times two situations occur (See #91) */
 int nerr_no_Jmodel;
 int nerr_Jmodel_wrong_freq;
-<<<<<<< HEAD
-=======
-
-
 
 // advanced mode variables
 struct advanced_modes
@@ -1161,6 +1157,3 @@ FILE *optr;  //pointer to a diagnostic file that will contain dvds information
    whether it has already calculated the matom emissivities or not. */
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
-
-
->>>>>>> 9eeed264a9f0fcf01817a51af948a2e09594ada6
