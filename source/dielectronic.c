@@ -176,7 +176,7 @@ total_dr (WindPtr one, double t_e)		//Current electron temperature of the cell
       else
 	{
 	  x +=
-	    one->vol * xplasma->ne * xplasma->density[n +
+	    xplasma->vol * xplasma->ne * xplasma->density[n +
 						      1] * dr_coeffs[n] *
 	    meanke;
 	}

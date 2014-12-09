@@ -2928,3 +2928,257 @@ for (n = 0; n < NDIM2; n++)
 
   return (0);
 }
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+  A summary of the important quantites in a given cell.
+  Primarily used for easily making plots
+
+  Description:  
+
+  Arguments:
+    w WindPtr
+    rootname filename of root pf 
+    ochoice whether to save to file  
+
+  Returns:
+
+  Notes:
+
+  History:
+  1411 JM coded
+
+************************************************************************/
+
+int
+complete_physical_summary (w, rootname, ochoice)
+     WindPtr w;
+     char rootname[];
+     int ochoice;
+{
+  int n, np;
+  char filename[LINELENGTH];
+  double he1den, he2den, he3den;
+  double h1den, h2den, c3den, c4den, c5den;
+  double n5den, o6den, si4den;
+  int frac_choice;
+  int ii, jj;
+  double vtot;
+  FILE *fptr, *fopen ();
+  PlasmaPtr xplasma;
+
+  rdint("Save ions as densities (0) or fractions? (1)", &frac_choice);
+
+  if (ochoice)
+  {
+    strcpy (filename, rootname);
+    strcat (filename, ".complete");
+    fptr = fopen (filename, "w");
+  }
+  else
+    printf("This mode is recommended purely for file output\n");
+
+
+  /* JM 1411 -- First we have to write out some headers so that 
+     astropy can read the output */
+
+  printf("n\tnplasma\tinwind\ti\tj\tx\tz\tv\tvx\tvy\tvz\tdvds_ave\tvol\t \
+rho\tne\tte\ttr\tnphot\tw\tave_freq\tIP\tconv\tconv_tr\tconv_te\tconv_hc\t \
+lum_tot\tlum_rad\tlum_fb\tlum_ff\tlum_lines\tlum_adiabatic\tlum_comp\tlum_dr\t \
+heat_tot\theat_photo\theat_lines\theat_ff\theat_comp\theat_ind_comp\t \
+ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\n");
+
+  if (ochoice)
+    fprintf(fptr, "n\tnplasma\tinwind\ti\tj\tx\tz\tv\tvx\tvy\tvz\tdvds_ave\tvol\t \
+rho\tne\tte\ttr\tnphot\tw\tave_freq\tIP\tconv\tconv_tr\tconv_te\tconv_hc\t \
+lum_tot\tlum_rad\tlum_fb\tlum_ff\tlum_lines\tlum_adiabatic\tlum_comp\tlum_dr\t \
+heat_tot\theat_photo\theat_lines\theat_ff\theat_comp\theat_ind_comp\t \
+ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\n");
+
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      wind_n_to_ij (n, &ii, &jj);
+      
+      if (w[n].vol > 0.0)
+  {
+    np = w[n].nplasma;
+
+    vtot = sqrt (w[n].v[0] * w[n].v[0] + w[n].v[1] * w[n].v[1] +
+                 w[n].v[2] * w[n].v[2]);
+
+    xplasma = &plasmamain[np];
+
+    /* find the density of the main ions (or fractions if frac_choice == 1)*/
+    h1den = get_density_or_frac(xplasma,1,1, frac_choice);
+    h2den = get_density_or_frac(xplasma,1,2, frac_choice);
+    he1den = get_density_or_frac(xplasma,2,1, frac_choice);
+    he2den = get_density_or_frac(xplasma,2,2, frac_choice);
+    he3den = get_density_or_frac(xplasma,2,3, frac_choice);
+    c3den = get_density_or_frac(xplasma,6,3, frac_choice);
+    c4den = get_density_or_frac(xplasma,6,4, frac_choice);
+    c5den = get_density_or_frac(xplasma,6,5, frac_choice);
+    n5den = get_density_or_frac(xplasma,7,5, frac_choice);
+    o6den =  get_density_or_frac(xplasma,8,6, frac_choice);
+    si4den =  get_density_or_frac(xplasma,14,4, frac_choice);
+
+    /* printf("%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\n",
+            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2], vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol, 
+            plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
+            plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].ip, plasmamain[np].converge_whole, 
+            plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
+            plasmamain[np].lum_ioniz, plasmamain[np].lum_rad, plasmamain[np].lum_fb, 
+            plasmamain[np].lum_ff, plasmamain[np].lum_lines, plasmamain[np].lum_adiabatic, 
+            plasmamain[np].lum_comp, plasmamain[np].lum_dr, plasmamain[np].heat_tot, plasmamain[np].heat_photo, 
+            plasmamain[np].heat_lines , plasmamain[np].heat_ff , plasmamain[np].heat_comp, plasmamain[np].heat_ind_comp,
+            h1den, h2den, he1den, he2den, he3den, c3den, c4den, c5den, n5den, o6den, si4den);
+    */
+    
+    if (ochoice)
+      fprintf(fptr, "%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\n",
+            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2], vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol,
+            plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
+            plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].ip, plasmamain[np].converge_whole, 
+            plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
+            plasmamain[np].lum_ioniz, plasmamain[np].lum_rad, plasmamain[np].lum_fb, 
+            plasmamain[np].lum_ff, plasmamain[np].lum_lines, plasmamain[np].lum_adiabatic, 
+            plasmamain[np].lum_comp, plasmamain[np].lum_dr, plasmamain[np].heat_tot, plasmamain[np].heat_photo, 
+            plasmamain[np].heat_lines , plasmamain[np].heat_ff , plasmamain[np].heat_comp, plasmamain[np].heat_ind_comp,
+            h1den, h2den, he1den, he2den, he3den, c3den, c4den, c5den, n5den, o6den, si4den);
+  }
+    else
+  {
+      /* if we aren't inwind then print out a load of zeroes */
+
+      /* printf("%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n",
+            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]);
+      */
+
+      if (ochoice)
+        fprintf(fptr, "%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n",
+            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]);
+  }
+    }
+  
+  if (ochoice)
+    printf("\nSaved summary of physical quantites in %s, use py_read_output.py to read\n",
+          filename);
+
+  return (0);
+
+}
+
+/**************************************************************************
+
+
+  Synopsis:  
+  get_density_or_frac works out the density of an ion element, istate,
+  in a plasma cell xplasma.
+
+  if frac_choice is 1, return an ion fraction
+
+  History:
+  1411 JM coded
+
+************************************************************************/
+
+
+double get_density_or_frac(xplasma,element,istate, frac_choice)
+    PlasmaPtr xplasma;
+    int element;
+    int istate;
+    int frac_choice;
+{
+  int nion, nelem;
+  double nh, density;
+
+  /* find the ion and element in the list */
+  nion = find_ion(element, istate);
+
+  nelem = find_element(element);
+
+  /* get density of ion */
+  density = xplasma->density[nion];
+
+  /* we want an ion fraction, not a density, so divide by nh */
+  if (frac_choice)
+  {
+    nh = xplasma->density[0] + xplasma->density[1];
+    density /= ele[nelem].abun * nh;
+  }
+
+  return (density);
+}
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+  find_ion is a little routine which finds which number ion in the list corresponds
+  to element with istate. e.g. for CIV, element = 6 and istate = 4.
+
+  History:
+  1411 JM coded
+
+************************************************************************/
+
+
+int find_ion(element, istate)
+    int element;
+    int istate;
+{
+  int nion;
+
+  nion = 0;
+
+  while (nion < nions && !(ion[nion].z == element && ion[nion].istate == istate))
+    nion++;
+
+  return nion;
+}
+
+/**************************************************************************
+
+
+  Synopsis:  
+  find_ion is a little routine which finds which number element in the list corresponds
+  to element with z == element. e.g. for CIV, element = 6.
+
+  History:
+  1411 JM coded
+
+************************************************************************/
+
+
+int find_element(element)
+    int element;
+{
+  int n;
+
+  n = 0;
+
+  while (n < nelements && ele[n].z != element)
+    n++;
+
+  return n;
+}

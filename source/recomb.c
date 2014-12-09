@@ -418,7 +418,7 @@ total_fb (WindPtr one, double t, double f1, double f2)
 	{
 
 	  total += xplasma->lum_ion[nion] =
-	    one->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t,
+	    xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t,
 									    f1,
 									    f2,
 									    nion,

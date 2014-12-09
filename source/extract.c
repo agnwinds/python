@@ -255,12 +255,17 @@ int extract_one(WindPtr w, PhotPtr pp, int itype, int nspec)
 	else if (pp->nres > -1 && pp->nres < NLINES)	// added < NLINES condition for macro atoms (SS)
 	{
 
-		/* It was a wind photon.  In this case, what we do depends on whether it is a photon which arose via line radiation or some 
-		   other process.
-
-		   If geo.scatter_mode==0 then there is no need to reweight.  This is the isotropic assumption.
-
-		   NB--It is important that reweightwind be called after scatter, as there are variables which are set in scatter and in
+	  dvds = dvwind_ds (pp);
+	  ishell = pp->grid;
+	  tau = sobolev (&w[ishell], pp->x, -1.0, lin_ptr[pp->nres], dvds);
+	  if (tau > 0.0)
+	    pp->w *= (1. - exp (-tau)) / tau;
+	  tau = 0.0;
+	}
+	
+/* But in any event we have to reposition wind photons so thath they don't go through
+the same resonance again */
+		   /*NB--It is important that reweightwind be called after scatter, as there are variables which are set in scatter and in
 		   aniosowind that are used by reweightwind.  02may ksl */
 
 		if (geo.scatter_mode == 1)

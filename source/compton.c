@@ -66,6 +66,8 @@ kappa_comp (PlasmaPtr xplasma, double freq)		// Frequency of the current photon 
 
   x = (sigma * H) / (MELEC * C * C);	//Calculate the constant
   x *= xplasma->ne * freq;	//Multiply by cell electron density and frequency of the packet.
+
+  x *= geo.fill;    // multiply by the filling factor- should cancel with density enhancement
   return (x);
 }
 
@@ -125,6 +127,8 @@ kappa_ind_comp (PlasmaPtr xplasma, double freq)		// Frequency of the current pho
   x *= sigma * J;		// NSH 130214 factor of THOMPSON removed, since alpha is now the actual compton cross section
   x *= 1 / (2 * freq * freq);
 
+  x *= geo.fill;    // multiply by the filling factor- should cancel with density enhancement
+
   if (sane_check (x)) //For some reason we have a problem
     {
       Error
@@ -167,7 +171,7 @@ total_comp (WindPtr one, double t_e)		//Current electron temperature of the cell
   xplasma = &plasmamain[nplasma];	//copy the plasma structure for that cell to local variable
 
   x = 16. * PI * THOMPSON * BOLTZMANN / (MELEC * C * C);	//Keep all the constants together
-  x *= xplasma->ne * one->vol * xplasma->j * t_e;	//multiply by the volume (from wind) and j (from plasma) and t_e
+  x *= xplasma->ne * xplasma->vol * xplasma->j * t_e;	//multiply by the volume (from wind) and j (from plasma) and t_e
 
 
   return (x);

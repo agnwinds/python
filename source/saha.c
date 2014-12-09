@@ -160,18 +160,6 @@ nebular_concentrations (PlasmaPtr xplasma, int mode)			// 0=saha using tr, 1=sah
 
 
     }
- // else if (mode == 5)		NSH 130626 - mode removed		
-				/* This replicates Sim's (2008) power
-				   law method for ionization in a non-BB radiation
-				   field.  */
- //   {
-
- //     partition_functions (xplasma, 1);	//lte partition function using t_e and no weights
-
- //     m = concentrations (xplasma, 1);	// Saha equation using t_e 
-
- //     m = sim_driver (xplasma);
- //   }
 
   /* Two new modes, they could probably be combined into one if statement, but having 
      two adds little complexity and allows for other   modifications if required. No 
@@ -768,6 +756,11 @@ lucy_mazzali1 (double nh, double t_r, double t_e, double www, int nelem, double 
 //  int ilow, ihi; 0712 nsh zeta moved into subroutine
   int first, last, nion;
   double numerator, denominator;
+
+  if (ele[nelem].z==26) {
+	  Debug("Working on Fe\n");
+  }
+
   if (t_r > MIN_TEMP)
     {
       fudge = www * sqrt (t_e / t_r);

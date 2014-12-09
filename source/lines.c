@@ -135,7 +135,9 @@ lum_lines (
 	  q = 1. - scattering_fraction (lin_ptr[n], xplasma);
 
 	  x *= foo2 = q * a21 (lin_ptr[n]) * z / (1. - z);
-	  x *= foo3 = H * lin_ptr[n]->freq * one->vol;
+
+    /* JM 1411 -- corrected to use filled volume, rather than cell volume */
+	  x *= foo3 = H * lin_ptr[n]->freq * xplasma->vol;
 	  if (geo.line_mode == 3)
 	    x *= foo4 = p_escape (lin_ptr[n], xplasma);	// Include effects of line trapping 
 	  else

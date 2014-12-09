@@ -324,7 +324,7 @@ adiabatic_cooling (WindPtr one, double t)
   xplasma = &plasmamain[nplasma];
 
   //JM 1401 -- here was an old factor of 3/2 which KSL and JM believe to be incorrect. 
-  cooling = xplasma->ne * BOLTZMANN * t * one->vol * one->div_v;
+  cooling = xplasma->ne * BOLTZMANN * t * xplasma->vol * one->div_v;
 
   return (cooling);
 }
@@ -678,7 +678,7 @@ total_free (WindPtr one, double t_e, double f1, double f2)
       x = BREMS_CONSTANT * xplasma->ne * (sum) / H_OVER_K;
     }
 
-  x *= sqrt (t_e) * one->vol;
+  x *= sqrt (t_e) * xplasma->vol;
   x *= (exp (-H_OVER_K * f1 / t_e) - exp (-H_OVER_K * f2 / t_e));
 
   return (x);
@@ -770,7 +770,7 @@ ff (WindPtr one, double t_e, double freq)
     }
 
 
-  fnu *= exp (-H_OVER_K * freq / t_e) / sqrt (t_e) * one->vol;
+  fnu *= exp (-H_OVER_K * freq / t_e) / sqrt (t_e) * xplasma->vol;
 
   return (fnu);
 

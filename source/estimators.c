@@ -125,7 +125,7 @@ bf_estimators_increment (WindPtr one, PhotPtr p, double ds)
 
 	  if (phot_top[n].macro_info == 1 && geo.macro_simple == 0)	// it is a macro atom
 	    {
-	      x = kap_bf[nn] / density;	//this is the cross section
+	      x = kap_bf[nn] / (density * geo.fill);	//this is the cross section
 
 	      /* Now identify which of the BF processes from this level this is. */
 
@@ -147,20 +147,29 @@ bf_estimators_increment (WindPtr one, PhotPtr p, double ds)
 	      // Now calculate the contributions and add them on.
 	      weight_of_packet = p->w;
 	      y = weight_of_packet * x * ds;
+
 	      exponential =
 		y * exp (-(freq_av - ft) / BOLTZMANN / xplasma->t_e);
+
 	      mplasma->gamma[config[llvl].bfu_indx_first + m] += y / freq_av;
+
 	      mplasma->alpha_st[config[llvl].bfu_indx_first + m] +=
 		exponential / freq_av;
+
 	      mplasma->gamma_e[config[llvl].bfu_indx_first + m] += y / ft;
+
 	      mplasma->alpha_st_e[config[llvl].bfu_indx_first + m] +=
 		exponential / ft;
 
 	      /* Now record the contribution to the energy absorbed by macro atoms. */
-	      yy = y * den_config (xplasma, llvl);
+        /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
+	      yy = y * den_config (xplasma, llvl) * geo.fill;
+
 	      mplasma->matom_abs[phot_top[n].uplev] += abs_cont =
 		yy * ft / freq_av;
+
 	      xplasma->kpkt_abs += yy - abs_cont;
+
 	      /* the following is just a check that flags packets that appear to travel a 
 	         suspiciously large optical depth in the continuum */
 	      if ((yy / weight_of_packet) > 50)
@@ -183,8 +192,11 @@ bf_estimators_increment (WindPtr one, PhotPtr p, double ds)
 		  weight_of_packet = p->w;
 		  y = weight_of_packet * x * ds;
 
+ 
+      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
 		  xplasma->heat_photo += heat_contribution =
-		    y * density * (1.0 - (ft / freq_av));
+		    y * density * (1.0 - (ft / freq_av)) * geo.fill;
+
 		  xplasma->heat_tot += heat_contribution;
 		  /* This heat contribution is also the contibution to making k-packets in this volume. So we record it. */
 
@@ -193,6 +205,9 @@ bf_estimators_increment (WindPtr one, PhotPtr p, double ds)
 	    }
 	}
     }
+
+  /* JM1411 -- the below processes have the factor geo.fill incorporated directly
+     into the kappa subroutines */
 
   /* Now for contribution to heating due to ff processes. (SS, Apr 04) */
 
@@ -242,7 +257,7 @@ bf_estimators_increment (WindPtr one, PhotPtr p, double ds)
 	  x = sigma_phot_verner (&augerion[n], freq_av);	//this is the cross section
 	  y = weight_of_packet * x * ds;
 
-	  xplasma->gamma_inshl[n] += y / freq_av / H / one->vol;
+	  xplasma->gamma_inshl[n] += y / freq_av / H / xplasma->vol;
 	}
     }
 
@@ -449,7 +464,8 @@ mc_estimator_normalise (int n)
   mplasma = &macromain[xplasma->nplasma];
 
   /* All the estimators need the volume so get that first. */
-  volume = one->vol;
+  /* JM 1411 - changed to use filled volume */
+  volume = xplasma->vol;
 
   /* bf estimators. During the mc calculation the quantity stored
      was weight * cross-section * path-length / frequency.
@@ -676,7 +692,7 @@ total_fb_matoms (PlasmaPtr xplasma, double t_e, double f1, double f2)
 		 - mplasma->alpha_st_old[config[i].bfu_indx_first + j]
 		 - alpha_sp (cont_ptr, xplasma, 0))
 		* H * phot_top[config[i].bfu_jump[j]].freq[0] * density *
-		xplasma->ne * wmain[xplasma->nwind].vol;
+		xplasma->ne * xplasma->vol;
 
 	      /* Now add the collisional ionization term. */
 	      density = den_config (xplasma, cont_ptr->nlev);
@@ -684,7 +700,7 @@ total_fb_matoms (PlasmaPtr xplasma, double t_e, double f1, double f2)
 		q_ioniz (cont_ptr,
 			 t_e) * density * xplasma->ne * H *
 		phot_top[config[i].bfu_jump[j]].freq[0] *
-		wmain[xplasma->nwind].vol;
+		xplasma->vol;
 
 	      /* That's the bf cooling contribution. */
 	      total += cool_contribution;
@@ -753,7 +769,7 @@ total_bb_cooling (PlasmaPtr xplasma, double t_e)
 	  lower_density = den_config (xplasma, line_ptr->nconfigl);
 	  cool_contribution =
 	    (lower_density * q12 (line_ptr, t_e)) * xplasma->ne *
-	    wmain[xplasma->nwind].vol * line_ptr->freq * H;
+	    xplasma->vol * line_ptr->freq * H;
 	}
       else
 	{			//It's a simple line - don't know the level populations
@@ -772,7 +788,7 @@ total_bb_cooling (PlasmaPtr xplasma, double t_e)
 	    (lower_density * line_ptr->gu / line_ptr->gl -
 	     upper_density) * coll_rate / (exp (H_OVER_K * line_ptr->freq /
 						t_e) -
-					   1.) * wmain[xplasma->nwind].vol *
+					   1.) * xplasma->vol *
 	    line_ptr->freq * H;
 
 
@@ -821,6 +837,7 @@ History:
           May 04  SS   Corrections made to get energy rather than number of heating events.
           May 04  SS   Macro_simple option added (for all ions to be "simple")
 	06may	ksl	57+ -- Modified for plasma structue.  Note that volume is used
+  1411  JM  changed to use filled volume
           
 ************************************************************/
 
@@ -845,7 +862,7 @@ macro_bb_heating (PlasmaPtr xplasma, double t_e)
 	  heat_contribution =
 	    upper_density * q21 (line_ptr,
 				 t_e) * xplasma->ne *
-	    wmain[xplasma->nwind].vol * line_ptr->freq * H;
+	    xplasma->vol * line_ptr->freq * H;
 	  total += heat_contribution;
 	}
     }
@@ -886,6 +903,7 @@ History:
                      but with the inclusion of three body recombination it makes
                      more sense to put it all in one subroutine.
 	06may	ksl	57+ -- Modified for plama structue
+  1411  JM  changed to use filled volume
           
 ************************************************************/
 
@@ -914,7 +932,7 @@ macro_bf_heating (PlasmaPtr xplasma, double t_e)
 	    (mplasma->gamma_e_old[config[i].bfu_indx_first + j] -
 	     mplasma->gamma_old[config[i].bfu_indx_first + j]) * H *
 	    phot_top[config[i].bfu_jump[j]].freq[0] * lower_density *
-	    wmain[xplasma->nwind].vol;
+	    xplasma->vol;
 
 	  /* Three body recombination part. */
 	  upper_density =
@@ -922,7 +940,7 @@ macro_bf_heating (PlasmaPtr xplasma, double t_e)
 	  heat_contribution +=
 	    q_recomb (&phot_top[config[i].bfu_jump[j]],
 		      t_e) * xplasma->ne * xplasma->ne * H * upper_density *
-	    wmain[xplasma->nwind].vol *
+	    xplasma->vol *
 	    phot_top[config[i].bfu_jump[j]].freq[0];
 
 	  total += heat_contribution;

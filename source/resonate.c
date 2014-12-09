@@ -117,7 +117,7 @@ calculate_ds (WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nres, dou
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
-  kap_es = THOMPSON * xplasma->ne;
+  kap_es = THOMPSON * xplasma->ne * geo.fill;
   /* This is the electron scattering opacity per unit length. For the Macro Atom approach we need an 
      equivalent opacity per unit length due to each of the b-f continuua. Call it kap_bf. (SS) */
 
@@ -266,7 +266,8 @@ method). If the macro atom method is not used just get kap_bf to 0 and move on).
   /* To this point kappa is for the part ot the cell that is filled with material so
    * we must reduce this to account for the filling factor 1409 - ksl */
 
-  kap_cont*=geo.fill;
+  //kap_cont*=geo.fill;
+  //JM 1411 -- I've incorporated the filling factor directly into the kappa routines 
 
 
 
@@ -639,7 +640,7 @@ kappa_bf (PlasmaPtr xplasma, double freq, int macro_all)
       if (freq > ft && freq < phot_top[n].freq[phot_top[n].np - 1]
 	  && phot_top[n].macro_info > macro_all)
 	{
-	  /*Need the appropriate density at this point. */
+	  /* Need the appropriate density at this point. */
 
 	  nconf = phot_top[n].nlev;	//Returning lower level = correct (SS)
 
@@ -650,7 +651,8 @@ kappa_bf (PlasmaPtr xplasma, double freq, int macro_all)
 	    {
 
 	      /*          kap_tot += x = (delete) */
-	      kap_bf[nn] = x = sigma_phot_topbase (&phot_top[n], freq) * density;	//stimulated recombination? (SS)
+	      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
+	      kap_bf[nn] = x = sigma_phot_topbase (&phot_top[n], freq) * density * geo.fill;	//stimulated recombination? (SS)
 	      kap_bf_tot += x;
 	    }
 	}

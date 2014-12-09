@@ -45,6 +45,7 @@ main (int argc, char *argv[])
   double fthresh, fmax;
   double alpha_agn, distance, agn_ip, lum_agn, const_agn, IPstart, IPstop, IP;
   int lstart, lmax;
+  double xweight;
   double temp_func (), trr_rate;
   FILE *fp_h, *fp1_h;
   FILE *fp_he, *fp1_he;
@@ -64,7 +65,7 @@ main (int argc, char *argv[])
   weight = 0.0001;
   xne = nh;
 
-  strcpy (geo.atomic_filename, "atomic/standard73");
+  strcpy (geo.atomic_filename, "data/standard73");
   printf ("atomic_filename=%s\n", geo.atomic_filename);
   get_atomic_data (geo.atomic_filename);
 
@@ -680,9 +681,9 @@ nh=1e10;
       Log ("i=%i,Ionisation Parameter=%f\n", i, (agn_ip));
 
 
-      plasmamain[0].pl_w[0] =
+      xweight =
 	const_agn / ((4. * PI) * (4. * PI * distance * distance));
-      printf ("weight=%e\n", plasmamain[0].pl_w[0]);
+      printf ("weight=%e\n", xweight);
       variable_temperature (&plasmamain[0], 7);
       fprintf (fp_h, "%6.3e %6.3e %6.3e %6.3e\n", agn_ip, plasmamain[0].ne,
 	       plasmamain[0].density[0], plasmamain[0].density[1]);
