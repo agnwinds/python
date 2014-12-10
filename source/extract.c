@@ -257,7 +257,7 @@ int extract_one(WindPtr w, PhotPtr pp, int itype, int nspec)
 
 	  dvds = dvwind_ds (pp);
 	  ishell = pp->grid;
-	  tau = sobolev (&w[ishell], pp->x, -1.0, lin_ptr[pp->nres], dvds);
+	  tau = sobolev (&w[ishell], pp, -1.0, lin_ptr[pp->nres], dvds);
 	  if (tau > 0.0)
 	    pp->w *= (1. - exp (-tau)) / tau;
 	  tau = 0.0;
@@ -289,7 +289,7 @@ the same resonance again */
 		/* But in any event we have to reposition wind photons so thath they don't go through the same resonance again */
 
 		reposition(w, pp);					// Only reposition the photon if it was a wind photon
-	}
+	
 
 	if (tau > TAU_MAX)
 		istat = P_ABSORB;						/* Check to see if tau already too large */

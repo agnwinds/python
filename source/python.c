@@ -2532,18 +2532,13 @@ int main(int argc, char *argv[])
 		check_time(root);
 	}
 
-	printf("DELAY DUMP STARTED\n");
 	delay_dump_finish();		// SWM - Finish delay dumping (for extract mode)
-	printf("DELAY DUMP FINISHED\n");
-
 
 	/* 
 	 * XXXX -- END CYCLE TO CALCULATE DETAILED SPECTRUM 
 	 */
 
-	printf("PHOTGEN\n");
 	phot_gen_sum(photfile, "a");
-	printf("PHOTGENNED\n");
 
 	/* 
 	 * 57h - 07jul -- ksl -- Write out the freebound information 

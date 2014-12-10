@@ -334,7 +334,7 @@ wind_keplerian_sinvec(
 	pp->x[1] = r * sinphi * sintheta;
 	pp->x[0] = r * costheta;
 
-	pp->w *= 0.5 / (0.5 * sintheta);	
+	pp->w 	 = 0.5 / (0.5 * sintheta);	
 
 	return(0);
 }
@@ -344,10 +344,9 @@ wind_keplerian_randvec(
 	PhotPtr pp, 
 	double r)
 {
-	double costheta, sintheta;
+	double costheta, sintheta, x[3];
 	double phi, sinphi, cosphi, d_rot;
 	double p_biased;
-	double axis_u[3], axis_v[3], x[3];
 	double k = w_keplerian->d_photon_bias,
 		c = w_keplerian->d_photon_bias_const;
 
@@ -360,23 +359,17 @@ wind_keplerian_randvec(
 	costheta = log( (k * p_biased / c) + exp(-k))/k;
 	sintheta = sqrt (1. - costheta*costheta);
 
-	x[2] = r * cosphi * sintheta;
-	x[1] = r * sinphi * sintheta;
 	x[0] = r * costheta;
-	
-	axis_u[0] = cos(d_rot);
-	axis_u[1] = sin(d_rot);
-	axis_u[2] = 0.;	
-	axis_v[0] = 0.;
-	axis_v[1] = 0.;
-	axis_v[2] = 1.;
-	
-	struct basis b_rotate;
-	create_basis(axis_u, axis_v, &b_rotate);
-	project_to(&b_rotate, x, pp->x);
+	x[1] = r * cosphi * sintheta;
+	x[2] = r * sinphi * sintheta;
+		
+	pp->x[0] = cos(d_rot)*x[0] - sin(d_rot)*x[1];
+	pp->x[1] = sin(d_rot)*x[0] + cos(d_rot)*x[1];
+	pp->x[2] = x[2];
+	pp->w   *= 0.5 / (c * exp(k*costheta));	
 
+	//if(pp->np < 100) printf("POS: %g %g %g %g %g %g\n",pp->x[0]/r,pp->x[1]/r,pp->x[2]/r,pp->w,c,k);
 	//Adjust weight by relative probality densities (.5 for random, c e^-kt for biased)
-	pp->w *= 0.5 / (c * exp(k*costheta));	
 	return (0);
 }
 
