@@ -53,8 +53,8 @@ int get_wind_keplerian_params(void)
 	w_keplerian = (Wind_Keplerian_Ptr) calloc(sizeof(wind_keplerian_dummy), 1);
 
 	Log("wind_keplerian: Creating wind for simple Keplerian disk\n");
-	w_keplerian->d_theta_min = 0;
-	w_keplerian->d_theta_max = 0;
+	w_keplerian->d_theta_min = 0.;
+	w_keplerian->d_theta_max = 0.; //If both zero, set to maximum
 	windmin = 2.8e9 / geo.rstar;
 	windmax = 8.4e9 / geo.rstar;
 	rddoub("wind_keplerian.diskmin(units_of_rstar)", &windmin);
@@ -73,7 +73,7 @@ int get_wind_keplerian_params(void)
 	geo.wind_rmin = geo.rstar;
 	geo.wind_rmax = geo.rmax;
 	geo.wind_rho_min = w_keplerian->d_rad_min;
-	geo.wind_rho_max = w_keplerian->d_rad_max * RADIAN;
+	geo.wind_rho_max = w_keplerian->d_rad_max;
 	geo.wind_thetamin = w_keplerian->d_theta_min;
 	geo.wind_thetamax = w_keplerian->d_theta_max;
 	geo.xlog_scale = w_keplerian->d_rad_min;
@@ -85,6 +85,7 @@ int get_wind_keplerian_params(void)
 		geo.xlog_scale = geo.compton_torus_rmin;
 	}
 	geo.zlog_scale = w_keplerian->d_height;
+	DFUDGE = geo.zlog_scale/10.;
 
 	return (0);
 }
@@ -114,7 +115,7 @@ double wind_keplerian_velocity(double x[], double v[])
 	v[0] = 0.;																						//Zero R, Phi components
 	v[2] = 0.;
 	if (r > w_keplerian->d_rad_min && r < w_keplerian->d_rad_max 
-			&& x[2]<w_keplerian->d_height)										//If point is within the wind 
+			&& x[2] < (w_keplerian->d_height + DFUDGE) )						//If point is within the wind 
 		v[1] = sqrt(G * geo.mstar / r);											//Simple keplerian Theta component
 	else
 		v[1] = 0;																						//Or it's zero
@@ -144,7 +145,8 @@ History:
 double wind_keplerian_rho(double x[])
 {
 	double r = sqrt(x[0] * x[0] + x[1] * x[1]);			//Convert position into radius
-	if (r < w_keplerian->d_rad_min || r > w_keplerian->d_rad_max || x[2] > w_keplerian->d_height)
+	if (r < w_keplerian->d_rad_min || r > w_keplerian->d_rad_max 
+		|| x[2] > (w_keplerian->d_height) )
 		return (0.0);																	//If the radius lies outside the wind, zero
 	else
 		return (w_keplerian->d_density);							//Else return flat value

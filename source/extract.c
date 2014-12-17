@@ -135,7 +135,6 @@ int extract(WindPtr w, PhotPtr p, int itype)
 			{													/* If the photon was scattered in the wind, the frequency also must be shifted */
 				vwind_xyz(&pp, v);			/* Get the velocity at the position of pp */
 				doppler(p, &pp, v, pp.nres);	/* Doppler shift the photon -- test! */
-
 				/* Doppler shift the photon (as nonresonant scatter) to new direction */
 			}
 
@@ -350,8 +349,8 @@ the same resonance again */
 		if(pp->nrscat>0)	//SWM - Records total distance travelled by extract photon
 		{
 			stuff_v(x_inwind,pp->x);
-			pp->path = path_inwind;
-			delay_dump_single(pp); 
+			pp->path = path_inwind; pp->nscat = -1;
+			delay_dump_single(pp);
 			//printf("Reverb photon extracted: %g %g %g\n",pp->freq,delay_to_observer(pp),pp->w);
 		}
 

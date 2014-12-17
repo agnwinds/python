@@ -515,8 +515,8 @@ rdstr (char question[], char answer[])
 
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
-  else
-		restart_par(1);
+  else if(rdpar_stat == 2)
+	restart_par(1);
   
 
   while (query == REISSUE)
@@ -543,8 +543,8 @@ rdchar (char question[], char *answer)
   
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
-  else
-		restart_par(1);
+  else if(rdpar_stat == 2)
+	restart_par(1);
   
   while (query == REISSUE)
     {
@@ -569,8 +569,8 @@ rdint (char question[], int *answer)
 
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
-  else
-		restart_par(1);
+  else if(rdpar_stat == 2)
+	restart_par(1);
   
 
   while (query == REISSUE)
@@ -598,7 +598,7 @@ rdflo (char question[], float *answer)
   
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
-  else
+  else if(rdpar_stat == 2)
 		restart_par(1);
   
   while (query == REISSUE)
@@ -626,7 +626,7 @@ rddoub (char question[], double *answer)
   
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
-  else
+  else if(rdpar_stat == 2)
 		restart_par(1); 
   
   while (query == REISSUE)
@@ -651,7 +651,7 @@ rdline (char question[], char answer[])
   query = REISSUE;
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
-  else
+  else if(rdpar_stat == 2)
 		restart_par(1);
   
   while (query == REISSUE)
