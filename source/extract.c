@@ -306,7 +306,7 @@ the same resonance again */
 
 	/* Now we can actually extract the reweighted photon */
 
-	double x_inwind[3], path_inwind;	//SWM - Tracks last photon position in wind	
+	double x_inwind[3], path_inwind = 0.;	//SWM - Tracks last photon position in wind	
 	while (istat == P_INWIND)
 	{
 		stuff_v(pp->x,x_inwind);				//SWM -Track last photon position and path length

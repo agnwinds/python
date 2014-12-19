@@ -2402,8 +2402,8 @@ int main(int argc, char *argv[])
 		xsignal(root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n", "COMMENT", geo.pcycle, geo.pcycles);
 
 
-	/* SWM - Prep delay dump file */
-	delay_dump_prep(delay_dumpfile, nspectra - 1);
+	/* SWM - Prep delay dump file (if we are not restarting an existing run) */
+	delay_dump_prep(delay_dumpfile, nspectra - 1, restart_stat);
 
 	while (geo.pcycle < geo.pcycles)
 	{							/* This allows you to build up photons in bunches */

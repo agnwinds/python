@@ -57,7 +57,6 @@ delay_spectrum_summary (
     double renorm,				/* parameter used to rescale spectrum as it is building up */
     int loglin				/* switch to tell the code if we are utputting a log or a lin */
 )
-
 {
 	FILE *fopen(), *fptr;
 	int i, n;
@@ -181,7 +180,7 @@ History:
 	14aug	-	Written by SWM
 ***********************************************************/
 char delay_dump_file[LINELENGTH];
-int delay_dump_bank_size=1024, delay_dump_bank_curr=0,delay_dump_spec;
+int delay_dump_bank_size=65535, delay_dump_bank_curr=0,delay_dump_spec;
 PhotPtr delay_dump_bank;
 
 double
@@ -198,14 +197,17 @@ delay_to_observer(PhotPtr pp)
 }
 
 int 
-delay_dump_prep (char filename[], int nspec)
+delay_dump_prep (char filename[], int nspec, int restart_stat)
 {
 	FILE *fopen(), *fptr;
 	char string[LINELENGTH];
 	
 	strcpy(delay_dump_file,filename);
-	delay_dump_spec=nspec;
-	
+	delay_dump_spec = nspec;
+	delay_dump_bank = (PhotPtr) calloc(sizeof(p_dummy), delay_dump_bank_size);
+	if(restart_stat) return(0);
+
+	/* If this isn't a continue run, prep the output file */
 	if ((fptr = fopen(filename, "w")) == NULL)
 	{
 		Error("delay_dump: Unable to open %s for writing\n", filename);
@@ -236,7 +238,6 @@ delay_dump_prep (char filename[], int nspec)
 			"  Last L       Last M       Last N     "
 			"Scatters RScatter Delay\n");	
 	fclose(fptr);
-	delay_dump_bank = (PhotPtr) calloc(sizeof(p_dummy), delay_dump_bank_size);
 	return(0);
 }
 
