@@ -2211,19 +2211,25 @@ J_summary (w, rootname, ochoice)
   char filename[LINELENGTH];
   char number[2], line_number[10];
   int nplasma;
+  int uplvl, llvl, njump, lu, ll;
   struct lines *line_ptr;
-  int uplvl, llvl, njump;
 
 
   i = 1;
   rdint ("Band number for J or macro atom J (0), or backup (-1)", &i);
 
+
   while (i >=0)
   {
     if (i == 0)
     {
+      printf("H alpha is 3->2 in this notation!\n");
       rdint ("Upper level macro atom", &uplvl);
       rdint ("Lower level macro atom", &llvl);
+
+      /* Convert 'user levels' into actually levels. i.e. 1 is 0! */
+      uplvl = uplvl - 1;
+      llvl = llvl - 1;
 
 
 
@@ -2231,17 +2237,22 @@ J_summary (w, rootname, ochoice)
          pointer corresponding to this transition */
       njump = 0;
       printf("Level %i has %i upwards jumps %i downwards jumps\n", 
-             llvl, config[llvl].n_bbu_jump, config[llvl].n_bbd_jump);
-      
+             llvl+1, config[llvl].n_bbu_jump, config[llvl].n_bbd_jump);
+
       while (njump < config[llvl].n_bbu_jump)
       {
-        line_ptr = lin_ptr[config[uplvl].bbu_jump[njump]];
-        if (line_ptr->nconfigl == llvl && line_ptr->nconfigu == uplvl)
+        line_ptr = &line[config[llvl].bbu_jump[njump]];
+        lu = line_ptr->nconfigu;
+        ll = line_ptr->nconfigl;
+
+        // printf("ll %i lu %i llvl %i uplvl %i njump %i\n",
+        //         ll, lu, llvl, uplvl, njump);
+        if (ll == llvl && lu == uplvl)
           break;
         njump++;
       }
 
-    if (njump > config[llvl].n_bbu_jump)
+    if (njump >= config[llvl].n_bbu_jump)
     {
       Error("Couldn't find this transition, try something else!\n");
       return (0);
@@ -2255,13 +2266,16 @@ J_summary (w, rootname, ochoice)
   {
     nplasma = w[n].nplasma;
     if (i == 0)
-      aaa[n] = macromain[nplasma].jbar[config[uplvl].bbu_indx_first + njump];
+      aaa[n] = macromain[nplasma].jbar_old[config[llvl].bbu_indx_first + njump];
     else
       aaa[n] = (plasmamain[nplasma].xj[i]);
   }
     }
   
   printf("Line wavelength is %.2f\n", (C / line_ptr->freq) / ANGSTROM);
+  printf("Line freq is %8.4e\n", line_ptr->freq);
+  printf("njump %i llvl %i uplvl %i nres %i",
+          njump, llvl, uplvl, config[llvl].bbu_jump[njump]);
   display ("J in cell");
   //printf ("i=%i", i);
   sprintf (number, "%i", i);
@@ -2289,6 +2303,7 @@ J_summary (w, rootname, ochoice)
   return (0);
 
 }
+
 
 int
 J_scat_summary (w, rootname, ochoice)
