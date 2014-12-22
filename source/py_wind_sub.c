@@ -2209,37 +2209,86 @@ J_summary (w, rootname, ochoice)
 {
   int i, n;
   char filename[LINELENGTH];
-  char number[2];
+  char number[2], line_number[10];
   int nplasma;
+  struct lines *line_ptr;
+  int uplvl, llvl, njump;
 
 
   i = 1;
-  rdint ("Band number for J", &i);
+  rdint ("Band number for J or macro atom J (0), or backup (-1)", &i);
+
+  while (i >=0)
+  {
+    if (i == 0)
+    {
+      rdint ("Upper level macro atom", &uplvl);
+      rdint ("Lower level macro atom", &llvl);
+
+
+
+      /* now we need to find the jbar estimator and line 
+         pointer corresponding to this transition */
+      njump = 0;
+      printf("Level %i has %i upwards jumps %i downwards jumps\n", 
+             llvl, config[llvl].n_bbu_jump, config[llvl].n_bbd_jump);
+      
+      while (njump < config[llvl].n_bbu_jump)
+      {
+        line_ptr = lin_ptr[config[uplvl].bbu_jump[njump]];
+        if (line_ptr->nconfigl == llvl && line_ptr->nconfigu == uplvl)
+          break;
+        njump++;
+      }
+
+    if (njump > config[llvl].n_bbu_jump)
+    {
+      Error("Couldn't find this transition, try something else!\n");
+      return (0);
+    }
+  }
 
   for (n = 0; n < NDIM2; n++)
     {
       aaa[n] = 0;
       if (w[n].vol > 0.0)
-	{
-	  nplasma = w[n].nplasma;
-	  aaa[n] = (plasmamain[nplasma].xj[i]);
-	}
+  {
+    nplasma = w[n].nplasma;
+    if (i == 0)
+      aaa[n] = macromain[nplasma].jbar[config[uplvl].bbu_indx_first + njump];
+    else
+      aaa[n] = (plasmamain[nplasma].xj[i]);
+  }
     }
+  
+  printf("Line wavelength is %.2f\n", (C / line_ptr->freq) / ANGSTROM);
   display ("J in cell");
-  printf ("i=%i", i);
+  //printf ("i=%i", i);
   sprintf (number, "%i", i);
+
   if (ochoice)
     {
       strcpy (filename, rootname);
-      strcat (filename, ".J_band");
-      strcat (filename, number);
+      if (i == 0)
+      {
+        sprintf(line_number, "%ito%i", uplvl, llvl);
+        strcat (filename, ".Jbar_");
+        strcat (filename, line_number);
+      }
+      else
+      {
+        strcat (filename, ".J_band");
+        strcat (filename, number);
+      } 
       write_array (filename, ochoice);
 
     }
+
+    rdint ("Band number for J or macro atom J (0), or backup (-1)", &i);
+  }
   return (0);
 
 }
-
 
 int
 J_scat_summary (w, rootname, ochoice)
