@@ -461,6 +461,10 @@ int matom_emiss_report(void);
 /* direct_ion.c */
 int compute_di_coeffs(double T);
 double total_di(WindPtr one, double t_e);
+/* para_update.c */
+int communicate_estimators_para(void);
+int gather_spectra_para(int nspec_helper, int nspecs);
+int communicate_matom_estimators_para(void);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
