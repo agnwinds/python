@@ -288,6 +288,8 @@ communicate_matom_estimators_para ()
 
   /* allocate helper arrays for the estimators we want to communicate */
   /* the sizes of these arrays should match the allocation in calloc_estimators in gridwind.c */
+  /* we need two arrays for each set of variables. Note that we stick all estimators of
+     the same size in the same helper array */
   jbar_helper = calloc (sizeof (double), NPLASMA * size_Jbar_est);
   gamma_helper = calloc (sizeof (double), NPLASMA * 4 * size_gamma_est);
   alpha_helper = calloc (sizeof (double), NPLASMA * 2 * size_alpha_est);
@@ -299,12 +301,14 @@ communicate_matom_estimators_para ()
   level_helper2 = calloc (sizeof (double), NPLASMA * nlevels_macro);
   kpkt_helper2 = calloc (sizeof (double), NPLASMA);
 
-
+  /* set an mpi barrier before we start */
   MPI_Barrier (MPI_COMM_WORLD);
 
+  /* now we loop through each cell and copy the values of our variables 
+     into our helper arrays */
   for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
     {
-
+      /* one kpkt_abs quantity per cell */
       kpkt_helper[mpi_i] = plasmamain[mpi_i].kpkt_abs / np_mpi_global;
 
       for (n = 0; n < nlevels_macro; n++)
