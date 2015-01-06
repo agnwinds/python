@@ -34,6 +34,8 @@ History:
 int
 communicate_estimators_para ()
 {
+#ifdef MPI_ON   // these routines should only be called anyway in parallel but we need these to compile
+  
   int mpi_i, mpi_j;
   double *maxfreqhelper, *maxfreqhelper2;
   /*NSH 131213 the next line introduces new helper arrays for the max and min frequencies in bands */
@@ -50,7 +52,6 @@ communicate_estimators_para ()
   /* The size of the helper array for integers. We transmit 6 numbers 
      for each cell, plus one array of length NXBANDS */
   plasma_int_helpers = (6 + NXBANDS) * NPLASMA;
-
 
 
   maxfreqhelper = calloc (sizeof (double), NPLASMA);
@@ -194,6 +195,7 @@ communicate_estimators_para ()
   free (iredhelper);
   free (iredhelper2);
 
+#endif
   return (0);
 }
 
@@ -228,6 +230,8 @@ gather_spectra_para (nspec_helper, nspecs)
      int nspec_helper;
      int nspecs;
 {
+#ifdef MPI_ON   // these routines should only be called anyway in parallel but we need these to compile
+
   double *redhelper, *redhelper2;
   int mpi_i, mpi_j;
 
@@ -263,6 +267,7 @@ gather_spectra_para (nspec_helper, nspecs)
 
   free (redhelper);
   free (redhelper2);
+#endif
 
   return (0);
 }
@@ -298,6 +303,8 @@ History:
 int
 communicate_matom_estimators_para ()
 {
+#ifdef MPI_ON   // these routines should only be called anyway in parallel but we need these to compile
+
   int n, mpi_i;
   double *gamma_helper, *alpha_helper;
   double *level_helper, *cell_helper, *jbar_helper;
@@ -312,6 +319,8 @@ communicate_matom_estimators_para ()
     Log("No need to communicate matom estimators as no macro-atoms!\n");
     return (0);
   }
+
+
 
   /* allocate helper arrays for the estimators we want to communicate */
   /* the sizes of these arrays should match the allocation in calloc_estimators in gridwind.c */
@@ -432,7 +441,7 @@ communicate_matom_estimators_para ()
       macromain[mpi_i].cooling_normalisation = cell_helper[mpi_i + NPLASMA];
       macromain[mpi_i].cooling_bftot = cell_helper[mpi_i + 2 * NPLASMA];
       macromain[mpi_i].cooling_bf_coltot = cell_helper[mpi_i + 3 * NPLASMA];
-      macromain[mpi_i].cooling_bbtot = cell_helper[mpi_i + 4 * NPLASMA];lslt 
+      macromain[mpi_i].cooling_bbtot = cell_helper[mpi_i + 4 * NPLASMA];
       macromain[mpi_i].cooling_ff = cell_helper[mpi_i + 5 * NPLASMA];
       macromain[mpi_i].cooling_adiabatic = cell_helper[mpi_i + 6 * NPLASMA];
 
@@ -498,6 +507,8 @@ communicate_matom_estimators_para ()
   free (alpha_helper2);
   free (cooling_bf_helper2);
   free (cooling_bb_helper2);
+#endif
+
 
   return (0);
 }
