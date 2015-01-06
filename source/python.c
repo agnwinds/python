@@ -194,6 +194,10 @@ History:
 			Also some modifications to the parallel communiactions to deal with some new
 			plasma variabales, and the min and max frequency photons seen in bands.
 	1409	ksl	Added new switch -d to enable use of a new Debug logging feature
+	1411 	JM removed photons per cycle in favour of NPHOT. subcycles are now eliminated
+	1501 	JM moved some parallelization stuff to subroutines in para_update.c
+			functions are communicate_estimators_para, communicate_matom_estimators_para,
+			and gather_spectra_para
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -1914,7 +1918,7 @@ run -- 07jul -- ksl
 
     communicate_estimators_para ();
 
-    communicate_matom_estimators_para (); 
+    communicate_matom_estimators_para (); // this will return 0 if nlevels_macro == 0
 #endif
 
 
@@ -2148,7 +2152,7 @@ run -- 07jul -- ksl
 
       /* Do an MPI reduce to get the spectra all gathered to the master thread */
 #ifdef MPI_ON
-      gather_spectra_para(spec_spec_helpers, MSPEC);
+      gather_spectra_para(spec_spec_helpers, nspectra);
 #endif
 
 
