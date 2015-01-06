@@ -288,10 +288,18 @@ communicate_matom_estimators_para ()
   double *cooling_bf_helper, *cooling_bb_helper; 
   double *cooling_bf_helper2, *cooling_bb_helper2;
 
+  if (nlevels_macro == 0 && geo.nmacro == 0)
+  {
+    /* in this case no space would have been allocated for macro-atom estimators */
+    Log("No need to communicate matom estimators as no macro-atoms!\n");
+    return (0);
+  }
+
   /* allocate helper arrays for the estimators we want to communicate */
   /* the sizes of these arrays should match the allocation in calloc_estimators in gridwind.c */
   /* we need two arrays for each set of variables. Note that we stick all estimators of
      the same size in the same helper array */
+  /* could put some error conditions here to check memory allocation worked */
   jbar_helper = calloc (sizeof (double), NPLASMA * size_Jbar_est);
   gamma_helper = calloc (sizeof (double), NPLASMA * 4 * size_gamma_est);
   alpha_helper = calloc (sizeof (double), NPLASMA * 2 * size_alpha_est);
