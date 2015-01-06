@@ -1,7 +1,13 @@
 /***********************************************************
                         University of Southampton
 
-Synopsis: communicate_estimators_para
+Synopsis:   
+  communicate_estimators_para averages the spectral
+  estimators between tasks using MPI_Reduce. 
+  It should only be called if the MPI_ON flag was present 
+  in compilation. It communicates all the information
+  required for the spectral model ionization scheme, and 
+  also heating and cooling quantities in cells.
 
 Arguments:		
 
@@ -197,7 +203,13 @@ communicate_estimators_para ()
 
 Synopsis: gather_spectra_para
 
-Arguments:		
+Arguments:	
+  int nspec_helper
+    size of the helper arrays used by the MPI_Reduce and Broadcast routines
+
+  int nspecs
+    the number of spectra computed. This is longer for the spectral cycles than
+    the ionization cycles 	
 
 Returns:
  
@@ -260,7 +272,13 @@ gather_spectra_para (nspec_helper, nspecs)
 /***********************************************************
                         University of Southampton
 
-Synopsis: communicate_matom_estimators_para
+Synopsis: 
+  communicate_matom_estimators_para averages the macro-atom 
+  estimators between tasks using MPI_Reduce. 
+  It should only be called if the MPI_ON flag was present 
+  in compilation, and returns 0 immediately if no macro atom levels.
+  This should probably be improved by working out exactly
+  what is needed in simple-ion only mode. 
 
 Arguments:		
 
@@ -407,13 +425,14 @@ communicate_matom_estimators_para ()
 
   for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
     {
-
+      /* one kpkt_abs quantity per cell */
       plasmamain[mpi_i].kpkt_abs = cell_helper[mpi_i];
 
+      /* each of the cooling sums and normalisations also have one quantity per cell */
       macromain[mpi_i].cooling_normalisation = cell_helper[mpi_i + NPLASMA];
       macromain[mpi_i].cooling_bftot = cell_helper[mpi_i + 2 * NPLASMA];
       macromain[mpi_i].cooling_bf_coltot = cell_helper[mpi_i + 3 * NPLASMA];
-      macromain[mpi_i].cooling_bbtot = cell_helper[mpi_i + 4 * NPLASMA];
+      macromain[mpi_i].cooling_bbtot = cell_helper[mpi_i + 4 * NPLASMA];lslt 
       macromain[mpi_i].cooling_ff = cell_helper[mpi_i + 5 * NPLASMA];
       macromain[mpi_i].cooling_adiabatic = cell_helper[mpi_i + 6 * NPLASMA];
 
@@ -454,6 +473,8 @@ communicate_matom_estimators_para ()
   }
     }
 
+
+  /* at this stage each thread should have the correctly averaged estimators */
   Log_parallel ("Thread %d happy after broadcast.\n", rank_global);
 
 
