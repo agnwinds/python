@@ -285,8 +285,8 @@ communicate_matom_estimators_para ()
   double *level_helper, *cell_helper, *jbar_helper;
   double *gamma_helper2, *alpha_helper2;
   double *level_helper2, *cell_helper2, *jbar_helper2;
-  double *cooling_bf_helper, cooling_bb_helper; 
-  double *cooling_bf_helper2, cooling_bb_helper2;
+  double *cooling_bf_helper, *cooling_bb_helper; 
+  double *cooling_bf_helper2, *cooling_bb_helper2;
 
   /* allocate helper arrays for the estimators we want to communicate */
   /* the sizes of these arrays should match the allocation in calloc_estimators in gridwind.c */
@@ -454,7 +454,7 @@ communicate_matom_estimators_para ()
 
   MPI_Barrier (MPI_COMM_WORLD);
 
-  free (kpkt_helper);
+  free (cell_helper);
   free (level_helper);
   free (jbar_helper);
   free (gamma_helper);
@@ -462,7 +462,7 @@ communicate_matom_estimators_para ()
   free (cooling_bf_helper);
   free (cooling_bb_helper);
 
-  free (kpkt_helper2);
+  free (cell_helper2);
   free (level_helper2);
   free (jbar_helper2);
   free (gamma_helper2);
