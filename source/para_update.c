@@ -35,7 +35,7 @@ int
 communicate_estimators_para ()
 {
 #ifdef MPI_ON   // these routines should only be called anyway in parallel but we need these to compile
-  
+
   int mpi_i, mpi_j;
   double *maxfreqhelper, *maxfreqhelper2;
   /*NSH 131213 the next line introduces new helper arrays for the max and min frequencies in bands */
@@ -172,12 +172,12 @@ communicate_estimators_para ()
   MPI_Bcast (iredhelper2, plasma_int_helpers, MPI_INT, 0, MPI_COMM_WORLD);
   for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
     {
-      plasmamain[mpi_i].ntot = iredhelper[mpi_i];
-      plasmamain[mpi_i].ntot_star = iredhelper[mpi_i + NPLASMA];
-      plasmamain[mpi_i].ntot_bl = iredhelper[mpi_i + 2 * NPLASMA];
-      plasmamain[mpi_i].ntot_disk = iredhelper[mpi_i + 3 * NPLASMA];
-      plasmamain[mpi_i].ntot_wind = iredhelper[mpi_i + 4 * NPLASMA];
-      plasmamain[mpi_i].ntot_agn = iredhelper[mpi_i + 5 * NPLASMA];
+      plasmamain[mpi_i].ntot = iredhelper2[mpi_i];
+      plasmamain[mpi_i].ntot_star = iredhelper2[mpi_i + NPLASMA];
+      plasmamain[mpi_i].ntot_bl = iredhelper2[mpi_i + 2 * NPLASMA];
+      plasmamain[mpi_i].ntot_disk = iredhelper2[mpi_i + 3 * NPLASMA];
+      plasmamain[mpi_i].ntot_wind = iredhelper2[mpi_i + 4 * NPLASMA];
+      plasmamain[mpi_i].ntot_agn = iredhelper2[mpi_i + 5 * NPLASMA];
       for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	{
 	  plasmamain[mpi_i].nxtot[mpi_j] = iredhelper2[mpi_i + (6 + mpi_j) * NPLASMA];
@@ -435,50 +435,50 @@ communicate_matom_estimators_para ()
   for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
     {
       /* one kpkt_abs quantity per cell */
-      plasmamain[mpi_i].kpkt_abs = cell_helper[mpi_i];
+      plasmamain[mpi_i].kpkt_abs = cell_helper2[mpi_i];
 
       /* each of the cooling sums and normalisations also have one quantity per cell */
-      macromain[mpi_i].cooling_normalisation = cell_helper[mpi_i + NPLASMA];
-      macromain[mpi_i].cooling_bftot = cell_helper[mpi_i + 2 * NPLASMA];
-      macromain[mpi_i].cooling_bf_coltot = cell_helper[mpi_i + 3 * NPLASMA];
-      macromain[mpi_i].cooling_bbtot = cell_helper[mpi_i + 4 * NPLASMA];
-      macromain[mpi_i].cooling_ff = cell_helper[mpi_i + 5 * NPLASMA];
-      macromain[mpi_i].cooling_adiabatic = cell_helper[mpi_i + 6 * NPLASMA];
+      macromain[mpi_i].cooling_normalisation = cell_helper2[mpi_i + NPLASMA];
+      macromain[mpi_i].cooling_bftot = cell_helper2[mpi_i + 2 * NPLASMA];
+      macromain[mpi_i].cooling_bf_coltot = cell_helper2[mpi_i + 3 * NPLASMA];
+      macromain[mpi_i].cooling_bbtot = cell_helper2[mpi_i + 4 * NPLASMA];
+      macromain[mpi_i].cooling_ff = cell_helper2[mpi_i + 5 * NPLASMA];
+      macromain[mpi_i].cooling_adiabatic = cell_helper2[mpi_i + 6 * NPLASMA];
 
 
       for (n = 0; n < nlevels_macro; n++)
 	{
-	  macromain[mpi_i].matom_abs[n] = level_helper[mpi_i + (n * NPLASMA)];
+	  macromain[mpi_i].matom_abs[n] = level_helper2[mpi_i + (n * NPLASMA)];
 	}
 
       for (n = 0; n < size_Jbar_est; n++)
 	{
-	  macromain[mpi_i].jbar[n] = jbar_helper[mpi_i + (n * NPLASMA)];
+	  macromain[mpi_i].jbar[n] = jbar_helper2[mpi_i + (n * NPLASMA)];
 	}
 
       for (n = 0; n < size_gamma_est; n++)
 	{
-	  macromain[mpi_i].alpha_st[n] = gamma_helper[mpi_i + (n * NPLASMA)];
-	  macromain[mpi_i].alpha_st_e[n] = gamma_helper[mpi_i + ((n + size_gamma_est) * NPLASMA)] / np_mpi_global;
-	  macromain[mpi_i].gamma[n] = gamma_helper[mpi_i + ((n + 2 * size_gamma_est) * NPLASMA)];
-	  macromain[mpi_i].gamma_e[n] = gamma_helper[mpi_i + ((n + 3 * size_gamma_est) * NPLASMA)];
+	  macromain[mpi_i].alpha_st[n] = gamma_helper2[mpi_i + (n * NPLASMA)];
+	  macromain[mpi_i].alpha_st_e[n] = gamma_helper2[mpi_i + ((n + size_gamma_est) * NPLASMA)] / np_mpi_global;
+	  macromain[mpi_i].gamma[n] = gamma_helper2[mpi_i + ((n + 2 * size_gamma_est) * NPLASMA)];
+	  macromain[mpi_i].gamma_e[n] = gamma_helper2[mpi_i + ((n + 3 * size_gamma_est) * NPLASMA)];
 	}
 
       for (n = 0; n < size_alpha_est; n++)
 	{
-	  macromain[mpi_i].recomb_sp[n] = alpha_helper[mpi_i + (n * NPLASMA)];
-	  macromain[mpi_i].recomb_sp_e[n] = alpha_helper[mpi_i + ((n + size_alpha_est) * NPLASMA)];
+	  macromain[mpi_i].recomb_sp[n] = alpha_helper2[mpi_i + (n * NPLASMA)];
+	  macromain[mpi_i].recomb_sp_e[n] = alpha_helper2[mpi_i + ((n + size_alpha_est) * NPLASMA)];
 	}
 
       for (n = 0; n < ntop_phot; n++)
   {
-    macromain[mpi_i].cooling_bf[n] = cooling_bf_helper[mpi_i + (n * NPLASMA)];
-    macromain[mpi_i].cooling_bf_col[n] = cooling_bf_helper[mpi_i + ((n + ntop_phot) * NPLASMA)];
+    macromain[mpi_i].cooling_bf[n] = cooling_bf_helper2[mpi_i + (n * NPLASMA)];
+    macromain[mpi_i].cooling_bf_col[n] = cooling_bf_helper2[mpi_i + ((n + ntop_phot) * NPLASMA)];
   }
 
       for (n = 0; n < nlines; n++)
   {
-    macromain[mpi_i].cooling_bb[n] = cooling_bb_helper[mpi_i + (n * NPLASMA)];
+    macromain[mpi_i].cooling_bb[n] = cooling_bb_helper2[mpi_i + (n * NPLASMA)];
   }
     }
 
