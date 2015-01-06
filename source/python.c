@@ -2044,12 +2044,15 @@ run -- 07jul -- ksl
       MPI_Bcast(iredhelper2, plasma_int_helpers, MPI_INT, 0, MPI_COMM_WORLD);
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
 	{
-	  plasmamain[mpi_i].ntot = iredhelper[mpi_i];
-	  plasmamain[mpi_i].ntot_star = iredhelper[mpi_i+NPLASMA]; 
-	  plasmamain[mpi_i].ntot_bl = iredhelper[mpi_i+2*NPLASMA];
-	  plasmamain[mpi_i].ntot_disk = iredhelper[mpi_i+3*NPLASMA]; 
-	  plasmamain[mpi_i].ntot_wind = iredhelper[mpi_i+4*NPLASMA];
-	  plasmamain[mpi_i].ntot_agn = iredhelper[mpi_i+5*NPLASMA];
+	  /* JM 1501 -- prior to Python 78b there was a mistake here as the 
+	     send arrays were used rather than the recieve arrays. corrected with a '2'.
+	     see #132 */
+	  plasmamain[mpi_i].ntot = iredhelper2[mpi_i];
+	  plasmamain[mpi_i].ntot_star = iredhelper2[mpi_i+NPLASMA]; 
+	  plasmamain[mpi_i].ntot_bl = iredhelper2[mpi_i+2*NPLASMA];
+	  plasmamain[mpi_i].ntot_disk = iredhelper2[mpi_i+3*NPLASMA]; 
+	  plasmamain[mpi_i].ntot_wind = iredhelper2[mpi_i+4*NPLASMA];
+	  plasmamain[mpi_i].ntot_agn = iredhelper2[mpi_i+5*NPLASMA];
 	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	    {
 	      plasmamain[mpi_i].nxtot[mpi_j] = iredhelper2[mpi_i+(6+mpi_j)*NPLASMA];
