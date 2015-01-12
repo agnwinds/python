@@ -663,6 +663,7 @@ spectrum_summary (char filename[], char mode[], int nspecmin, int nspecmax, int 
 
   /* Construct and write a header string  for the output file */
   fprintf (fptr, "# Python Version %s\n", VERSION);
+  fprintf (fptr, "# Git commit hash %s\n", GIT_COMMIT_HASH);
 
   get_time (string);
   fprintf (fptr, "# Date	%s\n#  \n", string);

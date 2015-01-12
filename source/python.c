@@ -469,11 +469,10 @@ int main(int argc, char *argv[])
 	}
 
 
-
-
-	/* 
-	 * Start logging of errors and comments 
-	 */
+  Log ("!!Python Version %s \n", VERSION);	//54f -- ksl -- Now read from version.h
+  Log ("!!Git commit hash %s", GIT_COMMIT_HASH);
+  Log ("!!Python is running with %d processors\n", np_mpi_global);
+  Log_parallel ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
 
 	Log("!!Python Version %s \n", VERSION);	// 54f -- ksl -- Now read from
 	// version.h
@@ -1946,10 +1945,85 @@ int main(int argc, char *argv[])
 		 * heated disk 
 		 */
 
-		for (n = 0; n < NRINGS; n++)
-		{
-			qdisk.heat[n] = qdisk.nphot[n] = qdisk.w[n] = qdisk.ave_freq[n] = 0;
-		}
+      for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
+	{
+  	  plasmamain[mpi_i].max_freq = maxfreqhelper2[mpi_i];
+	  plasmamain[mpi_i].j = redhelper2[mpi_i];
+	  plasmamain[mpi_i].ave_freq = redhelper2[mpi_i+NPLASMA];
+	  plasmamain[mpi_i].lum = redhelper2[mpi_i+2*NPLASMA];
+	  plasmamain[mpi_i].heat_tot = redhelper2[mpi_i+3*NPLASMA];
+	  plasmamain[mpi_i].heat_lines = redhelper2[mpi_i+4*NPLASMA];
+	  plasmamain[mpi_i].heat_ff = redhelper2[mpi_i+5*NPLASMA];
+	  plasmamain[mpi_i].heat_comp = redhelper2[mpi_i+6*NPLASMA];
+	  plasmamain[mpi_i].heat_ind_comp = redhelper2[mpi_i+7*NPLASMA];
+	  plasmamain[mpi_i].heat_photo = redhelper2[mpi_i+8*NPLASMA];
+      plasmamain[mpi_i].ip = redhelper2[mpi_i+9*NPLASMA];
+      plasmamain[mpi_i].j_direct = redhelper2[mpi_i+10*NPLASMA];
+      plasmamain[mpi_i].j_scatt = redhelper2[mpi_i+11*NPLASMA];
+      plasmamain[mpi_i].ip_direct = redhelper2[mpi_i+12*NPLASMA];
+      plasmamain[mpi_i].ip_scatt = redhelper2[mpi_i+13*NPLASMA];
+	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
+	    {
+	      plasmamain[mpi_i].xj[mpi_j]=redhelper2[mpi_i+(14+mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].xave_freq[mpi_j]=redhelper2[mpi_i+(14+NXBANDS+mpi_j)*NPLASMA];
+	      plasmamain[mpi_i].xsd_freq[mpi_j]=redhelper2[mpi_i+(14+NXBANDS*2+mpi_j)*NPLASMA];
+
+          /* 131213 NSH And unpack the min and max banded frequencies to the plasma array */ 
+	      plasmamain[mpi_i].fmax[mpi_j] = maxbandfreqhelper2[mpi_i*NXBANDS+mpi_j];
+	      plasmamain[mpi_i].fmin[mpi_j] = minbandfreqhelper2[mpi_i*NXBANDS+mpi_j];
+	    }
+	}
+      Log_parallel("Thread %d happy after broadcast.\n", rank_global);
+
+      MPI_Barrier(MPI_COMM_WORLD);
+
+      for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
+	{
+	  iredhelper[mpi_i] = plasmamain[mpi_i].ntot;
+	  iredhelper[mpi_i+NPLASMA] = plasmamain[mpi_i].ntot_star;
+	  iredhelper[mpi_i+2*NPLASMA] = plasmamain[mpi_i].ntot_bl;
+	  iredhelper[mpi_i+3*NPLASMA] = plasmamain[mpi_i].ntot_disk;
+	  iredhelper[mpi_i+4*NPLASMA] = plasmamain[mpi_i].ntot_wind;
+	  iredhelper[mpi_i+5*NPLASMA] = plasmamain[mpi_i].ntot_agn;
+	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
+	    {
+	      iredhelper[mpi_i+(6+mpi_j)*NPLASMA] = plasmamain[mpi_i].nxtot[mpi_j];
+	    }
+	}
+      MPI_Reduce(iredhelper, iredhelper2, plasma_int_helpers, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+      if (rank_global == 0)
+	{
+	  Log_parallel("Zeroth thread successfully received the integer sum. About to broadcast.\n");
+	}
+      
+      MPI_Bcast(iredhelper2, plasma_int_helpers, MPI_INT, 0, MPI_COMM_WORLD);
+      for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
+	{
+	  /* JM 1501 -- prior to Python 78b there was a mistake here as the 
+	     send arrays were used rather than the recieve arrays. corrected with a '2'.
+	     see #132 */
+	  plasmamain[mpi_i].ntot = iredhelper2[mpi_i];
+	  plasmamain[mpi_i].ntot_star = iredhelper2[mpi_i+NPLASMA]; 
+	  plasmamain[mpi_i].ntot_bl = iredhelper2[mpi_i+2*NPLASMA];
+	  plasmamain[mpi_i].ntot_disk = iredhelper2[mpi_i+3*NPLASMA]; 
+	  plasmamain[mpi_i].ntot_wind = iredhelper2[mpi_i+4*NPLASMA];
+	  plasmamain[mpi_i].ntot_agn = iredhelper2[mpi_i+5*NPLASMA];
+	  for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
+	    {
+	      plasmamain[mpi_i].nxtot[mpi_j] = iredhelper2[mpi_i+(6+mpi_j)*NPLASMA];
+	    }
+	}
+  
+	free (maxfreqhelper);
+    free (maxfreqhelper2);
+ 	free (maxbandfreqhelper);
+ 	free (maxbandfreqhelper2);
+ 	free (minbandfreqhelper);
+ 	free (minbandfreqhelper2);
+    free (redhelper);
+    free (redhelper2); 
+    free (iredhelper);
+    free (iredhelper2);
 
 
 

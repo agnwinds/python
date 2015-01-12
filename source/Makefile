@@ -61,11 +61,11 @@ else ifeq (gcc, $(CC))
 
 	# check the version
 	# we'll use this to print to the user and also to do some checks
-	COMPILER_VERSION = $(shell expr `gcc -dumpversion`)
+	COMPILER_VERSION := $(shell expr `gcc -dumpversion`)
 
 	# if it's gcc we want to check if the version is 4.8 or later
 	# if it is then we'll disable aggressive loop optimizations, see #100
-	GCCVERSIONGTEQ4 = $(shell expr `gcc -dumpversion | cut -f1-2 -d.` \>= 4.8)
+	GCCVERSIONGTEQ4 := $(shell expr `gcc -dumpversion | cut -f1-2 -d.` \>= 4.8)
 	COMPILER_PRINT_STRING = Compiling with $(CC) $(COMPILER_VERSION)
 	ifeq ("$(GCCVERSIONGTEQ4)", "1")
 		EXTRA_FLAGS += -fno-aggressive-loop-optimizations
@@ -80,7 +80,7 @@ else	# you must be using clang or icc
 	COMPILER_PRINT_STRING = Compiling with $(CC) $(COMPILER_VERSION)
 endif
 
-
+GIT_COMMIT_HASH := $(shell expr `git rev-parse HEAD`)
 
 INCLUDE = ../include
 LIB = ../lib
@@ -121,6 +121,7 @@ startup:
 	@echo 'MPI_FLAG=' $(MPI_FLAG)
 	echo "#define VERSION " \"$(VERSION)\" > version.h
 	echo "#define CHOICE"   $(CHOICE) >> version.h
+	echo "#define GIT_COMMIT_HASH" \"$(GIT_COMMIT_HASH)\" >> version.h
 
 foo: foo.o signal.o time.o
 	$(CC) ${cfllags} foo.o signal.o time.o ${LDFLAGS}  -o foo
