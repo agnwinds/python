@@ -317,30 +317,6 @@ int wind_keplerian_cylvar_volumes(WindPtr w, int icomp)	// The component for whi
 }
 
 
-int
-wind_keplerian_sinvec(
-	PhotPtr pp, 
-	double r)
-{
-	double sintheta, costheta, p_biased;
-	double sinphi, cosphi, phi;
-	p_biased = rand()/MAXRAND;
-	costheta = 2.*asin(sqrt(p_biased));
-	sintheta = sqrt(1 - costheta*costheta);
-	
-	phi    = 2. * PI * (rand () / MAXRAND);
-	sinphi = sin (phi);
-	cosphi = cos (phi);
-	
-	pp->x[2] = r * cosphi * sintheta;
-	pp->x[1] = r * sinphi * sintheta;
-	pp->x[0] = r * costheta;
-
-	pp->w 	 = 0.5 / (0.5 * sintheta);	
-
-	return(0);
-}
-
 int 	//http://www.nucleonica.net/wiki/images/8/89/MCNPvolI.pdf
 wind_keplerian_randvec(
 	PhotPtr pp, 

@@ -2515,7 +2515,7 @@ int main(int argc, char *argv[])
 		/* 
 		 * SWM 2/9/14 - Delay dump 
 		 */
-		delay_dump(p, NPHOT, nspectra - 1);
+		delay_dump(p, NPHOT, nspectra - 1, 0);
 
 		geo.pcycle++;			// Increment the spectral cycles
 

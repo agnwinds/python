@@ -151,9 +151,7 @@ delay_spectrum_summary (
 		}
 	}
 	fclose(fptr);
-
 	return (0);
-
 }
 
 
@@ -182,6 +180,7 @@ History:
 char delay_dump_file[LINELENGTH];
 int delay_dump_bank_size=65535, delay_dump_bank_curr=0,delay_dump_spec;
 PhotPtr delay_dump_bank;
+int *delay_dump_bank_ex;
 
 double
 delay_to_observer(PhotPtr pp)
@@ -201,10 +200,17 @@ delay_dump_prep (char filename[], int nspec, int restart_stat)
 {
 	FILE *fopen(), *fptr;
 	char string[LINELENGTH];
+	int i;
 	
-	strcpy(delay_dump_file,filename);
+	//Allocate and zero dump files and set extract status
 	delay_dump_spec = nspec;
 	delay_dump_bank = (PhotPtr) calloc(sizeof(p_dummy), delay_dump_bank_size);
+	delay_dump_bank_ex = (int*) calloc(sizeof(int),		delay_dump_bank_size);
+	for(i=0;i<delay_dump_bank_size;i++)	delay_dump_bank_ex[i] = 0;
+
+
+	//Get output filename
+	strcpy(delay_dump_file,filename);
 	if(restart_stat) return(0);
 
 	/* If this isn't a continue run, prep the output file */
@@ -236,7 +242,7 @@ delay_dump_prep (char filename[], int nspec, int restart_stat)
 	fprintf(fptr, "# \n# Freq      Wavelength  Weight   "
 			"  Last X       Last Y       Last Z     "
 			"  Last L       Last M       Last N     "
-			"Scatters RScatter Delay\n");	
+			"Scatters RScatter Delay Extracted\n");	
 	fclose(fptr);
 	return(0);
 }
@@ -246,17 +252,18 @@ delay_dump_finish()
 {
 	if(delay_dump_bank_curr>0)
 	{
-		delay_dump(delay_dump_bank,delay_dump_bank_curr-1,delay_dump_spec);
+		delay_dump(delay_dump_bank,delay_dump_bank_curr-1,delay_dump_spec, 1);
 	}
 	free(delay_dump_bank);
+	free(delay_dump_bank_ex);
 	return(0);
 }
 
 int 
-delay_dump (PhotPtr p, int np, int nspec)
+delay_dump (PhotPtr p, int np, int nspec, int iExtracted)
 {
 	FILE *fopen(), *fptr;
-	int nphot, mscat, mtopbot;
+	int nphot, mscat, mtopbot, i;
 	double zangle;
 
 	/* 
@@ -283,11 +290,12 @@ delay_dump (PhotPtr p, int np, int nspec)
 				if (xxspec[nspec].mmin < zangle 
 					&& zangle < xxspec[nspec].mmax)
 				{	/* SWM 15/8/14 - Added path delay in comparison to photon heading straight from origin to rmax*/
-					fprintf(fptr, "%10.5g %10.5g %10.5g %+10.5e %+10.5e %+10.5e %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g\n", 
+					fprintf(fptr, "%10.5g %10.5g %10.5g %+10.5e %+10.5e %+10.5e %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g %i\n", 
 						p[nphot].freq, C * 1e8 / p[nphot].freq, p[nphot].w, 
 						p[nphot].x[0], p[nphot].x[1], p[nphot].x[2], 
 						p[nphot].lmn[0], p[nphot].lmn[1], p[nphot].lmn[2], 
-						p[nphot].nscat, p[nphot].nrscat, delay_to_observer(&p[nphot]));
+						p[nphot].nscat, p[nphot].nrscat, delay_to_observer(&p[nphot]),
+						(iExtracted ? delay_dump_bank_ex[nphot] : 0));
 				}
 			}
 		}
@@ -297,14 +305,16 @@ delay_dump (PhotPtr p, int np, int nspec)
 }
 
 int 
-delay_dump_single (PhotPtr pp)
+delay_dump_single (PhotPtr pp, int extract_phot)
 {
 	stuff_phot(pp, &delay_dump_bank[delay_dump_bank_curr]);			//Bank single photon in temp array
-	//printf("Delay Bank: %d/%d\n",delay_dump_bank_curr,delay_dump_bank_size);
+	delay_dump_bank_ex[delay_dump_bank_curr] = extract_phot;		//Record if it's extract photon
 	if(delay_dump_bank_curr == delay_dump_bank_size-1)				//If temp array is full
-	{																//Dump to file, zero array size
-		delay_dump(delay_dump_bank,delay_dump_bank_size,delay_dump_spec);
+	{																	//Dump to file, zero array position
+		delay_dump(delay_dump_bank,delay_dump_bank_size,delay_dump_spec,1);
 		delay_dump_bank_curr=0;
+		int i;
+		for(i=0;i<delay_dump_bank_size;i++) delay_dump_bank_ex[i]=0;	//Zero extract status of single array
 	}
 	else
 	{

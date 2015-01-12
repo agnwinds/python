@@ -350,7 +350,7 @@ the same resonance again */
 		{
 			stuff_v(x_inwind,pp->x);
 			pp->path = path_inwind; pp->nscat = -1;
-			delay_dump_single(pp);
+			delay_dump_single(pp, 1);
 			//printf("Reverb photon extracted: %g %g %g\n",pp->freq,delay_to_observer(pp),pp->w);
 		}
 
