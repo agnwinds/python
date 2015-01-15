@@ -1846,17 +1846,25 @@ dvds_summary (w, rootname, ochoice)
      char rootname[];
      int ochoice;
 {
-  char filename[LINELENGTH];
-  int n;
+  char filename[LINELENGTH], suffix[LINELENGTH];
+  int n, ichoice;
+  struct photon p;
+  //double v1[3]
 
-  for (n = 0; n < NDIM2; n++)
+
+
+  rdint("dvds_ave (0) dvdx (1) dvdy (2) dvdz (3) component LoS (4):", &ichoice);
+
+  if (ichoice == 0)
+  {
+    for (n = 0; n < NDIM2; n++)
     {
       aaa[n] = 0;
       if (w[n].vol > 0.0)
-	{
-	  aaa[n] = w[n].dvds_ave;
+  {
+    aaa[n] = w[n].dvds_ave;
 
-	}
+  }
     }
   display ("Average dvds");
   if (ochoice)
@@ -1865,6 +1873,43 @@ dvds_summary (w, rootname, ochoice)
       strcat (filename, ".dvds");
       write_array (filename, ochoice);
     }
+  }
+
+  else if (ichoice > 0 && ichoice < 4)
+  {
+   
+
+    for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+  {
+    p.lmn[0] = 0.0;
+    p.lmn[1] = 0.0;
+    p.lmn[2] = 0.0;
+    stuff_v(w[n].xcen, p.x);
+
+    p.lmn[ichoice - 1] = 1.0;
+    aaa[n] = dvwind_ds(&p);
+
+  }
+    }
+  display ("Average dvds");
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      sprintf(suffix, ".dvds_%i", ichoice - 1);
+      strcat (filename, suffix);
+      write_array (filename, ochoice);
+    }
+  }
+
+  else
+  {
+    get_los_dvds(w, rootname, ochoice);
+  }
+
+
   return (0);
 }
 
@@ -3361,4 +3406,139 @@ int find_element(element)
 
   return n;
 }
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+  get_los_dvds finds the gradient along the LoS 
+  of the velocity projected along the same line of sight.
+
+  History:
+  1501 JM coded
+
+************************************************************************/
+
+int get_los_dvds(w, rootname, ochoice)
+    WindPtr w;
+    char rootname[];
+    int ochoice;
+{
+  struct photon p;
+  struct photon ptest;
+  int  n;
+  double ds, dvds, v1[3], v2[3], xtest;
+  double lmn[3], diff[3], phase;
+  int vchoice;
+  double obs_angle, rzero, r;
+  char filename[LINELENGTH], vstring[3], suffix[LINELENGTH];
+
+  vchoice = 0;
+  phase = 0.5;
+  obs_angle = 80.0;
+
+  rdint("real (0) rotational (1) or poloidal (2) or back(-1):", &vchoice);
+
+  while (vchoice >= 0)
+  {
+    rddoub("angle in deg:", &obs_angle);
+    rddoub("phase (0 to 1):", &phase);
+
+    lmn[0] = sin (obs_angle / RADIAN) * cos (-phase * 360. / RADIAN);
+    lmn[1] = sin (obs_angle / RADIAN) * sin (-phase * 360. / RADIAN);
+    lmn[2] = cos (obs_angle / RADIAN);
+
+    // if (vchoice == 0) 
+    //   strcpy (vstring, "");
+    // else if (vchoice == 1) 
+    //   strcpy (vstring, "rot");
+    // else if (vchoice == 2) 
+    //   strcpy (vstring, "pol");
+
+
+    for (n = 0; n < NDIM2; n++)
+      {
+        aaa[n] = 0;
+        if (w[n].vol > 0.0)
+    {
+
+      stuff_v(w[n].xcen, p.x);
+      stuff_v(lmn, p.lmn);
+      stuff_phot(&p, &ptest);
+
+      vsub (p.x, w[n].x, diff);
+      ds = 0.001 * length (diff);
+      move_phot (&ptest, ds);
+
+      if (vchoice == 0)
+        dvds = dvwind_ds(&p);
+
+      /* next choice is for turning off rotational velocity */
+      else if (vchoice == 1)
+        {
+          model_velocity(p.x, v1);
+          model_velocity(ptest.x, v2);
+          v1[1] = 0.0;
+          v2[1] = 0.0;
+
+          /* calculate the relevant gradient */
+          dvds = fabs(dot(v1, p.lmn) - dot(v2, p.lmn)) / ds;
+        }
+
+      /* next choice is for turning rotational velocity only */
+      else
+        {
+          r = sqrt (p.x[0] * p.x[0] + p.x[1] * p.x[1]);
+          rzero = sv_find_wind_rzero (p.x);
+          v1[0] = v1[2] = 0.0;
+          v1[1] = sqrt (G * geo.mstar * rzero) / r;
+
+
+          r = sqrt (ptest.x[0] * ptest.x[0] + ptest.x[1] * ptest.x[1]);
+          rzero = sv_find_wind_rzero (ptest.x);
+          v2[0] = v2[2] = 0.0;
+          v2[1] = sqrt (G * geo.mstar * rzero) / r;
+
+          if (p.x[1] != 0.0)
+            {
+              project_from_cyl_xyz (p.x, v1, xtest);
+              stuff_v (xtest, v1);
+            }
+          if (ptest.x[1] != 0.0)
+              project_from_cyl_xyz (ptest.x, v2, xtest);
+              stuff_v (xtest, v2);
+            }
+
+          /* calculate the relevant gradient */
+          dvds = fabs(dot(v1, p.lmn) - dot(v2, p.lmn)) / ds;
+        }
+
+        aaa[n] = dvds;
+
+    }
+      }
+
+    printf("%s ", vstring);
+    display ("dvds along a LoS");
+
+    if (ochoice)
+      {
+        strcpy (filename, rootname);
+        sprintf (suffix, ".dv%i_ds_A%.1f_P%.2f", vchoice, obs_angle, phase);
+        strcat (filename, suffix);
+        write_array (filename, ochoice);
+      }
+
+    rdint("real (0) rotational (1) or poloidal (2) or back(-1):", &vchoice);
+
+  }
+
+  return (0);
+}
+
+
+
+
 
