@@ -451,10 +451,10 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   /* Start logging of errors and comments */
 
   Log ("!!Python Version %s \n", VERSION);	//54f -- ksl -- Now read from version.h
-  Log ("!!Git commit hash %s", GIT_COMMIT_HASH);
+  Log ("!!Git commit hash %s\n", GIT_COMMIT_HASH);
   Log ("!!Python is running with %d processors\n", np_mpi_global);
   Log_parallel ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
-
+  Debug("Debug statements are on. To turn off use lower verbosity (< 5).\n");
   /* Set the maximum time if it was defined */
   if (time_max > 0)
     {
