@@ -3429,7 +3429,7 @@ int get_los_dvds(w, rootname, ochoice)
   struct photon p;
   struct photon ptest;
   int  n;
-  double ds, dvds, v1[3], v2[3], xtest;
+  double ds, dvds, v1[3], v2[3], xtest[3];
   double lmn[3], diff[3], phase;
   int vchoice;
   double obs_angle, rzero, r;
@@ -3532,8 +3532,6 @@ int get_los_dvds(w, rootname, ochoice)
       }
 
     rdint("real (0) rotational (1) or poloidal (2) or back(-1):", &vchoice);
-
-  }
 
   return (0);
 }
