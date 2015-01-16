@@ -3431,15 +3431,17 @@ int get_los_dvds(w, rootname, ochoice)
   int  n;
   double ds, dvds, v1[3], v2[3], xtest[3];
   double lmn[3], diff[3], phase;
-  int vchoice;
+  int vchoice, sight_choice;
   double obs_angle, rzero, r;
-  char filename[LINELENGTH], vstring[3], suffix[LINELENGTH];
+  char filename[LINELENGTH], suffix[LINELENGTH];
 
   vchoice = 0;
-  phase = 0.5;
+  phase = 0;
   obs_angle = 80.0;
+  sight_choice = 0;
 
-  rdint("real (0) rotational (1) or poloidal (2) or back(-1):", &vchoice);
+  rdint("use component along LoS (0), or magnitude (1):", &sight_choice);
+  rdint("real (0) poloidal (1) or rotational (2) or back(-1):", &vchoice);
 
   while (vchoice >= 0)
   {
@@ -3484,7 +3486,10 @@ int get_los_dvds(w, rootname, ochoice)
           v2[1] = 0.0;
 
           /* calculate the relevant gradient */
-          dvds = fabs(dot(v1, p.lmn) - dot(v2, p.lmn)) / ds;
+          if (sight_choice == 0)
+            dvds = fabs(dot(v1, p.lmn) - dot(v2, p.lmn)) / ds;
+          else
+            dvds = fabs(length(v1) - length(v2)) / ds;
         }
 
       /* next choice is for turning rotational velocity only */
@@ -3507,12 +3512,16 @@ int get_los_dvds(w, rootname, ochoice)
               stuff_v (xtest, v1);
             }
           if (ptest.x[1] != 0.0)
+            { 
               project_from_cyl_xyz (ptest.x, v2, xtest);
               stuff_v (xtest, v2);
             }
 
           /* calculate the relevant gradient */
-          dvds = fabs(dot(v1, p.lmn) - dot(v2, p.lmn)) / ds;
+          if (sight_choice == 0)
+            dvds = fabs(dot(v1, p.lmn) - dot(v2, p.lmn)) / ds;
+          else
+            dvds = fabs(length(v1) - length(v2)) / ds;
         }
 
         aaa[n] = dvds;
@@ -3520,7 +3529,8 @@ int get_los_dvds(w, rootname, ochoice)
     }
       }
 
-    printf("%s ", vstring);
+    printf("vchoice %i y coord %8.4e direction cosines %.2f %.2f %.2f\n", 
+            vchoice, p.x[1], p.lmn[0], p.lmn[1], p.lmn[2]);
     display ("dvds along a LoS");
 
     if (ochoice)
@@ -3531,7 +3541,9 @@ int get_los_dvds(w, rootname, ochoice)
         write_array (filename, ochoice);
       }
 
-    rdint("real (0) rotational (1) or poloidal (2) or back(-1):", &vchoice);
+    rdint("real (0) poloidal (1) or rotational (2) or back(-1):", &vchoice);
+
+  }
 
   return (0);
 }
