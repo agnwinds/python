@@ -286,19 +286,14 @@ int xdefine_phot(double f1, double f2, int ioniz_or_final, int iwind)
 		agn_init(geo.r_agn, geo.lum_agn, geo.alpha_agn, f1, f2, ioniz_or_final, &geo.f_agn);
 	}
 
-	/* The choices associated with iwind are iwind = -1 Don't generate any wind photons at all 1 Create wind photons and force a
-	   reinitialization of the wind 0 Create wind photons but remain open to the question of whether the wind needs to be reinitialized.
-	   Initialization is forced in that case by init */
-	if (iwind == -1)
-		geo.f_wind = geo.lum_wind = 0.0;
 
-	if (iwind == 1 || (iwind == 0))
-	{							/* Then find the luminosity and flux of the wind */
-		geo.lum_wind = wind_luminosity(0.0, VERY_BIG);
-		xxxpdfwind = 1;			// Turn on the portion of the line luminosity routine which creates pdfs
-		geo.f_wind = wind_luminosity(f1, f2);
-		xxxpdfwind = 0;			// Turn off the portion of the line luminosity routine which creates pdfs
-	}
+  Debug("JM: f_tot %8.2e f_star %8.2e   f_disk %8.2e   f_bl %8.2e   f_agn %8.2e f_wind %8.2e   f_matom %8.2e   f_kpkt %8.2e \n",
+     geo.f_tot, geo.f_star, geo.f_disk, geo.f_bl, geo.f_agn, geo.f_wind, geo.f_matom,
+     geo.f_kpkt);
+
+  Log_silent
+    ("xdefine_phot: lum_star %8.2e lum_disk %8.2e lum_bl %8.2e lum_agn %8.2e lum_wind %8.2e\n",
+     geo.lum_star, geo.lum_disk, geo.lum_bl, geo.lum_agn, geo.lum_wind);
 
 	/* New block follow for dealing with emission via k-packets and macro atoms. SS */
 	if (geo.matom_radiation)
@@ -377,7 +372,7 @@ History:
 
 int xmake_phot(PhotPtr p, double f1, double f2, int ioniz_or_final, int iwind, double weight, int iphot_start, int nphotons)	// The
 																																// total
-																																// number
+																														// number
 																																// of
 																																// photons
 																																// to
