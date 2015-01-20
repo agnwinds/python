@@ -1346,8 +1346,7 @@ int main(int argc, char *argv[])
 		}
 		else if (geo.wind_type == 10)
 		{
-			// SWM Added
-			get_wind_keplerian_params();
+			get_wind_keplerian_params();	// SWM Added
 		}
 		else if (geo.wind_type != 2)
 		{
@@ -1945,6 +1944,8 @@ int main(int argc, char *argv[])
 		 * heated disk 
 		 */
 
+
+#ifdef MPI_ON
       for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
 	{
   	  plasmamain[mpi_i].max_freq = maxfreqhelper2[mpi_i];
@@ -2024,7 +2025,7 @@ int main(int argc, char *argv[])
     free (redhelper2); 
     free (iredhelper);
     free (iredhelper2);
-
+#endif
 
 
 		photon_checks(p, freqmin, freqmax, "Check before transport");

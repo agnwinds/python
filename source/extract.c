@@ -349,8 +349,9 @@ the same resonance again */
 		if(pp->nrscat>0)	//SWM - Records total distance travelled by extract photon
 		{
 			stuff_v(x_inwind,pp->x);
-			pp->path = path_inwind; pp->nscat = -1;
-			delay_dump_single(pp, 1);
+			pp->path = path_inwind;
+			printf("DELAY DUMP SINGLE\n");
+			delay_dump_single(pp, 1); //SWM
 			//printf("Reverb photon extracted: %g %g %g\n",pp->freq,delay_to_observer(pp),pp->w);
 		}
 

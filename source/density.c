@@ -50,21 +50,18 @@ structure that must be summed. We need to convert that to a position
 in the plasma structure*/
 
   if ((coord_fraction (1, p->x, nnn, frac, &nelem)) > 0)
+  {
+    dd = 0;
+    for (nn = 0; nn < nelem; nn++)
     {
-
-      dd = 0;
-
-      for (nn = 0; nn < nelem; nn++)
-	{
-	  nplasma = wmain[nnn[nn]].nplasma;
-	  dd += plasmamain[nplasma].density[nion] * frac[nn];
-	}
+      nplasma = wmain[nnn[nn]].nplasma;
+      dd += plasmamain[nplasma].density[nion] * frac[nn];
+      printf("get_ion_density: dd %e, den[nion] %e, frac[nn] %e\n",dd, plasmamain[nplasma].density[nion], frac[nn]);
     }
+  }
   else
-    {
-      dd = 0;
-    }
-
-
+  {
+    dd = 0;
+  }
   return (dd);
 }

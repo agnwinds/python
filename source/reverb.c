@@ -277,7 +277,7 @@ delay_dump (PhotPtr p, int np, int nspec, int iExtracted)
 	
 	for (nphot = 0; nphot < np; nphot++)
 	{
-		if (p[nphot].istat == P_ESCAPE && p[nphot].nrscat>0)
+		if (p[nphot].istat == P_ESCAPE && p[nphot].nscat>0)
 		{
 			zangle = fabs(p[nphot].lmn[2]);
 			/* 
