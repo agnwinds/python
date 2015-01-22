@@ -56,7 +56,6 @@ in the plasma structure*/
     {
       nplasma = wmain[nnn[nn]].nplasma;
       dd += plasmamain[nplasma].density[nion] * frac[nn];
-      printf("get_ion_density: dd %e, den[nion] %e, frac[nn] %e\n",dd, plasmamain[nplasma].density[nion], frac[nn]);
     }
   }
   else

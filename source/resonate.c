@@ -111,6 +111,9 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 	int nplasma;
 	PlasmaPtr xplasma, xplasma2;
 
+
+	//printf("Calculate_ds entered\n");
+
 	one = &w[p->grid];			// Get a pointer to the cell where the photon bundle is located.
 	nplasma = one->nplasma;
 	xplasma = &plasmamain[nplasma];
@@ -189,7 +192,8 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 	/* The next section checks to see if the frequency difference on the two sides is very small and if not limits the resonances
 	   one has to worry about */
 
-	if (fabs(dfreq) < EPSILON)
+
+	if (fabs(dfreq) < EPSILON*.001) //SWM tenthing
 	{
 		// Error
 		// ("translate: v same at both sides of cell %d\n",one->nwind); /*NSH 130724 shortened error statement, was causing issues
@@ -256,14 +260,17 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 		nn = nstart + n * ndelt;	/* So if the frequency of resonance increases as we travel through the grid cell, we go up in
 									   the array, otherwise down */
 		x = (lin_ptr[nn]->freq - freq_inner) / dfreq;
-
-		printf("Checking line %i: freq %e, range across cell= %e -> %e\n",nn,lin_ptr[nn]->freq,freq_inner,freq_outer); //SWM TEMP
+		if(nn==0){
+			//printf("Pos Inner: %e %e %e\n",	p->x[0],	p->x[1],	p->x[2]);	
+			printf("x %6.1f - Line Freq: %e, range across cell: %15.10e -> %15.10e\n",x,nn,lin_ptr[nn]->freq,freq_inner,freq_outer); //SWM TEMP
+			//printf("Pos Outer: %e %e %e\n",	phot.x[0], 	phot.x[1], 	phot.x[2]);
+		}
 
 		if (0. < x && x < 1.)
 		//if(lin_ptr[nn]->freq < 2.e15)	//SWM TEMP
 		{						/* this particular line is in resonance */
 			ds = x * smax;
-			printf("Cont scattered: tau=%e tau-scat=%e\n",ttau + (kap_cont) * (ds - ds_current),tau_scat);
+			printf("Checking for cont scatter: tau=%e tau-scat=%e\n",ttau + (kap_cont) * (ds - ds_current),tau_scat);
 
 			/* Before checking for a resonant scatter, need to check for scattering due to a continuum process. */
 			if (ttau + (kap_cont) * (ds - ds_current) > tau_scat)
@@ -283,7 +290,6 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 				/* increment tau by the continuum optical depth to this point */
 				ttau += kap_cont * (ds - ds_current);	/* kap_cont used here rather than kap_es */
 
-
 				ds_current = ds;	/* At this point ds_current is exactly the position of the resonance */
 				kkk = lin_ptr[nn]->nion;
 
@@ -302,10 +308,7 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 				// ?? This seems like an incredibly small number; how can anything this small affect anything ??
 
 				dd = get_ion_density(&p_now, kkk);
-				printf("Res scattered: scattering density dd= %e, threshold LDEN_MIN= %e\n",dd,LDEN_MIN);
-				printf("Res position is %e %e %e\n",p_now.x[0],p_now.x[1],p_now.x[2]);
-
-
+				printf("Checking ion density at %6.1e %6.1e %6.1e=%e\n",p_now.x[0],p_now.x[1],p_now.x[2],dd);
 				if (dd > LDEN_MIN)
 				{
 					/* If we have reached this point then we have to initalize dvds1 and dvds2. Otherwise there is no need to do
@@ -325,7 +328,7 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 
 
 					tau_sobolev = sobolev(one, p, dd, lin_ptr[nn], dvds);
-					printf("tau_sobolev: %e, for np: %i\n",tau_sobolev,p->np); //SWM
+					printf("Checking tau sobolev: %e\n",tau_sobolev,p->np); //SWM
 
 					/* tau_sobolev now stores the optical depth. This is fed into the next statement for the bb estimator
 					   calculation. SS March 2004 */
@@ -396,7 +399,7 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 					*tau = ttau;
 
 
-
+					printf("Successfully scattered!\n");
 
 					return (ds_current);
 				}

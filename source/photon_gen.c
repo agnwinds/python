@@ -698,10 +698,10 @@ int photo_gen_star(PhotPtr p, double r, double t, double weight, double f1, doub
 			Error_silent("photo_gen_star: phot no. %d freq %g out of range %g %g\n", i, p[i].freq, freqmin, freqmax);
 		}
 		if (geo.wind_type == 10) 
-    {
-      wind_keplerian_randvec(&p[i], r);
-    }		
-    else
+    	{
+      		wind_keplerian_randvec(&p[i], r); //SWM
+    	}		
+    	else
 			randvec(p[i].x, r);
 
 		/* Added by SS August 2004 for finite disk. */
@@ -720,7 +720,7 @@ int photo_gen_star(PhotPtr p, double r, double t, double weight, double f1, doub
 			}
 		}
 
-		randvcos(p[i].lmn, p[i].x);
+		randvcos(p[i].lmn, p[i].x); //SWM
 		//printf("XYZLMN: %g %g %g %g %g %g\n",p[i].x[0],p[i].x[1],p[i].x[2],p[i].lmn[0],p[i].lmn[1],p[i].lmn[2]);
 	}
 	return (0);

@@ -70,6 +70,7 @@ int get_wind_keplerian_params(void)
 	w_keplerian->d_photon_bias_const = w_keplerian->d_photon_bias /
 		(exp(w_keplerian->d_photon_bias)-exp(-w_keplerian->d_photon_bias));
 	
+
 	geo.wind_rmin = geo.rstar;
 	geo.wind_rmax = geo.rmax;
 	geo.wind_rho_min = w_keplerian->d_rad_min;
@@ -77,16 +78,8 @@ int get_wind_keplerian_params(void)
 	geo.wind_thetamin = w_keplerian->d_theta_min;
 	geo.wind_thetamax = w_keplerian->d_theta_max;
 	geo.xlog_scale = w_keplerian->d_rad_min;
-
-	/* !! 70b - This change is to accomodate the torus, but it is not obvious this is the best way to set the scales now. It
-	   might be better do do this in make_grid!! */
-	if (geo.compton_torus && geo.compton_torus_rmin < geo.xlog_scale)
-	{
-		geo.xlog_scale = geo.compton_torus_rmin;
-	}
 	geo.zlog_scale = w_keplerian->d_height;
 	DFUDGE = geo.zlog_scale/10.;
-
 	return (0);
 }
 
@@ -115,7 +108,7 @@ double wind_keplerian_velocity(double x[], double v[])
 	v[0] = 0.;																						//Zero R, Phi components
 	v[2] = 0.;
 	if (r > w_keplerian->d_rad_min && r < w_keplerian->d_rad_max 
-			&& x[2] < (w_keplerian->d_height + DFUDGE) )						//If point is within the wind 
+			&& abs(x[2]) < (w_keplerian->d_height + DFUDGE) )						//If point is within the wind 
 		v[1] = sqrt(G * geo.mstar / r);											//Simple keplerian Theta component
 	else
 		v[1] = 0;																						//Or it's zero
@@ -146,7 +139,7 @@ double wind_keplerian_rho(double x[])
 {
 	double r = sqrt(x[0] * x[0] + x[1] * x[1]);			//Convert position into radius
 	if (r < w_keplerian->d_rad_min || r > w_keplerian->d_rad_max 
-		|| x[2] > (w_keplerian->d_height) )
+		|| abs(x[2]) > (w_keplerian->d_height) )
 		return (0.0);																	//If the radius lies outside the wind, zero
 	else
 		return (w_keplerian->d_density);							//Else return flat value
