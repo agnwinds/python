@@ -2085,13 +2085,25 @@ run -- 07jul -- ksl
 
     }
 
-
-
   /* the next condition should really when one has nothing more to do */
 
-  if (geo.pcycle >= geo.pcycles)
+  else if (geo.pcycle >= geo.pcycles)
     xsignal (root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n",
 	     "COMMENT", geo.pcycle, geo.pcycles);
+
+  else
+    {
+      /* Then we are restarting a run with more spectral cycles, but we 
+         have already completed some. The memory for the spectral arrays
+         should already have been allocated, and the spectrum was initialised
+         on the original run, so we just need to renormalise the saved spectrum */
+      /* See issue #134 (JM) */
+      if (restart_stat  == 0)
+      	Error("Not restarting, but geo.pcycle = %i and trying to renormalise!\n",
+      		   geo.pcycle);
+
+      spectrum_restart_renormalise(nangles);  
+    }
 
 
   while (geo.pcycle < geo.pcycles)
