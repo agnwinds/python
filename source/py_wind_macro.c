@@ -141,8 +141,8 @@ macro_summary (w, rootname, ochoice)
   nplasma=0;
 
   /* get input from the user */
-  rdint ("Detailed cell info (0), specific level info (1) \
-          emissivities (2) Balmer escapes (3) Pops (4)", &choose);
+  rdint ("Detailed cell info (0), levels (1) \
+emissivities (2) P_escapes (3) Detailed Pops (4) taus (5) estimators (6)", &choose);
 
   if (choose == 0)
     {
@@ -178,12 +178,12 @@ macro_summary (w, rootname, ochoice)
     {
       nconfig = -1;
       version = 0;
-      rdint ("Departure coeff (1) or number density (0)", &version);
-      rdint ("Configuration.Number(-1 to rollup)", &nconfig);
+      rdint ("Number density (0), Fractional Pop (1) or Departure coeff (2)", &version);
+      rdint ("Level.Number(-1 to rollup)", &nconfig);
       while (nconfig >= 0)
 	{
 	  depcoef_overview_specific (version, nconfig, w, rootname, ochoice);
-	  rdint ("Configuration.Number(-1 to rollup)", &nconfig);
+	  rdint ("Level.Number(-1 to rollup)", &nconfig);
 	}
     }
 
@@ -199,6 +199,18 @@ macro_summary (w, rootname, ochoice)
         }
     }
 
+  /* JM 1311 -- new loop added to report escape probabilities 
+     Note this currently only works for Balmer lines */
+  else if (choose == 3)
+    {
+      rdint ("Upper level escape to view (-1 - back, Halpha = 3):", &nlev);
+      while (nlev >= 0)
+        {
+          level_escapeoverview (nlev, w, rootname, ochoice);
+          rdint ("Upper level escape to view (-1 - back, Halpha = 3):", &nlev);
+        }
+    }
+
   /* JM 1311 -- new loop added to report level populations in a cell */
   else if (choose == 4)
     {
@@ -210,17 +222,28 @@ macro_summary (w, rootname, ochoice)
         }
     }
 
-  /* JM 1311 -- new loop added to report escape probabilities 
+  /* JM 1311 -- new loop added to report taus 
      Note this currently only works for Balmer lines */
-  else
+  else if (choose == 5)
     {
-      rdint ("Upper level escape to view (-1 - back, Halpha = 3):", &nlev);
+      rdint ("Upper level tau to view (-1 - back, Halpha = 3):", &nlev);
       while (nlev >= 0)
         {
-          level_escapeoverview (nlev, w, rootname, ochoice);
-          rdint ("Upper level escape to view (-1 - back, Halpha = 3):", &nlev);
+          level_tauoverview (nlev, w, rootname, ochoice);
+          rdint ("Upper level tau to view (-1 - back, Halpha = 3):", &nlev);
         }
     }
+
+  /* JM 1311 -- add stuff for estimators here */
+  // else 
+  //   {
+  //     rdint ("Estimator to view: jbar (0) back (-1)", &version);
+  //     while (version >= 0)
+  //       {
+  //         estimator_overview (version, w, rootname, ochoice);
+  //         rdint ("Upper level tau to view (-1 - back, Halpha = 3):", &nlev);
+  //       }
+  //   }
 
 
 
@@ -518,6 +541,7 @@ copy_plasma (x1, x2)
 
   /* JM 1409 -- added this for depcoef_overview_specific */
   x2->partition = x1->partition;
+  x2->density = x1->density;
 
   /* Note this isn't everything in the cell! 
      Only the things needed for these routines */
@@ -557,13 +581,15 @@ depcoef_overview_specific (version, nconfig, w, rootname, ochoice)
      int ochoice;
 {
   int n;
-  char filename[LINELENGTH];
+  char filename[LINELENGTH], lname[LINELENGTH];
   ConfigPtr p;
-  PlasmaPtr x, xdummy;
-  double xden, lteden;
+  PlasmaPtr xplasma, xdummy;
+  double xden, lteden, ion_density;
   int copy_plasma ();
   plasma_dummy pdum;
 
+
+  nconfig = nconfig - 1;
 
   for (n = 0; n < NDIM2; n++)
     {
@@ -572,10 +598,10 @@ depcoef_overview_specific (version, nconfig, w, rootname, ochoice)
 	{
 	  xden = -1;
 
-	  x = &plasmamain[w[n].nplasma];
+	  xplasma = &plasmamain[w[n].nplasma];
 	  xdummy = &pdum;
 
-	  copy_plasma (x, xdummy);
+	  copy_plasma (xplasma, xdummy);
 	  geo.macro_ioniz_mode = 0;
 
 	  partition_functions (xdummy, 1);
@@ -584,27 +610,48 @@ depcoef_overview_specific (version, nconfig, w, rootname, ochoice)
 	  geo.macro_ioniz_mode = 1;
 
 	  p = &config[nconfig];
-	  xden = den_config (x, nconfig);
+	  xden = den_config (xplasma, nconfig);
 	  lteden = den_config (xdummy, nconfig);
+
+    ion_density = xplasma->density[p->nion];
 
 	  if (version == 0)
 	    {
 	      aaa[n] = xden;
 	    }
+    else if (version == 1)
+      {
+        aaa[n] = xden / ion_density;
+      }
 	  else
 	    {
 	      aaa[n] = xden / lteden;
 	    }
 	}
     }
-  display ("Dep_coef");
+
+  if (version == 0)
+    display ("Level Population Number Densities");
+  else if (version == 1)
+    display ("Fractional Level Population");
+  else
+    display ("Departure Coefficient");
 
   if (ochoice)
     {
       strcpy (filename, rootname);
-      strcat (filename, ".dep_coef");
-      write_array (filename, ochoice);
 
+      sprintf (lname, ".lev%d_", nconfig+1);
+      strcat (filename, lname);
+
+      if (version == 0)
+        strcat (filename, "den");
+      else if (version == 1)
+        strcat (filename, "frac_pop");
+      else
+        strcat (filename, "dep_coef");
+
+      write_array (filename, ochoice);
     }
 
   return (0);
@@ -903,3 +950,106 @@ int level_escapeoverview (nlev, w, rootname, ochoice)
   return (0);
 }
 
+
+
+
+/**************************************************************************
+
+  Synopsis:  
+
+  Routine to print taus for a given 
+  Balmer line in each cell.
+
+  Description:  
+
+  Arguments:  
+
+  Returns:
+
+  Notes:
+
+  History:
+      1312  JM  Coded
+ ************************************************************************/
+
+
+
+int level_tauoverview (nlev, w, rootname, ochoice)
+  int nlev;
+  WindPtr w;
+  char rootname[];
+  int ochoice;
+{
+  PlasmaPtr xplasma;
+  WindPtr one;
+  int n, nplasma, nline, found;
+  char name[LINELENGTH], lname[LINELENGTH];
+  char filename[LINELENGTH];
+  double lambda;
+
+  
+  found = 0;
+  nline = 0;
+
+
+
+  /* Find the line in line list */
+  while (found != 1 && nline < nlines)
+  {
+
+    if (lin_ptr[nline]->levl == 2 && lin_ptr[nline]->levu == nlev && 
+       lin_ptr[nline]->z == 1 && lin_ptr[nline]->istate == 1)
+      { 
+        found = 1;
+      }
+
+    nline++; 
+  }
+
+
+  if (nline == nlines)
+    {
+      Error ("level_tauoverview: Could not find line in linelist\n");
+      exit (0);
+    }
+
+  nline--;
+  
+  lambda = ( C/ lin_ptr[nline]->freq ) * 1e8;
+
+  strcpy (name, "");
+  sprintf (name, "Balmer series taus for Level %i, Lambda %.1f", nlev, lambda);
+
+
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      nplasma = w[n].nplasma;
+
+      if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+        {
+          xplasma = &plasmamain[nplasma];
+          one = &wmain[xplasma->nwind];
+          aaa[n] = sobolev (one, one->x, xplasma->density[lin_ptr[nline]->nion], lin_ptr[nline], one->dvds_ave);
+
+          
+        }
+    }
+
+  display(name);
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".lev");
+
+      sprintf (lname, "%d", nlev);
+      strcat (filename, lname);
+
+      strcat (filename, "_tau");
+      write_array (filename, ochoice);
+
+    }
+
+  return (0);
+}

@@ -55,6 +55,7 @@ double get_ne(double density[]);
 int spectrum_init(double f1, double f2, int nangle, double angle[], double phase[], int scat_select[], int top_bot_select[], int select_extract, double rho_select[], double z_select[], double az_select[], double r_select[]);
 int spectrum_create(PhotPtr p, double f1, double f2, int nangle, int select_extract);
 int spectrum_summary(char filename[], char mode[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin);
+int spectrum_restart_renormalise(int nangle);
 /* wind2d.c */
 int define_wind(void);
 int where_in_grid(double x[]);
@@ -319,7 +320,7 @@ int fake_matom_bf(PhotPtr p, int *nres, int *escape);
 int macro_pops(PlasmaPtr xplasma, double xne);
 int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 double get_kpkt_f(void);
-double get_matom_f(void);
+double get_matom_f(int mode);
 int photo_gen_kpkt(PhotPtr p, double weight, int photstart, int nphot);
 int photo_gen_matom(PhotPtr p, double weight, int photstart, int nphot);
 int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper);
@@ -465,6 +466,10 @@ double tb_exp1(double freq);
 int matrix_ion_populations(PlasmaPtr xplasma, int mode);
 int populate_ion_rate_matrix(PlasmaPtr xplasma, double rate_matrix[nions][nions], double pi_rates[nions], double rr_rates[nions], double b_temp[nions], double xne, int xelem[nions]);
 int solve_matrix(double *a_data, double *b_data, int nrows, double *x);
+/* para_update.c */
+int communicate_estimators_para(void);
+int gather_spectra_para(int nspec_helper, int nspecs);
+int communicate_matom_estimators_para(void);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
@@ -507,6 +512,7 @@ int complete_physical_summary(WindPtr w, char rootname[], int ochoice);
 double get_density_or_frac(PlasmaPtr xplasma, int element, int istate, int frac_choice);
 int find_ion(int element, int istate);
 int find_element(int element);
+int get_los_dvds(WindPtr w, char rootname[], int ochoice);
 /* py_wind_ion.c */
 int ion_summary(WindPtr w, int element, int istate, int iswitch, char rootname[], int ochoice);
 int tau_ave_summary(WindPtr w, int element, int istate, double freq, char rootname[], int ochoice);
@@ -528,6 +534,7 @@ int depcoef_overview_specific(int version, int nconfig, WindPtr w, char rootname
 int level_popsoverview(int nplasma, WindPtr w, char rootname[], int ochoice);
 int level_emissoverview(int nlev, WindPtr w, char rootname[], int ochoice);
 int level_escapeoverview(int nlev, WindPtr w, char rootname[], int ochoice);
+int level_tauoverview(int nlev, WindPtr w, char rootname[], int ochoice);
 /* py_wind.c */
 int main(int argc, char *argv[]);
 int one_choice(int choice, char *root, int ochoice);

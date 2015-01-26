@@ -1846,17 +1846,25 @@ dvds_summary (w, rootname, ochoice)
      char rootname[];
      int ochoice;
 {
-  char filename[LINELENGTH];
-  int n;
+  char filename[LINELENGTH], suffix[LINELENGTH];
+  int n, ichoice;
+  struct photon p;
+  //double v1[3]
 
-  for (n = 0; n < NDIM2; n++)
+
+
+  rdint("dvds_ave (0) dvdx (1) dvdy (2) dvdz (3) component LoS (4):", &ichoice);
+
+  if (ichoice == 0)
+  {
+    for (n = 0; n < NDIM2; n++)
     {
       aaa[n] = 0;
       if (w[n].vol > 0.0)
-	{
-	  aaa[n] = w[n].dvds_ave;
+  {
+    aaa[n] = w[n].dvds_ave;
 
-	}
+  }
     }
   display ("Average dvds");
   if (ochoice)
@@ -1865,6 +1873,43 @@ dvds_summary (w, rootname, ochoice)
       strcat (filename, ".dvds");
       write_array (filename, ochoice);
     }
+  }
+
+  else if (ichoice > 0 && ichoice < 4)
+  {
+   
+
+    for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+  {
+    p.lmn[0] = 0.0;
+    p.lmn[1] = 0.0;
+    p.lmn[2] = 0.0;
+    stuff_v(w[n].xcen, p.x);
+
+    p.lmn[ichoice - 1] = 1.0;
+    aaa[n] = dvwind_ds(&p);
+
+  }
+    }
+  display ("Average dvds");
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      sprintf(suffix, ".dvds_%i", ichoice - 1);
+      strcat (filename, suffix);
+      write_array (filename, ochoice);
+    }
+  }
+
+  else
+  {
+    get_los_dvds(w, rootname, ochoice);
+  }
+
+
   return (0);
 }
 
@@ -2209,33 +2254,97 @@ J_summary (w, rootname, ochoice)
 {
   int i, n;
   char filename[LINELENGTH];
-  char number[2];
+  char number[2], line_number[10];
   int nplasma;
+  int uplvl, llvl, njump, lu, ll;
+  struct lines *line_ptr;
 
 
   i = 1;
-  rdint ("Band number for J", &i);
+  rdint ("Band number for J or macro atom J (0), or backup (-1)", &i);
+
+
+  while (i >=0)
+  {
+    if (i == 0)
+    {
+      printf("H alpha is 3->2 in this notation!\n");
+      rdint ("Upper level macro atom", &uplvl);
+      rdint ("Lower level macro atom", &llvl);
+
+      /* Convert 'user levels' into actually levels. i.e. 1 is 0! */
+      uplvl = uplvl - 1;
+      llvl = llvl - 1;
+
+
+
+      /* now we need to find the jbar estimator and line 
+         pointer corresponding to this transition */
+      njump = 0;
+      printf("Level %i has %i upwards jumps %i downwards jumps\n", 
+             llvl+1, config[llvl].n_bbu_jump, config[llvl].n_bbd_jump);
+
+      while (njump < config[llvl].n_bbu_jump)
+      {
+        line_ptr = &line[config[llvl].bbu_jump[njump]];
+        lu = line_ptr->nconfigu;
+        ll = line_ptr->nconfigl;
+
+        // printf("ll %i lu %i llvl %i uplvl %i njump %i\n",
+        //         ll, lu, llvl, uplvl, njump);
+        if (ll == llvl && lu == uplvl)
+          break;
+        njump++;
+      }
+
+    if (njump >= config[llvl].n_bbu_jump)
+    {
+      Error("Couldn't find this transition, try something else!\n");
+      return (0);
+    }
+  }
 
   for (n = 0; n < NDIM2; n++)
     {
       aaa[n] = 0;
       if (w[n].vol > 0.0)
-	{
-	  nplasma = w[n].nplasma;
-	  aaa[n] = (plasmamain[nplasma].xj[i]);
-	}
+  {
+    nplasma = w[n].nplasma;
+    if (i == 0)
+      aaa[n] = macromain[nplasma].jbar_old[config[llvl].bbu_indx_first + njump];
+    else
+      aaa[n] = (plasmamain[nplasma].xj[i]);
+  }
     }
+  
+  printf("Line wavelength is %.2f\n", (C / line_ptr->freq) / ANGSTROM);
+  printf("Line freq is %8.4e\n", line_ptr->freq);
+  printf("njump %i llvl %i uplvl %i nres %i",
+          njump, llvl, uplvl, config[llvl].bbu_jump[njump]);
   display ("J in cell");
-  printf ("i=%i", i);
+  //printf ("i=%i", i);
   sprintf (number, "%i", i);
+
   if (ochoice)
     {
       strcpy (filename, rootname);
-      strcat (filename, ".J_band");
-      strcat (filename, number);
+      if (i == 0)
+      {
+        sprintf(line_number, "%ito%i", uplvl, llvl);
+        strcat (filename, ".Jbar_");
+        strcat (filename, line_number);
+      }
+      else
+      {
+        strcat (filename, ".J_band");
+        strcat (filename, number);
+      } 
       write_array (filename, ochoice);
 
     }
+
+    rdint ("Band number for J or macro atom J (0), or backup (-1)", &i);
+  }
   return (0);
 
 }
@@ -3297,4 +3406,149 @@ int find_element(element)
 
   return n;
 }
+
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+  get_los_dvds finds the gradient along the LoS 
+  of the velocity projected along the same line of sight.
+
+  History:
+  1501 JM coded
+
+************************************************************************/
+
+int get_los_dvds(w, rootname, ochoice)
+    WindPtr w;
+    char rootname[];
+    int ochoice;
+{
+  struct photon p;
+  struct photon ptest;
+  int  n;
+  double ds, dvds, v1[3], v2[3], xtest[3];
+  double lmn[3], diff[3], phase;
+  int vchoice, sight_choice;
+  double obs_angle, rzero, r;
+  char filename[LINELENGTH], suffix[LINELENGTH];
+
+  vchoice = 0;
+  phase = 0;
+  obs_angle = 80.0;
+  sight_choice = 0;
+
+  rdint("use component along LoS (0), or magnitude (1):", &sight_choice);
+  rdint("real (0) poloidal (1) or rotational (2) or back(-1):", &vchoice);
+
+  while (vchoice >= 0)
+  {
+    rddoub("angle in deg:", &obs_angle);
+    rddoub("phase (0 to 1):", &phase);
+
+    lmn[0] = sin (obs_angle / RADIAN) * cos (-phase * 360. / RADIAN);
+    lmn[1] = sin (obs_angle / RADIAN) * sin (-phase * 360. / RADIAN);
+    lmn[2] = cos (obs_angle / RADIAN);
+
+    // if (vchoice == 0) 
+    //   strcpy (vstring, "");
+    // else if (vchoice == 1) 
+    //   strcpy (vstring, "rot");
+    // else if (vchoice == 2) 
+    //   strcpy (vstring, "pol");
+
+
+    for (n = 0; n < NDIM2; n++)
+      {
+        aaa[n] = 0;
+        if (w[n].vol > 0.0)
+    {
+
+      stuff_v(w[n].xcen, p.x);
+      stuff_v(lmn, p.lmn);
+      stuff_phot(&p, &ptest);
+
+      vsub (p.x, w[n].x, diff);
+      ds = 0.001 * length (diff);
+      move_phot (&ptest, ds);
+
+      if (vchoice == 0)
+        dvds = dvwind_ds(&p);
+
+      /* next choice is for turning off rotational velocity */
+      else if (vchoice == 1)
+        {
+          model_velocity(p.x, v1);
+          model_velocity(ptest.x, v2);
+          v1[1] = 0.0;
+          v2[1] = 0.0;
+
+          /* calculate the relevant gradient */
+          if (sight_choice == 0)
+            dvds = fabs(dot(v1, p.lmn) - dot(v2, p.lmn)) / ds;
+          else
+            dvds = fabs(length(v1) - length(v2)) / ds;
+        }
+
+      /* next choice is for turning rotational velocity only */
+      else
+        {
+          r = sqrt (p.x[0] * p.x[0] + p.x[1] * p.x[1]);
+          rzero = sv_find_wind_rzero (p.x);
+          v1[0] = v1[2] = 0.0;
+          v1[1] = sqrt (G * geo.mstar * rzero) / r;
+
+
+          r = sqrt (ptest.x[0] * ptest.x[0] + ptest.x[1] * ptest.x[1]);
+          rzero = sv_find_wind_rzero (ptest.x);
+          v2[0] = v2[2] = 0.0;
+          v2[1] = sqrt (G * geo.mstar * rzero) / r;
+
+          if (p.x[1] != 0.0)
+            {
+              project_from_cyl_xyz (p.x, v1, xtest);
+              stuff_v (xtest, v1);
+            }
+          if (ptest.x[1] != 0.0)
+            { 
+              project_from_cyl_xyz (ptest.x, v2, xtest);
+              stuff_v (xtest, v2);
+            }
+
+          /* calculate the relevant gradient */
+          if (sight_choice == 0)
+            dvds = fabs(dot(v1, p.lmn) - dot(v2, p.lmn)) / ds;
+          else
+            dvds = fabs(length(v1) - length(v2)) / ds;
+        }
+
+        aaa[n] = dvds;
+
+    }
+      }
+
+    printf("vchoice %i y coord %8.4e direction cosines %.2f %.2f %.2f\n", 
+            vchoice, p.x[1], p.lmn[0], p.lmn[1], p.lmn[2]);
+    display ("dvds along a LoS");
+
+    if (ochoice)
+      {
+        strcpy (filename, rootname);
+        sprintf (suffix, ".dv%i_ds_A%.1f_P%.2f", vchoice, obs_angle, phase);
+        strcat (filename, suffix);
+        write_array (filename, ochoice);
+      }
+
+    rdint("real (0) poloidal (1) or rotational (2) or back(-1):", &vchoice);
+
+  }
+
+  return (0);
+}
+
+
+
+
 

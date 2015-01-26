@@ -680,6 +680,7 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
 
   /* Construct and write a header string  for the output file */
   fprintf (fptr, "# Python Version %s\n", VERSION);
+  fprintf (fptr, "# Git commit hash %s\n", GIT_COMMIT_HASH);
 
   get_time (string);
   fprintf (fptr, "# Date	%s\n#  \n", string);
@@ -767,4 +768,59 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
 
   return (0);
 
+}
+
+
+
+
+
+
+/***********************************************************
+                                       University of Southampton
+
+ Synopsis:
+   
+	spectrum_spectrum_restart_renormalise() renormalises the spectra
+
+Arguments:		
+				
+Returns:
+  
+Description:	
+	This simple routine renormalises the spectra when one restarts
+	a run which already has some spectral cycles run.
+
+	This is done by multiplying all the spectra we have read in by a 
+	factor
+
+	renorm_factor = (cycles in old pf file) / (cycles in new pf file)
+			
+Notes:
+	see Issue #134
+
+History:
+ 	15jan JM	Coded
+
+**************************************************************/
+
+int spectrum_restart_renormalise(nangle)
+    int nangle;
+{
+  double renorm_factor;
+  int n, m, nspec;
+
+  nspec = nangle + MSPEC;
+  renorm_factor = ( (double) geo.pcycle + 1.0) / ( (double) geo.pcycles + 1.0); 
+
+  /* loop over each spectrum column and each wavelength bin */
+  for (n = MSPEC; n < nspec; n++)
+  {
+  	for (m = 0; m < NWAVE; m++)
+  	  {
+        xxspec[n].f[m] *= renorm_factor;
+        xxspec[n].lf[m] *= renorm_factor;
+  	  } 
+  }
+
+  return (0);
 }

@@ -1157,4 +1157,10 @@ FILE *optr;  //pointer to a diagnostic file that will contain dvds information
         
 #define NMAX_OPTIONS 20 
 
+/* these two variables are used by xdefine_phot() in photon_gen.c 
+   to set the mode for get_matom_f()in matom.c and tell it 
+   whether it has already calculated the matom emissivities or not. */
+#define CALCULATE_MATOM_EMISSIVITIES 0
+#define USE_STORED_MATOM_EMISSIVITIES 1
+
 
