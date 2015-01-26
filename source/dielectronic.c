@@ -78,7 +78,7 @@ compute_dr_coeffs (double temp)
 {
   int n, n1, n2;
   double Adi, Bdi, T0, T1;
-  for (n = 0; n < nions; n++)
+  for (n = 1; n < nions+1; n++)
     {
       if (ion[n].drflag == 0)
 	{
@@ -167,7 +167,7 @@ total_dr (WindPtr one, double t_e)		//Current electron temperature of the cell
   meanv = pow ((2 * BOLTZMANN * t_e / MELEC), 0.5);
   meanke = 0.5 * MELEC * meanv * meanv;
 
-  for (n = 0; n < nions; n++)
+  for (n = 1; n < nions+1; n++)
     {
       if (ion[n].drflag == 0)	//We have no DR for this ion.
 	{

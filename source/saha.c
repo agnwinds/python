@@ -183,6 +183,16 @@ nebular_concentrations (PlasmaPtr xplasma, int mode)			// 0=saha using tr, 1=sah
       m = variable_temperature (xplasma, mode);
     }
 
+//NSH 1411 - two new modes for matrix ionization schemes
+  else if (mode == NEBULARMODE_MATRIX_BB)
+	{
+	m=matrix_ion_populations(xplasma,mode);
+	}
+  else if(mode == NEBULARMODE_MATRIX_SPECTRALMODEL)
+	{
+	m=matrix_ion_populations(xplasma,mode);
+	}
+
   else
     {
 // If reached this point the program does not understand what is desired.

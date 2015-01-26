@@ -140,6 +140,9 @@ History:
 			than once
 	12jul   nsh	73 - added structures and routines to read in badnell style total recombination rate data
         12sept	nsh	73 - added structures and routines to read in gaunt factor data from sutherland 1997
+  14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120. 
+	14nov	nsh	78b - added DERE direct ionizaion data, and changed al recomb data to refer to state being left
+                 Also used write_atomicdata to control if summary is written to file.
 **************************************************************/
 
 
@@ -2025,7 +2028,7 @@ would like to have simple lines for macro-ions */
 		    }
 
 		  istate = ne;	//         get the ionisation state we are recombining from
-		  istate--;	//    we will associate the rate with the ion we are recombining to
+//		  istate--;	//    we will associate the rate with the ion we are recombining to
 
 		  for (n = 0; n < nions; n++)	//Loop over ions to find the correct place to put the data
 		    {
@@ -2080,7 +2083,7 @@ would like to have simple lines for macro-ions */
 		    }
 
 		  istate = ne;	//         get the ionisation state we are recombining from
-		  istate--;	//    we will associate the rate with the ion we are recombining to
+//		  istate--;	//    we will associate the rate with the ion we are recombining to
 
 		  for (n = 0; n < nions; n++)	//Loop over ions to find the correct place to put the data
 		    {
@@ -2173,7 +2176,7 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 		    }
 
 		  istate = ne;	//         get the traditional ionisation state
-		  istate--;	//    we will associate the rate with the ion we are recombining to
+//		  istate--;	//    we will associate the rate with the ion we are recombining to
 		  for (n = 0; n < nions; n++)	//Loop over ions to find the correct place to put the data
 		    {
 		      if (ion[n].z == z && ion[n].istate == istate)	// this works out which ion we are dealing with
@@ -2224,7 +2227,7 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 		    }
 
 		  istate = ne;	//         get the traditional ionisation state
-		  istate--;	//    we will associate the rate with the ion we are recombining to
+//		  istate--;	//    we will associate the rate with the ion we are recombining to
 		  for (n = 0; n < nions; n++)	//Loop over ions to find the correct place to put the data
 		    {
 		      if (ion[n].z == z && ion[n].istate == istate)	// this works out which ion we are dealing with
@@ -2273,7 +2276,7 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
 		      exit (0);
 		    }
 		  istate = z - ne + 1;	//         get the traditional ionisation state
-		  istate--;	//    we will associate the rate with the ion we are recombining to
+//		  istate--;	//    we will associate the rate with the ion we are recombining to
 		  for (n = 0; n < nions; n++)	//Loop over ions to find the correct place to put the data
 		    {
 		      if (ion[n].z == z && ion[n].istate == istate)	// this works out which ion we are dealing with

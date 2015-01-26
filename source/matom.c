@@ -1381,21 +1381,16 @@ macro_pops (PlasmaPtr xplasma, double xne)
   double this_ion_density, level_population;
   double inversion_test;
   double q_ioniz (), q_recomb ();
-  int s;			//NEWKSL
   double *a_data, *b_data;
-  gsl_permutation *p;		//NEWKSL
-  gsl_matrix_view m;		//NEWKSL
-  gsl_vector_view b;		//NEWKSL
-  gsl_vector *populations, *test_vector;	//NEWKSL
-  gsl_matrix *test_matrix;
+  double *populations;
   int index_fast_col, ierr;
-  double test_val;
 
   MacroPtr mplasma;
   mplasma = &macromain[xplasma->nplasma];
 
   /* Start with an outer loop over elements: there are no rates that couple
      levels of different elements so we can always separate them out. */
+
 
   for (index_element = 0; index_element < nelements; index_element++)
     {
@@ -1713,76 +1708,21 @@ macro_pops (PlasmaPtr xplasma, double xne)
 	     calloc also sets the elements to zero, which is required */
 
 	  b_data = (double *) calloc (sizeof (rate), n_macro_lvl);
+	  populations = (double *) calloc (sizeof (rate), n_macro_lvl);
 
 	  /* replace the first entry with 1.0- this is part of the normalisation constraint */
 	  b_data[0] = 1.0;
 
-      /* create gsl matrix/vector views of the arrays of rates */
-	  m = gsl_matrix_view_array (a_data, n_macro_lvl, n_macro_lvl);	//KSLNEW
+      /* this next routine is a general routine which solves the matrix equation
+         via LU decomposition */
+	  ierr = solve_matrix(a_data, b_data, n_macro_lvl, populations);
 
-	  /* these are used for testing the solution below */
-	  test_matrix = gsl_matrix_alloc(n_macro_lvl, n_macro_lvl);
-	  test_vector = gsl_vector_alloc (n_macro_lvl);
+	  if (ierr != 0)
+	  	Error("macro_pops: bad return from solve_matrix\n");
 
-	  gsl_matrix_memcpy(test_matrix, &m.matrix); 	// create copy for testing 
-
-	  b = gsl_vector_view_array (b_data, n_macro_lvl);	//KSLNEW
-
-	  /* the populations vector will be a gsl vector which stores populations */
-	  populations = gsl_vector_alloc (n_macro_lvl);	//KSLNEW
-
-
-	  p = gsl_permutation_alloc (n_macro_lvl);	//NEWKSL
-
-	  gsl_linalg_LU_decomp (&m.matrix, p, &s);
-
-	  gsl_linalg_LU_solve (&m.matrix, p, &b.vector, populations);
-
-	  gsl_permutation_free (p);
-
-
-	  /**********************************************************/
-
-      /* JM 140414 -- before we clean, we should check that the populations vector we 
-         have just created really is a solution to the matrix equation */
-      
-      /* declaration contained in my_linalg.h, taken from gsl library */
-      ierr = gsl_blas_dgemv(CblasNoTrans, 1.0, test_matrix, populations, 0.0, test_vector);
-
-      if (ierr != 0)
-        {
-      	  Error("macro_pops: bad return when testing matrix solution to rate equations.\n");
-        }
-
-      /* now cycle through and check the solution to y = m * populations really is
-         (1, 0, 0 ... 0) */
-
-      for (mm = 0; mm < n_macro_lvl; mm++)
-        {
-
-          /* get the element of the vector we want to check */
-          test_val = gsl_vector_get (test_vector, mm);
-          
-          if (mm == 0)		// 0th element should be 1
-          {
-      	    if ( (fabs(test_val - 1.0)) > EPSILON)
-      	      Error("macro_pops: test vector has first element = %8.4e, should be 1.0\n",
-      	      	     test_val);    
-          }     
-
-          else 				// all other elements should be zero
-          {
-          	if ( fabs(test_val)  > EPSILON)
-      	      Error("macro_pops: test vector has element %i = %8.4e, should be 0.0\n",
-      	      	     mm, test_val);    
-          }
-        }
-
-        /* free memory */
-        free (a_data);	
-	    free (b_data);	
-	    free (test_vector);
-	    free (test_matrix);
+      /* free memory */
+      free (a_data);	
+	  free (b_data);	
 
 
 
@@ -1813,12 +1753,10 @@ macro_pops (PlasmaPtr xplasma, double xne)
               /* this if statement means we only clean if there's a radiative jump between the levels */
               if (radiative_flag[index_lvl][nn])
               {
-		        inversion_test = gsl_vector_get (populations, conf_to_matrix[index_lvl]) * config[nn].g / config[index_lvl].g * 0.999999;	//include a correction factor 
-		        if (gsl_vector_get (populations, conf_to_matrix[nn]) >
-			    inversion_test)
+		        inversion_test = populations[conf_to_matrix[index_lvl]] * config[nn].g / config[index_lvl].g * 0.999999;	//include a correction factor 
+		        if (populations[conf_to_matrix[nn]] > inversion_test)
 			  {
-			    gsl_vector_set (populations, conf_to_matrix[nn],
-					  inversion_test);
+			    populations[conf_to_matrix[nn]] = inversion_test;
 			  }
 		      }
 		    }
@@ -1845,7 +1783,7 @@ macro_pops (PlasmaPtr xplasma, double xne)
 		   ion[index_ion].first_nlte_level + ion[index_ion].nlte;
 		   index_lvl++)
 		{
-		  level_population = gsl_vector_get (populations, conf_to_matrix[index_lvl]);	
+		  level_population = populations[conf_to_matrix[index_lvl]];	
 		  this_ion_density += level_population;
 
 		  /* JM 140409 -- add error check for negative populations */
@@ -1866,8 +1804,7 @@ macro_pops (PlasmaPtr xplasma, double xne)
 		{
 
 		  xplasma->levden[config[index_lvl].nden] =
-		    gsl_vector_get (populations,
-				    conf_to_matrix[index_lvl]) /
+		    populations[conf_to_matrix[index_lvl]] /
 		    this_ion_density;
 
 		  mm++;
@@ -1883,7 +1820,6 @@ macro_pops (PlasmaPtr xplasma, double xne)
 
 	    }
 
-	  gsl_vector_free (populations);
 	}
     }
 

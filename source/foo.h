@@ -54,6 +54,7 @@ double get_ne(double density[]);
 int spectrum_init(double f1, double f2, int nangle, double angle[], double phase[], int scat_select[], int top_bot_select[], int select_extract, double rho_select[], double z_select[], double az_select[], double r_select[]);
 int spectrum_create(PhotPtr p, double f1, double f2, int nangle, int select_extract);
 int spectrum_summary(char filename[], char mode[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin);
+int spectrum_restart_renormalise(int nangle);
 /* wind2d.c */
 int define_wind(void);
 int where_in_grid(double x[]);
@@ -251,8 +252,7 @@ double xinteg_fb(double t, double f1, double f2, int nion, int fb_choice);
 int fb_save(char filename[]);
 int fb_read(char filename[]);
 double total_rrate(int nion, double T);
-double badnell_gs_rr(int nion, double T);
-double milne_gs_rr(int nion, double T);
+double gs_rrate(int nion, double T);
 /* diag.c */
 int open_diagfile(void);
 /* sv.c */
@@ -448,12 +448,8 @@ double exp_w(double j, double exp_temp, double numin, double numax);
 double exp_stddev(double exp_temp, double numin, double numax);
 /* variable_temperature.c */
 int variable_temperature(PlasmaPtr xplasma, int mode);
-double bb_correct_2(double xtemp, double t_r, double www, int nion);
+double pi_correct(double xtemp, int nion, PlasmaPtr xplasma, int mode);
 double temp_func(double solv_temp);
-double pl_correct_2(double xtemp, int nion);
-double tb_planck1(double freq);
-double tb_logpow1(double freq);
-double tb_exp1(double freq);
 /* matom_diag.c */
 int matom_emiss_report(void);
 /* direct_ion.c */
@@ -468,6 +464,19 @@ int get_wind_keplerian_params(void);
 double wind_keplerian_velocity(double x[], double v[]);
 double wind_keplerian_rho(double x[]);
 int wind_keplerian_cyl_volumes(WindPtr w, int icomp);
+/* pi_rates.c */
+double calc_pi_rate(int nion, PlasmaPtr xplasma, int mode);
+double tb_planck1(double freq);
+double tb_logpow1(double freq);
+double tb_exp1(double freq);
+/* matrix_ion.c */
+int matrix_ion_populations(PlasmaPtr xplasma, int mode);
+int populate_ion_rate_matrix(PlasmaPtr xplasma, double rate_matrix[nions][nions], double pi_rates[nions], double rr_rates[nions], double b_temp[nions], double xne, int xelem[nions]);
+int solve_matrix(double *a_data, double *b_data, int nrows, double *x);
+/* para_update.c */
+int communicate_estimators_para(void);
+int gather_spectra_para(int nspec_helper, int nspecs);
+int communicate_matom_estimators_para(void);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

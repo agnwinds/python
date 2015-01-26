@@ -215,58 +215,67 @@ History:
 
 int main(int argc, char *argv[])
 {
-	WindPtr w;
-	PhotPtr p;
+  WindPtr w;
+  PhotPtr p;
 
-	// 140902 - wcycles and pcycles eliminated everywher in favor of using the 
-	// 
-	// variables that are in the goe structure
-	// int i, wcycles, pcycles;
-	int i;
-	double freqmin, freqmax;
-	double swavemin, swavemax, renorm;
-	long nphot_to_define;
-	int n, nangles;
-	int iwind;
-	int thermal_opt;			/* NSH 131213 - added to control options to turn on and off some heating and cooling mechanisms */
+  int i;
+  double freqmin, freqmax;
+  double swavemin, swavemax, renorm;
+  long nphot_to_define;
+  int n, nangles;
+  int iwind;
+  int thermal_opt; /*NSH 131213 - added to control options to turn on and off some heating and cooling mechanisms */
 
-	/* 
-	 * Next three lines have variables that should be a structure, or possibly we should allocate the space for the spectra to avoid all
-	 * this nonsense.  02feb ksl 
-	 */
+/* Next three lines have variables that should be a structure, or possibly we
+should allocate the space for the spectra to avoid all this nonsense.  02feb ksl */
 
-	double angle[NSPEC], phase[NSPEC];
-	int scat_select[NSPEC], top_bot_select[NSPEC];
-	double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC], r_select[NSPEC];
+  double angle[NSPEC], phase[NSPEC];
+  int scat_select[NSPEC], top_bot_select[NSPEC];
+  double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC],
+    r_select[NSPEC];
 
-	char yesno[20];
-	int select_extract, select_spectype;
-	char root[LINELENGTH], input[LINELENGTH], wspecfile[LINELENGTH], lspecfile[LINELENGTH], specfile[LINELENGTH], diskfile[LINELENGTH];
-	char windradfile[LINELENGTH], windsavefile[LINELENGTH];
-	char specsavefile[LINELENGTH];
-	char photfile[LINELENGTH], diagfile[LINELENGTH], old_windsavefile[LINELENGTH], diagfolder[LINELENGTH];
-	char delay_dumpfile[LINELENGTH];	/* SWM 10/10/14 - Added */
-	char dummy[LINELENGTH];
-	char tprofile[LINELENGTH];
-	double x, xbl;
+  char yesno[20];
+  int select_extract, select_spectype;
+  char root[LINELENGTH], input[LINELENGTH], wspecfile[LINELENGTH],
+    lspecfile[LINELENGTH], specfile[LINELENGTH], diskfile[LINELENGTH];
+  char windradfile[LINELENGTH], windsavefile[LINELENGTH];
+  char specsavefile[LINELENGTH];
+  char photfile[LINELENGTH], diagfile[LINELENGTH],
+    old_windsavefile[LINELENGTH], diagfolder[LINELENGTH];
+  char dummy[LINELENGTH];
+  char tprofile[LINELENGTH];
+  double x,xbl;
 
-	int nn;
-	double zz, zzz, zze, ztot, zz_adiab;
-	int icheck, nn_adiab;
-	FILE *qptr;
+  int nn;
+  double zz, zzz, zze, ztot, zz_adiab;
+  int icheck, nn_adiab;
+  FILE *fopen (), *qptr;
 
-	int disk_illum;
-	int istandard, keep_photoabs;
-	int opar_stat, restart_stat;
-	double time_max;			// The maximum time the program is allowed to
-	// run before halting
-	double lstar;				// The luminosity of the star, iv it exists
+  int disk_illum;
+  int istandard, keep_photoabs;
+  int opar_stat, restart_stat;
+  double time_max;		// The maximum time the program is allowed to run before halting
+  double lstar;                 // The luminosity of the star, iv it exists
 
-	int my_rank;				// these two variables are used regardless of
-	// parallel mode
-	int np_mpi;					// rank and number of processes, 0 and 1 in
-	// non-parallel
-	int time_to_quit;
+  int my_rank;		// these two variables are used regardless of parallel mode
+  int np_mpi;		// rank and number of processes, 0 and 1 in non-parallel
+  int time_to_quit;
+
+  int mkdir();
+
+  #ifdef MPI_ON
+    int ioniz_spec_helpers, spec_spec_helpers;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &np_mpi);
+  #else
+    my_rank = 0;
+    np_mpi=1;
+  #endif
+  
+  np_mpi_global = np_mpi;              /// Glob al variable which holds the number of MPI processes
+  rank_global = my_rank;   /// Global variable which holds the rank of the active MPI process
 
 #ifdef MPI_ON
 	int mpi_i, mpi_j;
@@ -818,10 +827,96 @@ int main(int argc, char *argv[])
 	 * macro atom formalism 
 	 */
 
-	/* 
-	 * For now handle scattering as part of a hidden line transfermode ?? 
-	 */
-	if (geo.line_mode == 4)
+  rdint
+    ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,6=pairwise_bb,7=pairwise_pow)",
+     &geo.ioniz_mode);
+
+  if (geo.ioniz_mode == IONMODE_FIXED)
+    {
+      rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
+    }
+  if (geo.ioniz_mode == 4 || geo.ioniz_mode == 5 || geo.ioniz_mode > 9)	/*NSH CLOUDY test - remove once done */
+    {
+      Log ("The allowed ionization modes are 0, 1, 2, 3, 6, 7\n");
+      Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
+      exit (0);
+    }
+
+/*Normally, geo.partition_mode is set to -1, which means that partition functions are calculated to take
+full advantage of the data file.  This means that in calculating the partition functions, the information
+on levels and their multiplicities is taken into account.   */
+
+  geo.partition_mode = -1;	//?? Stuart, is there a reason not to move this earlier so it does not affect restart
+
+
+  rdint
+    ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,6=macro_atoms,7=macro_atoms+aniso.scattering)",
+     &geo.line_mode);
+
+/* ?? ksl Next section seems rather a kluge.  Why don't we specifty the underlying variables explicitly 
+It also seems likely that we have mixed usage of some things, e.g geo.rt_mode and geo.macro_simple */
+
+/* JM 1406 -- geo.rt_mode and geo.macro_simple control different things. geo.rt_mode controls the radiative
+   transfer and whether or not you are going to use the indivisible packet constraint, so you can have all simple 
+   ions, all macro-atoms or a mix of the two. geo.macro_simple just means one can turn off the full macro atom 
+   treatment and treat everything as 2-level simple ions inside the macro atom formalism */ 
+
+  /* For now handle scattering as part of a hidden line transfermode ?? */
+  if (geo.line_mode == 4)
+    {
+      geo.scatter_mode = 1;	// Turn on anisotropic scattering
+      geo.line_mode = 3;	// Drop back to escape probabilities
+      geo.rt_mode = 1;		// Not macro atom (SS)
+    }
+  else if (geo.line_mode == 5)
+    {
+      geo.scatter_mode = 2;	// Thermal trapping model
+      geo.line_mode = 3;	// Single scattering model is best for this mode
+      geo.rt_mode = 1;		// Not macro atom (SS) 
+    }
+  else if (geo.line_mode == 6)
+    {
+      geo.scatter_mode = 0;	// isotropic
+      geo.line_mode = 3;	// Single scattering
+      geo.rt_mode = 2;		// Identify macro atom treatment (SS)
+      geo.macro_simple = 0;	// We don't want the all simple case (SS)
+    }
+  else if (geo.line_mode == 7)
+    {
+      geo.scatter_mode = 2;	// thermal trapping
+      geo.line_mode = 3;	// Single scattering
+      geo.rt_mode = 2;		// Identify macro atom treatment (SS)
+      geo.macro_simple = 0;	// We don't want the all simple case (SS)
+    }
+  else if (geo.line_mode == 8)
+    {
+      geo.scatter_mode = 0;	// isotropic
+      geo.line_mode = 3;	// Single scattering
+      geo.rt_mode = 2;		// Identify macro atom treatment i.e. indivisible packets
+      geo.macro_simple = 1;	// This is for test runs with all simple ions (SS)
+    }
+  else if (geo.line_mode == 9)	// JM 1406 -- new mode, as mode 7, but scatter mode is 1
+    {
+      geo.scatter_mode = 1;	// anisotropic scatter mode 1
+      geo.line_mode = 3;	// Single scattering
+      geo.rt_mode = 2;		// Identify macro atom treatment 
+      geo.macro_simple = 0;	// We don't want the all simple case 
+    }  
+  else
+    {
+      geo.scatter_mode = 0;	// isotropic
+      geo.rt_mode = 1;		// Not macro atom (SS)
+    }
+
+  thermal_opt = 0; /* NSH 131213 Set the option to zero - the default. The lines allow allow the
+  user to turn off mechanisms that affect the thermal balance. Adiabatic is the only one implemented
+  to start off with. */
+
+  rdint
+    ("Thermal_balance_options(0=everything.on,1=no.adiabatic)",
+     &thermal_opt);
+
+  if (thermal_opt == 1)
 	{
 		geo.scatter_mode = 1;	// Turn on anisotropic scattering
 		geo.line_mode = 3;		// Drop back to escape probabilities
@@ -2435,26 +2530,25 @@ int main(int argc, char *argv[])
 	 * Finished initializations required for macro-atom approach 
 	 */
 
-	/* 
-	 * Calculate and store which bf processess need to be considered in each cell Note that this is not macro-specific but is just to speed 
-	 * the program up. 
-	 */
+  /* the next condition should really when one has nothing more to do */
 
-	kbf_need(freqmin, freqmax);
+  else if (geo.pcycle >= geo.pcycles)
+    xsignal (root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n",
+	     "COMMENT", geo.pcycle, geo.pcycles);
 
-	/* 
-	 * XXXX - BEGIN CYCLES TO CREATE THE DETAILED SPECTRUM 
-	 */
+  else
+    {
+      /* Then we are restarting a run with more spectral cycles, but we 
+         have already completed some. The memory for the spectral arrays
+         should already have been allocated, and the spectrum was initialised
+         on the original run, so we just need to renormalise the saved spectrum */
+      /* See issue #134 (JM) */
+      if (restart_stat  == 0)
+      	Error("Not restarting, but geo.pcycle = %i and trying to renormalise!\n",
+      		   geo.pcycle);
 
-	/* 
-	 * the next section initializes the spectrum array in two cases, for the standard one where one is calulating the spectrum for the
-	 * first time and in the somewhat abnormal case where additional ionization cycles were calculated for the wind 
-	 */
-
-	if (geo.pcycle == 0)
-	{
-		spectrum_init(freqmin, freqmax, nangles, angle, phase, scat_select,
-					  top_bot_select, select_extract, rho_select, z_select, az_select, r_select);
+      spectrum_restart_renormalise(nangles);  
+    }
 
 		/* 
 		 * 68b - zero the portion of plasma main that records the numbers of scatters by each ion in a cell 
