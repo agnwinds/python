@@ -451,7 +451,7 @@ if __name__ == "__main__":
 
     elif mode == "ions":
         make_wind_plot(None, fname, 
-                       var = ["ionh1", "ionh2", "ionC3", "ionC4", "ionC5", "ionSi4", "ionN5", "ionO6"],
+                       var = ["ionH1", "ionH2", "ionC3", "ionC4", "ionC5", "ionSi4", "ionN5", "ionO6"],
                        fname_prefix="ions", den_or_frac = 1)
 
     elif mode == "compare":     # comapre 2 or more spectra
@@ -473,7 +473,7 @@ if __name__ == "__main__":
         make_spec_plot(s, fname, components = True)
         make_wind_plot(None, fname)
         make_wind_plot(None, fname, 
-                       var = ["ionh1", "ionh2", "ionC3", "ionC4", "ionC5", "ionSi4", "ionN5", "ionO6"],
+                       var = ["ionH1", "ionH2", "ionC3", "ionC4", "ionC5", "ionSi4", "ionN5", "ionO6"],
                        fname_prefix="ions", den_or_frac = 1)
 
     else:
