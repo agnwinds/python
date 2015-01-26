@@ -2474,8 +2474,12 @@ int main(int argc, char *argv[])
 		xsignal(root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n", "COMMENT", geo.pcycle, geo.pcycles);
 
 
-	/* SWM - Prep delay dump file (if we are not restarting an existing run) */
-	delay_dump_prep(delay_dumpfile, nspectra - 1, restart_stat);
+	/* SWM - Prep delay dump file (if we are not restarting an existing run and are 0th thread) */
+#ifdef MPI_ON
+	if(rank_global == 0) delay_dump_prep(delay_dumpfile, nspectra - 1, restart_stat, rank_global);
+#else
+	delay_dump_prep(delay_dumpfile, nspectra - 1, restart_stat, -1);
+#endif
 
 	while (geo.pcycle < geo.pcycles)
 	{							/* This allows you to build up photons in bunches */
@@ -2604,7 +2608,11 @@ int main(int argc, char *argv[])
 		check_time(root);
 	}
 
+
 	delay_dump_finish();		// SWM - Finish delay dumping (for extract mode)
+#ifdef MPI_ON
+	delay_dump_combine(np_mpi_global);
+#endif
 
 	/* 
 	 * XXXX -- END CYCLE TO CALCULATE DETAILED SPECTRUM 

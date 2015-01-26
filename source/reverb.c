@@ -55,8 +55,8 @@ delay_spectrum_summary (
     int nspecmax,
     int select_spectype,
     double renorm,				/* parameter used to rescale spectrum as it is building up */
-    int loglin				/* switch to tell the code if we are utputting a log or a lin */
-)
+    int loglin					/* switch to tell the code if we are outputting a log or a lin */
+	)
 {
 	FILE *fopen(), *fptr;
 	int i, n;
@@ -196,11 +196,13 @@ delay_to_observer(PhotPtr pp)
 }
 
 int 
-delay_dump_prep (char filename[], int nspec, int restart_stat)
+delay_dump_prep (char filename[], int nspec, int restart_stat, int iRank)
 {
 	FILE *fopen(), *fptr;
-	char string[LINELENGTH];
+	char string[LINELENGTH], cFile[LINELENGTH], cRank[LINELENGTH];
 	int i;
+
+	if(restart_stat) return(0);
 	
 	//Allocate and zero dump files and set extract status
 	delay_dump_spec = nspec;
@@ -208,24 +210,29 @@ delay_dump_prep (char filename[], int nspec, int restart_stat)
 	delay_dump_bank_ex = (int*) calloc(sizeof(int),		delay_dump_bank_size);
 	for(i=0;i<delay_dump_bank_size;i++)	delay_dump_bank_ex[i] = 0;
 
-
 	//Get output filename
-	strcpy(delay_dump_file,filename);
-	if(restart_stat) return(0);
+	strcpy(cFile, filename);			//Copy filename to new string
+	if(iRank > 0)					
+	{
+		sprintf(cRank,"%i",iRank);		//Write thread # to string
+		strcat(cFile,cRank);			//Append thread # to filename
+	}
+	strcpy(delay_dump_file,cFile);		//Store modified filename for later
 
 	/* If this isn't a continue run, prep the output file */
-	if ((fptr = fopen(filename, "w")) == NULL)
+	if ((fptr = fopen(delay_dump_file, "w")) == NULL)
 	{
-		Error("delay_dump: Unable to open %s for writing\n", filename);
+		Error("delay_dump: Unable to open %s for writing\n", delay_dump_file);
 		exit(0);
 	}
 
-	/* Check that nspec is reasonable */
-	if (nspec < MSPEC)
+	if (nspec < MSPEC)					//Check that NSPEC is reasonable
 	{
 		Error("delay_dump: nspec %d below MSPEC value \n", nspec);
 		exit(0);
 	}
+
+	if(iRank > 0) return(0);			//If this is a slave thread, don't write header
 
 	/* 
 	 * Construct and write a header string for the output file 
@@ -256,6 +263,31 @@ delay_dump_finish()
 	}
 	free(delay_dump_bank);
 	free(delay_dump_bank_ex);
+	return(0);
+}
+
+int 
+delay_dump_combine(int iRanks)
+{
+	FILE *fopen(), *fptr;
+	char string[LINELENGTH], cCall[LINELENGTH];
+	
+	strcpy(cCall, "cat ");
+	strcat(cCall, delay_dump_file);
+	strcat(cCall, "*");
+
+	if(system(cCall)<0)
+	{
+		Error("delay_dump_combine: Error calling system command '%s'",cCall);
+	}
+/*
+	if ((fptr = fopen(delay_dump_file, "a")) == NULL)
+	{
+		Error("delay_dump: Unable to reopen %s for writing\n", delay_dump_file);
+		exit(0);
+	}
+*/
+	
 	return(0);
 }
 

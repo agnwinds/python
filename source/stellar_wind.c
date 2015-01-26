@@ -165,9 +165,12 @@ stellar_velocity (double x[], double v[])
     speed = geo.cl_v_zero;
   else
     {
-      zzz = pow (1. - geo.cl_rmin / r, geo.cl_beta);
-      speed = geo.cl_v_zero + (geo.cl_v_infinity - geo.cl_v_zero) * zzz;
+      //zzz = pow (1. - geo.cl_rmin / r, geo.cl_beta);
+      //speed = geo.cl_v_zero + (geo.cl_v_infinity - geo.cl_v_zero) * zzz;
+      speed = geo.cl_v_zero * (r / geo.cl_rmin);
     }
+    
+
   v[0] = speed * x[0] / r;
   v[1] = speed * x[1] / r;
   v[2] = speed * x[2] / r;

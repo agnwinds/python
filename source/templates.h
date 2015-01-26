@@ -461,7 +461,7 @@ int compute_di_coeffs(double T);
 double total_di(WindPtr one, double t_e);
 /* reverb.c */
 int delay_spectrum_summary(char filename[], char mode[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin);
-int delay_dump_prep(char filename[], int nspec, int restart_par);
+int delay_dump_prep(char filename[], int nspec, int restart_par, int iRank);
 int delay_dump(PhotPtr p, int np, int nspec, int iExtracted);
 /* wind_keplerian.c */
 int get_wind_keplerian_params(void);

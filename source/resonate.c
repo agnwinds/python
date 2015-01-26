@@ -267,10 +267,8 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 		}
 
 		if (0. < x && x < 1.)
-		//if(lin_ptr[nn]->freq < 2.e15)	//SWM TEMP
 		{						/* this particular line is in resonance */
 			ds = x * smax;
-			printf("Checking for cont scatter: tau=%e tau-scat=%e\n",ttau + (kap_cont) * (ds - ds_current),tau_scat);
 
 			/* Before checking for a resonant scatter, need to check for scattering due to a continuum process. */
 			if (ttau + (kap_cont) * (ds - ds_current) > tau_scat)
@@ -328,7 +326,6 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 
 
 					tau_sobolev = sobolev(one, p, dd, lin_ptr[nn], dvds);
-					printf("Checking tau sobolev: %e\n",tau_sobolev,p->np); //SWM
 
 					/* tau_sobolev now stores the optical depth. This is fed into the next statement for the bb estimator
 					   calculation. SS March 2004 */
