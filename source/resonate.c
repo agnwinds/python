@@ -111,9 +111,6 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 	int nplasma;
 	PlasmaPtr xplasma, xplasma2;
 
-
-	//printf("Calculate_ds entered\n");
-
 	one = &w[p->grid];			// Get a pointer to the cell where the photon bundle is located.
 	nplasma = one->nplasma;
 	xplasma = &plasmamain[nplasma];
@@ -260,11 +257,6 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 		nn = nstart + n * ndelt;	/* So if the frequency of resonance increases as we travel through the grid cell, we go up in
 									   the array, otherwise down */
 		x = (lin_ptr[nn]->freq - freq_inner) / dfreq;
-		if(nn==0){
-			//printf("Pos Inner: %e %e %e\n",	p->x[0],	p->x[1],	p->x[2]);	
-			printf("x %6.1f - Line Freq: %e, range across cell: %15.10e -> %15.10e\n",x,nn,lin_ptr[nn]->freq,freq_inner,freq_outer); //SWM TEMP
-			//printf("Pos Outer: %e %e %e\n",	phot.x[0], 	phot.x[1], 	phot.x[2]);
-		}
 
 		if (0. < x && x < 1.)
 		{						/* this particular line is in resonance */
@@ -306,7 +298,6 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 				// ?? This seems like an incredibly small number; how can anything this small affect anything ??
 
 				dd = get_ion_density(&p_now, kkk);
-				printf("Checking ion density at %6.1e %6.1e %6.1e=%e\n",p_now.x[0],p_now.x[1],p_now.x[2],dd);
 				if (dd > LDEN_MIN)
 				{
 					/* If we have reached this point then we have to initalize dvds1 and dvds2. Otherwise there is no need to do
@@ -394,10 +385,6 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 					*istat = P_SCAT;
 					*nres = nn;
 					*tau = ttau;
-
-
-					printf("Successfully scattered!\n");
-
 					return (ds_current);
 				}
 

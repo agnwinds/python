@@ -65,8 +65,6 @@ delay_spectrum_summary (
 	double lfreqmin, lfreqmax, ldfreq;
 	double x, dd;
 
-
-
 	/* 
 	 * Open or reopen a file for writing the spectrum 
 	 */
@@ -218,6 +216,7 @@ delay_dump_prep (char filename[], int nspec, int restart_stat, int iRank)
 		strcat(cFile,cRank);			//Append thread # to filename
 	}
 	strcpy(delay_dump_file,cFile);		//Store modified filename for later
+	printf("delay_dump_prep: Preparing file '%s' for writing\n", delay_dump_file);
 
 	/* If this isn't a continue run, prep the output file */
 	if ((fptr = fopen(delay_dump_file, "w")) == NULL)
@@ -232,24 +231,26 @@ delay_dump_prep (char filename[], int nspec, int restart_stat, int iRank)
 		exit(0);
 	}
 
-	if(iRank > 0) return(0);			//If this is a slave thread, don't write header
+	if(iRank > 0) 
+	{
+		fprintf(fptr, "# Delay dump file for slave process %d\n",iRank);
+	}
+	else 
+	{									// Construct and write a header string for the output file 
+		fprintf(fptr, "# Python Version %s\n", VERSION);	
 
-	/* 
-	 * Construct and write a header string for the output file 
-	 */
-	fprintf(fptr, "# Python Version %s\n", VERSION);
+		get_time(string);
+		fprintf(fptr, "# Date	%s\n#  \n", string);
+		fprintf(fptr, "# Spectrum: %s\n", xxspec[nspec].name);
 
-	get_time(string);
-	fprintf(fptr, "# Date	%s\n#  \n", string);
-	fprintf(fptr, "# Spectrum: %s\n", xxspec[nspec].name);
-
-	/* 
-	 * Write the rest of the header for the spectrum file 
-	 */
-	fprintf(fptr, "# \n# Freq      Wavelength  Weight   "
-			"  Last X       Last Y       Last Z     "
-			"  Last L       Last M       Last N     "
-			"Scatters RScatter Delay Extracted\n");	
+		/* 
+		 * Write the rest of the header for the spectrum file 
+	 	*/
+		fprintf(fptr, "# \n# Freq      Wavelength  Weight   "
+				"  Last X       Last Y       Last Z     "
+				"  Last L       Last M       Last N     "
+				"Scatters RScatter Delay Extracted\n");	
+	}
 	fclose(fptr);
 	return(0);
 }
@@ -272,14 +273,19 @@ delay_dump_combine(int iRanks)
 	FILE *fopen(), *fptr;
 	char string[LINELENGTH], cCall[LINELENGTH];
 	
-	strcpy(cCall, "cat ");
-	strcat(cCall, delay_dump_file);
-	strcat(cCall, "*");
 
+	sprintf(cCall, "cat %s %s* > delay_dump_temp",delay_dump_file,delay_dump_file);
 	if(system(cCall)<0)
-	{
 		Error("delay_dump_combine: Error calling system command '%s'",cCall);
-	}
+
+	sprintf(cCall, "mv delay_dump_temp > %s",delay_dump_file);
+	if(system(cCall)<0)
+		Error("delay_dump_combine: Error calling system command '%s'",cCall);
+
+	sprintf(cCall, "rm %s?*",delay_dump_file);
+	if(system(cCall)<0)
+		Error("delay_dump_combine: Error calling system command '%s'",cCall);
+
 /*
 	if ((fptr = fopen(delay_dump_file, "a")) == NULL)
 	{

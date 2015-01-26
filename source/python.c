@@ -2473,22 +2473,23 @@ int main(int argc, char *argv[])
 	if (geo.pcycle >= geo.pcycles)
 		xsignal(root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n", "COMMENT", geo.pcycle, geo.pcycles);
 
+/* SWM - Prep delay dump file (if we are not restarting an existing run and are 0th thread) */
+	#ifdef MPI_ON
+		delay_dump_prep(delay_dumpfile, nspectra - 1, restart_stat, rank_global);
+		MPI_Barrier(MPI_COMM_WORLD);
+	#else
+		delay_dump_prep(delay_dumpfile, nspectra - 1, restart_stat, -1);
+	#endif
 
-	/* SWM - Prep delay dump file (if we are not restarting an existing run and are 0th thread) */
-#ifdef MPI_ON
-	if(rank_global == 0) delay_dump_prep(delay_dumpfile, nspectra - 1, restart_stat, rank_global);
-#else
-	delay_dump_prep(delay_dumpfile, nspectra - 1, restart_stat, -1);
-#endif
 
 	while (geo.pcycle < geo.pcycles)
 	{							/* This allows you to build up photons in bunches */
 
 		xsignal(root, "%-20s Starting %d of %d spectral cycle \n", "NOK", geo.pcycle, geo.pcycles);
 
-#if DEBUG
-		ispy_init("python", geo.pcycle + 1000);
-#endif
+		#if DEBUG
+			ispy_init("python", geo.pcycle + 1000);
+		#endif
 
 		Log("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle, geo.pcycles);
 		Log_flush();			/* NSH June 13 Added call to flush logfile */
@@ -2524,7 +2525,6 @@ int main(int argc, char *argv[])
 		/* 
 		 * Tranport photons through the wind 
 		 */
-
 		trans_phot(w, p, select_extract);
 
 #if DEBUG
@@ -2571,14 +2571,14 @@ int main(int argc, char *argv[])
 		free(redhelper2);
 #endif
 
-#ifdef MPI_ON
-		if (rank_global == 0)
-		{
-#endif
-			spectrum_summary(specfile, "w", 0, nspectra - 1, select_spectype, renorm, 0);
-#ifdef MPI_ON
-		}
-#endif
+		#ifdef MPI_ON
+			if (rank_global == 0)
+			{
+		#endif
+				spectrum_summary(specfile, "w", 0, nspectra - 1, select_spectype, renorm, 0);
+		#ifdef MPI_ON
+			}
+		#endif
 		Log("Completed spectrum cycle %3d :  The elapsed TIME was %f\n", geo.pcycle, timer());
 
 
@@ -2595,24 +2595,23 @@ int main(int argc, char *argv[])
 
 		geo.pcycle++;			// Increment the spectral cycles
 
-#ifdef MPI_ON
-		if (rank_global == 0)
-		{
-#endif
-			wind_save(windsavefile);	// This is only needed to update
-			// pcycle
-			spec_save(specsavefile);
-#ifdef MPI_ON
-		}
-#endif
+		#ifdef MPI_ON
+			if (rank_global == 0)
+			{
+		#endif
+				wind_save(windsavefile);	// This is only needed to update pycycle
+				spec_save(specsavefile);
+		#ifdef MPI_ON
+			}
+		#endif
 		check_time(root);
 	}
 
 
 	delay_dump_finish();		// SWM - Finish delay dumping (for extract mode)
-#ifdef MPI_ON
-	delay_dump_combine(np_mpi_global);
-#endif
+	#ifdef MPI_ON 					// SWM - Then combine the different thread's outputs
+		delay_dump_combine(np_mpi_global);
+	#endif
 
 	/* 
 	 * XXXX -- END CYCLE TO CALCULATE DETAILED SPECTRUM 
