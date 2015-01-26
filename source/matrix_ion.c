@@ -73,16 +73,14 @@ int matrix_ion_populations(xplasma, mode)
 	double newden[NIONS];
 	double nh, t_e, t_r, www;
 	double xne, xxne, xxxne;
-	double xsaha, x, theta;
-	int s;												/* s is the 'sign' of the permutation - is had the value -1^n where n is the number of
-																   permutations. We dont use it anywhere, but in principle it can be used to refine the
-																   solution via gsl_linalg_LU_refine */
+	//double xsaha, x, theta;
+	//int s;												
 	double b_temp[nions];
 	double *b_data, *a_data;
 	double *populations;
 	int ierr, niterate;
 	double xnew;
-	double xden[nelements];
+	//double xden[nelements];
 	int xion[nions];							// This array keeps track of what ion is in each line
 	int xelem[nions];							// This array keeps track of the element for each ion
 	double pi_rates[nions];
@@ -169,12 +167,12 @@ int matrix_ion_populations(xplasma, mode)
 
 	xne = xxne = xxxne = get_ne(newden);	// Set n_e to the current value. 
 
-	/* xne is the current working number xxne
+	/* xne is the current working number xxne */
 
 
-	   /*These following commented out lines calculate the electron density from Saha given the current electron temperature */
+	/* These following commented out lines calculate the electron density from Saha given the current electron temperature */
 	// if (t_e < MIN_TEMP)
-	// t_e = MIN_TEMP; /* fudge to prevent divide by zeros */
+	// t_e = MIN_TEMP;  fudge to prevent divide by zeros 
 	// xsaha = SAHA * pow (t_e, 1.5);
 	// theta = xsaha * exp (-ion[0].ip / (BOLTZMANN * t_e)) / nh;
 	// if (theta < THETAMAX)
@@ -187,7 +185,7 @@ int matrix_ion_populations(xplasma, mode)
 	/* xxxne is the shared variable so the temperature solver routine can access it */
 	// if (xne < 1.e-6)
 	// xne = xxxne = 1.e-6; /* Set a minimum ne to assure we can calculate
-	// xne the first time through the loop */
+	// xne the first time through the loop 
 
 
 
@@ -327,7 +325,7 @@ int matrix_ion_populations(xplasma, mode)
 					 xplasma->pl_log_w[nn], xplasma->pl_alpha[nn], xplasma->exp_w[nn], xplasma->exp_temp[nn]);
 			}
 
-			Error("matrix_ion_populations: xxne %e theta %e\n", xxne, theta);
+			Error("matrix_ion_populations: xxne %e theta %e\n", xxne);
 
 			return (-1);							/* If we get to MAXITERATIONS, we return without copying the new populations into plasma */
 		}
@@ -605,18 +603,21 @@ int solve_matrix(a_data, b_data, nrows, x)
 		 double *x;
 {
 	int mm, ierr, s;
+	/* s is the 'sign' of the permutation - is had the value -1^n where n is the number of
+	permutations. We dont use it anywhere, but in principle it can be used to refine the
+	solution via gsl_linalg_LU_refine */
 	double test_val;
-	gsl_permutation *p;						// NEWKSL
-	gsl_matrix_view m;						// NEWKSL
-	gsl_vector_view b;						// NEWKSL
-	gsl_vector *test_vector, *populations;	// NEWKSL
+	gsl_permutation *p;						
+	gsl_matrix_view m;						
+	gsl_vector_view b;						
+	gsl_vector *test_vector, *populations;	
 	gsl_matrix *test_matrix;
 
 	ierr = 0;
 	test_val = 0.0;
 
 	/* create gsl matrix/vector views of the arrays of rates */
-	m = gsl_matrix_view_array(a_data, nrows, nrows);	// KSLNEW
+	m = gsl_matrix_view_array(a_data, nrows, nrows);	
 
 	/* these are used for testing the solution below */
 	test_matrix = gsl_matrix_alloc(nrows, nrows);
@@ -624,10 +625,10 @@ int solve_matrix(a_data, b_data, nrows, x)
 
 	gsl_matrix_memcpy(test_matrix, &m.matrix);	// create copy for testing 
 
-	b = gsl_vector_view_array(b_data, nrows);	// KSLNEW
+	b = gsl_vector_view_array(b_data, nrows);	
 
 	/* the populations vector will be a gsl vector which stores populations */
-	populations = gsl_vector_alloc(nrows);	// KSLNEW
+	populations = gsl_vector_alloc(nrows);	
 
 
 	p = gsl_permutation_alloc(nrows);	// NEWKSL

@@ -67,7 +67,6 @@ calc_pi_rate (nion,xplasma,mode)
 	int nion;
 	int mode;
 {
-  double q;
   int  n, j;
   double pi_rate;
   int ntmin, nvmin;
