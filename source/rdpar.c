@@ -734,6 +734,32 @@ rdpar_set_verbose (int vlevel)
 }
 
 
+int rd_extra(firstword, answer, wordlength)
+    char firstword[];
+    double *answer;
+    int *wordlength;
+{ 
+  int nwords;
+  char secondword[LINELEN];
+  char line[LINELEN];
+  char *ccc, *index ();
+  
+  if (fgets (line, LINELEN, rdin_ptr) == NULL)
+  	  {
+	    return (1);		// get_extra_diagnostics uses this return value 
+	  }	
+
+  nwords = sscanf (line, "%s %s", firstword, secondword);
+
+  if ((ccc = index (firstword, '(')) != NULL)
+	{
+	  *wordlength = (int) (ccc - firstword);
+	}
+
+  sscanf (secondword, "%le", answer);
+
+  return (0); 
+}
 
 
 

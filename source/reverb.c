@@ -249,7 +249,7 @@ delay_dump_prep (char filename[], int nspec, int restart_stat, int iRank)
 		fprintf(fptr, "# \n# Freq      Wavelength  Weight   "
 				"  Last X       Last Y       Last Z     "
 				"  Last L       Last M       Last N     "
-				"Scatters RScatter Delay Extracted\n");	
+				"Scatters RScatter Delay Extracted Spectrum\n");	
 	}
 	fclose(fptr);
 	return(0);
@@ -273,16 +273,8 @@ delay_dump_combine(int iRanks)
 	FILE *fopen(), *fptr;
 	char string[LINELENGTH], cCall[LINELENGTH];
 	
-
-	sprintf(cCall, "cat %s %s* > delay_dump_temp",delay_dump_file,delay_dump_file);
-	if(system(cCall)<0)
-		Error("delay_dump_combine: Error calling system command '%s'",cCall);
-
-	sprintf(cCall, "mv delay_dump_temp > %s",delay_dump_file);
-	if(system(cCall)<0)
-		Error("delay_dump_combine: Error calling system command '%s'",cCall);
-
-	sprintf(cCall, "rm %s?*",delay_dump_file);
+	//Yes this is done as a system call and won't work on Windows machines. Lazy solution!
+	sprintf(cCall, "cat %s[0-9]* >> ", delay_dump_file);
 	if(system(cCall)<0)
 		Error("delay_dump_combine: Error calling system command '%s'",cCall);
 
@@ -328,12 +320,12 @@ delay_dump (PhotPtr p, int np, int nspec, int iExtracted)
 				if (xxspec[nspec].mmin < zangle 
 					&& zangle < xxspec[nspec].mmax)
 				{	/* SWM 15/8/14 - Added path delay in comparison to photon heading straight from origin to rmax*/
-					fprintf(fptr, "%10.5g %10.5g %10.5g %+10.5e %+10.5e %+10.5e %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g %i\n", 
+					fprintf(fptr, "%10.5g %10.5g %10.5g %+10.5e %+10.5e %+10.5e %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g %5d %5d\n", 
 						p[nphot].freq, C * 1e8 / p[nphot].freq, p[nphot].w, 
 						p[nphot].x[0], p[nphot].x[1], p[nphot].x[2], 
 						p[nphot].lmn[0], p[nphot].lmn[1], p[nphot].lmn[2], 
 						p[nphot].nscat, p[nphot].nrscat, delay_to_observer(&p[nphot]),
-						(iExtracted ? delay_dump_bank_ex[nphot] : 0));
+						(iExtracted ? delay_dump_bank_ex[nphot] : 0), nspec);
 				}
 			}
 		}

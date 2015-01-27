@@ -3,7 +3,7 @@
 #endif 
 
 int np_mpi_global;               /// Global variable which holds the number of MPI processes
-
+ int write_atomicdata;
 int rank_global; 
 
 #define DEBUG 				0	/* 0 means do not debug */

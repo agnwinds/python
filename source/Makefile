@@ -156,7 +156,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c auger_ionization.c \
 		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
 		spectral_estimators.c variable_temperature.c matom_diag.c \
-		direct_ion.c reverb.c wind_keplerian.c para_update.c\
+		direct_ion.c reverb.c wind_keplerian.c para_update.c \
 		pi_rates.c matrix_ion.c 
 
 
@@ -190,7 +190,7 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		matom.o estimators.o yso.o elvis.o photon2d.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
 		spectral_estimators.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
-        variable_temperature.o bb.o rdpar.o log.o direct_ion.o wind_keplerian.o
+        variable_temperature.o bb.o rdpar.o log.o direct_ion.o wind_keplerian.o \
 		diag.o matrix_ion.o pi_rates.o 
 
 
