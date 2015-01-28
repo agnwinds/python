@@ -67,7 +67,6 @@ calc_pi_rate (nion,xplasma,mode)
 	int nion;
 	int mode;
 {
-  double q;
   int  n, j;
   double pi_rate;
   int ntmin, nvmin;
@@ -203,6 +202,9 @@ else if (mode==2)  //blackbody mode
     }
 
 pi_rate=(4*PI*pi_rate)/H;
+
+
+
 
 return(pi_rate);
 }
