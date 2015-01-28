@@ -246,13 +246,14 @@ def read_pf(root):
     pf_dict
         Dictionary object containing parameters in pf file
     '''
+    from collections import OrderedDict
 
     if not ".pf" in root:
         root = root + ".pf"
 
     params, vals = np.loadtxt(root, dtype="string", unpack=True)
 
-    pf_dict = dict()
+    pf_dict = OrderedDict()
 
     old_param = None 
     old_val = None
@@ -285,7 +286,45 @@ def read_pf(root):
     return pf_dict
 
 
+def write_pf(root, pf_dict):
 
+    '''
+    writes a Python .pf file from a dictionary
+
+    Parameters
+    ----------
+    root : file or str
+        File, filename to write.  
+
+    pf_dict:
+        dictionary to write
+    
+    Returns
+    ----------
+    pf_dict
+        Dictionary object containing parameters in pf file
+    '''
+
+    if not ".pf" in root:
+        root = root + ".pf"
+
+    f = open(root, "w")
+
+    for key,val in pf_dict.iteritems():
+
+        # convert if it is a float
+        if isinstance(val, list):           
+            for i in range(len(val)):
+                f.write("%s    %s\n" % (key, val[i]))
+
+        #elif isinstance(val, float): 
+        #    if "photons_per_cycle" not in key:
+        #        if val > 1e5:
+        #            f.write("%s    %e\n" % (key, val))
+        else:
+            f.write("%s    %s\n" % (key, val))
+
+    return (0)
 
 
 def setpars():
