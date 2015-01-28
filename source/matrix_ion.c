@@ -662,12 +662,20 @@ int solve_matrix(a_data, b_data, nrows, x)
 		/* get the element of the vector we want to check */
 		test_val = gsl_vector_get(test_vector, mm);
 
-		if ((fabs((test_val - b_data[mm])) / test_val) > EPSILON)
+		/* b_data is (1,0,0,0..) when we do matom rates. test_val is normally something like
+		   1e-16 if it's supposed to be 0. We have a different error check if b_data[mm] is 0 */
+
+		if (b_data[mm] > 0.0)
+		  {
+			if ( fabs((test_val - b_data[mm]) / test_val) > EPSILON)
 		{
 			// Error("solve_matrix: test solution fails for row %i %e != %e\n",
 			// mm, test_val, b_data[mm]);
 			ierr = 1;
 		}
+		  }
+        else if (fabs(test_val - b_data[mm]) > EPSILON) // if b_data is 0, check absolute error
+          ierr = 1;
 	}
 
 	/* copy the populations to a normal array */

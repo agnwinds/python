@@ -246,14 +246,22 @@ def read_pf(root):
     pf_dict
         Dictionary object containing parameters in pf file
     '''
-    from collections import OrderedDict
+    OrderedDict_present=True
+    try:
+        from collections import OrderedDict
+    except ImportError:
+        OrderedDict_present=False
 
     if not ".pf" in root:
         root = root + ".pf"
 
     params, vals = np.loadtxt(root, dtype="string", unpack=True)
 
-    pf_dict = OrderedDict()
+    if OrderedDict_present:
+        pf_dict = OrderedDict()
+    else:
+        pf_dict = dict()    # should work with all version of python, but bad for writing
+        print "Warning, your dictionary object is not ordered."
 
     old_param = None 
     old_val = None
@@ -307,6 +315,16 @@ def write_pf(root, pf_dict):
 
     if not ".pf" in root:
         root = root + ".pf"
+
+    OrderedDict_present=True
+    try:
+        from collections import OrderedDict
+    except ImportError:
+        OrderedDict_present=False
+
+    if (isinstance(pf_dict, OrderedDict) == False):
+        print "Warning, your dictionary object is not ordered. Output file will be wrong, writing anyway."
+
 
     f = open(root, "w")
 
