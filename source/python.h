@@ -344,6 +344,8 @@ struct geometry
 
 // The next set of parameters relate to the central source of an AGN
 
+  double pl_low_cutoff;  /* accessible only in advanced mode- see #34. default to zero */
+
   double alpha_agn;		/*The power law index of a BH at the center of an AGN.  Note that the luminosity
 				   of the agn is elsewhere in the structure
 				 */

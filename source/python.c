@@ -1114,6 +1114,12 @@ It also seems likely that we have mixed usage of some things, e.g geo.rt_mode an
 	  geo.alpha_agn = (-1.5);
 	  rddoub ("agn_power_law_index", &geo.alpha_agn);
 
+      /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
+       only in advanced mode. default is zero which is checked before we call photo_gen_agn */
+      geo.pl_low_cutoff = 0.0;	
+	  if (modes.iadvanced)
+	  	rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
+
 /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
 This is only used in the sim correction factor for the first time through. 
 Afterwards, the photons are used to compute the sim parameters. */
@@ -1148,6 +1154,12 @@ Afterwards, the photons are used to compute the sim parameters. */
 	       geo.lum_agn / xbl);
 	  geo.alpha_agn = (-1.5);
 	  rddoub ("agn_power_law_index", &geo.alpha_agn);
+
+      /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
+       only in advanced mode. default is zero which is checked before we call photo_gen_agn */
+      geo.pl_low_cutoff = 0.0;	
+	  if (modes.iadvanced)
+	  	rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
 
 /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
 This is only used in the sim correction factor for the first time through. 
