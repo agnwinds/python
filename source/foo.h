@@ -470,6 +470,15 @@ int solve_matrix(double *a_data, double *b_data, int nrows, double *x);
 int communicate_estimators_para(void);
 int gather_spectra_para(int nspec_helper, int nspecs);
 int communicate_matom_estimators_para(void);
+/* setup.c */
+int get_line_transfer_mode(void);
+int get_wind_params(void);
+double get_stellar_params(void);
+int get_disk_params(char *tprofile);
+int get_bl_and_agn_params(double lstar);
+int get_compton_torus_params(void);
+double setup_dfudge(void);
+int setup_windcone(void);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

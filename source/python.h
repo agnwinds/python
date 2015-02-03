@@ -123,6 +123,11 @@ int NPHOT;			/* As of python_40, NPHOT must be defined in the main program using
 #define SPECTYPE_CL_TAB  -5
 #define SPECTYPE_NONE	 -3
 
+/* definitions of system types */
+#define SYSTEM_TYPE_STAR    0
+#define SYSTEM_TYPE_BINARY  1
+#define SYSTEM_TYPE_AGN     2
+
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10
 #define LINELENGTH 	160
