@@ -223,7 +223,6 @@ main (argc, argv)
   WindPtr w;
   PhotPtr p;
 
-  int i;
   double freqmin, freqmax;
   double swavemin, swavemax, renorm;
   long nphot_to_define;
@@ -231,8 +230,8 @@ main (argc, argv)
   int iwind;
   int thermal_opt; /*NSH 131213 - added to control options to turn on and off some heating and cooling mechanisms */
 
-/* Next three lines have variables that should be a structure, or possibly we
-should allocate the space for the spectra to avoid all this nonsense.  02feb ksl */
+  /* Next three lines have variables that should be a structure, or possibly we
+  should allocate the space for the spectra to avoid all this nonsense.  02feb ksl */
 
   double angle[NSPEC], phase[NSPEC];
   int scat_select[NSPEC], top_bot_select[NSPEC];
@@ -241,20 +240,13 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   char yesno[20];
   int select_extract, select_spectype;
-  char root[LINELENGTH], input[LINELENGTH], wspecfile[LINELENGTH],
-    lspecfile[LINELENGTH], specfile[LINELENGTH], diskfile[LINELENGTH];
-  char windradfile[LINELENGTH], windsavefile[LINELENGTH];
-  char specsavefile[LINELENGTH];
-  char photfile[LINELENGTH], diagfile[LINELENGTH],
-    old_windsavefile[LINELENGTH], diagfolder[LINELENGTH];
   char dummy[LINELENGTH];
-  char tprofile[LINELENGTH];
   double x;
 
   int nn;
   double zz, zzz, zze, ztot, zz_adiab;
   int icheck, nn_adiab;
-  FILE *fopen (), *qptr;
+  FILE *fopen ();
 
   int disk_illum;
   int istandard, keep_photoabs;
@@ -314,132 +306,16 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   init_advanced_modes();
 
 
-  /* Parse the command line.  */
+  /* Parse the command line. Get the root. create files.diagfolder + diagfiles */
 
-  if (argc == 1)
-    {
-      printf ("Input file (interactive=stdin):");
-      fgets (dummy, LINELENGTH, stdin);
-      get_root (root, dummy);
-      strcpy (diagfile, root);
-      strcat (diagfile, ".diag");
-    }
-  else
-    {
+  restart_stat = parse_command_line (argc, argv);
 
-      for (i = 1; i < argc; i++)
-	{
-
-	  if (strcmp (argv[i], "-h") == 0)
-	    {
-	      help ();
-	    }
-	  else if (strcmp (argv[i], "-r") == 0)
-	    {
-	      Log ("Restarting %s\n", root);
-	      restart_stat = 1;
-	    }
-	  else if (strcmp (argv[i], "-t") == 0)
-	    {
-	      if (sscanf (argv[i + 1], "%lf", &time_max) != 1)
-		{
-		  Error ("python: Expected time after -t switch\n");
-		  exit (0);
-		}
-	      i++;
-
-	    }
-	  else if (strcmp (argv[i], "-v") == 0)
-	    {
-	      if (sscanf (argv[i + 1], "%d", &verbosity) != 1)
-		{
-		  Error ("python: Expected verbosity after -v switch\n");
-		  exit (0);
-		}
-	      Log_set_verbosity (verbosity);
-	      i++;
-
-	    }
-	  else if (strcmp (argv[i], "-e") == 0)
-	    {
-	      if (sscanf (argv[i + 1], "%d", &time_to_quit) != 1)
-		{
-		  Error ("python: Expected max errors after -e switch\n");
-		  exit (0);
-		}
-	      Log_quit_after_n_errors (time_to_quit);
-	      i++;
-
-	    }
-	  else if (strcmp (argv[i], "-d") == 0)
-	  {
-		modes.iadvanced = 1;
-	  	i++;
-	    }		
-	  else if (strncmp (argv[i], "-", 1) == 0)
-	    {
-	      Error ("python: Unknown switch %s\n", argv[i]);
-	      help ();
-	    }
-	}
-
-
-
-      /* The last command line variable is always the .pf file */
-
-      strcpy (dummy, argv[argc - 1]);
-      get_root (root, dummy);
-
-  /* This completes the parsing of the command line */
-
-      /* JM130722 we now store diag files in a subdirectory if in parallel*/
-      /* ksl - I believe this is created in all cases, and that is what we want */
-
-      sprintf(diagfolder,"diag_%s/",root);
-      mkdir(diagfolder, 0777);
-      strcpy (diagfile,diagfolder);
-      sprintf(dummy,"_%d.diag",my_rank);	
-      strcat (diagfile, root);
-      strcat (diagfile, dummy);
-
-
-    }
 
 
   /* 0811 - ksl - If the restart flag has been set, we check to see if a windsave file exists.  If it doues we will 
      we will restart from that point.  If the windsave file does not exist we will start from scratch */
 
-  if (restart_stat == 0)
-    {				// Then we are simply running from a new model
-      xsignal_rm (root);	// Any old signal file
-      xsignal (root, "%-20s %s \n", "START", root);
-      Log_init (diagfile);
-    }
-  else
-    {
-      /* Note that alghough we chekc that we dan open the windsave file, it is not read here.   */
-
-      strcpy (windsavefile, root);
-      strcat (windsavefile, ".wind_save");
-      qptr = fopen (windsavefile, "r");
-
-      if (qptr != NULL)
-	{
-	  /* Then the file does exist and we can restart */
-	  fclose (qptr);
-	  xsignal (root, "%-20s %s\n", "RESTART", root);
-	  Log_append (diagfile);
-	}
-      else
-	{
-	  /* It does not exist and so we start from scratch */
-	  restart_stat = 0;
-	  xsignal_rm (root);	// Any old signal file
-	  xsignal (root, "%-20s %s \n", "START", root);
-	  Log_init (diagfile);
-	}
-    }
-
+  init_log_and_windsave(restart_stat);
 
 
 
@@ -450,41 +326,42 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
   Log ("!!Python is running with %d processors\n", np_mpi_global);
   Log_parallel ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
   Debug("Debug statements are on. To turn off use lower verbosity (< 5).\n");
+
   /* Set the maximum time if it was defined */
   if (time_max > 0)
     {
-      set_max_time (root, time_max);
+      set_max_time (files.root, time_max);
     }
 
 
-  xsignal (root, "%-20s Initializing variables for %s\n", "NOK", root);
+  xsignal (files.root, "%-20s Initializing variables for %s\n", "NOK", files.root);
 
 
-  if (strncmp (root, "dummy", 5) == 0)
+  if (strncmp (files.root, "dummy", 5) == 0)
     {
       Log
 	("Proceeding to create rdpar file in dummy.pf, but will not run prog\n");
     }
-  else if (strncmp (root, "stdin", 5) == 0
-	   || strncmp (root, "rdpar", 5) == 0 || root[0] == ' '
-	   || strlen (root) == 0)
+  else if (strncmp (files.root, "stdin", 5) == 0
+	   || strncmp (files.root, "rdpar", 5) == 0 || files.root[0] == ' '
+	   || strlen (files.root) == 0)
     {
-      strcpy (root, "mod");
+      strcpy (files.root, "mod");
       Log
 	("Proceeding in interactive mode\n Output files will have rootname mod\n");
     }
   else
     {
-      strcpy (input, root);
-      strcat (input, ".pf");
+      strcpy (files.input, files.root);
+      strcat (files.input, ".pf");
 
-      if ((opar_stat = opar (input)) == 2)
+      if ((opar_stat = opar (files.input)) == 2)
 	{
-	  Log ("Reading data from file %s\n", input);
+	  Log ("Reading data from file %s\n", files.input);
 	}
       else
 	{
-	  Log ("Creating a new parameter file %s\n", input);
+	  Log ("Creating a new parameter file %s\n", files.input);
 	}
 
     }
@@ -495,30 +372,30 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
      those which are for short-term diagnostics are overwritten.  ksl 97aug. */
 
 
-  strcpy (basename, root);	//56d -- ksl --Added so filenames could be created by routines as necessary
+  strcpy (basename, files.root);	//56d -- ksl --Added so filenames could be created by routines as necessary
 
-  strcpy (wspecfile, root);
-  strcpy (lspecfile, root);
+  strcpy (files.wspec, files.root);
+  strcpy (files.lspec, files.root);
 
-  strcpy (specfile, root);
-  strcpy (windradfile, "python");
-  strcpy (windsavefile, root);
-  strcpy (specsavefile, root);
+  strcpy (files.spec, files.root);
+  strcpy (files.windrad, "python");
+  strcpy (files.windsave, files.root);
+  strcpy (files.specsave, files.root);
 
   /* 130722 JM we now save python.phot and disk.diag files under diag_root folder */
-  strcpy (photfile, diagfolder);
-  strcpy (diskfile, diagfolder);
-  strcat (photfile, "python");
-  strcat (diskfile, root);
+  strcpy (files.phot, files.diagfolder);
+  strcpy (files.disk, files.diagfolder);
+  strcat (files.phot, "python");
+  strcat (files.disk, files.root);
 
-  strcat (wspecfile, ".spec_tot");
-  strcat (lspecfile, ".log_spec_tot");
-  strcat (specfile, ".spec");
-  strcat (windradfile, ".wind_rad");
-  strcat (windsavefile, ".wind_save");
-  strcat (specsavefile, ".spec_save");
-  strcat (photfile, ".phot");
-  strcat (diskfile, ".disk.diag");
+  strcat (files.wspec, ".spec_tot");
+  strcat (files.lspec, ".log_spec_tot");
+  strcat (files.spec, ".spec");
+  strcat (files.windrad, ".wind_rad");
+  strcat (files.windsave, ".wind_save");
+  strcat (files.specsave, ".spec_save");
+  strcat (files.phot, ".phot");
+  strcat (files.disk, ".disk.diag");
 
 
 /* Provide plausible initial values for the sizes of the wind arrays.  This is desirable
@@ -553,7 +430,7 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
 
 
-/* BEGIN GATHERING INPUT DATA */
+  /* BEGIN GATHERING INPUT DATA */
 
   /* Describe the basic calculation in terms of the number of iterations which will
      be used to calculate the wind parameters and the number of iterations and wavelength
@@ -578,16 +455,16 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	     new windfile. In other words it is not a restart where we would overwrite
 	     the previous wind model.  */
 
-	  strcpy (old_windsavefile, "earlier.run");
-	  rdstr ("Old_windfile(root_only)", old_windsavefile);
-	  strcat (old_windsavefile, ".wind_save");
+	  strcpy (files.old_windsave, "earlier.run");
+	  rdstr ("Old_windfile(root_only)", files.old_windsave);
+	  strcat (files.old_windsave, ".wind_save");
 
 
 	  Log
 	    ("Starting a new run from scratch starting with previous windfile");
-	  if (wind_read (old_windsavefile) < 0)
+	  if (wind_read (files.old_windsave) < 0)
 	    {
-	      Error ("python: Unable to open %s\n", old_windsavefile);	//program will exit if unable to read the file
+	      Error ("python: Unable to open %s\n", files.old_windsave);	//program will exit if unable to read the file
 	      exit (0);
 	    }
 	  geo.wind_type = 2;	// after wind_read one will have a different wind_type otherwise
@@ -621,22 +498,22 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 
   else	if (restart_stat == 1)		/* We want to continue a previous run*/
     {
-      Log ("Continuing a previous run of %s \n", root);
-      strcpy (old_windsavefile, root);
-      strcat (old_windsavefile, ".wind_save");
-      if (wind_read (old_windsavefile) < 0)
+      Log ("Continuing a previous run of %s \n", files.root);
+      strcpy (files.old_windsave, files.root);
+      strcat (files.old_windsave, ".wind_save");
+      if (wind_read (files.old_windsave) < 0)
 	{
-	  Error ("python: Unable to open %s\n", old_windsavefile);	//program will exit if unable to read the file
+	  Error ("python: Unable to open %s\n", files.old_windsave);	//program will exit if unable to read the file
 	  exit (0);
 	}
       w = wmain;
       geo.wind_type = 2;	// We read the data from a file
-      xsignal (root, "%-20s Read %s\n", "COMMENT", old_windsavefile);
+      xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.old_windsave);
 
       if (geo.pcycle > 0)
 	{
-	  spec_read (specsavefile);
-	  xsignal (root, "%-20s Read %s\n", "COMMENT", specsavefile);
+	  spec_read (files.specsave);
+	  xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.specsave);
 	}
     }
 
@@ -679,61 +556,17 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
       exit (0);
     }
 
-
-  if (geo.wind_type != 2)
-    {
-      /* Define the coordinate system for the grid and allocate memory for the wind structure */
-      rdint
-	("Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)",
-	 &geo.coord_type);
-
-      rdint ("Wind.dim.in.x_or_r.direction", &geo.ndim);
-      if (geo.coord_type)
-	{
-	  rdint ("Wind.dim.in.z_or_theta.direction", &geo.mdim);
-	  if (geo.mdim < 4)
-	    {
-	      Error
-		("python: geo.mdim must be at least 4 to allow for boundaries\n");
-	      exit (0);
-	    }
-	}
-      else
-	geo.mdim = 1;
-
-    }
-
-/* 130405 ksl - Check that NDIM_MAX is greater than NDIM and MDIM.  */
-
-  if ((geo.ndim > NDIM_MAX) || (geo.mdim > NDIM_MAX))
-    {
-      Error
-	("NDIM_MAX %d is less than NDIM %d or MDIM %d. Fix in python.h and recompile\n",
-	 NDIM_MAX, geo.ndim, geo.mdim);
-      exit (0);
-    }
+  /* Define the coordinate system for the grid and allocate memory for the wind structure
+     by reading from user */
+  
+  get_grid_params();
 
 
-  /* If we are in advanced then allow the user to modify scale lengths */
-  if (modes.iadvanced)
-  {
-  	rdint ("adjust_grid(0=no,1=yes)", &modes.adjust_grid);
-
-  	if (modes.adjust_grid)
-  	  {
-  	  	Log("You have opted to adjust the grid scale lengths\n");
-  	  	rddoub ("geo.xlog_scale", &geo.xlog_scale);
-  	  	if (geo.coord_type)
-  	  	  rddoub ("geo.zlog_scale", &geo.zlog_scale);
-  	  }
-  }
-
-
-//080808 - 62 - Ionization section has been cleaned up -- ksl
-/* ??? ksl - Acoording to line 110 of ioniztion. option 4 is LTE with SIM_correction.  It would be good to
- * know what this is actually.   Note that pairwise is the appraoch which cboses between pairwise_bb, and pairwise_pow.
- * Normally, any of the pairwise options should force use of a banding option with a broad set of bands
- */
+  //080808 - 62 - Ionization section has been cleaned up -- ksl
+  /* ??? ksl - Acoording to line 110 of ioniztion. option 4 is LTE with SIM_correction.  It would be good to
+   * know what this is actually.   Note that pairwise is the appraoch which cboses between pairwise_bb, and pairwise_pow.
+   * Normally, any of the pairwise options should force use of a banding option with a broad set of bands
+   */
 
   rdint
     ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,6=pairwise_bb,7=pairwise_pow)",
@@ -750,9 +583,9 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
       exit (0);
     }
 
-/*Normally, geo.partition_mode is set to -1, which means that partition functions are calculated to take
-full advantage of the data file.  This means that in calculating the partition functions, the information
-on levels and their multiplicities is taken into account.   */
+  /*Normally, geo.partition_mode is set to -1, which means that partition functions are calculated to take
+  full advantage of the data file.  This means that in calculating the partition functions, the information
+  on levels and their multiplicities is taken into account.   */
 
   geo.partition_mode = -1;	//?? Stuart, is there a reason not to move this earlier so it does not affect restart
 
@@ -811,88 +644,10 @@ on levels and their multiplicities is taken into account.   */
 	 &geo.disk_type);
 
 
-  // Determine what radiation sources there are.  Note that most of these values are initilized in init_geo
+  /* Determine what radiation sources there are.  
+     Note that most of these values are initilized in init_geo */
 
-  if (geo.system_type != SYSTEM_TYPE_AGN)
-    {				/* If is a stellar system */
-      rdint ("Star_radiation(y=1)", &geo.star_radiation);
-      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-      rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
-      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-      geo.agn_radiation = 0;	// So far at least, our star systems don't have a BH
-    }
-  else				/* If it is an AGN */
-    {
-      geo.star_radiation = 0;	// 70b - AGN do not have a star at the center */
-      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-      geo.bl_radiation = 0;
-      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-      geo.agn_radiation = 1;
-      rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
-    }
-
-  if (!geo.star_radiation && !geo.disk_radiation && !geo.bl_radiation
-      && !geo.bl_radiation && !geo.agn_radiation)
-    {
-      Error ("python: No radiation sources so nothing to do but quit!\n");
-      exit (0);
-    }
-
-  /* 
-     With the macro atom approach we won't want to generate photon 
-     bundles in the wind so switch it off here. (SS)
-   */
-
-  if (geo.rt_mode == 2)
-    {
-      Log
-	("python: Using Macro Atom method so switching off wind radiation.\n");
-      geo.wind_radiation = 0;
-    }
-
-
-  /* 080517 - ksl - Reassigning bb to -1, etc is to make room for reading in model
-     grids, but complicates what happens if one tries to restart a model.  This needs
-     to be updated so one can re-read the geo file, proabbly by defining variaables 
-     BB etc, and then by checking whether or not the type is assigned to BB or read
-     in as 0.  Also need to store each of these model list names in geo structure.
-   */
-
-  get_spectype (geo.star_radiation,
-		"Rad_type_for_star(0=bb,1=models)_to_make_wind",
-		&geo.star_ion_spectype);
-
-  get_spectype (geo.disk_radiation,
-		"Rad_type_for_disk(0=bb,1=models)_to_make_wind",
-		&geo.disk_ion_spectype);
-
-  get_spectype (geo.bl_radiation,
-		"Rad_type_for_bl(0=bb,1=models,3=pow)_to_make_wind",
-		&geo.bl_ion_spectype);
-  get_spectype (geo.agn_radiation,
-		"Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table)_to_make_wind",
-		&geo.agn_ion_spectype);
-
-
-  /* 130621 - ksl - This is a kluge to add a power law to stellar systems.  What id done
-     is to remove the bl emission, which we always assume to some kind of temperature
-     driven source, and replace it with a power law source
-
-     Note that the next 3 or 4 lines just tell you that there is supposed to be a power
-     law source.  They don't teel you what the parameters are.
-   */
-
-  if (geo.bl_ion_spectype == SPECTYPE_POW)
-    {
-      geo.agn_radiation = 1;
-      geo.agn_ion_spectype = SPECTYPE_POW;
-      geo.bl_radiation = 0;
-      Log("Trying to make a start with a power law boundary layer\n");
-    }
-  else {
-      Log("Not Trying to make a start with a power law boundary layer %d\n",geo.bl_ion_spectype);
-  }
-	  
+  get_radiation_sources(); 
 
 
   if (geo.wind_type == 2)
@@ -913,7 +668,7 @@ on levels and their multiplicities is taken into account.   */
 
       if (geo.disk_type)	/* Then a disk exists and it needs to be described */
 	{
-      get_disk_params(tprofile);
+      get_disk_params();
 	}
 
       else
@@ -971,7 +726,7 @@ on levels and their multiplicities is taken into account.   */
 		 &geo.disk_tprofile);
 	      if (geo.disk_tprofile == 1)
 		{
-		  rdstr ("T_profile_file", tprofile);
+		  rdstr ("T_profile_file", files.tprofile);
 		}
 	    }
 	}
@@ -1272,16 +1027,16 @@ on levels and their multiplicities is taken into account.   */
 
   /* Wrap up and save all the inputs */
 
-  if (strncmp (root, "mod", 3) == 0)
+  if (strncmp (files.root, "mod", 3) == 0)
     cpar ("mod.pf");
-  else if (strncmp (root, "dummy", 5) == 0)
+  else if (strncmp (files.root, "dummy", 5) == 0)
     {
       cpar ("dummy.pf");
       exit (0);
     }
   else if (opar_stat == 1)
     {
-      cpar (input);
+      cpar (files.input);
     }
   else
     cpar ("python.pf");
@@ -1318,7 +1073,7 @@ on levels and their multiplicities is taken into account.   */
 
   if (geo.disk_tprofile == 1)
     {
-      read_non_standard_disk_profile (tprofile);
+      read_non_standard_disk_profile (files.tprofile);
     }
 
 
@@ -1354,8 +1109,8 @@ on levels and their multiplicities is taken into account.   */
 
   geo.disk_illum = disk_illum;
 
-  xsignal (root, "%-20s Finished initialization for %s\n", "NOK", root);
-  check_time (root);
+  xsignal (files.root, "%-20s Finished initialization for %s\n", "NOK", files.root);
+  check_time (files.root);
 
 #ifdef MPI_ON
   /* Since the wind is now set up can work out the length big arrays to help with the MPI reductions of the spectra
@@ -1378,7 +1133,7 @@ on levels and their multiplicities is taken into account.   */
 /* XXXX - BEGINNING OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
 
   if (geo.wcycle == geo.wcycles)
-    xsignal (root, "%-20s No ionization needed: wcycles(%d)==wcyeles(%d)\n",
+    xsignal (files.root, "%-20s No ionization needed: wcycles(%d)==wcyeles(%d)\n",
 	     "COMMENT", geo.wcycle, geo.wcycles);
   else
     {
@@ -1393,7 +1148,7 @@ on levels and their multiplicities is taken into account.   */
   while (geo.wcycle < geo.wcycles)
     {				/* This allows you to build up photons in bunches */
 
-      xsignal (root, "%-20s Starting %d of %d ionization cycle \n", "NOK",
+      xsignal (files.root, "%-20s Starting %d of %d ionization cycle \n", "NOK",
 	       geo.wcycle, geo.wcycles);
 
 
@@ -1518,7 +1273,7 @@ on levels and their multiplicities is taken into account.   */
 	  Log("Luminosity taken up by adiabatic kpkt destruction %18.12e number of packets %d\n", zz_adiab, nn_adiab);
 
     if (modes.print_windrad_summary)
-	  wind_rad_summary (w, windradfile, "a");
+	  wind_rad_summary (w, files.windrad, "a");
 
 
 
@@ -1547,7 +1302,7 @@ on levels and their multiplicities is taken into account.   */
 
 
       /* Calculate and store the amount of heating of the disk due to radiation impinging on the disk */
-      qdisk_save (diskfile, ztot);
+      qdisk_save (files.disk, ztot);
 
 /* Completed writing file describing disk heating */
 
@@ -1597,14 +1352,14 @@ on levels and their multiplicities is taken into account.   */
       if (rank_global == 0)
       {
 #endif
-      spectrum_summary (wspecfile, "w", 0, 5, 0, 1., 0);
-      spectrum_summary (lspecfile, "w", 0, 5, 0, 1., 1);	/* output the log spectrum */
+      spectrum_summary (files.wspec, "w", 0, 5, 0, 1., 0);
+      spectrum_summary (files.lspec, "w", 0, 5, 0, 1., 1);	/* output the log spectrum */
 
 #ifdef MPI_ON
       }
       MPI_Barrier(MPI_COMM_WORLD);
 #endif
-      phot_gen_sum (photfile, "w");	/* Save info about the way photons are created and absorbed
+      phot_gen_sum (files.phot, "w");	/* Save info about the way photons are created and absorbed
 					   by the disk */
 
       /* Save everything after each cycle and prepare for the next cycle 
@@ -1612,7 +1367,7 @@ on levels and their multiplicities is taken into account.   */
       /* NSH1306 - moved geo.wcycle++ back, but moved the log and xsignal statements */
 
 
-      xsignal (root, "%-20s Finished %d of %d ionization cycle \n", "OK",
+      xsignal (files.root, "%-20s Finished %d of %d ionization cycle \n", "OK",
 	       geo.wcycle, geo.wcycles);
       geo.wcycle++;		//Increment ionisation cycles
 
@@ -1624,8 +1379,8 @@ on levels and their multiplicities is taken into account.   */
       if (rank_global == 0)
       {
 #endif
-      wind_save (windsavefile);
-      Log_silent ("Saved wind structure in %s after cycle %d\n", windsavefile,
+      wind_save (files.windsave);
+      Log_silent ("Saved wind structure in %s after cycle %d\n", files.windsave,
 	   geo.wcycle);
 #ifdef MPI_ON
       }
@@ -1635,7 +1390,7 @@ on levels and their multiplicities is taken into account.   */
 
 
 
-      check_time (root);
+      check_time (files.root);
       Log_flush ();		/*Flush the logfile */
 
     }				// End of Cycle loop
@@ -1706,7 +1461,7 @@ on levels and their multiplicities is taken into account.   */
   /* the next condition should really when one has nothing more to do */
 
   else if (geo.pcycle >= geo.pcycles)
-    xsignal (root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n",
+    xsignal (files.root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n",
 	     "COMMENT", geo.pcycle, geo.pcycles);
 
   else
@@ -1727,7 +1482,7 @@ on levels and their multiplicities is taken into account.   */
   while (geo.pcycle < geo.pcycles)
     {				/* This allows you to build up photons in bunches */
 
-      xsignal (root, "%-20s Starting %d of %d spectral cycle \n", "NOK",
+      xsignal (files.root, "%-20s Starting %d of %d spectral cycle \n", "NOK",
 	       geo.pcycle, geo.pcycles);
 
     if (modes.ispy)
@@ -1772,7 +1527,7 @@ on levels and their multiplicities is taken into account.   */
       trans_phot (w, p, select_extract);
 
     if (modes.print_windrad_summary)
-      wind_rad_summary (w, windradfile, "a");
+      wind_rad_summary (w, files.windrad, "a");
 
 
       spectrum_create (p, freqmin, freqmax, nangles, select_extract);
@@ -1793,7 +1548,7 @@ on levels and their multiplicities is taken into account.   */
       if (rank_global == 0)
       {
 #endif
-      spectrum_summary (specfile, "w", 0, nspectra - 1, select_spectype,
+      spectrum_summary (files.spec, "w", 0, nspectra - 1, select_spectype,
 			renorm, 0);
 #ifdef MPI_ON
       }
@@ -1805,7 +1560,7 @@ on levels and their multiplicities is taken into account.   */
 
       /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
 
-      xsignal (root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK",
+      xsignal (files.root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK",
 	       geo.pcycle, geo.pcycles);
 
       geo.pcycle++;		// Increment the spectral cycles
@@ -1814,18 +1569,18 @@ on levels and their multiplicities is taken into account.   */
       if (rank_global == 0)
       {
 #endif
-      wind_save (windsavefile);	// This is only needed to update pcycle
-      spec_save (specsavefile);
+      wind_save (files.windsave);	// This is only needed to update pcycle
+      spec_save (files.specsave);
 #ifdef MPI_ON
       }
 #endif
-      check_time (root);
+      check_time (files.root);
     }
 
 
 /* XXXX -- END CYCLE TO CALCULATE DETAILED SPECTRUM */
 
-  phot_gen_sum (photfile, "a");
+  phot_gen_sum (files.phot, "a");
 
 /* 57h - 07jul -- ksl -- Write out the freebound information */
 
@@ -1855,7 +1610,7 @@ on levels and their multiplicities is taken into account.   */
   #endif  
 
 
-  xsignal (root, "%-20s %s\n", "COMPLETE", root);
+  xsignal (files.root, "%-20s %s\n", "COMPLETE", files.root);
   Log ("Completed entire program.  The elapsed TIME was %f\n", timer ());
   return EXIT_SUCCESS;
 }

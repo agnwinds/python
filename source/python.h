@@ -1159,6 +1159,27 @@ modes;
 FILE *optr;  //pointer to a diagnostic file that will contain dvds information
 
 
+
+struct filenames
+{
+  char root[LINELENGTH];        // main rootname
+  char windsave[LINELENGTH];    // wind save filename
+  char specsave[LINELENGTH];    // spec save filename
+  char diag[LINELENGTH];        // diag file
+  char diagfolder[LINELENGTH];  // diag folder
+  char old_windsave[LINELENGTH];// old windsave name
+  char input[LINELENGTH];       // input name if creating new pf file
+  char lspec[LINELENGTH];       // log_spec_tot fname
+  char wspec[LINELENGTH];       // spectot fname
+  char disk[LINELENGTH];        // disk diag fname
+  char tprofile[LINELENGTH];    // non standard tprofile fname
+  char phot[LINELENGTH];        // photfile e.g. python.phot
+  char windrad[LINELENGTH];     // wind rad file
+  char spec[LINELENGTH];        // .spec file
+}
+files;
+
+
         
 #define NMAX_OPTIONS 20 
 

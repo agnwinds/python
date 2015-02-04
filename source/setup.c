@@ -2,10 +2,276 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+
 #include "atomic.h"
-
-
 #include "python.h"
+
+/***********************************************************
+             University of Southampton
+
+Synopsis: 
+  parse_command_line parses the command line and communicates stuff
+  to the loggin routines (e.g. verbosity).
+   
+Arguments:   
+  argc            command line arguments 
+
+Returns:
+  restart_start   1 if restarting
+ 
+ 
+Description:  
+
+Notes:
+
+History:
+  1502  JM  Moved here from main()
+
+**************************************************************/
+
+
+int parse_command_line(argc, argv)
+    int argc;
+    char *argv[];
+{
+  int restart_stat, verbosity, time_to_quit, i;
+  char dummy[LINELENGTH];
+  int mkdir();
+  double time_max;
+
+  restart_stat = 0;
+
+  if (argc == 1)
+    {
+      printf ("Input file (interactive=stdin):");
+      fgets (dummy, LINELENGTH, stdin);
+      get_root (files.root, dummy);
+      strcpy (files.diag, files.root);
+      strcat (files.diag, ".diag");
+    }
+  else
+    {
+
+      for (i = 1; i < argc; i++)
+  {
+
+    if (strcmp (argv[i], "-h") == 0)
+      {
+        help ();
+      }
+    else if (strcmp (argv[i], "-r") == 0)
+      {
+        Log ("Restarting %s\n", files.root);
+        restart_stat = 1;
+      }
+    else if (strcmp (argv[i], "-t") == 0)
+      {
+        if (sscanf (argv[i + 1], "%lf", &time_max) != 1)
+    {
+      Error ("python: Expected time after -t switch\n");
+      exit (0);
+    }
+        i++;
+
+      }
+    else if (strcmp (argv[i], "-v") == 0)
+      {
+        if (sscanf (argv[i + 1], "%d", &verbosity) != 1)
+    {
+      Error ("python: Expected verbosity after -v switch\n");
+      exit (0);
+    }
+        Log_set_verbosity (verbosity);
+        i++;
+
+      }
+    else if (strcmp (argv[i], "-e") == 0)
+      {
+        if (sscanf (argv[i + 1], "%d", &time_to_quit) != 1)
+    {
+      Error ("python: Expected max errors after -e switch\n");
+      exit (0);
+    }
+        Log_quit_after_n_errors (time_to_quit);
+        i++;
+
+      }
+    else if (strcmp (argv[i], "-d") == 0)
+    {
+    modes.iadvanced = 1;
+      i++;
+      }   
+    else if (strncmp (argv[i], "-", 1) == 0)
+      {
+        Error ("python: Unknown switch %s\n", argv[i]);
+        help ();
+      }
+  }
+
+
+      /* The last command line variable is always the .pf file */
+
+      strcpy (dummy, argv[argc - 1]);
+      get_root (files.root, dummy);
+
+      /* This completes the parsing of the command line */
+
+      /* JM130722 we now store diag files in a subdirectory if in parallel*/
+      /* ksl - I believe this is created in all cases, and that is what we want */
+
+      sprintf(files.diagfolder,"diag_%s/",files.root);
+      mkdir(files.diagfolder, 0777);
+      strcpy (files.diag, files.diagfolder);
+      sprintf(dummy,"_%d.diag",rank_global);  
+      strcat (files.diag, files.root);
+      strcat (files.diag, dummy);
+
+
+    }
+
+  return (restart_stat);
+}
+
+
+
+/***********************************************************
+             University of Southampton
+
+Synopsis: 
+  init_files 
+   
+Arguments:   
+  argc            command line arguments 
+
+Returns:
+  restart_start   1 if restarting
+ 
+ 
+Description:  
+
+Notes:
+
+History:
+  1502  JM  Moved here from main()
+
+**************************************************************/
+
+int init_log_and_windsave(restart_stat)
+    int restart_stat;
+{
+  FILE *fopen (), *qptr;
+
+  if (restart_stat == 0)
+    {       // Then we are simply running from a new model
+      xsignal_rm (files.root);  // Any old signal file
+      xsignal (files.root, "%-20s %s \n", "START", files.root);
+      Log_init (files.diag);
+    }
+  else
+    {
+      /* Note that alghough we chekc that we dan open the windsave file, it is not read here.   */
+
+      strcpy (files.windsave, files.root);
+      strcat (files.windsave, ".wind_save");
+      qptr = fopen (files.windsave, "r");
+
+      if (qptr != NULL)
+  {
+    /* Then the file does exist and we can restart */
+    fclose (qptr);
+    xsignal (files.root, "%-20s %s\n", "RESTART", files.root);
+    Log_append (files.diag);
+  }
+      else
+  {
+    /* It does not exist and so we start from scratch */
+    restart_stat = 0;
+    xsignal_rm (files.root);  // Any old signal file
+    xsignal (files.root, "%-20s %s \n", "START", files.root);
+    Log_init (files.diag);
+  }
+    }
+
+  return (0);
+}
+
+/***********************************************************
+             University of Southampton
+
+Synopsis: 
+  get_grid_params reads information on the coordinate system
+  and grid dimensions and sets the corresponding variables
+  in the geo structure
+   
+Arguments:    
+
+Returns:
+ 
+ 
+Description:  
+
+Notes:
+
+History:
+  1502  JM  Moved here from main()
+
+**************************************************************/
+
+int get_grid_params()
+
+{
+if (geo.wind_type != 2)
+    {
+      /* Define the coordinate system for the grid and allocate memory for the wind structure */
+      rdint
+  ("Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)",
+   &geo.coord_type);
+
+      rdint ("Wind.dim.in.x_or_r.direction", &geo.ndim);
+      if (geo.coord_type)
+  {
+    rdint ("Wind.dim.in.z_or_theta.direction", &geo.mdim);
+    if (geo.mdim < 4)
+      {
+        Error
+    ("python: geo.mdim must be at least 4 to allow for boundaries\n");
+        exit (0);
+      }
+  }
+      else
+  geo.mdim = 1;
+
+    }
+
+/* 130405 ksl - Check that NDIM_MAX is greater than NDIM and MDIM.  */
+
+  if ((geo.ndim > NDIM_MAX) || (geo.mdim > NDIM_MAX))
+    {
+      Error
+  ("NDIM_MAX %d is less than NDIM %d or MDIM %d. Fix in python.h and recompile\n",
+   NDIM_MAX, geo.ndim, geo.mdim);
+      exit (0);
+    }
+
+
+  /* If we are in advanced then allow the user to modify scale lengths */
+  if (modes.iadvanced)
+  {
+    rdint ("adjust_grid(0=no,1=yes)", &modes.adjust_grid);
+
+    if (modes.adjust_grid)
+      {
+        Log("You have opted to adjust the grid scale lengths\n");
+        rddoub ("geo.xlog_scale", &geo.xlog_scale);
+        if (geo.coord_type)
+          rddoub ("geo.zlog_scale", &geo.zlog_scale);
+      }
+  }
+
+  return (0);
+}
+
+
 
 /***********************************************************
              University of Southampton
@@ -94,6 +360,117 @@ int get_line_transfer_mode ()
 
   return (0);
 }
+
+
+
+/***********************************************************
+             University of Southampton
+
+Synopsis: 
+  get_radiation_sources
+   
+Arguments:    
+
+Returns:
+ 
+ 
+Description:  
+
+Notes:
+
+History:
+  1502  JM  Moved here from main()
+
+**************************************************************/
+
+int get_radiation_sources()
+{
+  if (geo.system_type != SYSTEM_TYPE_AGN)
+    {       /* If is a stellar system */
+      rdint ("Star_radiation(y=1)", &geo.star_radiation);
+      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+      rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
+      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+      geo.agn_radiation = 0;  // So far at least, our star systems don't have a BH
+    }
+  else        /* If it is an AGN */
+    {
+      geo.star_radiation = 0; // 70b - AGN do not have a star at the center */
+      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+      geo.bl_radiation = 0;
+      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+      geo.agn_radiation = 1;
+      rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
+    }
+
+  if (!geo.star_radiation && !geo.disk_radiation && !geo.bl_radiation
+      && !geo.bl_radiation && !geo.agn_radiation)
+    {
+      Error ("python: No radiation sources so nothing to do but quit!\n");
+      exit (0);
+    }
+
+  /* 
+     With the macro atom approach we won't want to generate photon 
+     bundles in the wind so switch it off here. (SS)
+   */
+
+  if (geo.rt_mode == 2)
+    {
+      Log
+  ("python: Using Macro Atom method so switching off wind radiation.\n");
+      geo.wind_radiation = 0;
+    }
+
+
+  /* 080517 - ksl - Reassigning bb to -1, etc is to make room for reading in model
+     grids, but complicates what happens if one tries to restart a model.  This needs
+     to be updated so one can re-read the geo file, proabbly by defining variaables 
+     BB etc, and then by checking whether or not the type is assigned to BB or read
+     in as 0.  Also need to store each of these model list names in geo structure.
+   */
+
+  get_spectype (geo.star_radiation,
+    "Rad_type_for_star(0=bb,1=models)_to_make_wind",
+    &geo.star_ion_spectype);
+
+  get_spectype (geo.disk_radiation,
+    "Rad_type_for_disk(0=bb,1=models)_to_make_wind",
+    &geo.disk_ion_spectype);
+
+  get_spectype (geo.bl_radiation,
+    "Rad_type_for_bl(0=bb,1=models,3=pow)_to_make_wind",
+    &geo.bl_ion_spectype);
+  get_spectype (geo.agn_radiation,
+    "Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table)_to_make_wind",
+    &geo.agn_ion_spectype);
+
+
+  /* 130621 - ksl - This is a kluge to add a power law to stellar systems.  What id done
+     is to remove the bl emission, which we always assume to some kind of temperature
+     driven source, and replace it with a power law source
+
+     Note that the next 3 or 4 lines just tell you that there is supposed to be a power
+     law source.  They don't teel you what the parameters are.
+   */
+
+  if (geo.bl_ion_spectype == SPECTYPE_POW)
+    {
+      geo.agn_radiation = 1;
+      geo.agn_ion_spectype = SPECTYPE_POW;
+      geo.bl_radiation = 0;
+      Log("Trying to make a start with a power law boundary layer\n");
+    }
+  else 
+    {
+      Log("Not Trying to make a start with a power law boundary layer %d\n",geo.bl_ion_spectype);
+    }
+  
+  return (0);
+}
+
+
+
 
 /***********************************************************
              University of Southampton
@@ -263,8 +640,7 @@ History:
 **************************************************************/
 
 
-int get_disk_params (tprofile)
-  char *tprofile;
+int get_disk_params ()
 {
   int disk_illum;
 //        if (geo.disk_radiation) /*NSH 130906 - Commented out this if loop. It was causing problems with restart - bug #44
@@ -279,7 +655,7 @@ int get_disk_params (tprofile)
   rdint ("Disk.temperature.profile(0=standard;1=readin)", &geo.disk_tprofile);
   if (geo.disk_tprofile == 1)
     {
-      rdstr ("T_profile_file", tprofile);
+      rdstr ("T_profile_file", files.tprofile);
     }
 //          }
 //        else
@@ -642,3 +1018,39 @@ int setup_windcone()
     }
   return (0);
 }
+
+
+
+/***********************************************************
+             University of Southampton
+
+Synopsis: 
+  get_spectrum_params 
+   
+Arguments:    
+
+Returns:
+  dfudge  double  
+        the push through distance
+Description:  
+
+Notes:
+  The angles thetamin and
+  thetamax are all defined from the z axis, so that an angle of 0
+  is a flow that is perpeindicular to to the disk and one that is
+  close to 90 degrees will be parallel to the plane of the disk
+  geo.wind_thetamin and max are defined in the routines that initialize
+  the various wind models, e. g. get_sv_wind_parameters. These
+  have been called at this point.  
+
+  z is the place where the windcone intercepts the z axis
+  dzdr is the slope 
+
+  111124 fixed notes on this - ksl
+History:
+  1502  JM  Moved here from main()
+
+**************************************************************/
+
+
+
