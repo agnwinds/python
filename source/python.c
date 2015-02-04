@@ -1508,6 +1508,7 @@ if (geo.coord_type==RTHETA && geo.wind_type==2) //We need to generate an rtheta 
 	  exit (0);
 	}
 
+    
       for (n = 0; n < nangles; n++)
 	rddoub ("angle(0=pole)", &angle[n]);
 
@@ -1515,9 +1516,18 @@ if (geo.coord_type==RTHETA && geo.wind_type==2) //We need to generate an rtheta 
        * even for systems which are not binaries.  Phase 0 in this case corresponds to
        * an extraction direction which is in the xz plane
        */
+      /* JM 1502 -- change this so we only ask for phase if the system is a binary -- see #137 */
 
-      for (n = 0; n < nangles; n++)
-	rddoub ("phase(0=inferior_conjunction)", &phase[n]);
+      if (geo.system_type == SYSTEM_TYPE_BINARY)
+      {
+        
+        for (n = 0; n < nangles; n++)
+	      rddoub ("phase(0=inferior_conjunction)", &phase[n]);
+      }
+      else
+      	Log("No phase information needed as system type %i is not a binary\n",
+      		 geo.system_type);
+
 
       rdint ("live.or.die(0).or.extract(anything_else)", &select_extract);
       if (select_extract != 0)
