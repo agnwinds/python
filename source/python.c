@@ -639,6 +639,8 @@ main (argc, argv)
   rdint ("System_type(0=star,1=binary,2=agn)", &geo.system_type);
 
   /* specify if there is a disk and what type */
+  /* JM 1502 -- moved disk type question here- previously it was just before
+     asking for disk radiation. See #8 and #44 */
   rdint
 	("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
 	 &geo.disk_type);
@@ -692,26 +694,10 @@ main (argc, argv)
 
 
 
-    /* Describe the wind */
+    /* Describe the wind. This routine readsin geo.rmax and geo.twind
+       and then gets params by calling e.g. get_sv_wind_params() */
 
-      if (geo.system_type == SYSTEM_TYPE_AGN)
-	{
-	  geo.rmax = 50. * geo.r_agn;
-	}
-
-      rddoub ("wind.radmax(cm)", &geo.rmax);
-      rddoub ("wind.t.init", &geo.twind);
-
-      geo.diskrad_sq = geo.diskrad * geo.diskrad;
-
-    /* Now get parameters that are specific to a given wind model
-
-       Note: When one adds a new model, the only things that should be read in and modified
-       are parameters in geo.  This is in order to preserve the ability to continue a calculation
-       with the same basic wind geometry, without reading in all of the input parameters.  
-    */
-
-      get_wind_params();	// calls a load of subroutines such as get_sv_params()
+      get_wind_params();	
 
     }				// End of block to define a model for the first time
 
@@ -887,7 +873,7 @@ main (argc, argv)
       for (n = 0; n < nangles; n++)
 	rddoub ("angle(0=pole)", &angle[n]);
 
-      /* 05apr-ksl-56--For diagnositic reasons I have left questions regarding phase
+      /* 05apr-ksl-56--For diagnostic reasons I have left questions regarding phase
        * even for systems which are not binaries.  Phase 0 in this case corresponds to
        * an extraction direction which is in the xz plane
        */

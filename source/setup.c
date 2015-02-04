@@ -496,6 +496,24 @@ History:
 int
 get_wind_params()
 {
+  if (geo.system_type == SYSTEM_TYPE_AGN)
+  {
+    geo.rmax = 50. * geo.r_agn;
+  }
+
+  rddoub ("wind.radmax(cm)", &geo.rmax);
+  rddoub ("wind.t.init", &geo.twind);
+
+  geo.diskrad_sq = geo.diskrad * geo.diskrad;
+
+
+  /* Now get parameters that are specific to a given wind model
+
+    Note: When one adds a new model, the only things that should be read in and modified
+    are parameters in geo.  This is in order to preserve the ability to continue a calculation
+    with the same basic wind geometry, without reading in all of the input parameters.  
+  */
+
   if (geo.wind_type == 1)
     {
       get_stellar_wind_params ();
