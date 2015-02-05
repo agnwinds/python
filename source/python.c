@@ -624,6 +624,7 @@ main (argc, argv)
     get_bl_and_agn_params (lstar);
 
 
+
     /* Describe the Compton torus */
     geo.compton_torus=0;
 

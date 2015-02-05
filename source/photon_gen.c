@@ -429,6 +429,7 @@ xmake_phot (p, f1, f2, ioniz_or_final, iwind, weight, iphot_start, nphotons)
 
   int nphot, nn;
   int nstar, nbl, nwind, ndisk, nmatom, nagn, nkpkt;
+  double agn_f1;
 
 /* Determine the number of photons of each type 
 Error ?? -- This is a kluge.  It is intended to preserve what was done with versions earlier than
@@ -564,11 +565,28 @@ stellar photons */
       nphot = nagn;
       if (nphot > 0)
 	{
+    /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
+       only in advanced mode */
+    if (geo.pl_low_cutoff != 0.0 && geo.pl_low_cutoff > f1)
+      agn_f1 = geo.pl_low_cutoff;
+
+    /* error condition if user specifies power law cutoff below that hardwired in
+       ionization cycles */
+    else if (geo.pl_low_cutoff > f1 && ioniz_or_final == 0)
+      {
+        Error("photo_gen_agn: power_law low f cutoff (%8.4e) is lower than hardwired minimum frequency (%8.4e)\n", 
+               geo.pl_low_cutoff, f1);
+        agn_f1 = f1;
+      }
+    else
+      agn_f1 = f1;
+
+
 	  if (ioniz_or_final == 1)
-	    photo_gen_agn (p, geo.r_agn, geo.alpha_agn, weight, f1, f2,
+	    photo_gen_agn (p, geo.r_agn, geo.alpha_agn, weight, agn_f1, f2,
 			   geo.agn_spectype, iphot_start, nphot);
 	  else
-	    photo_gen_agn (p, geo.r_agn, geo.alpha_agn, weight, f1, f2,
+	    photo_gen_agn (p, geo.r_agn, geo.alpha_agn, weight, agn_f1, f2,
 			   geo.agn_ion_spectype, iphot_start, nphot);
 	}
       iphot_start += nphot;
