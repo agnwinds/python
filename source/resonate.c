@@ -1176,17 +1176,19 @@ scatter (p, nres, nnscat)
          could occur if we were in a macro atom approach but had no macro atoms.  Need
          to fix all this up with a thorough review of macro atoms. !!!
        */
+      /* JM 1502 -- I've reinstated this call to mplasma, it should happen regardless of whether we have
+         actual macro-atom levels as one can be in the simple ion approach. see #138 */
 
-      if (geo.nmacro > 0)
-	{
+    //    if (geo.nmacro > 0)
+	  //{
 	  mplasma = &macromain[xplasma->nplasma];
-	}
-      else
-	{
-	  mplasma = NULL;
-	  Error
-	    ("Resonate: In macro atom section, but no macro atoms.  Seems very odd\n");
-	}
+    //}
+    //   else
+	  // {
+	  //   mplasma = NULL;
+	  //   Error
+	  //     ("Resonate: In macro atom section, but no macro atoms.  Seems very odd\n");
+	  // }
 
       /* Electron scattering is the simplest to deal with. The co-moving 
          frequency is unchanged so it's just a randomisation of the direction.
