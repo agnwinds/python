@@ -379,7 +379,7 @@ main (argc, argv)
 
   if (restart_stat == 0)	/* We are starting a new run from scratch */
     {
-      /* Note that these describe wind geometryies and not the type of object */
+      /* Note that these describe wind geometries and not the type of object */
 
 
       rdint
@@ -501,14 +501,14 @@ main (argc, argv)
   get_grid_params();
 
 
-  //080808 - 62 - Ionization section has been cleaned up -- ksl
-  /* ??? ksl - Acoording to line 110 of ioniztion. option 4 is LTE with SIM_correction.  It would be good to
+  /* 080808 - 62 - Ionization section has been cleaned up -- ksl */
+  /* ??? ksl - Acoording to line 110 of ionization. option 4 is LTE with SIM_correction.  It would be good to
    * know what this is actually.   Note that pairwise is the appraoch which cboses between pairwise_bb, and pairwise_pow.
    * Normally, any of the pairwise options should force use of a banding option with a broad set of bands
    */
 
   rdint
-    ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,6=pairwise_bb,7=pairwise_pow)",
+    ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,6=pairwise_bb,7=pairwise_pow,8=matrix_bb,9=matrix_pow)",
      &geo.ioniz_mode);
 
   if (geo.ioniz_mode == IONMODE_FIXED)
@@ -978,15 +978,15 @@ main (argc, argv)
       open_diagfile ();
     }
 
-/* initialize the random number generator */
-//      srand( (n=(unsigned int) clock()));  
+  /* initialize the random number generator */
+  //      srand( (n=(unsigned int) clock()));  
   srand (1084515760+(13*rank_global));
 
   /* 68b - 0902 - ksl - Start with photon history off */
 
   phot_hist_on = 0;
 
-/* If required, read in a non-standard disk temperature profile */
+  /* If required, read in a non-standard disk temperature profile */
 
   if (geo.disk_tprofile == 1)
     {
@@ -1150,7 +1150,7 @@ main (argc, argv)
 	  Log
 	    ("!!python: Total photon luminosity before transphot %18.12e\n",
 	     zz);
-	  Log_flush ();		/*NSH June 13 Added call to flush logfile */
+	  Log_flush ();		/* NSH June 13 Added call to flush logfile */
 	  ztot += zz;		/* Total luminosity in all cycles, used for calculating disk heating */
 
 	  /* kbf_need determines how many & which bf processes one needs to considere.  It was introduced
