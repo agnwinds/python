@@ -249,7 +249,6 @@ main (argc, argv)
   FILE *fopen ();
 
   int disk_illum;
-  int istandard, keep_photoabs;
   int opar_stat, restart_stat;
   double time_max;		// The maximum time the program is allowed to run before halting
   double lstar;                 // The luminosity of the star, iv it exists
@@ -333,69 +332,9 @@ main (argc, argv)
       set_max_time (files.root, time_max);
     }
 
-
   xsignal (files.root, "%-20s Initializing variables for %s\n", "NOK", files.root);
-
-
-  if (strncmp (files.root, "dummy", 5) == 0)
-    {
-      Log
-	("Proceeding to create rdpar file in dummy.pf, but will not run prog\n");
-    }
-  else if (strncmp (files.root, "stdin", 5) == 0
-	   || strncmp (files.root, "rdpar", 5) == 0 || files.root[0] == ' '
-	   || strlen (files.root) == 0)
-    {
-      strcpy (files.root, "mod");
-      Log
-	("Proceeding in interactive mode\n Output files will have rootname mod\n");
-    }
-  else
-    {
-      strcpy (files.input, files.root);
-      strcat (files.input, ".pf");
-
-      if ((opar_stat = opar (files.input)) == 2)
-	{
-	  Log ("Reading data from file %s\n", files.input);
-	}
-      else
-	{
-	  Log ("Creating a new parameter file %s\n", files.input);
-	}
-
-    }
-
-  /* Now create the names of all the files which will be written.  Note that some files
-     have the same root as the input file, while others have a generic name of python.
-     This is intended so that files which you really want to keep have unique names, while
-     those which are for short-term diagnostics are overwritten.  ksl 97aug. */
-
-
-  strcpy (basename, files.root);	//56d -- ksl --Added so filenames could be created by routines as necessary
-
-  strcpy (files.wspec, files.root);
-  strcpy (files.lspec, files.root);
-
-  strcpy (files.spec, files.root);
-  strcpy (files.windrad, "python");
-  strcpy (files.windsave, files.root);
-  strcpy (files.specsave, files.root);
-
-  /* 130722 JM we now save python.phot and disk.diag files under diag_root folder */
-  strcpy (files.phot, files.diagfolder);
-  strcpy (files.disk, files.diagfolder);
-  strcat (files.phot, "python");
-  strcat (files.disk, files.root);
-
-  strcat (files.wspec, ".spec_tot");
-  strcat (files.lspec, ".log_spec_tot");
-  strcat (files.spec, ".spec");
-  strcat (files.windrad, ".wind_rad");
-  strcat (files.windsave, ".wind_save");
-  strcat (files.specsave, ".spec_save");
-  strcat (files.phot, ".phot");
-  strcat (files.disk, ".disk.diag");
+  
+  opar_stat = setup_created_files();
 
 
 /* Provide plausible initial values for the sizes of the wind arrays.  This is desirable
@@ -649,7 +588,7 @@ main (argc, argv)
   /* Determine what radiation sources there are.  
      Note that most of these values are initilized in init_geo */
 
-  get_radiation_sources(); 
+  get_radiation_sources (); 
 
 
   if (geo.wind_type == 2)
@@ -663,14 +602,14 @@ main (argc, argv)
 
       /* get_stellar_params gets information like mstar, rstar, tstar etc.
          it returns the luminosity of the star */
-      lstar = get_stellar_params();
+      lstar = get_stellar_params ();
 
 
       /* Describe the disk */
 
       if (geo.disk_type)	/* Then a disk exists and it needs to be described */
 	{
-      get_disk_params();
+      get_disk_params ();
 	}
 
       else
@@ -682,7 +621,7 @@ main (argc, argv)
 
     /* describe the boundary layer / agn components to the spectrum if they exist. 
        reads in information specified by the user and sets variables in geo structure */
-    get_bl_and_agn_params(lstar);
+    get_bl_and_agn_params (lstar);
 
 
     /* Describe the Compton torus */
@@ -690,14 +629,14 @@ main (argc, argv)
 
     /* JM 1411 -- we only ask about the Torus if we've used the -d flag */
     if (modes.iadvanced)
-      get_compton_torus_params();
+      get_compton_torus_params ();
 
 
 
     /* Describe the wind. This routine readsin geo.rmax and geo.twind
        and then gets params by calling e.g. get_sv_wind_params() */
 
-      get_wind_params();	
+      get_wind_params ();	
 
     }				// End of block to define a model for the first time
 
@@ -787,9 +726,9 @@ main (argc, argv)
   else
     Log ("There is no BH \n");
 
-/* Describe the spectra which will be extracted and the way it will be extracted */
+  /* Describe the spectra which will be extracted and the way it will be extracted */
 
-/* First initialise things to semi-reasonable values */
+  /* First initialise things to semi-reasonable values */
 
   nangles = 4;
   angle[0] = 10;
@@ -958,29 +897,10 @@ main (argc, argv)
 
   /* 57h -- New section of inputs to provide more control over how the program is
   run -- 07jul -- ksl
+  1502 JM -- moved to subroutine
   */
 
-  istandard = 1;
-  SMAX_FRAC = 0.5;
-  DENSITY_PHOT_MIN = 1.e-10;
-  keep_photoabs = 1;
-
-  /* 141116 - ksl - Made care factors and advanced command as this is clearly somethng that is diagnostic */
-
-  if (modes.iadvanced) {
-  	rdint ("Use.standard.care.factors(1=yes)", &istandard);
-
-  	if (!istandard)
-   	 {
-      		rddoub ("Fractional.distance.photon.may.travel", &SMAX_FRAC);
-      		rddoub ("Lowest.ion.density.contributing.to.photoabsorption",
-	      &DENSITY_PHOT_MIN);
-      	rdint ("Keep.photoabs.during.final.spectrum(1=yes)", &keep_photoabs);
-    }
-  }
-
-
-
+  get_standard_care_factors();
 
 
 /* 081221 - 67c - Establish limits on the frequency intervals to be used by the ionization cycles and 
@@ -1412,7 +1332,7 @@ main (argc, argv)
   geo.ioniz_or_extract = 0;
 
 /* 57h -- 07jul -- Next steps to speed up extraction stage */
-  if (!keep_photoabs)
+  if (!modes.keep_photoabs)
     {
       DENSITY_PHOT_MIN = -1.0;	// Do not calculated photoabsorption in detailed spectrum 
     }
@@ -1432,7 +1352,7 @@ main (argc, argv)
 
   kbf_need (freqmin, freqmax);
 
-/* XXXX - BEGIN CYCLES TO CREATE THE DETAILED SPECTRUM */
+  /* XXXX - BEGIN CYCLES TO CREATE THE DETAILED SPECTRUM */
 
   /* the next section initializes the spectrum array in two cases, for the
    * standard one where one is calulating the spectrum for the first time
@@ -1591,6 +1511,7 @@ main (argc, argv)
 
 
 /* Finally done */
+   
 #ifdef MPI_ON
   sprintf (dummy,"End of program, Thread %d only",my_rank);   // added so we make clear these are just errors for thread ngit status	
   error_summary (dummy);	// Summarize the errors that were recorded by the program
@@ -2160,6 +2081,9 @@ int init_advanced_modes()
   modes.print_dvds_info = 0;          // print out information on velocity gradients
   write_atomicdata = 0;               // print out summary of atomic data 
   //note this is defined in atomic.h, rather than the modes structure 
+
+
+  modes.keep_photoabs = 1;			  // keep photoabsorption in final spectrum
 
   return (0);
 }

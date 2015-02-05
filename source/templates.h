@@ -483,6 +483,8 @@ int get_bl_and_agn_params(double lstar);
 int get_compton_torus_params(void);
 double setup_dfudge(void);
 int setup_windcone(void);
+int setup_created_files(void);
+int get_standard_care_factors(void);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

@@ -1072,3 +1072,147 @@ History:
 
 
 
+
+
+
+
+
+
+/***********************************************************
+             University of Southampton
+
+Synopsis: 
+  setup_created_files 
+   
+Arguments:    
+
+Returns:
+
+Description:  
+
+Notes:
+
+History:
+  1502  JM  Moved here from main()
+
+**************************************************************/
+
+int setup_created_files()
+{
+  int opar_stat;
+  
+  if (strncmp (files.root, "dummy", 5) == 0)
+    {
+      Log
+  ("Proceeding to create rdpar file in dummy.pf, but will not run prog\n");
+    }
+
+  else if (strncmp (files.root, "stdin", 5) == 0
+     || strncmp (files.root, "rdpar", 5) == 0 || files.root[0] == ' '
+     || strlen (files.root) == 0)
+    {
+      strcpy (files.root, "mod");
+      Log
+  ("Proceeding in interactive mode\n Output files will have rootname mod\n");
+    }
+
+  else
+    {
+      strcpy (files.input, files.root);
+      strcat (files.input, ".pf");
+
+      if ((opar_stat = opar (files.input)) == 2)
+  {
+    Log ("Reading data from file %s\n", files.input);
+  }
+      else
+  {
+    Log ("Creating a new parameter file %s\n", files.input);
+  }
+
+    }
+
+
+  /* Now create the names of all the files which will be written.  Note that some files
+  have the same root as the input file, while others have a generic name of python.
+  This is intended so that files which you really want to keep have unique names, while
+  those which are for short-term diagnostics are overwritten.  ksl 97aug. */
+
+  strcpy (basename, files.root);  //56d -- ksl --Added so filenames could be created by routines as necessary
+
+  strcpy (files.wspec, files.root);
+  strcpy (files.lspec, files.root);
+
+  strcpy (files.spec, files.root);
+  strcpy (files.windrad, "python");
+  strcpy (files.windsave, files.root);
+  strcpy (files.specsave, files.root);
+
+  /* 130722 JM we now save python.phot and disk.diag files under diag_root folder */
+  strcpy (files.phot, files.diagfolder);
+  strcpy (files.disk, files.diagfolder);
+  strcat (files.phot, "python");
+  strcat (files.disk, files.root);
+
+  strcat (files.wspec, ".spec_tot");
+  strcat (files.lspec, ".log_spec_tot");
+  strcat (files.spec, ".spec");
+  strcat (files.windrad, ".wind_rad");
+  strcat (files.windsave, ".wind_save");
+  strcat (files.specsave, ".spec_save");
+  strcat (files.phot, ".phot");
+  strcat (files.disk, ".disk.diag");
+
+
+  return (opar_stat);
+}
+
+
+
+
+
+
+
+/***********************************************************
+             University of Southampton
+
+Synopsis: 
+  get_standard_care_factors provides more control over how the program is
+  run
+   
+Arguments:    
+
+Returns:
+
+Description:  
+
+Notes:
+
+History:
+  1502  JM  Moved here from main()
+
+**************************************************************/
+
+int get_standard_care_factors()
+{
+  int istandard;
+  istandard = 1;
+  SMAX_FRAC = 0.5;
+  DENSITY_PHOT_MIN = 1.e-10;
+
+  /* 141116 - ksl - Made care factors and advanced command as this is clearly somethng that is diagnostic */
+
+  if (modes.iadvanced) {
+    rdint ("Use.standard.care.factors(1=yes)", &istandard);
+
+    if (!istandard)
+     {
+        rddoub ("Fractional.distance.photon.may.travel", &SMAX_FRAC);
+        rddoub ("Lowest.ion.density.contributing.to.photoabsorption",
+        &DENSITY_PHOT_MIN);
+        rdint ("Keep.photoabs.during.final.spectrum(1=yes)", &modes.keep_photoabs);
+      }
+  }
+  return (0);
+}
+
