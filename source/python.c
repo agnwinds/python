@@ -1420,23 +1420,27 @@ int main(argc, argv)
 		for (n = 0; n < nangles; n++)
 			rddoub("angle(0=pole)", &angle[n]);
 
-		/* 05apr-ksl-56--For diagnositic reasons I have left questions regarding phase even for systems which are not binaries.
-		   Phase 0 in this case corresponds to an extraction direction which is in the xz plane */
 
-		for (n = 0; n < nangles; n++)
-			rddoub("phase(0=inferior_conjunction)", &phase[n]);
+    
+      for (n = 0; n < nangles; n++)
+	rddoub ("angle(0=pole)", &angle[n]);
 
-		rdint("live.or.die(0).or.extract(anything_else)", &select_extract);
-		if (select_extract != 0)
-		{
-			select_extract = 1;
-			Log("OK, extracting from specific angles\n");
-		}
-		else
-			Log("OK, using live or die option\n");
+      /* 05apr-ksl-56--For diagnositic reasons I have left questions regarding phase
+       * even for systems which are not binaries.  Phase 0 in this case corresponds to
+       * an extraction direction which is in the xz plane
+       */
+      /* JM 1502 -- change this so we only ask for phase if the system is a binary -- see #137 */
 
-		/* Select spectra with certain numbers of scatterings.  See extract 1997 aug 28 ksl 141116 - ksl The following options are 
-		   clealy diagnostic and have been relegated to advanced commands */
+      if (geo.system_type == SYSTEM_TYPE_BINARY)
+      {
+        
+        for (n = 0; n < nangles; n++)
+	      rddoub ("phase(0=inferior_conjunction)", &phase[n]);
+      }
+      else
+      	Log("No phase information needed as system type %i is not a binary\n",
+      		 geo.system_type);
+
 
 		if (modes.iadvanced)
 		{

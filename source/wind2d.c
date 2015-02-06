@@ -212,10 +212,16 @@ int define_wind(void)
 		Error("wind2d.c: Don't know how to make volumes for coordinate type %d\n", geo.coord_type);
 	}
 
-	/* Now check if there is a second component and if so get the volumes for these cells as well */
-
-	if (geo.compton_torus)
-	{
+	/* JM 1502 -- we want the macro structure to be allocated in geo.rt_mode = 2. see #138  */
+  
+  	if (geo.rt_mode == 2)
+  	{
+    	calloc_macro (NPLASMA);
+    	calloc_estimators (NPLASMA);
+  	}
+  
+	/* 06may -- At this point we have calculated the volumes of all of the cells and it should
+	be optional which variables beyond here are moved to structures othere than Wind */
 
 		if (geo.coord_type == SPHERICAL)
 		{

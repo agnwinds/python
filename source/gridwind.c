@@ -358,14 +358,15 @@ int
 calloc_macro (int nelem)
 {
 
+  /* JM 1502 -- commented out this if loop because we want 
+     the macro structure to be allocated regardless in geo.rt_mode = 2. see #138 */
+  //  if (nlevels_macro == 0 && geo.nmacro == 0)
+  //    {   
+  //      Log
+  // ("calloc_macro: Allocated no space for macro since nlevels_macro==0 and geo.nmacro==0\n");
+  //      return (0);
+  //    }
 
-  if (nlevels_macro == 0 && geo.nmacro == 0)
-    {
-      
-      Log
-	("calloc_macro: Allocated no space for macro since nlevels_macro==0 and geo.nmacro==0\n");
-      return (0);
-    }
   if (macromain != NULL)
     {
       free (macromain);
@@ -385,7 +386,7 @@ calloc_macro (int nelem)
   else if (nlevels_macro > 0 || geo.nmacro > 0)
     {
       Log
-	("Allocated %10d bytes for each of %5d elements of       macro totaling %10.1f Mb \n",
+	("Allocated %10d bytes for each of %5d elements of macro totaling %10.1f Mb \n",
 	 sizeof (macro_dummy), (nelem + 1),
 	 1.e-6 * (nelem + 1) * sizeof (macro_dummy));
     }

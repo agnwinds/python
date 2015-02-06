@@ -108,8 +108,15 @@ As now represented geo.kn_dratio is the distance to the focus point in stellar r
 use these generic parameters in the rest of the routines here, as especially for the yso model they may have
 to be modified -- ksl 04jun */
 
-  geo.wind_rmin = geo.rstar;
-  geo.wind_rmax = geo.rmax;
+
+  /* JM 1502 -- added capability for user to adjust launch radii of KWD wind
+     required to reproduce Stuart's X-ray models (Sim+ 2008,2010) 
+     units are in stellar radii / WD radii / grav radii as in SV model */
+  rddoub ("kn.rmin", &geo.wind_rmin);
+  rddoub ("kn.rmax", &geo.wind_rmax ); 
+
+  geo.wind_rmin *= geo.rstar;
+  geo.wind_rmax *= geo.rstar;
   geo.wind_thetamin = atan (1. / geo.kn_dratio);
 /* Somewhat paradoxically diskrad is in cm, while dn_ratio which is really d in KWD95 is 
 in units of WD radii */
@@ -125,13 +132,13 @@ in units of WD radii */
 	      (((geo.kn_dratio * geo.rstar) + zdisk (geo.diskrad))));
     }
 
-  geo.wind_rho_min = geo.rstar;
-  geo.wind_rho_max = geo.diskrad;
+  geo.wind_rho_min = geo.wind_rmin;
+  geo.wind_rho_max = geo.wind_rmax;
   /* The change in the boundary of the wind (as corner of disk -- see above) 
      means that wind_rho_max nees to be redefined so that it is used correctly
      to compute the boundary of the wind elsewhere. */
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == 2) // If disk_type==2, then the disk is vertically extended
     {
       geo.wind_rho_max =
 	geo.diskrad - (zdisk (geo.diskrad) * tan (geo.wind_thetamax));

@@ -246,13 +246,22 @@ def read_pf(root):
     pf_dict
         Dictionary object containing parameters in pf file
     '''
+    OrderedDict_present=True
+    try:
+        from collections import OrderedDict
+    except ImportError:
+        OrderedDict_present=False
 
     if not ".pf" in root:
         root = root + ".pf"
 
     params, vals = np.loadtxt(root, dtype="string", unpack=True)
 
-    pf_dict = dict()
+    if OrderedDict_present:
+        pf_dict = OrderedDict()
+    else:
+        pf_dict = dict()    # should work with all version of python, but bad for writing
+        print "Warning, your dictionary object is not ordered."
 
     old_param = None 
     old_val = None
@@ -285,7 +294,55 @@ def read_pf(root):
     return pf_dict
 
 
+def write_pf(root, pf_dict):
 
+    '''
+    writes a Python .pf file from a dictionary
+
+    Parameters
+    ----------
+    root : file or str
+        File, filename to write.  
+
+    pf_dict:
+        dictionary to write
+    
+    Returns
+    ----------
+    pf_dict
+        Dictionary object containing parameters in pf file
+    '''
+
+    if not ".pf" in root:
+        root = root + ".pf"
+
+    OrderedDict_present=True
+    try:
+        from collections import OrderedDict
+    except ImportError:
+        OrderedDict_present=False
+
+    if (isinstance(pf_dict, OrderedDict) == False):
+        print "Warning, your dictionary object is not ordered. Output file will be wrong, writing anyway."
+
+
+    f = open(root, "w")
+
+    for key,val in pf_dict.iteritems():
+
+        # convert if it is a float
+        if isinstance(val, list):           
+            for i in range(len(val)):
+                f.write("%s    %s\n" % (key, val[i]))
+
+        #elif isinstance(val, float): 
+        #    if "photons_per_cycle" not in key:
+        #        if val > 1e5:
+        #            f.write("%s    %e\n" % (key, val))
+        else:
+            f.write("%s    %s\n" % (key, val))
+
+    return (0)
 
 
 def setpars():

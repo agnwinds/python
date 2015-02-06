@@ -1013,30 +1013,70 @@ History:
 
 int scatter(PhotPtr p, int *nres, int *nnscat)
 {
-	double v[3];
-	double z_prime[3];
-	int which_out;
-	struct photon pold;
-	int i, n;
-	double p_init[3], p_final[3], dp[3], dp_cyl[3];
-	WindPtr one;
-	double prob_kpkt, kpkt_choice;
-	double gamma_twiddle, gamma_twiddle_e, stim_fact;
-	int m, llvl, ulvl;
-	PlasmaPtr xplasma;
-	MacroPtr mplasma;
+  double v[3];
+  double z_prime[3];
+  int which_out;
+  struct photon pold;
+  int i, n;
+  double p_init[3], p_final[3], dp[3], dp_cyl[3];
+  WindPtr one;
+  double prob_kpkt, kpkt_choice;
+  double gamma_twiddle, gamma_twiddle_e, stim_fact;
+  int m, llvl, ulvl;
+  PlasmaPtr xplasma;
+  MacroPtr mplasma;
 
 
 
-	stuff_phot(p, &pold);
-	n = where_in_grid(pold.x);	// Find out where we are
+  stuff_phot (p, &pold);
+  n = where_in_grid (pold.x);	// Find out where we are
 
-	// 71 - 1112 Check added to test out spherical wind models 
-	if (n < 0)
-	{
-		Error("scatter: Trying to scatter a photon in grid cell %d\n", n);
-		return (-1);
-	}
+  //71 - 1112 Check added to test out spherical wind models 
+  if (n < 0)
+    {
+      Error ("scatter: Trying to scatter a photon in grid cell %d\n", n);
+      return (-1);
+    }
+
+  one = &wmain[p->grid];
+  xplasma = &plasmamain[one->nplasma];
+  //OLD - did not trap a problem if (xplasma==NULL){
+  //OLD - did not trap a problem          Error("Houston, we have a null pointer at %d %d",p->grid,one->nplasma);
+  //OLD - did not trap a problem }
+
+  /* On entering this subroutine we know that a photon packet has been 
+     absorbed. nres tells us which process absorbed it. There are currently
+     four "absorption" processes: electron scattering (flagged -1) line
+     absorption (flagged by +ve integer < NLINES), bf absorption 
+     (flagged by +ve integer > NLINES) and ff absorption (flagged -2). (SS) */
+
+  /* If the macro atom method is being used then the following section must be
+     performed to select a macro atom deactivation process. If not then the
+     deactivation process is always the same as the activation process and so
+     nothing needs to be done. */
+
+  if (geo.rt_mode == 2)		//check if macro atom method in use
+    {
+
+      /* 1112 - 71 - ksl - Moved to avoid trying to reference mplasma if there are no 
+         macro atoms.  This was to fix a segmentation fault that appeared
+         when compiling with a new version of gcc.   It's possible that the error below
+         could occur if we were in a macro atom approach but had no macro atoms.  Need
+         to fix all this up with a thorough review of macro atoms. !!!
+       */
+      /* JM 1502 -- I've reinstated this call to mplasma, it should happen regardless of whether we have
+         actual macro-atom levels as one can be in the simple ion approach. see #138 */
+
+    //    if (geo.nmacro > 0)
+	  //{
+	  mplasma = &macromain[xplasma->nplasma];
+    //}
+    //   else
+	  // {
+	  //   mplasma = NULL;
+	  //   Error
+	  //     ("Resonate: In macro atom section, but no macro atoms.  Seems very odd\n");
+	  // }
 
 	one = &wmain[p->grid];
 	xplasma = &plasmamain[one->nplasma];
