@@ -22,7 +22,7 @@ compiler:
 branches:
   only:
       dev
-      setup_reorg
+      tests_for_travis
 
 install:
     # first configure
