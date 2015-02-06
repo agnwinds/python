@@ -19,6 +19,8 @@ compiler:
     - gcc
 
 # only want to run this test when we commit to dev
+# JM 1502 -- I've created a test branch which means we can run the travis test on stuff,
+# and possibly improve it before we push to dev 
 branches:
   only:
       dev
