@@ -822,7 +822,98 @@ int main(argc, argv)
 	// SS - initalise the choice of handling for macro pops.
 	if (geo.wind_type == 2)
 	{
-		geo.macro_ioniz_mode = 1;	// Now that macro atom properties are available for restarts
+	  geo.lum_bl = 0;
+	  geo.t_bl = 0;
+	}
+
+/* Describe the agn */
+
+      if (geo.agn_radiation && geo.system_type == SYSTEM_TYPE_AGN)	/* This peculiar line is to enamble us to add a star with a power law component */
+	{
+	  xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
+
+	  /* If there is no disk, initilize geo.lum to the luminosity of a star */
+	  if (geo.disk_type==0) {
+		  geo.lum_agn=lstar;
+	  }
+
+	  // At present we have set geo.r_agn = geo.rstar, and encouraged the user
+	  // set the default for the radius of the BH to be 6 R_Schwartschild.
+	  // rddoub("R_agn(cm)",&geo.r_agn);
+
+	  rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
+	  Log ("OK, the agn lum will be about %.2e the disk lum\n",
+	       geo.lum_agn / xbl);
+	  geo.alpha_agn = (-1.5);
+	  rddoub ("agn_power_law_index", &geo.alpha_agn);
+
+      /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
+       only in advanced mode. default is zero which is checked before we call photo_gen_agn */
+      geo.pl_low_cutoff = 0.0;	
+	  if (modes.iadvanced)
+	  	rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
+
+/* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
+This is only used in the sim correction factor for the first time through. 
+Afterwards, the photons are used to compute the sim parameters. */
+
+	  geo.const_agn =
+	    geo.lum_agn /
+	    (((pow (2.42e18, geo.alpha_agn + 1.)) -
+	      pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
+	  Log ("AGN Input parameters give a power law constant of %e\n",
+	       geo.const_agn);
+
+	  if (geo.agn_ion_spectype == SPECTYPE_CL_TAB)	/*NSH 0412 - option added to allow direct comparison with cloudy power law table option */
+	    {
+	      geo.agn_cltab_low = 1.0;
+	      geo.agn_cltab_hi = 10000;
+	      rddoub ("low_energy_break(ev)", &geo.agn_cltab_low);	/*lo frequency break - in ev */
+	      rddoub ("high_energy_break(ev)", &geo.agn_cltab_hi);
+	      geo.agn_cltab_low_alpha = 2.5;	//this is the default value in cloudy
+	      geo.agn_cltab_hi_alpha = -2.0;	//this is the default value in cloudy
+	    }
+	}
+      else if (geo.agn_radiation)  /* We want to add a power law to something other than an AGN */
+	{
+	  xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
+
+	  // At present we have set geo.r_agn = geo.rstar, and encouraged the user
+	  // set the default for the radius of the BH to be 6 R_Schwartschild.
+	  // rddoub("R_agn(cm)",&geo.r_agn);
+
+	  rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
+	  Log ("OK, the agn lum will be about %.2e the disk lum\n",
+	       geo.lum_agn / xbl);
+	  geo.alpha_agn = (-1.5);
+	  rddoub ("agn_power_law_index", &geo.alpha_agn);
+
+      /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
+       only in advanced mode. default is zero which is checked before we call photo_gen_agn */
+      geo.pl_low_cutoff = 0.0;	
+	  if (modes.iadvanced)
+	  	rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
+
+/* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
+This is only used in the sim correction factor for the first time through. 
+Afterwards, the photons are used to compute the sim parameters. */
+
+	  geo.const_agn =
+	    geo.lum_agn /
+	    (((pow (2.42e18, geo.alpha_agn + 1.)) -
+	      pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
+	  Log ("AGN Input parameters give a power law constant of %e\n",
+	       geo.const_agn);
+
+	  if (geo.agn_ion_spectype == SPECTYPE_CL_TAB)	/*NSH 0412 - option added to allow direct comparison with cloudy power law table option */
+	    {
+	      geo.agn_cltab_low = 1.0;
+	      geo.agn_cltab_hi = 10000;
+	      rddoub ("low_energy_break(ev)", &geo.agn_cltab_low);	/*lo frequency break - in ev */
+	      rddoub ("high_energy_break(ev)", &geo.agn_cltab_hi);
+	      geo.agn_cltab_low_alpha = 2.5;	//this is the default value in cloudy
+	      geo.agn_cltab_hi_alpha = -2.0;	//this is the default value in cloudy
+	    }
 	}
 	else
 	{

@@ -380,47 +380,77 @@ int xmake_phot(PhotPtr p, double f1, double f2, int ioniz_or_final, int iwind, d
 																																// in this
 																																// call
 {
+  int nphot, nn;
+  int nstar, nbl, nwind, ndisk, nmatom, nagn, nkpkt;
+  double agn_f1;
 
-	int nphot, nn;
-	int nstar, nbl, nwind, ndisk, nmatom, nagn, nkpkt;
+/* Determine the number of photons of each type 
+Error ?? -- This is a kluge.  It is intended to preserve what was done with versions earlier than
+python 40 but it is not really what one wants.
+*/
+  nstar = nbl = nwind = ndisk = 0;
+  nagn = nkpkt = nmatom = 0;
 
-	/* Determine the number of photons of each type Error ?? -- This is a kluge.  It is intended to preserve what was done with versions
-	   earlier than python 40 but it is not really what one wants. */
-	nstar = nbl = nwind = ndisk = 0;
-	nagn = nkpkt = nmatom = 0;
-
-	if (geo.star_radiation)
-	{
-		nstar = geo.f_star / geo.f_tot * nphotons;
-	}
-	if (geo.bl_radiation)
-	{
-		nbl = geo.f_bl / geo.f_tot * nphotons;
-	}
-	if (iwind >= 0)
-	{
-		nwind = geo.f_wind / geo.f_tot * nphotons;
-	}
-	if (geo.disk_radiation)
-	{
-		ndisk = geo.f_disk / geo.f_tot * nphotons;	/* Ensure that nphot photons are created */
-	}
-	if (geo.agn_radiation)
-	{
-		nagn = geo.f_agn / geo.f_tot * nphotons;	/* Ensure that nphot photons are created */
-	}
-	if (geo.matom_radiation)
-	{
-		nkpkt = geo.f_kpkt / geo.f_tot * nphotons;
-		nmatom = geo.f_matom / geo.f_tot * nphotons;
-	}
+  if (geo.star_radiation)
+    {
+      nstar = geo.f_star / geo.f_tot * nphotons;
+    }
+  if (geo.bl_radiation)
+    {
+      nbl = geo.f_bl / geo.f_tot * nphotons;
+    }
+  if (iwind >= 0)
+    {
+      nwind = geo.f_wind / geo.f_tot * nphotons;
+    }
+  if (geo.disk_radiation)
+    {
+      ndisk = geo.f_disk / geo.f_tot * nphotons;	/* Ensure that nphot photons are created */
+    }
+  if (geo.agn_radiation)
+    {
+      nagn = geo.f_agn / geo.f_tot * nphotons;	/* Ensure that nphot photons are created */
+    }
+  if (geo.matom_radiation)
+    {
+      nkpkt = geo.f_kpkt / geo.f_tot * nphotons;
+      nmatom = geo.f_matom / geo.f_tot * nphotons;
+    }
 
 
-	nphot = ndisk + nwind + nbl + nstar + nagn + nkpkt + nmatom;
+  nphot = ndisk + nwind + nbl + nstar + nagn + nkpkt + nmatom;
 
-	/* Error - This appears to be an attempt to make sure we have the right number of photons but this looks as iff it could end up with
-	   the sum of the photons exceeding the number that are desired.  Why isn't this a problem.  Error - ksl 101029 */
-	if (nphot < nphotons)
+  /* Error - This appears to be an attempt to make sure we have the right number of photons
+   * but this looks as iff it could end up with the sum of the photons exceeding the number that
+   * are desired.  Why isn't this a problem.  Error - ksl 101029
+   */
+  if (nphot < nphotons)
+    {
+      if (ndisk > 0)
+	ndisk += (nphotons - nphot);
+      else if (nwind > 0)
+	nwind += (nphotons - nphot);
+      else if (nbl > 0)
+	nbl += (nphotons - nphot);
+      else if (nagn > 0)
+	nagn += (nphotons - nphot);
+      else
+	nstar += (nphotons - nphot);
+    }
+
+
+  Log
+    ("photon_gen: band %6.2e to %6.2e weight %6.2e nphotons %d ndisk %6d nwind %6d nstar %6d npow %d \n",
+     f1,f2,weight, nphotons, ndisk, nwind, nstar, nagn);
+
+  /* Generate photons from the star, the bl, the wind and then from the disk */
+  /* Now adding generation from kpkts and macro atoms too (SS June 04) */
+
+
+  if (geo.star_radiation)
+    {
+      nphot = nstar;
+      if (nphot > 0)
 	{
 		if (ndisk > 0)
 			ndisk += (nphotons - nphot);
@@ -492,15 +522,29 @@ int xmake_phot(PhotPtr p, double f1, double f2, int ioniz_or_final, int iwind, d
 
 	if (geo.disk_radiation)
 	{
-		nphot = ndisk;
-		if (nphot > 0)
-		{
-			if (ioniz_or_final == 1)
-				photo_gen_disk(p, weight, f1, f2, geo.disk_spectype, iphot_start, nphot);
-			else
-				photo_gen_disk(p, weight, f1, f2, geo.disk_ion_spectype, iphot_start, nphot);
-		}
-		iphot_start += nphot;
+    /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
+       only in advanced mode */
+    if (geo.pl_low_cutoff != 0.0 && geo.pl_low_cutoff > f1)
+      agn_f1 = geo.pl_low_cutoff;
+
+    /* error condition if user specifies power law cutoff below that hardwired in
+       ionization cycles */
+    else if (geo.pl_low_cutoff > f1 && ioniz_or_final == 0)
+      {
+        Error("photo_gen_agn: power_law low f cutoff (%8.4e) is lower than hardwired minimum frequency (%8.4e)\n", 
+               geo.pl_low_cutoff, f1);
+        agn_f1 = f1;
+      }
+    else
+      agn_f1 = f1;
+
+
+	  if (ioniz_or_final == 1)
+	    photo_gen_agn (p, geo.r_agn, geo.alpha_agn, weight, agn_f1, f2,
+			   geo.agn_spectype, iphot_start, nphot);
+	  else
+	    photo_gen_agn (p, geo.r_agn, geo.alpha_agn, weight, agn_f1, f2,
+			   geo.agn_ion_spectype, iphot_start, nphot);
 	}
 
 	/* Generate the agn photons */
