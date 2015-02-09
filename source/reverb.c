@@ -463,7 +463,6 @@ wind_paths_constructor (Wind_Ptr wind)
 		Error("wind_paths_constructor: Could not allocate memory\n");
 		exit(0);
 	}
-
 	paths->front = wind_paths_side_constructor(wind,  1);
 	paths->back	 = wind_paths_side_constructor(wind, -1);
 	return(paths);

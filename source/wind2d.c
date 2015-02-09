@@ -77,7 +77,7 @@ History:
 **************************************************************/
 
 
-int define_wind(void)
+int define_wind()
 {
 	int i, j, n;
 	int nn;
@@ -110,9 +110,13 @@ int define_wind(void)
 	}
 
 
+	if (geo.wind_type == 10)
+	{
+		get_wind_keplerian_params();
+	}
 
 	if (geo.wind_type == 9)		// This is the mode where we want the wind and the grid carefully controlled to allow a very thin
-		// shell. We ensure that the coordinate type is spherical. 
+								// shell. We ensure that the coordinate type is spherical. 
 	{
 		Log("We are making a thin shell type grid to match a thin shell wind. This is totally aphysical and should only be used for testing purposes\n");
 		shell_make_grid(w);
@@ -128,7 +132,7 @@ int define_wind(void)
 	else if (geo.coord_type == RTHETA)
 	{
 		if (geo.wind_type == 3)	// 13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special
-			// case of a 'proga' wind in rtheta coordinates
+								// case of a 'proga' wind in rtheta coordinates
 		{
 			rtheta_make_zeus_grid(w);
 		}
@@ -147,25 +151,25 @@ int define_wind(void)
 	}
 	for (n = 0; n < NDIM2; n++)
 	{
-		/* 04aug -- ksl -52 -- The next couple of lines are part of the changes made in the program to allow more that one coordinate
-		   system in python */
+		/* 04aug -- ksl -52 -- The next couple of lines are part of the changes made in the program to allow more that one
+		   coordinate system in python */
 		model_velocity(w[n].x, w[n].v);
 		model_vgrad(w[n].x, w[n].v_grad);
 	}
 
 	wind_complete(w);
 
-	/* wind_complete has to precede the volume calculations because the 1d vectors are used in the volume calculations. wind_complete
-	   itself is just a driver routine.  It has to be called out as a separate routine, because the 1d vectors are not saved and have to
-	   be recreated when a windfile is read into the program 06may ksl */
+	/* wind_complete has to precede the volume calculations because the 1d vectors are used in the volume calculations.
+	   wind_complete itself is just a driver routine.  It has to be called out as a separate routine, because the 1d vectors are
+	   not saved and have to be recreated when a windfile is read into the program 06may ksl */
 
 
-	/* Now define the valid volumes of each cell and also determine whether the cells are in all or partially in the wind. Note - 05apr
-	   --55d -- ksl.  Previously there was a separate calculation here of whether a cell was in the wind and its volume. Given the
-	   increasingly complicated geometry when thick disks were first allowed, Stuart had gone back to determining whether a cell was all
-	   or partly in the wind by checking a bunch of positions in the cell.  But this is almost idetnaical to calculating the volume of
-	   the cell, and therefore I have moved this functionality in the the respective volumes calculation. At least then we will do the
-	   calculation the same way both times.  . */
+	/* Now define the valid volumes of each cell and also determine whether the cells are in all or partially in the wind. Note -
+	   05apr --55d -- ksl.  Previously there was a separate calculation here of whether a cell was in the wind and its volume.
+	   Given the increasingly complicated geometry when thick disks were first allowed, Stuart had gone back to determining whether 
+	   a cell was all or partly in the wind by checking a bunch of positions in the cell.  But this is almost idetnaical to
+	   calculating the volume of the cell, and therefore I have moved this functionality in the the respective volumes calculation. 
+	   At least then we will do the calculation the same way both times.  . */
 
 
 	if (geo.coord_type == SPHERICAL)
@@ -174,20 +178,13 @@ int define_wind(void)
 	}
 	else if (geo.coord_type == CYLIND)
 	{
-		if (geo.wind_type == 10)
-		{
-			wind_keplerian_cyl_volumes(w, W_ALL_INWIND);
-		}
-		else
-		{
-			cylind_volumes(w, W_ALL_INWIND);
-		}
+		cylind_volumes(w, W_ALL_INWIND);
 	}
 	else if (geo.coord_type == RTHETA)
 	{
 		if (geo.wind_type == 3)	// 13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special
-			// case of a 'proga' wind in rtheta coordinates We dont need to work out if cells are in the wind,
-			// they are known to be in the wind.
+								// case of a 'proga' wind in rtheta coordinates We dont need to work out if cells are in the wind,
+								// they are known to be in the wind.
 		{
 			rtheta_zeus_volumes(w);
 		}
@@ -198,30 +195,17 @@ int define_wind(void)
 	}
 	else if (geo.coord_type == CYLVAR)
 	{
-		if (geo.wind_type == 10)
-		{
-			wind_keplerian_cylvar_volumes(w, W_ALL_INWIND);
-		}
-		else
-		{
-			cylvar_volumes(w, W_ALL_INWIND);
-		}
+		cylvar_volumes(w, W_ALL_INWIND);
 	}
 	else
 	{
 		Error("wind2d.c: Don't know how to make volumes for coordinate type %d\n", geo.coord_type);
 	}
 
-	/* JM 1502 -- we want the macro structure to be allocated in geo.rt_mode = 2. see #138  */
-  
-  	if (geo.rt_mode == 2)
-  	{
-    	calloc_macro (NPLASMA);
-    	calloc_estimators (NPLASMA);
-  	}
-  
-	/* 06may -- At this point we have calculated the volumes of all of the cells and it should
-	be optional which variables beyond here are moved to structures othere than Wind */
+	/* Now check if there is a second component and if so get the volumes for these cells as well */
+
+	if (geo.compton_torus)
+	{
 
 		if (geo.coord_type == SPHERICAL)
 		{
@@ -246,8 +230,8 @@ int define_wind(void)
 
 	}
 
-	/* The routines above have established the volumes of the cells that are in the wind and also assigned the variables w[].inwind at
-	   least insofar as the wind is concerned. We now need to do the same for the torus */
+	/* The routines above have established the volumes of the cells that are in the wind and also assigned the variables w[].inwind 
+	   at least insofar as the wind is concerned. We now need to do the same for the torus */
 
 	n_vol = n_inwind = n_part = 0;
 	n_comp = n_comp_part = 0;
@@ -272,8 +256,8 @@ int define_wind(void)
 		Log("wind2d: cells of which %d are in in the torus , %d partially ini the torus\n", n_comp, n_comp_part);
 	}
 
-	/* 56d --Now check the volume calculations for 2d wind models 58b --If corners are in the wind, but there is zero_volume then ignore. 
-	 */
+	/* 56d --Now check the volume calculations for 2d wind models 58b --If corners are in the wind, but there is zero_volume then
+	   ignore. */
 	if (geo.coord_type != SPHERICAL)
 	{
 		for (n = 0; n < NDIM2; n++)
@@ -282,7 +266,7 @@ int define_wind(void)
 			if (w[n].vol == 0 && n_inwind > 0)
 			{
 				wind_n_to_ij(n, &i, &j);
-				Error("wind2d: Cell %3d (%2d,%2d) has %d corners in wind, but zero volume\n", n, i, j);
+				Error("wind2d: Cell %3d (%2d,%2d) has %d corners in wind, but zero volume\n", n, i, j, n_inwind);
 				w[n].inwind = W_IGNORE;
 			}
 			if (w[n].inwind == W_PART_INWIND && n_inwind == 4)
@@ -313,8 +297,8 @@ int define_wind(void)
 	calloc_macro(NPLASMA);
 	calloc_estimators(NPLASMA);
 
-	/* 06may -- At this point we have calculated the volumes of all of the cells and it should be optional which variables beyond here
-	   are moved to structures othere than Wind */
+	/* 06may -- At this point we have calculated the volumes of all of the cells and it should be optional which variables beyond
+	   here are moved to structures othere than Wind */
 
 
 	/* Now calculate parameters that need to be calculated at the center of the grid cell */
@@ -327,37 +311,37 @@ int define_wind(void)
 		/* 140905 - ksl - Next two lines allow for clumping */
 		plasmamain[n].rho = model_rho(x) / geo.fill;
 		plasmamain[n].vol = w[nwind].vol * geo.fill;	// Copy volumes
-		/* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, I've put new things in here to
-		   initialise the exponential models */
+		/* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, I've put new things in
+		   here to initialise the exponential models */
 		for (nn = 0; nn < NXBANDS; nn++)
 		{
-			plasmamain[n].spec_mod_type[nn] = -1;	/* NSH 120817 - setting this to a negative number means that at the outset, we assume 
-													   we do not have a suitable model for the cell */
-			plasmamain[n].exp_temp[nn] = geo.tmax;	/* NSH 120817 - as an initial guess, set this number to the hottest part of the model 
-													   - this should define where any exponential dropoff becomes important */
+			plasmamain[n].spec_mod_type[nn] = -1;	/* NSH 120817 - setting this to a negative number means that at the outset, we
+													   assume we do not have a suitable model for the cell */
+			plasmamain[n].exp_temp[nn] = geo.tmax;	/* NSH 120817 - as an initial guess, set this number to the hottest part of the 
+													   model - this should define where any exponential dropoff becomes important */
 			plasmamain[n].exp_w[nn] = 0.0;	/* 120817 Who knows what this should be! */
 			plasmamain[n].pl_alpha[nn] = geo.alpha_agn;	// As an initial guess we assume the whole wind is optically thin and so
-			// the spectral index for a PL illumination will be the same everywhere.
-			/* plasmamain[n].pl_w[nn] = geo.const_agn / (4.0*PI*(x[0] * x[0] + x[1] * x[1] + x[2] * x[2])); // constant / area of a
-			   sphere plasmamain[n].pl_w[nn] /= 4.*PI; // take account of solid angle NSH 120817 removed - if PL not suitable, it will
-			   be set to zero anyway, so safe to keep it at zero from the outset! */
+														// the spectral index for a PL illumination will be the same everywhere.
+			/* plasmamain[n].pl_w[nn] = geo.const_agn / (4.0*PI*(x[0] * x[0] + x[1] * x[1] + x[2] * x[2])); // constant / area of a 
+			   sphere plasmamain[n].pl_w[nn] /= 4.*PI; // take account of solid angle NSH 120817 removed - if PL not suitable, it
+			   will be set to zero anyway, so safe to keep it at zero from the outset! */
 			// plasmamain[n].pl_w[nn] = 0.0;
 			plasmamain[n].pl_log_w[nn] = -1e99;	/* 131114 - a tiny weight - just to fill the variable */
 
 
-			plasmamain[n].fmin_mod[nn] = 1e99;	/* Set the minium model frequency to the max frequency in the band - means it will never
-												   be used which is correct at this time - there is no model */
+			plasmamain[n].fmin_mod[nn] = 1e99;	/* Set the minium model frequency to the max frequency in the band - means it will
+												   never be used which is correct at this time - there is no model */
 			plasmamain[n].fmax_mod[nn] = 1e-99;	/* Set the maximum model frequency to the min frequency in the band */
 		}
 
 
-		/* NSH 130530 Next few lines allow the use of the temperature which can be computed from Zeus models to be used as an initial
-		   guess for the wind temperature */
+		/* NSH 130530 Next few lines allow the use of the temperature which can be computed from Zeus models to be used as an
+		   initial guess for the wind temperature */
 		if (geo.wind_type == 3)
 		{
 			plasmamain[n].t_r = proga_temp(x) / 0.9;	// This is a kluge, it means that we get the temperature we expect, if we
-			// read in a temperature from a zeus file - otherwise it is multiplies by
-			// 0.9 //
+														// read in a temperature from a zeus file - otherwise it is multiplies by
+														// 0.9 //
 		}
 		else
 		{
@@ -409,8 +393,8 @@ int define_wind(void)
 
 		/* 68b - Initialize the scatters array 73d - and the pariwise ionization denominator and temperature */
 
-		for (j = 0; j < nions; j++)	/* NSH 1107 - changed this loop to loop over nions rather than NIONS. Dynamic allocation means that
-									   these arrays are no longer of length NIONS */
+		for (j = 0; j < nions; j++)	/* NSH 1107 - changed this loop to loop over nions rather than NIONS. Dynamic allocation means
+									   that these arrays are no longer of length NIONS */
 		{
 			plasmamain[n].PWdenom[j] = 0.0;
 			plasmamain[n].PWnumer[j] = 0.0;
@@ -425,9 +409,9 @@ int define_wind(void)
 	/* Calculate the the divergence of the wind at the center of each grid cell */
 	wind_div_v(w);
 
-	/* Now calculate the adiabatic cooling.  Note: adiabatic cooling is not used in the program at present.  There are issues concerning
-	   how to incorporate it into the macro atom approach, as well as questions concerning the appropriate calculation. If changes are
-	   made to this, then they must also be made in the corresponding portion of wind_updates.  04nov -- ksl */
+	/* Now calculate the adiabatic cooling.  Note: adiabatic cooling is not used in the program at present.  There are issues
+	   concerning how to incorporate it into the macro atom approach, as well as questions concerning the appropriate calculation.
+	   If changes are made to this, then they must also be made in the corresponding portion of wind_updates.  04nov -- ksl */
 
 	/* 06may -- ksl -- This is awkward because liminosities are now part of plasma structure */
 	for (i = 0; i < NPLASMA; i++)
@@ -450,17 +434,18 @@ int define_wind(void)
 	nerr_no_Jmodel = 0;
 
 	/* 
-	   Check that m_dot is correct.  This calculation is very approximate.  It only calculates mdot flowing up through the grid, i.e. any 
-	   material that leaks out the side will not be counted.  A much better approach is needed, e.g. to calculate the mass flow in a
-	   spherical shell at the edge of the disk.  In addition, it uses a very inexact way to determine which grid points are in the wind.
-	   Today, I simply modified the routine so the flux was calculated mid-way in grid space through the wind. ??? ksl 01mar15
+	   Check that m_dot is correct.  This calculation is very approximate.  It only calculates mdot flowing up through the grid,
+	   i.e. any material that leaks out the side will not be counted.  A much better approach is needed, e.g. to calculate the mass 
+	   flow in a spherical shell at the edge of the disk.  In addition, it uses a very inexact way to determine which grid points
+	   are in the wind.  Today, I simply modified the routine so the flux was calculated mid-way in grid space through the wind.
+	   ??? ksl 01mar15
 
-	   04aug -- I have not written the routine to do the check that with cooridnate systems other than spherical, we are getting the
-	   correct mdot.  It should be possible to do this in a coordinate system independent manner simply by inteegrating using
+	   04aug -- I have not written the routine to do the check that with cooridnate systems other than spherical, we are getting
+	   the correct mdot.  It should be possible to do this in a coordinate system independent manner simply by inteegrating using
 	   interpolated values and so this would be a good thing to fix.  But it is not used elsewhere so I have skipped it for now.
 
-	   05apr -- Looked at this again.  It is clearly a straightforwrd thing to do use the rho function which is below. One would simply
-	   integrate over various surface integrals to make it happen. */
+	   05apr -- Looked at this again.  It is clearly a straightforwrd thing to do use the rho function which is below. One would
+	   simply integrate over various surface integrals to make it happen. */
 
 	if (geo.coord_type == CYLIND)
 	{
@@ -540,7 +525,8 @@ int define_wind(void)
 
 int wig_n;
 double wig_x, wig_y, wig_z;
-int where_in_grid(double x[])
+int where_in_grid(x)
+	 double x[];
 {
 	int n;
 	double fx, fz;
@@ -642,7 +628,9 @@ History:
 **************************************************************/
 int ierr_vwind = 0;
 
-int vwind_xyz(PhotPtr p, double v[])
+int vwind_xyz(p, v)
+	 PhotPtr p;
+	 double v[];
 {
 	int i;
 	double rho, r;
@@ -655,7 +643,7 @@ int vwind_xyz(PhotPtr p, double v[])
 	// gives the correct result in all coord systems.
 
 
-	/* 56d -- 05jul -- I had considerable problem with the next routine for cylvar coords.  Coord_fraction must produce a plausible
+	/* 56d -- 05jul -- I had considerable problem with the next routine for cylvar coords.  Coord_fraction must produce a plausible 
 	   result in all cases */
 
 	coord_fraction(0, p->x, nnn, frac, &nelem);
@@ -774,7 +762,8 @@ History:
 **************************************************************/
 
 int wind_div_err = (-3);
-int wind_div_v(WindPtr w)
+int wind_div_v(w)
+	 WindPtr w;
 {
 	int icell;
 	double x_zero[3], v2[3], v1[3];
@@ -791,12 +780,12 @@ int wind_div_v(WindPtr w)
 
 		delta = 0.01 * x_zero[2];	// new 04mar ksl -- delta is the distance across which we measure e.g. dv_x/dx
 
-		/* JM 1302 -- This has now been changed so instead of taking the midpoint and comparing to a point delta in the +v direction, we
-		   now fo delta/2 in either direction. This is in order to correctly evaluate dv/dy -- see bug report #70 */
+		/* JM 1302 -- This has now been changed so instead of taking the midpoint and comparing to a point delta in the +v
+		   direction, we now fo delta/2 in either direction. This is in order to correctly evaluate dv/dy -- see bug report #70 */
 
 		/* for each of x,y,z we first create a copy of the vector at the center. We then step 0.5*delta in positive and negative
-		   directions and evaluate the difference in velocities. Dividing this by delta gives the value of dv_x/dx, and the sum of these
-		   gives the divergence */
+		   directions and evaluate the difference in velocities. Dividing this by delta gives the value of dv_x/dx, and the sum of
+		   these gives the divergence */
 
 
 		/* Calculate dv_x/dx at this position */
@@ -829,12 +818,13 @@ int wind_div_v(WindPtr w)
 		w[icell].div_v = div;
 
 
-		if (div < 0 && (wind_div_err < 0 || w[icell].inwind == W_ALL_INWIND))	/* NSH 130322 another fix needed here the inwind check
-																				   was w->inwind and was returning the wrong value */
+		if (div < 0 && (wind_div_err < 0 || w[icell].inwind == W_ALL_INWIND))	/* NSH 130322 another fix needed here the inwind
+																				   check was w->inwind and was returning the wrong
+																				   value */
 		{
 			Error("wind_div_v: div v %e is negative in cell %d. Major problem if inwind (%d) == 0\n", div, icell, w[icell].inwind);	/* NSH 
 																																	   130222 
-																																	   -
+																																	   - 
 																																	   last 
 																																	   fix 
 																																	 */
@@ -849,16 +839,18 @@ int wind_div_v(WindPtr w)
 /* 
    find the density of the wind at x
 
-   History: 02feb ksl Changed the calculation to use the general purpose routine fraction. This made a slight difference, an improvement
-   I believe in how the program performs at the boundaries.  In the new version if you ask for rho at a position that is below say
-   wind_midz one obtains the density at the center of the cell. In the old version it tried to extrapolate.  As far as I can determine
-   the difference was relatively modest. 04aug ksl 52a -- modified to carry out a coordinate system independend determination of rho.
-   06may ksl 57+ -- Modified for plasma structure but this is probably not what one wants in the end. There is no reason for the call to
-   include w at all, since it is not used..
+   History: 02feb ksl Changed the calculation to use the general purpose routine fraction. This made a slight difference, an
+   improvement I believe in how the program performs at the boundaries.  In the new version if you ask for rho at a position that
+   is below say wind_midz one obtains the density at the center of the cell. In the old version it tried to extrapolate.  As far as 
+   I can determine the difference was relatively modest. 04aug ksl 52a -- modified to carry out a coordinate system independend
+   determination of rho. 06may ksl 57+ -- Modified for plasma structure but this is probably not what one wants in the end.
+   There is no reason for the call to include w at all, since it is not used..
 
  */
 
-double rho(WindPtr w, double x[])
+double rho(w, x)
+	 WindPtr w;
+	 double x[];
 {
 	int n, where_in_grid();
 	double dd;
@@ -894,12 +886,16 @@ double rho(WindPtr w, double x[])
 	return (dd);
 }
 
-/* Next is a routine to check the wind mass loss rate.  The mdot is checked in a plane running from 0 to r, and in a sphere of radius r
+/* Next is a routine to check the wind mass loss rate.  The mdot is checked in a plane running from 0 to r, and in a sphere of
+   radius r
 
    04aug -- ksl -- this looks coordinate system independnet but need to check */
 
 #define NSTEPS 100
-int mdot_wind(WindPtr w, double z, double rmax)	// The radius at which mdot will be calculated
+int mdot_wind(w, z, rmax)
+	 WindPtr w;
+	 double z;					// The height (usually small) above the disk at which mdot will be calculated
+	 double rmax;				// The radius at which mdot will be calculated
 {
 	struct photon p;			// needed because vwind_xyz has a call which involves a photon
 	double r, dr, rmin;
@@ -972,7 +968,10 @@ History:
  
 **************************************************************/
 
-int get_random_location(int n, int icomp, double x[])	// Returned position
+int get_random_location(n, icomp, x)
+	 int n;						// Cell in which to create postion
+	 int icomp;					// The component we want the position in
+	 double x[];				// Returned position
 {
 
 	if (geo.coord_type == CYLIND)
@@ -1001,12 +1000,12 @@ int get_random_location(int n, int icomp, double x[])	// Returned position
 }
 
 
-int zero_scatters(void)
+int zero_scatters()
 {
 	int n, j;
 
-	for (n = 0; n < NPLASMA; n++)	/* NSH 1107 - changed loop to only run over nions to avoid running over the end of the array after
-									   the arry was dynamically allocated in 78a */
+	for (n = 0; n < NPLASMA; n++)	/* NSH 1107 - changed loop to only run over nions to avoid running over the end of the array
+									   after the arry was dynamically allocated in 78a */
 	{
 		for (j = 0; j < nions; j++)
 		{
@@ -1020,22 +1019,24 @@ int zero_scatters(void)
 
 /* The next routine checks how many corners of a wind cell are in the wind
 
-   This routine returns the number of corners of a wind cell that are in the wind.  It is intended to standardize this check so that one
-   can use such a routin in the volumes calculations.
+   This routine returns the number of corners of a wind cell that are in the wind.  It is intended to standardize this check so
+   that one can use such a routin in the volumes calculations.
 
    Notes:
 
    It has not been implemented for a spherical (1d) coordinate system.
 
-   The fact that none of the corners of a cell are in the wind is not necessarily a guarantee that the wind does not pass through the
-   cell.  This is not only a theoretical problem, because we generally use a logarithmic spacing for the wind cells and thus the
-   dimensions of the cells get quite large as one gets far from the center.
+   The fact that none of the corners of a cell are in the wind is not necessarily a guarantee that the wind does not pass through
+   the cell.  This is not only a theoretical problem, because we generally use a logarithmic spacing for the wind cells and thus
+   the dimensions of the cells get quite large as one gets far from the center.
 
    The only way to verify this is to check all four surfaces of the wind.
 
    History 080403 ksl 68c - Added, or more correctly simply moved code into a separate routine so could be called from elsewhere */
 
-int check_corners_inwind(int n, int icomp)	// check corners for this component
+int check_corners_inwind(n, icomp)
+	 int n;
+	 int icomp;					// check corners for this component
 {
 	int n_inwind;
 	int i, j;

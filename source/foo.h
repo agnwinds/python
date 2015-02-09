@@ -25,6 +25,7 @@ int get_spectype(int yesno, char *question, int *spectype);
 int qdisk_init(void);
 int qdisk_save(char *diskfile, double ztot);
 int read_non_standard_disk_profile(char *tprofile);
+int init_advanced_modes(void);
 /* photon2d.c */
 int translate(WindPtr w, PhotPtr pp, double tau_scat, double *tau, int *nres);
 int translate_in_space(PhotPtr pp);
@@ -120,7 +121,7 @@ double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nre
 int select_continuum_scattering_process(double kap_cont, double kap_es, double kap_ff, PlasmaPtr xplasma);
 double kappa_bf(PlasmaPtr xplasma, double freq, int macro_all);
 int kbf_need(double fmin, double fmax);
-double sobolev(WindPtr one, PhotPtr p, double den_ion, struct lines *lptr, double dvds);
+double sobolev(WindPtr one, double x[], double den_ion, struct lines *lptr, double dvds);
 int doppler(PhotPtr pin, PhotPtr pout, double v[], int nres);
 int scatter(PhotPtr p, int *nres, int *nnscat);
 /* radiation.c */
@@ -132,7 +133,6 @@ double sigma_phot_verner(struct innershell *x_ptr, double freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
 int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave);
-int save_photon_stats(WindPtr one, PhotPtr p, double ds);
 double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
 /* wind_updates2d.c */
 int wind_update(WindPtr (w));
@@ -255,6 +255,8 @@ double total_rrate(int nion, double T);
 double gs_rrate(int nion, double T);
 /* diag.c */
 int open_diagfile(void);
+int get_extra_diagnostics(void);
+int save_photon_stats(WindPtr one, PhotPtr p, double ds);
 /* sv.c */
 int get_sv_wind_params(void);
 double sv_velocity(double x[], double v[]);
@@ -457,13 +459,27 @@ int compute_di_coeffs(double T);
 double total_di(WindPtr one, double t_e);
 /* reverb.c */
 int delay_spectrum_summary(char filename[], char mode[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin);
-int delay_dump_prep(char filename[], int nspec);
-int delay_dump(char filename[], PhotPtr p, double f1, double f2, int nspec);
+double delay_to_observer(PhotPtr pp);
+int delay_dump_prep(char filename[], int nspec, int restart_stat, int iRank);
+int delay_dump_finish(void);
+int delay_dump_combine(int iRanks);
+int delay_dump(PhotPtr p, int np, int nspec, int iExtracted);
+int delay_dump_single(PhotPtr pp, int extract_phot);
+Path_Data_Ptr path_data_constructor(double r_rad_min, double r_rad_max, int i_bins, int i_angles);
+int wind_paths_add_phot(Wind_Paths_Ptr paths, PhotPtr pp);
+int wind_paths_side_add_phot(Wind_Paths_Side_Ptr side, PhotPtr pp);
 /* wind_keplerian.c */
 int get_wind_keplerian_params(void);
 double wind_keplerian_velocity(double x[], double v[]);
 double wind_keplerian_rho(double x[]);
 int wind_keplerian_cyl_volumes(WindPtr w, int icomp);
+int wind_keplerian_cylvar_volumes(WindPtr w, int icomp);
+int wind_keplerian_randvec(PhotPtr pp, double r);
+int rand_sign(void);
+/* para_update.c */
+int communicate_estimators_para(void);
+int gather_spectra_para(int nspec_helper, int nspecs);
+int communicate_matom_estimators_para(void);
 /* pi_rates.c */
 double calc_pi_rate(int nion, PlasmaPtr xplasma, int mode);
 double tb_planck1(double freq);
@@ -473,10 +489,6 @@ double tb_exp1(double freq);
 int matrix_ion_populations(PlasmaPtr xplasma, int mode);
 int populate_ion_rate_matrix(PlasmaPtr xplasma, double rate_matrix[nions][nions], double pi_rates[nions], double rr_rates[nions], double b_temp[nions], double xne, int xelem[nions]);
 int solve_matrix(double *a_data, double *b_data, int nrows, double *x);
-/* para_update.c */
-int communicate_estimators_para(void);
-int gather_spectra_para(int nspec_helper, int nspecs);
-int communicate_matom_estimators_para(void);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

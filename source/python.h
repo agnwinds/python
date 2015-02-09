@@ -436,7 +436,24 @@ struct blmodel
 }
 blmod;
 
-
+/*
+    SWN 6-2-15
+    Wind paths is defined per cell and contains a binned array holding the spectrum of paths. Layers are
+    For each frequency:
+      For each path bin:
+        What's the total flux of all these photons entering the cell?
+*/
+typedef struct wind_paths_side
+{
+  double* ad_path_to_obs;           //Path from host cell to each observer
+  double* ad_freq_path_flux[NWAVE]; //Array[by frequency] of arrays [by path] of total flux of photons with the given v&p
+  double  ad_freq_flux[NWAVE];      //Array[by frequency] of total flux
+  double  ad_flux;                  //Total flux
+} wind_paths_side_dummy, *Wind_Paths_Side_Ptr;
+typedef struct wind_paths
+{
+  Wind_Paths_Side_Ptr front, back;
+} wind_paths_dummy, *Wind_Paths_Ptr;
 
 
 /* 	This structure defines the wind.  The structure w is allocated in the main
@@ -482,7 +499,6 @@ and PART in whatever, as n and n+1
 #define W_NOT_INWIND  -1	//None of gridcell is in the wind
 #define W_IGNORE      -2	//Even though the wind may occupy a small part of this cell, assume
 				//photons simply pass through the cell.  This is new in 58b
-
 typedef struct wind
 {
   int nwind;			/*A self-reference to this cell in the wind structure */
@@ -510,24 +526,6 @@ typedef struct wind
 wind_dummy, *WindPtr;
 WindPtr wmain;
 
-/*
-    SWN 6-2-15
-    Wind paths is defined per cell and contains a binned array holding the spectrum of paths. Layers are
-    For each frequency:
-      For each path bin:
-        What's the total flux of all these photons entering the cell?
-*/
-typedef struct wind_paths_side
-{
-  double* ad_path_to_obs;           //Path from host cell to each observer
-  double* ad_freq_path_flux[NWAVE]; //Array[by frequency] of arrays [by path] of total flux of photons with the given v&p
-  double  ad_freq_flux[NWAVE];      //Array[by frequency] of total flux
-  double  ad_flux;                  //Total flux
-} wind_paths_side_dummy, *Wind_Paths_Side_Ptr;
-typedef struct wind_paths
-{
-  wind_paths_side front, back;
-} wind_paths_dummy, *Wind_Paths_Ptr;
 
 /* 57+ - 06jun -- plasma is a new structure that contains information about the properties of the
 plasma in regions of the geometry that are actually included n the wind 
