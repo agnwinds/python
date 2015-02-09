@@ -309,9 +309,6 @@ the same resonance again */
 	double x_inwind[3], path_inwind = 0.;	//SWM - Tracks last photon position in wind	
 	while (istat == P_INWIND)
 	{
-		stuff_v(pp->x,x_inwind);				//SWM -Track last photon position and path length
-		path_inwind=pp->path;
-		
 		istat = translate(w, pp, 20., &tau, &nres);
 		icell++;
 		
@@ -348,10 +345,8 @@ the same resonance again */
 		
 		if(pp->nrscat>0)	//SWM - Records total distance travelled by extract photon
 		{
-			stuff_v(x_inwind,pp->x);
-			pp->path = path_inwind;
-			delay_dump_single(pp, 1); //SWM
-			//printf("Reverb photon extracted: %g %g %g\n",pp->freq,delay_to_observer(pp),pp->w);
+			stuff_v(pstart->x,pp->x);	//Restore photon to initial position (necessary for reweighting schemes)
+			delay_dump_single(pp, 1); 	//Dump photon now weight has been modified
 		}
 
 		if (!(0 <= tau && tau < 1.e4))

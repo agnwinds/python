@@ -1,14 +1,11 @@
 /* 
  * The subroutines in this file handle outputting spectrum array reverb data
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
 #include "atomic.h"
-
 #include "python.h"
 
 /***********************************************************
@@ -255,6 +252,25 @@ delay_dump_prep (char filename[], int nspec, int restart_stat, int iRank)
 	return(0);
 }
 
+/***********************************************************
+Synopsis:
+	delay_dump_finish()  
+		Outputs any leftover photons.
+
+Arguments:		
+	None
+
+Returns:
+	To file only
+  
+Description:	
+	Dumps last remaining extracted photons to file and frees arrays.
+
+Notes:
+
+History:
+	6/2/15	-	Written by SWM
+***********************************************************/
 int 
 delay_dump_finish()
 {
@@ -267,6 +283,25 @@ delay_dump_finish()
 	return(0);
 }
 
+/***********************************************************
+Synopsis:
+	delay_dump_combine(iRanks)  
+		Finishes off delay dump for multithreaded runs
+
+Arguments:		
+	int iRanks	Combines delay dump file from each thread
+
+Returns:
+	To file only
+  
+Description:	
+	Uses system commands to achieve this quickly
+
+Notes:
+
+History:
+	6/2/15	-	Written by SWM
+***********************************************************/
 int 
 delay_dump_combine(int iRanks)
 {
@@ -277,18 +312,32 @@ delay_dump_combine(int iRanks)
 	sprintf(cCall, "cat %s[0-9]* >> ", delay_dump_file);
 	if(system(cCall)<0)
 		Error("delay_dump_combine: Error calling system command '%s'",cCall);
-
-/*
-	if ((fptr = fopen(delay_dump_file, "a")) == NULL)
-	{
-		Error("delay_dump: Unable to reopen %s for writing\n", delay_dump_file);
-		exit(0);
-	}
-*/
-	
 	return(0);
 }
 
+/***********************************************************
+Synopsis:
+	delay_dump(PhotPtr p, int np, int nspec, int iExtracted)  
+		Dumps array of photons provided to file
+
+Arguments:		
+	PhotPtr p 		Array of photons to dump
+	int np 			Length of array
+	int nspec 		Spectrum to dump for
+	int iExtracted 	Whether or not this array is of extracted photons
+
+Returns:
+	To file only
+  
+Description:	
+	Dumps to this thread's delay_dump_file the passed photon
+	array.
+
+Notes:
+
+History:
+	6/2/15	-	Written by SWM
+***********************************************************/
 int 
 delay_dump (PhotPtr p, int np, int nspec, int iExtracted)
 {
@@ -334,6 +383,27 @@ delay_dump (PhotPtr p, int np, int nspec, int iExtracted)
 	return (0);
 }
 
+/***********************************************************
+Synopsis:
+	delay_dump_single(PhotPtr pp, int extract_phot)  
+		Finishes off delay dump for multithreaded runs
+
+Arguments:		
+	PhotPtr pp 			Photon to dump
+	int extract_phot	Whether or not this was extracted
+
+Returns:
+	To internal arrays only
+  
+Description:	
+	Pushes the passed photon into the delay_dump_bank. If
+	this fills it, dumps current bank to file and restarts it.
+
+Notes:
+
+History:
+	6/2/15	-	Written by SWM
+***********************************************************/
 int 
 delay_dump_single (PhotPtr pp, int extract_phot)
 {
@@ -349,6 +419,113 @@ delay_dump_single (PhotPtr pp, int extract_phot)
 	else
 	{
 		delay_dump_bank_curr++;
+	}
+	return(0);
+}
+
+
+typedef struct path_data
+{
+  double* ad_path_bin;              //Array of bins for the path histograms
+  int     i_path_bins, i_obs;       //Number of bins, number of observers
+} path_data_dummy, *Path_Data_Ptr;
+Path_Data_Ptr path_data;
+
+Path_Data_Ptr
+path_data_constructor (double r_rad_min, double r_rad_max, int i_bins, int i_angles)
+{
+	int i;
+	Path_Data_Ptr data = (Path_Data_Ptr) calloc(sizeof(path_data_dummy),1);
+
+	if(data = NULL)
+	{
+		Error("path_data_constructor: Could not allocate memory\n");
+		exit(0);
+	}
+
+	data->i_obs = i_angles;
+	data->i_path_bins=i_bins;
+	data->ad_path_bin = (*double) calloc(sizeof(double),i_bins);
+	for(i=0; i <= i_bins; i++){
+		data->ad_path_bin[i] = r_rad_min + i*(r_rad_max*5.0-r_rad_min)/i_bins
+	}
+	return(data);
+}
+
+Wind_Paths_Ptr
+wind_paths_constructor (Wind_Ptr wind)
+{
+	int i;
+	Wind_Paths_Ptr paths = (Wind_Paths_Ptr) calloc(sizeof(wind_paths_dummy),1);
+
+	if(data = NULL)
+	{
+		Error("wind_paths_constructor: Could not allocate memory\n");
+		exit(0);
+	}
+
+	paths->front = wind_paths_side_constructor(wind,  1);
+	paths->back	 = wind_paths_side_constructor(wind, -1);
+	return(paths);
+}
+
+Wind_Paths_Side_Ptr
+wind_paths_side_constructor (Wind_Ptr wind, int i_side)
+{
+	int i;
+	photon p_test;
+	Wind_Paths_Side_Ptr side = (Wind_Paths_Side_Ptr) calloc(sizeof(wind_paths_side_dummy), 1);
+	
+	if(path = NULL)
+	{
+		Error("wind_paths_side_constructor: Could not allocate memory for cell %d\n",windcell->nwind);
+		exit(0);
+	}
+
+	stuff_v(wind->xcen,p_test.x);
+	p_test.x[0] *= i_side;
+
+	side->ad_path_to_obs = (*double) calloc(sizeof(double), g_path_data->i_obs);
+	for(i=0; i<g_path_data->i_obs;i++)
+	{
+		stuff_v(xxspec[MSPEC+i].lmn,p_test.lmn);
+		side->ad_path_to_obs[i] = delay_to_observer(&p_test);
+	}	
+
+	for(i=0;i<NWAVE;i++)
+	{
+		side->ad_freq_flux[i] = (*double) calloc(sizeof(double),g_path_data->i_path_bins)
+	}
+	return(side);
+}
+
+int
+wind_paths_add_phot (Wind_Paths_Ptr paths, PhotPtr pp)
+{
+	if(pp->x[0] > 0)
+		wind_paths_side_add_phot(paths->front, pp);
+	else
+		wind_paths_side_add_phot(paths->back,  pp);
+	return(0);
+}
+
+int
+wind_paths_side_add_phot (Wind_Paths_Side_Ptr side, PhotPtr pp)
+{
+	int i,j;
+
+	for(i=0; i<NWAVE-1; i++)
+	{
+		if(pp->freq >= xxspec[0].freq[i] && pp->freq <= xxspec[0].freq[i+1])
+		{
+			for(j=0; j<= g_path_data->i_path_bins; j++)
+			{
+				if(pp->path >= g_path_data->ad_path_bin[i] && pp->path <= g_path_data->ad_path_bin[i+1])
+				{
+					side->ad_freq_path_flux[i][j] += pp->w;
+				}
+			}
+		}
 	}
 	return(0);
 }
