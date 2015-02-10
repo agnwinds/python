@@ -497,7 +497,7 @@ int main(argc, argv)
 	strcpy(windradfile, "python");
 	strcpy(windsavefile, root);
 	strcpy(specsavefile, root);
-	strcpy(delay_dump_file, root); //SWM
+	strcpy(delay_dump_file, root);	// SWM
 
 	/* 130722 JM we now save python.phot and disk.diag files under diag_root folder */
 	strcpy(photfile, diagfolder);
@@ -513,7 +513,7 @@ int main(argc, argv)
 	strcat(specsavefile, ".spec_save");
 	strcat(photfile, ".phot");
 	strcat(diskfile, ".disk.diag");
-	strcat(delay_dump_file, ".delay_dump"); //SWM
+	strcat(delay_dump_file, ".delay_dump");	// SWM
 
 
 
@@ -745,9 +745,9 @@ int main(argc, argv)
 	   that we have mixed usage of some things, e.g geo.rt_mode and geo.macro_simple */
 
 	/* JM 1406 -- geo.rt_mode and geo.macro_simple control different things. geo.rt_mode controls the radiative transfer and
-	   whether or not you are going to use the indivisible packet constraint, so you can have all simple ions, all macro-atoms or
-	   a mix of the two. geo.macro_simple just means one can turn off the full macro atom treatment and treat everything as
-	   2-level simple ions inside the macro atom formalism */
+	   whether or not you are going to use the indivisible packet constraint, so you can have all simple ions, all macro-atoms or a 
+	   mix of the two. geo.macro_simple just means one can turn off the full macro atom treatment and treat everything as 2-level
+	   simple ions inside the macro atom formalism */
 
 	/* For now handle scattering as part of a hidden line transfermode ?? */
 	if (geo.line_mode == 4)
@@ -822,98 +822,92 @@ int main(argc, argv)
 	// SS - initalise the choice of handling for macro pops.
 	if (geo.wind_type == 2)
 	{
-	  geo.lum_bl = 0;
-	  geo.t_bl = 0;
+		geo.lum_bl = 0;
+		geo.t_bl = 0;
 	}
 
-/* Describe the agn */
+	/* Describe the agn */
 
-      if (geo.agn_radiation && geo.system_type == SYSTEM_TYPE_AGN)	/* This peculiar line is to enamble us to add a star with a power law component */
+	if (geo.agn_radiation && geo.system_type == SYSTEM_TYPE_AGN)	/* This peculiar line is to enamble us to add a star with a
+																	   power law component */
 	{
-	  xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
+		xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
 
-	  /* If there is no disk, initilize geo.lum to the luminosity of a star */
-	  if (geo.disk_type==0) {
-		  geo.lum_agn=lstar;
-	  }
+		/* If there is no disk, initilize geo.lum to the luminosity of a star */
+		if (geo.disk_type == 0)
+		{
+			geo.lum_agn = lstar;
+		}
 
-	  // At present we have set geo.r_agn = geo.rstar, and encouraged the user
-	  // set the default for the radius of the BH to be 6 R_Schwartschild.
-	  // rddoub("R_agn(cm)",&geo.r_agn);
+		// At present we have set geo.r_agn = geo.rstar, and encouraged the user
+		// set the default for the radius of the BH to be 6 R_Schwartschild.
+		// rddoub("R_agn(cm)",&geo.r_agn);
 
-	  rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
-	  Log ("OK, the agn lum will be about %.2e the disk lum\n",
-	       geo.lum_agn / xbl);
-	  geo.alpha_agn = (-1.5);
-	  rddoub ("agn_power_law_index", &geo.alpha_agn);
+		rddoub("lum_agn(ergs/s)", &geo.lum_agn);
+		Log("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
+		geo.alpha_agn = (-1.5);
+		rddoub("agn_power_law_index", &geo.alpha_agn);
 
-      /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
-       only in advanced mode. default is zero which is checked before we call photo_gen_agn */
-      geo.pl_low_cutoff = 0.0;	
-	  if (modes.iadvanced)
-	  	rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
+		/* JM 1502 -- lines to add a low frequency power law cutoff. accessible only in advanced mode. default is zero which is
+		   checked before we call photo_gen_agn */
+		geo.pl_low_cutoff = 0.0;
+		if (modes.iadvanced)
+			rddoub("agn_power_law_cutoff", &geo.pl_low_cutoff);
 
-/* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
-This is only used in the sim correction factor for the first time through. 
-Afterwards, the photons are used to compute the sim parameters. */
+		/* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. This is only used in the sim 
+		   correction factor for the first time through. Afterwards, the photons are used to compute the sim parameters. */
 
-	  geo.const_agn =
-	    geo.lum_agn /
-	    (((pow (2.42e18, geo.alpha_agn + 1.)) -
-	      pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
-	  Log ("AGN Input parameters give a power law constant of %e\n",
-	       geo.const_agn);
+		geo.const_agn =
+			geo.lum_agn / (((pow(2.42e18, geo.alpha_agn + 1.)) - pow(4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
+		Log("AGN Input parameters give a power law constant of %e\n", geo.const_agn);
 
-	  if (geo.agn_ion_spectype == SPECTYPE_CL_TAB)	/*NSH 0412 - option added to allow direct comparison with cloudy power law table option */
-	    {
-	      geo.agn_cltab_low = 1.0;
-	      geo.agn_cltab_hi = 10000;
-	      rddoub ("low_energy_break(ev)", &geo.agn_cltab_low);	/*lo frequency break - in ev */
-	      rddoub ("high_energy_break(ev)", &geo.agn_cltab_hi);
-	      geo.agn_cltab_low_alpha = 2.5;	//this is the default value in cloudy
-	      geo.agn_cltab_hi_alpha = -2.0;	//this is the default value in cloudy
-	    }
+		if (geo.agn_ion_spectype == SPECTYPE_CL_TAB)	/* NSH 0412 - option added to allow direct comparison with cloudy power law 
+														   table option */
+		{
+			geo.agn_cltab_low = 1.0;
+			geo.agn_cltab_hi = 10000;
+			rddoub("low_energy_break(ev)", &geo.agn_cltab_low);	/* lo frequency break - in ev */
+			rddoub("high_energy_break(ev)", &geo.agn_cltab_hi);
+			geo.agn_cltab_low_alpha = 2.5;	// this is the default value in cloudy
+			geo.agn_cltab_hi_alpha = -2.0;	// this is the default value in cloudy
+		}
 	}
-      else if (geo.agn_radiation)  /* We want to add a power law to something other than an AGN */
+	else if (geo.agn_radiation)	/* We want to add a power law to something other than an AGN */
 	{
-	  xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
+		xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
 
-	  // At present we have set geo.r_agn = geo.rstar, and encouraged the user
-	  // set the default for the radius of the BH to be 6 R_Schwartschild.
-	  // rddoub("R_agn(cm)",&geo.r_agn);
+		// At present we have set geo.r_agn = geo.rstar, and encouraged the user
+		// set the default for the radius of the BH to be 6 R_Schwartschild.
+		// rddoub("R_agn(cm)",&geo.r_agn);
 
-	  rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
-	  Log ("OK, the agn lum will be about %.2e the disk lum\n",
-	       geo.lum_agn / xbl);
-	  geo.alpha_agn = (-1.5);
-	  rddoub ("agn_power_law_index", &geo.alpha_agn);
+		rddoub("lum_agn(ergs/s)", &geo.lum_agn);
+		Log("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
+		geo.alpha_agn = (-1.5);
+		rddoub("agn_power_law_index", &geo.alpha_agn);
 
-      /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
-       only in advanced mode. default is zero which is checked before we call photo_gen_agn */
-      geo.pl_low_cutoff = 0.0;	
-	  if (modes.iadvanced)
-	  	rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
+		/* JM 1502 -- lines to add a low frequency power law cutoff. accessible only in advanced mode. default is zero which is
+		   checked before we call photo_gen_agn */
+		geo.pl_low_cutoff = 0.0;
+		if (modes.iadvanced)
+			rddoub("agn_power_law_cutoff", &geo.pl_low_cutoff);
 
-/* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
-This is only used in the sim correction factor for the first time through. 
-Afterwards, the photons are used to compute the sim parameters. */
+		/* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. This is only used in the sim 
+		   correction factor for the first time through. Afterwards, the photons are used to compute the sim parameters. */
 
-	  geo.const_agn =
-	    geo.lum_agn /
-	    (((pow (2.42e18, geo.alpha_agn + 1.)) -
-	      pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
-	  Log ("AGN Input parameters give a power law constant of %e\n",
-	       geo.const_agn);
+		geo.const_agn =
+			geo.lum_agn / (((pow(2.42e18, geo.alpha_agn + 1.)) - pow(4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
+		Log("AGN Input parameters give a power law constant of %e\n", geo.const_agn);
 
-	  if (geo.agn_ion_spectype == SPECTYPE_CL_TAB)	/*NSH 0412 - option added to allow direct comparison with cloudy power law table option */
-	    {
-	      geo.agn_cltab_low = 1.0;
-	      geo.agn_cltab_hi = 10000;
-	      rddoub ("low_energy_break(ev)", &geo.agn_cltab_low);	/*lo frequency break - in ev */
-	      rddoub ("high_energy_break(ev)", &geo.agn_cltab_hi);
-	      geo.agn_cltab_low_alpha = 2.5;	//this is the default value in cloudy
-	      geo.agn_cltab_hi_alpha = -2.0;	//this is the default value in cloudy
-	    }
+		if (geo.agn_ion_spectype == SPECTYPE_CL_TAB)	/* NSH 0412 - option added to allow direct comparison with cloudy power law 
+														   table option */
+		{
+			geo.agn_cltab_low = 1.0;
+			geo.agn_cltab_hi = 10000;
+			rddoub("low_energy_break(ev)", &geo.agn_cltab_low);	/* lo frequency break - in ev */
+			rddoub("high_energy_break(ev)", &geo.agn_cltab_hi);
+			geo.agn_cltab_low_alpha = 2.5;	// this is the default value in cloudy
+			geo.agn_cltab_hi_alpha = -2.0;	// this is the default value in cloudy
+		}
 	}
 	else
 	{
@@ -963,8 +957,8 @@ Afterwards, the photons are used to compute the sim parameters. */
 
 
 	/* 080517 - ksl - Reassigning bb to -1, etc is to make room for reading in model grids, but complicates what happens if one
-	   tries to restart a model.  This needs to be updated so one can re-read the geo file, proabbly by defining variaables BB
-	   etc, and then by checking whether or not the type is assigned to BB or read in as 0.  Also need to store each of these model 
+	   tries to restart a model.  This needs to be updated so one can re-read the geo file, proabbly by defining variaables BB etc, 
+	   and then by checking whether or not the type is assigned to BB or read in as 0.  Also need to store each of these model
 	   list names in geo structure. */
 
 	get_spectype(geo.star_radiation, "Rad_type_for_star(0=bb,1=models)_to_make_wind", &geo.star_ion_spectype);
@@ -1067,7 +1061,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 			// disk_illum = 0;
 			// }
 
-			/* 04aug ksl ??? Until everything is initialized we need to stick to a simple disk, while teff is being set up..  This 
+			/* 04aug ksl ??? Until everything is initialized we need to stick to a simple disk, while teff is being set up..  This
 			   is because some of the models, e.g. knigge have wind structures that depend on teff. * 080518 - ksl - this is quite
 			   confusing.  I understand that the KWD models have base velocities that are affected by t_eff, but we have not done
 			   anything yet.  Possible this is a consideration for restart, but I would have guessed we recalculated all of that,
@@ -1151,7 +1145,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 			geo.alpha_agn = (-1.5);
 			rddoub("agn_power_law_index", &geo.alpha_agn);
 
-			/* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. This is only used in the 
+			/* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. This is only used in the
 			   sim correction factor for the first time through. Afterwards, the photons are used to compute the sim parameters. */
 
 			geo.const_agn =
@@ -1182,7 +1176,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 			geo.alpha_agn = (-1.5);
 			rddoub("agn_power_law_index", &geo.alpha_agn);
 
-			/* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. This is only used in the 
+			/* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. This is only used in the
 			   sim correction factor for the first time through. Afterwards, the photons are used to compute the sim parameters. */
 
 			geo.const_agn =
@@ -1465,7 +1459,6 @@ Afterwards, the photons are used to compute the sim parameters. */
 
 	/* Completed initialization of this section.  Note that get_spectype uses the source of the ratiation and then value given to
 	   return a spectrum type. The output is not the same number as one inputs. It's not obvious that this is a good idea. */
-
 	if (geo.pcycles > 0)
 	{
 
@@ -1496,7 +1489,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 		em_rnge.fmax = C / (swavemin * 1.e-8);
 
 		geo.matom_radiation = 0;	// initialise for ionization cycles - don't use pre-computed emissivities for macro-atom
-									// levels/ k-packets.
+		// levels/ k-packets.
 
 		/* Note: Below here many of the variables which are read in are not currently part of geo stucture */
 
@@ -1512,25 +1505,22 @@ Afterwards, the photons are used to compute the sim parameters. */
 			rddoub("angle(0=pole)", &angle[n]);
 
 
-    
-      for (n = 0; n < nangles; n++)
-	rddoub ("angle(0=pole)", &angle[n]);
 
-      /* 05apr-ksl-56--For diagnositic reasons I have left questions regarding phase
-       * even for systems which are not binaries.  Phase 0 in this case corresponds to
-       * an extraction direction which is in the xz plane
-       */
-      /* JM 1502 -- change this so we only ask for phase if the system is a binary -- see #137 */
+		for (n = 0; n < nangles; n++)
+			rddoub("angle(0=pole)", &angle[n]);
 
-      if (geo.system_type == SYSTEM_TYPE_BINARY)
-      {
-        
-        for (n = 0; n < nangles; n++)
-	      rddoub ("phase(0=inferior_conjunction)", &phase[n]);
-      }
-      else
-      	Log("No phase information needed as system type %i is not a binary\n",
-      		 geo.system_type);
+		/* 05apr-ksl-56--For diagnositic reasons I have left questions regarding phase even for systems which are not binaries.
+		   Phase 0 in this case corresponds to an extraction direction which is in the xz plane */
+		/* JM 1502 -- change this so we only ask for phase if the system is a binary -- see #137 */
+
+		if (geo.system_type == SYSTEM_TYPE_BINARY)
+		{
+
+			for (n = 0; n < nangles; n++)
+				rddoub("phase(0=inferior_conjunction)", &phase[n]);
+		}
+		else
+			Log("No phase information needed as system type %i is not a binary\n", geo.system_type);
 
 
 		if (modes.iadvanced)
@@ -1699,8 +1689,8 @@ Afterwards, the photons are used to compute the sim parameters. */
 
 	/* The next section sets up a structure qdisk to record the effects of illumination on the disk.  disk_init is called primarily 
 	   to get a defined set of annular rings which are kept throughout the ionization calculation.  A second structure qdisk is
-	   needed because in the process of generating photons in various bands the annular rings are changed disk_init calculates the 
-	   flux from the disk in the energy range set by freqmin and freqmax, and uses is this to identify the position of the rings in 
+	   needed because in the process of generating photons in various bands the annular rings are changed disk_init calculates the
+	   flux from the disk in the energy range set by freqmin and freqmax, and uses is this to identify the position of the rings in
 	   the disk, so that each ring contributes the same amount to the flux */
 
 
@@ -1708,7 +1698,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 
 	qdisk_init();				/* Initialize a disk qdisk to store the information about photons impinging on the disk */
 
-	/* 04aug -- ksl -- now that everything is initialized, we set geo.disk_illum 080518 - ksl - I believe that the reason for this 
+	/* 04aug -- ksl -- now that everything is initialized, we set geo.disk_illum 080518 - ksl - I believe that the reason for this
 	   somewhat weird logic is to assure that models (e.g corona and knigge) where the base wind velocity depends on teff are not
 	   altered by illumination, but since no photons have been transported at this stage, it's hard to see why that would matter. */
 
@@ -1722,7 +1712,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 	   for the estimator arrays are set up in the subroutines themselves */
 	ioniz_spec_helpers = 2 * MSPEC * NWAVE;	// we need space for log and lin spectra for MSPEC XNWAVE
 	spec_spec_helpers = (NWAVE * (MSPEC + nangles));	// We need space for NWAVE wavelengths for nspectra, which will eventually
-														// equal nangles + MSPEC
+	// equal nangles + MSPEC
 
 #endif
 
@@ -1746,12 +1736,15 @@ Afterwards, the photons are used to compute the sim parameters. */
 								   previously calculated spectra must be recreated */
 	}
 
-
-#ifdef MPI_ON 					//SWM - If using MPI, dump each thread
-	delay_dump_prep( delay_dump_file, 0, NSPEC -1, rank_global); //Currently hardcoded to last spectrum
-#else 							//SWM - Dump master
-	delay_dump_prep( delay_dump_file, NSPEC -1, restart_stat, -1); //Currently hardcoded to last spectrum
-#endif
+	spectrum_init(freqmin, freqmax, nangles, angle, phase, scat_select,
+				  top_bot_select, select_extract, rho_select, z_select, az_select, r_select);
+	g_path_data = (Path_Data_Ptr) path_data_constructor (0.0, geo.rmax, 30, nangles);
+	wind_paths_init(wmain); //SWM - Wind cell init, hopefully farm this out to the wind defining routines
+	#ifdef MPI_ON
+		delay_dump_prep(delay_dump_file, NSPEC - 1, restart_stat, rank_global);	// Currently hardcoded to last spectrum
+	#else
+		delay_dump_prep(delay_dump_file, NSPEC - 1, restart_stat, 0);			// Currently hardcoded to last spectrum		
+	#endif
 
 	while (geo.wcycle < geo.wcycles)
 	{							/* This allows you to build up photons in bunches */
@@ -1766,11 +1759,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 
 		spectrum_init(freqmin, freqmax, nangles, angle, phase, scat_select,
 					  top_bot_select, select_extract, rho_select, z_select, az_select, r_select);
-
-
 		wind_rad_init();		/* Zero the parameters pertaining to the radiation field */
-
-
 
 		if (modes.ispy)
 			ispy_init("python", geo.wcycle);
@@ -1803,7 +1792,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 
 		/* Zero the arrays that store the heating of the disk */
 
-		/* 080520 - ksl - There is a conundrum here.  One should really zero out the quantities below each time the wind structure 
+		/* 080520 - ksl - There is a conundrum here.  One should really zero out the quantities below each time the wind structure
 		   is updated.  But relatively few photons hit the disk under normal situations, and therefore the statistcs are not very
 		   good. */
 
@@ -1959,7 +1948,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 		geo.wcycle++;			// Increment ionisation cycles
 
 
-		delay_dump(p, NPHOT, NSPEC -1, 0); //SWM - Dump delay tracks from this iteration
+		delay_dump(p, NPHOT, NSPEC - 1, 0);	// SWM - Dump delay tracks from this iteration
 
 		/* NSH 1408 - Save only the windsave file from thread 0, to prevent many processors from writing to the same file. */
 
@@ -1984,12 +1973,12 @@ Afterwards, the photons are used to compute the sim parameters. */
 
 	/* XXXX - END OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
 
-#ifdef MPI_ON 						//SWM- If MPI is on
-	delay_dump_finish();				//Each thread dumps to file
-	MPI_Barrier(MPI_COMM_WORLD);		//Once all done
-	delay_dump_combine(np_mpi_global);	//Combine results
-#else 								//Otherwise
-	delay_dump_finish(); 				//Just dump
+#ifdef MPI_ON					// SWM- If MPI is on
+	delay_dump_finish();		// Each thread dumps to file
+	MPI_Barrier(MPI_COMM_WORLD);	// Once all done
+	delay_dump_combine(np_mpi_global);	// Combine results
+#else // Otherwise
+	delay_dump_finish();		// Just dump
 #endif
 
 	Log(" Completed wind creation.  The elapsed TIME was %f\n", timer());
@@ -2050,7 +2039,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 
 	else
 	{
-		/* Then we are restarting a run with more spectral cycles, but we have already completed some. The memory for the spectral 
+		/* Then we are restarting a run with more spectral cycles, but we have already completed some. The memory for the spectral
 		   arrays should already have been allocated, and the spectrum was initialised on the original run, so we just need to
 		   renormalise the saved spectrum */
 		/* See issue #134 (JM) */
@@ -2081,7 +2070,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 
 		/* Create the initial photon bundles which need to be trannsported through the wind
 
-		   For the detailed spectra, NPHOT*pcycles is the number of photon bundles which will equal the luminosity, 1 implies that 
+		   For the detailed spectra, NPHOT*pcycles is the number of photon bundles which will equal the luminosity, 1 implies that
 		   detailed spectra, as opposed to the ionization of the wind is being calculated
 
 		   JM 130306 must convert NPHOT and pcycles to double precision variable nphot_to_define
@@ -2172,7 +2161,7 @@ Afterwards, the photons are used to compute the sim parameters. */
 	/* Finally done */
 #ifdef MPI_ON
 	sprintf(dummy, "End of program, Thread %d only", my_rank);	// added so we make clear these are just errors for thread ngit
-																// status 
+	// status 
 	error_summary(dummy);		// Summarize the errors that were recorded by the program
 	Log("Run py_error.py for full error report.\n");
 #else

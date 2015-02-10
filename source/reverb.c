@@ -191,14 +191,13 @@ delay_to_observer(PhotPtr pp)
 }
 
 int 
-delay_dump_prep (char filename[], int nspec, int restart_stat, int iRank)
+delay_dump_prep (char filename[], int nspec, int restart_stat, int i_rank)
 {
 	FILE *fopen(), *fptr;
-	char string[LINELENGTH], cFile[LINELENGTH], cRank[LINELENGTH];
+	char string[LINELENGTH], c_file[LINELENGTH], c_rank[LINELENGTH];
 	int i;
 
 	if(restart_stat) return(0);
-	
 	//Allocate and zero dump files and set extract status
 	delay_dump_spec = nspec;
 	delay_dump_bank = (PhotPtr) calloc(sizeof(p_dummy), delay_dump_bank_size);
@@ -206,31 +205,30 @@ delay_dump_prep (char filename[], int nspec, int restart_stat, int iRank)
 	for(i=0;i<delay_dump_bank_size;i++)	delay_dump_bank_ex[i] = 0;
 
 	//Get output filename
-	strcpy(cFile, filename);			//Copy filename to new string
-	if(iRank > 0)					
+	strcpy(c_file, filename);			//Copy filename to new string
+	if(i_rank > 0)					
 	{
-		sprintf(cRank,"%i",iRank);		//Write thread # to string
-		strcat(cFile,cRank);			//Append thread # to filename
+		sprintf(c_rank,"%i",i_rank);	//Write thread # to string
+		strcat(c_file,c_rank);			//Append thread # to filename
 	}
-	strcpy(delay_dump_file,cFile);		//Store modified filename for later
-	printf("delay_dump_prep: Preparing file '%s' for writing\n", delay_dump_file);
+	strcpy(delay_dump_file,c_file);		//Store modified filename for later
 
 	/* If this isn't a continue run, prep the output file */
 	if ((fptr = fopen(delay_dump_file, "w")) == NULL)
 	{
-		Error("delay_dump: Unable to open %s for writing\n", delay_dump_file);
+		Error("delay_dump_prep: Unable to open %s for writing\n", delay_dump_file);
 		exit(0);
 	}
 
 	if (nspec < MSPEC)					//Check that NSPEC is reasonable
 	{
-		Error("delay_dump: nspec %d below MSPEC value \n", nspec);
+		Error("delay_dump_prep: nspec %d below MSPEC value \n", nspec);
 		exit(0);
 	}
 
-	if(iRank > 0) 
+	if(i_rank > 0) 
 	{
-		fprintf(fptr, "# Delay dump file for slave process %d\n",iRank);
+		fprintf(fptr, "# Delay dump file for slave process %d\n",i_rank);
 	}
 	else 
 	{									// Construct and write a header string for the output file 
@@ -423,21 +421,38 @@ delay_dump_single (PhotPtr pp, int extract_phot)
 	return(0);
 }
 
+/***********************************************************
+Synopsis:
+	path_data_constructor(double r_rad_min, double r_rad_max,
+						  int i_bins, int i_angles)  
+		Returns global data container for wind path info
 
-typedef struct path_data
-{
-  double* ad_path_bin;              //Array of bins for the path histograms
-  int     i_path_bins, i_obs;       //Number of bins, number of observers
-} path_data_dummy, *Path_Data_Ptr;
-Path_Data_Ptr path_data;
+Arguments:		
+	r_rad_min 		Minimum disk radius
+	r_rad_max 		Maximum disk radius, used for making 
+					the path distance arrays
+	i_bins 			Number of path distance bins
+	i_angles 		Number of observer angles
 
+Returns:
+	Pointer to prepped global path data info.
+  
+Description:	
+	Sets up global data used by the individual cells for
+	binning purposes.
+
+Notes:
+
+History:
+	9/2/15	-	Written by SWM
+***********************************************************/
 Path_Data_Ptr
 path_data_constructor (double r_rad_min, double r_rad_max, int i_bins, int i_angles)
 {
 	int i;
 	Path_Data_Ptr data = (Path_Data_Ptr) calloc(sizeof(path_data_dummy),1);
 
-	if(data = NULL)
+	if(data == NULL)
 	{
 		Error("path_data_constructor: Could not allocate memory\n");
 		exit(0);
@@ -445,86 +460,209 @@ path_data_constructor (double r_rad_min, double r_rad_max, int i_bins, int i_ang
 
 	data->i_obs = i_angles;
 	data->i_path_bins=i_bins;
-	data->ad_path_bin = (*double) calloc(sizeof(double),i_bins);
+	data->ad_path_bin = (double*) calloc(sizeof(double),i_bins);
 	for(i=0; i <= i_bins; i++){
-		data->ad_path_bin[i] = r_rad_min + i*(r_rad_max*5.0-r_rad_min)/i_bins
+		data->ad_path_bin[i] = r_rad_min + i*(r_rad_max*5.0-r_rad_min)/i_bins;
 	}
 	return(data);
 }
 
-Wind_Paths_Ptr
-wind_paths_constructor (Wind_Ptr wind)
+/***********************************************************
+Synopsis:
+	wind_paths_constructor(WindPtr wind)  
+		Constructs a wind path record and returns it.
+
+Arguments:		
+	Wind_Ptr wind	Wind cell the paths are being made for
+
+Returns:
+  	Pointer to finished wind paths
+
+Description:	
+	Constructs a wind cell's path data and returns a pointer
+	to it. Also calculates the distance to each extract 
+	viewpoint from the cell via a dummy photon.
+
+Notes:
+
+History:
+	9/2/15	-	Written by SWM
+***********************************************************/
+Wind_Paths_Side_Ptr
+wind_paths_side_constructor (WindPtr wind, int i_side)
 {
 	int i;
+	PhotPtr p_test = (PhotPtr) calloc(sizeof(p_dummy), 1);
+	Wind_Paths_Side_Ptr side = (Wind_Paths_Side_Ptr) calloc(sizeof(wind_paths_side_dummy), 1);
+
+	if(side == NULL)
+	{
+		Error("wind_paths_side_constructor: Could not allocate memory for cell %d\n",wind->nwind);
+		exit(0);
+	}
+
+	stuff_v(wind->xcen,p_test->x);
+	p_test->x[0] *= i_side;
+	side->ad_path_to_obs = (double*) calloc(sizeof(double), g_path_data->i_obs);
+
+	for(i=0; i<g_path_data->i_obs;i++)
+	{
+		stuff_v(xxspec[MSPEC+i].lmn,p_test->lmn);
+		side->ad_path_to_obs[i] = delay_to_observer(p_test);
+	}	
+
+	side->ad_freq_flux = (double*) calloc(sizeof(double), NWAVE-1);
+	side->ad_freq_path_flux = (double*) calloc(sizeof(double), (NWAVE-1) * g_path_data->i_path_bins);
+
+	if(side->ad_freq_path_flux == NULL)
+	{
+		Error("wind_paths_side_constructor: Could not allocate memory for cell %d bins\n",wind->nwind);
+		exit(0);
+	}
+	free(p_test);
+	return(side);
+}
+
+Wind_Paths_Ptr
+wind_paths_constructor (WindPtr wind)
+{
 	Wind_Paths_Ptr paths = (Wind_Paths_Ptr) calloc(sizeof(wind_paths_dummy),1);
 
-	if(data = NULL)
+	if(paths == NULL)
 	{
 		Error("wind_paths_constructor: Could not allocate memory\n");
 		exit(0);
 	}
-	paths->front = wind_paths_side_constructor(wind,  1);
-	paths->back	 = wind_paths_side_constructor(wind, -1);
+	paths->front = (Wind_Paths_Side_Ptr) wind_paths_side_constructor(wind,  1);
+	paths->back	 = (Wind_Paths_Side_Ptr) wind_paths_side_constructor(wind, -1);
 	return(paths);
 }
 
-Wind_Paths_Side_Ptr
-wind_paths_side_constructor (Wind_Ptr wind, int i_side)
-{
-	int i;
-	photon p_test;
-	Wind_Paths_Side_Ptr side = (Wind_Paths_Side_Ptr) calloc(sizeof(wind_paths_side_dummy), 1);
-	
-	if(path = NULL)
-	{
-		Error("wind_paths_side_constructor: Could not allocate memory for cell %d\n",windcell->nwind);
-		exit(0);
-	}
+/***********************************************************
+Synopsis:
+	wind_paths_add_phot(Wind_Paths_Ptr paths, PhotPtr pp)  
+		Adds a photon's weight to a wind cell's delay array.
 
-	stuff_v(wind->xcen,p_test.x);
-	p_test.x[0] *= i_side;
+Arguments:		
+	PhotPtr pp 				Photon to dump
+	Wind_Paths_Ptr paths	Paths (from wind) to add to
 
-	side->ad_path_to_obs = (*double) calloc(sizeof(double), g_path_data->i_obs);
-	for(i=0; i<g_path_data->i_obs;i++)
-	{
-		stuff_v(xxspec[MSPEC+i].lmn,p_test.lmn);
-		side->ad_path_to_obs[i] = delay_to_observer(&p_test);
-	}	
+Returns:
+  
+Description:	
+	Adds photon to frequency and path bin as appropriate.
+	As wind array is 2d, .5th dimension added via keeping
+	two path sets for + and - x-axis positions). No full 3-d
+	treatment required as Extract mode's viewpoint always
+	lies along X-axis.
 
-	for(i=0;i<NWAVE;i++)
-	{
-		side->ad_freq_flux[i] = (*double) calloc(sizeof(double),g_path_data->i_path_bins)
-	}
-	return(side);
-}
+Notes:
 
-int
-wind_paths_add_phot (Wind_Paths_Ptr paths, PhotPtr pp)
-{
-	if(pp->x[0] > 0)
-		wind_paths_side_add_phot(paths->front, pp);
-	else
-		wind_paths_side_add_phot(paths->back,  pp);
-	return(0);
-}
-
+History:
+	9/2/15	-	Written by SWM
+***********************************************************/
 int
 wind_paths_side_add_phot (Wind_Paths_Side_Ptr side, PhotPtr pp)
 {
 	int i,j;
 
+	printf("wind_paths_side_add_phot: Photon at %g %g %g\n",
+			pp->x[0], pp->x[1], pp->x[2]);
+
 	for(i=0; i<NWAVE-1; i++)
 	{
-		if(pp->freq >= xxspec[0].freq[i] && pp->freq <= xxspec[0].freq[i+1])
+		if(pp->freq >= xxspec[0].f[i] && pp->freq <= xxspec[0].f[i+1])
 		{
-			for(j=0; j<= g_path_data->i_path_bins; j++)
+			for(j=0; j< g_path_data->i_path_bins; j++)
 			{
-				if(pp->path >= g_path_data->ad_path_bin[i] && pp->path <= g_path_data->ad_path_bin[i+1])
+				if(	pp->path >= g_path_data->ad_path_bin[i] && 
+					pp->path <= g_path_data->ad_path_bin[i+1])
 				{
-					side->ad_freq_path_flux[i][j] += pp->w;
+					side->ad_freq_path_flux[i*(NWAVE-1)+j] += pp->w;
 				}
 			}
 		}
+	}
+	return(0);
+}
+int
+wind_paths_add_phot (WindPtr wind, PhotPtr pp)
+{
+	if(pp->x[0] >= 0.0)
+		wind_paths_side_add_phot(wind->paths->front, pp);
+	else
+		wind_paths_side_add_phot(wind->paths->back,  pp);
+	return(0);
+}
+
+/***********************************************************
+Synopsis:
+	wind_paths_add_phot(Wind_Paths_Ptr paths, PhotPtr pp)  
+		Adds a photon's weight to a wind cell's delay array.
+
+Arguments:		
+	PhotPtr pp 				Photon to dump
+	Wind_Paths_Ptr paths	Paths (from wind) to add to
+
+Returns:
+  
+Description:	
+	Adds photon to frequency and path bin as appropriate.
+	As wind array is 2d, .5th dimension added via keeping
+	two path sets for + and - x-axis positions). No full 3-d
+	treatment required as Extract mode's viewpoint always
+	lies along X-axis.
+
+Notes:
+
+History:
+	10/2/15	-	Written by SWM
+***********************************************************/
+int
+wind_paths_side_evaluate (Wind_Paths_Side_Ptr side)
+{
+	int i,j;
+
+	side->d_flux  = 0.0;
+	side->d_path  = 0.0;
+	for(i=0; i<NWAVE-1; i++)
+	{
+		side->ad_freq_flux[i]=0.0;
+		for(j=0; j< g_path_data->i_path_bins; j++)
+		{
+			side->d_path			+= side->ad_freq_path_flux[i*(NWAVE)+j]*
+									(g_path_data->ad_path_bin[i] + g_path_data->ad_path_bin[i+1]) / 2.0;
+			side->ad_freq_flux[i] 	+= side->ad_freq_path_flux[i*(NWAVE)+j];
+		}
+		side->d_flux += side->ad_freq_flux[i];
+	}
+	if(side->d_flux > 0.0) side->d_path /= side->d_flux;
+	return(0);
+}
+int
+wind_paths_evaluate(WindPtr wind)
+{
+	int i;
+	for(i=0; i<geo.ndim*geo.mdim; i++)
+	{
+		if(wind[i].inwind) 
+		{
+			wind_paths_side_evaluate (wind[i].paths->front);
+			wind_paths_side_evaluate (wind[i].paths->back);
+		}
+	}
+	return(0);
+}
+
+
+int
+wind_paths_init(WindPtr wind)
+{
+	int i;
+
+	for(i=0; i<geo.ndim*geo.mdim; i++)
+	{
+		if(wind[i].inwind)wind_paths_constructor (&wind[i]);
 	}
 	return(0);
 }

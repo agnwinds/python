@@ -305,8 +305,6 @@ the same resonance again */
 	}
 
 	/* Now we can actually extract the reweighted photon */
-
-	double x_inwind[3], path_inwind = 0.;	//SWM - Tracks last photon position in wind	
 	while (istat == P_INWIND)
 	{
 		istat = translate(w, pp, 20., &tau, &nres);
@@ -345,7 +343,7 @@ the same resonance again */
 		
 		if(pp->nrscat>0)	//SWM - Records total distance travelled by extract photon
 		{
-			stuff_v(pstart->x,pp->x);	//Restore photon to initial position (necessary for reweighting schemes)
+			stuff_v(pstart.x,pp->x);	//Restore photon to initial position (necessary for reweighting schemes)
 			delay_dump_single(pp, 1); 	//Dump photon now weight has been modified
 		}
 

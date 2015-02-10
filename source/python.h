@@ -447,15 +447,23 @@ blmod;
 */
 typedef struct wind_paths_side
 {
-  double* ad_path_to_obs;           //Path from host cell to each observer
-  double* ad_freq_path_flux[NWAVE]; //Array[by frequency] of arrays [by path] of total flux of photons with the given v&p
-  double  ad_freq_flux[NWAVE];      //Array[by frequency] of total flux
-  double  ad_flux;                  //Total flux
+  double* ad_path_to_obs;     //Path from host cell to each observer
+  double* ad_freq_path_flux;  //Array[by frequency, then path] of total flux of photons with the given v&p
+  double* ad_freq_flux;       //Array[by frequency] of total flux of photons with the given v
+  double  d_flux, d_path;     //Total flux, average path
 } wind_paths_side_dummy, *Wind_Paths_Side_Ptr;
 typedef struct wind_paths
 {
   Wind_Paths_Side_Ptr front, back;
 } wind_paths_dummy, *Wind_Paths_Ptr;
+
+typedef struct path_data
+{
+  double* ad_path_bin;              //Array of bins for the path histograms
+  int     i_path_bins, i_obs;       //Number of bins, number of observers
+} path_data_dummy, *Path_Data_Ptr;
+Path_Data_Ptr path_data;
+Path_Data_Ptr g_path_data;
 
 
 /* 	This structure defines the wind.  The structure w is allocated in the main

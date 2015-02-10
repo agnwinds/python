@@ -294,21 +294,6 @@ int trans_phot(WindPtr w, PhotPtr p, int iextract	/* 0 means do not extract alon
 				   statement has a loophole that needs to be plugged, when it comes back with avalue of n = -1 */
 				pp.grid = n = where_in_grid(pp.x);
 
-				// OLD71 if (pp.grid > -1)
-				// OLD71 {
-				// OLD71 if ((n = where_in_grid (pp.x)) != pp.grid)
-				// OLD71 {
-				// OLD71/* This error condition happens occassionally.  The reason is that we have added a "push through 
-				// OLD71 * distance" to get a photon to move on to the next cell, and have not updated the grid cell 
-				// OLD71 * before returning from translate. If one is concerned about this restore some of the lines
-				// OLD71 * that can befound in trans_phot in versions up through 54a.  04dec -- ksl
-				// OLD71 */
-				// OLD71 pp.grid = n;
-				// OLD71
-				// OLD71 }
-				// OLD71 }
-				// OLD71 else
-
 				if (n < 0)
 				{
 					Error("trans_phot: Trying to scatter a photon which is not in the wind\n");
@@ -479,7 +464,8 @@ int trans_phot(WindPtr w, PhotPtr p, int iextract	/* 0 means do not extract alon
 				stuff_phot(&pp, &p[nphot]);
 				icell = 0;
 			}
-
+			if(geo.wcycle == geo.wcycles-1) 
+				wind_paths_add_phot(&w[n], &pp);	//SWM Wind path adder
 
 
 			/* This completes the portion of the code that handles the scattering of a photon What follows is a simple check to see

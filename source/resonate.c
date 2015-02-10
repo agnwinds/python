@@ -332,7 +332,7 @@ process. */
 	      //If the density of the ion is very small we shouldn't have to worry about a resonance, but otherwise
 	      // ?? This seems like an incredibly small number; how can anything this small affect anything ??
 
-	      dd = get_ion_density (p_now.x, kkk);
+	      dd = get_ion_density (&p_now, kkk);
 
 	      if (dd > LDEN_MIN)
 		{
