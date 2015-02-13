@@ -460,7 +460,7 @@ mc_estimator_normalise (n)
      int n;
 
 {
-  double volume;
+  double volume, filled_volume;
   int i, j;
   double stimfac, line_freq, stat_weight_ratio;
   double heat_contribution;
@@ -473,8 +473,11 @@ mc_estimator_normalise (n)
   mplasma = &macromain[xplasma->nplasma];
 
   /* All the estimators need the volume so get that first. */
-  /* JM 1411 - changed to use filled volume */
-  volume = xplasma->vol;
+  /* JM 1411 - we use filled volume for gamma and alpha estimators,
+     but the cell volume for jbar because it is a sobolev quantity. */
+
+  filled_volume = xplasma->vol; 
+  volume = one->vol;
 
   /* bf estimators. During the mc calculation the quantity stored
      was weight * cross-section * path-length / frequency.
@@ -500,9 +503,9 @@ mc_estimator_normalise (n)
       for (j = 0; j < config[i].n_bfu_jump; j++)
 	{
 
-	  mplasma->gamma_old[config[i].bfu_indx_first + j] = mplasma->gamma[config[i].bfu_indx_first + j] / H / volume;	//normalise
+	  mplasma->gamma_old[config[i].bfu_indx_first + j] = mplasma->gamma[config[i].bfu_indx_first + j] / H / filled_volume;	//normalise
 	  mplasma->gamma[config[i].bfu_indx_first + j] = 0.0;	//re-initialise for next iteration
-	  mplasma->gamma_e_old[config[i].bfu_indx_first + j] = mplasma->gamma_e[config[i].bfu_indx_first + j] / H / volume;	//normalise
+	  mplasma->gamma_e_old[config[i].bfu_indx_first + j] = mplasma->gamma_e[config[i].bfu_indx_first + j] / H / filled_volume;	//normalise
 	  mplasma->gamma_e[config[i].bfu_indx_first + j] = 0.0;	//re-initialise for next iteration
 
 	  /* For the stimulated recombination parts we need the the
@@ -515,12 +518,12 @@ mc_estimator_normalise (n)
 
 	  mplasma->alpha_st_old[config[i].bfu_indx_first + j] =
 	    mplasma->alpha_st[config[i].bfu_indx_first +
-			      j] * stimfac * stat_weight_ratio / H / volume;
+			      j] * stimfac * stat_weight_ratio / H / filled_volume;
 	  mplasma->alpha_st[config[i].bfu_indx_first + j] = 0.0;
 
 	  mplasma->alpha_st_e_old[config[i].bfu_indx_first + j] =
 	    mplasma->alpha_st_e[config[i].bfu_indx_first +
-				j] * stimfac * stat_weight_ratio / H / volume;
+				j] * stimfac * stat_weight_ratio / H / filled_volume;
 	  mplasma->alpha_st_e[config[i].bfu_indx_first + j] = 0.0;
 
 	  /* For continuua whose edges lie beyond freqmin assume that gamma
@@ -592,6 +595,9 @@ mc_estimator_normalise (n)
 
 	  //get the line frequency
 	  line_freq = line[config[i].bbu_jump[j]].freq;
+
+    /* normalise jbar. Note that this is the only estimator here which 
+       is normalised by the non-filled volume rather than the filled volume */
 	  mplasma->jbar_old[config[i].bbu_indx_first + j] =
 	    mplasma->jbar[config[i].bbu_indx_first +
 			  j] * C * stimfac / 4. / PI / volume / line_freq;
