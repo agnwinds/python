@@ -35,7 +35,7 @@
 
 
 /* The next term attempts gloabally to define a minimum density to prevent zero devides in some routines */
-#define DENSITY_MIN		1.e-20
+#define DENSITY_MIN		1.0e-80
 /* 
 
    Note that the structure ele array may not be completely filled.  In this structure, the dimension is simply
