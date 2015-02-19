@@ -31,6 +31,7 @@ Arguments:
 	-d	Enters detailed or advanced mode. Allows one to access extra diagnositics and some
 	    other advanced commands
 	-e  Alter the maximum number of errors before the program quits
+	-i  Diagnostic mode which quits after reading in inputs. Used for Travis test suite.
 
 
 	
@@ -378,7 +379,11 @@ should allocate the space for the spectra to avoid all this nonsense.  02feb ksl
 	  {
 		modes.iadvanced = 1;
 	  	i++;
-	    }		
+	  }		
+	  else if (strcmp (argv[i], "-i") == 0)
+      {
+        modes.quit_after_inputs = 1;
+      }
 	  else if (strncmp (argv[i], "-", 1) == 0)
 	    {
 	      Error ("python: Unknown switch %s\n", argv[i]);
@@ -1689,10 +1694,15 @@ run -- 07jul -- ksl
   else
     cpar ("python.pf");
 
-/* OK all inputs have been obtained at this point and the inputs have been copied to "mod.pf" or "python.pf" */
+  /* OK all inputs have been obtained at this point and the inputs have been copied to "mod.pf" or "python.pf" */
+  /* JM 1502 -- if we have used the -i flag we want to quit after inputs as we were just testing readin */
+  if (modes.quit_after_inputs)
+    {
+      Log ("Run with -i flag, so quitting now inputs have been gathered.\n");	
+  	  exit(0);
+    }
 
-
-/* INPUTS ARE FINALLY COMPLETE */
+  /* INPUTS ARE FINALLY COMPLETE */
 
 
   /* Next line finally defines the wind if this is the initial time this model is being run */
@@ -2810,6 +2820,7 @@ int init_advanced_modes()
   modes.use_debug = 0;
   modes.print_dvds_info = 0;          // print out information on velocity gradients
   write_atomicdata = 0;               // print out summary of atomic data 
+  modes.quit_after_inputs = 0;		  // testing mode which quits after reading in inputs
   //note this is defined in atomic.h, rather than the modes structure 
 
   return (0);
