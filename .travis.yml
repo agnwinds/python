@@ -52,6 +52,7 @@ script:
     - py balmer_test > balmer_test.out
     - python check_travis_test.py 
     - cd ..
+    - Setup_Py_Dir
     - py -i cv_macro_benchmark
     - py -i cv_standard
     - py -i -d sv_detailedmode
