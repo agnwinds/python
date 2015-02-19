@@ -98,9 +98,15 @@ int parse_command_line(argc, argv)
       }
     else if (strcmp (argv[i], "-d") == 0)
     {
-    modes.iadvanced = 1;
+      modes.iadvanced = 1;
       i++;
-      }   
+    }
+
+    else if (strcmp (argv[i], "-i") == 0)
+      {
+        modes.quit_after_inputs = 1;
+      }
+
     else if (strncmp (argv[i], "-", 1) == 0)
       {
         Error ("python: Unknown switch %s\n", argv[i]);

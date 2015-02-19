@@ -1154,7 +1154,7 @@ struct advanced_modes
   int use_debug;                // print out debug statements
   int print_dvds_info;          // print out information on the velocity gradients
   int keep_photoabs;            // keep photoabsorption in final spectrum
-
+  int quit_after_inputs;        // quit after inputs read in, testing mode
 }
 modes;
 

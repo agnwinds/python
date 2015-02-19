@@ -31,6 +31,7 @@ Arguments:
 	-d	Enters detailed or advanced mode. Allows one to access extra diagnositics and some
 	    other advanced commands
 	-e  Alter the maximum number of errors before the program quits
+	-i  Diagnostic mode which quits after reading in inputs. Used for Travis test suite.
 
 
 	
@@ -960,7 +961,12 @@ main (argc, argv)
 
 
   /* OK all inputs have been obtained at this point and the inputs have been copied to "mod.pf" or "python.pf" */
-
+  /* JM 1502 -- if we have used the -i flag we want to quit after inputs as we were just testing readin */
+  if (modes.quit_after_inputs)
+    {
+      Log ("Run with -i flag, so quitting now inputs have been gathered.\n");	
+  	  exit(0);
+    }
 
   /* INPUTS ARE FINALLY COMPLETE */
 
@@ -2081,6 +2087,7 @@ int init_advanced_modes()
   modes.use_debug = 0;
   modes.print_dvds_info = 0;          // print out information on velocity gradients
   write_atomicdata = 0;               // print out summary of atomic data 
+  modes.quit_after_inputs = 0;		  // testing mode which quits after reading in inputs
   //note this is defined in atomic.h, rather than the modes structure 
 
 
