@@ -24,7 +24,6 @@ compiler:
 branches:
   only:
       dev
-      tests_for_travis
 
 install:
     # first configure
