@@ -19,8 +19,6 @@ compiler:
     - gcc
 
 # only want to run this test when we commit to dev
-# JM 1502 -- I've created a test branch which means we can run the travis test on stuff,
-# and possibly improve it before we push to dev 
 branches:
   only:
       dev
@@ -51,7 +49,7 @@ script:
     - py test1 > test1.out
     - py balmer_test > balmer_test.out
     - python check_travis_test.py 
-    - cp ../examples/*.pf .
+    - cd ..
     - py -i cv_macro_benchmark
     - py -i cv_standard
     - py -i -d sv_detailedmode

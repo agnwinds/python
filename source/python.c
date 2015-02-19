@@ -308,8 +308,8 @@ main (argc, argv)
 
   /* Parse the command line. Get the root. create files.diagfolder + diagfiles */
 
-  restart_stat = parse_command_line (argc, argv);
 
+  restart_stat = parse_command_line (argc, argv);
 
 
   /* 0811 - ksl - If the restart flag has been set, we check to see if a windsave file exists.  If it doues we will 
