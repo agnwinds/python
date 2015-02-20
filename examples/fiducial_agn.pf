@@ -10,6 +10,7 @@ Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,5=recalc_pow,6=pairwise_
 Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,6=macro_atoms,7=macro_atoms+aniso.scattering)                    3
 Thermal_balance_options(0=everything.on,1=no.adiabatic)  0
 System_type(0=star,1=binary,2=agn)                   2
+disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)                    1
 Disk_radiation(y=1)                               1
 Wind_radiation(y=1)                               1
 QSO_BH_radiation(y=1)                             1
@@ -17,7 +18,6 @@ Rad_type_for_disk(0=bb,1=models)_to_make_wind                    0
 Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table)_to_make_wind                   3
 mstar(msol)                                    1e9
 rstar(cm)                               8.85667e+14
-disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)                    1
 disk.mdot(msol/yr)                             5
 Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=analytic)                    0
 Disk.temperature.profile(0=standard;1=readin)                    0
