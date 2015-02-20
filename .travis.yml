@@ -55,3 +55,4 @@ script:
     - py -i -d sv_detailedmode
     - py -i fiducial_agn
     - py -i 1d_sn
+    - py -i agn_ss_2010_modela.pf
