@@ -460,19 +460,18 @@ double total_di(WindPtr one, double t_e);
 /* reverb.c */
 int delay_spectrum_summary(char filename[], char mode[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin);
 double delay_to_observer(PhotPtr pp);
-int delay_dump_prep(char filename[], int nspec, int restart_stat, int iRank);
+int delay_dump_prep(char filename[], int nspec, int restart_stat, int i_rank);
 int delay_dump_finish(void);
 int delay_dump_combine(int iRanks);
 int delay_dump(PhotPtr p, int np, int nspec, int iExtracted);
 int delay_dump_single(PhotPtr pp, int extract_phot);
-Path_Data_Ptr path_data_constructor(double r_rad_min, double r_rad_max, int i_bins, int i_angles);
-Wind_Paths_Side_Ptr wind_paths_side_constructor(WindPtr wind, int i_side);
+Path_Data_Ptr path_data_constructor(double r_rad_min, double r_rad_max, int i_bins, int i_angles, double freqmin, double freqmax, int i_theta_res);
 Wind_Paths_Ptr wind_paths_constructor(WindPtr wind);
-int wind_paths_side_add_phot(Wind_Paths_Side_Ptr side, PhotPtr pp);
+int wind_paths_init(WindPtr wind);
 int wind_paths_add_phot(WindPtr wind, PhotPtr pp);
-int wind_paths_side_evaluate(Wind_Paths_Side_Ptr side);
+int wind_paths_single_evaluate(Wind_Paths_Ptr paths);
 int wind_paths_evaluate(WindPtr wind);
-int wind_paths_finish(WindPtr wind);
+int wind_paths_output(WindPtr wind, char c_file_in[]);
 /* wind_keplerian.c */
 int get_wind_keplerian_params(void);
 double wind_keplerian_velocity(double x[], double v[]);

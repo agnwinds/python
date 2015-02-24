@@ -1736,15 +1736,12 @@ int main(argc, argv)
 								   previously calculated spectra must be recreated */
 	}
 
+	// SWM - Setting up spectrum and wind cell data
 	spectrum_init(freqmin, freqmax, nangles, angle, phase, scat_select,
 				  top_bot_select, select_extract, rho_select, z_select, az_select, r_select);
-	g_path_data = (Path_Data_Ptr) path_data_constructor (0.0, geo.rmax, 30, nangles);
+	g_path_data = (Path_Data_Ptr) path_data_constructor (0.0, geo.rmax, 30, nangles,freqmin, freqmax, 30);
 	wind_paths_init(wmain); //SWM - Wind cell init, hopefully farm this out to the wind defining routines
-	#ifdef MPI_ON
-		delay_dump_prep(delay_dump_file, NSPEC - 1, restart_stat, rank_global);	// Currently hardcoded to last spectrum
-	#else
-		delay_dump_prep(delay_dump_file, NSPEC - 1, restart_stat, 0);			// Currently hardcoded to last spectrum		
-	#endif
+
 
 	while (geo.wcycle < geo.wcycles)
 	{							/* This allows you to build up photons in bunches */
@@ -1947,9 +1944,6 @@ int main(argc, argv)
 		xsignal(root, "%-20s Finished %d of %d ionization cycle \n", "OK", geo.wcycle, geo.wcycles);
 		geo.wcycle++;			// Increment ionisation cycles
 
-
-		delay_dump(p, NPHOT, NSPEC - 1, 0);	// SWM - Dump delay tracks from this iteration
-
 		/* NSH 1408 - Save only the windsave file from thread 0, to prevent many processors from writing to the same file. */
 
 #ifdef MPI_ON
@@ -1972,16 +1966,11 @@ int main(argc, argv)
 	}							// End of Cycle loop
 
 	/* XXXX - END OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
-
-#ifdef MPI_ON					// SWM- If MPI is on
-	delay_dump_finish();		// Each thread dumps to file
-	MPI_Barrier(MPI_COMM_WORLD);	// Once all done
-	delay_dump_combine(np_mpi_global);	// Combine results
-#else // Otherwise
-	delay_dump_finish();		// Just dump
-#endif
-
 	Log(" Completed wind creation.  The elapsed TIME was %f\n", timer());
+
+	// SWM - Evaluate wind paths for last iteration
+	wind_paths_evaluate(w);
+	wind_paths_output(w, root);
 
 
 	/* XXXX - THE CALCULATION OF A DETAILED SPECTRUM IN A SPECIFIC REGION OF WAVELENGTH SPACE */
@@ -2049,6 +2038,12 @@ int main(argc, argv)
 		spectrum_restart_renormalise(nangles);
 	}
 
+	//SWM - Prepare for delay dump of data
+	#ifdef MPI_ON
+		delay_dump_prep(delay_dump_file, NSPEC - 1, restart_stat, rank_global);	// Currently hardcoded to last spectrum
+	#else
+		delay_dump_prep(delay_dump_file, NSPEC - 1, restart_stat, 0);			// Currently hardcoded to last spectrum		
+	#endif
 
 	while (geo.pcycle < geo.pcycles)
 	{							/* This allows you to build up photons in bunches */
@@ -2110,7 +2105,6 @@ int main(argc, argv)
 
 
 
-
 #ifdef MPI_ON
 		if (rank_global == 0)
 		{
@@ -2127,6 +2121,10 @@ int main(argc, argv)
 
 		xsignal(root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK", geo.pcycle, geo.pcycles);
 
+
+
+		delay_dump(p, NPHOT, NSPEC - 1, 0);	// SWM - Dump delay tracks from this iteration
+
 		geo.pcycle++;			// Increment the spectral cycles
 
 #ifdef MPI_ON
@@ -2140,6 +2138,16 @@ int main(argc, argv)
 #endif
 		check_time(root);
 	}
+
+
+#ifdef MPI_ON					// SWM- If MPI is on
+	delay_dump_finish();		// Each thread dumps to file
+	MPI_Barrier(MPI_COMM_WORLD);	// Once all done
+	delay_dump_combine(np_mpi_global);	// Combine results
+#else // Otherwise
+	delay_dump_finish();		// Just dump
+#endif
+
 
 
 	/* XXXX -- END CYCLE TO CALCULATE DETAILED SPECTRUM */

@@ -239,6 +239,24 @@ int trans_phot(WindPtr w, PhotPtr p, int iextract	/* 0 means do not extract alon
 			// Log("Photon=%i,weight=%e,tauscat=%f,nres=%i,istat=%i\n",nphot,p[nphot].w,tau_scat,nres,istat);
 			/* nres is the resonance at which the photon was stopped.  At present the same value is also stored in pp->nres, but I
 			   have not yet eliminated it from translate. ?? 02jan ksl */
+			if(geo.wcycle == geo.wcycles-1)
+			{
+				n = where_in_grid(pp.x);
+				
+
+				if(n>= 0)
+				{
+					pp.np = nphot;
+					wind_paths_add_phot(&w[n], &pp);			//SWM Wind path adder	
+					if(nphot < 20)
+					{
+						double rotmatXX, rotmatYX, rotmatXY, rotmatYY,rotangle;
+						printf("PPP %g %g %d\n",
+							sqrt(pp.x[0]*pp.x[0]+pp.x[1]*pp.x[1]), fabs(pp.x[2]), nphot);
+					}
+				}
+			}
+
 
 			icell++;
 			istat = walls(&pp, &p[nphot]);
@@ -254,13 +272,14 @@ int trans_phot(WindPtr w, PhotPtr p, int iextract	/* 0 means do not extract alon
 				break;
 			}
 
-			if (pp.w < weight_min)
+			if (pp.w < weight_min)//SWM test tweak
 			{
 				istat = pp.istat = P_ABSORB;	/* This photon was absorbed by continuum opacity within the wind */
 				pp.tau = VERY_BIG;
 				stuff_phot(&pp, &p[nphot]);
 				break;
 			}
+	
 
 			if (istat == P_HIT_STAR)
 			{													/* It was absorbed by the star */
@@ -427,7 +446,7 @@ int trans_phot(WindPtr w, PhotPtr p, int iextract	/* 0 means do not extract alon
 					{
 						/* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
 						   First find the sobolev optical depth along that vector */
-						tau_norm = sobolev(&wmain[pextract.grid], &pextract, -1.0, lin_ptr[pextract.nres], wmain[pextract.grid].dvds_max);
+						tau_norm = sobolev(&wmain[pextract.grid], &pextract.x, -1.0, lin_ptr[pextract.nres], wmain[pextract.grid].dvds_max);
 
 						/* then turn into a probability */
 						p_norm = p_escape_from_tau(tau_norm);
@@ -464,21 +483,18 @@ int trans_phot(WindPtr w, PhotPtr p, int iextract	/* 0 means do not extract alon
 				stuff_phot(&pp, &p[nphot]);
 				icell = 0;
 			}
-			if(geo.wcycle == geo.wcycles-1) 
-				wind_paths_add_phot(&w[n], &pp);	//SWM Wind path adder
-
 
 			/* This completes the portion of the code that handles the scattering of a photon What follows is a simple check to see
 			   if this particular photon has gotten stuck in the wind 54b-ksl */
 
-			if (pp.nscat == MAXSCAT)
+			if (pp.nscat == MAXSCAT) //SWM
 			{
 				istat = pp.istat = P_TOO_MANY_SCATTERS;	/* Scattered too many times */
 				stuff_phot(&pp, &p[nphot]);
 				break;
 			}
 
-			if (pp.istat == P_ADIABATIC)
+			if (pp.istat == P_ADIABATIC) //SWM
 			{
 				istat = pp.istat = p[nphot].istat = P_ADIABATIC;
 				stuff_phot(&pp, &p[nphot]);

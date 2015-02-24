@@ -197,13 +197,6 @@ delay_dump_prep (char filename[], int nspec, int restart_stat, int i_rank)
 	char string[LINELENGTH], c_file[LINELENGTH], c_rank[LINELENGTH];
 	int i;
 
-	if(restart_stat) return(0);
-	//Allocate and zero dump files and set extract status
-	delay_dump_spec = nspec;
-	delay_dump_bank = (PhotPtr) calloc(sizeof(p_dummy), delay_dump_bank_size);
-	delay_dump_bank_ex = (int*) calloc(sizeof(int),		delay_dump_bank_size);
-	for(i=0;i<delay_dump_bank_size;i++)	delay_dump_bank_ex[i] = 0;
-
 	//Get output filename
 	strcpy(c_file, filename);			//Copy filename to new string
 	if(i_rank > 0)					
@@ -212,6 +205,19 @@ delay_dump_prep (char filename[], int nspec, int restart_stat, int i_rank)
 		strcat(c_file,c_rank);			//Append thread # to filename
 	}
 	strcpy(delay_dump_file,c_file);		//Store modified filename for later
+
+	//Allocate and zero dump files and set extract status
+	delay_dump_spec = nspec;
+	delay_dump_bank = (PhotPtr) calloc(sizeof(p_dummy), delay_dump_bank_size);
+	delay_dump_bank_ex = (int*) calloc(sizeof(int),		delay_dump_bank_size);
+	for(i=0;i<delay_dump_bank_size;i++)	delay_dump_bank_ex[i] = 0;
+
+	//Check whether we should continue
+	if(restart_stat == 1) 
+	{
+		printf("delay_dump_prep: Resume run, skipping writeout\n");
+		return(0);
+	}
 
 	/* If this isn't a continue run, prep the output file */
 	if ((fptr = fopen(delay_dump_file, "w")) == NULL)
@@ -307,7 +313,7 @@ delay_dump_combine(int iRanks)
 	char string[LINELENGTH], cCall[LINELENGTH];
 	
 	//Yes this is done as a system call and won't work on Windows machines. Lazy solution!
-	sprintf(cCall, "cat %s[0-9]* >> ", delay_dump_file);
+	sprintf(cCall, "cat %s[0-9]* >> %s", delay_dump_file, delay_dump_file);
 	if(system(cCall)<0)
 		Error("delay_dump_combine: Error calling system command '%s'",cCall);
 	return(0);
@@ -447,7 +453,8 @@ History:
 	9/2/15	-	Written by SWM
 ***********************************************************/
 Path_Data_Ptr
-path_data_constructor (double r_rad_min, double r_rad_max, int i_bins, int i_angles)
+path_data_constructor (	double r_rad_min, double r_rad_max, int i_bins, int i_angles,
+						double freqmin, double freqmax, int i_theta_res)
 {
 	int i;
 	Path_Data_Ptr data = (Path_Data_Ptr) calloc(sizeof(path_data_dummy),1);
@@ -458,11 +465,18 @@ path_data_constructor (double r_rad_min, double r_rad_max, int i_bins, int i_ang
 		exit(0);
 	}
 
-	data->i_obs = i_angles;
-	data->i_path_bins=i_bins;
-	data->ad_path_bin = (double*) calloc(sizeof(double),i_bins);
-	for(i=0; i <= i_bins; i++){
+	data->i_theta_res	= i_theta_res;
+	data->i_obs 		= i_angles;
+	data->i_path_bins	= i_bins;
+	data->ad_path_bin	= (double*) calloc(sizeof(double),i_bins+1);
+	for(i=0; i <= i_bins; i++)
+	{
 		data->ad_path_bin[i] = r_rad_min + i*(r_rad_max*5.0-r_rad_min)/i_bins;
+	}
+	data->ad_freq_bin = (double*) calloc(sizeof(double),NWAVE);
+	for(i=0; i < NWAVE; i++)
+	{
+		data->ad_freq_bin[i] = freqmin + i*(freqmax-freqmin)/(NWAVE-1);
 	}
 	return(data);
 }
@@ -488,41 +502,6 @@ Notes:
 History:
 	9/2/15	-	Written by SWM
 ***********************************************************/
-Wind_Paths_Side_Ptr
-wind_paths_side_constructor (WindPtr wind, int i_side)
-{
-	int i;
-	PhotPtr p_test = (PhotPtr) calloc(sizeof(p_dummy), 1);
-	Wind_Paths_Side_Ptr side = (Wind_Paths_Side_Ptr) calloc(sizeof(wind_paths_side_dummy), 1);
-
-	if(side == NULL)
-	{
-		Error("wind_paths_side_constructor: Could not allocate memory for cell %d\n",wind->nwind);
-		exit(0);
-	}
-
-	stuff_v(wind->xcen,p_test->x);
-	p_test->x[0] *= i_side;
-	side->ad_path_to_obs = (double*) calloc(sizeof(double), g_path_data->i_obs);
-
-	for(i=0; i<g_path_data->i_obs;i++)
-	{
-		stuff_v(xxspec[MSPEC+i].lmn,p_test->lmn);
-		side->ad_path_to_obs[i] = delay_to_observer(p_test);
-	}	
-
-	side->ad_freq_flux = (double*) calloc(sizeof(double), NWAVE-1);
-	side->ad_freq_path_flux = (double*) calloc(sizeof(double), (NWAVE-1) * g_path_data->i_path_bins);
-
-	if(side->ad_freq_path_flux == NULL)
-	{
-		Error("wind_paths_side_constructor: Could not allocate memory for cell %d bins\n",wind->nwind);
-		exit(0);
-	}
-	free(p_test);
-	return(side);
-}
-
 Wind_Paths_Ptr
 wind_paths_constructor (WindPtr wind)
 {
@@ -530,12 +509,53 @@ wind_paths_constructor (WindPtr wind)
 
 	if(paths == NULL)
 	{
-		Error("wind_paths_constructor: Could not allocate memory\n");
+		Error("wind_paths_constructor: Could not allocate memory for cell %d\n",wind->nwind);
 		exit(0);
 	}
-	paths->front = (Wind_Paths_Side_Ptr) wind_paths_side_constructor(wind,  1);
-	paths->back	 = (Wind_Paths_Side_Ptr) wind_paths_side_constructor(wind, -1);
+
+	paths->ad_freq_flux = (double*) calloc(sizeof(double), NWAVE);
+	paths->ai_freq_num 	= (int*) 	calloc(sizeof(int), NWAVE);
+	paths->ad_freq_path_flux	= (double*) calloc(sizeof(double), NWAVE * g_path_data->i_path_bins);
+	paths->ai_freq_path_num 	= (int*)	calloc(sizeof(int), NWAVE * g_path_data->i_path_bins);
+	if(	paths->ad_freq_path_flux == NULL 	|| paths->ad_freq_flux == NULL ||
+		paths->ai_freq_path_num == NULL		|| paths->ai_freq_num == NULL )
+	{
+		Error("wind_paths_constructor: Could not allocate memory for cell %d bins\n",wind->nwind);
+		exit(0);
+	}
 	return(paths);
+}
+
+/***********************************************************
+Synopsis:
+	wind_paths_init(WindPtr wind)  
+		Initialises wind path structures
+
+Arguments:		
+	WindPtr wind	Wind to initialise
+
+Returns:
+  
+Description:	
+	Iterates over each wind cell, and sets up the wind path
+	data therein. This should ideally be folded into the
+	regular wind setup at some point.
+
+Notes:
+
+History:
+	10/2/15	-	Written by SWM
+***********************************************************/
+int
+wind_paths_init(WindPtr wind)
+{
+	int i;
+
+	for(i=0; i<NDIM*MDIM; i++)
+	{
+		wind[i].paths = (Wind_Paths_Ptr) wind_paths_constructor (&wind[i]);
+	}
+	return(0);
 }
 
 /***********************************************************
@@ -562,56 +582,43 @@ History:
 	9/2/15	-	Written by SWM
 ***********************************************************/
 int
-wind_paths_side_add_phot (Wind_Paths_Side_Ptr side, PhotPtr pp)
+wind_paths_add_phot (WindPtr wind, PhotPtr pp)
 {
 	int i,j;
 
-	printf("wind_paths_side_add_phot: Photon at %g %g %g\n",
-			pp->x[0], pp->x[1], pp->x[2]);
-
 	for(i=0; i<NWAVE-1; i++)
 	{
-		if(pp->freq >= xxspec[0].f[i] && pp->freq <= xxspec[0].f[i+1])
+		if(	pp->freq >= g_path_data->ad_freq_bin[i] &&
+			pp->freq <	g_path_data->ad_freq_bin[i+1])
 		{
 			for(j=0; j< g_path_data->i_path_bins; j++)
 			{
-				if(	pp->path >= g_path_data->ad_path_bin[i] && 
-					pp->path <= g_path_data->ad_path_bin[i+1])
+				if(	pp->path >= g_path_data->ad_path_bin[j] && 
+					pp->path <= g_path_data->ad_path_bin[j+1])
 				{
-					side->ad_freq_path_flux[i*(NWAVE-1)+j] += pp->w;
+					wind->paths->ad_freq_path_flux[i*g_path_data->i_path_bins + j]	+= pp->w;
+					wind->paths->ai_freq_path_num[i*g_path_data->i_path_bins + j]	++;
 				}
 			}
 		}
 	}
 	return(0);
 }
-int
-wind_paths_add_phot (WindPtr wind, PhotPtr pp)
-{
-	if(pp->x[0] >= 0.0)
-		wind_paths_side_add_phot(wind->paths->front, pp);
-	else
-		wind_paths_side_add_phot(wind->paths->back,  pp);
-	return(0);
-}
 
 /***********************************************************
 Synopsis:
-	wind_paths_add_phot(Wind_Paths_Ptr paths, PhotPtr pp)  
-		Adds a photon's weight to a wind cell's delay array.
+	wind_paths_evaluate(WindPtr wind)  
+		Evaluates wind path details for a cycle
 
 Arguments:		
-	PhotPtr pp 				Photon to dump
-	Wind_Paths_Ptr paths	Paths (from wind) to add to
+	WindPtr wind	Wind to evaluate
 
 Returns:
   
 Description:	
-	Adds photon to frequency and path bin as appropriate.
-	As wind array is 2d, .5th dimension added via keeping
-	two path sets for + and - x-axis positions). No full 3-d
-	treatment required as Extract mode's viewpoint always
-	lies along X-axis.
+	Iterates over each wind cell, recording the total flux
+	in each bin in the cell's arrays for use later on, as
+	well as making a simple 'average path' calculation.
 
 Notes:
 
@@ -619,50 +626,347 @@ History:
 	10/2/15	-	Written by SWM
 ***********************************************************/
 int
-wind_paths_side_evaluate (Wind_Paths_Side_Ptr side)
+wind_paths_single_evaluate (Wind_Paths_Ptr paths)
 {
 	int i,j;
 
-	side->d_flux  = 0.0;
-	side->d_path  = 0.0;
+	paths->d_flux	= 0.0;
+	paths->d_path	= 0.0;
+	paths->i_num	= 0.0;
 	for(i=0; i<NWAVE-1; i++)
 	{
-		side->ad_freq_flux[i]=0.0;
+		paths->ad_freq_flux[i]	=0.0;
+		paths->ai_freq_num[i]	=0;
+
 		for(j=0; j< g_path_data->i_path_bins; j++)
 		{
-			side->d_path			+= side->ad_freq_path_flux[i*(NWAVE)+j]*
-									(g_path_data->ad_path_bin[i] + g_path_data->ad_path_bin[i+1]) / 2.0;
-			side->ad_freq_flux[i] 	+= side->ad_freq_path_flux[i*(NWAVE)+j];
+			paths->ad_freq_flux[i] 	+= paths->ad_freq_path_flux[i*g_path_data->i_path_bins + j];
+			paths->ai_freq_num[i]	+= paths->ai_freq_path_num[i*g_path_data->i_path_bins + j];
+			paths->d_path			+= paths->ad_freq_path_flux[i*g_path_data->i_path_bins + j]*
+									(g_path_data->ad_path_bin[j] + g_path_data->ad_path_bin[j+1]) / 2.0;
 		}
-		side->d_flux += side->ad_freq_flux[i];
+
+		paths->d_flux 	+= paths->ad_freq_flux[i];
+		paths->i_num	+= paths->ai_freq_num[i];
 	}
-	if(side->d_flux > 0.0) side->d_path /= side->d_flux;
+	if(paths->d_flux > 0.0) paths->d_path /= paths->d_flux;
 	return(0);
 }
 int
 wind_paths_evaluate(WindPtr wind)
 {
 	int i;
-	for(i=0; i<geo.ndim*geo.mdim; i++)
+	for(i=0; i< NDIM*MDIM; i++)
 	{
-		if(wind[i].inwind) 
+		if(wind[i].inwind >= 0)
+			wind_paths_single_evaluate (wind[i].paths);
+	}
+	return(0);
+}
+
+int 
+wind_paths_point_index(int i, int j, int k, int i_top)
+{
+	int n;
+	if(i_top >= 0)
+	{
+		n = i*(g_path_data->i_theta_res+1)*MDIM +
+			j*(g_path_data->i_theta_res+1) +
+			k;
+	}
+	else
+	{
+		n = (g_path_data->i_theta_res+1)*MDIM*NDIM +
+ 			i*(g_path_data->i_theta_res+1)*MDIM +
+			j*(g_path_data->i_theta_res+1) +
+			k;
+	}
+	return(n);
+		
+}
+
+int
+wind_paths_output(WindPtr wind, char c_file_in[])
+{
+	FILE *fopen(), *fptr;
+	char c_file[LINELENGTH];	
+	int i,j,k,l, n, i_obs, i_cells,i_points;
+	double r_theta, r_x, r_y;
+	PhotPtr p_test = calloc(sizeof(p_dummy),1);
+
+	//Get output filename
+	strcpy(c_file, c_file_in);			//Copy filename to new string
+	strcat(c_file,".wind_paths.vtk");	//Append thread # to filename
+
+	if ((fptr = fopen(c_file, "w")) == NULL)
+	{
+		Error("wind_paths_output: Unable to open %s for writing\n", c_file);
+		exit(0);
+	}
+
+
+	i_cells = 2*(NDIM-1)*(MDIM-1)*g_path_data->i_theta_res;
+	i_points= 2*NDIM*MDIM*(g_path_data->i_theta_res+1);
+
+	fprintf(fptr, "# vtk DataFile Version 2.0\n");
+	fprintf(fptr, "Wind file data\nASCII\n");
+	fprintf(fptr, "DATASET UNSTRUCTURED_GRID\n");
+	fprintf(fptr, "POINTS %d float\n",i_points);
+	for(i=0; i < NDIM; i++)
+	{
+		for(j=0; j < MDIM; j++)
 		{
-			wind_paths_side_evaluate (wind[i].paths->front);
-			wind_paths_side_evaluate (wind[i].paths->back);
+			wind_ij_to_n(i,j,&n);
+
+			for(k=0; k <= g_path_data->i_theta_res; k++)
+			{
+				r_theta = k * (PI/(double) g_path_data->i_theta_res);
+				r_x = wind[n].x[0] * cos(r_theta);
+				r_y = wind[n].x[0] * sin(r_theta);
+				fprintf(fptr, "%10.5g %10.5g %10.5g\n",r_x, r_y, wind[n].x[2]);
+			}
 		}
 	}
+		for(i=0; i < NDIM; i++)
+	{
+		for(j=0; j < MDIM; j++)
+		{
+			wind_ij_to_n(i,j,&n);
+
+			for(k=0; k <= g_path_data->i_theta_res; k++)
+			{
+				r_theta = k * (PI/(double) g_path_data->i_theta_res);
+				r_x = wind[n].x[0] * cos(r_theta);
+				r_y = wind[n].x[0] * sin(r_theta);
+				fprintf(fptr, "%10.5g %10.5g %10.5g\n",r_x, r_y, -wind[n].x[2]);
+			}
+		}
+	}
+	fprintf(fptr, "\n");
+
+	fprintf(fptr, "CELLS %d %d\n",i_cells,9*i_cells);
+	for(i=0; i < NDIM-1; i++)
+	{
+		for(j=0; j < MDIM-1; j++)
+		{
+			for(k=0; k < g_path_data->i_theta_res; k++)
+			{	
+				fprintf(fptr, "8 %d %d %d %d %d %d %d %d\n",
+						wind_paths_point_index(i,	j,	k	,1),
+						wind_paths_point_index(i,	j,	k+1 ,1),
+						wind_paths_point_index(i,	j+1,k+1	,1),
+						wind_paths_point_index(i, 	j+1,k	,1),
+						wind_paths_point_index(i+1,	j,	k	,1),
+						wind_paths_point_index(i+1,	j,	k+1	,1),
+						wind_paths_point_index(i+1,	j+1,k+1	,1),
+						wind_paths_point_index(i+1,	j+1,k	,1));
+			}
+		}
+	}
+		for(i=0; i < NDIM-1; i++)
+	{
+		for(j=0; j < MDIM-1; j++)
+		{
+			for(k=0; k < g_path_data->i_theta_res; k++)
+			{	
+				fprintf(fptr, "8 %d %d %d %d %d %d %d %d\n",
+						wind_paths_point_index(i,	j,	k	,-1),
+						wind_paths_point_index(i,	j,	k+1 ,-1),
+						wind_paths_point_index(i,	j+1,k+1	,-1),
+						wind_paths_point_index(i, 	j+1,k	,-1),
+						wind_paths_point_index(i+1,	j,	k	,-1),
+						wind_paths_point_index(i+1,	j,	k+1	,-1),
+						wind_paths_point_index(i+1,	j+1,k+1	,-1),
+						wind_paths_point_index(i+1,	j+1,k	,-1));
+			}
+		}
+	}
+
+	fprintf(fptr, "CELL_TYPES %d\n",i_cells);
+	for(i=0; i<i_cells;i++)
+		fprintf(fptr, "12\n");
+	fprintf(fptr, "\n");
+
+	fprintf(fptr, "CELL_DATA %d\n",i_cells);
+	fprintf(fptr, "SCALARS path_length float 1\n");
+	fprintf(fptr, "LOOKUP_TABLE default\n");
+	for(i=0; i < NDIM-1; i++)
+	{
+		for(j=0; j < MDIM-1; j++)
+		{
+			wind_ij_to_n(i,j,&n);
+			for(k=0; k < g_path_data->i_theta_res; k++)
+			{	
+				if(wind[n].paths->i_num > 0)
+				{
+					r_theta = k * (PI/(double) g_path_data->i_theta_res);
+					p_test->x[0] = wind[n].xcen[0] * cos(r_theta);
+					p_test->x[1] = wind[n].xcen[0] * sin(r_theta);
+					p_test->x[2] = wind[n].xcen[2];
+					stuff_v(xxspec[MSPEC].lmn,p_test->lmn);
+					fprintf(fptr, "%g\n", wind[n].paths->d_path + delay_to_observer(p_test));					
+				}
+				else
+				{
+					fprintf(fptr, "-1\n");
+				}
+						
+			}
+		}
+	}
+	for(i=0; i < NDIM-1; i++)
+	{
+		for(j=0; j < MDIM-1; j++)
+		{
+			wind_ij_to_n(i,j,&n);
+			for(k=0; k < g_path_data->i_theta_res; k++)
+			{	
+				if(wind[n].paths->i_num > 0)
+				{
+					r_theta = k * (PI/(double) g_path_data->i_theta_res);
+					p_test->x[0] = wind[n].xcen[0] * cos(r_theta);
+					p_test->x[1] = wind[n].xcen[0] * sin(r_theta);
+					p_test->x[2] = -wind[n].xcen[2];
+					stuff_v(xxspec[MSPEC].lmn,p_test->lmn);
+					fprintf(fptr, "%g\n", wind[n].paths->d_path + delay_to_observer(p_test));					
+				}
+				else
+				{
+					fprintf(fptr, "-1\n");
+				}
+						
+			}
+		}
+	}
+
+	fprintf(fptr, "SCALARS path_errors float 1\n");
+	fprintf(fptr, "LOOKUP_TABLE default\n");
+	for(i=0; i < NDIM-1; i++)
+	{
+		for(j=0; j < MDIM-1; j++)
+		{
+			wind_ij_to_n(i,j,&n);
+			for(k=0; k < g_path_data->i_theta_res; k++)
+			{	
+				if(wind[n].paths->i_num >0)
+				{
+					fprintf(fptr, "%g\n",
+							sqrt((double)wind[n].paths->i_num)/
+							(double)wind[n].paths->i_num);					
+				}
+				else
+				{
+					fprintf(fptr, "-1\n");
+				}
+						
+			}
+		}
+	}
+	for(i=0; i < NDIM-1; i++)
+	{
+		for(j=0; j < MDIM-1; j++)
+		{
+			wind_ij_to_n(i,j,&n);
+			for(k=0; k < g_path_data->i_theta_res; k++)
+			{	
+				if(wind[n].paths->i_num >0)
+				{
+					fprintf(fptr, "%g\n",
+							sqrt((double)wind[n].paths->i_num)/
+							(double)wind[n].paths->i_num);					
+				}
+				else
+				{
+					fprintf(fptr, "-1\n");
+				}
+						
+			}
+		}
+	}
+
+	free(p_test);
 	return(0);
 }
 
 
 int
-wind_paths_init(WindPtr wind)
+wind_paths_output_w(WindPtr wind, char c_file_in[])
 {
-	int i;
+	FILE *fopen(), *fptr;
+	char c_file[LINELENGTH];	
+	int i,j,k,l=0, n, i_obs;
+	double r_theta;
+	PhotPtr p_test = calloc(sizeof(p_dummy),1);
 
-	for(i=0; i<geo.ndim*geo.mdim; i++)
+	//Get output filename
+	strcpy(c_file, c_file_in);			//Copy filename to new string
+	strcat(c_file,".wind_paths");		//Append thread # to filename
+
+	if ((fptr = fopen(c_file, "w")) == NULL)
 	{
-		if(wind[i].inwind)wind_paths_constructor (&wind[i]);
+		Error("wind_paths_output: Unable to open %s for writing\n", c_file);
+		exit(0);
 	}
+
+	fprintf(fptr, "# Wind path information\n");
+	fprintf(fptr, "# X       |  Y       |  Z       ");
+	for(i=0;i<g_path_data->i_obs;i++)
+		fprintf(fptr, "| Flux     | Error    ");
+	fprintf(fptr, "\n ");
+
+	for(i=0; i< NDIM; i++)
+	{
+		for(j=0; j< MDIM; j++)
+		{
+			wind_ij_to_n(i,j,&n);
+
+			for(k=0; k<g_path_data->i_theta_res; k++)
+			{
+				r_theta = k * (PI/(double) g_path_data->i_theta_res);
+				p_test->x[0] = wind[n].xcen[0] * cos(r_theta);
+				p_test->x[1] = wind[n].xcen[0] * sin(r_theta);
+
+				fprintf(fptr, "%10.5g %10.5g %10.5g",wind[n].xcen[0], r_theta, wind[n].xcen[2]);
+				for(i_obs=0; i_obs<g_path_data->i_obs; i_obs++)
+				{
+					if(wind[n].paths->i_num > 0)
+					{
+						p_test->x[2] = wind[n].xcen[2];
+						stuff_v(xxspec[MSPEC+i_obs].lmn,p_test->lmn);
+						fprintf(fptr, " %10.5g %10.5g %d\n", 
+								wind[n].paths->d_path + delay_to_observer(p_test), 
+								sqrt((double)wind[n].paths->i_num)/(double)wind[n].paths->i_num,
+								i_obs);
+					}
+					else
+					{
+						fprintf(fptr, " %10.5g %10.5g %d\n", NAN, NAN, l);
+					}
+				}
+
+				fprintf(fptr, "%10.5g %10.5g %10.5g",wind[n].xcen[0], r_theta, -wind[n].xcen[2]);
+				for(i_obs=0; i_obs<g_path_data->i_obs; i_obs++)
+				{
+					if(wind[n].paths->i_num > 0)
+					{
+						p_test->x[2] = -wind[n].xcen[2];
+						stuff_v(xxspec[MSPEC+i_obs].lmn,p_test->lmn);
+						fprintf(fptr, " %10.5g %10.5g %d\n", 
+								wind[n].paths->d_path + delay_to_observer(p_test), 
+								sqrt((double)wind[n].paths->i_num)/(double)wind[n].paths->i_num,
+								i_obs);
+					}
+					else
+					{
+						fprintf(fptr, " %10.5g %10.5g %d\n", NAN, NAN, i_obs);
+					}
+				}	
+				fprintf(fptr, "\n");
+			}
+			fprintf(fptr, "\n");		
+		}
+		fprintf(fptr, "\n");	
+	}
+	free(p_test);
 	return(0);
 }

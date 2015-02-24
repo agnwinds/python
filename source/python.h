@@ -443,24 +443,24 @@ blmod;
     Wind paths is defined per cell and contains a binned array holding the spectrum of paths. Layers are
     For each frequency:
       For each path bin:
-        What's the total flux of all these photons entering the cell?
+        What's the total fluxback of all these photons entering the cell?
 */
-typedef struct wind_paths_side
-{
-  double* ad_path_to_obs;     //Path from host cell to each observer
-  double* ad_freq_path_flux;  //Array[by frequency, then path] of total flux of photons with the given v&p
-  double* ad_freq_flux;       //Array[by frequency] of total flux of photons with the given v
-  double  d_flux, d_path;     //Total flux, average path
-} wind_paths_side_dummy, *Wind_Paths_Side_Ptr;
 typedef struct wind_paths
 {
-  Wind_Paths_Side_Ptr front, back;
+  double* ad_freq_path_flux;  //Array[by frequency, then path] of total flux of photons with the given v&p
+  int*    ai_freq_path_num;   //Array[by frequency, then path] of the number of photons in this bin
+  double* ad_freq_flux;       //Array[by frequency] of total flux of photons with the given v
+  int*    ai_freq_num;        //Array[by frequency] of the number of photons in this bin
+  double  d_flux, d_path;     //Total flux, average path
+  int     i_num;              //Number of photons hitting this cell
 } wind_paths_dummy, *Wind_Paths_Ptr;
 
 typedef struct path_data
 {
   double* ad_path_bin;              //Array of bins for the path histograms
+  double* ad_freq_bin;              //Array of bins for the frequency histograms
   int     i_path_bins, i_obs;       //Number of bins, number of observers
+  int     i_theta_res;              //Number of angular bins when outputting observer paths
 } path_data_dummy, *Path_Data_Ptr;
 Path_Data_Ptr path_data;
 Path_Data_Ptr g_path_data;
