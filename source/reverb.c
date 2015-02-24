@@ -57,7 +57,7 @@ delay_spectrum_summary (
 {
 	FILE *fopen(), *fptr;
 	int i, n;
-	char string[LINELENGTH];
+	char string[LINELENGTH], c_file[LINELENGTH];
 	double freq, freqmin, dfreq, freq1;
 	double lfreqmin, lfreqmax, ldfreq;
 	double x, dd;
@@ -65,7 +65,9 @@ delay_spectrum_summary (
 	/* 
 	 * Open or reopen a file for writing the spectrum 
 	 */
-	if ((fptr = fopen(filename, "w")) == NULL)
+	 strcpy(c_file, filename);
+	 strcat(c_file, ".delay_spec");
+	if ((fptr = fopen(c_file, "w")) == NULL)
 	{
 		Error("delay_spectrum_summary: Unable to open %s for writing\n", filename);
 		exit(0);
@@ -199,6 +201,7 @@ delay_dump_prep (char filename[], int nspec, int restart_stat, int i_rank)
 
 	//Get output filename
 	strcpy(c_file, filename);			//Copy filename to new string
+	strcat(c_file, ".delay_dump");
 	if(i_rank > 0)					
 	{
 		sprintf(c_rank,"%i",i_rank);	//Write thread # to string
@@ -453,7 +456,7 @@ History:
 	9/2/15	-	Written by SWM
 ***********************************************************/
 Path_Data_Ptr
-path_data_constructor (	double r_rad_min, double r_rad_max, int i_bins, int i_angles,
+path_data_constructor (	double r_rad_min, double r_rad_max, int i_path_bins, int i_angles,
 						double freqmin, double freqmax, int i_theta_res)
 {
 	int i;
@@ -467,11 +470,11 @@ path_data_constructor (	double r_rad_min, double r_rad_max, int i_bins, int i_an
 
 	data->i_theta_res	= i_theta_res;
 	data->i_obs 		= i_angles;
-	data->i_path_bins	= i_bins;
+	data->i_path_bins	= i_path_bins;
 	data->ad_path_bin	= (double*) calloc(sizeof(double),i_bins+1);
-	for(i=0; i <= i_bins; i++)
+	for(i=0; i <= i_path_bins; i++)
 	{
-		data->ad_path_bin[i] = r_rad_min + i*(r_rad_max*5.0-r_rad_min)/i_bins;
+		data->ad_path_bin[i] = r_rad_min + i*(r_rad_max*5.0-r_rad_min)/i_path_bins;
 	}
 	data->ad_freq_bin = (double*) calloc(sizeof(double),NWAVE);
 	for(i=0; i < NWAVE; i++)
@@ -479,6 +482,14 @@ path_data_constructor (	double r_rad_min, double r_rad_max, int i_bins, int i_an
 		data->ad_freq_bin[i] = freqmin + i*(freqmax-freqmin)/(NWAVE-1);
 	}
 	return(data);
+}
+int
+path_data_init(double r_rad_min, double r_rad_max, int i_path_bins, int i_angles,
+	double r_freq_min, double f_freq_max, int i_theta_res)
+{
+	g_path_data = (Path_Data_Ptr) path_data_constructor (r_rad_min, r_rad_max, i_path_bins, 
+		i_angles, r_freq_min, r_freq_max, i_theta_res);
+	return(0);
 }
 
 /***********************************************************
@@ -668,19 +679,10 @@ int
 wind_paths_point_index(int i, int j, int k, int i_top)
 {
 	int n;
-	if(i_top >= 0)
-	{
-		n = i*(g_path_data->i_theta_res+1)*MDIM +
-			j*(g_path_data->i_theta_res+1) +
-			k;
-	}
-	else
-	{
-		n = (g_path_data->i_theta_res+1)*MDIM*NDIM +
- 			i*(g_path_data->i_theta_res+1)*MDIM +
-			j*(g_path_data->i_theta_res+1) +
-			k;
-	}
+	n = i*2*(g_path_data->i_theta_res+1)*MDIM +
+			j*2*(g_path_data->i_theta_res+1) +
+			k*2 +
+			i_top;
 	return(n);
 		
 }
@@ -691,7 +693,7 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 	FILE *fopen(), *fptr;
 	char c_file[LINELENGTH];	
 	int i,j,k,l, n, i_obs, i_cells,i_points;
-	double r_theta, r_x, r_y;
+	double r_theta, r_x, r_y, r_err;
 	PhotPtr p_test = calloc(sizeof(p_dummy),1);
 
 	//Get output filename
@@ -723,21 +725,7 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 				r_theta = k * (PI/(double) g_path_data->i_theta_res);
 				r_x = wind[n].x[0] * cos(r_theta);
 				r_y = wind[n].x[0] * sin(r_theta);
-				fprintf(fptr, "%10.5g %10.5g %10.5g\n",r_x, r_y, wind[n].x[2]);
-			}
-		}
-	}
-		for(i=0; i < NDIM; i++)
-	{
-		for(j=0; j < MDIM; j++)
-		{
-			wind_ij_to_n(i,j,&n);
-
-			for(k=0; k <= g_path_data->i_theta_res; k++)
-			{
-				r_theta = k * (PI/(double) g_path_data->i_theta_res);
-				r_x = wind[n].x[0] * cos(r_theta);
-				r_y = wind[n].x[0] * sin(r_theta);
+				fprintf(fptr, "%10.5g %10.5g %10.5g\n",r_x, r_y,  wind[n].x[2]);	
 				fprintf(fptr, "%10.5g %10.5g %10.5g\n",r_x, r_y, -wind[n].x[2]);
 			}
 		}
@@ -760,24 +748,15 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 						wind_paths_point_index(i+1,	j,	k+1	,1),
 						wind_paths_point_index(i+1,	j+1,k+1	,1),
 						wind_paths_point_index(i+1,	j+1,k	,1));
-			}
-		}
-	}
-		for(i=0; i < NDIM-1; i++)
-	{
-		for(j=0; j < MDIM-1; j++)
-		{
-			for(k=0; k < g_path_data->i_theta_res; k++)
-			{	
 				fprintf(fptr, "8 %d %d %d %d %d %d %d %d\n",
-						wind_paths_point_index(i,	j,	k	,-1),
-						wind_paths_point_index(i,	j,	k+1 ,-1),
-						wind_paths_point_index(i,	j+1,k+1	,-1),
-						wind_paths_point_index(i, 	j+1,k	,-1),
-						wind_paths_point_index(i+1,	j,	k	,-1),
-						wind_paths_point_index(i+1,	j,	k+1	,-1),
-						wind_paths_point_index(i+1,	j+1,k+1	,-1),
-						wind_paths_point_index(i+1,	j+1,k	,-1));
+						wind_paths_point_index(i,	j,	k	,0),
+						wind_paths_point_index(i,	j,	k+1 ,0),
+						wind_paths_point_index(i,	j+1,k+1	,0),
+						wind_paths_point_index(i, 	j+1,k	,0),
+						wind_paths_point_index(i+1,	j,	k	,0),
+						wind_paths_point_index(i+1,	j,	k+1	,0),
+						wind_paths_point_index(i+1,	j+1,k+1	,0),
+						wind_paths_point_index(i+1,	j+1,k	,0));
 			}
 		}
 	}
@@ -788,57 +767,6 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 	fprintf(fptr, "\n");
 
 	fprintf(fptr, "CELL_DATA %d\n",i_cells);
-	fprintf(fptr, "SCALARS path_length float 1\n");
-	fprintf(fptr, "LOOKUP_TABLE default\n");
-	for(i=0; i < NDIM-1; i++)
-	{
-		for(j=0; j < MDIM-1; j++)
-		{
-			wind_ij_to_n(i,j,&n);
-			for(k=0; k < g_path_data->i_theta_res; k++)
-			{	
-				if(wind[n].paths->i_num > 0)
-				{
-					r_theta = k * (PI/(double) g_path_data->i_theta_res);
-					p_test->x[0] = wind[n].xcen[0] * cos(r_theta);
-					p_test->x[1] = wind[n].xcen[0] * sin(r_theta);
-					p_test->x[2] = wind[n].xcen[2];
-					stuff_v(xxspec[MSPEC].lmn,p_test->lmn);
-					fprintf(fptr, "%g\n", wind[n].paths->d_path + delay_to_observer(p_test));					
-				}
-				else
-				{
-					fprintf(fptr, "-1\n");
-				}
-						
-			}
-		}
-	}
-	for(i=0; i < NDIM-1; i++)
-	{
-		for(j=0; j < MDIM-1; j++)
-		{
-			wind_ij_to_n(i,j,&n);
-			for(k=0; k < g_path_data->i_theta_res; k++)
-			{	
-				if(wind[n].paths->i_num > 0)
-				{
-					r_theta = k * (PI/(double) g_path_data->i_theta_res);
-					p_test->x[0] = wind[n].xcen[0] * cos(r_theta);
-					p_test->x[1] = wind[n].xcen[0] * sin(r_theta);
-					p_test->x[2] = -wind[n].xcen[2];
-					stuff_v(xxspec[MSPEC].lmn,p_test->lmn);
-					fprintf(fptr, "%g\n", wind[n].paths->d_path + delay_to_observer(p_test));					
-				}
-				else
-				{
-					fprintf(fptr, "-1\n");
-				}
-						
-			}
-		}
-	}
-
 	fprintf(fptr, "SCALARS path_errors float 1\n");
 	fprintf(fptr, "LOOKUP_TABLE default\n");
 	for(i=0; i < NDIM-1; i++)
@@ -850,33 +778,14 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 			{	
 				if(wind[n].paths->i_num >0)
 				{
-					fprintf(fptr, "%g\n",
-							sqrt((double)wind[n].paths->i_num)/
-							(double)wind[n].paths->i_num);					
+					r_err = sqrt((double)wind[n].paths->i_num)/
+							(double)wind[n].paths->i_num;		
+					fprintf(fptr, "%g\n",r_err);
+					fprintf(fptr, "%g\n",r_err);			
 				}
 				else
 				{
 					fprintf(fptr, "-1\n");
-				}
-						
-			}
-		}
-	}
-	for(i=0; i < NDIM-1; i++)
-	{
-		for(j=0; j < MDIM-1; j++)
-		{
-			wind_ij_to_n(i,j,&n);
-			for(k=0; k < g_path_data->i_theta_res; k++)
-			{	
-				if(wind[n].paths->i_num >0)
-				{
-					fprintf(fptr, "%g\n",
-							sqrt((double)wind[n].paths->i_num)/
-							(double)wind[n].paths->i_num);					
-				}
-				else
-				{
 					fprintf(fptr, "-1\n");
 				}
 						
@@ -884,89 +793,42 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 		}
 	}
 
-	free(p_test);
-	return(0);
-}
-
-
-int
-wind_paths_output_w(WindPtr wind, char c_file_in[])
-{
-	FILE *fopen(), *fptr;
-	char c_file[LINELENGTH];	
-	int i,j,k,l=0, n, i_obs;
-	double r_theta;
-	PhotPtr p_test = calloc(sizeof(p_dummy),1);
-
-	//Get output filename
-	strcpy(c_file, c_file_in);			//Copy filename to new string
-	strcat(c_file,".wind_paths");		//Append thread # to filename
-
-	if ((fptr = fopen(c_file, "w")) == NULL)
+	for(i_obs=0; i_obs<g_path_data->i_obs; i_obs++)
 	{
-		Error("wind_paths_output: Unable to open %s for writing\n", c_file);
-		exit(0);
-	}
+		printf("SPECS: %d %s %g %g %g\n",MSPEC+i_obs, 
+				xxspec[MSPEC+i_obs].name, xxspec[MSPEC+i_obs].x[0],
+				xxspec[MSPEC+i_obs].x[1], xxspec[MSPEC+i_obs].x[2]);
+		fprintf(fptr, "SCALARS path_%s float 1\n",xxspec[MSPEC+i_obs].name);
+		fprintf(fptr, "LOOKUP_TABLE default\n");
+		stuff_v(xxspec[MSPEC+i_obs].lmn,p_test->lmn);
 
-	fprintf(fptr, "# Wind path information\n");
-	fprintf(fptr, "# X       |  Y       |  Z       ");
-	for(i=0;i<g_path_data->i_obs;i++)
-		fprintf(fptr, "| Flux     | Error    ");
-	fprintf(fptr, "\n ");
-
-	for(i=0; i< NDIM; i++)
-	{
-		for(j=0; j< MDIM; j++)
+		for(i=0; i < NDIM-1; i++)
 		{
-			wind_ij_to_n(i,j,&n);
-
-			for(k=0; k<g_path_data->i_theta_res; k++)
+			for(j=0; j < MDIM-1; j++)
 			{
-				r_theta = k * (PI/(double) g_path_data->i_theta_res);
-				p_test->x[0] = wind[n].xcen[0] * cos(r_theta);
-				p_test->x[1] = wind[n].xcen[0] * sin(r_theta);
-
-				fprintf(fptr, "%10.5g %10.5g %10.5g",wind[n].xcen[0], r_theta, wind[n].xcen[2]);
-				for(i_obs=0; i_obs<g_path_data->i_obs; i_obs++)
-				{
+				wind_ij_to_n(i,j,&n);
+				for(k=0; k < g_path_data->i_theta_res; k++)
+				{	
 					if(wind[n].paths->i_num > 0)
 					{
+						r_theta = k * (PI/(double) g_path_data->i_theta_res);
+						p_test->x[0] = wind[n].xcen[0] * cos(r_theta);
+						p_test->x[1] = wind[n].xcen[0] * sin(r_theta);
 						p_test->x[2] = wind[n].xcen[2];
-						stuff_v(xxspec[MSPEC+i_obs].lmn,p_test->lmn);
-						fprintf(fptr, " %10.5g %10.5g %d\n", 
-								wind[n].paths->d_path + delay_to_observer(p_test), 
-								sqrt((double)wind[n].paths->i_num)/(double)wind[n].paths->i_num,
-								i_obs);
-					}
-					else
-					{
-						fprintf(fptr, " %10.5g %10.5g %d\n", NAN, NAN, l);
-					}
-				}
-
-				fprintf(fptr, "%10.5g %10.5g %10.5g",wind[n].xcen[0], r_theta, -wind[n].xcen[2]);
-				for(i_obs=0; i_obs<g_path_data->i_obs; i_obs++)
-				{
-					if(wind[n].paths->i_num > 0)
-					{
+						fprintf(fptr, "%g\n", wind[n].paths->d_path + delay_to_observer(p_test));
 						p_test->x[2] = -wind[n].xcen[2];
-						stuff_v(xxspec[MSPEC+i_obs].lmn,p_test->lmn);
-						fprintf(fptr, " %10.5g %10.5g %d\n", 
-								wind[n].paths->d_path + delay_to_observer(p_test), 
-								sqrt((double)wind[n].paths->i_num)/(double)wind[n].paths->i_num,
-								i_obs);
+						fprintf(fptr, "%g\n", wind[n].paths->d_path + delay_to_observer(p_test));						
 					}
 					else
 					{
-						fprintf(fptr, " %10.5g %10.5g %d\n", NAN, NAN, i_obs);
-					}
-				}	
-				fprintf(fptr, "\n");
+						fprintf(fptr, "-1\n");
+						fprintf(fptr, "-1\n");
+					}			
+				}
 			}
-			fprintf(fptr, "\n");		
 		}
-		fprintf(fptr, "\n");	
 	}
+
 	free(p_test);
 	return(0);
 }

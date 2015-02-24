@@ -457,33 +457,6 @@ int matom_emiss_report(void);
 /* direct_ion.c */
 int compute_di_coeffs(double T);
 double total_di(WindPtr one, double t_e);
-/* reverb.c */
-int delay_spectrum_summary(char filename[], char mode[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin);
-double delay_to_observer(PhotPtr pp);
-int delay_dump_prep(char filename[], int nspec, int restart_stat, int i_rank);
-int delay_dump_finish(void);
-int delay_dump_combine(int iRanks);
-int delay_dump(PhotPtr p, int np, int nspec, int iExtracted);
-int delay_dump_single(PhotPtr pp, int extract_phot);
-Path_Data_Ptr path_data_constructor(double r_rad_min, double r_rad_max, int i_bins, int i_angles, double freqmin, double freqmax, int i_theta_res);
-Wind_Paths_Ptr wind_paths_constructor(WindPtr wind);
-int wind_paths_init(WindPtr wind);
-int wind_paths_add_phot(WindPtr wind, PhotPtr pp);
-int wind_paths_single_evaluate(Wind_Paths_Ptr paths);
-int wind_paths_evaluate(WindPtr wind);
-int wind_paths_output(WindPtr wind, char c_file_in[]);
-/* wind_keplerian.c */
-int get_wind_keplerian_params(void);
-double wind_keplerian_velocity(double x[], double v[]);
-double wind_keplerian_rho(double x[]);
-int wind_keplerian_cyl_volumes(WindPtr w, int icomp);
-int wind_keplerian_cylvar_volumes(WindPtr w, int icomp);
-int wind_keplerian_randvec(PhotPtr pp, double r);
-int rand_sign(void);
-/* para_update.c */
-int communicate_estimators_para(void);
-int gather_spectra_para(int nspec_helper, int nspecs);
-int communicate_matom_estimators_para(void);
 /* pi_rates.c */
 double calc_pi_rate(int nion, PlasmaPtr xplasma, int mode);
 double tb_planck1(double freq);
@@ -493,6 +466,50 @@ double tb_exp1(double freq);
 int matrix_ion_populations(PlasmaPtr xplasma, int mode);
 int populate_ion_rate_matrix(PlasmaPtr xplasma, double rate_matrix[nions][nions], double pi_rates[nions], double rr_rates[nions], double b_temp[nions], double xne, int xelem[nions]);
 int solve_matrix(double *a_data, double *b_data, int nrows, double *x);
+/* para_update.c */
+int communicate_estimators_para(void);
+int gather_spectra_para(int nspec_helper, int nspecs);
+int communicate_matom_estimators_para(void);
+/* setup.c */
+int parse_command_line(int argc, char *argv[]);
+int init_log_and_windsave(int restart_stat);
+int get_grid_params(void);
+int get_line_transfer_mode(void);
+int get_radiation_sources(void);
+int get_wind_params(void);
+double get_stellar_params(void);
+int get_disk_params(void);
+int get_bl_and_agn_params(double lstar);
+int get_compton_torus_params(void);
+double setup_dfudge(void);
+int setup_windcone(void);
+int setup_created_files(void);
+int get_standard_care_factors(void);
+/* reverb.c */
+int delay_spectrum_summary(char filename[], char mode[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin);
+double delay_to_observer(PhotPtr pp);
+int delay_dump_prep(char filename[], int nspec, int restart_stat, int i_rank);
+int delay_dump_finish(void);
+int delay_dump_combine(int iRanks);
+int delay_dump(PhotPtr p, int np, int nspec, int iExtracted);
+int delay_dump_single(PhotPtr pp, int extract_phot);
+Path_Data_Ptr path_data_constructor(double r_rad_min, double r_rad_max, int i_path_bins, int i_angles, double freqmin, double freqmax, int i_theta_res);
+int path_data_init(double r_rad_min, double r_rad_max, int i_path_bins, int i_angles, double r_freq_min, double f_freq_max, int i_theta_res);
+Wind_Paths_Ptr wind_paths_constructor(WindPtr wind);
+int wind_paths_init(WindPtr wind);
+int wind_paths_add_phot(WindPtr wind, PhotPtr pp);
+int wind_paths_single_evaluate(Wind_Paths_Ptr paths);
+int wind_paths_evaluate(WindPtr wind);
+int wind_paths_point_index(int i, int j, int k, int i_top);
+int wind_paths_output(WindPtr wind, char c_file_in[]);
+/* wind_keplerian.c */
+int get_wind_keplerian_params(void);
+double wind_keplerian_velocity(double x[], double v[]);
+double wind_keplerian_rho(double x[]);
+int wind_keplerian_cyl_volumes(WindPtr w, int icomp);
+int wind_keplerian_cylvar_volumes(WindPtr w, int icomp);
+int wind_keplerian_randvec(PhotPtr pp, double r);
+int rand_sign(void);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

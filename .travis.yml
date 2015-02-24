@@ -22,7 +22,6 @@ compiler:
 branches:
   only:
       dev
-      tests_for_travis
 
 install:
     # first configure
@@ -50,3 +49,11 @@ script:
     - py test1 > test1.out
     - py balmer_test > balmer_test.out
     - python check_travis_test.py 
+    - cd ..
+    - Setup_Py_Dir
+    - py -i cv_macro_benchmark
+    - py -i cv_standard
+    - py -i -d sv_detailedmode
+    - py -i fiducial_agn
+    - py -i 1d_sn
+    - py -i agn_ss_2010_modela.pf

@@ -248,12 +248,6 @@ int trans_phot(WindPtr w, PhotPtr p, int iextract	/* 0 means do not extract alon
 				{
 					pp.np = nphot;
 					wind_paths_add_phot(&w[n], &pp);			//SWM Wind path adder	
-					if(nphot < 20)
-					{
-						double rotmatXX, rotmatYX, rotmatXY, rotmatYY,rotangle;
-						printf("PPP %g %g %d\n",
-							sqrt(pp.x[0]*pp.x[0]+pp.x[1]*pp.x[1]), fabs(pp.x[2]), nphot);
-					}
 				}
 			}
 
