@@ -471,7 +471,7 @@ path_data_constructor (	double r_rad_min, double r_rad_max, int i_path_bins, int
 	data->i_theta_res	= i_theta_res;
 	data->i_obs 		= i_angles;
 	data->i_path_bins	= i_path_bins;
-	data->ad_path_bin	= (double*) calloc(sizeof(double),i_bins+1);
+	data->ad_path_bin	= (double*) calloc(sizeof(double),i_path_bins+1);
 	for(i=0; i <= i_path_bins; i++)
 	{
 		data->ad_path_bin[i] = r_rad_min + i*(r_rad_max*5.0-r_rad_min)/i_path_bins;
@@ -485,7 +485,7 @@ path_data_constructor (	double r_rad_min, double r_rad_max, int i_path_bins, int
 }
 int
 path_data_init(double r_rad_min, double r_rad_max, int i_path_bins, int i_angles,
-	double r_freq_min, double f_freq_max, int i_theta_res)
+	double r_freq_min, double r_freq_max, int i_theta_res)
 {
 	g_path_data = (Path_Data_Ptr) path_data_constructor (r_rad_min, r_rad_max, i_path_bins, 
 		i_angles, r_freq_min, r_freq_max, i_theta_res);
@@ -692,7 +692,7 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 {
 	FILE *fopen(), *fptr;
 	char c_file[LINELENGTH];	
-	int i,j,k,l, n, i_obs, i_cells,i_points;
+	int i,j,k, n, i_obs, i_cells,i_points;
 	double r_theta, r_x, r_y, r_err;
 	PhotPtr p_test = calloc(sizeof(p_dummy),1);
 

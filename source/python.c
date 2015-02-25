@@ -1066,15 +1066,9 @@ main (argc, argv)
 				       */
     }
 
-  /* SWM - Setup for path tracking  approaches */
+  /* SWM - Setup for wind path tracking */
   path_data_init(0.0, geo.rmax, 30, nangles, freqmin, freqmax, 30);
   wind_paths_init(wmain);
-  #ifdef MPI_ON
-	delay_dump_prep(delay_dump_file, NSPEC - 1, restart_stat, rank_global);	// Currently hardcoded to last spectrum
-  #else
-	delay_dump_prep(delay_dump_file, NSPEC - 1, restart_stat, 0);			// Currently hardcoded to last spectrum		
-  #endif
-
 
   while (geo.wcycle < geo.wcycles)
     {				/* This allows you to build up photons in bunches */
@@ -1333,7 +1327,7 @@ main (argc, argv)
 
 /* SWM - Evaluate wind paths for last iteration */
 	wind_paths_evaluate(w);
-	wind_paths_output(w, root);
+	wind_paths_output(w, files.root);
 
 
 /* XXXX - THE CALCULATION OF A DETAILED SPECTRUM IN A SPECIFIC REGION OF WAVELENGTH SPACE */
@@ -1412,6 +1406,9 @@ main (argc, argv)
 
       spectrum_restart_renormalise(nangles);  
     }
+
+    /* SWM0215: Prepare for photon-based path tracking */
+	delay_dump_prep(files.root, NSPEC - 1, restart_stat, rank_global);	// Currently hardcoded to last spectrum
 
 
   while (geo.pcycle < geo.pcycles)

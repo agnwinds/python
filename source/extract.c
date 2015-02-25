@@ -344,6 +344,7 @@ the same resonance again */
 		if(pp->nrscat>0)	//SWM - Records total distance travelled by extract photon
 		{
 			stuff_v(pstart.x,pp->x);	//Restore photon to initial position (necessary for reweighting schemes)
+			pp->path = pstart.path;
 			delay_dump_single(pp, 1); 	//Dump photon now weight has been modified
 		}
 
