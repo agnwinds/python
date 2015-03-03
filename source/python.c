@@ -199,6 +199,7 @@ History:
 	1501 	JM moved some parallelization stuff to subroutines in para_update.c
 			functions are communicate_estimators_para, communicate_matom_estimators_para,
 			and gather_spectra_para
+	1502	Major reorganisation of input gathering and setup. See setup.c, #136 and #139
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
