@@ -498,7 +498,11 @@ int Log_parallel(char *format, ...)
   va_start (ap, format);
   va_copy (ap2,ap);  /* ap is not necessarily preserved by vprintf */
 
-  result = vprintf (format, ap);
+  if (my_rank==0)
+    result = vprintf (format, ap);
+
+  fprintf (diagptr, "Para: ");
+  result = vfprintf (diagptr, format, ap2);
   
   return (result);
 }
