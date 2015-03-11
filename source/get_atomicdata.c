@@ -3166,9 +3166,12 @@ very_small=1e-6;
 for (j=0; j < nxphot; j++)
 	{	
 	xver=&xphot[j];
-	xphot_tab[j].z = xphot->z;
-	xphot_tab[j].istate = xphot->istate;
-	xphot_tab[j].nion = xphot->nion;
+
+  /* JM 1503 -- there used to be a bug here, in that we did xphot_tab[j].z = xphot->z
+     instead of xphot_tab[j].z = xver->z. See #141 */
+	xphot_tab[j].z = xver->z;
+	xphot_tab[j].istate = xver->istate;
+	xphot_tab[j].nion = xver->nion;
 	f1=xver->freq_t*(1+very_small); //We need to start our tabulation just a tiny way up from from the threshold, otherwise it is equal to zero.
 	f2=xver->freq_max*(1-very_small); //We need to start our tabulation just a tiny way up from from the threshold, otherwise it is equal to zero.
 	lf1=log(f1);
