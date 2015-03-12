@@ -15,7 +15,6 @@ int index_phot_verner(void);
 int index_collisions(void);
 void indexx(int n, float arrin[], int indx[]);
 int limit_lines(double freqmin, double freqmax);
-int tabulate_verner(void);
 /* python.c */
 int main(int argc, char *argv[]);
 int help(void);
@@ -127,8 +126,7 @@ int scatter(PhotPtr p, int *nres, int *nnscat);
 /* radiation.c */
 int radiation(PhotPtr p, double ds);
 double kappa_ff(PlasmaPtr xplasma, double freq);
-double sigma_phot(struct photoionization *x_ptr, double freq);
-double sigma_phot_topbase(struct topbase_phot *x_ptr, double freq);
+double sigma_phot(struct topbase_phot *x_ptr, double freq);
 double sigma_phot_verner(struct innershell *x_ptr, double freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);

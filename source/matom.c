@@ -633,7 +633,7 @@ alpha_sp_integrand (freq)
   if (freq < fthresh)
     return (0.0);		// No recombination at frequencies lower than the threshold freq occur
 
-  x = sigma_phot_topbase (cont_ext_ptr, freq);	//this is the cross-section
+  x = sigma_phot (cont_ext_ptr, freq);	//this is the cross-section
   integrand = x * freq * freq * exp (H_OVER_K * (fthresh - freq) / tt);
 
   if (temp_choice == 1)
@@ -754,7 +754,10 @@ kpkt (p, nres, escape)
       cooling_ff = 0.0;
       cooling_bf_coltot = 0.0;
 
-      for (i = 0; i < ntop_phot; i++)
+      /* JM 1503 -- we used to loop over ntop_phot here, 
+         but we should really loop over the tabulated Verner Xsections too
+         see #86, #141 */
+      for (i = 0; i < ntop_phot + nxphot; i++)
 	{
 	  cont_ptr = &phot_top[i];
 	  ulvl = cont_ptr->uplev;
@@ -799,7 +802,9 @@ kpkt (p, nres, escape)
 	    {
 	      cooling_bftot += cooling_bf[i];
 	    }
+
 	  cooling_normalisation += cooling_bf[i];
+
 	  if (cont_ptr->macro_info == 1 && geo.macro_simple == 0)
 	    {
 	      /* Include collisional ionization as a cooling term in macro atoms. Don't include
@@ -974,14 +979,18 @@ kpkt (p, nres, escape)
 
   if (destruction_choice < mplasma->cooling_bftot)
     {				//destruction by bf
-      for (i = 0; i < ntop_phot; i++)
+
+      /* JM 1503 -- we used to loop over ntop_phot here, 
+         but we should really loop over the tabulated Verner Xsections too
+         see #86, #141 */
+      for (i = 0; i < ntop_phot + nxphot; i++)
 	{
 	  if (destruction_choice < mplasma->cooling_bf[i])
 	    {
 	      /* Having got here we know that desturction of the k-packet was via the process labelled
 	         by i. Let's just check that i is a sensible number. */
 
-	      if (i > ntop_phot - 1)
+	      if (i > ntop_phot + nxphot - 1)
 		{
 		  Error
 		    ("kpkt (matom.c): trying to destroy k-packet in unknown process. Abort.\n");
@@ -996,8 +1005,7 @@ kpkt (p, nres, escape)
 
 	      /* Now (as in matom) choose a frequency for the new packet. */
 
-	      p->freq = phot_top[i].freq[0]
-		-
+	      p->freq = phot_top[i].freq[0] -
 		(log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e /
 		 H_OVER_K);
 	      /* Co-moving frequency - changed to rest frequency by doppler */
@@ -1098,14 +1106,14 @@ kpkt (p, nres, escape)
 	destruction_choice - mplasma->cooling_bftot -
 	mplasma->cooling_bbtot - mplasma->cooling_ff - mplasma->cooling_adiabatic;
 
-      for (i = 0; i < ntop_phot; i++)
+      for (i = 0; i < ntop_phot + nxphot; i++)
 	{
 	  if (destruction_choice < mplasma->cooling_bf_col[i])
 	    {
 	      /* Having got here we know that destruction of the k-packet was via the process labelled
 	         by i. Let's just check that i is a sensible number. */
 
-	      if (i > ntop_phot - 1)
+	      if (i > ntop_phot + nxphot - 1)
 		{
 		  Error
 		    ("kpkt (matom.c): trying to destroy k-packet in unknown process. Abort.\n");

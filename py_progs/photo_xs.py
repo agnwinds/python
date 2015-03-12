@@ -180,7 +180,7 @@ class Photo(object):
 		f = open(output_filename, "w")
 		for i in range(len(self.z)):
 
-			f.write("%sS %i %i %i %i %8.4e %i\n" % (prefix, self.z[i], self.ion[i], -999, -999, self.E0[i], self.np[i]))
+			f.write("%sS %i %i %i %i %8.4e %i\n" % (prefix, self.z[i], self.ion[i], self.islp[i], self.l[i], self.E0[i], self.np[i]))
 
 			for j in range(len(self.energy[i])):
 
@@ -226,6 +226,7 @@ class Photo(object):
 		self.XS = sigma_phot(self, freq)
 
 		self.islp = np.ones(len(self.z)) * -999		# islp not relevant to Verner
+		self.l = np.ones(len(self.z)) * -999		# islp not relevant to Verner
 		self.np = np.ones(len(self.z)) * N_VERNER_TAB	# all np values the same...not really necessary but more flexible
 
 		self.tabulated = True
@@ -256,7 +257,53 @@ class Photo(object):
 
 		return 0
 
+	def associate_levels(self, levels):
+
+		ground_state_select = (levels.et == 0.0)
+
+
+		for i in range(len(self.z)):
+
+			z_select = (levels.z == self.z[i])
+			ion_select = (levels.ion == self.ion[i])
+			select = z_select * ion_select * ground_state_select
+
+			islp = levels.islp[select]
+			nlev = levels.l[select]
+			z = levels.z[select]
+			et = levels.et[select]
+			ion = levels.ion[select]
+
+			if len(z) == 1:
+				print "Match: %i %i %i %i %8.4e" % (z[0], ion[0], islp[0], nlev[0], et[0])
+				self.islp[i] = float(islp)
+			 	self.l[i] = float(nlev)
+			elif len(z) < 1:
+				print "No matches for ion %i %i. Not writing level info." % (self.z[i], self.ion[i])
+			else:
+				print "Multiple matches for ion %i %i. Not writing level info." % (self.z[i], self.ion[i])
+
+		return 0
+
+
+
+class TopBaseLevel(object):
+
+	def __init__(self, fname):
+
+		self.z, self.ion, self.islp, self.l, self.E, self.et = sum_records = np.loadtxt(fname, 
+				dtype={'names': ('Z', 'ion', 'islp', 'l', 'E0', 'np'), 
+				'formats': ('i4', 'i4', 'i4', 'i4', 'float', 'float')}, 
+	                        comments='#', delimiter=None, converters=None, 
+	                        skiprows=0, usecols=(1,2,3,4,5,6), unpack=True, ndmin=0)
+
+
+
+
+
+
 	
+
 
 # Next lines permit one to run the routine from the command line with various options -- see docstring
 if __name__ == "__main__":
@@ -275,6 +322,13 @@ if __name__ == "__main__":
 
 		v.read_vfky_file(input_fname)
 		v.tabulate_vfky()
+
+		fnames = ["topbase_levels_he.py", "topbase_levels_h.py", "topbase_levels_cno.py", "topbase_levels_fe.py"]
+
+		for f in fnames:
+			lev = TopBaseLevel("data/atomic77/%s" % f)
+			v.associate_levels(lev)
+
 		v.write_file(output_fname)
 
 		print "Tabulated and saved output in %s" % output_fname

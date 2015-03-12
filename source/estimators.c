@@ -62,7 +62,6 @@ bf_estimators_increment (one, p, ds)
   double y, yy;
   double exponential, heat_contribution;
   int n, m, llvl, nn;
-  double sigma_phot_topbase ();
   double density;
   double abs_cont;
   int nplasma;
@@ -191,7 +190,7 @@ bf_estimators_increment (one, p, ds)
 	         recombination is included here. (SS, Apr 04) */
 	      if (density > DENSITY_PHOT_MIN)
 		{
-		  x = sigma_phot_topbase (&phot_top[n], freq_av);	//this is the cross section
+		  x = sigma_phot (&phot_top[n], freq_av);	//this is the cross section
 		  weight_of_packet = p->w;
 		  y = weight_of_packet * x * ds;
 
@@ -1122,7 +1121,7 @@ gamma_integrand (freq)
   if (freq < fthresh)
     return (0.0);		// No photoionization at frequencies lower than the threshold freq occur
 
-  x = sigma_phot_topbase (cont_ext_ptr2, freq);	//this is the cross-section
+  x = sigma_phot (cont_ext_ptr2, freq);	//this is the cross-section
   integrand = x * freq * freq / (exp (H_OVER_K * freq / tt) - 1);
 
   return (integrand);
@@ -1180,7 +1179,7 @@ gamma_e_integrand (freq)
   if (freq < fthresh)
     return (0.0);		// No photoionization at frequencies lower than the threshold freq occur
 
-  x = sigma_phot_topbase (cont_ext_ptr2, freq);	//this is the cross-section
+  x = sigma_phot (cont_ext_ptr2, freq);	//this is the cross-section
   integrand =
     x * freq * freq * freq / (exp (H_OVER_K * freq / tt) - 1) / fthresh;
 
@@ -1256,7 +1255,7 @@ alpha_st_integrand (freq)
   if (freq < fthresh)
     return (0.0);		// No recombination at frequencies lower than the threshold freq occur
 
-  x = sigma_phot_topbase (cont_ext_ptr2, freq);	//this is the cross-section
+  x = sigma_phot (cont_ext_ptr2, freq);	//this is the cross-section
   integrand =
     x * freq * freq * exp (H_OVER_K * (fthresh - freq) / tt) /
     (exp (H_OVER_K * freq / ttrr) - 1);
@@ -1332,7 +1331,7 @@ alpha_st_e_integrand (freq)
   if (freq < fthresh)
     return (0.0);		// No recombination at frequencies lower than the threshold freq occur
 
-  x = sigma_phot_topbase (cont_ext_ptr2, freq);	//this is the cross-section
+  x = sigma_phot (cont_ext_ptr2, freq);	//this is the cross-section
   integrand =
     x * freq * freq * exp (H_OVER_K * (fthresh - freq) / tt) /
     (exp (H_OVER_K * freq / ttrr) - 1) * freq / fthresh;

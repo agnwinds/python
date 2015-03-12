@@ -661,9 +661,9 @@ kappa_bf (xplasma, freq, macro_all)
 	  if (density > DENSITY_PHOT_MIN || phot_top[n].macro_info == 1)
 	    {
 
-	      /*          kap_tot += x = (delete) */
+	      /* kap_tot += x = (delete) */
 	      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
-	      kap_bf[nn] = x = sigma_phot_topbase (&phot_top[n], freq) * density * geo.fill;	//stimulated recombination? (SS)
+	      kap_bf[nn] = x = sigma_phot(&phot_top[n], freq) * density * geo.fill;	//stimulated recombination? (SS)
 	      kap_bf_tot += x;
 	    }
 	}
@@ -736,7 +736,7 @@ kbf_need (fmin, fmax)
 
   PlasmaPtr xplasma;
   WindPtr one;
-  int nplasma;
+  int nplasma, nion;
 
 
   for (nplasma = 0; nplasma < NPLASMA; nplasma++)	// Loop over all the cells in the wind
@@ -745,21 +745,26 @@ kbf_need (fmin, fmax)
       one = &wmain[xplasma->nwind];
       nuse = 0;
 
-      for (n = 0; n < ntop_phot; n++)	// Loop over photoionisation processes. 
+      for (n = 0; n < ntop_phot + nxphot; n++)	// Loop over photoionisation processes. 
 	{
 
 	  ft = phot_top[n].freq[0];	//This is the edge frequency (SS)
 
 	  if ((ft > (fmin / 3.)) && (ft < fmax))
 	    {
+        nion = phot_top[n].nion;
 
+        if (ion[nion].phot_info == 0)      // vfky
+        {
+          density = xplasma->density[nion];
+        }
+        else if (ion[nion].phot_info == 1)  // topbases
+        {
+	        nconf = phot_top[n].nlev;	//Returning lower level = correct (SS)
+	        density = den_config (xplasma, nconf);
+        }
 
-	      nconf = phot_top[n].nlev;	//Returning lower level = correct (SS)
-
-	      density = den_config (xplasma, nconf);
-
-	      tau_test =
-		phot_top[n].x[0] * density * SMAX_FRAC * length (one->xcen);
+	      tau_test = phot_top[n].x[0] * density * SMAX_FRAC * length (one->xcen);
 
 
 	      if (tau_test > 1.e-6 || phot_top[n].macro_info == 1)
