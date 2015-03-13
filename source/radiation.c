@@ -113,7 +113,7 @@ radiation (p, ds)
      PhotPtr p;
      double ds;
 {
-  PhotoionizationPtr x_ptr;
+  //PhotoionizationPtr x_ptr;
   TopPhotPtr x_top_ptr;
 
   WindPtr one;

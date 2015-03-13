@@ -184,7 +184,7 @@ get_atomic_data (masterfile)
   char choice;
   int lineno;			/* the line number in the file beginning with 1 */
   int index_collisions (), index_lines (), index_phot_top (),
-    index_phot_verner (), tabulate_verner();
+    index_phot_verner (), summarise_xsections();
   int nwords;
   int nlte, nmax;
   //  
@@ -354,15 +354,6 @@ get_atomic_data (masterfile)
 
   nlevels = nxphot = ntop_phot = nauger = ndrecomb = ncpart = 0;	//Added counter for DR//
 
-  for (i = 0; i < NIONS; i++)
-    {
-      xphot[i].z = xphot[i].istate = -1;
-      xphot[i].sigma = 0.0;
-      xphot[i].freq_t = VERY_BIG;
-      xphot[i].freq_max = 0;
-      xphot[i].freq0 = VERY_BIG;
-    }
-
   for (i = 0; i < NLEVELS; i++)
     {
       phot_top[i].nlev = (-1);
@@ -380,22 +371,6 @@ get_atomic_data (masterfile)
       phot_top[i].sigma = 0.0;
     }
 
-  for (i = 0; i < NIONS; i++)
-    {
-      xphot_tab[i].nlev = (-1);
-      xphot_tab[i].uplev = (-1);
-      xphot_tab[i].nion = (-1);
-      xphot_tab[i].z = (-1);
-      xphot_tab[i].np = (-1);
-      xphot_tab[i].macro_info = (-1);	//Initialise - don't know if using Macro Atoms or not: set to -1 (SS)
-      for (j = 0; j < NCROSS; j++)
-	{
-	  xphot_tab[i].freq[j] = (-1);
-	  xphot_tab[i].x[j] = (-1);
-	}
-      xphot_tab[i].f = (-1);
-      xphot_tab[i].sigma = 0.0;
-    }
 
 
   for (i = 0; i < NLEVELS; i++)
@@ -1549,12 +1524,17 @@ for the ionstate.
 
               ion[n].phot_info = 0;    /* Mark this ion as using VFKY photo */
               ion[n].nxphot = ntop_phot + nxphot;
+
+              for (n = 0; n < np; n++)
+               {
+                 phot_top[ntop_phot + nxphot].freq[n] = xe[n] * EV2ERGS / H;  // convert from eV to freqency
+                 phot_top[ntop_phot + nxphot].x[n] = xx[n]; // leave cross sections in  CGS
+               }
               nxphot++;
             }
 
         else if (ion[n].phot_info == 1)
             {
-
           Debug
             ("Get_atomic_data: file %s  Ignoring VFKY photoinization for ion %d with topbase photoionization\n",
              file, n);
@@ -2688,11 +2668,11 @@ or zero so that simple checks of true and false can be used for them */
 	     config[n].g, config[n].ex);
 
   /* Write the photoionization data  */
-  fprintf (fptr, "Photoinization data: There are %d edges\n", nxphot);
-  for (n = 0; n < nxphot; n++)
+  fprintf (fptr, "Photoionization data: There are %d edges\n", ntop_phot + nxphot);
+  for (n = 0; n < ntop_phot + nxphot; n++)
     {
-      fprintf (fptr, "n %3d z %2d istate %3d sigma %8.2e freq_t %8.2e\n", n,
-	       xphot[n].z, xphot[n].istate, xphot[n].sigma, xphot[n].freq_t);
+      fprintf (fptr, "n %3d z %2d istate %3d sigma %8.2e freq[0] %8.2e\n", n,
+	       phot_top[n].z, phot_top[n].istate, phot_top[n].sigma, phot_top[n].freq[0]);
     }
 
   /* Write the resonance line data to the file */
@@ -2755,8 +2735,9 @@ or zero so that simple checks of true and false can be used for them */
   if (ntop_phot > 0)
     index_phot_top ();
 
-  return (0);
+  summarise_xsections();  // debug routine, only prints if verbosity > 4
 
+  return (0);
 }
 
 /**************************************************************************
@@ -2845,15 +2826,15 @@ index_phot_top ()
   void indexx ();
 
   /* Allocate memory for some modestly large arrays */
-  freqs = calloc (sizeof (foo), ntop_phot + 2);
-  index = calloc (sizeof (ioo), ntop_phot + 2);
+  freqs = calloc (sizeof (foo), ntop_phot + nxphot + 2);
+  index = calloc (sizeof (ioo), ntop_phot + nxphot + 2);
 
   freqs[0] = 0;
-  for (n = 0; n < ntop_phot; n++)
+  for (n = 0; n < ntop_phot + nxphot; n++)
     freqs[n + 1] = phot_top[n].freq[0];	/* So filled matrix 
 					   elements run from 1 to ntop_phot */
 
-  indexx (ntop_phot, freqs, index);	/* Note that this math recipes routine 
+  indexx (ntop_phot + nxphot, freqs, index);	/* Note that this math recipes routine 
 					   expects arrays to run from 1 to nlines inclusive */
 
   /* The for loop indices are complicated by the numerical recipes routine, 
@@ -2862,7 +2843,7 @@ index_phot_top ()
      and the numbers run from 1 to nlines, but the 
      pointer array is only filled from elements 0 to nlines -1 */
 
-  for (n = 0; n < ntop_phot; n++)
+  for (n = 0; n < ntop_phot + nxphot; n++)
     {
       phot_top_ptr[n] = &phot_top[index[n + 1] - 1];
     }
@@ -2875,51 +2856,6 @@ index_phot_top ()
 
 }
 
-/* Index the verner photoionization crossections by frequency
-
-	06jul	ksl	57h - Adapted from index_phot_top as
-			part of attempt to speed up the photoionization
-			parts of pthon
-*/
-int
-index_phot_verner ()
-{
-  float *freqs, foo;
-  int *index, ioo;
-  int n;
-  void indexx ();
-
-  /* Allocate memory for some modestly large arrays */
-  freqs = calloc (sizeof (foo), nxphot + 2);
-  index = calloc (sizeof (ioo), nxphot + 2);
-
-  freqs[0] = 0;
-  for (n = 0; n < nxphot; n++)
-    freqs[n + 1] = xphot[n].freq_t;	/* So filled matrix 
-					   elements run from 1 to nxphot */
-
-  indexx (nxphot, freqs, index);	/* Note that this math recipes routine 
-					   expects arrays to run from 1 to nxphot inclusive */
-
-  /* The for loop indices are complicated by the numerical recipes routine, 
-     which is a simple translation of a fortran routine.
-     Specifically, index array elements 1 to nlines are now filled, 
-     and the numbers run from 1 to nlines, but the 
-     pointer array is only filled from elements 0 to nlines -1 */
-
-  for (n = 0; n < nxphot; n++)
-    {
-      xphot_ptr1[n] = &xphot[n];
-      xphot_ptr[n] = &xphot[index[n + 1] - 1];
-    }
-
-  /* Free the memory for the arrays */
-  free (freqs);
-  free (index);
-
-  return (0);
-
-}
 
 /* index_xcol sorts the collisional lines into frequency order
    History:
@@ -3125,4 +3061,24 @@ limit_lines (freqmin, freqmax)
   return (nline_delt = nline_max - nline_min + 1);
 }
 
+
+/* A Routine which prints out cross-sections. Only accessed with verbosity > 4 as uses
+   Debug function */
+
+int summarise_xsections()
+{
+  int nion;
+
+  for (nion = 0; nion < nions; nion++)
+  {
+    if (ion[nion].phot_info == 1)
+      Debug("Topbase Ion %i Z %i istate %i nground %i nfirst %i ntop %i f0 %8.4e IP %8.4e\n",
+           nion, ion[nion].z, ion[nion].istate, ion[nion].ntop_ground, ion[nion].ntop_first, ion[nion].ntop, phot_top[ion[nion].ntop_ground].freq[0], ion[nion].ip / EV2ERGS / HEV);
+    else if (ion[nion].phot_info == 0)
+      Debug("Vfky Ion %i Z %i istate %i nground %i f0 %8.4e IP %8.4e\n",
+           nion, ion[nion].z, ion[nion].istate, ion[nion].nxphot, phot_top[ion[nion].nxphot].freq[0], ion[nion].ip / EV2ERGS / HEV);
+  }
+
+  return 0;
+}
 

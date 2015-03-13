@@ -340,7 +340,6 @@ total_fb (one, t, f1, f2)
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
-
   if (t < 1000. || f2 < f1)
     return (0);			/* It's too cold to emit */
 
@@ -353,6 +352,8 @@ total_fb (one, t, f1, f2)
 
   total = 0;
   xplasma->lum_z = 0.0;
+
+
   for (nion = 0; nion < nions; nion++)
     {
       if (xplasma->density[nion] > DENSITY_PHOT_MIN)
@@ -492,7 +493,7 @@ use that instead if possible --  57h */
       if (f1 != one_fb_f1 || f2 != one_fb_f2)
 	{			// Regenerate the jumps 
 	  fb_njumps = 0;
-	  for (n = 0; n < ntop_phot; n++)
+	  for (n = 0; n < ntop_phot + nxphot; n++)
 	    {			//IS THIS ADDED BRACKET CORRECT? (SS, MAY04)
 	      fthresh = phot_top_ptr[n]->freq[0];
 	      if (f1 < fthresh && fthresh < f2)
@@ -502,6 +503,7 @@ use that instead if possible --  57h */
 		}
 	    }			//IS THIS CORRECT? (SS, MAY04)
 	}
+
 
       //!BUG SSMay04
       //It doesn't seem to work unless this is zero? (SS May04)
@@ -513,6 +515,7 @@ use that instead if possible --  57h */
       dfreq = (f2 - f1) / 199;
       for (n = 0; n < 200; n++)
 	{
+    //Debug ("calling fb, n=%i\n", n);
 	  fb_x[n] = f1 + dfreq * n;
 	  fb_y[n] = fb (xplasma, xplasma->t_e, fb_x[n], nions, 0);
 	}
@@ -533,6 +536,8 @@ use that instead if possible --  57h */
 
 /* OK, we have not created a new pdf, cdf actually.  We are in a position to
 generate photons */
+
+  //Debug ("one_fb, got here 2\n");
 
 /* First generate the phton we need */
   freq = pdf_get_rand (&pdf_fb);
@@ -683,19 +688,24 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
 
   fnu = 0.0;			/* Initially set the emissivity to zero */
 
+  //Debug("in fb for ion_choice %i\n", ion_choice);
+
   for (nion = nion_min; nion < nion_max; nion++)
     {
-      if (ion[n].phot_info == 1) // topbase
+      if (ion[nion].phot_info == 1) // topbase
         {
           nmin = ion[nion].ntop_first;
           nmax = nmin + ion[nion].ntop;
         }
-      else if (ion[n].phot_info == 0) // VFKY 
+      else if (ion[nion].phot_info == 0) // VFKY 
         {
           nmin = ion[nion].nxphot;
           nmax = nmin + 1;
         }
+      else 
+        nmin = nmax = 0; // no XS / ionized - don't do anything 
 
+      //Debug("in fb for ion %i info %i, nmin nmax %i, %i\n", nion, ion[nion].phot_info, nmin, nmax);
 
       x = 0.0;
 
@@ -814,10 +824,10 @@ init_freebound (t1, t2, f1, f2)
       Log ("init_freebound: Creating recombination coefficients\n");
       for (nion = 0; nion < nions; nion++)
 	{
+
 	  for (j = 0; j < NTEMPS; j++)
 	    {
 	      t = fb_t[j];
-
 	      xnrecomb[nion][j] = xinteg_fb (t, 0.0, 1.e50, nion, 2);
 	    }
 	}
@@ -1000,22 +1010,25 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
   if (-1 < nion && nion < nions)	//Get emissivity for this specific ion_number
     {
-      if (ion[n].phot_info == 1) // topbase
+      if (ion[nion].phot_info == 1) // topbase
         {
           nmin = ion[nion].ntop_first;
           nmax = nmin + ion[nion].ntop;
         }
-      else if (ion[n].phot_info == 0) // VFKY 
+      else if (ion[nion].phot_info == 0) // VFKY 
         {
           nmin = ion[nion].nxphot;
           nmax = nmin + 1;
         }
+      else 
+        // the ion is a fullt ionized ion / doesn't have a cross-section, so return 0
+        return (0.0);
     }
   else				// Get the total emissivity
     {
       Error ("integ_fb: %d is unacceptable value of nion\n", nion);
-      mytrap ();
-      return (0);
+      //mytrap ();      // JM 1410 -- mytrap is deprecated
+      exit (0);
     }
 
   // Put information where it can be used by the integrating function
@@ -1033,10 +1046,15 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
   fnu = 0.0;
 
+  
   for (n = nmin; n < nmax; n++)
     {				
       // loop over relevent Topbase or VFKY photoionzation x-sections
       fb_xtop = &phot_top[n];
+
+      //Debug("xinteg_fb ion %i, n min max %i %i %i\n", nion, n, nmin, nmax);
+      //Debug("type %i nxphot %i ntop_phot %i ntop %i\n", 
+      //       ion[nion].phot_info, ion[nion].nxphot, ion[nion].ntop_first, ion[nion].ntop);
 
       /* Adding an if statement here so that photoionization that's part of a macro atom is 
          not included here (these will be dealt with elsewhere). (SS, Apr04) */
@@ -1116,6 +1134,8 @@ fb_save (filename)
   char line[LINELENGTH];
   int n;
 
+  return (0);
+
   if ((fptr = fopen (filename, "w")) == NULL)
     {
       Error ("fb_save: Unable to open %s\n", filename);
@@ -1156,6 +1176,8 @@ fb_read (filename)
   char atomic_filename[LINELENGTH];
 
   int xnelements, xnions, xnlevels, xnxphot, xntopphot, xnfb;
+
+  return (0);
 
 /* Initialize nfb to 0 so a return means that python will
 have to calcuate the coefficients */
@@ -1406,7 +1428,7 @@ gs_rrate (nion, T)
   double rate, drdt, dt;
   int i, imin, imax;
   double rates[BAD_GS_RR_PARAMS], temps[BAD_GS_RR_PARAMS];
-  int ntmin, n;
+  int ntmin;
   double fthresh, fmax, dnu;
 
 
@@ -1490,7 +1512,7 @@ gs_rrate (nion, T)
       }
     else if (ion[nion-1].phot_info == 0) //vfky 
       {
-        fb_xtop = &phot_top[ion[n].nxphot];
+        fb_xtop = &phot_top[ion[nion-1].nxphot];
       }
 
     fthresh = fb_xtop->freq[0];
