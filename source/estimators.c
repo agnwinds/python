@@ -112,12 +112,12 @@ bf_estimators_increment (one, p, ds)
       n = xplasma->kbf_use[nn];
       ft = phot_top[n].freq[0];	//This is the edge frequency (SS)
 
-      if (ion[phot_top[n].nion].phot_info == 2)   //topbase 
+      if (ion[phot_top[n].nion].phot_info == 1)   //topbase 
       {
         llvl = phot_top[n].nlev;	//Returning lower level = correct (SS)
         density = den_config (xplasma, llvl);
       }
-      else if (ion[phot_top[n].nion].phot_info == 1)   //verner
+      else if (ion[phot_top[n].nion].phot_info == 0)   //cfky
       {
         density = xplasma->density[phot_top[n].nion];
         llvl = 0;   // shouldn't ever be used 
@@ -136,9 +136,9 @@ bf_estimators_increment (one, p, ds)
 	  if (phot_top[n].macro_info == 1 && geo.macro_simple == 0)	// it is a macro atom
 	    {
         /* quick check that we don't have a VFKY cross-section here */
-        if (ion[phot_top[n].nion].phot_info == 1)
+        if (ion[phot_top[n].nion].phot_info == 0)
         {
-          Error("bf_estimators_increment: Verner cross-section in macro-atom section! Setting heating to 0 for this XS.\n");
+          Error("bf_estimators_increment: Vfky cross-section in macro-atom section! Setting heating to 0 for this XS.\n");
           density = 0.0;
         }
 

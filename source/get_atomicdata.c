@@ -3095,13 +3095,13 @@ int check_xsections()
     {
       Error("get_atomicdata: not tracking levels for ion %i z %i istate %i, yet marked as topbase xsection!\n",
              nion, ion[nion].z, ion[nion].istate);
-      exit(0);
+      //exit(0);
     }
     if (ion[nion].phot_info != 1 && ion[nion].macro_info)
     {
       Error("get_atomicdata: macro atom but no topbase xsection! ion %i z %i istate %i, yet marked as topbase xsection!\n",
              nion, ion[nion].z, ion[nion].istate);
-      exit(0);
+      //exit(0);
     }
   }
 
