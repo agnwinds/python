@@ -184,7 +184,7 @@ get_atomic_data (masterfile)
   char choice;
   int lineno;			/* the line number in the file beginning with 1 */
   int index_collisions (), index_lines (), index_phot_top (),
-    index_phot_verner (), summarise_xsections();
+    index_phot_verner (), check_xsections();
   int nwords;
   int nlte, nmax;
   //  
@@ -352,7 +352,7 @@ get_atomic_data (masterfile)
       ion[n].nxderedi = -1; //Initialise the pointer into the Dere DI rate structure
     }
 
-  nlevels = nxphot = ntop_phot = nauger = ndrecomb = ncpart = 0;	//Added counter for DR//
+  nlevels = nxphot = nphot_total = ntop_phot = nauger = ndrecomb = ncpart = 0;	//Added counter for DR//
 
   for (i = 0; i < NLEVELS; i++)
     {
@@ -1361,9 +1361,10 @@ for the ionstate.
 
 		      ntop_phot_macro++;
 		      ntop_phot++;
+          nphot_total++;
 
 		      /* 080812 - Added check to assure we did not exceed the allowed number of photoionization records */
-		      if (ntop_phot > NTOP_PHOT)
+		      if (nphot_total > NTOP_PHOT)
 			{
 			  Error
 			    ("get_atomicdata: More macro photoionization cross sections that NTOP_PHOT (%d).  Increase in atomic.h\n",
@@ -1464,9 +1465,10 @@ for the ionstate.
 
 			      ntop_phot_simple++;
 			      ntop_phot++;
+            nphot_total++;
 
 			      /* 080812 - Added check to assure we did not exceed the allowed number of photoionization records */
-			      if (ntop_phot > NTOP_PHOT)
+			      if (nphot_total > NTOP_PHOT)
 				{
 				  Error
 				    ("get_atomicdata: More TopBase photoionization cross sections that NTOP_PHOT (%d).  Increase in atomic.h\n",
@@ -1514,23 +1516,24 @@ for the ionstate.
         if (ion[n].phot_info == -1)
             {
               /* Then there is a match */
-              phot_top[ntop_phot + nxphot].nlev = n; // level associated with this crossection.
-              phot_top[ntop_phot + nxphot].nion = config[n].nion;
-              phot_top[ntop_phot + nxphot].z = z;
-              phot_top[ntop_phot + nxphot].istate = istate;
-              phot_top[ntop_phot + nxphot].np = np;
-              phot_top[ntop_phot + nxphot].nlast = -1;
-              phot_top[ntop_phot + nxphot].macro_info = 0;
+              phot_top[nphot_total].nlev = n; // level associated with this crossection.
+              phot_top[nphot_total].nion = config[n].nion;
+              phot_top[nphot_total].z = z;
+              phot_top[nphot_total].istate = istate;
+              phot_top[nphot_total].np = np;
+              phot_top[nphot_total].nlast = -1;
+              phot_top[nphot_total].macro_info = 0;
 
               ion[n].phot_info = 0;    /* Mark this ion as using VFKY photo */
-              ion[n].nxphot = ntop_phot + nxphot;
+              ion[n].nxphot = nphot_total;
 
               for (n = 0; n < np; n++)
                {
-                 phot_top[ntop_phot + nxphot].freq[n] = xe[n] * EV2ERGS / H;  // convert from eV to freqency
-                 phot_top[ntop_phot + nxphot].x[n] = xx[n]; // leave cross sections in  CGS
+                 phot_top[nphot_total].freq[n] = xe[n] * EV2ERGS / H;  // convert from eV to freqency
+                 phot_top[nphot_total].x[n] = xx[n]; // leave cross sections in  CGS
                }
               nxphot++;
+              nphot_total++;
             }
 
         else if (ion[n].phot_info == 1)
@@ -1549,6 +1552,14 @@ for the ionstate.
 				 file, lineno);
 			      exit (0);
 			    }
+        if (nphot_total > NTOP_PHOT)
+        {
+          Error
+            ("get_atomicdata: More photoionization cross sections that NTOP_PHOT (%d).  Increase in atomic.h\n",
+             NTOP_PHOT);
+          exit (0);
+        }
+
 			  break;
 			}
 		      else
@@ -2573,12 +2584,12 @@ or zero so that simple checks of true and false can be used for them */
 	}
     }
 
-  for (n = 0; n < ntop_phot; n++)
+  for (n = 0; n < nphot_total; n++)
     {
       if (phot_top[n].macro_info == -1)
 	{
 	  Error
-	    ("Topbase xphot %d for element %s and ion %d is of unknown type\n",
+	    ("Photoionization cross-section %d for element %s and ion %d is of unknown type\n",
 	     n, phot_top[n].z, phot_top[n].istate);
 	  exit (0);
 	}
@@ -2735,7 +2746,7 @@ or zero so that simple checks of true and false can be used for them */
   if (ntop_phot > 0)
     index_phot_top ();
 
-  summarise_xsections();  // debug routine, only prints if verbosity > 4
+  check_xsections();  // debug routine, only prints if verbosity > 4
 
   return (0);
 }
@@ -3062,21 +3073,36 @@ limit_lines (freqmin, freqmax)
 }
 
 
-/* A Routine which prints out cross-sections. Only accessed with verbosity > 4 as uses
-   Debug function */
+/* check_xsections is  a routine which checks xsections are ok.
+   Only prints out each xsection with verbosity > 4 as uses Debug function */
 
-int summarise_xsections()
+int check_xsections()
 {
-  int nion;
+  int nion, n;
 
-  for (nion = 0; nion < nions; nion++)
+  for (n = 0; n < nphot_total; n++)
   {
+    nion = phot_top[n].nion;
     if (ion[nion].phot_info == 1)
-      Debug("Topbase Ion %i Z %i istate %i nground %i nfirst %i ntop %i f0 %8.4e IP %8.4e\n",
-           nion, ion[nion].z, ion[nion].istate, ion[nion].ntop_ground, ion[nion].ntop_first, ion[nion].ntop, phot_top[ion[nion].ntop_ground].freq[0], ion[nion].ip / EV2ERGS / HEV);
+      Debug("Topbase Ion %i Z %i istate %i nground %i ilv %i ntop %i f0 %8.4e IP %8.4e\n",
+           nion, ion[nion].z, ion[nion].istate, ion[nion].ntop_ground, phot_top[n].nlev, ion[nion].ntop, phot_top[n].freq[0], ion[nion].ip / EV2ERGS / HEV);
     else if (ion[nion].phot_info == 0)
       Debug("Vfky Ion %i Z %i istate %i nground %i f0 %8.4e IP %8.4e\n",
-           nion, ion[nion].z, ion[nion].istate, ion[nion].nxphot, phot_top[ion[nion].nxphot].freq[0], ion[nion].ip / EV2ERGS / HEV);
+           nion, ion[nion].z, ion[nion].istate, ion[nion].nxphot, phot_top[n].freq[0], ion[nion].ip / EV2ERGS / HEV);
+
+    /* some simple checks -- could be made more robust */
+    if (ion[nion].n_lte_max > 0 && ion[nion].phot_info != 1)
+    {
+      Error("get_atomicdata: not tracking levels for ion %i z %i istate %i, yet marked as topbase xsection!\n",
+             nion, ion[nion].z, ion[nion].istate);
+      exit(0);
+    }
+    if (ion[nion].phot_info != 1 && ion[nion].macro_info)
+    {
+      Error("get_atomicdata: macro atom but no topbase xsection! ion %i z %i istate %i, yet marked as topbase xsection!\n",
+             nion, ion[nion].z, ion[nion].istate);
+      exit(0);
+    }
   }
 
   return 0;

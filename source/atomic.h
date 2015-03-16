@@ -292,6 +292,7 @@ double phot_freq_min;		/*The lowest frequency for which photoionization can occu
 #define NCROSS 1500
 #define NTOP_PHOT 250		/* Maximum number of photoionisation processes. (SS) */
 int ntop_phot;			/* The actual number of TopBase photoionzation x-sections */
+int nphot_total;    /* total number of photoionzation x-sections = nxphot + ntop_phot */
 
 typedef struct topbase_phot
 {				/* If the old topbase treatment is to be replaced by Macro Atoms perhaps this

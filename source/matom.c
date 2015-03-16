@@ -703,8 +703,8 @@ kpkt (p, nres, escape)
 
   int i;
   int ulvl;
-  double cooling_bf[NTOP_PHOT];
-  double cooling_bf_col[NTOP_PHOT];	//collisional cooling in bf transitions
+  double cooling_bf[nphot_total];
+  double cooling_bf_col[nphot_total];	//collisional cooling in bf transitions
   double cooling_bb[NLINES];
   double cooling_adiabatic;
   struct topbase_phot *cont_ptr;
@@ -757,7 +757,7 @@ kpkt (p, nres, escape)
       /* JM 1503 -- we used to loop over ntop_phot here, 
          but we should really loop over the tabulated Verner Xsections too
          see #86, #141 */
-      for (i = 0; i < ntop_phot + nxphot; i++)
+      for (i = 0; i < nphot_total; i++)
 	{
 	  cont_ptr = &phot_top[i];
 	  ulvl = cont_ptr->uplev;
@@ -791,8 +791,8 @@ kpkt (p, nres, escape)
 		     upper_density);
 	      Error ("alpha_sp(cont_ptr, xplasma,2) %g \n",
 		     alpha_sp (cont_ptr, xplasma, 2));
-	      Error ("i, ulvl, ntop_phot, nion %d %d %d %d\n", i, ulvl,
-		     ntop_phot, cont_ptr->nion);
+	      Error ("i, ulvl, nphot_total, nion %d %d %d %d\n", i, ulvl,
+		     nphot_total, cont_ptr->nion);
 	      Error ("nlev, z, istate %d %d %d \n", cont_ptr->nlev,
 		     cont_ptr->z, cont_ptr->istate);
 	      Error ("freq[0] %g\n", cont_ptr->freq[0]);
@@ -825,7 +825,7 @@ kpkt (p, nres, escape)
 
 	}
 
-      /* end of loop over ntop_phot */
+      /* end of loop over nphot_total */
 
       for (i = 0; i < nlines; i++)
 	{
@@ -983,14 +983,14 @@ kpkt (p, nres, escape)
       /* JM 1503 -- we used to loop over ntop_phot here, 
          but we should really loop over the tabulated Verner Xsections too
          see #86, #141 */
-      for (i = 0; i < ntop_phot + nxphot; i++)
+      for (i = 0; i < nphot_total; i++)
 	{
 	  if (destruction_choice < mplasma->cooling_bf[i])
 	    {
 	      /* Having got here we know that desturction of the k-packet was via the process labelled
 	         by i. Let's just check that i is a sensible number. */
 
-	      if (i > ntop_phot + nxphot - 1)
+	      if (i > nphot_total - 1)
 		{
 		  Error
 		    ("kpkt (matom.c): trying to destroy k-packet in unknown process. Abort.\n");
@@ -1106,14 +1106,14 @@ kpkt (p, nres, escape)
 	destruction_choice - mplasma->cooling_bftot -
 	mplasma->cooling_bbtot - mplasma->cooling_ff - mplasma->cooling_adiabatic;
 
-      for (i = 0; i < ntop_phot + nxphot; i++)
+      for (i = 0; i < nphot_total; i++)
 	{
 	  if (destruction_choice < mplasma->cooling_bf_col[i])
 	    {
 	      /* Having got here we know that destruction of the k-packet was via the process labelled
 	         by i. Let's just check that i is a sensible number. */
 
-	      if (i > ntop_phot + nxphot - 1)
+	      if (i > nphot_total - 1)
 		{
 		  Error
 		    ("kpkt (matom.c): trying to destroy k-packet in unknown process. Abort.\n");
@@ -2329,7 +2329,7 @@ get_matom_f (mode)
 			  if (nres > (nlines - 1))
 			    {
 			      nres = NLINES + 1;
-			      while (nres < (NLINES + 1 + ntop_phot))
+			      while (nres < (NLINES + 1 + nphot_total))
 				{
 				  if (phot_top[nres - NLINES - 1].uplev != m)
 				    {
@@ -2342,7 +2342,7 @@ get_matom_f (mode)
 				}
 			    }
 
-			  if (nres > NLINES + ntop_phot)
+			  if (nres > NLINES + nphot_total)
 			    {
 			      Error ("Problem in get_matom_f (1). Abort. \n");
 			      exit (0);

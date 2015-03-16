@@ -745,7 +745,7 @@ kbf_need (fmin, fmax)
       one = &wmain[xplasma->nwind];
       nuse = 0;
 
-      for (n = 0; n < ntop_phot + nxphot; n++)	// Loop over photoionisation processes. 
+      for (n = 0; n < nphot_total; n++)	// Loop over photoionisation processes. 
 	{
 
 	  ft = phot_top[n].freq[0];	//This is the edge frequency (SS)
@@ -1020,7 +1020,7 @@ doppler (pin, pout, v, nres)
     {				/* It was a resonant scatter. */
       pout->freq = lin_ptr[nres]->freq / (1. - dot (v, pout->lmn) / C);
     }
-  else if ((nres > NLINES && nres < NLINES + ntop_phot + 1) || nres == -2)
+  else if ((nres > NLINES && nres < NLINES + nphot_total + 1) || nres == -2)
     /* It was continuum emission - new comoving frequency has been chosen by
        the matom/kpkt routine, but now need to convert in the same way 
        as for lines (SS) */
@@ -1043,8 +1043,8 @@ doppler (pin, pout, v, nres)
 
   else
     {
-      Error ("doppler: nres %d > NLINES+ntop_phot %d\n", nres,
-	     NLINES + ntop_phot);
+      Error ("doppler: nres %d > NLINES + nphot_total %d\n", nres,
+	     NLINES + nphot_total);
       exit (0);
     }
 

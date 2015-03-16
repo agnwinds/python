@@ -112,9 +112,17 @@ bf_estimators_increment (one, p, ds)
       n = xplasma->kbf_use[nn];
       ft = phot_top[n].freq[0];	//This is the edge frequency (SS)
 
-      llvl = phot_top[n].nlev;	//Returning lower level = correct (SS)
+      if (ion[phot_top[n].nion].phot_info == 2)   //topbase 
+      {
+        llvl = phot_top[n].nlev;	//Returning lower level = correct (SS)
+        density = den_config (xplasma, llvl);
+      }
+      else if (ion[phot_top[n].nion].phot_info == 1)   //verner
+      {
+        density = xplasma->density[phot_top[n].nion];
+        llvl = 0;   // shouldn't ever be used 
+      }
 
-      density = den_config (xplasma, llvl);
 
       /* JM130729 Bugfix 31: This if loop causes the else statement for simple ions to be 
        * entered in macro atom mode- it appeared to be introduced sometime between 58 and 68.
@@ -127,6 +135,14 @@ bf_estimators_increment (one, p, ds)
 
 	  if (phot_top[n].macro_info == 1 && geo.macro_simple == 0)	// it is a macro atom
 	    {
+        /* quick check that we don't have a VFKY cross-section here */
+        if (ion[phot_top[n].nion].phot_info == 1)
+        {
+          Error("bf_estimators_increment: Verner cross-section in macro-atom section! Setting heating to 0 for this XS.\n");
+          density = 0.0;
+        }
+
+
 	      x = kap_bf[nn] / (density * geo.fill);	//this is the cross section
 
 	      /* Now identify which of the BF processes from this level this is. */

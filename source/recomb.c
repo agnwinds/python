@@ -493,7 +493,7 @@ use that instead if possible --  57h */
       if (f1 != one_fb_f1 || f2 != one_fb_f2)
 	{			// Regenerate the jumps 
 	  fb_njumps = 0;
-	  for (n = 0; n < ntop_phot + nxphot; n++)
+	  for (n = 0; n < nphot_total; n++)
 	    {			//IS THIS ADDED BRACKET CORRECT? (SS, MAY04)
 	      fthresh = phot_top_ptr[n]->freq[0];
 	      if (f1 < fthresh && fthresh < f2)
@@ -1051,10 +1051,6 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
     {				
       // loop over relevent Topbase or VFKY photoionzation x-sections
       fb_xtop = &phot_top[n];
-
-      //Debug("xinteg_fb ion %i, n min max %i %i %i\n", nion, n, nmin, nmax);
-      //Debug("type %i nxphot %i ntop_phot %i ntop %i\n", 
-      //       ion[nion].phot_info, ion[nion].nxphot, ion[nion].ntop_first, ion[nion].ntop);
 
       /* Adding an if statement here so that photoionization that's part of a macro atom is 
          not included here (these will be dealt with elsewhere). (SS, Apr04) */

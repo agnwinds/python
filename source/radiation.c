@@ -220,7 +220,8 @@ radiation (p, ds)
 
 
 	  /* 57h -- 06jul -- ksl -- change loop to use pointers ordered by frequency */
-	  for (n = 0; n < ntop_phot + nxphot; n++)
+    /* JM 1503 -- loop over all photoionization xsections */
+	  for (n = 0; n < nphot_total; n++)
 	    {
 
 	      x_top_ptr = phot_top_ptr[n];
@@ -246,10 +247,22 @@ radiation (p, ds)
 
 	      if (freq_xs < x_top_ptr->freq[x_top_ptr->np - 1])
 		{
-		  /*Need the appropriate density at this point. */
+		  /* Need the appropriate density at this point. */
+      /* how we get this depends if we have a topbase (level by level) 
+         or vfky cross-section (ion by ion) */
+      nion = x_top_ptr->nion;
 
-		  nconf = x_top_ptr->nlev;
-		  density = den_config (xplasma, nconf);
+      if (ion[nion].phot_info == 1) // topbase
+      {
+        nconf = x_top_ptr->nlev;
+        density = den_config (xplasma, nconf);
+      }
+
+      else if (ion[nion].phot_info == 0) // verner
+		    density = xplasma->density[nion];
+
+      else            // possibly a little conservative
+        Error("radiation.c: No type (%i) for xsection!\n");
 
 		  if (density > DENSITY_PHOT_MIN)
 		    {
@@ -266,7 +279,6 @@ radiation (p, ds)
 			{	// Calculate during ionization cycles only
 
 			  frac_tot += z = x * (freq_xs - ft) / freq_xs;
-			  nion = config[nconf].nion;
 
 			  if (nion > 3)
 			    {
