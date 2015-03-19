@@ -173,7 +173,7 @@ get_atomic_data (masterfile)
   double el, eu;
   int qnum;
   double qqnum, ggg, gg;
-  int istate, z;
+  int istate, z, nion;
   int iistate, zz;
   int levl, levu;
   double q;
@@ -1509,23 +1509,23 @@ for the ionstate.
 
           }
 
-        for (n = 0; n < nions; n++)
+        for (nion = 0; nion < nions; nion++)
           {
-            if (ion[n].z == z && ion[n].istate == istate)
+            if (ion[nion].z == z && ion[nion].istate == istate)
         { 
-        if (ion[n].phot_info == -1)
+        if (ion[nion].phot_info == -1)
             {
               /* Then there is a match */
-              phot_top[nphot_total].nlev = n; // level associated with this crossection.
-              phot_top[nphot_total].nion = config[n].nion;
+              phot_top[nphot_total].nlev = ion[nion].firstlevel; // gorund state
+              phot_top[nphot_total].nion = nion;
               phot_top[nphot_total].z = z;
               phot_top[nphot_total].istate = istate;
               phot_top[nphot_total].np = np;
               phot_top[nphot_total].nlast = -1;
               phot_top[nphot_total].macro_info = 0;
 
-              ion[n].phot_info = 0;    /* Mark this ion as using VFKY photo */
-              ion[n].nxphot = nphot_total;
+              ion[nion].phot_info = 0;    /* Mark this ion as using VFKY photo */
+              ion[nion].nxphot = nphot_total;
 
               for (n = 0; n < np; n++)
                {
@@ -1536,11 +1536,11 @@ for the ionstate.
               nphot_total++;
             }
 
-        else if (ion[n].phot_info == 1)
+        else if (ion[nion].phot_info == 1)
             {
           Debug
             ("Get_atomic_data: file %s  Ignoring VFKY photoinization for ion %d with topbase photoionization\n",
-             file, n);
+             file, nion);
             }
         }
 			    }

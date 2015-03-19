@@ -14,7 +14,7 @@ int index_phot_top(void);
 int index_collisions(void);
 void indexx(int n, float arrin[], int indx[]);
 int limit_lines(double freqmin, double freqmax);
-int summarise_xsections(void);
+int check_xsections(void);
 /* python.c */
 int main(int argc, char *argv[]);
 int help(void);
