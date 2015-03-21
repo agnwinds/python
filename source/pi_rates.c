@@ -102,14 +102,16 @@ calc_pi_rate (nion,xplasma,mode)
   else if (ion[nion].phot_info == 0)	// verner
     {
       n = nvmin;		//just the ground state ionization fraction.
-      xtop = &xphot_tab[ion[n].nxphot];
+      xtop = &phot_top[ion[n].nxphot];
     }
   else
     {
 	  Error
 	    ("calc_pi_rate: No photoionization xsection for ion %d (element %d, ion state %d)\n",
 	     nion, ion[nion].z, ion[nion].istate);
-	  exit(0); /* NSH 1408 I have decided that this is actually a really serous problem - we have no business including an ion for which we have no photoionization data.... */
+    /* NSH 1408 I have decided that this is actually a really serous problem - 
+       we have no business including an ion for which we have no photoionization data.... */
+	  exit(0); 
     }
 
   fthresh = xtop->freq[0];
@@ -250,7 +252,7 @@ tb_planck1 (freq)
   answer = (2. * H * pow (freq, 3.)) / (pow (C, 2));
   answer *= (1 / (bbe - 1));
 //      answer*=weight;
-  answer *= sigma_phot_topbase (xtop, freq);
+  answer *= sigma_phot(xtop, freq);
   answer /= freq;
 
   return (answer);
@@ -273,7 +275,7 @@ tb_logpow1 (freq)
   answer = pow(10,xpl_logw+(xpl_alpha-1.0)*log10(freq));
 
 
-  answer *= sigma_phot_topbase (xtop, freq);	// and finally multiply by the cross section.
+  answer *= sigma_phot (xtop, freq);	// and finally multiply by the cross section.
 
   return (answer);
 }
@@ -317,7 +319,7 @@ tb_exp1 (freq)
   double answer;
 
   answer = xexp_w * exp ((-1.0 * H * freq) / (BOLTZMANN * xexp_temp));
-  answer *= sigma_phot_topbase (xtop, freq);	// and finally multiply by the cross section.
+  answer *= sigma_phot (xtop, freq);	// and finally multiply by the cross section.
   answer /= freq;
   return (answer);
 }

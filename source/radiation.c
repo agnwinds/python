@@ -113,7 +113,7 @@ radiation (p, ds)
      PhotPtr p;
      double ds;
 {
-  PhotoionizationPtr x_ptr;
+  //PhotoionizationPtr x_ptr;
   TopPhotPtr x_top_ptr;
 
   WindPtr one;
@@ -220,7 +220,8 @@ radiation (p, ds)
 
 
 	  /* 57h -- 06jul -- ksl -- change loop to use pointers ordered by frequency */
-	  for (n = 0; n < ntop_phot; n++)
+    /* JM 1503 -- loop over all photoionization xsections */
+	  for (n = 0; n < nphot_total; n++)
 	    {
 
 	      x_top_ptr = phot_top_ptr[n];
@@ -246,18 +247,30 @@ radiation (p, ds)
 
 	      if (freq_xs < x_top_ptr->freq[x_top_ptr->np - 1])
 		{
-		  /*Need the appropriate density at this point. */
+		  /* Need the appropriate density at this point. */
+      /* how we get this depends if we have a topbase (level by level) 
+         or vfky cross-section (ion by ion) */
+      nion = x_top_ptr->nion;
 
-		  nconf = x_top_ptr->nlev;
-		  density = den_config (xplasma, nconf);
+      if (ion[nion].phot_info == 1) // topbase
+      {
+        nconf = x_top_ptr->nlev;
+        density = den_config (xplasma, nconf);
+      }
+
+      else if (ion[nion].phot_info == 0) // verner
+		    density = xplasma->density[nion];
+
+      else            // possibly a little conservative
+        Error("radiation.c: No type (%i) for xsection!\n");
 
 		  if (density > DENSITY_PHOT_MIN)
 		    {
 
 		      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
 		      kappa_tot += x =
-			sigma_phot_topbase (x_top_ptr,
-					    freq_xs) * density * frac_path * geo.fill;
+			sigma_phot (x_top_ptr, freq_xs) * density 
+			        * frac_path * geo.fill;
 
 		      /* I believe most of next steps are totally diagnsitic; it is possible if 
 		         statement could be deleted entirely 060802 -- ksl */
@@ -266,7 +279,6 @@ radiation (p, ds)
 			{	// Calculate during ionization cycles only
 
 			  frac_tot += z = x * (freq_xs - ft) / freq_xs;
-			  nion = config[nconf].nion;
 
 			  if (nion > 3)
 			    {
@@ -279,69 +291,10 @@ radiation (p, ds)
 
 		    }
 
-
-		}
-
-	    }
-
-/* Next section is for photoionization of those ions using VFKY values */
-
-	  for (n = 0; n < nxphot; n++)
-	    {
-	      x_ptr = xphot_ptr[n];
-	      nion = x_ptr->nion;
-
-	      if (ion[nion].phot_info == 0)
-		{		// Avoid ions with topbase x-sections
-		  ft = x_ptr->freq_t;
-
-		  if (ft > freq_min && ft < freq_max)
-		    {
-		      /* then the shifting of the photon causes it to cross an edge. 
-		         Find out where between fmin and fmax the edge would be in freq space.
-		         freq_xs is freq halfway between the edge and the max freq if an edge gets crossed */   
-		      frac_path = (freq_max - ft) / (freq_max - freq_min);	
-		      freq_xs = 0.5 * (ft + freq_max);
-		    }
-
-		  else if (ft > freq_max)
-		    break;	// The remaining transitions will have higher thresholds
-
-		  else if (ft < freq_min)
-		    {
-		      frac_path = 1.0;	// then all frequency along ds are above edge
-		      freq_xs = freq;	// use the average frequency
-		    }
-
-		  density =
-		    xplasma->density[nion] * ion[nion].g /
-		    xplasma->partition[nion];
-
-		  if (density > DENSITY_PHOT_MIN)
-		    {
-
-		      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
-		      kappa_tot += x =
-			sigma_phot (x_ptr, freq_xs) * density * frac_path * geo.fill;
-
-		      /* Next if statment down to kappa_ion appers to be totally diagnostic - 060802 -- ksl */
-		      if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
-			{	// Calculate during ionization cycles only
-
-			  frac_tot += z = x * (freq_xs - ft) / freq_xs;
-
-			  if (nion > 3)
-			    {
-			      frac_z += z;
-			    }
-			  frac_ion[nion] += z;
-			  kappa_ion[nion] += x;
-			}
-		    }
 		}
 	    }
-	}
 
+    }
     }
 
 
@@ -566,83 +519,13 @@ kappa_ff (xplasma, freq)
   return (x);
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis: 
-	double sigma_phot(x_ptr,freq)	calculates the photionization crossection due to the transition 
-	associated with x_ptr at frequency freq
-Arguments:
-
-Returns:
-	
-Description:	 
-	sigma_phot uses Verner et al.'s interpolation formulae for the photoionization crossection
-	to calculate the bound free (or photoionization) optical depth.  The data must
-	have been into the photoionization structures xphot with get_atomic_data and
-	the densities of individual ions must have been calculated previously.
-
-Notes:
-
-History:
-	98jul	ksl	Coded (actually moved from a subroutine called kappa_ds)
-	06jul	ksl	57h -- Added code to avoid recalculating crossection
-			if that is possible, i.e. if we are calculating
-			a the x-section at the same frequency as last
-			time the routine was entired for this ion. 
-
-**************************************************************/
-
-double
-sigma_phot (x_ptr, freq)
-     struct photoionization *x_ptr;
-     double freq;
-{
-  double ft;
-  double x, y;
-  double f1, f2, f3;
-  double xsection;
-
-
-  ft = x_ptr->freq_t;		/* threshold frequency */
-
-
-  if (ft < freq && freq < x_ptr->freq_max)
-    {
-      if (freq == x_ptr->f_last)
-	return (x_ptr->sigma_last);	// Avoid recalculating xsection
-
-      x = freq / x_ptr->freq0 - x_ptr->y0;
-      y = sqrt (x * x + x_ptr->y1 * x_ptr->y1);
-
-      /* This was line fixed by CK in 1998 Jul */
-      f1 = (x - 1.0) * (x - 1.0) + x_ptr->yw * x_ptr->yw;
-
-      //     f2 = pow (y, 0.5 * x_ptr->p - 5.5);
-      f2 = exp ((0.5 * x_ptr->p - 5.5) * log (y));
-
-//     f3 = pow (1.0 + sqrt (y / x_ptr->ya), -x_ptr->p);
-      f3 = exp ((-x_ptr->p) * log ((1.0 + sqrt (y / x_ptr->ya))));
-
-
-      xsection = x_ptr->sigma * f1 * f2 * f3;	// the photoinization xsection
-
-/* Store crossesction for future use */
-      x_ptr->sigma_last = xsection;
-      x_ptr->f_last = freq;
-
-      return (xsection);
-    }
-  else
-    return (0.0);
-}
 
 
 /***********************************************************
 				       Space Telescope Science Institute
 
  Synopsis:
-	double sigma_phot_topbase(x_ptr,freq)	calculates the
+	double sigma_phot(x_ptr,freq)	calculates the
 	photionization crossection due to the transition associated with
 	x_ptr at frequency freq
 Arguments:
@@ -669,7 +552,7 @@ History:
 **************************************************************/
 
 double
-sigma_phot_topbase (x_ptr, freq)
+sigma_phot (x_ptr, freq)
      struct topbase_phot *x_ptr;
      double freq;
 {

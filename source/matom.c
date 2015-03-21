@@ -633,7 +633,7 @@ alpha_sp_integrand (freq)
   if (freq < fthresh)
     return (0.0);		// No recombination at frequencies lower than the threshold freq occur
 
-  x = sigma_phot_topbase (cont_ext_ptr, freq);	//this is the cross-section
+  x = sigma_phot (cont_ext_ptr, freq);	//this is the cross-section
   integrand = x * freq * freq * exp (H_OVER_K * (fthresh - freq) / tt);
 
   if (temp_choice == 1)
@@ -703,8 +703,8 @@ kpkt (p, nres, escape)
 
   int i;
   int ulvl;
-  double cooling_bf[NTOP_PHOT];
-  double cooling_bf_col[NTOP_PHOT];	//collisional cooling in bf transitions
+  double cooling_bf[nphot_total];
+  double cooling_bf_col[nphot_total];	//collisional cooling in bf transitions
   double cooling_bb[NLINES];
   double cooling_adiabatic;
   struct topbase_phot *cont_ptr;
@@ -754,7 +754,10 @@ kpkt (p, nres, escape)
       cooling_ff = 0.0;
       cooling_bf_coltot = 0.0;
 
-      for (i = 0; i < ntop_phot; i++)
+      /* JM 1503 -- we used to loop over ntop_phot here, 
+         but we should really loop over the tabulated Verner Xsections too
+         see #86, #141 */
+      for (i = 0; i < nphot_total; i++)
 	{
 	  cont_ptr = &phot_top[i];
 	  ulvl = cont_ptr->uplev;
@@ -788,8 +791,8 @@ kpkt (p, nres, escape)
 		     upper_density);
 	      Error ("alpha_sp(cont_ptr, xplasma,2) %g \n",
 		     alpha_sp (cont_ptr, xplasma, 2));
-	      Error ("i, ulvl, ntop_phot, nion %d %d %d %d\n", i, ulvl,
-		     ntop_phot, cont_ptr->nion);
+	      Error ("i, ulvl, nphot_total, nion %d %d %d %d\n", i, ulvl,
+		     nphot_total, cont_ptr->nion);
 	      Error ("nlev, z, istate %d %d %d \n", cont_ptr->nlev,
 		     cont_ptr->z, cont_ptr->istate);
 	      Error ("freq[0] %g\n", cont_ptr->freq[0]);
@@ -799,7 +802,9 @@ kpkt (p, nres, escape)
 	    {
 	      cooling_bftot += cooling_bf[i];
 	    }
+
 	  cooling_normalisation += cooling_bf[i];
+
 	  if (cont_ptr->macro_info == 1 && geo.macro_simple == 0)
 	    {
 	      /* Include collisional ionization as a cooling term in macro atoms. Don't include
@@ -820,7 +825,7 @@ kpkt (p, nres, escape)
 
 	}
 
-      /* end of loop over ntop_phot */
+      /* end of loop over nphot_total */
 
       for (i = 0; i < nlines; i++)
 	{
@@ -974,14 +979,18 @@ kpkt (p, nres, escape)
 
   if (destruction_choice < mplasma->cooling_bftot)
     {				//destruction by bf
-      for (i = 0; i < ntop_phot; i++)
+
+      /* JM 1503 -- we used to loop over ntop_phot here, 
+         but we should really loop over the tabulated Verner Xsections too
+         see #86, #141 */
+      for (i = 0; i < nphot_total; i++)
 	{
 	  if (destruction_choice < mplasma->cooling_bf[i])
 	    {
 	      /* Having got here we know that desturction of the k-packet was via the process labelled
 	         by i. Let's just check that i is a sensible number. */
 
-	      if (i > ntop_phot - 1)
+	      if (i > nphot_total - 1)
 		{
 		  Error
 		    ("kpkt (matom.c): trying to destroy k-packet in unknown process. Abort.\n");
@@ -996,8 +1005,7 @@ kpkt (p, nres, escape)
 
 	      /* Now (as in matom) choose a frequency for the new packet. */
 
-	      p->freq = phot_top[i].freq[0]
-		-
+	      p->freq = phot_top[i].freq[0] -
 		(log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e /
 		 H_OVER_K);
 	      /* Co-moving frequency - changed to rest frequency by doppler */
@@ -1098,14 +1106,14 @@ kpkt (p, nres, escape)
 	destruction_choice - mplasma->cooling_bftot -
 	mplasma->cooling_bbtot - mplasma->cooling_ff - mplasma->cooling_adiabatic;
 
-      for (i = 0; i < ntop_phot; i++)
+      for (i = 0; i < nphot_total; i++)
 	{
 	  if (destruction_choice < mplasma->cooling_bf_col[i])
 	    {
 	      /* Having got here we know that destruction of the k-packet was via the process labelled
 	         by i. Let's just check that i is a sensible number. */
 
-	      if (i > ntop_phot - 1)
+	      if (i > nphot_total - 1)
 		{
 		  Error
 		    ("kpkt (matom.c): trying to destroy k-packet in unknown process. Abort.\n");
@@ -2321,7 +2329,7 @@ get_matom_f (mode)
 			  if (nres > (nlines - 1))
 			    {
 			      nres = NLINES + 1;
-			      while (nres < (NLINES + 1 + ntop_phot))
+			      while (nres < (NLINES + 1 + nphot_total))
 				{
 				  if (phot_top[nres - NLINES - 1].uplev != m)
 				    {
@@ -2334,7 +2342,7 @@ get_matom_f (mode)
 				}
 			    }
 
-			  if (nres > NLINES + ntop_phot)
+			  if (nres > NLINES + nphot_total)
 			    {
 			      Error ("Problem in get_matom_f (1). Abort. \n");
 			      exit (0);
