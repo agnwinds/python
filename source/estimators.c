@@ -62,7 +62,6 @@ bf_estimators_increment (one, p, ds)
   double y, yy;
   double exponential, heat_contribution;
   int n, m, llvl, nn;
-  double sigma_phot_topbase ();
   double density;
   double abs_cont;
   int nplasma;
@@ -113,9 +112,17 @@ bf_estimators_increment (one, p, ds)
       n = xplasma->kbf_use[nn];
       ft = phot_top[n].freq[0];	//This is the edge frequency (SS)
 
-      llvl = phot_top[n].nlev;	//Returning lower level = correct (SS)
+      if (ion[phot_top[n].nion].phot_info == 1)   //topbase 
+      {
+        llvl = phot_top[n].nlev;	//Returning lower level = correct (SS)
+        density = den_config (xplasma, llvl);
+      }
+      else if (ion[phot_top[n].nion].phot_info == 0)   //cfky
+      {
+        density = xplasma->density[phot_top[n].nion];
+        llvl = 0;   // shouldn't ever be used 
+      }
 
-      density = den_config (xplasma, llvl);
 
       /* JM130729 Bugfix 31: This if loop causes the else statement for simple ions to be 
        * entered in macro atom mode- it appeared to be introduced sometime between 58 and 68.
@@ -128,6 +135,14 @@ bf_estimators_increment (one, p, ds)
 
 	  if (phot_top[n].macro_info == 1 && geo.macro_simple == 0)	// it is a macro atom
 	    {
+        /* quick check that we don't have a VFKY cross-section here */
+        if (ion[phot_top[n].nion].phot_info == 0)
+        {
+          Error("bf_estimators_increment: Vfky cross-section in macro-atom section! Setting heating to 0 for this XS.\n");
+          density = 0.0;
+        }
+
+
 	      x = kap_bf[nn] / (density * geo.fill);	//this is the cross section
 
 	      /* Now identify which of the BF processes from this level this is. */
@@ -191,7 +206,7 @@ bf_estimators_increment (one, p, ds)
 	         recombination is included here. (SS, Apr 04) */
 	      if (density > DENSITY_PHOT_MIN)
 		{
-		  x = sigma_phot_topbase (&phot_top[n], freq_av);	//this is the cross section
+		  x = sigma_phot (&phot_top[n], freq_av);	//this is the cross section
 		  weight_of_packet = p->w;
 		  y = weight_of_packet * x * ds;
 
@@ -1122,7 +1137,7 @@ gamma_integrand (freq)
   if (freq < fthresh)
     return (0.0);		// No photoionization at frequencies lower than the threshold freq occur
 
-  x = sigma_phot_topbase (cont_ext_ptr2, freq);	//this is the cross-section
+  x = sigma_phot (cont_ext_ptr2, freq);	//this is the cross-section
   integrand = x * freq * freq / (exp (H_OVER_K * freq / tt) - 1);
 
   return (integrand);
@@ -1180,7 +1195,7 @@ gamma_e_integrand (freq)
   if (freq < fthresh)
     return (0.0);		// No photoionization at frequencies lower than the threshold freq occur
 
-  x = sigma_phot_topbase (cont_ext_ptr2, freq);	//this is the cross-section
+  x = sigma_phot (cont_ext_ptr2, freq);	//this is the cross-section
   integrand =
     x * freq * freq * freq / (exp (H_OVER_K * freq / tt) - 1) / fthresh;
 
@@ -1256,7 +1271,7 @@ alpha_st_integrand (freq)
   if (freq < fthresh)
     return (0.0);		// No recombination at frequencies lower than the threshold freq occur
 
-  x = sigma_phot_topbase (cont_ext_ptr2, freq);	//this is the cross-section
+  x = sigma_phot (cont_ext_ptr2, freq);	//this is the cross-section
   integrand =
     x * freq * freq * exp (H_OVER_K * (fthresh - freq) / tt) /
     (exp (H_OVER_K * freq / ttrr) - 1);
@@ -1332,7 +1347,7 @@ alpha_st_e_integrand (freq)
   if (freq < fthresh)
     return (0.0);		// No recombination at frequencies lower than the threshold freq occur
 
-  x = sigma_phot_topbase (cont_ext_ptr2, freq);	//this is the cross-section
+  x = sigma_phot (cont_ext_ptr2, freq);	//this is the cross-section
   integrand =
     x * freq * freq * exp (H_OVER_K * (fthresh - freq) / tt) /
     (exp (H_OVER_K * freq / ttrr) - 1) * freq / fthresh;
