@@ -67,6 +67,7 @@ stuff_phot (PhotPtr pin, PhotPtr pout)
   pout->origin = pin->origin;
   pout->nnscat = pin->nnscat;
   pout->np = pin->np;
+  pout->importance = pin->importance;
 
 
   return (0);

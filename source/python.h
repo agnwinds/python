@@ -537,6 +537,7 @@ typedef struct wind
   int inwind;			/* 061104 -- 58b -- ksl -- Moved definitions of for whether a cell is or is not
 				   inwind to #define statements above */
   Wind_Paths_Ptr paths;         // SWM 6-2-15 Path data struct for each cell
+  double importance;            // SWM 24-3-15 Importance data for cell
 }
 wind_dummy, *WindPtr;
 WindPtr wmain;
@@ -933,6 +934,7 @@ typedef struct photon
 				 */
   int np;			/*NSH 13/4/11 - an internal pointer to the photon number so 
 				   so we can write out details of where the photon goes */
+  double importance; /* SWM 24-3-15 Importance of photon for splitting */
 
 }
 p_dummy, *PhotPtr;
