@@ -1462,86 +1462,6 @@ gs_rrate (nion, T)
         rate = pow(10,(log10(rates[imin]) + drdt * dt));
   }
 
-<<<<<<< HEAD
-  else if (T >= temps[BAD_GS_RR_PARAMS - 1])	//we are above the range of GS data
-    {
-      Log_silent
-	("bad_gs_rr: Requested temp %e is above limit (%e) of data for ion %i\n",
-	 T, nion, bad_gs_rr[ion[nion].nxbadgsrr].temps[BAD_GS_RR_PARAMS - 1]);
- //     rate = rates[BAD_GS_RR_PARAMS - 1];
-	imax=BAD_GS_RR_PARAMS - 1;
-	imin=BAD_GS_RR_PARAMS - 2;
-//We will try to extrapolate.
-
-
-
-    }
-  else				//We must be within the range of tabulated data
-    {
-      for (i = 0; i < BAD_GS_RR_PARAMS - 1; i++)
-	{
-        if (temps[i] <= T && T < temps[i + 1])	//We have bracketed the correct temperature
-	    {
-	      imin = i;
-	      imax = i + 1;
-	    }
-	}
-/* NSH 140313 - changed the following lines to interpolate in log space */
-    }
-      drdt = (log10(rates[imax]) - log10(rates[imin])) / (log10(temps[imax]) - log10(temps[imin]));
-      dt = (log10(T) - log10(temps[imin]));
-      rate = pow(10,(log10(rates[imin]) + drdt * dt));
-}
-
-else  //we will need to use the milne relation - NB - this is different from using xinteg_fb because that routine does recombination to all excited levels (at least for topbase ions).
-{
-//printf("We are using the milne relation for GS recomb\n");
- rate = 0.0;			/* NSH 130605 to remove o3 compile error */
-
-
-  fbt = T;
-  fbfr = 2;
-
-  if (ion[nion-1].phot_info == 1)	//topbase
-    {
-
-      ntmin = ion[nion-1].ntop_ground;
-      fb_xtop = &phot_top[ntmin];
-      fthresh = fb_xtop->freq[0];
-      fmax = fb_xtop->freq[fb_xtop->np - 1];
-      dnu = 100.0 * (fbt / H_OVER_K);
-      if (fthresh + dnu < fmax)
-	{
-	  fmax = fthresh + dnu;
-	}
-      rate = qromb (fb_topbase_partial, fthresh, fmax, 1e-5);
-    }
-  else if (ion[nion-1].phot_info == 0)	// verner
-    {
-      nvmin = nion-1;
-      n = nvmin;
-
-n = nvmin;		//just the ground state ionization fraction.
-    //  fb_xtop = &xphot_tab[ion[n].nxphot];
-  //    fthresh = fb_xtop->freq[0];
-//      fmax = fb_xtop->freq[fb_xtop->np - 1];
-      fb_xver = &xphot[ion[n].nxphot];
-      fthresh = fb_xver->freq_t;
-      fmax = fb_xver->freq_max;
-      dnu = 100.0 * (fbt / H_OVER_K);
-      if (fthresh + dnu < fmax)
-	{
-	  fmax = fthresh + dnu;
-	}
-      rate = qromb (fb_verner_partial, fthresh, fmax, 1.e-5);
- //     rate = qromb (fb_topbase_partial, fthresh, fmax, 1.e-5);
-    }
-}
-
-
-
-
-=======
   /* we will need to use the milne relation - 
      NB - this is different from using xinteg_fb because 
      that routine does recombination to all excited levels (at least for topbase ions).
@@ -1576,7 +1496,6 @@ n = nvmin;		//just the ground state ionization fraction.
 
     rate = qromb (fb_topbase_partial, fthresh, fmax, 1e-5);
   }
->>>>>>> 549f0b41516061a2fcf4c42ad7e1a377c58f4290
 
 
   return (rate);

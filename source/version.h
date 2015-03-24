@@ -1,3 +1,3 @@
-#define VERSION  "rv"
+#define VERSION  "st"
 #define CHOICE 1 // Compress plasma as much as possible
-#define GIT_COMMIT_HASH "e26a539ad07e544ebcb9ff278f4ff427973938ba"
+#define GIT_COMMIT_HASH "fec77ebb74659433ecfd3da0581c60b4e0de74c0"

@@ -2862,55 +2862,6 @@ index_phot_top (void)
 
 }
 
-<<<<<<< HEAD
-/* Index the verner photoionization crossections by frequency
-
-	06jul	ksl	57h - Adapted from index_phot_top as
-			part of attempt to speed up the photoionization
-			parts of pthon
-*/
-int 
-index_phot_verner (void)
-{
-  float *freqs, foo;
-  int *index, ioo;
-  int n;
-  void indexx ();
-
-  /* Allocate memory for some modestly large arrays */
-  freqs = calloc (sizeof (foo), nxphot + 2);
-  index = calloc (sizeof (ioo), nxphot + 2);
-
-  freqs[0] = 0;
-  for (n = 0; n < nxphot; n++)
-    freqs[n + 1] = xphot[n].freq_t;	/* So filled matrix 
-					   elements run from 1 to nxphot */
-
-  indexx (nxphot, freqs, index);	/* Note that this math recipes routine 
-					   expects arrays to run from 1 to nxphot inclusive */
-
-  /* The for loop indices are complicated by the numerical recipes routine, 
-     which is a simple translation of a fortran routine.
-     Specifically, index array elements 1 to nlines are now filled, 
-     and the numbers run from 1 to nlines, but the 
-     pointer array is only filled from elements 0 to nlines -1 */
-
-  for (n = 0; n < nxphot; n++)
-    {
-      xphot_ptr1[n] = &xphot[n];
-      xphot_ptr[n] = &xphot[index[n + 1] - 1];
-    }
-
-  /* Free the memory for the arrays */
-  free (freqs);
-  free (index);
-
-  return (0);
-
-}
-=======
->>>>>>> 549f0b41516061a2fcf4c42ad7e1a377c58f4290
-
 /* index_xcol sorts the collisional lines into frequency order
    History:
 	98mar8	ksl	Copied and adapted from index lines.  Note that it is possible
@@ -3116,22 +3067,7 @@ limit_lines (double freqmin, double freqmax)
 /* check_xsections is  a routine which checks xsections are ok.
    Only prints out each xsection with verbosity > 4 as uses Debug function */
 
-<<<<<<< HEAD
-History:
-   13sep           nsh     coded and tested
-  
- 
-**************************************************************/
-
-#define N_VERNER_TAB 100  // The number of points we will tabulate the verner function over
-
-
-struct photoionization *xver;	//Verner & Ferland description of a photoionization x-section
-int 
-tabulate_verner (void)
-=======
 int check_xsections()
->>>>>>> 549f0b41516061a2fcf4c42ad7e1a377c58f4290
 {
   int nion, n;
 

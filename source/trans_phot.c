@@ -179,7 +179,7 @@ int trans_phot(WindPtr w, PhotPtr p, int iextract	/* 0 means do not extract alon
 			{
 				/* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient. First
 				   find the sobolev optical depth along that vector */
-				tau_norm = sobolev(&wmain[pextract.grid], &pextract, -1.0, lin_ptr[pextract.nres], wmain[pextract.grid].dvds_max);
+				tau_norm = sobolev(&wmain[pextract.grid], &pextract.x, -1.0, lin_ptr[pextract.nres], wmain[pextract.grid].dvds_max);
 
 				/* then turn into a probability */
 				p_norm = p_escape_from_tau(tau_norm);
