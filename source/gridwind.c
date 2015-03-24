@@ -637,7 +637,7 @@ calloc_estimators (int nelem)
 	  free (macromain[n].cooling_bf);
 	}*/
       if ((macromain[n].cooling_bf =
-	   calloc (sizeof (double), ntop_phot)) == NULL)
+	   calloc (sizeof (double), nphot_total)) == NULL)
 	{
 	  Error
 	    ("calloc_estimators: Error in allocating memory for MA estimators\n");
@@ -649,7 +649,7 @@ calloc_estimators (int nelem)
 	  free (macromain[n].cooling_bf_col);
 	}*/
       if ((macromain[n].cooling_bf_col =
-	   calloc (sizeof (double), ntop_phot)) == NULL)
+	   calloc (sizeof (double), nphot_total)) == NULL)
 	{
 	  Error
 	    ("calloc_estimators: Error in allocating memory for MA estimators\n");

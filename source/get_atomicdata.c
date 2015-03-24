@@ -172,18 +172,18 @@ get_atomic_data (char masterfile[])
   double el, eu;
   int qnum;
   double qqnum, ggg, gg;
-  int istate, z;
+  int istate, z, nion;
   int iistate, zz;
   int levl, levu;
   double q;
-  int nelectrons;
-  double et, emax, e0, sigma, ya, p, yw, y0, y1;
-  double freq, f, exx, lambda, alpha, beta, tm;
+  //int nelectrons;
+  //double et, emax, e0, sigma, ya, p, yw, y0, y1;
+  double freq, f, exx, lambda, alpha, beta, tm, et, p;
   double the_ground_frac[20];
   char choice;
   int lineno;			/* the line number in the file beginning with 1 */
   int index_collisions (), index_lines (), index_phot_top (),
-    index_phot_verner (), tabulate_verner();
+    index_phot_verner (), check_xsections();
   int nwords;
   int nlte, nmax;
   //  
@@ -351,16 +351,7 @@ get_atomic_data (char masterfile[])
       ion[n].nxderedi = -1; //Initialise the pointer into the Dere DI rate structure
     }
 
-  nlevels = nxphot = ntop_phot = nauger = ndrecomb = ncpart = 0;	//Added counter for DR//
-
-  for (i = 0; i < NIONS; i++)
-    {
-      xphot[i].z = xphot[i].istate = -1;
-      xphot[i].sigma = 0.0;
-      xphot[i].freq_t = VERY_BIG;
-      xphot[i].freq_max = 0;
-      xphot[i].freq0 = VERY_BIG;
-    }
+  nlevels = nxphot = nphot_total = ntop_phot = nauger = ndrecomb = ncpart = 0;	//Added counter for DR//
 
   for (i = 0; i < NLEVELS; i++)
     {
@@ -379,22 +370,6 @@ get_atomic_data (char masterfile[])
       phot_top[i].sigma = 0.0;
     }
 
-  for (i = 0; i < NIONS; i++)
-    {
-      xphot_tab[i].nlev = (-1);
-      xphot_tab[i].uplev = (-1);
-      xphot_tab[i].nion = (-1);
-      xphot_tab[i].z = (-1);
-      xphot_tab[i].np = (-1);
-      xphot_tab[i].macro_info = (-1);	//Initialise - don't know if using Macro Atoms or not: set to -1 (SS)
-      for (j = 0; j < NCROSS; j++)
-	{
-	  xphot_tab[i].freq[j] = (-1);
-	  xphot_tab[i].x[j] = (-1);
-	}
-      xphot_tab[i].f = (-1);
-      xphot_tab[i].sigma = 0.0;
-    }
 
 
   for (i = 0; i < NLEVELS; i++)
@@ -1282,13 +1257,16 @@ for the ionstate.
 
 		case 'w':
 		  if (strncmp (word, "PhotMacS", 8) == 0)
-		    {		// It's a Macro atom entry - similar format to TOPBASE - see below (SS)
+		    {		
+          // It's a Macro atom entry - similar format to TOPBASE - see below (SS)
 		      sscanf (aline, "%*s %d %d %d %d %le %d\n", &z, &istate,
-			      &levl, &levu, &exx, &np);
+			            &levl, &levu, &exx, &np);
 		      islp = -1;
 		      ilv = -1;
+
 		      for (n = 0; n < np; n++)
-			{	//Read the photo. records but do nothing with them until verifyina a valid level
+			{	
+        //Read the photo. records but do nothing with them until verifyina a valid level
 			  if (fgets (aline, LINELENGTH, fptr) == NULL)
 			    {
 			      Error
@@ -1382,9 +1360,10 @@ for the ionstate.
 
 		      ntop_phot_macro++;
 		      ntop_phot++;
+          nphot_total++;
 
 		      /* 080812 - Added check to assure we did not exceed the allowed number of photoionization records */
-		      if (ntop_phot > NTOP_PHOT)
+		      if (nphot_total > NTOP_PHOT)
 			{
 			  Error
 			    ("get_atomicdata: More macro photoionization cross sections that NTOP_PHOT (%d).  Increase in atomic.h\n",
@@ -1393,10 +1372,12 @@ for the ionstate.
 			}
 		      break;
 		    }
-		  else
-		    {
-		      if (strncmp (word, "PhotTopS", 8) == 0)
-			{	// It's a TOPBASE style photoionization record, beginning with the summary record
+
+
+
+		  else if (strncmp (word, "PhotTopS", 8) == 0)
+			{	
+        // It's a TOPBASE style photoionization record, beginning with the summary record
 			  sscanf (aline, "%*s %d %d %d %d %le %d\n", &z,
 				  &istate, &islp, &ilv, &exx, &np);
 			  for (n = 0; n < np; n++)
@@ -1445,14 +1426,11 @@ for the ionstate.
 			      phot_top[ntop_phot].np = np;
 			      phot_top[ntop_phot].nlast = -1;
 			      phot_top[ntop_phot].macro_info = 0;
-/*NSH 0312 - next line sees if the topbase level just read in is the ground state - if it is, the ion structure element ntop_ground is set to that topbase level number */
-			      if (islp ==
-				  config[ion
-					 [config[n].nion].
-					 first_nlte_level].isp
-				  && ilv ==
-				  config[ion[config[n].nion].
-					 first_nlte_level].ilv)
+
+            /* NSH 0312 - next line sees if the topbase level just read in is the ground state - 
+              if it is, the ion structure element ntop_ground is set to that topbase level number */
+			      if (islp == config[ion[config[n].nion].first_nlte_level].isp
+				      && ilv == config[ion[config[n].nion].first_nlte_level].ilv)
 				{
 				  ion[config[n].nion].ntop_ground = ntop_phot;
 				}
@@ -1486,9 +1464,10 @@ for the ionstate.
 
 			      ntop_phot_simple++;
 			      ntop_phot++;
+            nphot_total++;
 
 			      /* 080812 - Added check to assure we did not exceed the allowed number of photoionization records */
-			      if (ntop_phot > NTOP_PHOT)
+			      if (nphot_total > NTOP_PHOT)
 				{
 				  Error
 				    ("get_atomicdata: More TopBase photoionization cross sections that NTOP_PHOT (%d).  Increase in atomic.h\n",
@@ -1504,55 +1483,66 @@ for the ionstate.
 			    }
 			  break;
 			}
-		      /*Check that there is an ion which has the same ionization state as this record 
+
+
+		      /* Check that there is an ion which has the same ionization state as this record 
 		         otherwise it must be a VFKY style record and so read with that format */
-		      else if (sscanf
-			       (aline,
-				"%*s %d %d %le %le %le %le %le %le %le %le %le",
-				&z, &nelectrons, &et, &emax, &e0, &sigma, &ya,
-				&p, &yw, &y0, &y1) == 11)
+		      else if (strncmp (word, "PhotVfkyS", 8) == 0)
 			{
-			  istate = z - nelectrons + 1;
-			  for (n = 0; n < nions; n++)
-			    {
-			      if (ion[n].z == z && ion[n].istate == istate)
-				{	/* Then there is a match */
-				  xphot[nxphot].z = z;
-				  xphot[nxphot].istate = istate;
-				  xphot[nxphot].nion = n;
-				  xphot[nxphot].freq_t = et / HEV;
-				  if (xphot[nxphot].freq_t < phot_freq_min)
-				    {
-				      phot_freq_min = xphot[nxphot].freq_t;
-				    }
-				  xphot[nxphot].freq_max = emax / HEV;
-				  xphot[nxphot].freq0 = e0 / HEV;
-				  xphot[nxphot].sigma = sigma * 1e-18;	// sigma is read in in Megabarns
+        // It's a TOPBASE style photoionization record, beginning with the summary record
+        sscanf (aline, "%*s %d %d %d %d %le %d\n", &z,
+          &istate, &islp, &ilv, &exx, &np);
+        for (n = 0; n < np; n++)
+          { 
+            //Read the topbase photoionization records
+            if (fgets (aline, LINELENGTH, fptr) == NULL)
+        {
+          Error
+            ("Get_atomic_data: Problem reading Vfky photoionization record\n");
+          Error ("Get_atomic_data: %s\n", aline);
+          exit (0);
+        }
+            sscanf (aline, "%*s %le %le", &xe[n], &xx[n]);
+            lineno++;
 
-				  xphot[nxphot].ya = ya;
-				  xphot[nxphot].p = p;
-				  xphot[nxphot].yw = yw;
-				  xphot[nxphot].y0 = y0;
-				  xphot[nxphot].y1 = y1;
+          }
 
+        for (nion = 0; nion < nions; nion++)
+          {
+            if (ion[nion].z == z && ion[nion].istate == istate)
+        { 
+        if (ion[nion].phot_info == -1)
+            {
+              /* Then there is a match */
+              phot_top[nphot_total].nlev = ion[nion].firstlevel; // gorund state
+              phot_top[nphot_total].nion = nion;
+              phot_top[nphot_total].z = z;
+              phot_top[nphot_total].istate = istate;
+              phot_top[nphot_total].np = np;
+              phot_top[nphot_total].nlast = -1;
+              phot_top[nphot_total].macro_info = 0;
 
+              ion[nion].phot_info = 0;    /* Mark this ion as using VFKY photo */
+              ion[nion].nxphot = nphot_total;
 
-				  if (ion[n].phot_info == -1)
-				    {
-				      ion[n].phot_info = 0;	/* Mark this ion as using VFKY photo */
-				      ion[n].nxphot = nxphot;
-				      nxphot++;
-				    }
-				  else if (ion[n].phot_info == 1)
-				    {
-				      if (DEBUG)
-					Error
-					  ("Get_atomic_data: file %s  Ignoring VFKY photoinization for ion %d with topbase photoionization\n",
-					   file, n);
-				    }
+              for (n = 0; n < np; n++)
+               {
+                 phot_top[nphot_total].freq[n] = xe[n] * EV2ERGS / H;  // convert from eV to freqency
+                 phot_top[nphot_total].x[n] = xx[n]; // leave cross sections in  CGS
+               }
+              nxphot++;
+              nphot_total++;
+            }
 
-				}
+        else if (ion[nion].phot_info == 1)
+            {
+          Debug
+            ("Get_atomic_data: file %s  Ignoring VFKY photoinization for ion %d with topbase photoionization\n",
+             file, nion);
+            }
+        }
 			    }
+
 			  if (nxphot > NIONS)
 			    {
 			      Error
@@ -1560,6 +1550,14 @@ for the ionstate.
 				 file, lineno);
 			      exit (0);
 			    }
+        if (nphot_total > NTOP_PHOT)
+        {
+          Error
+            ("get_atomicdata: More photoionization cross sections that NTOP_PHOT (%d).  Increase in atomic.h\n",
+             NTOP_PHOT);
+          exit (0);
+        }
+
 			  break;
 			}
 		      else
@@ -1570,7 +1568,7 @@ for the ionstate.
 			  Error ("Get_atomic_data: %s\n", aline);
 			  exit (0);
 			}
-		    }
+		    
 
 		  /*Input data for innershell ionization followed by
 		     Auger effect */
@@ -2584,12 +2582,12 @@ or zero so that simple checks of true and false can be used for them */
 	}
     }
 
-  for (n = 0; n < ntop_phot; n++)
+  for (n = 0; n < nphot_total; n++)
     {
       if (phot_top[n].macro_info == -1)
 	{
 	  Error
-	    ("Topbase xphot %d for element %s and ion %d is of unknown type\n",
+	    ("Photoionization cross-section %d for element %s and ion %d is of unknown type\n",
 	     n, phot_top[n].z, phot_top[n].istate);
 	  exit (0);
 	}
@@ -2678,11 +2676,11 @@ or zero so that simple checks of true and false can be used for them */
 	     config[n].g, config[n].ex);
 
   /* Write the photoionization data  */
-  fprintf (fptr, "Photoinization data: There are %d edges\n", nxphot);
-  for (n = 0; n < nxphot; n++)
+  fprintf (fptr, "Photoionization data: There are %d edges\n", ntop_phot + nxphot);
+  for (n = 0; n < ntop_phot + nxphot; n++)
     {
-      fprintf (fptr, "n %3d z %2d istate %3d sigma %8.2e freq_t %8.2e\n", n,
-	       xphot[n].z, xphot[n].istate, xphot[n].sigma, xphot[n].freq_t);
+      fprintf (fptr, "n %3d z %2d istate %3d sigma %8.2e freq[0] %8.2e\n", n,
+	       phot_top[n].z, phot_top[n].istate, phot_top[n].sigma, phot_top[n].freq[0]);
     }
 
   /* Write the resonance line data to the file */
@@ -2733,18 +2731,19 @@ or zero so that simple checks of true and false can be used for them */
   index_collisions ();
 
 /* Index the verner photionization structure by threshold frequecy -- 57h -- 06jul ksl */
+//   if (nxphot > 0)
+// 	{
+//     /index_phot_verner ();
+// tabulate_verner(); //Create a tabulated version of the data
+// 	}
 
-  if (nxphot > 0)
-	{
-    index_phot_verner ();
-tabulate_verner(); //Create a tabulated version of the data
-	}
 /* Index the topbase photoionization structure by threshold freqeuncy */
   if (ntop_phot > 0)
     index_phot_top ();
 
-  return (0);
+  check_xsections();  // debug routine, only prints if verbosity > 4
 
+  return (0);
 }
 
 /**************************************************************************
@@ -2833,15 +2832,15 @@ index_phot_top (void)
   void indexx ();
 
   /* Allocate memory for some modestly large arrays */
-  freqs = calloc (sizeof (foo), ntop_phot + 2);
-  index = calloc (sizeof (ioo), ntop_phot + 2);
+  freqs = calloc (sizeof (foo), ntop_phot + nxphot + 2);
+  index = calloc (sizeof (ioo), ntop_phot + nxphot + 2);
 
   freqs[0] = 0;
-  for (n = 0; n < ntop_phot; n++)
+  for (n = 0; n < ntop_phot + nxphot; n++)
     freqs[n + 1] = phot_top[n].freq[0];	/* So filled matrix 
 					   elements run from 1 to ntop_phot */
 
-  indexx (ntop_phot, freqs, index);	/* Note that this math recipes routine 
+  indexx (ntop_phot + nxphot, freqs, index);	/* Note that this math recipes routine 
 					   expects arrays to run from 1 to nlines inclusive */
 
   /* The for loop indices are complicated by the numerical recipes routine, 
@@ -2850,7 +2849,7 @@ index_phot_top (void)
      and the numbers run from 1 to nlines, but the 
      pointer array is only filled from elements 0 to nlines -1 */
 
-  for (n = 0; n < ntop_phot; n++)
+  for (n = 0; n < ntop_phot + nxphot; n++)
     {
       phot_top_ptr[n] = &phot_top[index[n + 1] - 1];
     }
@@ -2863,6 +2862,7 @@ index_phot_top (void)
 
 }
 
+<<<<<<< HEAD
 /* Index the verner photoionization crossections by frequency
 
 	06jul	ksl	57h - Adapted from index_phot_top as
@@ -2908,6 +2908,8 @@ index_phot_verner (void)
   return (0);
 
 }
+=======
+>>>>>>> 549f0b41516061a2fcf4c42ad7e1a377c58f4290
 
 /* index_xcol sorts the collisional lines into frequency order
    History:
@@ -3111,29 +3113,10 @@ limit_lines (double freqmin, double freqmax)
 }
 
 
-/***********************************************************
-                Southampton University
+/* check_xsections is  a routine which checks xsections are ok.
+   Only prints out each xsection with verbosity > 4 as uses Debug function */
 
-Synopsis: tabulate_verner - turn a VFKY type cross section into a tabulated version
-
-Arguments:		none	
-
-Returns:		none - but populates the xphot_tab structure which 
-				has the same form as a topbase array
- 
-Description:		This subroutine was coded in September 2013 as a 
-				band aid for an issue observed with the variable
-				temperature code. It turned out that integrals
-				over the verner cross sections were taking a great deal
-				of processor time due to having to calculate 
-				the cross section. This routine tabulates the
-				crosss sections on a loagrithmic grid, over the
-				number of points defined by the N_VERNER_TAB
-				number defined at the top of the routine
-
-Notes:
-
-
+<<<<<<< HEAD
 History:
    13sep           nsh     coded and tested
   
@@ -3146,40 +3129,37 @@ History:
 struct photoionization *xver;	//Verner & Ferland description of a photoionization x-section
 int 
 tabulate_verner (void)
+=======
+int check_xsections()
+>>>>>>> 549f0b41516061a2fcf4c42ad7e1a377c58f4290
 {
+  int nion, n;
 
-  double f1,f2,dlogf,lf1,lf2,freq;
-  double sigma_phot();
-  int  j,n;
-  double very_small; //This is a small number (set to be the same as epsilon - but get_atomic_data doesn't have access to python.h
+  for (n = 0; n < nphot_total; n++)
+  {
+    nion = phot_top[n].nion;
+    if (ion[nion].phot_info == 1)
+      Debug("Topbase Ion %i Z %i istate %i nground %i ilv %i ntop %i f0 %8.4e IP %8.4e\n",
+           nion, ion[nion].z, ion[nion].istate, ion[nion].ntop_ground, phot_top[n].nlev, ion[nion].ntop, phot_top[n].freq[0], ion[nion].ip / EV2ERGS / HEV);
+    else if (ion[nion].phot_info == 0)
+      Debug("Vfky Ion %i Z %i istate %i nground %i f0 %8.4e IP %8.4e\n",
+           nion, ion[nion].z, ion[nion].istate, ion[nion].nxphot, phot_top[n].freq[0], ion[nion].ip / EV2ERGS / HEV);
 
-very_small=1e-6;
+    /* some simple checks -- could be made more robust */
+    if (ion[nion].n_lte_max > 0 && ion[nion].phot_info != 1)
+    {
+      Error("get_atomicdata: not tracking levels for ion %i z %i istate %i, yet marked as topbase xsection!\n",
+             nion, ion[nion].z, ion[nion].istate);
+      //exit(0);
+    }
+    if (ion[nion].phot_info != 1 && ion[nion].macro_info)
+    {
+      Error("get_atomicdata: macro atom but no topbase xsection! ion %i z %i istate %i, yet marked as topbase xsection!\n",
+             nion, ion[nion].z, ion[nion].istate);
+      //exit(0);
+    }
+  }
 
-
-for (j=0; j < nxphot; j++)
-	{	
-	xver=&xphot[j];
-	xphot_tab[j].z = xphot->z;
-	xphot_tab[j].istate = xphot->istate;
-	xphot_tab[j].nion = xphot->nion;
-	f1=xver->freq_t*(1+very_small); //We need to start our tabulation just a tiny way up from from the threshold, otherwise it is equal to zero.
-	f2=xver->freq_max*(1-very_small); //We need to start our tabulation just a tiny way up from from the threshold, otherwise it is equal to zero.
-	lf1=log(f1);
-	lf2=log(f2);
-	dlogf=(lf2-lf1)/(N_VERNER_TAB);
-
-	for (n=0;n<N_VERNER_TAB+1;n++)
-		{
-		xphot_tab[j].freq[n]=freq=exp(lf1+(n*dlogf));
-		xphot_tab[j].x[n]=sigma_phot (xver, freq);
-		}
-
-	xphot_tab[j].np=N_VERNER_TAB;
-	xphot_tab[j].nlast = -1;
-
-	}
-
-  return (0);
+  return 0;
 }
-
 

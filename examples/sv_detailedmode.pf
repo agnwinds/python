@@ -1,5 +1,5 @@
 Wind_type()                  0 
-Atomic_data                       data/standard77
+Atomic_data                       data/standard78
 write_atomicdata 					1
 photons_per_cycle                          10000
 Ionization_cycles                               1

@@ -1120,6 +1120,9 @@ History:
 int setup_created_files()
 {
   int opar_stat;
+
+  opar_stat = 0;    /* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
+           the assumption is that we are reading from the command line */
   
   if (strncmp (files.root, "dummy", 5) == 0)
     {

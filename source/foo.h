@@ -11,11 +11,10 @@ double check_fmax(double fmin, double fmax, double temp);
 int get_atomic_data(char masterfile[]);
 int index_lines(void);
 int index_phot_top(void);
-int index_phot_verner(void);
 int index_collisions(void);
 void indexx(int n, float arrin[], int indx[]);
 int limit_lines(double freqmin, double freqmax);
-int tabulate_verner(void);
+int check_xsections(void);
 /* python.c */
 int main(int argc, char *argv[]);
 int help(void);
@@ -127,8 +126,7 @@ int scatter(PhotPtr p, int *nres, int *nnscat);
 /* radiation.c */
 int radiation(PhotPtr p, double ds);
 double kappa_ff(PlasmaPtr xplasma, double freq);
-double sigma_phot(struct photoionization *x_ptr, double freq);
-double sigma_phot_topbase(struct topbase_phot *x_ptr, double freq);
+double sigma_phot(struct topbase_phot *x_ptr, double freq);
 double sigma_phot_verner(struct innershell *x_ptr, double freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
@@ -238,7 +236,6 @@ double ff(WindPtr one, double t_e, double freq);
 double one_ff(WindPtr one, double f1, double f2);
 double gaunt_ff(double gsquared);
 /* recomb.c */
-double fb_verner_partial(double freq);
 double fb_topbase_partial(double freq);
 double integ_fb(double t, double f1, double f2, int nion, int fb_choice);
 double total_fb(WindPtr one, double t, double f1, double f2);

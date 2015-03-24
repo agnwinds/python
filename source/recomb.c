@@ -115,74 +115,9 @@ x*= H;
 /* These are external structures used primarily because we need to call 
 Numerical Recipes routines from fb_verner and fb_topbase */
 
-struct photoionization *fb_xver;	//Verner & Ferland description of a photoionization x-section
 struct topbase_phot *fb_xtop;	//Topbase description of a photoionization x-section
 double fbt;			// Temperature at which thee emissivity is calculated
 int fbfr;			// fb_choice (see above)
-
-
-
-/**************************************************************************
-                    Space Telescope Science Institute
-                                                                                                   
-                                                                                                   
-  Synopsis: fb_verner returns the partial (for a specific ion) emissivity for ions 
-described in terms of Verner & Ferland photoionization x-sections.
-                                                                                                   
-  Description:
-                                                                                                   
-  Arguments:  
-                                                                                                   
-                                                                                                   
-  Returns:
-                                                                                                   
-  Notes:
-	The routines fb_verner_partial and fb_topbase_partial return the emissivity at
-	a specific freqency.  Because they are called by some NR recipes 
-	routines that integrates over frequency, most of the information 
-	for these routines has to be and is passed by the external structures  
-                                                                                                   
-                                                                                                   
-                                                                                                   
-  History:
-	02jul	ksl	Removed all references to the wind cell.
-                                                                                                   
- ************************************************************************/
-
-double 
-fb_verner_partial (double freq)
-{
-
-  int nion;
-  double partial;
-  double x;
-  double gn, gion;
-  double fthresh;
-  double sigma_phot ();
-
-  fthresh = fb_xver->freq_t;
-  if (freq < fthresh)
-    return (0.0);		// No recombination at frequencies lower than the threshold freq occur
-
-  nion = fb_xver->nion;
-//?? Seems like gn should actually be the multiplicity of the excited and not the ground state ???
-  gn = ion[nion].g;		// This is g factor of the ion to which you are recombining
-  gion = ion[nion + 1].g;	// Want the g factor of the next ion up
-  x = sigma_phot (fb_xver, freq);
-// Next expression from Ferland
-  partial =
-    FBEMISS * gn / (2. * gion) * pow (freq * freq / fbt,
-				      1.5) * exp (H_OVER_K *
-						  (fthresh - freq) / fbt) * x;
-
-// 0=emissivity, 1=heat loss from electrons, 2=photons emissivity
-  if (fbfr == 1)
-    partial *= (freq - fthresh) / freq;
-  else if (fbfr == 2)
-    partial /= (H * freq);
-
-  return (partial);
-}
 
 
 
@@ -223,7 +158,6 @@ fb_topbase_partial (double freq)
   double x;
   double gn, gion;
   double fthresh;
-  double sigma_phot_topbase ();
 
   fthresh = fb_xtop->freq[0];
   if (freq < fthresh)
@@ -232,7 +166,7 @@ fb_topbase_partial (double freq)
   nion = fb_xtop->nion;
   gn = config[fb_xtop->nlev].g;
   gion = ion[nion + 1].g;	// Want the g factor of the next ion up
-  x = sigma_phot_topbase (fb_xtop, freq);
+  x = sigma_phot (fb_xtop, freq);
 // Now calculate emission using Ferland's expression
 
 
@@ -399,7 +333,6 @@ total_fb (WindPtr one, double t, double f1, double f2)
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
-
   if (t < 1000. || f2 < f1)
     return (0);			/* It's too cold to emit */
 
@@ -412,6 +345,8 @@ total_fb (WindPtr one, double t, double f1, double f2)
 
   total = 0;
   xplasma->lum_z = 0.0;
+
+
   for (nion = 0; nion < nions; nion++)
     {
       if (xplasma->density[nion] > DENSITY_PHOT_MIN)
@@ -553,7 +488,7 @@ use that instead if possible --  57h */
       if (f1 != one_fb_f1 || f2 != one_fb_f2)
 	{			// Regenerate the jumps 
 	  fb_njumps = 0;
-	  for (n = 0; n < ntop_phot; n++)
+	  for (n = 0; n < nphot_total; n++)
 	    {			//IS THIS ADDED BRACKET CORRECT? (SS, MAY04)
 	      fthresh = phot_top_ptr[n]->freq[0];
 	      if (f1 < fthresh && fthresh < f2)
@@ -563,6 +498,7 @@ use that instead if possible --  57h */
 		}
 	    }			//IS THIS CORRECT? (SS, MAY04)
 	}
+
 
       //!BUG SSMay04
       //It doesn't seem to work unless this is zero? (SS May04)
@@ -574,6 +510,7 @@ use that instead if possible --  57h */
       dfreq = (f2 - f1) / 199;
       for (n = 0; n < 200; n++)
 	{
+    //Debug ("calling fb, n=%i\n", n);
 	  fb_x[n] = f1 + dfreq * n;
 	  fb_y[n] = fb (xplasma, xplasma->t_e, fb_x[n], nions, 0);
 	}
@@ -594,6 +531,8 @@ use that instead if possible --  57h */
 
 /* OK, we have not created a new pdf, cdf actually.  We are in a position to
 generate photons */
+
+  //Debug ("one_fb, got here 2\n");
 
 /* First generate the phton we need */
   freq = pdf_get_rand (&pdf_fb);
@@ -709,8 +648,7 @@ fb (PlasmaPtr xplasma, double t, double freq, int ion_choice, int fb_choice)		//
 {
   int n;
   double fnu, x;
-  int ntmin, ntmax;		// These are the Topbase photo-ionization levels that are used
-  int nv;			// The Verner photo-ionization level
+  int nmin, nmax;		// These are the photo-ionization xsections that are used
   int nion, nion_min, nion_max;
 
 
@@ -738,17 +676,32 @@ fb (PlasmaPtr xplasma, double t, double freq, int ion_choice, int fb_choice)		//
 
   fnu = 0.0;			/* Initially set the emissivity to zero */
 
+  //Debug("in fb for ion_choice %i\n", ion_choice);
+
   for (nion = nion_min; nion < nion_max; nion++)
     {
-      ntmin = ion[nion].ntop_first;
-      ntmax = ntmin + ion[nion].ntop;
-      nv = ion[nion].nxphot;
+      if (ion[nion].phot_info == 1) // topbase
+        {
+          nmin = ion[nion].ntop_first;
+          nmax = nmin + ion[nion].ntop;
+        }
+      else if (ion[nion].phot_info == 0) // VFKY 
+        {
+          nmin = ion[nion].nxphot;
+          nmax = nmin + 1;
+        }
+      else 
+        nmin = nmax = 0; // no XS / ionized - don't do anything 
+
+      //Debug("in fb for ion %i info %i, nmin nmax %i, %i\n", nion, ion[nion].phot_info, nmin, nmax);
+
       x = 0.0;
 
-/* Loop over relevent Topbase photoionization x-sections.  If 
-an ion does not have Topbase photoionization x-sections then
-ntmin and ntmax are the same and the loop will be skipped. */
-      for (n = ntmin; n < ntmax; n++)
+      /* Loop over relevent Topbase photoionization x-sections.  If 
+      an ion does not have Topbase photoionization x-sections then
+      ntmin and ntmax are the same and the loop will be skipped. */
+
+      for (n = nmin; n < nmax; n++)
 	{
 	  fb_xtop = &phot_top[n];	/*Externally transmited to fb_topbase_partial */
 	  /* We don't want to include fb transitions associated with macro atoms here
@@ -758,17 +711,15 @@ ntmin and ntmax are the same and the loop will be skipped. */
 	    {
 	      x += fb_topbase_partial (freq);
 	    }
-	}
-// Loop over the relevant Verner x-sections   xxxx
 
-/* 57h -- Fixed this so that only call fb_verner_partial when necessary */
-      if (nv > -1)
-	{
-	  fb_xver = &xphot[nv];	// This assigns a specific verner x-section to fb_xver 
-	  fnu += fb_verner_partial (freq);
+    fnu += xplasma->density[nion] * x;
 	}
+
+  
+      /* x is the emissivity from this ion. Add it to the total */
       fnu += xplasma->density[nion] * x;
     }
+
   fnu *= xplasma->ne;		// Correct from specific emissivity to the total fb emissivity
 
   return (fnu);
@@ -860,10 +811,10 @@ init_freebound (double t1, double t2, double f1, double f2)
       Log ("init_freebound: Creating recombination coefficients\n");
       for (nion = 0; nion < nions; nion++)
 	{
+
 	  for (j = 0; j < NTEMPS; j++)
 	    {
 	      t = fb_t[j];
-
 	      xnrecomb[nion][j] = xinteg_fb (t, 0.0, 1.e50, nion, 2);
 	    }
 	}
@@ -1030,34 +981,39 @@ xinteg_fb (double t, double f1, double f2, int nion, int fb_choice)		// 0=full, 
   double dnu;  //NSH 140120 - a parameter to allow one to restrict the integration limits.
   double fthresh, fmax;
   double den_config ();
-  double sigma_phot (), sigma_phot_topbase ();
-  int ntmin, ntmax;		// These are the Topbase photo-ionization levels that are used
-  int nvmin, nvmax;		// These are the limits on the Verland x-sections
+  int nmin, nmax;		// These are the limits over which number xsections we will use 
   double qromb ();
-  double fb_topbase_partial (), fb_verner_partial ();
 
-  dnu=0.0; //Avoid compilation errors.
-
+  dnu = 0.0; //Avoid compilation errors.
 
   if (-1 < nion && nion < nions)	//Get emissivity for this specific ion_number
     {
-      ntmin = ion[nion].ntop_first;
-      ntmax = ntmin + ion[nion].ntop;
-      nvmin = nion;
-      nvmax = nvmin + 1;
+      if (ion[nion].phot_info == 1) // topbase
+        {
+          nmin = ion[nion].ntop_first;
+          nmax = nmin + ion[nion].ntop;
+        }
+      else if (ion[nion].phot_info == 0) // VFKY 
+        {
+          nmin = ion[nion].nxphot;
+          nmax = nmin + 1;
+        }
+      else 
+        // the ion is a fullt ionized ion / doesn't have a cross-section, so return 0
+        return (0.0);
     }
   else				// Get the total emissivity
     {
       Error ("integ_fb: %d is unacceptable value of nion\n", nion);
-      mytrap ();
-      return (0);
+      //mytrap ();      // JM 1410 -- mytrap is deprecated
+      exit (0);
     }
 
-// Put information where it can be used by the integrating function
+  // Put information where it can be used by the integrating function
   fbt = t;
   fbfr = fb_choice;
 
-/* Limit the frequency range to one that is reasonable before integrating */
+  /* Limit the frequency range to one that is reasonable before integrating */
 
   if (f1 < 3e12)
     f1 = 3e12;			// 10000 Angstroms
@@ -1068,9 +1024,12 @@ xinteg_fb (double t, double f1, double f2, int nion, int fb_choice)		// 0=full, 
 
   fnu = 0.0;
 
-  for (n = ntmin; n < ntmax; n++)
-    {				// loop over relevent Topbase photoionzation x-sections
+  
+  for (n = nmin; n < nmax; n++)
+    {				
+      // loop over relevent Topbase or VFKY photoionzation x-sections
       fb_xtop = &phot_top[n];
+
       /* Adding an if statement here so that photoionization that's part of a macro atom is 
          not included here (these will be dealt with elsewhere). (SS, Apr04) */
       if (fb_xtop->macro_info == 0 || geo.macro_simple == 1 || geo.rt_mode == 1)	//Macro atom check. (SS)
@@ -1084,8 +1043,8 @@ xinteg_fb (double t, double f1, double f2, int nion, int fb_choice)		// 0=full, 
 
 	  // Now calculate the emissivity as long as fmax exceeds xthreshold and there are ions to recombine
 	  if (fmax > fthresh)
-                {
-//NSH 140120 - this is a test to ensure that the exponential will not go to zero in the integrations 
+        {
+        //NSH 140120 - this is a test to ensure that the exponential will not go to zero in the integrations 
      		dnu = 100.0 * (fbt / H_OVER_K);
       		if (fthresh + dnu < fmax)
 			{
@@ -1096,32 +1055,8 @@ xinteg_fb (double t, double f1, double f2, int nion, int fb_choice)		// 0=full, 
 	}
     }
 
-/* This completes the calculation of those levels for which we have Topbase x-sections, now do Verner */
-
-  for (n = nvmin; n < nvmax; n++)
-    {
-      if (ion[n].phot_info == 0)
-	{			// Only work on ions without Topbase and with Verner
-	  fb_xver = &xphot[ion[n].nxphot];
-	  fthresh = fb_xver->freq_t;
-	  fmax = fb_xver->freq_max;	//So at this point these are the maximal allowable
-	  if (f1 > fthresh)
-	    fthresh = f1;	//So move fthresh up, if f1 was greater than this
-	  if (f2 < fmax)	//Move fmax down if we wanted a narrower range
-	    fmax = f2;
-	  // Now integrate only if its in allowable range  && there are ions to recombine
-	  if (fmax > fthresh)
-//NSH 140120 - this is a test to ensure that the exponential will not go to zero in the integrations 
-		{     		
-		dnu = 100.0 * (fbt / H_OVER_K);
-      		if (fthresh + dnu < fmax)
-			{
-	  		fmax = fthresh + dnu;
-			}
-	        fnu += qromb (fb_verner_partial, fthresh, fmax, 1.e-4);
-		}
-	}
-    }
+  /* This completes the calculation of those levels 
+     for which we have Topbase x-sections, now do Verner */
 
   return (fnu);
 }
@@ -1172,6 +1107,8 @@ fb_save (char filename[])
   char line[LINELENGTH];
   int n;
 
+  return (0);
+
   if ((fptr = fopen (filename, "w")) == NULL)
     {
       Error ("fb_save: Unable to open %s\n", filename);
@@ -1211,6 +1148,8 @@ fb_read (char filename[])
   char atomic_filename[LINELENGTH];
 
   int xnelements, xnions, xnlevels, xnxphot, xntopphot, xnfb;
+
+  return (0);
 
 /* Initialize nfb to 0 so a return means that python will
 have to calcuate the coefficients */
@@ -1458,41 +1397,72 @@ gs_rrate (nion, T)
   double rate, drdt, dt;
   int i, imin, imax;
   double rates[BAD_GS_RR_PARAMS], temps[BAD_GS_RR_PARAMS];
-  int ntmin, nvmin, n;
+  int ntmin;
   double fthresh, fmax, dnu;
 
 
   imin = imax = 0;		/* NSH 130605 to remove o3 compile error */
 
 
-//  if (ion[nion].bad_gs_rr_t_flag != 1 && ion[nion].bad_gs_rr_r_flag != 1)
-//    {
-//      Error ("bad_gs_rr: Insufficient GS_RR parameters for ion %i\n", nion);
-//      return (0);
-//    }
+  //  if (ion[nion].bad_gs_rr_t_flag != 1 && ion[nion].bad_gs_rr_r_flag != 1)
+  //    {
+  //      Error ("bad_gs_rr: Insufficient GS_RR parameters for ion %i\n", nion);
+  //      return (0);
+  //    }
 
-if (ion[nion].bad_gs_rr_t_flag == 1 && ion[nion].bad_gs_rr_r_flag == 1)	//We have tabulated gs data
+  if (ion[nion].bad_gs_rr_t_flag == 1 && ion[nion].bad_gs_rr_r_flag == 1)	//We have tabulated gs data
 
-//NSH force code to always use milne for a test REMOVE ME!!!
-//if (ion[nion].bad_gs_rr_t_flag == 100 && ion[nion].bad_gs_rr_r_flag == 100)	//We have tabulated gs data
-   {
-//printf("We are using the tabulations for GS recomb\n");
-  for (i = 0; i < BAD_GS_RR_PARAMS; i++)
-    {
-      rates[i] = bad_gs_rr[ion[nion].nxbadgsrr].rates[i];
-      temps[i] = bad_gs_rr[ion[nion].nxbadgsrr].temps[i];
-    }
+    //NSH force code to always use milne for a test REMOVE ME!!!
+    //if (ion[nion].bad_gs_rr_t_flag == 100 && ion[nion].bad_gs_rr_r_flag == 100)	//We have tabulated gs data
+     {
+    //printf("We are using the tabulations for GS recomb\n");
+    for (i = 0; i < BAD_GS_RR_PARAMS; i++)
+      {
+        rates[i] = bad_gs_rr[ion[nion].nxbadgsrr].rates[i];
+        temps[i] = bad_gs_rr[ion[nion].nxbadgsrr].temps[i];
+      }
 
-  if (T < temps[0])		//we are below the range of GS data
-    {
-      Log_silent
-	("bad_gs_rr: Requested temp %e is below limit of data for ion %i(Tmin= %e)\n",
-	 T, nion, temps[0]);
-//      rate = rates[0];
-     	imax=1;
-	imin=0;  
+    if (T < temps[0])		//we are below the range of GS data
+      {
+        Log_silent
+  	("bad_gs_rr: Requested temp %e is below limit of data for ion %i(Tmin= %e)\n",
+  	 T, nion, temps[0]);
+        //      rate = rates[0];
+       	imax=1;
+  	    imin=0;  
+      }
+
+    else if (T >= temps[BAD_GS_RR_PARAMS - 1])	//we are above the range of GS data
+      {
+        Log_silent
+  	("bad_gs_rr: Requested temp %e is above limit (%e) of data for ion %i\n",
+  	 T, nion, bad_gs_rr[ion[nion].nxbadgsrr].temps[BAD_GS_RR_PARAMS - 1]);
+    //     rate = rates[BAD_GS_RR_PARAMS - 1];
+  	imax=BAD_GS_RR_PARAMS - 1;
+  	imin=BAD_GS_RR_PARAMS - 2;
+    //We will try to extrapolate.
+
+
+
+      }
+    else				//We must be within the range of tabulated data
+      {
+        for (i = 0; i < BAD_GS_RR_PARAMS - 1; i++)
+  	{
+          if (temps[i] <= T && T < temps[i + 1])	//We have bracketed the correct temperature
+  	    {
+  	      imin = i;
+  	      imax = i + 1;
+  	    }
+  	}
+  /* NSH 140313 - changed the following lines to interpolate in log space */
+      }
+        drdt = (log10(rates[imax]) - log10(rates[imin])) / (log10(temps[imax]) - log10(temps[imin]));
+        dt = (log10(T) - log10(temps[imin]));
+        rate = pow(10,(log10(rates[imin]) + drdt * dt));
   }
 
+<<<<<<< HEAD
   else if (T >= temps[BAD_GS_RR_PARAMS - 1])	//we are above the range of GS data
     {
       Log_silent
@@ -1571,11 +1541,45 @@ n = nvmin;		//just the ground state ionization fraction.
 
 
 
+=======
+  /* we will need to use the milne relation - 
+     NB - this is different from using xinteg_fb because 
+     that routine does recombination to all excited levels (at least for topbase ions).
+  */
+  else  
+  {
+     //printf("We are using the milne relation for GS recomb\n");
+     rate = 0.0;			/* NSH 130605 to remove o3 compile error */
+
+    fbt = T;
+    fbfr = 2;
+
+    if (ion[nion-1].phot_info == 1)	//topbase
+      {
+        ntmin = ion[nion-1].ntop_ground;
+        fb_xtop = &phot_top[ntmin];
+      }
+    else if (ion[nion-1].phot_info == 0) //vfky 
+      {
+        fb_xtop = &phot_top[ion[nion-1].nxphot];
+      }
+
+    fthresh = fb_xtop->freq[0];
+    fmax = fb_xtop->freq[fb_xtop->np - 1];
+    dnu = 100.0 * (fbt / H_OVER_K);
+
+    if (fthresh + dnu < fmax)
+  	  {
+  	    fmax = fthresh + dnu;
+  	  }
+    
+
+    rate = qromb (fb_topbase_partial, fthresh, fmax, 1e-5);
+  }
+>>>>>>> 549f0b41516061a2fcf4c42ad7e1a377c58f4290
 
 
   return (rate);
-
-
 }
 
 

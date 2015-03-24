@@ -87,7 +87,7 @@ if __name__ == "__main__":
             try:
                 new_dict[key] = old_dict[key]
             except KeyError:
-                print "file %s has no key %s: using template value" % (fname[i], key)
+                print "file %s has no key %s: using template value" % (fnames[i], key)
 
         if copy:
             r.write_pf ( "New_%s" % fnames[i], new_dict)

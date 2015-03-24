@@ -199,6 +199,7 @@ History:
 	1501 	JM moved some parallelization stuff to subroutines in para_update.c
 			functions are communicate_estimators_para, communicate_matom_estimators_para,
 			and gather_spectra_para
+	1502	Major reorganisation of input gathering and setup. See setup.c, #136 and #139
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -295,10 +296,6 @@ main (argc, argv)
   Log_set_verbosity (verbosity);
 
 
-  Log_parallel ("Thread %d starting.\n", my_rank); //JM130723 moved this after verbosity switch
-
-
-
   restart_stat = 0;
   time_max = -1;
 
@@ -316,6 +313,8 @@ main (argc, argv)
      we will restart from that point.  If the windsave file does not exist we will start from scratch */
 
   init_log_and_windsave(restart_stat);
+
+  Log_parallel ("Thread %d starting.\n", my_rank); //JM130723 moved this after verbosity switch
 
 
 

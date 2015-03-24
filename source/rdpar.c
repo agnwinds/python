@@ -686,8 +686,10 @@ get_root (char root[], char total[])
   i = strcspn (total, ".");
   if ((j = strcspn (total, "\n")) < i)
     i = j;
-  if (verbose)
-    printf ("number %d\n", i);
+  
+  //JM 1503 -- we don't need this and it muddles output. 
+  //if (verbose)
+  //  printf ("number %d\n", i);
   if (i == 0)
     {
       strcpy (root, "rdpar");
@@ -697,7 +699,7 @@ get_root (char root[], char total[])
       strncpy (root, total, strcspn (total, "."));
       root[i] = '\0';
     }
-  if (verbose)
+  if ( (verbose) && (rd_rank==0) )
     printf ("%s\n", root);
 
   return(0);

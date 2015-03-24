@@ -31,6 +31,7 @@ History:
 #include "atomic.h"
 #include "python.h"
 
+    
 int
 communicate_estimators_para ()
 {
@@ -332,7 +333,7 @@ communicate_matom_estimators_para ()
   alpha_helper = calloc (sizeof (double), NPLASMA * 2 * size_alpha_est);
   level_helper = calloc (sizeof (double), NPLASMA * nlevels_macro);
   cell_helper = calloc (sizeof (double), 7 * NPLASMA);
-  cooling_bf_helper = calloc (sizeof (double), NPLASMA * 2 * ntop_phot);
+  cooling_bf_helper = calloc (sizeof (double), NPLASMA * 2 * nphot_total);
   cooling_bb_helper = calloc (sizeof (double), NPLASMA * nlines);
 
   jbar_helper2 = calloc (sizeof (double), NPLASMA * size_Jbar_est);
@@ -340,7 +341,7 @@ communicate_matom_estimators_para ()
   alpha_helper2 = calloc (sizeof (double), NPLASMA * 2 * size_alpha_est);
   level_helper2 = calloc (sizeof (double), NPLASMA * nlevels_macro);
   cell_helper2 = calloc (sizeof (double), 7 * NPLASMA);
-  cooling_bf_helper2 = calloc (sizeof (double), NPLASMA * 2 * ntop_phot);
+  cooling_bf_helper2 = calloc (sizeof (double), NPLASMA * 2 * nphot_total);
   cooling_bb_helper2 = calloc (sizeof (double), NPLASMA * nlines);
 
 
@@ -390,10 +391,10 @@ communicate_matom_estimators_para ()
 	  alpha_helper[mpi_i + ((n + size_alpha_est) * NPLASMA)] = macromain[mpi_i].recomb_sp_e[n] / np_mpi_global;
 	}
 
-      for (n = 0; n < ntop_phot; n++)
+      for (n = 0; n < nphot_total; n++)
   {
     cooling_bf_helper[mpi_i + (n * NPLASMA)] = macromain[mpi_i].cooling_bf[n] / np_mpi_global;
-    cooling_bf_helper[mpi_i + ((n + ntop_phot) * NPLASMA)] = macromain[mpi_i].cooling_bf_col[n] / np_mpi_global;
+    cooling_bf_helper[mpi_i + ((n + nphot_total) * NPLASMA)] = macromain[mpi_i].cooling_bf_col[n] / np_mpi_global;
   }
 
       for (n = 0; n < nlines; n++)
@@ -409,7 +410,7 @@ communicate_matom_estimators_para ()
   MPI_Reduce (jbar_helper, jbar_helper2, NPLASMA * size_Jbar_est, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Reduce (gamma_helper, gamma_helper2, NPLASMA * 4 * size_gamma_est, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Reduce (alpha_helper, alpha_helper2, NPLASMA * 2 * size_alpha_est, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-  MPI_Reduce (cooling_bf_helper, cooling_bf_helper2, NPLASMA * 2 * ntop_phot, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+  MPI_Reduce (cooling_bf_helper, cooling_bf_helper2, NPLASMA * 2 * nphot_total, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Reduce (cooling_bb_helper, cooling_bb_helper2, NPLASMA * nlines, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
 
@@ -423,7 +424,7 @@ communicate_matom_estimators_para ()
   MPI_Bcast (jbar_helper2, NPLASMA * size_Jbar_est, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (gamma_helper2, NPLASMA * 4 * size_gamma_est, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (alpha_helper2, NPLASMA * 2 * size_alpha_est, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast (cooling_bf_helper2, NPLASMA * 2 * ntop_phot, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast (cooling_bf_helper2, NPLASMA * 2 * nphot_total, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (cooling_bb_helper2, NPLASMA * nlines, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
 
@@ -470,10 +471,10 @@ communicate_matom_estimators_para ()
 	  macromain[mpi_i].recomb_sp_e[n] = alpha_helper2[mpi_i + ((n + size_alpha_est) * NPLASMA)];
 	}
 
-      for (n = 0; n < ntop_phot; n++)
+      for (n = 0; n < nphot_total; n++)
   {
     macromain[mpi_i].cooling_bf[n] = cooling_bf_helper2[mpi_i + (n * NPLASMA)];
-    macromain[mpi_i].cooling_bf_col[n] = cooling_bf_helper2[mpi_i + ((n + ntop_phot) * NPLASMA)];
+    macromain[mpi_i].cooling_bf_col[n] = cooling_bf_helper2[mpi_i + ((n + nphot_total) * NPLASMA)];
   }
 
       for (n = 0; n < nlines; n++)
