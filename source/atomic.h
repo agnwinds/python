@@ -290,7 +290,7 @@ int nxphot;			/*The actual number of ions for which there are VFKY photoionizati
 double phot_freq_min;		/*The lowest frequency for which photoionization can occur */
 
 #define NCROSS 1500
-#define NTOP_PHOT 250		/* Maximum number of photoionisation processes. (SS) */
+#define NTOP_PHOT 400		/* Maximum number of photoionisation processes. (SS) */
 int ntop_phot;			/* The actual number of TopBase photoionzation x-sections */
 int nphot_total;    /* total number of photoionzation x-sections = nxphot + ntop_phot */
 
