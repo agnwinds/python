@@ -131,6 +131,11 @@ int NPHOT;			/* As of python_40, NPHOT must be defined in the main program using
 #define NCOMPS 	10
 #define LINELENGTH 	160
 
+/* definitions of reverberation mapping types */
+#define REV_NONE    0
+#define REV_PHOTON  1
+#define REV_WIND    2
+
 struct geometry
 {
 
@@ -267,6 +272,10 @@ struct geometry
   double sv_r_scale, sv_alpha;	/* the scale length and power law exponent for the velocity law */
   double sv_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
 
+
+  double wind_bc_density;
+  double wind_hubble_velocity, wind_hubble_exponent;
+
   /* Paramater for the Elvis AGN wind - closely based on SV */
   double elvis_offset;		/*This is a vertical offset for a region where the
 				   wind rises vertically from the disk */
@@ -374,6 +383,9 @@ struct geometry
 // The next set of parameters describe the input datafiles that are read
   char atomic_filename[132];	/* 54e -- The masterfile for the atomic data */
   char fixed_con_file[132];	/* 54e -- For fixed concentrations, the file specifying concentrations */
+
+  //Added by SWM for reverberation mapping - 0=None, 1=Photon, 2=Wind
+  int reverb; 
 }
 geo;
 

@@ -555,10 +555,18 @@ get_wind_params()
   else if (geo.wind_type == 9)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
     {
       get_shell_wind_params ();
+    }
+  else if (geo.wind_type == 10)
+  {
+      get_wind_keplerian_params();
+  }
+  else if (geo.wind_type == 11) //SWM 30-3-15 Added simple biconical wind
+    {
+      get_bc_wind_params ();
+    }
 /*NSH 121219 moved	  dfudge = (geo.wind_rmax - geo.wind_rmin) / 1000.0;	Stop photons getting pushed out of the cell 
 Modified again in python 71b to take account of change in parametrisation of shell wind 
 	  DFUDGE = dfudge; */
-    }
   else if (geo.wind_type != 2)
     {
       Error ("python: Unknown wind type %d\n", geo.wind_type);

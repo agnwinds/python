@@ -496,6 +496,8 @@ was a resonant scatter but we want isotropic scattering anyway.  */
       p[n].tau = p[n].nscat = p[n].nrscat = 0;
       p[n].origin = PTYPE_WIND;	// A wind photon
 
+      if(geo.reverb == REV_WIND) // SWM 26-3-15: Added wind paths
+	      wind_paths_gen_phot(&wmain[icell], &p[n]);
     }
 
 

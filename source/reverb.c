@@ -175,7 +175,7 @@ History:
 	14aug	-	Written by SWM
 ***********************************************************/
 char delay_dump_file[LINELENGTH];
-int delay_dump_bank_size=65535, delay_dump_bank_curr=0,delay_dump_spec;
+int delay_dump_bank_size=65535, delay_dump_bank_curr=0;
 PhotPtr delay_dump_bank;
 int *delay_dump_bank_ex;
 
@@ -193,7 +193,7 @@ delay_to_observer(PhotPtr pp)
 }
 
 int 
-delay_dump_prep (char filename[], int nspec, int restart_stat, int i_rank)
+delay_dump_prep (char filename[], int restart_stat, int i_rank)
 {
 	FILE *fopen(), *fptr;
 	char string[LINELENGTH], c_file[LINELENGTH], c_rank[LINELENGTH];
@@ -210,7 +210,6 @@ delay_dump_prep (char filename[], int nspec, int restart_stat, int i_rank)
 	strcpy(delay_dump_file,c_file);		//Store modified filename for later
 
 	//Allocate and zero dump files and set extract status
-	delay_dump_spec = nspec;
 	delay_dump_bank = (PhotPtr) calloc(sizeof(p_dummy), delay_dump_bank_size);
 	delay_dump_bank_ex = (int*) calloc(sizeof(int),		delay_dump_bank_size);
 	for(i=0;i<delay_dump_bank_size;i++)	delay_dump_bank_ex[i] = 0;
@@ -229,12 +228,6 @@ delay_dump_prep (char filename[], int nspec, int restart_stat, int i_rank)
 		exit(0);
 	}
 
-	if (nspec < MSPEC)					//Check that NSPEC is reasonable
-	{
-		Error("delay_dump_prep: nspec %d below MSPEC value \n", nspec);
-		exit(0);
-	}
-
 	if(i_rank > 0) 
 	{
 		fprintf(fptr, "# Delay dump file for slave process %d\n",i_rank);
@@ -245,15 +238,13 @@ delay_dump_prep (char filename[], int nspec, int restart_stat, int i_rank)
 
 		get_time(string);
 		fprintf(fptr, "# Date	%s\n#  \n", string);
-		fprintf(fptr, "# Spectrum: %s\n", xxspec[nspec].name);
-
 		/* 
 		 * Write the rest of the header for the spectrum file 
 	 	*/
 		fprintf(fptr, "# \n# Freq      Wavelength  Weight   "
 				"  Last X       Last Y       Last Z     "
 				"  Last L       Last M       Last N     "
-				"Scatters RScatter Delay Extracted Spectrum\n");	
+				"Scatters RScatter Delay Extracted Spectrum Origin\n");	
 	}
 	fclose(fptr);
 	return(0);
@@ -283,7 +274,7 @@ delay_dump_finish()
 {
 	if(delay_dump_bank_curr>0)
 	{
-		delay_dump(delay_dump_bank,delay_dump_bank_curr-1,delay_dump_spec, 1);
+		delay_dump(delay_dump_bank,delay_dump_bank_curr-1, 1);
 	}
 	free(delay_dump_bank);
 	free(delay_dump_bank_ex);
@@ -312,8 +303,8 @@ History:
 int 
 delay_dump_combine(int iRanks)
 {
-	FILE *fopen(), *fptr;
-	char string[LINELENGTH], cCall[LINELENGTH];
+	FILE *fopen();
+	char cCall[LINELENGTH];
 	
 	//Yes this is done as a system call and won't work on Windows machines. Lazy solution!
 	sprintf(cCall, "cat %s[0-9]* >> %s", delay_dump_file, delay_dump_file);
@@ -330,7 +321,6 @@ Synopsis:
 Arguments:		
 	PhotPtr p 		Array of photons to dump
 	int np 			Length of array
-	int nspec 		Spectrum to dump for
 	int iExtracted 	Whether or not this array is of extracted photons
 
 Returns:
@@ -346,7 +336,7 @@ History:
 	6/2/15	-	Written by SWM
 ***********************************************************/
 int 
-delay_dump (PhotPtr p, int np, int nspec, int iExtracted)
+delay_dump (PhotPtr p, int np, int iExtracted)
 {
 	FILE *fopen(), *fptr;
 	int nphot, mscat, mtopbot, i;
@@ -369,19 +359,21 @@ delay_dump (PhotPtr p, int np, int nspec, int iExtracted)
 			/* 
 			 * Complicated if statement to allow one to choose whether to construct the spectrum from all photons or just from photons which have scattered a specific number of times.  01apr13--ksl-Modified if statement to change behavior on negative numbers to say that a negative number for mscat implies that you accept any photon with |mscat| or more scatters 
 			 */
-			if (((mscat = xxspec[nspec].nscat) > 999 || p[nphot].nscat == mscat 
-				|| (mscat < 0 && p[nphot].nscat >= (-mscat)))
-				&& ((mtopbot = xxspec[nspec].top_bot) == 0 || (mtopbot * p[nphot].x[2]) > 0))
-			{
-				if (xxspec[nspec].mmin < zangle 
-					&& zangle < xxspec[nspec].mmax)
-				{	/* SWM 15/8/14 - Added path delay in comparison to photon heading straight from origin to rmax*/
-					fprintf(fptr, "%10.5g %10.5g %10.5g %+10.5e %+10.5e %+10.5e %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g %5d %5d\n", 
-						p[nphot].freq, C * 1e8 / p[nphot].freq, p[nphot].w, 
-						p[nphot].x[0], p[nphot].x[1], p[nphot].x[2], 
-						p[nphot].lmn[0], p[nphot].lmn[1], p[nphot].lmn[2], 
-						p[nphot].nscat, p[nphot].nrscat, delay_to_observer(&p[nphot]),
-						(iExtracted ? delay_dump_bank_ex[nphot] : 0), nspec);
+			 for(i=MSPEC; i<nspectra; i++)
+			 {
+				if (((mscat = xxspec[i].nscat) > 999 || p[i].nscat == mscat 
+					|| (mscat < 0 && p[nphot].nscat >= (-mscat)))
+					&& ((mtopbot = xxspec[i].top_bot) == 0 || (mtopbot * p[nphot].x[2]) > 0))
+				{
+					if (xxspec[i].mmin < zangle && zangle < xxspec[i].mmax)
+					{	/* SWM 15/8/14 - Added path delay in comparison to photon heading straight from origin to rmax*/
+						fprintf(fptr, "%10.5g %10.5g %10.5g %+10.5e %+10.5e %+10.5e %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g %5d %5d %5d\n", 
+							p[nphot].freq, C * 1e8 / p[nphot].freq, p[nphot].w, 
+							p[nphot].x[0], p[nphot].x[1], p[nphot].x[2], 
+							p[nphot].lmn[0], p[nphot].lmn[1], p[nphot].lmn[2], 
+							p[nphot].nscat, p[nphot].nrscat, delay_to_observer(&p[nphot]),
+							(iExtracted ? delay_dump_bank_ex[nphot] : 0), i-MSPEC, p[nphot].origin);
+					}
 				}
 			}
 		}
@@ -418,7 +410,7 @@ delay_dump_single (PhotPtr pp, int extract_phot)
 	delay_dump_bank_ex[delay_dump_bank_curr] = extract_phot;		//Record if it's extract photon
 	if(delay_dump_bank_curr == delay_dump_bank_size-1)				//If temp array is full
 	{																	//Dump to file, zero array position
-		delay_dump(delay_dump_bank,delay_dump_bank_size,delay_dump_spec,1);
+		delay_dump(delay_dump_bank,delay_dump_bank_size,1);
 		delay_dump_bank_curr=0;
 		int i;
 		for(i=0;i<delay_dump_bank_size;i++) delay_dump_bank_ex[i]=0;	//Zero extract status of single array
@@ -618,6 +610,70 @@ wind_paths_add_phot (WindPtr wind, PhotPtr pp)
 
 /***********************************************************
 Synopsis:
+	wind_paths_gen_phot(Wind_Paths_Ptr paths, PhotPtr pp)  
+		Adds a path delay from the origin cell to photon
+
+Arguments:		
+	PhotPtr pp 				Photon to set path of
+	Wind_Paths_Ptr paths	Paths (from wind) to use
+
+Returns:
+  
+Description:	
+	Picks a weighted random frequency bin, then weighted 
+	random path bin, then assigns the photon a path selected
+	from within that bin (nonweighted uniform randomly). 
+
+Notes:
+	May want to correlate photon energy with wind path in
+	future!
+
+History:
+	26/3/15	-	Written by SWM
+***********************************************************/
+int
+wind_paths_gen_phot (WindPtr wind, PhotPtr pp)
+{
+	double r_rand, r_total;
+	int i_freq, i_path;
+
+	i_freq = -1;
+	i_path = -1;
+
+	r_total = 0;
+	r_rand = wind->paths->d_flux * rand() / MAXRAND;
+	while(r_rand < r_total)
+	{
+		r_total += wind->paths->ad_freq_flux[++i_freq];
+		if(i_freq >= NWAVE)
+		{
+			Error("wind_paths_gen_phot: No path data in wind cell %d at %g %g %g\n",
+					wind->nwind, wind->x[0], wind->x[1], wind->x[2]);
+			exit(0);
+		}
+	}
+
+	r_total = 0;
+	r_rand = wind->paths->d_flux * rand() / MAXRAND;
+	while(r_rand < r_total)
+	{
+		r_total += wind->paths->ad_freq_flux[i_freq*g_path_data->i_path_bins + (++i_path)];
+		if(i_path > g_path_data->i_path_bins)
+		{
+			Error("wind_paths_gen_phot: No path data in wind cell %d at %g %g %g\n",
+					wind->nwind, wind->x[0], wind->x[1], wind->x[2]);
+			exit(0);
+		}
+	}
+
+	pp->path = g_path_data->ad_freq_bin[i_path-1] +
+		(g_path_data->ad_freq_bin[i_path] - g_path_data->ad_freq_bin[i_path-1])*(rand() / MAXRAND);
+	return(0);
+}
+
+
+/***********************************************************
+Synopsis:
 	wind_paths_evaluate(WindPtr wind)  
 		Evaluates wind path details for a cycle
 
@@ -634,7 +690,7 @@ Description:
 Notes:
 
 History:
-	10/2/15	-	Written by SWM
+	26/2/15	-	Written by SWM
 ***********************************************************/
 int
 wind_paths_single_evaluate (Wind_Paths_Ptr paths)
@@ -675,6 +731,26 @@ wind_paths_evaluate(WindPtr wind)
 	return(0);
 }
 
+
+/***********************************************************
+Synopsis:
+	wind_paths_point_index(int i, j, k, i_top)  
+		Given trz index in wind, returns vtk file index
+
+Arguments:		
+	int i, j, k 	Theta, radius and height of cell
+	int i_top		Whether point is + or -ive height
+
+Returns:
+	int n 			Index for vtk poly
+  
+Description:	
+
+Notes:
+
+History:
+	26/2/15	-	Written by SWM
+***********************************************************/
 int 
 wind_paths_point_index(int i, int j, int k, int i_top)
 {
@@ -795,9 +871,6 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 
 	for(i_obs=0; i_obs<g_path_data->i_obs; i_obs++)
 	{
-		printf("SPECS: %d %s %g %g %g\n",MSPEC+i_obs, 
-				xxspec[MSPEC+i_obs].name, xxspec[MSPEC+i_obs].x[0],
-				xxspec[MSPEC+i_obs].x[1], xxspec[MSPEC+i_obs].x[2]);
 		fprintf(fptr, "SCALARS path_%s float 1\n",xxspec[MSPEC+i_obs].name);
 		fprintf(fptr, "LOOKUP_TABLE default\n");
 		stuff_v(xxspec[MSPEC+i_obs].lmn,p_test->lmn);

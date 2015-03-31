@@ -103,6 +103,7 @@ double rtsafe(void (*funcd)(double, double *, double *), double x1, double x2, d
 double golden(double ax, double bx, double cx, double (*f)(double), double tol, double *xmin);
 /* trans_phot.c */
 int trans_phot(WindPtr w, PhotPtr p, int iextract);
+int trans_phot_single(WindPtr w, PhotPtr p, int iextract);
 /* phot_util.c */
 int stuff_phot(PhotPtr pin, PhotPtr pout);
 int move_phot(PhotPtr pp, double ds);
@@ -485,16 +486,17 @@ int get_standard_care_factors(void);
 /* reverb.c */
 int delay_spectrum_summary(char filename[], char mode[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin);
 double delay_to_observer(PhotPtr pp);
-int delay_dump_prep(char filename[], int nspec, int restart_stat, int i_rank);
+int delay_dump_prep(char filename[], int restart_stat, int i_rank);
 int delay_dump_finish(void);
 int delay_dump_combine(int iRanks);
-int delay_dump(PhotPtr p, int np, int nspec, int iExtracted);
+int delay_dump(PhotPtr p, int np, int iExtracted);
 int delay_dump_single(PhotPtr pp, int extract_phot);
 Path_Data_Ptr path_data_constructor(double r_rad_min, double r_rad_max, int i_path_bins, int i_angles, double freqmin, double freqmax, int i_theta_res);
-int path_data_init(double r_rad_min, double r_rad_max, int i_path_bins, int i_angles, double r_freq_min, double f_freq_max, int i_theta_res);
+int path_data_init(double r_rad_min, double r_rad_max, int i_path_bins, int i_angles, double r_freq_min, double r_freq_max, int i_theta_res);
 Wind_Paths_Ptr wind_paths_constructor(WindPtr wind);
 int wind_paths_init(WindPtr wind);
 int wind_paths_add_phot(WindPtr wind, PhotPtr pp);
+int wind_paths_gen_phot(WindPtr wind, PhotPtr pp);
 int wind_paths_single_evaluate(Wind_Paths_Ptr paths);
 int wind_paths_evaluate(WindPtr wind);
 int wind_paths_point_index(int i, int j, int k, int i_top);
@@ -507,6 +509,10 @@ int wind_keplerian_cyl_volumes(WindPtr w, int icomp);
 int wind_keplerian_cylvar_volumes(WindPtr w, int icomp);
 int wind_keplerian_randvec(PhotPtr pp, double r);
 int rand_sign(void);
+/* wind_biconical.c */
+int get_bc_wind_params(void);
+double wind_biconical_velocity(double x[], double v[]);
+double wind_biconical_rho(double x[]);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

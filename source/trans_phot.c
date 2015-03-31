@@ -69,15 +69,11 @@ int plinit = 0;
 int trans_phot(WindPtr w, PhotPtr p, int iextract	/* 0 means do not extract along specific angles; nonzero implies to extract */
 	)
 {
-	double tau_scat, tau;
-	int nphot, istat;
-	double dot(), rrr;
+	int nphot;
+	double dot();
 	int translate();
-	int icell;
-	int nres, *ptr_nres;
-	int kkk, n;
-	double weight_min;
-	struct photon pp, pextract;
+	int n;
+	struct photon pextract;
 	double get_ion_density();
 	int nnscat;
 	int disk_illum;
@@ -263,11 +259,12 @@ int trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 		// Log("Photon=%i,weight=%e,tauscat=%f,nres=%i,istat=%i\n",nphot,p[nphot].w,tau_scat,nres,istat);
 		/* nres is the resonance at which the photon was stopped.  At present the same value is also stored in pp->nres, but I
 		   have not yet eliminated it from translate. ?? 02jan ksl */
-		if(geo.wcycle == geo.wcycles-1)
-		{
-			n = where_in_grid(pp.x);
-			if(n>= 0)
-				wind_paths_add_phot(&w[n], &pp);			//SWM Wind path adder	
+		if(geo.reverb == REV_WIND){
+			if(geo.wcycle == geo.wcycles-1)
+			{
+				n = where_in_grid(pp.x);
+				if(n>= 0) wind_paths_add_phot(&w[n], &pp);			//SWM Wind path adder	
+			}
 		}
 
 

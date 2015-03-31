@@ -366,7 +366,7 @@ main (argc, argv)
   z_axis[1] = z_axis[0] = 0.0;
 
 
-
+  geo.reverb = REV_WIND;
 
 
   /* BEGIN GATHERING INPUT DATA */
@@ -1065,10 +1065,19 @@ main (argc, argv)
 				       */
     }
 
-  /* SWM - Setup for wind path tracking */
-  path_data_init(0.0, geo.rmax, 30, nangles, freqmin, freqmax, 30);
-  wind_paths_init(wmain);
-
+	/* SWM - Setup for path tracking */
+	delay_dump_prep(files.root, restart_stat, rank_global);
+ 	if(geo.reverb == REV_WIND)
+ 	{
+  		path_data_init(0.0, geo.rmax, 30, nangles, freqmin, freqmax, 30);
+  		wind_paths_init(wmain);
+  	}
+  	else if(geo.reverb == REV_PHOTON && geo.wind_radiation != 0)
+  	{
+      	Error("Wind radiation is on but wind-based path tracking is not enabled!\n");
+      	exit(0);  		
+  	}
+ 
   while (geo.wcycle < geo.wcycles)
     {				/* This allows you to build up photons in bunches */
 
@@ -1325,9 +1334,11 @@ main (argc, argv)
   Log (" Completed wind creation.  The elapsed TIME was %f\n", timer ());
 
 /* SWM - Evaluate wind paths for last iteration */
+if(geo.reverb == REV_WIND)
+{
 	wind_paths_evaluate(w);
 	wind_paths_output(w, files.root);
-
+}
 
 /* XXXX - THE CALCULATION OF A DETAILED SPECTRUM IN A SPECIFIC REGION OF WAVELENGTH SPACE */
 
@@ -1405,10 +1416,6 @@ main (argc, argv)
 
       spectrum_restart_renormalise(nangles);  
     }
-
-    /* SWM0215: Prepare for photon-based path tracking */
-	delay_dump_prep(files.root, NSPEC - 1, restart_stat, rank_global);	// Currently hardcoded to last spectrum
-
 
   while (geo.pcycle < geo.pcycles)
     {				/* This allows you to build up photons in bunches */
@@ -1488,7 +1495,7 @@ main (argc, argv)
 	   geo.pcycle, timer ());
 
 	/* SWM0215: Delay dump photons from this cycle */
-	delay_dump(p, NPHOT, NSPEC - 1, 0);	// SWM - Dump delay tracks from this iteration
+	delay_dump(p, NPHOT, 0);	// SWM - Dump delay tracks from this iteration
 
 
       /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
@@ -1516,13 +1523,13 @@ main (argc, argv)
   phot_gen_sum (files.phot, "a");
 
 /* SWM0215: Dump the last photon path details to file */
-#ifdef MPI_ON					// SWM- If MPI is on
 	delay_dump_finish();		// Each thread dumps to file
-	MPI_Barrier(MPI_COMM_WORLD);	// Once all done
-	delay_dump_combine(np_mpi_global);	// Combine results
-#else // Otherwise
-	delay_dump_finish();		// Just dump
-#endif
+	#ifdef MPI_ON
+		MPI_Barrier(MPI_COMM_WORLD);	// Once all done
+		if(my_rank == 0) delay_dump_combine(np_mpi_global);	// Combine results if necessary
+	#endif
+	
+	
 
 /* 57h - 07jul -- ksl -- Write out the freebound information */
 
