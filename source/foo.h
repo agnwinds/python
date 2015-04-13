@@ -314,12 +314,6 @@ double alpha_sp_integrand(double freq);
 int kpkt(PhotPtr p, int *nres, int *escape);
 int fake_matom_bb(PhotPtr p, int *nres, int *escape);
 int fake_matom_bf(PhotPtr p, int *nres, int *escape);
-int macro_pops(PlasmaPtr xplasma, double xne);
-int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
-double get_kpkt_f(void);
-double get_matom_f(int mode);
-int photo_gen_kpkt(PhotPtr p, double weight, int photstart, int nphot);
-int photo_gen_matom(PhotPtr p, double weight, int photstart, int nphot);
 int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper);
 double q_ioniz(struct topbase_phot *cont_ptr, double electron_temperature);
 double q_recomb(struct topbase_phot *cont_ptr, double electron_temperature);
@@ -482,6 +476,14 @@ double setup_dfudge(void);
 int setup_windcone(void);
 int setup_created_files(void);
 int get_standard_care_factors(void);
+/* photo_gen_matom.c */
+double get_kpkt_f(void);
+double get_matom_f(int mode);
+int photo_gen_kpkt(PhotPtr p, double weight, int photstart, int nphot);
+int photo_gen_matom(PhotPtr p, double weight, int photstart, int nphot);
+/* macro_gov.c */
+int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
+int macro_pops(PlasmaPtr xplasma, double xne);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
