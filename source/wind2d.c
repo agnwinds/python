@@ -313,9 +313,14 @@ recreated when a windfile is read into the program
   calloc_dyn_plasma (NPLASMA); /*78a NSH 1407 - allocate space for dynamically sized arrays*/
   create_maps (CHOICE);		// Populate the maps from plasmamain & wmain
 
-  calloc_macro (NPLASMA);
-  calloc_estimators (NPLASMA);
-
+  /* JM 1502 -- we want the macro structure to be allocated in geo.rt_mode = 2. see #138  */
+  
+  if (geo.rt_mode == 2)
+  {
+    calloc_macro (NPLASMA);
+    calloc_estimators (NPLASMA);
+  }
+  
 /* 06may -- At this point we have calculated the volumes of all of the cells and it should
 be optional which variables beyond here are moved to structures othere than Wind */
 

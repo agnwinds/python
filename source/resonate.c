@@ -661,9 +661,9 @@ kappa_bf (xplasma, freq, macro_all)
 	  if (density > DENSITY_PHOT_MIN || phot_top[n].macro_info == 1)
 	    {
 
-	      /*          kap_tot += x = (delete) */
+	      /* kap_tot += x = (delete) */
 	      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
-	      kap_bf[nn] = x = sigma_phot_topbase (&phot_top[n], freq) * density * geo.fill;	//stimulated recombination? (SS)
+	      kap_bf[nn] = x = sigma_phot(&phot_top[n], freq) * density * geo.fill;	//stimulated recombination? (SS)
 	      kap_bf_tot += x;
 	    }
 	}
@@ -736,7 +736,7 @@ kbf_need (fmin, fmax)
 
   PlasmaPtr xplasma;
   WindPtr one;
-  int nplasma;
+  int nplasma, nion;
 
 
   for (nplasma = 0; nplasma < NPLASMA; nplasma++)	// Loop over all the cells in the wind
@@ -745,21 +745,26 @@ kbf_need (fmin, fmax)
       one = &wmain[xplasma->nwind];
       nuse = 0;
 
-      for (n = 0; n < ntop_phot; n++)	// Loop over photoionisation processes. 
+      for (n = 0; n < nphot_total; n++)	// Loop over photoionisation processes. 
 	{
 
 	  ft = phot_top[n].freq[0];	//This is the edge frequency (SS)
 
 	  if ((ft > (fmin / 3.)) && (ft < fmax))
 	    {
+        nion = phot_top[n].nion;
 
+        if (ion[nion].phot_info == 0)      // vfky
+        {
+          density = xplasma->density[nion];
+        }
+        else if (ion[nion].phot_info == 1)  // topbases
+        {
+	        nconf = phot_top[n].nlev;	//Returning lower level = correct (SS)
+	        density = den_config (xplasma, nconf);
+        }
 
-	      nconf = phot_top[n].nlev;	//Returning lower level = correct (SS)
-
-	      density = den_config (xplasma, nconf);
-
-	      tau_test =
-		phot_top[n].x[0] * density * SMAX_FRAC * length (one->xcen);
+	      tau_test = phot_top[n].x[0] * density * SMAX_FRAC * length (one->xcen);
 
 
 	      if (tau_test > 1.e-6 || phot_top[n].macro_info == 1)
@@ -1015,7 +1020,7 @@ doppler (pin, pout, v, nres)
     {				/* It was a resonant scatter. */
       pout->freq = lin_ptr[nres]->freq / (1. - dot (v, pout->lmn) / C);
     }
-  else if ((nres > NLINES && nres < NLINES + ntop_phot + 1) || nres == -2)
+  else if ((nres > NLINES && nres < NLINES + nphot_total + 1) || nres == -2)
     /* It was continuum emission - new comoving frequency has been chosen by
        the matom/kpkt routine, but now need to convert in the same way 
        as for lines (SS) */
@@ -1038,8 +1043,8 @@ doppler (pin, pout, v, nres)
 
   else
     {
-      Error ("doppler: nres %d > NLINES+ntop_phot %d\n", nres,
-	     NLINES + ntop_phot);
+      Error ("doppler: nres %d > NLINES + nphot_total %d\n", nres,
+	     NLINES + nphot_total);
       exit (0);
     }
 
@@ -1176,17 +1181,19 @@ scatter (p, nres, nnscat)
          could occur if we were in a macro atom approach but had no macro atoms.  Need
          to fix all this up with a thorough review of macro atoms. !!!
        */
+      /* JM 1502 -- I've reinstated this call to mplasma, it should happen regardless of whether we have
+         actual macro-atom levels as one can be in the simple ion approach. see #138 */
 
-      if (geo.nmacro > 0)
-	{
+    //    if (geo.nmacro > 0)
+	  //{
 	  mplasma = &macromain[xplasma->nplasma];
-	}
-      else
-	{
-	  mplasma = NULL;
-	  Error
-	    ("Resonate: In macro atom section, but no macro atoms.  Seems very odd\n");
-	}
+    //}
+    //   else
+	  // {
+	  //   mplasma = NULL;
+	  //   Error
+	  //     ("Resonate: In macro atom section, but no macro atoms.  Seems very odd\n");
+	  // }
 
       /* Electron scattering is the simplest to deal with. The co-moving 
          frequency is unchanged so it's just a randomisation of the direction.

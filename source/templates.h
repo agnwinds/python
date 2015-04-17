@@ -11,11 +11,10 @@ double check_fmax(double fmin, double fmax, double temp);
 int get_atomic_data(char masterfile[]);
 int index_lines(void);
 int index_phot_top(void);
-int index_phot_verner(void);
 int index_collisions(void);
 void indexx(int n, float arrin[], int indx[]);
 int limit_lines(double freqmin, double freqmax);
-int tabulate_verner(void);
+int check_xsections(void);
 /* python.c */
 int main(int argc, char *argv[]);
 int help(void);
@@ -127,8 +126,7 @@ int scatter(PhotPtr p, int *nres, int *nnscat);
 /* radiation.c */
 int radiation(PhotPtr p, double ds);
 double kappa_ff(PlasmaPtr xplasma, double freq);
-double sigma_phot(struct photoionization *x_ptr, double freq);
-double sigma_phot_topbase(struct topbase_phot *x_ptr, double freq);
+double sigma_phot(struct topbase_phot *x_ptr, double freq);
 double sigma_phot_verner(struct innershell *x_ptr, double freq);
 double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
@@ -238,7 +236,6 @@ double ff(WindPtr one, double t_e, double freq);
 double one_ff(WindPtr one, double f1, double f2);
 double gaunt_ff(double gsquared);
 /* recomb.c */
-double fb_verner_partial(double freq);
 double fb_topbase_partial(double freq);
 double integ_fb(double t, double f1, double f2, int nion, int fb_choice);
 double total_fb(WindPtr one, double t, double f1, double f2);
@@ -317,12 +314,6 @@ double alpha_sp_integrand(double freq);
 int kpkt(PhotPtr p, int *nres, int *escape);
 int fake_matom_bb(PhotPtr p, int *nres, int *escape);
 int fake_matom_bf(PhotPtr p, int *nres, int *escape);
-int macro_pops(PlasmaPtr xplasma, double xne);
-int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
-double get_kpkt_f(void);
-double get_matom_f(int mode);
-int photo_gen_kpkt(PhotPtr p, double weight, int photstart, int nphot);
-int photo_gen_matom(PhotPtr p, double weight, int photstart, int nphot);
 int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper);
 double q_ioniz(struct topbase_phot *cont_ptr, double electron_temperature);
 double q_recomb(struct topbase_phot *cont_ptr, double electron_temperature);
@@ -470,6 +461,29 @@ int solve_matrix(double *a_data, double *b_data, int nrows, double *x);
 int communicate_estimators_para(void);
 int gather_spectra_para(int nspec_helper, int nspecs);
 int communicate_matom_estimators_para(void);
+/* setup.c */
+int parse_command_line(int argc, char *argv[]);
+int init_log_and_windsave(int restart_stat);
+int get_grid_params(void);
+int get_line_transfer_mode(void);
+int get_radiation_sources(void);
+int get_wind_params(void);
+double get_stellar_params(void);
+int get_disk_params(void);
+int get_bl_and_agn_params(double lstar);
+int get_compton_torus_params(void);
+double setup_dfudge(void);
+int setup_windcone(void);
+int setup_created_files(void);
+int get_standard_care_factors(void);
+/* photo_gen_matom.c */
+double get_kpkt_f(void);
+double get_matom_f(int mode);
+int photo_gen_kpkt(PhotPtr p, double weight, int photstart, int nphot);
+int photo_gen_matom(PhotPtr p, double weight, int photstart, int nphot);
+/* macro_gov.c */
+int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
+int macro_pops(PlasmaPtr xplasma, double xne);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

@@ -258,24 +258,24 @@ int nline_min, nline_max, nline_delt;	/*For calculating which line are likely to
 
 /*structure containing photoionization data */
 
-/* Photoionization crossections from Verner, Ferland, Korista & Yakovlev */
-typedef struct photoionization
-{
-  int nion;			/* index to the appropriate ion in the structure ions, so for example, ion would
-				   normally be 0 for neutral H, 1 for H+, 1 for He, 2 for He+ etc */
-  int z, istate;
-  double freq_t;		/*frequency of threshold derived from ionization potential */
-  double freq_max;		/* maximum frequency for which fit formula apllies */
-  double freq0;			/* fit parameter */
-  double sigma;			/*cross section at freq0 */
-  double ya, p, yw, y0, y1;	/* Fit prarameters */
-  double f_last, sigma_last;	/*last freq, last x-section */
+// /* Photoionization crossections from Verner, Ferland, Korista & Yakovlev */
+// typedef struct photoionization
+// {
+//   int nion;			/* index to the appropriate ion in the structure ions, so for example, ion would
+// 				   normally be 0 for neutral H, 1 for H+, 1 for He, 2 for He+ etc */
+//   int z, istate;
+//   double freq_t;		/*frequency of threshold derived from ionization potential */
+//   double freq_max;		/* maximum frequency for which fit formula apllies */
+//   double freq0;			/* fit parameter */
+//   double sigma;			/*cross section at freq0 */
+//   double ya, p, yw, y0, y1;	/* Fit prarameters */
+//   double f_last, sigma_last;	/*last freq, last x-section */
 
-} Photoionization, *PhotoionizationPtr;
+// } Photoionization, *PhotoionizationPtr;
 
-Photoionization xphot[NIONS];
-PhotoionizationPtr xphot_ptr[NIONS];	/* Pointers to xphot in threshold frequency order --57h -- ksl */
-PhotoionizationPtr xphot_ptr1[NIONS];	/* Pointers to xphot in ion order --57h -- ksl */
+// Photoionization xphot[NIONS];
+// PhotoionizationPtr xphot_ptr[NIONS];	/* Pointers to xphot in threshold frequency order --57h -- ksl */
+// PhotoionizationPtr xphot_ptr1[NIONS];	/* Pointers to xphot in ion order --57h -- ksl */
 
 
 
@@ -290,8 +290,9 @@ int nxphot;			/*The actual number of ions for which there are VFKY photoionizati
 double phot_freq_min;		/*The lowest frequency for which photoionization can occur */
 
 #define NCROSS 1500
-#define NTOP_PHOT 250		/* Maximum number of photoionisation processes. (SS) */
+#define NTOP_PHOT 400		/* Maximum number of photoionisation processes. (SS) */
 int ntop_phot;			/* The actual number of TopBase photoionzation x-sections */
+int nphot_total;    /* total number of photoionzation x-sections = nxphot + ntop_phot */
 
 typedef struct topbase_phot
 {				/* If the old topbase treatment is to be replaced by Macro Atoms perhaps this

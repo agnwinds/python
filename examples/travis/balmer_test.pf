@@ -9,6 +9,7 @@ Wind_ionization()   3
 Line_transfer()   7
 Thermal_balance_options(0=everything.on,1=no.adiabatic) 1
 System_type()   0
+disk.type()   0
 Star_radiation(y=1)   1
 Disk_radiation(y=1)   0
 Boundary_layer_radiation(y=1)   0
@@ -17,7 +18,6 @@ Rad_type_for_star(0=bb,1=models)_to_make_wind   0
 mstar(msol)   0.8
 rstar(cm)   1e10
 tstar   10000
-disk.type()   0
 Torus(0=no,1=yes)   0
 wind.radmax(cm)   1.00000000001e11
 wind.t.init   11100

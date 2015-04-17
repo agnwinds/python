@@ -123,6 +123,11 @@ int NPHOT;			/* As of python_40, NPHOT must be defined in the main program using
 #define SPECTYPE_CL_TAB  -5
 #define SPECTYPE_NONE	 -3
 
+/* definitions of system types */
+#define SYSTEM_TYPE_STAR    0
+#define SYSTEM_TYPE_BINARY  1
+#define SYSTEM_TYPE_AGN     2
+
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10
 #define LINELENGTH 	160
@@ -343,6 +348,8 @@ struct geometry
   double weight;		/*weight factor for photons/defined in define_phot */
 
 // The next set of parameters relate to the central source of an AGN
+
+  double pl_low_cutoff;  /* accessible only in advanced mode- see #34. default to zero */
 
   double alpha_agn;		/*The power law index of a BH at the center of an AGN.  Note that the luminosity
 				   of the agn is elsewhere in the structure
@@ -790,8 +797,8 @@ typedef struct macro
   double cooling_ff;
   double cooling_adiabatic;     // this is just lum_adiabatic / vol / ne
 
-  double lte_pops[NLEVELS_MACRO]; /* a store of LTE level populations for the macro atom. */ 
-  double lte_pops_norm;
+  // double lte_pops[NLEVELS_MACRO];  //a store of LTE level populations for the macro atom.  
+  // double lte_pops_norm;
 
 } macro_dummy, *MacroPtr;
 
@@ -1146,12 +1153,34 @@ struct advanced_modes
   int diag_on_off;              // extra diagnostics
   int use_debug;                // print out debug statements
   int print_dvds_info;          // print out information on the velocity gradients
-
+  int keep_photoabs;            // keep photoabsorption in final spectrum
+  int quit_after_inputs;        // quit after inputs read in, testing mode
 }
 modes;
 
 
 FILE *optr;  //pointer to a diagnostic file that will contain dvds information
+
+
+
+struct filenames
+{
+  char root[LINELENGTH];        // main rootname
+  char windsave[LINELENGTH];    // wind save filename
+  char specsave[LINELENGTH];    // spec save filename
+  char diag[LINELENGTH];        // diag file
+  char diagfolder[LINELENGTH];  // diag folder
+  char old_windsave[LINELENGTH];// old windsave name
+  char input[LINELENGTH];       // input name if creating new pf file
+  char lspec[LINELENGTH];       // log_spec_tot fname
+  char wspec[LINELENGTH];       // spectot fname
+  char disk[LINELENGTH];        // disk diag fname
+  char tprofile[LINELENGTH];    // non standard tprofile fname
+  char phot[LINELENGTH];        // photfile e.g. python.phot
+  char windrad[LINELENGTH];     // wind rad file
+  char spec[LINELENGTH];        // .spec file
+}
+files;
 
 
         

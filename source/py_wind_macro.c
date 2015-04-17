@@ -749,7 +749,7 @@ level_popsoverview (nplasma, w, rootname, ochoice)
     lteden = den_config (xdummy, i);
     Log("%i %8.4e %8.4e\n", i+1, xplasma->levden[i], xden/lteden);
     if (ochoice)
-      fprintf(f, "%i %8.4e %8.4e\n", i+1, xden, xden/lteden);
+      fprintf(f, "%i %8.4e %8.4e\n", i+1, xplasma->levden[i], xden/lteden);
   }
   fclose(f);
 
