@@ -330,7 +330,7 @@ config_overview (n, icell)
     }
   else
     {
-      Error("%i is not a cell in plasma structure!!\n" % icell);
+      Error("%i is not a cell in plasma structure!!\n" , icell);
       return 0;
     }
 
@@ -488,7 +488,7 @@ depcoef_overview (icell)
     }
   else
     {
-      Error("%i is not a cell in plasma structure!!\n" % icell);
+      Error("%i is not a cell in plasma structure!!\n" , icell);
       return 0;
     }
 
