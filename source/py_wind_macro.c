@@ -322,7 +322,6 @@ config_overview (n, icell)
   p = &config[n];
   /* initialize the density */
   xden = -1;
-  x = 0; // remove compilation warnings.
   
   if (icell >= 0 && icell < NDIM2)
     {
