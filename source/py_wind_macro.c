@@ -330,7 +330,7 @@ config_overview (n, icell)
     }
   else
     {
-      Error("%i is not a cell in plasma structure!!\n");
+      Error("%i is not a cell in plasma structure!!\n" % icell);
       return 0;
     }
 
@@ -485,6 +485,11 @@ depcoef_overview (icell)
       partition_functions (xdummy, 1);
       saha (xdummy, xdummy->ne, xdummy->t_e);
       geo.macro_ioniz_mode = 1;
+    }
+  else
+    {
+      Error("%i is not a cell in plasma structure!!\n" % icell);
+      return 0;
     }
 
   printf
