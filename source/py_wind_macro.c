@@ -322,10 +322,17 @@ config_overview (n, icell)
   p = &config[n];
   /* initialize the density */
   xden = -1;
+  x = 0; // remove compilation warnings.
+  
   if (icell >= 0 && icell < NDIM2)
     {
       x = &plasmamain[icell];
       xden = x->levden[p->nden];
+    }
+  else
+    {
+      Error("%i is not a cell in plasma structure!!\n");
+      return 0;
     }
 
 
