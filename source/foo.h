@@ -494,6 +494,7 @@ int delay_dump_single(PhotPtr pp, int extract_phot);
 Path_Data_Ptr path_data_constructor(double r_rad_min, double r_rad_max, int i_path_bins, int i_angles, double freqmin, double freqmax, int i_theta_res);
 int path_data_init(double r_rad_min, double r_rad_max, int i_path_bins, int i_angles, double r_freq_min, double r_freq_max, int i_theta_res);
 Wind_Paths_Ptr wind_paths_constructor(WindPtr wind);
+int reverb_init(WindPtr wind, int nangles, double freqmin, double freqmax);
 int wind_paths_init(WindPtr wind);
 int wind_paths_add_phot(WindPtr wind, PhotPtr pp);
 int wind_paths_gen_phot(WindPtr wind, PhotPtr pp);
@@ -513,6 +514,10 @@ int rand_sign(void);
 int get_bc_wind_params(void);
 double wind_biconical_velocity(double x[], double v[]);
 double wind_biconical_rho(double x[]);
+/* splitting.c */
+int importance_map_init_spherical(WindPtr w, double r_imp_max, double r_thresh);
+int importance_map_init_cylindrical(WindPtr w);
+int importance_map_init(WindPtr w, double r_imp_max, double r_thresh_r, double r_thresh_theta);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

@@ -553,7 +553,7 @@ History:
 	3/15	-	Written by SWM
 ***********************************************************/
 int
-reverb_init(WindPtr wind, int nangles, int path_bins, int theta_bins, double freqmin, double freqmax)
+reverb_init(WindPtr wind, int nangles, double freqmin, double freqmax)
 {
 	int i;
 
