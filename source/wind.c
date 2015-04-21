@@ -302,10 +302,6 @@ model_velocity (double x[], double v[])
     {
       speed = wind_keplerian_velocity(x, v);
     }
-  else if (geo.wind_type == 11)
-    {
-      speed = wind_biconical_velocity(x, v);
-    }
   else
     {
       Error ("wind: Unknown windtype %d\n", geo.wind_type);
@@ -422,10 +418,6 @@ model_rho (double x[])
   {
     rho = wind_keplerian_rho(x);
   }
-  else if (geo.wind_type == 11)
-	{
-	  rho = wind_biconical_rho(x);
-	}
   else
     {
       Error ("wind2d: Unknown windtype %d\n", geo.wind_type);

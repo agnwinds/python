@@ -560,10 +560,7 @@ get_wind_params()
   {
       get_wind_keplerian_params();
   }
-  else if (geo.wind_type == 11) //SWM 30-3-15 Added simple biconical wind
-    {
-      get_bc_wind_params ();
-    }
+
 /*NSH 121219 moved	  dfudge = (geo.wind_rmax - geo.wind_rmin) / 1000.0;	Stop photons getting pushed out of the cell 
 Modified again in python 71b to take account of change in parametrisation of shell wind 
 	  DFUDGE = dfudge; */
