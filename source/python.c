@@ -365,10 +365,6 @@ main (argc, argv)
   z_axis[2] = 1.0;
   z_axis[1] = z_axis[0] = 0.0;
 
-
-  geo.reverb = REV_WIND;
-
-
   /* BEGIN GATHERING INPUT DATA */
 
   /* Describe the basic calculation in terms of the number of iterations which will
@@ -928,7 +924,23 @@ main (argc, argv)
  */
   freqs_init (freqmin, freqmax);
 
-  
+  /* SWM 20/4/15
+	Read parameters, to be merged into regular settings later
+	*/
+	geo.vr_ionisation = 0;
+	geo.vr_spectrum = 0;
+	geo.reverb = 0;
+	rdint("vr.ionisation" ,	&geo.vr_ionisation);
+	rdint("vr.spectrum", 	&geo.vr_spectrum);
+	rdint("reverb.type", &geo.reverb);	
+	if(geo.reverb == REV_WIND)
+	{
+		geo.reverb_path_bins = 30;
+		geo.reverb_theta_bins = 30;
+		rdint("reverb.path_bins", &geo.reverb_path_bins);
+		rdint("reverb.theta_bins", &geo.reverb_theta_bins);	
+	}
+
   if (modes.iadvanced)
     {
       /* Do we require extra diagnostics or not */
@@ -1066,18 +1078,10 @@ main (argc, argv)
     }
 
 	/* SWM - Setup for path tracking */
+	importance_map_init(wmain, 3.0, geo.rmax/2.0, 0.0);
+	reverb_init(wmain, nangles, freqmin, freqmax);
 	delay_dump_prep(files.root, restart_stat, rank_global);
- 	if(geo.reverb == REV_WIND)
- 	{
-  		path_data_init(0.0, geo.rmax, 30, nangles, freqmin, freqmax, 30);
-  		wind_paths_init(wmain);
-  	}
-  	else if(geo.reverb == REV_PHOTON && geo.wind_radiation != 0)
-  	{
-      	Error("Wind radiation is on but wind-based path tracking is not enabled!\n");
-      	exit(0);  		
-  	}
- 
+	 	
   while (geo.wcycle < geo.wcycles)
     {				/* This allows you to build up photons in bunches */
 
@@ -1334,11 +1338,11 @@ main (argc, argv)
   Log (" Completed wind creation.  The elapsed TIME was %f\n", timer ());
 
 /* SWM - Evaluate wind paths for last iteration */
-if(geo.reverb == REV_WIND)
-{
-	wind_paths_evaluate(w);
-	wind_paths_output(w, files.root);
-}
+	if(geo.reverb == REV_WIND)
+	{
+		wind_paths_evaluate(w);
+		wind_paths_output(w, files.root);
+	}
 
 /* XXXX - THE CALCULATION OF A DETAILED SPECTRUM IN A SPECIFIC REGION OF WAVELENGTH SPACE */
 

@@ -571,7 +571,7 @@ rdint (char question[], int *answer)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
   else if(rdpar_stat == 2)
 	restart_par(1);
-  
+
 
   while (query == REISSUE)
     {

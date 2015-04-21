@@ -259,7 +259,8 @@ int trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 		// Log("Photon=%i,weight=%e,tauscat=%f,nres=%i,istat=%i\n",nphot,p[nphot].w,tau_scat,nres,istat);
 		/* nres is the resonance at which the photon was stopped.  At present the same value is also stored in pp->nres, but I
 		   have not yet eliminated it from translate. ?? 02jan ksl */
-		if(geo.reverb == REV_WIND){
+		if(geo.reverb == REV_WIND)
+		{
 			if(geo.wcycle == geo.wcycles-1)
 			{
 				n = where_in_grid(pp.x);
@@ -483,6 +484,36 @@ int trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 				extract(w, &pextract, PTYPE_WIND);	// Treat as wind photon for purpose of extraction
 			}
 
+			/* SWM 31-3-15: This section checks if variance reduction is being run, and if so if the photon needs splitting */
+			if((geo.wcycle == geo.wcycles && geo.vr_spectrum) || (geo.wcycle < geo.wcycles && geo.vr_ionisation))
+			{
+				if(pp.importance < wmain[n].importance)
+				{
+					double r_split;
+					int i_split, i_split_loop;
+					struct photon p_split;
+					r_split = wmain[n].importance / pp.importance;
+					
+					if(r_split > 1.0)
+					{
+						i_split 	= 	(int) r_split;
+						r_split 	-= 	(double) i_split;
+
+						if( (rand()/MAXRAND) > r_split)
+							i_split += 1;	
+					
+						pp.w *= (pp.importance / wmain[n].importance);
+						pp.importance = wmain[n].importance;
+					
+						for(i_split_loop=1; i_split_loop < i_split-1; i_split_loop++)
+						{
+							stuff_phot(&pp, &p_split);		
+							trans_phot_single(w, &p_split, iextract);				
+						}
+					}
+				}
+			}
+
 			/* OK we are ready to continue the processing of a photon which has scattered. The next steps reinitialize parameters
 			   so that the photon can continue throug the wind */
 
@@ -497,14 +528,14 @@ int trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 		/* This completes the portion of the code that handles the scattering of a photon What follows is a simple check to see
 		   if this particular photon has gotten stuck in the wind 54b-ksl */
 
-		if (pp.nscat == MAXSCAT) //SWM
+		if (pp.nscat == MAXSCAT)
 		{
 			istat = pp.istat = P_TOO_MANY_SCATTERS;	/* Scattered too many times */
 			stuff_phot(&pp, p);
 			break;
 		}
 
-		if (pp.istat == P_ADIABATIC) //SWM
+		if (pp.istat == P_ADIABATIC)
 		{
 			istat = pp.istat = p->istat = P_ADIABATIC;
 			stuff_phot(&pp, p);

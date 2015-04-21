@@ -498,6 +498,11 @@ was a resonant scatter but we want isotropic scattering anyway.  */
 
       if(geo.reverb == REV_WIND) // SWM 26-3-15: Added wind paths
 	      wind_paths_gen_phot(&wmain[icell], &p[n]);
+	  else
+	  	p[n].path = sqrt(p[n].x[0] * p[n].x[0]
+	  					+p[n].x[1] * p[n].x[1]
+	  					+p[n].x[2] * p[n].x[2])
+	  					-geo.rstar;
     }
 
 

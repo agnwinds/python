@@ -144,6 +144,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   for (n = 0; n < NPHOT; n++){
 	  p[n].w_orig = p[n].w;
     p[n].freq_orig = p[n].freq;
+    p[n].importance = 1.0;  //SWM Set importance to 1.0
   }
   return (0);
 
@@ -463,7 +464,6 @@ python 40 but it is not really what one wants.
       nkpkt = geo.f_kpkt / geo.f_tot * nphotons;
       nmatom = geo.f_matom / geo.f_tot * nphotons;
     }
-
 
   nphot = ndisk + nwind + nbl + nstar + nagn + nkpkt + nmatom;
 

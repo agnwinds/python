@@ -531,6 +531,56 @@ wind_paths_constructor (WindPtr wind)
 
 /***********************************************************
 Synopsis:
+	reverb_init(WindPtr wind, int nangles, path_bins, theta_bins,
+				double freqmin, freqmax)  
+		Initialises module variables
+
+Arguments:	
+	WindPtr wind 	Wind cell array, passed further down	
+	int nangles 	Number of angles used
+	int path_bins 	Number of bins to sort photon paths by
+	int theta_bins  For output only, number of angular bins
+	double freqmin
+	double freqmax 	Frequency range to record paths over
+
+Returns:
+  
+Description:	
+
+Notes:
+
+History:
+	3/15	-	Written by SWM
+***********************************************************/
+int
+reverb_init(WindPtr wind, int nangles, int path_bins, int theta_bins, double freqmin, double freqmax)
+{
+	int i;
+
+	if(geo.reverb == REV_WIND)
+	{
+		if(geo.wind_radiation == 0)
+ 	 	{
+    	  	Error("Wind radiation is off but wind-based path tracking is enabled!\n");
+      		exit(0);  		
+  		} 
+  		else
+ 		{
+			printf("Wind cell-based path tracking is enabled for frequency range %g-%g\n",
+					freqmin, freqmax);
+	  		path_data_init(0.0, geo.rmax, geo.reverb_path_bins, nangles, freqmin, freqmax, geo.reverb_theta_bins);
+			wind_paths_init(wind);
+		}
+	}
+	else if (geo.reverb == REV_PHOTON)
+		printf("Photon-based path tracking is enabled.\n");
+
+	
+	return(0);
+}
+
+/***********************************************************
+Synopsis:
 	wind_paths_init(WindPtr wind)  
 		Initialises wind path structures
 
@@ -553,6 +603,11 @@ int
 wind_paths_init(WindPtr wind)
 {
 	int i;
+
+	if(geo.reverb == 2)
+		printf("Reverberation mapping using wind cell paths.\n");
+	else if (geo.reverb == 1)
+		printf("Reverberation mapping using photon paths.\n");
 
 	for(i=0; i<NDIM*MDIM; i++)
 	{
@@ -640,7 +695,7 @@ wind_paths_gen_phot (WindPtr wind, PhotPtr pp)
 	i_freq = -1;
 	i_path = -1;
 
-	r_total = 0;
+	r_total = 0.0;
 	r_rand = wind->paths->d_flux * rand() / MAXRAND;
 	while(r_rand < r_total)
 	{
@@ -780,7 +835,9 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 	{
 		Error("wind_paths_output: Unable to open %s for writing\n", c_file);
 		exit(0);
-	}
+	} 
+	
+	printf("Outputting wind path information to file '%s'.\n", c_file);
 
 
 	i_cells = 2*(NDIM-1)*(MDIM-1)*g_path_data->i_theta_res;
@@ -843,6 +900,22 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 	fprintf(fptr, "\n");
 
 	fprintf(fptr, "CELL_DATA %d\n",i_cells);
+
+	fprintf(fptr, "SCALARS phot_count float 1\n");
+	fprintf(fptr, "LOOKUP_TABLE default\n");
+	for(i=0; i < NDIM-1; i++)
+	{
+		for(j=0; j < MDIM-1; j++)
+		{
+			wind_ij_to_n(i,j,&n);
+			for(k=0; k < g_path_data->i_theta_res; k++)
+			{	
+				fprintf(fptr, "%d\n",wind[n].paths->i_num);
+				fprintf(fptr, "%d\n",wind[n].paths->i_num);					
+			}
+		}
+	}
+
 	fprintf(fptr, "SCALARS path_errors float 1\n");
 	fprintf(fptr, "LOOKUP_TABLE default\n");
 	for(i=0; i < NDIM-1; i++)
@@ -865,6 +938,62 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 					fprintf(fptr, "-1\n");
 				}
 						
+			}
+		}
+	}
+
+	fprintf(fptr, "SCALARS crowflies float 1\n");
+	fprintf(fptr, "LOOKUP_TABLE default\n");
+	for(i=0; i < NDIM-1; i++)
+	{
+		for(j=0; j < MDIM-1; j++)
+		{
+			wind_ij_to_n(i,j,&n);
+			for(k=0; k < g_path_data->i_theta_res; k++)
+			{	
+				if(wind[n].paths->i_num >0)
+				{	
+					double f_diff;
+					f_diff 	= wind[n].paths->d_path;
+					f_diff -= (	sqrt(
+								wind[n].xcen[0] * wind[n].xcen[0] +
+								wind[n].xcen[1] * wind[n].xcen[1] +
+								wind[n].xcen[2] * wind[n].xcen[2] ) 
+					    		- geo.rstar );
+					f_diff = fabs(f_diff);
+					f_diff /= wind[n].paths->d_path;
+
+					fprintf(fptr, "%g\n",f_diff);
+					fprintf(fptr, "%g\n",f_diff);
+				}
+				else
+				{
+					fprintf(fptr, "-1\n");
+					fprintf(fptr, "-1\n");
+				}		
+			}
+		}
+	}
+
+	fprintf(fptr, "SCALARS path_average float 1\n");
+	fprintf(fptr, "LOOKUP_TABLE default\n");
+	for(i=0; i < NDIM-1; i++)
+	{
+		for(j=0; j < MDIM-1; j++)
+		{
+			wind_ij_to_n(i,j,&n);
+			for(k=0; k < g_path_data->i_theta_res; k++)
+			{	
+				if(wind[n].paths->i_num >0)
+				{	
+					fprintf(fptr, "%g\n",wind[n].paths->d_path);
+					fprintf(fptr, "%g\n",wind[n].paths->d_path);
+				}
+				else
+				{
+					fprintf(fptr, "-1\n");
+					fprintf(fptr, "-1\n");
+				}		
 			}
 		}
 	}

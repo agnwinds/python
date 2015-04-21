@@ -385,7 +385,10 @@ struct geometry
   char fixed_con_file[132];	/* 54e -- For fixed concentrations, the file specifying concentrations */
 
   //Added by SWM for reverberation mapping - 0=None, 1=Photon, 2=Wind
-  int reverb; 
+  int reverb, reverb_path_bins, reverb_theta_bins; 
+  //Added by SWM for variance reduction
+  int vr_ionisation;
+  int vr_spectrum;
 }
 geo;
 
