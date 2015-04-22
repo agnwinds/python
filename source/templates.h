@@ -510,10 +510,6 @@ int wind_keplerian_cyl_volumes(WindPtr w, int icomp);
 int wind_keplerian_cylvar_volumes(WindPtr w, int icomp);
 int wind_keplerian_randvec(PhotPtr pp, double r);
 int rand_sign(void);
-/* wind_biconical.c */
-int get_bc_wind_params(void);
-double wind_biconical_velocity(double x[], double v[]);
-double wind_biconical_rho(double x[]);
 /* splitting.c */
 int importance_map_init_spherical(WindPtr w, double r_imp_max, double r_thresh);
 int importance_map_init_cylindrical(WindPtr w);
