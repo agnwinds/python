@@ -213,8 +213,9 @@ struct rdpar {
 
 /* This routine sets rdpar up to read from a file.  If it fails you proceed interactively */
 
-int 
-opar (char filename[])
+int
+opar (filename)
+     char filename[];
 {
   FILE *fopen (), *tmp_ptr;
   int rdpar_init();
@@ -251,8 +252,9 @@ opar (char filename[])
    doit!0 --> force recylcling
  */
 
-int 
-restart_par (int doit)
+int
+restart_par (doit)
+     int doit;
 {
   char dummy[LINELEN];
 
@@ -290,8 +292,9 @@ restart_par (int doit)
    The old parameters of the input file are stored in filename.old.  Also has the 
    effect of closing all the files associated with rdpar */
 
-int 
-cpar (char filename[])
+int
+cpar (filename)
+     char filename[];
 {
   char old_filename[LINELEN];
 
@@ -318,7 +321,7 @@ cpar (char filename[])
    does however set put rdpar into a known mode and set up the output file */
 
 int 
-rdpar_init (void)
+rdpar_init ()
 {
   FILE *fopen ();
   rdin_ptr = stdin;		/* Initialize rdin_ptr to standard input */
@@ -337,8 +340,9 @@ rdpar_init (void)
  * When the routine returns NORMAL or OLD the input has been 
  * successfully processed
  * */
-int 
-string_process (char question[], char dummy[])
+int
+string_process (question, dummy)
+     char question[], dummy[];
 {
   char firstword[LINELEN], secondword[LINELEN];
   char line[LINELEN], tdummy[LINELEN];
@@ -391,7 +395,7 @@ string_process (char question[], char dummy[])
       if (fgets (line, LINELEN, rdin_ptr) == NULL)
 	{
 	  printf ("Error: string_proces: Unexpectedly reached EOF\n");
-	  printf ("                      Switching to inteactive mode\n");
+	  printf ("                      Switching to interactive mode\n");
 	  rdpar_stat = 1;
 	  goto b;
 	}
@@ -459,8 +463,9 @@ which records the accepted values for all of the variables.
 
 
 
-int 
-rdpar_store_record (char *name, char *value)
+int
+rdpar_store_record(name,value)
+	char *name,*value;
 {
 	strcpy(rdpar_record[rdpar_nrec].name,name);
 	strcpy(rdpar_record[rdpar_nrec].value,value);
@@ -496,8 +501,9 @@ rdpar_save(file_ptr)
 }
 
 /*Add a general purpose message line */
-int 
-message (char string[])
+int
+message (string)
+     char string[];
 {
   fprintf (stderr, "%s\n", string);
   fflush (stderr);
@@ -506,19 +512,15 @@ message (char string[])
 
 /* These are the specific routines that are called to read in a variable */
 
-int 
-rdstr (char question[], char answer[])
+int
+rdstr (question, answer)
+     char question[], answer[];
 {
   int query;
   char dummy[LINELEN];
   query = REISSUE;
-
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
-  else if(rdpar_stat == 2)
-	restart_par(1);
-  
-
   while (query == REISSUE)
     {
       sprintf (dummy, "%s", answer);
@@ -534,18 +536,16 @@ rdstr (char question[], char answer[])
 }
 
 
-int 
-rdchar (char question[], char *answer)
+int
+rdchar (question, answer)
+     char question[];
+     char *answer;
 {
   int query;
   char dummy[LINELEN];
   query = REISSUE;
-  
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
-  else if(rdpar_stat == 2)
-	restart_par(1);
-  
   while (query == REISSUE)
     {
       sprintf (dummy, "%c", *answer);
@@ -560,19 +560,16 @@ rdchar (char question[], char *answer)
   return (query);
 }
 
-int 
-rdint (char question[], int *answer)
+int
+rdint (question, answer)
+     char question[];
+     int *answer;
 {
   int query;
   char dummy[LINELEN];
   query = REISSUE;
-
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
-  else if(rdpar_stat == 2)
-	restart_par(1);
-
-
   while (query == REISSUE)
     {
       sprintf (dummy, "%d", *answer);
@@ -587,20 +584,16 @@ rdint (char question[], int *answer)
   return (query);
 }
 
-int 
-rdflo (char question[], float *answer)
+int
+rdflo (question, answer)
+     char question[];
+     float *answer;
 {
   int query;
   char dummy[LINELEN];
   query = REISSUE;
-  
-  
-  
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
-  else if(rdpar_stat == 2)
-		restart_par(1);
-  
   while (query == REISSUE)
     {
       sprintf (dummy, "%g", *answer);
@@ -615,45 +608,40 @@ rdflo (char question[], float *answer)
   return (query);
 }
 
-int 
-rddoub (char question[], double *answer)
+int
+rddoub (question, answer)
+     char question[];
+     double *answer;
 {
   int query;
   char dummy[LINELEN];
   query = REISSUE;
-  
-  
-  
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
-  else if(rdpar_stat == 2)
-		restart_par(1); 
-  
   while (query == REISSUE)
+    {
+      sprintf (dummy, "%g", *answer);
+      query = string_process (question, dummy);
+      if (query == NORMAL)
 	{
-    sprintf (dummy, "%g", *answer);
-    query = string_process (question, dummy);
-    if (query == NORMAL)
-		{
-			sscanf (dummy, "%le", answer);
-      if (rd_rank==0 && verbose==1)
-				printf ("%s	  %e\n", question, *answer);
-		}
-  }
+	  sscanf (dummy, "%le", answer);
+          if (rd_rank==0 && verbose==1)
+	    printf ("%s	  %e\n", question, *answer);
+	}
+    }
   return (query);
 }
 
-int 
-rdline (char question[], char answer[])
+int
+rdline (question, answer)
+     char question[];
+     char answer[];
 {
   int query;
   char dummy[LINELEN];
   query = REISSUE;
   if (rdpar_stat == 0)
     rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
-  else if(rdpar_stat == 2)
-		restart_par(1);
-  
   while (query == REISSUE)
     {
       sprintf (dummy, "%s", answer);
@@ -679,8 +667,9 @@ rdline (char question[], char answer[])
 ksl 99jul 
 */
 
-int 
-get_root (char root[], char total[])
+int
+get_root (root, total)
+     char root[], total[];
 {
   int i, j;
   i = strcspn (total, ".");
@@ -708,9 +697,6 @@ get_root (char root[], char total[])
 
 
 
-
-
-
 /* JM130717 the next set of routines are designed to clean up the code 
  * in parallel mode
  */
@@ -719,21 +705,35 @@ get_root (char root[], char total[])
  * if not in parallel mode then we set rd_rank to zero
  */
 
-int 
-rdpar_set_mpi_rank (int rank)
+int rdpar_set_mpi_rank (rank)
+	int rank;
 {
 	rd_rank=rank;
 	return(0);
 }
 
-int 
-rdpar_set_verbose (int vlevel)
+
+/* sets the verbosity level
+ */
+
+int rdpar_set_verbose (vlevel)
+	int vlevel;
 {
 	if (vlevel < 2)
 	  verbose=0;
        // printf("JM VERB %s\n\n", verbose);
 	return(0);
 }
+
+
+
+/* JM 141015 -- rd_extra is a function designed 
+   to help address #111. We want to implement 
+   extra diagnostics which can be supplied at the 
+   end of the file if extra_diagnostics is set to
+   1 in the parameter file. This function is used
+   by get_extra_diagnostics() to do this 
+*/
 
 
 int rd_extra(firstword, answer, wordlength)
@@ -762,6 +762,3 @@ int rd_extra(firstword, answer, wordlength)
 
   return (0); 
 }
-
-
-
