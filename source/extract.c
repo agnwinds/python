@@ -84,7 +84,7 @@ int extract(WindPtr w, PhotPtr p, int itype)
 		/* If statement allows one to choose whether to construct the spectrum from all photons or just from photons that have
 		   scattered a specific number of times or in specific regions of the wind. */
 
-		yep = 1;										// Start by assuming it is a good photon for extraction
+		yep = 1;				// Start by assuming it is a good photon for extraction
 
 		if ((mscat = xxspec[n].nscat) > 999 || p->nscat == mscat || (mscat < 0 && p->nscat >= (-mscat)))
 			yep = 1;
@@ -94,12 +94,12 @@ int extract(WindPtr w, PhotPtr p, int itype)
 		if (yep)
 		{
 			if ((mtopbot = xxspec[n].top_bot) == 0)
-				yep = 1;								// Then there are no positional parameters and we are done
+				yep = 1;		// Then there are no positional parameters and we are done
 			else if (mtopbot == -1 && p->x[2] < 0)
 				yep = 1;
 			else if (mtopbot == 1 && p->x[2] > 0)
 				yep = 1;
-			else if (mtopbot == 2)		// Then to count, the photom must originate within sn.r of sn.x
+			else if (mtopbot == 2)	// Then to count, the photom must originate within sn.r of sn.x
 			{
 				vsub(p->x, xxspec[n].x, xdiff);
 				if (length(xdiff) > xxspec[n].r)
@@ -112,7 +112,7 @@ int extract(WindPtr w, PhotPtr p, int itype)
 
 
 
-		if (yep)										// Then we want to extract this photon
+		if (yep)				// Then we want to extract this photon
 		{
 			/* Create a photon pp to use here and in extract_one.  This assures we have not modified p as part of extract */
 			stuff_phot(p, &pp);
@@ -132,8 +132,8 @@ int extract(WindPtr w, PhotPtr p, int itype)
 
 			}
 			if (itype == PTYPE_WIND)
-			{													/* If the photon was scattered in the wind, the frequency also must be shifted */
-				vwind_xyz(&pp, v);			/* Get the velocity at the position of pp */
+			{					/* If the photon was scattered in the wind, the frequency also must be shifted */
+				vwind_xyz(&pp, v);	/* Get the velocity at the position of pp */
 				doppler(p, &pp, v, pp.nres);	/* Doppler shift the photon -- test! */
 				/* Doppler shift the photon (as nonresonant scatter) to new direction */
 			}
@@ -141,9 +141,10 @@ int extract(WindPtr w, PhotPtr p, int itype)
 			if (diag_on_off && 1545.0 < 2.997925e18 / pp.freq && 2.997925e18 / pp.freq < 1565.0)
 			{
 				fprintf(epltptr,
-								"%3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %7.2f %7.2f \n",
-								n, p->x[0], p->x[1], p->x[2], v[0], v[1], v[2],
-								p->lmn[0], p->lmn[1], p->lmn[2], pp.lmn[0], pp.lmn[1], pp.lmn[2], 2.997925e18 / p->freq, 2.997925e18 / pp.freq);
+						"%3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %7.2f %7.2f \n",
+						n, p->x[0], p->x[1], p->x[2], v[0], v[1], v[2],
+						p->lmn[0], p->lmn[1], p->lmn[2], pp.lmn[0], pp.lmn[1], pp.lmn[2], 2.997925e18 / p->freq,
+						2.997925e18 / pp.freq);
 			}
 
 			/* 68b - 0902 - ksl - turn phot_history on for the middle spectrum.  Note that we have to wait to actually initialize
@@ -151,7 +152,7 @@ int extract(WindPtr w, PhotPtr p, int itype)
 
 			if (phot_history_spectrum == n)
 			{
-				phot_hist_on = 1;				// Start recording the history of the photon
+				phot_hist_on = 1;	// Start recording the history of the photon
 			}
 
 			/* Now extract the photon */
@@ -240,58 +241,57 @@ int extract_one(WindPtr w, PhotPtr pp, int itype, int nspec)
 	/* Reweight the photons. Note that photons have already been frequency shifted prior to entering extract */
 
 	if (itype == PTYPE_STAR || itype == PTYPE_BL)
-	{															/* It was an unscattered photon from the star */
+	{							/* It was an unscattered photon from the star */
 		stuff_v(pp->x, x);
 		renorm(x, 1.);
 		zz = fabs(dot(x, xxspec[nspec].lmn));
 		pp->w *= zz * (2.0 + 3.0 * zz);	/* Eqn 2.19 Knigge's thesis */
 	}
 	else if (itype == PTYPE_DISK)
-	{															/* It was an unscattered photon from the disk */
+	{							/* It was an unscattered photon from the disk */
 		zz = fabs(xxspec[nspec].lmn[2]);
 		pp->w *= zz * (2.0 + 3.0 * zz);	/* Eqn 2.19 Knigge's thesis */
 	}
 	else if (pp->nres > -1 && pp->nres < NLINES)	// added < NLINES condition for macro atoms (SS)
 	{
 
-	  dvds = dvwind_ds (pp);
-	  ishell = pp->grid;
-	  tau = sobolev (&w[ishell], pp->x, -1.0, lin_ptr[pp->nres], dvds);
-	  if (tau > 0.0)
-	    pp->w *= (1. - exp (-tau)) / tau;
-	  tau = 0.0;
+		dvds = dvwind_ds(pp);
+		ishell = pp->grid;
+		tau = sobolev(&w[ishell], pp->x, -1.0, lin_ptr[pp->nres], dvds);
+		if (tau > 0.0)
+			pp->w *= (1. - exp(-tau)) / tau;
+		tau = 0.0;
 	}
-	
-/* But in any event we have to reposition wind photons so thath they don't go through
-the same resonance again */
-		   /*NB--It is important that reweightwind be called after scatter, as there are variables which are set in scatter and in
-		   aniosowind that are used by reweightwind.  02may ksl */
 
-		if (geo.scatter_mode == 1)
-		{														// Then we have anisotropic scattering
-			/* In new call it is important to realize that pp->lmn must be the new photon direction, and that the weight of the
-			   photon will have been changed */
-			reweightwind(pp);
-		}
-		else if (geo.scatter_mode == 2)	/* Then we have anisotropic scattering based on a random number of scatters at the
-																		   scattering site */
-		{
+	/* But in any event we have to reposition wind photons so thath they don't go through the same resonance again */
+	/* NB--It is important that reweightwind be called after scatter, as there are variables which are set in scatter and in
+	   aniosowind that are used by reweightwind.  02may ksl */
 
-			dvds = dvwind_ds(pp);
-			ishell = pp->grid;
-			tau = sobolev(&w[ishell], pp->x, -1.0, lin_ptr[pp->nres], dvds);
-			if (tau > 0.0)
-				pp->w *= (1. - exp(-tau)) / tau;
-			tau = 0.0;
-		}
+	if (geo.scatter_mode == 1)
+	{							// Then we have anisotropic scattering
+		/* In new call it is important to realize that pp->lmn must be the new photon direction, and that the weight of the photon
+		   will have been changed */
+		reweightwind(pp);
+	}
+	else if (geo.scatter_mode == 2)	/* Then we have anisotropic scattering based on a random number of scatters at the scattering
+									   site */
+	{
 
-		/* But in any event we have to reposition wind photons so thath they don't go through the same resonance again */
+		dvds = dvwind_ds(pp);
+		ishell = pp->grid;
+		tau = sobolev(&w[ishell], pp->x, -1.0, lin_ptr[pp->nres], dvds);
+		if (tau > 0.0)
+			pp->w *= (1. - exp(-tau)) / tau;
+		tau = 0.0;
+	}
 
-		reposition(w, pp);					// Only reposition the photon if it was a wind photon
-	
+	/* But in any event we have to reposition wind photons so thath they don't go through the same resonance again */
+
+	reposition(w, pp);			// Only reposition the photon if it was a wind photon
+
 
 	if (tau > TAU_MAX)
-		istat = P_ABSORB;						/* Check to see if tau already too large */
+		istat = P_ABSORB;		/* Check to see if tau already too large */
 	else if (geo.system_type == 1)	/* Changed 69 to allow for additional system types */
 		istat = hit_secondary(pp);	/* Check to see if it hit secondary */
 
@@ -301,7 +301,7 @@ the same resonance again */
 
 	if (phot_hist_on)
 	{
-		phot_hist(pp, 0);						// Initialize the photon history
+		phot_hist(pp, 0);		// Initialize the photon history
 	}
 
 	/* Now we can actually extract the reweighted photon */
@@ -309,7 +309,7 @@ the same resonance again */
 	{
 		istat = translate(w, pp, 20., &tau, &nres);
 		icell++;
-		
+
 		istat = walls(pp, &pstart);
 		if (istat == -1)
 		{
@@ -319,20 +319,20 @@ the same resonance again */
 
 		if (pp->w < weight_min)
 		{
-			istat = P_ABSORB;					/* This photon was absorbed within the wind */
+			istat = P_ABSORB;	/* This photon was absorbed within the wind */
 			break;
 		}
 
 		if (istat == P_HIT_STAR)
-		{														/* It was absorbed in the photosphere */
+		{						/* It was absorbed in the photosphere */
 			break;
 		}
 		if (istat == P_HIT_DISK)
-		{														/* It was absorbed in the disk */
+		{						/* It was absorbed in the disk */
 			break;
 		}
 		if (istat == P_SCAT)
-		{														/* Cause the photon to scatter and reinitilize */
+		{						/* Cause the photon to scatter and reinitilize */
 			break;
 		}
 	}
@@ -340,12 +340,12 @@ the same resonance again */
 	if (istat == P_ESCAPE)
 	{
 		/* This seems very defensive.  Is tau ever less than 0? */
-		
-		if(pp->nrscat>0)	//SWM - Records total distance travelled by extract photon
+
+		if (pp->nrscat > 0)		// SWM - Records total distance travelled by extract photon
 		{
-			stuff_v(pstart.x,pp->x);	//Restore photon to initial position (necessary for reweighting schemes)
+			stuff_v(pstart.x, pp->x);	// Restore photon to initial position (necessary for reweighting schemes)
 			pp->path = pstart.path;
-			delay_dump_single(pp, 1); 	//Dump photon now weight has been modified
+			delay_dump_single(pp, 1);	// Dump photon now weight has been modified
 		}
 
 		if (!(0 <= tau && tau < 1.e4))

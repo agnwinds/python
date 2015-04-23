@@ -314,10 +314,16 @@ config_overview (int n, int icell)
   p = &config[n];
   /* initialize the density */
   xden = -1;
+  
   if (icell >= 0 && icell < NDIM2)
     {
       x = &plasmamain[icell];
       xden = x->levden[p->nden];
+    }
+  else
+    {
+      Error("%i is not a cell in plasma structure!!\n" , icell);
+      return 0;
     }
 
 
@@ -470,6 +476,11 @@ depcoef_overview (int icell)
       partition_functions (xdummy, 1);
       saha (xdummy, xdummy->ne, xdummy->t_e);
       geo.macro_ioniz_mode = 1;
+    }
+  else
+    {
+      Error("%i is not a cell in plasma structure!!\n" , icell);
+      return 0;
     }
 
   printf
@@ -730,7 +741,7 @@ level_popsoverview (int nplasma, WindPtr w, char rootname[], int ochoice)
     lteden = den_config (xdummy, i);
     Log("%i %8.4e %8.4e\n", i+1, xplasma->levden[i], xden/lteden);
     if (ochoice)
-      fprintf(f, "%i %8.4e %8.4e\n", i+1, xden, xden/lteden);
+      fprintf(f, "%i %8.4e %8.4e\n", i+1, xplasma->levden[i], xden/lteden);
   }
   fclose(f);
 

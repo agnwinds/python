@@ -440,7 +440,7 @@ def read_convergence (root ):
                 data = line.split()
                 conv_fraction.append(float (data[3]))
                 
-    print conv_fraction
+    #print conv_fraction
 
     final_conv = conv_fraction [-1]
     return final_conv

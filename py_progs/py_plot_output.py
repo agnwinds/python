@@ -47,7 +47,7 @@ except ImportError:
 
 
 
-def make_spec_plot(s, fname, smooth_factor = 10, angles = True, components = False):
+def make_spec_plot(s, fname, smooth_factor = 10, angles = True, components = False, with_composite=False):
 
 	'''
     make a spectrum plot from astropy.table.table.Table object 
@@ -102,11 +102,22 @@ def make_spec_plot(s, fname, smooth_factor = 10, angles = True, components = Fal
 
 		print "Making a %i by %i plot, %i spectra" % (nx, ny, nspecs)
 
+		if with_composite:
+			lambda_composite, f_composite, errors = np.loadtxt("%s/examples/telfer_qso_composite_hst.asc" % (os.environ["PYTHON"]), unpack=True, comments="#")
+
 		for i in range(nspecs):
 
 			p.subplot(ny, nx, i+1)
 
-			p.plot(s["Lambda"], util.smooth(s[s.dtype.names[ncomponents + i]], window_len = smooth_factor))
+			if with_composite:
+				f_1100 = util.get_flux_at_wavelength(s["Lambda"],s[s.dtype.names[ncomponents + i]], 1100.0)
+				p.plot(s["Lambda"], util.smooth(s[s.dtype.names[ncomponents + i]]/f_1100, window_len = smooth_factor), label="Model")
+				p.plot(lambda_composite, f_composite, label="HST composite")
+				p.legend()
+
+			else:
+				p.plot(s["Lambda"], util.smooth(s[s.dtype.names[ncomponents + i]], window_len = smooth_factor))
+
 
 			p.title(s.dtype.names[ncomponents + i])
 			p.xlabel("Wavelength")
@@ -441,6 +452,10 @@ if __name__ == "__main__":
     if mode == "spec":
         s = r.read_spectrum(fname)
         make_spec_plot(s, fname)
+
+    elif mode == "specc":   # compare to the HST composite QSO spectrum
+        s = r.read_spectrum(fname)
+        make_spec_plot(s, fname, with_composite=True)
 
     elif mode == "wind":
         make_wind_plot(None, fname)

@@ -142,7 +142,9 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		agn.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
 		spectral_estimators.o variable_temperature.o matom_diag.o \
 		log.o lineio.o rdpar.o direct_ion.o pi_rates.o matrix_ion.o para_update.o \
-		setup.o reverb.o wind_keplerian.o splitting.o
+		reverb.o wind_keplerian.o splitting.o \
+		setup.o photo_gen_matom.o macro_gov.o
+
 
 
 python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
@@ -158,7 +160,8 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
 		spectral_estimators.c variable_temperature.c matom_diag.c \
 		direct_ion.c pi_rates.c matrix_ion.c para_update.c setup.c \
-		reverb.c wind_keplerian.c splitting.c
+		reverb.c wind_keplerian.c splitting.c \
+		photo_gen_matom.c macro_gov.c
 
 # kpar_source is now declared seaprately from python_source so that the file log.h 
 # can be made using cproto
@@ -190,8 +193,8 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		matom.o estimators.o yso.o elvis.o photon2d.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
 		spectral_estimators.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
-        variable_temperature.o bb.o rdpar.o log.o direct_ion.o wind_keplerian.o \
-		diag.o matrix_ion.o pi_rates.o reverb.o time.o
+       	variable_temperature.o bb.o rdpar.o log.o direct_ion.o diag.o matrix_ion.o \
+		pi_rates.o photo_gen_matom.o macro_gov.o wind_keplerian.o time.o
 
 
 py_wind: startup $(py_wind_objects)

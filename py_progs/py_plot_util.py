@@ -244,3 +244,32 @@ def parse_rcparams(fname = "params.rc"):
 
 	return 0
 
+def get_flux_at_wavelength(lambda_array, flux_array, w):
+
+	'''
+    turn a table, one of whose colnames is value_string,
+    into a masked array based on values of inwind 
+
+    Parameters
+    ----------
+    lambda_array: array-like	
+    	array of wavelengths in angstroms. 1d 
+
+    flux_array: array-like 
+    	array of fluxes same shape as lambda_array 
+
+    w: float 
+    	wavelength in angstroms to find
+    
+    Returns
+    ----------
+    f: float 
+    	flux at point w
+    '''
+
+	i = np.abs(lambda_array - w).argmin()
+
+	return flux_array[i]
+
+
+

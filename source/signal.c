@@ -136,9 +136,14 @@ xsignal (char *root, char *format, ...)
 int
 xsignal_rm (char *root)
 {
+
+#ifdef MPI_ON
+  if (rank_global==0)   // only remove sig file if 0th thread
+    {
+#endif
+
   char filename[LINELENGTH];
   char command[LINELENGTH];
-
   /* Make the filemne */
   strcpy (filename, "");
   strcpy (filename, root);
@@ -147,6 +152,10 @@ xsignal_rm (char *root)
   strcpy (command, "rm ");
   strcat (command, filename);
   system (command);
+
+#ifdef MPI_ON
+  }
+#endif
 
   return (0);
 
