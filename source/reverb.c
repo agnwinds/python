@@ -942,7 +942,7 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 		}
 	}
 
-	fprintf(fptr, "SCALARS crowflies float 1\n");
+	fprintf(fptr, "SCALARS path_rel_diff_from_direct float 1\n");
 	fprintf(fptr, "LOOKUP_TABLE default\n");
 	for(i=0; i < NDIM-1; i++)
 	{

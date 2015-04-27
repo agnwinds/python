@@ -832,6 +832,8 @@ int main(argc, argv)
 		}
 	}
 
+
+
 	/* Select the units of the output spectra.  This is always needed */
 
 	rdint("spec.type(flambda(1),fnu(2),basic(other)", &select_spectype);
@@ -850,9 +852,9 @@ int main(argc, argv)
 
 	/* 57h -- New section of inputs to provide more control over how the program is run -- 07jul -- ksl 1502 JM -- moved to
 	   subroutine */
-
 	get_standard_care_factors();
-
+	/* 0415 SWM - Added metaparams */
+	get_meta_params();
 
 	/* 081221 - 67c - Establish limits on the frequency intervals to be used by the ionization cycles and the fraquency bands for
 	   stratified sampling.  Changes here were made to allow more control over statified sampling, since we have expanded the
@@ -874,21 +876,6 @@ int main(argc, argv)
 	/* 1112 - 71 - ksl Next routine sets up the frequencies that are used for charactizing the spectrum in a cell * These need to
 	   be coordinated with the bands that are set up for spectral gneration */
 	freqs_init(freqmin, freqmax);
-
-	/* SWM 20/4/15 Read parameters, to be merged into regular settings later */
-	geo.vr_ionisation = 0;
-	geo.vr_spectrum = 0;
-	geo.reverb = 0;
-	rdint("vr.ionisation", &geo.vr_ionisation);
-	rdint("vr.spectrum", &geo.vr_spectrum);
-	rdint("reverb.type", &geo.reverb);
-	if (geo.reverb == REV_WIND)
-	{
-		geo.reverb_path_bins = 30;
-		geo.reverb_theta_bins = 30;
-		rdint("reverb.path_bins", &geo.reverb_path_bins);
-		rdint("reverb.theta_bins", &geo.reverb_theta_bins);
-	}
 
 	if (modes.iadvanced)
 	{

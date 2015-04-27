@@ -356,6 +356,12 @@ int trans_phot_single(WindPtr w, PhotPtr p, int iextract)
 
 			}
 
+			/* 0215 SWM - Added cell-based reverberation mapping */
+			if(geo.reverb == REV_WIND && geo.pcycle == 0 && geo.wcycle == geo.wcycles -1)
+			{
+				 wind_paths_add_phot (&wmain[n], &pp);
+			}
+
 
 			/* SS July 04 - next lines modified so that the "thermal trapping" model of anisotropic scattering is included in the
 			   macro atom method. What happens now is all in scatter - within that routine the "thermal trapping" model is used to

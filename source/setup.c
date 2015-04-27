@@ -948,6 +948,48 @@ int get_compton_torus_params ()
   return (0);
 }
 
+/***********************************************************
+             University of Southampton
+
+Synopsis: 
+  get_meta_params reads in data pertaining to simulation meta-
+  properties like reverberation mapping settings and variance
+  reduction techniques.
+   
+Arguments:    
+
+Returns:
+ 
+Description:  
+
+Notes:
+
+History:
+  1504  SWM   Added
+
+**************************************************************/
+
+
+int get_meta_params ()
+{
+  geo.vr_ionisation = 0;
+  geo.vr_spectrum = 0;
+  geo.reverb = 0;
+  /*
+  rdint("vr.ionisation", &geo.vr_ionisation);
+  rdint("vr.spectrum", &geo.vr_spectrum);
+  */
+  rdint("reverb.type", &geo.reverb);
+  if (geo.reverb == REV_WIND)
+  {
+    geo.reverb_path_bins = 30;
+    geo.reverb_theta_bins = 30;
+    rdint("reverb.path_bins", &geo.reverb_path_bins);
+    rdint("reverb.theta_bins", &geo.reverb_theta_bins);
+  }
+
+  return (0);
+}
 
 
 /***********************************************************

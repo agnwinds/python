@@ -473,6 +473,7 @@ double get_stellar_params(void);
 int get_disk_params(void);
 int get_bl_and_agn_params(double lstar);
 int get_compton_torus_params(void);
+int get_meta_params(void);
 double setup_dfudge(void);
 int setup_windcone(void);
 int setup_created_files(void);
