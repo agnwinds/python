@@ -772,12 +772,6 @@ int main(argc, argv)
 		for (n = 0; n < nangles; n++)
 			rddoub("angle(0=pole)", &angle[n]);
 
-
-		for(n=0; n<nangles; n++)
-		{
-			printf("Read in angle %d of %d: %e\n",n,nangles,angle[n]);
-		}
-
 		/* 05apr-ksl-56--For diagnostic reasons I have left questions regarding phase even for systems which are not binaries.
 		   Phase 0 in this case corresponds to an extraction direction which is in the xz plane */
 		/* JM 1502 -- change this so we only ask for phase if the system is a binary -- see #137 */

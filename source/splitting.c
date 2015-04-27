@@ -62,7 +62,7 @@ int importance_map_init (
 
 	if(geo.coord_type == SPHERICAL)
 	{
-		//importance_map_init_spherical (w, r_imp_max, r_thresh_r);
+		importance_map_init_spherical (w, r_imp_max, r_thresh_r);
 	}
 
 	return(0);
