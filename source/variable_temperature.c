@@ -506,6 +506,18 @@ numerator=denominator=0.0;
 }
 
 
+/* temp_func is the function minimised by zbrent to find a temperature
+   when the ion ratios are one (so the logarithm will be 0), 
+   to avoid numerical problems. It is the natural log of the saha equation
+   with the ne taken to the RHS. The correction 
+   factors are applied after and depend on the temperature we find.
+
+   note xxxne is a global variable which is declared above and 
+   assigned in the main variable_temperature routine. 
+
+   Originally coded by NSH
+   1504 JM  replaced constant with SAHA for clarity (same value).
+*/
 
 double
 temp_func (solv_temp)
@@ -513,7 +525,7 @@ temp_func (solv_temp)
 {
   double answer;
   answer =
-    log (4.83e15 / xxxne) + 1.5 * log (solv_temp) -
+    log (SAHA / xxxne) + 1.5 * log (solv_temp) -
     (xip / (BOLTZMANN * solv_temp));
 
   return (answer);
