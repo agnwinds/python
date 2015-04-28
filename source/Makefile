@@ -171,7 +171,7 @@ additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_
 
 prototypes: 
 	cp templates.h templates.h.old
-	cproto -I$(INCLUDE) $(python_source) ${additional_py_wind_source} test_saha.c  > foo.h  
+	cproto -I$(INCLUDE) $(python_source) ${additional_py_wind_source} > foo.h  
 	cp foo.h templates.h
 	cproto -I$(INCLUDE) $(kpar_source) > log.h 
 
@@ -211,11 +211,6 @@ test_bb: bb.o test_bb.o pdf.o recipes.o bilinear.o time.o
 	
 test_pow: test_pow.o pdf.o recipes.o bilinear.o time.o 
 	$(CC)  ${CFLAGS} pdf.o test_pow.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_pow
-
-
-test_saha: test_saha.o $(python_objects)
-	$(CC) ${CFLAGS} test_saha.o $(python_objects) $(LDFLAGS) -o test_saha
-		mv $@ $(BIN)
 
 test_matrix: test_matrix.o $(python_objects)
 	$(CC) ${CFLAGS} test_matrix.o $(python_objects) $(LDFLAGS) -o test_matrix

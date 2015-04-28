@@ -296,7 +296,7 @@ int where_in_2dcell(int ichoice, double x[], int n, double *fx, double *fz);
 int wind_n_to_ij(int n, int *i, int *j);
 int wind_ij_to_n(int i, int j, int *n);
 /* density.c */
-double get_ion_density(PhotPtr p, int nion);
+double get_ion_density(double x[], int nion);
 /* detail.c */
 int detailed_balance(PlasmaPtr xplasma, int nelem, double newden[]);
 int rebalance(double rates_up[], double rates_down[], double fraction[], int ntot);
@@ -505,10 +505,6 @@ int wind_keplerian_cyl_volumes(WindPtr w, int icomp);
 int wind_keplerian_cylvar_volumes(WindPtr w, int icomp);
 int wind_keplerian_randvec(PhotPtr pp, double r);
 int rand_sign(void);
-/* splitting.c */
-int importance_map_init_spherical(WindPtr w, double r_imp_max, double r_thresh);
-int importance_map_init_cylindrical(WindPtr w);
-int importance_map_init(WindPtr w, double r_imp_max, double r_thresh_r, double r_thresh_theta);
 /* photo_gen_matom.c */
 double get_kpkt_f(void);
 double get_matom_f(int mode);
@@ -585,4 +581,3 @@ int level_tauoverview(int nlev, WindPtr w, char rootname[], int ochoice);
 int main(int argc, char *argv[]);
 int one_choice(int choice, char *root, int ochoice);
 int py_wind_help(void);
-/* test_saha.c */

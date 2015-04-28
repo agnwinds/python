@@ -26,6 +26,7 @@ History:
 			in continuing effort to enable more 
 			coordinate systems.
 	06may	ksl	57+ -- Modified to use plasma structure
+  1411 JM Modified to use a general vector x, rather than a PhotPtr
 **************************************************************/
 
 #include <stdio.h>
@@ -37,8 +38,10 @@ History:
 
 
 
-double 
-get_ion_density (PhotPtr p, int nion)
+double
+get_ion_density (x, nion)
+     double x[];
+     int nion;
 {
   double dd;
   int nn, nnn[4], nelem;
@@ -49,18 +52,22 @@ get_ion_density (PhotPtr p, int nion)
 structure that must be summed. We need to convert that to a position
 in the plasma structure*/
 
-  if ((coord_fraction (1, p->x, nnn, frac, &nelem)) > 0)
-  {
-    dd = 0;
-    for (nn = 0; nn < nelem; nn++)
+  if ((coord_fraction (1, x, nnn, frac, &nelem)) > 0)
     {
-      nplasma = wmain[nnn[nn]].nplasma;
-      dd += plasmamain[nplasma].density[nion] * frac[nn];
+
+      dd = 0;
+
+      for (nn = 0; nn < nelem; nn++)
+	{
+	  nplasma = wmain[nnn[nn]].nplasma;
+	  dd += plasmamain[nplasma].density[nion] * frac[nn];
+	}
     }
-  }
   else
-  {
-    dd = 0;
-  }
+    {
+      dd = 0;
+    }
+
+
   return (dd);
 }
