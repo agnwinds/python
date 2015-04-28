@@ -114,10 +114,8 @@ nebular_concentrations (xplasama, mode)  modifies the densities of ions, levels,
 
 **************************************************************/
 
-int
-nebular_concentrations (xplasma, mode)
-     PlasmaPtr xplasma;
-     int mode;			// 0=saha using tr, 1=saha using te, 2= Lucy & Mazzali
+int 
+nebular_concentrations (PlasmaPtr xplasma, int mode)			// 0=saha using tr, 1=saha using te, 2= Lucy & Mazzali
 {
   double get_ne ();
   int lucy_mazzali1 ();
@@ -290,10 +288,8 @@ concentrations (xplasma, mode)
 //#define MIN_TEMP         100. NSH 0712 - moved into python.h because this is used in severalpaces
 
 
-int
-concentrations (xplasma, mode)
-     PlasmaPtr xplasma;
-     int mode;			//   0=saha using tr, 1=saha using te
+int 
+concentrations (PlasmaPtr xplasma, int mode)			//   0=saha using tr, 1=saha using te
 {
   int nion, niterate;
   double xne, xxne, xnew, xsaha;
@@ -461,10 +457,8 @@ concentrations (xplasma, mode)
 
 **************************************************************/
 
-int
-saha (xplasma, ne, t)
-     PlasmaPtr xplasma;
-     double ne, t;
+int 
+saha (PlasmaPtr xplasma, double ne, double t)
 
 {
   double nh;
@@ -609,9 +603,8 @@ saha (xplasma, ne, t)
 #define MIN_FUDGE  1.e-10
 #define MAX_FUDGE  10.
 
-int
-lucy (xplasma)
-     PlasmaPtr xplasma;
+int 
+lucy (PlasmaPtr xplasma)
 {
   int nelem, nion, niterate;
   double xne, xnew;
@@ -764,15 +757,13 @@ lucy (xplasma)
 **************************************************************/
 
 
-int
-lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
-     double nh, t_r, t_e, www;
-     int nelem;
-     double ne, density[], xne, newden[];
+int 
+lucy_mazzali1 (double nh, double t_r, double t_e, double www, int nelem, double ne, double density[], double xne, double newden[])
 {
-  double fudge;			
+  double fudge;			// dummy, interpfrac; 0712 zeta calculation moved into zeta.c
   double fudge2, q;
   double sum, a;
+//  int ilow, ihi; 0712 nsh zeta moved into subroutine
   int first, last, nion;
   double numerator, denominator;
 
@@ -783,14 +774,35 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
   if (t_r > MIN_TEMP)
     {
       fudge = www * sqrt (t_e / t_r);
-    }
 
+//NSH 0712These lines now moved into zeta.c we retain the caculation of sqrt t_e/t_r
+      /* now get the right place in the ground_frac tables  CK */
+//      dummy = t_e / TMIN - 1.;
+//      ilow = dummy;           /* have now truncated to integer below */
+//      ihi = ilow + 1;         /*these are the indeces bracketing the true value */
+//      interpfrac = (dummy - ilow);    /*this is the interpolation fraction */
+//      if (ilow < 0)
+//      {
+//        ilow = 0;
+//        ihi = 0;
+//        interpfrac = 1.;
+//      }
+//    if (ihi > 19)
+//      {
+//        ilow = 19;
+//        ihi = 19;
+//        interpfrac = 1.;
+//      }
+
+    }
   else
     {
       Error_silent
 	("lucy_mazzali1: t_r too low www %8.2e t_e %8.2e  t_r %8.2e \n", www,
 	 t_e, t_r);
       fudge = 0.0;
+//      interpfrac = 0.0;
+//      ihi = ilow = 0;
     }
 
   if (fudge < MIN_FUDGE || MAX_FUDGE < fudge)
@@ -807,42 +819,18 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
 					   be 0 and last will be 2 so the for loop below will just be done once for nion = 1 */
 
 
-  /* JM 1411 -- the next two while loops check if there are ions low down
-     or high up in the sequence of ions that have negligible density-
-     in which case we don't bother applying the mazzali lucy 
-     scheme to those ions */
-
-  /* JM 1411 -- we only want to increment first if 
-     we don't go off the end of the array, see #93 */
-  while (density[first] < 1.1 * DENSITY_MIN && first < last)
+  while (density[first] < 1.1 * DENSITY_MIN)
     {
       newden[first] = DENSITY_MIN;
-      
       first++;
-      
-      /* if first has been incremented all the way up to last 
-         then this means all ions have negligible densities - 
-         so throw an error */
-      if (first == last)
-        Error("lucy_mazzali1: elem %i has all ions < %8.4e density\n", 
-               nelem, DENSITY_MIN);
-
     }
-
-  /* JM 1411 -- we only want to decrement last if 
-     we don't go off the end of the array, see #93 */ 
-  while (density[last - 1] < 1.1 * DENSITY_MIN && last > first)
+  while (density[last - 1] < 1.1 * DENSITY_MIN)
     {
       newden[last - 1] = DENSITY_MIN;
-
-      if (last > first)
-        last--;
+      last--;
     }
 
-
-
   sum = newden[first] = 1.;
-
   for (nion = first + 1; nion < last; nion++)
     {
       numerator = newden[nion - 1] * fudge * (ne) * density[nion];
@@ -853,28 +841,25 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
          first find fraction of recombinations going directly to
          the ground state for this temperature and ion */
 
-      /* NSH 1207 - call external function, mode 2 uses chianti and badnell 
-         data to try to take account of DR in zeta - if atomic data is not read in, 
-         then the old interpolated zeta will be returned */
+      fudge2 = compute_zeta (t_e, nion - 1, 2);	/* NSH 1207 - call external function, mode 2 uses chianti and badnell data to try to take account of DR in zeta - if atomic data is not read in, then the old interpolated zeta will be returned */
 
-      fudge2 = compute_zeta (t_e, nion - 1, 2);	
 
-      /* Since nion-1 points at state i-1 (saha: n_i/n_i-1) we want ground_frac[nion-1].
+/* NSH 0712 - Old way of doing it, not moved into routines in zeta.c 
+	ground_frac[nion - 1].frac[ilow] +
+	interpfrac * (ground_frac[nion - 1].frac[ihi] -
+		      ground_frac[nion - 1].frac[ilow]); */
+      /*Since nion-1 points at state i-1 (saha: n_i/n_i-1) we want ground_frac[nion-1].
          Note that we NEVER access the last ion for any element in that way
          which is just as well since you can't have recombinations INTO
          a fully ionized state -- The corresponding lines in recombination.out 
          are just dummies to make reading the data easier */
-
       fudge2 = fudge2 + www * (1.0 - fudge2);
       newden[nion] = fudge2 * q;
       sum += newden[nion];
-
-      // This is the equation being calculated
-      // sum+=newden[nion]=newden[nion-1]*fudge*(*ne)*density[nion]/density[nion-1]/xne;
+// This is the equation being calculated
+//              sum+=newden[nion]=newden[nion-1]*fudge*(*ne)*density[nion]/density[nion-1]/xne;
     }
-
   a = nh * ele[nelem].abun / sum;
-
   for (nion = first; nion < last; nion++)
     newden[nion] *= a;
 
@@ -941,10 +926,8 @@ struct force_con
 con_force[10];
 int nforce;
 
-int
-fix_concentrations (xplasma, mode)
-     PlasmaPtr xplasma;
-     int mode;			// 0=saha using tr, 1=saha using te, 2= Lucy & Mazzali
+int 
+fix_concentrations (PlasmaPtr xplasma, int mode)			// 0=saha using tr, 1=saha using te, 2= Lucy & Mazzali
 
 {
   int nelem, nion;
@@ -1050,9 +1033,8 @@ fix_concentrations (xplasma, mode)
 
 **************************************************************/
 
-double
-get_ne (density)
-     double density[];
+double 
+get_ne (double density[])
 {
   int n;
   double ne;

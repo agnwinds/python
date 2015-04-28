@@ -97,10 +97,7 @@ History:
 ************************************************************/
 
 int
-matom (p, nres, escape)
-     PhotPtr p;
-     int *nres;
-     int *escape;
+matom (PhotPtr p, int *nres, int* escape)
 {
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
@@ -526,9 +523,8 @@ matom (p, nres, escape)
 struct lines *b12_line_ptr;
 double b12_a;
 
-double
-b12 (line_ptr)
-     struct lines *line_ptr;
+double 
+b12 (struct lines *line_ptr)
 {
   double freq;
 
@@ -576,11 +572,8 @@ times the integral of   a(nu) nu2 exp [(chi- h nu)/kT].
 */
 #define ALPHA_SP_CONSTANT 5.79618e-36
 
-double
-alpha_sp (cont_ptr, xplasma, ichoice)
-     struct topbase_phot *cont_ptr;
-     PlasmaPtr xplasma;
-     int ichoice;
+double 
+alpha_sp (struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice)
 {
   double alpha_sp_value;
   double fthresh, flast;
@@ -618,9 +611,8 @@ alpha_sp (cont_ptr, xplasma, ichoice)
 /* alpha_sp_integrand. This returns the integrand for alpha_sp at a chosen
    frequency*/
 
-double
-alpha_sp_integrand (freq)
-     double freq;		//frequency 
+double 
+alpha_sp_integrand (double freq)		//frequency 
 {
   double fthresh;
   double x;
@@ -694,11 +686,8 @@ History:
           
 ************************************************************/
 
-int
-kpkt (p, nres, escape)
-     PhotPtr p;
-     int *nres;
-     int *escape;
+int 
+kpkt (PhotPtr p, int *nres, int *escape)
 {
 
   int i;
@@ -1190,11 +1179,8 @@ History:
 
 ************************************************************/
 
-int
-fake_matom_bb (p, nres, escape)
-     PhotPtr p;
-     int *nres;
-     int *escape;
+int 
+fake_matom_bb (PhotPtr p, int *nres, int *escape)
 {
   double kprb, rprb;
   WindPtr one;
@@ -1316,11 +1302,8 @@ History:
 
 ************************************************************/
 
-int
-fake_matom_bf (p, nres, escape)
-     PhotPtr p;
-     int *nres;
-     int *escape;
+int 
+fake_matom_bf (PhotPtr p, int *nres, int *escape)
 {
   WindPtr one;
   PlasmaPtr xplasma;
@@ -1341,7 +1324,6 @@ fake_matom_bf (p, nres, escape)
   return (0);
 
 }
-
 
 /************************************************************
                                     Imperial College London
@@ -1371,12 +1353,8 @@ History:
 
 ************************************************************/
 
-int
-emit_matom (w, p, nres, upper)
-     WindPtr w;
-     PhotPtr p;
-     int *nres;
-     int upper;
+int 
+emit_matom (WindPtr w, PhotPtr p, int *nres, int upper)
 {
   struct lines *line_ptr;
   struct topbase_phot *cont_ptr;
@@ -1532,10 +1510,8 @@ emit_matom (w, p, nres, upper)
 Calculated following equation 5-79 of Mihalas.
 */
 
-double
-q_ioniz (cont_ptr, electron_temperature)
-     struct topbase_phot *cont_ptr;
-     double electron_temperature;
+double 
+q_ioniz (struct topbase_phot *cont_ptr, double electron_temperature)
 {
   double coeff;
   double gaunt;
@@ -1563,10 +1539,8 @@ q_recomb = 2.07e-16 * gl/gu * exp(E/kT) * q_ioniz
 then substituting the above expression for q_ioniz.
 */
 
-double
-q_recomb (cont_ptr, electron_temperature)
-     struct topbase_phot *cont_ptr;
-     double electron_temperature;
+double 
+q_recomb (struct topbase_phot *cont_ptr, double electron_temperature)
 {
   double coeff;
   double gaunt;

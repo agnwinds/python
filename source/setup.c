@@ -555,10 +555,15 @@ get_wind_params()
   else if (geo.wind_type == 9)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
     {
       get_shell_wind_params ();
+    }
+  else if (geo.wind_type == 10)
+  {
+      get_wind_keplerian_params();
+  }
+
 /*NSH 121219 moved	  dfudge = (geo.wind_rmax - geo.wind_rmin) / 1000.0;	Stop photons getting pushed out of the cell 
 Modified again in python 71b to take account of change in parametrisation of shell wind 
 	  DFUDGE = dfudge; */
-    }
   else if (geo.wind_type != 2)
     {
       Error ("python: Unknown wind type %d\n", geo.wind_type);
@@ -943,6 +948,41 @@ int get_compton_torus_params ()
   return (0);
 }
 
+/***********************************************************
+             University of Southampton
+
+Synopsis: 
+  get_meta_params reads in data pertaining to simulation meta-
+  properties like reverberation mapping settings and variance
+  reduction techniques.
+   
+Arguments:    
+
+Returns:
+ 
+Description:  
+
+Notes:
+
+History:
+  1504  SWM   Added
+
+**************************************************************/
+
+int get_meta_params ()
+{
+  geo.reverb = 0;
+  rdint("reverb.type", &geo.reverb);
+  if (geo.reverb == REV_WIND)
+  {
+    geo.reverb_path_bins = 30;
+    geo.reverb_theta_bins = 30;
+    rdint("reverb.path_bins", &geo.reverb_path_bins);
+    rdint("reverb.theta_bins", &geo.reverb_theta_bins);
+  }
+
+  return (0);
+}
 
 
 /***********************************************************

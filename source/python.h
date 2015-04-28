@@ -3,11 +3,10 @@
 #endif 
 
 int np_mpi_global;               /// Global variable which holds the number of MPI processes
-
+ int write_atomicdata;
 int rank_global; 
 
-// DEBUG is deprecated, see #111, #120
-//#define DEBUG 				0	/* 0 means do not debug */
+#define DEBUG 				0	/* 0 means do not debug */
 int verbosity;			/* verbosity level. 0 low, 10 is high */
 
 /* the functions contained in log., rdpar.c and lineio.c are
@@ -132,8 +131,14 @@ int NPHOT;			/* As of python_40, NPHOT must be defined in the main program using
 #define NCOMPS 	10
 #define LINELENGTH 	160
 
+/* definitions of reverberation mapping types */
+#define REV_NONE    0
+#define REV_PHOTON  1
+#define REV_WIND    2
+
 struct geometry
 {
+
 /* 67 - ksl This section added to allow for restarting the program, and adds parameters used
  * in the calculation */
 
@@ -267,6 +272,10 @@ struct geometry
   double sv_r_scale, sv_alpha;	/* the scale length and power law exponent for the velocity law */
   double sv_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
 
+
+  double wind_bc_density;
+  double wind_hubble_velocity, wind_hubble_exponent;
+
   /* Paramater for the Elvis AGN wind - closely based on SV */
   double elvis_offset;		/*This is a vertical offset for a region where the
 				   wind rises vertically from the disk */
@@ -374,16 +383,19 @@ struct geometry
 // The next set of parameters describe the input datafiles that are read
   char atomic_filename[132];	/* 54e -- The masterfile for the atomic data */
   char fixed_con_file[132];	/* 54e -- For fixed concentrations, the file specifying concentrations */
+
+  //Added by SWM for reverberation mapping - 0=None, 1=Photon, 2=Wind
+  int reverb, reverb_path_bins, reverb_theta_bins; 
 }
 geo;
 
 
-struct plane
+typedef struct plane	/*SWM 10-10-14 - Switched to TypeDef */
 {
   double x[3];			/* A position included in the plane (usally the "center" */
   double lmn[3];		/* A unit vector perpendicular to the plane (usually in the "positive" direction */
-}
-plane_l1, plane_sec, plane_m2_far;	/* these all define planes which are perpendicular to the line of sight from the 
+} plane_dummy, *PlanePtr;
+plane_dummy plane_l1, plane_sec, plane_m2_far;	/* these all define planes which are perpendicular to the line of sight from the 
 					   primary to the seconday */
 
 
@@ -443,7 +455,32 @@ struct blmodel
 }
 blmod;
 
+/*
+    SWN 6-2-15
+    Wind paths is defined per cell and contains a binned array holding the spectrum of paths. Layers are
+    For each frequency:
+      For each path bin:
+        What's the total fluxback of all these photons entering the cell?
+*/
+typedef struct wind_paths
+{
+  double* ad_freq_path_flux;  //Array[by frequency, then path] of total flux of photons with the given v&p
+  int*    ai_freq_path_num;   //Array[by frequency, then path] of the number of photons in this bin
+  double* ad_freq_flux;       //Array[by frequency] of total flux of photons with the given v
+  int*    ai_freq_num;        //Array[by frequency] of the number of photons in this bin
+  double  d_flux, d_path;     //Total flux, average path
+  int     i_num;              //Number of photons hitting this cell
+} wind_paths_dummy, *Wind_Paths_Ptr;
 
+typedef struct path_data
+{
+  double* ad_path_bin;              //Array of bins for the path histograms
+  double* ad_freq_bin;              //Array of bins for the frequency histograms
+  int     i_path_bins, i_obs;       //Number of bins, number of observers
+  int     i_theta_res;              //Number of angular bins when outputting observer paths
+} path_data_dummy, *Path_Data_Ptr;
+Path_Data_Ptr path_data;
+Path_Data_Ptr g_path_data;
 
 
 /* 	This structure defines the wind.  The structure w is allocated in the main
@@ -489,7 +526,6 @@ and PART in whatever, as n and n+1
 #define W_NOT_INWIND  -1	//None of gridcell is in the wind
 #define W_IGNORE      -2	//Even though the wind may occupy a small part of this cell, assume
 				//photons simply pass through the cell.  This is new in 58b
-
 typedef struct wind
 {
   int nwind;			/*A self-reference to this cell in the wind structure */
@@ -512,11 +548,11 @@ typedef struct wind
 				   where the volume is the volume that is actually filled with material. */
   int inwind;			/* 061104 -- 58b -- ksl -- Moved definitions of for whether a cell is or is not
 				   inwind to #define statements above */
-
+  Wind_Paths_Ptr paths;         // SWM 6-2-15 Path data struct for each cell
 }
 wind_dummy, *WindPtr;
-
 WindPtr wmain;
+
 
 /* 57+ - 06jun -- plasma is a new structure that contains information about the properties of the
 plasma in regions of the geometry that are actually included n the wind 
@@ -890,6 +926,7 @@ typedef struct photon
   double freq, freq_orig;    /* current and original frequency of this packet */
   double w,w_orig;		       /* current and original weight of this packet */
   double tau;
+  double path;			/* SWM 31/7/14 - Total path length travelled by this photon */
   int istat;			/*status of photon.  See definitions P_INWIND, etc above */
   int nscat;			/*number of scatterings */
   int nres;			/*The line number in lin_ptr of last scatter or wind line creation */
@@ -908,6 +945,7 @@ typedef struct photon
 				 */
   int np;			/*NSH 13/4/11 - an internal pointer to the photon number so 
 				   so we can write out details of where the photon goes */
+  double importance; /* SWM 24-3-15 Importance of photon for splitting */
 
 }
 p_dummy, *PhotPtr;
@@ -979,6 +1017,8 @@ typedef struct spectrum
 				   <0    -> select only photons whose last position is below the disk */
   double x[3], r;		/* The position and radius of a special region from which to extract spectra  */
   double f[NWAVE];
+  double delay[NWAVE];		/* SWM 10-10-14 - Added delays */
+  double delay_weight[NWAVE];
   double lf[NWAVE];		/* a second array to hole the extracted spectrum in log units */
   double lfreq[NWAVE];		/* We need to hold what freqeuncy intervals our logarithmic spectrum has been taken over */
 }
@@ -1033,18 +1073,13 @@ char hubeny_list[132];		//Location of listing of files representing hubeny atmos
 // Allow for a diagnostic file 
 
 FILE *epltptr;			//TEST
-// diag_on_off is deprecated see #111, #120
-//int diag_on_off;		// on is non-zero  //TEST
+int diag_on_off;		// on is non-zero  //TEST
 
 
 /* These variables are stored or used by the routines for anisotropic scattering */
 /* Allow for the transfer of tau info to scattering routine */
-
-/* JM 1411 -- tau_x_dvds doesn't appear to be used anywhere, so I've 
-   made it a local variable rather than global */  
-//double tau_x_dvds;		//tau_x_dvds/dvds is the actual tau
+double tau_x_dvds;		//tau_x_dvds/dvds is the actual tau
 //double tau_scatter_min;               //Set in subroutine scatter for use by extract
-
 struct Pdf pdf_randwind_store[100];
 PdfPtr pdf_randwind;
 struct photon phot_randwind;
@@ -1136,8 +1171,6 @@ int ncell_stats[NCSTAT];	//the numbers of the cells we are going to log
 int nerr_no_Jmodel;
 int nerr_Jmodel_wrong_freq;
 
-
-
 // advanced mode variables
 struct advanced_modes
 {
@@ -1191,5 +1224,3 @@ files;
    whether it has already calculated the matom emissivities or not. */
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
-
-

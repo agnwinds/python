@@ -57,8 +57,8 @@ History:
 **************************************************************/
 
 
-int
-get_stellar_wind_params ()
+int 
+get_stellar_wind_params (void)
 {
   Log ("Creating a wind model for a Star\n");
 
@@ -99,15 +99,9 @@ get_stellar_wind_params ()
 /* define the the variables that determine the gridding */
   geo.wind_rho_min = 0;
   geo.wind_rho_max = geo.rmax;
+  geo.xlog_scale = 0.3 * geo.rstar;
+  geo.zlog_scale = 0.3 * geo.rstar;
 
-
-  /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
-  if (modes.adjust_grid == 0)
-    {
-      geo.xlog_scale = 0.3 * geo.rstar;
-      geo.zlog_scale = 0.3 * geo.rstar;
-    }
-    
   return (0);
 }
 
@@ -152,9 +146,8 @@ History:
  
 **************************************************************/
 
-double
-stellar_velocity (x, v)
-     double x[], v[];
+double 
+stellar_velocity (double x[], double v[])
 {
   double r, speed, zzz;
   double length ();
@@ -172,9 +165,12 @@ stellar_velocity (x, v)
     speed = geo.cl_v_zero;
   else
     {
-      zzz = pow (1. - geo.cl_rmin / r, geo.cl_beta);
-      speed = geo.cl_v_zero + (geo.cl_v_infinity - geo.cl_v_zero) * zzz;
+      //zzz = pow (1. - geo.cl_rmin / r, geo.cl_beta);
+      //speed = geo.cl_v_zero + (geo.cl_v_infinity - geo.cl_v_zero) * zzz;
+      speed = geo.cl_v_zero * (r / geo.cl_rmin);
     }
+    
+
   v[0] = speed * x[0] / r;
   v[1] = speed * x[1] / r;
   v[2] = speed * x[2] / r;
@@ -204,9 +200,8 @@ History:
  
 **************************************************************/
 
-double
-stellar_rho (x)
-     double x[];
+double 
+stellar_rho (double x[])
 {
   double r, rho, v[3];
   double length (), stellar_velocity ();
@@ -242,9 +237,8 @@ NB: Making ds too small can cause roundoff and/or precision errors.
         01dec   ksl     Added for python_40
 
 */
-int
-stellar_vel_grad (x, velgrad)
-     double x[], velgrad[][3];
+int 
+stellar_vel_grad (double x[], double velgrad[][3])
 {
   double v0[3], v1[3];
   double dx[3], dv[3];

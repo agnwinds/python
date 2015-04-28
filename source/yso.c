@@ -61,8 +61,8 @@ History:
                         at the top (rather than bottom) outer edge of disk.
 **************************************************************/
 
-int
-get_yso_wind_params ()
+int 
+get_yso_wind_params (void)
 {
 
 /* The approach to get the input parameters is to call both input parameter routines
@@ -104,12 +104,8 @@ in units of WD radii */
 	geo.diskrad - (zdisk (geo.diskrad) * tan (geo.wind_thetamax));
     }
 
-  /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
-  if (modes.adjust_grid == 0)
-    {
-      geo.xlog_scale = geo.rstar;
-      geo.zlog_scale = 1e7;
-    }
+  geo.xlog_scale = geo.rstar;
+  geo.zlog_scale = 1e7;
 
   return (0);
 }
@@ -141,9 +137,8 @@ History:
  
 **************************************************************/
 
-double
-yso_velocity (x, v)
-     double x[], v[];
+double 
+yso_velocity (double x[], double v[])
 {
   double r, rzero;
   double zzz;
@@ -190,9 +185,8 @@ History:
  
 **************************************************************/
 
-double
-yso_rho (x)
-     double x[];
+double 
+yso_rho (double x[])
 {
   double r, rzero;
   double dd;

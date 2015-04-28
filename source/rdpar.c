@@ -762,8 +762,3 @@ int rd_extra(firstword, answer, wordlength)
 
   return (0); 
 }
-
-
-
-
-

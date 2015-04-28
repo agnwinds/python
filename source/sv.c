@@ -40,8 +40,8 @@ History:
 	11aug	ksl	70b - kluge to get better xscale with compton torus
 **************************************************************/
 
-int
-get_sv_wind_params ()
+int 
+get_sv_wind_params (void)
 {
   double windmin, windmax, theta_min, theta_max;
   double qromb (), sv_wind_mdot_integral ();
@@ -93,33 +93,25 @@ get_sv_wind_params ()
   geo.wind_rho_max = geo.sv_rmax;
   geo.wind_thetamin = geo.sv_thetamin;
   geo.wind_thetamax = geo.sv_thetamax;
+  geo.xlog_scale = geo.sv_rmin;
 
- 
-  /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
-  if (modes.adjust_grid == 0)
+  /* !! 70b - This change is to accomodate the torus, but it is not obvious this is the
+   * best way to set the scales now. It might be better do do this in make_grid!!  */
+  if (geo.compton_torus && geo.compton_torus_rmin < geo.xlog_scale)
     {
-      geo.xlog_scale = geo.sv_rmin;
-
-      /* !! 70b - This change is to accomodate the torus, but it is not obvious this is the
-       * best way to set the scales now. It might be better do do this in make_grid!!  */
-      if (geo.compton_torus && geo.compton_torus_rmin < geo.xlog_scale)
-        {
-          geo.xlog_scale = geo.compton_torus_rmin;
-        }
-
-     /*70d - ksl - This change made to give one a chance of being able to do an 
-       agn and a CV with the sv model.  The underlying assumption is that the
-       effective radius provides a good scale factor in the verticla direction.
-       An alternative would be to use sv_rmin.
-     */
-
-     //OLD70d  geo.zlog_scale = 1e7;
-     geo.zlog_scale = geo.rstar;
+      geo.xlog_scale = geo.compton_torus_rmin;
     }
 
-  
+/*70d - ksl - This change made to give one a chance of being able to do an 
+   agn and a CV with the sv model.  The underlying assumption is that the
+   effective radius provides a good scale factor in the verticla direction.
+   An alternative would be to use sv_rmin.
+ */
 
-  /*Now calculate the normalization factor for the wind*/
+//OLD70d  geo.zlog_scale = 1e7;
+  geo.zlog_scale = geo.rstar;
+
+/*Now calculate the normalization factor for the wind*/
 
   geo.mdot_norm =
     qromb (sv_wind_mdot_integral, geo.sv_rmin, geo.sv_rmax, 1e-6);
@@ -156,9 +148,8 @@ History:
  
 **************************************************************/
 
-double
-sv_velocity (x, v)
-     double x[], v[];
+double 
+sv_velocity (double x[], double v[])
 {
   double r, rzero, theta, speed;
   double ldist, zzz, v_escape, vl;
@@ -271,9 +262,8 @@ History:
  
 **************************************************************/
 
-double
-sv_rho (x)
-     double x[];
+double 
+sv_rho (double x[])
 {
   double r, rzero, theta;
   double ldist;
@@ -373,9 +363,10 @@ History:
 **************************************************************/
 
 
-double
-sv_find_wind_rzero (p)
-     double p[];		/* Note that p is a 3 vector and not a photon structure */
+double 
+sv_find_wind_rzero (
+    double p[]		/* Note that p is a 3 vector and not a photon structure */
+)
 {
   double x, z;
   double sv_zero_r ();
@@ -454,9 +445,8 @@ History:
 
 double zero_p[3];
 
-int
-sv_zero_init (p)
-     double p[];
+int 
+sv_zero_init (double p[])
 {
   stuff_v (p, zero_p);
   zero_p[2] = fabs (zero_p[2]);	/* Required to get correct 
@@ -467,9 +457,8 @@ sv_zero_init (p)
 /* This routine is used to test whether a guess of r_zero is correct.  If
    you have the answer exactly then sv_zero_r will return 0 */
 
-double
-sv_zero_r (r)
-     double r;
+double 
+sv_zero_r (double r)
 {
   double theta;
   double rho, rho_guess;
@@ -512,9 +501,8 @@ History:
  
 **************************************************************/
 
-double
-sv_theta_wind (r)
-     double r;
+double 
+sv_theta_wind (double r)
 {
   double theta;
   if (r <= geo.sv_rmin)
@@ -553,9 +541,8 @@ History:
  
 **************************************************************/
 
-double
-sv_wind_mdot_integral (r)
-     double r;
+double 
+sv_wind_mdot_integral (double r)
 {
   double x;
   double sv_theta_wind ();

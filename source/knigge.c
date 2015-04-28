@@ -55,8 +55,8 @@ History:
 			has been initialized in cgs units
 **************************************************************/
 
-int
-get_knigge_wind_params ()
+int 
+get_knigge_wind_params (void)
 {
   double kn_wind_mdot_integral ();
   double qromb ();
@@ -153,12 +153,9 @@ in units of WD radii */
  * edge of the wind
  */
 
-  /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
-  if (modes.adjust_grid == 0)
-    {
-      geo.xlog_scale = geo.rstar;
-      geo.zlog_scale = geo.rstar;
-    }
+  geo.xlog_scale = geo.rstar;
+  geo.zlog_scale = geo.rstar;
+
 
 
 /*Now calculate the normalization factor for the wind*/
@@ -241,9 +238,8 @@ History:
 #define kfudge 1.01
 
 
-double
-kn_velocity (x, v)
-     double x[], v[];
+double 
+kn_velocity (double x[], double v[])
 {
   double r, rzero, theta;
   double ldist, zzz, v_escape, vl;
@@ -382,9 +378,8 @@ History:
  
 **************************************************************/
 
-double
-kn_rho (x)
-     double x[];
+double 
+kn_rho (double x[])
 {
   double r, rzero;
   double dd;
@@ -450,9 +445,8 @@ History:
 **************************************************************/
 
 
-double
-kn_vzero (r)
-     double r;
+double 
+kn_vzero (double r)
 {
   double tref, tdisk ();
   double t, teff ();
@@ -490,9 +484,8 @@ History:
  
 **************************************************************/
 
-double
-kn_wind_mdot_integral (r)
-     double r;
+double 
+kn_wind_mdot_integral (double r)
 {
   double tref, tdisk ();
   double t, teff ();
@@ -526,9 +519,8 @@ History:
  
 **************************************************************/
 
-double
-kn_rho_zero (r)
-     double r;
+double 
+kn_rho_zero (double r)
 {
   double tref, tdisk ();
   double t, teff ();

@@ -39,8 +39,8 @@ History:
 **************************************************************/
 
 
-int
-get_shell_wind_params ()
+int 
+get_shell_wind_params (void)
 {
   double vtemp[3];
   double rhotemp[200];
@@ -128,13 +128,9 @@ get_shell_wind_params ()
 /* define the the variables that determine the gridding */
   geo.wind_rho_min = 0;
   geo.wind_rho_max = geo.rmax;
+  geo.xlog_scale = 0.3 * geo.rstar;
+  geo.zlog_scale = 0.3 * geo.rstar;
 
-  /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
-  if (modes.adjust_grid == 0)
-    {
-      geo.xlog_scale = 0.3 * geo.rstar;
-      geo.zlog_scale = 0.3 * geo.rstar;
-    }
 
 /* Since this is a diagnostic routine, we will write out some information to check it is doing what we think) */
   Log ("shell rmin=%f shell rmax=%f\n", shell_rmin, shell_rmax);

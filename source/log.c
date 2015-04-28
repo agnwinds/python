@@ -38,8 +38,7 @@
 
 		int Log_parallel(message)			Log statement for parallel reporting
 
-    JM- Debug statements are controlled by verbosity now, so no need for Log_Debug
-		int Log_debug(value)				Turn on logging of Debug statements if value is non-zero
+		int Leg_debug(value)				Turn on logging of Debug statements if value is non-zero
 
 		int Debug( char *format, ...) 			Log an statement to the screen.  This is essentially a 
 								intended to replace a printf statement in situations where
@@ -112,8 +111,6 @@ History:
 			know about (no photons in band, no model in band) but do not want 
 			to crash the code.
   1407 JM removed warning - we would like to throw errors
-  1411 JM debug statements are controlled by verbosity now, 
-          so no need for Log_Debug
 
  
 **************************************************************/
@@ -132,7 +129,7 @@ History:
 #define SHOW_PARALLEL		1
 #define SHOW_LOG  		2
 #define SHOW_ERROR		2
-#define SHOW_DEBUG	  	4
+#define SHOW_WARNING	  	3
 #define SHOW_LOG_SILENT  	5
 #define SHOW_ERROR_SILENT	5
 
@@ -158,13 +155,10 @@ int nerrors;
 FILE *diagptr;
 int init_log = 0;
 int log_verbosity=5;   // A parameter which can be used to suppress what would normally be logged or printed
+int log_debug=0;	//A parameter which is set to cause Debug commands to be logged
 
-//1411 JM debug statements are controlled by verbosity now, so no need for Log_Debug
-//int log_debug=0;	//A parameter which is set to cause Debug commands to be logged
-
-int
-Log_init (filename)
-     char *filename;
+int 
+Log_init (char *filename)
 {
   FILE *fopen ();
 
@@ -189,9 +183,8 @@ Log_init (filename)
 }
 
 
-int
-Log_append (filename)
-     char *filename;
+int 
+Log_append (char *filename)
 {
   FILE *fopen ();
 
@@ -215,8 +208,8 @@ Log_append (filename)
   return (0);
 }
 
-int
-Log_close ()
+int 
+Log_close (void)
 {
   fclose (diagptr);
   init_log = 0;
@@ -228,11 +221,11 @@ Log_close ()
  * carried out through the logging subroutines
  */
 
-int Log_set_verbosity(vlevel)
-	int vlevel;
+int 
+Log_set_verbosity (int vlevel)
 {
 	log_verbosity=vlevel;
-  rdpar_set_verbose(vlevel);
+        rdpar_set_verbose(vlevel);
 	return(0);
 }
 
@@ -241,8 +234,8 @@ int Log_set_verbosity(vlevel)
  * carried out through the logging subroutines
  */
 
-int Log_print_max(print_max)
-	int print_max;
+int 
+Log_print_max (int print_max)
 {
 	log_print_max=print_max;
 	return(0);
@@ -253,8 +246,8 @@ int Log_print_max(print_max)
  * carried out through the logging subroutines
  */
 
-int Log_quit_after_n_errors(n)
-	int n;
+int 
+Log_quit_after_n_errors (int n)
 {
 	time_to_quit=n;
 	return(0);
@@ -366,9 +359,8 @@ Shout (char *format, ...)
   return (result);
 }
 
-int
-sane_check (x)
-     double x;
+int 
+sane_check (double x)
 {
   int i;
   if ((i = isfinite (x)) == 0)
@@ -382,8 +374,8 @@ sane_check (x)
 
 /* JM 1410- mytrap is a function that was previously use for debugging. 
    It is now deprecated in python but you may want to use for tests */
-int
-mytrap ()
+int 
+mytrap (void)
 {
   int x;
   x = 0;
@@ -435,9 +427,8 @@ error_count (char *format)
 
 
 
-int
-error_summary (message)
-     char *message;
+int 
+error_summary (char *message)
 {
   int n;
   Log ("\nError summary: %s\n", message);
@@ -453,8 +444,8 @@ error_summary (message)
 
 /*NSH 121107 added a routine to flush the diagfile*/
 
-int
-Log_flush()
+int 
+Log_flush (void)
 {
   if (init_log == 0)
     Log_init ("logfile");
@@ -472,8 +463,8 @@ return(0);
  * if not in parallel mode then we set my_rank to zero
  */
 
-int Log_set_mpi_rank(rank, n_mpi)
-	int rank, n_mpi;
+int 
+Log_set_mpi_rank (int rank, int n_mpi)
 {
 	my_rank=rank;
 	rdpar_set_mpi_rank(rank);	//this just communicates the rank to rdpar	
@@ -509,13 +500,13 @@ int Log_parallel(char *format, ...)
 
 
 /* Set a flag to which cause Debug statements to be logged */
-// int Log_debug(value)
-// 	int value;
-// {
-// 	log_debug=value;
-// 	return(0);
-// }
-/* JM- Debug statements are controlled by verbosity now, so no need for Log_Debug */
+int 
+Log_debug (int value)
+{
+	log_debug=value;
+	return(0);
+}
+
 /* Log a debug statement if the external varialbe log_debug
  * has been set to a non-zero value
  */
@@ -526,11 +517,13 @@ Debug (char *format, ...)
   va_list ap,ap2;
   int result;
 
-  if (log_verbosity < SHOW_DEBUG) 
-    return(0); 
+  if (log_debug == 0) return(0);
 
   if (init_log == 0)
     Log_init ("logfile");
+
+  if (log_verbosity < SHOW_LOG) 
+	  return(0);
 
   va_start (ap, format);
   va_copy (ap2,ap); /*NSH 121212 - Line added to allow error logging to work */

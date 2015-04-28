@@ -40,13 +40,8 @@ History:
  
 **************************************************************/
 
-int
-translate (w, pp, tau_scat, tau, nres)
-     WindPtr w;			//w here refers to entire wind, not a single element
-     PhotPtr pp;
-     double tau_scat;
-     double *tau;
-     int *nres;
+int 
+translate (WindPtr w, PhotPtr pp, double tau_scat, double *tau, int *nres)
 {
   int istat;
 
@@ -99,9 +94,8 @@ History:
 **************************************************************/
 
 
-int
-translate_in_space (pp)
-     PhotPtr pp;
+int 
+translate_in_space (PhotPtr pp)
 {
   double ds, x;
   double ds_to_wind (), ds_to_sphere ();
@@ -215,9 +209,8 @@ History:
 
 
 
-double
-ds_to_wind (pp)
-     PhotPtr pp;
+double 
+ds_to_wind (PhotPtr pp)
 {
   struct photon ptest;
   double ds, x;
@@ -293,12 +286,8 @@ History:
 
 int neglible_vol_count = 0;
 
-int
-translate_in_wind (w, p, tau_scat, tau, nres)
-     WindPtr w;			//w here refers to entire wind, not a single element
-     PhotPtr p;
-     double tau_scat, *tau;
-     int *nres;
+int 
+translate_in_wind (WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nres)
 
 
 {
@@ -359,21 +348,17 @@ return and record an error */
   if (one->inwind == W_PART_INWIND)
     {				// The cell is partially in the wind
       s = ds_to_wind (p);	//smax is set to be the distance to edge of the wind
-      if (s < smax)
-	smax = s;
+      if (s < smax)	smax = s;
       s = ds_to_disk (p, 0);	// ds_to_disk can return a negative distance
-      if (s > 0 && s < smax)
-	smax = s;
+      if (s > 0 && s < smax) smax = s;
     }
   // 110930 - ksl - Next section added to accommodate the torus 
   if (geo.compton_torus && one->inwind == W_PART_INTORUS)
     {
       s = ds_to_torus (p);	//smax is set to be the distance to edge of the wind
-      if (s < smax)
-	smax = s;
+      if (s < smax) smax = s;
       s = ds_to_disk (p, 0);	// ds_to_disk can return a negative distance
-      if (s > 0 && s < smax)
-	smax = s;
+      if (s > 0 && s < smax) smax = s;
     }
   else if (one->inwind == W_IGNORE)
     {
@@ -396,8 +381,6 @@ because of the fact that we used a volume integration to determine whether the c
 was in the wind, but now we are explicitly handling this case, see above.  So if this
 error continues to appear, new investigations are required.
 */
-
-
       Error
 	("translate_in_wind: Grid cell %d of photon is not in wind, moving photon %.2e\n",
 	 n, smax);
@@ -411,13 +394,8 @@ error continues to appear, new investigations are required.
 
 /* At this point we now know how far the photon can travel in it's current grid cell */
 
-
-
   smax += DFUDGE;		/* DFUDGE is to force the photon through the cell boundaries.
 				   Implies that phot is in another cell often.  */
-
-
-
 
 /* The next set of limits the distance a photon can travel.  There are 
 a good many photons which travel more than this distance without this 
@@ -427,9 +405,9 @@ tend to slow the program down significantly because it forces more calls to
 radiation, which is the single largest contributer to execution time.*/
 
   if (smax > SMAX_FRAC * length (p->x))
-    {
-      smax = SMAX_FRAC * length (p->x);
-    }
+  {
+    smax = SMAX_FRAC * length (p->x);
+  }
 
   /* We now determine whether scattering prevents the photon from reaching the far edge of
      the cell.  calculate_ds calculates whether there are scatterings and makes use of the 
@@ -438,14 +416,12 @@ radiation, which is the single largest contributer to execution time.*/
 
 
 /* Note that ds_current does not alter p in any way at present 02jan ksl */
-
   ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
 
   if (p->nres < 0)
     xplasma->nscat_es++;
   if (p->nres > 0)
     xplasma->nscat_res++;
-
 
 /* OK now we increment the radiation field in the cell, translate the photon and wrap 
    things up If the photon is going to scatter in this cell, radiation also reduces 
@@ -454,47 +430,34 @@ radiation, which is the single largest contributer to execution time.*/
 /*04apr-ksl--In the macro-method, b-f and other continuum processes do not reduce the photon
 weight, but are treated as as scattering processes.  Therfore most of what was in the old
 subroutine radiation can be avoided. 
-
-
 */
 
   if (geo.rt_mode == 2)
-    {				// Macro-method
-
-      one = &w[p->grid];	/* So one is the grid cell of interest */
-      nplasma = one->nplasma;
-      xplasma = &plasmamain[nplasma];
-      xplasma->ntot++;
+  {				// Macro-method
+    one = &w[p->grid];	/* So one is the grid cell of interest */
+    nplasma = one->nplasma;
+    xplasma = &plasmamain[nplasma];
+    xplasma->ntot++;
 
 /*57h -- ksl -- 071506 moved steps not needed in calculation of detailed spectrum inside if statement
 for consistency.  Delete comment when satisfied OK */
-
-      if (geo.ioniz_or_extract == 1)	//don't need to record estimators if this is set to 0 (spectrum cycle)
-	{
-	  bf_estimators_increment (one, p, ds_current);
-/*photon weight times distance in the shell is proportional to the mean intensity */
-	  xplasma->j += p->w * ds_current;
-
-/* frequency weighted by the weights and distance       in the shell .  See eqn 2 ML93 */
-
-	  xplasma->ave_freq += p->freq * p->w * ds_current;
-
-	}
-
-    }
-  else
+    if (geo.ioniz_or_extract == 1)	//don't need to record estimators if this is set to 0 (spectrum cycle)
     {
-      radiation (p, ds_current);
-    }
-
+        bf_estimators_increment (one, p, ds_current);
+        /*photon weight times distance in the shell is proportional to the mean intensity */
+        xplasma->j += p->w * ds_current;
+        /* frequency weighted by the weights and distancebin the shell. See eqn 2 ML93 */
+        xplasma->ave_freq += p->freq * p->w * ds_current;
+     }
+  }
+  else
+  {
+    radiation (p, ds_current);
+  }
 
   move_phot (p, ds_current);
-
   p->nres = (*nres);
-
   return (p->istat = istat);
-
-
 }
 
 /***********************************************************
@@ -534,9 +497,8 @@ History:
 
 **************************************************************/
 
-int
-walls (p, pold)
-     PhotPtr p, pold;
+int 
+walls (PhotPtr p, PhotPtr pold)
 {
   double dot (), r, rho, rho_sq;
   double xxx[3];

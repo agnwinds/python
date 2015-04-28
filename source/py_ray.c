@@ -55,8 +55,8 @@ int nc4 = 0;
 
 #define LINELENGTH 132
 
-int
-main ()
+int 
+main (void)
 {
   WindPtr w;
   PhotPtr p;
@@ -267,12 +267,8 @@ main ()
 }
 
 
-int
-gen_one_phot (p, weight, freq, x, theta, phi)
-     PhotPtr p;
-     double weight, freq;
-     double x[3];
-     double theta, phi;		// relative to a cartesian system
+int 
+gen_one_phot (PhotPtr p, double weight, double freq, double x[3], double theta, double phi)		// relative to a cartesian system
 {
   double lmn[3];
 
@@ -404,7 +400,7 @@ original specification of the velocities  */
 
       vwind_xyz (w, &zphot, vz);	// v is the current velocity of the photon
       vlosz = dot (tphot.lmn, vz);	// This is vlos as calulated from the grid
-      density = get_ion_density (zphot.x, nc4);
+      density = get_ion_density (&zphot, nc4);
       massden = kn_rho (zphot.x);
 
 

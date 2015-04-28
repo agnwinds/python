@@ -9,8 +9,8 @@
 #include "log.h"
 
 
-// DEBUG is deprecated as described by #111
-//#define DEBUG  0		/* nonzero implies debug */
+
+#define DEBUG  0		/* nonzero implies debug */
 
 /***********************************************************
                                        Space Telescope Science Institute
@@ -150,9 +150,8 @@ History:
 #define LINELENGTH 400
 #define MAXWORDS    20
 
-int
-get_atomic_data (masterfile)
-     char masterfile[];
+int 
+get_atomic_data (char masterfile[])
 {
 
   FILE *fopen (), *fptr, *mptr, *vptr;
@@ -682,8 +681,8 @@ ksl 04Apr  ??
 		    n++;
 		  if (n == nelements)
 		    {
-		      
-			Debug
+		      if (DEBUG)
+			Error
 			  ("get_atomic_data: file %s line %d has ion for unknown element with z %d\n",
 			   file, lineno, z);
 		      break;
@@ -894,8 +893,8 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
 		    n++;
 		  if (n == nions)
 		    {
-		      
-			Debug
+		      if (DEBUG)
+			Error
 			  ("get_atomic_data: file %s line %d has level for unknown ion \n",
 			   file, lineno);
 		      break;
@@ -1082,8 +1081,8 @@ is already incremented
 		    n++;
 		  if (n == nions)
 		    {
-		      
-			Debug
+		      if (DEBUG)
+			Error
 			  ("get_atomic_data: file %s line %d has level for unknown ion \n",
 			   file, lineno);
 		      break;
@@ -1134,8 +1133,8 @@ described as macro-levels. */
 /*  Check whether we already have too many levels specified for this ion. If so, skip */
 		  if (ion[n].nmax == ion[n].nlevels)
 		    {
-		      
-      Debug    
+		      if (DEBUG)
+			Error
 			  ("get_atomic_data: file %s line %d has level exceeding the number allowed for ion[%d]\n",
 			   file, lineno, n);
 
@@ -1412,8 +1411,8 @@ for the ionstate.
 			    n++;
 			  if (n == nlevels)
 			    {
-
-				Debug
+			      if (DEBUG)
+				Error
 				  ("No ion found to match PhotTop data in file %s on line %d. Data ignored.\n",
 				   file, lineno);
 			      break;	// There was no pre-existing ion
@@ -1488,7 +1487,6 @@ for the ionstate.
 
 		      /* Check that there is an ion which has the same ionization state as this record 
 		         otherwise it must be a VFKY style record and so read with that format */
-
 		      else if (strncmp (word, "PhotVfkyS", 8) == 0)
 			{
         // It's a TOPBASE style photoionization record, beginning with the summary record
@@ -2637,9 +2635,8 @@ or zero so that simple checks of true and false can be used for them */
      bb_max, NBBJUMPS);
 
 /* Now, write the data to a file so you can check it later if you wish */
-/* JM 1411 -- this is now controlled by one of the -d flag modes, defined in atomic.h */
-  if (write_atomicdata)
-    {
+
+#if DEBUG
 
   if ((fptr = fopen ("data.out", "w")) == NULL)
     {
@@ -2721,9 +2718,7 @@ or zero so that simple checks of true and false can be used for them */
     }
 
   fclose (fptr);
-  }  // end of if statement based on modes.write_atomicdata
-
-
+#endif
 
   /* Finally create frequency ordered pointers to the various portions
    * of the atomic data
@@ -2780,8 +2775,8 @@ arrays that are ordered a useful frequency order.
 			compiler does not allocate a very large stack.
  */
 
-int
-index_lines ()
+int 
+index_lines (void)
 {
   float *freqs, foo;
   int *index, ioo;
@@ -2828,8 +2823,8 @@ index_lines ()
 	01oct	ksl	Adapted from index_lines as part to topbase 
 			addition to python 
 */
-int
-index_phot_top ()
+int 
+index_phot_top (void)
 {
   float *freqs, foo;
   int *index, ioo;
@@ -2867,7 +2862,6 @@ index_phot_top ()
 
 }
 
-
 /* index_xcol sorts the collisional lines into frequency order
    History:
 	98mar8	ksl	Copied and adapted from index lines.  Note that it is possible
@@ -2875,8 +2869,8 @@ index_phot_top ()
 
  */
 
-int
-index_collisions ()
+int 
+index_collisions (void)
 {
   float *freqs, foo;
   int *index, ioo;
@@ -2920,10 +2914,8 @@ index_collisions ()
 
 /* Numerical recipes routine used by index_lines which in turn is used by get_atomic_data */
 
-void
-indexx (n, arrin, indx)
-     int n, indx[];
-     float arrin[];
+void 
+indexx (int n, float arrin[], int indx[])
 {
   int l, j, ir, indxt, i;
   float q;
@@ -3018,9 +3010,8 @@ History:
 
 
 
-int
-limit_lines (freqmin, freqmax)
-     double freqmin, freqmax;
+int 
+limit_lines (double freqmin, double freqmax)
 {
 
   int nmin, nmax, n;

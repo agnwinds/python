@@ -131,7 +131,7 @@ History:
  */
 
 char *choice_options = "\n\
-   1=onefile summary n=ne,  R=rho,  v=vel,        i=ion info, j=ave_tau, f=ave_freq, p=nphot, S=sim_alpha\n\
+   n=ne,  R=rho,  v=vel,        i=ion info, j=ave_tau, f=ave_freq, p=nphot, S=sim_alpha\n\
    r=t_r, t=t_e,  w=rad_weight,  s=vol,     l=lum,     C=cooling/heating,  b=adiabatic cooling\n\
    a=abs, c=c4,   g=photo,       h=recomb,  k=tau H,   l=lum,     m=F_rad, x=total, y=mod_te,\n\
    o=overview,    e=everything, P=Partial emission meas, I=Ionisation parameter\n\
@@ -141,10 +141,8 @@ char *choice_options = "\n\
    z=Zoom,u=unZoom,Z=switch to/from raw and yz projected modes, F=Create files, A=Change file write defaults\n\
    N=new.windfile q=quit (preferred over EOF)\n";
 
-int
-main (argc, argv)
-     int argc;
-     char *argv[];
+int 
+main (int argc, char *argv[])
 {
 
 
@@ -166,9 +164,6 @@ main (argc, argv)
 
   interactive = 1;		/* Default to the standard operating mofe for py_wind */
   strcpy (parameter_file, "NONE");
-
-  /* Next command stops Debug statements printing out in py_wind */
-  Log_set_verbosity (3);
 
   if (argc == 1)
     {
@@ -359,11 +354,8 @@ History:
 
 **************************************************************/
 
-int
-one_choice (choice, root, ochoice)
-     char choice;
-     char *root;
-     int ochoice;
+int 
+one_choice (int choice, char *root, int ochoice)
 {
   double lambda, freq;
   int n, istate, iswitch;
@@ -586,15 +578,6 @@ one_choice (choice, root, ochoice)
 	  Log ("Switching to projected y z display");
 	}
       break;
-
-    /* JM -- typing 1 gives you a summary of everything in one file with
-      astropy.io.ascii compliant headers */
-
-    case '1':
-      complete_physical_summary(wmain, root, ochoice);  //
-      break;
-
-
     case 'u':			/* Go back to full image */
       zoom (1);
       break;
@@ -643,8 +626,8 @@ History:
 **************************************************************/
 
 
-int
-py_wind_help ()
+int 
+py_wind_help (void)
 {
 
   char *some_help;

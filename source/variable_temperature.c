@@ -84,10 +84,8 @@ variable_temperature (xplasama, mode)  modifies the densities of ions, levels, a
 
 double xxxne, xip;
 
-int
-variable_temperature (xplasma, mode)
-     PlasmaPtr xplasma;
-     int mode;			//   6=correct using dilute blackbody, 7=power law
+int 
+variable_temperature (PlasmaPtr xplasma, int mode)			//   6=correct using dilute blackbody, 7=power law
 {
   int nion;			
   double xnew, xsaha;
@@ -431,10 +429,8 @@ variable_temperature (xplasma, mode)
   Notes:
 
 
-
   History:
- 
-	12feb	NSH	Coded as part of the quasar project
+ 	12feb	NSH	Coded as part of the quasar project
 	13sep	NSH	Changed to always use the topbase style of data - verner data is now tabulated.
   	14aug	NSH	Code to calculate the PI rate coefficient removed to new subroutine calc_pi_rate
 			as part of the effort to inroduce matrix ionization calculation. This meant that
@@ -507,7 +503,6 @@ numerator=denominator=0.0;
 
 
   return (q);
-
 }
 
 
@@ -535,5 +530,3 @@ temp_func (solv_temp)
 
   return (answer);
 }
-
-
