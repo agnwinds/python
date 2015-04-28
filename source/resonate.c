@@ -8,8 +8,9 @@
 #include "atomic.h"
 #include "python.h"
 
-/* These routines have to do with calculating where resonances are and how strong they are. These routines should be made geometry
-   independent and therefore should work with very minor (header only) modifications in other configurations. */
+/* These routines have to do with calculating where resonances are and how strong they are.  
+   These routines should be made geometry independent and therefore should work with 
+   very minor (header only) modifications in other configurations. */
 
 
 /***********************************************************
@@ -91,367 +92,399 @@ double cds_v2_old, cds_dvds2_old;
 
 
 
-double calculate_ds(w, p, tau_scat, tau, nres, smax, istat)
-	 WindPtr w;					// w here refers to entire wind, not a single element
-	 PhotPtr p;
-	 double tau_scat, *tau;
-	 int *nres;
-	 double smax;
-	 int *istat;
+double
+calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
+     WindPtr w;			//w here refers to entire wind, not a single element
+     PhotPtr p;
+     double tau_scat, *tau;
+     int *nres;
+     double smax;
+     int *istat;
 {
-	int kkk;
-	double kap_es;
-	double freq_inner, freq_outer, dfreq, ttau, freq_av;
-	int n, nn, nstart, ndelt;
-	double x;
-	double ds_current, ds;
-	double v_inner[3], v_outer[3], v1, v2, dvds, dd;
-	double v_check[3], vch, vc;
-	double dvds1, dvds2;
-	struct photon phot, p_now;
-	int init_dvds;
-	double kap_bf_tot, kap_ff, kap_cont;
-	double tau_sobolev;
-	WindPtr one, two;
-	int check_in_grid;
-	int nplasma;
-	PlasmaPtr xplasma, xplasma2;
+  int kkk;
+  double kap_es;
+  double freq_inner, freq_outer, dfreq, ttau, freq_av;
+  int n, nn, nstart, ndelt;
+  double x;
+  double ds_current, ds;
+  double v_inner[3], v_outer[3], v1, v2, dvds, dd;
+  double v_check[3], vch, vc;
+  double dvds1, dvds2;
+  struct photon phot, p_now;
+  int init_dvds;
+  double kap_bf_tot, kap_ff, kap_cont;
+  double tau_sobolev;
+  WindPtr one, two;
+  int check_in_grid;
+  int nplasma;
+  PlasmaPtr xplasma, xplasma2;
 
-	one = &w[p->grid];			// Get a pointer to the cell where the photon bundle is located.
-	nplasma = one->nplasma;
-	xplasma = &plasmamain[nplasma];
+  one = &w[p->grid];		//Get a pointer to the cell where the photon bundle is located.
+  nplasma = one->nplasma;
+  xplasma = &plasmamain[nplasma];
 
-	kap_es = THOMPSON * xplasma->ne * geo.fill;
-	/* This is the electron scattering opacity per unit length. For the Macro Atom approach we need an equivalent opacity per unit
-	   length due to each of the b-f continuua. Call it kap_bf. (SS) */
+  kap_es = THOMPSON * xplasma->ne * geo.fill;
+  /* This is the electron scattering opacity per unit length. For the Macro Atom approach we need an 
+     equivalent opacity per unit length due to each of the b-f continuua. Call it kap_bf. (SS) */
 
 
-	ttau = *tau;
-	ds_current = 0;
-	init_dvds = 0;
-	dvds1 = dvds2 = 0.0;		// To avoid a -03 compile warning
-	*nres = -1;
-	*istat = P_INWIND;
+  ttau = *tau;
+  ds_current = 0;
+  init_dvds = 0;
+  dvds1 = dvds2 = 0.0;		// To avoid a -03 compile warning
+  *nres = -1;
+  *istat = P_INWIND;
 
-	if (ttau < 0.0)
+  if (ttau < 0.0)
+    {
+      Error
+	("calculate_ds:  odd tau  %8.2e at %g entering calculate_ds\n", ttau,
+	 p->freq);
+    }
+
+
+/* So "phot"  is a photon vector at the far edge of the cell, while p remains the photon 
+   vector at the near edge of the cell, and p_now is the midpoint.  Note that comp_phot
+   compares the position and direction of two photons.  If they are the same, then 
+   it just takes v1 from the old value.  */
+
+  if (comp_phot (&cds_phot_old, p))
+    {
+      vwind_xyz (p, v_inner);
+      v1 = dot (p->lmn, v_inner);
+    }
+  else
+    {
+      v1 = cds_v2_old;
+    }
+
+  /* Create phot, a photon at the far side of the cell */
+  stuff_phot (p, &phot);
+  move_phot (&phot, smax);
+  vwind_xyz (&phot, v_outer);
+  v2 = dot (phot.lmn, v_outer);
+
+  /* Check to see that the velocity is monotonic across the cell
+   * by calculating the velocity at the midpoint of the path
+   *
+   * If it is, then reduce smax
+   */
+  vc = C;
+  while (vc > VCHECK && smax > DFUDGE)
+    {
+      stuff_phot (p, &p_now);
+      move_phot (&p_now, smax / 2.);
+      vwind_xyz (&p_now, v_check);
+      vch = dot (p_now.lmn, v_check);
+
+      vc = fabs (vch - 0.5 * (v1 + v2));
+
+      if (vc > VCHECK)
 	{
-		Error("calculate_ds:  odd tau  %8.2e at %g entering calculate_ds\n", ttau, p->freq);
+	  stuff_phot (&p_now, &phot);
+	  smax *= 0.5;
+	  v2 = vch;
 	}
+    }
 
 
-	/* So "phot" is a photon vector at the far edge of the cell, while p remains the photon vector at the near edge of the cell,
-	   and p_now is the midpoint.  Note that comp_phot compares the position and direction of two photons.  If they are the same,
-	   then it just takes v1 from the old value.  */
+/* This Doppler shift shifts the photon from the global to the local 
+frame of rest. Therefore multiply. See doppler notes for a discussion
 
-	if (comp_phot(&cds_phot_old, p))
-	{
-		vwind_xyz(p, v_inner);
-		v1 = dot(p->lmn, v_inner);
-	}
-	else
-	{
-		v1 = cds_v2_old;
-	}
+02feb: The sign appears correct.  If the photon is moving in the same 
+direction as v, then in the rest frame of the ions, 
+then the photon frequency will be less. */
 
-	/* Create phot, a photon at the far side of the cell */
-	stuff_phot(p, &phot);
-	move_phot(&phot, smax);
-	vwind_xyz(&phot, v_outer);
-	v2 = dot(phot.lmn, v_outer);
 
-	/* Check to see that the velocity is monotonic across the cell by calculating the velocity at the midpoint of the path If it
-	   is, then reduce smax */
-	vc = C;
-	while (vc > VCHECK && smax > DFUDGE)
-	{
-		stuff_phot(p, &p_now);
-		move_phot(&p_now, smax / 2.);
-		vwind_xyz(&p_now, v_check);
-		vch = dot(p_now.lmn, v_check);
+  freq_inner = p->freq * (1. - v1 / C);
+  freq_outer = phot.freq * (1. - v2 / C);
+  dfreq = freq_outer - freq_inner;
 
-		vc = fabs(vch - 0.5 * (v1 + v2));
+/* The next section checks to see if the frequency difference on
+ * the two sides is very small and if not limits the resonances
+ * one has to worry about
+ */
 
-		if (vc > VCHECK)
+  if (fabs (dfreq) < EPSILON)
+    {
+      Error
+	("translate: v same at both sides of cell %d\n",one->nwind); /*NSH 130724 shortened error statement, was causing issues with formatting */
+
+/* so dfreq is %2g,\n v_inner %.2g %.2g %.2g v_outer %.2g %.2g %.2g \n",
+	 one->nwind, dfreq, v_inner[0], v_inner[1], v_inner[2], v_outer[0],
+	 v_outer[1], v_outer[2]); This is the part of the above error statement cut out */
+      x = -1;
+      return (smax);		// This is not really the best thing to do, but it avoids disaster below
+
+    }
+  else if (dfreq > 0)
+    {
+      limit_lines (freq_inner, freq_outer);
+      nstart = nline_min;
+      ndelt = 1;
+    }
+  else
+    {
+      limit_lines (freq_outer, freq_inner);
+      nstart = nline_max;
+      ndelt = (-1);
+    }
+
+//nline_min, nline_max, and nline_delt are found in atomic.h and are set by limit_lines()
+
+
+/* Next part deals with computation of bf opacity. In the macro atom method this is needed.
+In the old method it is not. This section activates if geo.rt_mode==2 (switch for macro atom
+method). If the macro atom method is not used just get kap_bf to 0 and move on). SS*/
+
+  kap_bf_tot = 0;
+  kap_ff = 0;
+
+
+  if (geo.rt_mode == 2)
+    {
+      /* Potentially several continuum may contribute in a given frequency range so the kap_bf is an array. 
+         Also need to store the total - kap_bf_tot. */
+
+
+      freq_av = freq_inner;	//(freq_inner + freq_outer) * 0.5;  //need to do better than this perhaps but okay for star - comoving frequency (SS)
+
+
+      kap_bf_tot = kappa_bf (xplasma, freq_av, 0);
+      kap_ff = kappa_ff (xplasma, freq_av);
+
+      /* Okay the bound free contribution to the opacity is now sorted out (SS) */
+    }
+
+  if (one->vol == 0)
+    {
+      kap_bf_tot = kap_ff = 0.0;
+      Error_silent ("ds_calculate vol = 0: cell %d position %g %g %g\n",
+		    p->grid, p->x[0], p->x[1], p->x[2]);
+      /* !BUG (SS June 04) */
+      /* This shouldn't happen - but very occassionally it does. Seems to be a minor problem relating to
+         the grid cells at the edge of the wind. Possibly requires more accurate volume calculation. */
+    }
+
+
+  kap_cont = kap_es + kap_bf_tot + kap_ff;	//total continuum opacity 
+
+  /* To this point kappa is for the part ot the cell that is filled with material so
+   * we must reduce this to account for the filling factor 1409 - ksl */
+
+  //kap_cont*=geo.fill;
+  //JM 1411 -- I've incorporated the filling factor directly into the kappa routines 
+
+
+
+/* Finally begin the loop over the resonances that can interact with the
+     photon in the cell */
+
+  for (n = 0; n < nline_delt; n++)
+    {
+      nn = nstart + n * ndelt;	/* So if the frequency of resonance increases as we travel through
+				   the grid cell, we go up in the array, otherwise down */
+      x = (lin_ptr[nn]->freq - freq_inner) / dfreq;
+
+      if (0. < x && x < 1.)
+	{			/* this particular line is in resonance */
+	  ds = x * smax;
+
+
+/* Before checking for a resonant scatter, need to check for scattering due to a continuum
+process. */
+	  if (ttau + (kap_cont) * (ds - ds_current) > tau_scat)
+	    {
+	      /* then the photon was scattered by the continuum before reaching the resonance 
+	         Need to randomly select the continumm process which caused the photon to
+	         scatter.  The variable threshold is used for this. */
+
+	      *nres =
+		select_continuum_scattering_process (kap_cont, kap_es,
+						     kap_ff, xplasma);
+	      *istat = P_SCAT;	//flag as scattering
+	      ds_current += (tau_scat - ttau) / (kap_cont);	//distance travelled
+	      ttau = tau_scat;
+	      *tau = ttau;
+	      return (ds_current);
+	    }
+	  else
+	    {
+
+	      /* increment tau by the continuum optical depth to this point */
+	      ttau += kap_cont * (ds - ds_current);	/*kap_cont used here rather than kap_es */
+
+
+	      ds_current = ds;	/* At this point ds_current is exactly the position of the resonance */
+	      kkk = lin_ptr[nn]->nion;
+
+
+	      /* The density is calculated in the wind array at the center of a cell.  We use
+	         that as the first estimate of the density.  So don't delete the next line.  However, we 
+	         can do better except  at the edges of the grid.   01apr07 ksl.  ??? One could still do 
+	         better than this since even if we can usually interpolate in one direction if not two ???
+	       */
+	      stuff_phot (p, &p_now);
+	      move_phot (&p_now, ds_current);	// So p_now contains the current position of the photon
+
+
+	      //?? It looks like this if statement could be moved up higher, possibly above the xrho line if willing to accept cruder dd estimate
+	      //If the density of the ion is very small we shouldn't have to worry about a resonance, but otherwise
+	      // ?? This seems like an incredibly small number; how can anything this small affect anything ??
+
+	      dd = get_ion_density (p_now.x, kkk);
+
+	      if (dd > LDEN_MIN)
 		{
-			stuff_phot(&p_now, &phot);
-			smax *= 0.5;
-			v2 = vch;
-		}
-	}
+		  /* If we have reached this point then we have to initalize dvds1 and dvds2. Otherwise
+		     there is no need to do this, especially as dvwind_ds is an expensive calculation time wise */
+
+		  if (init_dvds == 0)
+		    {
+		      dvds1 = dvwind_ds (p);
+		      dvds2 = dvwind_ds (&phot);
+		      init_dvds = 1;
+		    }
+
+		  dvds = (1. - x) * dvds1 + x * dvds2;
+
+		  /* Add the line optical depth  Note that one really should translate the photon to this point 
+		     before doing this (?? What is "this"??)as p-> x is being used to calculate direction of the wind */
 
 
-	/* This Doppler shift shifts the photon from the global to the local frame of rest. Therefore multiply. See doppler notes for a 
-	   discussion
+		tau_sobolev =
+		    sobolev (one, p->x, dd, lin_ptr[nn], dvds);
 
-	   02feb: The sign appears correct.  If the photon is moving in the same direction as v, then in the rest frame of the ions,
-	   then the photon frequency will be less. */
+		  /* tau_sobolev now stores the optical depth. This is fed into the next statement for the bb estimator
+		     calculation. SS March 2004 */
 
-
-	freq_inner = p->freq * (1. - v1 / C);
-	freq_outer = phot.freq * (1. - v2 / C);
-	dfreq = freq_outer - freq_inner;
-
-	/* The next section checks to see if the frequency difference on the two sides is very small and if not limits the resonances
-	   one has to worry about */
-
-	if (fabs(dfreq) < EPSILON)
-	{
-		Error("translate: v same at both sides of cell %d\n", one->nwind);	/* NSH 130724 shortened error statement, was causing
-																			   issues with formatting */
-
-		/* so dfreq is %2g,\n v_inner %.2g %.2g %.2g v_outer %.2g %.2g %.2g \n", one->nwind, dfreq, v_inner[0], v_inner[1],
-		   v_inner[2], v_outer[0], v_outer[1], v_outer[2]); This is the part of the above error statement cut out */
-		x = -1;
-		return (smax);			// This is not really the best thing to do, but it avoids disaster below
-
-	}
-	else if (dfreq > 0)
-	{
-		limit_lines(freq_inner, freq_outer);
-		nstart = nline_min;
-		ndelt = 1;
-	}
-	else
-	{
-		limit_lines(freq_outer, freq_inner);
-		nstart = nline_max;
-		ndelt = (-1);
-	}
-
-	// nline_min, nline_max, and nline_delt are found in atomic.h and are set by limit_lines()
-
-
-	/* Next part deals with computation of bf opacity. In the macro atom method this is needed. In the old method it is not. This
-	   section activates if geo.rt_mode==2 (switch for macro atom method). If the macro atom method is not used just get kap_bf to
-	   0 and move on). SS */
-
-	kap_bf_tot = 0;
-	kap_ff = 0;
-
-
-	if (geo.rt_mode == 2)
-	{
-		/* Potentially several continuum may contribute in a given frequency range so the kap_bf is an array. Also need to store
-		   the total - kap_bf_tot. */
-
-
-		freq_av = freq_inner;	// (freq_inner + freq_outer) * 0.5; //need to do better than this perhaps but okay for star -
-		// comoving frequency (SS)
-
-
-		kap_bf_tot = kappa_bf(xplasma, freq_av, 0);
-		kap_ff = kappa_ff(xplasma, freq_av);
-
-		/* Okay the bound free contribution to the opacity is now sorted out (SS) */
-	}
-
-	if (one->vol == 0)
-	{
-		kap_bf_tot = kap_ff = 0.0;
-		Error_silent("ds_calculate vol = 0: cell %d position %g %g %g\n", p->grid, p->x[0], p->x[1], p->x[2]);
-		/* !BUG (SS June 04) */
-		/* This shouldn't happen - but very occassionally it does. Seems to be a minor problem relating to the grid cells at the
-		   edge of the wind. Possibly requires more accurate volume calculation. */
-	}
-
-
-	kap_cont = kap_es + kap_bf_tot + kap_ff;	// total continuum opacity 
-
-	/* To this point kappa is for the part ot the cell that is filled with material so we must reduce this to account for the
-	   filling factor 1409 - ksl */
-
-	// kap_cont*=geo.fill;
-	// JM 1411 -- I've incorporated the filling factor directly into the kappa routines 
+		/* 140903 Increment ttau allowing for filling factor */
+		  ttau += tau_sobolev;  
 
 
 
-	/* Finally begin the loop over the resonances that can interact with the photon in the cell */
+		  /* ksl - ??? 0902 - Stuart it looks to mee as if this is being run in the Macro case even during the 
+		   * extraction cycles.  Could you check. It shouldn't be necessary.  ???
+		   */
 
-	for (n = 0; n < nline_delt; n++)
-	{
-		nn = nstart + n * ndelt;	/* So if the frequency of resonance increases as we travel through the grid cell, we go up in
-									   the array, otherwise down */
-		x = (lin_ptr[nn]->freq - freq_inner) / dfreq;
+		  if (geo.rt_mode == 2)	//Macro Atom case (SS)
+		    {
 
-		if (0. < x && x < 1.)
-		{						/* this particular line is in resonance */
-			ds = x * smax;
+		      /*
+		         Because push through distance may take us out of the cell we want, need to make sure
+		         that the cell is correct before incrementing the heating rate/estimators. So 1st check if
+		         it's still in the wind and second get a pointer to the grid cell where the resonance really happens.
+		       */
 
+		      check_in_grid = walls (&p_now, p);
 
-			/* Before checking for a resonant scatter, need to check for scattering due to a continuum process. */
-			if (ttau + (kap_cont) * (ds - ds_current) > tau_scat)
+		      if (check_in_grid != P_HIT_STAR
+			  && check_in_grid != P_HIT_DISK
+			  && check_in_grid != P_ESCAPE)
 			{
-				/* then the photon was scattered by the continuum before reaching the resonance Need to randomly select the
-				   continumm process which caused the photon to scatter.  The variable threshold is used for this. */
+			  two = &w[where_in_grid (p_now.x)];
+			  xplasma2 = &plasmamain[two->nplasma];
 
-				*nres = select_continuum_scattering_process(kap_cont, kap_es, kap_ff, xplasma);
-				*istat = P_SCAT;	// flag as scattering
-				ds_current += (tau_scat - ttau) / (kap_cont);	// distance travelled
-				ttau = tau_scat;
-				*tau = ttau;
-				return (ds_current);
-			}
-			else
-			{
-
-				/* increment tau by the continuum optical depth to this point */
-				ttau += kap_cont * (ds - ds_current);	/* kap_cont used here rather than kap_es */
-
-
-				ds_current = ds;	/* At this point ds_current is exactly the position of the resonance */
-				kkk = lin_ptr[nn]->nion;
-
-
-				/* The density is calculated in the wind array at the center of a cell.  We use that as the first estimate of the
-				   density.  So don't delete the next line.  However, we can do better except at the edges of the grid.  01apr07
-				   ksl.  ??? One could still do better than this since even if we can usually interpolate in one direction if not
-				   two ??? */
-				stuff_phot(p, &p_now);
-				move_phot(&p_now, ds_current);	// So p_now contains the current position of the photon
-
-
-				// ?? It looks like this if statement could be moved up higher, possibly above the xrho line if willing to accept
-				// cruder dd estimate
-				// If the density of the ion is very small we shouldn't have to worry about a resonance, but otherwise
-				// ?? This seems like an incredibly small number; how can anything this small affect anything ??
-
-				dd = get_ion_density(&p_now, kkk);
-
-				if (dd > LDEN_MIN)
+			  if (lin_ptr[nn]->macro_info == 1
+			      && geo.macro_simple == 0)
+			    {
+			      /* The line is part of a macro atom so increment the estimator if desired (SS July 04). */
+			      if (geo.ioniz_or_extract == 1)
 				{
-					/* If we have reached this point then we have to initalize dvds1 and dvds2. Otherwise there is no need to do
-					   this, especially as dvwind_ds is an expensive calculation time wise */
-
-					if (init_dvds == 0)
-					{
-						dvds1 = dvwind_ds(p);
-						dvds2 = dvwind_ds(&phot);
-						init_dvds = 1;
-					}
-
-					dvds = (1. - x) * dvds1 + x * dvds2;
-
-					/* Add the line optical depth Note that one really should translate the photon to this point before doing this
-					   (?? What is "this"??)as p-> x is being used to calculate direction of the wind */
-
-
-					tau_sobolev = sobolev(one, p->x, dd, lin_ptr[nn], dvds);
-
-					/* tau_sobolev now stores the optical depth. This is fed into the next statement for the bb estimator
-					   calculation. SS March 2004 */
-
-					/* 140903 Increment ttau allowing for filling factor */
-					ttau += tau_sobolev;
-
-
-
-					/* ksl - ??? 0902 - Stuart it looks to mee as if this is being run in the Macro case even during the extraction 
-					   cycles.  Could you check. It shouldn't be necessary.  ??? */
-
-					if (geo.rt_mode == 2)	// Macro Atom case (SS)
-					{
-
-						/* 
-						   Because push through distance may take us out of the cell we want, need to make sure that the cell is
-						   correct before incrementing the heating rate/estimators. So 1st check if it's still in the wind and
-						   second get a pointer to the grid cell where the resonance really happens. */
-
-						check_in_grid = walls(&p_now, p);
-
-						if (check_in_grid != P_HIT_STAR && check_in_grid != P_HIT_DISK && check_in_grid != P_ESCAPE)
-						{
-							two = &w[where_in_grid(p_now.x)];
-							xplasma2 = &plasmamain[two->nplasma];
-
-							if (lin_ptr[nn]->macro_info == 1 && geo.macro_simple == 0)
-							{
-								/* The line is part of a macro atom so increment the estimator if desired (SS July 04). */
-								if (geo.ioniz_or_extract == 1)
-								{
-									bb_estimators_increment(two, p, tau_sobolev, dvds, nn);
-								}
-							}
-							else
-							{
-								/* The line is from a simple ion. Record the heating contribution and move on. */
-
-								bb_simple_heat(xplasma2, p, tau_sobolev, dvds, nn);
-
-							}
-						}
-					}
-					/* Completed special calculations for the Macro Atom case */
-
-					/* 68b - 0902 - The next section is to track where absorption is taking place along the line of sight to the
-					   observer.  It is probably possibly to simplify some of what is happening here, as we have various photons
-					   real and imaginary in this subroutine.  p, the orginal photon, phot the photon at the opposide edge of the
-					   cell and p_now hte photon at its current position.  Some of these could be used to store information needed
-					   in phot_hist. */
-
-					if (phot_hist_on)
-					{
-						p_now.tau = ttau;
-						p_now.nres = nn;
-						phot_hist(&p_now, 1);
-					}
-
-
+				  bb_estimators_increment (two, p,
+							   tau_sobolev, dvds,
+							   nn);
 				}
+			    }
+			  else
+			    {
+			      /* The line is from a simple ion. Record the heating contribution and move on. */
 
+			      bb_simple_heat (xplasma2, p, tau_sobolev, dvds,
+					      nn);
 
-
-				/* Check to see whether the photon should scatter at this point */
-				if (ttau > tau_scat)
-				{
-					*istat = P_SCAT;
-					*nres = nn;
-					*tau = ttau;
-
-
-
-
-					return (ds_current);
-				}
-
-				/* End of loop to process an individual resonance */
+			    }
 			}
-			*tau = ttau;
+		    }
+		  /* Completed special calculations for the Macro Atom case */
+
+		  /* 68b - 0902 - The next section is to track where absorption is taking place along the line of sight
+		   * to the observer.  It is probably possibly to simplify some of what is happening here, as we
+		   * have various photons real and imaginary in this subroutine.  p, the orginal photon, phot the
+		   * photon at the opposide edge of the cell and p_now hte photon at its current position.  Some
+		   * of these could be used to store information needed in phot_hist.
+		   */
+
+		  if (phot_hist_on)
+		    {
+		      p_now.tau = ttau;
+		      p_now.nres = nn;
+		      phot_hist (&p_now, 1);
+		    }
+
+
 		}
+
+
+
+	      /* Check to see whether the photon should scatter at this point */
+	      if (ttau > tau_scat)
+		{
+		  *istat = P_SCAT;
+		  *nres = nn;
+		  *tau = ttau;
+
+
+
+
+		  return (ds_current);
+		}
+
+	      /* End of loop to process an individual resonance */
+	    }
+	  *tau = ttau;
 	}
+    }
 
 
 
-	/* If the photon reaches this point it was not scattered by resonances. ds_current is either 0 if there were no resonances or
-	   the postion of the "last" resonance if there were resonances.  But we need to check one last time to see if it was scattered 
-	   by continuum process. Note: ksl -- It is generally a bad policy to have a bunch of repeated code like this.  We should
-	   probably rewrite some of this in terms of subroutines for clarity, especially the bit that calculates where the continuum
-	   scattering event occurred.  04 apr
+/* If the photon reaches this point it was not scattered by resonances.  
+ds_current is either 0 if there were no resonances or the postion of the 
+"last" resonance if there were resonances.  But we need to check one
+last time to see if it was scattered by continuum process.
+Note: ksl -- It is generally a bad policy to have a bunch of repeated code
+like this.  We should probably rewrite some of this in terms of subroutines
+for clarity, especially the bit that calculates where the continuum scattering
+event occurred.  04 apr
 
-	 */
+ */
 
-	if (ttau + kap_cont * (smax - ds_current) > tau_scat)
-	{
-		*nres = select_continuum_scattering_process(kap_cont, kap_es, kap_ff, xplasma);
+  if (ttau + kap_cont * (smax - ds_current) > tau_scat)
+    {
+      *nres =
+	select_continuum_scattering_process (kap_cont, kap_es, kap_ff,
+					     xplasma);
 
-		/* A scattering event has occurred in the shell and we remain in the same shell */
-		ds_current += (tau_scat - ttau) / (kap_cont);
-		*istat = P_SCAT;		/* Flag for scattering (SS) */
-		ttau = tau_scat;
-	}
-	else
-	{							/* Then we did hit the other side of the shell (or possibly the another wall of the same shell) */
-		*istat = P_INWIND;
-		ttau += kap_cont * (smax - ds_current);	/* kap_es replaced with kap_cont (SS) */
-		ds_current = smax;
+      /* A scattering event has occurred in the shell  and we remain in the same shell */
+      ds_current += (tau_scat - ttau) / (kap_cont);
+      *istat = P_SCAT;		/* Flag for scattering (SS) */
+      ttau = tau_scat;
+    }
+  else
+    {				/* Then we did hit the other side of the shell  
+				   (or possibly the another wall of the same shell) */
+      *istat = P_INWIND;
+      ttau += kap_cont * (smax - ds_current);	/* kap_es replaced with kap_cont (SS) */
+      ds_current = smax;
 
-	}
+    }
 
-	*tau = ttau;
+  *tau = ttau;
 
-	stuff_phot(&phot, &cds_phot_old);	// Store the final photon position
-	cds_v2_old = v2;			// and the velocity along the line of sight
+  stuff_phot (&phot, &cds_phot_old);	// Store the final photon position
+  cds_v2_old = v2;		// and the velocity along the line of sight
 
-	return (ds_current);
+  return (ds_current);
 
 }
 
@@ -493,56 +526,60 @@ History:
                         vary from cell to cell.
 
 **************************************************************/
-int select_continuum_scattering_process(kap_cont, kap_es, kap_ff, xplasma)
-	 double kap_cont, kap_es, kap_ff;
-	 PlasmaPtr xplasma;
+int
+select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma)
+     double kap_cont, kap_es, kap_ff;
+     PlasmaPtr xplasma;
 {
-	int nres;
-	double threshold;
-	double run_tot;
-	int ncont;
+  int nres;
+  double threshold;
+  double run_tot;
+  int ncont;
 
-	threshold = ((rand() + 0.5) / MAXRAND) * (kap_cont);
+  threshold = ((rand () + 0.5) / MAXRAND) * (kap_cont);
 
-	/* First check for electron scattering. */
-	if (kap_es > threshold)
-	{							/* electron scattering event occurred (SS) */
-		nres = -1;				// flag electron scatterin (SS) */
-	}
-	/* Now chech for ff. */
-	else if ((kap_es + kap_ff) > threshold)
+  /* First check for electron scattering. */
+  if (kap_es > threshold)
+    {				/* electron scattering event occurred (SS) */
+      nres = -1;		// flag electron scatterin (SS) */
+    }
+  /* Now chech for ff. */
+  else if ((kap_es + kap_ff) > threshold)
+    {
+      nres = -2;
+    }
+  /* Now check for bf. */
+  else
+    {				/* use a running sum to find which photoionisation process it was */
+      /* 
+         If a non-macro-atom run is being done this part should never be reached.
+         Just do a check that all is well - this can be removed eventually (SS)
+       */
+      if (geo.rt_mode == 1)
 	{
-		nres = -2;
+	  Error
+	    ("calculate_ds: Not using macro atoms but trying to excite one? Aboort.\n");
+	  exit (0);		//hopefully this will never happen and this check can be deleted at some
+	  //point (SS)
 	}
-	/* Now check for bf. */
-	else
-	{							/* use a running sum to find which photoionisation process it was */
-		/* 
-		   If a non-macro-atom run is being done this part should never be reached. Just do a check that all is well - this can be
-		   removed eventually (SS) */
-		if (geo.rt_mode == 1)
-		{
-			Error("calculate_ds: Not using macro atoms but trying to excite one? Aboort.\n");
-			exit(0);			// hopefully this will never happen and this check can be deleted at some
-			// point (SS)
-		}
-		run_tot = kap_es + kap_ff;
-		ncont = 0;
-		while (run_tot < threshold)
-		{
-			run_tot += kap_bf[ncont];
-			ncont++;
-		}
-		/* When it gets here know that excitation is in photoionisation labelled by ncont */
-		/* ksl 04apr: I don't particularly like this approach for labelling a photoionization transition. It implies that coding
-		   and then decoding needs to be done accurately.  It is quite likely that we should expand the types of scattering events, 
-		   e.g P_SCAT --> P_RES, P_CONT. It is a bit of a conundrum though because we have previously only had two types of
-		   scatters, and so for example doppler used nres to define how to doppler shift. In the end, I decided to keep Stuart's
-		   approach but but to use a fixed offset of NLINES rather than nlines.  This has the modest advantage that
-		   photoionizations always start at the same place.  ksl */
-		nres = NLINES + 1 + xplasma->kbf_use[ncont - 1];	// modified SS Nov 04
+      run_tot = kap_es + kap_ff;
+      ncont = 0;
+      while (run_tot < threshold)
+	{
+	  run_tot += kap_bf[ncont];
+	  ncont++;
 	}
-	return (nres);
+      /* When it gets here know that excitation is in photoionisation labelled by ncont */
+/* ksl 04apr: I don't particularly like this approach for labelling a photoionization transition.
+It implies that coding and then decoding needs to be done accurately.  It is quite likely that
+we should expand the types of scattering events, e.g P_SCAT --> P_RES, P_CONT. It is a bit of
+a conundrum though because we have previously only had two types of scatters, and so for example
+doppler used nres to define how to doppler shift. In the end, I decided to keep Stuart's 
+approach but but to use a fixed offset of NLINES rather than nlines.  This has the modest
+advantage that photoionizations always start at the same place.  ksl*/
+      nres = NLINES + 1 + xplasma->kbf_use[ncont - 1];	//modified SS Nov 04
+    }
+  return (nres);
 }
 
 
@@ -578,61 +615,63 @@ History:
                         make more sense.
 
 **************************************************************/
-double kappa_bf(xplasma, freq, macro_all)
-	 PlasmaPtr xplasma;
-	 double freq;
-	 int macro_all;
+double
+kappa_bf (xplasma, freq, macro_all)
+     PlasmaPtr xplasma;
+     double freq;
+     int macro_all;
 
 
 {
-	double kap_bf_tot;
-	double ft;
-	double x;
-	int nconf;
-	double density;
-	int n;
-	int nn;
+  double kap_bf_tot;
+  double ft;
+  double x;
+  int nconf;
+  double density;
+  int n;
+  int nn;
 
 
-	kap_bf_tot = 0;				// initalise to 0 (SS)
+  kap_bf_tot = 0;		//initalise to 0 (SS)
 
-	macro_all--;				// Subtract one from macro_all to avoid >= in for loop below.
+  macro_all--;			// Subtract one from macro_all to avoid >= in for loop below.
 
 
-	// if (freq > CR)
-	// {
+  //if (freq > CR)
+  //  {
 
-	for (nn = 0; nn < xplasma->kbf_nuse; nn++)	// Loop over photoionisation processes. 
-		// This is mostly copied from old radiation.c (SS)
+  for (nn = 0; nn < xplasma->kbf_nuse; nn++)	// Loop over photoionisation processes. 
+    // This is mostly copied from old radiation.c (SS)
+    {
+      n = xplasma->kbf_use[nn];
+      ft = phot_top[n].freq[0];	//This is the edge frequency (SS)
+
+      kap_bf[nn] = 0.0;
+
+      if (freq > ft && freq < phot_top[n].freq[phot_top[n].np - 1]
+	  && phot_top[n].macro_info > macro_all)
 	{
-		n = xplasma->kbf_use[nn];
-		ft = phot_top[n].freq[0];	// This is the edge frequency (SS)
+	  /* Need the appropriate density at this point. */
 
-		kap_bf[nn] = 0.0;
+	  nconf = phot_top[n].nlev;	//Returning lower level = correct (SS)
 
-		if (freq > ft && freq < phot_top[n].freq[phot_top[n].np - 1] && phot_top[n].macro_info > macro_all)
-		{
-			/* Need the appropriate density at this point. */
-
-			nconf = phot_top[n].nlev;	// Returning lower level = correct (SS)
-
-			density = den_config(xplasma, nconf);	// Need to check what this does (SS)
+	  density = den_config (xplasma, nconf);	//Need to check what this does (SS)
 
 
-			if (density > DENSITY_PHOT_MIN || phot_top[n].macro_info == 1)
-			{
+	  if (density > DENSITY_PHOT_MIN || phot_top[n].macro_info == 1)
+	    {
 
-				/* kap_tot += x = (delete) */
-				/* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
-				kap_bf[nn] = x = sigma_phot(&phot_top[n], freq) * density * geo.fill;	// stimulated recombination? (SS)
-				kap_bf_tot += x;
-			}
-		}
+	      /*          kap_tot += x = (delete) */
+	      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
+	      kap_bf[nn] = x = sigma_phot_topbase (&phot_top[n], freq) * density * geo.fill;	//stimulated recombination? (SS)
+	      kap_bf_tot += x;
+	    }
 	}
+    }
 
-	// }
+  //}
 
-	return (kap_bf_tot);
+  return (kap_bf_tot);
 }
 
 /***********************************************************
@@ -683,64 +722,60 @@ History:
                    
 
 **************************************************************/
-int kbf_need(fmin, fmax)
-	 double fmin, fmax;
+int
+kbf_need (fmin, fmax)
+     double fmin, fmax;
 
 
 {
-	int nconf;
-	double density;
-	double tau_test, ft;
-	int n;
-	int nuse;
+  int nconf;
+  double density;
+  double tau_test, ft;
+  int n;
+  int nuse;
 
-	PlasmaPtr xplasma;
-	WindPtr one;
-	int nplasma, nion;
+  PlasmaPtr xplasma;
+  WindPtr one;
+  int nplasma;
 
 
-	for (nplasma = 0; nplasma < NPLASMA; nplasma++)	// Loop over all the cells in the wind
+  for (nplasma = 0; nplasma < NPLASMA; nplasma++)	// Loop over all the cells in the wind
+    {
+      xplasma = &plasmamain[nplasma];
+      one = &wmain[xplasma->nwind];
+      nuse = 0;
+
+      for (n = 0; n < ntop_phot; n++)	// Loop over photoionisation processes. 
 	{
-		xplasma = &plasmamain[nplasma];
-		one = &wmain[xplasma->nwind];
-		nuse = 0;
 
-		for (n = 0; n < nphot_total; n++)	// Loop over photoionisation processes. 
+	  ft = phot_top[n].freq[0];	//This is the edge frequency (SS)
+
+	  if ((ft > (fmin / 3.)) && (ft < fmax))
+	    {
+
+
+	      nconf = phot_top[n].nlev;	//Returning lower level = correct (SS)
+
+	      density = den_config (xplasma, nconf);
+
+	      tau_test =
+		phot_top[n].x[0] * density * SMAX_FRAC * length (one->xcen);
+
+
+	      if (tau_test > 1.e-6 || phot_top[n].macro_info == 1)
 		{
-
-			ft = phot_top[n].freq[0];	// This is the edge frequency (SS)
-
-			if ((ft > (fmin / 3.)) && (ft < fmax))
-			{
-				nion = phot_top[n].nion;
-
-				if (ion[nion].phot_info == 0)	// vfky
-				{
-					density = xplasma->density[nion];
-				}
-				else if (ion[nion].phot_info == 1)	// topbases
-				{
-					nconf = phot_top[n].nlev;	// Returning lower level = correct (SS)
-					density = den_config(xplasma, nconf);
-				}
-
-				tau_test = phot_top[n].x[0] * density * SMAX_FRAC * length(one->xcen);
-
-
-				if (tau_test > 1.e-6 || phot_top[n].macro_info == 1)
-				{
-					/* Store the bf transition and increment nuse */
-					xplasma->kbf_use[nuse] = n;
-					nuse += 1;
-				}
-			}
-
+		  /* Store the bf transition and increment nuse */
+		  xplasma->kbf_use[nuse] = n;
+		  nuse += 1;
 		}
-		xplasma->kbf_nuse = nuse;
+	    }
+
 	}
+      xplasma->kbf_nuse = nuse;
+    }
 
 
-	return (0);
+  return (0);
 }
 
 /***********************************************************
@@ -796,101 +831,106 @@ History:
 
 **************************************************************/
 
-double sobolev(one, x, den_ion, lptr, dvds)
-	 WindPtr one;				// This is a single cell in the wind
-	 double x[];
-	 double den_ion;
-	 struct lines *lptr;
-	 double dvds;
+double
+sobolev (one, x, den_ion, lptr, dvds)
+     WindPtr one;		// This is a single cell in the wind
+     double x[];
+     double den_ion;
+     struct lines *lptr;
+     double dvds;
 {
-	double tau, xden_ion, tau_x_dvds;
-	double two_level_atom(), d1, d2;
-	int nion;
-	double d_hold;
-	int nplasma;
-	PlasmaPtr xplasma;
+  double tau, xden_ion, tau_x_dvds;
+  double two_level_atom (), d1, d2;
+  int nion;
+  double d_hold;
+  int nplasma;
+  PlasmaPtr xplasma;
 
-	nplasma = one->nplasma;
-	xplasma = &plasmamain[nplasma];
+  nplasma = one->nplasma;
+  xplasma = &plasmamain[nplasma];
 
-	if ((dvds = fabs(dvds)) == 0.0)	// This forces dvds to be positive -- a good thing!
+  if ((dvds = fabs (dvds)) == 0.0)	// This forces dvds to be positive -- a good thing!
+    {
+	  d1 = d2 = 0.;  // Elimiante warning when complied with clang
+      tau = VERY_BIG;
+      Error ("Sobolev: Surprise tau = VERY_BIG\n");
+    }
+
+  else if (lptr->macro_info == 1 && geo.rt_mode == 2 && geo.macro_simple == 0)
+    {
+      // macro atom case SS 
+      d1 = den_config (xplasma, lptr->nconfigl);
+      d2 = den_config (xplasma, lptr->nconfigu);
+    }
+
+  else
+    {
+      nion = lptr->nion;
+
+/* Next few steps to allow used of better calculation of density of this particular 
+ion which was done above in calculate ds.  It was made necessary by a change in the
+calls to two_level atom
+*/
+      d_hold = xplasma->density[nion];	// Store the density of this ion in the cell
+
+      if (den_ion < 0)
 	{
-		d1 = d2 = 0.;			// Elimiante warning when complied with clang
-		tau = VERY_BIG;
-		Error("Sobolev: Surprise tau = VERY_BIG\n");
+	  xplasma->density[nion] = get_ion_density (x, lptr->nion);	// Forced calculation of density 
+	}
+      else
+	{
+	  xplasma->density[nion] = den_ion;	// Put den_ion into the density array
+	}
+      two_level_atom (lptr, xplasma, &d1, &d2);	// Calculate d1 & d2
+      xplasma->density[nion] = d_hold;	// Restore w
+    }
+
+
+
+  xden_ion = (d1 - lptr->gl / lptr->gu * d2);
+
+  if (xden_ion < 0)
+    {
+      Error ("sobolev: den_ion has negative density %g %g %g %g %g %g\n",
+	     d1, d2, lptr->gl, lptr->gu, lptr->freq, lptr->f);
+
+      /*SS July 08: With macro atoms, the population solver can default to d2 = gu/gl * d1 which should
+         give exactly zero here but can be negative, numerically. 
+         So I'm modyfying this to set tau to zero in such cases, when the populations are vanishingly small anyway. */
+      tau_x_dvds = PI_E2_OVER_M * d1 * lptr->f / (lptr->freq);
+      tau = tau_x_dvds / dvds;
+
+      tau *= geo.fill;
+
+      if (tau > 1.e-3)
+	{
+	  exit (0);
 	}
 
-	else if (lptr->macro_info == 1 && geo.rt_mode == 2 && geo.macro_simple == 0)
+      else
 	{
-		// macro atom case SS 
-		d1 = den_config(xplasma, lptr->nconfigl);
-		d2 = den_config(xplasma, lptr->nconfigu);
+	  Error ("sobolev: continuing by setting tau to zero\n");
+	  return (0.0);
 	}
+    }
 
-	else
-	{
-		nion = lptr->nion;
+  //  tau = PI_E2_OVER_M * xden_ion * lptr->f ;
+  //  tau /= (lptr->freq*dvds);
 
-		/* Next few steps to allow used of better calculation of density of this particular ion which was done above in calculate
-		   ds.  It was made necessary by a change in the calls to two_level atom */
-		d_hold = xplasma->density[nion];	// Store the density of this ion in the cell
+  // N.B. tau_x_dvds is an external variable and is used in anisotropic
+  // scattering  0902 - ksl - I believe the question here, which has
+  // been here for a long time  is whether this is 
+  // good programming practice ????
 
-		if (den_ion < 0)
-		{
-			xplasma->density[nion] = get_ion_density(x, lptr->nion);	// Forced calculation of density 
-		}
-		else
-		{
-			xplasma->density[nion] = den_ion;	// Put den_ion into the density array
-		}
-		two_level_atom(lptr, xplasma, &d1, &d2);	// Calculate d1 & d2
-		xplasma->density[nion] = d_hold;	// Restore w
-	}
+  /* JM 1411 -- tau_x_dvds doesn't appear to be used anywhere, so I've 
+     made it a local variable rather than global */  
+  tau_x_dvds = PI_E2_OVER_M * xden_ion * lptr->f / (lptr->freq);
+  tau = tau_x_dvds / dvds;
 
+  /* JM 1411 -- multiply the optical depth by the filling factor */
+  tau *= geo.fill;
 
-
-	xden_ion = (d1 - lptr->gl / lptr->gu * d2);
-
-	if (xden_ion < 0)
-	{
-		Error("sobolev: den_ion has negative density %g %g %g %g %g %g\n", d1, d2, lptr->gl, lptr->gu, lptr->freq, lptr->f);
-
-		/* SS July 08: With macro atoms, the population solver can default to d2 = gu/gl * d1 which should give exactly zero here
-		   but can be negative, numerically. So I'm modyfying this to set tau to zero in such cases, when the populations are
-		   vanishingly small anyway. */
-		tau_x_dvds = PI_E2_OVER_M * d1 * lptr->f / (lptr->freq);
-		tau = tau_x_dvds / dvds;
-
-		tau *= geo.fill;
-
-		if (tau > 1.e-3)
-		{
-			exit(0);
-		}
-
-		else
-		{
-			Error("sobolev: continuing by setting tau to zero\n");
-			return (0.0);
-		}
-	}
-
-	// tau = PI_E2_OVER_M * xden_ion * lptr->f ;
-	// tau /= (lptr->freq*dvds);
-
-	// N.B. tau_x_dvds is an external variable and is used in anisotropic
-	// scattering 0902 - ksl - I believe the question here, which has
-	// been here for a long time is whether this is 
-	// good programming practice ????
-
-	/* JM 1411 -- tau_x_dvds doesn't appear to be used anywhere, so I've made it a local variable rather than global */
-	tau_x_dvds = PI_E2_OVER_M * xden_ion * lptr->f / (lptr->freq);
-	tau = tau_x_dvds / dvds;
-
-	/* JM 1411 -- multiply the optical depth by the filling factor */
-	tau *= geo.fill;
-
-	return (tau);
+  return (tau);
 }
 
 
@@ -947,55 +987,63 @@ History:
 ***********************************************************/
 
 
-int doppler(pin, pout, v, nres)
-	 PhotPtr pin, pout;
-	 double v[];
-	 int nres;
+int
+doppler (pin, pout, v, nres)
+     PhotPtr pin, pout;
+     double v[];
+     int nres;
 
 {
-	double dot();
-	// double ftemp;
-	// double beta;
-	// double q[3];
+  double dot ();
+//  double ftemp;
+// double beta;
+//  double q[3];
 
-	if (nres == -1)				// Electron scattering (SS)
-	{							/* It was a non-resonant scatter */
-		pout->freq = pin->freq * (1 - dot(v, pin->lmn) / C) / (1 - dot(v, pout->lmn) / C);
-		// beta=(dot (v, pin->lmn) / C);
-		// ftemp=pin->freq*sqrt((1-beta)/(1+beta));
-		// beta=(dot (v, pout->lmn) / C);
-		// pout->freq=ftemp/sqrt((1-beta)/(1+beta));
+  if (nres == -1)		//Electron scattering (SS)
+    {				/*It was a non-resonant scatter */
+      pout->freq =
+	pin->freq * (1 - dot (v, pin->lmn) / C) / (1 -
+						   dot (v, pout->lmn) / C);
+//    beta=(dot (v, pin->lmn) / C);
+      //   ftemp=pin->freq*sqrt((1-beta)/(1+beta));
+      //  beta=(dot (v, pout->lmn) / C);
+      // pout->freq=ftemp/sqrt((1-beta)/(1+beta));
 
 
-	}
-	else if (nres > -1 && nres < nlines)
-	{							/* It was a resonant scatter. */
-		pout->freq = lin_ptr[nres]->freq / (1. - dot(v, pout->lmn) / C);
-	}
-	else if ((nres > NLINES && nres < NLINES + nphot_total + 1) || nres == -2)
-		/* It was continuum emission - new comoving frequency has been chosen by the matom/kpkt routine, but now need to convert in 
-		   the same way as for lines (SS) */
+    }
+  else if (nres > -1 && nres < nlines)
+    {				/* It was a resonant scatter. */
+      pout->freq = lin_ptr[nres]->freq / (1. - dot (v, pout->lmn) / C);
+    }
+  else if ((nres > NLINES && nres < NLINES + ntop_phot + 1) || nres == -2)
+    /* It was continuum emission - new comoving frequency has been chosen by
+       the matom/kpkt routine, but now need to convert in the same way 
+       as for lines (SS) */
+    {
+      /* 
+         If a 2-level atom run, one should never arrive here.
+         Just do a check that all is well - this can be removed eventually (SS)
+       */
+      if (geo.rt_mode == 1)
 	{
-		/* 
-		   If a 2-level atom run, one should never arrive here. Just do a check that all is well - this can be removed eventually
-		   (SS) */
-		if (geo.rt_mode == 1)
-		{
-			Error("doppler: Not using macro atoms but trying to deexcite one? Abort.\n");
-			exit(0);
-		}
-		pout->freq = pout->freq / (1. - dot(v, pout->lmn) / C);
+	  Error
+	    ("doppler: Not using macro atoms but trying to deexcite one? Abort.\n");
+	  exit (0);
 	}
-	/* Now do one final check that nothing is awry.  This is another check added by SS that should probably be deleted or done
-	   before this point. I have made it fatal so that we will pay attention to it if it occurs. ksl */
+      pout->freq = pout->freq / (1. - dot (v, pout->lmn) / C);
+    }
+/* Now do one final check that nothing is awry.  This is another
+ * check added by SS that should probably be deleted or done before this point.  
+ * I have made it fatal so that we will pay attention to it if it occurs. ksl */
 
-	else
-	{
-		Error("doppler: nres %d > NLINES + nphot_total %d\n", nres, NLINES + nphot_total);
-		exit(0);
-	}
+  else
+    {
+      Error ("doppler: nres %d > NLINES+ntop_phot %d\n", nres,
+	     NLINES + ntop_phot);
+      exit (0);
+    }
 
-	return (0);
+  return (0);
 
 }
 
@@ -1071,288 +1119,325 @@ History:
 
 ***********************************************************/
 
-int scatter(p, nres, nnscat)
-	 PhotPtr p;
-	 int *nres;
-	 int *nnscat;
+int
+scatter (p, nres, nnscat)
+     PhotPtr p;
+     int *nres;
+     int *nnscat;
 {
-	double v[3];
-	double z_prime[3];
-	int which_out;
-	struct photon pold;
-	int i, n;
-	double p_init[3], p_final[3], dp[3], dp_cyl[3];
-	WindPtr one;
-	double prob_kpkt, kpkt_choice;
-	double gamma_twiddle, gamma_twiddle_e, stim_fact;
-	int m, llvl, ulvl;
-	PlasmaPtr xplasma;
-	MacroPtr mplasma;
+  double v[3];
+  double z_prime[3];
+  int which_out;
+  struct photon pold;
+  int i, n;
+  double p_init[3], p_final[3], dp[3], dp_cyl[3];
+  WindPtr one;
+  double prob_kpkt, kpkt_choice;
+  double gamma_twiddle, gamma_twiddle_e, stim_fact;
+  int m, llvl, ulvl;
+  PlasmaPtr xplasma;
+  MacroPtr mplasma;
 
 
 
-	stuff_phot(p, &pold);
-	n = where_in_grid(pold.x);	// Find out where we are
+  stuff_phot (p, &pold);
+  n = where_in_grid (pold.x);	// Find out where we are
 
-	// 71 - 1112 Check added to test out spherical wind models 
-	if (n < 0)
+  //71 - 1112 Check added to test out spherical wind models 
+  if (n < 0)
+    {
+      Error ("scatter: Trying to scatter a photon in grid cell %d\n", n);
+      return (-1);
+    }
+
+  one = &wmain[p->grid];
+  xplasma = &plasmamain[one->nplasma];
+  //OLD - did not trap a problem if (xplasma==NULL){
+  //OLD - did not trap a problem          Error("Houston, we have a null pointer at %d %d",p->grid,one->nplasma);
+  //OLD - did not trap a problem }
+
+  /* On entering this subroutine we know that a photon packet has been 
+     absorbed. nres tells us which process absorbed it. There are currently
+     four "absorption" processes: electron scattering (flagged -1) line
+     absorption (flagged by +ve integer < NLINES), bf absorption 
+     (flagged by +ve integer > NLINES) and ff absorption (flagged -2). (SS) */
+
+  /* If the macro atom method is being used then the following section must be
+     performed to select a macro atom deactivation process. If not then the
+     deactivation process is always the same as the activation process and so
+     nothing needs to be done. */
+
+  if (geo.rt_mode == 2)		//check if macro atom method in use
+    {
+
+      /* 1112 - 71 - ksl - Moved to avoid trying to reference mplasma if there are no 
+         macro atoms.  This was to fix a segmentation fault that appeared
+         when compiling with a new version of gcc.   It's possible that the error below
+         could occur if we were in a macro atom approach but had no macro atoms.  Need
+         to fix all this up with a thorough review of macro atoms. !!!
+       */
+      /* JM 1502 -- I've reinstated this call to mplasma, it should happen regardless of whether we have
+         actual macro-atom levels as one can be in the simple ion approach. see #138 */
+
+    //    if (geo.nmacro > 0)
+	  //{
+	  mplasma = &macromain[xplasma->nplasma];
+    //}
+    //   else
+	  // {
+	  //   mplasma = NULL;
+	  //   Error
+	  //     ("Resonate: In macro atom section, but no macro atoms.  Seems very odd\n");
+	  // }
+
+      /* Electron scattering is the simplest to deal with. The co-moving 
+         frequency is unchanged so it's just a randomisation of the direction.
+         For b-b and b-f processes it is first necessary to determine the
+         process by which re-emission occurs. (SS). */
+
+      if (*nres > (-1) && *nres < NLINES)
 	{
-		Error("scatter: Trying to scatter a photon in grid cell %d\n", n);
-		return (-1);
+	  /* It's a bb line - we can go straight to macro_gov since we know that
+	     we don't want a k-packet immediately. macro_gov now makes the decision
+	     regarding the treament (simple or full macro). */
+	  macro_gov (p, nres, 1, &which_out);
 	}
 
-	one = &wmain[p->grid];
-	xplasma = &plasmamain[one->nplasma];
-	// OLD - did not trap a problem if (xplasma==NULL){
-	// OLD - did not trap a problem Error("Houston, we have a null pointer at %d %d",p->grid,one->nplasma);
-	// OLD - did not trap a problem }
-
-	/* On entering this subroutine we know that a photon packet has been absorbed. nres tells us which process absorbed it. There
-	   are currently four "absorption" processes: electron scattering (flagged -1) line absorption (flagged by +ve integer <
-	   NLINES), bf absorption (flagged by +ve integer > NLINES) and ff absorption (flagged -2). (SS) */
-
-	/* If the macro atom method is being used then the following section must be performed to select a macro atom deactivation
-	   process. If not then the deactivation process is always the same as the activation process and so nothing needs to be done. */
-
-	if (geo.rt_mode == 2)		// check if macro atom method in use
+      else if (*nres > NLINES)
 	{
+	  /* This means that it was a photoionisation process.
+	     For this case we need to decide first whether to excite
+	     a macro atom directly or to create a k-packet. */
 
-		/* 1112 - 71 - ksl - Moved to avoid trying to reference mplasma if there are no macro atoms.  This was to fix a
-		   segmentation fault that appeared when compiling with a new version of gcc.  It's possible that the error below could
-		   occur if we were in a macro atom approach but had no macro atoms.  Need to fix all this up with a thorough review of
-		   macro atoms. !!! */
-		/* JM 1502 -- I've reinstated this call to mplasma, it should happen regardless of whether we have actual macro-atom levels 
-		   as one can be in the simple ion approach. see #138 */
+	  /* 
+	     The probability if creating a k-packet is given by the 
+	     mc estimators gamma, gamma_e, alpha_st, alpha_st_e.
+	     Start by identifying which estimators we want and then
+	     by computing gamma_twiddle (in Leon's notation - 
+	     Lucy 2003 A&A 403 261 */
 
-		// if (geo.nmacro > 0)
-		// {
-		mplasma = &macromain[xplasma->nplasma];
-		// }
-		// else
-		// {
-		// mplasma = NULL;
-		// Error
-		// ("Resonate: In macro atom section, but no macro atoms.  Seems very odd\n");
-		// }
+	  /* Now, (Apr04) I'm adding the possibility that the continuum
+	     is not from a macro ion but from one that we don't have/want
+	     a macro atom treatment. If it's non macro atom all that happens 
+	     is an on-the-spot decision about whether to excite a fake
+	     bf macro atom or create a k-packet. Since we've not recorded
+	     monte carlo estimators for simple ions the decision about creating
+	     a k-packet is based only on the frequency of the scattered packet.
+	     (SS) */
 
-		/* Electron scattering is the simplest to deal with. The co-moving frequency is unchanged so it's just a randomisation of
-		   the direction. For b-b and b-f processes it is first necessary to determine the process by which re-emission occurs.
-		   (SS). */
+	  if (phot_top[*nres - NLINES - 1].macro_info == 1
+	      && geo.macro_simple == 0)
+	    {
+	      /* Macro ion case (SS) */
 
-		if (*nres > (-1) && *nres < NLINES)
+	      // Note:  NLINES-1 in the lines below is correct.  This is becasue
+	      // the 1st bf is identified by nres = NLINES+1 and this is 
+	      // the zeroth element of phot_top: hence the -1.  SS
+
+	      llvl = phot_top[*nres - NLINES - 1].nlev;	//lower level
+	      ulvl = phot_top[*nres - NLINES - 1].uplev;	//upper level
+
+	      for (m = 0; m < config[llvl].n_bfu_jump; m++)
 		{
-			/* It's a bb line - we can go straight to macro_gov since we know that we don't want a k-packet immediately. macro_gov
-			   now makes the decision regarding the treament (simple or full macro). */
-			macro_gov(p, nres, 1, &which_out);
+		  if (config[llvl].bfu_jump[m] == *nres - NLINES - 1)
+		    {
+		      break;
+		    }
 		}
 
-		else if (*nres > NLINES)
+	      // m should now be the label to identify which of the bf processes from llvl
+	      // this is. Check that it is reasonable
+
+	      if (m > config[llvl].n_bfu_jump - 1)
 		{
-			/* This means that it was a photoionisation process. For this case we need to decide first whether to excite a macro
-			   atom directly or to create a k-packet. */
-
-			/* 
-			   The probability if creating a k-packet is given by the mc estimators gamma, gamma_e, alpha_st, alpha_st_e. Start by
-			   identifying which estimators we want and then by computing gamma_twiddle (in Leon's notation - Lucy 2003 A&A 403 261 */
-
-			/* Now, (Apr04) I'm adding the possibility that the continuum is not from a macro ion but from one that we don't
-			   have/want a macro atom treatment. If it's non macro atom all that happens is an on-the-spot decision about whether
-			   to excite a fake bf macro atom or create a k-packet. Since we've not recorded monte carlo estimators for simple ions 
-			   the decision about creating a k-packet is based only on the frequency of the scattered packet. (SS) */
-
-			if (phot_top[*nres - NLINES - 1].macro_info == 1 && geo.macro_simple == 0)
-			{
-				/* Macro ion case (SS) */
-
-				// Note: NLINES-1 in the lines below is correct.  This is becasue
-				// the 1st bf is identified by nres = NLINES+1 and this is 
-				// the zeroth element of phot_top: hence the -1.  SS
-
-				llvl = phot_top[*nres - NLINES - 1].nlev;	// lower level
-				ulvl = phot_top[*nres - NLINES - 1].uplev;	// upper level
-
-				for (m = 0; m < config[llvl].n_bfu_jump; m++)
-				{
-					if (config[llvl].bfu_jump[m] == *nres - NLINES - 1)
-					{
-						break;
-					}
-				}
-
-				// m should now be the label to identify which of the bf processes from llvl
-				// this is. Check that it is reasonable
-
-				if (m > config[llvl].n_bfu_jump - 1)
-				{
-					Error("scatter (resonate.c): could not identify bf transition. Abort. \n");
-					exit(0);
-				}
-
-				// Need to compute the factor needed for the stimulated term.
-
-				stim_fact = den_config(xplasma, ulvl) / den_config(xplasma, llvl) / xplasma->ne;
-
-				gamma_twiddle =
-					mplasma->gamma_old[config[llvl].bfu_indx_first + m] -
-					(mplasma->alpha_st_old[config[llvl].bfu_indx_first + m] * stim_fact);
-				gamma_twiddle_e =
-					mplasma->gamma_e_old[config[llvl].bfu_indx_first + m] -
-					(mplasma->alpha_st_e_old[config[llvl].bfu_indx_first + m] * stim_fact);
-
-				// Both gamma_twiddles must be greater that zero if this is going to work. If they 
-				// are zero then it's probably because this is the first iteration and so the've not
-				// been computed yet. For that first iteration k-packets will be ignored. If the
-				// gamma_twiddles are negative then something has gone wrong.
-
-				if (gamma_twiddle > 0 && gamma_twiddle_e > 0)
-				{
-					prob_kpkt = 1. - gamma_twiddle / gamma_twiddle_e;
-				}
-				else if (gamma_twiddle == 0 && gamma_twiddle_e == 0)
-				{
-					prob_kpkt = 0.;
-				}
-				else
-				{
-					Error("scatter (resonate.c): a gamma_twiddle is negative. Abort.\n");
-					exit(0);
-				}
-
-				/* Having got here we have calculated the probability of a k-packet being created. Now either make a k-packet or
-				   excite a macro atom. */
-
-				kpkt_choice = ((rand() + 0.5) / MAXRAND);	// random number for kpkt choice
-
-				if (prob_kpkt > kpkt_choice)
-				{
-					macro_gov(p, nres, 2, &which_out);	// routine to deal with kpkt
-				}
-				else
-				{
-					macro_gov(p, nres, 1, &which_out);	// routine to deal with macro atom excitation
-				}
-			}
-			else if (phot_top[*nres - NLINES - 1].macro_info == 0 || geo.macro_simple == 1)
-			{
-				// Simple ion case //
-				/* Need to make decision about making a k-packet. Get the fraction of the energy that goes into the electron rather 
-				   than being stored as ionisation energy: this fraction gives the selection probability for the packet. It's given 
-				   by the (photon frequency / edge frequency - 1) (SS) */
-
-
-				prob_kpkt = 1. - (phot_top[*nres - NLINES - 1].freq[0] / p->freq);
-
-
-				/* Now choose whether or not to make a k-packet. */
-
-				kpkt_choice = ((rand() + 0.5) / MAXRAND);	// random number for kpkt choice
-
-				if (prob_kpkt > kpkt_choice)
-				{
-					macro_gov(p, nres, 2, &which_out);	// routine to deal with kpkt
-				}
-				else
-				{
-					macro_gov(p, nres, 1, &which_out);	// routine to deal with fake macro atom bf excitation
-
-				}
-			}
-			else
-			{
-				/* Our best-laid schemes have gang agley. It should never get here unless the input has been messed up in some way. 
-				   (SS) */
-				Error("scatter (resonate.c): continuum scatter - seems to be neither macro nor simple. Abort.\n");
-				exit(0);
-			}
+		  Error
+		    ("scatter (resonate.c): could not identify bf transition. Abort. \n");
+		  exit (0);
 		}
-		else if (*nres == -2)
-		{						/* This is a ff event (SS). */
-			macro_gov(p, nres, 2, &which_out);	// ff always make a k-packet
+
+	      // Need to compute the factor needed for the stimulated term.
+
+	      stim_fact =
+		den_config (xplasma, ulvl) / den_config (xplasma,
+							 llvl) / xplasma->ne;
+
+	      gamma_twiddle =
+		mplasma->gamma_old[config[llvl].bfu_indx_first + m] -
+		(mplasma->alpha_st_old[config[llvl].bfu_indx_first + m] *
+		 stim_fact);
+	      gamma_twiddle_e =
+		mplasma->gamma_e_old[config[llvl].bfu_indx_first + m] -
+		(mplasma->alpha_st_e_old[config[llvl].bfu_indx_first + m] *
+		 stim_fact);
+
+	      // Both gamma_twiddles must be greater that zero if this is going to work. If they 
+	      // are zero then it's probably because this is the first iteration and so the've not
+	      //been computed yet. For that first iteration k-packets will be ignored. If the
+	      // gamma_twiddles are negative then something has gone wrong.
+
+	      if (gamma_twiddle > 0 && gamma_twiddle_e > 0)
+		{
+		  prob_kpkt = 1. - gamma_twiddle / gamma_twiddle_e;
 		}
+	      else if (gamma_twiddle == 0 && gamma_twiddle_e == 0)
+		{
+		  prob_kpkt = 0.;
+		}
+	      else
+		{
+		  Error
+		    ("scatter (resonate.c): a gamma_twiddle is negative. Abort.\n");
+		  exit (0);
+		}
+
+	      /* Having got here we have calculated the probability of a k-packet
+	         being created. Now either make a k-packet or excite a macro atom. */
+
+	      kpkt_choice = ((rand () + 0.5) / MAXRAND);	//random number for kpkt choice
+
+	      if (prob_kpkt > kpkt_choice)
+		{
+		  macro_gov (p, nres, 2, &which_out);	//routine to deal with kpkt
+		}
+	      else
+		{
+		  macro_gov (p, nres, 1, &which_out);	//routine to deal with macro atom excitation
+		}
+	    }
+	  else if (phot_top[*nres - NLINES - 1].macro_info == 0
+		   || geo.macro_simple == 1)
+	    {
+	      // Simple ion case //
+	      /* Need to make decision about making a k-packet. Get the fraction of the energy
+	         that goes into the electron rather than being stored as ionisation energy: this
+	         fraction gives the selection probability for the packet. It's given by the
+	         (photon frequency / edge frequency - 1) (SS) */
+
+
+	      prob_kpkt =
+		1. - (phot_top[*nres - NLINES - 1].freq[0] / p->freq);
+
+
+	      /* Now choose whether or not to make a k-packet. */
+
+	      kpkt_choice = ((rand () + 0.5) / MAXRAND);	//random number for kpkt choice
+
+	      if (prob_kpkt > kpkt_choice)
+		{
+		  macro_gov (p, nres, 2, &which_out);	//routine to deal with kpkt
+		}
+	      else
+		{
+		  macro_gov (p, nres, 1, &which_out);	//routine to deal with fake macro atom bf excitation
+
+		}
+	    }
+	  else
+	    {
+	      /* Our best-laid schemes have gang agley. It should never get here unless the input has been
+	         messed up in some way. (SS) */
+	      Error
+		("scatter (resonate.c): continuum scatter - seems to be neither macro nor simple. Abort.\n");
+	      exit (0);
+	    }
 	}
-
-	/* So at this point we have completed all the bits that are specific to the macro approach. 54b--ksl */
-
-	/* SS Apr 04: I've moved this next block up so that nres is set correctly for the call to randvec */
-
-	/* Since the error check is commented out for good reason, we should just assign *nres to p->nres, and be done with it.  ??
-	   Stuart, assuming you agree just eliminate all the clutter here.  KSL ?? */
-	p->nres = *nres;			// Update the resonance number on a scatter
-
-	/* SS July 04 Next block is modified to include the thermal trapping model for anisotropic scattering. The code for this has
-	   been moved from trans_phot to here so that this model can work with macro atoms. For macro atoms the code above decides that 
-	   emission will occur in the line - we now just need to use the thermal trapping model to choose the direction. */
-
-
-	if (*nres == -1 || *nres == -2 || *nres > NLINES || geo.scatter_mode == 0 || geo.scatter_mode > 2)
-		// geo.scatter_mode > 2 should never happen but to keep consistency with what was here before I've
-		// added it as a possibility SS.  ?? I'm not sure about the geo.scatter mode > 2 stuff.  Seems
-		// as if we should put an error check at the end and bail.  ksl 04dec.
-	{
-		/* It was either an electron scatter, bf emission or ff emission so the distribution is isotropic, or it was a line photon
-		   but we want isotropic scattering anyway.  */
-		randvec(z_prime, 1.0);	/* Get a new direction for the photon */
-		stuff_v(z_prime, p->lmn);
+      else if (*nres == -2)
+	{			/* This is a ff event (SS). */
+	  macro_gov (p, nres, 2, &which_out);	//ff always make a k-packet
 	}
+    }
 
-	else if (geo.scatter_mode == 1)
-	{							// It was a line photon and we want anisotropic scattering model 1
+  /* So at this point we have completed all the bits that are specific to the macro approach. 54b--ksl */
 
-		randwind(p, z_prime, wmain[n].lmn);
-		stuff_v(z_prime, p->lmn);
+  /* SS Apr 04: I've moved this next block up so that nres is set correctly for the call to randvec */
 
-	}
-	else
-	{							// It was a line photon and we want to use the thermal trapping model to choose the output
-		// direction
+  /* Since the error check is commented out for good reason, we should just assign 
+   * *nres to p->nres,  and be done with it.  ?? Stuart, assuming you agree just
+   * eliminate all the clutter here.  KSL  ??
+   */
+  p->nres = *nres;		// Update the resonance number on a scatter
 
-		/* JM 1906 -- added normalisation of the below rejection method. We normalise to the escape probability of along the
-		   direction of dvds_max, with a safety net of 20% in case we missed the maximum */
-		randwind_thermal_trapping(p, nnscat);
-	}
-
-	/* End of modification for thermal trapping model (SS July 04) */
-
-
-
-	// stuff_v (z_prime, p->lmn);
-
-	vwind_xyz(p, v);			/* Get the velocity vector for the wind */
-	doppler(&pold, p, v, *nres);
+  /* SS July 04
+     Next block is modified to include the thermal trapping model for anisotropic scattering.
+     The code for this has been moved from trans_phot to here so that this model can work 
+     with macro atoms.
+     For macro atoms the code above decides that emission will occur in the line - we now just need
+     to use the thermal trapping model to choose the direction. */
 
 
-	/* We estimate velocities by interpolating between the velocities at the edges of the cell based on the photon direction.  We
-	   have now changed the direction of the photon, and so we may not be at the resoance as calculated this way.  reposition moves 
-	   the photon to the resonance using the new velocity
+  if (*nres == -1 || *nres == -2 || *nres > NLINES || geo.scatter_mode == 0
+      || geo.scatter_mode > 2)
+    //geo.scatter_mode > 2 should never happen but to keep consistency with what was here before I've
+    //added it as a possibility  SS.  ?? I'm not sure about the geo.scatter mode > 2 stuff.  Seems
+    // as if we should put an error check at the end and bail.  ksl 04dec.
+    {
+      /*  It was either an electron scatter, bf emission or ff emission so the  distribution is isotropic, 
+         or it was a line photon but we want isotropic scattering anyway.  */
+      randvec (z_prime, 1.0);	/* Get a new direction for the photon */
+      stuff_v (z_prime, p->lmn);
+    }
 
-	   Note that one cannot fudge the frequencies, e.g. for some kind of thermal broadening before this or else one will defeat the 
-	   purpose of reposition.
+  else if (geo.scatter_mode == 1)
+    {				// It was a line photon and we want anisotropic scattering model 1
 
-	 */
+      randwind (p, z_prime, wmain[n].lmn);
+      stuff_v (z_prime, p->lmn);
 
+    }
+  else
+    {				//It was a line photon and we want to use the thermal trapping model to choose the output direction
 
+      /* JM 1906 -- added normalisation of the below rejection method. We normalise
+         to the escape probability of along the direction of dvds_max, with a safety net of 
+         20% in case we missed the maximum */
+      randwind_thermal_trapping(p, nnscat);
+    }
 
-	/* Now calculate the momentum transfer.  What follows appears to be correct only if there was no energy absorbed at the
-	   scattering site. ?? The rest of this is only needed in the ionization cycle.  Need to eliminate in the detailed spectrum
-	   calculation ?? */
-
-	stuff_v(pold.lmn, p_init);
-	renorm(p_init, pold.w / C);
-	stuff_v(p->lmn, p_final);
-	renorm(p_final, p->w / C);
-	vsub(p_final, p_init, dp);
-
-	project_from_xyz_cyl(pold.x, dp, dp_cyl);
-
-
-
-	if (pold.x[2] < 0)
-		dp_cyl[2] *= (-1);
-	for (i = 0; i < 3; i++)
-	{
-		xplasma->dmo_dt[i] += dp_cyl[i];
-	}
+  /* End of modification for thermal trapping model (SS July 04) */
 
 
-	return (0);
+
+  //stuff_v (z_prime, p->lmn);
+
+  vwind_xyz (p, v);		/* Get the velocity vector for the wind */
+  doppler (&pold, p, v, *nres);
+
+
+/* We estimate velocities by interpolating between the velocities at the edges of the cell based
+on the photon direction.  We have now changed the direction of the photon, and so we may not
+be at the resoance as calculated this way.  reposition moves the photon to the resonance using
+the new velocity 
+
+Note that one cannot fudge the frequencies, e.g. for some kind of thermal
+broadening  before this or else one will defeat the purpose of reposition.
+
+*/
+
+
+
+/*Now calculate the momentum transfer.  What follows appears to be 
+correct only if there was no energy absorbed at the scattering site. 
+?? The rest of this is only needed in the ionization cycle.  Need to eliminate in the 
+detailed spectrum calculation ??
+*/
+
+  stuff_v (pold.lmn, p_init);
+  renorm (p_init, pold.w / C);
+  stuff_v (p->lmn, p_final);
+  renorm (p_final, p->w / C);
+  vsub (p_final, p_init, dp);
+
+  project_from_xyz_cyl (pold.x, dp, dp_cyl);
+
+
+
+  if (pold.x[2] < 0)
+    dp_cyl[2] *= (-1);
+  for (i = 0; i < 3; i++)
+    {
+      xplasma->dmo_dt[i] += dp_cyl[i];
+    }
+
+
+  return (0);
 }

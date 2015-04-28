@@ -969,16 +969,9 @@ History:
 
 **************************************************************/
 
-
 int get_meta_params ()
 {
-  geo.vr_ionisation = 0;
-  geo.vr_spectrum = 0;
   geo.reverb = 0;
-  /*
-  rdint("vr.ionisation", &geo.vr_ionisation);
-  rdint("vr.spectrum", &geo.vr_spectrum);
-  */
   rdint("reverb.type", &geo.reverb);
   if (geo.reverb == REV_WIND)
   {

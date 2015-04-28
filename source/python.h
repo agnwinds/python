@@ -386,9 +386,6 @@ struct geometry
 
   //Added by SWM for reverberation mapping - 0=None, 1=Photon, 2=Wind
   int reverb, reverb_path_bins, reverb_theta_bins; 
-  //Added by SWM for variance reduction
-  int vr_ionisation;
-  int vr_spectrum;
 }
 geo;
 
@@ -552,7 +549,6 @@ typedef struct wind
   int inwind;			/* 061104 -- 58b -- ksl -- Moved definitions of for whether a cell is or is not
 				   inwind to #define statements above */
   Wind_Paths_Ptr paths;         // SWM 6-2-15 Path data struct for each cell
-  double importance;            // SWM 24-3-15 Importance data for cell
 }
 wind_dummy, *WindPtr;
 WindPtr wmain;

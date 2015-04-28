@@ -998,7 +998,6 @@ int main(argc, argv)
 	}
 
 	/* SWM - Setup for path tracking */
-	importance_map_init(wmain, 3.0, geo.rmax / 2.0, 0.0);
 	reverb_init(wmain, nangles, freqmin, freqmax);
 	delay_dump_prep(files.root, restart_stat, rank_global);
 
