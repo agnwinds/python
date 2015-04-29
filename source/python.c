@@ -322,6 +322,11 @@ main (argc, argv)
 
   Log ("!!Python Version %s \n", VERSION);	//54f -- ksl -- Now read from version.h
   Log ("!!Git commit hash %s\n", GIT_COMMIT_HASH);
+  /* warn the user if there are uncommited changes */
+  int git_diff_status = GIT_DIFF_STATUS;
+  if (git_diff_status > 0)
+  	Log("!!Git: This version was compiled with %i files with uncommitted changes.\n",
+  		  git_diff_status);
   Log ("!!Python is running with %d processors\n", np_mpi_global);
   Log_parallel ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
   Debug("Debug statements are on. To turn off use lower verbosity (< 5).\n");
