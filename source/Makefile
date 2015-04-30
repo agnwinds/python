@@ -80,6 +80,8 @@ else	# you must be using clang or icc
 	COMPILER_PRINT_STRING = Compiling with $(CC) $(COMPILER_VERSION)
 endif
 
+# this command finds out how many files with uncommitted changes there are
+GIT_DIFF_STATUS := $(shell expr `git status --porcelain 2>/dev/null| grep "^ M" | wc -l`)
 GIT_COMMIT_HASH := $(shell expr `git rev-parse HEAD`)
 
 INCLUDE = ../include
@@ -110,7 +112,7 @@ LDFLAGS= -L$(LIB) -lm -lcfitsio -lgsl -lgslcblas
 
 #Note that version should be a single string without spaces. 
 
-VERSION = 79b_dev
+VERSION = 79c_dev
 
 CHOICE=1             // Compress plasma as much as possible
 # CHOICE=0           //  Keep relation between plasma and wind identical
@@ -122,6 +124,7 @@ startup:
 	echo "#define VERSION " \"$(VERSION)\" > version.h
 	echo "#define CHOICE"   $(CHOICE) >> version.h
 	echo "#define GIT_COMMIT_HASH" \"$(GIT_COMMIT_HASH)\" >> version.h
+	echo "#define GIT_DIFF_STATUS" $(GIT_DIFF_STATUS)\ >> version.h
 
 foo: foo.o signal.o time.o
 	$(CC) ${cfllags} foo.o signal.o time.o ${LDFLAGS}  -o foo
