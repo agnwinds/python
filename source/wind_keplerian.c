@@ -348,8 +348,8 @@ wind_keplerian_randvec (PhotPtr pp, double r)
   return (0);
 }
 
-int
-rand_sign ()
+int 
+rand_sign (void)
 {
   return ((rand () % 2) * 2 - 1);
 }

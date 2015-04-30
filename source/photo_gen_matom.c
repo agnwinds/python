@@ -104,8 +104,7 @@ History:
 ************************************************************/
 
 double
-get_matom_f (mode)
-    int mode;
+get_matom_f (int mode)
 {
   int n, m;
   int mm, ss;
@@ -554,10 +553,7 @@ History:
 
 ************************************************************/
 int
-photo_gen_kpkt (p, weight, photstart, nphot)
-     PhotPtr p;
-     double weight;
-     int photstart, nphot;
+photo_gen_kpkt (PhotPtr p, double weight, int photstart, int nphot)
 {
   int photstop;
   int icell;
@@ -725,10 +721,7 @@ History:
 
 ************************************************************/
 int
-photo_gen_matom (p, weight, photstart, nphot)
-     PhotPtr p;
-     double weight;
-     int photstart, nphot;
+photo_gen_matom (PhotPtr p, double weight, int photstart, int nphot)
 {
   int photstop;
   int icell;

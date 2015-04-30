@@ -3067,7 +3067,8 @@ limit_lines (double freqmin, double freqmax)
 /* check_xsections is  a routine which checks xsections are ok.
    Only prints out each xsection with verbosity > 4 as uses Debug function */
 
-int check_xsections()
+int 
+check_xsections (void)
 {
   int nion, n;
 

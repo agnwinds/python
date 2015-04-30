@@ -959,11 +959,8 @@ level_escapeoverview (int nlev, WindPtr w, char rootname[], int ochoice)
 
 
 
-int level_tauoverview (nlev, w, rootname, ochoice)
-  int nlev;
-  WindPtr w;
-  char rootname[];
-  int ochoice;
+int 
+level_tauoverview (int nlev, WindPtr w, char rootname[], int ochoice)
 {
   PlasmaPtr xplasma;
   WindPtr one;

@@ -479,7 +479,6 @@ int setup_windcone(void);
 int setup_created_files(void);
 int get_standard_care_factors(void);
 /* reverb.c */
-int delay_spectrum_summary(char filename[], char mode[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin);
 double delay_to_observer(PhotPtr pp);
 int delay_dump_prep(char filename[], int restart_stat, int i_rank);
 int delay_dump_finish(void);

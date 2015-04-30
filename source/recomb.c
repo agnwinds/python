@@ -1389,10 +1389,8 @@ History:
 	
                                                                                                                                       
 **************************************************************/
-double
-gs_rrate (nion, T)
-     int nion;
-     double T;
+double 
+gs_rrate (int nion, double T)
 {
   double rate, drdt, dt;
   int i, imin, imax;

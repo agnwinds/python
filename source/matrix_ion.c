@@ -64,10 +64,7 @@ int   matrix_ion_populations (xplasma,mode)
 
 
 int
-matrix_ion_populations (xplasma, mode)
-     PlasmaPtr xplasma;
-     int mode;
-
+matrix_ion_populations (PlasmaPtr xplasma, int mode)
 {
   int nn, mm, nrows;
   double rate_matrix[nions][nions];
@@ -404,17 +401,14 @@ matrix_ion_populations (xplasma, mode)
 
 **************************************************************/
 
-int
-populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, rr_rates, b_temp,
-			  xne, xelem)
-     PlasmaPtr xplasma;
-     double rate_matrix[nions][nions];
-     double pi_rates[nions];
-     double rr_rates[nions];
-     double xne;
-     double b_temp[nions];
-     int xelem[nions];
-
+int populate_ion_rate_matrix(
+  PlasmaPtr xplasma, 
+  double rate_matrix[nions][nions], 
+  double pi_rates[nions], 
+  double rr_rates[nions], 
+  double b_temp[nions], 
+  double xne, 
+  int xelem[nions])
 {
   int nn, mm;
   double nh;
@@ -610,10 +604,11 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, rr_rates, b_temp,
 **************************************************************/
 
 int
-solve_matrix (a_data, b_data, nrows, x)
-     double *a_data, *b_data;
-     int nrows;
-     double *x;
+solve_matrix (
+    double *a_data, 
+    double *b_data, 
+    int nrows, 
+    double *x)
 {
   int mm, ierr, s;
   /* s is the 'sign' of the permutation - is had the value -1^n where n is the number of

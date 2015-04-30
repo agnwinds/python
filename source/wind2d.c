@@ -77,7 +77,8 @@ History:
 **************************************************************/
 
 
-int define_wind()
+int 
+define_wind (void)
 {
 	int i, j, n;
 	int nn;
@@ -525,8 +526,8 @@ int define_wind()
 
 int wig_n;
 double wig_x, wig_y, wig_z;
-int where_in_grid(x)
-	 double x[];
+int 
+where_in_grid (double x[])
 {
 	int n;
 	double fx, fz;
@@ -628,9 +629,8 @@ History:
 **************************************************************/
 int ierr_vwind = 0;
 
-int vwind_xyz(p, v)
-	 PhotPtr p;
-	 double v[];
+int 
+vwind_xyz (PhotPtr p, double v[])
 {
 	int i;
 	double rho, r;
@@ -762,8 +762,8 @@ History:
 **************************************************************/
 
 int wind_div_err = (-3);
-int wind_div_v(w)
-	 WindPtr w;
+int 
+wind_div_v (WindPtr w)
 {
 	int icell;
 	double x_zero[3], v2[3], v1[3];
@@ -848,9 +848,8 @@ int wind_div_v(w)
 
  */
 
-double rho(w, x)
-	 WindPtr w;
-	 double x[];
+double 
+rho (WindPtr w, double x[])
 {
 	int n, where_in_grid();
 	double dd;
@@ -892,10 +891,8 @@ double rho(w, x)
    04aug -- ksl -- this looks coordinate system independnet but need to check */
 
 #define NSTEPS 100
-int mdot_wind(w, z, rmax)
-	 WindPtr w;
-	 double z;					// The height (usually small) above the disk at which mdot will be calculated
-	 double rmax;				// The radius at which mdot will be calculated
+int 
+mdot_wind (WindPtr w, double z, double rmax)				// The radius at which mdot will be calculated
 {
 	struct photon p;			// needed because vwind_xyz has a call which involves a photon
 	double r, dr, rmin;
@@ -968,10 +965,8 @@ History:
  
 **************************************************************/
 
-int get_random_location(n, icomp, x)
-	 int n;						// Cell in which to create postion
-	 int icomp;					// The component we want the position in
-	 double x[];				// Returned position
+int 
+get_random_location (int n, int icomp, double x[])				// Returned position
 {
 
 	if (geo.coord_type == CYLIND)
@@ -1000,7 +995,8 @@ int get_random_location(n, icomp, x)
 }
 
 
-int zero_scatters()
+int 
+zero_scatters (void)
 {
 	int n, j;
 
@@ -1034,9 +1030,8 @@ int zero_scatters()
 
    History 080403 ksl 68c - Added, or more correctly simply moved code into a separate routine so could be called from elsewhere */
 
-int check_corners_inwind(n, icomp)
-	 int n;
-	 int icomp;					// check corners for this component
+int 
+check_corners_inwind (int n, int icomp)					// check corners for this component
 {
 	int n_inwind;
 	int i, j;

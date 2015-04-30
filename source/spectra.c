@@ -1,5 +1,6 @@
 
-/* The subroutines in this file handle allocating, incrementing, and writing out the spectrum arrays for Python */
+/* The subroutines in this file handle allocating, incrementing, and writing out the
+   spectrum arrays for Python */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -84,177 +85,186 @@ History:
 
 int i_spec_start = 0;
 
-int
-spectrum_init(double f1, double f2, int nangle, double angle[], double phase[], int scat_select[], int top_bot_select[],
-			  int select_extract, double rho_select[], double z_select[], double az_select[], double r_select[])
+int 
+spectrum_init (double f1, double f2, int nangle, double angle[], double phase[], int scat_select[], int top_bot_select[], int select_extract, double rho_select[], double z_select[], double az_select[], double r_select[])
 {
-	int i, n;
-	int nspec;
-	double freqmin, freqmax, dfreq;
-	double lfreqmin, lfreqmax, ldfreq;	/* NSH 1302 Min, max and delta for the log spectrum */
-	double x1, x2;
-	char dummy[20];
+  int i, n;
+  int nspec;
+  double freqmin, freqmax, dfreq;
+  double lfreqmin, lfreqmax, ldfreq;	/* NSH 1302 Min, max and delta for the log spectrum */
+  double x1, x2;
+  char dummy[20];
 
-	freqmin = f1;
-	freqmax = f2;
-	dfreq = (freqmax - freqmin) / NWAVE;
+  freqmin = f1;
+  freqmax = f2;
+  dfreq = (freqmax - freqmin) / NWAVE;
 
-	nspec = nangle + MSPEC;
+  nspec = nangle + MSPEC;
 
-	/* NSH 1302 Lines to set up a logarithmic spectrum */
+/* NSH 1302 Lines to set up a logarithmic spectrum */
 
-	lfreqmin = log10(freqmin);
-	lfreqmax = log10(freqmax);
-	ldfreq = (lfreqmax - lfreqmin) / NWAVE;
+  lfreqmin = log10 (freqmin);
+  lfreqmax = log10 (freqmax);
+  ldfreq = (lfreqmax - lfreqmin) / NWAVE;
 
-	/* Create the spectrum arrays the first time routine is called */
-	if (i_spec_start == 0)
+  /* Create the spectrum arrays the first time routine is called */
+  if (i_spec_start == 0)
+    {
+      xxspec = calloc (sizeof (spectrum_dummy), nspec);
+      if (xxspec == NULL)
 	{
-		xxspec = calloc(sizeof(spectrum_dummy), nspec);
-		if (xxspec == NULL)
-		{
-			Error("spectrum_init: Could not allocate memory for %d spectra with %d wavelengths\n", nspec, NWAVE);
-			exit(0);
-		}
-
-		nspectra = nspec;		/* Note that nspectra is a global variable */
-
-		i_spec_start = 1;		/* This is to prevent reallocation of the same arrays on multiple calls to spectrum_init */
+	  Error
+	    ("spectrum_init: Could not allocate memory for %d spectra with %d wavelengths\n",
+	     nspec, NWAVE);
+	  exit (0);
 	}
 
+      nspectra = nspec;		/* Note that nspectra is a global variable */
 
-	Log_silent("Zeroing or rezeroing all %d spectral matrices\n", nspec);
+      i_spec_start = 1;		/* This is to prevent reallocation of the same arrays on multiple calls to spectrum_init */
+    }
 
 
-	for (i = 0; i <= MAXSCAT; i++)
-		nscat[i] = nres[i] = 0;
+  Log_silent ("Zeroing or rezeroing all %d spectral matrices\n", nspec);
 
-	for (i = 0; i < NSTAT; i++)
-		nstat[i] = 0;
 
-	for (n = 0; n < nspec; n++)
+  for (i = 0; i <= MAXSCAT; i++)
+    nscat[i] = nres[i] = 0;
+
+  for (i = 0; i < NSTAT; i++)
+    nstat[i] = 0;
+
+  for (n = 0; n < nspec; n++)
+    {
+      xxspec[n].freqmin = freqmin;
+      xxspec[n].freqmax = freqmax;
+      xxspec[n].dfreq = dfreq;
+      xxspec[n].lfreqmin = lfreqmin;
+      xxspec[n].lfreqmax = lfreqmax;
+      xxspec[n].ldfreq = ldfreq;
+      for (i = 0; i < NSTAT; i++)
+	xxspec[n].nphot[i] = 0;
+      for (i = 0; i < NWAVE; i++)
 	{
-		xxspec[n].freqmin = freqmin;
-		xxspec[n].freqmax = freqmax;
-		xxspec[n].dfreq = dfreq;
-		xxspec[n].lfreqmin = lfreqmin;
-		xxspec[n].lfreqmax = lfreqmax;
-		xxspec[n].ldfreq = ldfreq;
-		for (i = 0; i < NSTAT; i++)
-			xxspec[n].nphot[i] = 0;
-		for (i = 0; i < NWAVE; i++)
-		{
-			xxspec[n].f[i] = 0;
-			xxspec[n].lf[i] = 0;	/* NSH 1302 zero the logarithmic spectra */
-		}
+	  xxspec[n].f[i] = 0;
+	  xxspec[n].lf[i] = 0;	/* NSH 1302 zero the logarithmic spectra */
 	}
+    }
 
-	strcpy(xxspec[0].name, "Created");
-	strcpy(xxspec[1].name, "Emitted");
-	strcpy(xxspec[2].name, "CenSrc");
-	strcpy(xxspec[3].name, "Disk   ");
-	strcpy(xxspec[4].name, "Wind   ");
-	strcpy(xxspec[5].name, "HitSurf");
-	strcpy(xxspec[6].name, "Scattered");
-	for (n = 0; n < MSPEC; n++)
+  strcpy (xxspec[0].name, "Created");
+  strcpy (xxspec[1].name, "Emitted");
+  strcpy (xxspec[2].name, "CenSrc");
+  strcpy (xxspec[3].name, "Disk   ");
+  strcpy (xxspec[4].name, "Wind   ");
+  strcpy (xxspec[5].name, "HitSurf");
+  strcpy (xxspec[6].name, "Scattered");
+  for (n = 0; n < MSPEC; n++)
+    {
+      xxspec[n].lmn[0] = xxspec[n].lmn[1] = xxspec[n].lmn[2] = 0.;
+      xxspec[n].renorm = 1.0;
+    }
+
+  for (n = MSPEC; n < nspec; n++)
+    {
+/* 
+We want to set up the direction cosines for extractions.  We have to be careful
+about the sense of the orbital phase within the program.  Viewed from the "north"
+pole in a system with the secondary along the x axis the observer moves clockwise
+and phases just before 0 should be in the +x + y quadrant (since we have the disk and
+wind rotating counter clockwize as viewed from the top.  Another way of saying this
+is at phases just before 0, e.g. 0.98, the observer sees the receeding side of the 
+disk. The minus sign in the terms associated with phase are to make this happen.
+02feb ksl
+*/
+
+      sprintf (xxspec[n].name, "A%02.0f", angle[n - MSPEC]);
+      xxspec[n].lmn[0] =
+	sin (angle[n - MSPEC] / RADIAN) * cos (-phase[n - MSPEC] * 360. /
+					       RADIAN);
+      xxspec[n].lmn[1] =
+	sin (angle[n - MSPEC] / RADIAN) * sin (-phase[n - MSPEC] * 360. /
+					       RADIAN);
+      xxspec[n].lmn[2] = cos (angle[n - MSPEC] / RADIAN);
+      Log_silent ("Angle %e Angle cosines:%e %e %e\n", angle[n - MSPEC],
+		  xxspec[n].lmn[0], xxspec[n].lmn[1], xxspec[n].lmn[2]);
+
+      /* Initialize variables needed for live or die option */
+      x1 = angle[n - MSPEC] - DANG_LIVE_OR_DIE;
+      x2 = angle[n - MSPEC] + DANG_LIVE_OR_DIE;
+      if (x1 < 0.)
+	x1 = 0;
+      if (x2 > 180.)
+	x2 = 180.;
+      x1 = fabs (cos (x1 / RADIAN));
+      x2 = fabs (cos (x2 / RADIAN));
+      if (x1 > x2)
 	{
-		xxspec[n].lmn[0] = xxspec[n].lmn[1] = xxspec[n].lmn[2] = 0.;
-		xxspec[n].renorm = 1.0;
+	  xxspec[n].mmax = x1;
+	  xxspec[n].mmin = x2;
 	}
-
-	for (n = MSPEC; n < nspec; n++)
+      else
 	{
-		/* 
-		   We want to set up the direction cosines for extractions.  We have to be careful about the sense of the orbital phase
-		   within the program.  Viewed from the "north" pole in a system with the secondary along the x axis the observer moves
-		   clockwise and phases just before 0 should be in the +x + y quadrant (since we have the disk and wind rotating counter
-		   clockwize as viewed from the top.  Another way of saying this is at phases just before 0, e.g. 0.98, the observer sees
-		   the receeding side of the disk. The minus sign in the terms associated with phase are to make this happen. 02feb ksl */
-
-		sprintf(xxspec[n].name, "A%02.0f", angle[n - MSPEC]);
-		xxspec[n].lmn[0] = sin(angle[n - MSPEC] / RADIAN) * cos(-phase[n - MSPEC] * 360. / RADIAN);
-		xxspec[n].lmn[1] = sin(angle[n - MSPEC] / RADIAN) * sin(-phase[n - MSPEC] * 360. / RADIAN);
-		xxspec[n].lmn[2] = cos(angle[n - MSPEC] / RADIAN);
-		Log_silent("Angle %e Angle cosines:%e %e %e\n", angle[n - MSPEC], xxspec[n].lmn[0], xxspec[n].lmn[1], xxspec[n].lmn[2]);
-
-		/* Initialize variables needed for live or die option */
-		x1 = angle[n - MSPEC] - DANG_LIVE_OR_DIE;
-		x2 = angle[n - MSPEC] + DANG_LIVE_OR_DIE;
-		if (x1 < 0.)
-			x1 = 0;
-		if (x2 > 180.)
-			x2 = 180.;
-		x1 = fabs(cos(x1 / RADIAN));
-		x2 = fabs(cos(x2 / RADIAN));
-		if (x1 > x2)
-		{
-			xxspec[n].mmax = x1;
-			xxspec[n].mmin = x2;
-		}
-		else
-		{
-			xxspec[n].mmax = x2;
-			xxspec[n].mmin = x1;
-		}
-		if (select_extract == 0)
-		{
-			xxspec[n].renorm = 1. / (xxspec[n].mmax - xxspec[n].mmin);
-		}
-		else
-			xxspec[n].renorm = 1.;
-		/* Completed initialization of variables for live or die */
-
-		/* 68g - Changed the format of the string describing the spectrum so that it was shorted and so that the phase was always
-		   given.  ksl 091125 */
-		strcpy(dummy, "");
-		sprintf(dummy, "P%04.2f", phase[n - MSPEC]);
-		strcat(xxspec[n].name, dummy);
-		xxspec[n].nscat = scat_select[n - MSPEC];
-		if (xxspec[n].nscat < MAXSCAT)
-		{						/* Then conditions have been place on the number of scatters to be included so update the names */
-			strcpy(dummy, "");
-			if (xxspec[n].nscat > MAXSCAT)
-				sprintf(dummy, "_sc:all");
-			if (xxspec[n].nscat >= 0)
-				sprintf(dummy, "_sc:%d", xxspec[n].nscat);
-			else
-				sprintf(dummy, "_sc:>%d", -xxspec[n].nscat);
-			strcat(xxspec[n].name, dummy);
-		}
-		xxspec[n].top_bot = top_bot_select[n - MSPEC];
-		if (xxspec[n].top_bot != 0)
-		{						/* Then conditions have been placed on the last location of the photon so update the names */
-			strcpy(dummy, "");
-			if (xxspec[n].top_bot == 1)
-				sprintf(dummy, "_top");
-			else if (xxspec[n].top_bot == -1)
-				sprintf(dummy, "_bot");
-			else if (xxspec[n].top_bot == 2)
-			{
-				sprintf(dummy, "_pos");
-				xxspec[n].x[0] = rho_select[n - MSPEC] * cos(az_select[n - MSPEC] / RADIAN);
-				xxspec[n].x[1] = rho_select[n - MSPEC] * sin(az_select[n - MSPEC] / RADIAN);
-				xxspec[n].x[2] = z_select[n - MSPEC];
-				xxspec[n].r = r_select[n - MSPEC];
-
-			}
-			else
-			{
-				Error("spectrum_init: Unknown option %d\n", xxspec[n].top_bot);
-				exit(0);
-
-			}
-			strcat(xxspec[n].name, dummy);
-		}
+	  xxspec[n].mmax = x2;
+	  xxspec[n].mmin = x1;
 	}
-
-	for (n = MSPEC; n < nspec; n++)
-	{	
-		printf("Angle: %d %e\n",n-nangle, angle[n-MSPEC]);
-		printf("Spec: %d %e %e\n", n-nangle, xxspec[n].mmin, xxspec[n].mmax);
+      if (select_extract == 0)
+	{
+	  xxspec[n].renorm = 1. / (xxspec[n].mmax - xxspec[n].mmin);
 	}
+      else
+	xxspec[n].renorm = 1.;
+      /* Completed initialization of variables for live or die */
 
-	return (0);
+/* 68g - Changed the format of the string describing the spectrum so that it was shorted
+ * and so that the phase was always given.  ksl 091125
+ */
+      strcpy (dummy, "");
+      sprintf (dummy, "P%04.2f", phase[n - MSPEC]);
+      strcat (xxspec[n].name, dummy);
+      xxspec[n].nscat = scat_select[n - MSPEC];
+      if (xxspec[n].nscat < MAXSCAT)
+	{			/* Then conditions have been place on the
+				   number of scatters to be included so update the names */
+	  strcpy (dummy, "");
+	  if (xxspec[n].nscat > MAXSCAT)
+	    sprintf (dummy, "_sc:all");
+	  if (xxspec[n].nscat >= 0)
+	    sprintf (dummy, "_sc:%d", xxspec[n].nscat);
+	  else
+	    sprintf (dummy, "_sc:>%d", -xxspec[n].nscat);
+	  strcat (xxspec[n].name, dummy);
+	}
+      xxspec[n].top_bot = top_bot_select[n - MSPEC];
+      if (xxspec[n].top_bot != 0)
+	{			/* Then conditions have been placed on the last
+				   location of the photon so update the names */
+	  strcpy (dummy, "");
+	  if (xxspec[n].top_bot == 1)
+	    sprintf (dummy, "_top");
+	  else if (xxspec[n].top_bot == -1)
+	    sprintf (dummy, "_bot");
+	  else if (xxspec[n].top_bot == 2)
+	    {
+	      sprintf (dummy, "_pos");
+	      xxspec[n].x[0] =
+		rho_select[n - MSPEC] * cos (az_select[n - MSPEC] / RADIAN);
+	      xxspec[n].x[1] =
+		rho_select[n - MSPEC] * sin (az_select[n - MSPEC] / RADIAN);
+	      xxspec[n].x[2] = z_select[n - MSPEC];
+	      xxspec[n].r = r_select[n - MSPEC];
+
+	    }
+	  else
+	    {
+	      Error ("spectrum_init: Unknown option %d\n", xxspec[n].top_bot);
+	      exit (0);
+
+	    }
+	  strcat (xxspec[n].name, dummy);
+	}
+    }
+
+  return (0);
 }
 
 /***********************************************************
@@ -318,243 +328,252 @@ History:
 			not recorded.
 **************************************************************/
 
-int spectrum_create(PhotPtr p, double f1, double f2, int nangle, int select_extract)
+int 
+spectrum_create (PhotPtr p, double f1, double f2, int nangle, int select_extract)
+
 {
-	int nphot, i, j, k, k1, n;
-	int nspec, spectype;
-	double freqmin, freqmax, dfreq;
-	double lfreqmin, lfreqmax, ldfreq;
-	double x1;
-	int wind_n_to_ij();
-	int mscat, mtopbot;
-	double delta;
-	double nlow, nhigh;
-	int k_orig, k1_orig;
+  int nphot, i, j, k, k1, n;
+  int nspec, spectype;
+  double freqmin, freqmax, dfreq;
+  double lfreqmin, lfreqmax, ldfreq;
+  double x1;
+  int wind_n_to_ij ();
+  int mscat, mtopbot;
+  double delta;
+  double nlow, nhigh;
+  int k_orig, k1_orig;
 
-	freqmin = f1;
-	freqmax = f2;
-	dfreq = (freqmax - freqmin) / NWAVE;
-	nspec = nangle + MSPEC;
-	nlow = 0.0;					// variable to storte the number of photons that have frequencies which are too low
-	nhigh = 0.0;				// variable to storte the number of photons that have frequencies which are too high
-	delta = 0.0;				// fractional frequency error allowod
+  freqmin = f1;
+  freqmax = f2;
+  dfreq = (freqmax - freqmin) / NWAVE;
+  nspec = nangle + MSPEC;
+  nlow = 0.0;			// variable to storte the number of photons that have frequencies which are too low
+  nhigh = 0.0;			// variable to storte the number of photons that have frequencies which are too high
+  delta = 0.0;			// fractional frequency error allowod
 
-	/* Lines to set up a logarithmic spectrum */
+/* Lines to set up a logarithmic spectrum */
 
-	lfreqmin = log10(freqmin);
-	lfreqmax = log10(freqmax);
-	ldfreq = (lfreqmax - lfreqmin) / NWAVE;
+  lfreqmin = log10 (freqmin);
+  lfreqmax = log10 (freqmax);
+  ldfreq = (lfreqmax - lfreqmin) / NWAVE;
 
 
-	for (nphot = 0; nphot < NPHOT; nphot++)
+  for (nphot = 0; nphot < NPHOT; nphot++)
+    {
+      if ((j = p[nphot].nscat) < 0 || j > MAXSCAT)
+	nscat[MAXSCAT]++;
+      else
+	nscat[j]++;
+
+      if ((j = p[nphot].nrscat) < 0 || j > MAXSCAT)
+	nres[MAXSCAT]++;
+      else
+	nres[j]++;
+
+    /* find out where we are in log space */
+      k1 = (log10 (p[nphot].freq) - log10 (freqmin)) / ldfreq;
+      if (k1 < 0)
 	{
-		if ((j = p[nphot].nscat) < 0 || j > MAXSCAT)
-			nscat[MAXSCAT]++;
-		else
-			nscat[j]++;
+	  k1 = 0;
+	}
+      if (k1 > NWAVE)
+	{
+	  k1 = NWAVE;
+	}
 
-		if ((j = p[nphot].nrscat) < 0 || j > MAXSCAT)
-			nres[MAXSCAT]++;
-		else
-			nres[j]++;
-
-		/* find out where we are in log space */
-		k1 = (log10(p[nphot].freq) - log10(freqmin)) / ldfreq;
-		if (k1 < 0)
-		{
-			k1 = 0;
-		}
-		if (k1 > NWAVE)
-		{
-			k1 = NWAVE;
-		}
-
-		/* also need to work out where we are for photon's original wavelength */
-		k1_orig = (log10(p[nphot].freq_orig) - log10(freqmin)) / ldfreq;
-		if (k1_orig < 0)
-		{
-			k1_orig = 0;
-		}
-		if (k1_orig > NWAVE)
-		{
-			k1_orig = NWAVE;
-		}
-
-
-		/* lines to work out where we are in a normal spectrum with linear spacing */
-		k = (p[nphot].freq - freqmin) / dfreq;
-		if (k < 0)
-		{
-			if (((1. - p[nphot].freq / freqmin) > delta) && (geo.rt_mode != 2))
-				nlow = nlow + 1;
-			k = 0;
-		}
-		else if (k > NWAVE - 1)
-		{
-			if (((1. - freqmax / p[nphot].freq) > delta) && (geo.rt_mode != 2))
-				nhigh = nhigh + 1;
-			k = NWAVE - 1;
-		}
-
-		/* also need to work out where we are for photon's original wavelength */
-		k_orig = (p[nphot].freq_orig - freqmin) / dfreq;
-		if (k_orig < 0)
-		{
-			if (((1. - p[nphot].freq_orig / freqmin) > delta) && (geo.rt_mode != 2))
-				nlow = nlow + 1;
-			k_orig = 0;
-		}
-		else if (k_orig > NWAVE - 1)
-		{
-			if (((1. - freqmax / p[nphot].freq_orig) > delta) && (geo.rt_mode != 2))
-				nhigh = nhigh + 1;
-			k_orig = NWAVE - 1;
-		}
-
-
-		xxspec[0].f[k_orig] += p[nphot].w_orig;	/* created spectrum with original weights and wavelengths */
-		xxspec[0].lf[k1_orig] += p[nphot].w_orig;	/* logarithmic created spectrum */
-
-
-		if ((i = p[nphot].istat) == P_ESCAPE)
-		{
-			xxspec[0].nphot[i]++;
-			xxspec[1].f[k] += p[nphot].w;	/* emitted spectrum */
-			xxspec[1].lf[k1] += p[nphot].w;	/* logarithmic emitted spectrum */
-			xxspec[1].nphot[i]++;
-			spectype = p[nphot].origin;
-			if (spectype >= 10)
-				spectype -= 10;
-			if (spectype == PTYPE_STAR || spectype == PTYPE_BL || spectype == PTYPE_AGN)	// Then it came from the bl or the star
-			{
-				xxspec[2].f[k] += p[nphot].w;	/* emitted star (+bl) spectrum */
-				xxspec[2].lf[k1] += p[nphot].w;	/* logarithmic emitted star (+bl) spectrum */
-				xxspec[2].nphot[i]++;
-			}
-			else if (spectype == PTYPE_DISK)	// Then it was a disk photon 
-			{
-				xxspec[3].f[k] += p[nphot].w;	/* transmitted disk spectrum */
-				xxspec[3].lf[k1] += p[nphot].w;	/* logarithmic transmitted disk spectrum */
-				xxspec[3].nphot[i]++;
-			}
-			else if (spectype == PTYPE_WIND)
-			{
-				xxspec[4].f[k] += p[nphot].w;	/* wind spectrum */
-				xxspec[4].lf[k1] += p[nphot].w;	/* logarithmic wind spectrum */
-				xxspec[4].nphot[i]++;
-			}
-			else
-			{
-				Error("spectrum_create: Unknown photon type %d\n", spectype);
-			}
-
-			/* For Live or Die option, increment the spectra here */
-			if (select_extract == 0)
-			{
-				x1 = fabs(p[nphot].lmn[2]);
-				for (n = MSPEC; n < nspec; n++)
-				{
-					/* Complicated if statement to allow one to choose whether to construct the spectrum from all photons or just
-					   from photons which have scattered a specific number of times.  01apr13--ksl-Modified if statement to change
-					   behavior on negative numbers to say that a negative number for mscat implies that you accept any photon
-					   with |mscat| or more scatters */
-					if (((mscat = xxspec[n].nscat) > 999 ||
-						 p[nphot].nscat == mscat ||
-						 (mscat < 0 && p[nphot].nscat >= (-mscat)))
-						&& ((mtopbot = xxspec[n].top_bot) == 0 || (mtopbot * p[nphot].x[2]) > 0))
-
-					{
-						if (xxspec[n].mmin < x1 && x1 < xxspec[n].mmax)
-							xxspec[n].f[k] += p[nphot].w;
-						xxspec[n].lf[k1] += p[nphot].w;	/* logarithmic spectrum */
-					}
-
-				}
-			}
-		}
-		else if (i == P_HIT_STAR || i == P_HIT_DISK)
-		{
-			xxspec[5].f[k] += p[nphot].w;	/* absorbed spectrum */
-			xxspec[5].lf[k1] += p[nphot].w;	/* logarithmic absorbed spectrum */
-			xxspec[5].nphot[i]++;
-		}
-
-		if (j > 0)
-		{
-			xxspec[6].f[k] += p[nphot].w;	/* j is the number of scatters so this constructs */
-			xxspec[6].lf[k1] += p[nphot].w;	/* logarithmic j is the number of scatters so this constructs */
-			if (i < 0 || i > NSTAT - 1)
-				xxspec[6].nphot[NSTAT - 1]++;
-			else
-				xxspec[6].nphot[i]++;	/* scattering spectrum */
-		}
-
-		if (i < 0 || i > NSTAT - 1)
-			nstat[NSTAT - 1]++;
-		else
-			nstat[i]++;
-
-
+	/* also need to work out where we are for photon's original wavelength */
+      k1_orig = (log10 (p[nphot].freq_orig) - log10 (freqmin)) / ldfreq;
+      if (k1_orig < 0)
+	{
+	  k1_orig = 0;
+	}
+      if (k1_orig > NWAVE)
+	{
+	  k1_orig = NWAVE;
 	}
 
 
-	if ((nlow / nphot > 0.05) || (nhigh / nphot > 0.05))
+    /* lines to work out where we are in a normal spectrum with linear spacing */
+      k = (p[nphot].freq - freqmin) / dfreq;
+      if (k < 0)
 	{
-		Error("spectrum_create: Fraction of photons lost: %4.2f wi/ freq. low, %4.2f w/freq hi\n", nlow / nphot, nhigh / nphot);
+	  if (((1. - p[nphot].freq / freqmin) > delta) && (geo.rt_mode != 2))
+	    nlow = nlow + 1;
+	  k = 0;
 	}
-	else
+      else if (k > NWAVE - 1)
 	{
-		Log("spectrum_create: Fraction of photons lost:  %4.2f wi/ freq. low, %4.2f w/freq hi\n", nlow / nphot, nhigh / nphot);
+	  if (((1. - freqmax / p[nphot].freq) > delta) && (geo.rt_mode != 2))
+	    nhigh = nhigh + 1;
+	  k = NWAVE - 1;
 	}
 
-
-	Log("\nNo. of photons which have scattered n times\n");
-	for (i = 0; i <= MAXSCAT; i++)
+	/* also need to work out where we are for photon's original wavelength */
+	  k_orig = (p[nphot].freq_orig - freqmin) / dfreq;
+	  if (k_orig < 0)
 	{
-		Log("%6d", nscat[i]);
-		if ((i % 10) == 9)
-			Log("\n");
+	  if (((1. - p[nphot].freq_orig / freqmin) > delta) && (geo.rt_mode != 2))
+	    nlow = nlow + 1;
+	  k_orig = 0;
 	}
-	Log("\nNumber of photons resonantly scattering n times\n");
-	for (i = 0; i <= MAXSCAT; i++)
+      else if (k_orig > NWAVE - 1)
 	{
-		Log("%6d", nres[i]);
-		if ((i % 10) == 9)
-			Log("\n");
-	}
-	Log("\nNo of photons and their fates\n");
-	for (i = 0; i < NSTAT; i++)
-	{
-		Log("%6d", nstat[i]);
-		if ((i % 10) == 9)
-			Log("\n");
-	}
-	Log("\n");
-
-
-	/* Now subsample the matrix which contains the positions where photons last scattered and print the results to the screen.
-	   Photons which are never in the grid end up in cell 0,0
-
-	   In this instance subsampling means to actually do sums, such that all of the photons that scattered in the wind are counted
-	   in a courser grid.
-
-	 */
-
-
-
-
-	Log("Photons contributing to the various spectra\n");
-	Log("Inwin  Scat  Esc   Star  >nscat  err  Absor  Disk  sec  Adiab(matom)\n");
-	for (n = 0; n < nspectra; n++)
-	{
-		for (i = 0; i < NSTAT; i++)
-			Log(" %5d", xxspec[n].nphot[i]);
-		Log("\n");
-
+	  if (((1. - freqmax / p[nphot].freq_orig) > delta) && (geo.rt_mode != 2))
+	    nhigh = nhigh + 1;
+	  k_orig = NWAVE - 1;
 	}
 
 
-	return (0);
+    xxspec[0].f[k_orig] += p[nphot].w_orig;	/* created spectrum with original weights and wavelengths */
+	xxspec[0].lf[k1_orig] += p[nphot].w_orig;	/* logarithmic created spectrum */
+	
+
+      if ((i = p[nphot].istat) == P_ESCAPE)
+	{
+      xxspec[0].nphot[i]++;
+	  xxspec[1].f[k] += p[nphot].w;	/* emitted spectrum */
+	  xxspec[1].lf[k1] += p[nphot].w;	/* logarithmic emitted spectrum */
+	  xxspec[1].nphot[i]++;
+	  spectype = p[nphot].origin;
+	  if (spectype >= 10)
+	    spectype -= 10;
+	  if (spectype == PTYPE_STAR || spectype == PTYPE_BL || spectype == PTYPE_AGN)	// Then it came from the bl or the star
+	    {
+	      xxspec[2].f[k] += p[nphot].w;	/* emitted star (+bl) spectrum */
+	      xxspec[2].lf[k1] += p[nphot].w;	/* logarithmic emitted star (+bl) spectrum */
+	      xxspec[2].nphot[i]++;
+	    }
+	  else if (spectype == PTYPE_DISK)	// Then it was a disk photon 
+	    {
+	      xxspec[3].f[k] += p[nphot].w;	/* transmitted disk spectrum */
+	      xxspec[3].lf[k1] += p[nphot].w;	/* logarithmic transmitted disk spectrum */
+	      xxspec[3].nphot[i]++;
+	    }
+	  else if (spectype == PTYPE_WIND)
+	    {
+	      xxspec[4].f[k] += p[nphot].w;	/* wind spectrum */
+	      xxspec[4].lf[k1] += p[nphot].w;	/* logarithmic wind spectrum */
+	      xxspec[4].nphot[i]++;
+	    }
+	  else
+	    {
+	      Error ("spectrum_create: Unknown photon type %d\n", spectype);
+	    }
+
+	  /* For Live or Die option, increment the spectra here */
+	  if (select_extract == 0)
+	    {
+	      x1 = fabs (p[nphot].lmn[2]);
+	      for (n = MSPEC; n < nspec; n++)
+		{
+		  /* Complicated if statement to allow one to choose whether to construct the spectrum
+		     from all photons or just from photons which have scattered a specific number
+		     of times.  01apr13--ksl-Modified if statement to change behavior on negative numbers 
+		     to say that a negative number for mscat implies that you accept any photon with 
+		     |mscat| or more scatters */
+		  if (((mscat = xxspec[n].nscat) > 999 ||
+		       p[nphot].nscat == mscat ||
+		       (mscat < 0 && p[nphot].nscat >= (-mscat)))
+		      && ((mtopbot = xxspec[n].top_bot) == 0
+			  || (mtopbot * p[nphot].x[2]) > 0))
+
+		    {
+		      if (xxspec[n].mmin < x1 && x1 < xxspec[n].mmax)
+			xxspec[n].f[k] += p[nphot].w;
+		      xxspec[n].lf[k1] += p[nphot].w;	/* logarithmic spectrum */
+		    }
+
+		}
+	    }
+	}
+      else if (i == P_HIT_STAR || i == P_HIT_DISK)
+	{
+	  xxspec[5].f[k] += p[nphot].w;	/*absorbed spectrum */
+	  xxspec[5].lf[k1] += p[nphot].w;	/*logarithmic absorbed spectrum */
+	  xxspec[5].nphot[i]++;
+	}
+
+      if (j > 0)
+	{
+	  xxspec[6].f[k] += p[nphot].w;	/* j is the number of scatters so this constructs */
+	  xxspec[6].lf[k1] += p[nphot].w;	/* logarithmic j is the number of scatters so this constructs */
+	  if (i < 0 || i > NSTAT - 1)
+	    xxspec[6].nphot[NSTAT - 1]++;
+	  else
+	    xxspec[6].nphot[i]++;	/* scattering spectrum */
+	}
+
+      if (i < 0 || i > NSTAT - 1)
+	nstat[NSTAT - 1]++;
+      else
+	nstat[i]++;
+
+
+    }
+
+
+  if ((nlow / nphot > 0.05) || (nhigh / nphot > 0.05))
+    {
+      Error
+	("spectrum_create: Fraction of photons lost: %4.2f wi/ freq. low, %4.2f w/freq hi\n",
+	 nlow / nphot, nhigh / nphot);
+    }
+  else
+    {
+      Log
+	("spectrum_create: Fraction of photons lost:  %4.2f wi/ freq. low, %4.2f w/freq hi\n",
+	 nlow / nphot, nhigh / nphot);
+    }
+
+
+  Log ("\nNo. of photons which have scattered n times\n");
+  for (i = 0; i <= MAXSCAT; i++)
+    {
+      Log ("%6d", nscat[i]);
+      if ((i % 10) == 9)
+	Log ("\n");
+    }
+  Log ("\nNumber of photons resonantly scattering n times\n");
+  for (i = 0; i <= MAXSCAT; i++)
+    {
+      Log ("%6d", nres[i]);
+      if ((i % 10) == 9)
+	Log ("\n");
+    }
+  Log ("\nNo of photons and their fates\n");
+  for (i = 0; i < NSTAT; i++)
+    {
+      Log ("%6d", nstat[i]);
+      if ((i % 10) == 9)
+	Log ("\n");
+    }
+  Log ("\n");
+
+
+  /* Now subsample the matrix which contains the positions where photons
+     last scattered and print the results to the screen.  Photons which are never
+     in the grid end up in cell 0,0 
+
+     In this instance subsampling means to actually do sums, such that all of
+     the photons that scattered in the wind are counted in a courser grid.
+
+   */
+
+
+
+
+  Log ("Photons contributing to the various spectra\n");
+  Log ("Inwin  Scat  Esc   Star  >nscat  err  Absor  Disk  sec  Adiab(matom)\n");
+  for (n = 0; n < nspectra; n++)
+    {
+      for (i = 0; i < NSTAT; i++)
+	Log (" %5d", xxspec[n].nphot[i]);
+      Log ("\n");
+
+    }
+
+
+  return (0);
 
 }
 
@@ -613,130 +632,124 @@ History:
 
 
 
-int spectrum_summary(char filename[], char mode[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin)	// parameter 
-																																// used 
-																																// to 
-																																// rescale 
-																																// spectrum 
-																																// as 
-																																// it 
-																																// is 
-																																// building 
-																																// up 
-																																// 
+int 
+spectrum_summary (char filename[], char mode[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin)		// parameter used to rescale spectrum as it is building up 
+
 {
-	FILE *fopen(), *fptr;
-	int i, n;
-	char string[LINELENGTH];
-	double freq, freqmin, dfreq, freq1;
-	double lfreqmin, lfreqmax, ldfreq;
-	double x, dd;
+  FILE *fopen (), *fptr;
+  int i, n;
+  char string[LINELENGTH];
+  double freq, freqmin, dfreq, freq1;
+  double lfreqmin, lfreqmax, ldfreq;
+  double x, dd;
 
 
 
-	/* Open or reopen a file for writing the spectrum */
-	if ((fptr = fopen(filename, "w")) == NULL)
+  /* Open or reopen a file for writing the spectrum */
+  if ((fptr = fopen (filename, "w")) == NULL)
+    {
+      Error ("spectrum_summary: Unable to open %s for writing\n", filename);
+      exit (0);
+    }
+
+  /* Check that nspecmin and nspecmax are reasonable */
+  if (nspecmin < 0 || nspecmax < 0 || nspecmin > nspecmax)
+    {
+      Error
+	("spectrum_summary: nspecmin %d or nspecmax %d not reasonable \n",
+	 nspecmin, nspecmax);
+      exit (0);
+    }
+
+  /* Construct and write a header string  for the output file */
+  fprintf (fptr, "# Python Version %s\n", VERSION);
+  fprintf (fptr, "# Git commit hash %s\n", GIT_COMMIT_HASH);
+
+  get_time (string);
+  fprintf (fptr, "# Date	%s\n#  \n", string);
+
+  /* Save all of the parameter file information to the spectrum file */
+
+  rdpar_save (fptr);
+
+
+  /* Write the rest of the header for the spectrum file */
+  /* JM 1411 -- Removed comment line for column headers, see #122 */
+  fprintf (fptr, "# \nFreq.        Lambda");
+
+  for (n = nspecmin; n <= nspecmax; n++)
+    {
+      fprintf (fptr, " %8s", xxspec[n].name);
+    }
+
+
+  fprintf (fptr, "\n");
+
+
+  /* Ignore the end bins because they include all photons outside the frequency range and there may be some
+     as a result of the fact that the bb function generate some IR photons */
+  dd = 4. * PI * (100. * PC) * (100. * PC);
+
+  if (loglin == 0)
+    {
+      freqmin = xxspec[nspecmin].freqmin;
+      dfreq = (xxspec[nspecmin].freqmax - freqmin) / NWAVE;
+      for (i = 1; i < NWAVE - 1; i++)
 	{
-		Error("spectrum_summary: Unable to open %s for writing\n", filename);
-		exit(0);
-	}
-
-	/* Check that nspecmin and nspecmax are reasonable */
-	if (nspecmin < 0 || nspecmax < 0 || nspecmin > nspecmax)
-	{
-		Error("spectrum_summary: nspecmin %d or nspecmax %d not reasonable \n", nspecmin, nspecmax);
-		exit(0);
-	}
-
-	/* Construct and write a header string for the output file */
-	fprintf(fptr, "# Python Version %s\n", VERSION);
-	fprintf(fptr, "# Git commit hash %s\n", GIT_COMMIT_HASH);
-
-	get_time(string);
-	fprintf(fptr, "# Date	%s\n#  \n", string);
-
-	/* Save all of the parameter file information to the spectrum file */
-
-	rdpar_save(fptr);
-
-
-	/* Write the rest of the header for the spectrum file */
-
-	fprintf(fptr, "# \n# Freq.        Lambda");
-
-	for (n = nspecmin; n <= nspecmax; n++)
-	{
-		fprintf(fptr, " %8s", xxspec[n].name);
-	}
-
-
-	fprintf(fptr, "\n");
-
-
-	/* Ignore the end bins because they include all photons outside the frequency range and there may be some as a result of the
-	   fact that the bb function generate some IR photons */
-	dd = 4. * PI * (100. * PC) * (100. * PC);
-
-	if (loglin == 0)
-	{
-		freqmin = xxspec[nspecmin].freqmin;
-		dfreq = (xxspec[nspecmin].freqmax - freqmin) / NWAVE;
-		for (i = 1; i < NWAVE - 1; i++)
-		{
-			freq = freqmin + i * dfreq;
-			fprintf(fptr, "%-8e %.3f ", freq, C * 1e8 / freq);
-			for (n = nspecmin; n <= nspecmax; n++)
-			{
-				x = xxspec[n].f[i] * xxspec[n].renorm;
-				if (select_spectype == 1)
-				{				/* flambda */
-					x *= (freq * freq * 1e-8) / (dfreq * dd * C);
-				}
-				else if (select_spectype == 2)
-				{				/* fnu */
-					x /= (dfreq * dd);
-				}
-				fprintf(fptr, " %8.3g", x * renorm);
-			}
-
-
-			fprintf(fptr, "\n");
+	  freq = freqmin + i * dfreq;
+	  fprintf (fptr, "%-8e %.3f ", freq, C * 1e8 / freq);
+	  for (n = nspecmin; n <= nspecmax; n++)
+	    {
+	      x = xxspec[n].f[i] * xxspec[n].renorm;
+	      if (select_spectype == 1)
+		{		/* flambda */
+		  x *= (freq * freq * 1e-8) / (dfreq * dd * C);
 		}
-	}
-	else if (loglin == 1)
-	{
-		lfreqmin = log10(xxspec[nspecmin].freqmin);
-		freq1 = lfreqmin;
-		lfreqmax = log10(xxspec[nspecmin].freqmax);
-		ldfreq = (lfreqmax - lfreqmin) / NWAVE;
-
-		for (i = 1; i < NWAVE - 1; i++)
-		{
-			freq = pow(10., (lfreqmin + i * ldfreq));
-			dfreq = freq - freq1;
-			fprintf(fptr, "%-8e %.3f ", freq, C * 1e8 / freq);
-			for (n = nspecmin; n <= nspecmax; n++)
-			{
-				x = xxspec[n].lf[i] * xxspec[n].renorm;
-				if (select_spectype == 1)
-				{				/* flambda */
-					x *= (freq * freq * 1e-8) / (dfreq * dd * C);
-				}
-				else if (select_spectype == 2)
-				{				/* fnu */
-					x /= (dfreq * dd);
-				}
-				fprintf(fptr, " %8.3g", x * renorm);	/* this really shouldn't get called if we are outputting log data */
-			}
-
-
-			fprintf(fptr, "\n");
-			freq1 = freq;
+	      else if (select_spectype == 2)
+		{		/*fnu */
+		  x /= (dfreq * dd);
 		}
-	}
-	fclose(fptr);
+	      fprintf (fptr, " %8.3g", x * renorm);
+	    }
 
-	return (0);
+
+	  fprintf (fptr, "\n");
+	}
+    }
+  else if (loglin == 1)
+    {
+      lfreqmin = log10 (xxspec[nspecmin].freqmin);
+      freq1 = lfreqmin;
+      lfreqmax = log10 (xxspec[nspecmin].freqmax);
+      ldfreq = (lfreqmax - lfreqmin) / NWAVE;
+
+      for (i = 1; i < NWAVE - 1; i++)
+	{
+	  freq = pow (10., (lfreqmin + i * ldfreq));
+	  dfreq = freq - freq1;
+	  fprintf (fptr, "%-8e %.3f ", freq, C * 1e8 / freq);
+	  for (n = nspecmin; n <= nspecmax; n++)
+	    {
+	      x = xxspec[n].lf[i] * xxspec[n].renorm;
+	      if (select_spectype == 1)
+		{		/* flambda */
+		  x *= (freq * freq * 1e-8) / (dfreq * dd * C);
+		}
+	      else if (select_spectype == 2)
+		{		/*fnu */
+		  x /= (dfreq * dd);
+		}
+	      fprintf (fptr, " %8.3g", x * renorm);	/* this really shouldn't get called if we are outputting log data */
+	    }
+
+
+	  fprintf (fptr, "\n");
+	  freq1 = freq;
+	}
+    }
+  fclose (fptr);
+
+  return (0);
 
 }
 
@@ -773,24 +786,24 @@ History:
 
 **************************************************************/
 
-int spectrum_restart_renormalise(nangle)
-	 int nangle;
+int 
+spectrum_restart_renormalise (int nangle)
 {
-	double renorm_factor;
-	int n, m, nspec;
+  double renorm_factor;
+  int n, m, nspec;
 
-	nspec = nangle + MSPEC;
-	renorm_factor = ((double)geo.pcycle + 1.0) / ((double)geo.pcycles + 1.0);
+  nspec = nangle + MSPEC;
+  renorm_factor = ( (double) geo.pcycle + 1.0) / ( (double) geo.pcycles + 1.0); 
 
-	/* loop over each spectrum column and each wavelength bin */
-	for (n = MSPEC; n < nspec; n++)
-	{
-		for (m = 0; m < NWAVE; m++)
-		{
-			xxspec[n].f[m] *= renorm_factor;
-			xxspec[n].lf[m] *= renorm_factor;
-		}
-	}
+  /* loop over each spectrum column and each wavelength bin */
+  for (n = MSPEC; n < nspec; n++)
+  {
+  	for (m = 0; m < NWAVE; m++)
+  	  {
+        xxspec[n].f[m] *= renorm_factor;
+        xxspec[n].lf[m] *= renorm_factor;
+  	  } 
+  }
 
-	return (0);
+  return (0);
 }

@@ -3017,11 +3017,8 @@ for (n = 0; n < NDIM2; n++)
 
 ************************************************************************/
 
-int
-complete_physical_summary (w, rootname, ochoice)
-     WindPtr w;
-     char rootname[];
-     int ochoice;
+int 
+complete_physical_summary (WindPtr w, char rootname[], int ochoice)
 {
   int n, np;
   char filename[LINELENGTH];
@@ -3166,11 +3163,8 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
 ************************************************************************/
 
 
-double get_density_or_frac(xplasma,element,istate, frac_choice)
-    PlasmaPtr xplasma;
-    int element;
-    int istate;
-    int frac_choice;
+double 
+get_density_or_frac (PlasmaPtr xplasma, int element, int istate, int frac_choice)
 {
   int nion, nelem;
   double nh, density;
@@ -3207,9 +3201,8 @@ double get_density_or_frac(xplasma,element,istate, frac_choice)
 ************************************************************************/
 
 
-int find_ion(element, istate)
-    int element;
-    int istate;
+int 
+find_ion (int element, int istate)
 {
   int nion;
 
@@ -3234,8 +3227,8 @@ int find_ion(element, istate)
 ************************************************************************/
 
 
-int find_element(element)
-    int element;
+int 
+find_element (int element)
 {
   int n;
 

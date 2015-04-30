@@ -74,11 +74,11 @@ History:
 ************************************************************/
 
 int
-macro_gov (p, nres, matom_or_kpkt, which_out)
-     PhotPtr p;
-     int *nres;
-     int matom_or_kpkt;
-     int *which_out;
+macro_gov (
+     PhotPtr p,
+     int *nres,
+     int matom_or_kpkt,
+     int *which_out)
 
 {
   int escape;			//this tells us when the r-packet is escaping 
@@ -258,9 +258,9 @@ History:
 ************************************************************/
 
 int
-macro_pops (xplasma, xne)
-     PlasmaPtr xplasma;
-     double xne;
+macro_pops (
+     PlasmaPtr xplasma,
+     double xne)
 {
 
   int index_element, index_ion, index_lvl;

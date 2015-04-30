@@ -291,12 +291,8 @@ gen_one_phot (PhotPtr p, double weight, double freq, double x[3], double theta, 
   return (0);
 }
 
-int
-process_one_phot (optr, w, p, ds, smax)
-     FILE *optr;
-     WindPtr w;			// These is the whole wind structure
-     PhotPtr p;
-     double ds, smax;
+int 
+process_one_phot (FILE *optr, WindPtr w, PhotPtr p, double ds, double smax)
 {
   struct photon tphot, zphot;
   double s, v[3], vs[3], zvs[3], lmn[3];

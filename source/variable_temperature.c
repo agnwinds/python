@@ -439,12 +439,8 @@ variable_temperature (PlasmaPtr xplasma, int mode)			//   6=correct using dilute
 **************************************************************/
 int bb_correct_err = 0;
 
-double
-pi_correct (xtemp , nion, xplasma, mode)
-     double xtemp;
-     int nion;
-     PlasmaPtr xplasma;
-     int mode;
+double 
+pi_correct (double xtemp, int nion, PlasmaPtr xplasma, int mode)
 {
   double q;
   int ion_lower;
@@ -519,9 +515,8 @@ numerator=denominator=0.0;
    1504 JM  replaced constant with SAHA for clarity (same value).
 */
 
-double
-temp_func (solv_temp)
-     double solv_temp;
+double 
+temp_func (double solv_temp)
 {
   double answer;
   answer =

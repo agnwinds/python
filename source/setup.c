@@ -30,9 +30,8 @@ History:
 **************************************************************/
 
 
-int parse_command_line(argc, argv)
-    int argc;
-    char *argv[];
+int 
+parse_command_line (int argc, char *argv[])
 {
   int restart_stat, verbosity, time_to_quit, i;
   char dummy[LINELENGTH];
@@ -162,8 +161,8 @@ History:
 
 **************************************************************/
 
-int init_log_and_windsave(restart_stat)
-    int restart_stat;
+int 
+init_log_and_windsave (int restart_stat)
 {
   FILE *fopen (), *qptr;
 
@@ -223,7 +222,8 @@ History:
 
 **************************************************************/
 
-int get_grid_params()
+int 
+get_grid_params (void)
 
 {
 if (geo.wind_type != 2)
@@ -302,7 +302,8 @@ History:
 **************************************************************/
 
 
-int get_line_transfer_mode ()
+int 
+get_line_transfer_mode (void)
 {
   rdint
     ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,6=macro_atoms,7=macro_atoms+aniso.scattering)",
@@ -389,7 +390,8 @@ History:
 
 **************************************************************/
 
-int get_radiation_sources()
+int 
+get_radiation_sources (void)
 {
   if (geo.system_type != SYSTEM_TYPE_AGN)
     {       /* If is a stellar system */
@@ -499,8 +501,8 @@ History:
 
 **************************************************************/
 
-int
-get_wind_params()
+int 
+get_wind_params (void)
 {
   if (geo.system_type == SYSTEM_TYPE_AGN)
   {
@@ -599,7 +601,8 @@ History:
 
 **************************************************************/
 
-double get_stellar_params ()
+double 
+get_stellar_params (void)
 {
   double lstar;
 
@@ -669,7 +672,8 @@ History:
 **************************************************************/
 
 
-int get_disk_params ()
+int 
+get_disk_params (void)
 {
   int disk_illum;
 //        if (geo.disk_radiation) /*NSH 130906 - Commented out this if loop. It was causing problems with restart - bug #44
@@ -761,8 +765,8 @@ History:
 
 **************************************************************/
 
-int get_bl_and_agn_params (lstar)
-    double lstar;
+int 
+get_bl_and_agn_params (double lstar)
 {
   double xbl;
 
@@ -913,7 +917,8 @@ History:
 **************************************************************/
 
 
-int get_compton_torus_params ()
+int 
+get_compton_torus_params (void)
 {
   /* 70b - ksl - 1108067 - Here we add parameters for the compton torus or blocking region 
    *
@@ -969,7 +974,8 @@ History:
 
 **************************************************************/
 
-int get_meta_params ()
+int 
+get_meta_params (void)
 {
   geo.reverb = 0;
   rdint("reverb.type", &geo.reverb);
@@ -1006,7 +1012,8 @@ History:
 
 **************************************************************/
 
-double setup_dfudge ()
+double 
+setup_dfudge (void)
 {
   double dfudge;
 
@@ -1070,7 +1077,8 @@ History:
 
 **************************************************************/
 
-int setup_windcone()
+int 
+setup_windcone (void)
 {
    if (geo.wind_thetamin > 0.0)
     {
@@ -1157,7 +1165,8 @@ History:
 
 **************************************************************/
 
-int setup_created_files()
+int 
+setup_created_files (void)
 {
   int opar_stat;
 
@@ -1256,7 +1265,8 @@ History:
 
 **************************************************************/
 
-int get_standard_care_factors()
+int 
+get_standard_care_factors (void)
 {
   int istandard;
   istandard = 1;
