@@ -221,9 +221,9 @@ trans_phot (w, p, iextract)
 	      p_norm = 1.0;
 
 	      /* throw an error if nnscat does not equal 1 */
-	      if (p[nphot].nnscat != 1)
-		Error ("nnscat is %i for photon %i in scatter mode %i!\n",
-		       p[nphot].nnscat, nphot, geo.scatter_mode);
+	      if (pextract.nnscat != 1)
+		Error ("nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
+		       pextract.nnscat, nphot, geo.scatter_mode, pextract.nres, NLINES);
 	    }
 
 
@@ -453,6 +453,10 @@ the current version of scattering really does what the old code did for two-leve
 	       * the wind at all???
 	       * Also how is this enforced; where is pp.w set to a low value.
 	       */
+	       /* JM 1504 -- This is correct. It's one of the odd things about combining the macro-atom
+	         approach with our way of doing 'spectral cycles'. If photons activate macro-atoms they
+	         are destroyed, but we counter this by generating photons from deactivating macro-atoms
+	         with the already calculated emissivities. */
 
 	      if (geo.matom_radiation == 1 && geo.rt_mode == 2
 		  && pp.w < weight_min)
@@ -537,10 +541,13 @@ been initialized. 02may ksl.  This seems to be OK at present.*/
 		      p_norm = 1.0;
 
 		      /* throw an error if nnscat does not equal 1 */
-		      if (p[nphot].nnscat != 1)
+		      /* JM 1504-- originally I'd used the wrong value of nnscat here.
+		         This would throw large amounts of errors which weren't actually errors */
+		      /* nnscat is the quantity associated with this photon being extracted */
+		      if (nnscat != 1)
 			Error
-			  ("nnscat is %i for photon %i in scatter mode %i!\n",
-			   p[nphot].nnscat, nphot, geo.scatter_mode);
+			  ("nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
+			   nnscat, nphot, geo.scatter_mode, pextract.nres, NLINES);
 		    }
 
 		  /* We then increase weight to account for number of scatters.

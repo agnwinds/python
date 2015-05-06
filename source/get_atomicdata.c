@@ -143,6 +143,7 @@ History:
   14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120. 
 	14nov	nsh	78b - added DERE direct ionizaion data, and changed al recomb data to refer to state being left
                  Also used write_atomicdata to control if summary is written to file.
+  15apr JM  79b -- VFKY cross-sections are now tabulated. Multiple changes here, see pull #143
 **************************************************************/
 
 
@@ -1567,6 +1568,7 @@ for the ionstate.
 			  Error
 			    ("get_atomic_data: file %s line %d: photoionization line incorrectly formatted\n",
 			     file, lineno);
+        Log("Make sure you are using the tabulated verner cross sections (photo_vfky_tabulated.data)\n");
 			  Error ("Get_atomic_data: %s\n", aline);
 			  exit (0);
 			}

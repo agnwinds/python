@@ -80,6 +80,8 @@ else	# you must be using clang or icc
 	COMPILER_PRINT_STRING = Compiling with $(CC) $(COMPILER_VERSION)
 endif
 
+# this command finds out how many files with uncommitted changes there are
+GIT_DIFF_STATUS := $(shell expr `git status --porcelain 2>/dev/null| grep "^ M" | wc -l`)
 GIT_COMMIT_HASH := $(shell expr `git rev-parse HEAD`)
 
 INCLUDE = ../include
@@ -90,7 +92,7 @@ ifeq (D,$(firstword $(MAKECMDGOALS)))
 # use pg when you want to use gprof the profiler
 # to use profiler make with arguments "make D python" 
 # this can be altered to whatever is best	
-	CFLAGS = -g -pg -Wall $(EXTRA_FLAGS) -I$(INCLUDE)$(MPI_FLAG)
+	CFLAGS = -g -pg -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG)
 	FFLAGS = -g -pg   
 	PRINT_VAR = DEBUGGING, -g -pg -Wall flags
 else
@@ -124,6 +126,7 @@ startup:
 	echo "#define VERSION " \"$(VERSION)\" > version.h
 	echo "#define CHOICE"   $(CHOICE) >> version.h
 	echo "#define GIT_COMMIT_HASH" \"$(GIT_COMMIT_HASH)\" >> version.h
+	echo "#define GIT_DIFF_STATUS" $(GIT_DIFF_STATUS)\ >> version.h
 
 foo: foo.o signal.o time.o
 	$(CC) ${cfllags} foo.o signal.o time.o ${LDFLAGS}  -o foo
@@ -202,6 +205,26 @@ py_wind: startup $(py_wind_objects)
 	$(CC) $(CFLAGS) $(py_wind_objects) $(LDFLAGS) -o py_wind
 	cp $@ $(BIN)
 	mv $@ $(BIN)/py_wind$(VERSION)
+
+
+table_objects = windsave2table.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
+		emission.o recomb.o util.o detail.o \
+		pdf.o random.o recipes.o saha.o \
+		stellar_wind.o homologous.o sv.o proga.o corona.o knigge.o  disk.o\
+		lines.o vector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
+		radiation.o gradv.o phot_util.o anisowind.o resonate.o density.o \
+		matom.o estimators.o yso.o elvis.o photon2d.o cylindrical.o rtheta.o spherical.o  \
+		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
+		spectral_estimators.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
+        	variable_temperature.o bb.o rdpar.o log.o direct_ion.o diag.o matrix_ion.o \
+		pi_rates.o photo_gen_matom.o macro_gov.o
+
+
+
+windsave2table: $(table_objects) 
+	$(CC) $(CFLAGS) $(table_objects) $(LDFLAGS) -o windsave2table
+	cp $@ $(BIN)
+	mv $@ $(BIN)/windsave2table$(VERSION)
 
 py_smooth: py_smooth.o 
 	$(CC) $(CFLAGS) py_smooth.o  $(LDFLAGS)  -o py_smooth
