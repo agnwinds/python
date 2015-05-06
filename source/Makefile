@@ -92,7 +92,7 @@ ifeq (D,$(firstword $(MAKECMDGOALS)))
 # use pg when you want to use gprof the profiler
 # to use profiler make with arguments "make D python" 
 # this can be altered to whatever is best	
-	CFLAGS = -g -pg -Wall $(EXTRA_FLAGS) -I$(INCLUDE)$(MPI_FLAG)
+	CFLAGS = -g -pg -Wall $(EXTRA_FLAGS) -I$(INCLUDE) $(MPI_FLAG)
 	FFLAGS = -g -pg   
 	PRINT_VAR = DEBUGGING, -g -pg -Wall flags
 else
