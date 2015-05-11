@@ -181,14 +181,14 @@ int stellar_vel_grad(double x[], double velgrad[][3]);
 int get_homologous_params(void);
 double homologous_velocity(double x[], double v[]);
 double homologous_rho(double x[]);
-/* proga.c */
-int get_proga_wind_params(void);
-int get_proga(void);
-double proga_velocity(double x[], double v[]);
-double proga_rho(double x[]);
-double proga_temp(double x[]);
-int rtheta_make_zeus_grid(WindPtr w);
-int rtheta_zeus_volumes(WindPtr w);
+/* hydro_import.c */
+int get_hydro_wind_params(void);
+int get_hydro(void);
+double hydro_velocity(double x[], double v[]);
+double hydro_rho(double x[]);
+double hydro_temp(double x[]);
+int rtheta_make_hydro_grid(WindPtr w);
+int rtheta_hydro_volumes(WindPtr w);
 /* corona.c */
 int get_corona_params(void);
 double corona_velocity(double x[], double v[]);
@@ -554,4 +554,3 @@ int main(int argc, char *argv[]);
 int one_choice(int choice, char *root, int ochoice);
 int py_wind_help(void);
 /* test_saha.c */
-int main(int argc, char *argv[]);

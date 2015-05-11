@@ -388,7 +388,7 @@ main (argc, argv)
 
 
       rdint
-	("Wind_type(0=SV,1=Sphere,2=Previous,3=Proga,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell)",
+	("Wind_type(0=SV,1=Sphere,2=Previous,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell)",
 	 &geo.wind_type);
 
 
@@ -977,7 +977,10 @@ main (argc, argv)
 
   /* Next line finally defines the wind if this is the initial time this model is being run */
   if (geo.wind_type != 2)	// Define the wind and allocate the arrays the first time
+{
+	printf ("Going to define wind\n");
     define_wind ();
+}
   // Do not reinit if you want to use old windfile
 
   w = wmain;
