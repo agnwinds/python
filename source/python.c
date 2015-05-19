@@ -391,7 +391,6 @@ main (argc, argv)
 	("Wind_type(0=SV,1=Sphere,2=Previous,3=Proga,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell)",
 	 &geo.wind_type);
 
-
       if (geo.wind_type == 2)
 	{
 	  /* This option is for the confusing case where we want to start with
@@ -580,7 +579,8 @@ main (argc, argv)
   /*  Establish the overall system type  - Added for python_69 to allow qso's have different inputs
       Note - ksl - What happened to the possibility of a true single star with no disk - 110914 */
 
-  rdint ("System_type(0=star,1=binary,2=agn)", &geo.system_type);
+  rdint ("System_type(0=star,1=binary,2=agn)", &n);	//SWM - Tweaked to read to int, then to enum
+  geo.system_type = (enum system_type_enum) n;
 
   /* specify if there is a disk and what type */
   /* JM 1502 -- moved disk type question here- previously it was just before

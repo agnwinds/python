@@ -104,29 +104,15 @@ int NPHOT;			/* As of python_40, NPHOT must be defined in the main program using
 
  */
 
-/* Definitions of the coordinate system types (geo.coord_type) */
-
-#define SPHERICAL		0
-#define CYLIND			1
-#define	RTHETA			2
-#define	CYLVAR                  3
-
-
 /* Definitions of spectral types, which are all negative because when
  * one reads a spectrum from a list of models these are numbered beginning
  * with zero, see the discussion in get_models.c   080518 - ksl - 60a
  */
-
 #define SPECTYPE_BB      -1
 #define SPECTYPE_UNIFORM -2
 #define SPECTYPE_POW     -4
 #define SPECTYPE_CL_TAB  -5
 #define SPECTYPE_NONE	 -3
-
-/* definitions of system types */
-#define SYSTEM_TYPE_STAR    0
-#define SYSTEM_TYPE_BINARY  1
-#define SYSTEM_TYPE_AGN     2
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10
@@ -141,8 +127,14 @@ struct geometry
   int wcycles, pcycles;		/* The number of ionization and spectrum cycles desired */
 
 /* Begin description of the actual geometery */
+  enum coord_type_enum
+  	{	SPHERICAL 	=0,
+		CYLIND 		=1,
+		RTHETA		=2,
+		CYLVAR      =3
+  	} coord_type;
 
-  int coord_type, ndim, mdim;	/* The type of geometry and dimensionality of the wind array. 
+  int ndim, mdim;	/* The type of geometry and dimensionality of the wind array. 
 				   0=1-d spherical, 1=cylindrical, 2 = spherical polar, 3=cylindrical
 				   but the z coordinate changes with rho in an attempt to allow for
 				   a vertically extended disk....
@@ -154,10 +146,11 @@ struct geometry
   double mstar, rstar, rstar_sq, tstar, gstar;	/* Basic parameters for the WD */
   double twind;			/* temperature of wind */
   double tmax;			/*NSH 120817 the maximim temperature of any element of the model - used to help estimate things for an exponential representation of the spectrum in a cell */
-  int system_type;		/*0--> single star system
-				   1--> binary system
-				   2--> AGN
-				 */
+  enum system_type_enum 
+  	{	SYSTEM_TYPE_STAR	=0, 
+  		SYSTEM_TYPE_BINARY	=1, 
+  		SYSTEM_TYPE_AGN		=2
+  	} 	system_type;
   int disk_type;		/*0 --> no disk, 
 				   1 --> a standard disk in xy plane, 
 				   2 --> a vertically extended disk 
@@ -482,14 +475,6 @@ is that if a new component is to be added, it should be added with by with two v
 and PART in whatever, as n and n+1
 */
 
-#define W_PART_INTORUS 3	//Part of cell is in the torus
-#define W_ALL_INTORUS  2	//Entire grid cell is in the torus
-#define W_PART_INWIND  1	//Part of gridcell is in the wind
-#define W_ALL_INWIND   0	//Entire grid cell is in the wind
-#define W_NOT_INWIND  -1	//None of gridcell is in the wind
-#define W_IGNORE      -2	//Even though the wind may occupy a small part of this cell, assume
-				//photons simply pass through the cell.  This is new in 58b
-
 typedef struct wind
 {
   int nwind;			/*A self-reference to this cell in the wind structure */
@@ -510,9 +495,11 @@ typedef struct wind
   double vol;			/* valid volume of this cell (that is the volume of the cell that is considered
 				   to be in the wind.  This differs from the volume in the Plasma structure
 				   where the volume is the volume that is actually filled with material. */
-  int inwind;			/* 061104 -- 58b -- ksl -- Moved definitions of for whether a cell is or is not
-				   inwind to #define statements above */
-
+  enum inwind_enum
+  	{	W_IGNORE=-2, 	W_NOT_INWIND=-1, 
+  		W_ALL_INWIND=0, W_PART_INWIND=1, 
+  		W_ALL_INTORUS=2, W_PART_INTORUS=3
+  	}	inwind;			
 }
 wind_dummy, *WindPtr;
 
@@ -595,16 +582,6 @@ typedef struct plasma
   double w;			/*The dilution factor of the wind */
   int ntot;			/*Total number of photon passages */
 
-
-#define PTYPE_STAR	    0
-#define PTYPE_BL	    1
-#define PTYPE_DISK          2
-#define PTYPE_WIND	    3
-#define PTYPE_AGN           4
-
-#define SPEC_MOD_PL         1
-#define SPEC_MOD_EXP	    2
-
   /* NSH 15/4/11 - added some counters to give a rough idea of where photons from various sources are ending up */
   /* NSH 111005  - changed counters to real variables, that allows us to take account of differening weights of photons */
   /* ksl - ???? The reason these are doubles if that what Nick did was to truly count the photons, but it is
@@ -685,7 +662,11 @@ NSH 130725 - this number is now also used to say if the cell is over temperature
   double gamma_inshl[NAUGER];	/*MC estimator that will record the inner shell ionization rate - very similar to macro atom-style estimators */
   /* 1108 Increase sim estimators to cover all of the bands */
   /* 1208 Add parameters for an exponential representation, and a switch to say which we prefer. */
-  int spec_mod_type[NXBANDS];	/* NSH 120817 A switch to say which type of representation we are using for this band in this cell. Negative means we have no useful representation, 0 means power law, 1 means exponential */
+  enum spec_mod_type_enum 
+  	{  	SPEC_MOD_PL=1, 
+  		SPEC_MOD_EXP=2
+	} 	spec_mod_type[NXBANDS];	/* NSH 120817 A switch to say which type of representation we are using for this band in this cell. Negative means we have no useful representation, 0 means power law, 1 means exponential */
+
   double pl_alpha[NXBANDS];	/*Computed spectral index for a power law spectrum representing this cell NSH 120817 - changed name from sim_alpha to PL_alpha */
 //  double pl_w[NXBANDS];		/*This is the computed weight of a PL spectrum in this cell - not the same as the dilution factor NSH 120817 - changed name from sim_w to pl_w */
   double pl_log_w[NXBANDS];    /* NSH 131106 - this is the log version of the power law weight. It is in an attempt to allow very large values of alpha to work with the PL spectral model to avoide NAN problems. The pl_w version can be deleted once testing is complete */
@@ -808,27 +789,6 @@ int xxxpdfwind;			// When 1, line luminosity calculates pdf
 
 int size_Jbar_est, size_gamma_est, size_alpha_est;
 
-// These definitions define a photon type, generally it's origin
-#define PTYPE_STAR	    0
-#define PTYPE_BL	    1
-#define PTYPE_DISK          2
-#define PTYPE_WIND	    3
-#define PTYPE_AGN           4
-
-/* These definitions define the current or final state of a photon.  They are used by
-phot.istat below */
-
-#define P_INWIND            0	//in wind,
-#define P_SCAT              1	//in process of scattering,
-#define P_ESCAPE            2	//Escaped to reach the universe,
-#define P_HIT_STAR          3	//absorbed by photosphere of star,
-#define P_HIT_DISK          7	//Banged into disk
-#define P_ABSORB            6	//Photoabsorbed within wind
-#define P_TOO_MANY_SCATTERS 4	//in wind after MAXSCAT scatters
-#define P_ERROR             5	//Too many calls to translate without something happening
-#define P_SEC               8	//Photon hit secondary
-#define P_ADIABATIC         9 //records that a photon created a kpkt which was destroyed by adiabatic cooling
-
 #define TMAX_FACTOR			1.5	/*Factor by which t_e can exceed
 						   t_r in order for absorbed to 
 						   match emitted flux */
@@ -857,7 +817,6 @@ phot.istat below */
 #define IONMODE_MATRIX_BB 8	              // matrix solver BB model
 #define IONMODE_MATRIX_SPECTRALMODEL 9        // matrix solver spectral model
 
-
 // and the corresponding modes in nebular_concentrations
 #define NEBULARMODE_TR 0                       // LTE using t_r
 #define NEBULARMODE_TE 1                       // LTE using t_e
@@ -866,11 +825,6 @@ phot.istat below */
 #define NEBULARMODE_PAIRWISE_SPECTRALMODEL 7   // pairwise spectral models
 #define NEBULARMODE_MATRIX_BB 8	               // matrix solver BB model
 #define NEBULARMODE_MATRIX_SPECTRALMODEL 9     // matrix solver spectral model
-
-
-
-
-
 
 #define NDIM_MAX 500                // maximum size of the grid in each dimension
 double wind_x[NDIM_MAX], wind_z[NDIM_MAX];	/* These define the edges of the cells in the x and z directions */
@@ -890,7 +844,19 @@ typedef struct photon
   double freq, freq_orig;    /* current and original frequency of this packet */
   double w,w_orig;		       /* current and original weight of this packet */
   double tau;
-  int istat;			/*status of photon.  See definitions P_INWIND, etc above */
+  enum istat_enum 
+  	{	P_INWIND           =0,	//in wind,
+		P_SCAT             =1,	//in process of scattering,
+		P_ESCAPE           =2,	//Escaped to reach the universe,
+		P_HIT_STAR         =3,	//absorbed by photosphere of star,
+		P_HIT_DISK         =7,	//Banged into disk
+		P_ABSORB           =6,	//Photoabsorbed within wind
+		P_TOO_MANY_SCATTERS=4,	//in wind after MAXSCAT scatters
+		P_ERROR            =5,	//Too many calls to translate without something happening
+		P_SEC              =8,	//Photon hit secondary
+		P_ADIABATIC        =9 	//records that a photon created a kpkt which was destroyed by adiabatic cooling
+  	} 	istat;					/*status of photon.*/
+
   int nscat;			/*number of scatterings */
   int nres;			/*The line number in lin_ptr of last scatter or wind line creation */
   int nnscat;			/* Used for the thermal trapping model of
@@ -902,16 +868,20 @@ typedef struct photon
 				   the photon is in the wind.  If the photon is not
 				   in the wind, then -1 implies inside the wind cone and  
 				   -2 implies outside the wind */
-  int origin;			/* Where this photon originated.  If the photon has
-				   scattered it's "origin" may be changed to "wind".  The
-				   definitions should be according to PTYPE ... above. 
-				 */
+
+  enum origin_enum
+  	{	PTYPE_STAR=0, 
+  		PTYPE_BL=1, 
+  		PTYPE_DISK=2,
+  		PTYPE_WIND=3,
+  		PTYPE_AGN=4
+  	} 	origin;				/* Where this photon originated.  If the photon has
+		   					scattered it's "origin" may be changed to "wind".*/
   int np;			/*NSH 13/4/11 - an internal pointer to the photon number so 
 				   so we can write out details of where the photon goes */
 
 }
 p_dummy, *PhotPtr;
-
 
 /* minimum value for tau for p_escape_from_tau function- below this we 
    set to p_escape_ to 1 */
@@ -1191,5 +1161,3 @@ files;
    whether it has already calculated the matom emissivities or not. */
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
-
-
