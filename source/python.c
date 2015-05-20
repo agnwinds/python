@@ -908,6 +908,9 @@ main (argc, argv)
 
   get_standard_care_factors();
 
+	/* 0415 SWM - Added metaparams */
+	get_meta_params();
+
 
 /* 081221 - 67c - Establish limits on the frequency intervals to be used by the ionization cycles and 
  * the fraquency bands for stratified sampling.  Changes here were made to allow more control
@@ -1073,6 +1076,12 @@ main (argc, argv)
 				       */
     }
 
+	/* SWM - Setup for path tracking */
+	if(geo.reverb > 0)
+	{
+		reverb_init(wmain, nangles, freqmin, freqmax);
+		delay_dump_prep(files.root, restart_stat, rank_global);
+	}
   
 
   while (geo.wcycle < geo.wcycles)
@@ -1330,6 +1339,12 @@ main (argc, argv)
 
   Log (" Completed wind creation.  The elapsed TIME was %f\n", timer ());
 
+	/* SWM - Evaluate wind paths for last iteration */
+	if (geo.reverb == REV_WIND)
+	{
+		wind_paths_evaluate(w);
+		wind_paths_output(w, files.root);
+	}
 
 /* XXXX - THE CALCULATION OF A DETAILED SPECTRUM IN A SPECIFIC REGION OF WAVELENGTH SPACE */
 
@@ -1486,7 +1501,8 @@ main (argc, argv)
       Log ("Completed spectrum cycle %3d :  The elapsed TIME was %f\n",
 	   geo.pcycle, timer ());
 
-
+		/* SWM0215: Delay dump photons from this cycle */
+		if(geo.reverb > 0) delay_dump(p, NPHOT, 0);	// SWM - Dump delay tracks from this iteration
 
       /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
 
@@ -1521,6 +1537,14 @@ main (argc, argv)
   fb_save ("recomb.save");
 #ifdef MPI_ON
    }
+#endif
+
+	/* SWM0215: Dump the last photon path details to file */
+	if(geo.reverb != REV_NONE) delay_dump_finish();		// Each thread dumps to file
+#ifdef MPI_ON
+	MPI_Barrier(MPI_COMM_WORLD);	// Once all done
+	if (my_rank == 0 && geo.reverb != REV_NONE) 
+		delay_dump_combine(np_mpi_global);	// Combine results if necessary
 #endif
 
 
