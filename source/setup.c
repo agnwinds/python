@@ -530,7 +530,7 @@ get_wind_params()
     }
   else if (geo.wind_type == 3)
     {
-      get_proga_wind_params ();
+      get_hydro_wind_params ();
     }
   else if (geo.wind_type == 4)
     {
