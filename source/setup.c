@@ -652,7 +652,7 @@ Synopsis:
 Arguments:		
 
 Returns:
- 
+  disk_illum - this is used by python.c and so needs to be returned
  
 Description:	
 
@@ -664,7 +664,7 @@ History:
 **************************************************************/
 
 
-int get_disk_params ()
+double get_disk_params ()
 {
   int disk_illum;
 //        if (geo.disk_radiation) /*NSH 130906 - Commented out this if loop. It was causing problems with restart - bug #44
@@ -730,7 +730,7 @@ int get_disk_params ()
       rddoub ("disk.z0(fractional.height.at.diskrad)", &geo.disk_z0);
       rddoub ("disk.z1(powerlaw.index)", &geo.disk_z1);
     }
-  return (0);
+  return (disk_illum);
 }
 
 

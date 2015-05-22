@@ -614,7 +614,7 @@ main (argc, argv)
 
       if (geo.disk_type)	/* Then a disk exists and it needs to be described */
 	{
-      get_disk_params ();
+      disk_illum = get_disk_params ();
 	}
 
       else

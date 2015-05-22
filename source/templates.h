@@ -469,7 +469,7 @@ int get_line_transfer_mode(void);
 int get_radiation_sources(void);
 int get_wind_params(void);
 double get_stellar_params(void);
-int get_disk_params(void);
+double get_disk_params(void);
 int get_bl_and_agn_params(double lstar);
 int get_compton_torus_params(void);
 double setup_dfudge(void);
@@ -554,4 +554,3 @@ int main(int argc, char *argv[]);
 int one_choice(int choice, char *root, int ochoice);
 int py_wind_help(void);
 /* test_saha.c */
-int main(int argc, char *argv[]);
