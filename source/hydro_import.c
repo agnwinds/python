@@ -218,7 +218,7 @@ get_hydro ()
   	hydro_thetamax=89.9;
 
 
-  rddoub ("Hydro_thetamax(degrees - negative means no maximum)", &hydro_thetamax);
+  rddoub ("Hydro_thetamax(degrees:negative_means_no_maximum)", &hydro_thetamax);
 
   //If we have set the maximum angle to a negaive value, we mean that we dont want to restrict.
   if (hydro_thetamax < 0.0) hydro_thetamax=VERY_BIG;
