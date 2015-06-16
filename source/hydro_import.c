@@ -214,13 +214,16 @@ get_hydro ()
     }
 
 //	Log ("Hydro datafile = %s\n",datafile);
- 	hydro_thetamax=89.9;
 
-  rddoub ("Hydro_thetamax(degrees)", &hydro_thetamax);
+  	hydro_thetamax=89.9;
 
+
+  rddoub ("Hydro_thetamax(degrees:negative_means_no_maximum)", &hydro_thetamax);
+
+  //If we have set the maximum angle to a negaive value, we mean that we dont want to restrict.
+  if (hydro_thetamax < 0.0) hydro_thetamax=VERY_BIG;
   hydro_thetamax=hydro_thetamax/RADIAN;
   
-
 
 
   ihydro_r = 0;
@@ -238,12 +241,12 @@ get_hydro ()
 
 	if (strncmp (word, "ir", 2) == 0)
 		{
-		printf ("We have a title line, we might do something with this in the future \n");
+		Log ("We have a hydro title line, we might do something with this in the future \n");
 		}
 	else
 		{
       		itest = sscanf (aline, "%d %lf %lf %d %lf %lf %lf %lf %lf %lf %lf", &i, &r, &r_edge, &j, &theta, &theta_edge,  &vr, &vtheta, &vphi, &rho, &temp);	
-//	printf ("aline=%s itest= %i\n",aline,itest);
+//				printf ("aline=%s itest= %i\n",aline,itest);
       		if (itest != 11) //We have an line which does not match what we expect, so quit
 			{
 			Error("hydro.c data file improperly formatted\n");
@@ -268,12 +271,14 @@ get_hydro ()
 		//If theta is greater than thetamax, then we will replace rho with the last density above the disk
 		else if (hydro_theta_edge[j] > hydro_thetamax)
 			{
+//				printf ("edge is greater than thetamax %e > %e\n",hydro_theta_edge[j] , hydro_thetamax);
 			/* NSH 130327 - for the time being, if theta is in the disk, replace with the last
  			density above the disk */
 			rho=hydro_ptr[i * MAXHYDRO + j_hydro_thetamax].rho;
 			}
 		hydro_ptr[i * MAXHYDRO + j].temp = temp;	
           	hydro_ptr[i * MAXHYDRO + j].rho = rho;
+//			printf ("input rho %e temp %e vr %e vtheta %e vphi %e\n",rho,temp,vr,vtheta,vphi);
 	  	hydro_ptr[i * MAXHYDRO + j].v[0] = vr;
 	  	hydro_ptr[i * MAXHYDRO + j].v[1] = vtheta;
 	  	hydro_ptr[i * MAXHYDRO + j].v[2] = vphi;
@@ -293,7 +298,7 @@ get_hydro ()
 	}
   else
 	{	
- 	Log ("PROGA j_proga_thetamax=%i, bracketing cells have theta = %f and %f\n",j_hydro_thetamax,hydro_theta_cent[j_hydro_thetamax]*RADIAN,hydro_theta_cent[j_hydro_thetamax+1]*RADIAN); 
+ 	Log ("HYDRO j_hydro_thetamax=%i, bracketing cells have theta = %f and %f\n",j_hydro_thetamax,hydro_theta_cent[j_hydro_thetamax]*RADIAN,hydro_theta_cent[j_hydro_thetamax+1]*RADIAN); 
 	ihydro_theta=j_hydro_thetamax;
 	geo.wind_thetamax=hydro_thetamax;
 	MDIM = geo.mdim = ihydro_theta+2;
@@ -528,7 +533,7 @@ hydro_rho (x)
   double f1, f2;
   r = length (x);
   theta = asin (sqrt (x[0] * x[0] + x[1] * x[1]) / r);
-//   printf ("x %.2g %.2g %.2g  -> r= %.2g theta = %.2g ", x[0], x[1], x[2], r,        theta);
+//     printf ("x %.2g %.2g %.2g  -> r= %.2g theta = %.2g ", x[0], x[1], x[2], r,        theta);
 
   if (r > hydro_r_cent[ihydro_r])
     {
@@ -563,7 +568,7 @@ hydro_rho (x)
 
 
 //rrho=hydro_ptr[ii*MAXHYDRO+jj].rho;
-
+//  printf ("Data rho=%e\n",hydro_ptr[im * MAXHYDRO + jm].rho);
   rrho =
     (1. - f1) * ((1. - f2) * hydro_ptr[im * MAXHYDRO + jm].rho +
 		 f2 * hydro_ptr[im * MAXHYDRO + jj].rho) + f1 * ((1. -
@@ -580,6 +585,7 @@ hydro_rho (x)
 									   MAXHYDRO
 									   +
 									   jj].rho);
+//  printf ("Rho= %e\n",rrho);
 
   if (rrho < 1e-23)
     rrho = 1e-23;
