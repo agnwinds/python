@@ -962,7 +962,7 @@ History:
 int 
 get_meta_params (void)
 {
-  geo.reverb = 0;
+  geo.reverb = REV_NONE;
   rdint("reverb.type", &geo.reverb);
   if (geo.reverb == REV_WIND)
   {

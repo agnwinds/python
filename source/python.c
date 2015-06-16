@@ -1077,7 +1077,7 @@ main (argc, argv)
     }
 
 	/* SWM - Setup for path tracking */
-	if(geo.reverb > 0)
+	if(geo.reverb > REV_NONE)
 	{
 		reverb_init(wmain, nangles, freqmin, freqmax);
 		delay_dump_prep(files.root, restart_stat, rank_global);
@@ -1502,7 +1502,7 @@ main (argc, argv)
 	   geo.pcycle, timer ());
 
 		/* SWM0215: Delay dump photons from this cycle */
-		if(geo.reverb > 0) delay_dump(p, NPHOT, 0);	// SWM - Dump delay tracks from this iteration
+		if(geo.reverb > REV_NONE) delay_dump(p, NPHOT, 0);	// SWM - Dump delay tracks from this iteration
 
       /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
 

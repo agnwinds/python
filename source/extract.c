@@ -404,7 +404,9 @@ the same resonance again */
 		{
 			stuff_v(pstart.x, pp->x);	// Restore photon to initial position (necessary for reweighting schemes)
 			pp->path = pstart.path;
-			delay_dump_single(pp, 1);	// Dump photon now weight has been modified
+
+			if (geo.reverb > REV_NONE)		// only want to dump photon if the reverb structures are set up
+			  delay_dump_single(pp, 1);	// Dump photon now weight has been modified
 		}
 
 
