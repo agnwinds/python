@@ -981,7 +981,6 @@ main (argc, argv)
   /* Next line finally defines the wind if this is the initial time this model is being run */
   if (geo.wind_type != 2)	// Define the wind and allocate the arrays the first time
 {
-	printf ("Going to define wind\n");
     define_wind ();
 }
   // Do not reinit if you want to use old windfile
