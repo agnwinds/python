@@ -111,7 +111,7 @@ define_wind ()
       w[n].inwind = W_NOT_INWIND;
     }
 
-printf ("Got to define wind %i\n",geo.coord_type);
+  //printf ("Got to define wind %i\n",geo.coord_type);
 
   if (geo.wind_type == 9)	//This is the mode where we want the wind and the grid carefully controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
     {
