@@ -591,7 +591,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	  istat = pp.istat = P_INWIND;	// if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
 	  tau = 0;
 	  
-	  stuff_v (pp.x, x_dfudge_check);
+	  stuff_v (pp.x, x_dfudge_check); // this is a vector we use to see if dfudge moved the photon outside the wind cone
 	  reposition (w, &pp);
 
 	  /* JM 1506 -- call walls again to account for instance where DFUDGE 
@@ -609,7 +609,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       /* JM 1506 -- we don't throw errors here now, but we do keep a track 
          of how many 4 photons were lost due to DFUDGE pushing them 
          outside of the wind after scatter */
-	  if (where_in_wind (pp.x) < 0 && where_in_wind (x_dfudge_check[3]) >= 0)
+	  if (where_in_wind (pp.x) < 0 && where_in_wind (&x_dfudge_check[3]) >= 0)
 	  {
       	n_lost_to_dfudge++;		// increment the counter (checked at end of trans_phot)
 	  }
