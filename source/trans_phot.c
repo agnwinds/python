@@ -246,8 +246,6 @@ trans_phot (
 
   n_lost_to_dfudge = 0;		// reset the counter
 
-  exit(0);
-
   return (0);
 }
 
