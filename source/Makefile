@@ -212,7 +212,7 @@ py_wind: startup $(py_wind_objects)
 
 summarize_atomic: summarize_atomic.o get_atomicdata.o log.o rdpar.o  
 	$(CC) $(CFLAGS) summarize_atomic.o get_atomicdata.o log.o rdpar.o   -o summarize_atomic
-	cp $@ $(BIN)
+	mv $@ $(BIN)
 
 
 table_objects = windsave2table.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
