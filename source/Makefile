@@ -225,7 +225,7 @@ table_objects = windsave2table.o get_atomicdata.o py_wind_sub.o windsave.o py_wi
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
 		spectral_estimators.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
         	variable_temperature.o bb.o rdpar.o log.o direct_ion.o diag.o matrix_ion.o \
-		pi_rates.o photo_gen_matom.o macro_gov.o
+		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o time.o
 
 
 
