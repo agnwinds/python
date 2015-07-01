@@ -8,15 +8,8 @@
 #
 # Procedure:
 #       - travis automatically clones the main dev branch of the repository
-<<<<<<< HEAD
 #       - we clone the rest the atomic data from the data repository
 #       - we then run some simple test models to check we are reading in data and so on
-=======
-#       - we clone the rest of the directory structure into a folder called structure
-#       - note this is different from normal directory layout, but facilitates the build
-#       - Cfitsio and gsl are built
-#       - we then cd into the main build directory and do make test_tr. 
->>>>>>> e186f1de7bdd2c0e33ab09d7aae52f3c0f27d583
 #   
 #####################################################################################
 
@@ -31,7 +24,6 @@ branches:
       dev
 
 install:
-<<<<<<< HEAD
     # first configure
     - export PYTHON=$TRAVIS_BUILD_DIR
     - export PATH=$PATH:$PYTHON/bin 
@@ -44,33 +36,10 @@ install:
     #Then clone data
     - mkdir data
     - git clone --depth=50 git://github.com/agnwinds/data.git data
-=======
-    # clone the structure branch into a sub directory
-    - git clone --depth=50 --branch=structure git://github.com/agnwinds/python.git structure
-    - cd structure
-    - export PYTHON=$TRAVIS_BUILD_DIR/structure
-    - echo $PYTHON
-    - echo $PWD
-
-    # make cfitsio library
-    - cd software/cfitsio3040
-    - ./configure 
-    - make
-    - mv libcfitsio.a ../../lib
-    - make clean
-
-    # Then make GSL library
-    - cd ../../software/gsl-1.15
-    - ./configure --disable-shared --prefix=$PYTHON/gsl
-    - make
-    - make install
-    - make clean
->>>>>>> e186f1de7bdd2c0e33ab09d7aae52f3c0f27d583
 
 
 script:
     - echo $PWD
-<<<<<<< HEAD
     - cd source/
     - make clean
     - make CC=gcc py_wind
@@ -88,12 +57,3 @@ script:
     - py -i fiducial_agn
     - py -i 1d_sn
     - py -i agn_ss_2010_modela.pf
-=======
-    # cd back into right directory for making source code and make using gcc
-    - cd ../../../
-    # these long strings of variables are required because we have a different directory layout to normal
-    - make CC=gcc LIB=structure/lib LIB2=structure/gsl/lib BIN=structure/bin INCLUDE=structure/include INCLUDE2=structure/gsl/include python
-    - make clean
-    - make CC=gcc LIB=structure/lib LIB2=structure/gsl/lib BIN=structure/bin INCLUDE=structure/include INCLUDE2=structure/gsl/include py_wind
-    - make clean
->>>>>>> e186f1de7bdd2c0e33ab09d7aae52f3c0f27d583

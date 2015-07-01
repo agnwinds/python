@@ -210,11 +210,14 @@ py_wind: startup $(py_wind_objects)
 	mv $@ $(BIN)/py_wind$(VERSION)
 
 
+<<<<<<< HEAD
 summarize_atomic: summarize_atomic.o get_atomicdata.o log.o rdpar.o  
 	$(CC) $(CFLAGS) summarize_atomic.o get_atomicdata.o log.o rdpar.o   -o summarize_atomic
 	mv $@ $(BIN)
 
 
+=======
+>>>>>>> parent of dd92d7b... Merge branch 'data' of https://github.com/agnwinds/python into atomic
 table_objects = windsave2table.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
 		emission.o recomb.o util.o detail.o \
 		pdf.o random.o recipes.o saha.o \
