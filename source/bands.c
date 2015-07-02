@@ -517,7 +517,7 @@ bands_init (imode, band)
 
       f1_log = log10 (f1);
       f2_log = log10 (f2);
-      df = (f2_log - f1_log) / (band->nbands + 1);
+      df = (f2_log - f1_log) / (band->nbands );
       ii = 0;
       while (ii < band->nbands)
 	{
