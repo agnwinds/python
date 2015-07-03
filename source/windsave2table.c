@@ -50,6 +50,7 @@ main (argc, argv)
   char windsavefile[LINELENGTH];
   char parameter_file[LINELENGTH];
   double xdoub;
+  int create_master_table(), create_ion_table();
 
 
   // py_wind uses rdpar, but only in an interactive mode. As a result 
@@ -176,7 +177,7 @@ create_master_table (rootname)
   char filename[132];
   double *get_one ();
   double *get_ion ();
-  double *c[50];
+  double *c[50],*converge;
   char column_name[50][20];
   char one_line[1024], start[132], one_value[20];
 
@@ -216,8 +217,20 @@ create_master_table (rootname)
   c[7] = get_ion (8, 6, 0);
   strcpy (column_name[7], "o6");
 
+  c[8]=get_one("dmo_dt_x");
+  strcpy (column_name[8], "dmo_dt_x");
 
-  ncols = 8;
+
+  c[9]=get_one("dmo_dt_y");
+  strcpy (column_name[9], "dmo_dt_y");
+
+  c[10]=get_one("dmo_dt_z");
+  strcpy (column_name[10], "dmo_dt_z");
+
+  ncols = 11;
+
+
+  converge=get_one("converge");
 
   /* At this point oll of the data has been collected */
 
@@ -232,13 +245,13 @@ create_master_table (rootname)
       /* First assemble the heder line
        */
 
-      sprintf (start, "%8s %4s %6s %8s %8s %8s ", "r", "i", "inwind", "v_x",
+      sprintf (start, "%8s %4s %8s %6s %8s %8s %8s ", "r", "i", "inwind", "converge","v_x",
 	       "v_y", "v_z");
       strcpy (one_line, start);
       n = 0;
       while (n < ncols)
 	{
-	  sprintf (one_value, "%8s ", column_name[n]);
+	  sprintf (one_value, "%9s ", column_name[n]);
 	  strcat (one_line, one_value);
 
 	  n++;
@@ -253,14 +266,14 @@ create_master_table (rootname)
       for (i = 0; i < NDIM2; i++)
 	{
 	  // This line is different from the two d case
-	  sprintf (start, "%8.2e %4d %6d %8.2e %8.2e %8.2e ", wmain[i].r, i,
-		   wmain[i].inwind, wmain[i].v[0], wmain[i].v[1],
+	  sprintf (start, "%8.2e %4d %6d %8.0f %8.2e %8.2e %8.2e ", wmain[i].r, i,
+		   wmain[i].inwind,converge[i],wmain[i].v[0], wmain[i].v[1],
 		   wmain[i].v[2]);
 	  strcpy (one_line, start);
 	  n = 0;
 	  while (n < ncols)
 	    {
-	      sprintf (one_value, "%8.2e ", c[n][i]);
+	      sprintf (one_value, "%9.2e ", c[n][i]);
 	      strcat (one_line, one_value);
 	      n++;
 	    }
@@ -272,16 +285,16 @@ create_master_table (rootname)
 
       Log ("Processing 2d wind\n");
 
-      /* First assemble the heder line
+      /* First assemble the header line
        */
 
-      sprintf (start, "%8s %8s %4s %4s %6s %8s %8s %8s ", "x", "z", "i", "j",
-	       "inwind", "v_x", "v_y", "v_z");
+      sprintf (start, "%8s %8s %4s %4s %6s %8s %8s %8s %8s ", "x", "z", "i", "j",
+	       "inwind", "converge","v_x", "v_y", "v_z");
       strcpy (one_line, start);
       n = 0;
       while (n < ncols)
 	{
-	  sprintf (one_value, "%8s ", column_name[n]);
+	  sprintf (one_value, "%9s ", column_name[n]);
 	  strcat (one_line, one_value);
 
 	  n++;
@@ -294,15 +307,15 @@ create_master_table (rootname)
       for (i = 0; i < NDIM2; i++)
 	{
 	  wind_n_to_ij (i, &ii, &jj);
-	  sprintf (start, "%8.2e %8.2e %4d %4d %6d %8.2e %8.2e %8.2e ",
+	  sprintf (start, "%8.2e %8.2e %4d %4d %6d %8.0f %8.2e %8.2e %8.2e ",
 		   wmain[i].xcen[0], wmain[i].xcen[2], ii, jj,
-		   wmain[i].inwind, wmain[i].v[0], wmain[i].v[1],
+		   wmain[i].inwind, converge[i],wmain[i].v[0], wmain[i].v[1],
 		   wmain[i].v[2]);
 	  strcpy (one_line, start);
 	  n = 0;
 	  while (n < ncols)
 	    {
-	      sprintf (one_value, "%8.2e ", c[n][i]);
+	      sprintf (one_value, "%9.2e ", c[n][i]);
 	      strcat (one_line, one_value);
 	      n++;
 	    }
@@ -314,6 +327,34 @@ create_master_table (rootname)
 
 
 
+
+/***********************************************************
+                                       Space Telescope Science Institute
+
+ Synopsis:
+	windsave2table writes key variables in a wind save file to an astropy table    
+		as calculated by python.  This is the main routine.
+
+Arguments:		
+
+	py_wind  windsave_root
+
+
+
+Returns:
+ 
+Description:	
+	
+
+	
+Notes:
+
+
+
+History:
+	150428	ksl	Adpated from routines in py_wind.c
+
+**************************************************************/
 int
 create_ion_table (rootname, iz)
      char rootname[];
@@ -448,6 +489,39 @@ create_ion_table (rootname, iz)
 }
 
 
+/*
+
+
+*/
+
+/***********************************************************
+                                       Space Telescope Science Institute
+
+Synopsis:
+
+	Get get denensity, etc for one particular ion
+
+Arguments:		
+
+
+
+
+Returns:
+ 
+Description:	
+	
+
+   This will return an array with all zeros if there is no such ion
+	
+Notes:
+
+
+
+History:
+	150428	ksl	Adpated from routines in py_wind.c
+
+**************************************************************/
+
 double *
 get_ion (element, istate, iswitch)
      int element, istate, iswitch;
@@ -472,7 +546,8 @@ get_ion (element, istate, iswitch)
     {
       Log ("Error--element %d ion %d not found in define_wind\n", element,
 	   istate);
-      return (-1);
+      return (x);
+      // return (-1);
     }
   nelem = 0;
   while (nelem < nelements && ele[nelem].z != element)
@@ -540,6 +615,9 @@ get_ion (element, istate, iswitch)
 
   Returns:
 
+  	The values in the plasma pointer for this variable. A double
+	will be returned even if the PlasmaPtr varible is an integer
+
   Notes:
   	Getting any simple variable from the plama structure should
 	follow this template.
@@ -576,6 +654,27 @@ get_one (variable_name)
 	    {
 	      x[n] = plasmamain[nplasma].t_r;
 	    }
+	  else if (strcmp (variable_name, "converge")==0)
+	  {
+		  x[n]=plasmamain[nplasma].converge_whole;
+	  }
+	  else if (strcmp (variable_name, "dmo_dt_x")==0)
+	  {
+		  x[n]=plasmamain[nplasma].dmo_dt[0];
+	  }
+	  else if (strcmp (variable_name, "dmo_dt_y")==0)
+	  {
+		  x[n]=plasmamain[nplasma].dmo_dt[1];
+	  }
+	  else if (strcmp (variable_name, "dmo_dt_z")==0)
+	  {
+		  x[n]=plasmamain[nplasma].dmo_dt[2];
+	  }
+
+
+
+
+			  
 	  else
 	    {
 	      Error ("get_one: Unknown variable %s\n", variable_name);
