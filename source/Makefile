@@ -210,6 +210,11 @@ py_wind: startup $(py_wind_objects)
 	mv $@ $(BIN)/py_wind$(VERSION)
 
 
+summarize_atomic: summarize_atomic.o get_atomicdata.o log.o rdpar.o  
+	$(CC) $(CFLAGS) summarize_atomic.o get_atomicdata.o log.o rdpar.o   -o summarize_atomic
+	mv $@ $(BIN)
+
+
 table_objects = windsave2table.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
 		emission.o recomb.o util.o detail.o \
 		pdf.o random.o recipes.o saha.o \
@@ -220,7 +225,7 @@ table_objects = windsave2table.o get_atomicdata.o py_wind_sub.o windsave.o py_wi
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
 		spectral_estimators.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
         	variable_temperature.o bb.o rdpar.o log.o direct_ion.o diag.o matrix_ion.o \
-		pi_rates.o photo_gen_matom.o macro_gov.o
+		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o time.o
 
 
 
