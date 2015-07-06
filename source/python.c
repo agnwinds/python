@@ -585,6 +585,8 @@ main (argc, argv)
   	case 0: geo.system_type = SYSTEM_TYPE_STAR;
   	case 1: geo.system_type = SYSTEM_TYPE_BINARY;
   	case 2: geo.system_type = SYSTEM_TYPE_AGN;
+  	Error ("main: Unknown system type %d\n \
+  		Valid system types are 0=Star, 1=Binary, 2=AGN\n", n);
   }
 
 

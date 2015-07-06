@@ -240,7 +240,7 @@ if (geo.wind_type != 2)
         case 2: geo.coord_type = RTHETA;
         case 3: geo.coord_type = CYLVAR;
         default:Error("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
-          0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)")
+          0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
       }
 
       rdint ("Wind.dim.in.x_or_r.direction", &geo.ndim);
@@ -978,7 +978,7 @@ get_meta_params (void)
   switch(meta_param)
   {
     case 0: geo.reverb = REV_NONE;
-    case 1: geo.reverb = REV_PHOT;
+    case 1: geo.reverb = REV_PHOTON;
     case 2: geo.reverb = REV_WIND;
     default:geo.reverb = REV_NONE;
   }
