@@ -21,8 +21,8 @@ compiler:
 # only want to run this test when we commit to dev
 branches:
   only:
-      dev
-      enum
+    - dev
+    - enum
 
 install:
     # first configure
