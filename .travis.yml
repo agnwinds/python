@@ -22,6 +22,7 @@ compiler:
 branches:
   only:
       dev
+      enum
 
 install:
     # first configure
