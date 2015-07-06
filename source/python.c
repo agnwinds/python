@@ -579,8 +579,14 @@ main (argc, argv)
   /*  Establish the overall system type  - Added for python_69 to allow qso's have different inputs
       Note - ksl - What happened to the possibility of a true single star with no disk - 110914 */
 
-  rdint ("System_type(0=star,1=binary,2=agn)", &n);	//SWM - Tweaked to read to int, then to enum
-  geo.system_type = (enum system_type_enum) n;
+  rdint ("System_type(0=star,1=binary,2=agn)", &n);	//SWM - Tweaked to read to enum
+  switch (n)
+  {
+  	case 0: geo.system_type = SYSTEM_TYPE_STAR;
+  	case 1: geo.system_type = SYSTEM_TYPE_BINARY;
+  	case 2: geo.system_type = SYSTEM_TYPE_AGN;
+  }
+
 
   /* specify if there is a disk and what type */
   /* JM 1502 -- moved disk type question here- previously it was just before

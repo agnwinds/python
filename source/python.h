@@ -147,9 +147,9 @@ struct geometry
   double twind;			/* temperature of wind */
   double tmax;			/*NSH 120817 the maximim temperature of any element of the model - used to help estimate things for an exponential representation of the spectrum in a cell */
   enum system_type_enum 
-  	{	SYSTEM_TYPE_STAR	=0, 
+  	{	SYSTEM_TYPE_STAR	  =0, 
   		SYSTEM_TYPE_BINARY	=1, 
-  		SYSTEM_TYPE_AGN		=2
+  		SYSTEM_TYPE_AGN		  =2
   	} 	system_type;
   int disk_type;		/*0 --> no disk, 
 				   1 --> a standard disk in xy plane, 
@@ -877,7 +877,8 @@ typedef struct photon
   double w,w_orig;		       /* current and original weight of this packet */
   double tau;
   enum istat_enum 
-  	{	P_INWIND           =0,	//in wind,
+  	{	
+    P_INWIND           =0,	//in wind,
 		P_SCAT             =1,	//in process of scattering,
 		P_ESCAPE           =2,	//Escaped to reach the universe,
 		P_HIT_STAR         =3,	//absorbed by photosphere of star,
@@ -887,7 +888,7 @@ typedef struct photon
 		P_ERROR            =5,	//Too many calls to translate without something happening
 		P_SEC              =8,	//Photon hit secondary
 		P_ADIABATIC        =9 	//records that a photon created a kpkt which was destroyed by adiabatic cooling
-  	} 	istat;					/*status of photon.*/
+  	} 	istat;					   /*status of photon.*/
 
   int nscat;			/*number of scatterings */
   int nres;			/*The line number in lin_ptr of last scatter or wind line creation */
