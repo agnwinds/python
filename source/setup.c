@@ -226,20 +226,20 @@ History:
 int get_grid_params()
 
 {
-  int grid_param;
+  int input_int;
 if (geo.wind_type != 2)
     {
       /* Define the coordinate system for the grid and allocate memory for the wind structure */
       rdint
   ("Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)",
-   &grid_param);
-      switch(grid_param)
+   &input_int);
+      switch(input_int)
       {
-        case 0: geo.coord_type = SPHERICAL;
-        case 1: geo.coord_type = CYLIND;
-        case 2: geo.coord_type = RTHETA;
-        case 3: geo.coord_type = CYLVAR;
-        default:Error("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
+        case 0: geo.coord_type = SPHERICAL; break;
+        case 1: geo.coord_type = CYLIND; break;
+        case 2: geo.coord_type = RTHETA; break;
+        case 3: geo.coord_type = CYLVAR; break;
+        default: Error("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
           0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
       }
 
@@ -977,10 +977,10 @@ get_meta_params (void)
   rdint("reverb.type", &meta_param);
   switch(meta_param)
   {
-    case 0: geo.reverb = REV_NONE;
-    case 1: geo.reverb = REV_PHOTON;
-    case 2: geo.reverb = REV_WIND;
-    default:geo.reverb = REV_NONE;
+    case 0: geo.reverb = REV_NONE; break;
+    case 1: geo.reverb = REV_PHOTON; break;
+    case 2: geo.reverb = REV_WIND; break;
+    default:geo.reverb = REV_NONE; break;
   }
 
   if (geo.reverb == REV_WIND)

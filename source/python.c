@@ -582,10 +582,10 @@ main (argc, argv)
   rdint ("System_type(0=star,1=binary,2=agn)", &n);	//SWM - Tweaked to read to enum
   switch (n)
   {
-  	case 0: geo.system_type = SYSTEM_TYPE_STAR;
-  	case 1: geo.system_type = SYSTEM_TYPE_BINARY;
-  	case 2: geo.system_type = SYSTEM_TYPE_AGN;
-  	Error ("main: Unknown system type %d\n \
+  	case 0: geo.system_type = SYSTEM_TYPE_STAR; break;
+  	case 1: geo.system_type = SYSTEM_TYPE_BINARY; break;
+  	case 2: geo.system_type = SYSTEM_TYPE_AGN; break;
+  	default:Error ("main: Unknown system type %d\n \
   		Valid system types are 0=Star, 1=Binary, 2=AGN\n", n);
   }
 
