@@ -962,8 +962,18 @@ History:
 int 
 get_meta_params (void)
 {
+  int read_int;
   geo.reverb = REV_NONE;
-  rdint("reverb.type", &geo.reverb);
+  rdint("reverb.type", &read_int);
+  switch (read_int)
+  {
+    case 0: geo.reverb = REV_NONE; break;
+    case 1: geo.reverb = REV_PHOTON; break;
+    case 2: geo.reverb = REV_WIND; break;
+    default:Error("get_meta_params: Invalid reverb mode.\n \
+      Valid modes are 0=None, 1=Photon, 2=Wind.\n");
+  }
+
   if (geo.reverb == REV_WIND)
   {
     geo.reverb_path_bins = 30;

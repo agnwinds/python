@@ -132,12 +132,6 @@ int NPHOT;			/* As of python_40, NPHOT must be defined in the main program using
 #define NCOMPS 	10
 #define LINELENGTH 	160
 
-
-/* SWM - Reverb enums */
- #define REV_NONE 0
- #define REV_PHOTON 1
- #define REV_WIND 2
-
 struct geometry
 {
 /* 67 - ksl This section added to allow for restarting the program, and adds parameters used
@@ -381,8 +375,9 @@ struct geometry
   char atomic_filename[132];	/* 54e -- The masterfile for the atomic data */
   char fixed_con_file[132];	/* 54e -- For fixed concentrations, the file specifying concentrations */
 
-  //Added by SWM for reverberation mapping - 0=None, 1=Photon, 2=Wind
-  int reverb, reverb_path_bins, reverb_theta_bins; 
+  //Added by SWM for reverberation mapping
+  enum reverb_enum {REV_NONE=0, REV_PHOTON=1, REV_WIND=2} reverb; 
+  int reverb_path_bins, reverb_theta_bins; 
 }
 geo;
 
