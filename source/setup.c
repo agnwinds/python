@@ -967,21 +967,40 @@ get_meta_params (void)
   rdint("reverb.type", &read_int);
   switch (read_int)
   {
-    case 0: geo.reverb = REV_NONE; break;
-    case 1: geo.reverb = REV_PHOTON; break;
-    case 2: geo.reverb = REV_WIND; break;
-    default:Error("get_meta_params: Invalid reverb mode.\n \
-      Valid modes are 0=None, 1=Photon, 2=Wind.\n");
+    case 0: geo.reverb = REV_NONE;    break;
+    case 1: geo.reverb = REV_PHOTON;  break;
+    case 2: geo.reverb = REV_WIND;    break;
+    case 3: geo.reverb = REV_MACRO;   break;
+    default:Error("reverb.type: Invalid reverb mode.\n \
+      Valid modes are 0=None, 1=Photon, 2=Wind, 3=Macro-atom.\n");
   }
 
-  if (geo.reverb == REV_WIND)
+  if (geo.reverb == REV_WIND || geo.reverb == REV_MACRO)
   {
     geo.reverb_path_bins = 30;
     geo.reverb_theta_bins = 30;
     rdint("reverb.path_bins", &geo.reverb_path_bins);
     rdint("reverb.theta_bins", &geo.reverb_theta_bins);
   }
+  if(geo.reverb == REV_MACRO)
+  {
+    if(geo.rt_mode != 2)Error("reverb.type: Invalid reverb mode.\n \
+      Macro-atom mode selected but macro-atom scattering not on.\n");
+    
+    rdint("reverb.path_bins", &geo.reverb_macro_lines);
+    allocate(geo.reverb_macro_line(geo.reverb_macro_lines));
+    if(geo.rt_mode != 2)Error("reverb.macro_lines: \
+      Must specify 1 or more lines to watch in macro-atom mode.\n");
+    
 
+    int i,z,ion;
+    for(i=0; i<geo.reverb_macro_lines; i++)
+    {
+      rdint2("reverb.macro_line",z,ion);
+      if(z < 1 || z < ion) Error("reverb.macro_line: Invalid line selected - Z %d, ion %d\n",\
+       z, ion);
+    }
+  }
   return (0);
 }
 

@@ -1,6 +1,12 @@
-/*
- * The subroutines in this file handle outputting spectrum array reverb data
- */
+/********************************************************//**
+ * @file   reverb.c
+ * @Author SWM
+ * @date   July, 2015
+ * @brief  Reverberation mapping functions.
+ *
+ * File containing reverberation mapping functions.
+ ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -476,11 +482,16 @@ History:
 int
 wind_paths_init(WindPtr wind)
 {
-	int	i;
+	int	i, j;
 
 	for (i = 0; i < NDIM * MDIM; i++) 
 	{
 		wind[i].paths = (Wind_Paths_Ptr) wind_paths_constructor(&wind[i]);
+		allocate (wind[i].reverb_macro_line(geo.reverb_macro_lines));
+		for j=0; j< geo.reverb_macro_lines; j++)
+		{
+			wind[i].line_path[j] = (Wind_Paths_Ptr) wind_paths_constructor(&wind[i]);
+		}
 	}
 	return (0);
 }
@@ -662,26 +673,26 @@ wind_paths_evaluate(WindPtr wind)
 	return (0);
 }
 
-
-/***********************************************************
-Synopsis:
-	wind_paths_point_index(int i, j, k, i_top)
-		Given trz index in wind, returns vtk file index
-
-Arguments:
-	int i, j, k 	Theta, radius and height of cell
-	int i_top		Whether point is + or -ive height
-
-Returns:
-	int n 			Index for vtk poly
-
-Description:
-
-Notes:
-
-History:
-	26/2/15	-	Written by SWM
-***********************************************************/
+/****************************************************************/
+/**
+ * @name		Wind paths point index
+ * @brief		Given trz index in wind, returns vtk data index.
+ * 
+ * @param [in] i 	Theta index of cell.
+ * @param [in] j 	Radius index of cell.
+ * @param [in] k 	Height index of cell.
+ * @param [in] i_top Whether the point is above or below the disk
+ * 
+ * @return			Index for vtk poly.
+ * 
+ * When given the position of a cell in the wind, returns the
+ * corresponding index in the flat VTK data arrays. RZ uses the
+ * uses the standard wind location, theta is set as defined in
+ * #path_data.
+ *
+ * @notes Written by SWM 4/15.
+ */
+/****************************************************************/
 int
 wind_paths_point_index(int i, int j, int k, int i_top)
 {

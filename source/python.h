@@ -377,7 +377,8 @@ struct geometry
 
   //Added by SWM for reverberation mapping
   enum reverb_enum {REV_NONE=0, REV_PHOTON=1, REV_WIND=2} reverb; 
-  int reverb_path_bins, reverb_theta_bins; 
+  int reverb_path_bins, reverb_theta_bins;
+  int reverb_macro_lines, *reverb_macro_line;
 }
 geo;
 
@@ -541,7 +542,7 @@ typedef struct wind
 				   where the volume is the volume that is actually filled with material. */
   int inwind;			/* 061104 -- 58b -- ksl -- Moved definitions of for whether a cell is or is not
 				   inwind to #define statements above */
-  Wind_Paths_Ptr paths;         // SWM 6-2-15 Path data struct for each cell
+  Wind_Paths_Ptr paths, *line_path;         // SWM 6-2-15 Path data struct for each cell
 }
 wind_dummy, *WindPtr;
 
