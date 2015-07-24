@@ -520,10 +520,26 @@ History:
 	9/2/15	-	Written by SWM
 ***********************************************************/
 int
+wind_paths_add_phot_matom(WindPtr wind, PhotPtr pp, int nres)
+{
+	int i;
+	for (i = 0; i < geo.reverb_matoms; i++)
+		if(nres == geo.reverb_matom[i])
+			paths_add_phot(&wind->path_matom[i], pp)
+	return (0);
+}
+
+int
 wind_paths_add_phot(WindPtr wind, PhotPtr pp)
 {
-	int		i         , j;
+	paths_add_phot(wind->paths, pp);
+	return(0);
+}
 
+int
+paths_add_phot(wind_paths *path, PhotPtr pp)
+{
+	int i, j;
 	for (i = 0; i < NWAVE - 1; i++) 
 	{
 		if (pp->freq >= g_path_data->ad_freq_bin[i] &&
@@ -534,8 +550,8 @@ wind_paths_add_phot(WindPtr wind, PhotPtr pp)
 				if (pp->path >= g_path_data->ad_path_bin[j] &&
 				    pp->path <= g_path_data->ad_path_bin[j + 1]) 
 				{
-					wind->paths->ad_freq_path_flux[i * g_path_data->i_path_bins + j] += pp->w;
-					wind->paths->ai_freq_path_num[i * g_path_data->i_path_bins +  j]++;
+					path->ad_freq_path_flux[i * g_path_data->i_path_bins + j]+= pp->w;
+					path->ai_freq_path_num[i * g_path_data->i_path_bins +  j]++;
 				}
 			}
 		}
@@ -703,6 +719,21 @@ wind_paths_point_index(int i, int j, int k, int i_top)
 
 }
 
+/****************************************************************/
+/**
+ * @name		Wind paths output
+ * @brief		Outputs wind path information to vtk.
+ * 
+ * @param [in] wind 		Pointer to wind array.
+ * @param [in] c_file_in	Name of input file.
+ *  
+ * When given a wind containing position and delay map information
+ * generated using REVERB_WIND, outputs a 3d model of the wind to
+ * file in ASCII .vtk format.
+ *
+ * @notes Written by SWM 4/15.
+ */
+/****************************************************************/
 int
 wind_paths_output(WindPtr wind, char c_file_in[])
 {
@@ -713,10 +744,11 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 	PhotPtr		p_test = calloc(sizeof(p_dummy), 1);
 
 	//Get output filename
-		strcpy(c_file, c_file_in);	//Copy filename to new string
-		strcat(c_file, ".wind_paths.vtk");
+	strcpy(c_file, c_file_in);			//Copy filename to new string
+	strcat(c_file, ".wind_paths.vtk");	//Append
 
-		if ((fptr = fopen(c_file, "w")) == NULL) {
+	if ((fptr = fopen(c_file, "w")) == NULL)
+	{
 		Error("wind_paths_output: Unable to open %s for writing\n", c_file);
 		exit(0);
 	}
@@ -728,6 +760,8 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 
 	fprintf(fptr, "# vtk DataFile Version 2.0\n");
 	fprintf(fptr, "Wind file data\nASCII\n");
+
+	//Write out positions of corners of each wind cell as vertexes
 	fprintf(fptr, "DATASET UNSTRUCTURED_GRID\n");
 	fprintf(fptr, "POINTS %d float\n", i_points);
 	for (i = 0; i < NDIM; i++) {
@@ -747,6 +781,7 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 	}
 	fprintf(fptr, "\n");
 
+	//Write out the vertexes comprising each cell
 	fprintf(fptr, "CELLS %d %d\n", i_cells, 9 * i_cells);
 	for (i = 0; i < NDIM - 1; i++) {
 		for (j = 0; j < MDIM - 1; j++) {
@@ -773,11 +808,14 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 		}
 	}
 
+	//Write the type for each cell (would be unnecessary if STRUCTURED_GRID used)
+	//But this allows for more flexible expansion
 	fprintf(fptr, "CELL_TYPES %d\n", i_cells);
 	for (i = 0; i < i_cells; i++)
 		fprintf(fptr, "12\n");
 	fprintf(fptr, "\n");
 
+	//Write out the arrays containing the various properties in the appropriate order
 	fprintf(fptr, "CELL_DATA %d\n", i_cells);
 
 	fprintf(fptr, "SCALARS phot_count float 1\n");
@@ -792,6 +830,7 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 		}
 	}
 
+	//Use statistical error
 	fprintf(fptr, "SCALARS path_errors float 1\n");
 	fprintf(fptr, "LOOKUP_TABLE default\n");
 	for (i = 0; i < NDIM - 1; i++) {
