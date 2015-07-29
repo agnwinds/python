@@ -140,10 +140,10 @@ History:
 			than once
 	12jul   nsh	73 - added structures and routines to read in badnell style total recombination rate data
         12sept	nsh	73 - added structures and routines to read in gaunt factor data from sutherland 1997
-  14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120. 
+        14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120. 
 	14nov	nsh	78b - added DERE direct ionizaion data, and changed al recomb data to refer to state being left
-                 Also used write_atomicdata to control if summary is written to file.
-  15apr JM  79b -- VFKY cross-sections are now tabulated. Multiple changes here, see pull #143
+                        Also used write_atomicdata to control if summary is written to file.
+        15apr JM  79b -- VFKY cross-sections are now tabulated. Multiple changes here, see pull #143
 **************************************************************/
 
 
