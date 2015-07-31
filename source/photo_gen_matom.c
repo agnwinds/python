@@ -867,6 +867,7 @@ photo_gen_matom (p, weight, photstart, nphot)
       p[n].istat = 0;
       p[n].tau = p[n].nscat = p[n].nrscat = 0;
       p[n].origin = PTYPE_WIND;	// Call it a wind photon
+      wind_paths_gen_phot_matom(&wmain[icell], &p[n], nres);	//0715 SWM - Added path generation
 
     }
 

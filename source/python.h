@@ -376,7 +376,7 @@ struct geometry
   char fixed_con_file[132];	/* 54e -- For fixed concentrations, the file specifying concentrations */
 
   //Added by SWM for reverberation mapping
-  enum reverb_enum {REV_NONE=0, REV_PHOTON=1, REV_WIND=2} reverb; 
+  enum reverb_enum {REV_NONE=0, REV_PHOTON=1, REV_WIND=2, REV_MATOM=3} reverb; 
   int reverb_path_bins, reverb_theta_bins;
   int reverb_matoms, *reverb_matom;
 }
@@ -458,10 +458,8 @@ blmod;
 */
 typedef struct wind_paths
 {
-  double* ad_freq_path_flux;  //Array[by frequency, then path] of total flux of photons with the given v&p
-  int*    ai_freq_path_num;   //Array[by frequency, then path] of the number of photons in this bin
-  double* ad_freq_flux;       //Array[by frequency] of total flux of photons with the given v
-  int*    ai_freq_num;        //Array[by frequency] of the number of photons in this bin
+  double* ad_path_flux;  //Array[by frequency, then path] of total flux of photons with the given v&p
+  int*    ai_path_num;   //Array[by frequency, then path] of the number of photons in this bin
   double  d_flux, d_path;     //Total flux, average path
   int     i_num;              //Number of photons hitting this cell
 } wind_paths_dummy, *Wind_Paths_Ptr;
@@ -469,7 +467,6 @@ typedef struct wind_paths
 typedef struct path_data
 {
   double* ad_path_bin;              //Array of bins for the path histograms
-  double* ad_freq_bin;              //Array of bins for the frequency histograms
   int     i_path_bins, i_obs;       //Number of bins, number of observers
   int     i_theta_res;              //Number of angular bins when outputting observer paths
 } path_data_dummy, *Path_Data_Ptr;
@@ -542,7 +539,7 @@ typedef struct wind
 				   where the volume is the volume that is actually filled with material. */
   int inwind;			/* 061104 -- 58b -- ksl -- Moved definitions of for whether a cell is or is not
 				   inwind to #define statements above */
-  Wind_Paths_Ptr paths, *path_matom;         // SWM 6-2-15 Path data struct for each cell
+  Wind_Paths_Ptr paths, *paths_matom;         // SWM 6-2-15 Path data struct for each cell
 }
 wind_dummy, *WindPtr;
 

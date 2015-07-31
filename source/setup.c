@@ -962,7 +962,7 @@ History:
 int 
 get_meta_params (void)
 {
-  int read_int;
+  int read_int, i;
   geo.reverb = REV_NONE;
   rdint("reverb.type", &read_int);
   switch (read_int)
@@ -970,36 +970,46 @@ get_meta_params (void)
     case 0: geo.reverb = REV_NONE;    break;
     case 1: geo.reverb = REV_PHOTON;  break;
     case 2: geo.reverb = REV_WIND;    break;
-    case 3: geo.reverb = REV_MACRO;   break;
+    case 3: geo.reverb = REV_MATOM;   break;
     default:Error("reverb.type: Invalid reverb mode.\n \
       Valid modes are 0=None, 1=Photon, 2=Wind, 3=Macro-atom.\n");
   }
 
-  if (geo.reverb == REV_WIND || geo.reverb == REV_MACRO)
+  if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
   {
-    geo.reverb_path_bins = 30;
-    geo.reverb_theta_bins = 30;
+    geo.reverb_path_bins = 100;
+    geo.reverb_theta_bins = 100;
     rdint("reverb.path_bins", &geo.reverb_path_bins);
     rdint("reverb.theta_bins", &geo.reverb_theta_bins);
   }
-  if(geo.reverb == REV_MACRO)
-  {
-    if(geo.rt_mode != 2)Error("reverb.type: Invalid reverb mode.\n \
-      Macro-atom mode selected but macro-atom scattering not on.\n");
-    
-    rdint("reverb.path_bins", &geo.reverb_macro_lines);
-    allocate(geo.reverb_macro_line(geo.reverb_macro_lines));
-    if(geo.rt_mode != 2)Error("reverb.macro_lines: \
-      Must specify 1 or more lines to watch in macro-atom mode.\n");
-    
 
-    int i,z,ion;
-    for(i=0; i<geo.reverb_macro_lines; i++)
-    {
-      rdint2("reverb.macro_line",z,ion);
-      if(z < 1 || z < ion) Error("reverb.macro_line: Invalid line selected - Z %d, ion %d\n",\
-       z, ion);
-    }
+  if(geo.reverb == REV_MATOM)
+  {
+    if(geo.rt_mode != 2)
+      {
+        Error("reverb.type: Invalid reverb mode.\n \
+      Macro-atom mode selected but macro-atom scattering not on.\n");
+        exit(0);
+      }
+    
+    rdint("reverb.matom_elements", &geo.reverb_matoms);
+    geo.reverb_matom = (int *) calloc(geo.reverb_matoms, sizeof(int));
+    if(geo.rt_mode != 2)
+      {
+        Error("reverb.matom_elements: \
+      Must specify 1 or more elements to watch in macro-atom mode.\n");
+        exit(0);
+      }  
+    for(i=0; i<geo.reverb_matoms; i++)
+      rdint("reverb.matom_element",&(geo.reverb_matom[i]));
+  }
+  else if(geo.reverb == REV_WIND)
+  {
+    if (geo.wind_radiation == 0)
+    { 
+      Error("reverb.type: Wind radiation is off but wind-based path tracking is enabled!\n");
+      exit(0);
+    } 
   }
   return (0);
 }

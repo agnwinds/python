@@ -318,8 +318,7 @@ History:
 ***********************************************************/
 Path_Data_Ptr
 path_data_constructor(double r_rad_min, double r_rad_max, int i_path_bins,
-		      int i_angles, double freqmin, double freqmax,
-		      int i_theta_res)
+		      int i_angles, int i_theta_res)
 {
 	int		i;
 	Path_Data_Ptr	data = (Path_Data_Ptr) calloc(sizeof(path_data_dummy), 1);
@@ -338,23 +337,16 @@ path_data_constructor(double r_rad_min, double r_rad_max, int i_path_bins,
 		data->ad_path_bin[i] =
 			r_rad_min + i * (r_rad_max * 5.0 - r_rad_min) / i_path_bins;
 	}
-	data->ad_freq_bin = (double *)calloc(sizeof(double), NWAVE);
-	for (i = 0; i < NWAVE; i++) 
-	{
-		data->ad_freq_bin[i] = freqmin + i * (freqmax - freqmin) / (NWAVE - 1);
-	}
 	return (data);
 }
 
 int
 path_data_init(double r_rad_min, double r_rad_max, int i_path_bins,
-	       int i_angles, double r_freq_min, double r_freq_max,
-	       int i_theta_res)
+	       int i_angles, int i_theta_res)
 {
 	g_path_data =
 	(Path_Data_Ptr) path_data_constructor(r_rad_min, r_rad_max, i_path_bins,
-					   i_angles, r_freq_min, r_freq_max,
-					      i_theta_res);
+					   i_angles, i_theta_res);
 	return (0);
 }
 
@@ -392,14 +384,11 @@ wind_paths_constructor(WindPtr wind)
 			 wind->nwind);
 		exit(0);
 	}
-	paths->ad_freq_flux = (double *)calloc(sizeof(double), NWAVE);
-	paths->ai_freq_num = (int *)calloc(sizeof(int), NWAVE);
-	paths->ad_freq_path_flux =
-		(double *)calloc(sizeof(double), NWAVE * g_path_data->i_path_bins);
-	paths->ai_freq_path_num =
-		(int *)calloc(sizeof(int), NWAVE * g_path_data->i_path_bins);
-	if (paths->ad_freq_path_flux == NULL || paths->ad_freq_flux == NULL
-	 || paths->ai_freq_path_num == NULL || paths->ai_freq_num == NULL) 
+	paths->ad_path_flux =
+		(double *)calloc(sizeof(double), g_path_data->i_path_bins);
+	paths->ai_path_num =
+		(int *)calloc(sizeof(int), g_path_data->i_path_bins);
+	if (paths->ad_path_flux == NULL || paths->ai_path_num == NULL) 
 	{
 		Error
 			("wind_paths_constructor: Could not allocate memory for cell %d bins\n",
@@ -411,8 +400,7 @@ wind_paths_constructor(WindPtr wind)
 
 /***********************************************************
 Synopsis:
-	reverb_init(WindPtr wind, int nangles, path_bins, theta_bins,
-				double freqmin, freqmax)
+	reverb_init(WindPtr wind, int nangles, path_bins, theta_bins)
 		Initialises module variables
 
 Arguments:
@@ -420,8 +408,6 @@ Arguments:
 	int nangles 	Number of angles used
 	int path_bins 	Number of bins to sort photon paths by
 	int theta_bins  For output only, number of angular bins
-	double freqmin
-	double freqmax 	Frequency range to record paths over
 
 Returns:
 
@@ -431,30 +417,37 @@ Notes:
 
 History:
 	3/15	-	Written by SWM
+
 ***********************************************************/
 int
-reverb_init(WindPtr wind, int nangles, double freqmin, double freqmax)
+reverb_init(WindPtr wind, int nangles)
 {
-	if (geo.reverb == REV_WIND) 
+	int i, j;
+	if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM) 
 	{
-		if (geo.wind_radiation == 0) 
-		{
-			Error
-			("Wind radiation is off but wind-based path tracking is enabled!\n");
-			exit(0);
-		} 
-		else 
-		{
-			Log ("Wind cell-based path tracking is enabled for frequency range %g-%g\n",
-				 freqmin, freqmax);
-			path_data_init(0.0, geo.rmax, geo.reverb_path_bins, nangles,
-				   freqmin, freqmax, geo.reverb_theta_bins);
-			wind_paths_init(wind);
-		}
+		Log ("Wind cell-based path tracking is enabled\n");
+		path_data_init(0.0, geo.rmax, geo.reverb_path_bins, nangles,
+			   geo.reverb_theta_bins);
+		wind_paths_init(wind);
 	}
 	else if (geo.reverb == REV_PHOTON)
 		Log("Photon-based path tracking is enabled.\n");
 
+	if(geo.reverb == REV_MATOM)
+	{
+      for(i=0; i<geo.reverb_matoms; i++)
+      {
+      	for(j=0; j<NLINES; j++)
+      		if(geo.reverb_matom[i] == line[j].z) break;
+
+      	if(j == NLINES || geo.reverb_matom[i] <= 0)
+      	{
+      		Error("reverb_init: Tracking invalid element %d\n",
+      				geo.reverb_matom[i]);
+			exit(0);	
+      	}
+      }
+  	}
 
 	return (0);
 }
@@ -486,11 +479,11 @@ wind_paths_init(WindPtr wind)
 
 	for (i = 0; i < NDIM * MDIM; i++) 
 	{
-		wind[i].paths = (Wind_Paths_Ptr) wind_paths_constructor(&wind[i]);
-		allocate (wind[i].reverb_macro_line(geo.reverb_macro_lines));
-		for j=0; j< geo.reverb_macro_lines; j++)
+		wind[i].paths 		= (Wind_Paths_Ptr) wind_paths_constructor(&wind[i]);
+		wind[i].paths_matom = (Wind_Paths_Ptr *) calloc (sizeof(Wind_Paths_Ptr), geo.reverb_matoms);
+		for (j=0; j< geo.reverb_matoms; j++)
 		{
-			wind[i].line_path[j] = (Wind_Paths_Ptr) wind_paths_constructor(&wind[i]);
+			wind[i].paths_matom[j] = (Wind_Paths_Ptr) wind_paths_constructor(&wind[i]);
 		}
 	}
 	return (0);
@@ -508,7 +501,7 @@ Arguments:
 Returns:
 
 Description:
-	Adds photon to frequency and path bin as appropriate.
+	Adds photon to path bin as appropriate.
 	As wind array is 2d, .5th dimension added via keeping
 	two path sets for + and - x-axis positions). No full 3-d
 	treatment required as Extract mode's viewpoint always
@@ -517,41 +510,25 @@ Description:
 Notes:
 
 History:
-	9/2/15	-	Written by SWM
+	24/7/15	-	Written by SWM
 ***********************************************************/
 int
-wind_paths_add_phot_matom(WindPtr wind, PhotPtr pp, int nres)
+wind_paths_add_phot_matom(WindPtr wind, double path, double absorbed, int matom_lev)
 {
-	int i;
-	for (i = 0; i < geo.reverb_matoms; i++)
-		if(nres == geo.reverb_matom[i])
-			paths_add_phot(&wind->path_matom[i], pp)
-	return (0);
-}
+	int i, j, z;
+	z = lin_ptr[matom_lev]->z;
 
-int
-wind_paths_add_phot(WindPtr wind, PhotPtr pp)
-{
-	paths_add_phot(wind->paths, pp);
-	return(0);
-}
-
-int
-paths_add_phot(wind_paths *path, PhotPtr pp)
-{
-	int i, j;
-	for (i = 0; i < NWAVE - 1; i++) 
+	for (j = 0; j < geo.reverb_matoms; j++)
 	{
-		if (pp->freq >= g_path_data->ad_freq_bin[i] &&
-		    pp->freq < g_path_data->ad_freq_bin[i + 1]) 
+		if(z == geo.reverb_matom[j])
 		{
-			for (j = 0; j < g_path_data->i_path_bins; j++) 
+			for (i=0; i < g_path_data->i_path_bins; i++) 
 			{
-				if (pp->path >= g_path_data->ad_path_bin[j] &&
-				    pp->path <= g_path_data->ad_path_bin[j + 1]) 
+				if (path >= g_path_data->ad_path_bin[i] &&
+				    path <= g_path_data->ad_path_bin[i+1]) 
 				{
-					path->ad_freq_path_flux[i * g_path_data->i_path_bins + j]+= pp->w;
-					path->ai_freq_path_num[i * g_path_data->i_path_bins +  j]++;
+					wind->paths_matom[j]->ad_path_flux[i]+= absorbed;
+					wind->paths_matom[j]->ai_path_num[ i]++;
 				}
 			}
 		}
@@ -561,42 +538,72 @@ paths_add_phot(wind_paths *path, PhotPtr pp)
 
 /***********************************************************
 Synopsis:
-	wind_paths_gen_phot(Wind_Paths_Ptr paths, PhotPtr pp)
-		Adds a path delay from the origin cell to photon
+	wind_paths_add_phot(Wind_Paths_Ptr paths, PhotPtr pp)
+		Adds a photon's weight to a wind cell's delay array.
 
 Arguments:
-	PhotPtr pp 				Photon to set path of
-	Wind_Paths_Ptr paths	Paths (from wind) to use
+	PhotPtr pp 				Photon to dump
+	Wind_Paths_Ptr paths	Paths (from wind) to add to
 
 Returns:
 
 Description:
-	Picks a weighted random frequency bin, then weighted
-	random path bin, then assigns the photon a path selected
-	from within that bin (nonweighted uniform randomly).
+	Adds photon to path bin as appropriate.
+	As wind array is 2d,5th dimension added via keeping
+	two path sets for + and - x-axis positions). No full 3-d
+	treatment required as Extract mode's viewpoint always
+	lies along X-axis.
 
 Notes:
-	May want to correlate photon energy with wind path in
-	future!
 
 History:
-	26/3/15	-	Written by SWM
+	9/2/15	-	Written by SWM
+	24/7/15	-	Removed frequency
+***********************************************************/
+int
+wind_paths_add_phot(WindPtr wind, PhotPtr pp)
+{
+	int i;
+	for (i=0; i < g_path_data->i_path_bins; i++) 
+	{
+		if (pp->path >= g_path_data->ad_path_bin[i] &&
+		    pp->path <= g_path_data->ad_path_bin[i+1]) 
+		{
+			wind->paths->ad_path_flux[i]+= pp->w;
+			wind->paths->ai_path_num[ i]++;
+		}
+	}
+	return (0);
+}
+
+/********************************************************//*
+ * @name 	Wind paths generate photon
+ * @brief	Generates path for a wind photon
+ *
+ * @param [in] wind		Wind cell to spawn in
+ * @param [in,out] pp 	Photon to set path of
+ *
+ * Picks a random path bin, weighted by the flux in each in
+ * this cell, then assigns a path from within that bin 
+ * (from a uniform random distribution)
+ *
+ * @notes
+ * 26/2/15	-	Written by SWM
+ * 24/7/15	-	Removed frequency
 ***********************************************************/
 int
 wind_paths_gen_phot(WindPtr wind, PhotPtr pp)
 {
-	double		r_rand , r_total;
-	int		i_freq    , i_path;
+	double	r_rand , r_total, r_bin_min, r_bin_rand;
+	int		i_path;
 
-	i_freq = -1;
 	i_path = -1;
-
 	r_total = 0.0;
 	r_rand = wind->paths->d_flux * rand() / MAXRAND;
 	while (r_rand < r_total) 
 	{
-		r_total += wind->paths->ad_freq_flux[++i_freq];
-		if (i_freq >= NWAVE) 
+		r_total += wind->paths->ad_path_flux[++i_path];
+		if (i_path >= g_path_data->i_path_bins) 
 		{
 			Error
 				("wind_paths_gen_phot: No path data in wind cell %d at %g %g %g\n",
@@ -605,92 +612,142 @@ wind_paths_gen_phot(WindPtr wind, PhotPtr pp)
 		}
 	}
 
-	r_total = 0;
-	r_rand = wind->paths->d_flux * rand() / MAXRAND;
+	//Assign photon path to a random position within the bin.
+	r_bin_min 	= g_path_data->ad_path_bin[i_path-1];
+	r_bin_rand	= (rand() / MAXRAND) *
+				 (g_path_data->ad_path_bin[i_path  ]-
+				  g_path_data->ad_path_bin[i_path-1]) ;
+	pp->path 	= r_bin_min + r_bin_rand;
+
+	return (0);
+}
+
+/********************************************************//*
+ * @name 	Wind paths generate photon matom
+ * @brief	Generates path for a wind macro-atom photon
+ *
+ * @param [in] wind		Wind cell to spawn in
+ * @param [in,out] pp 	Photon to set path of
+ * @patam [in] matom_lev	Macro-atom level to generate for
+ *
+ * If the level corresponds to an element that has been
+ * tracked, pick a random path as wind_paths_gen_phot() using
+ * the path array for that line. Otherwise, 
+ *
+ * @notes
+ * 26/2/15	-	Written by SWM
+ * 24/7/15	-	Removed frequency
+***********************************************************/
+int
+wind_paths_gen_phot_matom(WindPtr wind, PhotPtr pp, int matom_lev)
+{
+	double	r_rand, r_total, r_bin_min, r_bin_rand;
+	int		i_path, j, z;
+	Wind_Paths_Ptr PathPtr;
+
+	z = lin_ptr[matom_lev]->z;
+	PathPtr = wind->paths;
+
+	//Iterate over array to see if this element is tracked
+	//If so, point as its specific path information
+	for (j = 0; j < geo.reverb_matoms; j++)
+		if(z == geo.reverb_matom[j]) 
+			PathPtr = wind->paths_matom[j];
+
+
+	i_path = -1;
+	r_total = 0.0;
+	r_rand = PathPtr->d_flux * rand() / MAXRAND;
 	while (r_rand < r_total) 
 	{
-		r_total += wind->paths->ad_freq_flux[i_freq * g_path_data->i_path_bins +
-						  (++i_path)];
-		if (i_path > g_path_data->i_path_bins)
+		r_total += PathPtr->ad_path_flux[++i_path];
+		if (i_path >= g_path_data->i_path_bins) 
 		{
-			Error("wind_paths_gen_phot: No path data in wind cell %d at %g %g %g\n",
+			Error
+				("wind_paths_gen_phot_matom: No path data in wind cell %d at %g %g %g\n",
 			   wind->nwind, wind->x[0], wind->x[1], wind->x[2]);
 			exit(0);
 		}
 	}
 
-	pp->path = g_path_data->ad_freq_bin[i_path - 1] +
-		(g_path_data->ad_freq_bin[i_path] -
-		 g_path_data->ad_freq_bin[i_path - 1]) * (rand() / MAXRAND);
+	//Assign photon path to a random position within the bin.
+	r_bin_min 	= g_path_data->ad_path_bin[i_path-1];
+	r_bin_rand  = (rand() / MAXRAND) *
+				 (g_path_data->ad_path_bin[i_path  ]-
+				  g_path_data->ad_path_bin[i_path-1]) ;
+	pp->path 	= r_bin_min + r_bin_rand;
+
 	return (0);
 }
 
-
-/***********************************************************
-Synopsis:
-	wind_paths_evaluate(WindPtr wind)
-		Evaluates wind path details for a cycle
-
-Arguments:
-	WindPtr wind	Wind to evaluate
-
-Returns:
-
-Description:
-	Iterates over each wind cell, recording the total flux
-	in each bin in the cell's arrays for use later on, as
-	well as making a simple 'average path' calculation.
-
-Notes:
-
-History:
-	26/2/15	-	Written by SWM
-***********************************************************/
+/*************************************************************//**
+ * @name 	Wind paths single evaluate
+ * @brief	Evaluates individual wind cell paths
+ *
+ * @param [in,out] wind	Wind cell to evaluate
+ *
+ * Records the total flux in the cell, as well as making a 
+ * simple 'average path' calculation.
+ *
+ * @see wind_paths_evaluate()
+ *
+ * @notes
+ * 26/2/15	-	Written by SWM
+ * 24/7/15	-	Removed frequency
+*****************************************************************/
 int
 wind_paths_single_evaluate(Wind_Paths_Ptr paths)
 {
-	int		i         , j;
-
+	int i;
 	paths->d_flux = 0.0;
 	paths->d_path = 0.0;
 	paths->i_num = 0.0;
-	for (i = 0; i < NWAVE - 1; i++) {
-		paths->ad_freq_flux[i] = 0.0;
-		paths->ai_freq_num[i] = 0;
 
-		for (j = 0; j < g_path_data->i_path_bins; j++) {
-			paths->ad_freq_flux[i] +=
-				paths->ad_freq_path_flux[i * g_path_data->i_path_bins + j];
-			paths->ai_freq_num[i] +=
-				paths->ai_freq_path_num[i * g_path_data->i_path_bins + j];
-			paths->d_path +=
-				paths->ad_freq_path_flux[i * g_path_data->i_path_bins +
-					 j] * (g_path_data->ad_path_bin[j] +
-					       g_path_data->ad_path_bin[j +
-								  1]) / 2.0;
-		}
-
-		paths->d_flux += paths->ad_freq_flux[i];
-		paths->i_num += paths->ai_freq_num[i];
+	for (i = 0; i < g_path_data->i_path_bins; i++) 
+	{
+		paths->d_flux += paths->ad_path_flux[i];
+		paths->i_num++;
+		paths->d_path += paths->ad_path_flux[i] *
+					(g_path_data->ad_path_bin[i  ] +
+				     g_path_data->ad_path_bin[i+1]) / 2.0;
 	}
+
 	if (paths->d_flux > 0.0)
 		paths->d_path /= paths->d_flux;
 	return (0);
 }
 
+/*************************************************************//**
+ * @name 	Wind paths evaluate
+ * @brief	Evaluates wind path details for a cycle
+ *
+ * @param [in,out] wind	Wind to evaluate
+ *
+ * Iterates over each cell in the wind.
+ * 
+ * @see wind_paths_single_evaluate()
+ *
+ * @notes
+ * 26/2/15	-	Written by SWM
+ * 24/7/15	-	Removed frequency
+*****************************************************************/
 int
 wind_paths_evaluate(WindPtr wind)
 {
-	int		i;
+	int	i, j;
 	for (i = 0; i < NDIM * MDIM; i++) {
 		if (wind[i].inwind >= 0)
+		{
 			wind_paths_single_evaluate(wind[i].paths);
+			for(j = 0; j < geo.reverb_matoms; j++)
+				wind_paths_single_evaluate(wind[i].paths_matom[j]);
+		}
 	}
 	return (0);
 }
 
-/****************************************************************/
-/**
+
+/*************************************************************//**
  * @name		Wind paths point index
  * @brief		Given trz index in wind, returns vtk data index.
  * 
@@ -707,20 +764,18 @@ wind_paths_evaluate(WindPtr wind)
  * #path_data.
  *
  * @notes Written by SWM 4/15.
- */
-/****************************************************************/
+ *****************************************************************/
 int
 wind_paths_point_index(int i, int j, int k, int i_top)
 {
-	int		n;
+	int	n;
 	n = i * 2 * (g_path_data->i_theta_res + 1) * MDIM +
 		j * 2 * (g_path_data->i_theta_res + 1) + k * 2 + i_top;
 	return (n);
 
 }
 
-/****************************************************************/
-/**
+/*************************************************************//**
  * @name		Wind paths output
  * @brief		Outputs wind path information to vtk.
  * 
@@ -732,8 +787,8 @@ wind_paths_point_index(int i, int j, int k, int i_top)
  * file in ASCII .vtk format.
  *
  * @notes Written by SWM 4/15.
- */
-/****************************************************************/
+*****************************************************************/
+
 int
 wind_paths_output(WindPtr wind, char c_file_in[])
 {

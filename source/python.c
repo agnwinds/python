@@ -1078,7 +1078,7 @@ main (argc, argv)
 	/* SWM - Setup for path tracking */
 	if(geo.reverb > REV_NONE)
 	{
-		reverb_init(wmain, nangles, freqmin, freqmax);
+		reverb_init(wmain, nangles);
 		delay_dump_prep(files.root, restart_stat, rank_global);
 	}
   

@@ -600,7 +600,11 @@ rdint2 (question, answer1, answer2)
   
   	while (query == REISSUE)
   	{
-  		sprintf (dummy, "%d", *answer);
+  		if(found == 0)
+  			sprintf (dummy, "%d", *answer1);
+    	else if(found == 1)
+    		sprintf (dummy, "%d", *answer2);
+
     	query = string_process (question, dummy);
     	if (query == NORMAL)
 		{
