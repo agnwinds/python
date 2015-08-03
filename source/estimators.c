@@ -717,6 +717,13 @@ total_fb_matoms (xplasma, t_e, f1, f2)
 	         process. */
 	      cont_ptr = &phot_top[config[i].bfu_jump[j]];
 	      density = den_config (xplasma, cont_ptr->uplev);
+
+        /* the cooling contribution for each transition is given by 
+           density * ne * [(alpha_sp_e - alpha_sp) + (alpha_st_e - alpha_st)]
+           we call alpha_sp() with modes 1 and 0 to get the different
+           versions of the sp. recombination rate coefficient.
+           This is essentially equation (33) of Lucy (2003) */
+           
 	      cool_contribution =
 		(mplasma->alpha_st_e_old[config[i].bfu_indx_first + j] +
 		 alpha_sp (cont_ptr, xplasma, 1)
