@@ -422,34 +422,42 @@ History:
 int
 reverb_init(WindPtr wind, int nangles)
 {
-	int i, j;
+	int i, j, k=0;
 	if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM) 
 	{
-		Log ("Wind cell-based path tracking is enabled\n");
 		path_data_init(0.0, geo.rmax, geo.reverb_path_bins, nangles,
 			   geo.reverb_theta_bins);
+
+		if(geo.reverb == REV_MATOM)
+		{
+			Log("reverb_init: Macro-atom level based path tracking is enabled.\n");
+			for(i=0; i<geo.reverb_matoms; i++)
+	      		for(j=0; j<NLEVELS; j++)
+	      			if(	geo.reverb_matom[i] == config[j].z && config[j].macro_info == 1)
+	      				geo.reverb_matom_levels++;
+
+			geo.reverb_matom_level = (int *) calloc (sizeof(int), geo.reverb_matom_levels);
+	      	for(j=0; j<NLEVELS; j++)
+		      	for(i=0; i<geo.reverb_matoms; i++)
+		      		if(	geo.reverb_matom[i] == config[j].z && config[j].macro_info == 1)
+		      		{
+/*		      			printf("reverb_init: Level %d/%d is %d/%d (elem %d-%d)\n",
+		      				k,geo.reverb_matom_levels,
+		      				j,NLEVELS,
+		      				config[j].z,config[j].istate); */
+		      			geo.reverb_matom_level[k++] = j;
+		      		}
+	  	}
+	  	else if(geo.reverb == REV_WIND)
+	  		Log ("reverb_init: Wind cell-based path tracking is enabled\n");
+
 		wind_paths_init(wind);
 	}
 	else if (geo.reverb == REV_PHOTON)
-		Log("Photon-based path tracking is enabled.\n");
+		Log("reverb_init: Photon-based path tracking is enabled.\n");
+	else
 
-	if(geo.reverb == REV_MATOM)
-	{
-      for(i=0; i<geo.reverb_matoms; i++)
-      {
-      	for(j=0; j<NLINES; j++)
-      		if(geo.reverb_matom[i] == line[j].z) break;
-
-      	if(j == NLINES || geo.reverb_matom[i] <= 0)
-      	{
-      		Error("reverb_init: Tracking invalid element %d\n",
-      				geo.reverb_matom[i]);
-			exit(0);	
-      	}
-      }
-  	}
-
-	return (0);
+  	return (0);
 }
 
 /***********************************************************
@@ -480,10 +488,10 @@ wind_paths_init(WindPtr wind)
 	for (i = 0; i < NDIM * MDIM; i++) 
 	{
 		wind[i].paths 		= (Wind_Paths_Ptr) wind_paths_constructor(&wind[i]);
-		wind[i].paths_matom = (Wind_Paths_Ptr *) calloc (sizeof(Wind_Paths_Ptr), geo.reverb_matoms);
-		for (j=0; j< geo.reverb_matoms; j++)
+		wind[i].paths_level	= (Wind_Paths_Ptr *) calloc (sizeof(Wind_Paths_Ptr), geo.reverb_matom_levels);
+		for (j=0; j< geo.reverb_matom_levels; j++)
 		{
-			wind[i].paths_matom[j] = (Wind_Paths_Ptr) wind_paths_constructor(&wind[i]);
+			wind[i].paths_level[j] = (Wind_Paths_Ptr) wind_paths_constructor(&wind[i]);
 		}
 	}
 	return (0);
@@ -513,22 +521,22 @@ History:
 	24/7/15	-	Written by SWM
 ***********************************************************/
 int
-wind_paths_add_phot_matom(WindPtr wind, double path, double absorbed, int matom_lev)
+wind_paths_add_phot_matom(WindPtr wind, double path, double absorbed, int matom_line)
 {
-	int i, j, z;
-	z = lin_ptr[matom_lev]->z;
+	int i, j, level;
+	level = line[matom_line].nconfigu;
 
-	for (j = 0; j < geo.reverb_matoms; j++)
+	for (j = 0; j < geo.reverb_matom_levels; j++)
 	{
-		if(z == geo.reverb_matom[j])
+		if(level == geo.reverb_matom_level[j])
 		{
 			for (i=0; i < g_path_data->i_path_bins; i++) 
 			{
 				if (path >= g_path_data->ad_path_bin[i] &&
 				    path <= g_path_data->ad_path_bin[i+1]) 
 				{
-					wind->paths_matom[j]->ad_path_flux[i]+= absorbed;
-					wind->paths_matom[j]->ai_path_num[ i]++;
+					wind->paths_level[j]->ad_path_flux[i]+= absorbed;
+					wind->paths_level[j]->ai_path_num[ i]++;
 				}
 			}
 		}
@@ -597,28 +605,38 @@ wind_paths_gen_phot(WindPtr wind, PhotPtr pp)
 	double	r_rand , r_total, r_bin_min, r_bin_rand;
 	int		i_path;
 
-	i_path = -1;
-	r_total = 0.0;
-	r_rand = wind->paths->d_flux * rand() / MAXRAND;
-	while (r_rand < r_total) 
+	if(geo.wcycle == 0) 
 	{
-		r_total += wind->paths->ad_path_flux[++i_path];
-		if (i_path >= g_path_data->i_path_bins) 
-		{
-			Error
-				("wind_paths_gen_phot: No path data in wind cell %d at %g %g %g\n",
-			   wind->nwind, wind->x[0], wind->x[1], wind->x[2]);
-			exit(0);
-		}
+		//If this is the first cycle, we don't have wind path data yet
+		pp->path = sqrt( pp->x[0] * pp->x[0]
+	  					+pp->x[1] * pp->x[1]
+	  					+pp->x[2] * pp->x[2])
+	  					-geo.rstar;
 	}
+	else
+	{
+		i_path = -1;
+		r_total = 0.0;
+		r_rand = wind->paths->d_flux * rand() / MAXRAND;
+		while (r_rand < r_total) 
+		{
+			r_total += wind->paths->ad_path_flux[++i_path];
+			if (i_path >= g_path_data->i_path_bins) 
+			{
+				Error
+					("wind_paths_gen_phot: No path data in wind cell %d at %g %g %g\n",
+				   wind->nwind, wind->x[0], wind->x[1], wind->x[2]);
+				exit(0);
+			}
+		}
 
-	//Assign photon path to a random position within the bin.
-	r_bin_min 	= g_path_data->ad_path_bin[i_path-1];
-	r_bin_rand	= (rand() / MAXRAND) *
-				 (g_path_data->ad_path_bin[i_path  ]-
-				  g_path_data->ad_path_bin[i_path-1]) ;
-	pp->path 	= r_bin_min + r_bin_rand;
-
+		//Assign photon path to a random position within the bin.
+		r_bin_min 	= g_path_data->ad_path_bin[i_path-1];
+		r_bin_rand	= (rand() / MAXRAND) *
+					 (g_path_data->ad_path_bin[i_path  ]-
+					  g_path_data->ad_path_bin[i_path-1]) ;
+		pp->path 	= r_bin_min + r_bin_rand;
+	}
 	return (0);
 }
 
@@ -642,18 +660,17 @@ int
 wind_paths_gen_phot_matom(WindPtr wind, PhotPtr pp, int matom_lev)
 {
 	double	r_rand, r_total, r_bin_min, r_bin_rand;
-	int		i_path, j, z;
+	int		i_path, j, level;
 	Wind_Paths_Ptr PathPtr;
 
-	z = lin_ptr[matom_lev]->z;
+	level = line[matom_lev].nconfigu;
 	PathPtr = wind->paths;
 
 	//Iterate over array to see if this element is tracked
 	//If so, point as its specific path information
-	for (j = 0; j < geo.reverb_matoms; j++)
-		if(z == geo.reverb_matom[j]) 
-			PathPtr = wind->paths_matom[j];
-
+	for (j = 0; j < geo.reverb_matom_levels; j++)
+		if(level == geo.reverb_matom_level[j]) 
+			PathPtr = wind->paths_level[j];
 
 	i_path = -1;
 	r_total = 0.0;
@@ -739,8 +756,8 @@ wind_paths_evaluate(WindPtr wind)
 		if (wind[i].inwind >= 0)
 		{
 			wind_paths_single_evaluate(wind[i].paths);
-			for(j = 0; j < geo.reverb_matoms; j++)
-				wind_paths_single_evaluate(wind[i].paths_matom[j]);
+			for(j = 0; j < geo.reverb_matom_levels; j++)
+				wind_paths_single_evaluate(wind[i].paths_level[j]);
 		}
 	}
 	return (0);
