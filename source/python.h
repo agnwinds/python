@@ -695,9 +695,11 @@ NSH 130725 - this number is now also used to say if the cell is over temperature
   /* 1108 Increase sim estimators to cover all of the bands */
   /* 1208 Add parameters for an exponential representation, and a switch to say which we prefer. */
   enum spec_mod_type_enum 
-  	{  	SPEC_MOD_PL=1, 
-  		SPEC_MOD_EXP=2
-	} 	spec_mod_type[NXBANDS];	/* NSH 120817 A switch to say which type of representation we are using for this band in this cell. Negative means we have no useful representation, 0 means power law, 1 means exponential */
+  	{  	
+      SPEC_MOD_PL=1, 
+  		SPEC_MOD_EXP=2,
+      SPEC_MOD_FAIL=-1
+	  } spec_mod_type[NXBANDS];	/* NSH 120817 A switch to say which type of representation we are using for this band in this cell. Negative means we have no useful representation, 0 means power law, 1 means exponential */
 
   double pl_alpha[NXBANDS];	/*Computed spectral index for a power law spectrum representing this cell NSH 120817 - changed name from sim_alpha to PL_alpha */
 //  double pl_w[NXBANDS];		/*This is the computed weight of a PL spectrum in this cell - not the same as the dilution factor NSH 120817 - changed name from sim_w to pl_w */

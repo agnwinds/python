@@ -130,7 +130,7 @@ if (mode==1) //Modelled version of J
 	  xpl_logw = xplasma->pl_log_w[j];
 	  xexp_temp = xplasma->exp_temp[j];
 	  xexp_w = xplasma->exp_w[j];
-	  if (xplasma->spec_mod_type[j] > 0)	//Only bother doing the integrals if we have a model in this band
+	  if (xplasma->spec_mod_type[j] != SPEC_MOD_FAIL)	//Only bother doing the integrals if we have a model in this band
 	    {
 	      f1 = xplasma->fmin_mod[j]; //NSH 131114 - Set the low frequency limit to the lowest frequency that the model applies to
 	      f2= xplasma->fmax_mod[j]; //NSH 131114 - Set the high frequency limit to the highest frequency that the model applies to
