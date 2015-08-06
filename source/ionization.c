@@ -413,9 +413,10 @@ History:
 	98	ksl	Coded as part of python effort
 	02jul	ksl	Added mode variable so could try detailed balance
 	06may	ksl	57+ -- Switched to use plasma structue
+    15aug   nsh 79 -- added a mode to leave t_e fixed
 
 **************************************************************/
-
+\
 
 
 int
@@ -432,10 +433,25 @@ one_shot (xplasma, mode)
   gain = xplasma->gain;
 
 
-  te_old = xplasma->t_e;
-  te_new = calc_te (xplasma, 0.7 * te_old, 1.3 * te_old);
+  
+  
+  
+     if (modes.fixed_temp==0)      //If we are not in fixed temp mode (the normal state of affairs)
+    {
+	  te_old = xplasma->t_e;    //Store the old electron tmperature
+	  te_new = calc_te (xplasma, 0.7 * te_old, 1.3 * te_old);  //compute the new t_e - no limits on where it can go
+  	  xplasma->t_e = (1 - gain) * te_old + gain * te_new;  //Allow the temperature to move by a fraction gain towards the equilibrium temperature
+	}
+	else
+	{
+	    compute_dr_coeffs (xplasma->t_e);
+	     xplasma->lum_dr = total_dr (&wmain[xplasma->nwind], xplasma->t_e);
+	     xplasma->lum_di = total_di (&wmain[xplasma->nwind], xplasma->t_e);
+	     xplasma->lum_comp = total_comp (&wmain[xplasma->nwind], xplasma->t_e);
+	     total_emission (&wmain[xplasma->nwind], 0., VERY_BIG);
+	}
+  
 
-  xplasma->t_e = (1 - gain) * te_old + gain * te_new;
 
 /* NSH 130722 - NOTE - at this stage, the cooling terms are still those computed from the 'ideal' t_e, not the new t_e - this may be worth investigatiing. */
   if (xplasma->t_e > TMAX)
