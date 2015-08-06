@@ -55,6 +55,7 @@ if __name__ == "__main__":		# allows one to run from command line without runnin
 	t_e=10000
 	nh=1e7
 	lum_start=1e25
+	nprocs=0
 	
 	
 	
@@ -75,6 +76,8 @@ if __name__ == "__main__":		# allows one to run from command line without runnin
 				print data[0],data[1]
 				if data[0]=='alpha': 
 					alpha=data[1]
+				if data[0]=='nprocs': 
+					nprocs=int(data[1])
 				if data[0]=='npoints':
 					npoints=int(data[1])
 				if data[0]=='t_e':
@@ -181,7 +184,10 @@ if __name__ == "__main__":		# allows one to run from command line without runnin
 		inp.write("Band.minimum_fraction)                         0.4\n")
 		inp.write("Band.minimum_fraction)                         0.3\n")
 		inp.close()
-		cmd="time "+python_ver+" "+python_opts+" input > output"
+		if nprocs==0:
+			cmd="time "+python_ver+" "+python_opts+" input > output"
+		else:
+			cmd="time mpirun -n "+str(nprocs)+" "+python_ver+" "+python_opts+" input > output"
 		print cmd
 		subprocess.check_call(cmd,shell=True)	   #This is where we define the version of python to use
 		subprocess.check_call("tail -n 60 output  | grep OUTPUT > temp",shell=True)#Strip the last 60 lines from the output
