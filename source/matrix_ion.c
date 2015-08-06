@@ -63,6 +63,8 @@ int   matrix_ion_populations (xplasma,mode)
 #include "my_linalg.h"
 
 
+
+
 int
 matrix_ion_populations (xplasma, mode)
      PlasmaPtr xplasma;
@@ -86,6 +88,7 @@ matrix_ion_populations (xplasma, mode)
   int xelem[nions];		// This array keeps track of the element for each ion
   double pi_rates[nions];
   double rr_rates[nions];
+  double inner_rates[n_inner_tot]; //This array contains the rates for each of the inner shells. Where they go to requires the electron yield array
 
   /* Copy some quantities from the cell into local variables */
 
@@ -118,29 +121,54 @@ matrix_ion_populations (xplasma, mode)
 	{
 	  if (mode == NEBULARMODE_MATRIX_BB)
 	    {
-	      pi_rates[mm] = calc_pi_rate (mm, xplasma, 2);	// PI rate for the BB model
+	      pi_rates[mm] = calc_pi_rate (mm, xplasma, 2, 1);	// PI rate for the BB model
 	    }
 	  else if (mode == NEBULARMODE_MATRIX_SPECTRALMODEL)
 	    {
-	      pi_rates[mm] = calc_pi_rate (mm, xplasma, 1);	// PI rate for an explicit spectral model
+	      pi_rates[mm] = calc_pi_rate (mm, xplasma, 1, 1);	// PI rate for an explicit spectral model
 	    }
 	  else
 	    {
 	      // If reached this point the program does not understand what type of spectral model to apply 
 	      Error ("matrix_ion_populations: Unknown mode %d\n", mode);
 	      exit (0);
-	    }
+	    }		
 	}
-      for (nn = 0; nn < nelements; nn++)
-	{
-	  if (ion[mm].z == ele[nn].z)
-	    {
-	      xelem[mm] = nn;	/* xelem logs which element each ow in the arrays refers to. This is important because we need
-				   to know what the total density will be for a group of rows all representing the same
-				   element. */
-	    }
-	}
+
+    for (nn = 0; nn < nelements; nn++)
+{
+  if (ion[mm].z == ele[nn].z)
+    {
+      xelem[mm] = nn;	/* xelem logs which element each ow in the arrays refers to. This is important because we need
+			   to know what the total density will be for a group of rows all representing the same
+			   element. */
     }
+	}
+  }
+	
+	
+	/* The next loop generates the inner shell ionization rates, if they are present in the atomic data and
+	we wish to compute auger ionizaion rates. This only computes the rates out of each ion, we also need to 
+    consult the electron yield array if we are to compute the change in electron number*/
+  
+	if (geo.auger_ionization==1)
+	{
+		for (mm=0; mm<n_inner_tot; mm++)
+		{
+			if (mode==NEBULARMODE_MATRIX_BB)
+			{
+				inner_rates[mm]=calc_pi_rate(mm, xplasma, 2, 2);
+			}
+			else if (mode==NEBULARMODE_MATRIX_SPECTRALMODEL)
+			{
+				inner_rates[mm]=calc_pi_rate(mm,xplasma,1,2);
+			}
+		}
+	}
+
+	
+		
+
 
   /* This next line sets the partition function for each ion. This has always been the place here python calculates the
      partition funcions and sets the level densities for each ion. It needs to be done, or other parts of the code which rely
@@ -198,7 +226,7 @@ matrix_ion_populations (xplasma, mode)
     {
 
 
-      populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, rr_rates,
+      populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
 				b_temp, xne, xelem);
 
 
@@ -405,11 +433,12 @@ matrix_ion_populations (xplasma, mode)
 **************************************************************/
 
 int
-populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, rr_rates, b_temp,
+populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates, b_temp,
 			  xne, xelem)
      PlasmaPtr xplasma;
      double rate_matrix[nions][nions];
      double pi_rates[nions];
+	 double inner_rates[n_inner_tot];
      double rr_rates[nions];
      double xne;
      double b_temp[nions];
@@ -418,6 +447,8 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, rr_rates, b_temp,
 {
   int nn, mm;
   double nh;
+ int n_elec,d_elec,ion_out; //The number of electrons left in a current ion
+
 
   nh = xplasma->rho * rho2nh;	// The number density of hydrogen ions - computed from density
 
@@ -537,6 +568,28 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, rr_rates, b_temp,
 	    }
 	}
     }
+	
+	
+	
+	for (mm=0; mm<n_inner_tot; mm++)  //There mare be several rates for each ion, so we loop over all the rates
+	{
+		if (inner_cross[mm].n_elec_yield != -1)  //we only want to treat ionization where we have info about the yield
+		{
+			ion_out=inner_cross[mm].nion;  //this is the ion which is being depopulated
+			rate_matrix[ion_out][ion_out]-=inner_rates[mm]; //This is the depopulation
+			n_elec=ion[ion_out].z-ion[ion_out].istate+1;
+			if (n_elec>11)
+				n_elec=11;
+			for (d_elec=1;d_elec<n_elec;d_elec++) //We do a loop over the number of remaining electrons
+			{
+				nn=ion_out+d_elec; //We will be populating a state d_elec stages higher
+				rate_matrix[nn][ion_out] += inner_rates[mm]*inner_elec_yield[inner_cross[mm].n_elec_yield].prob[d_elec-1];
+			}
+		}
+	}
+	
+
+
 
   /* Now, we replace the first line for each element with 1's and 0's. This is done because we actually have more equations
      than unknowns. We replace the array elements relating to each ion stage in this element with a 1, and all the other array

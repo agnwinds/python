@@ -73,6 +73,8 @@ History:
 			also initialise the min and max frequencies seen in a band.
 	14jul	nsh	added call to calloc_dyn_plasma to allocate space for arrays of variable size - currently
 			those with length nion.
+	15jul	nsh added a mode for fixed temperature, which does not multiply wind temp by 0.9 so you get what you ask for
+
 
 **************************************************************/
 
@@ -377,7 +379,14 @@ be optional which variables beyond here are moved to structures othere than Wind
       plasmamain[n].gain = 0.5;
       plasmamain[n].dt_e_old = 0.0;
       plasmamain[n].dt_e = 0.0;
-      plasmamain[n].t_e = plasmamain[n].t_e_old = 0.9 * plasmamain[n].t_r;	//Lucy guess
+/* The next lines set the electrom temperature to 0.9 times the radiation temperature (which is a bit
+	  odd since the input is the wind temperature, but is taken to be the radiation temperature). If we have
+	  a fixed temprature calculation,then the wind temperature is set to be the wind temperature so the
+	  user gets what they are expecting */
+      if (modes.fixed_temp==0)
+		  plasmamain[n].t_e = plasmamain[n].t_e_old = 0.9 * plasmamain[n].t_r;	//Lucy guess
+	  else
+		  plasmamain[n].t_e = plasmamain[n].t_e_old = plasmamain[n].t_r; //If we want to fix the temperature, we set it to tr which has previously been set to twind.
 
 
 /* Calculate an initial guess for the weight of the PL spectrum (constant / area of a sphere / 4pi) */

@@ -123,6 +123,7 @@ radiation (p, ds)
   double kappa_tot, frac_tot, frac_ff;
   double frac_z, frac_comp;	/* nsh 1108 added frac_comp - the heating in the cell due to compton heating */
   double frac_ind_comp;		/* nsh 1205 added frac_ind_comp - the heating due to induced compton heating */
+  double frac_auger;
   double kappa_ion[NIONS];
   double frac_ion[NIONS];
   double density, ft, tau, tau2;
@@ -138,7 +139,7 @@ radiation (p, ds)
   double freq_min, freq_max;
   double frac_path, freq_xs;
   struct photon phot;
-
+  
   one = &wmain[p->grid];	/* So one is the grid cell of interest */
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "radiation");
@@ -156,9 +157,13 @@ radiation (p, ds)
   /* Create phot, a photon at the position we are moving to 
      note that the actual movement of the photon gets done after the call to radiation */
   stuff_phot (p, &phot);	// copy photon ptr
+  
   move_phot (&phot, ds);	// move it by ds
+  
   vwind_xyz (&phot, v_outer);	// get velocity vector at new pos
+  
   v2 = dot (phot.lmn, v_outer);	// get direction cosine
+  
 
   /* calculate photon frequencies in rest frame of cell */
   freq_inner = p->freq * (1. - v1 / C);
@@ -176,7 +181,9 @@ radiation (p, ds)
   kappa_tot += frac_comp = kappa_comp (xplasma, freq);	/* 70 NSH 1108 calculate compton opacity, store it in kappa_comp and also add it to kappa_tot, the total opacity for the photon path */
   kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq);
   frac_tot = frac_z = 0;	/* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
-				   indicate this is all diagnostic and might be removed */
+				   indicate this is all diagnostic and might be removed */  
+	  frac_auger=0;
+
 
   /* JM 1405 -- Check which of the frequencies is larger.
      if freq_max is always larger this can be removed. My checks
@@ -192,11 +199,9 @@ radiation (p, ds)
       freq_min = freq_outer;
     }
 
+if (freq > phot_freq_min)
 
-  if (freq > phot_freq_min)
-
-    {
-
+{
       if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
 	{			// Initialize during ionization cycles only
 	  for (nion = 0; nion < nions; nion++)
@@ -223,10 +228,8 @@ radiation (p, ds)
     /* JM 1503 -- loop over all photoionization xsections */
 	  for (n = 0; n < nphot_total; n++)
 	    {
-
 	      x_top_ptr = phot_top_ptr[n];
 	      ft = x_top_ptr->freq[0];
-
 	      if (ft > freq_min && ft < freq_max)
 		{
 		  /* then the shifting of the photon causes it to cross an edge. 
@@ -251,8 +254,7 @@ radiation (p, ds)
       /* how we get this depends if we have a topbase (level by level) 
          or vfky cross-section (ion by ion) */
       nion = x_top_ptr->nion;
-
-      if (ion[nion].phot_info == 1) // topbase
+      if (ion[nion].phot_info > 0) // topbase or hybrid
       {
         nconf = x_top_ptr->nlev;
         density = den_config (xplasma, nconf);
@@ -269,9 +271,7 @@ radiation (p, ds)
 
 		      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
 		      kappa_tot += x =
-			sigma_phot (x_top_ptr, freq_xs) * density 
-			        * frac_path * geo.fill;
-
+			sigma_phot (x_top_ptr, freq_xs) * density * frac_path * geo.fill;
 		      /* I believe most of next steps are totally diagnsitic; it is possible if 
 		         statement could be deleted entirely 060802 -- ksl */
 
@@ -279,7 +279,6 @@ radiation (p, ds)
 			{	// Calculate during ionization cycles only
 
 			  frac_tot += z = x * (freq_xs - ft) / freq_xs;
-
 			  if (nion > 3)
 			    {
 			      frac_z += z;
@@ -290,12 +289,68 @@ radiation (p, ds)
 			}
 
 		    }
-
+		
+		
 		}
-	    }
-
-    }
-    }
+	    }		/* NSH loop over all inner shell cross sections as well! But only for VFKY ions - topbase has those edges in */
+		
+		if (freq > inner_freq_min)
+		{
+		for (n = 0; n < n_inner_tot; n++)
+		{
+			if (ion[inner_cross[n].nion].phot_info != 1) //We only compute this if we have a non pure topbase ion. If we have a pure topbase ion, then the innershell edges are in the data
+			{
+				x_top_ptr = inner_cross_ptr[n];
+				if (x_top_ptr->n_elec_yield != -1)   //Only any point in doing this if we know the energy of elecrons
+				{
+					ft = x_top_ptr->freq[0];
+					
+					if (ft > freq_min && ft < freq_max)
+					{
+						frac_path = (freq_max - ft) / (freq_max - freq_min);	
+						freq_xs = 0.5 * (ft + freq_max);
+					}
+					else if (ft > freq_max)
+						break;		// The remaining transitions will have higher thresholds
+					else if (ft < freq_min)
+					{
+						frac_path = 1.0;	// then all frequency along ds are above edge
+						freq_xs = freq;	// use the average frequency
+					}
+					if (freq_xs < x_top_ptr->freq[x_top_ptr->np - 1])
+					{
+						nion = x_top_ptr->nion;
+						if (ion[nion].phot_info == 0) // verner only ion
+						{
+							density = xplasma->density[nion];  //All these rates are from the ground state, so we just need the density of the ion.
+						}
+						else if (ion[nion].phot_info > 0) // topbase or hybrid
+						{
+							nconf=phot_top[ion[nion].ntop_ground].nlev;  //The lower level of the ground state Pi cross section (should be GS!)
+					        density = den_config (xplasma, nconf);
+						}
+						if (density > DENSITY_PHOT_MIN)
+						{
+							kappa_tot += x =
+								sigma_phot (x_top_ptr, freq_xs) * density * frac_path * geo.fill;
+							if (geo.ioniz_or_extract && x_top_ptr->n_elec_yield!=-1)	// 57h -- ksl -- 060715 Calculate during ionization cycles only
+							{
+								frac_auger += z = x * (inner_elec_yield[x_top_ptr->n_elec_yield].Ea/EV2ERGS) / (freq_xs*HEV);
+			  			 		if (nion > 3)
+								{
+									frac_z += z;
+								}
+								frac_ion[nion] += z;
+								kappa_ion[nion] += x;
+							}
+						}
+					}
+				}
+			}
+		}
+		}
+	}
+}
 
 
 
@@ -415,7 +470,8 @@ radiation (p, ds)
 	  xplasma->heat_photo += z * frac_tot;
 	  xplasma->heat_z += z * frac_z;
 	  xplasma->heat_tot += z * frac_tot;	//All of the photoinization opacities
-
+	  xplasma->heat_auger += z * frac_auger;
+	  xplasma->heat_tot += z * frac_auger;	//All the inner shell opacities
 	  /* Calculate the number of photoionizations per unit volume for H and He 
 	     JM 1405 changed this to use freq_xs */
 	  xplasma->nioniz++;
@@ -561,8 +617,6 @@ sigma_phot (x_ptr, freq)
   double frac, fbot, ftop;
   int linterp ();
   int nlast;
-
-
 
   if (freq < x_ptr->freq[0])
     return (0.0);		// Since this was below threshold

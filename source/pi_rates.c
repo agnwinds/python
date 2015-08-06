@@ -22,7 +22,7 @@ double xexp_temp, xexp_w;
   Synopsis:   
 
 int
-calc_pi_rate (nion,xplasma,mode)  calculates the photoionization rarte coefficient for ion	
+calc_pi_rate (nion,xplasma,mode,type)  calculates the photoionization rarte coefficient for ion	
 				nion, based upon the mean intensity stored in cell xplasma
 				The mode tells the subroutine wether we are modelling the
 				mean intensity as a dilute blackbody (mode2) or as a series
@@ -36,7 +36,8 @@ calc_pi_rate (nion,xplasma,mode)  calculates the photoionization rarte coefficie
      int mode;			1 - use a power law and or exponential model for J
      				2 - use a dilute BB model for J - t_r and w are those 
 				parameters in xplasma
-
+      int type        1 - a normal outer shell, nion refers to the ion
+      				2 - an inner shell transition, nion refers to the element in the inner_cross 
 
   Returns:
  	The photioinization rate coefficient for the ion.
@@ -53,8 +54,10 @@ calc_pi_rate (nion,xplasma,mode)  calculates the photoionization rarte coefficie
 
 
 
+
   History:
 	2014Aug NSH - coded
+	2015July NSH - added code to permit this subroutine to also compute inner shell PI rates.
 
 **************************************************************/
 
@@ -62,12 +65,13 @@ calc_pi_rate (nion,xplasma,mode)  calculates the photoionization rarte coefficie
 
 
 double 
-calc_pi_rate (nion,xplasma,mode)
+calc_pi_rate (nion,xplasma,mode,type)
 	PlasmaPtr xplasma;
 	int nion;
 	int mode;
+	int type;
 {
-  int  n, j;
+  int  j;
   double pi_rate;
   int ntmin, nvmin;
   double fthresh, fmax, fmaxtemp;
@@ -75,34 +79,40 @@ calc_pi_rate (nion,xplasma,mode)
   double exp_qromb, pl_qromb;
 
 
-  exp_qromb = 1e-4;
+  exp_qromb = 1e-4; /*These are the two tolerance values for the rhomberg integrals */
   pl_qromb = 1e-4;
 
 
-  if (-1 < nion && nion < nions)	//Get cross section for this specific ion_number
-    {
-      ntmin = ion[nion].ntop_ground;	/*We only ever use the ground state cross sections. This is for topbase */
-      nvmin = nion;	/*and this is for verner cross sections */
-    }
-  else
-    {
-      Error ("calc_pi_rate: %d is unacceptable value of nion\n", nion);
-      //mytrap ();  JM 1410 -- mytrap is deprecated
-      exit (0);
-      return (1.0);
-    }
+
+  ntmin=nvmin=-1; /* Initialize these to an unreasonable number. We dont use them all the time */
+  
+
+  
 
 
 
-  if (ion[nion].phot_info == 1)	//topbase
-    {
-      n = ntmin;
-      xtop = &phot_top[n];
+
+	if (type==1) //We are computing a normal outer shell rate
+	{
+	    if (-1 < nion && nion < nions)	//Get cross section for this specific ion_number
+	      {
+	        ntmin = ion[nion].ntop_ground;	/*We only ever use the ground state cross sections. This is for topbase */
+	        nvmin = ion[nion].nxphot;
+	      }
+	    else
+	      {
+	        Error ("calc_pi_rate: %d is unacceptable value of nion\n", nion);
+	        //mytrap ();  JM 1410 -- mytrap is deprecated
+	        exit (0);
+	        return (1.0);
+	      }
+  if (ion[nion].phot_info > 0)	//topbase or hybrid VFKY (GS)+TB excited
+    { 
+      xtop = &phot_top[ntmin];
     }
   else if (ion[nion].phot_info == 0)	// verner
-    {
-      n = nvmin;		//just the ground state ionization fraction.
-      xtop = &phot_top[ion[n].nxphot];
+    {		//just the ground state ionization fraction.
+      xtop = &phot_top[nvmin];
     }
   else
     {
@@ -113,10 +123,39 @@ calc_pi_rate (nion,xplasma,mode)
        we have no business including an ion for which we have no photoionization data.... */
 	  exit(0); 
     }
+}
+else if (type==2)  //We are computing an inner shell rate - nion refers to an actual cross section.
+{
+	if (-1<nion && nion<n_inner_tot) //We have a reasonable value for nion_in
+	{
+		xtop = &inner_cross[nion];   //Set the cross sections for the integral to the inner shell cross section
+	}
+	else
+	{
+  	  Error
+  	    ("calc_pi_rate: No inner shell xsection for record %d (element %d, ion state %d)\n",
+  	     nion, inner_cross[nion].z, inner_cross[nion].istate);
+      /* NSH 1408 I have decided that this is actually a really serous problem - 
+         we have no business including an ion for which we have no photoionization data.... */
+  	  exit(0); 
+	}
+}
+else
+{
+	Error ("calc_pi_rate: unknown mode %i\n",type);
+}
 
-  fthresh = xtop->freq[0];
-  fmax = xtop->freq[xtop->np - 1];
-  pi_rate = 0;
+
+
+/* At this stage, xtop points to either an outer or inner shell photoionization cross section
+	We now prepare to explicitly integrate J x csec over modelled bands */
+
+
+
+
+  fthresh = xtop->freq[0];          //The first frequency for which we have a cross section
+  fmax = xtop->freq[xtop->np - 1];  //THe last frequency
+  pi_rate = 0;          			//Initialise the pi rate - it will be computed thruogh several integrals
 
 
 
@@ -323,6 +362,7 @@ tb_exp1 (freq)
   answer /= freq;
   return (answer);
 }
+
 
 
 

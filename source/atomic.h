@@ -38,6 +38,7 @@
 #define DENSITY_MIN		1.e-20
 /* 
 
+
    Note that the structure ele array may not be completely filled.  In this structure, the dimension is simply
    the order in which elements are read in, and one may skip elements (which are not of interest).
 
@@ -48,6 +49,7 @@
    about a specific element *elz may be better, at least that is the idea
 
  */
+
 
 #define NELEMENTS		50	/* Maximum number of elements to consider */
 int nelements;			/* The actual number of ions read from the data file */
@@ -63,6 +65,9 @@ int nlevels_macro;		/* Actual number of macro atom levels. (SS, June 04) */
 int nlines;			/* Actual number of lines that were read in */
 int nlines_macro;		/* Actual number of Macro Atom lines that were read in.  New version of get_atomic
 				   data assumes that macro lines are read in before non-macro lines */
+#define N_INNER     10 /*Maximum number of inner shell ionization cross sections per ion*/
+int n_inner_tot;       /*The actual number of inner shell ionization cross sections in total*/
+
 
 #define NBBJUMPS         100	/* Maximum number of Macro Atom bound-bound jumps from any one configuration (SS) */
 
@@ -164,6 +169,8 @@ typedef struct ions
 				   this ion if it exists */
   int dere_di_flag;              /* Flag to say if we have DERE direct ionization data for this ion */
   int nxderedi;		/* index into the dere direct ionization structure to give the location of the data for this ion */
+  int nxinner[N_INNER];  /*index to each of the inner shell cross sections associtated with this ion*/
+  int n_inner;   /*The number of inner shell cross section associated with this ion*/
 
 }
 ion_dummy, *IonPtr;
@@ -288,6 +295,7 @@ int nline_min, nline_max, nline_delt;	/*For calculating which line are likely to
 
 int nxphot;			/*The actual number of ions for which there are VFKY photoionization x-sections */
 double phot_freq_min;		/*The lowest frequency for which photoionization can occur */
+double inner_freq_min;     /*The lowest frequency for which inner shel ionization can take place*/
 
 #define NCROSS 1500
 #define NTOP_PHOT 400		/* Maximum number of photoionisation processes. (SS) */
@@ -301,11 +309,14 @@ typedef struct topbase_phot
   int uplev;			/* Internal index to the config structure for the upper state (SS) */
   int nion;			/* Internal index to the    ion structure for this x-section */
   int z, istate;
-  int np;
+  int np;         /*the number of points in the corr section fit */
+  int n, l;       /*Shell and subshell, used for inner shell*/
   int nlast;			/* nlast is an index into the arrays freq and x.  It allows 
 				   a quick check to see whether one needs to do a search
 				   for the correct array elements, or whether this process
 				   can be short circuited */
+  int n_elec_yield;   /*Index to the electron yield array - only used for inner shell ionizations*/
+  int n_fluor_yield;  /*Inder to the fluorescent photon yield array - only used for inner shell ionizations*/
   int macro_info;		/* Identifies whether line is to be treated using a Macro Atom approach.
 				   set to -1 initially
 				   set to 0 if not a macro atom line  
@@ -317,13 +328,20 @@ typedef struct topbase_phot
 				   upper configuration (uplev) and then down_index (for deexcitation) or the lower
 				   configuration (nlev) and then up_index. (SS) */
   int up_index;
+  int use;    /* It we are to use this cross section. This allows unused VFKY cross sections to sit in the array. */
   double freq[NCROSS], x[NCROSS];
   double f, sigma;		/*last freq, last x-section */
 } Topbase_phot, *TopPhotPtr;
 
 Topbase_phot phot_top[NLEVELS];
-TopPhotPtr phot_top_ptr[NLEVELS];	/* Pointers to phot_top in threshold frequency order */
-Topbase_phot xphot_tab[NIONS];  /* Tabulated verner data - uses the same structure as topbase to simplify code.*/
+TopPhotPtr phot_top_ptr[NLEVELS];	/* Pointers to phot_top in threshold frequency order - this */
+Topbase_phot inner_cross[N_INNER*NIONS];
+TopPhotPtr inner_cross_ptr[N_INNER*NIONS];
+
+
+
+
+//Topbase_phot xphot_tab[NIONS];  /* Tabulated verner data - uses the same structure as topbase to simplify code.*/
 
 /* Photoionization crossections from Verner & Yakovlev - to be used for inner shell ionization and the Auger effect*/
 typedef struct innershell
@@ -349,9 +367,30 @@ typedef struct innershell
 Innershell augerion[NAUGER];
 
 
+/* This next is the electron yield data for inner shell ionization from Kaastra and Mewe */
+typedef struct inner_elec_yield
+{
+	int nion;  /*Index to the ion which was the parent of the inner shell ionization*/
+	int z,istate;   
+    int n, l;			/*Quantum numbers of shell */
+	double prob[10];     /*The probability for between 1 and 10 electrons being ejected*/
+	double I;            /*Ionization energy*/
+	double Ea;           /*Average electron energy */
+} Inner_elec_yield, Inner_elec_yieldPtr;
 
+Inner_elec_yield inner_elec_yield[N_INNER*NIONS];
 
+/* This structure is for the flourescent photon yield following inner shell ionization from Kaastra and Mewe*/
+typedef struct inner_fluor_yield
+{
+	int nion;       /*Index to the ion which was the parent of the inner shell ionization*/
+	int z,istate;   /*atomic number and state (astro notation) of the parent */
+	int n, l;       /*shell and subshell of the parent */
+	double freq;  /*the rest frequency of the photon emitted */
+	double yield;   /*number of photons per ionization*/
+}  Inner_fluor_yield, Inner_fluor_yieldPtr;
 
+Inner_fluor_yield inner_fluor_yield[N_INNER*NIONS];
 
 
 
