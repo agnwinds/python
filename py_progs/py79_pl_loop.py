@@ -181,7 +181,9 @@ if __name__ == "__main__":		# allows one to run from command line without runnin
 		inp.write("Band.minimum_fraction)                         0.4\n")
 		inp.write("Band.minimum_fraction)                         0.3\n")
 		inp.close()
-		subprocess.check_call("time "+python_ver+" "+python_opts+" input > output",shell=True)	   #This is where we define the version of python to use
+		cmd="time "+python_ver+" "+python_opts+" input > output"
+		print cmd
+		subprocess.check_call(cmd,shell=True)	   #This is where we define the version of python to use
 		subprocess.check_call("tail -n 60 output  | grep OUTPUT > temp",shell=True)#Strip the last 60 lines from the output
 		inp=open('temp','r')
 		for line in inp.readlines():
