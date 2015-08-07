@@ -611,6 +611,7 @@ typedef struct plasma
   double heat_lines_macro, heat_photo_macro;	/* bb and bf heating due to macro atoms. Subset of heat_lines 
 						   and heat_photo. SS June 04. */
   double heat_photo, heat_z;	/*photoionization heating total and of metals */
+  double heat_auger;       /* photoionization heating due to inner shell ionizations */  
   double w;			/*The dilution factor of the wind */
   int ntot;			/*Total number of photon passages */
 
@@ -1168,6 +1169,7 @@ struct advanced_modes
   int print_dvds_info;          // print out information on the velocity gradients
   int keep_photoabs;            // keep photoabsorption in final spectrum
   int quit_after_inputs;        // quit after inputs read in, testing mode
+  int fixed_temp;               // do not alter temperature from that set in the parameter file
 }
 modes;
 

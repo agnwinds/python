@@ -140,10 +140,10 @@ History:
 			than once
 	12jul   nsh	73 - added structures and routines to read in badnell style total recombination rate data
         12sept	nsh	73 - added structures and routines to read in gaunt factor data from sutherland 1997
-        14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120. 
+  14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120. 
 	14nov	nsh	78b - added DERE direct ionizaion data, and changed al recomb data to refer to state being left
-                        Also used write_atomicdata to control if summary is written to file.
-        15apr JM  79b -- VFKY cross-sections are now tabulated. Multiple changes here, see pull #143
+                 Also used write_atomicdata to control if summary is written to file.
+  15apr JM  79b -- VFKY cross-sections are now tabulated. Multiple changes here, see pull #143
 **************************************************************/
 
 
@@ -177,6 +177,7 @@ get_atomic_data (masterfile)
   int istate, z, nion;
   int iistate, zz;
   int levl, levu;
+  int in, il;  //The levels used in inner shell data
   double q;
   //int nelectrons;
   //double et, emax, e0, sigma, ya, p, yw, y0, y1;
@@ -184,7 +185,7 @@ get_atomic_data (masterfile)
   double the_ground_frac[20];
   char choice;
   int lineno;			/* the line number in the file beginning with 1 */
-  int index_collisions (), index_lines (), index_phot_top (),
+  int index_collisions (), index_lines (), index_phot_top (), index_inner_cross (),
     index_phot_verner (), check_xsections();
   int nwords;
   int nlte, nmax;
@@ -216,6 +217,10 @@ get_atomic_data (masterfile)
   char gsflag, drflag;		//Flags to say what part of data is being read in for DR and RR
   double gstmin, gstmax;	//The range of temperatures for which all ions have GS RR rates
   double gsqrdtemp, gfftemp, s1temp, s2temp, s3temp;	//Temporary storage for gaunt factors
+  int n_elec_yield_tot;  //The number of inner shell cross sections with matching electron yield arrays
+  int n_fluor_yield_tot; //The number of inner shell cross sections with matching fluorescent photon yield arrays
+  double I,Ea;  //The ionization energy and mean electron energy for electron yields
+  double energy;  //The energy of inner shell fluorescent photons
 
   /* define which files to read as data files */
 
@@ -313,6 +318,8 @@ get_atomic_data (masterfile)
 
 
   phot_freq_min = VERY_BIG;
+  inner_freq_min = VERY_BIG;
+
   for (n = 0; n < NELEMENTS; n++)
     {
       strcpy (ele[n].name, "none");
@@ -351,26 +358,64 @@ get_atomic_data (masterfile)
       ion[n].nxbadgsrr = -1;	//Initialise the pointer into the bad_gs_rr structure.
       ion[n].dere_di_flag = 0; //Initialise to say this ion has no Dere DI rate data
       ion[n].nxderedi = -1; //Initialise the pointer into the Dere DI rate structure
+	  ion[n].n_inner = 0;  //Initialise the pointer to say we have no inner shell ionization cross sections
+	  for (i =0; i<N_INNER; i++)
+		  ion[n].nxinner[i]=-1;  //Inintialise the inner shell pointer array
     }
 
-  nlevels = nxphot = nphot_total = ntop_phot = nauger = ndrecomb = ncpart = 0;	//Added counter for DR//
+  nlevels = nxphot = nphot_total = ntop_phot = nauger = ndrecomb = ncpart = n_inner_tot =0;	//Added counter for DR//
+  n_elec_yield_tot = n_fluor_yield_tot = 0; //Counters for electron and fluorescent photon yields
 
-  for (i = 0; i < NLEVELS; i++)
+  //This initialisese the top_phot array - it is used for all ionization processes so some elements
+  //are only used in some circumstances
+
+  for (n = 0; n < NLEVELS; n++)
     {
-      phot_top[i].nlev = (-1);
-      phot_top[i].uplev = (-1);
-      phot_top[i].nion = (-1);
-      phot_top[i].z = (-1);
-      phot_top[i].np = (-1);
-      phot_top[i].macro_info = (-1);	//Initialise - don't know if using Macro Atoms or not: set to -1 (SS)
-      for (j = 0; j < NCROSS; j++)
+      phot_top[n].nlev = (-1);   
+      phot_top[n].uplev = (-1);
+      phot_top[n].nion = (-1);    //the ion to which this cross section belongs
+	  phot_top[n].n_elec_yield = -1;  //pointer to the electron yield array (for inner shell)
+	  phot_top[n].n_fluor_yield =-1;  //pointer to the fluorescent photon yield (for inner shell)
+	  phot_top[n].n=-1;   //pointer to shell (inner shell)
+	  phot_top[n].l=-1;   //pointer to l subshell (inner shell only)
+      phot_top[n].z = (-1);  //atomic number
+      phot_top[n].np = (-1);  //number of points in the fit
+      phot_top[n].macro_info = (-1);	//Initialise - don't know if using Macro Atoms or not: set to -1 (SS)
+      for (j = 0; j < NCROSS; j++)   //initialise the crooss sectiond
 	{
-	  phot_top[i].freq[j] = (-1);
-	  phot_top[i].x[j] = (-1);
+	  phot_top[n].freq[j] = (-1);
+	  phot_top[n].x[j] = (-1);
 	}
-      phot_top[i].f = (-1);
-      phot_top[i].sigma = 0.0;
+      phot_top[n].f = (-1);      //last frequency
+      phot_top[n].sigma = 0.0;   //last cross section
     }
+
+
+	for (n=0; n<NIONS*N_INNER; n++)  //Initialise atomic arrasy with dimension NIONS*NINNER
+	{
+        inner_cross[n].nlev = (-1);
+        inner_cross[n].uplev = (-1);
+        inner_cross[n].nion = inner_elec_yield[n].nion = inner_fluor_yield[n].nion = (-1);
+  	    inner_cross[n].n_elec_yield = -1; 
+  	    inner_cross[n].n_fluor_yield =-1;
+  	    inner_cross[n].n=inner_elec_yield[n].n = inner_fluor_yield[n].n = (-1);
+  	    inner_cross[n].l=inner_elec_yield[n].l = inner_fluor_yield[n].l = (-1);
+        inner_cross[n].z = inner_elec_yield[n].z = inner_fluor_yield[n].z = (-1);
+		inner_elec_yield[n].I=inner_elec_yield[n].Ea = 0.0;
+		inner_fluor_yield[n].freq=inner_fluor_yield[n].yield=0.0;
+		for (j=0;j<10;j++)
+			inner_elec_yield[n].prob[j]=0.0;
+        inner_cross[n].np = (-1);
+        inner_cross[n].macro_info = (-1);	//Initialise - don't know if using Macro Atoms or not: set to -1 (SS)
+        for (j = 0; j < NCROSS; j++)
+  	{
+  	    inner_cross[n].freq[j] = (-1);
+  	    inner_cross[n].x[j] = (-1);
+  	}
+        inner_cross[n].f = (-1);
+        inner_cross[n].sigma = 0.0;
+      }
+	 
 
 
 
@@ -453,6 +498,7 @@ get_atomic_data (masterfile)
 	}
 
     }
+
 
 
 
@@ -567,6 +613,8 @@ structure does not have this property! */
 		choice = 'x';	/*It's a collision strength line */
 	      else if (strncmp (word, "InPhot", 6) == 0)
 		choice = 'A';	/*It's an inner shell ionization for Auger effect */
+		  else if (strncmp (word, "InnerVYS", 8) ==0)
+		choice = 'I';  /*Its a set of inner shell photoionization cross sections */
 	      else if (strncmp (word, "DR_BADNL", 8) == 0)	/* It's a badnell type dielectronic recombination file */
 		choice = 'D';
 	      else if (strncmp (word, "DR_SHULL", 8) == 0)	/*its a schull type dielectronic recombination */
@@ -583,6 +631,10 @@ structure does not have this property! */
 		choice = 'G';
 	      else if (strncmp (word, "FF_GAUNT", 8) == 0)	/*Its a data file giving the temperature averaged gaunt factors from Sutherland (1997) */
 		choice = 'g';
+	      else if (strncmp (word, "Kelecyield", 10) == 0)	/*Electron yield from inner shell ionization fro Kaastra and Mewe*/
+		choice = 'K';
+		  else if (strncmp (word, "Kphotyield", 10) == 0)   /*Floruescent photon yield from IS ionization from Kaastra and Mewe*/
+			  choice = 'F'; 
 	      else if (strncmp (word, "*", 1) == 0);	/* It's a continuation so record type remains same */
 
 	      else
@@ -1517,7 +1569,7 @@ for the ionstate.
         if (ion[nion].phot_info == -1)
             {
               /* Then there is a match */
-              phot_top[nphot_total].nlev = ion[nion].firstlevel; // gorund state
+              phot_top[nphot_total].nlev = ion[nion].firstlevel; // ground state
               phot_top[nphot_total].nion = nion;
               phot_top[nphot_total].z = z;
               phot_top[nphot_total].istate = istate;
@@ -1533,14 +1585,33 @@ for the ionstate.
                  phot_top[nphot_total].freq[n] = xe[n] * EV2ERGS / H;  // convert from eV to freqency
                  phot_top[nphot_total].x[n] = xx[n]; // leave cross sections in  CGS
                }
+		      if (phot_freq_min > phot_top[ntop_phot].freq[0])
+			       phot_freq_min = phot_top[ntop_phot].freq[0];
               nxphot++;
               nphot_total++;
             }
 
-        else if (ion[nion].phot_info == 1)
-            {
-          Debug
-            ("Get_atomic_data: file %s  Ignoring VFKY photoinization for ion %d with topbase photoionization\n",
+        else if (ion[nion].phot_info == 1) /*We already have a topbase cross section, but the VFKY 
+			data is superior for the ground state, so we replace that data with the current data*/
+		           {
+				phot_top[ion[nion].ntop_ground].nlev = ion[nion].firstlevel; // ground state
+				phot_top[ion[nion].ntop_ground].nion = nion;
+				phot_top[ion[nion].ntop_ground].z = z;
+				phot_top[ion[nion].ntop_ground].istate = istate;
+				phot_top[ion[nion].ntop_ground].np = np;
+				phot_top[ion[nion].ntop_ground].nlast = -1;
+				phot_top[ion[nion].ntop_ground].macro_info = 0;
+				ion[nion].phot_info = 2;  //We mark this as having hybrid data - VFKY ground, TB excited, potentially VFKY innershell
+				for (n = 0; n < np; n++)
+				{
+					phot_top[ion[nion].ntop_ground].freq[n] = xe[n] * EV2ERGS / H;  // convert from eV to freqency
+					phot_top[ion[nion].ntop_ground].x[n] = xx[n]; // leave cross sections in  CGS
+				}
+  		      if (phot_freq_min > phot_top[ion[nion].ntop_ground].freq[0])
+  			       phot_freq_min = phot_top[ion[nion].ntop_ground].freq[0];
+//				
+			  Debug
+            ("Get_atomic_data: file %s  Replacing ground state topbase photoionization for ion %d with VFKY photoionization\n",
              file, nion);
             }
         }
@@ -1572,7 +1643,62 @@ for the ionstate.
 			  Error ("Get_atomic_data: %s\n", aline);
 			  exit (0);
 			}
-		    
+			
+			/* Input inner shell cross section data */
+			
+			
+			
+case 'I':	
+	if (sscanf (aline, "%*s %d %d %d %d %le %d\n", &z,&istate, &in, &il, &exx, &np) !=6)
+	{
+		Error ("Inner shell ionization data incorrectly formatted\n");
+		Error ("Get_atomic_data: %s\n", aline);
+		exit (0);
+	}
+	for (n = 0; n < np; n++)
+	{ 
+		//Read the topbase photoionization records
+		if (fgets (aline, LINELENGTH, fptr) == NULL)
+		{
+			Error("Get_atomic_data: Problem reading VY inner shell record\n");
+			Error ("Get_atomic_data: %s\n", aline);
+        	exit (0);
+     	}
+     	sscanf (aline, "%*s %le %le", &xe[n], &xx[n]);
+		lineno++;
+	}
+	for (nion = 0; nion < nions; nion++)
+	{
+				if (ion[nion].z == z && ion[nion].istate == istate)
+		{ 
+			/* Then there is a match */
+      		inner_cross[n_inner_tot].nion = nion;
+			inner_cross[n_inner_tot].np = np;
+			inner_cross[n_inner_tot].z = z;
+			inner_cross[n_inner_tot].istate = istate;
+			inner_cross[n_inner_tot].n = in;
+			inner_cross[n_inner_tot].l = il;
+	        inner_cross[n_inner_tot].nlast = -1;
+			ion[nion].n_inner++;   /*Increment the number of inner shells*/
+    		ion[nion].nxinner[ion[nion].n_inner] = n_inner_tot;
+			for (n = 0; n < np; n++)
+     		{
+        		inner_cross[n_inner_tot].freq[n] = xe[n] * EV2ERGS / H;  // convert from eV to freqency
+				inner_cross[n_inner_tot].x[n] = xx[n]; // leave cross sections in  CGS
+			}
+		      if (inner_freq_min > inner_cross[n_inner_tot].freq[0])
+			       inner_freq_min = inner_cross[n_inner_tot].freq[0];
+  		    n_inner_tot++;
+			  
+ 	   }
+   }
+	if (n_inner_tot > N_INNER*NIONS)
+	{
+		Error("getatomic_data: file %s line %d: Inner edges than we have room for.\n",file, lineno);	
+		exit (0);
+	}
+	break;
+	
 
 		  /*Input data for innershell ionization followed by
 		     Auger effect */
@@ -2419,7 +2545,75 @@ ion[n].dere_di_flag=1;
 			}
 		    }
 		  break;
+		  
+		case 'K':
+		nparam=sscanf (aline, "%*s %d %d %d %d %le %le %le %le %le %le %le %le %le %le %le %le", &z, &istate, &in, &il,&I, &Ea,
+		 &temp[0], &temp[1], &temp[2], &temp[3], &temp[4], &temp[5], &temp[6], &temp[7], &temp[8], &temp[9]);
+		if (nparam != 16)
+		{
+			Error ("Something wrong with electron yield data\n");
+			Error ("Get_atomic_data %s\n",aline);
+			exit(0);
+		}
+		for (n=0; n<n_inner_tot; n++)
+		{
+			if (inner_cross[n].z==z && inner_cross[n].istate==istate && inner_cross[n].n==in && inner_cross[n].l==il)
+			{
+				if (inner_cross[n].n_elec_yield==-1) /*This is the first yield data for this vacancy */
+				{
+					inner_elec_yield[n_elec_yield_tot].nion=n; /*This yield refers to this ion*/
+					inner_cross[n].n_elec_yield=n_elec_yield_tot;
+					inner_elec_yield[n_elec_yield_tot].z=z;
+					inner_elec_yield[n_elec_yield_tot].istate=istate;
+					inner_elec_yield[n_elec_yield_tot].n=in;
+					inner_elec_yield[n_elec_yield_tot].l=il;
+					inner_elec_yield[n_elec_yield_tot].I=I* EV2ERGS;
+					inner_elec_yield[n_elec_yield_tot].Ea=Ea* EV2ERGS;
+					for (n1=0;n1<10;n1++)
+					{
+						inner_elec_yield[n_elec_yield_tot].prob[n1]=temp[n1]/10000.0;
+					}
+					n_elec_yield_tot++;
+				}
+				else
+				{
+					Error("Get_atomic_data: more than one electron yield record for inner_cross %i\n",n);
+				}
+			}
+		}
+		break;  
 
+		case 'F':
+		nparam=sscanf (aline, "%*s %d %d %d %d %le %le ", &z, &istate, &in, &il,&energy, &yield);
+		if (nparam != 6)
+		{
+			Error ("Something wrong with fluorescent yield data\n");
+			Error ("Get_atomic_data %s\n",aline);
+			exit(0);
+		}
+		for (n=0; n<n_inner_tot; n++)
+		{
+			if (inner_cross[n].z==z && inner_cross[n].istate==istate && inner_cross[n].n==in && inner_cross[n].l==il)
+			{
+				if (inner_cross[n].n_fluor_yield==-1) /*This is the first yield data for this vacancy */
+				{
+					inner_fluor_yield[n_fluor_yield_tot].nion=n; /*This yield refers to this ion*/
+					inner_cross[n].n_elec_yield=n_fluor_yield_tot;
+					inner_fluor_yield[n_fluor_yield_tot].z=z;
+					inner_fluor_yield[n_fluor_yield_tot].istate=istate;
+					inner_fluor_yield[n_fluor_yield_tot].n=in;
+					inner_fluor_yield[n_fluor_yield_tot].l=il;
+					inner_fluor_yield[n_fluor_yield_tot].freq=energy/HEV;
+					inner_fluor_yield[n_fluor_yield_tot].yield=yield;
+					n_fluor_yield_tot++;
+				}
+				else
+				{
+					Error("Get_atomic_data: more than one electron yield record for inner_cross %i\n",n);
+				}
+			}
+		}
+		break;  
 
 		case 'c':	/* It was a comment line so do nothing */
 		  break;
@@ -2444,12 +2638,21 @@ ion[n].dere_di_flag=1;
  */
 
   fclose (mptr);
-
 /* OK now summarize the data that has been read*/
 
+  n_elec_yield_tot=0;  //Reset this numnber, we are now going to use it to check we have yields for all inner shells
+  n_fluor_yield_tot=0;  //Reset this numnber, we are now going to use it to check we have yields for all inner shells
 
-
-
+  for (n=0;n<n_inner_tot;n++)
+  {
+	  if (inner_cross[n].n_elec_yield != -1)
+		  n_elec_yield_tot++;
+	   else
+		   Error("get_atomicdata: No inner electron yield data for inner cross section %i\n",n);
+ 	  if (inner_cross[n].n_fluor_yield != -1)
+ 		  n_fluor_yield_tot++;
+	   
+}
 
   Log
     ("Data of %3d elements, %3d ions, %5d levels, %5d lines, and %5d topbase records\n",
@@ -2461,6 +2664,10 @@ ion[n].dere_di_flag=1;
     ("Simple  %3d elements, %3d ions, %5d levels, %5d lines, and %5d topbase records\n",
      nelements, nions_simple, nlevels_simple, nlines_simple,
      ntop_phot_simple);
+     Log ("We have read in %3d Inner shell photoionization cross sections\n", n_inner_tot);	//110818 nsh added a reporting line about dielectronic recombination coefficients
+	 Log ("                %3d have matching electron yield data\n",n_elec_yield_tot);
+	 Log ("                %3d have matching fluorescent yield data\n",n_fluor_yield_tot);
+	 
   Log ("We have read in %3d Dielectronic recombination coefficients\n", ndrecomb);	//110818 nsh added a reporting line about dielectronic recombination coefficients
   Log ("We have read in %3d Cardona partition functions coefficients\n",
        ncpart);
@@ -2472,6 +2679,7 @@ ion[n].dere_di_flag=1;
   Log ("We have read in %3d Scaled electron temperature frequency averaged gaunt factors\n",
        gaunt_n_gsqrd);
   Log ("The minimum frequency for photoionization is %8.2e\n", phot_freq_min);
+  Log ("The minimum frequency for inner shell ionization is %8.2e\n", inner_freq_min);
 
 
 /* Now begin a series of calculations with the data that has been read in in order
@@ -2745,8 +2953,12 @@ or zero so that simple checks of true and false can be used for them */
 // 	}
 
 /* Index the topbase photoionization structure by threshold freqeuncy */
-  if (ntop_phot > 0)
+  if (ntop_phot+nxphot > 0)
     index_phot_top ();
+/* Index the topbase photoionization structure by threshold freqeuncy */
+  if (n_inner_tot > 0)
+    index_inner_cross ();
+
 
   check_xsections();  // debug routine, only prints if verbosity > 4
 
@@ -2868,6 +3080,46 @@ index_phot_top ()
   return (0);
 
 }
+
+int
+index_inner_cross ()
+{
+  float *freqs, foo;
+  int *index, ioo;
+  int n;
+  void indexx ();
+
+  /* Allocate memory for some modestly large arrays */
+  freqs = calloc (sizeof (foo), n_inner_tot + 2);
+  index = calloc (sizeof (ioo), n_inner_tot + 2);
+
+  freqs[0] = 0;
+  for (n = 0; n < n_inner_tot; n++)
+    freqs[n + 1] = inner_cross[n].freq[0];	/* So filled matrix 
+					   elements run from 1 to ntop_phot */
+
+  indexx (n_inner_tot, freqs, index);	/* Note that this math recipes routine 
+					   expects arrays to run from 1 to nlines inclusive */
+
+  /* The for loop indices are complicated by the numerical recipes routine, 
+     which is a simple translation of a fortran routine.
+     Specifically, index array elements 1 to nlines are now filled, 
+     and the numbers run from 1 to nlines, but the 
+     pointer array is only filled from elements 0 to nlines -1 */
+
+  for (n = 0; n < n_inner_tot; n++)
+    {
+      inner_cross_ptr[n] = &inner_cross[index[n + 1] - 1];
+    }
+
+  /* Free the memory for the arrays */
+  free (freqs);
+  free (index);
+
+  return (0);
+
+}
+
 
 
 /* index_xcol sorts the collisional lines into frequency order
@@ -3087,13 +3339,13 @@ int check_xsections()
     nion = phot_top[n].nion;
     if (ion[nion].phot_info == 1)
       Debug("Topbase Ion %i Z %i istate %i nground %i ilv %i ntop %i f0 %8.4e IP %8.4e\n",
-           nion, ion[nion].z, ion[nion].istate, ion[nion].ntop_ground, phot_top[n].nlev, ion[nion].ntop, phot_top[n].freq[0], ion[nion].ip / EV2ERGS / HEV);
+           nion, ion[nion].z, ion[nion].istate, ion[nion].ntop_ground, phot_top[n].nlev, ion[nion].ntop, phot_top[n].freq[0], ion[nion].ip);
     else if (ion[nion].phot_info == 0)
       Debug("Vfky Ion %i Z %i istate %i nground %i f0 %8.4e IP %8.4e\n",
-           nion, ion[nion].z, ion[nion].istate, ion[nion].nxphot, phot_top[n].freq[0], ion[nion].ip / EV2ERGS / HEV);
+           nion, ion[nion].z, ion[nion].istate, ion[nion].nxphot, phot_top[n].freq[0], ion[nion].ip);
 
     /* some simple checks -- could be made more robust */
-    if (ion[nion].n_lte_max > 0 && ion[nion].phot_info != 1)
+    if (ion[nion].n_lte_max == 0 && ion[nion].phot_info == 1)
     {
       Error("get_atomicdata: not tracking levels for ion %i z %i istate %i, yet marked as topbase xsection!\n",
              nion, ion[nion].z, ion[nion].istate);
