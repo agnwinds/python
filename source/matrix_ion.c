@@ -103,6 +103,9 @@ matrix_ion_populations (xplasma, mode)
   compute_dr_coeffs (t_e);
   compute_di_coeffs (t_e);
 
+  /* JM 1508 -- also compute direct recombination coefficients */
+  compute_qrecomb_coeffs(t_e);
+
   /* In the following loop, over all ions in the simulation, we compute the radiative recombination rates, and photionization
      rates OUT OF each ionization stage. The PI rates are calculated either using the modelled mean intensity in a cell, or
      using the dilute blackbody approximation, depending on which mode we are in. At the same time, we copy the ion densities

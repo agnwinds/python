@@ -612,6 +612,7 @@ typedef struct plasma
 						   and heat_photo. SS June 04. */
   double heat_photo, heat_z;	/*photoionization heating total and of metals */
   double heat_auger;       /* photoionization heating due to inner shell ionizations */  
+  double heat_qrecomb; /*1508 JM The three body recombination heating */
   double w;			/*The dilution factor of the wind */
   int ntot;			/*Total number of photon passages */
 
