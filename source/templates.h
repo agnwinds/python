@@ -11,6 +11,7 @@ double check_fmax(double fmin, double fmax, double temp);
 int get_atomic_data(char masterfile[]);
 int index_lines(void);
 int index_phot_top(void);
+int index_inner_cross(void);
 int index_collisions(void);
 void indexx(int n, float arrin[], int indx[]);
 int limit_lines(double freqmin, double freqmax);
@@ -450,13 +451,13 @@ int matom_emiss_report(void);
 int compute_di_coeffs(double T);
 double total_di(WindPtr one, double t_e);
 /* pi_rates.c */
-double calc_pi_rate(int nion, PlasmaPtr xplasma, int mode);
+double calc_pi_rate(int nion, PlasmaPtr xplasma, int mode, int type);
 double tb_planck1(double freq);
 double tb_logpow1(double freq);
 double tb_exp1(double freq);
 /* matrix_ion.c */
 int matrix_ion_populations(PlasmaPtr xplasma, int mode);
-int populate_ion_rate_matrix(PlasmaPtr xplasma, double rate_matrix[nions][nions], double pi_rates[nions], double rr_rates[nions], double b_temp[nions], double xne, int xelem[nions]);
+int populate_ion_rate_matrix(PlasmaPtr xplasma, double rate_matrix[nions][nions], double pi_rates[nions], double inner_rates[n_inner_tot], double rr_rates[nions], double b_temp[nions], double xne, int xelem[nions]);
 int solve_matrix(double *a_data, double *b_data, int nrows, double *x);
 /* para_update.c */
 int communicate_estimators_para(void);

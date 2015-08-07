@@ -110,12 +110,12 @@ bf_estimators_increment (one, p, ds)
       n = xplasma->kbf_use[nn];
       ft = phot_top[n].freq[0];	//This is the edge frequency (SS)
 
-      if (ion[phot_top[n].nion].phot_info == 1)   //topbase 
+      if (ion[phot_top[n].nion].phot_info > 0)   //topbase or hybrid
       {
         llvl = phot_top[n].nlev;	//Returning lower level = correct (SS)
         density = den_config (xplasma, llvl);
       }
-      else if (ion[phot_top[n].nion].phot_info == 0)   //cfky
+      else if (ion[phot_top[n].nion].phot_info == 0)   //vfky
       {
         density = xplasma->density[phot_top[n].nion];
         llvl = 0;   // shouldn't ever be used 
@@ -721,6 +721,13 @@ total_fb_matoms (xplasma, t_e, f1, f2)
 	         process. */
 	      cont_ptr = &phot_top[config[i].bfu_jump[j]];
 	      density = den_config (xplasma, cont_ptr->uplev);
+
+        /* the cooling contribution for each transition is given by 
+           density * ne * [(alpha_sp_e - alpha_sp) + (alpha_st_e - alpha_st)]
+           we call alpha_sp() with modes 1 and 0 to get the different
+           versions of the sp. recombination rate coefficient.
+           This is essentially equation (33) of Lucy (2003) */
+           
 	      cool_contribution =
 		(mplasma->alpha_st_e_old[config[i].bfu_indx_first + j] +
 		 alpha_sp (cont_ptr, xplasma, 1)

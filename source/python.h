@@ -607,6 +607,7 @@ typedef struct plasma
   double heat_lines_macro, heat_photo_macro;	/* bb and bf heating due to macro atoms. Subset of heat_lines 
 						   and heat_photo. SS June 04. */
   double heat_photo, heat_z;	/*photoionization heating total and of metals */
+  double heat_auger;       /* photoionization heating due to inner shell ionizations */  
   double w;			/*The dilution factor of the wind */
   int ntot;			/*Total number of photon passages */
 
@@ -691,9 +692,11 @@ NSH 130725 - this number is now also used to say if the cell is over temperature
   /* 1108 Increase sim estimators to cover all of the bands */
   /* 1208 Add parameters for an exponential representation, and a switch to say which we prefer. */
   enum spec_mod_type_enum 
-  	{  	SPEC_MOD_PL=1, 
-  		SPEC_MOD_EXP=2
-	} 	spec_mod_type[NXBANDS];	/* NSH 120817 A switch to say which type of representation we are using for this band in this cell. Negative means we have no useful representation, 0 means power law, 1 means exponential */
+  	{  	
+      SPEC_MOD_PL=1, 
+  		SPEC_MOD_EXP=2,
+      SPEC_MOD_FAIL=-1
+	  } spec_mod_type[NXBANDS];	/* NSH 120817 A switch to say which type of representation we are using for this band in this cell. Negative means we have no useful representation, 0 means power law, 1 means exponential */
 
   double pl_alpha[NXBANDS];	/*Computed spectral index for a power law spectrum representing this cell NSH 120817 - changed name from sim_alpha to PL_alpha */
 //  double pl_w[NXBANDS];		/*This is the computed weight of a PL spectrum in this cell - not the same as the dilution factor NSH 120817 - changed name from sim_w to pl_w */
@@ -903,9 +906,16 @@ typedef struct photon
   		PTYPE_BL=1, 
   		PTYPE_DISK=2,
   		PTYPE_WIND=3,
-  		PTYPE_AGN=4
+  		PTYPE_AGN=4,
+      PTYPE_STAR_MATOM=10,     
+      PTYPE_BL_MATOM=11, 
+      PTYPE_DISK_MATOM=12,
+      PTYPE_WIND_MATOM=13,
+      PTYPE_AGN_MATOM=14
   	} 	origin;				/* Where this photon originated.  If the photon has
-		   					scattered it's "origin" may be changed to "wind".*/
+		   					         scattered it's "origin" may be changed to "wind".*/
+                      /* note that we add 10 to origin when processed by a macro-atom
+                         which means we need these values in the enum list */
   int np;			/*NSH 13/4/11 - an internal pointer to the photon number so 
 				   so we can write out details of where the photon goes */
   double path; /* SWM - Photon path length */
@@ -1155,6 +1165,7 @@ struct advanced_modes
   int print_dvds_info;          // print out information on the velocity gradients
   int keep_photoabs;            // keep photoabsorption in final spectrum
   int quit_after_inputs;        // quit after inputs read in, testing mode
+  int fixed_temp;               // do not alter temperature from that set in the parameter file
 }
 modes;
 

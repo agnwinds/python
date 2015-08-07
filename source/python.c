@@ -10,7 +10,7 @@
  
 Arguments:		
 
-	Usage:  py [-h] [-r] [-d] [-t time_max] xxx  or simply py
+	Usage:  py [-h] [-r] [-d] [-f] [-t time_max] xxx  or simply py
 
 	where xxx is the rootname or full name of a parameter file, e. g. test.pf
 
@@ -30,6 +30,7 @@ Arguments:
 		and Error_silent
 	-d	Enters detailed or advanced mode. Allows one to access extra diagnositics and some
 	    other advanced commands
+    -f  Fixed temperature mode - does not attempt to chenge the temperature of cells.
 	-e  Alter the maximum number of errors before the program quits
 	-i  Diagnostic mode which quits after reading in inputs. Used for Travis test suite.
 
@@ -2126,6 +2127,7 @@ int init_advanced_modes()
   modes.print_dvds_info = 0;          // print out information on velocity gradients
   write_atomicdata = 0;               // print out summary of atomic data 
   modes.quit_after_inputs = 0;		  // testing mode which quits after reading in inputs
+  modes.fixed_temp = 0;               // do not attempt to change temperature - used for testing
   //note this is defined in atomic.h, rather than the modes structure 
 
 
