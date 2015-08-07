@@ -101,6 +101,11 @@ int parse_command_line(argc, argv)
       modes.iadvanced = 1;
       i++;
     }
+    else if (strcmp (argv[i], "-f") == 0)
+    {
+      modes.fixed_temp = 1;
+      i++;
+    }
 
     else if (strcmp (argv[i], "-i") == 0)
       {

@@ -373,7 +373,7 @@ of the if statement
       for (i = 0; i < geo.nxfreq; i++)
 	{
 	  xplasma->xj[i] = xplasma->xave_freq[i] = xplasma->xsd_freq[i] = xplasma->nxtot[i] = 0.0;	//zero estimators
-	  //       xplasma->spec_mod_type[i]=-1; //Tell the code we dont have a model at the moment
+	  //       xplasma->spec_mod_type[i]=SPEC_MOD_FAIL; //Tell the code we dont have a model at the moment
 	}
     }
 

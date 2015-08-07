@@ -98,7 +98,7 @@ WindPtr (w);
 {
   int n, i, j;
   double trad, nh;
-  double wtest, xsum, asum, psum, fsum, lsum, csum, icsum;	/*1108 NSH csum added to sum compton heating 1204 NSH icsum added to sum induced compton heating */
+  double wtest, xsum, asum, psum, fsum, lsum, csum, icsum, ausum;	/*1108 NSH csum added to sum compton heating 1204 NSH icsum added to sum induced compton heating */
   double volume;
   char string[LINELEN];
   double t_r_old, t_e_old, dt_r, dt_e;
@@ -123,7 +123,7 @@ WindPtr (w);
 
   /* the commbuffer needs to be larger enough to pack all variables in MPI_Pack and MPI_Unpack routines NSH 1407 - the 
   NIONS changed to nions for the 12 arrays in plasma that are now dynamically allocated */
-  size_of_commbuffer = 8 * (12*nions + NLTE_LEVELS + 2*NTOP_PHOT + 12*NXBANDS + 2*LPDF + NAUGER + 104)*(floor(NPLASMA/np_mpi_global)+1);
+  size_of_commbuffer = 8 * (12*nions + NLTE_LEVELS + 2*NTOP_PHOT + 12*NXBANDS + 2*LPDF + NAUGER + 105)*(floor(NPLASMA/np_mpi_global)+1);
       
   commbuffer = (char *) malloc(size_of_commbuffer*sizeof(char));
 
@@ -380,6 +380,7 @@ WindPtr (w);
 	      MPI_Pack(&plasmamain[n].heat_lines_macro, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].heat_photo_macro, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].heat_photo, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+	      MPI_Pack(&plasmamain[n].heat_auger, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].heat_z, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].w, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
 	      MPI_Pack(&plasmamain[n].ntot, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -509,6 +510,7 @@ WindPtr (w);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].heat_lines_macro, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].heat_photo_macro, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].heat_photo, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].heat_auger, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].heat_z, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].w, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 	      MPI_Unpack(commbuffer, size_of_commbuffer, &position, &plasmamain[n].ntot, 1, MPI_INT, MPI_COMM_WORLD);
@@ -653,7 +655,7 @@ free (commbuffer);
 
   /* Check the balance between the absorbed and the emitted flux */
 
-  xsum = psum = lsum = fsum = csum = icsum = 0;	//1108 NSH zero the new csum counter for compton heating
+  xsum = psum = ausum = lsum = fsum = csum = icsum = 0;	//1108 NSH zero the new csum counter for compton heating
 
   for (nplasma = 0; nplasma < NPLASMA; nplasma++)
     {
@@ -663,6 +665,9 @@ free (commbuffer);
       if (sane_check (plasmamain[nplasma].heat_photo))
 	Error ("wind_update:sane_check w(%d).heat_photo is %e\n", nplasma,
 	       plasmamain[nplasma].heat_photo);
+	  if (sane_check (plasmamain[nplasma].heat_auger))
+	 	Error ("wind_update:sane_check w(%d).heat_auger is %e\n", nplasma,
+	 	       plasmamain[nplasma].heat_auger);
       if (sane_check (plasmamain[nplasma].heat_photo_macro))
 	Error ("wind_update:sane_check w(%d).heat_photo_macro is %e\n",
 	       nplasma, plasmamain[nplasma].heat_photo_macro);
@@ -681,6 +686,7 @@ free (commbuffer);
 	       plasmamain[nplasma].heat_comp);
       xsum += plasmamain[nplasma].heat_tot;
       psum += plasmamain[nplasma].heat_photo;
+      ausum += plasmamain[nplasma].heat_auger;
       fsum += plasmamain[nplasma].heat_ff;
       lsum += plasmamain[nplasma].heat_lines;
       csum += plasmamain[nplasma].heat_comp;	//1108 NSH Increment the compton heating counter
@@ -739,16 +745,16 @@ free (commbuffer);
 
 
 
-  asum = wind_luminosity (0.0, VERY_BIG);
+  asum = wind_luminosity (0.0, VERY_BIG);  /*We call wind_luminosity here to obtain an up to date set of cooling rates*/
 
 
   /* 1108 NSH Added commands to report compton heating */
-  Log ("!!wind_update: Absorbed flux    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e)\n", 
-        xsum, psum, fsum, csum, icsum, lsum);
+  Log ("!!wind_update: Absorbed flux    %8.2e  (photo %8.2e ff %8.2e compton %8.2e auger %8.2e induced_compton %8.2e lines %8.2e)\n", 
+        xsum, psum, fsum, csum, ausum, icsum, lsum);
 	
   /* 1306 Added line to split out absorbed flux from wind heating */
-  Log ("!!wind_update: Wind heating     %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e adiabatic %8.2e)\n", 
-        xsum+geo.heat_adiabatic, psum, fsum, csum, icsum, lsum, geo.heat_adiabatic);
+  Log ("!!wind_update: Wind heating     %8.2e  (photo %8.2e ff %8.2e compton %8.2e auger %8.2e induced_compton %8.2e lines %8.2e adiabatic %8.2e)\n", 
+        xsum+geo.heat_adiabatic, psum, fsum, csum, ausum, icsum, lsum, geo.heat_adiabatic);
 	
   /* 1108 NSH added commands to report compton cooling 1110 removed, 
    * this line now just reports cooling mechanisms that will generate photons */
@@ -823,7 +829,6 @@ free (commbuffer);
 	  pow (100 / HEV, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
       agn_ip /= (w[n].r * w[n].r);
       agn_ip /= plasmamain[0].rho * rho2nh;
-
       /* Report luminosities, IP and other diagnositic quantities */
       Log
 	("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim_2010)= %e Meaured_IP(cloudy)= %e distance= %e volume= %e mean_ds=%e\n",
@@ -832,12 +837,12 @@ free (commbuffer);
 	 w[n].vol, plasmamain[0].mean_ds / plasmamain[0].n_ds);
 
       /* 1108 NSH Added commands to report compton heating */
-      Log ("OUTPUT Absorbed_flux(ergs-1cm-3)    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e )\n", 
-            xsum / w[n].vol, psum / w[n].vol, fsum / w[n].vol, csum / w[n].vol, icsum / w[n].vol, lsum / w[n].vol);	
+      Log ("OUTPUT Absorbed_flux(ergs-1cm-3)    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e auger %8.2e )\n", 
+            xsum / w[n].vol, psum / w[n].vol,  fsum / w[n].vol, csum / w[n].vol, icsum / w[n].vol, lsum / w[n].vol, ausum / w[n].vol);	
 
       /* 1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons.*/
       Log ("OUTPUT Wind_cooling(ergs-1cm-3)     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e DI %8.2e adiabatic %8.2e lines %8.2e ) after update\n",
-           (asum + geo.lum_comp + geo.lum_dr + geo.lum_dr +geo.lum_adiabatic) / w[n].vol, geo.lum_fb / w[n].vol, geo.lum_ff / w[n].vol, 
+           (asum + geo.lum_comp + geo.lum_dr + geo.lum_di +geo.lum_adiabatic) / w[n].vol, geo.lum_fb / w[n].vol, geo.lum_ff / w[n].vol, 
            geo.lum_comp / w[n].vol, geo.lum_dr / w[n].vol,  geo.lum_di / w[n].vol,geo.lum_adiabatic / w[n].vol, geo.lum_lines / w[n].vol);	
 
       Log ("OUTPUT Wind_line_cooling(ergs-1cm-3)  HHe %8.2e Metals %8.2e\n",
@@ -945,6 +950,8 @@ wind_rad_init ()
       plasmamain[n].lum_comp = 0.0;	//1108 NSH Zero the compton luminosity for the cell
       plasmamain[n].heat_comp = 0.0;	//1108 NSH Zero the compton heating for the cell
       plasmamain[n].heat_ind_comp = 0.0;	//1108 NSH Zero the induced compton heating for the cell
+      plasmamain[n].heat_auger = 0.0;	//1108 NSH Zero the auger heating for the cell
+	  
       if (nlevels_macro > 1)
 	macromain[n].kpkt_rates_known = -1;
 
@@ -966,6 +973,7 @@ wind_rad_init ()
 	{
 	  plasmamain[n].ioniz[i] = plasmamain[n].recomb[i] =
 	    plasmamain[n].heat_ion[i] = plasmamain[n].lum_ion[i] = 0.0;
+	  
 	}
 
       /*Block added (Dec 08) to zero the auger rate estimators */

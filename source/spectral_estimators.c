@@ -167,7 +167,7 @@ spectral_estimators (xplasma)
 	  xplasma->pl_alpha[n] = 999.9;	    //Give alpha a value that will show up as an error
 	  xplasma->exp_w[n] = 0.0;	        //Make sure that w is zero, s no chance of mucking up ionization balance
 	  xplasma->exp_temp[n] = 1e99;	    //Give temp a value that will show up as an error
-	  xplasma->spec_mod_type[n] = -1;	//This tells the code that we have failed to model the spectrum in this band/cell/
+	  xplasma->spec_mod_type[n] = SPEC_MOD_FAIL;	//This tells the code that we have failed to model the spectrum in this band/cell/
 	}
 
 
@@ -183,7 +183,7 @@ spectral_estimators (xplasma)
 	  xplasma->pl_alpha[n] = 999.9;	    //Give alpha a value that will show up as an error
 	  xplasma->exp_w[n] = 0.0;	        //Make sure that w is zero, s no chance of mucking up ionization balance
 	  xplasma->exp_temp[n] = 1e99;	    //Give temp a value that will show up as an error
-	  xplasma->spec_mod_type[n] = -1;	//This tells the code that we have failed to model the spectrum in this band/cell/
+	  xplasma->spec_mod_type[n] = SPEC_MOD_FAIL;	//This tells the code that we have failed to model the spectrum in this band/cell/
 	}
 
 
@@ -431,7 +431,7 @@ spectral_estimators (xplasma)
 
 	  else
 	    {
-	      xplasma->spec_mod_type[n] = -1;	//Oh dear, there is no suitable model - this should be an error
+	      xplasma->spec_mod_type[n] = SPEC_MOD_FAIL;	//Oh dear, there is no suitable model - this should be an error
 
 	      Error("No suitable model in band %i cell %i (nphot=%i fmin=%e fmax=%e)\n",
 		         n, xplasma->nplasma, xplasma->nxtot[n], xplasma->fmin[n],

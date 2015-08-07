@@ -692,7 +692,7 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
 
   for (nion = nion_min; nion < nion_max; nion++)
     {
-      if (ion[nion].phot_info == 1) // topbase
+      if (ion[nion].phot_info > 0) // topbase or VFKY+topbase
         {
           nmin = ion[nion].ntop_first;
           nmax = nmin + ion[nion].ntop;
@@ -1010,7 +1010,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
   if (-1 < nion && nion < nions)	//Get emissivity for this specific ion_number
     {
-      if (ion[nion].phot_info == 1) // topbase
+      if (ion[nion].phot_info > 0) // topbase or hybrid
         {
           nmin = ion[nion].ntop_first;
           nmax = nmin + ion[nion].ntop;
@@ -1501,7 +1501,7 @@ gs_rrate (nion, T)
     fbt = T;
     fbfr = 2;
 
-    if (ion[nion-1].phot_info == 1)	//topbase
+    if (ion[nion-1].phot_info > 0)	//topbase or hybrid
       {
         ntmin = ion[nion-1].ntop_ground;
         fb_xtop = &phot_top[ntmin];
