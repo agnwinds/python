@@ -527,7 +527,7 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
     {
       if (ion[mm].istate != 1)	// we have space for electrons
 	{
-	  rate_matrix[mm][mm] -= (xne * rr_rates[mm]);
+	  rate_matrix[mm][mm] -= xne * (rr_rates[mm] + xne * qrecomb_coeffs[mm]);
 	}
     }
 
@@ -540,7 +540,7 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
 	{
 	  if (mm == nn - 1 && ion[nn].istate != 1 && ion[mm].z == ion[nn].z)
 	    {
-	      rate_matrix[mm][nn] += (xne * rr_rates[nn]);
+	      rate_matrix[mm][nn] += xne * (rr_rates[nn] + xne * qrecomb_coeffs[nn]);
 	    }
 	}
     }

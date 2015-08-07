@@ -89,8 +89,6 @@ compute_qrecomb_coeffs(T)
   int n, nvmin, ntmin;
   struct topbase_phot *xtop;
 
-
-
   for (n = 0; n < nions; n++)
     {
       if (ion[n].dere_di_flag == 0)
@@ -170,13 +168,14 @@ total_di (one, t_e)
 
   for (n = 0; n < nions; n++)
     {
-      if (ion[n].dere_di_flag == 0)	//We have no DR for this ion.
+      //We have no DR for this ion, or it's a macro-atom
+      if (ion[n].dere_di_flag == 0 || )	
 	{
 	  x += 0.0;		//Add nothing to the sum of coefficients
 	}
       else
 	{
-
+    
 	  x += xplasma->vol * xplasma->ne * xplasma->density[n] * di_coeffs[n] *
 	    dere_di_rate[ion[n].nxderedi].xi * EV2ERGS;
 
@@ -240,7 +239,7 @@ total_qrecomb (one, t_e)
       else
   {
 
-    x += xplasma->vol * xplasma->ne * xplasma->density[n] * qrecomb_coeffs[n] *
+    x += xplasma->vol * xplasma->ne * xplasma->ne * xplasma->density[n] * qrecomb_coeffs[n] *
       dere_di_rate[ion[n].nxderedi].xi * EV2ERGS;
 
     //printf ("n=%i V=%e ne=%e rho=%e coeff=%e xi=%e cooling=%e\n",n, V , 
