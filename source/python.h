@@ -909,9 +909,16 @@ typedef struct photon
   		PTYPE_BL=1, 
   		PTYPE_DISK=2,
   		PTYPE_WIND=3,
-  		PTYPE_AGN=4
+  		PTYPE_AGN=4,
+      PTYPE_STAR_MATOM=10,     
+      PTYPE_BL_MATOM=11, 
+      PTYPE_DISK_MATOM=12,
+      PTYPE_WIND_MATOM=13,
+      PTYPE_AGN_MATOM=14
   	} 	origin;				/* Where this photon originated.  If the photon has
-		   					scattered it's "origin" may be changed to "wind".*/
+		   					         scattered it's "origin" may be changed to "wind".*/
+                      /* note that we add 10 to origin when processed by a macro-atom
+                         which means we need these values in the enum list */
   int np;			/*NSH 13/4/11 - an internal pointer to the photon number so 
 				   so we can write out details of where the photon goes */
   double path; /* SWM - Photon path length */
