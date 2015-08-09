@@ -714,6 +714,7 @@ NSH 130725 - this number is now also used to say if the cell is over temperature
   double ip;			/*NSH 111004 Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
   //int kpkt_rates_known;
   //COOLSTR kpkt_rates;
+  double compton_cooling;
 } plasma_dummy, *PlasmaPtr;
 
 PlasmaPtr plasmamain;

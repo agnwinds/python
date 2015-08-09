@@ -419,6 +419,7 @@ int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, d
 int get_shell_wind_params(void);
 /* compton.c */
 double kappa_comp(PlasmaPtr xplasma, double freq);
+double comp_cool(PlasmaPtr xplasma, double freq);
 double kappa_ind_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
 double klein_nishina(double nu);

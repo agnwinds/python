@@ -139,6 +139,7 @@ radiation (p, ds)
   double freq_min, freq_max;
   double frac_path, freq_xs;
   struct photon phot;
+  double weight_frac,freq_frac,kappa_comp_cool;
   
   one = &wmain[p->grid];	/* So one is the grid cell of interest */
   xplasma = &plasmamain[one->nplasma];
@@ -178,11 +179,13 @@ radiation (p, ds)
      note that we also call these with the average frequency along ds */
 
   kappa_tot = frac_ff = kappa_ff (xplasma, freq);	/* Add ff opacity */
-  kappa_tot += frac_comp = kappa_comp (xplasma, freq);	/* 70 NSH 1108 calculate compton opacity, store it in kappa_comp and also add it to kappa_tot, the total opacity for the photon path */
-  kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq);
+  frac_comp = kappa_comp (xplasma, freq);	/* 70 NSH 1108 calculate compton opacity, store it in kappa_comp and also add it to kappa_tot, the total opacity for the photon path */
+  frac_ind_comp = kappa_ind_comp (xplasma, freq);
+  kappa_comp_cool =  comp_cool (xplasma,freq);
+  
   frac_tot = frac_z = 0;	/* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
 				   indicate this is all diagnostic and might be removed */  
-	  frac_auger=0;
+  frac_auger=0;
 
 
   /* JM 1405 -- Check which of the frequencies is larger.
@@ -373,17 +376,38 @@ if (freq > phot_freq_min)
   if (tau > 0.0001)
     {				/* Need differentiate between thick and thin cases */
       x = exp (-tau);
-      p->w = w_out = w_in * x;
-      energy_abs = w_in - w_out;
-      w_ave = (w_in - w_out) / tau;
+//	  p->w = w_out = w_in * x;
+//  w_out = w_in * x;
+      energy_abs = w_in - (w_in*x);
+//      w_ave = (w_in - w_out) / tau;
     }
   else
     {
       tau2 = tau * tau;
-      p->w = w_out = w_in * (1. - tau + 0.5 * tau2);	/*Calculate to second order */
+//      p->w = w_out = w_in * (1. - tau + 0.5 * tau2);	/*Calculate to second order */
       energy_abs = w_in * (tau - 0.5 * tau2);
-      w_ave = w_in * (1. - 0.5 * tau + 0.1666667 * tau2);
-    }
+//      w_ave = w_in * (1. - 0.5 * tau + 0.1666667 * tau2);
+  }
+	//We now have the energy absorbed, but we split this between a reduction in weight, and a change in frequency
+
+    
+	  freq_frac=frac_comp+frac_ind_comp-kappa_comp_cool;
+	  weight_frac=kappa_tot-freq_frac;
+	
+    z = (energy_abs) / kappa_tot;
+	
+	  p->w = w_out =  w_in - (z * weight_frac);
+	  
+	  w_ave = (w_in - w_out) / tau;
+	  
+	  
+	  
+		  p->freq=p->freq-(z*freq_frac)/H;
+	
+		  xplasma->compton_cooling=z*kappa_comp_cool/xplasma->t_e;
+	
+	
+	
 
   /*74a_ksl: 121215 -- Added to check on a problem photon */
   if (sane_check (p->w))

@@ -73,6 +73,32 @@ kappa_comp (xplasma, freq)
   return (x);
 }
 
+double
+	comp_cool (xplasma,freq)
+        PlasmaPtr xplasma;		// Pointer to current plasma cell
+        double freq;		// Frequency of the current photon being tracked
+   {
+     double x;			// The opacity of the cell by the time we return it.
+     double sigma;			/*The cross section, thompson, or KN if hnu/mec2 > 0.01 */
+
+   /*	alpha=1/(1+freq*HRYD*(1.1792e-4+(7.084e-10*freq*HRYD))); NSH 130214 This is the approximate way of doing it.*/
+
+    //	sigma=THOMPSON/(1+freq*HRYD*(1.1792e-4+(7.084e-10*freq*HRYD)));
+
+
+     sigma = klein_nishina (freq);	//NSH 130214 - full KN formula
+
+     x = (sigma * BOLTZMANN * xplasma->t_e) / (MELEC * C * C);	//Calculate the constant
+     x *= xplasma->ne;	//Multiply by cell electron density and frequency of the packet.
+
+	 
+
+     x *= geo.fill;    // multiply by the filling factor- should cancel with density enhancement
+	 
+	 
+     return (x);
+   }
+
 /**************************************************************************
                     Space Telescope Science Institute
 
