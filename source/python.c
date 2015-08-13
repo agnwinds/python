@@ -396,13 +396,21 @@ main (argc, argv)
 	 &zdom[ndomain].wind_type);
 
       geo.run_type=0;
-      if (zdom[ndomain].wind_type==PREVIOUS){
+      if (zdom[ndomain].wind_type == PREVIOUS)
+        {
 	      geo.run_type=PREVIOUS;
-      }
-      else if (zdom[ndomain].wind_type!=10) {
+        }
+      else if (zdom[ndomain].wind_type != 10) 
+        {
 	      strcat(zdom[ndomain].name,"Wind");
+	      geo.wind_domain_number = ndomain;
 	      ndomain++;
-      }
+        }
+      else
+        {
+      	  /* there's no wind, set wind domain_number to -1 */
+      	  geo.wind_domain_number = -1;
+        }
 
       if (geo.run_type == PREVIOUS)
 	{
@@ -514,8 +522,8 @@ main (argc, argv)
 
   /* Define the coordinate system for the grid and allocate memory for the wind structure
      by reading from user */
-  
-  get_grid_params();
+  if (geo.wind_domain_number != -1)
+    get_grid_params(ndomain);
 
 
   /* 080808 - 62 - Ionization section has been cleaned up -- ksl */
@@ -611,15 +619,21 @@ main (argc, argv)
 	 &geo.disk_type);
 
   /* ksl 1508 Add parameters for a disk atmosphere */
-  geo.disk_atmosphere=0;
-  zdom[ndomain].ndim=30;
-  zdom[ndomain].mdim=10;
+  geo.disk_atmosphere = 0;
+  geo.atmos_domain_number = -1; // default is no disk atmosphere
+  zdom[ndomain].ndim = 30;
+  zdom[ndomain].mdim = 10;
 
   rdint("disk.atmosphere(0=no,1=yes)",&geo.disk_atmosphere);
-  if (geo.disk_atmosphere!=0) {
-	  strcat(zdom[ndomain].name,"Disk Atmosphere");
+  if (geo.disk_atmosphere != 0) 
+    {
+      /* specify the domain name and number */	
+      strcat(zdom[ndomain].name,"Disk Atmosphere");
+	  geo.atmos_domain_number = ndomain;	
+
 	  input_int=1;
 	  rdint  ("atmos.coord.system(1=cylindrical,2=spherical_polar,3=cyl_var)", &input_int);
+	
 	switch(input_int)
 	{
 		case 0: zdom[ndomain].coord_type = SPHERICAL; break;
@@ -627,8 +641,8 @@ main (argc, argv)
 		case 2: zdom[ndomain].coord_type = RTHETA; break;
 		case 3: zdom[ndomain].coord_type = CYLVAR; break;
 		default: Error("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
-0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
-}
+                        0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
+    }
 
 
 	  rdint ("atmos.dim.in.x_or_r.direction", &zdom[ndomain].ndim);
@@ -1724,9 +1738,10 @@ History:
 int
 init_geo ()
 {
-	geo.ndomain=ndomain=0;   /*ndomain is a convenince variable so we do not always
-				   need to write geo.ndomain but it should nearly always
-				   be set to the same value as geo.ndomain */
+  geo.ndomain = ndomain = 0;   /* ndomain is a convenince variable so we do not always
+				              need to write geo.ndomain but it should nearly always
+				              be set to the same value as geo.ndomain */
+
   zdom[0].coord_type = 1;
   zdom[0].ndim = 30;
   zdom[0].mdim = 30;

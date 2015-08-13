@@ -96,60 +96,69 @@ define_wind ()
 
   WindPtr w;
 
+  set_nstart_nstop();
+
+  for (ndom = 0; ndom < geo.ndomain; ndom++
+  {
+
+
   /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
      to propagate.  This is the reason we divide by NDIM-2 here, rather than NDIM-1 */
 
-  NDIM = ndim = geo.ndim;
-  MDIM = mdim = geo.mdim;
-  NDIM2 = NDIM * MDIM;
+  NDIM = xdom[ndom].ndim;
+  MDIM = xdom[ndom].mdim;
+  NDIM2 = xdom[ndom].ndim * xdom[ndom].mdim;
+
+  set_nstart_nstop();
   calloc_wind (NDIM2);
+
   w = wmain;
 
   /* initialize inwind to a known state */
 
-  for (n = 0; n < NDIM2; n++)
+  for (n = xdom[ndom].nstart; n < xdom[ndom].nstop; n++)
     {
       w[n].inwind = W_NOT_INWIND;
     }
 
   //printf ("Got to define wind %i\n",geo.coord_type);
 
-  if (geo.wind_type == 9)	//This is the mode where we want the wind and the grid carefully controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
+  if (xdom[ndom].wind_type == 9)	//This is the mode where we want the wind and the grid carefully controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
     {
       Log
 	("We are making a thin shell type grid to match a thin shell wind. This is totally aphysical and should only be used for testing purposes\n");
-      shell_make_grid (w);
+      shell_make_grid (w, ndom);
     }
-  else if (geo.coord_type == SPHERICAL)
+  else if (xdom[ndom].coord_type == SPHERICAL)
     {
-      spherical_make_grid (w);
+      spherical_make_grid (w, ndom);
     }
-  else if (geo.coord_type == CYLIND)
+  else if (xdom[ndom].coord_type == CYLIND)
     {
-      cylind_make_grid (w);
+      cylind_make_grid (w, ndom);
     }
-  else if (geo.coord_type == RTHETA)
+  else if (xdom[ndom].coord_type == RTHETA)
     {
-      if (geo.wind_type == 3) //13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates
+      if (xdom[ndom].wind_type == 3) //13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates
       	{
-	rtheta_make_hydro_grid (w);
+	        rtheta_make_hydro_grid (w, ndom);
       	}
       else
-	{
-        rtheta_make_grid (w);
-	}
+	      {
+          rtheta_make_grid (w, ndom);
+	      }
     }
-  else if (geo.coord_type == CYLVAR)
+  else if (xdom[ndom].coord_type == CYLVAR)
     {
-      cylvar_make_grid (w);
+      cylvar_make_grid (w, ndom);
     }
   else
     {
       Error ("define_wind: Don't know how to make coordinate type %d\n",
-	     geo.coord_type);
+	     xdom[ndom].coord_type);
     }
-  for (n = 0; n < NDIM2; n++)
+  for (n = xdom[ndom].nstart; n < xdom[ndom].nstop; n++)
     {
       /* 04aug -- ksl -52 -- The next couple of lines are part of the changes
        * made in the program to allow more that one coordinate system in python 
@@ -190,14 +199,18 @@ recreated when a windfile is read into the program
     }
   else if (geo.coord_type == RTHETA)
     {
-      if (geo.wind_type == 3) //13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates We dont need to work out if cells are in the wind, they are known to be in the wind.
+      /* 13jun -- nsh - 76 - This is a switch to allow one to use 
+         the actual zeus grid in the special case of a 'proga' wind 
+        in rtheta coordinates We dont need to work out if cells are 
+        in the wind, they are known to be in the wind. */
+      if (geo.wind_type == 3) 
       	{
-	rtheta_hydro_volumes (w);
+	        rtheta_hydro_volumes (w);
       	}
       else
-	{
-        rtheta_volumes (w, W_ALL_INWIND);
-	}
+	      {
+          rtheta_volumes (w, W_ALL_INWIND);
+	      }
     }
   else if (geo.coord_type == CYLVAR)
     {

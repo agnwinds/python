@@ -289,8 +289,14 @@ int ndomain;  /* This is a convenience variable and one should be careful that n
 
 struct geometry
 {
-/* 67 - ksl This section added to allow for restarting the program, and adds parameters used
- * in the calculation */
+  /* variables which store the domain numbers of the wind, disk atmosphere.
+     Other components should be added here */
+  int wind_domain_number;
+  int atmos_domain_number;
+
+
+  /* 67 - ksl This section added to allow for restarting the program, and adds parameters used
+   * in the calculation */
 
   int wcycle, pcycle;		/* The number of completed ionization and spectrum cycles */
   int wcycles, pcycles;		/* The number of ionization and spectrum cycles desired */
@@ -679,7 +685,7 @@ typedef struct wind
 }
 wind_dummy, *WindPtr;
 
-WindPtr wmain,zwind[MaxDom];
+WindPtr wmain, zwind[MaxDom];
 
 /* 57+ - 06jun -- plasma is a new structure that contains information about the properties of the
 plasma in regions of the geometry that are actually included n the wind 
