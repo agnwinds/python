@@ -56,53 +56,57 @@ History:
 **************************************************************/
 
 int
-get_knigge_wind_params ()
+get_knigge_wind_params (ndom)
+	int ndom;
 {
   double kn_wind_mdot_integral ();
   double qromb ();
   double dmin;
   double disktheta, test;
 
+  DomainPtr one_dom;
+  one_dom=&zdom[ndom];
+
   Log ("Creating Knigge's wind description for Cataclysmic Variable\n");
 
-  geo.wind_mdot /= MSOL / YR;
-  rddoub ("wind.mdot(msol/yr)", &geo.wind_mdot);
+  one_dom->wind_mdot /= MSOL / YR;
+  rddoub ("wind.mdot(msol/yr)", &one_dom->wind_mdot);
   geo.wind_mdot *= MSOL / YR;
 
 
-  geo.kn_r_scale = 7e10;	/*Accleration length scale for wind */
-  geo.kn_alpha = 1.5;		/* Accleration scale exponent for wind */
-  geo.kn_v_infinity = 3;	/* Final speed of wind in units of escape velocity */
-  geo.kn_lambda = 0.0;		/* Mass loss rate exponent */
-  geo.kn_dratio = dmin = 0.5 * sqrt (geo.diskrad / geo.rstar);	/* Center of collimation in units of the WD 
+  one_dom->kn_r_scale = 7e10;	/*Accleration length scale for wind */
+  one_dom->kn_alpha = 1.5;		/* Accleration scale exponent for wind */
+  one_dom->kn_v_infinity = 3;	/* Final speed of wind in units of escape velocity */
+  one_dom->kn_lambda = 0.0;		/* Mass loss rate exponent */
+  one_dom->kn_dratio = dmin = 0.5 * sqrt (geo.diskrad / geo.rstar);	/* Center of collimation in units of the WD 
 								   radius. The value set here is for the minimum collimation, see KWD95.  The coefficient 0.5 is 
 								   approximate */
-  geo.kn_v_zero = 1.0;		/* NSH 19/04/11 New parameter - multiple of sound speed to be used as initial velocity of wind */
+  one_dom->kn_v_zero = 1.0;		/* NSH 19/04/11 New parameter - multiple of sound speed to be used as initial velocity of wind */
 
 /* There is confusion in various papers concerning whether to use d or d/dmin.  In KWD95, d/dmin was
 used but in later papers, e.g KD97 d in WD radii was used.  I believe d is more natural and so will use it, 
 but one should remember that this differs from KWD.  To emphasize this we will calculate and log d/dmin.
 Terminolgy is awful here. -- ksl 
 
-As now represented geo.kn_dratio is the distance to the focus point in stellar radii!
+As now represented kn_dratio is the distance to the focus point in stellar radii!
 
 */
-  rddoub ("kn.d", &geo.kn_dratio);
+  rddoub ("kn.d", &one_dom->kn_dratio);
   Log_silent ("dmin = %f so the ratio d/dmin here is %f  (%.2e %.2e) \n",
-	      dmin, geo.kn_dratio / dmin, geo.diskrad, geo.rstar);
+	      dmin, one_dom->kn_dratio / dmin, geo.diskrad, geo.rstar);
 
 
-  rddoub ("kn.mdot_r_exponent", &geo.kn_lambda);	/* Mass loss rate exponent */
-  rddoub ("kn.v_infinity(in_units_of_vescape)", &geo.kn_v_infinity);	/* Final speed of wind in units of escape velocity */
-  if (geo.kn_v_infinity < 0)
+  rddoub ("kn.mdot_r_exponent", &one_dom->kn_lambda);	/* Mass loss rate exponent */
+  rddoub ("kn.v_infinity(in_units_of_vescape)", &one_dom->kn_v_infinity);	/* Final speed of wind in units of escape velocity */
+  if (one_dom->kn_v_infinity < 0)
     {
       Log
 	("Since geo.kn_v_infinity is less than zero, will use SV prescription for velocity law.\n Velocity at base remains the soundspeed\n");
     }
 
-  rddoub ("kn.acceleration_length(cm)", &geo.kn_r_scale);	/*Accleration length scale for wind */
-  rddoub ("kn.acceleration_exponent", &geo.kn_alpha);	/* Accleration scale exponent */
-  rddoub ("kn.v_zero(multiple_of_sound_speed_at_base)", &geo.kn_v_zero);
+  rddoub ("kn.acceleration_length(cm)", &one_dom->kn_r_scale);	/*Accleration length scale for wind */
+  rddoub ("kn.acceleration_exponent", &one_dom->kn_alpha);	/* Accleration scale exponent */
+  rddoub ("kn.v_zero(multiple_of_sound_speed_at_base)", &one_dom->kn_v_zero);
 
 /* Assign the generic parameters for the wind the generic parameters of the wind. Note that one should not really
 use these generic parameters in the rest of the routines here, as especially for the yso model they may have
@@ -112,42 +116,38 @@ to be modified -- ksl 04jun */
   /* JM 1502 -- added capability for user to adjust launch radii of KWD wind
      required to reproduce Stuart's X-ray models (Sim+ 2008,2010) 
      units are in stellar radii / WD radii / grav radii as in SV model */
-  rddoub ("kn.rmin", &geo.wind_rmin);
-  rddoub ("kn.rmax", &geo.wind_rmax ); 
+  rddoub ("kn.rmin", &one_dom->wind_rmin);
+  rddoub ("kn.rmax", &one_dom->wind_rmax ); 
 
-  geo.wind_rmin *= geo.rstar;
-  geo.wind_rmax *= geo.rstar;
-  geo.wind_thetamin = atan (1. / geo.kn_dratio);
+  one_dom->wind_rmin *= geo.rstar;
+  one_dom->wind_rmax *= geo.rstar;
+  one_dom->wind_thetamin = atan (1. / one_dom->kn_dratio);
 /* Somewhat paradoxically diskrad is in cm, while dn_ratio which is really d in KWD95 is 
 in units of WD radii */
-  geo.wind_thetamax = atan (geo.diskrad / (geo.kn_dratio * geo.rstar));
+  one_dom->wind_thetamax = atan (geo.diskrad / (one_dom->kn_dratio * geo.rstar));
 
   /* Next lines added by SS Sep 04. Changed the wind shape so that the boundary touches the outer 
      corner of the disk rather than the intersection of the disk edge with the xy-plane. */
 
   if (geo.disk_type == 2)
     {
-      geo.wind_thetamax =
+      one_dom->wind_thetamax =
 	atan (geo.diskrad /
-	      (((geo.kn_dratio * geo.rstar) + zdisk (geo.diskrad))));
+	      (((one_dom->kn_dratio * geo.rstar) + zdisk (geo.diskrad))));
     }
 
-  geo.wind_rho_min = geo.wind_rmin;
-  geo.wind_rho_max = geo.wind_rmax;
+  one_dom->wind_rho_min = one_dom->wind_rmin;
+  one_dom->wind_rho_max = one_dom->wind_rmax;
   /* The change in the boundary of the wind (as corner of disk -- see above) 
      means that wind_rho_max nees to be redefined so that it is used correctly
      to compute the boundary of the wind elsewhere. */
 
   if (geo.disk_type == 2) // If disk_type==2, then the disk is vertically extended
     {
-      geo.wind_rho_max =
-	geo.diskrad - (zdisk (geo.diskrad) * tan (geo.wind_thetamax));
+      one_dom->wind_rho_max =
+	geo.diskrad - (zdisk (geo.diskrad) * tan (one_dom->wind_thetamax));
     }
 
-  /* Some changes were made here to make this more general by Nick */
-//OLD70d  geo.xlog_scale = geo.rstar/10.0;
-//geo.zlog_scale = 1e8;
-//OLD70d  geo.zlog_scale = geo.rstar/10.0;
 /* 70d - ksl - I changed the scaling to something that produced more cells
  * in the wind, at the cost of slightly less spatial resolution at the inner
  * edge of the wind
@@ -156,8 +156,8 @@ in units of WD radii */
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      geo.xlog_scale = geo.rstar;
-      geo.zlog_scale = geo.rstar;
+      one_dom->xlog_scale = geo.rstar;
+      one_dom->zlog_scale = geo.rstar;
     }
 
 
@@ -171,11 +171,11 @@ in units of WD radii */
     {
       disktheta = atan (zdisk (geo.diskrad) / geo.diskrad);
       test =
-	geo.kn_dratio * geo.rstar * sin (geo.wind_thetamin) *
-	cos (disktheta) / sin ((PI / 2.) - geo.wind_thetamin - disktheta);
+	one_dom->kn_dratio * geo.rstar * sin (one_dom->wind_thetamin) *
+	cos (disktheta) / sin ((PI / 2.) - one_dom->wind_thetamin - disktheta);
     }
 
-  geo.mdot_norm = qromb (kn_wind_mdot_integral, test, geo.diskrad, 1e-6);
+  one_dom->mdot_norm = qromb (kn_wind_mdot_integral, test, geo.diskrad, 1e-6);
 
   return (0);
 }

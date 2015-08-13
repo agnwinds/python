@@ -197,7 +197,7 @@ int get_corona_params(void);
 double corona_velocity(double x[], double v[]);
 double corona_rho(double x[]);
 /* knigge.c */
-int get_knigge_wind_params(void);
+int get_knigge_wind_params(int ndom);
 double kn_velocity(double x[], double v[]);
 double kn_rho(double x[]);
 double kn_vzero(double r);
@@ -470,7 +470,6 @@ int init_log_and_windsave(int restart_stat);
 int get_grid_params(int ndom);
 int get_line_transfer_mode(void);
 int get_radiation_sources(void);
-int get_nstart_and_nstop(void);
 int get_wind_params(void);
 double get_stellar_params(void);
 double get_disk_params(void);
