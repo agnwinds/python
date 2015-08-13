@@ -264,6 +264,9 @@ model_velocity (x, v)
      double x[], v[];
 {
   double speed;
+  int ndom;
+
+  ndom=0; //PLACEHOLDER
 
 
   if (geo.wind_type == 0)
@@ -288,7 +291,7 @@ model_velocity (x, v)
     }
   else if (geo.wind_type == 6)
     {
-      speed = homologous_velocity (x, v);
+      speed = homologous_velocity (ndom,x, v);
     }
   else if (geo.wind_type == 7)
     {
@@ -380,6 +383,9 @@ model_rho (x)
      double x[];
 {
   double rho;
+  int ndom;
+
+  ndom=0;  //PLACEHOLDER
   if (geo.wind_type == 0)
     {
       rho = sv_rho (x);
@@ -402,7 +408,7 @@ model_rho (x)
     }
   else if (geo.wind_type == 6)
     {
-      rho = homologous_rho (x);
+      rho = homologous_rho (ndom,x);
     }
   else if (geo.wind_type == 7)
     {

@@ -194,7 +194,7 @@ struct cone windcone[2];	/* The cones that define the boundary of winds like SV 
 
 #define NDIM_MAX 500                // maximum size of the grid in each dimension
 
-struct domain
+typedef struct domain
 {
 	char name[LINELENGTH];
 	int wind_type;
@@ -275,7 +275,9 @@ double wind_midz_var[NDIM_MAX][NDIM_MAX];
 
 
 }
-domain_dummy, zdom[MaxDom];   // One structure for each domain
+domain_dummy, *DomainPtr;   // One structure for each domain
+
+struct domain zdom[MaxDom];
 
 int ndomain;  /* This is a convenience variable and one should be careful that ndomain and geo.ndomain
 		 are identical once all the inputs are read in, whehter from the command line

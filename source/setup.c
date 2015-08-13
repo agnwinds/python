@@ -293,8 +293,8 @@ if (geo.wind_type != 2)
 */
 
   zdom[geo.ndomain].coord_type=geo.coord_type;
-  zdom[geo.ndomain].NDIM=zdom[geo.ndomain].ndim=geo.ndim;
-  zdom[geo.ndomain].MDIM=zdom[geo.ndomain].mdim=geo.mdim;
+  zdom[geo.ndomain].ndim=geo.ndim;
+  zdom[geo.ndomain].mdim=geo.mdim;
 
   return (0);
 }
@@ -524,6 +524,10 @@ History:
 int
 get_wind_params()
 {
+
+	int ndom;
+	ndom=0; // PLACEHOLDER
+
   if (geo.system_type == SYSTEM_TYPE_AGN)
   {
     geo.rmax = 50. * geo.r_agn;
@@ -564,7 +568,7 @@ get_wind_params()
     }
   else if (geo.wind_type == 6)
     {
-      get_homologous_params ();
+      get_homologous_params (ndom);
     }
   else if (geo.wind_type == 7)
     {

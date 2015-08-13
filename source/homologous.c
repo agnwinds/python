@@ -19,64 +19,68 @@ Arguments:
 Returns:
  
 Description:	
-	The parameters, geo.cl...,  obtained here are only used in the routines in homologous.c
+	The parameters, cl...,  obtained here are only used in the routines in homologous.c
 	which calculate the velocity and density of the wind during the initialization process.
-	Other portions of the structure, geo defined here are more general purpose.
+	Other portions of the structure, 
 
 Notes:
 
 
 History:
         13jul   sas     Created for SN test problem. Based on stellar_wind.c
+	15aug	ksl	Modified to accept a domain number
 **************************************************************/
 
 
 int
-get_homologous_params ()
+get_homologous_params (ndom)
+     int ndom;
 {
+  DomainPtr one;
+  one = &zdom[ndom];
+
   Log ("Creating a homolgous wind model\n");
 
 
 
-  geo.stellar_wind_mdot = 100.;
-  geo.wind_rmin = geo.rstar;
-  geo.cl_v_zero = 200e5;
-  geo.cl_beta = 7.0;
 
-  geo.stellar_wind_mdot /= MSOL / YR;
-  rddoub ("homologous_boundary_mdot(msol/yr)", &geo.stellar_wind_mdot);
-  geo.stellar_wind_mdot *= MSOL / YR;
 
-  rddoub ("homologous.radmin(cm)", &geo.wind_rmin);	/*Radius where wind begins */
+  one->stellar_wind_mdot = 100.;
+  one->wind_rmin = geo.rstar;
+  one->cl_v_zero = 200e5;
+  one->cl_beta = 7.0;
+
+  one->stellar_wind_mdot /= MSOL / YR;
+  rddoub ("homologous_boundary_mdot(msol/yr)", &one->stellar_wind_mdot);
+  one->stellar_wind_mdot *= MSOL / YR;
+
+  rddoub ("homologous.radmin(cm)", &one->wind_rmin);	/*Radius where wind begins */
   if (geo.wind_rmin < geo.rstar)
     {
       Error
 	("get_homologous_params: It is unreasonable to have the wind start inside the star!\n");
       Log ("Setting geo.wind_rmin to geo.rstar\n");
-      geo.wind_rmin = geo.rstar;
+      one->wind_rmin = geo.rstar;
     }
-  geo.cl_rmin = geo.wind_rmin;
+  one->cl_rmin = one->wind_rmin;
 
-  rddoub ("homologous.vbase(cm)", &geo.cl_v_zero);	/* Velocity at base of the wind */
-  rddoub ("homologous.density_exponent", &geo.cl_beta);	/* Density law exponent */
+  rddoub ("homologous.vbase(cm)", &one->cl_v_zero);	/* Velocity at base of the wind */
+  rddoub ("homologous.density_exponent", &one->cl_beta);	/* Density law exponent */
 
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
-//OLD71  geo.wind_rmin = geo.rstar;
-  geo.wind_rmin = geo.wind_rmin;	//71 ksl - Not modified this so that we did not waste cells
-  geo.wind_rmax = geo.rmax;
-  geo.wind_thetamin = 0.0;
-  geo.wind_thetamax = 90. / RADIAN;
+  one->wind_thetamin = 0.0;
+  one->wind_thetamax = 90. / RADIAN;
 
 /* define the the variables that determine the gridding */
-  geo.wind_rho_min = 0;
-  geo.wind_rho_max = geo.rmax;
+  one->wind_rho_min = 0;
+  one->wind_rho_max = geo.rmax;
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      geo.xlog_scale = 0.3 * geo.rstar;
-      geo.zlog_scale = 0.3 * geo.rstar;
+      one->xlog_scale = 0.3 * geo.rstar;
+      one->zlog_scale = 0.3 * geo.rstar;
     }
 
   return (0);
@@ -104,23 +108,29 @@ Description:
 	
 	The values of the individiual constants should all be part of the structure geo.
 
-	Vmin:  			geo.cl_v_zero;		velocity at base of wind 
-	R			geo.cl_rmin	       	the inner radius of the wind
+	Vmin:  			cl_v_zero;		velocity at base of wind 
+	R			cl_rmin	       	the inner radius of the wind
 
 		
 Notes:
 
 History:
         13jul   sas     Coded for homolgous test
+	15aug	ksl	Added domains support.  Note that this routine
+			is only used to set up the grid and so we do not
+			need to determin which domain we are in from x
  
 **************************************************************/
 
 double
-homologous_velocity (x, v)
+homologous_velocity (ndom, x, v)
+     int ndom;
      double x[], v[];
 {
   double r, speed;
-  double length ();
+
+  DomainPtr one;
+  one = &zdom[ndom];
 
   if ((r = length (x)) == 0.0)
     {
@@ -131,11 +141,11 @@ homologous_velocity (x, v)
     }
 
 
-  if (r <= geo.rstar || r <= geo.cl_rmin)
-    speed = geo.cl_v_zero;
+  if (r <= geo.rstar || r <= one->cl_rmin)
+    speed = one->cl_v_zero;
   else
     {
-      speed = r * geo.cl_v_zero / geo.cl_rmin;
+      speed = r * one->cl_v_zero / one->cl_rmin;
     }
   v[0] = speed * x[0] / r;
   v[1] = speed * x[1] / r;
@@ -163,19 +173,26 @@ Notes:
 
 History:
  	13Jul	sas	Modified from stellar_wind.c portions of the code.
+	15aug 	ksl	Modified to accept domains
  
 **************************************************************/
 
 double
-homologous_rho (x)
+homologous_rho (ndom, x)
+     int ndom;
      double x[];
 {
   double r, rho, length ();
+  DomainPtr one;
+  one = &zdom[ndom];
+
 
   r = length (x);
-  
-  rho = geo.stellar_wind_mdot / (4. * PI * geo.cl_rmin * geo.cl_rmin * geo.cl_v_zero) * pow( (r/geo.cl_rmin), -1.*geo.cl_beta);
+
+  rho =
+    one->stellar_wind_mdot / (4. * PI * one->cl_rmin * one->cl_rmin *
+			      one->cl_v_zero) * pow ((r / one->cl_rmin),
+						     -1. * one->cl_beta);
 
   return (rho);
 }
-

@@ -180,9 +180,9 @@ double stellar_velocity(double x[], double v[]);
 double stellar_rho(double x[]);
 int stellar_vel_grad(double x[], double velgrad[][3]);
 /* homologous.c */
-int get_homologous_params(void);
-double homologous_velocity(double x[], double v[]);
-double homologous_rho(double x[]);
+int get_homologous_params(int ndom);
+double homologous_velocity(int ndom, double x[], double v[]);
+double homologous_rho(int ndom, double x[]);
 /* hydro_import.c */
 int get_hydro_wind_params(void);
 int get_hydro(void);

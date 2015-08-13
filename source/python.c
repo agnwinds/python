@@ -355,9 +355,6 @@ main (argc, argv)
 
 /* Set the global variables that define the size of the grid as defined in geo.  These are used for convenience */
 
-  zdom[0].NDIM = zdom[0].ndim;
-  zdom[0].MDIM = zdom[0].mdim;
-  zdom[0].NDIM2 = zdom[0].ndim * zdom[0].mdim;
 
 /* End of definition of wind arrays */
 
