@@ -262,6 +262,7 @@ main (argc, argv)
   int np_mpi;		// rank and number of processes, 0 and 1 in non-parallel
   int time_to_quit;
   int input_int;
+  int ndomain=0;       //Local variable for ndomain
 
   int mkdir();
 
@@ -1037,6 +1038,7 @@ main (argc, argv)
   	  exit(0);
     }
 /* Print out some diagnositic infomration about the domains */
+geo.ndomain=ndomain;  // Store ndomain in geo so that it can be saved
 
 Log("There are %d domains\n", geo.ndomain);
 for(n=0;n<geo.ndomain;n++){
@@ -1046,7 +1048,6 @@ for(n=0;n<geo.ndomain;n++){
 
   /* INPUTS ARE FINALLY COMPLETE */
 
-geo.ndomain=ndomain;  // Store ndomain in geo so that it can be saved
 
 
   /* Next line finally defines the wind if this is the initial time this model is being run */
@@ -1744,9 +1745,8 @@ History:
 int
 init_geo ()
 {
-  geo.ndomain=ndomain=0;   /*ndomain is a convenience variable so we do not always
-				   need to write geo.ndomain but it should nearly always
-				   be set to the same value as geo.ndomain */
+  geo.ndomain=0;   
+
   zdom[0].coord_type = 1;
   zdom[0].ndim = 30;
   zdom[0].mdim = 30;
