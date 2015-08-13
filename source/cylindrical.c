@@ -224,7 +224,7 @@ cylind_wind_complete (w)
 
   /* Finally define some one-d vectors that make it easier to locate a photon in the wind given that we
      have adoped a "rectangular" grid of points.  Note that rectangular does not mean equally spaced. */
-
+  /* JM -- PLACEHOLDER -- NEED TO MOVE INTO DOMAIN STRUCTURE */
   for (i = 0; i < NDIM; i++)
     wind_x[i] = w[i * MDIM].x[0];
   for (j = 0; j < MDIM; j++)

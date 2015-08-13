@@ -260,13 +260,12 @@ wind_check (www, n)
  */
 
 double
-model_velocity (x, v)
+model_velocity (x, v, ndom)
      double x[], v[];
+     int ndom;
 {
   double speed;
   int ndom;
-
-  ndom = 0; //PLACEHOLDER
 
 
   if (geo.wind_type == 0)
@@ -328,8 +327,9 @@ model_velocity (x, v)
  */
 
 int
-model_vgrad (x, v_grad)
+model_vgrad (x, v_grad, ndom)
      double x[], v_grad[][3];
+     int ndom;
 {
 
   double v0[3], v1[3];
@@ -338,7 +338,7 @@ model_vgrad (x, v_grad)
   int i, j;
   int vsub (), stuff_v ();
 
-  model_velocity (x, v0);
+  model_velocity (x, v0, ndom);
 
 
   ds = 0.001 * length (x);
@@ -350,7 +350,7 @@ model_vgrad (x, v_grad)
       stuff_v (x, dx);
       dx[i] += ds;
 
-      model_velocity (dx, v1);
+      model_velocity (dx, v1, ndom);
 
       if (sane_check (v1[0]) || sane_check (v1[1]) || sane_check (v1[2]))
 	{

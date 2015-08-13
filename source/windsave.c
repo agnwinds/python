@@ -73,7 +73,7 @@ wind_save (filename)
   sprintf (line, "Version %s\n", VERSION);
   n = fwrite (line, sizeof (line), 1, fptr);
   n += fwrite (&geo, sizeof (geo), 1, fptr);
-  n += fwrite(&zdom, sizeof (domain_dummy), geo.ndomain, fptr);
+  n += fwrite (zdom, sizeof (domain_dummy), geo.ndomain, fptr);
   n += fwrite (wmain, sizeof (wind_dummy), NDIM2, fptr);
   n += fwrite (plasmamain, sizeof (plasma_dummy), NPLASMA, fptr);
 

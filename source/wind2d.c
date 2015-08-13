@@ -164,8 +164,8 @@ define_wind ()
       /* 04aug -- ksl -52 -- The next couple of lines are part of the changes
        * made in the program to allow more that one coordinate system in python 
        */
-      model_velocity (w[n].x, w[n].v);
-      model_vgrad (w[n].x, w[n].v_grad);
+      model_velocity (w[n].x, w[n].v, ndom);
+      model_vgrad (w[n].x, w[n].v_grad, ndom);
     }
 
   }
