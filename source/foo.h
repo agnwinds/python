@@ -197,7 +197,7 @@ int get_corona_params(void);
 double corona_velocity(double x[], double v[]);
 double corona_rho(double x[]);
 /* knigge.c */
-int get_knigge_wind_params(void);
+int get_knigge_wind_params(int ndom);
 double kn_velocity(double x[], double v[]);
 double kn_rho(double x[]);
 double kn_vzero(double r);

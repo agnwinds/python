@@ -227,6 +227,7 @@ double wind_midz_var[NDIM_MAX][NDIM_MAX];
   double wind_rmin, wind_rmax;	/*Spherical extent of the wind */
   double wind_rho_min, wind_rho_max;	/*Min/Max rho for wind in disk plane */
   double wind_thetamin, wind_thetamax;	/*Angles defining inner and outer cones of wind, measured from disk plane */
+  double mdot_norm;		/*A normalization factor used in SV wind, and Knigge wind */
 
   double rmax;   // JM 1508 -- added in case domains have different grid sizes
   /* Parameters defining Shlossman & Vitello Wind */
