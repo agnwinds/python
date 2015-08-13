@@ -190,44 +190,48 @@ recreated when a windfile is read into the program
    * in the the respective volumes calculation.  At least then we will do the calculation the
    * same way both times.  . 
    */
+   /* JM 1508 -- Added loop over domains */
 
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
 
-  if (geo.coord_type == SPHERICAL)
-    {
-      spherical_volumes (w, W_ALL_INWIND);
-    }
-  else if (geo.coord_type == CYLIND)
-    {
-      cylind_volumes (w, W_ALL_INWIND);
-    }
-  else if (geo.coord_type == RTHETA)
-    {
+  {
+    if (geo.coord_type == SPHERICAL)
+      {
+        spherical_volumes (w, W_ALL_INWIND);
+      }
+    else if (geo.coord_type == CYLIND)
+      {
+        cylind_volumes (w, W_ALL_INWIND);
+      }
+    else if (geo.coord_type == RTHETA)
+      {
       /* 13jun -- nsh - 76 - This is a switch to allow one to use 
          the actual zeus grid in the special case of a 'proga' wind 
         in rtheta coordinates We dont need to work out if cells are 
         in the wind, they are known to be in the wind. */
-      if (geo.wind_type == 3) 
-      	{
-	        rtheta_hydro_volumes (w);
-      	}
-      else
-	      {
-          rtheta_volumes (w, W_ALL_INWIND);
-	      }
-    }
-  else if (geo.coord_type == CYLVAR)
-    {
-      cylvar_volumes (w, W_ALL_INWIND);
-    }
-  else
-    {
-      Error
-	("wind2d.c: Don't know how to make volumes for coordinate type %d\n",
-	 geo.coord_type);
-    }
+        if (geo.wind_type == 3) 
+      	  {
+	          rtheta_hydro_volumes (w);
+      	  }
+        else
+	        {
+            rtheta_volumes (w, W_ALL_INWIND);
+	        }
+      }
+    else if (geo.coord_type == CYLVAR)
+      {
+        cylvar_volumes (w, W_ALL_INWIND);
+      }
+    else
+      {
+        Error
+	    ("wind2d.c: Don't know how to make volumes for coordinate type %d\n",
+	      geo.coord_type);
+      }
+  }
 
-/* Now check if there is a second component and if so get the volumes for these cells as well */
-
+  /* Now check if there is a second component and if so get the volumes for these cells as well */
+  /* PLACEHOLDER -- need to encorporate Torus into domains */
   if (geo.compton_torus)
     {
 
@@ -291,29 +295,35 @@ recreated when a windfile is read into the program
 /* 56d --Now check the volume calculations for 2d wind models 
    58b --If corners are in the wind, but there is zero_volume then ignore.
 */
-  if (geo.coord_type != SPHERICAL)
-    {
-      for (n = 0; n < NDIM2; n++)
-	{
-	  n_inwind = check_corners_inwind (n, 0, ndom);
-	  if (w[n].vol == 0 && n_inwind > 0)
-	    {
-	      wind_n_to_ij (n, &i, &j, ndom);
-	      Error
-		("wind2d: Cell %3d (%2d,%2d) has %d corners in wind, but zero volume\n",
-		 n, i, j, n_inwind);
-	      w[n].inwind = W_IGNORE;
-	    }
-	  if (w[n].inwind == W_PART_INWIND && n_inwind == 4)
-	    {
-	      wind_n_to_ij (n, &i, &j, ndom);
-	      Error
-		("wind2d: Cell %3d (%2d,%2d) has 4 corners in wind, but is only partially in wind\n",
-		 i, j, n);
-	    }
-	}
 
-    }
+  /* JM 1508 -- Added loop over domains */
+
+  for (ndom = 0; ndom < geo.ndomain; ndom++)  
+  {
+    if (zdom[ndom].coord_type != SPHERICAL)
+      {
+        for (n = 0; n < NDIM2; n++)
+  	{
+  	  n_inwind = check_corners_inwind (n, 0, ndom);
+  	  if (w[n].vol == 0 && n_inwind > 0)
+  	    {
+  	      wind_n_to_ij (n, &i, &j, ndom);
+  	      Error
+  		("wind2d: Cell %3d (%2d,%2d) has %d corners in wind, but zero volume\n",
+  		 n, i, j, n_inwind);
+  	      w[n].inwind = W_IGNORE;
+  	    }
+  	  if (w[n].inwind == W_PART_INWIND && n_inwind == 4)
+  	    {
+  	      wind_n_to_ij (n, &i, &j, ndom);
+  	      Error
+  		("wind2d: Cell %3d (%2d,%2d) has 4 corners in wind, but is only partially in wind\n",
+  		 i, j, n);
+  	    }
+  	}
+
+      }
+  }
 
 
 /* Now create the second structure, the one that is sized only to contain cells in the wind */
@@ -351,30 +361,38 @@ be optional which variables beyond here are moved to structures othere than Wind
       nwind = plasmamain[n].nwind;
       stuff_v (w[nwind].xcen, x);
       /* 140905 - ksl - Next two lines allow for clumping */
-      plasmamain[n].rho = model_rho (x)/geo.fill;
+      /* JM PLACEHOLDER need to make model_rho have domain number */
+      plasmamain[n].rho = model_rho (x) / geo.fill;
       plasmamain[n].vol = w[nwind].vol*geo.fill;	// Copy volumes
-/* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, I've put new things in here to initialise the exponential models */
+
+      /* NSH 120817 This is where we initialise the spectral models for the wind. 
+         The pl stuff is old, I've put new things in here to initialise the exponential 
+         models */
       for (nn = 0; nn < NXBANDS; nn++)
 	{
-	  plasmamain[n].spec_mod_type[nn] = SPEC_MOD_FAIL;	/*NSH 120817 - setting this to a negative number means that at the outset, we assume we do not have a suitable model for the cell */
+    /*NSH 120817 - setting this to a negative number means that at the outset, we assume we do not have a suitable model for the cell */
+	  plasmamain[n].spec_mod_type[nn] = SPEC_MOD_FAIL;	
 	  plasmamain[n].exp_temp[nn] = geo.tmax;	/*NSH 120817 - as an initial guess, set this number to the hottest part of the model - this should define where any exponential dropoff becomes important */
 	  plasmamain[n].exp_w[nn] = 0.0;	/* 120817 Who knows what this should be! */
 	  plasmamain[n].pl_alpha[nn] = geo.alpha_agn;	//As an initial guess we assume the whole wind is optically thin and so the spectral index for a PL illumination will be the same everywhere.
 	  /*     plasmamain[n].pl_w[nn] = geo.const_agn / (4.0*PI*(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]));  // constant / area of a sphere
 	     plasmamain[n].pl_w[nn] /= 4.*PI;   // take account of solid angle NSH 120817 removed - if PL not suitable, it will be set to zero anyway, so safe to keep it at zero from the outset! */
-//	  plasmamain[n].pl_w[nn] = 0.0;
+    //plasmamain[n].pl_w[nn] = 0.0;
 	  plasmamain[n].pl_log_w[nn] = -1e99; /*131114 - a tiny weight - just to fill the variable */ 
 
 
-          plasmamain[n].fmin_mod[nn] = 1e99; /* Set the minium model frequency to the max frequency in the band - means it will never be used which is correct at this time - there is no model */
-          plasmamain[n].fmax_mod[nn] = 1e-99; /* Set the maximum model frequency to the min frequency in the band */
+    plasmamain[n].fmin_mod[nn] = 1e99; /* Set the minium model frequency to the max frequency in the band - means it will never be used which is correct at this time - there is no model */
+    plasmamain[n].fmax_mod[nn] = 1e-99; /* Set the maximum model frequency to the min frequency in the band */
 	}
 
 
 /* NSH 130530 Next few lines allow the use of the temperature which can be computed from Zeus models to be used as an initial guess for the wind temperature */
       if (geo.wind_type == 3)
 	{
-	  plasmamain[n].t_r = hydro_temp (x)/0.9; //This is a kluge, it means that we get the temperature we expect, if we read in a temperature from a zeus file - otherwise it is multiplies by 0.9 //
+    /* This is a kluge, it means that we get the temperature we expect, 
+       if we read in a temperature from a zeus file - otherwise it is multiplies
+       by 0.9 */
+	  plasmamain[n].t_r = hydro_temp (x) / 0.9; 
 	}
       else
 	{
@@ -391,10 +409,11 @@ be optional which variables beyond here are moved to structures othere than Wind
 	  plasmamain[n].t_r = geo.compton_torus_te;
 	}
 
-/* Initialize variables having to do with converence in initial stages */
+      /* Initialize variables having to do with converence in initial stages */
       plasmamain[n].gain = 0.5;
       plasmamain[n].dt_e_old = 0.0;
       plasmamain[n].dt_e = 0.0;
+
 /* The next lines set the electrom temperature to 0.9 times the radiation temperature (which is a bit
 	  odd since the input is the wind temperature, but is taken to be the radiation temperature). If we have
 	  a fixed temprature calculation,then the wind temperature is set to be the wind temperature so the
@@ -402,7 +421,8 @@ be optional which variables beyond here are moved to structures othere than Wind
       if (modes.fixed_temp==0)
 		  plasmamain[n].t_e = plasmamain[n].t_e_old = 0.9 * plasmamain[n].t_r;	//Lucy guess
 	  else
-		  plasmamain[n].t_e = plasmamain[n].t_e_old = plasmamain[n].t_r; //If we want to fix the temperature, we set it to tr which has previously been set to twind.
+		  plasmamain[n].t_e = plasmamain[n].t_e_old = plasmamain[n].t_r; 
+      //If we want to fix the temperature, we set it to tr which has previously been set to twind.
 
 
 /* Calculate an initial guess for the weight of the PL spectrum (constant / area of a sphere / 4pi) */
@@ -834,13 +854,14 @@ wind_div_v (w)
   double x_zero[3], v2[3], v1[3];
   struct photon ppp;
   double div, delta;
-  double length ();
   double xxx[3];
+
+
   for (icell = 0; icell < NDIM2; icell++)
     {
       /* Find the center of the cell */
 
-      /*   stuff_v (w->xcen, x_zero); OLD NSH 130322 - this line seems to assume w is a cell, rather than the whole wind structure */
+      /* stuff_v (w->xcen, x_zero); OLD NSH 130322 - this line seems to assume w is a cell, rather than the whole wind structure */
       stuff_v (w[icell].xcen, x_zero);  /*NEW NSH 130322 - now gets the centre of the current cell in the loop */
 
       delta = 0.01 * x_zero[2]; //new 04mar ksl -- delta is the distance across which we measure e.g. dv_x/dx

@@ -542,7 +542,7 @@ wind_n_to_ij (n, i, j, ndom)
      int n, *i, *j, ndom;
 {
   int n_use;
-  if (geo.coord_type == SPHERICAL)
+  if (zdom[ndom].coord_type == SPHERICAL)
     {
       *i = n - zdom[ndom].nstart;
       *j = 0;
