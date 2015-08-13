@@ -351,7 +351,7 @@ main (argc, argv)
  * primarily for creating reasonable .pf files*/
 
 /* Set plausible values for everything in geo struct which basically defines the overall geometry */
-
+/* JM 1508 -- init_geo() also allocates the memory for the domain structure */  
   init_geo ();
 
 /* Set the global variables that define the size of the grid as defined in geo.  These are used for convenience */
@@ -704,8 +704,8 @@ main (argc, argv)
 
     /* Describe the wind. This routine readsin geo.rmax and geo.twind
        and then gets params by calling e.g. get_sv_wind_params() */
-
-      get_wind_params ();	
+    /* PLACEHOLDER -- call with wind domain number */
+      get_wind_params (geo.wind_domain_number);	
 
     }				// End of block to define a model for the first time
 
@@ -1038,7 +1038,7 @@ main (argc, argv)
   	  exit(0);
     }
 /* Print out some diagnositic infomration about the domains */
-geo.ndomain=ndomain;  // Store ndomain in geo so that it can be saved
+geo.ndomain = ndomain;  // Store ndomain in geo so that it can be saved
 
 Log("There are %d domains\n", geo.ndomain);
 for(n=0;n<geo.ndomain;n++){
@@ -1745,7 +1745,12 @@ History:
 int
 init_geo ()
 {
-  geo.ndomain=0;   
+  geo.ndomain = 0;   /*ndomain is a convenience variable so we do not always
+				   need to write geo.ndomain but it should nearly always
+				   be set to the same value as geo.ndomain */
+
+  /* allocate space for maximum number of domains */
+  zdom = (DomainPtr) calloc (sizeof (domain_dummy), MaxDom);
 
   zdom[0].coord_type = 1;
   zdom[0].ndim = 30;

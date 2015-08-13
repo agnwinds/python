@@ -266,12 +266,12 @@ model_velocity (x, v)
   double speed;
   int ndom;
 
-  ndom=0; //PLACEHOLDER
+  ndom = 0; //PLACEHOLDER
 
 
   if (geo.wind_type == 0)
     {
-      speed = sv_velocity (x, v);
+      speed = sv_velocity (x, v, ndom);
     }
   else if (geo.wind_type == 1)
     {
@@ -386,9 +386,10 @@ model_rho (x)
   int ndom;
 
   ndom=0;  //PLACEHOLDER
+
   if (geo.wind_type == 0)
     {
-      rho = sv_rho (x);
+      rho = sv_rho (x, ndom);
     }
   else if (geo.wind_type == 1)
     {

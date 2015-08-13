@@ -258,13 +258,13 @@ int open_diagfile(void);
 int get_extra_diagnostics(void);
 int save_photon_stats(WindPtr one, PhotPtr p, double ds);
 /* sv.c */
-int get_sv_wind_params(void);
-double sv_velocity(double x[], double v[]);
-double sv_rho(double x[]);
-double sv_find_wind_rzero(double p[]);
+int get_sv_wind_params(int ndom);
+double sv_velocity(double x[], double v[], int ndom);
+double sv_rho(double x[], int ndom);
+double sv_find_wind_rzero(double p[], int ndom);
 int sv_zero_init(double p[]);
 double sv_zero_r(double r);
-double sv_theta_wind(double r);
+double sv_theta_wind(double r, int ndom);
 double sv_wind_mdot_integral(double r);
 /* ionization.c */
 int ion_abundances(PlasmaPtr xplasma, int mode);
@@ -470,7 +470,7 @@ int init_log_and_windsave(int restart_stat);
 int get_grid_params(int ndom);
 int get_line_transfer_mode(void);
 int get_radiation_sources(void);
-int get_wind_params(void);
+int get_wind_params(int ndom);
 double get_stellar_params(void);
 double get_disk_params(void);
 int get_bl_and_agn_params(double lstar);

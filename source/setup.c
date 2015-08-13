@@ -525,11 +525,9 @@ History:
 **************************************************************/
 
 int
-get_wind_params()
+get_wind_params(ndom)
+    int ndom;
 {
-
-	int ndom;
-	ndom=0; // PLACEHOLDER
 
   if (geo.system_type == SYSTEM_TYPE_AGN)
   {
@@ -555,7 +553,7 @@ get_wind_params()
     }
   else if (geo.wind_type == 0)
     {
-      get_sv_wind_params ();
+      get_sv_wind_params (ndom);
     }
   else if (geo.wind_type == 3)
     {
