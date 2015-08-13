@@ -355,9 +355,6 @@ main (argc, argv)
 
 /* Set the global variables that define the size of the grid as defined in geo.  These are used for convenience */
 
-  zdom[0].NDIM = zdom[0].ndim;
-  zdom[0].MDIM = zdom[0].mdim;
-  zdom[0].NDIM2 = zdom[0].ndim * zdom[0].mdim;
 
 /* End of definition of wind arrays */
 
@@ -546,6 +543,8 @@ main (argc, argv)
       Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
       exit (0);
     }
+
+
 
   /*Normally, geo.partition_mode is set to -1, which means that partition functions are calculated to take
   full advantage of the data file.  This means that in calculating the partition functions, the information
@@ -1037,6 +1036,13 @@ main (argc, argv)
       Log ("Run with -i flag, so quitting now inputs have been gathered.\n");	
   	  exit(0);
     }
+/* Print out some diagnositic infomration about the domains */
+
+Log("There are %d domains\n", geo.ndomain);
+for(n=0;n<geo.ndomain;n++){
+	Log("%20s %d %d %d %d %d\n",zdom[n].name,zdom[n].wind_type,zdom[n].ndim,zdom[n].mdim,zdom[n].ndim2);
+}
+
 
   /* INPUTS ARE FINALLY COMPLETE */
 
@@ -1738,10 +1744,9 @@ History:
 int
 init_geo ()
 {
-  geo.ndomain = ndomain = 0;   /* ndomain is a convenince variable so we do not always
-				              need to write geo.ndomain but it should nearly always
-				              be set to the same value as geo.ndomain */
-
+  geo.ndomain=ndomain=0;   /*ndomain is a convenience variable so we do not always
+				   need to write geo.ndomain but it should nearly always
+				   be set to the same value as geo.ndomain */
   zdom[0].coord_type = 1;
   zdom[0].ndim = 30;
   zdom[0].mdim = 30;
