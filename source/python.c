@@ -539,6 +539,8 @@ main (argc, argv)
       exit (0);
     }
 
+
+
   /*Normally, geo.partition_mode is set to -1, which means that partition functions are calculated to take
   full advantage of the data file.  This means that in calculating the partition functions, the information
   on levels and their multiplicities is taken into account.   */
@@ -1023,6 +1025,13 @@ main (argc, argv)
       Log ("Run with -i flag, so quitting now inputs have been gathered.\n");	
   	  exit(0);
     }
+/* Print out some diagnositic infomration about the domains */
+
+Log("There are %d domains\n", geo.ndomain);
+for(n=0;n<geo.ndomain;n++){
+	Log("%20s %d %d %d %d %d\n",zdom[n].name,zdom[n].wind_type,zdom[n].ndim,zdom[n].mdim,zdom[n].ndim2);
+}
+
 
   /* INPUTS ARE FINALLY COMPLETE */
 
@@ -1724,7 +1733,7 @@ History:
 int
 init_geo ()
 {
-	geo.ndomain=ndomain=0;   /*ndomain is a convenince variable so we do not always
+	geo.ndomain=ndomain=0;   /*ndomain is a convenience variable so we do not always
 				   need to write geo.ndomain but it should nearly always
 				   be set to the same value as geo.ndomain */
   zdom[0].coord_type = 1;

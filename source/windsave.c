@@ -42,6 +42,7 @@ History:
 			the wind ptr.
 	14jul	nsh	78a - Added code to allow dynamically allocated arrays
 			in the plasma structure to be read in and written out.
+	15aug	ksl	Modified to write domain stucture
  
 **************************************************************/
 
@@ -72,6 +73,7 @@ wind_save (filename)
   sprintf (line, "Version %s\n", VERSION);
   n = fwrite (line, sizeof (line), 1, fptr);
   n += fwrite (&geo, sizeof (geo), 1, fptr);
+  n += fwrite(&zdom, sizeof (domain_dummy), geo.ndomain, fptr);
   n += fwrite (wmain, sizeof (wind_dummy), NDIM2, fptr);
   n += fwrite (plasmamain, sizeof (plasma_dummy), NPLASMA, fptr);
 
@@ -167,6 +169,7 @@ in the plasma structure */
 		was done to enable one to handle missing files differently in
 		different cases
 14jul	nsh	Code added to read in variable length arrays in plasma structure
+15aug	ksl	Updated to read domain structure
 */
 int
 wind_read (filename)
@@ -208,6 +211,8 @@ wind_read (filename)
   MDIM = mdim;
   NDIM2 = ndim * mdim;
   NPLASMA = geo.nplasma;
+
+  n += fwrite(&zdom, sizeof (domain_dummy), geo.ndomain, fptr);
 
   calloc_wind (NDIM2);
   n += fread (wmain, sizeof (wind_dummy), NDIM2, fptr);

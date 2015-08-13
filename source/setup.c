@@ -289,6 +289,13 @@ if (geo.wind_type != 2)
       }
   }
 
+/* Populate the domain structure with information about the coordiante system
+*/
+
+  zdom[geo.ndomain].coord_type=geo.coord_type;
+  zdom[geo.ndomain].NDIM=zdom[geo.ndomain].ndim=geo.ndim;
+  zdom[geo.ndomain].MDIM=zdom[geo.ndomain].mdim=geo.mdim;
+
   return (0);
 }
 
