@@ -280,9 +280,6 @@ domain_dummy, *DomainPtr;   // One structure for each domain
 
 DomainPtr zdom;
 
-int ndomain;  /* This is a convenience variable and one should be careful that ndomain and geo.ndomain
-		 are identical once all the inputs are read in, whehter from the command line
-		 or from an old wind model */
 
 /* the geometry structure contains information that applies to all domains or alternatimve
  a single domain.  Information that is domain specific should be placed directly in the domain
