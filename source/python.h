@@ -278,7 +278,7 @@ double wind_midz_var[NDIM_MAX][NDIM_MAX];
 }
 domain_dummy, *DomainPtr;   // One structure for each domain
 
-struct domain zdom[MaxDom];
+DomainPtr zdom;
 
 int ndomain;  /* This is a convenience variable and one should be careful that ndomain and geo.ndomain
 		 are identical once all the inputs are read in, whehter from the command line
@@ -687,7 +687,7 @@ typedef struct wind
 }
 wind_dummy, *WindPtr;
 
-WindPtr wmain, zwind[MaxDom];
+WindPtr wmain;
 
 /* 57+ - 06jun -- plasma is a new structure that contains information about the properties of the
 plasma in regions of the geometry that are actually included n the wind 
@@ -868,7 +868,7 @@ NSH 130725 - this number is now also used to say if the cell is over temperature
   //COOLSTR kpkt_rates;
 } plasma_dummy, *PlasmaPtr;
 
-PlasmaPtr plasmamain,zplasma[MaxDom];
+PlasmaPtr plasmamain;
 
 /* A storage area for photons.  The idea is that it is sometimes time-consuming to create the
 cumulative distribution function for a process, but trivial to create more than one photon 
