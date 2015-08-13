@@ -19,6 +19,9 @@ int verbosity;			/* verbosity level. 0 low, 10 is high */
 value determined by values in python.h to a values which are adjustable from
 within python */
 
+int ndim;                       // Define the fundamental dimension of the grid
+int mdim;
+int NDIM, MDIM, NDIM2;
 int NPLASMA;			//The number of cells with non-zero volume or the size of plasma structure
 
 char basename[132];		// The root of the parameter file name being used by python
@@ -294,10 +297,10 @@ struct geometry
 
 /* Begin description of the actual geometery */
   // XXX  This needs to be removed from geometry
-//  enum coord_type_enum coord_type;
+enum coord_type_enum coord_type;
 int ndomain;  /*The number of domains in a model*/
 
-//  int ndim, mdim;	
+int ndim, mdim;	
 /* The type of geometry and dimensionality of the wind array. 
 				   0=1-d spherical, 1=cylindrical, 2 = spherical polar, 3=cylindrical
 				   but the z coordinate changes with rho in an attempt to allow for
@@ -337,6 +340,10 @@ int ndomain;  /*The number of domains in a model*/
   int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply old file
  				Added in order to separate the question of whether we are continuing an old run fro
 			       the type of wind model 	*/
+int log_linear;               /*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */
+double xlog_scale, zlog_scale;   /* Scale factors for setting up a logarithmic grid, the [1,1] cell
+				will be located at xlog_scale,zlog_scale */
+
   int run_type;                 /*1508 - New variable that describes whether this is a continuation of a previous run 
   				Added in order to separate the question of whether we are continuing an old run fro
 				the type of wind model */                  
