@@ -64,12 +64,14 @@ History:
 int
 get_yso_wind_params ()
 {
+int ndom;
+ndom=0;  //PLACEHOLDER
 
 /* The approach to get the input parameters is to call both input parameter routines
 one after the other*/
 
   get_stellar_wind_params ();
-  get_knigge_wind_params ();
+  get_knigge_wind_params (ndom);
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 

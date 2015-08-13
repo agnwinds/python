@@ -565,7 +565,7 @@ get_wind_params(ndom)
     }
   else if (geo.wind_type == 5)
     {
-      get_knigge_wind_params ();
+      get_knigge_wind_params (ndom);
     }
   else if (geo.wind_type == 6)
     {
