@@ -70,8 +70,8 @@ int set_nstart_nstop(void);
 /* wind.c */
 int where_in_wind(double x[]);
 int wind_check(WindPtr www, int n);
-double model_velocity(double x[], double v[]);
-int model_vgrad(double x[], double v_grad[][3]);
+double model_velocity(double x[], double v[], int ndom);
+int model_vgrad(double x[], double v_grad[][3], int ndom);
 double model_rho(double x[]);
 /* vector.c */
 double dot(double a[], double b[]);

@@ -265,8 +265,6 @@ model_velocity (x, v, ndom)
      int ndom;
 {
   double speed;
-  int ndom;
-
 
   if (geo.wind_type == 0)
     {
