@@ -229,6 +229,7 @@ double wind_midz_var[NDIM_MAX][NDIM_MAX];
   double wind_rho_min, wind_rho_max;	/*Min/Max rho for wind in disk plane */
   double wind_thetamin, wind_thetamax;	/*Angles defining inner and outer cones of wind, measured from disk plane */
 
+  double rmax;   // JM 1508 -- added in case domains have different grid sizes
   /* Parameters defining Shlossman & Vitello Wind */
   double sv_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
   double sv_rmin, sv_rmax, sv_thetamin, sv_thetamax, sv_gamma;	/* parameters defining the goemetry of the wind */

@@ -538,12 +538,13 @@ History:
 
 
 int
-wind_n_to_ij (n, i, j)
-     int n, *i, *j;
+wind_n_to_ij (n, i, j, ndom)
+     int n, *i, *j, ndom;
 {
+  int n_use;
   if (geo.coord_type == SPHERICAL)
     {
-      *i = n;
+      *i = n - zdom[ndom].nstart;
       *j = 0;
 /*  130624 - ksl - Removed this error as it program appears to be working as intended
  *  and there are times when this routine should be called for spherical models
@@ -553,16 +554,17 @@ wind_n_to_ij (n, i, j)
 	 n);
 */
     }
-  *i = n / MDIM;
-  *j = n - (*i) * MDIM;
+  n_use = n - zdom[ndom].nstart;
+  *i = n_use / zdom[ndom].mdim;
+  *j = n_use - (*i) * zdom[ndom].mdim;
   return (0);
 }
 
 int
-wind_ij_to_n (i, j, n)
-     int *n, i, j;
+wind_ij_to_n (i, j, n, ndom)
+     int *n, i, j, ndom;
 {
-  if (geo.coord_type == SPHERICAL)
+  if (zdom[ndom].coord_type == SPHERICAL)
     {
       Error
 	("Warning: wind_ij_to_n being called for spherical coordinates %d %d\n",
@@ -570,6 +572,6 @@ wind_ij_to_n (i, j, n)
       *n = i;
       return (*n);
     }
-  *n = i * MDIM + j;		// MDIM because the array is in z order
+  *n = zdom[ndom].nstart + i * MDIM + j;		// MDIM because the array is in z order
   return (*n);
 }

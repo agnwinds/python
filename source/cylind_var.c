@@ -65,9 +65,7 @@ cylvar_ds_in_cell (p)
   int n, ix, iz, iroot;
   double a, b, c, root[2];
   double s, smax;
-  int where_in_grid (), wind_n_to_ij ();
-  int quadratic ();
-  int radiation ();
+  int ndom;
 
 
   if ((p->grid = n = where_in_grid (p->x)) < 0)
@@ -76,7 +74,8 @@ cylvar_ds_in_cell (p)
       return (n);		/* Photon was not in wind */
     }
 
-  wind_n_to_ij (n, &ix, &iz);	/*Convert the index n to two dimensions */
+  ndom = wmain[n].ndomain;
+  wind_n_to_ij (n, &ix, &iz, ndom);	/*Convert the index n to two dimensions */
 
   smax = VERY_BIG;		//initialize smax to a large number
 
@@ -152,8 +151,9 @@ History:
 
 
 int
-cylvar_make_grid (w)
+cylvar_make_grid (w, ndom)
      WindPtr w;
+     int ndom;
 {
   double dr, dz, dlogr, dlogz;
   double r, z_offset;
@@ -166,18 +166,18 @@ cylvar_make_grid (w)
 
   /* First calculate parameters that are to be calculated at the edge of the grid cell.  This is
      mainly the positions and the velocity */
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < zdom[ndom].ndim; i++)
     {
-      for (j = 0; j < MDIM; j++)
+      for (j = 0; j < zdom[ndom].mdim; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  wind_ij_to_n (i, j, &n, ndom);
 	  w[n].x[1] = w[n].xcen[n] = 0;	//The cells are all defined in the xz plane
 
 	  /*Define the grid points */
-	  if (geo.log_linear == 1)
+	  if (zdom[ndom].log_linear == 1)
 	    {			// linear intervals
 
-	      dr = geo.rmax / (NDIM - 3);
+	      dr = zdom[ndom].rmax / (NDIM - 3);
 	      w[n].x[0] = r = i * dr;	/* The first zone is at the inner radius of
 					   the wind */
 	      if (r < geo.diskrad)
@@ -187,7 +187,7 @@ cylvar_make_grid (w)
 	      else
 		z_offset = zdisk (geo.diskrad);
 
-	      dz = (geo.rmax - z_offset) / (MDIM - 4);
+	      dz = (zdom[ndom].rmax - z_offset) / (MDIM - 4);
 	      if (j == 0)
 		w[n].x[2] = 0;
 	      else if (j == 1)
@@ -203,17 +203,17 @@ cylvar_make_grid (w)
 	  else
 	    {			//logarithmic intervals
 
-	      dlogr = (log10 (geo.rmax / geo.xlog_scale)) / (NDIM - 3);
+	      dlogr = (log10 (zdom[ndom].rmax / zdom[ndom].xlog_scale)) / (NDIM - 3);
 	      if (i == 0)
 		{
 		  w[n].x[0] = r = 0.0;
-		  w[n].xcen[0] = 0.5 * geo.xlog_scale + zdisk (r);
+		  w[n].xcen[0] = 0.5 * zdom[ndom].xlog_scale + zdisk (r);
 		}
 	      else
 		{
-		  w[n].x[0] = r = geo.xlog_scale * pow (10., dlogr * (i - 1));
+		  w[n].x[0] = r = zdom[ndom].xlog_scale * pow (10., dlogr * (i - 1));
 		  w[n].xcen[0] =
-		    0.5 * geo.xlog_scale * (pow (10., dlogr * (i - 1)) +
+		    0.5 * zdom[ndom].xlog_scale * (pow (10., dlogr * (i - 1)) +
 					    pow (10.,
 						 dlogr * (i))) + zdisk (r);
 		}
@@ -226,7 +226,7 @@ cylvar_make_grid (w)
 		z_offset = zdisk (geo.diskrad);
 
 	      dlogz =
-		(log10 ((geo.rmax - z_offset) / geo.zlog_scale)) / (MDIM - 4);
+		(log10 ((zdom[ndom].rmax - z_offset) / zdom[ndom].zlog_scale)) / (MDIM - 4);
 	      if (j == 0)
 		{
 		  w[n].x[2] = 0;
@@ -235,14 +235,14 @@ cylvar_make_grid (w)
 	      else if (j == 1)
 		{
 		  w[n].x[2] = 0.9 * z_offset;	// 0.9 is to keep the first grid cell out of wind
-		  w[n].xcen[2] = z_offset + 0.5 * geo.zlog_scale;
+		  w[n].xcen[2] = z_offset + 0.5 * zdom[ndom].zlog_scale;
 		}
 	      else
 		{
 		  w[n].x[2] = z_offset +
-		    geo.zlog_scale * pow (10, dlogz * (j - 2));
+		    zdom[ndom].zlog_scale * pow (10, dlogz * (j - 2));
 		  w[n].xcen[2] = z_offset +
-		    0.5 * geo.zlog_scale * (pow (10., dlogz * (j - 2)) +
+		    0.5 * zdom[ndom].zlog_scale * (pow (10., dlogz * (j - 2)) +
 					    pow (10., dlogz * (j - 1)));
 		}
 	    }
@@ -335,7 +335,8 @@ cylvar_wind_complete (w)
     {
       for (j = 0; j < MDIM; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  /* PLACEHOLDER NEEDS DOMAIN */		
+	  wind_ij_to_n (i, j, &n, 0);
 	  wind_z_var[i][j] = w[n].x[2];
 	  wind_midz_var[i][j] = w[n].xcen[2];
 	}
@@ -404,7 +405,8 @@ cylvar_volumes (w, icomp)
     {
       for (j = 0; j < MDIM - 1; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  /* PLACEHOLDER NEEDS DOMAIN */		
+	  wind_ij_to_n (i, j, &n, 0);
 
 	  /* Encapsulate the grid cell with a rectangle for integrating */
 	  rmin = w[n].x[0];
@@ -576,7 +578,8 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
       fraction (z[2], wind_midz_var[i], MDIM, &j, fz, 0);	// This should get one close
     }
 
-  wind_ij_to_n (i, j, &cylvar_n_approx);
+  /* PLACEHOLDER NEEDS DOMAIN */	
+  wind_ij_to_n (i, j, &cylvar_n_approx, 0);
 
   /* Check to see if x is outside the region of the calculation.  Note that this
    * caclulation cannot be done until i is determined */
@@ -720,9 +723,10 @@ cylvar_get_random_location (n, icomp, x)
   double fx, fz;
   double zz;
   double phi;
-  int where_in_2dcell ();
+  int ndom;
 
-  wind_n_to_ij (n, &i, &j);
+  ndom = wmain[n].ndomain;
+  wind_n_to_ij (n, &i, &j, ndom);
 
   /* Encapsulate the grid cell with a rectangle for integrating */
 
@@ -835,12 +839,14 @@ cylvar_extend_density (w)
     {
       for (j = 0; j < MDIM - 1; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  /* PLACEHOLDER NEEDS DOMAIN */		
+	  wind_ij_to_n (i, j, &n, 0);
 	  if (w[n].vol == 0)
 
 	    {			//Then this grid point is not in the wind 
-
-	      wind_ij_to_n (i + 1, j, &m);
+          
+          /* PLACEHOLDER NEEDS DOMAIN */	
+	      wind_ij_to_n (i + 1, j, &m, 0);
 
 	      if (w[m].vol > 0)
 		{
@@ -849,7 +855,8 @@ cylvar_extend_density (w)
 		}
 	      else if (i > 0)
 		{
-		  wind_ij_to_n (i - 1, j, &m);
+		  /* PLACEHOLDER NEEDS DOMAIN */		
+		  wind_ij_to_n (i - 1, j, &m, 0);
 		  if (w[m].vol > 0)
 		    {
 		      w[n].nplasma = w[m].nplasma;

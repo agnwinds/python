@@ -348,7 +348,6 @@ spectrum_create (p, f1, f2, nangle, select_extract)
   double freqmin, freqmax, dfreq;
   double lfreqmin, lfreqmax, ldfreq;
   double x1;
-  int wind_n_to_ij ();
   int mscat, mtopbot;
   double delta;
   double nlow, nhigh;

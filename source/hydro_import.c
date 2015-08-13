@@ -717,20 +717,19 @@ History:
 
 
 int
-rtheta_make_hydro_grid (w)
+rtheta_make_hydro_grid (w, ndom)
      WindPtr w;
+     int ndom;
 {
   double theta, thetacen, dtheta;
   int i, j, n;
-
-  
 
 
   for (i = 0; i < NDIM; i++)
     {
       for (j = 0; j < MDIM; j++)
 	{
- 	  wind_ij_to_n (i, j, &n);
+ 	  wind_ij_to_n (i, j, &n, ndom);
 		w[n].inwind = W_ALL_INWIND;	
 	  if (i == 0)  // The inner edge of the grid should be geo.rstar
 		{
@@ -864,9 +863,6 @@ rtheta_hydro_volumes (w)
   int i, j, n;
 
 
-
-
-
   double rmin, rmax, thetamin, thetamax;
 
 
@@ -874,7 +870,9 @@ rtheta_hydro_volumes (w)
     {
       for (j = 0; j < MDIM; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+
+    /* PLACEHOLDER, NEEDS DOMAIN */
+	  wind_ij_to_n (i, j, &n, 0);
 	  if (w[n].inwind == W_ALL_INWIND)
 	    {
 

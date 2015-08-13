@@ -91,56 +91,57 @@ define_wind ()
   int n_vol, n_inwind, n_part;
   int n_comp, n_comp_part;
 
-  int nwind;
+  int nwind, ndom;
   int nplasma;
 
   WindPtr w;
 
-  set_nstart_nstop();
-
-  for (ndom = 0; ndom < geo.ndomain; ndom++
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
 
-
-  /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
+     /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
      to propagate.  This is the reason we divide by NDIM-2 here, rather than NDIM-1 */
 
-  NDIM = xdom[ndom].ndim;
-  MDIM = xdom[ndom].mdim;
-  NDIM2 = xdom[ndom].ndim * xdom[ndom].mdim;
+    NDIM = zdom[ndom].ndim;
+    MDIM = zdom[ndom].mdim;
+    NDIM2 += zdom[ndom].ndim * zdom[ndom].mdim;
+  }
 
   set_nstart_nstop();
   calloc_wind (NDIM2);
 
   w = wmain;
 
-  /* initialize inwind to a known state */
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
+  {
 
-  for (n = xdom[ndom].nstart; n < xdom[ndom].nstop; n++)
+  /* initialize inwind to a known state for all wind cells in this domain */
+
+  for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
     {
       w[n].inwind = W_NOT_INWIND;
     }
 
   //printf ("Got to define wind %i\n",geo.coord_type);
 
-  if (xdom[ndom].wind_type == 9)	//This is the mode where we want the wind and the grid carefully controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
+  if (zdom[ndom].wind_type == 9)	//This is the mode where we want the wind and the grid carefully controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
     {
       Log
 	("We are making a thin shell type grid to match a thin shell wind. This is totally aphysical and should only be used for testing purposes\n");
       shell_make_grid (w, ndom);
     }
-  else if (xdom[ndom].coord_type == SPHERICAL)
+  else if (zdom[ndom].coord_type == SPHERICAL)
     {
       spherical_make_grid (w, ndom);
     }
-  else if (xdom[ndom].coord_type == CYLIND)
+  else if (zdom[ndom].coord_type == CYLIND)
     {
       cylind_make_grid (w, ndom);
     }
-  else if (xdom[ndom].coord_type == RTHETA)
+  else if (zdom[ndom].coord_type == RTHETA)
     {
-      if (xdom[ndom].wind_type == 3) //13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates
+      if (zdom[ndom].wind_type == 3) //13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates
       	{
 	        rtheta_make_hydro_grid (w, ndom);
       	}
@@ -149,16 +150,16 @@ define_wind ()
           rtheta_make_grid (w, ndom);
 	      }
     }
-  else if (xdom[ndom].coord_type == CYLVAR)
+  else if (zdom[ndom].coord_type == CYLVAR)
     {
       cylvar_make_grid (w, ndom);
     }
   else
     {
       Error ("define_wind: Don't know how to make coordinate type %d\n",
-	     xdom[ndom].coord_type);
+	     zdom[ndom].coord_type);
     }
-  for (n = xdom[ndom].nstart; n < xdom[ndom].nstop; n++)
+  for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
     {
       /* 04aug -- ksl -52 -- The next couple of lines are part of the changes
        * made in the program to allow more that one coordinate system in python 
@@ -166,6 +167,8 @@ define_wind ()
       model_velocity (w[n].x, w[n].v);
       model_vgrad (w[n].x, w[n].v_grad);
     }
+
+  }
 
   wind_complete (w);
 
@@ -292,10 +295,10 @@ recreated when a windfile is read into the program
     {
       for (n = 0; n < NDIM2; n++)
 	{
-	  n_inwind = check_corners_inwind (n, 0);
+	  n_inwind = check_corners_inwind (n, 0, ndom);
 	  if (w[n].vol == 0 && n_inwind > 0)
 	    {
-	      wind_n_to_ij (n, &i, &j);
+	      wind_n_to_ij (n, &i, &j, ndom);
 	      Error
 		("wind2d: Cell %3d (%2d,%2d) has %d corners in wind, but zero volume\n",
 		 n, i, j, n_inwind);
@@ -303,7 +306,7 @@ recreated when a windfile is read into the program
 	    }
 	  if (w[n].inwind == W_PART_INWIND && n_inwind == 4)
 	    {
-	      wind_n_to_ij (n, &i, &j);
+	      wind_n_to_ij (n, &i, &j, ndom);
 	      Error
 		("wind2d: Cell %3d (%2d,%2d) has 4 corners in wind, but is only partially in wind\n",
 		 i, j, n);
@@ -1118,15 +1121,17 @@ History
  */
 
 int
-check_corners_inwind (n, icomp)
+check_corners_inwind (n, icomp, ndom)
      int n;
      int icomp;			// check corners for this component
+     int ndom;
 {
   int n_inwind;
   int i, j;
 
-  wind_n_to_ij (n, &i, &j);
+  wind_n_to_ij (n, &i, &j, ndom);
 
+  /* ndom not use, PLACEHOLDER */
   n_inwind = 0;
   if (i < (NDIM - 2) && j < (MDIM - 2))
     {
@@ -1141,3 +1146,21 @@ check_corners_inwind (n, icomp)
     }
   return (n_inwind);
 }
+
+
+
+int
+set_nstart_nstop()
+{
+  int n, ndom;
+  n = 0;
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
+  {
+    zdom[ndom].nstart = n;
+    n += zdom[ndom].ndim * zdom[ndom].mdim;
+    zdom[ndom].nstop = n;
+  }
+  return 0;
+}
+
+

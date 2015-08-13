@@ -567,7 +567,6 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   int n;
   double v[3];
   double dot ();
-  int wind_n_to_ij (), stuff_v (), randvec ();
   int get_random_location ();
   double test;
   int nnscat;
@@ -738,7 +737,6 @@ photo_gen_matom (p, weight, photstart, nphot)
   int n;
   double v[3];
   double dot ();
-  int wind_n_to_ij (), stuff_v (), randvec ();
   int emit_matom ();
   double test;
   int upper;

@@ -494,10 +494,6 @@ int get_radiation_sources()
   return (0);
 }
 
-int get_nstart_and_nstop()
-{
-  int n;
-}
 
 
 /***********************************************************
