@@ -231,20 +231,20 @@ cylind_wind_complete (ndom, w)
   /* JM -- PLACEHOLDER -- NEED TO MOVE INTO DOMAIN STRUCTURE */
   /* JM -- replaced with structures in the domain structure */
   for (i = 0; i < one_dom->ndim; i++)
-    one_dom->wind_x[i] = w[i * one_dom->ndim].x[0];
+    one_dom->wind_x[i] = w[i * one_dom->mdim].x[0];
 
-  for (j = 0; j < one_dom->ndim; j++)
+  for (j = 0; j < one_dom->mdim; j++)
     one_dom->wind_z[j] = w[j].x[2];
 
   for (i = 0; i < one_dom->ndim - 1; i++)
-    one_dom->wind_midx[i] = 0.5 * (w[i * one_dom->ndim].x[0] + w[(i + 1) * one_dom->ndim].x[0]);
+    one_dom->wind_midx[i] = 0.5 * (w[i * one_dom->mdim].x[0] + w[(i + 1) * one_dom->mdim].x[0]);
 
-  for (j = 0; j < one_dom->ndim - 1; j++)
+  for (j = 0; j < one_dom->mdim - 1; j++)
     one_dom->wind_midz[j] = 0.5 * (w[j].x[2] + w[(j + 1)].x[2]);
 
   /* Add something plausible for the edges */
   one_dom->wind_midx[one_dom->ndim - 1] = 2. * one_dom->wind_x[one_dom->ndim - 1] - one_dom->wind_midx[one_dom->ndim - 2];
-  one_dom->wind_midz[one_dom->ndim - 1] = 2. * one_dom->wind_z[one_dom->ndim - 1] - one_dom->wind_midz[one_dom->ndim - 2];
+  one_dom->wind_midz[one_dom->mdim - 1] = 2. * one_dom->wind_z[one_dom->mdim - 1] - one_dom->wind_midz[one_dom->mdim - 2];
 
   return (0);
 }
@@ -326,13 +326,13 @@ cylind_volumes (ndom, w, icomp)
 	  if (w[n].inwind == W_NOT_INWIND)
 	    {
 	      /* PLACEHOLDER, NEEDS DOMAIN */	
-	      n_inwind = check_corners_inwind (n, icomp, ndom);
+	      n_inwind = check_corners_inwind (n, icomp);
 
 
-	      rmin = wind_x[i];
-	      rmax = wind_x[i + 1];
-	      zmin = wind_z[j];
-	      zmax = wind_z[j + 1];
+	      rmin = one_dom->wind_x[i];
+	      rmax = one_dom->wind_x[i + 1];
+	      zmin = one_dom->wind_z[j];
+	      zmax = one_dom->wind_z[j + 1];
 
 	      //leading factor of 2 added to allow for volume above and below plane (SSMay04)
 	      w[n].vol = 2 * PI * (rmax * rmax - rmin * rmin) * (zmax - zmin);
@@ -659,10 +659,13 @@ cylind_is_cell_in_wind (n, icomp)
   int i, j;
   double r, z, dr, dz;
   double rmin, rmax, zmin, zmax;
-  double x[3], ndom;
+  double x[3];
+  int ndom;
+  DomainPtr one_dom;
 
   /* First check if the cell is in the boundary */
   ndom = wmain[n].ndomain;
+  one_dom = &zdom[ndom];
   wind_n_to_ij (ndom,n, &i, &j);
 
   if (i >= (NDIM - 2) && j >= (MDIM - 2))
@@ -673,7 +676,7 @@ cylind_is_cell_in_wind (n, icomp)
   /* Assume that if all four corners are in the wind that the
   entire cell is in the wind */
 
-  if (check_corners_inwind (n, icomp, ndom) == 4)
+  if (check_corners_inwind (n, icomp) == 4)
     {
       //OLD 70b return (W_ALL_INWIND);
       return (icomp);
@@ -682,10 +685,10 @@ cylind_is_cell_in_wind (n, icomp)
   /* So at this point, we have dealt with the easy cases */
 
 
-  rmin = wind_x[i];
-  rmax = wind_x[i + 1];
-  zmin = wind_z[j];
-  zmax = wind_z[j + 1];
+  rmin = one_dom->wind_x[i];
+  rmax = one_dom->wind_x[i + 1];
+  zmin = one_dom->wind_z[j];
+  zmax = one_dom->wind_z[j + 1];
 
   dr = (rmax - rmin) / RESOLUTION;
   dz = (zmax - zmin) / RESOLUTION;

@@ -121,7 +121,7 @@ define_wind ()
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
 
-    Log ("Definex wind %d for domian %d\n", zdom[ndom].coord_type,n);
+    Log ("Define wind %d for domain %d\n", zdom[ndom].coord_type,n);
 
     if (zdom[ndom].wind_type == 9)	//This is the mode where we want the wind and the grid carefully controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
       {
@@ -200,7 +200,7 @@ recreated when a windfile is read into the program
       }
     else if (geo.coord_type == CYLIND)
       {
-        cylind_volumes (w, W_ALL_INWIND);
+        cylind_volumes (ndom, w, W_ALL_INWIND);
       }
     else if (geo.coord_type == RTHETA)
       {
@@ -240,7 +240,7 @@ recreated when a windfile is read into the program
 	}
       else if (geo.coord_type == CYLIND)
 	{
-	  cylind_volumes (w, W_ALL_INTORUS);
+	  cylind_volumes (ndom, w, W_ALL_INTORUS);
 	}
       else if (geo.coord_type == RTHETA)
 	{
@@ -306,7 +306,7 @@ recreated when a windfile is read into the program
         for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
   	{
 
-  	  n_inwind = check_corners_inwind (n, 0, ndom);
+  	  n_inwind = check_corners_inwind (n, 0);
 
   	  if (w[n].vol == 0 && n_inwind > 0)
   	    {
@@ -1160,29 +1160,35 @@ History
  */
 
 int
-check_corners_inwind (ndom, n, icomp)
+check_corners_inwind (n, icomp)
      int n;
      int icomp;			// check corners for this component
-     int ndom;
 {
   int n_inwind;
   int i, j;
+  DomainPtr one_dom;
+  int ndom;
+
+  /* find the domain */
+  ndom = wmain[n].ndomain;
+  one_dom = &zdom[ndom];
 
   wind_n_to_ij (ndom, n, &i, &j);
 
-  /* ndom not use, PLACEHOLDER */
   n_inwind = 0;
-  if (i < (NDIM - 2) && j < (MDIM - 2))
+
+  if (i < (one_dom->ndim - 2) && j < (one_dom->mdim- 2))
     {
       if (where_in_wind (wmain[n].x) == icomp)
 	n_inwind++;
       if (where_in_wind (wmain[n + 1].x) == icomp)
 	n_inwind++;
-      if (where_in_wind (wmain[n + MDIM].x) == icomp)
+      if (where_in_wind (wmain[n + one_dom->mdim].x) == icomp)
 	n_inwind++;
-      if (where_in_wind (wmain[n + MDIM + 1].x) == icomp)
+      if (where_in_wind (wmain[n + one_dom->mdim + 1].x) == icomp)
 	n_inwind++;
     }
+
   return (n_inwind);
 }
 

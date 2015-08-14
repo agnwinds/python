@@ -719,7 +719,7 @@ rtheta_is_cell_in_wind (n, icomp)
   /* Assume that if all four corners are in the wind that the
    * entire cell is in the wind */
 
-  if (check_corners_inwind (n, icomp, ndom) == 4)
+  if (check_corners_inwind (n, icomp) == 4)
     {
       //OLD 70B return (W_ALL_INWIND);
       return (icomp);

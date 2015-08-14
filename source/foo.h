@@ -65,7 +65,7 @@ double rho(WindPtr w, double x[]);
 int mdot_wind(WindPtr w, double z, double rmax);
 int get_random_location(int n, int icomp, double x[]);
 int zero_scatters(void);
-int check_corners_inwind(int ndom, int n, int icomp);
+int check_corners_inwind(int n, int icomp);
 int set_nstart_nstop(void);
 /* wind.c */
 int where_in_wind(double x[]);
@@ -356,8 +356,8 @@ double ds_to_pillbox(PhotPtr pp, double rmin, double rmax, double height);
 /* cylindrical.c */
 double cylind_ds_in_cell(PhotPtr p);
 int cylind_make_grid(WindPtr w, int ndom);
-int cylind_wind_complete(WindPtr w);
-int cylind_volumes(WindPtr w, int icomp);
+int cylind_wind_complete(int ndom, WindPtr w);
+int cylind_volumes(int ndom, WindPtr w, int icomp);
 int cylind_where_in_grid(double x[]);
 int cylind_get_random_location(int n, int icomp, double x[]);
 int cylind_extend_density(WindPtr w);
