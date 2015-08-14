@@ -459,7 +459,7 @@ cylvar_volumes (w, icomp)
 		       &f, &g) == 0)
 		    {
 		      kk++;
-		      if (where_in_wind (0,x) == W_ALL_INWIND)
+		      if (where_in_wind (x) == W_ALL_INWIND)
 			{
 			  volume += r;
 			  jj++;
@@ -779,7 +779,7 @@ cylvar_get_random_location (n, icomp, x)
 
 
       x[2] = zmin + (zmax - zmin) * (rand () / (MAXRAND - 0.5));
-      inwind = where_in_wind (0,x);	/* Some photons will not be in the wind
+      inwind = where_in_wind (x);	/* Some photons will not be in the wind
 					   because the boundaries of the wind split the grid cell */
       incell = where_in_2dcell (0, x, n, &fx, &fz);
     }

@@ -69,99 +69,107 @@ History:
 **************************************************************/
 
 int
-where_in_wind (ndom, x)
-     int ndom;
+where_in_wind (x)
      double x[];
 {
   double rho, rho_min, rho_max, z;
   int ireturn;
-  DomainPtr one_dom;
+  int ndom, nuse;
 
-  one_dom = &zdom[ndom];
+  nuse = -1;
 
-  ireturn = W_ALL_INWIND;
+  for (ndom = geo.ndomain - 1; ndom > -1; ndom--)
+  {
+    DomainPtr one_dom;
 
-  //110814 - Currently geo.wind_rmin is always set to geo.rstar except for models that are 
-  //calculated by others.  Thus we would all the grids to start at rmin.
+    one_dom = &zdom[ndom];
+ 
+    ireturn = ndom;
 
-
-  /* First check to see if photon is inside star or outside wind */
-  if ((z = length (x)) < one_dom->wind_rmin)
-    {
-      ireturn = (-3);		/*x is inside the wind  radially */
-    }
-  else if (z > one_dom->wind_rmax)
-    {
-      ireturn = (-4);		/*the position is beyond the wind radially */
-    }
+    //110814 - Currently geo.wind_rmin is always set to geo.rstar except for models that are 
+    //calculated by others.  Thus we would all the grids to start at rmin.
 
 
-  z = fabs (x[2]);		/* This is necessary to get correct answer above
+    /* First check to see if photon is inside star or outside wind */
+    if ((z = length (x)) < one_dom->wind_rmin)
+      {
+        ireturn = -3;		/*x is inside the wind  radially */
+      }
+    else if (z > one_dom->wind_rmax)
+      {
+        ireturn = -4;		/*the position is beyond the wind radially */
+      }
+
+
+    z = fabs (x[2]);		/* This is necessary to get correct answer above
 				   and below plane */
-  rho = sqrt (x[0] * x[0] + x[1] * x[1]);	/* This is distance from z axis */
+    rho = sqrt (x[0] * x[0] + x[1] * x[1]);	/* This is distance from z axis */
 
-  /* Now check to see if position is inside the disk */
-  if (geo.disk_type == 2)
-    {
-      if (rho < geo.diskrad && z < zdisk (rho))
-	return (-5);
-    }
+    /* Now check to see if position is inside the disk */
+    if (geo.disk_type == 2)
+      {
+        if (rho < geo.diskrad && z < zdisk (rho))
+	        ireturn = -5;
+      }
 
-  /* 70b -ksl - Now check if the position is in the torus.  This check
-     precedes the check to see if the position is in the wind
-   */
+    /* 70b -ksl - Now check if the position is in the torus.  This check
+       precedes the check to see if the position is in the wind
+     */
 
-  if (geo.compton_torus)
-    {
-      if (geo.compton_torus_rmin < rho && rho < geo.compton_torus_rmax
-	  && z < geo.compton_torus_zheight)
-	{
-	  return (W_ALL_INTORUS);
-	}
-    }
+    if (geo.compton_torus)
+      {
+        if (geo.compton_torus_rmin < rho && rho < geo.compton_torus_rmax
+  	  && z < geo.compton_torus_zheight)
+  	{
+  	  ireturn = W_ALL_INTORUS;
+  	}
+      }
 
-  /* Now for the elvis wind model, check to see if the position is
-   * inside all of the wind or if it is in the vertical section of the wind
-   *
-   * Note the use of sv_rmax and sv_rmin here, because thise are not the
-   * same as for the windcones gescribed by geo.wind_rmin and geo.wind_rmax
-   * 111124 ksl
-   */
+    /* Now for the elvis wind model, check to see if the position is
+     * inside all of the wind or if it is in the vertical section of the wind
+     *
+     * Note the use of sv_rmax and sv_rmin here, because thise are not the
+     * same as for the windcones gescribed by geo.wind_rmin and geo.wind_rmax
+     * 111124 ksl
+     */
 
-  if (geo.wind_type == 8)
-    {
-      if (rho < one_dom->sv_rmin)
-	{
-	  return (-1);
-	}
-      if (rho < one_dom->sv_rmax && z < one_dom->elvis_offset)
-	{
-	  return (W_ALL_INWIND);
-	}
-    }
-
-
-
-  /* Check if one is inside the inner windcone */
-  if (rho < (rho_min = one_dom->wind_rho_min + z * tan (one_dom->wind_thetamin)))
-    {
-      ireturn = (-1);
-    }
-
-  /* Finally check if positon is outside the outer windcone */
-  /* NSH 130401 - The check below was taking a long time if geo.wind_thetamax was very close to pi/2.
-     check inserted to simply return INWIND if geo.wind_thetamax is within machine precision of pi/2. */
-
-  else if (fabs (one_dom->wind_thetamax - PI / 2.0) > 1e-6)	/* Only perform the next check if thetamax is not equal to pi/2 */
-    {
-      if (rho > (rho_max = one_dom->wind_rho_max + z * tan (one_dom->wind_thetamax)))
-	{
-	  ireturn = (-2);
-	}
-    }				/* If thetamax is equal to pi/2, then the photon must be in the wind if it has got to this point */
+    if (geo.wind_type == 8)
+      {
+        if (rho < one_dom->sv_rmin)
+  	{
+  	  ireturn = -1;
+  	}
+        if (rho < one_dom->sv_rmax && z < one_dom->elvis_offset)
+  	{
+  	  ireturn = ndom;
+  	}
+      }
 
 
-  return (ireturn);
+
+    /* Check if one is inside the inner windcone */
+    if (rho < (rho_min = one_dom->wind_rho_min + z * tan (one_dom->wind_thetamin)))
+      {
+        ireturn = (-1);
+      }
+
+    /* Finally check if positon is outside the outer windcone */
+    /* NSH 130401 - The check below was taking a long time if geo.wind_thetamax was very close to pi/2.
+       check inserted to simply return INWIND if geo.wind_thetamax is within machine precision of pi/2. */
+
+    else if (fabs (one_dom->wind_thetamax - PI / 2.0) > 1e-6)	/* Only perform the next check if thetamax is not equal to pi/2 */
+      {
+        if (rho > (rho_max = one_dom->wind_rho_max + z * tan (one_dom->wind_thetamax)))
+  	{
+  	  ireturn = (-2);
+  	}
+      }				/* If thetamax is equal to pi/2, then the photon must be in the wind if it has got to this point */
+
+    if (ireturn >= 0 && nuse < 0)
+      nuse = ireturn;
+  }
+
+  return (nuse);
 }
 
 
@@ -435,8 +443,8 @@ model_rho (ndom, x)
 
   /* 70b - as this is written the torus simply overlays the wind */
 
-  if ((where_in_wind (0,x) == W_ALL_INTORUS)
-      || (where_in_wind (0,x) == W_PART_INTORUS))
+  if ((where_in_wind (x) == W_ALL_INTORUS)
+      || (where_in_wind (x) == W_PART_INTORUS))
     {
       rho = torus_rho (x);
     }

@@ -300,10 +300,9 @@ cylind_wind_complete (ndom, w)
 
 
 int
-cylind_volumes (ndom, w, icomp)
-     int ndom;
+cylind_volumes (ndom, w)
+     int ndom;			// domain number
      WindPtr w;
-     int icomp;			// component number
 {
   int i, j, n;
   int jj, kk;
@@ -322,14 +321,13 @@ cylind_volumes (ndom, w, icomp)
     {
       for (j = 0; j < one_dom->mdim; j++)
 	{
-	  /* PLACEHOLDER, NEEDS DOMAIN */
+
 	  wind_ij_to_n (ndom, i, j, &n);
 
 	  /* 70b - only try to assign the cell if it has not already been assigned */
 	  if (w[n].inwind == W_NOT_INWIND)
 	    {
-	      /* PLACEHOLDER, NEEDS DOMAIN */	
-	      n_inwind = check_corners_inwind (n, icomp);
+	      n_inwind = check_corners_inwind (n);
 
 
 	      rmin = one_dom->wind_x[i];
@@ -340,7 +338,7 @@ cylind_volumes (ndom, w, icomp)
 	      //leading factor of 2 added to allow for volume above and below plane (SSMay04)
 	      w[n].vol = 2 * PI * (rmax * rmax - rmin * rmin) * (zmax - zmin);
 
-	      n_inwind = cylind_is_cell_in_wind (n, icomp);
+	      n_inwind = cylind_is_cell_in_wind (n);
 
 	      if (n_inwind == W_NOT_INWIND)
 		{
@@ -368,7 +366,8 @@ cylind_volumes (ndom, w, icomp)
 			  x[0] = r;
 			  x[1] = 0;
 			  x[2] = z;
-			  if (where_in_wind (ndom, x) == icomp)
+
+			  if (where_in_wind (x) == ndom)
 			    {
 			      num += r * r;	/* 0 implies in wind */
 			      jj++;
@@ -389,12 +388,12 @@ cylind_volumes (ndom, w, icomp)
 	      else if (jj == kk)
 		{
 		  //OLD 70b w[n].inwind = W_ALL_INWIND;     // All of cell is inwind
-		  w[n].inwind = icomp;	// All of cell is inwind
+		  w[n].inwind = ndom;	// All of cell is inwind
 		}
 	      else
 		{
 		  //OLD 70b w[n].inwind = W_PART_INWIND;    // Some of cell is inwind
-		  w[n].inwind = icomp + 1;	// Some of cell is inwind
+		  w[n].inwind = ndom + 1;	// Some of cell is inwind
 		  w[n].vol *= fraction;
 		}
 	    }
@@ -487,7 +486,7 @@ cylind_where_in_grid (ndom, x)
 
  Arguments:		
  	int n -- Cell in which random poition is to be generated
-	int icomp - The component, e. g. the wind in which the
+	int ndom - The component, e. g. the wind in which the
 		location is to be generated.
  Returns:
  	double x -- the position
@@ -505,10 +504,9 @@ cylind_where_in_grid (ndom, x)
 **************************************************************/
 
 int
-cylind_get_random_location (n, icomp, x)
+cylind_get_random_location (n, x)
      int n;			// Cell in which to create postion
      double x[];		// Returned position
-     int icomp;
 {
   int i, j;
   int inwind;
@@ -530,7 +528,7 @@ cylind_get_random_location (n, icomp, x)
 
   /* Generate a position which is both in the cell and in the wind */
   inwind = -1;
-  while (inwind != icomp)
+  while (inwind != ndom)
     {
       r =
 	sqrt (rmin * rmin +
@@ -544,7 +542,7 @@ cylind_get_random_location (n, icomp, x)
 
 
       x[2] = zmin + (zmax - zmin) * (rand () / (MAXRAND - 0.5));
-      inwind = where_in_wind (ndom, x);	/* Some photons will not be in the wind
+      inwind = where_in_wind (x);	/* Some photons will not be in the wind
 					   because the boundaries of the wind split the grid cell */
     }
 
@@ -661,9 +659,8 @@ History:
 */
 
 int
-cylind_is_cell_in_wind (n, icomp)
+cylind_is_cell_in_wind (n)
      int n;			// cell number
-     int icomp;			// component number
 {
   int i, j;
   double r, z, dr, dz;
@@ -685,10 +682,10 @@ cylind_is_cell_in_wind (n, icomp)
   /* Assume that if all four corners are in the wind that the
   entire cell is in the wind */
 
-  if (check_corners_inwind (n, icomp) == 4)
+  if (check_corners_inwind (n) == 4)
     {
       //OLD 70b return (W_ALL_INWIND);
-      return (icomp);
+      return (ndom);
     }
 
   /* So at this point, we have dealt with the easy cases */
@@ -711,17 +708,19 @@ cylind_is_cell_in_wind (n, icomp)
       x[2] = z;
 
       x[0] = rmin;
-      if (where_in_wind (ndom, x) == icomp)
+
+      if (where_in_wind (x) == ndom)
 	{
 	  //OLD 70b return (W_PART_INWIND);
-	  return (icomp + 1);
+	  return (ndom + 1);
 	}
 
       x[0] = rmax;
-      if (where_in_wind (ndom, x) == icomp)
+
+      if (where_in_wind (x) == ndom)
 	{
 	  //OLD 70b return (W_PART_INWIND);
-	  return (icomp + 1);
+	  return (ndom + 1);
 	}
     }
 
@@ -734,17 +733,19 @@ cylind_is_cell_in_wind (n, icomp)
       x[0] = r;
 
       x[2] = zmin;
-      if (where_in_wind (0,x) == icomp)
+
+      if (where_in_wind (x) == ndom)
 	{
 	  //OLD 70b return (W_PART_INWIND);
-	  return (icomp + 1);
+	  return (ndom + 1);
 	}
 
       x[2] = zmax;
-      if (where_in_wind (0,x) == icomp)
+
+      if (where_in_wind (x) == ndom)
 	{
 	  //OLD 70b return (W_PART_INWIND);
-	  return (icomp + 1);
+	  return (ndom + 1);
 	}
     }
 

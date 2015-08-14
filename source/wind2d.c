@@ -200,7 +200,7 @@ recreated when a windfile is read into the program
       }
     else if (zdom[ndom].coord_type == CYLIND)
       {
-        cylind_volumes (ndom, w, W_ALL_INWIND);
+        cylind_volumes (ndom, w);
       }
     else if (zdom[ndom].coord_type == RTHETA)
       {
@@ -240,7 +240,7 @@ recreated when a windfile is read into the program
 	}
       else if (geo.coord_type == CYLIND)
 	{
-	  cylind_volumes (ndom, w, W_ALL_INTORUS);
+	  cylind_volumes (ndom, w);
 	}
       else if (geo.coord_type == RTHETA)
 	{
@@ -306,7 +306,7 @@ recreated when a windfile is read into the program
         for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
   	{
 
-  	  n_inwind = check_corners_inwind (n, 0);
+  	  n_inwind = check_corners_inwind (n);
 
   	  if (w[n].vol == 0 && n_inwind > 0)
   	    {
@@ -632,7 +632,7 @@ where_in_grid (x)
   if (wig_x != x[0] || wig_y != x[1] || wig_z != x[2])  // Calculate if new position
     {
 
-  for (ndom = geo.ndomain; ndom > 0; ndom--)
+  for (ndom = geo.ndomain - 1; ndom > -1; ndom--)
   {
 
       if (zdom[ndom].coord_type == CYLIND)
@@ -974,7 +974,7 @@ rho (w, x)
   int nplasma;
 
 
-  if (where_in_wind (0,x) != 0)	//note that where_in_wind is independent of grid.
+  if (where_in_wind (x) != 0)	//note that where_in_wind is independent of grid.
     return (0.0);
 
   n = coord_fraction (1, x, nnn, frac, &nelem);
@@ -1093,9 +1093,10 @@ get_random_location (n, icomp, x)
      double x[];		// Returned position
 {
 
+	// PLACEHOLDER --- I don't think any of thee need to transfer icomp, as this is known from n
   if (geo.coord_type == CYLIND)
     {
-      cylind_get_random_location (n, icomp, x);
+      cylind_get_random_location (n, x);
     }
   else if (geo.coord_type == RTHETA)
     {
@@ -1169,9 +1170,8 @@ History
  */
 
 int
-check_corners_inwind (n, icomp)
+check_corners_inwind (n)
      int n;
-     int icomp;			// check corners for this component
 {
   int n_inwind;
   int i, j;
@@ -1188,13 +1188,13 @@ check_corners_inwind (n, icomp)
 
   if (i < (one_dom->ndim - 2) && j < (one_dom->mdim- 2))
     {
-      if (where_in_wind (0,wmain[n].x) == icomp)
+      if (where_in_wind (wmain[n].x) == ndom)
 	n_inwind++;
-      if (where_in_wind (0,wmain[n + 1].x) == icomp)
+      if (where_in_wind (wmain[n + 1].x) == ndom)
 	n_inwind++;
-      if (where_in_wind (0,wmain[n + one_dom->mdim].x) == icomp)
+      if (where_in_wind (wmain[n + one_dom->mdim].x) == ndom)
 	n_inwind++;
-      if (where_in_wind (0,wmain[n + one_dom->mdim + 1].x) == icomp)
+      if (where_in_wind (wmain[n + one_dom->mdim + 1].x) == ndom)
 	n_inwind++;
     }
 

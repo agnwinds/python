@@ -65,10 +65,10 @@ double rho(WindPtr w, double x[]);
 int mdot_wind(WindPtr w, double z, double rmax);
 int get_random_location(int n, int icomp, double x[]);
 int zero_scatters(void);
-int check_corners_inwind(int n, int icomp);
+int check_corners_inwind(int n);
 int set_nstart_nstop(void);
 /* wind.c */
-int where_in_wind(int ndom, double x[]);
+int where_in_wind(double x[]);
 int wind_check(WindPtr www, int n);
 double model_velocity(int ndom, double x[], double v[]);
 int model_vgrad(int ndom, double x[], double v_grad[][3]);
@@ -357,11 +357,11 @@ double ds_to_pillbox(PhotPtr pp, double rmin, double rmax, double height);
 double cylind_ds_in_cell(PhotPtr p);
 int cylind_make_grid(int ndom, WindPtr w);
 int cylind_wind_complete(int ndom, WindPtr w);
-int cylind_volumes(int ndom, WindPtr w, int icomp);
+int cylind_volumes(int ndom, WindPtr w);
 int cylind_where_in_grid(int ndom, double x[]);
-int cylind_get_random_location(int n, int icomp, double x[]);
+int cylind_get_random_location(int n, double x[]);
 int cylind_extend_density(WindPtr w);
-int cylind_is_cell_in_wind(int n, int icomp);
+int cylind_is_cell_in_wind(int n);
 /* rtheta.c */
 double rtheta_ds_in_cell(PhotPtr p);
 int rtheta_make_grid(WindPtr w, int ndom);

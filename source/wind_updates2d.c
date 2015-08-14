@@ -85,6 +85,7 @@ History:
 			and unpack commands for the same reason.
 	14sept	nsh	78b: Changes to deal with the inclusion of direct recombination
 	14nov 	JM 78b: Changed volume to be the filled volume
+	15aug	ksl	Updated for domains
 
 
 **************************************************************/
@@ -98,7 +99,10 @@ WindPtr (w);
 {
   int n, i, j;
   double trad, nh;
-  double wtest, xsum, asum, psum, fsum, lsum, csum, icsum, ausum;	/*1108 NSH csum added to sum compton heating 1204 NSH icsum added to sum induced compton heating */
+
+  /*1108 NSH csum added to sum compton heating 1204 NSH icsum added to sum induced compton heating */
+  double wtest, xsum, asum, psum, fsum, lsum, csum, icsum, ausum;	
+
   double volume;
   char string[LINELEN];
   double t_r_old, t_e_old, dt_r, dt_e;
@@ -111,6 +115,7 @@ WindPtr (w);
   double nsh_lum_hhe;
   double nsh_lum_metals;
   int my_nmin, my_nmax;	//Note that these variables are still used even without MPI on
+
 #ifdef MPI_ON
   int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
   int size_of_commbuffer;

@@ -41,7 +41,6 @@ reposition (w, p)
 {
 
   int n;
-  int stuff_phot ();
 
 
   if (p->nres < 0)
