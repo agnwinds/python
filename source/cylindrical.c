@@ -134,12 +134,15 @@ History:
 
 
 int
-cylind_make_grid (w, ndom)
+cylind_make_grid (ndom, w)
      WindPtr w;
      int ndom;
 {
   double dr, dz, dlogr, dlogz;
   int i, j, n;
+  DomainPtr one_dom;
+
+  one_dom = &zdom[ndom];
 
   /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
@@ -148,19 +151,19 @@ cylind_make_grid (w, ndom)
 
   /* First calculate parameters that are to be calculated at the edge of the grid cell.  This is
      mainly the positions and the velocity */
-  for (i = 0; i < zdom[ndom].ndim; i++)
+  for (i = 0; i < one_dom->ndim; i++)
     {
-      for (j = 0; j < zdom[ndom].mdim; j++)
+      for (j = 0; j < one_dom->mdim; j++)
 	{
 	  wind_ij_to_n (ndom, i, j, &n);
 	  w[n].x[1] = w[n].xcen[1] = 0;	//The cells are all defined in the xz plane
 
 	  /*Define the grid points */
-	  if (zdom[ndom].log_linear == 1)
+	  if (one_dom->log_linear == 1)
 	    {			// linear intervals
 
-	      dr = zdom[ndom].rmax / (zdom[ndom].ndim - 3);
-	      dz = zdom[ndom].rmax / (zdom[ndom].mdim - 3);
+	      dr = one_dom->rmax / (one_dom->ndim - 3);
+	      dz = one_dom->rmax / (one_dom->mdim - 3);
 	      w[n].x[0] = i * dr;	/* The first zone is at the inner radius of
 					   the wind */
 	      w[n].x[2] = j * dz;
@@ -170,31 +173,31 @@ cylind_make_grid (w, ndom)
 	  else
 	    {			//logarithmic intervals
 
-	      dlogr = (log10 (zdom[ndom].rmax / zdom[ndom].xlog_scale)) / (zdom[ndom].ndim - 3);
-	      dlogz = (log10 (zdom[ndom].rmax / zdom[ndom].zlog_scale)) / (zdom[ndom].mdim - 3);
+	      dlogr = (log10 (one_dom->rmax / one_dom->xlog_scale)) / (one_dom->ndim - 3);
+	      dlogz = (log10 (one_dom->rmax / one_dom->zlog_scale)) / (one_dom->mdim - 3);
 	      if (i == 0)
 		{
 		  w[n].x[0] = 0.0;
-		  w[n].xcen[0] = 0.5 * zdom[ndom].xlog_scale;
+		  w[n].xcen[0] = 0.5 * one_dom->xlog_scale;
 		}
 	      else
 		{
-		  w[n].x[0] = zdom[ndom].xlog_scale * pow (10., dlogr * (i - 1));
+		  w[n].x[0] = one_dom->xlog_scale * pow (10., dlogr * (i - 1));
 		  w[n].xcen[0] =
-		    0.5 * zdom[ndom].xlog_scale * (pow (10., dlogr * (i - 1)) +
+		    0.5 * one_dom->xlog_scale * (pow (10., dlogr * (i - 1)) +
 					    pow (10., dlogr * (i)));
 		}
 
 	      if (j == 0)
 		{
 		  w[n].x[2] = 0.0;
-		  w[n].xcen[2] = 0.5 * zdom[ndom].zlog_scale;
+		  w[n].xcen[2] = 0.5 * one_dom->zlog_scale;
 		}
 	      else
 		{
-		  w[n].x[2] = zdom[ndom].zlog_scale * pow (10, dlogz * (j - 1));
+		  w[n].x[2] = one_dom->zlog_scale * pow (10, dlogz * (j - 1));
 		  w[n].xcen[2] =
-		    0.5 * zdom[ndom].zlog_scale * (pow (10., dlogz * (j - 1)) +
+		    0.5 * one_dom->zlog_scale * (pow (10., dlogz * (j - 1)) +
 					    pow (10., dlogz * (j)));
 		}
 	    }

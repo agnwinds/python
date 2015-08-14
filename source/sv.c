@@ -336,7 +336,7 @@ sv_rho (ndom, x)
   if (rzero > one_dom->sv_rmax)
     rzero = one_dom->sv_rmax;
   dtheta_drzero =
-    (sv_theta_wind (rzero, ndom) - sv_theta_wind ((1. - EPSILON) * rzero, ndom)) 
+    (sv_theta_wind (ndom, rzero) - sv_theta_wind (ndom, (1. - EPSILON) * rzero)) 
      / (EPSILON * rzero);
 
   dr_drzero = 1. + ldist * dtheta_drzero / cos (theta);
@@ -381,8 +381,8 @@ History:
 
 double
 sv_find_wind_rzero (ndom, p)
-     double p[];		/* Note that p is a 3 vector and not a photon structure */
      int ndom;
+     double p[];		/* Note that p is a 3 vector and not a photon structure */
 {
   double x, z;
   double zbrent ();
@@ -486,7 +486,7 @@ sv_zero_r (r)
 
   // sv_zero_r_ndom should be set to the domain number before calling sv_zero_r
 
-  theta = sv_theta_wind (r, sv_zero_r_ndom);
+  theta = sv_theta_wind (sv_zero_r_ndom, r);
 
   rho = sqrt (zero_p[0] * zero_p[0] + zero_p[1] * zero_p[1]);
   rho_guess = r + tan (theta) * zero_p[2];
@@ -524,9 +524,9 @@ History:
 **************************************************************/
 
 double
-sv_theta_wind (r, ndom)
-     double r;
+sv_theta_wind (ndom, r)
      int ndom;
+     double r;
 {
   double theta;
   DomainPtr one_dom;
@@ -578,7 +578,7 @@ sv_wind_mdot_integral (r)
   DomainPtr one_dom;
 
   one_dom = &zdom[mdot_integral_ndom];
-  x = 2 * PI * pow (r, one_dom->sv_lambda + 1.) * cos (sv_theta_wind (r, mdot_integral_ndom));
+  x = 2 * PI * pow (r, one_dom->sv_lambda + 1.) * cos (sv_theta_wind (mdot_integral_ndom, r));
   return (x);
 
 }

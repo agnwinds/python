@@ -521,7 +521,7 @@ main (argc, argv)
   /* Define the coordinate system for the grid and allocate memory for the wind structure
      by reading from user */
   if (geo.wind_domain_number != -1)
-    get_grid_params(ndomain);
+    get_grid_params(ndomain - 1); // JM PLACEHOLDER -- really we should change the input order here!
 
 
   /* 080808 - 62 - Ionization section has been cleaned up -- ksl */

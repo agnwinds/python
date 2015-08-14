@@ -295,10 +295,9 @@ int get_grid_params(ndom)
 
 /* Populate the domain structure with information about the coordiante system
 */
-
-  zdom[geo.ndomain].coord_type=geo.coord_type;
-  zdom[geo.ndomain].ndim=geo.ndim;
-  zdom[geo.ndomain].mdim=geo.mdim;
+  //zdom[geo.ndomain].coord_type=geo.coord_type;
+  //zdom[geo.ndomain].ndim=geo.ndim;
+  //zdom[geo.ndomain].mdim=geo.mdim;
 
   return (0);
 }

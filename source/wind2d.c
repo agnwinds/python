@@ -121,7 +121,7 @@ define_wind ()
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
 
-    Log ("Define wind %d for domain %d\n", zdom[ndom].coord_type,n);
+    Log ("Define wind %d for domain %d\n", zdom[ndom].coord_type, ndom);
 
     if (zdom[ndom].wind_type == 9)	//This is the mode where we want the wind and the grid carefully controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
       {
@@ -135,7 +135,7 @@ define_wind ()
       }
     else if (zdom[ndom].coord_type == CYLIND)
       {
-        cylind_make_grid (w, ndom);
+        cylind_make_grid (ndom, w);
       }
     else if (zdom[ndom].coord_type == RTHETA)
       {
@@ -194,15 +194,15 @@ recreated when a windfile is read into the program
   for (ndom = 0; ndom < geo.ndomain; ndom++)
 
   {
-    if (geo.coord_type == SPHERICAL)
+    if (zdom[ndom].coord_type == SPHERICAL)
       {
         spherical_volumes (w, W_ALL_INWIND);
       }
-    else if (geo.coord_type == CYLIND)
+    else if (zdom[ndom].coord_type == CYLIND)
       {
         cylind_volumes (ndom, w, W_ALL_INWIND);
       }
-    else if (geo.coord_type == RTHETA)
+    else if (zdom[ndom].coord_type == RTHETA)
       {
       /* 13jun -- nsh - 76 - This is a switch to allow one to use 
          the actual zeus grid in the special case of a 'proga' wind 
@@ -217,7 +217,7 @@ recreated when a windfile is read into the program
             rtheta_volumes (w, W_ALL_INWIND);
 	        }
       }
-    else if (geo.coord_type == CYLVAR)
+    else if (zdom[ndom].coord_type == CYLVAR)
       {
         cylvar_volumes (w, W_ALL_INWIND);
       }

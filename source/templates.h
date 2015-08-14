@@ -264,7 +264,7 @@ double sv_rho(int ndom, double x[]);
 double sv_find_wind_rzero(int ndom, double p[]);
 int sv_zero_init(double p[]);
 double sv_zero_r(double r);
-double sv_theta_wind(double r, int ndom);
+double sv_theta_wind(int ndom, double r);
 double sv_wind_mdot_integral(double r);
 /* ionization.c */
 int ion_abundances(PlasmaPtr xplasma, int mode);
@@ -355,7 +355,7 @@ double elvis_wind_mdot_integral(double r);
 double ds_to_pillbox(PhotPtr pp, double rmin, double rmax, double height);
 /* cylindrical.c */
 double cylind_ds_in_cell(PhotPtr p);
-int cylind_make_grid(WindPtr w, int ndom);
+int cylind_make_grid(int ndom, WindPtr w);
 int cylind_wind_complete(int ndom, WindPtr w);
 int cylind_volumes(int ndom, WindPtr w, int icomp);
 int cylind_where_in_grid(double x[]);
