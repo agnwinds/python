@@ -306,7 +306,7 @@ create_master_table (rootname)
       /* Now assemble the lines of the table */
       for (i = 0; i < NDIM2; i++)
 	{
-	  wind_n_to_ij (i, &ii, &jj);
+	  wind_n_to_ij (ndom, i, &ii, &jj);
 	  sprintf (start, "%8.2e %8.2e %4d %4d %6d %8.0f %8.2e %8.2e %8.2e ",
 		   wmain[i].xcen[0], wmain[i].xcen[2], ii, jj,
 		   wmain[i].inwind, converge[i],wmain[i].v[0], wmain[i].v[1],
@@ -471,7 +471,7 @@ create_ion_table (rootname, iz)
       /* Now assemble the lines of the table */
       for (i = 0; i < NDIM2; i++)
 	{
-	  wind_n_to_ij (i, &ii, &jj);
+	  wind_n_to_ij (ndom, i, &ii, &jj);
 	  sprintf (start, "%8.2e %8.2e %4d %4d %6d ", wmain[i].xcen[0],
 		   wmain[i].xcen[2], ii, jj, wmain[i].inwind);
 	  strcpy (one_line, start);

@@ -75,7 +75,7 @@ cylvar_ds_in_cell (p)
     }
 
   ndom = wmain[n].ndomain;
-  wind_n_to_ij (n, &ix, &iz, ndom);	/*Convert the index n to two dimensions */
+  wind_n_to_ij (ndom,n, &ix, &iz);	/*Convert the index n to two dimensions */
 
   smax = VERY_BIG;		//initialize smax to a large number
 
@@ -170,7 +170,7 @@ cylvar_make_grid (w, ndom)
     {
       for (j = 0; j < zdom[ndom].mdim; j++)
 	{
-	  wind_ij_to_n (i, j, &n, ndom);
+	  wind_ij_to_n (ndom, i, j, &n);
 	  w[n].x[1] = w[n].xcen[n] = 0;	//The cells are all defined in the xz plane
 
 	  /*Define the grid points */
@@ -336,7 +336,7 @@ cylvar_wind_complete (w)
       for (j = 0; j < MDIM; j++)
 	{
 	  /* PLACEHOLDER NEEDS DOMAIN */		
-	  wind_ij_to_n (i, j, &n, 0);
+	  wind_ij_to_n (0, i, j, &n);
 	  wind_z_var[i][j] = w[n].x[2];
 	  wind_midz_var[i][j] = w[n].xcen[2];
 	}
@@ -406,7 +406,7 @@ cylvar_volumes (w, icomp)
       for (j = 0; j < MDIM - 1; j++)
 	{
 	  /* PLACEHOLDER NEEDS DOMAIN */		
-	  wind_ij_to_n (i, j, &n, 0);
+	  wind_ij_to_n (0,i, j, &n);
 
 	  /* Encapsulate the grid cell with a rectangle for integrating */
 	  rmin = w[n].x[0];
@@ -579,7 +579,7 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
     }
 
   /* PLACEHOLDER NEEDS DOMAIN */	
-  wind_ij_to_n (i, j, &cylvar_n_approx, 0);
+  wind_ij_to_n (0, i, j, &cylvar_n_approx);
 
   /* Check to see if x is outside the region of the calculation.  Note that this
    * caclulation cannot be done until i is determined */
@@ -726,7 +726,7 @@ cylvar_get_random_location (n, icomp, x)
   int ndom;
 
   ndom = wmain[n].ndomain;
-  wind_n_to_ij (n, &i, &j, ndom);
+  wind_n_to_ij (ndom, n, &i, &j);
 
   /* Encapsulate the grid cell with a rectangle for integrating */
 
@@ -840,13 +840,13 @@ cylvar_extend_density (w)
       for (j = 0; j < MDIM - 1; j++)
 	{
 	  /* PLACEHOLDER NEEDS DOMAIN */		
-	  wind_ij_to_n (i, j, &n, 0);
+	  wind_ij_to_n (0, i, j, &n);
 	  if (w[n].vol == 0)
 
 	    {			//Then this grid point is not in the wind 
           
           /* PLACEHOLDER NEEDS DOMAIN */	
-	      wind_ij_to_n (i + 1, j, &m, 0);
+	      wind_ij_to_n (0, i + 1, j, &m);
 
 	      if (w[m].vol > 0)
 		{
@@ -856,7 +856,7 @@ cylvar_extend_density (w)
 	      else if (i > 0)
 		{
 		  /* PLACEHOLDER NEEDS DOMAIN */		
-		  wind_ij_to_n (i - 1, j, &m, 0);
+		  wind_ij_to_n (0, i - 1, j, &m);
 		  if (w[m].vol > 0)
 		    {
 		      w[n].nplasma = w[m].nplasma;

@@ -65,7 +65,7 @@ double rho(WindPtr w, double x[]);
 int mdot_wind(WindPtr w, double z, double rmax);
 int get_random_location(int n, int icomp, double x[]);
 int zero_scatters(void);
-int check_corners_inwind(int n, int icomp, int ndom);
+int check_corners_inwind(int ndom, int n, int icomp);
 int set_nstart_nstop(void);
 /* wind.c */
 int where_in_wind(double x[]);
@@ -295,8 +295,8 @@ int fraction(double value, double array[], int npts, int *ival, double *f, int m
 int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);
 int coord_fraction(int ichoice, double x[], int ii[], double frac[], int *nelem);
 int where_in_2dcell(int ichoice, double x[], int n, double *fx, double *fz);
-int wind_n_to_ij(int n, int *i, int *j, int ndom);
-int wind_ij_to_n(int i, int j, int *n, int ndom);
+int wind_n_to_ij(int ndom, int n, int *i, int *j);
+int wind_ij_to_n(int ndom, int i, int j, int *n);
 /* density.c */
 double get_ion_density(double x[], int nion);
 /* detail.c */

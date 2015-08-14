@@ -1481,6 +1481,11 @@ wind_element (w)
   PlasmaPtr xplasma;
   int m, n, i, j, nn, mm;
   int first, last;
+  int ndom;
+
+  Log("py_wind_sub.wind_element does not work yet\n");
+
+
   n = 50;
 a: printf("There are %i wind elements in this model\n",NDIM2);
 rdint ("Wind.array.element", &n);
@@ -1493,7 +1498,7 @@ rdint ("Wind.array.element", &n);
 	goto a;
 	}
 
-  wind_n_to_ij (n, &i, &j);
+  wind_n_to_ij (ndom,n, &i, &j);
   xplasma = &plasmamain[w[n].nplasma];
 
   Log
@@ -3193,6 +3198,7 @@ complete_physical_summary (w, rootname, ochoice)
   double vtot;
   FILE *fptr, *fopen ();
   PlasmaPtr xplasma;
+  int ndom;
 
   rdint("Save ions as densities (0) or fractions? (1)", &frac_choice);
 
@@ -3223,9 +3229,11 @@ heat_tot\theat_photo\theat_lines\theat_ff\theat_comp\theat_ind_comp\t \
 ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\n");
 
 
+  Log("py_wind_sub does not work yet\n");
+  ndom=0;
   for (n = 0; n < NDIM2; n++)
     {
-      wind_n_to_ij (n, &ii, &jj);
+      wind_n_to_ij (ndom, n, &ii, &jj);
       
       if (w[n].vol > 0.0)
   {

@@ -94,6 +94,10 @@ write_array (filename, choice)
   int i;
   int nn, nnn[4], nelem;
   double frac[4];
+  int ndom;
+  Log("py_wind_sub write array deos not work yet");
+  ndom=0
+
 
   if (choice == 0)		// Then we don't really want output files
     {
@@ -166,7 +170,7 @@ are linear, and x otherwise.  This is not particularly transparent ?? ksl */
 
 	  for (i = 0; i < NDIM2; i++)
 	    {
-	      wind_n_to_ij (i, &ii, &jj);
+	      wind_n_to_ij (ndom,i, &ii, &jj);
 	      fprintf (fptr, "%8.4e %8.4e %8.2e %3d %3d %3d\n",
 		       wmain[i].xcen[0], wmain[i].xcen[2], aaa[i],
 		       wmain[i].inwind, ii, jj);

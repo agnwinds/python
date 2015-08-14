@@ -764,13 +764,13 @@ rtheta_make_zeus_grid (w)
 
   
 
-
+Log("rtheta_make_zeus_grid needs fixing for domains\n");
 
   for (i = 0; i < NDIM; i++)
     {
       for (j = 0; j < MDIM; j++)
 	{
- 	  wind_ij_to_n (i, j, &n);
+ 	  wind_ij_to_n (0, i, j, &n);
 		w[n].inwind = W_ALL_INWIND;	
 	  if (i == 0)  // The inner edge of the grid should be geo.rstar
 		{
@@ -824,13 +824,13 @@ rtheta_make_zeus_grid (w)
 
 /*for (i = 0; i < NDIM; i++)
 	{
-	wind_ij_to_n (i, 0, &n);
+	wind_ij_to_n (0, i, 0, &n);
 	printf ("i=%i, n=%i, r=%e, rcen=%e\n",i,n,w[n].r,w[n].rcen);
 	}
 
 for (i = 0; i < MDIM; i++)
 	{
-	wind_ij_to_n (0, i, &n);
+	wind_ij_to_n (0, 0, i, &n);
 	printf ("j=%i,  iprogatheta=%i, n=%i, theta=%f, thetacen=%f\n",i,iproga_theta,n,w[n].theta,w[n].thetacen);
 	}*/
 
@@ -901,12 +901,14 @@ rtheta_zeus_volumes (w)
 
   double rmin, rmax, thetamin, thetamax;
 
+  Log("rtheta_zeus_volumes needs fixing for Domains\n")
+
 
   for (i = 0; i < NDIM; i++)
     {
       for (j = 0; j < MDIM; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  wind_ij_to_n (0, i, j, &n);
 	  if (w[n].inwind == W_ALL_INWIND)
 	    {
 

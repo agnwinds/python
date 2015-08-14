@@ -722,7 +722,7 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 	for (i = 0; i < NDIM; i++) {
 		for (j = 0; j < MDIM; j++) {
 			/* PLACEHOLDER NEEDS DOMAIN */	
-			wind_ij_to_n(i, j, &n, 0);
+			wind_ij_to_n(0, i, j, &n);
 
 			for (k = 0; k <= g_path_data->i_theta_res; k++) {
 				r_theta = k * (PI / (double)g_path_data->i_theta_res);
@@ -775,7 +775,7 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 	for (i = 0; i < NDIM - 1; i++) {
 		for (j = 0; j < MDIM - 1; j++) {
 			/* PLACEHOLDER NEEDS DOMAIN */	
-			wind_ij_to_n(i, j, &n, 0);
+			wind_ij_to_n(0, i, j, &n);
 			for (k = 0; k < g_path_data->i_theta_res; k++) {
 				fprintf(fptr, "%d\n", wind[n].paths->i_num);
 				fprintf(fptr, "%d\n", wind[n].paths->i_num);
@@ -788,7 +788,7 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 	for (i = 0; i < NDIM - 1; i++) {
 		for (j = 0; j < MDIM - 1; j++) {
 			/* PLACEHOLDER NEEDS DOMAIN */	
-			wind_ij_to_n(i, j, &n, 0);
+			wind_ij_to_n(0, i, j, &n);
 			for (k = 0; k < g_path_data->i_theta_res; k++) {
 				if (wind[n].paths->i_num > 0) {
 					r_err = sqrt((double)wind[n].paths->i_num) /
@@ -809,7 +809,7 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 	for (i = 0; i < NDIM - 1; i++) {
 		for (j = 0; j < MDIM - 1; j++) {
 			/* PLACEHOLDER NEEDS DOMAIN */	
-			wind_ij_to_n(i, j, &n, 0);
+			wind_ij_to_n(0,i, j, &n);
 			for (k = 0; k < g_path_data->i_theta_res; k++) {
 				if (wind[n].paths->i_num > 0) {
 					double		f_diff;
@@ -836,7 +836,7 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 	for (i = 0; i < NDIM - 1; i++) {
 		for (j = 0; j < MDIM - 1; j++) {
 			/* PLACEHOLDER NEEDS DOMAIN */	
-			wind_ij_to_n(i, j, &n, 0);
+			wind_ij_to_n(0, i, j, &n);
 			for (k = 0; k < g_path_data->i_theta_res; k++) {
 				if (wind[n].paths->i_num > 0) {
 					fprintf(fptr, "%g\n", wind[n].paths->d_path);
@@ -857,7 +857,7 @@ wind_paths_output(WindPtr wind, char c_file_in[])
 		for (i = 0; i < NDIM - 1; i++) {
 			for (j = 0; j < MDIM - 1; j++) {
 				/* PLACEHOLDER NEEDS DOMAIN */	
-				wind_ij_to_n(i, j, &n, 0);
+				wind_ij_to_n(0, i, j, &n);
 				for (k = 0; k < g_path_data->i_theta_res; k++) {
 					if (wind[n].paths->i_num > 0) {
 						r_theta = k * (PI / (double)g_path_data->i_theta_res);

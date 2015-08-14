@@ -729,7 +729,7 @@ rtheta_make_hydro_grid (w, ndom)
     {
       for (j = 0; j < MDIM; j++)
 	{
- 	  wind_ij_to_n (i, j, &n, ndom);
+ 	  wind_ij_to_n (ndom, i, j, &n);
 		w[n].inwind = W_ALL_INWIND;	
 	  if (i == 0)  // The inner edge of the grid should be geo.rstar
 		{
@@ -791,13 +791,13 @@ rtheta_make_hydro_grid (w, ndom)
 /*
 for (i = 0; i < NDIM; i++)
 	{
-	wind_ij_to_n (i, 0, &n);
+	wind_ij_to_n (0, i, 0, &n);
 	printf ("i=%i, n=%i, r=%e, rcen=%e\n",i,n,w[n].r,w[n].rcen);
 	}
 
 for (i = 0; i < MDIM; i++)
 	{
-	wind_ij_to_n (0, i, &n);
+	wind_ij_to_n (0, 0, i, &n);
 	printf ("j=%i,  ihydrotheta=%i, n=%i, theta=%f, thetacen=%f\n",i,ihydro_theta,n,w[n].theta,w[n].thetacen);
 	}
 */
@@ -872,7 +872,7 @@ rtheta_hydro_volumes (w)
 	{
 
     /* PLACEHOLDER, NEEDS DOMAIN */
-	  wind_ij_to_n (i, j, &n, 0);
+	  wind_ij_to_n (0, i, j, &n);
 	  if (w[n].inwind == W_ALL_INWIND)
 	    {
 

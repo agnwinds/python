@@ -113,17 +113,16 @@ define_wind ()
 
   w = wmain;
 
+  /* initialize inwind to a known state for all wind cells in this domain */
+  for (n=0;n<NDIM2;n++){
+	  w[n].inwind = W_NOT_INWIND;
+  }
+
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
 
-  /* initialize inwind to a known state for all wind cells in this domain */
 
-  for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
-    {
-      w[n].inwind = W_NOT_INWIND;
-    }
-
-  //printf ("Got to define wind %i\n",geo.coord_type);
+  Log ("Define wind %d for domian %d\n",zdom[ndom].coord_type,n);
 
   if (zdom[ndom].wind_type == 9)	//This is the mode where we want the wind and the grid carefully controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
     {
@@ -291,25 +290,25 @@ recreated when a windfile is read into the program
 /* 56d --Now check the volume calculations for 2d wind models 
    58b --If corners are in the wind, but there is zero_volume then ignore.
 */
-  if (geo.coord_type != SPHERICAL)
+  if (zdom[ndom].coord_type != SPHERICAL)
     {
       for (n = 0; n < NDIM2; n++)
 	{
 	  n_inwind = check_corners_inwind (n, 0, ndom);
 	  if (w[n].vol == 0 && n_inwind > 0)
 	    {
-	      wind_n_to_ij (n, &i, &j, ndom);
+	      wind_n_to_ij (ndom, n, &i, &j);
 	      Error
-		("wind2d: Cell %3d (%2d,%2d) has %d corners in wind, but zero volume\n",
-		 n, i, j, n_inwind);
+		("wind2d: Cell %3d (%2d,%2d) in doman %d has %d corners in wind, but zero volume\n",
+		 n, i, j, n_inwind,ndom);
 	      w[n].inwind = W_IGNORE;
 	    }
 	  if (w[n].inwind == W_PART_INWIND && n_inwind == 4)
 	    {
-	      wind_n_to_ij (n, &i, &j, ndom);
+	      wind_n_to_ij (ndom, n, &i, &j);
 	      Error
-		("wind2d: Cell %3d (%2d,%2d) has 4 corners in wind, but is only partially in wind\n",
-		 i, j, n);
+		("wind2d: Cell %3d (%2d,%2d) in domain %d has 4 corners in wind, but is only partially in wind\n",
+		 i, j, n,ndom);
 	    }
 	}
 
@@ -353,28 +352,40 @@ be optional which variables beyond here are moved to structures othere than Wind
       /* 140905 - ksl - Next two lines allow for clumping */
       plasmamain[n].rho = model_rho (x)/geo.fill;
       plasmamain[n].vol = w[nwind].vol*geo.fill;	// Copy volumes
-/* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, I've put new things in here to initialise the exponential models */
+/* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, 
+ * I've put new things in here to initialise the exponential models */
       for (nn = 0; nn < NXBANDS; nn++)
 	{
-	  plasmamain[n].spec_mod_type[nn] = SPEC_MOD_FAIL;	/*NSH 120817 - setting this to a negative number means that at the outset, we assume we do not have a suitable model for the cell */
-	  plasmamain[n].exp_temp[nn] = geo.tmax;	/*NSH 120817 - as an initial guess, set this number to the hottest part of the model - this should define where any exponential dropoff becomes important */
+	  plasmamain[n].spec_mod_type[nn] = SPEC_MOD_FAIL;	/*NSH 120817 - setting this to 
+	      a negative number means that at the outset, we assume we do not have a 
+	      suitable model for the cell */
+	  plasmamain[n].exp_temp[nn] = geo.tmax;	/*NSH 120817 - as an initial guess, 
+							  set this number to the hottest part of the model - 
+							  this should define where any exponential dropoff becomes important */
 	  plasmamain[n].exp_w[nn] = 0.0;	/* 120817 Who knows what this should be! */
-	  plasmamain[n].pl_alpha[nn] = geo.alpha_agn;	//As an initial guess we assume the whole wind is optically thin and so the spectral index for a PL illumination will be the same everywhere.
+	  plasmamain[n].pl_alpha[nn] = geo.alpha_agn;	/*As an initial guess we assume the whole wind is 
+	  			optically thin and so the spectral index for a PL illumination will be the 
+				same everywhere.  */
 	  /*     plasmamain[n].pl_w[nn] = geo.const_agn / (4.0*PI*(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]));  // constant / area of a sphere
 	     plasmamain[n].pl_w[nn] /= 4.*PI;   // take account of solid angle NSH 120817 removed - if PL not suitable, it will be set to zero anyway, so safe to keep it at zero from the outset! */
 //	  plasmamain[n].pl_w[nn] = 0.0;
+
 	  plasmamain[n].pl_log_w[nn] = -1e99; /*131114 - a tiny weight - just to fill the variable */ 
 
 
-          plasmamain[n].fmin_mod[nn] = 1e99; /* Set the minium model frequency to the max frequency in the band - means it will never be used which is correct at this time - there is no model */
+          plasmamain[n].fmin_mod[nn] = 1e99; /* Set the minium model frequency to the max frequency in the band - 
+						means it will never be used which is correct at this time - there is no model */
           plasmamain[n].fmax_mod[nn] = 1e-99; /* Set the maximum model frequency to the min frequency in the band */
 	}
 
 
-/* NSH 130530 Next few lines allow the use of the temperature which can be computed from Zeus models to be used as an initial guess for the wind temperature */
-      if (geo.wind_type == 3)
+/* NSH 130530 Next few lines allow the use of the temperature which can be computed from Zeus models to be 
+ * used as an initial guess for the wind temperature */
+
+      if (zdom[ndom].wind_type == 3)
 	{
-	  plasmamain[n].t_r = hydro_temp (x)/0.9; //This is a kluge, it means that we get the temperature we expect, if we read in a temperature from a zeus file - otherwise it is multiplies by 0.9 //
+	  plasmamain[n].t_r = hydro_temp (x)/0.9; //This is a kluge, it means that we get the temperature we expect, 
+	  	// if we read in a temperature from a zeus file - otherwise it is multiplies by 0.9 //
 	}
       else
 	{
@@ -385,6 +396,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 
 
       /* 70b - Initialize the temperature in the torus to a different value */
+
       if (w[nwind].inwind == W_ALL_INTORUS
 	  || w[nwind].inwind == W_PART_INTORUS)
 	{
@@ -1121,7 +1133,7 @@ History
  */
 
 int
-check_corners_inwind (n, icomp, ndom)
+check_corners_inwind (ndom, n, icomp)
      int n;
      int icomp;			// check corners for this component
      int ndom;
@@ -1129,7 +1141,7 @@ check_corners_inwind (n, icomp, ndom)
   int n_inwind;
   int i, j;
 
-  wind_n_to_ij (n, &i, &j, ndom);
+  wind_n_to_ij (ndom, n, &i, &j);
 
   /* ndom not use, PLACEHOLDER */
   n_inwind = 0;

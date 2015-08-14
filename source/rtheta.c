@@ -55,7 +55,7 @@ rtheta_ds_in_cell (p)
     }
 
   ndom = wmain[n].ndomain;
-  wind_n_to_ij (n, &ix, &iz, ndom);	/*Convert the index n to two dimensions */
+  wind_n_to_ij (ndom, n, &ix, &iz);	/*Convert the index n to two dimensions */
 
 
   /* Set up the quadratic equations in the radial  direction */
@@ -154,7 +154,7 @@ rtheta_make_grid (w, ndom)
     {
       for (j = 0; j < zdom[ndom].mdim; j++)
 	{
-	  wind_ij_to_n (i, j, &n, ndom);
+	  wind_ij_to_n (ndom, i, j, &n);
 
 
 	  /*Define the grid points */
@@ -375,7 +375,7 @@ rtheta_volumes (w, icomp)
       for (j = 0; j < MDIM; j++)
 	{
 	  /* PLACEHOLDER NEEDS DOMAIN */	 
-	  wind_ij_to_n (i, j, &n, 0);
+	  wind_ij_to_n (0, i, j, &n);
 	  if (w[n].inwind == W_NOT_INWIND)
 	    {
 
@@ -518,7 +518,7 @@ rtheta_where_in_grid (x)
 
   /* At this point i,j are just outside the x position */
   /* PLACEHOLDER NEEDS DOMAIN */	
-  wind_ij_to_n (i, j, &n, 0);
+  wind_ij_to_n (0, i, j, &n);
 
   return (n);
 }
@@ -562,7 +562,7 @@ rtheta_get_random_location (n, icomp, x)
   int ndom;
 
   ndom = wmain[n].ndomain;
-  wind_n_to_ij (n, &i, &j, ndom);
+  wind_n_to_ij (ndom, n, &i, &j);
 
   rmin = wind_x[i];
   rmax = wind_x[i + 1];
@@ -646,13 +646,13 @@ rtheta_extend_density (w)
       for (j = 0; j < MDIM - 1; j++)
 	{
 	  /* PLACEHOLDER NEEDS DOMAIN */		
-	  wind_ij_to_n (i, j, &n, 0);
+	  wind_ij_to_n (0, i, j, &n);
 	  if (w[n].vol == 0)
 
 	    {			//Then this grid point is not in the wind 
 
           /* PLACEHOLDER NEEDS DOMAIN */	
-	      wind_ij_to_n (i + 1, j, &m, 0);
+	      wind_ij_to_n (0, i + 1, j, &m);
 	      if (w[m].vol > 0)
 		{		//Then the windcell in the +x direction is in the wind and
 		  // we can copy the densities to the grid cell n
@@ -662,7 +662,7 @@ rtheta_extend_density (w)
 	      else if (i > 0)
 		{
 		  /* PLACEHOLDER NEEDS DOMAIN */		
-		  wind_ij_to_n (i - 1, j, &m, 0);
+		  wind_ij_to_n (0, i - 1, j, &m);
 		  if (w[m].vol > 0)
 		    {		//Then the grid cell in the -x direction is in the wind and
 		      // we can copy the densities to the grid cell n
@@ -709,7 +709,7 @@ rtheta_is_cell_in_wind (n, icomp)
 
   /* First check if the cell is in the boundary */
   ndom = wmain[n].ndomain;
-  wind_n_to_ij (n, &i, &j, ndom);
+  wind_n_to_ij (ndom, n, &i, &j);
 
   if (i >= (NDIM - 2) && j >= (MDIM - 2))
     {
