@@ -3488,8 +3488,8 @@ int get_los_dvds(w, rootname, ochoice)
       /* next choice is for turning off rotational velocity */
       else if (vchoice == 1)
         {
-          model_velocity(p.x, v1);
-          model_velocity(ptest.x, v2);
+          model_velocity(ndom, p.x, v1);
+          model_velocity(ndom, ptest.x, v2);
           v1[1] = 0.0;
           v2[1] = 0.0;
 
@@ -3504,13 +3504,13 @@ int get_los_dvds(w, rootname, ochoice)
       else
         {
           r = sqrt (p.x[0] * p.x[0] + p.x[1] * p.x[1]);
-          rzero = sv_find_wind_rzero (p.x);
+          rzero = sv_find_wind_rzero (ndom, p.x);
           v1[0] = v1[2] = 0.0;
           v1[1] = sqrt (G * geo.mstar * rzero) / r;
 
 
           r = sqrt (ptest.x[0] * ptest.x[0] + ptest.x[1] * ptest.x[1]);
-          rzero = sv_find_wind_rzero (ptest.x);
+          rzero = sv_find_wind_rzero (ndom, ptest.x);
           v2[0] = v2[2] = 0.0;
           v2[1] = sqrt (G * geo.mstar * rzero) / r;
 

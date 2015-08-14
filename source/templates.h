@@ -70,8 +70,8 @@ int set_nstart_nstop(void);
 /* wind.c */
 int where_in_wind(double x[]);
 int wind_check(WindPtr www, int n);
-double model_velocity(double x[], double v[], int ndom);
-int model_vgrad(double x[], double v_grad[][3], int ndom);
+double model_velocity(int ndom, double x[], double v[]);
+int model_vgrad(int ndom, double x[], double v_grad[][3]);
 double model_rho(double x[]);
 /* vector.c */
 double dot(double a[], double b[]);
@@ -260,8 +260,8 @@ int save_photon_stats(WindPtr one, PhotPtr p, double ds);
 /* sv.c */
 int get_sv_wind_params(int ndom);
 double sv_velocity(double x[], double v[], int ndom);
-double sv_rho(double x[], int ndom);
-double sv_find_wind_rzero(double p[], int ndom);
+double sv_rho(int ndom, double x[]);
+double sv_find_wind_rzero(int ndom, double p[]);
 int sv_zero_init(double p[]);
 double sv_zero_r(double r);
 double sv_theta_wind(double r, int ndom);
