@@ -533,7 +533,7 @@ get_wind_params(ndom)
     geo.rmax = 50. * geo.r_agn;
   }
 
-  rddoub ("wind.radmax(cm)", &geo.rmax);
+  rddoub ("wind.radmax(cm)", &zdom[ndom].rmax);
   rddoub ("wind.t.init", &geo.twind);
 
   geo.diskrad_sq = geo.diskrad * geo.diskrad;

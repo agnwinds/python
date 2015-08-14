@@ -671,7 +671,7 @@ cylind_is_cell_in_wind (n, icomp)
   one_dom = &zdom[ndom];
   wind_n_to_ij (ndom,n, &i, &j);
 
-  if (i >= (NDIM - 2) && j >= (MDIM - 2))
+  if (i >= (one_dom->ndim - 2) && j >= (one_dom->mdim - 2))
     {
       return (W_NOT_INWIND);
     }

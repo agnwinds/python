@@ -69,7 +69,8 @@ History:
 **************************************************************/
 
 int
-where_in_wind (x)
+where_in_wind (ndom, x)
+     int ndom;
      double x[];
 {
   double rho, rho_min, rho_max, z;
@@ -82,11 +83,11 @@ where_in_wind (x)
 
 
   /* First check to see if photon is inside star or outside wind */
-  if ((z = length (x)) < geo.wind_rmin)
+  if ((z = length (x)) < one_dom->wind_rmin)
     {
       ireturn = (-3);		/*x is inside the wind  radially */
     }
-  else if (z > geo.wind_rmax)
+  else if (z > one_dom->wind_rmax)
     {
       ireturn = (-4);		/*the position is beyond the wind radially */
     }
@@ -126,11 +127,11 @@ where_in_wind (x)
 
   if (geo.wind_type == 8)
     {
-      if (rho < geo.sv_rmin)
+      if (rho < one_dom->sv_rmin)
 	{
 	  return (-1);
 	}
-      if (rho < geo.sv_rmax && z < geo.elvis_offset)
+      if (rho < one_dom->sv_rmax && z < one_dom->elvis_offset)
 	{
 	  return (W_ALL_INWIND);
 	}
@@ -139,7 +140,7 @@ where_in_wind (x)
 
 
   /* Check if one is inside the inner windcone */
-  if (rho < (rho_min = geo.wind_rho_min + z * tan (geo.wind_thetamin)))
+  if (rho < (rho_min = one_dom->wind_rho_min + z * tan (one_dom->wind_thetamin)))
     {
       ireturn = (-1);
     }
@@ -148,9 +149,9 @@ where_in_wind (x)
   /* NSH 130401 - The check below was taking a long time if geo.wind_thetamax was very close to pi/2.
      check inserted to simply return INWIND if geo.wind_thetamax is within machine precision of pi/2. */
 
-  else if (fabs (geo.wind_thetamax - PI / 2.0) > 1e-6)	/* Only perform the next check if thetamax is not equal to pi/2 */
+  else if (fabs (one_dom->wind_thetamax - PI / 2.0) > 1e-6)	/* Only perform the next check if thetamax is not equal to pi/2 */
     {
-      if (rho > (rho_max = geo.wind_rho_max + z * tan (geo.wind_thetamax)))
+      if (rho > (rho_max = one_dom->wind_rho_max + z * tan (one_dom->wind_thetamax)))
 	{
 	  ireturn = (-2);
 	}
