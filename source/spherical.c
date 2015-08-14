@@ -53,9 +53,6 @@ spherical_ds_in_cell (p)
 
   int n, ix;
   double s, smax;
-  int where_in_grid ();
-  int quadratic ();
-  int radiation ();
 
   if ((p->grid = n = where_in_grid (p->x)) < 0)
     {

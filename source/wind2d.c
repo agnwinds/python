@@ -1057,9 +1057,10 @@ get_random_location (n, icomp, x)
      double x[];		// Returned position
 {
 
+	// PLACEHOLDER --- I don't think any of thee need to transfer icomp, as this is known from n
   if (geo.coord_type == CYLIND)
     {
-      cylind_get_random_location (n, icomp, x);
+      cylind_get_random_location (n, x);
     }
   else if (geo.coord_type == RTHETA)
     {

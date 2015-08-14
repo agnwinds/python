@@ -357,11 +357,11 @@ double ds_to_pillbox(PhotPtr pp, double rmin, double rmax, double height);
 double cylind_ds_in_cell(PhotPtr p);
 int cylind_make_grid(WindPtr w, int ndom);
 int cylind_wind_complete(WindPtr w);
-int cylind_volumes(WindPtr w, int icomp);
+int cylind_volumes(WindPtr w, int ndom);
 int cylind_where_in_grid(double x[]);
-int cylind_get_random_location(int n, int icomp, double x[]);
+int cylind_get_random_location(int n, double x[]);
 int cylind_extend_density(WindPtr w);
-int cylind_is_cell_in_wind(int n, int icomp);
+int cylind_is_cell_in_wind(int n);
 /* rtheta.c */
 double rtheta_ds_in_cell(PhotPtr p);
 int rtheta_make_grid(WindPtr w, int ndom);
