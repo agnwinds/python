@@ -1483,7 +1483,8 @@ wind_element (w)
   int first, last;
   int ndom;
 
-  Log("py_wind_sub.wind_element does not work yet\n");
+  ndom=w->ndomain;
+
 
 
   n = 50;
@@ -3442,6 +3443,10 @@ int get_los_dvds(w, rootname, ochoice)
   int vchoice, sight_choice;
   double obs_angle, rzero, r;
   char filename[LINELENGTH], suffix[LINELENGTH];
+
+  int ndom;
+
+  ndom=w->ndomain;
 
   vchoice = 0;
   phase = 0;

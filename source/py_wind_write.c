@@ -96,7 +96,7 @@ write_array (filename, choice)
   double frac[4];
   int ndom;
   Log("py_wind_sub write array deos not work yet");
-  ndom=0
+  ndom=0;
 
 
   if (choice == 0)		// Then we don't really want output files
