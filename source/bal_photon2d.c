@@ -189,6 +189,13 @@ translate_in_wind (w, p, tau_scat, tau, nres)
   double calculate_ds ();
   double ds_to_wind ();
   int istat;
+  int ndom;
+
+  Error("This routine does not work yet\n");
+
+  ndom=0;
+
+
 
 
 
@@ -198,7 +205,7 @@ translate_in_wind (w, p, tau_scat, tau, nres)
       return (n);		/* Photon was not in wind */
     }
 
-  wind_n_to_ij (n, &ix, &iz);	/*Convert the index n to two dimensions */
+  wind_n_to_ij (ndom, n, &ix, &iz);	/*Convert the index n to two dimensions */
 
   smax = geo.pl_vol - p->x[2];
 

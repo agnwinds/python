@@ -200,7 +200,9 @@ History:
 	1501 	JM moved some parallelization stuff to subroutines in para_update.c
 			functions are communicate_estimators_para, communicate_matom_estimators_para,
 			and gather_spectra_para
-	1502	Major reorganisation of input gathering and setup. See setup.c, #136 and #139
+	1502		Major reorganisation of input gathering and setup. See setup.c, #136 and #139
+	1508	ksl	Instroduction of the concept of domains to handle the disk and wind as separate
+			domains
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -259,6 +261,8 @@ main (argc, argv)
   int my_rank;		// these two variables are used regardless of parallel mode
   int np_mpi;		// rank and number of processes, 0 and 1 in non-parallel
   int time_to_quit;
+  int input_int;
+  int ndomain=0;       //Local variable for ndomain
 
   int mkdir();
 
@@ -347,14 +351,11 @@ main (argc, argv)
  * primarily for creating reasonable .pf files*/
 
 /* Set plausible values for everything in geo struct which basically defines the overall geometry */
-
+/* JM 1508 -- init_geo() also allocates the memory for the domain structure */  
   init_geo ();
 
 /* Set the global variables that define the size of the grid as defined in geo.  These are used for convenience */
 
-  NDIM = geo.ndim;
-  MDIM = geo.mdim;
-  NDIM2 = geo.ndim * geo.mdim;
 
 /* End of definition of wind arrays */
 
@@ -389,10 +390,27 @@ main (argc, argv)
 
 
       rdint
-	("Wind_type(0=SV,1=Sphere,2=Previous,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell)",
-	 &geo.wind_type);
+	("Wind_type(0=SV,1=Sphere,2=Previous,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)",
+	 &zdom[ndomain].wind_type);
 
-      if (geo.wind_type == 2)
+      geo.run_type=0;
+      if (zdom[ndomain].wind_type == PREVIOUS)
+        {
+	      geo.run_type=PREVIOUS;
+        }
+      else if (zdom[ndomain].wind_type != 10) 
+        {
+	      strcat(zdom[ndomain].name,"Wind");
+	      geo.wind_domain_number = ndomain;
+	      ndomain++;
+        }
+      else
+        {
+      	  /* there's no wind, set wind domain_number to -1 */
+      	  geo.wind_domain_number = -1;
+        }
+
+      if (geo.run_type == PREVIOUS)
 	{
 	  /* This option is for the confusing case where we want to start with
 	     a previous wind model, but we are going to write the result to a
@@ -411,7 +429,7 @@ main (argc, argv)
 	      Error ("python: Unable to open %s\n", files.old_windsave);	//program will exit if unable to read the file
 	      exit (0);
 	    }
-	  geo.wind_type = 2;	// after wind_read one will have a different wind_type otherwise
+	  geo.run_type = PREVIOUS;	// after wind_read one will have a different wind_type otherwise
 	  w = wmain;
 
 
@@ -451,7 +469,7 @@ main (argc, argv)
 	  exit (0);
 	}
       w = wmain;
-      geo.wind_type = 2;	// We read the data from a file
+      geo.run_type = PREVIOUS;	// We read the data from a file
       xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.old_windsave);
 
       if (geo.pcycle > 0)
@@ -502,8 +520,8 @@ main (argc, argv)
 
   /* Define the coordinate system for the grid and allocate memory for the wind structure
      by reading from user */
-  
-  get_grid_params();
+  if (geo.wind_domain_number != -1)
+    get_grid_params(ndomain);
 
 
   /* 080808 - 62 - Ionization section has been cleaned up -- ksl */
@@ -526,6 +544,8 @@ main (argc, argv)
       Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
       exit (0);
     }
+
+
 
   /*Normally, geo.partition_mode is set to -1, which means that partition functions are calculated to take
   full advantage of the data file.  This means that in calculating the partition functions, the information
@@ -568,7 +588,7 @@ main (argc, argv)
     geo.macro_simple = 1;	// Make everything simple if no macro atoms -- 57h
 
   //SS - initalise the choice of handling for macro pops.
-  if (geo.wind_type == 2)
+  if (geo.run_type == PREVIOUS)
     {
       geo.macro_ioniz_mode = 1;	// Now that macro atom properties are available for restarts
     }
@@ -598,6 +618,40 @@ main (argc, argv)
 	("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
 	 &geo.disk_type);
 
+  /* ksl 1508 Add parameters for a disk atmosphere */
+  geo.disk_atmosphere = 0;
+  geo.atmos_domain_number = -1; // default is no disk atmosphere
+  zdom[ndomain].ndim = 30;
+  zdom[ndomain].mdim = 10;
+
+  rdint("disk.atmosphere(0=no,1=yes)",&geo.disk_atmosphere);
+  if (geo.disk_atmosphere != 0) 
+    {
+      /* specify the domain name and number */	
+      strcat(zdom[ndomain].name,"Disk Atmosphere");
+	  geo.atmos_domain_number = ndomain;	
+
+	  input_int=1;
+	  rdint  ("atmos.coord.system(1=cylindrical,2=spherical_polar,3=cyl_var)", &input_int);
+	
+	switch(input_int)
+	{
+		case 0: zdom[ndomain].coord_type = SPHERICAL; break;
+		case 1: zdom[ndomain].coord_type = CYLIND; break;
+		case 2: zdom[ndomain].coord_type = RTHETA; break;
+		case 3: zdom[ndomain].coord_type = CYLVAR; break;
+		default: Error("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
+                        0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
+    }
+
+
+	  rdint ("atmos.dim.in.x_or_r.direction", &zdom[ndomain].ndim);
+	  rdint ("atmos.dim.in.z_or_theta.direction", &zdom[ndomain].mdim);
+	  ndomain++;
+  }
+
+
+
 
   /* Determine what radiation sources there are.  
      Note that most of these values are initilized in init_geo */
@@ -605,13 +659,13 @@ main (argc, argv)
   get_radiation_sources (); 
 
 
-  if (geo.wind_type == 2)
+  if (geo.run_type == PREVIOUS)
     {
       disk_illum = geo.disk_illum;
     }
 
 
-  if (geo.wind_type != 2)	// Start of block to define a model for the first time
+  if (geo.run_type != PREVIOUS)	// Start of block to define a model for the first time
     {
 
       /* get_stellar_params gets information like mstar, rstar, tstar etc.
@@ -650,8 +704,8 @@ main (argc, argv)
 
     /* Describe the wind. This routine readsin geo.rmax and geo.twind
        and then gets params by calling e.g. get_sv_wind_params() */
-
-      get_wind_params ();	
+    /* PLACEHOLDER -- call with wind domain number */
+      get_wind_params (geo.wind_domain_number);	
 
     }				// End of block to define a model for the first time
 
@@ -689,7 +743,7 @@ main (argc, argv)
   /*NSH 130821 broken out into a seperate routine added these lines to fix bug41, where
   the cones are never defined for an rtheta grid if the model is restarted */
 
-  if (geo.coord_type==RTHETA && geo.wind_type==2) //We need to generate an rtheta wind cone if we are restarting
+  if (zdom[0].coord_type==RTHETA && geo.run_type==PREVIOUS) //We need to generate an rtheta wind cone if we are restarting
     {
       rtheta_make_cones(wmain);
     }
@@ -758,8 +812,8 @@ main (argc, argv)
       scat_select[n] = 1000;
       top_bot_select[n] = 0;
     }
-  swavemin = 1450;
-  swavemax = 1650;
+  swavemin = 850;
+  swavemax = 1850;
 
 /* These two variables have to do with what types of spectra are created n the
  * spectrum files. They are not associated with the nature of the spectra that
@@ -983,12 +1037,21 @@ main (argc, argv)
       Log ("Run with -i flag, so quitting now inputs have been gathered.\n");	
   	  exit(0);
     }
+/* Print out some diagnositic infomration about the domains */
+geo.ndomain = ndomain;  // Store ndomain in geo so that it can be saved
+
+Log("There are %d domains\n", geo.ndomain);
+for(n=0;n<geo.ndomain;n++){
+	Log("%20s %d %d %d %d %d\n",zdom[n].name,zdom[n].wind_type,zdom[n].ndim,zdom[n].mdim,zdom[n].ndim2);
+}
+
 
   /* INPUTS ARE FINALLY COMPLETE */
 
 
+
   /* Next line finally defines the wind if this is the initial time this model is being run */
-  if (geo.wind_type != 2)	// Define the wind and allocate the arrays the first time
+  if (geo.run_type != PREVIOUS)	// Define the wind and allocate the arrays the first time
 {
     define_wind ();
 }
@@ -1125,7 +1188,7 @@ main (argc, argv)
 
       /* JM 1409 -- We used to execute subcycles here, but these have been removed */
 
-	  if (!geo.wind_radiation || (geo.wcycle == 0 && geo.wind_type != 2))
+	  if (!geo.wind_radiation || (geo.wcycle == 0 && geo.run_type != PREVIOUS))
 	    iwind = -1;		/* Do not generate photons from wind */
 	  else
 	    iwind = 1;		/* Create wind photons and force a reinitialization of wind parms */
@@ -1682,22 +1745,29 @@ History:
 int
 init_geo ()
 {
-  geo.coord_type = 1;
-  geo.ndim = 30;
-  geo.mdim = 30;
+  geo.ndomain = 0;   /*ndomain is a convenience variable so we do not always
+				   need to write geo.ndomain but it should nearly always
+				   be set to the same value as geo.ndomain */
+
+  /* allocate space for maximum number of domains */
+  zdom = (DomainPtr) calloc (sizeof (domain_dummy), MaxDom);
+
+  zdom[0].coord_type = 1;
+  zdom[0].ndim = 30;
+  zdom[0].mdim = 30;
   geo.disk_z0 = geo.disk_z1 = 0.0;	// 080518 - ksl - moved this up
   geo.adiabatic = 1;		// Default is now set so that adiabatic cooling is included in the wind
   geo.auger_ionization = 1;	//Default is on.
 
 
-  geo.wind_type = 0;		// Schlossman and Vitello
+  geo.run_type = 0;		// Not a restart of a previous run
 
   geo.star_ion_spectype = geo.star_spectype
     = geo.disk_ion_spectype = geo.disk_spectype
     = geo.bl_ion_spectype = geo.bl_spectype = SPECTYPE_BB;
   geo.agn_ion_spectype = SPECTYPE_POW;	// 130605 - nsh - moved from python.c
 
-  geo.log_linear = 0;		/* Set intervals to be logarithmic */
+  zdom[0].log_linear = 0;		/* Set intervals to be logarithmic */
 
   geo.rmax = 1e11;
   geo.rmax_sq = geo.rmax * geo.rmax;
@@ -1911,7 +1981,7 @@ get_spectype (yesno, question, spectype)
 	*spectype = SPECTYPE_CL_TAB;
       else
 	{
-	  if (geo.wind_type == 2)
+	  if (geo.run_type == PREVIOUS)
 	    {			// Continuing an old model
 	      strcpy (model_list, geo.model_list[get_spectype_count]);
 	    }

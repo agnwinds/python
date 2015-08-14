@@ -109,8 +109,9 @@ History:
 
 
 int
-spherical_make_grid (w)
+spherical_make_grid (w, ndom)
      WindPtr w;
+     int ndom;
 {
   double dr, dlogr;
   int n;
@@ -120,23 +121,23 @@ spherical_make_grid (w)
       {
 
 	/*Define the grid points */
-	if (geo.log_linear == 1)
+	if (zdom[ndom].log_linear == 1)
 	  {			// linear intervals
 
-	    dr = (geo.rmax - geo.rstar) / (NDIM - 3);
+	    dr = (zdom[ndom].rmax - geo.rstar) / (NDIM - 3);
 	    w[n].r = geo.rstar + n * dr;
 	    w[n].rcen = w[n].r + 0.5 * dr;
 	  }
 	else
 	  {			//logarithmic intervals
-	    dlogr = (log10 (geo.rmax / geo.rstar)) / (NDIM - 3);
+	    dlogr = (log10 (zdom[ndom].rmax / geo.rstar)) / (NDIM - 3);
 	    w[n].r = geo.rstar * pow (10., dlogr * (n - 1));
 	    w[n].rcen = 0.5 * geo.rstar * (pow (10., dlogr * (n)) +
 					   pow (10., dlogr * (n - 1)));
 	    Log ("OLD W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
-	    dlogr = (log10 (geo.rmax / geo.wind_rmin)) / (NDIM - 3);
-	    w[n].r = geo.wind_rmin * pow (10., dlogr * (n - 1));
-	    w[n].rcen = 0.5 * geo.wind_rmin * (pow (10., dlogr * (n)) +
+	    dlogr = (log10 (zdom[ndom].rmax / zdom[ndom].wind_rmin)) / (NDIM - 3);
+	    w[n].r = zdom[ndom].wind_rmin * pow (10., dlogr * (n - 1));
+	    w[n].rcen = 0.5 * zdom[ndom].wind_rmin * (pow (10., dlogr * (n)) +
 					       pow (10., dlogr * (n - 1)));
 	    Log ("New W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
 	  }
@@ -432,8 +433,10 @@ spherical_get_random_location (n, icomp, x)
   int inwind;
   double r, rmin, rmax;
   double theta, phi;
+  int ndom;
 
-  wind_n_to_ij (n, &i, &j);
+  ndom = wmain[n].ndomain;
+  wind_n_to_ij (ndom, n, &i, &j);
   rmin = wind_x[i];
   rmax = wind_x[i + 1];
 
@@ -569,23 +572,24 @@ History:
 
 
 int
-shell_make_grid (w)
+shell_make_grid (w, ndom)
      WindPtr w;
+     int ndom;
 {
   int n;
 
 
-  w[0].r = geo.wind_rmin - (geo.wind_rmax - geo.wind_rmin);
-  w[1].r = geo.wind_rmin;
-  w[2].r = geo.wind_rmax;
-  w[3].r = geo.wind_rmax + (geo.wind_rmax - geo.wind_rmin);
+  w[0].r = zdom[ndom].wind_rmin - (zdom[ndom].wind_rmax - zdom[ndom].wind_rmin);
+  w[1].r = zdom[ndom].wind_rmin;
+  w[2].r = zdom[ndom].wind_rmax;
+  w[3].r = zdom[ndom].wind_rmax + (zdom[ndom].wind_rmax - zdom[ndom].wind_rmin);
 
 
 
   w[0].rcen = (w[0].r + w[1].r) / 2;
   w[1].rcen = (w[1].r + w[2].r) / 2;
   w[2].rcen = (w[2].r + w[3].r) / 2;
-  w[3].rcen = w[2].rcen + (geo.wind_rmax - geo.wind_rmin);
+  w[3].rcen = w[2].rcen + (zdom[ndom].wind_rmax - zdom[ndom].wind_rmin);
 
 
 

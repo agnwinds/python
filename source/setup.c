@@ -228,11 +228,15 @@ History:
 
 **************************************************************/
 
-int get_grid_params()
-
+int get_grid_params(ndom)
+    int ndom;
 {
   int input_int;
-if (geo.wind_type != 2)
+
+  if (ndom != geo.wind_domain_number)
+    Error("Trying to get wind grid params for a non-wind!\n");
+
+  if (geo.wind_type != PREVIOUS)
     {
       /* Define the coordinate system for the grid and allocate memory for the wind structure */
       rdint
@@ -240,37 +244,37 @@ if (geo.wind_type != 2)
    &input_int);
       switch(input_int)
       {
-        case 0: geo.coord_type = SPHERICAL; break;
-        case 1: geo.coord_type = CYLIND; break;
-        case 2: geo.coord_type = RTHETA; break;
-        case 3: geo.coord_type = CYLVAR; break;
+        case 0: zdom[ndom].coord_type = SPHERICAL; break;
+        case 1: zdom[ndom].coord_type = CYLIND; break;
+        case 2: zdom[ndom].coord_type = RTHETA; break;
+        case 3: zdom[ndom].coord_type = CYLVAR; break;
         default: Error("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
           0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
       }
 
-      rdint ("Wind.dim.in.x_or_r.direction", &geo.ndim);
-      if (geo.coord_type)
+      rdint ("Wind.dim.in.x_or_r.direction", &zdom[ndom].ndim);
+      if (zdom[ndom].coord_type)
   {
-    rdint ("Wind.dim.in.z_or_theta.direction", &geo.mdim);
-    if (geo.mdim < 4)
+    rdint ("Wind.dim.in.z_or_theta.direction", &zdom[ndom].mdim);
+    if (zdom[ndom].mdim < 4)
       {
         Error
-    ("python: geo.mdim must be at least 4 to allow for boundaries\n");
+    ("python: domain mdim must be at least 4 to allow for boundaries\n");
         exit (0);
       }
   }
       else
-  geo.mdim = 1;
+  zdom[ndom].mdim = 1;
 
     }
 
 /* 130405 ksl - Check that NDIM_MAX is greater than NDIM and MDIM.  */
 
-  if ((geo.ndim > NDIM_MAX) || (geo.mdim > NDIM_MAX))
+  if ((zdom[ndom].ndim > NDIM_MAX) || (zdom[ndom].mdim > NDIM_MAX))
     {
       Error
   ("NDIM_MAX %d is less than NDIM %d or MDIM %d. Fix in python.h and recompile\n",
-   NDIM_MAX, geo.ndim, geo.mdim);
+   NDIM_MAX, zdom[ndom].ndim, zdom[ndom].mdim);
       exit (0);
     }
 
@@ -283,11 +287,18 @@ if (geo.wind_type != 2)
     if (modes.adjust_grid)
       {
         Log("You have opted to adjust the grid scale lengths\n");
-        rddoub ("geo.xlog_scale", &geo.xlog_scale);
+        rddoub ("geo.xlog_scale", &zdom[ndom].xlog_scale);
         if (geo.coord_type)
-          rddoub ("geo.zlog_scale", &geo.zlog_scale);
+          rddoub ("geo.zlog_scale", &zdom[ndom].zlog_scale);
       }
   }
+
+/* Populate the domain structure with information about the coordiante system
+*/
+
+  zdom[geo.ndomain].coord_type=geo.coord_type;
+  zdom[geo.ndomain].ndim=geo.ndim;
+  zdom[geo.ndomain].mdim=geo.mdim;
 
   return (0);
 }
@@ -492,7 +503,6 @@ int get_radiation_sources()
 
 
 
-
 /***********************************************************
              University of Southampton
 
@@ -515,8 +525,10 @@ History:
 **************************************************************/
 
 int
-get_wind_params()
+get_wind_params(ndom)
+    int ndom;
 {
+
   if (geo.system_type == SYSTEM_TYPE_AGN)
   {
     geo.rmax = 50. * geo.r_agn;
@@ -541,7 +553,7 @@ get_wind_params()
     }
   else if (geo.wind_type == 0)
     {
-      get_sv_wind_params ();
+      get_sv_wind_params (ndom);
     }
   else if (geo.wind_type == 3)
     {
@@ -553,11 +565,11 @@ get_wind_params()
     }
   else if (geo.wind_type == 5)
     {
-      get_knigge_wind_params ();
+      get_knigge_wind_params (ndom);
     }
   else if (geo.wind_type == 6)
     {
-      get_homologous_params ();
+      get_homologous_params (ndom);
     }
   else if (geo.wind_type == 7)
     {

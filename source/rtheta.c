@@ -45,9 +45,7 @@ rtheta_ds_in_cell (p)
 
   int n, ix, iz;
   double s, smax;
-  int where_in_grid (), wind_n_to_ij ();
-  int quadratic ();
-  int radiation ();
+  int ndom;
 
 
   if ((p->grid = n = where_in_grid (p->x)) < 0)
@@ -56,7 +54,8 @@ rtheta_ds_in_cell (p)
       return (n);		/* Photon was not in wind */
     }
 
-  wind_n_to_ij (n, &ix, &iz);	/*Convert the index n to two dimensions */
+  ndom = wmain[n].ndomain;
+  wind_n_to_ij (ndom, n, &ix, &iz);	/*Convert the index n to two dimensions */
 
 
   /* Set up the quadratic equations in the radial  direction */
@@ -134,8 +133,9 @@ History:
 
 
 int
-rtheta_make_grid (w)
+rtheta_make_grid (w, ndom)
      WindPtr w;
+     int ndom;
 {
   double dr, theta, thetacen, dtheta, dlogr;
   int i, j, n;
@@ -150,25 +150,25 @@ rtheta_make_grid (w)
 
   /* First calculate parameters that are to be calculated at the edge of the grid cell.  This is
      mainly the positions and the velocity */
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < zdom[ndom].mdim; i++)
     {
-      for (j = 0; j < MDIM; j++)
+      for (j = 0; j < zdom[ndom].mdim; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  wind_ij_to_n (ndom, i, j, &n);
 
 
 	  /*Define the grid points */
-	  if (geo.log_linear == 1)
+	  if (zdom[ndom].log_linear == 1)
 	    {			// linear intervals
 
-	      dr = (geo.rmax - geo.rstar) / (NDIM - 3);
+	      dr = (zdom[ndom].rmax - geo.rstar) / (NDIM - 3);
 	      w[n].r = geo.rstar + i * dr;
 	      w[n].rcen = w[n].r + 0.5 * dr;
 	    }
 	  else
 	    {			//logarithmic intervals
 
-	      dlogr = (log10 (geo.rmax / geo.rstar)) / (MDIM - 3);
+	      dlogr = (log10 (zdom[ndom].rmax / geo.rstar)) / (MDIM - 3);
 	      w[n].r = geo.rstar * pow (10., dlogr * (i - 1));
 	      w[n].rcen = 0.5 * geo.rstar * (pow (10., dlogr * (i)) +
 					     pow (10., dlogr * (i - 1)));
@@ -374,7 +374,8 @@ rtheta_volumes (w, icomp)
     {
       for (j = 0; j < MDIM; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  /* PLACEHOLDER NEEDS DOMAIN */	 
+	  wind_ij_to_n (0, i, j, &n);
 	  if (w[n].inwind == W_NOT_INWIND)
 	    {
 
@@ -516,7 +517,8 @@ rtheta_where_in_grid (x)
   fraction (theta, wind_z, MDIM, &j, &f, 0);
 
   /* At this point i,j are just outside the x position */
-  wind_ij_to_n (i, j, &n);
+  /* PLACEHOLDER NEEDS DOMAIN */	
+  wind_ij_to_n (0, i, j, &n);
 
   return (n);
 }
@@ -557,8 +559,11 @@ rtheta_get_random_location (n, icomp, x)
   double r, rmin, rmax, sthetamin, sthetamax;
   double theta, phi;
   double zz;
+  int ndom;
 
-  wind_n_to_ij (n, &i, &j);
+  ndom = wmain[n].ndomain;
+  wind_n_to_ij (ndom, n, &i, &j);
+
   rmin = wind_x[i];
   rmax = wind_x[i + 1];
   sthetamin = sin (wind_z[j] / RADIAN);
@@ -640,12 +645,14 @@ rtheta_extend_density (w)
     {
       for (j = 0; j < MDIM - 1; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  /* PLACEHOLDER NEEDS DOMAIN */		
+	  wind_ij_to_n (0, i, j, &n);
 	  if (w[n].vol == 0)
 
 	    {			//Then this grid point is not in the wind 
 
-	      wind_ij_to_n (i + 1, j, &m);
+          /* PLACEHOLDER NEEDS DOMAIN */	
+	      wind_ij_to_n (0, i + 1, j, &m);
 	      if (w[m].vol > 0)
 		{		//Then the windcell in the +x direction is in the wind and
 		  // we can copy the densities to the grid cell n
@@ -654,7 +661,8 @@ rtheta_extend_density (w)
 		}
 	      else if (i > 0)
 		{
-		  wind_ij_to_n (i - 1, j, &m);
+		  /* PLACEHOLDER NEEDS DOMAIN */		
+		  wind_ij_to_n (0, i - 1, j, &m);
 		  if (w[m].vol > 0)
 		    {		//Then the grid cell in the -x direction is in the wind and
 		      // we can copy the densities to the grid cell n
@@ -696,10 +704,12 @@ rtheta_is_cell_in_wind (n, icomp)
   double rmin, rmax, thetamin, thetamax;
   double dr, dtheta;
   double x[3];
+  int ndom;
 
 
   /* First check if the cell is in the boundary */
-  wind_n_to_ij (n, &i, &j);
+  ndom = wmain[n].ndomain;
+  wind_n_to_ij (ndom, n, &i, &j);
 
   if (i >= (NDIM - 2) && j >= (MDIM - 2))
     {
@@ -709,7 +719,7 @@ rtheta_is_cell_in_wind (n, icomp)
   /* Assume that if all four corners are in the wind that the
    * entire cell is in the wind */
 
-  if (check_corners_inwind (n, icomp) == 4)
+  if (check_corners_inwind (n, icomp, ndom) == 4)
     {
       //OLD 70B return (W_ALL_INWIND);
       return (icomp);

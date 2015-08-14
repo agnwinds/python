@@ -50,9 +50,7 @@ cylind_ds_in_cell (p)
   double a, b, c, root[2];
   double z1, z2, q;
   double smax;
-  int where_in_grid (), wind_n_to_ij ();
-  int quadratic ();
-  int radiation ();
+  int ndom;
 
 
   if ((p->grid = n = where_in_grid (p->x)) < 0)
@@ -61,7 +59,8 @@ cylind_ds_in_cell (p)
       return (n);		/* Photon was not in wind */
     }
 
-  wind_n_to_ij (n, &ix, &iz);	/*Convert the index n to two dimensions */
+  ndom = wmain[n].ndomain;
+  wind_n_to_ij (ndom, n, &ix, &iz);	/*Convert the index n to two dimensions */
 
   smax = VERY_BIG;		//initialize smax to a large number
 
@@ -135,8 +134,9 @@ History:
 
 
 int
-cylind_make_grid (w)
+cylind_make_grid (w, ndom)
      WindPtr w;
+     int ndom;
 {
   double dr, dz, dlogr, dlogz;
   int i, j, n;
@@ -148,19 +148,19 @@ cylind_make_grid (w)
 
   /* First calculate parameters that are to be calculated at the edge of the grid cell.  This is
      mainly the positions and the velocity */
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < zdom[ndom].ndim; i++)
     {
-      for (j = 0; j < MDIM; j++)
+      for (j = 0; j < zdom[ndom].mdim; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  wind_ij_to_n (ndom, i, j, &n);
 	  w[n].x[1] = w[n].xcen[1] = 0;	//The cells are all defined in the xz plane
 
 	  /*Define the grid points */
-	  if (geo.log_linear == 1)
+	  if (zdom[ndom].log_linear == 1)
 	    {			// linear intervals
 
-	      dr = geo.rmax / (NDIM - 3);
-	      dz = geo.rmax / (MDIM - 3);
+	      dr = zdom[ndom].rmax / (zdom[ndom].ndim - 3);
+	      dz = zdom[ndom].rmax / (zdom[ndom].mdim - 3);
 	      w[n].x[0] = i * dr;	/* The first zone is at the inner radius of
 					   the wind */
 	      w[n].x[2] = j * dz;
@@ -170,31 +170,31 @@ cylind_make_grid (w)
 	  else
 	    {			//logarithmic intervals
 
-	      dlogr = (log10 (geo.rmax / geo.xlog_scale)) / (NDIM - 3);
-	      dlogz = (log10 (geo.rmax / geo.zlog_scale)) / (MDIM - 3);
+	      dlogr = (log10 (zdom[ndom].rmax / zdom[ndom].xlog_scale)) / (zdom[ndom].ndim - 3);
+	      dlogz = (log10 (zdom[ndom].rmax / zdom[ndom].zlog_scale)) / (zdom[ndom].mdim - 3);
 	      if (i == 0)
 		{
 		  w[n].x[0] = 0.0;
-		  w[n].xcen[0] = 0.5 * geo.xlog_scale;
+		  w[n].xcen[0] = 0.5 * zdom[ndom].xlog_scale;
 		}
 	      else
 		{
-		  w[n].x[0] = geo.xlog_scale * pow (10., dlogr * (i - 1));
+		  w[n].x[0] = zdom[ndom].xlog_scale * pow (10., dlogr * (i - 1));
 		  w[n].xcen[0] =
-		    0.5 * geo.xlog_scale * (pow (10., dlogr * (i - 1)) +
+		    0.5 * zdom[ndom].xlog_scale * (pow (10., dlogr * (i - 1)) +
 					    pow (10., dlogr * (i)));
 		}
 
 	      if (j == 0)
 		{
 		  w[n].x[2] = 0.0;
-		  w[n].xcen[2] = 0.5 * geo.zlog_scale;
+		  w[n].xcen[2] = 0.5 * zdom[ndom].zlog_scale;
 		}
 	      else
 		{
-		  w[n].x[2] = geo.zlog_scale * pow (10, dlogz * (j - 1));
+		  w[n].x[2] = zdom[ndom].zlog_scale * pow (10, dlogz * (j - 1));
 		  w[n].xcen[2] =
-		    0.5 * geo.zlog_scale * (pow (10., dlogz * (j - 1)) +
+		    0.5 * zdom[ndom].zlog_scale * (pow (10., dlogz * (j - 1)) +
 					    pow (10., dlogz * (j)));
 		}
 	    }
@@ -217,25 +217,34 @@ cylind_make_grid (w)
  */
 
 int
-cylind_wind_complete (w)
+cylind_wind_complete (ndom, w)
+     int ndom;
      WindPtr w;
 {
   int i, j;
+  DomainPtr one_dom;
+
+  one_dom = &zdom[ndom];
 
   /* Finally define some one-d vectors that make it easier to locate a photon in the wind given that we
      have adoped a "rectangular" grid of points.  Note that rectangular does not mean equally spaced. */
+  /* JM -- PLACEHOLDER -- NEED TO MOVE INTO DOMAIN STRUCTURE */
+  /* JM -- replaced with structures in the domain structure */
+  for (i = 0; i < one_dom->ndim; i++)
+    one_dom->wind_x[i] = w[i * one_dom->ndim].x[0];
 
-  for (i = 0; i < NDIM; i++)
-    wind_x[i] = w[i * MDIM].x[0];
-  for (j = 0; j < MDIM; j++)
-    wind_z[j] = w[j].x[2];
-  for (i = 0; i < NDIM - 1; i++)
-    wind_midx[i] = 0.5 * (w[i * MDIM].x[0] + w[(i + 1) * MDIM].x[0]);
-  for (j = 0; j < MDIM - 1; j++)
-    wind_midz[j] = 0.5 * (w[j].x[2] + w[(j + 1)].x[2]);
+  for (j = 0; j < one_dom->ndim; j++)
+    one_dom->wind_z[j] = w[j].x[2];
+
+  for (i = 0; i < one_dom->ndim - 1; i++)
+    one_dom->wind_midx[i] = 0.5 * (w[i * one_dom->ndim].x[0] + w[(i + 1) * one_dom->ndim].x[0]);
+
+  for (j = 0; j < one_dom->ndim - 1; j++)
+    one_dom->wind_midz[j] = 0.5 * (w[j].x[2] + w[(j + 1)].x[2]);
+
   /* Add something plausible for the edges */
-  wind_midx[NDIM - 1] = 2. * wind_x[NDIM - 1] - wind_midx[NDIM - 2];
-  wind_midz[MDIM - 1] = 2. * wind_z[MDIM - 1] - wind_midz[MDIM - 2];
+  one_dom->wind_midx[one_dom->ndim - 1] = 2. * one_dom->wind_x[one_dom->ndim - 1] - one_dom->wind_midx[one_dom->ndim - 2];
+  one_dom->wind_midz[one_dom->ndim - 1] = 2. * one_dom->wind_z[one_dom->ndim - 1] - one_dom->wind_midz[one_dom->ndim - 2];
 
   return (0);
 }
@@ -288,7 +297,8 @@ cylind_wind_complete (w)
 
 
 int
-cylind_volumes (w, icomp)
+cylind_volumes (ndom, w, icomp)
+     int ndom;
      WindPtr w;
      int icomp;			// component number
 {
@@ -301,18 +311,22 @@ cylind_volumes (w, icomp)
   double zmin, zmax;
   double dr, dz, x[3];
   int n_inwind;
+  DomainPtr one_dom;
 
+  one_dom = &zdom[ndom];
 
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < one_dom->ndim; i++)
     {
-      for (j = 0; j < MDIM; j++)
+      for (j = 0; j < one_dom->mdim; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  /* PLACEHOLDER, NEEDS DOMAIN */
+	  wind_ij_to_n (ndom, i, j, &n);
 
 	  /* 70b - only try to assign the cell if it has not already been assigned */
 	  if (w[n].inwind == W_NOT_INWIND)
 	    {
-	      n_inwind = check_corners_inwind (n, icomp);
+	      /* PLACEHOLDER, NEEDS DOMAIN */	
+	      n_inwind = check_corners_inwind (n, icomp, ndom);
 
 
 	      rmin = wind_x[i];
@@ -451,7 +465,8 @@ cylind_where_in_grid (x)
   fraction (z, wind_z, MDIM, &j, &f, 0);
 
   /* At this point i,j are just outside the x position */
-  wind_ij_to_n (i, j, &n);
+  /* PLACEHOLDER NEEDS DOMAIN */
+  wind_ij_to_n (0, i, j, &n);
 
   return (n);
 
@@ -495,7 +510,10 @@ cylind_get_random_location (n, icomp, x)
   double r, rmin, rmax, zmin, zmax;
   double zz;
   double phi;
-  wind_n_to_ij (n, &i, &j);
+  int ndom;
+
+  ndom = wmain[n].ndomain;
+  wind_n_to_ij (ndom, n, &i, &j);
   rmin = wind_x[i];
   rmax = wind_x[i + 1];
   zmin = wind_z[j];
@@ -582,12 +600,14 @@ cylind_extend_density (w)
     {
       for (j = 0; j < MDIM - 1; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  /* PLACEHOLDER, NEEDS DOMAIN */	
+	  wind_ij_to_n (0, i, j, &n);
 	  if (w[n].vol == 0)
 
 	    {			//Then this grid point is not in the wind 
 
-	      wind_ij_to_n (i + 1, j, &m);
+          /* PLACEHOLDER, NEEDS DOMAIN */
+	      wind_ij_to_n (0, i + 1, j, &m);
 	      if (w[m].vol > 0)
 		{		//Then the windcell in the +x direction is in the wind and
 		  // we can copy the densities to the grid cell n
@@ -596,7 +616,8 @@ cylind_extend_density (w)
 		}
 	      else if (i > 0)
 		{
-		  wind_ij_to_n (i - 1, j, &m);
+		  /* PLACEHOLDER, NEEDS DOMAIN */
+		  wind_ij_to_n (0, i - 1, j, &m);
 		  if (w[m].vol > 0)
 		    {		//Then the grid cell in the -x direction is in the wind and
 		      // we can copy the densities to the grid cell n
@@ -638,25 +659,27 @@ cylind_is_cell_in_wind (n, icomp)
   int i, j;
   double r, z, dr, dz;
   double rmin, rmax, zmin, zmax;
-  double x[3];
+  double x[3], ndom;
+
   /* First check if the cell is in the boundary */
-  wind_n_to_ij (n, &i, &j);
+  ndom = wmain[n].ndomain;
+  wind_n_to_ij (ndom,n, &i, &j);
 
   if (i >= (NDIM - 2) && j >= (MDIM - 2))
     {
       return (W_NOT_INWIND);
     }
 
-/* Assume that if all four corners are in the wind that the
-entire cell is in the wind */
+  /* Assume that if all four corners are in the wind that the
+  entire cell is in the wind */
 
-  if (check_corners_inwind (n, icomp) == 4)
+  if (check_corners_inwind (n, icomp, ndom) == 4)
     {
       //OLD 70b return (W_ALL_INWIND);
       return (icomp);
     }
 
-/* So at this point, we have dealt with the easy cases */
+  /* So at this point, we have dealt with the easy cases */
 
 
   rmin = wind_x[i];
@@ -667,7 +690,7 @@ entire cell is in the wind */
   dr = (rmax - rmin) / RESOLUTION;
   dz = (zmax - zmin) / RESOLUTION;
 
-// Check inner and outer boundary in the z direction
+  // Check inner and outer boundary in the z direction
 
   x[1] = 0;
 
@@ -691,7 +714,7 @@ entire cell is in the wind */
     }
 
 
-// Check inner and outer boundary in the z direction
+  // Check inner and outer boundary in the z direction
 
   for (r = rmin + dr / 2; r < rmax; r += dr)
     {
@@ -715,6 +738,4 @@ entire cell is in the wind */
 
   /* If one has reached this point, then this wind cell is not in the wind */
   return (W_NOT_INWIND);
-
-
 }

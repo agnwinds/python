@@ -50,7 +50,8 @@ main (argc, argv)
   char windsavefile[LINELENGTH];
   char parameter_file[LINELENGTH];
   double xdoub;
-  int create_master_table(), create_ion_table();
+  int create_master_table (), create_ion_table ();
+  int ndom;
 
 
   // py_wind uses rdpar, but only in an interactive mode. As a result 
@@ -116,13 +117,19 @@ I did not change this now.  Though it could be done.  02apr ksl */
 
   ochoice = 1;
 
+  Log ("The wind_file has %d domains\n", geo.ndomain);
 
-  create_master_table (root);
-  create_ion_table (root, 6);
-  create_ion_table (root, 7);
-  create_ion_table (root, 8);
-  create_ion_table (root, 14);
-  create_ion_table (root, 26);
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
+    {
+
+
+      create_master_table (ndom, root);
+      create_ion_table (ndom, root, 6);
+      create_ion_table (ndom, root, 7);
+      create_ion_table (ndom, root, 8);
+      create_ion_table (ndom, root, 14);
+      create_ion_table (ndom, root, 26);
+    }
   return (0);
 }
 
@@ -171,13 +178,14 @@ History:
 **************************************************************/
 
 int
-create_master_table (rootname)
+create_master_table (ndom, rootname)
+     int ndom;
      char rootname[];
 {
   char filename[132];
   double *get_one ();
   double *get_ion ();
-  double *c[50],*converge;
+  double *c[50], *converge;
   char column_name[50][20];
   char one_line[1024], start[132], one_value[20];
 
@@ -188,6 +196,8 @@ create_master_table (rootname)
 
   strcpy (filename, rootname);
   strcat (filename, "_master.txt");
+
+  sprintf (filename, "%s_%d_master.txt", rootname, ndom);
 
   fptr = fopen (filename, "w");
 
@@ -217,20 +227,20 @@ create_master_table (rootname)
   c[7] = get_ion (8, 6, 0);
   strcpy (column_name[7], "o6");
 
-  c[8]=get_one("dmo_dt_x");
+  c[8] = get_one ("dmo_dt_x");
   strcpy (column_name[8], "dmo_dt_x");
 
 
-  c[9]=get_one("dmo_dt_y");
+  c[9] = get_one ("dmo_dt_y");
   strcpy (column_name[9], "dmo_dt_y");
 
-  c[10]=get_one("dmo_dt_z");
+  c[10] = get_one ("dmo_dt_z");
   strcpy (column_name[10], "dmo_dt_z");
 
   ncols = 11;
 
 
-  converge=get_one("converge");
+  converge = get_one ("converge");
 
   /* At this point oll of the data has been collected */
 
@@ -238,15 +248,15 @@ create_master_table (rootname)
 
 
 
-  if (geo.coord_type == SPHERICAL)
+  if (zdom[ndom].coord_type == SPHERICAL)
     {
 
 
       /* First assemble the heder line
        */
 
-      sprintf (start, "%8s %4s %8s %6s %8s %8s %8s ", "r", "i", "inwind", "converge","v_x",
-	       "v_y", "v_z");
+      sprintf (start, "%8s %4s %8s %6s %8s %8s %8s ", "r", "i", "inwind",
+	       "converge", "v_x", "v_y", "v_z");
       strcpy (one_line, start);
       n = 0;
       while (n < ncols)
@@ -266,9 +276,9 @@ create_master_table (rootname)
       for (i = 0; i < NDIM2; i++)
 	{
 	  // This line is different from the two d case
-	  sprintf (start, "%8.2e %4d %6d %8.0f %8.2e %8.2e %8.2e ", wmain[i].r, i,
-		   wmain[i].inwind,converge[i],wmain[i].v[0], wmain[i].v[1],
-		   wmain[i].v[2]);
+	  sprintf (start, "%8.2e %4d %6d %8.0f %8.2e %8.2e %8.2e ",
+		   wmain[i].r, i, wmain[i].inwind, converge[i],
+		   wmain[i].v[0], wmain[i].v[1], wmain[i].v[2]);
 	  strcpy (one_line, start);
 	  n = 0;
 	  while (n < ncols)
@@ -288,8 +298,8 @@ create_master_table (rootname)
       /* First assemble the header line
        */
 
-      sprintf (start, "%8s %8s %4s %4s %6s %8s %8s %8s %8s ", "x", "z", "i", "j",
-	       "inwind", "converge","v_x", "v_y", "v_z");
+      sprintf (start, "%8s %8s %4s %4s %6s %8s %8s %8s %8s ", "x", "z", "i",
+	       "j", "inwind", "converge", "v_x", "v_y", "v_z");
       strcpy (one_line, start);
       n = 0;
       while (n < ncols)
@@ -306,11 +316,12 @@ create_master_table (rootname)
       /* Now assemble the lines of the table */
       for (i = 0; i < NDIM2; i++)
 	{
-	  wind_n_to_ij (i, &ii, &jj);
-	  sprintf (start, "%8.2e %8.2e %4d %4d %6d %8.0f %8.2e %8.2e %8.2e ",
+	  wind_n_to_ij (ndom, i, &ii, &jj);
+	  sprintf (start,
+		   "%8.2e %8.2e %4d %4d %6d %8.0f %8.2e %8.2e %8.2e ",
 		   wmain[i].xcen[0], wmain[i].xcen[2], ii, jj,
-		   wmain[i].inwind, converge[i],wmain[i].v[0], wmain[i].v[1],
-		   wmain[i].v[2]);
+		   wmain[i].inwind, converge[i], wmain[i].v[0],
+		   wmain[i].v[1], wmain[i].v[2]);
 	  strcpy (one_line, start);
 	  n = 0;
 	  while (n < ncols)
@@ -356,7 +367,8 @@ History:
 
 **************************************************************/
 int
-create_ion_table (rootname, iz)
+create_ion_table (ndom, rootname, iz)
+	int ndom;
      char rootname[];
      int iz;			// Where z is the element 
 {
@@ -409,7 +421,7 @@ create_ion_table (rootname, iz)
 
 
 
-  if (geo.coord_type == SPHERICAL)
+  if (zdom[ndom].coord_type == SPHERICAL)
     {
 
 
@@ -471,7 +483,7 @@ create_ion_table (rootname, iz)
       /* Now assemble the lines of the table */
       for (i = 0; i < NDIM2; i++)
 	{
-	  wind_n_to_ij (i, &ii, &jj);
+	  wind_n_to_ij (ndom, i, &ii, &jj);
 	  sprintf (start, "%8.2e %8.2e %4d %4d %6d ", wmain[i].xcen[0],
 		   wmain[i].xcen[2], ii, jj, wmain[i].inwind);
 	  strcpy (one_line, start);
@@ -499,7 +511,7 @@ create_ion_table (rootname, iz)
 
 Synopsis:
 
-	Get get denensity, etc for one particular ion
+	Get get density, etc for one particular ion
 
 Arguments:		
 
@@ -624,18 +636,29 @@ get_ion (element, istate, iswitch)
 
   History:
   	150429 ksl Adapted from te_summary in py_wind
+	1508	ksl	Updated for domains
 
  ************************************************************************/
 double *
-get_one (variable_name)
+get_one (ndom, variable_name)
+     int ndom;
      char variable_name[];
 {
   int n;
   int nplasma;
   double *x;
+  int NDIM2;
+  int nstart, nstop;
+
+  nstart = zdom[ndom].nstart;
+  nstop = zdom[ndom].nstart;
+  NDIM2 = zdom[ndom].ndim2;
+
+
+
 
   x = (double *) calloc (sizeof (double), NDIM2);
-  for (n = 0; n < NDIM2; n++)
+  for (n = nstart; n < nstop; n++)
     {
       x[n] = 0;
       if (wmain[n].vol > 0.0)
@@ -654,27 +677,27 @@ get_one (variable_name)
 	    {
 	      x[n] = plasmamain[nplasma].t_r;
 	    }
-	  else if (strcmp (variable_name, "converge")==0)
-	  {
-		  x[n]=plasmamain[nplasma].converge_whole;
-	  }
-	  else if (strcmp (variable_name, "dmo_dt_x")==0)
-	  {
-		  x[n]=plasmamain[nplasma].dmo_dt[0];
-	  }
-	  else if (strcmp (variable_name, "dmo_dt_y")==0)
-	  {
-		  x[n]=plasmamain[nplasma].dmo_dt[1];
-	  }
-	  else if (strcmp (variable_name, "dmo_dt_z")==0)
-	  {
-		  x[n]=plasmamain[nplasma].dmo_dt[2];
-	  }
+	  else if (strcmp (variable_name, "converge") == 0)
+	    {
+	      x[n] = plasmamain[nplasma].converge_whole;
+	    }
+	  else if (strcmp (variable_name, "dmo_dt_x") == 0)
+	    {
+	      x[n] = plasmamain[nplasma].dmo_dt[0];
+	    }
+	  else if (strcmp (variable_name, "dmo_dt_y") == 0)
+	    {
+	      x[n] = plasmamain[nplasma].dmo_dt[1];
+	    }
+	  else if (strcmp (variable_name, "dmo_dt_z") == 0)
+	    {
+	      x[n] = plasmamain[nplasma].dmo_dt[2];
+	    }
 
 
 
 
-			  
+
 	  else
 	    {
 	      Error ("get_one: Unknown variable %s\n", variable_name);

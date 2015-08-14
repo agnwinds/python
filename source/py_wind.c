@@ -261,6 +261,9 @@ I did not change this now.  Though it could be done.  02apr ksl */
   printf ("Read Atomic data from %s\n", geo.atomic_filename);
 
 
+  printf("There were %d domains",geo.ndomain);
+
+
 /* Produce a standard set of output files and exit*/
   if (interactive == 0 && strcmp (parameter_file, "NONE") == 0)
     {
