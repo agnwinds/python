@@ -509,7 +509,8 @@ where_in_2dcell (ichoice, x, n, fx, fz)
 
 /***********************************************************
           Space Telescope Science Institute
-Synopsis: wind_n_to_ij(n,i,j) and wind_ij_to_n(i,j,n) are two 
+
+Synopsis: wind_n_to_ij(ndom, n,i,j) and wind_ij_to_n(i,j,n) are two 
 routines which effectively translate between the one dimensional 
 wind structure and the two dimensional physical grid 
 
@@ -520,9 +521,12 @@ two dimensional grid
 
 Returns:
 
+i,j position in a given domain
+
 Description:
 
 Notes:
+
 For 2d, the underlying 1-d grid is organized so that as n increases, 
 one goes up in z, and then steps out in rho., or in theta and then
 z as the case may be.
@@ -534,11 +538,12 @@ History:
 	02feb	ksl	Allowed for different dimensions in x and z
 	05apr	ksl	Added error_check to verify routine 
 			is not called with spherical coordiantes
+	15aug	jm/ksl	Modified to account for domains
 **************************************************************/
 
 
 int
-wind_n_to_ij (n, i, j, ndom)
+wind_n_to_ij (ndom, n, i, j)
      int n, *i, *j, ndom;
 {
   int n_use;
@@ -546,13 +551,6 @@ wind_n_to_ij (n, i, j, ndom)
     {
       *i = n - zdom[ndom].nstart;
       *j = 0;
-/*  130624 - ksl - Removed this error as it program appears to be working as intended
- *  and there are times when this routine should be called for spherical models
- *  since we basically still have a 2d grid in this case      
-       Error
-	("Warning: wind_n_to_ij being called for spherical coordinates %d \n",
-	 n);
-*/
     }
   n_use = n - zdom[ndom].nstart;
   *i = n_use / zdom[ndom].mdim;
@@ -561,7 +559,7 @@ wind_n_to_ij (n, i, j, ndom)
 }
 
 int
-wind_ij_to_n (i, j, n, ndom)
+wind_ij_to_n (ndom, i, j, n)
      int *n, i, j, ndom;
 {
   if (zdom[ndom].coord_type == SPHERICAL)

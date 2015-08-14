@@ -251,16 +251,20 @@ wind_check (www, n)
 }
 
 
-/* model_velocity(x,v)
- * Calculate the wind velocity at a specific point in space from the original 
- * usually analytic expressions
- *
- * 04aug	ksl	52 -- adapted from wind2d.c as part of effort to 
- * 			handle multiple coordinate systems
+/* model_velocity(ndom, x,v)
+
+Calculate the wind velocity at a specific point in space from the original 
+usually analytic expressions
+
+ History
+
+	04aug	ksl	52 -- adapted from wind2d.c as part of effort to 
+ 			handle multiple coordinate systems
+	15Aug	ksl	Updated for domains
  */
 
 double
-model_velocity (x, v, ndom)
+model_velocity (ndom, x, v)
      double x[], v[];
      int ndom;
 {
@@ -325,7 +329,7 @@ model_velocity (x, v, ndom)
  */
 
 int
-model_vgrad (x, v_grad, ndom)
+model_vgrad (ndom, x, v_grad)
      double x[], v_grad[][3];
      int ndom;
 {
@@ -336,7 +340,7 @@ model_vgrad (x, v_grad, ndom)
   int i, j;
   int vsub (), stuff_v ();
 
-  model_velocity (x, v0, ndom);
+  model_velocity (ndom, x, v0);
 
 
   ds = 0.001 * length (x);
@@ -348,7 +352,7 @@ model_vgrad (x, v_grad, ndom)
       stuff_v (x, dx);
       dx[i] += ds;
 
-      model_velocity (dx, v1, ndom);
+      model_velocity (ndom, dx, v1);
 
       if (sane_check (v1[0]) || sane_check (v1[1]) || sane_check (v1[2]))
 	{
@@ -387,7 +391,7 @@ model_rho (x)
 
   if (geo.wind_type == 0)
     {
-      rho = sv_rho (x, ndom);
+      rho = sv_rho (ndom, x);
     }
   else if (geo.wind_type == 1)
     {

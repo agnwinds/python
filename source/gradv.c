@@ -101,13 +101,13 @@ dvwind_ds (p)
       /* calculate the velocity at the position of the photon */
       /* note we use model velocity, which could potentially be slow,
       but avoids interpolating (see #118) */
-      model_velocity(pp.x, v1, ndom);
+      model_velocity(ndom ,pp.x, v1);
 
       /* copy the photon and move it by ds, and evaluate the velocity
       at the new point */
       stuff_phot(&pp, &pnew);
       move_phot(&pnew, ds);
-      model_velocity(pnew.x, v2, ndom);
+      model_velocity(ndom, pnew.x, v2);
 
       /* calculate the relevant gradient */
       dvds = fabs(dot(v1, pp.lmn) - dot(v2, pp.lmn)) / ds;

@@ -1481,6 +1481,12 @@ wind_element (w)
   PlasmaPtr xplasma;
   int m, n, i, j, nn, mm;
   int first, last;
+  int ndom;
+
+  ndom=w->ndomain;
+
+
+
   n = 50;
 a: printf("There are %i wind elements in this model\n",NDIM2);
 rdint ("Wind.array.element", &n);
@@ -1493,7 +1499,7 @@ rdint ("Wind.array.element", &n);
 	goto a;
 	}
 
-  wind_n_to_ij (n, &i, &j);
+  wind_n_to_ij (ndom,n, &i, &j);
   xplasma = &plasmamain[w[n].nplasma];
 
   Log
@@ -3193,6 +3199,7 @@ complete_physical_summary (w, rootname, ochoice)
   double vtot;
   FILE *fptr, *fopen ();
   PlasmaPtr xplasma;
+  int ndom;
 
   rdint("Save ions as densities (0) or fractions? (1)", &frac_choice);
 
@@ -3223,9 +3230,11 @@ heat_tot\theat_photo\theat_lines\theat_ff\theat_comp\theat_ind_comp\t \
 ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\n");
 
 
+  Log("py_wind_sub does not work yet\n");
+  ndom=0;
   for (n = 0; n < NDIM2; n++)
     {
-      wind_n_to_ij (n, &ii, &jj);
+      wind_n_to_ij (ndom, n, &ii, &jj);
       
       if (w[n].vol > 0.0)
   {
@@ -3435,6 +3444,10 @@ int get_los_dvds(w, rootname, ochoice)
   double obs_angle, rzero, r;
   char filename[LINELENGTH], suffix[LINELENGTH];
 
+  int ndom;
+
+  ndom=w->ndomain;
+
   vchoice = 0;
   phase = 0;
   obs_angle = 80.0;
@@ -3480,8 +3493,8 @@ int get_los_dvds(w, rootname, ochoice)
       /* next choice is for turning off rotational velocity */
       else if (vchoice == 1)
         {
-          model_velocity(p.x, v1);
-          model_velocity(ptest.x, v2);
+          model_velocity(ndom, p.x, v1);
+          model_velocity(ndom, ptest.x, v2);
           v1[1] = 0.0;
           v2[1] = 0.0;
 
@@ -3496,13 +3509,13 @@ int get_los_dvds(w, rootname, ochoice)
       else
         {
           r = sqrt (p.x[0] * p.x[0] + p.x[1] * p.x[1]);
-          rzero = sv_find_wind_rzero (p.x);
+          rzero = sv_find_wind_rzero (ndom, p.x);
           v1[0] = v1[2] = 0.0;
           v1[1] = sqrt (G * geo.mstar * rzero) / r;
 
 
           r = sqrt (ptest.x[0] * ptest.x[0] + ptest.x[1] * ptest.x[1]);
-          rzero = sv_find_wind_rzero (ptest.x);
+          rzero = sv_find_wind_rzero (ndom, ptest.x);
           v2[0] = v2[2] = 0.0;
           v2[1] = sqrt (G * geo.mstar * rzero) / r;
 

@@ -436,7 +436,7 @@ spherical_get_random_location (n, icomp, x)
   int ndom;
 
   ndom = wmain[n].ndomain;
-  wind_n_to_ij (n, &i, &j, ndom);
+  wind_n_to_ij (ndom, n, &i, &j);
   rmin = wind_x[i];
   rmax = wind_x[i + 1];
 

@@ -178,8 +178,8 @@ sv_velocity (x, v, ndom)
 
   one_dom = &zdom[ndom];
 
-  rzero = sv_find_wind_rzero (x, ndom);
-  theta = sv_theta_wind (rzero, ndom);
+  rzero = sv_find_wind_rzero (ndom, x);
+  theta = sv_theta_wind (ndom, rzero);
 
   r = sqrt (x[0] * x[0] + x[1] * x[1]);
   ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
@@ -279,20 +279,16 @@ History:
 **************************************************************/
 
 double
-sv_rho (x, ndom)
+sv_rho (ndom, x)
      double x[];
      int ndom;
 {
   double r, rzero, theta;
   double ldist;
-//  double sv_find_wind_rzero ();
-//  double sv_theta_wind ();
   double dmdot_da;
   double dtheta_drzero, dr_drzero;
 
   double v[3], rho;
-//  double sv_velocity ();
-//  double sv_find_wind_rzero (), sv_theta_wind ();
   struct photon ptest;
   double xtest[3];
   double s;
@@ -302,8 +298,8 @@ sv_rho (x, ndom)
   one_dom = &zdom[ndom];
   sv_velocity (x, v, ndom);
 
-  rzero = sv_find_wind_rzero (x, ndom);
-  theta = sv_theta_wind (rzero, ndom);
+  rzero = sv_find_wind_rzero (ndom, x);
+  theta = sv_theta_wind (ndom, rzero);
 
   r = sqrt (x[0] * x[0] + x[1] * x[1]);
   ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
@@ -378,12 +374,13 @@ Notes:
 
 History:
  	97jan      ksl	Coding on python began.
+	15aug	ksl	Adapted for domains
  
 **************************************************************/
 
 
 double
-sv_find_wind_rzero (p, ndom)
+sv_find_wind_rzero (ndom, p)
      double p[];		/* Note that p is a 3 vector and not a photon structure */
      int ndom;
 {
