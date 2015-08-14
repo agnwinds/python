@@ -121,51 +121,51 @@ define_wind ()
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
 
+    Log ("Definex wind %d for domian %d\n", zdom[ndom].coord_type,n);
 
-  Log ("Define wind %d for domian %d\n",zdom[ndom].coord_type,n);
-
-  if (zdom[ndom].wind_type == 9)	//This is the mode where we want the wind and the grid carefully controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
-    {
-      Log
-	("We are making a thin shell type grid to match a thin shell wind. This is totally aphysical and should only be used for testing purposes\n");
-      shell_make_grid (w, ndom);
-    }
-  else if (zdom[ndom].coord_type == SPHERICAL)
-    {
-      spherical_make_grid (w, ndom);
-    }
-  else if (zdom[ndom].coord_type == CYLIND)
-    {
-      cylind_make_grid (w, ndom);
-    }
-  else if (zdom[ndom].coord_type == RTHETA)
-    {
-      if (zdom[ndom].wind_type == 3) //13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates
-      	{
-	        rtheta_make_hydro_grid (w, ndom);
-      	}
-      else
-	      {
-          rtheta_make_grid (w, ndom);
-	      }
-    }
-  else if (zdom[ndom].coord_type == CYLVAR)
-    {
-      cylvar_make_grid (w, ndom);
-    }
-  else
-    {
-      Error ("define_wind: Don't know how to make coordinate type %d\n",
-	     zdom[ndom].coord_type);
-    }
-  for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
-    {
-      /* 04aug -- ksl -52 -- The next couple of lines are part of the changes
-       * made in the program to allow more that one coordinate system in python 
-       */
-      model_velocity (ndom, w[n].x, w[n].v);
-      model_vgrad (ndom, w[n].x, w[n].v_grad);
-    }
+    if (zdom[ndom].wind_type == 9)	//This is the mode where we want the wind and the grid carefully controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
+      {
+        Log
+  	("We are making a thin shell type grid to match a thin shell wind. This is totally aphysical and should only be used for testing purposes\n");
+        shell_make_grid (w, ndom);
+      }
+    else if (zdom[ndom].coord_type == SPHERICAL)
+      {
+        spherical_make_grid (w, ndom);
+      }
+    else if (zdom[ndom].coord_type == CYLIND)
+      {
+        cylind_make_grid (w, ndom);
+      }
+    else if (zdom[ndom].coord_type == RTHETA)
+      {
+        if (zdom[ndom].wind_type == 3) //13jun -- nsh - 76 - This is a switch to allow one to use the actual zeus grid in the special case of a 'proga' wind in rtheta coordinates
+        	{
+  	        rtheta_make_hydro_grid (w, ndom);
+        	}
+        else
+  	      {
+            rtheta_make_grid (w, ndom);
+  	      }
+      }
+    else if (zdom[ndom].coord_type == CYLVAR)
+      {
+        cylvar_make_grid (w, ndom);
+      }
+    else
+      {
+        Error ("define_wind: Don't know how to make coordinate type %d\n",
+  	     zdom[ndom].coord_type);
+      }
+    for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
+      {
+        /* 04aug -- ksl -52 -- The next couple of lines are part of the changes
+         * made in the program to allow more that one coordinate system in python 
+         */
+        w[n].ndomain = ndom;    // JM -- PLACEHOLDER -- not sure if this is the best place to do this step 
+        model_velocity (ndom, w[n].x, w[n].v);
+        model_vgrad (ndom, w[n].x, w[n].v_grad);
+      }
 
   }
 
@@ -266,6 +266,8 @@ recreated when a windfile is read into the program
 
   n_vol = n_inwind = n_part = 0;
   n_comp = n_comp_part = 0;
+
+  /* here we loop over the entire wind structure, which has dimensions NDIM2 */
   for (n = 0; n < NDIM2; n++)
     {
       if (w[n].vol > 0.0)
@@ -301,9 +303,11 @@ recreated when a windfile is read into the program
   {
     if (zdom[ndom].coord_type != SPHERICAL)
       {
-        for (n = 0; n < NDIM2; n++)
+        for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
   	{
+
   	  n_inwind = check_corners_inwind (n, 0, ndom);
+
   	  if (w[n].vol == 0 && n_inwind > 0)
   	    {
   	      wind_n_to_ij (ndom, n, &i, &j);
@@ -325,7 +329,7 @@ recreated when a windfile is read into the program
   }
 
 
-/* Now create the second structure, the one that is sized only to contain cells in the wind */
+  /* Now create the second structure, the one that is sized only to contain cells in the wind */
 
   if (CHOICE)
     {
@@ -347,6 +351,11 @@ recreated when a windfile is read into the program
     calloc_macro (NPLASMA);
     calloc_estimators (NPLASMA);
   }
+
+  /* JM PLACEHOLDER -- has the density been set up correctly */
+  Log("Saving test wind file NPLASMA %i\n", NPLASMA);
+  wind_save("test_plasma.wind_save");
+  exit (0);
   
 /* 06may -- At this point we have calculated the volumes of all of the cells and it should
 be optional which variables beyond here are moved to structures othere than Wind */
@@ -358,11 +367,12 @@ be optional which variables beyond here are moved to structures othere than Wind
   for (n = 0; n < NPLASMA; n++)
     {
       nwind = plasmamain[n].nwind;
+      ndom = wmain[nwind].ndomain;
       stuff_v (w[nwind].xcen, x);
       /* 140905 - ksl - Next two lines allow for clumping */
       /* JM PLACEHOLDER need to make model_rho have domain number */
-      plasmamain[n].rho = model_rho (x) / geo.fill;
-      plasmamain[n].vol = w[nwind].vol*geo.fill;	// Copy volumes
+      plasmamain[n].rho = model_rho (ndom, x) / geo.fill;
+      plasmamain[n].vol = w[nwind].vol * geo.fill;	// Copy volumes
 
 /* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, 
  * I've put new things in here to initialise the exponential models */
@@ -425,7 +435,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 	  odd since the input is the wind temperature, but is taken to be the radiation temperature). If we have
 	  a fixed temprature calculation,then the wind temperature is set to be the wind temperature so the
 	  user gets what they are expecting */
-      if (modes.fixed_temp==0)
+      if (modes.fixed_temp == 0)
 		  plasmamain[n].t_e = plasmamain[n].t_e_old = 0.9 * plasmamain[n].t_r;	//Lucy guess
 	  else
 		  plasmamain[n].t_e = plasmamain[n].t_e_old = plasmamain[n].t_r; 
@@ -438,6 +448,7 @@ be optional which variables beyond here are moved to structures othere than Wind
       rrstar =
 	1. - (geo.rstar * geo.rstar) / (x[0] * x[0] + x[1] * x[1] +
 					x[2] * x[2]);
+  
       if (rrstar > 0)
 	{
 	  plasmamain[n].w = 0.5 * (1 - sqrt (rrstar));

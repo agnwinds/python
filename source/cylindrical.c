@@ -217,25 +217,34 @@ cylind_make_grid (w, ndom)
  */
 
 int
-cylind_wind_complete (w)
+cylind_wind_complete (ndom, w)
+     int ndom;
      WindPtr w;
 {
   int i, j;
+  DomainPtr one_dom;
+
+  one_dom = &zdom[ndom];
 
   /* Finally define some one-d vectors that make it easier to locate a photon in the wind given that we
      have adoped a "rectangular" grid of points.  Note that rectangular does not mean equally spaced. */
   /* JM -- PLACEHOLDER -- NEED TO MOVE INTO DOMAIN STRUCTURE */
-  for (i = 0; i < NDIM; i++)
-    wind_x[i] = w[i * MDIM].x[0];
-  for (j = 0; j < MDIM; j++)
-    wind_z[j] = w[j].x[2];
-  for (i = 0; i < NDIM - 1; i++)
-    wind_midx[i] = 0.5 * (w[i * MDIM].x[0] + w[(i + 1) * MDIM].x[0]);
-  for (j = 0; j < MDIM - 1; j++)
-    wind_midz[j] = 0.5 * (w[j].x[2] + w[(j + 1)].x[2]);
+  /* JM -- replaced with structures in the domain structure */
+  for (i = 0; i < one_dom->ndim; i++)
+    one_dom->wind_x[i] = w[i * one_dom->ndim].x[0];
+
+  for (j = 0; j < one_dom->ndim; j++)
+    one_dom->wind_z[j] = w[j].x[2];
+
+  for (i = 0; i < one_dom->ndim - 1; i++)
+    one_dom->wind_midx[i] = 0.5 * (w[i * one_dom->ndim].x[0] + w[(i + 1) * one_dom->ndim].x[0]);
+
+  for (j = 0; j < one_dom->ndim - 1; j++)
+    one_dom->wind_midz[j] = 0.5 * (w[j].x[2] + w[(j + 1)].x[2]);
+
   /* Add something plausible for the edges */
-  wind_midx[NDIM - 1] = 2. * wind_x[NDIM - 1] - wind_midx[NDIM - 2];
-  wind_midz[MDIM - 1] = 2. * wind_z[MDIM - 1] - wind_midz[MDIM - 2];
+  one_dom->wind_midx[one_dom->ndim - 1] = 2. * one_dom->wind_x[one_dom->ndim - 1] - one_dom->wind_midx[one_dom->ndim - 2];
+  one_dom->wind_midz[one_dom->ndim - 1] = 2. * one_dom->wind_z[one_dom->ndim - 1] - one_dom->wind_midz[one_dom->ndim - 2];
 
   return (0);
 }
@@ -288,7 +297,8 @@ cylind_wind_complete (w)
 
 
 int
-cylind_volumes (w, icomp)
+cylind_volumes (ndom, w, icomp)
+     int ndom;
      WindPtr w;
      int icomp;			// component number
 {
@@ -301,20 +311,22 @@ cylind_volumes (w, icomp)
   double zmin, zmax;
   double dr, dz, x[3];
   int n_inwind;
+  DomainPtr one_dom;
 
+  one_dom = &zdom[ndom];
 
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < one_dom->ndim; i++)
     {
-      for (j = 0; j < MDIM; j++)
+      for (j = 0; j < one_dom->mdim; j++)
 	{
 	  /* PLACEHOLDER, NEEDS DOMAIN */
-	  wind_ij_to_n (0, i, j, &n);
+	  wind_ij_to_n (ndom, i, j, &n);
 
 	  /* 70b - only try to assign the cell if it has not already been assigned */
 	  if (w[n].inwind == W_NOT_INWIND)
 	    {
 	      /* PLACEHOLDER, NEEDS DOMAIN */	
-	      n_inwind = check_corners_inwind (n, icomp, 0);
+	      n_inwind = check_corners_inwind (n, icomp, ndom);
 
 
 	      rmin = wind_x[i];
@@ -658,8 +670,8 @@ cylind_is_cell_in_wind (n, icomp)
       return (W_NOT_INWIND);
     }
 
-/* Assume that if all four corners are in the wind that the
-entire cell is in the wind */
+  /* Assume that if all four corners are in the wind that the
+  entire cell is in the wind */
 
   if (check_corners_inwind (n, icomp, ndom) == 4)
     {
@@ -667,7 +679,7 @@ entire cell is in the wind */
       return (icomp);
     }
 
-/* So at this point, we have dealt with the easy cases */
+  /* So at this point, we have dealt with the easy cases */
 
 
   rmin = wind_x[i];
@@ -678,7 +690,7 @@ entire cell is in the wind */
   dr = (rmax - rmin) / RESOLUTION;
   dz = (zmax - zmin) / RESOLUTION;
 
-// Check inner and outer boundary in the z direction
+  // Check inner and outer boundary in the z direction
 
   x[1] = 0;
 
@@ -702,7 +714,7 @@ entire cell is in the wind */
     }
 
 
-// Check inner and outer boundary in the z direction
+  // Check inner and outer boundary in the z direction
 
   for (r = rmin + dr / 2; r < rmax; r += dr)
     {
@@ -726,6 +738,4 @@ entire cell is in the wind */
 
   /* If one has reached this point, then this wind cell is not in the wind */
   return (W_NOT_INWIND);
-
-
 }

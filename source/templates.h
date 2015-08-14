@@ -72,7 +72,7 @@ int where_in_wind(double x[]);
 int wind_check(WindPtr www, int n);
 double model_velocity(int ndom, double x[], double v[]);
 int model_vgrad(int ndom, double x[], double v_grad[][3]);
-double model_rho(double x[]);
+double model_rho(int ndom, double x[]);
 /* vector.c */
 double dot(double a[], double b[]);
 double length(double a[]);

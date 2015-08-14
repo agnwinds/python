@@ -328,30 +328,36 @@ int
 wind_complete (w)
      WindPtr w;
 {
+  int ndom;
 
-  if (geo.coord_type == SPHERICAL)
-    {
-      spherical_wind_complete (w);
-    }
-  else if (geo.coord_type == CYLIND)
-    {
-      cylind_wind_complete (w);
-    }
-  else if (geo.coord_type == RTHETA)
-    {
-      rtheta_wind_complete (w);
-    }
-  else if (geo.coord_type == CYLVAR)
-    {
-      cylvar_wind_complete (w);
-    }
-  else
-    {
-      Error ("wind_complete: Don't know how to complete coord_type %d\n",
-	     geo.coord_type);
-      exit (0);
-    }
+  /* JM Loop over number of domains */
 
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
+  {
+    if (zdom[ndom].coord_type == SPHERICAL)
+      {
+        spherical_wind_complete (w);
+      }
+    else if (zdom[ndom].coord_type == CYLIND)
+      {
+        cylind_wind_complete (ndom, w);
+      }
+    else if (zdom[ndom].coord_type == RTHETA)
+      {
+        rtheta_wind_complete (w);
+      }
+    else if (zdom[ndom].coord_type == CYLVAR)
+      {
+        cylvar_wind_complete (w);
+      }
+    else
+      {
+        Error ("wind_complete: Don't know how to complete coord_type %d\n",
+  	     zdom[ndom].coord_type);
+        exit (0);
+      }
+
+  }
   return (0);
 }
 

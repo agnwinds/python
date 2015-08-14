@@ -293,7 +293,7 @@ sv_rho (ndom, x)
   double xtest[3];
   double s;
   DomainPtr one_dom;
-//  double ds_to_disk ();
+  // double ds_to_disk ();
 
   one_dom = &zdom[ndom];
   sv_velocity (x, v, ndom);

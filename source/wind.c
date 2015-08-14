@@ -381,13 +381,11 @@ History
  */
 
 double
-model_rho (x)
-     double x[];
+model_rho (ndom, x)
+    int ndom;
+    double x[];
 {
   double rho;
-  int ndom;
-
-  ndom=0;  //PLACEHOLDER
 
   if (geo.wind_type == 0)
     {
@@ -411,7 +409,7 @@ model_rho (x)
     }
   else if (geo.wind_type == 6)
     {
-      rho = homologous_rho (ndom,x);
+      rho = homologous_rho (ndom, x);
     }
   else if (geo.wind_type == 7)
     {
