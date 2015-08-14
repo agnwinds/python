@@ -450,13 +450,13 @@ original specification of the velocities  */
 						   calulated from the v array of the grid */
 
       printf ("zvels %f vels %f deltas %f \n", zvels, vels, deltas);
-      if (where_in_wind (tphot.x) == 0)
+      if (where_in_wind (0,tphot.x) == 0)
 	printf
 	  ("%.3e %.3e %.3e %.3e %.3e %.3e %.3e %.3e %.3e %.3e %.3e %.3e %.2f %.3e %.3e\n",
 	   tphot.x[0], tphot.x[1], tphot.x[2], s, v[0], v[1], v[2], vs[0],
 	   vs[1], vs[2], dvds, dvds_exact, dlambda, vlos, vlos_exact);
 
-      if (where_in_wind (tphot.x) == 0)
+      if (where_in_wind (0,tphot.x) == 0)
 	{
 	  fprintf (optr,
 		   "%.3e %.3e %.3e %.3e %.3e %.3e %.3e %.3e %.3e %.3e %.3e %.3e %.2f %.3e %.3e %.3e %.3e\n",

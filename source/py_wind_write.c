@@ -193,8 +193,8 @@ are linear, and x otherwise.  This is not particularly transparent ?? ksl */
 	  for (jj = 0; jj < ODIM; jj++)
 	    {
 	      xx[2] = z = zmin + jj * (zmax - zmin) / (ODIM - 1);
-	      //OLD 70B if (where_in_wind (xx) == 0)
-	      if (where_in_wind (xx) >= 0)
+	      //OLD 70B if (where_in_wind (0,xx) == 0)
+	      if (where_in_wind (0,xx) >= 0)
 		{		// Then the position is in the wind region
 		  coord_fraction (0, xx, nnn, frac, &nelem);
 		  for (nn = 0; nn < nelem; nn++)

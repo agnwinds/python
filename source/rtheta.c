@@ -420,7 +420,7 @@ rtheta_volumes (w, icomp)
 			  x[0] = r * sin (theta);
 			  x[1] = 0;
 			  x[2] = r * cos (theta);;
-			  if (where_in_wind (x) == icomp)
+			  if (where_in_wind (0,x) == icomp)
 			    {
 			      num += r * r * sin (theta);	/* 0 implies in wind */
 			      jj++;
@@ -585,7 +585,7 @@ rtheta_get_random_location (n, icomp, x)
       x[0] = r * cos (phi) * sin (theta);
       x[1] = r * sin (phi) * sin (theta);
       x[2] = r * cos (theta);
-      inwind = where_in_wind (x);	/* Some photons will not be in the wind
+      inwind = where_in_wind (0,x);	/* Some photons will not be in the wind
 					   because the boundaries of the wind split the grid cell */
     }
 
@@ -745,7 +745,7 @@ rtheta_is_cell_in_wind (n, icomp)
       x[0] = rmin * sin (theta);
       x[2] = rmin * cos (theta);;
 
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (0,x) == icomp)
 	{
 	  //OLD 70B return (W_PART_INWIND);
 	  return (icomp + 1);
@@ -753,7 +753,7 @@ rtheta_is_cell_in_wind (n, icomp)
 
       x[0] = rmax * sin (theta);
       x[2] = rmax * cos (theta);;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (0,x) == icomp)
 	{
 	  //OLD 70B return (W_PART_INWIND);
 	  return (icomp + 1);
@@ -767,7 +767,7 @@ rtheta_is_cell_in_wind (n, icomp)
     {
       x[0] = r * sin (thetamin);
       x[2] = r * cos (thetamin);;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (0,x) == icomp)
 	{
 	  //OLD 70B return (W_PART_INWIND);
 	  return (icomp + 1);
@@ -775,7 +775,7 @@ rtheta_is_cell_in_wind (n, icomp)
 
       x[0] = r * sin (thetamax);
       x[2] = r * cos (thetamax);;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (0,x) == icomp)
 	{
 	  //Old 70b return (W_PART_INWIND);
 	  return (icomp + 1);

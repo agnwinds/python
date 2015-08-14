@@ -42,7 +42,6 @@ reposition (w, p)
 
   int n;
   int stuff_phot ();
-  int where_in_grid ();
 
 
   if (p->nres < 0)

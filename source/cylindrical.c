@@ -368,7 +368,7 @@ cylind_volumes (ndom, w, icomp)
 			  x[0] = r;
 			  x[1] = 0;
 			  x[2] = z;
-			  if (where_in_wind (x) == icomp)
+			  if (where_in_wind (ndom, x) == icomp)
 			    {
 			      num += r * r;	/* 0 implies in wind */
 			      jj++;
@@ -441,13 +441,17 @@ cylind_volumes (ndom, w, icomp)
 
 
 int
-cylind_where_in_grid (x)
+cylind_where_in_grid (ndom, x)
+     int ndom;
      double x[];
 {
   int i, j, n;
   double z;
   double rho;
   double f;
+  DomainPtr one_dom;
+
+  one_dom = &zdom[ndom];
 
   z = fabs (x[2]);		/* This is necessary to get correct answer above
 				   and below plane */
@@ -456,7 +460,7 @@ cylind_where_in_grid (x)
   rho = sqrt (x[0] * x[0] + x[1] * x[1]);	/* This is distance from z
 						   axis */
   /* Check to see if x is outside the region of the calculation */
-  if (rho > wind_x[NDIM - 1] || z > wind_z[MDIM - 1])
+  if (rho > one_dom->wind_x[one_dom->ndim - 1] || z > one_dom->wind_z[one_dom->mdim - 1])
     {
       return (-2);		/* x is outside grid */
     }
@@ -464,15 +468,13 @@ cylind_where_in_grid (x)
   if (rho < wind_x[0])
     return (-1);
 
-  fraction (rho, wind_x, NDIM, &i, &f, 0);
-  fraction (z, wind_z, MDIM, &j, &f, 0);
+  fraction (rho, one_dom->wind_x, one_dom->ndim, &i, &f, 0);
+  fraction (z, one_dom->wind_z, one_dom->mdim, &j, &f, 0);
 
   /* At this point i,j are just outside the x position */
-  /* PLACEHOLDER NEEDS DOMAIN */
-  wind_ij_to_n (0, i, j, &n);
+  wind_ij_to_n (ndom, i, j, &n);
 
   return (n);
-
 }
 
 
@@ -514,13 +516,17 @@ cylind_get_random_location (n, icomp, x)
   double zz;
   double phi;
   int ndom;
+  DomainPtr one_dom;
 
   ndom = wmain[n].ndomain;
+  one_dom = &zdom[ndom];
+
   wind_n_to_ij (ndom, n, &i, &j);
-  rmin = wind_x[i];
-  rmax = wind_x[i + 1];
-  zmin = wind_z[j];
-  zmax = wind_z[j + 1];
+
+  rmin = one_dom->wind_x[i];
+  rmax = one_dom->wind_x[i + 1];
+  zmin = one_dom->wind_z[j];
+  zmax = one_dom->wind_z[j + 1];
 
   /* Generate a position which is both in the cell and in the wind */
   inwind = -1;
@@ -538,7 +544,7 @@ cylind_get_random_location (n, icomp, x)
 
 
       x[2] = zmin + (zmax - zmin) * (rand () / (MAXRAND - 0.5));
-      inwind = where_in_wind (x);	/* Some photons will not be in the wind
+      inwind = where_in_wind (ndom, x);	/* Some photons will not be in the wind
 					   because the boundaries of the wind split the grid cell */
     }
 
@@ -705,14 +711,14 @@ cylind_is_cell_in_wind (n, icomp)
       x[2] = z;
 
       x[0] = rmin;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (ndom, x) == icomp)
 	{
 	  //OLD 70b return (W_PART_INWIND);
 	  return (icomp + 1);
 	}
 
       x[0] = rmax;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (ndom, x) == icomp)
 	{
 	  //OLD 70b return (W_PART_INWIND);
 	  return (icomp + 1);
@@ -728,14 +734,14 @@ cylind_is_cell_in_wind (n, icomp)
       x[0] = r;
 
       x[2] = zmin;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (0,x) == icomp)
 	{
 	  //OLD 70b return (W_PART_INWIND);
 	  return (icomp + 1);
 	}
 
       x[2] = zmax;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (0,x) == icomp)
 	{
 	  //OLD 70b return (W_PART_INWIND);
 	  return (icomp + 1);

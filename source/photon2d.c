@@ -51,8 +51,8 @@ translate (w, pp, tau_scat, tau, nres)
   int istat;
 
 
-//Old 70b  if (where_in_wind (pp->x) != 0)
-  if (where_in_wind (pp->x) < 0)
+//Old 70b  if (where_in_wind (0,pp->x) != 0)
+  if (where_in_wind (0, pp->x) < 0)
     {
       istat = translate_in_space (pp);
     }
@@ -63,7 +63,8 @@ translate (w, pp, tau_scat, tau, nres)
   else
     {
       istat = pp->istat = -1;	/* It's not in the wind and it's not in the grid.  Bummer! */
-      Error ("translate: Found photon that was not in wind or grid\n");
+      Error ("translate: Found photon that was not in wind or grid, istat %i\n",
+               where_in_wind (0, pp->x));
     }
 
 

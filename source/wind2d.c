@@ -355,7 +355,6 @@ recreated when a windfile is read into the program
   /* JM PLACEHOLDER -- has the density been set up correctly */
   Log("Saving test wind file NPLASMA %i\n", NPLASMA);
   wind_save("test_plasma.wind_save");
-  exit (0);
   
 /* 06may -- At this point we have calculated the volumes of all of the cells and it should
 be optional which variables beyond here are moved to structures othere than Wind */
@@ -625,37 +624,47 @@ int
 where_in_grid (x)
      double x[];
 {
-  int n;
+  int n, nuse, ndom;
   double fx, fz;
 
-  if (wig_x != x[0] || wig_y != x[1] || wig_z != x[2])	// Calculate if new position
+  nuse = -1; // initialise nuse to a "not found" value
+
+  if (wig_x != x[0] || wig_y != x[1] || wig_z != x[2])  // Calculate if new position
     {
 
-      if (geo.coord_type == CYLIND)
-	{
-	  n = cylind_where_in_grid (x);
-	}
-      else if (geo.coord_type == RTHETA)
-	{
-	  n = rtheta_where_in_grid (x);
-	}
-      else if (geo.coord_type == SPHERICAL)
-	{
-	  n = spherical_where_in_grid (x);
-	}
-      else if (geo.coord_type == CYLVAR)
-	{
-	  n = cylvar_where_in_grid (x, 0, &fx, &fz);
-	}
+  for (ndom = geo.ndomain; ndom > 0; ndom--)
+  {
+
+      if (zdom[ndom].coord_type == CYLIND)
+  	{
+  	  n = cylind_where_in_grid (ndom, x);
+  	}
+      else if (zdom[ndom].coord_type == RTHETA)
+  	{
+  	  n = rtheta_where_in_grid (x);
+  	}
+      else if (zdom[ndom].coord_type == SPHERICAL)
+  	{
+  	  n = spherical_where_in_grid (x);
+  	}
+      else if (zdom[ndom].coord_type == CYLVAR)
+  	{
+  	  n = cylvar_where_in_grid (x, 0, &fx, &fz);
+  	}
       else
-	{
-	  Error ("where_in_grid: Unknown coord_type %d\n", geo.coord_type);
-	  exit (0);
-	}
+  	{
+  	  Error ("where_in_grid: Unknown coord_type %d for domain %d\n", 
+              zdom[ndom].coord_type, ndom);
+  	  exit (0);
+  	}
+    
+    /* only store if you haven't already found a grid cell */
+    if (nuse < 0)
+      nuse = n;
+  }
 
-/* Store old positions to short-circuit calculation if asked for same position more
-than once */
-
+      /* Store old positions to short-circuit calculation if asked for same position more
+         than once */
       wig_x = x[0];
       wig_y = x[1];
       wig_z = x[2];
@@ -958,14 +967,14 @@ rho (w, x)
      WindPtr w;
      double x[];
 {
-  int n, where_in_grid ();
+  int n;
   double dd;
   double frac[4];
   int nn, nnn[4], nelem;
   int nplasma;
 
 
-  if (where_in_wind (x) != 0)	//note that where_in_wind is independent of grid.
+  if (where_in_wind (0,x) != 0)	//note that where_in_wind is independent of grid.
     return (0.0);
 
   n = coord_fraction (1, x, nnn, frac, &nelem);
@@ -1179,13 +1188,13 @@ check_corners_inwind (n, icomp)
 
   if (i < (one_dom->ndim - 2) && j < (one_dom->mdim- 2))
     {
-      if (where_in_wind (wmain[n].x) == icomp)
+      if (where_in_wind (0,wmain[n].x) == icomp)
 	n_inwind++;
-      if (where_in_wind (wmain[n + 1].x) == icomp)
+      if (where_in_wind (0,wmain[n + 1].x) == icomp)
 	n_inwind++;
-      if (where_in_wind (wmain[n + one_dom->mdim].x) == icomp)
+      if (where_in_wind (0,wmain[n + one_dom->mdim].x) == icomp)
 	n_inwind++;
-      if (where_in_wind (wmain[n + one_dom->mdim + 1].x) == icomp)
+      if (where_in_wind (0,wmain[n + one_dom->mdim + 1].x) == icomp)
 	n_inwind++;
     }
 

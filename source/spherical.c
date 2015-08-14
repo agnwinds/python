@@ -53,7 +53,6 @@ spherical_ds_in_cell (p)
 
   int n, ix;
   double s, smax;
-  int where_in_grid ();
   int quadratic ();
   int radiation ();
 
@@ -308,7 +307,7 @@ spherical_volumes (w, icomp)
 		    x[0] = r * sin (theta);
 		    x[1] = 0;
 		    x[2] = r * cos (theta);;
-		    if (where_in_wind (x) == icomp)
+		    if (where_in_wind (0,x) == icomp)
 		      {
 			num += r * r * sin (theta);	/* 0 implies in wind */
 			jj++;
@@ -455,7 +454,7 @@ spherical_get_random_location (n, icomp, x)
       x[0] = r * cos (phi) * sin (theta);
       x[1] = r * sin (phi) * sin (theta);
       x[2] = r * cos (theta);
-      inwind = where_in_wind (x);	/* Some photons will not be in the wind */
+      inwind = where_in_wind (0,x);	/* Some photons will not be in the wind */
     }
 
   return (inwind);

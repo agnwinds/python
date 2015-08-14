@@ -75,6 +75,9 @@ where_in_wind (ndom, x)
 {
   double rho, rho_min, rho_max, z;
   int ireturn;
+  DomainPtr one_dom;
+
+  one_dom = &zdom[ndom];
 
   ireturn = W_ALL_INWIND;
 
@@ -432,8 +435,8 @@ model_rho (ndom, x)
 
   /* 70b - as this is written the torus simply overlays the wind */
 
-  if ((where_in_wind (x) == W_ALL_INTORUS)
-      || (where_in_wind (x) == W_PART_INTORUS))
+  if ((where_in_wind (0,x) == W_ALL_INTORUS)
+      || (where_in_wind (0,x) == W_PART_INTORUS))
     {
       rho = torus_rho (x);
     }
