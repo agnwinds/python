@@ -206,11 +206,7 @@ wind_read (filename)
 
 /* Now allocate space for the wind array */
 
-  ndim = geo.ndim;
-  mdim = geo.mdim;
-  NDIM = ndim;
-  MDIM = mdim;
-  NDIM2 = ndim * mdim;
+  NDIM2 = geo.ndim2;   
   NPLASMA = geo.nplasma;
 
   Log("XXX print geo.ndomain %d\n",geo.ndomain);

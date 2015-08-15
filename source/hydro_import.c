@@ -294,14 +294,14 @@ get_hydro ()
 	ihydro_theta=ithetamax;
 	geo.wind_thetamax=90. / RADIAN;
 	hydro_thetamax=90.0/RADIAN;
-	MDIM = geo.mdim = ihydro_theta+1;
+	MDIM = zdom[0].mdim = ihydro_theta+1;
 	}
   else
 	{	
  	Log ("HYDRO j_hydro_thetamax=%i, bracketing cells have theta = %f and %f\n",j_hydro_thetamax,hydro_theta_cent[j_hydro_thetamax]*RADIAN,hydro_theta_cent[j_hydro_thetamax+1]*RADIAN); 
 	ihydro_theta=j_hydro_thetamax;
 	geo.wind_thetamax=hydro_thetamax;
-	MDIM = geo.mdim = ihydro_theta+2;
+	MDIM = zdom[0].mdim = ihydro_theta+2;
 	}
 
 
@@ -323,7 +323,7 @@ get_hydro ()
 /* Set a couple of last tags*/
  
 	geo.coord_type=RTHETA; //At the moment we only deal with RTHETA - in the future we might want to do some clever stuff
-	NDIM = geo.ndim = ihydro_r+3; //We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
+	NDIM = zdom[0].ndim = ihydro_r+3; //We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
 
 
 

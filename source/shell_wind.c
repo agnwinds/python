@@ -54,6 +54,8 @@ get_shell_wind_params ()
   int i;
 
 
+  //PlACEHOLDER
+  Log("XXX Not fixed for domains");
   Log ("Creating wind with a single shell for testing purposes\n");
 
 
@@ -68,12 +70,12 @@ get_shell_wind_params ()
 
 /* This may not be important, but we sould make sure that NDIM is 4... */
 
-  if (geo.ndim != 4)
+  if (zdom[0].ndim != 4)
     {
       Error
 	("For the shell type wind, we take control of the grid, and need NDIM to be the minimum - 4 - changing\n");
-      geo.ndim = 4;
-      geo.mdim = 1;
+      zdom[0].ndim = 4;
+      zdom[0].mdim = 1;
     }
 
 

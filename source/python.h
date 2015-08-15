@@ -21,6 +21,9 @@ within python */
 
 int ndim;                       // Define the fundamental dimension of the grid
 int mdim;
+
+/* With domains NDIM and MDIM need to be removed but NDIM2 is the total number of cells in wmain, and there
+are certain times we want to loop over everything.  The situation with NPLASMA is similar */
 int NDIM, MDIM, NDIM2;
 int NPLASMA;			//The number of cells with non-zero volume or the size of plasma structure
 
@@ -306,7 +309,8 @@ struct geometry
 enum coord_type_enum coord_type;
 int ndomain;  /*The number of domains in a model*/
 
-int ndim, mdim;	
+//int ndim, mdim;  ksl: deleted these variables since goe structure does should not contain info about individual domains	
+int ndim2; /* ksl: This is a new variable for use with domains */
 /* The type of geometry and dimensionality of the wind array. 
 				   0=1-d spherical, 1=cylindrical, 2 = spherical polar, 3=cylindrical
 				   but the z coordinate changes with rho in an attempt to allow for

@@ -46,6 +46,7 @@ main (argc, argv)
   int ochoice;
 
   char root[LINELENGTH], input[LINELENGTH];
+  char rootname[LINELENGTH]; // this takes into account domains
   char outputfile[LINELENGTH];
   char windsavefile[LINELENGTH];
   char parameter_file[LINELENGTH];
@@ -122,13 +123,14 @@ I did not change this now.  Though it could be done.  02apr ksl */
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
 
+      sprintf (rootname, "%s_%d", root, ndom);
 
-      create_master_table (ndom, root);
-      create_ion_table (ndom, root, 6);
-      create_ion_table (ndom, root, 7);
-      create_ion_table (ndom, root, 8);
-      create_ion_table (ndom, root, 14);
-      create_ion_table (ndom, root, 26);
+      create_master_table (ndom, rootname);
+      create_ion_table (ndom, rootname, 6);
+      create_ion_table (ndom, rootname, 7);
+      create_ion_table (ndom, rootname, 8);
+      create_ion_table (ndom, rootname, 14);
+      create_ion_table (ndom, rootname, 26);
     }
   return (0);
 }
@@ -197,7 +199,6 @@ create_master_table (ndom, rootname)
   strcpy (filename, rootname);
   strcat (filename, "_master.txt");
 
-  sprintf (filename, "%s_%d_master.txt", rootname, ndom);
 
   fptr = fopen (filename, "w");
 
@@ -664,7 +665,7 @@ get_one (ndom, variable_name)
   for (n = nstart; n < nstop; n++)
     {
       x[n] = 0;
-      Log("XXX %d %f %d\n",n,wmain[n].vol,wmain[n].nplasma);
+      Log("XXX %d %e %d\n",n,wmain[n].vol,wmain[n].nplasma);
       if (wmain[n].vol > 0.0)
 	{
 	  nplasma = wmain[n].nplasma;
