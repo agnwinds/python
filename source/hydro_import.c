@@ -57,6 +57,7 @@ HydroPtr hydro_ptr;
 			the model.
 	04jun	ksl	Moved get_hydro_wind_params from python.c to this file
 	13mar	nsh	Reopened development prior to trip to LV to work with DP.
+	15aug	ksl	Began updates to accommodate domains
 
 	
 
@@ -111,7 +112,8 @@ History:
 
 
 int
-get_hydro_wind_params ()
+get_hydro_wind_params (ndom)
+	int ndom;
 {
   int get_hydro ();
 
@@ -124,14 +126,6 @@ get_hydro_wind_params ()
     ("Creating a wind model using a Hydro calculatioon\n");
 
   get_hydro ();
- // geo.wind_rmin = 8.7e8;	/*Radius where wind begins */
- // if (geo.wind_rmin < geo.rstar)
- //   {
- //     Error
-//	("get_stellar_wind_params: It is unreasonable to have the wind start inside the star!\n");
-//      Log ("Setting geo.wind_rmin to geo.rstar\n");
- //     geo.wind_rmin = geo.rstar;
- //   }
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
@@ -162,8 +156,8 @@ Log ("geo.wind_rhomax=%e\n",geo.wind_rho_max);
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      geo.xlog_scale = 0.3 * geo.rstar;
-      geo.zlog_scale = 0.3 * geo.rstar;
+      zdom[ndom].xlog_scale = 0.3 * geo.rstar;
+      zdom[ndom].zlog_scale = 0.3 * geo.rstar;
     }
     
   return (0);

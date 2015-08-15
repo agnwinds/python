@@ -176,16 +176,15 @@ int randvec(double a[], double r);
 int randvcos(double lmn[], double north[]);
 double vcos(double x);
 /* stellar_wind.c */
-int get_stellar_wind_params(void);
-double stellar_velocity(double x[], double v[]);
-double stellar_rho(double x[]);
-int stellar_vel_grad(double x[], double velgrad[][3]);
+int get_stellar_wind_params(int ndom);
+double stellar_velocity(int ndom, double x[], double v[]);
+double stellar_rho(int ndom, double x[]);
 /* homologous.c */
 int get_homologous_params(int ndom);
 double homologous_velocity(int ndom, double x[], double v[]);
 double homologous_rho(int ndom, double x[]);
 /* hydro_import.c */
-int get_hydro_wind_params(void);
+int get_hydro_wind_params(int ndom);
 int get_hydro(void);
 double hydro_velocity(double x[], double v[]);
 double hydro_rho(double x[]);
@@ -193,16 +192,16 @@ double hydro_temp(double x[]);
 int rtheta_make_hydro_grid(WindPtr w, int ndom);
 int rtheta_hydro_volumes(WindPtr w);
 /* corona.c */
-int get_corona_params(void);
+int get_corona_params(int ndom);
 double corona_velocity(double x[], double v[]);
 double corona_rho(double x[]);
 /* knigge.c */
 int get_knigge_wind_params(int ndom);
-double kn_velocity(double x[], double v[]);
-double kn_rho(double x[]);
+double kn_velocity(int ndom, double x[], double v[]);
+double kn_rho(int ndom, double x[]);
 double kn_vzero(double r);
 double kn_wind_mdot_integral(double r);
-double kn_rho_zero(double r);
+double kn_rho_zero(int ndom, double r);
 /* disk.c */
 double tdisk(double m, double mdot, double r);
 double teff(double t, double x);
@@ -340,11 +339,11 @@ double alpha_st_e_integrand(double freq);
 /* wind_sum.c */
 int xtemp_rad(WindPtr w);
 /* yso.c */
-int get_yso_wind_params(void);
-double yso_velocity(double x[], double v[]);
-double yso_rho(double x[]);
+int get_yso_wind_params(int ndom);
+double yso_velocity(int ndom, double x[], double v[]);
+double yso_rho(int ndom, double x[]);
 /* elvis.c */
-int get_elvis_wind_params(void);
+int get_elvis_wind_params(int ndom);
 double elvis_velocity(double x[], double v[]);
 double elvis_rho(double x[]);
 double elvis_find_wind_rzero(double p[]);
@@ -417,7 +416,7 @@ double emittance_pow(double freqmin, double freqmax, double lum, double alpha);
 double emittance_bpow(double freqmin, double freqmax, double lum, double alpha);
 int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
 /* shell_wind.c */
-int get_shell_wind_params(void);
+int get_shell_wind_params(int ndom);
 /* compton.c */
 double kappa_comp(PlasmaPtr xplasma, double freq);
 double kappa_ind_comp(PlasmaPtr xplasma, double freq);

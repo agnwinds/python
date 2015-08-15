@@ -288,7 +288,7 @@ model_velocity (ndom, x, v)
     }
   else if (geo.wind_type == 1)
     {
-      speed = stellar_velocity (x, v);
+      speed = stellar_velocity (ndom, x, v);
     }
   else if (geo.wind_type == 3)
     {
@@ -300,7 +300,7 @@ model_velocity (ndom, x, v)
     }
   else if (geo.wind_type == 5)
     {
-      speed = kn_velocity (x, v);
+      speed = kn_velocity (ndom, x, v);
     }
   else if (geo.wind_type == 6)
     {
@@ -308,7 +308,7 @@ model_velocity (ndom, x, v)
     }
   else if (geo.wind_type == 7)
     {
-      speed = yso_velocity (x, v);
+      speed = yso_velocity (ndom, x, v);
     }
   else if (geo.wind_type == 8)
     {
@@ -316,7 +316,7 @@ model_velocity (ndom, x, v)
     }
   else if (geo.wind_type == 9)
     {
-      speed = stellar_velocity (x, v);
+      speed = stellar_velocity (ndom, x, v);
     }
   else
     {
@@ -405,7 +405,7 @@ model_rho (ndom, x)
     }
   else if (geo.wind_type == 1)
     {
-      rho = stellar_rho (x);
+      rho = stellar_rho (ndom, x);
     }
   else if (geo.wind_type == 3)
     {
@@ -417,7 +417,7 @@ model_rho (ndom, x)
     }
   else if (geo.wind_type == 5)
     {
-      rho = kn_rho (x);
+      rho = kn_rho (ndom, x);
     }
   else if (geo.wind_type == 6)
     {
@@ -425,7 +425,7 @@ model_rho (ndom, x)
     }
   else if (geo.wind_type == 7)
     {
-      rho = yso_rho (x);
+      rho = yso_rho (ndom, x);
     }
   else if (geo.wind_type == 8)
     {
@@ -433,7 +433,7 @@ model_rho (ndom, x)
     }
   else if (geo.wind_type == 9)
     {
-      rho = stellar_rho (x);
+      rho = stellar_rho (ndom, x);
     }
   else
     {

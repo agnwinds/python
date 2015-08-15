@@ -40,7 +40,8 @@ History:
 
 
 int
-get_shell_wind_params ()
+get_shell_wind_params (ndom)
+	int ndom;
 {
   double vtemp[3];
   double rhotemp[200];
@@ -134,8 +135,8 @@ get_shell_wind_params ()
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      geo.xlog_scale = 0.3 * geo.rstar;
-      geo.zlog_scale = 0.3 * geo.rstar;
+      zdom[ndom].xlog_scale = 0.3 * geo.rstar;
+      zdom[ndom].zlog_scale = 0.3 * geo.rstar;
     }
 
 /* Since this is a diagnostic routine, we will write out some information to check it is doing what we think) */
@@ -150,9 +151,8 @@ get_shell_wind_params ()
 
       postemp[0] = postemp[2] = r[i] / pow (2.0, 0.5);
       postemp[1] = 0.0;
-      speedtemp = stellar_velocity (postemp, vtemp);
-      rhotemp[i] = stellar_rho (postemp) * rho2nh;
-//              dvtemp[i]=shell_dv(postemp);
+      speedtemp = stellar_velocity (ndom, postemp, vtemp);
+      rhotemp[i] = stellar_rho (ndom, postemp) * rho2nh;
       Log ("ring=%i,x=%e,r=%10.30e,speed=%10.20e,density=%10.20e\n", i,
 	      r[i] / pow (2.0, 0.5), r[i], speedtemp, rhotemp[i]);
     }

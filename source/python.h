@@ -292,10 +292,20 @@ DomainPtr zdom;
 
 struct geometry
 {
+
+int ndomain;  /*The number of domains in a model*/
+
+//int ndim, mdim;  ksl: deleted these variables since goe structure does should not contain info about individual domains	
+int ndim2; 		/* This total number of windcells in all domains */
+int nplasma, nmacro;	/*The total number of cells in the plasma and macro structures in all domains */
+
   /* variables which store the domain numbers of the wind, disk atmosphere.
-     Other components should be added here */
-  int wind_domain_number;
-  int atmos_domain_number;
+     Other components should be added here.  Right now we need a wind_domain 
+    number because the inputs for the disk and a putativel disk atmosphere are 
+   interrsed.  The first step will be to put this information into alocal variale
+  in python.c.  We should not have to carry this forward */
+	int wind_domain_number;
+	int atmos_domain_number;
 
 
   /* 67 - ksl This section added to allow for restarting the program, and adds parameters used
@@ -307,10 +317,7 @@ struct geometry
 /* Begin description of the actual geometery */
   // XXX  This needs to be removed from geometry
 enum coord_type_enum coord_type;
-int ndomain;  /*The number of domains in a model*/
 
-//int ndim, mdim;  ksl: deleted these variables since goe structure does should not contain info about individual domains	
-int ndim2; /* ksl: This is a new variable for use with domains */
 /* The type of geometry and dimensionality of the wind array. 
 				   0=1-d spherical, 1=cylindrical, 2 = spherical polar, 3=cylindrical
 				   but the z coordinate changes with rho in an attempt to allow for
@@ -318,7 +325,6 @@ int ndim2; /* ksl: This is a new variable for use with domains */
 				   ndim is the dimensionality of the first dimension.  In the CV case
 				   it is in the plane of the disk. Mdim is generally along the z axis
 				 */
-  int nplasma, nmacro;		/*The number of cells in the plasma and macro structures 08mar ksl */
   double rmax, rmax_sq;		/* The maximum distance to which a photon should be followed */
   double mstar, rstar, rstar_sq, tstar, gstar;	/* Basic parameters for the WD */
   double twind;			/* temperature of wind */
@@ -347,12 +353,13 @@ int ndim2; /* ksl: This is a new variable for use with domains */
   double disk_mdot;		/* mdot of  DISK */
   double diskrad, diskrad_sq;
   double disk_z0, disk_z1;	/* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 */
-  int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply old file
- 				Added in order to separate the question of whether we are continuing an old run fro
-			       the type of wind model 	*/
-int log_linear;               /*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */
-double xlog_scale, zlog_scale;   /* Scale factors for setting up a logarithmic grid, the [1,1] cell
-				will be located at xlog_scale,zlog_scale */
+//  The next lines are domain specific, but we cannot remove wind_type until test photon flow through wind
+int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply old file
+		        Added in order to separate the question of whether we are continuing an old run fro
+ 		       the type of wind model 	*/
+// int log_linear;               /*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */
+// double xlog_scale, zlog_scale;   /* Scale factors for setting up a logarithmic grid, the [1,1] cell
+// 				will be located at xlog_scale,zlog_scale */
 
   int run_type;                 /*1508 - New variable that describes whether this is a continuation of a previous run 
   				Added in order to separate the question of whether we are continuing an old run fro

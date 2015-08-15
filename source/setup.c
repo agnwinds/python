@@ -237,7 +237,7 @@ get_grid_params (ndom)
 {
   int input_int;
 
-  if (ndom != geo.wind_domain_number)
+  if (ndom >= geo.ndomain)
     Error ("Trying to get wind grid params for a non-existent wind!\n");
 
   /* ksl - The if statement seems superflous.  Why are we intering this routine if we are continuing and earlier calculation? */
@@ -563,7 +563,7 @@ get_wind_params (ndom)
 
   if (geo.wind_type == 1)
     {
-      get_stellar_wind_params ();
+      get_stellar_wind_params (ndom);
     }
   else if (geo.wind_type == 0)
     {
@@ -571,11 +571,11 @@ get_wind_params (ndom)
     }
   else if (geo.wind_type == 3)
     {
-      get_hydro_wind_params ();
+      get_hydro_wind_params (ndom);
     }
   else if (geo.wind_type == 4)
     {
-      get_corona_params ();
+      get_corona_params (ndom);
     }
   else if (geo.wind_type == 5)
     {
@@ -587,15 +587,15 @@ get_wind_params (ndom)
     }
   else if (geo.wind_type == 7)
     {
-      get_yso_wind_params ();
+      get_yso_wind_params (ndom);
     }
   else if (geo.wind_type == 8)
     {
-      get_elvis_wind_params ();
+      get_elvis_wind_params (ndom);
     }
   else if (geo.wind_type == 9)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
     {
-      get_shell_wind_params ();
+      get_shell_wind_params (ndom);
 /*NSH 121219 moved	  dfudge = (geo.wind_rmax - geo.wind_rmin) / 1000.0;	Stop photons getting pushed out of the cell 
 Modified again in python 71b to take account of change in parametrisation of shell wind 
 	  DFUDGE = dfudge; */

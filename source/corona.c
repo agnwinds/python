@@ -23,11 +23,13 @@ Notes:
 History:
  	00sep	ksl	Coding begun
 	04jun	ksl	Moved from python.c to provide better uniformity of what files contain.
+	15aug	ksl	Began mods to accomodate domains
 **************************************************************/
 
 
 int
-get_corona_params ()
+get_corona_params (ndom)
+	int ndom;
 {
   Log ("Creating a corona above a disk\n");
 
@@ -66,8 +68,8 @@ get_corona_params ()
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      geo.xlog_scale = 0.3 * geo.corona_rmin;
-      geo.zlog_scale = 0.3 * geo.corona_scale_height;
+      zdom[ndom].xlog_scale = 0.3 * geo.corona_rmin;
+      zdom[ndom].zlog_scale = 0.3 * geo.corona_scale_height;
     }
 
 /* Prior to 01dec, windcones were defined here.  But this broke a capability to continue

@@ -619,8 +619,6 @@ main (argc, argv)
 	 &geo.disk_type);
 
   /* ksl 1508 Add parameters for a disk atmosphere */
-  geo.disk_atmosphere = 0;
-  geo.atmos_domain_number = -1; // default is no disk atmosphere
   zdom[ndomain].ndim = 30;
   zdom[ndomain].mdim = 10;
 

@@ -59,18 +59,18 @@ History:
  	04jun	ksl	Added this possibility
         04Sep   SS      Changed finite disk case to cut off wind
                         at the top (rather than bottom) outer edge of disk.
+	08aug	ksl	Modifications to accommodate domains begun
 **************************************************************/
 
 int
-get_yso_wind_params ()
+get_yso_wind_params (ndom)
+	int ndom;
 {
-int ndom;
-ndom=0;  //PLACEHOLDER
 
 /* The approach to get the input parameters is to call both input parameter routines
 one after the other*/
 
-  get_stellar_wind_params ();
+  get_stellar_wind_params (ndom);
   get_knigge_wind_params (ndom);
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
@@ -109,8 +109,8 @@ in units of WD radii */
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      geo.xlog_scale = geo.rstar;
-      geo.zlog_scale = 1e7;
+      zdom[ndom].xlog_scale = geo.rstar;
+      zdom[ndom].zlog_scale = 1e7;
     }
 
   return (0);
@@ -144,26 +144,26 @@ History:
 **************************************************************/
 
 double
-yso_velocity (x, v)
+yso_velocity (ndom, x, v)
+	int ndom;
      double x[], v[];
 {
   double r, rzero;
   double zzz;
   double dd;
-  double fabs ();
 
 /* First step is to determine whether we are inside the windcone of the kwd wind. 
 This is done as it was done in kn_velocity by seeing if the kwd streamline hits
 the disk.  If it does not, then we calculate the velocity for a stellar wind */
 
-  dd = geo.rstar * geo.kn_dratio;	//dd is the distance of the focus point in cm 
+  dd = geo.rstar * zdom[ndom].kn_dratio;	//dd is the distance of the focus point in cm 
   r = sqrt (x[0] * x[0] + x[1] * x[1]);	// rho of the point we have been given
   rzero = r / (1. + fabs (x[2] / dd));	// Nothing prevents this from being less than R_wd
 
   if (rzero < geo.rstar)
-    zzz = stellar_velocity (x, v);
+    zzz = stellar_velocity (ndom, x, v);
   else
-    zzz = kn_velocity (x, v);
+    zzz = kn_velocity (ndom, x, v);
 
 
   return (zzz);
@@ -193,7 +193,8 @@ History:
 **************************************************************/
 
 double
-yso_rho (x)
+yso_rho (ndom,x)
+	int ndom;
      double x[];
 {
   double r, rzero;
@@ -206,50 +207,11 @@ yso_rho (x)
 
   if (rzero < geo.rstar)
     {
-      rho = stellar_rho (x);
+      rho = stellar_rho (ndom,x);
     }
   else
-    rho = kn_rho (x);
+    rho = kn_rho (ndom,x);
 
   return (rho);
 }
 
-
-/*
-   Next routine is eliminated in py52 in favor of a generic routine 04 aug
-
-yso_vel_grad calculates the velocity radient tensor at any point in
-the flow
-
-The velocity gradient is defined as a 3 x 3 tensor such that
-
-velgrad[i][j]= dv_i/dx_j
-
-
-        04jun   ksl     Began work on this.  The routine simple
-			chooses between the way to calculate
-			velocity gradients and uses the original
-			routines
-
-*/
-/*
-int
-yso_vel_grad (x, velgrad)
-     double x[], velgrad[][3];
-{
-  double dd, r, rzero;
-
-  dd = geo.rstar * geo.kn_dratio;
-  r = sqrt (x[0] * x[0] + x[1] * x[1]);	//rho coordinate of the point we have been given
-  rzero = r / (1. + fabs (x[2] / dd));	//rho at the base for this streamline
-
-  if (rzero < geo.rstar)
-    {
-      stellar_vel_grad (x, velgrad);
-    }
-  else
-    kn_vel_grad (x, velgrad);
-
-  return (0);
-}
-*/

@@ -1,13 +1,3 @@
-
-
-/* 
-   This file was created in 98 december 98.    All subroutines which are required for
-   a spherical description of the wind should be stored here. No generic wind routines
-   should be placed here.
-
- */
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -54,11 +44,13 @@ History:
 			old .pf files for stellar winds will have to be modified, but there
 			are few of these.  Deleted lines which eliminated the disk for 
 			stellar models.
+	15aug	ksl	Change to accomodate multiple domains
 **************************************************************/
 
 
 int
-get_stellar_wind_params ()
+get_stellar_wind_params (ndom)
+	int ndom;
 {
   Log ("Creating a wind model for a Star\n");
 
@@ -90,22 +82,21 @@ get_stellar_wind_params ()
   rddoub ("stellar.wind.acceleration_exponent", &geo.cl_beta);	/* Accleration scale exponent */
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
-//OLD71  geo.wind_rmin = geo.rstar;
   geo.wind_rmin = geo.wind_rmin;	//71 ksl - Not modified this so that we did not waste cells
-  geo.wind_rmax = geo.rmax;
-  geo.wind_thetamin = 0.0;
-  geo.wind_thetamax = 90. / RADIAN;
+  zdom[ndom].wind_rmax = geo.rmax;
+  zdom[ndom].wind_thetamin = 0.0;
+  zdom[ndom].wind_thetamax = 90. / RADIAN;
 
 /* define the the variables that determine the gridding */
-  geo.wind_rho_min = 0;
-  geo.wind_rho_max = geo.rmax;
+  zdom[ndom].wind_rho_min = 0;
+  zdom[ndom].wind_rho_max = geo.rmax;
 
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      geo.xlog_scale = 0.3 * geo.rstar;
-      geo.zlog_scale = 0.3 * geo.rstar;
+      zdom[ndom].xlog_scale = 0.3 * geo.rstar;
+      zdom[ndom].zlog_scale = 0.3 * geo.rstar;
     }
     
   return (0);
@@ -153,7 +144,8 @@ History:
 **************************************************************/
 
 double
-stellar_velocity (x, v)
+stellar_velocity (ndom, x, v)
+	int ndom;
      double x[], v[];
 {
   double r, speed, zzz;
@@ -205,20 +197,21 @@ History:
 **************************************************************/
 
 double
-stellar_rho (x)
+stellar_rho (ndom, x)
+	int ndom;
      double x[];
 {
   double r, rho, v[3];
-  double length (), stellar_velocity ();
+
   r = length (x);
-  if (r < geo.cl_rmin)
+  if (r < zdom[ndom].cl_rmin)
     {
-      rho = geo.stellar_wind_mdot / (4. * PI * r * r * geo.cl_v_zero);
+      rho = zdom[ndom].stellar_wind_mdot / (4. * PI * r * r * zdom[ndom].cl_v_zero);
     }
   else
     {
       rho =
-	geo.stellar_wind_mdot / (4. * PI * r * r * stellar_velocity (x, v));
+	zdom[ndom].stellar_wind_mdot / (4. * PI * r * r * stellar_velocity (ndom,x, v));
     }
 
   return (rho);
@@ -242,6 +235,12 @@ NB: Making ds too small can cause roundoff and/or precision errors.
         01dec   ksl     Added for python_40
 
 */
+
+/*
+ 
+   1508 ksl  I do not believe this is used any longer an have commented
+   this out as part of the implementation of domains
+
 int
 stellar_vel_grad (x, velgrad)
      double x[], velgrad[][3];
@@ -268,3 +267,4 @@ stellar_vel_grad (x, velgrad)
 
   return (0);
 }
+*/
