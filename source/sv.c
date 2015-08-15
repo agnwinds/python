@@ -1,14 +1,3 @@
-
-
-/* The routines in this file define and summarize the properties of the wind.  The routines here are
-   specific to the SV description of a wind. It is only useful in the 2-d version of the code.
-
-   This file was created in 98apr in order to being to isolate the SV description from the more
-   generic parts of the wind.  Major modifications, mostly moving new code here and
-   creating the remaining subroutines to completely concentrate the sv dependent routines
-   here were made in 98dec.
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

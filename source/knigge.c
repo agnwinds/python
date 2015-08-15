@@ -31,7 +31,7 @@ History:
 
 
 /* This is a variable required to do the integration of local mdot in KWD */
-double kn_lambda; //kn_lambda required for the intgration
+double kn_lambda;		//kn_lambda required for the intgration
 
 /***********************************************************
 	Space Telescope Science Institute
@@ -61,7 +61,7 @@ History:
 
 int
 get_knigge_wind_params (ndom)
-	int ndom;
+     int ndom;
 {
   double qromb ();
   double dmin;
@@ -76,13 +76,15 @@ get_knigge_wind_params (ndom)
 
 
   zdom[ndom].kn_r_scale = 7e10;	/*Accleration length scale for wind */
-  zdom[ndom].kn_alpha = 1.5;		/* Accleration scale exponent for wind */
+  zdom[ndom].kn_alpha = 1.5;	/* Accleration scale exponent for wind */
   zdom[ndom].kn_v_infinity = 3;	/* Final speed of wind in units of escape velocity */
-  zdom[ndom].kn_lambda = 0.0;		/* Mass loss rate exponent */
+  zdom[ndom].kn_lambda = 0.0;	/* Mass loss rate exponent */
   zdom[ndom].kn_dratio = dmin = 0.5 * sqrt (geo.diskrad / geo.rstar);	/* Center of collimation in units of the WD 
-								   radius. The value set here is for the minimum collimation, see KWD95.  The coefficient 0.5 is 
-								   approximate */
-  zdom[ndom].kn_v_zero = 1.0;		/* NSH 19/04/11 New parameter - multiple of sound speed to be used as initial velocity of wind */
+									   radius. The value set here is for the minimum collimation, see KWD95.  The coefficient 0.5 is 
+									   approximate */
+  zdom[ndom].kn_v_zero = 1.0;	/* NSH 19/04/11 Parameter which 
+				   can use to muliply the initial velocity of wind so that it
+				   is greater or less than the sound speed. */
 
 /* There is confusion in various papers concerning whether to use d or d/dmin.  In KWD95, d/dmin was
 used but in later papers, e.g KD97 d in WD radii was used.  I believe d is more natural and so will use it, 
@@ -107,7 +109,8 @@ As now represented kn_dratio is the distance to the focus point in stellar radii
 
   rddoub ("kn.acceleration_length(cm)", &zdom[ndom].kn_r_scale);	/*Accleration length scale for wind */
   rddoub ("kn.acceleration_exponent", &zdom[ndom].kn_alpha);	/* Accleration scale exponent */
-  rddoub ("kn.v_zero(multiple_of_sound_speed_at_base)", &zdom[ndom].kn_v_zero);
+  rddoub ("kn.v_zero(multiple_of_sound_speed_at_base)",
+	  &zdom[ndom].kn_v_zero);
 
 /* Assign the generic parameters for the wind the generic parameters of the wind. Note that one should not really
 use these generic parameters in the rest of the routines here, as especially for the yso model they may have
@@ -118,14 +121,15 @@ to be modified -- ksl 04jun */
      required to reproduce Stuart's X-ray models (Sim+ 2008,2010) 
      units are in stellar radii / WD radii / grav radii as in SV model */
   rddoub ("kn.rmin", &zdom[ndom].wind_rmin);
-  rddoub ("kn.rmax", &zdom[ndom].wind_rmax ); 
+  rddoub ("kn.rmax", &zdom[ndom].wind_rmax);
 
   zdom[ndom].wind_rmin *= geo.rstar;
   zdom[ndom].wind_rmax *= geo.rstar;
   zdom[ndom].wind_thetamin = atan (1. / zdom[ndom].kn_dratio);
 /* Somewhat paradoxically diskrad is in cm, while dn_ratio which is really d in KWD95 is 
 in units of WD radii */
-  zdom[ndom].wind_thetamax = atan (geo.diskrad / (zdom[ndom].kn_dratio * geo.rstar));
+  zdom[ndom].wind_thetamax =
+    atan (geo.diskrad / (zdom[ndom].kn_dratio * geo.rstar));
 
   /* Next lines added by SS Sep 04. Changed the wind shape so that the boundary touches the outer 
      corner of the disk rather than the intersection of the disk edge with the xy-plane. */
@@ -143,7 +147,7 @@ in units of WD radii */
      means that wind_rho_max nees to be redefined so that it is used correctly
      to compute the boundary of the wind elsewhere. */
 
-  if (geo.disk_type == 2) // If disk_type==2, then the disk is vertically extended
+  if (geo.disk_type == 2)	// If disk_type==2, then the disk is vertically extended
     {
       zdom[ndom].wind_rho_max =
 	geo.diskrad - (zdisk (geo.diskrad) * tan (zdom[ndom].wind_thetamax));
@@ -173,11 +177,13 @@ in units of WD radii */
       disktheta = atan (zdisk (geo.diskrad) / geo.diskrad);
       test =
 	zdom[ndom].kn_dratio * geo.rstar * sin (zdom[ndom].wind_thetamin) *
-	cos (disktheta) / sin ((PI / 2.) - zdom[ndom].wind_thetamin - disktheta);
+	cos (disktheta) / sin ((PI / 2.) - zdom[ndom].wind_thetamin -
+			       disktheta);
     }
 
-  kn_lambda =zdom[ndom].kn_lambda;
-  zdom[ndom].mdot_norm = qromb (kn_wind_mdot_integral, test, geo.diskrad, 1e-6);
+  kn_lambda = zdom[ndom].kn_lambda;
+  zdom[ndom].mdot_norm =
+    qromb (kn_wind_mdot_integral, test, geo.diskrad, 1e-6);
 
   return (0);
 }
@@ -246,20 +252,17 @@ History:
 
 double
 kn_velocity (ndom, x, v)
-	int ndom;
+     int ndom;
      double x[], v[];
 {
   double r, rzero, theta;
   double ldist, zzz, v_escape, vl;
   double dd;
-  double vzero, kn_vzero ();
-  double fabs ();
-  double tdisk ();
-  double teff ();
+  double vzero;
   struct photon ptest;
   double xtest[3];
   double s;
-  double ds_to_disk ();
+
   DomainPtr one_dom;
 
 
@@ -299,9 +302,8 @@ kn_velocity (ndom, x, v)
       rzero = length (ptest.x);
     }
 
-/* Note, Knigge's velocity law is slightly different from SV */
 
-/* If statement limits the poloidal component of the velocity to be no more than 
+/* The if statement, below  limits the poloidal component of the velocity to be no more than 
 the poloidal velocity at the inner edge of the wind. It is there for continuity reasons */
 
   if (rzero < geo.rstar)
@@ -309,10 +311,15 @@ the poloidal velocity at the inner edge of the wind. It is there for continuity 
   else
     v_escape = sqrt (2. * G * geo.mstar / rzero);
 
-  /* Note that vzero which is the sound speed dos not depend on any of the kwd parameters */
- 
+/* Note that vzero for kwd the sound speed dos not depend on any of the kwd parameters */
+
   vzero = kn_vzero (rzero);
-  vzero *= one_dom->kn_v_zero;	/*NSH 19/4/11 Multiply sound speed by new multiplyer to allow faster velocity at base of wind */
+
+/*NSH 19/4/11 In the standard KWD model, the speed at the base of the wind is the
+   * sound speed.  The next line modifies this by the factor given by kn_v_zero, which
+   * is an input to the code. */
+
+  vzero *= one_dom->kn_v_zero;
 
 /* 578 -- 06oct -- ksl -- The next lines are modified to allow one to create a SV style
 velocity law if kn_v_infinity is less than 0 */
@@ -327,7 +334,8 @@ velocity law if kn_v_infinity is less than 0 */
     {
       zzz = pow (ldist / one_dom->kn_r_scale, one_dom->kn_alpha);
       vl =
-	vzero + ((-one_dom->kn_v_infinity) * v_escape - vzero) * zzz / (1. + zzz);
+	vzero + ((-one_dom->kn_v_infinity) * v_escape - vzero) * zzz / (1. +
+									zzz);
     }
 
 
@@ -395,7 +403,7 @@ History:
 
 double
 kn_rho (ndom, x)
-	int ndom;
+     int ndom;
      double x[];
 {
   double r, rzero;
@@ -405,10 +413,10 @@ kn_rho (ndom, x)
   struct photon ptest;
   double s, theta;
 
-DomainPtr one_dom;
+  DomainPtr one_dom;
 
 
-one_dom = &zdom[ndom];
+  one_dom = &zdom[ndom];
 
 
   dd = geo.rstar * one_dom->kn_dratio;
@@ -434,7 +442,8 @@ one_dom = &zdom[ndom];
   vzero = kn_vzero (rzero);	//polidal velocity at base
   if ((r * vqr) > 0)		// If statement to assure denominator is not zero
     {
-      rho = kn_rho_zero (ndom, rzero) * (rzero * rzero * vzero) / (r * r * vqr);
+      rho =
+	kn_rho_zero (ndom, rzero) * (rzero * rzero * vzero) / (r * r * vqr);
     }
   else
     rho = 0.0;
@@ -549,21 +558,21 @@ History:
 **************************************************************/
 
 double
-kn_rho_zero (ndom,r)
+kn_rho_zero (ndom, r)
      double r;
      int ndom;
 {
   double tref;
-  double t; 
+  double t;
   double x, ratio;
   double vzero, dd, cosd;
 
-    DomainPtr one_dom;
+  DomainPtr one_dom;
 
 
-      one_dom = &zdom[ndom];
+  one_dom = &zdom[ndom];
 
-  
+
   tref = tdisk (geo.mstar, geo.disk_mdot, geo.rstar);
   ratio = r / geo.rstar;
 

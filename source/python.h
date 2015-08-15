@@ -233,6 +233,7 @@ double wind_midz_var[NDIM_MAX][NDIM_MAX];
   double mdot_norm;		/*A normalization factor used in SV wind, and Knigge wind */
 
   double rmax;   // JM 1508 -- added in case domains have different grid sizes
+  double twind;   // ksl 1508 -- added in case domains have different initail temperatures
   /* Parameters defining Shlossman & Vitello Wind */
   double sv_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
   double sv_rmin, sv_rmax, sv_thetamin, sv_thetamax, sv_gamma;	/* parameters defining the goemetry of the wind */

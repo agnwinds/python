@@ -275,6 +275,7 @@ usually analytic expressions
 	15Aug	ksl	Updated for domains
  */
 
+
 double
 model_velocity (ndom, x, v)
      double x[], v[];
@@ -282,45 +283,50 @@ model_velocity (ndom, x, v)
 {
   double speed;
 
-  if (geo.wind_type == 0)
+
+
+
+
+
+  if (zdom[ndom].wind_type == 0)
     {
       speed = sv_velocity (x, v, ndom);
     }
-  else if (geo.wind_type == 1)
+  else if (zdom[ndom].wind_type == 1)
     {
       speed = stellar_velocity (ndom, x, v);
     }
-  else if (geo.wind_type == 3)
+  else if (zdom[ndom].wind_type == 3)
     {
       speed = hydro_velocity (x, v);
     }
-  else if (geo.wind_type == 4)
+  else if (zdom[ndom].wind_type == 4)
     {
       speed = corona_velocity (x, v);
     }
-  else if (geo.wind_type == 5)
+  else if (zdom[ndom].wind_type == 5)
     {
       speed = kn_velocity (ndom, x, v);
     }
-  else if (geo.wind_type == 6)
+  else if (zdom[ndom].wind_type == 6)
     {
       speed = homologous_velocity (ndom,x, v);
     }
-  else if (geo.wind_type == 7)
+  else if (zdom[ndom].wind_type == 7)
     {
       speed = yso_velocity (ndom, x, v);
     }
-  else if (geo.wind_type == 8)
+  else if (zdom[ndom].wind_type == 8)
     {
       speed = elvis_velocity (x, v);
     }
-  else if (geo.wind_type == 9)
+  else if (zdom[ndom].wind_type == 9)
     {
       speed = stellar_velocity (ndom, x, v);
     }
   else
     {
-      Error ("wind: Unknown windtype %d\n", geo.wind_type);
+      Error ("wind: Unknown windtype %d\n", zdom[ndom].wind_type);
       exit (0);
     }
 
@@ -399,39 +405,39 @@ model_rho (ndom, x)
 {
   double rho;
 
-  if (geo.wind_type == 0)
+  if (zdom[ndom].wind_type == SV)
     {
       rho = sv_rho (ndom, x);
     }
-  else if (geo.wind_type == 1)
+  else if (zdom[ndom].wind_type == SPHERE)
     {
       rho = stellar_rho (ndom, x);
     }
-  else if (geo.wind_type == 3)
+  else if (zdom[ndom].wind_type == HYDRO)
     {
       rho = hydro_rho (x);
     }
-  else if (geo.wind_type == 4)
+  else if (zdom[ndom].wind_type == CORONA)
     {
       rho = corona_rho (x);
     }
-  else if (geo.wind_type == 5)
+  else if (zdom[ndom].wind_type == KNIGGE)
     {
       rho = kn_rho (ndom, x);
     }
-  else if (geo.wind_type == 6)
+  else if (zdom[ndom].wind_type == HOMOLOGOUS)
     {
       rho = homologous_rho (ndom, x);
     }
-  else if (geo.wind_type == 7)
+  else if (zdom[ndom].wind_type == YSO)
     {
       rho = yso_rho (ndom, x);
     }
-  else if (geo.wind_type == 8)
+  else if (zdom[ndom].wind_type == ELVIS)
     {
       rho = elvis_rho (x);
     }
-  else if (geo.wind_type == 9)
+  else if (zdom[ndom].wind_type ==SHELL)
     {
       rho = stellar_rho (ndom, x);
     }

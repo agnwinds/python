@@ -240,7 +240,7 @@ get_grid_params (ndom)
   if (ndom >= geo.ndomain)
     Error ("Trying to get wind grid params for a non-existent wind!\n");
 
-  /* ksl - The if statement seems superflous.  Why are we intering this routine if we are continuing and earlier calculation? */
+  /* ksl - The if statement seems superflous.  Why are we entering this routine if we are continuing and earlier calculation? */
   if (geo.wind_type != PREVIOUS)
     {
       /* Define the coordinate system for the grid and allocate memory for the wind structure */
@@ -548,6 +548,12 @@ get_wind_params (ndom)
       geo.rmax = 50. * geo.r_agn;
     }
 
+  // XXX These need to be initalized sensibly and 
+  // it is not ovious that is happenning
+
+  zdom[ndom].rmax=1e12;
+  zdom[ndom].twind=1e5;
+
   rddoub ("wind.radmax(cm)", &zdom[ndom].rmax);
   rddoub ("wind.t.init", &geo.twind);
 
@@ -561,52 +567,55 @@ get_wind_params (ndom)
      with the same basic wind geometry, without reading in all of the input parameters.  
    */
 
-  if (geo.wind_type == 1)
+  if (zdom[ndom].wind_type == 1)
     {
       get_stellar_wind_params (ndom);
     }
-  else if (geo.wind_type == 0)
+  else if (zdom[ndom].wind_type == 0)
     {
       get_sv_wind_params (ndom);
     }
-  else if (geo.wind_type == 3)
+  else if (zdom[ndom].wind_type == 3)
     {
       get_hydro_wind_params (ndom);
     }
-  else if (geo.wind_type == 4)
+  else if (zdom[ndom].wind_type == 4)
     {
       get_corona_params (ndom);
     }
-  else if (geo.wind_type == 5)
+  else if (zdom[ndom].wind_type == 5)
     {
       get_knigge_wind_params (ndom);
     }
-  else if (geo.wind_type == 6)
+  else if (zdom[ndom].wind_type == 6)
     {
       get_homologous_params (ndom);
     }
-  else if (geo.wind_type == 7)
+  else if (zdom[ndom].wind_type == 7)
     {
       get_yso_wind_params (ndom);
     }
-  else if (geo.wind_type == 8)
+  else if (zdom[ndom].wind_type == 8)
     {
       get_elvis_wind_params (ndom);
     }
-  else if (geo.wind_type == 9)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
+  else if (zdom[ndom].wind_type == 9)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
     {
       get_shell_wind_params (ndom);
 /*NSH 121219 moved	  dfudge = (geo.wind_rmax - geo.wind_rmin) / 1000.0;	Stop photons getting pushed out of the cell 
 Modified again in python 71b to take account of change in parametrisation of shell wind 
 	  DFUDGE = dfudge; */
     }
-  else if (geo.wind_type != 2)
+  else if (zdom[ndom].wind_type != 2)
     {
-      Error ("python: Unknown wind type %d\n", geo.wind_type);
+	    /* XXX this is part of the new problem with a previous wind model */
+      Error ("python: Unknown wind type %d\n", zdom[ndom].wind_type);
       exit (0);
     }
 
   /* Get the filling factor of the wind */
+  // XXX  This is not in the right place.  It provides a golal filling factor to our
+  // models
   geo.fill = 1.;
   rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
 
