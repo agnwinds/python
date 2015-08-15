@@ -30,13 +30,14 @@ History:
 **************************************************************/
 
 
-int parse_command_line(argc, argv)
-    int argc;
-    char *argv[];
+int
+parse_command_line (argc, argv)
+     int argc;
+     char *argv[];
 {
   int restart_stat, verbosity, time_to_quit, i;
   char dummy[LINELENGTH];
-  int mkdir();
+  int mkdir ();
   double time_max;
 
   restart_stat = 0;
@@ -53,71 +54,71 @@ int parse_command_line(argc, argv)
     {
 
       for (i = 1; i < argc; i++)
-  {
+	{
 
-    if (strcmp (argv[i], "-h") == 0)
-      {
-        help ();
-      }
-    else if (strcmp (argv[i], "-r") == 0)
-      {
-        Log ("Restarting %s\n", files.root);
-        restart_stat = 1;
-      }
-    else if (strcmp (argv[i], "-t") == 0)
-      {
-        if (sscanf (argv[i + 1], "%lf", &time_max) != 1)
-    {
-      Error ("python: Expected time after -t switch\n");
-      exit (0);
-    }
-        i++;
+	  if (strcmp (argv[i], "-h") == 0)
+	    {
+	      help ();
+	    }
+	  else if (strcmp (argv[i], "-r") == 0)
+	    {
+	      Log ("Restarting %s\n", files.root);
+	      restart_stat = 1;
+	    }
+	  else if (strcmp (argv[i], "-t") == 0)
+	    {
+	      if (sscanf (argv[i + 1], "%lf", &time_max) != 1)
+		{
+		  Error ("python: Expected time after -t switch\n");
+		  exit (0);
+		}
+	      i++;
 
-      }
-    else if (strcmp (argv[i], "-v") == 0)
-      {
-        if (sscanf (argv[i + 1], "%d", &verbosity) != 1)
-    {
-      Error ("python: Expected verbosity after -v switch\n");
-      exit (0);
-    }
-        Log_set_verbosity (verbosity);
-        i++;
+	    }
+	  else if (strcmp (argv[i], "-v") == 0)
+	    {
+	      if (sscanf (argv[i + 1], "%d", &verbosity) != 1)
+		{
+		  Error ("python: Expected verbosity after -v switch\n");
+		  exit (0);
+		}
+	      Log_set_verbosity (verbosity);
+	      i++;
 
-      }
-    else if (strcmp (argv[i], "-e") == 0)
-      {
-        if (sscanf (argv[i + 1], "%d", &time_to_quit) != 1)
-    {
-      Error ("python: Expected max errors after -e switch\n");
-      exit (0);
-    }
-        Log_quit_after_n_errors (time_to_quit);
-        i++;
+	    }
+	  else if (strcmp (argv[i], "-e") == 0)
+	    {
+	      if (sscanf (argv[i + 1], "%d", &time_to_quit) != 1)
+		{
+		  Error ("python: Expected max errors after -e switch\n");
+		  exit (0);
+		}
+	      Log_quit_after_n_errors (time_to_quit);
+	      i++;
 
-      }
-    else if (strcmp (argv[i], "-d") == 0)
-    {
-      modes.iadvanced = 1;
-      i++;
-    }
-    else if (strcmp (argv[i], "-f") == 0)
-    {
-      modes.fixed_temp = 1;
-      i++;
-    }
+	    }
+	  else if (strcmp (argv[i], "-d") == 0)
+	    {
+	      modes.iadvanced = 1;
+	      i++;
+	    }
+	  else if (strcmp (argv[i], "-f") == 0)
+	    {
+	      modes.fixed_temp = 1;
+	      i++;
+	    }
 
-    else if (strcmp (argv[i], "-i") == 0)
-      {
-        modes.quit_after_inputs = 1;
-      }
+	  else if (strcmp (argv[i], "-i") == 0)
+	    {
+	      modes.quit_after_inputs = 1;
+	    }
 
-    else if (strncmp (argv[i], "-", 1) == 0)
-      {
-        Error ("python: Unknown switch %s\n", argv[i]);
-        help ();
-      }
-  }
+	  else if (strncmp (argv[i], "-", 1) == 0)
+	    {
+	      Error ("python: Unknown switch %s\n", argv[i]);
+	      help ();
+	    }
+	}
 
 
       /* The last command line variable is always the .pf file */
@@ -127,13 +128,13 @@ int parse_command_line(argc, argv)
 
       /* This completes the parsing of the command line */
 
-      /* JM130722 we now store diag files in a subdirectory if in parallel*/
+      /* JM130722 we now store diag files in a subdirectory if in parallel */
       /* ksl - I believe this is created in all cases, and that is what we want */
 
-      sprintf(files.diagfolder,"diag_%s/",files.root);
-      mkdir(files.diagfolder, 0777);
+      sprintf (files.diagfolder, "diag_%s/", files.root);
+      mkdir (files.diagfolder, 0777);
       strcpy (files.diag, files.diagfolder);
-      sprintf(dummy,"_%d.diag",rank_global);  
+      sprintf (dummy, "_%d.diag", rank_global);
       strcat (files.diag, files.root);
       strcat (files.diag, dummy);
 
@@ -167,14 +168,15 @@ History:
 
 **************************************************************/
 
-int init_log_and_windsave(restart_stat)
-    int restart_stat;
+int
+init_log_and_windsave (restart_stat)
+     int restart_stat;
 {
   FILE *fopen (), *qptr;
 
   if (restart_stat == 0)
-    {       // Then we are simply running from a new model
-      xsignal_rm (files.root);  // Any old signal file
+    {				// Then we are simply running from a new model
+      xsignal_rm (files.root);	// Any old signal file
       xsignal (files.root, "%-20s %s \n", "START", files.root);
       Log_init (files.diag);
     }
@@ -187,20 +189,20 @@ int init_log_and_windsave(restart_stat)
       qptr = fopen (files.windsave, "r");
 
       if (qptr != NULL)
-  {
-    /* Then the file does exist and we can restart */
-    fclose (qptr);
-    xsignal (files.root, "%-20s %s\n", "RESTART", files.root);
-    Log_append (files.diag);
-  }
+	{
+	  /* Then the file does exist and we can restart */
+	  fclose (qptr);
+	  xsignal (files.root, "%-20s %s\n", "RESTART", files.root);
+	  Log_append (files.diag);
+	}
       else
-  {
-    /* It does not exist and so we start from scratch */
-    restart_stat = 0;
-    xsignal_rm (files.root);  // Any old signal file
-    xsignal (files.root, "%-20s %s \n", "START", files.root);
-    Log_init (files.diag);
-  }
+	{
+	  /* It does not exist and so we start from scratch */
+	  restart_stat = 0;
+	  xsignal_rm (files.root);	// Any old signal file
+	  xsignal (files.root, "%-20s %s \n", "START", files.root);
+	  Log_init (files.diag);
+	}
     }
 
   return (0);
@@ -225,46 +227,59 @@ Notes:
 
 History:
   1502  JM  Moved here from main()
+  1508	ksl	Updated for domains
 
 **************************************************************/
 
-int get_grid_params(ndom)
-    int ndom;
+int
+get_grid_params (ndom)
+     int ndom;
 {
   int input_int;
 
   if (ndom != geo.wind_domain_number)
-    Error("Trying to get wind grid params for a non-wind!\n");
+    Error ("Trying to get wind grid params for a non-existent wind!\n");
 
+  /* ksl - The if statement seems superflous.  Why are we intering this routine if we are continuing and earlier calculation? */
   if (geo.wind_type != PREVIOUS)
     {
       /* Define the coordinate system for the grid and allocate memory for the wind structure */
       rdint
-  ("Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)",
-   &input_int);
-      switch(input_int)
-      {
-        case 0: zdom[ndom].coord_type = SPHERICAL; break;
-        case 1: zdom[ndom].coord_type = CYLIND; break;
-        case 2: zdom[ndom].coord_type = RTHETA; break;
-        case 3: zdom[ndom].coord_type = CYLVAR; break;
-        default: Error("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
+	("Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)",
+	 &input_int);
+      switch (input_int)
+	{
+	case 0:
+	  zdom[ndom].coord_type = SPHERICAL;
+	  break;
+	case 1:
+	  zdom[ndom].coord_type = CYLIND;
+	  break;
+	case 2:
+	  zdom[ndom].coord_type = RTHETA;
+	  break;
+	case 3:
+	  zdom[ndom].coord_type = CYLVAR;
+	  break;
+	default:
+	  Error
+	    ("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
           0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
-      }
+	}
 
       rdint ("Wind.dim.in.x_or_r.direction", &zdom[ndom].ndim);
       if (zdom[ndom].coord_type)
-  {
-    rdint ("Wind.dim.in.z_or_theta.direction", &zdom[ndom].mdim);
-    if (zdom[ndom].mdim < 4)
-      {
-        Error
-    ("python: domain mdim must be at least 4 to allow for boundaries\n");
-        exit (0);
-      }
-  }
+	{
+	  rdint ("Wind.dim.in.z_or_theta.direction", &zdom[ndom].mdim);
+	  if (zdom[ndom].mdim < 4)
+	    {
+	      Error
+		("python: domain mdim must be at least 4 to allow for boundaries\n");
+	      exit (0);
+	    }
+	}
       else
-  zdom[ndom].mdim = 1;
+	zdom[ndom].mdim = 1;
 
     }
 
@@ -273,31 +288,28 @@ int get_grid_params(ndom)
   if ((zdom[ndom].ndim > NDIM_MAX) || (zdom[ndom].mdim > NDIM_MAX))
     {
       Error
-  ("NDIM_MAX %d is less than NDIM %d or MDIM %d. Fix in python.h and recompile\n",
-   NDIM_MAX, zdom[ndom].ndim, zdom[ndom].mdim);
+	("NDIM_MAX %d is less than NDIM %d or MDIM %d. Fix in python.h and recompile\n",
+	 NDIM_MAX, zdom[ndom].ndim, zdom[ndom].mdim);
       exit (0);
     }
 
 
   /* If we are in advanced then allow the user to modify scale lengths */
   if (modes.iadvanced)
-  {
-    rdint ("adjust_grid(0=no,1=yes)", &modes.adjust_grid);
+    {
+      rdint ("adjust_grid(0=no,1=yes)", &modes.adjust_grid);
 
-    if (modes.adjust_grid)
-      {
-        Log("You have opted to adjust the grid scale lengths\n");
-        rddoub ("geo.xlog_scale", &zdom[ndom].xlog_scale);
-        if (geo.coord_type)
-          rddoub ("geo.zlog_scale", &zdom[ndom].zlog_scale);
-      }
-  }
+      if (modes.adjust_grid)
+	{
+	  Log ("You have opted to adjust the grid scale lengths\n");
+	  rddoub ("geo.xlog_scale", &zdom[ndom].xlog_scale);
+	  if (geo.coord_type)
+	    rddoub ("geo.zlog_scale", &zdom[ndom].zlog_scale);
+	}
+    }
 
-/* Populate the domain structure with information about the coordiante system
-*/
-  //zdom[geo.ndomain].coord_type=geo.coord_type;
-  //zdom[geo.ndomain].ndim=geo.ndim;
-  //zdom[geo.ndomain].mdim=geo.mdim;
+  zdom[ndom].ndim2 = zdom[ndom].ndim * zdom[ndom].mdim;
+
 
   return (0);
 }
@@ -327,7 +339,8 @@ History:
 **************************************************************/
 
 
-int get_line_transfer_mode ()
+int
+get_line_transfer_mode ()
 {
   rdint
     ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,6=macro_atoms,7=macro_atoms+aniso.scattering)",
@@ -414,19 +427,20 @@ History:
 
 **************************************************************/
 
-int get_radiation_sources()
+int
+get_radiation_sources ()
 {
   if (geo.system_type != SYSTEM_TYPE_AGN)
-    {       /* If is a stellar system */
+    {				/* If is a stellar system */
       rdint ("Star_radiation(y=1)", &geo.star_radiation);
       rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
       rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
       rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-      geo.agn_radiation = 0;  // So far at least, our star systems don't have a BH
+      geo.agn_radiation = 0;	// So far at least, our star systems don't have a BH
     }
-  else        /* If it is an AGN */
+  else				/* If it is an AGN */
     {
-      geo.star_radiation = 0; // 70b - AGN do not have a star at the center */
+      geo.star_radiation = 0;	// 70b - AGN do not have a star at the center */
       rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
       geo.bl_radiation = 0;
       rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
@@ -449,7 +463,7 @@ int get_radiation_sources()
   if (geo.rt_mode == 2)
     {
       Log
-  ("python: Using Macro Atom method so switching off wind radiation.\n");
+	("python: Using Macro Atom method so switching off wind radiation.\n");
       geo.wind_radiation = 0;
     }
 
@@ -462,19 +476,19 @@ int get_radiation_sources()
    */
 
   get_spectype (geo.star_radiation,
-    "Rad_type_for_star(0=bb,1=models)_to_make_wind",
-    &geo.star_ion_spectype);
+		"Rad_type_for_star(0=bb,1=models)_to_make_wind",
+		&geo.star_ion_spectype);
 
   get_spectype (geo.disk_radiation,
-    "Rad_type_for_disk(0=bb,1=models)_to_make_wind",
-    &geo.disk_ion_spectype);
+		"Rad_type_for_disk(0=bb,1=models)_to_make_wind",
+		&geo.disk_ion_spectype);
 
   get_spectype (geo.bl_radiation,
-    "Rad_type_for_bl(0=bb,1=models,3=pow)_to_make_wind",
-    &geo.bl_ion_spectype);
+		"Rad_type_for_bl(0=bb,1=models,3=pow)_to_make_wind",
+		&geo.bl_ion_spectype);
   get_spectype (geo.agn_radiation,
-    "Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table)_to_make_wind",
-    &geo.agn_ion_spectype);
+		"Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table)_to_make_wind",
+		&geo.agn_ion_spectype);
 
 
   /* 130621 - ksl - This is a kluge to add a power law to stellar systems.  What id done
@@ -490,13 +504,14 @@ int get_radiation_sources()
       geo.agn_radiation = 1;
       geo.agn_ion_spectype = SPECTYPE_POW;
       geo.bl_radiation = 0;
-      Log("Trying to make a start with a power law boundary layer\n");
+      Log ("Trying to make a start with a power law boundary layer\n");
     }
-  else 
+  else
     {
-      Log("Not Trying to make a start with a power law boundary layer %d\n",geo.bl_ion_spectype);
+      Log ("Not Trying to make a start with a power law boundary layer %d\n",
+	   geo.bl_ion_spectype);
     }
-  
+
   return (0);
 }
 
@@ -524,14 +539,14 @@ History:
 **************************************************************/
 
 int
-get_wind_params(ndom)
-    int ndom;
+get_wind_params (ndom)
+     int ndom;
 {
 
   if (geo.system_type == SYSTEM_TYPE_AGN)
-  {
-    geo.rmax = 50. * geo.r_agn;
-  }
+    {
+      geo.rmax = 50. * geo.r_agn;
+    }
 
   rddoub ("wind.radmax(cm)", &zdom[ndom].rmax);
   rddoub ("wind.t.init", &geo.twind);
@@ -541,10 +556,10 @@ get_wind_params(ndom)
 
   /* Now get parameters that are specific to a given wind model
 
-    Note: When one adds a new model, the only things that should be read in and modified
-    are parameters in geo.  This is in order to preserve the ability to continue a calculation
-    with the same basic wind geometry, without reading in all of the input parameters.  
-  */
+     Note: When one adds a new model, the only things that should be read in and modified
+     are parameters in geo.  This is in order to preserve the ability to continue a calculation
+     with the same basic wind geometry, without reading in all of the input parameters.  
+   */
 
   if (geo.wind_type == 1)
     {
@@ -620,7 +635,8 @@ History:
 
 **************************************************************/
 
-double get_stellar_params ()
+double
+get_stellar_params ()
 {
   double lstar;
 
@@ -690,7 +706,8 @@ History:
 **************************************************************/
 
 
-double get_disk_params ()
+double
+get_disk_params ()
 {
   int disk_illum;
 //        if (geo.disk_radiation) /*NSH 130906 - Commented out this if loop. It was causing problems with restart - bug #44
@@ -782,8 +799,9 @@ History:
 
 **************************************************************/
 
-int get_bl_and_agn_params (lstar)
-    double lstar;
+int
+get_bl_and_agn_params (lstar)
+     double lstar;
 {
   double xbl;
 
@@ -828,15 +846,15 @@ int get_bl_and_agn_params (lstar)
       rddoub ("agn_power_law_index", &geo.alpha_agn);
 
       /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
-       only in advanced mode. default is zero which is checked before we call photo_gen_agn */
-      geo.pl_low_cutoff = 0.0;  
+         only in advanced mode. default is zero which is checked before we call photo_gen_agn */
+      geo.pl_low_cutoff = 0.0;
       if (modes.iadvanced)
-        rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
+	rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
 
 
-    /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
-    This is only used in the sim correction factor for the first time through. 
-    Afterwards, the photons are used to compute the sim parameters. */
+      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
+         This is only used in the sim correction factor for the first time through. 
+         Afterwards, the photons are used to compute the sim parameters. */
 
       geo.const_agn =
 	geo.lum_agn /
@@ -870,15 +888,15 @@ int get_bl_and_agn_params (lstar)
       rddoub ("agn_power_law_index", &geo.alpha_agn);
 
       /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
-       only in advanced mode. default is zero which is checked before we call photo_gen_agn */
-      geo.pl_low_cutoff = 0.0;  
+         only in advanced mode. default is zero which is checked before we call photo_gen_agn */
+      geo.pl_low_cutoff = 0.0;
       if (modes.iadvanced)
-        rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
+	rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
 
 
-    /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
-    This is only used in the sim correction factor for the first time through. 
-    Afterwards, the photons are used to compute the sim parameters. */
+      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
+         This is only used in the sim correction factor for the first time through. 
+         Afterwards, the photons are used to compute the sim parameters. */
 
       geo.const_agn =
 	geo.lum_agn /
@@ -934,7 +952,8 @@ History:
 **************************************************************/
 
 
-int get_compton_torus_params ()
+int
+get_compton_torus_params ()
 {
   /* 70b - ksl - 1108067 - Here we add parameters for the compton torus or blocking region 
    *
@@ -985,27 +1004,35 @@ History:
   1504  SWM   Added
 **************************************************************/
 
-int 
+int
 get_meta_params (void)
 {
   int meta_param;
 
-  rdint("reverb.type", &meta_param);
-  switch(meta_param)
-  {
-    case 0: geo.reverb = REV_NONE; break;
-    case 1: geo.reverb = REV_PHOTON; break;
-    case 2: geo.reverb = REV_WIND; break;
-    default:geo.reverb = REV_NONE; break;
-  }
+  rdint ("reverb.type", &meta_param);
+  switch (meta_param)
+    {
+    case 0:
+      geo.reverb = REV_NONE;
+      break;
+    case 1:
+      geo.reverb = REV_PHOTON;
+      break;
+    case 2:
+      geo.reverb = REV_WIND;
+      break;
+    default:
+      geo.reverb = REV_NONE;
+      break;
+    }
 
   if (geo.reverb == REV_WIND)
-  {
-    geo.reverb_path_bins = 30;
-    geo.reverb_theta_bins = 30;
-    rdint("reverb.path_bins", &geo.reverb_path_bins);
-    rdint("reverb.theta_bins", &geo.reverb_theta_bins);
-  }
+    {
+      geo.reverb_path_bins = 30;
+      geo.reverb_theta_bins = 30;
+      rdint ("reverb.path_bins", &geo.reverb_path_bins);
+      rdint ("reverb.theta_bins", &geo.reverb_theta_bins);
+    }
 
   return (0);
 }
@@ -1032,15 +1059,16 @@ History:
 
 **************************************************************/
 
-double setup_dfudge ()
+double
+setup_dfudge ()
 {
   double dfudge;
 
   /* 121219 NSH Set up DFUDGE to be a value that makes some kind of sense
-  given the scale of the wind. Up till py74b2 it was set to be fixed at
-  1e5, so we ensure that this is a minimum, so any winds of CV type scale
-  will keep the old dfudge, and hopefully look the same. We also need to
-  set defudge slightly differently for the shell wind.*/
+     given the scale of the wind. Up till py74b2 it was set to be fixed at
+     1e5, so we ensure that this is a minimum, so any winds of CV type scale
+     will keep the old dfudge, and hopefully look the same. We also need to
+     set defudge slightly differently for the shell wind. */
 
   if (geo.wind_type == 9)
     {
@@ -1060,7 +1088,7 @@ double setup_dfudge ()
 	}
     }
 
-  return (dfudge);		
+  return (dfudge);
 }
 
 
@@ -1096,9 +1124,10 @@ History:
 
 **************************************************************/
 
-int setup_windcone()
+int
+setup_windcone ()
 {
-   if (geo.wind_thetamin > 0.0)
+  if (geo.wind_thetamin > 0.0)
     {
       windcone[0].dzdr = 1. / tan (geo.wind_thetamin);
       windcone[0].z = (-geo.wind_rho_min / tan (geo.wind_thetamin));
@@ -1183,26 +1212,27 @@ History:
 
 **************************************************************/
 
-int setup_created_files()
+int
+setup_created_files ()
 {
   int opar_stat;
 
-  opar_stat = 0;    /* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
-           the assumption is that we are reading from the command line */
-  
+  opar_stat = 0;		/* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
+				   the assumption is that we are reading from the command line */
+
   if (strncmp (files.root, "dummy", 5) == 0)
     {
       Log
-  ("Proceeding to create rdpar file in dummy.pf, but will not run prog\n");
+	("Proceeding to create rdpar file in dummy.pf, but will not run prog\n");
     }
 
   else if (strncmp (files.root, "stdin", 5) == 0
-     || strncmp (files.root, "rdpar", 5) == 0 || files.root[0] == ' '
-     || strlen (files.root) == 0)
+	   || strncmp (files.root, "rdpar", 5) == 0 || files.root[0] == ' '
+	   || strlen (files.root) == 0)
     {
       strcpy (files.root, "mod");
       Log
-  ("Proceeding in interactive mode\n Output files will have rootname mod\n");
+	("Proceeding in interactive mode\n Output files will have rootname mod\n");
     }
 
   else
@@ -1211,23 +1241,23 @@ int setup_created_files()
       strcat (files.input, ".pf");
 
       if ((opar_stat = opar (files.input)) == 2)
-  {
-    Log ("Reading data from file %s\n", files.input);
-  }
+	{
+	  Log ("Reading data from file %s\n", files.input);
+	}
       else
-  {
-    Log ("Creating a new parameter file %s\n", files.input);
-  }
+	{
+	  Log ("Creating a new parameter file %s\n", files.input);
+	}
 
     }
 
 
   /* Now create the names of all the files which will be written.  Note that some files
-  have the same root as the input file, while others have a generic name of python.
-  This is intended so that files which you really want to keep have unique names, while
-  those which are for short-term diagnostics are overwritten.  ksl 97aug. */
+     have the same root as the input file, while others have a generic name of python.
+     This is intended so that files which you really want to keep have unique names, while
+     those which are for short-term diagnostics are overwritten.  ksl 97aug. */
 
-  strcpy (basename, files.root);  //56d -- ksl --Added so filenames could be created by routines as necessary
+  strcpy (basename, files.root);	//56d -- ksl --Added so filenames could be created by routines as necessary
 
   strcpy (files.wspec, files.root);
   strcpy (files.lspec, files.root);
@@ -1282,7 +1312,8 @@ History:
 
 **************************************************************/
 
-int get_standard_care_factors()
+int
+get_standard_care_factors ()
 {
   int istandard;
   istandard = 1;
@@ -1291,17 +1322,18 @@ int get_standard_care_factors()
 
   /* 141116 - ksl - Made care factors and advanced command as this is clearly somethng that is diagnostic */
 
-  if (modes.iadvanced) {
-    rdint ("Use.standard.care.factors(1=yes)", &istandard);
+  if (modes.iadvanced)
+    {
+      rdint ("Use.standard.care.factors(1=yes)", &istandard);
 
-    if (!istandard)
-     {
-        rddoub ("Fractional.distance.photon.may.travel", &SMAX_FRAC);
-        rddoub ("Lowest.ion.density.contributing.to.photoabsorption",
-        &DENSITY_PHOT_MIN);
-        rdint ("Keep.photoabs.during.final.spectrum(1=yes)", &modes.keep_photoabs);
-      }
-  }
+      if (!istandard)
+	{
+	  rddoub ("Fractional.distance.photon.may.travel", &SMAX_FRAC);
+	  rddoub ("Lowest.ion.density.contributing.to.photoabsorption",
+		  &DENSITY_PHOT_MIN);
+	  rdint ("Keep.photoabs.during.final.spectrum(1=yes)",
+		 &modes.keep_photoabs);
+	}
+    }
   return (0);
 }
-

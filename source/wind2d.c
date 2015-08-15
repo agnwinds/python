@@ -1203,6 +1203,15 @@ check_corners_inwind (n)
 
 
 
+/* 
+
+Setup the locations of starting and ending positions of the different
+domains for wmain.  The information is placed in zdom for later use
+
+
+jm  Coded	Part of the effort to incorporate domains
+
+*/
 int
 set_nstart_nstop()
 {

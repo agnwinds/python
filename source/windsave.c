@@ -70,6 +70,7 @@ wind_save (filename)
       exit (0);
     }
 
+  Log("XXX zdom  %d  %d %d %d %d\n",zdom[0].nstart,zdom[0].nstop,zdom[0].ndim,zdom[0].mdim,zdom[0].ndim2);
   sprintf (line, "Version %s\n", VERSION);
   n = fwrite (line, sizeof (line), 1, fptr);
   n += fwrite (&geo, sizeof (geo), 1, fptr);
@@ -212,7 +213,14 @@ wind_read (filename)
   NDIM2 = ndim * mdim;
   NPLASMA = geo.nplasma;
 
-  n += fwrite(&zdom, sizeof (domain_dummy), geo.ndomain, fptr);
+  Log("XXX print geo.ndomain %d\n",geo.ndomain);
+  zdom = (DomainPtr) calloc (sizeof (domain_dummy), MaxDom);
+  Log("Get ready\n");
+  zdom[0].coord_type = 1;
+  Log("XXX before zdom %d %d\n",zdom[0].mdim,zdom[0].mdim);
+  n += fread(zdom, sizeof (domain_dummy), geo.ndomain, fptr);
+  Log("XXX after zdom %d %d\n",zdom[0].mdim,zdom[0].mdim);
+
 
   calloc_wind (NDIM2);
   n += fread (wmain, sizeof (wind_dummy), NDIM2, fptr);

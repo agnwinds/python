@@ -203,13 +203,13 @@ create_master_table (ndom, rootname)
 
   /* Get the variables that one needs */
 
-  c[0] = get_one ("ne");
+  c[0] = get_one (ndom, "ne");
   strcpy (column_name[0], "ne");
 
-  c[1] = get_one ("t_e");
+  c[1] = get_one (ndom, "t_e");
   strcpy (column_name[1], "t_e");
 
-  c[2] = get_one ("t_r");
+  c[2] = get_one (ndom, "t_r");
   strcpy (column_name[2], "t_r");
 
   c[3] = get_ion (1, 1, 0);
@@ -227,20 +227,20 @@ create_master_table (ndom, rootname)
   c[7] = get_ion (8, 6, 0);
   strcpy (column_name[7], "o6");
 
-  c[8] = get_one ("dmo_dt_x");
+  c[8] = get_one (ndom, "dmo_dt_x");
   strcpy (column_name[8], "dmo_dt_x");
 
 
-  c[9] = get_one ("dmo_dt_y");
+  c[9] = get_one (ndom, "dmo_dt_y");
   strcpy (column_name[9], "dmo_dt_y");
 
-  c[10] = get_one ("dmo_dt_z");
+  c[10] = get_one (ndom, "dmo_dt_z");
   strcpy (column_name[10], "dmo_dt_z");
 
   ncols = 11;
 
 
-  converge = get_one ("converge");
+  converge = get_one (ndom, "converge");
 
   /* At this point oll of the data has been collected */
 
@@ -651,19 +651,25 @@ get_one (ndom, variable_name)
   int nstart, nstop;
 
   nstart = zdom[ndom].nstart;
-  nstop = zdom[ndom].nstart;
+  nstop = zdom[ndom].nstop;
   NDIM2 = zdom[ndom].ndim2;
+
+  Log("XXX get_one: %d %d %d\n",nstart,nstop,NDIM2);
 
 
 
 
   x = (double *) calloc (sizeof (double), NDIM2);
+
   for (n = nstart; n < nstop; n++)
     {
       x[n] = 0;
+      Log("XXX %d %f %d\n",n,wmain[n].vol,wmain[n].nplasma);
       if (wmain[n].vol > 0.0)
 	{
 	  nplasma = wmain[n].nplasma;
+
+
 
 	  if (strcmp (variable_name, "ne") == 0)
 	    {
