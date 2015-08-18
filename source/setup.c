@@ -1033,7 +1033,7 @@ double setup_dfudge ()
 
   if (geo.wind_type == 9)
     {
-      dfudge = (geo.wind_rmax - geo.wind_rmin) / 10000000.0;
+      dfudge = (geo.wind_rmax - geo.wind_rmin) / 1000.0;
     }
   else
     {
@@ -1048,7 +1048,7 @@ double setup_dfudge ()
 	  Log ("DFUDGE set to %e based on geo.rmax\n", dfudge);
 	}
     }
-
+	 printf ("BLAH dfudge=%e\n",dfudge);
   return (dfudge);		
 }
 
