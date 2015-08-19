@@ -322,6 +322,8 @@ cylind_volumes (ndom, w)
 
   one_dom = &zdom[ndom];
 
+  Log("XXX Cyl Volumns: %e %e\n",zdom[ndom].wind_x[2],zdom[ndom].wind_z[2]);
+
   for (i = 0; i < one_dom->ndim; i++)
     {
       for (j = 0; j < one_dom->mdim; j++)
@@ -740,7 +742,7 @@ cylind_is_cell_in_wind (n)
       x[2] = zmin;
 
       if (where_in_wind (x) == ndom)
-	{
+{
 	  //OLD 70b return (W_PART_INWIND);
 	  return (ndom + 1);
 	}

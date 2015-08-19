@@ -85,6 +85,10 @@ get_knigge_wind_params (ndom)
   zdom[ndom].kn_v_zero = 1.0;	/* NSH 19/04/11 Parameter which 
 				   can use to muliply the initial velocity of wind so that it
 				   is greater or less than the sound speed. */
+  zdom[ndom].wind_rmin=1;   /* Innner and outer edges of the wind in stellar radii. These
+ 				parameters were added by JM to allow one to duplicate the YSO
+			       paper	*/
+  zdom[ndom].wind_rmax=10.;
 
 /* There is confusion in various papers concerning whether to use d or d/dmin.  In KWD95, d/dmin was
 used but in later papers, e.g KD97 d in WD radii was used.  I believe d is more natural and so will use it, 
