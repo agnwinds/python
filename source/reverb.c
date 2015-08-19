@@ -150,7 +150,7 @@ Returns:
 	To file only
 
 Description:
-	Uses system commands to achieve this quickly
+	Uses very simple fetch/put characters to append to root file.
 
 Notes:
 
@@ -160,9 +160,22 @@ History:
 int
 delay_dump_combine(int iRanks)
 {
-	FILE *fopen();
-	char cCall     [LINELENGTH];
-
+	FILE *fopen(), *f_base, *f_cat;
+	char cCall[LINELENGTH], c_cat[LINELENGTH], c_char;
+	int i;
+/*
+	f_base = fopen(delay_dump_file, 'a');
+	for(i=1;i<iRanks;i++)
+	{
+		sprintf(c_cat, "%s%d", c_cat, i);
+		if((f_cat = fopen(c_cat, 'r')) == NULL)
+			Error("delay_dump_combine: Missing file %s%d", c_cat,i);
+		else
+			while((c_char = fgetc(f_cat)) != EOF) fputc(c_char, f_base);
+		fclose(f_cat);
+	}
+	fclose(f_base);
+*/
 	//Yes this is done as a system call and won 't work on Windows machines. Lazy solution!
 	sprintf(cCall, "cat %s[0-9]* >> %s", delay_dump_file, delay_dump_file);
 	if (system(cCall) < 0)
