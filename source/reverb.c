@@ -197,13 +197,17 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 {
 	FILE *fopen(), *fptr;
 	int	 nphot, mscat, mtopbot, i;
-	double zangle, minpath;
+	double zangle, minpath=0.0;
 
-	if(geo.system_type == SYSTEM_TYPE_STAR || geo.system_type == SYSTEM_TYPE_BINARY)
-		minpath = geo.rmax - geo.rstar;	
-	else if(geo.system_type == SYSTEM_TYPE_AGN)
-		minpath = geo.r_agn;
-
+	switch(geo.system_type) 
+	{
+		case SYSTEM_TYPE_STAR:
+			minpath = geo.rmax - geo.rstar;	break;
+		case SYSTEM_TYPE_BINARY:
+			minpath = geo.rmax - geo.rstar;	break;
+		case SYSTEM_TYPE_AGN:
+			minpath = geo.r_agn;
+	}
 	
 	/*
 	 * Open a file for writing the spectrum
@@ -455,7 +459,7 @@ reverb_init(WindPtr wind, int nangles)
 	}
 	else if (geo.reverb == REV_PHOTON)
 		Log("reverb_init: Photon-based path tracking is enabled.\n");
-	else
+	
 
   	return (0);
 }
