@@ -1079,7 +1079,7 @@ double setup_dfudge ()
 	  Log ("DFUDGE set to %e based on geo.rmax\n", dfudge);
 	}
     }
-
+	 printf ("BLAH dfudge=%e\n",dfudge);
   return (dfudge);		
 }
 
