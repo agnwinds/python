@@ -602,6 +602,27 @@ wind_paths_add_phot(WindPtr wind, PhotPtr pp)
 }
 
 /********************************************************//*
+ * @name 	Photon path generate photon
+ * @brief	Generates path for a 'wind' photon in photon mode
+ *
+ * @param [in,out] pp 	Photon to set path of
+ *
+ * Finds the straight-line distance between photon and the 
+ * outer star radius, sets minimum path to that.
+ *
+ * @notes
+ * 20/8/15	-	Written by SWM
+***********************************************************/
+int
+phot_paths_gen_phot(PhotPtr pp)
+{
+	pp->path = sqrt((pp->x[0] * pp->x[0])
+	  			+	(pp->x[1] * pp->x[1])
+	  			+	(pp->x[2] * pp->x[2])); 
+	return (0);
+}
+
+/********************************************************//*
  * @name 	Wind paths generate photon
  * @brief	Generates path for a wind photon
  *
@@ -622,13 +643,9 @@ wind_paths_gen_phot(WindPtr wind, PhotPtr pp)
 	double	r_rand , r_total, r_bin_min, r_bin_rand;
 	int		i_path;
 
-	if(geo.wcycle == 0) 
+	if(geo.wcycle == 0 || plasmamain[wind->nplasma]->ntot == 0) 
 	{
-		//If this is the first cycle, we don't have wind path data yet
-		pp->path = sqrt( pp->x[0] * pp->x[0]
-	  					+pp->x[1] * pp->x[1]
-	  					+pp->x[2] * pp->x[2])
-	  					-geo.rstar;
+		phot_paths_gen_phot(pp);
 	}
 	else
 	{
