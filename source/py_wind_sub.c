@@ -1483,7 +1483,7 @@ wind_element (w)
   int first, last;
   int ndom;
 
-  ndom=w->ndomain;
+  ndom=w->ndom;
 
 
 
@@ -3446,7 +3446,7 @@ int get_los_dvds(w, rootname, ochoice)
 
   int ndom;
 
-  ndom=w->ndomain;
+  ndom=w->ndom;
 
   vchoice = 0;
   phase = 0;

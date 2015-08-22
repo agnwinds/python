@@ -432,7 +432,7 @@ spherical_get_random_location (n, icomp, x)
   double theta, phi;
   int ndom;
 
-  ndom = wmain[n].ndomain;
+  ndom = wmain[n].ndom;
   wind_n_to_ij (ndom, n, &i, &j);
   rmin = wind_x[i];
   rmax = wind_x[i + 1];

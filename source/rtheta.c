@@ -54,7 +54,7 @@ rtheta_ds_in_cell (p)
       return (n);		/* Photon was not in wind */
     }
 
-  ndom = wmain[n].ndomain;
+  ndom = wmain[n].ndom;
   wind_n_to_ij (ndom, n, &ix, &iz);	/*Convert the index n to two dimensions */
 
 
@@ -561,7 +561,7 @@ rtheta_get_random_location (n, icomp, x)
   double zz;
   int ndom;
 
-  ndom = wmain[n].ndomain;
+  ndom = wmain[n].ndom;
   wind_n_to_ij (ndom, n, &i, &j);
 
   rmin = wind_x[i];
@@ -708,7 +708,7 @@ rtheta_is_cell_in_wind (n, icomp)
 
 
   /* First check if the cell is in the boundary */
-  ndom = wmain[n].ndomain;
+  ndom = wmain[n].ndom;
   wind_n_to_ij (ndom, n, &i, &j);
 
   if (i >= (NDIM - 2) && j >= (MDIM - 2))

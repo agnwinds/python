@@ -665,7 +665,7 @@ and PART in whatever, as n and n+1
 
 typedef struct wind
 {
-  int ndomain;		/*The domain associated with this element of the wind */
+  int ndom;		/*The domain associated with this element of the wind */
   int nwind;			/*A self-reference to this cell in the wind structure */
   int nplasma;			/*A cross refrence to the corresponding cell in the plasma structure */
   double x[3];			/*position of inner vertex of cell */
@@ -738,12 +738,6 @@ typedef struct plasma
 
   double kappa_ff_factor;	/* Multiplicative factor for calculating the FF heating for                                      a photon. */
 
-  /* Two new objects in the structure to hol the number of line resonant scatters and the number of electron scatters */
-
-  int nscat_es;
-  int nscat_res;
-
-
 
   double recomb_simple[NTOP_PHOT];	/* "alpha_e - alpha" (in Leon's notation) for b-f processes in simple atoms. */
 
@@ -771,20 +765,20 @@ typedef struct plasma
   double heat_photo, heat_z;	/*photoionization heating total and of metals */
   double heat_auger;       /* photoionization heating due to inner shell ionizations */  
   double w;			/*The dilution factor of the wind */
+
   int ntot;			/*Total number of photon passages */
 
-  /* NSH 15/4/11 - added some counters to give a rough idea of where photons from various sources are ending up */
-  /* NSH 111005  - changed counters to real variables, that allows us to take account of differening weights of photons */
-  /* ksl - ???? The reason these are doubles if that what Nick did was to truly count the photons, but it is
-   * not clera why that is a good idea.  I have converted them back to mean the number of packets in radiation.c.  It
-   * would be simpler if this was an array rather than individual
-   * variables
-   */
+  int nscat_es;   /* The number of electrons scatters in the cell */
+  int nscat_res;  /* The number of resonant line scatters in the cell */
+
+  /* NSH 15/4/11 - added counters to give a rough idea of where photons from various sources are ending up */
+
   int ntot_star;
   int ntot_bl;
   int ntot_disk;		/* NSH 15/4/11 Added to count number of photons from the disk in the cell */
   int ntot_wind;
   int ntot_agn;			/* NSH 15/4/11 Added to count number of photons from the AGN in the cell */
+
   double mean_ds;		/* NSH 6/9/12 Added to allow a check that a thin shell is really optcially thin */
   int n_ds;			/* NSH 6/9/12 Added to allow the mean dsto be computed */
   int nrad;			/* Total number of photons radiated within the cell */
@@ -870,8 +864,7 @@ NSH 130725 - this number is now also used to say if the cell is over temperature
   double sim_ip;		/*Ionisation parameter for the cell as defined in Sim etal 2010 */
   double ferland_ip;		/* IP calculaterd from equation 5.4 in hazy1 - assuming allphotons come from 0,0,0 and the wind is transparent */
   double ip;			/*NSH 111004 Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
-  //int kpkt_rates_known;
-  //COOLSTR kpkt_rates;
+
 } plasma_dummy, *PlasmaPtr;
 
 PlasmaPtr plasmamain;

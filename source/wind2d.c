@@ -169,7 +169,7 @@ define_wind ()
 	  /* 04aug -- ksl -52 -- The next couple of lines are part of the changes
 	   * made in the program to allow more that one coordinate system in python 
 	   */
-	  w[n].ndomain = ndom;	// JM -- PLACEHOLDER -- not sure if this is the best place to do this step 
+	  w[n].ndom = ndom;	// JM -- PLACEHOLDER -- not sure if this is the best place to do this step 
 	  model_velocity (ndom, w[n].x, w[n].v);
 	  model_vgrad (ndom, w[n].x, w[n].v_grad);
 	}
@@ -375,7 +375,7 @@ be optional which variables beyond here are moved to structures othere than Wind
   for (n = 0; n < NPLASMA; n++)
     {
       nwind = plasmamain[n].nwind;
-      ndom = wmain[nwind].ndomain;
+      ndom = wmain[nwind].ndom;
       stuff_v (w[nwind].xcen, x);
       /* 140905 - ksl - Next two lines allow for clumping */
       /* JM PLACEHOLDER need to make model_rho have domain number */
@@ -1188,7 +1188,7 @@ check_corners_inwind (n)
   int ndom;
 
   /* find the domain */
-  ndom = wmain[n].ndomain;
+  ndom = wmain[n].ndom;
   one_dom = &zdom[ndom];
 
   wind_n_to_ij (ndom, n, &i, &j);

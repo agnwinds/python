@@ -74,7 +74,7 @@ cylvar_ds_in_cell (p)
       return (n);		/* Photon was not in wind */
     }
 
-  ndom = wmain[n].ndomain;
+  ndom = wmain[n].ndom;
   wind_n_to_ij (ndom,n, &ix, &iz);	/*Convert the index n to two dimensions */
 
   smax = VERY_BIG;		//initialize smax to a large number
@@ -725,7 +725,7 @@ cylvar_get_random_location (n, icomp, x)
   double phi;
   int ndom;
 
-  ndom = wmain[n].ndomain;
+  ndom = wmain[n].ndom;
   wind_n_to_ij (ndom, n, &i, &j);
 
   /* Encapsulate the grid cell with a rectangle for integrating */
