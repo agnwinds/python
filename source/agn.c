@@ -36,22 +36,22 @@
 /***********************************************************
 Space Telescope Science Institute
 
-Synopsis: star_init (r, tstar, freqmin, freqmax, ioniz_or_final, f)
+Synopsis: agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
+
  Arguments:              
  Returns:
  Description:    
+	This is essentially a parallel routine that is set up for other types of 
+	sources.  It actually does not do very much.
+
  
-This routine calculates the luminosity of the star and the luminosity within the frequency boundaries. 
-BB functions are assumed 
+	This routine calculates the luminosity of the star and the 
+	luminosity within the frequency boundaries.  BB functions are assumed 
+
 Notes:
 History:
 **************************************************************/
 
-
-
-/* This is essentially a parallel routine that is set up for other types of sources.  It actually does not do very
- * much
- */
 
 double
 agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
@@ -317,13 +317,11 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
   int i, iend;
   int n;
   double ftest;
-  double dot ();
-  double planck ();
-  double plaw ();
-  int randvec (), randvcos ();
-  double zdisk ();
 
-  t = alpha;			/* NSH 130605, this is a slightly odd statmenent, put in to avoid 03 compilation errors, but stemming from the odd behaviour that one can give the AGN a themal spectral type, and the alpha parameter is then used to transmit the temperature. */
+  t = alpha;			/* NSH 130605, this is a slightly odd statmenent, put in to avoid 03 compilation 
+				   errors, but stemming from the odd behaviour that one can give the AGN a 
+				   themal spectral type, and the alpha parameter is then used to transmit 
+				   the temperature. */
 
 
   if ((iend = istart + nphot) > NPHOT)
@@ -376,7 +374,8 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
 	  /*Produce a uniform distribution of frequencies */
 	  p[i].freq = freqmin + rand () * dfreq;
 	}
-      else if (spectype == SPECTYPE_POW)	/* this is the call to the powerlaw routine we are most interested in */
+      else if (spectype == SPECTYPE_POW)	/* this is the call to the powerlaw routine 
+						   we are most interested in */
 	{
 	  p[i].freq = get_rand_pow (freqmin, freqmax, alpha);
 	}
@@ -419,6 +418,6 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
 
       /* this last bit is the direction, might need a change */
       randvcos (p[i].lmn, p[i].x);
-   }
+    }
   return (0);
 }

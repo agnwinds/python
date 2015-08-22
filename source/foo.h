@@ -193,8 +193,8 @@ int rtheta_make_hydro_grid(WindPtr w, int ndom);
 int rtheta_hydro_volumes(WindPtr w);
 /* corona.c */
 int get_corona_params(int ndom);
-double corona_velocity(double x[], double v[]);
-double corona_rho(double x[]);
+double corona_velocity(int ndom, double x[], double v[]);
+double corona_rho(int ndom, double x[]);
 /* knigge.c */
 int get_knigge_wind_params(int ndom);
 double kn_velocity(int ndom, double x[], double v[]);

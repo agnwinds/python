@@ -302,7 +302,7 @@ model_velocity (ndom, x, v)
     }
   else if (zdom[ndom].wind_type == 4)
     {
-      speed = corona_velocity (x, v);
+      speed = corona_velocity (ndom, x, v);
     }
   else if (zdom[ndom].wind_type == 5)
     {
@@ -419,7 +419,7 @@ model_rho (ndom, x)
     }
   else if (zdom[ndom].wind_type == CORONA)
     {
-      rho = corona_rho (x);
+      rho = corona_rho (ndom, x);
     }
   else if (zdom[ndom].wind_type == KNIGGE)
     {
