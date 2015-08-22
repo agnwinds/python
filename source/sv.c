@@ -5,7 +5,7 @@
 #include "atomic.h"
 #include "python.h"
 
-int mdot_integral_ndom;
+int sdom;
 int sv_zero_r_ndom;   
 
 /***********************************************************
@@ -19,7 +19,7 @@ Arguments:
 Returns:
  
 Description:	
-	The parameters, one_dom->sv...,  obtained here are only used in the routines in stellar_winds.c
+	The parameters, zdom[ndom].sv...,  obtained here are only used in the routines in stellar_winds.c
 	which calculate the velocity and density of the wind during the initialization process.
 	Other portions of the structure, geo defined here are more general purpose.		
 Notes:
@@ -30,6 +30,7 @@ History:
  				adding a spherical wind
         080518  ksl     60a - geo should contain only cgs units
 	11aug	ksl	70b - kluge to get better xscale with compton torus
+	15aug	ksl	Updates for multiple domains
 **************************************************************/
 
 int
@@ -40,9 +41,9 @@ get_sv_wind_params (ndom)
 
   Log ("Creating an SV wind model for a Cataclysmic Variable\n");
 
-  geo.wind_mdot /= (MSOL / YR);	// Convert to MSOL/YR for easy of data entry
-  rddoub ("wind.mdot(msol/yr)", &geo.wind_mdot);
-  geo.wind_mdot *= MSOL / YR;
+  zdom[ndom].wind_mdot /= (MSOL / YR);	// Convert to MSOL/YR for easy of data entry
+  rddoub ("wind.mdot(msol/yr)", &zdom[ndom].wind_mdot);
+  zdom[ndom].wind_mdot *= MSOL / YR;
 
 
   zdom[ndom].sv_rmin = 2.8e9;
@@ -113,9 +114,9 @@ get_sv_wind_params (ndom)
 
   /*Now calculate the normalization factor for the wind*/
   
-  mdot_integral_ndom = ndom;
+  sdom = ndom;
 
-  geo.mdot_norm =
+  zdom[ndom].mdot_norm =
     qromb (sv_wind_mdot_integral, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 1e-6);
   return (0);
 }
@@ -161,11 +162,9 @@ sv_velocity (x, v, ndom)
   double xtest[3];
   double s;
   double ds_to_disk ();
-  DomainPtr one_dom;
 
   zzz = v_escape = -99.;
 
-  one_dom = &zdom[ndom];
 
   rzero = sv_find_wind_rzero (ndom, x);
   theta = sv_theta_wind (ndom, rzero);
@@ -192,10 +191,10 @@ sv_velocity (x, v, ndom)
     }
 
 
-  vl = one_dom->sv_v_zero;
+  vl = zdom[ndom].sv_v_zero;
   if (ldist > 0)
     {
-      zzz = pow (ldist / one_dom->sv_r_scale, one_dom->sv_alpha);
+      zzz = pow (ldist / zdom[ndom].sv_r_scale, zdom[ndom].sv_alpha);
 
       if (rzero < geo.rstar)
 	v_escape = sqrt (2. * G * geo.mstar / geo.rstar);
@@ -203,8 +202,8 @@ sv_velocity (x, v, ndom)
 	v_escape = sqrt (2. * G * geo.mstar / rzero);
 
       vl =
-	one_dom->sv_v_zero + (one_dom->sv_v_infinity * v_escape -
-			 one_dom->sv_v_zero) * zzz / (1. + zzz);
+	zdom[ndom].sv_v_zero + (zdom[ndom].sv_v_infinity * v_escape -
+			 zdom[ndom].sv_v_zero) * zzz / (1. + zzz);
     }
 
   v[0] = vl * sin (theta);
@@ -281,10 +280,7 @@ sv_rho (ndom, x)
   struct photon ptest;
   double xtest[3];
   double s;
-  DomainPtr one_dom;
-  // double ds_to_disk ();
 
-  one_dom = &zdom[ndom];
   sv_velocity (x, v, ndom);
 
   rzero = sv_find_wind_rzero (ndom, x);
@@ -314,16 +310,16 @@ sv_rho (ndom, x)
 
 /* Reduced by a factor of 2 to account for radiation on both sides of the disk */
   dmdot_da =
-    geo.wind_mdot * pow (rzero,
-			 one_dom->sv_lambda) * cos (theta) / geo.mdot_norm / 2.;
+    zdom[ndom].wind_mdot * pow (rzero,
+			 zdom[ndom].sv_lambda) * cos (theta) / zdom[ndom].mdot_norm / 2.;
 
 /* Although the current definition of sv_theta_wind is continuous, the derivative is not continuous accross the
    outer boundary of the wind and thus dtheta_drzero would appear to change discontinuously.   This created
    large apparent density jumps at the outside edge of the wind. We can't allow that and so we force the derivative to equal
    that at the edge of the wind if you try to calculate the density rho.  ksl 97apr23 */
 
-  if (rzero > one_dom->sv_rmax)
-    rzero = one_dom->sv_rmax;
+  if (rzero > zdom[ndom].sv_rmax)
+    rzero = zdom[ndom].sv_rmax;
   dtheta_drzero =
     (sv_theta_wind (ndom, rzero) - sv_theta_wind (ndom, (1. - EPSILON) * rzero)) 
      / (EPSILON * rzero);
@@ -374,11 +370,8 @@ sv_find_wind_rzero (ndom, p)
      double p[];		/* Note that p is a 3 vector and not a photon structure */
 {
   double x, z;
-  double zbrent ();
   double rho_min, rho_max, rho;
-  DomainPtr one_dom;
 
-  one_dom = &zdom[ndom];
   /* thetamin and theta max are defined w.r.t  z axis */
 
   z = fabs (p[2]);		/* This is necessary to get correct answer above
@@ -400,18 +393,18 @@ sv_find_wind_rzero (ndom, p)
    * continuous
    */
 
-  rho_min = one_dom->sv_rmin + z * tan (one_dom->sv_thetamin);
-  rho_max = one_dom->sv_rmax + z * tan (one_dom->sv_thetamax);
+  rho_min = zdom[ndom].sv_rmin + z * tan (zdom[ndom].sv_thetamin);
+  rho_max = zdom[ndom].sv_rmax + z * tan (zdom[ndom].sv_thetamax);
   rho = sqrt (p[0] * p[0] + p[1] * p[1]);
 
   if (rho <= rho_min)
     {
-      x = one_dom->sv_rmin * rho / rho_min;
+      x = zdom[ndom].sv_rmin * rho / rho_min;
       return (x);
     }
   if (rho >= rho_max)
     {
-      x = one_dom->sv_rmax + rho - rho_max;
+      x = zdom[ndom].sv_rmax + rho - rho_max;
       return (x);
     }
 
@@ -420,7 +413,7 @@ sv_find_wind_rzero (ndom, p)
 
   /* change the global variable sv_zero_r_ndom before we call zbrent */
   sv_zero_r_ndom = ndom;
-  x = zbrent (sv_zero_r, one_dom->sv_rmin, one_dom->sv_rmax, 100.);
+  x = zbrent (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100.);
   return (x);
 
 }
@@ -495,13 +488,13 @@ Arguments:
 	double r	a radial distance on the surface of the disk		
 
 Returns:
-	As long as r is between geo.sv_rmin and geo.sv_rmax, sv_theta_wind returns the
+	As long as r is between sv_rmin and sv_rmax, sv_theta_wind returns the
 	angle given by the SV prescription.
 	
-	Inside geo.sv_rmin, it returns a value which smoothly goes from thetamin to 0
+	Inside sv_rmin, it returns a value which smoothly goes from thetamin to 0
 	as the radius goes to 0
 	
-	Outside geo.sv_rmax, it returns geo.sv_thetamax
+	Outside sv_rmax, it returns sv_thetamax
  
 Description:	
 		
@@ -518,18 +511,16 @@ sv_theta_wind (ndom, r)
      double r;
 {
   double theta;
-  DomainPtr one_dom;
 
-  one_dom = &zdom[ndom];
   
-  if (r <= geo.sv_rmin)
-    return (atan (tan (one_dom->sv_thetamin * r / one_dom->sv_rmin)));
-  if (r >= one_dom->sv_rmax)
-    return (one_dom->sv_thetamax);
-  theta = one_dom->sv_thetamin +
-    (one_dom->sv_thetamax -
-     one_dom->sv_thetamin) * pow ((r - one_dom->sv_rmin) / (one_dom->sv_rmax - one_dom->sv_rmin),
-			     one_dom->sv_gamma);
+  if (r <= zdom[ndom].sv_rmin)
+    return (atan (tan (zdom[ndom].sv_thetamin * r / zdom[ndom].sv_rmin)));
+  if (r >= zdom[ndom].sv_rmax)
+    return (zdom[ndom].sv_thetamax);
+  theta = zdom[ndom].sv_thetamin +
+    (zdom[ndom].sv_thetamax -
+     zdom[ndom].sv_thetamin) * pow ((r - zdom[ndom].sv_rmin) / (zdom[ndom].sv_rmax - zdom[ndom].sv_rmin),
+			     zdom[ndom].sv_gamma);
   return (theta);
 
 }
@@ -564,10 +555,8 @@ sv_wind_mdot_integral (r)
      double r;
 {
   double x;
-  DomainPtr one_dom;
 
-  one_dom = &zdom[mdot_integral_ndom];
-  x = 2 * PI * pow (r, one_dom->sv_lambda + 1.) * cos (sv_theta_wind (mdot_integral_ndom, r));
+  x = 2 * PI * pow (r, zdom[sdom].sv_lambda + 1.) * cos (sv_theta_wind (sdom, r));
   return (x);
 
 }

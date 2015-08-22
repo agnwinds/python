@@ -551,8 +551,8 @@ get_wind_params (ndom)
   // XXX These need to be initalized sensibly and 
   // it is not ovious that is happenning
 
-  zdom[ndom].rmax=1e12;
-  zdom[ndom].twind=1e5;
+  zdom[ndom].rmax = 1e12;
+  zdom[ndom].twind = 1e5;
 
   rddoub ("wind.radmax(cm)", &zdom[ndom].rmax);
   rddoub ("wind.t.init", &geo.twind);
@@ -608,7 +608,7 @@ Modified again in python 71b to take account of change in parametrisation of she
     }
   else if (zdom[ndom].wind_type != 2)
     {
-	    /* XXX this is part of the new problem with a previous wind model */
+      /* XXX this is part of the new problem with a previous wind model */
       Error ("python: Unknown wind type %d\n", zdom[ndom].wind_type);
       exit (0);
     }
@@ -1130,33 +1130,43 @@ Notes:
   111124 fixed notes on this - ksl
 History:
 	1502  JM 	Moved here from main()
+	1508	ksl	Modified to construct wind cones  fo
+			all domains
 
 **************************************************************/
 
 int
 setup_windcone ()
 {
-  if (geo.wind_thetamin > 0.0)
+  int ndom;
+
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
-      windcone[0].dzdr = 1. / tan (geo.wind_thetamin);
-      windcone[0].z = (-geo.wind_rho_min / tan (geo.wind_thetamin));
-    }
-  else
-    {
-      windcone[0].dzdr = VERY_BIG;
-      windcone[0].z = -VERY_BIG;;
-    }
+
+      if (zdom[ndom].wind_thetamin > 0.0)
+	{
+	  zdom[ndom].windcone[0].dzdr = 1. / tan (zdom[ndom].wind_thetamin);
+	  zdom[ndom].windcone[0].z =
+	    (-zdom[ndom].wind_rho_min / tan (zdom[ndom].wind_thetamin));
+	}
+      else
+	{
+	  zdom[ndom].windcone[0].dzdr = VERY_BIG;
+	  zdom[ndom].windcone[0].z = -VERY_BIG;;
+	}
 
 
-  if (geo.wind_thetamax > 0.0)
-    {
-      windcone[1].dzdr = 1. / tan (geo.wind_thetamax);
-      windcone[1].z = (-geo.wind_rho_max / tan (geo.wind_thetamax));
-    }
-  else
-    {
-      windcone[1].dzdr = VERY_BIG;
-      windcone[1].z = -VERY_BIG;;
+      if (zdom[ndom].wind_thetamax > 0.0)
+	{
+	  zdom[ndom].windcone[1].dzdr = 1. / tan (zdom[ndom].wind_thetamax);
+	  zdom[ndom].windcone[1].z =
+	    (-zdom[ndom].wind_rho_max / tan (zdom[ndom].wind_thetamax));
+	}
+      else
+	{
+	  zdom[ndom].windcone[1].dzdr = VERY_BIG;
+	  zdom[ndom].windcone[1].z = -VERY_BIG;;
+	}
     }
   return (0);
 }

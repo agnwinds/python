@@ -318,7 +318,7 @@ model_velocity (ndom, x, v)
     }
   else if (zdom[ndom].wind_type == 8)
     {
-      speed = elvis_velocity (x, v);
+      speed = elvis_velocity (ndom, x, v);
     }
   else if (zdom[ndom].wind_type == 9)
     {
@@ -435,7 +435,7 @@ model_rho (ndom, x)
     }
   else if (zdom[ndom].wind_type == ELVIS)
     {
-      rho = elvis_rho (x);
+      rho = elvis_rho (ndom, x);
     }
   else if (zdom[ndom].wind_type ==SHELL)
     {

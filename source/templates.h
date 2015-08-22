@@ -344,12 +344,12 @@ double yso_velocity(int ndom, double x[], double v[]);
 double yso_rho(int ndom, double x[]);
 /* elvis.c */
 int get_elvis_wind_params(int ndom);
-double elvis_velocity(double x[], double v[]);
-double elvis_rho(double x[]);
-double elvis_find_wind_rzero(double p[]);
+double elvis_velocity(int ndom, double x[], double v[]);
+double elvis_rho(int ndom, double x[]);
+double elvis_find_wind_rzero(int ndom, double p[]);
 int elvis_zero_init(double p[]);
 double elvis_zero_r(double r);
-double elvis_theta_wind(double r);
+double elvis_theta_wind(int ndom, double r);
 double elvis_wind_mdot_integral(double r);
 double ds_to_pillbox(PhotPtr pp, double rmin, double rmax, double height);
 /* cylindrical.c */

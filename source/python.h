@@ -191,7 +191,7 @@ cone_dummy, *ConePtr;
 
 ConePtr cones_rtheta;		/*A ptr to the cones that define the theta directions in rtheta coods */
 
-struct cone windcone[2];	/* The cones that define the boundary of winds like SV or kwd */
+//OLD  struct cone windcone[2];	/* The cones that define the boundary of winds like SV or kwd */
 
 /* End of structures which are used to define boundaries to the emission regions */
 
@@ -203,17 +203,18 @@ typedef struct domain
 	int wind_type;
 	int ndim, mdim, ndim2;
 	int nstart,nstop;  //the beginning and end (-1) location in wmain of this component
-  enum coord_type_enum coord_type;
-  int log_linear;		/*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */
-  double xlog_scale, zlog_scale;	/* Scale factors for setting up a logarithmic grid, the [1,1] cell
+  	enum coord_type_enum coord_type;
+  	int log_linear;		/*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */
+  	double xlog_scale, zlog_scale;	/* Scale factors for setting up a logarithmic grid, the [1,1] cell
 					   will be located at xlog_scale,zlog_scale */
 
 	/* The next few structures define the boundaries of an emission region */
-	struct cone windcone[2];    /* The cones that define the boundary of winds like SV or kwd */
-	struct plane windplane[2];   /* Plaanes which define the top and bootom of a layer */
+	struct cone windcone[2];   /* The cones that define the boundary of winds like SV or kwd */
+	struct plane windplane[2]; /* Planes which define the top and bottom of a layer */
+	double rho_min,rho,max;    /* These are used for the inneer and outer boundary of a pillbox */
 
-double wind_x[NDIM_MAX], wind_z[NDIM_MAX];	/* These define the edges of the cells in the x and z directions */
-double wind_midx[NDIM_MAX], wind_midz[NDIM_MAX];	/* These define the midpoints of the cells in the x and z directions */
+	double wind_x[NDIM_MAX], wind_z[NDIM_MAX];	/* These define the edges of the cells in the x and z directions */
+	double wind_midx[NDIM_MAX], wind_midz[NDIM_MAX];	/* These define the midpoints of the cells in the x and z directions */
 
 /* Next two lines are for cyl_var coordinates.  They are used in locating the appropriate 
  * locating the appropriate cell, for example by cylvar_where_in_grid
@@ -358,9 +359,6 @@ enum coord_type_enum coord_type;
 int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply old file
 		        Added in order to separate the question of whether we are continuing an old run fro
  		       the type of wind model 	*/
-// int log_linear;               /*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */
-// double xlog_scale, zlog_scale;   /* Scale factors for setting up a logarithmic grid, the [1,1] cell
-// 				will be located at xlog_scale,zlog_scale */
 
   int run_type;                 /*1508 - New variable that describes whether this is a continuation of a previous run 
   				Added in order to separate the question of whether we are continuing an old run fro
@@ -448,24 +446,22 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
 				 */
   int auger_ionization;		/*0 -> Do not include innershell photoionization /Auger effects; 1-> include them */
   /* Parameters defining Shlossman & Vitello Wind */
-  double sv_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
-  double sv_rmin, sv_rmax, sv_thetamin, sv_thetamax, sv_gamma;	/* parameters defining the goemetry of the wind */
-  double sv_v_zero;		/* velocity at base of wind */
-  double sv_r_scale, sv_alpha;	/* the scale length and power law exponent for the velocity law */
-  double sv_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
+//  double sv_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
+//  double sv_rmin, sv_rmax, sv_thetamin, sv_thetamax, sv_gamma;	/* parameters defining the goemetry of the wind */
+//  double sv_v_zero;		/* velocity at base of wind */
+//  double sv_r_scale, sv_alpha;	/* the scale length and power law exponent for the velocity law */
+//  double sv_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
 
   /* Paramater for the Elvis AGN wind - closely based on SV */
-  double elvis_offset;		/*This is a vertical offset for a region where the
-				   wind rises vertically from the disk */
+//  double elvis_offset;		/*This is a vertical offset for a region where the
+//				   wind rises vertically from the disk */
 
   /* Parameters defining Knigge Wind */
-  double kn_dratio;		/* parameter describing collimation of wind */
-  double kn_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
-//    double kn_rmin, kn_rmax, kn_thetamin, kn_thetamax, kn_gamma;      /* parameters defining the goemetry of the wind */
-//    double kn_v_zero;         /* velocity at base of wind */
-  double kn_r_scale, kn_alpha;	/* the scale length and power law exponent for the velocity law */
-  double kn_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
-  double kn_v_zero;		/* NSH 19/04/11 - Added in as the multiple of the sound speed to use as the initial velocity */
+//  double kn_dratio;		/* parameter describing collimation of wind */
+//  double kn_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
+//  double kn_r_scale, kn_alpha;	/* the scale length and power law exponent for the velocity law */
+//  double kn_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
+//  double kn_v_zero;		/* NSH 19/04/11 - Added in as the multiple of the sound speed to use as the initial velocity */
 
   /* Parameters describing Castor and Larmors spherical wind */
   double cl_v_zero, cl_v_infinity, cl_beta;	/* Power law exponent */
@@ -476,11 +472,11 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
   double shell_rmin, shell_rmax;
 
   /*Parameters defining a corona in a ring above a disk */
-  double corona_rmin, corona_rmax;	//the minimum and maximu radius of the corona
+  // double corona_rmin, corona_rmax;	//the minimum and maximu radius of the corona
 
-  double corona_base_density, corona_scale_height;	//the density at the base of the corona and the scale height
+  // double corona_base_density, corona_scale_height;	//the density at the base of the corona and the scale height
 
-  double corona_vel_frac;	// the radial velocity of the corona in units of the keplerian velocity
+  // double corona_vel_frac;	// the radial velocity of the corona in units of the keplerian velocity
 
 /* The filling factior for the wind or corona */
   double fill;

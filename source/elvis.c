@@ -21,16 +21,25 @@ Description:
 
 Notes:
 
+	Although this is colloquially called an Elvis model; it is really just an offset
+	wind model
+
 	These routines were all developed from the original sv routines by SS and so 
 	changes in one may well effect the other.  The velocity flow assumes that one
 	calculates a "poloidal distance" starting with a vertical flow until you get
 	to the offset height at which point the remaining distance is calculated according
 	to that prescribed by the SV model 
 
+	15aug The incorporation of domains is a little complicated for the offset model,
+	because the integraal that must be carried out requires a number of parameters
+	that need to be passed around the direct system call.  Instead of defining all
+	of these individually, I have created a single external variable edom, which
+	should only be used within the functios in this routine.  This is a safe only
+	so long as no external routines call one of the routines that uses edom
+
 History:
          Oct06 SS
-	 1111	ksl	Began to try to understand in detail what Stuart intended prior to any
-	 		real code modifications.  
+	 15aug	ksl	Modififications to account for domains
 **************************************************************/
 
 
@@ -46,23 +55,26 @@ Arguments:
 Returns:
  
 Description:	
-	The parameters, geo.sv...,  needed to define the wind.
+	The parameters, sv...,  needed to define the wind.
 	The parameters are identical to that nneed for a SV wind with an additional offset.
 Notes:
 
 
 History:
          Oct06 SS
-	 1111	ksl	Began to try to understand in detail what Stuart intended prior to any
-	 		real code modifications
+	 15uag	ksl	Modifications to allow for domains
 **************************************************************/
+
+int edom;			/* External variable which allows one to avoid passing the domain for calls within
+				   the routines in this file  */
 
 int
 get_elvis_wind_params (ndom)
-	int ndom;
+     int ndom;
 {
   double windmin, windmax, theta_min, theta_max;
-  double qromb (), elvis_wind_mdot_integral ();
+
+  edom = ndom;
 
   Log ("Creating an SV/Elvis wind model for an AGN\n");
 
@@ -70,63 +82,68 @@ get_elvis_wind_params (ndom)
   geo.wind_mdot *= MSOL / YR;
 
 
-  geo.sv_rmin = 2.8e9;
-  geo.sv_rmax = 8.4e9;
-  geo.sv_thetamin = 20. / RADIAN;
-  geo.sv_thetamax = 65. / RADIAN;
-  geo.sv_gamma = 1.;
-  geo.sv_v_zero = 6e5;		/* velocity at base of wind */
-  geo.sv_r_scale = 7e10;	/*Accleration length scale for wind */
-  geo.sv_alpha = 1.5;		/* Accleration scale exponent */
-  geo.sv_v_infinity = 3;	/* Final speed of wind in units of escape velocity */
-  geo.sv_lambda = 0.0;		/* Mass loss rate exponent */
-  geo.elvis_offset = 1.e14;
+  zdom[ndom].sv_rmin = 2.8e9;
+  zdom[ndom].sv_rmax = 8.4e9;
+  zdom[ndom].sv_thetamin = 20. / RADIAN;
+  zdom[ndom].sv_thetamax = 65. / RADIAN;
+  zdom[ndom].sv_gamma = 1.;
+  zdom[ndom].sv_v_zero = 6e5;	/* velocity at base of wind */
+  zdom[ndom].sv_r_scale = 7e10;	/*Accleration length scale for wind */
+  zdom[ndom].sv_alpha = 1.5;	/* Accleration scale exponent */
+  zdom[ndom].sv_v_infinity = 3;	/* Final speed of wind in units of escape velocity */
+  zdom[ndom].sv_lambda = 0.0;	/* Mass loss rate exponent */
+  zdom[ndom].elvis_offset = 1.e14;
 
-  windmin = geo.sv_rmin / geo.rstar;
-  windmax = geo.sv_rmax / geo.rstar;
+  windmin = zdom[ndom].sv_rmin / geo.rstar;
+  windmax = zdom[ndom].sv_rmax / geo.rstar;
   rddoub ("sv.diskmin(wd_rad)", &windmin);
   rddoub ("sv.diskmax(wd_rad)", &windmax);
 
 
-  geo.sv_rmin = windmin * geo.rstar;
-  geo.sv_rmax = windmax * geo.rstar;
+  zdom[ndom].sv_rmin = windmin * geo.rstar;
+  zdom[ndom].sv_rmax = windmax * geo.rstar;
 
-  theta_min = geo.sv_thetamin * RADIAN;
-  theta_max = geo.sv_thetamax * RADIAN;
+  theta_min = zdom[ndom].sv_thetamin * RADIAN;
+  theta_max = zdom[ndom].sv_thetamax * RADIAN;
   rddoub ("sv.thetamin(deg)", &theta_min);
   rddoub ("sv.thetamax(deg)", &theta_max);
-  geo.sv_thetamin = theta_min / RADIAN;
-  geo.sv_thetamax = theta_max / RADIAN;
+  zdom[ndom].sv_thetamin = theta_min / RADIAN;
+  zdom[ndom].sv_thetamax = theta_max / RADIAN;
 
-  rddoub ("sv.mdot_r_exponent", &geo.sv_lambda);	/* Mass loss rate exponent */
-  rddoub ("sv.v_infinity(in_units_of_vescape", &geo.sv_v_infinity);	/* Final speed of wind in units of escape velocity */
+  rddoub ("sv.mdot_r_exponent", &zdom[ndom].sv_lambda);	/* Mass loss rate exponent */
+  rddoub ("sv.v_infinity(in_units_of_vescape", &zdom[ndom].sv_v_infinity);	/* Final speed of wind in units of escape velocity */
 
-  rddoub ("sv.acceleration_length(cm)", &geo.sv_r_scale);	/*Accleration length scale for wind */
-  rddoub ("sv.acceleration_exponent", &geo.sv_alpha);	/* Accleration scale exponent */
+  rddoub ("sv.acceleration_length(cm)", &zdom[ndom].sv_r_scale);	/*Accleration length scale for wind */
+  rddoub ("sv.acceleration_exponent", &zdom[ndom].sv_alpha);	/* Accleration scale exponent */
 
-  rddoub ("elvis_offset(cm)", &geo.elvis_offset);	/* This is the vertical offset - the length over which the wind rises vertically */
+  rddoub ("elvis_offset(cm)", &zdom[ndom].elvis_offset);	/* This is the vertical offset - the length over which the wind rises vertically */
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
 
-  geo.wind_rmin = geo.rstar;
-  geo.wind_rmax = geo.rmax;
-  geo.wind_rho_min = geo.sv_rmin - (geo.elvis_offset * tan (geo.sv_thetamin));
-  geo.wind_rho_max = geo.sv_rmax - (geo.elvis_offset * tan (geo.sv_thetamin));
-  geo.wind_thetamin = geo.sv_thetamin;
-  geo.wind_thetamax = geo.sv_thetamax;
+  zdom[ndom].wind_rmin = geo.rstar;
+  zdom[ndom].wind_rmax = geo.rmax;
+  zdom[ndom].wind_rho_min =
+    zdom[ndom].sv_rmin -
+    (zdom[ndom].elvis_offset * tan (zdom[ndom].sv_thetamin));
+  zdom[ndom].wind_rho_max =
+    zdom[ndom].sv_rmax -
+    (zdom[ndom].elvis_offset * tan (zdom[ndom].sv_thetamin));
+  zdom[ndom].wind_thetamin = zdom[ndom].sv_thetamin;
+  zdom[ndom].wind_thetamax = zdom[ndom].sv_thetamax;
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      zdom[ndom].xlog_scale = geo.sv_rmin;
+      zdom[ndom].xlog_scale = zdom[ndom].sv_rmin;
       zdom[ndom].zlog_scale = 1e15;	/* Big number - for AGN */
     }
 
 /*Now calculate the normalization factor for the wind*/
 
-  geo.mdot_norm =
-    qromb (elvis_wind_mdot_integral, geo.sv_rmin, geo.sv_rmax, 1e-6);
+  zdom[ndom].mdot_norm =
+    qromb (elvis_wind_mdot_integral, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax,
+	   1e-6);
   return (0);
 }
 
@@ -134,9 +151,10 @@ get_elvis_wind_params (ndom)
                                        Space Telescope Science Institute
 
  Synopsis:
-	double elvis_velocity(x,v) calulates the v of an offset Schlossman Vitello wind from a position
+	double elvis_velocity(ndom, x,v) calulates the v of an offset Schlossman Vitello wind from a position
 	x
 Arguments:		
+	ndom			the relevant domain
 	double x[]		the position where for the which one desires the velocity
 Returns:
 	double v[]		the calculated velocity
@@ -152,34 +170,37 @@ History:
 **************************************************************/
 
 double
-elvis_velocity (x, v)
+elvis_velocity (ndom, x, v)
+     int ndom;
      double x[], v[];
 {
   double r, rzero, theta, speed;
   double ldist, zzz, v_escape, vl;
-  double elvis_find_wind_rzero ();
-  double elvis_theta_wind ();
   struct photon ptest;
   double xtest[3];
   double s;
-  double ds_to_disk ();
+
+  edom = ndom;			// External variable used only in the evlvis routines
 
   zzz = v_escape = -99.;
 
-  rzero = elvis_find_wind_rzero (x);
-  theta = elvis_theta_wind (rzero);
+  rzero = elvis_find_wind_rzero (ndom, x);
+  theta = elvis_theta_wind (ndom, rzero);
 
   /* Calculate the poloidal distance, assuming a stream line that is vertical 
    * up to the elvis offset and then along an SV stream line after that.  ksl 111123 
    */
 
   r = sqrt (x[0] * x[0] + x[1] * x[1]);
-  if (fabs (x[2]) > geo.elvis_offset)
+  if (fabs (x[2]) > zdom[ndom].elvis_offset)
     {
       ldist =
-	geo.elvis_offset + sqrt ((r - rzero) * (r - rzero) +
-				 (x[2] - geo.elvis_offset) * (x[2] -
-							      geo.elvis_offset));
+	zdom[ndom].elvis_offset + sqrt ((r - rzero) * (r - rzero) +
+					(x[2] -
+					 zdom[ndom].elvis_offset) * (x[2] -
+								     zdom
+								     [ndom].
+								     elvis_offset));
     }
   else
     {
@@ -207,10 +228,10 @@ elvis_velocity (x, v)
 
 
   /* Having calculated the "poloidal distance" calculate the velocity ksl 111124 */
-  vl = geo.sv_v_zero;
+  vl = zdom[ndom].sv_v_zero;
   if (ldist > 0)
     {
-      zzz = pow (ldist / geo.sv_r_scale, geo.sv_alpha);
+      zzz = pow (ldist / zdom[ndom].sv_r_scale, zdom[ndom].sv_alpha);
 
       if (rzero < geo.rstar)
 	v_escape = sqrt (2. * G * geo.mstar / geo.rstar);
@@ -218,12 +239,12 @@ elvis_velocity (x, v)
 	v_escape = sqrt (2. * G * geo.mstar / rzero);
 
       vl =
-	geo.sv_v_zero + (geo.sv_v_infinity * v_escape -
-			 geo.sv_v_zero) * zzz / (1. + zzz);
+	zdom[ndom].sv_v_zero + (zdom[ndom].sv_v_infinity * v_escape -
+				zdom[ndom].sv_v_zero) * zzz / (1. + zzz);
     }
 
   /* Now calculate the direction of the velocity */
-  if (fabs (x[2]) > geo.elvis_offset)
+  if (fabs (x[2]) > zdom[ndom].elvis_offset)
     {
       v[0] = vl * sin (theta);
       v[2] = vl * cos (theta);
@@ -288,38 +309,36 @@ History:
 **************************************************************/
 
 double
-elvis_rho (x)
+elvis_rho (ndom, x)
+     int ndom;
      double x[];
 {
   double r, rzero, theta;
   double ldist;
-  double elvis_find_wind_rzero ();
-  double elvis_theta_wind ();
   double dmdot_da;
   double dtheta_drzero, dr_drzero;
 
   double v[3], rho;
-  double elvis_velocity ();
-//  double elvis_find_wind_rzero (), elvis_theta_wind ();
   struct photon ptest;
   double xtest[3];
   double s;
-  double ds_to_disk ();
 
 
-  elvis_velocity (x, v);
+  elvis_velocity (ndom, x, v);
 
-  rzero = elvis_find_wind_rzero (x);
+  rzero = elvis_find_wind_rzero (ndom, x);
 
   /* ERROR - This is a mistake, and is a root cause of some of the problems we are seeing in the Elvis wind 111124 */
-  if (rzero > geo.sv_rmax)
+  if (rzero > zdom[ndom].sv_rmax)
     {
       rho = 1.e-20;		//This is a fudge which keeps the wind boundaries conical by filling in excess space with
       // "empty" space - a waste of memory and time but to do otherwise would require a 
       // more substantial change to the way wind boundaries are defined SSOct06
       return (rho);
     }
-  if (rzero < (geo.sv_rmin + (geo.elvis_offset * tan (geo.sv_thetamin))))
+  if (rzero <
+      (zdom[ndom].sv_rmin +
+       (zdom[ndom].elvis_offset * tan (zdom[ndom].sv_thetamin))))
     {
       rho = 1.e-20;		//fudge, as above
       return (rho);
@@ -328,15 +347,18 @@ elvis_rho (x)
 
 
 
-  theta = elvis_theta_wind (rzero);
+  theta = elvis_theta_wind (ndom, rzero);
 
   r = sqrt (x[0] * x[0] + x[1] * x[1]);
-  if (fabs (x[2]) > geo.elvis_offset)
+  if (fabs (x[2]) > zdom[ndom].elvis_offset)
     {
       ldist =
-	geo.elvis_offset + sqrt ((r - rzero) * (r - rzero) +
-				 (x[2] - geo.elvis_offset) * (x[2] -
-							      geo.elvis_offset));
+	zdom[ndom].elvis_offset + sqrt ((r - rzero) * (r - rzero) +
+					(x[2] -
+					 zdom[ndom].elvis_offset) * (x[2] -
+								     zdom
+								     [ndom].
+								     elvis_offset));
     }
   else
     {
@@ -361,10 +383,12 @@ elvis_rho (x)
       rzero = length (ptest.x);
     }
 
-  if (fabs (x[2]) < geo.elvis_offset)
+  if (fabs (x[2]) < zdom[ndom].elvis_offset)
     {
       dmdot_da =
-	geo.wind_mdot * pow (rzero, geo.sv_lambda) / geo.mdot_norm / 2.;
+	zdom[ndom].wind_mdot * pow (rzero,
+				    zdom[ndom].sv_lambda) /
+	zdom[ndom].mdot_norm / 2.;
       rho = dmdot_da / v[2];
 
       return (rho);
@@ -372,19 +396,20 @@ elvis_rho (x)
 
   /* Reduced by a factor of 2 to account for radiation on both sides of the disk */
   dmdot_da =
-    geo.wind_mdot * pow (rzero,
-			 geo.sv_lambda) * cos (theta) / geo.mdot_norm / 2.;
+    zdom[ndom].wind_mdot * pow (rzero,
+				zdom[ndom].sv_lambda) * cos (theta) /
+    zdom[ndom].mdot_norm / 2.;
 
   /* Although the current definition of sv_theta_wind is continuous, the derivative is not continuous accross the
      outer boundary of the wind and thus dtheta_drzero would appear to change discontinuously.   This created
      large apparent density jumps at the outside edge of the wind. We can't allow that and so we force the derivative to equal
      that at the edge of the wind if you try to calculate the density rho.  ksl 97apr23 */
 
-  if (rzero > geo.sv_rmax)
-    rzero = geo.sv_rmax;
+  if (rzero > zdom[ndom].sv_rmax)
+    rzero = zdom[ndom].sv_rmax;
   dtheta_drzero =
-    (elvis_theta_wind (rzero) -
-     elvis_theta_wind ((1. - EPSILON) * rzero)) / (EPSILON * rzero);
+    (elvis_theta_wind (ndom, rzero) -
+     elvis_theta_wind (ndom, (1. - EPSILON) * rzero)) / (EPSILON * rzero);
 
   dr_drzero = 1. + ldist * dtheta_drzero / cos (theta);
   /* Note VS93 eqn 8 is dr/drzero but equation  7 is drzero/dr   ksl 97 apr 19 */
@@ -416,14 +441,12 @@ History:
 
 
 double
-elvis_find_wind_rzero (p)
+elvis_find_wind_rzero (ndom, p)
+     int ndom;
      double p[];		/* Note that p is a 3 vector and not a photon structure */
 {
   double x, z;
-  double elvis_zero_r ();
-  double zbrent ();
   double rho_min, rho_max, rho;
-  int elvis_zero_init ();
 
   /* thetamin and theta max are defined w.r.t  z axis */
 
@@ -433,7 +456,7 @@ elvis_find_wind_rzero (p)
 
   /* If the position is underneath the elvis_offset, the stream line is assumed
    * to be vertical and so you just return rho 111124 ksl */
-  if (z <= geo.elvis_offset)
+  if (z <= zdom[ndom].elvis_offset)
     {
       x = (sqrt (p[0] * p[0] + p[1] * p[1]));	// If p is in the xy plane, there is no need to think further
       return (x);
@@ -443,25 +466,27 @@ elvis_find_wind_rzero (p)
   elvis_zero_init (p);		/* This initializes the routine sv_zero_r.  It is not
 				   actually needed unless zbrent is called, but it
 				   does allow you to check your answer otherwize
+
+				   It does not require a domain number
 				 */
 
   /* The next lines provide a value for the footpoint position when the positions
    * we want the footpoint for is outside of the wind 111124 ksl */
-  rho_min = geo.sv_rmin + z * tan (geo.sv_thetamin);
-  rho_max = geo.sv_rmax + z * tan (geo.sv_thetamax);
+  rho_min = zdom[ndom].sv_rmin + z * tan (zdom[ndom].sv_thetamin);
+  rho_max = zdom[ndom].sv_rmax + z * tan (zdom[ndom].sv_thetamax);
   rho = sqrt (p[0] * p[0] + p[1] * p[1]);
 
   /* Note that theta_min and theta_max are measured from the z axis */
 
   if (rho <= rho_min)
     {
-      x = geo.sv_rmin * rho / rho_min;
-      return (x + (geo.elvis_offset * tan (geo.sv_thetamin)));
+      x = zdom[ndom].sv_rmin * rho / rho_min;
+      return (x + (zdom[ndom].elvis_offset * tan (zdom[ndom].sv_thetamin)));
     }
   if (rho >= rho_max)
     {
-      x = geo.sv_rmax + rho - rho_max;
-      return (x + (geo.elvis_offset * tan (geo.sv_thetamax)));
+      x = zdom[ndom].sv_rmax + rho - rho_max;
+      return (x + (zdom[ndom].elvis_offset * tan (zdom[ndom].sv_thetamax)));
     }
 
   /* 100 here means that zbrent will end if one has a guess of rzero which is
@@ -469,8 +494,10 @@ elvis_find_wind_rzero (p)
 
   x =
     zbrent (elvis_zero_r,
-	    geo.sv_rmin + (geo.elvis_offset * tan (geo.sv_thetamin)),
-	    geo.sv_rmax + (geo.elvis_offset * tan (geo.sv_thetamax)), 100.);
+	    zdom[ndom].sv_rmin +
+	    (zdom[ndom].elvis_offset * tan (zdom[ndom].sv_thetamin)),
+	    zdom[ndom].sv_rmax +
+	    (zdom[ndom].elvis_offset * tan (zdom[ndom].sv_thetamax)), 100.);
   return (x);
 
 }
@@ -491,6 +518,10 @@ Description:
 	
 		
 Notes:
+
+	This routine does not require a domain, indeed it is so short
+	it is not entirely clear why it is required.  It simple sets 
+	and internal vector zero_p
 
 History:
  
@@ -517,18 +548,17 @@ elvis_zero_r (r)
 {
   double theta;
   double rho, rho_guess;
-  double elvis_theta_wind ();
 
-  theta = elvis_theta_wind (r);
+  theta = elvis_theta_wind (edom, r);
 
   rho = sqrt (zero_p[0] * zero_p[0] + zero_p[1] * zero_p[1]);
-  if (zero_p[2] < geo.elvis_offset)
+  if (zero_p[2] < zdom[edom].elvis_offset)
     {
       rho_guess = r;
     }
   else
     {
-      rho_guess = r + tan (theta) * (zero_p[2] - geo.elvis_offset);
+      rho_guess = r + tan (theta) * (zero_p[2] - zdom[edom].elvis_offset);
     }
   return (rho_guess - rho);
 
@@ -539,9 +569,11 @@ elvis_zero_r (r)
                                        Space Telescope Science Institute
 
  Synopsis:
-	double elvis_theta_wind(r) finds the angle at which the wind that rises from a specific point on the disk bend to
+	double elvis_theta_wind(r) finds the angle at which the wind that rises 
+	from a specific point on the disk bend to
  
 Arguments:
+	ndom   		the domain where the parameters are stored
 	double r	a radial distance on the surface of the disk		
 
 Returns:
@@ -550,28 +582,38 @@ Description:
 		
 Notes:
 
+
 History:
+	15aug	ksl	Modifications made for domains.
  
 **************************************************************/
 
 double
-elvis_theta_wind (r)
+elvis_theta_wind (ndom, r)
+     int ndom;
      double r;
 {
   double theta;
-  if (r <= (geo.sv_rmin + geo.elvis_offset * tan (geo.sv_thetamin)))
-    return (atan (tan (geo.sv_thetamin * r / geo.sv_rmin)));
-  if (r >= (geo.sv_rmax + geo.elvis_offset * tan (geo.sv_thetamax)))
-    return (geo.sv_thetamax);
-  theta = geo.sv_thetamin +
-    (geo.sv_thetamax -
-     geo.sv_thetamin) * pow ((r - geo.sv_rmin -
-			      geo.elvis_offset * tan (geo.sv_thetamin)) /
-			     (geo.sv_rmax +
-			      geo.elvis_offset * tan (geo.sv_thetamax) -
-			      geo.sv_rmin -
-			      geo.elvis_offset * tan (geo.sv_thetamin)),
-			     geo.sv_gamma);
+  if (r <=
+      (zdom[ndom].sv_rmin +
+       zdom[ndom].elvis_offset * tan (zdom[ndom].sv_thetamin)))
+    return (atan (tan (zdom[ndom].sv_thetamin * r / zdom[ndom].sv_rmin)));
+  if (r >=
+      (zdom[ndom].sv_rmax +
+       zdom[ndom].elvis_offset * tan (zdom[ndom].sv_thetamax)))
+    return (zdom[ndom].sv_thetamax);
+  theta = zdom[ndom].sv_thetamin +
+    (zdom[ndom].sv_thetamax -
+     zdom[ndom].sv_thetamin) * pow ((r - zdom[ndom].sv_rmin -
+				     zdom[ndom].elvis_offset *
+				     tan (zdom[ndom].sv_thetamin)) /
+				    (zdom[ndom].sv_rmax +
+				     zdom[ndom].elvis_offset *
+				     tan (zdom[ndom].sv_thetamax) -
+				     zdom[ndom].sv_rmin -
+				     zdom[ndom].elvis_offset *
+				     tan (zdom[ndom].sv_thetamin)),
+				    zdom[ndom].sv_gamma);
   return (theta);
 
 }
@@ -592,6 +634,10 @@ Description:
 		
 Notes:
 
+	The relevant domain must stored in the external variable edom
+
+	Note that this calls elvis_theta_wind()
+
 History:
 
  
@@ -602,21 +648,25 @@ elvis_wind_mdot_integral (r)
      double r;
 {
   double x;
-  double elvis_theta_wind ();
 
-  if (r < (geo.sv_rmin + geo.elvis_offset * tan (geo.sv_thetamin)))
+  if (r <
+      (zdom[edom].sv_rmin +
+       zdom[edom].elvis_offset * tan (zdom[edom].sv_thetamin)))
     {
       x = 0.0;
       return (x);
     }
-  if (r > geo.sv_rmax)
+  if (r > zdom[edom].sv_rmax)
     {
       x = 0.0;
       return (x);
     }
 
 
-  x = 2 * PI * pow (r, geo.sv_lambda + 1.) * cos (elvis_theta_wind (r));
+  x =
+    2 * PI * pow (r,
+		  zdom[edom].sv_lambda + 1.) * cos (elvis_theta_wind (edom,
+								      r));
   return (x);
 
 }

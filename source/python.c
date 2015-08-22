@@ -1737,6 +1737,8 @@ History:
 	081112	ksl	67 - moved more of initializaiton of geo into
 			this routine as part of genearl cleanup of the main
 			routine
+	1508	ksl	A number of changes have been made in order to accommodate
+			domans
 
 **************************************************************/
 

@@ -62,8 +62,9 @@ translate (w, pp, tau_scat, tau, nres)
   else
     {
       istat = pp->istat = -1;	/* It's not in the wind and it's not in the grid.  Bummer! */
-      Error ("translate: Found photon that was not in wind or grid, istat %i\n",
-               where_in_wind ( pp->x));
+      Error
+	("translate: Found photon that was not in wind or grid, istat %i\n",
+	 where_in_wind (pp->x));
     }
 
   return (istat);
@@ -207,6 +208,10 @@ History:
 			currently unchanged.  
 	11nov	ksl	Modified to account for elvis wind model with
 			its pillbox at the bottom
+	15aug	ksl	Modifications for domains.  The asumption we make
+			is that the poton is not in any of the wind
+			regions at this point, and that we are looking
+			for the closest wind boundary.  
  
 **************************************************************/
 
@@ -218,17 +223,41 @@ ds_to_wind (pp)
 {
   struct photon ptest;
   double ds, x;
+  int ndom;
 
   stuff_phot (pp, &ptest);
-  ds = ds_to_sphere (geo.wind_rmax, &ptest);
-  if ((x = ds_to_sphere (geo.wind_rmin, &ptest)) < ds)
-    ds = x;
-  if ((x = ds_to_cone (&windcone[0], &ptest)) < ds)
-    ds = x;
-  if ((x = ds_to_cone (&windcone[1], &ptest)) < ds)
-    ds = x;
-  if (geo.wind_type == 8)
-    x = ds_to_pillbox (&ptest, geo.sv_rmin, geo.sv_rmax, geo.elvis_offset);
+
+  /* First calculated the distance to the edge of the of
+     all of the "computatational domain */
+
+  ds = ds_to_sphere (geo.rmax, &ptest);
+
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
+    {
+      /* Check if the photon hits the inner or outer radius of the wind */
+      if ((x = ds_to_sphere (zdom[ndom].wind_rmax, &ptest)) < ds)
+	ds = x;
+
+      if ((x = ds_to_sphere (zdom[ndom].wind_rmin, &ptest)) < ds)
+	ds = x;
+
+      /* Check if the photon hits the inner or outer windcone */
+
+      if ((x = ds_to_cone (&zdom[ndom].windcone[0], &ptest)) < ds)
+	ds = x;
+      if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
+	ds = x;
+
+      /* Check if the photon hits the pillpox portion of an Elvis wind */
+      if (zdom[ndom].wind_type == ELVIS)
+	{
+	  x =
+	    ds_to_pillbox (&ptest, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax,
+			   zdom[ndom].elvis_offset);
+	  if (x < ds)
+	    ds = x;
+	}
+    }
 
   return (ds);
 }

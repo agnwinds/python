@@ -80,16 +80,16 @@ one after the other*/
   geo.wind_thetamin = 0.0;
 /* Somewhat paradoxically diskrad is in cm, while dn_ratio which is really d in KWD95 is 
 in units of WD radii */
-  geo.wind_thetamax = atan (geo.diskrad / (geo.kn_dratio * geo.rstar));
+  zdom[ndom].wind_thetamax = atan (geo.diskrad / (zdom[ndom].kn_dratio * geo.rstar));
 // Line above would be 90 degeres if we want a stellar wind outside the windcone
   /* Next lines added by SS Sep 04. Changed the wind shape so that the boundary touches the outer 
      corner of the disk rather than the intersection of the disk edge with the xy-plane. */
 
   if (geo.disk_type == 2)
     {
-      geo.wind_thetamax =
+      zdom[ndom].wind_thetamax =
 	atan (geo.diskrad /
-	      (((geo.kn_dratio * geo.rstar) + zdisk (geo.diskrad))));
+	      (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (geo.diskrad))));
     }
 
 
@@ -103,7 +103,7 @@ in units of WD radii */
   if (geo.disk_type == 2)
     {
       geo.wind_rho_max =
-	geo.diskrad - (zdisk (geo.diskrad) * tan (geo.wind_thetamax));
+	geo.diskrad - (zdisk (geo.diskrad) * tan (zdom[ndom].wind_thetamax));
     }
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
@@ -201,7 +201,7 @@ yso_rho (ndom,x)
   double dd;
   double rho;
 
-  dd = geo.rstar * geo.kn_dratio;
+  dd = geo.rstar * zdom[ndom].kn_dratio;
   r = sqrt (x[0] * x[0] + x[1] * x[1]);	//rho coordinate of the point we have been given
   rzero = r / (1. + fabs (x[2] / dd));	//rho at the base for this streamline
 

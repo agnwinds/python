@@ -44,7 +44,7 @@ Arguments:
 Returns:
  
 Description:	
-	The parameters, geo.kn...,  obtained here are only used in the routines in stellar_winds.c
+	The parameters, kn...,  obtained here are only used in the routines in stellar_winds.c
 	which calculate the velocity and density of the wind during the initialization process.
 	Other portions of the structure, geo defined here are more general purpose.		
 Notes:
@@ -63,7 +63,6 @@ int
 get_knigge_wind_params (ndom)
      int ndom;
 {
-  double qromb ();
   double dmin;
   double disktheta, test;
 
@@ -108,7 +107,7 @@ As now represented kn_dratio is the distance to the focus point in stellar radii
   if (zdom[ndom].kn_v_infinity < 0)
     {
       Log
-	("Since geo.kn_v_infinity is less than zero, will use SV prescription for velocity law.\n Velocity at base remains the soundspeed\n");
+	("Since kn_v_infinity is less than zero, will use SV prescription for velocity law.\n Velocity at base remains the soundspeed\n");
     }
 
   rddoub ("kn.acceleration_length(cm)", &zdom[ndom].kn_r_scale);	/*Accleration length scale for wind */
@@ -204,7 +203,8 @@ in units of WD radii */
 	double kn_velocity(x,v) calculates the v in cartesion coordinates
 	of a Knigge wind from a position x in cartesian coordinates.  
 Arguments:		
-	double x[]		the postion where for the which one desires the velocity
+	ndom			The domain for the KN wind
+	double x[]		the position where one desires the velocity
 Returns:
 	double v[]		the calculated velocity
 	
@@ -391,7 +391,8 @@ test programs.
  Synopsis:
 	double kn_rho(x) calculates the density of an kn_wind at a position x
 Arguments:		
-	double x[]	the position where for the which one desires the density
+	ndom		The domain where kn params are stored
+	double x[]	the position which one desires the density
 Returns:
 	The density at x is returned in gram/cm**3
 	
@@ -526,9 +527,9 @@ double
 kn_wind_mdot_integral (r)
      double r;
 {
-  double tref, tdisk ();
-  double t, teff ();
+  double t;
   double x, ratio;
+  double tref;
 
 
   tref = tdisk (geo.mstar, geo.disk_mdot, geo.rstar);
