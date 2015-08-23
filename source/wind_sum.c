@@ -21,6 +21,8 @@ Returns:
  
 Description:	
 	
+	This is just a logging routine
+	
 Notes:
 	This was added in spring 2004 to try to understand how the
 	temperature was evolving in the models
@@ -38,6 +40,9 @@ History:
 			are very large, and a warning about
 			the display when not using cylindrical 
 			coords.
+	15aug	ksl	Modified for domains, on the assumption
+			that we wanted to print out results for
+			all of the domians
 
 **************************************************************/
 
@@ -49,70 +54,83 @@ xtemp_rad (w)
   double x;
   int py_wind_min, py_wind_max, py_wind_delta;
   int nplasma;
-
-  py_wind_min = 0;
-  py_wind_max = NDIM;
-
-  /* py_wind_delta can be used to subsample the array */
-  py_wind_delta = 1;
-  if (MDIM > 30)
-    py_wind_delta = 1 + MDIM / 30;
+  int ndom, ndim, mdim, nstart;
 
 
-  if (geo.coord_type != 1)
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
-      Log
-	("Warning: Since coord type is not cylindrical, next print out may look odd\n");
-    }
 
-  Log ("\n T rad\n");
+      Log ("Results for Dommain %d\n", ndom);
+      ndim = zdom[ndom].ndim;
+      mdim = zdom[ndom].mdim;
+      nstart = zdom[ndom].nstart;
 
-  Log ("   z\\x   ");
-  for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
-    Log ("%8.2e ", w[i * MDIM].x[0]);
-  Log ("\n");
 
-  for (j = 0; j < MDIM; j++)
-    {
-      Log ("%8.2e ", w[j].x[2]);
-      for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
+
+      py_wind_min = 0;
+      py_wind_max = ndim;
+
+      /* py_wind_delta can be used to subsample the array */
+      py_wind_delta = 1;
+      if (mdim > 30)
+	py_wind_delta = 1 + mdim / 30;
+
+
+      if (zdom[ndom].coord_type != 1)
 	{
-	  n = i * MDIM + j;
-	  if (w[n].vol > 0.0)
-	    {
-	      nplasma = w[n].nplasma;
-	      x = plasmamain[nplasma].t_r;
-	    }
-	  else
-	    x = 0.0;
-	  Log ("%8.2g ", x);
+	  Log
+	    ("Warning: Since coord type is not cylindrical, next print out may look odd\n");
 	}
-      Log ("\n");
-    }
 
-  Log ("\n T e\n");
+      Log ("\n T rad\n");
 
-  Log ("   z\\x   ");
-  for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
-    Log ("%8.2e ", w[i * MDIM].x[0]);
-  Log ("\n");
-
-  for (j = 0; j < MDIM; j++)
-    {
-      Log ("%8.2e ", w[j].x[2]);
+      Log ("   z\\x   ");
       for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
-	{
-	  n = i * MDIM + j;
-	  if (w[n].vol > 0.0)
-	    {
-	      nplasma = w[n].nplasma;
-	      x = plasmamain[nplasma].t_e;
-	    }
-	  else
-	    x = 0.0;
-	  Log ("%8.2g ", x);
-	}
+	Log ("%8.2e ", w[nstart + i * mdim].x[0]);
       Log ("\n");
+
+      for (j = 0; j < mdim; j++)
+	{
+	  Log ("%8.2e ", w[j].x[2]);
+	  for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
+	    {
+	      n = nstart + i * mdim + j;
+	      if (w[n].vol > 0.0)
+		{
+		  nplasma = w[n].nplasma;
+		  x = plasmamain[nplasma].t_r;
+		}
+	      else
+		x = 0.0;
+	      Log ("%8.2g ", x);
+	    }
+	  Log ("\n");
+	}
+
+      Log ("\n T e\n");
+
+      Log ("   z\\x   ");
+      for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
+	Log ("%8.2e ", w[nstart + i * mdim].x[0]);
+      Log ("\n");
+
+      for (j = 0; j < mdim; j++)
+	{
+	  Log ("%8.2e ", w[j].x[2]);
+	  for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
+	    {
+	      n = nstart + i * mdim + j;
+	      if (w[n].vol > 0.0)
+		{
+		  nplasma = w[n].nplasma;
+		  x = plasmamain[nplasma].t_e;
+		}
+	      else
+		x = 0.0;
+	      Log ("%8.2g ", x);
+	    }
+	  Log ("\n");
+	}
     }
 
   return (0);

@@ -116,8 +116,11 @@ spherical_make_grid (w, ndom)
 {
   double dr, dlogr;
   int n;
+  int ndim;
 
-  for (n = 0; n < NDIM; n++)
+  ndim=zdom[ndom].ndim;
+
+  for (n = 0; n < ndim; n++)
     {
       {
 
@@ -125,19 +128,15 @@ spherical_make_grid (w, ndom)
 	if (zdom[ndom].log_linear == 1)
 	  {			// linear intervals
 
-	    dr = (zdom[ndom].rmax - geo.rstar) / (NDIM - 3);
+	    dr = (zdom[ndom].rmax - geo.rstar) / (ndim - 3);
 	    w[n].r = geo.rstar + n * dr;
 	    w[n].rcen = w[n].r + 0.5 * dr;
 	  }
 	else
 	  {			//logarithmic intervals
-	    dlogr = (log10 (zdom[ndom].rmax / geo.rstar)) / (NDIM - 3);
-	    w[n].r = geo.rstar * pow (10., dlogr * (n - 1));
-	    w[n].rcen = 0.5 * geo.rstar * (pow (10., dlogr * (n)) +
-					   pow (10., dlogr * (n - 1)));
-	    Log ("OLD W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
+
 	    dlogr =
-	      (log10 (zdom[ndom].rmax / zdom[ndom].wind_rmin)) / (NDIM - 3);
+	      (log10 (zdom[ndom].rmax / zdom[ndom].wind_rmin)) / (ndim - 3);
 	    w[n].r = zdom[ndom].wind_rmin * pow (10., dlogr * (n - 1));
 	    w[n].rcen = 0.5 * zdom[ndom].wind_rmin * (pow (10., dlogr * (n)) +
 						      pow (10.,
@@ -528,21 +527,25 @@ spherical_get_random_location (n, icomp, x)
 
 
 int
-spherical_extend_density (w)
+spherical_extend_density (ndom, w)
+	int ndom;
      WindPtr w;
 {
 
   int j, n, m;
+  int ndim,nstart;
+
+  ndim=zdom[ndom].ndim;
+  nstart=zdom[ndom].nstart;
   /* 
      Now we need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
      In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
      cell that is just inside (or outside) the wind. 
    */
 
-  /* XXX this is not fixed */
-  for (j = 0; j < NDIM2 - 1; j++)
+  for (j = 0; j < ndim - 1; j++)
     {
-      n = j;
+      n = nstart+j;
       if (w[n].vol == 0)	// Then the grid point is not in the wind
 
 	{
@@ -602,6 +605,9 @@ shell_make_grid (w, ndom)
      int ndom;
 {
   int n;
+  int ndim;
+
+  ndim=zdom[ndom].ndim;
 
 
   w[0].r =
@@ -627,7 +633,7 @@ shell_make_grid (w, ndom)
      in the hopes this will be a reasonable portion of the wind in
      a biconical flow.
    */
-  for (n = 0; n < NDIM; n++)
+  for (n = 0; n < ndim; n++)
     {
       Log ("Cell %i:  inner edge = %2.20e, centre = %2.20e\n", n, w[n].r,
 	   w[n].rcen);

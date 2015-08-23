@@ -145,20 +145,24 @@ rtheta_make_grid (w, ndom)
 {
   double dr, theta, thetacen, dtheta, dlogr;
   int i, j, n;
+  int mdim, ndim;
+
+  ndim = zdom[ndom].ndim;
+  mdim = zdom[ndom].mdim;
 
   /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
      to propagate.  This is the reason we divide by NDIM-2 here, rather than NDIM-1 */
 
 /* Next two lines for linear intervals */
-  dtheta = 90. / (MDIM - 3);
+  dtheta = 90. / (mdim - 3);
 
 
   /* First calculate parameters that are to be calculated at the edge of the grid cell.  This is
      mainly the positions and the velocity */
-  for (i = 0; i < zdom[ndom].mdim; i++)
+  for (i = 0; i < mdim; i++)
     {
-      for (j = 0; j < zdom[ndom].mdim; j++)
+      for (j = 0; j < mdim; j++)
 	{
 	  wind_ij_to_n (ndom, i, j, &n);
 
@@ -167,14 +171,14 @@ rtheta_make_grid (w, ndom)
 	  if (zdom[ndom].log_linear == 1)
 	    {			// linear intervals
 
-	      dr = (zdom[ndom].rmax - geo.rstar) / (NDIM - 3);
+	      dr = (zdom[ndom].rmax - geo.rstar) / (ndim - 3);
 	      w[n].r = geo.rstar + i * dr;
 	      w[n].rcen = w[n].r + 0.5 * dr;
 	    }
 	  else
 	    {			//logarithmic intervals
 
-	      dlogr = (log10 (zdom[ndom].rmax / geo.rstar)) / (MDIM - 3);
+	      dlogr = (log10 (zdom[ndom].rmax / geo.rstar)) / (mdim - 3);
 	      w[n].r = geo.rstar * pow (10., dlogr * (i - 1));
 	      w[n].rcen = 0.5 * geo.rstar * (pow (10., dlogr * (i)) +
 					     pow (10., dlogr * (i - 1)));
@@ -256,7 +260,7 @@ rtheta_make_cones (ndom, w)
   mdim = zdom[ndom].mdim;
 
 
-  zdom[ndom].cones_rtheta = (ConePtr) calloc (sizeof (cone_dummy), MDIM);
+  zdom[ndom].cones_rtheta = (ConePtr) calloc (sizeof (cone_dummy), mdim);
   if (zdom[ndom].cones_rtheta == NULL)
     {
       Error
@@ -319,25 +323,25 @@ rtheta_wind_complete (ndom, w)
   /* Finally define some one-d vectors that make it easier to locate a photon in the wind given that we
      have adoped a "rectangular" grid of points.  Note that rectangular does not mean equally spaced. */
 
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < ndim; i++)
     {
-      zdom[ndom].wind_x[i] = w[nstart + i * MDIM].r;
+      zdom[ndom].wind_x[i] = w[nstart + i * mdim].r;
     }
-  for (j = 0; j < MDIM; j++)
+  for (j = 0; j < mdim; j++)
     zdom[ndom].wind_z[j] = w[nstart + j].theta;
 
-  for (i = 0; i < NDIM - 1; i++)
-    zdom[ndom].wind_midx[i] = w[nstart + i * MDIM].rcen;
+  for (i = 0; i < ndim - 1; i++)
+    zdom[ndom].wind_midx[i] = w[nstart + i * mdim].rcen;
 
-  for (j = 0; j < MDIM - 1; j++)
+  for (j = 0; j < mdim - 1; j++)
     zdom[ndom].wind_midz[j] = w[nstart + j].thetacen;
 
   /* Add something plausible for the edges */
   /* ?? It is bizarre that one needs to do anything like this ???. wind should be defined to include NDIM -1 */
-  zdom[ndom].wind_midx[NDIM - 1] =
-    2. * zdom[ndom].wind_x[NDIM - 1] - zdom[ndom].wind_midx[NDIM - 2];
-  zdom[ndom].wind_midz[MDIM - 1] =
-    2. * zdom[ndom].wind_z[MDIM - 1] - zdom[ndom].wind_midz[MDIM - 2];
+  zdom[ndom].wind_midx[ndim - 1] =
+    2. * zdom[ndom].wind_x[ndim - 1] - zdom[ndom].wind_midx[ndim - 2];
+  zdom[ndom].wind_midz[mdim - 1] =
+    2. * zdom[ndom].wind_z[mdim - 1] - zdom[ndom].wind_midz[mdim - 2];
 
   return (0);
 }
@@ -686,37 +690,38 @@ rtheta_get_random_location (n, icomp, x)
 
 
 int
-rtheta_extend_density (w)
+rtheta_extend_density (ndom, w)
+     int ndom;
      WindPtr w;
 {
-
-  /* XXX Needs fixing */
   int i, j, n, m;
-  for (i = 0; i < NDIM - 1; i++)
+  int ndim, mdim;
+
+  ndim = zdom[ndom].ndim;
+  mdim = zdom[ndom].mdim;
+
+  for (i = 0; i < ndim - 1; i++)
     {
-      for (j = 0; j < MDIM - 1; j++)
+      for (j = 0; j < mdim - 1; j++)
 	{
-	  /* PLACEHOLDER NEEDS DOMAIN */
-	  wind_ij_to_n (0, i, j, &n);
+	  wind_ij_to_n (ndom, i, j, &n);
 	  if (w[n].vol == 0)
 
-	    {			//Then this grid point is not in the wind 
+	    {			/*Then this grid point is not in the wind */
 
-	      /* PLACEHOLDER NEEDS DOMAIN */
-	      wind_ij_to_n (0, i + 1, j, &m);
+	      wind_ij_to_n (ndom, i + 1, j, &m);
 	      if (w[m].vol > 0)
-		{		//Then the windcell in the +x direction is in the wind and
-		  // we can copy the densities to the grid cell n
+		{		/*Then the windcell in the +x direction is in the wind and
+				   we can copy the densities to the grid cell n  */
 		  w[n].nplasma = w[m].nplasma;
 
 		}
 	      else if (i > 0)
 		{
-		  /* PLACEHOLDER NEEDS DOMAIN */
-		  wind_ij_to_n (0, i - 1, j, &m);
+		  wind_ij_to_n (ndom, i - 1, j, &m);
 		  if (w[m].vol > 0)
-		    {		//Then the grid cell in the -x direction is in the wind and
-		      // we can copy the densities to the grid cell n
+		    {		/*Then the grid cell in the -x direction is in the wind and
+				   we can copy the densities to the grid cell n */
 		      w[n].nplasma = w[m].nplasma;
 
 		    }

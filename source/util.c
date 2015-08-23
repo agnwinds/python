@@ -455,6 +455,7 @@ Notes:
 History:
 	05jul	ksl	56d -- Created in the context of incorporating
 			CYLVAR coordinates.
+	15aug	ksl	Began attempt to incorporate domains
 		       	
 
 **************************************************************/
@@ -465,41 +466,48 @@ int
 where_in_2dcell (ichoice, x, n, fx, fz)
      int ichoice;
      double x[];
-     int n;
+     int n;  // A known wind cell
      double *fx, *fz;
 {
   double *x00, *x01, *x10, *x11;
   double z[3];
   int i;
-  int bilin ();
+  int ndom, nstart, nstop,mdim;
 
-  /* Assign the corners ot the region we want to determin
-   * the fractional position of
-   */
+  ndom=wmain[n].ndom;
+  nstart=zdom[ndom].nstart;
+  nstop=zdom[ndom].nstop;
+  mdim=zdom[ndom].mdim;
 
-  if (n < 0 || n + MDIM + 1 >= NDIM2)
+
+  /* First check that n is reasonable. This semems almost impossible */
+  if (n < nstart || n + mdim + 1 >= nstop)
     {
       if (ierr_where_in_2dcell < 100)
 	{
-	  Error ("where_in_2dcell: Unreasonable n %d \n", n);
+	  Error ("where_in_2dcell: Unreasonable n %d This should not happen. Please investigate \n", n);
 	  ierr_where_in_2dcell++;
 	}
       return (n);		// And hope that calling routine knows how to handle this.
     }
 
+  /* Assign the corners ot the region we want to determin
+   * the fractional position of
+   */
+
   if (ichoice == 0)
     {
       x00 = wmain[n].x;
       x01 = wmain[n + 1].x;
-      x10 = wmain[n + MDIM].x;
-      x11 = wmain[n + MDIM + 1].x;
+      x10 = wmain[n + mdim].x;
+      x11 = wmain[n + mdim + 1].x;
     }
   else
     {
       x00 = wmain[n].xcen;
       x01 = wmain[n + 1].xcen;
-      x10 = wmain[n + MDIM].xcen;
-      x11 = wmain[n + MDIM + 1].xcen;
+      x10 = wmain[n + mdim].xcen;
+      x11 = wmain[n + mdim + 1].xcen;
     }
 
   /* Rotate the input vector onto the xz plane
@@ -584,6 +592,6 @@ wind_ij_to_n (ndom, i, j, n)
       *n = i;
       return (*n);
     }
-  *n = zdom[ndom].nstart + i * MDIM + j;		// MDIM because the array is in z order
+  *n = zdom[ndom].nstart + i * zdom[ndom].mdim + j;		// MDIM because the array is in z order
   return (*n);
 }

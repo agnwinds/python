@@ -19,12 +19,13 @@ int verbosity;			/* verbosity level. 0 low, 10 is high */
 value determined by values in python.h to a values which are adjustable from
 within python */
 
-int ndim;                       // Define the fundamental dimension of the grid
-int mdim;
+//OLD Domain int ndim;                       // Define the fundamental dimension of the grid
+//OLD Domain int mdim;
 
 /* With domains NDIM and MDIM need to be removed but NDIM2 is the total number of cells in wmain, and there
 are certain times we want to loop over everything.  The situation with NPLASMA is similar */
-int NDIM, MDIM, NDIM2;
+//OLD Domain int NDIM, MDIM, NDIM2;
+int NDIM2;                      //The total number of wind cells in wmain
 int NPLASMA;			//The number of cells with non-zero volume or the size of plasma structure
 
 char basename[132];		// The root of the parameter file name being used by python

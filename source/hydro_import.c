@@ -146,12 +146,6 @@ get_hydro_wind_params (ndom)
 
 
 
-
-//      geo.wind_rho_min=4*8.7e8;
-  //      geo.wind_rho_max=12.*8.7e8;
-  //      geo.wind_thetamin=20.0/RADIAN;
-  //      geo.wind_thetamax=65./RADIAN;
-
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
@@ -178,6 +172,7 @@ get_hydro ()
   double theta, theta_edge, temp;
   double vr, vtheta, vphi;
   int irmax, ithetamax, itest;
+  int ndim,mdim;
 
 /*Write something into the file name strings */
 
@@ -206,7 +201,6 @@ get_hydro ()
       exit (0);
     }
 
-//      Log ("Hydro datafile = %s\n",datafile);
 
   hydro_thetamax = 89.9;
 
@@ -232,7 +226,6 @@ get_hydro ()
       if (aline[0] != '#')
 	{
 	  sscanf (aline, "%s", word);
-//      printf ("first word=%s\n",word);
 
 	  if (strncmp (word, "ir", 2) == 0)
 	    {
@@ -245,7 +238,6 @@ get_hydro ()
 		sscanf (aline, "%d %lf %lf %d %lf %lf %lf %lf %lf %lf %lf",
 			&i, &r, &r_edge, &j, &theta, &theta_edge, &vr,
 			&vtheta, &vphi, &rho, &temp);
-//                              printf ("aline=%s itest= %i\n",aline,itest);
 	      if (itest != 11)	//We have an line which does not match what we expect, so quit
 		{
 		  Error ("hydro.c data file improperly formatted\n");
@@ -274,14 +266,12 @@ get_hydro ()
 	      //If theta is greater than thetamax, then we will replace rho with the last density above the disk
 	      else if (hydro_theta_edge[j] > hydro_thetamax)
 		{
-//                              printf ("edge is greater than thetamax %e > %e\n",hydro_theta_edge[j] , hydro_thetamax);
 		  /* NSH 130327 - for the time being, if theta is in the disk, replace with the last
 		     density above the disk */
 		  rho = hydro_ptr[i * MAXHYDRO + j_hydro_thetamax].rho;
 		}
 	      hydro_ptr[i * MAXHYDRO + j].temp = temp;
 	      hydro_ptr[i * MAXHYDRO + j].rho = rho;
-//                      printf ("input rho %e temp %e vr %e vtheta %e vphi %e\n",rho,temp,vr,vtheta,vphi);
 	      hydro_ptr[i * MAXHYDRO + j].v[0] = vr;
 	      hydro_ptr[i * MAXHYDRO + j].v[1] = vtheta;
 	      hydro_ptr[i * MAXHYDRO + j].v[2] = vphi;
@@ -297,7 +287,7 @@ get_hydro ()
       ihydro_theta = ithetamax;
       geo.wind_thetamax = 90. / RADIAN;
       hydro_thetamax = 90.0 / RADIAN;
-      MDIM = zdom[0].mdim = ihydro_theta + 1;
+      mdim = zdom[0].mdim = ihydro_theta + 1;
     }
   else
     {
@@ -307,7 +297,7 @@ get_hydro ()
 	 hydro_theta_cent[j_hydro_thetamax + 1] * RADIAN);
       ihydro_theta = j_hydro_thetamax;
       geo.wind_thetamax = hydro_thetamax;
-      MDIM = zdom[0].mdim = ihydro_theta + 2;
+      mdim = zdom[0].mdim = ihydro_theta + 2;
     }
 
 
@@ -330,7 +320,7 @@ get_hydro ()
 /* Set a couple of last tags*/
 
   geo.coord_type = RTHETA;	//At the moment we only deal with RTHETA - in the future we might want to do some clever stuff
-  NDIM = zdom[0].ndim = ihydro_r + 3;	//We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
+  ndim = zdom[0].ndim = ihydro_r + 3;	//We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
 
 
 
@@ -736,11 +726,15 @@ rtheta_make_hydro_grid (w, ndom)
 {
   double theta, thetacen, dtheta;
   int i, j, n;
+  int ndim,mdim;
+
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
 
 
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < ndim; i++)
     {
-      for (j = 0; j < MDIM; j++)
+      for (j = 0; j < mdim; j++)
 	{
 	  wind_ij_to_n (ndom, i, j, &n);
 	  w[n].inwind = W_ALL_INWIND;

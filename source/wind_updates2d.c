@@ -115,6 +115,7 @@ WindPtr (w);
   double nsh_lum_hhe;
   double nsh_lum_metals;
   int my_nmin, my_nmax;	//Note that these variables are still used even without MPI on
+  int ndom;
 
 #ifdef MPI_ON
   int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
@@ -637,19 +638,21 @@ free (commbuffer);
      *
    */
 
-  if (geo.coord_type == CYLIND)
-    cylind_extend_density (w);
-  else if (geo.coord_type == RTHETA)
-    rtheta_extend_density (w);
-  else if (geo.coord_type == SPHERICAL)
-    spherical_extend_density (w);
-  else if (geo.coord_type == CYLVAR)
-    cylvar_extend_density (w);
+for (ndom=0;ndom<geo.ndomain;ndom++){
+  if (zdom[ndom].coord_type == CYLIND)
+    cylind_extend_density (ndom, w);
+  else if (zdom[ndom].coord_type == RTHETA)
+    rtheta_extend_density (ndom, w);
+  else if (zdom[ndom].coord_type == SPHERICAL)
+    spherical_extend_density (ndom, w);
+  else if (zdom[ndom].coord_type == CYLVAR)
+    cylvar_extend_density (ndom, w);
   else
     {
       Error ("Wind_update2d: Unknown coordinate type %d\n", geo.coord_type);
       exit (0);
     }
+}
 
   /* Finished updatating region outside of wind */
 

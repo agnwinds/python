@@ -93,6 +93,7 @@ define_wind ()
   int n_comp, n_comp_part;
 
   int nwind, ndom;
+  int nstart, ndim, mdim;
   int nplasma;
 
   WindPtr w;
@@ -103,10 +104,10 @@ define_wind ()
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
-	    //PLACEHOLDER  we should not really need to define NDIM and MDIM here, we may need NDIM2
-      NDIM = zdom[ndom].ndim;
-      MDIM = zdom[ndom].mdim;
-      geo.ndim2=NDIM2 += zdom[ndom].ndim * zdom[ndom].mdim;
+      //PLACEHOLDER  we should not really need to define NDIM and MDIM here, we may need NDIM2
+      ndim = zdom[ndom].ndim;
+      mdim = zdom[ndom].mdim;
+      geo.ndim2 = NDIM2 += zdom[ndom].ndim * zdom[ndom].mdim;
     }
 
   set_nstart_nstop ();
@@ -203,7 +204,7 @@ recreated when a windfile is read into the program
     {
       if (zdom[ndom].coord_type == SPHERICAL)
 	{
-	  spherical_volumes (ndom,w, W_ALL_INWIND);
+	  spherical_volumes (ndom, w, W_ALL_INWIND);
 	}
       else if (zdom[ndom].coord_type == CYLIND)
 	{
@@ -221,12 +222,12 @@ recreated when a windfile is read into the program
 	    }
 	  else
 	    {
-	      rtheta_volumes (ndom,w, W_ALL_INWIND);
+	      rtheta_volumes (ndom, w, W_ALL_INWIND);
 	    }
 	}
       else if (zdom[ndom].coord_type == CYLVAR)
 	{
-	  cylvar_volumes (w, W_ALL_INWIND);
+	  cylvar_volumes (ndom, w, W_ALL_INWIND);
 	}
       else
 	{
@@ -251,11 +252,11 @@ recreated when a windfile is read into the program
 	}
       else if (geo.coord_type == RTHETA)
 	{
-	  rtheta_volumes (ndom,w, W_ALL_INTORUS);
+	  rtheta_volumes (ndom, w, W_ALL_INTORUS);
 	}
       else if (geo.coord_type == CYLVAR)
 	{
-	  cylvar_volumes (w, W_ALL_INTORUS);
+	  cylvar_volumes (ndom, w, W_ALL_INTORUS);
 	}
       else
 	{
@@ -544,44 +545,56 @@ be optional which variables beyond here are moved to structures othere than Wind
 
      05apr -- Looked at this again.  It is clearly a straightforwrd thing to do use the rho function
      which is below. One would simply integrate over various surface integrals to make it happen.  
+
+     15aug -- ksl - It's not clear this it really correct with dommains, but the follwoin compiles
 */
 
-  if (geo.coord_type == CYLIND)
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
-      mdotwind = 0;
-      mdotbase = 0;
-      for (i = 0; i < NDIM - 1; i++)
+      if (zdom[ndom].coord_type == CYLIND)
 	{
-	  n = i * MDIM + (MDIM / 2);
-// rr is router * router - rinner *rinner for this shell
-	  rr =
-	    w[n + MDIM].x[0] * w[n + MDIM].x[0] + w[n +
-						    MDIM].x[1] * w[n +
-								   MDIM].x[1]
-	    - (w[n].x[0] * w[n].x[0] + w[n].x[1] * w[n].x[1]);
-	  if (w[i * MDIM].inwind == W_ALL_INWIND)
-	    {
-	      nplasma = w[i * MDIM].nplasma;
-	      mdotbase +=
-		plasmamain[nplasma].rho * PI * rr * w[i * MDIM].v[2];
-	    }
-	  if (w[n].inwind == W_ALL_INWIND)
-	    {
-	      nplasma = w[n].nplasma;
-	      mdotwind += plasmamain[nplasma].rho * PI * rr * w[n].v[2];
-	    }
-	}
+	  Log
+	    ("Warning: wind2d.c: next lines may not make sense with multiple domains\n");
+	  ndim = zdom[ndom].ndim;
+	  mdim = zdom[ndom].mdim;
+	  nstart = zdom[ndom].nstart;
 
-      //Factor of 2 to allow for wind on both sides of disk
-      Log ("m dot wind: Desired %g   Base %g Calculated %g\n",
-	   geo.wind_mdot, 2. * mdotbase, 2. * mdotwind);
-      mdot_wind (w, 1.e6, geo.wind_rmax / 2.);
-    }
-  else
-    {
-      Error
-	("wind2d.c: Don't know how to check wind mdot for this coordtype %d\n",
-	 geo.coord_type);
+	  mdotwind = 0;
+	  mdotbase = 0;
+	  for (i = 0; i < ndim - 1; i++)
+	    {
+	      n = nstart + i * mdim + (mdim / 2);
+// rr is router * router - rinner *rinner for this shell
+	      rr =
+		w[n + mdim].x[0] * w[n + mdim].x[0] + w[n +
+							mdim].x[1] * w[n +
+								       mdim].
+		x[1] - (w[n].x[0] * w[n].x[0] + w[n].x[1] * w[n].x[1]);
+	      if (w[nstart + i * mdim].inwind == W_ALL_INWIND)
+		{
+		  nplasma = w[nstart + i * mdim].nplasma;
+		  mdotbase +=
+		    plasmamain[nplasma].rho * PI * rr * w[nstart +
+							  i * mdim].v[2];
+		}
+	      if (w[n].inwind == W_ALL_INWIND)
+		{
+		  nplasma = w[n].nplasma;
+		  mdotwind += plasmamain[nplasma].rho * PI * rr * w[n].v[2];
+		}
+	    }
+
+	  //Factor of 2 to allow for wind on both sides of disk
+	  Log ("m dot wind: Desired %g   Base %g Calculated %g\n",
+	       geo.wind_mdot, 2. * mdotbase, 2. * mdotwind);
+	  mdot_wind (w, 1.e6, geo.wind_rmax / 2.);
+	}
+      else
+	{
+	  Error
+	    ("wind2d.c: Don't know how to check wind mdot for this coordtype %d\n",
+	     geo.coord_type);
+	}
     }
 
   return (0);
@@ -633,48 +646,48 @@ int wig_n;
 double wig_x, wig_y, wig_z;
 int
 where_in_grid (ndom, x)
-	int ndom;
+     int ndom;
      double x[];
 {
 //  int n, nuse;
   int n;
   double fx, fz;
 
-//  nuse = -1;			// initialise nuse to a "not found" value
+//  nuse = -1;                  // initialise nuse to a "not found" value
 
   if (wig_x != x[0] || wig_y != x[1] || wig_z != x[2])	// Calculate if new position
     {
 
 //      for (ndom = geo.ndomain - 1; ndom > -1; ndom--)
-//	{
+//      {
 
-	  if (zdom[ndom].coord_type == CYLIND)
-	    {
-	      n = cylind_where_in_grid (ndom, x);
-	    }
-	  else if (zdom[ndom].coord_type == RTHETA)
-	    {
-	      n = rtheta_where_in_grid (ndom,x);
-	    }
-	  else if (zdom[ndom].coord_type == SPHERICAL)
-	    {
-	      n = spherical_where_in_grid (ndom,x);
-	    }
-	  else if (zdom[ndom].coord_type == CYLVAR)
-	    {
-	      n = cylvar_where_in_grid (ndom,x, 0, &fx, &fz);
-	    }
-	  else
-	    {
-	      Error ("where_in_grid: Unknown coord_type %d for domain %d\n",
-		     zdom[ndom].coord_type, ndom);
-	      exit (0);
-	    }
+      if (zdom[ndom].coord_type == CYLIND)
+	{
+	  n = cylind_where_in_grid (ndom, x);
+	}
+      else if (zdom[ndom].coord_type == RTHETA)
+	{
+	  n = rtheta_where_in_grid (ndom, x);
+	}
+      else if (zdom[ndom].coord_type == SPHERICAL)
+	{
+	  n = spherical_where_in_grid (ndom, x);
+	}
+      else if (zdom[ndom].coord_type == CYLVAR)
+	{
+	  n = cylvar_where_in_grid (ndom, x, 0, &fx, &fz);
+	}
+      else
+	{
+	  Error ("where_in_grid: Unknown coord_type %d for domain %d\n",
+		 zdom[ndom].coord_type, ndom);
+	  exit (0);
+	}
 
-//	  /* only store if you haven't already found a grid cell */
-//	  if (nuse < 0)
-//	    nuse = n;
-//	}
+//        /* only store if you haven't already found a grid cell */
+//        if (nuse < 0)
+//          nuse = n;
+//      }
 
       /* Store old positions to short-circuit calculation if asked for same position more
          than once */

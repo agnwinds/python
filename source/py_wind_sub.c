@@ -70,12 +70,18 @@ zoom (direction)
      int direction;
 {
   int center;
+  int ndim;
+
+  //PLACEHOLDER XXX 
+  
+	ndim=zdom[0].ndim;
+
   if (direction == 1)
     {				/* then unzoom */
       Log ("Showing selected positions throughout wind\n");
       py_wind_min = 0;
-      py_wind_max = NDIM;
-      py_wind_delta = NDIM / 10;
+      py_wind_max = ndim;
+      py_wind_delta = ndim / 10;
       /*
        * Allow for the possibility that the wind has an xdimension
        * < 10
@@ -96,9 +102,9 @@ zoom (direction)
 	  py_wind_min = 0;
 	}
       py_wind_max = py_wind_min + 10;
-      if (py_wind_max > NDIM)
+      if (py_wind_max > ndim)
 	{
-	  py_wind_max = NDIM;
+	  py_wind_max = ndim;
 	  Log
 	    ("zoom: this choice of py_wind_max is lager than NDIM, adusting py_wind_max to NDIM");
 	}

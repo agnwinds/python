@@ -589,20 +589,25 @@ cylind_get_random_location (n, x)
 
  History:
 	05apr	ksl	56 -- Moved functionality from wind updates   
-	06may	kls	57+ -- Changed to a mapping for plasma.  The
+	06may	ksl	57+ -- Changed to a mapping for plasma.  The
 				idea is that we always can use a mapping
 				to define what is in an adjascent cell.
 				This will need to be verified.
+	15aug	ksl	Modified for multipel domains
  
 **************************************************************/
 
 
 int
-cylind_extend_density (w)
+cylind_extend_density (ndom, w)
      WindPtr w;
 {
 
   int i, j, n, m;
+  int ndim,mdim;
+
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
 
   /* Now we need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
      In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
@@ -618,18 +623,16 @@ cylind_extend_density (w)
      *
    */
 
-  for (i = 0; i < NDIM - 1; i++)
+  for (i = 0; i < ndim - 1; i++)
     {
-      for (j = 0; j < MDIM - 1; j++)
+      for (j = 0; j < mdim - 1; j++)
 	{
-	  /* PLACEHOLDER, NEEDS DOMAIN */	
-	  wind_ij_to_n (0, i, j, &n);
+	  wind_ij_to_n (ndom, i, j, &n);
 	  if (w[n].vol == 0)
 
 	    {			//Then this grid point is not in the wind 
 
-          /* PLACEHOLDER, NEEDS DOMAIN */
-	      wind_ij_to_n (0, i + 1, j, &m);
+	      wind_ij_to_n (ndom, i + 1, j, &m);
 	      if (w[m].vol > 0)
 		{		//Then the windcell in the +x direction is in the wind and
 		  // we can copy the densities to the grid cell n
@@ -638,8 +641,7 @@ cylind_extend_density (w)
 		}
 	      else if (i > 0)
 		{
-		  /* PLACEHOLDER, NEEDS DOMAIN */
-		  wind_ij_to_n (0, i - 1, j, &m);
+		  wind_ij_to_n (ndom, i - 1, j, &m);
 		  if (w[m].vol > 0)
 		    {		//Then the grid cell in the -x direction is in the wind and
 		      // we can copy the densities to the grid cell n
