@@ -50,6 +50,7 @@ History:
 	05jun	ksl	56d -- modified so that search for top and
 			bottom of each cell is determined using
 			the cones that define each cell.
+	15aug	ksl	Updates to use with domains
  
 **************************************************************/
 
@@ -67,15 +68,18 @@ cylvar_ds_in_cell (p)
   double s, smax;
   int ndom;
 
+  ndom=wmain[p->grid].ndom;
 
-  if ((p->grid = n = where_in_grid (p->x)) < 0)
+
+	  // XXX  Next lines are just a check and one can probbly delette
+	  // them but one shcoul check.  For now have just tried to get this working
+	  //
+  if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
     {
       Error ("translate_in_wind: Photon not in grid when routine entered\n");
       return (n);		/* Photon was not in wind */
     }
 
-  ndom = wmain[n].ndom;
-  wind_n_to_ij (ndom,n, &ix, &iz);	/*Convert the index n to two dimensions */
 
   smax = VERY_BIG;		//initialize smax to a large number
 
@@ -729,6 +733,7 @@ cylvar_get_random_location (n, icomp, x)
   wind_n_to_ij (ndom, n, &i, &j);
 
   /* Encapsulate the grid cell with a rectangle for integrating */
+  /* XXX What folows does not look right for domains */
 
   rmin = wmain[n].x[0];
   if (rmin > wmain[n + 1].x[0])

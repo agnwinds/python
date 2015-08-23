@@ -52,14 +52,22 @@ cylind_ds_in_cell (p)
   double smax;
   int ndom;
 
+  ndom=wmain[p->grid].ndom;
 
-  if ((p->grid = n = where_in_grid (p->x)) < 0)
+
+  /* XXX -- The next lines may be unnecessary; they effectively recheck whether
+   * the grid cell has changed, which should not be happening.  But we do have
+   * the issue that we need to be sure to check what cell we are in at the right
+   * time
+   */
+
+
+  if ((p->grid = n = where_in_grid (ndom,p->x)) < 0)
     {
       Error ("translate_in_wind: Photon not in grid when routine entered\n");
       return (n);		/* Photon was not in wind */
     }
 
-  ndom = wmain[n].ndom;
   wind_n_to_ij (ndom, n, &ix, &iz);	/*Convert the index n to two dimensions */
 
   smax = VERY_BIG;		//initialize smax to a large number

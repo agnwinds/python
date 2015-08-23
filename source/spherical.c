@@ -53,8 +53,11 @@ spherical_ds_in_cell (p)
 
   int n, ix;
   double s, smax;
+  int ndom;
 
-  if ((p->grid = n = where_in_grid (p->x)) < 0)
+  ndom=wmain[p->grid].ndom;
+
+  if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
     {
       Error ("translate_in_wind: Photon not in grid when routine entered\n");
       return (n);		/* Photon was not in wind */
@@ -448,7 +451,7 @@ spherical_get_random_location (n, icomp, x)
       theta = acos (2. * (rand () / MAXRAND) - 1);
 
       phi = 2. * PI * (rand () / MAXRAND);
-// Project from r, theta phi to x y z
+/* Project from r, theta phi to x y z  */
       x[0] = r * cos (phi) * sin (theta);
       x[1] = r * sin (phi) * sin (theta);
       x[2] = r * cos (theta);
@@ -512,6 +515,7 @@ spherical_extend_density (w)
      cell that is just inside (or outside) the wind. 
    */
 
+  /* XXX this is not fixed */
   for (j = 0; j < NDIM2 - 1; j++)
     {
       n = j;

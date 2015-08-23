@@ -36,6 +36,7 @@ History:
 	05apr	ksl	55d -- Minor mod to get more info on problem case
 			of a photon not in wind or grid
 	11aug	ksl	70b - Incorporate mulitple components
+	15aug	ksl	Incorporate multiple domains
 
  
 **************************************************************/
@@ -50,12 +51,11 @@ translate (w, pp, tau_scat, tau, nres)
 {
   int istat;
 
-  //Old 70b  if (where_in_wind (pp->x) != 0)
   if (where_in_wind (pp->x) < 0)
     {
       istat = translate_in_space (pp);
     }
-  else if ((pp->grid = where_in_grid (pp->x)) >= 0)
+  else if ((pp->grid = where_in_grid (wmain[pp->grid].ndom,pp->x)) >= 0)
     {
       istat = translate_in_wind (w, pp, tau_scat, tau, nres);
     }
@@ -307,6 +307,7 @@ History:
 			the numbers of errors for a photon
 			going through a region with negligibe
 			volume.  
+	15aug	ksl	Incorporate multiple domains
  
 **************************************************************/
 
@@ -333,6 +334,7 @@ translate_in_wind (w, p, tau_scat, tau, nres)
   double smax, s, ds_current;
   int istat;
   int nplasma;
+  int ndom;
 
   WindPtr one;
   PlasmaPtr xplasma;
@@ -341,7 +343,7 @@ translate_in_wind (w, p, tau_scat, tau, nres)
 /* First verify that the photon is in the grid, and if not
 return and record an error */
 
-  if ((p->grid = n = where_in_grid (p->x)) < 0)
+  if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
     {
       Error ("translate_in_wind: Photon not in grid when routine entered\n");
       return (n);		/* Photon was not in grid */
@@ -352,25 +354,26 @@ return and record an error */
   one = &wmain[n];		/* one is the grid cell where the photon is */
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
+  ndom=one->ndom;
 
 
 
 
 /* Calculate the maximum distance the photon can travel in the cell */
 
-  if (geo.coord_type == CYLIND)
+  if (zdom[ndom].coord_type == CYLIND)
     {
       smax = cylind_ds_in_cell (p);	// maximum distance the photon can travel in a cell
     }
-  else if (geo.coord_type == RTHETA)
+  else if (zdom[ndom].coord_type == RTHETA)
     {
       smax = rtheta_ds_in_cell (p);
     }
-  else if (geo.coord_type == SPHERICAL)
+  else if (zdom[ndom].coord_type == SPHERICAL)
     {
       smax = spherical_ds_in_cell (p);
     }
-  else if (geo.coord_type == CYLVAR)
+  else if (zdom[ndom].coord_type == CYLVAR)
     {
       smax = cylvar_ds_in_cell (p);
     }
@@ -378,7 +381,7 @@ return and record an error */
     {
       Error
 	("translate_in_wind: Don't know how to find ds_in_cell in this coord system %d\n",
-	 geo.coord_type);
+	 zdom[ndom].coord_type);
       exit (0);
     }
 

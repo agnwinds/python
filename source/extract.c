@@ -321,7 +321,7 @@ have been changed */
 /* But in any event we have to reposition wind photons so thath they don't go through
 the same resonance again */
 
-      reposition (w, pp);	// Only reposition the photon if it was a wind photon
+      reposition (pp);	// Only reposition the photon if it was a wind photon
     }
 
   if (tau > TAU_MAX)

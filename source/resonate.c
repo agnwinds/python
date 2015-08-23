@@ -382,7 +382,8 @@ process. */
 			  && check_in_grid != P_HIT_DISK
 			  && check_in_grid != P_ESCAPE)
 			{
-			  two = &w[where_in_grid (p_now.x)];
+				/* XXX  The next line seems a bit redundant.  */
+			  two = &w[where_in_grid (wmain[p_now.grid].ndom, p_now.x)];
 			  xplasma2 = &plasmamain[two->nplasma];
 
 			  if (lin_ptr[nn]->macro_info == 1
@@ -1146,7 +1147,7 @@ scatter (p, nres, nnscat)
 
 
   stuff_phot (p, &pold);
-  n = where_in_grid (pold.x);	// Find out where we are
+  n = where_in_grid (wmain[pold.grid].ndom, pold.x);	// Find out where we are
 
   //71 - 1112 Check added to test out spherical wind models 
   if (n < 0)
@@ -1157,9 +1158,6 @@ scatter (p, nres, nnscat)
 
   one = &wmain[p->grid];
   xplasma = &plasmamain[one->nplasma];
-  //OLD - did not trap a problem if (xplasma==NULL){
-  //OLD - did not trap a problem          Error("Houston, we have a null pointer at %d %d",p->grid,one->nplasma);
-  //OLD - did not trap a problem }
 
   /* On entering this subroutine we know that a photon packet has been 
      absorbed. nres tells us which process absorbed it. There are currently
@@ -1175,25 +1173,8 @@ scatter (p, nres, nnscat)
   if (geo.rt_mode == 2)		//check if macro atom method in use
     {
 
-      /* 1112 - 71 - ksl - Moved to avoid trying to reference mplasma if there are no 
-         macro atoms.  This was to fix a segmentation fault that appeared
-         when compiling with a new version of gcc.   It's possible that the error below
-         could occur if we were in a macro atom approach but had no macro atoms.  Need
-         to fix all this up with a thorough review of macro atoms. !!!
-       */
-      /* JM 1502 -- I've reinstated this call to mplasma, it should happen regardless of whether we have
-         actual macro-atom levels as one can be in the simple ion approach. see #138 */
 
-    //    if (geo.nmacro > 0)
-	  //{
 	  mplasma = &macromain[xplasma->nplasma];
-    //}
-    //   else
-	  // {
-	  //   mplasma = NULL;
-	  //   Error
-	  //     ("Resonate: In macro atom section, but no macro atoms.  Seems very odd\n");
-	  // }
 
       /* Electron scattering is the simplest to deal with. The co-moving 
          frequency is unchanged so it's just a randomisation of the direction.
@@ -1235,9 +1216,10 @@ scatter (p, nres, nnscat)
 	    {
 	      /* Macro ion case (SS) */
 
-	      // Note:  NLINES-1 in the lines below is correct.  This is becasue
-	      // the 1st bf is identified by nres = NLINES+1 and this is 
-	      // the zeroth element of phot_top: hence the -1.  SS
+	      /* Note:  NLINES-1 in the lines below is correct.  This is becasue
+	         the 1st bf is identified by nres = NLINES+1 and this is 
+	         the zeroth element of phot_top: hence the -1.  SS
+	      */
 
 	      llvl = phot_top[*nres - NLINES - 1].nlev;	//lower level
 	      ulvl = phot_top[*nres - NLINES - 1].uplev;	//upper level
@@ -1260,7 +1242,7 @@ scatter (p, nres, nnscat)
 		  exit (0);
 		}
 
-	      // Need to compute the factor needed for the stimulated term.
+	      /* Need to compute the factor needed for the stimulated term. */
 
 	      stim_fact =
 		den_config (xplasma, ulvl) / den_config (xplasma,
@@ -1275,10 +1257,11 @@ scatter (p, nres, nnscat)
 		(mplasma->alpha_st_e_old[config[llvl].bfu_indx_first + m] *
 		 stim_fact);
 
-	      // Both gamma_twiddles must be greater that zero if this is going to work. If they 
-	      // are zero then it's probably because this is the first iteration and so the've not
-	      //been computed yet. For that first iteration k-packets will be ignored. If the
-	      // gamma_twiddles are negative then something has gone wrong.
+	      /* Both gamma_twiddles must be greater that zero if this is going to work. If they 
+	      are zero then it's probably because this is the first iteration and so the've not
+	      been computed yet. For that first iteration k-packets will be ignored. If the
+	      gamma_twiddles are negative then something has gone wrong.
+	      */
 
 	      if (gamma_twiddle > 0 && gamma_twiddle_e > 0)
 		{

@@ -58,7 +58,7 @@ int spectrum_summary(char filename[], char mode[], int nspecmin, int nspecmax, i
 int spectrum_restart_renormalise(int nangle);
 /* wind2d.c */
 int define_wind(void);
-int where_in_grid(double x[]);
+int where_in_grid(int ndom, double x[]);
 int vwind_xyz(PhotPtr p, double v[]);
 int wind_div_v(WindPtr w);
 double rho(WindPtr w, double x[]);
@@ -282,7 +282,7 @@ int levels(PlasmaPtr xplasma, int mode);
 double dvwind_ds(PhotPtr p);
 int dvds_ave(void);
 /* reposition.c */
-int reposition(WindPtr w, PhotPtr p);
+int reposition(PhotPtr p);
 /* anisowind.c */
 int randwind(PhotPtr p, double lmn[3], double north[3]);
 double vrandwind(double x);

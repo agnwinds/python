@@ -624,25 +624,28 @@ be optional which variables beyond here are moved to structures othere than Wind
 	04aug	ksl	52a -- Now almos a shell, as moved to allow
 			multiple coordinate systems
 	05apr	ksl	55d -- Added spherical as a possiblity
+	15aug	ksl	Modified so that a domain number is requried
  
 **************************************************************/
 
 int wig_n;
 double wig_x, wig_y, wig_z;
 int
-where_in_grid (x)
+where_in_grid (ndom, x)
+	int ndom;
      double x[];
 {
-  int n, nuse, ndom;
+//  int n, nuse;
+  int n;
   double fx, fz;
 
-  nuse = -1;			// initialise nuse to a "not found" value
+//  nuse = -1;			// initialise nuse to a "not found" value
 
   if (wig_x != x[0] || wig_y != x[1] || wig_z != x[2])	// Calculate if new position
     {
 
-      for (ndom = geo.ndomain - 1; ndom > -1; ndom--)
-	{
+//      for (ndom = geo.ndomain - 1; ndom > -1; ndom--)
+//	{
 
 	  if (zdom[ndom].coord_type == CYLIND)
 	    {
@@ -667,10 +670,10 @@ where_in_grid (x)
 	      exit (0);
 	    }
 
-	  /* only store if you haven't already found a grid cell */
-	  if (nuse < 0)
-	    nuse = n;
-	}
+//	  /* only store if you haven't already found a grid cell */
+//	  if (nuse < 0)
+//	    nuse = n;
+//	}
 
       /* Store old positions to short-circuit calculation if asked for same position more
          than once */

@@ -273,6 +273,7 @@ History:
 			FOR ALL COORDINATE SYSTEMS.
 	13sep	nsh	76b -- Modified calls to fraction to take
 			account of new mode.
+	15aug	ksl	Modifeied to handle multiple domains
 		       	
 
 **************************************************************/

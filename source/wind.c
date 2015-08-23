@@ -21,12 +21,23 @@
                   Space Telescope Science Institute
 
  Synopsis:
-	where_in_wind determines whether a position x is in the wind region.
+	where_in_wind determines whether a position x is in  wind region.
  
 Arguments:		
 	double x[3]	a position
 Returns:
  	where_in_wind returns 
+
+	The domain number if the position is in "active" region
+	of a domain.  It returns a negative number if that is not
+	the case.  
+     	
+
+
+	These are the nominal returns if there is only one domain.
+	If there are multiple domains these returns are not in 
+	general meaning full and should be rewritten
+
 	 W_ALL_INTORUS if the photon is in the torus
 	 W_ALL_INWIND if the photon is in the wind, 
  	-1 if it is inside the inner wind cone, and 
@@ -38,13 +49,13 @@ Description:
 	
 		
 Notes:
-	It does not tell you whether it is in the grid or not, just whether the photon is
-	between the two wind cones and/or inside minimum or maximum radius of the wind.     
-	It does not update pp->grid
+	Where_in_wind does not tell you whether a postion is in the grid or not, just whether 
+	the photon is between the two wind cones and/or inside minimum or maximum radius of the wind.     
 
 	11Aug. - ksl - it does not look like any of the negative return values are actually utilized
 	anywhere.  It could be that one should return W_NOT_INWIND in all
 	of these cases
+
 History:
  	97jan   ksl	Coding on python began.
  	98dec	ksl	Modified so the call to where_in_wind involves only
@@ -65,6 +76,10 @@ History:
 			now if it is within machine precision of
 			pi/2, is returns that the photon is in wind
 			and does not do the check. 
+	15aug	jm/ksl	Modifications to determine what domain
+			a positions is in if any.  With multiple 
+			domains, it is unclear that what inside
+			and outside the wind mean.  
 			
 **************************************************************/
 
@@ -74,102 +89,117 @@ where_in_wind (x)
 {
   double rho, rho_min, rho_max, z;
   int ireturn;
-  int ndom, nuse;
+  int ndom;
 
-  nuse = -1;
+
+  /* First check for items, like the diks that are not domain
+   * related, like the disk */
+
+  z = fabs (x[2]);		/* This is necessary to get correct answer above
+				   and below plane */
+  rho = sqrt (x[0] * x[0] + x[1] * x[1]);	/* This is distance from z axis */
+
+  /* Now check to see if position is inside the disk */
+  if (geo.disk_type == 2)
+    {
+      if (rho < geo.diskrad && z < zdisk (rho))
+	{
+	  ireturn = -5;
+	  return (ireturn);
+	}
+    }
+
+  /* 70b -ksl - Now check if the position is in the torus.  This check
+     precedes the check to see if the position is in the wind
+   */
+
+  if (geo.compton_torus)
+    {
+      if (geo.compton_torus_rmin < rho && rho < geo.compton_torus_rmax
+	  && z < geo.compton_torus_zheight)
+	{
+	  ireturn = W_ALL_INTORUS;
+	  return (ireturn);
+	}
+    }
+
+
+  /* Now check for things realted to the domains */
 
   for (ndom = geo.ndomain - 1; ndom > -1; ndom--)
-  {
-    DomainPtr one_dom;
+    {
+      DomainPtr one_dom;
 
-    one_dom = &zdom[ndom];
- 
-    ireturn = ndom;
+      one_dom = &zdom[ndom];
 
-    //110814 - Currently geo.wind_rmin is always set to geo.rstar except for models that are 
-    //calculated by others.  Thus we would all the grids to start at rmin.
+      ireturn = ndom;
 
-
-    /* First check to see if photon is inside star or outside wind */
-    if ((z = length (x)) < one_dom->wind_rmin)
-      {
-        ireturn = -3;		/*x is inside the wind  radially */
-      }
-    else if (z > one_dom->wind_rmax)
-      {
-        ireturn = -4;		/*the position is beyond the wind radially */
-      }
+      //110814 - Currently geo.wind_rmin is always set to geo.rstar except for models that are 
+      //calculated by others.  Thus we would all the grids to start at rmin.
 
 
-    z = fabs (x[2]);		/* This is necessary to get correct answer above
-				   and below plane */
-    rho = sqrt (x[0] * x[0] + x[1] * x[1]);	/* This is distance from z axis */
+      /* First check to see if photon is inside star or outside wind */
+      if ((z = length (x)) < one_dom->wind_rmin)
+	{
+	  ireturn = -3;		/*x is inside the wind  radially */
+	}
+      else if (z > one_dom->wind_rmax)
+	{
+	  ireturn = -4;		/*the position is beyond the wind radially */
+	}
 
-    /* Now check to see if position is inside the disk */
-    if (geo.disk_type == 2)
-      {
-        if (rho < geo.diskrad && z < zdisk (rho))
-	        ireturn = -5;
-      }
+      /* Now for the elvis wind model, check to see if the position is
+       * inside all of the wind or if it is in the vertical section of the wind
+       *
+       * Note the use of sv_rmax and sv_rmin here, because thise are not the
+       * same as for the windcones gescribed by geo.wind_rmin and geo.wind_rmax
+       * 111124 ksl
+       */
 
-    /* 70b -ksl - Now check if the position is in the torus.  This check
-       precedes the check to see if the position is in the wind
-     */
-
-    if (geo.compton_torus)
-      {
-        if (geo.compton_torus_rmin < rho && rho < geo.compton_torus_rmax
-  	  && z < geo.compton_torus_zheight)
-  	{
-  	  ireturn = W_ALL_INTORUS;
-  	}
-      }
-
-    /* Now for the elvis wind model, check to see if the position is
-     * inside all of the wind or if it is in the vertical section of the wind
-     *
-     * Note the use of sv_rmax and sv_rmin here, because thise are not the
-     * same as for the windcones gescribed by geo.wind_rmin and geo.wind_rmax
-     * 111124 ksl
-     */
-
-    if (geo.wind_type == 8)
-      {
-        if (rho < one_dom->sv_rmin)
-  	{
-  	  ireturn = -1;
-  	}
-        if (rho < one_dom->sv_rmax && z < one_dom->elvis_offset)
-  	{
-  	  ireturn = ndom;
-  	}
-      }
+      if (geo.wind_type == ELVIS)
+	{
+	  if (rho < one_dom->sv_rmin)
+	    {
+	      ireturn = -1;
+	    }
+	  if (rho < one_dom->sv_rmax && z < one_dom->elvis_offset)
+	    {
+	      ireturn = ndom;
+	    }
+	}
 
 
 
-    /* Check if one is inside the inner windcone */
-    if (rho < (rho_min = one_dom->wind_rho_min + z * tan (one_dom->wind_thetamin)))
-      {
-        ireturn = (-1);
-      }
+      /* Check if one is inside the inner windcone */
+      if (rho <
+	  (rho_min =
+	   one_dom->wind_rho_min + z * tan (one_dom->wind_thetamin)))
+	{
+	  ireturn = (-1);
+	}
 
-    /* Finally check if positon is outside the outer windcone */
-    /* NSH 130401 - The check below was taking a long time if geo.wind_thetamax was very close to pi/2.
-       check inserted to simply return INWIND if geo.wind_thetamax is within machine precision of pi/2. */
+      /* Finally check if positon is outside the outer windcone */
+      /* NSH 130401 - The check below was taking a long time if geo.wind_thetamax was very close to pi/2.
+         check inserted to simply return INWIND if geo.wind_thetamax is within machine precision of pi/2. */
 
-    else if (fabs (one_dom->wind_thetamax - PI / 2.0) > 1e-6)	/* Only perform the next check if thetamax is not equal to pi/2 */
-      {
-        if (rho > (rho_max = one_dom->wind_rho_max + z * tan (one_dom->wind_thetamax)))
-  	{
-  	  ireturn = (-2);
-  	}
-      }				/* If thetamax is equal to pi/2, then the photon must be in the wind if it has got to this point */
+      else if (fabs (one_dom->wind_thetamax - PI / 2.0) > 1e-6)	/* Only perform the next check if thetamax is not equal to pi/2 */
+	{
+	  if (rho >
+	      (rho_max =
+	       one_dom->wind_rho_max + z * tan (one_dom->wind_thetamax)))
+	    {
+	      ireturn = (-2);
+	    }
+	}
 
-    if (ireturn >= 0 && nuse < 0)
-      nuse = ireturn;
-  }
+      if (ireturn == ndom)
+	{
+	  return (ireturn);
 
-  return (nuse);
+	}
+
+    }
+      return (ireturn);
 }
 
 
@@ -232,8 +262,8 @@ wind_check (www, n)
 	    }
 	  if (sane_check (www[i].xcen[j]))
 	    {
-	      Error ("wind_check:sane_check www[%d].xcen[%d] %e\n", i, j,
-		     www[i].xcen[j]);
+	      Error ("wind_check:sane_check www[%d].xcen[%d] %e\n", i,
+		     j, www[i].xcen[j]);
 	    }
 	  if (sane_check (www[i].v[j]))
 	    {
@@ -247,8 +277,9 @@ wind_check (www, n)
 	    {
 	      if (sane_check (www[i].v_grad[j][k]))
 		{
-		  Error ("wind_check:sane_check www[%d].v_grad[%d][%d] %e\n",
-			 i, j, k, www[i].v_grad[j][k]);
+		  Error
+		    ("wind_check:sane_check www[%d].v_grad[%d][%d] %e\n",
+		     i, j, k, www[i].v_grad[j][k]);
 		}
 	    }
 
@@ -310,7 +341,7 @@ model_velocity (ndom, x, v)
     }
   else if (zdom[ndom].wind_type == 6)
     {
-      speed = homologous_velocity (ndom,x, v);
+      speed = homologous_velocity (ndom, x, v);
     }
   else if (zdom[ndom].wind_type == 7)
     {
@@ -374,8 +405,8 @@ model_vgrad (ndom, x, v_grad)
 
       if (sane_check (v1[0]) || sane_check (v1[1]) || sane_check (v1[2]))
 	{
-	  Error ("model_vgrad:sane_check dx %f %f %f v0 %f %f %f\n", dx[0],
-		 dx[1], dx[2], v1[0], v1[1], v1[2]);
+	  Error ("model_vgrad:sane_check dx %f %f %f v0 %f %f %f\n",
+		 dx[0], dx[1], dx[2], v1[0], v1[1], v1[2]);
 	}
 
       vsub (v1, v0, dv);
@@ -400,8 +431,8 @@ History
 
 double
 model_rho (ndom, x)
-    int ndom;
-    double x[];
+     int ndom;
+     double x[];
 {
   double rho;
 
@@ -437,7 +468,7 @@ model_rho (ndom, x)
     {
       rho = elvis_rho (ndom, x);
     }
-  else if (zdom[ndom].wind_type ==SHELL)
+  else if (zdom[ndom].wind_type == SHELL)
     {
       rho = stellar_rho (ndom, x);
     }

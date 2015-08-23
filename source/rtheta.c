@@ -31,6 +31,8 @@ History:
  	04aug	ksl	This code was removed from translate_in_wind
        			in python_52 as part of effort to isolate
 			dependencies on coordinate grids
+	15aug	ksl	Updates to where_in_grid section to allow
+			for multiple domains
  
 **************************************************************/
 
@@ -47,14 +49,18 @@ rtheta_ds_in_cell (p)
   double s, smax;
   int ndom;
 
+  ndom=wmain[p->grid].ndom;
 
-  if ((p->grid = n = where_in_grid (p->x)) < 0)
+
+  /* XXX Note clear that next lines are necessary as they effectively recheck
+   * what grid cell a photon is in */
+
+  if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
     {
       Error ("translate_in_wind: Photon not in grid when routine entered\n");
       return (n);		/* Photon was not in wind */
     }
 
-  ndom = wmain[n].ndom;
   wind_n_to_ij (ndom, n, &ix, &iz);	/*Convert the index n to two dimensions */
 
 
@@ -200,7 +206,6 @@ rtheta_make_grid (w, ndom)
 	}
     }
   rtheta_make_cones(w);
-  /* OK finished successfuly */
   return (0);
 	}
 
@@ -271,16 +276,22 @@ rtheta_make_cones (w)
 
 
 
-/* This simple little routine just populates two one dimensional arrays that are used for interpolation.
- * It could be part of the routine above, except that the arrays are  not tranferred to py_wind in wind_save
- * It's left that way for now, but when one cleans up the program, it might be more sensible to do it the other
- * way
- *
- * Note that because of history these interpolation variable look like those for cylindrical coordinates.
- * It would be better to rename the variables at some point for clarity!! ksl
- *
- * History
- * 04aug	ksl	Routine was removed from windsave,  wind_complete is now just a driver.
+/* 
+ 
+rtheta_wind_complete (w)
+
+Description
+
+This simple little routine just populates two one dimensional arrays that are used for interpolation.
+It could be part of the routine above, except that the arrays are  not tranferred to py_wind in wind_save
+It's left that way for now, but when one cleans up the program, it might be more sensible to do it the other
+way
+
+Note that because of history these interpolation variable look like those for cylindrical coordinates.
+It would be better to rename the variables at some point for clarity!! ksl
+
+History
+	04aug	ksl	Routine was removed from windsave,  wind_complete is now just a driver.
  */
 
 int
@@ -288,6 +299,9 @@ rtheta_wind_complete (w)
      WindPtr w;
 {
   int i, j;
+
+
+  /* XXX this routine needs to be fixed */
 
   /* Finally define some one-d vectors that make it easier to locate a photon in the wind given that we
      have adoped a "rectangular" grid of points.  Note that rectangular does not mean equally spaced. */
@@ -374,7 +388,7 @@ rtheta_volumes (w, icomp)
     {
       for (j = 0; j < MDIM; j++)
 	{
-	  /* PLACEHOLDER NEEDS DOMAIN */	 
+	  /* XXXX PLACEHOLDER NEEDS DOMAIN */	 
 	  wind_ij_to_n (0, i, j, &n);
 	  if (w[n].inwind == W_NOT_INWIND)
 	    {
@@ -499,6 +513,7 @@ rtheta_where_in_grid (x)
   double r, theta;
   double f;
 
+  /* XXXX PLACEHOLDER  -- This is not fixed */
   r = length (x);
   theta = acos ((fabs (x[2] / r))) * RADIAN;
 
@@ -581,7 +596,7 @@ rtheta_get_random_location (n, icomp, x)
 	asin (sthetamin + (rand () / MAXRAND) * (sthetamax - sthetamin));
 
       phi = 2. * PI * (rand () / MAXRAND);
-// Project from r, theta phi to x y z
+/* Project from r, theta phi to x y z  */
       x[0] = r * cos (phi) * sin (theta);
       x[1] = r * sin (phi) * sin (theta);
       x[2] = r * cos (theta);
@@ -640,6 +655,7 @@ rtheta_extend_density (w)
      WindPtr w;
 {
 
+	/* XXX Needs fixing */
   int i, j, n, m;
   for (i = 0; i < NDIM - 1; i++)
     {
@@ -735,7 +751,7 @@ rtheta_is_cell_in_wind (n, icomp)
   dr = (rmax - rmin) / RESOLUTION;
   dtheta = (thetamax - thetamin) / RESOLUTION;
 
-  // Check inner and outer boundary in the z direction
+  /* Check inner and outer boundary in the z direction  */
 
   x[1] = 0;
 

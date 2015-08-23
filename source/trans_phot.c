@@ -379,7 +379,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
 	  /* 71 - 1112 - ksl - placed this line here to try to avoid an error I was seeing in scatter.  I believe the first if
 	     statement has a loophole that needs to be plugged, when it comes back with avalue of n = -1 */
-	  pp.grid = n = where_in_grid (pp.x);
+	  pp.grid = n = where_in_grid (wmain[n].ndom,pp.x);
 
 	  if (n < 0)
 	    {
@@ -590,7 +590,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	  tau = 0;
 	  
 	  stuff_v (pp.x, x_dfudge_check); // this is a vector we use to see if dfudge moved the photon outside the wind cone
-	  reposition (w, &pp);
+	  reposition (&pp);
 
 	  /* JM 1506 -- call walls again to account for instance where DFUDGE 
 	     can take photon outside of the wind and into the disk or star 
