@@ -364,7 +364,7 @@ int cylind_is_cell_in_wind(int n);
 /* rtheta.c */
 double rtheta_ds_in_cell(PhotPtr p);
 int rtheta_make_grid(WindPtr w, int ndom);
-int rtheta_make_cones(WindPtr w);
+int rtheta_make_cones(int ndom, WindPtr w);
 int rtheta_wind_complete(int ndom, WindPtr w);
 int rtheta_volumes(int ndom, WindPtr w, int icomp);
 int rtheta_where_in_grid(int ndom, double x[]);

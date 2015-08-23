@@ -746,19 +746,15 @@ rtheta_make_hydro_grid (w, ndom)
 	  w[n].inwind = W_ALL_INWIND;
 	  if (i == 0)		// The inner edge of the grid should be geo.rstar
 	    {
-//              printf ("HYDRO setting inner radial grid cells (n=%i i=%i j=%i) up \n",n,i,j);
 	      w[n].r = geo.rstar;	//So we set the inner edge to be the stellar (or QSO) radius
 	      w[n].rcen = (geo.rstar + hydro_r_edge[0]) / 2.0;	//It will be a big cell
 	      w[n].inwind = W_NOT_INWIND;
-//              printf ("inner radius =%e, center=%e\n",w[n].r,w[n].rcen);
 	    }
 	  else if (i - 1 > ihydro_r)	// We are at the radial limit of the data, this last cell will be a ghost cell of our own
 	    {
-//              printf ("HYDRO we are outside radial edge of the wind (%i > %i)\n",i-1,ihydro_r);
 	      w[n].r = geo.rmax;	// so we set the outer cell to be the edge of the wind
 	      w[n].rcen = geo.rmax;	// And it has zero volume
 	      w[n].inwind = W_NOT_INWIND;
-//              printf ("edge=%e, center=%e\n",w[n].r,w[n].rcen);
 	    }
 	  else
 	    {
@@ -769,18 +765,14 @@ rtheta_make_hydro_grid (w, ndom)
 
 
 
-//              printf ("dtheta=%e test = %e, test2= %e, hydro_thetamax = %e j = %i ihydro_theta=%i\n",dtheta,hydro_theta_cent[j]+(dtheta/2.0),hydro_theta_cent[j]-(dtheta/2.0), hydro_thetamax,j,ihydro_theta);
 	  if (hydro_theta_cent[j] + (dtheta / 2.0) > hydro_thetamax && hydro_theta_cent[j] - (dtheta / 2.0) < hydro_thetamax)	//This cell bridges the boundary - we reset it so the lower edge is at the disk boundary
 	    {
-//              printf ("We have reached the disk %e > %e\n",hydro_theta_cent[j]+(hydro_dtheta_cent[j]/2.0), hydro_thetamax);
 	      theta = hydro_theta_edge[j];
 	      thetacen = ((hydro_thetamax + theta) / 2.0);
-//              printf ("Setting theta=%e thetacen=%e\n",theta,thetacen);
 	    }
 
 	  else if (j >= ihydro_theta)	//We are setting up a cell past where there is any data
 	    {
-//              printf ("we are past ihydro_theta , %i, %i \n",j,ihydro_theta);
 	      thetacen = hydro_thetamax;	//Set the center and the edge to the maximum extent of the data/interest
 	      theta = hydro_thetamax;
 	      w[n].inwind = W_NOT_INWIND;
@@ -797,45 +789,13 @@ rtheta_make_hydro_grid (w, ndom)
 	  w[n].x[2] = w[n].r * cos (theta);
 	  w[n].xcen[0] = w[n].rcen * sin (thetacen);
 	  w[n].xcen[2] = w[n].rcen * cos (thetacen);
-//        printf ("Cell %i r=%e, rcne=%e, theta=%f, thetacen=%f, x=%e, y=%e, z=%e, inwind=%i\n",n,w[n].r,w[n].rcen,w[n].theta,w[n].thetacen,w[n].x[0],w[n].x[1],w[n].x[2],w[n].inwind);
 
 	}
     }
-/*
-for (i = 0; i < NDIM; i++)
-	{
-	wind_ij_to_n (0, i, 0, &n);
-	printf ("i=%i, n=%i, r=%e, rcen=%e\n",i,n,w[n].r,w[n].rcen);
-	}
-
-for (i = 0; i < MDIM; i++)
-	{
-	wind_ij_to_n (0, 0, i, &n);
-	printf ("j=%i,  ihydrotheta=%i, n=%i, theta=%f, thetacen=%f\n",i,ihydro_theta,n,w[n].theta,w[n].thetacen);
-	}
-*/
-
   /* Now set up the wind cones that are needed for calclating ds in a cell */
 
 
-/*
-  cones_rtheta = (ConePtr) calloc (sizeof (cone_dummy), MDIM);
-  if (cones_rtheta == NULL)
-    {
-      Error
-	("rtheta_make_grid: There is a problem in allocating memory for the cones structure\n");
-      exit (0);
-
-    }
-
-
-  for (n = 0; n < MDIM; n++)
-    {
-      cones_rtheta[n].z = 0.0;
-      cones_rtheta[n].dzdr = 1. / tan (w[n].theta / RADIAN);	// New definition
-    }
-*/
-  rtheta_make_cones (w);	//NSH 130821 broken out into a seperate routine
+  rtheta_make_cones (ndom, w);	//NSH 130821 broken out into a seperate routine
 
 
 

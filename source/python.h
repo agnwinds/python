@@ -189,9 +189,9 @@ typedef struct cone
 }
 cone_dummy, *ConePtr;
 
-ConePtr cones_rtheta;		/*A ptr to the cones that define the theta directions in rtheta coods */
+//Old-Moved to domain ConePtr cones_rtheta;		/*A ptr to the cones that define the theta directions in rtheta coods */
 
-//OLD  struct cone windcone[2];	/* The cones that define the boundary of winds like SV or kwd */
+//OLD-Moved to domain  struct cone windcone[2];	/* The cones that define the boundary of winds like SV or kwd */
 
 /* End of structures which are used to define boundaries to the emission regions */
 
@@ -216,6 +216,7 @@ typedef struct domain
 	double wind_x[NDIM_MAX], wind_z[NDIM_MAX];	/* These define the edges of the cells in the x and z directions */
 	double wind_midx[NDIM_MAX], wind_midz[NDIM_MAX];	/* These define the midpoints of the cells in the x and z directions */
 
+ConePtr cones_rtheta;		/*A ptr to the cones that define the theta directions in rtheta coods */
 /* Next two lines are for cyl_var coordinates.  They are used in locating the appropriate 
  * locating the appropriate cell, for example by cylvar_where_in_grid
  */
@@ -1012,16 +1013,11 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define NEBULARMODE_MATRIX_BB 8	               // matrix solver BB model
 #define NEBULARMODE_MATRIX_SPECTRALMODEL 9     // matrix solver spectral model
 
-// XXX these arrrays need to be removed down ot midz_var
+// XXX these arrrays have been transferreed to the domains
 // double wind_x[NDIM_MAX], wind_z[NDIM_MAX];	/* These define the edges of the cells in the x and z directions */
 // double wind_midx[NDIM_MAX], wind_midz[NDIM_MAX];	/* These define the midpoints of the cells in the x and z directions */
-
-/* Next two lines are for cyl_var coordinates.  They are used in locating the appropriate 
- * locating the appropriate cell, for example by cylvar_where_in_grid
- */
-
-double wind_z_var[NDIM_MAX][NDIM_MAX];
-double wind_midz_var[NDIM_MAX][NDIM_MAX];
+// double wind_z_var[NDIM_MAX][NDIM_MAX];
+// double wind_midz_var[NDIM_MAX][NDIM_MAX];
 
 typedef struct photon
 {

@@ -263,6 +263,7 @@ main (argc, argv)
   int time_to_quit;
   int input_int;
   int ndomain=0;       //Local variable for ndomain
+  int ndom;
 
   int mkdir();
 
@@ -739,12 +740,20 @@ main (argc, argv)
 
 
   /*NSH 130821 broken out into a seperate routine added these lines to fix bug41, where
-  the cones are never defined for an rtheta grid if the model is restarted */
+  the cones are never defined for an rtheta grid if the model is restarted. 
+  
+  XXX ksl is unclear why the wind cones ar being initilized here, rather than as part of
+routines located elsewhere, but I have follwoed previous practice and reinitialized them
+as part to the domain effort.  
+  */
+
+  for (ndom=0;ndom<geo.ndomain;ndom++){
 
   if (zdom[0].coord_type==RTHETA && geo.run_type==PREVIOUS) //We need to generate an rtheta wind cone if we are restarting
     {
-      rtheta_make_cones(wmain);
+      rtheta_make_cones(ndom,wmain);
     }
+  }
 
   geo.rmax_sq = geo.rmax * geo.rmax;
 

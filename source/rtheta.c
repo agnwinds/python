@@ -49,7 +49,7 @@ rtheta_ds_in_cell (p)
   double s, smax;
   int ndom;
 
-  ndom=wmain[p->grid].ndom;
+  ndom = wmain[p->grid].ndom;
 
 
   /* XXX Note clear that next lines are necessary as they effectively recheck
@@ -75,12 +75,11 @@ rtheta_ds_in_cell (p)
   /* At this point we have found how far the photon can travel in r in its
      current direction.  Now we must worry about motion in the theta direction  */
 
-/* XXX cones_rtheta is a problem here */
-  s = ds_to_cone (&cones_rtheta[iz], p);
+  s = ds_to_cone (&zdom[ndom].cones_rtheta[iz], p);
   if (s < smax)
     smax = s;
 
-  s = ds_to_cone (&cones_rtheta[iz + 1], p);
+  s = ds_to_cone (&zdom[ndom].cones_rtheta[iz + 1], p);
   if (s < smax)
     smax = s;
 
@@ -183,14 +182,16 @@ rtheta_make_grid (w, ndom)
 
 	  /* Only the radial distance can be logarithmic */
 
-	      theta = w[n].theta = dtheta * j;
-	      thetacen = w[n].thetacen = w[n].theta + 0.5 * dtheta;
-	      if (theta>90.){
-		      theta=90.;
-	      }
-	      if (thetacen>90.){
-		      thetacen=90.;
-	      }
+	  theta = w[n].theta = dtheta * j;
+	  thetacen = w[n].thetacen = w[n].theta + 0.5 * dtheta;
+	  if (theta > 90.)
+	    {
+	      theta = 90.;
+	    }
+	  if (thetacen > 90.)
+	    {
+	      thetacen = 90.;
+	    }
 
 
 	  /* Now calculate the positions of these points in the xz plane */
@@ -206,9 +207,9 @@ rtheta_make_grid (w, ndom)
 
 	}
     }
-  rtheta_make_cones(w);
+  rtheta_make_cones (ndom, w);
   return (0);
-	}
+}
 
 
 
@@ -236,6 +237,7 @@ History:
 			an rtheta grid could not be restarted. This was because
 			these commands are only called when the initial
 			model is set up - and the cones structure is not saved.
+	15aug	ksl	Moved cones to domains
 			
 
 **************************************************************/
@@ -244,14 +246,18 @@ History:
   /* Now set up the wind cones that are needed for calclating ds in a cell */
 
 int
-rtheta_make_cones (w)
+rtheta_make_cones (ndom, w)
+     int ndom;
      WindPtr w;
 {
-  int  n;
+  int n;
+  int mdim;
+
+  mdim = zdom[ndom].mdim;
 
 
-  cones_rtheta = (ConePtr) calloc (sizeof (cone_dummy), MDIM);
-  if (cones_rtheta == NULL)
+  zdom[ndom].cones_rtheta = (ConePtr) calloc (sizeof (cone_dummy), MDIM);
+  if (zdom[ndom].cones_rtheta == NULL)
     {
       Error
 	("rtheta_make_grid: There is a problem in allocating memory for the cones structure\n");
@@ -260,15 +266,15 @@ rtheta_make_cones (w)
     }
 
 
-  for (n = 0; n < MDIM; n++)
+  for (n = 0; n < mdim; n++)
     {
-      cones_rtheta[n].z = 0.0;
-      cones_rtheta[n].dzdr = 1. / tan (w[n].theta / RADIAN);	// New definition
+      zdom[ndom].cones_rtheta[n].z = 0.0;
+      zdom[ndom].cones_rtheta[n].dzdr = 1. / tan (w[n].theta / RADIAN);	// New definition
     }
 
 
   return (0);
-	}
+}
 
 
 
@@ -298,15 +304,15 @@ History
 
 int
 rtheta_wind_complete (ndom, w)
-	int ndom;
+     int ndom;
      WindPtr w;
 {
   int i, j;
-  int ndim,mdim,nstart;
+  int ndim, mdim, nstart;
 
-  ndim=zdom[ndom].ndim;
-  mdim=zdom[ndom].mdim;
-  nstart=zdom[ndom].nstart;
+  ndim = zdom[ndom].ndim;
+  mdim = zdom[ndom].mdim;
+  nstart = zdom[ndom].nstart;
 
 
 
@@ -314,22 +320,24 @@ rtheta_wind_complete (ndom, w)
      have adoped a "rectangular" grid of points.  Note that rectangular does not mean equally spaced. */
 
   for (i = 0; i < NDIM; i++)
-	{
-    zdom[ndom].wind_x[i] = w[nstart+i * MDIM].r;
-}
+    {
+      zdom[ndom].wind_x[i] = w[nstart + i * MDIM].r;
+    }
   for (j = 0; j < MDIM; j++)
-    zdom[ndom].wind_z[j] = w[nstart+j].theta;
+    zdom[ndom].wind_z[j] = w[nstart + j].theta;
 
   for (i = 0; i < NDIM - 1; i++)
-    zdom[ndom].wind_midx[i] = w[nstart+i * MDIM].rcen;
+    zdom[ndom].wind_midx[i] = w[nstart + i * MDIM].rcen;
 
   for (j = 0; j < MDIM - 1; j++)
-    zdom[ndom].wind_midz[j] = w[nstart+j].thetacen;
+    zdom[ndom].wind_midz[j] = w[nstart + j].thetacen;
 
   /* Add something plausible for the edges */
   /* ?? It is bizarre that one needs to do anything like this ???. wind should be defined to include NDIM -1 */
-  zdom[ndom].wind_midx[NDIM - 1] = 2. * zdom[ndom].wind_x[NDIM - 1] - zdom[ndom].wind_midx[NDIM - 2];
-  zdom[ndom].wind_midz[MDIM - 1] = 2. * zdom[ndom].wind_z[MDIM - 1] - zdom[ndom].wind_midz[MDIM - 2];
+  zdom[ndom].wind_midx[NDIM - 1] =
+    2. * zdom[ndom].wind_x[NDIM - 1] - zdom[ndom].wind_midx[NDIM - 2];
+  zdom[ndom].wind_midz[MDIM - 1] =
+    2. * zdom[ndom].wind_z[MDIM - 1] - zdom[ndom].wind_midz[MDIM - 2];
 
   return (0);
 }
@@ -382,7 +390,7 @@ rtheta_wind_complete (ndom, w)
 
 int
 rtheta_volumes (ndom, w, icomp)
-	int ndom;
+     int ndom;
      WindPtr w;
      int icomp;
 {
@@ -394,10 +402,10 @@ rtheta_volumes (ndom, w, icomp)
   double dr, dtheta, x[3];
   double rmin, rmax, thetamin, thetamax;
   int n_inwind;
-  int ndim,mdim;
+  int ndim, mdim;
 
-  ndim=zdom[ndom].ndim;
-  mdim=zdom[ndom].mdim;
+  ndim = zdom[ndom].ndim;
+  mdim = zdom[ndom].mdim;
 
   for (i = 0; i < mdim; i++)
     {
@@ -522,23 +530,23 @@ rtheta_volumes (ndom, w, icomp)
 
 int
 rtheta_where_in_grid (ndom, x)
-	int ndom;
+     int ndom;
      double x[];
 {
   int i, j, n;
   double r, theta;
   double f;
-  int ndim,mdim;
+  int ndim, mdim;
 
-  ndim=zdom[ndom].ndim;
-  mdim=zdom[ndom].mdim;
+  ndim = zdom[ndom].ndim;
+  mdim = zdom[ndom].mdim;
 
   r = length (x);
   theta = acos ((fabs (x[2] / r))) * RADIAN;
 
   /* Check to see if x is outside the region of the calculation */
 
-    if (r > zdom[ndom].wind_x[ndim - 1])  /* Fixed version */
+  if (r > zdom[ndom].wind_x[ndim - 1])	/* Fixed version */
     {
       return (-2);		/* x is outside grid */
     }
@@ -682,19 +690,19 @@ rtheta_extend_density (w)
      WindPtr w;
 {
 
-	/* XXX Needs fixing */
+  /* XXX Needs fixing */
   int i, j, n, m;
   for (i = 0; i < NDIM - 1; i++)
     {
       for (j = 0; j < MDIM - 1; j++)
 	{
-	  /* PLACEHOLDER NEEDS DOMAIN */		
+	  /* PLACEHOLDER NEEDS DOMAIN */
 	  wind_ij_to_n (0, i, j, &n);
 	  if (w[n].vol == 0)
 
 	    {			//Then this grid point is not in the wind 
 
-          /* PLACEHOLDER NEEDS DOMAIN */	
+	      /* PLACEHOLDER NEEDS DOMAIN */
 	      wind_ij_to_n (0, i + 1, j, &m);
 	      if (w[m].vol > 0)
 		{		//Then the windcell in the +x direction is in the wind and
@@ -704,7 +712,7 @@ rtheta_extend_density (w)
 		}
 	      else if (i > 0)
 		{
-		  /* PLACEHOLDER NEEDS DOMAIN */		
+		  /* PLACEHOLDER NEEDS DOMAIN */
 		  wind_ij_to_n (0, i - 1, j, &m);
 		  if (w[m].vol > 0)
 		    {		//Then the grid cell in the -x direction is in the wind and
@@ -740,7 +748,7 @@ of these are in the wind
 
 int
 rtheta_is_cell_in_wind (n, icomp)
-     int n;   /* The wind cell number */
+     int n;			/* The wind cell number */
      int icomp;
 {
   int i, j;
@@ -748,7 +756,7 @@ rtheta_is_cell_in_wind (n, icomp)
   double rmin, rmax, thetamin, thetamax;
   double dr, dtheta;
   double x[3];
-  int ndom,mdim,ndim;
+  int ndom, mdim, ndim;
 
 
   /* XXX I don't understand why this routine does not simply return the
@@ -758,8 +766,8 @@ rtheta_is_cell_in_wind (n, icomp)
   /* First check if the cell is in the boundary */
   ndom = wmain[n].ndom;
   wind_n_to_ij (ndom, n, &i, &j);
-  ndim=zdom[ndom].ndim;
-  mdim=zdom[ndom].mdim;
+  ndim = zdom[ndom].ndim;
+  mdim = zdom[ndom].mdim;
 
   if (i >= (ndim - 2) && j >= (mdim - 2))
     {
