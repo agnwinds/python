@@ -273,7 +273,12 @@ History:
 			FOR ALL COORDINATE SYSTEMS.
 	13sep	nsh	76b -- Modified calls to fraction to take
 			account of new mode.
-	15aug	ksl	Modifeied to handle multiple domains
+	15aug	ksl	Modified to handle multiple domains.  This
+			routine could yield errors if we are asked
+			for positions outside one of the active 
+			wind regions, so for now it finds the 
+			domain, and prints and error if not
+			in any domain
 		       	
 
 **************************************************************/
@@ -294,14 +299,22 @@ coord_fraction (ichoice, x, ii, frac, nelem)
   double dr, dz;
   int cylvar_coord_fraction ();
   int n;
+  int ndom;
+
+
+  ndom=where_in_wind(x);
+  if (ndom<0){
+	  Error("coord_fraction: %8.2e  %8.2e %8.2e is not in any wind\n",x[0],x[1],x[2]);
+	  ndom=0;
+  }
 
 
   /* Jump to special routine if CYLVAR coords */
 
-  if (geo.coord_type == CYLVAR)
+  if (zdom[ndom].coord_type == CYLVAR)
     {
 
-      n = cylvar_coord_fraction (ichoice, x, ii, frac, nelem);
+      n = cylvar_coord_fraction (ndom, ichoice, x, ii, frac, nelem);
       if (n < 0 && ierr_coord_fraction < 1000)
 	{
 	  Error
@@ -320,27 +333,27 @@ coord_fraction (ichoice, x, ii, frac, nelem)
 
   if (ichoice == 0)
     {
-      xx = wind_x;
-      zz = wind_z;
+      xx = zdom[ndom].wind_x;
+      zz = zdom[ndom].wind_z;
     }
   else
     {
-      xx = wind_midx;
-      zz = wind_midz;
+      xx = zdom[ndom].wind_midx;
+      zz = zdom[ndom].wind_midz;
     }
 
   /* Now convert x to the appropriate coordinate system */
-  if (geo.coord_type == CYLIND)
+  if (zdom[ndom].coord_type == CYLIND)
     {
       r = sqrt (x[0] * x[0] + x[1] * x[1]);
       z = fabs (x[2]);
     }
-  else if (geo.coord_type == RTHETA)
+  else if (zdom[ndom].coord_type == RTHETA)
     {
       r = length (x);
       z = acos (fabs (x[2]) / r) * RADIAN;
     }
-  else if (geo.coord_type == SPHERICAL)
+  else if (zdom[ndom].coord_type == SPHERICAL)
     {
       r = length (x);
       z = 0;			// To avoid -O3 warning
@@ -353,9 +366,9 @@ coord_fraction (ichoice, x, ii, frac, nelem)
       exit (0);
     }
 
-  if (geo.coord_type == SPHERICAL)
+  if (zdom[ndom].coord_type == SPHERICAL)
     {				/* We are dealing with a 1d system */
-      fraction (r, xx, NDIM, &ix, &dr, 0); //linear space
+      fraction (r, xx, zdom[ndom].ndim, &ix, &dr, 0); //linear space
       ii[0] = ix;
       frac[0] = (1. - dr);
       ii[1] = ix + 1;
@@ -368,19 +381,19 @@ coord_fraction (ichoice, x, ii, frac, nelem)
     }
   else
     {				/* We are dealing with a 2d system */
-      fraction (r, xx, NDIM, &ix, &dr, 0);
-      fraction (z, zz, MDIM, &iz, &dz, 0);
+      fraction (r, xx, zdom[ndom].ndim, &ix, &dr, 0);
+      fraction (z, zz, zdom[ndom].mdim, &iz, &dz, 0);
 
-      ii[0] = ix * MDIM + iz;
+      ii[0] = ix * zdom[ndom].mdim + iz;
       frac[0] = (1. - dz) * (1. - dr);
 
-      ii[1] = (ix + 1) * MDIM + iz;
+      ii[1] = (ix + 1) * zdom[ndom].mdim+ iz;
       frac[1] = (1. - dz) * dr;
 
-      ii[2] = ix * MDIM + iz + 1;
+      ii[2] = ix * zdom[ndom].mdim+ iz + 1;
       frac[2] = (dz) * (1. - dr);
 
-      ii[3] = (ix + 1) * MDIM + iz + 1;
+      ii[3] = (ix + 1) * zdom[ndom].mdim + iz + 1;
       frac[3] = (dz) * (dr);
       *nelem = 4;
 
@@ -394,7 +407,7 @@ coord_fraction (ichoice, x, ii, frac, nelem)
   /* Note that this is a very incoplethe check in the sneste that 
    * the posision could be out of the grid in other directions */
 
-  if (r > xx[NDIM - 1])
+  if (r > xx[zdom[ndom].ndim - 1])
     {
       return (-2);		/* x is outside grid */
     }

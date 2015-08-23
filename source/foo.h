@@ -190,7 +190,7 @@ double hydro_velocity(double x[], double v[]);
 double hydro_rho(double x[]);
 double hydro_temp(double x[]);
 int rtheta_make_hydro_grid(WindPtr w, int ndom);
-int rtheta_hydro_volumes(WindPtr w);
+int rtheta_hydro_volumes(int ndom, WindPtr w);
 /* corona.c */
 int get_corona_params(int ndom);
 double corona_velocity(int ndom, double x[], double v[]);
@@ -365,30 +365,30 @@ int cylind_is_cell_in_wind(int n);
 double rtheta_ds_in_cell(PhotPtr p);
 int rtheta_make_grid(WindPtr w, int ndom);
 int rtheta_make_cones(WindPtr w);
-int rtheta_wind_complete(WindPtr w);
-int rtheta_volumes(WindPtr w, int icomp);
-int rtheta_where_in_grid(double x[]);
+int rtheta_wind_complete(int ndom, WindPtr w);
+int rtheta_volumes(int ndom, WindPtr w, int icomp);
+int rtheta_where_in_grid(int ndom, double x[]);
 int rtheta_get_random_location(int n, int icomp, double x[]);
 int rtheta_extend_density(WindPtr w);
 int rtheta_is_cell_in_wind(int n, int icomp);
 /* spherical.c */
 double spherical_ds_in_cell(PhotPtr p);
 int spherical_make_grid(WindPtr w, int ndom);
-int spherical_wind_complete(WindPtr w);
-int spherical_volumes(WindPtr w, int icomp);
-int spherical_where_in_grid(double x[]);
+int spherical_wind_complete(int ndom, WindPtr w);
+int spherical_volumes(int ndom, WindPtr w, int icomp);
+int spherical_where_in_grid(int ndom, double x[]);
 int spherical_get_random_location(int n, int icomp, double x[]);
 int spherical_extend_density(WindPtr w);
 int shell_make_grid(WindPtr w, int ndom);
 /* cylind_var.c */
 double cylvar_ds_in_cell(PhotPtr p);
 int cylvar_make_grid(WindPtr w, int ndom);
-int cylvar_wind_complete(WindPtr w);
+int cylvar_wind_complete(int ndom, WindPtr w);
 int cylvar_volumes(WindPtr w, int icomp);
-int cylvar_where_in_grid(double x[], int ichoice, double *fx, double *fz);
+int cylvar_where_in_grid(int ndom, double x[], int ichoice, double *fx, double *fz);
 int cylvar_get_random_location(int n, int icomp, double x[]);
 int cylvar_extend_density(WindPtr w);
-int cylvar_coord_fraction(int ichoice, double x[], int ii[], double frac[], int *nelem);
+int cylvar_coord_fraction(int ndom, int ichoice, double x[], int ii[], double frac[], int *nelem);
 /* bilinear.c */
 int bilin(double x[], double x00[], double x01[], double x10[], double x11[], double *f, double *g);
 int xquadratic(double a, double b, double c, double r[]);

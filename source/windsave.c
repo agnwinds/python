@@ -340,7 +340,7 @@ wind_complete (w)
   {
     if (zdom[ndom].coord_type == SPHERICAL)
       {
-        spherical_wind_complete (w);
+        spherical_wind_complete (ndom, w);
       }
     else if (zdom[ndom].coord_type == CYLIND)
       {
@@ -348,11 +348,11 @@ wind_complete (w)
       }
     else if (zdom[ndom].coord_type == RTHETA)
       {
-        rtheta_wind_complete (w);
+        rtheta_wind_complete (ndom, w);
       }
     else if (zdom[ndom].coord_type == CYLVAR)
       {
-        cylvar_wind_complete (w);
+        cylvar_wind_complete (ndom, w);
       }
     else
       {

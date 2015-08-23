@@ -81,6 +81,9 @@ cylvar_ds_in_cell (p)
     }
 
 
+    wind_n_to_ij (ndom, n, &ix, &iz);   /*Convert the index n to two dimensions */
+
+
   smax = VERY_BIG;		//initialize smax to a large number
 
   /* Set up the quadratic equations in the radial rho direction */
@@ -89,13 +92,13 @@ cylvar_ds_in_cell (p)
   b = 2. * (p->lmn[0] * p->x[0] + p->lmn[1] * p->x[1]);
   c = p->x[0] * p->x[0] + p->x[1] * p->x[1];
 
-  iroot = quadratic (a, b, c - wind_x[ix] * wind_x[ix], root);	/* iroot will be the smallest positive root
+  iroot = quadratic (a, b, c - zdom[ndom].wind_x[ix] * zdom[ndom].wind_x[ix], root);	/* iroot will be the smallest positive root
 								   if one exists or negative otherwise */
 
   if (iroot >= 0 && root[iroot] < smax)
     smax = root[iroot];
 
-  iroot = quadratic (a, b, c - wind_x[ix + 1] * wind_x[ix + 1], root);
+  iroot = quadratic (a, b, c - zdom[ndom].wind_x[ix + 1] * zdom[ndom].wind_x[ix + 1], root);
 
   if (iroot >= 0 && root[iroot] < smax)
     smax = root[iroot];
@@ -286,28 +289,35 @@ History:
 	05may	ksl	56a -- began modifications starting with same 
 			routine in cylindrical
 	06jun	ksl	56d -- Completed models for cylvar
+	15aug	ksl	Adaptatations for domains
 
 **************************************************************/
 
 
 int
-cylvar_wind_complete (w)
+cylvar_wind_complete (ndom, w)
+	int ndom;
      WindPtr w;
 {
   int i, j, n;
   double drho, dz;
+  int mdim,ndim,nstart;
+
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
+  nstart=zdom[ndom].nstart;
 
   /* First define the windcones for each cell */
   n = 0; // silence compiler warning
 
-  for (i = 0; i < NDIM - 1; i++)
+  for (i = 0; i < ndim - 1; i++)
     {
-      for (j = 0; j < MDIM - 1; j++)
+      for (j = 0; j < ndim - 1; j++)
 	{
 	  /* Everything is defined in the xz plane, so life is fairly easy */
-	  n = i * MDIM + j;
-	  dz = w[n + MDIM].x[2] - w[n].x[2];	// change in z for one step in rho
-	  drho = w[n + MDIM].x[0] - w[n].x[0];
+	  n = nstart+i * mdim + j;
+	  dz = w[n + mdim].x[2] - w[n].x[2];	// change in z for one step in rho
+	  drho = w[n + mdim].x[0] - w[n].x[0];
 
 
 	  if (drho > 0)
@@ -328,21 +338,20 @@ cylvar_wind_complete (w)
 
    */
 
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < ndim; i++)
     {
-      wind_x[i] = w[i * MDIM].x[0];
-      wind_midx[i] = w[i * MDIM].xcen[0];
+      zdom[ndom].wind_x[i] = w[nstart+i * mdim].x[0];
+      zdom[ndom].wind_midx[i] = w[nstart+i * mdim].xcen[0];
     }
 
 
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < ndim; i++)
     {
-      for (j = 0; j < MDIM; j++)
+      for (j = 0; j < mdim; j++)
 	{
-	  /* PLACEHOLDER NEEDS DOMAIN */		
-	  wind_ij_to_n (0, i, j, &n);
-	  wind_z_var[i][j] = w[n].x[2];
-	  wind_midz_var[i][j] = w[n].xcen[2];
+	  wind_ij_to_n (ndom, i, j, &n);
+	  zdom[ndom].wind_z_var[i][j] = w[n].x[2];
+	  zdom[ndom].wind_midz_var[i][j] = w[n].xcen[2];
 	}
     }
 
@@ -541,6 +550,7 @@ cylvar_volumes (w, icomp)
 			was outside the grid.
 	13sep	nsh	76b -- Modified calls to fraction to take account
 			of new modes
+	15aug	ksl	Modified for domains
  
 **************************************************************/
 
@@ -549,7 +559,8 @@ int cylvar_n_approx;
 int ierr_cylvar_where_in_grid = 0;
 
 int
-cylvar_where_in_grid (x, ichoice, fx, fz)
+cylvar_where_in_grid (ndom, x, ichoice, fx, fz)
+	int ndom;
      double x[];
      int ichoice;
      double *fx, *fz;
@@ -557,7 +568,11 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
   int i, j, n, ii;
   double z[3];
   double rho;
-  int where_in_2dcell ();
+  int ndim,mdim,nstart;
+
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
+  nstart=zdom[ndom].nstart;
 
   /* copy x to a dummy vector z, so that the z[0] component is really rho */
   z[0] = rho = sqrt (x[0] * x[0] + x[1] * x[1]);
@@ -573,25 +588,24 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
 
   if (ichoice == 0)
     {
-      fraction (rho, wind_x, NDIM, &i, fx, 0);
-      fraction (z[2], wind_z_var[i], MDIM, &j, fz, 0);	// This should get one close
+      fraction (rho, zdom[ndom].wind_x, mdim, &i, fx, 0);
+      fraction (z[2], zdom[ndom].wind_z_var[i], ndim, &j, fz, 0);	// This should get one close
     }
   else
     {
-      fraction (rho, wind_midx, NDIM, &i, fx, 0);
-      fraction (z[2], wind_midz_var[i], MDIM, &j, fz, 0);	// This should get one close
+      fraction (rho, zdom[ndom].wind_midx, ndim, &i, fx, 0);
+      fraction (z[2], zdom[ndom].wind_midz_var[i], mdim, &j, fz, 0);	// This should get one close
     }
 
-  /* PLACEHOLDER NEEDS DOMAIN */	
-  wind_ij_to_n (0, i, j, &cylvar_n_approx);
+  wind_ij_to_n (ndom, i, j, &cylvar_n_approx);
 
   /* Check to see if x is outside the region of the calculation.  Note that this
    * caclulation cannot be done until i is determined */
 
-  if (rho < wind_x[0])
+  if (rho < zdom[ndom].wind_x[0])
     return (-1);
 
-  if (rho > wind_x[NDIM - 1] || z[2] > wind_z_var[i][MDIM - 1])
+  if (rho > zdom[ndom].wind_x[ndim - 1] || z[2] > zdom[ndom].wind_z_var[i][mdim - 1])
     {
       return (-2);		/* x is outside grid */
     }
@@ -610,7 +624,7 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
       Error
 	("cylvar_where_in_grid: fraction and where_in_2d_cell incompatible %d -- %e %e\n",
 	 n, z[0], z[2]);
-      fraction (rho, wind_midx, NDIM, &i, fx, 0);
+      fraction (rho, zdom[ndom].wind_midx, ndim, &i, fx, 0);
       ii = where_in_2dcell (ichoice, z, n, fx, fz);
     }
 
@@ -946,6 +960,7 @@ History:
 			which is in cylindvar.c.  PROBABLY THIS ROUTINE
 			SHOULD BE REWRITTEN SO THIS IS THE CASE
 			FOR ALL COORDINATE SYSTEMS.
+	15aug	ksl	Modifications to allow for domains
 		       	
 
 **************************************************************/
@@ -953,7 +968,8 @@ History:
 
 
 int
-cylvar_coord_fraction (ichoice, x, ii, frac, nelem)
+cylvar_coord_fraction (ndom, ichoice, x, ii, frac, nelem)
+	int ndom;
      int ichoice;
      double x[];
      int ii[];
@@ -964,7 +980,10 @@ cylvar_coord_fraction (ichoice, x, ii, frac, nelem)
   int n;
 
 
-  if ((n = cylvar_where_in_grid (x, ichoice, &dr, &dz)) < 0)
+  /* XXX Modifications in cylvar_coord_frac ar not complete */
+
+
+  if ((n = cylvar_where_in_grid (ndom, x, ichoice, &dr, &dz)) < 0)
     {
       n = cylvar_n_approx;
     }
@@ -973,13 +992,13 @@ cylvar_coord_fraction (ichoice, x, ii, frac, nelem)
   ii[0] = n;
   frac[0] = (1. - dz) * (1. - dr);
 
-  ii[1] = n + MDIM;
+  ii[1] = n + zdom[ndom].mdim;
   frac[1] = (1. - dz) * dr;
 
   ii[2] = n + 1;
   frac[2] = (dz) * (1. - dr);
 
-  ii[3] = n + MDIM + 1;
+  ii[3] = n + zdom[ndom].mdim + 1;
   frac[3] = (dz) * (dr);
   *nelem = 4;
 

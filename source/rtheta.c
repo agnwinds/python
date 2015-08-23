@@ -66,8 +66,8 @@ rtheta_ds_in_cell (p)
 
   /* Set up the quadratic equations in the radial  direction */
 
-  smax = ds_to_sphere (wind_x[ix], p);
-  s = ds_to_sphere (wind_x[ix + 1], p);
+  smax = ds_to_sphere (zdom[ndom].wind_x[ix], p);
+  s = ds_to_sphere (zdom[ndom].wind_x[ix + 1], p);
   if (s < smax)
     smax = s;
 
@@ -75,6 +75,7 @@ rtheta_ds_in_cell (p)
   /* At this point we have found how far the photon can travel in r in its
      current direction.  Now we must worry about motion in the theta direction  */
 
+/* XXX cones_rtheta is a problem here */
   s = ds_to_cone (&cones_rtheta[iz], p);
   if (s < smax)
     smax = s;
@@ -292,34 +293,43 @@ It would be better to rename the variables at some point for clarity!! ksl
 
 History
 	04aug	ksl	Routine was removed from windsave,  wind_complete is now just a driver.
+	15aug	ksl	Modified for domains
  */
 
 int
-rtheta_wind_complete (w)
+rtheta_wind_complete (ndom, w)
+	int ndom;
      WindPtr w;
 {
   int i, j;
+  int ndim,mdim,nstart;
+
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
+  nstart=zdom[ndom].nstart;
 
 
-  /* XXX this routine needs to be fixed */
 
   /* Finally define some one-d vectors that make it easier to locate a photon in the wind given that we
      have adoped a "rectangular" grid of points.  Note that rectangular does not mean equally spaced. */
 
   for (i = 0; i < NDIM; i++)
 	{
-    wind_x[i] = w[i * MDIM].r;
+    zdom[ndom].wind_x[i] = w[nstart+i * MDIM].r;
 }
   for (j = 0; j < MDIM; j++)
-    wind_z[j] = w[j].theta;
+    zdom[ndom].wind_z[j] = w[nstart+j].theta;
+
   for (i = 0; i < NDIM - 1; i++)
-    wind_midx[i] = w[i * MDIM].rcen;
+    zdom[ndom].wind_midx[i] = w[nstart+i * MDIM].rcen;
+
   for (j = 0; j < MDIM - 1; j++)
-    wind_midz[j] = w[j].thetacen;
+    zdom[ndom].wind_midz[j] = w[nstart+j].thetacen;
+
   /* Add something plausible for the edges */
   /* ?? It is bizarre that one needs to do anything like this ???. wind should be defined to include NDIM -1 */
-  wind_midx[NDIM - 1] = 2. * wind_x[NDIM - 1] - wind_midx[NDIM - 2];
-  wind_midz[MDIM - 1] = 2. * wind_z[MDIM - 1] - wind_midz[MDIM - 2];
+  zdom[ndom].wind_midx[NDIM - 1] = 2. * zdom[ndom].wind_x[NDIM - 1] - zdom[ndom].wind_midx[NDIM - 2];
+  zdom[ndom].wind_midz[MDIM - 1] = 2. * zdom[ndom].wind_z[MDIM - 1] - zdom[ndom].wind_midz[MDIM - 2];
 
   return (0);
 }
@@ -371,7 +381,8 @@ rtheta_wind_complete (w)
 
 
 int
-rtheta_volumes (w, icomp)
+rtheta_volumes (ndom, w, icomp)
+	int ndom;
      WindPtr w;
      int icomp;
 {
@@ -383,20 +394,23 @@ rtheta_volumes (w, icomp)
   double dr, dtheta, x[3];
   double rmin, rmax, thetamin, thetamax;
   int n_inwind;
+  int ndim,mdim;
 
-  for (i = 0; i < NDIM; i++)
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
+
+  for (i = 0; i < mdim; i++)
     {
-      for (j = 0; j < MDIM; j++)
+      for (j = 0; j < mdim; j++)
 	{
-	  /* XXXX PLACEHOLDER NEEDS DOMAIN */	 
-	  wind_ij_to_n (0, i, j, &n);
+	  wind_ij_to_n (ndom, i, j, &n);
 	  if (w[n].inwind == W_NOT_INWIND)
 	    {
 
-	      rmin = wind_x[i];
-	      rmax = wind_x[i + 1];
-	      thetamin = wind_z[j] / RADIAN;
-	      thetamax = wind_z[j + 1] / RADIAN;
+	      rmin = zdom[ndom].wind_x[i];
+	      rmax = zdom[ndom].wind_x[i + 1];
+	      thetamin = zdom[ndom].wind_z[j] / RADIAN;
+	      thetamax = zdom[ndom].wind_z[j + 1] / RADIAN;
 
 	      //leading factor of 2 added to allow for volume above and below plane (SSMay04)
 	      w[n].vol =
@@ -500,40 +514,46 @@ rtheta_volumes (w, icomp)
 			systems.
    	13sep	nsh	76b -- Changed calls to fraction to take account of
 			new modes.
+	15aug	ksl	Added domains.  
  
 **************************************************************/
 
 
 
 int
-rtheta_where_in_grid (x)
+rtheta_where_in_grid (ndom, x)
+	int ndom;
      double x[];
 {
   int i, j, n;
   double r, theta;
   double f;
+  int ndim,mdim;
 
-  /* XXXX PLACEHOLDER  -- This is not fixed */
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
+
   r = length (x);
   theta = acos ((fabs (x[2] / r))) * RADIAN;
 
   /* Check to see if x is outside the region of the calculation */
-//  if (r > wind_x[MDIM - 1])  /* ERROR NSH 130626 - wind_x has NDIM members, so this check fails every time if the grid is not square! (/
-    if (r > wind_x[NDIM - 1])  /* Fixed version */
+
+    if (r > zdom[ndom].wind_x[ndim - 1])  /* Fixed version */
     {
       return (-2);		/* x is outside grid */
     }
-  else if (r < wind_x[0])
+  else if (r < zdom[ndom].wind_x[0])
     {
       return (-1);		/*x is inside grid */
     }
 
-  fraction (r, wind_x, NDIM, &i, &f, 0);
-  fraction (theta, wind_z, MDIM, &j, &f, 0);
+  /* Locate the position in i and j */
+  fraction (r, zdom[ndom].wind_x, ndim, &i, &f, 0);
+  fraction (theta, zdom[ndom].wind_z, mdim, &j, &f, 0);
 
-  /* At this point i,j are just outside the x position */
-  /* PLACEHOLDER NEEDS DOMAIN */	
-  wind_ij_to_n (0, i, j, &n);
+  /* Convert i,j back to n */
+
+  wind_ij_to_n (ndom, i, j, &n);
 
   return (n);
 }
@@ -560,12 +580,13 @@ rtheta_where_in_grid (x)
 			multiple coordinate systems
 	11aug	ksl	70b - Modifications to incoporate multiple 
 			components
+	15aug	ksl	Allow for mulitple domains
  
 **************************************************************/
 
 int
 rtheta_get_random_location (n, icomp, x)
-     int n;			// Cell in which to create position
+     int n;			// Wind cell in which to create position
      int icomp;			// The component in which to create position
      double x[];		// Returned position
 {
@@ -579,12 +600,13 @@ rtheta_get_random_location (n, icomp, x)
   ndom = wmain[n].ndom;
   wind_n_to_ij (ndom, n, &i, &j);
 
-  rmin = wind_x[i];
-  rmax = wind_x[i + 1];
-  sthetamin = sin (wind_z[j] / RADIAN);
-  sthetamax = sin (wind_z[j + 1] / RADIAN);
+  rmin = zdom[ndom].wind_x[i];
+  rmax = zdom[ndom].wind_x[i + 1];
+  sthetamin = sin (zdom[ndom].wind_z[j] / RADIAN);
+  sthetamax = sin (zdom[ndom].wind_z[j + 1] / RADIAN);
 
   /* Generate a position which is both in the cell and in the wind */
+
   inwind = -1;
   while (inwind != icomp)
     {
@@ -596,7 +618,9 @@ rtheta_get_random_location (n, icomp, x)
 	asin (sthetamin + (rand () / MAXRAND) * (sthetamax - sthetamin));
 
       phi = 2. * PI * (rand () / MAXRAND);
+
 /* Project from r, theta phi to x y z  */
+
       x[0] = r * cos (phi) * sin (theta);
       x[1] = r * sin (phi) * sin (theta);
       x[2] = r * cos (theta);
@@ -605,9 +629,12 @@ rtheta_get_random_location (n, icomp, x)
     }
 
   zz = rand () / MAXRAND - 0.5;	//positions above are all at +z distances
+
   if (zz < 0)
     x[2] *= -1;			/* The photon is in the bottom half of the wind */
+
   return (inwind);
+
 }
 
 
@@ -708,11 +735,12 @@ of these are in the wind
 			explicit use of the fact that we expect PART in
 			a component to be 1 greater than ALL in a component,
 			see python.h
+	15aug	ksl	Allow for multiple domains
 */
 
 int
 rtheta_is_cell_in_wind (n, icomp)
-     int n;
+     int n;   /* The wind cell number */
      int icomp;
 {
   int i, j;
@@ -720,14 +748,20 @@ rtheta_is_cell_in_wind (n, icomp)
   double rmin, rmax, thetamin, thetamax;
   double dr, dtheta;
   double x[3];
-  int ndom;
+  int ndom,mdim,ndim;
+
+
+  /* XXX I don't understand why this routine does not simply return the
+   * domain number if the question is whether a cell is in the wind */
 
 
   /* First check if the cell is in the boundary */
   ndom = wmain[n].ndom;
   wind_n_to_ij (ndom, n, &i, &j);
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
 
-  if (i >= (NDIM - 2) && j >= (MDIM - 2))
+  if (i >= (ndim - 2) && j >= (mdim - 2))
     {
       return (W_NOT_INWIND);
     }
@@ -743,10 +777,10 @@ rtheta_is_cell_in_wind (n, icomp)
 
   /* So at this point, we have dealt with the easy cases */
 
-  rmin = wind_x[i];
-  rmax = wind_x[i + 1];
-  thetamin = wind_z[j] / RADIAN;
-  thetamax = wind_z[j + 1] / RADIAN;
+  rmin = zdom[ndom].wind_x[i];
+  rmax = zdom[ndom].wind_x[i + 1];
+  thetamin = zdom[ndom].wind_z[j] / RADIAN;
+  thetamax = zdom[ndom].wind_z[j + 1] / RADIAN;
 
   dr = (rmax - rmin) / RESOLUTION;
   dtheta = (thetamax - thetamin) / RESOLUTION;

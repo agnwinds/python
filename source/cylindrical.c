@@ -78,13 +78,13 @@ cylind_ds_in_cell (p)
   b = 2. * (p->lmn[0] * p->x[0] + p->lmn[1] * p->x[1]);
   c = p->x[0] * p->x[0] + p->x[1] * p->x[1];
 
-  iroot = quadratic (a, b, c - wind_x[ix] * wind_x[ix], root);	/* iroot will be the smallest positive root
+  iroot = quadratic (a, b, c - zdom[ndom].wind_x[ix] * zdom[ndom].wind_x[ix], root);	/* iroot will be the smallest positive root
 								   if one exists or negative otherwise */
 
   if (iroot >= 0 && root[iroot] < smax)
     smax = root[iroot];
 
-  iroot = quadratic (a, b, c - wind_x[ix + 1] * wind_x[ix + 1], root);
+  iroot = quadratic (a, b, c - zdom[ndom].wind_x[ix + 1] * zdom[ndom].wind_x[ix + 1], root);
 
   if (iroot >= 0 && root[iroot] < smax)
     smax = root[iroot];
@@ -92,8 +92,8 @@ cylind_ds_in_cell (p)
   /* At this point we have found how far the photon can travel in rho in its
      current direction.  Now we must worry about motion in the z direction  */
 
-  z1 = wind_z[iz];
-  z2 = wind_z[iz + 1];
+  z1 = zdom[ndom].wind_z[iz];
+  z2 = zdom[ndom].wind_z[iz + 1];
   if (p->x[2] < 0)
     {				/* We need to worry about which side of the plane the photon is on! */
       z1 *= (-1.);
@@ -479,7 +479,7 @@ cylind_where_in_grid (ndom, x)
       return (-2);		/* x is outside grid */
     }
 
-  if (rho < wind_x[0])
+  if (rho < one_dom->wind_x[0])
     return (-1);
 
   fraction (rho, one_dom->wind_x, one_dom->ndim, &i, &f, 0);

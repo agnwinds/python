@@ -42,6 +42,7 @@ Notes:
 
 History:
  	05apr	ksl	55d: Adapted from rtheta.c
+	15aug	ksl	Domains incorporated
  
 **************************************************************/
 
@@ -55,7 +56,7 @@ spherical_ds_in_cell (p)
   double s, smax;
   int ndom;
 
-  ndom=wmain[p->grid].ndom;
+  ndom = wmain[p->grid].ndom;
 
   if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
     {
@@ -67,8 +68,8 @@ spherical_ds_in_cell (p)
 
   /* Set up the quadratic equations in the radial  direction */
 
-  smax = ds_to_sphere (wind_x[ix], p);
-  s = ds_to_sphere (wind_x[ix + 1], p);
+  smax = ds_to_sphere (zdom[ndom].wind_x[ix], p);
+  s = ds_to_sphere (zdom[ndom].wind_x[ix + 1], p);
   if (s < smax)
     smax = s;
 
@@ -135,10 +136,12 @@ spherical_make_grid (w, ndom)
 	    w[n].rcen = 0.5 * geo.rstar * (pow (10., dlogr * (n)) +
 					   pow (10., dlogr * (n - 1)));
 	    Log ("OLD W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
-	    dlogr = (log10 (zdom[ndom].rmax / zdom[ndom].wind_rmin)) / (NDIM - 3);
+	    dlogr =
+	      (log10 (zdom[ndom].rmax / zdom[ndom].wind_rmin)) / (NDIM - 3);
 	    w[n].r = zdom[ndom].wind_rmin * pow (10., dlogr * (n - 1));
 	    w[n].rcen = 0.5 * zdom[ndom].wind_rmin * (pow (10., dlogr * (n)) +
-					       pow (10., dlogr * (n - 1)));
+						      pow (10.,
+							   dlogr * (n - 1)));
 	    Log ("New W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
 	  }
 
@@ -187,30 +190,39 @@ spherical_make_grid (w, ndom)
  Notes:
  History:
  	05apr	ksl	55d: Adapted from rtheta.c
+	15aug	ksl	Add domains
  
 **************************************************************/
 
 
 int
-spherical_wind_complete (w)
+spherical_wind_complete (ndom, w)
+     int ndom;
      WindPtr w;
 {
   int i;
+  int ndim, mdim, nstart;
+
+  ndim = zdom[ndom].ndim;
+  mdim = zdom[ndom].mdim;
+  nstart = zdom[ndom].nstart;
 
   /* Finally define some one-d vectors that make it easier to 
    * locate a photon in the wind given that we have adoped 
    * a "rectangular" grid of points.  Note that rectangular 
    * does not mean equally spaced. */
 
-  for (i = 0; i < NDIM; i++)
-    wind_x[i] = w[i].r;
-  for (i = 0; i < NDIM - 1; i++)
-    wind_midx[i] = w[i].rcen;
+  for (i = 0; i < ndim; i++)
+    zdom[ndom].wind_x[i] = w[nstart + i].r;
+  for (i = 0; i < mdim - 1; i++)
+    zdom[ndom].wind_midx[i] = w[nstart + i].rcen;
   /* Add something plausible for the edges */
   /* ?? It is bizarre that one needs to do anything like this ???. 
    * wind should be defined to include NDIM -1 */
-  wind_midx[NDIM - 1] = 2. * wind_x[NDIM - 1] - wind_midx[NDIM - 2];
-  wind_midz[MDIM - 1] = 2. * wind_z[MDIM - 1] - wind_midz[MDIM - 2];
+  zdom[ndom].wind_midx[ndim - 1] =
+    2. * zdom[ndom].wind_x[ndim - 1] - zdom[ndom].wind_midx[ndim - 2];
+  zdom[ndom].wind_midz[mdim - 1] =
+    2. * zdom[ndom].wind_z[mdim - 1] - zdom[ndom].wind_midz[mdim - 2];
 
   return (0);
 }
@@ -249,13 +261,15 @@ spherical_wind_complete (w)
 			component.  Note that this makes explicit
 			use of the way components are defined,
 			See python.h
+	15aug	ksl	Added support for domains
  
 **************************************************************/
 #define RESOLUTION   100
 
 
 int
-spherical_volumes (w, icomp)
+spherical_volumes (ndom, w, icomp)
+     int ndom;
      WindPtr w;
      int icomp;
 {
@@ -267,26 +281,32 @@ spherical_volumes (w, icomp)
   double rmin, rmax;
   double thetamin, thetamax;
   int jj, kk;
+  int ndim, nstart;
+
+  ndim = zdom[ndom].ndim;
+  nstart = zdom[ndom].nstart;
+
+  /* XXX what is the purpose of icomp in spherical volumes */
 
   thetamin = 0.0;
   thetamax = 0.5 * PI;
 
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < ndim; i++)
     {
       {
-	n = i;
-	rmin = wind_x[i];
-	rmax = wind_x[i + 1];
+	n = i + nstart;
+	rmin = zdom[ndom].wind_x[i];
+	rmax = zdom[ndom].wind_x[i + 1];
 
 	w[n].vol = 4. / 3. * PI * (rmax * rmax * rmax - rmin * rmin * rmin);
 
-	if (i == NDIM - 1)
+	if (i == ndim - 1)
 	  {
 	    fraction = 0.0;	/* Force outside edge volues to zero */
 	    jj = 0;
 	    kk = RESOLUTION;
 	  }
-	else if (i == NDIM - 2)
+	else if (i == ndim - 2)
 	  {
 	    fraction = 0.0;	/* Force outside edge volues to zero */
 	    jj = 0;
@@ -375,26 +395,30 @@ spherical_volumes (w, icomp)
 
 
 int
-spherical_where_in_grid (x)
+spherical_where_in_grid (ndom, x)
+     int ndom;
      double x[];
 {
   int n;
   double r;
   double f;
+  int ndim;
+
+  ndim = zdom[ndom].ndim;
 
   r = length (x);
 
   /* Check to see if x is outside the region of the calculation */
-  if (r > wind_x[NDIM - 1])
+  if (r > zdom[ndom].wind_x[ndim - 1])
     {
       return (-2);		/* x is outside grid */
     }
-  else if (r < wind_x[0])
+  else if (r < zdom[ndom].wind_x[0])
     {
       return (-1);		/*x is inside grid */
     }
 
-  fraction (r, wind_x, NDIM, &n, &f, 0);
+  fraction (r, zdom[ndom].wind_x, ndim, &n, &f, 0);
 
   return (n);
 }
@@ -437,8 +461,8 @@ spherical_get_random_location (n, icomp, x)
 
   ndom = wmain[n].ndom;
   wind_n_to_ij (ndom, n, &i, &j);
-  rmin = wind_x[i];
-  rmax = wind_x[i + 1];
+  rmin = zdom[ndom].wind_x[i];
+  rmax = zdom[ndom].wind_x[i + 1];
 
   /* Generate a position which is both in the cell and in the wind */
   inwind = -1;
@@ -580,10 +604,12 @@ shell_make_grid (w, ndom)
   int n;
 
 
-  w[0].r = zdom[ndom].wind_rmin - (zdom[ndom].wind_rmax - zdom[ndom].wind_rmin);
+  w[0].r =
+    zdom[ndom].wind_rmin - (zdom[ndom].wind_rmax - zdom[ndom].wind_rmin);
   w[1].r = zdom[ndom].wind_rmin;
   w[2].r = zdom[ndom].wind_rmax;
-  w[3].r = zdom[ndom].wind_rmax + (zdom[ndom].wind_rmax - zdom[ndom].wind_rmin);
+  w[3].r =
+    zdom[ndom].wind_rmax + (zdom[ndom].wind_rmax - zdom[ndom].wind_rmin);
 
 
 

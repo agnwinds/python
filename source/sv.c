@@ -466,7 +466,7 @@ sv_zero_r (r)
   double theta;
   double rho, rho_guess;
 
-  // sv_zero_r_ndom should be set to the domain number before calling sv_zero_r
+  /* sv_zero_r_ndom should be set to the domain number before calling sv_zero_r */
 
   theta = sv_theta_wind (sv_zero_r_ndom, r);
 

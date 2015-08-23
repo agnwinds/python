@@ -379,7 +379,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
 	  /* 71 - 1112 - ksl - placed this line here to try to avoid an error I was seeing in scatter.  I believe the first if
 	     statement has a loophole that needs to be plugged, when it comes back with avalue of n = -1 */
-	  pp.grid = n = where_in_grid (wmain[n].ndom,pp.x);
+
+	  pp.grid = n = where_in_grid (wmain[pp.grid].ndom,pp.x);
 
 	  if (n < 0)
 	    {

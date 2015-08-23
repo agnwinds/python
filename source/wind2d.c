@@ -203,7 +203,7 @@ recreated when a windfile is read into the program
     {
       if (zdom[ndom].coord_type == SPHERICAL)
 	{
-	  spherical_volumes (w, W_ALL_INWIND);
+	  spherical_volumes (ndom,w, W_ALL_INWIND);
 	}
       else if (zdom[ndom].coord_type == CYLIND)
 	{
@@ -217,11 +217,11 @@ recreated when a windfile is read into the program
 	     in the wind, they are known to be in the wind. */
 	  if (geo.wind_type == 3)
 	    {
-	      rtheta_hydro_volumes (w);
+	      rtheta_hydro_volumes (ndom, w);
 	    }
 	  else
 	    {
-	      rtheta_volumes (w, W_ALL_INWIND);
+	      rtheta_volumes (ndom,w, W_ALL_INWIND);
 	    }
 	}
       else if (zdom[ndom].coord_type == CYLVAR)
@@ -237,13 +237,13 @@ recreated when a windfile is read into the program
     }
 
   /* Now check if there is a second component and if so get the volumes for these cells as well */
-  /* PLACEHOLDER -- need to encorporate Torus into domains */
+  /* PLACEHOLDER -- XXX need to encorporate Torus into domains */
   if (geo.compton_torus)
     {
 
       if (geo.coord_type == SPHERICAL)
 	{
-	  spherical_volumes (w, W_ALL_INTORUS);
+	  spherical_volumes (ndom, w, W_ALL_INTORUS);
 	}
       else if (geo.coord_type == CYLIND)
 	{
@@ -251,7 +251,7 @@ recreated when a windfile is read into the program
 	}
       else if (geo.coord_type == RTHETA)
 	{
-	  rtheta_volumes (w, W_ALL_INTORUS);
+	  rtheta_volumes (ndom,w, W_ALL_INTORUS);
 	}
       else if (geo.coord_type == CYLVAR)
 	{
@@ -595,11 +595,12 @@ be optional which variables beyond here are moved to structures othere than Wind
  	where_in_grid locates the 1-d grid position of the photon. 
 
  Arguments:		
-	double x[];
+ 	ndom		The domain number for the searhc
+	double x[];     The postion
  Returns:
  	where_in_grid normally  returns the cell number associated with
- 		a postion.  If the photon is in the grid this will be a positive
- 		integer < NDIM*MDIM.
+ 		a position.  If the photon is in the grid this will 
+		be a positive integer < NDIM*MDIM.
  	photon is inside the grid        -1
 	photon is outside the grid       -2
  Description:	
@@ -653,15 +654,15 @@ where_in_grid (ndom, x)
 	    }
 	  else if (zdom[ndom].coord_type == RTHETA)
 	    {
-	      n = rtheta_where_in_grid (x);
+	      n = rtheta_where_in_grid (ndom,x);
 	    }
 	  else if (zdom[ndom].coord_type == SPHERICAL)
 	    {
-	      n = spherical_where_in_grid (x);
+	      n = spherical_where_in_grid (ndom,x);
 	    }
 	  else if (zdom[ndom].coord_type == CYLVAR)
 	    {
-	      n = cylvar_where_in_grid (x, 0, &fx, &fz);
+	      n = cylvar_where_in_grid (ndom,x, 0, &fx, &fz);
 	    }
 	  else
 	    {
