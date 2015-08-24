@@ -83,7 +83,6 @@ write_array (filename, choice)
      int choice;
 {
   //Dynamical allocation is allowed, although I generally avoid it -- 05apr ksl
-  float rin[NDIM], zin[MDIM];
   float r, z;
   float rmin, rmax, zmin, zmax;
   int ii, jj;
@@ -94,9 +93,15 @@ write_array (filename, choice)
   int i;
   int nn, nnn[4], nelem;
   double frac[4];
-  int ndom;
+  int ndom,ndim,mdim,nstart;
+  /* PLACEHOLDER XXX */
   Log("py_wind_sub write array deos not work yet");
   ndom=0;
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
+  nstart=zdom[ndom].nstart;
+  float rin[ndim], zin[mdim];
+
 
 
   if (choice == 0)		// Then we don't really want output files
@@ -113,34 +118,34 @@ write_array (filename, choice)
 
   /* Write out the header information for the file */
   fprintf (fptr, "# TITLE= \"%s\"\n", outfile);
-  if (geo.coord_type == SPHERICAL)
+  if (zdom[ndom].coord_type == SPHERICAL)
     {
       fprintf (fptr, "# Coord_Sys SPHERICAL\n");
     }
-  else if (geo.coord_type == CYLIND)
+  else if (zdom[ndom].coord_type == CYLIND)
     {
       fprintf (fptr, "# Coord_Sys CYLIND\n");
     }
-  else if (geo.coord_type == RTHETA)
+  else if (zdom[ndom].coord_type == RTHETA)
     {
       fprintf (fptr, "# Coord_Sys RTHETA\n");
     }
-  else if (geo.coord_type == CYLVAR)
+  else if (zdom[ndom].coord_type == CYLVAR)
     {
       fprintf (fptr, "# Coord_Sys CYLVAR\n");
     }
   else
     {
       Error ("write_array: Unknown coordinaate system type: %d\n",
-	     geo.coord_type);
+	     zdom[ndom].coord_type);
     }
 
 
 // Put the r and z coord. grid  into easier to understand arrays
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < ndim; i++)
     {
-      zin[i] = wmain[i].x[2];
-      rin[i] = wmain[i * MDIM].x[0];
+      zin[i] = wmain[nstart+i].x[2];
+      rin[i] = wmain[nstart+i * mdim].x[0];
     }
 
 
@@ -150,16 +155,16 @@ are linear, and x otherwise.  This is not particularly transparent ?? ksl */
   if (choice == 1)
     {				// print out the original array elements
 
-      if (geo.coord_type == SPHERICAL)
+      if (zdom[ndom].coord_type == SPHERICAL)
 	{
     
     /* JM 1411 -- added header for reading with astropy ascii module */
     fprintf (fptr, "r var inwind i\n");
 
-	  for (i = 0; i < NDIM; i++)
+	  for (i = 0; i < ndim; i++)
 	    {
-	      fprintf (fptr, "%8.2e %8.2e %3d %3d \n", wmain[i].r, aaa[i],
-		       wmain[i].inwind, i);
+	      fprintf (fptr, "%8.2e %8.2e %3d %3d \n", wmain[nstart+i].r, aaa[i],
+		       wmain[nstart+i].inwind, i);
 	    }
 	}
       else
@@ -168,12 +173,12 @@ are linear, and x otherwise.  This is not particularly transparent ?? ksl */
     /* JM 1411 -- added header for reading with astropy ascii module */
     fprintf (fptr, "x z var inwind i j\n");
 
-	  for (i = 0; i < NDIM2; i++)
+	  for (i = 0; i < ndim*mdim; i++)
 	    {
 	      wind_n_to_ij (ndom,i, &ii, &jj);
 	      fprintf (fptr, "%8.4e %8.4e %8.2e %3d %3d %3d\n",
-		       wmain[i].xcen[0], wmain[i].xcen[2], aaa[i],
-		       wmain[i].inwind, ii, jj);
+		       wmain[nstart+i].xcen[0], wmain[nstart+i].xcen[2], aaa[i],
+		       wmain[nstart+i].inwind, ii, jj);
 	    }
 	}
 
@@ -196,7 +201,7 @@ are linear, and x otherwise.  This is not particularly transparent ?? ksl */
 	      //OLD 70B if (where_in_wind (xx) == 0)
 	      if (where_in_wind (xx) >= 0)
 		{		// Then the position is in the wind region
-		  coord_fraction (0, xx, nnn, frac, &nelem);
+		  coord_fraction (ndom, 0, xx, nnn, frac, &nelem);
 		  for (nn = 0; nn < nelem; nn++)
 		    {
 		      aout[ii][jj] += aaa[nnn[nn]] * frac[nn];
@@ -287,26 +292,35 @@ display (name)
      char name[];
 {
   int i, j, n;
+  int ndom,ndim,mdim,nstart;
+
+  /* PLACEHOLDER XXX */
+  ndom=0;
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
+  nstart=zdom[ndom].nstart;
+
+
   Log ("\n %s \n", name);
   Log ("z/theta \\x/r");
   for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
     if (geo.coord_type == 1 || py_wind_project == 1)
-      Log ("%8.2e ", wmain[i * MDIM].x[0]);
+      Log ("%8.2e ", wmain[nstart+i * mdim].x[0]);
     else
-      Log ("%8.2e ", wmain[i * MDIM].rcen);
+      Log ("%8.2e ", wmain[nstart+i * mdim].rcen);
 
   Log ("\n");
 
-  for (j = 0; j < MDIM; j++)
+  for (j = 0; j < mdim; j++)
     {
-      if (geo.coord_type == 1 || py_wind_project == 1)
-	Log ("%8.2e ", wmain[j].x[2]);
+      if (zdom[ndom].coord_type == 1 || py_wind_project == 1)
+	Log ("%8.2e ", wmain[nstart+j].x[2]);
       else
-	Log ("%8.2e ", wmain[j].thetacen);
+	Log ("%8.2e ", wmain[nstart+j].thetacen);
 
       for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
 	{
-	  n = i * MDIM + j;
+	  n = i * mdim + j;
 	  Log ("%8.2g ", aaa[n]);
 	}
       Log ("\n");
