@@ -63,8 +63,9 @@ dvwind_ds (p)
   double frac[4];
   double x;
 
-  /* PLACEHOLDER -- NEEDS DOMAIN */
-  int ndom = 0;
+  int ndom;
+
+  ndom=wmain[p->grid].ndom;
 
 
   /* We want the change in velocity along the line of sight, but we
@@ -88,7 +89,7 @@ dvwind_ds (p)
   tensor ought to be rotated in order to give the right answer for spherical 
   coordinates */
 
-  if (geo.coord_type == SPHERICAL)
+  if (zdom[ndom].coord_type == SPHERICAL)
     {
       struct photon pnew;
       double v1[3], v2[3], diff[3];
@@ -116,7 +117,7 @@ dvwind_ds (p)
   else // for non spherical coords we interpolate on v_grad
     {
 
-      n = coord_fraction (0, pp.x, nnn, frac, &nelem);
+      n = coord_fraction (ndom, 0, pp.x, nnn, frac, &nelem);
 
 
       for (j = 0; j < 3; j++)

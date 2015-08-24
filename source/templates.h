@@ -292,7 +292,7 @@ int randwind_thermal_trapping(PhotPtr p, int *nnscat);
 /* util.c */
 int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
 int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);
-int coord_fraction(int ichoice, double x[], int ii[], double frac[], int *nelem);
+int coord_fraction(int ndom, int ichoice, double x[], int ii[], double frac[], int *nelem);
 int where_in_2dcell(int ichoice, double x[], int n, double *fx, double *fz);
 int wind_n_to_ij(int ndom, int n, int *i, int *j);
 int wind_ij_to_n(int ndom, int i, int j, int *n);

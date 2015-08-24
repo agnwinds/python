@@ -278,7 +278,10 @@ History:
 			for positions outside one of the active 
 			wind regions, so for now it finds the 
 			domain, and prints and error if not
-			in any domain
+			in any domain.  Ultimately added the domain
+			to one of the input variables because 
+			there are times when we want coordinates
+			which are outside the wind region.
 		       	
 
 **************************************************************/
@@ -286,7 +289,8 @@ History:
 int ierr_coord_fraction = 0;
 
 int
-coord_fraction (ichoice, x, ii, frac, nelem)
+coord_fraction (ndom, ichoice, x, ii, frac, nelem)
+	int ndom;
      int ichoice;
      double x[];
      int ii[];
@@ -297,16 +301,15 @@ coord_fraction (ichoice, x, ii, frac, nelem)
   double *xx, *zz;
   int ix, iz;
   double dr, dz;
-  int cylvar_coord_fraction ();
   int n;
-  int ndom;
+//  int ndom;
 
 
-  ndom=where_in_wind(x);
-  if (ndom<0){
-	  Error("coord_fraction: %8.2e  %8.2e %8.2e is not in any wind\n",x[0],x[1],x[2]);
-	  ndom=0;
-  }
+//  ndom=where_in_wind(x);
+//  if (ndom<0){
+//	  Error("coord_fraction: %8.2e  %8.2e %8.2e is not in any wind\n",x[0],x[1],x[2]);
+//	  ndom=0;
+//  }
 
 
   /* Jump to special routine if CYLVAR coords */

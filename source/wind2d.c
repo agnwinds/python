@@ -100,7 +100,7 @@ define_wind ()
 
 
   /* Determine the size of the structure, we need to allocate 
-   * from the individual domains and then allocatee the space*/
+     from the individual domains and then allocatee the space */
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
@@ -187,15 +187,15 @@ recreated when a windfile is read into the program
 
 
   /* Now define the valid volumes of each cell and also determine whether the cells are in all
-   * or partially in the wind.
-   *
-   * Note - 05apr --55d -- ksl.  Previously there was a separate calculation here of whether a cell
-   * was in the wind and its volume.  Given the increasingly complicated geometry when thick
-   * disks were first allowed, Stuart had gone back to determining whether a cell was all or
-   * partly in the wind by checking a bunch of positions in the cell.  But this is almost idetnaical 
-   * to calculating the volume of the cell, and therefore I have moved this functionality
-   * in the the respective volumes calculation.  At least then we will do the calculation the
-   * same way both times.  . 
+     or partially in the wind.
+
+     Note - 05apr --55d -- ksl.  Previously there was a separate calculation here of whether a cell
+     was in the wind and its volume.  Given the increasingly complicated geometry when thick
+     disks were first allowed, Stuart had gone back to determining whether a cell was all or
+     partly in the wind by checking a bunch of positions in the cell.  But this is almost idetnaical 
+     to calculating the volume of the cell, and therefore I have moved this functionality
+     in the the respective volumes calculation.  At least then we will do the calculation the
+     same way both times.  . 
    */
   /* JM 1508 -- Added loop over domains */
 
@@ -233,7 +233,7 @@ recreated when a windfile is read into the program
 	{
 	  Error
 	    ("wind2d.c: Don't know how to make volumes for coordinate type %d\n",
-	     geo.coord_type);
+	     zdom[ndom].coord_type);
 	}
     }
 
@@ -242,19 +242,19 @@ recreated when a windfile is read into the program
   if (geo.compton_torus)
     {
 
-      if (geo.coord_type == SPHERICAL)
+      if (zdom[ndom].coord_type == SPHERICAL)
 	{
 	  spherical_volumes (ndom, w, W_ALL_INTORUS);
 	}
-      else if (geo.coord_type == CYLIND)
+      else if (zdom[ndom].coord_type == CYLIND)
 	{
 	  cylind_volumes (ndom, w);
 	}
-      else if (geo.coord_type == RTHETA)
+      else if (zdom[ndom].coord_type == RTHETA)
 	{
 	  rtheta_volumes (ndom, w, W_ALL_INTORUS);
 	}
-      else if (geo.coord_type == CYLVAR)
+      else if (zdom[ndom].coord_type == CYLVAR)
 	{
 	  cylvar_volumes (ndom, w, W_ALL_INTORUS);
 	}
@@ -262,7 +262,7 @@ recreated when a windfile is read into the program
 	{
 	  Error
 	    ("wind2d.c: Don't know how to make volumes for coordinate type %d\n",
-	     geo.coord_type);
+	     zdom[ndom].coord_type);
 	}
 
     }
@@ -546,7 +546,7 @@ be optional which variables beyond here are moved to structures othere than Wind
      05apr -- Looked at this again.  It is clearly a straightforwrd thing to do use the rho function
      which is below. One would simply integrate over various surface integrals to make it happen.  
 
-     15aug -- ksl - It's not clear this it really correct with dommains, but the follwoin compiles
+     15aug -- ksl - It's not clear this it really correct with dommains, but the following compiles
 */
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
@@ -568,8 +568,8 @@ be optional which variables beyond here are moved to structures othere than Wind
 	      rr =
 		w[n + mdim].x[0] * w[n + mdim].x[0] + w[n +
 							mdim].x[1] * w[n +
-								       mdim].
-		x[1] - (w[n].x[0] * w[n].x[0] + w[n].x[1] * w[n].x[1]);
+								       mdim].x
+		[1] - (w[n].x[0] * w[n].x[0] + w[n].x[1] * w[n].x[1]);
 	      if (w[nstart + i * mdim].inwind == W_ALL_INWIND)
 		{
 		  nplasma = w[nstart + i * mdim].nplasma;
@@ -585,9 +585,9 @@ be optional which variables beyond here are moved to structures othere than Wind
 	    }
 
 	  //Factor of 2 to allow for wind on both sides of disk
-	  Log ("m dot wind: Desired %g   Base %g Calculated %g\n",
-	       geo.wind_mdot, 2. * mdotbase, 2. * mdotwind);
-	  mdot_wind (w, 1.e6, geo.wind_rmax / 2.);
+	  Log ("m dot wind: Domain %d Desired %g   Base %g Calculated %g\n",
+	       ndom, zdom[ndom].wind_mdot, 2. * mdotbase, 2. * mdotwind);
+	  mdot_wind (w, 1.e6, zdom[ndom].wind_rmax / 2.);
 	}
       else
 	{
@@ -772,6 +772,7 @@ vwind_xyz (p, v)
   double ctheta, stheta;
   double x, frac[4];
   int nn, nnn[4], nelem;
+  int ndom;
 
 
   // gives the correct result in all coord systems.
@@ -782,7 +783,9 @@ vwind_xyz (p, v)
    * produce a plausible result in all cases
    */
 
-  coord_fraction (0, p->x, nnn, frac, &nelem);
+  ndom = wmain[p->grid].ndom;
+
+  coord_fraction (ndom, 0, p->x, nnn, frac, &nelem);
 
 
 
@@ -798,7 +801,7 @@ vwind_xyz (p, v)
 
   rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
 
-  if (geo.coord_type == SPHERICAL)
+  if (zdom[ndom].coord_type == SPHERICAL)
     {				// put the velocity into cylindrical coordinates on the xz axis
       x = sqrt (vv[0] * vv[0] + vv[2] * vv[2]);	//v_r
       r = length (p->x);
@@ -972,6 +975,19 @@ wind_div_v (w)
 /* 
 find the density of the wind at x
 
+
+
+Returns
+
+	The density at x, if the postion is in the active region of the wind.
+	If the postion is not in the active region of one of the domains, then
+	0 is returned.  No error is reported for this
+
+
+Description
+
+
+
 History:
 	02feb	ksl Changed the calculation to use the general purpose routine fraction.
 			This made a slight difference, an improvement I believe in how
@@ -985,6 +1001,7 @@ History:
 	06may	ksl	57+ -- Modified for plasma structure but this is probably not 
 			what one wants in the end.  There is no reason for the call
 			to include w at all, since it is not used..
+	15aug	ksl	Modified to accept multiple domains
 
 */
 
@@ -998,12 +1015,13 @@ rho (w, x)
   double frac[4];
   int nn, nnn[4], nelem;
   int nplasma;
+  int ndom;
 
 
-  if (where_in_wind (x) != 0)	//note that where_in_wind is independent of grid.
+  if ((ndom = where_in_wind (x)) < 0)	//note that where_in_wind is independent of grid.
     return (0.0);
 
-  n = coord_fraction (1, x, nnn, frac, &nelem);
+  n = coord_fraction (ndom, 1, x, nnn, frac, &nelem);
 
   if (n < 0)
     {
@@ -1013,8 +1031,6 @@ rho (w, x)
     {
 
       dd = 0;
-      //59a - ksl - 070823 - fiexed obvious error that has been there since
-      //I split the structures into w and plasmamain.
       for (nn = 0; nn < nelem; nn++)
 	{
 	  nplasma = w[nnn[nn]].nplasma;
@@ -1047,7 +1063,15 @@ mdot_wind (w, z, rmax)
   double mdot, mplane, msphere;
   double x[3], v[3], q[3], dot ();
 // Calculate the mass loss rate immediately above the disk
+
+  /* Check that everything is defined  sensible */
   rmin = geo.rstar;
+
+  if (rmax <= rmin){
+	  Error("mdot_wind: rmax %g is less than %g, so returning\n",rmax,rmin);
+	  return(0.0);
+  }
+
   dr = (rmax - rmin) / NSTEPS;
   mdot = 0;
   p.x[1] = x[1] = 0.0;
@@ -1108,38 +1132,41 @@ History:
 	05apr	ksl	55d -- Added spherical option
 	11aug	ksl	70b -- Added option of getting a random location in
 			the torus, or any new component
+	15aug	ksl	Updated to accept multiple domains
 
  
 **************************************************************/
 
 int
 get_random_location (n, icomp, x)
-     int n;			// Cell in which to create postion
+     int n;			// Cell in which to create position
      int icomp;			// The component we want the position in
      double x[];		// Returned position
 {
+  int ndom;
 
-  // PLACEHOLDER --- I don't think any of thee need to transfer icomp, as this is known from n
-  if (geo.coord_type == CYLIND)
+  ndom = wmain[n].ndom;
+
+  if (zdom[ndom].coord_type == CYLIND)
     {
       cylind_get_random_location (n, x);
     }
-  else if (geo.coord_type == RTHETA)
+  else if (zdom[ndom].coord_type == RTHETA)
     {
       rtheta_get_random_location (n, icomp, x);
     }
-  else if (geo.coord_type == SPHERICAL)
+  else if (zdom[ndom].coord_type == SPHERICAL)
     {
       spherical_get_random_location (n, icomp, x);
     }
-  else if (geo.coord_type == CYLVAR)
+  else if (zdom[ndom].coord_type == CYLVAR)
     {
       cylvar_get_random_location (n, icomp, x);
     }
   else
     {
       Error ("get_random_location: Don't know this coord_type %d\n",
-	     geo.coord_type);
+	     zdom[ndom].coord_type);
       exit (0);
     }
 
