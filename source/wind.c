@@ -92,7 +92,7 @@ where_in_wind (x,ndomain)
      double x[];
      int *ndomain;
 {
-  double rho, rho_min, rho_max, z;
+  double rho, rad, rho_min, rho_max, z;
   int ireturn;
   int ndom;
   DomainPtr one_dom;
@@ -104,6 +104,7 @@ where_in_wind (x,ndomain)
   z = fabs (x[2]);		/* Necessary to get correct answer above
 				   and below plane */
   rho = sqrt (x[0] * x[0] + x[1] * x[1]);	/* This is distance from z axis */
+
 
   /* Check if position is inside the disk for a vertically extended disk */
   if (geo.disk_type == 2)
@@ -137,6 +138,7 @@ where_in_wind (x,ndomain)
   ireturn=W_NOT_INWIND;
   *ndomain=-1;
 
+  rad=length(x);
 
   for (ndom = geo.ndomain - 1; ndom > -1; ndom--)
     {
@@ -146,11 +148,11 @@ where_in_wind (x,ndomain)
 
       /* First check to see if photon is inside or outside wind */
 
-      if ((z = length (x)) < one_dom->wind_rmin)
+      if (rad < one_dom->wind_rmin)
 	{
 	  continue;		/*x is inside the wind  radially */
 	}
-      if (z > one_dom->wind_rmax)
+      if (rad > one_dom->wind_rmax)
 	{
 	  continue;		/*the position is beyond the wind radially */
 	}
