@@ -67,11 +67,8 @@ trans_phot (
 
 {
   int nphot;
-  double dot ();
-  int translate ();
   int n;
   struct photon pp, pextract;
-  double get_ion_density ();
   int nnscat;
   int disk_illum;
   int nerr;
@@ -284,14 +281,12 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 {
   double tau_scat, tau;
   int istat;
-  double dot (), rrr;
-  int translate ();
+  double rrr;
   int icell;
   int nres, *ptr_nres;
   int kkk, n;
   double weight_min;
   struct photon pp, pextract;
-  double get_ion_density ();
   int nnscat;
   int nerr;
   double p_norm, tau_norm;

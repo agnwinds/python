@@ -297,7 +297,7 @@ int where_in_2dcell(int ichoice, double x[], int n, double *fx, double *fz);
 int wind_n_to_ij(int ndom, int n, int *i, int *j);
 int wind_ij_to_n(int ndom, int i, int j, int *n);
 /* density.c */
-double get_ion_density(double x[], int nion);
+double get_ion_density(int ndom, double x[], int nion);
 /* detail.c */
 int detailed_balance(PlasmaPtr xplasma, int nelem, double newden[]);
 int rebalance(double rates_up[], double rates_down[], double fraction[], int ntot);

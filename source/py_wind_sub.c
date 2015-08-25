@@ -212,7 +212,7 @@ a:Log ("Input x=0,y=0,z=0 to return to main routine\n");
   ndom=where_in_wind(x);
   if (ndom<0){
 	  Log("Position %8.2e  %8.2e %8.2e is not in an active region of grid\n", x[0], x[1], x[2]);
-	  return(0);
+	  ndom=0;
   }
 
   n = where_in_grid (ndom,x);
@@ -233,7 +233,7 @@ a:Log ("Input x=0,y=0,z=0 to return to main routine\n");
   p.x[1] = x[1];
   p.x[2] = x[2];
 
-  vwind_xyz (&p, v);
+  vwind_xyz (ndom, &p, v);
   Log ("Velocity: %8.2e  %8.2e %8.2e\n", v[0], v[1], v[2]);
 
 

@@ -27,8 +27,8 @@ History:
 			coordinate systems.
 	06may	ksl	57+ -- Modified to use plasma structure
   	1411 	JM 	Modified to use a general vector x, rather than a PhotPtr
-	15aug	ksl	Moved check for domain itno get_ion_denisty as part
-			of effort to extend to multiple domins
+	15aug	ksl	Modified for domains so that the domain is reuquired as an
+			input
 **************************************************************/
 
 #include <stdio.h>
@@ -41,7 +41,8 @@ History:
 
 
 double
-get_ion_density (x, nion)
+get_ion_density (ndom, x, nion)
+int	ndom;
      double x[];
      int nion;
 {
@@ -49,15 +50,6 @@ get_ion_density (x, nion)
   int nn, nnn[4], nelem;
   double frac[4];
   int nplasma;
-  int ndom;
-
-  ndom = where_in_wind (x);
-  if (ndom < 0)
-    {
-      Error ("get_ion_denisty: %8.2e  %8.2e %8.2e is not in any wind\n", x[0],
-	     x[1], x[2]);
-      ndom = 0;
-    }
 
 
 /* nnn is an array which contains the elements of the Wind (coordinate)

@@ -335,7 +335,8 @@ process. */
 	      //If the density of the ion is very small we shouldn't have to worry about a resonance, but otherwise
 	      // ?? This seems like an incredibly small number; how can anything this small affect anything ??
 
-	      dd = get_ion_density (p_now.x, kkk);
+
+	      dd = get_ion_density (ndom, p_now.x, kkk);
 
 	      if (dd > LDEN_MIN)
 		{
@@ -853,10 +854,12 @@ sobolev (one, x, den_ion, lptr, dvds)
   int nion;
   double d_hold;
   int nplasma;
+  int ndom;
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
+  ndom=wmain[plasmamain->nwind].ndom;
 
   if ((dvds = fabs (dvds)) == 0.0)	// This forces dvds to be positive -- a good thing!
     {
@@ -884,7 +887,7 @@ calls to two_level atom
 
       if (den_ion < 0)
 	{
-	  xplasma->density[nion] = get_ion_density (x, lptr->nion);	// Forced calculation of density 
+	  xplasma->density[nion] = get_ion_density (ndom, x, lptr->nion);	// Forced calculation of density 
 	}
       else
 	{
