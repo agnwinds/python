@@ -64,6 +64,7 @@ History:
 			the doppler shift is carried out.)
 	09feb	ksl	68b - Added hooks to track energy deposition of extracted photons
 			in the wind 
+	15aug	ksl	Modifications to allow multiple domains.
 
 **************************************************************/
 
@@ -81,6 +82,7 @@ extract (w, p, itype)
   int vsub ();
   int yep;
   double xdiff[3];
+  int ndom;
 
 
   /* 68b -09021 - ksl - The next line selects the middle inclination angle for recording the absorbed enery */
@@ -149,7 +151,8 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 	  if (itype == PTYPE_WIND)
 	    {			/* If the photon was scattered in the wind, 
 				   the frequency also must be shifted */
-	      vwind_xyz (&pp, v);	/*  Get the velocity at the position of pp */
+		    ndom=wmain[p->grid].ndom;
+	      vwind_xyz (ndom, &pp, v);	/*  Get the velocity at the position of pp */
 	      doppler (p, &pp, v, pp.nres);	/*  Doppler shift the photon -- test! */
 
 /*  Doppler shift the photon (as nonresonant scatter) to new direction */

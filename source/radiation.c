@@ -139,8 +139,10 @@ radiation (p, ds)
   double freq_min, freq_max;
   double frac_path, freq_xs;
   struct photon phot;
+  int ndom;
   
   one = &wmain[p->grid];	/* So one is the grid cell of interest */
+  ndom=one->ndom;
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "radiation");
 
@@ -151,7 +153,7 @@ radiation (p, ds)
      this could be improved, so we throw an error if the difference between v1 and v2 is large */
 
   /* calculate velocity at original position */
-  vwind_xyz (p, v_inner);	// get velocity vector at new pos
+  vwind_xyz (ndom, p, v_inner);	// get velocity vector at new pos
   v1 = dot (p->lmn, v_inner);	// get direction cosine
 
   /* Create phot, a photon at the position we are moving to 
@@ -160,7 +162,7 @@ radiation (p, ds)
   
   move_phot (&phot, ds);	// move it by ds
   
-  vwind_xyz (&phot, v_outer);	// get velocity vector at new pos
+  vwind_xyz (ndom, &phot, v_outer);	// get velocity vector at new pos
   
   v2 = dot (phot.lmn, v_outer);	// get direction cosine
   

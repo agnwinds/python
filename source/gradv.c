@@ -214,6 +214,7 @@ dvds_ave ()
   int icell;
   double dvds_min, lmn_min[3];	//TEST
   char filename[LINELENGTH];
+  int ndom;
 
   strcpy (filename, basename);
   strcat (filename, ".dvds.diag");
@@ -224,6 +225,7 @@ dvds_ave ()
 
   for (icell = 0; icell < NDIM2; icell++)
     {
+	    ndom=wmain[icell].ndom;
 
       dvds_max = 0.0;		// Set dvds_max to zero for the cell.
       dvds_min = 1.e30;		// TEST
@@ -239,7 +241,7 @@ dvds_ave ()
       ds = 0.001 * length (diff);
 
       /* Find the velocity at the center of the cell */
-      vwind_xyz (&p, v_zero);
+      vwind_xyz (ndom, &p, v_zero);
 
       sum = 0.0;
       for (n = 0; n < N_DVDS_AVE; n++)
@@ -252,7 +254,7 @@ dvds_ave ()
 	      delta[2] = (-delta[2]);
 	    }
 	  vadd (p.x, delta, pp.x);
-	  vwind_xyz (&pp, vdelta);
+	  vwind_xyz (ndom, &pp, vdelta);
 	  vsub (vdelta, v_zero, diff);
 	  dvds = length (diff);
 

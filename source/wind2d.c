@@ -704,11 +704,11 @@ where_in_grid (ndom, x)
                                        Space Telescope Science Institute
 
  Synopsis:
-	vwind_xyz(w,p,v) finds the velocity vector v for the wind in cartesian 
+	vwind_xyz(ndom,p,v) finds the velocity vector v for the wind in cartesian 
 	coordinates at the position of the photon p.
  
  Arguments:		
-	WindPtr w;
+	int ndom;  
 	PhotPtr p;
 	double v[];
 
@@ -757,12 +757,14 @@ History:
 			is now fixed, but see the notes above.
 	06may	ksl	57+ -- Changed call to elimatnate passing the
 			Wind array.  Use wmain instead.
+	15aug	ksl	Added a variable for the domain
  
 **************************************************************/
 int ierr_vwind = 0;
 
 int
-vwind_xyz (p, v)
+vwind_xyz (ndom, p, v)
+	int ndom;
      PhotPtr p;
      double v[];
 {
@@ -772,18 +774,15 @@ vwind_xyz (p, v)
   double ctheta, stheta;
   double x, frac[4];
   int nn, nnn[4], nelem;
-  int ndom;
 
 
-  // gives the correct result in all coord systems.
 
+  if (ndom<0 || ndom>=geo.ndomain){
+	  Error("vwind_xyz: Received invalid domain  %d\n",ndom);
+  }
 
-  /* 56d -- 05jul -- I had considerable problem with the
-   * next routine for cylvar coords.  Coord_fraction must
-   * produce a plausible result in all cases
-   */
+  
 
-  ndom = wmain[p->grid].ndom;
 
   coord_fraction (ndom, 0, p->x, nnn, frac, &nelem);
 
@@ -899,6 +898,7 @@ History:
       0.5ds in both +ve and -ve. This stops negative values of
       dvdy appearing in rotationally dominated portions of wind,
       and in some cases even leading to div_v being negative.
+  15aug  ksl 	Modified to add dom variable to vwind_xyz 
 **************************************************************/
 
 int wind_div_err = (-3);
@@ -911,6 +911,7 @@ wind_div_v (w)
   struct photon ppp;
   double div, delta;
   double xxx[3];
+  int ndom;
 
 
   for (icell = 0; icell < NDIM2; icell++)
@@ -919,6 +920,7 @@ wind_div_v (w)
 
       /* stuff_v (w->xcen, x_zero); OLD NSH 130322 - this line seems to assume w is a cell, rather than the whole wind structure */
       stuff_v (w[icell].xcen, x_zero);	/*NEW NSH 130322 - now gets the centre of the current cell in the loop */
+      ndom=wmain[icell].ndom;
 
       delta = 0.01 * x_zero[2];	//new 04mar ksl -- delta is the distance across which we measure e.g. dv_x/dx
 
@@ -934,26 +936,26 @@ wind_div_v (w)
       /* Calculate dv_x/dx at this position */
       stuff_v (x_zero, ppp.x);
       ppp.x[0] += 0.5 * delta;
-      vwind_xyz (&ppp, v2);
+      vwind_xyz (ndom, &ppp, v2);
       ppp.x[0] -= delta;
-      vwind_xyz (&ppp, v1);
+      vwind_xyz (ndom, &ppp, v1);
       div = xxx[0] = (v2[0] - v1[0]) / delta;
 
       /* Calculate dv_y/dy */
       stuff_v (x_zero, ppp.x);
       ppp.x[1] += 0.5 * delta;
-      vwind_xyz (&ppp, v2);
+      vwind_xyz (ndom, &ppp, v2);
       ppp.x[1] -= delta;
-      vwind_xyz (&ppp, v1);
+      vwind_xyz (ndom, &ppp, v1);
       div += xxx[1] = (v2[1] - v1[1]) / delta;
 
 
       /* Calculate dv_z/dz */
       stuff_v (x_zero, ppp.x);
       ppp.x[2] += 0.5 * delta;
-      vwind_xyz (&ppp, v2);
+      vwind_xyz (ndom, &ppp, v2);
       ppp.x[2] -= delta;
-      vwind_xyz (&ppp, v1);
+      vwind_xyz (ndom, &ppp, v1);
       div += xxx[2] = (v2[2] - v1[2]) / delta;
 
 
@@ -1062,6 +1064,12 @@ mdot_wind (w, z, rmax)
   double den, rho ();
   double mdot, mplane, msphere;
   double x[3], v[3], q[3], dot ();
+  int ndom;
+
+  ndom=0;
+
+  Log("For simplicity, mdot wind checks only carried out for domain 0\n");
+
 // Calculate the mass loss rate immediately above the disk
 
   /* Check that everything is defined  sensible */
@@ -1080,7 +1088,7 @@ mdot_wind (w, z, rmax)
     {
       p.x[0] = x[0] = r;
       den = rho (w, x);
-      vwind_xyz (&p, v);
+      vwind_xyz (ndom, &p, v);
       mdot += 2 * PI * r * dr * den * v[2];
 //mdot+=2*PI*r*dr;
     }
@@ -1097,7 +1105,7 @@ mdot_wind (w, z, rmax)
       q[0] = sin (theta);
       q[2] = cos (theta);
       den = rho (w, x);
-      vwind_xyz (&p, v);
+      vwind_xyz (ndom, &p, v);
       mdot += 2 * PI * rmax * rmax * sin (theta) * dtheta * den * dot (v, q);
     }
   msphere = 2 * mdot;		// Factor of two because wind is in both hemispheres

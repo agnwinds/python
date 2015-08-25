@@ -551,6 +551,7 @@ History:
           Sep  04 SS - minor bug fixed
 	06may	ksl	57+ -- Updated to use plasma structure. 
 			and to elimate passing entrie wind structure
+	15aug	ksl	Added domain support
 
 ************************************************************/
 int
@@ -572,6 +573,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   int nnscat;
   double dvwind_ds (), sobolev ();
   int nplasma;
+  int ndom;
 
 
 
@@ -667,7 +669,8 @@ photo_gen_kpkt (p, weight, photstart, nphot)
       /* The next two lines correct the frequency to first order, but do not result in
          forward scattering of the distribution */
 
-      vwind_xyz (&p[n], v);
+      ndom=wmain[icell].ndom;
+      vwind_xyz (ndom, &p[n], v);
       p[n].freq /= (1. - dot (v, p[n].lmn) / C);
 
       p[n].istat = 0;
@@ -721,6 +724,7 @@ History:
 	0812	ksl	67c -- Changed call to photo_gen_matom to
 			eliminate WindPtr w, since we have access
 			to this through wmain.
+	15aug	ksl	Added domain support
 
 ************************************************************/
 int
@@ -743,6 +747,7 @@ photo_gen_matom (p, weight, photstart, nphot)
   int nnscat;
   double dvwind_ds (), sobolev ();
   int nplasma;
+  int ndom;
 
 
 
@@ -831,8 +836,10 @@ photo_gen_matom (p, weight, photstart, nphot)
       p[n].grid = icell;
 
 
-      // Determine the direction of the photon
-      // Need to allow for anisotropic emission here
+      /* Determine the direction of the photon
+      Need to allow for anisotropic emission here
+      */ 
+
       nnscat = 1;
       if (p[n].nres < 0 || p[n].nres > NLINES || geo.scatter_mode == 0)
 	{
@@ -859,7 +866,8 @@ photo_gen_matom (p, weight, photstart, nphot)
       /* The next two lines correct the frequency to first order, but do not result in
          forward scattering of the distribution */
 
-      vwind_xyz (&p[n], v);
+      ndom=wmain[icell].ndom;
+      vwind_xyz (ndom, &p[n], v);
       p[n].freq /= (1. - dot (v, p[n].lmn) / C);
 
       p[n].istat = 0;

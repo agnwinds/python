@@ -85,6 +85,7 @@ History:
                         "simple").
 	06may	ksl	57+ -- To allow for plasma structure.  
 	1409	ksl	Changes to accommodate clumping
+	1509	ksl	Added domain support
 **************************************************************/
 
 struct photon cds_phot_old;
@@ -118,10 +119,12 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   int check_in_grid;
   int nplasma;
   PlasmaPtr xplasma, xplasma2;
+  int ndom;
 
   one = &w[p->grid];		//Get a pointer to the cell where the photon bundle is located.
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
+  ndom=one->ndom;
 
   kap_es = THOMPSON * xplasma->ne * geo.fill;
   /* This is the electron scattering opacity per unit length. For the Macro Atom approach we need an 
@@ -150,7 +153,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
   if (comp_phot (&cds_phot_old, p))
     {
-      vwind_xyz (p, v_inner);
+      vwind_xyz (ndom, p, v_inner);
       v1 = dot (p->lmn, v_inner);
     }
   else
@@ -161,7 +164,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   /* Create phot, a photon at the far side of the cell */
   stuff_phot (p, &phot);
   move_phot (&phot, smax);
-  vwind_xyz (&phot, v_outer);
+  vwind_xyz (ndom, &phot, v_outer);
   v2 = dot (phot.lmn, v_outer);
 
   /* Check to see that the velocity is monotonic across the cell
@@ -174,7 +177,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
     {
       stuff_phot (p, &p_now);
       move_phot (&p_now, smax / 2.);
-      vwind_xyz (&p_now, v_check);
+      vwind_xyz (ndom, &p_now, v_check);
       vch = dot (p_now.lmn, v_check);
 
       vc = fabs (vch - 0.5 * (v1 + v2));
@@ -1116,9 +1119,10 @@ History:
                         scattering model would work as before for "simple" calculations.
                         Previously nnscat was always just = 1.
 
-        1406 	JM 		Added normalisation of rejection method for anisotropic scattering
-        				'thermal trapping' model.
-        				See Issue #82.
+        1406 	JM	Added normalisation of rejection method for anisotropic scattering
+        		'thermal trapping' model.
+        		See Issue #82.
+	1509	ksl	Added domain support
 
 
 
@@ -1143,6 +1147,7 @@ scatter (p, nres, nnscat)
   int m, llvl, ulvl;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
+  int ndom;
 
 
 
@@ -1387,7 +1392,8 @@ scatter (p, nres, nnscat)
 
   //stuff_v (z_prime, p->lmn);
 
-  vwind_xyz (p, v);		/* Get the velocity vector for the wind */
+  ndom=wmain[p->grid].ndom;
+  vwind_xyz (ndom, p, v);		/* Get the velocity vector for the wind */
   doppler (&pold, p, v, *nres);
 
 

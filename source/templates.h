@@ -59,7 +59,7 @@ int spectrum_restart_renormalise(int nangle);
 /* wind2d.c */
 int define_wind(void);
 int where_in_grid(int ndom, double x[]);
-int vwind_xyz(PhotPtr p, double v[]);
+int vwind_xyz(int ndom, PhotPtr p, double v[]);
 int wind_div_v(WindPtr w);
 double rho(WindPtr w, double x[]);
 int mdot_wind(WindPtr w, double z, double rmax);

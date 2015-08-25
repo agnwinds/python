@@ -363,6 +363,7 @@ History:
 			stopgap for now since should not need to be addressing
 			wind array.  Changed call to remove wind since entire
 			grid was tramsmitted.
+	15aug	ksl	Added domain support
  
 **************************************************************/
 
@@ -380,6 +381,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   int icell;
   int nplasma;
   int nnscat;
+  int ndom;
 
 
   photstop = photstart + nphot;
@@ -409,6 +411,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       icell--;			/* We have got up to xlum, so this is the cell in which the photon must be generated */
 
       nplasma = wmain[icell].nplasma;
+      ndom=wmain[icell].ndom;
 
 
       /* Now generate a single photon in this cell */
@@ -448,7 +451,8 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 
       if (wmain[icell].inwind > 1)
 	{
-	  get_random_location (icell, 2, p[n].x);	/* NSH 1110 Added this if statement to take account of photons being generated from the torus. Hope I've done it correctly!! */
+	  get_random_location (icell, 2, p[n].x);	/* NSH 1110 Added this if statement to take account of photons being generated 
+							   from the torus. Hope I've done it correctly!! */
 	}
       else
 	{
@@ -461,11 +465,13 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 
 
 
-	  // Determine the direction of the photon
-	  // ?? Need to allow for anisotropic emission here
-      // JM 1406 -- I think there's a mistake here. I believe this should be
-      // if (p[n].nres < 0 || p[n].nres > NLINES || geo.scatter_mode == 0)
-      // to allow for isotropic BF continuum emission
+      /*
+	Determine the direction of the photon
+	?? Need to allow for anisotropic emission here
+	JM 1406 -- I think there's a mistake here. I believe this should be
+	if (p[n].nres < 0 || p[n].nres > NLINES || geo.scatter_mode == 0)
+	to allow for isotropic BF continuum emission
+      */
       nnscat = 1;
       if (p[n].nres < 0 || geo.scatter_mode != 1)
 	{
@@ -476,7 +482,7 @@ was a resonant scatter but we want isotropic scattering anyway.  */
       else if (geo.scatter_mode == 1) 
 	{			// It was a line photon and we want anisotropic scattering mode 1
 
-// -1. forces a full reinitialization of the pdf for anisotropic scattering
+/* -1. forces a full reinitialization of the pdf for anisotropic scattering  */
       
 	  randwind (&p[n], p[n].lmn, wmain[icell].lmn);
 
@@ -491,7 +497,7 @@ was a resonant scatter but we want isotropic scattering anyway.  */
       /* The next two lines correct the frequency to first order, but do not result in
          forward scattering of the distribution */
 
-      vwind_xyz (&p[n], v);
+      vwind_xyz (ndom, &p[n], v);
       p[n].freq *= (1. + dot (v, p[n].lmn) / C);
 
       p[n].istat = 0;
