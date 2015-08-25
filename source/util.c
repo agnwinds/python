@@ -302,14 +302,6 @@ coord_fraction (ndom, ichoice, x, ii, frac, nelem)
   int ix, iz;
   double dr, dz;
   int n;
-//  int ndom;
-
-
-//  ndom=where_in_wind(x);
-//  if (ndom<0){
-//	  Error("coord_fraction: %8.2e  %8.2e %8.2e is not in any wind\n",x[0],x[1],x[2]);
-//	  ndom=0;
-//  }
 
 
   /* Jump to special routine if CYLVAR coords */

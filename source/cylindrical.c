@@ -325,7 +325,7 @@ cylind_volumes (ndom, w)
   double rmax, rmin;
   double zmin, zmax;
   double dr, dz, x[3];
-  int n_inwind;
+  int n_inwind, ndomain;
   DomainPtr one_dom;
 
   one_dom = &zdom[ndom];
@@ -342,7 +342,7 @@ cylind_volumes (ndom, w)
 	  /* 70b - only try to assign the cell if it has not already been assigned */
 	  if (w[n].inwind == W_NOT_INWIND)
 	    {
-	      n_inwind = check_corners_inwind (n);
+	      n_inwind = check_corners_inwind (n);  //XXX bizarre why does this check and not use it, see bellow
 
 
 	      rmin = one_dom->wind_x[i];
@@ -353,7 +353,7 @@ cylind_volumes (ndom, w)
 	      //leading factor of 2 added to allow for volume above and below plane (SSMay04)
 	      w[n].vol = 2 * PI * (rmax * rmax - rmin * rmin) * (zmax - zmin);
 
-	      n_inwind = cylind_is_cell_in_wind (n);
+	      n_inwind = cylind_is_cell_in_wind (n); //XXX bizarre what is the difference bewen this n_inwind and check_corneers
 
 	      if (n_inwind == W_NOT_INWIND)
 		{
@@ -382,7 +382,7 @@ cylind_volumes (ndom, w)
 			  x[1] = 0;
 			  x[2] = z;
 
-			  if (where_in_wind (x) == ndom)
+			  if (where_in_wind (x,&ndomain) == W_ALL_INWIND)
 			    {
 			      num += r * r;	/* 0 implies in wind */
 			      jj++;
@@ -528,7 +528,7 @@ cylind_get_random_location (n, x)
   double r, rmin, rmax, zmin, zmax;
   double zz;
   double phi;
-  int ndom;
+  int ndom,ndomain;
   DomainPtr one_dom;
 
   ndom = wmain[n].ndom;
@@ -542,8 +542,8 @@ cylind_get_random_location (n, x)
   zmax = one_dom->wind_z[j + 1];
 
   /* Generate a position which is both in the cell and in the wind */
-  inwind = -1;
-  while (inwind != ndom)
+  inwind = W_NOT_INWIND;
+  while (inwind != W_ALL_INWIND)
     {
       r =
 	sqrt (rmin * rmin +
@@ -557,7 +557,7 @@ cylind_get_random_location (n, x)
 
 
       x[2] = zmin + (zmax - zmin) * (rand () / (MAXRAND - 0.5));
-      inwind = where_in_wind (x);	/* Some photons will not be in the wind
+      inwind = where_in_wind (x,&ndomain);	/* Some photons will not be in the wind
 					   because the boundaries of the wind split the grid cell */
     }
 
@@ -683,7 +683,7 @@ cylind_is_cell_in_wind (n)
   double r, z, dr, dz;
   double rmin, rmax, zmin, zmax;
   double x[3];
-  int ndom;
+  int ndom,ndomain;
   DomainPtr one_dom;
 
   /* First check if the cell is in the boundary */
@@ -701,8 +701,7 @@ cylind_is_cell_in_wind (n)
 
   if (check_corners_inwind (n) == 4)
     {
-      //OLD 70b return (W_ALL_INWIND);
-      return (ndom);
+      return (W_ALL_INWIND);
     }
 
   /* So at this point, we have dealt with the easy cases */
@@ -726,18 +725,16 @@ cylind_is_cell_in_wind (n)
 
       x[0] = rmin;
 
-      if (where_in_wind (x) == ndom)
+      if (where_in_wind (x,&ndomain) == W_ALL_INWIND)
 	{
-	  //OLD 70b return (W_PART_INWIND);
-	  return (ndom + 1);
+	  return (W_PART_INWIND);
 	}
 
       x[0] = rmax;
 
-      if (where_in_wind (x) == ndom)
+      if (where_in_wind (x,&ndomain) == W_ALL_INWIND)
 	{
-	  //OLD 70b return (W_PART_INWIND);
-	  return (ndom + 1);
+	  return (W_PART_INWIND);
 	}
     }
 
@@ -751,18 +748,16 @@ cylind_is_cell_in_wind (n)
 
       x[2] = zmin;
 
-      if (where_in_wind (x) == ndom)
+      if (where_in_wind (x,&ndomain) == W_ALL_INWIND)
 {
-	  //OLD 70b return (W_PART_INWIND);
-	  return (ndom + 1);
+	  return (W_PART_INWIND);
 	}
 
       x[2] = zmax;
 
-      if (where_in_wind (x) == ndom)
+      if (where_in_wind (x,&ndomain) == W_ALL_INWIND)
 	{
-	  //OLD 70b return (W_PART_INWIND);
-	  return (ndom + 1);
+	 return (W_PART_INWIND);
 	}
     }
 

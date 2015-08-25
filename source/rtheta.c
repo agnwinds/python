@@ -406,7 +406,7 @@ rtheta_volumes (ndom, w, icomp)
   double dr, dtheta, x[3];
   double rmin, rmax, thetamin, thetamax;
   int n_inwind;
-  int ndim, mdim;
+  int ndim, mdim,ndomain;
 
   ndim = zdom[ndom].ndim;
   mdim = zdom[ndom].mdim;
@@ -460,7 +460,7 @@ rtheta_volumes (ndom, w, icomp)
 			  x[0] = r * sin (theta);
 			  x[1] = 0;
 			  x[2] = r * cos (theta);;
-			  if (where_in_wind (x) == icomp)
+			  if (where_in_wind (x,&ndomain) == W_ALL_INWIND)
 			    {
 			      num += r * r * sin (theta);	/* 0 implies in wind */
 			      jj++;
@@ -478,10 +478,10 @@ rtheta_volumes (ndom, w, icomp)
 		  w[n].vol = 0.0;
 		}
 	      else if (jj == kk)
-		w[n].inwind = icomp;	// The cell is completely in the wind
+		w[n].inwind = W_ALL_INWIND;	// The cell is completely in the wind
 	      else
 		{
-		  w[n].inwind = icomp + 1;	//The cell is partially in the wind
+		  w[n].inwind = W_PART_INWIND;	//The cell is partially in the wind
 		  w[n].vol *= fraction;
 		}
 
@@ -607,7 +607,7 @@ rtheta_get_random_location (n, icomp, x)
   double r, rmin, rmax, sthetamin, sthetamax;
   double theta, phi;
   double zz;
-  int ndom;
+  int ndom,ndomain;
 
   ndom = wmain[n].ndom;
   wind_n_to_ij (ndom, n, &i, &j);
@@ -619,8 +619,8 @@ rtheta_get_random_location (n, icomp, x)
 
   /* Generate a position which is both in the cell and in the wind */
 
-  inwind = -1;
-  while (inwind != icomp)
+  inwind = W_NOT_INWIND;
+  while (inwind != W_ALL_INWIND)
     {
       r =
 	sqrt (rmin * rmin +
@@ -636,7 +636,7 @@ rtheta_get_random_location (n, icomp, x)
       x[0] = r * cos (phi) * sin (theta);
       x[1] = r * sin (phi) * sin (theta);
       x[2] = r * cos (theta);
-      inwind = where_in_wind (x);	/* Some photons will not be in the wind
+      inwind = where_in_wind (x,&ndomain);	/* Some photons will not be in the wind
 					   because the boundaries of the wind split the grid cell */
     }
 
@@ -762,10 +762,8 @@ rtheta_is_cell_in_wind (n, icomp)
   double dr, dtheta;
   double x[3];
   int ndom, mdim, ndim;
+  int ndomain;
 
-
-  /* XXX I don't understand why this routine does not simply return the
-   * domain number if the question is whether a cell is in the wind */
 
 
   /* First check if the cell is in the boundary */
@@ -784,8 +782,7 @@ rtheta_is_cell_in_wind (n, icomp)
 
   if (check_corners_inwind (n) == 4)
     {
-      //OLD 70B return (W_ALL_INWIND);
-      return (icomp);
+      return (W_ALL_INWIND);
     }
 
   /* So at this point, we have dealt with the easy cases */
@@ -808,18 +805,16 @@ rtheta_is_cell_in_wind (n, icomp)
       x[0] = rmin * sin (theta);
       x[2] = rmin * cos (theta);;
 
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (x,&ndomain) == W_ALL_INWIND)
 	{
-	  //OLD 70B return (W_PART_INWIND);
-	  return (icomp + 1);
+	  return (W_PART_INWIND);
 	}
 
       x[0] = rmax * sin (theta);
       x[2] = rmax * cos (theta);;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (x, &ndomain) == W_ALL_INWIND)
 	{
-	  //OLD 70B return (W_PART_INWIND);
-	  return (icomp + 1);
+	  return (W_PART_INWIND);
 	}
 
     }
@@ -830,18 +825,16 @@ rtheta_is_cell_in_wind (n, icomp)
     {
       x[0] = r * sin (thetamin);
       x[2] = r * cos (thetamin);;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (x,&ndomain) == W_ALL_INWIND)
 	{
-	  //OLD 70B return (W_PART_INWIND);
-	  return (icomp + 1);
+	  return (W_PART_INWIND);
 	}
 
       x[0] = r * sin (thetamax);
       x[2] = r * cos (thetamax);;
-      if (where_in_wind (x) == icomp)
+      if (where_in_wind (x,&ndomain) == W_ALL_INWIND)
 	{
-	  //Old 70b return (W_PART_INWIND);
-	  return (icomp + 1);
+	 return (W_PART_INWIND);
 	}
 
     }

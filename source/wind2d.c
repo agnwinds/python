@@ -1017,11 +1017,16 @@ rho (w, x)
   double frac[4];
   int nn, nnn[4], nelem;
   int nplasma;
-  int ndom;
+  int ndom,ndomain;
 
 
-  if ((ndom = where_in_wind (x)) < 0)	//note that where_in_wind is independent of grid.
+  if (where_in_wind (x,&ndomain) < 0)	//note that where_in_wind is independent of grid.
     return (0.0);
+
+  if ((ndom=ndomain)<0){
+	  Error("rho: Domain not fournd %d\n",ndomain);
+	  return(0.0);
+  }
 
   n = coord_fraction (ndom, 1, x, nnn, frac, &nelem);
 
@@ -1237,7 +1242,7 @@ check_corners_inwind (n)
   int n_inwind;
   int i, j;
   DomainPtr one_dom;
-  int ndom;
+  int ndom,ndomain;
 
   /* find the domain */
   ndom = wmain[n].ndom;
@@ -1249,13 +1254,13 @@ check_corners_inwind (n)
 
   if (i < (one_dom->ndim - 2) && j < (one_dom->mdim - 2))
     {
-      if (where_in_wind (wmain[n].x) == ndom)
+      if (where_in_wind (wmain[n].x,&ndomain) == W_ALL_INWIND)
 	n_inwind++;
-      if (where_in_wind (wmain[n + 1].x) == ndom)
+      if (where_in_wind (wmain[n + 1].x,&ndomain) == W_ALL_INWIND)
 	n_inwind++;
-      if (where_in_wind (wmain[n + one_dom->mdim].x) == ndom)
+      if (where_in_wind (wmain[n + one_dom->mdim].x,&ndomain) == W_ALL_INWIND)
 	n_inwind++;
-      if (where_in_wind (wmain[n + one_dom->mdim + 1].x) == ndom)
+      if (where_in_wind (wmain[n + one_dom->mdim + 1].x,&ndomain) == W_ALL_INWIND)
 	n_inwind++;
     }
 

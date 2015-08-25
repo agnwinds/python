@@ -68,7 +68,7 @@ int zero_scatters(void);
 int check_corners_inwind(int n);
 int set_nstart_nstop(void);
 /* wind.c */
-int where_in_wind(double x[]);
+int where_in_wind(double x[], int *ndomain);
 int wind_check(WindPtr www, int n);
 double model_velocity(int ndom, double x[], double v[]);
 int model_vgrad(int ndom, double x[], double v_grad[][3]);

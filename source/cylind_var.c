@@ -411,6 +411,7 @@ cylvar_volumes (ndom, w, icomp)
   double volume;
   double f, g;
   int ndim,mdim,nstart,nstop;
+  int ndomain;
 
 
   ndim=zdom[ndom].ndim;
@@ -483,7 +484,7 @@ cylvar_volumes (ndom, w, icomp)
 		       &f, &g) == 0)
 		    {
 		      kk++;
-		      if (where_in_wind (x) == W_ALL_INWIND)
+		      if (where_in_wind (x, &ndomain) == W_ALL_INWIND)
 			{
 			  volume += r;
 			  jj++;
@@ -753,6 +754,7 @@ cylvar_get_random_location (n, icomp, x)
   double zz;
   double phi;
   int ndom,mdim,ndim;
+  int ndomain;
 
   ndom = wmain[n].ndom;
   ndim=zdom[ndom].ndim;
@@ -797,7 +799,7 @@ cylvar_get_random_location (n, icomp, x)
 
   /* Generate a position which is both in the cell and in the wind */
   inwind = incell = -1;
-  while (inwind != icomp || incell != 0)
+  while (inwind != W_ALL_INWIND || incell != 0)
     {
       r =
 	sqrt (rmin * rmin +
@@ -811,9 +813,9 @@ cylvar_get_random_location (n, icomp, x)
 
 
       x[2] = zmin + (zmax - zmin) * (rand () / (MAXRAND - 0.5));
-      inwind = where_in_wind (x);	/* Some photons will not be in the wind
+      inwind = where_in_wind (x, &ndomain);	/* Some photons will not be in the wind
 					   because the boundaries of the wind split the grid cell */
-      incell = where_in_2dcell (0, x, n, &fx, &fz);
+      incell = where_in_2dcell (ndom, x, n, &fx, &fz);
     }
 
   zz = rand () / MAXRAND - 0.5;	//positions above are all at +z distances

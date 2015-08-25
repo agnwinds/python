@@ -21,16 +21,16 @@
                   Space Telescope Science Institute
 
  Synopsis:
-	where_in_wind determines whether a position x is in  wind region.
+	where_in_wind determines whether a position x is in a wind region.
  
 Arguments:		
 	double x[3]	a position
 Returns:
  	where_in_wind returns 
 
-	The domain number if the position is in "active" region
-	of a domain.  It returns a negative number if that is not
-	the case.  
+	W_ALL_INWIND if the position is in a wind,
+	and the domain number
+
      	
 
 
@@ -80,32 +80,38 @@ History:
 			a positions is in if any.  With multiple 
 			domains, it is unclear that what inside
 			and outside the wind mean.  
+	15aug	ksl	Changed where in wind so it returns whether
+			you are in the wind or not, and added a variable
+			so that it also returns the domain if you are in 
+			the wind.
 			
 **************************************************************/
 
 int
-where_in_wind (x)
+where_in_wind (x,ndomain)
      double x[];
+     int *ndomain;
 {
   double rho, rho_min, rho_max, z;
   int ireturn;
   int ndom;
+  DomainPtr one_dom;
 
 
   /* First check for items, like the diks that are not domain
    * related, like the disk */
 
-  z = fabs (x[2]);		/* This is necessary to get correct answer above
+  z = fabs (x[2]);		/* Necessary to get correct answer above
 				   and below plane */
   rho = sqrt (x[0] * x[0] + x[1] * x[1]);	/* This is distance from z axis */
 
-  /* Now check to see if position is inside the disk */
+  /* Check if position is inside the disk for a vertically extended disk */
   if (geo.disk_type == 2)
     {
       if (rho < geo.diskrad && z < zdisk (rho))
 	{
-	  ireturn = -5;
-	  return (ireturn);
+	  *ndomain=-1;
+	  return (W_IN_DISK);
 	}
     }
 
@@ -118,34 +124,35 @@ where_in_wind (x)
       if (geo.compton_torus_rmin < rho && rho < geo.compton_torus_rmax
 	  && z < geo.compton_torus_zheight)
 	{
-	  ireturn = W_ALL_INTORUS;
-	  return (ireturn);
+		*ndomain=-1;  // PLACEHOLDER XXX need to deal with compton torus later
+	  return(W_ALL_INTORUS);
 	}
     }
 
 
-  /* Now check for things realted to the domains */
+  /* Now check whether position is a wind region of any of the domains.
+   * This is done in reverse order on the assumption that our domains
+   * are layered on top of one another.  */
+
+  ireturn=W_NOT_INWIND;
+  *ndomain=-1;
+
 
   for (ndom = geo.ndomain - 1; ndom > -1; ndom--)
     {
-      DomainPtr one_dom;
 
       one_dom = &zdom[ndom];
 
-      ireturn = ndom;
 
-      //110814 - Currently geo.wind_rmin is always set to geo.rstar except for models that are 
-      //calculated by others.  Thus we would all the grids to start at rmin.
+      /* First check to see if photon is inside or outside wind */
 
-
-      /* First check to see if photon is inside star or outside wind */
       if ((z = length (x)) < one_dom->wind_rmin)
 	{
-	  ireturn = -3;		/*x is inside the wind  radially */
+	  continue;		/*x is inside the wind  radially */
 	}
-      else if (z > one_dom->wind_rmax)
+      if (z > one_dom->wind_rmax)
 	{
-	  ireturn = -4;		/*the position is beyond the wind radially */
+	  continue;		/*the position is beyond the wind radially */
 	}
 
       /* Now for the elvis wind model, check to see if the position is
@@ -156,15 +163,17 @@ where_in_wind (x)
        * 111124 ksl
        */
 
-      if (geo.wind_type == ELVIS)
+      if (one_dom->wind_type == ELVIS)
 	{
 	  if (rho < one_dom->sv_rmin)
 	    {
-	      ireturn = -1;
+	      continue;
 	    }
 	  if (rho < one_dom->sv_rmax && z < one_dom->elvis_offset)
 	    {
-	      ireturn = ndom;
+     		*ndomain=ndom;
+     		ireturn=W_ALL_INWIND;
+	      break;  /* The position is in the cap */
 	    }
 	}
 
@@ -175,28 +184,29 @@ where_in_wind (x)
 	  (rho_min =
 	   one_dom->wind_rho_min + z * tan (one_dom->wind_thetamin)))
 	{
-	  ireturn = (-1);
+	  continue;
 	}
 
       /* Finally check if positon is outside the outer windcone */
       /* NSH 130401 - The check below was taking a long time if geo.wind_thetamax was very close to pi/2.
          check inserted to simply return INWIND if geo.wind_thetamax is within machine precision of pi/2. */
+      //XXX PLACEHOLDER -- ksl -- I am not clear on why this is ffuficient for elvis mdodel, since it seems like you could get something to the side of the cap
 
-      else if (fabs (one_dom->wind_thetamax - PI / 2.0) > 1e-6)	/* Only perform the next check if thetamax is not equal to pi/2 */
+      if (fabs (one_dom->wind_thetamax - PI / 2.0) > 1e-6)	/* Only perform the next check if thetamax is not equal to pi/2 */
 	{
 	  if (rho >
 	      (rho_max =
 	       one_dom->wind_rho_max + z * tan (one_dom->wind_thetamax)))
 	    {
-	      ireturn = (-2);
+	      continue;
 	    }
 	}
 
-      if (ireturn == ndom)
-	{
-	  return (ireturn);
-
-	}
+      /* At this point we have passed all of the tests for being in the wind */
+      
+      *ndomain=ndom;
+      ireturn=W_ALL_INWIND;
+      break;
 
     }
       return (ireturn);
@@ -435,6 +445,7 @@ model_rho (ndom, x)
      double x[];
 {
   double rho;
+  int ndomain;
 
   if (zdom[ndom].wind_type == SV)
     {
@@ -480,8 +491,8 @@ model_rho (ndom, x)
 
   /* 70b - as this is written the torus simply overlays the wind */
 
-  if ((where_in_wind (x) == W_ALL_INTORUS)
-      || (where_in_wind (x) == W_PART_INTORUS))
+  if ((where_in_wind (x,&ndomain) == W_ALL_INTORUS)
+      || (where_in_wind (x,&ndomain) == W_PART_INTORUS))
     {
       rho = torus_rho (x);
     }

@@ -93,7 +93,7 @@ write_array (filename, choice)
   int i;
   int nn, nnn[4], nelem;
   double frac[4];
-  int ndom,ndim,mdim,nstart;
+  int ndom,ndim,mdim,nstart,ndomain;
   /* PLACEHOLDER XXX */
   Log("py_wind_sub write array deos not work yet");
   ndom=0;
@@ -198,8 +198,7 @@ are linear, and x otherwise.  This is not particularly transparent ?? ksl */
 	  for (jj = 0; jj < ODIM; jj++)
 	    {
 	      xx[2] = z = zmin + jj * (zmax - zmin) / (ODIM - 1);
-	      //OLD 70B if (where_in_wind (xx) == 0)
-	      if (where_in_wind (xx) >= 0)
+	      if (where_in_wind (xx,&ndomain) == W_ALL_INWIND)
 		{		// Then the position is in the wind region
 		  coord_fraction (ndom, 0, xx, nnn, frac, &nelem);
 		  for (nn = 0; nn < nelem; nn++)

@@ -687,7 +687,7 @@ typedef struct wind
 				   to be in the wind.  This differs from the volume in the Plasma structure
 				   where the volume is the volume that is actually filled with material. */
   enum inwind_enum
-  	{	W_IGNORE=-2, 	W_NOT_INWIND=-1, 
+  	{	W_IN_DISK=-5, W_IGNORE=-2, 	W_NOT_INWIND=-1, 
   		W_ALL_INWIND=0, W_PART_INWIND=1, 
   		W_ALL_INTORUS=2, W_PART_INTORUS=3
   	}	inwind;			

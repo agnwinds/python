@@ -195,7 +195,7 @@ position_summary (w)
   struct photon p;
   int n;
   int nplasma;
-  int ndom;
+  int inwind, ndom;
 
   x[0] = geo.wind_rmax / 5;
   x[1] = 0.0;
@@ -209,9 +209,9 @@ a:Log ("Input x=0,y=0,z=0 to return to main routine\n");
   if (length (x) == 0.0)
     return (0);
 
-  ndom=where_in_wind(x);
-  if (ndom<0){
-	  Log("Position %8.2e  %8.2e %8.2e is not in an active region of grid\n", x[0], x[1], x[2]);
+  inwind=where_in_wind(x,&ndom);
+  if (inwind!=W_ALL_INWIND){
+	  Log("Position %8.2e  %8.2e %8.2e is not in an active region of grid %d %d\n", x[0], x[1], x[2],inwind,ndom);
 	  ndom=0;
   }
 

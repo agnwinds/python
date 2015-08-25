@@ -50,8 +50,9 @@ translate (w, pp, tau_scat, tau, nres)
      int *nres;
 {
   int istat;
+  int ndomain;
 
-  if (where_in_wind (pp->x) < 0)
+  if (where_in_wind (pp->x,&ndomain) < 0)
     {
       istat = translate_in_space (pp);
     }
@@ -64,7 +65,7 @@ translate (w, pp, tau_scat, tau, nres)
       istat = pp->istat = -1;	/* It's not in the wind and it's not in the grid.  Bummer! */
       Error
 	("translate: Found photon that was not in wind or grid, istat %i\n",
-	 where_in_wind (pp->x));
+	 where_in_wind (pp->x,&ndomain));
     }
 
   return (istat);

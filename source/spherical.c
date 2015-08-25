@@ -280,12 +280,12 @@ spherical_volumes (ndom, w, icomp)
   double rmin, rmax;
   double thetamin, thetamax;
   int jj, kk;
-  int ndim, nstart;
+  int ndim, nstart,ndomain;
 
   ndim = zdom[ndom].ndim;
   nstart = zdom[ndom].nstart;
 
-  /* XXX what is the purpose of icomp in spherical volumes */
+  /* XXX what is the purpose of icomp in spherical volumes. It is not used */
 
   thetamin = 0.0;
   thetamax = 0.5 * PI;
@@ -327,7 +327,7 @@ spherical_volumes (ndom, w, icomp)
 		    x[0] = r * sin (theta);
 		    x[1] = 0;
 		    x[2] = r * cos (theta);;
-		    if (where_in_wind (x) == icomp)
+		    if (where_in_wind (x, &ndomain) == W_ALL_INWIND)
 		      {
 			num += r * r * sin (theta);	/* 0 implies in wind */
 			jj++;
@@ -342,12 +342,10 @@ spherical_volumes (ndom, w, icomp)
 	    w[n].vol = 0.0;
 	  }
 	else if (jj == kk)
-	  //OLD 70b w[n].inwind = W_ALL_INWIND; // The cell is completely in the wind
-	  w[n].inwind = icomp;	// The cell is completely in the wind
+	  w[n].inwind = W_ALL_INWIND; // The cell is completely in the wind
 	else
 	  {
-	    //OLD 70b w[n].inwind = W_PART_INWIND;      //The cell is partially in the wind
-	    w[n].inwind = icomp + 1;	//The cell is partially in the wind
+	    w[n].inwind = W_PART_INWIND;      //The cell is partially in the wind
 	    w[n].vol *= fraction;
 	  }
 
@@ -456,16 +454,18 @@ spherical_get_random_location (n, icomp, x)
   int inwind;
   double r, rmin, rmax;
   double theta, phi;
-  int ndom;
+  int ndom,ndomain;
 
   ndom = wmain[n].ndom;
   wind_n_to_ij (ndom, n, &i, &j);
   rmin = zdom[ndom].wind_x[i];
   rmax = zdom[ndom].wind_x[i + 1];
 
+  // XXX PLACEHOLDER icomp is not used
+
   /* Generate a position which is both in the cell and in the wind */
-  inwind = -1;
-  while (inwind != icomp)
+  inwind = W_NOT_INWIND;
+  while (inwind != W_ALL_INWIND)
     {
       r = (rmin * rmin * rmin) +
 	(rmax * rmax * rmax -
@@ -478,7 +478,7 @@ spherical_get_random_location (n, icomp, x)
       x[0] = r * cos (phi) * sin (theta);
       x[1] = r * sin (phi) * sin (theta);
       x[2] = r * cos (theta);
-      inwind = where_in_wind (x);	/* Some photons will not be in the wind */
+      inwind = where_in_wind (x,&ndomain);	/* Some photons will not be in the wind */
     }
 
   return (inwind);
