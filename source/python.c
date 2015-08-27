@@ -725,37 +725,6 @@ main (argc, argv)
 	}
     }
 
-  /* 121219 NSH Set up DFUDGE to be a value that makes some kind of sense
-  given the scale of the wind. Up till py74b2 it was set to be fixed at
-  1e5, so we ensure that this is a minimum, so any winds of CV type scale
-  will keep the old dfudge, and hopefully look the same. We also need to
-  set defudge slightly differently for the shell wind.*/
-
-  DFUDGE = setup_dfudge();
-
-
-  /* Now define the wind cones generically. modifies the global windcone structure */
-
-  setup_windcone();
-
-
-  /*NSH 130821 broken out into a seperate routine added these lines to fix bug41, where
-  the cones are never defined for an rtheta grid if the model is restarted. 
-  
-  XXX ksl is unclear why the wind cones ar being initilized here, rather than as part of
-routines located elsewhere, but I have follwoed previous practice and reinitialized them
-as part to the domain effort.  
-  */
-
-  for (ndom=0;ndom<geo.ndomain;ndom++){
-
-  if (zdom[0].coord_type==RTHETA && geo.run_type==PREVIOUS) //We need to generate an rtheta wind cone if we are restarting
-    {
-      rtheta_make_cones(ndom,wmain);
-    }
-  }
-
-  geo.rmax_sq = geo.rmax * geo.rmax;
 
   /* Calculate additional parameters associated with the binary star system */
 
@@ -1044,7 +1013,11 @@ as part to the domain effort.
       Log ("Run with -i flag, so quitting now inputs have been gathered.\n");	
   	  exit(0);
     }
+
+/* INPUTS ARE FINALLY COMPLETE */
+
 /* Print out some diagnositic infomration about the domains */
+
 geo.ndomain = ndomain;  // Store ndomain in geo so that it can be saved
 
 Log("There are %d domains\n", geo.ndomain);
@@ -1053,7 +1026,38 @@ for(n=0;n<geo.ndomain;n++){
 }
 
 
-  /* INPUTS ARE FINALLY COMPLETE */
+  /* 121219 NSH Set up DFUDGE to be a value that makes some kind of sense
+  given the scale of the wind. Up till py74b2 it was set to be fixed at
+  1e5, so we ensure that this is a minimum, so any winds of CV type scale
+  will keep the old dfudge, and hopefully look the same. We also need to
+  set defudge slightly differently for the shell wind.*/
+
+  DFUDGE = setup_dfudge();
+
+
+  /* Now define the wind cones generically. modifies the global windcone structure */
+
+  setup_windcone();
+
+
+  /*NSH 130821 broken out into a seperate routine added these lines to fix bug41, where
+  the cones are never defined for an rtheta grid if the model is restarted. 
+  
+  XXX ksl is unclear why the wind cones ar being initilized here, rather than as part of
+routines located elsewhere, but I have follwoed previous practice and reinitialized them
+as part to the domain effort.  
+  */
+
+  for (ndom=0;ndom<geo.ndomain;ndom++){
+
+  if (zdom[0].coord_type==RTHETA && geo.run_type==PREVIOUS) //We need to generate an rtheta wind cone if we are restarting
+    {
+      rtheta_make_cones(ndom,wmain);
+    }
+  }
+
+  geo.rmax_sq = geo.rmax * geo.rmax;
+
 
 
 
