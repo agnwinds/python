@@ -400,7 +400,7 @@ the same resonance again */
 
     	/* This seems very defensive.  Is tau ever less than 0? */
 	
-		if (pp->nrscat > 0)		// SWM - Records total distance travelled by extract photon
+		if (pp->nscat > 0 || pp->origin >= 10 )		// SWM - Records total distance travelled by extract photon
 		{
 			stuff_v(pstart.x, pp->x);	// Restore photon to initial position (necessary for reweighting schemes)
 			pp->path = pstart.path;

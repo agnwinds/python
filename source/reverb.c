@@ -643,7 +643,7 @@ wind_paths_gen_phot(WindPtr wind, PhotPtr pp)
 	double	r_rand , r_total, r_bin_min, r_bin_rand;
 	int		i_path;
 
-	if(geo.wcycle == 0 || plasmamain[wind->nplasma]->ntot == 0) 
+	if(geo.wcycle == 0 || plasmamain[wind->nplasma].ntot == 0) 
 	{
 		phot_paths_gen_phot(pp);
 	}
