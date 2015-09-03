@@ -84,10 +84,10 @@ get_knigge_wind_params (ndom)
   zdom[ndom].kn_v_zero = 1.0;	/* NSH 19/04/11 Parameter which 
 				   can use to muliply the initial velocity of wind so that it
 				   is greater or less than the sound speed. */
-  zdom[ndom].wind_rmin=1;   /* Innner and outer edges of the wind in stellar radii. These
+  zdom[ndom].wind_rho_min=1;   /* Innner and outer edges of the wind in stellar radii. These
  				parameters were added by JM to allow one to duplicate the YSO
 			       paper	*/
-  zdom[ndom].wind_rmax=10.;
+  zdom[ndom].wind_rho_max=geo.diskrad/geo.rstar;
 
 /* There is confusion in various papers concerning whether to use d or d/dmin.  In KWD95, d/dmin was
 used but in later papers, e.g KD97 d in WD radii was used.  I believe d is more natural and so will use it, 
@@ -123,11 +123,11 @@ to be modified -- ksl 04jun */
   /* JM 1502 -- added capability for user to adjust launch radii of KWD wind
      required to reproduce Stuart's X-ray models (Sim+ 2008,2010) 
      units are in stellar radii / WD radii / grav radii as in SV model */
-  rddoub ("kn.rmin", &zdom[ndom].wind_rmin);
-  rddoub ("kn.rmax", &zdom[ndom].wind_rmax);
+  rddoub ("kn.rmin", &zdom[ndom].wind_rho_min);
+  rddoub ("kn.rmax", &zdom[ndom].wind_rho_max);
 
-  zdom[ndom].wind_rmin *= geo.rstar;
-  zdom[ndom].wind_rmax *= geo.rstar;
+  zdom[ndom].wind_rho_min *= geo.rstar;
+  zdom[ndom].wind_rho_max *= geo.rstar;
   zdom[ndom].wind_thetamin = atan (1. / zdom[ndom].kn_dratio);
 /* Somewhat paradoxically diskrad is in cm, while dn_ratio which is really d in KWD95 is 
 in units of WD radii */
@@ -144,12 +144,13 @@ in units of WD radii */
 	      (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (geo.diskrad))));
     }
 
-  zdom[ndom].wind_rho_min = zdom[ndom].wind_rmin;
-  zdom[ndom].wind_rho_max = zdom[ndom].wind_rmax;
+  zdom[ndom].wind_rmin = zdom[ndom].wind_rho_min;
+  zdom[ndom].wind_rmax = zdom[ndom].wind_rho_max;
   /* The change in the boundary of the wind (as corner of disk -- see above) 
      means that wind_rho_max nees to be redefined so that it is used correctly
      to compute the boundary of the wind elsewhere. */
 
+  // XXX Next lines supercede definitions above and look wrong 
   if (geo.disk_type == 2)	// If disk_type==2, then the disk is vertically extended
     {
       zdom[ndom].wind_rho_max =

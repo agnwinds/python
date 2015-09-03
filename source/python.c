@@ -385,10 +385,9 @@ main (argc, argv)
      of the system */
 
 
-  if (restart_stat == 0)	/* We are starting a new run from scratch */
+  if (restart_stat == 0)	/* We are starting a new run from scratch, which is the normal
+ mode of operation */
     {
-      /* Note that these describe wind geometries and not the type of object */
-
 
       rdint
 	("Wind_type(0=SV,1=Sphere,2=Previous,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)",
