@@ -356,8 +356,8 @@ coord_fraction (ndom, ichoice, x, ii, frac, nelem)
   else
     {
       Error
-	("coord_fraction: Don't know how to handle this coordinate type %d\n",
-	 geo.coord_type);
+	("coord_fraction: Unknown coordinate type %d for doman\n",
+	 zdom[ndom].coord_type,ndom);
       exit (0);
     }
 

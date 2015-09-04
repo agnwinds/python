@@ -593,8 +593,8 @@ be optional which variables beyond here are moved to structures othere than Wind
       else
 	{
 	  Error
-	    ("wind2d.c: Don't know how to check wind mdot for this coordtype %d\n",
-	     geo.coord_type);
+	    ("wind2d.c: Unknown coordtype %d for domain %d\n",
+	     zdom[ndom].coord_type,ndom);
 	}
     }
 

@@ -649,7 +649,7 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
     cylvar_extend_density (ndom, w);
   else
     {
-      Error ("Wind_update2d: Unknown coordinate type %d\n", geo.coord_type);
+      Error ("Wind_update2d: Unknown coordinate type %d for domain %d \n", zdom[ndom].coord_type,ndom);
       exit (0);
     }
 }

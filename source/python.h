@@ -299,7 +299,6 @@ struct geometry
 
 int ndomain;  /*The number of domains in a model*/
 
-//int ndim, mdim;  ksl: deleted these variables since goe structure does should not contain info about individual domains	
 int ndim2; 		/* This total number of windcells in all domains */
 int nplasma, nmacro;	/*The total number of cells in the plasma and macro structures in all domains */
 
@@ -357,7 +356,7 @@ enum coord_type_enum coord_type;
   double disk_mdot;		/* mdot of  DISK */
   double diskrad, diskrad_sq;
   double disk_z0, disk_z1;	/* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 */
-//  The next lines are domain specific, but we cannot remove wind_type until test photon flow through wind
+//  XXX  The next lines are domain specific, but we cannot remove wind_type until test photon flow through wind
 int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply old file
 		        Added in order to separate the question of whether we are continuing an old run fro
  		       the type of wind model 	*/

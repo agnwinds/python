@@ -66,14 +66,13 @@ int mdot_wind(WindPtr w, double z, double rmax);
 int get_random_location(int n, int icomp, double x[]);
 int zero_scatters(void);
 int check_corners_inwind(int n);
-int set_nstart_nstop(void);
 /* wind.c */
 int where_in_wind(double x[], int *ndomain);
 int wind_check(WindPtr www, int n);
 double model_velocity(int ndom, double x[], double v[]);
 int model_vgrad(int ndom, double x[], double v_grad[][3]);
 double model_rho(int ndom, double x[]);
-/* vector.c */
+/* vvector.c */
 double dot(double a[], double b[]);
 double length(double a[]);
 int renorm(double a[], double scalar);
