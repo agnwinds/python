@@ -294,6 +294,10 @@ DomainPtr zdom;
  structure.  ksl
  */
 
+#define SYSTEM_TYPE_STAR   0
+#define SYSTEM_TYPE_BINARY 1
+#define SYSTEM_TYPE_AGN    2
+
 struct geometry
 {
 
@@ -332,11 +336,9 @@ enum coord_type_enum coord_type;
   double mstar, rstar, rstar_sq, tstar, gstar;	/* Basic parameters for the WD */
   double twind;			/* temperature of wind */
   double tmax;			/*NSH 120817 the maximim temperature of any element of the model - used to help estimate things for an exponential representation of the spectrum in a cell */
-  enum system_type_enum 
-  	{	SYSTEM_TYPE_STAR	  =0, 
-  		SYSTEM_TYPE_BINARY	=1, 
-  		SYSTEM_TYPE_AGN		  =2
-  	} 	system_type;
+
+  int system_type;  /* See allowed types above */
+
   int disk_type;		/*0 --> no disk, 
 				   1 --> a standard disk in xy plane, 
 				   2 --> a vertically extended disk 

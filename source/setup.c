@@ -237,8 +237,13 @@ get_grid_params (ndom)
 {
   int input_int;
 
+  // XXX - If we keep this error, then we need to assure that geo.ndomain is incremented
+  // before this statement
+
   if (ndom >= geo.ndomain)
     Error ("Trying to get wind grid params for a non-existent wind!\n");
+
+  input_int=1;
 
   /* ksl - The if statement seems superflous.  Why are we entering this routine if we are continuing and earlier calculation? */
   if (geo.wind_type != PREVIOUS)

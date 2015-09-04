@@ -69,7 +69,7 @@ get_knigge_wind_params (ndom)
 
   Log ("Creating Knigge's wind description for Cataclysmic Variable\n");
 
-  zdom[ndom].wind_mdot /= MSOL / YR;
+  zdom[ndom].wind_mdot = 0.1*geo.disk_mdot / (MSOL / YR);
   rddoub ("wind.mdot(msol/yr)", &zdom[ndom].wind_mdot);
   geo.wind_mdot *= MSOL / YR;
 
