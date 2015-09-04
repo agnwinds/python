@@ -1076,6 +1076,7 @@ mdot_wind (w, z, rmax)
 
   ndom = 0;
 
+  // XXX  = mdot_wind could be generalized
   Log ("For simplicity, mdot wind checks only carried out for domain 0\n");
 
 // Calculate the mass loss rate immediately above the disk
@@ -1100,9 +1101,8 @@ mdot_wind (w, z, rmax)
       den = rho (w, x);
       vwind_xyz (ndom, &p, v);
       mdot += 2 * PI * r * dr * den * v[2];
-//mdot+=2*PI*r*dr;
     }
-  mplane = 2 * mdot;		// Factor of two because wind is in both hemispheres
+  //
 // Calculate the mass loss rate in a sphere
   dtheta = PI / (2 * NSTEPS);
   mdot = 0;
@@ -1119,8 +1119,10 @@ mdot_wind (w, z, rmax)
       mdot += 2 * PI * rmax * rmax * sin (theta) * dtheta * den * dot (v, q);
     }
   msphere = 2 * mdot;		// Factor of two because wind is in both hemispheres
+
   Log ("Wind Mdot Desired %e Plane %e Sphere(%e) %e\n",
-       geo.wind_mdot, mplane, rmax, msphere);
+       zdom[ndom].wind_mdot, mplane, rmax, msphere);
+
   return (0);
 }
 

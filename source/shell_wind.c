@@ -55,7 +55,7 @@ get_shell_wind_params (ndom)
   int i;
 
 
-  //PlACEHOLDER
+  //PlACEHOLDER  XXX
   Log("XXX Not fixed for domains");
   Log ("Creating wind with a single shell for testing purposes\n");
 
@@ -80,26 +80,26 @@ get_shell_wind_params (ndom)
     }
 
 
-  geo.stellar_wind_mdot = 1.e-6;
-  geo.wind_rmin = geo.rstar;
-  geo.cl_beta = 1.0;
-  shell_rmin = geo.cl_rmin = 2.8e9;
-  shell_vmin = geo.cl_v_zero = 200e5;
-  shell_vmax = geo.cl_v_infinity = 3000e5;
+  zdom[ndom].stellar_wind_mdot = 1.e-6;
+  zdom[ndom].wind_rmin = geo.rstar;
+  zdom[ndom].cl_beta = 1.0;
+  shell_rmin = zdom[ndom].cl_rmin = 2.8e9;
+  shell_vmin = zdom[ndom].cl_v_zero = 200e5;
+  shell_vmax = zdom[ndom].cl_v_infinity = 3000e5;
 
-  geo.stellar_wind_mdot /= MSOL / YR;
-  rddoub ("shell_wind_mdot(msol/yr)", &geo.stellar_wind_mdot);
-  geo.stellar_wind_mdot *= MSOL / YR;
+  zdom[ndom].stellar_wind_mdot /= MSOL / YR;
+  rddoub ("shell_wind_mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
+  zdom[ndom].stellar_wind_mdot *= MSOL / YR;
 
-  rddoub ("shell.wind.radmin(cm)", &geo.wind_rmin);	/*Radius where wind begins */
-  if (geo.wind_rmin < geo.rstar)
+  rddoub ("shell.wind.radmin(cm)", &zdom[ndom].wind_rmin);	/*Radius where wind begins */
+  if (zdom[ndom].wind_rmin < geo.rstar)
     {
       Error
 	("get_shell_wind_params: It is unreasonable to have the wind start inside the star!\n");
       Log ("Setting geo.wind_rmin to geo.rstar\n");
-      geo.wind_rmin = geo.rstar;
+      zdom[ndom].wind_rmin = geo.rstar;
     }
-  geo.cl_rmin = shell_rmin = geo.wind_rmin;
+  zdom[ndom].cl_rmin = shell_rmin = zdom[ndom].wind_rmin;
 
 
 /*120130 NSH the next two lines have been modified to mean that the wind will end up as a CL wind, but the v_0 and v_infinity will be calulated here from these two variables, which are now local */
@@ -108,13 +108,13 @@ get_shell_wind_params (ndom)
   rddoub ("shell.wind.v_at_rmax(cm)", &shell_vmax);	/* Final speed of wind in units of escape velocity */
 
 /*120130 NSH This line stays as it is */
-  rddoub ("shell.wind.acceleration_exponent", &geo.cl_beta);	/* Accleration scale exponent for a CL wind */
+  rddoub ("shell.wind.acceleration_exponent", &zdom[ndom].cl_beta);	/* Accleration scale exponent for a CL wind */
   Log ("Geo rmax = %f\n", geo.rmax);
-  shell_rmax = geo.wind_rmax = geo.rmax;
+  shell_rmax = zdom[ndom].wind_rmax = geo.rmax;
 /*120130 NSH These next lines invert the cl velocity equation to get the cl factors from the local shell factors */
-  geo.cl_v_zero = shell_vmin;
-  factor = pow ((1 - (geo.wind_rmin / geo.wind_rmax)), geo.cl_beta);
-  geo.cl_v_infinity =
+  zdom[ndom].cl_v_zero = shell_vmin;
+  factor = pow ((1 - (zdom[ndom].wind_rmin / zdom[ndom].wind_rmax)), zdom[ndom].cl_beta);
+  zdom[ndom].cl_v_infinity =
     (shell_vmax - shell_vmin + shell_vmin * factor) / factor;
 
 
@@ -125,12 +125,12 @@ get_shell_wind_params (ndom)
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 //  geo.wind_rmin = geo.rstar;
 
-  geo.wind_thetamin = 0.0;
-  geo.wind_thetamax = 90. / RADIAN;
+  zdom[ndom].wind_thetamin = 0.0;
+  zdom[ndom].wind_thetamax = 90. / RADIAN;
 
 /* define the the variables that determine the gridding */
-  geo.wind_rho_min = 0;
-  geo.wind_rho_max = geo.rmax;
+  zdom[ndom].wind_rho_min = 0;
+  zdom[ndom].wind_rho_max = geo.rmax;
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)

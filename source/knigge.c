@@ -71,7 +71,7 @@ get_knigge_wind_params (ndom)
 
   zdom[ndom].wind_mdot = 0.1*geo.disk_mdot / (MSOL / YR);
   rddoub ("wind.mdot(msol/yr)", &zdom[ndom].wind_mdot);
-  geo.wind_mdot *= MSOL / YR;
+  zdom[ndom].wind_mdot *= MSOL / YR;
 
 
   zdom[ndom].kn_r_scale = 7e10;	/*Accleration length scale for wind */
@@ -588,7 +588,7 @@ kn_rho_zero (ndom, r)
     ratio = kfudge;
 
   t = teff (tref, ratio);
-  x = geo.wind_mdot * pow (t, 4. * one_dom->kn_lambda) / one_dom->mdot_norm;
+  x = one_dom->wind_mdot * pow (t, 4. * one_dom->kn_lambda) / one_dom->mdot_norm;
   vzero = kn_vzero (r);
   dd = geo.rstar * one_dom->kn_dratio;
   cosd = dd / sqrt (r * r + dd * dd);

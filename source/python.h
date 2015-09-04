@@ -439,7 +439,7 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
   char model_list[NCOMPS][LINELENGTH];	/* The file which contains the model names and the associated values for the model */
 
   /* Generic parameters for the wind */
-  double wind_mdot, stellar_wind_mdot;	/* Mass loss rate in disk and stellar wind */
+//Eliminated in domains  double wind_mdot, stellar_wind_mdot;	/* Mass loss rate in disk and stellar wind */
   double wind_rmin, wind_rmax;	/*Spherical extent of the wind */
   double wind_rho_min, wind_rho_max;	/*Min/Max rho for wind in disk plane */
   double wind_thetamin, wind_thetamax;	/*Angles defining inner and outer cones of wind, measured from disk plane */

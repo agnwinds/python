@@ -74,12 +74,15 @@ get_elvis_wind_params (ndom)
 {
   double windmin, windmax, theta_min, theta_max;
 
+  //XXX This is not debugged
+
   edom = ndom;
 
   Log ("Creating an SV/Elvis wind model for an AGN\n");
 
-  rddoub ("wind.mdot(msol/yr)", &geo.wind_mdot);
-  geo.wind_mdot *= MSOL / YR;
+  zdom[ndom].wind_mdot=0.1*geo.disk_mdot/ (MSOL / YR);
+  rddoub ("wind.mdot(msol/yr)", &zdom[ndom].wind_mdot);
+  zdom[ndom].wind_mdot *= MSOL / YR;
 
 
   zdom[ndom].sv_rmin = 2.8e9;

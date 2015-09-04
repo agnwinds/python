@@ -54,35 +54,37 @@ get_stellar_wind_params (ndom)
 {
   Log ("Creating a wind model for a Star\n");
 
+  // XXX stellar winds are not debugged
 
 
-  geo.stellar_wind_mdot = 1.e-6;
-  geo.wind_rmin = geo.rstar;
-  geo.cl_beta = 1.0;
-  geo.cl_rmin = 2.8e9;
-  geo.cl_v_zero = 200e5;
-  geo.cl_v_infinity = 3000e5;
 
-  geo.stellar_wind_mdot /= MSOL / YR;
-  rddoub ("stellar_wind_mdot(msol/yr)", &geo.stellar_wind_mdot);
-  geo.stellar_wind_mdot *= MSOL / YR;
+  zdom[ndom].stellar_wind_mdot = 1.e-6;
+  zdom[ndom].wind_rmin = geo.rstar;
+  zdom[ndom].cl_beta = 1.0;
+  zdom[ndom].cl_rmin = 2.8e9;
+  zdom[ndom].cl_v_zero = 200e5;
+  zdom[ndom].cl_v_infinity = 3000e5;
 
-  rddoub ("stellar.wind.radmin(cm)", &geo.wind_rmin);	/*Radius where wind begins */
-  if (geo.wind_rmin < geo.rstar)
+  zdom[ndom].stellar_wind_mdot /= MSOL / YR;
+  rddoub ("stellar_wind_mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
+  zdom[ndom].stellar_wind_mdot *= MSOL / YR;
+
+  rddoub ("stellar.wind.radmin(cm)", &zdom[ndom].wind_rmin);	/*Radius where wind begins */
+  if (zdom[ndom].wind_rmin < geo.rstar)
     {
       Error
 	("get_stellar_wind_params: It is unreasonable to have the wind start inside the star!\n");
       Log ("Setting geo.wind_rmin to geo.rstar\n");
-      geo.wind_rmin = geo.rstar;
+      zdom[ndom].wind_rmin = geo.rstar;
     }
-  geo.cl_rmin = geo.wind_rmin;
-  rddoub ("stellar.wind_vbase(cm)", &geo.cl_v_zero);	/* Velocity at base of the wind */
-  rddoub ("stellar.wind.v_infinity(cm)", &geo.cl_v_infinity);	/* Final speed of wind in units of escape velocity */
+  zdom[ndom].cl_rmin = zdom[ndom].wind_rmin;
+  rddoub ("stellar.wind_vbase(cm)", &zdom[ndom].cl_v_zero);	/* Velocity at base of the wind */
+  rddoub ("stellar.wind.v_infinity(cm)", &zdom[ndom].cl_v_infinity);	/* Final speed of wind in units of escape velocity */
 
-  rddoub ("stellar.wind.acceleration_exponent", &geo.cl_beta);	/* Accleration scale exponent */
+  rddoub ("stellar.wind.acceleration_exponent", &zdom[ndom].cl_beta);	/* Accleration scale exponent */
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
-  geo.wind_rmin = geo.wind_rmin;	//71 ksl - Not modified this so that we did not waste cells
+  geo.wind_rmin = zdom[ndom].wind_rmin;	//71 ksl - Not modified this so that we did not waste cells
   zdom[ndom].wind_rmax = geo.rmax;
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 90. / RADIAN;
