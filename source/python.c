@@ -233,10 +233,10 @@ main (argc, argv)
   long nphot_to_define;
   int n, nangles;
   int iwind;
-  int thermal_opt; /*NSH 131213 - added to control options to turn on and off some heating and cooling mechanisms */
+  int thermal_opt;		/*NSH 131213 - added to control options to turn on and off some heating and cooling mechanisms */
 
   /* Next three lines have variables that should be a structure, or possibly we
-  should allocate the space for the spectra to avoid all this nonsense.  02feb ksl */
+     should allocate the space for the spectra to avoid all this nonsense.  02feb ksl */
 
   double angle[NSPEC], phase[NSPEC];
   int scat_select[NSPEC], top_bot_select[NSPEC];
@@ -256,32 +256,32 @@ main (argc, argv)
   int disk_illum;
   int opar_stat, restart_stat;
   double time_max;		// The maximum time the program is allowed to run before halting
-  double lstar;                 // The luminosity of the star, iv it exists
+  double lstar;			// The luminosity of the star, iv it exists
 
-  int my_rank;		// these two variables are used regardless of parallel mode
-  int np_mpi;		// rank and number of processes, 0 and 1 in non-parallel
+  int my_rank;			// these two variables are used regardless of parallel mode
+  int np_mpi;			// rank and number of processes, 0 and 1 in non-parallel
   int time_to_quit;
   int input_int;
-  int ndomain=0;       //Local variable for ndomain
+  int ndomain = 0;		//Local variable for ndomain
   int ndom;
 
-  int mkdir();
+  int mkdir ();
 
-  #ifdef MPI_ON
-    int ioniz_spec_helpers, spec_spec_helpers;
+#ifdef MPI_ON
+  int ioniz_spec_helpers, spec_spec_helpers;
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &np_mpi);
-  #else
-    my_rank = 0;
-    np_mpi=1;
-  #endif
-  
-  np_mpi_global = np_mpi;              /// Glob al variable which holds the number of MPI processes
-  rank_global = my_rank;   /// Global variable which holds the rank of the active MPI process
+  MPI_Init (&argc, &argv);
+  MPI_Comm_rank (MPI_COMM_WORLD, &my_rank);
+  MPI_Comm_size (MPI_COMM_WORLD, &np_mpi);
+#else
+  my_rank = 0;
+  np_mpi = 1;
+#endif
 
-  Log_set_mpi_rank(my_rank, np_mpi);	// communicates my_rank to kpar
+  np_mpi_global = np_mpi;	/// Glob al variable which holds the number of MPI processes
+  rank_global = my_rank;	/// Global variable which holds the rank of the active MPI process
+
+  Log_set_mpi_rank (my_rank, np_mpi);	// communicates my_rank to kpar
 
 
   opar_stat = 0;		/* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
@@ -293,6 +293,8 @@ main (argc, argv)
 				   is initially set to the lifetime of the universe
 				 */
 
+  time_max = -1;
+
   verbosity = 3;		/* Set the default verbosity to 3.  To get more info raise the verbosity level to a higher number. To
 				   get less set the verbosity to a lower level. */
 
@@ -302,11 +304,9 @@ main (argc, argv)
   Log_set_verbosity (verbosity);
 
 
-  restart_stat = 0;
-  time_max = -1;
 
   /* initialise options for advanced mode (all set to 0) */
-  init_advanced_modes();
+  init_advanced_modes ();
 
 
   /* Parse the command line. Get the root. create files.diagfolder + diagfiles */
@@ -318,10 +318,9 @@ main (argc, argv)
   /* 0811 - ksl - If the restart flag has been set, we check to see if a windsave file exists.  If it doues we will 
      we will restart from that point.  If the windsave file does not exist we will start from scratch */
 
-  init_log_and_windsave(restart_stat);
+  init_log_and_windsave (restart_stat);
 
-  Log_parallel ("Thread %d starting.\n", my_rank); //JM130723 moved this after verbosity switch
-
+  Log_parallel ("Thread %d starting.\n", my_rank);	//JM130723 moved this after verbosity switch
 
 
   /* Start logging of errors and comments */
@@ -331,11 +330,14 @@ main (argc, argv)
   /* warn the user if there are uncommited changes */
   int git_diff_status = GIT_DIFF_STATUS;
   if (git_diff_status > 0)
-  	Log("!!Git: This version was compiled with %i files with uncommitted changes.\n",
-  		  git_diff_status);
+    Log
+      ("!!Git: This version was compiled with %i files with uncommitted changes.\n",
+       git_diff_status);
   Log ("!!Python is running with %d processors\n", np_mpi_global);
-  Log_parallel ("This is MPI task number %d (a total of %d tasks are running).\n", rank_global, np_mpi_global);
-  Debug("Debug statements are on. To turn off use lower verbosity (< 5).\n");
+  Log_parallel
+    ("This is MPI task number %d (a total of %d tasks are running).\n",
+     rank_global, np_mpi_global);
+  Debug ("Debug statements are on. To turn off use lower verbosity (< 5).\n");
 
   /* Set the maximum time if it was defined */
   if (time_max > 0)
@@ -343,16 +345,18 @@ main (argc, argv)
       set_max_time (files.root, time_max);
     }
 
-  xsignal (files.root, "%-20s Initializing variables for %s\n", "NOK", files.root);
-  
-  opar_stat = setup_created_files();
+  xsignal (files.root, "%-20s Initializing variables for %s\n", "NOK",
+	   files.root);
+
+  opar_stat = setup_created_files ();
 
 
 /* Provide plausible initial values for the sizes of the wind arrays.  This is desirable
  * primarily for creating reasonable .pf files*/
 
 /* Set plausible values for everything in geo struct which basically defines the overall geometry */
-/* JM 1508 -- init_geo() also allocates the memory for the domain structure */  
+/* JM 1508 -- init_geo() also allocates the memory for the domain structure */
+
   init_geo ();
 
 /* Set the global variables that define the size of the grid as defined in geo.  These are used for convenience */
@@ -364,14 +368,14 @@ main (argc, argv)
 /* Initialize variables which are used in the main routine */
 
 
-/* Initialize basis vectors for a cartesian coordinate system */
+/* Initialize basis vectors for a cartesian coordinate system (used by anioswind) */
 
-  x_axis[0] = 1.0;
-  x_axis[1] = x_axis[2] = 0.0;
-  y_axis[1] = 1.0;
-  y_axis[0] = y_axis[2] = 0.0;
-  z_axis[2] = 1.0;
-  z_axis[1] = z_axis[0] = 0.0;
+x_axis[0] = 1.0;
+x_axis[1] = x_axis[2] = 0.0;
+y_axis[1] = 1.0;
+y_axis[0] = y_axis[2] = 0.0;
+z_axis[2] = 1.0;
+z_axis[1] = z_axis[0] = 0.0;
 
 
 
@@ -386,29 +390,29 @@ main (argc, argv)
 
 
   if (restart_stat == 0)	/* We are starting a new run from scratch, which is the normal
- mode of operation */
+				   mode of operation */
     {
 
       rdint
 	("Wind_type(0=SV,1=Sphere,2=Previous,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)",
 	 &zdom[ndomain].wind_type);
 
-      geo.run_type=0;
+      geo.run_type = 0;
       if (zdom[ndomain].wind_type == PREVIOUS)
-        {
-	      geo.run_type=PREVIOUS;
-        }
-      else if (zdom[ndomain].wind_type != 10) 
-        {
-	      strcat(zdom[ndomain].name,"Wind");
-	      geo.wind_domain_number = ndomain;
-	      ndomain++;
-        }
+	{
+	  geo.run_type = PREVIOUS;
+	}
+      else if (zdom[ndomain].wind_type != 10)
+	{
+	  strcat (zdom[ndomain].name, "Wind");
+	  geo.wind_domain_number = ndomain;
+	  ndomain++;
+	}
       else
-        {
-      	  /* there's no wind, set wind domain_number to -1 */
-      	  geo.wind_domain_number = -1;
-        }
+	{
+	  /* there's no wind, set wind domain_number to -1 */
+	  geo.wind_domain_number = -1;
+	}
 
       if (geo.run_type == PREVIOUS)
 	{
@@ -440,14 +444,14 @@ main (argc, argv)
 				   and old wind files, we also got the atomic data */
 
 	  rdstr ("Atomic_data", geo.atomic_filename);
-      
-      /* read a variable which controls whether to save a summary of atomic data
-         this is defined in atomic.h, rather than the modes structure */
-	  if (modes.iadvanced)	
-	  	rdint ("write_atomicdata", &write_atomicdata);	
+
+	  /* read a variable which controls whether to save a summary of atomic data
+	     this is defined in atomic.h, rather than the modes structure */
+	  if (modes.iadvanced)
+	    rdint ("write_atomicdata", &write_atomicdata);
 
 	  if (write_atomicdata)
-	  	Log("You have opted to save a summary of the atomic data\n");
+	    Log ("You have opted to save a summary of the atomic data\n");
 
 	  get_atomic_data (geo.atomic_filename);
 
@@ -458,7 +462,7 @@ main (argc, argv)
 
     }
 
-  else	if (restart_stat == 1)		/* We want to continue a previous run*/
+  else if (restart_stat == 1)	/* We want to continue a previous run */
     {
       Log ("Continuing a previous run of %s \n", files.root);
       strcpy (files.old_windsave, files.root);
@@ -489,7 +493,7 @@ main (argc, argv)
 
   x = 100000;
   rddoub ("photons_per_cycle", &x);
-  NPHOT = x;	// NPHOT is photons/cycle
+  NPHOT = x;			// NPHOT is photons/cycle
 
 #ifdef MPI_ON
   Log ("Photons per cycle per MPI task will be %d\n", NPHOT / np_mpi_global);
@@ -502,7 +506,7 @@ main (argc, argv)
   rdint ("spectrum_cycles", &geo.pcycles);
 
 
-  Debug ("Test %d %d \n",geo.wcycles,geo.pcycles);
+  Debug ("Test %d %d \n", geo.wcycles, geo.pcycles);
 
   if (geo.wcycles == 0 && geo.pcycles == 0)
     exit (0);			//There is really nothing to do!
@@ -521,7 +525,7 @@ main (argc, argv)
   /* Define the coordinate system for the grid and allocate memory for the wind structure
      by reading from user */
   if (geo.wind_domain_number != -1)
-    get_grid_params(ndomain - 1); // JM PLACEHOLDER -- really we should change the input order here!
+    get_grid_params (ndomain - 1);	// JM PLACEHOLDER -- really we should change the input order here!
 
 
   /* 080808 - 62 - Ionization section has been cleaned up -- ksl */
@@ -548,35 +552,34 @@ main (argc, argv)
 
 
   /*Normally, geo.partition_mode is set to -1, which means that partition functions are calculated to take
-  full advantage of the data file.  This means that in calculating the partition functions, the information
-  on levels and their multiplicities is taken into account.   */
+     full advantage of the data file.  This means that in calculating the partition functions, the information
+     on levels and their multiplicities is taken into account.   */
 
   geo.partition_mode = -1;	//?? Stuart, is there a reason not to move this earlier so it does not affect restart
 
-  
+
   /* get_line_transfer_mode reads in the Line_transfer question from the user, 
      then alters the variables geo.line_mode, geo.scatter_mode, geo.rt_mode and geo.macro_simple */
-  
-  get_line_transfer_mode();
+
+  get_line_transfer_mode ();
 
 
-  
 
-  thermal_opt = 0; /* NSH 131213 Set the option to zero - the default. The lines allow allow the
-  user to turn off mechanisms that affect the thermal balance. Adiabatic is the only one implemented
-  to start off with. */
+
+  thermal_opt = 0;		/* NSH 131213 Set the option to zero - the default. The lines allow allow the
+				   user to turn off mechanisms that affect the thermal balance. Adiabatic is the only one implemented
+				   to start off with. */
 
   rdint
-    ("Thermal_balance_options(0=everything.on,1=no.adiabatic)",
-     &thermal_opt);
+    ("Thermal_balance_options(0=everything.on,1=no.adiabatic)", &thermal_opt);
 
   if (thermal_opt == 1)
-	{
-	  geo.adiabatic = 0;
-	}
+    {
+      geo.adiabatic = 0;
+    }
 
   else if (thermal_opt > 1 || thermal_opt < 0)
-	{
+    {
       Error ("Unknown thermal balance mode %d\n", thermal_opt);
       exit (0);
     }
@@ -598,50 +601,61 @@ main (argc, argv)
     }
 
   /*  Establish the overall system type  
-      Note 1509 - ksl - Exactly what we call a system type is a little bizarre. The original
+     Note 1509 - ksl - Exactly what we call a system type is a little bizarre. The original
      intent of this was to allow one to ignore a secondary star, but with addition of AGN it, really
-    is a bit unclear what one would like to use here */
+     is a bit unclear what one would like to use here */
 
-  geo.system_type=SYSTEM_TYPE_STAR;  
-  rdint ("System_type(0=star,1=binary,2=agn)", &geo.system_type);	
+  geo.system_type = SYSTEM_TYPE_STAR;
+  rdint ("System_type(0=star,1=binary,2=agn)", &geo.system_type);
 
 
   /* specify if there is a disk and what type */
   /* JM 1502 -- moved disk type question here- previously it was just before
      asking for disk radiation. See #8 and #44 */
   rdint
-	("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
-	 &geo.disk_type);
+    ("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
+     &geo.disk_type);
 
   /* ksl 1508 Add parameters for a disk atmosphere */
   zdom[ndomain].ndim = 30;
   zdom[ndomain].mdim = 10;
 
-  rdint("disk.atmosphere(0=no,1=yes)",&geo.disk_atmosphere);
-  if (geo.disk_atmosphere != 0) 
+  rdint ("disk.atmosphere(0=no,1=yes)", &geo.disk_atmosphere);
+  if (geo.disk_atmosphere != 0)
     {
-      /* specify the domain name and number */	
-      strcat(zdom[ndomain].name,"Disk Atmosphere");
-	  geo.atmos_domain_number = ndomain;	
+      /* specify the domain name and number */
+      strcat (zdom[ndomain].name, "Disk Atmosphere");
+      geo.atmos_domain_number = ndomain;
 
-	  input_int=1;
-	  rdint  ("atmos.coord.system(1=cylindrical,2=spherical_polar,3=cyl_var)", &input_int);
-	
-	switch(input_int)
+      input_int = 1;
+      rdint ("atmos.coord.system(1=cylindrical,2=spherical_polar,3=cyl_var)",
+	     &input_int);
+
+      switch (input_int)
 	{
-		case 0: zdom[ndomain].coord_type = SPHERICAL; break;
-		case 1: zdom[ndomain].coord_type = CYLIND; break;
-		case 2: zdom[ndomain].coord_type = RTHETA; break;
-		case 3: zdom[ndomain].coord_type = CYLVAR; break;
-		default: Error("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
+	case 0:
+	  zdom[ndomain].coord_type = SPHERICAL;
+	  break;
+	case 1:
+	  zdom[ndomain].coord_type = CYLIND;
+	  break;
+	case 2:
+	  zdom[ndomain].coord_type = RTHETA;
+	  break;
+	case 3:
+	  zdom[ndomain].coord_type = CYLVAR;
+	  break;
+	default:
+	  Error
+	    ("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
                         0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
+	}
+
+
+      rdint ("atmos.dim.in.x_or_r.direction", &zdom[ndomain].ndim);
+      rdint ("atmos.dim.in.z_or_theta.direction", &zdom[ndomain].mdim);
+      ndomain++;
     }
-
-
-	  rdint ("atmos.dim.in.x_or_r.direction", &zdom[ndomain].ndim);
-	  rdint ("atmos.dim.in.z_or_theta.direction", &zdom[ndomain].mdim);
-	  ndomain++;
-  }
 
 
 
@@ -649,7 +663,7 @@ main (argc, argv)
   /* Determine what radiation sources there are.  
      Note that most of these values are initilized in init_geo */
 
-  get_radiation_sources (); 
+  get_radiation_sources ();
 
 
   if (geo.run_type == PREVIOUS)
@@ -670,35 +684,35 @@ main (argc, argv)
 
       if (geo.disk_type)	/* Then a disk exists and it needs to be described */
 	{
-      disk_illum = get_disk_params ();
+	  disk_illum = get_disk_params ();
 	}
 
       else
-	{			
+	{
 	  /* There is no disk so set variables accordingly */
 	  geo.disk_radiation = 0;
 	  geo.diskrad = 0;
 	}
 
-    /* describe the boundary layer / agn components to the spectrum if they exist. 
-       reads in information specified by the user and sets variables in geo structure */
-    get_bl_and_agn_params (lstar);
+      /* describe the boundary layer / agn components to the spectrum if they exist. 
+         reads in information specified by the user and sets variables in geo structure */
+      get_bl_and_agn_params (lstar);
 
 
 
-    /* Describe the Compton torus */
-    geo.compton_torus=0;
+      /* Describe the Compton torus */
+      geo.compton_torus = 0;
 
-    /* JM 1411 -- we only ask about the Torus if we've used the -d flag */
-    if (modes.iadvanced)
-      get_compton_torus_params ();
+      /* JM 1411 -- we only ask about the Torus if we've used the -d flag */
+      if (modes.iadvanced)
+	get_compton_torus_params ();
 
 
 
-    /* Describe the wind. This routine reads in geo.rmax and geo.twind
-       and then gets params by calling e.g. get_sv_wind_params() */
-    /* PLACEHOLDER -- XXX call with wind domain number */
-      get_wind_params (geo.wind_domain_number);	
+      /* Describe the wind. This routine reads in geo.rmax and geo.twind
+         and then gets params by calling e.g. get_sv_wind_params() */
+      /* PLACEHOLDER -- XXX call with wind domain number */
+      get_wind_params (geo.wind_domain_number);
 
     }				// End of block to define a model for the first time
 
@@ -848,7 +862,7 @@ main (argc, argv)
 	  exit (0);
 	}
 
-    
+
       for (n = 0; n < nangles; n++)
 	rddoub ("angle(0=pole)", &angle[n]);
 
@@ -859,14 +873,15 @@ main (argc, argv)
       /* JM 1502 -- change this so we only ask for phase if the system is a binary -- see #137 */
 
       if (geo.system_type == SYSTEM_TYPE_BINARY)
-      {
-        
-        for (n = 0; n < nangles; n++)
-	      rddoub ("phase(0=inferior_conjunction)", &phase[n]);
-      }
+	{
+
+	  for (n = 0; n < nangles; n++)
+	    rddoub ("phase(0=inferior_conjunction)", &phase[n]);
+	}
       else
-      	Log("No phase information needed as system type %i is not a binary\n",
-      		 geo.system_type);
+	Log
+	  ("No phase information needed as system type %i is not a binary\n",
+	   geo.system_type);
 
 
       rdint ("live.or.die(0).or.extract(anything_else)", &select_extract);
@@ -882,39 +897,40 @@ main (argc, argv)
  * 141116 - ksl The following options are clealy diagnostic and have been relegated to 
  * advanced commands*/
 
-      if (modes.iadvanced) {
-      strcpy (yesno, "n");
-      rdstr ("Select_specific_no_of_scatters_in_spectra(y/n)", yesno);
-      if (yesno[0] == 'y')
+      if (modes.iadvanced)
 	{
-	  Log
-	    ("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
-	  for (n = 0; n < nangles; n++)
+	  strcpy (yesno, "n");
+	  rdstr ("Select_specific_no_of_scatters_in_spectra(y/n)", yesno);
+	  if (yesno[0] == 'y')
 	    {
-	      rdint ("Select_scatters", &scat_select[n]);
-	    }
-	}
-      strcpy (yesno, "n");
-      rdstr ("Select_photons_by_position(y/n)", yesno);
-      if (yesno[0] == 'y')
-	{
-	  Log
-	    ("OK 0->all; -1 -> below; 1 -> above the disk, 2 -> specific location in wind\n");
-	  for (n = 0; n < nangles; n++)
-	    {
-	      rdint ("Select_location", &top_bot_select[n]);
-	      if (top_bot_select[n] == 2)
+	      Log
+		("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
+	      for (n = 0; n < nangles; n++)
 		{
-		  Log
-		    ("Warning: Make sure that position will be in wind, or no joy will be obtained\n");
-		  rddoub ("rho(cm)", &rho_select[n]);
-		  rddoub ("z(cm)", &z_select[n]);
-		  rddoub ("azimuth(deg)", &az_select[n]);
-		  rddoub ("r(cm)", &r_select[n]);
-
+		  rdint ("Select_scatters", &scat_select[n]);
 		}
 	    }
-	}
+	  strcpy (yesno, "n");
+	  rdstr ("Select_photons_by_position(y/n)", yesno);
+	  if (yesno[0] == 'y')
+	    {
+	      Log
+		("OK 0->all; -1 -> below; 1 -> above the disk, 2 -> specific location in wind\n");
+	      for (n = 0; n < nangles; n++)
+		{
+		  rdint ("Select_location", &top_bot_select[n]);
+		  if (top_bot_select[n] == 2)
+		    {
+		      Log
+			("Warning: Make sure that position will be in wind, or no joy will be obtained\n");
+		      rddoub ("rho(cm)", &rho_select[n]);
+		      rddoub ("z(cm)", &z_select[n]);
+		      rddoub ("azimuth(deg)", &az_select[n]);
+		      rddoub ("r(cm)", &r_select[n]);
+
+		    }
+		}
+	    }
 	}
     }
 
@@ -935,14 +951,14 @@ main (argc, argv)
 
 
   /* 57h -- New section of inputs to provide more control over how the program is
-  run -- 07jul -- ksl
-  1502 JM -- moved to subroutine
-  */
+     run -- 07jul -- ksl
+     1502 JM -- moved to subroutine
+   */
 
-  get_standard_care_factors();
+  get_standard_care_factors ();
 
-	/* 0415 SWM - Added metaparams */
-	get_meta_params();
+  /* 0415 SWM - Added metaparams */
+  get_meta_params ();
 
 
 /* 081221 - 67c - Establish limits on the frequency intervals to be used by the ionization cycles and 
@@ -960,25 +976,25 @@ main (argc, argv)
 
   bands_init (-1, &xband);
 
-  /*if we have changed min and max in bands_init, we need to make sure this is reflected in the frequency bounds*/
+  /*if we have changed min and max in bands_init, we need to make sure this is reflected in the frequency bounds */
   freqmin = xband.f1[0];
   freqmax = xband.f2[xband.nbands - 1];
 
- /* 1112 - 71 - ksl Next routine sets up the frequencies that are used for charactizing the spectrum in a cell
- * These need to be coordinated with the bands that are set up for spectral gneration
- */
+  /* 1112 - 71 - ksl Next routine sets up the frequencies that are used for charactizing the spectrum in a cell
+   * These need to be coordinated with the bands that are set up for spectral gneration
+   */
   freqs_init (freqmin, freqmax);
 
-  
+
   if (modes.iadvanced)
     {
       /* Do we require extra diagnostics or not */
       rdint ("Extra.diagnostics(0=no,1=yes) ", &modes.diag_on_off);
 
       if (modes.diag_on_off)
-        {
-          get_extra_diagnostics();
-        }
+	{
+	  get_extra_diagnostics ();
+	}
     }
 
 
@@ -1004,51 +1020,54 @@ main (argc, argv)
   /* JM 1502 -- if we have used the -i flag we want to quit after inputs as we were just testing readin */
   if (modes.quit_after_inputs)
     {
-      Log ("Run with -i flag, so quitting now inputs have been gathered.\n");	
-  	  exit(0);
+      Log ("Run with -i flag, so quitting now inputs have been gathered.\n");
+      exit (0);
     }
 
 /* INPUTS ARE FINALLY COMPLETE */
 
 /* Print out some diagnositic infomration about the domains */
 
-geo.ndomain = ndomain;  // Store ndomain in geo so that it can be saved
+  geo.ndomain = ndomain;	// Store ndomain in geo so that it can be saved
 
-Log("There are %d domains\n", geo.ndomain);
-for(n=0;n<geo.ndomain;n++){
-	Log("%20s %d %d %d %d\n",zdom[n].name,zdom[n].wind_type,zdom[n].ndim,zdom[n].mdim,zdom[n].ndim2);
-}
+  Log ("There are %d domains\n", geo.ndomain);
+  for (n = 0; n < geo.ndomain; n++)
+    {
+      Log ("%20s %d %d %d %d\n", zdom[n].name, zdom[n].wind_type,
+	   zdom[n].ndim, zdom[n].mdim, zdom[n].ndim2);
+    }
 
 
   /* 121219 NSH Set up DFUDGE to be a value that makes some kind of sense
-  given the scale of the wind. Up till py74b2 it was set to be fixed at
-  1e5, so we ensure that this is a minimum, so any winds of CV type scale
-  will keep the old dfudge, and hopefully look the same. We also need to
-  set defudge slightly differently for the shell wind.*/
+     given the scale of the wind. Up till py74b2 it was set to be fixed at
+     1e5, so we ensure that this is a minimum, so any winds of CV type scale
+     will keep the old dfudge, and hopefully look the same. We also need to
+     set defudge slightly differently for the shell wind. */
 
-  DFUDGE = setup_dfudge();
+  DFUDGE = setup_dfudge ();
 
 
   /* Now define the wind cones generically. modifies the global windcone structure */
 
-  setup_windcone();
+  setup_windcone ();
 
 
   /*NSH 130821 broken out into a seperate routine added these lines to fix bug41, where
-  the cones are never defined for an rtheta grid if the model is restarted. 
-  
-  XXX ksl is unclear why the wind cones ar being initilized here, rather than as part of
-routines located elsewhere, but I have follwoed previous practice and reinitialized them
-as part to the domain effort.  
-  */
+     the cones are never defined for an rtheta grid if the model is restarted. 
 
-  for (ndom=0;ndom<geo.ndomain;ndom++){
+     XXX ksl is unclear why the wind cones ar being initilized here, rather than as part of
+     routines located elsewhere, but I have follwoed previous practice and reinitialized them
+     as part to the domain effort.  
+   */
 
-  if (zdom[0].coord_type==RTHETA && geo.run_type==PREVIOUS) //We need to generate an rtheta wind cone if we are restarting
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
-      rtheta_make_cones(ndom,wmain);
+
+      if (zdom[0].coord_type == RTHETA && geo.run_type == PREVIOUS)	//We need to generate an rtheta wind cone if we are restarting
+	{
+	  rtheta_make_cones (ndom, wmain);
+	}
     }
-  }
 
   //OLD - Moved to get_wind_parameters geo.rmax_sq = geo.rmax * geo.rmax;
 
@@ -1057,9 +1076,9 @@ as part to the domain effort.
 
   /* Next line finally defines the wind if this is the initial time this model is being run */
   if (geo.run_type != PREVIOUS)	// Define the wind and allocate the arrays the first time
-{
-    define_wind ();
-}
+    {
+      define_wind ();
+    }
   // Do not reinit if you want to use old windfile
 
   w = wmain;
@@ -1072,7 +1091,7 @@ as part to the domain effort.
 
   /* initialize the random number generator */
   //      srand( (n=(unsigned int) clock()));  
-  srand (1084515760+(13*rank_global));
+  srand (1084515760 + (13 * rank_global));
 
   /* 68b - 0902 - ksl - Start with photon history off */
 
@@ -1118,14 +1137,15 @@ as part to the domain effort.
 
   geo.disk_illum = disk_illum;
 
-  xsignal (files.root, "%-20s Finished initialization for %s\n", "NOK", files.root);
+  xsignal (files.root, "%-20s Finished initialization for %s\n", "NOK",
+	   files.root);
   check_time (files.root);
 
 #ifdef MPI_ON
   /* Since the wind is now set up can work out the length big arrays to help with the MPI reductions of the spectra
      the variables for the estimator arrays are set up in the subroutines themselves */
-  ioniz_spec_helpers = 2*MSPEC*NWAVE; //we need space for log and lin spectra for MSPEC XNWAVE
-  spec_spec_helpers = (NWAVE*(MSPEC+nangles)); //We need space for NWAVE wavelengths for nspectra, which will eventually equal nangles + MSPEC
+  ioniz_spec_helpers = 2 * MSPEC * NWAVE;	//we need space for log and lin spectra for MSPEC XNWAVE
+  spec_spec_helpers = (NWAVE * (MSPEC + nangles));	//We need space for NWAVE wavelengths for nspectra, which will eventually equal nangles + MSPEC
 
 #endif
 
@@ -1142,29 +1162,30 @@ as part to the domain effort.
 /* XXXX - BEGINNING OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
 
   if (geo.wcycle == geo.wcycles)
-    xsignal (files.root, "%-20s No ionization needed: wcycles(%d)==wcyeles(%d)\n",
+    xsignal (files.root,
+	     "%-20s No ionization needed: wcycles(%d)==wcyeles(%d)\n",
 	     "COMMENT", geo.wcycle, geo.wcycles);
   else
     {
-      geo.pcycle = 0;  /* Set the spectrum cycles executed to 0, because 
-				          we are going to modify the wind and hence any
-				          previously calculated spectra must be recreated
-				       */
+      geo.pcycle = 0;		/* Set the spectrum cycles executed to 0, because 
+				   we are going to modify the wind and hence any
+				   previously calculated spectra must be recreated
+				 */
     }
 
-	/* SWM - Setup for path tracking */
-	if(geo.reverb > REV_NONE)
-	{
-		reverb_init(wmain, nangles, freqmin, freqmax);
-		delay_dump_prep(files.root, restart_stat, rank_global);
-	}
-  
+  /* SWM - Setup for path tracking */
+  if (geo.reverb > REV_NONE)
+    {
+      reverb_init (wmain, nangles, freqmin, freqmax);
+      delay_dump_prep (files.root, restart_stat, rank_global);
+    }
+
 
   while (geo.wcycle < geo.wcycles)
     {				/* This allows you to build up photons in bunches */
 
-      xsignal (files.root, "%-20s Starting %d of %d ionization cycle \n", "NOK",
-	       geo.wcycle, geo.wcycles);
+      xsignal (files.root, "%-20s Starting %d of %d ionization cycle \n",
+	       "NOK", geo.wcycle, geo.wcycles);
 
 
       Log ("!!Python: Begining cycle %d of %d for defining wind\n",
@@ -1183,8 +1204,8 @@ as part to the domain effort.
 
 
 
-    if (modes.ispy)
-      ispy_init ("python", geo.wcycle);
+      if (modes.ispy)
+	ispy_init ("python", geo.wcycle);
 
 
       geo.n_ioniz = 0.0;
@@ -1193,28 +1214,29 @@ as part to the domain effort.
 
       /* JM 1409 -- We used to execute subcycles here, but these have been removed */
 
-	  if (!geo.wind_radiation || (geo.wcycle == 0 && geo.run_type != PREVIOUS))
-	    iwind = -1;		/* Do not generate photons from wind */
-	  else
-	    iwind = 1;		/* Create wind photons and force a reinitialization of wind parms */
+      if (!geo.wind_radiation
+	  || (geo.wcycle == 0 && geo.run_type != PREVIOUS))
+	iwind = -1;		/* Do not generate photons from wind */
+      else
+	iwind = 1;		/* Create wind photons and force a reinitialization of wind parms */
 
-	  /* Create the photons that need to be transported through the wind
-	   *
-	   * NPHOT is the number of photon bundles which will equal the luminosity; 
-	   * 0 => for ionization calculation 
-	   */
+      /* Create the photons that need to be transported through the wind
+       *
+       * NPHOT is the number of photon bundles which will equal the luminosity; 
+       * 0 => for ionization calculation 
+       */
 
 
-	  /* JM 130306 need to convert photons_per_cycle to double precision for define_phot */
-	  /* ksl 130410 - This is needed here not because we expect photons per cycle to 
-	   * exceed the size of an integer, but because of the call to define phot in the
-	   * spectrum cycle, which can exceed this
-	   */
-	  /* JM 1409 photons_per_cycle has been removed in favour of NPHOT */
+      /* JM 130306 need to convert photons_per_cycle to double precision for define_phot */
+      /* ksl 130410 - This is needed here not because we expect photons per cycle to 
+       * exceed the size of an integer, but because of the call to define phot in the
+       * spectrum cycle, which can exceed this
+       */
+      /* JM 1409 photons_per_cycle has been removed in favour of NPHOT */
 
-	  nphot_to_define = (long) NPHOT;
+      nphot_to_define = (long) NPHOT;
 
-	  define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
+      define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
 
       /* Zero the arrays that store the heating of the disk */
 
@@ -1234,86 +1256,87 @@ as part to the domain effort.
 
 
 
-	  photon_checks (p, freqmin, freqmax, "Check before transport");
+      photon_checks (p, freqmin, freqmax, "Check before transport");
 
-	  wind_ip ();
+      wind_ip ();
 
 
-	  zz = 0.0;
-	  for (nn = 0; nn < NPHOT; nn++)
+      zz = 0.0;
+      for (nn = 0; nn < NPHOT; nn++)
+	{
+	  zz += p[nn].w;
+	}
+
+      Log
+	("!!python: Total photon luminosity before transphot %18.12e\n", zz);
+      Log_flush ();		/* NSH June 13 Added call to flush logfile */
+      ztot += zz;		/* Total luminosity in all cycles, used for calculating disk heating */
+
+      /* kbf_need determines how many & which bf processes one needs to considere.  It was introduced
+       * as a way to speed up the program.  It has to be recalculated evey time one changes
+       * freqmin and freqmax
+       */
+
+      kbf_need (freqmin, freqmax);
+
+      /* NSH 22/10/12  This next call populates the prefactor for free free heating for each cell in the plasma array */
+      /* NSH 4/12/12  Changed so it is only called if we have read in gsqrd data */
+      if (gaunt_n_gsqrd > 0)
+	pop_kappa_ff_array ();
+
+      /* Transport the photons through the wind */
+      trans_phot (w, p, 0);
+
+      /*Determine how much energy was absorbed in the wind */
+      zze = zzz = zz_adiab = 0.0;
+      nn_adiab = 0;
+      for (nn = 0; nn < NPHOT; nn++)
+	{
+	  zzz += p[nn].w;
+	  if (p[nn].istat == P_ESCAPE)
+	    zze += p[nn].w;
+	  if (p[nn].istat == P_ADIABATIC)
 	    {
-	      zz += p[nn].w;
+	      zz_adiab += p[nn].w;
+	      nn_adiab++;
 	    }
+	}
 
-	  Log
-	    ("!!python: Total photon luminosity before transphot %18.12e\n",
-	     zz);
-	  Log_flush ();		/* NSH June 13 Added call to flush logfile */
-	  ztot += zz;		/* Total luminosity in all cycles, used for calculating disk heating */
-
-	  /* kbf_need determines how many & which bf processes one needs to considere.  It was introduced
-	   * as a way to speed up the program.  It has to be recalculated evey time one changes
-	   * freqmin and freqmax
-	   */
-
-	  kbf_need (freqmin, freqmax);
-
-	  /* NSH 22/10/12  This next call populates the prefactor for free free heating for each cell in the plasma array */
-	  /* NSH 4/12/12  Changed so it is only called if we have read in gsqrd data */
-	  if (gaunt_n_gsqrd > 0)
-	    pop_kappa_ff_array ();
-
-	  /* Transport the photons through the wind */
-	  trans_phot (w, p, 0);
-
-	  /*Determine how much energy was absorbed in the wind */
-	  zze = zzz = zz_adiab = 0.0;
-	  nn_adiab = 0;
-	  for (nn = 0; nn < NPHOT; nn++)
-	    {
-	      zzz += p[nn].w;
-	      if (p[nn].istat == P_ESCAPE)
-		zze += p[nn].w;
-	      if (p[nn].istat == P_ADIABATIC)
-	      {
-		    zz_adiab += p[nn].w;
-		    nn_adiab++;
-		  }
-	    }
-
-	  Log
-	    ("!!python: Total photon luminosity after transphot %18.12e (diff %18.12e). Radiated luminosity %18.12e\n",
-	     zzz, zzz - zz, zze);
+      Log
+	("!!python: Total photon luminosity after transphot %18.12e (diff %18.12e). Radiated luminosity %18.12e\n",
+	 zzz, zzz - zz, zze);
       if (geo.rt_mode == 2)
-	  Log("Luminosity taken up by adiabatic kpkt destruction %18.12e number of packets %d\n", zz_adiab, nn_adiab);
+	Log
+	  ("Luminosity taken up by adiabatic kpkt destruction %18.12e number of packets %d\n",
+	   zz_adiab, nn_adiab);
 
-    if (modes.print_windrad_summary)
-	  wind_rad_summary (w, files.windrad, "a");
-
-
-
-
-	  photon_checks (p, freqmin, freqmax, "Check after transport");
-
-	  spectrum_create (p, freqmin, freqmax, nangles, select_extract);
+      if (modes.print_windrad_summary)
+	wind_rad_summary (w, files.windrad, "a");
 
 
 
-   /* At this point we should communicate all the useful infomation 
-      that has been accummulated on differenet MPI tasks */
+
+      photon_checks (p, freqmin, freqmax, "Check after transport");
+
+      spectrum_create (p, freqmin, freqmax, nangles, select_extract);
+
+
+
+      /* At this point we should communicate all the useful infomation 
+         that has been accummulated on differenet MPI tasks */
 
 #ifdef MPI_ON
 
-    communicate_estimators_para ();
+      communicate_estimators_para ();
 
-    communicate_matom_estimators_para (); // this will return 0 if nlevels_macro == 0
+      communicate_matom_estimators_para ();	// this will return 0 if nlevels_macro == 0
 #endif
 
 
 
 
-    if (modes.ispy)
-      ispy_close ();
+      if (modes.ispy)
+	ispy_close ();
 
 
       /* Calculate and store the amount of heating of the disk due to radiation impinging on the disk */
@@ -1338,11 +1361,11 @@ as part to the domain effort.
 
 #ifdef MPI_ON
 	  if (rank_global == 0)
-	  {
+	    {
 #endif
-	  wind_save (dummy);
+	      wind_save (dummy);
 #ifdef MPI_ON
-          }
+	    }
 #endif
 	  Log ("Saved wind structure in %s\n", dummy);
 	}
@@ -1357,7 +1380,7 @@ as part to the domain effort.
 
 #ifdef MPI_ON
 
-    gather_spectra_para (ioniz_spec_helpers, MSPEC);
+      gather_spectra_para (ioniz_spec_helpers, MSPEC);
 
 #endif
 
@@ -1365,14 +1388,14 @@ as part to the domain effort.
 
 #ifdef MPI_ON
       if (rank_global == 0)
-      {
+	{
 #endif
-      spectrum_summary (files.wspec, "w", 0, 5, 0, 1., 0);
-      spectrum_summary (files.lspec, "w", 0, 5, 0, 1., 1);	/* output the log spectrum */
+	  spectrum_summary (files.wspec, "w", 0, 5, 0, 1., 0);
+	  spectrum_summary (files.lspec, "w", 0, 5, 0, 1., 1);	/* output the log spectrum */
 
 #ifdef MPI_ON
-      }
-      MPI_Barrier(MPI_COMM_WORLD);
+	}
+      MPI_Barrier (MPI_COMM_WORLD);
 #endif
       phot_gen_sum (files.phot, "w");	/* Save info about the way photons are created and absorbed
 					   by the disk */
@@ -1382,8 +1405,8 @@ as part to the domain effort.
       /* NSH1306 - moved geo.wcycle++ back, but moved the log and xsignal statements */
 
 
-      xsignal (files.root, "%-20s Finished %d of %d ionization cycle \n", "OK",
-	       geo.wcycle, geo.wcycles);
+      xsignal (files.root, "%-20s Finished %d of %d ionization cycle \n",
+	       "OK", geo.wcycle, geo.wcycles);
       geo.wcycle++;		//Increment ionisation cycles
 
 
@@ -1392,14 +1415,14 @@ as part to the domain effort.
 
 #ifdef MPI_ON
       if (rank_global == 0)
-      {
+	{
 #endif
-      wind_save (files.windsave);
-      Log_silent ("Saved wind structure in %s after cycle %d\n", files.windsave,
-	   geo.wcycle);
+	  wind_save (files.windsave);
+	  Log_silent ("Saved wind structure in %s after cycle %d\n",
+		      files.windsave, geo.wcycle);
 #ifdef MPI_ON
-      }
-      MPI_Barrier(MPI_COMM_WORLD);
+	}
+      MPI_Barrier (MPI_COMM_WORLD);
 #endif
 
 
@@ -1415,12 +1438,12 @@ as part to the domain effort.
 
   Log (" Completed wind creation.  The elapsed TIME was %f\n", timer ());
 
-	/* SWM - Evaluate wind paths for last iteration */
-	if (geo.reverb == REV_WIND)
-	{
-		wind_paths_evaluate(w);
-		wind_paths_output(w, files.root);
-	}
+  /* SWM - Evaluate wind paths for last iteration */
+  if (geo.reverb == REV_WIND)
+    {
+      wind_paths_evaluate (w);
+      wind_paths_output (w, files.root);
+    }
 
 /* XXXX - THE CALCULATION OF A DETAILED SPECTRUM IN A SPECIFIC REGION OF WAVELENGTH SPACE */
 
@@ -1482,7 +1505,8 @@ as part to the domain effort.
   /* the next condition should really when one has nothing more to do */
 
   else if (geo.pcycle >= geo.pcycles)
-    xsignal (files.root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n",
+    xsignal (files.root,
+	     "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n",
 	     "COMMENT", geo.pcycle, geo.pcycles);
 
   else
@@ -1492,11 +1516,12 @@ as part to the domain effort.
          should already have been allocated, and the spectrum was initialised
          on the original run, so we just need to renormalise the saved spectrum */
       /* See issue #134 (JM) */
-      if (restart_stat  == 0)
-      	Error("Not restarting, but geo.pcycle = %i and trying to renormalise!\n",
-      		   geo.pcycle);
+      if (restart_stat == 0)
+	Error
+	  ("Not restarting, but geo.pcycle = %i and trying to renormalise!\n",
+	   geo.pcycle);
 
-      spectrum_restart_renormalise(nangles);  
+      spectrum_restart_renormalise (nangles);
     }
 
 
@@ -1506,8 +1531,8 @@ as part to the domain effort.
       xsignal (files.root, "%-20s Starting %d of %d spectral cycle \n", "NOK",
 	       geo.pcycle, geo.pcycles);
 
-    if (modes.ispy)
-      ispy_init ("python", geo.pcycle + 1000);
+      if (modes.ispy)
+	ispy_init ("python", geo.pcycle + 1000);
 
 
       Log ("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle,
@@ -1529,7 +1554,7 @@ as part to the domain effort.
 
        */
 
-      nphot_to_define = (long) NPHOT * (long) geo.pcycles;
+      nphot_to_define = (long) NPHOT *(long) geo.pcycles;
       define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);
 
       for (icheck = 0; icheck < NPHOT; icheck++)
@@ -1547,8 +1572,8 @@ as part to the domain effort.
 
       trans_phot (w, p, select_extract);
 
-    if (modes.print_windrad_summary)
-      wind_rad_summary (w, files.windrad, "a");
+      if (modes.print_windrad_summary)
+	wind_rad_summary (w, files.windrad, "a");
 
 
       spectrum_create (p, freqmin, freqmax, nangles, select_extract);
@@ -1558,7 +1583,7 @@ as part to the domain effort.
 
       /* Do an MPI reduce to get the spectra all gathered to the master thread */
 #ifdef MPI_ON
-      gather_spectra_para(spec_spec_helpers, nspectra);
+      gather_spectra_para (spec_spec_helpers, nspectra);
 #endif
 
 
@@ -1567,34 +1592,35 @@ as part to the domain effort.
 
 #ifdef MPI_ON
       if (rank_global == 0)
-      {
+	{
 #endif
-      spectrum_summary (files.spec, "w", 0, nspectra - 1, select_spectype,
-			renorm, 0);
+	  spectrum_summary (files.spec, "w", 0, nspectra - 1, select_spectype,
+			    renorm, 0);
 #ifdef MPI_ON
-      }
+	}
 #endif
       Log ("Completed spectrum cycle %3d :  The elapsed TIME was %f\n",
 	   geo.pcycle, timer ());
 
-		/* SWM0215: Delay dump photons from this cycle */
-		if(geo.reverb > REV_NONE) delay_dump(p, NPHOT, 0);	// SWM - Dump delay tracks from this iteration
+      /* SWM0215: Delay dump photons from this cycle */
+      if (geo.reverb > REV_NONE)
+	delay_dump (p, NPHOT, 0);	// SWM - Dump delay tracks from this iteration
 
       /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
 
-      xsignal (files.root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK",
-	       geo.pcycle, geo.pcycles);
+      xsignal (files.root, "%-20s Finished %3d of %3d spectrum cycles \n",
+	       "OK", geo.pcycle, geo.pcycles);
 
       geo.pcycle++;		// Increment the spectral cycles
 
-#ifdef MPI_ON    
-      if (rank_global == 0)
-      {
-#endif
-      wind_save (files.windsave);	// This is only needed to update pcycle
-      spec_save (files.specsave);
 #ifdef MPI_ON
-      }
+      if (rank_global == 0)
+	{
+#endif
+	  wind_save (files.windsave);	// This is only needed to update pcycle
+	  spec_save (files.specsave);
+#ifdef MPI_ON
+	}
 #endif
       check_time (files.root);
     }
@@ -1607,27 +1633,28 @@ as part to the domain effort.
 /* 57h - 07jul -- ksl -- Write out the freebound information */
 
 #ifdef MPI_ON
-   if (rank_global == 0)
-   {
+  if (rank_global == 0)
+    {
 #endif
-  fb_save ("recomb.save");
+      fb_save ("recomb.save");
 #ifdef MPI_ON
-   }
+    }
 #endif
 
-	/* SWM0215: Dump the last photon path details to file */
-	if(geo.reverb != REV_NONE) delay_dump_finish();		// Each thread dumps to file
+  /* SWM0215: Dump the last photon path details to file */
+  if (geo.reverb != REV_NONE)
+    delay_dump_finish ();	// Each thread dumps to file
 #ifdef MPI_ON
-	MPI_Barrier(MPI_COMM_WORLD);	// Once all done
-	if (my_rank == 0 && geo.reverb != REV_NONE) 
-		delay_dump_combine(np_mpi_global);	// Combine results if necessary
+  MPI_Barrier (MPI_COMM_WORLD);	// Once all done
+  if (my_rank == 0 && geo.reverb != REV_NONE)
+    delay_dump_combine (np_mpi_global);	// Combine results if necessary
 #endif
 
 
 /* Finally done */
-   
+
 #ifdef MPI_ON
-  sprintf (dummy,"End of program, Thread %d only",my_rank);   // added so we make clear these are just errors for thread ngit status	
+  sprintf (dummy, "End of program, Thread %d only", my_rank);	// added so we make clear these are just errors for thread ngit status    
   error_summary (dummy);	// Summarize the errors that were recorded by the program
   Log ("Run py_error.py for full error report.\n");
 #else
@@ -1635,10 +1662,10 @@ as part to the domain effort.
 #endif
 
 
-  #ifdef MPI_ON
-    MPI_Finalize();
-    Log_parallel("Thread %d Finalized. All done\n", my_rank);
-  #endif  
+#ifdef MPI_ON
+  MPI_Finalize ();
+  Log_parallel ("Thread %d Finalized. All done\n", my_rank);
+#endif
 
 
   xsignal (files.root, "%-20s %s\n", "COMPLETE", files.root);
@@ -1752,7 +1779,7 @@ History:
 int
 init_geo ()
 {
-  geo.ndomain = 0;   /*ndomain is a convenience variable so we do not always
+  geo.ndomain = 0;		/*ndomain is a convenience variable so we do not always
 				   need to write geo.ndomain but it should nearly always
 				   be set to the same value as geo.ndomain */
 
@@ -1766,7 +1793,7 @@ init_geo ()
   zdom[0].coord_type = 1;
   zdom[0].ndim = 30;
   zdom[0].mdim = 30;
-  zdom[0].log_linear = 0;		/* Set intervals to be logarithmic */
+  zdom[0].log_linear = 0;	/* Set intervals to be logarithmic */
 
   geo.disk_z0 = geo.disk_z1 = 0.0;	// 080518 - ksl - moved this up
   geo.adiabatic = 1;		// Default is now set so that adiabatic cooling is included in the wind
@@ -2193,26 +2220,27 @@ History:
 **************************************************************/
 
 
-int init_advanced_modes()
-{ 
-  modes.iadvanced = 0;                // this is controlled by the -d flag, global mode control.
-  modes.save_cell_stats = 0;          // want to save photons statistics by cell
-  modes.ispy = 0;                 	  // want to use the ispy function
-  modes.keep_ioncycle_windsaves = 0;  // want to save wind file each ionization cycle
-  modes.track_resonant_scatters = 0;  // want to track resonant scatters
-  modes.save_extract_photons = 0;     // we want to save details on extracted photons
-  modes.print_windrad_summary = 0;    // we want to print the wind rad summary each cycle
-  modes.adjust_grid = 0;              // the user wants to adjust the grid scale
-  modes.diag_on_off = 0;              // extra diagnostics
+int
+init_advanced_modes ()
+{
+  modes.iadvanced = 0;		// this is controlled by the -d flag, global mode control.
+  modes.save_cell_stats = 0;	// want to save photons statistics by cell
+  modes.ispy = 0;		// want to use the ispy function
+  modes.keep_ioncycle_windsaves = 0;	// want to save wind file each ionization cycle
+  modes.track_resonant_scatters = 0;	// want to track resonant scatters
+  modes.save_extract_photons = 0;	// we want to save details on extracted photons
+  modes.print_windrad_summary = 0;	// we want to print the wind rad summary each cycle
+  modes.adjust_grid = 0;	// the user wants to adjust the grid scale
+  modes.diag_on_off = 0;	// extra diagnostics
   modes.use_debug = 0;
-  modes.print_dvds_info = 0;          // print out information on velocity gradients
-  write_atomicdata = 0;               // print out summary of atomic data 
-  modes.quit_after_inputs = 0;		  // testing mode which quits after reading in inputs
-  modes.fixed_temp = 0;               // do not attempt to change temperature - used for testing
+  modes.print_dvds_info = 0;	// print out information on velocity gradients
+  write_atomicdata = 0;		// print out summary of atomic data 
+  modes.quit_after_inputs = 0;	// testing mode which quits after reading in inputs
+  modes.fixed_temp = 0;		// do not attempt to change temperature - used for testing
   //note this is defined in atomic.h, rather than the modes structure 
 
 
-  modes.keep_photoabs = 1;			  // keep photoabsorption in final spectrum
+  modes.keep_photoabs = 1;	// keep photoabsorption in final spectrum
 
   return (0);
 }

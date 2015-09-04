@@ -19,12 +19,10 @@ int verbosity;			/* verbosity level. 0 low, 10 is high */
 value determined by values in python.h to a values which are adjustable from
 within python */
 
-//OLD Domain int ndim;                       // Define the fundamental dimension of the grid
-//OLD Domain int mdim;
 
 /* With domains NDIM and MDIM need to be removed but NDIM2 is the total number of cells in wmain, and there
 are certain times we want to loop over everything.  The situation with NPLASMA is similar */
-//OLD Domain int NDIM, MDIM, NDIM2;
+
 int NDIM2;                      //The total number of wind cells in wmain
 int NPLASMA;			//The number of cells with non-zero volume or the size of plasma structure
 
@@ -41,9 +39,8 @@ char basename[132];		// The root of the parameter file name being used by python
 
 double dfudge;			// This is the push-through distance
 double DFUDGE;
+
 #define VCHECK	1.e6		// The maximum allowable error in calculation of the velocity in calculate_ds
-
-
 
 
 /* 57h -- Changed several defined variables to numbers to allow one to vary them 
@@ -85,15 +82,11 @@ double DENSITY_PHOT_MIN;	/* This constant is a minimum density for the purpose o
 #define TAU_MAX				20.	/* Sets an upper limit in extract on when
 						   a photon can be assumed to be completely absorbed */
 
-//#define SELECT_NEBULAR                1 /*non zero means to use the nebular approximation; 0 implies
-//                                                              use LTE populations based on t_rad*/
 #define DANG_LIVE_OR_DIE   2.0	/* If constructing photons from a live or die run of the code, the
 				   angle over which photons will be accepted must be defined */
 
 
-//#define NPHOT                                 10000
-int NPHOT;			/* As of python_40, NPHOT must be defined in the main program using
-				   python.h */
+int NPHOT;			/* The number of photon bundles created.  defined in python.c */
 
 #define NWAVE  			       10000	//Increasing from 4000 to 10000 (SS June 04)
 #define MAXSCAT 			50
@@ -190,9 +183,6 @@ typedef struct cone
 }
 cone_dummy, *ConePtr;
 
-//Old-Moved to domain ConePtr cones_rtheta;		/*A ptr to the cones that define the theta directions in rtheta coods */
-
-//OLD-Moved to domain  struct cone windcone[2];	/* The cones that define the boundary of winds like SV or kwd */
 
 /* End of structures which are used to define boundaries to the emission regions */
 
@@ -236,6 +226,7 @@ double wind_midz_var[NDIM_MAX][NDIM_MAX];
   double mdot_norm;		/*A normalization factor used in SV wind, and Knigge wind */
 
   double twind;   // ksl 1508 -- added in case domains have different initail temperatures
+
   /* Parameters defining Shlossman & Vitello Wind */
   double sv_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
   double sv_rmin, sv_rmax, sv_thetamin, sv_thetamax, sv_gamma;	/* parameters defining the goemetry of the wind */
@@ -250,8 +241,6 @@ double wind_midz_var[NDIM_MAX][NDIM_MAX];
   /* Parameters defining Knigge Wind */
   double kn_dratio;		/* parameter describing collimation of wind */
   double kn_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
-//    double kn_rmin, kn_rmax, kn_thetamin, kn_thetamax, kn_gamma;      /* parameters defining the goemetry of the wind */
-//    double kn_v_zero;         /* velocity at base of wind */
   double kn_r_scale, kn_alpha;	/* the scale length and power law exponent for the velocity law */
   double kn_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
   double kn_v_zero;		/* NSH 19/04/11 - Added in as the multiple of the sound speed to use as the initial velocity */
@@ -300,9 +289,8 @@ DomainPtr zdom;
 struct geometry
 {
 
-int ndomain;  /*The number of domains in a model*/
-
-int ndim2; 		/* This total number of windcells in all domains */
+int ndomain;  		/*The number of domains in a model*/
+int ndim2; 		/* The total number of windcells in all domains */
 int nplasma, nmacro;	/*The total number of cells in the plasma and macro structures in all domains */
 
   /* variables which store the domain numbers of the wind, disk atmosphere.
@@ -310,6 +298,7 @@ int nplasma, nmacro;	/*The total number of cells in the plasma and macro structu
     number because the inputs for the disk and a putativel disk atmosphere are 
    interrsed.  The first step will be to put this information into alocal variale
   in python.c.  We should not have to carry this forward */
+
 	int wind_domain_number;
 	int atmos_domain_number;
 
@@ -438,8 +427,7 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
   char model_list[NCOMPS][LINELENGTH];	/* The file which contains the model names and the associated values for the model */
 
   /* Generic parameters for the wind */
-//Eliminated in domains  double wind_mdot, stellar_wind_mdot;	/* Mass loss rate in disk and stellar wind */
-//  double wind_rmin, wind_rmax;	/*Spherical extent of the wind */
+
   double wind_rho_min, wind_rho_max;	/*Min/Max rho for wind in disk plane */
   double wind_thetamin, wind_thetamax;	/*Angles defining inner and outer cones of wind, measured from disk plane */
   double mdot_norm;		/*A normalization factor used in SV wind, and Knigge wind */
@@ -457,11 +445,6 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
   double shell_rmin, shell_rmax;
 
   /*Parameters defining a corona in a ring above a disk */
-  // double corona_rmin, corona_rmax;	//the minimum and maximu radius of the corona
-
-  // double corona_base_density, corona_scale_height;	//the density at the base of the corona and the scale height
-
-  // double corona_vel_frac;	// the radial velocity of the corona in units of the keplerian velocity
 
 /* The filling factior for the wind or corona */
   double fill;
@@ -681,13 +664,7 @@ wind_dummy, *WindPtr;
 WindPtr wmain;
 
 /* 57+ - 06jun -- plasma is a new structure that contains information about the properties of the
-plasma in regions of the geometry that are actually included n the wind 
-
-	07jul	ksl	Added volume to the structure.  The value of this should be the same
-			as the corresponding volume in the Wind structure, as we are still
-			using the Wind volume for some tests of whether the a photon can
-			interact in a cell.
-*/
+plasma in regions of the geometry that are actually included n the wind */
 
 /* 70 - 1108 - Define wavelengths in which to record gross spectrum in a cell, see also xave_freq and xj in plasma structure */
 /* ksl - It would probably make more sense to define these in the same ways that bands are done for the generation of photons, or to
@@ -753,16 +730,17 @@ typedef struct plasma
 
   int ntot;			/*Total number of photon passages */
 
-  int nscat_es;   /* The number of electrons scatters in the cell */
-  int nscat_res;  /* The number of resonant line scatters in the cell */
-
-  /* NSH 15/4/11 - added counters to give a rough idea of where photons from various sources are ending up */
+  /*  counters of the number of photon passages by origin */
 
   int ntot_star;
   int ntot_bl;
-  int ntot_disk;		/* NSH 15/4/11 Added to count number of photons from the disk in the cell */
+  int ntot_disk;		
   int ntot_wind;
-  int ntot_agn;			/* NSH 15/4/11 Added to count number of photons from the AGN in the cell */
+  int ntot_agn;			
+
+
+  int nscat_es;   /* The number of electrons scatters in the cell */
+  int nscat_res;  /* The number of resonant line scatters in the cell */
 
   double mean_ds;		/* NSH 6/9/12 Added to allow a check that a thin shell is really optcially thin */
   int n_ds;			/* NSH 6/9/12 Added to allow the mean dsto be computed */
@@ -869,24 +847,6 @@ typedef struct photon_store
 
 PhotStorePtr photstoremain;
 
-/* 
-060616 -- ksl -- 57g -- Modified the plamsa structure to add a new macro stucture that is only needed for macro
-atoms. This structure contains most of the variables that were previously dominating the total size of the plasma
-array. This effectively solves a problem with producing a huge wind_save file, as well as making the size of the
-executable much smaller for the simple atom case.
-
-0608 -- ksl -- 57h -- There is now and extended  discussion in gridwind.c about possible ways to restructure 
-the macro structure in order to dynamically set the size of arrays like jbar and jbar_old.  For now, recompilation 
-of the code is required.  
-
-0803 -- ksl -- 60 -- The first index is the level, or config  number.  get_atomicdata assures that macro levels, 
-if they exist have lower level numbers than other types of levels.  
-
-0911 -- ksl - 68f -- The structure is allocated in a complicated fashion to minimize the total amount of space
-taken up by the macro structure, particularly when it is written out to disk.  First the basic array structurre
-is allocated (in calloc_macro) and then space for the various arrays contatined in the maccro pointer, like
-jbar are allcoated in calloc_esimators.  
-*/
 
 
 typedef struct macro
@@ -949,8 +909,6 @@ typedef struct macro
   double cooling_ff;
   double cooling_adiabatic;     // this is just lum_adiabatic / vol / ne
 
-  // double lte_pops[NLEVELS_MACRO];  //a store of LTE level populations for the macro atom.  
-  // double lte_pops_norm;
 
 } macro_dummy, *MacroPtr;
 
@@ -997,11 +955,6 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define NEBULARMODE_MATRIX_BB 8	               // matrix solver BB model
 #define NEBULARMODE_MATRIX_SPECTRALMODEL 9     // matrix solver spectral model
 
-// XXX these arrrays have been transferreed to the domains
-// double wind_x[NDIM_MAX], wind_z[NDIM_MAX];	/* These define the edges of the cells in the x and z directions */
-// double wind_midx[NDIM_MAX], wind_midz[NDIM_MAX];	/* These define the midpoints of the cells in the x and z directions */
-// double wind_z_var[NDIM_MAX][NDIM_MAX];
-// double wind_midz_var[NDIM_MAX][NDIM_MAX];
 
 typedef struct photon
 {
@@ -1129,7 +1082,7 @@ typedef struct spectrum
 }
 spectrum_dummy, *SpecPtr;
 
-/*1409 - ksl - Replaced variable s with xxspec to avoid confusion in case some wanted to use a variable s */
+
 SpecPtr xxspec;
 
 
@@ -1185,10 +1138,6 @@ FILE *epltptr;			//TEST
 /* These variables are stored or used by the routines for anisotropic scattering */
 /* Allow for the transfer of tau info to scattering routine */
 
-/* JM 1411 -- tau_x_dvds doesn't appear to be used anywhere, so I've 
-   made it a local variable rather than global */  
-//double tau_x_dvds;		//tau_x_dvds/dvds is the actual tau
-//double tau_scatter_min;               //Set in subroutine scatter for use by extract
 
 struct Pdf pdf_randwind_store[100];
 PdfPtr pdf_randwind;
@@ -1200,7 +1149,8 @@ Added for python_43.2 */
 
 
 /* Provide generally for having arrays which descibe the 3 xyz axes. 
-these are initialized in main  */
+these are initialized in main, and used in anisowind  */
+
 
 double x_axis[3];
 double y_axis[3];
