@@ -1102,7 +1102,8 @@ mdot_wind (w, z, rmax)
       vwind_xyz (ndom, &p, v);
       mdot += 2 * PI * r * dr * den * v[2];
     }
-  //
+
+  mplane=2. * mdot;
 // Calculate the mass loss rate in a sphere
   dtheta = PI / (2 * NSTEPS);
   mdot = 0;
