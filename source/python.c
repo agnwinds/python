@@ -695,9 +695,9 @@ main (argc, argv)
 
 
 
-    /* Describe the wind. This routine readsin geo.rmax and geo.twind
+    /* Describe the wind. This routine reads in geo.rmax and geo.twind
        and then gets params by calling e.g. get_sv_wind_params() */
-    /* PLACEHOLDER -- call with wind domain number */
+    /* PLACEHOLDER -- XXX call with wind domain number */
       get_wind_params (geo.wind_domain_number);	
 
     }				// End of block to define a model for the first time
@@ -1050,7 +1050,7 @@ as part to the domain effort.
     }
   }
 
-  geo.rmax_sq = geo.rmax * geo.rmax;
+  //OLD - Moved to get_wind_parameters geo.rmax_sq = geo.rmax * geo.rmax;
 
 
 
@@ -1745,7 +1745,7 @@ History:
 			this routine as part of genearl cleanup of the main
 			routine
 	1508	ksl	A number of changes have been made in order to accommodate
-			domans
+			domains
 
 **************************************************************/
 
@@ -1757,11 +1757,17 @@ init_geo ()
 				   be set to the same value as geo.ndomain */
 
   /* allocate space for maximum number of domains */
+  /* XXX it is not clear that this is the natural place to instantiate domains, since this routine
+   * refers to the geo pointer.  It is even less clear why these particular variables are initialized
+   * here */
+
   zdom = (DomainPtr) calloc (sizeof (domain_dummy), MaxDom);
 
   zdom[0].coord_type = 1;
   zdom[0].ndim = 30;
   zdom[0].mdim = 30;
+  zdom[0].log_linear = 0;		/* Set intervals to be logarithmic */
+
   geo.disk_z0 = geo.disk_z1 = 0.0;	// 080518 - ksl - moved this up
   geo.adiabatic = 1;		// Default is now set so that adiabatic cooling is included in the wind
   geo.auger_ionization = 1;	//Default is on.
@@ -1774,7 +1780,6 @@ init_geo ()
     = geo.bl_ion_spectype = geo.bl_spectype = SPECTYPE_BB;
   geo.agn_ion_spectype = SPECTYPE_POW;	// 130605 - nsh - moved from python.c
 
-  zdom[0].log_linear = 0;		/* Set intervals to be logarithmic */
 
   geo.rmax = 1e11;
   geo.rmax_sq = geo.rmax * geo.rmax;

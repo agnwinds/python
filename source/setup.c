@@ -562,7 +562,6 @@ get_wind_params (ndom)
   rddoub ("wind.radmax(cm)", &zdom[ndom].rmax);
   rddoub ("wind.t.init", &geo.twind);
 
-  geo.diskrad_sq = geo.diskrad * geo.diskrad;
 
 
   /* Now get parameters that are specific to a given wind model
@@ -623,6 +622,13 @@ Modified again in python 71b to take account of change in parametrisation of she
   // models
   geo.fill = 1.;
   rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
+
+  /* The next lines assure that geo.rmax_sq really does define the edge of the grid */
+  if (zdom[ndom].rmax>geo.rmax){
+	  geo.rmax=zdom[ndom].rmax;
+	  geo.rmax_sq=geo.rmax*geo.rmax;
+	  Log("XXXX  size  %e  %e\n",geo.rmax,geo.rmax_sq);
+  }
 
   return (0);
 }
@@ -773,6 +779,8 @@ get_disk_params ()
 
   rddoub ("disk.radmax(cm)", &geo.diskrad);
   Log ("geo.diskrad  %e\n", geo.diskrad);
+
+  geo.diskrad_sq = geo.diskrad * geo.diskrad;
 
 /* If diskrad <= geo.rstar set geo.disk_type = 0 to make any disk transparent anyway. */
 
