@@ -81,7 +81,7 @@ get_shell_wind_params (ndom)
 
 
   zdom[ndom].stellar_wind_mdot = 1.e-6;
-  zdom[ndom].wind_rmin = geo.rstar;
+  zdom[ndom].rmin = geo.rstar;
   zdom[ndom].cl_beta = 1.0;
   shell_rmin = zdom[ndom].cl_rmin = 2.8e9;
   shell_vmin = zdom[ndom].cl_v_zero = 200e5;
@@ -91,15 +91,15 @@ get_shell_wind_params (ndom)
   rddoub ("shell_wind_mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
   zdom[ndom].stellar_wind_mdot *= MSOL / YR;
 
-  rddoub ("shell.wind.radmin(cm)", &zdom[ndom].wind_rmin);	/*Radius where wind begins */
-  if (zdom[ndom].wind_rmin < geo.rstar)
+  rddoub ("shell.wind.radmin(cm)", &zdom[ndom].rmin);	/*Radius where wind begins */
+  if (zdom[ndom].rmin < geo.rstar)
     {
       Error
 	("get_shell_wind_params: It is unreasonable to have the wind start inside the star!\n");
-      Log ("Setting geo.wind_rmin to geo.rstar\n");
-      zdom[ndom].wind_rmin = geo.rstar;
+      Log ("Setting geo.rmin to geo.rstar\n");
+      zdom[ndom].rmin = geo.rstar;
     }
-  zdom[ndom].cl_rmin = shell_rmin = zdom[ndom].wind_rmin;
+  zdom[ndom].cl_rmin = shell_rmin = zdom[ndom].rmin;
 
 
 /*120130 NSH the next two lines have been modified to mean that the wind will end up as a CL wind, but the v_0 and v_infinity will be calulated here from these two variables, which are now local */
@@ -110,10 +110,10 @@ get_shell_wind_params (ndom)
 /*120130 NSH This line stays as it is */
   rddoub ("shell.wind.acceleration_exponent", &zdom[ndom].cl_beta);	/* Accleration scale exponent for a CL wind */
   Log ("Geo rmax = %f\n", geo.rmax);
-  shell_rmax = zdom[ndom].wind_rmax = geo.rmax;
+  shell_rmax = zdom[ndom].rmax = geo.rmax;
 /*120130 NSH These next lines invert the cl velocity equation to get the cl factors from the local shell factors */
   zdom[ndom].cl_v_zero = shell_vmin;
-  factor = pow ((1 - (zdom[ndom].wind_rmin / zdom[ndom].wind_rmax)), zdom[ndom].cl_beta);
+  factor = pow ((1 - (zdom[ndom].rmin / zdom[ndom].rmax)), zdom[ndom].cl_beta);
   zdom[ndom].cl_v_infinity =
     (shell_vmax - shell_vmin + shell_vmin * factor) / factor;
 
@@ -123,7 +123,7 @@ get_shell_wind_params (ndom)
 
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
-//  geo.wind_rmin = geo.rstar;
+//  geo.rmin = geo.rstar;
 
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 90. / RADIAN;

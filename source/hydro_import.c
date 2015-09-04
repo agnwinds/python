@@ -128,9 +128,9 @@ get_hydro_wind_params (ndom)
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
-  geo.wind_rmin = hydro_r_edge[0];
+  geo.rmin = hydro_r_edge[0];
 
-  geo.wind_rmax = geo.rmax = hydro_r_edge[ihydro_r] + 2.0 * (hydro_r_cent[ihydro_r] - hydro_r_edge[ihydro_r]);	//Set the outer edge of the wind to the outer edge of the final defined cell
+  geo.rmax = geo.rmax = hydro_r_edge[ihydro_r] + 2.0 * (hydro_r_cent[ihydro_r] - hydro_r_edge[ihydro_r]);	//Set the outer edge of the wind to the outer edge of the final defined cell
   Log ("rmax=%e\n", geo.rmax);
   geo.wind_rho_min = 0.0;	//Set wind_rmin 0.0, otherwise wind cones dont work properly 
   Log ("rho_min=%e\n", geo.wind_rho_min);
@@ -139,8 +139,8 @@ get_hydro_wind_params (ndom)
   geo.wind_thetamin = hydro_theta_edge[0];
   Log ("theta_min=%e\n", geo.wind_thetamin);
 
-  Log ("geo.wind_rmin=%e\n", geo.wind_rmin);
-  Log ("geo.wind_rmax=%e\n", geo.wind_rmax);
+  Log ("geo.rmin=%e\n", geo.rmin);
+  Log ("geo.rmax=%e\n", geo.rmax);
   Log ("geo.wind_rhomin=%e\n", geo.wind_rho_min);
   Log ("geo.wind_rhomax=%e\n", geo.wind_rho_max);
 

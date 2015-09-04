@@ -197,7 +197,7 @@ position_summary (w)
   int nplasma;
   int inwind, ndom;
 
-  x[0] = geo.wind_rmax / 5;
+  x[0] = geo.rmax / 5;
   x[1] = 0.0;
   x[2] = x[0];
 

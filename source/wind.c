@@ -148,11 +148,11 @@ where_in_wind (x,ndomain)
 
       /* First check to see if photon is inside or outside wind */
 
-      if (rad < one_dom->wind_rmin)
+      if (rad < one_dom->rmin)
 	{
 	  continue;		/*x is inside the wind  radially */
 	}
-      if (rad > one_dom->wind_rmax)
+      if (rad > one_dom->rmax)
 	{
 	  continue;		/*the position is beyond the wind radially */
 	}
@@ -161,7 +161,7 @@ where_in_wind (x,ndomain)
        * inside all of the wind or if it is in the vertical section of the wind
        *
        * Note the use of sv_rmax and sv_rmin here, because thise are not the
-       * same as for the windcones gescribed by geo.wind_rmin and geo.wind_rmax
+       * same as for the windcones gescribed by geo.rmin and geo.rmax
        * 111124 ksl
        */
 

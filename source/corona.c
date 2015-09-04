@@ -36,9 +36,9 @@ get_corona_params (ndom)
 // Start with reasonable values for everything which is important
 
   zdom[ndom].wind_thetamin = 0.0;
-  zdom[ndom].wind_rmax = geo.rmax;
+  zdom[ndom].rmax = geo.rmax;
   zdom[ndom].wind_thetamax = 0.0;
-  zdom[ndom].wind_rmin = geo.rstar;
+  zdom[ndom].rmin = geo.rstar;
 
   zdom[ndom].corona_rmin = 1.e10;
   zdom[ndom].corona_rmax = 2.e10;
@@ -58,8 +58,8 @@ get_corona_params (ndom)
   rddoub ("corona.scale_height(cm)", &zdom[ndom].corona_scale_height);	/*Radius where corona begins */
   rddoub ("corona.vel_frac", &zdom[ndom].corona_vel_frac);	/*fractional radial velocity of corona */
 
-  zdom[ndom].wind_rmin = zdom[ndom].corona_rmin;
-  zdom[ndom].wind_rmax = zdom[ndom].rmax;
+  zdom[ndom].rmin = zdom[ndom].corona_rmin;
+  zdom[ndom].rmax = zdom[ndom].rmax;
   zdom[ndom].wind_rho_min = zdom[ndom].corona_rmin;
   zdom[ndom].wind_rho_max = zdom[ndom].corona_rmax;
   zdom[ndom].wind_thetamin = 0.0;

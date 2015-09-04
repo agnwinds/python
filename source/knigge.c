@@ -144,8 +144,8 @@ in units of WD radii */
 	      (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (geo.diskrad))));
     }
 
-  zdom[ndom].wind_rmin = zdom[ndom].wind_rho_min;
-  zdom[ndom].wind_rmax = geo.rmax;   /* This needs to be the edge of the wind, which is a global
+  zdom[ndom].rmin = zdom[ndom].wind_rho_min;
+  zdom[ndom].rmax = geo.rmax;   /* This needs to be the edge of the wind, which is a global
 					parameter
 					*/
   /* The change in the boundary of the wind (as corner of disk -- see above) 

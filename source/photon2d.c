@@ -236,10 +236,10 @@ ds_to_wind (pp)
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
       /* Check if the photon hits the inner or outer radius of the wind */
-      if ((x = ds_to_sphere (zdom[ndom].wind_rmax, &ptest)) < ds)
+      if ((x = ds_to_sphere (zdom[ndom].rmax, &ptest)) < ds)
 	ds = x;
 
-      if ((x = ds_to_sphere (zdom[ndom].wind_rmin, &ptest)) < ds)
+      if ((x = ds_to_sphere (zdom[ndom].rmin, &ptest)) < ds)
 	ds = x;
 
       /* Check if the photon hits the inner or outer windcone */

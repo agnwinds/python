@@ -230,12 +230,11 @@ double wind_midz_var[NDIM_MAX][NDIM_MAX];
 
   /* Generic parameters for the wind */
   double wind_mdot, stellar_wind_mdot;	/* Mass loss rate in disk and stellar wind */
-  double wind_rmin, wind_rmax;	/*Spherical extent of the wind */
+  double rmin, rmax;			/*Spherical extent of the wind */
   double wind_rho_min, wind_rho_max;	/*Min/Max rho for wind in disk plane */
   double wind_thetamin, wind_thetamax;	/*Angles defining inner and outer cones of wind, measured from disk plane */
   double mdot_norm;		/*A normalization factor used in SV wind, and Knigge wind */
 
-  double rmax;   // JM 1508 -- added in case domains have different grid sizes
   double twind;   // ksl 1508 -- added in case domains have different initail temperatures
   /* Parameters defining Shlossman & Vitello Wind */
   double sv_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
@@ -332,7 +331,7 @@ enum coord_type_enum coord_type;
 				   ndim is the dimensionality of the first dimension.  In the CV case
 				   it is in the plane of the disk. Mdim is generally along the z axis
 				 */
-  double rmax, rmax_sq;		/* The maximum distance to which a photon should be followed */
+  double rmin, rmax, rmax_sq;		/* The maximum distance to which a photon should be followed */
   double mstar, rstar, rstar_sq, tstar, gstar;	/* Basic parameters for the WD */
   double twind;			/* temperature of wind */
   double tmax;			/*NSH 120817 the maximim temperature of any element of the model - used to help estimate things for an exponential representation of the spectrum in a cell */
@@ -440,7 +439,7 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
 
   /* Generic parameters for the wind */
 //Eliminated in domains  double wind_mdot, stellar_wind_mdot;	/* Mass loss rate in disk and stellar wind */
-  double wind_rmin, wind_rmax;	/*Spherical extent of the wind */
+//  double wind_rmin, wind_rmax;	/*Spherical extent of the wind */
   double wind_rho_min, wind_rho_max;	/*Min/Max rho for wind in disk plane */
   double wind_thetamin, wind_thetamax;	/*Angles defining inner and outer cones of wind, measured from disk plane */
   double mdot_norm;		/*A normalization factor used in SV wind, and Knigge wind */
@@ -448,23 +447,6 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
 				   1-> Use adiabatic heating in calculating the cooling of the wind
 				 */
   int auger_ionization;		/*0 -> Do not include innershell photoionization /Auger effects; 1-> include them */
-  /* Parameters defining Shlossman & Vitello Wind */
-//  double sv_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
-//  double sv_rmin, sv_rmax, sv_thetamin, sv_thetamax, sv_gamma;	/* parameters defining the goemetry of the wind */
-//  double sv_v_zero;		/* velocity at base of wind */
-//  double sv_r_scale, sv_alpha;	/* the scale length and power law exponent for the velocity law */
-//  double sv_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
-
-  /* Paramater for the Elvis AGN wind - closely based on SV */
-//  double elvis_offset;		/*This is a vertical offset for a region where the
-//				   wind rises vertically from the disk */
-
-  /* Parameters defining Knigge Wind */
-//  double kn_dratio;		/* parameter describing collimation of wind */
-//  double kn_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
-//  double kn_r_scale, kn_alpha;	/* the scale length and power law exponent for the velocity law */
-//  double kn_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
-//  double kn_v_zero;		/* NSH 19/04/11 - Added in as the multiple of the sound speed to use as the initial velocity */
 
   /* Parameters describing Castor and Larmors spherical wind */
   double cl_v_zero, cl_v_infinity, cl_beta;	/* Power law exponent */

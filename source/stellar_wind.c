@@ -59,7 +59,7 @@ get_stellar_wind_params (ndom)
 
 
   zdom[ndom].stellar_wind_mdot = 1.e-6;
-  zdom[ndom].wind_rmin = geo.rstar;
+  zdom[ndom].rmin = geo.rstar;
   zdom[ndom].cl_beta = 1.0;
   zdom[ndom].cl_rmin = 2.8e9;
   zdom[ndom].cl_v_zero = 200e5;
@@ -69,23 +69,23 @@ get_stellar_wind_params (ndom)
   rddoub ("stellar_wind_mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
   zdom[ndom].stellar_wind_mdot *= MSOL / YR;
 
-  rddoub ("stellar.wind.radmin(cm)", &zdom[ndom].wind_rmin);	/*Radius where wind begins */
-  if (zdom[ndom].wind_rmin < geo.rstar)
+  rddoub ("stellar.wind.radmin(cm)", &zdom[ndom].rmin);	/*Radius where wind begins */
+  if (zdom[ndom].rmin < geo.rstar)
     {
       Error
 	("get_stellar_wind_params: It is unreasonable to have the wind start inside the star!\n");
-      Log ("Setting geo.wind_rmin to geo.rstar\n");
-      zdom[ndom].wind_rmin = geo.rstar;
+      Log ("Setting geo.rmin to geo.rstar\n");
+      zdom[ndom].rmin = geo.rstar;
     }
-  zdom[ndom].cl_rmin = zdom[ndom].wind_rmin;
+  zdom[ndom].cl_rmin = zdom[ndom].rmin;
   rddoub ("stellar.wind_vbase(cm)", &zdom[ndom].cl_v_zero);	/* Velocity at base of the wind */
   rddoub ("stellar.wind.v_infinity(cm)", &zdom[ndom].cl_v_infinity);	/* Final speed of wind in units of escape velocity */
 
   rddoub ("stellar.wind.acceleration_exponent", &zdom[ndom].cl_beta);	/* Accleration scale exponent */
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
-  geo.wind_rmin = zdom[ndom].wind_rmin;	//71 ksl - Not modified this so that we did not waste cells
-  zdom[ndom].wind_rmax = geo.rmax;
+  geo.rmin = zdom[ndom].rmin;	//71 ksl - Not modified this so that we did not waste cells
+  zdom[ndom].rmax = geo.rmax;
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 90. / RADIAN;
 
@@ -219,54 +219,3 @@ stellar_rho (ndom, x)
   return (rho);
 }
 
-
-/*
-stellar_vel_grad calculates the velocity gradient tensor at any point in
-the flow
-
-The velocity gradient is defined as a 3 x 3 tensor such that
-
-	velgrad[i][j]= dv_i/dx_j
-
-NB: in c the rightmost index changes changes most rapidly so that
-	dv[i]= velgrad[i][j] * dx[j]
-makes sense.
-
-NB: Making ds too small can cause roundoff and/or precision errors.
-
-        01dec   ksl     Added for python_40
-
-*/
-
-/*
- 
-   1508 ksl  I do not believe this is used any longer an have commented
-   this out as part of the implementation of domains
-
-int
-stellar_vel_grad (x, velgrad)
-     double x[], velgrad[][3];
-{
-  double v0[3], v1[3];
-  double dx[3], dv[3];
-  double ds;
-  int i, j;
-  int vsub (), stuff_v ();
-
-  stellar_velocity (x, v0);
-
-  ds = 1.e7;
-  for (i = 0; i < 3; i++)
-    {
-      stuff_v (x, dx);
-      dx[i] += ds;
-      stellar_velocity (dx, v1);
-      vsub (v1, v0, dv);
-      for (j = 0; j < 3; j++)
-	dv[j] /= ds;
-      stuff_v (dv, &velgrad[i][0]);
-    }
-
-  return (0);
-}
-*/

@@ -136,9 +136,9 @@ spherical_make_grid (w, ndom)
 	  {			//logarithmic intervals
 
 	    dlogr =
-	      (log10 (zdom[ndom].rmax / zdom[ndom].wind_rmin)) / (ndim - 3);
-	    w[n].r = zdom[ndom].wind_rmin * pow (10., dlogr * (n - 1));
-	    w[n].rcen = 0.5 * zdom[ndom].wind_rmin * (pow (10., dlogr * (n)) +
+	      (log10 (zdom[ndom].rmax / zdom[ndom].rmin)) / (ndim - 3);
+	    w[n].r = zdom[ndom].rmin * pow (10., dlogr * (n - 1));
+	    w[n].rcen = 0.5 * zdom[ndom].rmin * (pow (10., dlogr * (n)) +
 						      pow (10.,
 							   dlogr * (n - 1)));
 	    Log ("New W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
@@ -611,18 +611,18 @@ shell_make_grid (w, ndom)
 
 
   w[0].r =
-    zdom[ndom].wind_rmin - (zdom[ndom].wind_rmax - zdom[ndom].wind_rmin);
-  w[1].r = zdom[ndom].wind_rmin;
-  w[2].r = zdom[ndom].wind_rmax;
+    zdom[ndom].rmin - (zdom[ndom].rmax - zdom[ndom].rmin);
+  w[1].r = zdom[ndom].rmin;
+  w[2].r = zdom[ndom].rmax;
   w[3].r =
-    zdom[ndom].wind_rmax + (zdom[ndom].wind_rmax - zdom[ndom].wind_rmin);
+    zdom[ndom].rmax + (zdom[ndom].rmax - zdom[ndom].rmin);
 
 
 
   w[0].rcen = (w[0].r + w[1].r) / 2;
   w[1].rcen = (w[1].r + w[2].r) / 2;
   w[2].rcen = (w[2].r + w[3].r) / 2;
-  w[3].rcen = w[2].rcen + (zdom[ndom].wind_rmax - zdom[ndom].wind_rmin);
+  w[3].rcen = w[2].rcen + (zdom[ndom].rmax - zdom[ndom].rmin);
 
 
 

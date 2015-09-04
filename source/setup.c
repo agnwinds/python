@@ -1094,7 +1094,7 @@ setup_dfudge ()
 
   if (geo.wind_type == 9)
     {
-      dfudge = (geo.wind_rmax - geo.wind_rmin) / 1000.0;
+      dfudge = (geo.rmax - geo.rmin) / 1000.0;
     }
   else
     {

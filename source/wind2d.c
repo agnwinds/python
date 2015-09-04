@@ -588,7 +588,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 	  //Factor of 2 to allow for wind on both sides of disk
 	  Log ("m dot wind: Domain %d Desired %g   Base %g Calculated %g\n",
 	       ndom, zdom[ndom].wind_mdot, 2. * mdotbase, 2. * mdotwind);
-	  mdot_wind (w, 1.e6, zdom[ndom].wind_rmax / 2.);
+	  mdot_wind (w, 1.e6, zdom[ndom].rmax / 2.);
 	}
       else
 	{

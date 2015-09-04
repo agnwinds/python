@@ -124,8 +124,8 @@ get_elvis_wind_params (ndom)
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
 
-  zdom[ndom].wind_rmin = geo.rstar;
-  zdom[ndom].wind_rmax = geo.rmax;
+  zdom[ndom].rmin = geo.rstar;
+  zdom[ndom].rmax = geo.rmax;
   zdom[ndom].wind_rho_min =
     zdom[ndom].sv_rmin -
     (zdom[ndom].elvis_offset * tan (zdom[ndom].sv_thetamin));

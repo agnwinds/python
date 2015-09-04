@@ -80,8 +80,8 @@ get_sv_wind_params (ndom)
   rddoub ("sv.acceleration_exponent", &zdom[ndom].sv_alpha);	/* Accleration scale exponent */
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
-  zdom[ndom].wind_rmin = geo.rstar;
-  zdom[ndom].wind_rmax = geo.rmax;
+  zdom[ndom].rmin = geo.rstar;
+  zdom[ndom].rmax = geo.rmax;  // XXX This line undoes 
   zdom[ndom].wind_rho_min = zdom[ndom].sv_rmin;
   zdom[ndom].wind_rho_max = zdom[ndom].sv_rmax;
   zdom[ndom].wind_thetamin = zdom[ndom].sv_thetamin;
