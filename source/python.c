@@ -1021,7 +1021,7 @@ geo.ndomain = ndomain;  // Store ndomain in geo so that it can be saved
 
 Log("There are %d domains\n", geo.ndomain);
 for(n=0;n<geo.ndomain;n++){
-	Log("%20s %d %d %d %d %d\n",zdom[n].name,zdom[n].wind_type,zdom[n].ndim,zdom[n].mdim,zdom[n].ndim2);
+	Log("%20s %d %d %d %d\n",zdom[n].name,zdom[n].wind_type,zdom[n].ndim,zdom[n].mdim,zdom[n].ndim2);
 }
 
 

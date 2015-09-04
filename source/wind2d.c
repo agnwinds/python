@@ -68,12 +68,14 @@ History:
 			try and speed up the pairwise ionization scheme
 	13may	nsh	added code to use temprature computed from internal energy in a
 			zeus file as a first guess for temperature in a proga type model
-	13sep	nsh	small change to avoid the muliplicatoin by 0.9 (lucy guess) from giving us the 				wrong zeus temperature.
+	13sep	nsh	small change to avoid the muliplicatoin by 0.9 (lucy guess) from giving us the
+			wrong zeus temperature.
 	13nov	nsh	changes to take account of log formulation of power law
 			also initialise the min and max frequencies seen in a band.
 	14jul	nsh	added call to calloc_dyn_plasma to allocate space for arrays of variable size - currently
 			those with length nion.
-	15jul	nsh added a mode for fixed temperature, which does not multiply wind temp by 0.9 so you get what you ask for
+	15jul	nsh 	added a mode for fixed temperature, which does not multiply wind temp by 0.9 
+			so you get what you ask for
 	15aug	jm	Adapted for multiple domains
 
 
@@ -102,15 +104,24 @@ define_wind ()
   /* Determine the size of the structure, we need to allocate 
      from the individual domains and then allocatee the space */
 
+  /*
+     Setup the locations of starting and ending positions of the different
+     domains for wmain.  The information is placed in zdom for later use.
+     Note that zdom[ndom].ndim, zdom[ndom].mdim, and zdom[ndom].ndim2 shold
+     have been established in get_grid_params(ndom).
+   */
+
+  n = 0;
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
+      zdom[ndom].nstart = n;
+      n += zdom[ndom].ndim * zdom[ndom].mdim;
+      zdom[ndom].nstop = n;
       //PLACEHOLDER  we should not really need to define NDIM and MDIM here, we may need NDIM2
-      ndim = zdom[ndom].ndim;
-      mdim = zdom[ndom].mdim;
       geo.ndim2 = NDIM2 += zdom[ndom].ndim * zdom[ndom].mdim;
     }
 
-  set_nstart_nstop ();
+
   calloc_wind (NDIM2);
 
   w = wmain;
@@ -167,10 +178,7 @@ define_wind ()
 	}
       for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
 	{
-	  /* 04aug -- ksl -52 -- The next couple of lines are part of the changes
-	   * made in the program to allow more that one coordinate system in python 
-	   */
-	  w[n].ndom = ndom;	// JM -- PLACEHOLDER -- not sure if this is the best place to do this step 
+	  w[n].ndom = ndom;	// Assign each wind cell to a domain                                       
 	  model_velocity (ndom, w[n].x, w[n].v);
 	  model_vgrad (ndom, w[n].x, w[n].v_grad);
 	}
@@ -178,12 +186,6 @@ define_wind ()
     }
 
   wind_complete (w);
-
-/* wind_complete has to precede the volume calculations because the 1d vectors are used
-in the volume calculations.  wind_complete itself is just a driver routine.  It has to
-be called out as a separate routine, because the 1d vectors are not saved and have to be
-recreated when a windfile is read into the program
-06may ksl */
 
 
   /* Now define the valid volumes of each cell and also determine whether the cells are in all
@@ -197,7 +199,6 @@ recreated when a windfile is read into the program
      in the the respective volumes calculation.  At least then we will do the calculation the
      same way both times.  . 
    */
-  /* JM 1508 -- Added loop over domains */
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
 
@@ -764,7 +765,7 @@ int ierr_vwind = 0;
 
 int
 vwind_xyz (ndom, p, v)
-	int ndom;
+     int ndom;
      PhotPtr p;
      double v[];
 {
@@ -777,11 +778,12 @@ vwind_xyz (ndom, p, v)
 
 
 
-  if (ndom<0 || ndom>=geo.ndomain){
-	  Error("vwind_xyz: Received invalid domain  %d\n",ndom);
-  }
+  if (ndom < 0 || ndom >= geo.ndomain)
+    {
+      Error ("vwind_xyz: Received invalid domain  %d\n", ndom);
+    }
 
-  
+
 
 
   coord_fraction (ndom, 0, p->x, nnn, frac, &nelem);
@@ -920,7 +922,7 @@ wind_div_v (w)
 
       /* stuff_v (w->xcen, x_zero); OLD NSH 130322 - this line seems to assume w is a cell, rather than the whole wind structure */
       stuff_v (w[icell].xcen, x_zero);	/*NEW NSH 130322 - now gets the centre of the current cell in the loop */
-      ndom=wmain[icell].ndom;
+      ndom = wmain[icell].ndom;
 
       delta = 0.01 * x_zero[2];	//new 04mar ksl -- delta is the distance across which we measure e.g. dv_x/dx
 
@@ -1017,16 +1019,17 @@ rho (w, x)
   double frac[4];
   int nn, nnn[4], nelem;
   int nplasma;
-  int ndom,ndomain;
+  int ndom, ndomain;
 
 
-  if (where_in_wind (x,&ndomain) < 0)	//note that where_in_wind is independent of grid.
+  if (where_in_wind (x, &ndomain) < 0)	//note that where_in_wind is independent of grid.
     return (0.0);
 
-  if ((ndom=ndomain)<0){
-	  Error("rho: Domain not fournd %d\n",ndomain);
-	  return(0.0);
-  }
+  if ((ndom = ndomain) < 0)
+    {
+      Error ("rho: Domain not fournd %d\n", ndomain);
+      return (0.0);
+    }
 
   n = coord_fraction (ndom, 1, x, nnn, frac, &nelem);
 
@@ -1071,19 +1074,21 @@ mdot_wind (w, z, rmax)
   double x[3], v[3], q[3], dot ();
   int ndom;
 
-  ndom=0;
+  ndom = 0;
 
-  Log("For simplicity, mdot wind checks only carried out for domain 0\n");
+  Log ("For simplicity, mdot wind checks only carried out for domain 0\n");
 
 // Calculate the mass loss rate immediately above the disk
 
   /* Check that everything is defined  sensible */
   rmin = geo.rstar;
 
-  if (rmax <= rmin){
-	  Error("mdot_wind: rmax %g is less than %g, so returning\n",rmax,rmin);
-	  return(0.0);
-  }
+  if (rmax <= rmin)
+    {
+      Error ("mdot_wind: rmax %g is less than %g, so returning\n", rmax,
+	     rmin);
+      return (0.0);
+    }
 
   dr = (rmax - rmin) / NSTEPS;
   mdot = 0;
@@ -1242,7 +1247,7 @@ check_corners_inwind (n)
   int n_inwind;
   int i, j;
   DomainPtr one_dom;
-  int ndom,ndomain;
+  int ndom, ndomain;
 
   /* find the domain */
   ndom = wmain[n].ndom;
@@ -1254,40 +1259,17 @@ check_corners_inwind (n)
 
   if (i < (one_dom->ndim - 2) && j < (one_dom->mdim - 2))
     {
-      if (where_in_wind (wmain[n].x,&ndomain) == W_ALL_INWIND)
+      if (where_in_wind (wmain[n].x, &ndomain) == W_ALL_INWIND)
 	n_inwind++;
-      if (where_in_wind (wmain[n + 1].x,&ndomain) == W_ALL_INWIND)
+      if (where_in_wind (wmain[n + 1].x, &ndomain) == W_ALL_INWIND)
 	n_inwind++;
-      if (where_in_wind (wmain[n + one_dom->mdim].x,&ndomain) == W_ALL_INWIND)
+      if (where_in_wind (wmain[n + one_dom->mdim].x, &ndomain) ==
+	  W_ALL_INWIND)
 	n_inwind++;
-      if (where_in_wind (wmain[n + one_dom->mdim + 1].x,&ndomain) == W_ALL_INWIND)
+      if (where_in_wind (wmain[n + one_dom->mdim + 1].x, &ndomain) ==
+	  W_ALL_INWIND)
 	n_inwind++;
     }
 
   return (n_inwind);
-}
-
-
-
-/* 
-
-Setup the locations of starting and ending positions of the different
-domains for wmain.  The information is placed in zdom for later use
-
-
-jm  Coded	Part of the effort to incorporate domains
-
-*/
-int
-set_nstart_nstop ()
-{
-  int n, ndom;
-  n = 0;
-  for (ndom = 0; ndom < geo.ndomain; ndom++)
-    {
-      zdom[ndom].nstart = n;
-      n += zdom[ndom].ndim * zdom[ndom].mdim;
-      zdom[ndom].nstop = n;
-    }
-  return 0;
 }
