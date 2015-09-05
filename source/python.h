@@ -310,20 +310,22 @@ int nplasma, nmacro;	/*The total number of cells in the plasma and macro structu
   int wcycles, pcycles;		/* The number of ionization and spectrum cycles desired */
 
 /* Begin description of the actual geometery */
-  // XXX  This needs to be removed from geometry
-enum coord_type_enum coord_type;
 
-/* The type of geometry and dimensionality of the wind array. 
-				   0=1-d spherical, 1=cylindrical, 2 = spherical polar, 3=cylindrical
-				   but the z coordinate changes with rho in an attempt to allow for
-				   a vertically extended disk....
-				   ndim is the dimensionality of the first dimension.  In the CV case
-				   it is in the plane of the disk. Mdim is generally along the z axis
-				 */
+/* The next variables refere to the entire space in which pbotons sill be tracked.  Photons
+ * outside these regions are assumed to have hit something or be freely moving through space.
+ */
+
   double rmin, rmax, rmax_sq;		/* The maximum distance to which a photon should be followed */
+  double wind_rho_min, wind_rho_max;	/*Min/Max rho for wind in disk plane */
+  double wind_thetamin, wind_thetamax;	/*Angles defining inner and outer cones of wind, measured from disk plane */
+
+
+/* Basic paremeters of the system, as opposed to elements of the wind or winds */
+
   double mstar, rstar, rstar_sq, tstar, gstar;	/* Basic parameters for the WD */
   double twind;			/* temperature of wind */
-  double tmax;			/*NSH 120817 the maximim temperature of any element of the model - used to help estimate things for an exponential representation of the spectrum in a cell */
+  double tmax;			/*NSH 120817 the maximum temperature of any element of the model 
+				  - used to help estimate things for an exponential representation of the spectrum in a cell */
 
   int system_type;  /* See allowed types above */
 
@@ -426,22 +428,11 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
 					   for the agn in the ionization and final spectrum calculation */
   char model_list[NCOMPS][LINELENGTH];	/* The file which contains the model names and the associated values for the model */
 
-  /* Generic parameters for the wind */
-
-  double wind_rho_min, wind_rho_max;	/*Min/Max rho for wind in disk plane */
-  double wind_thetamin, wind_thetamax;	/*Angles defining inner and outer cones of wind, measured from disk plane */
   double mdot_norm;		/*A normalization factor used in SV wind, and Knigge wind */
   int adiabatic;		/*0-> Do not include adiabatic heating in calculating the cooling of the wind
 				   1-> Use adiabatic heating in calculating the cooling of the wind
 				 */
   int auger_ionization;		/*0 -> Do not include innershell photoionization /Auger effects; 1-> include them */
-
-
-  /* Parameters describing a spherical shell test wind */
-//OLD  double shell_vmin, shell_vmax, shell_beta;
-//OLD  double shell_rmin, shell_rmax;
-
-  /*Parameters defining a corona in a ring above a disk */
 
 /* The filling factior for the wind or corona */
   double fill;
@@ -480,8 +471,6 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
   double lum_dr_ioniz;		
   double lum_adiabatic_ioniz;	
   double lum_wind_ioniz, lum_star_ioniz, lum_disk_ioniz, lum_bl_ioniz, lum_tot_ioniz;
-
-
 
   double f_matom, f_kpkt;	/*Added by SS Jun 2004 - to be used in computations of detailed spectra - the
 				   energy emitted in the band via k-packets and macro atoms respectively. */

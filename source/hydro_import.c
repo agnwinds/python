@@ -107,6 +107,8 @@ History:
 	13may	nsh	Now read in the inteernal energy - this allows the
 			computation of temperature for a cell, this makes sense
 			as a first guess of temperature	
+	15sept	ksl	Made modifications to allow for domains, but Nick will
+			need to debug this
 	
 **************************************************************/
 
@@ -124,25 +126,25 @@ get_hydro_wind_params (ndom)
 
   Log ("Creating a wind model using a Hydro calculatioon\n");
 
-  get_hydro ();
+  get_hydro (ndom);
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
-  geo.rmin = hydro_r_edge[0];
+  geo.rmin = zdom[ndom].rmin=hydro_r_edge[0];
 
-  geo.rmax = geo.rmax = hydro_r_edge[ihydro_r] + 2.0 * (hydro_r_cent[ihydro_r] - hydro_r_edge[ihydro_r]);	//Set the outer edge of the wind to the outer edge of the final defined cell
+  geo.rmax = zdom[ndom].rmax = hydro_r_edge[ihydro_r] + 2.0 * (hydro_r_cent[ihydro_r] - hydro_r_edge[ihydro_r]);	//Set the outer edge of the wind to the outer edge of the final defined cell
   Log ("rmax=%e\n", geo.rmax);
-  geo.wind_rho_min = 0.0;	//Set wind_rmin 0.0, otherwise wind cones dont work properly 
-  Log ("rho_min=%e\n", geo.wind_rho_min);
-  geo.wind_rho_max = geo.rmax;	//This is the outer edge of the
-  Log ("rho_max=%e\n", geo.wind_rho_max);
-  geo.wind_thetamin = hydro_theta_edge[0];
+  geo.wind_rho_min =zdom[ndom].wind_rho_min= 0.0;	//Set wind_rmin 0.0, otherwise wind cones dont work properly 
+  Log ("rho_min=%e\n", zdom[ndom].wind_rho_min);
+  geo.wind_rho_max = zdom[ndom].rmax;	//This is the outer edge of the
+  Log ("rho_max=%e\n", zdom[ndom].wind_rho_max);
+  geo.wind_thetamin=zdom[ndom].wind_thetamin= hydro_theta_edge[0];
   Log ("theta_min=%e\n", geo.wind_thetamin);
 
-  Log ("geo.rmin=%e\n", geo.rmin);
-  Log ("geo.rmax=%e\n", geo.rmax);
-  Log ("geo.wind_rhomin=%e\n", geo.wind_rho_min);
-  Log ("geo.wind_rhomax=%e\n", geo.wind_rho_max);
+  Log ("geo.rmin=%e\n", zdom[ndom].rmin);
+  Log ("geo.rmax=%e\n", zdom[ndom].rmax);
+  Log ("geo.wind_rhomin=%e\n", zdom[ndom].wind_rho_min);
+  Log ("geo.wind_rhomax=%e\n", zdom[ndom].wind_rho_max);
 
 
 
@@ -159,7 +161,8 @@ get_hydro_wind_params (ndom)
 
 
 int
-get_hydro ()
+get_hydro (ndom)
+	int ndom;
 {
 
   FILE *fopen (), *fptr;
@@ -287,7 +290,7 @@ get_hydro ()
       ihydro_theta = ithetamax;
       geo.wind_thetamax = 90. / RADIAN;
       hydro_thetamax = 90.0 / RADIAN;
-      mdim = zdom[0].mdim = ihydro_theta + 1;
+      mdim = zdom[ndom].mdim = ihydro_theta + 1;
     }
   else
     {
@@ -297,7 +300,7 @@ get_hydro ()
 	 hydro_theta_cent[j_hydro_thetamax + 1] * RADIAN);
       ihydro_theta = j_hydro_thetamax;
       geo.wind_thetamax = hydro_thetamax;
-      mdim = zdom[0].mdim = ihydro_theta + 2;
+      mdim = zdom[ndom].mdim = ihydro_theta + 2;
     }
 
 
@@ -319,8 +322,8 @@ get_hydro ()
 
 /* Set a couple of last tags*/
 
-  geo.coord_type = RTHETA;	//At the moment we only deal with RTHETA - in the future we might want to do some clever stuff
-  ndim = zdom[0].ndim = ihydro_r + 3;	//We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
+  zdom[ndom].coord_type = RTHETA;	//At the moment we only deal with RTHETA - in the future we might want to do some clever stuff
+  ndim = zdom[ndom].ndim = ihydro_r + 3;	//We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
 
 
 

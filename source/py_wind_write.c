@@ -303,7 +303,7 @@ display (name)
   Log ("\n %s \n", name);
   Log ("z/theta \\x/r");
   for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
-    if (geo.coord_type == 1 || py_wind_project == 1)
+    if (zdom[ndom].coord_type == 1 || py_wind_project == 1)
       Log ("%8.2e ", wmain[nstart+i * mdim].x[0]);
     else
       Log ("%8.2e ", wmain[nstart+i * mdim].rcen);

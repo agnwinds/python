@@ -184,7 +184,7 @@ double homologous_velocity(int ndom, double x[], double v[]);
 double homologous_rho(int ndom, double x[]);
 /* hydro_import.c */
 int get_hydro_wind_params(int ndom);
-int get_hydro(void);
+int get_hydro(int ndom);
 double hydro_velocity(double x[], double v[]);
 double hydro_rho(double x[]);
 double hydro_temp(double x[]);
