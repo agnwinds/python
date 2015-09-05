@@ -559,12 +559,32 @@ get_wind_params (ndom)
     }
 
   // XXX These need to be initalized sensibly and 
-  // it is not ovious that is happenning
+  // it is not obvious that is happenning
 
   zdom[ndom].rmax = 1e12;
   zdom[ndom].twind = 1e5;
 
   rddoub ("wind.radmax(cm)", &zdom[ndom].rmax);
+  /* The next lines assure that geo.rmax_sq really does define the edge of the grid */
+  if (zdom[ndom].rmax>geo.rmax){
+	  geo.rmax=zdom[ndom].rmax;
+	  geo.rmax_sq=geo.rmax*geo.rmax;
+	  Log("XXXX  size  %e  %e\n",geo.rmax,geo.rmax_sq);
+  }
+
+  /* ksl XXX - There is something of a philosophicla problem that needs to be worked
+   * out with geo.rmax and zdom[ndom].rmax for the general case of winds.  Suppose
+   * we wish to create, say a spherical outflow with two domains one going from 
+   * r1 to r2 and the other going from r2 to r3.  Then we want to keep geo.rmax which is 
+   * intended to be the distance beyond which photons are moving through free space separate
+   * from the values in the wind zones.  Right now we are setting the outer limit of each
+   * wind to be geo.rmax regardless, in routines like get_stellar_wind_params and get_sv_wind
+   * This is not what we want.  What should happen is that for each componetn where it is
+   * relevant we should ask for the outer edge of the domain and then at the end we should determine
+   * what geo.rmax should be set to.  There are some cases, e.g. get_hydor_wind where one should not
+   * need to ask the question about rmax, but others where it is necessary
+   */
+
   rddoub ("wind.t.init", &geo.twind);
 
 
@@ -628,12 +648,6 @@ Modified again in python 71b to take account of change in parametrisation of she
   geo.fill = 1.;
   rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
 
-  /* The next lines assure that geo.rmax_sq really does define the edge of the grid */
-  if (zdom[ndom].rmax>geo.rmax){
-	  geo.rmax=zdom[ndom].rmax;
-	  geo.rmax_sq=geo.rmax*geo.rmax;
-	  Log("XXXX  size  %e  %e\n",geo.rmax,geo.rmax_sq);
-  }
 
   return (0);
 }

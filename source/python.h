@@ -438,13 +438,14 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
 
 
   /* Parameters describing a spherical shell test wind */
-  double shell_vmin, shell_vmax, shell_beta;
-  double shell_rmin, shell_rmax;
+//OLD  double shell_vmin, shell_vmax, shell_beta;
+//OLD  double shell_rmin, shell_rmax;
 
   /*Parameters defining a corona in a ring above a disk */
 
 /* The filling factior for the wind or corona */
   double fill;
+
 /* Initial values for defining wind structure for a planar geometry.  These are currently only used by balance and this
    may not be the best approach generally and depending on where this ends up. Some consolidation is desirable */
   double pl_vol, pl_vmax;
