@@ -612,15 +612,21 @@ z_axis[1] = z_axis[0] = 0.0;
   /* specify if there is a disk and what type */
   /* JM 1502 -- moved disk type question here- previously it was just before
      asking for disk radiation. See #8 and #44 */
+
   rdint
     ("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
      &geo.disk_type);
 
-  /* ksl 1508 Add parameters for a disk atmosphere */
+  if (geo.disk_type==0) {
+	  geo.disk_atmosphere=0;
+  }
+  else {
+  /* ksl 1508 Add parameters for a disk atmosphere XXX  */
   zdom[ndomain].ndim = 30;
   zdom[ndomain].mdim = 10;
 
   rdint ("disk.atmosphere(0=no,1=yes)", &geo.disk_atmosphere);
+  }
   if (geo.disk_atmosphere != 0)
     {
       /* specify the domain name and number */

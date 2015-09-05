@@ -18,9 +18,9 @@ Arguments:
 Returns:
  
 Description:	
-	The parameters, geo.cl...,  obtained here are only used in the routines in stellar_winds.c
+	The parameters, zdom[ndom].cl...,  obtained here are only used in the routines in stellar_winds.c
 	which calculate the velocity and density of the wind during the initialization process.
-	Other portions of the structure, geo defined here are more general purpose.
+	Other portions of the structure, zdom[ndom] defined here are more general purpose.
 
 Notes:
 	Although it seems natural to assume that the wind starts at the photosphere, this
@@ -54,7 +54,6 @@ get_stellar_wind_params (ndom)
 {
   Log ("Creating a wind model for a Star\n");
 
-  // XXX stellar winds are not debugged
 
 
 
@@ -65,7 +64,6 @@ get_stellar_wind_params (ndom)
   zdom[ndom].cl_v_zero = 200e5;
   zdom[ndom].cl_v_infinity = 3000e5;
 
-  zdom[ndom].stellar_wind_mdot /= MSOL / YR;
   rddoub ("stellar_wind_mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
   zdom[ndom].stellar_wind_mdot *= MSOL / YR;
 
@@ -110,9 +108,10 @@ get_stellar_wind_params (ndom)
                                        Space Telescope Science Institute
 
  Synopsis:
-	double stellar_velocity(x,v) calulates the v the wind at a position 
+	double stellar_velocity(ndom, x,v) calulates the v the wind at a position 
 	x (where both x and v in cartesian coordinates)
 Arguments:		
+	ndom 			The domain number
 	double x[]		the postion where for the which one desires the velocity
 Returns:
 	double v[]		the calculated velocity
@@ -124,12 +123,12 @@ Description:
 
 	v(r)=V_o + (V_infinity-V_o) (1-R/r)**beta
 	
-	The values of the individiual constants should all be part of the structure geo.
+	The values of the individiual constants should all be part of the structure zdom[ndom].
 
-	V_o:  			geo.cl_v_zero;		velocity at base of wind 
-	V_infinity:		geo.cl_v_infinity;	the velocity at infinity
-	R			geo.cl_rmin	       	the inner radius of the wind
-	beta			geo.cl_beta		power law exponent for the velocity law
+	V_o:  			zdom[ndom].cl_v_zero;		velocity at base of wind 
+	V_infinity:		zdom[ndom].cl_v_infinity;	the velocity at infinity
+	R			zdom[ndom].cl_rmin	       	the inner radius of the wind
+	beta			zdom[ndom].cl_beta		power law exponent for the velocity law
 
 		
 Notes:
@@ -162,12 +161,12 @@ stellar_velocity (ndom, x, v)
     }
 
 
-  if (r <= geo.rstar || r <= geo.cl_rmin)
-    speed = geo.cl_v_zero;
+  if (r <= geo.rstar || r <= zdom[ndom].cl_rmin)
+    speed = zdom[ndom].cl_v_zero;
   else
     {
-      zzz = pow (1. - geo.cl_rmin / r, geo.cl_beta);
-      speed = geo.cl_v_zero + (geo.cl_v_infinity - geo.cl_v_zero) * zzz;
+      zzz = pow (1. - zdom[ndom].cl_rmin / r, zdom[ndom].cl_beta);
+      speed = zdom[ndom].cl_v_zero + (zdom[ndom].cl_v_infinity - zdom[ndom].cl_v_zero) * zzz;
     }
   v[0] = speed * x[0] / r;
   v[1] = speed * x[1] / r;

@@ -436,9 +436,6 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
 				 */
   int auger_ionization;		/*0 -> Do not include innershell photoionization /Auger effects; 1-> include them */
 
-  /* Parameters describing Castor and Larmors spherical wind */
-  double cl_v_zero, cl_v_infinity, cl_beta;	/* Power law exponent */
-  double cl_rmin, cl_rmax;
 
   /* Parameters describing a spherical shell test wind */
   double shell_vmin, shell_vmax, shell_beta;
