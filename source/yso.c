@@ -110,7 +110,15 @@ in units of WD radii */
   if (modes.adjust_grid == 0)
     {
       zdom[ndom].xlog_scale = geo.rstar;
+      zdom[ndom].zlog_scale = 1e-4*geo.rstar;
+      /*
+       * XXX -- ksl this is not explicitly associated with domains but zlog_scale was hard wired, which is not normally 
+       * what we want in python, as we would like variables like zlog_scale to depend on other input parameters.
+       * For the model calculated by Stuart, 1e7 below corresponds to a number of 2.6e-5, and but I arbitrarily
+       * rounded up to 1e-4
+       *
       zdom[ndom].zlog_scale = 1e7;
+      */
     }
 
   return (0);

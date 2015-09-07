@@ -139,7 +139,12 @@ get_elvis_wind_params (ndom)
   if (modes.adjust_grid == 0)
     {
       zdom[ndom].xlog_scale = zdom[ndom].sv_rmin;
-      zdom[ndom].zlog_scale = 1e15;	/* Big number - for AGN */
+      if (geo.rstar>1e7){
+	      zdom[ndom].zlog_scale = geo.rstar;
+      }
+      else {
+	      zdom[ndom].zlog_scale = zdom[ndom].sv_rmin;
+      }
     }
 
 /*Now calculate the normalization factor for the wind*/
