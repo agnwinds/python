@@ -135,7 +135,7 @@ enum coord_type_enum
 
 #define SV   			0
 #define	SPHERE  		1
-#define	PREVIOUS 		2
+// #define	PREVIOUS 		2
 #define	HYDRO 			3
 #define	CORONA 			4
 #define KNIGGE			5
@@ -260,14 +260,6 @@ double wind_midz_var[NDIM_MAX][NDIM_MAX];
 
   double corona_vel_frac;	// the radial velocity of the corona in units of the keplerian velocity
   
-// 70b - ksl - 110809  The next set of sources relate to a compton torus that is initially at least just related to AGN
-
-//  int compton_torus;		/* 0 if there is no Compton torus; 1 otherwise */
-//  double compton_torus_rmin;	/* The minimum radius of the torus */
-//  double compton_torus_rmax;	/* The maximum radius of the torus */
-//  double compton_torus_zheight;	/* The height of the torus. */
-//  double compton_torus_tau;	/* The optical depth through the torus at the height. */
-//  double compton_torus_te;	/* The initial temperature of the torus */
 
 
 
@@ -285,6 +277,7 @@ DomainPtr zdom;
 #define SYSTEM_TYPE_STAR   0
 #define SYSTEM_TYPE_BINARY 1
 #define SYSTEM_TYPE_AGN    2
+#define	SYSTEM_TYPE_PREVIOUS   	   3
 
 struct geometry
 {

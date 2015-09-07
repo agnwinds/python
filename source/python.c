@@ -393,28 +393,23 @@ z_axis[1] = z_axis[0] = 0.0;
 				   mode of operation */
     {
 
-      rdint
-	("Wind_type(0=SV,1=Sphere,2=Previous,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)",
-	 &zdom[ndomain].wind_type);
+  /*  Establish the overall system type  
+     Note 1509 - ksl - Exactly what we call a system type is a little bizarre. The original
+     intent of this was to allow one to ignore a secondary star, but with addition of AGN it, really
+     is a bit unclear what one would like to use here */
+
+  geo.system_type = SYSTEM_TYPE_STAR;
+  rdint ("System_type(0=star,1=binary,2=agn,3=previous)", &geo.system_type);
+
+
 
       geo.run_type = 0;
-      if (zdom[ndomain].wind_type == PREVIOUS)
+      if (geo.system_type == SYSTEM_TYPE_PREVIOUS)
 	{
-	  geo.run_type = PREVIOUS;
-	}
-      else if (zdom[ndomain].wind_type != 10)
-	{
-	  strcat (zdom[ndomain].name, "Wind");
-	  geo.wind_domain_number = ndomain;
-	  ndomain++;
-	}
-      else
-	{
-	  /* there's no wind, set wind domain_number to -1 */
-	  geo.wind_domain_number = -1;
+	  geo.run_type = SYSTEM_TYPE_PREVIOUS;
 	}
 
-      if (geo.run_type == PREVIOUS)
+      if (geo.run_type == SYSTEM_TYPE_PREVIOUS)
 	{
 	  /* This option is for the confusing case where we want to start with
 	     a previous wind model, but we are going to write the result to a
@@ -433,7 +428,7 @@ z_axis[1] = z_axis[0] = 0.0;
 	      Error ("python: Unable to open %s\n", files.old_windsave);	//program will exit if unable to read the file
 	      exit (0);
 	    }
-	  geo.run_type = PREVIOUS;	// after wind_read one will have a different wind_type otherwise
+	  geo.run_type = SYSTEM_TYPE_PREVIOUS;	// after wind_read one will have a different wind_type otherwise
 	  w = wmain;
 
 
@@ -442,6 +437,21 @@ z_axis[1] = z_axis[0] = 0.0;
       else
 	{			/* Read the atomic datafile here, because for the cases where we have read
 				   and old wind files, we also got the atomic data */
+
+      rdint
+	("Wind_type(0=SV,1=Sphere,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)",
+	 &zdom[ndomain].wind_type);
+      if (zdom[ndomain].wind_type != 10)
+	{
+	  strcat (zdom[ndomain].name, "Wind");
+	  geo.wind_domain_number = ndomain;
+	  ndomain++;
+	}
+      else
+	{
+	  /* there's no wind, set wind domain_number to -1 */
+	  geo.wind_domain_number = -1;
+	}
 
 	  rdstr ("Atomic_data", geo.atomic_filename);
 
@@ -473,7 +483,7 @@ z_axis[1] = z_axis[0] = 0.0;
 	  exit (0);
 	}
       w = wmain;
-      geo.run_type = PREVIOUS;	// We read the data from a file
+      geo.run_type = SYSTEM_TYPE_PREVIOUS;	// We read the data from a file
       xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.old_windsave);
 
       if (geo.pcycle > 0)
@@ -591,7 +601,7 @@ z_axis[1] = z_axis[0] = 0.0;
     geo.macro_simple = 1;	// Make everything simple if no macro atoms -- 57h
 
   //SS - initalise the choice of handling for macro pops.
-  if (geo.run_type == PREVIOUS)
+  if (geo.run_type == SYSTEM_TYPE_PREVIOUS)
     {
       geo.macro_ioniz_mode = 1;	// Now that macro atom properties are available for restarts
     }
@@ -599,15 +609,6 @@ z_axis[1] = z_axis[0] = 0.0;
     {
       geo.macro_ioniz_mode = 0;
     }
-
-  /*  Establish the overall system type  
-     Note 1509 - ksl - Exactly what we call a system type is a little bizarre. The original
-     intent of this was to allow one to ignore a secondary star, but with addition of AGN it, really
-     is a bit unclear what one would like to use here */
-
-  geo.system_type = SYSTEM_TYPE_STAR;
-  rdint ("System_type(0=star,1=binary,2=agn)", &geo.system_type);
-
 
   /* specify if there is a disk and what type */
   /* JM 1502 -- moved disk type question here- previously it was just before
@@ -672,13 +673,13 @@ z_axis[1] = z_axis[0] = 0.0;
   get_radiation_sources ();
 
 
-  if (geo.run_type == PREVIOUS)
+  if (geo.run_type == SYSTEM_TYPE_PREVIOUS)
     {
       disk_illum = geo.disk_illum;
     }
 
 
-  if (geo.run_type != PREVIOUS)	// Start of block to define a model for the first time
+  if (geo.run_type != SYSTEM_TYPE_PREVIOUS)	// Start of block to define a model for the first time
     {
 
       /* get_stellar_params gets information like mstar, rstar, tstar etc.
@@ -1060,7 +1061,7 @@ z_axis[1] = z_axis[0] = 0.0;
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
 
-      if (zdom[0].coord_type == RTHETA && geo.run_type == PREVIOUS)	//We need to generate an rtheta wind cone if we are restarting
+      if (zdom[0].coord_type == RTHETA && geo.run_type == SYSTEM_TYPE_PREVIOUS)	//We need to generate an rtheta wind cone if we are restarting
 	{
 	  rtheta_make_cones (ndom, wmain);
 	}
@@ -1072,7 +1073,7 @@ z_axis[1] = z_axis[0] = 0.0;
 
 
   /* Next line finally defines the wind if this is the initial time this model is being run */
-  if (geo.run_type != PREVIOUS)	// Define the wind and allocate the arrays the first time
+  if (geo.run_type != SYSTEM_TYPE_PREVIOUS)	// Define the wind and allocate the arrays the first time
     {
       define_wind ();
     }
@@ -1212,7 +1213,7 @@ z_axis[1] = z_axis[0] = 0.0;
       /* JM 1409 -- We used to execute subcycles here, but these have been removed */
 
       if (!geo.wind_radiation
-	  || (geo.wcycle == 0 && geo.run_type != PREVIOUS))
+	  || (geo.wcycle == 0 && geo.run_type != SYSTEM_TYPE_PREVIOUS))
 	iwind = -1;		/* Do not generate photons from wind */
       else
 	iwind = 1;		/* Create wind photons and force a reinitialization of wind parms */
@@ -2016,7 +2017,7 @@ get_spectype (yesno, question, spectype)
 	*spectype = SPECTYPE_CL_TAB;
       else
 	{
-	  if (geo.run_type == PREVIOUS)
+	  if (geo.run_type == SYSTEM_TYPE_PREVIOUS)
 	    {			// Continuing an old model
 	      strcpy (model_list, geo.model_list[get_spectype_count]);
 	    }
