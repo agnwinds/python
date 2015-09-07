@@ -246,7 +246,7 @@ get_grid_params (ndom)
   input_int=1;
 
   /* ksl - The if statement seems superflous.  Why are we entering this routine if we are continuing and earlier calculation? */
-  if (geo.wind_type != PREVIOUS)
+  if (geo.run_type != SYSTEM_TYPE_PREVIOUS)
     {
       /* Define the coordinate system for the grid and allocate memory for the wind structure */
       rdint
