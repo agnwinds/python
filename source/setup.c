@@ -973,64 +973,6 @@ get_bl_and_agn_params (lstar)
 
 /***********************************************************
              University of Southampton
-
-Synopsis: 
-  get_compton_torus_params sets up a compton torus or blocking region.
-  It is not production ready and so is part of 'advanced mode',
-  accessed with the d flag
-   
-Arguments:		
-
-Returns:
- 
-Description:	
-
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-
-**************************************************************/
-
-
-int
-get_compton_torus_params ()
-{
-  /* 70b - ksl - 1108067 - Here we add parameters for the compton torus or blocking region 
-   *
-   * Note that the whole flow of this may be a bit odd as it seems as if we have to keep checking for whether
-   * we are modelling an agn
-   *
-   * Note that these calls need to precede the calls below, because we want to keep the compton torus  ???
-   * inside the actual wind, or at least that's what ksl believes on 110809.  ???
-   */
-
-  /* 140907: ksl - I have effectively commented out any consideration of the compton_torus because it is not
-   * debugged.  But one can continue debugging it by setting the DEBUG variatble to true 
-   */
-  rdint ("Torus(0=no,1=yes)", &geo.compton_torus);
-
-  if (geo.compton_torus)
-    {
-      rddoub ("Torus.rmin(cm)", &geo.compton_torus_rmin);
-      rddoub ("Torus.rmax(cm)", &geo.compton_torus_rmax);
-      rddoub ("Torus.height(cm)", &geo.compton_torus_zheight);
-      rddoub ("Torus.optical_depth", &geo.compton_torus_tau);
-      rddoub ("Torus.tinit", &geo.compton_torus_te);
-      if (geo.compton_torus_tau <= 0)
-	{
-	  geo.compton_torus_tau = 0.001;
-	  Error
-	    ("python: A torus with zero optical depth makes no sense. Setting to %f\n",
-	     geo.compton_torus_tau);
-	}
-    }
-
-  return (0);
-}
-
-/***********************************************************
-             University of Southampton
 Synopsis: 
   get_meta_params reads in data pertaining to simulation meta-
   properties like reverberation mapping settings and variance

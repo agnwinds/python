@@ -116,20 +116,6 @@ where_in_wind (x,ndomain)
 	}
     }
 
-  /* 70b -ksl - Now check if the position is in the torus.  This check
-     precedes the check to see if the position is in the wind
-   */
-
-  if (geo.compton_torus)
-    {
-      if (geo.compton_torus_rmin < rho && rho < geo.compton_torus_rmax
-	  && z < geo.compton_torus_zheight)
-	{
-		*ndomain=-1;  // PLACEHOLDER XXX need to deal with compton torus later
-	  return(W_ALL_INTORUS);
-	}
-    }
-
 
   /* Now check whether position is a wind region of any of the domains.
    * This is done in reverse order on the assumption that our domains
@@ -447,7 +433,6 @@ model_rho (ndom, x)
      double x[];
 {
   double rho;
-  int ndomain;
 
   if (zdom[ndom].wind_type == SV)
     {
@@ -489,14 +474,6 @@ model_rho (ndom, x)
     {
       Error ("wind2d: Unknown windtype %d\n", geo.wind_type);
       exit (0);
-    }
-
-  /* 70b - as this is written the torus simply overlays the wind */
-
-  if ((where_in_wind (x,&ndomain) == W_ALL_INTORUS)
-      || (where_in_wind (x,&ndomain) == W_PART_INTORUS))
-    {
-      rho = torus_rho (x);
     }
 
   return (rho);

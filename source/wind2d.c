@@ -238,35 +238,6 @@ define_wind ()
 	}
     }
 
-  /* Now check if there is a second component and if so get the volumes for these cells as well */
-  /* PLACEHOLDER -- XXX need to encorporate Torus into domains */
-  if (geo.compton_torus)
-    {
-
-      if (zdom[ndom].coord_type == SPHERICAL)
-	{
-	  spherical_volumes (ndom, w, W_ALL_INTORUS);
-	}
-      else if (zdom[ndom].coord_type == CYLIND)
-	{
-	  cylind_volumes (ndom, w);
-	}
-      else if (zdom[ndom].coord_type == RTHETA)
-	{
-	  rtheta_volumes (ndom, w, W_ALL_INTORUS);
-	}
-      else if (zdom[ndom].coord_type == CYLVAR)
-	{
-	  cylvar_volumes (ndom, w, W_ALL_INTORUS);
-	}
-      else
-	{
-	  Error
-	    ("wind2d.c: Don't know how to make volumes for coordinate type %d\n",
-	     zdom[ndom].coord_type);
-	}
-
-    }
 
 /* The routines above have established the volumes of the cells that are in the wind
  * and also assigned the variables w[].inwind at least insofar as the wind is concerned.
@@ -294,13 +265,6 @@ define_wind ()
   Log
     ("wind2d: %3d cells of which %d are in inwind, %d partially in_wind, & %d with pos. vol\n",
      NDIM2, n_inwind, n_part, n_vol);
-
-  if (geo.compton_torus)
-    {
-      Log
-	("wind2d: cells of which %d are in in the torus , %d partially ini the torus\n",
-	 n_comp, n_comp_part);
-    }
 
 /* 56d --Now check the volume calculations for 2d wind models 
    58b --If corners are in the wind, but there is zero_volume then ignore.
@@ -425,16 +389,6 @@ be optional which variables beyond here are moved to structures othere than Wind
 	  plasmamain[n].t_r = geo.twind;
 	}
 
-
-
-
-      /* 70b - Initialize the temperature in the torus to a different value */
-
-      if (w[nwind].inwind == W_ALL_INTORUS
-	  || w[nwind].inwind == W_PART_INTORUS)
-	{
-	  plasmamain[n].t_r = geo.compton_torus_te;
-	}
 
       /* Initialize variables having to do with converence in initial stages */
       plasmamain[n].gain = 0.5;

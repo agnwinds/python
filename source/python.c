@@ -706,15 +706,6 @@ z_axis[1] = z_axis[0] = 0.0;
 
 
 
-      /* Describe the Compton torus */
-      geo.compton_torus = 0;
-
-      /* JM 1411 -- we only ask about the Torus if we've used the -d flag */
-      if (modes.iadvanced)
-	get_compton_torus_params ();
-
-
-
       /* Describe the wind. This routine reads in geo.rmax and geo.twind
          and then gets params by calling e.g. get_sv_wind_params() */
       /* PLACEHOLDER -- XXX call with wind domain number */

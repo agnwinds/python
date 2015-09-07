@@ -108,11 +108,6 @@ translate_in_space (pp)
 
   ds = ds_to_wind (pp);
 
-  /* Check whether the photon hit the torus first */
-  if (geo.compton_torus && (x = ds_to_torus (pp)) < ds)
-    {
-      ds = x;
-    }
 
 /* ?? The way in which a photon is identified as hitting the star seems
 a bit convoluted.  Despite the fact that it is already identified here
@@ -395,17 +390,7 @@ return and record an error */
       if (s > 0 && s < smax)
 	smax = s;
     }
-  // 110930 - ksl - Next section added to accommodate the torus 
-  if (geo.compton_torus && one->inwind == W_PART_INTORUS)
-    {
-      s = ds_to_torus (p);	//smax is set to be the distance to edge of the wind
-      if (s < smax)
-	smax = s;
-      s = ds_to_disk (p, 0);	// ds_to_disk can return a negative distance
-      if (s > 0 && s < smax)
-	smax = s;
-    }
-  else if (one->inwind == W_IGNORE)
+  if (one->inwind == W_IGNORE)
     {
       if ((neglible_vol_count % 100) == 0)
 	Error

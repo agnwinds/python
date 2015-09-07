@@ -262,12 +262,12 @@ double wind_midz_var[NDIM_MAX][NDIM_MAX];
   
 // 70b - ksl - 110809  The next set of sources relate to a compton torus that is initially at least just related to AGN
 
-  int compton_torus;		/* 0 if there is no Compton torus; 1 otherwise */
-  double compton_torus_rmin;	/* The minimum radius of the torus */
-  double compton_torus_rmax;	/* The maximum radius of the torus */
-  double compton_torus_zheight;	/* The height of the torus. */
-  double compton_torus_tau;	/* The optical depth through the torus at the height. */
-  double compton_torus_te;	/* The initial temperature of the torus */
+//  int compton_torus;		/* 0 if there is no Compton torus; 1 otherwise */
+//  double compton_torus_rmin;	/* The minimum radius of the torus */
+//  double compton_torus_rmax;	/* The maximum radius of the torus */
+//  double compton_torus_zheight;	/* The height of the torus. */
+//  double compton_torus_tau;	/* The optical depth through the torus at the height. */
+//  double compton_torus_te;	/* The initial temperature of the torus */
 
 
 
@@ -496,14 +496,6 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
   double r_agn;			/* radius of the "photosphere" of the BH in the AGN.  */
   double d_agn;			/* the distance to the agn - only used in balance to calculate the ioinsation fraction */
 
-// 70b - ksl - 110809  The next set of sources relate to a compton torus that is initially at least just related to AGN
-
-  int compton_torus;		/* 0 if there is no Compton torus; 1 otherwise */
-  double compton_torus_rmin;	/* The minimum radius of the torus */
-  double compton_torus_rmax;	/* The maximum radius of the torus */
-  double compton_torus_zheight;	/* The height of the torus. */
-  double compton_torus_tau;	/* The optical depth through the torus at the height. */
-  double compton_torus_te;	/* The initial temperature of the torus */
 
 //70i - nsh 111007 - put lum_ioniz and n_ioniz into the geo structure. This will allow a simple estimate of ionisation parameter to be computed;
 

@@ -422,9 +422,7 @@ double kappa_ind_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
 double klein_nishina(double nu);
 /* torus.c */
-double torus_rho(double x[]);
 double ds_to_cylinder(double rho, struct photon *p);
-double ds_to_torus(PhotPtr pp);
 /* zeta.c */
 double compute_zeta(double temp, int nion, int mode);
 /* dielectronic.c */
@@ -472,7 +470,6 @@ int get_wind_params(int ndom);
 double get_stellar_params(void);
 double get_disk_params(void);
 int get_bl_and_agn_params(double lstar);
-int get_compton_torus_params(void);
 int get_meta_params(void);
 double setup_dfudge(void);
 int setup_windcone(void);
