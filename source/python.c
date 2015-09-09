@@ -487,9 +487,10 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
   rdint ("spectrum_cycles", &geo.pcycles);
 
 
-  if (geo.wcycles == 0 && geo.pcycles == 0)
+  if (geo.wcycles == 0 && geo.pcycles == 0) {
 	  Log("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
     exit (0);			//There is really nothing to do!
+  }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */
     // XXX Not clear why we want to do this here; why not after all of the input data arre in hand
