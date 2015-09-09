@@ -101,7 +101,7 @@ delay_dump_prep(char filename[], int restart_stat, int i_rank)
 		fprintf(fptr, "# Date	%s\n#  \n", string);
 		fprintf(fptr, "# \n# Freq      Wavelength  Weight   "
 			" Last X     Last Y     Last Z    "
-		    " Scatters   RScatter   Delay      Extracted  Spectrum   Origin   \n");
+		    " Scatters   RScatter   Delay      Extracted  Spectrum   Origin   Last_Z  \n");
 	}
 	fclose(fptr);
 	return (0);
@@ -257,7 +257,7 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 							p[nphot].nscat, p[nphot].nrscat,
 							(delay_to_observer(&p[nphot]) - (geo.rmax-minpath)) / C,
 							(iExtracted ? delay_dump_bank_ex[nphot] : 0),
-							i - MSPEC, p[nphot].origin);
+							i - MSPEC, p[nphot].origin, lin_ptr[p[nphot].nres]->z);
 					}
 				}
 			}
