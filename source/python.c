@@ -278,9 +278,8 @@ main (argc, argv)
   np_mpi = 1;
 #endif
 
-  np_mpi_global = np_mpi;	/// Glob al variable which holds the number of MPI processes
-  rank_global = my_rank;	/// Global variable which holds the rank of the active MPI process
-
+  np_mpi_global = np_mpi;	        // Global variable which holds the number of MPI processes
+  rank_global = my_rank;	        // Global variable which holds the rank of the active MPI process
   Log_set_mpi_rank (my_rank, np_mpi);	// communicates my_rank to kpar
 
 
@@ -292,36 +291,30 @@ main (argc, argv)
   time_max = 13.8e9 * 3.2e7;	/* 67 - ksl - 08nov - The maximum time the program will run without stopping.  This
 				   is initially set to the lifetime of the universe
 				 */
-
   time_max = -1;
-
-  verbosity = 3;		/* Set the default verbosity to 3.  To get more info raise the verbosity level to a higher number. To
-				   get less set the verbosity to a lower level. */
-
   time_to_quit = 100000;	// Initialise variable
 
 
+
+
+  /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
+ get less set the verbosity to a lower level. The verbosity can be reset from the comamnd line */
+  verbosity = 3;		
   Log_set_verbosity (verbosity);
-
-
 
   /* initialise options for advanced mode (all set to 0) */
   init_advanced_modes ();
 
-
   /* Parse the command line. Get the root. create files.diagfolder + diagfiles */
-
 
   restart_stat = parse_command_line (argc, argv);
 
-
-  /* 0811 - ksl - If the restart flag has been set, we check to see if a windsave file exists.  If it doues we will 
+  /* If the restart flag has been set, we check to see if a windsave file exists.  If it doues we will 
      we will restart from that point.  If the windsave file does not exist we will start from scratch */
 
   init_log_and_windsave (restart_stat);
 
-  Log_parallel ("Thread %d starting.\n", my_rank);	//JM130723 moved this after verbosity switch
-
+  Log_parallel ("Thread %d starting.\n", my_rank);	
 
   /* Start logging of errors and comments */
 
@@ -350,33 +343,10 @@ main (argc, argv)
 
   opar_stat = setup_created_files ();
 
-
-/* Provide plausible initial values for the sizes of the wind arrays.  This is desirable
- * primarily for creating reasonable .pf files*/
-
-/* Set plausible values for everything in geo struct which basically defines the overall geometry */
-/* JM 1508 -- init_geo() also allocates the memory for the domain structure */
+/* Set plausible values for everything in geo struct which basically defines the overall geometry
+As of 1508,  init_geo() also allocates the memory for the domain structure */
 
   init_geo ();
-
-/* Set the global variables that define the size of the grid as defined in geo.  These are used for convenience */
-
-
-/* End of definition of wind arrays */
-
-
-/* Initialize variables which are used in the main routine */
-
-
-/* Initialize basis vectors for a cartesian coordinate system (used by anioswind) */
-
-x_axis[0] = 1.0;
-x_axis[1] = x_axis[2] = 0.0;
-y_axis[1] = 1.0;
-y_axis[0] = y_axis[2] = 0.0;
-z_axis[2] = 1.0;
-z_axis[1] = z_axis[0] = 0.0;
-
 
 
 
@@ -393,7 +363,7 @@ z_axis[1] = z_axis[0] = 0.0;
 				   mode of operation */
     {
 
-  /*  Establish the overall system type  
+  /* First,  establish the overall system type . 
      Note 1509 - ksl - Exactly what we call a system type is a little bizarre. The original
      intent of this was to allow one to ignore a secondary star, but with addition of AGN it, really
      is a bit unclear what one would like to use here */
@@ -402,14 +372,10 @@ z_axis[1] = z_axis[0] = 0.0;
   rdint ("System_type(0=star,1=binary,2=agn,3=previous)", &geo.system_type);
 
 
-
+// XXX it is not obious why run_type needs to be in geo.  It is used only in python and setup at present
       geo.run_type = 0;
-      if (geo.system_type == SYSTEM_TYPE_PREVIOUS)
-	{
-	  geo.run_type = SYSTEM_TYPE_PREVIOUS;
-	}
 
-      if (geo.run_type == SYSTEM_TYPE_PREVIOUS)
+      if (geo.system_type == SYSTEM_TYPE_PREVIOUS)
 	{
 	  /* This option is for the confusing case where we want to start with
 	     a previous wind model, but we are going to write the result to a
@@ -423,6 +389,8 @@ z_axis[1] = z_axis[0] = 0.0;
 
 	  Log
 	    ("Starting a new run from scratch starting with previous windfile");
+
+	  /* Note that wind_read also reads the atomic data file that was used to create the previous run of the data. */
 	  if (wind_read (files.old_windsave) < 0)
 	    {
 	      Error ("python: Unable to open %s\n", files.old_windsave);	//program will exit if unable to read the file
@@ -430,6 +398,7 @@ z_axis[1] = z_axis[0] = 0.0;
 	    }
 	  geo.run_type = SYSTEM_TYPE_PREVIOUS;	// after wind_read one will have a different wind_type otherwise
 	  w = wmain;
+	  ndomain=geo.ndomain;  // XXX Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
 
 
 	}
@@ -457,6 +426,7 @@ z_axis[1] = z_axis[0] = 0.0;
 
 	  /* read a variable which controls whether to save a summary of atomic data
 	     this is defined in atomic.h, rather than the modes structure */
+	  // XXX Why is this an advanced option; it seems more like a debugging option to me.  
 	  if (modes.iadvanced)
 	    rdint ("write_atomicdata", &write_atomicdata);
 
@@ -472,7 +442,7 @@ z_axis[1] = z_axis[0] = 0.0;
 
     }
 
-  else if (restart_stat == 1)	/* We want to continue a previous run */
+  else if (restart_stat == 1)	/* We want to continue a previous run.*/
     {
       Log ("Continuing a previous run of %s \n", files.root);
       strcpy (files.old_windsave, files.root);
@@ -483,6 +453,7 @@ z_axis[1] = z_axis[0] = 0.0;
 	  exit (0);
 	}
       w = wmain;
+      ndomain=geo.ndomain;  // XXX Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
       geo.run_type = SYSTEM_TYPE_PREVIOUS;	// We read the data from a file
       xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.old_windsave);
 
@@ -516,12 +487,12 @@ z_axis[1] = z_axis[0] = 0.0;
   rdint ("spectrum_cycles", &geo.pcycles);
 
 
-  Debug ("Test %d %d \n", geo.wcycles, geo.pcycles);
-
   if (geo.wcycles == 0 && geo.pcycles == 0)
+	  Log("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
     exit (0);			//There is really nothing to do!
 
   /* Allocate the memory for the photon structure now that NPHOT is established */
+    // XXX Not clear why we want to do this here; why not after all of the input data arre in hand
 
   p = (PhotPtr) calloc (sizeof (p_dummy), NPHOT);
 
@@ -532,17 +503,21 @@ z_axis[1] = z_axis[0] = 0.0;
       exit (0);
     }
 
-  /* Define the coordinate system for the grid and allocate memory for the wind structure
-     by reading from user */
-  if (geo.wind_domain_number != -1)
+  /* Define the coordinate system for the wind grid.  The wind array is allocated later */
+  
+  if (geo.wind_domain_number != -1 && geo.run_type!=SYSTEM_TYPE_PREVIOUS)
     get_grid_params (ndomain - 1);	// JM PLACEHOLDER -- really we should change the input order here!
 
 
-  /* 080808 - 62 - Ionization section has been cleaned up -- ksl */
   /* ??? ksl - Acoording to line 110 of ionization. option 4 is LTE with SIM_correction.  It would be good to
    * know what this is actually.   Note that pairwise is the appraoch which cboses between pairwise_bb, and pairwise_pow.
    * Normally, any of the pairwise options should force use of a banding option with a broad set of bands
+   *
+   * NOte that in principle one can change the ioniztion mode between runs
    */
+
+  // XXX  I is unclear to me why all of this dwon to the next XXX is not moved to a single subroutine.  It all
+  // pertains to how the radiatiate tranfer is carreid out
 
   rdint
     ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,6=pairwise_bb,7=pairwise_pow,8=matrix_bb,9=matrix_pow)",
@@ -614,6 +589,8 @@ z_axis[1] = z_axis[0] = 0.0;
   /* JM 1502 -- moved disk type question here- previously it was just before
      asking for disk radiation. See #8 and #44 */
 
+  // XXX End here
+
   rdint
     ("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
      &geo.disk_type);
@@ -623,6 +600,7 @@ z_axis[1] = z_axis[0] = 0.0;
   }
   else {
   /* ksl 1508 Add parameters for a disk atmosphere XXX  */
+	  // XXX This looks like a problem for restarts
   zdom[ndomain].ndim = 30;
   zdom[ndomain].mdim = 10;
 
@@ -633,7 +611,8 @@ z_axis[1] = z_axis[0] = 0.0;
       /* specify the domain name and number */
       strcat (zdom[ndomain].name, "Disk Atmosphere");
       geo.atmos_domain_number = ndomain;
-
+//XXX Whyi isn't get_grid_param used here.  We could pass a variable to it, to mofifiy the rdpar names if
+// necessary
       input_int = 1;
       rdint ("atmos.coord.system(1=cylindrical,2=spherical_polar,3=cyl_var)",
 	     &input_int);
@@ -734,6 +713,8 @@ z_axis[1] = z_axis[0] = 0.0;
 
   /* Calculate additional parameters associated with the binary star system */
 
+  // XXX This may be a problem for restarts, now that we have changed the meaing of 
+  // SYSTEM type
   if (geo.system_type == SYSTEM_TYPE_BINARY)
     binary_basics ();
 
@@ -1026,6 +1007,7 @@ z_axis[1] = z_axis[0] = 0.0;
 
 /* Print out some diagnositic infomration about the domains */
 
+  // XXX This is clearly wroing for repeats
   geo.ndomain = ndomain;	// Store ndomain in geo so that it can be saved
 
   Log ("There are %d domains\n", geo.ndomain);
@@ -1067,7 +1049,6 @@ z_axis[1] = z_axis[0] = 0.0;
 	}
     }
 
-  //OLD - Moved to get_wind_parameters geo.rmax_sq = geo.rmax * geo.rmax;
 
 
 
@@ -1835,6 +1816,15 @@ init_geo ()
   strcpy (geo.fixed_con_file, "none");
 
   // Note that geo.model_list is initialized through get_spectype 
+
+  /* Initialize a few other variables in python.h */
+x_axis[0] = 1.0;
+x_axis[1] = x_axis[2] = 0.0;
+y_axis[1] = 1.0;
+y_axis[0] = y_axis[2] = 0.0;
+z_axis[2] = 1.0;
+z_axis[1] = z_axis[0] = 0.0;
+
 
 
   return (0);

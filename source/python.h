@@ -348,7 +348,8 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
 
   int run_type;                 /*1508 - New variable that describes whether this is a continuation of a previous run 
   				Added in order to separate the question of whether we are continuing an old run fro
-				the type of wind model */                  
+				the type of wind model.  Bascially if run_type is 0, this is a run from scratch,
+			       if SYSTEM_TYPE_PREVIOUS it is an old run	*/                  
   int star_radiation, disk_radiation;	/* 1 means consider radiation from star, disk,  bl, and/or wind */
   int bl_radiation, wind_radiation, agn_radiation;
   int matom_radiation;		/* Added by SS Jun 2004: for use in macro atom computations of detailed spectra

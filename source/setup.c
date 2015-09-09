@@ -241,7 +241,7 @@ get_grid_params (ndom)
   // before this statement
 
   if (ndom >= geo.ndomain)
-    Error ("Trying to get wind grid params for a non-existent wind!\n");
+    Error ("Trying to get grid params for a non-existent domain!\n");
 
   input_int=1;
 
