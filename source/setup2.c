@@ -767,3 +767,171 @@ init_observers ()
 
   return(0);
 }
+
+/***********************************************************
+				Space Telescope Science Institute
+
+Synopsis:
+	init_photons gets information about how many photones 
+	there should be per cycle and then instantiates
+	PhotPtr
+
+Arguments:	
+    none	
+
+Returns:
+ 
+Description:	
+	
+Notes:
+
+History:
+    1509   ksl    Moved the code from python.c
+**************************************************************/
+PhotPtr
+init_photons()
+{
+	PhotPtr p;
+	double x;
+
+  /* 140907 - ksl - Although photons_per_cycle is really an integer, 
+     read in as a double so it is easier for input */
+
+  x = 100000;
+  rddoub ("photons_per_cycle", &x);
+  NPHOT = x;			// NPHOT is photons/cycle
+
+#ifdef MPI_ON
+  Log ("Photons per cycle per MPI task will be %d\n", NPHOT / np_mpi_global);
+
+  NPHOT /= np_mpi_global;
+#endif
+
+  rdint ("Ionization_cycles", &geo.wcycles);
+
+  rdint ("spectrum_cycles", &geo.pcycles);
+
+
+  if (geo.wcycles == 0 && geo.pcycles == 0)
+    {
+      Log
+	("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
+      exit (0);			//There is really nothing to do!
+    }
+
+  /* Allocate the memory for the photon structure now that NPHOT is established */
+  // XXX Not clear why we want to do this here; why not after all of the input data arre in hand
+
+  p = (PhotPtr) calloc (sizeof (p_dummy), NPHOT);
+
+  if (p == NULL)
+    {
+      Error
+	("There is a problem in allocating memory for the photon structure\n");
+      exit (0);
+    }
+
+  return(p);
+
+}
+
+
+
+
+/***********************************************************
+				Space Telescope Science Institute
+
+Synopsis:
+	init_ioinization
+
+Arguments:	
+    none	
+
+Returns:
+ 
+Description:	
+	
+Notes:
+
+History:
+    1509   ksl    Moved the code from python.c
+**************************************************************/
+int 
+init_ionization()
+{
+	int thermal_opt;
+
+
+  // XXX  I is unclear to me why all of this dwon to the next XXX is not moved to a single subroutine.  It all
+  // pertains to how the radiatiate tranfer is carreid out
+
+  rdint
+    ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,6=pairwise_bb,7=pairwise_pow,8=matrix_bb,9=matrix_pow)",
+     &geo.ioniz_mode);
+
+  if (geo.ioniz_mode == IONMODE_FIXED)
+    {
+      rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
+    }
+  if (geo.ioniz_mode == 4 || geo.ioniz_mode == 5 || geo.ioniz_mode > 9)	/*NSH CLOUDY test - remove once done */
+    {
+      Log ("The allowed ionization modes are 0, 1, 2, 3, 6, 7\n");
+      Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
+      exit (0);
+    }
+
+
+
+  /*Normally, geo.partition_mode is set to -1, which means that partition functions are calculated to take
+     full advantage of the data file.  This means that in calculating the partition functions, the information
+     on levels and their multiplicities is taken into account.   */
+
+  geo.partition_mode = -1;	//?? Stuart, is there a reason not to move this earlier so it does not affect restart
+
+
+  /* get_line_transfer_mode reads in the Line_transfer question from the user, 
+     then alters the variables geo.line_mode, geo.scatter_mode, geo.rt_mode and geo.macro_simple */
+
+  get_line_transfer_mode ();
+
+
+
+
+  thermal_opt = 0;		/* NSH 131213 Set the option to zero - the default. The lines allow allow the
+				   user to turn off mechanisms that affect the thermal balance. Adiabatic is the only one implemented
+				   to start off with. */
+
+  rdint
+    ("Thermal_balance_options(0=everything.on,1=no.adiabatic)", &thermal_opt);
+
+  if (thermal_opt == 1)
+    {
+      geo.adiabatic = 0;
+    }
+
+  else if (thermal_opt > 1 || thermal_opt < 0)
+    {
+      Error ("Unknown thermal balance mode %d\n", thermal_opt);
+      exit (0);
+    }
+
+
+  /* 57h -- Next line prevents bf calculation of macro_estimaters when no macro atoms are present.   */
+
+  if (nlevels_macro == 0)
+    geo.macro_simple = 1;	// Make everything simple if no macro atoms -- 57h
+
+  //SS - initalise the choice of handling for macro pops.
+  if (geo.run_type == SYSTEM_TYPE_PREVIOUS)
+    {
+      geo.macro_ioniz_mode = 1;	// Now that macro atom properties are available for restarts
+    }
+  else
+    {
+      geo.macro_ioniz_mode = 0;
+    }
+
+  return(0);
+
+}
+
