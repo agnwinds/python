@@ -1370,8 +1370,9 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
       if (rank_global == 0)
 	{
 #endif
-	  spectrum_summary (files.wspec, "w", 0, 5, 0, 1., 0);
-	  spectrum_summary (files.lspec, "w", 0, 5, 0, 1., 1);	/* output the log spectrum */
+
+      spectrum_summary (files.wspec, "w", 0, 6, 0, 1., 0);
+      spectrum_summary (files.lspec, "w", 0, 6, 0, 1., 1);	/* output the log spectrum */
 
 #ifdef MPI_ON
 	}

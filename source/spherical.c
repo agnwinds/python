@@ -120,6 +120,9 @@ spherical_make_grid (w, ndom)
 
   ndim=zdom[ndom].ndim;
 
+  /* PLACEHOLDER XXX -- JM question -- shouldn't we be looping over nstart to nstop here? 
+    Or alternatively setting w[n + nstart] where nstart = zdom[ndom].nstart */
+
   for (n = 0; n < ndim; n++)
     {
       {
