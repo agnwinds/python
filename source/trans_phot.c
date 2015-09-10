@@ -604,8 +604,9 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       /* JM 1506 -- we don't throw errors here now, but we do keep a track 
          of how many 4 photons were lost due to DFUDGE pushing them 
          outside of the wind after scatter */
+
 	  // XXX PLACEHOLDER Check that this is the correct logic here 
-	  if (where_in_wind (pp.x,&ndom) != W_ALL_INWIND && where_in_wind (x_dfudge_check,&ndom) == W_ALL_INWIND)
+	  if (where_in_wind (pp.x, &ndom) != W_ALL_INWIND && where_in_wind (x_dfudge_check, &ndom) == W_ALL_INWIND)
 	  {
       	n_lost_to_dfudge++;		// increment the counter (checked at end of trans_phot)
 	  }
