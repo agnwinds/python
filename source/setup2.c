@@ -892,6 +892,7 @@ init_ionization()
   /* get_line_transfer_mode reads in the Line_transfer question from the user, 
      then alters the variables geo.line_mode, geo.scatter_mode, geo.rt_mode and geo.macro_simple */
 
+  // XXX - Note clear that get_line_transfer_mode should be a separate routine; perhaps incoroporate here
   get_line_transfer_mode ();
 
 

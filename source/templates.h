@@ -506,6 +506,8 @@ int qdisk_save(char *diskfile, double ztot);
 int read_non_standard_disk_profile(char *tprofile);
 int init_advanced_modes(void);
 int init_observers(void);
+PhotPtr init_photons(void);
+int init_ionization(void);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
