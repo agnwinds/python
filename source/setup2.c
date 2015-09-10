@@ -822,7 +822,7 @@ init_photons()
   /* Allocate the memory for the photon structure now that NPHOT is established */
   // XXX Not clear why we want to do this here; why not after all of the input data arre in hand
 
-  p = (PhotPtr) calloc (sizeof (p_dummy), NPHOT);
+  photmain= p = (PhotPtr) calloc (sizeof (p_dummy), NPHOT);
 
   if (p == NULL)
     {

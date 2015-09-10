@@ -994,6 +994,10 @@ typedef struct photon
 }
 p_dummy, *PhotPtr;
 
+PhotPtr photmain;  /* A pointer to all of the photons that have been created in a subcycle. Added to ease 
+		      breaking the main routine of python into separate rooutines for inputs and running the
+		      program */
+
 /* minimum value for tau for p_escape_from_tau function- below this we 
    set to p_escape_ to 1 */
 #define TAU_MIN 1e-6

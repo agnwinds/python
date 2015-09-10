@@ -148,7 +148,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		spectral_estimators.o variable_temperature.o matom_diag.o \
 		log.o lineio.o rdpar.o direct_ion.o pi_rates.o matrix_ion.o para_update.o \
 		setup.o photo_gen_matom.o macro_gov.o \
-		reverb.o setup2.o
+		reverb.o setup2.o run.o
 		
 
 
@@ -166,7 +166,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		spectral_estimators.c variable_temperature.c matom_diag.c \
 		direct_ion.c pi_rates.c matrix_ion.c para_update.c setup.c \
 		photo_gen_matom.c macro_gov.c \
-		reverb.c setup2.c
+		reverb.c setup2.c run.c
 
 # kpar_source is now declared seaprately from python_source so that the file log.h 
 # can be made using cproto

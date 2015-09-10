@@ -508,6 +508,8 @@ int init_advanced_modes(void);
 int init_observers(void);
 PhotPtr init_photons(void);
 int init_ionization(void);
+/* run.c */
+int make_spectra(int restart_stat);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
