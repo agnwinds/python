@@ -509,6 +509,7 @@ int init_observers(void);
 PhotPtr init_photons(void);
 int init_ionization(void);
 /* run.c */
+int calculate_ionization(int restart_stat);
 int make_spectra(int restart_stat);
 /* py_wind_sub.c */
 int zoom(int direction);
