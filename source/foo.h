@@ -18,14 +18,6 @@ int limit_lines(double freqmin, double freqmax);
 int check_xsections(void);
 /* python.c */
 int main(int argc, char *argv[]);
-int help(void);
-int init_geo(void);
-int photon_checks(PhotPtr p, double freqmin, double freqmax, char *comment);
-int get_spectype(int yesno, char *question, int *spectype);
-int qdisk_init(void);
-int qdisk_save(char *diskfile, double ztot);
-int read_non_standard_disk_profile(char *tprofile);
-int init_advanced_modes(void);
 /* photon2d.c */
 int translate(WindPtr w, PhotPtr pp, double tau_scat, double *tau, int *nres);
 int translate_in_space(PhotPtr pp);
@@ -504,6 +496,16 @@ int wind_paths_single_evaluate(Wind_Paths_Ptr paths);
 int wind_paths_evaluate(WindPtr wind);
 int wind_paths_point_index(int i, int j, int k, int i_top);
 int wind_paths_output(WindPtr wind, char c_file_in[]);
+/* setup2.c */
+int help(void);
+int init_geo(void);
+int photon_checks(PhotPtr p, double freqmin, double freqmax, char *comment);
+int get_spectype(int yesno, char *question, int *spectype);
+int qdisk_init(void);
+int qdisk_save(char *diskfile, double ztot);
+int read_non_standard_disk_profile(char *tprofile);
+int init_advanced_modes(void);
+int init_observers(void);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

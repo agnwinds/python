@@ -229,22 +229,15 @@ main (argc, argv)
   PhotPtr p;
 
   double freqmin, freqmax;
-  double swavemin, swavemax, renorm;
+  double renorm;
   long nphot_to_define;
-  int n, nangles;
+  int n;
   int iwind;
   int thermal_opt;		/*NSH 131213 - added to control options to turn on and off some heating and cooling mechanisms */
 
   /* Next three lines have variables that should be a structure, or possibly we
      should allocate the space for the spectra to avoid all this nonsense.  02feb ksl */
 
-  double angle[NSPEC], phase[NSPEC];
-  int scat_select[NSPEC], top_bot_select[NSPEC];
-  double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC],
-    r_select[NSPEC];
-
-  char yesno[20];
-  int select_extract, select_spectype;
   char dummy[LINELENGTH];
   double x;
 
@@ -265,7 +258,6 @@ main (argc, argv)
   int ndomain = 0;		//Local variable for ndomain
   int ndom;
 
-  int mkdir ();
 
 #ifdef MPI_ON
   int ioniz_spec_helpers, spec_spec_helpers;
@@ -278,8 +270,8 @@ main (argc, argv)
   np_mpi = 1;
 #endif
 
-  np_mpi_global = np_mpi;	        // Global variable which holds the number of MPI processes
-  rank_global = my_rank;	        // Global variable which holds the rank of the active MPI process
+  np_mpi_global = np_mpi;	// Global variable which holds the number of MPI processes
+  rank_global = my_rank;	// Global variable which holds the rank of the active MPI process
   Log_set_mpi_rank (my_rank, np_mpi);	// communicates my_rank to kpar
 
 
@@ -298,8 +290,8 @@ main (argc, argv)
 
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
- get less set the verbosity to a lower level. The verbosity can be reset from the comamnd line */
-  verbosity = 3;		
+     get less set the verbosity to a lower level. The verbosity can be reset from the comamnd line */
+  verbosity = 3;
   Log_set_verbosity (verbosity);
 
   /* initialise options for advanced mode (all set to 0) */
@@ -314,7 +306,7 @@ main (argc, argv)
 
   init_log_and_windsave (restart_stat);
 
-  Log_parallel ("Thread %d starting.\n", my_rank);	
+  Log_parallel ("Thread %d starting.\n", my_rank);
 
   /* Start logging of errors and comments */
 
@@ -363,13 +355,14 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 				   mode of operation */
     {
 
-  /* First,  establish the overall system type . 
-     Note 1509 - ksl - Exactly what we call a system type is a little bizarre. The original
-     intent of this was to allow one to ignore a secondary star, but with addition of AGN it, really
-     is a bit unclear what one would like to use here */
+      /* First,  establish the overall system type . 
+         Note 1509 - ksl - Exactly what we call a system type is a little bizarre. The original
+         intent of this was to allow one to ignore a secondary star, but with addition of AGN it, really
+         is a bit unclear what one would like to use here */
 
-  geo.system_type = SYSTEM_TYPE_STAR;
-  rdint ("System_type(0=star,1=binary,2=agn,3=previous)", &geo.system_type);
+      geo.system_type = SYSTEM_TYPE_STAR;
+      rdint ("System_type(0=star,1=binary,2=agn,3=previous)",
+	     &geo.system_type);
 
 
 // XXX it is not obious why run_type needs to be in geo.  It is used only in python and setup at present
@@ -398,7 +391,7 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	    }
 	  geo.run_type = SYSTEM_TYPE_PREVIOUS;	// after wind_read one will have a different wind_type otherwise
 	  w = wmain;
-	  ndomain=geo.ndomain;  // XXX Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
+	  ndomain = geo.ndomain;	// XXX Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
 
 
 	}
@@ -407,20 +400,20 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	{			/* Read the atomic datafile here, because for the cases where we have read
 				   and old wind files, we also got the atomic data */
 
-      rdint
-	("Wind_type(0=SV,1=Sphere,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)",
-	 &zdom[ndomain].wind_type);
-      if (zdom[ndomain].wind_type != 10)
-	{
-	  strcat (zdom[ndomain].name, "Wind");
-	  geo.wind_domain_number = ndomain;
-	  ndomain++;
-	}
-      else
-	{
-	  /* there's no wind, set wind domain_number to -1 */
-	  geo.wind_domain_number = -1;
-	}
+	  rdint
+	    ("Wind_type(0=SV,1=Sphere,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)",
+	     &zdom[ndomain].wind_type);
+	  if (zdom[ndomain].wind_type != 10)
+	    {
+	      strcat (zdom[ndomain].name, "Wind");
+	      geo.wind_domain_number = ndomain;
+	      ndomain++;
+	    }
+	  else
+	    {
+	      /* there's no wind, set wind domain_number to -1 */
+	      geo.wind_domain_number = -1;
+	    }
 
 	  rdstr ("Atomic_data", geo.atomic_filename);
 
@@ -442,7 +435,7 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 
     }
 
-  else if (restart_stat == 1)	/* We want to continue a previous run.*/
+  else if (restart_stat == 1)	/* We want to continue a previous run. */
     {
       Log ("Continuing a previous run of %s \n", files.root);
       strcpy (files.old_windsave, files.root);
@@ -453,7 +446,7 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	  exit (0);
 	}
       w = wmain;
-      ndomain=geo.ndomain;  // XXX Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
+      ndomain = geo.ndomain;	// XXX Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
       geo.run_type = SYSTEM_TYPE_PREVIOUS;	// We read the data from a file
       xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.old_windsave);
 
@@ -487,13 +480,15 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
   rdint ("spectrum_cycles", &geo.pcycles);
 
 
-  if (geo.wcycles == 0 && geo.pcycles == 0) {
-	  Log("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
-    exit (0);			//There is really nothing to do!
-  }
+  if (geo.wcycles == 0 && geo.pcycles == 0)
+    {
+      Log
+	("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
+      exit (0);			//There is really nothing to do!
+    }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */
-    // XXX Not clear why we want to do this here; why not after all of the input data arre in hand
+  // XXX Not clear why we want to do this here; why not after all of the input data arre in hand
 
   p = (PhotPtr) calloc (sizeof (p_dummy), NPHOT);
 
@@ -505,8 +500,8 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
     }
 
   /* Define the coordinate system for the wind grid.  The wind array is allocated later */
-  
-  if (geo.wind_domain_number != -1 && geo.run_type!=SYSTEM_TYPE_PREVIOUS)
+
+  if (geo.wind_domain_number != -1 && geo.run_type != SYSTEM_TYPE_PREVIOUS)
     get_grid_params (ndomain - 1);	// JM PLACEHOLDER -- really we should change the input order here!
 
 
@@ -596,17 +591,19 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
     ("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
      &geo.disk_type);
 
-  if (geo.disk_type==0) {
-	  geo.disk_atmosphere=0;
-  }
-  else {
-  /* ksl 1508 Add parameters for a disk atmosphere XXX  */
-	  // XXX This looks like a problem for restarts
-  zdom[ndomain].ndim = 30;
-  zdom[ndomain].mdim = 10;
+  if (geo.disk_type == 0)
+    {
+      geo.disk_atmosphere = 0;
+    }
+  else
+    {
+      /* ksl 1508 Add parameters for a disk atmosphere XXX  */
+      // XXX This looks like a problem for restarts
+      zdom[ndomain].ndim = 30;
+      zdom[ndomain].mdim = 10;
 
-  rdint ("disk.atmosphere(0=no,1=yes)", &geo.disk_atmosphere);
-  }
+      rdint ("disk.atmosphere(0=no,1=yes)", &geo.disk_atmosphere);
+    }
   if (geo.disk_atmosphere != 0)
     {
       /* specify the domain name and number */
@@ -762,30 +759,13 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
   /* Describe the spectra which will be extracted and the way it will be extracted */
 
   /* First initialise things to semi-reasonable values */
-
-  nangles = 4;
-  angle[0] = 10;
-  angle[1] = 30.;
-  angle[2] = 60.;
-  angle[3] = 80.;
-  for (n = 4; n < NSPEC; n++)
-    angle[n] = 45;
-  for (n = 0; n < NSPEC; n++)
-    {
-      phase[n] = 0.5;
-      scat_select[n] = 1000;
-      top_bot_select[n] = 0;
-    }
-  swavemin = 850;
-  swavemax = 1850;
-
 /* These two variables have to do with what types of spectra are created n the
  * spectrum files. They are not associated with the nature of the spectra that
  * are generated by say the boundary layer
  */
 
-  select_extract = 1;
-  select_spectype = 1;
+  geo.select_extract = 1;
+  geo.select_spectype = 1;
 
 /* Completed initialization of this section.  Note that get_spectype uses the source of the
  * ratiation and then value given to return a spectrum type. The output is not the same 
@@ -815,119 +795,10 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 
 
 
-      rddoub ("spectrum_wavemin", &swavemin);
-      rddoub ("spectrum_wavemax", &swavemax);
-      if (swavemin > swavemax)
-	{
-	  swavemax = swavemin;
-	  swavemin = swavemax;
-	}
-
-      /* SS June 04: convert these to frequencies and store for use
-         in computing macro atom and k-packet emissivities. */
-
-      em_rnge.fmin = C / (swavemax * 1.e-8);
-      em_rnge.fmax = C / (swavemin * 1.e-8);
-
-      geo.matom_radiation = 0;	//initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
-
-/* Note: Below here many of the variables which are read in are not currently part of geo stucture */
-
-      rdint ("no_observers", &nangles);
-
-      if (nangles < 1 || nangles > NSPEC)
-	{
-	  Error ("no_observers %d should not be > %d or <0\n", nangles,
-		 NSPEC);
-	  exit (0);
-	}
-
-
-      for (n = 0; n < nangles; n++)
-	rddoub ("angle(0=pole)", &angle[n]);
-
-      /* 05apr-ksl-56--For diagnostic reasons I have left questions regarding phase
-       * even for systems which are not binaries.  Phase 0 in this case corresponds to
-       * an extraction direction which is in the xz plane
-       */
-      /* JM 1502 -- change this so we only ask for phase if the system is a binary -- see #137 */
-
-      if (geo.system_type == SYSTEM_TYPE_BINARY)
-	{
-
-	  for (n = 0; n < nangles; n++)
-	    rddoub ("phase(0=inferior_conjunction)", &phase[n]);
-	}
-      else
-	Log
-	  ("No phase information needed as system type %i is not a binary\n",
-	   geo.system_type);
-
-
-      rdint ("live.or.die(0).or.extract(anything_else)", &select_extract);
-      if (select_extract != 0)
-	{
-	  select_extract = 1;
-	  Log ("OK, extracting from specific angles\n");
-	}
-      else
-	Log ("OK, using live or die option\n");
-
-/* Select spectra with certain numbers of scatterings.  See extract 1997 aug 28 ksl 
- * 141116 - ksl The following options are clealy diagnostic and have been relegated to 
- * advanced commands*/
-
-      if (modes.iadvanced)
-	{
-	  strcpy (yesno, "n");
-	  rdstr ("Select_specific_no_of_scatters_in_spectra(y/n)", yesno);
-	  if (yesno[0] == 'y')
-	    {
-	      Log
-		("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
-	      for (n = 0; n < nangles; n++)
-		{
-		  rdint ("Select_scatters", &scat_select[n]);
-		}
-	    }
-	  strcpy (yesno, "n");
-	  rdstr ("Select_photons_by_position(y/n)", yesno);
-	  if (yesno[0] == 'y')
-	    {
-	      Log
-		("OK 0->all; -1 -> below; 1 -> above the disk, 2 -> specific location in wind\n");
-	      for (n = 0; n < nangles; n++)
-		{
-		  rdint ("Select_location", &top_bot_select[n]);
-		  if (top_bot_select[n] == 2)
-		    {
-		      Log
-			("Warning: Make sure that position will be in wind, or no joy will be obtained\n");
-		      rddoub ("rho(cm)", &rho_select[n]);
-		      rddoub ("z(cm)", &z_select[n]);
-		      rddoub ("azimuth(deg)", &az_select[n]);
-		      rddoub ("r(cm)", &r_select[n]);
-
-		    }
-		}
-	    }
-	}
+      init_observers ();
     }
 
-  /* Select the units of the output spectra.  This is always needed */
-
-  rdint ("spec.type(flambda(1),fnu(2),basic(other)", &select_spectype);
-  if (select_spectype == 1)
-    {
-      Log ("OK, generating flambda at 100pc\n");
-    }
-  else if (select_spectype == 2)
-    {
-      Log ("OK, generating fnu at 100 pc\n");
-    }
-  else
-    Log ("OK, basic Monte Carlo spectrum\n");
-
+  geo.matom_radiation = 0;	//initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
 
 
   /* 57h -- New section of inputs to provide more control over how the program is
@@ -1156,7 +1027,7 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
   /* SWM - Setup for path tracking */
   if (geo.reverb > REV_NONE)
     {
-      reverb_init (wmain, nangles, freqmin, freqmax);
+      reverb_init (wmain, geo.nangles, freqmin, freqmax);
       delay_dump_prep (files.root, restart_stat, rank_global);
     }
 
@@ -1175,9 +1046,10 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
       /* Initialize all of the arrays, etc, that need initialization for each cycle
        */
 
-      spectrum_init (freqmin, freqmax, nangles, angle, phase, scat_select,
-		     top_bot_select, select_extract, rho_select, z_select,
-		     az_select, r_select);
+      spectrum_init (freqmin, freqmax, geo.nangles, geo.angle, geo.phase,
+		     geo.scat_select, geo.top_bot_select,
+		     geo.select_extract, geo.rho_select, geo.z_select,
+		     geo.az_select, geo.r_select);
 
 
       wind_rad_init ();		/*Zero the parameters pertaining to the radiation field */
@@ -1298,7 +1170,7 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 
       photon_checks (p, freqmin, freqmax, "Check after transport");
 
-      spectrum_create (p, freqmin, freqmax, nangles, select_extract);
+      spectrum_create (p, freqmin, freqmax, geo.nangles, geo.select_extract);
 
 
 
@@ -1371,8 +1243,8 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	{
 #endif
 
-      spectrum_summary (files.wspec, "w", 0, 6, 0, 1., 0);
-      spectrum_summary (files.lspec, "w", 0, 6, 0, 1., 1);	/* output the log spectrum */
+	  spectrum_summary (files.wspec, "w", 0, 6, 0, 1., 0);
+	  spectrum_summary (files.lspec, "w", 0, 6, 0, 1., 1);	/* output the log spectrum */
 
 #ifdef MPI_ON
 	}
@@ -1428,8 +1300,8 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 
 /* XXXX - THE CALCULATION OF A DETAILED SPECTRUM IN A SPECIFIC REGION OF WAVELENGTH SPACE */
 
-  freqmax = C / (swavemin * 1.e-8);
-  freqmin = C / (swavemax * 1.e-8);
+  freqmax = C / (geo.swavemin * 1.e-8);
+  freqmin = C / (geo.swavemax * 1.e-8);
 
 
   /* Perform the initilizations required to handle macro-atoms during the detailed
@@ -1471,9 +1343,10 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 
   if (geo.pcycle == 0)
     {
-      spectrum_init (freqmin, freqmax, nangles, angle, phase, scat_select,
-		     top_bot_select, select_extract, rho_select, z_select,
-		     az_select, r_select);
+      spectrum_init (freqmin, freqmax, geo.nangles, geo.angle, geo.phase,
+		     geo.scat_select, geo.top_bot_select,
+		     geo.select_extract, geo.rho_select, geo.z_select,
+		     geo.az_select, geo.r_select);
 
       /* 68b - zero the portion of plasma main that records the numbers of scatters by
        * each ion in a cell
@@ -1502,22 +1375,22 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	  ("Not restarting, but geo.pcycle = %i and trying to renormalise!\n",
 	   geo.pcycle);
 
-      spectrum_restart_renormalise (nangles);
+      spectrum_restart_renormalise (geo.nangles);
     }
 
 
   while (geo.pcycle < geo.pcycles)
     {				/* This allows you to build up photons in bunches */
 
-      xsignal (files.root, "%-20s Starting %d of %d spectral cycle \n", "NOK",
-	       geo.pcycle, geo.pcycles);
+      xsignal (files.root, "%-20s Starting %d of %d spectral cycle \n",
+	       "NOK", geo.pcycle, geo.pcycles);
 
       if (modes.ispy)
 	ispy_init ("python", geo.pcycle + 1000);
 
 
-      Log ("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle,
-	   geo.pcycles);
+      Log ("!!Cycle %d of %d to calculate a detailed spectrum\n",
+	   geo.pcycle, geo.pcycles);
       Log_flush ();		/*NSH June 13 Added call to flush logfile */
       if (!geo.wind_radiation)
 	iwind = -1;		/* Do not generate photons from wind */
@@ -1551,13 +1424,13 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 
       /* Tranport photons through the wind */
 
-      trans_phot (w, p, select_extract);
+      trans_phot (w, p, geo.select_extract);
 
       if (modes.print_windrad_summary)
 	wind_rad_summary (w, files.windrad, "a");
 
 
-      spectrum_create (p, freqmin, freqmax, nangles, select_extract);
+      spectrum_create (p, freqmin, freqmax, geo.nangles, geo.select_extract);
 
 /* Write out the detailed spectrum each cycle so that one can see the statistics build up! */
       renorm = ((double) (geo.pcycles)) / (geo.pcycle + 1.0);
@@ -1575,8 +1448,8 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
       if (rank_global == 0)
 	{
 #endif
-	  spectrum_summary (files.spec, "w", 0, nspectra - 1, select_spectype,
-			    renorm, 0);
+	  spectrum_summary (files.spec, "w", 0, nspectra - 1,
+			    geo.select_spectype, renorm, 0);
 #ifdef MPI_ON
 	}
 #endif
@@ -1653,4 +1526,3 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
   Log ("Completed entire program.  The elapsed TIME was %f\n", timer ());
   return EXIT_SUCCESS;
 }
-

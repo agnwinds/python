@@ -302,6 +302,16 @@ int nplasma, nmacro;	/*The total number of cells in the plasma and macro structu
   int wcycle, pcycle;		/* The number of completed ionization and spectrum cycles */
   int wcycles, pcycles;		/* The number of ionization and spectrum cycles desired */
 
+  /* 1509 - ksl - Moved parameters which describe the spectra to be extracted from main into the
+   * geometry structure */
+#define NSPEC   20
+	int nangles;
+	double angle[NSPEC], phase[NSPEC];
+	int scat_select[NSPEC], top_bot_select[NSPEC];
+	double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC], r_select[NSPEC];
+	double swavemin, swavemax;
+	int select_extract,select_spectype;
+
 /* Begin description of the actual geometery */
 
 /* The next variables refere to the entire space in which pbotons sill be tracked.  Photons

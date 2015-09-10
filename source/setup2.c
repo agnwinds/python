@@ -2,68 +2,15 @@
                                        Space Telescope Science Institute
 
  Synopsis:
-	Python is a program designed to simulate the transfer of radiation in a wind.  It uses the
-	Sobolev approximation.  It models a wind as a biconical flow.     
-	
-	This is the "main" routine for Python.  It's basic purpose is to gather the input variables 
-	and to control the flow of the program
  
 Arguments:		
 
-	Usage:  py [-h] [-r] [-d] [-f] [-t time_max] xxx  or simply py
-
-	where xxx is the rootname or full name of a parameter file, e. g. test.pf
-
-	and the switches have the following meanings
-
-	-h 	to get this help message
-	-r 	restart a run of the progarm reading the file xxx.windsave
-
-	-t time_max	limit the total time to approximately time_max seconds.  Note that the program checks
-		for this limit somewhat infrequently, usually at the ends of cycles, because it
-		is attempting to save the program outputs so that the program can be restarted with
-		-r if theat is desired.
-	-v num  determines the amount of information that is printed out.  If num is small, then
-		less information is printed out; if num is large more is printed out.  Setting
-		v to 5 causes the routine to print out all the information which outputs have
-		included previously.  The current default is set to 3 which suppresses Debug, Log_silent
-		and Error_silent
-	-d	Enters detailed or advanced mode. Allows one to access extra diagnositics and some
-	    other advanced commands
-    -f  Fixed temperature mode - does not attempt to chenge the temperature of cells.
-	-e  Alter the maximum number of errors before the program quits
-	-i  Diagnostic mode which quits after reading in inputs. Used for Travis test suite.
-
-
-	
-	if one simply types py or pyZZ where ZZ is the version number one is queried for a name
-	of the parameter file.
-
-	NOTE - If this is modified, please also modify the help message in help() below
 Returns:
  
 Description:	
-	Python is far too complicated to describe.  Basically it simulates the radiative transfer
-	of photons through the wind of a cataclysmic variable or a star.  The kinematic formulation for
-	the CV wind is due to Schlossman and Vitello while that of the star is due to Castor & Larmors. 
-	
-	 Radiation from an optically thick disk, the WD star, a boundary layer and the wind itself
-	 may be included
-	
-	There are 4 basic portions to the program which are easy to see in the main program.
-	
-	1. A data gathering stage
-	
-	2. A calculation of the state of ionization of the wind.
-	
-	3. A calculation of a detailed spectrum in which the ionization is held fixed.
 	
 		
 Notes:
-	The program has been designed and tested both on Suns and MacIntoshes (with Symentec's
-	C compiler).  Some of its peculiarities are due to memory limitations and relatively small 
-	stack sizes on the Mac.  When compiling, check to see that the global varible MAC is
-	set properly in python.h.
 
 History:
 	15sep	ksl	Setup and other ancillary routines that were part
@@ -246,12 +193,12 @@ init_geo ()
   // Note that geo.model_list is initialized through get_spectype 
 
   /* Initialize a few other variables in python.h */
-x_axis[0] = 1.0;
-x_axis[1] = x_axis[2] = 0.0;
-y_axis[1] = 1.0;
-y_axis[0] = y_axis[2] = 0.0;
-z_axis[2] = 1.0;
-z_axis[1] = z_axis[0] = 0.0;
+  x_axis[0] = 1.0;
+  x_axis[1] = x_axis[2] = 0.0;
+  y_axis[1] = 1.0;
+  y_axis[0] = y_axis[2] = 0.0;
+  z_axis[2] = 1.0;
+  z_axis[1] = z_axis[0] = 0.0;
 
 
 
@@ -659,4 +606,164 @@ init_advanced_modes ()
   modes.keep_photoabs = 1;	// keep photoabsorption in final spectrum
 
   return (0);
+}
+
+/***********************************************************
+				University of Southampton
+
+Synopsis:
+	init_observers sets up the parameter for the final parameters
+	to be extracted extracted as
+
+
+Arguments:	
+    none	
+
+Returns:
+ 
+Description:	
+	
+Notes:
+
+History:
+    1509	ksl	Code moved from main after puttting the
+    			parameters into the goe structure
+**************************************************************/
+
+int
+init_observers ()
+{
+  int n;
+  char yesno[20];
+
+
+  geo.nangles = 4;
+  geo.angle[0] = 10;
+  geo.angle[1] = 30.;
+  geo.angle[2] = 60.;
+  geo.angle[3] = 80.;
+  for (n = 4; n < NSPEC; n++)
+    geo.angle[n] = 45;
+  for (n = 0; n < NSPEC; n++)
+    {
+      geo.phase[n] = 0.5;
+      geo.scat_select[n] = 1000;
+      geo.top_bot_select[n] = 0;
+    }
+  geo.swavemin = 850;
+  geo.swavemax = 1850;
+
+  rddoub ("spectrum_wavemin", &geo.swavemin);
+  rddoub ("spectrum_wavemax", &geo.swavemax);
+  if (geo.swavemin > geo.swavemax)
+    {
+      geo.swavemax = geo.swavemin;
+      geo.swavemin = geo.swavemax;
+    }
+
+  /* SS June 04: convert these to frequencies and store for use
+     in computing macro atom and k-packet emissivities. */
+
+  em_rnge.fmin = C / (geo.swavemax * 1.e-8);
+  em_rnge.fmax = C / (geo.swavemin * 1.e-8);
+
+  geo.matom_radiation = 0;	//initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
+
+/* Note: Below here many of the variables which are read in are not currently part of geo stucture */
+
+  rdint ("no_observers", &geo.nangles);
+
+  if (geo.nangles < 1 || geo.nangles > NSPEC)
+    {
+      Error ("no_observers %d should not be > %d or <0\n", geo.nangles,
+	     NSPEC);
+      exit (0);
+    }
+
+
+  for (n = 0; n < geo.nangles; n++)
+    rddoub ("angle(0=pole)", &geo.angle[n]);
+
+  /* 05apr-ksl-56--For diagnostic reasons I have left questions regarding phase
+   * even for systems which are not binaries.  Phase 0 in this case corresponds to
+   * an extraction direction which is in the xz plane
+   */
+  /* JM 1502 -- change this so we only ask for phase if the system is a binary -- see #137 */
+
+  if (geo.system_type == SYSTEM_TYPE_BINARY)
+    {
+
+      for (n = 0; n < geo.nangles; n++)
+	rddoub ("phase(0=inferior_conjunction)", &geo.phase[n]);
+    }
+  else
+    Log
+      ("No phase information needed as system type %i is not a binary\n",
+       geo.system_type);
+
+
+  rdint ("live.or.die(0).or.extract(anything_else)", &geo.select_extract);
+  if (geo.select_extract != 0)
+    {
+      geo.select_extract = 1;
+      Log ("OK, extracting from specific angles\n");
+    }
+  else
+    Log ("OK, using live or die option\n");
+
+/* Select spectra with certain numbers of scatterings.  See extract 1997 aug 28 ksl 
+ * 141116 - ksl The following options are clealy diagnostic and have been relegated to 
+ * advanced commands*/
+
+  if (modes.iadvanced)
+    {
+      strcpy (yesno, "n");
+      rdstr ("Select_specific_no_of_scatters_in_spectra(y/n)", yesno);
+      if (yesno[0] == 'y')
+	{
+	  Log
+	    ("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
+	  for (n = 0; n < geo.nangles; n++)
+	    {
+	      rdint ("Select_scatters", &geo.scat_select[n]);
+	    }
+	}
+      strcpy (yesno, "n");
+      rdstr ("Select_photons_by_position(y/n)", yesno);
+      if (yesno[0] == 'y')
+	{
+	  Log
+	    ("OK 0->all; -1 -> below; 1 -> above the disk, 2 -> specific location in wind\n");
+	  for (n = 0; n < geo.nangles; n++)
+	    {
+	      rdint ("Select_location", &geo.top_bot_select[n]);
+	      if (geo.top_bot_select[n] == 2)
+		{
+		  Log
+		    ("Warning: Make sure that position will be in wind, or no joy will be obtained\n");
+		  rddoub ("rho(cm)", &geo.rho_select[n]);
+		  rddoub ("z(cm)", &geo.z_select[n]);
+		  rddoub ("azimuth(deg)", &geo.az_select[n]);
+		  rddoub ("r(cm)", &geo.r_select[n]);
+
+		}
+	    }
+	}
+    }
+
+  /* Select the units of the output spectra.  This is always needed */
+
+  rdint ("spec.type(flambda(1),fnu(2),basic(other)", &geo.select_spectype);
+  if (geo.select_spectype == 1)
+    {
+      Log ("OK, generating flambda at 100pc\n");
+    }
+  else if (geo.select_spectype == 2)
+    {
+      Log ("OK, generating fnu at 100 pc\n");
+    }
+  else
+    Log ("OK, basic Monte Carlo spectrum\n");
+
+  return(0);
 }
