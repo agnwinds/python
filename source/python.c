@@ -342,7 +342,31 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
      of the system */
 
 
-  if (restart_stat == 0)	/* We are starting a new run from scratch, which is the normal
+  if (restart_stat == 1)	/* We want to continue a run. This is generally used 
+                                   because we had to limit to runtime of python or we decided
+				   we needed more ionization or spectral cycles */
+    {
+      Log ("Continuing a previous run of %s \n", files.root);
+      strcpy (files.old_windsave, files.root);
+      strcat (files.old_windsave, ".wind_save");
+      if (wind_read (files.old_windsave) < 0)
+	{
+	  Error ("python: Unable to open %s\n", files.old_windsave);	//program will exit if unable to read the file
+	  exit (0);
+	}
+      w = wmain;
+      ndomain = geo.ndomain;	// XXX Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
+      geo.run_type = SYSTEM_TYPE_PREVIOUS;	// We read the data from a file
+      xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.old_windsave);
+
+      if (geo.pcycle > 0)
+	{
+	  spec_read (files.specsave);
+	  xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.specsave);
+	}
+    }
+
+  else if (restart_stat == 0)	/* We are starting a new run from scratch, which is the normal
 				   mode of operation */
     {
 
@@ -361,10 +385,11 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 
       if (geo.system_type == SYSTEM_TYPE_PREVIOUS)
 	{
-	  /* This option is for the confusing case where we want to start with
-	     a previous wind model, but we are going to write the result to a
-	     new windfile. In other words it is not a restart where we would overwrite
-	     the previous wind model.  */
+	  /* This option is for the confusing case where we want to start with a previous wind 
+	   * model,(presumably because that run produced a wind close to the one we are looking for, 
+	   * but we are going to change some parameters that do not affect the wind geometry,  
+	   * We will write use new filenames for the results, so all of the previous work is still saved,
+	    */
 
 	  strcpy (files.old_windsave, "earlier.run");
 	  rdstr ("Old_windfile(root_only)", files.old_windsave);
@@ -388,7 +413,11 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	}
 
       else
-	{			/* Read the atomic datafile here, because for the cases where we have read
+	{			/*  (presumably because that run produced a wind close to the one
+				                 we are looking for, but we are going to change some parameters that do not affect the wind 
+						              geometry,  We will write use new filenames for the results, so all of the previous work is
+							                   still saved,
+									   Read the atomic datafile here, because for the cases where we have read
 				   and old wind files, we also got the atomic data */
 
 	  rdint
@@ -424,28 +453,6 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
       geo.wcycles = geo.pcycles = 1;
       geo.wcycle = geo.pcycle = 0;
 
-    }
-
-  else if (restart_stat == 1)	/* We want to continue a previous run. */
-    {
-      Log ("Continuing a previous run of %s \n", files.root);
-      strcpy (files.old_windsave, files.root);
-      strcat (files.old_windsave, ".wind_save");
-      if (wind_read (files.old_windsave) < 0)
-	{
-	  Error ("python: Unable to open %s\n", files.old_windsave);	//program will exit if unable to read the file
-	  exit (0);
-	}
-      w = wmain;
-      ndomain = geo.ndomain;	// XXX Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
-      geo.run_type = SYSTEM_TYPE_PREVIOUS;	// We read the data from a file
-      xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.old_windsave);
-
-      if (geo.pcycle > 0)
-	{
-	  spec_read (files.specsave);
-	  xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.specsave);
-	}
     }
 
 
