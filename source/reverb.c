@@ -160,9 +160,9 @@ History:
 int
 delay_dump_combine(int iRanks)
 {
-	FILE *fopen(), *f_base, *f_cat;
-	char cCall[LINELENGTH], c_cat[LINELENGTH], c_char;
-	int i;
+	FILE *fopen();//, *f_base, *f_cat;
+	char cCall[LINELENGTH]; //, c_cat[LINELENGTH], c_char;
+	//int i;
 /*
 	f_base = fopen(delay_dump_file, 'a');
 	for(i=1;i<iRanks;i++)
@@ -251,7 +251,7 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 					|| (mtopbot * p[nphot].x[2]) > 0)) {
 					if (xxspec[i].mmin < zangle && zangle < xxspec[i].mmax) {
 						fprintf(fptr,
-							"%10.5g %10.5g %10.5g %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g %5d %5d %5d\n",
+							"%10.5g %10.5g %10.5g %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g %5d %5d %5d %5d\n",
 							p[nphot].freq, C * 1e8 / p[nphot].freq, p[nphot].w, 
 							p[nphot].x[0], p[nphot].x[1], p[nphot].x[2],
 							p[nphot].nscat, p[nphot].nrscat,
