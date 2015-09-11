@@ -258,7 +258,7 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 							(delay_to_observer(&p[nphot]) - (geo.rmax-minpath)) / C,
 							(iExtracted ? delay_dump_bank_ex[nphot] : 0),
 							i - MSPEC, p[nphot].origin, 
-							(p[nphot].nres > -1? lin_ptr[p[nphot].nres]->z : 0));
+							p[nphot].nres);
 					}
 				}
 			}
