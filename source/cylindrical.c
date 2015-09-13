@@ -153,6 +153,11 @@ cylind_make_grid (ndom, w)
 
   one_dom = &zdom[ndom];
 
+  if (zdom[ndom].zmax==0) {
+	  /* Check if zmax has been set, and if not set it to rmax */
+	  zdom[ndom].zmax=zdom[ndom].rmax;
+  }  
+
 
   Log("Making cylindrical grid %d\n",ndom);
   Log("XXX rmax  %e\n",one_dom->rmax);
@@ -176,7 +181,7 @@ cylind_make_grid (ndom, w)
 	    {			// linear intervals
 
 	      dr = one_dom->rmax / (one_dom->ndim - 3);
-	      dz = one_dom->rmax / (one_dom->mdim - 3);
+	      dz = one_dom->zmax / (one_dom->mdim - 3);
 	      w[n].x[0] = i * dr;	/* The first zone is at the inner radius of
 					   the wind */
 	      w[n].x[2] = j * dz;
@@ -187,7 +192,7 @@ cylind_make_grid (ndom, w)
 	    {			//logarithmic intervals
 
 	      dlogr = (log10 (one_dom->rmax / one_dom->xlog_scale)) / (one_dom->ndim - 3);
-	      dlogz = (log10 (one_dom->rmax / one_dom->zlog_scale)) / (one_dom->mdim - 3);
+	      dlogz = (log10 (one_dom->zmax / one_dom->zlog_scale)) / (one_dom->mdim - 3);
 	      if (i == 0)
 		{
 		  w[n].x[0] = 0.0;

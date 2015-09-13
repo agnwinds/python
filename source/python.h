@@ -221,11 +221,12 @@ double wind_midz_var[NDIM_MAX][NDIM_MAX];
   /* Generic parameters for the wind */
   double wind_mdot, stellar_wind_mdot;	/* Mass loss rate in disk and stellar wind */
   double rmin, rmax;			/*Spherical extent of the wind */
+  double zmax;				/* Vertical extent of the wind, often the same as rmas */
   double wind_rho_min, wind_rho_max;	/*Min/Max rho for wind in disk plane */
   double wind_thetamin, wind_thetamax;	/*Angles defining inner and outer cones of wind, measured from disk plane */
   double mdot_norm;		/*A normalization factor used in SV wind, and Knigge wind */
 
-  double twind;   // ksl 1508 -- added in case domains have different initail temperatures
+  double twind;   // ksl 1508 -- added in case domains have different initial temperatures
 
   /* Parameters defining Shlossman & Vitello Wind */
   double sv_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
@@ -254,14 +255,10 @@ double wind_midz_var[NDIM_MAX][NDIM_MAX];
   double shell_rmin, shell_rmax;
 
   /*Parameters defining a corona in a ring above a disk */
-  double corona_rmin, corona_rmax;	//the minimum and maximu radius of the corona
-
-  double corona_base_density, corona_scale_height;	//the density at the base of the corona and the scale height
-
-  double corona_vel_frac;	// the radial velocity of the corona in units of the keplerian velocity
-  
-
-
+  double corona_rmin, corona_rmax;	/*the minimum and maximu radius of the corona */
+  double corona_zmax;                   /*The maximum vertical extent of the corona */
+  double corona_base_density, corona_scale_height;	/*the density at the base of the corona and the scale height */
+  double corona_vel_frac;		/* the radial velocity of the corona in units of the keplerian velocity */
 
 }
 domain_dummy, *DomainPtr;   // One structure for each domain
