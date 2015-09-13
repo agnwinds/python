@@ -245,7 +245,6 @@ main (argc, argv)
   int my_rank;			// these two variables are used regardless of parallel mode
   int np_mpi;			// rank and number of processes, 0 and 1 in non-parallel
   int time_to_quit;
-  int input_int;
   int ndomain = 0;		//Local variable for ndomain
   int ndom;
 
@@ -329,7 +328,10 @@ main (argc, argv)
 /* Set plausible values for everything in geo struct which basically defines the overall geometry
 As of 1508,  init_geo() also allocates the memory for the domain structure */
 
-  init_geo ();
+  zdom = (DomainPtr) calloc (sizeof (domain_dummy), MaxDom);
+
+
+
 
 
 
@@ -343,7 +345,7 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 
 
   if (restart_stat == 1)	/* We want to continue a run. This is generally used 
-                                   because we had to limit to runtime of python or we decided
+				   because we had to limit to runtime of python or we decided
 				   we needed more ionization or spectral cycles */
     {
       Log ("Continuing a previous run of %s \n", files.root);
@@ -366,8 +368,7 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	}
     }
 
-  else if (restart_stat == 0)	/* We are starting a new run from scratch, which is the normal
-				   mode of operation */
+  else if (restart_stat == 0)	/* We are starting a new run, which is the normal mode of operation */
     {
 
       /* First,  establish the overall system type . 
@@ -383,13 +384,15 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 // XXX it is not obious why run_type needs to be in geo.  It is used only in python and setup at present
       geo.run_type = 0;
 
+  init_geo ();  // XXX  This could and should be particularized for the system type.                                                            
+
       if (geo.system_type == SYSTEM_TYPE_PREVIOUS)
 	{
 	  /* This option is for the confusing case where we want to start with a previous wind 
 	   * model,(presumably because that run produced a wind close to the one we are looking for, 
 	   * but we are going to change some parameters that do not affect the wind geometry,  
 	   * We will write use new filenames for the results, so all of the previous work is still saved,
-	    */
+	   */
 
 	  strcpy (files.old_windsave, "earlier.run");
 	  rdstr ("Old_windfile(root_only)", files.old_windsave);
@@ -414,10 +417,10 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 
       else
 	{			/*  (presumably because that run produced a wind close to the one
-				                 we are looking for, but we are going to change some parameters that do not affect the wind 
-						              geometry,  We will write use new filenames for the results, so all of the previous work is
-							                   still saved,
-									   Read the atomic datafile here, because for the cases where we have read
+				   we are looking for, but we are going to change some parameters that do not affect the wind 
+				   geometry,  We will write use new filenames for the results, so all of the previous work is
+				   still saved,
+				   Read the atomic datafile here, because for the cases where we have read
 				   and old wind files, we also got the atomic data */
 
 	  rdint
@@ -427,13 +430,33 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	    {
 	      strcat (zdom[ndomain].name, "Wind");
 	      geo.wind_domain_number = ndomain;
+              get_grid_params (geo.wind_domain_number);
+
 	      ndomain++;
+	    }
+
+	  rdint
+	    ("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
+	     &geo.disk_type);
+
+	  if (geo.disk_type == 0)
+	    {
+	      geo.disk_atmosphere = 0;
 	    }
 	  else
 	    {
-	      /* there's no wind, set wind domain_number to -1 */
-	      geo.wind_domain_number = -1;
+	      rdint ("disk.atmosphere(0=no,1=yes)", &geo.disk_atmosphere);
 	    }
+	  if (geo.disk_atmosphere != 0)
+	    {
+	      geo.atmos_domain_number = ndomain;
+	      strcat (zdom[ndomain].name, "Disk Atmosphere");
+	      geo.atmos_domain_number = ndomain;
+              get_grid_params (geo.wind_domain_number);
+	      ndomain++;
+	    }
+
+
 
 	  rdstr ("Atomic_data", geo.atomic_filename);
 
@@ -466,74 +489,13 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 
 
 
-  /* Define the coordinate system for the wind grid.  The wind array is allocated later */
-
-  if (geo.wind_domain_number != -1 && geo.run_type != SYSTEM_TYPE_PREVIOUS)
-    get_grid_params (ndomain - 1);	// JM PLACEHOLDER -- really we should change the input order here!
-
   /* Define how ionzation is going to be calculated */
 
-     init_ionization();
+  init_ionization ();
 
-     /* specify if there is a disk and what type */
+  /* specify if there is a disk and what type */
   /* JM 1502 -- moved disk type question here- previously it was just before
      asking for disk radiation. See #8 and #44 */
-
-
-  rdint
-    ("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
-     &geo.disk_type);
-
-  if (geo.disk_type == 0)
-    {
-      geo.disk_atmosphere = 0;
-    }
-  else
-    {
-      /* ksl 1508 Add parameters for a disk atmosphere XXX  */
-      // XXX This looks like a problem for restarts
-      zdom[ndomain].ndim = 30;
-      zdom[ndomain].mdim = 10;
-
-      rdint ("disk.atmosphere(0=no,1=yes)", &geo.disk_atmosphere);
-    }
-  if (geo.disk_atmosphere != 0)
-    {
-      /* specify the domain name and number */
-      strcat (zdom[ndomain].name, "Disk Atmosphere");
-      geo.atmos_domain_number = ndomain;
-//XXX Whyi isn't get_grid_param used here.  We could pass a variable to it, to mofifiy the rdpar names if
-// necessary
-      input_int = 1;
-      rdint ("atmos.coord.system(1=cylindrical,2=spherical_polar,3=cyl_var)",
-	     &input_int);
-
-      switch (input_int)
-	{
-	case 0:
-	  zdom[ndomain].coord_type = SPHERICAL;
-	  break;
-	case 1:
-	  zdom[ndomain].coord_type = CYLIND;
-	  break;
-	case 2:
-	  zdom[ndomain].coord_type = RTHETA;
-	  break;
-	case 3:
-	  zdom[ndomain].coord_type = CYLVAR;
-	  break;
-	default:
-	  Error
-	    ("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
-                        0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
-	}
-
-
-      rdint ("atmos.dim.in.x_or_r.direction", &zdom[ndomain].ndim);
-      rdint ("atmos.dim.in.z_or_theta.direction", &zdom[ndomain].mdim);
-      ndomain++;
-    }
-
 
 
 
@@ -957,7 +919,7 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 
   /* XXXX - Execute  CYCLES TO CREATE THE DETAILED SPECTRUM */
 
-  make_spectra(restart_stat);
+  make_spectra (restart_stat);
 
-  return(0);
+  return (0);
 }

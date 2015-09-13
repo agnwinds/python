@@ -136,18 +136,25 @@ init_geo ()
   geo.ndomain = 0;		/*ndomain is a convenience variable so we do not always
 				   need to write geo.ndomain but it should nearly always
 				   be set to the same value as geo.ndomain */
+  geo.wind_domain_number=-1;
+  geo.atmos_domain_number=-1;
 
-  /* allocate space for maximum number of domains */
-  /* XXX it is not clear that this is the natural place to instantiate domains, since this routine
-   * refers to the geo pointer.  It is even less clear why these particular variables are initialized
-   * here */
-
-  zdom = (DomainPtr) calloc (sizeof (domain_dummy), MaxDom);
+// XXX It should be possible to initialize some of this based ont he system type, and in particular it should 
+// be possilbe to used this to set up a benchmark cv, AGN, etc.  right now everything is setup for a CV
+//
+//OLD  zdom = (DomainPtr) calloc (sizeof (domain_dummy), MaxDom);
+/*  The domains have been created but have not been initialized at all */
 
   zdom[0].coord_type = 1;
   zdom[0].ndim = 30;
   zdom[0].mdim = 30;
   zdom[0].log_linear = 0;	/* Set intervals to be logarithmic */
+
+  zdom[1].coord_type = 1;
+  zdom[1].ndim = 30;
+  zdom[1].mdim = 10;
+  zdom[1].log_linear = 1;	/* Set intervals to be logarithmic */
+
 
   geo.disk_z0 = geo.disk_z1 = 0.0;	// 080518 - ksl - moved this up
   geo.adiabatic = 1;		// Default is now set so that adiabatic cooling is included in the wind
