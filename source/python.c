@@ -384,7 +384,7 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 // XXX it is not obious why run_type needs to be in geo.  It is used only in python and setup at present
       geo.run_type = 0;
 
-  init_geo ();  // XXX  This could and should be particularized for the system type.                                                            
+      init_geo ();		// XXX  This could and should be particularized for the system type.                                                            
 
       if (geo.system_type == SYSTEM_TYPE_PREVIOUS)
 	{
@@ -430,7 +430,7 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	    {
 	      strcat (zdom[ndomain].name, "Wind");
 	      geo.wind_domain_number = ndomain;
-              get_grid_params (geo.wind_domain_number);
+	      get_grid_params (geo.wind_domain_number);
 
 	      ndomain++;
 	    }
@@ -452,7 +452,7 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	      geo.atmos_domain_number = ndomain;
 	      strcat (zdom[ndomain].name, "Disk Atmosphere");
 	      geo.atmos_domain_number = ndomain;
-              get_grid_params (geo.wind_domain_number);
+	      get_grid_params (geo.wind_domain_number);
 	      ndomain++;
 	    }
 
@@ -489,14 +489,9 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 
 
 
-  /* Define how ionzation is going to be calculated */
+  /* Define how ionization is going to be calculated */
 
   init_ionization ();
-
-  /* specify if there is a disk and what type */
-  /* JM 1502 -- moved disk type question here- previously it was just before
-     asking for disk radiation. See #8 and #44 */
-
 
 
   /* Determine what radiation sources there are.  
