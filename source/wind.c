@@ -143,6 +143,11 @@ where_in_wind (x,ndomain)
 	  continue;		/*the position is beyond the wind radially */
 	}
 
+      if (z > one_dom->zmax)
+	{
+	  continue;		/*the position is beyond the wind radially */
+	}
+
       /* Now for the elvis wind model, check to see if the position is
        * inside all of the wind or if it is in the vertical section of the wind
        *

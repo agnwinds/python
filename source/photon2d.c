@@ -106,7 +106,6 @@ translate_in_space (pp)
      PhotPtr pp;
 {
   double ds, x;
-  double ds_to_wind (), ds_to_sphere ();
   int move_phot ();
 
   ds = ds_to_wind (pp);
@@ -246,6 +245,20 @@ ds_to_wind (pp)
 	ds = x;
       if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
 	ds = x;
+
+      if (zdom[ndom].wind_type == CORONA)  {
+
+	      /* As currently written ds_to_plane can give a negative number */
+	      x = ds_to_plane (&zdom[ndom].windplane[0], &ptest);
+	      if (x>0 && x<ds){
+		      ds=x;
+	      }
+	      x = ds_to_plane (&zdom[ndom].windplane[1], &ptest);
+	      if (x>0 && x<ds){
+		      ds=x;
+	      }
+      }
+
 
       /* Check if the photon hits the pillpox portion of an Elvis wind */
       if (zdom[ndom].wind_type == ELVIS)

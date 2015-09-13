@@ -158,7 +158,7 @@ enum coord_type_enum
 
 typedef struct plane /*SWM 10-10-14 - Switched to TypeDef */
 {
-  double x[3];			/* A position included in the plane (usally the "center" */
+  double x[3];			/* A position included in the plane (usually the "center" */
   double lmn[3];		/* A unit vector perpendicular to the plane (usually in the "positive" direction */
 } plane_dummy, *PlanePtr;
 plane_dummy plane_l1, plane_sec, plane_m2_far;	/* these all define planes which are perpendicular to the line of sight from the 

@@ -68,6 +68,18 @@ get_corona_params (ndom)
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 0.0;
 
+  /* Set up wind planes for a layer with a specific height*/
+
+  zdom[ndom].windplane[0].x[0]  =zdom[ndom].windplane[0].x[1]=zdom[ndom].windplane[0].x[2]=0;
+  zdom[ndom].windplane[0].lmn[0]=zdom[ndom].windplane[0].lmn[1]=0;
+  zdom[ndom].windplane[0].lmn[2]=1;
+
+  zdom[ndom].windplane[1].x[0]  =zdom[ndom].windplane[0].x[1]=0;
+  zdom[ndom].windplane[1].x[2]  =zdom[ndom].corona_zmax;
+  zdom[ndom].windplane[1].lmn[0]=zdom[ndom].windplane[0].lmn[1]=0;
+  zdom[ndom].windplane[1].lmn[2]=1;
+
+
 
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
