@@ -615,7 +615,7 @@ wind_paths_add_phot(WindPtr wind, PhotPtr pp)
  * 20/8/15	-	Written by SWM
 ***********************************************************/
 int
-phot_paths_gen_phot(PhotPtr pp)
+wind_paths_gen_phot_simple(PhotPtr pp)
 {
 	pp->path = sqrt((pp->x[0] * pp->x[0])
 	  			+	(pp->x[1] * pp->x[1])
@@ -646,7 +646,7 @@ wind_paths_gen_phot(WindPtr wind, PhotPtr pp)
 
 	if(geo.wcycle == 0 || plasmamain[wind->nplasma].ntot == 0) 
 	{
-		phot_paths_gen_phot(pp);
+		wind_paths_gen_phot_simple(pp);
 	}
 	else
 	{
@@ -698,37 +698,43 @@ wind_paths_gen_phot_matom(WindPtr wind, PhotPtr pp, int matom_lev)
 	int		i_path, j, level;
 	Wind_Paths_Ptr PathPtr;
 
-	level = line[matom_lev].nconfigu;
-	PathPtr = wind->paths;
-
-	//Iterate over array to see if this element is tracked
-	//If so, point as its specific path information
-	for (j = 0; j < geo.reverb_matom_levels; j++)
-		if(level == geo.reverb_matom_level[j]) 
-			PathPtr = wind->paths_level[j];
-
-	i_path = -1;
-	r_total = 0.0;
-	r_rand = PathPtr->d_flux * rand() / MAXRAND;
-	while (r_rand < r_total) 
+	if(geo.wcycle == 0 || plasmamain[wind->nplasma].ntot == 0) 
 	{
-		r_total += PathPtr->ad_path_flux[++i_path];
-		if (i_path >= g_path_data->i_path_bins) 
-		{
-			Error
-				("wind_paths_gen_phot_matom: No path data in wind cell %d at %g %g %g\n",
-			   wind->nwind, wind->x[0], wind->x[1], wind->x[2]);
-			exit(0);
-		}
+		wind_paths_gen_phot_simple(pp);
 	}
+	else
+	{
+		level = line[matom_lev].nconfigu;
+		PathPtr = wind->paths;
 
-	//Assign photon path to a random position within the bin.
-	r_bin_min 	= g_path_data->ad_path_bin[i_path-1];
-	r_bin_rand  = (rand() / MAXRAND) *
-				 (g_path_data->ad_path_bin[i_path  ]-
-				  g_path_data->ad_path_bin[i_path-1]) ;
-	pp->path 	= r_bin_min + r_bin_rand;
+		//Iterate over array to see if this element is tracked
+		//If so, point as its specific path information
+		for (j = 0; j < geo.reverb_matom_levels; j++)
+			if(level == geo.reverb_matom_level[j]) 
+				PathPtr = wind->paths_level[j];
 
+		i_path = -1;
+		r_total = 0.0;
+		r_rand = PathPtr->d_flux * rand() / MAXRAND;
+		while (r_rand < r_total) 
+		{
+			r_total += PathPtr->ad_path_flux[++i_path];
+			if (i_path >= g_path_data->i_path_bins) 
+			{
+				Error
+					("wind_paths_gen_phot_matom: No path data in wind cell %d at %g %g %g\n",
+				   wind->nwind, wind->x[0], wind->x[1], wind->x[2]);
+				exit(0);
+			}
+		}
+
+		//Assign photon path to a random position within the bin.
+		r_bin_min 	= g_path_data->ad_path_bin[i_path-1];
+		r_bin_rand  = (rand() / MAXRAND) *
+					 (g_path_data->ad_path_bin[i_path  ]-
+					  g_path_data->ad_path_bin[i_path-1]) ;
+		pp->path 	= r_bin_min + r_bin_rand;
+	}
 	return (0);
 }
 

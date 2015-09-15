@@ -1179,6 +1179,9 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
 	  p[i].x[2] = -(z + EPSILON);
 	  north[2] *= -1;
 	}
+	if(geo.reverb != REV_NONE) //SWM - Assign photon starting path
+		wind_paths_gen_phot_simple(&p[i]);
+
       randvcos (p[i].lmn, north);
 
       /* Note that the next bit of code is almost duplicated in photo_gen_star.  It's

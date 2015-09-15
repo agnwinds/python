@@ -874,7 +874,7 @@ photo_gen_matom (p, weight, photstart, nphot)
       	case REV_WIND:
       		wind_paths_gen_phot(&wmain[icell], &p[n]); break;
       	case REV_PHOTON:
-      		phot_paths_gen_phot(&p[n]); break;
+      		wind_paths_gen_phot_simple(&p[n]); break;
       	case REV_NONE:
       	default: 
       		break;
