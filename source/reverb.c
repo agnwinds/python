@@ -734,6 +734,7 @@ wind_paths_gen_phot_matom(WindPtr wind, PhotPtr pp, int matom_lev)
 					 (g_path_data->ad_path_bin[i_path  ]-
 					  g_path_data->ad_path_bin[i_path-1]) ;
 		pp->path 	= r_bin_min + r_bin_rand;
+		printf("MATOM: Gen phot at %g %g %g : %g\n",pp->x[0],pp->x[1],pp->x[2],pp->path);
 	}
 	return (0);
 }

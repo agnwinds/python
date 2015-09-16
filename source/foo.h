@@ -72,7 +72,7 @@ int wind_check(WindPtr www, int n);
 double model_velocity(double x[], double v[]);
 int model_vgrad(double x[], double v_grad[][3]);
 double model_rho(double x[]);
-/* vector.c */
+/* vvector.c */
 double dot(double a[], double b[]);
 double length(double a[]);
 int renorm(double a[], double scalar);
@@ -504,6 +504,7 @@ int reverb_init(WindPtr wind, int nangles);
 int wind_paths_init(WindPtr wind);
 int wind_paths_add_phot_matom(WindPtr wind, double path, double absorbed, int matom_line);
 int wind_paths_add_phot(WindPtr wind, PhotPtr pp);
+int wind_paths_gen_phot_simple(PhotPtr pp);
 int wind_paths_gen_phot(WindPtr wind, PhotPtr pp);
 int wind_paths_gen_phot_matom(WindPtr wind, PhotPtr pp, int matom_lev);
 int wind_paths_single_evaluate(Wind_Paths_Ptr paths);
