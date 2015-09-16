@@ -452,7 +452,7 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	      geo.atmos_domain_number = ndomain;
 	      strcat (zdom[ndomain].name, "Disk Atmosphere");
 	      geo.atmos_domain_number = ndomain;
-	      get_grid_params (geo.wind_domain_number);
+	      get_grid_params (geo.atmos_domain_number);
 	      zdom[ndomain].wind_type=CORONA;
 	      ndomain++;
 	    }
