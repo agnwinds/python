@@ -502,7 +502,7 @@ was a resonant scatter but we want isotropic scattering anyway.  */
       	case REV_MATOM:
 	    	wind_paths_gen_phot(&wmain[icell], &p[n]); break;
 	    case REV_PHOTON:
-	  		wind_paths_gen_phot_simple(&wmain[icell], &p[n]); break;
+	  		wind_paths_gen_phot_simple(&p[n]); break;
 	  	case REV_NONE:
 	  	default: 
 	  		break;
