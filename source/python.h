@@ -202,7 +202,7 @@ typedef struct domain
 	/* The next few structures define the boundaries of an emission region */
 	struct cone windcone[2];   /* The cones that define the boundary of winds like SV or kwd */
 	struct plane windplane[2]; /* Planes which define the top and bottom of a layer */
-	double rho_min,rho,max;    /* These are used for the inneer and outer boundary of a pillbox */
+	double rho_min,rho_max;    /* These are used for the inneer and outer boundary of a pillbox */
 
 	double wind_x[NDIM_MAX], wind_z[NDIM_MAX];	/* These define the edges of the cells in the x and z directions */
 	double wind_midx[NDIM_MAX], wind_midz[NDIM_MAX];	/* These define the midpoints of the cells in the x and z directions */

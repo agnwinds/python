@@ -765,12 +765,14 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
      XXX ksl is unclear why the wind cones ar being initilized here, rather than as part of
      routines located elsewhere, but I have follwoed previous practice and reinitialized them
      as part to the domain effort.  
+
+     XXX This looks wrong; we read all of this infromation in I think
    */
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
 
-      if (zdom[0].coord_type == RTHETA && geo.run_type == SYSTEM_TYPE_PREVIOUS)	//We need to generate an rtheta wind cone if we are restarting
+      if (zdom[ndom].coord_type == RTHETA && geo.run_type == SYSTEM_TYPE_PREVIOUS)	//We need to generate an rtheta wind cone if we are restarting
 	{
 	  rtheta_make_cones (ndom, wmain);
 	}

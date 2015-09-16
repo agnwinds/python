@@ -241,39 +241,33 @@ define_wind ()
 
 /* The routines above have established the volumes of the cells that are in the wind
  * and also assigned the variables w[].inwind at least insofar as the wind is concerned.
- * We now need to do the same for the torus
  */
 
-  n_vol = n_inwind = n_part = 0;
-  n_comp = n_comp_part = 0;
-
-  /* here we loop over the entire wind structure, which has dimensions NDIM2 */
-  for (n = 0; n < NDIM2; n++)
-    {
-      if (w[n].vol > 0.0)
-	n_vol++;
-      if (w[n].inwind == W_ALL_INWIND)
-	n_inwind++;
-      if (w[n].inwind == W_PART_INWIND)
-	n_part++;
-      if (w[n].inwind == W_ALL_INTORUS)
-	n_comp++;
-      if (w[n].inwind == W_PART_INTORUS)
-	n_comp_part++;
-    }
-
-  Log
-    ("wind2d: %3d cells of which %d are in inwind, %d partially in_wind, & %d with pos. vol\n",
-     NDIM2, n_inwind, n_part, n_vol);
-
-/* 56d --Now check the volume calculations for 2d wind models 
-   58b --If corners are in the wind, but there is zero_volume then ignore.
-*/
-
-  /* JM 1508 -- Added loop over domains */
+/* Perform some consistency checks of teh wind */
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
+      n_vol = n_inwind = n_part = 0;
+      n_comp = n_comp_part = 0;
+      for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
+	{
+	  if (w[n].vol > 0.0)
+	    n_vol++;
+	  if (w[n].inwind == W_ALL_INWIND)
+	    n_inwind++;
+	  if (w[n].inwind == W_PART_INWIND)
+	    n_part++;
+	  if (w[n].inwind == W_ALL_INTORUS)
+	    n_comp++;
+	  if (w[n].inwind == W_PART_INTORUS)
+	    n_comp_part++;
+
+	}
+      Log
+	("wind2d: For domain %d there are %3d cells of which %d are in inwind, %d partially in_wind, & %d with pos. vol\n",
+	 ndom, zdom[ndom].ndim2, n_inwind, n_part, n_vol);
+
+
       if (zdom[ndom].coord_type != SPHERICAL)
 	{
 	  for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
@@ -285,19 +279,25 @@ define_wind ()
 		{
 		  wind_n_to_ij (ndom, n, &i, &j);
 		  Error
-		    ("wind2d: Cell %3d (%2d,%2d) has %d corners in wind, but zero volume\n",
-		     n, i, j, n_inwind);
+		    ("wind2d: Cell %3d (%2d,%2d) in domain %d has %d corners in wind, but zero volume\n",
+		     n, i, j, ndom, n_inwind);
 		  w[n].inwind = W_IGNORE;
 		}
 	      if (w[n].inwind == W_PART_INWIND && n_inwind == 4)
 		{
 		  wind_n_to_ij (ndom, n, &i, &j);
 		  Error
-		    ("wind2d: Cell %3d (%2d,%2d) has 4 corners in wind, but is only partially in wind\n",
-		     i, j, n);
+		    ("wind2d: Cell %3d (%2d,%2d) in domain %d has 4 corners in wind, but is only partially in wind\n",
+		     n, i, j, ndom);
 		}
 	    }
 
+	}
+      else
+	{
+	  Log
+	    ("Not checking  corners_in_wind for SPHERICAL coordinates used in domain %d\n",
+	     ndom);
 	}
     }
 
@@ -540,15 +540,16 @@ be optional which variables beyond here are moved to structures othere than Wind
 	    }
 
 	  //Factor of 2 to allow for wind on both sides of disk
-	  Log ("m dot wind: Domain %d Desired %g   Base %g Calculated %g\n",
-	       ndom, zdom[ndom].wind_mdot, 2. * mdotbase, 2. * mdotwind);
+	  Log
+	    ("m dot wind: Domain %d Desired %g   Base %g Calculated %g\n",
+	     ndom, zdom[ndom].wind_mdot, 2. * mdotbase, 2. * mdotwind);
 	  mdot_wind (w, 1.e6, zdom[ndom].rmax / 2.);
 	}
       else
 	{
 	  Error
 	    ("wind2d.c: Unknown coordtype %d for domain %d\n",
-	     zdom[ndom].coord_type,ndom);
+	     zdom[ndom].coord_type, ndom);
 	}
     }
 
@@ -1057,7 +1058,7 @@ mdot_wind (w, z, rmax)
       mdot += 2 * PI * r * dr * den * v[2];
     }
 
-  mplane=2. * mdot;
+  mplane = 2. * mdot;
 // Calculate the mass loss rate in a sphere
   dtheta = PI / (2 * NSTEPS);
   mdot = 0;
