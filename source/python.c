@@ -453,6 +453,7 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	      strcat (zdom[ndomain].name, "Disk Atmosphere");
 	      geo.atmos_domain_number = ndomain;
 	      get_grid_params (geo.wind_domain_number);
+	      zdom[ndomain].wind_type=CORONA;
 	      ndomain++;
 	    }
 
@@ -538,6 +539,10 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
          and then gets params by calling e.g. get_sv_wind_params() */
       /* PLACEHOLDER -- XXX call with wind domain number */
       get_wind_params (geo.wind_domain_number);
+
+      if (geo.atmos_domain_number>=0) {
+	      get_wind_params(geo.atmos_domain_number);
+      }
 
     }				// End of block to define a model for the first time
 
