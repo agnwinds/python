@@ -233,8 +233,9 @@ cylind_make_grid (ndom, w)
  * It's left that way for now, but when one cleans up the program, it might be more sensible to do it the other
  * way
  *
- * History
- * 04aug	ksl	Routine was removed from windsave,  wind_complete is now just a driver.
+History
+04aug	ksl	Routine was removed from windsave,  wind_complete is now just a driver.
+15sep	ksl	Update for domains
  */
 
 int
@@ -243,29 +244,32 @@ cylind_wind_complete (ndom, w)
      WindPtr w;
 {
   int i, j;
+  int nstart,mdim,ndim;
   DomainPtr one_dom;
 
   one_dom = &zdom[ndom];
+  nstart=one_dom->nstart;
+  ndim=one_dom->ndim;
+  mdim=one_dom->mdim;
 
   /* Finally define some one-d vectors that make it easier to locate a photon in the wind given that we
      have adoped a "rectangular" grid of points.  Note that rectangular does not mean equally spaced. */
-  /* JM -- PLACEHOLDER -- NEED TO MOVE INTO DOMAIN STRUCTURE */
-  /* JM -- replaced with structures in the domain structure */
-  for (i = 0; i < one_dom->ndim; i++)
-    one_dom->wind_x[i] = w[i * one_dom->mdim].x[0];
+
+  for (i = 0; i < ndim; i++)
+    one_dom->wind_x[i] = w[nstart +i * mdim].x[0];
 
   for (j = 0; j < one_dom->mdim; j++)
-    one_dom->wind_z[j] = w[j].x[2];
+    one_dom->wind_z[j] = w[nstart +j].x[2];
 
   for (i = 0; i < one_dom->ndim - 1; i++)
-    one_dom->wind_midx[i] = 0.5 * (w[i * one_dom->mdim].x[0] + w[(i + 1) * one_dom->mdim].x[0]);
+    one_dom->wind_midx[i] = 0.5 * (w[nstart +i * mdim].x[0] + w[nstart + (i + 1) * mdim].x[0]);
 
   for (j = 0; j < one_dom->mdim - 1; j++)
-    one_dom->wind_midz[j] = 0.5 * (w[j].x[2] + w[(j + 1)].x[2]);
+    one_dom->wind_midz[j] = 0.5 * (w[nstart +j].x[2] + w[nstart +j + 1].x[2]);
 
   /* Add something plausible for the edges */
-  one_dom->wind_midx[one_dom->ndim - 1] = 2. * one_dom->wind_x[one_dom->ndim - 1] - one_dom->wind_midx[one_dom->ndim - 2];
-  one_dom->wind_midz[one_dom->mdim - 1] = 2. * one_dom->wind_z[one_dom->mdim - 1] - one_dom->wind_midz[one_dom->mdim - 2];
+  one_dom->wind_midx[one_dom->ndim - 1] = 2. * one_dom->wind_x[nstart +ndim - 1] - one_dom->wind_midx[nstart + ndim - 2];
+  one_dom->wind_midz[one_dom->mdim - 1] = 2. * one_dom->wind_z[nstart +mdim - 1] - one_dom->wind_midz[nstart + mdim - 2];
 
   return (0);
 }
