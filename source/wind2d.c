@@ -125,7 +125,16 @@ define_wind ()
 
   w = wmain;
 
-  /* initialize inwind to a known state for all wind cells in this domain */
+  /* Assign the domains to each cell */
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
+    {
+      for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
+	{
+	  w[n].ndom = ndom;	// Assign each wind cell to a domain                                       
+	}
+    }
+
+  /* initialize inwind to a known state for all wind cells */
   for (n = 0; n < NDIM2; n++)
     {
       w[n].inwind = W_NOT_INWIND;
@@ -177,7 +186,6 @@ define_wind ()
 	}
       for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
 	{
-	  w[n].ndom = ndom;	// Assign each wind cell to a domain                                       
 	  model_velocity (ndom, w[n].x, w[n].v);
 	  model_vgrad (ndom, w[n].x, w[n].v_grad);
 	}
@@ -242,8 +250,9 @@ define_wind ()
  * and also assigned the variables w[].inwind at least insofar as the wind is concerned.
  */
 
-/* Perform some consistency checks of teh wind */
+/* Perform some consistency checks of the wind */
 
+  NPLASMA=0;
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
       n_vol = n_inwind = n_part = 0;
@@ -257,6 +266,7 @@ define_wind ()
 	    n_part++;
 
 	}
+      NPLASMA+=n_vol;
       Log
 	("wind2d: For domain %d there are %3d cells of which %d are in inwind, %d partially in_wind, & %d with pos. vol\n",
 	 ndom, zdom[ndom].ndim2, n_inwind, n_part, n_vol);
@@ -298,14 +308,10 @@ define_wind ()
 
   /* Now create the second structure, the one that is sized only to contain cells in the wind */
 
-  if (CHOICE)
-    {
-      NPLASMA = n_vol;
-    }
-  else				/* Force NPLASMA to equal NDIM2 (for diagnostic reasons) */
-    {
-      NPLASMA = NDIM2;
-    }
+  /* CHOICE is defined in the Makefile. XXX Really unclear that this option is needed.  Consider removing  ksl */
+  if (CHOICE==0){
+	  NPLASMA = NDIM2;
+  }
 
   /* Allocate space for the plasma arrays */
 
@@ -1162,13 +1168,33 @@ zero_scatters ()
 }
 
 
-/* The next routine checks how many corners of a wind cell
- * are in the wind
-  
- This routine returns the number of corners of a wind cell
- that are in the wind.  It is intended to standardize this
- check so that one can use such a routin in the volumes
- calculations.  
+/*************************************************************  
+                                       Space Telescope Science Institute
+
+	Check how many corners  of a wind cell are in the wind defined by this
+	particular domain
+
+Synopsis:
+
+	The routine basically just calls where_in_wind for each of the 4 corners
+	of the cell.
+
+
+Arguments:		
+
+	int n where n is the cell number
+
+Returns:
+
+	The routine simply returns the number of corners of the cell that 
+	is in the wind
+ 
+Description:	
+	This is really just a driver routine for coordinate system specific
+	routines
+ 
+	It is intended to standardize this check so that one can 
+	use such a routin in the volumes calculations.  
 
 Notes:
 
@@ -1190,6 +1216,9 @@ History
 	080403	ksl	68c - Added, or more correctly simply
 			moved code into a separate routine so 
 			could be called from elsewhere
+	15sep	ksl	Modifidy so that it n_inwind is incremented
+			only if we are in the domain associated with
+			this particular cell.
  */
 
 int
@@ -1211,15 +1240,13 @@ check_corners_inwind (n)
 
   if (i < (one_dom->ndim - 2) && j < (one_dom->mdim - 2))
     {
-      if (where_in_wind (wmain[n].x, &ndomain) == W_ALL_INWIND)
+      if (where_in_wind (wmain[n].x, &ndomain) == W_ALL_INWIND && ndom==ndomain)
 	n_inwind++;
-      if (where_in_wind (wmain[n + 1].x, &ndomain) == W_ALL_INWIND)
+      if (where_in_wind (wmain[n + 1].x, &ndomain) == W_ALL_INWIND && ndom==ndomain)
 	n_inwind++;
-      if (where_in_wind (wmain[n + one_dom->mdim].x, &ndomain) ==
-	  W_ALL_INWIND)
+      if (where_in_wind (wmain[n + one_dom->mdim].x, &ndomain) == W_ALL_INWIND  && ndom==ndomain)
 	n_inwind++;
-      if (where_in_wind (wmain[n + one_dom->mdim + 1].x, &ndomain) ==
-	  W_ALL_INWIND)
+      if (where_in_wind (wmain[n + one_dom->mdim + 1].x, &ndomain ) == W_ALL_INWIND  && ndom==ndomain)
 	n_inwind++;
     }
 

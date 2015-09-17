@@ -311,6 +311,7 @@ cylind_wind_complete (ndom, w)
 	11aug	ksl	Add ability to determine the volume for different
 			components.  See python.h for explanation of
 			relatinship between PART and ALL
+	15sep	ksl	Modified to account for mulitple domains
  
 **************************************************************/
 
@@ -335,7 +336,6 @@ cylind_volumes (ndom, w)
 
   one_dom = &zdom[ndom];
 
-  Log("XXX Cyl Volumns: %e %e\n",zdom[ndom].wind_x[2],zdom[ndom].wind_z[2]);
 
   for (i = 0; i < one_dom->ndim; i++)
     {
@@ -344,10 +344,10 @@ cylind_volumes (ndom, w)
 
 	  wind_ij_to_n (ndom, i, j, &n);
 
+	  // XXX Why is it necessary to do the check indicated by the if statement.   
 	  /* 70b - only try to assign the cell if it has not already been assigned */
 	  if (w[n].inwind == W_NOT_INWIND)
 	    {
-	      n_inwind = check_corners_inwind (n);  //XXX bizarre why does this check and not use it, see bellow
 
 
 	      rmin = one_dom->wind_x[i];
@@ -358,17 +358,17 @@ cylind_volumes (ndom, w)
 	      //leading factor of 2 added to allow for volume above and below plane (SSMay04)
 	      w[n].vol = 2 * PI * (rmax * rmax - rmin * rmin) * (zmax - zmin);
 
-	      n_inwind = cylind_is_cell_in_wind (n); //XXX bizarre what is the difference bewen this n_inwind and check_corneers
+	      n_inwind = cylind_is_cell_in_wind (n); 
 
 	      if (n_inwind == W_NOT_INWIND)
 		{
-		  fraction = 0.0;	/* Force outside edge volues to zero */
+		  fraction = 0.0;	
 		  jj = 0;
 		  kk = RESOLUTION * RESOLUTION;
 		}
 	      else if (n_inwind == W_ALL_INWIND)
 		{
-		  fraction = 1.0;	/* Force outside edge volues to zero */
+		  fraction = 1.0;	
 		  jj = kk = RESOLUTION * RESOLUTION;
 		}
 	      else
@@ -387,7 +387,7 @@ cylind_volumes (ndom, w)
 			  x[1] = 0;
 			  x[2] = z;
 
-			  if (where_in_wind (x,&ndomain) == W_ALL_INWIND)
+			  if (where_in_wind (x,&ndomain) == W_ALL_INWIND && ndom==ndomain)
 			    {
 			      num += r * r;	/* 0 implies in wind */
 			      jj++;
@@ -520,6 +520,8 @@ cylind_where_in_grid (ndom, x)
  History:
 	04aug	ksl	52a -- Moved from where_in_wind as incorporated
 			multiple coordinate systems
+	15sep	ksl	Modified so that the random location has to be
+			in the wind in a particular domain
  
 **************************************************************/
 
@@ -537,6 +539,7 @@ cylind_get_random_location (n, x)
   DomainPtr one_dom;
 
   ndom = wmain[n].ndom;
+  ndomain=-1;
   one_dom = &zdom[ndom];
 
   wind_n_to_ij (ndom, n, &i, &j);
@@ -548,7 +551,7 @@ cylind_get_random_location (n, x)
 
   /* Generate a position which is both in the cell and in the wind */
   inwind = W_NOT_INWIND;
-  while (inwind != W_ALL_INWIND)
+  while (inwind != W_ALL_INWIND ||  ndomain!=ndom)
     {
       r =
 	sqrt (rmin * rmin +
@@ -677,6 +680,10 @@ History:
   11Aug	ksl	70b - Modified to incoporate torus
   		See python.h for more complete explanation
 		of how PART and ALL are related
+  15sep ksl	Modified to ask the more refined question of
+  		whether this cell is in the wind of the
+		specific domain assigned to the cell.
+	
 
 */
 
@@ -691,25 +698,29 @@ cylind_is_cell_in_wind (n)
   int ndom,ndomain;
   DomainPtr one_dom;
 
-  /* First check if the cell is in the boundary */
   ndom = wmain[n].ndom;
   one_dom = &zdom[ndom];
   wind_n_to_ij (ndom,n, &i, &j);
 
+  /* First check if the cell is in the boundary */
   if (i >= (one_dom->ndim - 2) && j >= (one_dom->mdim - 2))
     {
       return (W_NOT_INWIND);
     }
 
   /* Assume that if all four corners are in the wind that the
-  entire cell is in the wind */
+  entire cell is in the wind.  check_corners also now checks 
+  that the corners are in the wind of a specific domain */
 
   if (check_corners_inwind (n) == 4)
     {
       return (W_ALL_INWIND);
     }
 
-  /* So at this point, we have dealt with the easy cases */
+  /* So at this point, we have dealt with the easy cases 
+  of being in the region of the wind which is used for the 
+  boundary and when all the edges of the cell are in the wind.
+  */
 
 
   rmin = one_dom->wind_x[i];
@@ -730,14 +741,14 @@ cylind_is_cell_in_wind (n)
 
       x[0] = rmin;
 
-      if (where_in_wind (x,&ndomain) == W_ALL_INWIND)
+      if (where_in_wind (x,&ndomain) == W_ALL_INWIND && ndom==ndomain)
 	{
 	  return (W_PART_INWIND);
 	}
 
       x[0] = rmax;
 
-      if (where_in_wind (x,&ndomain) == W_ALL_INWIND)
+      if (where_in_wind (x,&ndomain) == W_ALL_INWIND && ndom==ndomain)
 	{
 	  return (W_PART_INWIND);
 	}
@@ -753,14 +764,14 @@ cylind_is_cell_in_wind (n)
 
       x[2] = zmin;
 
-      if (where_in_wind (x,&ndomain) == W_ALL_INWIND)
+      if (where_in_wind (x,&ndomain) == W_ALL_INWIND && ndom==ndomain)
 {
 	  return (W_PART_INWIND);
 	}
 
       x[2] = zmax;
 
-      if (where_in_wind (x,&ndomain) == W_ALL_INWIND)
+      if (where_in_wind (x,&ndomain) == W_ALL_INWIND && ndom==ndomain)
 	{
 	 return (W_PART_INWIND);
 	}

@@ -139,10 +139,6 @@ init_geo ()
   geo.wind_domain_number=-1;
   geo.atmos_domain_number=-1;
 
-// XXX It should be possible to initialize some of this based ont he system type, and in particular it should 
-// be possilbe to used this to set up a benchmark cv, AGN, etc.  right now everything is setup for a CV
-//
-//OLD  zdom = (DomainPtr) calloc (sizeof (domain_dummy), MaxDom);
 /*  The domains have been created but have not been initialized at all */
 
   zdom[0].coord_type = 1;
@@ -153,7 +149,7 @@ init_geo ()
   zdom[1].coord_type = 1;
   zdom[1].ndim = 30;
   zdom[1].mdim = 10;
-  zdom[1].log_linear = 1;	/* Set intervals to be logarithmic */
+  zdom[1].log_linear = 0;	/* Set intervals to be logarithmic */
 
 
   geo.disk_z0 = geo.disk_z1 = 0.0;	// 080518 - ksl - moved this up
