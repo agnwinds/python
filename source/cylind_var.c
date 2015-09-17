@@ -502,13 +502,11 @@ cylvar_volumes (ndom, w, icomp)
 	    }
 	  else if (jj == kk)
 	    {
-	      //OLD 70b w[n].inwind = W_ALL_INWIND;     // All of cell is inwind
-	      w[n].inwind = icomp;	// All of cell is inwind
+	      w[n].inwind = W_ALL_INWIND;     // All of cell is inwind
 	    }
 	  else
 	    {
-	      //OLD 70b w[n].inwind = W_PART_INWIND;    // Some of cell is inwind
-	      w[n].inwind = icomp + 1;	// Some of cell is inwind
+	      w[n].inwind = W_PART_INWIND;    // Some of cell is inwind
 	    }
 	}
     }

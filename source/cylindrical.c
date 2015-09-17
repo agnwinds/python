@@ -411,13 +411,11 @@ cylind_volumes (ndom, w)
 		}
 	      else if (jj == kk)
 		{
-		  //OLD 70b w[n].inwind = W_ALL_INWIND;     // All of cell is inwind
-		  w[n].inwind = ndom;	// All of cell is inwind
+		  w[n].inwind = W_ALL_INWIND;	// All of cell is inwind
 		}
 	      else
 		{
-		  //OLD 70b w[n].inwind = W_PART_INWIND;    // Some of cell is inwind
-		  w[n].inwind = ndom + 1;	// Some of cell is inwind
+		  w[n].inwind = W_PART_INWIND;    // Some of cell is inwind
 		  w[n].vol *= fraction;
 		}
 	    }
