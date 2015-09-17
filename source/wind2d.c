@@ -92,7 +92,6 @@ define_wind ()
   double mdotbase, mdotwind, rr;
   int ierr;
   int n_vol, n_inwind, n_part;
-  int n_comp, n_comp_part;
 
   int nwind, ndom;
   int nstart, ndim, mdim;
@@ -248,7 +247,6 @@ define_wind ()
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
       n_vol = n_inwind = n_part = 0;
-      n_comp = n_comp_part = 0;
       for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
 	{
 	  if (w[n].vol > 0.0)
@@ -257,10 +255,6 @@ define_wind ()
 	    n_inwind++;
 	  if (w[n].inwind == W_PART_INWIND)
 	    n_part++;
-	  if (w[n].inwind == W_ALL_INTORUS)
-	    n_comp++;
-	  if (w[n].inwind == W_PART_INTORUS)
-	    n_comp_part++;
 
 	}
       Log
