@@ -432,7 +432,7 @@ error continues to appear, new investigations are required.
       Error
 	("translate_in_wind: Grid cell %d of photon is not in wind, moving photon %.2e\n",
 	 n, smax);
-      Error ("translate_in_wind: photon position: x %g y %g z %g\n", p->x[0],
+      Error ("translate_in_wind: photon %d position: x %g y %g z %g\n", p->np, p->x[0],
 	     p->x[1], p->x[2]);
       move_phot (p, smax);
       return (p->istat);

@@ -38,7 +38,6 @@ Returns:
 	If there are multiple domains these returns are not in 
 	general meaning full and should be rewritten
 
-	 W_ALL_INTORUS if the photon is in the torus
 	 W_ALL_INWIND if the photon is in the wind, 
  	-1 if it is inside the inner wind cone, and 
  	-2 if it is outside the outer wind cone.
