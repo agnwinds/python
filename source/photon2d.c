@@ -30,6 +30,10 @@ Notes:
 	used so that the calling routines for translate (trans_phot and extract) can be the same
 	in the 1 and 2d versions.
 
+	where_in_wind returns the correct domain for a given position, or domain 0 if the
+	position is not in the wind of a domain.  The photon structure does not have the domain
+	number directly incoded, but it can be obtained from the grid number, which where in_grid updates
+
 History:
  	1997	ksl	Coded and debugged as part of Python effort.
  	98nov	ksl	Modified call to where_in_wind 
@@ -56,7 +60,7 @@ translate (w, pp, tau_scat, tau, nres)
     {
       istat = translate_in_space (pp);
     }
-  else if ((pp->grid = where_in_grid (wmain[pp->grid].ndom,pp->x)) >= 0)
+  else if ((pp->grid = where_in_grid (ndomain,pp->x)) >= 0)
     {
 //		 printf ("photon %i start=%e %e %e %e",pp->np,pp->x[0], pp->x[1], pp->x[2],sqrt(pp->x[0]*pp->x[0]+pp->x[1]*pp->x[1]+pp->x[2]*pp->x[2]));
       istat = translate_in_wind (w, pp, tau_scat, tau, nres);
