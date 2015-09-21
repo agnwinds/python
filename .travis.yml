@@ -23,6 +23,7 @@ branches:
   only:
     - dev
     - enum
+    - domain2
 
 install:
     # first configure
