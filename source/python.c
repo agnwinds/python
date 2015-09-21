@@ -250,8 +250,6 @@ main (argc, argv)
 
 
 #ifdef MPI_ON
-  int ioniz_spec_helpers, spec_spec_helpers;
-
   MPI_Init (&argc, &argv);
   MPI_Comm_rank (MPI_COMM_WORLD, &my_rank);
   MPI_Comm_size (MPI_COMM_WORLD, &np_mpi);
@@ -848,14 +846,6 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
   xsignal (files.root, "%-20s Finished initialization for %s\n", "NOK",
 	   files.root);
   check_time (files.root);
-
-#ifdef MPI_ON
-  /* Since the wind is now set up can work out the length big arrays to help with the MPI reductions of the spectra
-     the variables for the estimator arrays are set up in the subroutines themselves */
-  ioniz_spec_helpers = 2 * MSPEC * NWAVE;	//we need space for log and lin spectra for MSPEC XNWAVE
-  spec_spec_helpers = (NWAVE * (MSPEC + nangles));	//We need space for NWAVE wavelengths for nspectra, which will eventually equal nangles + MSPEC
-
-#endif
 
 
 

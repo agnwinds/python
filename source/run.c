@@ -74,6 +74,9 @@ calculate_ionization (restart_stat)
   double freqmin, freqmax;
   long nphot_to_define;
   int iwind;
+#ifdef MPI_ON
+  int ioniz_spec_helpers;
+#endif
 
 
 
@@ -87,7 +90,11 @@ calculate_ionization (restart_stat)
   freqmin = xband.f1[0];
   freqmax = xband.f2[xband.nbands - 1];
 
-
+#ifdef MPI_ON
+  /* the length of the big arrays to help with the MPI reductions of the spectra
+     the variables for the estimator arrays are set up in the subroutines themselves */
+  ioniz_spec_helpers = 2 * MSPEC * NWAVE; //we need space for log and lin spectra for MSPEC XNWAVE
+#endif
 
 /* XXXX - THE CALCULATION OF THE IONIZATION OF THE WIND */
 
@@ -417,6 +424,10 @@ int make_spectra(restart_stat)
   double renorm;
   long nphot_to_define;
   int iwind;
+  char dummy[LINELENGTH];
+#ifdef MPI_ON
+  int spec_spec_helpers;
+#endif
 
   /* Next three lines have variables that should be a structure, or possibly we
      should allocate the space for the spectra to avoid all this nonsense.  02feb ksl */
@@ -434,6 +445,11 @@ int make_spectra(restart_stat)
   freqmax = C / (geo.swavemin * 1.e-8);
   freqmin = C / (geo.swavemax * 1.e-8);
 
+#ifdef MPI_ON
+  /* the length of the big arrays to help with the MPI reductions of the spectra
+     the variables for the estimator arrays are set up in the subroutines themselves */
+  spec_spec_helpers = (NWAVE * (MSPEC + geo.nangles));  //We need space for NWAVE wavelengths for nspectra, which will eventually equal nangles + MSPEC
+#endif
 
   /* Perform the initilizations required to handle macro-atoms during the detailed
      calculation of the spectrum.  
@@ -631,7 +647,7 @@ int make_spectra(restart_stat)
     delay_dump_finish ();	// Each thread dumps to file
 #ifdef MPI_ON
   MPI_Barrier (MPI_COMM_WORLD);	// Once all done
-  if (my_rank == 0 && geo.reverb != REV_NONE)
+  if (rank_global == 0 && geo.reverb != REV_NONE)
     delay_dump_combine (np_mpi_global);	// Combine results if necessary
 #endif
 
@@ -639,7 +655,7 @@ int make_spectra(restart_stat)
 /* Finally done */
 
 #ifdef MPI_ON
-  sprintf (dummy, "End of program, Thread %d only", my_rank);	// added so we make clear these are just errors for thread ngit status    
+  sprintf (dummy, "End of program, Thread %d only", rank_global);	// added so we make clear these are just errors for thread ngit status    
   error_summary (dummy);	// Summarize the errors that were recorded by the program
   Log ("Run py_error.py for full error report.\n");
 #else
@@ -649,7 +665,7 @@ int make_spectra(restart_stat)
 
 #ifdef MPI_ON
   MPI_Finalize ();
-  Log_parallel ("Thread %d Finalized. All done\n", my_rank);
+  Log_parallel ("Thread %d Finalized. All done\n", rank_global);
 #endif
 
 
