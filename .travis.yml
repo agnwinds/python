@@ -49,7 +49,6 @@ script:
     - cd ../examples/travis 
     - Setup_Py_Dir
     - py balmer_test > balmer_test.out
-    - python check_travis_test.py 
     - cd ..
     - Setup_Py_Dir
     - py -i cv_macro_benchmark
