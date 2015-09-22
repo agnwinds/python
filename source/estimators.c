@@ -423,7 +423,7 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
 
   //1507 SWM: Log paths of photons contributing to estimators
   if(geo.reverb == REV_MATOM)
-    wind_paths_add_phot_matom(one, p->path,
+    wind_paths_add_matom(one, p->path,
       weight_of_packet * (1. - exp (-tau_sobolev)),
       line_ptr->nconfigu);
 

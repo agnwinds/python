@@ -47,7 +47,7 @@ Returns:   Will return an r-packet after (possibly) several calls to matom and k
 
 Description:
 
-
+  
 Notes:   I've written this to be as general as possible so that if we want to improve the treatment of simple
          ions it should not need to be re-written.
 

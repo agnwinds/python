@@ -515,77 +515,61 @@ wind_paths_init(WindPtr wind)
 	return (0);
 }
 
-/***********************************************************
-Synopsis:
-	wind_paths_add_phot(Wind_Paths_Ptr paths, PhotPtr pp)
-		Adds a photon's weight to a wind cell's delay array.
-
-Arguments:
-	PhotPtr pp 				Photon to dump
-	Wind_Paths_Ptr paths	Paths (from wind) to add to
-
-Returns:
-
-Description:
-	Adds photon to path bin as appropriate.
-	As wind array is 2d, .5th dimension added via keeping
-	two path sets for + and - x-axis positions). No full 3-d
-	treatment required as Extract mode's viewpoint always
-	lies along X-axis.
-
-Notes:
-
-History:
-	24/7/15	-	Written by SWM
-***********************************************************/
+/*************************************************************//**
+ * @name		Wind paths add matom
+ * @brief		Following a matom event, increments cell paths
+ * 
+ * @param [in, out] wind 		Wind cell to register photon in.
+ * @param [in]		path 		Path of photon in interaction.
+ * @param [in]		absorbed 	Weight of photon in interaction.
+ * @param [in]		matom_line 	Matom line excited.
+ * @return 						0
+ *  
+ * When given a wind cell and photon info in matom mode, iterates 
+ * over the list of tracked lines to see if the event is being
+ * tracked, if so adds the weight to the path array. If not,
+ * defaults to behaviour as wind_paths_add_phot().
+ *
+ * @notes Written by SWM 2/15.
+*****************************************************************/
 int
-wind_paths_add_phot_matom(WindPtr wind, double path, double absorbed, int matom_line)
+wind_paths_add_matom(WindPtr wind, double path, double absorbed, int matom_line)
 {
 	int i, j, level;
-	level = line[matom_line].nconfigu;
+	Wind_Paths_Ptr path_select = wind->paths;
 
+	level = line[matom_line].nconfigu;
 	for (j = 0; j < geo.reverb_matom_levels; j++)
-	{
 		if(level == geo.reverb_matom_level[j])
+			path_select = wind->paths_level[j];
+
+	for (i=0; i < g_path_data->i_path_bins; i++) 
+	{
+		if (path >= g_path_data->ad_path_bin[i] &&
+		    path <= g_path_data->ad_path_bin[i+1]) 
 		{
-			for (i=0; i < g_path_data->i_path_bins; i++) 
-			{
-				if (path >= g_path_data->ad_path_bin[i] &&
-				    path <= g_path_data->ad_path_bin[i+1]) 
-				{
-					wind->paths_level[j]->ad_path_flux[i]+= absorbed;
-					wind->paths_level[j]->ai_path_num[ i]++;
-				}
-			}
+			path_select->ad_path_flux[i]+= absorbed;
+			path_select->ai_path_num[ i]++;
 		}
 	}
+
+
 	return (0);
 }
 
-/***********************************************************
-Synopsis:
-	wind_paths_add_phot(Wind_Paths_Ptr paths, PhotPtr pp)
-		Adds a photon's weight to a wind cell's delay array.
-
-Arguments:
-	PhotPtr pp 				Photon to dump
-	Wind_Paths_Ptr paths	Paths (from wind) to add to
-
-Returns:
-
-Description:
-	Adds photon to path bin as appropriate.
-	As wind array is 2d,5th dimension added via keeping
-	two path sets for + and - x-axis positions). No full 3-d
-	treatment required as Extract mode's viewpoint always
-	lies along X-axis.
-
-Notes:
-
-History:
-	9/2/15	-	Written by SWM
-	24/7/15	-	Removed frequency
-***********************************************************/
+/*************************************************************//**
+ * @name		Wind paths add phot
+ * @brief		Registers a photon passage with a wind cell.
+ * 
+ * @param [in, out] wind 	Wind cell to register photon in.
+ * @param [in] pp			Photon to register in wind cell.
+ * @return 					0
+ *  
+ * When given a wind cell and photon, adds the photon's weight to
+ * the appropriate delay bin.
+ *
+ * @notes Written by SWM 2/15.
+*****************************************************************/
 int
 wind_paths_add_phot(WindPtr wind, PhotPtr pp)
 {
@@ -603,13 +587,15 @@ wind_paths_add_phot(WindPtr wind, PhotPtr pp)
 }
 
 /********************************************************//*
- * @name 	Photon path generate photon
+ * @name 	Wind paths generate photon simple
  * @brief	Generates path for a 'wind' photon in photon mode
  *
  * @param [in,out] pp 	Photon to set path of
+ * @return 				0
  *
  * Finds the straight-line distance between photon and the 
- * outer star radius, sets minimum path to that.
+ * outer star radius, sets minimum path to that. Used in 
+ * photon mode, and in all modes for non-wind starting paths.
  *
  * @notes
  * 20/8/15	-	Written by SWM
@@ -629,6 +615,7 @@ wind_paths_gen_phot_simple(PhotPtr pp)
  *
  * @param [in] wind		Wind cell to spawn in
  * @param [in,out] pp 	Photon to set path of
+ * @return 				0
  *
  * Picks a random path bin, weighted by the flux in each in
  * this cell, then assigns a path from within that bin 
@@ -679,9 +666,10 @@ wind_paths_gen_phot(WindPtr wind, PhotPtr pp)
  * @name 	Wind paths generate photon matom
  * @brief	Generates path for a wind macro-atom photon
  *
- * @param [in] wind		Wind cell to spawn in
- * @param [in,out] pp 	Photon to set path of
+ * @param [in] wind			Wind cell to spawn in
+ * @param [in,out] pp 		Photon to set path of
  * @patam [in] matom_lev	Macro-atom level to generate for
+ * @return 					0
  *
  * If the level corresponds to an element that has been
  * tracked, pick a random path as wind_paths_gen_phot() using
@@ -743,7 +731,7 @@ wind_paths_gen_phot_matom(WindPtr wind, PhotPtr pp, int matom_lev)
  * @name 	Wind paths single evaluate
  * @brief	Evaluates individual wind cell paths
  *
- * @param [in,out] wind	Wind cell to evaluate
+ * @param [in,out] wind		Wind cell to evaluate
  *
  * Records the total flux in the cell, as well as making a 
  * simple 'average path' calculation.
@@ -781,6 +769,7 @@ wind_paths_single_evaluate(Wind_Paths_Ptr paths)
  * @brief	Evaluates wind path details for a cycle
  *
  * @param [in,out] wind	Wind to evaluate
+ * @return 				0
  *
  * Iterates over each cell in the wind.
  * 
@@ -814,7 +803,6 @@ wind_paths_evaluate(WindPtr wind)
  * @param [in] j 	Radius index of cell.
  * @param [in] k 	Height index of cell.
  * @param [in] i_top Whether the point is above or below the disk
- * 
  * @return			Index for vtk poly.
  * 
  * When given the position of a cell in the wind, returns the
@@ -840,6 +828,7 @@ wind_paths_point_index(int i, int j, int k, int i_top)
  * 
  * @param [in] wind 		Pointer to wind array.
  * @param [in] c_file_in	Name of input file.
+ * @return 					0
  *  
  * When given a wind containing position and delay map information
  * generated using REVERB_WIND, outputs a 3d model of the wind to
@@ -847,7 +836,6 @@ wind_paths_point_index(int i, int j, int k, int i_top)
  *
  * @notes Written by SWM 4/15.
 *****************************************************************/
-
 int
 wind_paths_output(WindPtr wind, char c_file_in[])
 {
