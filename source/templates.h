@@ -55,7 +55,7 @@ int vwind_xyz(int ndom, PhotPtr p, double v[]);
 int wind_div_v(WindPtr w);
 double rho(WindPtr w, double x[]);
 int mdot_wind(WindPtr w, double z, double rmax);
-int get_random_location(int n, int icomp, double x[]);
+int get_random_location(int n, double x[]);
 int zero_scatters(void);
 int check_corners_inwind(int n);
 /* wind.c */
@@ -357,27 +357,27 @@ double rtheta_ds_in_cell(PhotPtr p);
 int rtheta_make_grid(WindPtr w, int ndom);
 int rtheta_make_cones(int ndom, WindPtr w);
 int rtheta_wind_complete(int ndom, WindPtr w);
-int rtheta_volumes(int ndom, WindPtr w, int icomp);
+int rtheta_volumes(int ndom, WindPtr w);
 int rtheta_where_in_grid(int ndom, double x[]);
-int rtheta_get_random_location(int n, int icomp, double x[]);
+int rtheta_get_random_location(int n, double x[]);
 int rtheta_extend_density(int ndom, WindPtr w);
-int rtheta_is_cell_in_wind(int n, int icomp);
+int rtheta_is_cell_in_wind(int n);
 /* spherical.c */
 double spherical_ds_in_cell(PhotPtr p);
 int spherical_make_grid(WindPtr w, int ndom);
 int spherical_wind_complete(int ndom, WindPtr w);
-int spherical_volumes(int ndom, WindPtr w, int icomp);
+int spherical_volumes(int ndom, WindPtr w);
 int spherical_where_in_grid(int ndom, double x[]);
-int spherical_get_random_location(int n, int icomp, double x[]);
+int spherical_get_random_location(int n, double x[]);
 int spherical_extend_density(int ndom, WindPtr w);
 int shell_make_grid(WindPtr w, int ndom);
 /* cylind_var.c */
 double cylvar_ds_in_cell(PhotPtr p);
 int cylvar_make_grid(WindPtr w, int ndom);
 int cylvar_wind_complete(int ndom, WindPtr w);
-int cylvar_volumes(int ndom, WindPtr w, int icomp);
+int cylvar_volumes(int ndom, WindPtr w);
 int cylvar_where_in_grid(int ndom, double x[], int ichoice, double *fx, double *fz);
-int cylvar_get_random_location(int n, int icomp, double x[]);
+int cylvar_get_random_location(int n, double x[]);
 int cylvar_extend_density(int ndom, WindPtr w);
 int cylvar_coord_fraction(int ndom, int ichoice, double x[], int ii[], double frac[], int *nelem);
 /* bilinear.c */

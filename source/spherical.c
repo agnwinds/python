@@ -270,10 +270,9 @@ spherical_wind_complete (ndom, w)
 
 
 int
-spherical_volumes (ndom, w, icomp)
+spherical_volumes (ndom, w)
      int ndom;
      WindPtr w;
-     int icomp;
 {
   int i, n;
   double fraction;
@@ -288,7 +287,6 @@ spherical_volumes (ndom, w, icomp)
   ndim = zdom[ndom].ndim;
   nstart = zdom[ndom].nstart;
 
-  /* XXX what is the purpose of icomp in spherical volumes. It is not used */
 
   thetamin = 0.0;
   thetamax = 0.5 * PI;
@@ -431,7 +429,6 @@ spherical_where_in_grid (ndom, x)
 
  Arguments:		
  	int n -- Cell in which random position is to be generated
-	int icomp -- The component we want the postion to be generated in
  Returns:
  	double x -- the position
  Description:	
@@ -448,9 +445,8 @@ spherical_where_in_grid (ndom, x)
 **************************************************************/
 
 int
-spherical_get_random_location (n, icomp, x)
+spherical_get_random_location (n, x)
      int n;			// Cell in which to create position
-     int icomp;			// Component in which to create position
      double x[];		// Returned position
 {
   int i, j;
@@ -464,7 +460,6 @@ spherical_get_random_location (n, icomp, x)
   rmin = zdom[ndom].wind_x[i];
   rmax = zdom[ndom].wind_x[i + 1];
 
-  // XXX PLACEHOLDER icomp is not used
 
   /* Generate a position which is both in the cell and in the wind */
   inwind = W_NOT_INWIND;

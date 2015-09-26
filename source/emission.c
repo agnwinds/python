@@ -447,23 +447,10 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       p[n].w = weight;
       /* Determine the position of the photon in the moving frame */
 
-      /* !! ERROR - Need to account for emission from torus if it exists */
 
-      if (wmain[icell].inwind > 1)
-	{
-	  get_random_location (icell, 2, p[n].x);	/* NSH 1110 Added this if statement to take account of photons being generated 
-							   from the torus. Hope I've done it correctly!! */
-	}
-      else
-	{
-	  get_random_location (icell, 0, p[n].x);
-	}
+      get_random_location (icell, p[n].x);
 
       p[n].grid = icell;
-
-
-
-
 
       /*
 	Determine the direction of the photon

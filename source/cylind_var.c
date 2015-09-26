@@ -371,6 +371,7 @@ cylvar_wind_complete (ndom, w)
 	allowing for the fact that some cells 
 
  Arguments:		
+ 	int ndom      the domain poiinter
 	WindPtr w;    the entire wind
  Returns:
 
@@ -397,10 +398,9 @@ cylvar_wind_complete (ndom, w)
 
 
 int
-cylvar_volumes (ndom, w, icomp)
+cylvar_volumes (ndom, w)
 	int ndom;
      WindPtr w;
-     int icomp;			// The component for which we want the volume
 {
   int i, j, n;
   int jj, kk;
@@ -719,8 +719,6 @@ cylvar_where_in_grid (ndom, x, ichoice, fx, fz)
 
  Arguments:		
  	int n -- Cell in which random position is to be generated
-	int icomp - Component in which the random position is to
-		be generated
  Returns:
  	double x -- the position
  Description:	
@@ -740,9 +738,8 @@ cylvar_where_in_grid (ndom, x, ichoice, fx, fz)
 **************************************************************/
 
 int
-cylvar_get_random_location (n, icomp, x)
+cylvar_get_random_location (n, x)
      int n;			// Cell in which to create position
-     int icomp;			// Component in which to create position
      double x[];		// Returned position
 {
   int i, j;

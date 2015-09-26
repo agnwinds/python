@@ -212,7 +212,7 @@ define_wind ()
     {
       if (zdom[ndom].coord_type == SPHERICAL)
 	{
-	  spherical_volumes (ndom, w, W_ALL_INWIND);
+	  spherical_volumes (ndom, w);
 	}
       else if (zdom[ndom].coord_type == CYLIND)
 	{
@@ -230,12 +230,12 @@ define_wind ()
 	    }
 	  else
 	    {
-	      rtheta_volumes (ndom, w, W_ALL_INWIND);
+	      rtheta_volumes (ndom, w);
 	    }
 	}
       else if (zdom[ndom].coord_type == CYLVAR)
 	{
-	  cylvar_volumes (ndom, w, W_ALL_INWIND);
+	  cylvar_volumes (ndom, w);
 	}
       else
 	{
@@ -1088,7 +1088,7 @@ mdot_wind (w, z, rmax)
 
  Synopsis:
 	get_random_location is simply will produce a at a random place in
-	a cell n from component icomp.  
+	a cell n 
 Arguments:		
 
 Returns:
@@ -1114,9 +1114,8 @@ History:
 **************************************************************/
 
 int
-get_random_location (n, icomp, x)
+get_random_location (n, x)
      int n;			// Cell in which to create position
-     int icomp;			// The component we want the position in
      double x[];		// Returned position
 {
   int ndom;
@@ -1129,15 +1128,15 @@ get_random_location (n, icomp, x)
     }
   else if (zdom[ndom].coord_type == RTHETA)
     {
-      rtheta_get_random_location (n, icomp, x);
+      rtheta_get_random_location (n, x);
     }
   else if (zdom[ndom].coord_type == SPHERICAL)
     {
-      spherical_get_random_location (n, icomp, x);
+      spherical_get_random_location (n, x);
     }
   else if (zdom[ndom].coord_type == CYLVAR)
     {
-      cylvar_get_random_location (n, icomp, x);
+      cylvar_get_random_location (n, x);
     }
   else
     {

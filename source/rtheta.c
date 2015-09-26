@@ -393,10 +393,9 @@ rtheta_wind_complete (ndom, w)
 
 
 int
-rtheta_volumes (ndom, w, icomp)
+rtheta_volumes (ndom, w)
      int ndom;
      WindPtr w;
-     int icomp;
 {
   int i, j, n;
   int jj, kk;
@@ -430,7 +429,7 @@ rtheta_volumes (ndom, w, icomp)
 				     rmin * rmin * rmin) * (cos (thetamin) -
 							    cos (thetamax));
 
-	      n_inwind = rtheta_is_cell_in_wind (n, icomp);
+	      n_inwind = rtheta_is_cell_in_wind (n);
 	      if (n_inwind == W_NOT_INWIND)
 		{
 		  fraction = 0.0;	/* Force outside edge volues to zero */
@@ -597,9 +596,8 @@ rtheta_where_in_grid (ndom, x)
 **************************************************************/
 
 int
-rtheta_get_random_location (n, icomp, x)
+rtheta_get_random_location (n, x)
      int n;			// Wind cell in which to create position
-     int icomp;			// The component in which to create position
      double x[];		// Returned position
 {
   int i, j;
@@ -752,9 +750,8 @@ of these are in the wind
 */
 
 int
-rtheta_is_cell_in_wind (n, icomp)
+rtheta_is_cell_in_wind (n)
      int n;			/* The wind cell number */
-     int icomp;
 {
   int i, j;
   double r, theta;
