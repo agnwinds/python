@@ -695,7 +695,6 @@ Synopsis:
 
 
 Arguments:   
-       WindPtr w                   the ptr to the structure defining the wind
        PhotPtr p;                  the ptr to the structire for the photons
        double weight;              the photon weight
        int photstart, nphot;       the number of the first photon to be generated and

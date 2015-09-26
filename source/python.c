@@ -231,9 +231,6 @@ main (argc, argv)
   double freqmin, freqmax;
   int n;
 
-  /* Next three lines have variables that should be a structure, or possibly we
-     should allocate the space for the spectra to avoid all this nonsense.  02feb ksl */
-
 
   FILE *fopen ();
 
@@ -275,14 +272,14 @@ main (argc, argv)
   time_to_quit = 100000;	// Initialise variable
 
 
-
-
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
      get less set the verbosity to a lower level. The verbosity can be reset from the comamnd line */
+
   verbosity = 3;
   Log_set_verbosity (verbosity);
 
   /* initialise options for advanced mode (all set to 0) */
+
   init_advanced_modes ();
 
   /* Parse the command line. Get the root. create files.diagfolder + diagfiles */
@@ -300,16 +297,20 @@ main (argc, argv)
 
   Log ("!!Python Version %s \n", VERSION);	//54f -- ksl -- Now read from version.h
   Log ("!!Git commit hash %s\n", GIT_COMMIT_HASH);
+
   /* warn the user if there are uncommited changes */
+
   int git_diff_status = GIT_DIFF_STATUS;
   if (git_diff_status > 0)
     Log
       ("!!Git: This version was compiled with %i files with uncommitted changes.\n",
        git_diff_status);
+
   Log ("!!Python is running with %d processors\n", np_mpi_global);
   Log_parallel
     ("This is MPI task number %d (a total of %d tasks are running).\n",
      rank_global, np_mpi_global);
+
   Debug ("Debug statements are on. To turn off use lower verbosity (< 5).\n");
 
   /* Set the maximum time if it was defined */
@@ -323,16 +324,9 @@ main (argc, argv)
 
   opar_stat = setup_created_files ();
 
-/* Set plausible values for everything in geo struct which basically defines the overall geometry
-As of 1508,  init_geo() also allocates the memory for the domain structure */
+/* Allocate the domain structure */
 
   zdom = (DomainPtr) calloc (sizeof (domain_dummy), MaxDom);
-
-
-
-
-
-
 
   /* BEGIN GATHERING INPUT DATA */
 
@@ -349,6 +343,7 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
       Log ("Continuing a previous run of %s \n", files.root);
       strcpy (files.old_windsave, files.root);
       strcat (files.old_windsave, ".wind_save");
+
       if (wind_read (files.old_windsave) < 0)
 	{
 	  Error ("python: Unable to open %s\n", files.old_windsave);	//program will exit if unable to read the file
@@ -356,7 +351,9 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	}
       w = wmain;
       ndomain = geo.ndomain;	// XXX Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
+
       geo.run_type = SYSTEM_TYPE_PREVIOUS;	// We read the data from a file
+
       xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.old_windsave);
 
       if (geo.pcycle > 0)
@@ -375,21 +372,19 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
          is a bit unclear what one would like to use here */
 
       geo.system_type = SYSTEM_TYPE_STAR;
+
       rdint ("System_type(0=star,1=binary,2=agn,3=previous)",
 	     &geo.system_type);
 
-
-// XXX it is not obious why run_type needs to be in geo.  It is used only in python and setup at present
-      geo.run_type = 0;
-
-      init_geo ();		// XXX  This could and should be particularized for the system type.                                                            
+      init_geo ();   /* Set values in the geometry structure and the domain stucture to reasonable starting
+			values */      
 
       if (geo.system_type == SYSTEM_TYPE_PREVIOUS)
 	{
 	  /* This option is for the confusing case where we want to start with a previous wind 
-	   * model,(presumably because that run produced a wind close to the one we are looking for, 
-	   * but we are going to change some parameters that do not affect the wind geometry,  
-	   * We will write use new filenames for the results, so all of the previous work is still saved,
+	   model,(presumably because that run produced a wind close to the one we are looking for, 
+	   but we are going to change some parameters that do not affect the wind geometry,  
+	   We will write use new filenames for the results, so all of the previous work is still saved,
 	   */
 
 	  strcpy (files.old_windsave, "earlier.run");
@@ -401,11 +396,13 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	    ("Starting a new run from scratch starting with previous windfile");
 
 	  /* Note that wind_read also reads the atomic data file that was used to create the previous run of the data. */
+
 	  if (wind_read (files.old_windsave) < 0)
 	    {
 	      Error ("python: Unable to open %s\n", files.old_windsave);	//program will exit if unable to read the file
 	      exit (0);
 	    }
+
 	  geo.run_type = SYSTEM_TYPE_PREVIOUS;	// after wind_read one will have a different wind_type otherwise
 	  w = wmain;
 	  ndomain = geo.ndomain;	// XXX Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
@@ -414,12 +411,8 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	}
 
       else
-	{			/*  (presumably because that run produced a wind close to the one
-				   we are looking for, but we are going to change some parameters that do not affect the wind 
-				   geometry,  We will write use new filenames for the results, so all of the previous work is
-				   still saved,
-				   Read the atomic datafile here, because for the cases where we have read
-				   and old wind files, we also got the atomic data */
+	{	
+		/* This option is the most common one, where we are starting to define a completely new system */
 
 	  rdint
 	    ("Wind_type(0=SV,1=Sphere,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)",
@@ -440,6 +433,8 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	  if (geo.disk_type == 0)
 	    {
 	      geo.disk_atmosphere = 0;
+	      geo.disk_radiation = 0;
+	      geo.diskrad = 0;
 	    }
 	  else
 	    {
@@ -455,25 +450,21 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	      ndomain++;
 	    }
 
-
-
 	  rdstr ("Atomic_data", geo.atomic_filename);
 
 	  /* read a variable which controls whether to save a summary of atomic data
 	     this is defined in atomic.h, rather than the modes structure */
-	  // XXX Why is this an advanced option; it seems more like a debugging option to me.  
-	  if (modes.iadvanced)
-	    rdint ("write_atomicdata", &write_atomicdata);
+
+	  if (modes.iadvanced) {
+	    rdint ("write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
 
 	  if (write_atomicdata)
 	    Log ("You have opted to save a summary of the atomic data\n");
+	  }
 
 	  get_atomic_data (geo.atomic_filename);
 
 	}
-
-      geo.wcycles = geo.pcycles = 1;
-      geo.wcycle = geo.pcycle = 0;
 
     }
 
@@ -510,8 +501,8 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 
       /* get_stellar_params gets information like mstar, rstar, tstar etc.
          it returns the luminosity of the star */
-      lstar = get_stellar_params ();
 
+      lstar = get_stellar_params ();
 
       /* Describe the disk */
 
@@ -520,22 +511,14 @@ As of 1508,  init_geo() also allocates the memory for the domain structure */
 	  disk_illum = get_disk_params ();
 	}
 
-      else
-	{
-	  /* There is no disk so set variables accordingly */
-	  geo.disk_radiation = 0;
-	  geo.diskrad = 0;
-	}
-
       /* describe the boundary layer / agn components to the spectrum if they exist. 
          reads in information specified by the user and sets variables in geo structure */
+
       get_bl_and_agn_params (lstar);
-
-
 
       /* Describe the wind. This routine reads in geo.rmax and geo.twind
          and then gets params by calling e.g. get_sv_wind_params() */
-      /* PLACEHOLDER -- XXX call with wind domain number */
+
       get_wind_params (geo.wind_domain_number);
 
       if (geo.atmos_domain_number>=0) {

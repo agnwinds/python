@@ -112,6 +112,8 @@ Notes:
 
 	Note that init_geo is set up for CVs and Stars and not AGN
 
+	XXX init_geo ought to be particularized for the system type.
+
 
 History:
  	98dec	ksl	Coded and debugged.  Much of code was copied from old main routine for
@@ -136,8 +138,13 @@ init_geo ()
   geo.ndomain = 0;		/*ndomain is a convenience variable so we do not always
 				   need to write geo.ndomain but it should nearly always
 				   be set to the same value as geo.ndomain */
-  geo.wind_domain_number=-1;
-  geo.atmos_domain_number=-1;
+  geo.run_type = 0;		/* Indicates this is a run from scratch, which includes
+				   the case where we already have a wind model but want
+				   to change some of the parameters.  init_goe should not
+				   be called at all if we are simply continuing a previous
+				   run */
+  geo.wind_domain_number = -1;
+  geo.atmos_domain_number = -1;
 
 /*  The domains have been created but have not been initialized at all */
 
@@ -203,7 +210,8 @@ init_geo ()
   z_axis[2] = 1.0;
   z_axis[1] = z_axis[0] = 0.0;
 
-
+  geo.wcycles = geo.pcycles = 1;
+  geo.wcycle = geo.pcycle = 0;
 
   return (0);
 }
@@ -600,10 +608,10 @@ init_advanced_modes ()
   modes.diag_on_off = 0;	// extra diagnostics
   modes.use_debug = 0;
   modes.print_dvds_info = 0;	// print out information on velocity gradients
-  write_atomicdata = 0;		// print out summary of atomic data 
   modes.quit_after_inputs = 0;	// testing mode which quits after reading in inputs
   modes.fixed_temp = 0;		// do not attempt to change temperature - used for testing
-  //note this is defined in atomic.h, rather than the modes structure 
+  //note write_atomicdata  is defined in atomic.h, rather than the modes structure 
+  write_atomicdata = 0;		// print out summary of atomic data 
 
 
   modes.keep_photoabs = 1;	// keep photoabsorption in final spectrum
@@ -768,7 +776,7 @@ init_observers ()
   else
     Log ("OK, basic Monte Carlo spectrum\n");
 
-  return(0);
+  return (0);
 }
 
 /***********************************************************
@@ -792,10 +800,10 @@ History:
     1509   ksl    Moved the code from python.c
 **************************************************************/
 PhotPtr
-init_photons()
+init_photons ()
 {
-	PhotPtr p;
-	double x;
+  PhotPtr p;
+  double x;
 
   /* 140907 - ksl - Although photons_per_cycle is really an integer, 
      read in as a double so it is easier for input */
@@ -825,7 +833,7 @@ init_photons()
   /* Allocate the memory for the photon structure now that NPHOT is established */
   // XXX Not clear why we want to do this here; why not after all of the input data arre in hand
 
-  photmain= p = (PhotPtr) calloc (sizeof (p_dummy), NPHOT);
+  photmain = p = (PhotPtr) calloc (sizeof (p_dummy), NPHOT);
 
   if (p == NULL)
     {
@@ -834,7 +842,7 @@ init_photons()
       exit (0);
     }
 
-  return(p);
+  return (p);
 
 }
 
@@ -859,10 +867,10 @@ Notes:
 History:
     1509   ksl    Moved the code from python.c
 **************************************************************/
-int 
-init_ionization()
+int
+init_ionization ()
 {
-	int thermal_opt;
+  int thermal_opt;
 
 
   // XXX  I is unclear to me why all of this dwon to the next XXX is not moved to a single subroutine.  It all
@@ -935,7 +943,6 @@ init_ionization()
       geo.macro_ioniz_mode = 0;
     }
 
-  return(0);
+  return (0);
 
 }
-
