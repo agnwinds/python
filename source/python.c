@@ -622,22 +622,13 @@ main (argc, argv)
 		    "Rad_type_for_agn(3=power_law,4=cloudy_table)_in_final_spectrum",
 		    &geo.agn_spectype);
 
-
-
       init_observers ();
     }
 
   geo.matom_radiation = 0;	//initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
 
-
-  /* 57h -- New section of inputs to provide more control over how the program is
-     run -- 07jul -- ksl
-     1502 JM -- moved to subroutine
-   */
-
   get_standard_care_factors ();
 
-  /* 0415 SWM - Added metaparams */
   get_meta_params ();
 
 
@@ -678,7 +669,6 @@ main (argc, argv)
     }
 
 
-
   /* Wrap up and save all the inputs */
 
   if (strncmp (files.root, "mod", 3) == 0)
@@ -696,8 +686,9 @@ main (argc, argv)
     cpar ("python.pf");
 
 
-  /* OK all inputs have been obtained at this point and the inputs have been copied to "mod.pf" or "python.pf" */
-  /* JM 1502 -- if we have used the -i flag we want to quit after inputs as we were just testing readin */
+  /* At this point, all inputs have been obtained at this point and the inputs have been copied to "mod.pf" or "python.pf"
+   * If we have used, the -i flag, we quit; otherwise we continue on to run the model */
+
   if (modes.quit_after_inputs)
     {
       Log ("Run with -i flag, so quitting now inputs have been gathered.\n");
@@ -708,7 +699,8 @@ main (argc, argv)
 
 /* Print out some diagnositic infomration about the domains */
 
-  // XXX This is clearly wroing for repeats
+  // XXX This is clearly wrong for repeats
+
   geo.ndomain = ndomain;	// Store ndomain in geo so that it can be saved
 
   Log ("There are %d domains\n", geo.ndomain);
@@ -719,14 +711,11 @@ main (argc, argv)
     }
 
 
-  /* 121219 NSH Set up DFUDGE to be a value that makes some kind of sense
-     given the scale of the wind. Up till py74b2 it was set to be fixed at
-     1e5, so we ensure that this is a minimum, so any winds of CV type scale
-     will keep the old dfudge, and hopefully look the same. We also need to
-     set defudge slightly differently for the shell wind. */
+  /* DFUDGE is a distance that assures we can "push through" boundaries.  setup_dfudge
+   sets the push through distance depending on the size of the system. 
+  */
 
   DFUDGE = setup_dfudge ();
-
 
   /* Now define the wind cones generically. modifies the global windcone structure */
 
@@ -753,26 +742,25 @@ main (argc, argv)
     }
 
 
-
-
-
   /* Next line finally defines the wind if this is the initial time this model is being run */
+
   if (geo.run_type != SYSTEM_TYPE_PREVIOUS)	// Define the wind and allocate the arrays the first time
     {
       define_wind ();
     }
-  // Do not reinit if you want to use old windfile
 
   w = wmain;
 
   if (modes.save_cell_stats)
     {
-      /* Open a diagnostic file or files.  These are all fixed files */
+      /* Open a diagnostic file or files (with hardwired names) */
+
       open_diagfile ();
     }
 
   /* initialize the random number generator */
   //      srand( (n=(unsigned int) clock()));  
+
   srand (1084515760 + (13 * rank_global));
 
   /* 68b - 0902 - ksl - Start with photon history off */

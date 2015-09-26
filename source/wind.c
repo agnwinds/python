@@ -170,7 +170,6 @@ where_in_wind (x,ndomain)
 	}
 
 
-
       /* Check if one is inside the inner windcone */
       if (rho <
 	  (rho_min =
@@ -182,7 +181,7 @@ where_in_wind (x,ndomain)
       /* Finally check if positon is outside the outer windcone */
       /* NSH 130401 - The check below was taking a long time if geo.wind_thetamax was very close to pi/2.
          check inserted to simply return INWIND if geo.wind_thetamax is within machine precision of pi/2. */
-      //XXX PLACEHOLDER -- ksl -- I am not clear on why this is ffuficient for elvis mdodel, since it seems like you could get something to the side of the cap
+      //XXX PLACEHOLDER -- ksl -- I am not clear on why this is sufficient for elvis mdodel, since it seems like you could get something to the side of the cap
 
       if (fabs (one_dom->wind_thetamax - PI / 2.0) > 1e-6)	/* Only perform the next check if thetamax is not equal to pi/2 */
 	{

@@ -19,6 +19,8 @@ Description:
 	
 	The first two routines in this file write and read the wind structure.  		
 	The second two routines do the same thing for the spectrum structure
+	(Note that these are used for restarts; there are separate ascii_writing 
+	routines for writing the spectra out for plotting.)
 
 Notes:
 
@@ -50,9 +52,7 @@ History:
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
 #include "atomic.h"
-
 #include "python.h"
 
 
@@ -70,7 +70,6 @@ wind_save (filename)
       exit (0);
     }
 
-  Log("XXX zdom  %d  %d %d %d %d\n",zdom[0].nstart,zdom[0].nstop,zdom[0].ndim,zdom[0].mdim,zdom[0].ndim2);
   sprintf (line, "Version %s\n", VERSION);
   n = fwrite (line, sizeof (line), 1, fptr);
   n += fwrite (&geo, sizeof (geo), 1, fptr);
@@ -80,28 +79,28 @@ wind_save (filename)
 
 /* NSH 1407 - The following loop writes out the variable length arrays
 in the plasma structure */
-      for (m = 0; m < NPLASMA; m++)
-{
-  n += fwrite (plasmamain[m].density,sizeof(double),nions,fptr);
-  n += fwrite (plasmamain[m].partition,sizeof(double),nions,fptr);
 
-  n += fwrite (plasmamain[m].PWdenom,sizeof(double),nions,fptr);
-  n += fwrite (plasmamain[m].PWdtemp,sizeof(double),nions,fptr);
-  n += fwrite (plasmamain[m].PWnumer,sizeof(double),nions,fptr);
-  n += fwrite (plasmamain[m].PWntemp,sizeof(double),nions,fptr);
+  for (m = 0; m < NPLASMA; m++)
+    {
+      n += fwrite (plasmamain[m].density, sizeof (double), nions, fptr);
+      n += fwrite (plasmamain[m].partition, sizeof (double), nions, fptr);
 
-  n += fwrite (plasmamain[m].ioniz,sizeof(double),nions,fptr);
-  n += fwrite (plasmamain[m].recomb,sizeof(double),nions,fptr);
+      n += fwrite (plasmamain[m].PWdenom, sizeof (double), nions, fptr);
+      n += fwrite (plasmamain[m].PWdtemp, sizeof (double), nions, fptr);
+      n += fwrite (plasmamain[m].PWnumer, sizeof (double), nions, fptr);
+      n += fwrite (plasmamain[m].PWntemp, sizeof (double), nions, fptr);
 
-  n += fwrite (plasmamain[m].scatters,sizeof(int),nions,fptr);
-  n += fwrite (plasmamain[m].xscatters,sizeof(double),nions,fptr);
+      n += fwrite (plasmamain[m].ioniz, sizeof (double), nions, fptr);
+      n += fwrite (plasmamain[m].recomb, sizeof (double), nions, fptr);
 
-  n += fwrite (plasmamain[m].heat_ion,sizeof(double),nions,fptr);
-  n += fwrite (plasmamain[m].lum_ion,sizeof(double),nions,fptr);
-}
+      n += fwrite (plasmamain[m].scatters, sizeof (int), nions, fptr);
+      n += fwrite (plasmamain[m].xscatters, sizeof (double), nions, fptr);
 
+      n += fwrite (plasmamain[m].heat_ion, sizeof (double), nions, fptr);
+      n += fwrite (plasmamain[m].lum_ion, sizeof (double), nions, fptr);
+    }
 
-
+/* Now write out the macro atom info */
 
   if (geo.nmacro)
     {
@@ -166,12 +165,16 @@ in the plasma structure */
 
 /*
 
-11dec	ksl	Updated so returns -1 if it cannot open the windsave file.  This
-		was done to enable one to handle missing files differently in
-		different cases
-14jul	nsh	Code added to read in variable length arrays in plasma structure
-15aug	ksl	Updated to read domain structure
+   wind_read (filename)
+
+   History
+	11dec	ksl	Updated so returns -1 if it cannot open the windsave file.  This
+			was done to enable one to handle missing files differently in
+			different cases
+	14jul	nsh	Code added to read in variable length arrays in plasma structure
+	15aug	ksl	Updated to read domain structure
 */
+
 int
 wind_read (filename)
      char filename[];
@@ -194,7 +197,7 @@ wind_read (filename)
 
   n += fread (&geo, sizeof (geo), 1, fptr);
 
-  /* 091105 - ksl - Now read the atomic data file.  This is necessary to do here in order to establish the 
+  /* Read the atomic data file.  This is necessary to do here in order to establish the 
    * values for the dimensionality of some of the variable length structures, associated 
    * with macro atoms, especially but likely to be a good idea ovrall
    */
@@ -202,20 +205,13 @@ wind_read (filename)
   get_atomic_data (geo.atomic_filename);
 
 
-
-
 /* Now allocate space for the wind array */
 
-  NDIM2 = geo.ndim2;   
+  NDIM2 = geo.ndim2;
   NPLASMA = geo.nplasma;
 
-  Log("XXX print geo.ndomain %d\n",geo.ndomain);
   zdom = (DomainPtr) calloc (sizeof (domain_dummy), MaxDom);
-  Log("Get ready\n");
-  zdom[0].coord_type = 1;
-  Log("XXX before zdom %d %d\n",zdom[0].mdim,zdom[0].mdim);
-  n += fread(zdom, sizeof (domain_dummy), geo.ndomain, fptr);
-  Log("XXX after zdom %d %d\n",zdom[0].mdim,zdom[0].mdim);
+  n += fread (zdom, sizeof (domain_dummy), geo.ndomain, fptr);
 
 
   calloc_wind (NDIM2);
@@ -225,29 +221,33 @@ wind_read (filename)
 
   n += fread (plasmamain, sizeof (plasma_dummy), NPLASMA, fptr);
 
-  calloc_dyn_plasma (NPLASMA); /*NSH 1407 allocate space for the dynamically allocated plasma arrays */
+  /*Allocate space for the dynamically allocated plasma arrays */
+
+  calloc_dyn_plasma (NPLASMA);
+
   for (m = 0; m < NPLASMA; m++)
-{
+    {
 
-  n += fread (plasmamain[m].density,sizeof(double),nions,fptr);
-  n += fread (plasmamain[m].partition,sizeof(double),nions,fptr);
+      n += fread (plasmamain[m].density, sizeof (double), nions, fptr);
+      n += fread (plasmamain[m].partition, sizeof (double), nions, fptr);
 
-  n += fread (plasmamain[m].PWdenom,sizeof(double),nions,fptr);
-  n += fread (plasmamain[m].PWdtemp,sizeof(double),nions,fptr);
-  n += fread (plasmamain[m].PWnumer,sizeof(double),nions,fptr);
-  n += fread (plasmamain[m].PWntemp,sizeof(double),nions,fptr);
+      n += fread (plasmamain[m].PWdenom, sizeof (double), nions, fptr);
+      n += fread (plasmamain[m].PWdtemp, sizeof (double), nions, fptr);
+      n += fread (plasmamain[m].PWnumer, sizeof (double), nions, fptr);
+      n += fread (plasmamain[m].PWntemp, sizeof (double), nions, fptr);
 
-  n += fread (plasmamain[m].ioniz,sizeof(double),nions,fptr);
-  n += fread (plasmamain[m].recomb,sizeof(double),nions,fptr);
+      n += fread (plasmamain[m].ioniz, sizeof (double), nions, fptr);
+      n += fread (plasmamain[m].recomb, sizeof (double), nions, fptr);
 
-  n += fread (plasmamain[m].scatters,sizeof(int),nions,fptr);
-  n += fread (plasmamain[m].xscatters,sizeof(double),nions,fptr);
+      n += fread (plasmamain[m].scatters, sizeof (int), nions, fptr);
+      n += fread (plasmamain[m].xscatters, sizeof (double), nions, fptr);
 
-  n += fread (plasmamain[m].heat_ion,sizeof(double),nions,fptr);
-  n += fread (plasmamain[m].lum_ion,sizeof(double),nions,fptr);
-}
+      n += fread (plasmamain[m].heat_ion, sizeof (double), nions, fptr);
+      n += fread (plasmamain[m].lum_ion, sizeof (double), nions, fptr);
+    }
 
 
+  /*Allocate space for macro-atoms */
 
   if (geo.nmacro > 0)
     {
@@ -337,31 +337,31 @@ wind_complete (w)
   /* JM Loop over number of domains */
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
-  {
-    if (zdom[ndom].coord_type == SPHERICAL)
-      {
-        spherical_wind_complete (ndom, w);
-      }
-    else if (zdom[ndom].coord_type == CYLIND)
-      {
-        cylind_wind_complete (ndom, w);
-      }
-    else if (zdom[ndom].coord_type == RTHETA)
-      {
-        rtheta_wind_complete (ndom, w);
-      }
-    else if (zdom[ndom].coord_type == CYLVAR)
-      {
-        cylvar_wind_complete (ndom, w);
-      }
-    else
-      {
-        Error ("wind_complete: Don't know how to complete coord_type %d\n",
-  	     zdom[ndom].coord_type);
-        exit (0);
-      }
+    {
+      if (zdom[ndom].coord_type == SPHERICAL)
+	{
+	  spherical_wind_complete (ndom, w);
+	}
+      else if (zdom[ndom].coord_type == CYLIND)
+	{
+	  cylind_wind_complete (ndom, w);
+	}
+      else if (zdom[ndom].coord_type == RTHETA)
+	{
+	  rtheta_wind_complete (ndom, w);
+	}
+      else if (zdom[ndom].coord_type == CYLVAR)
+	{
+	  cylvar_wind_complete (ndom, w);
+	}
+      else
+	{
+	  Error ("wind_complete: Don't know how to complete coord_type %d\n",
+		 zdom[ndom].coord_type);
+	  exit (0);
+	}
 
-  }
+    }
   return (0);
 }
 
@@ -404,7 +404,9 @@ spec_read (filename)
       Error ("spec_read: Unable to open %s\n", filename);
       exit (0);
     }
+
   n = fread (line, sizeof (line), 1, fptr);
+
   sscanf (line, "%*s %s %*s %d", version, &nspectra);
   Log
     ("Reading specfile %s with %d spectra created with python version %s with python version %s\n",
