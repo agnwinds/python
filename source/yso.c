@@ -85,7 +85,7 @@ in units of WD radii */
   /* Next lines added by SS Sep 04. Changed the wind shape so that the boundary touches the outer 
      corner of the disk rather than the intersection of the disk edge with the xy-plane. */
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       zdom[ndom].wind_thetamax =
 	atan (geo.diskrad /
@@ -100,7 +100,7 @@ in units of WD radii */
      means that wind_rho_max nees to be redefined so that it is used correctly
      to compute the boundary of the wind elsewhere. */
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       geo.wind_rho_max =
 	geo.diskrad - (zdisk (geo.diskrad) * tan (zdom[ndom].wind_thetamax));

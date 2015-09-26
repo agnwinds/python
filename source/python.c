@@ -234,7 +234,6 @@ main (argc, argv)
 
   FILE *fopen ();
 
-  int disk_illum;
   int opar_stat, restart_stat;
   double time_max;		// The maximum time the program is allowed to run before halting
   double lstar;			// The luminosity of the star, iv it exists
@@ -430,7 +429,7 @@ main (argc, argv)
 	    ("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
 	     &geo.disk_type);
 
-	  if (geo.disk_type == 0)
+	  if (geo.disk_type == DISK_NONE)
 	    {
 	      geo.disk_atmosphere = 0;
 	      geo.disk_radiation = 0;
@@ -490,12 +489,6 @@ main (argc, argv)
   get_radiation_sources ();
 
 
-  if (geo.run_type == SYSTEM_TYPE_PREVIOUS)
-    {
-      disk_illum = geo.disk_illum;
-    }
-
-
   if (geo.run_type != SYSTEM_TYPE_PREVIOUS)	// Start of block to define a model for the first time
     {
 
@@ -508,7 +501,7 @@ main (argc, argv)
 
       if (geo.disk_type)	/* Then a disk exists and it needs to be described */
 	{
-	  disk_illum = get_disk_params ();
+	  get_disk_params ();
 	}
 
       /* describe the boundary layer / agn components to the spectrum if they exist. 
@@ -566,7 +559,7 @@ main (argc, argv)
 
   if (geo.diskrad <= 0.0)
     {
-      geo.disk_type = 0;
+      geo.disk_type = DISK_NONE;
       geo.disk_radiation = 0;
     }
 
@@ -815,26 +808,16 @@ main (argc, argv)
 
   qdisk_init ();		/* Initialize a disk qdisk to store the information about photons impinging on the disk */
 
-/* 04aug -- ksl -- now that everything is initialized, we set geo.disk_illum
- *
- * 080518 - ksl - I believe that the reason for this somewhat weird logic is to
- * assure that models (e.g corona and knigge) where the base wind velocity
- * depends on teff are not altered by illumination, but since no photons
- * have been transported at this stage, it's hard to see why that would
- * matter.
- */
-
-  geo.disk_illum = disk_illum;
 
   xsignal (files.root, "%-20s Finished initialization for %s\n", "NOK",
 	   files.root);
   check_time (files.root);
 
 
-
 /* XXXX - THE CALCULATION OF THE IONIZATION OF THE WIND */
 
   geo.ioniz_or_extract = 1;	//SS July 04 - want to compute MC estimators during ionization cycles
+ 
   //1 simply implies we are in the ionization section of the code
   //and allows routines to act accordinaly.
 

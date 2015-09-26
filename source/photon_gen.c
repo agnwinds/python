@@ -791,8 +791,7 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
 
       randvec (p[i].x, r);
 
-      /* Added by SS August 2004 for finite disk. */
-      if (geo.disk_type == 2)
+      if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
 	{
 	  while (fabs (p[i].x[2]) < zdisk (r))
 	    {

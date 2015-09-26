@@ -290,7 +290,7 @@ ds_to_disk (p, miss_return)
   void disk_deriv ();
 
 
-  if (geo.disk_type == 0)
+  if (geo.disk_type == DISK_NONE)
     return (VERY_BIG);		/* There is no disk! */
 
   if (ds_to_disk_init == 0)
@@ -325,7 +325,7 @@ ds_to_disk (p, miss_return)
   r_plane = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
 
 
-  if (geo.disk_type == 1)
+  if (geo.disk_type == DISK_FLAT)
     {
       if (r_plane > geo.diskrad)
 	return (VERY_BIG);

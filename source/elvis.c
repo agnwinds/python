@@ -217,7 +217,7 @@ elvis_velocity (ndom, x, v)
 
   /* If the disk is vertically extended ksl 111124 
    * ERROR? - This calculation of the poloical distance replaces the one above.  It does not take the offset into account*/
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       xtest[0] = r;		// Define xtest in the +z plane
       xtest[1] = 0;
@@ -373,7 +373,7 @@ elvis_rho (ndom, x)
       ldist = fabs (x[2]);
     }
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       xtest[0] = r;		// Define xtest in the +z plane
       xtest[1] = 0;

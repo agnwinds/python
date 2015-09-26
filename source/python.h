@@ -276,6 +276,8 @@ DomainPtr zdom;
 #define SYSTEM_TYPE_AGN    2
 #define	SYSTEM_TYPE_PREVIOUS   	   3
 
+
+
 struct geometry
 {
 
@@ -328,6 +330,10 @@ int nplasma, nmacro;	/*The total number of cells in the plasma and macro structu
 				  - used to help estimate things for an exponential representation of the spectrum in a cell */
 
   int system_type;  /* See allowed types above */
+
+#define DISK_NONE   0
+#define DISK_FLAT   1
+#define DISK_VERTICALLY_EXTENDED   2
 
   int disk_type;		/*0 --> no disk, 
 				   1 --> a standard disk in xy plane, 

@@ -438,7 +438,7 @@ get_radiation_sources ()
   if (geo.system_type != SYSTEM_TYPE_AGN)
     {				/* If is a stellar system */
       rdint ("Star_radiation(y=1)", &geo.star_radiation);
-      if (geo.disk_type!=0){
+      if (geo.disk_type!=DISK_NONE){
       rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
       }
       else {
@@ -801,15 +801,15 @@ get_disk_params ()
 
   geo.diskrad_sq = geo.diskrad * geo.diskrad;
 
-/* If diskrad <= geo.rstar set geo.disk_type = 0 to make any disk transparent anyway. */
+/* If diskrad <= geo.rstar set geo.disk_type = DISK_NONE to make any disk transparent anyway. */
 
   if (geo.diskrad < geo.rstar)
     {
       Log ("Disk radius is less than star radius, so assuming no disk)\n");
-      geo.disk_type = 0;
+      geo.disk_type = DISK_NONE;
     }
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {				/* Get the additional variables need to describe a vertically extended disk */
       rddoub ("disk.z0(fractional.height.at.diskrad)", &geo.disk_z0);
       rddoub ("disk.z1(powerlaw.index)", &geo.disk_z1);
@@ -871,7 +871,7 @@ get_bl_and_agn_params (lstar)
       xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
 
       /* If there is no disk, initilize geo.lum to the luminosity of a star */
-      if (geo.disk_type == 0)
+      if (geo.disk_type == DISK_NONE)
 	{
 	  geo.lum_agn = lstar;
 	}

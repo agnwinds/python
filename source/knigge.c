@@ -144,7 +144,7 @@ in units of WD radii */
   /* Next lines added by SS Sep 04. Changed the wind shape so that the boundary touches the outer 
      corner of the disk rather than the intersection of the disk edge with the xy-plane. */
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       zdom[ndom].wind_thetamax =
 	atan (geo.diskrad /
@@ -162,7 +162,7 @@ in units of WD radii */
      to compute the boundary of the wind elsewhere. */
 
   // XXX Next lines supercede definitions above and look wrong 
-  if (geo.disk_type == 2)	// If disk_type==2, then the disk is vertically extended
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)	
     {
       zdom[ndom].wind_rho_max =
 	geo.diskrad - (zdisk (geo.diskrad) * tan (zdom[ndom].wind_thetamax));
@@ -187,7 +187,7 @@ in units of WD radii */
 
   /* For non-flat disk some streamlines are missing (SS). */
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       disktheta = atan (zdisk (geo.diskrad) / geo.diskrad);
       test =
@@ -300,7 +300,7 @@ kn_velocity (ndom, x, v)
 
 /* 04aug -- ksl -- 52 Take the thickness of the disk into account if that is necessary.  */
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       xtest[0] = r;		// Define xtest in the +xz plane
       xtest[1] = 0;
@@ -441,7 +441,7 @@ kn_rho (ndom, x)
   rzero = r / (1. + fabs (x[2] / dd));	//rho at the base for this streamline
   /* If the disk is thick we need to modify the position of rzero */
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       theta = atan (rzero / dd);
       ptest.x[0] = rzero;

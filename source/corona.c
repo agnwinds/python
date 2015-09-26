@@ -203,7 +203,7 @@ corona_rho (ndom, x)
   double gref, g;
   double zscale;
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       Error
 	("corona_rho: Quitting. Need to think more about coronal model more with vertically extended disk\n");

@@ -158,7 +158,7 @@ sv_velocity (x, v, ndom)
   ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
 
   /* Calculate the poloidal distance for a vertically extended disk ksl 111124 */
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       xtest[0] = r;		// Define xtest in the +z plane
       xtest[1] = 0;
@@ -274,7 +274,7 @@ sv_rho (ndom, x)
   r = sqrt (x[0] * x[0] + x[1] * x[1]);
   ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
 
-  if (geo.disk_type == 2)	/* These are corrections for a vertically extended disk */
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)	/* These are corrections for a vertically extended disk */
     {
       xtest[0] = r;		// Define xtest in the +z plane
       xtest[1] = 0;

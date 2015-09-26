@@ -190,7 +190,7 @@ init_geo ()
   geo.bl_radiation = 0;		/*1 implies boundary layer will radiate */
   geo.wind_radiation = 0;	/* 1 implies wind will radiate */
 
-  geo.disk_type = 1;		/*1 implies existence of a disk for purposes of absorption */
+  geo.disk_type = DISK_FLAT;		/*1 implies existence of a disk for purposes of absorption */
   geo.diskrad = 2.4e10;
   geo.disk_mdot = 1.e-8 * MSOL / YR;
 

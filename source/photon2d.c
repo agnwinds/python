@@ -590,7 +590,7 @@ walls (p, pold)
    *  If disk_type==2, then the disk is vertically extended
    */
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
       if ((rho * rho) < geo.diskrad_sq && fabs (p->x[2]) <= (z = zdisk (rho)))
@@ -609,7 +609,6 @@ walls (p, pold)
 	{
 	  Error ("walls: distance %g<0.\n", s);
 	  return (-1);
-//        exit (0);
 	}
       // Check whether it hit the disk plane beyond the geo.diskrad**2
       vmove (pold->x, pold->lmn, s, xxx);
