@@ -300,7 +300,7 @@ temp=(3.0/2.0)*data["TOTAL ENERGY"]
 data["TEMPERATURE"]=temp/((data["DENSITY"]/(consts.m_p.cgs*MU))*consts.k_B.cgs)
 
 # Open an output file 
-fname=data["Filename"]+".dat"
+fname=data["Filename"]+".zeu"
 
 # Preamble
 
