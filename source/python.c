@@ -32,7 +32,11 @@ Arguments:
 	    other advanced commands
     -f  Fixed temperature mode - does not attempt to chenge the temperature of cells.
 	-e  Alter the maximum number of errors before the program quits
-	-i  Diagnostic mode which quits after reading in inputs. Used for Travis test suite.
+	-i  Diagnostic mode which quits after reading in inputs. Used for Travis test suite.    
+	-z  Mode to connect with zeus - it either runs two cycles in this is the first call - in order
+         to obtain a good starting state, else it runs just one cycle. In both cases, it does
+		 not attempt to seek a new temperature, but it does output heating and cooling rates
+         in a plain text file.
 
 
 	
@@ -2128,6 +2132,8 @@ int init_advanced_modes()
   write_atomicdata = 0;               // print out summary of atomic data 
   modes.quit_after_inputs = 0;		  // testing mode which quits after reading in inputs
   modes.fixed_temp = 0;               // do not attempt to change temperature - used for testing
+  modes.zeus_connect = 0;             // connect with zeus
+  
   //note this is defined in atomic.h, rather than the modes structure 
 
 

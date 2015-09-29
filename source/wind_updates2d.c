@@ -100,6 +100,7 @@ WindPtr (w);
   double trad, nh;
   double wtest, xsum, asum, psum, fsum, lsum, csum, icsum, ausum;	/*1108 NSH csum added to sum compton heating 1204 NSH icsum added to sum induced compton heating */
   double volume;
+  double vol;
   char string[LINELEN];
   double t_r_old, t_e_old, dt_r, dt_e;
   double t_r_ave_old, t_r_ave, t_e_ave_old, t_e_ave;
@@ -115,6 +116,7 @@ WindPtr (w);
   int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
   int size_of_commbuffer;
   char *commbuffer;
+  FILE *fptr, *fopen ();
 
   /* JM 1409 -- Added for issue #110 to ensure correct reporting in parallel */
   int nmax_r_temp, nmax_e_temp;
@@ -652,6 +654,11 @@ free (commbuffer);
   strcpy (string, "");
   sprintf (string, "# Wind update: Number %d", num_updates);
 
+  if (modes.zeus_connect==1) //If we are running in zeus connect mode - we open a file for heatcool rates
+  {
+	  Log("Outputting heatcool file for connecting to zeus\n");
+      fptr = fopen ("py_heatcool.dat", "w");
+  }
 
   /* Check the balance between the absorbed and the emitted flux */
 
@@ -712,7 +719,23 @@ free (commbuffer);
       plasmamain[nplasma].lum_adiabatic_ioniz = plasmamain[nplasma].lum_adiabatic;
 
 
+
+	  if (modes.zeus_connect==1) //If we are running in zeus connect mode, we output heating and cooling rates.
+	  {
+	 		 wind_n_to_ij (plasmamain[nplasma].nwind, &i, &j);
+			 vol=w[plasmamain[nplasma].nwind].vol;
+	 		 fprintf(fptr,"%d %d %e %e %e %e %e %e %e %e %e %e %e\n",i,j,w[plasmamain[nplasma].nwind].rcen,
+			 w[plasmamain[nplasma].nwind].thetacen/RADIAN,
+			 plasmamain[nplasma].heat_photo/vol,plasmamain[nplasma].heat_comp/vol,
+			 plasmamain[nplasma].heat_lines/vol,plasmamain[nplasma].heat_ff/vol,
+			 plasmamain[nplasma].lum_fb/vol,plasmamain[nplasma].lum_comp/vol,
+			 plasmamain[nplasma].lum_lines/vol,plasmamain[nplasma].lum_ff/vol,
+			 plasmamain[nplasma].ip);
+	   }
     }
+	
+    if (modes.zeus_connect==1) 
+        fclose(fptr);
 
   /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
      cycles in the windsavefile even if the spectral cycles are run */
