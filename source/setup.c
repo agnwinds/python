@@ -587,8 +587,10 @@ Modified again in python 71b to take account of change in parametrisation of she
     }
 
   /* Get the filling factor of the wind */
+	 
   geo.fill = 1.;
-  rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
+  if (geo.wind_type != 3) //At present, we wont ask this question if we have a read in hydro model.
+  	rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
 
   return (0);
 }
