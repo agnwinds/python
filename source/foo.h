@@ -497,6 +497,7 @@ int delay_dump_finish(void);
 int delay_dump_combine(int iRanks);
 int delay_dump(PhotPtr p, int np, int iExtracted);
 int delay_dump_single(PhotPtr pp, int extract_phot);
+/* paths.c */
 Path_Data_Ptr path_data_constructor(double r_rad_min, double r_rad_max, int i_path_bins, int i_angles, int i_theta_res);
 int path_data_init(double r_rad_min, double r_rad_max, int i_path_bins, int i_angles, int i_theta_res);
 Wind_Paths_Ptr wind_paths_constructor(WindPtr wind);
@@ -507,7 +508,7 @@ int wind_paths_add_phot(WindPtr wind, PhotPtr pp);
 int wind_paths_gen_phot_simple(PhotPtr pp);
 int wind_paths_gen_phot(WindPtr wind, PhotPtr pp);
 int wind_paths_gen_phot_matom(WindPtr wind, PhotPtr pp, int matom_lev);
-int wind_paths_single_evaluate(Wind_Paths_Ptr paths);
+int wind_paths_evaluate_single(Wind_Paths_Ptr paths);
 int wind_paths_evaluate(WindPtr wind);
 int wind_paths_point_index(int i, int j, int k, int i_top);
 int wind_paths_output(WindPtr wind, char c_file_in[]);

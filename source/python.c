@@ -1348,10 +1348,11 @@ main (argc, argv)
   Log (" Completed wind creation.  The elapsed TIME was %f\n", timer ());
 
 	/* SWM - Evaluate wind paths for last iteration */
-	if (geo.reverb == REV_WIND)
+	if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
 	{
 		wind_paths_evaluate(w);
 		wind_paths_output(w, files.root);
+		Log(" Completed evaluating wind path arrays.");
 	}
 
 /* XXXX - THE CALCULATION OF A DETAILED SPECTRUM IN A SPECIFIC REGION OF WAVELENGTH SPACE */
