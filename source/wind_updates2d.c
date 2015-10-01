@@ -112,11 +112,12 @@ WindPtr (w);
   double nsh_lum_hhe;
   double nsh_lum_metals;
   int my_nmin, my_nmax;	//Note that these variables are still used even without MPI on
+  FILE *fptr, *fopen (); /*This is the file to communicate with zeus */
+  
 #ifdef MPI_ON
   int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
   int size_of_commbuffer;
   char *commbuffer;
-  FILE *fptr, *fopen ();
 
   /* JM 1409 -- Added for issue #110 to ensure correct reporting in parallel */
   int nmax_r_temp, nmax_e_temp;
