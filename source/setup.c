@@ -106,6 +106,12 @@ int parse_command_line(argc, argv)
       modes.fixed_temp = 1;
       i++;
     }
+    else if (strcmp (argv[i], "-z") == 0)
+      {
+        modes.zeus_connect = 1;
+		Log ("setting zeus_connect to %i\n",modes.zeus_connect);
+		i++;
+      }
 
     else if (strcmp (argv[i], "-i") == 0)
       {
@@ -593,8 +599,10 @@ Modified again in python 71b to take account of change in parametrisation of she
     }
 
   /* Get the filling factor of the wind */
+	 
   geo.fill = 1.;
-  rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
+  if (geo.wind_type != 3) //At present, we wont ask this question if we have a read in hydro model.
+  	rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
 
   return (0);
 }
@@ -1060,7 +1068,6 @@ double setup_dfudge ()
 	  Log ("DFUDGE set to %e based on geo.rmax\n", dfudge);
 	}
     }
-	 printf ("BLAH dfudge=%e\n",dfudge);
   return (dfudge);		
 }
 
