@@ -131,7 +131,6 @@ int parse_command_line(argc, argv)
         help ();
       }
   }
-      Log("got here\n");
 
       /* The last command line variable is always the .pf file */
 
