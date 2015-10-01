@@ -182,7 +182,9 @@ cylvar_make_grid (w, ndom)
     {
       for (j = 0; j < mdim; j++)
 	{
+
 	  wind_ij_to_n (ndom, i, j, &n);
+
 	  w[n].x[1] = w[n].xcen[1] = 0;	//The cells are all defined in the xz plane
 
 	  /*Define the grid points */

@@ -424,6 +424,7 @@ int make_spectra(restart_stat)
   double renorm;
   long nphot_to_define;
   int iwind;
+  char dummy[LINELENGTH];
 #ifdef MPI_ON
   int spec_spec_helpers;
 #endif
