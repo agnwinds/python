@@ -112,13 +112,26 @@ int parse_command_line(argc, argv)
         modes.quit_after_inputs = 1;
       }
 
+    else if (strcmp (argv[i], "--version") == 0)
+      {
+        /* give information about the pyhon version, such as commit hash */
+        Log ("Python Version %s \n", VERSION);  //54f -- ksl -- Now read from version.h
+        Log ("Built from git commit hash %s\n", GIT_COMMIT_HASH);
+        /* warn the user if there are uncommited changes */
+        int git_diff_status = GIT_DIFF_STATUS;
+        if (git_diff_status > 0)
+          Log("This version was compiled with %i files with uncommitted changes.\n",
+              git_diff_status);
+        exit(0);
+      }
+
     else if (strncmp (argv[i], "-", 1) == 0)
       {
         Error ("python: Unknown switch %s\n", argv[i]);
         help ();
       }
   }
-
+      Log("got here\n");
 
       /* The last command line variable is always the .pf file */
 

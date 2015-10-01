@@ -33,6 +33,8 @@ Arguments:
     -f  Fixed temperature mode - does not attempt to chenge the temperature of cells.
 	-e  Alter the maximum number of errors before the program quits
 	-i  Diagnostic mode which quits after reading in inputs. Used for Travis test suite.
+	--version print out python version, commit hash and if there were files with uncommitted
+	    changes
 
 
 	
