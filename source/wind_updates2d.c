@@ -861,7 +861,7 @@ free (commbuffer);
       agn_ip /= plasmamain[0].rho * rho2nh;
       /* Report luminosities, IP and other diagnositic quantities */
       Log
-	("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim_2010)= %e Meaured_IP(cloudy)= %e Measured_Xi=%e distance= %e volume= %e mean_ds=%e\n",
+	("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim_2010)= %e Meaured_IP(cloudy)= %e Measured_Xi= %e distance= %e volume= %e mean_ds=%e\n",
 	 geo.lum_agn, plasmamain[0].t_e, plasmamain[0].rho * rho2nh,
 	 plasmamain[0].ne, geo.alpha_agn, agn_ip, plasmamain[0].ip, plasmamain[0].xi,w[n].r,
 	 w[n].vol, plasmamain[0].mean_ds / plasmamain[0].n_ds);
