@@ -35,7 +35,7 @@ emittance_brem (freqmin, freqmax, lum, t)
   /* we may need some checking routines to make sure that the requested frequency range is within the defined range,
      or it could default to zero outside the defined range */
 
-  emit =  constant * qromb(integ_brem,freqmin,freqmax,t);
+  emit =  constant * qromb(integ_brem,freqmin,freqmax,geo.brem_temp);
 
   return (emit);
 }
@@ -48,6 +48,6 @@ integ_brem (freq)
      double freq;
 {
   double answer;
-  answer = constant * pow(freq,-0.2) * exp ((-1.0 * H * freq) / (BOLTZMANN * T_b));
+  answer = constant * pow(freq,-0.2) * exp ((-1.0 * H * freq) / (BOLTZMANN * geo.brem_temp));
   return (answer);
 }
