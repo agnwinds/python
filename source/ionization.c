@@ -440,6 +440,7 @@ one_shot (xplasma, mode)
 	{
 		te_new = te_old; //We dont want to change the temperature
 		xxxplasma = xplasma;
+		printf ("BLAH Going to zero_emit t=%e\n",te_old);
 		zero_emit(te_old); //But we do still want to compute all heating and cooling rates
 		dte = xplasma->dt_e=0.0;	 
 	}

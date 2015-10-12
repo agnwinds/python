@@ -339,6 +339,7 @@ total_fb (one, t, f1, f2)
 
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
+  printf ("BLAH got to total db t=%e\n",t);
 
   if (t < 1000. || f2 < f1)
     return (0);			/* It's too cold to emit */
