@@ -795,6 +795,7 @@ int get_bl_and_agn_params (lstar)
     double lstar;
 {
   double xbl;
+  double temp_const_agn;
 
   /* Describe the boundary layer */
 
@@ -847,9 +848,11 @@ int get_bl_and_agn_params (lstar)
 	else if (geo.agn_ion_spectype == SPECTYPE_BREM)
 	{
 		geo.brem_temp=1.16e8; //10kev
+		geo.const_agn=1.0;
 		rddoub ("agn_bremsstrahung_temp(K)",&geo.brem_temp);
-		geo.const_agn = geo.lum_agn / qromb(integ_brem,4.84e17,2.42e18,1e-4);
-      Log ("AGN Input parameters give a Bremsstrahlung constant of %e\n", geo.const_agn);
+		temp_const_agn = geo.lum_agn / qromb(integ_brem,4.84e17,2.42e18,1e-4);
+		geo.const_agn=temp_const_agn
+      Log ("AGN Input parameters give a Bremsstrahlung constant of %e\n", temp_const_agn);
 		
 	}
 

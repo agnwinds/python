@@ -48,6 +48,6 @@ integ_brem (freq)
      double freq;
 {
   double answer;
-  answer = constant * pow(freq,-0.2) * exp ((-1.0 * H * freq) / (BOLTZMANN * geo.brem_temp));
+  answer = geo.const_agn * pow(freq,-0.2) * exp ((-1.0 * H * freq) / (BOLTZMANN * geo.brem_temp));
   return (answer);
 }
