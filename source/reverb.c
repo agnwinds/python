@@ -28,7 +28,8 @@ int     *delay_dump_bank_ex;
  * @return 					Distance from photon to plane
  *
  * Sets up the observer plane, then calculates the distance
- * from the current photon to it.
+ * from the current photon to it. Uses ds_to_plane() for
+ * reliability.
  *
  * @notes
  * 9/14	-	Written by SWM
