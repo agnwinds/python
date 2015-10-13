@@ -14,6 +14,38 @@
 #include "atomic.h"
 #include "python.h"
 
+
+char	delay_dump_file[LINELENGTH];
+int		delay_dump_bank_size = 65535, delay_dump_bank_curr = 0;
+PhotPtr	delay_dump_bank;
+int     *delay_dump_bank_ex;
+
+/********************************************************//*
+ * @name 	delay_to_observer
+ * @brief	Calculates the delay to the observer plane
+ *
+ * @param [in] pp			Pointer to test photon
+ * @return 					Distance from photon to plane
+ *
+ * Sets up the observer plane, then calculates the distance
+ * from the current photon to it.
+ *
+ * @notes
+ * 9/14	-	Written by SWM
+***********************************************************/
+double
+delay_to_observer(PhotPtr pp)
+{
+	plane_dummy	observer;
+	observer.x[0] = pp->lmn[0] * geo.rmax;
+	observer.x[1] = pp->lmn[1] * geo.rmax;
+	observer.x[2] = pp->lmn[2] * geo.rmax;
+	observer.lmn[0] = pp->lmn[0];
+	observer.lmn[1] = pp->lmn[1];
+	observer.lmn[2] = pp->lmn[2];
+	return (pp->path + ds_to_plane(&observer, pp));
+}
+
 /***********************************************************
 Synopsis:
 	delay_dump(filename, p, f1, f2, nspec)
@@ -36,24 +68,6 @@ Notes:
 History:
 	14aug	-	Written by SWM
 ***********************************************************/
-char	delay_dump_file[LINELENGTH];
-int		delay_dump_bank_size = 65535, delay_dump_bank_curr = 0;
-PhotPtr	delay_dump_bank;
-int     *delay_dump_bank_ex;
-
-double
-delay_to_observer(PhotPtr pp)
-{
-	plane_dummy	observer;
-	observer.x[0] = pp->lmn[0] * geo.rmax;
-	observer.x[1] = pp->lmn[1] * geo.rmax;
-	observer.x[2] = pp->lmn[2] * geo.rmax;
-	observer.lmn[0] = pp->lmn[0];
-	observer.lmn[1] = pp->lmn[1];
-	observer.lmn[2] = pp->lmn[2];
-	return (pp->path + ds_to_plane(&observer, pp));
-}
-
 int
 delay_dump_prep(char filename[], int restart_stat, int i_rank)
 {
@@ -101,7 +115,7 @@ delay_dump_prep(char filename[], int restart_stat, int i_rank)
 		fprintf(fptr, "# Date	%s\n#  \n", string);
 		fprintf(fptr, "# \n# Freq      Wavelength  Weight   "
 			" Last X     Last Y     Last Z    "
-		    " Scatters   RScatter   Delay      Extracted  Spectrum   Origin   Last_Z  \n");
+		    " Scatters   RScatter   Delay      Extracted  Spectrum   Origin   Last_Res  \n");
 	}
 	fclose(fptr);
 	return (0);
@@ -232,7 +246,9 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 		exit(0);
 	}
 	for (nphot = 0; nphot < np; nphot++) {
-		if (p[nphot].istat == P_ESCAPE && p[nphot].nscat > 0) {
+		if (p[nphot].istat == P_ESCAPE && 
+			(p[nphot].nscat > 0 || p[nphot].origin == PTYPE_WIND || p[nphot].origin == PTYPE_WIND_MATOM)) 
+		{
 			zangle = fabs(p[nphot].lmn[2]);
 			/*
 			 * Complicated if statement to allow one to choose
@@ -249,16 +265,17 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 				|| (mscat < 0 && p[nphot].nscat >= (-mscat)))
 				    && ((mtopbot = xxspec[i].top_bot) == 0
 					|| (mtopbot * p[nphot].x[2]) > 0)) {
-					if (xxspec[i].mmin < zangle && zangle < xxspec[i].mmax) {
+					if (xxspec[i].mmin < zangle && zangle < xxspec[i].mmax) 
+					{
 						fprintf(fptr,
-							"%10.5g %10.5g %10.5g %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g %5d %5d %5d %5d\n",
+							"%10.5g %10.5g %10.5g %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g %5d %5d %5d %10d\n",
 							p[nphot].freq, C * 1e8 / p[nphot].freq, p[nphot].w, 
 							p[nphot].x[0], p[nphot].x[1], p[nphot].x[2],
 							p[nphot].nscat, p[nphot].nrscat,
 							(delay_to_observer(&p[nphot]) - (geo.rmax-minpath)) / C,
 							(iExtracted ? delay_dump_bank_ex[nphot] : 0),
 							i - MSPEC, p[nphot].origin, 
-							p[nphot].nres);
+							p[nphot].nres_orig);
 					}
 				}
 			}

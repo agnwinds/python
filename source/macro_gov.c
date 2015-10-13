@@ -113,6 +113,12 @@ int macro_gov(p, nres, matom_or_kpkt, which_out)
 						   macro atom */
 						if (p->origin < 10)
 							p->origin += 10;
+
+						//SWM - If reverb is on, and this is the last ionisation cycle, then track the photon path
+						if(geo.reverb == REV_MATOM && geo.ioniz_or_extract && geo.wcycle == geo.wcycles -1)
+						{
+							line_paths_add_phot(&(wmain[p->grid]), p, nres);
+						}
 						return (1);
 					}
 				}

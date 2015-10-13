@@ -369,9 +369,11 @@ struct geometry
   char fixed_con_file[132];	/* 54e -- For fixed concentrations, the file specifying concentrations */
 
   //Added by SWM for reverberation mapping
-  enum reverb_enum {REV_NONE=0, REV_PHOTON=1, REV_WIND=2, REV_MATOM=3} reverb; 
-  int reverb_path_bins, reverb_theta_bins;
-  int reverb_matoms, *reverb_matom, reverb_matom_levels, *reverb_matom_level;
+  enum reverb_enum      {REV_NONE=0, REV_PHOTON=1, REV_WIND=2, REV_MATOM=3} reverb; 
+  enum reverb_vis_enum  {REV_VIS_NONE=0, REV_VIS_VTK=1, REV_VIS_DUMP=2, REV_VIS_BOTH=3} reverb_vis;
+  int reverb_path_bins, reverb_theta_bins;  //SWM - Number of bins for path arrays, vtk output angular bins
+  int reverb_dump_cells, *reverb_dump_cell; //SWM - Number of cells to dump, list of cells to dump 'nwind' values
+  int reverb_lines, *reverb_line;           //SWM - Number of lines to track, and array of line 'nres' values
 }
 geo;
 
@@ -457,15 +459,6 @@ typedef struct wind_paths
   int     i_num;              //Number of photons hitting this cell
 } wind_paths_dummy, *Wind_Paths_Ptr;
 
-typedef struct path_data
-{
-  double* ad_path_bin;              //Array of bins for the path histograms
-  int     i_path_bins, i_obs;       //Number of bins, number of observers
-  int     i_theta_res;              //Number of angular bins when outputting observer paths
-} path_data_dummy, *Path_Data_Ptr;
-Path_Data_Ptr path_data;
-Path_Data_Ptr g_path_data;
-
 /* 	This structure defines the wind.  The structure w is allocated in the main
 	routine.  The total size of the structure will be NDIM x MDIM, and the two
 	dimenssions do not need to be the same.  The order of the
@@ -527,7 +520,7 @@ typedef struct wind
   		W_ALL_INWIND=0, W_PART_INWIND=1, 
   		W_ALL_INTORUS=2, W_PART_INTORUS=3
   	}	inwind;			
-  Wind_Paths_Ptr paths, *paths_level;         // SWM 6-2-15 Path data struct for each cell
+  Wind_Paths_Ptr paths, *line_paths;         // SWM 6-2-15 Path data struct for each cell
 }
 wind_dummy, *WindPtr;
 
@@ -890,7 +883,8 @@ typedef struct photon
   	} 	istat;					   /*status of photon.*/
 
   int nscat;			/*number of scatterings */
-  int nres;			/*The line number in lin_ptr of last scatter or wind line creation */
+  int nres;			/*The line number in lin_ptr of last scatter or wind line creation. Continuum if > nlines. */
+  int nres_orig; //10-15 SWM: Origin resonance for matoms 
   int nnscat;			/* Used for the thermal trapping model of
 				   anisotropic scattering to carry the number of
 				   scattering to "extract" when needed for wind

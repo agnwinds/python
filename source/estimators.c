@@ -105,6 +105,8 @@ bf_estimators_increment (one, p, ds)
     }
 
 
+
+
   for (nn = 0; nn < xplasma->kbf_nuse; nn++)
     {
       n = xplasma->kbf_use[nn];
@@ -420,12 +422,6 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
 
   mplasma->matom_abs[line_ptr->nconfigu] +=
     weight_of_packet * (1. - exp (-tau_sobolev));
-
-  //1507 SWM: Log paths of photons contributing to estimators
-  if(geo.reverb == REV_MATOM && geo.wcycle == geo.wcycles - 1)
-    wind_paths_add_matom(one, p->path,
-      weight_of_packet * (1. - exp (-tau_sobolev)),
-      line_ptr->nconfigu);
 
   return (0);
   /* All done. (SS) */

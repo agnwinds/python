@@ -978,7 +978,8 @@ int
 get_meta_params (void)
 {
 
-  int meta_param, i;
+  int meta_param, i, j, z, istate, levl, levu, posx, posz;
+  char trackline[LINELENGTH];
 
   rdint("reverb.type", &meta_param);
   switch(meta_param)
@@ -993,31 +994,82 @@ get_meta_params (void)
 
   if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
   {
+    geo.reverb_lines = 0;
     geo.reverb_path_bins = 100;
     geo.reverb_theta_bins = 100;
+    geo.reverb_dump_cells = 0;
+    geo.reverb_vis = REV_VIS_NONE;
     rdint("reverb.path_bins", &geo.reverb_path_bins);
-    rdint("reverb.theta_bins", &geo.reverb_theta_bins);
+    rdint("reverb.visualisation", &meta_param);
+    switch(meta_param)
+    {
+      case 0: geo.reverb_vis = REV_VIS_NONE;  break;
+      case 1: geo.reverb_vis = REV_VIS_VTK;   break;
+      case 2: geo.reverb_vis = REV_VIS_DUMP;  break;
+      case 3: geo.reverb_vis = REV_VIS_BOTH;  break;
+      default:Error("reverb.visualisation: Invalid mode.\n \
+        Valid modes are 0=None, 1=VTK, 2=Cell dump, 3=Both.\n");
+    }
+    if(geo.reverb_vis == REV_VIS_VTK  || geo.reverb_vis == REV_VIS_BOTH)
+      rdint("reverb.theta_bins", &geo.reverb_theta_bins);
+    if(geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
+    {
+      rdint("reverb.dump_cells", &geo.reverb_dump_cells);
+      geo.reverb_dump_cell = (int *) calloc(geo.reverb_dump_cells, sizeof(int));
+      for(i=0; i<geo.reverb_dump_cells; i++)
+      {
+        rdline("reverb.dump_cell", &trackline);
+        if(sscanf(trackline, "%d:%d", &posx, &posz) == EOF)
+        {
+          Error("reverb.dump_cell: Invalid position line '%s'\n \
+            Expected format '[r index]:[z index]'\n",trackline);
+          exit(0);
+        }
+        else
+        {
+          geo.reverb_dump_cell[i] = posz*NDIM + posx;
+        }
+      }
+    }
   }
 
   if(geo.reverb == REV_MATOM)
   {
     if(geo.rt_mode != 2)
-      {
+    {
         Error("reverb.type: Invalid reverb mode.\n \
       Macro-atom mode selected but macro-atom scattering not on.\n");
         exit(0);
-      }
+    }
     
-    rdint("reverb.matom_elements", &geo.reverb_matoms);
-    geo.reverb_matom = (int *) calloc(geo.reverb_matoms, sizeof(int));
+    rdint("reverb.matom_lines", &geo.reverb_lines);
+    geo.reverb_line = (int *) calloc(geo.reverb_lines, sizeof(int));
     if(geo.rt_mode != 2)
-      {
-        Error("reverb.matom_elements: \
-      Must specify 1 or more elements to watch in macro-atom mode.\n");
+    {
+        Error("reverb.matom_lines: \
+      Must specify 1 or more lines to watch in macro-atom mode.\n");
         exit(0);
-      }  
-    for(i=0; i<geo.reverb_matoms; i++)
-      rdint("reverb.matom_element",&(geo.reverb_matom[i]));
+     }  
+    for(i=0; i<geo.reverb_lines; i++)
+    {
+      rdline("reverb.matom_line", &trackline);
+      if(sscanf(trackline, "%d:%d:%d:%d", &z, &istate, &levu, &levl) == EOF)
+      {
+        Error("reverb.matom_line: Malformed line '%s'\n \
+          Expected format '[z]:[istate]:[upper level]:[lower level]'\n",trackline);
+        exit(0);
+      }
+      else
+      {
+        for(j=0; j<nlines_macro; j++)
+        {
+          if(line[j].z == z && line[j].istate == istate && line[j].levu == levu && line[j].levl == levl)
+          {
+            geo.reverb_line[i] = line[j].where_in_list;
+          }
+        }
+      }
+    }
   }
   else if(geo.reverb == REV_WIND)
   {

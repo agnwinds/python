@@ -144,11 +144,13 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     }
 
 
-  for (n = 0; n < NPHOT; n++){
-	  p[n].w_orig = p[n].w;
-      p[n].freq_orig = p[n].freq;
-      if(geo.reverb != REV_NONE && p[n].path < 0.0) //SWM - Set path lengths for disk, star etc. 
-      	wind_paths_gen_phot_simple(&p[n]);
+  for (n = 0; n < NPHOT; n++)
+  {
+    p[n].w_orig = p[n].w;
+    p[n].freq_orig = p[n].freq;
+    p[n].nres_orig = p[n].nres;
+    if(geo.reverb != REV_NONE && p[n].path < 0.0) //SWM - Set path lengths for disk, star etc. 
+     	simple_paths_gen_phot(&p[n]);
   }
   return (0);
 

@@ -1351,7 +1351,10 @@ main (argc, argv)
 	if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
 	{
 		wind_paths_evaluate(w);
-		wind_paths_output(w, files.root);
+		if(geo.reverb_vis == REV_VIS_VTK 	|| geo.reverb_vis == REV_VIS_BOTH)
+			wind_paths_output_vtk(w, files.root, nangles);
+		if(geo.reverb_vis == REV_VIS_DUMP	|| geo.reverb_vis == REV_VIS_BOTH)
+			wind_paths_output_dump(w);
 		Log(" Completed evaluating wind path arrays.");
 	}
 

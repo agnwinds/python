@@ -673,15 +673,15 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
       p[n].istat = 0;
       p[n].tau = p[n].nscat = p[n].nrscat = 0;
-      p[n].origin = PTYPE_WIND;	// Call it a wind photon
+      p[n].origin = PTYPE_WIND_MATOM;	// Call it a wind photon
 
       switch(geo.reverb) { //0715 SWM - Added path generation
       	case REV_MATOM: 
-      	  	wind_paths_gen_phot_matom(&wmain[icell], &p[n], nres); break;
+      	  	line_paths_gen_phot(&wmain[icell], &p[n], nres); break;
       	case REV_WIND:
       		wind_paths_gen_phot(&wmain[icell], &p[n]); break;
       	case REV_PHOTON:
-      		wind_paths_gen_phot_simple(&p[n]); break;
+      		simple_paths_gen_phot(&p[n]); break;
       	case REV_NONE:
       	default: 
       		break;
@@ -879,15 +879,15 @@ photo_gen_matom (p, weight, photstart, nphot)
 
       p[n].istat = 0;
       p[n].tau = p[n].nscat = p[n].nrscat = 0;
-      p[n].origin = PTYPE_WIND;	// Call it a wind photon
+      p[n].origin = PTYPE_WIND_MATOM;	// SWM - Call it a wind photon
 
       switch(geo.reverb) { //0715 SWM - Added path generation
       	case REV_MATOM: 
-      	  	wind_paths_gen_phot_matom(&wmain[icell], &p[n], nres); break;
+      	  	line_paths_gen_phot(&wmain[icell], &p[n], nres); break;
       	case REV_WIND:
       		wind_paths_gen_phot(&wmain[icell], &p[n]); break;
       	case REV_PHOTON:
-      		wind_paths_gen_phot_simple(&p[n]); break;
+      		simple_paths_gen_phot(&p[n]); break;
       	case REV_NONE:
       	default: 
       		break;
