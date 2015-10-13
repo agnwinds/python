@@ -69,6 +69,22 @@ Notes:
 History:
 	14aug	-	Written by SWM
 ***********************************************************/
+/********************************************************//*
+ * @name 	delay_dump
+ * @brief	Calculates the delay to the observer plane
+ *
+ * @param [in] filename		Pointer to test photon
+ * @param [in] restart_stat Whether or not the 
+ * @param [in] i_rank		Parallel rank
+ * @return 					0
+ *
+ * Sets up the observer plane, then calculates the distance
+ * from the current photon to it. Uses ds_to_plane() for
+ * reliability.
+ *
+ * @notes
+ * 9/14	-	Written by SWM
+***********************************************************/
 int
 delay_dump_prep(char filename[], int restart_stat, int i_rank)
 {
@@ -225,18 +241,9 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 {
 	FILE *fopen(), *fptr;
 	int	 nphot, mscat, mtopbot, i;
-	double zangle, minpath=0.0;
+	double zangle;
 
-	switch(geo.system_type) 
-	{
-		case SYSTEM_TYPE_STAR:
-			minpath = geo.rmax - geo.rstar;	break;
-		case SYSTEM_TYPE_BINARY:
-			minpath = geo.rmax - geo.rstar;	break;
-		case SYSTEM_TYPE_AGN:
-			minpath = geo.r_agn;
-	}
-	
+
 	/*
 	 * Open a file for writing the spectrum
 	 */
@@ -273,7 +280,7 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 							p[nphot].freq, C * 1e8 / p[nphot].freq, p[nphot].w, 
 							p[nphot].x[0], p[nphot].x[1], p[nphot].x[2],
 							p[nphot].nscat, p[nphot].nrscat,
-							(delay_to_observer(&p[nphot]) - (geo.rmax-minpath)) / C,
+							(delay_to_observer(&p[nphot]) - geo.rmax) / C,
 							(iExtracted ? delay_dump_bank_ex[nphot] : 0),
 							i - MSPEC, p[nphot].origin, 
 							p[nphot].nres_orig);
