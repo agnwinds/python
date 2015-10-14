@@ -242,6 +242,7 @@ pdf_gen_from_func (pdf, func, xmin, xmax, njumps, jump)
   int icheck, pdfsteps;
   int pdf_check (), recalc_pdf_from_cdf ();
   double gen_array_from_func (), delta;
+  printf ("arrived in pdf gen from func icheck=\n");
 
   njump_min = njump_max = 0;
   /* Check the input data before proceeding */
@@ -351,6 +352,7 @@ pdf_gen_from_func (pdf, func, xmin, xmax, njumps, jump)
     {
       Error ("pdf_gen_from_function: error %d on pdf_check\n", icheck);
     }
+	printf ("finished icheck=%i\n",icheck);
   return (icheck);
 
 }
@@ -407,7 +409,6 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
 
   /* First, allocate an array for internal use, if that
      has not already been done */
-
 
   if (init_pdf == 0 || pdf_steps_current < pdfsteps)
     {

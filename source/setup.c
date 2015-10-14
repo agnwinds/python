@@ -851,7 +851,7 @@ int get_bl_and_agn_params (lstar)
 		geo.const_agn=1.0;
 		rddoub ("agn_bremsstrahung_temp(K)",&geo.brem_temp);
 		temp_const_agn = geo.lum_agn / qromb(integ_brem,4.84e17,2.42e18,1e-4);
-		geo.const_agn=temp_const_agn
+		geo.const_agn=temp_const_agn;
       Log ("AGN Input parameters give a Bremsstrahlung constant of %e\n", temp_const_agn);
 		
 	}
