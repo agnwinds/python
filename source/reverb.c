@@ -6,7 +6,6 @@
  *
  * File containing reverberation mapping functions.
  ***********************************************************/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,40 +46,20 @@ delay_to_observer(PhotPtr pp)
 	return (pp->path + ds_to_plane(&observer, pp));
 }
 
-/***********************************************************
-Synopsis:
-	delay_dump(filename, p, f1, f2, nspec)
-		Calculates the delay for the photons. Cloned from spectra.c
-
-Arguments:
-	filename		File to output to
-	PhotPtr p		Array of photons (pass global p)
-	int nspec		Observer spectrum to dump for
-
-Returns:
-	To file only
-
-Description:
-	Prep wipes clean the output file and writes the header, dump then
-	builds up the output file in batches.
-
-Notes:
-
-History:
-	14aug	-	Written by SWM
-***********************************************************/
 /********************************************************//*
- * @name 	delay_dump
- * @brief	Calculates the delay to the observer plane
+ * @name 	delay_dump_prep
+ * @brief	Prepares delay dump output file
  *
- * @param [in] filename		Pointer to test photon
- * @param [in] restart_stat Whether or not the 
+ * @param [in] filename		File root for run
+ * @param [in] restart_stat If this is a restart run
  * @param [in] i_rank		Parallel rank
  * @return 					0
  *
- * Sets up the observer plane, then calculates the distance
- * from the current photon to it. Uses ds_to_plane() for
- * reliability.
+ * Sets up filenames, allocates bank for temporary storage
+ * of photons that are to be dumped, and if it's not a resume
+ * run prints out a header for the file. Filename is set per
+ * thread. The file is then built up in batches using
+ * delay_dump() in increments of #delay_dump_bank_size.
  *
  * @notes
  * 9/14	-	Written by SWM
@@ -93,9 +72,10 @@ delay_dump_prep(char filename[], int restart_stat, int i_rank)
 	int	i;
 
 	//Get output filename
-		strcpy(c_file, filename);		//Copy filename to new string
-		strcat(c_file, ".delay_dump");
-	if (i_rank > 0) {
+	strcpy(c_file, filename);		//Copy filename to new string
+	strcat(c_file, ".delay_dump");
+	if (i_rank > 0) 
+	{
 		sprintf(c_rank, "%i", i_rank);	//Write thread to string
 		strcat(c_file, c_rank);			//Append thread to filename
 	}
@@ -107,14 +87,15 @@ delay_dump_prep(char filename[], int restart_stat, int i_rank)
 	for (i = 0; i < delay_dump_bank_size; i++)
 		delay_dump_bank_ex[i] = 0;
 
-	//Check whether we should continue
-	if (restart_stat == 1) {
+	if (restart_stat == 1) 
+	{	//Check whether the output file already has a header
 		Log("delay_dump_prep: Resume run, skipping writeout\n");
 		return (0);
 	}
 
-	/* If this isn't a continue run, prep the output file */
-	if ((fptr = fopen(delay_dump_file, "w")) == NULL) {
+	if ((fptr = fopen(delay_dump_file, "w")) == NULL) 
+	{	//If this isn't a continue run, prep the output file
+	
 		Error("delay_dump_prep: Unable to open %s for writing\n",
 		      delay_dump_file);
 		exit(0);
@@ -125,8 +106,7 @@ delay_dump_prep(char filename[], int restart_stat, int i_rank)
 		fprintf(fptr, "# Delay dump file for slave process %d\n", i_rank);
 	}
 	else
-	{
-		// Construct and write a header string for the output file
+	{	// Construct and write a header string for the output file
 		fprintf(fptr, "# Python Version %s\n", VERSION);
 		get_time(string);
 		fprintf(fptr, "# Date	%s\n#  \n", string);
@@ -138,24 +118,16 @@ delay_dump_prep(char filename[], int restart_stat, int i_rank)
 	return (0);
 }
 
-/***********************************************************
-Synopsis:
-	delay_dump_finish()
-		Outputs any leftover photons.
-
-Arguments:
-	None
-
-Returns:
-	To file only
-
-Description:
-	Dumps last remaining extracted photons to file and frees arrays.
-
-Notes:
-
-History:
-	6/2/15	-	Written by SWM
+/********************************************************//*
+ * @name 	delay_dump_finish
+ * @brief	Finishes dumping tracked photons to file
+ *
+ * @return 					0
+ *
+ * Dumps the remaining tracked photons to file, frees memory.
+ *
+ * @notes
+ * 6/15	-	Written by SWM
 ***********************************************************/
 int 
 delay_dump_finish (void)
@@ -169,30 +141,24 @@ delay_dump_finish (void)
 	return (0);
 }
 
-/***********************************************************
-Synopsis:
-	delay_dump_combine(iRanks)
-		Finishes off delay dump for multithreaded runs
-
-Arguments:
-	int iRanks	Combines delay dump file from each thread
-
-Returns:
-	To file only
-
-Description:
-	Uses very simple fetch/put characters to append to root file.
-
-Notes:
-
-History:
-	6/2/15	-	Written by SWM
+/********************************************************//*
+ * @name 	delay_dump_combine
+ * @brief	Prepares delay dump output file
+ *
+ * @param [in] i_ranks		Number of parallel processes
+ * @return 					0
+ *
+ * Collects all the delay dump files together at the end. 
+ * Called by the master thread. Uses 'cat' for simplicity.
+ *
+ * @notes
+ * 6/15	-	Written by SWM
 ***********************************************************/
 int
-delay_dump_combine(int iRanks)
+delay_dump_combine(int i_ranks)
 {
 	FILE *fopen();//, *f_base, *f_cat;
-	char cCall[LINELENGTH]; //, c_cat[LINELENGTH], c_char;
+	char c_call[LINELENGTH]; //, c_cat[LINELENGTH], c_char;
 	//int i;
 /*
 	f_base = fopen(delay_dump_file, 'a');
@@ -208,33 +174,28 @@ delay_dump_combine(int iRanks)
 	fclose(f_base);
 */
 	//Yes this is done as a system call and won 't work on Windows machines. Lazy solution!
-	sprintf(cCall, "cat %s[0-9]* >> %s", delay_dump_file, delay_dump_file);
-	if (system(cCall) < 0)
-		Error("delay_dump_combine: Error calling system command '%s'", cCall);
+	sprintf(c_call, "cat %s[0-9]* >> %s", delay_dump_file, delay_dump_file);
+	if (system(c_call) < 0)
+		Error("delay_dump_combine: Error calling system command '%s'", c_call);
 	return (0);
 }
 
-/***********************************************************
-Synopsis:
-	delay_dump(PhotPtr p, int np, int nspec, int iExtracted)
-		Dumps array of photons provided to file
-
-Arguments:
-	PhotPtr p 		Array of photons to dump
-	int np 			Length of array
-	int iExtracted 	Whether or not this array is of extracted photons
-
-Returns:
-	To file only
-
-Description:
-	Dumps to this thread's delay_dump_file the passed photon
-	array.
-
-Notes:
-
-History:
-	6/2/15	-	Written by SWM
+/********************************************************//*
+ * @name 	delay_dump
+ * @brief	Dumps tracked photons to file
+ *
+ * @param [in] np			Pointer to photon array tp dump
+ * @param [in] np			Number photons in p
+ * @param [in] iExtracted	Array of extract flags for p
+ * @return 					0
+ *
+ * Sifts through the photons in the delay_dump file, checking
+ * if they've scattered or were generated in the wind and so
+ * contribute to the delay map. Uses the same filters as 
+ * the spectra_create() function for scatters & angles.
+ *
+ * @notes
+ * 6/15	-	Written by SWM
 ***********************************************************/
 int
 delay_dump(PhotPtr p, int np, int iExtracted)
@@ -242,7 +203,6 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 	FILE *fopen(), *fptr;
 	int	 nphot, mscat, mtopbot, i;
 	double zangle;
-
 
 	/*
 	 * Open a file for writing the spectrum
@@ -271,8 +231,9 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 			for (i = MSPEC; i < nspectra; i++) {
 				if (((mscat = xxspec[i].nscat) > 999 || p[i].nscat == mscat
 				|| (mscat < 0 && p[nphot].nscat >= (-mscat)))
-				    && ((mtopbot = xxspec[i].top_bot) == 0
-					|| (mtopbot * p[nphot].x[2]) > 0)) {
+				&& ((mtopbot = xxspec[i].top_bot) == 0
+				|| (mtopbot * p[nphot].x[2]) > 0)) 
+				{
 					if (xxspec[i].mmin < zangle && zangle < xxspec[i].mmax) 
 					{
 						fprintf(fptr,
@@ -283,7 +244,7 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 							(delay_to_observer(&p[nphot]) - geo.rmax) / C,
 							(iExtracted ? delay_dump_bank_ex[nphot] : 0),
 							i - MSPEC, p[nphot].origin, 
-							p[nphot].nres_orig);
+							p[nphot].nres);
 					}
 				}
 			}
@@ -293,26 +254,19 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 	return (0);
 }
 
-/***********************************************************
-Synopsis:
-	delay_dump_single(PhotPtr pp, int extract_phot)
-		Finishes off delay dump for multithreaded runs
-
-Arguments:
-	PhotPtr pp 			Photon to dump
-	int extract_phot	Whether or not this was extracted
-
-Returns:
-	To internal arrays only
-
-Description:
-	Pushes the passed photon into the delay_dump_bank. If
-	this fills it, dumps current bank to file and restarts it.
-
-Notes:
-
-History:
-	6/2/15	-	Written by SWM
+/********************************************************//*
+ * @name 	delay_dump_single
+ * @brief	Preps a single photon to be dumped
+ *
+ * @param [in] pp			Pointer to extracted photon
+ * @param [in] iExtracted	Is p an extract photon
+ * @return 					0
+ *
+ * Takes a photon and copies it to the staging arrays for 
+ * delay dumping, to be output to file later.
+ *
+ * @notes
+ * 6/15	-	Written by SWM
 ***********************************************************/
 int
 delay_dump_single(PhotPtr pp, int extract_phot)

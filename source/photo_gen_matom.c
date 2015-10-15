@@ -673,9 +673,10 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
       p[n].istat = 0;
       p[n].tau = p[n].nscat = p[n].nrscat = 0;
-      p[n].origin = PTYPE_WIND_MATOM;	// Call it a wind photon
+      p[n].origin = PTYPE_WIND;	// Call it a wind photon
 
-      switch(geo.reverb) { //0715 SWM - Added path generation
+      switch(geo.reverb) 
+      { //0715 SWM - Added path generation
       	case REV_MATOM: 
       	  	line_paths_gen_phot(&wmain[icell], &p[n], nres); break;
       	case REV_WIND:
@@ -879,9 +880,10 @@ photo_gen_matom (p, weight, photstart, nphot)
 
       p[n].istat = 0;
       p[n].tau = p[n].nscat = p[n].nrscat = 0;
-      p[n].origin = PTYPE_WIND_MATOM;	// SWM - Call it a wind photon
+      p[n].origin = PTYPE_WIND;	// Call it a wind photon
 
-      switch(geo.reverb) { //0715 SWM - Added path generation
+      switch(geo.reverb) 
+      { //0715 SWM - Added path generation
       	case REV_MATOM: 
       	  	line_paths_gen_phot(&wmain[icell], &p[n], nres); break;
       	case REV_WIND:

@@ -218,10 +218,10 @@ wind_paths_add_phot(WindPtr wind, PhotPtr pp)
 {
 	int i;
 	for (i=0; i < geo.reverb_path_bins; i++) 
-	{
+	{	//For each bin
 		if (pp->path >= reverb_path_bin[i] &&
 		    pp->path <= reverb_path_bin[i+1]) 
-		{
+		{	//If the path falls within its bounds, add photon weight
 			wind->paths->ad_path_flux[i]+= pp->w;
 			wind->paths->ai_path_num[ i]++;
 			break;
@@ -492,6 +492,7 @@ wind_paths_dump(WindPtr wind)
 	sprintf(c_file,"%s.wind_paths_%d.csv", files.root, wind->nwind);
 	fptr = fopen(c_file, "w");
 
+	//Print out header for bins
 	fprintf(fptr, "'Path Bin', 'General'");
 	for(j=0;j< geo.reverb_lines; j++)
 		fprintf(fptr, ", %d", j);

@@ -978,7 +978,7 @@ int
 get_meta_params (void)
 {
 
-  int meta_param, i, j, z, istate, levl, levu, posx, posz;
+  int meta_param, i, j, k, z, istate, levl, levu;
   char trackline[LINELENGTH];
 
   rdint("reverb.type", &meta_param);
@@ -1016,18 +1016,18 @@ get_meta_params (void)
     {
       rdint("reverb.dump_cells", &geo.reverb_dump_cells);
       geo.reverb_dump_cell = (int *) calloc(geo.reverb_dump_cells, sizeof(int));
-      for(i=0; i<geo.reverb_dump_cells; i++)
+      for(k=0; k<geo.reverb_dump_cells; k++)
       {
         rdline("reverb.dump_cell", &trackline);
-        if(sscanf(trackline, "%d:%d", &posx, &posz) == EOF)
+        if(sscanf(trackline, "%d:%d", &i, &j) == EOF)
         {
           Error("reverb.dump_cell: Invalid position line '%s'\n \
-            Expected format '[r index]:[z index]'\n",trackline);
+            Expected format '[i]:[j]'\n",trackline);
           exit(0);
         }
         else
         {
-          geo.reverb_dump_cell[i] = posz*NDIM + posx;
+          wind_ij_to_n(i,j,&geo.reverb_dump_cell[k]);
         }
       }
     }

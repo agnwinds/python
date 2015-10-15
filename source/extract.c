@@ -397,16 +397,16 @@ the same resonance again */
 	   */
 
 	  xxspec[nspec].f[k] += pp->w * exp (-(tau));	//OK increment the spectrum in question
-
-    	/* This seems very defensive.  Is tau ever less than 0? */
 	
-		if (pp->nscat > 0 || pp->origin >= 10)		// SWM - Records total distance travelled by extract photon
-		{
-			stuff_v(pstart.x, pp->x);	// Restore photon to initial position (necessary for reweighting schemes)
-			pp->path = pstart.path;
-
-			if (geo.reverb > REV_NONE)		// only want to dump photon if the reverb structures are set up
-			  delay_dump_single(pp, 1);	// Dump photon now weight has been modified
+		// SWM - Records total distance travelled by extract photon
+	  	if(geo.reverb != REV_NONE)
+	  	{	//If we are in reverb mode
+			if (pp->nscat > 0 || pp->origin == PTYPE_WIND || pp->origin == PTYPE_WIND_MATOM)
+			{	//If this photon has scattered, been reprocessed, or originated in the wind it's important
+				stuff_v(pstart.x, pp->x);	//Restore photon to initial position before extraction
+				pp->path = pstart.path;		//Put back path to initial path before extraction
+				 delay_dump_single(pp, 1);	// Dump photon now weight has been modified by extraction
+			}
 		}
 
 
