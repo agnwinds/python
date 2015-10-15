@@ -209,7 +209,6 @@ total_emission (one, f1, f2)
 
   t_e = xplasma->t_e;		// Change so calls to total emission are simpler
 
-  printf ("BLAH Got to total emission te=%f\n",t_e);
 
   if (f2 < f1)
     {
