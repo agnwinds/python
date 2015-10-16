@@ -170,6 +170,8 @@ cylvar_make_grid (w, ndom)
   ndim=zdom[ndom].ndim;
   mdim=zdom[ndom].mdim;
 
+   zdom[ndom].zmax=0.0;
+
 
   /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
@@ -259,6 +261,10 @@ cylvar_make_grid (w, ndom)
 		    0.5 * zdom[ndom].zlog_scale * (pow (10., dlogz * (j - 2)) +
 					    pow (10., dlogz * (j - 1)));
 		}
+
+	      if (w[n].x[2]>zdom[ndom].zmax) {
+		      zdom[ndom].zmax=w[n].x[2];
+	      }
 	    }
 
 
@@ -649,7 +655,7 @@ cylvar_where_in_grid (ndom, x, ichoice, fx, fz)
 	  if (ierr_cylvar_where_in_grid < 100)
 	    {
 	      Error
-		("cylvar_where_in_grid: Position %f %f %f gavegrid cell in disk %d (%d %d)\n",
+		("cylvar_where_in_grid: Position %f %f %f gave grid cell in disk %d (%d %d)\n",
 		 z[0], z[1], z[2], n, i, j);
 	      ierr_cylvar_where_in_grid++;
 	    }

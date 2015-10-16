@@ -143,7 +143,7 @@ define_wind ()
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
 
-      Log ("Define wind %d for domain %d\n", zdom[ndom].coord_type, ndom);
+      Log ("Define wind coord_type %d for domain %d\n", zdom[ndom].coord_type, ndom);
 
       if (zdom[ndom].wind_type == 9)	/* nsh: This is the mode where we want the wind and the grid carefully 
 					   controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
@@ -548,7 +548,7 @@ be optional which variables beyond here are moved to structures othere than Wind
       else
 	{
 	  Error
-	    ("wind2d.c: Unknown coordtype %d for domain %d\n",
+	    ("wind2d.c: Not currently able to calculate mdot wind for coordtype %d in domain %d\n",
 	     zdom[ndom].coord_type, ndom);
 	}
     }
