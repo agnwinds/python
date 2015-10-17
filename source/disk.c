@@ -87,7 +87,9 @@ teff (t, x)
       q = (1.e0 - pow (x, -0.5e0)) / (x * x * x);
       q = t * pow (q, 0.25e0);
 
-      if (geo.disk_illum == 2)	// Absorb photons and increase t so that heat is radiated
+      if (geo.disk_illum == 2 && geo.wcycle > 0)	/* Absorb photons and increase t so that heat is radiated
+							   but only do this if there has been at least one
+							   ionization cycle */
 	{
 	  r = x * geo.rstar;	// 04aug -- Requires fix if disk does not extend to rstar
 	  kkk = 1;		// photon cannot hit the disk at r<qdisk.r[0]

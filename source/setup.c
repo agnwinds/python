@@ -754,6 +754,8 @@ Notes:
 
 History:
 	1502  JM 	Moved here from main()
+	1510	ksl	Modified to restore illumination
+			options, which were brokedn
 
 **************************************************************/
 
@@ -761,16 +763,14 @@ History:
 double
 get_disk_params ()
 {
-  int disk_illum;
 //        if (geo.disk_radiation) /*NSH 130906 - Commented out this if loop. It was causing problems with restart - bug #44
 //          {
   geo.disk_mdot /= (MSOL / YR);	// Convert to msol/yr to simplify input
   rddoub ("disk.mdot(msol/yr)", &geo.disk_mdot);
   geo.disk_mdot *= (MSOL / YR);
-  disk_illum = 0;
   rdint
     ("Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=analytic)",
-     &disk_illum);
+     &geo.disk_illum);
   rdint ("Disk.temperature.profile(0=standard;1=readin)", &geo.disk_tprofile);
   if (geo.disk_tprofile == 1)
     {
@@ -783,25 +783,7 @@ get_disk_params ()
 //            disk_illum = 0;
 //          }
 
-  /* 04aug ksl ??? Until everything is initialized we need to stick to a simple disk, 
-     while teff is being set up..  This is because some of the
-     models, e.g. knigge have wind structures that depend on teff.
-     *
-     080518 - ksl - this is quite confusing.  I understand that the KWD models have
-     base velocities that are affected by t_eff, but we have not done anything
-     yet.  Possible this is a consideration for restart, but I would have guessed
-     we recalculated all of that, and in any event this is within the block to
-     reset things.  this is likely a problem of some sort
 
-     However, the next line does force the illum to
-     0 while initialization is going on, unless ?? the illum is 3
-   */
-
-  geo.disk_illum = 0;
-  if (disk_illum == 3)		// 080518 - And why is it different in the analytic case?
-    {
-      geo.disk_illum = 3;
-    }
 
   /* Set a default for diskrad for an AGN */
   if (geo.system_type == SYSTEM_TYPE_AGN)
@@ -827,7 +809,7 @@ get_disk_params ()
       rddoub ("disk.z0(fractional.height.at.diskrad)", &geo.disk_z0);
       rddoub ("disk.z1(powerlaw.index)", &geo.disk_z1);
     }
-  return (disk_illum);
+  return (0);
 }
 
 
