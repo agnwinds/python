@@ -93,7 +93,6 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   int n;
   int iphot_start;
 
-  printf ("Got to xdefine phot\n");
 
   if (freq_sampling == 0)
     {				/* Original approach, uniform sampling of entire wavelength interval, 
@@ -113,11 +112,9 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     {				/* Use banding, create photons with different weithst in different wavelength
 				   bands.  this is used for the for ionization calculation where one wants to assure
 				   that you have "enough" photons at high energy */
-		printf ("About to go to populate_bads\n");
 	  
 	  ftot = populate_bands (f1, f2, ioniz_or_final, iwind, &xband);
 
-	  printf ("Back from populate bands, now we will generate the prohons\n");
       for(n=0; n<NPHOT; n++) p[n].path = 0.0; /* SWM - Zero photon paths */
 
 // Now generate the photons
@@ -137,7 +134,6 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
 	      xband.weight[n] = weight =
 		natural_weight * xband.nat_fraction[n] /
 		xband.used_fraction[n];
-		  printf ("Off to make our first photons\n");
 	      xmake_phot (p, xband.f1[n], xband.f2[n],
 			  ioniz_or_final, iwind, weight, iphot_start,
 			  xband.nphot[n]);
@@ -197,7 +193,6 @@ populate_bands (f1, f2, ioniz_or_final, iwind, band)
     {
       if (band->f1[n] < band->f2[n])
 	{
-		printf ("Going to xdefine_phot for band %i\n",n);
 	  xdefine_phot (band->f1[n], band->f2[n], ioniz_or_final, iwind);
 	  ftot += band->flux[n] = geo.f_tot;
 	}
@@ -206,7 +201,6 @@ populate_bands (f1, f2, ioniz_or_final, iwind, band)
       if (band->flux[n] == 0.0)
 	band->min_fraction[n] = 0;	//Because you will not be able to generate photons
     }
-	printf ("finished first loop in populate bands\n");
 /* So now we can distribute the photons */
   frac_used = 0;
 
@@ -318,10 +312,8 @@ calculates the boundaries of the various disk annulae depending on f1 and f2 */
     }
   if (geo.agn_radiation)
     {
-		printf ("Going to agn_init\n");
       agn_init (geo.r_agn, geo.lum_agn, geo.alpha_agn, f1, f2, ioniz_or_final,
 		&geo.f_agn);
-		printf ("We have an emittance of %e between %e and %e\n",geo.f_agn,f1,f2);
     }
 
 /* The choices associated with iwind are
@@ -468,7 +460,6 @@ python 40 but it is not really what one wants.
   if (geo.agn_radiation)
     {
       nagn = geo.f_agn / geo.f_tot * nphotons;	/* Ensure that nphot photons are created */
-	  printf ("We are going to make %i photons\n",nagn);
     }
   if (geo.matom_radiation)
     {
@@ -593,7 +584,6 @@ stellar photons */
     else
       agn_f1 = f1;
 
-	printf ("About to go to photo_gen_agn\n");
 	  if (ioniz_or_final == 1)
 	    photo_gen_agn (p, geo.r_agn, geo.alpha_agn, weight, agn_f1, f2,
 			   geo.agn_spectype, iphot_start, nphot);
