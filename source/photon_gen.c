@@ -736,10 +736,6 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
 {
   double freqmin, freqmax, dfreq;
   int i, iend;
-//OLD1409  double dot ();
-//OLD1409  double planck ();
-//OLD1409  int randvec (), randvcos ();
-//OLD1409  double zdisk ();
   if ((iend = istart + nphot) > NPHOT)
     {
       Error ("photo_gen_star: iend %d > NPHOT %d\n", iend, NPHOT);

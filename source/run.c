@@ -133,7 +133,7 @@ calculate_ionization (restart_stat)
 	       "NOK", geo.wcycle, geo.wcycles);
 
 
-      Log ("!!Python: Begining cycle %d of %d for defining wind\n",
+      Log ("!!Python: Beginning cycle %d of %d for defining wind\n",
 	   geo.wcycle, geo.wcycles);
       Log_flush ();		/*NH June 13 Added call to flush logfile */
 
@@ -424,7 +424,6 @@ int make_spectra(restart_stat)
   double renorm;
   long nphot_to_define;
   int iwind;
-  char dummy[LINELENGTH];
 #ifdef MPI_ON
   int spec_spec_helpers;
 #endif

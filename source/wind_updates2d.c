@@ -700,11 +700,6 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
       csum += plasmamain[nplasma].heat_comp;	//1108 NSH Increment the compton heating counter
       icsum += plasmamain[nplasma].heat_ind_comp;	//1205 NSH Increment the induced compton heating counter
 
-// Comment - ksl - Next line generated an inappopriate amount of output in the .diag file
-// OLD           Log ("OUTPUT logIP(cloudy_thoeretical)= %e logIP(cloudy_actual)=%e\n",
-// OLD           log10(plasmamain[nplasma].ferland_ip),log10(plasmamain[nplasma].ip)); 
-      
-
 
       /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
          cycles in the windsavefile even if the spectral cycles are run */
@@ -1199,7 +1194,6 @@ wind_ip ()
       plasmamain[n].ferland_ip =
 	geo.n_ioniz / (4 * PI * C * plasmamain[n].rho * rho2nh * (r * r));
 
-//OLD     Log ("NSH log(ferland_ip) for cell %i = %e (r=%e nh=%e nioniz=%e)\n",n,log10(plasmamain[n].ferland_ip),r,plasmamain[n].rho*rho2nh,geo.n_ioniz);
       r =
 	sqrt ((wmain[plasmamain[n].nwind].x[0] *
 	       wmain[plasmamain[n].nwind].x[0] +
@@ -1211,7 +1205,6 @@ wind_ip ()
       plasmamain[n].ferland_ip =
 	geo.n_ioniz / (4 * PI * C * plasmamain[n].rho * rho2nh * (r * r));
 
-//OLD     Log  ("NSH log(ferland_ip) for cell %i = %e (r=%e nh=%e nioniz=%e)\n",n,log10(plasmamain[n].ferland_ip),r,plasmamain[n].rho*rho2nh,geo.n_ioniz);
     }
   return (0);
 }

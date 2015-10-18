@@ -250,6 +250,7 @@ total_emission (one, f1, f2)
          better, but at the moment, simply removing this line, and putting the calculation of compton luminosity 
          into calc_te with the adiabatic cooling and the new DR cooling is the way to make things a little more stable */
       //OLD     xplasma->lum_rad += xplasma->lum_comp = total_comp (one, t_e); 
+      //XXX - ksl - A line was commented out here.  It was said this makes things more stable, but the question is what is correct
     }
 
 

@@ -24,6 +24,9 @@ Description:
 
 Notes:
 
+	The switches should be described in the introduction to
+	python.c, instead of here
+
 History:
   1502  JM  Moved here from main()
 
@@ -763,6 +766,7 @@ History:
 double
 get_disk_params ()
 {
+	// XXX Commenting lines out instead of fixing a problem is not good practice
 //        if (geo.disk_radiation) /*NSH 130906 - Commented out this if loop. It was causing problems with restart - bug #44
 //          {
   geo.disk_mdot /= (MSOL / YR);	// Convert to msol/yr to simplify input
