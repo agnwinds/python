@@ -46,10 +46,7 @@ script:
     - make clean
     - make CC=gcc py_wind
     - make clean
-    - cd ../examples/travis 
-    - Setup_Py_Dir
-    - py balmer_test > balmer_test.out
-    - cd ..
+    - cd ../examples/
     - Setup_Py_Dir
     - py -i cv_macro_benchmark
     - py -i cv_standard

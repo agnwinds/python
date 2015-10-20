@@ -9,6 +9,7 @@ disk.atmosphere(0=no,1=yes)                     0
 geo.xlog_scale 									1e7
 geo.zlog_scale 									1e7
 disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)                    1
+disk.atmosphere(0=no,1=yes)                                    0
 Atomic_data                       data/standard78
 write_atomicdata 					1
 photons_per_cycle                          10000
