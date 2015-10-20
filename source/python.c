@@ -33,9 +33,11 @@ Arguments:
     -f  Fixed temperature mode - does not attempt to chenge the temperature of cells.
 	-e  Alter the maximum number of errors before the program quits
 	-i  Diagnostic mode which quits after reading in inputs. Used for Travis test suite.
-	--version print out python version, commit hash and if there were files with uncommitted
+	-z  Mode to connect with zeus - it either runs two cycles in this is the first call - in order
+         to obtain a good starting state, else it runs just one cycle. In both cases, it does
+		 not attempt to seek a new temperature, but it does output heating and cooling rates
+    --version print out python version, commit hash and if there were files with uncommitted
 	    changes
-
 
 	
 	if one simply types py or pyZZ where ZZ is the version number one is queried for a name
@@ -866,7 +868,6 @@ main (argc, argv)
   kbf_need (freqmin, freqmax);
 
   /* XXXX - Execute  CYCLES TO CREATE THE DETAILED SPECTRUM */
-
   make_spectra (restart_stat);
 
   return (0);

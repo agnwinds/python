@@ -58,7 +58,6 @@ parse_command_line (argc, argv)
 
       for (i = 1; i < argc; i++)
 	{
-
 	  if (strcmp (argv[i], "-h") == 0)
 	    {
 	      help ();
@@ -110,7 +109,12 @@ parse_command_line (argc, argv)
 	      modes.fixed_temp = 1;
 	      i++;
 	    }
-
+    else if (strcmp (argv[i], "-z") == 0)
+      {
+        modes.zeus_connect = 1;
+        Log ("setting zeus_connect to %i\n",modes.zeus_connect);
+        i++;
+      }
 	  else if (strcmp (argv[i], "-i") == 0)
 	    {
 	      modes.quit_after_inputs = 1;
@@ -135,7 +139,6 @@ parse_command_line (argc, argv)
 	      help ();
 	    }
 	}
-
 
       /* The last command line variable is always the .pf file */
 
@@ -661,8 +664,10 @@ Modified again in python 71b to take account of change in parametrisation of she
   /* Get the filling factor of the wind */
   // XXX  This is not in the right place.  It provides a golal filling factor to our
   // models
-  geo.fill = 1.;
-  rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
+
+	geo.fill = 1.;
+  if (geo.wind_type != 3) //At present, we wont ask this question if we have a read in hydro model.
+  	rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
 
 
   return (0);
@@ -1050,7 +1055,7 @@ setup_dfudge ()
      given the scale of the wind. Up till py74b2 it was set to be fixed at
      1e5, so we ensure that this is a minimum, so any winds of CV type scale
      will keep the old dfudge, and hopefully look the same. We also need to
-     set defudge slightly differently for the shell wind. */
+     set dfudge slightly differently for the shell wind. */
 
   if (geo.wind_type == 9)
     {
@@ -1070,7 +1075,7 @@ setup_dfudge ()
 	}
     }
 
-  return (dfudge);
+  return (dfudge);		
 }
 
 
