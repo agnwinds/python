@@ -45,6 +45,8 @@ History:
 	14jul	nsh	78a - Added code to allow dynamically allocated arrays
 			in the plasma structure to be read in and written out.
 	15aug	ksl	Modified to write domain stucture
+	15oct	ksl	Modified to write disk and qdisk structures which is
+			needed to properly handle restarts
  
 **************************************************************/
 
@@ -75,6 +77,8 @@ wind_save (filename)
   n += fwrite (&geo, sizeof (geo), 1, fptr);
   n += fwrite (zdom, sizeof (domain_dummy), geo.ndomain, fptr);
   n += fwrite (wmain, sizeof (wind_dummy), NDIM2, fptr);
+  n += fwrite(&disk, sizeof (disk), 1, fptr);
+  n += fwrite(&qdisk, sizeof (disk), 1, fptr);
   n += fwrite (plasmamain, sizeof (plasma_dummy), NPLASMA, fptr);
 
 /* NSH 1407 - The following loop writes out the variable length arrays
@@ -173,6 +177,7 @@ in the plasma structure */
 			different cases
 	14jul	nsh	Code added to read in variable length arrays in plasma structure
 	15aug	ksl	Updated to read domain structure
+	15oct	ksl	Updated to read disk and qdisk stuctures
 */
 
 int
@@ -217,6 +222,11 @@ wind_read (filename)
   calloc_wind (NDIM2);
   n += fread (wmain, sizeof (wind_dummy), NDIM2, fptr);
 
+  /* Read the disk and qdisk structures */
+
+  n += fread(&disk, sizeof (disk), 1, fptr);
+  n += fread(&qdisk, sizeof (disk), 1, fptr);
+
   calloc_plasma (NPLASMA);
 
   n += fread (plasmamain, sizeof (plasma_dummy), NPLASMA, fptr);
@@ -224,6 +234,7 @@ wind_read (filename)
   /*Allocate space for the dynamically allocated plasma arrays */
 
   calloc_dyn_plasma (NPLASMA);
+
 
   for (m = 0; m < NPLASMA; m++)
     {
