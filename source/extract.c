@@ -401,7 +401,7 @@ the same resonance again */
 		// SWM - Records total distance travelled by extract photon
 	  	if(geo.reverb != REV_NONE)
 	  	{	//If we are in reverb mode
-			if (pp->nscat > 0 || pp->origin == PTYPE_WIND || pp->origin == PTYPE_WIND_MATOM)
+			if (pp->nscat > 0 || pp->origin > 9 || (pp->nres > -1 && pp->nres < nlines))
 			{	//If this photon has scattered, been reprocessed, or originated in the wind it's important
 				stuff_v(pstart.x, pp->x);	//Restore photon to initial position before extraction
 				pp->path = pstart.path;		//Put back path to initial path before extraction

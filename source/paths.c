@@ -487,12 +487,16 @@ wind_paths_dump(WindPtr wind)
 {
 	FILE *fopen(), *fptr;
 	char c_file[LINELENGTH];
-	int j, k;
+	int i, j, k;
 
 	sprintf(c_file,"%s.wind_paths_%d.csv", files.root, wind->nwind);
 	fptr = fopen(c_file, "w");
 
+	wind_n_to_ij(wind->nwind, &i,&j);
 	//Print out header for bins
+	fprintf(fptr, "'Wind cell', %d,'I:J',%d,%d,'Inwind',%d\n",
+		wind->nwind, i, j, wind->inwind);
+
 	fprintf(fptr, "'Path Bin', 'General'");
 	for(j=0;j< geo.reverb_lines; j++)
 		fprintf(fptr, ", %d", j);
@@ -529,10 +533,11 @@ wind_paths_dump(WindPtr wind)
 int
 wind_paths_output_dump(WindPtr wind)
 {
-	int i;
+	int i,n;
 	for(i=0;i< geo.reverb_dump_cells; i++)
 	{	
-		wind_paths_dump(&wind[geo.reverb_dump_cell[i]]);	
+		wind_ij_to_n(geo.reverb_dump_i[i], geo.reverb_dump_j[i], &n);
+		wind_paths_dump(&wind[n]);	
 	}
 	return(0);
 }

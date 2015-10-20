@@ -1015,19 +1015,16 @@ get_meta_params (void)
     if(geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
     {
       rdint("reverb.dump_cells", &geo.reverb_dump_cells);
-      geo.reverb_dump_cell = (int *) calloc(geo.reverb_dump_cells, sizeof(int));
+      geo.reverb_dump_i = (int *) calloc(geo.reverb_dump_cells, sizeof(int));
+      geo.reverb_dump_j = (int *) calloc(geo.reverb_dump_cells, sizeof(int));
       for(k=0; k<geo.reverb_dump_cells; k++)
       {
         rdline("reverb.dump_cell", &trackline);
-        if(sscanf(trackline, "%d:%d", &i, &j) == EOF)
+        if(sscanf(trackline, "%d:%d", &geo.reverb_dump_i[k], &geo.reverb_dump_j[k]) == EOF)
         {
           Error("reverb.dump_cell: Invalid position line '%s'\n \
             Expected format '[i]:[j]'\n",trackline);
           exit(0);
-        }
-        else
-        {
-          wind_ij_to_n(i,j,&geo.reverb_dump_cell[k]);
         }
       }
     }

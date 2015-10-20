@@ -372,7 +372,8 @@ struct geometry
   enum reverb_enum      {REV_NONE=0, REV_PHOTON=1, REV_WIND=2, REV_MATOM=3} reverb; 
   enum reverb_vis_enum  {REV_VIS_NONE=0, REV_VIS_VTK=1, REV_VIS_DUMP=2, REV_VIS_BOTH=3} reverb_vis;
   int reverb_path_bins, reverb_theta_bins;  //SWM - Number of bins for path arrays, vtk output angular bins
-  int reverb_dump_cells, *reverb_dump_cell; //SWM - Number of cells to dump, list of cells to dump 'nwind' values
+  int reverb_dump_cells;                    //SWM - Number of cells to dump, list of cells to dump 'nwind' values
+  int *reverb_dump_i, *reverb_dump_j;       //SWM - i & j values of the cells to dump. Necessary as ij_to_n doesn't work in setup
   int reverb_lines, *reverb_line;           //SWM - Number of lines to track, and array of line 'nres' values
 }
 geo;
