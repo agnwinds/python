@@ -166,9 +166,6 @@ Description:
   
    Finally it rescales this to get the actual velocity.
   
-   is travelling in the
-   disk by interpolating on the velocities that are contained 
-
 Notes"
 
 	The routine projects the input variable x on to the xy plane
@@ -189,7 +186,7 @@ vdisk (x, v)
 {
   double xhold[3];
   double r, speed;
-  int linterp ();
+
   stuff_v (x, xhold);
   xhold[2] = 0.0;
   r = length (xhold);
@@ -198,6 +195,7 @@ vdisk (x, v)
   renorm (v, speed);
   return (speed);
 }
+
 
 /***********************************************************
              Space Telescope Science Institute
