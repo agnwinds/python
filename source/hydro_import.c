@@ -446,11 +446,11 @@ hydro_rho (x)
   double f1, f2;
   r = length (x);
   theta = asin (sqrt (x[0] * x[0] + x[1] * x[1]) / r);
-//     printf ("x %.2g %.2g %.2g  -> r= %.2g theta = %.2g ", x[0], x[1], x[2], r,        theta);
+       printf ("NSH hydro_rho x %e %e %e  -> r= %e theta = %e ", x[0], x[1], x[2], r,        theta/RADIAN);
 
   if (r > hydro_r_cent[ihydro_r])
     {
-      Log (" r outside hydro grid in hydro_rho\n");
+      Log (" r outside hydro grid in hydro_rho %e > %e\n",r,hydro_r_cent[ihydro_r]);
       rrho = 1.e-23;
       return (rrho);
     }
@@ -635,6 +635,17 @@ rtheta_make_hydro_grid (w, ndom)
     }
   /* Now set up the wind cones that are needed for calclating ds in a cell */
 
+	for (i = 0; i < ndim; i++)
+		{
+		wind_ij_to_n (ndom,i, 0, &n);
+		printf ("hydro_grid i=%i, ihydro_r=%i n=%i, r=%e, rcen=%e\n",i,ihydro_r,n,w[n].r,w[n].rcen);
+		}
+
+	for (i = 0; i < mdim; i++)
+		{
+		wind_ij_to_n (ndom,0, i, &n);
+		printf ("hydro_grid j=%i,  ihydrotheta=%i, n=%i, theta=%f, thetacen=%f\n",i,ihydro_theta,n,w[n].theta,w[n].thetacen);
+		}
 
   rtheta_make_cones (ndom, w);	//NSH 130821 broken out into a seperate routine
 
