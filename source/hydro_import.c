@@ -449,7 +449,7 @@ hydro_rho (x)
   double f1, f2;
   r = length (x);
   theta = asin (sqrt (x[0] * x[0] + x[1] * x[1]) / r);
-//      printf ("NSH2 x %e %e %e  -> r= %e theta = %f \n", x[0], x[1], x[2], r,        theta);
+       printf ("NSH hydro_rho x %e %e %e  -> r= %e theta = %f ", x[0], x[1], x[2], r,        theta);
 
 
   hydro_frac (r,hydro_r_cent,ihydro_r,&im,&ii,&f1);
