@@ -449,7 +449,7 @@ hydro_rho (x)
   double f1, f2;
   r = length (x);
   theta = asin (sqrt (x[0] * x[0] + x[1] * x[1]) / r);
-       printf ("NSH hydro_rho x %e %e %e  -> r= %e theta = %f ", x[0], x[1], x[2], r,        theta);
+//       printf ("NSH hydro_rho x %e %e %e  -> r= %e theta = %f ", x[0], x[1], x[2], r,        theta);
 
 
   hydro_frac (r,hydro_r_cent,ihydro_r,&im,&ii,&f1);
@@ -461,7 +461,7 @@ hydro_rho (x)
   if (rrho < 1e-23)
     rrho = 1e-23;
 
-   printf ("Grid point %d %d rho %e f1=%f f2=%f\n", ii, jj, rrho,f1,f2);
+//   printf ("Grid point %d %d rho %e f1=%f f2=%f\n", ii, jj, rrho,f1,f2);
 
   return (rrho);
 }
