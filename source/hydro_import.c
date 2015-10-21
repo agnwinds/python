@@ -436,7 +436,7 @@ hydro_rho (x)
   int ii, jj;
   int im, jm;
   double r, theta;
-  double rho;
+  double rrho;
   double f1, f2;
   r = length (x);
   theta = asin (sqrt (x[0] * x[0] + x[1] * x[1]) / r);
@@ -446,15 +446,15 @@ hydro_rho (x)
   hydro_frac (r,hydro_r_cent,ihydro_r,&im,&ii,&f1);
   hydro_frac (theta,hydro_theta_cent,ihydro_theta,&jm,&jj,&f2);
 
-  		rho=hydro_interp_value(rho_input,im,ii,jm,jj,f1,f2);		
+  		rrho=hydro_interp_value(rho_input,im,ii,jm,jj,f1,f2);		
 
 
-  if (rho < 1e-23)
-    rho = 1e-23;
+  if (rrho < 1e-23)
+    rrho = 1e-23;
 
- //  printf ("Grid point %d %d rho %e f1=%f f2=%f\n", ii, jj, rrho,f1,f2);
+   printf ("Grid point %d %d rho %e f1=%f f2=%f\n", ii, jj, rrho,f1,f2);
 
-  return (rho);
+  return (rrho);
 }
 
 
