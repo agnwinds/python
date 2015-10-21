@@ -298,7 +298,7 @@ get_hydro (ndom)
       ihydro_theta = ithetamax;
       geo.wind_thetamax = 90. / RADIAN;
       hydro_thetamax = 90.0 / RADIAN;
-      mdim = zdom[ndom].mdim = ihydro_theta + 1;
+      mdim = zdom[ndom].mdim = ihydro_theta + 2;
     }
   else
     {
@@ -335,14 +335,8 @@ get_hydro (ndom)
 //geo.ndim2 = NDIM2 += zdom[ndom].ndim * zdom[ndom].mdim;
 
 
-for (i=0;i<mdim;i++)
-{
-	printf ("hydro_grid i=%i theta_edge=%f theta_cen=%f\n",i,hydro_theta_edge[i]*RADIAN,hydro_theta_cent[i]*RADIAN);
-}
-for (i=0;i<ndim;i++)
-{
-	printf ("hydro_grid i=%i r_edge=%f r_cen=%f\n",i,hydro_r_edge[i],hydro_r_cent[i]);
-}
+  printf ("NSH ndim (r)=%i ihydro_theta=%i mdim(theta)=%i\n",ndim,ihydro_theta,mdim);
+
 
 
   return (0);
