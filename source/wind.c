@@ -124,26 +124,32 @@ where_in_wind (x,ndomain)
   *ndomain=-1;
 
   rad=length(x);
-
+  //  printf ("Where is photon with rad=%e\n",rad);
   for (ndom = geo.ndomain - 1; ndom > -1; ndom--)
     {
 
       one_dom = &zdom[ndom];
-
+//	  	  printf ("Checking domain %i\n",ndom);
+//		  printf ("NSH rmin =%e rmax=%e rhomin=%e rhomax=%e zmax=%e thetamin=%e thetamax=%e\n",one_dom->rmin,one_dom->rmax,one_dom->wind_rho_min,one_dom->wind_rho_max,one_dom->zmax,one_dom->wind_thetamin,one_dom->wind_thetamax);
 
       /* First check to see if photon is inside or outside wind */
 
       if (rad < one_dom->rmin)
 	{
+//		printf ("NSH photon is inside the wind radially\n");
 	  continue;		/*x is inside the wind  radially */
 	}
       if (rad > one_dom->rmax)
 	{
+//		printf ("NSH photon is beyond the wind radially\n");
+		
 	  continue;		/*the position is beyond the wind radially */
 	}
 
       if (z > one_dom->zmax)
 	{
+//		printf ("NSH photon is beyond the wind vertically????\n");
+		
 	  continue;		/*the position is beyond the wind radially */
 	}
 
@@ -436,7 +442,6 @@ model_rho (ndom, x)
      double x[];
 {
   double rho;
-  printf ("NSH in model_rho ndom=%i windtype=%i\n",ndom,zdom[ndom].wind_type);
   if (zdom[ndom].wind_type == SV)
     {
       rho = sv_rho (ndom, x);
@@ -447,7 +452,6 @@ model_rho (ndom, x)
     }
   else if (zdom[ndom].wind_type == HYDRO)
     {
-		printf ("NSH going to hydro_rho\n");
       rho = hydro_rho (x);
     }
   else if (zdom[ndom].wind_type == CORONA)

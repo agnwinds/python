@@ -355,7 +355,6 @@ be optional which variables beyond here are moved to structures othere than Wind
       stuff_v (w[nwind].xcen, x);
       /* 140905 - ksl - Next two lines allow for clumping */
       /* JM PLACEHOLDER need to make model_rho have domain number */
-	  printf ("NSH about to go to model_rho\n");
       plasmamain[n].rho = model_rho (ndom, x) / geo.fill;
       plasmamain[n].vol = w[nwind].vol * geo.fill;	// Copy volumes
 

@@ -56,6 +56,10 @@ translate (w, pp, tau_scat, tau, nres)
   int istat;
   int ndomain;
 
+
+ //  printf ("NSH return from where)in_wind=%i domain=%i\n",where_in_wind (pp->x,&ndomain),ndomain);
+
+
   if (where_in_wind (pp->x,&ndomain) < 0)
     {
       istat = translate_in_space (pp);

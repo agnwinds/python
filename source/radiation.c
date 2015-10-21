@@ -144,6 +144,10 @@ radiation (p, ds)
   int ndom;
   
   one = &wmain[p->grid];	/* So one is the grid cell of interest */
+  
+
+	  
+  
   ndom=one->ndom;
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "radiation");

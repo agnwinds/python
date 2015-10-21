@@ -127,23 +127,25 @@ get_hydro_wind_params (ndom)
 
 
 
-  Log ("Creating a wind model using a Hydro calculatioon\n");
+  Log ("Creating a wind model using a Hydro calculation = domain %i\n",ndom);
 
   get_hydro (ndom);
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
-
   geo.rmin = zdom[ndom].rmin=hydro_r_edge[0];
 
   geo.rmax = zdom[ndom].rmax = hydro_r_edge[ihydro_r] + 2.0 * (hydro_r_cent[ihydro_r] - hydro_r_edge[ihydro_r]);	//Set the outer edge of the wind to the outer edge of the final defined cell
   Log ("rmax=%e\n", geo.rmax);
   geo.wind_rho_min =zdom[ndom].wind_rho_min= 0.0;	//Set wind_rmin 0.0, otherwise wind cones dont work properly 
   Log ("rho_min=%e\n", zdom[ndom].wind_rho_min);
-  geo.wind_rho_max = zdom[ndom].rmax;	//This is the outer edge of the
+  geo.wind_rho_max = zdom[ndom].wind_rho_max = zdom[ndom].rmax;	//This is the outer edge of the
   Log ("rho_max=%e\n", zdom[ndom].wind_rho_max);
+  zdom[ndom].zmax = zdom[ndom].rmax;	//This is the outer edge of the
+  Log ("zmax=%e\n", zdom[ndom].zmax);
+
   geo.wind_thetamin=zdom[ndom].wind_thetamin= hydro_theta_edge[0];
   Log ("theta_min=%e\n", geo.wind_thetamin);
-
+  Log ("theta_max=%e\n", geo.wind_thetamax);
   Log ("geo.rmin=%e\n", zdom[ndom].rmin);
   Log ("geo.rmax=%e\n", zdom[ndom].rmax);
   Log ("geo.wind_rhomin=%e\n", zdom[ndom].wind_rho_min);
@@ -296,7 +298,7 @@ get_hydro (ndom)
     {
       Log ("HYDRO j_hydro_thetamax never bracketed, using all data\n");
       ihydro_theta = ithetamax;
-      geo.wind_thetamax = 90. / RADIAN;
+	  geo.wind_thetamax=zdom[ndom].wind_thetamax=90. / RADIAN;
       hydro_thetamax = 90.0 / RADIAN;
       mdim = zdom[ndom].mdim = ihydro_theta + 2;
     }
@@ -307,12 +309,12 @@ get_hydro (ndom)
 	 j_hydro_thetamax, hydro_theta_cent[j_hydro_thetamax] * RADIAN,
 	 hydro_theta_cent[j_hydro_thetamax + 1] * RADIAN);
       ihydro_theta = j_hydro_thetamax;
-      geo.wind_thetamax = hydro_thetamax;
+      geo.wind_thetamax =zdom[ndom].wind_thetamax= hydro_thetamax;
       mdim = zdom[ndom].mdim = ihydro_theta + 2;
     }
 
 
-
+	printf ("NSH thetamax= %e \n",geo.wind_thetamax);
 
 
   if (hydro_r_edge[0] < geo.rstar)
@@ -335,7 +337,7 @@ get_hydro (ndom)
 //geo.ndim2 = NDIM2 += zdom[ndom].ndim * zdom[ndom].mdim;
 
 
-  printf ("NSH ndim (r)=%i ihydro_theta=%i mdim(theta)=%i\n",ndim,ihydro_theta,mdim);
+//  printf ("NSH ndim (r)=%i ihydro_theta=%i mdim(theta)=%i\n",ndim,ihydro_theta,mdim);
 
 
 
@@ -446,11 +448,11 @@ hydro_rho (x)
   double f1, f2;
   r = length (x);
   theta = asin (sqrt (x[0] * x[0] + x[1] * x[1]) / r);
-       printf ("NSH hydro_rho x %e %e %e  -> r= %e theta = %e ", x[0], x[1], x[2], r,        theta/RADIAN);
+//       printf ("NSH hydro_rho x %e %e %e  -> r= %e theta = %e ", x[0], x[1], x[2], r,        theta);
 
-  if (r > hydro_r_cent[ihydro_r])
+  if (( hydro_r_cent[ihydro_r] -r )/r < -1e-6)
     {
-      Log (" r outside hydro grid in hydro_rho %e > %e\n",r,hydro_r_cent[ihydro_r]);
+      Log (" r outside hydro grid in hydro_rho %e > %e %e\n",r,hydro_r_cent[ihydro_r],(hydro_r_cent[ihydro_r] -r )/r);
       rrho = 1.e-23;
       return (rrho);
     }
@@ -467,7 +469,7 @@ hydro_rho (x)
     rrho = 1e-23;
 
 
-    printf ("Grid point %d %d rho %e f1=%f f2=%f\n", ii, jj, rrho,f1,f2);
+//    printf ("Grid point %d %d rho %e f1=%f f2=%f\n", ii, jj, rrho,f1,f2);
 
   return (rrho);
 }
@@ -634,7 +636,7 @@ rtheta_make_hydro_grid (w, ndom)
 	}
     }
   /* Now set up the wind cones that are needed for calclating ds in a cell */
-
+	/*
 	for (i = 0; i < ndim; i++)
 		{
 		wind_ij_to_n (ndom,i, 0, &n);
@@ -646,7 +648,7 @@ rtheta_make_hydro_grid (w, ndom)
 		wind_ij_to_n (ndom,0, i, &n);
 		printf ("hydro_grid j=%i,  ihydrotheta=%i, n=%i, theta=%f, thetacen=%f\n",i,ihydro_theta,n,w[n].theta,w[n].thetacen);
 		}
-
+*/
   rtheta_make_cones (ndom, w);	//NSH 130821 broken out into a seperate routine
 
 
