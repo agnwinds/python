@@ -118,6 +118,7 @@ define_wind ()
       zdom[ndom].nstop = n;
       //PLACEHOLDER  we should not really need to define NDIM and MDIM here, we may need NDIM2
       geo.ndim2 = NDIM2 += zdom[ndom].ndim * zdom[ndom].mdim;
+	  printf ("NSH domain %i ndim %i mdim %i NDIM2= %i geo.ndim2= %i\n",ndom,zdom[ndom].ndim , zdom[ndom].mdim,NDIM2,geo.ndim2);
     }
 
 
@@ -191,9 +192,9 @@ define_wind ()
 	}
 
     }
-
+	printf ("NSH finished making grid\n");
   wind_complete (w);
-
+  printf ("NSH back from completing wind\n");
 
   /* Now define the valid volumes of each cell and also determine whether the cells are in all
      or partially in the wind.
@@ -208,8 +209,9 @@ define_wind ()
    */
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
-
+	  
     {
+		printf ("NSH doing domain %i with coord type %i\n",ndom,zdom[ndom].coord_type);
       if (zdom[ndom].coord_type == SPHERICAL)
 	{
 	  spherical_volumes (ndom, w);
@@ -220,16 +222,19 @@ define_wind ()
 	}
       else if (zdom[ndom].coord_type == RTHETA)
 	{
+		printf ("NSH we have a coord type of RTHETA, wind type is %i\n",geo.wind_type);
 	  /* 13jun -- nsh - 76 - This is a switch to allow one to use 
 	     the actual zeus grid in the special case of a 'proga' wind 
 	     in rtheta coordinates We dont need to work out if cells are 
 	     in the wind, they are known to be in the wind. */
-	  if (geo.wind_type == 3)
+	  if (zdom[ndom].wind_type == 3)
 	    {
+			printf ("NSH going to make volumes for domain %i\n",ndom);
 	      rtheta_hydro_volumes (ndom, w);
 	    }
 	  else
 	    {
+			printf ("This is odd, we were supposed to be somewhere else!!\n");
 	      rtheta_volumes (ndom, w);
 	    }
 	}
@@ -244,6 +249,10 @@ define_wind ()
 	     zdom[ndom].coord_type);
 	}
     }
+	printf ("NSH made volumes\n");
+
+
+
 
 
 /* The routines above have established the volumes of the cells that are in the wind
@@ -258,6 +267,7 @@ define_wind ()
       n_vol = n_inwind = n_part = 0;
       for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
 	{
+//		printf ("Wind check x=%e y=%e z=%e density=\n",w[n].x[0],w[n].x[1],w[n].x[2]);
 	  if (w[n].vol > 0.0)
 	    n_vol++;
 	  if (w[n].inwind == W_ALL_INWIND)
@@ -336,7 +346,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 
 
 /* Now calculate parameters that need to be calculated at the center of the grid cell */
-
+  printf ("NSH about to start populating plasma NPLASMA=%i\n",NPLASMA);
 
   for (n = 0; n < NPLASMA; n++)
     {
@@ -345,6 +355,7 @@ be optional which variables beyond here are moved to structures othere than Wind
       stuff_v (w[nwind].xcen, x);
       /* 140905 - ksl - Next two lines allow for clumping */
       /* JM PLACEHOLDER need to make model_rho have domain number */
+	  printf ("NSH about to go to model_rho\n");
       plasmamain[n].rho = model_rho (ndom, x) / geo.fill;
       plasmamain[n].vol = w[nwind].vol * geo.fill;	// Copy volumes
 

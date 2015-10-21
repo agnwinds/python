@@ -436,7 +436,7 @@ model_rho (ndom, x)
      double x[];
 {
   double rho;
-
+  printf ("NSH in model_rho ndom=%i windtype=%i\n",ndom,zdom[ndom].wind_type);
   if (zdom[ndom].wind_type == SV)
     {
       rho = sv_rho (ndom, x);
@@ -447,6 +447,7 @@ model_rho (ndom, x)
     }
   else if (zdom[ndom].wind_type == HYDRO)
     {
+		printf ("NSH going to hydro_rho\n");
       rho = hydro_rho (x);
     }
   else if (zdom[ndom].wind_type == CORONA)

@@ -3,15 +3,18 @@
 
 double hydro_r_cent[MAXHYDRO];
 double hydro_r_edge[MAXHYDRO];
-double hydro_dr_cent[MAXHYDRO];
-double hydro_dr_edge[MAXHYDRO];
 double hydro_theta_cent[MAXHYDRO];
 double hydro_theta_edge[MAXHYDRO];
-double hydro_dtheta_cent[MAXHYDRO];
-double hydro_dtheta_edge[MAXHYDRO];
 int ihydro_r, ihydro_theta, j_hydro_thetamax, ihydro_mod;
-double hydro_thetamax;		//The angle at which we want to truncate the theta grid
+double hydro_thetamax; //The angle at which we want to truncate the theta grid
+double v_r_input[MAXHYDRO*MAXHYDRO];
+double v_theta_input[MAXHYDRO*MAXHYDRO];
+double v_phi_input[MAXHYDRO*MAXHYDRO];
+double rho_input[MAXHYDRO*MAXHYDRO];
+double temp_input[MAXHYDRO*MAXHYDRO];
 
+
+/*
 typedef struct hydro_mod
 {
   double rho;
@@ -21,7 +24,7 @@ typedef struct hydro_mod
 hydro_dummy, *HydroPtr;
 
 HydroPtr hydro_ptr;
-
+*/
 
 
 
@@ -187,7 +190,7 @@ get_hydro (ndom)
       hydro_r_cent[k] = 0;
       hydro_theta_cent[k] = 0;
     }
-
+	/*
   hydro_ptr = (HydroPtr) calloc (sizeof (hydro_dummy), MAXHYDRO * MAXHYDRO);
 
   if (hydro_ptr == NULL)
@@ -196,7 +199,7 @@ get_hydro (ndom)
 	("There is a problem in allocating memory for the hydro structure\n");
       exit (0);
     }
-
+*/
   rdstr ("hydro_file", datafile);
   if ((fptr = fopen (datafile, "r")) == NULL)
     {
@@ -271,13 +274,18 @@ get_hydro (ndom)
 		{
 		  /* NSH 130327 - for the time being, if theta is in the disk, replace with the last
 		     density above the disk */
-		  rho = hydro_ptr[i * MAXHYDRO + j_hydro_thetamax].rho;
+			rho=rho_input[i * MAXHYDRO + j_hydro_thetamax];
 		}
-	      hydro_ptr[i * MAXHYDRO + j].temp = temp;
-	      hydro_ptr[i * MAXHYDRO + j].rho = rho;
-	      hydro_ptr[i * MAXHYDRO + j].v[0] = vr;
-	      hydro_ptr[i * MAXHYDRO + j].v[1] = vtheta;
-	      hydro_ptr[i * MAXHYDRO + j].v[2] = vphi;
+//	      hydro_ptr[i * MAXHYDRO + j].temp = temp;
+//	      hydro_ptr[i * MAXHYDRO + j].rho = rho;
+//	      hydro_ptr[i * MAXHYDRO + j].v[0] = vr;
+//	      hydro_ptr[i * MAXHYDRO + j].v[1] = vtheta;
+//	      hydro_ptr[i * MAXHYDRO + j].v[2] = vphi;
+  		rho_input[i * MAXHYDRO + j] = rho;
+  		temp_input[i * MAXHYDRO + j] = temp;
+		v_r_input[i * MAXHYDRO + j] = vr;
+		v_theta_input[i * MAXHYDRO + j] = vtheta;
+		v_phi_input[i * MAXHYDRO + j] = vphi;
 	    }
 	}
     }
@@ -324,7 +332,7 @@ get_hydro (ndom)
 
   zdom[ndom].coord_type = RTHETA;	//At the moment we only deal with RTHETA - in the future we might want to do some clever stuff
   ndim = zdom[ndom].ndim = ihydro_r + 3;	//We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
-
+//geo.ndim2 = NDIM2 += zdom[ndom].ndim * zdom[ndom].mdim;
 
 
   return (0);
@@ -361,7 +369,7 @@ hydro_velocity (x, v)
   int im, jm;
   double f1, f2;
   double r, theta;
-  double vr, vtheta, vphi;
+  double v_r_interp, v_theta_interp, v_phi_interp;
   double speed;
   double xxx;
 //printf ("Proga_velocity x=%e,%e,%e, v=%e,%e,%e ",x[0],x[1],x[2],v[0],v[1],v[2]);
@@ -370,7 +378,7 @@ hydro_velocity (x, v)
       v[0] = v[1] = v[2] = 0.0;
       return (0.);
     };
-
+  
 
 
   xxx = (sqrt (x[0] * x[0] + x[1] * x[1]) / r);
@@ -381,135 +389,35 @@ hydro_velocity (x, v)
   else
     theta = asin (xxx);
 
-  // printf (" r=%e, theta=%f\n",r,theta*RADIAN);
 
 
-
-
-
-  // printf ("Proga_theta x %.2g %.2g %.2g  -> r= %.2g theta = %.5g\n", x[0], x[1], x[2], r,theta);
+ // printf ("Proga_theta x %.2g %.2g %.2g  -> r= %.2g theta = %.5g\n", x[0], x[1], x[2], r,theta);
   im = jm = ii = jj = 0;
+  f1=f2=0.0;
+hydro_frac (r,hydro_r_cent,ihydro_r,&im,&ii,&f1);
+hydro_frac (theta,hydro_theta_cent,ihydro_theta,&jm,&jj,&f2);
+v_r_interp=hydro_interp_value(v_r_input,im,ii,jm,jj,f1,f2);		
+
+im = jm = ii = jj = 0;
+f1=f2=0.0;
+
+hydro_frac (r,hydro_r_cent,ihydro_r,&im,&ii,&f1);
+hydro_frac (theta,hydro_theta_cent,ihydro_theta,&jm,&jj,&f2);
 
 
+        v_theta_interp=hydro_interp_value(v_theta_input,im,ii,jm,jj,f1,f2);	
+		
+im = jm = ii = jj = 0;
+f1=f2=0.0;
+hydro_frac (r,hydro_r_cent,ihydro_r,&im,&ii,&f1);
+hydro_frac (theta,hydro_theta_cent,ihydro_theta,&jm,&jj,&f2);	
+v_phi_interp=hydro_interp_value(v_phi_input,im,ii,jm,jj,f1,f2);		
 
-  while (hydro_r_cent[ii] < r && ii <= ihydro_r)	//Search through radius array, until array value is greater than your value of r
-    ii++;
-  while (hydro_theta_cent[jj] < theta && jj <= ihydro_theta)	//Search through theta array until value is greater than your value of theta
-    jj++;
+//printf ("TEST7 %e cos %e sin %e\n",theta,cos(theta),sin(theta));
 
-
-
-  if (ii > 0 && ii < ihydro_r)
-    {				//r is in the normal range
-
-      f1 = (r - hydro_r_cent[ii - 1]) / (hydro_r_cent[ii] - hydro_r_cent[ii - 1]);	//Work out fractional position in the ii-1th radial bin where you want to be
-      im = ii - 1;		//This is the radial bin below your value of r
-
-    }
-  else if (ii == ihydro_r)
-    {				// r is greater than anything in Proga's model
-
-      f1 = 1;			//If we are outside the model set fractional position to 1
-      im = ii - 1;		//And the bin to the outermost
-    }
-  else
-    {
-      f1 = 1;			//Otherwise, we must be inide the innermost bin, so again, set fration to 1
-      im = 0;			// And the bin to the innermost. Lines below to the same for theta.
-    }
-//      printf ("f1=%e im=%i ",f1,im);
-  if (jj > 0 && jj < ihydro_theta)
-    {				// theta is inside the normal range
-
-      f2 =
-	(theta - hydro_theta_cent[jj - 1]) / (hydro_theta_cent[jj] -
-					      hydro_theta_cent[jj - 1]);
-      jm = jj - 1;
-    }
-  else if (jj == ihydro_theta)
-    {				//theta is more than the maximum theta
-
-      f2 = 1;
-      jm = jj - 1;
-    }
-  else
-    {				//theta is less than the expected theta
-
-      f2 = 1;
-      jm = 0;
-    }
-//printf ("f2=%e jm=%i \n",f1,im);
-//printf ("Cells to use are %i %i %i %i\n",im * MAXHYDRO + jm,im * MAXHYDRO + jj,ii*MAXHYDRO+jm,ii*MAXHYDRO+jj);
-//printf ("v_theta= %e %e %e %e\n",hydro_ptr[im * MAXHYDRO + jm].v[1],hydro_ptr[im * MAXHYDRO + jj].v[1],hydro_ptr[ii
-//                                                                          *
-//                                                                          MAXHYDRO
-//                                                                          +
-//                                                                          jm].v
-//                                                                [1],hydro_ptr[ii
-//                                                                          *
-//                                                                          MAXHYDRO
-//                                                                          +
-//                                                                          jj].v
-//                                                                [1]);
-  vr =
-    (1. - f1) * ((1. - f2) * hydro_ptr[im * MAXHYDRO + jm].v[0] +
-		 f2 * hydro_ptr[im * MAXHYDRO + jj].v[0]) + f1 * ((1. -
-								   f2) *
-								  hydro_ptr[ii
-									    *
-									    MAXHYDRO
-									    +
-									    jm].
-								  v[0] +
-								  f2 *
-								  hydro_ptr[ii
-									    *
-									    MAXHYDRO
-									    +
-									    jj].
-								  v[0]);
-
-  vtheta =
-    (1. - f1) * ((1. - f2) * hydro_ptr[im * MAXHYDRO + jm].v[1] +
-		 f2 * hydro_ptr[im * MAXHYDRO + jj].v[1]) + f1 * ((1. -
-								   f2) *
-								  hydro_ptr[ii
-									    *
-									    MAXHYDRO
-									    +
-									    jm].
-								  v[1] +
-								  f2 *
-								  hydro_ptr[ii
-									    *
-									    MAXHYDRO
-									    +
-									    jj].
-								  v[1]);
-
-  vphi =
-    (1. - f1) * ((1. - f2) * hydro_ptr[im * MAXHYDRO + jm].v[2] +
-		 f2 * hydro_ptr[im * MAXHYDRO + jj].v[2]) + f1 * ((1. -
-								   f2) *
-								  hydro_ptr[ii
-									    *
-									    MAXHYDRO
-									    +
-									    jm].
-								  v[2] +
-								  f2 *
-								  hydro_ptr[ii
-									    *
-									    MAXHYDRO
-									    +
-									    jj].
-								  v[2]);
-
-
-
-  v[0] = vr * sin (theta) - vtheta * cos (theta);
-  v[1] = vphi;
-  v[2] = vr * cos (theta) + vtheta * sin (theta);
+  v[0] = v_r_interp * sin (theta) + v_theta_interp * cos (theta);
+  v[1] = v_phi_interp;
+  v[2] = v_r_interp * cos (theta) - v_theta_interp * sin (theta);
 
   speed = sqrt (v[0] * v[0] + v[1] * v[1] * v[2] * v[2]);
 
@@ -520,6 +428,7 @@ hydro_velocity (x, v)
   return (speed);
 
 }
+
 
 
 double
@@ -543,57 +452,18 @@ hydro_rho (x)
     }
 
   im = jm = ii = jj = 0;
-  while (hydro_r_cent[ii] < r && ii < ihydro_r)
-    ii++;
-  while (hydro_theta_cent[jj] < theta && jj < ihydro_theta)
-    jj++;
+  f1=f2=0.0;
+  hydro_frac (r,hydro_r_cent,ihydro_r,&im,&ii,&f1);
+  hydro_frac (theta,hydro_theta_cent,ihydro_theta,&jm,&jj,&f2);
 
-  if (ii > 0)
-    {
-      f1 =
-	(r - hydro_r_cent[ii - 1]) / (hydro_r_cent[ii] -
-				      hydro_r_cent[ii - 1]);
-      im = ii - 1;
-    }
-  else
-    f1 = 1;
+  		rrho=hydro_interp_value(rho_input,im,ii,jm,jj,f1,f2);		
 
-  if (jj > 0)
-    {
-      f2 =
-	(theta - hydro_theta_cent[jj - 1]) / (hydro_theta_cent[jj] -
-					      hydro_theta_cent[jj - 1]);
-      jm = jj - 1;
-    }
-  else
-    f2 = 1;
-
-
-//rrho=hydro_ptr[ii*MAXHYDRO+jj].rho;
-//  printf ("Data rho=%e\n",hydro_ptr[im * MAXHYDRO + jm].rho);
-  rrho =
-    (1. - f1) * ((1. - f2) * hydro_ptr[im * MAXHYDRO + jm].rho +
-		 f2 * hydro_ptr[im * MAXHYDRO + jj].rho) + f1 * ((1. -
-								  f2) *
-								 hydro_ptr[ii
-									   *
-									   MAXHYDRO
-									   +
-									   jm].
-								 rho +
-								 f2 *
-								 hydro_ptr[ii
-									   *
-									   MAXHYDRO
-									   +
-									   jj].
-								 rho);
-//  printf ("Rho= %e\n",rrho);
 
   if (rrho < 1e-23)
     rrho = 1e-23;
 
-  //  printf ("Grid point %d %d rho %e f1=%f f2=%f\n", ii, jj, rrho,f1,f2);
+
+    printf ("Grid point %d %d rho %e f1=%f f2=%f\n", ii, jj, rrho,f1,f2);
 
   return (rrho);
 }
@@ -616,6 +486,8 @@ Description:
 Notes:
 History:
  	13apr	nsh	Began work
+	15oct 	nsh - temperature is now computed by a helper script,
+				also now common code removed to subroutines
 	
 **************************************************************/
 
@@ -633,6 +505,10 @@ hydro_temp (x)
   theta = asin (sqrt (x[0] * x[0] + x[1] * x[1]) / r);
   // printf ("x %.2g %.2g %.2g  -> r= %.2g theta = %.2g\n", x[0], x[1], x[2], r,
 //        theta);
+  
+  
+  im = jm = ii = jj = 0;
+  f1=f2=0.0;
 
   if (r > hydro_r_cent[ihydro_r])
     {
@@ -640,53 +516,16 @@ hydro_temp (x)
       temp = 1e4;
       return (temp);
     }
+	
 
-  im = jm = ii = jj = 0;
-  while (hydro_r_cent[ii] < r && ii < ihydro_r)
-    ii++;
-  while (hydro_theta_cent[jj] < theta && jj < ihydro_theta)
-    jj++;
+    hydro_frac (r,hydro_r_cent,ihydro_r,&im,&ii,&f1);
+    hydro_frac (theta,hydro_theta_cent,ihydro_theta,&jm,&jj,&f2);
 
-  if (ii > 0)
-    {
-      f1 =
-	(r - hydro_r_cent[ii - 1]) / (hydro_r_cent[ii] -
-				      hydro_r_cent[ii - 1]);
-      im = ii - 1;
-    }
-  else
-    f1 = 1;
-
-  if (jj > 0)
-    {
-      f2 =
-	(theta - hydro_theta_cent[jj - 1]) / (hydro_theta_cent[jj] -
-					      hydro_theta_cent[jj - 1]);
-      jm = jj - 1;
-    }
-  else
-    f2 = 1;
+    temp=hydro_interp_value(temp_input,im,ii,jm,jj,f1,f2);
 
 
-//rrho=hydro_ptr[ii*MAXHYDRO+jj].rho;
-
-  temp =
-    (1. - f1) * ((1. - f2) * hydro_ptr[im * MAXHYDRO + jm].temp +
-		 f2 * hydro_ptr[im * MAXHYDRO + jj].temp) + f1 * ((1. -
-								   f2) *
-								  hydro_ptr[ii
-									    *
-									    MAXHYDRO
-									    +
-									    jm].
-								  temp +
-								  f2 *
-								  hydro_ptr[ii
-									    *
-									    MAXHYDRO
-									    +
-									    jj].
-								  temp);
+  if (temp < 1e4)		//Set a lower limit.
+    temp = 1e4;
 
   if (temp < 1e4)		//Set a lower limit.
     temp = 1e4;
@@ -695,6 +534,7 @@ hydro_temp (x)
 
   return (temp);
 }
+
 
 
 
@@ -837,7 +677,7 @@ rtheta_hydro_volumes (ndom, w)
   DomainPtr one_dom;
 
   one_dom = &zdom[ndom];
-
+  printf ("NSH here in hydro_volumes\n");
 
 
 
@@ -874,3 +714,140 @@ rtheta_hydro_volumes (ndom, w)
     }
   return (0);
 }
+
+
+/***********************************************************
+                                       Southampton
+
+ Synopsis:
+	hydro_frac replaces many lines of identical code, all of which
+	interpolate on the input grid to get value for the python grid.
+	This code find out the fraction along a coord array where the centre
+	or edge of the python grid cell lies on the hydro grid
+Arguments:		
+		double coord;
+		double coord_array[];
+		int imax;
+		int *cell1,*cell2;
+		double *frac;
+Returns:
+ 
+Description:
+
+	
+
+
+History:
+	15sept	nsh	76 -- Coded and debugged.
+
+
+**************************************************************/
+
+
+
+
+int
+	hydro_frac (coord,coord_array,imax,cell1,cell2,frac)
+		double coord;
+		double coord_array[];
+		int imax;
+		int *cell1,*cell2;
+		double *frac;
+	{	
+		int ii;
+		ii=0;
+		*cell1=0;
+		*cell2=0;
+
+	    while (coord_array[ii] < coord && ii < imax)	//Search through array, until array value is greater than your coordinate
+	      ii++;
+
+
+	    
+
+
+
+
+//if (ii > 0 && ii < imax)
+
+    if (ii > imax)
+	    {				// r is greater than anything in Proga's model
+//  printf ("I DONT THINK WE CAN EVER GET HERE\n");
+	     *frac = 1;			//If we are outside the model set fractional position to 1
+      *cell1 = *cell2 = imax;		//And the bin to the outermost
+		return(0);
+	  }
+	  else if (ii==0)
+	    {
+    *frac = 1;			//Otherwise, we must be inside the innermost bin, so again, set fration to 1
+	    *cell1 = *cell2 = 0;			// And the bin to the innermost. Lines below to the same for theta.
+		 return(0);
+		 }
+ 		else if (ii>0)
+   {				//r is in the normal range
+
+     *frac = (coord - coord_array[ii - 1]) / (coord_array[ii] - coord_array[ii - 1]);	//Work out fractional position in the ii-1th radial bin where you want to be
+     *cell1 = ii - 1;		//This is the radial bin below your value of r
+	  *cell2 = ii;
+	  return(0);
+   }
+		 
+		 
+		 
+
+  return(0);
+}
+
+/***********************************************************
+                                       Southampton
+
+ Synopsis:
+	hydro_interp_value replaces many lines of identical code, all of which
+	interpolate on the input grid to get value for the python grid.
+Arguments:		
+		double array[]; - the arrayof input data
+		int im,ii; //the two cells surrounding the cell in the first dim (r)
+		int jm,jj; //the two cells surrounding the cell in the second dim (theta)
+		double f1,f2;  //the fraction between the two values in first and second dim
+Returns:
+ 
+Description:
+
+	
+
+
+History:
+	15sept	nsh	76 -- Coded and debugged.
+
+
+**************************************************************/
+
+
+
+double
+	hydro_interp_value(array,im,ii,jm,jj,f1,f2)
+		double array[];
+		int im,ii; //the two cells surrounding the cell in the first dim (r)
+		int jm,jj; //the two cells surrounding the cell in the second dim (theta)
+		double f1,f2;  //the fraction between the two values in first and second dim
+	{	
+				double value;
+				double d1,d2;
+				
+//				printf ("TEST7b %i %i %i %i %e %e %e\n",im,ii,jm,jj,f1,f2,array[im * MAXHYDRO + jm]);
+
+				d1=array[im * MAXHYDRO + jm]+f1*(array[ii * MAXHYDRO + jm]-array[im * MAXHYDRO + jm]);
+				d2=array[im * MAXHYDRO + jj]+f1*(array[ii * MAXHYDRO + jj]-array[im * MAXHYDRO + jj]);
+				value=d1+f2*(d2-d1);
+//								printf ("TEST3 %e %e %e\n",d1,d2,value);
+				
+				
+			  
+				
+	
+
+//	    value =
+//    (1. - f1) * ((1. - f2) * array[im * MAXHYDRO + jm] + f2 * array[im * MAXHYDRO + jj]) + 
+//			 f1 *  ((1. - f2) * array[ii * MAXHYDRO + jm] + f2 * array[ii * MAXHYDRO + jj]);
+		return(value);
+	}

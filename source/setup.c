@@ -623,6 +623,7 @@ get_wind_params (ndom)
   else if (zdom[ndom].wind_type == 3)
     {
       get_hydro_wind_params (ndom);
+	  printf ("NSH back from get_hydro, hydro is domian %i ndim=%i mdim=%i\n",ndom,zdom[ndom].ndim,zdom[ndom].mdim);
     }
   else if (zdom[ndom].wind_type == 4)
     {

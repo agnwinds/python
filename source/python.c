@@ -515,7 +515,8 @@ main (argc, argv)
          and then gets params by calling e.g. get_sv_wind_params() */
 
       get_wind_params (geo.wind_domain_number);
-
+	  printf ("NSH back from get_wind, hydro is domian %i ndim=%i mdim=%i\n",geo.wind_domain_number,zdom[geo.wind_domain_number].ndim,zdom[geo.wind_domain_number].mdim);
+	  
       if (geo.atmos_domain_number>=0) {
 	      get_wind_params(geo.atmos_domain_number);
       }
@@ -748,6 +749,7 @@ main (argc, argv)
 
   if (geo.run_type != SYSTEM_TYPE_PREVIOUS)	// Define the wind and allocate the arrays the first time
     {
+		printf("NSH about to go to define_wind \n");
       define_wind ();
     }
 
