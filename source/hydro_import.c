@@ -335,6 +335,16 @@ get_hydro (ndom)
 //geo.ndim2 = NDIM2 += zdom[ndom].ndim * zdom[ndom].mdim;
 
 
+for (i=0;i<mdim;i++)
+{
+	printf ("hydro_grid i=%i theta_edge=%f theta_cen=%f\n",i,hydro_theta_edge[i]*RADIAN,hydro_theta_cent[i]*RADIAN);
+}
+for (i=0;i<ndim;i++)
+{
+	printf ("hydro_grid i=%i r_edge=%f r_cen=%f\n",i,hydro_r_edge[i],hydro_r_cent[i]);
+}
+
+
   return (0);
 }
 
