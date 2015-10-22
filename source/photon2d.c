@@ -239,27 +239,27 @@ ds_to_wind (pp)
       if ((x = ds_to_sphere (zdom[ndom].rmax, &ptest)) < ds)
 	  {
 	  	ds = x;
-		printf ("hitting outer radius\n");
+//		printf ("hitting outer radius\n");
       }
 
       if ((x = ds_to_sphere (zdom[ndom].rmin, &ptest)) < ds)
 	  {
 	  	ds = x;
-		printf ("hitting inner radius %e\n",zdom[ndom].rmin);
+//		printf ("hitting inner radius %e\n",zdom[ndom].rmin);
       }
       /* Check if the photon hits the inner or outer windcone */
-	  printf ("Checking inner\n");
+//	  printf ("Checking inner\n");
       if ((x = ds_to_cone (&zdom[ndom].windcone[0], &ptest)) < ds)
 	  {
 	  	ds = x;
-		printf ("hitting inner windcone\n");
+//		printf ("hitting inner windcone\n");
       }
-	  printf ("Checking outer\n");
+//	  printf ("Checking outer\n");
 	  
       if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
 	  {
 	  	ds = x;
-		printf ("hitting outer windcone\n");
+//		printf ("hitting outer windcone\n");
       }
       if (zdom[ndom].wind_type == CORONA)  {
 
@@ -267,12 +267,12 @@ ds_to_wind (pp)
 	      x = ds_to_plane (&zdom[ndom].windplane[0], &ptest);
 	      if (x>0 && x<ds)	  {
 	  	ds = x;
-		printf ("hitting inner windplane\n");
+//		printf ("hitting inner windplane\n");
       }
 	      x = ds_to_plane (&zdom[ndom].windplane[1], &ptest);
 	      if (x>0 && x<ds) {
 	  	ds = x;
-		printf ("hitting outer windplane\n");
+//		printf ("hitting outer windplane\n");
       }
       }
 
@@ -286,11 +286,11 @@ ds_to_wind (pp)
 	  if (x < ds)
 	  {
 	 	  	ds = x;
-	 		printf ("hitting pillbox\n");
+//	 		printf ("hitting pillbox\n");
 	       }
 	}
     }
-    printf ("NSH_photon x=%e y=%e z=%e  distance to shpere=%e\n",pp->x[0],pp->x[1],pp->x[2],ds);
+//    printf ("NSH_photon x=%e y=%e z=%e  distance to shpere=%e\n",pp->x[0],pp->x[1],pp->x[2],ds);
 
 
 
