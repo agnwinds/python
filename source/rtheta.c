@@ -264,7 +264,7 @@ rtheta_make_cones (ndom, w)
   if (zdom[ndom].cones_rtheta == NULL)
     {
       Error
-	("rtheta_make_grid: There is a problem in allocating memory for the cones structure\n");
+	("rtheta_make_gid: There is a problem in allocating memory for the cones structure\n");
       exit (0);
 
     }
@@ -274,6 +274,7 @@ rtheta_make_cones (ndom, w)
     {
       zdom[ndom].cones_rtheta[n].z = 0.0;
       zdom[ndom].cones_rtheta[n].dzdr = 1. / tan (w[n].theta / RADIAN);	// New definition
+	  printf ("NSH cones z=%e dzdr=%e\n",zdom[ndom].cones_rtheta[n].z,zdom[ndom].cones_rtheta[n].dzdr);
     }
 
 
