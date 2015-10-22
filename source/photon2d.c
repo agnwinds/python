@@ -229,10 +229,8 @@ ds_to_wind (pp)
   ds = ds_to_sphere (geo.wind_rmax, &ptest);
   if ((x = ds_to_sphere (geo.wind_rmin, &ptest)) < ds)
     ds = x;
-  printf ("looking to inner cone\n");
   if ((x = ds_to_cone (&windcone[0], &ptest)) < ds)
     ds = x;
-  printf ("looking to outer cone\n");
   
   if ((x = ds_to_cone (&windcone[1], &ptest)) < ds)
     ds = x;
