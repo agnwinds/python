@@ -356,7 +356,7 @@ ds_to_cone (cc, p)
     }
 
   /* Set up and solve the quadratic equation that gives the cone intercept */
-
+	printf ("NSH_dzdr=%e\n",cc->dzdr);
   dzdr2 = cc->dzdr * cc->dzdr;
   dz = pp.x[2] - cc->z;
 

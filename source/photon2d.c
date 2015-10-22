@@ -237,34 +237,45 @@ ds_to_wind (pp)
      all of the "computatational domain */
 
   ds = ds_to_sphere (geo.rmax, &ptest);
-
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
       /* Check if the photon hits the inner or outer radius of the wind */
       if ((x = ds_to_sphere (zdom[ndom].rmax, &ptest)) < ds)
-	ds = x;
+	  {
+	  	ds = x;
+		printf ("hitting outer radius\n");
+      }
 
       if ((x = ds_to_sphere (zdom[ndom].rmin, &ptest)) < ds)
-	ds = x;
-
+	  {
+	  	ds = x;
+		printf ("hitting inner radius %e\n",geo.rmin);
+      }
       /* Check if the photon hits the inner or outer windcone */
 
       if ((x = ds_to_cone (&zdom[ndom].windcone[0], &ptest)) < ds)
-	ds = x;
+	  {
+	  	ds = x;
+		printf ("hitting inner windcone\n");
+      }
       if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
-	ds = x;
-
+	  {
+	  	ds = x;
+		printf ("hitting outer windcone\n");
+      }
       if (zdom[ndom].wind_type == CORONA)  {
 
 	      /* As currently written ds_to_plane can give a negative number */
 	      x = ds_to_plane (&zdom[ndom].windplane[0], &ptest);
-	      if (x>0 && x<ds){
-		      ds=x;
-	      }
+	      if (x>0 && x<ds)	  {
+	  	ds = x;
+		printf ("hitting inner windplane\n");
+      }
 	      x = ds_to_plane (&zdom[ndom].windplane[1], &ptest);
-	      if (x>0 && x<ds){
-		      ds=x;
-	      }
+	      if (x>0 && x<ds) {
+	  	ds = x;
+		printf ("hitting outer windplane\n");
+      }
       }
 
 
@@ -275,9 +286,14 @@ ds_to_wind (pp)
 	    ds_to_pillbox (&ptest, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax,
 			   zdom[ndom].elvis_offset);
 	  if (x < ds)
-	    ds = x;
+	  {
+	 	  	ds = x;
+	 		printf ("hitting pillbox\n");
+	       }
 	}
     }
+    printf ("NSH_photon x=%e y=%e z=%e  distance to shpere=%e\n",pp->x[0],pp->x[1],pp->x[2],ds);
+	
 
   return (ds);
 }
