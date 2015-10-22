@@ -245,6 +245,7 @@ main (argc, argv)
   int time_to_quit;
   int ndomain = 0;		//Local variable for ndomain
   int ndom;
+  int i,j;
 
 
 #ifdef MPI_ON
@@ -817,6 +818,9 @@ main (argc, argv)
 
 
 /* XXXX -  CALCULATE THE IONIZATION OF THE WIND */
+
+
+
 
   calculate_ionization (restart_stat);
 

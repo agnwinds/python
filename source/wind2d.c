@@ -288,6 +288,7 @@ define_wind ()
 	    {
 
 	      n_inwind = check_corners_inwind (n);
+	  	n_inwind=check_centre_inwind(n);
 
 	      if (w[n].vol == 0 && n_inwind > 0)
 		{
@@ -1261,3 +1262,35 @@ check_corners_inwind (n)
 
   return (n_inwind);
 }
+
+
+
+int
+check_centre_inwind (n1)
+     int n1;
+{
+  int n_inwind;
+  int i, j, i1,j1;
+  DomainPtr one_dom;
+  int ndom, ndomain,n2;
+
+  /* find the domain */
+  ndom = wmain[n1].ndom;
+  one_dom = &zdom[ndom];
+
+  wind_n_to_ij (ndom, n1, &i, &j);
+//  printf("NSH_test1 cell centre is  inner%e r=%e outer %e inner=%e %e theta=%e outer=%e %e\n",zdom[ndom].wind_x[i],wmain[n1].rcen,zdom[ndom].wind_x[i+1],zdom[ndom].wind_z[j],
+//  atan(1./zdom[ndom].cones_rtheta[j].dzdr)*RADIAN,wmain[n1].thetacen,zdom[ndom].wind_z[j+1],atan(1./zdom[ndom].cones_rtheta[j+1].dzdr)*RADIAN);
+  
+  n2 = where_in_grid (ndom, wmain[n1].xcen);
+  wind_n_to_ij (ndom, n2, &i1, &j1);
+
+
+//  printf ("NSH_test1 i am in cell %i, where in grid returns %i\n",n1,n2);
+
+  return (n2);
+
+
+}
+
+

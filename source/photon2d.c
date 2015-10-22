@@ -74,7 +74,7 @@ translate (w, pp, tau_scat, tau, nres)
 	("translate: Found photon that was not in wind or grid, istat %i\n",
 	 where_in_wind (pp->x,&ndomain));
     }
-
+//	printf ("NSH_rtheta photon %i istat=%i domain=%i\n",pp->np,istat,ndomain);
   return (istat);
 }
 
@@ -647,8 +647,16 @@ walls (p, pold)
 
   rho_sq = (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
   if (rho_sq > geo.rmax_sq)
+  {
+	 //printf ("NSH_rtheta walls thinks we have escaped rho_sq=%e geo,rmax_sq=%e\n",rho_sq,geo.rmax_sq);
+ 
     return (p->istat = P_ESCAPE);	/* The photon is coursing through the universe */
+  }
   if (fabs (p->x[2]) > geo.rmax)
-    return (p->istat = P_ESCAPE);
+  {
+//	  printf ("NSH_rtheta walls thinks we have escaped p->x[2]=%e geo,rmax_sq=%e\n",p->x[2],geo.rmax_sq);
+      return (p->istat = P_ESCAPE);
+  	
+  }
   return (p->istat);		/* The photon is still in the wind */
 }

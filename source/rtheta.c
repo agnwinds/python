@@ -62,15 +62,22 @@ rtheta_ds_in_cell (p)
     }
 
   wind_n_to_ij (ndom, n, &ix, &iz);	/*Convert the index n to two dimensions */
+//    printf ("NSH_rtheta photon %i in cell %i ix=%i iz=%i r=%e theta=%e\n",p->np,n,ix,iz,wmain[p->grid].r,wmain[p->grid].theta);
+//	  printf ("NSH_rtheta bounded by inner_cone=%e outer_cone=%e inner_rad=%e outer_rad=%e\n",atan(1./zdom[ndom].cones_rtheta[iz].dzdr)*RADIAN,atan(1./zdom[ndom].cones_rtheta[iz+1].dzdr)*RADIAN,zdom[ndom].wind_x[ix],zdom[ndom].wind_x[ix+1]);
 
 
   /* Set up the quadratic equations in the radial  direction */
 
   smax = ds_to_sphere (zdom[ndom].wind_x[ix], p);
+//   printf ("NSH_rtheta distnace to inner radius s=%e\n",smax);
   s = ds_to_sphere (zdom[ndom].wind_x[ix + 1], p);
   if (s < smax)
-    smax = s;
+  {
+      smax = s;
+	  
+//	  	  printf ("NSH_rtheta hitting outer radius s=%e, should next be in zone %i\n",smax,ix+1);
 
+  }
 
   /* At this point we have found how far the photon can travel in r in its
      current direction.  Now we must worry about motion in the theta direction  */
@@ -79,14 +86,14 @@ rtheta_ds_in_cell (p)
   if (s < smax)
   {
       smax = s;
-printf ("NSH_rtheta in cell %i, hitting upper s=%e, should next be in cone %i\n",iz,s,iz-1); 	
+//	 printf ("NSH_rtheta hitting upper cone s=%e, should next be in cone %i\n",s,iz-1); 	
   }
 
   s = ds_to_cone (&zdom[ndom].cones_rtheta[iz + 1], p);
   if (s < smax)
   {
       smax = s;
-printf ("NSH_rtheta in cell %i, hitting lower s=%e, should next be in cone %i\n",iz,s,iz+1);  	
+//		  printf ("NSH_rtheta hitting lower cone s=%e, should next be in cone %i\n",s,iz+1);  	
   }
 
   if (smax <= 0)
@@ -165,7 +172,7 @@ rtheta_make_grid (w, ndom)
 
   /* First calculate parameters that are to be calculated at the edge of the grid cell.  This is
      mainly the positions and the velocity */
-  for (i = 0; i < mdim; i++)
+  for (i = 0; i < ndim; i++)
     {
       for (j = 0; j < mdim; j++)
 	{
@@ -417,7 +424,7 @@ rtheta_volumes (ndom, w)
   ndim = zdom[ndom].ndim;
   mdim = zdom[ndom].mdim;
 
-  for (i = 0; i < mdim; i++)
+  for (i = 0; i < ndim; i++)
     {
       for (j = 0; j < mdim; j++)
 	{

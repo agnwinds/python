@@ -136,6 +136,8 @@ get_hydro_wind_params (ndom)
 
   geo.rmax = zdom[ndom].rmax = hydro_r_edge[ihydro_r] + 2.0 * (hydro_r_cent[ihydro_r] - hydro_r_edge[ihydro_r]);	//Set the outer edge of the wind to the outer edge of the final defined cell
   Log ("rmax=%e\n", geo.rmax);
+  geo.rmax_sq=geo.rmax*geo.rmax;  
+  Log ("rmax_sq=%e\n", geo.rmax);
   geo.wind_rho_min =zdom[ndom].wind_rho_min= 0.0;	//Set wind_rmin 0.0, otherwise wind cones dont work properly 
   Log ("rho_min=%e\n", zdom[ndom].wind_rho_min);
   geo.wind_rho_max = zdom[ndom].wind_rho_max = zdom[ndom].rmax;	//This is the outer edge of the
@@ -470,7 +472,7 @@ hydro_rho (x)
 
 
 //    printf ("Grid point %d %d rho %e f1=%f f2=%f\n", ii, jj, rrho,f1,f2);
-
+  rrho=1e-23;
   return (rrho);
 }
 
