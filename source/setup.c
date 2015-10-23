@@ -110,6 +110,12 @@ parse_command_line (argc, argv)
 	      modes.fixed_temp = 1;
 	      i++;
 	    }
+	    else if (strcmp (argv[i], "-z") == 0)
+	      {
+	        modes.zeus_connect = 1;
+			Log ("setting zeus_connect to %i\n",modes.zeus_connect);
+			i++;
+	      }
 
 	  else if (strcmp (argv[i], "-i") == 0)
 	    {
@@ -627,7 +633,6 @@ get_wind_params (ndom)
   else if (zdom[ndom].wind_type == 3)
     {
       get_hydro_wind_params (ndom);
-	  printf ("NSH back from get_hydro, hydro is domian %i ndim=%i mdim=%i\n",ndom,zdom[ndom].ndim,zdom[ndom].mdim);
     }
   else if (zdom[ndom].wind_type == 4)
     {

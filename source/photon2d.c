@@ -62,10 +62,7 @@ translate (w, pp, tau_scat, tau, nres)
     }
   else if ((pp->grid = where_in_grid (ndomain,pp->x)) >= 0)
     {
-//		 printf ("photon %i start=%e %e %e %e",pp->np,pp->x[0], pp->x[1], pp->x[2],sqrt(pp->x[0]*pp->x[0]+pp->x[1]*pp->x[1]+pp->x[2]*pp->x[2]));
       istat = translate_in_wind (w, pp, tau_scat, tau, nres);
-//	 printf ("end=%e %e %e %e\n",pp->x[0], pp->x[1], pp->x[2],sqrt(pp->x[0]*pp->x[0]+pp->x[1]*pp->x[1]+pp->x[2]*pp->x[2]));
-		
     }
   else
     {
@@ -74,7 +71,6 @@ translate (w, pp, tau_scat, tau, nres)
 	("translate: Found photon that was not in wind or grid, istat %i\n",
 	 where_in_wind (pp->x,&ndomain));
     }
-//	printf ("NSH_rtheta photon %i istat=%i domain=%i\n",pp->np,istat,ndomain);
   return (istat);
 }
 
@@ -239,27 +235,21 @@ ds_to_wind (pp)
       if ((x = ds_to_sphere (zdom[ndom].rmax, &ptest)) < ds)
 	  {
 	  	ds = x;
-//		printf ("hitting outer radius\n");
       }
 
       if ((x = ds_to_sphere (zdom[ndom].rmin, &ptest)) < ds)
 	  {
 	  	ds = x;
-//		printf ("hitting inner radius %e\n",zdom[ndom].rmin);
       }
       /* Check if the photon hits the inner or outer windcone */
-//	  printf ("Checking inner\n");
       if ((x = ds_to_cone (&zdom[ndom].windcone[0], &ptest)) < ds)
 	  {
 	  	ds = x;
-//		printf ("hitting inner windcone\n");
       }
-//	  printf ("Checking outer\n");
 	  
       if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
 	  {
 	  	ds = x;
-//		printf ("hitting outer windcone\n");
       }
       if (zdom[ndom].wind_type == CORONA)  {
 
@@ -267,12 +257,10 @@ ds_to_wind (pp)
 	      x = ds_to_plane (&zdom[ndom].windplane[0], &ptest);
 	      if (x>0 && x<ds)	  {
 	  	ds = x;
-//		printf ("hitting inner windplane\n");
       }
 	      x = ds_to_plane (&zdom[ndom].windplane[1], &ptest);
 	      if (x>0 && x<ds) {
 	  	ds = x;
-//		printf ("hitting outer windplane\n");
       }
       }
 
@@ -286,11 +274,9 @@ ds_to_wind (pp)
 	  if (x < ds)
 	  {
 	 	  	ds = x;
-//	 		printf ("hitting pillbox\n");
 	       }
 	}
     }
-//    printf ("NSH_photon x=%e y=%e z=%e  distance to shpere=%e\n",pp->x[0],pp->x[1],pp->x[2],ds);
 
 
 
@@ -647,16 +633,12 @@ walls (p, pold)
 
   rho_sq = (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
   if (rho_sq > geo.rmax_sq)
-  {
-	 //printf ("NSH_rtheta walls thinks we have escaped rho_sq=%e geo,rmax_sq=%e\n",rho_sq,geo.rmax_sq);
- 
+  { 
     return (p->istat = P_ESCAPE);	/* The photon is coursing through the universe */
   }
   if (fabs (p->x[2]) > geo.rmax)
   {
-//	  printf ("NSH_rtheta walls thinks we have escaped p->x[2]=%e geo,rmax_sq=%e\n",p->x[2],geo.rmax_sq);
-      return (p->istat = P_ESCAPE);
-  	
+      return (p->istat = P_ESCAPE);  	
   }
   return (p->istat);		/* The photon is still in the wind */
 }

@@ -316,7 +316,6 @@ get_hydro (ndom)
     }
 
 
-	printf ("NSH thetamax= %e \n",geo.wind_thetamax);
 
 
   if (hydro_r_edge[0] < geo.rstar)
@@ -472,7 +471,6 @@ hydro_rho (x)
 
 
 //    printf ("Grid point %d %d rho %e f1=%f f2=%f\n", ii, jj, rrho,f1,f2);
-  rrho=1e-23;
   return (rrho);
 }
 

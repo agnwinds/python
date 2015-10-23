@@ -228,9 +228,7 @@ trans_phot (
 	}
 
       p[nphot].np = nphot;
-//	  printf ("NSH_rtheta going off to translate photon %i\n",nphot);
       trans_phot_single (w, &p[nphot], iextract);
-//	  printf ("NSH_rtheta back from translating photon %i\n",nphot);
 
     }
 
@@ -315,17 +313,14 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
          which case it reach the inner edge and was reabsorbed. If the photon escapes then we leave the photon at the position
          of it's last scatter.  In most other cases though we store the final position of the photon. */
 
-//		printf("NSH_rtheta off to translate\n");
 
       istat = translate (w, &pp, tau_scat, &tau, &nres);
       /* nres is the resonance at which the photon was stopped.  At present the same value is also stored in pp->nres, but I have 
          not yet eliminated it from translate. ?? 02jan ksl */
-//	printf("NSH_rtheta back from translate istat=%i\n",istat);
 
 
       icell++;
       istat = walls (&pp, p);
-//  	printf("NSH_rtheta back from walls istat=%i\n",istat);
 	  
       // pp is where the photon is going, p is where it was
 

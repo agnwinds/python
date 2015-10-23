@@ -118,7 +118,6 @@ define_wind ()
       zdom[ndom].nstop = n;
       //PLACEHOLDER  we should not really need to define NDIM and MDIM here, we may need NDIM2
       geo.ndim2 = NDIM2 += zdom[ndom].ndim * zdom[ndom].mdim;
-	  printf ("NSH domain %i ndim %i mdim %i NDIM2= %i geo.ndim2= %i\n",ndom,zdom[ndom].ndim , zdom[ndom].mdim,NDIM2,geo.ndim2);
     }
 
 
@@ -192,9 +191,7 @@ define_wind ()
 	}
 
     }
-	printf ("NSH finished making grid\n");
   wind_complete (w);
-  printf ("NSH back from completing wind\n");
 
   /* Now define the valid volumes of each cell and also determine whether the cells are in all
      or partially in the wind.
@@ -211,7 +208,6 @@ define_wind ()
   for (ndom = 0; ndom < geo.ndomain; ndom++)
 	  
     {
-		printf ("NSH doing domain %i with coord type %i\n",ndom,zdom[ndom].coord_type);
       if (zdom[ndom].coord_type == SPHERICAL)
 	{
 	  spherical_volumes (ndom, w);
@@ -222,19 +218,16 @@ define_wind ()
 	}
       else if (zdom[ndom].coord_type == RTHETA)
 	{
-		printf ("NSH we have a coord type of RTHETA, wind type is %i\n",geo.wind_type);
 	  /* 13jun -- nsh - 76 - This is a switch to allow one to use 
 	     the actual zeus grid in the special case of a 'proga' wind 
 	     in rtheta coordinates We dont need to work out if cells are 
 	     in the wind, they are known to be in the wind. */
 	  if (zdom[ndom].wind_type == 3)
 	    {
-			printf ("NSH going to make volumes for domain %i\n",ndom);
 	      rtheta_hydro_volumes (ndom, w);
 	    }
 	  else
 	    {
-			printf ("This is odd, we were supposed to be somewhere else!!\n");
 	      rtheta_volumes (ndom, w);
 	    }
 	}
@@ -249,7 +242,6 @@ define_wind ()
 	     zdom[ndom].coord_type);
 	}
     }
-	printf ("NSH made volumes\n");
 
 
 
@@ -267,7 +259,6 @@ define_wind ()
       n_vol = n_inwind = n_part = 0;
       for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
 	{
-//		printf ("Wind check x=%e y=%e z=%e density=\n",w[n].x[0],w[n].x[1],w[n].x[2]);
 	  if (w[n].vol > 0.0)
 	    n_vol++;
 	  if (w[n].inwind == W_ALL_INWIND)
@@ -286,10 +277,7 @@ define_wind ()
 	{
 	  for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
 	    {
-
 	      n_inwind = check_corners_inwind (n);
-	  	n_inwind=check_centre_inwind(n);
-
 	      if (w[n].vol == 0 && n_inwind > 0)
 		{
 		  wind_n_to_ij (ndom, n, &i, &j);
@@ -347,7 +335,6 @@ be optional which variables beyond here are moved to structures othere than Wind
 
 
 /* Now calculate parameters that need to be calculated at the center of the grid cell */
-  printf ("NSH about to start populating plasma NPLASMA=%i\n",NPLASMA);
 
   for (n = 0; n < NPLASMA; n++)
     {
@@ -1264,33 +1251,5 @@ check_corners_inwind (n)
 }
 
 
-
-int
-check_centre_inwind (n1)
-     int n1;
-{
-  int n_inwind;
-  int i, j, i1,j1;
-  DomainPtr one_dom;
-  int ndom, ndomain,n2;
-
-  /* find the domain */
-  ndom = wmain[n1].ndom;
-  one_dom = &zdom[ndom];
-
-  wind_n_to_ij (ndom, n1, &i, &j);
-//  printf("NSH_test1 cell centre is  inner%e r=%e outer %e inner=%e %e theta=%e outer=%e %e\n",zdom[ndom].wind_x[i],wmain[n1].rcen,zdom[ndom].wind_x[i+1],zdom[ndom].wind_z[j],
-//  atan(1./zdom[ndom].cones_rtheta[j].dzdr)*RADIAN,wmain[n1].thetacen,zdom[ndom].wind_z[j+1],atan(1./zdom[ndom].cones_rtheta[j+1].dzdr)*RADIAN);
-  
-  n2 = where_in_grid (ndom, wmain[n1].xcen);
-  wind_n_to_ij (ndom, n2, &i1, &j1);
-
-
-//  printf ("NSH_test1 i am in cell %i, where in grid returns %i\n",n1,n2);
-
-  return (n2);
-
-
-}
 
 
