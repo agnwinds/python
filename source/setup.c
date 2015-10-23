@@ -996,7 +996,7 @@ get_meta_params (void)
   {
     geo.reverb_lines = 0;
     geo.reverb_path_bins = 100;
-    geo.reverb_theta_bins = 100;
+    geo.reverb_angle_bins = 100;
     geo.reverb_dump_cells = 0;
     geo.reverb_vis = REV_VIS_NONE;
     rdint("reverb.path_bins", &geo.reverb_path_bins);
@@ -1011,7 +1011,7 @@ get_meta_params (void)
         Valid modes are 0=None, 1=VTK, 2=Cell dump, 3=Both.\n");
     }
     if(geo.reverb_vis == REV_VIS_VTK  || geo.reverb_vis == REV_VIS_BOTH)
-      rdint("reverb.theta_bins", &geo.reverb_theta_bins);
+      rdint("reverb.angle_bins", &geo.reverb_angle_bins);
     if(geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
     {
       rdint("reverb.dump_cells", &geo.reverb_dump_cells);
@@ -1073,7 +1073,6 @@ get_meta_params (void)
     if (geo.wind_radiation == 0)
     { 
       Error("reverb.type: Wind radiation is off but wind-based path tracking is enabled!\n");
-      exit(0);
     } 
   }
   return (0);

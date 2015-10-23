@@ -204,6 +204,8 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 	int	 nphot, mscat, mtopbot, i;
 	double zangle;
 
+
+	printf("delay_dump: Dumping %d photons\n",np);
 	/*
 	 * Open a file for writing the spectrum
 	 */
@@ -213,9 +215,12 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 		      delay_dump_file);
 		exit(0);
 	}
-	for (nphot = 0; nphot < np; nphot++) {
-		if (p[nphot].istat == P_ESCAPE && 
-			(p[nphot].nscat > 0 || p[nphot].origin == PTYPE_WIND || p[nphot].origin == PTYPE_WIND_MATOM)) 
+	for (nphot = 0; nphot < np; nphot++) 
+	{
+
+		if (iExtracted  || 
+			(p[nphot].istat == P_ESCAPE && 
+			(p[nphot].nscat > 0 || p[nphot].origin == PTYPE_WIND || p[nphot].origin == PTYPE_WIND_MATOM)))
 		{
 			zangle = fabs(p[nphot].lmn[2]);
 			/*
@@ -228,13 +233,16 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 			 * implies that you accept any photon with |mscat| or
 			 * more scatters
 			 */
-			for (i = MSPEC; i < nspectra; i++) {
-				if (((mscat = xxspec[i].nscat) > 999 || p[i].nscat == mscat
-				|| (mscat < 0 && p[nphot].nscat >= (-mscat)))
-				&& ((mtopbot = xxspec[i].top_bot) == 0
-				|| (mtopbot * p[nphot].x[2]) > 0)) 
+			for (i = MSPEC; i < nspectra; i++) 
+			{
+		  		if (((mscat = xxspec[i].nscat) > 999 ||
+		       		p[nphot].nscat == mscat ||
+		       		(mscat < 0 && p[nphot].nscat >= (-mscat)))
+		      		&& ((mtopbot = xxspec[i].top_bot) == 0
+			  		|| (mtopbot * p[nphot].x[2]) > 0))
 				{
-					if (xxspec[i].mmin < zangle && zangle < xxspec[i].mmax) 
+					if (iExtracted ||
+						(xxspec[i].mmin < zangle && zangle < xxspec[i].mmax))
 					{
 						fprintf(fptr,
 							"%10.5g %10.5g %10.5g %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g %5d %5d %5d %10d\n",
