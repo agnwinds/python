@@ -251,6 +251,7 @@ matrix_ion_populations (xplasma, mode)
       /* Replaced inline array allocaation with calloc, which will work with older version of c compilers */
 
       /* This next line produces an array of the correct size to hold the rate matrix */
+	
       a_data = (double *) calloc (sizeof (double), nrows * nrows);
 
       /* We now copy our rate matrix into the prepared matrix */
@@ -323,7 +324,7 @@ matrix_ion_populations (xplasma, mode)
 	  if (newden[nn] < DENSITY_MIN)	// this wil also capture the case where population doesnt have a value for this ion
 	    newden[nn] = DENSITY_MIN;
 	}
-
+	free (populations);
 
       xnew = get_ne (newden);	/* determine the electron density for this density distribution */
 

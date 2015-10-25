@@ -64,7 +64,6 @@ ion_abundances (xplasma, mode)
 {
   int ireturn;
 
-
   if (mode == IONMODE_ML93_FIXTE)
     {
 /* on-the-spot approximation using existing t_e.   This routine does not attempt 
@@ -416,7 +415,8 @@ History:
     15aug   nsh 79 -- added a mode to leave t_e fixed
 
 **************************************************************/
-\
+
+	PlasmaPtr xxxplasma;
 
 
 
@@ -438,8 +438,8 @@ one_shot (xplasma, mode)
 	if (modes.zeus_connect==1 || modes.fixed_temp==1)
 	{
 		te_new = te_old; //We dont want to change the temperature
-//		xxxplasma = xplasma;
-//		zero_emit(te_old); //But we do still want to compute all heating and cooling rates
+		xxxplasma = xplasma;
+		zero_emit(te_old); //But we do still want to compute all heating and cooling rates
 		dte = xplasma->dt_e=0.0;	 
 	}
 	else //Do things to old way - look for a new temperature
@@ -601,7 +601,6 @@ calc_te (xplasma, tmin, tmax)
 
 }
 
-PlasmaPtr xxxplasma;
 
 
 /* This is just a function which has a zero when total energy loss is equal to total energy gain */
