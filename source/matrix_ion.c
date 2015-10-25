@@ -280,7 +280,7 @@ matrix_ion_populations (xplasma, mode)
 	  b_data[nn] = b_temp[nn];
 	}
 
-      ierr = solve_matrix (a_data, b_data, nrows, populations);
+	     ierr = solve_matrix (a_data, b_data, nrows, populations);
 
       if (ierr != 0)
 	Error ("matrix_ion_populations: bad return from solve_matrix\n");
@@ -324,7 +324,6 @@ matrix_ion_populations (xplasma, mode)
 	  if (newden[nn] < DENSITY_MIN)	// this wil also capture the case where population doesnt have a value for this ion
 	    newden[nn] = DENSITY_MIN;
 	}
-	free (populations);
 
       xnew = get_ne (newden);	/* determine the electron density for this density distribution */
 
@@ -687,8 +686,8 @@ solve_matrix (a_data, b_data, nrows, x)
   m = gsl_matrix_view_array (a_data, nrows, nrows);
 
   /* these are used for testing the solution below */
-  test_matrix = gsl_matrix_alloc (nrows, nrows);
-  test_vector = gsl_vector_alloc (nrows);
+    test_matrix = gsl_matrix_alloc (nrows, nrows);
+	  test_vector = gsl_vector_alloc (nrows);
 
   gsl_matrix_memcpy (test_matrix, &m.matrix);	// create copy for testing 
 
@@ -714,47 +713,47 @@ solve_matrix (a_data, b_data, nrows, x)
      statement just says we do not do anything to test_matrix, and the 0.0 means we do not add a second matrix to the result
      If the solution has worked, then test_vector should be equal to b_temp */
 
-  ierr =
-    gsl_blas_dgemv (CblasNoTrans, 1.0, test_matrix, populations, 0.0,
-		    test_vector);
+    ierr =
+		  gsl_blas_dgemv (CblasNoTrans, 1.0, test_matrix, populations, 0.0,
+			    test_vector);
 
-  if (ierr != 0)
-    {
-      Error
-	("solve_matrix: bad return when testing matrix solution to rate equations.\n");
-    }
+//  if (ierr != 0)
+  //  {
+ //     Error
+//	("solve_matrix: bad return when testing matrix solution to rate equations.\n");
+ //   }
 
   /* now cycle through and check the solution to y = m * populations really is (1, 0, 0 ... 0) */
 
-  for (mm = 0; mm < nrows; mm++)
-    {
+ // for (mm = 0; mm < nrows; mm++)
+//{
 
       /* get the element of the vector we want to check */
-      test_val = gsl_vector_get (test_vector, mm);
+  //    test_val = gsl_vector_get (test_vector, mm);
 
       /* b_data is (1,0,0,0..) when we do matom rates. test_val is normally something like
          1e-16 if it's supposed to be 0. We have a different error check if b_data[mm] is 0 */
 
-      if (b_data[mm] > 0.0)
-	{
-	  if (fabs ((test_val - b_data[mm]) / test_val) > EPSILON)
-	    {
+   //   if (b_data[mm] > 0.0)
+//	{
+//	  if (fabs ((test_val - b_data[mm]) / test_val) > EPSILON)
+//	    {
 	      // Error("solve_matrix: test solution fails for row %i %e != %e\n",
 	      // mm, test_val, b_data[mm]);
-	      ierr = 1;
-	    }
-	}
-      else if (fabs (test_val - b_data[mm]) > EPSILON)	// if b_data is 0, check absolute error
-	ierr = 1;
-    }
+//	      ierr = 1;
+//	    }
+//	}
+  //    else if (fabs (test_val - b_data[mm]) > EPSILON)	// if b_data is 0, check absolute error
+//	ierr = 1;
+  //  }
 
   /* copy the populations to a normal array */
   for (mm = 0; mm < nrows; mm++)
     x[mm] = gsl_vector_get (populations, mm);
 
   /* free memory */
-  free (test_vector);
-  free (test_matrix);
+    free (test_vector);
+	 free (test_matrix);
   gsl_vector_free (populations);
 
   return (ierr);
