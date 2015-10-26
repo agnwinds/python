@@ -664,6 +664,8 @@ free (commbuffer);
   {
 	  Log("Outputting heatcool file for connecting to zeus\n");
       fptr = fopen ("py_heatcool.dat", "w");
+	 fprintf(fptr,"i j rcen thetacen heat_photo heat_comp heat_lines heat_ff lum_fb lum_comp lum_lines lum_ff xi\n");
+	  
   }
 
   /* Check the balance between the absorbed and the emitted flux */
