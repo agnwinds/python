@@ -802,7 +802,7 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
         asum + geo.lum_comp + geo.lum_dr + geo.lum_di + geo.lum_adiabatic, geo.lum_fb, geo.lum_ff, geo.lum_comp, 
         geo.lum_dr, geo.lum_di, geo.lum_lines, geo.lum_adiabatic);	
 
-
+		  printf ("NSH iave=%i"\n);
 
   /* Print out some diagnositics of the changes in the wind update */
   t_r_ave_old /= iave;
