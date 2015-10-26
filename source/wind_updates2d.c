@@ -674,6 +674,8 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
   {
 	  Log("Outputting heatcool file for connecting to zeus\n");
       fptr = fopen ("py_heatcool.dat", "w");
+ 	 fprintf(fptr,"i j rcen thetacen heat_photo heat_comp heat_lines heat_ff lum_fb lum_comp lum_lines lum_ff xi rho vx vy vz temp nphot\n");
+	  
   }
 
   /* Check the balance between the absorbed and the emitted flux */
@@ -729,17 +731,18 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
       plasmamain[nplasma].lum_rad_ioniz = plasmamain[nplasma].lum_rad;
       plasmamain[nplasma].lum_adiabatic_ioniz = plasmamain[nplasma].lum_adiabatic;
 
-
 	  if (modes.zeus_connect==1) //If we are running in zeus connect mode, we output heating and cooling rates.
 	  {
 	 		 wind_n_to_ij (geo.wind_domain_number,plasmamain[nplasma].nwind, &i, &j);
-	 		 fprintf(fptr,"%d %d %e %e %e %e %e %e %e %e %e %e %e\n",i,j,w[plasmamain[nplasma].nwind].rcen,
+	 		 fprintf(fptr,"%d %d %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %i\n",i,j,w[plasmamain[nplasma].nwind].rcen,
 			 w[plasmamain[nplasma].nwind].thetacen/RADIAN,
 			 plasmamain[nplasma].heat_photo/volume,plasmamain[nplasma].heat_comp/volume,
 			 plasmamain[nplasma].heat_lines/volume,plasmamain[nplasma].heat_ff/volume,
 			 plasmamain[nplasma].lum_fb/volume,plasmamain[nplasma].lum_comp/volume,
 			 plasmamain[nplasma].lum_lines/volume,plasmamain[nplasma].lum_ff/volume,
-			 plasmamain[nplasma].xi);
+			 plasmamain[nplasma].xi,plasmamain[nplasma].rho,w[plasmamain[nplasma].nwind].v[0],
+			 w[plasmamain[nplasma].nwind].v[1],w[plasmamain[nplasma].nwind].v[2],plasmamain[nplasma].t_e,
+			 plasmamain[nplasma].ntot);
 	   }
     }
 	

@@ -323,7 +323,7 @@ matrix_ion_populations (xplasma, mode)
 	  if (newden[nn] < DENSITY_MIN)	// this wil also capture the case where population doesnt have a value for this ion
 	    newden[nn] = DENSITY_MIN;
 	}
-
+	free (populations);
 
       xnew = get_ne (newden);	/* determine the electron density for this density distribution */
 
@@ -752,8 +752,8 @@ solve_matrix (a_data, b_data, nrows, x)
     x[mm] = gsl_vector_get (populations, mm);
 
   /* free memory */
-  free (test_vector);
-  free (test_matrix);
+  gsl_vector_free (test_vector);
+  gsl_matrix_free (test_matrix);
   gsl_vector_free (populations);
 
   return (ierr);
