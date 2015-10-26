@@ -733,22 +733,22 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
 
 	  if (modes.zeus_connect==1) //If we are running in zeus connect mode, we output heating and cooling rates.
 	  {
-		  printf ("BLAAAAAAAAHHHHHHH\n");
-//	 		 wind_n_to_ij (geo.wind_domain_number,plasmamain[nplasma].nwind, &i, &j);
-//	 		 fprintf(fptr,"%d %d %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %i\n",i,j,w[plasmamain[nplasma].nwind].rcen,
-//			 w[plasmamain[nplasma].nwind].thetacen/RADIAN,
-//			 plasmamain[nplasma].heat_photo/volume,plasmamain[nplasma].heat_comp/volume,
-//			 plasmamain[nplasma].heat_lines/volume,plasmamain[nplasma].heat_ff/volume,
-//			 plasmamain[nplasma].lum_fb/volume,plasmamain[nplasma].lum_comp/volume,
-//			 plasmamain[nplasma].lum_lines/volume,plasmamain[nplasma].lum_ff/volume,
-//			 plasmamain[nplasma].xi,plasmamain[nplasma].rho,w[plasmamain[nplasma].nwind].v[0],
-//			 w[plasmamain[nplasma].nwind].v[1],w[plasmamain[nplasma].nwind].v[2],plasmamain[nplasma].t_e,
-//			 plasmamain[nplasma].ntot);
+		  	 		 wind_n_to_ij (geo.wind_domain_number,plasmamain[nplasma].nwind, &i, &j);
+					 	 fprintf(fptr,"%d %d %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %i\n",i,j,w[plasmamain[nplasma].nwind].rcen,
+						w[plasmamain[nplasma].nwind].thetacen/RADIAN,
+						plasmamain[nplasma].heat_photo/volume,plasmamain[nplasma].heat_comp/volume,
+						plasmamain[nplasma].heat_lines/volume,plasmamain[nplasma].heat_ff/volume,
+						plasmamain[nplasma].lum_fb/volume,plasmamain[nplasma].lum_comp/volume,
+						plasmamain[nplasma].lum_lines/volume,plasmamain[nplasma].lum_ff/volume,
+						plasmamain[nplasma].xi,plasmamain[nplasma].rho,w[plasmamain[nplasma].nwind].v[0],
+						w[plasmamain[nplasma].nwind].v[1],w[plasmamain[nplasma].nwind].v[2],plasmamain[nplasma].t_e,
+						plasmamain[nplasma].ntot);
 	   }
     }
 	
     if (modes.zeus_connect==1) 
         fclose(fptr);
+	 printf ("Closed file\n")
 
   /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
      cycles in the windsavefile even if the spectral cycles are run */
@@ -826,9 +826,10 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
        (t_e_ave - t_e_ave_old));
   Log ("Summary  t_r  %6.0f   %6.0f  #t_r and dt_r on this update\n", t_r_ave,
        (t_r_ave - t_r_ave_old));
-
+		 printf ("Going to chack conv\n");
   check_convergence ();
   /* Summarize the radiative temperatures (ksl 04 mar)*/
+  printf ("Going to xtemp_rad\n");
   xtemp_rad (w);
 
 
