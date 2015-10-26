@@ -748,7 +748,7 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
 	
     if (modes.zeus_connect==1) 
         fclose(fptr);
-	 printf ("Closed file\n")
+	 printf ("Closed file\n");
 
   /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
      cycles in the windsavefile even if the spectral cycles are run */
