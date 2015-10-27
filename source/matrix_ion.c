@@ -738,13 +738,15 @@ solve_matrix (a_data, b_data, nrows, x)
 	{
 	  if (fabs ((test_val - b_data[mm]) / test_val) > EPSILON)
 	    {
-	      // Error("solve_matrix: test solution fails for row %i %e != %e\n",
-	      // mm, test_val, b_data[mm]);
+		Error("solve_matrix: test solution fails relative test for row %i %e != %e\n",mm, test_val, b_data[mm]);
 	      ierr = 1;
 	    }
 	}
       else if (fabs (test_val - b_data[mm]) > EPSILON)	// if b_data is 0, check absolute error
-	ierr = 1;
+	  {
+  		Error("solve_matrix: test solution fails absolute test for row %i %e != %e\n",mm, test_val, b_data[mm]);
+		ierr = 1;
+	}
     }
 
   /* copy the populations to a normal array */

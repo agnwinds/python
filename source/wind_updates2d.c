@@ -742,8 +742,8 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
 						plasmamain[nplasma].lum_lines/volume,plasmamain[nplasma].lum_ff/volume,
 						plasmamain[nplasma].xi,plasmamain[nplasma].rho,w[plasmamain[nplasma].nwind].v[0],
 						w[plasmamain[nplasma].nwind].v[1],w[plasmamain[nplasma].nwind].v[2],plasmamain[nplasma].t_e,
-						plasmamain[nplasma].ntot,plasmamain[nplasma].ne,
-						volume,plasmamain[nplasma].density[0],plasmamain[nplasma].density[1],nh);
+						plasmamain[nplasma].ntot,volume,plasmamain[nplasma].ne,
+						plasmamain[nplasma].density[0],plasmamain[nplasma].density[1],nh);
 	   }
     }
 	
