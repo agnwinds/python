@@ -516,9 +516,10 @@ hydro_temp (x)
   im = jm = ii = jj = 0;
   f1=f2=0.0;
 
-  if (r > hydro_r_cent[ihydro_r])
+
+  if (( hydro_r_cent[ihydro_r] -r )/r < -1e-6)
     {
-      Log (" r outside hydro grid in hydro_temp\n");
+      Log (" r outside hydro grid in hydro_temp %e > %e %e\n",r,hydro_r_cent[ihydro_r],(hydro_r_cent[ihydro_r] -r )/r);
       temp = 1e4;
       return (temp);
     }
@@ -533,8 +534,6 @@ hydro_temp (x)
   if (temp < 1e4)		//Set a lower limit.
     temp = 1e4;
 
-  if (temp < 1e4)		//Set a lower limit.
-    temp = 1e4;
 
 
 
