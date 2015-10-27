@@ -805,6 +805,9 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
 		  printf ("NSH iave=%i\n",iave);
 
   /* Print out some diagnositics of the changes in the wind update */
+		  
+	if (modes.zeus_connect!=1 && modes.fixed_temp!=1)	     //There is no point in computing tamperature changes, because we have fixed them!
+	{
   t_r_ave_old /= iave;
   t_e_ave_old /= iave;
   t_r_ave /= iave;
@@ -826,10 +829,14 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
        (t_e_ave - t_e_ave_old));
   Log ("Summary  t_r  %6.0f   %6.0f  #t_r and dt_r on this update\n", t_r_ave,
        (t_r_ave - t_r_ave_old));
-		 printf ("Going to chack conv\n");
-  check_convergence ();
+} 
+else
+	{
+		Log ("!!wind_update: We are running in fixed temperature mode\n");
+		
+	} 
+	check_convergence ();
   /* Summarize the radiative temperatures (ksl 04 mar)*/
-  printf ("Going to xtemp_rad\n");
   xtemp_rad (w);
 
 
