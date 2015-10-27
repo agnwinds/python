@@ -734,13 +734,13 @@ free (commbuffer);
 			 vol=w[plasmamain[nplasma].nwind].vol;
 	 		 fprintf(fptr,"%d %d %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %i %e %e %e %e %e\n",i,j,w[plasmamain[nplasma].nwind].rcen,
 			 w[plasmamain[nplasma].nwind].thetacen/RADIAN,
-			 plasmamain[nplasma].heat_photo/volume,plasmamain[nplasma].heat_comp/volume,
-			 plasmamain[nplasma].heat_lines/volume,plasmamain[nplasma].heat_ff/volume,
-			 plasmamain[nplasma].lum_fb/volume,plasmamain[nplasma].lum_comp/volume,
-			 plasmamain[nplasma].lum_lines/volume,plasmamain[nplasma].lum_ff/volume,
+			 plasmamain[nplasma].heat_photo/vol,plasmamain[nplasma].heat_comp/vol,
+			 plasmamain[nplasma].heat_lines/vol,plasmamain[nplasma].heat_ff/vol,
+			 plasmamain[nplasma].lum_fb/vol,plasmamain[nplasma].lum_comp/vol,
+			 plasmamain[nplasma].lum_lines/vol,plasmamain[nplasma].lum_ff/vol,
 			 plasmamain[nplasma].xi,plasmamain[nplasma].rho,w[plasmamain[nplasma].nwind].v[0],
 			 w[plasmamain[nplasma].nwind].v[1],w[plasmamain[nplasma].nwind].v[2],plasmamain[nplasma].t_e,
-			 plasmamain[nplasma].ntot,volume,plasmamain[nplasma].ne,plasmamain[nplasma].density[0],plasmamain[nplasma].density[1],nh);
+			 plasmamain[nplasma].ntot,vol,plasmamain[nplasma].ne,plasmamain[nplasma].density[0],plasmamain[nplasma].density[1],nh);
 	   }
     }
 	
