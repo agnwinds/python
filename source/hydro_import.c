@@ -713,9 +713,14 @@ rtheta_hydro_volumes (w)
 	  if (w[n].inwind == W_ALL_INWIND)
 	    {
 	      rmin = wind_x[i];
-	      rmax = 2.0*wind_midx[i]-wind_x[i];
+	      rmax = wind_x[i+1];
 	      thetamin = wind_z[j] / RADIAN;
-	      thetamax = (2.0*wind_midz[j]-wind_z[j]) / RADIAN;
+	      thetamax = wind_z[j+1] / RADIAN;
+		  
+		  
+		  
+		  
+		  
 //		printf ("NSH1 %i %i %i %e %e %f %f ",i,j,n,rmin,rmax,thetamin,thetamax);
 
 	      //leading factor of 2 added to allow for volume above and below plane (SSMay04)
