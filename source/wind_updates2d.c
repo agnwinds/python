@@ -664,7 +664,7 @@ free (commbuffer);
   {
 	  Log("Outputting heatcool file for connecting to zeus\n");
       fptr = fopen ("py_heatcool.dat", "w");
-	 fprintf(fptr,"i j rcen thetacen heat_photo heat_comp heat_lines heat_ff lum_fb lum_comp lum_lines lum_ff xi rho vx vy vz temp nphot\n");
+	 fprintf(fptr,"i j rcen thetacen heat_photo heat_comp heat_lines heat_ff lum_fb lum_comp lum_lines lum_ff xi rho vx vy vz temp nphot vol\n");
 	  
   }
 
@@ -732,7 +732,7 @@ free (commbuffer);
 	  {
 	 		 wind_n_to_ij (plasmamain[nplasma].nwind, &i, &j);
 			 vol=w[plasmamain[nplasma].nwind].vol;
-	 		 fprintf(fptr,"%d %d %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %i\n",i,j,w[plasmamain[nplasma].nwind].rcen,
+	 		 fprintf(fptr,"%d %d %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %i %e\n",i,j,w[plasmamain[nplasma].nwind].rcen,
 			 w[plasmamain[nplasma].nwind].thetacen/RADIAN,
 			 plasmamain[nplasma].heat_photo/volume,plasmamain[nplasma].heat_comp/volume,
 			 plasmamain[nplasma].heat_lines/volume,plasmamain[nplasma].heat_ff/volume,
@@ -740,7 +740,7 @@ free (commbuffer);
 			 plasmamain[nplasma].lum_lines/volume,plasmamain[nplasma].lum_ff/volume,
 			 plasmamain[nplasma].xi,plasmamain[nplasma].rho,w[plasmamain[nplasma].nwind].v[0],
 			 w[plasmamain[nplasma].nwind].v[1],w[plasmamain[nplasma].nwind].v[2],plasmamain[nplasma].t_e,
-			 plasmamain[nplasma].ntot);
+			 plasmamain[nplasma].ntot,volume);
 	   }
     }
 	
