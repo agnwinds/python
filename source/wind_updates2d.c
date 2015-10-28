@@ -733,7 +733,6 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
 
 	  if (modes.zeus_connect==1) //If we are running in zeus connect mode, we output heating and cooling rates.
 	  {
-		  fprintf(fptr,"i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff\n");
 		  wind_n_to_ij (geo.wind_domain_number,plasmamain[nplasma].nwind, &i, &j);
 		  vol=w[plasmamain[nplasma].nwind].vol;
 		  fprintf(fptr,"%d %d %e %e %e ",i,j,w[plasmamain[nplasma].nwind].rcen,w[plasmamain[nplasma].nwind].thetacen/RADIAN,vol); //output geometric things
