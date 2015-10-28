@@ -202,13 +202,10 @@ total_emission (one, f1, f2)
   int nplasma;
   PlasmaPtr xplasma;
 
-	
-
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
   t_e = xplasma->t_e;		// Change so calls to total emission are simpler
-
 
   if (f2 < f1)
     {

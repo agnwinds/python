@@ -408,6 +408,7 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
   /* First, allocate an array for internal use, if that
      has not already been done */
 
+
   if (init_pdf == 0 || pdf_steps_current < pdfsteps)
     {
 

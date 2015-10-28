@@ -112,8 +112,8 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     {				/* Use banding, create photons with different weithst in different wavelength
 				   bands.  this is used for the for ionization calculation where one wants to assure
 				   that you have "enough" photons at high energy */
-	  
-	  ftot = populate_bands (f1, f2, ioniz_or_final, iwind, &xband);
+      ftot = populate_bands (f1, f2, ioniz_or_final, iwind, &xband);
+
 
       for(n=0; n<NPHOT; n++) p[n].path = 0.0; /* SWM - Zero photon paths */
 
@@ -583,6 +583,7 @@ stellar photons */
       }
     else
       agn_f1 = f1;
+
 
 	  if (ioniz_or_final == 1)
 	    photo_gen_agn (p, geo.r_agn, geo.alpha_agn, weight, agn_f1, f2,

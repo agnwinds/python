@@ -140,7 +140,8 @@ lum_lines (one, nmin, nmax)
 	    {
 	      foo4 = 0.0;	// Added to prevent compilation warning
 	    }
-	  	  lum += lin_ptr[n]->pow= x;
+
+	  lum += lin_ptr[n]->pow = x;
 	  if (x < 0)
 	    {
 	      Log
@@ -238,14 +239,14 @@ q21 (line_ptr, t)
 
 /*NSH 121024 - the followinglines implement the approximate gaunt factor as described in eq 4.21 in hazy 2*/
 /* NSH 121026 commented out in py74a - not certain that this approximate gaunt factor actually inmproves anything */
-//           if (line_ptr->istate == 1) //Neutral
-//         {
-//         gaunt = ((BOLTZMANN*t)/(H*line_ptr->freq))/10.0;
-//         }
-//         else
-//         {
-//         gaunt = 0.2;
-//         } 
+      /*     if (line_ptr->istate == 1) //Neutral
+         {
+         gaunt = ((BOLTZMANN*t)/(H*line_ptr->freq))/10.0;
+         }
+         else
+         {
+         gaunt = 0.2;
+         } */
 
 
 

@@ -64,6 +64,7 @@ ion_abundances (xplasma, mode)
 {
   int ireturn;
 
+
   if (mode == IONMODE_ML93_FIXTE)
     {
 /* on-the-spot approximation using existing t_e.   This routine does not attempt 
@@ -415,9 +416,9 @@ History:
     15aug   nsh 79 -- added a mode to leave t_e fixed
 
 **************************************************************/
+\
 
 	PlasmaPtr xxxplasma;
-
 
 
 int

@@ -231,7 +231,6 @@ ds_to_wind (pp)
     ds = x;
   if ((x = ds_to_cone (&windcone[0], &ptest)) < ds)
     ds = x;
-  
   if ((x = ds_to_cone (&windcone[1], &ptest)) < ds)
     ds = x;
   if (geo.wind_type == 8)
