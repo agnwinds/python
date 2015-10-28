@@ -283,7 +283,11 @@ matrix_ion_populations (xplasma, mode)
 	     ierr = solve_matrix (a_data, b_data, nrows, populations);
 
       if (ierr != 0)
-	Error ("matrix_ion_populations: bad return from solve_matrix ierr=%i\n",ierr);
+	Error ("matrix_ion_populations: bad return from solve_matrix\n",ierr);
+	  if (ierr ==2)
+		  Error ("matrix_ion_populations: some matrix rows failing relative error check\n");
+	else if (ierr ==3)
+				 Error ("matrix_ion_populations: some matrix rows failing absolute error check\n");
 
       /* free memory */
       free (a_data);
@@ -741,7 +745,7 @@ solve_matrix (a_data, b_data, nrows, x)
 						{
 							Error("solve_matrix: test solution fails relative error for row %i %e != %e\n",
 								mm, test_val, b_data[mm]);
-							ierr = 1;
+							ierr = 2;
 						}
 					}
 					else if (fabs (test_val - b_data[mm]) > EPSILON)	// if b_data is 0, check absolute error
@@ -749,7 +753,7 @@ solve_matrix (a_data, b_data, nrows, x)
 					{
 						Error("solve_matrix: test solution fails absolute error for row %i %e != %e\n",
 							mm, test_val, b_data[mm]);
-						ierr = 1;
+						ierr = 3;
 					}
 				}
 
