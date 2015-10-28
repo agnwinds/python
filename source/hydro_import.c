@@ -693,7 +693,7 @@ rtheta_hydro_volumes (ndom, w)
   DomainPtr one_dom;
 
   one_dom = &zdom[ndom];
-  printf ("NSH here in hydro_volumes\n");
+//  printf ("NSH here in hydro_volumes\n");
 
 
 
@@ -716,7 +716,7 @@ rtheta_hydro_volumes (ndom, w)
 		2. * 2. / 3. * PI * (rmax * rmax * rmax -
 				     rmin * rmin * rmin) * (cos (thetamin) -
 							    cos (thetamax));
-		  printf ("NSH_vols %i %i rmin %e rmax %e thetamin %e thatmax %e vol %e\n",i,j,rmin,rmax,thetamin,thetamax,w[n].vol);
+	//	  printf ("NSH_vols %i %i rmin %e rmax %e thetamin %e thatmax %e vol %e\n",i,j,rmin,rmax,thetamin,thetamax,w[n].vol);
 		  
 	      if (w[n].vol == 0.0)
 		{
