@@ -806,7 +806,7 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
 
   /* Print out some diagnositics of the changes in the wind update */
 		  
-	if (modes.zeus_connect!=1 || modes.fixed_temp!=1)	     //There is no point in computing temperature changes, because we have fixed them!
+	if (modes.zeus_connect==1 || modes.fixed_temp==1)	     //There is no point in computing temperature changes, because we have fixed them!
 	{
   t_r_ave_old /= iave;
   t_e_ave_old /= iave;
