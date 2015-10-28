@@ -318,10 +318,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       /* nres is the resonance at which the photon was stopped.  At present the same value is also stored in pp->nres, but I have 
          not yet eliminated it from translate. ?? 02jan ksl */
 
-
       icell++;
       istat = walls (&pp, p);
-	  
       // pp is where the photon is going, p is where it was
 
 

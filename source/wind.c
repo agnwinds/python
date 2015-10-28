@@ -124,10 +124,12 @@ where_in_wind (x,ndomain)
   *ndomain=-1;
 
   rad=length(x);
+
   for (ndom = geo.ndomain - 1; ndom > -1; ndom--)
     {
 
       one_dom = &zdom[ndom];
+
 
       /* First check to see if photon is inside or outside wind */
 
@@ -434,6 +436,7 @@ model_rho (ndom, x)
      double x[];
 {
   double rho;
+
   if (zdom[ndom].wind_type == SV)
     {
       rho = sv_rho (ndom, x);

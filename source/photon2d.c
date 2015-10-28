@@ -62,7 +62,10 @@ translate (w, pp, tau_scat, tau, nres)
     }
   else if ((pp->grid = where_in_grid (ndomain,pp->x)) >= 0)
     {
+//		 printf ("photon %i start=%e %e %e %e",pp->np,pp->x[0], pp->x[1], pp->x[2],sqrt(pp->x[0]*pp->x[0]+pp->x[1]*pp->x[1]+pp->x[2]*pp->x[2]));
       istat = translate_in_wind (w, pp, tau_scat, tau, nres);
+//	 printf ("end=%e %e %e %e\n",pp->x[0], pp->x[1], pp->x[2],sqrt(pp->x[0]*pp->x[0]+pp->x[1]*pp->x[1]+pp->x[2]*pp->x[2]));
+		
     }
   else
     {
@@ -71,6 +74,7 @@ translate (w, pp, tau_scat, tau, nres)
 	("translate: Found photon that was not in wind or grid, istat %i\n",
 	 where_in_wind (pp->x,&ndomain));
     }
+
   return (istat);
 }
 
@@ -229,39 +233,34 @@ ds_to_wind (pp)
      all of the "computatational domain */
 
   ds = ds_to_sphere (geo.rmax, &ptest);
+
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
       /* Check if the photon hits the inner or outer radius of the wind */
       if ((x = ds_to_sphere (zdom[ndom].rmax, &ptest)) < ds)
-	  {
-	  	ds = x;
-      }
+	ds = x;
 
       if ((x = ds_to_sphere (zdom[ndom].rmin, &ptest)) < ds)
-	  {
-	  	ds = x;
-      }
+	ds = x;
+
       /* Check if the photon hits the inner or outer windcone */
+
       if ((x = ds_to_cone (&zdom[ndom].windcone[0], &ptest)) < ds)
-	  {
-	  	ds = x;
-      }
-	  
+	ds = x;
       if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
-	  {
-	  	ds = x;
-      }
+	ds = x;
+
       if (zdom[ndom].wind_type == CORONA)  {
 
 	      /* As currently written ds_to_plane can give a negative number */
 	      x = ds_to_plane (&zdom[ndom].windplane[0], &ptest);
-	      if (x>0 && x<ds)	  {
-	  	ds = x;
-      }
+	      if (x>0 && x<ds){
+		      ds=x;
+	      }
 	      x = ds_to_plane (&zdom[ndom].windplane[1], &ptest);
-	      if (x>0 && x<ds) {
-	  	ds = x;
-      }
+	      if (x>0 && x<ds){
+		      ds=x;
+	      }
       }
 
 
@@ -272,13 +271,9 @@ ds_to_wind (pp)
 	    ds_to_pillbox (&ptest, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax,
 			   zdom[ndom].elvis_offset);
 	  if (x < ds)
-	  {
-	 	  	ds = x;
-	       }
+	    ds = x;
 	}
     }
-
-
 
   return (ds);
 }
@@ -633,12 +628,8 @@ walls (p, pold)
 
   rho_sq = (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
   if (rho_sq > geo.rmax_sq)
-  { 
     return (p->istat = P_ESCAPE);	/* The photon is coursing through the universe */
-  }
   if (fabs (p->x[2]) > geo.rmax)
-  {
-      return (p->istat = P_ESCAPE);  	
-  }
+    return (p->istat = P_ESCAPE);
   return (p->istat);		/* The photon is still in the wind */
 }
