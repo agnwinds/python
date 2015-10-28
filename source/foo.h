@@ -58,7 +58,6 @@ int mdot_wind(WindPtr w, double z, double rmax);
 int get_random_location(int n, double x[]);
 int zero_scatters(void);
 int check_corners_inwind(int n);
-int check_centre_inwind(int n1);
 /* wind.c */
 int where_in_wind(double x[], int *ndomain);
 int wind_check(WindPtr www, int n);
