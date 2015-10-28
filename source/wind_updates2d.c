@@ -674,7 +674,7 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
   {
 	  Log("Outputting heatcool file for connecting to zeus\n");
       fptr = fopen ("py_heatcool.dat", "w");
- 	 fprintf(fptr,"i j rcen thetacen heat_photo heat_comp heat_lines heat_ff lum_fb lum_comp lum_lines lum_ff xi rho vx vy vz temp nphot vol ne nh1 nh2 nh\n");
+ 	 fprintf(fptr,"i j rcen thetacen temp xi heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff\n");
 	  
   }
 
@@ -733,24 +733,23 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
 
 	  if (modes.zeus_connect==1) //If we are running in zeus connect mode, we output heating and cooling rates.
 	  {
-		  	 		 wind_n_to_ij (geo.wind_domain_number,plasmamain[nplasma].nwind, &i, &j);
-					 vol=w[plasmamain[nplasma].nwind].vol;
-					 	 fprintf(fptr,"%d %d %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %i %e %e %e %e %e \n",i,j,w[plasmamain[nplasma].nwind].rcen,
-						w[plasmamain[nplasma].nwind].thetacen/RADIAN,
-						plasmamain[nplasma].heat_photo/vol,plasmamain[nplasma].heat_comp/vol,
-						plasmamain[nplasma].heat_lines/vol,plasmamain[nplasma].heat_ff/vol,
-						plasmamain[nplasma].lum_fb/vol,plasmamain[nplasma].lum_comp/vol,
-						plasmamain[nplasma].lum_lines/vol,plasmamain[nplasma].lum_ff/vol,
-						plasmamain[nplasma].xi,plasmamain[nplasma].rho,w[plasmamain[nplasma].nwind].v[0],
-						w[plasmamain[nplasma].nwind].v[1],w[plasmamain[nplasma].nwind].v[2],plasmamain[nplasma].t_e,
-						plasmamain[nplasma].ntot,vol,plasmamain[nplasma].ne,
-						plasmamain[nplasma].density[0],plasmamain[nplasma].density[1],nh);
+		  fprintf(fptr,"i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff\n");
+		  wind_n_to_ij (geo.wind_domain_number,plasmamain[nplasma].nwind, &i, &j);
+		  vol=w[plasmamain[nplasma].nwind].vol;
+		  fprintf(fptr,"%d %d %e %e %e ",i,j,w[plasmamain[nplasma].nwind].rcen,w[plasmamain[nplasma].nwind].thetacen/RADIAN,vol); //output geometric things
+		  fprintf(fptr,"%e %e %e ",plasmamain[nplasma].t_e,plasmamain[nplasma].xi,plasmamain[nplasma].ne); //output temp, xi and ne to ease plotting of heating rates
+		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_photo+plasmamain[nplasma].heat_auger)/vol); //Xray heating - or photoionization
+		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_comp)/vol); //Compton heating
+		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_lines)/vol); //Line heating 28/10/15 - not currently used in zeus
+		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_ff)/vol); //FF heating 28/10/15 - not currently used in zeus
+		  fprintf(fptr,"%e ",(plasmamain[nplasma].lum_comp)/vol); //Compton cooling
+		  fprintf(fptr,"%e ",(plasmamain[nplasma].lum_lines+plasmamain[nplasma].lum_fb+plasmamain[nplasma].lum_dr)/vol); //Line cooling must include all recombinatiobs cooling
+		  fprintf(fptr,"%e\n",(plasmamain[nplasma].lum_ff)/vol); //ff cooling
 	   }
     }
 	
     if (modes.zeus_connect==1) 
         fclose(fptr);
-	 printf ("Closed file\n");
 
   /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
      cycles in the windsavefile even if the spectral cycles are run */
@@ -808,7 +807,7 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
 
   /* Print out some diagnositics of the changes in the wind update */
 		  
-	if (modes.zeus_connect!=1 && modes.fixed_temp!=1)	     //There is no point in computing tamperature changes, because we have fixed them!
+	if (modes.zeus_connect!=1 || modes.fixed_temp!=1)	     //There is no point in computing temperature changes, because we have fixed them!
 	{
   t_r_ave_old /= iave;
   t_e_ave_old /= iave;
@@ -834,7 +833,7 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
 } 
 else
 	{
-		Log ("!!wind_update: We are running in fixed temperature mode\n");
+		Log ("!!wind_update: We are running in fixed temperature mode - no temperature report\n");
 		
 	} 
 	check_convergence ();
