@@ -628,13 +628,13 @@ rtheta_make_hydro_grid (w)
 for (i = 0; i < NDIM; i++)
 	{
 	wind_ij_to_n (i, 0, &n);
-	printf ("hydro_grid i=%i, ihydro_r=%i n=%i, r=%e, rcen=%e\n",i,ihydro_r,n,w[n].r,w[n].rcen);
+//	printf ("hydro_grid i=%i, ihydro_r=%i n=%i, r=%e, rcen=%e\n",i,ihydro_r,n,w[n].r,w[n].rcen);
 	}
 
 for (i = 0; i < MDIM; i++)
 	{
 	wind_ij_to_n (0, i, &n);
-	printf ("hydro_grid j=%i,  ihydrotheta=%i, n=%i, theta=%f, thetacen=%f\n",i,ihydro_theta,n,w[n].theta,w[n].thetacen);
+//	printf ("hydro_grid j=%i,  ihydrotheta=%i, n=%i, theta=%f, thetacen=%f\n",i,ihydro_theta,n,w[n].theta,w[n].thetacen);
 	}
 
 
