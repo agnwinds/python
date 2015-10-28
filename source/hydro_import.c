@@ -728,7 +728,7 @@ rtheta_hydro_volumes (w)
 		2. * 2. / 3. * PI * (rmax * rmax * rmax -
 				     rmin * rmin * rmin) * (cos (thetamin) -
 							    cos (thetamax));
-		  printf ("NSH_vols %i %i rmin %e rmax %e thetamin %e thatmax %e vol %e\n",i,j,rmin,rmax,thetamin,thetamax,w[n].vol);
+//		  printf ("NSH_vols %i %i rmin %e rmax %e thetamin %e thatmax %e vol %e\n",i,j,rmin,rmax,thetamin,thetamax,w[n].vol);
 	      if (w[n].vol == 0.0)
 		{
 		Log ("Found wind cell (%i) with no volume (%e) in wind, resetting\n",n,w[n].vol);
