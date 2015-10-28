@@ -808,6 +808,12 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
 		  
 	if (modes.zeus_connect==1 || modes.fixed_temp==1)	     //There is no point in computing temperature changes, because we have fixed them!
 	{
+		Log ("!!wind_update: We are running in fixed temperature mode - no temperature report\n");
+		
+	}
+	else
+	
+	{
   t_r_ave_old /= iave;
   t_e_ave_old /= iave;
   t_r_ave /= iave;
@@ -830,11 +836,7 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
   Log ("Summary  t_r  %6.0f   %6.0f  #t_r and dt_r on this update\n", t_r_ave,
        (t_r_ave - t_r_ave_old));
 } 
-else
-	{
-		Log ("!!wind_update: We are running in fixed temperature mode - no temperature report\n");
-		
-	} 
+	 
 	check_convergence ();
   /* Summarize the radiative temperatures (ksl 04 mar)*/
   xtemp_rad (w);
