@@ -674,7 +674,7 @@ for (ndom=0;ndom<geo.ndomain;ndom++){
   {
 	  Log("Outputting heatcool file for connecting to zeus\n");
       fptr = fopen ("py_heatcool.dat", "w");
- 	 fprintf(fptr,"i j rcen thetacen temp xi heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff\n");
+   	 fprintf(fptr,"i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff\n");
 	  
   }
 
