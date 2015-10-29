@@ -584,6 +584,10 @@ get_wind_params (ndom)
   zdom[ndom].twind = 1e5;
 
   rddoub ("wind.radmax(cm)", &zdom[ndom].rmax);
+  
+  geo.rmax_sq=geo.rmax*geo.rmax;    
+  
+  
   /* The next lines assure that geo.rmax_sq really does define the edge of the grid */
   if (zdom[ndom].rmax>geo.rmax){
 	  geo.rmax=zdom[ndom].rmax;

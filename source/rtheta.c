@@ -69,20 +69,24 @@ rtheta_ds_in_cell (p)
   smax = ds_to_sphere (zdom[ndom].wind_x[ix], p);
   s = ds_to_sphere (zdom[ndom].wind_x[ix + 1], p);
   if (s < smax)
-    smax = s;
-
+  {
+      smax = s;
+  }
 
   /* At this point we have found how far the photon can travel in r in its
      current direction.  Now we must worry about motion in the theta direction  */
 
   s = ds_to_cone (&zdom[ndom].cones_rtheta[iz], p);
   if (s < smax)
-    smax = s;
+  {
+      smax = s;
+  }
 
   s = ds_to_cone (&zdom[ndom].cones_rtheta[iz + 1], p);
   if (s < smax)
-    smax = s;
-
+  {
+      smax = s;
+  }
 
   if (smax <= 0)
     {
@@ -160,7 +164,7 @@ rtheta_make_grid (w, ndom)
 
   /* First calculate parameters that are to be calculated at the edge of the grid cell.  This is
      mainly the positions and the velocity */
-  for (i = 0; i < mdim; i++)
+  for (i = 0; i < ndim; i++)
     {
       for (j = 0; j < mdim; j++)
 	{
@@ -264,7 +268,7 @@ rtheta_make_cones (ndom, w)
   if (zdom[ndom].cones_rtheta == NULL)
     {
       Error
-	("rtheta_make_grid: There is a problem in allocating memory for the cones structure\n");
+	("rtheta_make_gid: There is a problem in allocating memory for the cones structure\n");
       exit (0);
 
     }
@@ -410,7 +414,7 @@ rtheta_volumes (ndom, w)
   ndim = zdom[ndom].ndim;
   mdim = zdom[ndom].mdim;
 
-  for (i = 0; i < mdim; i++)
+  for (i = 0; i < ndim; i++)
     {
       for (j = 0; j < mdim; j++)
 	{

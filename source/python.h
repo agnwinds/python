@@ -287,9 +287,9 @@ int nplasma, nmacro;	/*The total number of cells in the plasma and macro structu
 
   /* variables which store the domain numbers of the wind, disk atmosphere.
      Other components should be added here.  Right now we need a wind_domain 
-    number because the inputs for the disk and a putativel disk atmosphere are 
-   interrsed.  The first step will be to put this information into alocal variale
-  in python.c.  We should not have to carry this forward */
+     number because the inputs for the disk and a putativel disk atmosphere are 
+     interrsed.  The first step will be to put this information into alocal variale
+     in python.c. We should not have to carry this forward */
 
 	int wind_domain_number;
 	int atmos_domain_number;
@@ -814,8 +814,6 @@ NSH 130725 - this number is now also used to say if the cell is over temperature
   double ferland_ip;		/* IP calculaterd from equation 5.4 in hazy1 - assuming allphotons come from 0,0,0 and the wind is transparent */
   double ip;			/*NSH 111004 Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
   double xi;			/*NSH 151109 Ionization parameter as defined by Taratr et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
-  //int kpkt_rates_known;
-  //COOLSTR kpkt_rates;
 } plasma_dummy, *PlasmaPtr;
 
 PlasmaPtr plasmamain;

@@ -420,6 +420,8 @@ int make_spectra(restart_stat)
   WindPtr w;
   PhotPtr p;
 
+  char dummy[LINELENGTH];
+
   double freqmin, freqmax;
   double renorm;
   long nphot_to_define;
