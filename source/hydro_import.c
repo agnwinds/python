@@ -628,13 +628,13 @@ rtheta_make_hydro_grid (w)
 for (i = 0; i < NDIM; i++)
 	{
 	wind_ij_to_n (i, 0, &n);
-	printf ("hydro_grid i=%i, ihydro_r=%i n=%i, r=%e, rcen=%e\n",i,ihydro_r,n,w[n].r,w[n].rcen);
+//	printf ("hydro_grid i=%i, ihydro_r=%i n=%i, r=%e, rcen=%e\n",i,ihydro_r,n,w[n].r,w[n].rcen);
 	}
 
 for (i = 0; i < MDIM; i++)
 	{
 	wind_ij_to_n (0, i, &n);
-	printf ("hydro_grid j=%i,  ihydrotheta=%i, n=%i, theta=%f, thetacen=%f\n",i,ihydro_theta,n,w[n].theta,w[n].thetacen);
+//	printf ("hydro_grid j=%i,  ihydrotheta=%i, n=%i, theta=%f, thetacen=%f\n",i,ihydro_theta,n,w[n].theta,w[n].thetacen);
 	}
 
 
@@ -728,7 +728,7 @@ rtheta_hydro_volumes (w)
 		2. * 2. / 3. * PI * (rmax * rmax * rmax -
 				     rmin * rmin * rmin) * (cos (thetamin) -
 							    cos (thetamax));
-		  printf ("NSH_vols %i %i rmin %e rmax %e thetamin %e thatmax %e vol %e\n",i,j,rmin,rmax,thetamin,thetamax,w[n].vol);
+//		  printf ("NSH_vols %i %i rmin %e rmax %e thetamin %e thatmax %e vol %e\n",i,j,rmin,rmax,thetamin,thetamax,w[n].vol);
 	      if (w[n].vol == 0.0)
 		{
 		Log ("Found wind cell (%i) with no volume (%e) in wind, resetting\n",n,w[n].vol);
