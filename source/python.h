@@ -515,6 +515,7 @@ typedef struct wind
   double r, rcen;		/*radial location of cell (Used for spherical, spherical polar
 				   coordinates. (Added by ksl for 52a --04Aug) */
   double theta, thetacen;	/*Angle of coordinate from z axis (Added by ksl for 52a -- 04Aug) */
+  double dtheta,dr;    /* widths of bins, used in hydro import mode*/
   struct cone wcone;		/*56d -- cone structure that defines the bottom edge of the cell in 
 				   CYLVAR coordinates */
   double v[3];			/*velocity at inner vertex of cell.  For 2d coordinate systems this
@@ -712,6 +713,7 @@ NSH 130725 - this number is now also used to say if the cell is over temperature
   double sim_ip;		/*Ionisation parameter for the cell as defined in Sim etal 2010 */
   double ferland_ip;		/* IP calculaterd from equation 5.4 in hazy1 - assuming allphotons come from 0,0,0 and the wind is transparent */
   double ip;			/*NSH 111004 Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
+  double xi;			/*NSH 151109 Ionization parameter as defined by Taratr et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
   //int kpkt_rates_known;
   //COOLSTR kpkt_rates;
 } plasma_dummy, *PlasmaPtr;
@@ -1170,6 +1172,7 @@ struct advanced_modes
   int keep_photoabs;            // keep photoabsorption in final spectrum
   int quit_after_inputs;        // quit after inputs read in, testing mode
   int fixed_temp;               // do not alter temperature from that set in the parameter file
+  int zeus_connect;				// We are connecting to zeus, do not seek new temp and output a heating and cooling file
 }
 modes;
 

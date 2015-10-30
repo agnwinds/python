@@ -96,6 +96,8 @@ History:
 	1405    JM corrected error (#73) so that photon frequency is shifted to the rest frame of the 
 	        cell in question. Also added check which checks if a photoionization edge is crossed
 	        along ds.
+	1508	NSH slight modification to mean that compton scattering no longer reduces the weight of
+			the photon in this part of the code. It is now done when the photon scatters.
 **************************************************************/
 
 #include <stdio.h>
@@ -367,23 +369,52 @@ if (freq > phot_freq_min)
       Error ("Radiation:sane_check CHECKING ff=%e, comp=%e, ind_comp=%e\n",
 	     frac_ff, frac_comp, frac_ind_comp);
     }
-/* Calculate the reduction in the w of the photon bundle along with the average
-   weight in the cell */
+/* Calculate the heating effect*/
 
   if (tau > 0.0001)
     {				/* Need differentiate between thick and thin cases */
       x = exp (-tau);
-      p->w = w_out = w_in * x;
-      energy_abs = w_in - w_out;
-      w_ave = (w_in - w_out) / tau;
+      energy_abs = w_in *(1.-x);
     }
   else
     {
       tau2 = tau * tau;
-      p->w = w_out = w_in * (1. - tau + 0.5 * tau2);	/*Calculate to second order */
       energy_abs = w_in * (tau - 0.5 * tau2);
-      w_ave = w_in * (1. - 0.5 * tau + 0.1666667 * tau2);
     }
+
+	/* Calculate the reduction in weight - compton scattering is not included, it is now included at scattering
+	however induced compton heating is not implemented at scattering, so it should remain here for the time being
+	to maimtain consistency.*/
+
+    tau = (kappa_tot-frac_comp) * ds;
+
+    if (sane_check (tau))
+      {
+        Error ("Radiation:sane_check CHECKING ff=%e, comp=%e, ind_comp=%e\n",
+  	     frac_ff, frac_comp, frac_ind_comp);
+      }
+  /* Calculate the reduction in the w of the photon bundle along with the average
+     weight in the cell */
+
+    if (tau > 0.0001)
+      {				/* Need differentiate between thick and thin cases */
+        x = exp (-tau);
+        p->w = w_out = w_in * x;
+        w_ave = (w_in - w_out) / tau;
+      }
+    else
+      {
+        tau2 = tau * tau;
+        p->w = w_out = w_in * (1. - tau + 0.5 * tau2);	/*Calculate to second order */
+        w_ave = w_in * (1. - 0.5 * tau + 0.1666667 * tau2);
+      }
+
+
+
+
+
+
+
 
   /*74a_ksl: 121215 -- Added to check on a problem photon */
   if (sane_check (p->w))
@@ -953,6 +984,10 @@ update_banded_estimators (xplasma, p, ds, w_ave)
       /* IP needs to be radiation density in the cell. We sum wcontributions from
          each photon, then it is normalised in wind_update. */
       xplasma->ip += ((w_ave * ds) / (H * p->freq));
+		if (HEV * p->freq < 13600) //Tartar et al integrate up to 1000Ryd to define the ionization parameter
+		{
+			xplasma->xi += (w_ave * ds);
+		}
 
       if (p->nscat == 0)
 	{
