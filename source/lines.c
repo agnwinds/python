@@ -239,18 +239,18 @@ q21 (line_ptr, t)
 
 /*NSH 121024 - the followinglines implement the approximate gaunt factor as described in eq 4.21 in hazy 2*/
 /* NSH 121026 commented out in py74a - not certain that this approximate gaunt factor actually inmproves anything */
-      /*     if (line_ptr->istate == 1) //Neutral
+/*       if (line_ptr->istate == 1) //Neutral
          {
-         gaunt = ((BOLTZMANN*t)/(H*line_ptr->freq))/10.0;
+           gaunt = ((BOLTZMANN*t)/(H*line_ptr->freq))/10.0;
          }
-         else
+       else
          {
-         gaunt = 0.2;
-         } */
+           gaunt = 0.2;
+         }
+*/
 
 
-
-      gaunt = 1;
+      gaunt = 0.2;
       omega =
 	ECS_CONSTANT * line_ptr->gl * gaunt * line_ptr->f / line_ptr->freq;
       q21_a = 8.629e-6 / (sqrt (t) * line_ptr->gu) * omega;

@@ -547,7 +547,7 @@ mc_estimator_normalise (n)
        Ideally we don't want to have this so should probably switch this back sometime (SS August 05) !!!BUG */
 
 	  if (phot_top[config[i].bfu_jump[j]].freq[0] < 7.5e12
-	      || phot_top[config[i].bfu_jump[j]].freq[0] > 1.2e16)
+	      || phot_top[config[i].bfu_jump[j]].freq[0] > 5e18)
 	    {
 	      mplasma->gamma_old[config[i].bfu_indx_first + j] =
 		get_gamma (&phot_top[config[i].bfu_jump[j]], xplasma);
