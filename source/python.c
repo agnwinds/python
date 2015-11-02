@@ -796,7 +796,7 @@ main (argc, argv)
 
       geo.agn_spectype = 3;
       get_spectype (geo.agn_radiation,
-		    "Rad_type_for_agn(3=power_law,4=cloudy_table)_in_final_spectrum",
+		    "Rad_type_for_agn(3=power_law,4=cloudy_table,5=bremsstrahlung)_in_final_spectrum",
 		    &geo.agn_spectype);
 
 
@@ -1913,6 +1913,8 @@ get_spectype (yesno, question, spectype)
 	*spectype = SPECTYPE_POW;	// power law
       else if (stype == 4)
 	*spectype = SPECTYPE_CL_TAB;
+      else if (stype == 5)
+	*spectype = SPECTYPE_BREM;
       else
 	{
 	  if (geo.wind_type == 2)
