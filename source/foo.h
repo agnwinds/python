@@ -72,7 +72,7 @@ int wind_check(WindPtr www, int n);
 double model_velocity(double x[], double v[]);
 int model_vgrad(double x[], double v_grad[][3]);
 double model_rho(double x[]);
-/* vector.c */
+/* vvector.c */
 double dot(double a[], double b[]);
 double length(double a[]);
 int renorm(double a[], double scalar);
@@ -191,6 +191,8 @@ double hydro_rho(double x[]);
 double hydro_temp(double x[]);
 int rtheta_make_hydro_grid(WindPtr w);
 int rtheta_hydro_volumes(WindPtr w);
+int hydro_frac(double coord, double coord_array[], int imax, int *cell1, int *cell2, double *frac);
+double hydro_interp_value(double array[], int im, int ii, int jm, int jj, double f1, double f2);
 /* corona.c */
 int get_corona_params(void);
 double corona_velocity(double x[], double v[]);
@@ -420,6 +422,9 @@ double kappa_comp(PlasmaPtr xplasma, double freq);
 double kappa_ind_comp(PlasmaPtr xplasma, double freq);
 double total_comp(WindPtr one, double t_e);
 double klein_nishina(double nu);
+int compton_dir(PhotPtr p, PlasmaPtr xplasma);
+double compton_func(double f);
+double sigma_compton_partial(double f, double x);
 /* torus.c */
 double torus_rho(double x[]);
 double ds_to_cylinder(double rho, struct photon *p);
@@ -491,6 +496,11 @@ int photo_gen_matom(PhotPtr p, double weight, int photstart, int nphot);
 /* macro_gov.c */
 int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 int macro_pops(PlasmaPtr xplasma, double xne);
+/* brem.c */
+double emittance_brem(double freqmin, double freqmax, double lum, double t);
+double integ_brem(double freq);
+double brem_d(double alpha);
+double get_rand_brem(double freqmin, double freqmax);
 /* reverb.c */
 double delay_to_observer(PhotPtr pp);
 int delay_dump_prep(char filename[], int restart_stat, int i_rank);

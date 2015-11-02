@@ -168,8 +168,8 @@ total_di (one, t_e)
 
   for (n = 0; n < nions; n++)
     {
-      //We have no DR for this ion, or it's a macro-atom
-      if (ion[n].dere_di_flag == 0 || )	
+      //We have no DI data for this ion
+      if (ion[n].dere_di_flag == 0)	
 	{
 	  x += 0.0;		//Add nothing to the sum of coefficients
 	}
@@ -317,10 +317,6 @@ q_ioniz_dere (nion, t_e)
       /* NSH 140313 - changed the following lines to interpolate in log space */
       }
 
-  //if (ion[n].z==6 && ion[n].istate==4){
-  //
-  //printf ("T=%e Interploating between %e(%e) and %e(%e)\n",scaled_t,rates[imin],temps[imin],rates[imax],temps[imax]); 
-  //}
 
   drdt = ((dere_di_rate[nrec].rates[imax]) - (dere_di_rate[nrec].rates[imin])) / ((dere_di_rate[nrec].temps[imax]) - (dere_di_rate[nrec].temps[imin]));
   dt = ((scaled_t) - (dere_di_rate[nrec].temps[imin]));
@@ -360,9 +356,9 @@ q_ioniz (cont_ptr, electron_temperature)
   int nion;
 
   /* these next two quantities only used in Hydrogen, no Dere data case */
-  gaunt = 0.1;      //for now - from Mihalas for hydrogen
   u0 = cont_ptr->freq[0] * H_OVER_K / electron_temperature;
   nion = cont_ptr->nion;
+  gaunt = 0.1 * ion[nion].z;      //for now - from Mihalas for hydrogen and Helium
 
 
   /* if ion[n].dere_di_flag == 1 then we have direct ionization data for this ion
@@ -372,8 +368,8 @@ q_ioniz (cont_ptr, electron_temperature)
       coeff = q_ioniz_dere(nion, electron_temperature);
     }
 
-  /* if we are Hydrogen then use the approximation from Mihalas */
-  else if (ion[nion].z == 1)
+  /* let's only apply the approximation from Mihalas for Hydogen and Helium */
+  else if (ion[nion].z < 3)
     {
       coeff = 1.55e13 / sqrt (electron_temperature) * gaunt * cont_ptr->x[0] *
         exp (-1. * u0) / u0;
@@ -447,8 +443,9 @@ q_recomb (cont_ptr, electron_temperature)
   int nion;
 
   nion = cont_ptr->nion;
-  gaunt = 0.1;      //for now - from Mihalas for hydrogen
   u0 = cont_ptr->freq[0] * H_OVER_K / electron_temperature;
+  gaunt = 0.1 * ion[nion].z;      //for now - from Mihalas for hydrogen and Helium
+
 
   /* if ion[n].dere_di_flag == 1 then we have direct ionization data for this ion
      only do this if it is the ground state */
@@ -457,7 +454,7 @@ q_recomb (cont_ptr, electron_temperature)
       coeff = q_recomb_dere(cont_ptr, electron_temperature);
     }
 
-  /* if we are Hydrogen then use the approximation from Mihalas */
+  /* let's only apply the approximation from Mihalas for Hydogen and Helium */
   else if (ion[nion].z == 1)
     {
       coeff = 3.2085e-3  / electron_temperature * gaunt * cont_ptr->x[0]; // normal constants * 1/T times gaunt * cross section

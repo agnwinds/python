@@ -59,7 +59,7 @@ int nions;			/*The actual number of ions read from the datafile */
 int nlevels;			/*These are the actual number of levels which were read in */
 #define NLTE_LEVELS	270	/* Maximum number of levels to treat explicitly */
 int nlte_levels;		/* Actual number of levels to treat explicityly */
-#define NLEVELS_MACRO   150	/* Maximum number of macro atom levels. (SS, June 04) */
+#define NLEVELS_MACRO   200	/* Maximum number of macro atom levels. (SS, June 04) */
 int nlevels_macro;		/* Actual number of macro atom levels. (SS, June 04) */
 #define NLINES 		200000	/* Maximum number of lines to be read */
 int nlines;			/* Actual number of lines that were read in */
