@@ -110,6 +110,7 @@ int NPHOT;			/* The number of photon bundles created.  defined in python.c */
 #define SPECTYPE_UNIFORM -2
 #define SPECTYPE_POW     -4
 #define SPECTYPE_CL_TAB  -5
+#define SPECTYPE_BREM    -6
 #define SPECTYPE_NONE	 -3
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
@@ -493,7 +494,7 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
   double weight;		/*weight factor for photons/defined in define_phot */
 
 // The next set of parameters relate to the central source of an AGN
-
+  double brem_temp;       /*The temperature of a bremsstrahlung source */
   double pl_low_cutoff;  /* accessible only in advanced mode- see #34. default to zero */
 
   double alpha_agn;		/*The power law index of a BH at the center of an AGN.  Note that the luminosity

@@ -331,7 +331,7 @@ get_hydro (ndom)
   Log ("Read %d theta values\n", ihydro_theta);
   fclose (fptr);
 
-/* Set a couple of last tags*/
+  /* Set a couple of last tags */
 
   zdom[ndom].coord_type = RTHETA; //At the moment we only deal with RTHETA - in the future we might want to do some clever stuff
   ndim = zdom[ndom].ndim = ihydro_r + 3;  //We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
@@ -340,7 +340,18 @@ get_hydro (ndom)
 
 //  printf ("NSH ndim (r)=%i ihydro_theta=%i mdim(theta)=%i\n",ndim,ihydro_theta,mdim);
 
-
+	geo.coord_type=RTHETA; //At the moment we only deal with RTHETA - in the future we might want to do some clever stuff
+	NDIM = geo.ndim = ihydro_r+3; //We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
+	/*
+	for (i=0;i<MDIM;i++)
+	{
+		printf ("hydro_grid i=%i theta_edge=%f theta_cen=%f\n",i,hydro_theta_edge[i]*RADIAN,hydro_theta_cent[i]*RADIAN);
+	}
+	for (i=0;i<NDIM;i++)
+	{
+		printf ("hydro_grid i=%i r_edge=%f r_cen=%f\n",i,hydro_r_edge[i],hydro_r_cent[i]);
+	}
+*/
 
   return (0);
 }
@@ -445,11 +456,12 @@ hydro_rho (x)
   double length ();
   int ii, jj;
   int im, jm;
-  double r, theta, rrho;
+  double r, theta;
+  double rrho;
   double f1, f2;
   r = length (x);
   theta = asin (sqrt (x[0] * x[0] + x[1] * x[1]) / r);
-//       printf ("NSH hydro_rho x %e %e %e  -> r= %e theta = %e ", x[0], x[1], x[2], r,        theta);
+  //printf ("NSH hydro_rho x %e %e %e  -> r= %e theta = %f ", x[0], x[1], x[2], r,        theta);
 
   if (( hydro_r_cent[ihydro_r] -r )/r < -1e-6)
     {
@@ -463,14 +475,11 @@ hydro_rho (x)
   hydro_frac (r,hydro_r_cent,ihydro_r,&im,&ii,&f1);
   hydro_frac (theta,hydro_theta_cent,ihydro_theta,&jm,&jj,&f2);
 
-      rrho=hydro_interp_value(rho_input,im,ii,jm,jj,f1,f2);   
-
+  rrho=hydro_interp_value(rho_input,im,ii,jm,jj,f1,f2);   
 
   if (rrho < 1e-23)
     rrho = 1e-23;
 
-
-//    printf ("Grid point %d %d rho %e f1=%f f2=%f\n", ii, jj, rrho,f1,f2);
   return (rrho);
 }
 
@@ -634,20 +643,9 @@ rtheta_make_hydro_grid (w, ndom)
 
   }
     }
-  /* Now set up the wind cones that are needed for calclating ds in a cell */
-  /*
-  for (i = 0; i < ndim; i++)
-    {
-    wind_ij_to_n (ndom,i, 0, &n);
-    printf ("hydro_grid i=%i, ihydro_r=%i n=%i, r=%e, rcen=%e\n",i,ihydro_r,n,w[n].r,w[n].rcen);
-    }
 
-  for (i = 0; i < mdim; i++)
-    {
-    wind_ij_to_n (ndom,0, i, &n);
-    printf ("hydro_grid j=%i,  ihydrotheta=%i, n=%i, theta=%f, thetacen=%f\n",i,ihydro_theta,n,w[n].theta,w[n].thetacen);
-    }
-*/
+  /* Now set up the wind cones that are needed for calclating ds in a cell */
+
   rtheta_make_cones (ndom, w);  //NSH 130821 broken out into a seperate routine
 
 
@@ -693,9 +691,7 @@ rtheta_hydro_volumes (ndom, w)
   DomainPtr one_dom;
 
   one_dom = &zdom[ndom];
-//  printf ("NSH here in hydro_volumes\n");
-
-
+  //printf ("NSH here in hydro_volumes\n");
 
   for (i = 0; i < one_dom->ndim; i++)
     {
@@ -716,7 +712,7 @@ rtheta_hydro_volumes (ndom, w)
     2. * 2. / 3. * PI * (rmax * rmax * rmax -
              rmin * rmin * rmin) * (cos (thetamin) -
                   cos (thetamax));
-  //    printf ("NSH_vols %i %i rmin %e rmax %e thetamin %e thatmax %e vol %e\n",i,j,rmin,rmax,thetamin,thetamax,w[n].vol);
+        //printf ("NSH_vols %i %i rmin %e rmax %e thetamin %e thatmax %e vol %e\n",i,j,rmin,rmax,thetamin,thetamax,w[n].vol);
       
         if (w[n].vol == 0.0)
     {
@@ -730,6 +726,7 @@ rtheta_hydro_volumes (ndom, w)
       w[n].vol = 0.0;
   }
     }
+
   return (0);
 }
 

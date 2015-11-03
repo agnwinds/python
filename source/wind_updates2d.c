@@ -133,7 +133,6 @@ WindPtr (w);
   /* the commbuffer needs to be larger enough to pack all variables in MPI_Pack and MPI_Unpack routines NSH 1407 - the 
   NIONS changed to nions for the 12 arrays in plasma that are now dynamically allocated */
   size_of_commbuffer = 8 * (12*nions + NLTE_LEVELS + 2*NTOP_PHOT + 12*NXBANDS + 2*LPDF + NAUGER + 106)*(floor(NPLASMA/np_mpi_global)+1);
-      
   commbuffer = (char *) malloc(size_of_commbuffer*sizeof(char));
 
   /* JM 1409 -- Initialise parallel only variables */
@@ -678,6 +677,8 @@ for ( ndom = 0; ndom < geo.ndomain; ndom++)
   {
 	  Log("Outputting heatcool file for connecting to zeus\n");
       fptr = fopen ("py_heatcool.dat", "w");
+ 	 fprintf(fptr,"i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff\n");
+	  
   }
 
 
@@ -813,14 +814,12 @@ for ( ndom = 0; ndom < geo.ndomain; ndom++)
         asum + geo.lum_comp + geo.lum_dr + geo.lum_di + geo.lum_adiabatic, geo.lum_fb, geo.lum_ff, geo.lum_comp, 
         geo.lum_dr, geo.lum_di, geo.lum_lines, geo.lum_adiabatic);	
 
-		  printf ("NSH iave=%i\n",iave);
 
   /* Print out some diagnositics of the changes in the wind update */
 		  
 	if (modes.zeus_connect==1 || modes.fixed_temp==1)	     //There is no point in computing temperature changes, because we have fixed them!
 	{
-		Log ("!!wind_update: We are running in fixed temperature mode - no temperature report\n");
-		
+		Log ("!!wind_update: We are running in fixed temperature mode - no temperature report\n");	
 	}
 	else
 	
@@ -848,7 +847,8 @@ for ( ndom = 0; ndom < geo.ndomain; ndom++)
        (t_r_ave - t_r_ave_old));
 } 
 	 
-	check_convergence ();
+  check_convergence ();
+
   /* Summarize the radiative temperatures (ksl 04 mar)*/
   xtemp_rad (w);
 
@@ -894,6 +894,7 @@ for ( ndom = 0; ndom < geo.ndomain; ndom++)
 	  	 geo.lum_agn, plasmamain[0].t_e, plasmamain[0].rho * rho2nh,
 	  	 plasmamain[0].ne, geo.alpha_agn, agn_ip, plasmamain[0].ip, plasmamain[0].xi,w[n].r,
 	  	 w[n].vol, plasmamain[0].mean_ds / plasmamain[0].n_ds);
+
 
 
       /* 1108 NSH Added commands to report compton heating */

@@ -96,6 +96,11 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
       emit = emittance_bpow (freqmin, freqmax, lum, alpha);
       *f = emit;
     }
+	else if (spectype == SPECTYPE_BREM)
+	{
+		emit=qromb(integ_brem,freqmin,freqmax,1e-4);
+		*f=emit;
+	}
 
   return (*f);			/* Return the luminosity    */
 }
@@ -303,7 +308,6 @@ emittance_bpow (freqmin, freqmax, lum, alpha)
 
 
 
-
 int
 photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
      PhotPtr p;
@@ -353,6 +357,8 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
 	    }
 	}
     }
+	
+	
 
 
   for (i = istart; i < iend; i++)
@@ -382,6 +388,11 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
       else if (spectype == SPECTYPE_CL_TAB)
 	{
 	  p[i].freq = get_rand_pow (freqmin, freqmax, alpha);
+	}
+	else if (spectype == SPECTYPE_BREM)
+	{
+		p[i].freq = get_rand_brem(freqmin,freqmax);
+//		printf ("photon %i has freq %e\n",i,p[i].freq);
 	}
       else
 	{
@@ -418,6 +429,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
 
       /* this last bit is the direction, might need a change */
       randvcos (p[i].lmn, p[i].x);
-    }
+  }
+
   return (0);
 }
