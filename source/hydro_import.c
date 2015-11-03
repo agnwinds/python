@@ -335,13 +335,8 @@ get_hydro (ndom)
 
   zdom[ndom].coord_type = RTHETA; //At the moment we only deal with RTHETA - in the future we might want to do some clever stuff
   ndim = zdom[ndom].ndim = ihydro_r + 3;  //We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
-//geo.ndim2 = NDIM2 += zdom[ndom].ndim * zdom[ndom].mdim;
+  //geo.ndim2 = NDIM2 += zdom[ndom].ndim * zdom[ndom].mdim;
 
-
-//  printf ("NSH ndim (r)=%i ihydro_theta=%i mdim(theta)=%i\n",ndim,ihydro_theta,mdim);
-
-	geo.coord_type=RTHETA; //At the moment we only deal with RTHETA - in the future we might want to do some clever stuff
-	NDIM = geo.ndim = ihydro_r+3; //We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
 	/*
 	for (i=0;i<MDIM;i++)
 	{
