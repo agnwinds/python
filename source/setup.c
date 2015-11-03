@@ -896,6 +896,20 @@ get_bl_and_agn_params (lstar)
       if (modes.iadvanced)
 	rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
 
+      rddoub("geometry_for_pl_source(0=sphere,1=lamp_post)", &geo.pl_geometry);
+
+      if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
+        {
+          rddoub("lamp_post.height(r_g)", &geo.lamp_post_height);
+          geo.lamp_post_height *= G * geo.mstar / C / C;  //get it in CGS units 
+        }
+      else if (geo.pl_geometry != PL_GEOMETRY_SPHERE) // only two options at the moment
+        {
+          Error("Did not understand power law geometry %i. Fatal.\n", geo.pl_geometry);
+          exit(0);
+        }
+
+
 
       /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
          This is only used in the sim correction factor for the first time through. 

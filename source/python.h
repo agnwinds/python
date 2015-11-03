@@ -453,6 +453,10 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
   double lum_tot, lum_star, lum_disk, lum_bl, lum_wind;	/* The total luminosities of the disk, star, bl, & wind 
 							   are actually not used in a fundamental way in the program */
   double lum_agn;		/*The total luminosity of the AGN or point source at the center */
+  double pl_geometry;      /* geometry of X-ray point source */
+#define PL_GEOMETRY_SPHERE 0
+#define PL_GEOMETRY_LAMP_POST 1
+  double lamp_post_height; /* height of X-ray point source if lamp post */
 
 /* The next four variables added by nsh Apr 2012 to allow broken power law to match the cloudy table command */
   double agn_cltab_low;		//break at which the low frequency power law ends
