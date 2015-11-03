@@ -919,7 +919,7 @@ get_bl_and_agn_params (lstar)
       if (modes.iadvanced)
 	rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
 
-      rddoub("geometry_for_pl_source(0=sphere,1=lamp_post)", &geo.pl_geometry);
+      rdint("geometry_for_pl_source(0=sphere,1=lamp_post)", &geo.pl_geometry);
 
       if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
         {
