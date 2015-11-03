@@ -191,9 +191,7 @@ define_wind ()
 	}
 
     }
-
   wind_complete (w);
-
 
   /* Now define the valid volumes of each cell and also determine whether the cells are in all
      or partially in the wind.
@@ -208,7 +206,7 @@ define_wind ()
    */
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
-
+	  
     {
       if (zdom[ndom].coord_type == SPHERICAL)
 	{
@@ -224,7 +222,7 @@ define_wind ()
 	     the actual zeus grid in the special case of a 'proga' wind 
 	     in rtheta coordinates We dont need to work out if cells are 
 	     in the wind, they are known to be in the wind. */
-	  if (geo.wind_type == 3)
+	  if (zdom[ndom].wind_type == 3)
 	    {
 	      rtheta_hydro_volumes (ndom, w);
 	    }
@@ -244,6 +242,9 @@ define_wind ()
 	     zdom[ndom].coord_type);
 	}
     }
+
+
+
 
 
 /* The routines above have established the volumes of the cells that are in the wind
@@ -276,9 +277,7 @@ define_wind ()
 	{
 	  for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
 	    {
-
 	      n_inwind = check_corners_inwind (n);
-
 	      if (w[n].vol == 0 && n_inwind > 0)
 		{
 		  wind_n_to_ij (ndom, n, &i, &j);
@@ -336,7 +335,6 @@ be optional which variables beyond here are moved to structures othere than Wind
 
 
 /* Now calculate parameters that need to be calculated at the center of the grid cell */
-
 
   for (n = 0; n < NPLASMA; n++)
     {
@@ -1251,3 +1249,7 @@ check_corners_inwind (n)
 
   return (n_inwind);
 }
+
+
+
+
