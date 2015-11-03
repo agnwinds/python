@@ -434,7 +434,17 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
       else if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
   {
     p[i].x[0] = p[i].x[1] = 0.0;
-    p[i].x[2] = geo.lamp_post_height;
+
+    if (rand () > MAXRAND / 2)
+      {     /* Then the photon emerges in the upper hemisphere */
+        p[i].x[2] = geo.lamp_post_height;
+      }
+    else
+      {
+        p[i].x[2] = -geo.lamp_post_height;
+      }
+
+    randvec (p[i].lmn, 1.0);  // lamp-post geometry is isotropic, so completely random vector
 
     randvec (p[i].lmn, 1.0);  // lamp-post geometry is isotropic, so completely random vector
   }
