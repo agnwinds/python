@@ -480,11 +480,6 @@ int photo_gen_matom(PhotPtr p, double weight, int photstart, int nphot);
 /* macro_gov.c */
 int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 int macro_pops(PlasmaPtr xplasma, double xne);
-/* brem.c */
-double emittance_brem(double freqmin, double freqmax, double lum, double t);
-double integ_brem(double freq);
-double brem_d(double alpha);
-double get_rand_brem(double freqmin, double freqmax);
 /* reverb.c */
 double delay_to_observer(PhotPtr pp);
 int delay_dump_prep(char filename[], int restart_stat, int i_rank);
@@ -518,6 +513,11 @@ int init_ionization(void);
 /* run.c */
 int calculate_ionization(int restart_stat);
 int make_spectra(int restart_stat);
+/* brem.c */
+double emittance_brem(double freqmin, double freqmax, double lum, double t);
+double integ_brem(double freq);
+double brem_d(double alpha);
+double get_rand_brem(double freqmin, double freqmax);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
