@@ -623,7 +623,7 @@ main (argc, argv)
 
       geo.agn_spectype = 3;
       get_spectype (geo.agn_radiation,
-		    "Rad_type_for_agn(3=power_law,4=cloudy_table)_in_final_spectrum",
+		    "Rad_type_for_agn(3=power_law,4=cloudy_table,5=bremsstrahlung)_in_final_spectrum",
 		    &geo.agn_spectype);
 
       init_observers ();

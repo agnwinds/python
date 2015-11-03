@@ -144,6 +144,10 @@ radiation (p, ds)
   int ndom;
   
   one = &wmain[p->grid];	/* So one is the grid cell of interest */
+  
+
+	  
+  
   ndom=one->ndom;
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "radiation");
@@ -986,19 +990,20 @@ update_banded_estimators (xplasma, p, ds, w_ave)
       /* IP needs to be radiation density in the cell. We sum wcontributions from
          each photon, then it is normalised in wind_update. */
       xplasma->ip += ((w_ave * ds) / (H * p->freq));
-		if (HEV * p->freq < 13600) //Tartar et al integrate up to 1000Ryd to define the ionization parameter
+
+	  if (HEV * p->freq < 13600) //Tartar et al integrate up to 1000Ryd to define the ionization parameter
 		{
-			xplasma->xi += (w_ave * ds);
+		  xplasma->xi += (w_ave * ds);
 		}
 
       if (p->nscat == 0)
-	{
-	  xplasma->ip_direct += ((w_ave * ds) / (H * p->freq));
-	}
+	    {
+	      xplasma->ip_direct += ((w_ave * ds) / (H * p->freq));
+	    }
       else
-	{
-	  xplasma->ip_scatt += ((w_ave * ds) / (H * p->freq));
-	}
+	    {
+	      xplasma->ip_scatt += ((w_ave * ds) / (H * p->freq));
+	    } 
     }
 
   return (0);

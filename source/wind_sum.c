@@ -58,6 +58,7 @@ xtemp_rad (w)
   int ntot;
 
 
+
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
 
@@ -121,9 +122,11 @@ xtemp_rad (w)
 	  for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
 	    {
 	      n = nstart + i * mdim + j;
-	      if (w[n].vol > 0.0)
+//	      if (w[n].vol > 0.0)
+	  	      nplasma = w[n].nplasma;
+		      if (plasmamain[nplasma].vol > 0.0)
 		{
-		  nplasma = w[n].nplasma;
+//		  nplasma = w[n].nplasma;
 		  x = plasmamain[nplasma].t_e;
 		}
 	      else
@@ -149,8 +152,8 @@ xtemp_rad (w)
   	      nplasma = w[n].nplasma;
 	      if (plasmamain[nplasma].vol > 0.0)
 		{
-		  ntot = plasmamain[nplasma].ntot;
-		}
+	  	  ntot = plasmamain[nplasma].ntot;
+					}
 	      else
 		ntot = 0;
 	      Log ("%8d ", ntot);
@@ -158,6 +161,34 @@ xtemp_rad (w)
 	  Log ("\n");
 	}
     }
+	
+	
+	
+    Log ("\n ntot \n");
+
+    Log ("   z\\x   ");
+    for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
+Log ("%8.2e ", w[i * MDIM].x[0]);
+    Log ("\n");
+
+    for (j = 0; j < MDIM; j++)
+{
+  Log ("%8.2e ", w[j].x[2]);
+  for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
+    {
+      n = i * MDIM + j;
+      if (w[n].vol > 0.0)
+	{
+      nplasma = w[n].nplasma;
+	  ntot = plasmamain[nplasma].ntot;
+	}
+      else
+	ntot = 0;
+      Log ("%8d ", ntot);
+    }
+  Log ("\n");
+}
+	
 
   return (0);
 

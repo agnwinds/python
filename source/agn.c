@@ -96,6 +96,11 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
       emit = emittance_bpow (freqmin, freqmax, lum, alpha);
       *f = emit;
     }
+	else if (spectype == SPECTYPE_BREM)
+	{
+		emit=qromb(integ_brem,freqmin,freqmax,1e-4);
+		*f=emit;
+	}
 
   return (*f);			/* Return the luminosity    */
 }
@@ -303,7 +308,6 @@ emittance_bpow (freqmin, freqmax, lum, alpha)
 
 
 
-
 int
 photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
      PhotPtr p;
@@ -355,6 +359,8 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
       }
   }
     }
+	
+	
 
 
   for (i = istart; i < iend; i++)
@@ -382,9 +388,14 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
     p[i].freq = get_rand_pow (freqmin, freqmax, alpha);
   }
       else if (spectype == SPECTYPE_CL_TAB)
-  {
-    p[i].freq = get_rand_pow (freqmin, freqmax, alpha);
-  }
+	{
+	  p[i].freq = get_rand_pow (freqmin, freqmax, alpha);
+	}
+	else if (spectype == SPECTYPE_BREM)
+	{
+		p[i].freq = get_rand_brem(freqmin,freqmax);
+	}
+
       else
   {
     p[i].freq =
@@ -433,8 +444,10 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
          above the disk plane */
       else if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
   {
+    /* x and y coordinates are 0 */
     p[i].x[0] = p[i].x[1] = 0.0;
 
+    /* need to set the z coordinate to the lamp post height, but allow it to be above or below */
     if (rand () > MAXRAND / 2)
       {     /* Then the photon emerges in the upper hemisphere */
         p[i].x[2] = geo.lamp_post_height;
@@ -445,10 +458,9 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
       }
 
     randvec (p[i].lmn, 1.0);  // lamp-post geometry is isotropic, so completely random vector
-
-    randvec (p[i].lmn, 1.0);  // lamp-post geometry is isotropic, so completely random vector
   }
 
     }
+
   return (0);
 }

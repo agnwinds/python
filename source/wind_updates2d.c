@@ -119,6 +119,7 @@ WindPtr (w);
   int ndom;
   FILE *fptr, *fopen (); /*This is the file to communicate with zeus */
   
+
 #ifdef MPI_ON
   int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
   int size_of_commbuffer;
@@ -132,7 +133,6 @@ WindPtr (w);
   /* the commbuffer needs to be larger enough to pack all variables in MPI_Pack and MPI_Unpack routines NSH 1407 - the 
   NIONS changed to nions for the 12 arrays in plasma that are now dynamically allocated */
   size_of_commbuffer = 8 * (12*nions + NLTE_LEVELS + 2*NTOP_PHOT + 12*NXBANDS + 2*LPDF + NAUGER + 106)*(floor(NPLASMA/np_mpi_global)+1);
-      
   commbuffer = (char *) malloc(size_of_commbuffer*sizeof(char));
 
   /* JM 1409 -- Initialise parallel only variables */
@@ -207,12 +207,11 @@ WindPtr (w);
       t_e_old = plasmamain[n].t_e;
       iave++;
 
-
       if (plasmamain[n].ntot < 100)
 	{
 	  Log
-	    ("!!wind_update: Cell %d  with volume %8.2e has only %d photons\n",
-	     n, volume, plasmamain[n].ntot);
+	    ("!!wind_update: Cell %d  with volume %8.2e r=%e theta=%e has only %d photons\n",
+	     n, volume, w[nwind].rcen,w[nwind].thetacen,plasmamain[n].ntot);
 	}
 
       if (plasmamain[n].ntot > 0)
@@ -298,6 +297,11 @@ WindPtr (w);
       plasmamain[n].ip /= (C * volume * nh);
       plasmamain[n].ip_direct /= (C * volume * nh);
       plasmamain[n].ip_scatt /= (C * volume * nh);
+	  
+/* 1510 NSH Normalise xi, which at this point should be the luminosity of ionizing photons in a cell (just the sum of photon weights) */
+
+		plasmamain[n].xi *= 4.*PI;
+		plasmamain[n].xi /= ( volume * nh);
 
 /* 1510 NSH Normalise xi, which at this point should be the luminosity of ionizing photons in a cell (just the sum of photon weights) */
 
@@ -673,6 +677,17 @@ for ( ndom = 0; ndom < geo.ndomain; ndom++)
   {
 	  Log("Outputting heatcool file for connecting to zeus\n");
       fptr = fopen ("py_heatcool.dat", "w");
+ 	 fprintf(fptr,"i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff\n");
+	  
+  }
+
+
+  if (modes.zeus_connect==1) //If we are running in zeus connect mode - we open a file for heatcool rates
+  {
+	  Log("Outputting heatcool file for connecting to zeus\n");
+      fptr = fopen ("py_heatcool.dat", "w");
+   	 fprintf(fptr,"i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff\n");
+	  
   }
 
   /* Check the balance between the absorbed and the emitted flux */
@@ -728,27 +743,23 @@ for ( ndom = 0; ndom < geo.ndomain; ndom++)
       plasmamain[nplasma].lum_rad_ioniz = plasmamain[nplasma].lum_rad;
       plasmamain[nplasma].lum_adiabatic_ioniz = plasmamain[nplasma].lum_adiabatic;
 
-
-
-	  if (modes.zeus_connect == 1) //If we are running in zeus connect mode, we output heating and cooling rates.
-	    {
-	      nwind = plasmamain[nplasma].nwind;
-	      ndom = wmain[nwind].ndom;
-		  wind_n_to_ij (ndom, nwind, &i, &j);
-		  vol=w[nwind].vol;
-
-		  /* write to file */
-		  fprintf(fptr,"%d %d %e %e %e %e %e %e %e %e %e %e %e\n",i,j,w[nwind].rcen,
-		  		  w[nwind].thetacen/RADIAN,
-		          plasmamain[nplasma].heat_photo/vol,plasmamain[nplasma].heat_comp/vol,
-		          plasmamain[nplasma].heat_lines/vol,plasmamain[nplasma].heat_ff/vol,
-		          plasmamain[nplasma].lum_fb/vol,plasmamain[nplasma].lum_comp/vol,
-		          plasmamain[nplasma].lum_lines/vol,plasmamain[nplasma].lum_ff/vol,
-		          plasmamain[nplasma].xi);
-	    }
+	  if (modes.zeus_connect==1) //If we are running in zeus connect mode, we output heating and cooling rates.
+	  {
+		  wind_n_to_ij (geo.wind_domain_number,plasmamain[nplasma].nwind, &i, &j);
+		  vol=w[plasmamain[nplasma].nwind].vol;
+		  fprintf(fptr,"%d %d %e %e %e ",i,j,w[plasmamain[nplasma].nwind].rcen,w[plasmamain[nplasma].nwind].thetacen/RADIAN,vol); //output geometric things
+		  fprintf(fptr,"%e %e %e ",plasmamain[nplasma].t_e,plasmamain[nplasma].xi,plasmamain[nplasma].ne); //output temp, xi and ne to ease plotting of heating rates
+		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_photo+plasmamain[nplasma].heat_auger)/vol); //Xray heating - or photoionization
+		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_comp)/vol); //Compton heating
+		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_lines)/vol); //Line heating 28/10/15 - not currently used in zeus
+		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_ff)/vol); //FF heating 28/10/15 - not currently used in zeus
+		  fprintf(fptr,"%e ",(plasmamain[nplasma].lum_comp)/vol); //Compton cooling
+		  fprintf(fptr,"%e ",(plasmamain[nplasma].lum_lines+plasmamain[nplasma].lum_fb+plasmamain[nplasma].lum_dr)/vol); //Line cooling must include all recombinatiobs cooling
+		  fprintf(fptr,"%e\n",(plasmamain[nplasma].lum_ff)/vol); //ff cooling
+	   }
     }
 	
-    if (modes.zeus_connect == 1) 
+    if (modes.zeus_connect==1) 
         fclose(fptr);
 
   /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
@@ -804,8 +815,15 @@ for ( ndom = 0; ndom < geo.ndomain; ndom++)
         geo.lum_dr, geo.lum_di, geo.lum_lines, geo.lum_adiabatic);	
 
 
-
   /* Print out some diagnositics of the changes in the wind update */
+		  
+	if (modes.zeus_connect==1 || modes.fixed_temp==1)	     //There is no point in computing temperature changes, because we have fixed them!
+	{
+		Log ("!!wind_update: We are running in fixed temperature mode - no temperature report\n");	
+	}
+	else
+	
+	{
   t_r_ave_old /= iave;
   t_e_ave_old /= iave;
   t_r_ave /= iave;
@@ -827,8 +845,10 @@ for ( ndom = 0; ndom < geo.ndomain; ndom++)
        (t_e_ave - t_e_ave_old));
   Log ("Summary  t_r  %6.0f   %6.0f  #t_r and dt_r on this update\n", t_r_ave,
        (t_r_ave - t_r_ave_old));
-
+} 
+	 
   check_convergence ();
+
   /* Summarize the radiative temperatures (ksl 04 mar)*/
   xtemp_rad (w);
 
@@ -870,10 +890,12 @@ for ( ndom = 0; ndom < geo.ndomain; ndom++)
       agn_ip /= plasmamain[0].rho * rho2nh;
       /* Report luminosities, IP and other diagnositic quantities */
       Log
-	("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim_2010)= %e Meaured_IP(cloudy)= %e Measured_Xi=%e distance= %e volume= %e mean_ds=%e\n",
-	 geo.lum_agn, plasmamain[0].t_e, plasmamain[0].rho * rho2nh,
-	 plasmamain[0].ne, geo.alpha_agn, agn_ip, plasmamain[0].ip, plasmamain[0].xi,w[n].r,
-	 w[n].vol, plasmamain[0].mean_ds / plasmamain[0].n_ds);
+	  	("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim_2010)= %e Measured_IP(cloudy)= %e Measured_Xi= %e distance= %e volume= %e mean_ds=%e\n",
+	  	 geo.lum_agn, plasmamain[0].t_e, plasmamain[0].rho * rho2nh,
+	  	 plasmamain[0].ne, geo.alpha_agn, agn_ip, plasmamain[0].ip, plasmamain[0].xi,w[n].r,
+	  	 w[n].vol, plasmamain[0].mean_ds / plasmamain[0].n_ds);
+
+
 
       /* 1108 NSH Added commands to report compton heating */
       Log ("OUTPUT Absorbed_flux(ergs-1cm-3)    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e auger %8.2e )\n", 
@@ -973,19 +995,18 @@ wind_rad_init ()
       plasmamain[n].j_direct = plasmamain[n].j_scatt = 0,0;  //NSH 1309 zero j banded by number of scatters
       plasmamain[n].ip = 0.0;
       plasmamain[n].xi = 0.0;
-
       plasmamain[n].ip_direct = plasmamain[n].ip_scatt = 0.0;
       plasmamain[n].mean_ds = 0.0;
       plasmamain[n].n_ds = 0;
       plasmamain[n].ntot_disk = plasmamain[n].ntot_agn = 0;	//NSH 15/4/11 counters to see where photons come from
       plasmamain[n].ntot_star = plasmamain[n].ntot_bl =
-	plasmamain[n].ntot_wind = 0;
+	  plasmamain[n].ntot_wind = 0;
       plasmamain[n].heat_tot = plasmamain[n].heat_ff =
-	plasmamain[n].heat_photo = plasmamain[n].heat_lines = 0.0;
+	  plasmamain[n].heat_photo = plasmamain[n].heat_lines = 0.0;
       plasmamain[n].heat_z = 0.0;
       plasmamain[n].max_freq = 0.0;	//NSH 120814 Zero the counter which works out the maximum frequency seen in a cell and hence the maximum applicable frequency of the power law estimators.
       plasmamain[n].lum = plasmamain[n].lum_rad = plasmamain[n].lum_lines =
-	plasmamain[n].lum_ff = 0.0;
+	  plasmamain[n].lum_ff = 0.0;
       plasmamain[n].lum_fb = plasmamain[n].lum_z = 0.0;
       plasmamain[n].nrad = plasmamain[n].nioniz = 0;
       plasmamain[n].lum_comp = 0.0;	//1108 NSH Zero the compton luminosity for the cell
