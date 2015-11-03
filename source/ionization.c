@@ -653,11 +653,6 @@ zero_emit (t)
   xxxplasma->heat_tot += xxxplasma->heat_photo_macro;
   xxxplasma->heat_photo += xxxplasma->heat_photo_macro;
 
-  /* do the same thing for collisional recombination heating and cooling */
-  xxxplasma->heat_tot -= xxxplasma->heat_qrecomb;
-  xxxplasma->heat_qrecomb = total_qrecomb(&wmain[xxxplasma->nwind], t);
-  xxxplasma->heat_tot += xxxplasma->heat_qrecomb;
-
   //  difference = (xxxplasma->heat_tot - total_emission (xxxplasma, 0., VERY_BIG));
 
 
