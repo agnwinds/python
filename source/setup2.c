@@ -196,6 +196,9 @@ init_geo ()
 
   geo.t_bl = 100000.;
 
+  geo.pl_geometry = PL_GEOMETRY_SPHERE;   // default to spherical geometry
+  geo.lamp_post_height = 0.0;   // should only be used if geo.pl_geometry is PL_GEOMETRY_LAMP_POST
+
 
   strcpy (geo.atomic_filename, "data/standard78");
   strcpy (geo.fixed_con_file, "none");
