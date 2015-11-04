@@ -271,7 +271,7 @@ simple_paths_gen_phot(PhotPtr pp)
 double
 r_draw_from_path_histogram(Wind_Paths_Ptr PathPtr)
 {
-	double	r_rand , r_total, r_bin_min, r_bin_rand, r_path;
+	double	r_rand , r_total, r_bin_min, r_bin_rand, r_path, r_bin_max;
 	int		i_path=-1;
 
 	r_total= 0.0;
@@ -286,9 +286,9 @@ r_draw_from_path_histogram(Wind_Paths_Ptr PathPtr)
 
 	//Assign photon path to a random position within the bin.
 	r_bin_min 	= reverb_path_bin[i_path-1];
+	r_bin_max	= reverb_path_bin[i_path];
 	r_bin_rand	= (rand() / MAXRAND) *
-				 (reverb_path_bin[i_path  ]-
-				  reverb_path_bin[i_path-1]) ;
+				  (r_bin_max - r_bin_min);
 	r_path 		= r_bin_min + r_bin_rand;
 	return (r_path);
 }
@@ -363,8 +363,8 @@ line_paths_gen_phot(WindPtr wind, PhotPtr pp, int nres)
 	}
 	else if(wind->paths->i_num == 0)
 	{	//If there's no path data registered in this cell, default to simple
-		Error ("line_paths_gen_phot: No path data in cell %d at r=%g, z=%g\n",
-			   wind->nwind, sqrt(wind->x[0]*wind->x[0] + wind->x[1]*wind->x[1]), wind->x[2]);
+		//Error ("line_paths_gen_phot: No path data in cell %d at r=%g, z=%g\n",
+		//	   wind->nwind, sqrt(wind->x[0]*wind->x[0] + wind->x[1]*wind->x[1]), wind->x[2]);
 		simple_paths_gen_phot(pp);
 	}
 	else if(nres < 0 || nres >= nlines || lin_ptr[nres]->macro_info == 0)
@@ -386,8 +386,8 @@ line_paths_gen_phot(WindPtr wind, PhotPtr pp, int nres)
 				else
 				{	//If there are no photons in this histogram, log and default
 					//to using the wind path histogram.
-					Error("line_paths_gen_phot: No path data for line %d in cell %d at r=%g, z=%g\n",
-				  	 wind->nwind, nres, sqrt(wind->x[0]*wind->x[0] + wind->x[1]*wind->x[1]), wind->x[2]);
+					//Error("line_paths_gen_phot: No path data for line %d in cell %d at r=%g, z=%g\n",
+				  	// wind->nwind, nres, sqrt(wind->x[0]*wind->x[0] + wind->x[1]*wind->x[1]), wind->x[2]);
 					pp->path = r_draw_from_path_histogram(wind->paths);
 				}
 				return(0);

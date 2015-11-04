@@ -106,10 +106,29 @@ int parse_command_line(argc, argv)
       modes.fixed_temp = 1;
       i++;
     }
+    else if (strcmp (argv[i], "-z") == 0)
+      {
+        modes.zeus_connect = 1;
+		Log ("setting zeus_connect to %i\n",modes.zeus_connect);
+		i++;
+      }
 
     else if (strcmp (argv[i], "-i") == 0)
       {
         modes.quit_after_inputs = 1;
+      }
+
+    else if (strcmp (argv[i], "--version") == 0)
+      {
+        /* give information about the pyhon version, such as commit hash */
+        Log ("Python Version %s \n", VERSION);  //54f -- ksl -- Now read from version.h
+        Log ("Built from git commit hash %s\n", GIT_COMMIT_HASH);
+        /* warn the user if there are uncommited changes */
+        int git_diff_status = GIT_DIFF_STATUS;
+        if (git_diff_status > 0)
+          Log("This version was compiled with %i files with uncommitted changes.\n",
+              git_diff_status);
+        exit(0);
       }
 
     else if (strncmp (argv[i], "-", 1) == 0)
@@ -118,7 +137,6 @@ int parse_command_line(argc, argv)
         help ();
       }
   }
-
 
       /* The last command line variable is always the .pf file */
 
@@ -581,8 +599,10 @@ Modified again in python 71b to take account of change in parametrisation of she
     }
 
   /* Get the filling factor of the wind */
+	 
   geo.fill = 1.;
-  rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
+  if (geo.wind_type != 3) //At present, we wont ask this question if we have a read in hydro model.
+  	rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
 
   return (0);
 }
@@ -1127,7 +1147,6 @@ double setup_dfudge ()
 	  Log ("DFUDGE set to %e based on geo.rmax\n", dfudge);
 	}
     }
-	 printf ("BLAH dfudge=%e\n",dfudge);
   return (dfudge);		
 }
 
