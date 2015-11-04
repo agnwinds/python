@@ -277,7 +277,8 @@ q_ioniz_dere (nion, t_e)
 /******************************************************************************/
 
 /* q_ioniz. This returns the collisional ionization co-efficient
-Calculated following equation 5-79 of Mihalas.
+Calculated following equation 5-79 of Mihalas or from data from
+Dere 2007.
 */
 
 double
@@ -298,13 +299,13 @@ q_ioniz (cont_ptr, electron_temperature)
 
   /* if ion[n].dere_di_flag == 1 then we have direct ionization data for this ion
      only do this if it is the ground state */
-  if (ion[nion].dere_di_flag == 1 && config[cont_ptr->nlev].ilv == 1)
+  if (ion[nion].dere_di_flag == 1 && config[cont_ptr->nlev].ilv == 1 && ion[nion].macro_info == 0)
     {
       coeff = q_ioniz_dere(nion, electron_temperature);
     }
 
   /* let's only apply the approximation from Mihalas for Hydogen and Helium */
-  else if (ion[nion].z < 3)
+  else if (ion[nion].z < 3 && ion[nion].macro_info == 1)
     {
       coeff = 1.55e13 / sqrt (electron_temperature) * gaunt * cont_ptr->x[0] *
         exp (-1. * u0) / u0;
@@ -347,6 +348,11 @@ q_recomb_dere (cont_ptr, electron_temperature)
       coeff = 2.07e-16 * config[cont_ptr->nlev].g / config[cont_ptr->uplev].g;
       coeff *= exp(u0);
       coeff *= q_ioniz_dere(nion, electron_temperature);
+
+      /* do a sane check here, as there's an exponential which could blow up */
+      if (sane_check(coeff))
+        Error("q_recomb is %8.4e for ion %i at temperature %8.4e\n",
+               coeff, nion, electron_temperature);
     }
   else 
     coeff = 0.0;
@@ -384,13 +390,14 @@ q_recomb (cont_ptr, electron_temperature)
 
   /* if ion[n].dere_di_flag == 1 then we have direct ionization data for this ion
      only do this if it is the ground state */
-  if (ion[nion].dere_di_flag == 1 && config[cont_ptr->nlev].ilv == 1)
+  /* Still use the Mihalas approximation for macro-atoms */
+  if (ion[nion].dere_di_flag == 1 && config[cont_ptr->nlev].ilv == 1 && ion[nion].macro_info == 0)
     {
       coeff = q_recomb_dere(cont_ptr, electron_temperature);
     }
 
-  /* let's only apply the approximation from Mihalas for Hydogen and Helium */
-  else if (ion[nion].z == 1)
+  /* let's only apply the approximation from Mihalas for Hydogen and Helium macro-atoms */
+  else if (ion[nion].z < 3 && ion[nion].macro_info == 1)
     {
       coeff = 3.2085e-3  / electron_temperature * gaunt * cont_ptr->x[0]; // normal constants * 1/T times gaunt * cross section
 

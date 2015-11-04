@@ -1095,33 +1095,7 @@ main (argc, argv)
 		delay_dump_prep(files.root, restart_stat, rank_global);
 	}
   
-  /* JM XXX PLACEHOLDER */
-  /* TEST LOOP WHICH PRINTS OUT Q_IONIZ */
-  int i, itemp;
-  double tt_for_q;
 
-  for (itemp = 0; itemp < 11; itemp++)
-    {
-
-    tt_for_q = pow(10.0, 3 + 0.2*itemp);
-
-    for (i = 0; i < nions; i++)
-      Log("JMQ Ion %i %i Mihalas %8.4e T %8.4e\n",
-  		   ion[i].z, ion[i].istate, 
-  		   q_ioniz(&phot_top[ion[i].ntop_ground], tt_for_q), tt_for_q);
-
-    for (i = 0; i < nions; i++)
-      {
-  	    if (ion[i].dere_di_flag == 1)
-  	      Log("JMQ Ion %i %i Dere %8.4e T %8.4e\n",
-  		       ion[i].z, ion[i].istate, q_ioniz_dere(i, tt_for_q), tt_for_q);
-      }
-
-    }
-  
-  exit(0);
-  /* JM XXX END PLACEHOLDER */
-  
   while (geo.wcycle < geo.wcycles)
     {				/* This allows you to build up photons in bunches */
 
