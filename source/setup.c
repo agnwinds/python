@@ -1003,7 +1003,7 @@ get_meta_params (void)
 
   rdint("reverb.type", &meta_param);
   switch(meta_param)
-  {
+  { //Read in reverb tyoe, if any
     case 0: geo.reverb = REV_NONE;    break;
     case 1: geo.reverb = REV_PHOTON;  break;
     case 2: geo.reverb = REV_WIND;    break;
@@ -1013,7 +1013,7 @@ get_meta_params (void)
   }
 
   if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
-  {
+  { //If this requires further parameters, set defaults
     geo.reverb_lines = 0;
     geo.reverb_path_bins = 100;
     geo.reverb_angle_bins = 100;
@@ -1022,7 +1022,7 @@ get_meta_params (void)
     rdint("reverb.path_bins", &geo.reverb_path_bins);
     rdint("reverb.visualisation", &meta_param);
     switch(meta_param)
-    {
+    { //Select whether to produce 3d visualisation file and/or dump flat csvs of spread in cells
       case 0: geo.reverb_vis = REV_VIS_NONE;  break;
       case 1: geo.reverb_vis = REV_VIS_VTK;   break;
       case 2: geo.reverb_vis = REV_VIS_DUMP;  break;
@@ -1030,18 +1030,20 @@ get_meta_params (void)
       default:Error("reverb.visualisation: Invalid mode.\n \
         Valid modes are 0=None, 1=VTK, 2=Cell dump, 3=Both.\n");
     }
+
     if(geo.reverb_vis == REV_VIS_VTK  || geo.reverb_vis == REV_VIS_BOTH)
+      //If we're producing a 3d visualisation, select bins. This is just for aesthetics
       rdint("reverb.angle_bins", &geo.reverb_angle_bins);
     if(geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
-    {
+    { //If we;re dumping path arrays, read in the number of cells to dump them for
       rdint("reverb.dump_cells", &geo.reverb_dump_cells);
       geo.reverb_dump_i = (int *) calloc(geo.reverb_dump_cells, sizeof(int));
       geo.reverb_dump_j = (int *) calloc(geo.reverb_dump_cells, sizeof(int));
       for(k=0; k<geo.reverb_dump_cells; k++)
-      {
+      { //For each we expect, read a paired cell coord as "[i]:[j]". May need to use py_wind to find indexes.
         rdline("reverb.dump_cell", &trackline);
         if(sscanf(trackline, "%d:%d", &geo.reverb_dump_i[k], &geo.reverb_dump_j[k]) == EOF)
-        {
+        { //If this line is malformed, warn the user
           Error("reverb.dump_cell: Invalid position line '%s'\n \
             Expected format '[i]:[j]'\n",trackline);
           exit(0);
@@ -1051,35 +1053,36 @@ get_meta_params (void)
   }
 
   if(geo.reverb == REV_MATOM)
-  {
+  { //If this is macro-atom mode
     if(geo.rt_mode != 2)
-    {
-        Error("reverb.type: Invalid reverb mode.\n \
+    { //But we're not actually working in matom mode...
+      Error("reverb.type: Invalid reverb mode.\n \
       Macro-atom mode selected but macro-atom scattering not on.\n");
-        exit(0);
+      exit(0);
     }
     
     rdint("reverb.matom_lines", &geo.reverb_lines);
     geo.reverb_line = (int *) calloc(geo.reverb_lines, sizeof(int));
-    if(geo.rt_mode != 2)
-    {
-        Error("reverb.matom_lines: \
+    if(geo.reverb_lines <= 0)
+    { //Read in the number of matom lines
+      Error("reverb.matom_lines: \
       Must specify 1 or more lines to watch in macro-atom mode.\n");
-        exit(0);
+      exit(0);
      }  
+
     for(i=0; i<geo.reverb_lines; i++)
-    {
+    { //Finally, for each line
       rdline("reverb.matom_line", &trackline);
       if(sscanf(trackline, "%d:%d:%d:%d", &z, &istate, &levu, &levl) == EOF)
-      {
+      { //If this line is malformed, warn the user
         Error("reverb.matom_line: Malformed line '%s'\n \
           Expected format '[z]:[istate]:[upper level]:[lower level]'\n",trackline);
         exit(0);
       }
       else
-      {
+      { //Otherwise, sift through the line list to find what this transition corresponds to
         for(j=0; j<nlines_macro; j++)
-        {
+        { //And record the line position in geo for comparison purposes
           if(line[j].z == z && line[j].istate == istate && line[j].levu == levu && line[j].levl == levl)
           {
             geo.reverb_line[i] = line[j].where_in_list;
@@ -1089,9 +1092,9 @@ get_meta_params (void)
     }
   }
   else if(geo.reverb == REV_WIND)
-  {
+  { //For wind mode...
     if (geo.wind_radiation == 0)
-    { 
+    { //Warn if this data is being gathered but not used (can be useful for debug)
       Error("reverb.type: Wind radiation is off but wind-based path tracking is enabled!\n");
     } 
   }

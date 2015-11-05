@@ -247,9 +247,7 @@ wind_paths_add_phot(WindPtr wind, PhotPtr pp)
 int
 simple_paths_gen_phot(PhotPtr pp)
 {
-	pp->path = sqrt((pp->x[0] * pp->x[0])
-	  			+	(pp->x[1] * pp->x[1])
-	  			+	(pp->x[2] * pp->x[2])); 
+	pp->path = length(pp->x); 
 	return (0);
 }
 
@@ -292,6 +290,7 @@ r_draw_from_path_histogram(Wind_Paths_Ptr PathPtr)
 	r_path 		= r_bin_min + r_bin_rand;
 	return (r_path);
 }
+
 
 /********************************************************//*
  * @name 	wind_paths_generate_photon

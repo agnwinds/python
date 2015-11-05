@@ -62,7 +62,6 @@ stuff_phot (pin, pout)
 
   pout->istat = pin->istat;
   pout->nres = pin->nres;
-  pout->nres_orig = pin->nres_orig; //1015 SWM - Added for matoms
   pout->nrscat = pin->nrscat;
   pout->nscat = pin->nscat;
   pout->grid = pin->grid;

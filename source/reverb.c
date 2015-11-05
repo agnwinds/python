@@ -176,7 +176,13 @@ delay_dump_combine(int i_ranks)
 	//Yes this is done as a system call and won 't work on Windows machines. Lazy solution!
 	sprintf(c_call, "cat %s[0-9]* >> %s", delay_dump_file, delay_dump_file);
 	if (system(c_call) < 0)
+	{
 		Error("delay_dump_combine: Error calling system command '%s'", c_call);
+	}
+	else
+	{
+		sprintf(c_call,"rm %s[0-9]*");
+	}
 	return (0);
 }
 
@@ -201,9 +207,9 @@ int
 delay_dump(PhotPtr p, int np, int iExtracted)
 {
 	FILE *fopen(), *fptr;
-	int	 nphot, mscat, mtopbot, i;
-	double zangle;
-
+	int	 nphot, mscat, mtopbot, i, subzero;
+	double zangle, delay;
+	subzero=0;
 
 	printf("delay_dump: Dumping %d photons\n",np);
 	/*
@@ -217,7 +223,6 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 	}
 	for (nphot = 0; nphot < np; nphot++) 
 	{
-
 		if (iExtracted  || 
 			(p[nphot].istat == P_ESCAPE && 
 			(p[nphot].nscat > 0 || p[nphot].origin == PTYPE_WIND || p[nphot].origin == PTYPE_WIND_MATOM)))
@@ -244,12 +249,14 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 					if (iExtracted ||
 						(xxspec[i].mmin < zangle && zangle < xxspec[i].mmax))
 					{
+						delay = (delay_to_observer(&p[nphot]) - geo.rmax) / C;
+						if(delay<0)subzero++;
+
 						fprintf(fptr,
 							"%10.5g %10.5g %10.5g %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g %5d %5d %5d %10d\n",
 							p[nphot].freq, C * 1e8 / p[nphot].freq, p[nphot].w, 
 							p[nphot].x[0], p[nphot].x[1], p[nphot].x[2],
-							p[nphot].nscat, p[nphot].nrscat,
-							(delay_to_observer(&p[nphot]) - geo.rmax) / C,
+							p[nphot].nscat, p[nphot].nrscat, delay,
 							(iExtracted ? delay_dump_bank_ex[nphot] : 0),
 							i - MSPEC, p[nphot].origin, 
 							p[nphot].nres);
@@ -257,6 +264,11 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 				}
 			}
 		}
+	}
+
+	if(subzero>0)
+	{
+		Error ("delay_dump: %d photons with <0 delay found! Increase path bin resolution to minimise this error.", subzero);
 	}
 	fclose(fptr);
 	return (0);
