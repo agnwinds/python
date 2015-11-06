@@ -127,7 +127,6 @@ WindPtr (w);
   /* the commbuffer needs to be larger enough to pack all variables in MPI_Pack and MPI_Unpack routines NSH 1407 - the 
   NIONS changed to nions for the 12 arrays in plasma that are now dynamically allocated */
   size_of_commbuffer = 8 * (12*nions + NLTE_LEVELS + 2*NTOP_PHOT + 12*NXBANDS + 2*LPDF + NAUGER + 106)*(floor(NPLASMA/np_mpi_global)+1);
-      
   commbuffer = (char *) malloc(size_of_commbuffer*sizeof(char));
 
   /* JM 1409 -- Initialise parallel only variables */
@@ -665,6 +664,8 @@ free (commbuffer);
   {
 	  Log("Outputting heatcool file for connecting to zeus\n");
       fptr = fopen ("py_heatcool.dat", "w");
+ 	 fprintf(fptr,"i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff\n");
+	  
   }
 
   /* Check the balance between the absorbed and the emitted flux */
@@ -731,13 +732,15 @@ free (commbuffer);
 	  {
 	 		 wind_n_to_ij (plasmamain[nplasma].nwind, &i, &j);
 			 vol=w[plasmamain[nplasma].nwind].vol;
-	 		 fprintf(fptr,"%d %d %e %e %e %e %e %e %e %e %e %e %e\n",i,j,w[plasmamain[nplasma].nwind].rcen,
-			 w[plasmamain[nplasma].nwind].thetacen/RADIAN,
-			 plasmamain[nplasma].heat_photo/vol,plasmamain[nplasma].heat_comp/vol,
-			 plasmamain[nplasma].heat_lines/vol,plasmamain[nplasma].heat_ff/vol,
-			 plasmamain[nplasma].lum_fb/vol,plasmamain[nplasma].lum_comp/vol,
-			 plasmamain[nplasma].lum_lines/vol,plasmamain[nplasma].lum_ff/vol,
-			 plasmamain[nplasma].xi);
+   		  fprintf(fptr,"%d %d %e %e %e ",i,j,w[plasmamain[nplasma].nwind].rcen,w[plasmamain[nplasma].nwind].thetacen/RADIAN,vol); //output geometric things
+   		  fprintf(fptr,"%e %e %e ",plasmamain[nplasma].t_e,plasmamain[nplasma].xi,plasmamain[nplasma].ne); //output temp, xi and ne to ease plotting of heating rates
+   		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_photo+plasmamain[nplasma].heat_auger)/vol); //Xray heating - or photoionization
+   		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_comp)/vol); //Compton heating
+   		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_lines)/vol); //Line heating 28/10/15 - not currently used in zeus
+   		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_ff)/vol); //FF heating 28/10/15 - not currently used in zeus
+   		  fprintf(fptr,"%e ",(plasmamain[nplasma].lum_comp)/vol); //Compton cooling
+   		  fprintf(fptr,"%e ",(plasmamain[nplasma].lum_lines+plasmamain[nplasma].lum_fb+plasmamain[nplasma].lum_dr)/vol); //Line cooling must include all recombinatiobs cooling
+   		  fprintf(fptr,"%e\n",(plasmamain[nplasma].lum_ff)/vol); //ff cooling
 	   }
     }
 	
@@ -799,7 +802,14 @@ free (commbuffer);
 
 
   /* Print out some diagnositics of the changes in the wind update */
-  t_r_ave_old /= iave;
+		if (modes.zeus_connect==1 || modes.fixed_temp==1)	     //There is no point in computing temperature changes, because we have fixed them!
+   	{
+   		Log ("!!wind_update: We are running in fixed temperature mode - no temperature report\n");
+		
+   	} 
+		else
+		{
+ 	t_r_ave_old /= iave;
   t_e_ave_old /= iave;
   t_r_ave /= iave;
   t_e_ave /= iave;
@@ -818,6 +828,8 @@ free (commbuffer);
        (t_e_ave - t_e_ave_old));
   Log ("Summary  t_r  %6.0f   %6.0f  #t_r and dt_r on this update\n", t_r_ave,
        (t_r_ave - t_r_ave_old));
+   } 
+ 
 
   check_convergence ();
   /* Summarize the radiative temperatures (ksl 04 mar)*/
@@ -861,7 +873,7 @@ free (commbuffer);
       agn_ip /= plasmamain[0].rho * rho2nh;
       /* Report luminosities, IP and other diagnositic quantities */
       Log
-	("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim_2010)= %e Meaured_IP(cloudy)= %e Measured_Xi=%e distance= %e volume= %e mean_ds=%e\n",
+	("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim_2010)= %e Meaured_IP(cloudy)= %e Measured_Xi= %e distance= %e volume= %e mean_ds=%e\n",
 	 geo.lum_agn, plasmamain[0].t_e, plasmamain[0].rho * rho2nh,
 	 plasmamain[0].ne, geo.alpha_agn, agn_ip, plasmamain[0].ip, plasmamain[0].xi,w[n].r,
 	 w[n].vol, plasmamain[0].mean_ds / plasmamain[0].n_ds);

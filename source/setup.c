@@ -481,10 +481,10 @@ int get_radiation_sources()
     "Rad_type_for_bl(0=bb,1=models,3=pow)_to_make_wind",
     &geo.bl_ion_spectype);
   get_spectype (geo.agn_radiation,
-    "Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table)_to_make_wind",
+    "Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind",
     &geo.agn_ion_spectype);
 
-
+	 printf ("NSH %i\n",geo.agn_ion_spectype);
   /* 130621 - ksl - This is a kluge to add a power law to stellar systems.  What id done
      is to remove the bl emission, which we always assume to some kind of temperature
      driven source, and replace it with a power law source
@@ -795,6 +795,7 @@ int get_bl_and_agn_params (lstar)
     double lstar;
 {
   double xbl;
+  double temp_const_agn;
 
   /* Describe the boundary layer */
 
@@ -833,8 +834,27 @@ int get_bl_and_agn_params (lstar)
       rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
       Log ("OK, the agn lum will be about %.2e the disk lum\n",
 	   geo.lum_agn / xbl);
+		if (geo.agn_ion_spectype == SPECTYPE_POW || geo.agn_ion_spectype == SPECTYPE_CL_TAB)
+		{
       geo.alpha_agn = (-1.5);
       rddoub ("agn_power_law_index", &geo.alpha_agn);
+      geo.const_agn =
+	geo.lum_agn /
+	(((pow (2.42e18, geo.alpha_agn + 1.)) -
+	  pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
+      Log ("AGN Input parameters give a power law constant of %e\n",
+	   geo.const_agn);
+	}
+	else if (geo.agn_ion_spectype == SPECTYPE_BREM)
+	{
+		geo.brem_temp=1.16e8; //10kev
+		geo.const_agn=1.0;
+		rddoub ("agn_bremsstrahung_temp(K)",&geo.brem_temp);
+		temp_const_agn = geo.lum_agn / qromb(integ_brem,4.84e17,2.42e18,1e-4);
+		geo.const_agn=temp_const_agn;
+      Log ("AGN Input parameters give a Bremsstrahlung constant of %e\n", temp_const_agn);
+		
+	}
 
       /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
        only in advanced mode. default is zero which is checked before we call photo_gen_agn */
@@ -847,12 +867,7 @@ int get_bl_and_agn_params (lstar)
     This is only used in the sim correction factor for the first time through. 
     Afterwards, the photons are used to compute the sim parameters. */
 
-      geo.const_agn =
-	geo.lum_agn /
-	(((pow (2.42e18, geo.alpha_agn + 1.)) -
-	  pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
-      Log ("AGN Input parameters give a power law constant of %e\n",
-	   geo.const_agn);
+
 
       if (geo.agn_ion_spectype == SPECTYPE_CL_TAB)	/*NSH 0412 - option added to allow direct comparison with cloudy power law table option */
 	{

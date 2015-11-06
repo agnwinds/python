@@ -147,7 +147,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		agn.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
 		spectral_estimators.o variable_temperature.o matom_diag.o \
 		log.o lineio.o rdpar.o direct_ion.o pi_rates.o matrix_ion.o para_update.o \
-		setup.o photo_gen_matom.o macro_gov.o \
+		setup.o photo_gen_matom.o macro_gov.o brem.o\
 		reverb.o paths.o
 		
 
@@ -165,7 +165,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
 		spectral_estimators.c variable_temperature.c matom_diag.c \
 		direct_ion.c pi_rates.c matrix_ion.c para_update.c setup.c \
-		photo_gen_matom.c macro_gov.c \
+		photo_gen_matom.c macro_gov.c brem.c\
 		reverb.c paths.c
 
 # kpar_source is now declared seaprately from python_source so that the file log.h 
@@ -261,33 +261,6 @@ plot_roche: plot_roche.o roche.o vvector.o phot_util.o recipes.o
 		$(LDFLAGS) -o plot_roche
 		mv $@ $(BIN)/plot_roche
 
-# This diagnostic routine has not been kept up to date
-py_ray: bb.o get_atomicdata.o py_ray.o photon2d.o photon_gen.o \
-		saha.o spectra.o wind2d.o wind.o  vvector.o debug.o recipes.o \
-		trans_phot.o phot_util.o resonate.o radiation.o \
-		wind_updates2d.o windsave.o extract.o pdf.o roche.o random.o \
-		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
-		lines.o continuum.o get_models.o emission.o recomb.o util.o anisowind.o \
-		sv.o ionization.o  ispy.o   levels.o gradv.o reposition.o \
-		density.o  detail.o  bands.o \
-		yso.o elvis.o cylindrical.o rtheta.o \
-		matom.o estimators.o wind_sum.o
-	$(CC)  ${CFLAGS} py_ray.o get_atomicdata.o photon2d.o photon_gen.o \
-		bb.o detail.o \
-		saha.o spectra.o wind2d.o wind.o  vvector.o debug.o recipes.o \
-		trans_phot.o phot_util.o resonate.o radiation.o \
-		stellar_wind.o homologous.o  corona.o util.o anisowind.o \
-		wind_updates2d.o windsave.o extract.o ispy.o bands.o\
-		pdf.o roche.o random.o continuum.o get_models.o  \
-		lines.o ionization.o emission.o  recomb.o reposition.o \
-		sv.o hydro_import.o knigge.o disk.o  levels.o gradv.o density.o \
-		yso.o elvis.o cylindrical.o rtheta.o \
-		matom.o estimators.o wind_sum.o \
-		$(LDFLAGS) -o py_ray
-		cp $@ $(BIN)/py_ray
-		mv $@ $(BIN)/py_ray$(VERSION)
-
-
 
 
 # This diagnostic routine has not been kept up to date
@@ -316,38 +289,6 @@ py_grid: bb.o get_atomicdata.o py_grid.o photon2d.o photon_gen.o \
 		$(LDFLAGS) -o py_grid
 		cp $@ $(BIN)/py_grid
 		mv $@ $(BIN)/py_grid$(VERSION)
-
-balance_sources = balance_abso.c balance_bb.c balance.c balance_gen.c balance_sub.c bal_photon2d.c bal_trans_phot.c plane.c \
-		  partition.c agn.c compton.c torus.c spectral_estimators.c dielectronic.c variable_temperature.c  zeta.c
-
-startup_balance: startup $(balance_sources)
-	cproto -I$(INCLUDE) $(balance_sources) > balance_templates.h
-
-balance: balance.o balance_sub.o balance_gen.o balance_abso.o \
-		emission.o recomb.o balance_bb.o gradv.o \
-		bb.o pdf.o sv.o vvector.o wind_updates2d.o windsave.o \
-		radiation.o continuum.o get_models.o bal_trans_phot.o phot_util.o extract.o \
-		ionization.o saha.o recipes.o plane.o resonate.o ispy.o \
-		roche.o stellar_wind.o homologous.o hydro_import.o corona.o disk.o  knigge.o  \
-		lines.o get_atomicdata.o random.o wind2d.o wind.o   bal_photon2d.o  levels.o  \
-		util.o anisowind.o reposition.o density.o  detail.o bands.o matom.o estimators.o  bilinear.o   \
-		spherical.o cylindrical.o cylind_var.o rtheta.o yso.o elvis.o gridwind.o wind_sum.o \
-		partition.o auger_ionization.o agn.o shell_wind.o compton.o torus.o spectral_estimators.o \
-		dielectronic.o variable_temperature.o zeta.o
-	$(CC)   ${CFLAGS} balance.o balance_sub.o balance_gen.o   balance_abso.o \
-		emission.o recomb.o balance_bb.o gradv.o  detail.o \
-		get_atomicdata.o random.c wind2d.o wind.o  bal_trans_phot.o \
-		bb.o pdf.o sv.o vvector.o wind_updates2d.o windsave.o \
-		radiation.o continuum.o get_models.o plane.o phot_util.o resonate.o levels.o \
-		lines.o ionization.o saha.o recipes.o bal_photon2d.o  \
-		extract.o ispy.o roche.o stellar_wind.o homologous.o hydro_import.o corona.o disk.o  knigge.o  \
-		util.o anisowind.o reposition.o density.o bands.o matom.o estimators.o bilinear.o \
-		spherical.o cylindrical.o cylind_var.o rtheta.o  yso.o elvis.o   gridwind.o wind_sum.o\
-		partition.o  auger_ionization.o agn.o shell_wind.o torus.o compton.o spectral_estimators.o\
-		dielectronic.o  variable_temperature.o zeta.o \
-		$(LDFLAGS) -o balance
-	cp $@ $(BIN)/balance
-	mv $@ $(BIN)/balance$(VERSION)
 
 
 FILE = get_atomicdata.o atomic.o

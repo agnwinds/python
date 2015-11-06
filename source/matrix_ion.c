@@ -103,6 +103,9 @@ matrix_ion_populations (xplasma, mode)
   compute_dr_coeffs (t_e);
   compute_di_coeffs (t_e);
 
+  /* JM 1508 -- also compute direct recombination coefficients */
+  compute_qrecomb_coeffs(t_e);
+
   /* In the following loop, over all ions in the simulation, we compute the radiative recombination rates, and photionization
      rates OUT OF each ionization stage. The PI rates are calculated either using the modelled mean intensity in a cell, or
      using the dilute blackbody approximation, depending on which mode we are in. At the same time, we copy the ion densities
@@ -251,6 +254,7 @@ matrix_ion_populations (xplasma, mode)
       /* Replaced inline array allocaation with calloc, which will work with older version of c compilers */
 
       /* This next line produces an array of the correct size to hold the rate matrix */
+	
       a_data = (double *) calloc (sizeof (double), nrows * nrows);
 
       /* We now copy our rate matrix into the prepared matrix */
@@ -279,10 +283,14 @@ matrix_ion_populations (xplasma, mode)
 	  b_data[nn] = b_temp[nn];
 	}
 
-      ierr = solve_matrix (a_data, b_data, nrows, populations);
+	     ierr = solve_matrix (a_data, b_data, nrows, populations);
 
       if (ierr != 0)
-	Error ("matrix_ion_populations: bad return from solve_matrix\n");
+	Error ("matrix_ion_populations: bad return from solve_matrix\n",ierr);
+	  if (ierr ==2)
+		  Error ("matrix_ion_populations: some matrix rows failing relative error check\n");
+	else if (ierr ==3)
+				 Error ("matrix_ion_populations: some matrix rows failing absolute error check\n");
 
       /* free memory */
       free (a_data);
@@ -323,8 +331,7 @@ matrix_ion_populations (xplasma, mode)
 	  if (newden[nn] < DENSITY_MIN)	// this wil also capture the case where population doesnt have a value for this ion
 	    newden[nn] = DENSITY_MIN;
 	}
-
-
+	free (populations);
       xnew = get_ne (newden);	/* determine the electron density for this density distribution */
 
 
@@ -524,7 +531,7 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
     {
       if (ion[mm].istate != 1)	// we have space for electrons
 	{
-	  rate_matrix[mm][mm] -= (xne * rr_rates[mm]);
+	  rate_matrix[mm][mm] -= xne * (rr_rates[mm] + xne * qrecomb_coeffs[mm]);
 	}
     }
 
@@ -537,7 +544,7 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
 	{
 	  if (mm == nn - 1 && ion[nn].istate != 1 && ion[mm].z == ion[nn].z)
 	    {
-	      rate_matrix[mm][nn] += (xne * rr_rates[nn]);
+	      rate_matrix[mm][nn] += xne * (rr_rates[nn] + xne * qrecomb_coeffs[nn]);
 	    }
 	}
     }
@@ -686,10 +693,11 @@ solve_matrix (a_data, b_data, nrows, x)
   m = gsl_matrix_view_array (a_data, nrows, nrows);
 
   /* these are used for testing the solution below */
-  test_matrix = gsl_matrix_alloc (nrows, nrows);
-  test_vector = gsl_vector_alloc (nrows);
+      test_matrix = gsl_matrix_alloc (nrows, nrows);
+	  test_vector = gsl_vector_alloc (nrows);
 
-  gsl_matrix_memcpy (test_matrix, &m.matrix);	// create copy for testing 
+	   gsl_matrix_memcpy (test_matrix, &m.matrix);	// create copy for testing 
+
 
   b = gsl_vector_view_array (b_data, nrows);
 
@@ -713,47 +721,53 @@ solve_matrix (a_data, b_data, nrows, x)
      statement just says we do not do anything to test_matrix, and the 0.0 means we do not add a second matrix to the result
      If the solution has worked, then test_vector should be equal to b_temp */
 
-  ierr =
-    gsl_blas_dgemv (CblasNoTrans, 1.0, test_matrix, populations, 0.0,
-		    test_vector);
+    ierr =
+		  gsl_blas_dgemv (CblasNoTrans, 1.0, test_matrix, populations, 0.0,
+			    test_vector);
 
-  if (ierr != 0)
-    {
-      Error
-	("solve_matrix: bad return when testing matrix solution to rate equations.\n");
-    }
+				if (ierr != 0)
+				{
+					Error
+					("solve_matrix: bad return when testing matrix solution to rate equations.\n");
+				}
 
   /* now cycle through and check the solution to y = m * populations really is (1, 0, 0 ... 0) */
 
-  for (mm = 0; mm < nrows; mm++)
-    {
+				for (mm = 0; mm < nrows; mm++)
+				{
 
       /* get the element of the vector we want to check */
-      test_val = gsl_vector_get (test_vector, mm);
+					test_val = gsl_vector_get (test_vector, mm);
 
       /* b_data is (1,0,0,0..) when we do matom rates. test_val is normally something like
          1e-16 if it's supposed to be 0. We have a different error check if b_data[mm] is 0 */
 
-      if (b_data[mm] > 0.0)
-	{
-	  if (fabs ((test_val - b_data[mm]) / test_val) > EPSILON)
-	    {
-	      // Error("solve_matrix: test solution fails for row %i %e != %e\n",
-	      // mm, test_val, b_data[mm]);
-	      ierr = 1;
-	    }
-	}
-      else if (fabs (test_val - b_data[mm]) > EPSILON)	// if b_data is 0, check absolute error
-	ierr = 1;
-    }
+					if (b_data[mm] > 0.0)
+					{
+						if (fabs ((test_val - b_data[mm]) / test_val) > EPSILON)
+						{
+							Error("solve_matrix: test solution fails relative error for row %i %e != %e\n",
+								mm, test_val, b_data[mm]);
+							ierr = 2;
+						}
+					}
+					else if (fabs (test_val - b_data[mm]) > EPSILON)	// if b_data is 0, check absolute error
+						
+					{
+						Error("solve_matrix: test solution fails absolute error for row %i %e != %e\n",
+							mm, test_val, b_data[mm]);
+						ierr = 3;
+					}
+				}
 
   /* copy the populations to a normal array */
   for (mm = 0; mm < nrows; mm++)
     x[mm] = gsl_vector_get (populations, mm);
 
   /* free memory */
-  free (test_vector);
-  free (test_matrix);
+    gsl_vector_free (test_vector);
+
+	gsl_matrix_free (test_matrix);
   gsl_vector_free (populations);
 
   return (ierr);
