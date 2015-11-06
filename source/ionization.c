@@ -656,21 +656,26 @@ zero_emit (t)
   //  difference = (xxxplasma->heat_tot - total_emission (xxxplasma, 0., VERY_BIG));
 
 
-   /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
+  /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
    * are testing.  Adiabatic cooling is proportional to temperature
    */
 
   if (geo.adiabatic)
-     {
-     if (wmain[xxxplasma->nwind].div_v >= 0.0) //This is the case where we have adiabatic cooling - we want to retain the old behaviour, so we use the 'test' temperature to compute it. If div_v is less than zero, we don't do anything here, and so the existing value of adiabatic cooling is used - this was computed in wind_updates2d before the call to ion_abundances.
-	{	     
-	xxxplasma->lum_adiabatic = adiabatic_cooling (&wmain[xxxplasma->nwind], t);
-	}     
-     }
-   else 
-     {
-     xxxplasma->lum_adiabatic=0.0; 
-     }
+    {
+      if (wmain[xxxplasma->nwind].div_v >= 0.0) 
+      	{	     
+        /* This is the case where we have adiabatic cooling - we want to retain the old behaviour, 
+           so we use the 'test' temperature to compute it. If div_v is less than zero, we don't do
+           anything here, and so the existing value of adiabatic cooling is used - this was computed 
+           in wind_updates2d before the call to ion_abundances. */
+	        xxxplasma->lum_adiabatic = adiabatic_cooling (&wmain[xxxplasma->nwind], t);
+	      }     
+    }
+
+  else 
+    {
+      xxxplasma->lum_adiabatic=0.0; 
+    }
 
 
   /* difference =
@@ -679,7 +684,7 @@ zero_emit (t)
 
 
   /* 70g - nsh adding this line in next to calculate dielectronic recombination cooling without generating photons */
- compute_dr_coeffs (t);
+  compute_dr_coeffs (t);
   xxxplasma->lum_dr = total_dr (&wmain[xxxplasma->nwind], t);
 
   /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
@@ -687,8 +692,9 @@ zero_emit (t)
   xxxplasma->lum_di = total_di (&wmain[xxxplasma->nwind], t);
 
 
-/* 70g compton cooling calculated here to avoid generating photons */
+  /* 70g compton cooling calculated here to avoid generating photons */
   xxxplasma->lum_comp = total_comp (&wmain[xxxplasma->nwind], t);
+
 
   difference = xxxplasma->heat_tot - xxxplasma->lum_adiabatic - xxxplasma->lum_dr - xxxplasma->lum_di - xxxplasma->lum_comp - total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);	//NSH 1110 - total emission no longer computes compton.*/
 

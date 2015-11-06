@@ -523,7 +523,8 @@ typedef struct dere_di_rate
 
 Dere_di_rate dere_di_rate[NIONS];	//Set up the structure
 
-double di_coeffs[NIONS];  //This is an array to store the dr_coeffs 
+double di_coeffs[NIONS];  //This is an array to store the di_coeffs 
+double qrecomb_coeffs[NIONS];  //JM 1508 analogous array for three body recombination 
 
 #define MAX_GAUNT_N_GSQRD 100	//Space set aside for the number of parameters for scaled inverse temperature
 

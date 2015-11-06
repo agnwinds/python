@@ -319,8 +319,6 @@ int kpkt(PhotPtr p, int *nres, int *escape);
 int fake_matom_bb(PhotPtr p, int *nres, int *escape);
 int fake_matom_bf(PhotPtr p, int *nres, int *escape);
 int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper);
-double q_ioniz(struct topbase_phot *cont_ptr, double electron_temperature);
-double q_recomb(struct topbase_phot *cont_ptr, double electron_temperature);
 /* estimators.c */
 int bf_estimators_increment(WindPtr one, PhotPtr p, double ds);
 int bb_estimators_increment(WindPtr one, PhotPtr p, double tau_sobolev, double dvds, int nn);
@@ -454,7 +452,13 @@ double temp_func(double solv_temp);
 int matom_emiss_report(void);
 /* direct_ion.c */
 int compute_di_coeffs(double T);
+int compute_qrecomb_coeffs(double T);
 double total_di(WindPtr one, double t_e);
+double total_qrecomb(WindPtr one, double t_e);
+double q_ioniz_dere(int nion, double t_e);
+double q_ioniz(struct topbase_phot *cont_ptr, double electron_temperature);
+double q_recomb_dere(struct topbase_phot *cont_ptr, double electron_temperature);
+double q_recomb(struct topbase_phot *cont_ptr, double electron_temperature);
 /* pi_rates.c */
 double calc_pi_rate(int nion, PlasmaPtr xplasma, int mode, int type);
 double tb_planck1(double freq);
