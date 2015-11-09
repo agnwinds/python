@@ -544,16 +544,4 @@ Debug (char *format, ...)
 }
 
 
-/* exit_safely is a simple function which calls flush before exit */
-int exit_safely(return_value)
-    int return_value;
-{
-  Log_flush();
-  exit(return_value);
-  exit(0);
-}
-
-
-
-
 
