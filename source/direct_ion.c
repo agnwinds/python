@@ -337,6 +337,7 @@ q_recomb_dere (cont_ptr, electron_temperature)
   int nion;
   double u0;
   double gaunt, coeff;
+  double root_etemp;
 
   gaunt = 0.1;      //for now - from Mihalas for hydrogen
   u0 = cont_ptr->freq[0] * H_OVER_K / electron_temperature;
@@ -345,9 +346,12 @@ q_recomb_dere (cont_ptr, electron_temperature)
      only do this if it is the ground state */
   if (ion[nion].dere_di_flag == 1 && config[cont_ptr->nlev].ilv == 1)
     {
-      coeff = 2.07e-16 * config[cont_ptr->nlev].g / config[cont_ptr->uplev].g;
+      root_etemp = sqrt(electron_temperature);     
+      coeff = 2.07e-16 / (root_etemp * root_etemp * root_etemp);
+      coeff *= config[cont_ptr->nlev].g / config[cont_ptr->uplev].g;
       coeff *= exp(u0);
       coeff *= q_ioniz_dere(nion, electron_temperature);
+
 
       /* do a sane check here, as there's an exponential which could blow up */
       if (sane_check(coeff))
