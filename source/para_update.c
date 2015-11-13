@@ -164,7 +164,7 @@ communicate_estimators_para ()
       iredhelper[mpi_i + 4 * NPLASMA] = plasmamain[mpi_i].ntot_wind;
       iredhelper[mpi_i + 5 * NPLASMA] = plasmamain[mpi_i].ntot_agn;
       iredhelper[mpi_i + 6 * NPLASMA] = plasmamain[mpi_i].nioniz;
-	  
+
       for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	{
 	  iredhelper[mpi_i + (7 + mpi_j) * NPLASMA] = plasmamain[mpi_i].nxtot[mpi_j];
@@ -185,7 +185,8 @@ communicate_estimators_para ()
       plasmamain[mpi_i].ntot_disk = iredhelper2[mpi_i + 3 * NPLASMA];
       plasmamain[mpi_i].ntot_wind = iredhelper2[mpi_i + 4 * NPLASMA];
       plasmamain[mpi_i].ntot_agn = iredhelper2[mpi_i + 5 * NPLASMA];
-	  plasmamain[mpi_i].nioniz = iredhelper2[mpi_i + 6 * NPLASMA];
+	    plasmamain[mpi_i].nioniz = iredhelper2[mpi_i + 6 * NPLASMA];
+
       for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	{
 	  plasmamain[mpi_i].nxtot[mpi_j] = iredhelper2[mpi_i + (7 + mpi_j) * NPLASMA];
