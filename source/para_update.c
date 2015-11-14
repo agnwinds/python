@@ -52,7 +52,7 @@ communicate_estimators_para ()
 
   /* The size of the helper array for integers. We transmit 6 numbers 
      for each cell, plus one array of length NXBANDS */
-  plasma_int_helpers = (6 + NXBANDS) * NPLASMA;
+  plasma_int_helpers = (7 + NXBANDS) * NPLASMA;
 
 
   maxfreqhelper = calloc (sizeof (double), NPLASMA);
@@ -163,9 +163,10 @@ communicate_estimators_para ()
       iredhelper[mpi_i + 3 * NPLASMA] = plasmamain[mpi_i].ntot_disk;
       iredhelper[mpi_i + 4 * NPLASMA] = plasmamain[mpi_i].ntot_wind;
       iredhelper[mpi_i + 5 * NPLASMA] = plasmamain[mpi_i].ntot_agn;
+      iredhelper[mpi_i + 6 * NPLASMA] = plasmamain[mpi_i].nioniz;
       for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	{
-	  iredhelper[mpi_i + (6 + mpi_j) * NPLASMA] = plasmamain[mpi_i].nxtot[mpi_j];
+	  iredhelper[mpi_i + (7 + mpi_j) * NPLASMA] = plasmamain[mpi_i].nxtot[mpi_j];
 	}
     }
   MPI_Reduce (iredhelper, iredhelper2, plasma_int_helpers, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
@@ -183,9 +184,10 @@ communicate_estimators_para ()
       plasmamain[mpi_i].ntot_disk = iredhelper2[mpi_i + 3 * NPLASMA];
       plasmamain[mpi_i].ntot_wind = iredhelper2[mpi_i + 4 * NPLASMA];
       plasmamain[mpi_i].ntot_agn = iredhelper2[mpi_i + 5 * NPLASMA];
+      plasmamain[mpi_i].nioniz = iredhelper2[mpi_i + 6 * NPLASMA];
       for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	{
-	  plasmamain[mpi_i].nxtot[mpi_j] = iredhelper2[mpi_i + (6 + mpi_j) * NPLASMA];
+	  plasmamain[mpi_i].nxtot[mpi_j] = iredhelper2[mpi_i + (7 + mpi_j) * NPLASMA];
 	}
     }
 
