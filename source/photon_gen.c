@@ -115,7 +115,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
       ftot = populate_bands (f1, f2, ioniz_or_final, iwind, &xband);
 
 
-      for(n=0; n<NPHOT; n++) p[n].path = 0.0; /* SWM - Zero photon paths */
+      for(n=0; n<NPHOT; n++) p[n].path = -1.0; /* SWM - Zero photon paths */
 
 // Now generate the photons
       iphot_start = 0;
@@ -144,9 +144,12 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     }
 
 
-  for (n = 0; n < NPHOT; n++){
-	  p[n].w_orig = p[n].w;
+  for (n = 0; n < NPHOT; n++)
+  {
+    p[n].w_orig = p[n].w;
     p[n].freq_orig = p[n].freq;
+    if(geo.reverb != REV_NONE && p[n].path < 0.0) //SWM - Set path lengths for disk, star etc. 
+     	simple_paths_gen_phot(&p[n]);
   }
   return (0);
 

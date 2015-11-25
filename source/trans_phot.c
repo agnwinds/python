@@ -424,7 +424,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	    }
 
 	  /* 0215 SWM - Added cell-based reverberation mapping */
-	  if (geo.reverb == REV_WIND && geo.pcycle == 0
+	  if ((geo.reverb == REV_WIND || geo.reverb == REV_MATOM) && geo.ioniz_or_extract 
 	      && geo.wcycle == geo.wcycles - 1)
 	    {
 	      wind_paths_add_phot (&wmain[n], &pp);

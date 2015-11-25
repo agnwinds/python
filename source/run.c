@@ -121,8 +121,8 @@ calculate_ionization (restart_stat)
   /* SWM - Setup for path tracking */
   if (geo.reverb > REV_NONE)
     {
-      reverb_init (wmain, geo.nangles, freqmin, freqmax);
-      delay_dump_prep (files.root, restart_stat, rank_global);
+      reverb_init (wmain);
+      delay_dump_prep (restart_stat, rank_global);
     }
 
 
@@ -386,10 +386,9 @@ calculate_ionization (restart_stat)
   Log (" Completed wind creation.  The elapsed TIME was %f\n", timer ());
 
   /* SWM - Evaluate wind paths for last iteration */
-  if (geo.reverb == REV_WIND)
+  if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
     {
       wind_paths_evaluate (w);
-      wind_paths_output (w, files.root);
     }
 
   return(0);
@@ -605,7 +604,7 @@ int make_spectra(restart_stat)
 
       /* SWM0215: Delay dump photons from this cycle */
       if (geo.reverb > REV_NONE)
-	delay_dump (p, NPHOT, 0);	// SWM - Dump delay tracks from this iteration
+	     delay_dump (p, NPHOT, 0);	// SWM - Dump delay tracks from this iteration
 
       /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
 

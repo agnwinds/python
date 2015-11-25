@@ -310,8 +310,6 @@ int kpkt(PhotPtr p, int *nres, int *escape);
 int fake_matom_bb(PhotPtr p, int *nres, int *escape);
 int fake_matom_bf(PhotPtr p, int *nres, int *escape);
 int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper);
-double q_ioniz(struct topbase_phot *cont_ptr, double electron_temperature);
-double q_recomb(struct topbase_phot *cont_ptr, double electron_temperature);
 /* estimators.c */
 int bf_estimators_increment(WindPtr one, PhotPtr p, double ds);
 int bb_estimators_increment(WindPtr one, PhotPtr p, double tau_sobolev, double dvds, int nn);
@@ -443,7 +441,12 @@ double temp_func(double solv_temp);
 int matom_emiss_report(void);
 /* direct_ion.c */
 int compute_di_coeffs(double T);
+int compute_qrecomb_coeffs(double T);
 double total_di(WindPtr one, double t_e);
+double q_ioniz_dere(int nion, double t_e);
+double q_ioniz(struct topbase_phot *cont_ptr, double electron_temperature);
+double q_recomb_dere(struct topbase_phot *cont_ptr, double electron_temperature);
+double q_recomb(struct topbase_phot *cont_ptr, double electron_temperature);
 /* pi_rates.c */
 double calc_pi_rate(int nion, PlasmaPtr xplasma, int mode, int type);
 double tb_planck1(double freq);
@@ -482,22 +485,28 @@ int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 int macro_pops(PlasmaPtr xplasma, double xne);
 /* reverb.c */
 double delay_to_observer(PhotPtr pp);
-int delay_dump_prep(char filename[], int restart_stat, int i_rank);
+int delay_dump_prep(int restart_stat, int i_rank);
 int delay_dump_finish(void);
-int delay_dump_combine(int iRanks);
+int delay_dump_combine(int i_ranks);
 int delay_dump(PhotPtr p, int np, int iExtracted);
 int delay_dump_single(PhotPtr pp, int extract_phot);
-Path_Data_Ptr path_data_constructor(double r_rad_min, double r_rad_max, int i_path_bins, int i_angles, double freqmin, double freqmax, int i_theta_res);
-int path_data_init(double r_rad_min, double r_rad_max, int i_path_bins, int i_angles, double r_freq_min, double r_freq_max, int i_theta_res);
+/* paths.c */
 Wind_Paths_Ptr wind_paths_constructor(WindPtr wind);
-int reverb_init(WindPtr wind, int nangles, double freqmin, double freqmax);
+int reverb_init(WindPtr wind);
 int wind_paths_init(WindPtr wind);
+int line_paths_add_phot(WindPtr wind, PhotPtr pp, int *nres);
 int wind_paths_add_phot(WindPtr wind, PhotPtr pp);
+int simple_paths_gen_phot(PhotPtr pp);
+double r_draw_from_path_histogram(Wind_Paths_Ptr PathPtr);
 int wind_paths_gen_phot(WindPtr wind, PhotPtr pp);
-int wind_paths_single_evaluate(Wind_Paths_Ptr paths);
+int line_paths_gen_phot(WindPtr wind, PhotPtr pp, int nres);
+int wind_paths_evaluate_single(Wind_Paths_Ptr paths);
 int wind_paths_evaluate(WindPtr wind);
-int wind_paths_point_index(int i, int j, int k, int i_top);
-int wind_paths_output(WindPtr wind, char c_file_in[]);
+int wind_paths_dump(WindPtr wind);
+int wind_paths_output_dump(WindPtr wind);
+int wind_paths_point_index(int i, int j, int k, int i_top, DomainPtr dom);
+int wind_paths_sphere_point_index(int i, int j, int k);
+int wind_paths_output_vtk(WindPtr wind, int ndom);
 /* setup2.c */
 int help(void);
 int init_geo(void);
@@ -587,4 +596,3 @@ int level_tauoverview(int nlev, WindPtr w, char rootname[], int ochoice);
 int main(int argc, char *argv[]);
 int one_choice(int choice, char *root, int ochoice);
 int py_wind_help(void);
-/* test_saha.c */

@@ -518,10 +518,13 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
   char fixed_con_file[132];	/* 54e -- For fixed concentrations, the file specifying concentrations */
 
   //Added by SWM for reverberation mapping
-  enum reverb_enum {
-    REV_NONE=0, REV_PHOTON=1, REV_WIND=2
-  } reverb;
-  int reverb_path_bins, reverb_theta_bins; 
+  enum reverb_enum      {REV_NONE=0, REV_PHOTON=1, REV_WIND=2, REV_MATOM=3} reverb; 
+  enum reverb_vis_enum  {REV_VIS_NONE=0, REV_VIS_VTK=1, REV_VIS_DUMP=2, REV_VIS_BOTH=3} reverb_vis;
+  int reverb_wind_cycles;
+  int reverb_path_bins, reverb_angle_bins;  //SWM - Number of bins for path arrays, vtk output angular bins
+  int reverb_dump_cells;                    //SWM - Number of cells to dump, list of cells to dump 'nwind' values
+  double *reverb_dump_x, *reverb_dump_z;    //SWM - x & z values of the cells to dump
+  int reverb_lines, *reverb_line;           //SWM - Number of lines to track, and array of line 'nres' values
 }
 geo;
 
@@ -568,23 +571,11 @@ blmod;
 */
 typedef struct wind_paths
 {
-  double* ad_freq_path_flux;  //Array[by frequency, then path] of total flux of photons with the given v&p
-  int*    ai_freq_path_num;   //Array[by frequency, then path] of the number of photons in this bin
-  double* ad_freq_flux;       //Array[by frequency] of total flux of photons with the given v
-  int*    ai_freq_num;        //Array[by frequency] of the number of photons in this bin
+  double* ad_path_flux;  //Array[by frequency, then path] of total flux of photons with the given v&p
+  int*    ai_path_num;   //Array[by frequency, then path] of the number of photons in this bin
   double  d_flux, d_path;     //Total flux, average path
   int     i_num;              //Number of photons hitting this cell
 } wind_paths_dummy, *Wind_Paths_Ptr;
-
-typedef struct path_data
-{
-  double* ad_path_bin;              //Array of bins for the path histograms
-  double* ad_freq_bin;              //Array of bins for the frequency histograms
-  int     i_path_bins, i_obs;       //Number of bins, number of observers
-  int     i_theta_res;              //Number of angular bins when outputting observer paths
-} path_data_dummy, *Path_Data_Ptr;
-Path_Data_Ptr path_data;
-Path_Data_Ptr g_path_data;
 
 /* 	This structure defines the wind.  The structure w is allocated in the main
 	routine.  The total size of the structure will be NDIM x MDIM, and the two
@@ -648,7 +639,7 @@ typedef struct wind
   	{	W_IN_DISK=-5, W_IGNORE=-2, 	W_NOT_INWIND=-1, 
   		W_ALL_INWIND=0, W_PART_INWIND=1 
   	}	inwind;			
-  Wind_Paths_Ptr paths;         // SWM 6-2-15 Path data struct for each cell
+  Wind_Paths_Ptr paths, *line_paths;         // SWM 6-2-15 Path data struct for each cell
 }
 wind_dummy, *WindPtr;
 
@@ -969,7 +960,7 @@ typedef struct photon
   	} 	istat;					   /*status of photon.*/
 
   int nscat;			/*number of scatterings */
-  int nres;			/*The line number in lin_ptr of last scatter or wind line creation */
+  int nres;			/*The line number in lin_ptr of last scatter or wind line creation. Continuum if > nlines. */
   int nnscat;			/* Used for the thermal trapping model of
 				   anisotropic scattering to carry the number of
 				   scattering to "extract" when needed for wind

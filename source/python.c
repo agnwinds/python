@@ -815,7 +815,6 @@ main (argc, argv)
 
 /* 67 -ksl- geo.wycle will start at zero unless we are completing an old run */
 
-
 /* XXXX -  CALCULATE THE IONIZATION OF THE WIND */
 
   calculate_ionization (restart_stat);
@@ -825,12 +824,12 @@ main (argc, argv)
 
   Log (" Completed wind creation.  The elapsed TIME was %f\n", timer ());
 
-  /* SWM - Evaluate wind paths for last iteration */
-  if (geo.reverb == REV_WIND)
-    {
-      wind_paths_evaluate (w);
-      wind_paths_output (w, files.root);
-    }
+
+	/* SWM - Evaluate wind paths for last iteration */
+	if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
+	{	//If this is a mode in which we keep wind arrays, update them
+		wind_paths_evaluate(w);
+	}
 
 /* XXXX - THE CALCULATION OF A DETAILED SPECTRUM IN A SPECIFIC REGION OF WAVELENGTH SPACE */
 
