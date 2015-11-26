@@ -1997,6 +1997,29 @@ IP_summary (w, rootname, ochoice)
 
     }
 
+
+  /* JM added printout for xi too */
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+  {
+    nplasma = w[n].nplasma;
+    aaa[n] = ((plasmamain[nplasma].xi));
+  }
+    }
+  display ("Xi Ionization parameter");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".xi");
+      write_array (filename, ochoice);
+
+    }
+
+
+
   for (n = 0; n < NDIM2; n++)
     {
       aaa[n] = 0;
