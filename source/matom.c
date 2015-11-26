@@ -720,7 +720,7 @@ kpkt (p, nres, escape)
   MacroPtr mplasma;
 
   double coll_rate, rad_rate;
-  double q_ioniz ();
+  double freqmin, freqmax;
 
 
   /* Idea is to calculated the cooling
@@ -741,6 +741,21 @@ kpkt (p, nres, escape)
   mplasma = &macromain[xplasma->nplasma];
 
   electron_temperature = xplasma->t_e;
+
+  /* JM 1511 -- Fix for issue 187. We need band limits for free free packet
+     generation (see call to one_ff below) */
+  if (geo.ioniz_or_extract)
+    {
+      /* in spectral cycles, so use the boundaries of the photon generation bands */
+      freqmin = xband.f1[0];
+      freqmax = xband.f2[xband.nbands-1];
+    }
+  else
+    {
+      /* in spectral cycles, use the frequency range of the final spectrum */
+      freqmin = em_rnge.fmin;
+      freqmax = em_rnge.fmin;
+    }
 
 
   /* ksl 091108 - If the kpkt destruction rates for this cell are not known they are calculated here.  This happens
@@ -1073,7 +1088,9 @@ kpkt (p, nres, escape)
 
       *nres = -2;
 
-      p->freq = one_ff (one, 7.5e12, 2.626e16);	//get frequency of resulting energy packet
+      /* used to do one_ff (one, 7.5e12, 2.626e16) here,
+         but now use the band boundaries, see #187.*/
+      p->freq = one_ff (one, freqmin, freqmax);	//get frequency of resulting energy packet
 
       return (0);
     }
