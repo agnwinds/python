@@ -754,7 +754,7 @@ kpkt (p, nres, escape)
     {
       /* in spectral cycles, use the frequency range of the final spectrum */
       freqmin = em_rnge.fmin;
-      freqmax = em_rnge.fmin;
+      freqmax = em_rnge.fmax;
     }
 
 
