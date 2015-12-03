@@ -430,6 +430,9 @@ model_rho (x)
       rho = torus_rho (x);
     }
 
+  if (rho*rho2nh < 1e4)
+    rho = 1e4 / rho2nh;
+
   return (rho);
 
 }

@@ -282,6 +282,14 @@ main (argc, argv)
 
   Log_set_mpi_rank(my_rank, np_mpi);	// communicates my_rank to kpar
 
+  /* set debugging options */
+  at_start_dilute = 0;
+  if_fail_dilute = 0;
+  print_matrix = 0;
+  print_levs = 0;
+  cell_to_track = 2673;
+  max_integral = 1e17;
+
 
   opar_stat = 0;		/* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
 				   the assumption is that we are reading from the command line */
@@ -1000,6 +1008,9 @@ main (argc, argv)
 
   w = wmain;
 
+  /* JM XXX */
+  int i;
+
   if (modes.save_cell_stats)
     {
       /* Open a diagnostic file or files.  These are all fixed files */
@@ -1098,6 +1109,20 @@ main (argc, argv)
 
   while (geo.wcycle < geo.wcycles)
     {				/* This allows you to build up photons in bunches */
+
+	  if (print_levs)
+	    {
+	  	  for (i = 0; i < nions; i++)
+		  {
+		  	Log("Ion %i z %i istate %i density %8.4e\n",
+		  		 i, ion[i].z, ion[i].istate, plasmamain[cell_to_track].density[i]);
+		  }
+		  for (i = 0; i < NLTE_LEVELS; i++)
+		  {
+		    Log("Level %i levden %8.4e\n",
+		  		 i, plasmamain[cell_to_track].levden[i]);
+		  }
+		}
 
       xsignal (files.root, "%-20s Starting %d of %d ionization cycle \n", "NOK",
 	       geo.wcycle, geo.wcycles);
@@ -1265,6 +1290,17 @@ main (argc, argv)
 
       wind_update (w);
 
+      for (i = 0; i < nions; i++)
+	  {
+	  	Log("Ion %i z %i istate %i density %8.4e\n",
+	  		 i, ion[i].z, ion[i].istate, plasmamain[3122].density[i]);
+	  }
+	  for (i = 0; i < NLTE_LEVELS; i++)
+	  {
+	    Log("Level %i levden %8.4e\n",
+	  		 i, plasmamain[3122].levden[i]);
+	  }
+
 /* In a diagnostic mode save the wind file for each cycle (from thread 0) */
 
       if (modes.keep_ioncycle_windsaves)
@@ -1350,6 +1386,16 @@ main (argc, argv)
 
 
   Log (" Completed wind creation.  The elapsed TIME was %f\n", timer ());
+
+  /* JM XXX */
+  if (print_levs)
+  {
+	for (i = 0; i < nions; i++)
+	  {
+	  	Log("Ion %i z %i istate %i density %8.4e\n",
+	  		 i, ion[i].z, ion[i].istate, plasmamain[cell_to_track].density[i]);
+	  }
+  }
 
 	/* SWM - Evaluate wind paths for last iteration */
 	if (geo.reverb == REV_WIND)

@@ -106,6 +106,7 @@ matrix_ion_populations (xplasma, mode)
   /* JM 1508 -- also compute direct recombination coefficients */
   compute_qrecomb_coeffs(t_e);
 
+
   /* In the following loop, over all ions in the simulation, we compute the radiative recombination rates, and photionization
      rates OUT OF each ionization stage. The PI rates are calculated either using the modelled mean intensity in a cell, or
      using the dilute blackbody approximation, depending on which mode we are in. At the same time, we copy the ion densities
@@ -382,6 +383,8 @@ matrix_ion_populations (xplasma, mode)
 	{
 	  xplasma->density[nn] = newden[nn];
 	}
+      if (sane_check(xplasma->density[nn]))
+        Error("JM XXX matrix_ion ion %i is %8.4e!!!\n", nn, xplasma->density[nn]);
     }
 
 
@@ -765,9 +768,8 @@ solve_matrix (a_data, b_data, nrows, x)
     x[mm] = gsl_vector_get (populations, mm);
 
   /* free memory */
-    gsl_vector_free (test_vector);
-
-	gsl_matrix_free (test_matrix);
+  gsl_vector_free (test_vector);
+  gsl_matrix_free (test_matrix);
   gsl_vector_free (populations);
 
   return (ierr);

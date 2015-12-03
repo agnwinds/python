@@ -33,6 +33,14 @@ char basename[132];		// The root of the parameter file name being used by python
  * simply collected here
  * 
  * */
+int at_start_dilute, if_fail_dilute;
+int print_matrix, print_levs;
+int cell_to_track;
+double max_integral;
+
+
+
+
 
 double dfudge;			// This is the push-through distance
 double DFUDGE;

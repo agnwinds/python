@@ -401,15 +401,24 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
   if (tau_sobolev > 0.00001)
     {
       y = weight_of_packet * (1. - exp (-tau_sobolev)) / tau_sobolev / dvds;
+      if (sane_check(y))
+        Error("JM XXX JBARINC y %8.4e weight_of_packet %8.4e dvds %8.4e tau_sobolev %8.4e exp %8.4e\n", 
+              y, weight_of_packet, dvds, tau_sobolev, exp (-tau_sobolev));
     }
   else				//To avoid tau_sobolev = 0
     {
       y = weight_of_packet / dvds;
+      if (sane_check(y))
+        Error("JM XXX JBARINC y %8.4e = weight_of_packet %8.4e / dvds %8.4e\n", y, weight_of_packet, dvds);
     }
 
   if (y >= 0)
     {
       mplasma->jbar[config[llvl].bbu_indx_first + n] += y;
+
+      if (sane_check(mplasma->jbar[config[llvl].bbu_indx_first + n]))
+        Error("JM XXX JBARINC %i %i JBARNORM %8.4e y %8.4e\n",
+               config[llvl].bbu_indx_first, n, mplasma->jbar_old[config[llvl].bbu_indx_first + n], y);
     }
   else
     {
@@ -547,7 +556,7 @@ mc_estimator_normalise (n)
        Ideally we don't want to have this so should probably switch this back sometime (SS August 05) !!!BUG */
 
 	  if (phot_top[config[i].bfu_jump[j]].freq[0] < 7.5e12
-	      || phot_top[config[i].bfu_jump[j]].freq[0] > 1.2e16)
+	      || phot_top[config[i].bfu_jump[j]].freq[0] > 5e18)
 	    {
 	      mplasma->gamma_old[config[i].bfu_indx_first + j] =
 		get_gamma (&phot_top[config[i].bfu_jump[j]], xplasma);
@@ -587,7 +596,8 @@ mc_estimator_normalise (n)
 	  stimfac =
 	    stimfac * config[i].g /
 	    config[line[config[i].bbu_jump[j]].nconfigu].g;
-	  if (stimfac < 1.0)
+	  //if (stimfac < 1.0 && stimfac > 0.0)
+    if (stimfac < 1.0)
 	    {
 	      stimfac = 1. - stimfac;	//all's well
 	    }
@@ -614,6 +624,12 @@ mc_estimator_normalise (n)
 	  mplasma->jbar_old[config[i].bbu_indx_first + j] =
 	    mplasma->jbar[config[i].bbu_indx_first +
 			  j] * C * stimfac / 4. / PI / volume / line_freq;
+
+    if (sane_check(mplasma->jbar_old[config[i].bbu_indx_first + j]))
+      Error("JM XXX %i %i JBARNORM %8.4e non-norm %8.4e volume %8.4e line_freq %8.4e stimfac %8.4e\n",
+            config[i].bbu_indx_first, j, mplasma->jbar_old[config[i].bbu_indx_first + j], 
+            mplasma->jbar[config[i].bbu_indx_first + j], volume, line_freq, stimfac);
+
 
 	  mplasma->jbar[config[i].bbu_indx_first + j] = 0.0;
 	}
@@ -731,6 +747,16 @@ total_fb_matoms (xplasma, t_e, f1, f2)
 		 - alpha_sp (cont_ptr, xplasma, 0))
 		* H * phot_top[config[i].bfu_jump[j]].freq[0] * density *
 		xplasma->ne * xplasma->vol;
+
+        if (sane_check(cool_contribution))
+        {
+          Error("JM XXX total_fb_matoms: ion %i lev %i uplev %i has fb lum. %8.4e in cell %i\n", 
+             cont_ptr->nion, cont_ptr->nlev, cont_ptr->uplev, cool_contribution, xplasma->nplasma);
+          Error("JM XXX total_fb_matoms: density %8.4e ne %8.4e alpha_sp_1 %8.4e alpha_sp_0 %8.4e alpha_st_1 %8.4e alpha_st_0 %8.4e\n", 
+                 density, xplasma->ne, alpha_sp (cont_ptr, xplasma, 1), alpha_sp (cont_ptr, xplasma, 0),
+                 mplasma->alpha_st_e_old[config[i].bfu_indx_first + j], 
+                 mplasma->alpha_st_old[config[i].bfu_indx_first + j]);
+        }
 
 	      /* Now add the collisional ionization term. */
 	      density = den_config (xplasma, cont_ptr->nlev);
@@ -1089,6 +1115,48 @@ bb_simple_heat (xplasma, p, tau_sobolev, dvds, nn)
 }
 
 
+
+/**************************************************
+  get_dilute_estimators computes the bound free and 
+  bound bound estimators for a cell from a dilute blackbody.
+
+  
+*****************************************************/
+
+double
+get_dilute_estimators (xplasma)
+     PlasmaPtr xplasma;
+{
+
+  int i, j;
+  struct lines *line_ptr;
+  MacroPtr mplasma;
+  mplasma = &macromain[xplasma->nplasma];
+
+
+  for (i = 0; i < nlte_levels; i++)
+    {
+      for (j = 0; j < config[i].n_bfu_jump; j++)
+  {
+    mplasma->gamma_old[config[i].bfu_indx_first + j] = get_gamma (&phot_top[config[i].bfu_jump[j]], xplasma);
+    mplasma->gamma_e_old[config[i].bfu_indx_first + j] = get_gamma_e (&phot_top[config[i].bfu_jump[j]], xplasma);
+    mplasma->alpha_st_e_old[config[i].bfu_indx_first + j] = get_alpha_st_e (&phot_top[config[i].bfu_jump[j]], xplasma);
+    mplasma->alpha_st_old[config[i].bfu_indx_first + j] = get_alpha_st (&phot_top[config[i].bfu_jump[j]], xplasma);
+  }
+      for (j = 0; j < config[i].n_bbu_jump; j++)
+  {
+    line_ptr = &line[config[i].bbu_jump[j]];
+    mplasma->jbar_old[config[i].bbu_indx_first + j] = mean_intensity (xplasma, line_ptr->freq, 1);
+  }
+
+    }
+
+  return (0);
+}
+
+
+
+
 /**************************************************
   get_gamma - to get the energy weighted photoionization rate
   for a black body radiation field with known dilution factor
@@ -1114,6 +1182,7 @@ get_gamma (cont_ptr, xplasma)
   cont_ext_ptr2 = cont_ptr;	//external cont pointer
   fthresh = cont_ptr->freq[0];	//first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];	//last frequency in list
+  flast = max_integral;
 
   gamma_value = qromb (gamma_integrand, fthresh, flast, 1e-4);
 
@@ -1172,6 +1241,7 @@ get_gamma_e (cont_ptr, xplasma)
   cont_ext_ptr2 = cont_ptr;	//external cont pointer
   fthresh = cont_ptr->freq[0];	//first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];	//last frequency in list
+  flast = max_integral;
 
   gamma_e_value = qromb (gamma_e_integrand, fthresh, flast, 1e-4);
 
@@ -1231,7 +1301,8 @@ get_alpha_st (cont_ptr, xplasma)
   temp_ext_rad = xplasma->t_r;
   cont_ext_ptr2 = cont_ptr;	//"
   fthresh = cont_ptr->freq[0];	//first frequency in list
-  flast = cont_ptr->freq[cont_ptr->np - 1];	//last frequency in list
+  flast = max_integral;
+  //cont_ptr->freq[cont_ptr->np - 1];	//last frequency in list
   alpha_st_value = qromb (alpha_st_integrand, fthresh, flast, 1e-4);
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
@@ -1307,7 +1378,8 @@ get_alpha_st_e (cont_ptr, xplasma)
   temp_ext_rad = xplasma->t_r;	//"
   cont_ext_ptr2 = cont_ptr;	//"
   fthresh = cont_ptr->freq[0];	//first frequency in list
-  flast = cont_ptr->freq[cont_ptr->np - 1];	//last frequency in list
+  flast = max_integral;
+  //flast = cont_ptr->freq[cont_ptr->np - 1];	//last frequency in list
   alpha_st_e_value = qromb (alpha_st_e_integrand, fthresh, flast, 1e-4);
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 

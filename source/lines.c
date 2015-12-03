@@ -241,6 +241,18 @@ q21 (line_ptr, t)
 
       u0 = (BOLTZMANN*t) / (H*line_ptr->freq);
 
+/*NSH 121024 - the followinglines implement the approximate gaunt factor as described in eq 4.21 in hazy 2*/
+/* NSH 121026 commented out in py74a - not certain that this approximate gaunt factor actually inmproves anything */
+/*       if (line_ptr->istate == 1) //Neutral
+         {
+           gaunt = ((BOLTZMANN*t)/(H*line_ptr->freq))/10.0;
+         }
+       else
+         {
+           gaunt = 0.2;
+         }
+*/
+
       /* JM 1511 -- the relevant paper to consult here is Van Regemorter 1962. We use an effective gaunt 
          factor to calculate collision strengths. There is one regime in which kt < hnu. For that
          consult equation 4.20 and 4.21 of Hazy. */
@@ -256,6 +268,7 @@ q21 (line_ptr, t)
       //gaunt = 3.0 * sqrt(3.0) / 2.0 / PI * (1 - (1.0 / u0));
 
       omega = ECS_CONSTANT * line_ptr->gl * gaunt * line_ptr->f / line_ptr->freq;
+
       q21_a = 8.629e-6 / (sqrt (t) * line_ptr->gu) * omega;
       q21_t_old = t;
     }
@@ -653,6 +666,7 @@ p_escape (line_ptr, xplasma)
   double dd;			/* density of the relevent ion */
   double dvds;
   double w, tr;			/* the radiative weight, and radiation tempeature */
+  int inwind = wmain[xplasma->nwind].inwind;
   WindPtr one;
 
 //Populate variable from previous calling structure
@@ -665,7 +679,7 @@ p_escape (line_ptr, xplasma)
   one = &wmain[xplasma->nwind];
   dvds = one->dvds_ave;
 
-// Band-aid to prevent divide by zero in calculation of tau below
+  // Band-aid to prevent divide by zero in calculation of tau below
   if (dvds <= 0.0)
     {
       Error ("Warning: p_escape: dvds <=0 \n");
@@ -695,6 +709,9 @@ p_escape (line_ptr, xplasma)
 
       pe_escape = escape;
     }
+
+  // if (inwind == 1)
+  //   pe_escape = 1.0;
 
 
   return (pe_escape);

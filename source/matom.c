@@ -592,6 +592,7 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   cont_ext_ptr = cont_ptr;	//"
   fthresh = cont_ptr->freq[0];	//first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];	//last frequency in list
+  flast = max_integral;
   alpha_sp_value = qromb (alpha_sp_integrand, fthresh, flast, 1e-4);
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
