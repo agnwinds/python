@@ -279,14 +279,11 @@ macro_pops (xplasma, xne)
   double q_ioniz (), q_recomb ();
   double *a_data, *b_data;
   double *populations;
-  int index_fast_col, ierr;
+  int index_fast_col, ierr, insane;
 
   MacroPtr mplasma;
   mplasma = &macromain[xplasma->nplasma];
   
-  if (xplasma->nplasma == cell_to_track)
-    Log("JM XXX IN macro_pops\n");
-
   /* Start with an outer loop over elements: there are no rates that couple
      levels of different elements so we can always separate them out. */
 
@@ -426,14 +423,6 @@ macro_pops (xplasma, xne)
 		         diagonal and secondly as a +ve contribution for the off-diagonal
 		         corresponding to the level populated by this process. */
 
-		      if (rate < 0.0 || sane_check(rate))
-		      {
-		      	Error("macro_pops: bbu rate is %8.4e in cell/matom %i\n", rate, xplasma->nplasma);
-		      	Log("JM XXX BBU b12 %8.4e jbar %8.4e q12 %8.4e\n",
-		      		 b12 (line_ptr), mplasma->jbar_old[config[index_lvl].bbu_indx_first + index_bbu], q12 (line_ptr, xplasma->t_e));
-		      	rate = 0.0;
-		      }
-
 		      /* Get the matix indices for the upper and lower states of the jump. */
 
 		      lower = conf_to_matrix[index_lvl];
@@ -441,6 +430,11 @@ macro_pops (xplasma, xne)
 
 		      rate_matrix[lower][lower] += -1. * rate;
 		      rate_matrix[upper][lower] += rate;
+
+		      if (rate < 0.0 || sane_check(rate))
+              {
+		      	Error("macro_pops: bbu rate is %8.4e in cell/matom %i\n", rate, xplasma->nplasma);
+		      }
 
 		      /* There's a radiative jump between these levels, so we want to clean
 		         for popualtion inversions. Flag this jump */
@@ -622,7 +616,7 @@ macro_pops (xplasma, xne)
 
       /* this next routine is a general routine which solves the matrix equation
          via LU decomposition */
-	  ierr = solve_matrix(a_data, b_data, n_macro_lvl, populations);
+	  ierr = solve_matrix(a_data, b_data, n_macro_lvl, populations, xplasma->nplasma);
 
 	  if (ierr != 0)
 	  	Error("macro_pops: bad return from solve_matrix\n");
@@ -630,37 +624,6 @@ macro_pops (xplasma, xne)
       /* free memory */
       free (a_data);	
 	  free (b_data);
-
-	  if ( (xplasma->nplasma == cell_to_track) && print_matrix)
-	  {
-	  	for (nn = 0; nn < n_macro_lvl; nn++)
-	    {
-	      for (mm = 0; mm < n_macro_lvl; mm++)
-		{
-		  Log("JMRATES XXX rate_matrix i %i j %i rate %8.4e\n", 
-		  	   nn, mm, rate_matrix[nn][mm]);
-		}
-	    }
-
-
-	  }
-
-	  for (index_ion = ele[index_element].firstion;
-	       index_ion <
-	       (ele[index_element].firstion + ele[index_element].nions);
-	       index_ion++)
-	    {
-	      for (index_lvl = ion[index_ion].first_nlte_level;
-		   index_lvl <
-		   ion[index_ion].first_nlte_level + ion[index_ion].nlte;
-		   index_lvl++)
-		{	
-          if (sane_check(populations[conf_to_matrix[index_lvl]]) || populations[conf_to_matrix[index_lvl]] < 0)
-		  	Error("JM XXXa macro_pops pre clean: level %i has frac. pop. %8.4e in cell %i\n", 
-		    	   index_lvl, populations[conf_to_matrix[index_lvl]], xplasma->nplasma);
-		}
-	    }
-
 
 
 	  /* MC noise can cause population inversions (particularly amongst highly excited states)
@@ -692,9 +655,6 @@ macro_pops (xplasma, xne)
               if (radiative_flag[index_lvl][nn])
               {
 		        inversion_test = populations[conf_to_matrix[index_lvl]] * config[nn].g / config[index_lvl].g * 0.999999;	//include a correction factor 
-		        if (sane_check(inversion_test) || inversion_test < 0.0)
-		  	      Error("JM XXXb macro_pops pre clean: level %i nn %i has inversion_test %8.4e in cell %i\n", 
-		    	     index_lvl, nn, inversion_test, xplasma->nplasma);
 
 		        if (populations[conf_to_matrix[nn]] > inversion_test)
 			  {
@@ -711,8 +671,8 @@ macro_pops (xplasma, xne)
 	     level populations within an ion. Get the ion
 	     populations and write them to one->density[nion]. The level populations
 	     are to be put in "levden". */
-	  int insane = 0;
-	  int inwind = wmain[xplasma->nwind].inwind;
+	  insane = 0;
+
 
 	  nn = 0;
 	  mm = 0;
@@ -729,14 +689,6 @@ macro_pops (xplasma, xne)
 		{
 		  level_population = populations[conf_to_matrix[index_lvl]];	
 		  this_ion_density += level_population;
-
-		  /* JM 140409 -- add error check for negative populations */
-		  if (level_population < 0.0 || sane_check(level_population))
-		  {
-		    Error("JM XXXc macro_pops: level %i has frac. pop. %8.4e in cell %i inwind %i nwind %i\n", 
-		    	   index_lvl, level_population, xplasma->nplasma, inwind, xplasma->nwind);
-		    insane = 1;
-		  }
 
 		  nn++;
 		}
@@ -756,8 +708,8 @@ macro_pops (xplasma, xne)
 
 		  if (xplasma->levden[config[index_lvl].nden] < 0.0 || sane_check(xplasma->levden[config[index_lvl].nden]))
 		  {
-		  	Error("JM XXXe macro_pops: level %i has frac. pop. %8.4e in cell %i inwind %i nwind %i\n", 
-		    	   index_lvl, xplasma->levden[config[index_lvl].nden], xplasma->nplasma, inwind, xplasma->nwind);
+		  	Error("macro_pops: level %i has frac. pop. %8.4e in cell %i\n", 
+		    	   index_lvl, xplasma->levden[config[index_lvl].nden], xplasma->nplasma);
 		  	insane = 1;
 		  }
 
@@ -769,11 +721,11 @@ macro_pops (xplasma, xne)
 	      xplasma->density[index_ion] =
 		this_ion_density * ele[index_element].abun * xplasma->rho *
 		rho2nh;
-		  //if (ion[index_ion].z == 2 && 
+
 		  if (sane_check(xplasma->density[index_ion]) ||  xplasma->density[index_ion] < 0.0 )
 		  {
-		  	Error("JM XXXe macro_pops: ion %i pop. %8.4e in cell %i inwind %i nwind %i\n", 
-		    	   index_ion, xplasma->density[index_ion], xplasma->nplasma, inwind, xplasma->nwind);
+		  	Error("macro_pops: ion %i has frac. pop. %8.4e in cell %i\n", 
+		    	   index_ion, xplasma->density[index_ion], xplasma->nplasma);
 		  	insane = 1;
 		  }
 
@@ -785,7 +737,7 @@ macro_pops (xplasma, xne)
       /* if the variable insane has been set to 1 then that means we had either a negative or 
          non-finite level population somewhere. If that is the case, then set all the estimators
          to dilute blackbodies instead and go through the solution again */
-      if (insane && if_fail_dilute)
+      if (insane)
         {
           Error("macro_pops: found unreasonable populations in cell %i, so adopting dilute BBody excitation\n", xplasma->nplasma);
           get_dilute_estimators(xplasma);

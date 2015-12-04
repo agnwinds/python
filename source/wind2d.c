@@ -335,10 +335,9 @@ be optional which variables beyond here are moved to structures othere than Wind
       nwind = plasmamain[n].nwind;
       stuff_v (w[nwind].xcen, x);
       /* 140905 - ksl - Next two lines allow for clumping */
-      plasmamain[n].rho = model_rho (x) / geo.fill;
-      plasmamain[n].vol = w[nwind].vol * geo.fill;	// Copy volumes
-
-      /* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, I've put new things in here to initialise the exponential models */
+      plasmamain[n].rho = model_rho (x)/geo.fill;
+      plasmamain[n].vol = w[nwind].vol*geo.fill;	// Copy volumes
+/* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, I've put new things in here to initialise the exponential models */
       for (nn = 0; nn < NXBANDS; nn++)
 	{
 	  plasmamain[n].spec_mod_type[nn] = SPEC_MOD_FAIL;	/*NSH 120817 - setting this to a negative number means that at the outset, we assume we do not have a suitable model for the cell */
@@ -406,8 +405,6 @@ be optional which variables beyond here are moved to structures othere than Wind
       /* Determine the initial ionizations, either LTE or  fixed_concentrations */
       if (geo.ioniz_mode != IONMODE_FIXED)
 	{			/* Carry out an LTE determination of the ionization */
-
-    get_dilute_estimators(&plasmamain[n]);
 	  ierr = ion_abundances (&plasmamain[n], IONMODE_LTE);
 	}
       else

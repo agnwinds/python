@@ -313,18 +313,12 @@ matom (p, nres, escape)
 	      cont_ptr = &phot_top[config[uplvl].bfu_jump[n]];	//pointer to continuum
 
 	      jprbs_known[uplvl][m] = jprbs[m] = (mplasma->gamma_old[config[uplvl].bfu_indx_first + n] - (mplasma->alpha_st_old[config[uplvl].bfu_indx_first + n] * xplasma->ne * den_config (xplasma, cont_ptr->uplev) / den_config (xplasma, cont_ptr->nlev)) + (q_ioniz (cont_ptr, t_e) * ne)) * config[uplvl].ex;	//energy of lower state
+	     
+          /* this error condition can happen in unconverged hot cells where T_R >> T_E.
+             for the moment we set to 0 and hope spontaneous recombiantion takes care of things */
 	      if (jprbs[m] < 0.)	//test (can be deleted eventually SS)
 		{
-		  Error ("Negative probability (matom, 6). Abort?\n");
-		  Log
-		    ("mplasma->gamma_old[uplvl][n] %g, (mplasma->alpha_st_old[uplvl][n] * xplasma->ne * den_config (xplasma, cont_ptr->uplev) / den_config (xplasma, cont_ptr->nlev)) %g\n",
-		     mplasma->gamma_old[config[uplvl].bfu_indx_first + n],
-		     (mplasma->alpha_st_old[config[uplvl].bfu_indx_first +
-					    n] * xplasma->ne *
-		      den_config (xplasma,
-				  cont_ptr->uplev) / den_config (xplasma,
-								 cont_ptr->
-								 nlev)));
+		  //Error ("Negative probability (matom, 6). Abort?\n");
 		  jprbs_known[uplvl][m] = jprbs[m] = 0.0;
 
 		}
@@ -592,7 +586,6 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   cont_ext_ptr = cont_ptr;	//"
   fthresh = cont_ptr->freq[0];	//first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];	//last frequency in list
-  flast = max_integral;
   alpha_sp_value = qromb (alpha_sp_integrand, fthresh, flast, 1e-4);
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 

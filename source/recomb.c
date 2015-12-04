@@ -365,10 +365,6 @@ total_fb (one, t, f1, f2)
 									    f2,
 									    nion,
 									    1);
-
-	  if (sane_check(xplasma->lum_ion[nion]))
-		  	Error("JM XXX total_fb: ion %i has fb lum. %8.4e in cell %i\n", 
-		    	   nion, xplasma->lum_ion[nion], xplasma->nplasma);
 	  if (nion > 3)
 	    xplasma->lum_z += xplasma->lum_ion[nion];
 	}
