@@ -635,6 +635,10 @@ mc_estimator_normalise (n)
   xplasma->heat_photo_macro = heat_contribution;
   xplasma->heat_tot += heat_contribution;
 
+  
+  /* finally, check if we have any palces where stimulated recombination wins over
+     photoionization */
+  check_stimulated_recomb(xplasma);
 
   /* Now that we have estimators, set the plag to use them for the level populations */
 
@@ -1089,13 +1093,53 @@ bb_simple_heat (xplasma, p, tau_sobolev, dvds, nn)
 }
 
 /**************************************************
+  check_stimulated emission
+*****************************************************/
+
+int check_stimulated_recomb(xplasma)
+     PlasmaPtr xplasma;
+{
+  int i, j;
+  struct topbase_phot *cont_ptr;
+  int st_recomb_err;
+  double st_recomb, gamma, coll_ioniz;
+  MacroPtr mplasma;
+  mplasma = &macromain[xplasma->nplasma];
+
+  st_recomb_err = 0;
+
+  for (i = 0; i < nlte_levels; i++)
+    {
+      for (j = 0; j < config[i].n_bfu_jump; j++)
+  {
+    cont_ptr = &phot_top[config[i].bfu_jump[j]];
+    gamma = mplasma->gamma_old[config[i].bfu_indx_first + j];
+    st_recomb = mplasma->alpha_st_old[config[i].bfu_indx_first + j];
+    st_recomb *= xplasma->ne * den_config (xplasma, cont_ptr->uplev) / den_config (xplasma, cont_ptr->nlev);
+    coll_ioniz = q_ioniz (cont_ptr, xplasma->t_e) * xplasma->ne;
+
+    if (st_recomb > (gamma + coll_ioniz))
+      st_recomb_err += 1;
+  }
+    }
+
+  if (st_recomb_err > 0)
+    Error("check_stimulated_recomb: cell %i had %i bf jumps where ne*n_u/n_l*alpha_st > gamma\n", 
+           xplasma->nplasma, st_recomb_err);
+
+  return (0);
+}
+
+
+
+/**************************************************
   get_dilute_estimators computes the bound free and 
   bound bound estimators for a cell from a dilute blackbody.
   This is the default if macro_pops fails to find a solution
   for an ion.
 *****************************************************/
 
-double
+int
 get_dilute_estimators (xplasma)
      PlasmaPtr xplasma;
 {

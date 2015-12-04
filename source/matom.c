@@ -316,6 +316,7 @@ matom (p, nres, escape)
 	     
           /* this error condition can happen in unconverged hot cells where T_R >> T_E.
              for the moment we set to 0 and hope spontaneous recombiantion takes care of things */
+	      /* note that we check and report this in check_stimulated_recomb() in estimators.c once a cycle */
 	      if (jprbs[m] < 0.)	//test (can be deleted eventually SS)
 		{
 		  //Error ("Negative probability (matom, 6). Abort?\n");
