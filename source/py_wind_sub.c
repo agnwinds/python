@@ -3329,6 +3329,7 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
 
   if (ochoice)
   {
+
     fclose (fptr);
     printf("\nSaved summary of physical quantites in %s, use py_read_output.py to read\n",
           filename);

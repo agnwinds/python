@@ -115,7 +115,6 @@ LDFLAGS= -L$(LIB) -lm -lcfitsio -lgsl -lgslcblas
 
 VERSION = 79d_dev
 
-
 CHOICE=1             // Compress plasma as much as possible
 # CHOICE=0           //  Keep relation between plasma and wind identical
 
