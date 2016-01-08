@@ -279,7 +279,7 @@ macro_pops (xplasma, xne)
   double q_ioniz (), q_recomb ();
   double *a_data, *b_data;
   double *populations;
-  int index_fast_col, ierr, insane;
+  int index_fast_col, ierr, insane, sane_populations;
 
   MacroPtr mplasma;
   mplasma = &macromain[xplasma->nplasma];
@@ -318,7 +318,7 @@ macro_pops (xplasma, xne)
 	  && geo.macro_simple == 0)
 	{
 
-	  int sane_populations = 0;
+	  sane_populations = 0;
       while (sane_populations == 0)
       {
       
