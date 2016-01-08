@@ -176,9 +176,10 @@ are linear, and x otherwise.  This is not particularly transparent ?? ksl */
 	  for (i = 0; i < ndim*mdim; i++)
 	    {
 	      wind_n_to_ij (ndom,i, &ii, &jj);
-	      fprintf (fptr, "%8.4e %8.4e %8.2e %3d %3d %3d\n",
-		       wmain[nstart+i].xcen[0], wmain[nstart+i].xcen[2], aaa[i],
-		       wmain[nstart+i].inwind, ii, jj);
+	      fprintf (fptr, "%8.4e %8.4e %8.5e %3d %3d %3d\n",
+		       wmain[i].xcen[0], wmain[i].xcen[2], aaa[i],
+		       wmain[i].inwind, ii, jj);
+
 	    }
 	}
 

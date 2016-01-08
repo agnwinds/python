@@ -319,6 +319,8 @@ double total_bb_cooling(PlasmaPtr xplasma, double t_e);
 double macro_bb_heating(PlasmaPtr xplasma, double t_e);
 double macro_bf_heating(PlasmaPtr xplasma, double t_e);
 int bb_simple_heat(PlasmaPtr xplasma, PhotPtr p, double tau_sobolev, double dvds, int nn);
+int check_stimulated_recomb(PlasmaPtr xplasma);
+int get_dilute_estimators(PlasmaPtr xplasma);
 double get_gamma(struct topbase_phot *cont_ptr, PlasmaPtr xplasma);
 double gamma_integrand(double freq);
 double get_gamma_e(struct topbase_phot *cont_ptr, PlasmaPtr xplasma);
@@ -455,7 +457,7 @@ double tb_exp1(double freq);
 /* matrix_ion.c */
 int matrix_ion_populations(PlasmaPtr xplasma, int mode);
 int populate_ion_rate_matrix(PlasmaPtr xplasma, double rate_matrix[nions][nions], double pi_rates[nions], double inner_rates[n_inner_tot], double rr_rates[nions], double b_temp[nions], double xne, int xelem[nions]);
-int solve_matrix(double *a_data, double *b_data, int nrows, double *x);
+int solve_matrix(double *a_data, double *b_data, int nrows, double *x, int nplasma);
 /* para_update.c */
 int communicate_estimators_para(void);
 int gather_spectra_para(int nspec_helper, int nspecs);
