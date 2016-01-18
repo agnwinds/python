@@ -102,18 +102,15 @@ parse_command_line (argc, argv)
 	  else if (strcmp (argv[i], "-d") == 0)
 	    {
 	      modes.iadvanced = 1;
-	      i++;
 	    }
 	  else if (strcmp (argv[i], "-f") == 0)
 	    {
 	      modes.fixed_temp = 1;
-	      i++;
 	    }
     else if (strcmp (argv[i], "-z") == 0)
       {
         modes.zeus_connect = 1;
         Log ("setting zeus_connect to %i\n",modes.zeus_connect);
-        i++;
       }
 	  else if (strcmp (argv[i], "-i") == 0)
 	    {
