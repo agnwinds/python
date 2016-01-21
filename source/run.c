@@ -662,12 +662,6 @@ int make_spectra(restart_stat)
 #endif
 
 
-#ifdef MPI_ON
-  MPI_Finalize ();
-  Log_parallel ("Thread %d Finalized. All done\n", rank_global);
-#endif
-
-
   xsignal (files.root, "%-20s %s\n", "COMPLETE", files.root);
   Log ("Completed entire program.  The elapsed TIME was %f\n", timer ());
   return EXIT_SUCCESS;
