@@ -75,6 +75,7 @@ get_homologous_params (ndom)
 /* define the the variables that determine the gridding */
   one_dom->wind_rho_min = 0;
   one_dom->wind_rho_max = geo.rmax;
+  one_dom->zmax = geo.rmax;
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
