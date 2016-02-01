@@ -331,7 +331,16 @@ get_hydro ()
  
 	geo.coord_type=RTHETA; //At the moment we only deal with RTHETA - in the future we might want to do some clever stuff
 	NDIM = geo.ndim = ihydro_r+3; //We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
-
+	/*
+	for (i=0;i<MDIM;i++)
+	{
+		printf ("hydro_grid i=%i theta_edge=%f theta_cen=%f\n",i,hydro_theta_edge[i]*RADIAN,hydro_theta_cent[i]*RADIAN);
+	}
+	for (i=0;i<NDIM;i++)
+	{
+		printf ("hydro_grid i=%i r_edge=%f r_cen=%f\n",i,hydro_r_edge[i],hydro_r_cent[i]);
+	}
+*/
 
   return (0);
 }
@@ -436,25 +445,25 @@ hydro_rho (x)
   int ii, jj;
   int im, jm;
   double r, theta;
-  double rho;
+  double rrho;
   double f1, f2;
   r = length (x);
   theta = asin (sqrt (x[0] * x[0] + x[1] * x[1]) / r);
-//      printf ("NSH2 x %e %e %e  -> r= %e theta = %f \n", x[0], x[1], x[2], r,        theta);
+//       printf ("NSH hydro_rho x %e %e %e  -> r= %e theta = %f ", x[0], x[1], x[2], r,        theta);
 
 
   hydro_frac (r,hydro_r_cent,ihydro_r,&im,&ii,&f1);
   hydro_frac (theta,hydro_theta_cent,ihydro_theta,&jm,&jj,&f2);
 
-  		rho=hydro_interp_value(rho_input,im,ii,jm,jj,f1,f2);		
+  		rrho=hydro_interp_value(rho_input,im,ii,jm,jj,f1,f2);		
 
 
-  if (rho < 1e-23)
-    rho = 1e-23;
+  if (rrho < 1e-23)
+    rrho = 1e-23;
 
- //  printf ("Grid point %d %d rho %e f1=%f f2=%f\n", ii, jj, rrho,f1,f2);
+//   printf ("Grid point %d %d rho %e f1=%f f2=%f\n", ii, jj, rrho,f1,f2);
 
-  return (rho);
+  return (rrho);
 }
 
 
@@ -615,19 +624,19 @@ rtheta_make_hydro_grid (w)
 
 	}
     }
-	/*
+	
 for (i = 0; i < NDIM; i++)
 	{
 	wind_ij_to_n (i, 0, &n);
-	printf ("i=%i, ihydro_r=%i n=%i, r=%e, rcen=%e\n",i,ihydro_r,n,w[n].r,w[n].rcen);
+//	printf ("hydro_grid i=%i, ihydro_r=%i n=%i, r=%e, rcen=%e\n",i,ihydro_r,n,w[n].r,w[n].rcen);
 	}
 
 for (i = 0; i < MDIM; i++)
 	{
 	wind_ij_to_n (0, i, &n);
-	printf ("j=%i,  ihydrotheta=%i, n=%i, theta=%f, thetacen=%f\n",i,ihydro_theta,n,w[n].theta,w[n].thetacen);
+//	printf ("hydro_grid j=%i,  ihydrotheta=%i, n=%i, theta=%f, thetacen=%f\n",i,ihydro_theta,n,w[n].theta,w[n].thetacen);
 	}
-*/
+
 
   /* Now set up the wind cones that are needed for calclating ds in a cell */
 
@@ -704,9 +713,14 @@ rtheta_hydro_volumes (w)
 	  if (w[n].inwind == W_ALL_INWIND)
 	    {
 	      rmin = wind_x[i];
-	      rmax = 2.0*wind_midx[i]-wind_x[i];
+	      rmax = wind_x[i+1];
 	      thetamin = wind_z[j] / RADIAN;
-	      thetamax = (2.0*wind_midz[j]-wind_z[j]) / RADIAN;
+	      thetamax = wind_z[j+1] / RADIAN;
+		  
+		  
+		  
+		  
+		  
 //		printf ("NSH1 %i %i %i %e %e %f %f ",i,j,n,rmin,rmax,thetamin,thetamax);
 
 	      //leading factor of 2 added to allow for volume above and below plane (SSMay04)
@@ -714,6 +728,7 @@ rtheta_hydro_volumes (w)
 		2. * 2. / 3. * PI * (rmax * rmax * rmax -
 				     rmin * rmin * rmin) * (cos (thetamin) -
 							    cos (thetamax));
+//		  printf ("NSH_vols %i %i rmin %e rmax %e thetamin %e thatmax %e vol %e\n",i,j,rmin,rmax,thetamin,thetamax,w[n].vol);
 	      if (w[n].vol == 0.0)
 		{
 		Log ("Found wind cell (%i) with no volume (%e) in wind, resetting\n",n,w[n].vol);
