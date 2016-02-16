@@ -95,8 +95,8 @@ write_array (filename, choice)
   double frac[4];
   int ndom,ndim,mdim,nstart,ndomain;
   /* PLACEHOLDER XXX */
-  Log("py_wind_sub write array deos not work yet");
-  ndom=0;
+  printf("test %d\n",current_domain);
+  ndom=current_domain;
   ndim=zdom[ndom].ndim;
   mdim=zdom[ndom].mdim;
   nstart=zdom[ndom].nstart;
@@ -294,8 +294,7 @@ display (name)
   int i, j, n;
   int ndom,ndim,mdim,nstart;
 
-  /* PLACEHOLDER XXX */
-  ndom=0;
+  ndom=current_domain;
   ndim=zdom[ndom].ndim;
   mdim=zdom[ndom].mdim;
   nstart=zdom[ndom].nstart;

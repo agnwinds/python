@@ -264,7 +264,8 @@ double wind_midz_var[NDIM_MAX][NDIM_MAX];
 }
 domain_dummy, *DomainPtr;   // One structure for each domain
 
-DomainPtr zdom;
+DomainPtr zdom;   //This is the array pointer that contains the domains
+int current_domain; // This integer is used by py_wind only
 
 
 /* the geometry structure contains information that applies to all domains or alternatimve
