@@ -193,6 +193,7 @@ create_master_table (ndom, rootname)
 
 
   int i, ii, jj;
+  int nstart,nstop;
   int n, ncols;
   FILE *fopen (), *fptr;
 
@@ -213,19 +214,19 @@ create_master_table (ndom, rootname)
   c[2] = get_one (ndom, "t_r");
   strcpy (column_name[2], "t_r");
 
-  c[3] = get_ion (1, 1, 0);
+  c[3] = get_ion (ndom, 1, 1, 0);
   strcpy (column_name[3], "h1");
 
-  c[4] = get_ion (2, 2, 0);
+  c[4] = get_ion (ndom, 2, 2, 0);
   strcpy (column_name[4], "he2");
 
-  c[5] = get_ion (6, 4, 0);
+  c[5] = get_ion (ndom, 6, 4, 0);
   strcpy (column_name[5], "c4");
 
-  c[6] = get_ion (7, 5, 0);
+  c[6] = get_ion (ndom, 7, 5, 0);
   strcpy (column_name[6], "n5");
 
-  c[7] = get_ion (8, 6, 0);
+  c[7] = get_ion (ndom, 8, 6, 0);
   strcpy (column_name[7], "o6");
 
   c[8] = get_one (ndom, "dmo_dt_x");
@@ -246,14 +247,15 @@ create_master_table (ndom, rootname)
   /* At this point oll of the data has been collected */
 
 
-
+ nstart=zdom[ndom].nstart;
+ nstop=zdom[ndom].nstop;
 
 
   if (zdom[ndom].coord_type == SPHERICAL)
     {
 
 
-      /* First assemble the heder line
+      /* First assemble the header line
        */
 
       sprintf (start, "%8s %4s %8s %6s %8s %8s %8s ", "r", "i", "inwind",
@@ -274,7 +276,7 @@ create_master_table (ndom, rootname)
 
 
       /* Now assemble the lines of the table */
-      for (i = 0; i < NDIM2; i++)
+      for (i = nstart; i < nstop; i++)
 	{
 	  // This line is different from the two d case
 	  sprintf (start, "%8.2e %4d %6d %8.0f %8.2e %8.2e %8.2e ",
@@ -315,7 +317,7 @@ create_master_table (ndom, rootname)
 
 
       /* Now assemble the lines of the table */
-      for (i = 0; i < NDIM2; i++)
+      for (i = nstart; i < nstop; i++)
 	{
 	  wind_n_to_ij (ndom, i, &ii, &jj);
 	  sprintf (start,
@@ -381,6 +383,7 @@ create_ion_table (ndom, rootname, iz)
   char element_name[20];
   int istate[50];
   char one_line[1024], start[132], one_value[20];
+  int nstart,nstop;
 
 
   int i, ii, jj, n;
@@ -416,9 +419,12 @@ create_ion_table (ndom, rootname, iz)
     {
       istate[i] = ion[first_ion + i].istate;
 
-      c[i] = get_ion (iz, istate[i], 0);
+      c[i] = get_ion (ndom, iz, istate[i], 0);
       i++;
     }
+
+  nstart=zdom[ndom].nstart;
+  nstop=zdom[ndom].nstop;
 
 
 
@@ -446,7 +452,7 @@ create_ion_table (ndom, rootname, iz)
 
 
       /* Now assemble the lines of the table */
-      for (i = 0; i < NDIM2; i++)
+      for (i = nstart; i < nstop; i++)
 	{
 	  // This line is different from the two d case
 	  sprintf (start, "%8.2e %4d %6d ", wmain[i].r, i, wmain[i].inwind);
@@ -482,7 +488,7 @@ create_ion_table (ndom, rootname, iz)
       fprintf (fptr, "%s\n", one_line);
 
       /* Now assemble the lines of the table */
-      for (i = 0; i < NDIM2; i++)
+      for (i = nstart; i < nstop; i++)
 	{
 	  wind_n_to_ij (ndom, i, &ii, &jj);
 	  sprintf (start, "%8.2e %8.2e %4d %4d %6d ", wmain[i].xcen[0],
@@ -536,8 +542,8 @@ History:
 **************************************************************/
 
 double *
-get_ion (element, istate, iswitch)
-     int element, istate, iswitch;
+get_ion (ndom, element, istate, iswitch)
+     int ndom, element, istate, iswitch;
 {
   int nion, nelem;
   int n;
@@ -546,6 +552,7 @@ get_ion (element, istate, iswitch)
   // char filename[LINELENGTH];
   int nplasma;
   double *x;
+  int nstart,nstop;
 
 
 
@@ -568,9 +575,12 @@ get_ion (element, istate, iswitch)
 
   strcpy (name, "");
 
+  nstart=zdom[ndom].nstart;
+  nstop=zdom[ndom].nstop;
+
 
   // Now populate the array
-  for (n = 0; n < NDIM2; n++)
+  for (n = nstart; n < nstop; n++)
     {
       x[n] = 0;
       nplasma = wmain[n].nplasma;
@@ -655,7 +665,7 @@ get_one (ndom, variable_name)
   nstop = zdom[ndom].nstop;
   NDIM2 = zdom[ndom].ndim2;
 
-  Log("XXX get_one: %d %d %d\n",nstart,nstop,NDIM2);
+  //Log("XXX get_one: %d %d %d\n",nstart,nstop,NDIM2);
 
 
 
@@ -665,7 +675,7 @@ get_one (ndom, variable_name)
   for (n = nstart; n < nstop; n++)
     {
       x[n] = 0;
-      Log("XXX %d %e %d\n",n,wmain[n].vol,wmain[n].nplasma);
+      // Log("XXX %d %e %d\n",n,wmain[n].vol,wmain[n].nplasma);
       if (wmain[n].vol > 0.0)
 	{
 	  nplasma = wmain[n].nplasma;

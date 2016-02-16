@@ -72,9 +72,8 @@ zoom (direction)
   int center;
   int ndim;
 
-  //PLACEHOLDER XXX 
   
-	ndim=zdom[0].ndim;
+ndim=zdom[current_domain].ndim;
 
   if (direction == 1)
     {				/* then unzoom */

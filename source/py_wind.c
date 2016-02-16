@@ -345,6 +345,7 @@ I did not change this now.  Though it could be done.  02apr ksl */
 	    {
 	      printf ("Swithching to domain %d\n", current_domain);
 	    }
+      	  zoom (1);			/* Unzoom*/
 	  rdchar ("Choice", &c);
 	}
 

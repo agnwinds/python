@@ -88,14 +88,14 @@ write_array (filename, choice)
   int ii, jj;
   FILE *fopen (), *fptr;
   char outfile[LINELENGTH];
+  char extra[LINELENGTH];
+
   double length ();
   double xx[3];
   int i;
   int nn, nnn[4], nelem;
   double frac[4];
   int ndom,ndim,mdim,nstart,ndomain;
-  /* PLACEHOLDER XXX */
-  printf("test %d\n",current_domain);
   ndom=current_domain;
   ndim=zdom[ndom].ndim;
   mdim=zdom[ndom].mdim;
@@ -112,6 +112,10 @@ write_array (filename, choice)
 // Open the appropriate file
 
   strcpy (outfile, filename);
+  if (geo.ndomain>1){
+	  sprintf(extra,".%d",current_domain);
+	  strcat(outfile,extra);
+  }
   strcat (outfile, ".dat");	// Add standard extension to filenames, i.e. the one used by tecplot
   fptr = fopen (outfile, "w");
 
@@ -163,7 +167,7 @@ are linear, and x otherwise.  This is not particularly transparent ?? ksl */
 
 	  for (i = 0; i < ndim; i++)
 	    {
-	      fprintf (fptr, "%8.2e %8.2e %3d %3d \n", wmain[nstart+i].r, aaa[i],
+	      fprintf (fptr, "%8.2e %8.2e %3d %3d \n", wmain[nstart+i].r, aaa[nstart+i],
 		       wmain[nstart+i].inwind, i);
 	    }
 	}
@@ -175,10 +179,10 @@ are linear, and x otherwise.  This is not particularly transparent ?? ksl */
 
 	  for (i = 0; i < ndim*mdim; i++)
 	    {
-	      wind_n_to_ij (ndom,i, &ii, &jj);
+	      wind_n_to_ij (ndom,nstart+i, &ii, &jj);
 	      fprintf (fptr, "%8.4e %8.4e %8.5e %3d %3d %3d\n",
-		       wmain[i].xcen[0], wmain[i].xcen[2], aaa[i],
-		       wmain[i].inwind, ii, jj);
+		       wmain[nstart+i].xcen[0], wmain[nstart+i].xcen[2], aaa[nstart+i],
+		       wmain[nstart+i].inwind, ii, jj);
 
 	    }
 	}
@@ -299,6 +303,8 @@ display (name)
   mdim=zdom[ndom].mdim;
   nstart=zdom[ndom].nstart;
 
+  Log("Check me now %d %d\n",py_wind_min,py_wind_max);
+
 
   Log ("\n %s \n", name);
   Log ("z/theta \\x/r");
@@ -319,7 +325,7 @@ display (name)
 
       for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
 	{
-	  n = i * mdim + j;
+	  n = nstart+i * mdim + j;
 	  Log ("%8.2g ", aaa[n]);
 	}
       Log ("\n");

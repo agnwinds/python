@@ -548,7 +548,13 @@ For 2d, the underlying 1-d grid is organized so that as n increases,
 one goes up in z, and then steps out in rho., or in theta and then
 z as the case may be.
 
-In spherical coordinates, we assume that 
+With domains, this routine has to be used carefully, and a better
+statement would be that these routines map to and from the element 
+in wmain to the normally 2d element in an individual domain.
+
+So this means that if you want to get the ith and jth element of
+domain 1, then one needs to give nstart+whatever to wind_n_to_ij
+
  
 History:
 	97jan	ksl	Coding on python began.
