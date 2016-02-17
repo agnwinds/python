@@ -107,28 +107,29 @@ parse_command_line (argc, argv)
 	    {
 	      modes.fixed_temp = 1;
 	    }
-    else if (strcmp (argv[i], "-z") == 0)
-      {
-        modes.zeus_connect = 1;
-        Log ("setting zeus_connect to %i\n",modes.zeus_connect);
-      }
+	  else if (strcmp (argv[i], "-z") == 0)
+	    {
+	      modes.zeus_connect = 1;
+	      Log ("setting zeus_connect to %i\n", modes.zeus_connect);
+	    }
 	  else if (strcmp (argv[i], "-i") == 0)
 	    {
 	      modes.quit_after_inputs = 1;
 	    }
 
-    else if (strcmp (argv[i], "--version") == 0)
-      {
-        /* give information about the pyhon version, such as commit hash */
-        Log ("Python Version %s \n", VERSION);  //54f -- ksl -- Now read from version.h
-        Log ("Built from git commit hash %s\n", GIT_COMMIT_HASH);
-        /* warn the user if there are uncommited changes */
-        int git_diff_status = GIT_DIFF_STATUS;
-        if (git_diff_status > 0)
-          Log("This version was compiled with %i files with uncommitted changes.\n",
-              git_diff_status);
-        exit(0);
-      }
+	  else if (strcmp (argv[i], "--version") == 0)
+	    {
+	      /* give information about the pyhon version, such as commit hash */
+	      Log ("Python Version %s \n", VERSION);	//54f -- ksl -- Now read from version.h
+	      Log ("Built from git commit hash %s\n", GIT_COMMIT_HASH);
+	      /* warn the user if there are uncommited changes */
+	      int git_diff_status = GIT_DIFF_STATUS;
+	      if (git_diff_status > 0)
+		Log
+		  ("This version was compiled with %i files with uncommitted changes.\n",
+		   git_diff_status);
+	      exit (0);
+	    }
 
 	  else if (strncmp (argv[i], "-", 1) == 0)
 	    {
@@ -259,7 +260,7 @@ get_grid_params (ndom)
   if (ndom >= geo.ndomain)
     Error ("Trying to get grid params for a non-existent domain!\n");
 
-  input_int=1;
+  input_int = 1;
 
   /* ksl - The if statement seems superflous.  Why are we entering this routine if we are continuing and earlier calculation? */
   if (geo.run_type != SYSTEM_TYPE_PREVIOUS)
@@ -454,12 +455,14 @@ get_radiation_sources ()
   if (geo.system_type != SYSTEM_TYPE_AGN)
     {				/* If is a stellar system */
       rdint ("Star_radiation(y=1)", &geo.star_radiation);
-      if (geo.disk_type!=DISK_NONE){
-      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-      }
-      else {
-	      geo.disk_radiation=0;
-      }
+      if (geo.disk_type != DISK_NONE)
+	{
+	  rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+	}
+      else
+	{
+	  geo.disk_radiation = 0;
+	}
       rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
       rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
       geo.agn_radiation = 0;	// So far at least, our star systems don't have a BH
@@ -513,8 +516,8 @@ get_radiation_sources ()
 		"Rad_type_for_bl(0=bb,1=models,3=pow)_to_make_wind",
 		&geo.bl_ion_spectype);
   get_spectype (geo.agn_radiation,
-    "Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind",
-    &geo.agn_ion_spectype);
+		"Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind",
+		&geo.agn_ion_spectype);
 
   /* 130621 - ksl - This is a kluge to add a power law to stellar systems.  What id done
      is to remove the bl emission, which we always assume to some kind of temperature
@@ -567,31 +570,24 @@ int
 get_wind_params (ndom)
      int ndom;
 {
-
-  if (geo.system_type == SYSTEM_TYPE_AGN)
-    {
-      geo.rmax = 50. * geo.r_agn;
-    }
-
   // XXX These need to be initalized sensibly and 
   // it is not obvious that is happenning
 
   zdom[ndom].rmax = 1e12;
   zdom[ndom].twind = 1e5;
 
-  rddoub ("wind.radmax(cm)", &zdom[ndom].rmax);
-  
-  geo.rmax_sq=geo.rmax*geo.rmax;    
-  
-  
-  /* The next lines assure that geo.rmax_sq really does define the edge of the grid */
-  if (zdom[ndom].rmax>geo.rmax){
-	  geo.rmax=zdom[ndom].rmax;
-	  geo.rmax_sq=geo.rmax*geo.rmax;
-	  Log("XXXX  size  %e  %e\n",geo.rmax,geo.rmax_sq);
-  }
+  if (geo.system_type == SYSTEM_TYPE_AGN)
+    {
+      zdom[ndom].rmax = 50. * geo.r_agn;
+    }
 
-  /* ksl XXX - There is something of a philosophicla problem that needs to be worked
+
+  /* XXX - This should be part of the individual get_wind_parameters, not here */
+
+  rddoub ("wind.radmax(cm)", &zdom[ndom].rmax);
+  rddoub ("wind.t.init", &geo.twind);
+
+  /* ksl XXX - There is something of a philosophical problem that needs to be worked
    * out with geo.rmax and zdom[ndom].rmax for the general case of winds.  Suppose
    * we wish to create, say a spherical outflow with two domains one going from 
    * r1 to r2 and the other going from r2 to r3.  Then we want to keep geo.rmax which is 
@@ -604,7 +600,17 @@ get_wind_params (ndom)
    * need to ask the question about rmax, but others where it is necessary
    */
 
-  rddoub ("wind.t.init", &geo.twind);
+
+  /* Next lines are to assure that we have the largest possible value of the 
+   * sphere surrounding the system
+   */
+
+  if (zdom[ndom].rmax > geo.rmax)
+    {
+      geo.rmax = zdom[ndom].rmax;
+    }
+  geo.rmax_sq = geo.rmax * geo.rmax;
+  Log ("XXXX  size  %e  %e\n", geo.rmax, geo.rmax_sq);
 
 
 
@@ -650,9 +656,6 @@ get_wind_params (ndom)
   else if (zdom[ndom].wind_type == 9)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
     {
       get_shell_wind_params (ndom);
-/*NSH 121219 moved	  dfudge = (geo.wind_rmax - geo.wind_rmin) / 1000.0;	Stop photons getting pushed out of the cell 
-Modified again in python 71b to take account of change in parametrisation of shell wind 
-	  DFUDGE = dfudge; */
     }
   else if (zdom[ndom].wind_type != 2)
     {
@@ -662,12 +665,24 @@ Modified again in python 71b to take account of change in parametrisation of she
     }
 
   /* Get the filling factor of the wind */
-  // XXX  This is not in the right place.  It provides a golal filling factor to our
+  // XXX  This is not in the right place.  It provides a gobal filling factor to our
   // models
 
-	geo.fill = 1.;
-  if (geo.wind_type != 3) //At present, we wont ask this question if we have a read in hydro model.
-  	rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
+  geo.fill = 1.;
+  if (geo.wind_type != 3)	//At present, we wont ask this question if we have a read in hydro model.
+    rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
+
+  /* Next lines are to assure that we have the largest possible value of the 
+   * sphere surrounding the system
+   */
+
+  if (zdom[ndom].rmax > geo.rmax)
+    {
+      geo.rmax = zdom[ndom].rmax;
+    }
+  geo.rmax_sq = geo.rmax * geo.rmax;
+  Log ("XXXX  size  %e  %e\n", geo.rmax, geo.rmax_sq);
+
 
 
   return (0);
@@ -771,7 +786,7 @@ History:
 double
 get_disk_params ()
 {
-	// XXX Commenting lines out instead of fixing a problem is not good practice
+  // XXX Commenting lines out instead of fixing a problem is not good practice
 //        if (geo.disk_radiation) /*NSH 130906 - Commented out this if loop. It was causing problems with restart - bug #44
 //          {
   geo.disk_mdot /= (MSOL / YR);	// Convert to msol/yr to simplify input
@@ -888,26 +903,29 @@ get_bl_and_agn_params (lstar)
       rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
       Log ("OK, the agn lum will be about %.2e the disk lum\n",
 	   geo.lum_agn / xbl);
-		if (geo.agn_ion_spectype == SPECTYPE_POW || geo.agn_ion_spectype == SPECTYPE_CL_TAB)
-		{
-      geo.alpha_agn = (-1.5);
-      rddoub ("agn_power_law_index", &geo.alpha_agn);
-      geo.const_agn =
-	geo.lum_agn /
-	(((pow (2.42e18, geo.alpha_agn + 1.)) -
-	  pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
-      Log ("AGN Input parameters give a power law constant of %e\n",
-	   geo.const_agn);
-	}
-	else if (geo.agn_ion_spectype == SPECTYPE_BREM)
+      if (geo.agn_ion_spectype == SPECTYPE_POW
+	  || geo.agn_ion_spectype == SPECTYPE_CL_TAB)
 	{
-		geo.brem_temp=1.16e8; //10kev
-		geo.const_agn=1.0;
-		rddoub ("agn_bremsstrahung_temp(K)",&geo.brem_temp);
-		temp_const_agn = geo.lum_agn / qromb(integ_brem,4.84e17,2.42e18,1e-4);
-		geo.const_agn=temp_const_agn;
-      Log ("AGN Input parameters give a Bremsstrahlung constant of %e\n", temp_const_agn);
-		
+	  geo.alpha_agn = (-1.5);
+	  rddoub ("agn_power_law_index", &geo.alpha_agn);
+	  geo.const_agn =
+	    geo.lum_agn /
+	    (((pow (2.42e18, geo.alpha_agn + 1.)) -
+	      pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
+	  Log ("AGN Input parameters give a power law constant of %e\n",
+	       geo.const_agn);
+	}
+      else if (geo.agn_ion_spectype == SPECTYPE_BREM)
+	{
+	  geo.brem_temp = 1.16e8;	//10kev
+	  geo.const_agn = 1.0;
+	  rddoub ("agn_bremsstrahung_temp(K)", &geo.brem_temp);
+	  temp_const_agn =
+	    geo.lum_agn / qromb (integ_brem, 4.84e17, 2.42e18, 1e-4);
+	  geo.const_agn = temp_const_agn;
+	  Log ("AGN Input parameters give a Bremsstrahlung constant of %e\n",
+	       temp_const_agn);
+
 	}
 
       /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
@@ -916,18 +934,20 @@ get_bl_and_agn_params (lstar)
       if (modes.iadvanced)
 	rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
 
-      rdint("geometry_for_pl_source(0=sphere,1=lamp_post)", &geo.pl_geometry);
+      rdint ("geometry_for_pl_source(0=sphere,1=lamp_post)",
+	     &geo.pl_geometry);
 
       if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
-        {
-          rddoub("lamp_post.height(r_g)", &geo.lamp_post_height);
-          geo.lamp_post_height *= G * geo.mstar / C / C;  //get it in CGS units 
-        }
-      else if (geo.pl_geometry != PL_GEOMETRY_SPHERE) // only two options at the moment
-        {
-          Error("Did not understand power law geometry %i. Fatal.\n", geo.pl_geometry);
-          exit(0);
-        }
+	{
+	  rddoub ("lamp_post.height(r_g)", &geo.lamp_post_height);
+	  geo.lamp_post_height *= G * geo.mstar / C / C;	//get it in CGS units 
+	}
+      else if (geo.pl_geometry != PL_GEOMETRY_SPHERE)	// only two options at the moment
+	{
+	  Error ("Did not understand power law geometry %i. Fatal.\n",
+		 geo.pl_geometry);
+	  exit (0);
+	}
 
 
 
@@ -1026,111 +1046,136 @@ get_meta_params (void)
   int meta_param, i, j, k, z, istate, levl, levu;
   char trackline[LINELENGTH];
 
-  rdint("reverb.type", &meta_param);
-  switch(meta_param)
-  { //Read in reverb tyoe, if any
-    case 0: geo.reverb = REV_NONE;    break;
-    case 1: geo.reverb = REV_PHOTON;  break;
-    case 2: geo.reverb = REV_WIND;    break;
-    case 3: geo.reverb = REV_MATOM;   break;
-    default:Error("reverb.type: Invalid reverb mode.\n \
+  rdint ("reverb.type", &meta_param);
+  switch (meta_param)
+    {				//Read in reverb tyoe, if any
+    case 0:
+      geo.reverb = REV_NONE;
+      break;
+    case 1:
+      geo.reverb = REV_PHOTON;
+      break;
+    case 2:
+      geo.reverb = REV_WIND;
+      break;
+    case 3:
+      geo.reverb = REV_MATOM;
+      break;
+    default:
+      Error ("reverb.type: Invalid reverb mode.\n \
       Valid modes are 0=None, 1=Photon, 2=Wind, 3=Macro-atom.\n");
-  }
+    }
 
   if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
-  { //If this requires further parameters, set defaults
-    geo.reverb_lines = 0;
-    geo.reverb_path_bins = 1000;
-    geo.reverb_angle_bins = 100;
-    geo.reverb_dump_cells = 0;
-    geo.reverb_vis = REV_VIS_NONE;
+    {				//If this requires further parameters, set defaults
+      geo.reverb_lines = 0;
+      geo.reverb_path_bins = 1000;
+      geo.reverb_angle_bins = 100;
+      geo.reverb_dump_cells = 0;
+      geo.reverb_vis = REV_VIS_NONE;
 
-    //Read in the number of path bins to use (1000+ is recommended)
-    rdint("reverb.path_bins", &geo.reverb_path_bins);
+      //Read in the number of path bins to use (1000+ is recommended)
+      rdint ("reverb.path_bins", &geo.reverb_path_bins);
 
-    //Read in the visualisation setting
-    rdint("reverb.visualisation", &meta_param);
-    switch(meta_param)
-    { //Select whether to produce 3d visualisation file and/or dump flat csvs of spread in cells
-      case 0: geo.reverb_vis = REV_VIS_NONE;  break;
-      case 1: geo.reverb_vis = REV_VIS_VTK;   break;
-      case 2: geo.reverb_vis = REV_VIS_DUMP;  break;
-      case 3: geo.reverb_vis = REV_VIS_BOTH;  break;
-      default:Error("reverb.visualisation: Invalid mode.\n \
+      //Read in the visualisation setting
+      rdint ("reverb.visualisation", &meta_param);
+      switch (meta_param)
+	{			//Select whether to produce 3d visualisation file and/or dump flat csvs of spread in cells
+	case 0:
+	  geo.reverb_vis = REV_VIS_NONE;
+	  break;
+	case 1:
+	  geo.reverb_vis = REV_VIS_VTK;
+	  break;
+	case 2:
+	  geo.reverb_vis = REV_VIS_DUMP;
+	  break;
+	case 3:
+	  geo.reverb_vis = REV_VIS_BOTH;
+	  break;
+	default:
+	  Error ("reverb.visualisation: Invalid mode.\n \
         Valid modes are 0=None, 1=VTK, 2=Cell dump, 3=Both.\n");
+	}
+
+      if (geo.reverb_vis == REV_VIS_VTK || geo.reverb_vis == REV_VIS_BOTH)
+	{			//If we're producing a 3d visualisation, select bins. This is just for aesthetics
+	  rdint ("reverb.angle_bins", &geo.reverb_angle_bins);
+	}
+
+      if (geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
+	{			//If we're dumping path arrays, read in the number of cells to dump them for and allocate space
+	  rdint ("reverb.dump_cells", &geo.reverb_dump_cells);
+	  geo.reverb_dump_x =
+	    (double *) calloc (geo.reverb_dump_cells, sizeof (int));
+	  geo.reverb_dump_z =
+	    (double *) calloc (geo.reverb_dump_cells, sizeof (int));
+
+	  for (k = 0; k < geo.reverb_dump_cells; k++)
+	    {			//For each we expect, read a paired cell coord as "[i]:[j]". May need to use py_wind to find indexes.
+	      rdline ("reverb.dump_cell", &trackline);
+	      if (sscanf
+		  (trackline, "%lf:%lf", &geo.reverb_dump_x[k],
+		   &geo.reverb_dump_z[k]) == EOF)
+		{		//If this line is malformed, warn the user and quit
+		  Error ("reverb.dump_cell: Invalid position line '%s'\n \
+            Expected format '[x]:[z]'\n", trackline);
+		  exit (0);
+		}
+	    }
+	}
     }
 
-    if(geo.reverb_vis == REV_VIS_VTK  || geo.reverb_vis == REV_VIS_BOTH)
-    { //If we're producing a 3d visualisation, select bins. This is just for aesthetics
-      rdint("reverb.angle_bins", &geo.reverb_angle_bins);
-    }
-
-    if(geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
-    { //If we're dumping path arrays, read in the number of cells to dump them for and allocate space
-      rdint("reverb.dump_cells", &geo.reverb_dump_cells);
-      geo.reverb_dump_x = (double *) calloc(geo.reverb_dump_cells, sizeof(int));
-      geo.reverb_dump_z = (double *) calloc(geo.reverb_dump_cells, sizeof(int));
-
-      for(k=0; k<geo.reverb_dump_cells; k++)
-      { //For each we expect, read a paired cell coord as "[i]:[j]". May need to use py_wind to find indexes.
-        rdline("reverb.dump_cell", &trackline);
-        if(sscanf(trackline, "%lf:%lf", &geo.reverb_dump_x[k], &geo.reverb_dump_z[k]) == EOF)
-        { //If this line is malformed, warn the user and quit
-          Error("reverb.dump_cell: Invalid position line '%s'\n \
-            Expected format '[x]:[z]'\n",trackline);
-          exit(0);
-        }
-      }
-    }
-  }
-
-  if(geo.reverb == REV_MATOM)
-  { //If this is macro-atom mode
-    if(geo.rt_mode != 2)
-    { //But we're not actually working in matom mode...
-      Error("reverb.type: Invalid reverb mode.\n \
+  if (geo.reverb == REV_MATOM)
+    {				//If this is macro-atom mode
+      if (geo.rt_mode != 2)
+	{			//But we're not actually working in matom mode...
+	  Error ("reverb.type: Invalid reverb mode.\n \
       Macro-atom mode selected but macro-atom scattering not on.\n");
-      exit(0);
-    }
-    
-    //Read in the number of lines to be tracked and allocate space for them
-    rdint("reverb.matom_lines", &geo.reverb_lines);
-    geo.reverb_line = (int *) calloc(geo.reverb_lines, sizeof(int));
-    if(geo.reverb_lines <1)
-    { //If this is <1, then warn the user and quit
-      Error("reverb.matom_lines: \
-      Must specify 1 or more lines to watch in macro-atom mode.\n");
-      exit(0);
-     }  
+	  exit (0);
+	}
 
-    for(i=0; i<geo.reverb_lines; i++)
-    { //Finally, for each line we expect, read it in
-      rdline("reverb.matom_line", &trackline);
-      if(sscanf(trackline, "%d:%d:%d:%d", &z, &istate, &levu, &levl) == EOF)
-      { //If this line is malformed, warn the user
-        Error("reverb.matom_line: Malformed line '%s'\n \
-          Expected format '[z]:[istate]:[upper level]:[lower level]'\n",trackline);
-        exit(0);
-      }
-      else
-      { //Otherwise, sift through the line list to find what this transition corresponds to
-        for(j=0; j<nlines_macro; j++)
-        { //And record the line position in geo for comparison purposes
-          if(line[j].z == z && line[j].istate == istate && line[j].levu == levu && line[j].levl == levl)
-          { //We're matching z, ionisation state, and upper and lower level transitions
-            geo.reverb_line[i] = line[j].where_in_list;
-          }
-        }
-      }
+      //Read in the number of lines to be tracked and allocate space for them
+      rdint ("reverb.matom_lines", &geo.reverb_lines);
+      geo.reverb_line = (int *) calloc (geo.reverb_lines, sizeof (int));
+      if (geo.reverb_lines < 1)
+	{			//If this is <1, then warn the user and quit
+	  Error ("reverb.matom_lines: \
+      Must specify 1 or more lines to watch in macro-atom mode.\n");
+	  exit (0);
+	}
+
+      for (i = 0; i < geo.reverb_lines; i++)
+	{			//Finally, for each line we expect, read it in
+	  rdline ("reverb.matom_line", &trackline);
+	  if (sscanf (trackline, "%d:%d:%d:%d", &z, &istate, &levu, &levl) ==
+	      EOF)
+	    {			//If this line is malformed, warn the user
+	      Error ("reverb.matom_line: Malformed line '%s'\n \
+          Expected format '[z]:[istate]:[upper level]:[lower level]'\n", trackline);
+	      exit (0);
+	    }
+	  else
+	    {			//Otherwise, sift through the line list to find what this transition corresponds to
+	      for (j = 0; j < nlines_macro; j++)
+		{		//And record the line position in geo for comparison purposes
+		  if (line[j].z == z && line[j].istate == istate
+		      && line[j].levu == levu && line[j].levl == levl)
+		    {		//We're matching z, ionisation state, and upper and lower level transitions
+		      geo.reverb_line[i] = line[j].where_in_list;
+		    }
+		}
+	    }
+	}
     }
-  }
-  else if(geo.reverb == REV_WIND)
-  { //For wind mode...
-    if (geo.wind_radiation == 0)
-    { //Warn if this data is being gathered but not used (can be useful for debug)
-      Error("reverb.type: Wind radiation is off but wind-based path tracking is enabled!\n");
-    } 
-  }
+  else if (geo.reverb == REV_WIND)
+    {				//For wind mode...
+      if (geo.wind_radiation == 0)
+	{			//Warn if this data is being gathered but not used (can be useful for debug)
+	  Error
+	    ("reverb.type: Wind radiation is off but wind-based path tracking is enabled!\n");
+	}
+    }
   return (0);
 }
 
@@ -1185,7 +1230,7 @@ setup_dfudge ()
 	}
     }
 
-  return (dfudge);		
+  return (dfudge);
 }
 
 

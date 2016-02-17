@@ -160,7 +160,7 @@ cylind_make_grid (ndom, w)
 
 
   Log("Making cylindrical grid %d\n",ndom);
-  Log("XXX rmax  %e\n",one_dom->rmax);
+  Log("XXX rmax %e for domain %d\n",one_dom->rmax,ndom);
 
   /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
