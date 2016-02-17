@@ -1113,7 +1113,7 @@ get_meta_params (void)
 
 	  for (k = 0; k < geo.reverb_dump_cells; k++)
 	    {			//For each we expect, read a paired cell coord as "[i]:[j]". May need to use py_wind to find indexes.
-	      rdline ("reverb.dump_cell", &trackline);
+	      rdline ("reverb.dump_cell", trackline);
 	      if (sscanf
 		  (trackline, "%lf:%lf", &geo.reverb_dump_x[k],
 		   &geo.reverb_dump_z[k]) == EOF)
@@ -1147,7 +1147,7 @@ get_meta_params (void)
 
       for (i = 0; i < geo.reverb_lines; i++)
 	{			//Finally, for each line we expect, read it in
-	  rdline ("reverb.matom_line", &trackline);
+	  rdline ("reverb.matom_line", trackline);
 	  if (sscanf (trackline, "%d:%d:%d:%d", &z, &istate, &levu, &levl) ==
 	      EOF)
 	    {			//If this line is malformed, warn the user
