@@ -20,10 +20,15 @@ Description:
 	
 Notes:
 
+	The main difficulty with this program is that one needs to be consistent
+	regarding the size of the arrays that one stuffs the variables into.  
+	As now written, if one wants to access a variable in wmain, one needs to
+	include and offset, generally called nstart.
 
 
 History:
-	150428	ksl	Adpated from routines in py_wind.c
+	150428	ksl	Adapted from routines in py_wind.c
+	160216	ksl	Resolved issues with multiple domains
 
 **************************************************************/
 
@@ -46,11 +51,10 @@ main (argc, argv)
   int ochoice;
 
   char root[LINELENGTH], input[LINELENGTH];
-  char rootname[LINELENGTH]; // this takes into account domains
+  char rootname[LINELENGTH];	// this takes into account domains
   char outputfile[LINELENGTH];
   char windsavefile[LINELENGTH];
   char parameter_file[LINELENGTH];
-  double xdoub;
   int create_master_table (), create_ion_table ();
   int ndom;
 
@@ -89,25 +93,12 @@ main (argc, argv)
 
 /* Read in the wind file */
 
-/* Note that wind_read allocates the space for the WindPtr array.  The
-reason that this is done in wind_read is because wind_read also reads
-the geo structure.  The geo struc contains the dimensions of the wind
-array and so until it is read the space for the WindPtr structure cannot
-be allocated.  Howver, one cannot assign w in a subroutine.  Therefore
-the old call, namely wind_read(w,windsavefile, will not work.  The statement
-w=wmain is a way around this since wmain is external and therefore can
-be assigned.  Then w can be set to this ptr and all is restored. The
-use of w is endemic in the program. and it is always called through main.
-I did not change this now.  Though it could be done.  02apr ksl */
-
   if (wind_read (windsavefile) < 0)
     {
       Error ("py_wind: Could not open %s", windsavefile);
       exit (0);
     }
 
-/* aaa is used to store variable for writing to files for the purpose of plotting*/
-  aaa = calloc (sizeof (xdoub), NDIM2);
 
   printf ("Read wind_file %s\n", windsavefile);
 
@@ -118,12 +109,11 @@ I did not change this now.  Though it could be done.  02apr ksl */
 
   ochoice = 1;
 
-  Log ("The wind_file has %d domains\n", geo.ndomain);
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
 
-      sprintf (rootname, "%s_%d", root, ndom);
+      sprintf (rootname, "%s.%d", root, ndom);
 
       create_master_table (ndom, rootname);
       create_ion_table (ndom, rootname, 6);
@@ -193,12 +183,12 @@ create_master_table (ndom, rootname)
 
 
   int i, ii, jj;
-  int nstart,nstop;
+  int nstart, nstop, ndim2;
   int n, ncols;
   FILE *fopen (), *fptr;
 
   strcpy (filename, rootname);
-  strcat (filename, "_master.txt");
+  strcat (filename, ".master.txt");
 
 
   fptr = fopen (filename, "w");
@@ -239,7 +229,11 @@ create_master_table (ndom, rootname)
   c[10] = get_one (ndom, "dmo_dt_z");
   strcpy (column_name[10], "dmo_dt_z");
 
-  ncols = 11;
+  c[11] = get_one (ndom, "ntot");
+  strcpy (column_name[11], "ntot");
+
+
+  ncols = 12;
 
 
   converge = get_one (ndom, "converge");
@@ -247,8 +241,9 @@ create_master_table (ndom, rootname)
   /* At this point oll of the data has been collected */
 
 
- nstart=zdom[ndom].nstart;
- nstop=zdom[ndom].nstop;
+  nstart = zdom[ndom].nstart;
+  nstop = zdom[ndom].nstop;
+  ndim2 = zdom[ndom].ndim2;
 
 
   if (zdom[ndom].coord_type == SPHERICAL)
@@ -272,16 +267,15 @@ create_master_table (ndom, rootname)
       fprintf (fptr, "%s\n", one_line);
 
 
-
-
-
       /* Now assemble the lines of the table */
-      for (i = nstart; i < nstop; i++)
+
+      for (i = 0; i < ndim2; i++)
 	{
 	  // This line is different from the two d case
 	  sprintf (start, "%8.2e %4d %6d %8.0f %8.2e %8.2e %8.2e ",
-		   wmain[i].r, i, wmain[i].inwind, converge[i],
-		   wmain[i].v[0], wmain[i].v[1], wmain[i].v[2]);
+		   wmain[nstart + i].r, i, wmain[nstart + i].inwind,
+		   converge[i], wmain[nstart + i].v[0],
+		   wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
 	  strcpy (one_line, start);
 	  n = 0;
 	  while (n < ncols)
@@ -296,10 +290,7 @@ create_master_table (ndom, rootname)
   else
     {
 
-      Log ("Processing 2d wind\n");
-
-      /* First assemble the header line
-       */
+      /* First assemble the header line */
 
       sprintf (start, "%8s %8s %4s %4s %6s %8s %8s %8s %8s ", "x", "z", "i",
 	       "j", "inwind", "converge", "v_x", "v_y", "v_z");
@@ -312,19 +303,20 @@ create_master_table (ndom, rootname)
 
 	  n++;
 	}
-      printf ("%s\n", one_line);
       fprintf (fptr, "%s\n", one_line);
 
 
       /* Now assemble the lines of the table */
-      for (i = nstart; i < nstop; i++)
+
+      for (i = 0; i < ndim2; i++)
 	{
-	  wind_n_to_ij (ndom, i, &ii, &jj);
+	  wind_n_to_ij (ndom, nstart + i, &ii, &jj);
 	  sprintf (start,
 		   "%8.2e %8.2e %4d %4d %6d %8.0f %8.2e %8.2e %8.2e ",
-		   wmain[i].xcen[0], wmain[i].xcen[2], ii, jj,
-		   wmain[i].inwind, converge[i], wmain[i].v[0],
-		   wmain[i].v[1], wmain[i].v[2]);
+		   wmain[nstart + i].xcen[0], wmain[nstart + i].xcen[2], ii,
+		   jj, wmain[nstart + i].inwind, converge[i],
+		   wmain[nstart + i].v[0], wmain[nstart + i].v[1],
+		   wmain[nstart + i].v[2]);
 	  strcpy (one_line, start);
 	  n = 0;
 	  while (n < ncols)
@@ -336,6 +328,7 @@ create_master_table (ndom, rootname)
 	  fprintf (fptr, "%s\n", one_line);
 	}
     }
+
   return (0);
 }
 
@@ -346,20 +339,24 @@ create_master_table (ndom, rootname)
                                        Space Telescope Science Institute
 
  Synopsis:
-	windsave2table writes key variables in a wind save file to an astropy table    
-		as calculated by python.  This is the main routine.
+
+ create_ion_table makes an astropy table containing the relative abundances
+ of a given element as a function of the position in the grid
 
 Arguments:		
 
-	py_wind  windsave_root
+	ndom		The domain number
+	rootname	rootname for the output table
+	iz		element
 
 
 
 Returns:
+
+	0 on completion
  
 Description:	
 	
-
 	
 Notes:
 
@@ -371,7 +368,7 @@ History:
 **************************************************************/
 int
 create_ion_table (ndom, rootname, iz)
-	int ndom;
+     int ndom;
      char rootname[];
      int iz;			// Where z is the element 
 {
@@ -383,12 +380,13 @@ create_ion_table (ndom, rootname, iz)
   char element_name[20];
   int istate[50];
   char one_line[1024], start[132], one_value[20];
-  int nstart,nstop;
+  int nstart, nstop, ndim2;
 
 
   int i, ii, jj, n;
   FILE *fopen (), *fptr;
-// First we actually need to determine what ions exits, but we will ignore this for now
+
+/* First we actually need to determine what ions exits, but we will ignore this for now */
 
   i = 0;
   while (i < nelements)
@@ -405,11 +403,11 @@ create_ion_table (ndom, rootname, iz)
   number_ions = ele[i].nions;
   strcpy (element_name, ele[i].name);
 
-  Log ("element %d %d %s\n", first_ion, number_ions, element_name);
+// Log ("element %d %d %s\n", first_ion, number_ions, element_name);
 
 /* Open the output file */
 
-  sprintf (filename, "%s_%s.txt", rootname, element_name);
+  sprintf (filename, "%s.%s.txt", rootname, element_name);
 
   fptr = fopen (filename, "w");
 
@@ -423,8 +421,9 @@ create_ion_table (ndom, rootname, iz)
       i++;
     }
 
-  nstart=zdom[ndom].nstart;
-  nstop=zdom[ndom].nstop;
+  nstart = zdom[ndom].nstart;
+  nstop = zdom[ndom].nstop;
+  ndim2 = zdom[ndom].ndim2;
 
 
 
@@ -432,7 +431,7 @@ create_ion_table (ndom, rootname, iz)
     {
 
 
-      /* First assemble the heder line
+      /* First assemble the header line
        */
 
       sprintf (start, "%8s %4s %6s ", "r", "i", "inwind");
@@ -448,14 +447,13 @@ create_ion_table (ndom, rootname, iz)
       fprintf (fptr, "%s\n", one_line);
 
 
-
-
-
       /* Now assemble the lines of the table */
-      for (i = nstart; i < nstop; i++)
+
+      for (i = 0; i < ndim2; i++)
 	{
 	  // This line is different from the two d case
-	  sprintf (start, "%8.2e %4d %6d ", wmain[i].r, i, wmain[i].inwind);
+	  sprintf (start, "%8.2e %4d %6d ", wmain[nstart + i].r, i,
+		   wmain[nstart + i].inwind);
 	  strcpy (one_line, start);
 	  n = 0;
 	  while (n < number_ions)
@@ -470,10 +468,8 @@ create_ion_table (ndom, rootname, iz)
   else
     {
 
-      Log ("Processing 2d wind\n");
 
-      /* First assemble the heder line
-       */
+      /* First assemble the header line */
 
       sprintf (start, "%8s %8s %4s %4s %6s ", "x", "z", "i", "j", "inwind");
       strcpy (one_line, start);
@@ -485,14 +481,17 @@ create_ion_table (ndom, rootname, iz)
 
 	  n++;
 	}
+
       fprintf (fptr, "%s\n", one_line);
 
       /* Now assemble the lines of the table */
-      for (i = nstart; i < nstop; i++)
+
+      for (i = 0; i < ndim2; i++)
 	{
-	  wind_n_to_ij (ndom, i, &ii, &jj);
-	  sprintf (start, "%8.2e %8.2e %4d %4d %6d ", wmain[i].xcen[0],
-		   wmain[i].xcen[2], ii, jj, wmain[i].inwind);
+	  wind_n_to_ij (ndom, nstart + i, &ii, &jj);
+	  sprintf (start, "%8.2e %8.2e %4d %4d %6d ",
+		   wmain[nstart + i].xcen[0], wmain[nstart + i].xcen[2], ii,
+		   jj, wmain[nstart + i].inwind);
 	  strcpy (one_line, start);
 	  n = 0;
 	  while (n < number_ions)
@@ -504,14 +503,12 @@ create_ion_table (ndom, rootname, iz)
 	  fprintf (fptr, "%s\n", one_line);
 	}
     }
+
   return (0);
+
 }
 
 
-/*
-
-
-*/
 
 /***********************************************************
                                        Space Telescope Science Institute
@@ -522,20 +519,26 @@ Synopsis:
 
 Arguments:		
 
-
+	ndom	the domain number
+	element	the element number
+	istate	the ionization state
+	iswitch a swithc controlling exactly what is returned for that ion
 
 
 Returns:
+
+	Normally returns an array with values associated with what is requested
+   	This will return an array with all zeros if there is no such ion
  
 Description:	
 	
 
-   This will return an array with all zeros if there is no such ion
 	
 Notes:
 
-
-
+	Although a header lines is created, nothing appears to be done with this
+	It's up to the calling routine to control the name.  At present it
+	is not obvious this is happening.
 History:
 	150428	ksl	Adpated from routines in py_wind.c
 
@@ -547,17 +550,20 @@ get_ion (ndom, element, istate, iswitch)
 {
   int nion, nelem;
   int n;
-  // char choice[LINELENGTH], iname[LINELENGTH];
   char name[LINELENGTH];
-  // char filename[LINELENGTH];
   int nplasma;
   double *x;
-  int nstart,nstop;
+  int nstart, nstop, ndim2;
 
 
+  nstart = zdom[ndom].nstart;
+  nstop = zdom[ndom].nstop;
+  ndim2 = zdom[ndom].ndim2;
 
-  x = (double *) calloc (sizeof (double), NDIM2);
+  x = (double *) calloc (sizeof (double), ndim2);
+
 /* Find the ion */
+
   nion = 0;
   while (nion < nions
 	 && !(ion[nion].z == element && ion[nion].istate == istate))
@@ -567,7 +573,6 @@ get_ion (ndom, element, istate, iswitch)
       Log ("Error--element %d ion %d not found in define_wind\n", element,
 	   istate);
       return (x);
-      // return (-1);
     }
   nelem = 0;
   while (nelem < nelements && ele[nelem].z != element)
@@ -575,16 +580,13 @@ get_ion (ndom, element, istate, iswitch)
 
   strcpy (name, "");
 
-  nstart=zdom[ndom].nstart;
-  nstop=zdom[ndom].nstop;
+  /* Now populate the array */
 
-
-  // Now populate the array
-  for (n = nstart; n < nstop; n++)
+  for (n = 0; n < ndim2; n++)
     {
       x[n] = 0;
-      nplasma = wmain[n].nplasma;
-      if (wmain[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+      nplasma = wmain[nstart + n].nplasma;
+      if (wmain[nstart + n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
 	{
 	  if (iswitch == 0)
 	    {
@@ -621,8 +623,6 @@ get_ion (ndom, element, istate, iswitch)
 	}
     }
 
-
-
   return (x);
 }
 
@@ -650,6 +650,7 @@ get_ion (ndom, element, istate, iswitch)
 	1508	ksl	Updated for domains
 
  ************************************************************************/
+
 double *
 get_one (ndom, variable_name)
      int ndom;
@@ -658,28 +659,21 @@ get_one (ndom, variable_name)
   int n;
   int nplasma;
   double *x;
-  int NDIM2;
+  int ndim2;
   int nstart, nstop;
 
   nstart = zdom[ndom].nstart;
   nstop = zdom[ndom].nstop;
-  NDIM2 = zdom[ndom].ndim2;
+  ndim2 = zdom[ndom].ndim2;
 
-  //Log("XXX get_one: %d %d %d\n",nstart,nstop,NDIM2);
+  x = (double *) calloc (sizeof (double), ndim2);
 
-
-
-
-  x = (double *) calloc (sizeof (double), NDIM2);
-
-  for (n = nstart; n < nstop; n++)
+  for (n = 0; n < ndim2; n++)
     {
       x[n] = 0;
-      // Log("XXX %d %e %d\n",n,wmain[n].vol,wmain[n].nplasma);
-      if (wmain[n].vol > 0.0)
+      if (wmain[n + nstart].vol > 0.0)
 	{
-	  nplasma = wmain[n].nplasma;
-
+	  nplasma = wmain[n + nstart].nplasma;
 
 
 	  if (strcmp (variable_name, "ne") == 0)
@@ -710,8 +704,10 @@ get_one (ndom, variable_name)
 	    {
 	      x[n] = plasmamain[nplasma].dmo_dt[2];
 	    }
-
-
+	  else if (strcmp (variable_name, "ntot") == 0)
+	    {
+	      x[n] = plasmamain[nplasma].ntot;
+	    }
 
 
 
