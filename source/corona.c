@@ -36,7 +36,6 @@ get_corona_params (ndom)
 // Start with reasonable values for everything which is important
 
   zdom[ndom].wind_thetamin = 0.0;
-  zdom[ndom].rmax = geo.rmax;
   zdom[ndom].wind_thetamax = 0.0;
   zdom[ndom].rmin = geo.rstar;
 

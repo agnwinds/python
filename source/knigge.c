@@ -153,9 +153,7 @@ in units of WD radii */
 
 
   zdom[ndom].rmin = zdom[ndom].wind_rho_min;
-  zdom[ndom].rmax = geo.rmax;   /* This needs to be the edge of the wind, which is a global
-					parameter
-					*/
+  zdom[ndom].rmax = 10.*zdom[ndom].kn_r_scale;  /* Set rmax to something reasoable.*/
 
   /* The change in the boundary of the wind (as corner of disk -- see above) 
      means that wind_rho_max nees to be redefined so that it is used correctly
