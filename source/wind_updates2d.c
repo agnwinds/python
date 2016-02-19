@@ -186,6 +186,7 @@ WindPtr (w);
 
       nwind = plasmamain[n].nwind;
       volume = w[nwind].vol;
+
       //volume = plasmamain[n].vol; 	// 1411 JM -- we want volume to be the filled volume
       //1504 -- JM No we don't! The mean intensity shouldn't change if we *just* clump
 
@@ -210,8 +211,8 @@ WindPtr (w);
       if (plasmamain[n].ntot < 100)
 	{
 	  Log
-	    ("!!wind_update: Cell %d  with volume %8.2e r=%e theta=%e has only %d photons\n",
-	     n, volume, w[nwind].rcen,w[nwind].thetacen,plasmamain[n].ntot);
+	    ("!!wind_update: Cell %4d Dom %d  Vol. %8.2e r %8.2e theta %8.2e has only %4d photons\n",
+	     n, w[nwind].ndom,volume, w[nwind].rcen,w[nwind].thetacen,plasmamain[n].ntot);
 	}
 
       if (plasmamain[n].ntot > 0)

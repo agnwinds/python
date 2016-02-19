@@ -66,6 +66,7 @@ int
 get_yso_wind_params (ndom)
 	int ndom;
 {
+/* XXX yso model needs testing with domains */
 
 /* The approach to get the input parameters is to call both input parameter routines
 one after the other*/
@@ -75,13 +76,13 @@ one after the other*/
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
-  geo.rmin = geo.rstar;
-  geo.rmax = geo.rmax;
-  geo.wind_thetamin = 0.0;
-/* Somewhat paradoxically diskrad is in cm, while dn_ratio which is really d in KWD95 is 
-in units of WD radii */
+  zdom[ndom].rmin = geo.rstar;
+  zdom[ndom].rmax = geo.rmax;
+  zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = atan (geo.diskrad / (zdom[ndom].kn_dratio * geo.rstar));
+
 // Line above would be 90 degeres if we want a stellar wind outside the windcone
+
   /* Next lines added by SS Sep 04. Changed the wind shape so that the boundary touches the outer 
      corner of the disk rather than the intersection of the disk edge with the xy-plane. */
 
