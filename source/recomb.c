@@ -167,10 +167,13 @@ fb_topbase_partial (freq)
   nion = fb_xtop->nion;
 
   /* JM -- below lines to address bug #195 */
-  if (ion[nion].phot_info == 0)	// it's a topbase record
+  if (ion[nion].phot_info > 0)	// it's a topbase record
     gn = config[fb_xtop->nlev].g;
   else if (ion[nion].phot_info == 0)	// it's a VFKY record, so shouldn't really use levels
   	gn = ion[nion].g;
+  else
+  	Error("fb_topbase_partial: Did not understand cross-section type %i for ion %i. Setting multiplicity to zero!\n",
+  		   ion[nion].phot_info, nion);
 
 
   gion = ion[nion + 1].g;	// Want the g factor of the next ion up
