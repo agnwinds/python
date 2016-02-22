@@ -525,9 +525,11 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
   int reverb_path_bins, reverb_angle_bins;  //SWM - Number of bins for path arrays, vtk output angular bins
   int reverb_dump_cells;                    //SWM - Number of cells to dump, list of cells to dump 'nwind' values
   double *reverb_dump_x, *reverb_dump_z;    //SWM - x & z values of the cells to dump
+  double reverb_wind_paths_min_convergence; //SWM - Minimum number of cells converged before tracking paths
   int reverb_lines, *reverb_line;           //SWM - Number of lines to track, and array of line 'nres' values
 }
 geo;
+double proportion_converged;                //SWM - Used by reverb_wind_paths_min_convergence
 
 
 #define NRINGS	301		/* The actual number of rings completely defined

@@ -102,6 +102,8 @@ reverb_init(WindPtr wind)
 			r_rad_min = DFUDGE;
 
 		r_rad_max = geo.rmax * 5.0;
+		
+		geo.reverb_wind_paths_min_convergence = 0.85;
 
 		//Allocate sufficient bin space
 		reverb_path_bin = (double *)calloc(sizeof(double), geo.reverb_path_bins + 1);

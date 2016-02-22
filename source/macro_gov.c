@@ -116,6 +116,12 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 		         by a macro atom */
 		      if (p->origin < 10)
 			p->origin += 10;
+
+				//SWM - If reverb is on, and enough cells have converged, then track the photon path
+			  if(geo.reverb == REV_MATOM && geo.ioniz_or_extract && proportion_converged >= geo.reverb_wind_paths_min_convergence)
+			  {
+				line_paths_add_phot(&(wmain[p->grid]), p, nres);
+			  }	
 		      return (1);
 		    }
 		}

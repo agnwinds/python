@@ -16,7 +16,7 @@ Boundary_layer_radiation(y=1)                     0
 Wind_radiation(y=1)                               1
 Rad_type_for_star(0=bb,1=models)_to_make_wind                    0
 mstar(msol)                                     0.8
-rstar(cm)                                     1.23552e15
+rstar(cm)                                     1.23552e12
 tstar                                         10672.1
 wind.radmax(cm)                              2.2464e15
 wind.t.init                                  10000.0
