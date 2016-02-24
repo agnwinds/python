@@ -14,7 +14,7 @@ Core files which are standard tests
 More performance intensive core matom models:
 
 * cv_macro_benchmark.pf -- Macro-atom CV run from Matthews et al. (2015).
-* cv_macro_benchmark.pf -- Macro-atom AGN run from Matthews et al. (2016).
+* m16_agn.pf -- Macro-atom AGN run from Matthews et al. (2016).
 
 
 ### beta
