@@ -257,7 +257,7 @@ double gs_rrate(int nion, double T);
 /* diag.c */
 int open_diagfile(void);
 int get_extra_diagnostics(void);
-int save_photon_stats(WindPtr one, PhotPtr p, double ds);
+int save_photon_stats(WindPtr one, PhotPtr p, double ds, double w_ave);
 /* sv.c */
 int get_sv_wind_params(void);
 double sv_velocity(double x[], double v[]);
@@ -590,3 +590,4 @@ int main(int argc, char *argv[]);
 int one_choice(int choice, char *root, int ochoice);
 int py_wind_help(void);
 /* test_saha.c */
+int main(int argc, char *argv[]);
