@@ -2609,7 +2609,7 @@ ion[n].dere_di_flag=1;
 				if (inner_cross[n].n_fluor_yield==-1) /*This is the first yield data for this vacancy */
 				{
 					inner_fluor_yield[n_fluor_yield_tot].nion=n; /*This yield refers to this ion*/
-					inner_cross[n].n_elec_yield=n_fluor_yield_tot;
+					inner_cross[n].n_fluor_yield=n_fluor_yield_tot;
 					inner_fluor_yield[n_fluor_yield_tot].z=z;
 					inner_fluor_yield[n_fluor_yield_tot].istate=istate;
 					inner_fluor_yield[n_fluor_yield_tot].n=in;
