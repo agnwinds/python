@@ -43,7 +43,6 @@ compute_di_coeffs (T)
     {
       if (ion[n].dere_di_flag == 0)
 	{
-    //printf ("NO COEFFS\n");
 	  di_coeffs[n] = 0.0;
 	}
 
@@ -96,7 +95,7 @@ compute_qrecomb_coeffs(T)
       if (ion[n].istate > 1)  //There is only any point doing this is we are not a neutral ion
     {
 
-      if (ion[n].dere_di_flag == 0)
+      if (ion[n-1].dere_di_flag == 0)
   {
     //printf ("NO COEFFS\n");
     qrecomb_coeffs[n] = 0.0;
@@ -129,6 +128,10 @@ compute_qrecomb_coeffs(T)
   }
 
     }   //End of if statement for neutral ions
+	else //We are a neutral ion - so there can be no recombination
+	{
+		qrecomb_coeffs[n] = 0.0;
+	}  
     }   //End of loop over ions
 
   return (0);
