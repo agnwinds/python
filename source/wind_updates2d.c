@@ -732,8 +732,7 @@ free (commbuffer);
 
     }
 	
-    if (modes.zeus_connect==1) 
-        fclose(fptr);
+
 
   /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
      cycles in the windsavefile even if the spectral cycles are run */
