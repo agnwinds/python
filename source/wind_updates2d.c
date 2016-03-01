@@ -783,7 +783,7 @@ free (commbuffer);
 	  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_ff)/vol); //FF heating 28/10/15 - not currently used in zeus
 	  fprintf(fptr,"%e ",(plasmamain[nplasma].lum_comp)/vol); //Compton cooling
 	  fprintf(fptr,"%e ",(plasmamain[nplasma].lum_lines+plasmamain[nplasma].lum_fb+plasmamain[nplasma].lum_dr)/vol); //Line cooling must include all recombinatiobs cooling
-	  fprintf(fptr,"%e",(plasmamain[nplasma].lum_ff)/vol); //ff cooling
+	  fprintf(fptr,"%e ",(plasmamain[nplasma].lum_ff)/vol); //ff cooling
 	  fprintf(fptr,"%e ",plasmamain[nplasma].rho); //density
 	  fprintf(fptr,"%e\n",plasmamain[nplasma].rho*rho2nh); //hydrogen number density
    }
