@@ -7,8 +7,11 @@
 #include "python.h"
 #include "recipes.h"
 
-#include <gsl/gsl_sf_expint.h>	//We need this gsl library to evaluate the first exponential integral
+#include <gsl/gsl_sf_expint.h>  //We need this gsl library to evaluate the first exponential integral
 
+/* Ratio of hnu / kT beyond which we don't bother calculating 
+   see #197 */
+#define ALPHABIG_DIRECT_ION 100.   
 /* direct_ion contains the routines relating to direct (collisional) ionization and 
 threebody recombination */
 
@@ -42,17 +45,17 @@ compute_di_coeffs (T)
   for (n = 0; n < nions; n++)
     {
       if (ion[n].dere_di_flag == 0)
-	{
+  {
     //printf ("NO COEFFS\n");
-	  di_coeffs[n] = 0.0;
-	}
+    di_coeffs[n] = 0.0;
+  }
 
       else
-	{
-	  di_coeffs[n] = q_ioniz_dere(n, T);
-	}
+  {
+    di_coeffs[n] = q_ioniz_dere(n, T);
+  }
 
-    }		//End of loop over ions
+    }   //End of loop over ions
 
   return (0);
 }
@@ -159,41 +162,41 @@ History:
 
 double
 total_di (one, t_e)
-     WindPtr one;		// Pointer to the current wind cell - we need the cell volume, this is not in the plasma structure
-     double t_e;		//Current electron temperature of the cell
+     WindPtr one;   // Pointer to the current wind cell - we need the cell volume, this is not in the plasma structure
+     double t_e;    //Current electron temperature of the cell
 
 {
-  double x;			       //The returned variable
-  int nplasma;			   //The cell number in the plasma array
+  double x;            //The returned variable
+  int nplasma;         //The cell number in the plasma array
   PlasmaPtr xplasma;   //pointer to the relevant cell in the plasma structure
-  int n;			         //loop pointers
+  int n;               //loop pointers
 
 
-  nplasma = one->nplasma;	        //Get the correct plasma cell related to this wind cell
-  xplasma = &plasmamain[nplasma];	//copy the plasma structure for that cell to local variable
-  x = 0;			                    //zero the luminosity
+  nplasma = one->nplasma;         //Get the correct plasma cell related to this wind cell
+  xplasma = &plasmamain[nplasma]; //copy the plasma structure for that cell to local variable
+  x = 0;                          //zero the luminosity
 
 
-  compute_di_coeffs (t_e);	      //Calculate the DR coefficients for this cell
+  compute_di_coeffs (t_e);        //Calculate the DR coefficients for this cell
 
 
   for (n = 0; n < nions; n++)
     {
       //We have no DI data for this ion
-      if (ion[n].dere_di_flag == 0)	
-	{
-	  x += 0.0;		//Add nothing to the sum of coefficients
-	}
+      if (ion[n].dere_di_flag == 0) 
+  {
+    x += 0.0;   //Add nothing to the sum of coefficients
+  }
       else
-	{
+  {
     
-	  x += xplasma->vol * xplasma->ne * xplasma->density[n] * di_coeffs[n] *
-	    dere_di_rate[ion[n].nxderedi].xi * EV2ERGS;
+    x += xplasma->vol * xplasma->ne * xplasma->density[n] * di_coeffs[n] *
+      dere_di_rate[ion[n].nxderedi].xi * EV2ERGS;
 
     //printf ("n=%i V=%e ne=%e rho=%e coeff=%e xi=%e cooling=%e\n",n, V , 
     //xplasma->ne , xplasma->density[n] , di_coeffs[n] ,
     //dere_di_rate[ion[n].nxderedi].xi*EV2ERGS,x);
-	}
+  }
     }
   return (x);
 }
@@ -227,6 +230,10 @@ q_ioniz_dere (nion, t_e)
 
   t = (BOLTZMANN * t_e) / (dere_di_rate[nrec].xi * EV2ERGS);
   scaled_t = 1.0 - ((log (2.0)) / (log (2.0 + t)));
+
+  /* 1/t is (hnu) / (k t_e). when this ratio is >100 we return 0, see #197 */
+  if ( (1.0 / t) > ALPHABIG_DIRECT_ION)
+    return 0.0;
 
   if (scaled_t < dere_di_rate[nrec].temps[0])  //we are below the range of DI data data
     {
@@ -307,6 +314,10 @@ q_ioniz (cont_ptr, electron_temperature)
   nion = cont_ptr->nion;
   gaunt = 0.1 * ion[nion].z;      //for now - from Mihalas for hydrogen and Helium
 
+  /* when hnu / kT ratio is >100 we return 0, see #197 */
+  if (u0 > ALPHABIG_DIRECT_ION)
+    return (0.0);
+
 
   /* if ion[n].dere_di_flag == 1 then we have direct ionization data for this ion
      only do this if it is the ground state */
@@ -353,6 +364,11 @@ q_recomb_dere (cont_ptr, electron_temperature)
   gaunt = 0.1;      //for now - from Mihalas for hydrogen
   u0 = cont_ptr->freq[0] * H_OVER_K / electron_temperature;
   nion = cont_ptr->nion;
+
+  /* when hnu / kT ratio is >100 we return 0, see #197 */
+  if (u0 > ALPHABIG_DIRECT_ION)
+    return (0.0);
+
   /* if ion[n].dere_di_flag == 1 then we have direct ionization data for this ion
      only do this if it is the ground state */
   if (ion[nion].dere_di_flag == 1 && config[cont_ptr->nlev].ilv == 1)
@@ -415,6 +431,9 @@ q_recomb (cont_ptr, electron_temperature)
   u0 = cont_ptr->freq[0] * H_OVER_K / electron_temperature;
   gaunt = 0.1 * ion[nion].z;      //for now - from Mihalas for hydrogen and Helium
 
+  /* when hnu / kT ratio is >100 we return 0, see #197 */
+  if (u0 > ALPHABIG_DIRECT_ION)
+    return (0.0);
 
   /* if ion[n].dere_di_flag == 1 then we have direct ionization data for this ion
      only do this if it is the ground state */
