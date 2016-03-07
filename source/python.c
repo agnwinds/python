@@ -217,7 +217,7 @@ History:
 #include <string.h>
 #include <math.h>
 #include "atomic.h"
-#include <sys/time.h>  //To allow the used of the clock command without errors!!
+#include <time.h>  //To allow the used of the clock command without errors!!
 
 
 #include "python.h"
