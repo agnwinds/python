@@ -178,21 +178,15 @@ spherical_make_grid (w, ndom)
  Returns:
 
  Description:
- 	This simple little routine just populates two one dimensional 
-	arrays that are used for interpolation.  It could be part of the 
-	routine above, except that the arrays are not tranferred to 
-	py_wind in wind_save It's left that way for now, but when one 
-	cleans up the program, it might be more sensible to do it 
-	the other way
+ 	This simple little routine just populates one dimensional 
+	arrays that are used for interpolation.  
 
-	 Note that because of history these interpolation variable 
-	 look like those for cylindrical coordinates.  It would be 
-	 better to rename the variables at some point for clarity. ksl
-		
  Notes:
  History:
  	05apr	ksl	55d: Adapted from rtheta.c
 	15aug	ksl	Add domains
+	16mar	ksl	Removed reference to mdim as this is
+			a spherical grid
  
 **************************************************************/
 
@@ -203,28 +197,21 @@ spherical_wind_complete (ndom, w)
      WindPtr w;
 {
   int i;
-  int ndim, mdim, nstart;
+  int ndim, nstart;
 
   ndim = zdom[ndom].ndim;
-  mdim = zdom[ndom].mdim;
   nstart = zdom[ndom].nstart;
 
-  /* Finally define some one-d vectors that make it easier to 
-   * locate a photon in the wind given that we have adoped 
-   * a "rectangular" grid of points.  Note that rectangular 
-   * does not mean equally spaced. */
 
   for (i = 0; i < ndim; i++)
     zdom[ndom].wind_x[i] = w[nstart + i].r;
-  for (i = 0; i < mdim - 1; i++)
+  for (i = 0; i < ndim - 1; i++)
     zdom[ndom].wind_midx[i] = w[nstart + i].rcen;
   /* Add something plausible for the edges */
-  /* ?? It is bizarre that one needs to do anything like this ???. 
-   * wind should be defined to include NDIM -1 */
   zdom[ndom].wind_midx[ndim - 1] =
     2. * zdom[ndom].wind_x[ndim - 1] - zdom[ndom].wind_midx[ndim - 2];
-  zdom[ndom].wind_midz[mdim - 1] =
-    2. * zdom[ndom].wind_z[mdim - 1] - zdom[ndom].wind_midz[mdim - 2];
+  zdom[ndom].wind_midz[ndim - 1] =
+    2. * zdom[ndom].wind_z[ndim - 1] - zdom[ndom].wind_midz[ndim - 2];
 
   return (0);
 }
