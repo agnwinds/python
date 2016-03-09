@@ -38,6 +38,7 @@ Arguments:
 		 not attempt to seek a new temperature, but it does output heating and cooling rates
     --version print out python version, commit hash and if there were files with uncommitted
 	    changes
+	--seed set the random number seed to be time based, rather than fixed.
 
 	
 	if one simply types py or pyZZ where ZZ is the version number one is queried for a name
@@ -219,6 +220,7 @@ History:
 #include <string.h>
 #include <math.h>
 #include "atomic.h"
+#include <time.h>  //To allow the used of the clock command without errors!!
 
 
 #include "python.h"
@@ -539,6 +541,11 @@ main (argc, argv)
 		}
 	    }
 	}
+	if (modes.zeus_connect==1) /* We are in rad-hydro mode, we want the new density and temperature*/
+		{
+			Log ("We are going to read in the density and temperature from a zeus file\n");
+			get_hydro ();  //This line just populates the hydro structures  
+		}
     }
 
 
@@ -699,9 +706,9 @@ main (argc, argv)
       exit (0);
     }
 
-/* INPUTS ARE FINALLY COMPLETE */
+  /* INPUTS ARE FINALLY COMPLETE */
 
-/* Print out some diagnositic infomration about the domains */
+  /* Print out some diagnositic infomration about the domains */
 
   // XXX This is clearly wrong for repeats
 
@@ -753,6 +760,15 @@ main (argc, argv)
       define_wind ();
     }
 
+  else if (modes.zeus_connect==1) //We have restarted, but are in zeus connect mode, so we want to update density, temp and velocities
+  {
+  	/* XXX PLACEHOLDER JM: I don't believe this works! I don't understand what we will do
+  	   with domains in this instance 
+  	   the argument is ndom, which I've set to 0 as a placeholder. will domains even
+  	   have been defined at this stage? see #204 */
+	hydro_restart(0);
+  }
+
   w = wmain;
 
   if (modes.save_cell_stats)
@@ -763,9 +779,17 @@ main (argc, argv)
     }
 
   /* initialize the random number generator */
-  //      srand( (n=(unsigned int) clock()));  
-
-  srand (1084515760 + (13 * rank_global));
+  /* JM 1503 -- Sometimes it is useful to vary the random number seed. 
+     Default is fixed, but will vary with different processor numbers */
+  /* We don't want to run the same photons each cycle in zeus mode, so 
+     everytime we are using zeus we also set to use the clock */
+  if ( (modes.rand_seed_usetime == 1) || (modes.zeus_connect == 1) )
+    {
+      n=(unsigned int) clock()*(rank_global+1);
+  	  srand(n); 
+  	}
+  else 
+    srand (1084515760 + (13 * rank_global));
 
   /* 68b - 0902 - ksl - Start with photon history off */
 
@@ -817,7 +841,299 @@ main (argc, argv)
 
 /* XXXX -  CALCULATE THE IONIZATION OF THE WIND */
 
+<<<<<<< HEAD
   calculate_ionization (restart_stat);
+=======
+  if (geo.wcycle == geo.wcycles)
+    xsignal (files.root, "%-20s No ionization needed: wcycles(%d)==wcyeles(%d)\n",
+	     "COMMENT", geo.wcycle, geo.wcycles);
+  else
+    {
+      geo.pcycle = 0;  /* Set the spectrum cycles executed to 0, because 
+				          we are going to modify the wind and hence any
+				          previously calculated spectra must be recreated
+				       */
+    }
+
+	/* SWM - Setup for path tracking */
+	if(geo.reverb > REV_NONE)
+	{
+		reverb_init(wmain, nangles, freqmin, freqmax);
+		delay_dump_prep(files.root, restart_stat, rank_global);
+	}
+  
+
+  while (geo.wcycle < geo.wcycles)
+    {				/* This allows you to build up photons in bunches */
+
+      xsignal (files.root, "%-20s Starting %d of %d ionization cycle \n", "NOK",
+	       geo.wcycle, geo.wcycles);
+
+
+      Log ("!!Python: Begining cycle %d of %d for defining wind\n",
+	   geo.wcycle, geo.wcycles);
+      Log_flush ();		/*NH June 13 Added call to flush logfile */
+
+      /* Initialize all of the arrays, etc, that need initialization for each cycle
+       */
+
+      spectrum_init (freqmin, freqmax, nangles, angle, phase, scat_select,
+		     top_bot_select, select_extract, rho_select, z_select,
+		     az_select, r_select);
+
+
+      wind_rad_init ();		/*Zero the parameters pertaining to the radiation field */
+
+
+
+    if (modes.ispy)
+      ispy_init ("python", geo.wcycle);
+
+
+      geo.n_ioniz = 0.0;
+      geo.lum_ioniz = 0.0;
+      ztot = 0.0;		/* ztot is the luminosity of the disk multipled by the number of cycles, which is used by save_disk_heating */
+
+      /* JM 1409 -- We used to execute subcycles here, but these have been removed */
+
+	  if (!geo.wind_radiation || (geo.wcycle == 0 && geo.wind_type != 2))
+	    iwind = -1;		/* Do not generate photons from wind */
+	  else
+	    iwind = 1;		/* Create wind photons and force a reinitialization of wind parms */
+
+	  /* Create the photons that need to be transported through the wind
+	   *
+	   * NPHOT is the number of photon bundles which will equal the luminosity; 
+	   * 0 => for ionization calculation 
+	   */
+
+
+	  /* JM 130306 need to convert photons_per_cycle to double precision for define_phot */
+	  /* ksl 130410 - This is needed here not because we expect photons per cycle to 
+	   * exceed the size of an integer, but because of the call to define phot in the
+	   * spectrum cycle, which can exceed this
+	   */
+	  /* JM 1409 photons_per_cycle has been removed in favour of NPHOT */
+
+	  nphot_to_define = (long) NPHOT;
+
+	  define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
+
+      /* Zero the arrays that store the heating of the disk */
+
+      /* 080520 - ksl - There is a conundrum here.  One should really zero out the 
+       * quantities below each time the wind structure is updated.  But relatively
+       * few photons hit the disk under normal situations, and therefore the statistcs
+       * are not very good.  
+       */
+
+      /* 130213 JM -- previously this was done before define_phot, which meant that
+         the ionization state was never computed with the heated disk */
+
+      for (n = 0; n < NRINGS; n++)
+	{
+	  qdisk.heat[n] = qdisk.nphot[n] = qdisk.w[n] = qdisk.ave_freq[n] = 0;
+	}
+
+
+
+	  photon_checks (p, freqmin, freqmax, "Check before transport");
+
+	  wind_ip ();
+
+
+	  zz = 0.0;
+	  for (nn = 0; nn < NPHOT; nn++)
+	    {
+	      zz += p[nn].w;
+	    }
+
+	  Log
+	    ("!!python: Total photon luminosity before transphot %18.12e\n",
+	     zz);
+	  Log_flush ();		/* NSH June 13 Added call to flush logfile */
+	  ztot += zz;		/* Total luminosity in all cycles, used for calculating disk heating */
+
+	  /* kbf_need determines how many & which bf processes one needs to considere.  It was introduced
+	   * as a way to speed up the program.  It has to be recalculated evey time one changes
+	   * freqmin and freqmax
+	   */
+
+	  kbf_need (freqmin, freqmax);
+
+	  /* NSH 22/10/12  This next call populates the prefactor for free free heating for each cell in the plasma array */
+	  /* NSH 4/12/12  Changed so it is only called if we have read in gsqrd data */
+	  if (gaunt_n_gsqrd > 0)
+	    pop_kappa_ff_array ();
+
+	  /* Transport the photons through the wind */
+	  trans_phot (w, p, 0);
+
+	  /*Determine how much energy was absorbed in the wind */
+	  zze = zzz = zz_adiab = 0.0;
+	  nn_adiab = 0;
+	  for (nn = 0; nn < NPHOT; nn++)
+	    {
+	      zzz += p[nn].w;
+	      if (p[nn].istat == P_ESCAPE)
+		zze += p[nn].w;
+	      if (p[nn].istat == P_ADIABATIC)
+	      {
+		    zz_adiab += p[nn].w;
+		    nn_adiab++;
+		  }
+	    }
+
+	  Log
+	    ("!!python: Total photon luminosity after transphot %18.12e (diff %18.12e). Radiated luminosity %18.12e\n",
+	     zzz, zzz - zz, zze);
+      if (geo.rt_mode == 2)
+	  Log("Luminosity taken up by adiabatic kpkt destruction %18.12e number of packets %d\n", zz_adiab, nn_adiab);
+
+    if (modes.print_windrad_summary)
+	  wind_rad_summary (w, files.windrad, "a");
+
+
+
+
+	  photon_checks (p, freqmin, freqmax, "Check after transport");
+
+	  spectrum_create (p, freqmin, freqmax, nangles, select_extract);
+
+
+
+   /* At this point we should communicate all the useful infomation 
+      that has been accummulated on differenet MPI tasks */
+
+#ifdef MPI_ON
+
+    communicate_estimators_para ();
+
+    communicate_matom_estimators_para (); // this will return 0 if nlevels_macro == 0
+#endif
+
+
+
+
+    if (modes.ispy)
+      ispy_close ();
+
+
+      /* Calculate and store the amount of heating of the disk due to radiation impinging on the disk */
+	/* We only want one process to write to the file */
+#ifdef MPI_ON
+      if (rank_global == 0)
+      {
+#endif
+      qdisk_save (files.disk, ztot);
+	  
+#ifdef MPI_ON
+      }
+      MPI_Barrier(MPI_COMM_WORLD);
+#endif
+
+/* Completed writing file describing disk heating */
+
+      Log
+	("!!python: Number of ionizing photons %g lum of ionizing photons %g\n",
+	 geo.n_ioniz, geo.lum_ioniz);
+
+/* This step shoudl be MPI_parallelised too */
+
+      wind_update (w);
+
+/* In a diagnostic mode save the wind file for each cycle (from thread 0) */
+
+      if (modes.keep_ioncycle_windsaves)
+	{
+	  strcpy (dummy, "");
+	  sprintf (dummy, "python%02d.wind_save", geo.wcycle);
+
+#ifdef MPI_ON
+	  if (rank_global == 0)
+	  {
+#endif
+	  wind_save (dummy);
+#ifdef MPI_ON
+          }
+#endif
+	  Log ("Saved wind structure in %s\n", dummy);
+	}
+
+
+      Log ("Completed ionization cycle %d :  The elapsed TIME was %f\n",
+	   geo.wcycle, timer ());
+
+      Log_silent ("Finished creating spectra\n");
+
+      /* Do an MPI reduce to get the spectra all gathered to the master thread */
+
+#ifdef MPI_ON
+
+    gather_spectra_para (ioniz_spec_helpers, MSPEC);
+
+#endif
+
+
+
+#ifdef MPI_ON
+      if (rank_global == 0)
+      {
+#endif
+      spectrum_summary (files.wspec, "w", 0, 6, 0, 1., 0);
+      spectrum_summary (files.lspec, "w", 0, 6, 0, 1., 1);	/* output the log spectrum */
+      phot_gen_sum (files.phot, "w");	/* Save info about the way photons are created and absorbed
+					   by the disk */
+#ifdef MPI_ON
+      }
+      MPI_Barrier(MPI_COMM_WORLD);
+#endif
+
+
+      /* Save everything after each cycle and prepare for the next cycle 
+         JM1304: moved geo.wcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
+      /* NSH1306 - moved geo.wcycle++ back, but moved the log and xsignal statements */
+
+
+      xsignal (files.root, "%-20s Finished %d of %d ionization cycle \n", "OK",
+	       geo.wcycle, geo.wcycles);
+      geo.wcycle++;		//Increment ionisation cycles
+
+
+/* NSH 1408 - Save only the windsave file from thread 0, to prevent many processors from writing to the same
+ * file. */
+
+#ifdef MPI_ON
+      if (rank_global == 0)
+      {
+#endif
+      wind_save (files.windsave);
+      Log_silent ("Saved wind structure in %s after cycle %d\n", files.windsave,
+	   geo.wcycle);
+ /* In a diagnostic mode save the wind file for each cycle (from thread 0) */
+
+       if (modes.keep_ioncycle_windsaves)
+ 	{
+ 	  strcpy (dummy, "");
+ 	  sprintf (dummy, "python%02d.wind_save", geo.wcycle);
+	  wind_save (dummy);
+       Log ("Saved wind structure in %s\n", dummy);
+ 	}
+	   
+	   
+#ifdef MPI_ON
+      }
+      MPI_Barrier(MPI_COMM_WORLD);
+#endif
+
+
+
+
+      check_time (files.root);
+      Log_flush ();		/*Flush the logfile */
+
+    }				// End of Cycle loop
+>>>>>>> 2f3740196c6a44007e27b2b6db3941db442566d1
 
 /* XXXX - END OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
 
@@ -866,8 +1182,764 @@ main (argc, argv)
 
   kbf_need (freqmin, freqmax);
 
+<<<<<<< HEAD
   /* XXXX - Execute  CYCLES TO CREATE THE DETAILED SPECTRUM */
   make_spectra (restart_stat);
+=======
+  /* XXXX - BEGIN CYCLES TO CREATE THE DETAILED SPECTRUM */
+
+  /* the next section initializes the spectrum array in two cases, for the
+   * standard one where one is calulating the spectrum for the first time
+   * and in the somewhat abnormal case where additional ionization cycles
+   * were calculated for the wind
+   */
+
+  if (geo.pcycle == 0)
+    {
+      spectrum_init (freqmin, freqmax, nangles, angle, phase, scat_select,
+		     top_bot_select, select_extract, rho_select, z_select,
+		     az_select, r_select);
+
+      /* 68b - zero the portion of plasma main that records the numbers of scatters by
+       * each ion in a cell
+       */
+
+      zero_scatters ();
+
+    }
+
+  /* the next condition should really when one has nothing more to do */
+
+  else if (geo.pcycle >= geo.pcycles)
+    xsignal (files.root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n",
+	     "COMMENT", geo.pcycle, geo.pcycles);
+
+  else
+    {
+      /* Then we are restarting a run with more spectral cycles, but we 
+         have already completed some. The memory for the spectral arrays
+         should already have been allocated, and the spectrum was initialised
+         on the original run, so we just need to renormalise the saved spectrum */
+      /* See issue #134 (JM) */
+      if (restart_stat  == 0)
+      	Error("Not restarting, but geo.pcycle = %i and trying to renormalise!\n",
+      		   geo.pcycle);
+
+      spectrum_restart_renormalise(nangles);  
+    }
+
+
+  while (geo.pcycle < geo.pcycles)
+    {				/* This allows you to build up photons in bunches */
+
+      xsignal (files.root, "%-20s Starting %d of %d spectral cycle \n", "NOK",
+	       geo.pcycle, geo.pcycles);
+
+    if (modes.ispy)
+      ispy_init ("python", geo.pcycle + 1000);
+
+
+      Log ("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle,
+	   geo.pcycles);
+      Log_flush ();		/*NSH June 13 Added call to flush logfile */
+      if (!geo.wind_radiation)
+	iwind = -1;		/* Do not generate photons from wind */
+      else if (geo.pcycle == 0)
+	iwind = 1;		/* Create wind photons and force a reinitialization of wind parms */
+      else
+	iwind = 0;		/* Create wind photons but do not force reinitialization */
+
+      /* Create the initial photon bundles which need to be trannsported through the wind 
+
+         For the detailed spectra, NPHOT*pcycles is the number of photon bundles which will equal the luminosity, 
+         1 implies that detailed spectra, as opposed to the ionization of the wind is being calculated
+
+         JM 130306 must convert NPHOT and pcycles to double precision variable nphot_to_define
+
+       */
+
+      nphot_to_define = (long) NPHOT * (long) geo.pcycles;
+      define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);
+
+      for (icheck = 0; icheck < NPHOT; icheck++)
+	{
+	  if (sane_check (p[icheck].freq))
+	    {
+	      Error
+		("python after define phot:sane_check unnatural frequency for photon %d\n",
+		 icheck);
+	    }
+	}
+
+
+      /* Tranport photons through the wind */
+
+      trans_phot (w, p, select_extract);
+
+    if (modes.print_windrad_summary)
+      wind_rad_summary (w, files.windrad, "a");
+
+
+      spectrum_create (p, freqmin, freqmax, nangles, select_extract);
+
+/* Write out the detailed spectrum each cycle so that one can see the statistics build up! */
+      renorm = ((double) (geo.pcycles)) / (geo.pcycle + 1.0);
+
+      /* Do an MPI reduce to get the spectra all gathered to the master thread */
+#ifdef MPI_ON
+      gather_spectra_para(spec_spec_helpers, nspectra);
+#endif
+
+
+
+
+
+#ifdef MPI_ON
+      if (rank_global == 0)
+      {
+#endif
+      spectrum_summary (files.spec, "w", 0, nspectra - 1, select_spectype,
+			renorm, 0);
+#ifdef MPI_ON
+      }
+#endif
+      Log ("Completed spectrum cycle %3d :  The elapsed TIME was %f\n",
+	   geo.pcycle, timer ());
+
+		/* SWM0215: Delay dump photons from this cycle */
+		if(geo.reverb > REV_NONE) delay_dump(p, NPHOT, 0);	// SWM - Dump delay tracks from this iteration
+
+      /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
+
+      xsignal (files.root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK",
+	       geo.pcycle, geo.pcycles);
+
+      geo.pcycle++;		// Increment the spectral cycles
+
+#ifdef MPI_ON    
+      if (rank_global == 0)
+      {
+#endif
+      wind_save (files.windsave);	// This is only needed to update pcycle
+      spec_save (files.specsave);
+#ifdef MPI_ON
+      }
+#endif
+      check_time (files.root);
+    }
+
+
+/* XXXX -- END CYCLE TO CALCULATE DETAILED SPECTRUM */
+#ifdef MPI_ON    
+      if (rank_global == 0)
+      {
+#endif
+  phot_gen_sum (files.phot, "a");
+#ifdef MPI_ON
+      }
+#endif
+/* 57h - 07jul -- ksl -- Write out the freebound information */
+
+#ifdef MPI_ON
+   if (rank_global == 0)
+   {
+#endif
+  fb_save ("recomb.save");
+#ifdef MPI_ON
+   }
+#endif
+
+	/* SWM0215: Dump the last photon path details to file */
+	if(geo.reverb != REV_NONE) delay_dump_finish();		// Each thread dumps to file
+#ifdef MPI_ON
+	MPI_Barrier(MPI_COMM_WORLD);	// Once all done
+	if (my_rank == 0 && geo.reverb != REV_NONE) 
+		delay_dump_combine(np_mpi_global);	// Combine results if necessary
+#endif
+
+
+/* Finally done */
+   
+#ifdef MPI_ON
+  sprintf (dummy,"End of program, Thread %d only",my_rank);   // added so we make clear these are just errors for thread ngit status	
+  error_summary (dummy);	// Summarize the errors that were recorded by the program
+  Log ("Run py_error.py for full error report.\n");
+#else
+  error_summary ("End of program");	// Summarize the errors that were recorded by the program
+#endif
+
+
+  #ifdef MPI_ON
+    MPI_Finalize();
+    Log_parallel("Thread %d Finalized. All done\n", my_rank);
+  #endif  
+
+
+  xsignal (files.root, "%-20s %s\n", "COMPLETE", files.root);
+  Log ("Completed entire program.  The elapsed TIME was %f\n", timer ());
+  return EXIT_SUCCESS;
+}
+
+
+/***********************************************************
+                                       Space Telescope Science Institute
+
+ Synopsis:
+	print out some basic help on how to run the program
+Arguments:		
+
+Returns:
+ 
+Description:	
+		
+Notes:
+
+The easiest way to create the message, at least initially, is simply to to type
+out what you want to appear on the screen and then as \n\ to all of the lines, including
+the ones with nothing in them
+
+History:
+	081217	ksl	67c - Added so that ksl could remember all of the options
+	09feb	ksl	68b - Added info on -v switch
+
+**************************************************************/
+
+int
+help ()
+{
+  char *some_help;
+
+  some_help = "\
+\n\
+This program simulates radiative transfer in a (biconical) CV, YSO, quasar or (spherical) stellar wind \n\
+\n\
+	Usage:  py [-h] [-r] [-t time_max] xxx  or simply py \n\
+\n\
+	where xxx is the rootname or full name of a parameter file, e. g. test.pf \n\
+\n\
+	and the switches have the following meanings \n\
+\n\
+	-h 	to ge this help message \n\
+	-r 	restart a run of the progarm reading the file xxx.windsave \n\
+	-e change the maximum number of errors before quit- don't do this unless you understand\
+	the consequences! \n\
+\n\
+	-t time_max	limit the total time to approximately time_max seconds.  Note that the program checks \n\
+		for this limit somewhat infrequently, usually at the ends of cycles, because it \n\
+		is attempting to save the program outputs so that the program can be restarted with \n\
+		-r if that is desired. \n\
+\n\
+	-v n	controls the amount of print out.  The default is 4.  Larger numbers increase  \n\
+		the amount printed; smaller numbers decrease it.   \n\
+	if one simply types py or pyZZ where ZZ is the version number one is queried for a name \n\
+	of the parameter file. \n\
+\n\
+\n\
+";				// End of string to provide one with help
+
+  printf ("%s\n", some_help);
+
+  exit (0);
+}
+
+/***********************************************************
+                                       Space Telescope Science Institute
+
+ Synopsis:
+	init_geo initializes the geo structure to something that is semi-reasonable
+Arguments:		
+
+Returns:
+ 
+Description:	
+	Initial values for all of the variables that are not part of the individual
+	wind descriptions that are actully read(!) into the program should be 
+	created here.  The derived values are not needed.
+
+		
+Notes:
+
+	When initializing geo, be sure to initialize to cgs units, since this cgs units
+	are the working units for the program.  This is necessary for consistncy when
+	one tries to restart the program.
+
+	Note that init_geo is set up for CVs and Stars and not AGN
+
+
+History:
+ 	98dec	ksl	Coded and debugged.  Much of code was copied from old main routine for
+			python
+	04dec	ksl	This is probably still not completely up to date, but have
+			added some initializations 
+	080518	ksl	60a - modified to set all spectypes to SPECTYPE_BB, as part of 
+			effort to get restarting models to work better
+	080518	ksl	60a - modified all inputs to be in cgs units.  Added a small
+      			amount of code to initialize model_list	
+	081112	ksl	67 - moved more of initializaiton of geo into
+			this routine as part of genearl cleanup of the main
+			routine
+
+**************************************************************/
+
+int
+init_geo ()
+{
+  geo.coord_type = 1;
+  geo.ndim = 30;
+  geo.mdim = 30;
+  geo.disk_z0 = geo.disk_z1 = 0.0;	// 080518 - ksl - moved this up
+  geo.adiabatic = 1;		// Default is now set so that adiabatic cooling is included in the wind
+  geo.auger_ionization = 1;	//Default is on.
+
+
+  geo.wind_type = 0;		// Schlossman and Vitello
+
+  geo.star_ion_spectype = geo.star_spectype
+    = geo.disk_ion_spectype = geo.disk_spectype
+    = geo.bl_ion_spectype = geo.bl_spectype = SPECTYPE_BB;
+  geo.agn_ion_spectype = SPECTYPE_POW;	// 130605 - nsh - moved from python.c
+
+  geo.log_linear = 0;		/* Set intervals to be logarithmic */
+
+  geo.rmax = 1e11;
+  geo.rmax_sq = geo.rmax * geo.rmax;
+  geo.rstar = 7e8;
+  geo.rstar_sq = geo.rstar * geo.rstar;
+  geo.mstar = 0.8 * MSOL;
+  geo.m_sec = 0.4 * MSOL;
+  geo.period = 3.2 * 3600;
+  geo.tstar = 40000;
+  geo.twind = 40000;
+  geo.wind_mdot = 1.e-9 * MSOL / YR;
+
+  geo.ioniz_mode = IONMODE_ML93;	/* default is on the spot and find the best t */
+  geo.line_mode = 3;		/* default is escape probabilites */
+
+  geo.star_radiation = 1;	/* 1 implies star will radiate */
+  geo.disk_radiation = 1;	/* 1 implies disk will radiate */
+  geo.bl_radiation = 0;		/*1 implies boundary layer will radiate */
+  geo.wind_radiation = 0;	/* 1 implies wind will radiate */
+
+  geo.disk_type = 1;		/*1 implies existence of a disk for purposes of absorption */
+  geo.diskrad = 2.4e10;
+  geo.disk_mdot = 1.e-8 * MSOL / YR;
+
+  geo.t_bl = 100000.;
+
+
+  strcpy (geo.atomic_filename, "data/standard78");
+  strcpy (geo.fixed_con_file, "none");
+
+  // Note that geo.model_list is initialized through get_spectype 
+
+
+  return (0);
+}
+
+/*
+Perform some simple checks on the photon distribution just produced.
+
+History:
+	01	ksl	Removed from main routine
+	02jul	ksl	Loosened frequency limits to reflect the
+			fact that in some cases, e.g. those in
+			which the photon distribution has been split
+			into small energy segments, Doppler shifts
+			move photons out of that region.
+	08mar	ksl	Updated slightly, ane eliminated any frequency
+			checks photons generated by macro atoms since
+			these often get out of range.
+	090124	ksl	Modified slightly to reduce output if all
+			is OK and if not debugging
+
+*/
+int
+photon_checks (p, freqmin, freqmax, comment)
+     char *comment;
+     PhotPtr p;
+     double freqmin, freqmax;
+{
+  int nnn, nn;
+//  double lum_ioniz;  //NSH 16/2/2011 These are now declared externally to allow python to see them
+//  int n_ioniz;
+  int nlabel;
+
+  geo.n_ioniz = 0;
+  geo.lum_ioniz = 0.0;
+  nnn = 0;
+  nlabel = 0;
+
+
+  /* Next two lines are to allow for fact that photons generated in
+   * a frequency range may be Doppler shifted out of that range, especially
+   * if they are disk photons generated right up against one of the frequency
+   * limits
+   * 04aug--ksl-increased limit from 0.02 to 0.03, e.g from 6000 km/s to 9000 km/s
+   * 11apr--NSH-decreased freqmin to 0.4, to take account of double redshifted photons.
+   * shift.
+   */
+
+  Debug ("photon_checks: %s\n", comment);
+
+  freqmax *= (1.8);
+  freqmin *= (0.6);
+  for (nn = 0; nn < NPHOT; nn++)
+    {
+      p[nn].np = nn;		/*  NSH 13/4/11 This is a line to populate the new internal photon pointer */
+      if (H * p[nn].freq > ion[0].ip)
+	{
+	  geo.lum_ioniz += p[nn].w;
+	  geo.n_ioniz += p[nn].w / (H * p[nn].freq);
+	}
+      if (sane_check (p[nn].freq) != 0 || sane_check (p[nn].w))
+	{
+	  if (nlabel == 0)
+	    {
+	      Error
+		("photon_checks: nphot  origin  freq     freqmin    freqmax\n");
+	      nlabel++;
+	    }
+	  Error
+	    ("photon_checks:sane_check %6d %5d %10.4e %10.4e %10.4e %5d w %10.4e \n",
+	     nn, p[nn].origin, p[nn].freq, freqmin, freqmax, p[nn].w);
+	  p[nn].freq = freqmax;
+	  nnn++;
+	}
+      if (p[nn].origin < 10 && (p[nn].freq < freqmin || freqmax < p[nn].freq))
+	{
+	  if (nlabel == 0)
+	    {
+	      Error
+		("photon_checks: nphot  origin  freq     freqmin    freqmax\n");
+	      nlabel++;
+	    }
+	  Error
+	    ("photon_checks: %6d %5d %10.4e %10.4e %10.4e freq out of range\n",
+	     nn, p[nn].origin, p[nn].freq, freqmin, freqmax);
+	  p[nn].freq = freqmax;
+	  nnn++;
+	}
+      if (nnn > 100)
+	{
+	  Error
+	    ("photon_checks: Exiting because too many bad photons generated\n");
+	  exit (0);
+	}
+    }
+  Log ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
+
+  if (nnn == 0)
+    Debug ("photon_checks: All photons passed checks successfully\n");
+
+  return (0);
+}
+
+
+/***********************************************************
+                                       Space Telescope Science Institute
+
+ Synopsis:
+	Generalized routine to get the spectrum type and read the model files 
+Arguments:		
+
+Returns:
+ 
+Description:	
+
+		
+Notes:
+
+	The routine is slightly dangerous in the sense that if assumes that
+	rdint always wants 0 for BB, models for 1, and 2 for uniform.  If
+	we were to add another internally generated spectrum type one would
+	have to carefull consider how to do this.  
+
+	For models we have to handle two cases:
+		A new model.  Here we want to start with a default value and
+			to keep track of what was entered since it is likely
+			we will want that together
+		The continuation of an old model.  Here we need to expect the
+			same choices as previously
+081026 - Actual routine is still a mess.  
+		* yesno is a statment of whether the component exists
+		* question is really tightly associted with the way the program is 
+		written
+		* The progam returns the component type two ways, on through the call
+		* and the other through the return.  It ssems like one would do.:
+
+
+
+
+History:
+	080518	ksl	Coded as part of effort to make models restart more
+			easily, but also simplifies some of the code
+        121025  nsh	added a mode for power law
+
+**************************************************************/
+
+
+char get_spectype_oldname[LINELENGTH] = "data/kurucz91.ls";	/*This is to assure that we read model lists in the same order everytime */
+int get_spectype_count = 0;
+int
+get_spectype (yesno, question, spectype)
+     int yesno;
+     char *question;
+     int *spectype;
+{
+  char model_list[LINELENGTH];
+  int stype;
+  int get_models ();		// Note: Needed because get_models cannot be included in templates.h
+  if (yesno)
+    {
+      // First convert the spectype to the way the questionis supposed to be answered
+      if (*spectype == SPECTYPE_BB || *spectype == SPECTYPE_NONE)
+	stype = 0;
+      else if (*spectype == SPECTYPE_UNIFORM)
+	stype = 2;
+      else if (*spectype == SPECTYPE_POW)
+	stype = 3;
+      else
+	stype = 1;
+      /* Now get the response */
+      rdint (question, &stype);
+      /* Now convert the response back to the values which python uses */
+      if (stype == 0)
+	*spectype = SPECTYPE_BB;	// bb
+      else if (stype == 2)
+	*spectype = SPECTYPE_UNIFORM;	// uniform
+      else if (stype == 3)
+	*spectype = SPECTYPE_POW;	// power law
+      else if (stype == 4)
+	*spectype = SPECTYPE_CL_TAB;
+      else if (stype == 5)
+	*spectype = SPECTYPE_BREM;
+      else
+	{
+	  if (geo.wind_type == 2)
+	    {			// Continuing an old model
+	      strcpy (model_list, geo.model_list[get_spectype_count]);
+	    }
+	  else
+	    {			// Starting a new model
+	      strcpy (model_list, get_spectype_oldname);
+	    }
+	  rdstr ("Model_file", model_list);
+	  get_models (model_list, 2, spectype);
+	  strcpy (geo.model_list[get_spectype_count], model_list);	// Copy it to geo 
+	  strcpy (get_spectype_oldname, model_list);	// Also copy it back to the old name
+	  get_spectype_count++;
+	}
+    }
+  else
+    {
+      *spectype = SPECTYPE_NONE;	// No radiation
+    }
+
+  return (*spectype);
+}
+
+
+/***********************************************************
+                                       Space Telescope Science Institute
+
+ Synopsis:
+	The next couple of routines are for recording information about photons/energy impinging
+	on the disk, which is stored in a disk structure called qdisk.
+
+	qdisk_init() just initializes the structure (once the disk structue has been initialized.
+
+	qdisk_save records the results in a file
+
+Arguments:		
+
+Returns:
+ 
+Description:	
+
+		
+Notes:
+
+
+
+History:
+	04mar	ksl	add section to dump heating of disk.  
+ 			Factor of 2 in area calculation reflects
+ 			fact that disk has two sides
+	04dec	ksl	created variable ztot so fractional heating
+			is correct if multiple subcyles
+	080519	ksl	60a - Added code to calculate the irradiation of the disk
+			in terms of t and w.  This should help to monitor the effect
+			of irradiation on the disk
+
+**************************************************************/
+
+
+int
+qdisk_init ()
+{
+  int n;
+  for (n = 0; n < NRINGS; n++)
+    {
+      qdisk.r[n] = disk.r[n];
+      qdisk.t[n] = disk.t[n];
+      qdisk.g[n] = disk.g[n];
+      qdisk.v[n] = disk.v[n];
+      qdisk.heat[n] = 0.0;
+      qdisk.nphot[n] = 0;
+      qdisk.nhit[n] = 0;
+      qdisk.w[n] = 0;
+      qdisk.ave_freq[n] = 0;
+      qdisk.t_hit[0] = 0;
+    }
+  return (0);
+}
+
+int
+qdisk_save (diskfile, ztot)
+     char *diskfile;
+     double ztot;
+{
+  FILE *qptr;
+  int n;
+  double area, theat;
+  qptr = fopen (diskfile, "w");
+  fprintf (qptr,
+	   "# r       zdisk     t_disk     heat      nhit nhit/nemit  t_heat    t_irrad  W_irrad\n");
+  for (n = 0; n < NRINGS; n++)
+    {
+      area =
+	(2. * PI *
+	 (qdisk.r[n + 1] * qdisk.r[n + 1] - qdisk.r[n] * qdisk.r[n]));
+      theat = qdisk.heat[n] / area;
+      theat = pow (theat / STEFAN_BOLTZMANN, 0.25);	// theat is temperature if no internal energy production
+      if (qdisk.nhit[n] > 0)
+	{
+
+	  qdisk.ave_freq[n] /= qdisk.heat[n];
+	  qdisk.t_hit[n] = H * qdisk.ave_freq[n] / (BOLTZMANN * 3.832);	// Basic conversion from freq to T
+	  qdisk.w[n] =
+	    qdisk.heat[n] / (4. * PI * STEFAN_BOLTZMANN * area *
+			     qdisk.t_hit[n] * qdisk.t_hit[n] *
+			     qdisk.t_hit[n] * qdisk.t_hit[n]);
+	}
+
+      fprintf (qptr,
+	       "%8.3e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e\n",
+	       qdisk.r[n], zdisk (qdisk.r[n]), qdisk.t[n],
+	       qdisk.heat[n], qdisk.nhit[n],
+	       qdisk.heat[n] * NRINGS / ztot, theat, qdisk.t_hit[n],
+	       qdisk.w[n]);
+    }
+
+  fclose (qptr);
+  return (0);
+}
+
+
+
+/***********************************************************
+	Space Telescope Science Institute
+
+Synopsis:
+	Stuart's routine to read a non-standard disk profile
+	for YSO effort
+
+Arguments:		
+
+Returns:
+ 
+Description:	
+
+		
+Notes:
+	Originally part of main routine; moved to separate routine
+	by ksl sometime in the fall of 08
+
+
+
+History:
+
+**************************************************************/
+
+int
+read_non_standard_disk_profile (tprofile)
+     char *tprofile;
+{
+
+  FILE *fopen (), *fptr;
+  int n;
+  float dumflt1, dumflt2;
+  int dumint;
+
+  if ((fptr = fopen (tprofile, "r")) == NULL)
+    {
+      Error ("Could not open filename %s\n", tprofile);
+      exit (0);
+    }
+
+  fscanf (fptr, "%d\n", &dumint);
+  blmod.n_blpts = dumint;
+  for (n = 0; n < blmod.n_blpts; n++)
+    {
+      fscanf (fptr, "%g %g", &dumflt1, &dumflt2);
+      blmod.r[n] = dumflt1 * 1.e11;
+      blmod.t[n] = dumflt2 * 1.e3;
+    }
+
+  fclose (fptr);
+
+  return (0);
+}
+
+
+/***********************************************************
+				University of Southampton
+
+Synopsis:
+	init_advanced_modes simply initialises the set of 
+	advanced modes stored in the modes structure to a 
+	default value. For now, this is 0 (off).
+
+Arguments:	
+    none	
+
+Returns:
+    just initialises modes which is declared in python.h
+ 
+Description:	
+	
+Notes:
+    see #111 and #120
+
+History:
+    1410 -- JM -- Coded
+**************************************************************/
+
+
+int init_advanced_modes()
+{ 
+  modes.iadvanced = 0;                // this is controlled by the -d flag, global mode control.
+  modes.save_cell_stats = 0;          // want to save photons statistics by cell
+  modes.ispy = 0;                 	  // want to use the ispy function
+  modes.keep_ioncycle_windsaves = 0;  // want to save wind file each ionization cycle
+  modes.track_resonant_scatters = 0;  // want to track resonant scatters
+  modes.save_extract_photons = 0;     // we want to save details on extracted photons
+  modes.print_windrad_summary = 0;    // we want to print the wind rad summary each cycle
+  modes.adjust_grid = 0;              // the user wants to adjust the grid scale
+  modes.diag_on_off = 0;              // extra diagnostics
+  modes.use_debug = 0;
+  modes.print_dvds_info = 0;          // print out information on velocity gradients
+  write_atomicdata = 0;               // print out summary of atomic data 
+  modes.quit_after_inputs = 0;		  // testing mode which quits after reading in inputs
+  modes.fixed_temp = 0;               // do not attempt to change temperature - used for testing
+  modes.zeus_connect = 0;             // connect with zeus
+  modes.rand_seed_usetime = 0;		  // default random number seed is fixed, not based on time
+  
+  //note this is defined in atomic.h, rather than the modes structure 
+
+
+  modes.keep_photoabs = 1;			  // keep photoabsorption in final spectrum
+>>>>>>> 2f3740196c6a44007e27b2b6db3941db442566d1
 
   return (0);
 }

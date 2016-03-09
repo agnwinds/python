@@ -285,8 +285,18 @@ calculate_ionization (restart_stat)
 	ispy_close ();
 
 
-      /* Calculate and store the amount of heating of the disk due to radiation impinging on the disk */
+  /* Calculate and store the amount of heating of the disk due to radiation impinging on the disk */
+  /* We only want one process to write to the file */
+#ifdef MPI_ON
+      if (rank_global == 0)
+      {
+#endif
       qdisk_save (files.disk, ztot);
+    
+#ifdef MPI_ON
+      }
+      MPI_Barrier(MPI_COMM_WORLD);
+#endif
 
 /* Completed writing file describing disk heating */
 
@@ -339,13 +349,12 @@ calculate_ionization (restart_stat)
 
 	  spectrum_summary (files.wspec, "w", 0, 6, 0, 1., 0);
 	  spectrum_summary (files.lspec, "w", 0, 6, 0, 1., 1);	/* output the log spectrum */
-
+    phot_gen_sum (files.phot, "w"); /* Save info about the way photons are created and absorbed
+             by the disk */
 #ifdef MPI_ON
 	}
       MPI_Barrier (MPI_COMM_WORLD);
 #endif
-      phot_gen_sum (files.phot, "w");	/* Save info about the way photons are created and absorbed
-					   by the disk */
 
       /* Save everything after each cycle and prepare for the next cycle 
          JM1304: moved geo.wcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
@@ -627,8 +636,15 @@ int make_spectra(restart_stat)
 
 
 /* XXXX -- END CYCLE TO CALCULATE DETAILED SPECTRUM */
-
+#ifdef MPI_ON    
+      if (rank_global == 0)
+      {
+#endif
   phot_gen_sum (files.phot, "a");
+#ifdef MPI_ON
+      }
+#endif
+
 
 /* 57h - 07jul -- ksl -- Write out the freebound information */
 

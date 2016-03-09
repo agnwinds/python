@@ -9,7 +9,7 @@ Core files which are standard tests
 * cv_standard.pf -- Standard CV model (Shlosman & Vitello 1993; Long & Knigge 2002).
 * fiducial_agn.pf -- QSO model from Higginbottom et al. (2013).
 * 1d_sn.pf -- simple Supernovae model as presented in Kerzendorf & Sim (2013).
-* stellar.pf -- simple spherical stellar wind model
+* star.pf -- simple spherical stellar wind model
 
 More performance intensive core matom models:
 
@@ -24,4 +24,7 @@ Files of astrophysical interest not currently fully tested.
 * ngc5548.pf -- designed to represent rough params for NGC 5548
 * ulx1.pf -- First attempt at a ULX model
 * agn_ss_2010_modela.pf -- AGN model A from Sim et al. (2010).
+<<<<<<< HEAD
 * lamp_post.pf -- beta model for testing lamp post geometry
+=======
+>>>>>>> 2f3740196c6a44007e27b2b6db3941db442566d1

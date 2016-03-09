@@ -688,6 +688,7 @@ get_one (ndom, variable_name)
 	    {
 	      x[n] = plasmamain[nplasma].t_r;
 	    }
+
 	  else if (strcmp (variable_name, "converge") == 0)
 	    {
 	      x[n] = plasmamain[nplasma].converge_whole;
@@ -708,8 +709,6 @@ get_one (ndom, variable_name)
 	    {
 	      x[n] = plasmamain[nplasma].ntot;
 	    }
-
-
 
 	  else
 	    {

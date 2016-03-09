@@ -184,6 +184,7 @@ int rtheta_make_hydro_grid(WindPtr w, int ndom);
 int rtheta_hydro_volumes(int ndom, WindPtr w);
 int hydro_frac(double coord, double coord_array[], int imax, int *cell1, int *cell2, double *frac);
 double hydro_interp_value(double array[], int im, int ii, int jm, int jj, double f1, double f2);
+int hydro_restart(void);
 /* corona.c */
 int get_corona_params(int ndom);
 double corona_velocity(int ndom, double x[], double v[]);
@@ -248,7 +249,7 @@ double gs_rrate(int nion, double T);
 /* diag.c */
 int open_diagfile(void);
 int get_extra_diagnostics(void);
-int save_photon_stats(WindPtr one, PhotPtr p, double ds);
+int save_photon_stats(WindPtr one, PhotPtr p, double ds, double w_ave);
 /* sv.c */
 int get_sv_wind_params(int ndom);
 double sv_velocity(double x[], double v[], int ndom);
@@ -568,6 +569,7 @@ int convergence_all(WindPtr w, char rootname[], int ochoice);
 int model_bands(WindPtr w, char rootname[], int ochoice);
 int heatcool_summary(WindPtr w, char rootname[], int ochoice);
 int complete_physical_summary(WindPtr w, char rootname[], int ochoice);
+int complete_ion_summary(WindPtr w, char rootname[], int ochoice);
 double get_density_or_frac(PlasmaPtr xplasma, int element, int istate, int frac_choice);
 int find_ion(int element, int istate);
 int find_element(int element);
@@ -598,3 +600,8 @@ int level_tauoverview(int nlev, WindPtr w, char rootname[], int ochoice);
 int main(int argc, char *argv[]);
 int one_choice(int choice, char *root, int ochoice);
 int py_wind_help(void);
+<<<<<<< HEAD
+=======
+/* test_saha.c */
+int main(int argc, char *argv[]);
+>>>>>>> 2f3740196c6a44007e27b2b6db3941db442566d1
