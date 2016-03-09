@@ -343,6 +343,8 @@ struct geometry
 
 // The next set of parameters relate to the central source of an AGN
   double brem_temp;       /*The temperature of a bremsstrahlung source */
+  double brem_alpha;       /*The exponent of the nu term for a bremstrahlung source */
+
   double pl_low_cutoff;  /* accessible only in advanced mode- see #34. default to zero */
 
   double alpha_agn;		/*The power law index of a BH at the center of an AGN.  Note that the luminosity
