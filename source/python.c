@@ -38,6 +38,7 @@ Arguments:
 		 not attempt to seek a new temperature, but it does output heating and cooling rates
     --version print out python version, commit hash and if there were files with uncommitted
 	    changes
+	--seed set the random number seed to be time based, rather than fixed.
 
 	
 	if one simply types py or pyZZ where ZZ is the version number one is queried for a name
@@ -217,6 +218,7 @@ History:
 #include <string.h>
 #include <math.h>
 #include "atomic.h"
+#include <time.h>       /* time */
 
 
 #include "python.h"
@@ -1007,8 +1009,12 @@ main (argc, argv)
     }
 
   /* initialize the random number generator */
-  //      srand( (n=(unsigned int) clock()));  
-  srand (1084515760+(13*rank_global));
+  /* JM 1503 -- Sometimes it is useful to vary the random number seed. 
+     Default is fixed, but will vary with different processor numbers */
+  if (modes.rand_seed_usetime)
+  	srand(time(NULL)); 
+  else 
+    srand (1084515760+(13*rank_global));
 
   /* 68b - 0902 - ksl - Start with photon history off */
 
@@ -2135,6 +2141,7 @@ int init_advanced_modes()
   modes.quit_after_inputs = 0;		  // testing mode which quits after reading in inputs
   modes.fixed_temp = 0;               // do not attempt to change temperature - used for testing
   modes.zeus_connect = 0;             // connect with zeus
+  modes.rand_seed_usetime = 0;		  // default random number seed is fixed, not based on time
   
   //note this is defined in atomic.h, rather than the modes structure 
 
