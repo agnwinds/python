@@ -1023,7 +1023,7 @@ else if (modes.zeus_connect==1) //We have restarted, but are in zeus connect mod
      Default is fixed, but will vary with different processor numbers */
   /* We don't want to run the same photons each cycle in zeus mode, so 
      everytime we are using zeus we also set to use the clock */
-  if (modes.rand_seed_usetime || modes.zeus_connect==1)
+  if ( (modes.rand_seed_usetime == 1) || (modes.zeus_connect == 1) )
     {
       n=(unsigned int) clock()*(rank_global+1);
   	  srand(n); 
