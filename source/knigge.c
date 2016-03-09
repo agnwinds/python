@@ -67,7 +67,7 @@ get_knigge_wind_params (ndom)
   double disktheta, test;
 
 
-  Log ("Creating Knigge's wind description for Cataclysmic Variable\n");
+  Log ("Creating KWD wind in domain %d\n", ndom);
 
   zdom[ndom].wind_mdot = 0.1*geo.disk_mdot / (MSOL / YR);
   rddoub ("wind.mdot(msol/yr)", &zdom[ndom].wind_mdot);
@@ -99,7 +99,7 @@ As now represented kn_dratio is the distance to the focus point in stellar radii
 
 */
 
-  rddoub ("kn.d(in_wd_radii)", &zdom[ndom].kn_dratio);
+  rddoub ("kn.d(in_units_of_rstar)", &zdom[ndom].kn_dratio);
 
   Log_silent ("dmin = %f so the ratio d/dmin here is %f  (%.2e %.2e) \n",
 	      dmin, zdom[ndom].kn_dratio / dmin, geo.diskrad, geo.rstar);
@@ -110,7 +110,7 @@ As now represented kn_dratio is the distance to the focus point in stellar radii
   if (zdom[ndom].kn_v_infinity < 0)
     {
       Log
-	("Since kn_v_infinity is less than zero, will use SV prescription for velocity law.\n Velocity at base remains the soundspeed\n");
+	("Since kn_v_infinity is less than zero, will use SV prescription for velocity law.\n Velocity at base remains the sound speed\n");
     }
 
   rddoub ("kn.acceleration_length(cm)", &zdom[ndom].kn_r_scale);	/*Accleration length scale for wind */
@@ -129,8 +129,8 @@ to be modified -- ksl 04jun */
      
      1509 -- ksl -- This had not be implemented quite right.  Now fixed.  Defaults
      are for standard KWD model */
-  rddoub ("kn.rmin(in_wd_radii)", &zdom[ndom].wind_rho_min);
-  rddoub ("kn.rmax(in_wd_radii)", &zdom[ndom].wind_rho_max);
+  rddoub ("kn.rmin(in_units_of_rstar)", &zdom[ndom].wind_rho_min);
+  rddoub ("kn.rmax(in_units_of_rstar)", &zdom[ndom].wind_rho_max);
 
   zdom[ndom].wind_rho_min *= geo.rstar;
   zdom[ndom].wind_rho_max *= geo.rstar;
@@ -153,9 +153,7 @@ in units of WD radii */
 
 
   zdom[ndom].rmin = zdom[ndom].wind_rho_min;
-  zdom[ndom].rmax = geo.rmax;   /* This needs to be the edge of the wind, which is a global
-					parameter
-					*/
+  zdom[ndom].rmax = 10.*zdom[ndom].kn_r_scale;  /* Set rmax to something reasoable.*/
 
   /* The change in the boundary of the wind (as corner of disk -- see above) 
      means that wind_rho_max nees to be redefined so that it is used correctly

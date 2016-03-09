@@ -39,7 +39,7 @@ get_homologous_params (ndom)
   DomainPtr one_dom;
   one_dom = &zdom[ndom];
 
-  Log ("Creating a homolgous wind model\n");
+  Log ("Creating a homolgous wind model in domain %d\n",ndom);
 
 
 

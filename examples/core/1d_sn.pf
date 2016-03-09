@@ -22,6 +22,7 @@ wind.radmax(cm)                              2.2464e15
 wind.t.init                                  10000.0
 homologous_boundary_mdot(msol/yr)          26.8
 homologous.radmin(cm)                    1.23552e15
+homologous.radmax(cm)                    1.23552e17
 homologous.vbase(cm)                        1.1e9
 homologous.density_exponent                  7.0
 wind.filling_factor(1=smooth,<1=clumpted)		1

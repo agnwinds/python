@@ -59,7 +59,11 @@ History:
  	04jun	ksl	Added this possibility
         04Sep   SS      Changed finite disk case to cut off wind
                         at the top (rather than bottom) outer edge of disk.
-	08aug	ksl	Modifications to accommodate domains begun
+	16aug	ksl	Modifications to accommodate domains begun
+	16feb	ksl	Removed assignment of global variables, those not
+       			associated with a specific domain from within	
+			routine.  These should be assigned elsewhere, as
+			we could have multiple domains
 **************************************************************/
 
 int
@@ -75,11 +79,12 @@ one after the other*/
   get_knigge_wind_params (ndom);
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
-
-  zdom[ndom].rmin = geo.rstar;
-  zdom[ndom].rmax = geo.rmax;
-  zdom[ndom].wind_thetamin = 0.0;
-  zdom[ndom].wind_thetamax = atan (geo.diskrad / (zdom[ndom].kn_dratio * geo.rstar));
+//  These lines are unnecessary as these variables ahve already been assigned in knigge_wind_params, and
+//  we do not want to assign anything as being set to the global variables if we an avoid it.  ksl 160219
+//  zdom[ndom].rmin = geo.rstar;
+//  zdom[ndom].rmax = geo.rmax;
+//  zdom[ndom].wind_thetamin = 0.0;
+//  zdom[ndom].wind_thetamax = atan (geo.diskrad / (zdom[ndom].kn_dratio * geo.rstar));
 
 // Line above would be 90 degeres if we want a stellar wind outside the windcone
 
@@ -93,9 +98,9 @@ one after the other*/
 	      (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (geo.diskrad))));
     }
 
-
-  geo.wind_rho_min = geo.rstar;
-  geo.wind_rho_max = geo.diskrad;
+//  These global variables should not be defined within a domain specific routine which this is
+//  geo.wind_rho_min = geo.rstar;
+//  geo.wind_rho_max = geo.diskrad;
 
   /* The change in the boundary of the wind (as corner of disk -- see above) 
      means that wind_rho_max nees to be redefined so that it is used correctly
