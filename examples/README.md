@@ -9,7 +9,7 @@ Core files which are standard tests
 * cv_standard.pf -- Standard CV model (Shlosman & Vitello 1993; Long & Knigge 2002).
 * fiducial_agn.pf -- QSO model from Higginbottom et al. (2013).
 * 1d_sn.pf -- simple Supernovae model as presented in Kerzendorf & Sim (2013).
-* stellar.pf -- simple spherical stellar wind model
+* star.pf -- simple spherical stellar wind model
 
 More performance intensive core matom models:
 
