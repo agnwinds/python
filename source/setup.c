@@ -104,6 +104,12 @@ int parse_command_line(argc, argv)
     {
       modes.fixed_temp = 1;
     }
+
+    /* JM 1503 -- Sometimes it is useful to vary the random number seed. Set a mode for that */
+    else if (strcmp (argv[i], "--rseed") == 0)
+    {
+      modes.rand_seed_usetime = 1;
+    }
     else if (strcmp (argv[i], "-z") == 0)
       {
         modes.zeus_connect = 1;
