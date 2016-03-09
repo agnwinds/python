@@ -39,7 +39,7 @@ get_sv_wind_params (ndom)
 {
   double windmin, windmax, theta_min, theta_max;
 
-  Log ("Creating an SV wind model for a Cataclysmic Variable\n");
+  Log ("Creating an SV wind in domain %d\n", ndom);
 
   zdom[ndom].wind_mdot=0.1*geo.disk_mdot /(MSOL / YR);	// Convert to MSOL/YR for easy of data entry
   rddoub ("wind.mdot(msol/yr)", &zdom[ndom].wind_mdot);
@@ -52,9 +52,9 @@ get_sv_wind_params (ndom)
   zdom[ndom].sv_thetamax = 65. / RADIAN;
   zdom[ndom].sv_gamma = 1.;
   zdom[ndom].sv_v_zero = 6e5;		/* velocity at base of wind */
-  zdom[ndom].sv_r_scale = 7e10;	/*Accleration length scale for wind */
+  zdom[ndom].sv_r_scale = 7e10;		/*Accleration length scale for wind */
   zdom[ndom].sv_alpha = 1.5;		/* Accleration scale exponent */
-  zdom[ndom].sv_v_infinity = 3;	/* Final speed of wind in units of escape velocity */
+  zdom[ndom].sv_v_infinity = 3;		/* Final speed of wind in units of escape velocity */
   zdom[ndom].sv_lambda = 0.0;		/* Mass loss rate exponent */
 
   windmin = zdom[ndom].sv_rmin / geo.rstar;
@@ -73,15 +73,16 @@ get_sv_wind_params (ndom)
   zdom[ndom].sv_thetamin = theta_min / RADIAN;
   zdom[ndom].sv_thetamax = theta_max / RADIAN;
 
-  rddoub ("sv.mdot_r_exponent", &zdom[ndom].sv_lambda);	/* Mass loss rate exponent */
+  rddoub ("sv.mdot_r_exponent", &zdom[ndom].sv_lambda);				/* Mass loss rate exponent */
   rddoub ("sv.v_infinity(in_units_of_vescape", &zdom[ndom].sv_v_infinity);	/* Final speed of wind in units of escape velocity */
 
-  rddoub ("sv.acceleration_length(cm)", &zdom[ndom].sv_r_scale);	/*Accleration length scale for wind */
-  rddoub ("sv.acceleration_exponent", &zdom[ndom].sv_alpha);	/* Accleration scale exponent */
+  rddoub ("sv.acceleration_length(cm)", &zdom[ndom].sv_r_scale);		/*Accleration length scale for wind */
+  rddoub ("sv.acceleration_exponent", &zdom[ndom].sv_alpha);			/* Accleration scale exponent */
+
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
   zdom[ndom].rmin = geo.rstar;
-  zdom[ndom].rmax = geo.rmax;  // XXX This line undoes 
+  zdom[ndom].rmax = 10.*zdom[ndom].sv_r_scale;  // Set rmax to something reasonable
   zdom[ndom].wind_rho_min = zdom[ndom].sv_rmin;
   zdom[ndom].wind_rho_max = zdom[ndom].sv_rmax;
   zdom[ndom].wind_thetamin = zdom[ndom].sv_thetamin;
