@@ -6,7 +6,7 @@ Wind.dim.in.z_or_theta.direction                   200
 disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)                    1
 disk.atmosphere(0=no,1=yes)  0 
 Atomic_data    data/h10_hetop_lohe1_standard78
-photons_per_cycle    40000000.0
+photons_per_cycle    20000000.0
 Ionization_cycles    20.0
 spectrum_cycles    5.0
 Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,5=recalc_pow,6=pairwise_bb,7=pairwise_pow)    9.0
