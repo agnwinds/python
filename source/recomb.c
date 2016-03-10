@@ -176,8 +176,8 @@ fb_topbase_partial (freq)
   {
   	Error("fb_topbase_partial: Did not understand cross-section type %i for ion %i. Setting multiplicity to zero!\n",
   		   ion[nion].phot_info, nion);
-		gn = 0.0;   
-	   }
+  	gn = 0.0;
+  }
 
 
 
@@ -1354,22 +1354,23 @@ total_rrate (nion, T)
 	  term3 = 1.0 + sqrt (T / rrT1);
 	  term3 = pow (term3, (1 + rrB));
 
-      rate = pow ((term1 * term2 * term3), -1.0);
-      rate *= rrA;
-    }
-  else if (total_rr[ion[nion].nxtotalrr].type == RRTYPE_SHULL)
-    {
-      rate =
-	total_rr[ion[nion].nxtotalrr].params[0] * pow ((T / 1.0e4),-1.0*
-						       total_rr[ion
-								[nion].
-								nxtotalrr].
-						       params[1]);
-    }
-  else
-    {
-      Error ("total_rrate: unknown parameter type for ion %i\n", nion);
-      exit(0);  /* NSH This is a serious problem! */
+
+	  rate = pow ((term1 * term2 * term3), -1.0);
+	  rate *= rrA;
+	}
+      else if (total_rr[ion[nion].nxtotalrr].type == RRTYPE_SHULL)
+	{
+	  rate =
+	    total_rr[ion[nion].nxtotalrr].params[0] * pow ((T / 1.0e4),-1.0*
+							   total_rr[ion
+								    [nion].nxtotalrr].params
+							   [1]);
+	}
+      else
+	{
+	  Error ("total_rrate: unknown parameter type for ion %i\n", nion);
+	  exit (0);		/* NSH This is a serious problem! */
+	}
     }
   else				/*NSH 140812 - We dont have coefficients - in this case we can use xinteg_fb with mode 2 to use the milne relation to obtain a value for this - it is worth throwing an error though, since there rreally should be data for all ions. xinteg_fb
 				   is called with the lower ion in the pair, since it uses the photionization cross sectiuon of the lower ion */

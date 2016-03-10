@@ -184,7 +184,7 @@ int rtheta_make_hydro_grid(WindPtr w, int ndom);
 int rtheta_hydro_volumes(int ndom, WindPtr w);
 int hydro_frac(double coord, double coord_array[], int imax, int *cell1, int *cell2, double *frac);
 double hydro_interp_value(double array[], int im, int ii, int jm, int jj, double f1, double f2);
-int hydro_restart(void);
+int hydro_restart(int ndom);
 /* corona.c */
 int get_corona_params(int ndom);
 double corona_velocity(int ndom, double x[], double v[]);
@@ -600,8 +600,3 @@ int level_tauoverview(int nlev, WindPtr w, char rootname[], int ochoice);
 int main(int argc, char *argv[]);
 int one_choice(int choice, char *root, int ochoice);
 int py_wind_help(void);
-<<<<<<< HEAD
-=======
-/* test_saha.c */
-int main(int argc, char *argv[]);
->>>>>>> 2f3740196c6a44007e27b2b6db3941db442566d1

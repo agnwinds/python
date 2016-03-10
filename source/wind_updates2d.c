@@ -744,26 +744,10 @@ for ( ndom = 0; ndom < geo.ndomain; ndom++)
       plasmamain[nplasma].lum_rad_ioniz = plasmamain[nplasma].lum_rad;
       plasmamain[nplasma].lum_adiabatic_ioniz = plasmamain[nplasma].lum_adiabatic;
 
-<<<<<<< HEAD
-	  if (modes.zeus_connect==1) //If we are running in zeus connect mode, we output heating and cooling rates.
-	  {
-		  wind_n_to_ij (geo.wind_domain_number,plasmamain[nplasma].nwind, &i, &j);
-		  vol=w[plasmamain[nplasma].nwind].vol;
-		  fprintf(fptr,"%d %d %e %e %e ",i,j,w[plasmamain[nplasma].nwind].rcen,w[plasmamain[nplasma].nwind].thetacen/RADIAN,vol); //output geometric things
-		  fprintf(fptr,"%e %e %e ",plasmamain[nplasma].t_e,plasmamain[nplasma].xi,plasmamain[nplasma].ne); //output temp, xi and ne to ease plotting of heating rates
-		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_photo+plasmamain[nplasma].heat_auger)/vol); //Xray heating - or photoionization
-		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_comp)/vol); //Compton heating
-		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_lines)/vol); //Line heating 28/10/15 - not currently used in zeus
-		  fprintf(fptr,"%e ",(plasmamain[nplasma].heat_ff)/vol); //FF heating 28/10/15 - not currently used in zeus
-		  fprintf(fptr,"%e ",(plasmamain[nplasma].lum_comp)/vol); //Compton cooling
-		  fprintf(fptr,"%e ",(plasmamain[nplasma].lum_lines+plasmamain[nplasma].lum_fb+plasmamain[nplasma].lum_dr)/vol); //Line cooling must include all recombinatiobs cooling
-		  fprintf(fptr,"%e\n",(plasmamain[nplasma].lum_ff)/vol); //ff cooling
-	   }
-=======
 
 
 
->>>>>>> 2f3740196c6a44007e27b2b6db3941db442566d1
+
     }
 	
 
@@ -807,7 +791,7 @@ for ( ndom = 0; ndom < geo.ndomain; ndom++)
 	  for (nplasma = 0; nplasma < NPLASMA; nplasma++)
 	  {
 	  
- 		 wind_n_to_ij (plasmamain[nplasma].nwind, &i, &j);
+ 		 wind_n_to_ij (geo.wind_domain_number, plasmamain[nplasma].nwind, &i, &j);
 		 vol=w[plasmamain[nplasma].nwind].vol;
 	  fprintf(fptr,"%d %d %e %e %e ",i,j,w[plasmamain[nplasma].nwind].rcen,w[plasmamain[nplasma].nwind].thetacen/RADIAN,vol); //output geometric things
 	  fprintf(fptr,"%e %e %e ",plasmamain[nplasma].t_e,plasmamain[nplasma].xi,plasmamain[nplasma].ne); //output temp, xi and ne to ease plotting of heating rates

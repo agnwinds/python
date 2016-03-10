@@ -57,7 +57,6 @@ parse_command_line (argc, argv)
     {
 
       for (i = 1; i < argc; i++)
-<<<<<<< HEAD
 	{
 	  if (strcmp (argv[i], "-h") == 0)
 	    {
@@ -108,6 +107,12 @@ parse_command_line (argc, argv)
 	    {
 	      modes.fixed_temp = 1;
 	    }
+
+    /* JM 1503 -- Sometimes it is useful to vary the random number seed. Set a mode for that */
+    else if (strcmp (argv[i], "--rseed") == 0)
+      {
+        modes.rand_seed_usetime = 1;
+      }
 	  else if (strcmp (argv[i], "-z") == 0)
 	    {
 	      modes.zeus_connect = 1;
@@ -138,95 +143,6 @@ parse_command_line (argc, argv)
 	      help ();
 	    }
 	}
-=======
-  {
-
-    if (strcmp (argv[i], "-h") == 0)
-      {
-        help ();
-      }
-    else if (strcmp (argv[i], "-r") == 0)
-      {
-        Log ("Restarting %s\n", files.root);
-        restart_stat = 1;
-      }
-    else if (strcmp (argv[i], "-t") == 0)
-      {
-        if (sscanf (argv[i + 1], "%lf", &time_max) != 1)
-    {
-      Error ("python: Expected time after -t switch\n");
-      exit (0);
-    }
-        i++;
-
-      }
-    else if (strcmp (argv[i], "-v") == 0)
-      {
-        if (sscanf (argv[i + 1], "%d", &verbosity) != 1)
-    {
-      Error ("python: Expected verbosity after -v switch\n");
-      exit (0);
-    }
-        Log_set_verbosity (verbosity);
-        i++;
-
-      }
-    else if (strcmp (argv[i], "-e") == 0)
-      {
-        if (sscanf (argv[i + 1], "%d", &time_to_quit) != 1)
-    {
-      Error ("python: Expected max errors after -e switch\n");
-      exit (0);
-    }
-        Log_quit_after_n_errors (time_to_quit);
-        i++;
-
-      }
-    else if (strcmp (argv[i], "-d") == 0)
-    {
-      modes.iadvanced = 1;
-    }
-    else if (strcmp (argv[i], "-f") == 0)
-    {
-      modes.fixed_temp = 1;
-    }
-
-    /* JM 1503 -- Sometimes it is useful to vary the random number seed. Set a mode for that */
-    else if (strcmp (argv[i], "--rseed") == 0)
-    {
-      modes.rand_seed_usetime = 1;
-    }
-    else if (strcmp (argv[i], "-z") == 0)
-      {
-        modes.zeus_connect = 1;
-		    Log ("setting zeus_connect to %i\n",modes.zeus_connect);
-      }
-
-    else if (strcmp (argv[i], "-i") == 0)
-      {
-        modes.quit_after_inputs = 1;
-      }
-
-    else if (strcmp (argv[i], "--version") == 0)
-      {
-        /* give information about the pyhon version, such as commit hash */
-        Log ("Python Version %s \n", VERSION);  //54f -- ksl -- Now read from version.h
-        Log ("Built from git commit hash %s\n", GIT_COMMIT_HASH);
-        /* warn the user if there are uncommited changes */
-        int git_diff_status = GIT_DIFF_STATUS;
-        if (git_diff_status > 0)
-          Log("This version was compiled with %i files with uncommitted changes.\n",
-              git_diff_status);
-        exit(0);
-      }
-
-    else if (strncmp (argv[i], "-", 1) == 0)
-      {
-        Error ("python: Unknown switch %s\n", argv[i]);
-        help ();
-      }
-  }
->>>>>>> 2f3740196c6a44007e27b2b6db3941db442566d1
 
       /* The last command line variable is always the .pf file */
 

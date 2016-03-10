@@ -120,13 +120,6 @@ int
 get_hydro_wind_params (ndom)
      int ndom;
 {
-  int get_hydro ();
-
-
-
-
-
-
   Log ("Creating a wind model using a Hydro calculation = domain %i\n",ndom);
 
   get_hydro (ndom);
@@ -895,6 +888,7 @@ History:
 		int nwind;
 		double x[3];
 		double old_density;
+    int nstart, nstop, ndim2;
 		WindPtr w;
 		  
 		w = wmain;
