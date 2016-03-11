@@ -120,13 +120,6 @@ int
 get_hydro_wind_params (ndom)
      int ndom;
 {
-  int get_hydro ();
-
-
-
-
-
-
   Log ("Creating a wind model using a Hydro calculation = domain %i\n",ndom);
 
   get_hydro (ndom);
@@ -535,11 +528,11 @@ hydro_temp (x)
     temp=hydro_interp_value(temp_input,im,ii,jm,jj,f1,f2);
 
 
-  if (temp < 1e4)   //Set a lower limit.
-    temp = 1e4;
+	/* NSH 16/2/29 - removed lower limit - set this in the hydro translation software or hydro model */
 
-
-
+//  if (temp < 1e4)		//Set a lower limit.
+//    temp = 1e4;
+  
 
   return (temp);
 }
@@ -617,7 +610,7 @@ rtheta_make_hydro_grid (w, ndom)
         thetacen = ((hydro_thetamax + theta) / 2.0);
       }
 
-    else if (j >= ihydro_theta) //We are setting up a cell past where there is any data
+    else if (j > ihydro_theta) //We are setting up a cell past where there is any data
       {
         thetacen = hydro_thetamax;  //Set the center and the edge to the maximum extent of the data/interest
         theta = hydro_thetamax;
@@ -852,12 +845,105 @@ double
 //                printf ("TEST3 %e %e %e\n",d1,d2,value);
         
         
-        
-        
-  
+//			 f1 *  ((1. - f2) * array[ii * MAXHYDRO + jm] + f2 * array[ii * MAXHYDRO + jj]);
+		return(value);
+	}
+	
+	
+	
+/***********************************************************
+                                       Southampton
 
-//      value =
-//    (1. - f1) * ((1. - f2) * array[im * MAXHYDRO + jm] + f2 * array[im * MAXHYDRO + jj]) + 
-//       f1 *  ((1. - f2) * array[ii * MAXHYDRO + jm] + f2 * array[ii * MAXHYDRO + jj]);
-    return(value);
-  }
+ Synopsis:
+	hydro_restart is a subrotine which permits a previous wind save 
+		file to be used in a hydro simulation. The density and temperature
+		for each cell are those from the hydro simulation. The ion fractions
+		are taken from the windsave file
+Arguments:		
+	none 
+ 
+Returns:
+ 
+Description:
+
+	
+	This sets up a restarted hydro model
+
+
+History:
+	16feb	nsh	80 -- Coded and debugged.
+
+
+**************************************************************/
+	
+	
+	
+	
+	
+	int 
+		hydro_restart(ndom)
+    int ndom;
+	{
+		int n,nion;
+		int nwind;
+		double x[3];
+		double old_density;
+    int nstart, nstop, ndim2;
+		WindPtr w;
+		  
+		w = wmain;
+		zdom[ndom].wind_type = 3; //Temporarily set the wind type to hydro, so we can use the normal routines
+		
+    /* JM XXX PLACEHOLDER -- have we even set all these variables by this point? */
+    nstart = zdom[ndom].nstart;
+    nstop = zdom[ndom].nstop;
+    ndim2 = zdom[ndom].ndim2;
+
+		for (n = nstart; n < nstop; n++)
+		    {
+		      /* 04aug -- ksl -52 -- The next couple of lines are part of the changes
+		       * made in the program to allow more that one coordinate system in python 
+		       */
+
+          model_velocity (ndom, w[n].x, w[n].v);
+          model_vgrad (ndom, w[n].x, w[n].v_grad);
+	      }
+
+    /* JM XXX PLACEHOLDER -- unsure how we loop over the plasma cells just in one domain */
+    for (n = 0; n < NPLASMA; n++)
+      {
+	      nwind = plasmamain[n].nwind;
+	      stuff_v (w[nwind].xcen, x);
+		    old_density=plasmamain[n].rho;
+        plasmamain[n].rho = model_rho (ndom, x) / geo.fill;
+		    plasmamain[n].t_r = plasmamain[n].t_e = hydro_temp (x);
+
+		  for (nion=0;nion<nions;nion++) //Change the absolute number densities, fractions remain the same
+		  {
+			 plasmamain[n].density[nion] = plasmamain[n].density[nion] * (plasmamain[n].rho/old_density);
+		 }
+
+		 plasmamain[n].ne = get_ne (plasmamain[n].density); //get the new electron density
+		 partition_functions (&plasmamain[n], 4);  //ensure the partition functions and level densities are correct
+//	 	if (plasmamain[n].nplasma==0)
+//	 	{
+//	   printf ("BLAH H1_new=%e H2_new=%e ne_new=%e\n ",plasmamain[n].density[0],plasmamain[n].density[1],plasmamain[n].ne);
+//	   printf ("H1 ground_new=%e",plasmamain[n].levden[ion[0].first_levden]);
+//	 }	 
+		 
+		 
+		 
+		 
+		  }
+		  plasmamain[n].ne = get_ne (plasmamain[n].density);  //we also need to update the electron density
+		  partition_functions (&plasmamain[n], 4);	/* WARNING fudge NSH 11/5/14 - this is as a test. We really need a better implementation
+							   of partition functions and levels for a power law illuminating spectrum. We found that
+							   if we didnt make this call, we would end up with undefined levels - which did really
+							   crazy things */
+		    
+			
+	geo.wind_type=2; //Set the windtype back to restart
+	
+	return(0);
+	
+}

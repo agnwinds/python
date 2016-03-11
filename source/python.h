@@ -195,9 +195,9 @@ typedef struct domain
 	int wind_type;
 	int ndim, mdim, ndim2;
 	int nstart,nstop;  //the beginning and end (-1) location in wmain of this component
-  	enum coord_type_enum coord_type;
-  	int log_linear;		/*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */
-  	double xlog_scale, zlog_scale;	/* Scale factors for setting up a logarithmic grid, the [1,1] cell
+  enum coord_type_enum coord_type;
+  int log_linear;		/*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */
+  double xlog_scale, zlog_scale;	/* Scale factors for setting up a logarithmic grid, the [1,1] cell
 					   will be located at xlog_scale,zlog_scale */
 
 	/* The next few structures define the boundaries of an emission region */
@@ -500,6 +500,8 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
 
 // The next set of parameters relate to the central source of an AGN
   double brem_temp;       /*The temperature of a bremsstrahlung source */
+  double brem_alpha;       /*The exponent of the nu term for a bremstrahlung source */
+
   double pl_low_cutoff;  /* accessible only in advanced mode- see #34. default to zero */
 
   double alpha_agn;		/*The power law index of a BH at the center of an AGN.  Note that the luminosity
@@ -1239,6 +1241,7 @@ struct advanced_modes
   int quit_after_inputs;        // quit after inputs read in, testing mode
   int fixed_temp;               // do not alter temperature from that set in the parameter file
   int zeus_connect;				// We are connecting to zeus, do not seek new temp and output a heating and cooling file
+  int rand_seed_usetime;        // default random number seed is fixed, not based on time
 }
 modes;
 
