@@ -545,10 +545,9 @@ main (argc, argv)
 		{
 			/* XXX PLACEHOLDER JM: I don't believe this works! I don't understand what we will do
   	           with domains in this instance 
-  	           the argument is ndom, which I've set to 0 as a placeholder. will domains even
-  	           have been defined at this stage? see #204 */
+  	           the argument is ndom, which I've set to geo.wind_domain_number as a placeholder.  */
 			Log ("We are going to read in the density and temperature from a zeus file\n");
-			get_hydro (0);  //This line just populates the hydro structures  
+			get_hydro (geo.wind_domain_number);  //This line just populates the hydro structures  
 		}
     }
 
@@ -766,11 +765,10 @@ main (argc, argv)
 
   else if (modes.zeus_connect==1) //We have restarted, but are in zeus connect mode, so we want to update density, temp and velocities
   {
-  	/* XXX PLACEHOLDER JM: I don't believe this works! I don't understand what we will do
+  	/* XXX PLACEHOLDER JM: I don't know if this works! I don't understand what we will do
   	   with domains in this instance 
-  	   the argument is ndom, which I've set to 0 as a placeholder. will domains even
-  	   have been defined at this stage? see #204 */
-	hydro_restart(0);
+  	   the argument is ndom, which I've set to geo.wind_domain_number as a placeholder. */
+	hydro_restart(geo.wind_domain_number);
   }
 
   w = wmain;
