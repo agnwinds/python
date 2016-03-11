@@ -1296,25 +1296,6 @@ else if (modes.zeus_connect==1) //We have restarted, but are in zeus connect mod
 
       wind_update (w);
 
-/* In a diagnostic mode save the wind file for each cycle (from thread 0) */
-
-      if (modes.keep_ioncycle_windsaves)
-	{
-	  strcpy (dummy, "");
-	  sprintf (dummy, "python%02d.wind_save", geo.wcycle);
-
-#ifdef MPI_ON
-	  if (rank_global == 0)
-	  {
-#endif
-	  wind_save (dummy);
-#ifdef MPI_ON
-          }
-#endif
-	  Log ("Saved wind structure in %s\n", dummy);
-	}
-
-
       Log ("Completed ionization cycle %d :  The elapsed TIME was %f\n",
 	   geo.wcycle, timer ());
 
@@ -1363,7 +1344,7 @@ else if (modes.zeus_connect==1) //We have restarted, but are in zeus connect mod
 #endif
       wind_save (files.windsave);
       Log_silent ("Saved wind structure in %s after cycle %d\n", files.windsave,
-	   geo.wcycle);
+	               geo.wcycle);
  /* In a diagnostic mode save the wind file for each cycle (from thread 0) */
 
        if (modes.keep_ioncycle_windsaves)
@@ -1371,7 +1352,7 @@ else if (modes.zeus_connect==1) //We have restarted, but are in zeus connect mod
  	  strcpy (dummy, "");
  	  sprintf (dummy, "python%02d.wind_save", geo.wcycle);
 	  wind_save (dummy);
-       Log ("Saved wind structure in %s\n", dummy);
+      Log ("Saved wind structure in %s\n", dummy);
  	}
 	   
 	   
