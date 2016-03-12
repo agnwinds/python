@@ -125,12 +125,15 @@ get_shell_wind_params (ndom)
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
+  geo.rmin = zdom[ndom].rmin;
+  zdom[ndom].rmax = geo.rmax;
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 90. / RADIAN;
 
 /* define the the variables that determine the gridding */
   zdom[ndom].wind_rho_min = 0;
   zdom[ndom].wind_rho_max = zdom[ndom].rmax;
+  zdom[ndom].zmax = geo.rmax;
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
