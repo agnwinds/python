@@ -890,15 +890,9 @@ main (argc, argv)
    */
 
   kbf_need (freqmin, freqmax);
+
   /* XXXX - Execute  CYCLES TO CREATE THE DETAILED SPECTRUM */
   make_spectra (restart_stat);
-
-	#ifdef MPI_ON
- 	 MPI_Barrier(MPI_COMM_WORLD);
- 	 MPI_Finalize ();
-  	Log_parallel ("Thread %d Finalized. All done\n", rank_global);
-	#endif
-
 
   return (0);
 }

@@ -374,7 +374,6 @@ check_convergence ()
 
   xconverge = ((double) nconverge) / ntot;
   xconverging = ((double) nconverging) / ntot;
-  proportion_converged = xconverge;           //SWM - Record converging fraction for future use
   Log
     ("!!Check_converging: %4d (%.3f) converged and %4d (%.3f) converging of %d cells\n",
      nconverge, xconverge, nconverging, xconverging, ntot);
