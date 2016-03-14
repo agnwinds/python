@@ -107,6 +107,12 @@ parse_command_line (argc, argv)
 	    {
 	      modes.fixed_temp = 1;
 	    }
+
+    /* JM 1503 -- Sometimes it is useful to vary the random number seed. Set a mode for that */
+    else if (strcmp (argv[i], "--rseed") == 0)
+      {
+        modes.rand_seed_usetime = 1;
+      }
 	  else if (strcmp (argv[i], "-z") == 0)
 	    {
 	      modes.zeus_connect = 1;
@@ -917,15 +923,16 @@ get_bl_and_agn_params (lstar)
 	}
       else if (geo.agn_ion_spectype == SPECTYPE_BREM)
 	{
-	  geo.brem_temp = 1.16e8;	//10kev
-	  geo.const_agn = 1.0;
-	  rddoub ("agn_bremsstrahung_temp(K)", &geo.brem_temp);
-	  temp_const_agn =
-	    geo.lum_agn / qromb (integ_brem, 4.84e17, 2.42e18, 1e-4);
-	  geo.const_agn = temp_const_agn;
-	  Log ("AGN Input parameters give a Bremsstrahlung constant of %e\n",
-	       temp_const_agn);
 
+		geo.brem_temp=1.16e8; //10kev
+		geo.brem_alpha=-0.2; //This is the cloudy form of bremstrahlung
+		geo.const_agn=1.0;
+		rddoub ("agn_bremsstrahlung_temp(K)",&geo.brem_temp);
+		rddoub ("agn_bremsstrahlung_alpha",&geo.brem_alpha);
+		temp_const_agn = geo.lum_agn / qromb(integ_brem,4.84e17,2.42e18,1e-4);
+		geo.const_agn=temp_const_agn;
+      Log ("AGN Input parameters give a Bremsstrahlung constant of %e\n", temp_const_agn);
+		
 	}
 
       /* JM 1502 -- lines to add a low frequency power law cutoff. accessible

@@ -38,6 +38,7 @@ Arguments:
 		 not attempt to seek a new temperature, but it does output heating and cooling rates
     --version print out python version, commit hash and if there were files with uncommitted
 	    changes
+	--seed set the random number seed to be time based, rather than fixed.
 
 	
 	if one simply types py or pyZZ where ZZ is the version number one is queried for a name
@@ -219,6 +220,7 @@ History:
 #include <string.h>
 #include <math.h>
 #include "atomic.h"
+#include <time.h>  //To allow the used of the clock command without errors!!
 
 
 #include "python.h"
@@ -539,6 +541,14 @@ main (argc, argv)
 		}
 	    }
 	}
+	if (modes.zeus_connect==1) /* We are in rad-hydro mode, we want the new density and temperature*/
+		{
+			/* XXX PLACEHOLDER JM: I don't believe this works! I don't understand what we will do
+  	           with domains in this instance 
+  	           the argument is ndom, which I've set to geo.wind_domain_number as a placeholder.  */
+			Log ("We are going to read in the density and temperature from a zeus file\n");
+			get_hydro (geo.wind_domain_number);  //This line just populates the hydro structures  
+		}
     }
 
 
@@ -699,9 +709,9 @@ main (argc, argv)
       exit (0);
     }
 
-/* INPUTS ARE FINALLY COMPLETE */
+  /* INPUTS ARE FINALLY COMPLETE */
 
-/* Print out some diagnositic infomration about the domains */
+  /* Print out some diagnositic infomration about the domains */
 
   // XXX This is clearly wrong for repeats
 
@@ -753,6 +763,14 @@ main (argc, argv)
       define_wind ();
     }
 
+  else if (modes.zeus_connect==1) //We have restarted, but are in zeus connect mode, so we want to update density, temp and velocities
+  {
+  	/* XXX PLACEHOLDER JM: I don't know if this works! I don't understand what we will do
+  	   with domains in this instance 
+  	   the argument is ndom, which I've set to geo.wind_domain_number as a placeholder. */
+	hydro_restart(geo.wind_domain_number);
+  }
+
   w = wmain;
 
   if (modes.save_cell_stats)
@@ -763,9 +781,17 @@ main (argc, argv)
     }
 
   /* initialize the random number generator */
-  //      srand( (n=(unsigned int) clock()));  
-
-  srand (1084515760 + (13 * rank_global));
+  /* JM 1503 -- Sometimes it is useful to vary the random number seed. 
+     Default is fixed, but will vary with different processor numbers */
+  /* We don't want to run the same photons each cycle in zeus mode, so 
+     everytime we are using zeus we also set to use the clock */
+  if ( (modes.rand_seed_usetime == 1) || (modes.zeus_connect == 1) )
+    {
+      n=(unsigned int) clock()*(rank_global+1);
+  	  srand(n); 
+  	}
+  else 
+    srand (1084515760 + (13 * rank_global));
 
   /* 68b - 0902 - ksl - Start with photon history off */
 
@@ -816,7 +842,6 @@ main (argc, argv)
 /* 67 -ksl- geo.wycle will start at zero unless we are completing an old run */
 
 /* XXXX -  CALCULATE THE IONIZATION OF THE WIND */
-
   calculate_ionization (restart_stat);
 
 /* XXXX - END OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
