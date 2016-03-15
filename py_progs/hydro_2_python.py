@@ -93,8 +93,10 @@ def get_hdf_data(fname):
 
 #Get the time from the last long name 
 
-	time=float(long_name[-8:])
-
+	if long_name[-8:] != "********":
+		time=float(long_name[-8:])
+	else:
+		time=0.0
 #Get the dimensions from the last data set
 
 	dims=len((sds.info()[2]))
@@ -165,6 +167,9 @@ def get_hdf_data(fname):
 	for i in range(len(x2)-1):
 		theta_edge.append(theta_edge[-1]+dtheta)
 		dtheta=dtheta*theta_ratio
+	if (theta_edge[-1]+(x2[-1]-theta_edge[-1])*2.0)>(np.pi/2.0):
+		x2[-1]=(theta_edge[-1]+(np.pi/2.0))/2.0
+
 
 	alldat["r_edge"]=r_edge
 	alldat["theta_edge"]=theta_edge
@@ -296,7 +301,7 @@ elif fname[0:3]=="hdf":
 #We need to compute the temperature in order to supply it to python.
 
 
-temp=(3.0/2.0)*data["TOTAL ENERGY"]
+temp=(2.0/3.0)*data["TOTAL ENERGY"]
 data["TEMPERATURE"]=temp/((data["DENSITY"]/(consts.m_p.cgs*MU))*consts.k_B.cgs)
 
 # Open an output file 
