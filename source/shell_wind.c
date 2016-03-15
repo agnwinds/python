@@ -125,6 +125,8 @@ get_shell_wind_params (ndom)
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
+  geo.rmin = zdom[ndom].rmin;
+  zdom[ndom].rmax = geo.rmax;
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 90. / RADIAN;
 
