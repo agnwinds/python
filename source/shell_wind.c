@@ -131,6 +131,7 @@ get_shell_wind_params (ndom)
 /* define the the variables that determine the gridding */
   zdom[ndom].wind_rho_min = 0;
   zdom[ndom].wind_rho_max = zdom[ndom].rmax;
+  zdom[ndom].zmax = geo.rmax;
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
