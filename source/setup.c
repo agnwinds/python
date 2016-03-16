@@ -1219,6 +1219,10 @@ setup_dfudge ()
      will keep the old dfudge, and hopefully look the same. We also need to
      set dfudge slightly differently for the shell wind. */
 
+
+ /* XXX this is really not correct for domains, or very food for anything
+  * else. The fudge ought to be related to how big adjacent cells are */
+
   if (geo.wind_type == 9)
     {
       dfudge = (geo.rmax - geo.rmin) / 1000.0;

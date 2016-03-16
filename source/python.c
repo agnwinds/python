@@ -427,6 +427,8 @@ main (argc, argv)
 	      strcat (zdom[ndomain].name, "Wind");
 	      geo.wind_domain_number = ndomain;
 	      get_grid_params (geo.wind_domain_number);
+	      // XXX This is temporary fix to set up DFUDGE
+	      geo.wind_type=zdom[ndomain].wind_type;
 
 	      ndomain++;
 	    }
