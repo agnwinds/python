@@ -345,6 +345,11 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
   freqmax = f2;
   dfreq = (freqmax - freqmin) / MAXRAND;
 
+  /* XXX - this line had been deleted from agn.c in domain, but it still exists in dev, so adding it back
+   * as part of test of template_ionloop.pf.  It looks like agn.c in the two places have diverged */
+
+  r = (1. + EPSILON) * r;       /* Generate photons just outside the photosphere unnecessary for the AGN perhaps? */
+
   /* Generate photons just outside the photosphere unnecessary for the AGN perhaps? */
   /* note this is only used in the spherical source */
 
