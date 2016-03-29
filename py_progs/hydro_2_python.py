@@ -88,15 +88,18 @@ def get_hdf_data(fname):
 		if name[0:4]=="Data":
 			sds=hdf.select(name)
 			long_name=sds.attributes()["long_name"]
-			short_name=long_name[:-17]
+			for i in range(len(sds.attributes()["long_name"])):
+				if long_name[i:i+2]=="AT":
+					junk=i-1
+			short_name=long_name[:junk]
 			data_sets.append([name,long_name,short_name])
 
 #Get the time from the last long name 
-
-	if long_name[-8:] != "********":
-		time=float(long_name[-8:])
+	if long_name[junk+9:] != "********":
+		time=float(long_name[junk+9:])
 	else:
 		time=0.0
+		
 #Get the dimensions from the last data set
 
 	dims=len((sds.info()[2]))
@@ -123,10 +126,6 @@ def get_hdf_data(fname):
 	alldat["Dims"]=dims
 
 #Loop over all the data sets in the hdf file - name each of the resulting dictionaries with the short name
-
-
-
-
 
 	for i in range (len(data_sets)):
 		print data_sets[i][2]
