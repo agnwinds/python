@@ -321,7 +321,6 @@ int nplasma, nmacro;	/*The total number of cells in the plasma and macro structu
 
   double rmin, rmax, rmax_sq;		/* The maximum distance to which a photon should be followed */
   double wind_rho_min, wind_rho_max;	/*Min/Max rho for wind in disk plane */
-  double wind_thetamin, wind_thetamax;	/*Angles defining inner and outer cones of wind, measured from disk plane */
 
 
 /* Basic paremeters of the system, as opposed to elements of the wind or winds */

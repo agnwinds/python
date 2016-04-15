@@ -138,9 +138,9 @@ get_hydro_wind_params (ndom)
   zdom[ndom].zmax = zdom[ndom].rmax;  //This is the outer edge of the
   Log ("zmax=%e\n", zdom[ndom].zmax);
 
-  geo.wind_thetamin=zdom[ndom].wind_thetamin= hydro_theta_edge[0];
-  Log ("theta_min=%e\n", geo.wind_thetamin);
-  Log ("theta_max=%e\n", geo.wind_thetamax);
+  zdom[ndom].wind_thetamin= hydro_theta_edge[0];
+  Log ("theta_min=%e\n", zdom[ndom].wind_thetamin);
+  Log ("theta_max=%e\n", zdom[ndom].wind_thetamax);
   Log ("geo.rmin=%e\n", zdom[ndom].rmin);
   Log ("geo.rmax=%e\n", zdom[ndom].rmax);
   Log ("geo.wind_rhomin=%e\n", zdom[ndom].wind_rho_min);
@@ -293,7 +293,7 @@ get_hydro (ndom)
     {
       Log ("HYDRO j_hydro_thetamax never bracketed, using all data\n");
       ihydro_theta = ithetamax;
-    geo.wind_thetamax=zdom[ndom].wind_thetamax=90. / RADIAN;
+    zdom[ndom].wind_thetamax=90. / RADIAN;
       hydro_thetamax = 90.0 / RADIAN;
       mdim = zdom[ndom].mdim = ihydro_theta + 2;
     }
@@ -304,7 +304,7 @@ get_hydro (ndom)
    j_hydro_thetamax, hydro_theta_cent[j_hydro_thetamax] * RADIAN,
    hydro_theta_cent[j_hydro_thetamax + 1] * RADIAN);
       ihydro_theta = j_hydro_thetamax;
-      geo.wind_thetamax =zdom[ndom].wind_thetamax= hydro_thetamax;
+      zdom[ndom].wind_thetamax= hydro_thetamax;
       mdim = zdom[ndom].mdim = ihydro_theta + 2;
     }
 

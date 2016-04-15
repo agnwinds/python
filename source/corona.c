@@ -20,6 +20,9 @@ Description:
 	The parameters obtained here are only used in the routines in corona.c
 	Initially, we define it as a gaussian ring with and exponetial density distribution.   
 Notes:
+	The terminology here is a bit confusing because rmin and rmax as read in to the routine
+	refer actually to rho, which is easy to get confused with other parameters like zdom[ndom].rmax
+	which really are radii for the central source.
 History:
  	00sep	ksl	Coding begun
 	04jun	ksl	Moved from python.c to provide better uniformity of what files contain.
@@ -60,7 +63,9 @@ get_corona_params (ndom)
   rddoub ("corona.vel_frac", &zdom[ndom].corona_vel_frac);	/*fractional radial velocity of corona */
 
   zdom[ndom].rmin = zdom[ndom].corona_rmin;
-  zdom[ndom].rmax = zdom[ndom].corona_rmax;
+  /* rmax here is the defines a radius beyond which this region does not exist, if the veritical height is large
+   * compared to the horizontal size then one needs to include both */
+  zdom[ndom].rmax = sqrt(zdom[ndom].corona_rmax*zdom[ndom].corona_rmax+zdom[ndom].corona_zmax*zdom[ndom].corona_zmax);
   zdom[ndom].zmax=  zdom[ndom].corona_zmax;
   zdom[ndom].wind_rho_min = zdom[ndom].corona_rmin;
   zdom[ndom].wind_rho_max = zdom[ndom].corona_rmax;
