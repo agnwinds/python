@@ -811,7 +811,7 @@ NSH 130725 - this number is now also used to say if the cell is over temperature
   double sim_ip;		/*Ionisation parameter for the cell as defined in Sim etal 2010 */
   double ferland_ip;		/* IP calculaterd from equation 5.4 in hazy1 - assuming allphotons come from 0,0,0 and the wind is transparent */
   double ip;			/*NSH 111004 Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
-  double xi;			/*NSH 151109 Ionization parameter as defined by Taratr et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
+  double xi;			/*NSH 151109 Ionization parameter as defined by Tartar et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
 } plasma_dummy, *PlasmaPtr;
 
 PlasmaPtr plasmamain;
@@ -979,18 +979,18 @@ typedef struct photon
   		PTYPE_DISK=2,
   		PTYPE_WIND=3,
   		PTYPE_AGN=4,
-      PTYPE_STAR_MATOM=10,     
-      PTYPE_BL_MATOM=11, 
-      PTYPE_DISK_MATOM=12,
-      PTYPE_WIND_MATOM=13,
-      PTYPE_AGN_MATOM=14
-  	} 	origin;				/* Where this photon originated.  If the photon has
-		   					         scattered it's "origin" may be changed to "wind".*/
-                      /* note that we add 10 to origin when processed by a macro-atom
-                         which means we need these values in the enum list */
+      		PTYPE_STAR_MATOM=10,     
+      		PTYPE_BL_MATOM=11, 
+      		PTYPE_DISK_MATOM=12,
+      		PTYPE_WIND_MATOM=13,
+      		PTYPE_AGN_MATOM=14
+  	} 	origin;		/* Where this photon originated.  If the photon has
+		   		scattered it's "origin" may be changed to "wind".*/
+                      		/* note that we add 10 to origin when processed by a macro-atom
+                         	which means we need these values in the enum list */
   int np;			/*NSH 13/4/11 - an internal pointer to the photon number so 
 				   so we can write out details of where the photon goes */
-  double path; /* SWM - Photon path length */
+  double path; 			/* SWM - Photon path length */
 
 }
 p_dummy, *PhotPtr;

@@ -917,9 +917,10 @@ wind_div_v (w)
       w[icell].div_v = div;
 
 
-      if (div < 0 && (wind_div_err < 0 || w[icell].inwind == W_ALL_INWIND))	/*NSH 130322 another fix needed here the inwind check was w->inwind and was returning the wrong value */
+      /*NSH 130322 another fix needed here the inwind check was w->inwind and was returning the wrong value */
+      if (div < 0 && (wind_div_err < 0 || w[icell].inwind == W_ALL_INWIND))	
 	{
-	  Error ("wind_div_v: div v %e is negative in cell %d. Major problem if inwind (%d) == 0\n", div, icell, w[icell].inwind);	/*NSH 130222 - last fix */
+	  Error ("wind_div_v: div v %e negative in cell %d Domain %d. Major problem if inwind (%d) == 0\n", div, icell, w[icell].ndom, w[icell].inwind);	
 	  wind_div_err++;
 	}
     }

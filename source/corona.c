@@ -23,10 +23,13 @@ Notes:
 	The terminology here is a bit confusing because rmin and rmax as read in to the routine
 	refer actually to rho, which is easy to get confused with other parameters like zdom[ndom].rmax
 	which really are radii for the central source.
+
+
 History:
  	00sep	ksl	Coding begun
 	04jun	ksl	Moved from python.c to provide better uniformity of what files contain.
 	15aug	ksl	Began mods to accomodate domains
+	16apr	ksl	Added modifications for a uniform density grid
 **************************************************************/
 
 
@@ -59,11 +62,11 @@ get_corona_params (ndom)
   rddoub ("corona.radmax(cm)", &zdom[ndom].corona_rmax);	/*Radius where corona ends */
   rddoub ("corona.zmax(cm)", &zdom[ndom].corona_zmax);		/*Veritical heighe where corona ends */
   rddoub ("corona.base_den(cgs)", &zdom[ndom].corona_base_density);	/*Density at the base of the corona */
-  rddoub ("corona.scale_height(cm)", &zdom[ndom].corona_scale_height);	/*Radius where corona begins */
+  rddoub ("corona.scale_height(cm)", &zdom[ndom].corona_scale_height);	/*Scale height of corona */
   rddoub ("corona.vel_frac", &zdom[ndom].corona_vel_frac);	/*fractional radial velocity of corona */
 
   zdom[ndom].rmin = zdom[ndom].corona_rmin;
-  /* rmax here is the defines a radius beyond which this region does not exist, if the veritical height is large
+  /* rmax here is the defines a radius beyond which this region does not exist, if the vertical height is large
    * compared to the horizontal size then one needs to include both */
   zdom[ndom].rmax = sqrt(zdom[ndom].corona_rmax*zdom[ndom].corona_rmax+zdom[ndom].corona_zmax*zdom[ndom].corona_zmax);
   zdom[ndom].zmax=  zdom[ndom].corona_zmax;
@@ -90,19 +93,17 @@ get_corona_params (ndom)
   if (modes.adjust_grid == 0)
     {
       zdom[ndom].xlog_scale = 0.3 * zdom[ndom].corona_rmin;
-      zdom[ndom].zlog_scale = 0.3 * zdom[ndom].corona_scale_height;
+      if  (zdom[ndom].corona_scale_height<zdom[ndom].corona_zmax)
+      	zdom[ndom].zlog_scale = 0.3 * zdom[ndom].corona_scale_height;
+      else if (zdom[ndom].mdim > 0) {
+	      zdom[ndom].zlog_scale=zdom[ndom].corona_zmax/zdom[ndom].mdim;
+      }
+      else {
+	      Error("corona: Cannot define z coordinates unless zdom[ndom].mdim is defined. Aborting\n");
+	      exit(0);
+      }
     }
 
-/* Prior to 01dec, windcones were defined here.  But this broke a capability to continue
-   a calculation.  To fix this, wind_cone definition was moved backed to python.c.  To
-   ensure that the wind cones are properly defined, one must copy set some additional parameters.
-   Here is what happens in main
-  	windcone[0].r_zero = geo.wind_rho_min;
-  	windcone[1].r_zero = geo.wind_rho_max;
-  	windcone[0].drdz = tan (geo.wind_thetamin);
-  	windcone[1].drdz = tan (geo.wind_thetamax);
-  and so the next few lines make this happen appropriately
-*/
 
   zdom[ndom].wind_rho_min = zdom[ndom].corona_rmin;
   zdom[ndom].wind_rho_max = zdom[ndom].corona_rmax;

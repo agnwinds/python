@@ -193,6 +193,17 @@ cylind_make_grid (ndom, w)
 
 	      dlogr = (log10 (one_dom->rmax / one_dom->xlog_scale)) / (one_dom->ndim - 3);
 	      dlogz = (log10 (one_dom->zmax / one_dom->zlog_scale)) / (one_dom->mdim - 3);
+
+	      if (dlogr <= 0) {
+		      Error("cylindrical: dlogr %g is less than 0.  This is certainly wrong! Aborting\n",dlogr);
+		      exit(0);
+	      }
+
+	      if (dlogz <= 0) {
+		      Error("cylindrical: dlogz %g is less than 0.  This is certainly wrong! Aborting\n",dlogz);
+		      exit(0);
+	      }
+
 	      if (i == 0)
 		{
 		  w[n].x[0] = 0.0;
