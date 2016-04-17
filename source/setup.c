@@ -1426,8 +1426,11 @@ setup_created_files ()
 
   strcpy (files.wspec, files.root);
   strcpy (files.lspec, files.root);
-
   strcpy (files.spec, files.root);
+  strcpy (files.wspec_wind, files.root);
+  strcpy (files.lspec_wind, files.root);
+  strcpy (files.spec_wind, files.root);
+
   strcpy (files.windrad, "python");
   strcpy (files.windsave, files.root);
   strcpy (files.specsave, files.root);
@@ -1440,7 +1443,10 @@ setup_created_files ()
 
   strcat (files.wspec, ".spec_tot");
   strcat (files.lspec, ".log_spec_tot");
+  strcat (files.wspec_wind, ".spec_tot_wind");
+  strcat (files.lspec_wind, ".log_spec_tot_wind");
   strcat (files.spec, ".spec");
+  strcat (files.spec_wind, ".spec_wind");
   strcat (files.windrad, ".wind_rad");
   strcat (files.windsave, ".wind_save");
   strcat (files.specsave, ".spec_save");

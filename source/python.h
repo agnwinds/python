@@ -1067,6 +1067,10 @@ typedef struct spectrum
   double f[NWAVE];
   double lf[NWAVE];		/* a second array to hole the extracted spectrum in log units */
   double lfreq[NWAVE];		/* We need to hold what freqeuncy intervals our logarithmic spectrum has been taken over */
+
+  double f_wind[NWAVE];		/* The spectrum of photons created in the wind or scattered in the wind. Created for 
+ 				reflection studies but possible useful for other reasons as well. */
+  double lf_wind[NWAVE];	/* The logarithmic version of this */
 }
 spectrum_dummy, *SpecPtr;
 
@@ -1249,6 +1253,7 @@ FILE *optr;  //pointer to a diagnostic file that will contain dvds information
 
 
 
+/* Structure containing all of the file and directory names created */
 struct filenames
 {
   char root[LINELENGTH];        // main rootname
@@ -1258,13 +1263,16 @@ struct filenames
   char diagfolder[LINELENGTH];  // diag folder
   char old_windsave[LINELENGTH];// old windsave name
   char input[LINELENGTH];       // input name if creating new pf file
-  char lspec[LINELENGTH];       // log_spec_tot fname
-  char wspec[LINELENGTH];       // spectot fname
-  char disk[LINELENGTH];        // disk diag fname
+  char lspec[LINELENGTH];       // log_spec_tot file name
+  char wspec[LINELENGTH];       // spectot file name
+  char lspec_wind[LINELENGTH];  // log_spec_tot filename for wind photons
+  char wspec_wind[LINELENGTH];  // spectot filename for wind photons
+  char disk[LINELENGTH];        // disk diag file name
   char tprofile[LINELENGTH];    // non standard tprofile fname
   char phot[LINELENGTH];        // photfile e.g. python.phot
   char windrad[LINELENGTH];     // wind rad file
   char spec[LINELENGTH];        // .spec file
+  char spec_wind[LINELENGTH];   // .spec file for wind photons
 }
 files;
 
