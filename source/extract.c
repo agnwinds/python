@@ -400,6 +400,13 @@ the same resonance again */
 	   */
 
 	  xxspec[nspec].f[k] += pp->w * exp (-(tau));	//OK increment the spectrum in question
+
+	  /* If this photon was a wind photon, then also increment the "reflected" spectrum */
+	  if ( pp->origin == PTYPE_WIND || pp->origin == PTYPE_WIND_MATOM || pp->nscat > 0) {
+
+	  	xxspec[nspec].f_wind[k] += pp->w * exp (-(tau));	//OK increment the spectrum in question
+	    }
+			    
 	
 		// SWM - Records total distance travelled by extract photon
 	  	if(geo.reverb != REV_NONE)
