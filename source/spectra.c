@@ -402,9 +402,9 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	{
 	  k1 = 0;
 	}
-      if (k1 > NWAVE)
+      if (k1 > NWAVE-1)
 	{
-	  k1 = NWAVE;
+	  k1 = NWAVE-1;
 	}
 
       /* also need to work out where we are for photon's original wavelength */
@@ -413,9 +413,9 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	{
 	  k1_orig = 0;
 	}
-      if (k1_orig > NWAVE)
+      if (k1_orig > NWAVE-1)
 	{
-	  k1_orig = NWAVE;
+	  k1_orig = NWAVE-1;
 	}
 
 
@@ -457,7 +457,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
       if (iwind)
 	{
 	  xxspec[0].f_wind[k_orig] += p[nphot].w_orig;
-	  xxspec[0].lf_wind[k_orig] += p[nphot].w_orig;
+	  xxspec[0].lf_wind[k1_orig] += p[nphot].w_orig;
 	}
 
 
@@ -756,7 +756,7 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
 
   /* Write the rest of the header for the spectrum file */
   /* JM 1411 -- Removed comment line for column headers, see #122 */
-  fprintf (fptr, "# \nFreq.        Lambda");
+  fprintf (fptr, "# \nFreq.        Lambda  ");
 
   for (n = nspecmin; n <= nspecmax; n++)
     {
