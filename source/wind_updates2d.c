@@ -683,13 +683,7 @@ for ( ndom = 0; ndom < geo.ndomain; ndom++)
   }
 
 
-  if (modes.zeus_connect==1) //If we are running in zeus connect mode - we open a file for heatcool rates
-  {
-	  Log("Outputting heatcool file for connecting to zeus\n");
-      fptr = fopen ("py_heatcool.dat", "w");
-   	 fprintf(fptr,"i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff\n");
-	  
-  }
+
 
   /* Check the balance between the absorbed and the emitted flux */
 
