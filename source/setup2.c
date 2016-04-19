@@ -393,7 +393,9 @@ get_spectype (yesno, question, spectype)
       else if (stype == 3)
 	*spectype = SPECTYPE_POW;	// power law
       else if (stype == 4)
-	*spectype = SPECTYPE_CL_TAB;
+	*spectype = SPECTYPE_CL_TAB;   // broken power law
+	  else if (stype == 5)
+	*spectype = SPECTYPE_BREM; // bremstrahlung
       else
 	{
 	  if (geo.run_type == SYSTEM_TYPE_PREVIOUS)
