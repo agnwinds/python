@@ -37,8 +37,10 @@ char basename[132];		// The root of the parameter file name being used by python
  * 
  * */
 
+// XXX why is dfudge an global parameter. What is the difference between it and DFUDGE
 double dfudge;			// This is the push-through distance
 double DFUDGE;
+#define XFUDGE   1e-5          // The scale factor used in setting up cell x cell dfudge
 
 #define VCHECK	1.e6		// The maximum allowable error in calculation of the velocity in calculate_ds
 
@@ -637,6 +639,8 @@ typedef struct wind
   double vol;			/* valid volume of this cell (that is the volume of the cell that is considered
 				   to be in the wind.  This differs from the volume in the Plasma structure
 				   where the volume is the volume that is actually filled with material. */
+  double dfudge;		/* A number which defines a push through distance for this cell, which replaces the
+				   global variable DFUDGE in many instances */
   enum inwind_enum
   	{	W_IN_DISK=-5, W_IGNORE=-2, 	W_NOT_INWIND=-1, 
   		W_ALL_INWIND=0, W_PART_INWIND=1 

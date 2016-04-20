@@ -1223,9 +1223,12 @@ setup_dfudge ()
 
 
  /* XXX this is really not correct for domains, or very food for anything
-  * else. The fudge ought to be related to how big adjacent cells are */
+  else. The fudge ought to be related to how big adjacent cells are.
+  160420 - ksl - I am currently make changes so that within wind cells
+  dfudge is defined by the size of the cell, and so DFUDGE will only be used
+ in calculating travel outside of the wind.  */
 
-  if (geo.wind_type == 9)
+  if (geo.wind_type == SHELL)
     {
       dfudge = (geo.rmax - geo.rmin) / 1000.0;
     }

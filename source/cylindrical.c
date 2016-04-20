@@ -146,7 +146,7 @@ cylind_make_grid (ndom, w)
      WindPtr w;
      int ndom;
 {
-  double dr, dz, dlogr, dlogz;
+  double dr, dz, dlogr, dlogz,xfudge;
   int i, j, n;
   DomainPtr one_dom;
 
@@ -187,6 +187,7 @@ cylind_make_grid (ndom, w)
 	      w[n].x[2] = j * dz;
 	      w[n].xcen[0] = w[n].x[0] + 0.5 * dr;
 	      w[n].xcen[2] = w[n].x[2] + 0.5 * dz;
+
 	    }
 	  else
 	    {			//logarithmic intervals
@@ -231,6 +232,8 @@ cylind_make_grid (ndom, w)
 		}
 	    }
 
+	  xfudge=fmin((w[n].xcen[0]-w[n].x[0]),(w[n].xcen[2]-w[n].x[2]));
+	  w[n].dfudge=XFUDGE*xfudge;
 
 	}
     }

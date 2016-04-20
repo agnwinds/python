@@ -134,10 +134,11 @@ define_wind ()
 	}
     }
 
-  /* initialize inwind to a known state for all wind cells */
+  /* initialize inwind and dfudge to a known state for all wind cells */
   for (n = 0; n < NDIM2; n++)
     {
       w[n].inwind = W_NOT_INWIND;
+      w[n].dfudge = DFUDGE;
     }
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
@@ -242,7 +243,6 @@ define_wind ()
 	     zdom[ndom].coord_type);
 	}
     }
-
 
 
 

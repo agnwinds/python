@@ -742,10 +742,10 @@ main (argc, argv)
      the cones are never defined for an rtheta grid if the model is restarted. 
 
      XXX ksl is unclear why the wind cones ar being initilized here, rather than as part of
-     routines located elsewhere, but I have follwoed previous practice and reinitialized them
+     routines located elsewhere, but I have followed previous practice and reinitialized them
      as part to the domain effort.  
 
-     XXX This looks wrong; we read all of this infromation in I think
+     XXX This looks wrong; we read all of this information in I think
    */
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)

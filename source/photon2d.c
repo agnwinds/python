@@ -448,8 +448,9 @@ error continues to appear, new investigations are required.
 
 
 
-  smax += DFUDGE;		/* DFUDGE is to force the photon through the cell boundaries.
-				   Implies that phot is in another cell often.  */
+  smax += one->dfudge;    /* dfudge is to force the photon through the cell boundaries. */
+//OLD  smax += DFUDGE;		/* DFUDGE is to force the photon through the cell boundaries.
+//OLD				   Implies that phot is in another cell often.  */
 
 
 
