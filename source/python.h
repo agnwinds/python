@@ -37,8 +37,6 @@ char basename[132];		// The root of the parameter file name being used by python
  * 
  * */
 
-// XXX why is dfudge an global parameter. What is the difference between it and DFUDGE
-double dfudge;			// This is the push-through distance
 double DFUDGE;
 #define XFUDGE   1e-5          // The scale factor used in setting up cell x cell dfudge
 
