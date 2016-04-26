@@ -128,7 +128,7 @@ enum coord_type_enum
   	{	SPHERICAL 	=0,
 		CYLIND 		=1,
 		RTHETA		=2,
-		CYLVAR      =3
+		CYLVAR          =3
   	}; 
 
 
