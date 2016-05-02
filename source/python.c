@@ -511,7 +511,7 @@ main (argc, argv)
       Log("Allocated %10d bytes for each of %5d elements of photon structure totaling %10.1f Mb \n",
 	       sizeof (p_dummy), NPHOT, 1.e-6 * NPHOT * sizeof (p_dummy));
       if ( (NPHOT * sizeof (p_dummy)) > 1e9)
-      	Error("Over 1 GIGABYTE of photon structure allocated. Could serious problems.");
+      	Error("Over 1 GIGABYTE of photon structure allocated. Could cause serious problems.\n");
     }
 
 
