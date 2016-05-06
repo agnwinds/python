@@ -55,7 +55,7 @@ get_homologous_params (ndom)
   one_dom->stellar_wind_mdot *= MSOL / YR;
 
   rddoub ("homologous.radmin(cm)", &one_dom->rmin);	/*Radius where wind begins */
-  if (geo.rmin < geo.rstar)
+  if (one_dom->rmin < geo.rstar)
     {
       Error
 	("get_homologous_params: It is unreasonable to have the wind start inside the star!\n");
