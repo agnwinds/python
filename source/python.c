@@ -412,7 +412,6 @@ main (argc, argv)
 	  w = wmain;
 	  ndomain = geo.ndomain;	// XXX Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
 
-
 	}
 
       else
