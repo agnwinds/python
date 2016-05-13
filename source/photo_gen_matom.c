@@ -558,6 +558,7 @@ History:
           Sep  04 SS - minor bug fixed
 	06may	ksl	57+ -- Updated to use plasma structure. 
 			and to elimate passing entrie wind structure
+	15aug	ksl	Added domain support
 
 ************************************************************/
 int
@@ -574,12 +575,11 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   int n;
   double v[3];
   double dot ();
-  int wind_n_to_ij (), stuff_v (), randvec ();
-  int get_random_location ();
   double test;
   int nnscat;
   double dvwind_ds (), sobolev ();
   int nplasma;
+  int ndom;
 
 
 
@@ -638,8 +638,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
       /* Determine the position of the photon in the moving frame */
 
-      /* ! Need to account for possibility that photon is in the torus */
-      get_random_location (icell, 0, p[n].x);
+      get_random_location (icell,  p[n].x);
 
       p[n].grid = icell;
 
@@ -675,14 +674,29 @@ photo_gen_kpkt (p, weight, photstart, nphot)
       /* The next two lines correct the frequency to first order, but do not result in
          forward scattering of the distribution */
 
-      vwind_xyz (&p[n], v);
+      ndom=wmain[icell].ndom;
+      vwind_xyz (ndom, &p[n], v);
       p[n].freq /= (1. - dot (v, p[n].lmn) / C);
 
       p[n].istat = 0;
       p[n].tau = p[n].nscat = p[n].nrscat = 0;
       p[n].origin = PTYPE_WIND;	// Call it a wind photon
 
+      switch(geo.reverb) 
+      { //0715 SWM - Added path generation
+      	case REV_MATOM: 
+      	  	line_paths_gen_phot(&wmain[icell], &p[n], nres); break;
+      	case REV_WIND:
+      		wind_paths_gen_phot(&wmain[icell], &p[n]); break;
+      	case REV_PHOTON:
+      		simple_paths_gen_phot(&p[n]); break;
+      	case REV_NONE:
+      	default: 
+      		break;
+      }
+
     }
+
 
 
   return (nphot);		/* Return the number of photons generated */
@@ -702,7 +716,6 @@ Synopsis:
 
 
 Arguments:   
-       WindPtr w                   the ptr to the structure defining the wind
        PhotPtr p;                  the ptr to the structire for the photons
        double weight;              the photon weight
        int photstart, nphot;       the number of the first photon to be generated and
@@ -729,6 +742,7 @@ History:
 	0812	ksl	67c -- Changed call to photo_gen_matom to
 			eliminate WindPtr w, since we have access
 			to this through wmain.
+	15aug	ksl	Added domain support
 
 ************************************************************/
 int
@@ -745,13 +759,13 @@ photo_gen_matom (p, weight, photstart, nphot)
   int n;
   double v[3];
   double dot ();
-  int wind_n_to_ij (), stuff_v (), randvec ();
   int emit_matom ();
   double test;
   int upper;
   int nnscat;
   double dvwind_ds (), sobolev ();
   int nplasma;
+  int ndom;
 
 
 
@@ -833,15 +847,16 @@ photo_gen_matom (p, weight, photstart, nphot)
 
       /* Determine the position of the photon in the moving frame */
 
-      /* !! ERROR - need to account for posibilyt that photon is in torus */
 
-      get_random_location (icell, 0, p[n].x);
+      get_random_location (icell, p[n].x);
 
       p[n].grid = icell;
 
 
-      // Determine the direction of the photon
-      // Need to allow for anisotropic emission here
+      /* Determine the direction of the photon
+      Need to allow for anisotropic emission here
+      */ 
+
       nnscat = 1;
       if (p[n].nres < 0 || p[n].nres > NLINES || geo.scatter_mode == 0)
 	{
@@ -868,13 +883,26 @@ photo_gen_matom (p, weight, photstart, nphot)
       /* The next two lines correct the frequency to first order, but do not result in
          forward scattering of the distribution */
 
-      vwind_xyz (&p[n], v);
+      ndom=wmain[icell].ndom;
+      vwind_xyz (ndom, &p[n], v);
       p[n].freq /= (1. - dot (v, p[n].lmn) / C);
 
       p[n].istat = 0;
       p[n].tau = p[n].nscat = p[n].nrscat = 0;
       p[n].origin = PTYPE_WIND;	// Call it a wind photon
 
+      switch(geo.reverb) 
+      { //0715 SWM - Added path generation
+      	case REV_MATOM: 
+      	  	line_paths_gen_phot(&wmain[icell], &p[n], nres); break;
+      	case REV_WIND:
+      		wind_paths_gen_phot(&wmain[icell], &p[n]); break;
+      	case REV_PHOTON:
+      		simple_paths_gen_phot(&p[n]); break;
+      	case REV_NONE:
+      	default: 
+      		break;
+      }
     }
 
 

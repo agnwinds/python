@@ -156,7 +156,7 @@ calloc_wind (nelem)
     }
   else
     {
-      Log_silent
+      Log
 	("Allocated %10d bytes for each of %5d elements of             totaling %10.1f Mb\n",
 	 sizeof (wind_dummy), nelem, 1.e-6 * nelem * sizeof (wind_dummy));
     }
@@ -214,7 +214,7 @@ calloc_plasma (nelem)
     }
   else
     {
-      Log_silent
+      Log
 	("Allocated %10d bytes for each of %5d elements of      plasma totaling %10.1f Mb \n",
 	 sizeof (plasma_dummy), (nelem + 1),
 	 1.e-6 * (nelem + 1) * sizeof (plasma_dummy));
@@ -236,7 +236,7 @@ calloc_plasma (nelem)
     }
   else
     {
-      Log_silent
+      Log
 	("Allocated %10d bytes for each of %5d elements of photonstore totaling %10.1f Mb \n",
 	 sizeof (photon_store_dummy), (nelem + 1),
 	 1.e-6 * (nelem + 1) * sizeof (photon_store_dummy));

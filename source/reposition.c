@@ -28,21 +28,21 @@ Notes:
 History:
  	02	ksl	Created to handle problem which was discovered
 			in python_40
+	15aug	ksl	Modiefied for domains, and eliminated paosing 
+			the WindPtr as it is not used.
+			
  
 **************************************************************/
 
 
 
 int
-reposition (w, p)
-     WindPtr w;			//w here refers to entire wind, not a single element
+reposition (p)
      PhotPtr p;
 
 {
 
   int n;
-  int stuff_phot ();
-  int where_in_grid ();
 
 
   if (p->nres < 0)
@@ -50,7 +50,7 @@ reposition (w, p)
       return (0);
     }
 
-  if ((p->grid = n = where_in_grid (p->x)) < 0)
+  if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
     {
       Error ("reposition: Photon not in grid when routine entered %d \n", n);
       return (n);		/* Photon was not in wind */

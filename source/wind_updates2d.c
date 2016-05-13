@@ -85,6 +85,7 @@ History:
 			and unpack commands for the same reason.
 	14sept	nsh	78b: Changes to deal with the inclusion of direct recombination
 	14nov 	JM 78b: Changed volume to be the filled volume
+	15aug	ksl	Updated for domains
 
 
 **************************************************************/
@@ -98,7 +99,10 @@ WindPtr (w);
 {
   int n, i, j;
   double trad, nh;
-  double wtest, xsum, asum, psum, fsum, lsum, csum, icsum, ausum;	/*1108 NSH csum added to sum compton heating 1204 NSH icsum added to sum induced compton heating */
+
+  /*1108 NSH csum added to sum compton heating 1204 NSH icsum added to sum induced compton heating */
+  double wtest, xsum, asum, psum, fsum, lsum, csum, icsum, ausum;	
+
   double volume;
   double vol;
   char string[LINELEN];
@@ -112,8 +116,10 @@ WindPtr (w);
   double nsh_lum_hhe;
   double nsh_lum_metals;
   int my_nmin, my_nmax;	//Note that these variables are still used even without MPI on
+  int ndom;
   FILE *fptr, *fopen (); /*This is the file to communicate with zeus */
   
+
 #ifdef MPI_ON
   int num_mpi_cells, num_mpi_extra, position, ndo, n_mpi, num_comm, n_mpi2;
   int size_of_commbuffer;
@@ -202,12 +208,11 @@ WindPtr (w);
       t_e_old = plasmamain[n].t_e;
       iave++;
 
-
       if (plasmamain[n].ntot < 100)
 	{
 	  Log
-	    ("!!wind_update: Cell %d  with volume %8.2e has only %d photons\n",
-	     n, volume, plasmamain[n].ntot);
+	    ("!!wind_update: Cell %4d Dom %d  Vol. %8.2e r %8.2e theta %8.2e has only %4d photons\n",
+	     n, w[nwind].ndom,volume, w[nwind].rcen,w[nwind].thetacen,plasmamain[n].ntot);
 	}
 
       if (plasmamain[n].ntot > 0)
@@ -293,6 +298,11 @@ WindPtr (w);
       plasmamain[n].ip /= (C * volume * nh);
       plasmamain[n].ip_direct /= (C * volume * nh);
       plasmamain[n].ip_scatt /= (C * volume * nh);
+	  
+/* 1510 NSH Normalise xi, which at this point should be the luminosity of ionizing photons in a cell (just the sum of photon weights) */
+
+		plasmamain[n].xi *= 4.*PI;
+		plasmamain[n].xi /= ( volume * nh);
 
 /* 1510 NSH Normalise xi, which at this point should be the luminosity of ionizing photons in a cell (just the sum of photon weights) */
 
@@ -623,7 +633,7 @@ WindPtr (w);
 	}
 
     }
-free (commbuffer);
+  free (commbuffer);
 #endif
 
 
@@ -641,19 +651,22 @@ free (commbuffer);
      *
    */
 
-  if (geo.coord_type == CYLIND)
-    cylind_extend_density (w);
-  else if (geo.coord_type == RTHETA)
-    rtheta_extend_density (w);
-  else if (geo.coord_type == SPHERICAL)
-    spherical_extend_density (w);
-  else if (geo.coord_type == CYLVAR)
-    cylvar_extend_density (w);
+for ( ndom = 0; ndom < geo.ndomain; ndom++)
+{
+  if (zdom[ndom].coord_type == CYLIND)
+    cylind_extend_density (ndom, w);
+  else if (zdom[ndom].coord_type == RTHETA)
+    rtheta_extend_density (ndom, w);
+  else if (zdom[ndom].coord_type == SPHERICAL)
+    spherical_extend_density (ndom, w);
+  else if (zdom[ndom].coord_type == CYLVAR)
+    cylvar_extend_density (ndom, w);
   else
     {
-      Error ("Wind_update2d: Unknown coordinate type %d\n", geo.coord_type);
+      Error ("Wind_update2d: Unknown coordinate type %d for domain %d \n", zdom[ndom].coord_type,ndom);
       exit (0);
     }
+}
 
   /* Finished updatating region outside of wind */
 
@@ -668,6 +681,9 @@ free (commbuffer);
   	 fprintf(fptr,"i j rcen thetacen vol temp xi ne heat_xray heat_comp heat_lines heat_ff cool_comp cool_lines cool_ff rho n_h\n");
 	  
   }
+
+
+
 
   /* Check the balance between the absorbed and the emitted flux */
 
@@ -708,11 +724,6 @@ free (commbuffer);
       csum += plasmamain[nplasma].heat_comp;	//1108 NSH Increment the compton heating counter
       icsum += plasmamain[nplasma].heat_ind_comp;	//1205 NSH Increment the induced compton heating counter
 
-// Comment - ksl - Next line generated an inappopriate amount of output in the .diag file
-// OLD           Log ("OUTPUT logIP(cloudy_thoeretical)= %e logIP(cloudy_actual)=%e\n",
-// OLD           log10(plasmamain[nplasma].ferland_ip),log10(plasmamain[nplasma].ip)); 
-      
-
 
       /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
          cycles in the windsavefile even if the spectral cycles are run */
@@ -726,6 +737,7 @@ free (commbuffer);
       plasmamain[nplasma].lum_di_ioniz = plasmamain[nplasma].lum_di;
       plasmamain[nplasma].lum_rad_ioniz = plasmamain[nplasma].lum_rad;
       plasmamain[nplasma].lum_adiabatic_ioniz = plasmamain[nplasma].lum_adiabatic;
+
 
 
 
@@ -773,7 +785,7 @@ free (commbuffer);
 	  for (nplasma = 0; nplasma < NPLASMA; nplasma++)
 	  {
 	  
- 		 wind_n_to_ij (plasmamain[nplasma].nwind, &i, &j);
+ 		 wind_n_to_ij (geo.wind_domain_number, plasmamain[nplasma].nwind, &i, &j);
 		 vol=w[plasmamain[nplasma].nwind].vol;
 	  fprintf(fptr,"%d %d %e %e %e ",i,j,w[plasmamain[nplasma].nwind].rcen,w[plasmamain[nplasma].nwind].thetacen/RADIAN,vol); //output geometric things
 	  fprintf(fptr,"%e %e %e ",plasmamain[nplasma].t_e,plasmamain[nplasma].xi,plasmamain[nplasma].ne); //output temp, xi and ne to ease plotting of heating rates
@@ -809,25 +821,27 @@ free (commbuffer);
         geo.lum_dr, geo.lum_di, geo.lum_lines, geo.lum_adiabatic);	
 
 
-
   /* Print out some diagnositics of the changes in the wind update */
-		if (modes.zeus_connect==1 || modes.fixed_temp==1)	     //There is no point in computing temperature changes, because we have fixed them!
-   	{
-   		Log ("!!wind_update: We are running in fixed temperature mode - no temperature report\n");
-		
-   	} 
-		else
-		{
- 	t_r_ave_old /= iave;
+		  
+	if (modes.zeus_connect==1 || modes.fixed_temp==1)	     //There is no point in computing temperature changes, because we have fixed them!
+	{
+		Log ("!!wind_update: We are running in fixed temperature mode - no temperature report\n");	
+	}
+	else
+	
+	{
+  t_r_ave_old /= iave;
   t_e_ave_old /= iave;
   t_r_ave /= iave;
   t_e_ave /= iave;
-  wind_n_to_ij (nmax_r, &i, &j);
+
+  wind_n_to_ij (wmain[nmax_r].ndom, nmax_r, &i, &j);
   Log ("!!wind_update: Max change in t_r %6.0f at cell %4d (%d,%d)\n", dt_r,
        nmax_r, i, j);
   Log ("!!wind_update: Ave change in t_r %6.0f from %6.0f to %6.0f\n",
        (t_r_ave - t_r_ave_old), t_r_ave_old, t_r_ave);
-  wind_n_to_ij (nmax_e, &i, &j);
+  
+  wind_n_to_ij (wmain[nmax_e].ndom, nmax_e, &i, &j);
   Log ("!!wind_update: Max change in t_e %6.0f at cell %4d (%d,%d)\n", dt_e,
        nmax_e, i, j);
   Log ("!!wind_update: Ave change in t_e %6.0f from %6.0f to %6.0f\n",
@@ -837,10 +851,10 @@ free (commbuffer);
        (t_e_ave - t_e_ave_old));
   Log ("Summary  t_r  %6.0f   %6.0f  #t_r and dt_r on this update\n", t_r_ave,
        (t_r_ave - t_r_ave_old));
-   } 
- 
-
+} 
+	 
   check_convergence ();
+
   /* Summarize the radiative temperatures (ksl 04 mar)*/
   xtemp_rad (w);
 
@@ -882,10 +896,12 @@ free (commbuffer);
       agn_ip /= plasmamain[0].rho * rho2nh;
       /* Report luminosities, IP and other diagnositic quantities */
       Log
-	("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim_2010)= %e Meaured_IP(cloudy)= %e Measured_Xi= %e distance= %e volume= %e mean_ds=%e\n",
-	 geo.lum_agn, plasmamain[0].t_e, plasmamain[0].rho * rho2nh,
-	 plasmamain[0].ne, geo.alpha_agn, agn_ip, plasmamain[0].ip, plasmamain[0].xi,w[n].r,
-	 w[n].vol, plasmamain[0].mean_ds / plasmamain[0].n_ds);
+	  	("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim_2010)= %e Measured_IP(cloudy)= %e Measured_Xi= %e distance= %e volume= %e mean_ds=%e\n",
+	  	 geo.lum_agn, plasmamain[0].t_e, plasmamain[0].rho * rho2nh,
+	  	 plasmamain[0].ne, geo.alpha_agn, agn_ip, plasmamain[0].ip, plasmamain[0].xi,w[n].r,
+	  	 w[n].vol, plasmamain[0].mean_ds / plasmamain[0].n_ds);
+
+
 
       /* 1108 NSH Added commands to report compton heating */
       Log ("OUTPUT Absorbed_flux(ergs-1cm-3)    %8.2e  (photo %8.2e ff %8.2e compton %8.2e induced_compton %8.2e lines %8.2e auger %8.2e )\n", 
@@ -985,19 +1001,18 @@ wind_rad_init ()
       plasmamain[n].j_direct = plasmamain[n].j_scatt = 0,0;  //NSH 1309 zero j banded by number of scatters
       plasmamain[n].ip = 0.0;
       plasmamain[n].xi = 0.0;
-
       plasmamain[n].ip_direct = plasmamain[n].ip_scatt = 0.0;
       plasmamain[n].mean_ds = 0.0;
       plasmamain[n].n_ds = 0;
       plasmamain[n].ntot_disk = plasmamain[n].ntot_agn = 0;	//NSH 15/4/11 counters to see where photons come from
       plasmamain[n].ntot_star = plasmamain[n].ntot_bl =
-	plasmamain[n].ntot_wind = 0;
+	  plasmamain[n].ntot_wind = 0;
       plasmamain[n].heat_tot = plasmamain[n].heat_ff =
-	plasmamain[n].heat_photo = plasmamain[n].heat_lines = 0.0;
+	  plasmamain[n].heat_photo = plasmamain[n].heat_lines = 0.0;
       plasmamain[n].heat_z = 0.0;
       plasmamain[n].max_freq = 0.0;	//NSH 120814 Zero the counter which works out the maximum frequency seen in a cell and hence the maximum applicable frequency of the power law estimators.
       plasmamain[n].lum = plasmamain[n].lum_rad = plasmamain[n].lum_lines =
-	plasmamain[n].lum_ff = 0.0;
+	  plasmamain[n].lum_ff = 0.0;
       plasmamain[n].lum_fb = plasmamain[n].lum_z = 0.0;
       plasmamain[n].nrad = plasmamain[n].nioniz = 0;
       plasmamain[n].lum_comp = 0.0;	//1108 NSH Zero the compton luminosity for the cell
@@ -1242,7 +1257,6 @@ wind_ip ()
       plasmamain[n].ferland_ip =
 	geo.n_ioniz / (4 * PI * C * plasmamain[n].rho * rho2nh * (r * r));
 
-//OLD     Log ("NSH log(ferland_ip) for cell %i = %e (r=%e nh=%e nioniz=%e)\n",n,log10(plasmamain[n].ferland_ip),r,plasmamain[n].rho*rho2nh,geo.n_ioniz);
       r =
 	sqrt ((wmain[plasmamain[n].nwind].x[0] *
 	       wmain[plasmamain[n].nwind].x[0] +
@@ -1254,7 +1268,6 @@ wind_ip ()
       plasmamain[n].ferland_ip =
 	geo.n_ioniz / (4 * PI * C * plasmamain[n].rho * rho2nh * (r * r));
 
-//OLD     Log  ("NSH log(ferland_ip) for cell %i = %e (r=%e nh=%e nioniz=%e)\n",n,log10(plasmamain[n].ferland_ip),r,plasmamain[n].rho*rho2nh,geo.n_ioniz);
     }
   return (0);
 }

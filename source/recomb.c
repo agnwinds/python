@@ -167,6 +167,7 @@ fb_topbase_partial (freq)
   nion = fb_xtop->nion;
 
   /* JM -- below lines to address bug #195 */
+  gn = 1;
   if (ion[nion].phot_info > 0)	// it's a topbase record
     gn = config[fb_xtop->nlev].g;
   else if (ion[nion].phot_info == 0)	// it's a VFKY record, so shouldn't really use levels
@@ -175,8 +176,9 @@ fb_topbase_partial (freq)
   {
   	Error("fb_topbase_partial: Did not understand cross-section type %i for ion %i. Setting multiplicity to zero!\n",
   		   ion[nion].phot_info, nion);
-		gn = 0.0;   
-	   }
+  	gn = 0.0;
+  }
+
 
 
   gion = ion[nion + 1].g;	// Want the g factor of the next ion up
@@ -357,7 +359,7 @@ total_fb (one, t, f1, f2)
     return (0);			/* It's too cold to emit */
 
 // Initialize the free_bound structures if that is necessary
-  init_freebound (1.e3, 1.e9, f1, f2); //NSH 140121 increased limit to take account of hot plasmas
+  init_freebound (1.e3, 1.e9, f1, f2);	//NSH 140121 increased limit to take account of hot plasmas
 
 
 // Calculate the number of recombinations whenever calculating the fb_luminosities
@@ -373,11 +375,12 @@ total_fb (one, t, f1, f2)
 	{
 
 	  total += xplasma->lum_ion[nion] =
-	    xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t,
-									    f1,
-									    f2,
-									    nion,
-									    1);
+	    xplasma->vol * xplasma->ne * xplasma->density[nion +
+							  1] * integ_fb (t,
+									 f1,
+									 f2,
+									 nion,
+									 1);
 	  if (nion > 3)
 	    xplasma->lum_z += xplasma->lum_ion[nion];
 	}
@@ -528,7 +531,7 @@ use that instead if possible --  57h */
       dfreq = (f2 - f1) / 199;
       for (n = 0; n < 200; n++)
 	{
-    //Debug ("calling fb, n=%i\n", n);
+	  //Debug ("calling fb, n=%i\n", n);
 	  fb_x[n] = f1 + dfreq * n;
 	  fb_y[n] = fb (xplasma, xplasma->t_e, fb_x[n], nions, 0);
 	}
@@ -705,26 +708,26 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
 
   for (nion = nion_min; nion < nion_max; nion++)
     {
-      if (ion[nion].phot_info > 0) // topbase or VFKY+topbase
-        {
-          nmin = ion[nion].ntop_first;
-          nmax = nmin + ion[nion].ntop;
-        }
-      else if (ion[nion].phot_info == 0) // VFKY 
-        {
-          nmin = ion[nion].nxphot;
-          nmax = nmin + 1;
-        }
-      else 
-        nmin = nmax = 0; // no XS / ionized - don't do anything 
+      if (ion[nion].phot_info > 0)	// topbase or VFKY+topbase
+	{
+	  nmin = ion[nion].ntop_first;
+	  nmax = nmin + ion[nion].ntop;
+	}
+      else if (ion[nion].phot_info == 0)	// VFKY 
+	{
+	  nmin = ion[nion].nxphot;
+	  nmax = nmin + 1;
+	}
+      else
+	nmin = nmax = 0;	// no XS / ionized - don't do anything 
 
       //Debug("in fb for ion %i info %i, nmin nmax %i, %i\n", nion, ion[nion].phot_info, nmin, nmax);
 
       x = 0.0;
 
       /* Loop over relevent Topbase photoionization x-sections.  If 
-      an ion does not have Topbase photoionization x-sections then
-      ntmin and ntmax are the same and the loop will be skipped. */
+         an ion does not have Topbase photoionization x-sections then
+         ntmin and ntmax are the same and the loop will be skipped. */
 
       for (n = nmin; n < nmax; n++)
 	{
@@ -737,10 +740,10 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
 	      x += fb_topbase_partial (freq);
 	    }
 
-    fnu += xplasma->density[nion] * x;
+	  fnu += xplasma->density[nion] * x;
 	}
 
-  
+
       /* x is the emissivity from this ion. Add it to the total */
       fnu += xplasma->density[nion] * x;
     }
@@ -950,7 +953,7 @@ get_nrecomb (t, nion)
   int linterp ();
   double x;
 
-  linterp (t, fb_t, xnrecomb[nion], NTEMPS, &x,0); //Interpolate in linear space
+  linterp (t, fb_t, xnrecomb[nion], NTEMPS, &x, 0);	//Interpolate in linear space
   return (x);
 }
 
@@ -966,7 +969,7 @@ get_fb (t, nion, narray)
   int linterp ();
   double x;
 
-  linterp (t, fb_t, &freebound[narray].emiss[nion][0], NTEMPS, &x,0); //Interpolate in linear space
+  linterp (t, fb_t, &freebound[narray].emiss[nion][0], NTEMPS, &x, 0);	//Interpolate in linear space
   return (x);
 }
 
@@ -1013,29 +1016,29 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 {
   int n;
   double fnu;
-  double dnu;  //NSH 140120 - a parameter to allow one to restrict the integration limits.
+  double dnu;			//NSH 140120 - a parameter to allow one to restrict the integration limits.
   double fthresh, fmax;
   double den_config ();
   int nmin, nmax;		// These are the limits over which number xsections we will use 
   double qromb ();
 
-  dnu = 0.0; //Avoid compilation errors.
+  dnu = 0.0;			//Avoid compilation errors.
 
   if (-1 < nion && nion < nions)	//Get emissivity for this specific ion_number
     {
-      if (ion[nion].phot_info > 0) // topbase or hybrid
-        {
-          nmin = ion[nion].ntop_first;
-          nmax = nmin + ion[nion].ntop;
-        }
-      else if (ion[nion].phot_info == 0) // VFKY 
-        {
-          nmin = ion[nion].nxphot;
-          nmax = nmin + 1;
-        }
-      else 
-        // the ion is a fullt ionized ion / doesn't have a cross-section, so return 0
-        return (0.0);
+      if (ion[nion].phot_info > 0)	// topbase or hybrid
+	{
+	  nmin = ion[nion].ntop_first;
+	  nmax = nmin + ion[nion].ntop;
+	}
+      else if (ion[nion].phot_info == 0)	// VFKY 
+	{
+	  nmin = ion[nion].nxphot;
+	  nmax = nmin + 1;
+	}
+      else
+	// the ion is a fullt ionized ion / doesn't have a cross-section, so return 0
+	return (0.0);
     }
   else				// Get the total emissivity
     {
@@ -1059,9 +1062,9 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
   fnu = 0.0;
 
-  
+
   for (n = nmin; n < nmax; n++)
-    {				
+    {
       // loop over relevent Topbase or VFKY photoionzation x-sections
       fb_xtop = &phot_top[n];
 
@@ -1078,15 +1081,15 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
 	  // Now calculate the emissivity as long as fmax exceeds xthreshold and there are ions to recombine
 	  if (fmax > fthresh)
-        {
-        //NSH 140120 - this is a test to ensure that the exponential will not go to zero in the integrations 
-     		dnu = 100.0 * (fbt / H_OVER_K);
-      		if (fthresh + dnu < fmax)
-			{
-	  		fmax = fthresh + dnu;
-			}
-	    	fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
-	    	}
+	    {
+	      //NSH 140120 - this is a test to ensure that the exponential will not go to zero in the integrations 
+	      dnu = 100.0 * (fbt / H_OVER_K);
+	      if (fthresh + dnu < fmax)
+		{
+		  fmax = fthresh + dnu;
+		}
+	      fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
+	    }
 	}
     }
 
@@ -1330,51 +1333,52 @@ total_rrate (nion, T)
   rate = 0.0;			/* NSH 130605 to remove o3 compile error */
 
 
-  if (ion[nion].total_rrflag == 1) /*We have some kind of total radiative rate data*/
-{
-  if (total_rr[ion[nion].nxtotalrr].type == RRTYPE_BADNELL)
+  if (ion[nion].total_rrflag == 1)	/*We have some kind of total radiative rate data */
     {
-      rrA = total_rr[ion[nion].nxtotalrr].params[0];
-      rrB = total_rr[ion[nion].nxtotalrr].params[1];
-      rrT0 = total_rr[ion[nion].nxtotalrr].params[2];
-      rrT1 = total_rr[ion[nion].nxtotalrr].params[3];
-      rrC = total_rr[ion[nion].nxtotalrr].params[4];
-      rrT2 = total_rr[ion[nion].nxtotalrr].params[5];
+      if (total_rr[ion[nion].nxtotalrr].type == RRTYPE_BADNELL)
+	{
+	  rrA = total_rr[ion[nion].nxtotalrr].params[0];
+	  rrB = total_rr[ion[nion].nxtotalrr].params[1];
+	  rrT0 = total_rr[ion[nion].nxtotalrr].params[2];
+	  rrT1 = total_rr[ion[nion].nxtotalrr].params[3];
+	  rrC = total_rr[ion[nion].nxtotalrr].params[4];
+	  rrT2 = total_rr[ion[nion].nxtotalrr].params[5];
 
 
-      rrB = rrB + rrC * exp ((-1.0 * rrT2) / T);	//If C=0, this does nothing
+	  rrB = rrB + rrC * exp ((-1.0 * rrT2) / T);	//If C=0, this does nothing
 
 
-      term1 = sqrt (T / rrT0);
-      term2 = 1.0 + sqrt (T / rrT0);
-      term2 = pow (term2, (1 - rrB));
-      term3 = 1.0 + sqrt (T / rrT1);
-      term3 = pow (term3, (1 + rrB));
+	  term1 = sqrt (T / rrT0);
+	  term2 = 1.0 + sqrt (T / rrT0);
+	  term2 = pow (term2, (1 - rrB));
+	  term3 = 1.0 + sqrt (T / rrT1);
+	  term3 = pow (term3, (1 + rrB));
 
 
-      rate = pow ((term1 * term2 * term3), -1.0);
-      rate *= rrA;
+	  rate = pow ((term1 * term2 * term3), -1.0);
+	  rate *= rrA;
+	}
+      else if (total_rr[ion[nion].nxtotalrr].type == RRTYPE_SHULL)
+	{
+	  rate =
+	    total_rr[ion[nion].nxtotalrr].params[0] * pow ((T / 1.0e4),-1.0*
+							   total_rr[ion
+								    [nion].nxtotalrr].params
+							   [1]);
+	}
+      else
+	{
+	  Error ("total_rrate: unknown parameter type for ion %i\n", nion);
+	  exit (0);		/* NSH This is a serious problem! */
+	}
     }
-  else if (total_rr[ion[nion].nxtotalrr].type == RRTYPE_SHULL)
+  else				/*NSH 140812 - We dont have coefficients - in this case we can use xinteg_fb with mode 2 to use the milne relation to obtain a value for this - it is worth throwing an error though, since there rreally should be data for all ions. xinteg_fb
+				   is called with the lower ion in the pair, since it uses the photionization cross sectiuon of the lower ion */
     {
-      rate =
-	total_rr[ion[nion].nxtotalrr].params[0] * pow ((T / 1.0e4),-1.0*
-						       total_rr[ion
-								[nion].
-								nxtotalrr].
-						       params[1]);
-    }
-  else
-    {
-      Error ("total_rrate: unknown parameter type for ion %i\n", nion);
-      exit(0);  /* NSH This is a serious problem! */
-    }
-}
-  else /*NSH 140812 - We dont have coefficients - in this case we can use xinteg_fb with mode 2 to use the milne relation to obtain a value for this - it is worth throwing an error though, since there rreally should be data for all ions. xinteg_fb
-is called with the lower ion in the pair, since it uses the photionization cross sectiuon of the lower ion */
-    {
-      Error ("total_rrate: No T_RR parameters for ion %i - using milne relation\n", nion);
-      rate = xinteg_fb (T, 3e12, 3e18, nion-1, 2);
+      Error
+	("total_rrate: No T_RR parameters for ion %i - using milne relation\n",
+	 nion);
+      rate = xinteg_fb (T, 3e12, 3e18, nion - 1, 2);
     }
 
 
@@ -1453,92 +1457,93 @@ gs_rrate (nion, T)
   if (ion[nion].bad_gs_rr_t_flag == 1 && ion[nion].bad_gs_rr_r_flag == 1)	//We have tabulated gs data
 
     //NSH force code to always use milne for a test REMOVE ME!!!
-    //if (ion[nion].bad_gs_rr_t_flag == 100 && ion[nion].bad_gs_rr_r_flag == 100)	//We have tabulated gs data
-     {
-    //printf("We are using the tabulations for GS recomb\n");
-    for (i = 0; i < BAD_GS_RR_PARAMS; i++)
-      {
-        rates[i] = bad_gs_rr[ion[nion].nxbadgsrr].rates[i];
-        temps[i] = bad_gs_rr[ion[nion].nxbadgsrr].temps[i];
-      }
+    //if (ion[nion].bad_gs_rr_t_flag == 100 && ion[nion].bad_gs_rr_r_flag == 100)       //We have tabulated gs data
+    {
+      //printf("We are using the tabulations for GS recomb\n");
+      for (i = 0; i < BAD_GS_RR_PARAMS; i++)
+	{
+	  rates[i] = bad_gs_rr[ion[nion].nxbadgsrr].rates[i];
+	  temps[i] = bad_gs_rr[ion[nion].nxbadgsrr].temps[i];
+	}
 
-    if (T < temps[0])		//we are below the range of GS data
-      {
-        Log_silent
-  	("bad_gs_rr: Requested temp %e is below limit of data for ion %i(Tmin= %e)\n",
-  	 T, nion, temps[0]);
-        //      rate = rates[0];
-       	imax=1;
-  	    imin=0;  
-      }
+      if (T < temps[0])		//we are below the range of GS data
+	{
+	  Log_silent
+	    ("bad_gs_rr: Requested temp %e is below limit of data for ion %i(Tmin= %e)\n",
+	     T, nion, temps[0]);
+	  //      rate = rates[0];
+	  imax = 1;
+	  imin = 0;
+	}
 
-    else if (T >= temps[BAD_GS_RR_PARAMS - 1])	//we are above the range of GS data
-      {
-        Log_silent
-  	("bad_gs_rr: Requested temp %e is above limit (%e) of data for ion %i\n",
-  	 T, nion, bad_gs_rr[ion[nion].nxbadgsrr].temps[BAD_GS_RR_PARAMS - 1]);
-    //     rate = rates[BAD_GS_RR_PARAMS - 1];
-  	imax=BAD_GS_RR_PARAMS - 1;
-  	imin=BAD_GS_RR_PARAMS - 2;
-    //We will try to extrapolate.
+      else if (T >= temps[BAD_GS_RR_PARAMS - 1])	//we are above the range of GS data
+	{
+	  Log_silent
+	    ("bad_gs_rr: Requested temp %e is above limit (%e) of data for ion %i\n",
+	     T, nion,
+	     bad_gs_rr[ion[nion].nxbadgsrr].temps[BAD_GS_RR_PARAMS - 1]);
+	  //     rate = rates[BAD_GS_RR_PARAMS - 1];
+	  imax = BAD_GS_RR_PARAMS - 1;
+	  imin = BAD_GS_RR_PARAMS - 2;
+	  //We will try to extrapolate.
 
 
 
-      }
-    else				//We must be within the range of tabulated data
-      {
-        for (i = 0; i < BAD_GS_RR_PARAMS - 1; i++)
-  	{
-          if (temps[i] <= T && T < temps[i + 1])	//We have bracketed the correct temperature
-  	    {
-  	      imin = i;
-  	      imax = i + 1;
-  	    }
-  	}
-  /* NSH 140313 - changed the following lines to interpolate in log space */
-      }
-        drdt = (log10(rates[imax]) - log10(rates[imin])) / (log10(temps[imax]) - log10(temps[imin]));
-        dt = (log10(T) - log10(temps[imin]));
-        rate = pow(10,(log10(rates[imin]) + drdt * dt));
-  }
+	}
+      else			//We must be within the range of tabulated data
+	{
+	  for (i = 0; i < BAD_GS_RR_PARAMS - 1; i++)
+	    {
+	      if (temps[i] <= T && T < temps[i + 1])	//We have bracketed the correct temperature
+		{
+		  imin = i;
+		  imax = i + 1;
+		}
+	    }
+	  /* NSH 140313 - changed the following lines to interpolate in log space */
+	}
+      drdt =
+	(log10 (rates[imax]) - log10 (rates[imin])) / (log10 (temps[imax]) -
+						       log10 (temps[imin]));
+      dt = (log10 (T) - log10 (temps[imin]));
+      rate = pow (10, (log10 (rates[imin]) + drdt * dt));
+    }
 
   /* we will need to use the milne relation - 
      NB - this is different from using xinteg_fb because 
      that routine does recombination to all excited levels (at least for topbase ions).
-  */
-  else  
-  {
-     //printf("We are using the milne relation for GS recomb\n");
-     rate = 0.0;			/* NSH 130605 to remove o3 compile error */
+   */
+  else
+    {
+      //printf("We are using the milne relation for GS recomb\n");
+      rate = 0.0;		/* NSH 130605 to remove o3 compile error */
 
-    fbt = T;
-    fbfr = 2;
+      fbt = T;
+      fbfr = 2;
 
-    if (ion[nion-1].phot_info > 0)	//topbase or hybrid
-      {
-        ntmin = ion[nion-1].ntop_ground;
-        fb_xtop = &phot_top[ntmin];
-      }
-    else if (ion[nion-1].phot_info == 0) //vfky 
-      {
-        fb_xtop = &phot_top[ion[nion-1].nxphot];
-      }
+      if (ion[nion - 1].phot_info > 0)	//topbase or hybrid
+	{
+	  ntmin = ion[nion - 1].ntop_ground;
+	  fb_xtop = &phot_top[ntmin];
+	}
+      else if (ion[nion - 1].phot_info == 0)	//vfky 
+	{
+	  fb_xtop = &phot_top[ion[nion - 1].nxphot];
+	}
 
-    fthresh = fb_xtop->freq[0];
-    fmax = fb_xtop->freq[fb_xtop->np - 1];
-    dnu = 100.0 * (fbt / H_OVER_K);
+      fthresh = fb_xtop->freq[0];
+      fmax = fb_xtop->freq[fb_xtop->np - 1];
+      dnu = 100.0 * (fbt / H_OVER_K);
 
-    if (fthresh + dnu < fmax)
-  	  {
-  	    fmax = fthresh + dnu;
-  	  }
-    
+      if (fthresh + dnu < fmax)
+	{
+	  fmax = fthresh + dnu;
+	}
 
-    rate = qromb (fb_topbase_partial, fthresh, fmax, 1e-5);
-  }
+
+      rate = qromb (fb_topbase_partial, fthresh, fmax, 1e-5);
+    }
 
 
   return (rate);
 }
-
-

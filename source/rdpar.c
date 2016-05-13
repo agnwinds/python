@@ -588,6 +588,41 @@ rdint (question, answer)
 }
 
 int
+rdint2 (question, answer1, answer2)
+     char question[];
+     int *answer1, *answer2;
+{
+	int query, found = 0;
+	char dummy[LINELEN];
+  	query = REISSUE;
+  	if (rdpar_stat == 0)
+    	rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
+  
+  	while (query == REISSUE)
+  	{
+  		if(found == 0)
+  			sprintf (dummy, "%d", *answer1);
+    	else if(found == 1)
+    		sprintf (dummy, "%d", *answer2);
+
+    	query = string_process (question, dummy);
+    	if (query == NORMAL)
+		{
+			if(found == 0)
+				sscanf (dummy, "%d", answer1);
+	    	else if (found == 1)
+	    	{
+				sscanf (dummy, "%d", answer2);
+        		if (rd_rank==0 && verbose==1)
+	    			printf ("%s	  %d %d\n", question, *answer1, *answer2);
+	    	}
+		}
+  	}
+  	return (query);
+}
+
+
+int
 rdflo (question, answer)
      char question[];
      float *answer;

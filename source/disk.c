@@ -87,7 +87,9 @@ teff (t, x)
       q = (1.e0 - pow (x, -0.5e0)) / (x * x * x);
       q = t * pow (q, 0.25e0);
 
-      if (geo.disk_illum == 2)	// Absorb photons and increase t so that heat is radiated
+      if (geo.disk_illum == 2 && geo.wcycle > 0)	/* Absorb photons and increase t so that heat is radiated
+							   but only do this if there has been at least one
+							   ionization cycle */
 	{
 	  r = x * geo.rstar;	// 04aug -- Requires fix if disk does not extend to rstar
 	  kkk = 1;		// photon cannot hit the disk at r<qdisk.r[0]
@@ -164,9 +166,6 @@ Description:
   
    Finally it rescales this to get the actual velocity.
   
-   is travelling in the
-   disk by interpolating on the velocities that are contained 
-
 Notes"
 
 	The routine projects the input variable x on to the xy plane
@@ -187,7 +186,7 @@ vdisk (x, v)
 {
   double xhold[3];
   double r, speed;
-  int linterp ();
+
   stuff_v (x, xhold);
   xhold[2] = 0.0;
   r = length (xhold);
@@ -196,6 +195,7 @@ vdisk (x, v)
   renorm (v, speed);
   return (speed);
 }
+
 
 /***********************************************************
              Space Telescope Science Institute
@@ -290,7 +290,7 @@ ds_to_disk (p, miss_return)
   void disk_deriv ();
 
 
-  if (geo.disk_type == 0)
+  if (geo.disk_type == DISK_NONE)
     return (VERY_BIG);		/* There is no disk! */
 
   if (ds_to_disk_init == 0)
@@ -325,7 +325,7 @@ ds_to_disk (p, miss_return)
   r_plane = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
 
 
-  if (geo.disk_type == 1)
+  if (geo.disk_type == DISK_FLAT)
     {
       if (r_plane > geo.diskrad)
 	return (VERY_BIG);

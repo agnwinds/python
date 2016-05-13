@@ -63,6 +63,10 @@ dvwind_ds (p)
   double frac[4];
   double x;
 
+  int ndom;
+
+  ndom=wmain[p->grid].ndom;
+
 
   /* We want the change in velocity along the line of sight, but we
   need to be careful because of the fact that we have elected to 
@@ -85,7 +89,7 @@ dvwind_ds (p)
   tensor ought to be rotated in order to give the right answer for spherical 
   coordinates */
 
-  if (geo.coord_type == SPHERICAL)
+  if (zdom[ndom].coord_type == SPHERICAL)
     {
       struct photon pnew;
       double v1[3], v2[3], diff[3];
@@ -98,13 +102,13 @@ dvwind_ds (p)
       /* calculate the velocity at the position of the photon */
       /* note we use model velocity, which could potentially be slow,
       but avoids interpolating (see #118) */
-      model_velocity(pp.x, v1);
+      model_velocity(ndom ,pp.x, v1);
 
       /* copy the photon and move it by ds, and evaluate the velocity
       at the new point */
       stuff_phot(&pp, &pnew);
       move_phot(&pnew, ds);
-      model_velocity(pnew.x, v2);
+      model_velocity(ndom, pnew.x, v2);
 
       /* calculate the relevant gradient */
       dvds = fabs(dot(v1, pp.lmn) - dot(v2, pp.lmn)) / ds;
@@ -113,7 +117,7 @@ dvwind_ds (p)
   else // for non spherical coords we interpolate on v_grad
     {
 
-      n = coord_fraction (0, pp.x, nnn, frac, &nelem);
+      n = coord_fraction (ndom, 0, pp.x, nnn, frac, &nelem);
 
 
       for (j = 0; j < 3; j++)
@@ -210,6 +214,7 @@ dvds_ave ()
   int icell;
   double dvds_min, lmn_min[3];	//TEST
   char filename[LINELENGTH];
+  int ndom;
 
   strcpy (filename, basename);
   strcat (filename, ".dvds.diag");
@@ -220,6 +225,7 @@ dvds_ave ()
 
   for (icell = 0; icell < NDIM2; icell++)
     {
+	    ndom=wmain[icell].ndom;
 
       dvds_max = 0.0;		// Set dvds_max to zero for the cell.
       dvds_min = 1.e30;		// TEST
@@ -235,7 +241,7 @@ dvds_ave ()
       ds = 0.001 * length (diff);
 
       /* Find the velocity at the center of the cell */
-      vwind_xyz (&p, v_zero);
+      vwind_xyz (ndom, &p, v_zero);
 
       sum = 0.0;
       for (n = 0; n < N_DVDS_AVE; n++)
@@ -248,7 +254,7 @@ dvds_ave ()
 	      delta[2] = (-delta[2]);
 	    }
 	  vadd (p.x, delta, pp.x);
-	  vwind_xyz (&pp, vdelta);
+	  vwind_xyz (ndom, &pp, vdelta);
 	  vsub (vdelta, v_zero, diff);
 	  dvds = length (diff);
 

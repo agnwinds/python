@@ -85,7 +85,9 @@ History:
                         "simple").
 	06may	ksl	57+ -- To allow for plasma structure.  
 	1409	ksl	Changes to accommodate clumping
-	1508  nsh	changes to allow compton scattering to replace thomoson scattering.
+    1508  nsh	changes to allow compton scattering to replace thomoson scattering.
+
+	1509	ksl	Added domain support
 **************************************************************/
 
 struct photon cds_phot_old;
@@ -120,10 +122,12 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   int check_in_grid;
   int nplasma;
   PlasmaPtr xplasma, xplasma2;
+  int ndom;
 
   one = &w[p->grid];		//Get a pointer to the cell where the photon bundle is located.
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
+  ndom=one->ndom;
 
 //  kap_es = THOMPSON * xplasma->ne * geo.fill; NSH 1508 Moved to after the doppler shift is computed, for compton.
   /* This is the electron scattering opacity per unit length. For the Macro Atom approach we need an 
@@ -152,7 +156,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
   if (comp_phot (&cds_phot_old, p))
     {
-      vwind_xyz (p, v_inner);
+      vwind_xyz (ndom, p, v_inner);
       v1 = dot (p->lmn, v_inner);
     }
   else
@@ -163,7 +167,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   /* Create phot, a photon at the far side of the cell */
   stuff_phot (p, &phot);
   move_phot (&phot, smax);
-  vwind_xyz (&phot, v_outer);
+  vwind_xyz (ndom, &phot, v_outer);
   v2 = dot (phot.lmn, v_outer);
 
   /* Check to see that the velocity is monotonic across the cell
@@ -176,7 +180,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
     {
       stuff_phot (p, &p_now);
       move_phot (&p_now, smax / 2.);
-      vwind_xyz (&p_now, v_check);
+      vwind_xyz (ndom, &p_now, v_check);
       vch = dot (p_now.lmn, v_check);
 
       vc = fabs (vch - 0.5 * (v1 + v2));
@@ -349,7 +353,8 @@ process. */
 	      //If the density of the ion is very small we shouldn't have to worry about a resonance, but otherwise
 	      // ?? This seems like an incredibly small number; how can anything this small affect anything ??
 
-	      dd = get_ion_density (p_now.x, kkk);
+
+	      dd = get_ion_density (ndom, p_now.x, kkk);
 
 	      if (dd > LDEN_MIN)
 		{
@@ -399,7 +404,8 @@ process. */
 			  && check_in_grid != P_HIT_DISK
 			  && check_in_grid != P_ESCAPE)
 			{
-			  two = &w[where_in_grid (p_now.x)];
+				/* XXX  The next line seems a bit redundant.  */
+			  two = &w[where_in_grid (wmain[p_now.grid].ndom, p_now.x)];
 			  xplasma2 = &plasmamain[two->nplasma];
 
 			  if (lin_ptr[nn]->macro_info == 1
@@ -866,10 +872,12 @@ sobolev (one, x, den_ion, lptr, dvds)
   int nion;
   double d_hold;
   int nplasma;
+  int ndom;
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
+  ndom=wmain[plasmamain->nwind].ndom;
 
   if ((dvds = fabs (dvds)) == 0.0)	// This forces dvds to be positive -- a good thing!
     {
@@ -897,7 +905,7 @@ calls to two_level atom
 
       if (den_ion < 0)
 	{
-	  xplasma->density[nion] = get_ion_density (x, lptr->nion);	// Forced calculation of density 
+	  xplasma->density[nion] = get_ion_density (ndom, x, lptr->nion);	// Forced calculation of density 
 	}
       else
 	{
@@ -1132,9 +1140,10 @@ History:
                         scattering model would work as before for "simple" calculations.
                         Previously nnscat was always just = 1.
 
-        1406 	JM 		Added normalisation of rejection method for anisotropic scattering
-        				'thermal trapping' model.
-        				See Issue #82.
+        1406 	JM	Added normalisation of rejection method for anisotropic scattering
+        		'thermal trapping' model.
+        		See Issue #82.
+	1509	ksl	Added domain support
 
 
 
@@ -1160,11 +1169,13 @@ scatter (p, nres, nnscat)
   double v_dop;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
+  int ndom;
 
  // printf ("nres=%i\n",*nres);
 
-  stuff_phot (p, &pold);   //Save the original photon direction
-  n = where_in_grid (pold.x);	// Find out where we are
+
+  stuff_phot (p, &pold);
+  n = where_in_grid (wmain[pold.grid].ndom, pold.x);	// Find out where we are
 
   //71 - 1112 Check added to test out spherical wind models 
   if (n < 0)
@@ -1175,9 +1186,6 @@ scatter (p, nres, nnscat)
 
   one = &wmain[p->grid];
   xplasma = &plasmamain[one->nplasma];
-  //OLD - did not trap a problem if (xplasma==NULL){
-  //OLD - did not trap a problem          Error("Houston, we have a null pointer at %d %d",p->grid,one->nplasma);
-  //OLD - did not trap a problem }
 
   /* On entering this subroutine we know that a photon packet has been 
      absorbed. nres tells us which process absorbed it. There are currently
@@ -1193,25 +1201,8 @@ scatter (p, nres, nnscat)
   if (geo.rt_mode == 2)		//check if macro atom method in use
     {
 
-      /* 1112 - 71 - ksl - Moved to avoid trying to reference mplasma if there are no 
-         macro atoms.  This was to fix a segmentation fault that appeared
-         when compiling with a new version of gcc.   It's possible that the error below
-         could occur if we were in a macro atom approach but had no macro atoms.  Need
-         to fix all this up with a thorough review of macro atoms. !!!
-       */
-      /* JM 1502 -- I've reinstated this call to mplasma, it should happen regardless of whether we have
-         actual macro-atom levels as one can be in the simple ion approach. see #138 */
 
-    //    if (geo.nmacro > 0)
-	  //{
 	  mplasma = &macromain[xplasma->nplasma];
-    //}
-    //   else
-	  // {
-	  //   mplasma = NULL;
-	  //   Error
-	  //     ("Resonate: In macro atom section, but no macro atoms.  Seems very odd\n");
-	  // }
 
       /* Electron scattering is the simplest to deal with. The co-moving 
          frequency is unchanged so it's just a randomisation of the direction.
@@ -1253,9 +1244,10 @@ scatter (p, nres, nnscat)
 	    {
 	      /* Macro ion case (SS) */
 
-	      // Note:  NLINES-1 in the lines below is correct.  This is becasue
-	      // the 1st bf is identified by nres = NLINES+1 and this is 
-	      // the zeroth element of phot_top: hence the -1.  SS
+	      /* Note:  NLINES-1 in the lines below is correct.  This is becasue
+	         the 1st bf is identified by nres = NLINES+1 and this is 
+	         the zeroth element of phot_top: hence the -1.  SS
+	      */
 
 	      llvl = phot_top[*nres - NLINES - 1].nlev;	//lower level
 	      ulvl = phot_top[*nres - NLINES - 1].uplev;	//upper level
@@ -1278,7 +1270,7 @@ scatter (p, nres, nnscat)
 		  exit (0);
 		}
 
-	      // Need to compute the factor needed for the stimulated term.
+	      /* Need to compute the factor needed for the stimulated term. */
 
 	      stim_fact =
 		den_config (xplasma, ulvl) / den_config (xplasma,
@@ -1293,10 +1285,11 @@ scatter (p, nres, nnscat)
 		(mplasma->alpha_st_e_old[config[llvl].bfu_indx_first + m] *
 		 stim_fact);
 
-	      // Both gamma_twiddles must be greater that zero if this is going to work. If they 
-	      // are zero then it's probably because this is the first iteration and so the've not
-	      //been computed yet. For that first iteration k-packets will be ignored. If the
-	      // gamma_twiddles are negative then something has gone wrong.
+	      /* Both gamma_twiddles must be greater that zero if this is going to work. If they 
+	      are zero then it's probably because this is the first iteration and so the've not
+	      been computed yet. For that first iteration k-packets will be ignored. If the
+	      gamma_twiddles are negative then something has gone wrong.
+	      */
 
 	      if (gamma_twiddle > 0 && gamma_twiddle_e > 0)
 		{
@@ -1387,15 +1380,17 @@ scatter (p, nres, nnscat)
      For macro atoms the code above decides that emission will occur in the line - we now just need
      to use the thermal trapping model to choose the direction. */
 
+  /* JM 1509 -- moved this here so we have ndom for compton direction code */
+  ndom = wmain[p->grid].ndom;
 
   if (*nres == -1)   //Its an electron scatter, so we will call compton to get a direction
   {
-     vwind_xyz (p, v);  //get the local velocity at the location of the photon
-     v_dop = dot (p->lmn, v);  //get the dot product of the photon direction with the wind, to get the doppler velocity
-	  p->freq=p->freq * (1. - v_dop / C);  //This is the photon frequency in the electron rest frame
-	  compton_dir (p,xplasma);  //Get a new direction using the KN formula
-	  v_dop = dot (p->lmn, v);   //Find the dot product of the new velocity with the wind
-	  p->freq=p->freq / (1. - v_dop / C); //Transform back to the observers frame
+    vwind_xyz (ndom, p, v);  //get the local velocity at the location of the photon
+    v_dop = dot (p->lmn, v);  //get the dot product of the photon direction with the wind, to get the doppler velocity
+	p->freq=p->freq * (1. - v_dop / C);  //This is the photon frequency in the electron rest frame
+	compton_dir (p,xplasma);  //Get a new direction using the KN formula
+	v_dop = dot (p->lmn, v);   //Find the dot product of the new velocity with the wind
+	p->freq=p->freq / (1. - v_dop / C); //Transform back to the observers frame
 	  
   }
 	  
@@ -1433,9 +1428,11 @@ scatter (p, nres, nnscat)
 
   //stuff_v (z_prime, p->lmn);
 
-  vwind_xyz (p, v);		/* Get the velocity vector for the wind */
+  vwind_xyz (ndom, p, v);		/* Get the velocity vector for the wind */
+
   if (*nres !=-1)  //Only do this if its not an electron scatter, otherwise we have already dealt with this
-      doppler (&pold, p, v, *nres);
+    doppler (&pold, p, v, *nres);
+
 
 
 /* We estimate velocities by interpolating between the velocities at the edges of the cell based

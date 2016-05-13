@@ -50,6 +50,7 @@ History:
 	05jun	ksl	56d -- modified so that search for top and
 			bottom of each cell is determined using
 			the cones that define each cell.
+	15aug	ksl	Updates to use with domains
  
 **************************************************************/
 
@@ -65,18 +66,23 @@ cylvar_ds_in_cell (p)
   int n, ix, iz, iroot;
   double a, b, c, root[2];
   double s, smax;
-  int where_in_grid (), wind_n_to_ij ();
-  int quadratic ();
-  int radiation ();
+  int ndom;
+
+  ndom=wmain[p->grid].ndom;
 
 
-  if ((p->grid = n = where_in_grid (p->x)) < 0)
+	  // XXX  Next lines are just a check and one can probbly delette
+	  // them but one shcoul check.  For now have just tried to get this working
+	  //
+  if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
     {
       Error ("translate_in_wind: Photon not in grid when routine entered\n");
       return (n);		/* Photon was not in wind */
     }
 
-  wind_n_to_ij (n, &ix, &iz);	/*Convert the index n to two dimensions */
+
+    wind_n_to_ij (ndom, n, &ix, &iz);   /*Convert the index n to two dimensions */
+
 
   smax = VERY_BIG;		//initialize smax to a large number
 
@@ -86,13 +92,13 @@ cylvar_ds_in_cell (p)
   b = 2. * (p->lmn[0] * p->x[0] + p->lmn[1] * p->x[1]);
   c = p->x[0] * p->x[0] + p->x[1] * p->x[1];
 
-  iroot = quadratic (a, b, c - wind_x[ix] * wind_x[ix], root);	/* iroot will be the smallest positive root
+  iroot = quadratic (a, b, c - zdom[ndom].wind_x[ix] * zdom[ndom].wind_x[ix], root);	/* iroot will be the smallest positive root
 								   if one exists or negative otherwise */
 
   if (iroot >= 0 && root[iroot] < smax)
     smax = root[iroot];
 
-  iroot = quadratic (a, b, c - wind_x[ix + 1] * wind_x[ix + 1], root);
+  iroot = quadratic (a, b, c - zdom[ndom].wind_x[ix + 1] * zdom[ndom].wind_x[ix + 1], root);
 
   if (iroot >= 0 && root[iroot] < smax)
     smax = root[iroot];
@@ -152,12 +158,20 @@ History:
 
 
 int
-cylvar_make_grid (w)
+cylvar_make_grid (w, ndom)
      WindPtr w;
+     int ndom;
 {
   double dr, dz, dlogr, dlogz;
   double r, z_offset;
   int i, j, n;
+  int ndim, mdim;
+
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
+
+   zdom[ndom].zmax=0.0;
+
 
   /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
@@ -166,18 +180,20 @@ cylvar_make_grid (w)
 
   /* First calculate parameters that are to be calculated at the edge of the grid cell.  This is
      mainly the positions and the velocity */
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < zdom[ndom].ndim; i++)
     {
-      for (j = 0; j < MDIM; j++)
+      for (j = 0; j < mdim; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+
+	  wind_ij_to_n (ndom, i, j, &n);
+
 	  w[n].x[1] = w[n].xcen[1] = 0;	//The cells are all defined in the xz plane
 
 	  /*Define the grid points */
-	  if (geo.log_linear == 1)
+	  if (zdom[ndom].log_linear == 1)
 	    {			// linear intervals
 
-	      dr = geo.rmax / (NDIM - 3);
+	      dr = zdom[ndom].rmax / (ndim - 3);
 	      w[n].x[0] = r = i * dr;	/* The first zone is at the inner radius of
 					   the wind */
 	      if (r < geo.diskrad)
@@ -187,7 +203,7 @@ cylvar_make_grid (w)
 	      else
 		z_offset = zdisk (geo.diskrad);
 
-	      dz = (geo.rmax - z_offset) / (MDIM - 4);
+	      dz = (zdom[ndom].rmax - z_offset) / (mdim - 4);
 	      if (j == 0)
 		w[n].x[2] = 0;
 	      else if (j == 1)
@@ -203,17 +219,17 @@ cylvar_make_grid (w)
 	  else
 	    {			//logarithmic intervals
 
-	      dlogr = (log10 (geo.rmax / geo.xlog_scale)) / (NDIM - 3);
+	      dlogr = (log10 (zdom[ndom].rmax / zdom[ndom].xlog_scale)) / (ndim - 3);
 	      if (i == 0)
 		{
 		  w[n].x[0] = r = 0.0;
-		  w[n].xcen[0] = 0.5 * geo.xlog_scale + zdisk (r);
+		  w[n].xcen[0] = 0.5 * zdom[ndom].xlog_scale + zdisk (r);
 		}
 	      else
 		{
-		  w[n].x[0] = r = geo.xlog_scale * pow (10., dlogr * (i - 1));
+		  w[n].x[0] = r = zdom[ndom].xlog_scale * pow (10., dlogr * (i - 1));
 		  w[n].xcen[0] =
-		    0.5 * geo.xlog_scale * (pow (10., dlogr * (i - 1)) +
+		    0.5 * zdom[ndom].xlog_scale * (pow (10., dlogr * (i - 1)) +
 					    pow (10.,
 						 dlogr * (i))) + zdisk (r);
 		}
@@ -226,7 +242,7 @@ cylvar_make_grid (w)
 		z_offset = zdisk (geo.diskrad);
 
 	      dlogz =
-		(log10 ((geo.rmax - z_offset) / geo.zlog_scale)) / (MDIM - 4);
+		(log10 ((zdom[ndom].rmax - z_offset) / zdom[ndom].zlog_scale)) / (mdim - 4);
 	      if (j == 0)
 		{
 		  w[n].x[2] = 0;
@@ -235,16 +251,20 @@ cylvar_make_grid (w)
 	      else if (j == 1)
 		{
 		  w[n].x[2] = 0.9 * z_offset;	// 0.9 is to keep the first grid cell out of wind
-		  w[n].xcen[2] = z_offset + 0.5 * geo.zlog_scale;
+		  w[n].xcen[2] = z_offset + 0.5 * zdom[ndom].zlog_scale;
 		}
 	      else
 		{
 		  w[n].x[2] = z_offset +
-		    geo.zlog_scale * pow (10, dlogz * (j - 2));
+		    zdom[ndom].zlog_scale * pow (10, dlogz * (j - 2));
 		  w[n].xcen[2] = z_offset +
-		    0.5 * geo.zlog_scale * (pow (10., dlogz * (j - 2)) +
+		    0.5 * zdom[ndom].zlog_scale * (pow (10., dlogz * (j - 2)) +
 					    pow (10., dlogz * (j - 1)));
 		}
+
+	      if (w[n].x[2]>zdom[ndom].zmax) {
+		      zdom[ndom].zmax=w[n].x[2];
+	      }
 	    }
 
 
@@ -282,28 +302,35 @@ History:
 	05may	ksl	56a -- began modifications starting with same 
 			routine in cylindrical
 	06jun	ksl	56d -- Completed models for cylvar
+	15aug	ksl	Adaptatations for domains
 
 **************************************************************/
 
 
 int
-cylvar_wind_complete (w)
+cylvar_wind_complete (ndom, w)
+	int ndom;
      WindPtr w;
 {
   int i, j, n;
   double drho, dz;
+  int mdim,ndim,nstart;
+
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
+  nstart=zdom[ndom].nstart;
 
   /* First define the windcones for each cell */
   n = 0; // silence compiler warning
 
-  for (i = 0; i < NDIM - 1; i++)
+  for (i = 0; i < ndim - 1; i++)
     {
-      for (j = 0; j < MDIM - 1; j++)
+      for (j = 0; j < ndim - 1; j++)
 	{
 	  /* Everything is defined in the xz plane, so life is fairly easy */
-	  n = i * MDIM + j;
-	  dz = w[n + MDIM].x[2] - w[n].x[2];	// change in z for one step in rho
-	  drho = w[n + MDIM].x[0] - w[n].x[0];
+	  n = nstart+i * mdim + j;
+	  dz = w[n + mdim].x[2] - w[n].x[2];	// change in z for one step in rho
+	  drho = w[n + mdim].x[0] - w[n].x[0];
 
 
 	  if (drho > 0)
@@ -324,20 +351,20 @@ cylvar_wind_complete (w)
 
    */
 
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < ndim; i++)
     {
-      wind_x[i] = w[i * MDIM].x[0];
-      wind_midx[i] = w[i * MDIM].xcen[0];
+      zdom[ndom].wind_x[i] = w[nstart+i * mdim].x[0];
+      zdom[ndom].wind_midx[i] = w[nstart+i * mdim].xcen[0];
     }
 
 
-  for (i = 0; i < NDIM; i++)
+  for (i = 0; i < ndim; i++)
     {
-      for (j = 0; j < MDIM; j++)
+      for (j = 0; j < mdim; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
-	  wind_z_var[i][j] = w[n].x[2];
-	  wind_midz_var[i][j] = w[n].xcen[2];
+	  wind_ij_to_n (ndom, i, j, &n);
+	  zdom[ndom].wind_z_var[i][j] = w[n].x[2];
+	  zdom[ndom].wind_midz_var[i][j] = w[n].xcen[2];
 	}
     }
 
@@ -352,6 +379,7 @@ cylvar_wind_complete (w)
 	allowing for the fact that some cells 
 
  Arguments:		
+ 	int ndom      the domain poiinter
 	WindPtr w;    the entire wind
  Returns:
 
@@ -378,9 +406,9 @@ cylvar_wind_complete (w)
 
 
 int
-cylvar_volumes (w, icomp)
+cylvar_volumes (ndom, w)
+	int ndom;
      WindPtr w;
-     int icomp;			// The component for which we want the volume
 {
   int i, j, n;
   int jj, kk;
@@ -390,54 +418,61 @@ cylvar_volumes (w, icomp)
   double dr, dz, x[3];
   double volume;
   double f, g;
-  int bilin ();
+  int ndim,mdim,nstart,nstop;
+  int ndomain;
+
+
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
+  nstart=zdom[ndom].nstart;
+  nstop=zdom[ndom].nstop;
 
 
   /* Initialize all the volumes to 0 */
-  for (n = 0; n < NDIM2; n++)
+  for (n = nstart; n < nstop; n++)
     {
       w[n].vol = 0;
       w[n].inwind = W_NOT_INWIND;
     }
 
-  for (i = 0; i < NDIM - 1; i++)
+  for (i = 0; i < ndim - 1; i++)
     {
-      for (j = 0; j < MDIM - 1; j++)
+      for (j = 0; j < mdim - 1; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  wind_ij_to_n (ndom,i, j, &n);
 
 	  /* Encapsulate the grid cell with a rectangle for integrating */
 	  rmin = w[n].x[0];
 	  if (rmin > w[n + 1].x[0])
 	    rmin = w[n + 1].x[0];
-	  if (rmin > w[n + MDIM].x[0])
-	    rmin = w[n + MDIM].x[0];
-	  if (rmin > w[n + MDIM + 1].x[0])
-	    rmin = w[n + MDIM + 1].x[0];
+	  if (rmin > w[n + mdim].x[0])
+	    rmin = w[n + mdim].x[0];
+	  if (rmin > w[n + mdim + 1].x[0])
+	    rmin = w[n + mdim + 1].x[0];
 
 	  rmax = w[n].x[0];
 	  if (rmax < w[n + 1].x[0])
 	    rmax = w[n + 1].x[0];
-	  if (rmax < w[n + MDIM].x[0])
-	    rmax = w[n + MDIM].x[0];
-	  if (rmax < w[n + MDIM + 1].x[0])
-	    rmax = w[n + MDIM + 1].x[0];
+	  if (rmax < w[n + mdim].x[0])
+	    rmax = w[n + mdim].x[0];
+	  if (rmax < w[n + mdim + 1].x[0])
+	    rmax = w[n + mdim + 1].x[0];
 
 	  zmin = w[n].x[2];
 	  if (zmin > w[n + 1].x[2])
 	    zmin = w[n + 1].x[2];
-	  if (zmin > w[n + MDIM].x[2])
-	    zmin = w[n + MDIM].x[2];
-	  if (zmin > w[n + MDIM + 1].x[2])
-	    zmin = w[n + MDIM + 1].x[2];
+	  if (zmin > w[n + mdim].x[2])
+	    zmin = w[n + mdim].x[2];
+	  if (zmin > w[n + mdim + 1].x[2])
+	    zmin = w[n + mdim + 1].x[2];
 
 	  zmax = w[n].x[2];
 	  if (zmax < w[n + 1].x[2])
 	    zmax = w[n + 1].x[2];
-	  if (zmax < w[n + MDIM].x[2])
-	    zmax = w[n + MDIM].x[2];
-	  if (zmax < w[n + MDIM + 1].x[2])
-	    zmax = w[n + MDIM + 1].x[2];
+	  if (zmax < w[n + mdim].x[2])
+	    zmax = w[n + mdim].x[2];
+	  if (zmax < w[n + mdim + 1].x[2])
+	    zmax = w[n + mdim + 1].x[2];
 
 
 	  volume = 0;
@@ -452,12 +487,12 @@ cylvar_volumes (w, icomp)
 		  x[1] = 0;
 		  x[2] = z;
 		  if (bilin
-		      (x, w[i * MDIM + j].x, w[i * MDIM + j + 1].x,
-		       w[(i + 1) * MDIM + j].x, w[(i + 1) * MDIM + j + 1].x,
+		      (x, w[i * mdim + j].x, w[i * mdim + j + 1].x,
+		       w[(i + 1) * mdim + j].x, w[(i + 1) * mdim + j + 1].x,
 		       &f, &g) == 0)
 		    {
 		      kk++;
-		      if (where_in_wind (x) == W_ALL_INWIND)
+		      if (where_in_wind (x, &ndomain) == W_ALL_INWIND)
 			{
 			  volume += r;
 			  jj++;
@@ -475,13 +510,11 @@ cylvar_volumes (w, icomp)
 	    }
 	  else if (jj == kk)
 	    {
-	      //OLD 70b w[n].inwind = W_ALL_INWIND;     // All of cell is inwind
-	      w[n].inwind = icomp;	// All of cell is inwind
+	      w[n].inwind = W_ALL_INWIND;     // All of cell is inwind
 	    }
 	  else
 	    {
-	      //OLD 70b w[n].inwind = W_PART_INWIND;    // Some of cell is inwind
-	      w[n].inwind = icomp + 1;	// Some of cell is inwind
+	      w[n].inwind = W_PART_INWIND;    // Some of cell is inwind
 	    }
 	}
     }
@@ -535,6 +568,7 @@ cylvar_volumes (w, icomp)
 			was outside the grid.
 	13sep	nsh	76b -- Modified calls to fraction to take account
 			of new modes
+	15aug	ksl	Modified for domains
  
 **************************************************************/
 
@@ -543,7 +577,8 @@ int cylvar_n_approx;
 int ierr_cylvar_where_in_grid = 0;
 
 int
-cylvar_where_in_grid (x, ichoice, fx, fz)
+cylvar_where_in_grid (ndom, x, ichoice, fx, fz)
+	int ndom;
      double x[];
      int ichoice;
      double *fx, *fz;
@@ -551,7 +586,11 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
   int i, j, n, ii;
   double z[3];
   double rho;
-  int where_in_2dcell ();
+  int ndim,mdim,nstart;
+
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
+  nstart=zdom[ndom].nstart;
 
   /* copy x to a dummy vector z, so that the z[0] component is really rho */
   z[0] = rho = sqrt (x[0] * x[0] + x[1] * x[1]);
@@ -567,24 +606,24 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
 
   if (ichoice == 0)
     {
-      fraction (rho, wind_x, NDIM, &i, fx, 0);
-      fraction (z[2], wind_z_var[i], MDIM, &j, fz, 0);	// This should get one close
+      fraction (rho, zdom[ndom].wind_x, mdim, &i, fx, 0);
+      fraction (z[2], zdom[ndom].wind_z_var[i], ndim, &j, fz, 0);	// This should get one close
     }
   else
     {
-      fraction (rho, wind_midx, NDIM, &i, fx, 0);
-      fraction (z[2], wind_midz_var[i], MDIM, &j, fz, 0);	// This should get one close
+      fraction (rho, zdom[ndom].wind_midx, ndim, &i, fx, 0);
+      fraction (z[2], zdom[ndom].wind_midz_var[i], mdim, &j, fz, 0);	// This should get one close
     }
 
-  wind_ij_to_n (i, j, &cylvar_n_approx);
+  wind_ij_to_n (ndom, i, j, &cylvar_n_approx);
 
   /* Check to see if x is outside the region of the calculation.  Note that this
    * caclulation cannot be done until i is determined */
 
-  if (rho < wind_x[0])
+  if (rho < zdom[ndom].wind_x[0])
     return (-1);
 
-  if (rho > wind_x[NDIM - 1] || z[2] > wind_z_var[i][MDIM - 1])
+  if (rho > zdom[ndom].wind_x[ndim - 1] || z[2] > zdom[ndom].wind_z_var[i][mdim - 1])
     {
       return (-2);		/* x is outside grid */
     }
@@ -603,7 +642,7 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
       Error
 	("cylvar_where_in_grid: fraction and where_in_2d_cell incompatible %d -- %e %e\n",
 	 n, z[0], z[2]);
-      fraction (rho, wind_midx, NDIM, &i, fx, 0);
+      fraction (rho, zdom[ndom].wind_midx, ndim, &i, fx, 0);
       ii = where_in_2dcell (ichoice, z, n, fx, fz);
     }
 
@@ -616,13 +655,13 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
 	  if (ierr_cylvar_where_in_grid < 100)
 	    {
 	      Error
-		("cylvar_where_in_grid: Position %f %f %f gavegrid cell in disk %d (%d %d)\n",
+		("cylvar_where_in_grid: Position %f %f %f gave grid cell in disk %d (%d %d)\n",
 		 z[0], z[1], z[2], n, i, j);
 	      ierr_cylvar_where_in_grid++;
 	    }
 	  break;
 	}
-      if (*fz > 1. && j == MDIM)
+      if (*fz > 1. && j == mdim)
 	{
 	  // we are out of the grid at the "top" edge * fz = 0;
 	  n--;
@@ -688,8 +727,6 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
 
  Arguments:		
  	int n -- Cell in which random position is to be generated
-	int icomp - Component in which the random position is to
-		be generated
  Returns:
  	double x -- the position
  Description:	
@@ -709,9 +746,8 @@ cylvar_where_in_grid (x, ichoice, fx, fz)
 **************************************************************/
 
 int
-cylvar_get_random_location (n, icomp, x)
+cylvar_get_random_location (n, x)
      int n;			// Cell in which to create position
-     int icomp;			// Component in which to create position
      double x[];		// Returned position
 {
   int i, j;
@@ -720,48 +756,53 @@ cylvar_get_random_location (n, icomp, x)
   double fx, fz;
   double zz;
   double phi;
-  int where_in_2dcell ();
+  int ndom,mdim,ndim;
+  int ndomain;
 
-  wind_n_to_ij (n, &i, &j);
+  ndom = wmain[n].ndom;
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
+  
+  wind_n_to_ij (ndom, n, &i, &j);
 
   /* Encapsulate the grid cell with a rectangle for integrating */
 
   rmin = wmain[n].x[0];
   if (rmin > wmain[n + 1].x[0])
     rmin = wmain[n + 1].x[0];
-  if (rmin > wmain[n + MDIM].x[0])
-    rmin = wmain[n + MDIM].x[0];
-  if (rmin > wmain[n + MDIM + 1].x[0])
-    rmin = wmain[n + MDIM + 1].x[0];
+  if (rmin > wmain[n + mdim].x[0])
+    rmin = wmain[n + mdim].x[0];
+  if (rmin > wmain[n + mdim + 1].x[0])
+    rmin = wmain[n + mdim + 1].x[0];
 
   rmax = wmain[n].x[0];
   if (rmax < wmain[n + 1].x[0])
     rmax = wmain[n + 1].x[0];
-  if (rmax < wmain[n + MDIM].x[0])
-    rmax = wmain[n + MDIM].x[0];
-  if (rmax < wmain[n + MDIM + 1].x[0])
-    rmax = wmain[n + MDIM + 1].x[0];
+  if (rmax < wmain[n + mdim].x[0])
+    rmax = wmain[n + mdim].x[0];
+  if (rmax < wmain[n + mdim + 1].x[0])
+    rmax = wmain[n + mdim + 1].x[0];
 
   zmin = wmain[n].x[2];
   if (zmin > wmain[n + 1].x[2])
     zmin = wmain[n + 1].x[2];
-  if (zmin > wmain[n + MDIM].x[2])
-    zmin = wmain[n + MDIM].x[2];
-  if (zmin > wmain[n + MDIM + 1].x[2])
-    zmin = wmain[n + MDIM + 1].x[2];
+  if (zmin > wmain[n + mdim].x[2])
+    zmin = wmain[n + mdim].x[2];
+  if (zmin > wmain[n + mdim + 1].x[2])
+    zmin = wmain[n + mdim + 1].x[2];
 
   zmax = wmain[n].x[2];
   if (zmax < wmain[n + 1].x[2])
     zmax = wmain[n + 1].x[2];
-  if (zmax < wmain[n + MDIM].x[2])
-    zmax = wmain[n + MDIM].x[2];
-  if (zmax < wmain[n + MDIM + 1].x[2])
-    zmax = wmain[n + MDIM + 1].x[2];
+  if (zmax < wmain[n + mdim].x[2])
+    zmax = wmain[n + mdim].x[2];
+  if (zmax < wmain[n + mdim + 1].x[2])
+    zmax = wmain[n + mdim + 1].x[2];
 
 
   /* Generate a position which is both in the cell and in the wind */
   inwind = incell = -1;
-  while (inwind != icomp || incell != 0)
+  while (inwind != W_ALL_INWIND || incell != 0)
     {
       r =
 	sqrt (rmin * rmin +
@@ -775,9 +816,9 @@ cylvar_get_random_location (n, icomp, x)
 
 
       x[2] = zmin + (zmax - zmin) * (rand () / (MAXRAND - 0.5));
-      inwind = where_in_wind (x);	/* Some photons will not be in the wind
+      inwind = where_in_wind (x, &ndomain);	/* Some photons will not be in the wind
 					   because the boundaries of the wind split the grid cell */
-      incell = where_in_2dcell (0, x, n, &fx, &fz);
+      incell = where_in_2dcell (ndom, x, n, &fx, &fz);
     }
 
   zz = rand () / MAXRAND - 0.5;	//positions above are all at +z distances
@@ -825,22 +866,27 @@ cylvar_get_random_location (n, icomp, x)
 
 
 int
-cylvar_extend_density (w)
+cylvar_extend_density (ndom, w)
+	int ndom;
      WindPtr w;
 {
 
   int i, j, n, m;
+  int ndim,mdim;
 
-  for (i = 0; i < NDIM - 1; i++)
+  ndim=zdom[ndom].ndim;
+  mdim=zdom[ndom].mdim;
+
+  for (i = 0; i < ndim - 1; i++)
     {
-      for (j = 0; j < MDIM - 1; j++)
+      for (j = 0; j < mdim - 1; j++)
 	{
-	  wind_ij_to_n (i, j, &n);
+	  wind_ij_to_n (ndom, i, j, &n);
 	  if (w[n].vol == 0)
 
 	    {			//Then this grid point is not in the wind 
-
-	      wind_ij_to_n (i + 1, j, &m);
+          
+	      wind_ij_to_n (ndom, i + 1, j, &m);
 
 	      if (w[m].vol > 0)
 		{
@@ -849,7 +895,7 @@ cylvar_extend_density (w)
 		}
 	      else if (i > 0)
 		{
-		  wind_ij_to_n (i - 1, j, &m);
+		  wind_ij_to_n (ndom, i - 1, j, &m);
 		  if (w[m].vol > 0)
 		    {
 		      w[n].nplasma = w[m].nplasma;
@@ -934,6 +980,7 @@ History:
 			which is in cylindvar.c.  PROBABLY THIS ROUTINE
 			SHOULD BE REWRITTEN SO THIS IS THE CASE
 			FOR ALL COORDINATE SYSTEMS.
+	15aug	ksl	Modifications to allow for domains
 		       	
 
 **************************************************************/
@@ -941,7 +988,8 @@ History:
 
 
 int
-cylvar_coord_fraction (ichoice, x, ii, frac, nelem)
+cylvar_coord_fraction (ndom, ichoice, x, ii, frac, nelem)
+	int ndom;
      int ichoice;
      double x[];
      int ii[];
@@ -952,7 +1000,10 @@ cylvar_coord_fraction (ichoice, x, ii, frac, nelem)
   int n;
 
 
-  if ((n = cylvar_where_in_grid (x, ichoice, &dr, &dz)) < 0)
+  /* XXX Modifications in cylvar_coord_frac ar not complete */
+
+
+  if ((n = cylvar_where_in_grid (ndom, x, ichoice, &dr, &dz)) < 0)
     {
       n = cylvar_n_approx;
     }
@@ -961,13 +1012,13 @@ cylvar_coord_fraction (ichoice, x, ii, frac, nelem)
   ii[0] = n;
   frac[0] = (1. - dz) * (1. - dr);
 
-  ii[1] = n + MDIM;
+  ii[1] = n + zdom[ndom].mdim;
   frac[1] = (1. - dz) * dr;
 
   ii[2] = n + 1;
   frac[2] = (dz) * (1. - dr);
 
-  ii[3] = n + MDIM + 1;
+  ii[3] = n + zdom[ndom].mdim + 1;
   frac[3] = (dz) * (dr);
   *nelem = 4;
 

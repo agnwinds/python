@@ -156,7 +156,7 @@ to match heating and cooling in the wind element! */
 /* Feb 2012 NSH - new for mode 7. KSL has moved a lot of the mechanics that used to be here into
  power_abundances. This, once called, calculates the weight and alpha for each band in this cell. There is a lot of code that was clogging up this routine. Once this is done, one_shot gets called from within that routine. */
 
-	ireturn = spectral_estimators (xplasma);	/*Aug 2012 NSH - slight change to help integrate this into balance, power_estimators does the work of getting banded W and alpha. Then oneshot gets called. */
+	    ireturn = spectral_estimators (xplasma);	/*Aug 2012 NSH - slight change to help integrate this into balance, power_estimators does the work of getting banded W and alpha. Then oneshot gets called. */
       xplasma->dt_e_old = xplasma->dt_e;
       xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;	//Must store this before others
       xplasma->t_e_old = xplasma->t_e;
@@ -416,9 +416,11 @@ History:
     15aug   nsh 79 -- added a mode to leave t_e fixed
 
 **************************************************************/
-\
 
-	PlasmaPtr xxxplasma;
+
+
+PlasmaPtr xxxplasma;
+
 
 
 int

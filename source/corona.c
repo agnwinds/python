@@ -20,71 +20,95 @@ Description:
 	The parameters obtained here are only used in the routines in corona.c
 	Initially, we define it as a gaussian ring with and exponetial density distribution.   
 Notes:
+	The terminology here is a bit confusing because rmin and rmax as read in to the routine
+	refer actually to rho, which is easy to get confused with other parameters like zdom[ndom].rmax
+	which really are radii for the central source.
+
+
 History:
  	00sep	ksl	Coding begun
 	04jun	ksl	Moved from python.c to provide better uniformity of what files contain.
+	15aug	ksl	Began mods to accomodate domains
+	16apr	ksl	Added modifications for a uniform density grid
 **************************************************************/
 
 
 int
-get_corona_params ()
+get_corona_params (ndom)
+	int ndom;
 {
   Log ("Creating a corona above a disk\n");
 
 // Start with reasonable values for everything which is important
 
-  geo.wind_thetamin = 0.0;
-  geo.wind_rmax = geo.rmax;
-  geo.wind_thetamax = 0.0;
-  geo.wind_rmin = geo.rstar;
+  zdom[ndom].wind_thetamin = 0.0;
+  zdom[ndom].wind_thetamax = 0.0;
+  zdom[ndom].rmin = geo.rstar;
 
-  geo.corona_rmin = 1.e10;
-  geo.corona_rmax = 2.e10;
-  geo.corona_base_density = 1.e13;
-  geo.corona_scale_height = 1.e9;
+  zdom[ndom].corona_rmin = 1.e10;
+  zdom[ndom].corona_rmax = 2.e10;
+  zdom[ndom].corona_zmax = 2.e09;
+  zdom[ndom].corona_base_density = 1.e13;
+  zdom[ndom].corona_scale_height = 1.e9;
 
-  rddoub ("corona.radmin(cm)", &geo.corona_rmin);	/*Radius where corona begins */
-  if (geo.corona_rmin < geo.rstar)
+  rddoub ("corona.radmin(cm)", &zdom[ndom].corona_rmin);	/*Radius where corona begins */
+  if (zdom[ndom].corona_rmin < geo.rstar)
     {
       Error
 	("get_corona_params: It is unreasonable to have the corona start inside the star!\n");
       Log ("Setting geo.corona_rmin to geo.rstar\n");
-      geo.corona_rmin = geo.rstar;
+      zdom[ndom].corona_rmin = geo.rstar;
     }
-  rddoub ("corona.radmax(cm)", &geo.corona_rmax);	/*Radius where corona ends */
-  rddoub ("corona.base_den(cgs)", &geo.corona_base_density);	/*Density at the base of the corona */
-  rddoub ("corona.scale_height(cm)", &geo.corona_scale_height);	/*Radius where corona begins */
-  rddoub ("corona.vel_frac", &geo.corona_vel_frac);	/*fractional radial velocity of corona */
+  rddoub ("corona.radmax(cm)", &zdom[ndom].corona_rmax);	/*Radius where corona ends */
+  rddoub ("corona.zmax(cm)", &zdom[ndom].corona_zmax);		/*Veritical heighe where corona ends */
+  rddoub ("corona.base_den(cgs)", &zdom[ndom].corona_base_density);	/*Density at the base of the corona */
+  rddoub ("corona.scale_height(cm)", &zdom[ndom].corona_scale_height);	/*Scale height of corona */
+  rddoub ("corona.vel_frac", &zdom[ndom].corona_vel_frac);	/*fractional radial velocity of corona */
 
-  geo.wind_rmin = geo.corona_rmin;
-  geo.wind_rmax = geo.rmax;
-  geo.wind_rho_min = geo.corona_rmin;
-  geo.wind_rho_max = geo.corona_rmax;
-  geo.wind_thetamin = 0.0;
-  geo.wind_thetamax = 0.0;
+  zdom[ndom].rmin = zdom[ndom].corona_rmin;
+  /* rmax here is the defines a radius beyond which this region does not exist, if the vertical height is large
+   * compared to the horizontal size then one needs to include both */
+  zdom[ndom].rmax = sqrt(zdom[ndom].corona_rmax*zdom[ndom].corona_rmax+zdom[ndom].corona_zmax*zdom[ndom].corona_zmax);
+  zdom[ndom].zmax=  zdom[ndom].corona_zmax;
+  zdom[ndom].wind_rho_min = zdom[ndom].corona_rmin;
+  zdom[ndom].wind_rho_max = zdom[ndom].corona_rmax;
+  zdom[ndom].wind_thetamin = 0.0;
+  zdom[ndom].wind_thetamax = 0.0;
+
+  /* Set up wind planes for a layer with a specific height*/
+
+  zdom[ndom].windplane[0].x[0]  =zdom[ndom].windplane[0].x[1]=zdom[ndom].windplane[0].x[2]=0;
+  zdom[ndom].windplane[0].lmn[0]=zdom[ndom].windplane[0].lmn[1]=0;
+  zdom[ndom].windplane[0].lmn[2]=1;
+
+  zdom[ndom].windplane[1].x[0]  =zdom[ndom].windplane[0].x[1]=0;
+  zdom[ndom].windplane[1].x[2]  =zdom[ndom].corona_zmax;
+  zdom[ndom].windplane[1].lmn[0]=zdom[ndom].windplane[0].lmn[1]=0;
+  zdom[ndom].windplane[1].lmn[2]=1;
+
+
+
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      geo.xlog_scale = 0.3 * geo.corona_rmin;
-      geo.zlog_scale = 0.3 * geo.corona_scale_height;
+      zdom[ndom].xlog_scale = 0.3 * zdom[ndom].corona_rmin;
+      if  (zdom[ndom].corona_scale_height<zdom[ndom].corona_zmax)
+      	zdom[ndom].zlog_scale = 0.3 * zdom[ndom].corona_scale_height;
+      else if (zdom[ndom].mdim > 0) {
+	      zdom[ndom].zlog_scale=zdom[ndom].corona_zmax/zdom[ndom].mdim;
+      }
+      else {
+	      Error("corona: Cannot define z coordinates unless zdom[ndom].mdim is defined. Aborting\n");
+	      exit(0);
+      }
     }
 
-/* Prior to 01dec, windcones were defined here.  But this broke a capability to continue
-   a calculation.  To fix this, wind_cone definition was moved backed to python.c.  To
-   ensure that the wind cones are properly defined, one must copy set some additional parameters.
-   Here is what happens in main
-  	windcone[0].r_zero = geo.wind_rho_min;
-  	windcone[1].r_zero = geo.wind_rho_max;
-  	windcone[0].drdz = tan (geo.wind_thetamin);
-  	windcone[1].drdz = tan (geo.wind_thetamax);
-  and so the next few lines make this happen appropriately
-*/
 
-  geo.wind_rho_min = geo.corona_rmin;
-  geo.wind_rho_max = geo.corona_rmax;
-  geo.wind_thetamin = 0;
-  geo.wind_thetamax = 0;
+  zdom[ndom].wind_rho_min = zdom[ndom].corona_rmin;
+  zdom[ndom].wind_rho_max = zdom[ndom].corona_rmax;
+  zdom[ndom].wind_thetamin = 0;
+  zdom[ndom].wind_thetamax = 0;
 
   return (0);
 }
@@ -96,6 +120,7 @@ get_corona_params ()
 	double corona_velocity(x,v) calulates the v the wind at a position r
 	x
 Arguments:		
+	ndom 			The domain number in which the corona is descibed
 	double x[]		the position where for the which one desires the velocity
 Returns:
 	double v[]		the calculated velocity
@@ -112,11 +137,13 @@ History:
  	00sept	ksl	Coded as part of effort to add a stellar wind option to python
 	04aug	ksl	52 -- Modified to return xyz velocity in all
 			cases.
+	08aug	ksl	Modified for use with multiple domans
  
 **************************************************************/
 
 double
-corona_velocity (x, v)
+corona_velocity (ndom, x, v)
+	int ndom;
      double x[], v[];
 {
   double rho, speed;
@@ -128,7 +155,7 @@ corona_velocity (x, v)
   else
     speed = sqrt (G * geo.mstar / geo.rstar);
 
-  v[0] = -geo.corona_vel_frac * speed;
+  v[0] = -zdom[ndom].corona_vel_frac * speed;
   v[2] = 0.0;
   v[1] = speed;
   v[2] *= (-1);
@@ -155,6 +182,7 @@ corona_velocity (x, v)
  Synopsis:
 	double corona_rho(x) calculates the density of a corona at a position x
 Arguments:		
+	ndom 		The domain where the corona is descibed
 	double x[]		the postion where for the which one desires the denisty
 Returns:
 	The density at x is returned in gram/cm**3
@@ -172,16 +200,15 @@ History:
 **************************************************************/
 
 double
-corona_rho (x)
+corona_rho (ndom, x)
      double x[];
 {
   double rho;
   double tref, t;
   double gref, g;
-  double tdisk (), gdisk (), teff (), geff ();
   double zscale;
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       Error
 	("corona_rho: Quitting. Need to think more about coronal model more with vertically extended disk\n");
@@ -195,8 +222,7 @@ corona_rho (x)
 
   zscale = BOLTZMANN * t / (MPROT * g);
 
-rho = geo.corona_base_density * exp (-(x[2]) / geo.corona_scale_height);
-//  rho = geo.corona_base_density * exp (-(x[2]) / zscale);
+rho = zdom[ndom].corona_base_density * exp (-(x[2]) / zdom[ndom].corona_scale_height);
 
   if (rho < 1.e-10)
     rho = 1.e-10;		// A floor to the density appears to be needed for some of the
