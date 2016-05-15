@@ -415,11 +415,21 @@ main (argc, argv)
 
       else
 	{	
-		/* This option is the most common one, where we are starting to define a completely new system */
+	/* This option is the most common one, where we are starting to define a completely new system.  Nothe
+	 * that wind_type 2 is no longer allowed here.  At one time, this was used as the way to read in 
+	 * a previous model but this is now down via geo.system_type above.  kxl
+	 */
 
 	  rdint
 	    ("Wind_type(0=SV,1=Sphere,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)",
 	     &zdom[ndomain].wind_type);
+
+	  if (zdom[ndomain].wind_type==2) {
+		  Error("Wind_type 2, which was used to read in a previous model is no longer allowed! Use System_type instead!\n");
+		  exit(0);
+	  }
+
+	
 	  if (zdom[ndomain].wind_type != 10)
 	    {
 	      strcat (zdom[ndomain].name, "Wind");
