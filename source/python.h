@@ -277,6 +277,7 @@ int current_domain; // This integer is used by py_wind only
 #define SYSTEM_TYPE_BINARY 1
 #define SYSTEM_TYPE_AGN    2
 #define	SYSTEM_TYPE_PREVIOUS   	   3
+#define	SYSTEM_TYPE_ONE_D  	   4
 
 
 

@@ -112,23 +112,27 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
       xmake_phot (p, f1, f2, ioniz_or_final, iwind, weight, 0, NPHOT);
     }
   else
-    {				/* Use banding, create photons with different weithst in different wavelength
-				   bands.  this is used for the for ionization calculation where one wants to assure
-				   that you have "enough" photons at high energy */
-      ftot = populate_bands (f1, f2, ioniz_or_final, iwind, &xband);
+    {	/* Use banding, create photons with different weights in different wavelength
+	   bands.  This is used for the for ionization calculation where one wants to assure
+	   that you have "enough" photons at high energy */
 
+      ftot = populate_bands (f1, f2, ioniz_or_final, iwind, &xband);
 
       for(n=0; n<NPHOT; n++) p[n].path = -1.0; /* SWM - Zero photon paths */
 
-// Now generate the photons
+/* Now generate the photons */
+
       iphot_start = 0;
       for (n = 0; n < xband.nbands; n++)
 	{
 
 	  if (xband.nphot[n] > 0)
 	    {
-/*Reinitialization is required here always because we are changing the frequencies around all the time */
+	/*Reinitialization is required here always because we are changing 
+	 * the frequencies around all the time */
+
 	      xdefine_phot (xband.f1[n], xband.f2[n], ioniz_or_final, iwind);
+
 	      /* The weight of each photon is designed so that all of the photons add up to the
 	         luminosity of the photosphere.  This implies that photons must be generated in such
 	         a way that it mimics the energy distribution of the star. */
@@ -236,6 +240,7 @@ populate_bands (f1, f2, ioniz_or_final, iwind, band)
 /* Because of roundoff errors nphot may not sum to the desired value, namely NPHOT.  So
 add a few more photons to the band with most photons already. It should only be a few, at most
 one photon for each band.*/
+ 
   if (nphot < NPHOT)
     {
       band->nphot[most] += (NPHOT - nphot);
@@ -256,13 +261,12 @@ Arguments:
 
 Returns:
 
-The rosults are stored in the goe structure (see below).  
+The results are stored in the goe structure (see below).  
  
  
 Description:	
 
-This is an routine that initilizes things.  It does not generate photons itself.
-
+This is a routine that initilizes things.  It does not generate photons itself.
 		
 Notes:
 Note: This routine is something of a kluge.  Information is passed back to the calling
@@ -298,7 +302,6 @@ xdefine_phot (f1, f2, ioniz_or_final, iwind)
   geo.f_star = geo.f_disk = geo.f_bl = 0;
   geo.f_kpkt = geo.f_matom = 0;	//SS - kpkt and macro atom luminosities set to zero
 
-
   if (geo.star_radiation)
     {
       star_init (geo.rstar, geo.tstar, f1, f2, ioniz_or_final, &geo.f_star);
@@ -329,6 +332,7 @@ iwind = -1 	Don't generate any wind photons at all
 		the wind needs to be reinitialized.  Initialization is forced
 		in that case by init
 */
+
   if (iwind == -1)
     geo.f_wind = geo.lum_wind = 0.0;
 
@@ -383,12 +387,13 @@ iwind = -1 	Don't generate any wind photons at all
     geo.f_matom + geo.f_agn;
 
 
+/*Store the 3 variables that have to remain the same to avoid reinitialization  */
 
-//Store the 3 variables that have to remain the same to avoid reinitialization 
   f1_old = f1;
   f2_old = f2;
   iwind_old = iwind;
   return (0);
+
 }
 
 
@@ -540,6 +545,7 @@ stellar photons */
 	}
       iphot_start += nphot;
     }
+
 /* Generate the wind photons */
 
   if (iwind >= 0)
