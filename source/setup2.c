@@ -587,8 +587,8 @@ Arguments:
     none	
 
 Returns:
-    just initialises modes which is declared in python.h
- 
+    modes is a structure declared in python.h
+
 Description:	
 	
 Notes:

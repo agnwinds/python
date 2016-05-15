@@ -17,8 +17,8 @@ Arguments:
   argc            command line arguments 
 
 Returns:
+
   restart_start   1 if restarting
- 
  
 Description:  
 
@@ -151,8 +151,7 @@ parse_command_line (argc, argv)
 
       /* This completes the parsing of the command line */
 
-      /* JM130722 we now store diag files in a subdirectory if in parallel */
-      /* ksl - I believe this is created in all cases, and that is what we want */
+      /* Create a subdirectory to store diaganostic files*/
 
       sprintf (files.diagfolder, "diag_%s/", files.root);
       mkdir (files.diagfolder, 0777);

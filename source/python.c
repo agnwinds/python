@@ -28,17 +28,18 @@ Arguments:
 		v to 5 causes the routine to print out all the information which outputs have
 		included previously.  The current default is set to 3 which suppresses Debug, Log_silent
 		and Error_silent
+	-e nnn	The program stops normally stops after 1e6 errors of any type.  This swtich allows one to
+		adjust this number
 	-d	Enters detailed or advanced mode. Allows one to access extra diagnositics and some
-	    other advanced commands
-    -f  Fixed temperature mode - does not attempt to chenge the temperature of cells.
-	-e  Alter the maximum number of errors before the program quits
-	-i  Diagnostic mode which quits after reading in inputs. Used for Travis test suite.
-	-z  Mode to connect with zeus - it either runs two cycles in this is the first call - in order
-         to obtain a good starting state, else it runs just one cycle. In both cases, it does
-		 not attempt to seek a new temperature, but it does output heating and cooling rates
-    --version print out python version, commit hash and if there were files with uncommitted
-	    changes
-	--seed set the random number seed to be time based, rather than fixed.
+	    	other advanced commands
+    	-f  	Fixed temperature mode - does not attempt to chenge the temperature of cells.
+	-i  	Diagnostic mode which quits after reading in inputs. Used for Travis test suite.
+	-z  	Mode to connect with zeus - it either runs two cycles in this is the first call - in order
+         	to obtain a good starting state, else it runs just one cycle. In both cases, it does
+		not attempt to seek a new temperature, but it does output heating and cooling rates
+    --version	print out python version, commit hash and if there were files with uncommitted
+	    	changes
+       --seed	set the random number seed to be time based, rather than fixed.
 
 	
 	if one simply types py or pyZZ where ZZ is the version number one is queried for a name
@@ -268,11 +269,9 @@ main (argc, argv)
   opar_stat = 0;		/* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
 				   the assumption is that we are reading from the command line */
   restart_stat = 0;		/* 67 -ksl - 08nov - Assume initially that these is a new run from scratch, and not 
-				   a restart
-				 */
+				   a restart */
   time_max = 13.8e9 * 3.2e7;	/* 67 - ksl - 08nov - The maximum time the program will run without stopping.  This
-				   is initially set to the lifetime of the universe
-				 */
+				   is initially set to the lifetime of the universe */
   time_max = -1;
   time_to_quit = 100000;	// Initialise variable
 
@@ -283,7 +282,7 @@ main (argc, argv)
   verbosity = 3;
   Log_set_verbosity (verbosity);
 
-  /* initialise options for advanced mode (all set to 0) */
+  /* initialise the advanced mode flags (all set to 0) which is a structure in python.h*/
 
   init_advanced_modes ();
 
