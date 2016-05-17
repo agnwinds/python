@@ -359,11 +359,6 @@ int nplasma, nmacro;	/*The total number of cells in the plasma and macro structu
   double disk_mdot;		/* mdot of  DISK */
   double diskrad, diskrad_sq;
   double disk_z0, disk_z1;	/* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 */
-//  XXX  The next lines are domain specific, but we cannot remove wind_type until test photon flow through wind
-int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply old file
-		        Added in order to separate the question of whether we are continuing an old run fro
- 		       the type of wind model 	*/
-
   int run_type;                 /*1508 - New variable that describes whether this is a continuation of a previous run 
   				Added in order to separate the question of whether we are continuing an old run fro
 				the type of wind model.  Bascially if run_type is 0, this is a run from scratch,

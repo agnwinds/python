@@ -912,37 +912,27 @@ History:
     /* JM XXX PLACEHOLDER -- unsure how we loop over the plasma cells just in one domain */
     for (n = 0; n < NPLASMA; n++)
       {
-	      nwind = plasmamain[n].nwind;
-	      stuff_v (w[nwind].xcen, x);
-		    old_density=plasmamain[n].rho;
-        plasmamain[n].rho = model_rho (ndom, x) / geo.fill;
-		    plasmamain[n].t_r = plasmamain[n].t_e = hydro_temp (x);
+		nwind = plasmamain[n].nwind;
+		stuff_v (w[nwind].xcen, x);
+		old_density=plasmamain[n].rho;
+        	plasmamain[n].rho = model_rho (ndom, x) / geo.fill;
+		plasmamain[n].t_r = plasmamain[n].t_e = hydro_temp (x);
 
-		  for (nion=0;nion<nions;nion++) //Change the absolute number densities, fractions remain the same
+		for (nion=0;nion<nions;nion++) //Change the absolute number densities, fractions remain the same
 		  {
 			 plasmamain[n].density[nion] = plasmamain[n].density[nion] * (plasmamain[n].rho/old_density);
-		 }
+		  }
 
 		 plasmamain[n].ne = get_ne (plasmamain[n].density); //get the new electron density
 		 partition_functions (&plasmamain[n], 4);  //ensure the partition functions and level densities are correct
-//	 	if (plasmamain[n].nplasma==0)
-//	 	{
-//	   printf ("BLAH H1_new=%e H2_new=%e ne_new=%e\n ",plasmamain[n].density[0],plasmamain[n].density[1],plasmamain[n].ne);
-//	   printf ("H1 ground_new=%e",plasmamain[n].levden[ion[0].first_levden]);
-//	 }	 
 		 
-		 
-		 
-		 
-		  }
-		  plasmamain[n].ne = get_ne (plasmamain[n].density);  //we also need to update the electron density
-		  partition_functions (&plasmamain[n], 4);	/* WARNING fudge NSH 11/5/14 - this is as a test. We really need a better implementation
+  	}
+	plasmamain[n].ne = get_ne (plasmamain[n].density);  //we also need to update the electron density
+	partition_functions (&plasmamain[n], 4);	/* WARNING fudge NSH 11/5/14 - this is as a test. We really need a better implementation
 							   of partition functions and levels for a power law illuminating spectrum. We found that
 							   if we didnt make this call, we would end up with undefined levels - which did really
 							   crazy things */
 		    
-			
-	geo.wind_type=2; //Set the windtype back to restart
 	
 	return(0);
 	

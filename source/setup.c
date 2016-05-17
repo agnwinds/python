@@ -1204,20 +1204,46 @@ get_meta_params (void)
              University of Southampton
 
 Synopsis: 
+
   setup_dfudge works out dfudge and returns it to the user.
   the global variable DFUDGE is not altered here.
    
 Arguments:		
 
 Returns:
-  dfudge 	double	
-  			the push through distance
+  dfudge 	the push through distance 
+
 Description:	
 
+  DFUDGE is the push through distance when photons are not
+  travelling within wind cells.  (Inside a cell in a domain
+  the push through distance is defined on a cell by cell
+  basis)
+  
 Notes:
 
+  There are two competing factors in defining DFUDGE.  It
+  should be short enough so that the push through distane
+  goes only a small way into s cell.  It should be large
+  enough though that round-off errors do not prevent one
+  from actually getting into a cell.  When this happens
+  one can get "stuck photons".
+
+  Prior to domains, we had effectively 3 separate ways of
+  defining dfudge, one for the SHELL model, one for normal
+  stellar systems and one for AGN,  The shell model was
+  different because it can be thin but large scale.
+
+  The current version of setup_dfudge preserves the onld
+  value of dfudge as much as possible (except the it
+  senses the old SHELL case bu the differene between
+  gero.rmax and geo.rmin
+
+
 History:
-	1502  JM 	Moved here from main()
+	1502	JM 	Moved here from main()
+	1605	ksl	Revised to remove the dependence on
+			a specific geometry namely SHELL
 
 **************************************************************/
 
@@ -1225,37 +1251,24 @@ double
 setup_dfudge ()
 {
   double dfudge;
+  double delta;
 
-  /* 121219 NSH Set up DFUDGE to be a value that makes some kind of sense
-     given the scale of the wind. Up till py74b2 it was set to be fixed at
-     1e5, so we ensure that this is a minimum, so any winds of CV type scale
-     will keep the old dfudge, and hopefully look the same. We also need to
-     set dfudge slightly differently for the shell wind. */
+  delta=geo.rmax-geo.rmin;
 
-
- /* XXX this is really not correct for domains, or very food for anything
-  else. The fudge ought to be related to how big adjacent cells are.
-  160420 - ksl - I am currently make changes so that within wind cells
-  dfudge is defined by the size of the cell, and so DFUDGE will only be used
- in calculating travel outside of the wind.  */
-
-  if (geo.wind_type == SHELL)
+  if (delta < 1.e8)
     {
       dfudge = (geo.rmax - geo.rmin) / 1000.0;
     }
-  else
-    {
-      if (geo.rmax / 1.e10 < 1e5)
+  else if (delta  < 1e15)
 	{
 	  dfudge = 1e5;
-	  Log ("DFUDGE set to minimum value of %e\n", dfudge);
 	}
       else
 	{
 	  dfudge = geo.rmax / 1.e10;
-	  Log ("DFUDGE set to %e based on geo.rmax\n", dfudge);
 	}
-    }
+
+  Log ("DFUDGE set to %e based on geo.rmax\n", dfudge);
 
   return (dfudge);
 }
