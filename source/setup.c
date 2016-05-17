@@ -683,12 +683,11 @@ get_wind_params (ndom)
     }
 
   /* Get the filling factor of the wind */
-  // XXX  This is not in the right place.  It provides a gobal filling factor to our
-  // models
+  // XXX  This ismay  not in the right place to set the filling factor.  The filling factor should
+  // XXX  be specified for each domain.
 
   geo.fill = 1.;
-  if (geo.wind_type != 3)	//At present, we wont ask this question if we have a read in hydro model.
-    rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
+  rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
 
   /* Next lines are to assure that we have the largest possible value of the 
    * sphere surrounding the system

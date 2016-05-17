@@ -475,7 +475,7 @@ model_rho (ndom, x)
     }
   else
     {
-      Error ("wind2d: Unknown windtype %d\n", geo.wind_type);
+      Error ("wind2d: Unknown windtype %d for domain %d\n", zdom[ndom].wind_type,ndom);
       exit (0);
     }
 
