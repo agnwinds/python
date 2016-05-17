@@ -451,13 +451,35 @@ Notes:
 
 History:
   1502  JM  Moved here from main()
+  1605	ksl Modified the logic of this so that different radiation
+  	    sources could be chosen for SYSTEM_TYPE_ONE_D
 
 **************************************************************/
 
 int
 get_radiation_sources ()
 {
-  if (geo.system_type != SYSTEM_TYPE_AGN)
+ if (geo.system_type == SYSTEM_TYPE_AGN) 				/* If it is an AGN */
+    {
+      geo.star_radiation = 0;	// 70b - AGN do not have a star at the center */
+      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+      geo.bl_radiation = 0;
+      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+      geo.agn_radiation = 1;
+      rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
+    }
+
+ else if (geo.system_type==SYSTEM_TYPE_ONE_D) 
+     {
+	     geo.search_light_radiation=1; // The point of this model is we need this
+	     geo.star_radiation = 0;
+	     rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+	     geo.bl_radiation = 0;
+	     rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+	     geo.agn_radiation = 0;
+     }
+
+ else 
     {				/* If is a stellar system */
       rdint ("Star_radiation(y=1)", &geo.star_radiation);
       if (geo.disk_type != DISK_NONE)
@@ -471,15 +493,6 @@ get_radiation_sources ()
       rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
       rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
       geo.agn_radiation = 0;	// So far at least, our star systems don't have a BH
-    }
-  else				/* If it is an AGN */
-    {
-      geo.star_radiation = 0;	// 70b - AGN do not have a star at the center */
-      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-      geo.bl_radiation = 0;
-      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-      geo.agn_radiation = 1;
-      rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
     }
 
   if (!geo.star_radiation && !geo.disk_radiation && !geo.bl_radiation

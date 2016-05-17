@@ -136,6 +136,9 @@ enum coord_type_enum
 
 #define SV   			0
 #define	SPHERE  		1
+/* PREVIOUS is no longer an allowed type. Reading in an early model is now
+ * handled as a system_type 
+ */
 // #define	PREVIOUS 		2
 #define	HYDRO 			3
 #define	CORONA 			4
@@ -367,6 +370,7 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
 			       if SYSTEM_TYPE_PREVIOUS it is an old run	*/                  
   int star_radiation, disk_radiation;	/* 1 means consider radiation from star, disk,  bl, and/or wind */
   int bl_radiation, wind_radiation, agn_radiation;
+  int search_light_radiation;   /* 1605 - ksl - Added to implement 1d testing */
   int matom_radiation;		/* Added by SS Jun 2004: for use in macro atom computations of detailed spectra
 				   - 1 means use emissivities for BOTH macro atom levels and kpkts. 0 means don't
 				   (which is correct for the ionization cycles. */
@@ -412,29 +416,28 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
 				   1  anisotropic
 				   2  thermally broadened anisotropic
 				 */
-  int rt_mode;			/* radiative transfer mode (0=Sobolev,1=simple (used only by balance) */
-  /* This IS now used by Python - set to 2 for Macro Atom method. Set to 1
-     for non-Macro Atom methods (SS) */
 
-  /* 71 - 111229  - ksl - These are the frequency bands used when calculating parameters like a power law slope
-   * in limited regions.  Moved inside geo becuase we need to know this information in py_wind
-   */
+  int rt_mode;			/* radiative transfer mode. 2 for Macro Atom method,  1 for non-Macro Atom methods  */
+
+  /* The frequency bands used when calculating parameters like a power law slope in limited regions. */
+
 #define  NXBANDS 20		/* the maximum number of bands that can be defined */
+
   int nxfreq;			/* the number of bands actually used */
   double xfreq[NXBANDS + 1];	/* the band limits  */
 
 
-  /* The spectral types are SPECTYPE_BB for bb, SPECTYPE_UNIFORM for a uniform spectral distribution, 
-   * SPECTYPE_POW for a power law, 0 or more from a filelist.
-   * A value of SPECTYPE_NONE indicates no emission is expected from this particular source */
+  /* The next set pf variables assign a SPECTYPE (see above) for
+     each possible source of radiation in a model.  The value assigned can be different for
+    the ionization and detaled spectrum generation part of the code */ 
+
   int star_ion_spectype, star_spectype;	/* The type of spectrum used to create the continuum
 					   for the star in the ionization and final spectrum calculation */
-  int disk_ion_spectype, disk_spectype;	/* The type of spectrum used to create the continuum
-					   for the disk in the ionization and final spectrum calculation */
-  int bl_ion_spectype, bl_spectype;	/* The type of spectrum used to create the continuum
-					   for the bl in the ionization and final spectrum calculation */
-  int agn_ion_spectype, agn_spectype;	/* The type of spectrum used to create the continuum
-					   for the agn in the ionization and final spectrum calculation */
+  int disk_ion_spectype, disk_spectype;	/* Same as above but for the disk */
+  int bl_ion_spectype, bl_spectype;	/* Same as above but for the boundary layer */
+  int agn_ion_spectype, agn_spectype;	/* Same as above but for the AGN */
+  int search_light_ion_spectype, search_light_spectype; /* Same as above but for the search_light. Created for 1d test */
+
   char model_list[NCOMPS][LINELENGTH];	/* The file which contains the model names and the associated values for the model */
 
   double mdot_norm;		/*A normalization factor used in SV wind, and Knigge wind */
