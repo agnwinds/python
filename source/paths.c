@@ -51,11 +51,17 @@ wind_paths_constructor(WindPtr wind)
 			 wind->nwind);
 		exit(0);
 	}
-	paths->ad_path_flux =
-		(double *)calloc(sizeof(double), geo.reverb_path_bins);
-	paths->ai_path_num =
-		(int *)calloc(sizeof(int), geo.reverb_path_bins);
-	if (paths->ad_path_flux == NULL || paths->ai_path_num == NULL) 
+
+	paths->ad_path_flux 		= 	(double *)	calloc(sizeof(double), 	geo.reverb_path_bins);
+	paths->ai_path_num  		=	(int *)		calloc(sizeof(int), 	geo.reverb_path_bins);
+	paths->ad_path_flux_cent 	= 	(double *)	calloc(sizeof(double), 	geo.reverb_path_bins);
+	paths->ai_path_num_cent		=	(int *)		calloc(sizeof(int), 	geo.reverb_path_bins);
+	paths->ad_path_flux_disk 	= 	(double *)	calloc(sizeof(double), 	geo.reverb_path_bins);
+	paths->ai_path_num_disk		=	(int *)		calloc(sizeof(int), 	geo.reverb_path_bins);
+	paths->ad_path_flux_wind 	= 	(double *)	calloc(sizeof(double), 	geo.reverb_path_bins);
+	paths->ai_path_num_wind		=	(int *)		calloc(sizeof(int), 	geo.reverb_path_bins);	
+
+	if (paths->ad_path_flux == NULL || paths->ai_path_num_wind == NULL) 
 	{
 		Error
 			("wind_paths_constructor: Could not allocate memory for cell %d bins\n",
@@ -70,6 +76,7 @@ wind_paths_constructor(WindPtr wind)
  * @brief	Initialises everything for reverb mapping
  *
  * @param [in,out] wind		Top-level wind cell array
+ * @param [in] nangles		Number of observers
  * @return 					0
  *
  * Reports back to user the reverb mode running, and then
@@ -78,64 +85,76 @@ wind_paths_constructor(WindPtr wind)
  * @see wind_paths_init
  *
  * @notes
- * 03/15	-	Written by SWM
+ * 3/15	-	Written by SWM
 ***********************************************************/
 int
 reverb_init(WindPtr wind)
 {
 	char linelist[LINELENGTH];
-	int i;
-	double r_rad_min=0.0, r_rad_max=0.0, r_rad_min_log, r_rad_max_log, r_delta;
+	int i,n;
+	double x[3];
+	double r_rad_min=99e99, r_rad_max=0.0, r_rad_min_log, r_rad_max_log, r_delta;
 
 	if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM) 
 	{	//Initialise the arrays that handle photon path data and wind paths
-	
 
-		//Set the upper and lower bounds of the path bin array
-		if(geo.rmin>0)
-			r_rad_min = geo.rmin;
-		else if(geo.rstar > 0)
-			r_rad_min = geo.rstar;
-		else if(geo.r_agn > 0)
-			r_rad_min = geo.r_agn;
-		else
-			r_rad_min = DFUDGE;
+		if(geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
+		{	//If we're dumping out arrays of paths per cell
+			for(i=0; i<geo.reverb_dump_cells;i++)
+			{	//For each x/z position, find the n and put it in the array
+				x[0] = geo.reverb_dump_cell_x[i];
+				x[1] = 0.0;
+				x[2] = geo.reverb_dump_cell_z[i];
+				wind_x_to_n(x, &n);
+				if(n<0 || n > geo.ndim2)
+				{
+					Error("reverb_init: Trying to dump info from a cell outside the grid\n");
+				}
+				geo.reverb_dump_cell[i] = n;
+			}
+		}
 
-		r_rad_max = geo.rmax * 5.0;
+		for(i=0; i<geo.ndomain; i++)
+		{	//Find the smallest and largest domain scales in the problem
+			if(zdom[i].rmin < r_rad_min) r_rad_min = zdom[i].rmin;
+			if(zdom[i].rmax > r_rad_max) r_rad_max = zdom[i].rmax;
+		}
 
-		//Allocate sufficient bin space
+		//Allocate the array of bins
 		reverb_path_bin = (double *)calloc(sizeof(double), geo.reverb_path_bins + 1);
-
-		//Shift to log space, and calc the min/max and bin width in logspace
 		r_rad_min_log = log(r_rad_min);
-		r_rad_max_log = log(r_rad_max);
+		r_rad_max_log = log(r_rad_max*10.0);
 		r_delta = (r_rad_max_log - r_rad_min_log) / (double) geo.reverb_path_bins;
 		for (i = 0; i <= geo.reverb_path_bins; i++) 
-		{	//Create an even bin spacing in log space
+		{	//Set up the bounds for these bins
 			reverb_path_bin[i] = exp(r_rad_min_log + i*r_delta);
 		}
 
-		//Now, initialise the various wind path arrays
 		wind_paths_init(wind);
 
 		if(geo.reverb == REV_MATOM)
-		{	//If this is matom mode, detail the line numbers being tracked for use with bindata
+		{	//If this is matom mode, detail the line numbers being tracked 
 			sprintf(linelist, "reverb_init: Macro-atom line path tracking is enabled for lines %d", geo.reverb_line[0]);
 			for(i=1; i<geo.reverb_lines; i++)
 			{
 				sprintf(linelist, "%s, %d",linelist, geo.reverb_line[i]);
 			}
 			Log("%s\n",linelist);
+
+			for(i=0; i<nlines_macro; i++)
+        	{ //Record the h-alpha line index for comparison purposes
+          		if(line[i].z == 1 && line[i].istate == 1 && line[i].levu == 3 && line[i].levl == 2)
+          		{
+          			geo.nres_halpha = line[i].where_in_list; break;
+          		}
+        	}
 		}
 	  	else if(geo.reverb == REV_WIND)
-	  	{
 	  		Log ("reverb_init: Wind cell-based path tracking is enabled\n");
-	  	}
 	}
 	else if (geo.reverb == REV_PHOTON)
-	{
 		Log("reverb_init: Photon-based path tracking is enabled.\n");
-	}
+	
 
   	return (0);
 }
@@ -193,6 +212,7 @@ line_paths_add_phot(WindPtr wind, PhotPtr pp, int *nres)
 {
 	int i, j;
 
+	if(geo.reverb_disk == REV_DISK_IGNORE && pp->origin_orig == PTYPE_DISK) return(0);
 	if(*nres > nlines || *nres < 0) return(0); //This is a continuum photon
 
 	for (i = 0; i < geo.reverb_lines; i++)
@@ -204,9 +224,28 @@ line_paths_add_phot(WindPtr wind, PhotPtr pp, int *nres)
 				if (pp->path >= reverb_path_bin[j] &&
 				    pp->path <= reverb_path_bin[j+1]) 
 				{	//If the photon's path lies in this bin's bounds, record it
+					//printf("DEBUG: Added to line %d in cell %d - path %g weight %g\n",geo.reverb_line[i], wind->nwind, pp->path, pp->w);
 					wind->line_paths[i]->ad_path_flux[j]+= pp->w;
 					wind->line_paths[i]->ai_path_num[ j]++;
-					break; break;
+					switch(pp->origin)
+					{
+						case PTYPE_STAR:
+						case PTYPE_AGN:
+						case PTYPE_BL:
+							wind->line_paths[i]->ad_path_flux_cent[j]+= pp->w;
+							wind->line_paths[i]->ai_path_num_cent[ j]++;
+							break;
+						case PTYPE_DISK:
+							wind->line_paths[i]->ad_path_flux_disk[j]+= pp->w;
+							wind->line_paths[i]->ai_path_num_disk[ j]++;
+							break;
+						default:
+							wind->line_paths[i]->ad_path_flux_wind[j]+= pp->w;
+							wind->line_paths[i]->ai_path_num_wind[ j]++;
+							break;
+					}
+					//Exit out of this loop
+					return(0);
 				}
 			}
 		}
@@ -232,6 +271,8 @@ int
 wind_paths_add_phot(WindPtr wind, PhotPtr pp)
 {
 	int i;
+	if(geo.reverb_disk == REV_DISK_IGNORE && pp->origin_orig == PTYPE_DISK) return(0);
+
 	for (i=0; i < geo.reverb_path_bins; i++) 
 	{	//For each bin
 		if (pp->path >= reverb_path_bin[i] &&
@@ -239,7 +280,25 @@ wind_paths_add_phot(WindPtr wind, PhotPtr pp)
 		{	//If the path falls within its bounds, add photon weight
 			wind->paths->ad_path_flux[i]+= pp->w;
 			wind->paths->ai_path_num[ i]++;
-			break;
+
+			switch(pp->origin)
+			{
+				case PTYPE_STAR:
+				case PTYPE_AGN:
+				case PTYPE_BL:
+					wind->paths->ad_path_flux_cent[i]+= pp->w;
+					wind->paths->ai_path_num_cent[ i]++;
+					break;
+				case PTYPE_DISK:
+					wind->paths->ad_path_flux_disk[i]+= pp->w;
+					wind->paths->ai_path_num_disk[ i]++;
+					break;
+				default:
+					wind->paths->ad_path_flux_wind[i]+= pp->w;
+					wind->paths->ai_path_num_wind[ i]++;
+					break;
+			}
+			return(0);
 		}
 	}
 	return (0);
@@ -448,7 +507,6 @@ wind_paths_evaluate_single(Wind_Paths_Ptr paths)
 	//If there was any data in this cell, calculate avg. path
 	if (paths->i_num > 0)
 		paths->d_path /= paths->d_flux;
-
 	return (0);
 }
 
@@ -474,33 +532,12 @@ wind_paths_evaluate(WindPtr wind)
 	for (i = 0; i < geo.ndim2; i++)
 	{	//For each cell in the wind
 		if (wind[i].inwind >= 0)
-		{	//If this is a wind cel;, evaluate each of the path histograms
+		{	//If this is a wind cell;, evaluate each of the path histograms
 			wind_paths_evaluate_single(wind[i].paths);
 			for(j = 0; j < geo.reverb_lines; j++)
-			{
 				wind_paths_evaluate_single(wind[i].line_paths[j]);
-			}
 		}
 	}
-
-	if(rank_global == 0)
-	{	//If this is the head node and we're outputting data to vis, process it
-		if(geo.reverb_vis == REV_VIS_VTK 	|| geo.reverb_vis == REV_VIS_BOTH)\
-			Log("wind_paths_evaluate: Outputting %d .vtk visualisations\n",geo.ndomain);
-		{	//If we're visualising the delays in 3d
-			for(i=0; i<geo.ndomain; i++)
-			{	//For each domain, dump a vtk file of the grid & info
-				wind_paths_output_vtk(wind, i);
-			}
-		}
-		if(geo.reverb_vis == REV_VIS_DUMP	|| geo.reverb_vis == REV_VIS_BOTH)
-		{	//Dump the path delay information for certain tracked cells to file
-			wind_paths_output_dump(wind);
-		}
-	}
-
-	Log(" Completed evaluating wind path arrays.");
-
 	return (0);
 }
 
@@ -517,45 +554,37 @@ wind_paths_evaluate(WindPtr wind)
  *
  * @notes
  * 10/15	-	Written by SWM
- * 11/15	-	Updated to use domains by SWM
 *****************************************************************/
 int
-wind_paths_dump(WindPtr wind)
+wind_paths_dump(WindPtr wind, int rank_global)
 {
 	FILE *fopen(), *fptr;
 	char c_file[LINELENGTH];
-	int lin_pos, j, k;
+	int j, k;
 
-	//Setup file name and open the file
-	sprintf(c_file,"%s.wind_paths_%d.csv", files.root, wind->nwind);
+	sprintf(c_file,"%s.wind_paths_%d.%d.csv", files.root, wind->nwind, rank_global);
 	fptr = fopen(c_file, "w");
 
-	//Print out metadata header specifying the domain and position
-	//As nwind is unique but not descriptive, and X:Y:Domain would be too long
-	fprintf(fptr, "'Wind domain', %d,'X',%g,'Y',%g\n",
-		wind->ndom, wind->xcen[0], wind->xcen[2]);
+	//Print out header for bins
+	fprintf(fptr, "'Wind cell', %d,'Inwind',%d\n", wind->nwind, wind->inwind);
 
-	//Now print out the header for the actual path data for this wind cell 
-	fprintf(fptr, "'Path Bin', 'General'");
+	fprintf(fptr, "'Path Bin', 'Heating', 'Heating Central', 'Heating Disk', 'Heating Wind'");
 	for(j=0;j< geo.reverb_lines; j++)
-	{	//For each line, print its information (z, istate, upper->lower)
-		lin_pos = geo.reverb_line[j];
-		fprintf(fptr, ", %d:%d:%d:%d", 
-			lin_ptr[lin_pos]->z, 	lin_ptr[lin_pos]->istate,
-			lin_ptr[lin_pos]->levu, lin_ptr[lin_pos]->levl);
-	}
+		fprintf(fptr, ", %d, %d Central, %d Disk, %d Wind", j,j,j,j);
 	fprintf(fptr, "\n");
 
-	for(k=0;k< geo.reverb_path_bins; k++)
-	{	//For each path bin, print the 'wind' weight 
-		fprintf(fptr,"%g, %g",
-			reverb_path_bin[k],
-			wind->paths->ad_path_flux[k]);	
 
+	for(k=0;k< geo.reverb_path_bins; k++)
+	{	//For each path bin, print the 'wind' weight then the histogram for
+		//each tracked line
+		fprintf(fptr,"%g, %g",reverb_path_bin[k],
+			wind->paths->ad_path_flux[k]);	
 		for(j=0;j< geo.reverb_lines; j++)
-		{	//For each tracked line, print the weight in this bin
-			fprintf(fptr, ", %g", wind->line_paths[j]->ad_path_flux[k]);
-		}
+			fprintf(fptr, ", %g, %g, %g, %g", 
+				wind->line_paths[j]->ad_path_flux[k],
+				wind->line_paths[j]->ad_path_flux_cent[k],
+				wind->line_paths[j]->ad_path_flux_disk[k],
+				wind->line_paths[j]->ad_path_flux_wind[k]);
 		fprintf(fptr, "\n");		
 	}
 	fclose(fptr);
@@ -563,38 +592,26 @@ wind_paths_dump(WindPtr wind)
 }
 
 /*************************************************************//**
- * @name 	wind_paths_output_dump
- * @brief	Iterates through the wind, dumping cells of interest
+ * @name 	wind_paths_dump
+ * @brief	Dumps wind path arrays for a wind cell
  *
  * @param [in] wind		Wind array to dump from
  * @return 				0
  *
- * Calls wind_paths_dump() for each wind cell (in all domains)
- * at one of the xz positions where a dump is requested.
+ * Outputs a file "root.ngrid.csv" containing the path length bins
+ * and total flux in each for each line histogram (and the regular
+ * wind histogram) in the given cell.
  *
  * @notes
  * 10/15	-	Written by SWM
- * 11/15	- 	Updated to use domains by switching from ij to rz
 *****************************************************************/
 int
-wind_paths_output_dump(WindPtr wind)
+wind_paths_output_dump(WindPtr wind, int rank_global)
 {
-	int i,d, n;
-	double x[3];
+	int i;
 	for(i=0;i< geo.reverb_dump_cells; i++)
-	{	//For each location we want to dump the details for
-		x[0] = geo.reverb_dump_x[i];
-		x[1] = 0.0;
-		x[2] = geo.reverb_dump_z[i];
-		
-		for(d=0; d<geo.ndomain; d++)
-		{	//For each domain, check if this position is within it
-			n = where_in_grid(d, x);
-			if(n >= 0)
-			{	//If it is, then dump the delay information 
-				wind_paths_dump(&wind[n]);
-			}
-		}
+	{	
+		wind_paths_dump(&wind[geo.reverb_dump_cell[i]], rank_global);	
 	}
 	return(0);
 }
@@ -614,26 +631,24 @@ wind_paths_output_dump(WindPtr wind)
  * uses the standard wind location, theta is set as defined in
  * geo. Used in wind_paths_output() only.
  *
- * @notes
- * 04/15	-	Written by SWM
- * 11/15 	-	Updated to use domains by SWM
+ * @notes Written by SWM 4/15.
  *****************************************************************/
 int
-wind_paths_point_index(int i, int j, int k, int i_top, DomainPtr dom)
+wind_paths_point_index(int i, int j, int k, int i_top, int i_ndom)
 {
 	int	n;
-	n = i * 2 * (geo.reverb_angle_bins + 1) * dom->ndim +
+	n = i * 2 * (geo.reverb_angle_bins + 1) * zdom[i_ndom].ndim +
 		j * 2 * (geo.reverb_angle_bins + 1) + k * 2 + i_top;
 	return (n);
 }
 
 /*************************************************************//**
  * @name		wind_paths_sphere_point_index
- * @brief		Given rtt index in wind, returns vtk data index.
+ * @brief		Given trz index in wind, returns vtk data index.
  * 
- * @param [in] i 	Radius index of cell.
- * @param [in] j 	Theta index of cell.
- * @param [in] k 	Thi index of cell.
+ * @param [in] i 	Theta index of cell.
+ * @param [in] j 	Radius index of cell.
+ * @param [in] k 	Height index of cell.
  * @return			Index for vtk poly.
  * 
  * When given the position of a cell in the wind, returns the
@@ -658,329 +673,177 @@ wind_paths_sphere_point_index(int i, int j, int k)
  * @brief		Outputs wind path information to vtk.
  * 
  * @param [in] wind 		Pointer to wind array.
- * @param [in] ndom 		Index of the domain to plot
+ * @param [in] c_file_in	Name of input file.
  * @return 					0
  *  
  * When given a wind containing position and delay map information
  * generated using REVERB_WIND, outputs a 3d model of the wind to
- * file in ASCII .vtk format. Understanding this will require
- * familiarity with the VTK file format, documented here:
- * http://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf
+ * file in ASCII .vtk format.
  *
- * @notes
- *	04/15 	-	Written by SWM
- *	11/15 	-	Updated to domain by SWM
+ * @notes Written by SWM 4/15.
 *****************************************************************/
 int
-wind_paths_output_vtk(WindPtr wind, int ndom)
+wind_paths_output_vtk(WindPtr wind, char c_file_in[], int nangles)
 {
-	FILE        *fopen(), *fptr;
-	char		c_file[LINELENGTH];
-	int			i, j, k, n, i_obs, i_cells, i_points;
+	FILE           *fopen(), *fptr;
+	char		c_file    [LINELENGTH];
+	int		i         , j, k, n, i_obs, i_cells, i_points, i_dom;
 	double		r_azi, r_inc, r_x, r_y, r_z, r_err;
 	PhotPtr		p_test = calloc(sizeof(p_dummy), 1);
-	DomainPtr	dom;
 
-	//Get output filename
-	sprintf(c_file,"%s.%d.wind_paths.vtk", files.root, ndom);
+	for(i_dom=0; i_dom<geo.ndomain; i_dom++)
+	{	//For each domain in the model, output a vtk
+		//Get output filename
+		sprintf(c_file,"%s.dom_%d.wind_paths.vtk",c_file_in,i_dom);
 
-	if ((fptr = fopen(c_file, "w")) == NULL)
-	{	//If this file can't be opened, error out
-		Error("wind_paths_output_vtk: Unable to open %s for writing\n", c_file);
-		exit(0);
-	}
-	Log("Outputting wind path information to file '%s'.\n", c_file);
 
-	dom = &zdom[ndom];
-
-	//Setup the number of vertexes and cells within this mesh
-	//Notably, we skip the outside cell as it's empty
-	//For the spherical case, we generate theta and thi bins using the same resolution
-	switch(dom->coord_type)
-	{
-		case SPHERICAL: 
-			i_cells = 1 * (dom->ndim-1) * geo.reverb_angle_bins    *  geo.reverb_angle_bins;
-			i_points = 1 * dom->ndim *   (geo.reverb_angle_bins+1) * (geo.reverb_angle_bins+1);
-			break;
-		case CYLIND:
-			i_cells = 2 * (dom->ndim-1) * (dom->mdim-1) *  geo.reverb_angle_bins;
-			i_points = 2 * dom->ndim *     dom->mdim    * (geo.reverb_angle_bins+1);
-			break;
-		default:
-			free(p_test);
-			fclose(fptr);
-			Error("wind_paths_output_vtk: Mesh format not yet supported (CYLVAR/RTHETA)");
-			return(0);
-	}
-
-	//Write out header
-	fprintf(fptr, "# vtk DataFile Version 2.0\n");
-	fprintf(fptr, "Wind file data\nASCII\n");
-
-	//Write out positions of corners of each wind cell as vertexes
-	fprintf(fptr, "DATASET UNSTRUCTURED_GRID\n");
-	fprintf(fptr, "POINTS %d float\n", i_points);
-	if(dom->coord_type == SPHERICAL)	{
-		for (i = 0; i < dom->ndim; i++) 
+		if ((fptr = fopen(c_file, "w")) == NULL)
 		{
-			n = dom->nstart + i;
-			for(j=0; j <= geo.reverb_angle_bins; j++) {
-				r_inc = j * (PI / (double)geo.reverb_angle_bins) - PI/2.0;
-
-				for(k=0; k<= geo.reverb_angle_bins; k++) {
-					r_azi = k * (PI / (double)geo.reverb_angle_bins);
-					r_x = wind[n].x[0] * sin(r_inc) * cos(r_azi);
-					r_y = wind[n].x[0] * sin(r_inc) * sin(r_azi);
-					r_z = wind[n].x[0] * cos(r_inc);
-					fprintf(fptr, "%10.5g %10.5g %10.5g\n", r_x, r_y, r_z);
-				}
-			}
+			Error("wind_paths_output: Unable to open %s for writing\n", c_file);
+			exit(0);
 		}
-	} else {
-		for (i = 0; i < dom->ndim; i++) {
-			for (j = 0; j < dom->mdim; j++) 
-			{
-				wind_ij_to_n(ndom, i, j, &n);
-				for (k = 0; k <= geo.reverb_angle_bins; k++) {
-					r_azi = k * (PI / (double)geo.reverb_angle_bins);
-					r_x = wind[n].x[0] * cos(r_azi);
-					r_y = wind[n].x[0] * sin(r_azi);
-					fprintf(fptr, "%10.5g %10.5g %10.5g\n", r_x, r_y,
-						wind[n].x[2]);
-					fprintf(fptr, "%10.5g %10.5g %10.5g\n", r_x, r_y,
-						-wind[n].x[2]);
-				}
-			}
-		}
-	}
-	fprintf(fptr, "\n");
+		Log("Outputting wind path information to file '%s'.\n", c_file);
 
-	//Write out the vertexes comprising each cell
-	fprintf(fptr, "CELLS %d %d\n", i_cells, 9 * i_cells);
-	if(dom->coord_type == SPHERICAL) {
-		for (i = 0; i < dom->ndim-1; i++) 
+		if(zdom[i_dom].coord_type == SPHERICAL)
 		{
-			n = dom->nstart + i;
-			for(j=0; j < geo.reverb_angle_bins; j++) {
-				r_inc = j * (PI / (double)geo.reverb_angle_bins) - PI/2.0;
+			i_cells = 1  * (zdom[i_dom].ndim -1) *  geo.reverb_angle_bins 	 *  geo.reverb_angle_bins;
+			i_points = 1 *  zdom[i_dom].ndim 	 * (geo.reverb_angle_bins+1) * (geo.reverb_angle_bins+1);
+		} else {
+			i_cells = 	2 * (zdom[i_dom].ndim - 1) 	* (zdom[i_dom].mdim - 1) *  geo.reverb_angle_bins;
+			i_points = 	2 *  zdom[i_dom].ndim 		*  zdom[i_dom].ndim 	 * (geo.reverb_angle_bins + 1);
+		}
 
-				for(k=0; k< geo.reverb_angle_bins; k++) {
-					fprintf(fptr, "8 %d %d %d %d %d %d %d %d\n",
-						wind_paths_sphere_point_index(i, 	j,		k	),
-						wind_paths_sphere_point_index(i, 	j, 		k+1 ),
-					 	wind_paths_sphere_point_index(i, 	j+1,	k+1 ),
-					    wind_paths_sphere_point_index(i,	j+1, 	k	),
-					    wind_paths_sphere_point_index(i+1,	j, 		k	),
-					 	wind_paths_sphere_point_index(i+1,	j,		k+1 ),
-						wind_paths_sphere_point_index(i+1,	j+1,	k+1 ),
-						wind_paths_sphere_point_index(i+1,	j+1,	k	));					
+		fprintf(fptr, "# vtk DataFile Version 2.0\n");
+		fprintf(fptr, "Wind file data\nASCII\n");
+
+		//Write out positions of corners of each wind cell as vertexes
+		fprintf(fptr, "DATASET UNSTRUCTURED_GRID\n");
+		fprintf(fptr, "POINTS %d float\n", i_points);
+		if(zdom[i_dom].coord_type == SPHERICAL)	{
+			for (i = 0; i < zdom[i_dom].ndim; i++) {
+				n=zdom[i_dom].nstart+i;
+				for(j=0; j <= geo.reverb_angle_bins; j++) {
+					r_inc = j * (PI / (double)geo.reverb_angle_bins) - PI/2.0;
+
+					for(k=0; k<= geo.reverb_angle_bins; k++) {
+						r_azi = k * (PI / (double)geo.reverb_angle_bins);
+						r_x = wind[n].x[0] * sin(r_inc) * cos(r_azi);
+						r_y = wind[n].x[0] * sin(r_inc) * sin(r_azi);
+						r_z = wind[n].x[0] * cos(r_inc);
+						fprintf(fptr, "%10.5g %10.5g %10.5g\n", r_x, r_y, r_z);
+					}
 				}
 			}
-		}
-	} else {
-		for (i = 0; i < dom->ndim - 1; i++) {
-			for (j = 0; j < dom->mdim - 1; j++) {
-				for (k = 0; k < geo.reverb_angle_bins; k++) {
-					fprintf(fptr, "8 %d %d %d %d %d %d %d %d\n",
-						wind_paths_point_index(i, 	j, 		k, 		1, dom),
-						wind_paths_point_index(i, 	j, 		k+1, 	1, dom),
-						wind_paths_point_index(i, 	j+1,	k+1, 	1, dom),
-						wind_paths_point_index(i, 	j+1, 	k, 		1, dom),
-						wind_paths_point_index(i+1,	j, 		k, 		1, dom),
-						wind_paths_point_index(i+1, j, 		k+1, 	1, dom),
-						wind_paths_point_index(i+1, j+1, 	k+1, 	1, dom),
-						wind_paths_point_index(i+1, j+1, 	k, 		1, dom));
-					fprintf(fptr, "8 %d %d %d %d %d %d %d %d\n",
-						wind_paths_point_index(i, 	j, 		k, 		0, dom),
-						wind_paths_point_index(i, 	j, 		k+1, 	0, dom),
-						wind_paths_point_index(i, 	j+1, 	k+1,	0, dom),
-						wind_paths_point_index(i, 	j+1, 	k, 		0, dom),
-						wind_paths_point_index(i+1, j, 		k, 		0, dom),
-						wind_paths_point_index(i+1, j, 		k+1, 	0, dom),
-						wind_paths_point_index(i+1, j+1, 	k+1, 	0, dom),
-						wind_paths_point_index(i+1, j+1, 	k, 		0, dom));
-				}
-			}
-		}
-	}
-
-	//Write the type for each cell (would be unnecessary if STRUCTURED_GRID used)
-	//But this allows for more flexible expansion
-	fprintf(fptr, "CELL_TYPES %d\n", i_cells);
-	for (i = 0; i < i_cells; i++)
-		fprintf(fptr, "12\n");
-	fprintf(fptr, "\n");
-
-	//Write out the arrays containing the various properties in the appropriate order
-	fprintf(fptr, "CELL_DATA %d\n", i_cells);
-
-	fprintf(fptr, "SCALARS phot_count float 1\n");
-	fprintf(fptr, "LOOKUP_TABLE default\n");
-	if(dom->coord_type == SPHERICAL)	{
-		for (i = 0; i < dom->ndim - 1; i++) {
-			n = dom->nstart + i;
-			for (j = 0; j < geo.reverb_angle_bins; j++) {
-				for (k = 0; k < geo.reverb_angle_bins; k++) {
-					fprintf(fptr, "%d\n", wind[n].paths->i_num);
-				}
-			}
-		}
-	} else {
-		for (i = 0; i < dom->ndim - 1; i++) {
-			for (j = 0; j < dom->mdim - 1; j++) {
-				wind_ij_to_n(ndom, i, j, &n);
-				for (k = 0; k < geo.reverb_angle_bins; k++) {
-					fprintf(fptr, "%d\n", wind[n].paths->i_num);
-					fprintf(fptr, "%d\n", wind[n].paths->i_num);
-				}
-			}
-		}
-	}
-
-	//Use statistical error
-	fprintf(fptr, "SCALARS path_errors float 1\n");
-	fprintf(fptr, "LOOKUP_TABLE default\n");
-	if(dom->coord_type == SPHERICAL)	{
-		for (i = 0; i < dom->ndim - 1; i++) {
-			n = dom->nstart + i;
-			for (j = 0; j < geo.reverb_angle_bins; j++) {
-				for (k = 0; k < geo.reverb_angle_bins; k++) {
-					if (wind[n].paths->i_num > 0) {
-						r_err = sqrt((double)wind[n].paths->i_num) /
-							(double)wind[n].paths->i_num;
-						fprintf(fptr, "%g\n", r_err);
-					} else {
-						fprintf(fptr, "-1\n");
+		} else {
+			for (i = 0; i < zdom[i_dom].ndim; i++) {
+				for (j = 0; j < zdom[i_dom].mdim; j++) {
+					wind_ij_to_n(i_dom, i, j, &n);
+					for (k = 0; k <= geo.reverb_angle_bins; k++) {
+						r_azi = k * (PI / (double)geo.reverb_angle_bins);
+						r_x = wind[n].x[0] * cos(r_azi);
+						r_y = wind[n].x[0] * sin(r_azi);
+						fprintf(fptr, "%10.5g %10.5g %10.5g\n", r_x, r_y,
+							wind[n].x[2]);
+						fprintf(fptr, "%10.5g %10.5g %10.5g\n", r_x, r_y,
+							-wind[n].x[2]);
 					}
 				}
 			}
 		}
-	} else {
-		for (i = 0; i < dom->ndim - 1; i++) {
-			for (j = 0; j < dom->mdim - 1; j++) {
-				wind_ij_to_n(ndom, i, j, &n);
-				for (k = 0; k < geo.reverb_angle_bins; k++) {
-					if (wind[n].paths->i_num > 0) {
-						r_err = sqrt((double)wind[n].paths->i_num) /
-							(double)wind[n].paths->i_num;
-						fprintf(fptr, "%g\n", r_err);
-						fprintf(fptr, "%g\n", r_err);
-					} else {
-						fprintf(fptr, "-1\n");
-						fprintf(fptr, "-1\n");
-					}
+		fprintf(fptr, "\n");
 
-				}
-			}
-		}
-	}
+		//Write out the vertexes comprising each cell
+		fprintf(fptr, "CELLS %d %d\n", i_cells, 9 * i_cells);
+		if(zdom[i_dom].coord_type == SPHERICAL) {
+			for (i = 0; i < zdom[i_dom].ndim-1; i++) {
+				for(j=0; j < geo.reverb_angle_bins; j++) {
+					r_inc = j * (PI / (double)geo.reverb_angle_bins) - PI/2.0;
 
-	fprintf(fptr, "SCALARS path_rel_diff_from_direct float 1\n");
-	fprintf(fptr, "LOOKUP_TABLE default\n");
-	if(dom->coord_type == SPHERICAL)	{
-		for (i = 0; i < dom->ndim - 1; i++) {
-			n = dom->nstart + i;
-			for (j = 0; j < geo.reverb_angle_bins; j++) {
-				for (k = 0; k < geo.reverb_angle_bins; k++) {
-					if (wind[n].paths->i_num > 0) {
-						double		f_diff;
-						f_diff = wind[n].paths->d_path;
-						f_diff -= (sqrt(
-							wind[n].xcen[0] * wind[n].xcen[0] +
-						 	wind[n].xcen[1] * wind[n].xcen[1] +
-						 	wind[n].xcen[2] * wind[n].xcen[2] )
-							   - geo.rstar);
-						f_diff = fabs(f_diff);
-						f_diff /= wind[n].paths->d_path;
-
-						fprintf(fptr, "%g\n", f_diff);
-					} else {
-						fprintf(fptr, "-1\n");
+					for(k=0; k< geo.reverb_angle_bins; k++) {
+						fprintf(fptr, "8 %d %d %d %d %d %d %d %d\n",
+							wind_paths_sphere_point_index(i, 	j,		k	),
+							wind_paths_sphere_point_index(i, 	j, 		k+1 ),
+						 	wind_paths_sphere_point_index(i, 	j+1,	k+1 ),
+						    wind_paths_sphere_point_index(i,	j+1, 	k	),
+						    wind_paths_sphere_point_index(i+1,	j, 		k	),
+						 	wind_paths_sphere_point_index(i+1,	j,		k+1 ),
+							wind_paths_sphere_point_index(i+1,	j+1,	k+1 ),
+							wind_paths_sphere_point_index(i+1,	j+1,	k	));					
 					}
 				}
 			}
-		}
-	} else {
-		for (i = 0; i < dom->ndim - 1; i++) {
-			for (j = 0; j < dom->mdim - 1; j++) {
-				wind_ij_to_n(ndom, i, j, &n);
-				for (k = 0; k < geo.reverb_angle_bins; k++) {
-					if (wind[n].paths->i_num > 0) {
-						double		f_diff;
-						f_diff = wind[n].paths->d_path;
-						f_diff -= (sqrt(
-							wind[n].xcen[0] * wind[n].xcen[0] +
-							wind[n].xcen[1] * wind[n].xcen[1] +
-						 	wind[n].xcen[2] * wind[n].xcen[2] )
-							   - geo.rstar);
-						f_diff = fabs(f_diff);
-						f_diff /= wind[n].paths->d_path;
-
-						fprintf(fptr, "%g\n", f_diff);
-						fprintf(fptr, "%g\n", f_diff);
-					} else {
-						fprintf(fptr, "-1\n");
-						fprintf(fptr, "-1\n");
+		} else {
+			for (i = 0; i < zdom[i_dom].ndim - 1; i++) {
+				for (j = 0; j < zdom[i_dom].mdim - 1; j++) {
+					for (k = 0; k < geo.reverb_angle_bins; k++) {
+						fprintf(fptr, "8 %d %d %d %d %d %d %d %d\n",
+							wind_paths_point_index(i, 		j, 		k, 		1, i_dom),
+						    wind_paths_point_index(i, 		j, 		k + 1, 	1, i_dom),
+							wind_paths_point_index(i, 		j + 1, 	k + 1, 	1, i_dom),
+						    wind_paths_point_index(i, 		j + 1, 	k, 		1, i_dom),
+						    wind_paths_point_index(i + 1, 	j, 		k, 		1, i_dom),
+						 	wind_paths_point_index(i + 1, 	j, 		k + 1, 	1, i_dom),
+							wind_paths_point_index(i + 1, 	j + 1, 	k + 1, 	1, i_dom),
+							wind_paths_point_index(i + 1, 	j + 1, 	k, 		1, i_dom));
+						fprintf(fptr, "8 %d %d %d %d %d %d %d %d\n",
+							wind_paths_point_index(i, 		j, 		k, 		0, i_dom),
+						    wind_paths_point_index(i, 		j, 		k + 1, 	0, i_dom),
+						 	wind_paths_point_index(i, 		j + 1, 	k + 1,	0, i_dom),
+						    wind_paths_point_index(i, 		j + 1,	k,	 	0, i_dom),
+						    wind_paths_point_index(i + 1, 	j, 		k, 		0, i_dom),
+						 	wind_paths_point_index(i + 1, 	j, 		k + 1, 	0, i_dom),
+							wind_paths_point_index(i + 1, 	j + 1, 	k + 1, 	0, i_dom),
+							wind_paths_point_index(i + 1, 	j + 1, 	k, 		0, i_dom));
 					}
 				}
 			}
 		}
-	}
 
-	fprintf(fptr, "SCALARS path_average float 1\n");
-	fprintf(fptr, "LOOKUP_TABLE default\n");
-	if(dom->coord_type == SPHERICAL)	{
-		for (i = 0; i < dom->ndim - 1; i++) {
-			n = dom->nstart + i;
-			for (j = 0; j < geo.reverb_angle_bins; j++) {
-				for (k = 0; k < geo.reverb_angle_bins; k++) {
-					if (wind[n].paths->i_num > 0) {
-						fprintf(fptr, "%g\n", wind[n].paths->d_path);
-					} else {
-						fprintf(fptr, "-1\n");
-					}
-				}
-			}
-		}
-	} else {
-		for (i = 0; i < dom->ndim - 1; i++) {
-			for (j = 0; j < dom->mdim - 1; j++) {
-				wind_ij_to_n(ndom, i, j, &n);
-				for (k = 0; k < geo.reverb_angle_bins; k++) {
-					if (wind[n].paths->i_num > 0) {
-						fprintf(fptr, "%g\n", wind[n].paths->d_path);
-						fprintf(fptr, "%g\n", wind[n].paths->d_path);
-					} else {
-						fprintf(fptr, "-1\n");
-						fprintf(fptr, "-1\n");
-					}
-				}
-			}
-		}
-	}
+		//Write the type for each cell (would be unnecessary if STRUCTURED_GRID used)
+		//But this allows for more flexible expansion
+		fprintf(fptr, "CELL_TYPES %d\n", i_cells);
+		for (i = 0; i < i_cells; i++)
+			fprintf(fptr, "12\n");
+		fprintf(fptr, "\n");
 
+		//Write out the arrays containing the various properties in the appropriate order
+		fprintf(fptr, "CELL_DATA %d\n", i_cells);
 
-	for (i_obs = 0; i_obs < geo.nangles; i_obs++) 
-	{
-		fprintf(fptr, "SCALARS path_%s float 1\n", xxspec[MSPEC + i_obs].name);
+		fprintf(fptr, "SCALARS phot_count float 1\n");
 		fprintf(fptr, "LOOKUP_TABLE default\n");
-		stuff_v(xxspec[MSPEC + i_obs].lmn, p_test->lmn);
-
-		if(dom->coord_type == SPHERICAL)	{
-			for (i = 0; i < dom->ndim - 1; i++) {
-				n = dom->nstart + i;
+		if(zdom[i_dom].coord_type == SPHERICAL)	{
+			for (i = 0; i < zdom[i_dom].ndim - 1; i++) {
+				n=zdom[i_dom].nstart+i;
 				for (j = 0; j < geo.reverb_angle_bins; j++) {
-					r_inc = ((double)j + 0.5) * (PI / (double)geo.reverb_angle_bins) - PI/2.0;
+					for (k = 0; k < geo.reverb_angle_bins; k++) {
+						fprintf(fptr, "%d\n", wind[n].paths->i_num);
+					}
+				}
+			}
+		} else {
+			for (i = 0; i < zdom[i_dom].ndim - 1; i++) {
+				for (j = 0; j < zdom[i_dom].mdim - 1; j++) {
+					wind_ij_to_n(i_dom, i, j, &n);
+					for (k = 0; k < geo.reverb_angle_bins; k++) {
+						fprintf(fptr, "%d\n", wind[n].paths->i_num);
+						fprintf(fptr, "%d\n", wind[n].paths->i_num);
+					}
+				}
+			}
+		}
 
+		//Use statistical error
+		fprintf(fptr, "SCALARS path_errors float 1\n");
+		fprintf(fptr, "LOOKUP_TABLE default\n");
+		if(zdom[i_dom].coord_type == SPHERICAL)	{
+			for (i = 0; i < zdom[i_dom].ndim - 1; i++) {
+				n=zdom[i_dom].nstart+i;
+				for (j = 0; j < geo.reverb_angle_bins; j++) {
 					for (k = 0; k < geo.reverb_angle_bins; k++) {
 						if (wind[n].paths->i_num > 0) {
-							r_azi = ((double)k + 0.5) * (PI / (double)geo.reverb_angle_bins);
-							p_test->x[0] = wind[n].xcen[0] * sin(r_inc) * cos(r_azi);
-							p_test->x[1] = wind[n].xcen[0] * sin(r_inc) * sin(r_azi);
-							p_test->x[2] = wind[n].xcen[0] * cos(r_inc);
-							fprintf(fptr, "%g\n",
-							     wind[n].paths->d_path +
-							 delay_to_observer(p_test));
+							r_err = sqrt((double)wind[n].paths->i_num) /
+								(double)wind[n].paths->i_num;
+							fprintf(fptr, "%g\n", r_err);
 						} else {
 							fprintf(fptr, "-1\n");
 						}
@@ -988,22 +851,68 @@ wind_paths_output_vtk(WindPtr wind, int ndom)
 				}
 			}
 		} else {
-			for (i = 0; i < dom->ndim - 1; i++) {
-				for (j = 0; j < dom->mdim - 1; j++) {
-					wind_ij_to_n(ndom, i, j, &n);
+			for (i = 0; i < zdom[i_dom].ndim - 1; i++) {
+				for (j = 0; j < zdom[i_dom].mdim - 1; j++) {
+					wind_ij_to_n(i_dom, i, j, &n);
 					for (k = 0; k < geo.reverb_angle_bins; k++) {
 						if (wind[n].paths->i_num > 0) {
-							r_azi = ((double)k + 0.5) * (PI / (double)geo.reverb_angle_bins);
-							p_test->x[0] = wind[n].xcen[0] * cos(r_azi);
-							p_test->x[1] = wind[n].xcen[0] * sin(r_azi);
-							p_test->x[2] = wind[n].xcen[2];
-							fprintf(fptr, "%g\n",
-							     wind[n].paths->d_path +
-							 delay_to_observer(p_test));
-							p_test->x[2] = -wind[n].xcen[2];
-							fprintf(fptr, "%g\n",
-							     wind[n].paths->d_path +
-							 delay_to_observer(p_test));
+							r_err = sqrt((double)wind[n].paths->i_num) /
+								(double)wind[n].paths->i_num;
+							fprintf(fptr, "%g\n", r_err);
+							fprintf(fptr, "%g\n", r_err);
+						} else {
+							fprintf(fptr, "-1\n");
+							fprintf(fptr, "-1\n");
+						}
+
+					}
+				}
+			}
+		}
+
+		fprintf(fptr, "SCALARS path_rel_diff_from_direct float 1\n");
+		fprintf(fptr, "LOOKUP_TABLE default\n");
+		if(zdom[i_dom].coord_type == SPHERICAL)	{
+			for (i = 0; i < zdom[i_dom].ndim - 1; i++) {
+				n=zdom[i_dom].nstart+i;
+				for (j = 0; j < geo.reverb_angle_bins; j++) {
+					for (k = 0; k < geo.reverb_angle_bins; k++) {
+						if (wind[n].paths->i_num > 0) {
+							double		f_diff;
+							f_diff = wind[n].paths->d_path;
+							f_diff -= (sqrt(
+								wind[n].xcen[0] * wind[n].xcen[0] +
+							 	wind[n].xcen[1] * wind[n].xcen[1] +
+							 	wind[n].xcen[2] * wind[n].xcen[2] )
+								   - geo.rstar);
+							f_diff = fabs(f_diff);
+							f_diff /= wind[n].paths->d_path;
+
+							fprintf(fptr, "%g\n", f_diff);
+						} else {
+							fprintf(fptr, "-1\n");
+						}
+					}
+				}
+			}
+		} else {
+			for (i = 0; i < zdom[i_dom].ndim - 1; i++) {
+				for (j = 0; j < zdom[i_dom].mdim - 1; j++) {
+					wind_ij_to_n(i_dom, i, j, &n);
+					for (k = 0; k < geo.reverb_angle_bins; k++) {
+						if (wind[n].paths->i_num > 0) {
+							double		f_diff;
+							f_diff = wind[n].paths->d_path;
+							f_diff -= (sqrt(
+								wind[n].xcen[0] * wind[n].xcen[0] +
+								wind[n].xcen[1] * wind[n].xcen[1] +
+							 	wind[n].xcen[2] * wind[n].xcen[2] )
+								   - geo.rstar);
+							f_diff = fabs(f_diff);
+							f_diff /= wind[n].paths->d_path;
+
+							fprintf(fptr, "%g\n", f_diff);
+							fprintf(fptr, "%g\n", f_diff);
 						} else {
 							fprintf(fptr, "-1\n");
 							fprintf(fptr, "-1\n");
@@ -1012,9 +921,95 @@ wind_paths_output_vtk(WindPtr wind, int ndom)
 				}
 			}
 		}
-	}
 
-	free(p_test);
-	fclose(fptr);
+		fprintf(fptr, "SCALARS path_average float 1\n");
+		fprintf(fptr, "LOOKUP_TABLE default\n");
+		if(zdom[i_dom].coord_type == SPHERICAL)	{
+			for (i = 0; i < zdom[i_dom].ndim - 1; i++) {
+				n=zdom[i_dom].nstart+i;
+				for (j = 0; j < geo.reverb_angle_bins; j++) {
+					for (k = 0; k < geo.reverb_angle_bins; k++) {
+						if (wind[n].paths->i_num > 0) {
+							fprintf(fptr, "%g\n", wind[n].paths->d_path);
+						} else {
+							fprintf(fptr, "-1\n");
+						}
+					}
+				}
+			}
+		} else {
+
+			for (i = 0; i < zdom[i_dom].ndim - 1; i++) {
+				for (j = 0; j < zdom[i_dom].mdim - 1; j++) {
+					wind_ij_to_n(i_dom, i, j, &n);
+					for (k = 0; k < geo.reverb_angle_bins; k++) {
+						if (wind[n].paths->i_num > 0) {
+							fprintf(fptr, "%g\n", wind[n].paths->d_path);
+							fprintf(fptr, "%g\n", wind[n].paths->d_path);
+						} else {
+							fprintf(fptr, "-1\n");
+							fprintf(fptr, "-1\n");
+						}
+					}
+				}
+			}
+		}
+
+		for (i_obs = 0; i_obs < nangles; i_obs++) {
+			fprintf(fptr, "SCALARS path_%s float 1\n", xxspec[MSPEC + i_obs].name);
+			fprintf(fptr, "LOOKUP_TABLE default\n");
+			stuff_v(xxspec[MSPEC + i_obs].lmn, p_test->lmn);
+
+			if(zdom[i_dom].coord_type == SPHERICAL)	{
+				for (i = 0; i < zdom[i_dom].ndim - 1; i++) {
+					n=zdom[i_dom].nstart+i;
+					for (j = 0; j < geo.reverb_angle_bins; j++) {
+						r_inc = ((double)j + 0.5) * (PI / (double)geo.reverb_angle_bins) - PI/2.0;
+
+						for (k = 0; k < geo.reverb_angle_bins; k++) {
+							if (wind[n].paths->i_num > 0) {
+								r_azi = ((double)k + 0.5) * (PI / (double)geo.reverb_angle_bins);
+								p_test->x[0] = wind[n].xcen[0] * sin(r_inc) * cos(r_azi);
+								p_test->x[1] = wind[n].xcen[0] * sin(r_inc) * sin(r_azi);
+								p_test->x[2] = wind[n].xcen[0] * cos(r_inc);
+								fprintf(fptr, "%g\n",
+								    wind[n].paths->d_path +
+								 	delay_to_observer(p_test));
+							} else {
+								fprintf(fptr, "-1\n");
+							}
+						}
+					}
+				}
+			} else {
+				for (i = 0; i < zdom[i_dom].ndim - 1; i++) {
+					for (j = 0; j < zdom[i_dom].mdim - 1; j++) {
+						wind_ij_to_n(i_dom, i, j, &n);
+						for (k = 0; k < geo.reverb_angle_bins; k++) {
+							if (wind[n].paths->i_num > 0) {
+								r_azi = ((double)k + 0.5) * (PI / (double)geo.reverb_angle_bins);
+								p_test->x[0] = wind[n].xcen[0] * cos(r_azi);
+								p_test->x[1] = wind[n].xcen[0] * sin(r_azi);
+								p_test->x[2] = wind[n].xcen[2];
+								fprintf(fptr, "%g\n",
+								    wind[n].paths->d_path +
+								 	delay_to_observer(p_test));
+								p_test->x[2] = -wind[n].xcen[2];
+								fprintf(fptr, "%g\n",
+								    wind[n].paths->d_path +
+								 	delay_to_observer(p_test));
+							} else {
+								fprintf(fptr, "-1\n");
+								fprintf(fptr, "-1\n");
+							}
+						}
+					}
+				}
+			}
+		}
+
+		free(p_test);
+		fclose(fptr);
+	}
 	return (0);
 }

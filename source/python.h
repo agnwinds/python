@@ -519,13 +519,19 @@ int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply ol
   char atomic_filename[132];	/* 54e -- The masterfile for the atomic data */
   char fixed_con_file[132];	/* 54e -- For fixed concentrations, the file specifying concentrations */
 
+  //Added by SWM for tracking C-IV/H-A hotspots
+  int nres_halpha;
+
   //Added by SWM for reverberation mapping
+  double fraction_converged, reverb_fraction_converged;
+  enum reverb_disk_enum {REV_DISK_CORRELATED=0, REV_DISK_UNCORRELATED=1, REV_DISK_IGNORE=3} reverb_disk;
   enum reverb_enum      {REV_NONE=0, REV_PHOTON=1, REV_WIND=2, REV_MATOM=3} reverb; 
   enum reverb_vis_enum  {REV_VIS_NONE=0, REV_VIS_VTK=1, REV_VIS_DUMP=2, REV_VIS_BOTH=3} reverb_vis;
   int reverb_wind_cycles;
   int reverb_path_bins, reverb_angle_bins;  //SWM - Number of bins for path arrays, vtk output angular bins
-  int reverb_dump_cells;                    //SWM - Number of cells to dump, list of cells to dump 'nwind' values
-  double *reverb_dump_x, *reverb_dump_z;    //SWM - x & z values of the cells to dump
+  int reverb_dump_cells;                    //SWM - Number of cells to dump
+  double *reverb_dump_cell_x, *reverb_dump_cell_z;
+  int *reverb_dump_cell;
   int reverb_lines, *reverb_line;           //SWM - Number of lines to track, and array of line 'nres' values
 }
 geo;
@@ -574,11 +580,16 @@ blmod;
 typedef struct wind_paths
 {
   double* ad_path_flux;  //Array[by frequency, then path] of total flux of photons with the given v&p
-  int*    ai_path_num;   //Array[by frequency, then path] of the number of photons in this bin
+  double* ad_path_flux_disk;
+  double* ad_path_flux_wind;
+  double* ad_path_flux_cent;  // As above, by source
+  int*    ai_path_num;   //Array [by frequency, then path] of the number of photons in this bin
+  int*    ai_path_num_disk;
+  int*    ai_path_num_wind;
+  int*    ai_path_num_cent;     // As above, by source
   double  d_flux, d_path;     //Total flux, average path
   int     i_num;              //Number of photons hitting this cell
 } wind_paths_dummy, *Wind_Paths_Ptr;
-
 /* 	This structure defines the wind.  The structure w is allocated in the main
 	routine.  The total size of the structure will be NDIM x MDIM, and the two
 	dimenssions do not need to be the same.  The order of the
@@ -986,7 +997,7 @@ typedef struct photon
       		PTYPE_DISK_MATOM=12,
       		PTYPE_WIND_MATOM=13,
       		PTYPE_AGN_MATOM=14
-  	} 	origin;		/* Where this photon originated.  If the photon has
+  	} 	origin, origin_orig;		/* Where this photon originated.  If the photon has
 		   		scattered it's "origin" may be changed to "wind".*/
                       		/* note that we add 10 to origin when processed by a macro-atom
                          	which means we need these values in the enum list */

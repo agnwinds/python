@@ -596,3 +596,27 @@ wind_ij_to_n (ndom, i, j, n)
   *n = zdom[ndom].nstart + i * zdom[ndom].mdim + j;		// MDIM because the array is in z order
   return (*n);
 }
+
+int
+wind_x_to_n (double x[], int *n)
+{
+  int i,j,k;
+  for(i=0; i<geo.ndomain; i++)
+  {
+    for(j=0; j<zdom[i].ndim; k++)
+    {
+      if(x[0] > zdom[i].wind_x[j] && x[0] < zdom[i].wind_x[j+1])
+      {
+        for(k=0; k<zdom[i].mdim; k++)
+        {
+          if(x[2] > zdom[i].wind_z[k] && x[2] < zdom[i].wind_z[k+1])
+          {
+            wind_ij_to_n(i,j,k, n);
+            return(*n);
+          }
+        } 
+      }
+    }
+  }
+  return(*n);
+}

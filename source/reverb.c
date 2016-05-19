@@ -65,14 +65,17 @@ delay_to_observer(PhotPtr pp)
  * 9/14	-	Written by SWM
 ***********************************************************/
 int
-delay_dump_prep(int restart_stat, int i_rank)
+delay_dump_prep(char filename[], int restart_stat, int i_rank)
 {
 	FILE *fopen(), *fptr;
 	char string[LINELENGTH], c_file[LINELENGTH], c_rank[LINELENGTH];
 	int	i;
 
+	geo.fraction_converged=0.0;
+	geo.reverb_fraction_converged = 0.85;
+
 	//Get output filename
-	strcpy(c_file, files.root);			//Copy filename to new string
+	strcpy(c_file, filename);		//Copy filename to new string
 	strcat(c_file, ".delay_dump");
 	if (i_rank > 0) 
 	{
@@ -181,7 +184,11 @@ delay_dump_combine(int i_ranks)
 	}
 	else
 	{
-		sprintf(c_call,"rm %s[0-9]*",delay_dump_file);
+		sprintf(c_call,"rm %s[0-9]*", delay_dump_file);
+		if (system(c_call) < 0)
+		{
+			Error("delay_dump_combine: Error calling system command '%s'", c_call);
+		}
 	}
 	return (0);
 }
@@ -253,13 +260,13 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 						if(delay<0)subzero++;
 
 						fprintf(fptr,
-							"%10.5g %10.5g %10.5g %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g %5d %5d %5d %10d\n",
+							"%10.5g %10.5g %10.5g %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g %5d %5d %5d %10d %d\n",
 							p[nphot].freq, C * 1e8 / p[nphot].freq, p[nphot].w, 
 							p[nphot].x[0], p[nphot].x[1], p[nphot].x[2],
 							p[nphot].nscat, p[nphot].nrscat, delay,
 							(iExtracted ? delay_dump_bank_ex[nphot] : 0),
-							i - MSPEC, p[nphot].origin, 
-							p[nphot].nres);
+							i - MSPEC, p[nphot].origin_orig, 
+							p[nphot].nres, p[nphot].np);
 					}
 				}
 			}
@@ -268,7 +275,7 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 
 	if(subzero>0)
 	{
-		Log ("delay_dump: %d photons with <0 delay found! Increase path bin resolution to minimise this error\n", subzero);
+		Error ("delay_dump: %d photons with <0 delay found! Increase path bin resolution to minimise this error.", subzero);
 	}
 	fclose(fptr);
 	return (0);

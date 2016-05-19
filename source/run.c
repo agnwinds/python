@@ -122,7 +122,7 @@ calculate_ionization (restart_stat)
   if (geo.reverb > REV_NONE)
     {
       reverb_init (wmain);
-      delay_dump_prep (restart_stat, rank_global);
+      delay_dump_prep (files.root, restart_stat, rank_global);
     }
 
 
