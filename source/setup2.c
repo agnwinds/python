@@ -790,9 +790,9 @@ init_observers ()
 				Space Telescope Science Institute
 
 Synopsis:
-	init_photons gets information about how many photones 
-	there should be per cycle and then instantiates
-	PhotPtr
+	init_photons gets information about the number of 
+	cycles and how many photons there should be per cycle.
+        The routine then then instantiates PhotPtr
 
 Arguments:	
     none	
@@ -838,7 +838,6 @@ init_photons ()
     }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */
-  // XXX Not clear why we want to do this here; why not after all of the input data arre in hand
 
   photmain = p = (PhotPtr) calloc (sizeof (p_dummy), NPHOT);
 

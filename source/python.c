@@ -409,7 +409,9 @@ main (argc, argv)
 
 	  geo.run_type = SYSTEM_TYPE_PREVIOUS;	// after wind_read one will have a different wind_type otherwise
 	  w = wmain;
-	  ndomain = geo.ndomain;	// XXX Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
+	  ndomain = geo.ndomain;	// Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
+	  geo.wcycle=0;
+	  geo.pcycle=0;                 /* This is a new run of an old windsave file so we set the nunber of cycles already done to 0 */
 
 	}
 
@@ -468,10 +470,10 @@ main (argc, argv)
 	     this is defined in atomic.h, rather than the modes structure */
 
 	  if (modes.iadvanced) {
-	    rdint ("write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
 
-	  if (write_atomicdata)
-	    Log ("You have opted to save a summary of the atomic data\n");
+	    rdint ("write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
+	    if (write_atomicdata)
+	      Log ("You have opted to save a summary of the atomic data\n");
 	  }
 
 	  get_atomic_data (geo.atomic_filename);
@@ -483,9 +485,11 @@ main (argc, argv)
 
 
 
-/* Get the remainder of the data.  Note that this is done whether or not the windsave file was read in */
-/* Allocate the photons and read in the number of cycles.  Note XXX it is not at all clear whre we want this in the end, or that allocating
- * photons and getting the number of cycles goes together */
+/* Get the remainder of the input data.  Note that the next few lines are read from the input file whether or not the windsave file was read in,
+   because these are things one would like to be able to change even if we have read in an old windsave file.  init_photons reads in 
+   the numbers of ionization and spectral cycles and then instatiates PhotPtr.  It is possilbe that this should be moved to else where in
+   the flow of reading in data.
+ */
 
   p = init_photons ();
 
@@ -496,8 +500,10 @@ main (argc, argv)
   init_ionization ();
 
 
-  /* Determine what radiation sources there are.  
-     Note that most of these values are initilized in init_geo */
+  /* Determine what radiation sources are turned on.  
+     Note that most of the parameters, e.g T, or power_law index,  
+     that define the spectrum of the sources are set in init_geo 
+     */
 
   get_radiation_sources ();
 
@@ -561,8 +567,6 @@ main (argc, argv)
 
   /* Calculate additional parameters associated with the binary star system */
 
-  // XXX This may be a problem for restarts, now that we have changed the meaing of 
-  // SYSTEM type
   if (geo.system_type == SYSTEM_TYPE_BINARY)
     binary_basics ();
 
