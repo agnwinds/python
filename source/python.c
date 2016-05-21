@@ -354,7 +354,7 @@ main (argc, argv)
 	  exit (0);
 	}
       w = wmain;
-      ndomain = geo.ndomain;	// XXX Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
+      ndomain = geo.ndomain;	// Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
 
       geo.run_type = SYSTEM_TYPE_PREVIOUS;	// We read the data from a file
 
@@ -724,7 +724,6 @@ main (argc, argv)
 
   /* Print out some diagnositic infomration about the domains */
 
-  // XXX This is clearly wrong for repeats
 
   geo.ndomain = ndomain;	// Store ndomain in geo so that it can be saved
 
