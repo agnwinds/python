@@ -561,25 +561,23 @@ be optional which variables beyond here are moved to structures othere than Wind
  	where_in_grid locates the 1-d grid position of the photon. 
 
  Arguments:		
- 	ndom		The domain number for the searhc
-	double x[];     The postion
+ 	ndom		The domain number for the search
+	double x[];     The position
  Returns:
- 	where_in_grid normally  returns the cell number associated with
+ 	where_in_grid normally  returns element in wmain  associated with
  		a position.  If the photon is in the grid this will 
-		be a positive integer < NDIM*MDIM.
+		be a positive integer.
  	photon is inside the grid        -1
 	photon is outside the grid       -2
  Description:	
 	
 		
  Notes:
-	Where_in grid does not tell you whether the photon is in the wind or not. 
+	Where_in grid does not tell you whether the photon is in the wind!. 
 
 	What one means by inside or outside the grid may well be different
-	for different coordinate systems.
+	for different coordinate systems..
 
-	ksl--Not entirely clear why I don't make wig_x a vector.  Programming
-	is not elegant at all.
 
  History:
  	97jan	ksl	Coding on python began.
@@ -602,17 +600,12 @@ where_in_grid (ndom, x)
      int ndom;
      double x[];
 {
-//  int n, nuse;
   int n;
   double fx, fz;
 
-//  nuse = -1;                  // initialise nuse to a "not found" value
 
   if (wig_x != x[0] || wig_y != x[1] || wig_z != x[2])	// Calculate if new position
     {
-
-//      for (ndom = geo.ndomain - 1; ndom > -1; ndom--)
-//      {
 
       if (zdom[ndom].coord_type == CYLIND)
 	{
@@ -637,10 +630,6 @@ where_in_grid (ndom, x)
 	  exit (0);
 	}
 
-//        /* only store if you haven't already found a grid cell */
-//        if (nuse < 0)
-//          nuse = n;
-//      }
 
       /* Store old positions to short-circuit calculation if asked for same position more
          than once */
@@ -735,12 +724,7 @@ vwind_xyz (ndom, p, v)
       Error ("vwind_xyz: Received invalid domain  %d\n", ndom);
     }
 
-
-
-
   coord_fraction (ndom, 0, p->x, nnn, frac, &nelem);
-
-
 
   for (i = 0; i < 3; i++)
     {
@@ -763,7 +747,6 @@ vwind_xyz (ndom, p, v)
     }
   else if (p->x[2] < 0)		// For 2d coord syatems, velocity is reversed if the photon is in the lower hemisphere.
     vv[2] *= -1;
-
 
   if (rho == 0)
     {				// Then we will not be able to project from a cylindrical ot a cartesian system

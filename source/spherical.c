@@ -12,8 +12,8 @@
 
    Some of the variables in the Wind_ptr array, like the divergence
    have to be calculated at a certain place.  Logically, one would
-   do this along one of the principle axes.  But at present I have
-   calculted this along a 45 degree angle.  The reason I did this
+   do this along one of the principle axes.  But at present we have
+   calculated this along a 45 degree angle.  The reason we did this
    was because I want the code to run for normal bipolar winds.  But
    this can be an issue for anisotropic scattering!!  It should not
    affect items like the divergence, but it certainly affects the
@@ -103,7 +103,7 @@ Description:
 
 History:
  	05apr	ksl	55d: Adapted from rtheta.c
-	05jun	ksl	56a: Eliminated some superfluous varabiles, and
+	05jun	ksl	56a: Eliminated some superfluous variables, and
 			added better comments.
 
 **************************************************************/
@@ -115,24 +115,26 @@ spherical_make_grid (w, ndom)
      int ndom;
 {
   double dr, dlogr;
-  int n;
+  int j,n;
   int ndim;
 
   ndim=zdom[ndom].ndim;
 
-  /* PLACEHOLDER XXX -- JM question -- shouldn't we be looping over nstart to nstop here? 
-    Or alternatively setting w[n + nstart] where nstart = zdom[ndom].nstart */
+  /* JM question -- shouldn't we be looping over nstart to nstop here? 
+    Or alternatively setting w[n + nstart] where nstart = zdom[ndom].nstart.
+   ksl anwswer -- Yes.  Changed 1605  */
 
-  for (n = 0; n < ndim; n++)
+  for (j=0; j < ndim; j++)
     {
       {
+	n=j+zdom[ndom].nstart; // This is the element in wmain
 
 	/*Define the grid points */
 	if (zdom[ndom].log_linear == 1)
 	  {			// linear intervals
 
 	    dr = (zdom[ndom].rmax - geo.rstar) / (ndim - 3);
-	    w[n].r = geo.rstar + n * dr;
+	    w[n].r = geo.rstar + j * dr;
 	    w[n].rcen = w[n].r + 0.5 * dr;
 	  }
 	else
@@ -140,18 +142,17 @@ spherical_make_grid (w, ndom)
 
 	    dlogr =
 	      (log10 (zdom[ndom].rmax / zdom[ndom].rmin)) / (ndim - 3);
-	    w[n].r = zdom[ndom].rmin * pow (10., dlogr * (n - 1));
-	    w[n].rcen = 0.5 * zdom[ndom].rmin * (pow (10., dlogr * (n)) +
+	    w[n].r = zdom[ndom].rmin * pow (10., dlogr * (j - 1));
+	    w[n].rcen = 0.5 * zdom[ndom].rmin * (pow (10., dlogr * (j)) +
 						      pow (10.,
-							   dlogr * (n - 1)));
+							   dlogr * (j - 1)));
 	    Log ("New W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
 	  }
 
 	/* Now calculate the positions of these points in the xz plane.
-	   There is a choice about how one does this.   I have elected
-	   to assume that we want to calculate this at a 45 degree angle.
-	   in the hopes this will be a reasonable portion of the wind in
-	   a biconical flow.
+	   There is a choice about how one does this.  Here we  have elected
+	   to calculate this at a 45 degree angle.  in the hopes this will 
+	   be a reasonable portion of the wind in a biconical flow.
 	 */
 
 	w[n].x[1] = w[n].xcen[1] = 0.0;
@@ -229,12 +230,6 @@ spherical_wind_complete (ndom, w)
  Returns:
 
  Description:
-
- 	?? A spherical wind has only two edges.  The is an issue concerning
-	whether to allow a spherical wind that only fills a portion of the
-	sphere.  For example, on could imagine a spherical wind with a
-	portion blocked or something.  In that case, one has to have a 
-	different technique for evaluation the volume of the wind.
 		
  Notes:
  	This is like not the best way to do this integration. It
@@ -281,7 +276,7 @@ spherical_volumes (ndom, w)
   for (i = 0; i < ndim; i++)
     {
       {
-	n = i + nstart;
+	n = i + nstart; // nstart is the offset into the wind cell
 	rmin = zdom[ndom].wind_x[i];
 	rmax = zdom[ndom].wind_x[i + 1];
 
@@ -349,13 +344,13 @@ spherical_volumes (ndom, w)
                      Space Telescope Science Institute
 
  Synopsis:
- 	spherical_where_in_grid locates the grid position of the vector,
+ 	spherical_where_in_grid locates the element in wmain,
 	when one is using spherical coordinates. 
 
  Arguments:		
 	double x[];
  Returns:
- 	where_in_grid normally  returns the cell number associated with
+ 	where_in_grid normally  returns the wind element  associated with
  		a position.  If the position is in the grid this will be a positive
  		integer < NDIM*MDIM.
  	x is inside the grid        -1
@@ -369,11 +364,16 @@ spherical_volumes (ndom, w)
 	What one means by inside or outside the grid may well be different
 	for different coordinate systems.
 
-
+	This routine is not normally used directly.  Instead it is called bia
+	where_in_grid which determines which coordinate specific where_in_grid
+	routine to call.
 
  History:
  	05apr	ksl	55d: Adapted from rtheta.c.  
 	13sep	nsh	76b Changed call to fraction to take account of new mode
+	1605	ksl	Updated so it returns the element in wmain to
+			make this routine consistent with that of
+			the same routine for other coordiante systems
  
 **************************************************************/
 
@@ -388,6 +388,7 @@ spherical_where_in_grid (ndom, x)
   double r;
   double f;
   int ndim;
+
 
   ndim = zdom[ndom].ndim;
 
@@ -405,7 +406,10 @@ spherical_where_in_grid (ndom, x)
 
   fraction (r, zdom[ndom].wind_x, ndim, &n, &f, 0);
 
-  return (n);
+  // n is the position with this domain, so zdom[ndom].nstart is added 
+  // get to wmain
+
+  return (n+zdom[ndom].nstart);
 }
 
 /***********************************************************

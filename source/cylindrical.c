@@ -367,7 +367,6 @@ cylind_volumes (ndom, w)
 	  if (w[n].inwind == W_NOT_INWIND)
 	    {
 
-
 	      rmin = one_dom->wind_x[i];
 	      rmax = one_dom->wind_x[i + 1];
 	      zmin = one_dom->wind_z[j];
@@ -444,14 +443,14 @@ cylind_volumes (ndom, w)
 
  Synopsis:
  	cylind_where_in_grid locates the grid position of the vector,
-	when one is using cylindrical coordinates. 
+	when one is using cylindrical coordinates.   
 
  Arguments:		
 	double x[];
  Returns:
- 	where_in_grid normally  returns the cell number associated with
+ 	where_in_grid normally  returns the element number in wmain associated with
  		a position.  If the position is in the grid this will be a positive
- 		integer < NDIM*MDIM.
+ 		integer 
  	x is inside the grid        -1
 	x is outside the grid       -2
  Description:	
@@ -509,6 +508,7 @@ cylind_where_in_grid (ndom, x)
   /* At this point i,j are just outside the x position */
   wind_ij_to_n (ndom, i, j, &n);
 
+  /* n is the array element in wmain */
   return (n);
 }
 
