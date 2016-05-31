@@ -775,7 +775,6 @@ typedef struct plasma
   double lum_rad, lum_rad_old;	/* The specfic radiative luminosity in frequencies defined by freqmin
 				   and freqmax.  This will depend on the last call to total_emission */
 
-
   double lum_ioniz;
   double lum_lines_ioniz, lum_ff_ioniz, lum_adiabatic_ioniz;
   double lum_comp_ioniz;		/* 1108 NSH The compton luminosity of the cell */

@@ -280,31 +280,66 @@ tau_ave_summary (w, element, istate, freq, rootname, ochoice)
   return (0);
 }
 
+
+/***********************************************************
+               Space Telescope Science Institute
+
+ Synopsis:
+   line_summary returns luminosity of a given line 
+
+Arguments:    
+  WindPtr w       The structure which defines the wind in Python
+  char rootname[] The root of the input file      
+  int ochoice     Output file type
+
+Returns:
+  File rootname.line[ELEM][ION].dat
+ 
+Description:
+  For a given line from a preset selection, outputs luminosity.
+  Can cope with matom/non-matom lines.
+
+Notes:
+
+History:
+  31062016  SWM modified to add H-alpha, matoms
+**************************************************************/
 int
-line_summary (w, element, istate, rootname, ochoice)
+line_summary (w, rootname, ochoice)
      WindPtr w;
-     int element, istate;
      char rootname[];
      int ochoice;
 {
   int nion, nelem;
+  int element, istate, iline;
   int n;
-  double x;
+  double x, lambda;
   char choice[LINELENGTH], iname[LINELENGTH];
   char name[LINELENGTH];
   char filename[LINELENGTH];
   int nline;
   double freq_search, dd;
 
-  double d1, d2, z, energy_c4, rb, tot, omega;
+  double d1, d2, z, energy, rb, tot, omega;
   int nplasma;
 
+  rdint ("line (0=C-IV, 1=Hα)", &iline);
+  switch(iline)
+  {
+    case 0:
+      element = 6; istate = 4; lambda = 1548.1949e-8;
+      break;
+    case 1:
+      element = 1; istate = 1; lambda = 6562.7097e-8;
+      break;
+    default:
+      Error("line_summary: Not a valid line.");
+      exit(0);
+  }
 
-  element = 6;
-  istate = 4;
-  energy_c4 = HC / (1550e-8);
+  energy = HC / lambda;
 
-/* Find the CIV ion */
+/* Find the ion */
   nion = 0;
   while (nion < nions
 	 && !(ion[nion].z == element && ion[nion].istate == istate))
@@ -319,9 +354,9 @@ line_summary (w, element, istate, rootname, ochoice)
   while (nelem < nelements && ele[nelem].z != element)
     nelem++;
 
-/* Find the CIV line in the data */
+/* Find the line in the data */
   nline = 0;
-  freq_search = C / 1548.1949e-8;
+  freq_search = C / lambda;
 
   while (fabs (1. - lin_ptr[nline]->freq / freq_search) > 0.0001
 	 && nline < nlines)
@@ -360,9 +395,21 @@ line_summary (w, element, istate, rootname, ochoice)
 	{
 	  nplasma = w[n].nplasma;
 	  dd = plasmamain[nplasma].density[lin_ptr[nline]->nion];
-	  two_level_atom (lin_ptr[nline], &plasmamain[nplasma], &d1, &d2);
-	  x =
-	    (d2) * a21 (lin_ptr[nline]) * H * lin_ptr[nline]->freq * w[n].vol;
+
+    if(lin_ptr[nline]->macro_info == 1)
+    { //If this is a matom line
+      //Base matom emissivity for the upper level of the line
+      x = macromain[nplasma].matom_emiss[lin_ptr[nline]->nconfigu] * w[n].vol;
+      //Calculate the probability of this upper level de-exciting into the line
+      x *= matom_emit_in_line_prob(&(w[n]),lin_ptr[nline]);
+    }
+    else
+    { //If this is not a matom line
+      two_level_atom (lin_ptr[nline], &plasmamain[nplasma], &d1, &d2);
+      x =
+        (d2) * a21 (lin_ptr[nline]) * H * lin_ptr[nline]->freq * w[n].vol;
+    }
+
 	  x *= z = scattering_fraction (lin_ptr[nline], &plasmamain[nplasma]);
 
 	  tot += x;
@@ -374,8 +421,8 @@ line_summary (w, element, istate, rootname, ochoice)
 
   tot = 2. * tot;		// Why is there a factor of 2 here??? ksl
 
-  Log ("The total CIV luminosity (flux) is %8.2g (%8.2g)\n",
-       tot, tot / (4 * PI * 1e4 * PC * PC));
+  Log ("The total %s ion %d luminosity (flux) is %8.2g (%8.2g)\n",
+       ele[nelem].name, istate, tot, tot / (4 * PI * 1e4 * PC * PC));
 
 
   /* Store the appropriate values in a place where it does not matter */
@@ -389,12 +436,12 @@ line_summary (w, element, istate, rootname, ochoice)
 	      nplasma = w[n].nplasma;
 	      omega = 5.13 * pow (plasmamain[nplasma].t_e / 1.e5, 0.18);
 	      rb =
-		8.629e-6 * exp (-energy_c4 /
+		8.629e-6 * exp (-energy /
 				(BOLTZMANN * plasmamain[nplasma].t_e)) /
 		sqrt (plasmamain[nplasma].t_e) * omega;
 	      w[n].x[1] =
 		plasmamain[nplasma].density[nion] * plasmamain[nplasma].ne *
-		rb * energy_c4 * w[n].vol;
+		rb * energy * w[n].vol;
 	    }
 	  else
 	    w[n].x[1] = 0;
