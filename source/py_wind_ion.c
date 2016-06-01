@@ -399,7 +399,7 @@ line_summary (w, rootname, ochoice)
     if(lin_ptr[nline]->macro_info == 1)
     { //If this is a matom line
       //Base matom emissivity for the upper level of the line
-      x = macromain[nplasma].matom_emiss[lin_ptr[nline]->nconfigu] * w[n].vol;
+      x = macromain[nplasma].matom_emiss[lin_ptr[nline]->nconfigu];
       //Calculate the probability of this upper level de-exciting into the line
       x *= matom_emit_in_line_prob(&(w[n]),lin_ptr[nline]);
     }
