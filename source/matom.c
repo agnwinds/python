@@ -1549,12 +1549,11 @@ matom_emit_in_line_prob (WindPtr one, struct lines *line_ptr_emit)
 	double sp_rec_rate;
 	int n;
 	int nbbd, nbfd;
-	double t_e, ne;
+	double ne;
 	double bb_cont;
 	PlasmaPtr xplasma;
 
 	xplasma = &plasmamain[one->nplasma];
-	t_e = xplasma->t_e;		//electron temperature 
 	ne = xplasma->ne;		//electron number density
 
 
