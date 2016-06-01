@@ -64,7 +64,7 @@ bf_estimators_increment (one, p, ds)
   int n, m, llvl, nn;
   double density;
   double abs_cont;
-  int nplasma;
+  int nplasma, ndom;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
 
@@ -72,6 +72,7 @@ bf_estimators_increment (one, p, ds)
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
   mplasma = &macromain[xplasma->nplasma];
+  ndom = one->ndom;
 
 
   freq_av = p->freq;
@@ -143,7 +144,7 @@ bf_estimators_increment (one, p, ds)
         }
 
 
-	      x = kap_bf[nn] / (density * geo.fill);	//this is the cross section
+	      x = kap_bf[nn] / (density * zdom[ndom].fill);	//this is the cross section
 
 	      /* Now identify which of the BF processes from this level this is. */
 
@@ -180,8 +181,8 @@ bf_estimators_increment (one, p, ds)
 		exponential / ft;
 
 	      /* Now record the contribution to the energy absorbed by macro atoms. */
-        /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
-	      yy = y * den_config (xplasma, llvl) * geo.fill;
+        /* JM1411 -- added filling factor - density enhancement cancels with zdom[ndom].fill */
+	      yy = y * den_config (xplasma, llvl) * zdom[ndom].fill;
 
 	      mplasma->matom_abs[phot_top[n].uplev] += abs_cont =
 		yy * ft / freq_av;
@@ -211,9 +212,9 @@ bf_estimators_increment (one, p, ds)
 		  y = weight_of_packet * x * ds;
 
  
-      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
+      /* JM1411 -- added filling factor - density enhancement cancels with zdom[ndom].fill */
 		  xplasma->heat_photo += heat_contribution =
-		    y * density * (1.0 - (ft / freq_av)) * geo.fill;
+		    y * density * (1.0 - (ft / freq_av)) * zdom[ndom].fill;
 
 		  xplasma->heat_tot += heat_contribution;
 		  /* This heat contribution is also the contibution to making k-packets in this volume. So we record it. */
@@ -224,7 +225,7 @@ bf_estimators_increment (one, p, ds)
 	}
     }
 
-  /* JM1411 -- the below processes have the factor geo.fill incorporated directly
+  /* JM1411 -- the below processes have the factor zdom[ndom].fill incorporated directly
      into the kappa subroutines */
 
   /* Now for contribution to heating due to ff processes. (SS, Apr 04) */

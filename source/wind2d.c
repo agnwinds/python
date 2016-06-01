@@ -343,13 +343,14 @@ be optional which variables beyond here are moved to structures othere than Wind
       nwind = plasmamain[n].nwind;
       ndom = wmain[nwind].ndom;
       stuff_v (w[nwind].xcen, x);
-      
-      /* 140905 - ksl - Next two lines allow for clumping */
-      plasmamain[n].rho = model_rho (ndom, x) / geo.fill;
-      plasmamain[n].vol = w[nwind].vol * geo.fill;	// Copy volumes
 
-/* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, 
- * I've put new things in here to initialise the exponential models */
+      /* 140905 - ksl - Next two lines allow for clumping */
+      plasmamain[n].rho = model_rho (ndom, x) / zdom[ndom].fill;
+      plasmamain[n].vol = w[nwind].vol * zdom[ndom].fill;	// Copy volumes
+
+    /* NSH 120817 This is where we initialise the spectral models for the wind. The pl stuff is old, 
+     * I've put new things in here to initialise the exponential models */
+      
       for (nn = 0; nn < NXBANDS; nn++)
 	{
 	  plasmamain[n].spec_mod_type[nn] = SPEC_MOD_FAIL;	/*NSH 120817 - setting this to 
