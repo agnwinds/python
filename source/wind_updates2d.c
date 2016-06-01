@@ -315,11 +315,6 @@ WindPtr (w);
       plasmamain[n].xi *= 4. * PI;
       plasmamain[n].xi /= (volume * nh);
 
-/* 1510 NSH Normalise xi, which at this point should be the luminosity of ionizing photons in a cell (just the sum of photon weights) */
-
-      plasmamain[n].xi *= 4. * PI;
-      plasmamain[n].xi /= (volume * nh);
-
       /* If geo.adiabatic is true, then alculate the adiabatic cooling using the current, i.e 
        * previous value of t_e.  Note that this may not be  best way to determien the cooling. 
        * Changes made here should also be reflected in wind2d.c.  At present, adiabatic colling
