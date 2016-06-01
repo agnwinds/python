@@ -408,9 +408,21 @@ main (argc, argv)
 	      exit (0);
 	    }
 
-	  geo.run_type = SYSTEM_TYPE_PREVIOUS;	// after wind_read one will have a different wind_type otherwise
-	  w = wmain;
-	  ndomain = geo.ndomain;	// XXX Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
+  if (p == NULL)
+    {
+      Error
+	("There is a problem in allocating memory for the photon structure\n");
+      exit (0);
+    }
+  else 
+    {
+      /* JM 1605 -- large photon numbers can cause problems / runs to crash. Report to use (see #209) */
+      Log("Allocated %10d bytes for each of %5d elements of photon structure totaling %10.1f Mb \n",
+	       sizeof (p_dummy), NPHOT, 1.e-6 * NPHOT * sizeof (p_dummy));
+      if ( (NPHOT * sizeof (p_dummy)) > 1e9)
+      	Error("Over 1 GIGABYTE of photon structure allocated. Could cause serious problems.\n");
+    }
+
 
 
 	}
