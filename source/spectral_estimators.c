@@ -74,7 +74,7 @@ l			longer discard models on the basis of numerical limitations,
 
 /* external variables set up so zbrent can solve for alpha using sim_appha as integrand. NSH120817 Changed the names to remove reference to sim */
 double spec_numin, spec_numax, spec_numean;
-double lspec_numin, lspec_numax; //Log versions of numin and numax
+double lspec_numin, lspec_numax;	//Log versions of numin and numax
 
 
 int
@@ -82,185 +82,230 @@ spectral_estimators (xplasma)
      PlasmaPtr xplasma;
 {
   double pl_alpha_min, pl_alpha_max, pl_alpha_temp, pl_w_temp, j;
-  double exp_temp_min, exp_temp_max;	/*120817 the 'temperature' range we are going to search for an effective temperature for the exponential model */
-  double exp_temp_temp, exp_w_temp;	/*120817 the temporary values for temperature and weight of the exponential model */
-  int n,n1;
-  double pl_sd, exp_sd;		/*120817 Computed standard deviations for two models for comparison with true value */
-//  double ALPHAMAX = 200.0;	/*120817 Something to make it a bit more obvious as to what values of the powerlaw exponent we consider reasonable */
-  int plflag, expflag;		/*120817 Two flags to say if we have a reasonable PL or EXP model, set to 1 initially, -1 means there has been some failure that means we must not use this model, +1 means it is OK */
-  double genmin,genmax;
-  double dfreq; /* NSH 130711 - a number to help work out if we have fully filled a band */
+  double exp_temp_min, exp_temp_max;  /* 120817 the 'temperature' range we are going to search for an effective temperature for the exponential model */
+  double exp_temp_temp, exp_w_temp;	  /* 120817 the temporary values for temperature and weight of the exponential model */
+  int n, n1;
+  double pl_sd, exp_sd;		/* 120817 Computed standard deviations for two models for comparison with true value */
 
-/* This call is after a photon flight, so we *should* have access to j and ave freq, and so we can calculate proper values for W and alpha
-To avoid problems with solving, we need to find a reasonable range of values within which to search for a solution to eq18. A reasonable guess is that it is around the current value....
-*/
+  int plflag, expflag;		/* 120817 Two flags to say if we have a reasonable PL or EXP model, 
+                               set to 1 initially, -1 means there has been some failure that means 
+                               we must not use this model, +1 means it is OK */
+  double genmin, genmax;
+  double dfreq;			     /* NSH 130711 - a number to help work out if 
+                                we have fully filled a band */
 
-genmin=xband.f1[0];
-genmax=xband.f2[xband.nbands-1];
+  /* double ALPHAMAX = 200.0;  120817 Something to make it a bit more obvious as to what 
+                               values of the powerlaw exponent we consider reasonable */
 
-/* NSH 131108 The next few lines just work out which bands actually should have photons in - i.e. if we dont generate any photons in a band, we will not worry if there are no photons in that band */
+  /* This call is after a photon flight, so we *should* have access to j and ave freq, 
+     and so we can calculate proper values for W and alpha
+     To avoid problems with solving, we need to find a reasonable range of values within 
+     which to search for a solution to eq18. A reasonable guess is that it is around the current value....
+  */
 
-for (n1 =0; n1<xband.nbands; n1++)
+  genmin = xband.f1[0];
+  genmax = xband.f2[xband.nbands - 1];
+
+  /* NSH 131108 The next few lines just work out which bands actually should have photons in - 
+     i.e. if we dont generate any photons in a band, we will not worry if there are no photons in that band */
+
+  for (n1 = 0; n1 < xband.nbands; n1++)
+    {
+      if (xband.nphot[n1] > 0)
 	{
-	if (xband.nphot[n1] > 0)
-	 	{
-		genmin = xband.f1[n1]; //the first band with any photons will get set to 
-		break;
-		}
+	  genmin = xband.f1[n1];	//the first band with any photons will get set to 
+	  break;
 	}
+    }
 
-for (n1 =xband.nbands-1; n1>-1; n1--)
+  for (n1 = xband.nbands - 1; n1 > -1; n1--)
+    {
+      if (xband.nphot[n1] > 0)
 	{
-	if (xband.nphot[n1] > 0) 
-		{
-		genmax = xband.f2[n1]; //the first band going down will define the highest freq
-		break;
-		}
+	  genmax = xband.f2[n1];	//the first band going down will define the highest freq
+	  break;
 	}
+    }
 
-/* We loop over all of the bands, the first band is band number 0, and the last is band nxfreq-1 */
-/* 71 - 111229 - ksl - Small modification to reflect moving nxfreq, etc in the geo structure */
+  /* We loop over all of the bands, the first band is band number 0, and the last is band nxfreq-1 */
+  /* 71 - 111229 - ksl - Small modification to reflect moving nxfreq, etc in the geo structure */
   for (n = 0; n < geo.nxfreq; n++)
 
     {
-	Log_silent ("Starting out band %i in cell %i. mean=%e, sd=%e, minfreq=%e, maxfreq=%e, nphot=%i\n",n,xplasma->nplasma,xplasma->xave_freq[n],xplasma->xsd_freq[n],xplasma->fmin[n],xplasma->fmax[n],xplasma->nxtot[n]);
+      Log_silent
+	("Starting out band %i in cell %i. mean=%e, sd=%e, minfreq=%e, maxfreq=%e, nphot=%i\n",
+	 n, xplasma->nplasma, xplasma->xave_freq[n], xplasma->xsd_freq[n],
+	 xplasma->fmin[n], xplasma->fmax[n], xplasma->nxtot[n]);
 
       plflag = expflag = 1;	//Both potential models are in the running
-      if (xplasma->nxtot[n] <= 1) /*Catch the situation where there are only 1 or 0 photons in a band - we cannt reasonably try to model this situation*/ 
-		{
-	  	if (geo.xfreq[n] >= genmax || geo.xfreq[n+1] <= genmin) /*The band is outside where photons were generated, so not very surprising that there are no photons - just generate a log */
-		  	{
-			Log_silent("spectral_estimators: too few photons (1 or 0) in cell %d band %d but we weren't expecting any \n",xplasma->nplasma,n); //This is just a log, clearly it is not a problem//
-			}
-		else
-			{
-			Error("spectral_estimators: too few photons (1 or 0) in cell %d band %d to produce a model\n",xplasma->nplasma, n);
-/* NSH 130709 - changed this to be a warning, there are photons produced here, so the fact that there are none getting into a cell tells us something - it may be perfectly reasonable but nice to know  */
-			}
-//	  	xplasma->pl_w[n] = 0;	//We also want to make sure that the weight will be zero, this way we make sure there is no contribution to the ionization balance from this frequency.
-                xplasma->pl_log_w[n] = -999; //A very tiny weight - changed to take account of the new Log formulation
-	  	xplasma->pl_alpha[n] = 999.9;	//Give alpha a value that will show up as an error
-	  	xplasma->exp_w[n] = 0.0;	//Make sure that w is zero, s no chance of mucking up ionization balance
-	  	xplasma->exp_temp[n] = 1e99;	//Give temp a value that will show up as an error
-	  	xplasma->spec_mod_type[n] = -1;	//This tells the code that we have failed to model the spectrum in this band/cell/
-		}
-      else if (xplasma->fmax[n]==xplasma->fmin[n]) /*If all the photons in the cell are concentrated in a tiny range then we will also not expect to make a sensible model - this check could be reviewed later if lots of warning are produced */
-		{
-		Error("spectral_estimators: multiple photons but only one frequency seen in %d band %d\n",xplasma->nplasma,n); /*Flag as a warning, so one can see if it is an issue */
-                xplasma->pl_log_w[n] = -999; //A very tiny weight
-	  	xplasma->pl_alpha[n] = 999.9;	//Give alpha a value that will show up as an error
-	  	xplasma->exp_w[n] = 0.0;	//Make sure that w is zero, s no chance of mucking up ionization balance
-	  	xplasma->exp_temp[n] = 1e99;	//Give temp a value that will show up as an error
-	  	xplasma->spec_mod_type[n] = -1;	//This tells the code that we have failed to model the spectrum in this band/cell/
-		}
+
+      if (xplasma->nxtot[n] <= 1)	/* Catch the situation where there are only 1 or 0 photons in a band - 
+                                       we cannot reasonably try to model this situation */
+	{
+	  if (geo.xfreq[n] >= genmax || geo.xfreq[n + 1] <= genmin)	
+	    {
+	      /* The band is outside where photons were generated, so not very 
+	         surprising that there are no photons - just generate a log */
+	      Log_silent ("spectral_estimators: too few photons (1 or 0) in cell %d band %d but we weren't expecting any \n", 
+	                   xplasma->nplasma, n);	// This is just a log, clearly it is not a problem
+	    }
+
+	  else
+	    {
+	      Error
+		("spectral_estimators: too few photons (1 or 0) in cell %d band %d to produce a model\n",
+		 xplasma->nplasma, n);
+         /* NSH 130709 - changed this to be a warning, there are photons produced here, 
+            so the fact that there are none getting into a cell tells us something - it 
+            may be perfectly reasonable but nice to know  */
+	    }
+
+      /* We also want to make sure that the weight will be zero, this way we make 
+         sure there is no contribution to the ionization balance from this frequency. */
+      //xplasma->pl_w[n] = 0;   
+	  xplasma->pl_log_w[n] = -999;	    //A very tiny weight - changed to take account of the new Log formulation
+	  xplasma->pl_alpha[n] = 999.9;	    //Give alpha a value that will show up as an error
+	  xplasma->exp_w[n] = 0.0;	        //Make sure that w is zero, s no chance of mucking up ionization balance
+	  xplasma->exp_temp[n] = 1e99;	    //Give temp a value that will show up as an error
+	  xplasma->spec_mod_type[n] = SPEC_MOD_FAIL;	//This tells the code that we have failed to model the spectrum in this band/cell/
+	}
+
+
+    /*  If all the photons in the cell are concentrated in a tiny range then we will also not 
+        expect to make a sensible model - this check could be reviewed later if lots of warning are produced */
+	
+      else if (xplasma->fmax[n] == xplasma->fmin[n])	
+	{
+	  Error ("spectral_estimators: multiple photons but only one frequency seen in %d band %d\n", 
+	          xplasma->nplasma, n);	/* Flag as a warning, so one can see if it is an issue */
+
+	  xplasma->pl_log_w[n] = -999;	    //A very tiny weight
+	  xplasma->pl_alpha[n] = 999.9;	    //Give alpha a value that will show up as an error
+	  xplasma->exp_w[n] = 0.0;	        //Make sure that w is zero, s no chance of mucking up ionization balance
+	  xplasma->exp_temp[n] = 1e99;	    //Give temp a value that will show up as an error
+	  xplasma->spec_mod_type[n] = SPEC_MOD_FAIL;	//This tells the code that we have failed to model the spectrum in this band/cell/
+	}
+
+
       else
 	{
 
-/* NSH 131108 - these line no longer needed, since we are logging the maximum and minimum frequencies in each baand, rather than globally */
+     /* NSH 131108 - these lines no longer needed, since we are logging the maximum 
+        and minimum frequencies in each band, rather than globally */
 
-//	  spec_numin = geo.xfreq[n];	/*1108 NSH n is defined in python.c, and says which band of radiation estimators we are interested in using the for power law ionisation calculation */
-//	  if (xplasma->max_freq < geo.xfreq[n + 1])
-//	    {
-//	      Log_silent
-//		("NSH resetting max frequency of band %i from %e to %e due to lack of photons\n",
-//		 n, geo.xfreq[n + 1], xplasma->max_freq);
-//	      spec_numax = xplasma->max_freq;
-//	    }
-//	  else
-//	    {
-//	      spec_numax = geo.xfreq[n + 1];
-//	    }
+     /* spec_numin = geo.xfreq[n]; */    
+     /*   1108 NSH n is defined in python.c, and says which band of radiation estimators 
+        we are interested in using the for power law ionisation calculation */
+     /* if (xplasma->max_freq < geo.xfreq[n + 1])
+          {
+            Log_silent
+              ("NSH resetting max frequency of band %i from %e to %e due to lack of photons\n",
+               n, geo.xfreq[n + 1], xplasma->max_freq);
+            spec_numax = xplasma->max_freq;
+           }
+        else
+          {
+            spec_numax = geo.xfreq[n + 1];
+          } 
+      */
 
 
-/* NSH 131107 The next lines check and assign band limits. If the min/max frequency in a cell is within (fmax-fmin)/(sqrt(nphot)) of the end of
- a band, we say that the photons fill the band to that end - i.e. the fact we didnt see the minimum frequency is just because of photon numbers. */
+    /* NSH 131107 The next lines check and assign band limits. 
+       If the min/max frequency in a cell is within (fmax-fmin)/(sqrt(nphot)) of the end of
+       a band, we say that the photons fill the band to that end - i.e. the fact we didnt 
+       see the minimum frequency is just because of photon numbers. */
 
-	  dfreq = (geo.xfreq[n+1] - geo.xfreq[n])  / sqrt(xplasma->nxtot[n]); //This is a measure of the spacing between photons on average
+	  dfreq = (geo.xfreq[n + 1] - geo.xfreq[n]) / sqrt (xplasma->nxtot[n]);	//This is a measure of the spacing between photons on average
 	  if ((xplasma->fmin[n] - geo.xfreq[n]) < dfreq)
-		{
-		spec_numin = geo.xfreq[n];
-		}
+	    {
+	      spec_numin = geo.xfreq[n];
+	    }
 	  else
-		{		
-		spec_numin = xplasma->fmin[n];
-		}
-	  if ((geo.xfreq[n+1] - xplasma->fmax[n]) < dfreq)
-		{
-		spec_numax = geo.xfreq[n+1];
-		}
+	    {
+	      spec_numin = xplasma->fmin[n];
+	    }
+	  if ((geo.xfreq[n + 1] - xplasma->fmax[n]) < dfreq)
+	    {
+	      spec_numax = geo.xfreq[n + 1];
+	    }
 	  else
-		{		
-		spec_numax = xplasma->fmax[n];
-		}
-	  xplasma->fmin_mod[n]=spec_numin; //This is the low frequency limit of any model we might make
-	  xplasma->fmax_mod[n]=spec_numax; //This is the high frequency limit of any model we might make
-	  lspec_numax = log10(spec_numax);	  
-	  lspec_numin = log10(spec_numin);
+	    {
+	      spec_numax = xplasma->fmax[n];
+	    }
+
+	  xplasma->fmin_mod[n] = spec_numin;	//This is the low frequency limit of any model we might make
+	  xplasma->fmax_mod[n] = spec_numax;	//This is the high frequency limit of any model we might make
+	  lspec_numax = log10 (spec_numax);
+	  lspec_numin = log10 (spec_numin);
 	  spec_numean = xplasma->xave_freq[n];
 	  j = xplasma->xj[n];
 
 
-//	 Log
-//	    ("NSH We are about to calculate w and alpha, band %i cell %i j=%10.2e, mean_freq=%10.2e, numin=%10.2e(%8.2fev), numax=%10.2e(%8.2fev), //number of photons in band=%i\n",
-//	     n, xplasma->nplasma, j, spec_numean, spec_numin, spec_numin * HEV, spec_numax,
-//	     spec_numax * HEV, xplasma->nxtot[n]);
-
-//Log_flush();
+      //Log
+      //("NSH We are about to calculate w and alpha, band %i cell %i j=%10.2e, mean_freq=%10.2e, numin=%10.2e(%8.2fev), 
+      //numax=%10.2e(%8.2fev), //number of photons in band=%i\n",
+      //n, xplasma->nplasma, j, spec_numean, spec_numin, spec_numin * HEV, spec_numax,
+      //spec_numax * HEV, xplasma->nxtot[n]);
+      //Log_flush();
 
 
 
 	  pl_alpha_min = -0.1;	/*Lets just start the search around zero */
 	  pl_alpha_max = +0.1;
 
-//printf ("initial guess (lin) alpha=%f, pl_alpha_func=%e\n",pl_alpha_min,pl_alpha_func (pl_alpha_min));
-//printf ("initial guess (log) alpha=%f, pl_alpha_func=%e\n",pl_alpha_min,pl_alpha_func_log (pl_alpha_min));
+	  //printf ("initial guess (lin) alpha=%f, pl_alpha_func=%e\n",pl_alpha_min,pl_alpha_func (pl_alpha_min));
+	  //printf ("initial guess (log) alpha=%f, pl_alpha_func=%e\n",pl_alpha_min,pl_alpha_func_log (pl_alpha_min));
 
-	  while (pl_alpha_func_log (pl_alpha_min) * pl_alpha_func_log (pl_alpha_max) >
-		 0.0)
+	  while (pl_alpha_func_log (pl_alpha_min) *
+		 pl_alpha_func_log (pl_alpha_max) > 0.0)
 	    {
 	      pl_alpha_min = pl_alpha_min - 1.0;
 	      pl_alpha_max = pl_alpha_max + 1.0;
 	    }
 
 
-	  if (isfinite(pl_alpha_func_log(pl_alpha_min))==0
-	      || isfinite(pl_alpha_func_log (pl_alpha_max))==0)
+	  if (isfinite (pl_alpha_func_log (pl_alpha_min)) == 0
+	      || isfinite (pl_alpha_func_log (pl_alpha_max)) == 0)
 	    {
-	      Error
-		("spectral_estimators: Alpha cannot be bracketed (%e %e)in band %i cell %i- setting w to zero\n",
-		 pl_alpha_min,pl_alpha_max,n, xplasma->nplasma); //NSH 131108 - now a warning, this should no longer happen
-//	      xplasma->pl_w[n] = 0.0;
+	      Error ("spectral_estimators: Alpha cannot be bracketed (%e %e)in band %i cell %i- setting w to zero\n", 
+	              pl_alpha_min, pl_alpha_max, n, xplasma->nplasma);	  //NSH 131108 - now a warning, this should no longer happen
+          
+          //xplasma->pl_w[n] = 0.0;
 	      xplasma->pl_log_w[n] = -999.0;
 	      xplasma->pl_alpha[n] = -999.0;	//Set this to a value that might let us diagnose the problem
 	      plflag = -1;
 	    }
+
 	  else
 	    {
-/* We compute temporary values for sim alpha and sim weight. This will allow us to 
- * check that they are sensible before reassigning them */
+         /* We compute temporary values for sim alpha and sim weight. This will allow us to 
+            check that they are sensible before reassigning them */
 
 	      pl_alpha_temp =
-		zbrent (pl_alpha_func_log, pl_alpha_min, pl_alpha_max, 0.00001);
-//	      if (pl_alpha_temp > ALPHAMAX)
-//		pl_alpha_temp = ALPHAMAX;	//110818 nsh check to stop crazy values for alpha causing problems
-//	      if (pl_alpha_temp < -1. * ALPHAMAX)
-//		pl_alpha_temp = -1. * ALPHAMAX;
+		zbrent (pl_alpha_func_log, pl_alpha_min, pl_alpha_max,
+			0.00001);
+        //if (pl_alpha_temp > ALPHAMAX)
+        //pl_alpha_temp = ALPHAMAX;       //110818 nsh check to stop crazy values for alpha causing problems
+        //if (pl_alpha_temp < -1. * ALPHAMAX)
+        //pl_alpha_temp = -1. * ALPHAMAX;
 
-/*This next line computes the PL weight using an external function. Note that xplasma->j already 
- * contains the volume of the cell and a factor of 4pi, so the volume sent to sim_w is set to 1 
- * and j has a factor of 4PI reapplied to it. This means that the equation still works in balance. 
- * It may be better to just implement the factor here, rather than bother with an external call.... */
+		/* This next line computes the PL weight using an external function. Note that xplasma->j already 
+		 * contains the volume of the cell and a factor of 4pi, so the volume sent to sim_w is set to 1 
+		 * and j has a factor of 4PI reapplied to it. This means that the equation still works in balance. 
+		 * It may be better to just implement the factor here, rather than bother with an external call.... */
 
 
-//	      pl_w_temp = pl_w (j, pl_alpha_temp, spec_numin, spec_numax);
-              pl_w_temp = pl_log_w (j, pl_alpha_temp, lspec_numin, lspec_numax);
+          //pl_w_temp = pl_w (j, pl_alpha_temp, spec_numin, spec_numax);
+	      pl_w_temp =
+		pl_log_w (j, pl_alpha_temp, lspec_numin, lspec_numax);
 
-	      if ((isfinite(pl_w_temp))==0)
+	      if ((isfinite (pl_w_temp)) == 0)
 		{
-		  Error
-		    ("spectral_estimators: New PL parameters (%e) unreasonable, using existing parameters. Check number of photons in this cell\n",pl_w_temp); //NSH 131108 - now a warning, this should no longer happen
+		  Error ("spectral_estimators: New PL parameters (%e) unreasonable, using existing parameters. Check number of photons in this cell\n", 
+		          pl_w_temp);	// NSH 131108 - now a warning, this should no longer happen
+
 		  plflag = -1;	// Dont use this model
-//		  xplasma->pl_w[n] = 0.0;
+		  //xplasma->pl_w[n] = 0.0;
 		  xplasma->pl_log_w[n] = -999.0;
 		  xplasma->pl_alpha[n] = -999.0;
 		}
@@ -274,51 +319,68 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 
 
 
-//	  exp_temp_min = xplasma->t_r * 0.9;	/*Lets just start the search around the radiation temperature in the cell */
-	  exp_temp_min = ((H * spec_numax) / (BOLTZMANN) ) * 0.9; /*NSH 131107 -  change here - we will start the search around the temperature that we know will yield a sensible answer  */
-//	  exp_temp_max = xplasma->t_r * 1.1;
-	  exp_temp_max = ((H * spec_numax) / (BOLTZMANN) ) / 0.9; /*NSH 131107 - and the same for the maximum temp */
-	  while ((exp_temp_func (exp_temp_min) * exp_temp_func (exp_temp_max) > 0.0)  &&  ((exp_temp_func (-1.0*exp_temp_min) * exp_temp_func (-1.0*exp_temp_max) > 0.0))) /* NSH 131107 - changed to permit a negative temperautre, which will give a positive exponential */
+      //exp_temp_min = xplasma->t_r * 0.9;    /* Lets just start the search around the radiation temperature in the cell */
+	  /* NSH 131107 -  change here - we will start the search around the temperature that we know will yield a sensible answer  */
+	  exp_temp_min = ((H * spec_numax) / (BOLTZMANN)) * 0.9;	
+      //exp_temp_max = xplasma->t_r * 1.1;
+	  exp_temp_max = ((H * spec_numax) / (BOLTZMANN)) / 0.9;	/* NSH 131107 - and the same for the maximum temp */
+
+	  /* NSH 131107 - changed to permit a negative temperautre, which will give a positive exponential */
+	  while ((exp_temp_func (exp_temp_min) * exp_temp_func (exp_temp_max) > 0.0) && 
+	  	    ((exp_temp_func (-1.0 * exp_temp_min) * exp_temp_func (-1.0 * exp_temp_max) > 0.0)))	
 	    {
-	      if ((H * spec_numax) < (100.0 * BOLTZMANN * exp_temp_min * 0.9)) /*In this case we are going to get errors since the temperature is too to give a result in the exponential, and we will divide by zero */
+	      /* In this case we are going to get errors since the temperature is too to 
+	         give a result in the exponential, and we will divide by zero */
+	      if ((H * spec_numax) < (100.0 * BOLTZMANN * exp_temp_min * 0.9))	
 		{
-		exp_temp_min = exp_temp_min * 0.9; //Reduce the mininmum temperature, only if we will not end up with problems 
+		  exp_temp_min = exp_temp_min * 0.9;	// Reduce the mininmum temperature, only if we will not end up with problems 
 		}
-	      	exp_temp_max = exp_temp_max * 1.1; //The maximum temperature can go up forever with no fear of numerical problems
+	      exp_temp_max = exp_temp_max * 1.1;	// The maximum temperature can go up forever with no fear of numerical problems
 	    }
-	  if (isfinite(exp_temp_func (exp_temp_min))==0
-	      || isfinite(exp_temp_func (exp_temp_max))==0)
+
+
+	  if (isfinite (exp_temp_func (exp_temp_min)) == 0
+	      || isfinite (exp_temp_func (exp_temp_max)) == 0)
 	    {
-	      Error
-		("spectral_estimators: Exponential temperature cannot be bracketed (%e %e) in band %i - setting w to zero\n",
-		 exp_temp_min,exp_temp_max,n);//NSH 131108 - now a warning, this should no longer happen
+	      Error ("spectral_estimators: Exponential temperature cannot be bracketed (%e %e) in band %i - setting w to zero\n", 
+	              exp_temp_min, exp_temp_max, n);	//NSH 131108 - now a warning, this should no longer happen
 	      xplasma->exp_w[n] = 0.0;
 	      xplasma->exp_temp[n] = -1e99;
 	      expflag = -1;	//Discount an exponential model
 	    }
+
+
 	  else
 	    {
-/* We compute temporary values for sim alpha and sim weight. This will allow us to 
- * check that they are sensible before reassigning them */
+          /* We compute temporary values for sim alpha and sim weight. This will allow us to 
+             * check that they are sensible before reassigning them */
 
-/* But first see if we have a positive or negative solution. The temperatures are positive at the moment, if it was the negatives that worked, change the sign of the temperatures. */
+          /* But first see if we have a positive or negative solution. The temperatures are positive at the moment, 
+             if it was the negatives that worked, change the sign of the temperatures. */
 
-	      if (exp_temp_func (-1.0*exp_temp_min) * exp_temp_func (-1.0*exp_temp_max) < 0.0)
+	      if (exp_temp_func (-1.0 * exp_temp_min) *
+		  exp_temp_func (-1.0 * exp_temp_max) < 0.0)
 		{
-		exp_temp_min = -1.0* exp_temp_min;
-		exp_temp_max = -1.0* exp_temp_max;
+		  exp_temp_min = -1.0 * exp_temp_min;
+		  exp_temp_max = -1.0 * exp_temp_max;
 		}
-//printf("trying to find correct temp between %e (%e) and %e (%e)\n",exp_temp_min,exp_temp_func(exp_temp_min),exp_temp_max,exp_temp_func(exp_temp_max));
+         
+          /* printf("trying to find correct temp between %e (%e) and %e (%e)\n",exp_temp_min,
+             exp_temp_func(exp_temp_min),exp_temp_max,exp_temp_func(exp_temp_max)); */
 
-	      exp_temp_temp = zbrent (exp_temp_func, exp_temp_min, exp_temp_max, 0.00001);	/* Solve for the effective temperature */
-	      exp_w_temp = exp_w (j, exp_temp_temp, spec_numin, spec_numax);	/* Calculate the weight */
+          /* Solve for the effective temperature */
+	      exp_temp_temp = zbrent (exp_temp_func, exp_temp_min, exp_temp_max, 0.00001);	
+
+	      /* Calculate the weight */
+	      exp_w_temp = exp_w (j, exp_temp_temp, spec_numin, spec_numax);	
 
 
-	      if ((isfinite (exp_w_temp))==0)
+	      if ((isfinite (exp_w_temp)) == 0)
 		{
-		  Error
-		    ("spectral_estimators: New exponential parameters (%e) unreasonable, using existing parameters. Check number of photons in this cell\n",exp_w_temp); //NSH 131108 - now a warning, this should no longer happen
-		  expflag = -1;	//discount an exponential model
+		  Error ("spectral_estimators: New exponential parameters (%e) unreasonable, using existing parameters. Check number of photons in this cell\n", 
+		          exp_w_temp);	//NSH 131108 - now a warning, this should no longer happen
+
+		  expflag = -1;				//discount an exponential model
 		  xplasma->exp_w[n] = 0.0;
 		  xplasma->exp_temp[n] = -1e99;
 		}
@@ -329,21 +391,26 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 		}
 	    }
 
+
+      /* compute standard deviations for exponentials and power lawers */
 	  exp_sd = exp_stddev (xplasma->exp_temp[n], spec_numin, spec_numax);
-	  pl_sd = pl_log_stddev (xplasma->pl_alpha[n], lspec_numin, lspec_numax);
-	  Log_silent
-	    ("NSH in this cell %i band %i PL estimators are log(w)=%10.2e, alpha=%5.3f giving sd=%e compared to %e\n",
-	     xplasma->nplasma, n, xplasma->pl_log_w[n], xplasma->pl_alpha[n], pl_sd,
-	     xplasma->xsd_freq[n]);
-	  Log_silent
-	    ("NSH in this cell %i band %i exp estimators are w=%10.2e, temp=%10.2e giving sd=%e compared to %e\n",
-	     xplasma->nplasma, n, xplasma->exp_w[n], xplasma->exp_temp[n], exp_sd,
-	     xplasma->xsd_freq[n]);
-	  exp_sd =
-	    fabs ((exp_sd - xplasma->xsd_freq[n]) / xplasma->xsd_freq[n]);
+
 	  pl_sd =
-	    fabs ((pl_sd - xplasma->xsd_freq[n]) / xplasma->xsd_freq[n]);
-	  /* NSH 120817 These commands decide upon the best model, based upon how well the models predict the standard deviation */
+	    pl_log_stddev (xplasma->pl_alpha[n], lspec_numin, lspec_numax);
+
+	  Log_silent("NSH in this cell %i band %i PL estimators are log(w)=%10.2e, alpha=%5.3f giving sd=%e compared to %e\n",
+	     xplasma->nplasma, n, xplasma->pl_log_w[n], xplasma->pl_alpha[n],
+	     pl_sd, xplasma->xsd_freq[n]);
+
+	  Log_silent("NSH in this cell %i band %i exp estimators are w=%10.2e, temp=%10.2e giving sd=%e compared to %e\n",
+	     xplasma->nplasma, n, xplasma->exp_w[n], xplasma->exp_temp[n],
+	     exp_sd, xplasma->xsd_freq[n]);
+
+	  exp_sd = fabs ((exp_sd - xplasma->xsd_freq[n]) / xplasma->xsd_freq[n]);
+	  pl_sd = fabs ((pl_sd - xplasma->xsd_freq[n]) / xplasma->xsd_freq[n]);
+
+	  /* NSH 120817 These commands decide upon the best model, 
+	     based upon how well the models predict the standard deviation */
 	  if (expflag > 0 && plflag > 0)
 	    {
 	      if (exp_sd < pl_sd)
@@ -351,26 +418,35 @@ for (n1 =xband.nbands-1; n1>-1; n1--)
 	      else
 		xplasma->spec_mod_type[n] = SPEC_MOD_PL;
 	    }
+
 	  else if (plflag > 0)
 	    {
 	      xplasma->spec_mod_type[n] = SPEC_MOD_PL;
 	    }
+
 	  else if (expflag > 0)
 	    {
 	      xplasma->spec_mod_type[n] = SPEC_MOD_EXP;
 	    }
+
 	  else
 	    {
-	      xplasma->spec_mod_type[n] = -1;	//Oh dear, there is no suitable model - this should be an error
-	      Error ("No suitable model in band %i cell %i (nphot=%i fmin=%e fmax=%e)\n", n,
-		     xplasma->nplasma,xplasma->nxtot[n],xplasma->fmin[n],xplasma->fmax[n]);
-	  xplasma->fmin_mod[n]=spec_numax; //We will set the applicable frequency bands for the model to values that will cause errors if the model is used
-	  xplasma->fmax_mod[n]=spec_numin; 
+	      xplasma->spec_mod_type[n] = SPEC_MOD_FAIL;	//Oh dear, there is no suitable model - this should be an error
+
+	      Error("No suitable model in band %i cell %i (nphot=%i fmin=%e fmax=%e)\n",
+		         n, xplasma->nplasma, xplasma->nxtot[n], xplasma->fmin[n],
+		         xplasma->fmax[n]);
+
+          /* We will set the applicable frequency bands for the model to values that will cause errors if the model is used */
+	      xplasma->fmin_mod[n] = spec_numax;	
+	      xplasma->fmax_mod[n] = spec_numin;
 	    }
-	  Log_silent ("NSH In cell %i, band %i, the best model is %i\n",
-		      xplasma->nplasma, n, xplasma->spec_mod_type[n]);
+
+	    Log_silent ("NSH In cell %i, band %i, the best model is %i\n",
+		             xplasma->nplasma, n, xplasma->spec_mod_type[n]);
 	}			//End of loop that does things if there are more than zero photons in the band.
-    }				//End of loop over bands 
+
+    }			//End of loop over bands 
 
 
 
@@ -418,7 +494,7 @@ pl_alpha_func_log (alpha)
   double answer;
 
 //  answer = pl_mean (alpha, spec_numin, spec_numax) - spec_numean;
-  answer = pl_logmean (alpha, lspec_numin, lspec_numax) - spec_numean; //NSH 131106 change to deal with large number issues
+  answer = pl_logmean (alpha, lspec_numin, lspec_numax) - spec_numean;	//NSH 131106 change to deal with large number issues
   return (answer);
 }
 
@@ -450,23 +526,23 @@ pl_mean (alpha, numin, numax)
 }
 */
 
-/*NSH 131108 - changed the formulation to work in log space - also changed name */   
+/*NSH 131108 - changed the formulation to work in log space - also changed name */
 
 double
 pl_logmean (alpha, lnumin, lnumax)
-	double alpha;
-	double lnumin,lnumax;
+     double alpha;
+     double lnumin, lnumax;
 {
-  double k, answer, numerator, denominator, a,b,c,d;
+  double k, answer, numerator, denominator, a, b, c, d;
 
-  k = -1.0 * (lnumax * (alpha + 2.0)); //This is a prefector that scales everything to sensible numbers.
+  k = -1.0 * (lnumax * (alpha + 2.0));	//This is a prefector that scales everything to sensible numbers.
 
 //printf ("lnumax=%f, lnumin=%f, k=%f\n",lnumax,lnumin,k);
 
-a=pow (10.0,(k+(lnumax*(alpha+2.0))));
-b=pow (10.0,(k+(lnumin*(alpha+2.0))));
-c=pow (10.0,(k+(lnumax*(alpha+1.0))));
-d=pow (10.0,(k+(lnumin*(alpha+1.0))));
+  a = pow (10.0, (k + (lnumax * (alpha + 2.0))));
+  b = pow (10.0, (k + (lnumin * (alpha + 2.0))));
+  c = pow (10.0, (k + (lnumax * (alpha + 1.0))));
+  d = pow (10.0, (k + (lnumin * (alpha + 1.0))));
 
 //printf ("a=%e,b=%e,c=%e,d=%e\n",a,b,c,d);
 
@@ -521,17 +597,17 @@ d=pow (10.0,(k+(lnumin*(alpha+1.0))));
 /* The old - non log function */
 //double
 //pl_w (j, alpha, numin, numax)
-//     double j;			//the band limited spectral density
-//     double alpha;		//Computed spectral index for the cell
-//     double numin, numax;	//Range of frequencies we are considering
+//     double j;                        //the band limited spectral density
+//     double alpha;            //Computed spectral index for the cell
+//     double numin, numax;     //Range of frequencies we are considering
 //{
-//  double w;			//the answer
+//  double w;                   //the answer
 //
-//  double integral;		/*This will hold the unscaled integral of jnu from numin to numax */
+//  double integral;            /*This will hold the unscaled integral of jnu from numin to numax */
 
 
-//  integral = (pow (numax, (alpha + 1.0)) - pow (numin, (alpha + 1.0))) / (alpha + 1.0);	/* This is the integral */
-//  w = j / integral;		/*THe scaling factor is the actual band limited J / the integral. */
+//  integral = (pow (numax, (alpha + 1.0)) - pow (numin, (alpha + 1.0))) / (alpha + 1.0);       /* This is the integral */
+//  w = j / integral;           /*THe scaling factor is the actual band limited J / the integral. */
 
 //  return (w);
 //}
@@ -543,14 +619,16 @@ pl_log_w (j, alpha, lnumin, lnumax)
      double lnumin, lnumax;	//Range of frequencies we are considering
 {
   double logw;			//the answer
-  double logk; //scaling prefactor to permit huge numbers to be dealt with
+  double logk;			//scaling prefactor to permit huge numbers to be dealt with
   double log_integral;		/*This will hold the unscaled integral of jnu from numin to numax */
 
-  logk=-1.0 * lnumax * (alpha + 1.0);
+  logk = -1.0 * lnumax * (alpha + 1.0);
 
-  log_integral = log10 (( pow(10,(logk+(alpha+1.0)*lnumax)) - pow(10,(logk+(alpha+1.0)*lnumin)) )/(alpha + 1.0));
+  log_integral =
+    log10 ((pow (10, (logk + (alpha + 1.0) * lnumax)) -
+	    pow (10, (logk + (alpha + 1.0) * lnumin))) / (alpha + 1.0));
 
-  logw = log10(j) + logk - log_integral; 
+  logw = log10 (j) + logk - log_integral;
 
   return (logw);
 }
@@ -588,17 +666,17 @@ pl_log_w (j, alpha, lnumin, lnumax)
 //This is the original non -log foormulation 
 //double
 //pl_stddev (alpha, numin, numax)
-//     double alpha;		//Computed spectral index for the cell
-//     double numin, numax;	//Range of frequencies we are considering
+//     double alpha;            //Computed spectral index for the cell
+//     double numin, numax;     //Range of frequencies we are considering
 //{
-//  double answer;		//the answer
+//  double answer;              //the answer
 
-//  double numerator;		/*This will hold the unscaled integral of nu^2 jnu from numin to numax */
-//  double denominator;		/*This is the unscaled integral of jnu from numin to numax */
+//  double numerator;           /*This will hold the unscaled integral of nu^2 jnu from numin to numax */
+//  double denominator;         /*This is the unscaled integral of jnu from numin to numax */
 //  double mean;
 
-//  numerator = (pow (numax, (alpha + 3.0)) - pow (numin, (alpha + 3.0))) / (alpha + 3.0);	/* This is the integral for nu^2 bnu */
-//  denominator = (pow (numax, (alpha + 1.0)) - pow (numin, (alpha + 1.0))) / (alpha + 1.0);	/* This is the integral for nbu */
+//  numerator = (pow (numax, (alpha + 3.0)) - pow (numin, (alpha + 3.0))) / (alpha + 3.0);      /* This is the integral for nu^2 bnu */
+//  denominator = (pow (numax, (alpha + 1.0)) - pow (numin, (alpha + 1.0))) / (alpha + 1.0);    /* This is the integral for nbu */
 //  mean = pl_mean (alpha, numin, numax);
 //  answer = sqrt ((numerator / denominator) - (mean * mean));
 
@@ -617,16 +695,16 @@ pl_log_stddev (alpha, lnumin, lnumax)
   double numerator;		/*This will hold the unscaled integral of nu^2 jnu from numin to numax */
   double denominator;		/*This is the unscaled integral of jnu from numin to numax */
   double mean;
-  double k, a,b,c,d;
+  double k, a, b, c, d;
 
-  k = -1.0 * (lnumax * (alpha + 3.0)); //This is a prefector that scales everything to sensible numbers.
+  k = -1.0 * (lnumax * (alpha + 3.0));	//This is a prefector that scales everything to sensible numbers.
 
 //printf ("lnumax=%f, lnumin=%f, k=%f\n",lnumax,lnumin,k);
 
-a=pow (10.0,(k+(lnumax*(alpha+3.0))));
-b=pow (10.0,(k+(lnumin*(alpha+3.0))));
-c=pow (10.0,(k+(lnumax*(alpha+1.0))));
-d=pow (10.0,(k+(lnumin*(alpha+1.0))));
+  a = pow (10.0, (k + (lnumax * (alpha + 3.0))));
+  b = pow (10.0, (k + (lnumin * (alpha + 3.0))));
+  c = pow (10.0, (k + (lnumax * (alpha + 1.0))));
+  d = pow (10.0, (k + (lnumin * (alpha + 1.0))));
 
 //printf ("a=%e,b=%e,c=%e,d=%e\n",a,b,c,d);
 
@@ -825,6 +903,3 @@ exp_stddev (exp_temp, numin, numax)
 
   return (answer);
 }
-
-
-

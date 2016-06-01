@@ -22,7 +22,7 @@ double xexp_temp, xexp_w;
   Synopsis:   
 
 int
-calc_pi_rate (nion,xplasma,mode)  calculates the photoionization rarte coefficient for ion	
+calc_pi_rate (nion,xplasma,mode,type)  calculates the photoionization rarte coefficient for ion	
 				nion, based upon the mean intensity stored in cell xplasma
 				The mode tells the subroutine wether we are modelling the
 				mean intensity as a dilute blackbody (mode2) or as a series
@@ -36,7 +36,8 @@ calc_pi_rate (nion,xplasma,mode)  calculates the photoionization rarte coefficie
      int mode;			1 - use a power law and or exponential model for J
      				2 - use a dilute BB model for J - t_r and w are those 
 				parameters in xplasma
-
+      int type        1 - a normal outer shell, nion refers to the ion
+      				2 - an inner shell transition, nion refers to the element in the inner_cross 
 
   Returns:
  	The photioinization rate coefficient for the ion.
@@ -53,8 +54,10 @@ calc_pi_rate (nion,xplasma,mode)  calculates the photoionization rarte coefficie
 
 
 
+
   History:
 	2014Aug NSH - coded
+	2015July NSH - added code to permit this subroutine to also compute inner shell PI rates.
 
 **************************************************************/
 
@@ -62,12 +65,13 @@ calc_pi_rate (nion,xplasma,mode)  calculates the photoionization rarte coefficie
 
 
 double 
-calc_pi_rate (nion,xplasma,mode)
+calc_pi_rate (nion,xplasma,mode,type)
 	PlasmaPtr xplasma;
 	int nion;
 	int mode;
+	int type;
 {
-  int  n, j;
+  int  j;
   double pi_rate;
   int ntmin, nvmin;
   double fthresh, fmax, fmaxtemp;
@@ -75,46 +79,83 @@ calc_pi_rate (nion,xplasma,mode)
   double exp_qromb, pl_qromb;
 
 
-  exp_qromb = 1e-4;
+  exp_qromb = 1e-4; /*These are the two tolerance values for the rhomberg integrals */
   pl_qromb = 1e-4;
 
 
-  if (-1 < nion && nion < nions)	//Get cross section for this specific ion_number
-    {
-      ntmin = ion[nion].ntop_ground;	/*We only ever use the ground state cross sections. This is for topbase */
-      nvmin = nion;	/*and this is for verner cross sections */
-    }
-  else
-    {
-      Error ("calc_pi_rate: %d is unacceptable value of nion\n", nion);
-      //mytrap ();  JM 1410 -- mytrap is deprecated
-      exit (0);
-      return (1.0);
-    }
+
+  ntmin=nvmin=-1; /* Initialize these to an unreasonable number. We dont use them all the time */
+  
+
+  
 
 
 
-  if (ion[nion].phot_info == 1)	//topbase
-    {
-      n = ntmin;
-      xtop = &phot_top[n];
+
+	if (type==1) //We are computing a normal outer shell rate
+	{
+	    if (-1 < nion && nion < nions)	//Get cross section for this specific ion_number
+	      {
+	        ntmin = ion[nion].ntop_ground;	/*We only ever use the ground state cross sections. This is for topbase */
+	        nvmin = ion[nion].nxphot;
+	      }
+	    else
+	      {
+	        Error ("calc_pi_rate: %d is unacceptable value of nion\n", nion);
+	        //mytrap ();  JM 1410 -- mytrap is deprecated
+	        exit (0);
+	        return (1.0);
+	      }
+  if (ion[nion].phot_info > 0)	//topbase or hybrid VFKY (GS)+TB excited
+    { 
+      xtop = &phot_top[ntmin];
     }
   else if (ion[nion].phot_info == 0)	// verner
-    {
-      n = nvmin;		//just the ground state ionization fraction.
-      xtop = &xphot_tab[ion[n].nxphot];
+    {		//just the ground state ionization fraction.
+      xtop = &phot_top[nvmin];
     }
   else
     {
 	  Error
 	    ("calc_pi_rate: No photoionization xsection for ion %d (element %d, ion state %d)\n",
 	     nion, ion[nion].z, ion[nion].istate);
-	  exit(0); /* NSH 1408 I have decided that this is actually a really serous problem - we have no business including an ion for which we have no photoionization data.... */
+    /* NSH 1408 I have decided that this is actually a really serous problem - 
+       we have no business including an ion for which we have no photoionization data.... */
+	  exit(0); 
     }
+}
+else if (type==2)  //We are computing an inner shell rate - nion refers to an actual cross section.
+{
+	if (-1<nion && nion<n_inner_tot) //We have a reasonable value for nion_in
+	{
+		xtop = &inner_cross[nion];   //Set the cross sections for the integral to the inner shell cross section
+	}
+	else
+	{
+  	  Error
+  	    ("calc_pi_rate: No inner shell xsection for record %d (element %d, ion state %d)\n",
+  	     nion, inner_cross[nion].z, inner_cross[nion].istate);
+      /* NSH 1408 I have decided that this is actually a really serous problem - 
+         we have no business including an ion for which we have no photoionization data.... */
+  	  exit(0); 
+	}
+}
+else
+{
+	Error ("calc_pi_rate: unknown mode %i\n",type);
+}
 
-  fthresh = xtop->freq[0];
-  fmax = xtop->freq[xtop->np - 1];
-  pi_rate = 0;
+
+
+/* At this stage, xtop points to either an outer or inner shell photoionization cross section
+	We now prepare to explicitly integrate J x csec over modelled bands */
+
+
+
+
+  fthresh = xtop->freq[0];          //The first frequency for which we have a cross section
+  fmax = xtop->freq[xtop->np - 1];  //THe last frequency
+  pi_rate = 0;          			//Initialise the pi rate - it will be computed thruogh several integrals
 
 
 
@@ -128,7 +169,7 @@ if (mode==1) //Modelled version of J
 	  xpl_logw = xplasma->pl_log_w[j];
 	  xexp_temp = xplasma->exp_temp[j];
 	  xexp_w = xplasma->exp_w[j];
-	  if (xplasma->spec_mod_type[j] > 0)	//Only bother doing the integrals if we have a model in this band
+	  if (xplasma->spec_mod_type[j] != SPEC_MOD_FAIL)	//Only bother doing the integrals if we have a model in this band
 	    {
 	      f1 = xplasma->fmin_mod[j]; //NSH 131114 - Set the low frequency limit to the lowest frequency that the model applies to
 	      f2= xplasma->fmax_mod[j]; //NSH 131114 - Set the high frequency limit to the highest frequency that the model applies to
@@ -190,8 +231,8 @@ else if (mode==2)  //blackbody mode
   fmax = check_fmax (fthresh, fmaxtemp, xplasma->t_r);
   if (fthresh > fmax)
     {
-      Error
-	("pi_rates: temperature too low - ion %i has no PI rate\n",nion);
+//		 Error
+//	("pi_rates: temperature too low - ion %i has no PI rate\n",nion);
       pi_rate = 0.0;
     }
   else
@@ -250,7 +291,7 @@ tb_planck1 (freq)
   answer = (2. * H * pow (freq, 3.)) / (pow (C, 2));
   answer *= (1 / (bbe - 1));
 //      answer*=weight;
-  answer *= sigma_phot_topbase (xtop, freq);
+  answer *= sigma_phot(xtop, freq);
   answer /= freq;
 
   return (answer);
@@ -273,7 +314,7 @@ tb_logpow1 (freq)
   answer = pow(10,xpl_logw+(xpl_alpha-1.0)*log10(freq));
 
 
-  answer *= sigma_phot_topbase (xtop, freq);	// and finally multiply by the cross section.
+  answer *= sigma_phot (xtop, freq);	// and finally multiply by the cross section.
 
   return (answer);
 }
@@ -317,10 +358,11 @@ tb_exp1 (freq)
   double answer;
 
   answer = xexp_w * exp ((-1.0 * H * freq) / (BOLTZMANN * xexp_temp));
-  answer *= sigma_phot_topbase (xtop, freq);	// and finally multiply by the cross section.
+  answer *= sigma_phot (xtop, freq);	// and finally multiply by the cross section.
   answer /= freq;
   return (answer);
 }
+
 
 
 

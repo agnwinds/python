@@ -1,13 +1,3 @@
-
-
-/* 
-   This file was created in 98 december 98.    All subroutines which are required for
-   a spherical description of the wind should be stored here. No generic wind routines
-   should be placed here.
-
- */
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -28,9 +18,9 @@ Arguments:
 Returns:
  
 Description:	
-	The parameters, geo.cl...,  obtained here are only used in the routines in stellar_winds.c
+	The parameters, zdom[ndom].cl...,  obtained here are only used in the routines in stellar_winds.c
 	which calculate the velocity and density of the wind during the initialization process.
-	Other portions of the structure, geo defined here are more general purpose.
+	Other portions of the structure, zdom[ndom] defined here are more general purpose.
 
 Notes:
 	Although it seems natural to assume that the wind starts at the photosphere, this
@@ -54,58 +44,60 @@ History:
 			old .pf files for stellar winds will have to be modified, but there
 			are few of these.  Deleted lines which eliminated the disk for 
 			stellar models.
+	15aug	ksl	Change to accomodate multiple domains
 **************************************************************/
 
 
 int
-get_stellar_wind_params ()
+get_stellar_wind_params (ndom)
+	int ndom;
 {
   Log ("Creating a wind model for a Star\n");
 
 
 
-  geo.stellar_wind_mdot = 1.e-6;
-  geo.wind_rmin = geo.rstar;
-  geo.cl_beta = 1.0;
-  geo.cl_rmin = 2.8e9;
-  geo.cl_v_zero = 200e5;
-  geo.cl_v_infinity = 3000e5;
 
-  geo.stellar_wind_mdot /= MSOL / YR;
-  rddoub ("stellar_wind_mdot(msol/yr)", &geo.stellar_wind_mdot);
-  geo.stellar_wind_mdot *= MSOL / YR;
+  zdom[ndom].stellar_wind_mdot = 1.e-6;
+  zdom[ndom].rmin = geo.rstar;
+  zdom[ndom].cl_beta = 1.0;
+  zdom[ndom].cl_rmin = 2.8e9;
+  zdom[ndom].cl_v_zero = 200e5;
+  zdom[ndom].cl_v_infinity = 3000e5;
 
-  rddoub ("stellar.wind.radmin(cm)", &geo.wind_rmin);	/*Radius where wind begins */
-  if (geo.wind_rmin < geo.rstar)
+  rddoub ("stellar_wind_mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
+  zdom[ndom].stellar_wind_mdot *= MSOL / YR;
+
+  rddoub ("stellar.wind.radmin(cm)", &zdom[ndom].rmin);	/*Radius where wind begins */
+  if (zdom[ndom].rmin < geo.rstar)
     {
       Error
 	("get_stellar_wind_params: It is unreasonable to have the wind start inside the star!\n");
-      Log ("Setting geo.wind_rmin to geo.rstar\n");
-      geo.wind_rmin = geo.rstar;
+      Log ("Setting geo.rmin to geo.rstar\n");
+      zdom[ndom].rmin = geo.rstar;
     }
-  geo.cl_rmin = geo.wind_rmin;
-  rddoub ("stellar.wind_vbase(cm)", &geo.cl_v_zero);	/* Velocity at base of the wind */
-  rddoub ("stellar.wind.v_infinity(cm)", &geo.cl_v_infinity);	/* Final speed of wind in units of escape velocity */
+  zdom[ndom].cl_rmin = zdom[ndom].rmin;
+  rddoub ("stellar.wind_vbase(cm)", &zdom[ndom].cl_v_zero);	/* Velocity at base of the wind */
+  rddoub ("stellar.wind.v_infinity(cm)", &zdom[ndom].cl_v_infinity);	/* Final speed of wind in units of escape velocity */
 
-  rddoub ("stellar.wind.acceleration_exponent", &geo.cl_beta);	/* Accleration scale exponent */
+  rddoub ("stellar.wind.acceleration_exponent", &zdom[ndom].cl_beta);	/* Accleration scale exponent */
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
-//OLD71  geo.wind_rmin = geo.rstar;
-  geo.wind_rmin = geo.wind_rmin;	//71 ksl - Not modified this so that we did not waste cells
-  geo.wind_rmax = geo.rmax;
-  geo.wind_thetamin = 0.0;
-  geo.wind_thetamax = 90. / RADIAN;
+  geo.rmin = zdom[ndom].rmin;	//71 ksl - Not modified this so that we did not waste cells
+  zdom[ndom].rmax = geo.rmax;
+  zdom[ndom].wind_thetamin = 0.0;
+  zdom[ndom].wind_thetamax = 90. / RADIAN;
 
 /* define the the variables that determine the gridding */
-  geo.wind_rho_min = 0;
-  geo.wind_rho_max = geo.rmax;
+  zdom[ndom].wind_rho_min = 0;
+  zdom[ndom].wind_rho_max = geo.rmax;
+  zdom[ndom].zmax = geo.rmax;
 
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      geo.xlog_scale = 0.3 * geo.rstar;
-      geo.zlog_scale = 0.3 * geo.rstar;
+      zdom[ndom].xlog_scale = 0.3 * geo.rstar;
+      zdom[ndom].zlog_scale = 0.3 * geo.rstar;
     }
     
   return (0);
@@ -117,9 +109,10 @@ get_stellar_wind_params ()
                                        Space Telescope Science Institute
 
  Synopsis:
-	double stellar_velocity(x,v) calulates the v the wind at a position 
+	double stellar_velocity(ndom, x,v) calulates the v the wind at a position 
 	x (where both x and v in cartesian coordinates)
 Arguments:		
+	ndom 			The domain number
 	double x[]		the postion where for the which one desires the velocity
 Returns:
 	double v[]		the calculated velocity
@@ -131,12 +124,12 @@ Description:
 
 	v(r)=V_o + (V_infinity-V_o) (1-R/r)**beta
 	
-	The values of the individiual constants should all be part of the structure geo.
+	The values of the individiual constants should all be part of the structure zdom[ndom].
 
-	V_o:  			geo.cl_v_zero;		velocity at base of wind 
-	V_infinity:		geo.cl_v_infinity;	the velocity at infinity
-	R			geo.cl_rmin	       	the inner radius of the wind
-	beta			geo.cl_beta		power law exponent for the velocity law
+	V_o:  			zdom[ndom].cl_v_zero;		velocity at base of wind 
+	V_infinity:		zdom[ndom].cl_v_infinity;	the velocity at infinity
+	R			zdom[ndom].cl_rmin	       	the inner radius of the wind
+	beta			zdom[ndom].cl_beta		power law exponent for the velocity law
 
 		
 Notes:
@@ -153,7 +146,8 @@ History:
 **************************************************************/
 
 double
-stellar_velocity (x, v)
+stellar_velocity (ndom, x, v)
+	int ndom;
      double x[], v[];
 {
   double r, speed, zzz;
@@ -168,12 +162,12 @@ stellar_velocity (x, v)
     }
 
 
-  if (r <= geo.rstar || r <= geo.cl_rmin)
-    speed = geo.cl_v_zero;
+  if (r <= geo.rstar || r <= zdom[ndom].cl_rmin)
+    speed = zdom[ndom].cl_v_zero;
   else
     {
-      zzz = pow (1. - geo.cl_rmin / r, geo.cl_beta);
-      speed = geo.cl_v_zero + (geo.cl_v_infinity - geo.cl_v_zero) * zzz;
+      zzz = pow (1. - zdom[ndom].cl_rmin / r, zdom[ndom].cl_beta);
+      speed = zdom[ndom].cl_v_zero + (zdom[ndom].cl_v_infinity - zdom[ndom].cl_v_zero) * zzz;
     }
   v[0] = speed * x[0] / r;
   v[1] = speed * x[1] / r;
@@ -205,66 +199,23 @@ History:
 **************************************************************/
 
 double
-stellar_rho (x)
+stellar_rho (ndom, x)
+	int ndom;
      double x[];
 {
   double r, rho, v[3];
-  double length (), stellar_velocity ();
+
   r = length (x);
-  if (r < geo.cl_rmin)
+  if (r < zdom[ndom].cl_rmin)
     {
-      rho = geo.stellar_wind_mdot / (4. * PI * r * r * geo.cl_v_zero);
+      rho = zdom[ndom].stellar_wind_mdot / (4. * PI * r * r * zdom[ndom].cl_v_zero);
     }
   else
     {
       rho =
-	geo.stellar_wind_mdot / (4. * PI * r * r * stellar_velocity (x, v));
+	zdom[ndom].stellar_wind_mdot / (4. * PI * r * r * stellar_velocity (ndom,x, v));
     }
 
   return (rho);
 }
 
-
-/*
-stellar_vel_grad calculates the velocity gradient tensor at any point in
-the flow
-
-The velocity gradient is defined as a 3 x 3 tensor such that
-
-	velgrad[i][j]= dv_i/dx_j
-
-NB: in c the rightmost index changes changes most rapidly so that
-	dv[i]= velgrad[i][j] * dx[j]
-makes sense.
-
-NB: Making ds too small can cause roundoff and/or precision errors.
-
-        01dec   ksl     Added for python_40
-
-*/
-int
-stellar_vel_grad (x, velgrad)
-     double x[], velgrad[][3];
-{
-  double v0[3], v1[3];
-  double dx[3], dv[3];
-  double ds;
-  int i, j;
-  int vsub (), stuff_v ();
-
-  stellar_velocity (x, v0);
-
-  ds = 1.e7;
-  for (i = 0; i < 3; i++)
-    {
-      stuff_v (x, dx);
-      dx[i] += ds;
-      stellar_velocity (dx, v1);
-      vsub (v1, v0, dv);
-      for (j = 0; j < 3; j++)
-	dv[j] /= ds;
-      stuff_v (dv, &velgrad[i][0]);
-    }
-
-  return (0);
-}

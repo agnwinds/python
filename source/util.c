@@ -273,6 +273,15 @@ History:
 			FOR ALL COORDINATE SYSTEMS.
 	13sep	nsh	76b -- Modified calls to fraction to take
 			account of new mode.
+	15aug	ksl	Modified to handle multiple domains.  This
+			routine could yield errors if we are asked
+			for positions outside one of the active 
+			wind regions, so for now it finds the 
+			domain, and prints and error if not
+			in any domain.  Ultimately added the domain
+			to one of the input variables because 
+			there are times when we want coordinates
+			which are outside the wind region.
 		       	
 
 **************************************************************/
@@ -280,7 +289,8 @@ History:
 int ierr_coord_fraction = 0;
 
 int
-coord_fraction (ichoice, x, ii, frac, nelem)
+coord_fraction (ndom, ichoice, x, ii, frac, nelem)
+	int ndom;
      int ichoice;
      double x[];
      int ii[];
@@ -291,16 +301,15 @@ coord_fraction (ichoice, x, ii, frac, nelem)
   double *xx, *zz;
   int ix, iz;
   double dr, dz;
-  int cylvar_coord_fraction ();
   int n;
 
 
   /* Jump to special routine if CYLVAR coords */
 
-  if (geo.coord_type == CYLVAR)
+  if (zdom[ndom].coord_type == CYLVAR)
     {
 
-      n = cylvar_coord_fraction (ichoice, x, ii, frac, nelem);
+      n = cylvar_coord_fraction (ndom, ichoice, x, ii, frac, nelem);
       if (n < 0 && ierr_coord_fraction < 1000)
 	{
 	  Error
@@ -319,27 +328,27 @@ coord_fraction (ichoice, x, ii, frac, nelem)
 
   if (ichoice == 0)
     {
-      xx = wind_x;
-      zz = wind_z;
+      xx = zdom[ndom].wind_x;
+      zz = zdom[ndom].wind_z;
     }
   else
     {
-      xx = wind_midx;
-      zz = wind_midz;
+      xx = zdom[ndom].wind_midx;
+      zz = zdom[ndom].wind_midz;
     }
 
   /* Now convert x to the appropriate coordinate system */
-  if (geo.coord_type == CYLIND)
+  if (zdom[ndom].coord_type == CYLIND)
     {
       r = sqrt (x[0] * x[0] + x[1] * x[1]);
       z = fabs (x[2]);
     }
-  else if (geo.coord_type == RTHETA)
+  else if (zdom[ndom].coord_type == RTHETA)
     {
       r = length (x);
       z = acos (fabs (x[2]) / r) * RADIAN;
     }
-  else if (geo.coord_type == SPHERICAL)
+  else if (zdom[ndom].coord_type == SPHERICAL)
     {
       r = length (x);
       z = 0;			// To avoid -O3 warning
@@ -347,14 +356,14 @@ coord_fraction (ichoice, x, ii, frac, nelem)
   else
     {
       Error
-	("coord_fraction: Don't know how to handle this coordinate type %d\n",
-	 geo.coord_type);
+	("coord_fraction: Unknown coordinate type %d for doman\n",
+	 zdom[ndom].coord_type,ndom);
       exit (0);
     }
 
-  if (geo.coord_type == SPHERICAL)
+  if (zdom[ndom].coord_type == SPHERICAL)
     {				/* We are dealing with a 1d system */
-      fraction (r, xx, NDIM, &ix, &dr, 0); //linear space
+      fraction (r, xx, zdom[ndom].ndim, &ix, &dr, 0); //linear space
       ii[0] = ix;
       frac[0] = (1. - dr);
       ii[1] = ix + 1;
@@ -367,19 +376,19 @@ coord_fraction (ichoice, x, ii, frac, nelem)
     }
   else
     {				/* We are dealing with a 2d system */
-      fraction (r, xx, NDIM, &ix, &dr, 0);
-      fraction (z, zz, MDIM, &iz, &dz, 0);
+      fraction (r, xx, zdom[ndom].ndim, &ix, &dr, 0);
+      fraction (z, zz, zdom[ndom].mdim, &iz, &dz, 0);
 
-      ii[0] = ix * MDIM + iz;
+      ii[0] = ix * zdom[ndom].mdim + iz;
       frac[0] = (1. - dz) * (1. - dr);
 
-      ii[1] = (ix + 1) * MDIM + iz;
+      ii[1] = (ix + 1) * zdom[ndom].mdim+ iz;
       frac[1] = (1. - dz) * dr;
 
-      ii[2] = ix * MDIM + iz + 1;
+      ii[2] = ix * zdom[ndom].mdim+ iz + 1;
       frac[2] = (dz) * (1. - dr);
 
-      ii[3] = (ix + 1) * MDIM + iz + 1;
+      ii[3] = (ix + 1) * zdom[ndom].mdim + iz + 1;
       frac[3] = (dz) * (dr);
       *nelem = 4;
 
@@ -393,7 +402,7 @@ coord_fraction (ichoice, x, ii, frac, nelem)
   /* Note that this is a very incoplethe check in the sneste that 
    * the posision could be out of the grid in other directions */
 
-  if (r > xx[NDIM - 1])
+  if (r > xx[zdom[ndom].ndim - 1])
     {
       return (-2);		/* x is outside grid */
     }
@@ -441,6 +450,7 @@ Notes:
 History:
 	05jul	ksl	56d -- Created in the context of incorporating
 			CYLVAR coordinates.
+	15aug	ksl	Began attempt to incorporate domains
 		       	
 
 **************************************************************/
@@ -451,41 +461,48 @@ int
 where_in_2dcell (ichoice, x, n, fx, fz)
      int ichoice;
      double x[];
-     int n;
+     int n;  // A known wind cell
      double *fx, *fz;
 {
   double *x00, *x01, *x10, *x11;
   double z[3];
   int i;
-  int bilin ();
+  int ndom, nstart, nstop,mdim;
 
-  /* Assign the corners ot the region we want to determin
-   * the fractional position of
-   */
+  ndom=wmain[n].ndom;
+  nstart=zdom[ndom].nstart;
+  nstop=zdom[ndom].nstop;
+  mdim=zdom[ndom].mdim;
 
-  if (n < 0 || n + MDIM + 1 >= NDIM2)
+
+  /* First check that n is reasonable. This semems almost impossible */
+  if (n < nstart || n + mdim + 1 >= nstop)
     {
       if (ierr_where_in_2dcell < 100)
 	{
-	  Error ("where_in_2dcell: Unreasonable n %d \n", n);
+	  Error ("where_in_2dcell: Unreasonable n %d This should not happen. Please investigate \n", n);
 	  ierr_where_in_2dcell++;
 	}
       return (n);		// And hope that calling routine knows how to handle this.
     }
 
+  /* Assign the corners ot the region we want to determin
+   * the fractional position of
+   */
+
   if (ichoice == 0)
     {
       x00 = wmain[n].x;
       x01 = wmain[n + 1].x;
-      x10 = wmain[n + MDIM].x;
-      x11 = wmain[n + MDIM + 1].x;
+      x10 = wmain[n + mdim].x;
+      x11 = wmain[n + mdim + 1].x;
     }
   else
     {
       x00 = wmain[n].xcen;
       x01 = wmain[n + 1].xcen;
-      x10 = wmain[n + MDIM].xcen;
-      x11 = wmain[n + MDIM + 1].xcen;
+      x10 = wmain[n + mdim].xcen;
+      x11 = wmain[n + mdim + 1].xcen;
     }
 
   /* Rotate the input vector onto the xz plane
@@ -509,7 +526,8 @@ where_in_2dcell (ichoice, x, n, fx, fz)
 
 /***********************************************************
           Space Telescope Science Institute
-Synopsis: wind_n_to_ij(n,i,j) and wind_ij_to_n(i,j,n) are two 
+
+Synopsis: wind_n_to_ij(ndom, n,i,j) and wind_ij_to_n(i,j,n) are two 
 routines which effectively translate between the one dimensional 
 wind structure and the two dimensional physical grid 
 
@@ -520,49 +538,54 @@ two dimensional grid
 
 Returns:
 
+i,j position in a given domain
+
 Description:
 
 Notes:
+
 For 2d, the underlying 1-d grid is organized so that as n increases, 
 one goes up in z, and then steps out in rho., or in theta and then
 z as the case may be.
 
-In spherical coordinates, we assume that 
+With domains, this routine has to be used carefully, and a better
+statement would be that these routines map to and from the element 
+in wmain to the normally 2d element in an individual domain.
+
+So this means that if you want to get the ith and jth element of
+domain 1, then one needs to give nstart+whatever to wind_n_to_ij
+
  
 History:
 	97jan	ksl	Coding on python began.
 	02feb	ksl	Allowed for different dimensions in x and z
 	05apr	ksl	Added error_check to verify routine 
 			is not called with spherical coordiantes
+	15aug	jm/ksl	Modified to account for domains
 **************************************************************/
 
 
 int
-wind_n_to_ij (n, i, j)
-     int n, *i, *j;
+wind_n_to_ij (ndom, n, i, j)
+     int n, *i, *j, ndom;
 {
-  if (geo.coord_type == SPHERICAL)
+  int n_use;
+  if (zdom[ndom].coord_type == SPHERICAL)
     {
-      *i = n;
+      *i = n - zdom[ndom].nstart;
       *j = 0;
-/*  130624 - ksl - Removed this error as it program appears to be working as intended
- *  and there are times when this routine should be called for spherical models
- *  since we basically still have a 2d grid in this case      
-       Error
-	("Warning: wind_n_to_ij being called for spherical coordinates %d \n",
-	 n);
-*/
     }
-  *i = n / MDIM;
-  *j = n - (*i) * MDIM;
+  n_use = n - zdom[ndom].nstart;
+  *i = n_use / zdom[ndom].mdim;
+  *j = n_use - (*i) * zdom[ndom].mdim;
   return (0);
 }
 
 int
-wind_ij_to_n (i, j, n)
-     int *n, i, j;
+wind_ij_to_n (ndom, i, j, n)
+     int *n, i, j, ndom;
 {
-  if (geo.coord_type == SPHERICAL)
+  if (zdom[ndom].coord_type == SPHERICAL)
     {
       Error
 	("Warning: wind_ij_to_n being called for spherical coordinates %d %d\n",
@@ -570,6 +593,6 @@ wind_ij_to_n (i, j, n)
       *n = i;
       return (*n);
     }
-  *n = i * MDIM + j;		// MDIM because the array is in z order
+  *n = zdom[ndom].nstart + i * zdom[ndom].mdim + j;		// MDIM because the array is in z order
   return (*n);
 }

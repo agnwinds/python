@@ -298,6 +298,9 @@ cpar (filename)
 {
   char old_filename[LINELEN];
 
+  if (rd_rank != 0)
+  	return 0;
+
   fclose (rdout_ptr);
   fclose (rdin_ptr);
   rdpar_stat = 0;
@@ -585,6 +588,41 @@ rdint (question, answer)
 }
 
 int
+rdint2 (question, answer1, answer2)
+     char question[];
+     int *answer1, *answer2;
+{
+	int query, found = 0;
+	char dummy[LINELEN];
+  	query = REISSUE;
+  	if (rdpar_stat == 0)
+    	rdpar_init ();		/* Set rdin_ptr to stdin, and rdout_ptr to file tmp.rdpar */
+  
+  	while (query == REISSUE)
+  	{
+  		if(found == 0)
+  			sprintf (dummy, "%d", *answer1);
+    	else if(found == 1)
+    		sprintf (dummy, "%d", *answer2);
+
+    	query = string_process (question, dummy);
+    	if (query == NORMAL)
+		{
+			if(found == 0)
+				sscanf (dummy, "%d", answer1);
+	    	else if (found == 1)
+	    	{
+				sscanf (dummy, "%d", answer2);
+        		if (rd_rank==0 && verbose==1)
+	    			printf ("%s	  %d %d\n", question, *answer1, *answer2);
+	    	}
+		}
+  	}
+  	return (query);
+}
+
+
+int
 rdflo (question, answer)
      char question[];
      float *answer;
@@ -675,8 +713,10 @@ get_root (root, total)
   i = strcspn (total, ".");
   if ((j = strcspn (total, "\n")) < i)
     i = j;
-  if (verbose)
-    printf ("number %d\n", i);
+  
+  //JM 1503 -- we don't need this and it muddles output. 
+  //if (verbose)
+  //  printf ("number %d\n", i);
   if (i == 0)
     {
       strcpy (root, "rdpar");
@@ -686,7 +726,7 @@ get_root (root, total)
       strncpy (root, total, strcspn (total, "."));
       root[i] = '\0';
     }
-  if (verbose)
+  if ( (verbose) && (rd_rank==0) )
     printf ("%s\n", root);
 
   return(0);
@@ -755,6 +795,8 @@ int rd_extra(firstword, answer, wordlength)
 	{
 	  *wordlength = (int) (ccc - firstword);
 	}
+  else
+  	*wordlength = strlen (firstword);
 
   sscanf (secondword, "%le", answer);
 

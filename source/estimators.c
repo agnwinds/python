@@ -48,7 +48,7 @@ History:
 			one is already assigned here, and so I did not switch everything
 			but it may be that this should be done
 ************************************************************/
-
+      
 int
 bf_estimators_increment (one, p, ds)
      WindPtr one;
@@ -62,7 +62,6 @@ bf_estimators_increment (one, p, ds)
   double y, yy;
   double exponential, heat_contribution;
   int n, m, llvl, nn;
-  double sigma_phot_topbase ();
   double density;
   double abs_cont;
   int nplasma;
@@ -88,7 +87,7 @@ bf_estimators_increment (one, p, ds)
    */
   if (modes.save_cell_stats && ncstat > 0)
     {
-      save_photon_stats(one, p, ds);  // save photon statistics (extra diagnostics)
+      save_photon_stats(one, p, ds,p->w);  // save photon statistics (extra diagnostics)
     }
 
 
@@ -113,9 +112,17 @@ bf_estimators_increment (one, p, ds)
       n = xplasma->kbf_use[nn];
       ft = phot_top[n].freq[0];	//This is the edge frequency (SS)
 
-      llvl = phot_top[n].nlev;	//Returning lower level = correct (SS)
+      if (ion[phot_top[n].nion].phot_info > 0)   //topbase or hybrid
+      {
+        llvl = phot_top[n].nlev;	//Returning lower level = correct (SS)
+        density = den_config (xplasma, llvl);
+      }
+      else if (ion[phot_top[n].nion].phot_info == 0)   //vfky
+      {
+        density = xplasma->density[phot_top[n].nion];
+        llvl = 0;   // shouldn't ever be used 
+      }
 
-      density = den_config (xplasma, llvl);
 
       /* JM130729 Bugfix 31: This if loop causes the else statement for simple ions to be 
        * entered in macro atom mode- it appeared to be introduced sometime between 58 and 68.
@@ -128,6 +135,14 @@ bf_estimators_increment (one, p, ds)
 
 	  if (phot_top[n].macro_info == 1 && geo.macro_simple == 0)	// it is a macro atom
 	    {
+        /* quick check that we don't have a VFKY cross-section here */
+        if (ion[phot_top[n].nion].phot_info == 0)
+        {
+          Error("bf_estimators_increment: Vfky cross-section in macro-atom section! Setting heating to 0 for this XS.\n");
+          density = 0.0;
+        }
+
+
 	      x = kap_bf[nn] / (density * geo.fill);	//this is the cross section
 
 	      /* Now identify which of the BF processes from this level this is. */
@@ -191,7 +206,7 @@ bf_estimators_increment (one, p, ds)
 	         recombination is included here. (SS, Apr 04) */
 	      if (density > DENSITY_PHOT_MIN)
 		{
-		  x = sigma_phot_topbase (&phot_top[n], freq_av);	//this is the cross section
+		  x = sigma_phot (&phot_top[n], freq_av);	//this is the cross section
 		  weight_of_packet = p->w;
 		  y = weight_of_packet * x * ds;
 
@@ -473,8 +488,9 @@ mc_estimator_normalise (n)
   mplasma = &macromain[xplasma->nplasma];
 
   /* All the estimators need the volume so get that first. */
-  /* JM 1411 - changed to use filled volume */
-  volume = xplasma->vol;
+  /* JM 1507 - we use cell volume for all the estimators here */
+
+  volume = one->vol;
 
   /* bf estimators. During the mc calculation the quantity stored
      was weight * cross-section * path-length / frequency.
@@ -527,10 +543,11 @@ mc_estimator_normalise (n)
 	     is given by a black body. */
 
 	  /* For now place the limit at 7.5e12 which is 400000AA */
-	  /* Try also doing it for very high energy ones - greater than 50eV: 1.2e16 since up there the statistics of the estimators are very poor at the moment. Ideally we don't want to have this so should probably switch this back sometime (SS August 05) !!!BUG */
+	  /* Try also doing it for very high energy ones - greater than 50eV: 1.2e16 since up there the statistics of the estimators are very poor at the moment. 
+       Ideally we don't want to have this so should probably switch this back sometime (SS August 05) !!!BUG */
 
 	  if (phot_top[config[i].bfu_jump[j]].freq[0] < 7.5e12
-	      || phot_top[config[i].bfu_jump[j]].freq[0] > 1.2e16)
+	      || phot_top[config[i].bfu_jump[j]].freq[0] > 5e18)
 	    {
 	      mplasma->gamma_old[config[i].bfu_indx_first + j] =
 		get_gamma (&phot_top[config[i].bfu_jump[j]], xplasma);
@@ -570,7 +587,7 @@ mc_estimator_normalise (n)
 	  stimfac =
 	    stimfac * config[i].g /
 	    config[line[config[i].bbu_jump[j]].nconfigu].g;
-	  if (stimfac < 1.0)
+	  if (stimfac < 1.0 && stimfac >= 0.0)
 	    {
 	      stimfac = 1. - stimfac;	//all's well
 	    }
@@ -592,6 +609,8 @@ mc_estimator_normalise (n)
 
 	  //get the line frequency
 	  line_freq = line[config[i].bbu_jump[j]].freq;
+
+    /* normalise jbar. Note that this uses the cell volume rather than the filled volume */
 	  mplasma->jbar_old[config[i].bbu_indx_first + j] =
 	    mplasma->jbar[config[i].bbu_indx_first +
 			  j] * C * stimfac / 4. / PI / volume / line_freq;
@@ -616,6 +635,10 @@ mc_estimator_normalise (n)
   xplasma->heat_photo_macro = heat_contribution;
   xplasma->heat_tot += heat_contribution;
 
+  
+  /* finally, check if we have any palces where stimulated recombination wins over
+     photoionization */
+  check_stimulated_recomb(xplasma);
 
   /* Now that we have estimators, set the plag to use them for the level populations */
 
@@ -698,6 +721,13 @@ total_fb_matoms (xplasma, t_e, f1, f2)
 	         process. */
 	      cont_ptr = &phot_top[config[i].bfu_jump[j]];
 	      density = den_config (xplasma, cont_ptr->uplev);
+
+        /* the cooling contribution for each transition is given by 
+           density * ne * [(alpha_sp_e - alpha_sp) + (alpha_st_e - alpha_st)]
+           we call alpha_sp() with modes 1 and 0 to get the different
+           versions of the sp. recombination rate coefficient.
+           This is essentially equation (33) of Lucy (2003) */
+           
 	      cool_contribution =
 		(mplasma->alpha_st_e_old[config[i].bfu_indx_first + j] +
 		 alpha_sp (cont_ptr, xplasma, 1)
@@ -1062,6 +1092,85 @@ bb_simple_heat (xplasma, p, tau_sobolev, dvds, nn)
 
 }
 
+/**************************************************
+  check_stimulated emission
+*****************************************************/
+
+int check_stimulated_recomb(xplasma)
+     PlasmaPtr xplasma;
+{
+  int i, j;
+  struct topbase_phot *cont_ptr;
+  int st_recomb_err;
+  double st_recomb, gamma, coll_ioniz;
+  MacroPtr mplasma;
+  mplasma = &macromain[xplasma->nplasma];
+
+  st_recomb_err = 0;
+
+  for (i = 0; i < nlte_levels; i++)
+    {
+      for (j = 0; j < config[i].n_bfu_jump; j++)
+  {
+    cont_ptr = &phot_top[config[i].bfu_jump[j]];
+    gamma = mplasma->gamma_old[config[i].bfu_indx_first + j];
+    st_recomb = mplasma->alpha_st_old[config[i].bfu_indx_first + j];
+    st_recomb *= xplasma->ne * den_config (xplasma, cont_ptr->uplev) / den_config (xplasma, cont_ptr->nlev);
+    coll_ioniz = q_ioniz (cont_ptr, xplasma->t_e) * xplasma->ne;
+
+    if (st_recomb > (gamma + coll_ioniz))
+      st_recomb_err += 1;
+  }
+    }
+
+  if (st_recomb_err > 0)
+    Error("check_stimulated_recomb: cell %i had %i bf jumps where ne*n_u/n_l*alpha_st > gamma\n", 
+           xplasma->nplasma, st_recomb_err);
+
+  return (0);
+}
+
+
+
+/**************************************************
+  get_dilute_estimators computes the bound free and 
+  bound bound estimators for a cell from a dilute blackbody.
+  This is the default if macro_pops fails to find a solution
+  for an ion.
+*****************************************************/
+
+int
+get_dilute_estimators (xplasma)
+     PlasmaPtr xplasma;
+{
+
+  int i, j;
+  struct lines *line_ptr;
+  MacroPtr mplasma;
+  mplasma = &macromain[xplasma->nplasma];
+
+
+  for (i = 0; i < nlte_levels; i++)
+    {
+      for (j = 0; j < config[i].n_bfu_jump; j++)
+  {
+    mplasma->gamma_old[config[i].bfu_indx_first + j] = get_gamma (&phot_top[config[i].bfu_jump[j]], xplasma);
+    mplasma->gamma_e_old[config[i].bfu_indx_first + j] = get_gamma_e (&phot_top[config[i].bfu_jump[j]], xplasma);
+    mplasma->alpha_st_e_old[config[i].bfu_indx_first + j] = get_alpha_st_e (&phot_top[config[i].bfu_jump[j]], xplasma);
+    mplasma->alpha_st_old[config[i].bfu_indx_first + j] = get_alpha_st (&phot_top[config[i].bfu_jump[j]], xplasma);
+  }
+      for (j = 0; j < config[i].n_bbu_jump; j++)
+  {
+    line_ptr = &line[config[i].bbu_jump[j]];
+    mplasma->jbar_old[config[i].bbu_indx_first + j] = mean_intensity (xplasma, line_ptr->freq, 1);
+  }
+
+    }
+
+  return (0);
+}
+
+
 
 /**************************************************
   get_gamma - to get the energy weighted photoionization rate
@@ -1116,7 +1225,7 @@ gamma_integrand (freq)
   if (freq < fthresh)
     return (0.0);		// No photoionization at frequencies lower than the threshold freq occur
 
-  x = sigma_phot_topbase (cont_ext_ptr2, freq);	//this is the cross-section
+  x = sigma_phot (cont_ext_ptr2, freq);	//this is the cross-section
   integrand = x * freq * freq / (exp (H_OVER_K * freq / tt) - 1);
 
   return (integrand);
@@ -1174,7 +1283,7 @@ gamma_e_integrand (freq)
   if (freq < fthresh)
     return (0.0);		// No photoionization at frequencies lower than the threshold freq occur
 
-  x = sigma_phot_topbase (cont_ext_ptr2, freq);	//this is the cross-section
+  x = sigma_phot (cont_ext_ptr2, freq);	//this is the cross-section
   integrand =
     x * freq * freq * freq / (exp (H_OVER_K * freq / tt) - 1) / fthresh;
 
@@ -1250,7 +1359,7 @@ alpha_st_integrand (freq)
   if (freq < fthresh)
     return (0.0);		// No recombination at frequencies lower than the threshold freq occur
 
-  x = sigma_phot_topbase (cont_ext_ptr2, freq);	//this is the cross-section
+  x = sigma_phot (cont_ext_ptr2, freq);	//this is the cross-section
   integrand =
     x * freq * freq * exp (H_OVER_K * (fthresh - freq) / tt) /
     (exp (H_OVER_K * freq / ttrr) - 1);
@@ -1326,7 +1435,7 @@ alpha_st_e_integrand (freq)
   if (freq < fthresh)
     return (0.0);		// No recombination at frequencies lower than the threshold freq occur
 
-  x = sigma_phot_topbase (cont_ext_ptr2, freq);	//this is the cross-section
+  x = sigma_phot (cont_ext_ptr2, freq);	//this is the cross-section
   integrand =
     x * freq * freq * exp (H_OVER_K * (fthresh - freq) / tt) /
     (exp (H_OVER_K * freq / ttrr) - 1) * freq / fthresh;

@@ -31,6 +31,7 @@ History:
 #include "atomic.h"
 #include "python.h"
 
+    
 int
 communicate_estimators_para ()
 {
@@ -47,11 +48,11 @@ communicate_estimators_para ()
 
   /* The size of the helper array for doubles. We transmit 10 numbers 
      for each cell, plus three arrays, each of length NXBANDS */
-  plasma_double_helpers = (14 + 3 * NXBANDS) * NPLASMA;
+  plasma_double_helpers = (15 + 3 * NXBANDS) * NPLASMA;
 
-  /* The size of the helper array for integers. We transmit 6 numbers 
+  /* The size of the helper array for integers. We transmit 7 numbers 
      for each cell, plus one array of length NXBANDS */
-  plasma_int_helpers = (6 + NXBANDS) * NPLASMA;
+  plasma_int_helpers = (7 + NXBANDS) * NPLASMA;
 
 
   maxfreqhelper = calloc (sizeof (double), NPLASMA);
@@ -88,11 +89,13 @@ communicate_estimators_para ()
       redhelper[mpi_i + 11 * NPLASMA] = plasmamain[mpi_i].j_scatt / np_mpi_global;
       redhelper[mpi_i + 12 * NPLASMA] = plasmamain[mpi_i].ip_direct / np_mpi_global;
       redhelper[mpi_i + 13 * NPLASMA] = plasmamain[mpi_i].ip_scatt / np_mpi_global;
+      redhelper[mpi_i + 14 * NPLASMA] = plasmamain[mpi_i].heat_auger / np_mpi_global;
+
       for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	{
-	  redhelper[mpi_i + (14 + mpi_j) * NPLASMA] = plasmamain[mpi_i].xj[mpi_j] / np_mpi_global;
-	  redhelper[mpi_i + (14 + NXBANDS + mpi_j) * NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j] / np_mpi_global;
-	  redhelper[mpi_i + (14 + 2 * NXBANDS + mpi_j) * NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j] / np_mpi_global;
+	  redhelper[mpi_i + (15 + mpi_j) * NPLASMA] = plasmamain[mpi_i].xj[mpi_j] / np_mpi_global;
+	  redhelper[mpi_i + (15 + NXBANDS + mpi_j) * NPLASMA] = plasmamain[mpi_i].xave_freq[mpi_j] / np_mpi_global;
+	  redhelper[mpi_i + (15 + 2 * NXBANDS + mpi_j) * NPLASMA] = plasmamain[mpi_i].xsd_freq[mpi_j] / np_mpi_global;
 
 	  /* 131213 NSH populate the band limited min and max frequency arrays */
 	  maxbandfreqhelper[mpi_i * NXBANDS + mpi_j] = plasmamain[mpi_i].fmax[mpi_j];
@@ -104,6 +107,7 @@ communicate_estimators_para ()
   MPI_Reduce (minbandfreqhelper, minbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
   MPI_Reduce (maxbandfreqhelper, maxbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
   MPI_Reduce (maxfreqhelper, maxfreqhelper2, NPLASMA, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+  MPI_Barrier (MPI_COMM_WORLD);  
   MPI_Reduce (redhelper, redhelper2, plasma_double_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   if (rank_global == 0)
     {
@@ -111,6 +115,7 @@ communicate_estimators_para ()
       Log_parallel ("Zeroth thread successfully received the normalised estimators. About to broadcast.\n");
     }
 
+  MPI_Barrier (MPI_COMM_WORLD);
   MPI_Bcast (redhelper2, plasma_double_helpers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (maxfreqhelper2, NPLASMA, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   /* 131213 NSH Send out the global min and max band limited frequencies to all threads */
@@ -135,11 +140,13 @@ communicate_estimators_para ()
       plasmamain[mpi_i].j_scatt = redhelper2[mpi_i + 11 * NPLASMA];
       plasmamain[mpi_i].ip_direct = redhelper2[mpi_i + 12 * NPLASMA];
       plasmamain[mpi_i].ip_scatt = redhelper2[mpi_i + 13 * NPLASMA];
+      plasmamain[mpi_i].heat_auger = redhelper2[mpi_i + 14 * NPLASMA];
+
       for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	{
-	  plasmamain[mpi_i].xj[mpi_j] = redhelper2[mpi_i + (14 + mpi_j) * NPLASMA];
-	  plasmamain[mpi_i].xave_freq[mpi_j] = redhelper2[mpi_i + (14 + NXBANDS + mpi_j) * NPLASMA];
-	  plasmamain[mpi_i].xsd_freq[mpi_j] = redhelper2[mpi_i + (14 + NXBANDS * 2 + mpi_j) * NPLASMA];
+	  plasmamain[mpi_i].xj[mpi_j] = redhelper2[mpi_i + (15 + mpi_j) * NPLASMA];
+	  plasmamain[mpi_i].xave_freq[mpi_j] = redhelper2[mpi_i + (15 + NXBANDS + mpi_j) * NPLASMA];
+	  plasmamain[mpi_i].xsd_freq[mpi_j] = redhelper2[mpi_i + (15 + NXBANDS * 2 + mpi_j) * NPLASMA];
 
 	  /* 131213 NSH And unpack the min and max banded frequencies to the plasma array */
 	  plasmamain[mpi_i].fmax[mpi_j] = maxbandfreqhelper2[mpi_i * NXBANDS + mpi_j];
@@ -158,9 +165,11 @@ communicate_estimators_para ()
       iredhelper[mpi_i + 3 * NPLASMA] = plasmamain[mpi_i].ntot_disk;
       iredhelper[mpi_i + 4 * NPLASMA] = plasmamain[mpi_i].ntot_wind;
       iredhelper[mpi_i + 5 * NPLASMA] = plasmamain[mpi_i].ntot_agn;
+      iredhelper[mpi_i + 6 * NPLASMA] = plasmamain[mpi_i].nioniz;
+
       for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	{
-	  iredhelper[mpi_i + (6 + mpi_j) * NPLASMA] = plasmamain[mpi_i].nxtot[mpi_j];
+	  iredhelper[mpi_i + (7 + mpi_j) * NPLASMA] = plasmamain[mpi_i].nxtot[mpi_j];
 	}
     }
   MPI_Reduce (iredhelper, iredhelper2, plasma_int_helpers, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
@@ -178,9 +187,11 @@ communicate_estimators_para ()
       plasmamain[mpi_i].ntot_disk = iredhelper2[mpi_i + 3 * NPLASMA];
       plasmamain[mpi_i].ntot_wind = iredhelper2[mpi_i + 4 * NPLASMA];
       plasmamain[mpi_i].ntot_agn = iredhelper2[mpi_i + 5 * NPLASMA];
+	    plasmamain[mpi_i].nioniz = iredhelper2[mpi_i + 6 * NPLASMA];
+
       for (mpi_j = 0; mpi_j < NXBANDS; mpi_j++)
 	{
-	  plasmamain[mpi_i].nxtot[mpi_j] = iredhelper2[mpi_i + (6 + mpi_j) * NPLASMA];
+	  plasmamain[mpi_i].nxtot[mpi_j] = iredhelper2[mpi_i + (7 + mpi_j) * NPLASMA];
 	}
     }
 
@@ -332,7 +343,7 @@ communicate_matom_estimators_para ()
   alpha_helper = calloc (sizeof (double), NPLASMA * 2 * size_alpha_est);
   level_helper = calloc (sizeof (double), NPLASMA * nlevels_macro);
   cell_helper = calloc (sizeof (double), 7 * NPLASMA);
-  cooling_bf_helper = calloc (sizeof (double), NPLASMA * 2 * ntop_phot);
+  cooling_bf_helper = calloc (sizeof (double), NPLASMA * 2 * nphot_total);
   cooling_bb_helper = calloc (sizeof (double), NPLASMA * nlines);
 
   jbar_helper2 = calloc (sizeof (double), NPLASMA * size_Jbar_est);
@@ -340,7 +351,7 @@ communicate_matom_estimators_para ()
   alpha_helper2 = calloc (sizeof (double), NPLASMA * 2 * size_alpha_est);
   level_helper2 = calloc (sizeof (double), NPLASMA * nlevels_macro);
   cell_helper2 = calloc (sizeof (double), 7 * NPLASMA);
-  cooling_bf_helper2 = calloc (sizeof (double), NPLASMA * 2 * ntop_phot);
+  cooling_bf_helper2 = calloc (sizeof (double), NPLASMA * 2 * nphot_total);
   cooling_bb_helper2 = calloc (sizeof (double), NPLASMA * nlines);
 
 
@@ -390,10 +401,10 @@ communicate_matom_estimators_para ()
 	  alpha_helper[mpi_i + ((n + size_alpha_est) * NPLASMA)] = macromain[mpi_i].recomb_sp_e[n] / np_mpi_global;
 	}
 
-      for (n = 0; n < ntop_phot; n++)
+      for (n = 0; n < nphot_total; n++)
   {
     cooling_bf_helper[mpi_i + (n * NPLASMA)] = macromain[mpi_i].cooling_bf[n] / np_mpi_global;
-    cooling_bf_helper[mpi_i + ((n + ntop_phot) * NPLASMA)] = macromain[mpi_i].cooling_bf_col[n] / np_mpi_global;
+    cooling_bf_helper[mpi_i + ((n + nphot_total) * NPLASMA)] = macromain[mpi_i].cooling_bf_col[n] / np_mpi_global;
   }
 
       for (n = 0; n < nlines; n++)
@@ -404,12 +415,13 @@ communicate_matom_estimators_para ()
 
   /* because in the above loop we have already divided by number of processes, we can now do a sum
      with MPI_Reduce, passing it MPI_SUM as an argument. This will give us the mean across threads */
+  MPI_Barrier (MPI_COMM_WORLD);
   MPI_Reduce (cell_helper, cell_helper2, NPLASMA * 7, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Reduce (level_helper, level_helper2, NPLASMA * nlevels_macro, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Reduce (jbar_helper, jbar_helper2, NPLASMA * size_Jbar_est, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Reduce (gamma_helper, gamma_helper2, NPLASMA * 4 * size_gamma_est, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Reduce (alpha_helper, alpha_helper2, NPLASMA * 2 * size_alpha_est, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-  MPI_Reduce (cooling_bf_helper, cooling_bf_helper2, NPLASMA * 2 * ntop_phot, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+  MPI_Reduce (cooling_bf_helper, cooling_bf_helper2, NPLASMA * 2 * nphot_total, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Reduce (cooling_bb_helper, cooling_bb_helper2, NPLASMA * nlines, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
 
@@ -418,12 +430,13 @@ communicate_matom_estimators_para ()
       Log_parallel ("Zeroth thread successfully received the macro-atom estimators. About to broadcast.\n");
     }
 
+  MPI_Barrier (MPI_COMM_WORLD);
   MPI_Bcast (cell_helper2, NPLASMA * 7, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (level_helper2, NPLASMA * nlevels_macro, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (jbar_helper2, NPLASMA * size_Jbar_est, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (gamma_helper2, NPLASMA * 4 * size_gamma_est, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (alpha_helper2, NPLASMA * 2 * size_alpha_est, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast (cooling_bf_helper2, NPLASMA * 2 * ntop_phot, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast (cooling_bf_helper2, NPLASMA * 2 * nphot_total, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (cooling_bb_helper2, NPLASMA * nlines, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
 
@@ -470,10 +483,10 @@ communicate_matom_estimators_para ()
 	  macromain[mpi_i].recomb_sp_e[n] = alpha_helper2[mpi_i + ((n + size_alpha_est) * NPLASMA)];
 	}
 
-      for (n = 0; n < ntop_phot; n++)
+      for (n = 0; n < nphot_total; n++)
   {
     macromain[mpi_i].cooling_bf[n] = cooling_bf_helper2[mpi_i + (n * NPLASMA)];
-    macromain[mpi_i].cooling_bf_col[n] = cooling_bf_helper2[mpi_i + ((n + ntop_phot) * NPLASMA)];
+    macromain[mpi_i].cooling_bf_col[n] = cooling_bf_helper2[mpi_i + ((n + nphot_total) * NPLASMA)];
   }
 
       for (n = 0; n < nlines; n++)

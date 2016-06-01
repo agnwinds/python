@@ -38,6 +38,7 @@ import py_read_output as r
 import numpy as np 
 import os, sys
 import py_plot_util as util
+import brewer2mpl
 
 has_astropy = True 
 try:
@@ -45,9 +46,49 @@ try:
 except ImportError:
     has_astropy = False
 
+use_pretty = True
+try: 
+    import brewer2mpl
+except ImportError:
+    use_pretty = False
 
 
-def make_spec_plot(s, fname, smooth_factor = 10, angles = True, components = False):
+colormaps = ["Set1", "Set2", "Dark2", "Paired", "Paired2", "Accent"]
+
+def set_pretty(cmap="jm"):
+
+    if type(cmap) is str:
+        if cmap != "jm":
+            color = cmap 
+        else:
+            color = "Set1"
+    elif type(cmap) is int:
+        color = colormaps[cmap]
+    else:
+        raise TypeError("cmap must be string or integer.")
+
+    
+
+
+    #r.setpars()
+
+    # Get "Set2" colors from ColorBrewer (all colorbrewer scales: http://bl.ocks.org/mbostock/5577023)
+    set2 = brewer2mpl.get_map(color, 'qualitative', 8).mpl_colors
+
+    if cmap == "jm":
+        g = set2[2]
+        b = set2[1]
+        red = set2[0]
+        set2[0] = b
+        set2[1] = g
+        set2[2] = red
+
+    p.rc("axes", color_cycle=set2)
+    p.rcParams["legend.frameon"] = "False"
+
+    return set2
+
+def make_spec_plot(s, fname, smooth_factor = 10, angles = True, components = False, with_composite=False):
 
 	'''
     make a spectrum plot from astropy.table.table.Table object 
@@ -86,6 +127,7 @@ def make_spec_plot(s, fname, smooth_factor = 10, angles = True, components = Fal
 
 	ncomponents = 9
 
+
 	if angles:
 
 		# first make viewing angle plot
@@ -102,17 +144,28 @@ def make_spec_plot(s, fname, smooth_factor = 10, angles = True, components = Fal
 
 		print "Making a %i by %i plot, %i spectra" % (nx, ny, nspecs)
 
+		if with_composite:
+			lambda_composite, f_composite, errors = np.loadtxt("%s/examples/telfer_qso_composite_hst.asc" % (os.environ["PYTHON"]), unpack=True, comments="#")
+
 		for i in range(nspecs):
 
 			p.subplot(ny, nx, i+1)
 
-			p.plot(s["Lambda"], util.smooth(s[s.dtype.names[ncomponents + i]], window_len = smooth_factor))
+			if with_composite:
+				f_1100 = util.get_flux_at_wavelength(s["Lambda"],s[s.dtype.names[ncomponents + i]], 1100.0)
+				p.plot(s["Lambda"], util.smooth(s[s.dtype.names[ncomponents + i]]/f_1100, window_len = smooth_factor), label="Model")
+				p.plot(lambda_composite, f_composite, label="HST composite")
+				p.legend()
+
+			else:
+				p.plot(s["Lambda"], util.smooth(s[s.dtype.names[ncomponents + i]], window_len = smooth_factor))
+
 
 			p.title(s.dtype.names[ncomponents + i])
 			p.xlabel("Wavelength")
 			p.ylabel("Flux")
 
-		p.savefig("spectrum_%s.png" % (fname))
+		p.savefig("spectrum_%s.png" % (fname), dpi=300)
 		p.clf()
 
 	if components:
@@ -131,7 +184,7 @@ def make_spec_plot(s, fname, smooth_factor = 10, angles = True, components = Fal
 		p.ylabel("Flux")
 		p.legend()
 
-		p.savefig("spec_components_%s.png" % (fname))
+		p.savefig("spec_components_%s.png" % (fname), dpi=300)
 		p.clf()
 		
 	return 0
@@ -350,6 +403,8 @@ def make_spec_comparison_plot (s_array, labels, fname="comparison", smooth_facto
 
     ncomponents = 9
 
+    if use_pretty: set_pretty()
+
 
     if angles:
 
@@ -381,7 +436,7 @@ def make_spec_comparison_plot (s_array, labels, fname="comparison", smooth_facto
                 if i == 0 and j == (len(s_array) - 1):
                     p.legend()
 
-        p.savefig("spectrum_%s.png" % (fname))
+        p.savefig("spectrum_%s.png" % (fname), dpi=300)
         p.clf()
 
     if components:
@@ -407,7 +462,7 @@ def make_spec_comparison_plot (s_array, labels, fname="comparison", smooth_facto
             p.ylabel("Flux")
             p.legend()
 
-        p.savefig("spec_components_%s.png" % (fname))
+        p.savefig("spec_components_%s.png" % (fname), dpi=300)
         p.clf()
 
     return 0
@@ -427,6 +482,9 @@ if __name__ == "__main__":
         print __doc__
         sys.exit(1)
 
+    if use_pretty: 
+        set_pretty()
+
     # try to read a parms file in the directory
     io_print = True
     try:
@@ -441,6 +499,10 @@ if __name__ == "__main__":
     if mode == "spec":
         s = r.read_spectrum(fname)
         make_spec_plot(s, fname)
+
+    elif mode == "specc":   # compare to the HST composite QSO spectrum
+        s = r.read_spectrum(fname)
+        make_spec_plot(s, fname, with_composite=True)
 
     elif mode == "wind":
         make_wind_plot(None, fname)

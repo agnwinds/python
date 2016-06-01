@@ -467,11 +467,11 @@ numerator=denominator=0.0;
     	{
 	if (mode==6)
 		{
-      		numerator = calc_pi_rate(ion_lower,xplasma,2);	/*Call calc_pi_rate with mode 2, which returns the PI rate coeficient*/
+      		numerator = calc_pi_rate(ion_lower,xplasma,2, 1);	/*Call calc_pi_rate with mode 2, which returns the PI rate coeficient*/
 		}
 	else if (mode==7)  /*The mean intensity is modelled as a series of power laws and/or exponentials */
 		{
-		numerator=calc_pi_rate (ion_lower,xplasma,1); /*NSH 0814 - the PI rate is now calculated by an external subroutine. Mode 1 means calulate using a PL/exp model of the mean intensity*/
+		numerator=calc_pi_rate (ion_lower,xplasma,1, 1); /*NSH 0814 - the PI rate is now calculated by an external subroutine. Mode 1 means calulate using a PL/exp model of the mean intensity*/
 		}
 	xplasma->PWnumer[ion_lower] = numerator;	/* Store the calculated numerator for this cell - it wont change during one ionization cycle*/
     	}				//End of if statement to decide if this is the first iteration
@@ -491,7 +491,7 @@ numerator=denominator=0.0;
       w_store=xplasma->w;   
       xplasma->t_r=xtemp;
       xplasma->w=1.0;
-      denominator = calc_pi_rate(ion_lower,xplasma,2); /*Now we can call calc_pi_rate, which will now calulate an LTE rate coefficient at our guess temperature */
+      denominator = calc_pi_rate(ion_lower,xplasma,2, 1); /*Now we can call calc_pi_rate, which will now calulate an LTE rate coefficient at our guess temperature */
       xplasma->t_r=t_r_store; /*Put things back the way they were */
       xplasma->w=w_store;
       xplasma->PWdenom[ion_lower] = denominator;  /*Store the LTE rate coefficient for next time*/
@@ -511,6 +511,18 @@ numerator=denominator=0.0;
 }
 
 
+/* temp_func is the function minimised by zbrent to find a temperature
+   when the ion ratios are one (so the logarithm will be 0), 
+   to avoid numerical problems. It is the natural log of the saha equation
+   with the ne taken to the RHS. The correction 
+   factors are applied after and depend on the temperature we find.
+
+   note xxxne is a global variable which is declared above and 
+   assigned in the main variable_temperature routine. 
+
+   Originally coded by NSH
+   1504 JM  replaced constant with SAHA for clarity (same value).
+*/
 
 double
 temp_func (solv_temp)
@@ -518,7 +530,7 @@ temp_func (solv_temp)
 {
   double answer;
   answer =
-    log (4.83e15 / xxxne) + 1.5 * log (solv_temp) -
+    log (SAHA / xxxne) + 1.5 * log (solv_temp) -
     (xip / (BOLTZMANN * solv_temp));
 
   return (answer);

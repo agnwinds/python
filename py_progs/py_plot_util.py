@@ -155,7 +155,7 @@ def wind_to_masked(d, value_string, return_inwind=False):
 
     # we get the grid size by finding the maximum in the indicies list 99 => 100 size grid
     zshape = int(np.max(zindices) + 1)
-    xshape = int(np.max(zindices) + 1)
+    xshape = int(np.max(xindices) + 1)
 
     # now reshape our x,z and value arrays
     x = d["x"].reshape(xshape, zshape)
@@ -175,9 +175,9 @@ def wind_to_masked(d, value_string, return_inwind=False):
 
     #return the transpose for contour plots.
     if return_inwind:
-        return x, z, masked_values.T, inwind_bool.T
+        return x, z, masked_values, inwind_bool
     else:
-        return x, z, masked_values.T
+        return x, z, masked_values
 
 
 
@@ -243,4 +243,33 @@ def parse_rcparams(fname = "params.rc"):
 
 
 	return 0
+
+def get_flux_at_wavelength(lambda_array, flux_array, w):
+
+	'''
+    turn a table, one of whose colnames is value_string,
+    into a masked array based on values of inwind 
+
+    Parameters
+    ----------
+    lambda_array: array-like	
+    	array of wavelengths in angstroms. 1d 
+
+    flux_array: array-like 
+    	array of fluxes same shape as lambda_array 
+
+    w: float 
+    	wavelength in angstroms to find
+    
+    Returns
+    ----------
+    f: float 
+    	flux at point w
+    '''
+
+	i = np.abs(lambda_array - w).argmin()
+
+	return flux_array[i]
+
+
 

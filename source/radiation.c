@@ -96,6 +96,8 @@ History:
 	1405    JM corrected error (#73) so that photon frequency is shifted to the rest frame of the 
 	        cell in question. Also added check which checks if a photoionization edge is crossed
 	        along ds.
+	1508	NSH slight modification to mean that compton scattering no longer reduces the weight of
+			the photon in this part of the code. It is now done when the photon scatters.
 **************************************************************/
 
 #include <stdio.h>
@@ -113,7 +115,7 @@ radiation (p, ds)
      PhotPtr p;
      double ds;
 {
-  PhotoionizationPtr x_ptr;
+  //PhotoionizationPtr x_ptr;
   TopPhotPtr x_top_ptr;
 
   WindPtr one;
@@ -123,6 +125,7 @@ radiation (p, ds)
   double kappa_tot, frac_tot, frac_ff;
   double frac_z, frac_comp;	/* nsh 1108 added frac_comp - the heating in the cell due to compton heating */
   double frac_ind_comp;		/* nsh 1205 added frac_ind_comp - the heating due to induced compton heating */
+  double frac_auger;
   double kappa_ion[NIONS];
   double frac_ion[NIONS];
   double density, ft, tau, tau2;
@@ -138,8 +141,14 @@ radiation (p, ds)
   double freq_min, freq_max;
   double frac_path, freq_xs;
   struct photon phot;
-
+  int ndom;
+  
   one = &wmain[p->grid];	/* So one is the grid cell of interest */
+  
+
+	  
+  
+  ndom=one->ndom;
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "radiation");
 
@@ -150,15 +159,19 @@ radiation (p, ds)
      this could be improved, so we throw an error if the difference between v1 and v2 is large */
 
   /* calculate velocity at original position */
-  vwind_xyz (p, v_inner);	// get velocity vector at new pos
+  vwind_xyz (ndom, p, v_inner);	// get velocity vector at new pos
   v1 = dot (p->lmn, v_inner);	// get direction cosine
 
   /* Create phot, a photon at the position we are moving to 
      note that the actual movement of the photon gets done after the call to radiation */
   stuff_phot (p, &phot);	// copy photon ptr
+  
   move_phot (&phot, ds);	// move it by ds
-  vwind_xyz (&phot, v_outer);	// get velocity vector at new pos
+  
+  vwind_xyz (ndom, &phot, v_outer);	// get velocity vector at new pos
+  
   v2 = dot (phot.lmn, v_outer);	// get direction cosine
+  
 
   /* calculate photon frequencies in rest frame of cell */
   freq_inner = p->freq * (1. - v1 / C);
@@ -176,7 +189,9 @@ radiation (p, ds)
   kappa_tot += frac_comp = kappa_comp (xplasma, freq);	/* 70 NSH 1108 calculate compton opacity, store it in kappa_comp and also add it to kappa_tot, the total opacity for the photon path */
   kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq);
   frac_tot = frac_z = 0;	/* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
-				   indicate this is all diagnostic and might be removed */
+				   indicate this is all diagnostic and might be removed */  
+	  frac_auger=0;
+
 
   /* JM 1405 -- Check which of the frequencies is larger.
      if freq_max is always larger this can be removed. My checks
@@ -192,11 +207,9 @@ radiation (p, ds)
       freq_min = freq_outer;
     }
 
+if (freq > phot_freq_min)
 
-  if (freq > phot_freq_min)
-
-    {
-
+{
       if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
 	{			// Initialize during ionization cycles only
 	  for (nion = 0; nion < nions; nion++)
@@ -220,12 +233,11 @@ radiation (p, ds)
 
 
 	  /* 57h -- 06jul -- ksl -- change loop to use pointers ordered by frequency */
-	  for (n = 0; n < ntop_phot; n++)
+    /* JM 1503 -- loop over all photoionization xsections */
+	  for (n = 0; n < nphot_total; n++)
 	    {
-
 	      x_top_ptr = phot_top_ptr[n];
 	      ft = x_top_ptr->freq[0];
-
 	      if (ft > freq_min && ft < freq_max)
 		{
 		  /* then the shifting of the photon causes it to cross an edge. 
@@ -246,19 +258,28 @@ radiation (p, ds)
 
 	      if (freq_xs < x_top_ptr->freq[x_top_ptr->np - 1])
 		{
-		  /*Need the appropriate density at this point. */
+		  /* Need the appropriate density at this point. */
+      /* how we get this depends if we have a topbase (level by level) 
+         or vfky cross-section (ion by ion) */
+      nion = x_top_ptr->nion;
+      if (ion[nion].phot_info > 0) // topbase or hybrid
+      {
+        nconf = x_top_ptr->nlev;
+        density = den_config (xplasma, nconf);
+      }
 
-		  nconf = x_top_ptr->nlev;
-		  density = den_config (xplasma, nconf);
+      else if (ion[nion].phot_info == 0) // verner
+		    density = xplasma->density[nion];
+
+      else            // possibly a little conservative
+        Error("radiation.c: No type (%i) for xsection!\n");
 
 		  if (density > DENSITY_PHOT_MIN)
 		    {
 
 		      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
 		      kappa_tot += x =
-			sigma_phot_topbase (x_top_ptr,
-					    freq_xs) * density * frac_path * geo.fill;
-
+			sigma_phot (x_top_ptr, freq_xs) * density * frac_path * geo.fill;
 		      /* I believe most of next steps are totally diagnsitic; it is possible if 
 		         statement could be deleted entirely 060802 -- ksl */
 
@@ -266,8 +287,6 @@ radiation (p, ds)
 			{	// Calculate during ionization cycles only
 
 			  frac_tot += z = x * (freq_xs - ft) / freq_xs;
-			  nion = config[nconf].nion;
-
 			  if (nion > 3)
 			    {
 			      frac_z += z;
@@ -278,71 +297,68 @@ radiation (p, ds)
 			}
 
 		    }
-
-
+		
+		
 		}
-
-	    }
-
-/* Next section is for photoionization of those ions using VFKY values */
-
-	  for (n = 0; n < nxphot; n++)
-	    {
-	      x_ptr = xphot_ptr[n];
-	      nion = x_ptr->nion;
-
-	      if (ion[nion].phot_info == 0)
-		{		// Avoid ions with topbase x-sections
-		  ft = x_ptr->freq_t;
-
-		  if (ft > freq_min && ft < freq_max)
-		    {
-		      /* then the shifting of the photon causes it to cross an edge. 
-		         Find out where between fmin and fmax the edge would be in freq space.
-		         freq_xs is freq halfway between the edge and the max freq if an edge gets crossed */   
-		      frac_path = (freq_max - ft) / (freq_max - freq_min);	
-		      freq_xs = 0.5 * (ft + freq_max);
-		    }
-
-		  else if (ft > freq_max)
-		    break;	// The remaining transitions will have higher thresholds
-
-		  else if (ft < freq_min)
-		    {
-		      frac_path = 1.0;	// then all frequency along ds are above edge
-		      freq_xs = freq;	// use the average frequency
-		    }
-
-		  density =
-		    xplasma->density[nion] * ion[nion].g /
-		    xplasma->partition[nion];
-
-		  if (density > DENSITY_PHOT_MIN)
-		    {
-
-		      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
-		      kappa_tot += x =
-			sigma_phot (x_ptr, freq_xs) * density * frac_path * geo.fill;
-
-		      /* Next if statment down to kappa_ion appers to be totally diagnostic - 060802 -- ksl */
-		      if (geo.ioniz_or_extract)	// 57h -- ksl -- 060715
-			{	// Calculate during ionization cycles only
-
-			  frac_tot += z = x * (freq_xs - ft) / freq_xs;
-
-			  if (nion > 3)
-			    {
-			      frac_z += z;
-			    }
-			  frac_ion[nion] += z;
-			  kappa_ion[nion] += x;
+	    }		/* NSH loop over all inner shell cross sections as well! But only for VFKY ions - topbase has those edges in */
+		
+		if (freq > inner_freq_min)
+		{
+		for (n = 0; n < n_inner_tot; n++)
+		{
+			if (ion[inner_cross[n].nion].phot_info != 1) //We only compute this if we have a non pure topbase ion. If we have a pure topbase ion, then the innershell edges are in the data
+			{
+				x_top_ptr = inner_cross_ptr[n];
+				if (x_top_ptr->n_elec_yield != -1)   //Only any point in doing this if we know the energy of elecrons
+				{
+					ft = x_top_ptr->freq[0];
+					
+					if (ft > freq_min && ft < freq_max)
+					{
+						frac_path = (freq_max - ft) / (freq_max - freq_min);	
+						freq_xs = 0.5 * (ft + freq_max);
+					}
+					else if (ft > freq_max)
+						break;		// The remaining transitions will have higher thresholds
+					else if (ft < freq_min)
+					{
+						frac_path = 1.0;	// then all frequency along ds are above edge
+						freq_xs = freq;	// use the average frequency
+					}
+					if (freq_xs < x_top_ptr->freq[x_top_ptr->np - 1])
+					{
+						nion = x_top_ptr->nion;
+						if (ion[nion].phot_info == 0) // verner only ion
+						{
+							density = xplasma->density[nion];  //All these rates are from the ground state, so we just need the density of the ion.
+						}
+						else if (ion[nion].phot_info > 0) // topbase or hybrid
+						{
+							nconf=phot_top[ion[nion].ntop_ground].nlev;  //The lower level of the ground state Pi cross section (should be GS!)
+					        density = den_config (xplasma, nconf);
+						}
+						if (density > DENSITY_PHOT_MIN)
+						{
+							kappa_tot += x =
+								sigma_phot (x_top_ptr, freq_xs) * density * frac_path * geo.fill;
+							if (geo.ioniz_or_extract && x_top_ptr->n_elec_yield!=-1)	// 57h -- ksl -- 060715 Calculate during ionization cycles only
+							{
+								frac_auger += z = x * (inner_elec_yield[x_top_ptr->n_elec_yield].Ea/EV2ERGS) / (freq_xs*HEV);
+			  			 		if (nion > 3)
+								{
+									frac_z += z;
+								}
+								frac_ion[nion] += z;
+								kappa_ion[nion] += x;
+							}
+						}
+					}
+				}
 			}
-		    }
 		}
-	    }
+		}
 	}
-
-    }
+}
 
 
 
@@ -359,23 +375,52 @@ radiation (p, ds)
       Error ("Radiation:sane_check CHECKING ff=%e, comp=%e, ind_comp=%e\n",
 	     frac_ff, frac_comp, frac_ind_comp);
     }
-/* Calculate the reduction in the w of the photon bundle along with the average
-   weight in the cell */
+/* Calculate the heating effect*/
 
   if (tau > 0.0001)
     {				/* Need differentiate between thick and thin cases */
       x = exp (-tau);
-      p->w = w_out = w_in * x;
-      energy_abs = w_in - w_out;
-      w_ave = (w_in - w_out) / tau;
+      energy_abs = w_in *(1.-x);
     }
   else
     {
       tau2 = tau * tau;
-      p->w = w_out = w_in * (1. - tau + 0.5 * tau2);	/*Calculate to second order */
       energy_abs = w_in * (tau - 0.5 * tau2);
-      w_ave = w_in * (1. - 0.5 * tau + 0.1666667 * tau2);
     }
+
+	/* Calculate the reduction in weight - compton scattering is not included, it is now included at scattering
+	however induced compton heating is not implemented at scattering, so it should remain here for the time being
+	to maimtain consistency.*/
+
+    tau = (kappa_tot-frac_comp) * ds;
+
+    if (sane_check (tau))
+      {
+        Error ("Radiation:sane_check CHECKING ff=%e, comp=%e, ind_comp=%e\n",
+  	     frac_ff, frac_comp, frac_ind_comp);
+      }
+  /* Calculate the reduction in the w of the photon bundle along with the average
+     weight in the cell */
+
+    if (tau > 0.0001)
+      {				/* Need differentiate between thick and thin cases */
+        x = exp (-tau);
+        p->w = w_out = w_in * x;
+        w_ave = (w_in - w_out) / tau;
+      }
+    else
+      {
+        tau2 = tau * tau;
+        p->w = w_out = w_in * (1. - tau + 0.5 * tau2);	/*Calculate to second order */
+        w_ave = w_in * (1. - 0.5 * tau + 0.1666667 * tau2);
+      }
+
+
+
+
+
+
+
 
   /*74a_ksl: 121215 -- Added to check on a problem photon */
   if (sane_check (p->w))
@@ -423,7 +468,7 @@ radiation (p, ds)
    */
   if (modes.save_cell_stats && ncstat > 0)
     {
-      save_photon_stats (one, p, ds);	// save photon statistics (extra diagnostics)
+      save_photon_stats (one, p, ds, w_ave);	// save photon statistics (extra diagnostics)
     }
 
 
@@ -462,7 +507,8 @@ radiation (p, ds)
 	  xplasma->heat_photo += z * frac_tot;
 	  xplasma->heat_z += z * frac_z;
 	  xplasma->heat_tot += z * frac_tot;	//All of the photoinization opacities
-
+	  xplasma->heat_auger += z * frac_auger;
+	  xplasma->heat_tot += z * frac_auger;	//All the inner shell opacities
 	  /* Calculate the number of photoionizations per unit volume for H and He 
 	     JM 1405 changed this to use freq_xs */
 	  xplasma->nioniz++;
@@ -566,83 +612,13 @@ kappa_ff (xplasma, freq)
   return (x);
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis: 
-	double sigma_phot(x_ptr,freq)	calculates the photionization crossection due to the transition 
-	associated with x_ptr at frequency freq
-Arguments:
-
-Returns:
-	
-Description:	 
-	sigma_phot uses Verner et al.'s interpolation formulae for the photoionization crossection
-	to calculate the bound free (or photoionization) optical depth.  The data must
-	have been into the photoionization structures xphot with get_atomic_data and
-	the densities of individual ions must have been calculated previously.
-
-Notes:
-
-History:
-	98jul	ksl	Coded (actually moved from a subroutine called kappa_ds)
-	06jul	ksl	57h -- Added code to avoid recalculating crossection
-			if that is possible, i.e. if we are calculating
-			a the x-section at the same frequency as last
-			time the routine was entired for this ion. 
-
-**************************************************************/
-
-double
-sigma_phot (x_ptr, freq)
-     struct photoionization *x_ptr;
-     double freq;
-{
-  double ft;
-  double x, y;
-  double f1, f2, f3;
-  double xsection;
-
-
-  ft = x_ptr->freq_t;		/* threshold frequency */
-
-
-  if (ft < freq && freq < x_ptr->freq_max)
-    {
-      if (freq == x_ptr->f_last)
-	return (x_ptr->sigma_last);	// Avoid recalculating xsection
-
-      x = freq / x_ptr->freq0 - x_ptr->y0;
-      y = sqrt (x * x + x_ptr->y1 * x_ptr->y1);
-
-      /* This was line fixed by CK in 1998 Jul */
-      f1 = (x - 1.0) * (x - 1.0) + x_ptr->yw * x_ptr->yw;
-
-      //     f2 = pow (y, 0.5 * x_ptr->p - 5.5);
-      f2 = exp ((0.5 * x_ptr->p - 5.5) * log (y));
-
-//     f3 = pow (1.0 + sqrt (y / x_ptr->ya), -x_ptr->p);
-      f3 = exp ((-x_ptr->p) * log ((1.0 + sqrt (y / x_ptr->ya))));
-
-
-      xsection = x_ptr->sigma * f1 * f2 * f3;	// the photoinization xsection
-
-/* Store crossesction for future use */
-      x_ptr->sigma_last = xsection;
-      x_ptr->f_last = freq;
-
-      return (xsection);
-    }
-  else
-    return (0.0);
-}
 
 
 /***********************************************************
 				       Space Telescope Science Institute
 
  Synopsis:
-	double sigma_phot_topbase(x_ptr,freq)	calculates the
+	double sigma_phot(x_ptr,freq)	calculates the
 	photionization crossection due to the transition associated with
 	x_ptr at frequency freq
 Arguments:
@@ -669,7 +645,7 @@ History:
 **************************************************************/
 
 double
-sigma_phot_topbase (x_ptr, freq)
+sigma_phot (x_ptr, freq)
      struct topbase_phot *x_ptr;
      double freq;
 {
@@ -678,8 +654,6 @@ sigma_phot_topbase (x_ptr, freq)
   double frac, fbot, ftop;
   int linterp ();
   int nlast;
-
-
 
   if (freq < x_ptr->freq[0])
     return (0.0);		// Since this was below threshold
@@ -1017,14 +991,19 @@ update_banded_estimators (xplasma, p, ds, w_ave)
          each photon, then it is normalised in wind_update. */
       xplasma->ip += ((w_ave * ds) / (H * p->freq));
 
+	  if (HEV * p->freq < 13600) //Tartar et al integrate up to 1000Ryd to define the ionization parameter
+		{
+		  xplasma->xi += (w_ave * ds);
+		}
+
       if (p->nscat == 0)
-	{
-	  xplasma->ip_direct += ((w_ave * ds) / (H * p->freq));
-	}
+	    {
+	      xplasma->ip_direct += ((w_ave * ds) / (H * p->freq));
+	    }
       else
-	{
-	  xplasma->ip_scatt += ((w_ave * ds) / (H * p->freq));
-	}
+	    {
+	      xplasma->ip_scatt += ((w_ave * ds) / (H * p->freq));
+	    } 
     }
 
   return (0);

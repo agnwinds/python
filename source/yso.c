@@ -54,61 +54,68 @@ Notes:
 	region since that wind cones define the regions where photons
 	are scattered.  
 
+	XXX The yso implemetentation works but could be reimplemented
+	XXX with domains.  
+
 
 History:
  	04jun	ksl	Added this possibility
         04Sep   SS      Changed finite disk case to cut off wind
                         at the top (rather than bottom) outer edge of disk.
+	16aug	ksl	Modifications to accommodate domains begun
+	16feb	ksl	Removed assignment of global variables, those not
+       			associated with a specific domain from within	
+			routine.  These should be assigned elsewhere, as
+			we could have multiple domains
 **************************************************************/
 
 int
-get_yso_wind_params ()
+get_yso_wind_params (ndom)
+	int ndom;
 {
 
 /* The approach to get the input parameters is to call both input parameter routines
 one after the other*/
 
-  get_stellar_wind_params ();
-  get_knigge_wind_params ();
+  Log("The yso model has a two component wind a spherical stellar wind, and\n a KWD wind\n");
+  get_stellar_wind_params (ndom);
+  get_knigge_wind_params (ndom);
 
-/* Assign the generic parameters for the wind the generic parameters of the wind */
 
-  geo.wind_rmin = geo.rstar;
-  geo.wind_rmax = geo.rmax;
-  geo.wind_thetamin = 0.0;
-/* Somewhat paradoxically diskrad is in cm, while dn_ratio which is really d in KWD95 is 
-in units of WD radii */
-  geo.wind_thetamax = atan (geo.diskrad / (geo.kn_dratio * geo.rstar));
-// Line above would be 90 degeres if we want a stellar wind outside the windcone
   /* Next lines added by SS Sep 04. Changed the wind shape so that the boundary touches the outer 
      corner of the disk rather than the intersection of the disk edge with the xy-plane. */
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
-      geo.wind_thetamax =
+      zdom[ndom].wind_thetamax =
 	atan (geo.diskrad /
-	      (((geo.kn_dratio * geo.rstar) + zdisk (geo.diskrad))));
+	      (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (geo.diskrad))));
     }
 
-
-  geo.wind_rho_min = geo.rstar;
-  geo.wind_rho_max = geo.diskrad;
 
   /* The change in the boundary of the wind (as corner of disk -- see above) 
      means that wind_rho_max nees to be redefined so that it is used correctly
      to compute the boundary of the wind elsewhere. */
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       geo.wind_rho_max =
-	geo.diskrad - (zdisk (geo.diskrad) * tan (geo.wind_thetamax));
+	geo.diskrad - (zdisk (geo.diskrad) * tan (zdom[ndom].wind_thetamax));
     }
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      geo.xlog_scale = geo.rstar;
-      geo.zlog_scale = 1e7;
+      zdom[ndom].xlog_scale = geo.rstar;
+      zdom[ndom].zlog_scale = 1e-4*geo.rstar;
+      /*
+       * 1605- ksl - When Stuart wrote the yso paper, he hardwired zlong_xscale. When implementing domains, I noticed
+       * this.  Generally, we would like variables like zlog_scale to depend on other input parameters, and so I fixed
+       * this.  For the model calculated by Stuart, 1e7 below corresponds to a number of 2.6e-5, and but I arbitrarily
+       * rounded up to 1e-4
+       *
+      zdom[ndom].zlog_scale = 1e7;
+      */
     }
 
   return (0);
@@ -142,26 +149,26 @@ History:
 **************************************************************/
 
 double
-yso_velocity (x, v)
+yso_velocity (ndom, x, v)
+	int ndom;
      double x[], v[];
 {
   double r, rzero;
   double zzz;
   double dd;
-  double fabs ();
 
 /* First step is to determine whether we are inside the windcone of the kwd wind. 
 This is done as it was done in kn_velocity by seeing if the kwd streamline hits
 the disk.  If it does not, then we calculate the velocity for a stellar wind */
 
-  dd = geo.rstar * geo.kn_dratio;	//dd is the distance of the focus point in cm 
+  dd = geo.rstar * zdom[ndom].kn_dratio;	//dd is the distance of the focus point in cm 
   r = sqrt (x[0] * x[0] + x[1] * x[1]);	// rho of the point we have been given
   rzero = r / (1. + fabs (x[2] / dd));	// Nothing prevents this from being less than R_wd
 
   if (rzero < geo.rstar)
-    zzz = stellar_velocity (x, v);
+    zzz = stellar_velocity (ndom, x, v);
   else
-    zzz = kn_velocity (x, v);
+    zzz = kn_velocity (ndom, x, v);
 
 
   return (zzz);
@@ -191,63 +198,25 @@ History:
 **************************************************************/
 
 double
-yso_rho (x)
+yso_rho (ndom,x)
+	int ndom;
      double x[];
 {
   double r, rzero;
   double dd;
   double rho;
 
-  dd = geo.rstar * geo.kn_dratio;
+  dd = geo.rstar * zdom[ndom].kn_dratio;
   r = sqrt (x[0] * x[0] + x[1] * x[1]);	//rho coordinate of the point we have been given
   rzero = r / (1. + fabs (x[2] / dd));	//rho at the base for this streamline
 
   if (rzero < geo.rstar)
     {
-      rho = stellar_rho (x);
+      rho = stellar_rho (ndom,x);
     }
   else
-    rho = kn_rho (x);
+    rho = kn_rho (ndom,x);
 
   return (rho);
 }
 
-
-/*
-   Next routine is eliminated in py52 in favor of a generic routine 04 aug
-
-yso_vel_grad calculates the velocity radient tensor at any point in
-the flow
-
-The velocity gradient is defined as a 3 x 3 tensor such that
-
-velgrad[i][j]= dv_i/dx_j
-
-
-        04jun   ksl     Began work on this.  The routine simple
-			chooses between the way to calculate
-			velocity gradients and uses the original
-			routines
-
-*/
-/*
-int
-yso_vel_grad (x, velgrad)
-     double x[], velgrad[][3];
-{
-  double dd, r, rzero;
-
-  dd = geo.rstar * geo.kn_dratio;
-  r = sqrt (x[0] * x[0] + x[1] * x[1]);	//rho coordinate of the point we have been given
-  rzero = r / (1. + fabs (x[2] / dd));	//rho at the base for this streamline
-
-  if (rzero < geo.rstar)
-    {
-      stellar_vel_grad (x, velgrad);
-    }
-  else
-    kn_vel_grad (x, velgrad);
-
-  return (0);
-}
-*/

@@ -18,9 +18,12 @@ int verbosity;			/* verbosity level. 0 low, 10 is high */
 /* In python_43 the assignment of the WindPtr size has been moved from a fixed
 value determined by values in python.h to a values which are adjustable from
 within python */
-int ndim;			// Define the fundamental dimension of the grid
-int mdim;
-int NDIM, MDIM, NDIM2;
+
+
+/* With domains NDIM and MDIM need to be removed but NDIM2 is the total number of cells in wmain, and there
+are certain times we want to loop over everything.  The situation with NPLASMA is similar */
+
+int NDIM2;                      //The total number of wind cells in wmain
 int NPLASMA;			//The number of cells with non-zero volume or the size of plasma structure
 
 char basename[132];		// The root of the parameter file name being used by python
@@ -34,11 +37,10 @@ char basename[132];		// The root of the parameter file name being used by python
  * 
  * */
 
-double dfudge;			// This is the push-through distance
 double DFUDGE;
+#define XFUDGE   1e-5          // The scale factor used in setting up cell x cell dfudge
+
 #define VCHECK	1.e6		// The maximum allowable error in calculation of the velocity in calculate_ds
-
-
 
 
 /* 57h -- Changed several defined variables to numbers to allow one to vary them 
@@ -80,15 +82,11 @@ double DENSITY_PHOT_MIN;	/* This constant is a minimum density for the purpose o
 #define TAU_MAX				20.	/* Sets an upper limit in extract on when
 						   a photon can be assumed to be completely absorbed */
 
-//#define SELECT_NEBULAR                1 /*non zero means to use the nebular approximation; 0 implies
-//                                                              use LTE populations based on t_rad*/
 #define DANG_LIVE_OR_DIE   2.0	/* If constructing photons from a live or die run of the code, the
 				   angle over which photons will be accepted must be defined */
 
 
-//#define NPHOT                                 10000
-int NPHOT;			/* As of python_40, NPHOT must be defined in the main program using
-				   python.h */
+int NPHOT;			/* The number of photon bundles created.  defined in python.c */
 
 #define NWAVE  			       10000	//Increasing from 4000 to 10000 (SS June 04)
 #define MAXSCAT 			50
@@ -104,55 +102,244 @@ int NPHOT;			/* As of python_40, NPHOT must be defined in the main program using
 
  */
 
-/* Definitions of the coordinate system types (geo.coord_type) */
-
-#define SPHERICAL		0
-#define CYLIND			1
-#define	RTHETA			2
-#define	CYLVAR                  3
-
-
 /* Definitions of spectral types, which are all negative because when
  * one reads a spectrum from a list of models these are numbered beginning
  * with zero, see the discussion in get_models.c   080518 - ksl - 60a
  */
-
 #define SPECTYPE_BB      -1
 #define SPECTYPE_UNIFORM -2
 #define SPECTYPE_POW     -4
 #define SPECTYPE_CL_TAB  -5
+#define SPECTYPE_BREM    -6
 #define SPECTYPE_NONE	 -3
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10
 #define LINELENGTH 	160
 
+/* This structure contains the information needed for each separate region of space, e.g the
+ * wind and the disk
+ */
+
+// This is intialized in init_goe, but it my need to be in geo in order to be able to read
+// everything back
+
+enum coord_type_enum
+  	{	SPHERICAL 	=0,
+		CYLIND 		=1,
+		RTHETA		=2,
+		CYLVAR          =3
+  	}; 
+
+
+/* List of possible wind_types */
+
+#define SV   			0
+#define	SPHERE  		1
+/* PREVIOUS is no longer an allowed type. Reading in an early model is now
+ * handled as a system_type 
+ */
+// #define	PREVIOUS 		2
+#define	HYDRO 			3
+#define	CORONA 			4
+#define KNIGGE			5
+#define	HOMOLOGOUS 		6
+#define	YSO 			7
+#define	ELVIS 			8
+#define	SHELL 			9
+#define	NONE 			10
+#define	DISK_ATMOS 		11
+
+
+#define MaxDom			10
+
+/* Next define structures that pertain to possilbe region geometries
+ 
+   These definitions had to be moved up in python.h because they need to be defined 
+   prior to defining the domains, which must contain these structures in the new
+   schema  ksl 15aug
+*/
+
+typedef struct plane /*SWM 10-10-14 - Switched to TypeDef */
+{
+  double x[3];			/* A position included in the plane (usually the "center" */
+  double lmn[3];		/* A unit vector perpendicular to the plane (usually in the "positive" direction */
+} plane_dummy, *PlanePtr;
+plane_dummy plane_l1, plane_sec, plane_m2_far;	/* these all define planes which are perpendicular to the line of sight from the 
+					   primary to the seconday */
+
+
+/* Note that since we are interested in biconical flows, our definition of a cone is not exactly
+ * what one might guess.  The cone is defined in the positive z direction but reflected through 
+ * the xy plane.  
+ * 56d -- Beginning with 56d, ksl has switched to a new definition of cones, that is intended to
+ * make it possible to use ds_to_cone easier as part of different coordinate systems.  The new definition
+ * is based on the intersection of the cone with the z axis rather than the intersection with
+ * the disk plane.  At present both definitions are used in the program and therefore both shold
+ * be defined.  Once the new definition is promulgated through the entire program, and verified
+ * the old definitions can be elimiated.  05jul -- ksl
+ */
+
+typedef struct cone
+{
+  double z;			/* The place where the cone intersects the z axis (used after 56d) */
+  double dzdr;			/* the slope (used after 56d) */
+}
+cone_dummy, *ConePtr;
+
+
+/* End of structures which are used to define boundaries to the emission regions */
+
+#define NDIM_MAX 500                // maximum size of the grid in each dimension
+
+typedef struct domain
+{
+	char name[LINELENGTH];
+	int wind_type;
+	int ndim, mdim, ndim2;
+	int nstart,nstop;  //the beginning and end (-1) location in wmain of this component
+  enum coord_type_enum coord_type;
+  int log_linear;		/*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */
+  double xlog_scale, zlog_scale;	/* Scale factors for setting up a logarithmic grid, the [1,1] cell
+					   will be located at xlog_scale,zlog_scale */
+
+	/* The next few structures define the boundaries of an emission region */
+	struct cone windcone[2];   /* The cones that define the boundary of winds like SV or kwd */
+	struct plane windplane[2]; /* Planes which define the top and bottom of a layer */
+	double rho_min,rho_max;    /* These are used for the inneer and outer boundary of a pillbox */
+
+	double wind_x[NDIM_MAX], wind_z[NDIM_MAX];	/* These define the edges of the cells in the x and z directions */
+	double wind_midx[NDIM_MAX], wind_midz[NDIM_MAX];	/* These define the midpoints of the cells in the x and z directions */
+
+ConePtr cones_rtheta;		/*A ptr to the cones that define the theta directions in rtheta coods */
+/* Next two lines are for cyl_var coordinates.  They are used in locating the appropriate 
+ * locating the appropriate cell, for example by cylvar_where_in_grid
+ */
+
+double wind_z_var[NDIM_MAX][NDIM_MAX];
+double wind_midz_var[NDIM_MAX][NDIM_MAX];
+
+
+/* Since in principle we can mix and match arbitrarily the next parameters now have to be part of the domain structure */
+
+  /* Generic parameters for the wind */
+  double wind_mdot, stellar_wind_mdot;	/* Mass loss rate in disk and stellar wind */
+  double rmin, rmax;			/*Spherical extent of the wind */
+  double zmax;				/* Vertical extent of the wind, often the same as rmas */
+  double wind_rho_min, wind_rho_max;	/*Min/Max rho for wind in disk plane */
+  double wind_thetamin, wind_thetamax;	/*Angles defining inner and outer cones of wind, measured from disk plane */
+  double mdot_norm;		/*A normalization factor used in SV wind, and Knigge wind */
+
+  double twind;   // ksl 1508 -- added in case domains have different initial temperatures
+
+  /* Parameters defining Shlossman & Vitello Wind */
+  double sv_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
+  double sv_rmin, sv_rmax, sv_thetamin, sv_thetamax, sv_gamma;	/* parameters defining the goemetry of the wind */
+  double sv_v_zero;		/* velocity at base of wind */
+  double sv_r_scale, sv_alpha;	/* the scale length and power law exponent for the velocity law */
+  double sv_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
+
+  /* Paramater for the Elvis AGN wind - closely based on SV */
+  double elvis_offset;		/*This is a vertical offset for a region where the
+				   wind rises vertically from the disk */
+
+  /* Parameters defining Knigge Wind */
+  double kn_dratio;		/* parameter describing collimation of wind */
+  double kn_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
+  double kn_r_scale, kn_alpha;	/* the scale length and power law exponent for the velocity law */
+  double kn_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
+  double kn_v_zero;		/* NSH 19/04/11 - Added in as the multiple of the sound speed to use as the initial velocity */
+
+  /* Parameters describing Castor and Larmors spherical wind */
+  double cl_v_zero, cl_v_infinity, cl_beta;	/* Power law exponent */
+  double cl_rmin, cl_rmax;
+
+  /* Parameters describing a spherical shell test wind */
+  double shell_vmin, shell_vmax, shell_beta;
+  double shell_rmin, shell_rmax;
+
+  /*Parameters defining a corona in a ring above a disk */
+  double corona_rmin, corona_rmax;	/*the minimum and maximu radius of the corona */
+  double corona_zmax;                   /*The maximum vertical extent of the corona */
+  double corona_base_density, corona_scale_height;	/*the density at the base of the corona and the scale height */
+  double corona_vel_frac;		/* the radial velocity of the corona in units of the keplerian velocity */
+
+}
+domain_dummy, *DomainPtr;   // One structure for each domain
+
+DomainPtr zdom;   //This is the array pointer that contains the domains
+int current_domain; // This integer is used by py_wind only
+
+
+/* the geometry structure contains information that applies to all domains or alternatimve
+ a single domain.  Information that is domain specific should be placed directly in the domain
+ structure.  ksl
+ */
+
+#define SYSTEM_TYPE_STAR   0
+#define SYSTEM_TYPE_BINARY 1
+#define SYSTEM_TYPE_AGN    2
+#define	SYSTEM_TYPE_PREVIOUS   	   3
+#define	SYSTEM_TYPE_ONE_D  	   4
+
+
+
 struct geometry
 {
-/* 67 - ksl This section added to allow for restarting the program, and adds parameters used
- * in the calculation */
+
+int ndomain;  		/*The number of domains in a model*/
+int ndim2; 		/* The total number of windcells in all domains */
+int nplasma, nmacro;	/*The total number of cells in the plasma and macro structures in all domains */
+
+  /* variables which store the domain numbers of the wind, disk atmosphere.
+     Other components should be added here.  Right now we need a wind_domain 
+     number because the inputs for the disk and a putativel disk atmosphere are 
+     interrsed.  The first step will be to put this information into alocal variale
+     in python.c. We should not have to carry this forward */
+
+	int wind_domain_number;
+	int atmos_domain_number;
+
+
+  /* 67 - ksl This section added to allow for restarting the program, and adds parameters used
+   * in the calculation */
 
   int wcycle, pcycle;		/* The number of completed ionization and spectrum cycles */
   int wcycles, pcycles;		/* The number of ionization and spectrum cycles desired */
 
+  /* 1509 - ksl - Moved parameters which describe the spectra to be extracted from main into the
+   * geometry structure */
+#define NSPEC   20
+	int nangles;
+	double angle[NSPEC], phase[NSPEC];
+	int scat_select[NSPEC], top_bot_select[NSPEC];
+	double rho_select[NSPEC], z_select[NSPEC], az_select[NSPEC], r_select[NSPEC];
+	double swavemin, swavemax;
+	int select_extract,select_spectype;
+
 /* Begin description of the actual geometery */
 
-  int coord_type, ndim, mdim;	/* The type of geometry and dimensionality of the wind array. 
-				   0=1-d spherical, 1=cylindrical, 2 = spherical polar, 3=cylindrical
-				   but the z coordinate changes with rho in an attempt to allow for
-				   a vertically extended disk....
-				   ndim is the dimensionality of the first dimension.  In the CV case
-				   it is in the plane of the disk. Mdim is generally along the z axis
-				 */
-  int nplasma, nmacro;		/*The number of cells in the plasma and macro structures 08mar ksl */
-  double rmax, rmax_sq;		/* The maximum distance to which a photon should be followed */
+/* The next variables refere to the entire space in which pbotons sill be tracked.  Photons
+ * outside these regions are assumed to have hit something or be freely moving through space.
+ */
+
+  double rmin, rmax, rmax_sq;		/* The maximum distance to which a photon should be followed */
+  double wind_rho_min, wind_rho_max;	/*Min/Max rho for wind in disk plane */
+
+
+/* Basic paremeters of the system, as opposed to elements of the wind or winds */
+
   double mstar, rstar, rstar_sq, tstar, gstar;	/* Basic parameters for the WD */
   double twind;			/* temperature of wind */
-  double tmax;			/*NSH 120817 the maximim temperature of any element of the model - used to help estimate things for an exponential representation of the spectrum in a cell */
-  int system_type;		/*0--> single star system
-				   1--> binary system
-				   2--> AGN
-				 */
+  double tmax;			/*NSH 120817 the maximum temperature of any element of the model 
+				  - used to help estimate things for an exponential representation of the spectrum in a cell */
+
+  int system_type;  /* See allowed types above */
+
+#define DISK_NONE   0
+#define DISK_FLAT   1
+#define DISK_VERTICALLY_EXTENDED   2
+
   int disk_type;		/*0 --> no disk, 
 				   1 --> a standard disk in xy plane, 
 				   2 --> a vertically extended disk 
@@ -165,16 +352,20 @@ struct geometry
 				   3--> Disk illumination is treated in terms of an analytic approximation
 				   04Aug ksl -- this parameter added for Python52
 				 */
+  int disk_atmosphere;           /* 0 --> no
+				    1 --> yes
+				 */
   int disk_tprofile;
   double disk_mdot;		/* mdot of  DISK */
   double diskrad, diskrad_sq;
   double disk_z0, disk_z1;	/* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 */
-  int wind_type;		/*Basic prescription for wind(0=SV,1=speherical , 2 can imply old file */
-  int log_linear;		/*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */
-  double xlog_scale, zlog_scale;	/* Scale factors for setting up a logarithmic grid, the [1,1] cell
-					   will be located at xlog_scale,zlog_scale */
+  int run_type;                 /*1508 - New variable that describes whether this is a continuation of a previous run 
+  				Added in order to separate the question of whether we are continuing an old run fro
+				the type of wind model.  Bascially if run_type is 0, this is a run from scratch,
+			       if SYSTEM_TYPE_PREVIOUS it is an old run	*/                  
   int star_radiation, disk_radiation;	/* 1 means consider radiation from star, disk,  bl, and/or wind */
   int bl_radiation, wind_radiation, agn_radiation;
+  int search_light_radiation;   /* 1605 - ksl - Added to implement 1d testing */
   int matom_radiation;		/* Added by SS Jun 2004: for use in macro atom computations of detailed spectra
 				   - 1 means use emissivities for BOTH macro atom levels and kpkts. 0 means don't
 				   (which is correct for the ionization cycles. */
@@ -220,78 +411,39 @@ struct geometry
 				   1  anisotropic
 				   2  thermally broadened anisotropic
 				 */
-  int rt_mode;			/* radiative transfer mode (0=Sobolev,1=simple (used only by balance) */
-  /* This IS now used by Python - set to 2 for Macro Atom method. Set to 1
-     for non-Macro Atom methods (SS) */
 
-  /* 71 - 111229  - ksl - These are the frequency bands used when calculating parameters like a power law slope
-   * in limited regions.  Moved inside geo becuase we need to know this information in py_wind
-   */
+  int rt_mode;			/* radiative transfer mode. 2 for Macro Atom method,  1 for non-Macro Atom methods  */
+
+  /* The frequency bands used when calculating parameters like a power law slope in limited regions. */
+
 #define  NXBANDS 20		/* the maximum number of bands that can be defined */
+
   int nxfreq;			/* the number of bands actually used */
   double xfreq[NXBANDS + 1];	/* the band limits  */
 
 
-  /* The spectral types are SPECTYPE_BB for bb, SPECTYPE_UNIFORM for a uniform spectral distribution, 
-   * SPECTYPE_POW for a power law, 0 or more from a filelist.
-   * A value of SPECTYPE_NONE indicates no emission is expected from this particular source */
+  /* The next set pf variables assign a SPECTYPE (see above) for
+     each possible source of radiation in a model.  The value assigned can be different for
+    the ionization and detaled spectrum generation part of the code */ 
+
   int star_ion_spectype, star_spectype;	/* The type of spectrum used to create the continuum
 					   for the star in the ionization and final spectrum calculation */
-  int disk_ion_spectype, disk_spectype;	/* The type of spectrum used to create the continuum
-					   for the disk in the ionization and final spectrum calculation */
-  int bl_ion_spectype, bl_spectype;	/* The type of spectrum used to create the continuum
-					   for the bl in the ionization and final spectrum calculation */
-  int agn_ion_spectype, agn_spectype;	/* The type of spectrum used to create the continuum
-					   for the agn in the ionization and final spectrum calculation */
+  int disk_ion_spectype, disk_spectype;	/* Same as above but for the disk */
+  int bl_ion_spectype, bl_spectype;	/* Same as above but for the boundary layer */
+  int agn_ion_spectype, agn_spectype;	/* Same as above but for the AGN */
+  int search_light_ion_spectype, search_light_spectype; /* Same as above but for the search_light. Created for 1d test */
+
   char model_list[NCOMPS][LINELENGTH];	/* The file which contains the model names and the associated values for the model */
 
-  /* Generic parameters for the wind */
-  double wind_mdot, stellar_wind_mdot;	/* Mass loss rate in disk and stellar wind */
-  double wind_rmin, wind_rmax;	/*Spherical extent of the wind */
-  double wind_rho_min, wind_rho_max;	/*Min/Max rho for wind in disk plane */
-  double wind_thetamin, wind_thetamax;	/*Angles defining inner and outer cones of wind, measured from disk plane */
   double mdot_norm;		/*A normalization factor used in SV wind, and Knigge wind */
   int adiabatic;		/*0-> Do not include adiabatic heating in calculating the cooling of the wind
 				   1-> Use adiabatic heating in calculating the cooling of the wind
 				 */
   int auger_ionization;		/*0 -> Do not include innershell photoionization /Auger effects; 1-> include them */
-  /* Parameters defining Shlossman & Vitello Wind */
-  double sv_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
-  double sv_rmin, sv_rmax, sv_thetamin, sv_thetamax, sv_gamma;	/* parameters defining the goemetry of the wind */
-  double sv_v_zero;		/* velocity at base of wind */
-  double sv_r_scale, sv_alpha;	/* the scale length and power law exponent for the velocity law */
-  double sv_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
-
-  /* Paramater for the Elvis AGN wind - closely based on SV */
-  double elvis_offset;		/*This is a vertical offset for a region where the
-				   wind rises vertically from the disk */
-
-  /* Parameters defining Knigge Wind */
-  double kn_dratio;		/* parameter describing collimation of wind */
-  double kn_lambda;		/* power law exponent describing from  what portion of disk wind is radiated */
-//    double kn_rmin, kn_rmax, kn_thetamin, kn_thetamax, kn_gamma;      /* parameters defining the goemetry of the wind */
-//    double kn_v_zero;         /* velocity at base of wind */
-  double kn_r_scale, kn_alpha;	/* the scale length and power law exponent for the velocity law */
-  double kn_v_infinity;		/* the factor by which the velocity at infinity exceeds the excape velocity */
-  double kn_v_zero;		/* NSH 19/04/11 - Added in as the multiple of the sound speed to use as the initial velocity */
-
-  /* Parameters describing Castor and Larmors spherical wind */
-  double cl_v_zero, cl_v_infinity, cl_beta;	/* Power law exponent */
-  double cl_rmin, cl_rmax;
-
-  /* Parameters describing a spherical shell test wind */
-  double shell_vmin, shell_vmax, shell_beta;
-  double shell_rmin, shell_rmax;
-
-  /*Parameters defining a corona in a ring above a disk */
-  double corona_rmin, corona_rmax;	//the minimum and maximu radius of the corona
-
-  double corona_base_density, corona_scale_height;	//the density at the base of the corona and the scale height
-
-  double corona_vel_frac;	// the radial velocity of the corona in units of the keplerian velocity
 
 /* The filling factior for the wind or corona */
   double fill;
+
 /* Initial values for defining wind structure for a planar geometry.  These are currently only used by balance and this
    may not be the best approach generally and depending on where this ends up. Some consolidation is desirable */
   double pl_vol, pl_vmax;
@@ -301,6 +453,10 @@ struct geometry
   double lum_tot, lum_star, lum_disk, lum_bl, lum_wind;	/* The total luminosities of the disk, star, bl, & wind 
 							   are actually not used in a fundamental way in the program */
   double lum_agn;		/*The total luminosity of the AGN or point source at the center */
+  int pl_geometry;      /* geometry of X-ray point source */
+#define PL_GEOMETRY_SPHERE 0
+#define PL_GEOMETRY_LAMP_POST 1
+  double lamp_post_height; /* height of X-ray point source if lamp post */
 
 /* The next four variables added by nsh Apr 2012 to allow broken power law to match the cloudy table command */
   double agn_cltab_low;		//break at which the low frequency power law ends
@@ -327,8 +483,6 @@ struct geometry
   double lum_adiabatic_ioniz;	
   double lum_wind_ioniz, lum_star_ioniz, lum_disk_ioniz, lum_bl_ioniz, lum_tot_ioniz;
 
-
-
   double f_matom, f_kpkt;	/*Added by SS Jun 2004 - to be used in computations of detailed spectra - the
 				   energy emitted in the band via k-packets and macro atoms respectively. */
 
@@ -343,6 +497,8 @@ struct geometry
   double weight;		/*weight factor for photons/defined in define_phot */
 
 // The next set of parameters relate to the central source of an AGN
+  double brem_temp;       /*The temperature of a bremsstrahlung source */
+  double brem_alpha;       /*The exponent of the nu term for a bremstrahlung source */
 
   double pl_low_cutoff;  /* accessible only in advanced mode- see #34. default to zero */
 
@@ -353,14 +509,6 @@ struct geometry
   double r_agn;			/* radius of the "photosphere" of the BH in the AGN.  */
   double d_agn;			/* the distance to the agn - only used in balance to calculate the ioinsation fraction */
 
-// 70b - ksl - 110809  The next set of sources relate to a compton torus that is initially at least just related to AGN
-
-  int compton_torus;		/* 0 if there is no Compton torus; 1 otherwise */
-  double compton_torus_rmin;	/* The minimum radius of the torus */
-  double compton_torus_rmax;	/* The maximum radius of the torus */
-  double compton_torus_zheight;	/* The height of the torus. */
-  double compton_torus_tau;	/* The optical depth through the torus at the height. */
-  double compton_torus_te;	/* The initial temperature of the torus */
 
 //70i - nsh 111007 - put lum_ioniz and n_ioniz into the geo structure. This will allow a simple estimate of ionisation parameter to be computed;
 
@@ -369,41 +517,17 @@ struct geometry
 // The next set of parameters describe the input datafiles that are read
   char atomic_filename[132];	/* 54e -- The masterfile for the atomic data */
   char fixed_con_file[132];	/* 54e -- For fixed concentrations, the file specifying concentrations */
+
+  //Added by SWM for reverberation mapping
+  enum reverb_enum      {REV_NONE=0, REV_PHOTON=1, REV_WIND=2, REV_MATOM=3} reverb; 
+  enum reverb_vis_enum  {REV_VIS_NONE=0, REV_VIS_VTK=1, REV_VIS_DUMP=2, REV_VIS_BOTH=3} reverb_vis;
+  int reverb_wind_cycles;
+  int reverb_path_bins, reverb_angle_bins;  //SWM - Number of bins for path arrays, vtk output angular bins
+  int reverb_dump_cells;                    //SWM - Number of cells to dump, list of cells to dump 'nwind' values
+  double *reverb_dump_x, *reverb_dump_z;    //SWM - x & z values of the cells to dump
+  int reverb_lines, *reverb_line;           //SWM - Number of lines to track, and array of line 'nres' values
 }
 geo;
-
-
-struct plane
-{
-  double x[3];			/* A position included in the plane (usally the "center" */
-  double lmn[3];		/* A unit vector perpendicular to the plane (usually in the "positive" direction */
-}
-plane_l1, plane_sec, plane_m2_far;	/* these all define planes which are perpendicular to the line of sight from the 
-					   primary to the seconday */
-
-
-/* Note that since we are interested in biconical flows, our definition of a cone is not exactly
- * what one might guess.  The cone is defined in the positive z direction but reflected through 
- * the xy plane.  
- * 56d -- Beginning with 56d, ksl has switched to a new definition of cones, that is intended to
- * make it possible to use ds_to_cone easier as part of different coordinate systems.  The new definition
- * is based on the intersection of the cone with the z axis rather than the intersection with
- * the disk plane.  At present both definitions are used in the program and therefore both shold
- * be defined.  Once the new definition is promulgated through the entire program, and verified
- * the old definitions can be elimiated.  05jul -- ksl
- */
-
-typedef struct cone
-{
-  double z;			/* The place where the cone intersects the z axis (used after 56d) */
-  double dzdr;			/* the slope (used after 56d) */
-}
-cone_dummy, *ConePtr;
-
-ConePtr cones_rtheta;		/*A ptr to the cones that define the theta directions in rtheta coods */
-
-struct cone windcone[2];	/* The cones that define the boundary of winds like SV or kwd */
-
 
 
 #define NRINGS	301		/* The actual number of rings completely defined
@@ -439,7 +563,20 @@ struct blmodel
 blmod;
 
 
-
+/*
+    SWN 6-2-15
+    Wind paths is defined per cell and contains a binned array holding the spectrum of paths. Layers are
+    For each frequency:
+      For each path bin:
+        What's the total fluxback of all these photons entering the cell?
+*/
+typedef struct wind_paths
+{
+  double* ad_path_flux;  //Array[by frequency, then path] of total flux of photons with the given v&p
+  int*    ai_path_num;   //Array[by frequency, then path] of the number of photons in this bin
+  double  d_flux, d_path;     //Total flux, average path
+  int     i_num;              //Number of photons hitting this cell
+} wind_paths_dummy, *Wind_Paths_Ptr;
 
 /* 	This structure defines the wind.  The structure w is allocated in the main
 	routine.  The total size of the structure will be NDIM x MDIM, and the two
@@ -477,16 +614,9 @@ is that if a new component is to be added, it should be added with by with two v
 and PART in whatever, as n and n+1
 */
 
-#define W_PART_INTORUS 3	//Part of cell is in the torus
-#define W_ALL_INTORUS  2	//Entire grid cell is in the torus
-#define W_PART_INWIND  1	//Part of gridcell is in the wind
-#define W_ALL_INWIND   0	//Entire grid cell is in the wind
-#define W_NOT_INWIND  -1	//None of gridcell is in the wind
-#define W_IGNORE      -2	//Even though the wind may occupy a small part of this cell, assume
-				//photons simply pass through the cell.  This is new in 58b
-
 typedef struct wind
 {
+  int ndom;		/*The domain associated with this element of the wind */
   int nwind;			/*A self-reference to this cell in the wind structure */
   int nplasma;			/*A cross refrence to the corresponding cell in the plasma structure */
   double x[3];			/*position of inner vertex of cell */
@@ -494,6 +624,7 @@ typedef struct wind
   double r, rcen;		/*radial location of cell (Used for spherical, spherical polar
 				   coordinates. (Added by ksl for 52a --04Aug) */
   double theta, thetacen;	/*Angle of coordinate from z axis (Added by ksl for 52a -- 04Aug) */
+  double dtheta,dr;    /* widths of bins, used in hydro import mode*/
   struct cone wcone;		/*56d -- cone structure that defines the bottom edge of the cell in 
 				   CYLVAR coordinates */
   double v[3];			/*velocity at inner vertex of cell.  For 2d coordinate systems this
@@ -505,22 +636,20 @@ typedef struct wind
   double vol;			/* valid volume of this cell (that is the volume of the cell that is considered
 				   to be in the wind.  This differs from the volume in the Plasma structure
 				   where the volume is the volume that is actually filled with material. */
-  int inwind;			/* 061104 -- 58b -- ksl -- Moved definitions of for whether a cell is or is not
-				   inwind to #define statements above */
-
+  double dfudge;		/* A number which defines a push through distance for this cell, which replaces the
+				   global variable DFUDGE in many instances */
+  enum inwind_enum
+  	{	W_IN_DISK=-5, W_IGNORE=-2, 	W_NOT_INWIND=-1, 
+  		W_ALL_INWIND=0, W_PART_INWIND=1 
+  	}	inwind;			
+  Wind_Paths_Ptr paths, *line_paths;         // SWM 6-2-15 Path data struct for each cell
 }
 wind_dummy, *WindPtr;
 
 WindPtr wmain;
 
 /* 57+ - 06jun -- plasma is a new structure that contains information about the properties of the
-plasma in regions of the geometry that are actually included n the wind 
-
-	07jul	ksl	Added volume to the structure.  The value of this should be the same
-			as the corresponding volume in the Wind structure, as we are still
-			using the Wind volume for some tests of whether the a photon can
-			interact in a cell.
-*/
+plasma in regions of the geometry that are actually included n the wind */
 
 /* 70 - 1108 - Define wavelengths in which to record gross spectrum in a cell, see also xave_freq and xj in plasma structure */
 /* ksl - It would probably make more sense to define these in the same ways that bands are done for the generation of photons, or to
@@ -556,12 +685,6 @@ typedef struct plasma
 
   double kappa_ff_factor;	/* Multiplicative factor for calculating the FF heating for                                      a photon. */
 
-  /* Two new objects in the structure to hol the number of line resonant scatters and the number of electron scatters */
-
-  int nscat_es;
-  int nscat_res;
-
-
 
   double recomb_simple[NTOP_PHOT];	/* "alpha_e - alpha" (in Leon's notation) for b-f processes in simple atoms. */
 
@@ -587,31 +710,23 @@ typedef struct plasma
   double heat_lines_macro, heat_photo_macro;	/* bb and bf heating due to macro atoms. Subset of heat_lines 
 						   and heat_photo. SS June 04. */
   double heat_photo, heat_z;	/*photoionization heating total and of metals */
+  double heat_auger;       /* photoionization heating due to inner shell ionizations */  
   double w;			/*The dilution factor of the wind */
+
   int ntot;			/*Total number of photon passages */
 
+  /*  counters of the number of photon passages by origin */
 
-#define PTYPE_STAR	    0
-#define PTYPE_BL	    1
-#define PTYPE_DISK          2
-#define PTYPE_WIND	    3
-#define PTYPE_AGN           4
-
-#define SPEC_MOD_PL         1
-#define SPEC_MOD_EXP	    2
-
-  /* NSH 15/4/11 - added some counters to give a rough idea of where photons from various sources are ending up */
-  /* NSH 111005  - changed counters to real variables, that allows us to take account of differening weights of photons */
-  /* ksl - ???? The reason these are doubles if that what Nick did was to truly count the photons, but it is
-   * not clera why that is a good idea.  I have converted them back to mean the number of packets in radiation.c.  It
-   * would be simpler if this was an array rather than individual
-   * variables
-   */
   int ntot_star;
   int ntot_bl;
-  int ntot_disk;		/* NSH 15/4/11 Added to count number of photons from the disk in the cell */
+  int ntot_disk;		
   int ntot_wind;
-  int ntot_agn;			/* NSH 15/4/11 Added to count number of photons from the AGN in the cell */
+  int ntot_agn;			
+
+
+  int nscat_es;   /* The number of electrons scatters in the cell */
+  int nscat_res;  /* The number of resonant line scatters in the cell */
+
   double mean_ds;		/* NSH 6/9/12 Added to allow a check that a thin shell is really optcially thin */
   int n_ds;			/* NSH 6/9/12 Added to allow the mean dsto be computed */
   int nrad;			/* Total number of photons radiated within the cell */
@@ -680,7 +795,13 @@ NSH 130725 - this number is now also used to say if the cell is over temperature
   double gamma_inshl[NAUGER];	/*MC estimator that will record the inner shell ionization rate - very similar to macro atom-style estimators */
   /* 1108 Increase sim estimators to cover all of the bands */
   /* 1208 Add parameters for an exponential representation, and a switch to say which we prefer. */
-  int spec_mod_type[NXBANDS];	/* NSH 120817 A switch to say which type of representation we are using for this band in this cell. Negative means we have no useful representation, 0 means power law, 1 means exponential */
+  enum spec_mod_type_enum 
+  	{  	
+      SPEC_MOD_PL=1, 
+  		SPEC_MOD_EXP=2,
+      SPEC_MOD_FAIL=-1
+	  } spec_mod_type[NXBANDS];	/* NSH 120817 A switch to say which type of representation we are using for this band in this cell. Negative means we have no useful representation, 0 means power law, 1 means exponential */
+
   double pl_alpha[NXBANDS];	/*Computed spectral index for a power law spectrum representing this cell NSH 120817 - changed name from sim_alpha to PL_alpha */
 //  double pl_w[NXBANDS];		/*This is the computed weight of a PL spectrum in this cell - not the same as the dilution factor NSH 120817 - changed name from sim_w to pl_w */
   double pl_log_w[NXBANDS];    /* NSH 131106 - this is the log version of the power law weight. It is in an attempt to allow very large values of alpha to work with the PL spectral model to avoide NAN problems. The pl_w version can be deleted once testing is complete */
@@ -691,8 +812,7 @@ NSH 130725 - this number is now also used to say if the cell is over temperature
   double sim_ip;		/*Ionisation parameter for the cell as defined in Sim etal 2010 */
   double ferland_ip;		/* IP calculaterd from equation 5.4 in hazy1 - assuming allphotons come from 0,0,0 and the wind is transparent */
   double ip;			/*NSH 111004 Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
-  //int kpkt_rates_known;
-  //COOLSTR kpkt_rates;
+  double xi;			/*NSH 151109 Ionization parameter as defined by Tartar et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
 } plasma_dummy, *PlasmaPtr;
 
 PlasmaPtr plasmamain;
@@ -712,24 +832,6 @@ typedef struct photon_store
 
 PhotStorePtr photstoremain;
 
-/* 
-060616 -- ksl -- 57g -- Modified the plamsa structure to add a new macro stucture that is only needed for macro
-atoms. This structure contains most of the variables that were previously dominating the total size of the plasma
-array. This effectively solves a problem with producing a huge wind_save file, as well as making the size of the
-executable much smaller for the simple atom case.
-
-0608 -- ksl -- 57h -- There is now and extended  discussion in gridwind.c about possible ways to restructure 
-the macro structure in order to dynamically set the size of arrays like jbar and jbar_old.  For now, recompilation 
-of the code is required.  
-
-0803 -- ksl -- 60 -- The first index is the level, or config  number.  get_atomicdata assures that macro levels, 
-if they exist have lower level numbers than other types of levels.  
-
-0911 -- ksl - 68f -- The structure is allocated in a complicated fashion to minimize the total amount of space
-taken up by the macro structure, particularly when it is written out to disk.  First the basic array structurre
-is allocated (in calloc_macro) and then space for the various arrays contatined in the maccro pointer, like
-jbar are allcoated in calloc_esimators.  
-*/
 
 
 typedef struct macro
@@ -792,8 +894,6 @@ typedef struct macro
   double cooling_ff;
   double cooling_adiabatic;     // this is just lum_adiabatic / vol / ne
 
-  double lte_pops[NLEVELS_MACRO]; /* a store of LTE level populations for the macro atom. */ 
-  double lte_pops_norm;
 
 } macro_dummy, *MacroPtr;
 
@@ -802,27 +902,6 @@ MacroPtr macromain;
 int xxxpdfwind;			// When 1, line luminosity calculates pdf
 
 int size_Jbar_est, size_gamma_est, size_alpha_est;
-
-// These definitions define a photon type, generally it's origin
-#define PTYPE_STAR	    0
-#define PTYPE_BL	    1
-#define PTYPE_DISK          2
-#define PTYPE_WIND	    3
-#define PTYPE_AGN           4
-
-/* These definitions define the current or final state of a photon.  They are used by
-phot.istat below */
-
-#define P_INWIND            0	//in wind,
-#define P_SCAT              1	//in process of scattering,
-#define P_ESCAPE            2	//Escaped to reach the universe,
-#define P_HIT_STAR          3	//absorbed by photosphere of star,
-#define P_HIT_DISK          7	//Banged into disk
-#define P_ABSORB            6	//Photoabsorbed within wind
-#define P_TOO_MANY_SCATTERS 4	//in wind after MAXSCAT scatters
-#define P_ERROR             5	//Too many calls to translate without something happening
-#define P_SEC               8	//Photon hit secondary
-#define P_ADIABATIC         9 //records that a photon created a kpkt which was destroyed by adiabatic cooling
 
 #define TMAX_FACTOR			1.5	/*Factor by which t_e can exceed
 						   t_r in order for absorbed to 
@@ -852,7 +931,6 @@ phot.istat below */
 #define IONMODE_MATRIX_BB 8	              // matrix solver BB model
 #define IONMODE_MATRIX_SPECTRALMODEL 9        // matrix solver spectral model
 
-
 // and the corresponding modes in nebular_concentrations
 #define NEBULARMODE_TR 0                       // LTE using t_r
 #define NEBULARMODE_TE 1                       // LTE using t_e
@@ -863,21 +941,6 @@ phot.istat below */
 #define NEBULARMODE_MATRIX_SPECTRALMODEL 9     // matrix solver spectral model
 
 
-
-
-
-
-#define NDIM_MAX 500                // maximum size of the grid in each dimension
-double wind_x[NDIM_MAX], wind_z[NDIM_MAX];	/* These define the edges of the cells in the x and z directions */
-double wind_midx[NDIM_MAX], wind_midz[NDIM_MAX];	/* These define the midpoints of the cells in the x and z directions */
-
-/* Next two lines are for cyl_var coordinates.  They are used in locating the appropriate 
- * locating the appropriate cell, for example by cylvar_where_in_grid
- */
-
-double wind_z_var[NDIM_MAX][NDIM_MAX];
-double wind_midz_var[NDIM_MAX][NDIM_MAX];
-
 typedef struct photon
 {
   double x[3];			/* Vector containing position of packet */
@@ -885,9 +948,22 @@ typedef struct photon
   double freq, freq_orig;    /* current and original frequency of this packet */
   double w,w_orig;		       /* current and original weight of this packet */
   double tau;
-  int istat;			/*status of photon.  See definitions P_INWIND, etc above */
+  enum istat_enum 
+  	{	
+    P_INWIND           =0,	//in wind,
+		P_SCAT             =1,	//in process of scattering,
+		P_ESCAPE           =2,	//Escaped to reach the universe,
+		P_HIT_STAR         =3,	//absorbed by photosphere of star,
+		P_HIT_DISK         =7,	//Banged into disk
+		P_ABSORB           =6,	//Photoabsorbed within wind
+		P_TOO_MANY_SCATTERS=4,	//in wind after MAXSCAT scatters
+		P_ERROR            =5,	//Too many calls to translate without something happening
+		P_SEC              =8,	//Photon hit secondary
+		P_ADIABATIC        =9 	//records that a photon created a kpkt which was destroyed by adiabatic cooling
+  	} 	istat;					   /*status of photon.*/
+
   int nscat;			/*number of scatterings */
-  int nres;			/*The line number in lin_ptr of last scatter or wind line creation */
+  int nres;			/*The line number in lin_ptr of last scatter or wind line creation. Continuum if > nlines. */
   int nnscat;			/* Used for the thermal trapping model of
 				   anisotropic scattering to carry the number of
 				   scattering to "extract" when needed for wind
@@ -897,16 +973,32 @@ typedef struct photon
 				   the photon is in the wind.  If the photon is not
 				   in the wind, then -1 implies inside the wind cone and  
 				   -2 implies outside the wind */
-  int origin;			/* Where this photon originated.  If the photon has
-				   scattered it's "origin" may be changed to "wind".  The
-				   definitions should be according to PTYPE ... above. 
-				 */
+
+  enum origin_enum
+  	{	PTYPE_STAR=0, 
+  		PTYPE_BL=1, 
+  		PTYPE_DISK=2,
+  		PTYPE_WIND=3,
+  		PTYPE_AGN=4,
+      		PTYPE_STAR_MATOM=10,     
+      		PTYPE_BL_MATOM=11, 
+      		PTYPE_DISK_MATOM=12,
+      		PTYPE_WIND_MATOM=13,
+      		PTYPE_AGN_MATOM=14
+  	} 	origin;		/* Where this photon originated.  If the photon has
+		   		scattered it's "origin" may be changed to "wind".*/
+                      		/* note that we add 10 to origin when processed by a macro-atom
+                         	which means we need these values in the enum list */
   int np;			/*NSH 13/4/11 - an internal pointer to the photon number so 
 				   so we can write out details of where the photon goes */
+  double path; 			/* SWM - Photon path length */
 
 }
 p_dummy, *PhotPtr;
 
+PhotPtr photmain;  /* A pointer to all of the photons that have been created in a subcycle. Added to ease 
+		      breaking the main routine of python into separate rooutines for inputs and running the
+		      program */
 
 /* minimum value for tau for p_escape_from_tau function- below this we 
    set to p_escape_ to 1 */
@@ -976,10 +1068,14 @@ typedef struct spectrum
   double f[NWAVE];
   double lf[NWAVE];		/* a second array to hole the extracted spectrum in log units */
   double lfreq[NWAVE];		/* We need to hold what freqeuncy intervals our logarithmic spectrum has been taken over */
+
+  double f_wind[NWAVE];		/* The spectrum of photons created in the wind or scattered in the wind. Created for 
+ 				reflection studies but possible useful for other reasons as well. */
+  double lf_wind[NWAVE];	/* The logarithmic version of this */
 }
 spectrum_dummy, *SpecPtr;
 
-/*1409 - ksl - Replaced variable s with xxspec to avoid confusion in case some wanted to use a variable s */
+
 SpecPtr xxspec;
 
 
@@ -1035,10 +1131,6 @@ FILE *epltptr;			//TEST
 /* These variables are stored or used by the routines for anisotropic scattering */
 /* Allow for the transfer of tau info to scattering routine */
 
-/* JM 1411 -- tau_x_dvds doesn't appear to be used anywhere, so I've 
-   made it a local variable rather than global */  
-//double tau_x_dvds;		//tau_x_dvds/dvds is the actual tau
-//double tau_scatter_min;               //Set in subroutine scatter for use by extract
 
 struct Pdf pdf_randwind_store[100];
 PdfPtr pdf_randwind;
@@ -1050,7 +1142,8 @@ Added for python_43.2 */
 
 
 /* Provide generally for having arrays which descibe the 3 xyz axes. 
-these are initialized in main  */
+these are initialized in main, and used in anisowind  */
+
 
 double x_axis[3];
 double y_axis[3];
@@ -1148,12 +1241,41 @@ struct advanced_modes
   int diag_on_off;              // extra diagnostics
   int use_debug;                // print out debug statements
   int print_dvds_info;          // print out information on the velocity gradients
-
+  int keep_photoabs;            // keep photoabsorption in final spectrum
+  int quit_after_inputs;        // quit after inputs read in, testing mode
+  int fixed_temp;               // do not alter temperature from that set in the parameter file
+  int zeus_connect;				// We are connecting to zeus, do not seek new temp and output a heating and cooling file
+  int rand_seed_usetime;        // default random number seed is fixed, not based on time
 }
 modes;
 
 
 FILE *optr;  //pointer to a diagnostic file that will contain dvds information
+
+
+
+/* Structure containing all of the file and directory names created */
+struct filenames
+{
+  char root[LINELENGTH];        // main rootname
+  char windsave[LINELENGTH];    // wind save filename
+  char specsave[LINELENGTH];    // spec save filename
+  char diag[LINELENGTH];        // diag file
+  char diagfolder[LINELENGTH];  // diag folder
+  char old_windsave[LINELENGTH];// old windsave name
+  char input[LINELENGTH];       // input name if creating new pf file
+  char lspec[LINELENGTH];       // log_spec_tot file name
+  char wspec[LINELENGTH];       // spectot file name
+  char lspec_wind[LINELENGTH];  // log_spec_tot filename for wind photons
+  char wspec_wind[LINELENGTH];  // spectot filename for wind photons
+  char disk[LINELENGTH];        // disk diag file name
+  char tprofile[LINELENGTH];    // non standard tprofile fname
+  char phot[LINELENGTH];        // photfile e.g. python.phot
+  char windrad[LINELENGTH];     // wind rad file
+  char spec[LINELENGTH];        // .spec file
+  char spec_wind[LINELENGTH];   // .spec file for wind photons
+}
+files;
 
 
         
@@ -1164,5 +1286,3 @@ FILE *optr;  //pointer to a diagnostic file that will contain dvds information
    whether it has already calculated the matom emissivities or not. */
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
-
-

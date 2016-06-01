@@ -64,6 +64,7 @@ History:
 			the doppler shift is carried out.)
 	09feb	ksl	68b - Added hooks to track energy deposition of extracted photons
 			in the wind 
+	15aug	ksl	Modifications to allow multiple domains.
 
 **************************************************************/
 
@@ -81,6 +82,7 @@ extract (w, p, itype)
   int vsub ();
   int yep;
   double xdiff[3];
+  int ndom;
 
 
   /* 68b -09021 - ksl - The next line selects the middle inclination angle for recording the absorbed enery */
@@ -149,7 +151,8 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 	  if (itype == PTYPE_WIND)
 	    {			/* If the photon was scattered in the wind, 
 				   the frequency also must be shifted */
-	      vwind_xyz (&pp, v);	/*  Get the velocity at the position of pp */
+		    ndom=wmain[p->grid].ndom;
+	      vwind_xyz (ndom, &pp, v);	/*  Get the velocity at the position of pp */
 	      doppler (p, &pp, v, pp.nres);	/*  Doppler shift the photon -- test! */
 
 /*  Doppler shift the photon (as nonresonant scatter) to new direction */
@@ -321,7 +324,7 @@ have been changed */
 /* But in any event we have to reposition wind photons so thath they don't go through
 the same resonance again */
 
-      reposition (w, pp);	// Only reposition the photon if it was a wind photon
+      reposition (pp);	// Only reposition the photon if it was a wind photon
     }
 
   if (tau > TAU_MAX)
@@ -376,8 +379,6 @@ the same resonance again */
   if (istat == P_ESCAPE)
     {
 
-      /* This seems very defensive.  Is tau ever less than 0? */
-
       if (!(0 <= tau && tau < 1.e4))
 	Error_silent
 	  ("Warning: extract_one: ignoring very high tau  %8.2e at %g\n",
@@ -399,6 +400,25 @@ the same resonance again */
 	   */
 
 	  xxspec[nspec].f[k] += pp->w * exp (-(tau));	//OK increment the spectrum in question
+
+	  /* If this photon was a wind photon, then also increment the "reflected" spectrum */
+	  if ( pp->origin == PTYPE_WIND || pp->origin == PTYPE_WIND_MATOM || pp->nscat > 0) {
+
+	  	xxspec[nspec].f_wind[k] += pp->w * exp (-(tau));	//OK increment the spectrum in question
+	    }
+			    
+	
+		// SWM - Records total distance travelled by extract photon
+	  	if(geo.reverb != REV_NONE)
+	  	{	//If we are in reverb mode
+			//if (pp->nscat > 0 || pp->origin > 9 || (pp->nres > -1 && pp->nres < nlines))
+			if (pstart.nscat > 0 || pstart.origin > 9 || (pstart.nres > -1 && pstart.nres < nlines))
+			{	//If this photon has scattered, been reprocessed, or originated in the wind it's important
+				pstart.w = pp->w;				//Adjust weight to weight reduced by extraction
+				//pp->path = pstart.path;
+				delay_dump_single(&pstart, 1);	//Dump photon now weight has been modified by extraction
+			}
+		}
 
 
 

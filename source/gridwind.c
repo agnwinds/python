@@ -156,7 +156,7 @@ calloc_wind (nelem)
     }
   else
     {
-      Log_silent
+      Log
 	("Allocated %10d bytes for each of %5d elements of             totaling %10.1f Mb\n",
 	 sizeof (wind_dummy), nelem, 1.e-6 * nelem * sizeof (wind_dummy));
     }
@@ -214,7 +214,7 @@ calloc_plasma (nelem)
     }
   else
     {
-      Log_silent
+      Log
 	("Allocated %10d bytes for each of %5d elements of      plasma totaling %10.1f Mb \n",
 	 sizeof (plasma_dummy), (nelem + 1),
 	 1.e-6 * (nelem + 1) * sizeof (plasma_dummy));
@@ -236,7 +236,7 @@ calloc_plasma (nelem)
     }
   else
     {
-      Log_silent
+      Log
 	("Allocated %10d bytes for each of %5d elements of photonstore totaling %10.1f Mb \n",
 	 sizeof (photon_store_dummy), (nelem + 1),
 	 1.e-6 * (nelem + 1) * sizeof (photon_store_dummy));
@@ -644,7 +644,7 @@ calloc_estimators (nelem)
 	  free (macromain[n].cooling_bf);
 	}*/
       if ((macromain[n].cooling_bf =
-	   calloc (sizeof (double), ntop_phot)) == NULL)
+	   calloc (sizeof (double), nphot_total)) == NULL)
 	{
 	  Error
 	    ("calloc_estimators: Error in allocating memory for MA estimators\n");
@@ -656,7 +656,7 @@ calloc_estimators (nelem)
 	  free (macromain[n].cooling_bf_col);
 	}*/
       if ((macromain[n].cooling_bf_col =
-	   calloc (sizeof (double), ntop_phot)) == NULL)
+	   calloc (sizeof (double), nphot_total)) == NULL)
 	{
 	  Error
 	    ("calloc_estimators: Error in allocating memory for MA estimators\n");

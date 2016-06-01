@@ -70,12 +70,17 @@ zoom (direction)
      int direction;
 {
   int center;
+  int ndim;
+
+  
+ndim=zdom[current_domain].ndim;
+
   if (direction == 1)
     {				/* then unzoom */
       Log ("Showing selected positions throughout wind\n");
       py_wind_min = 0;
-      py_wind_max = NDIM;
-      py_wind_delta = NDIM / 10;
+      py_wind_max = ndim;
+      py_wind_delta = ndim / 10;
       /*
        * Allow for the possibility that the wind has an xdimension
        * < 10
@@ -96,9 +101,9 @@ zoom (direction)
 	  py_wind_min = 0;
 	}
       py_wind_max = py_wind_min + 10;
-      if (py_wind_max > NDIM)
+      if (py_wind_max > ndim)
 	{
-	  py_wind_max = NDIM;
+	  py_wind_max = ndim;
 	  Log
 	    ("zoom: this choice of py_wind_max is lager than NDIM, adusting py_wind_max to NDIM");
 	}
@@ -175,6 +180,9 @@ overview (w, rootname)
 
   Notes:
 
+  This has been modified to work with domains, but it is not obvious that
+  this is what one wants, because the position is fixed
+
   History:
 
  ************************************************************************/
@@ -186,8 +194,9 @@ position_summary (w)
   struct photon p;
   int n;
   int nplasma;
+  int inwind, ndom;
 
-  x[0] = geo.wind_rmax / 5;
+  x[0] = geo.rmax / 5;
   x[1] = 0.0;
   x[2] = x[0];
 
@@ -199,7 +208,13 @@ a:Log ("Input x=0,y=0,z=0 to return to main routine\n");
   if (length (x) == 0.0)
     return (0);
 
-  n = where_in_grid (x);
+  inwind=where_in_wind(x,&ndom);
+  if (inwind!=W_ALL_INWIND){
+	  Log("Position %8.2e  %8.2e %8.2e is not in an active region of grid %d %d\n", x[0], x[1], x[2],inwind,ndom);
+	  ndom=0;
+  }
+
+  n = where_in_grid (ndom,x);
   nplasma = wmain[n].nplasma;
 
   Log ("Position %8.2e  %8.2e %8.2e  Cell %5d\n", x[0], x[1], x[2], n);
@@ -217,7 +232,7 @@ a:Log ("Input x=0,y=0,z=0 to return to main routine\n");
   p.x[1] = x[1];
   p.x[2] = x[2];
 
-  vwind_xyz (&p, v);
+  vwind_xyz (ndom, &p, v);
   Log ("Velocity: %8.2e  %8.2e %8.2e\n", v[0], v[1], v[2]);
 
 
@@ -1481,6 +1496,12 @@ wind_element (w)
   PlasmaPtr xplasma;
   int m, n, i, j, nn, mm;
   int first, last;
+  int ndom;
+
+  ndom=w->ndom;
+
+
+
   n = 50;
 a: printf("There are %i wind elements in this model\n",NDIM2);
 rdint ("Wind.array.element", &n);
@@ -1493,7 +1514,7 @@ rdint ("Wind.array.element", &n);
 	goto a;
 	}
 
-  wind_n_to_ij (n, &i, &j);
+  wind_n_to_ij (ndom,n, &i, &j);
   xplasma = &plasmamain[w[n].nplasma];
 
   Log
@@ -1502,6 +1523,8 @@ rdint ("Wind.array.element", &n);
      xplasma->nrad);
   Log ("xyz %8.2e %8.2e %8.2e vel %8.2e %8.2e %8.2e\n", w[n].x[0], w[n].x[1],
        w[n].x[2], w[n].v[0], w[n].v[1], w[n].v[2]);
+  Log ("r theta %12.6e %12.6e \n", w[n].rcen, w[n].thetacen/RADIAN);
+	   
   Log ("nh %8.2e ne %8.2e t_r %8.2e t_e %8.2e w %8.2e vol %8.2e\n",
        xplasma->rho * rho2nh, xplasma->ne, xplasma->t_r, xplasma->t_e,
        xplasma->w, w[n].vol);
@@ -1515,9 +1538,9 @@ rdint ("Wind.array.element", &n);
     ("t_e %8.2e cool_tot %8.2e lum_lines  %8.2e lum_ff  %8.2e lum_fb     %8.2e cool_comp %8.2e cool_adiab %8.2e cool_DR %8.2e \n",
      xplasma->t_e, xplasma->lum_rad_ioniz+xplasma->lum_comp_ioniz+xplasma->lum_adiabatic_ioniz+xplasma->lum_dr_ioniz, xplasma->lum_lines_ioniz, xplasma->lum_ff_ioniz, xplasma->lum_fb_ioniz, xplasma->lum_comp_ioniz, xplasma->lum_adiabatic_ioniz, xplasma->lum_dr_ioniz);
   Log
-    ("t_r %8.2e heat_tot %8.2e heat_lines %8.2e heat_ff %8.2e heat_photo %8.2e heat_comp %8.2e heat_icomp %8.2e\n",
+    ("t_r %8.2e heat_tot %8.2e heat_lines %8.2e heat_ff %8.2e heat_photo %8.2e heat_auger %8.2e heat_comp %8.2e heat_icomp %8.2e\n",
      xplasma->t_r, xplasma->heat_tot, xplasma->heat_lines, xplasma->heat_ff,
-     xplasma->heat_photo, xplasma->heat_comp,xplasma->heat_ind_comp);
+     xplasma->heat_photo, xplasma->heat_auger,xplasma->heat_comp,xplasma->heat_ind_comp);
 
 
 
@@ -1996,6 +2019,29 @@ IP_summary (w, rootname, ochoice)
       write_array (filename, ochoice);
 
     }
+
+
+  /* JM added printout for xi too */
+  for (n = 0; n < NDIM2; n++)
+    {
+      aaa[n] = 0;
+      if (w[n].vol > 0.0)
+  {
+    nplasma = w[n].nplasma;
+    aaa[n] = ((plasmamain[nplasma].xi));
+  }
+    }
+  display ("Xi Ionization parameter");
+
+  if (ochoice)
+    {
+      strcpy (filename, rootname);
+      strcat (filename, ".xi");
+      write_array (filename, ochoice);
+
+    }
+
+
 
   for (n = 0; n < NDIM2; n++)
     {
@@ -3193,6 +3239,7 @@ complete_physical_summary (w, rootname, ochoice)
   double vtot;
   FILE *fptr, *fopen ();
   PlasmaPtr xplasma;
+  int ndom;
 
   rdint("Save ions as densities (0) or fractions? (1)", &frac_choice);
 
@@ -3212,20 +3259,22 @@ complete_physical_summary (w, rootname, ochoice)
   printf("n\tnplasma\tinwind\ti\tj\tx\tz\tv\tvx\tvy\tvz\tdvds_ave\tvol\t \
 rho\tne\tte\ttr\tnphot\tw\tave_freq\tIP\tconv\tconv_tr\tconv_te\tconv_hc\t \
 lum_tot\tlum_rad\tlum_fb\tlum_ff\tlum_lines\tlum_adiabatic\tlum_comp\tlum_dr\t \
-heat_tot\theat_photo\theat_lines\theat_ff\theat_comp\theat_ind_comp\t \
+heat_tot\theat_photo\theat_auger\theat_lines\theat_ff\theat_comp\theat_ind_comp\t \
 ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\n");
 
   if (ochoice)
-    fprintf(fptr, "n\tnplasma\tinwind\ti\tj\tx\tz\tv\tvx\tvy\tvz\tdvds_ave\tvol\t \
-rho\tne\tte\ttr\tnphot\tw\tave_freq\tIP\tconv\tconv_tr\tconv_te\tconv_hc\t \
+    fprintf(fptr, "n\tnplasma\tinwind\ti\tj\tx\tz\tr\ttheta\tv\tvx\tvy\tvz\tdvds_ave\tvol\t \
+rho\tne\tte\ttr\tnphot\tw\tave_freq\tIP\tXi\tconv\tconv_tr\tconv_te\tconv_hc\t \
 lum_tot\tlum_rad\tlum_fb\tlum_ff\tlum_lines\tlum_adiabatic\tlum_comp\tlum_dr\t \
-heat_tot\theat_photo\theat_lines\theat_ff\theat_comp\theat_ind_comp\t \
+heat_tot\theat_photo\theat_auger\theat_lines\theat_ff\theat_comp\theat_ind_comp\t \
 ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\n");
 
 
+  Log("py_wind_sub does not work yet\n");
+  ndom=0;
   for (n = 0; n < NDIM2; n++)
     {
-      wind_n_to_ij (n, &ii, &jj);
+      wind_n_to_ij (ndom, n, &ii, &jj);
       
       if (w[n].vol > 0.0)
   {
@@ -3249,7 +3298,7 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
     o6den =  get_density_or_frac(xplasma,8,6, frac_choice);
     si4den =  get_density_or_frac(xplasma,14,4, frac_choice);
 
-    /* printf("%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+    /* printf("%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e  %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
@@ -3266,22 +3315,23 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
     */
     
     if (ochoice)
-      fprintf(fptr, "%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
-            %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
-            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+      fprintf(fptr, "%i %i %i %i %i %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e %i %8.4e %8.4e %8.4e %8.4e \
+            %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e \
             %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e %8.4e\n",
-            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2], vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol,
+            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2],w[n].rcen,w[n].thetacen/RADIAN, vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol,
             plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
-            plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].ip, plasmamain[np].converge_whole, 
+            plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].ip, plasmamain[np].xi, plasmamain[np].converge_whole, 
             plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
-            plasmamain[np].lum_ioniz, plasmamain[np].lum_rad, plasmamain[np].lum_fb, 
+			plasmamain[np].lum_rad+plasmamain[np].lum_comp+plasmamain[np].lum_adiabatic+plasmamain[np].lum_dr,
+            plasmamain[np].lum_rad, plasmamain[np].lum_fb, 
             plasmamain[np].lum_ff, plasmamain[np].lum_lines, plasmamain[np].lum_adiabatic, 
-            plasmamain[np].lum_comp, plasmamain[np].lum_dr, plasmamain[np].heat_tot, plasmamain[np].heat_photo, 
+            plasmamain[np].lum_comp, plasmamain[np].lum_dr, plasmamain[np].heat_tot, plasmamain[np].heat_photo, plasmamain[np].heat_auger,
             plasmamain[np].heat_lines , plasmamain[np].heat_ff , plasmamain[np].heat_comp, plasmamain[np].heat_ind_comp,
             h1den, h2den, he1den, he2den, he3den, c3den, c4den, c5den, n5den, o6den, si4den);
   }
-    else
+   else
   {
       /* if we aren't inwind then print out a load of zeroes */
 
@@ -3292,24 +3342,108 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
             0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n",
             n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]);
       */
-
+	  
       if (ochoice)
-        fprintf(fptr, "%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
-            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+        fprintf(fptr, "%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
             0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
-            0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
             0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n",
-            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]);
+            n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]); 
   }
     }
   
+
   if (ochoice)
+  {
+    fclose (fptr);
     printf("\nSaved summary of physical quantites in %s, use py_read_output.py to read\n",
           filename);
+  }
 
   return (0);
+  
+  
+}
+
+/**************************************************************************
+
+
+  Synopsis:  
+  complete_ion_summary outputs a file with all of the ion fractions for a given cell
+
+
+  History:
+  1602 NSH coded
+
+************************************************************************/
+
+
+
+  int
+  complete_ion_summary (w, rootname, ochoice)
+       WindPtr w;
+  char rootname[];
+  int ochoice;
+  
+  {
+	  char cell[5];
+    PlasmaPtr xplasma;
+    FILE *fptr, *fopen ();
+    char filename[LINELENGTH];
+	
+	
+    int  n, mm;
+    n = 50;
+  a: printf("There are %i wind elements in this model\n",NDIM2);
+  rdint ("Wind.array.element", &n);
+
+    if (n < 0)
+      goto b;
+    else if (n > NDIM2)
+  	{
+  	printf("No, there are %i wind elements, not %i\n",NDIM2,n);
+  	goto a;
+  	}
+	printf ("OK, using cell %i\n",n);
+    xplasma = &plasmamain[w[n].nplasma];
+	
+    if (ochoice)
+    {
+      strcpy (filename, rootname);
+	  strcat (filename,"_cell_");
+	  sprintf(cell,"%04d",n);
+	strcat (filename,cell);
+  printf ("opening file %s\n",filename);
+	
+      strcat (filename, ".ions");
+	  printf ("opening file %s\n",filename);
+      fptr = fopen (filename, "w");
+    }
+	
+	printf ("ion z n(ion) n(ion)/n(H)\n");
+	
+	
+    if (ochoice)
+      fprintf(fptr, "ion z n(ion) n(ion)/n(H)\n");
+	
+
+    for (mm = 0; mm < nions; mm++)
+      {
+        
+		  printf ("%i %i %e %e\n",mm,ion[mm].z,xplasma->density[mm],xplasma->density[mm]/(xplasma->rho*rho2nh));
+		  if (ochoice)
+		  {
+			  fprintf (fptr,"%i %i %e %e\n",mm,ion[mm].z,xplasma->density[mm],xplasma->density[mm]/(xplasma->rho*rho2nh));
+		  }
+		
+      }
+	  goto a;
+
+	b:return (0);
 
 }
+
 
 /**************************************************************************
 
@@ -3435,6 +3569,10 @@ int get_los_dvds(w, rootname, ochoice)
   double obs_angle, rzero, r;
   char filename[LINELENGTH], suffix[LINELENGTH];
 
+  int ndom;
+
+  ndom=w->ndom;
+
   vchoice = 0;
   phase = 0;
   obs_angle = 80.0;
@@ -3480,8 +3618,8 @@ int get_los_dvds(w, rootname, ochoice)
       /* next choice is for turning off rotational velocity */
       else if (vchoice == 1)
         {
-          model_velocity(p.x, v1);
-          model_velocity(ptest.x, v2);
+          model_velocity(ndom, p.x, v1);
+          model_velocity(ndom, ptest.x, v2);
           v1[1] = 0.0;
           v2[1] = 0.0;
 
@@ -3496,13 +3634,13 @@ int get_los_dvds(w, rootname, ochoice)
       else
         {
           r = sqrt (p.x[0] * p.x[0] + p.x[1] * p.x[1]);
-          rzero = sv_find_wind_rzero (p.x);
+          rzero = sv_find_wind_rzero (ndom, p.x);
           v1[0] = v1[2] = 0.0;
           v1[1] = sqrt (G * geo.mstar * rzero) / r;
 
 
           r = sqrt (ptest.x[0] * ptest.x[0] + ptest.x[1] * ptest.x[1]);
-          rzero = sv_find_wind_rzero (ptest.x);
+          rzero = sv_find_wind_rzero (ndom, ptest.x);
           v2[0] = v2[2] = 0.0;
           v2[1] = sqrt (G * geo.mstar * rzero) / r;
 

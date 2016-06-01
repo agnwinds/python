@@ -156,7 +156,7 @@ to match heating and cooling in the wind element! */
 /* Feb 2012 NSH - new for mode 7. KSL has moved a lot of the mechanics that used to be here into
  power_abundances. This, once called, calculates the weight and alpha for each band in this cell. There is a lot of code that was clogging up this routine. Once this is done, one_shot gets called from within that routine. */
 
-	ireturn = spectral_estimators (xplasma);	/*Aug 2012 NSH - slight change to help integrate this into balance, power_estimators does the work of getting banded W and alpha. Then oneshot gets called. */
+	    ireturn = spectral_estimators (xplasma);	/*Aug 2012 NSH - slight change to help integrate this into balance, power_estimators does the work of getting banded W and alpha. Then oneshot gets called. */
       xplasma->dt_e_old = xplasma->dt_e;
       xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;	//Must store this before others
       xplasma->t_e_old = xplasma->t_e;
@@ -413,8 +413,13 @@ History:
 	98	ksl	Coded as part of python effort
 	02jul	ksl	Added mode variable so could try detailed balance
 	06may	ksl	57+ -- Switched to use plasma structue
+    15aug   nsh 79 -- added a mode to leave t_e fixed
 
 **************************************************************/
+
+
+
+PlasmaPtr xxxplasma;
 
 
 
@@ -431,19 +436,28 @@ one_shot (xplasma, mode)
 
   gain = xplasma->gain;
 
-
   te_old = xplasma->t_e;
-  te_new = calc_te (xplasma, 0.7 * te_old, 1.3 * te_old);
 
-  xplasma->t_e = (1 - gain) * te_old + gain * te_new;
-
-/* NSH 130722 - NOTE - at this stage, the cooling terms are still those computed from the 'ideal' t_e, not the new t_e - this may be worth investigatiing. */
-  if (xplasma->t_e > TMAX)
-	{	
-	xplasma->t_e = TMAX;
+	if (modes.zeus_connect==1 || modes.fixed_temp==1)
+	{
+		te_new = te_old; //We dont want to change the temperature
+		xxxplasma = xplasma;
+		zero_emit(te_old); //But we do still want to compute all heating and cooling rates
+		dte = xplasma->dt_e=0.0;	 
+	}
+	else //Do things to old way - look for a new temperature
+	{
+		te_new = calc_te (xplasma, 0.7 * te_old, 1.3 * te_old);  //compute the new t_e - no limits on where it can go
+		xplasma->t_e = (1 - gain) * te_old + gain * te_new;  //Allow the temperature to move by a fraction gain towards the equilibrium temperature
+	
+	/* NSH 130722 - NOTE - at this stage, the cooling terms are still those computed from the 'ideal' t_e, not the new t_e - this may be worth investigatiing. */
+		if (xplasma->t_e > TMAX) //check to see if we have maxed out the temperature.
+		{	
+			xplasma->t_e = TMAX;
+		}
+		dte = xplasma->dt_e;
 	}
 
-  dte = xplasma->dt_e;
 
 //  Log ("One_shot: %10.2f %10.2f %10.2f\n", te_old, te_new, w->t_e);
 //	xplasma->t_e=10000.0;      
@@ -525,7 +539,6 @@ meaning in nebular concentrations.
 	06may	ksl	Modified for plasma structue
  */
 
-PlasmaPtr xxxplasma;
 
 double
 calc_te (xplasma, tmin, tmax)
@@ -645,21 +658,26 @@ zero_emit (t)
   //  difference = (xxxplasma->heat_tot - total_emission (xxxplasma, 0., VERY_BIG));
 
 
-   /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
+  /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
    * are testing.  Adiabatic cooling is proportional to temperature
    */
 
   if (geo.adiabatic)
-     {
-     if (wmain[xxxplasma->nwind].div_v >= 0.0) //This is the case where we have adiabatic cooling - we want to retain the old behaviour, so we use the 'test' temperature to compute it. If div_v is less than zero, we don't do anything here, and so the existing value of adiabatic cooling is used - this was computed in wind_updates2d before the call to ion_abundances.
-	{	     
-	xxxplasma->lum_adiabatic = adiabatic_cooling (&wmain[xxxplasma->nwind], t);
-	}     
-     }
-   else 
-     {
-     xxxplasma->lum_adiabatic=0.0; 
-     }
+    {
+      if (wmain[xxxplasma->nwind].div_v >= 0.0) 
+      	{	     
+        /* This is the case where we have adiabatic cooling - we want to retain the old behaviour, 
+           so we use the 'test' temperature to compute it. If div_v is less than zero, we don't do
+           anything here, and so the existing value of adiabatic cooling is used - this was computed 
+           in wind_updates2d before the call to ion_abundances. */
+	        xxxplasma->lum_adiabatic = adiabatic_cooling (&wmain[xxxplasma->nwind], t);
+	      }     
+    }
+
+  else 
+    {
+      xxxplasma->lum_adiabatic=0.0; 
+    }
 
 
   /* difference =
@@ -668,7 +686,7 @@ zero_emit (t)
 
 
   /* 70g - nsh adding this line in next to calculate dielectronic recombination cooling without generating photons */
- compute_dr_coeffs (t);
+  compute_dr_coeffs (t);
   xxxplasma->lum_dr = total_dr (&wmain[xxxplasma->nwind], t);
 
   /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
@@ -676,8 +694,9 @@ zero_emit (t)
   xxxplasma->lum_di = total_di (&wmain[xxxplasma->nwind], t);
 
 
-/* 70g compton cooling calculated here to avoid generating photons */
+  /* 70g compton cooling calculated here to avoid generating photons */
   xxxplasma->lum_comp = total_comp (&wmain[xxxplasma->nwind], t);
+
 
   difference = xxxplasma->heat_tot - xxxplasma->lum_adiabatic - xxxplasma->lum_dr - xxxplasma->lum_di - xxxplasma->lum_comp - total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);	//NSH 1110 - total emission no longer computes compton.*/
 

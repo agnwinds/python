@@ -250,6 +250,7 @@ total_emission (one, f1, f2)
          better, but at the moment, simply removing this line, and putting the calculation of compton luminosity 
          into calc_te with the adiabatic cooling and the new DR cooling is the way to make things a little more stable */
       //OLD     xplasma->lum_rad += xplasma->lum_comp = total_comp (one, t_e); 
+      //XXX - ksl - A line was commented out here.  It was said this makes things more stable, but the question is what is correct
     }
 
 
@@ -315,14 +316,25 @@ adiabatic_cooling (one, t)
      double t;
 {
   double cooling;
-  int nplasma;
+  int nplasma, nion;
+  double nparticles;
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
   //JM 1401 -- here was an old factor of 3/2 which KSL and JM believe to be incorrect. 
-  cooling = xplasma->ne * BOLTZMANN * t * xplasma->vol * one->div_v;
+  //JM 1601 -- this should include the pressure from all particles, rather than just ne
+  //cooling = xplasma->ne * BOLTZMANN * t * xplasma->vol * one->div_v;
+  nparticles = xplasma->ne;
+
+  for (nion = 0; nion < nions; nion++)
+  {
+  	/* loop over all ions as they all contribute to the pressure */
+  	nparticles += xplasma->density[nion];
+  }
+
+  cooling = nparticles * BOLTZMANN * t * xplasma->vol * one->div_v;
 
   return (cooling);
 }
@@ -363,6 +375,7 @@ History:
 			stopgap for now since should not need to be addressing
 			wind array.  Changed call to remove wind since entire
 			grid was tramsmitted.
+	15aug	ksl	Added domain support
  
 **************************************************************/
 
@@ -380,6 +393,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   int icell;
   int nplasma;
   int nnscat;
+  int ndom;
 
 
   photstop = photstart + nphot;
@@ -409,6 +423,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       icell--;			/* We have got up to xlum, so this is the cell in which the photon must be generated */
 
       nplasma = wmain[icell].nplasma;
+      ndom=wmain[icell].ndom;
 
 
       /* Now generate a single photon in this cell */
@@ -444,28 +459,18 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       p[n].w = weight;
       /* Determine the position of the photon in the moving frame */
 
-      /* !! ERROR - Need to account for emission from torus if it exists */
 
-      if (wmain[icell].inwind > 1)
-	{
-	  get_random_location (icell, 2, p[n].x);	/* NSH 1110 Added this if statement to take account of photons being generated from the torus. Hope I've done it correctly!! */
-	}
-      else
-	{
-	  get_random_location (icell, 0, p[n].x);
-	}
+      get_random_location (icell, p[n].x);
 
       p[n].grid = icell;
 
-
-
-
-
-	  // Determine the direction of the photon
-	  // ?? Need to allow for anisotropic emission here
-      // JM 1406 -- I think there's a mistake here. I believe this should be
-      // if (p[n].nres < 0 || p[n].nres > NLINES || geo.scatter_mode == 0)
-      // to allow for isotropic BF continuum emission
+      /*
+	Determine the direction of the photon
+	?? Need to allow for anisotropic emission here
+	JM 1406 -- I think there's a mistake here. I believe this should be
+	if (p[n].nres < 0 || p[n].nres > NLINES || geo.scatter_mode == 0)
+	to allow for isotropic BF continuum emission
+      */
       nnscat = 1;
       if (p[n].nres < 0 || geo.scatter_mode != 1)
 	{
@@ -476,7 +481,7 @@ was a resonant scatter but we want isotropic scattering anyway.  */
       else if (geo.scatter_mode == 1) 
 	{			// It was a line photon and we want anisotropic scattering mode 1
 
-// -1. forces a full reinitialization of the pdf for anisotropic scattering
+/* -1. forces a full reinitialization of the pdf for anisotropic scattering  */
       
 	  randwind (&p[n], p[n].lmn, wmain[icell].lmn);
 
@@ -491,13 +496,22 @@ was a resonant scatter but we want isotropic scattering anyway.  */
       /* The next two lines correct the frequency to first order, but do not result in
          forward scattering of the distribution */
 
-      vwind_xyz (&p[n], v);
+      vwind_xyz (ndom, &p[n], v);
       p[n].freq *= (1. + dot (v, p[n].lmn) / C);
 
       p[n].istat = 0;
       p[n].tau = p[n].nscat = p[n].nrscat = 0;
       p[n].origin = PTYPE_WIND;	// A wind photon
-
+      switch(geo.reverb) {		// SWM 26-3-15: Added wind paths
+      	case REV_WIND: 
+      	case REV_MATOM:
+	    	wind_paths_gen_phot(&wmain[icell], &p[n]); break;
+	    case REV_PHOTON:
+	  		simple_paths_gen_phot(&p[n]); break;
+	  	case REV_NONE:
+	  	default: 
+	  		break;
+	  }
     }
 
 
@@ -685,7 +699,10 @@ total_free (one, t_e, f1, f2)
 		}
       x = BREMS_CONSTANT * xplasma->ne * (sum) / H_OVER_K;
     }
-
+  
+  /* JM 1604 -- The reason why this is proportional to t_e**1/2, 
+     rather than t_e**(-1/2) as in equation 40 of LK02 is because
+     one gets an extra factor of (k*t_e/h) when one does the integral */
   x *= sqrt (t_e) * xplasma->vol;
   x *= (exp (-H_OVER_K * f1 / t_e) - exp (-H_OVER_K * f2 / t_e));
 

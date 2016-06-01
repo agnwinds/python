@@ -53,6 +53,7 @@ and
 		when calculating pdf_rand.  ?? It might be more
 		computationally efficient to switch to isotropic
 		in this case ??
+15aug	ksl	Minor changes for multiple domains
 */
 
 #define  TAU_TOP   10.0		/* tau above which we assume the angular distribution function
@@ -62,6 +63,7 @@ and
 
 
 double tau_randwind = -1000.;
+
 //struct Pdf pdf_randwind;    // Moved into python.h for python_43.2
 
 int
@@ -74,11 +76,7 @@ randwind (p, lmn, north)
   double n;			/* the individual direction cosines in the rotated frame */
   double q;
   double phi;
-  int create_basis (), project_from ();
-  double vrandwind ();
-  double pdf_get_rand ();
   double xlmn[3], dummy[3];
-  int project_from_cyl_xyz ();
   double north_xyz[3];
   struct basis nbasis;
   int k;
@@ -93,8 +91,9 @@ randwind (p, lmn, north)
       return (-1);
     }
 
-// Next statement gets information needed to recalculate everything
-  k = where_in_grid (p->x);
+/* Get the position of the photon in the appropriated domain */
+  k = where_in_grid (wmain[p->grid].ndom, p->x);
+
   tau = sobolev (&wmain[k], p->x, -1., lin_ptr[p->nres], wmain[k].dvds_max);
 
   stuff_v (p->x, xyz);
@@ -183,7 +182,6 @@ double
 vrandwind (x)
      double x;
 {
-//  double a, b;
   double abscos, z;
 
   abscos = fabs (x);
@@ -193,21 +191,23 @@ vrandwind (x)
     }
 
 
-// The next lines generate a model for scattering in which
-// the source function is assumed to be constant through the
-// scattering region.  It is also related to escape probs.
+/* The next lines generate a model for scattering in which
+   the source function is assumed to be constant through the
+   scattering region.  It is also related to escape probs.  */
 
   z = (1. - exp (-tau_randwind / abscos)) * abscos;
 
-// These generate the probability density for the Eddington approximation
-//  a = 0.5;
-//  b = 1.5;
-//  z = x * (a * (1. + b * x));
+/* These generate the probability density for the Eddington approximation
+    a = 0.5;
+    b = 1.5;
+    z = x * (a * (1. + b * x));
 
 
-// The next line would generate a completely isotropic distribution
-// z=0.1;  // Completely isotropic
-
+   The next line would generate a completely isotropic distribution
+   z=0.1;  
+  
+      Completely isotropic
+*/
   if (sane_check (z))
     {
       Error ("vrandwind:sane_check tau_randwind %f x %f\n", tau_randwind, x);
@@ -254,7 +254,9 @@ and the reweighting is returned.
 02may	ksl	Changed calling function for reweightwind, in part
 		has already been calculated for this position, i.e.
 		to better encapsulate this routine.
-04deck	ksl	Miniscule mod to make compile cleanly with 03
+04dec	ksl	Miniscule mod to make compile cleanly with 03
+15aug	kls	Modifications to allow for mulitple domains, some 
+		editing of comments
 */
 
 #define REWEIGHTWIND_TAU_MAX 100.
@@ -273,15 +275,15 @@ reweightwind (p)
   int k;
 
   vsub (p->x, phot_randwind.x, delta);
-// Idea here is that if photon has moved from position where it was you must recalc.
+
+/* Idea here is that if photon has moved from position where it was you must recalc. */
+
   if ((x = length (delta)) > DFUDGE)
     {
-      k = where_in_grid (p->x);
-      tau = sobolev (&wmain[k], p->x, -1., lin_ptr[p->nres], wmain[k].dvds_max);
+      k = where_in_grid (wmain[p->grid].ndom, p->x);
+      tau =
+	sobolev (&wmain[k], p->x, -1., lin_ptr[p->nres], wmain[k].dvds_max);
       make_pdf_randwind (tau);	// Needed for the normalization
-//      Log
-//      ("Had to calculate the pdf for this photon %d %e tau_scat_min %10.2f norm %10.2f \n",
-//       p->nres, x, tau, pdf_randwind->norm);
       stuff_phot (p, &phot_randwind);
     }
   else
@@ -289,7 +291,7 @@ reweightwind (p)
 
   stuff_v (p->x, xyz);
   stuff_v (p->lmn, lmn);
-  k = where_in_grid (p->x);
+  k = where_in_grid (wmain[p->grid].ndom, p->x);
   stuff_v (wmain[k].lmn, north);
 
 /* We need to know the cos of the angle between the direction
@@ -307,6 +309,7 @@ what we do here */
 // Factor of 2 needed because the interval is from -1 to 1
 // ?? It's definitely needed to make a uniform distribution work
 // but is this reason really right
+
   z = 2. / pdf_randwind->norm;
   x = vrandwind (ctheta) * z;
 
@@ -325,11 +328,15 @@ what we do here */
 
 
 /*
- *
- * 02june	ksl	Modified make_pdf_randwind so that the first time
- * 			the program is entered an array of cumulative
- * 			distribution functions is created.  This is 
- * 			designed to speed the program up significantly
+ 
+
+   make_pdf_rand_wind(tau)
+
+   History
+	02june	ksl	Modified make_pdf_randwind so that the first time
+			the program is entered an array of cumulative
+			distribution functions is created.  This is 
+			designed to speed the program up significantly
 */
 
 int init_make_pdf_randwind = 1;
@@ -350,7 +357,8 @@ make_pdf_randwind (tau)
   double xtau;
   double log10 ();
 
-// Initalize jumps the first time routine is called
+/* Initalize jumps the first time routine is called */
+
   if (init_make_pdf_randwind)
     {
       make_pdf_randwind_njumps = 0;
@@ -364,12 +372,11 @@ make_pdf_randwind (tau)
       for (jj = 0; jj < 100; jj++)
 	{
 	  xtau = pow (10., LOGTAUMIN + pdf_randwind_dlogtau * jj);
-	  tau_randwind = xtau;	// This is passed to vrandwind by an external variable
+	  tau_randwind = xtau;	/* This is passed to vrandwind by an external variable */
 	  if ((echeck =
 	       pdf_gen_from_func (&pdf_randwind_store[jj], &vrandwind, -1.0,
 				  1.0, make_pdf_randwind_njumps,
 				  make_pdf_randwind_jumps)) != 0)
-//Old ksl 04mar gave warning      &make_pdf_randwind_jumps)) != 0)
 	    {
 	      Error ("Randwind: return from pdf_gen_from_func %d\n", echeck);
 	    }
@@ -432,10 +439,10 @@ History:
 ****************************************************************/
 
 
-int 
-randwind_thermal_trapping(p, nnscat)
-  PhotPtr p;
-  int *nnscat;
+int
+randwind_thermal_trapping (p, nnscat)
+     PhotPtr p;
+     int *nnscat;
 {
   double tau_norm, p_norm;
   double tau, dvds, z, ztest;
@@ -446,52 +453,45 @@ randwind_thermal_trapping(p, nnscat)
   one = &wmain[p->grid];
 
   /* we want to normalise our rejection method by the escape 
-    probability along the vector of maximum velocity gradient.
-    First find the sobolev optical depth along that vector */
+     probability along the vector of maximum velocity gradient.
+     First find the sobolev optical depth along that vector */
   tau_norm = sobolev (one, p->x, -1.0, lin_ptr[p->nres], one->dvds_max);
 
   /* then turn into a probability. Note that we take account of
      this in trans_phot before calling extract */
-  p_norm = p_escape_from_tau(tau_norm);
+  p_norm = p_escape_from_tau (tau_norm);
 
   /* Throw error if p_norm is 0 */
   if (p_norm <= 0)
-    Error("randwind_thermal_trapping: p_norm is %8.4e in cell %i",
-           p_norm, one->nplasma);
+    Error ("randwind_thermal_trapping: p_norm is %8.4e in cell %i",
+	   p_norm, one->nplasma);
 
   ztest = 1.0;
   z = 0.0;
- 
+
   /* JM 1406 -- we increment nnscat here, and it is recorded in the photon
-    structure. This is done because we actuall have to multiply the photon weight 
-    by 1/mean escape probability- which is nnscat. this is done in trans_phot.c
-    before extract is called. 
-  */  
+     structure. This is done because we actuall have to multiply the photon weight 
+     by 1/mean escape probability- which is nnscat. this is done in trans_phot.c
+     before extract is called. 
+   */
   *nnscat = *nnscat - 1;
 
-   /* rejection method loop, which chooses direction and also calculated nnscat*/
-   while (ztest > z)
-  {
-    *nnscat = *nnscat + 1; //- JM - see above 
-    randvec (z_prime, 1.0);       /* Get a new direction for the photon (isotropic */
-    stuff_v (z_prime, p->lmn);    // copy to photon pointer
+  /* rejection method loop, which chooses direction and also calculated nnscat */
+  while (ztest > z)
+    {
+      *nnscat = *nnscat + 1;	//- JM - see above 
+      randvec (z_prime, 1.0);	/* Get a new direction for the photon (isotropic */
+      stuff_v (z_prime, p->lmn);	// copy to photon pointer
 
 
-    /* generate random number, normalised by p_norm with a 1.2 for 20% 
-       safety net (as dvds_max is worked out with a sample of directions) */
-    ztest = (rand () + 0.5) / MAXRAND * p_norm;   
-    dvds = dvwind_ds (p);
-    tau = sobolev (one, p->x, -1.0, lin_ptr[p->nres], dvds);
+      /* generate random number, normalised by p_norm with a 1.2 for 20% 
+         safety net (as dvds_max is worked out with a sample of directions) */
+      ztest = (rand () + 0.5) / MAXRAND * p_norm;
+      dvds = dvwind_ds (p);
+      tau = sobolev (one, p->x, -1.0, lin_ptr[p->nres], dvds);
 
-    z = p_escape_from_tau (tau);  /* probability to see if it escapes in that direction */
-  }
-  
-  /* one could copy to the photon pointer here, 
-     but for the moment this is done after calling this routine */
-  //p->nnscat = nnscat;
+      z = p_escape_from_tau (tau);	/* probability to see if it escapes in that direction */
+    }
 
   return (0);
 }
-
-
-
