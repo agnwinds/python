@@ -389,10 +389,9 @@ concentrations (xplasma, mode)
       /*Set some floor so future divisions are sensible */
       for (nion = 0; nion < nions; nion++)
 	{
-	  if (xplasma->density[nion] < DENSITY_MIN){
+	  if (xplasma->density[nion] < DENSITY_MIN)
 	    xplasma->density[nion] = DENSITY_MIN;
-	    // Debug("Below min %g %g\n",DENSITY_MIN,xplasma->density[nion]);
-	  }
+	  
 	}
 
       /* Now determine the new value of ne from the ion abundances */
@@ -857,9 +856,6 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
   double dmax;
   int nmax;
 
-  if (ele[nelem].z==26) {
-	  Debug("Working on Fe\n");
-  }
 
   if (t_r > MIN_TEMP)
     {
@@ -883,9 +879,6 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
 
   /* Initialization of fudges complete */
 
-  if (ele[nelem].z==26) {
-	  Log("Doing Fe\n");
-  }
   first = ele[nelem].firstion;	/*identify the position of the first and last ion in the array */
   last = first + ele[nelem].nions;	/*  So for H which has 2 ions, H1 and H2, first will generally
 					   be 0 and last will be 2 so the for loop below will just be done once for nion = 1 */
@@ -982,9 +975,6 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
       // This is the equation being calculated
       // sum+=newden[nion]=newden[nion-1]*fudge*(*ne)*density[nion]/density[nion-1]/xne;
 
-	if (ele[nelem].z==26){
-			Debug("test %8.2g %8.2g %8.2g %8.2g %8.2g %8.2g\n",t_e,newden[nion-1],density[nion],density[nion-1],q,fudge2);
-			}
   }
 
   a = nh * ele[nelem].abun / sum;
