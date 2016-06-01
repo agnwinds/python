@@ -914,8 +914,8 @@ History:
       {
 		nwind = plasmamain[n].nwind;
 		stuff_v (w[nwind].xcen, x);
-		old_density=plasmamain[n].rho;
-        	plasmamain[n].rho = model_rho (ndom, x) / geo.fill;
+		old_density = plasmamain[n].rho;
+    plasmamain[n].rho = model_rho (ndom, x) / zdom[ndom].fill;
 		plasmamain[n].t_r = plasmamain[n].t_e = hydro_temp (x);
 
 		for (nion=0;nion<nions;nion++) //Change the absolute number densities, fractions remain the same

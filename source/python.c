@@ -533,7 +533,7 @@ main (argc, argv)
 
       get_wind_params (geo.wind_domain_number);
 
-      if (geo.atmos_domain_number>=0) {
+      if (geo.atmos_domain_number >= 0) {
 	      get_wind_params(geo.atmos_domain_number);
       }
 

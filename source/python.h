@@ -264,6 +264,9 @@ double wind_midz_var[NDIM_MAX][NDIM_MAX];
   double corona_base_density, corona_scale_height;	/*the density at the base of the corona and the scale height */
   double corona_vel_frac;		/* the radial velocity of the corona in units of the keplerian velocity */
 
+  /* The filling factior for the wind or corona */
+  /* JM 1601 -- Moved here from geo, see #212 */
+  double fill;
 }
 domain_dummy, *DomainPtr;   // One structure for each domain
 
@@ -440,9 +443,6 @@ int nplasma, nmacro;	/*The total number of cells in the plasma and macro structu
 				   1-> Use adiabatic heating in calculating the cooling of the wind
 				 */
   int auger_ionization;		/*0 -> Do not include innershell photoionization /Auger effects; 1-> include them */
-
-/* The filling factior for the wind or corona */
-  double fill;
 
 /* Initial values for defining wind structure for a planar geometry.  These are currently only used by balance and this
    may not be the best approach generally and depending on where this ends up. Some consolidation is desirable */

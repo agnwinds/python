@@ -127,9 +127,9 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   one = &w[p->grid];		//Get a pointer to the cell where the photon bundle is located.
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
-  ndom=one->ndom;
+  ndom = one->ndom;
 
-//  kap_es = THOMPSON * xplasma->ne * geo.fill; NSH 1508 Moved to after the doppler shift is computed, for compton.
+//  kap_es = THOMPSON * xplasma->ne * zdom[ndom].fill; NSH 1508 Moved to after the doppler shift is computed, for compton.
   /* This is the electron scattering opacity per unit length. For the Macro Atom approach we need an 
      equivalent opacity per unit length due to each of the b-f continuua. Call it kap_bf. (SS) */
 
@@ -214,7 +214,7 @@ then the photon frequency will be less. */
   
   mean_freq=(freq_inner+freq_outer)/2.0;
      
- kap_es = klein_nishina(mean_freq) * xplasma->ne * geo.fill; /*Compute the angle averaged cross section */
+ kap_es = klein_nishina(mean_freq) * xplasma->ne * zdom[ndom].fill; /*Compute the angle averaged cross section */
      
      
   
@@ -293,7 +293,7 @@ method). If the macro atom method is not used just get kap_bf to 0 and move on).
   /* To this point kappa is for the part ot the cell that is filled with material so
    * we must reduce this to account for the filling factor 1409 - ksl */
 
-  //kap_cont*=geo.fill;
+  //kap_cont*=zdom[ndom].fill;
   //JM 1411 -- I've incorporated the filling factor directly into the kappa routines 
 
 
@@ -653,6 +653,7 @@ kappa_bf (xplasma, freq, macro_all)
   double density;
   int n;
   int nn;
+  int ndom;
 
 
   kap_bf_tot = 0;		//initalise to 0 (SS)
@@ -662,6 +663,9 @@ kappa_bf (xplasma, freq, macro_all)
 
   //if (freq > CR)
   //  {
+
+  /* JM 1606 -- need to get the domain number so we know the filling factor */ 
+  ndom = wmain[xplasma->nwind].ndom;
 
   for (nn = 0; nn < xplasma->kbf_nuse; nn++)	// Loop over photoionisation processes. 
     // This is mostly copied from old radiation.c (SS)
@@ -685,8 +689,8 @@ kappa_bf (xplasma, freq, macro_all)
 	    {
 
 	      /* kap_tot += x = (delete) */
-	      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
-	      kap_bf[nn] = x = sigma_phot(&phot_top[n], freq) * density * geo.fill;	//stimulated recombination? (SS)
+	      /* JM1411 -- added filling factor - density enhancement cancels with zdom[ndom].fill */
+	      kap_bf[nn] = x = sigma_phot(&phot_top[n], freq) * density * zdom[ndom].fill;	//stimulated recombination? (SS)
 	      kap_bf_tot += x;
 	    }
 	}
@@ -930,7 +934,7 @@ calls to two_level atom
       tau_x_dvds = PI_E2_OVER_M * d1 * lptr->f / (lptr->freq);
       tau = tau_x_dvds / dvds;
 
-      tau *= geo.fill;
+      tau *= zdom[ndom].fill;		// filling factor is on a domain basis
 
       if (tau > 1.e-3)
 	{
@@ -958,7 +962,7 @@ calls to two_level atom
   tau = tau_x_dvds / dvds;
 
   /* JM 1411 -- multiply the optical depth by the filling factor */
-  tau *= geo.fill;
+  tau *= zdom[ndom].fill;
 
   return (tau);
 }
