@@ -683,11 +683,17 @@ get_wind_params (ndom)
     }
 
   /* Get the filling factor of the wind */
-  // XXX  This may  not in the right place to set the filling factor.  The filling factor should
-  // XXX  be specified for each domain.
+  // XXX  This may  not in the right place to set the filling factor.  
 
   zdom[ndom].fill = 1.;
-  rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
+
+  /* JM 1606 -- the filling factor is now specified on a domain by domain basis. See #212
+     deferring allowing any domain to be allowed a filling factor until we know what we 
+     are doing with inputs for multiple domains */
+  if (ndom == geo.wind_domain_number)
+    rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
+  else if (ndom == geo.atmos_domain_number)
+    rddoub ("atmos.filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
 
   /* Next lines are to assure that we have the largest possible value of the 
    * sphere surrounding the system
