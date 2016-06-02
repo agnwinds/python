@@ -185,22 +185,21 @@ nebular_concentrations (xplasma, mode)
       m = variable_temperature (xplasma, mode);
     }
 
-//NSH 1411 - two new modes for matrix ionization schemes
+  //NSH 1411 - two new modes for matrix ionization schemes
   else if (mode == NEBULARMODE_MATRIX_BB)
-	{
-	m=matrix_ion_populations(xplasma,mode);
-	}
+	  {
+	    m = matrix_ion_populations(xplasma,mode);
+	  }
   else if(mode == NEBULARMODE_MATRIX_SPECTRALMODEL)
-	{
-	m=matrix_ion_populations(xplasma,mode);
-	}
+	  {
+	    m = matrix_ion_populations(xplasma,mode);
+	  }
 
   else
     {
-// If reached this point the program does not understand what is desired.
+      // If reached this point the program does not understand what is desired.
       Error ("nebular_concentrations: Unknown mode %d\n", mode);
       exit (0);
-
     }
 
 
@@ -456,8 +455,9 @@ concentrations (xplasma, mode)
    98may        ksl     Abstracted from concentrations
    01jul	ksl	Added partition functions more properly
    080808	ksl	Modified so that calls parallel those of other 
-   			functions, that is so that this uses
-			the plasma array
+   			      functions, that is so that this uses
+			        the plasma array
+   1606   JM/ksl   This now works outwards from the most abundant ion. See #127
 
 
 **************************************************************/
@@ -478,7 +478,7 @@ saha (xplasma, ne, t)
   double big;
 
   double bdiff;
-  int nhigh,nfirst,nlast;
+  int nhigh, nfirst, nlast;
 
   density = xplasma->density;
   partition = xplasma->partition;
@@ -501,19 +501,14 @@ saha (xplasma, ne, t)
 	  exit (0);
 	}
 
-/*    These lines were put in to make sim work properly, ideally there should be a switch so 
-      if we are doing things the old way, we keep the old numbers. But, saha doesnt know the mode....
-      sum = density[first] = 1e-250;
-      big = pow (10., 250. / (last - first));
-      big=big*1e6;   */
 
-/* locate the dominate ion and the prominent ions.  This is the ion where b is closest to but just greater
- * than 1 */
+     /* locate the dominate ion and the prominent ions.  This is the ion where b is 
+        closest to but just greater than 1. See #127 */
 
-      bdiff=1e100;
-      nfirst=first;
-      nlast=last;
-      nhigh=0;
+      bdiff = 1e100;
+      nfirst = first;
+      nlast = last;
+      nhigh = 0;
       sum = density[first] = 0.0;
 
  
@@ -524,39 +519,38 @@ saha (xplasma, ne, t)
             {
 	      b = xsaha * partition[nion]
 	          * exp (-ion[nion - 1].ip / (BOLTZMANN * t)) / (ne *
-							   partition[nion -
-								     1]);
+							   partition[nion - 1]);
 
-	      if ((b>1) && (fabs(b-1.)<bdiff)){
-		      nhigh=nion;
-	      }
-	      if (b>1e10){
-		      nfirst=nion;
-	      }
-	      if (b<1e-10){
-		      nlast=nion;
-	      }
+        /* b should be around 1, but also > 1 */
+	      if ( (b > 1) && (fabs(b - 1.) < bdiff) )
+		      nhigh = nion;
 
-	      density[nion]=0;
+	      if (b > 1e10)
+		      nfirst = nion;
 
+	      if (b < 1e-10)
+		      nlast = nion;
+
+	      density[nion] = 0;
+
+	          }
 	}
-	}
 
-/* end of the identification of the highest ionization state.  At this point
- * all of the dnesities are 0 and we know what should be most abundant ion */
-
-
-      sum=density[nhigh]=1.;  /* Set the abundance of the most common ion to 1 */
+  /* end of the identification of the highest ionization state.  At this point
+   * all of the dnesities are 0 and we know what should be most abundant ion */
 
 
+      sum = density[nhigh] = 1.;  /* Set the abundance of the most common ion to 1 */
 
+
+      /* start at the highest density ion and work upwards first */
       for (nion = nhigh + 1; nion < last; nion++)
 	{ 
 
-	  /* JM 1309 -- this next if statement is to ensure that saha densities are only calculated if the 
-             ion in question is not a macro ion. Otherwise, this will affect the escape 
-             probabilities that are calculated in macro_pops. The exception to this is prior
-             to the first ionization cycle when we need to populate saha densities as a first guess */
+	     /* JM 1309 -- this next if statement is to ensure that saha densities are only calculated if the 
+       ion in question is not a macro ion. Otherwise, this will affect the escape 
+       probabilities that are calculated in macro_pops. The exception to this is prior
+       to the first ionization cycle when we need to populate saha densities as a first guess */
 
           if ((ion[nion].macro_info == 0) || (geo.macro_ioniz_mode == 0))
             {
@@ -579,14 +573,12 @@ saha (xplasma, ne, t)
             }
 	}
 
-      // Now do the ions that are below the hightest velocity 1
+      /* Now do the ions that are below the highest density ion */
       for (nion = nhigh; nion > first; nion--)
 	{ 
 
-	  /* JM 1309 -- this next if statement is to ensure that saha densities are only calculated if the 
-             ion in question is not a macro ion. Otherwise, this will affect the escape 
-             probabilities that are calculated in macro_pops. The exception to this is prior
-             to the first ionization cycle when we need to populate saha densities as a first guess */
+	    /* JM 1309 -- this next if statement is to ensure that saha densities are only calculated if the 
+         ion in question is not a macro ion. */
 
           if ((ion[nion].macro_info == 0) || (geo.macro_ioniz_mode == 0))
             {
@@ -609,8 +601,8 @@ saha (xplasma, ne, t)
             }
 	}
 
-      // End of calculating the relative abundances
-
+      /* End of calculating the relative abundances 
+         now turn them into ion densities by using the abundance relative to H */
 
       a = nh * ele[nelem].abun / sum;
 
@@ -618,9 +610,7 @@ saha (xplasma, ne, t)
 	{
 
           /* JM 1309 -- this next if statement is to ensure that saha densities are only calculated if the 
-             ion in question is not a macro ion. Otherwise, this will affect the escape 
-             probabilities that are calculated in macro_pops. The exception to this is prior
-             to the first ionization cycle when we need to populate saha densities as a first guess */
+             ion in question is not a macro ion. */
 
           if ((ion[nion].macro_info == 0) || (geo.macro_ioniz_mode == 0))
             {
@@ -630,11 +620,7 @@ saha (xplasma, ne, t)
 	        Error ("saha:sane_check failed for density of ion %i\n", nion);
             }    
 	}
-
-      if (ele[nelem].z==26){
-	      Log("Saha - Fe\n");
-      }
-    }
+    }  // end of loop over elements
 
 
   return (0);
