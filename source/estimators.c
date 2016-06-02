@@ -48,7 +48,7 @@ History:
 			one is already assigned here, and so I did not switch everything
 			but it may be that this should be done
 ************************************************************/
-
+      
 int
 bf_estimators_increment (one, p, ds)
      WindPtr one;
