@@ -117,6 +117,8 @@ define_wind ()
       n += zdom[ndom].ndim * zdom[ndom].mdim;
       zdom[ndom].nstop = n;
       //PLACEHOLDER  we should not really need to define NDIM and MDIM here, we may need NDIM2
+      /* NDIM2 here is the total dimensions of the grid, summed over all domains
+         and is used to allocate the wind pointer */
       geo.ndim2 = NDIM2 += zdom[ndom].ndim * zdom[ndom].mdim;
     }
 
@@ -326,7 +328,7 @@ define_wind ()
       calloc_estimators (NPLASMA);
     }
 
-  /* JM PLACEHOLDER -- has the density been set up correctly */
+  /* Save the wind file as "test_plasma" */
   Log ("Saving test wind file NPLASMA %i\n", NPLASMA);
   wind_save ("test_plasma.wind_save");
 
@@ -341,8 +343,8 @@ be optional which variables beyond here are moved to structures othere than Wind
       nwind = plasmamain[n].nwind;
       ndom = wmain[nwind].ndom;
       stuff_v (w[nwind].xcen, x);
+      
       /* 140905 - ksl - Next two lines allow for clumping */
-      /* JM PLACEHOLDER need to make model_rho have domain number */
       plasmamain[n].rho = model_rho (ndom, x) / geo.fill;
       plasmamain[n].vol = w[nwind].vol * geo.fill;	// Copy volumes
 

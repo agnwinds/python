@@ -894,7 +894,7 @@ History:
 		w = wmain;
 		zdom[ndom].wind_type = 3; //Temporarily set the wind type to hydro, so we can use the normal routines
 		
-    /* JM XXX PLACEHOLDER -- have we even set all these variables by this point? */
+    /* note that we will have passed the wind domain number as default */
     nstart = zdom[ndom].nstart;
     nstop = zdom[ndom].nstop;
     ndim2 = zdom[ndom].ndim2;
