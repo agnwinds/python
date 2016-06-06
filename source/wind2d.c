@@ -1236,5 +1236,100 @@ check_corners_inwind (n)
 }
 
 
+/***********************************************************
+                   University of Southampton
 
+Synopsis:
+  check_grid() loops over the entire wind points and checks quantities
+  like velocity gradients and optical depths across cells for large changes.
+  If there are large changes in cells, it tells the user how many cells and
+  suggests that the grid may need to be modified.
+
+Arguments: None   
+
+Returns: 0 for success
+ 
+Description:  
+
+Notes:
+  Must be called after define wind so NPLASMA and densities are set up.
+
+History:
+  1606 JM Coded
+
+**************************************************************/
+
+int check_grid()
+{
+  int ndom, n;
+  double l_sob, vth, lambda_t, nh; 
+  double delta_r, delta_x, delta_z, delta_vz, delta_vx;
+  double v1[3], v2[3];
+  WindPtr one;
+  PlasmaPtr xplasma;
+  int n_dv, n_tau;
+
+  n_dv = n_tau = 0;
+
+  for (n = 0; n < NPLASMA; n++)
+    { 
+      /* get the relevant pointers for this cell */
+      xplasma = &plasmamain[n];
+      one = &wmain[xplasma->nplasma]; 
+      ndom = one->ndom;
+
+      /* Hydrogen density, ne should be roughly this */
+      nh = xplasma->rho * rho2nh;
+
+      /* thermal speed */
+      vth = sqrt(1.5 * BOLTZMANN * xplasma->t_e / MPROT);
+
+      /* sobolev length -- this could be used for a check but isn't yet */
+      l_sob = vth / one->dvds_ave;
+
+      /* get approximate cell extents */ 
+      delta_z = 2.0 * (one->xcen[2] - one->x[2]);
+      delta_x = 2.0 * (one->xcen[0] - one->x[0]);
+
+      delta_r = sqrt(delta_x*delta_x + delta_z*delta_z);
+
+      /* Thomson mean free path 1/sigma*nh */
+      lambda_t = 1.0 / THOMPSON * nh;
+
+      /* get the velocity at cell corner and cell edge in x and z */
+      model_velocity (ndom, one->x, v1);
+      model_velocity (ndom, one->xcen, v2);
+
+      delta_vx = fabs( v1[0] - v2[0]);
+      delta_vz = fabs( v1[1] - v2[1]);
+
+      /* if we have errors then increment the error counters */
+      if ( delta_r / lambda_t > 1)
+      {
+        n_tau++;
+        //Error("check_grid: optical depth may be high in cell %i domain %i\n",
+        //       n, ndom);
+      }
+
+      if (delta_vx > 1e8 || delta_vz > 1e8)
+      {
+        n_dv++;
+        //Error("check_grid: velocity changes by >1,000 km/s across cell %i domain %i\n",
+        //       n, ndom);
+      }
+
+    }
+
+  /* report problems to user in a summary error message */
+  if (n_dv > 0)
+    Error("check_grid: velocity changes by >1,000 km/s in %i cells\n", n_dv);
+
+  if (n_tau > 0)
+    Error("check_grid: optical depth may be high in %i\n", n_tau);
+
+  if (n_dv > 0 || n_tau > 0)
+    Error("check_grid: some cells have large changes. Consider modifying zlog_scale or grid dims\n");
+
+  return (0);
+}
 
