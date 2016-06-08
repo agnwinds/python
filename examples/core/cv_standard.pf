@@ -39,7 +39,7 @@ sv.mdot_r_exponent   0
 sv.v_infinity(in_units_of_vescape   3
 sv.acceleration_length(cm)   7e10
 sv.acceleration_exponent   1.5
-wind.filling_factor(1=smooth,<1=clumpted)		1
+filling_factor(1=smooth,<1=clumpted)		1
 Rad_type_for_star()_in_final_spectrum   0
 Rad_type_for_disk(0=bb,1=models,2=uniform)_in_final_spectrum   0
 spectrum_wavemin   800

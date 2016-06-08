@@ -33,7 +33,7 @@ shell.wind.radmin(cm)                       1e11
 shell.wind_v_at_rmin(cm)                    1.00000
 shell.wind.v_at_rmax(cm)                    1.000010
 shell.wind.acceleration_exponent                   1
-wind.filling_factor(1=smooth,<1=clumped) (1)       1
+filling_factor(1=smooth,<1=clumped) (1)           1
 spec.type(flambda(1),fnu(2),basic(other)                    2
 reverb.type                                 0
 Use.standard.care.factors(1=yes)                    1

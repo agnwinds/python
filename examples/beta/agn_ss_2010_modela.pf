@@ -40,7 +40,7 @@ kn.acceleration_exponent                        1.0
 kn.v_zero(multiple_of_sound_speed_at_base)      0.0
 kn.rmin											100
 kn.rmax											150
-wind.filling_factor(1=smooth,<1=clumped)		1
+filling_factor(1=smooth,<1=clumped)		1
 Rad_type_for_disk(0=bb,1=models,2=uniform)_in_final_spectrum                    0
 Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table)_in_final_spectrum                   3
 Rad_type_for_star(0=bb,1=models)_to_make_wind                    				  0
