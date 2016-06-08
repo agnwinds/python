@@ -564,25 +564,23 @@ be optional which variables beyond here are moved to structures othere than Wind
  	where_in_grid locates the 1-d grid position of the photon. 
 
  Arguments:		
- 	ndom		The domain number for the searhc
-	double x[];     The postion
+ 	ndom		The domain number for the search
+	double x[];     The position
  Returns:
- 	where_in_grid normally  returns the cell number associated with
+ 	where_in_grid normally  returns element in wmain  associated with
  		a position.  If the photon is in the grid this will 
-		be a positive integer < NDIM*MDIM.
+		be a positive integer.
  	photon is inside the grid        -1
 	photon is outside the grid       -2
  Description:	
 	
 		
  Notes:
-	Where_in grid does not tell you whether the photon is in the wind or not. 
+	Where_in grid does not tell you whether the photon is in the wind!. 
 
 	What one means by inside or outside the grid may well be different
-	for different coordinate systems.
+	for different coordinate systems..
 
-	ksl--Not entirely clear why I don't make wig_x a vector.  Programming
-	is not elegant at all.
 
  History:
  	97jan	ksl	Coding on python began.
@@ -605,17 +603,12 @@ where_in_grid (ndom, x)
      int ndom;
      double x[];
 {
-//  int n, nuse;
   int n;
   double fx, fz;
 
-//  nuse = -1;                  // initialise nuse to a "not found" value
 
   if (wig_x != x[0] || wig_y != x[1] || wig_z != x[2])	// Calculate if new position
     {
-
-//      for (ndom = geo.ndomain - 1; ndom > -1; ndom--)
-//      {
 
       if (zdom[ndom].coord_type == CYLIND)
 	{
@@ -640,10 +633,6 @@ where_in_grid (ndom, x)
 	  exit (0);
 	}
 
-//        /* only store if you haven't already found a grid cell */
-//        if (nuse < 0)
-//          nuse = n;
-//      }
 
       /* Store old positions to short-circuit calculation if asked for same position more
          than once */
@@ -738,12 +727,7 @@ vwind_xyz (ndom, p, v)
       Error ("vwind_xyz: Received invalid domain  %d\n", ndom);
     }
 
-
-
-
   coord_fraction (ndom, 0, p->x, nnn, frac, &nelem);
-
-
 
   for (i = 0; i < 3; i++)
     {
@@ -766,7 +750,6 @@ vwind_xyz (ndom, p, v)
     }
   else if (p->x[2] < 0)		// For 2d coord syatems, velocity is reversed if the photon is in the lower hemisphere.
     vv[2] *= -1;
-
 
   if (rho == 0)
     {				// Then we will not be able to project from a cylindrical ot a cartesian system
@@ -1254,5 +1237,100 @@ check_corners_inwind (n)
 }
 
 
+/***********************************************************
+                   University of Southampton
 
+Synopsis:
+  check_grid() loops over the entire wind points and checks quantities
+  like velocity gradients and optical depths across cells for large changes.
+  If there are large changes in cells, it tells the user how many cells and
+  suggests that the grid may need to be modified.
+
+Arguments: None   
+
+Returns: 0 for success
+ 
+Description:  
+
+Notes:
+  Must be called after define wind so NPLASMA and densities are set up.
+
+History:
+  1606 JM Coded
+
+**************************************************************/
+
+int check_grid()
+{
+  int ndom, n;
+  double l_sob, vth, lambda_t, nh; 
+  double delta_r, delta_x, delta_z, delta_vz, delta_vx;
+  double v1[3], v2[3];
+  WindPtr one;
+  PlasmaPtr xplasma;
+  int n_dv, n_tau;
+
+  n_dv = n_tau = 0;
+
+  for (n = 0; n < NPLASMA; n++)
+    { 
+      /* get the relevant pointers for this cell */
+      xplasma = &plasmamain[n];
+      one = &wmain[xplasma->nplasma]; 
+      ndom = one->ndom;
+
+      /* Hydrogen density, ne should be roughly this */
+      nh = xplasma->rho * rho2nh;
+
+      /* thermal speed */
+      vth = sqrt(1.5 * BOLTZMANN * xplasma->t_e / MPROT);
+
+      /* sobolev length -- this could be used for a check but isn't yet */
+      l_sob = vth / one->dvds_ave;
+
+      /* get approximate cell extents */ 
+      delta_z = 2.0 * (one->xcen[2] - one->x[2]);
+      delta_x = 2.0 * (one->xcen[0] - one->x[0]);
+
+      delta_r = sqrt(delta_x*delta_x + delta_z*delta_z);
+
+      /* Thomson mean free path 1/sigma*nh */
+      lambda_t = 1.0 / THOMPSON * nh;
+
+      /* get the velocity at cell corner and cell edge in x and z */
+      model_velocity (ndom, one->x, v1);
+      model_velocity (ndom, one->xcen, v2);
+
+      delta_vx = fabs( v1[0] - v2[0]);
+      delta_vz = fabs( v1[1] - v2[1]);
+
+      /* if we have errors then increment the error counters */
+      if ( delta_r / lambda_t > 1)
+      {
+        n_tau++;
+        //Error("check_grid: optical depth may be high in cell %i domain %i\n",
+        //       n, ndom);
+      }
+
+      if (delta_vx > 1e8 || delta_vz > 1e8)
+      {
+        n_dv++;
+        //Error("check_grid: velocity changes by >1,000 km/s across cell %i domain %i\n",
+        //       n, ndom);
+      }
+
+    }
+
+  /* report problems to user in a summary error message */
+  if (n_dv > 0)
+    Error("check_grid: velocity changes by >1,000 km/s in %i cells\n", n_dv);
+
+  if (n_tau > 0)
+    Error("check_grid: optical depth may be high in %i\n", n_tau);
+
+  if (n_dv > 0 || n_tau > 0)
+    Error("check_grid: some cells have large changes. Consider modifying zlog_scale or grid dims\n");
+
+  return (0);
+}
 

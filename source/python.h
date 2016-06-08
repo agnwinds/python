@@ -198,9 +198,9 @@ typedef struct domain
 	int wind_type;
 	int ndim, mdim, ndim2;
 	int nstart,nstop;  //the beginning and end (-1) location in wmain of this component
-  enum coord_type_enum coord_type;
-  int log_linear;		/*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */
-  double xlog_scale, zlog_scale;	/* Scale factors for setting up a logarithmic grid, the [1,1] cell
+	enum coord_type_enum coord_type;
+	int log_linear;		/*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */
+	double xlog_scale, zlog_scale;	/* Scale factors for setting up a logarithmic grid, the [1,1] cell
 					   will be located at xlog_scale,zlog_scale */
 
 	/* The next few structures define the boundaries of an emission region */

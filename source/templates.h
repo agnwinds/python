@@ -58,12 +58,14 @@ int mdot_wind(WindPtr w, double z, double rmax);
 int get_random_location(int n, double x[]);
 int zero_scatters(void);
 int check_corners_inwind(int n);
+int check_grid(void);
 /* wind.c */
 int where_in_wind(double x[], int *ndomain);
 int wind_check(WindPtr www, int n);
 double model_velocity(int ndom, double x[], double v[]);
 int model_vgrad(int ndom, double x[], double v_grad[][3]);
 double model_rho(int ndom, double x[]);
+int check_grid(void);
 /* vvector.c */
 double dot(double a[], double b[]);
 double length(double a[]);
@@ -530,6 +532,9 @@ double emittance_brem(double freqmin, double freqmax, double lum, double t);
 double integ_brem(double freq);
 double brem_d(double alpha);
 double get_rand_brem(double freqmin, double freqmax);
+/* search_light.c */
+int search_light_init(void);
+int photo_gen_search_light(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

@@ -259,15 +259,15 @@ get_grid_params (ndom)
 {
   int input_int;
 
-  // XXX - If we keep this error, then we need to assure that geo.ndomain is incremented
-  // before this statement
 
   if (ndom >= geo.ndomain)
     Error ("Trying to get grid params for a non-existent domain!\n");
 
   input_int = 1;
 
-  /* ksl - The if statement seems superflous.  Why are we entering this routine if we are continuing and earlier calculation? */
+  /* ksl - The if statement seems superflous.  Why are we entering this routine if 
+   * we are continuing and earlier calculation? */
+
   if (geo.run_type != SYSTEM_TYPE_PREVIOUS)
     {
       /* Define the coordinate system for the grid and allocate memory for the wind structure */
@@ -309,6 +309,9 @@ get_grid_params (ndom)
 	zdom[ndom].mdim = 1;
 
     }
+  else {
+	  Error("get_grid_parameters: Houston! Why are we reading the coordinate system if run type is SYSTEM_TYPE_PREVIOUS\n");
+  }
 
 /* 130405 ksl - Check that NDIM_MAX is greater than NDIM and MDIM.  */
 
@@ -628,8 +631,6 @@ get_wind_params (ndom)
       geo.rmax = zdom[ndom].rmax;
     }
   geo.rmax_sq = geo.rmax * geo.rmax;
-  Log ("XXXX  size  %e  %e\n", geo.rmax, geo.rmax_sq);
-
 
 
   /* Now get parameters that are specific to a given wind model
@@ -677,7 +678,6 @@ get_wind_params (ndom)
     }
   else if (zdom[ndom].wind_type != 2)
     {
-      /* XXX this is part of the new problem with a previous wind model */
       Error ("python: Unknown wind type %d\n", zdom[ndom].wind_type);
       exit (0);
     }
@@ -688,12 +688,11 @@ get_wind_params (ndom)
   zdom[ndom].fill = 1.;
 
   /* JM 1606 -- the filling factor is now specified on a domain by domain basis. See #212
-     deferring allowing any domain to be allowed a filling factor until we know what we 
-     are doing with inputs for multiple domains */
-  if (ndom == geo.wind_domain_number)
-    rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
-  else if (ndom == geo.atmos_domain_number)
-    rddoub ("atmos.filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
+     XXX allows any domain to be allowed a filling factor but this should be modified when
+     we know what we are doing with inputs for multiple domains. Could create confusion */
+
+  rddoub ("filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
+
 
   /* Next lines are to assure that we have the largest possible value of the 
    * sphere surrounding the system
@@ -704,9 +703,6 @@ get_wind_params (ndom)
       geo.rmax = zdom[ndom].rmax;
     }
   geo.rmax_sq = geo.rmax * geo.rmax;
-  Log ("XXXX  size  %e  %e\n", geo.rmax, geo.rmax_sq);
-
-
 
   return (0);
 }
@@ -809,9 +805,6 @@ History:
 double
 get_disk_params ()
 {
-  // XXX Commenting lines out instead of fixing a problem is not good practice
-//        if (geo.disk_radiation) /*NSH 130906 - Commented out this if loop. It was causing problems with restart - bug #44
-//          {
   geo.disk_mdot /= (MSOL / YR);	// Convert to msol/yr to simplify input
   rddoub ("disk.mdot(msol/yr)", &geo.disk_mdot);
   geo.disk_mdot *= (MSOL / YR);
@@ -823,14 +816,6 @@ get_disk_params ()
     {
       rdstr ("T_profile_file", files.tprofile);
     }
-//          }
-//        else
-//          {
-//            geo.disk_mdot = 0;
-//            disk_illum = 0;
-//          }
-
-
 
   /* Set a default for diskrad for an AGN */
   if (geo.system_type == SYSTEM_TYPE_AGN)
@@ -852,7 +837,7 @@ get_disk_params ()
     }
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
-    {				/* Get the additional variables need to describe a vertically extended disk */
+    {		/* Get the additional variables need to describe a vertically extended disk */
       rddoub ("disk.z0(fractional.height.at.diskrad)", &geo.disk_z0);
       rddoub ("disk.z1(powerlaw.index)", &geo.disk_z1);
     }

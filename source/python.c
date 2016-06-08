@@ -711,6 +711,7 @@ main (argc, argv)
     cpar ("python.pf");
 
 
+
   /* At this point, all inputs have been obtained at this point and the inputs have been copied to "mod.pf" or "python.pf"
    * If we have used, the -i flag, we quit; otherwise we continue on to run the model */
 
@@ -780,6 +781,9 @@ main (argc, argv)
   	   the argument is ndom, which I've set to geo.wind_domain_number as a placeholder. */
 	hydro_restart(geo.wind_domain_number);
   }
+
+  /* this routine checks, somewhat crudely, if the grid is well enough resolved */
+  check_grid();
 
   w = wmain;
 

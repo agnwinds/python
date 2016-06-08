@@ -57,7 +57,6 @@ get_shell_wind_params (ndom)
   double factor;
   int i;
 
-  // XXX PLACEHOLDER -- I am not sure the shell wind works yet with domains
   Log ("Creating wind with a single shell for testing purposes\n");
 
 
