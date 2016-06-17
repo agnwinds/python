@@ -16,8 +16,8 @@
 
 char	delay_dump_file[LINELENGTH];
 int		delay_dump_bank_size = 65535, delay_dump_bank_curr = 0;
+int*	delay_dump_spec;
 PhotPtr	delay_dump_bank;
-int     *delay_dump_bank_ex;
 
 /********************************************************//*
  * @name 	delay_to_observer
@@ -69,7 +69,6 @@ delay_dump_prep(char filename[], int restart_stat, int i_rank)
 {
 	FILE *fopen(), *fptr;
 	char string[LINELENGTH], c_file[LINELENGTH], c_rank[LINELENGTH];
-	int	i;
 
 	geo.fraction_converged=0.0;
 	geo.reverb_fraction_converged = 0.85;
@@ -86,9 +85,7 @@ delay_dump_prep(char filename[], int restart_stat, int i_rank)
 
 	//Allocate and zero dump files and set extract status
 	delay_dump_bank = (PhotPtr) calloc(sizeof(p_dummy), delay_dump_bank_size);
-	delay_dump_bank_ex = (int *)calloc(sizeof(int), delay_dump_bank_size);
-	for (i = 0; i < delay_dump_bank_size; i++)
-		delay_dump_bank_ex[i] = 0;
+	delay_dump_spec = (int*) calloc(sizeof(int), delay_dump_bank_size);
 
 	if (restart_stat == 1) 
 	{	//Check whether the output file already has a header
@@ -113,9 +110,7 @@ delay_dump_prep(char filename[], int restart_stat, int i_rank)
 		fprintf(fptr, "# Python Version %s\n", VERSION);
 		get_time(string);
 		fprintf(fptr, "# Date	%s\n#  \n", string);
-		fprintf(fptr, "# \n# Freq      Wavelength  Weight   "
-			" Last X     Last Y     Last Z    "
-		    " Scatters   RScatter   Delay      Extracted  Spectrum   Origin   Last_Res  \n");
+		fprintf(fptr, "# \n#    Freq.     Lambda     Weight      Last X      Last Y      Last Z   Scat. RScat       Delay  Spec. Orig.   Res.\n");
 	}
 	fclose(fptr);
 	return (0);
@@ -137,10 +132,10 @@ delay_dump_finish (void)
 {
 	if (delay_dump_bank_curr > 0) 
 	{
-		delay_dump(delay_dump_bank, delay_dump_bank_curr - 1, 1);
+		delay_dump(delay_dump_bank, delay_dump_bank_curr - 1);
 	}
 	free(delay_dump_bank);
-	free(delay_dump_bank_ex);
+	free(delay_dump_spec);
 	return (0);
 }
 
@@ -211,11 +206,11 @@ delay_dump_combine(int i_ranks)
  * 6/15	-	Written by SWM
 ***********************************************************/
 int
-delay_dump(PhotPtr p, int np, int iExtracted)
+delay_dump(PhotPtr p, int np)
 {
 	FILE *fopen(), *fptr;
 	int	 nphot, mscat, mtopbot, i, subzero;
-	double zangle, delay;
+	double delay;
 	subzero=0;
 
 	printf("delay_dump: Dumping %d photons\n",np);
@@ -230,46 +225,32 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 	}
 	for (nphot = 0; nphot < np; nphot++) 
 	{
-		if (iExtracted  || 
-			(p[nphot].istat == P_ESCAPE && 
-			(p[nphot].nscat > 0 || p[nphot].origin == PTYPE_WIND || p[nphot].origin == PTYPE_WIND_MATOM)))
+		/*
+		 * Complicated if statement to allow one to choose
+		 * whether to construct the spectrum from all photons
+		 * or just from photons which have scattered a
+		 * specific number of times.  01apr13--ksl-Modified
+		 * if statement to change behavior on negative
+		 * numbers to say that a negative number for mscat
+		 * implies that you accept any photon with |mscat| or
+		 * more scatters
+		 */
+		 i = delay_dump_spec[nphot];
+  		if (((mscat = xxspec[i].nscat) > 999 ||
+       		p[nphot].nscat == mscat ||
+       		(mscat < 0 && p[nphot].nscat >= (-mscat)))
+      		&& ((mtopbot = xxspec[i].top_bot) == 0
+	  		|| (mtopbot * p[nphot].x[2]) > 0))
 		{
-			zangle = fabs(p[nphot].lmn[2]);
-			/*
-			 * Complicated if statement to allow one to choose
-			 * whether to construct the spectrum from all photons
-			 * or just from photons which have scattered a
-			 * specific number of times.  01apr13--ksl-Modified
-			 * if statement to change behavior on negative
-			 * numbers to say that a negative number for mscat
-			 * implies that you accept any photon with |mscat| or
-			 * more scatters
-			 */
-			for (i = MSPEC; i < nspectra; i++) 
-			{
-		  		if (((mscat = xxspec[i].nscat) > 999 ||
-		       		p[nphot].nscat == mscat ||
-		       		(mscat < 0 && p[nphot].nscat >= (-mscat)))
-		      		&& ((mtopbot = xxspec[i].top_bot) == 0
-			  		|| (mtopbot * p[nphot].x[2]) > 0))
-				{
-					if (iExtracted ||
-						(xxspec[i].mmin < zangle && zangle < xxspec[i].mmax))
-					{
-						delay = (delay_to_observer(&p[nphot]) - geo.rmax) / C;
-						if(delay<0)subzero++;
+			delay = (delay_to_observer(&p[nphot]) - geo.rmax) / C;
+			if(delay<0)subzero++;
 
-						fprintf(fptr,
-							"%10.5g %10.5g %10.5g %+10.5g %+10.5g %+10.5g %3d     %3d     %10.5g %5d %5d %5d %10d %d\n",
-							p[nphot].freq, C * 1e8 / p[nphot].freq, p[nphot].w, 
-							p[nphot].x[0], p[nphot].x[1], p[nphot].x[2],
-							p[nphot].nscat, p[nphot].nrscat, delay,
-							(iExtracted ? delay_dump_bank_ex[nphot] : 0),
-							i - MSPEC, p[nphot].origin_orig, 
-							p[nphot].nres, p[nphot].np);
-					}
-				}
-			}
+			fprintf(fptr,
+					"%10.5g %10.5g %10.5g %+10.5g %+10.5g %+10.5g %5d %5d %10.5g %5d %5d %5d\n",
+						p[nphot].freq, C * 1e8 / p[nphot].freq, p[nphot].w, 
+						p[nphot].x[0], p[nphot].x[1], p[nphot].x[2],
+						p[nphot].nscat, p[nphot].nrscat, delay,
+						i - MSPEC, p[nphot].origin_orig, p[nphot].nres);
 		}
 	}
 
@@ -286,7 +267,7 @@ delay_dump(PhotPtr p, int np, int iExtracted)
  * @brief	Preps a single photon to be dumped
  *
  * @param [in] pp			Pointer to extracted photon
- * @param [in] iExtracted	Is p an extract photon
+ * @param [in] i_spec		Spectrum p extracted to
  * @return 					0
  *
  * Takes a photon and copies it to the staging arrays for 
@@ -296,17 +277,15 @@ delay_dump(PhotPtr p, int np, int iExtracted)
  * 6/15	-	Written by SWM
 ***********************************************************/
 int
-delay_dump_single(PhotPtr pp, int extract_phot)
+delay_dump_single(PhotPtr pp, int i_spec)
 {
 	stuff_phot(pp, &delay_dump_bank[delay_dump_bank_curr]); 		//Bank single photon in temp array
-		delay_dump_bank_ex[delay_dump_bank_curr] = extract_phot; 	//Record if it's extract photon
+	delay_dump_spec[delay_dump_bank_curr] = i_spec;					//Record photon spectrum too
+
 	if (delay_dump_bank_curr == delay_dump_bank_size - 1)			//If temp array is full
 	{
-		delay_dump(delay_dump_bank, delay_dump_bank_size, 1);
+		delay_dump(delay_dump_bank, delay_dump_bank_size);
 		delay_dump_bank_curr = 0;										//Dump to file, zero array position
-		int		i;
-		for (i = 0; i < delay_dump_bank_size; i++)
-			delay_dump_bank_ex[i] = 0;									//Zero extract status of single array
 	}
 	else
 	{

@@ -493,8 +493,8 @@ double delay_to_observer(PhotPtr pp);
 int delay_dump_prep(char filename[], int restart_stat, int i_rank);
 int delay_dump_finish(void);
 int delay_dump_combine(int i_ranks);
-int delay_dump(PhotPtr p, int np, int iExtracted);
-int delay_dump_single(PhotPtr pp, int extract_phot);
+int delay_dump(PhotPtr p, int np);
+int delay_dump_single(PhotPtr pp, int i_spec);
 /* paths.c */
 Wind_Paths_Ptr wind_paths_constructor(WindPtr wind);
 int reverb_init(WindPtr wind);
@@ -580,7 +580,6 @@ int get_los_dvds(WindPtr w, char rootname[], int ochoice);
 int ion_summary(WindPtr w, int element, int istate, int iswitch, char rootname[], int ochoice);
 int tau_ave_summary(WindPtr w, int element, int istate, double freq, char rootname[], int ochoice);
 int line_summary(WindPtr w, char rootname[], int ochoice);
-int level_summary(WindPtr w, char rootname[], int ochoice);
 int total_emission_summary(WindPtr w, char rootname[], int ochoice);
 int modify_te(WindPtr w, char rootname[], int ochoice);
 int partial_measure_summary(WindPtr w, int element, int istate, char rootname[], int ochoice);

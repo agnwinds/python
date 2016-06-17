@@ -607,10 +607,6 @@ int make_spectra(restart_stat)
       Log ("Completed spectrum cycle %3d :  The elapsed TIME was %f\n",
 	   geo.pcycle, timer ());
 
-      /* SWM0215: Delay dump photons from this cycle */
-      if (geo.reverb > REV_NONE)
-	     delay_dump (p, NPHOT, 0);	// SWM - Dump delay tracks from this iteration
-
       /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
 
       xsignal (files.root, "%-20s Finished %3d of %3d spectrum cycles \n",
