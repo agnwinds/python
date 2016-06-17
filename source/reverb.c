@@ -110,7 +110,7 @@ delay_dump_prep(char filename[], int restart_stat, int i_rank)
 		fprintf(fptr, "# Python Version %s\n", VERSION);
 		get_time(string);
 		fprintf(fptr, "# Date	%s\n#  \n", string);
-		fprintf(fptr, "# \n#    Freq.     Lambda     Weight      Last X      Last Y      Last Z   Scat. RScat       Delay  Spec. Orig.   Res.\n");
+		fprintf(fptr, "# \n#    Freq.     Lambda     Weight      Last X      Last Y      Last Z Scat. RScat      Delay Spec. Orig.  Res.\n");
 	}
 	fclose(fptr);
 	return (0);
