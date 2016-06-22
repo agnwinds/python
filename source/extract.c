@@ -236,6 +236,7 @@ History:
  	97sep28	ksl	Modified weightings of extracted photons to be those in Knigge's thesis for
 			Eddington approximation
 	02jan2	ksl	Adapted extract to use photon types
+	16jun22 NSH Added lines to produce a logarithmically binned spectrum
 
 **************************************************************/
 
@@ -252,12 +253,13 @@ extract_one (w, pp, itype, nspec)
   struct photon pstart;
   double weight_min;
   int icell;
-  int k;
+  int k,k1;
   double x[3];
   double tau;
   double zz;
   double dvds;
-  int ishell;
+  double lfreqmin,lfreqmax,ldfreq;
+    int ishell;
 
 
   weight_min = EPSILON * pp->w;
@@ -393,6 +395,24 @@ the same resonance again */
 	    k = 0;
 	  else if (k > NWAVE - 1)
 	    k = NWAVE - 1;
+	  
+	  
+	  lfreqmin = log10 (xxspec[nspec].freqmin);
+	  lfreqmax = log10 (xxspec[nspec].freqmax);
+	  ldfreq = (lfreqmax - lfreqmin) / NWAVE;
+	  
+	  
+	  
+    /* find out where we are in log space */
+      k1 = (log10 (pp->freq) - log10 (xxspec[nspec].freqmin)) / ldfreq;
+      if (k1 < 0)
+	{
+	  k1 = 0;
+	}
+      if (k1 > NWAVE-1)
+	{
+	  k1 = NWAVE-1;
+	}
 
 	  /* Increment the spectrum.  Note that the photon weight has not been diminished
 	   * by its passage through th wind, even though it may have encounterd a number
@@ -400,6 +420,8 @@ the same resonance again */
 	   */
 
 	  xxspec[nspec].f[k] += pp->w * exp (-(tau));	//OK increment the spectrum in question
+	  xxspec[nspec].lf[k1] += pp->w * exp (-(tau));  //And increment the log spectrum
+	  
 
 	  /* If this photon was a wind photon, then also increment the "reflected" spectrum */
 	  if ( pp->origin == PTYPE_WIND || pp->origin == PTYPE_WIND_MATOM || pp->nscat > 0) {

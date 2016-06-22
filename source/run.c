@@ -599,8 +599,12 @@ int make_spectra(restart_stat)
 	{
 #endif
 	  spectrum_summary (files.spec, "w", 0, nspectra - 1, geo.select_spectype, renorm, 0, 0);
+	  spectrum_summary (files.lspec, "w", 0, nspectra - 1, geo.select_spectype, renorm, 0, 1);
+	  
 	  /* Next line is of spectrum just of the wind*/
 	  spectrum_summary (files.spec_wind, "w", 0, nspectra - 1, geo.select_spectype, renorm, 0, 1);
+	  spectrum_summary (files.lspec_wind, "w", 0, nspectra - 1, geo.select_spectype, renorm, 1, 1);
+	  
 #ifdef MPI_ON
 	}
 #endif
