@@ -1443,10 +1443,10 @@ setup_created_files ()
   strcpy (basename, files.root);	//56d -- ksl --Added so filenames could be created by routines as necessary
 
   strcpy (files.wspec, files.root);  //generated photons
-  strcpy (files.lspec, files.root);  //generated photon in log space
+  strcpy (files.lwspec, files.root);  //generated photon in log space
   
   strcpy (files.wspec_wind, files.root);
-  strcpy (files.lspec_wind, files.root);
+  strcpy (files.lwspec_wind, files.root);
   
   strcpy (files.spec, files.root);  
   strcpy (files.lspec, files.root);  
@@ -1468,9 +1468,10 @@ setup_created_files ()
   strcat (files.disk, files.root);
 
   strcat (files.wspec, ".spec_tot");
-  strcat (files.lspec, ".log_spec_tot");
+  strcat (files.lwspec, ".log_spec_tot");
+  
   strcat (files.wspec_wind, ".spec_tot_wind");
-  strcat (files.lspec_wind, ".log_spec_tot_wind");
+  strcat (files.lwspec_wind, ".log_spec_tot_wind");
   
   
   strcat (files.spec, ".spec");
