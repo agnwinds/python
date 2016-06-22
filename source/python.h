@@ -1264,9 +1264,9 @@ struct filenames
   char diagfolder[LINELENGTH];  // diag folder
   char old_windsave[LINELENGTH];// old windsave name
   char input[LINELENGTH];       // input name if creating new pf file
-  char lspec[LINELENGTH];       // log_spec_tot file name
+  char lwspec[LINELENGTH];       // log_spec_tot file name  
   char wspec[LINELENGTH];       // spectot file name
-  char lspec_wind[LINELENGTH];  // log_spec_tot filename for wind photons
+  char lwspec_wind[LINELENGTH];  // log_spec_tot filename for wind photons
   char wspec_wind[LINELENGTH];  // spectot filename for wind photons
   char disk[LINELENGTH];        // disk diag file name
   char tprofile[LINELENGTH];    // non standard tprofile fname
@@ -1274,6 +1274,8 @@ struct filenames
   char windrad[LINELENGTH];     // wind rad file
   char spec[LINELENGTH];        // .spec file
   char spec_wind[LINELENGTH];   // .spec file for wind photons
+  char lspec[LINELENGTH];        // .spec file
+  char lspec_wind[LINELENGTH];   // .spec file for wind photons
 }
 files;
 
