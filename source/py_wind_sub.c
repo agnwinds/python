@@ -1525,8 +1525,8 @@ rdint ("Wind.array.element", &n);
        w[n].x[2], w[n].v[0], w[n].v[1], w[n].v[2]);
   Log ("r theta %12.6e %12.6e \n", w[n].rcen, w[n].thetacen/RADIAN);
 	   
-  Log ("nh %8.2e ne %8.2e t_r %8.2e t_e %8.2e w %8.2e vol %8.2e\n",
-       xplasma->rho * rho2nh, xplasma->ne, xplasma->t_r, xplasma->t_e,
+  Log ("rho %8.2e nh %8.2e ne %8.2e t_r %8.2e t_e %8.2e w %8.2e vol %8.2e\n",
+       xplasma->rho ,xplasma->rho * rho2nh, xplasma->ne, xplasma->t_r, xplasma->t_e,
        xplasma->w, w[n].vol);
 
   if (w[n].inwind < 0)
@@ -1565,7 +1565,7 @@ rdint ("Wind.array.element", &n);
   Log ("DR cooling        %8.2e is %8.2g of total cooling\n", xplasma->lum_dr_ioniz,
        xplasma->lum_dr_ioniz / (xplasma->lum_rad + xplasma->lum_adiabatic + xplasma->lum_comp_ioniz + xplasma->lum_dr_ioniz));
   Log ("Number of ionizing photons in cell nioniz %d\n", xplasma->nioniz);
-  Log ("Log Ionization parameter in this cell cell based %4.2f ferland %4.2f\n", log10 (xplasma->ip), log10 (xplasma->ferland_ip));	//70h NSH computed ionizaion parameter
+  Log ("Log Ionization parameter in this cell U %4.2f xi %4.2f\n", log10 (xplasma->ip), log10 (xplasma->xi));	//70h NSH computed ionizaion parameter
   Log ("ioniz %8.2e %8.2e %8.2e %8.2e %8.2e\n",
        xplasma->ioniz[0], xplasma->ioniz[1], xplasma->ioniz[2],
        xplasma->ioniz[3], xplasma->ioniz[4]);
