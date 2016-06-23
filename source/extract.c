@@ -427,6 +427,8 @@ the same resonance again */
 	  if ( pp->origin == PTYPE_WIND || pp->origin == PTYPE_WIND_MATOM || pp->nscat > 0) {
 
 	  	xxspec[nspec].f_wind[k] += pp->w * exp (-(tau));	//OK increment the spectrum in question
+	  	xxspec[nspec].lf_wind[k1] += pp->w * exp (-(tau));	//OK increment the spectrum in question
+
 	    }
 			    
 	

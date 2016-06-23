@@ -795,11 +795,11 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
 	      else if (select_spectype == 2)
 		{		/*fnu */
 		  x /= (dfreq * dd);
-		}
+		}		
         else if (select_spectype == 0)
-  	{		/*fnu */
-  	  x /= (dfreq);  //With log spectra implemented, we should divide by nu, so log and lin spectra agree
-  	}
+		{		/*generated spectrum*/
+			x /= (dfreq);  //With log spectra implemented, we should divide by nu, so log and lin spectra agree
+  		}
 	      fprintf (fptr, " %8.3g", x * renorm);
 	    }
 
@@ -836,10 +836,10 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
 		  x /= (dfreq * dd);
 		}
         else if (select_spectype == 0)  
-  	{		/*fnu */
-  	  x /= (dfreq); 
-  	}
-	      fprintf (fptr, " %8.3g", x * renorm);	/* this really shouldn't get called if we are outputting log data */
+  		{		/*generated spectrum*/
+  	  	  x /= (dfreq); 
+  		}
+	      fprintf (fptr, " %8.3g", x * renorm);
 	    }
 
 
