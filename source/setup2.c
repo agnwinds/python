@@ -453,6 +453,8 @@ History:
 	080519	ksl	60a - Added code to calculate the irradiation of the disk
 			in terms of t and w.  This should help to monitor the effect
 			of irradiation on the disk
+	160526	ksl	Modified output file in qdisk_save to be an
+			astropy table
 
 **************************************************************/
 
@@ -484,10 +486,10 @@ qdisk_save (diskfile, ztot)
 {
   FILE *qptr;
   int n;
-  double area, theat;
+  double area, theat,ttot;
   qptr = fopen (diskfile, "w");
   fprintf (qptr,
-	   "# r       zdisk     t_disk     heat      nhit nhit/nemit  t_heat    t_irrad  W_irrad\n");
+	   "r         zdisk     t_disk   heat       nhit nhit/nemit  t_heat    t_irrad  W_irrad  t_tot\n");
   for (n = 0; n < NRINGS; n++)
     {
       area =
@@ -506,12 +508,14 @@ qdisk_save (diskfile, ztot)
 			     qdisk.t_hit[n] * qdisk.t_hit[n]);
 	}
 
+      ttot=pow(qdisk.t[n],4)+pow(theat,4);
+      ttot=pow(ttot,0.25);
       fprintf (qptr,
-	       "%8.3e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e\n",
+	       "%8.3e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
 	       qdisk.r[n], zdisk (qdisk.r[n]), qdisk.t[n],
 	       qdisk.heat[n], qdisk.nhit[n],
 	       qdisk.heat[n] * NRINGS / ztot, theat, qdisk.t_hit[n],
-	       qdisk.w[n]);
+	       qdisk.w[n],ttot);
     }
 
   fclose (qptr);

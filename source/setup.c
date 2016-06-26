@@ -809,7 +809,7 @@ get_disk_params ()
   rddoub ("disk.mdot(msol/yr)", &geo.disk_mdot);
   geo.disk_mdot *= (MSOL / YR);
   rdint
-    ("Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=analytic)",
+    ("Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=extra.heating.from.star)",
      &geo.disk_illum);
   rdint ("Disk.temperature.profile(0=standard;1=readin)", &geo.disk_tprofile);
   if (geo.disk_tprofile == 1)

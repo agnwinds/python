@@ -611,7 +611,7 @@ walls (p, pold)
 	}
       // Check whether it hit the disk plane beyond the geo.diskrad**2
       vmove (pold->x, pold->lmn, s, xxx);
-      if (dot (xxx, xxx) < geo.diskrad_sq && geo.disk_illum != 1)
+      if (dot (xxx, xxx) < geo.diskrad_sq && geo.disk_illum != DISK_ILLUM_SCATTER)
 	{			/* The photon has hit the disk */
 	  stuff_phot (pold, p);	/* Move the photon to the point where it hits the disk */
 	  move_phot (p, s);

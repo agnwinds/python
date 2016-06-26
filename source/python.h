@@ -347,18 +347,24 @@ int nplasma, nmacro;	/*The total number of cells in the plasma and macro structu
 				   1 --> a standard disk in xy plane, 
 				   2 --> a vertically extended disk 
 				   Note that this definition is new to Python52 */
+
+#define DISK_ILLUM_ABSORB_AND_DESTROY  0  /* Disk simply absorbs the radiation and it is lost */
+#define DISK_ILLUM_SCATTER             1  /* Disk reradiates the radiation immediately via electron scattering
+					    */
+#define DISK_ILLUM_ABSORB_AND_HEAT     2  /* Correct disk temperature for illumination by photons 
+					     which hit the dsik.  Disk radiation is absorbed and changes 
+					     the temperature of the disk for future ionization cycles
+					     */
+#define DISK_ILLUM_HEATED_BY_STAR      3  /* Correct disk temperature for illumination by star */
+
   int disk_illum;		/*Treatment of effects of illumination on the disk. 
-				   0--> Disk simply absorbs the radiation and it is lost
-				   1--> Disk reradiates the radiation immediately via electron scattering
-				   2--> Disk radiation is absorbed and changes the temperature of the disk for
-				   future ionization cycles
-				   3--> Disk illumination is treated in terms of an analytic approximation
-				   04Aug ksl -- this parameter added for Python52
-				 */
+				  */
+
   int disk_atmosphere;           /* 0 --> no
 				    1 --> yes
 				 */
-  int disk_tprofile;
+  int disk_tprofile;		/* This is an variable used to specify a standard accretion disk (0) or
+				   one that has been read in and stored. */
   double disk_mdot;		/* mdot of  DISK */
   double diskrad, diskrad_sq;
   double disk_z0, disk_z1;	/* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 */

@@ -70,7 +70,7 @@ trans_phot (
   int n;
   struct photon pp, pextract;
   int nnscat;
-  int disk_illum;
+  int disk_illum;  /* this is a variable used to store geo.disk_illum during exxtract */
   int nerr;
   double p_norm, tau_norm;
 
@@ -165,10 +165,12 @@ trans_phot (
 
       if (iextract)
 	{
-	  // SS - for reflecting disk have to make sure disk photons are only extracted once!
-	  if (disk_illum == 1 && p[nphot].origin == PTYPE_DISK)
+	  // SS - for reflecting disk have to make sure disk photons are only extracted once.  Note we restore the
+	  // correct geo.disk_illum value as soon as the photons are extracted!
+
+	  if (disk_illum == DISK_ILLUM_SCATTER && p[nphot].origin == PTYPE_DISK)
 	    {
-	      geo.disk_illum = 0;
+	      geo.disk_illum = DISK_ILLUM_ABSORB_AND_DESTROY;
 	    }
 
 
@@ -220,10 +222,10 @@ trans_phot (
 	  extract (w, &pextract, pextract.origin);
 
 
-	  // SS if necessary put back the correcy disk illumination
-	  if (disk_illum == 1 && p[nphot].origin == PTYPE_DISK)
+	  // Restore the correct disk illumination
+	  if (disk_illum == DISK_ILLUM_SCATTER && p[nphot].origin == PTYPE_DISK)
 	    {
-	      geo.disk_illum = 1;
+	      geo.disk_illum = DISK_ILLUM_SCATTER;
 	    }
 	}
 
