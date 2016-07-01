@@ -177,7 +177,7 @@ WindPtr (w);
   ndo = my_nmax - my_nmin;
 #endif
 
-  /* Before we do anything let's record the average tr and te from the last cycel */
+  /* Before we do anything let's record the average tr and te from the last cycle */
   /* JM 1409 -- Added for issue #110 to ensure correct reporting in parallel */
   for (n = 0; n < NPLASMA; n++)
     {
@@ -1063,7 +1063,7 @@ WindPtr (w);
 	}
     }
 
-  /* Finished updatating region outside of wind */
+  /* Finished updating region outside of wind */
 
   num_updates++;
   strcpy (string, "");
