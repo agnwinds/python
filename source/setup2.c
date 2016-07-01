@@ -442,6 +442,9 @@ Description:
 		
 Notes:
 
+	The reason the qdisk is needed as well as disk structure is that whenever the
+	wavelength bands are changed the radii in the disk structure are recalibratied.
+	We want qdisk to have fixed boundaries when this happens.
 
 
 History:

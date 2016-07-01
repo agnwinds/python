@@ -556,7 +556,7 @@ struct xdisk
 }
 disk, qdisk;			/* disk defines zones in the disk which in a specified frequency band emit equal amounts
 				   of radiation. qdisk stores the amount of heating of the disk as a result of
-				   illumination by the star or wind */
+				   illumination by the star or wind. It's boundaries are fixed throughout a cycle */
 
 #define NBLMODEL 100
 
