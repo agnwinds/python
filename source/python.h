@@ -343,10 +343,7 @@ int nplasma, nmacro;	/*The total number of cells in the plasma and macro structu
 #define DISK_FLAT   1
 #define DISK_VERTICALLY_EXTENDED   2
 
-  int disk_type;		/*0 --> no disk, 
-				   1 --> a standard disk in xy plane, 
-				   2 --> a vertically extended disk 
-				   Note that this definition is new to Python52 */
+  int disk_type;		
 
 #define DISK_ILLUM_ABSORB_AND_DESTROY  0  /* Disk simply absorbs the radiation and it is lost */
 #define DISK_ILLUM_SCATTER             1  /* Disk reradiates the radiation immediately via electron scattering
