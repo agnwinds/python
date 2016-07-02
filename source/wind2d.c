@@ -148,7 +148,7 @@ define_wind ()
 
       Log ("Define wind coord_type %d for domain %d\n", zdom[ndom].coord_type, ndom);
 
-      if (zdom[ndom].wind_type == 9)	/* nsh: This is the mode where we want the wind and the grid carefully 
+      if (zdom[ndom].wind_type == SHELL)	/* nsh: This is the mode where we want the wind and the grid carefully 
 					   controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
 					 */
 	{
@@ -166,7 +166,7 @@ define_wind ()
 	}
       else if (zdom[ndom].coord_type == RTHETA)
 	{
-	  if (zdom[ndom].wind_type == 3)	/* 13jun -- nsh - 76 - This is a switch to allow one to use the 
+	  if (zdom[ndom].wind_type == HYDRO)	/* 13jun -- nsh - 76 - This is a switch to allow one to use the 
 						   actual zeus grid in the special case of a 'proga' wind in rtheta 
 						   coordinates
 						 */
@@ -225,7 +225,7 @@ define_wind ()
 	     the actual zeus grid in the special case of a 'proga' wind 
 	     in rtheta coordinates We dont need to work out if cells are 
 	     in the wind, they are known to be in the wind. */
-	  if (zdom[ndom].wind_type == 3)
+	  if (zdom[ndom].wind_type == HYDRO)
 	    {
 	      rtheta_hydro_volumes (ndom, w);
 	    }
@@ -378,7 +378,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 /* NSH 130530 Next few lines allow the use of the temperature which can be computed from Zeus models to be 
  * used as an initial guess for the wind temperature */
 
-      if (zdom[ndom].wind_type == 3)
+      if (zdom[ndom].wind_type == HYDRO)
 	{
 	  plasmamain[n].t_r = hydro_temp (x); //NSH 151126 - slight tidy up here - we now set t_e and t_r to hydro temp, t_e change is below//
 	}

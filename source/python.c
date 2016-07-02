@@ -432,7 +432,7 @@ main (argc, argv)
 	  }
 
 	
-	  if (zdom[ndomain].wind_type != 10)
+	  if (zdom[ndomain].wind_type != NONE)
 	    {
 	      strcat (zdom[ndomain].name, "Wind");
 	      geo.wind_domain_number = ndomain;
