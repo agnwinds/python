@@ -374,6 +374,8 @@ get_spectype (yesno, question, spectype)
   int get_models ();		// Note: Needed because get_models cannot be included in templates.h
   if (yesno)
     {
+      // XXX This is rather odd. Why are these steps needed? Why don't we fix the question here.  ksl
+
       // First convert the spectype to the way the questionis supposed to be answered
       if (*spectype == SPECTYPE_BB || *spectype == SPECTYPE_NONE)
 	stype = 0;
@@ -905,7 +907,7 @@ init_ionization ()
     {
       rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
     }
-  if (geo.ioniz_mode == 4 || geo.ioniz_mode == 5 || geo.ioniz_mode > 9)	/*NSH CLOUDY test - remove once done */
+  if (geo.ioniz_mode == IONMODE_LTE_SIM || geo.ioniz_mode == 5 || geo.ioniz_mode > 9)	/*NSH CLOUDY test - remove once done */
     {
       Log ("The allowed ionization modes are 0, 1, 2, 3, 6, 7\n");
       Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
