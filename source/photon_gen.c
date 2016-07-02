@@ -1172,7 +1172,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
       north[1] = 0;
       north[2] = 1;
 
-      if (geo.disk_type == 2)
+      if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
 	{
 	  if (r == 0)
 	    theta = 0;
