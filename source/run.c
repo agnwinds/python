@@ -645,18 +645,6 @@ int make_spectra(restart_stat)
       }
 #endif
 
-
-/* 57h - 07jul -- ksl -- Write out the freebound information */
-
-#ifdef MPI_ON
-  if (rank_global == 0)
-    {
-#endif
-      fb_save ("recomb.save");
-#ifdef MPI_ON
-    }
-#endif
-
   /* SWM0215: Dump the last photon path details to file */
   if (geo.reverb != REV_NONE)
     delay_dump_finish ();	// Each thread dumps to file

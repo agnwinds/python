@@ -148,7 +148,6 @@ lum_lines (one, nmin, nmax)
 		("lum_lines: foo %10.3g (%10.3g %10.3g %10.3g) %10.3g %10.3g %10.3g %10.3g %10.3g %10.3g %10.3g\n",
 		 foo1, d1, d2, dd, foo2, foo3, foo4, lin_ptr[n]->el,
 		 xplasma->t_r, t_e, xplasma->w);
-	      //mytrap ();  JM 1410 -- mytrap is deprecated
 	    }
 	  if (sane_check (x) != 0)
 	    {
@@ -612,7 +611,6 @@ scattering_fraction (line_ptr, xplasma)
 	  Error
 	    ("scattering fraction:sane_check sf %8.2e q %8.2e escape %8.2e w %8.2e\n",
 	     sf, q, escape, w);
-	  //mytrap ();  JM 1410 -- mytrap is deprecated
 	}
       return (sf);
     }

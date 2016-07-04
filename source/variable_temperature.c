@@ -291,7 +291,6 @@ variable_temperature (xplasma, mode)
 		  Error
 		    ("variable_temperature: ion %i has a negative density %e\n",
 		     nion, newden[nion]);
-		  mytrap ();
 		}
 	      if (sane_check (sum))
 		Error

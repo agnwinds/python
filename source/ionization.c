@@ -477,7 +477,6 @@ meaning in nebular concentrations.
     {
       Error ("ionization_on_the_spot: t_r exceptionally small %g\n",
 	     xplasma->t_r);
-      //mytrap ();  JM 1410 -- mytrap is deprecated
       exit (0);
     }
 
