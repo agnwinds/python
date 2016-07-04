@@ -756,11 +756,10 @@ cylvar_get_random_location (n, x)
   double fx, fz;
   double zz;
   double phi;
-  int ndom,mdim,ndim;
+  int ndom,mdim;
   int ndomain;
 
   ndom = wmain[n].ndom;
-  ndim=zdom[ndom].ndim;
   mdim=zdom[ndom].mdim;
   
   wind_n_to_ij (ndom, n, &i, &j);

@@ -233,7 +233,6 @@ main (argc, argv)
      char *argv[];
 {
   WindPtr w;
-  PhotPtr p;
 
   double freqmin, freqmax;
   int n;
@@ -247,7 +246,6 @@ main (argc, argv)
 
   int my_rank;			// these two variables are used regardless of parallel mode
   int np_mpi;			// rank and number of processes, 0 and 1 in non-parallel
-  int time_to_quit;
   int ndomain = 0;		//Local variable for ndomain
   int ndom;
 
@@ -273,7 +271,6 @@ main (argc, argv)
   time_max = 13.8e9 * 3.2e7;	/* 67 - ksl - 08nov - The maximum time the program will run without stopping.  This
 				   is initially set to the lifetime of the universe */
   time_max = -1;
-  time_to_quit = 100000;	// Initialise variable
 
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
@@ -491,7 +488,7 @@ main (argc, argv)
    the flow of reading in data.
  */
 
-  p = init_photons ();
+  init_photons ();
 
 
 

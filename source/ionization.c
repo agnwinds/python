@@ -408,7 +408,7 @@ one_shot (xplasma, mode)
      int mode;
 
 {
-  double te_old, te_new, dte;
+  double te_old, te_new;
   double gain;
 
 
@@ -422,7 +422,6 @@ one_shot (xplasma, mode)
 		te_new = te_old; //We dont want to change the temperature
 		xxxplasma = xplasma;
 		zero_emit(te_old); //But we do still want to compute all heating and cooling rates
-		dte = xplasma->dt_e=0.0;	 
 	}
 	else //Do things to old way - look for a new temperature
 	{
@@ -434,12 +433,9 @@ one_shot (xplasma, mode)
 		{	
 			xplasma->t_e = TMAX;
 		}
-		dte = xplasma->dt_e;
 	}
 
 
-//  Log ("One_shot: %10.2f %10.2f %10.2f\n", te_old, te_new, w->t_e);
-//	xplasma->t_e=10000.0;      
 
 /* Modes in the driving routines are not identical to those in nebular concentrations.
 The next lines are an attempt to mediate this problem.  It might be better internally
@@ -523,7 +519,6 @@ calc_te (xplasma, tmin, tmax)
      PlasmaPtr xplasma;
      double tmin, tmax;
 {
-  double heat_tot;
   double z1, z2;
   int macro_pops ();
 		
@@ -534,7 +529,6 @@ calc_te (xplasma, tmin, tmax)
 
   xxxplasma = xplasma;
 
-  heat_tot = xplasma->heat_tot;
 
   xplasma->t_e = tmin;
   z1 = zero_emit (tmin);
@@ -561,7 +555,7 @@ calc_te (xplasma, tmin, tmax)
   /* With the new temperature in place for the cell, get the correct value of heat_tot.
      SS June  04 */
 
-  /* ksl - I basically don't undestand what is going on here.  If we start using
+  /* ksl - XXX I basically don't undestand what is going on here.  If we start using
    * macro atoms a lot we need to understand them better ??? - 
    * Look at zero emit as well 091611 */
 

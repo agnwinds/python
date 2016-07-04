@@ -67,7 +67,6 @@ trans_phot (
 
 {
   int nphot;
-  int n;
   struct photon pp, pextract;
   int nnscat;
   int disk_illum;  /* this is a variable used to store geo.disk_illum during exxtract */
@@ -75,7 +74,6 @@ trans_phot (
   double p_norm, tau_norm;
 
 
-  n = 0;			// To avoid -O3 warning
 
   /* 05jul -- not clear whether this is needed and why it is different from DEBUG */
   /* 1411 -- JM -- Debug usage has been altered. See #111, #120 */
@@ -302,6 +300,9 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   istat = P_INWIND;
   tau = 0;
   icell = 0;
+
+  n=0;  // Needed to avoid 03 warning, but it is not clear that it is defined as expected.
+
 
 
   /* This is the beginning of the loop for each photon and executes until the photon leaves the wind */
