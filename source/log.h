@@ -33,7 +33,6 @@ int Error(char *format, ...);
 int Error_silent(char *format, ...);
 int Shout(char *format, ...);
 int sane_check(double x);
-int mytrap(void);
 int error_count(char *format);
 int error_summary(char *message);
 int Log_flush(void);

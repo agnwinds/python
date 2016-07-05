@@ -271,8 +271,10 @@ if (freq > phot_freq_min)
       else if (ion[nion].phot_info == 0) // verner
 		    density = xplasma->density[nion];
 
-      else            // possibly a little conservative
+      else  {          // possibly a little conservative
         Error("radiation.c: No type (%i) for xsection!\n");
+	density=0.0;
+      }
 
 		  if (density > DENSITY_PHOT_MIN)
 		    {
@@ -332,10 +334,11 @@ if (freq > phot_freq_min)
 						{
 							density = xplasma->density[nion];  //All these rates are from the ground state, so we just need the density of the ion.
 						}
-						else if (ion[nion].phot_info > 0) // topbase or hybrid
+						//OLD fix gcc-4 worning  else if (ion[nion].phot_info > 0) // topbase or hybrid
+						else 
 						{
 							nconf=phot_top[ion[nion].ntop_ground].nlev;  //The lower level of the ground state Pi cross section (should be GS!)
-					        density = den_config (xplasma, nconf);
+					        	density = den_config (xplasma, nconf);
 						}
 						if (density > DENSITY_PHOT_MIN)
 						{

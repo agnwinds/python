@@ -188,9 +188,12 @@ linterp (x, xarray, yarray, xdim, y, mode)
 {
   int nelem;
   double frac;
-  int ierr;
-  ierr = fraction (x, xarray, xdim, &nelem, &frac, mode);
 
+  //  Note that fraction will return an integer if it is important
+  //  to know whether you have asked for a value that is outsde the
+  //  boudarry of the arrays
+ 
+  fraction (x, xarray, xdim, &nelem, &frac, mode);
 
   if (mode==0)
   	*y = (1. - frac) * yarray[nelem] + frac * yarray[nelem + 1];

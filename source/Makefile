@@ -152,6 +152,8 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		
 
 
+# For reasons that are unclear to me.  get_models.c cannot be included in the sources
+# Problems ocurr due to the prototypes that are generated.  ksl 160705
 python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		saha.c spectra.c wind2d.c wind.c  vvector.c debug.c recipes.c \
 		trans_phot.c phot_util.c resonate.c radiation.c \

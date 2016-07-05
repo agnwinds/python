@@ -785,7 +785,8 @@ kbf_need (fmin, fmax)
         {
           density = xplasma->density[nion];
         }
-        else if (ion[nion].phot_info > 0)  // topbase or hybrid
+        // else if (ion[nion].phot_info > 0)  // topbase or hybrid
+	else
         {
 	        nconf = phot_top[n].nlev;	//Returning lower level = correct (SS)
 	        density = den_config (xplasma, nconf);
