@@ -380,17 +380,6 @@ sane_check (x)
 }
 
 
-/* JM 1410- mytrap is a function that was previously use for debugging. 
-   It is now deprecated in python but you may want to use for tests */
-int
-mytrap ()
-{
-  int x;
-  x = 0;
-  Log ("mytrap!!\n");
-  return (0);
-}
-
 int
 error_count (char *format)
 {

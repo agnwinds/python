@@ -271,8 +271,10 @@ if (freq > phot_freq_min)
       else if (ion[nion].phot_info == 0) // verner
 		    density = xplasma->density[nion];
 
-      else            // possibly a little conservative
+      else  {          // possibly a little conservative
         Error("radiation.c: No type (%i) for xsection!\n");
+	density=0.0;
+      }
 
 		  if (density > DENSITY_PHOT_MIN)
 		    {
@@ -332,10 +334,11 @@ if (freq > phot_freq_min)
 						{
 							density = xplasma->density[nion];  //All these rates are from the ground state, so we just need the density of the ion.
 						}
-						else if (ion[nion].phot_info > 0) // topbase or hybrid
+						//OLD fix gcc-4 worning  else if (ion[nion].phot_info > 0) // topbase or hybrid
+						else 
 						{
 							nconf=phot_top[ion[nion].ntop_ground].nlev;  //The lower level of the ground state Pi cross section (should be GS!)
-					        density = den_config (xplasma, nconf);
+					        	density = den_config (xplasma, nconf);
 						}
 						if (density > DENSITY_PHOT_MIN)
 						{
@@ -1059,7 +1062,7 @@ mean_intensity (xplasma, freq, mode)
   J = 0.0;			// Avoid 03 error
 
 
-  if (geo.ioniz_mode == 5 || geo.ioniz_mode == 7)	/*If we are using power law ionization, use PL estimators */
+  if (geo.ioniz_mode == 5 || geo.ioniz_mode == IONMODE_PAIRWISE_SPECTRALMODEL)	/*If we are using power law ionization, use PL estimators */
     {
       if (geo.wcycle > 0)	/* there is only any point in worrying if we have had at least one cycle otherwise there is no model */
 	{

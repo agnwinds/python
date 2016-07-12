@@ -343,22 +343,25 @@ int nplasma, nmacro;	/*The total number of cells in the plasma and macro structu
 #define DISK_FLAT   1
 #define DISK_VERTICALLY_EXTENDED   2
 
-  int disk_type;		/*0 --> no disk, 
-				   1 --> a standard disk in xy plane, 
-				   2 --> a vertically extended disk 
-				   Note that this definition is new to Python52 */
+  int disk_type;		
+
+#define DISK_ILLUM_ABSORB_AND_DESTROY  0  /* Disk simply absorbs the radiation and it is lost */
+#define DISK_ILLUM_SCATTER             1  /* Disk reradiates the radiation immediately via electron scattering
+					    */
+#define DISK_ILLUM_ABSORB_AND_HEAT     2  /* Correct disk temperature for illumination by photons 
+					     which hit the dsik.  Disk radiation is absorbed and changes 
+					     the temperature of the disk for future ionization cycles
+					     */
+#define DISK_ILLUM_HEATED_BY_STAR      3  /* Correct disk temperature for illumination by star */
+
   int disk_illum;		/*Treatment of effects of illumination on the disk. 
-				   0--> Disk simply absorbs the radiation and it is lost
-				   1--> Disk reradiates the radiation immediately via electron scattering
-				   2--> Disk radiation is absorbed and changes the temperature of the disk for
-				   future ionization cycles
-				   3--> Disk illumination is treated in terms of an analytic approximation
-				   04Aug ksl -- this parameter added for Python52
-				 */
+				  */
+
   int disk_atmosphere;           /* 0 --> no
 				    1 --> yes
 				 */
-  int disk_tprofile;
+  int disk_tprofile;		/* This is an variable used to specify a standard accretion disk (0) or
+				   one that has been read in and stored. */
   double disk_mdot;		/* mdot of  DISK */
   double diskrad, diskrad_sq;
   double disk_z0, disk_z1;	/* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 */
@@ -550,7 +553,7 @@ struct xdisk
 }
 disk, qdisk;			/* disk defines zones in the disk which in a specified frequency band emit equal amounts
 				   of radiation. qdisk stores the amount of heating of the disk as a result of
-				   illumination by the star or wind */
+				   illumination by the star or wind. It's boundaries are fixed throughout a cycle */
 
 #define NBLMODEL 100
 
@@ -926,6 +929,7 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define IONMODE_LTE 1                          // LTE using t_r
 #define IONMODE_FIXED 2                       // Hardwired concentrations
 #define IONMODE_ML93 3                        // Lucy Mazzali
+#define IONMODE_LTE_SIM 4                     // LTE with SIM correction 
 #define IONMODE_PAIRWISE_ML93 6               // pairwise version of Lucy Mazzali 
 #define IONMODE_PAIRWISE_SPECTRALMODEL 7      // pariwise modeled J_nu approach
 #define IONMODE_MATRIX_BB 8	              // matrix solver BB model
@@ -935,6 +939,8 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define NEBULARMODE_TR 0                       // LTE using t_r
 #define NEBULARMODE_TE 1                       // LTE using t_e
 #define NEBULARMODE_ML93 2                     // ML93 using correction
+#define NEBULARMODE_NLTE_SIM 3                 // Non_LTE with SS modification (Probably could be removed)
+#define NEBULARMODE_LTE_GROUND 4               // A test mode which foces all levels to the GS (Probably could be removed)
 #define NEBULARMODE_PAIRWISE_ML93 6            // pairwise ML93
 #define NEBULARMODE_PAIRWISE_SPECTRALMODEL 7   // pairwise spectral models
 #define NEBULARMODE_MATRIX_BB 8	               // matrix solver BB model
@@ -1264,9 +1270,9 @@ struct filenames
   char diagfolder[LINELENGTH];  // diag folder
   char old_windsave[LINELENGTH];// old windsave name
   char input[LINELENGTH];       // input name if creating new pf file
-  char lspec[LINELENGTH];       // log_spec_tot file name
+  char lwspec[LINELENGTH];       // log_spec_tot file name  
   char wspec[LINELENGTH];       // spectot file name
-  char lspec_wind[LINELENGTH];  // log_spec_tot filename for wind photons
+  char lwspec_wind[LINELENGTH];  // log_spec_tot filename for wind photons
   char wspec_wind[LINELENGTH];  // spectot filename for wind photons
   char disk[LINELENGTH];        // disk diag file name
   char tprofile[LINELENGTH];    // non standard tprofile fname
@@ -1274,6 +1280,8 @@ struct filenames
   char windrad[LINELENGTH];     // wind rad file
   char spec[LINELENGTH];        // .spec file
   char spec_wind[LINELENGTH];   // .spec file for wind photons
+  char lspec[LINELENGTH];        // .spec file
+  char lspec_wind[LINELENGTH];   // .spec file for wind photons
 }
 files;
 

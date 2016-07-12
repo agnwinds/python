@@ -63,18 +63,19 @@ one_continuum (spectype, t, g, freqmin, freqmax)
      int spectype;
      double t, g, freqmin, freqmax;
 {
-  double par[2];		// For python we assume only two parameter models
+  //OLD not used in routine double par[2];		// For python we assume only two parameter models
   double lambdamin, lambdamax;
   double f;
   double pdf_get_rand ();
-  int model (), nwav;
+  // int model (), nwav;
+  int model ();
 
   if (old_t != t || old_g != g || old_freqmin != freqmin
       || old_freqmax != freqmax)
     {				/* Then we must initialize */
-      par[0] = t;
-      par[1] = g;
-      nwav = model (spectype, par);
+      //OLD not used in routine par[0] = t;
+      //OLD not used in routine par[1] = g;
+      //OLD nwav not used here ksl.  nwav = model (spectype, par);
       /*  Get_model returns wavelengths in Ang and flux in ergs/cm**2/Ang */
       lambdamin = C * 1e8 / freqmax;
       lambdamax = C * 1e8 / freqmin;
@@ -111,10 +112,11 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
      int spectype;
      double freqmin, freqmax, t, g;
 {
-  int model (), nwav, n;
+  int nwav, n;
   double w, x, lambdamin, lambdamax;
   double dlambda;
   double par[2];
+  int model();
 
   lambdamin = C / (freqmax * ANGSTROM);
   lambdamax = C / (freqmin * ANGSTROM);
@@ -132,7 +134,6 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
       Error ("lambda %f %f  model %f %f\n", lambdamin, lambdamax,
 	     comp[spectype].xmod.w[0], comp[spectype].xmod.w[nwav - 1]);
 
-//      exit (0);
     }
   x = 0;
   for (n = 0; n < nwav; n++)

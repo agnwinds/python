@@ -204,9 +204,9 @@ corona_rho (ndom, x)
      double x[];
 {
   double rho;
-  double tref, t;
-  double gref, g;
-  double zscale;
+//OLD not used. 160705 ksl  double tref, t;
+//OLD not used. 160705 ksl  double gref, g;
+//OLD not used ksl double zscale;
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
@@ -214,13 +214,13 @@ corona_rho (ndom, x)
 	("corona_rho: Quitting. Need to think more about coronal model more with vertically extended disk\n");
       exit (0);
     }
-  tref = tdisk (geo.mstar, geo.disk_mdot, geo.rstar);
-  t = teff (tref, x[0] / geo.rstar);
+//OLD not used 160705 ksl  tref = tdisk (geo.mstar, geo.disk_mdot, geo.rstar);
+//OLD not used 160705 ksl  t = teff (tref, x[0] / geo.rstar);
 
-  gref = gdisk (geo.mstar, geo.disk_mdot, geo.rstar);
-  g = geff (gref, x[0] / geo.rstar);
+//OLD not used 160705 ksl  gref = gdisk (geo.mstar, geo.disk_mdot, geo.rstar);
+//OLD not used 160705 ksl  g = geff (gref, x[0] / geo.rstar);
 
-  zscale = BOLTZMANN * t / (MPROT * g);
+//OLD not used - ksl: zscale = BOLTZMANN * t / (MPROT * g);
 
 rho = zdom[ndom].corona_base_density * exp (-(x[2]) / zdom[ndom].corona_scale_height);
 

@@ -74,7 +74,9 @@ matrix_ion_populations (xplasma, mode)
   int nn, mm, nrows;
   double rate_matrix[nions][nions];
   double newden[NIONS];
-  double nh, t_e, t_r, www;
+  // double nh, t_e, t_r, www;  www is not really used 
+  // double nh, t_e, t_r; t_r is not used 
+  double nh, t_e;
   double xne, xxne, xxxne;
   //double xsaha, x, theta;
   //int s;                                                                                                
@@ -94,8 +96,8 @@ matrix_ion_populations (xplasma, mode)
 
   nh = xplasma->rho * rho2nh;	// The number density of hydrogen ions - computed from density
   t_e = xplasma->t_e;		// The electron temperature in the cell - used for collisional processes 
-  t_r = xplasma->t_r;		// The radiation temperature - used for PI if we have a BB approximation
-  www = xplasma->w;		// The radiative weight in the cell - again for BB approximation for PI
+  // t_r = xplasma->t_r;		// The radiation temperature - used for PI if we have a BB approximation
+  // www = xplasma->w;		// The radiative weight in the cell - again for BB approximation for PI
 
   /* Dielectronic recombination and direct ionization coefficients depend only on electron temperature, calculate them now -
      they will not change */

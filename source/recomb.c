@@ -302,7 +302,6 @@ integ_fb (t, f1, f2, nion, fb_choice)
     }
 
   Error ("integ_fb: Unknown fb_choice(%d)\n", fb_choice);
-  mytrap ();
   exit (0);
 }
 
@@ -808,17 +807,6 @@ init_freebound (t1, t2, f1, f2)
   double xinteg_fb ();
   int nput;
 
-/* If init-freebound has never been called before initialize
-   the temperatures and calculate the
-    recombination rates.  Otherwise skip this section */
-
-
-/* First see if there is a recombination file that already exists that can be used*/
-
-  if (nfb == 0)
-    {
-      fb_read ("recomb.save");
-    }
 
   if (nfb == 0)
     {
@@ -869,7 +857,7 @@ been calculated for these conditions, and if so simply return.
     }
 
 /* We have to calculate a new set of freebound data */
-  if (i == NFB)
+  if (i == NFB -1 )
     {
       /* We've filled all the available space in freebound so we start recycling elements, assuming that the latest
        * ones are still likelyt to be needed
@@ -896,18 +884,17 @@ unless nfb had been set to 0.  The new set is added to the old
 on the assumption that the fb information will be reused.
 */
 
-  freebound[nput].f1 = f1;
-  freebound[nput].f2 = f2;
-
-/* So at this point, we know exactly what needs to be calculated */
 
   Log
     ("init_freebound: Creating recombination emissivites between %e and %e\n",
      f1, f2);
 
+
+  freebound[nput].f1 = f1;
+  freebound[nput].f2 = f2;
+
   for (nion = 0; nion < nions; nion++)
     {
-//      Log ("init_freebound:  ion %d\n", nion);
       for (j = 0; j < NTEMPS; j++)
 	{			//j covers the temps
 	  t = fb_t[j];
@@ -1043,7 +1030,6 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
   else				// Get the total emissivity
     {
       Error ("integ_fb: %d is unacceptable value of nion\n", nion);
-      //mytrap ();      // JM 1410 -- mytrap is deprecated
       exit (0);
     }
 
@@ -1097,186 +1083,6 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
      for which we have Topbase x-sections, now do Verner */
 
   return (fnu);
-}
-
-
-/***********************************************************
-                                       Space Telescope Science Institute
-                                                                                                                                      
- Synopsis:
-        fb_save(w,filename)
-        fb_read(filename)
-                                                                                                                                      
-Arguments:
-                                                                                                                                      
-                                                                                                                                      
-Returns:
-                                                                                                                                      
-Description:
-                                                                                                                                      
-        The two routines in this file write and read the structure.
-	associated with fb emission in order to save a bit of time
-	calculating them.  This is semidangerous so we need to save
-	some additional information to see, whether this is a good
-        idea
-                                                                                                                                      
-Notes:
-	ksl 0810 - The freebound structure could be done in a way
-	that saves space on disk and in the program.  To save
-	space on disk one just needs to write and read the array
-	one elment at a time.  
-                                                                                                                                      
-History:
-        06jul   ksl     57h -- Began coding
-	08may	ksl	60a -- Added code to make sure that one
-			was only checking the first word in VERSION.
-			Previously, there was a problem with VERSION
-			having an extra space compared to the version
-			that was read back.  May be just an OS X
-			problem.
-                                                                                                                                      
-**************************************************************/
-
-int
-fb_save (filename)
-     char filename[];
-{
-  FILE *fptr, *fopen ();
-
-  char line[LINELENGTH];
-  int n;
-
-  return (0);
-
-  if ((fptr = fopen (filename, "w")) == NULL)
-    {
-      Error ("fb_save: Unable to open %s\n", filename);
-      exit (0);
-    }
-
-  sprintf (line, "Version %s\n", VERSION);
-  n = fwrite (line, sizeof (line), 1, fptr);
-  sprintf (line, "%s %d %d %d %d %d %d\n", geo.atomic_filename, nelements,
-	   nions, nlevels, nxphot, ntop_phot, nfb);
-  n += fwrite (line, sizeof (line), 1, fptr);
-
-  n += fwrite (fb_t, sizeof (fb_t), 1, fptr);
-  n += fwrite (xnrecomb, sizeof (xnrecomb), 1, fptr);
-  n += fwrite (freebound, sizeof (freebound), 1, fptr);
-
-  fclose (fptr);
-
-  Log ("Wrote fb information for %s to %s for %d frequency intervals \n",
-       geo.atomic_filename, filename, nfb);
-  Log
-    ("There are  %d elem, %d ions, %d levels, %d Verner, %d topbase xsections\n",
-     nelements, nions, nlevels, nxphot, ntop_phot);
-
-  return (0);
-
-}
-
-
-int
-fb_read (filename)
-     char filename[];
-{
-  FILE *fptr, *fopen ();
-  int n;
-  char line[LINELENGTH];
-  char version[LINELENGTH], oldversion[LINELENGTH];
-  char atomic_filename[LINELENGTH];
-
-  int xnelements, xnions, xnlevels, xnxphot, xntopphot, xnfb;
-
-  return (0);
-
-/* Initialize nfb to 0 so a return means that python will
-have to calcuate the coefficients */
-
-  nfb = 0;
-
-  if ((fptr = fopen (filename, "r")) == NULL)
-    {
-      Log ("fb_read: Unable to open %s\n", filename);
-      return (0);
-    }
-
-  n = fread (line, sizeof (line), 1, fptr);
-  sscanf (line, "%*s %s", version);
-  Log
-    ("Reading Windfile %s created with python version %s with python version %s\n",
-     filename, version, VERSION);
-  n += fread (line, sizeof (line), 1, fptr);
-  sscanf (line, "%s %d %d %d %d %d %d\n", atomic_filename, &xnelements,
-	  &xnions, &xnlevels, &xnxphot, &xntopphot, &xnfb);
-
-  Log ("Reading fb information for %s \n", atomic_filename);
-  Log
-    ("There are  %d elem, %d ions, %d levels, %d Verner, %d topbase, and %d freq intervals\n",
-     xnelements, xnions, xnlevels, xnxphot, xntopphot, xnfb);
-
-/* Check insofar as possible that this reconbination file was created with the same 
-inputs.  The next statement is intended to handle problems with extra spaces on the
-string that constitutes VERSION*/
-
-  sscanf (VERSION, "%s", oldversion);
-  if (strcmp (version, oldversion))
-    {
-      Log ("fb_read: Different versions of python  %s != %s or %d !=d %d \n",
-	   version, oldversion, strlen (version), strlen (oldversion));
-      return (0);
-    }
-  if (strcmp (atomic_filename, geo.atomic_filename) != 0)
-    {
-      Log ("fb_read: Different atomic_filename\n");
-      return (0);
-    }
-  if (xnelements != nelements)
-    {
-      Log ("fb_read: old %d  new %d  nelements\n", xnelements, nelements);
-      return (0);
-    }
-  if (xnlevels != nlevels)
-    {
-      Log ("fb_read: old %d  new %d  nions\n", xnions, nions);
-      return (0);
-    }
-  if (xnlevels != nlevels)
-    {
-      Log ("fb_read: old %d  new %d  nlevels\n", xnlevels, nlevels);
-      return (0);
-    }
-  if (xnxphot != nxphot)
-    {
-      Log ("fb_read: old %d  new %d  nnxphot\n", xnxphot, nxphot);
-      return (0);
-    }
-  if (xnlevels != nlevels)
-    {
-      Log ("fb_read: old %d  new %d  ntopphot\n", xntopphot, ntop_phot);
-
-      return (0);
-    }
-
-
-
-
-
-  nfb = xnfb;
-
-  n += fread (fb_t, sizeof (fb_t), 1, fptr);
-  n += fread (xnrecomb, sizeof (xnrecomb), 1, fptr);
-  n += fread (freebound, sizeof (freebound), 1, fptr);
-
-  fclose (fptr);
-
-
-  Log ("Read geometry and wind structures from windsavefile %s\n", filename);
-
-  return (n);
-
-
 }
 
 

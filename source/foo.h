@@ -243,8 +243,6 @@ int init_freebound(double t1, double t2, double f1, double f2);
 double get_nrecomb(double t, int nion);
 double get_fb(double t, int nion, int narray);
 double xinteg_fb(double t, double f1, double f2, int nion, int fb_choice);
-int fb_save(char filename[]);
-int fb_read(char filename[]);
 double total_rrate(int nion, double T);
 double gs_rrate(int nion, double T);
 /* diag.c */

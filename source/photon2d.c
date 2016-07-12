@@ -583,10 +583,6 @@ walls (p, pold)
     return (p->istat = P_HIT_STAR);
 
   /* Check to see if it has hit the disk. 
-   * There are several possibilities:
-   *  If disk_type==0, then there is no disk.
-   *  If disk_type==1, then the disk is in the xy plane
-   *  If disk_type==2, then the disk is vertically extended
    */
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
@@ -601,7 +597,7 @@ walls (p, pold)
 	  return (p->istat = P_HIT_DISK);
 	}
     }
-  if (geo.disk_type && p->x[2] * pold->x[2] < 0.0)
+  else if (geo.disk_type == DISK_FLAT && p->x[2] * pold->x[2] < 0.0)
     {				// Then the photon crossed the xy plane and probably hit the disk
       s = (-(pold->x[2])) / (pold->lmn[2]);
       if (s < 0)
@@ -611,7 +607,7 @@ walls (p, pold)
 	}
       // Check whether it hit the disk plane beyond the geo.diskrad**2
       vmove (pold->x, pold->lmn, s, xxx);
-      if (dot (xxx, xxx) < geo.diskrad_sq && geo.disk_illum != 1)
+      if (dot (xxx, xxx) < geo.diskrad_sq && geo.disk_illum != DISK_ILLUM_SCATTER)
 	{			/* The photon has hit the disk */
 	  stuff_phot (pold, p);	/* Move the photon to the point where it hits the disk */
 	  move_phot (p, s);

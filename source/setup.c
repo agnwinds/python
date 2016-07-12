@@ -640,43 +640,43 @@ get_wind_params (ndom)
      with the same basic wind geometry, without reading in all of the input parameters.  
    */
 
-  if (zdom[ndom].wind_type == 1)
+  if (zdom[ndom].wind_type == SPHERE)
     {
       get_stellar_wind_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 0)
+  else if (zdom[ndom].wind_type == SV)
     {
       get_sv_wind_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 3)
+  else if (zdom[ndom].wind_type == HYDRO)
     {
       get_hydro_wind_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 4)
+  else if (zdom[ndom].wind_type == CORONA)
     {
       get_corona_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 5)
+  else if (zdom[ndom].wind_type == KNIGGE)
     {
       get_knigge_wind_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 6)
+  else if (zdom[ndom].wind_type == HOMOLOGOUS)
     {
       get_homologous_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 7)
+  else if (zdom[ndom].wind_type == YSO)
     {
       get_yso_wind_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 8)
+  else if (zdom[ndom].wind_type == ELVIS)
     {
       get_elvis_wind_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 9)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
+  else if (zdom[ndom].wind_type == SHELL)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
     {
       get_shell_wind_params (ndom);
     }
-  else if (zdom[ndom].wind_type != 2)
+  else 
     {
       Error ("python: Unknown wind type %d\n", zdom[ndom].wind_type);
       exit (0);
@@ -809,7 +809,7 @@ get_disk_params ()
   rddoub ("disk.mdot(msol/yr)", &geo.disk_mdot);
   geo.disk_mdot *= (MSOL / YR);
   rdint
-    ("Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=analytic)",
+    ("Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=extra.heating.from.star)",
      &geo.disk_illum);
   rdint ("Disk.temperature.profile(0=standard;1=readin)", &geo.disk_tprofile);
   if (geo.disk_tprofile == 1)
@@ -1442,12 +1442,20 @@ setup_created_files ()
 
   strcpy (basename, files.root);	//56d -- ksl --Added so filenames could be created by routines as necessary
 
-  strcpy (files.wspec, files.root);
-  strcpy (files.lspec, files.root);
-  strcpy (files.spec, files.root);
+  strcpy (files.wspec, files.root);  //generated photons
+  strcpy (files.lwspec, files.root);  //generated photon in log space
+  
   strcpy (files.wspec_wind, files.root);
-  strcpy (files.lspec_wind, files.root);
-  strcpy (files.spec_wind, files.root);
+  strcpy (files.lwspec_wind, files.root);
+  
+  strcpy (files.spec, files.root);  
+  strcpy (files.lspec, files.root);  
+  
+  strcpy (files.spec_wind, files.root);  
+  strcpy (files.lspec_wind, files.root); 
+  
+  
+  
 
   strcpy (files.windrad, "python");
   strcpy (files.windsave, files.root);
@@ -1460,11 +1468,19 @@ setup_created_files ()
   strcat (files.disk, files.root);
 
   strcat (files.wspec, ".spec_tot");
-  strcat (files.lspec, ".log_spec_tot");
+  strcat (files.lwspec, ".log_spec_tot");
+  
   strcat (files.wspec_wind, ".spec_tot_wind");
-  strcat (files.lspec_wind, ".log_spec_tot_wind");
+  strcat (files.lwspec_wind, ".log_spec_tot_wind");
+  
+  
   strcat (files.spec, ".spec");
+  strcat (files.lspec, ".log_spec");
+
   strcat (files.spec_wind, ".spec_wind");
+  strcat (files.lspec_wind, ".log_spec_wind");
+  
+  
   strcat (files.windrad, ".wind_rad");
   strcat (files.windsave, ".wind_save");
   strcat (files.specsave, ".spec_save");

@@ -586,11 +586,12 @@ cylvar_where_in_grid (ndom, x, ichoice, fx, fz)
   int i, j, n, ii;
   double z[3];
   double rho;
-  int ndim,mdim,nstart;
+  int ndim,mdim;
+  //int ndim,mdim,nstart;
 
   ndim=zdom[ndom].ndim;
   mdim=zdom[ndom].mdim;
-  nstart=zdom[ndom].nstart;
+  // nstart=zdom[ndom].nstart;
 
   /* copy x to a dummy vector z, so that the z[0] component is really rho */
   z[0] = rho = sqrt (x[0] * x[0] + x[1] * x[1]);
@@ -646,7 +647,6 @@ cylvar_where_in_grid (ndom, x, ichoice, fx, fz)
       ii = where_in_2dcell (ichoice, z, n, fx, fz);
     }
 
-//  while (ii != 0 && 0 <= j && j < MDIM)
   while (ii != 0)
     {
       if (*fz < 0 && j == 0)
@@ -756,11 +756,10 @@ cylvar_get_random_location (n, x)
   double fx, fz;
   double zz;
   double phi;
-  int ndom,mdim,ndim;
+  int ndom,mdim;
   int ndomain;
 
   ndom = wmain[n].ndom;
-  ndim=zdom[ndom].ndim;
   mdim=zdom[ndom].mdim;
   
   wind_n_to_ij (ndom, n, &i, &j);
