@@ -109,8 +109,8 @@ communicate_estimators_para ()
 
   for (mpi_i = 0; mpi_i < NRINGS; mpi_i++)
     {
-      qdisk_helper[mpi_i] = qdisk.heat[mpi_i]; 
-      qdisk_helper[mpi_i + NRINGS] = qdisk.ave_freq[mpi_i] / np_mpi_global;
+      qdisk_helper[mpi_i] = qdisk.heat[mpi_i] / np_mpi_global; 
+      qdisk_helper[mpi_i + NRINGS] = qdisk.ave_freq[mpi_i] / np_mpi_global; 
     }
 
 

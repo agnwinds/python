@@ -247,6 +247,7 @@ calculate_ionization (restart_stat)
 	      nn_adiab++;
 	    }
 	}
+  Log("photon weight is %8.4e for thread %i\n", p[0].w, rank_global);
 
       Log
 	("!!python: Total photon luminosity after transphot %18.12e (diff %18.12e). Radiated luminosity %18.12e\n",
