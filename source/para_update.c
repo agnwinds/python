@@ -41,8 +41,8 @@ communicate_estimators_para ()
   double *maxfreqhelper, *maxfreqhelper2;
   /*NSH 131213 the next line introduces new helper arrays for the max and min frequencies in bands */
   double *maxbandfreqhelper, *maxbandfreqhelper2, *minbandfreqhelper, *minbandfreqhelper2;
-  double *redhelper, *redhelper2;
-  int *iredhelper, *iredhelper2;
+  double *redhelper, *redhelper2, *qdisk_helper, *qdisk_helper2;
+  int *iredhelper, *iredhelper2, *iqdisk_helper, *iqdisk_helper2;
   // int size_of_helpers;
   int plasma_double_helpers, plasma_int_helpers;
 
@@ -64,9 +64,12 @@ communicate_estimators_para ()
   minbandfreqhelper2 = calloc (sizeof (double), NPLASMA * NXBANDS);
   redhelper = calloc (sizeof (double), plasma_double_helpers);
   redhelper2 = calloc (sizeof (double), plasma_double_helpers);
-  iredhelper = calloc (sizeof (int), plasma_int_helpers);
-  iredhelper2 = calloc (sizeof (int), plasma_int_helpers);
 
+  /* JM -- added routine to average the qdisk quantities. The 2 is because
+     we only have two doubles to worry about (heat and ave_freq) and 
+     two integers (nhit and nphot) */
+  qdisk_helper = calloc (sizeof (double), NRINGS * 2);
+  qdisk_helper2 = calloc (sizeof (double), NRINGS * 2);
 
   MPI_Barrier (MPI_COMM_WORLD);
   // the following blocks gather all the estimators to the zeroth (Master) thread
@@ -103,12 +106,25 @@ communicate_estimators_para ()
 
 	}
     }
+
+  for (mpi_i = 0; mpi_i < NRINGS; mpi_i++)
+    {
+      qdisk_helper[mpi_i] = qdisk.heat[mpi_i]; 
+      qdisk_helper[mpi_i + NRINGS] = qdisk.ave_freq[mpi_i] / np_mpi_global;
+    }
+
+
   /* 131213 NSH communiate the min and max band frequencies these use MPI_MIN or MPI_MAX */
+  MPI_Barrier (MPI_COMM_WORLD); 
   MPI_Reduce (minbandfreqhelper, minbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
   MPI_Reduce (maxbandfreqhelper, maxbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
-  MPI_Reduce (maxfreqhelper, maxfreqhelper2, NPLASMA, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
-  MPI_Barrier (MPI_COMM_WORLD);  
+  MPI_Reduce (maxfreqhelper, maxfreqhelper2, NPLASMA, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD); 
   MPI_Reduce (redhelper, redhelper2, plasma_double_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+  MPI_Reduce (redhelper, redhelper2, plasma_double_helpers, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+
+  /* JM 1607 -- seum up the qdisk values */
+  MPI_Reduce (qdisk_helper, qdisk_helper2, 2 * NRINGS, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+
   if (rank_global == 0)
     {
 
@@ -121,6 +137,9 @@ communicate_estimators_para ()
   /* 131213 NSH Send out the global min and max band limited frequencies to all threads */
   MPI_Bcast (minbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast (maxbandfreqhelper2, NPLASMA * NXBANDS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+  /* JM 1607 -- send out the qdisk values to all threads */
+  MPI_Bcast (qdisk_helper2, NRINGS, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
 
   for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
@@ -153,8 +172,31 @@ communicate_estimators_para ()
 	  plasmamain[mpi_i].fmin[mpi_j] = minbandfreqhelper2[mpi_i * NXBANDS + mpi_j];
 	}
     }
+
+  for (mpi_i = 0; mpi_i < NRINGS; mpi_i++)
+    {
+      qdisk.heat[mpi_i] = qdisk_helper2[mpi_i];
+      qdisk.ave_freq[mpi_i] = qdisk_helper2[mpi_i + NRINGS];
+    }
   Log_parallel ("Thread %d happy after broadcast.\n", rank_global);
 
+  /* now we've done all the doubles so we can free their helper arrays */
+  free (qdisk_helper);
+  free (qdisk_helper2);
+  free (redhelper);
+  free (redhelper2);
+  free (maxfreqhelper);
+  free (maxfreqhelper2);
+  free (maxbandfreqhelper);
+  free (maxbandfreqhelper2);
+  free (minbandfreqhelper);
+  free (minbandfreqhelper2);
+
+  /* allocate the integer helper arrays, set a barrier, then do all the integers. */
+  iqdisk_helper = calloc (sizeof (int), NRINGS * 2);
+  iqdisk_helper2 = calloc (sizeof (int), NRINGS * 2);
+  iredhelper = calloc (sizeof (int), plasma_int_helpers);
+  iredhelper2 = calloc (sizeof (int), plasma_int_helpers);
   MPI_Barrier (MPI_COMM_WORLD);
 
   for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
@@ -172,13 +214,27 @@ communicate_estimators_para ()
 	  iredhelper[mpi_i + (7 + mpi_j) * NPLASMA] = plasmamain[mpi_i].nxtot[mpi_j];
 	}
     }
+
+  for (mpi_i = 0; mpi_i < NRINGS; mpi_i++)
+    {
+      iqdisk_helper[mpi_i] = qdisk.nphot[mpi_i];
+      iqdisk_helper[mpi_i + NRINGS] = qdisk.nhit[mpi_i];
+    }
+
+  MPI_Barrier (MPI_COMM_WORLD);
   MPI_Reduce (iredhelper, iredhelper2, plasma_int_helpers, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+  MPI_Reduce (iqdisk_helper, iqdisk_helper2, 2 * NRINGS, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
   if (rank_global == 0)
     {
       Log_parallel ("Zeroth thread successfully received the integer sum. About to broadcast.\n");
     }
 
+  MPI_Barrier (MPI_COMM_WORLD);
   MPI_Bcast (iredhelper2, plasma_int_helpers, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast (iqdisk_helper2, NRINGS,  MPI_INT, 0, MPI_COMM_WORLD);
+
+
   for (mpi_i = 0; mpi_i < NPLASMA; mpi_i++)
     {
       plasmamain[mpi_i].ntot = iredhelper2[mpi_i];
@@ -195,16 +251,16 @@ communicate_estimators_para ()
 	}
     }
 
-  free (maxfreqhelper);
-  free (maxfreqhelper2);
-  free (maxbandfreqhelper);
-  free (maxbandfreqhelper2);
-  free (minbandfreqhelper);
-  free (minbandfreqhelper2);
-  free (redhelper);
-  free (redhelper2);
+  for (mpi_i = 0; mpi_i < NRINGS; mpi_i++)
+    {
+      qdisk.nphot[mpi_i] = iqdisk_helper2[mpi_i];
+      qdisk.nhit[mpi_i] = iqdisk_helper2[mpi_i + NRINGS];
+    }
+
   free (iredhelper);
   free (iredhelper2);
+  free (iqdisk_helper);
+  free (iqdisk_helper2);
 
 #endif
   return (0);
