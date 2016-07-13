@@ -495,6 +495,7 @@ qdisk_save (diskfile, ztot)
   qptr = fopen (diskfile, "w");
   fprintf (qptr,
 	   "r         zdisk     t_disk   heat       nhit nhit/nemit  t_heat    t_irrad  W_irrad  t_tot\n");
+  
   for (n = 0; n < NRINGS; n++)
     {
       area =
