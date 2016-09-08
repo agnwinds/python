@@ -1,20 +1,12 @@
-
-
-/* The routines in this file define and summarize the properties of the wind.  The routines here are
-   specific to the SV description of a wind. It is only useful in the 2-d version of the code.
-
-   This file was created in 98apr in order to being to isolate the SV description from the more
-   generic parts of the wind.  Major modifications, mostly moving new code here and
-   creating the remaining subroutines to completely concentrate the sv dependent routines
-   here were made in 98dec.
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
 #include "atomic.h"
 #include "python.h"
+
+int sdom;
+int sv_zero_r_ndom;   
 
 /***********************************************************
                                        Space Telescope Science Institute
@@ -27,7 +19,7 @@ Arguments:
 Returns:
  
 Description:	
-	The parameters, geo.sv...,  obtained here are only used in the routines in stellar_winds.c
+	The parameters, zdom[ndom].sv...,  obtained here are only used in the routines in stellar_winds.c
 	which calculate the velocity and density of the wind during the initialization process.
 	Other portions of the structure, geo defined here are more general purpose.		
 Notes:
@@ -38,91 +30,80 @@ History:
  				adding a spherical wind
         080518  ksl     60a - geo should contain only cgs units
 	11aug	ksl	70b - kluge to get better xscale with compton torus
+	15aug	ksl	Updates for multiple domains
 **************************************************************/
 
 int
-get_sv_wind_params ()
+get_sv_wind_params (ndom)
+    int ndom;
 {
   double windmin, windmax, theta_min, theta_max;
-  double qromb (), sv_wind_mdot_integral ();
 
-  Log ("Creating an SV wind model for a Cataclysmic Variable\n");
+  Log ("Creating an SV wind in domain %d\n", ndom);
 
-  geo.wind_mdot /= (MSOL / YR);	// Convert to MSOL/YR for easy of data entry
-  rddoub ("wind.mdot(msol/yr)", &geo.wind_mdot);
-  geo.wind_mdot *= MSOL / YR;
+  zdom[ndom].wind_mdot=0.1*geo.disk_mdot /(MSOL / YR);	// Convert to MSOL/YR for easy of data entry
+  rddoub ("wind.mdot(msol/yr)", &zdom[ndom].wind_mdot);
+  zdom[ndom].wind_mdot *= MSOL / YR;
 
 
-  geo.sv_rmin = 2.8e9;
-  geo.sv_rmax = 8.4e9;
-  geo.sv_thetamin = 20. / RADIAN;
-  geo.sv_thetamax = 65. / RADIAN;
-  geo.sv_gamma = 1.;
-  geo.sv_v_zero = 6e5;		/* velocity at base of wind */
-  geo.sv_r_scale = 7e10;	/*Accleration length scale for wind */
-  geo.sv_alpha = 1.5;		/* Accleration scale exponent */
-  geo.sv_v_infinity = 3;	/* Final speed of wind in units of escape velocity */
-  geo.sv_lambda = 0.0;		/* Mass loss rate exponent */
+  zdom[ndom].sv_rmin = 2.8e9;
+  zdom[ndom].sv_rmax = 8.4e9;
+  zdom[ndom].sv_thetamin = 20. / RADIAN;
+  zdom[ndom].sv_thetamax = 65. / RADIAN;
+  zdom[ndom].sv_gamma = 1.;
+  zdom[ndom].sv_v_zero = 6e5;		/* velocity at base of wind */
+  zdom[ndom].sv_r_scale = 7e10;		/*Accleration length scale for wind */
+  zdom[ndom].sv_alpha = 1.5;		/* Accleration scale exponent */
+  zdom[ndom].sv_v_infinity = 3;		/* Final speed of wind in units of escape velocity */
+  zdom[ndom].sv_lambda = 0.0;		/* Mass loss rate exponent */
 
-  windmin = geo.sv_rmin / geo.rstar;
-  windmax = geo.sv_rmax / geo.rstar;
+  windmin = zdom[ndom].sv_rmin / geo.rstar;
+  windmax = zdom[ndom].sv_rmax / geo.rstar;
   rddoub ("sv.diskmin(units_of_rstar)", &windmin);
   rddoub ("sv.diskmax(units_of_rstar)", &windmax);
 
 
-  geo.sv_rmin = windmin * geo.rstar;
-  geo.sv_rmax = windmax * geo.rstar;
+  zdom[ndom].sv_rmin = windmin * geo.rstar;
+  zdom[ndom].sv_rmax = windmax * geo.rstar;
 
-  theta_min = geo.sv_thetamin * RADIAN;
-  theta_max = geo.sv_thetamax * RADIAN;
+  theta_min = zdom[ndom].sv_thetamin * RADIAN;
+  theta_max = zdom[ndom].sv_thetamax * RADIAN;
   rddoub ("sv.thetamin(deg)", &theta_min);
   rddoub ("sv.thetamax(deg)", &theta_max);
-  geo.sv_thetamin = theta_min / RADIAN;
-  geo.sv_thetamax = theta_max / RADIAN;
+  zdom[ndom].sv_thetamin = theta_min / RADIAN;
+  zdom[ndom].sv_thetamax = theta_max / RADIAN;
 
-  rddoub ("sv.mdot_r_exponent", &geo.sv_lambda);	/* Mass loss rate exponent */
-  rddoub ("sv.v_infinity(in_units_of_vescape", &geo.sv_v_infinity);	/* Final speed of wind in units of escape velocity */
+  rddoub ("sv.mdot_r_exponent", &zdom[ndom].sv_lambda);				/* Mass loss rate exponent */
+  rddoub ("sv.v_infinity(in_units_of_vescape", &zdom[ndom].sv_v_infinity);	/* Final speed of wind in units of escape velocity */
 
-  rddoub ("sv.acceleration_length(cm)", &geo.sv_r_scale);	/*Accleration length scale for wind */
-  rddoub ("sv.acceleration_exponent", &geo.sv_alpha);	/* Accleration scale exponent */
+  rddoub ("sv.acceleration_length(cm)", &zdom[ndom].sv_r_scale);		/*Accleration length scale for wind */
+  rddoub ("sv.acceleration_exponent", &zdom[ndom].sv_alpha);			/* Accleration scale exponent */
+
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
-  geo.wind_rmin = geo.rstar;
-  geo.wind_rmax = geo.rmax;
-  geo.wind_rho_min = geo.sv_rmin;
-  geo.wind_rho_max = geo.sv_rmax;
-  geo.wind_thetamin = geo.sv_thetamin;
-  geo.wind_thetamax = geo.sv_thetamax;
+  zdom[ndom].rmin = geo.rstar;
+  zdom[ndom].rmax = 10.*zdom[ndom].sv_r_scale;  // Set rmax to something reasonable
+  zdom[ndom].wind_rho_min = zdom[ndom].sv_rmin;
+  zdom[ndom].wind_rho_max = zdom[ndom].sv_rmax;
+  zdom[ndom].wind_thetamin = zdom[ndom].sv_thetamin;
+  zdom[ndom].wind_thetamax = zdom[ndom].sv_thetamax;
 
  
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
     {
-      geo.xlog_scale = geo.sv_rmin;
-
-      /* !! 70b - This change is to accomodate the torus, but it is not obvious this is the
-       * best way to set the scales now. It might be better do do this in make_grid!!  */
-      if (geo.compton_torus && geo.compton_torus_rmin < geo.xlog_scale)
-        {
-          geo.xlog_scale = geo.compton_torus_rmin;
-        }
-
-     /*70d - ksl - This change made to give one a chance of being able to do an 
-       agn and a CV with the sv model.  The underlying assumption is that the
-       effective radius provides a good scale factor in the verticla direction.
-       An alternative would be to use sv_rmin.
-     */
-
-     //OLD70d  geo.zlog_scale = 1e7;
-     geo.zlog_scale = geo.rstar;
+     zdom[ndom].xlog_scale = zdom[ndom].sv_rmin;
+     zdom[ndom].zlog_scale = geo.rstar;
     }
 
   
 
   /*Now calculate the normalization factor for the wind*/
+  
+  sdom = ndom;
 
-  geo.mdot_norm =
-    qromb (sv_wind_mdot_integral, geo.sv_rmin, geo.sv_rmax, 1e-6);
+  zdom[ndom].mdot_norm =
+    qromb (sv_wind_mdot_integral, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 1e-6);
   return (0);
 }
 
@@ -157,13 +138,12 @@ History:
 **************************************************************/
 
 double
-sv_velocity (x, v)
+sv_velocity (x, v, ndom)
      double x[], v[];
+     int ndom;
 {
   double r, rzero, theta, speed;
   double ldist, zzz, v_escape, vl;
-  double sv_find_wind_rzero ();
-  double sv_theta_wind ();
   struct photon ptest;
   double xtest[3];
   double s;
@@ -171,14 +151,15 @@ sv_velocity (x, v)
 
   zzz = v_escape = -99.;
 
-  rzero = sv_find_wind_rzero (x);
-  theta = sv_theta_wind (rzero);
+
+  rzero = sv_find_wind_rzero (ndom, x);
+  theta = sv_theta_wind (ndom, rzero);
 
   r = sqrt (x[0] * x[0] + x[1] * x[1]);
   ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
 
   /* Calculate the poloidal distance for a vertically extended disk ksl 111124 */
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       xtest[0] = r;		// Define xtest in the +z plane
       xtest[1] = 0;
@@ -196,10 +177,10 @@ sv_velocity (x, v)
     }
 
 
-  vl = geo.sv_v_zero;
+  vl = zdom[ndom].sv_v_zero;
   if (ldist > 0)
     {
-      zzz = pow (ldist / geo.sv_r_scale, geo.sv_alpha);
+      zzz = pow (ldist / zdom[ndom].sv_r_scale, zdom[ndom].sv_alpha);
 
       if (rzero < geo.rstar)
 	v_escape = sqrt (2. * G * geo.mstar / geo.rstar);
@@ -207,8 +188,8 @@ sv_velocity (x, v)
 	v_escape = sqrt (2. * G * geo.mstar / rzero);
 
       vl =
-	geo.sv_v_zero + (geo.sv_v_infinity * v_escape -
-			 geo.sv_v_zero) * zzz / (1. + zzz);
+	zdom[ndom].sv_v_zero + (zdom[ndom].sv_v_infinity * v_escape -
+			 zdom[ndom].sv_v_zero) * zzz / (1. + zzz);
     }
 
   v[0] = vl * sin (theta);
@@ -272,34 +253,29 @@ History:
 **************************************************************/
 
 double
-sv_rho (x)
+sv_rho (ndom, x)
      double x[];
+     int ndom;
 {
   double r, rzero, theta;
   double ldist;
-//  double sv_find_wind_rzero ();
-//  double sv_theta_wind ();
   double dmdot_da;
   double dtheta_drzero, dr_drzero;
 
   double v[3], rho;
-//  double sv_velocity ();
-//  double sv_find_wind_rzero (), sv_theta_wind ();
   struct photon ptest;
   double xtest[3];
   double s;
-//  double ds_to_disk ();
 
+  sv_velocity (x, v, ndom);
 
-  sv_velocity (x, v);
-
-  rzero = sv_find_wind_rzero (x);
-  theta = sv_theta_wind (rzero);
+  rzero = sv_find_wind_rzero (ndom, x);
+  theta = sv_theta_wind (ndom, rzero);
 
   r = sqrt (x[0] * x[0] + x[1] * x[1]);
   ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
 
-  if (geo.disk_type == 2)	/* These are corrections for a vertically extended disk */
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)	/* These are corrections for a vertically extended disk */
     {
       xtest[0] = r;		// Define xtest in the +z plane
       xtest[1] = 0;
@@ -320,19 +296,19 @@ sv_rho (x)
 
 /* Reduced by a factor of 2 to account for radiation on both sides of the disk */
   dmdot_da =
-    geo.wind_mdot * pow (rzero,
-			 geo.sv_lambda) * cos (theta) / geo.mdot_norm / 2.;
+    zdom[ndom].wind_mdot * pow (rzero,
+			 zdom[ndom].sv_lambda) * cos (theta) / zdom[ndom].mdot_norm / 2.;
 
 /* Although the current definition of sv_theta_wind is continuous, the derivative is not continuous accross the
    outer boundary of the wind and thus dtheta_drzero would appear to change discontinuously.   This created
    large apparent density jumps at the outside edge of the wind. We can't allow that and so we force the derivative to equal
    that at the edge of the wind if you try to calculate the density rho.  ksl 97apr23 */
 
-  if (rzero > geo.sv_rmax)
-    rzero = geo.sv_rmax;
+  if (rzero > zdom[ndom].sv_rmax)
+    rzero = zdom[ndom].sv_rmax;
   dtheta_drzero =
-    (sv_theta_wind (rzero) -
-     sv_theta_wind ((1. - EPSILON) * rzero)) / (EPSILON * rzero);
+    (sv_theta_wind (ndom, rzero) - sv_theta_wind (ndom, (1. - EPSILON) * rzero)) 
+     / (EPSILON * rzero);
 
   dr_drzero = 1. + ldist * dtheta_drzero / cos (theta);
 /* Note VS93 eqn 8 is dr/drzero but equation  7 is drzero/dr   ksl 97 apr 19 */
@@ -369,19 +345,18 @@ Notes:
 
 History:
  	97jan      ksl	Coding on python began.
+	15aug	ksl	Adapted for domains
  
 **************************************************************/
 
 
 double
-sv_find_wind_rzero (p)
+sv_find_wind_rzero (ndom, p)
+     int ndom;
      double p[];		/* Note that p is a 3 vector and not a photon structure */
 {
   double x, z;
-  double sv_zero_r ();
-  double zbrent ();
   double rho_min, rho_max, rho;
-  int sv_zero_init ();
 
   /* thetamin and theta max are defined w.r.t  z axis */
 
@@ -404,25 +379,27 @@ sv_find_wind_rzero (p)
    * continuous
    */
 
-  rho_min = geo.sv_rmin + z * tan (geo.sv_thetamin);
-  rho_max = geo.sv_rmax + z * tan (geo.sv_thetamax);
+  rho_min = zdom[ndom].sv_rmin + z * tan (zdom[ndom].sv_thetamin);
+  rho_max = zdom[ndom].sv_rmax + z * tan (zdom[ndom].sv_thetamax);
   rho = sqrt (p[0] * p[0] + p[1] * p[1]);
 
   if (rho <= rho_min)
     {
-      x = geo.sv_rmin * rho / rho_min;
+      x = zdom[ndom].sv_rmin * rho / rho_min;
       return (x);
     }
   if (rho >= rho_max)
     {
-      x = geo.sv_rmax + rho - rho_max;
+      x = zdom[ndom].sv_rmax + rho - rho_max;
       return (x);
     }
 
   /* 100 here means that zbrent will end if one has a guess of rzero which is
      correct ot 100 cm */
 
-  x = zbrent (sv_zero_r, geo.sv_rmin, geo.sv_rmax, 100.);
+  /* change the global variable sv_zero_r_ndom before we call zbrent */
+  sv_zero_r_ndom = ndom;
+  x = zbrent (sv_zero_r, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 100.);
   return (x);
 
 }
@@ -467,15 +444,17 @@ sv_zero_init (p)
 /* This routine is used to test whether a guess of r_zero is correct.  If
    you have the answer exactly then sv_zero_r will return 0 */
 
+
 double
 sv_zero_r (r)
      double r;
 {
   double theta;
   double rho, rho_guess;
-  double sv_theta_wind ();
 
-  theta = sv_theta_wind (r);
+  /* sv_zero_r_ndom should be set to the domain number before calling sv_zero_r */
+
+  theta = sv_theta_wind (sv_zero_r_ndom, r);
 
   rho = sqrt (zero_p[0] * zero_p[0] + zero_p[1] * zero_p[1]);
   rho_guess = r + tan (theta) * zero_p[2];
@@ -495,13 +474,13 @@ Arguments:
 	double r	a radial distance on the surface of the disk		
 
 Returns:
-	As long as r is between geo.sv_rmin and geo.sv_rmax, sv_theta_wind returns the
+	As long as r is between sv_rmin and sv_rmax, sv_theta_wind returns the
 	angle given by the SV prescription.
 	
-	Inside geo.sv_rmin, it returns a value which smoothly goes from thetamin to 0
+	Inside sv_rmin, it returns a value which smoothly goes from thetamin to 0
 	as the radius goes to 0
 	
-	Outside geo.sv_rmax, it returns geo.sv_thetamax
+	Outside sv_rmax, it returns sv_thetamax
  
 Description:	
 		
@@ -513,18 +492,21 @@ History:
 **************************************************************/
 
 double
-sv_theta_wind (r)
+sv_theta_wind (ndom, r)
+     int ndom;
      double r;
 {
   double theta;
-  if (r <= geo.sv_rmin)
-    return (atan (tan (geo.sv_thetamin * r / geo.sv_rmin)));
-  if (r >= geo.sv_rmax)
-    return (geo.sv_thetamax);
-  theta = geo.sv_thetamin +
-    (geo.sv_thetamax -
-     geo.sv_thetamin) * pow ((r - geo.sv_rmin) / (geo.sv_rmax - geo.sv_rmin),
-			     geo.sv_gamma);
+
+  
+  if (r <= zdom[ndom].sv_rmin)
+    return (atan (tan (zdom[ndom].sv_thetamin * r / zdom[ndom].sv_rmin)));
+  if (r >= zdom[ndom].sv_rmax)
+    return (zdom[ndom].sv_thetamax);
+  theta = zdom[ndom].sv_thetamin +
+    (zdom[ndom].sv_thetamax -
+     zdom[ndom].sv_thetamin) * pow ((r - zdom[ndom].sv_rmin) / (zdom[ndom].sv_rmax - zdom[ndom].sv_rmin),
+			     zdom[ndom].sv_gamma);
   return (theta);
 
 }
@@ -533,7 +515,7 @@ sv_theta_wind (r)
                                        Space Telescope Science Institute
 
  Synopsis:
-	double sv_wind_mdot_integral(r) is the integrand of SV model for mdot as a function
+	double sv_wind_mdot_integral(r) is the integrand of SV model for mdot as ation
 	of radius
 Arguments:		
 	double r;
@@ -553,13 +535,14 @@ History:
  
 **************************************************************/
 
+
 double
 sv_wind_mdot_integral (r)
      double r;
 {
   double x;
-  double sv_theta_wind ();
-  x = 2 * PI * pow (r, geo.sv_lambda + 1.) * cos (sv_theta_wind (r));
+
+  x = 2 * PI * pow (r, zdom[sdom].sv_lambda + 1.) * cos (sv_theta_wind (sdom, r));
   return (x);
 
 }

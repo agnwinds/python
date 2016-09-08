@@ -70,12 +70,17 @@ zoom (direction)
      int direction;
 {
   int center;
+  int ndim;
+
+  
+ndim=zdom[current_domain].ndim;
+
   if (direction == 1)
     {				/* then unzoom */
       Log ("Showing selected positions throughout wind\n");
       py_wind_min = 0;
-      py_wind_max = NDIM;
-      py_wind_delta = NDIM / 10;
+      py_wind_max = ndim;
+      py_wind_delta = ndim / 10;
       /*
        * Allow for the possibility that the wind has an xdimension
        * < 10
@@ -96,9 +101,9 @@ zoom (direction)
 	  py_wind_min = 0;
 	}
       py_wind_max = py_wind_min + 10;
-      if (py_wind_max > NDIM)
+      if (py_wind_max > ndim)
 	{
-	  py_wind_max = NDIM;
+	  py_wind_max = ndim;
 	  Log
 	    ("zoom: this choice of py_wind_max is lager than NDIM, adusting py_wind_max to NDIM");
 	}
@@ -175,6 +180,9 @@ overview (w, rootname)
 
   Notes:
 
+  This has been modified to work with domains, but it is not obvious that
+  this is what one wants, because the position is fixed
+
   History:
 
  ************************************************************************/
@@ -186,8 +194,9 @@ position_summary (w)
   struct photon p;
   int n;
   int nplasma;
+  int inwind, ndom;
 
-  x[0] = geo.wind_rmax / 5;
+  x[0] = geo.rmax / 5;
   x[1] = 0.0;
   x[2] = x[0];
 
@@ -199,7 +208,13 @@ a:Log ("Input x=0,y=0,z=0 to return to main routine\n");
   if (length (x) == 0.0)
     return (0);
 
-  n = where_in_grid (x);
+  inwind=where_in_wind(x,&ndom);
+  if (inwind!=W_ALL_INWIND){
+	  Log("Position %8.2e  %8.2e %8.2e is not in an active region of grid %d %d\n", x[0], x[1], x[2],inwind,ndom);
+	  ndom=0;
+  }
+
+  n = where_in_grid (ndom,x);
   nplasma = wmain[n].nplasma;
 
   Log ("Position %8.2e  %8.2e %8.2e  Cell %5d\n", x[0], x[1], x[2], n);
@@ -217,7 +232,7 @@ a:Log ("Input x=0,y=0,z=0 to return to main routine\n");
   p.x[1] = x[1];
   p.x[2] = x[2];
 
-  vwind_xyz (&p, v);
+  vwind_xyz (ndom, &p, v);
   Log ("Velocity: %8.2e  %8.2e %8.2e\n", v[0], v[1], v[2]);
 
 
@@ -1481,6 +1496,12 @@ wind_element (w)
   PlasmaPtr xplasma;
   int m, n, i, j, nn, mm;
   int first, last;
+  int ndom;
+
+  ndom=w->ndom;
+
+
+
   n = 50;
 a: printf("There are %i wind elements in this model\n",NDIM2);
 rdint ("Wind.array.element", &n);
@@ -1493,7 +1514,7 @@ rdint ("Wind.array.element", &n);
 	goto a;
 	}
 
-  wind_n_to_ij (n, &i, &j);
+  wind_n_to_ij (ndom,n, &i, &j);
   xplasma = &plasmamain[w[n].nplasma];
 
   Log
@@ -1504,8 +1525,8 @@ rdint ("Wind.array.element", &n);
        w[n].x[2], w[n].v[0], w[n].v[1], w[n].v[2]);
   Log ("r theta %12.6e %12.6e \n", w[n].rcen, w[n].thetacen/RADIAN);
 	   
-  Log ("nh %8.2e ne %8.2e t_r %8.2e t_e %8.2e w %8.2e vol %8.2e\n",
-       xplasma->rho * rho2nh, xplasma->ne, xplasma->t_r, xplasma->t_e,
+  Log ("rho %8.2e nh %8.2e ne %8.2e t_r %8.2e t_e %8.2e w %8.2e vol %8.2e\n",
+       xplasma->rho ,xplasma->rho * rho2nh, xplasma->ne, xplasma->t_r, xplasma->t_e,
        xplasma->w, w[n].vol);
 
   if (w[n].inwind < 0)
@@ -1544,7 +1565,7 @@ rdint ("Wind.array.element", &n);
   Log ("DR cooling        %8.2e is %8.2g of total cooling\n", xplasma->lum_dr_ioniz,
        xplasma->lum_dr_ioniz / (xplasma->lum_rad + xplasma->lum_adiabatic + xplasma->lum_comp_ioniz + xplasma->lum_dr_ioniz));
   Log ("Number of ionizing photons in cell nioniz %d\n", xplasma->nioniz);
-  Log ("Log Ionization parameter in this cell cell based %4.2f ferland %4.2f\n", log10 (xplasma->ip), log10 (xplasma->ferland_ip));	//70h NSH computed ionizaion parameter
+  Log ("Log Ionization parameter in this cell U %4.2f xi %4.2f\n", log10 (xplasma->ip), log10 (xplasma->xi));	//70h NSH computed ionizaion parameter
   Log ("ioniz %8.2e %8.2e %8.2e %8.2e %8.2e\n",
        xplasma->ioniz[0], xplasma->ioniz[1], xplasma->ioniz[2],
        xplasma->ioniz[3], xplasma->ioniz[4]);
@@ -3218,6 +3239,7 @@ complete_physical_summary (w, rootname, ochoice)
   double vtot;
   FILE *fptr, *fopen ();
   PlasmaPtr xplasma;
+  int ndom;
 
   rdint("Save ions as densities (0) or fractions? (1)", &frac_choice);
 
@@ -3248,9 +3270,11 @@ heat_tot\theat_photo\theat_auger\theat_lines\theat_ff\theat_comp\theat_ind_comp\
 ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\n");
 
 
+  Log("py_wind_sub does not work yet\n");
+  ndom=0;
   for (n = 0; n < NDIM2; n++)
     {
-      wind_n_to_ij (n, &ii, &jj);
+      wind_n_to_ij (ndom, n, &ii, &jj);
       
       if (w[n].vol > 0.0)
   {
@@ -3545,6 +3569,10 @@ int get_los_dvds(w, rootname, ochoice)
   double obs_angle, rzero, r;
   char filename[LINELENGTH], suffix[LINELENGTH];
 
+  int ndom;
+
+  ndom=w->ndom;
+
   vchoice = 0;
   phase = 0;
   obs_angle = 80.0;
@@ -3590,8 +3618,8 @@ int get_los_dvds(w, rootname, ochoice)
       /* next choice is for turning off rotational velocity */
       else if (vchoice == 1)
         {
-          model_velocity(p.x, v1);
-          model_velocity(ptest.x, v2);
+          model_velocity(ndom, p.x, v1);
+          model_velocity(ndom, ptest.x, v2);
           v1[1] = 0.0;
           v2[1] = 0.0;
 
@@ -3606,13 +3634,13 @@ int get_los_dvds(w, rootname, ochoice)
       else
         {
           r = sqrt (p.x[0] * p.x[0] + p.x[1] * p.x[1]);
-          rzero = sv_find_wind_rzero (p.x);
+          rzero = sv_find_wind_rzero (ndom, p.x);
           v1[0] = v1[2] = 0.0;
           v1[1] = sqrt (G * geo.mstar * rzero) / r;
 
 
           r = sqrt (ptest.x[0] * ptest.x[0] + ptest.x[1] * ptest.x[1]);
-          rzero = sv_find_wind_rzero (ptest.x);
+          rzero = sv_find_wind_rzero (ndom, ptest.x);
           v2[0] = v2[2] = 0.0;
           v2[1] = sqrt (G * geo.mstar * rzero) / r;
 

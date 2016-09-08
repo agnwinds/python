@@ -67,18 +67,13 @@ trans_phot (
 
 {
   int nphot;
-  double dot ();
-  int translate ();
-  int n;
   struct photon pp, pextract;
-  double get_ion_density ();
   int nnscat;
-  int disk_illum;
+  int disk_illum;  /* this is a variable used to store geo.disk_illum during exxtract */
   int nerr;
   double p_norm, tau_norm;
 
 
-  n = 0;			// To avoid -O3 warning
 
   /* 05jul -- not clear whether this is needed and why it is different from DEBUG */
   /* 1411 -- JM -- Debug usage has been altered. See #111, #120 */
@@ -168,10 +163,12 @@ trans_phot (
 
       if (iextract)
 	{
-	  // SS - for reflecting disk have to make sure disk photons are only extracted once!
-	  if (disk_illum == 1 && p[nphot].origin == PTYPE_DISK)
+	  // SS - for reflecting disk have to make sure disk photons are only extracted once.  Note we restore the
+	  // correct geo.disk_illum value as soon as the photons are extracted!
+
+	  if (disk_illum == DISK_ILLUM_SCATTER && p[nphot].origin == PTYPE_DISK)
 	    {
-	      geo.disk_illum = 0;
+	      geo.disk_illum = DISK_ILLUM_ABSORB_AND_DESTROY;
 	    }
 
 
@@ -223,10 +220,10 @@ trans_phot (
 	  extract (w, &pextract, pextract.origin);
 
 
-	  // SS if necessary put back the correcy disk illumination
-	  if (disk_illum == 1 && p[nphot].origin == PTYPE_DISK)
+	  // Restore the correct disk illumination
+	  if (disk_illum == DISK_ILLUM_SCATTER && p[nphot].origin == PTYPE_DISK)
 	    {
-	      geo.disk_illum = 1;
+	      geo.disk_illum = DISK_ILLUM_SCATTER;
 	    }
 	}
 
@@ -284,18 +281,17 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 {
   double tau_scat, tau;
   int istat;
-  double dot (), rrr;
-  int translate ();
+  double rrr;
   int icell;
   int nres, *ptr_nres;
   int kkk, n;
   double weight_min;
   struct photon pp, pextract;
-  double get_ion_density ();
   int nnscat;
   int nerr;
   double p_norm, tau_norm;
   double x_dfudge_check[3];	
+  int ndom;
 
   /* Initialize parameters that are needed for the flight of the photon through the wind */
   stuff_phot (p, &pp);
@@ -304,6 +300,9 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   istat = P_INWIND;
   tau = 0;
   icell = 0;
+
+  n=0;  // Needed to avoid 03 warning, but it is not clear that it is defined as expected.
+
 
 
   /* This is the beginning of the loop for each photon and executes until the photon leaves the wind */
@@ -379,7 +378,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
 	  /* 71 - 1112 - ksl - placed this line here to try to avoid an error I was seeing in scatter.  I believe the first if
 	     statement has a loophole that needs to be plugged, when it comes back with avalue of n = -1 */
-	  pp.grid = n = where_in_grid (pp.x);
+
+	  pp.grid = n = where_in_grid (wmain[pp.grid].ndom,pp.x);
 
 	  if (n < 0)
 	    {
@@ -427,7 +427,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	    }
 
 	  /* 0215 SWM - Added cell-based reverberation mapping */
-	  if (geo.reverb == REV_WIND && geo.pcycle == 0
+	  if ((geo.reverb == REV_WIND || geo.reverb == REV_MATOM) && geo.ioniz_or_extract 
 	      && geo.wcycle == geo.wcycles - 1)
 	    {
 	      wind_paths_add_phot (&wmain[n], &pp);
@@ -590,7 +590,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	  tau = 0;
 	  
 	  stuff_v (pp.x, x_dfudge_check); // this is a vector we use to see if dfudge moved the photon outside the wind cone
-	  reposition (w, &pp);
+	  reposition (&pp);
 
 	  /* JM 1506 -- call walls again to account for instance where DFUDGE 
 	     can take photon outside of the wind and into the disk or star 
@@ -607,7 +607,9 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       /* JM 1506 -- we don't throw errors here now, but we do keep a track 
          of how many 4 photons were lost due to DFUDGE pushing them 
          outside of the wind after scatter */
-	  if (where_in_wind (pp.x) < 0 && where_in_wind (x_dfudge_check) >= 0)
+
+	  // XXX PLACEHOLDER Check that this is the correct logic here 
+	  if (where_in_wind (pp.x, &ndom) != W_ALL_INWIND && where_in_wind (x_dfudge_check, &ndom) == W_ALL_INWIND)
 	  {
       	n_lost_to_dfudge++;		// increment the counter (checked at end of trans_phot)
 	  }

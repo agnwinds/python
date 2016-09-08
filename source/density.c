@@ -26,7 +26,9 @@ History:
 			in continuing effort to enable more 
 			coordinate systems.
 	06may	ksl	57+ -- Modified to use plasma structure
-  1411 JM Modified to use a general vector x, rather than a PhotPtr
+  	1411 	JM 	Modified to use a general vector x, rather than a PhotPtr
+	15aug	ksl	Modified for domains so that the domain is reuquired as an
+			input
 **************************************************************/
 
 #include <stdio.h>
@@ -39,7 +41,8 @@ History:
 
 
 double
-get_ion_density (x, nion)
+get_ion_density (ndom, x, nion)
+int	ndom;
      double x[];
      int nion;
 {
@@ -48,11 +51,12 @@ get_ion_density (x, nion)
   double frac[4];
   int nplasma;
 
+
 /* nnn is an array which contains the elements of the Wind (coordinate)
 structure that must be summed. We need to convert that to a position
 in the plasma structure*/
 
-  if ((coord_fraction (1, x, nnn, frac, &nelem)) > 0)
+  if ((coord_fraction (ndom, 1, x, nnn, frac, &nelem)) > 0)
     {
 
       dd = 0;

@@ -106,26 +106,33 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
          a way that it mimics the energy distribution of the star. */
 
       geo.weight = (weight) = (geo.f_tot) / (nphot_tot);
+
+      for(n=0; n<NPHOT; n++) p[n].path = -1.0; /* SWM - Zero photon paths */
+
       xmake_phot (p, f1, f2, ioniz_or_final, iwind, weight, 0, NPHOT);
     }
   else
-    {				/* Use banding, create photons with different weithst in different wavelength
-				   bands.  this is used for the for ionization calculation where one wants to assure
-				   that you have "enough" photons at high energy */
+    {	/* Use banding, create photons with different weights in different wavelength
+	   bands.  This is used for the for ionization calculation where one wants to assure
+	   that you have "enough" photons at high energy */
+
       ftot = populate_bands (f1, f2, ioniz_or_final, iwind, &xband);
 
+      for(n=0; n<NPHOT; n++) p[n].path = -1.0; /* SWM - Zero photon paths */
 
-      for(n=0; n<NPHOT; n++) p[n].path = 0.0; /* SWM - Zero photon paths */
+/* Now generate the photons */
 
-// Now generate the photons
       iphot_start = 0;
       for (n = 0; n < xband.nbands; n++)
 	{
 
 	  if (xband.nphot[n] > 0)
 	    {
-/*Reinitialization is required here always because we are changing the frequencies around all the time */
+	/*Reinitialization is required here always because we are changing 
+	 * the frequencies around all the time */
+
 	      xdefine_phot (xband.f1[n], xband.f2[n], ioniz_or_final, iwind);
+
 	      /* The weight of each photon is designed so that all of the photons add up to the
 	         luminosity of the photosphere.  This implies that photons must be generated in such
 	         a way that it mimics the energy distribution of the star. */
@@ -144,9 +151,12 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     }
 
 
-  for (n = 0; n < NPHOT; n++){
-	  p[n].w_orig = p[n].w;
+  for (n = 0; n < NPHOT; n++)
+  {
+    p[n].w_orig = p[n].w;
     p[n].freq_orig = p[n].freq;
+    if(geo.reverb != REV_NONE && p[n].path < 0.0) //SWM - Set path lengths for disk, star etc. 
+     	simple_paths_gen_phot(&p[n]);
   }
   return (0);
 
@@ -230,6 +240,7 @@ populate_bands (f1, f2, ioniz_or_final, iwind, band)
 /* Because of roundoff errors nphot may not sum to the desired value, namely NPHOT.  So
 add a few more photons to the band with most photons already. It should only be a few, at most
 one photon for each band.*/
+ 
   if (nphot < NPHOT)
     {
       band->nphot[most] += (NPHOT - nphot);
@@ -250,13 +261,12 @@ Arguments:
 
 Returns:
 
-The rosults are stored in the goe structure (see below).  
+The results are stored in the goe structure (see below).  
  
  
 Description:	
 
-This is an routine that initilizes things.  It does not generate photons itself.
-
+This is a routine that initilizes things.  It does not generate photons itself.
 		
 Notes:
 Note: This routine is something of a kluge.  Information is passed back to the calling
@@ -292,7 +302,6 @@ xdefine_phot (f1, f2, ioniz_or_final, iwind)
   geo.f_star = geo.f_disk = geo.f_bl = 0;
   geo.f_kpkt = geo.f_matom = 0;	//SS - kpkt and macro atom luminosities set to zero
 
-
   if (geo.star_radiation)
     {
       star_init (geo.rstar, geo.tstar, f1, f2, ioniz_or_final, &geo.f_star);
@@ -323,6 +332,7 @@ iwind = -1 	Don't generate any wind photons at all
 		the wind needs to be reinitialized.  Initialization is forced
 		in that case by init
 */
+
   if (iwind == -1)
     geo.f_wind = geo.lum_wind = 0.0;
 
@@ -377,12 +387,13 @@ iwind = -1 	Don't generate any wind photons at all
     geo.f_matom + geo.f_agn;
 
 
+/*Store the 3 variables that have to remain the same to avoid reinitialization  */
 
-//Store the 3 variables that have to remain the same to avoid reinitialization 
   f1_old = f1;
   f2_old = f2;
   iwind_old = iwind;
   return (0);
+
 }
 
 
@@ -534,6 +545,7 @@ stellar photons */
 	}
       iphot_start += nphot;
     }
+
 /* Generate the wind photons */
 
   if (iwind >= 0)
@@ -736,10 +748,6 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
 {
   double freqmin, freqmax, dfreq;
   int i, iend;
-//OLD1409  double dot ();
-//OLD1409  double planck ();
-//OLD1409  int randvec (), randvcos ();
-//OLD1409  double zdisk ();
   if ((iend = istart + nphot) > NPHOT)
     {
       Error ("photo_gen_star: iend %d > NPHOT %d\n", iend, NPHOT);
@@ -791,8 +799,7 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
 
       randvec (p[i].x, r);
 
-      /* Added by SS August 2004 for finite disk. */
-      if (geo.disk_type == 2)
+      if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
 	{
 	  while (fabs (p[i].x[2]) < zdisk (r))
 	    {
@@ -897,11 +904,11 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   tref = tdisk (m, mdot, rmin);
   gref = gdisk (m, mdot, rmin);
 
-//?? Erorr -- ksl -- problem in new schema when we put energy bands to arbitrary high freqencies
-//>? Error -- Need to do something like pdf where can force some boundaries at parts of disk
-//   to prevent this problem
+  /* Now compute the apparent luminosity of the disk.  This is not actually used
+   to determine how annulae are set up.  It is just used to populate geo.ltot.
+   It can change if photons hitting the disk are allowed to raise the temperature
+   */
 
-  /* Now compute the apparent luminosity of the disk */
   ltot = 0;
   dr = (rmax - rmin) / STEPS;
   for (r = rmin; r < rmax; r += dr)
@@ -910,9 +917,8 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
       ltot += t * t * t * t * (2. * r + dr);
     }
   ltot *= 2. * STEFAN_BOLTZMANN * PI * dr;
-/* The area of an annulus is  PI*((r+dr)**2-r**2) = PI * (2. * r +dr) * dr.  An
-extra factor of two arises because the disk radiates from both of its sides.  */
-  q1 = 2. * PI * dr;
+
+
 
   /* Now establish the type of spectrum to create */
 
@@ -921,7 +927,14 @@ extra factor of two arises because the disk radiates from both of its sides.  */
   else
     spectype = geo.disk_ion_spectype;	/*type for ionization calculation */
 
-/* Next compute the band limited luminosity */
+/* Next compute the band limited luminosity ftot */
+
+/* The area of an annulus is  PI*((r+dr)**2-r**2) = PI * (2. * r +dr) * dr.  
+   The extra factor of two arises because the disk radiates from both of its sides.
+   */
+
+  q1 = 2. * PI * dr;
+
   (*ftot) = 0;
   for (r = rmin; r < rmax; r += dr)
     {
@@ -943,7 +956,8 @@ extra factor of two arises because the disk radiates from both of its sides.  */
   (*ftot) *= q1;
 
   
-  /* If *ftot is 0 in this energy range then all the photons come from the star */
+  /* If *ftot is 0 in this energy range then all the photons come elsewhere, e. g. the star or BL  */
+
   if ((*ftot) < EPSILON)
     {
       Log_silent
@@ -951,7 +965,9 @@ extra factor of two arises because the disk radiates from both of its sides.  */
       return (ltot);
     }
 
-  /* Now go back and find the boundaries of the each radial ring */
+  /* Now find the boundaries of the each annulus, which depends on the band limited flux.
+   Note that disk.v is calculated at the boundaries, because vdisk() interporlates on
+   the actual radius. */
 
   disk.r[0] = rmin;
   disk.v[0] = sqrt (G * geo.mstar / rmin);
@@ -1004,6 +1020,9 @@ extra factor of two arises because the disk radiates from both of its sides.  */
   disk.r[NRINGS - 1] = rmax;
   disk.v[NRINGS - 1] = sqrt (G * geo.mstar / rmax);
 
+
+  /* Now calculate the temperature and gravity of the annulae */
+
   for (nrings = 0; nrings < NRINGS - 1; nrings++)
     {
       r = 0.5 * (disk.r[nrings + 1] + disk.r[nrings]);
@@ -1021,8 +1040,6 @@ extra factor of two arises because the disk radiates from both of its sides.  */
       disk.w[nrings] = 0;
       disk.t_hit[nrings] = 0;
     }
-
-
 
   geo.lum_disk = ltot;
   return (ltot);
@@ -1155,7 +1172,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
       north[1] = 0;
       north[2] = 1;
 
-      if (geo.disk_type == 2)
+      if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
 	{
 	  if (r == 0)
 	    theta = 0;
@@ -1211,15 +1228,10 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
 	}
       /* Now Doppler shift this. Use convention of dividing when going from rest
          to moving frame */
+
       vdisk (p[i].x, v);
       p[i].freq /= (1. - dot (v, p[i].lmn) / C);
-      /*    if (p[i].freq < freqmin || freqmax < p[i].freq)
-         {
-         Error_silent
-         ("photo_gen_disk (after dopler) : phot no. %d freq %g out of range %g %g\n",
-         i, p[i].freq, freqmin, freqmax);
-         }
-       */
+
     }
   return (0);
 }
