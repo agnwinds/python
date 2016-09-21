@@ -67,95 +67,68 @@ wind_save (filename)
   int n, m;
 
   if ((fptr = fopen (filename, "w")) == NULL)
-    {
-      Error ("wind_save: Unable to open %s\n", filename);
-      exit (0);
-    }
+  {
+    Error ("wind_save: Unable to open %s\n", filename);
+    exit (0);
+  }
 
   sprintf (line, "Version %s\n", VERSION);
   n = fwrite (line, sizeof (line), 1, fptr);
   n += fwrite (&geo, sizeof (geo), 1, fptr);
   n += fwrite (zdom, sizeof (domain_dummy), geo.ndomain, fptr);
   n += fwrite (wmain, sizeof (wind_dummy), NDIM2, fptr);
-  n += fwrite(&disk, sizeof (disk), 1, fptr);
-  n += fwrite(&qdisk, sizeof (disk), 1, fptr);
+  n += fwrite (&disk, sizeof (disk), 1, fptr);
+  n += fwrite (&qdisk, sizeof (disk), 1, fptr);
   n += fwrite (plasmamain, sizeof (plasma_dummy), NPLASMA, fptr);
 
 /* NSH 1407 - The following loop writes out the variable length arrays
 in the plasma structure */
 
   for (m = 0; m < NPLASMA; m++)
-    {
-      n += fwrite (plasmamain[m].density, sizeof (double), nions, fptr);
-      n += fwrite (plasmamain[m].partition, sizeof (double), nions, fptr);
+  {
+    n += fwrite (plasmamain[m].density, sizeof (double), nions, fptr);
+    n += fwrite (plasmamain[m].partition, sizeof (double), nions, fptr);
 
-      n += fwrite (plasmamain[m].PWdenom, sizeof (double), nions, fptr);
-      n += fwrite (plasmamain[m].PWdtemp, sizeof (double), nions, fptr);
-      n += fwrite (plasmamain[m].PWnumer, sizeof (double), nions, fptr);
-      n += fwrite (plasmamain[m].PWntemp, sizeof (double), nions, fptr);
+    n += fwrite (plasmamain[m].PWdenom, sizeof (double), nions, fptr);
+    n += fwrite (plasmamain[m].PWdtemp, sizeof (double), nions, fptr);
+    n += fwrite (plasmamain[m].PWnumer, sizeof (double), nions, fptr);
+    n += fwrite (plasmamain[m].PWntemp, sizeof (double), nions, fptr);
 
-      n += fwrite (plasmamain[m].ioniz, sizeof (double), nions, fptr);
-      n += fwrite (plasmamain[m].recomb, sizeof (double), nions, fptr);
+    n += fwrite (plasmamain[m].ioniz, sizeof (double), nions, fptr);
+    n += fwrite (plasmamain[m].recomb, sizeof (double), nions, fptr);
 
-      n += fwrite (plasmamain[m].scatters, sizeof (int), nions, fptr);
-      n += fwrite (plasmamain[m].xscatters, sizeof (double), nions, fptr);
+    n += fwrite (plasmamain[m].scatters, sizeof (int), nions, fptr);
+    n += fwrite (plasmamain[m].xscatters, sizeof (double), nions, fptr);
 
-      n += fwrite (plasmamain[m].heat_ion, sizeof (double), nions, fptr);
-      n += fwrite (plasmamain[m].lum_ion, sizeof (double), nions, fptr);
-    }
+    n += fwrite (plasmamain[m].heat_ion, sizeof (double), nions, fptr);
+    n += fwrite (plasmamain[m].lum_ion, sizeof (double), nions, fptr);
+  }
 
 /* Now write out the macro atom info */
 
   if (geo.nmacro)
+  {
+    n += fwrite (macromain, sizeof (macro_dummy), NPLASMA, fptr);
+    for (m = 0; m < NPLASMA; m++)
     {
-      n += fwrite (macromain, sizeof (macro_dummy), NPLASMA, fptr);
-      for (m = 0; m < NPLASMA; m++)
-	{
-	  n +=
-	    fwrite (macromain[m].jbar, sizeof (double), size_Jbar_est, fptr);
-	  n +=
-	    fwrite (macromain[m].jbar_old, sizeof (double), size_Jbar_est,
-		    fptr);
-	  n +=
-	    fwrite (macromain[m].gamma, sizeof (double), size_gamma_est,
-		    fptr);
-	  n +=
-	    fwrite (macromain[m].gamma_old, sizeof (double), size_gamma_est,
-		    fptr);
-	  n +=
-	    fwrite (macromain[m].gamma_e, sizeof (double), size_gamma_est,
-		    fptr);
-	  n +=
-	    fwrite (macromain[m].gamma_e_old, sizeof (double), size_gamma_est,
-		    fptr);
-	  n +=
-	    fwrite (macromain[m].alpha_st, sizeof (double), size_gamma_est,
-		    fptr);
-	  n +=
-	    fwrite (macromain[m].alpha_st_old, sizeof (double),
-		    size_gamma_est, fptr);
-	  n +=
-	    fwrite (macromain[m].alpha_st_e, sizeof (double), size_gamma_est,
-		    fptr);
-	  n +=
-	    fwrite (macromain[m].alpha_st_e_old, sizeof (double),
-		    size_gamma_est, fptr);
-	  n +=
-	    fwrite (macromain[m].recomb_sp, sizeof (double), size_alpha_est,
-		    fptr);
-	  n +=
-	    fwrite (macromain[m].recomb_sp_e, sizeof (double), size_alpha_est,
-		    fptr);
-	  n +=
-	    fwrite (macromain[m].matom_emiss, sizeof (double), nlevels_macro,
-		    fptr);
-	  n +=
-	    fwrite (macromain[m].matom_abs, sizeof (double), nlevels_macro,
-		    fptr);
-
-	}
+      n += fwrite (macromain[m].jbar, sizeof (double), size_Jbar_est, fptr);
+      n += fwrite (macromain[m].jbar_old, sizeof (double), size_Jbar_est, fptr);
+      n += fwrite (macromain[m].gamma, sizeof (double), size_gamma_est, fptr);
+      n += fwrite (macromain[m].gamma_old, sizeof (double), size_gamma_est, fptr);
+      n += fwrite (macromain[m].gamma_e, sizeof (double), size_gamma_est, fptr);
+      n += fwrite (macromain[m].gamma_e_old, sizeof (double), size_gamma_est, fptr);
+      n += fwrite (macromain[m].alpha_st, sizeof (double), size_gamma_est, fptr);
+      n += fwrite (macromain[m].alpha_st_old, sizeof (double), size_gamma_est, fptr);
+      n += fwrite (macromain[m].alpha_st_e, sizeof (double), size_gamma_est, fptr);
+      n += fwrite (macromain[m].alpha_st_e_old, sizeof (double), size_gamma_est, fptr);
+      n += fwrite (macromain[m].recomb_sp, sizeof (double), size_alpha_est, fptr);
+      n += fwrite (macromain[m].recomb_sp_e, sizeof (double), size_alpha_est, fptr);
+      n += fwrite (macromain[m].matom_emiss, sizeof (double), nlevels_macro, fptr);
+      n += fwrite (macromain[m].matom_abs, sizeof (double), nlevels_macro, fptr);
 
     }
+
+  }
 
   fclose (fptr);
 
@@ -190,15 +163,13 @@ wind_read (filename)
   char version[LINELENGTH];
 
   if ((fptr = fopen (filename, "r")) == NULL)
-    {
-      return (-1);
-    }
+  {
+    return (-1);
+  }
 
   n = fread (line, sizeof (line), 1, fptr);
   sscanf (line, "%*s %s", version);
-  Log
-    ("Reading Windfile %s created with python version %s with python version %s\n",
-     filename, version, VERSION);
+  Log ("Reading Windfile %s created with python version %s with python version %s\n", filename, version, VERSION);
 
   n += fread (&geo, sizeof (geo), 1, fptr);
 
@@ -224,8 +195,8 @@ wind_read (filename)
 
   /* Read the disk and qdisk structures */
 
-  n += fread(&disk, sizeof (disk), 1, fptr);
-  n += fread(&qdisk, sizeof (disk), 1, fptr);
+  n += fread (&disk, sizeof (disk), 1, fptr);
+  n += fread (&qdisk, sizeof (disk), 1, fptr);
 
   calloc_plasma (NPLASMA);
 
@@ -237,84 +208,58 @@ wind_read (filename)
 
 
   for (m = 0; m < NPLASMA; m++)
-    {
+  {
 
-      n += fread (plasmamain[m].density, sizeof (double), nions, fptr);
-      n += fread (plasmamain[m].partition, sizeof (double), nions, fptr);
+    n += fread (plasmamain[m].density, sizeof (double), nions, fptr);
+    n += fread (plasmamain[m].partition, sizeof (double), nions, fptr);
 
-      n += fread (plasmamain[m].PWdenom, sizeof (double), nions, fptr);
-      n += fread (plasmamain[m].PWdtemp, sizeof (double), nions, fptr);
-      n += fread (plasmamain[m].PWnumer, sizeof (double), nions, fptr);
-      n += fread (plasmamain[m].PWntemp, sizeof (double), nions, fptr);
+    n += fread (plasmamain[m].PWdenom, sizeof (double), nions, fptr);
+    n += fread (plasmamain[m].PWdtemp, sizeof (double), nions, fptr);
+    n += fread (plasmamain[m].PWnumer, sizeof (double), nions, fptr);
+    n += fread (plasmamain[m].PWntemp, sizeof (double), nions, fptr);
 
-      n += fread (plasmamain[m].ioniz, sizeof (double), nions, fptr);
-      n += fread (plasmamain[m].recomb, sizeof (double), nions, fptr);
+    n += fread (plasmamain[m].ioniz, sizeof (double), nions, fptr);
+    n += fread (plasmamain[m].recomb, sizeof (double), nions, fptr);
 
-      n += fread (plasmamain[m].scatters, sizeof (int), nions, fptr);
-      n += fread (plasmamain[m].xscatters, sizeof (double), nions, fptr);
+    n += fread (plasmamain[m].scatters, sizeof (int), nions, fptr);
+    n += fread (plasmamain[m].xscatters, sizeof (double), nions, fptr);
 
-      n += fread (plasmamain[m].heat_ion, sizeof (double), nions, fptr);
-      n += fread (plasmamain[m].lum_ion, sizeof (double), nions, fptr);
-    }
+    n += fread (plasmamain[m].heat_ion, sizeof (double), nions, fptr);
+    n += fread (plasmamain[m].lum_ion, sizeof (double), nions, fptr);
+  }
 
 
   /*Allocate space for macro-atoms */
 
   if (geo.nmacro > 0)
+  {
+    calloc_macro (NPLASMA);
+    n += fread (macromain, sizeof (macro_dummy), NPLASMA, fptr);
+    calloc_estimators (NPLASMA);
+
+    for (m = 0; m < NPLASMA; m++)
     {
-      calloc_macro (NPLASMA);
-      n += fread (macromain, sizeof (macro_dummy), NPLASMA, fptr);
-      calloc_estimators (NPLASMA);
+      n += fread (macromain[m].jbar, sizeof (double), size_Jbar_est, fptr);
+      n += fread (macromain[m].jbar_old, sizeof (double), size_Jbar_est, fptr);
+      n += fread (macromain[m].gamma, sizeof (double), size_gamma_est, fptr);
+      n += fread (macromain[m].gamma_old, sizeof (double), size_gamma_est, fptr);
+      n += fread (macromain[m].gamma_e, sizeof (double), size_gamma_est, fptr);
+      n += fread (macromain[m].gamma_e_old, sizeof (double), size_gamma_est, fptr);
+      n += fread (macromain[m].alpha_st, sizeof (double), size_gamma_est, fptr);
+      n += fread (macromain[m].alpha_st_old, sizeof (double), size_gamma_est, fptr);
+      n += fread (macromain[m].alpha_st_e, sizeof (double), size_gamma_est, fptr);
+      n += fread (macromain[m].alpha_st_e_old, sizeof (double), size_gamma_est, fptr);
+      n += fread (macromain[m].recomb_sp, sizeof (double), size_alpha_est, fptr);
+      n += fread (macromain[m].recomb_sp_e, sizeof (double), size_alpha_est, fptr);
+      n += fread (macromain[m].matom_emiss, sizeof (double), nlevels_macro, fptr);
+      n += fread (macromain[m].matom_abs, sizeof (double), nlevels_macro, fptr);
 
-      for (m = 0; m < NPLASMA; m++)
-	{
-	  n +=
-	    fread (macromain[m].jbar, sizeof (double), size_Jbar_est, fptr);
-	  n +=
-	    fread (macromain[m].jbar_old, sizeof (double), size_Jbar_est,
-		   fptr);
-	  n +=
-	    fread (macromain[m].gamma, sizeof (double), size_gamma_est, fptr);
-	  n +=
-	    fread (macromain[m].gamma_old, sizeof (double), size_gamma_est,
-		   fptr);
-	  n +=
-	    fread (macromain[m].gamma_e, sizeof (double), size_gamma_est,
-		   fptr);
-	  n +=
-	    fread (macromain[m].gamma_e_old, sizeof (double), size_gamma_est,
-		   fptr);
-	  n +=
-	    fread (macromain[m].alpha_st, sizeof (double), size_gamma_est,
-		   fptr);
-	  n +=
-	    fread (macromain[m].alpha_st_old, sizeof (double), size_gamma_est,
-		   fptr);
-	  n +=
-	    fread (macromain[m].alpha_st_e, sizeof (double), size_gamma_est,
-		   fptr);
-	  n +=
-	    fread (macromain[m].alpha_st_e_old, sizeof (double),
-		   size_gamma_est, fptr);
-	  n +=
-	    fread (macromain[m].recomb_sp, sizeof (double), size_alpha_est,
-		   fptr);
-	  n +=
-	    fread (macromain[m].recomb_sp_e, sizeof (double), size_alpha_est,
-		   fptr);
-	  n +=
-	    fread (macromain[m].matom_emiss, sizeof (double), nlevels_macro,
-		   fptr);
-	  n +=
-	    fread (macromain[m].matom_abs, sizeof (double), nlevels_macro,
-		   fptr);
+      /* Force recalculation of kpkt_rates */
 
-	  /* Force recalculation of kpkt_rates */
-
-	  macromain[m].kpkt_rates_known = 0;
-	}
-
+      macromain[m].kpkt_rates_known = 0;
     }
+
+  }
 
   fclose (fptr);
 
@@ -348,31 +293,30 @@ wind_complete (w)
   /* JM Loop over number of domains */
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
+  {
+    if (zdom[ndom].coord_type == SPHERICAL)
     {
-      if (zdom[ndom].coord_type == SPHERICAL)
-	{
-	  spherical_wind_complete (ndom, w);
-	}
-      else if (zdom[ndom].coord_type == CYLIND)
-	{
-	  cylind_wind_complete (ndom, w);
-	}
-      else if (zdom[ndom].coord_type == RTHETA)
-	{
-	  rtheta_wind_complete (ndom, w);
-	}
-      else if (zdom[ndom].coord_type == CYLVAR)
-	{
-	  cylvar_wind_complete (ndom, w);
-	}
-      else
-	{
-	  Error ("wind_complete: Don't know how to complete coord_type %d\n",
-		 zdom[ndom].coord_type);
-	  exit (0);
-	}
-
+      spherical_wind_complete (ndom, w);
     }
+    else if (zdom[ndom].coord_type == CYLIND)
+    {
+      cylind_wind_complete (ndom, w);
+    }
+    else if (zdom[ndom].coord_type == RTHETA)
+    {
+      rtheta_wind_complete (ndom, w);
+    }
+    else if (zdom[ndom].coord_type == CYLVAR)
+    {
+      cylvar_wind_complete (ndom, w);
+    }
+    else
+    {
+      Error ("wind_complete: Don't know how to complete coord_type %d\n", zdom[ndom].coord_type);
+      exit (0);
+    }
+
+  }
   return (0);
 }
 
@@ -386,10 +330,10 @@ spec_save (filename)
   int n;
 
   if ((fptr = fopen (filename, "w")) == NULL)
-    {
-      Error ("spec_save: Unable to open %s\n", filename);
-      exit (0);
-    }
+  {
+    Error ("spec_save: Unable to open %s\n", filename);
+    exit (0);
+  }
 
   sprintf (line, "Version %s  nspectra %d\n", VERSION, nspectra);
   n = fwrite (line, sizeof (line), 1, fptr);
@@ -411,29 +355,25 @@ spec_read (filename)
   char version[LINELENGTH];
 
   if ((fptr = fopen (filename, "r")) == NULL)
-    {
-      Error ("spec_read: Unable to open %s\n", filename);
-      exit (0);
-    }
+  {
+    Error ("spec_read: Unable to open %s\n", filename);
+    exit (0);
+  }
 
   n = fread (line, sizeof (line), 1, fptr);
 
   sscanf (line, "%*s %s %*s %d", version, &nspectra);
-  Log
-    ("Reading specfile %s with %d spectra created with python version %s with python version %s\n",
-     filename, nspectra, version, VERSION);
+  Log ("Reading specfile %s with %d spectra created with python version %s with python version %s\n", filename, nspectra, version, VERSION);
 
 
   /* First allocate space */
 
   xxspec = calloc (sizeof (spectrum_dummy), nspectra);
   if (xxspec == NULL)
-    {
-      Error
-	("spectrum_init: Could not allocate memory for %d spectra with %d wavelengths\n",
-	 nspectra, NWAVE);
-      exit (0);
-    }
+  {
+    Error ("spectrum_init: Could not allocate memory for %d spectra with %d wavelengths\n", nspectra, NWAVE);
+    exit (0);
+  }
 
 /* Now read the rest of the file */
 
