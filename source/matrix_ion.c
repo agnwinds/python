@@ -71,7 +71,7 @@ matrix_ion_populations (xplasma, mode)
      int mode;
 
 {
-  double elem_dens[nelements+1]; //The fractional abundence of each ion
+  double elem_dens[200]; //The fractional abundence of each ion
   int nn, mm, nrows;
   double rate_matrix[nions][nions];
   double newden[NIONS];
@@ -102,16 +102,15 @@ matrix_ion_populations (xplasma, mode)
 
   /* Dielectronic recombination and direct ionization coefficients depend only on electron temperature, calculate them now -
      they will not change */
-  
-//  for (mm=0;mm<nelements+1;mm++)
-//  {
-//	  elem_dens[mm]=0.0;
-//  }
+  for (mm=0;mm<ion[nions-1].z+1;mm++)
+    {
+	  elem_dens[mm]=0.0;
+	    }
  
-//  for (mm=0;mm<nions;mm++)
-//  {	  
-//	  elem_dens[ion[mm].z]=elem_dens[ion[mm].z]+xplasma->density[mm];
-//  }
+		  for (mm=0;mm<nions;mm++)
+	{	  
+		elem_dens[ion[mm].z]=elem_dens[ion[mm].z]+xplasma->density[mm];
+			}
   
   
   
@@ -131,9 +130,7 @@ matrix_ion_populations (xplasma, mode)
 
   for (mm = 0; mm < nions; mm++)
     {
-      newden[mm] = xplasma->density[mm];
-//	  printf ("newden=%e\n",newden[mm]);
-		  //elem_dens[ion[mm].z];	// newden is our local density array - now made fractional
+      newden[mm] = xplasma->density[mm]/elem_dens[ion[mm].z];	// newden is our local density array - now made fractional
       xion[mm] = mm;		// xion is an array we use to track which ion is in which row of the matrix
       if (ion[mm].istate != 1)	// We can recombine since we are not in the first ionization stage
 	{
@@ -216,8 +213,8 @@ matrix_ion_populations (xplasma, mode)
      the same result as the original procedure, or for successive calculations, it should be a better guess. I've leftin the
      original code, commented out...  */
 
- // xne = xxne = xxxne = get_ne (xplasma->density);	// Set n_e to the current value. 
-  xne = xxne = xxxne = get_ne (newden);	// Set n_e to the current value. 
+ xne = xxne = xxxne = get_ne (xplasma->density);	// Set n_e to the current value. 
+//  xne = xxne = xxxne = get_ne (newden);	// Set n_e to the current value. 
 
   /* xne is the current working number xxne */
 
@@ -354,14 +351,13 @@ matrix_ion_populations (xplasma, mode)
 	    newden[nn] = DENSITY_MIN;
 	}
 	free (populations);
-      xnew = get_ne (newden);	/* determine the electron density for this density distribution */
+//      xnew = get_ne (newden);	/* determine the electron density for this density distribution */
 	  
-//	xnew=0.0;
-//	  for (nn = 0; nn < nions; nn++)
-//	    {
-//	      xnew += newden[nn] * (ion[nn].istate - 1) ;
-			  //* elem_dens[ion[nn].z];
-//	    }
+		xnew=0.0;
+			  for (nn = 0; nn < nions; nn++)
+			  	    {
+							      xnew += newden[nn] * (ion[nn].istate - 1)* elem_dens[ion[nn].z];
+					}
 
 
       if (xnew < DENSITY_MIN)
@@ -409,8 +405,7 @@ matrix_ion_populations (xplasma, mode)
       if (ion[nn].macro_info == 0 || geo.macro_ioniz_mode == 0
 	  || geo.macro_simple == 1)
 	{
- 	  xplasma->density[nn] = newden[nn];
-		  //*elem_dens[ion[nn].z];
+ 	  xplasma->density[nn] = newden[nn]*elem_dens[ion[nn].z];
 //	  printf ("test  %e\n",xplasma->density[nn]);
 	}
       if ( (sane_check(xplasma->density[nn])) || (xplasma->density[nn] < 0.0) )
@@ -650,8 +645,8 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
     {
       if (ion[nn].istate == 1)
 	{
-			  b_temp[nn] = nh * ele[xelem[nn]].abun;
-		//b_temp[nn]=1.0;
+//			  b_temp[nn] = nh * ele[xelem[nn]].abun;
+		b_temp[nn]=1.0;
 	  for (mm = 0; mm < nions; mm++)
 	    {
 	      if (ion[mm].z == ion[nn].z)
