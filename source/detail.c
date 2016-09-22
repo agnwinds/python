@@ -38,44 +38,43 @@ detailed_balance (xplasma, nelem, newden)
   double tot;
 
 
-  first = ele[nelem].firstion;	/*first and last identify the postion in the array */
-  last = first + ele[nelem].nions;	/*  So for H which has 2 ions, H1 and H2, first will generally
-					   be 0 and last will be 2 so the for loop below will just be done once for nion = 1 */
+  first = ele[nelem].firstion;  /*first and last identify the postion in the array */
+  last = first + ele[nelem].nions;      /*  So for H which has 2 ions, H1 and H2, first will generally
+                                           be 0 and last will be 2 so the for loop below will just be done once for nion = 1 */
 
 
   tot = 0;
   for (n = first; n < last; n++)
+  {
+    tot += xplasma->density[n];
+    if (xplasma->density[n] > 0.0)
     {
-      tot += xplasma->density[n];
-      if (xplasma->density[n] > 0.0)
-	{
-	  rates_up[n] = xplasma->ioniz[n] / xplasma->density[n];
-	}
-      else
-	rates_up[n] = 0.0;
-      if (xplasma->density[n + 1] > 0.0)
-	{
-	  rates_down[n] = xplasma->recomb[n] / xplasma->density[n + 1];
-	}
-      else
-	rates_down[n] = 0.0;
-
-      if (rates_up[n] < 1.e-50 || rates_down[n] < 1.e-50)
-	{
-	  rates_up[n] = 1e-10 * xplasma->density[n + 1];
-	  rates_down[n] = 1e-10 * xplasma->density[n];
-	}
+      rates_up[n] = xplasma->ioniz[n] / xplasma->density[n];
     }
+    else
+      rates_up[n] = 0.0;
+    if (xplasma->density[n + 1] > 0.0)
+    {
+      rates_down[n] = xplasma->recomb[n] / xplasma->density[n + 1];
+    }
+    else
+      rates_down[n] = 0.0;
 
-  rebalance (&rates_up[first], &rates_down[first], &fraction[first],
-	     ele[nelem].nions);
+    if (rates_up[n] < 1.e-50 || rates_down[n] < 1.e-50)
+    {
+      rates_up[n] = 1e-10 * xplasma->density[n + 1];
+      rates_down[n] = 1e-10 * xplasma->density[n];
+    }
+  }
+
+  rebalance (&rates_up[first], &rates_down[first], &fraction[first], ele[nelem].nions);
   for (n = first; n < last; n++)
-    {
-      newden[n] = fraction[n] * tot;
-      //Prevent the density from falling to a number likely to produce zero divides
-      if (newden[n] < DENSITY_MIN)
-	newden[n] = DENSITY_MIN;
-    }
+  {
+    newden[n] = fraction[n] * tot;
+    //Prevent the density from falling to a number likely to produce zero divides
+    if (newden[n] < DENSITY_MIN)
+      newden[n] = DENSITY_MIN;
+  }
 
   return (0);
 }
@@ -98,11 +97,11 @@ rebalance (rates_up, rates_down, fraction, ntot)
   double sum;
   fraction[0] = sum = 1.;
   for (n = 1; n < ntot; n++)
-    {
+  {
 
-      fraction[n] = rates_up[n - 1] / rates_down[n - 1] * fraction[n - 1];
-      sum += fraction[n];
-    }
+    fraction[n] = rates_up[n - 1] / rates_down[n - 1] * fraction[n - 1];
+    sum += fraction[n];
+  }
 
   for (n = 0; n < ntot; n++)
     fraction[n] /= sum;
@@ -140,71 +139,56 @@ wind_update_after_detailed_balance (xplasma, nelem, newden)
 {
   int nion;
   int first, last;
-  first = ele[nelem].firstion;	/*first and last identify the postion in the array */
-  last = first + ele[nelem].nions;	/*  So for H which has 2 ions, H1 and H2, first will generally
-					   be 0 and last will be 2 so the for loop below will just be done once for nion = 1 */
+  first = ele[nelem].firstion;  /*first and last identify the postion in the array */
+  last = first + ele[nelem].nions;      /*  So for H which has 2 ions, H1 and H2, first will generally
+                                           be 0 and last will be 2 so the for loop below will just be done once for nion = 1 */
   for (nion = first; nion < last; nion++)
+  {
+    if (xplasma->density[nion] > 0.0)
     {
-      if (xplasma->density[nion] > 0.0)
-	{
-	  xplasma->ioniz[nion] *= newden[nion] / xplasma->density[nion];
-	  xplasma->heat_ion[nion] *= newden[nion] / xplasma->density[nion];
-	}
-      else
-	{
-	  Error
-	    ("wind_update_after_detailed_balance: ioniz  Old den of nion %d (%s %d) not positive %e \n",
-	     nion, ele[nelem].name, ion[nion].istate, xplasma->density[nion]);
-	}
-      if (xplasma->density[nion + 1] > 0.0)
-	{
-	  xplasma->recomb[nion] *=
-	    newden[nion + 1] / xplasma->density[nion + 1];
-	  xplasma->heat_ion[nion + 1] *=
-	    newden[nion + 1] / xplasma->density[nion + 1];
-	}
-
-      else
-	{
-	  Error
-	    ("wind_update_after_detailed_balance: recomb Old den of nion %d (%s %d) not positive %e \n",
-	     nion + 1, ele[nelem].name, ion[nion + 1].istate,
-	     xplasma->density[nion + 1]);
-	}
+      xplasma->ioniz[nion] *= newden[nion] / xplasma->density[nion];
+      xplasma->heat_ion[nion] *= newden[nion] / xplasma->density[nion];
     }
+    else
+    {
+      Error
+        ("wind_update_after_detailed_balance: ioniz  Old den of nion %d (%s %d) not positive %e \n",
+         nion, ele[nelem].name, ion[nion].istate, xplasma->density[nion]);
+    }
+    if (xplasma->density[nion + 1] > 0.0)
+    {
+      xplasma->recomb[nion] *= newden[nion + 1] / xplasma->density[nion + 1];
+      xplasma->heat_ion[nion + 1] *= newden[nion + 1] / xplasma->density[nion + 1];
+    }
+
+    else
+    {
+      Error
+        ("wind_update_after_detailed_balance: recomb Old den of nion %d (%s %d) not positive %e \n",
+         nion + 1, ele[nelem].name, ion[nion + 1].istate, xplasma->density[nion + 1]);
+    }
+  }
 
   // Next is a kluge for now to preserve heating and cooling in original notation
   // It should be deleted eventually, but one has to make sure none of the functionality
   // is lost
 
   if (nelem == 0)
-    {
+  {
 
-      xplasma->heat_photo =
-	xplasma->heat_ion[0] + xplasma->heat_ion[2] + xplasma->heat_ion[3] +
-	xplasma->heat_z;
-      xplasma->heat_tot =
-	xplasma->heat_lines + xplasma->heat_ff + xplasma->heat_photo;
-      xplasma->lum_fb =
-	xplasma->lum_ion[0] + xplasma->lum_ion[2] + xplasma->lum_ion[3] +
-	xplasma->lum_z;
-      xplasma->lum_rad =
-	xplasma->lum_lines + xplasma->lum_ff + xplasma->lum_fb;
-    }
+    xplasma->heat_photo = xplasma->heat_ion[0] + xplasma->heat_ion[2] + xplasma->heat_ion[3] + xplasma->heat_z;
+    xplasma->heat_tot = xplasma->heat_lines + xplasma->heat_ff + xplasma->heat_photo;
+    xplasma->lum_fb = xplasma->lum_ion[0] + xplasma->lum_ion[2] + xplasma->lum_ion[3] + xplasma->lum_z;
+    xplasma->lum_rad = xplasma->lum_lines + xplasma->lum_ff + xplasma->lum_fb;
+  }
   else if (nelem == 1)
-    {
-      xplasma->lum_ion[2] *= newden[3] / xplasma->density[3];
-      xplasma->lum_ion[3] *= newden[4] / xplasma->density[4];
-      xplasma->heat_photo =
-	xplasma->heat_ion[1] + xplasma->heat_ion[2] + xplasma->heat_ion[3] +
-	xplasma->heat_z;
-      xplasma->heat_tot =
-	xplasma->heat_lines + xplasma->heat_ff + xplasma->heat_photo;
-      xplasma->lum_fb =
-	xplasma->lum_ion[0] + xplasma->lum_ion[2] + xplasma->lum_ion[3] +
-	xplasma->lum_z;
-      xplasma->lum_rad =
-	xplasma->lum_lines + xplasma->lum_ff + xplasma->lum_fb;
-    }
+  {
+    xplasma->lum_ion[2] *= newden[3] / xplasma->density[3];
+    xplasma->lum_ion[3] *= newden[4] / xplasma->density[4];
+    xplasma->heat_photo = xplasma->heat_ion[1] + xplasma->heat_ion[2] + xplasma->heat_ion[3] + xplasma->heat_z;
+    xplasma->heat_tot = xplasma->heat_lines + xplasma->heat_ff + xplasma->heat_photo;
+    xplasma->lum_fb = xplasma->lum_ion[0] + xplasma->lum_ion[2] + xplasma->lum_ion[3] + xplasma->lum_z;
+    xplasma->lum_rad = xplasma->lum_lines + xplasma->lum_ff + xplasma->lum_fb;
+  }
   return (0);
 }

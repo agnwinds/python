@@ -87,7 +87,7 @@ History:
 **************************************************************/
 
 int
-where_in_wind (x,ndomain)
+where_in_wind (x, ndomain)
      double x[];
      int *ndomain;
 {
@@ -100,107 +100,103 @@ where_in_wind (x,ndomain)
   /* First check for items, like the diks that are not domain
    * related, like the disk */
 
-  z = fabs (x[2]);		/* Necessary to get correct answer above
-				   and below plane */
-  rho = sqrt (x[0] * x[0] + x[1] * x[1]);	/* This is distance from z axis */
+  z = fabs (x[2]);              /* Necessary to get correct answer above
+                                   and below plane */
+  rho = sqrt (x[0] * x[0] + x[1] * x[1]);       /* This is distance from z axis */
 
 
   /* Check if position is inside the disk for a vertically extended disk */
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
+  {
+    if (rho < geo.diskrad && z < zdisk (rho))
     {
-      if (rho < geo.diskrad && z < zdisk (rho))
-	{
-	  *ndomain=-1;
-	  return (W_IN_DISK);
-	}
+      *ndomain = -1;
+      return (W_IN_DISK);
     }
+  }
 
 
   /* Now check whether position is a wind region of any of the domains.
    * This is done in reverse order on the assumption that our domains
    * are layered on top of one another.  */
 
-  ireturn=W_NOT_INWIND;
-  *ndomain=-1;
+  ireturn = W_NOT_INWIND;
+  *ndomain = -1;
 
-  rad=length(x);
+  rad = length (x);
 
   for (ndom = geo.ndomain - 1; ndom > -1; ndom--)
+  {
+
+    one_dom = &zdom[ndom];
+
+
+    /* First check to see if photon is inside or outside wind */
+
+    if (rad < one_dom->rmin)
     {
-
-      one_dom = &zdom[ndom];
-
-
-      /* First check to see if photon is inside or outside wind */
-
-      if (rad < one_dom->rmin)
-	{
-	  continue;		/*x is inside the wind  radially */
-	}
-      if (rad > one_dom->rmax)
-	{
-	  continue;		/*the position is beyond the wind radially */
-	}
-
-      if (z > one_dom->zmax)
-	{
-	  continue;		/*the position is beyond the wind radially */
-	}
-
-      /* Now for the elvis wind model, check to see if the position is
-       * inside all of the wind or if it is in the vertical section of the wind
-       *
-       * Note the use of sv_rmax and sv_rmin here, because thise are not the
-       * same as for the windcones gescribed by geo.rmin and geo.rmax
-       * 111124 ksl
-       */
-
-      if (one_dom->wind_type == ELVIS)
-	{
-	  if (rho < one_dom->sv_rmin)
-	    {
-	      continue;
-	    }
-	  if (rho < one_dom->sv_rmax && z < one_dom->elvis_offset)
-	    {
-     		*ndomain=ndom;
-     		ireturn=W_ALL_INWIND;
-	      break;  /* The position is in the cap */
-	    }
-	}
-
-
-      /* Check if one is inside the inner windcone */
-      if (rho <
-	  (rho_min =
-	   one_dom->wind_rho_min + z * tan (one_dom->wind_thetamin)))
-	{
-	  continue;
-	}
-
-      /* Finally check if positon is outside the outer windcone */
-      /* NSH 130401 - The check below was taking a long time if geo.wind_thetamax was very close to pi/2.
-         check inserted to simply return INWIND if geo.wind_thetamax is within machine precision of pi/2. */
-      //XXX PLACEHOLDER -- ksl -- I am not clear on why this is sufficient for elvis mdodel, since it seems like you could get something to the side of the cap
-
-      if (fabs (one_dom->wind_thetamax - PI / 2.0) > 1e-6)	/* Only perform the next check if thetamax is not equal to pi/2 */
-	{
-	  if (rho >
-	      (rho_max =
-	       one_dom->wind_rho_max + z * tan (one_dom->wind_thetamax)))
-	    {
-	      continue;
-	    }
-	}
-
-      /* At this point we have passed all of the tests for being in the wind */
-      
-      *ndomain=ndom;
-      ireturn=W_ALL_INWIND;
-      break;
-
+      continue;                 /*x is inside the wind  radially */
     }
-      return (ireturn);
+    if (rad > one_dom->rmax)
+    {
+      continue;                 /*the position is beyond the wind radially */
+    }
+
+    if (z > one_dom->zmax)
+    {
+      continue;                 /*the position is beyond the wind radially */
+    }
+
+    /* Now for the elvis wind model, check to see if the position is
+     * inside all of the wind or if it is in the vertical section of the wind
+     *
+     * Note the use of sv_rmax and sv_rmin here, because thise are not the
+     * same as for the windcones gescribed by geo.rmin and geo.rmax
+     * 111124 ksl
+     */
+
+    if (one_dom->wind_type == ELVIS)
+    {
+      if (rho < one_dom->sv_rmin)
+      {
+        continue;
+      }
+      if (rho < one_dom->sv_rmax && z < one_dom->elvis_offset)
+      {
+        *ndomain = ndom;
+        ireturn = W_ALL_INWIND;
+        break;                  /* The position is in the cap */
+      }
+    }
+
+
+    /* Check if one is inside the inner windcone */
+    if (rho < (rho_min = one_dom->wind_rho_min + z * tan (one_dom->wind_thetamin)))
+    {
+      continue;
+    }
+
+    /* Finally check if positon is outside the outer windcone */
+    /* NSH 130401 - The check below was taking a long time if geo.wind_thetamax was very close to pi/2.
+       check inserted to simply return INWIND if geo.wind_thetamax is within machine precision of pi/2. */
+    //XXX PLACEHOLDER -- ksl -- I am not clear on why this is sufficient for elvis mdodel, since it seems like you could get something to the side of the cap
+
+    if (fabs (one_dom->wind_thetamax - PI / 2.0) > 1e-6)        /* Only perform the next check if thetamax is not equal to pi/2 */
+    {
+      if (rho > (rho_max = one_dom->wind_rho_max + z * tan (one_dom->wind_thetamax)))
+      {
+        continue;
+      }
+    }
+
+    /* At this point we have passed all of the tests for being in the wind */
+
+    *ndomain = ndom;
+    ireturn = W_ALL_INWIND;
+    break;
+
+  }
+  return (ireturn);
 }
 
 
@@ -242,54 +238,47 @@ wind_check (www, n)
   Log ("Got to wind_check\n");
   int i, j, k, istart, istop;
   if (n < 0)
-    {
-      istart = 0;
-      istop = NDIM2;
-    }
+  {
+    istart = 0;
+    istop = NDIM2;
+  }
   else
-    {
-      istart = n;
-      istop = istart + 1;
-    }
+  {
+    istart = n;
+    istop = istart + 1;
+  }
 
   for (i = istart; i < istop; i++)
+  {
+    for (j = 0; j < 3; j++)
     {
-      for (j = 0; j < 3; j++)
-	{
-	  if (sane_check (www[i].x[j]))
-	    {
-	      Error ("wind_check:sane_check www[%d].x[%d] %e\n", i, j,
-		     www[i].x[j]);
-	    }
-	  if (sane_check (www[i].xcen[j]))
-	    {
-	      Error ("wind_check:sane_check www[%d].xcen[%d] %e\n", i,
-		     j, www[i].xcen[j]);
-	    }
-	  if (sane_check (www[i].v[j]))
-	    {
-	      Error ("wind_check:sane_check www[%d].v[%d] %e\n", i, j,
-		     www[i].v[j]);
-	    }
-	}
-      for (j = 0; j < 3; j++)
-	{
-	  for (k = 0; k < 3; k++)
-	    {
-	      if (sane_check (www[i].v_grad[j][k]))
-		{
-		  Error
-		    ("wind_check:sane_check www[%d].v_grad[%d][%d] %e\n",
-		     i, j, k, www[i].v_grad[j][k]);
-		}
-	    }
-
-	}
+      if (sane_check (www[i].x[j]))
+      {
+        Error ("wind_check:sane_check www[%d].x[%d] %e\n", i, j, www[i].x[j]);
+      }
+      if (sane_check (www[i].xcen[j]))
+      {
+        Error ("wind_check:sane_check www[%d].xcen[%d] %e\n", i, j, www[i].xcen[j]);
+      }
+      if (sane_check (www[i].v[j]))
+      {
+        Error ("wind_check:sane_check www[%d].v[%d] %e\n", i, j, www[i].v[j]);
+      }
     }
+    for (j = 0; j < 3; j++)
+    {
+      for (k = 0; k < 3; k++)
+      {
+        if (sane_check (www[i].v_grad[j][k]))
+        {
+          Error ("wind_check:sane_check www[%d].v_grad[%d][%d] %e\n", i, j, k, www[i].v_grad[j][k]);
+        }
+      }
 
-  Log
-    ("Wind_check: Punchthrough distance DFUDGE %e www[1].x[2] %e\n",
-     DFUDGE, www[1].x[2]);
+    }
+  }
+
+  Log ("Wind_check: Punchthrough distance DFUDGE %e www[1].x[2] %e\n", DFUDGE, www[1].x[2]);
   Log ("Finished wind check\n");
   return (0);
 }
@@ -316,46 +305,46 @@ model_velocity (ndom, x, v)
   double speed;
 
   if (zdom[ndom].wind_type == SV)
-    {
-      speed = sv_velocity (x, v, ndom);
-    }
+  {
+    speed = sv_velocity (x, v, ndom);
+  }
   else if (zdom[ndom].wind_type == SPHERE)
-    {
-      speed = stellar_velocity (ndom, x, v);
-    }
+  {
+    speed = stellar_velocity (ndom, x, v);
+  }
   else if (zdom[ndom].wind_type == HYDRO)
-    {
-      speed = hydro_velocity (x, v);
-    }
+  {
+    speed = hydro_velocity (x, v);
+  }
   else if (zdom[ndom].wind_type == CORONA)
-    {
-      speed = corona_velocity (ndom, x, v);
-    }
+  {
+    speed = corona_velocity (ndom, x, v);
+  }
   else if (zdom[ndom].wind_type == KNIGGE)
-    {
-      speed = kn_velocity (ndom, x, v);
-    }
+  {
+    speed = kn_velocity (ndom, x, v);
+  }
   else if (zdom[ndom].wind_type == HOMOLOGOUS)
-    {
-      speed = homologous_velocity (ndom, x, v);
-    }
+  {
+    speed = homologous_velocity (ndom, x, v);
+  }
   else if (zdom[ndom].wind_type == YSO)
-    {
-      speed = yso_velocity (ndom, x, v);
-    }
+  {
+    speed = yso_velocity (ndom, x, v);
+  }
   else if (zdom[ndom].wind_type == ELVIS)
-    {
-      speed = elvis_velocity (ndom, x, v);
-    }
+  {
+    speed = elvis_velocity (ndom, x, v);
+  }
   else if (zdom[ndom].wind_type == SHELL)
-    {
-      speed = stellar_velocity (ndom, x, v);
-    }
+  {
+    speed = stellar_velocity (ndom, x, v);
+  }
   else
-    {
-      Error ("wind: Unknown windtype %d\n", zdom[ndom].wind_type);
-      exit (0);
-    }
+  {
+    Error ("wind: Unknown windtype %d\n", zdom[ndom].wind_type);
+    exit (0);
+  }
 
   return (speed);
 }
@@ -393,23 +382,22 @@ model_vgrad (ndom, x, v_grad)
     ds = 1.e7;
 
   for (i = 0; i < 3; i++)
+  {
+    stuff_v (x, dx);
+    dx[i] += ds;
+
+    model_velocity (ndom, dx, v1);
+
+    if (sane_check (v1[0]) || sane_check (v1[1]) || sane_check (v1[2]))
     {
-      stuff_v (x, dx);
-      dx[i] += ds;
-
-      model_velocity (ndom, dx, v1);
-
-      if (sane_check (v1[0]) || sane_check (v1[1]) || sane_check (v1[2]))
-	{
-	  Error ("model_vgrad:sane_check dx %f %f %f v0 %f %f %f\n",
-		 dx[0], dx[1], dx[2], v1[0], v1[1], v1[2]);
-	}
-
-      vsub (v1, v0, dv);
-      for (j = 0; j < 3; j++)
-	dv[j] /= ds;
-      stuff_v (dv, &v_grad[i][0]);
+      Error ("model_vgrad:sane_check dx %f %f %f v0 %f %f %f\n", dx[0], dx[1], dx[2], v1[0], v1[1], v1[2]);
     }
+
+    vsub (v1, v0, dv);
+    for (j = 0; j < 3; j++)
+      dv[j] /= ds;
+    stuff_v (dv, &v_grad[i][0]);
+  }
 
   return (0);
 
@@ -433,50 +421,47 @@ model_rho (ndom, x)
   double rho;
 
   if (zdom[ndom].wind_type == SV)
-    {
-      rho = sv_rho (ndom, x);
-    }
+  {
+    rho = sv_rho (ndom, x);
+  }
   else if (zdom[ndom].wind_type == SPHERE)
-    {
-      rho = stellar_rho (ndom, x);
-    }
+  {
+    rho = stellar_rho (ndom, x);
+  }
   else if (zdom[ndom].wind_type == HYDRO)
-    {
-      rho = hydro_rho (x);
-    }
+  {
+    rho = hydro_rho (x);
+  }
   else if (zdom[ndom].wind_type == CORONA)
-    {
-      rho = corona_rho (ndom, x);
-    }
+  {
+    rho = corona_rho (ndom, x);
+  }
   else if (zdom[ndom].wind_type == KNIGGE)
-    {
-      rho = kn_rho (ndom, x);
-    }
+  {
+    rho = kn_rho (ndom, x);
+  }
   else if (zdom[ndom].wind_type == HOMOLOGOUS)
-    {
-      rho = homologous_rho (ndom, x);
-    }
+  {
+    rho = homologous_rho (ndom, x);
+  }
   else if (zdom[ndom].wind_type == YSO)
-    {
-      rho = yso_rho (ndom, x);
-    }
+  {
+    rho = yso_rho (ndom, x);
+  }
   else if (zdom[ndom].wind_type == ELVIS)
-    {
-      rho = elvis_rho (ndom, x);
-    }
+  {
+    rho = elvis_rho (ndom, x);
+  }
   else if (zdom[ndom].wind_type == SHELL)
-    {
-      rho = stellar_rho (ndom, x);
-    }
+  {
+    rho = stellar_rho (ndom, x);
+  }
   else
-    {
-      Error ("wind2d: Unknown windtype %d for domain %d\n", zdom[ndom].wind_type,ndom);
-      exit (0);
-    }
+  {
+    Error ("wind2d: Unknown windtype %d for domain %d\n", zdom[ndom].wind_type, ndom);
+    exit (0);
+  }
 
   return (rho);
 
 }
-
-
-

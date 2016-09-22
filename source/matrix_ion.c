@@ -86,18 +86,18 @@ matrix_ion_populations (xplasma, mode)
   int ierr, niterate;
   double xnew;
   //double xden[nelements];
-  int xion[nions];		// This array keeps track of what ion is in each line
-  int xelem[nions];		// This array keeps track of the element for each ion
+  int xion[nions];              // This array keeps track of what ion is in each line
+  int xelem[nions];             // This array keeps track of the element for each ion
   double pi_rates[nions];
   double rr_rates[nions];
-  double inner_rates[n_inner_tot]; //This array contains the rates for each of the inner shells. Where they go to requires the electron yield array
+  double inner_rates[n_inner_tot];      //This array contains the rates for each of the inner shells. Where they go to requires the electron yield array
 
   /* Copy some quantities from the cell into local variables */
 
-  nh = xplasma->rho * rho2nh;	// The number density of hydrogen ions - computed from density
-  t_e = xplasma->t_e;		// The electron temperature in the cell - used for collisional processes 
-  // t_r = xplasma->t_r;		// The radiation temperature - used for PI if we have a BB approximation
-  // www = xplasma->w;		// The radiative weight in the cell - again for BB approximation for PI
+  nh = xplasma->rho * rho2nh;   // The number density of hydrogen ions - computed from density
+  t_e = xplasma->t_e;           // The electron temperature in the cell - used for collisional processes 
+  // t_r = xplasma->t_r;                // The radiation temperature - used for PI if we have a BB approximation
+  // www = xplasma->w;          // The radiative weight in the cell - again for BB approximation for PI
 
   /* Dielectronic recombination and direct ionization coefficients depend only on electron temperature, calculate them now -
      they will not change */
@@ -106,7 +106,7 @@ matrix_ion_populations (xplasma, mode)
   compute_di_coeffs (t_e);
 
   /* JM 1508 -- also compute direct recombination coefficients */
-  compute_qrecomb_coeffs(t_e);
+  compute_qrecomb_coeffs (t_e);
 
 
   /* In the following loop, over all ions in the simulation, we compute the radiative recombination rates, and photionization
@@ -116,64 +116,64 @@ matrix_ion_populations (xplasma, mode)
      results are an improvement on what is there. */
 
   for (mm = 0; mm < nions; mm++)
+  {
+    newden[mm] = xplasma->density[mm];  // newden is our local density array
+    xion[mm] = mm;              // xion is an array we use to track which ion is in which row of the matrix
+    if (ion[mm].istate != 1)    // We can recombine since we are not in the first ionization stage
     {
-      newden[mm] = xplasma->density[mm];	// newden is our local density array
-      xion[mm] = mm;		// xion is an array we use to track which ion is in which row of the matrix
-      if (ion[mm].istate != 1)	// We can recombine since we are not in the first ionization stage
-	{
-	  rr_rates[mm] = total_rrate (mm, xplasma->t_e);	// radiative recombination rates
-	}
-      if (ion[mm].istate != ion[mm].z + 1)	// we can photoionize, since we are not in the z+1th ionization state (bare)
-	{
-	  if (mode == NEBULARMODE_MATRIX_BB)
-	    {
-	      pi_rates[mm] = calc_pi_rate (mm, xplasma, 2, 1);	// PI rate for the BB model
-	    }
-	  else if (mode == NEBULARMODE_MATRIX_SPECTRALMODEL)
-	    {
-	      pi_rates[mm] = calc_pi_rate (mm, xplasma, 1, 1);	// PI rate for an explicit spectral model
-	    }
-	  else
-	    {
-	      // If reached this point the program does not understand what type of spectral model to apply 
-	      Error ("matrix_ion_populations: Unknown mode %d\n", mode);
-	      exit (0);
-	    }		
-	}
+      rr_rates[mm] = total_rrate (mm, xplasma->t_e);    // radiative recombination rates
+    }
+    if (ion[mm].istate != ion[mm].z + 1)        // we can photoionize, since we are not in the z+1th ionization state (bare)
+    {
+      if (mode == NEBULARMODE_MATRIX_BB)
+      {
+        pi_rates[mm] = calc_pi_rate (mm, xplasma, 2, 1);        // PI rate for the BB model
+      }
+      else if (mode == NEBULARMODE_MATRIX_SPECTRALMODEL)
+      {
+        pi_rates[mm] = calc_pi_rate (mm, xplasma, 1, 1);        // PI rate for an explicit spectral model
+      }
+      else
+      {
+        // If reached this point the program does not understand what type of spectral model to apply 
+        Error ("matrix_ion_populations: Unknown mode %d\n", mode);
+        exit (0);
+      }
+    }
 
     for (nn = 0; nn < nelements; nn++)
-{
-  if (ion[mm].z == ele[nn].z)
     {
-      xelem[mm] = nn;	/* xelem logs which element each ow in the arrays refers to. This is important because we need
-			   to know what the total density will be for a group of rows all representing the same
-			   element. */
+      if (ion[mm].z == ele[nn].z)
+      {
+        xelem[mm] = nn;         /* xelem logs which element each ow in the arrays refers to. This is important because we need
+                                   to know what the total density will be for a group of rows all representing the same
+                                   element. */
+      }
     }
-	}
   }
-	
-	
-	/* The next loop generates the inner shell ionization rates, if they are present in the atomic data and
-	we wish to compute auger ionizaion rates. This only computes the rates out of each ion, we also need to 
-    consult the electron yield array if we are to compute the change in electron number*/
-  
-	if (geo.auger_ionization==1)
-	{
-		for (mm=0; mm<n_inner_tot; mm++)
-		{
-			if (mode==NEBULARMODE_MATRIX_BB)
-			{
-				inner_rates[mm]=calc_pi_rate(mm, xplasma, 2, 2);
-			}
-			else if (mode==NEBULARMODE_MATRIX_SPECTRALMODEL)
-			{
-				inner_rates[mm]=calc_pi_rate(mm,xplasma,1,2);
-			}
-		}
-	}
 
-	
-		
+
+  /* The next loop generates the inner shell ionization rates, if they are present in the atomic data and
+     we wish to compute auger ionizaion rates. This only computes the rates out of each ion, we also need to 
+     consult the electron yield array if we are to compute the change in electron number */
+
+  if (geo.auger_ionization == 1)
+  {
+    for (mm = 0; mm < n_inner_tot; mm++)
+    {
+      if (mode == NEBULARMODE_MATRIX_BB)
+      {
+        inner_rates[mm] = calc_pi_rate (mm, xplasma, 2, 2);
+      }
+      else if (mode == NEBULARMODE_MATRIX_SPECTRALMODEL)
+      {
+        inner_rates[mm] = calc_pi_rate (mm, xplasma, 1, 2);
+      }
+    }
+  }
+
+
+
 
 
   /* This next line sets the partition function for each ion. This has always been the place here python calculates the
@@ -185,13 +185,13 @@ matrix_ion_populations (xplasma, mode)
      We should really do better though... */
 
   if (mode == NEBULARMODE_MATRIX_BB)
-    {
-      partition_functions (xplasma, NEBULARMODE_ML93);	// We use t_r and the radiative weight
-    }
+  {
+    partition_functions (xplasma, NEBULARMODE_ML93);    // We use t_r and the radiative weight
+  }
   else if (mode == NEBULARMODE_MATRIX_SPECTRALMODEL)
-    {
-      partition_functions (xplasma, 4);	// Set to ground state 
-    }
+  {
+    partition_functions (xplasma, 4);   // Set to ground state 
+  }
 
   /* Next we need to obtain an initian guess for the electron density. In the past this has been done by calculating the
      hydrogen density directly from the Saha equation at the current electron temperature. In initial testing of this mode -
@@ -200,7 +200,7 @@ matrix_ion_populations (xplasma, mode)
      the same result as the original procedure, or for successive calculations, it should be a better guess. I've leftin the
      original code, commented out...  */
 
-  xne = xxne = xxxne = get_ne (newden);	// Set n_e to the current value. 
+  xne = xxne = xxxne = get_ne (newden); // Set n_e to the current value. 
 
   /* xne is the current working number xxne */
 
@@ -229,172 +229,165 @@ matrix_ion_populations (xplasma, mode)
 
   niterate = 0;
   while (niterate < MAXITERATIONS)
+  {
+
+
+    populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, xne, xelem);
+
+
+    /* The array is now fully populated, and we can begin the process of solving it */
+
+    nrows = nions;              /* This is a placeholder, we may end up removing rows and columns that have no rates (or very
+                                   low rates) connecting them to other rows. This may improve stability but will need to be
+                                   done carefully */
+
+    /* The solver routine was taken largely wholesale from the matom routine. I have left in most of the original comments, and 
+       added a few of my own for clarification */
+
+
+
+                /********************************************************************************/
+    /* The block that follows (down to next line of ***s) is to do the matrix inversion. It uses LU decomposition - the code
+       for doing this is taken from the GSL manual with very few modifications. */
+    /* here we solve the matrix equation M x = b, where x is our vector containing level populations as a fraction w.r.t the
+       whole element */
+    /* JM 1411 -- the actual LU decomposition- the process of obtaining a solution - is done by the routine solve_matrix() */
+
+    /* Replaced inline array allocaation with calloc, which will work with older version of c compilers */
+
+    /* This next line produces an array of the correct size to hold the rate matrix */
+
+    a_data = (double *) calloc (sizeof (double), nrows * nrows);
+
+    /* We now copy our rate matrix into the prepared matrix */
+    for (mm = 0; mm < nrows; mm++)
     {
-
-
-      populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
-				b_temp, xne, xelem);
-
-
-      /* The array is now fully populated, and we can begin the process of solving it */
-
-      nrows = nions;		/* This is a placeholder, we may end up removing rows and columns that have no rates (or very
-				   low rates) connecting them to other rows. This may improve stability but will need to be
-				   done carefully */
-
-      /* The solver routine was taken largely wholesale from the matom routine. I have left in most of the original comments, and 
-         added a few of my own for clarification */
-
-
-
-		/********************************************************************************/
-      /* The block that follows (down to next line of ***s) is to do the matrix inversion. It uses LU decomposition - the code
-         for doing this is taken from the GSL manual with very few modifications. */
-      /* here we solve the matrix equation M x = b, where x is our vector containing level populations as a fraction w.r.t the
-         whole element */
-      /* JM 1411 -- the actual LU decomposition- the process of obtaining a solution - is done by the routine solve_matrix() */
-
-      /* Replaced inline array allocaation with calloc, which will work with older version of c compilers */
-
-      /* This next line produces an array of the correct size to hold the rate matrix */
-	
-      a_data = (double *) calloc (sizeof (double), nrows * nrows);
-
-      /* We now copy our rate matrix into the prepared matrix */
-      for (mm = 0; mm < nrows; mm++)
-	{
-	  for (nn = 0; nn < nrows; nn++)
-	    {
-	      a_data[mm * nrows + nn] = rate_matrix[mm][nn];
-	    }
-	}
-
-
-
-      /* Replaced inline array allocaation with calloc, which will work with older version of c compilers calloc also sets the
-         elements to zero, which is required */
-
-      b_data = (double *) calloc (sizeof (double), nrows);
-      populations = (double *) calloc (sizeof (double), nrows);
-
-      /* This b_data column matrix is the total number density for each element, placed into the row which relates to the neutral 
-         ion. This matches the row in the rate matrix which is just 1 1 1 1 for all stages. NB, we could have chosen any line for 
-         this. */
-
       for (nn = 0; nn < nrows; nn++)
-	{
-	  b_data[nn] = b_temp[nn];
-	}
-
-	     ierr = solve_matrix (a_data, b_data, nrows, populations, xplasma->nplasma);
-
-      if (ierr != 0)
-	      Error ("matrix_ion_populations: bad return from solve_matrix\n",ierr);
-	    if (ierr ==2)
-		    Error ("matrix_ion_populations: some matrix rows failing relative error check\n");
-	    else if (ierr ==3)
-			  Error ("matrix_ion_populations: some matrix rows failing absolute error check\n");
-
-      /* free memory */
-      free (a_data);
-      free (b_data);
-
-      /* Calculate level populations for macro-atoms */
-      if (geo.macro_ioniz_mode == 1)
-	{
-	  macro_pops (xplasma, xne);
-	}
-
-      /* We now have the populations of all the ions stored in the matrix populations. We copy this data into the newden array
-         which will temperarily store all the populations. We wont copy this to the plasma structure until we are sure thatwe
-         have made things better. We just loop over all ions, and copy. The complexity in the loop is to future proof us against
-         the possibility that there are some ions that are not included in the matrix scheme becuse there is no route into or
-         out of it. */
-
-      for (nn = 0; nn < nions; nn++)
-	{
-	  newden[nn] = 0.0;	// initialise the arrayelement
-
-	  /* if the ion is being treated by macro_pops then use the populations just computed */
-	  if ((ion[nn].macro_info == 1) && (geo.macro_simple == 0)
-	      && (geo.macro_ioniz_mode == 1))
-	    {
-	      newden[nn] = xplasma->density[nn];
-	    }
-
-	  for (mm = 0; mm < nrows; mm++)	// inner loop over the elements of the population array
-	    {
-	      if (xion[mm] == nn)	// if this element contains the population of the ion is question
-		{
-		  newden[nn] = populations[mm];	// get the population
-		}
-	    }
+      {
+        a_data[mm * nrows + nn] = rate_matrix[mm][nn];
+      }
+    }
 
 
-	  if (newden[nn] < DENSITY_MIN)	// this wil also capture the case where population doesnt have a value for this ion
-	    newden[nn] = DENSITY_MIN;
-	}
-	free (populations);
-      xnew = get_ne (newden);	/* determine the electron density for this density distribution */
+
+    /* Replaced inline array allocaation with calloc, which will work with older version of c compilers calloc also sets the
+       elements to zero, which is required */
+
+    b_data = (double *) calloc (sizeof (double), nrows);
+    populations = (double *) calloc (sizeof (double), nrows);
+
+    /* This b_data column matrix is the total number density for each element, placed into the row which relates to the neutral 
+       ion. This matches the row in the rate matrix which is just 1 1 1 1 for all stages. NB, we could have chosen any line for 
+       this. */
+
+    for (nn = 0; nn < nrows; nn++)
+    {
+      b_data[nn] = b_temp[nn];
+    }
+
+    ierr = solve_matrix (a_data, b_data, nrows, populations, xplasma->nplasma);
+
+    if (ierr != 0)
+      Error ("matrix_ion_populations: bad return from solve_matrix\n", ierr);
+    if (ierr == 2)
+      Error ("matrix_ion_populations: some matrix rows failing relative error check\n");
+    else if (ierr == 3)
+      Error ("matrix_ion_populations: some matrix rows failing absolute error check\n");
+
+    /* free memory */
+    free (a_data);
+    free (b_data);
+
+    /* Calculate level populations for macro-atoms */
+    if (geo.macro_ioniz_mode == 1)
+    {
+      macro_pops (xplasma, xne);
+    }
+
+    /* We now have the populations of all the ions stored in the matrix populations. We copy this data into the newden array
+       which will temperarily store all the populations. We wont copy this to the plasma structure until we are sure thatwe
+       have made things better. We just loop over all ions, and copy. The complexity in the loop is to future proof us against
+       the possibility that there are some ions that are not included in the matrix scheme becuse there is no route into or
+       out of it. */
+
+    for (nn = 0; nn < nions; nn++)
+    {
+      newden[nn] = 0.0;         // initialise the arrayelement
+
+      /* if the ion is being treated by macro_pops then use the populations just computed */
+      if ((ion[nn].macro_info == 1) && (geo.macro_simple == 0) && (geo.macro_ioniz_mode == 1))
+      {
+        newden[nn] = xplasma->density[nn];
+      }
+
+      for (mm = 0; mm < nrows; mm++)    // inner loop over the elements of the population array
+      {
+        if (xion[mm] == nn)     // if this element contains the population of the ion is question
+        {
+          newden[nn] = populations[mm]; // get the population
+        }
+      }
 
 
-      if (xnew < DENSITY_MIN)
-	xnew = DENSITY_MIN;	/* fudge to keep a floor on ne */
+      if (newden[nn] < DENSITY_MIN)     // this wil also capture the case where population doesnt have a value for this ion
+        newden[nn] = DENSITY_MIN;
+    }
+    free (populations);
+    xnew = get_ne (newden);     /* determine the electron density for this density distribution */
 
 
-      if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6)	/* We have converged, or have the situation where we
-										   have a neutral plasma */
-	{
-	  break;		/* Break out of the while loop - we have finished our iterations */
-	}
-      xne = xxxne = (xnew + xne) / 2.;	/* New value of ne */
-
-      niterate++;
+    if (xnew < DENSITY_MIN)
+      xnew = DENSITY_MIN;       /* fudge to keep a floor on ne */
 
 
-      if (niterate == MAXITERATIONS)
-	{
-	  Error
-	    ("matrix_ion_populations: failed to converge for cell %i t %e nh %e xnew %e\n",
-	     xplasma->nplasma, t_e, nh, xnew);
+    if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6)        /* We have converged, or have the situation where we
+                                                                                   have a neutral plasma */
+    {
+      break;                    /* Break out of the while loop - we have finished our iterations */
+    }
+    xne = xxxne = (xnew + xne) / 2.;    /* New value of ne */
+
+    niterate++;
 
 
-	  for (nn = 0; nn < geo.nxfreq; nn++)
-	    {
-	      Log
-		("numin= %e (%e) numax= %e (%e) Model= %2d PL_log_w= %e PL_alpha= %e Exp_w= %e EXP_temp= %e\n",
-		 xplasma->fmin_mod[nn], geo.xfreq[nn], xplasma->fmax_mod[nn],
-		 geo.xfreq[nn + 1], xplasma->spec_mod_type[nn],
-		 xplasma->pl_log_w[nn], xplasma->pl_alpha[nn],
-		 xplasma->exp_w[nn], xplasma->exp_temp[nn]);
-	    }
+    if (niterate == MAXITERATIONS)
+    {
+      Error ("matrix_ion_populations: failed to converge for cell %i t %e nh %e xnew %e\n", xplasma->nplasma, t_e, nh, xnew);
 
-	  Error ("matrix_ion_populations: xxne %e theta %e\n", xxne);
 
-	  return (-1);		/* If we get to MAXITERATIONS, we return without copying the new populations into plasma */
-	}
-    }				/* This is the end of the iteration loop */
+      for (nn = 0; nn < geo.nxfreq; nn++)
+      {
+        Log
+          ("numin= %e (%e) numax= %e (%e) Model= %2d PL_log_w= %e PL_alpha= %e Exp_w= %e EXP_temp= %e\n",
+           xplasma->fmin_mod[nn], geo.xfreq[nn], xplasma->fmax_mod[nn],
+           geo.xfreq[nn + 1], xplasma->spec_mod_type[nn],
+           xplasma->pl_log_w[nn], xplasma->pl_alpha[nn], xplasma->exp_w[nn], xplasma->exp_temp[nn]);
+      }
+
+      Error ("matrix_ion_populations: xxne %e theta %e\n", xxne);
+
+      return (-1);              /* If we get to MAXITERATIONS, we return without copying the new populations into plasma */
+    }
+  }                             /* This is the end of the iteration loop */
 
 
   xplasma->ne = xnew;
   for (nn = 0; nn < nions; nn++)
+  {
+    /* If statement added here to suppress interference with macro populations (SS Apr 04) */
+    if (ion[nn].macro_info == 0 || geo.macro_ioniz_mode == 0 || geo.macro_simple == 1)
     {
-      /* If statement added here to suppress interference with macro populations (SS Apr 04) */
-      if (ion[nn].macro_info == 0 || geo.macro_ioniz_mode == 0
-	  || geo.macro_simple == 1)
-	{
-	  xplasma->density[nn] = newden[nn];
-	}
-      if ( (sane_check(xplasma->density[nn])) || (xplasma->density[nn] < 0.0) )
-        Error("matrix_ion_populations: ion %i has population %8.4e in cell %i\n", 
-               nn, xplasma->density[nn], xplasma->nplasma);
+      xplasma->density[nn] = newden[nn];
     }
+    if ((sane_check (xplasma->density[nn])) || (xplasma->density[nn] < 0.0))
+      Error ("matrix_ion_populations: ion %i has population %8.4e in cell %i\n", nn, xplasma->density[nn], xplasma->nplasma);
+  }
 
 
-  partition_functions (xplasma, 4);	/* WARNING fudge NSH 11/5/14 - this is as a test. We really need a better implementation
-					   of partition functions and levels for a power law illuminating spectrum. We found that
-					   if we didnt make this call, we would end up with undefined levels - which did really
-					   crazy things */
+  partition_functions (xplasma, 4);     /* WARNING fudge NSH 11/5/14 - this is as a test. We really need a better implementation
+                                           of partition functions and levels for a power law illuminating spectrum. We found that
+                                           if we didnt make this call, we would end up with undefined levels - which did really
+                                           crazy things */
 
 
 
@@ -446,12 +439,11 @@ matrix_ion_populations (xplasma, mode)
 **************************************************************/
 
 int
-populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates, b_temp,
-			  xne, xelem)
+populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, xne, xelem)
      PlasmaPtr xplasma;
      double rate_matrix[nions][nions];
      double pi_rates[nions];
-	 double inner_rates[n_inner_tot];
+     double inner_rates[n_inner_tot];
      double rr_rates[nions];
      double xne;
      double b_temp[nions];
@@ -460,19 +452,19 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
 {
   int nn, mm;
   double nh;
- int n_elec,d_elec,ion_out; //The number of electrons left in a current ion
+  int n_elec, d_elec, ion_out;  //The number of electrons left in a current ion
 
 
-  nh = xplasma->rho * rho2nh;	// The number density of hydrogen ions - computed from density
+  nh = xplasma->rho * rho2nh;   // The number density of hydrogen ions - computed from density
 
   /* First we initialise the matrix */
   for (nn = 0; nn < nions; nn++)
+  {
+    for (mm = 0; mm < nions; mm++)
     {
-      for (mm = 0; mm < nions; mm++)
-	{
-	  rate_matrix[nn][mm] = 0.0;
-	}
+      rate_matrix[nn][mm] = 0.0;
     }
+  }
 
 
   /* The next block of loops populate the matrix. For simplicity of reading the code each process has its own loop. Some rates
@@ -483,87 +475,85 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
 
 
   for (mm = 0; mm < nions; mm++)
+  {
+    if (ion[mm].istate != ion[mm].z + 1)        // we have electrons
     {
-      if (ion[mm].istate != ion[mm].z + 1)	// we have electrons
-	{
-	  rate_matrix[mm][mm] -= pi_rates[mm];
-	}
+      rate_matrix[mm][mm] -= pi_rates[mm];
     }
+  }
 
 
   /* Now we populate the elements relating to PI populating a state */
 
   for (mm = 0; mm < nions; mm++)
+  {
+    for (nn = 0; nn < nions; nn++)
     {
-      for (nn = 0; nn < nions; nn++)
-	{
 
-	  if (mm == nn + 1 && ion[nn].istate != ion[nn].z + 1
-	      && ion[mm].z == ion[nn].z)
-	    {
-	      rate_matrix[mm][nn] += pi_rates[nn];
-	    }
-	}
+      if (mm == nn + 1 && ion[nn].istate != ion[nn].z + 1 && ion[mm].z == ion[nn].z)
+      {
+        rate_matrix[mm][nn] += pi_rates[nn];
+      }
     }
+  }
 
   /* Now we populate the elements relating to direct ionization depopulating a state */
 
   for (mm = 0; mm < nions; mm++)
+  {
+    if (ion[mm].istate != ion[mm].z + 1 && ion[mm].dere_di_flag > 0)    // we have electrons and a DI rate
     {
-      if (ion[mm].istate != ion[mm].z + 1 && ion[mm].dere_di_flag > 0)	// we have electrons and a DI rate
-	{
-	  rate_matrix[mm][mm] -= (xne * di_coeffs[mm]);
-	}
+      rate_matrix[mm][mm] -= (xne * di_coeffs[mm]);
     }
+  }
 
   /* Now we populate the elements relating to direct ionization populating a state - this does depend on the electron density */
 
   for (mm = 0; mm < nions; mm++)
+  {
+    for (nn = 0; nn < nions; nn++)
     {
-      for (nn = 0; nn < nions; nn++)
-	{
-	  if (mm == nn + 1 && ion[nn].istate != ion[nn].z + 1
-	      && ion[mm].z == ion[nn].z && ion[nn].dere_di_flag > 0)
-	    {
-	      rate_matrix[mm][nn] += (xne * di_coeffs[nn]);
-	    }
-	}
+      if (mm == nn + 1 && ion[nn].istate != ion[nn].z + 1 && ion[mm].z == ion[nn].z && ion[nn].dere_di_flag > 0)
+      {
+        rate_matrix[mm][nn] += (xne * di_coeffs[nn]);
+      }
     }
+  }
 
 
   /* Now we populate the elements relating to radiative recomb depopulating a state */
 
   for (mm = 0; mm < nions; mm++)
+  {
+    if (ion[mm].istate != 1)    // we have space for electrons
     {
-      if (ion[mm].istate != 1)	// we have space for electrons
-	{
-	  rate_matrix[mm][mm] -= xne * (rr_rates[mm] + xne * qrecomb_coeffs[mm]);
-	}
+      rate_matrix[mm][mm] -= xne * (rr_rates[mm] + xne * qrecomb_coeffs[mm]);
     }
+  }
 
 
   /* Now we populate the elements relating to radiative recomb populating a state */
 
   for (mm = 0; mm < nions; mm++)
+  {
+    for (nn = 0; nn < nions; nn++)
     {
-      for (nn = 0; nn < nions; nn++)
-	{
-	  if (mm == nn - 1 && ion[nn].istate != 1 && ion[mm].z == ion[nn].z)
-	    {
-	      rate_matrix[mm][nn] += xne * (rr_rates[nn] + xne * qrecomb_coeffs[nn]);
-	    }
-	}
+      if (mm == nn - 1 && ion[nn].istate != 1 && ion[mm].z == ion[nn].z)
+      {
+        rate_matrix[mm][nn] += xne * (rr_rates[nn] + xne * qrecomb_coeffs[nn]);
+      }
     }
+  }
 
   /* Now we populate the elements relating to dielectronic recombination depopulating a state */
 
   for (mm = 0; mm < nions; mm++)
+  {
+    if (ion[mm].istate != 1 && ion[mm].drflag > 0)      // we have space for electrons
     {
-      if (ion[mm].istate != 1 && ion[mm].drflag > 0)	// we have space for electrons
-	{
-	  rate_matrix[mm][mm] -= (xne * dr_coeffs[mm]);
-	}
+      rate_matrix[mm][mm] -= (xne * dr_coeffs[mm]);
     }
+  }
 
 
   /* Now we populate the elements relating to dielectronic recombination populating a state */
@@ -571,36 +561,35 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
 
 
   for (mm = 0; mm < nions; mm++)
+  {
+    for (nn = 0; nn < nions; nn++)
     {
-      for (nn = 0; nn < nions; nn++)
-	{
-	  if (mm == nn - 1 && ion[nn].istate != 1 && ion[mm].z == ion[nn].z
-	      && ion[mm].drflag > 0)
-	    {
-	      rate_matrix[mm][nn] += (xne * dr_coeffs[nn]);
-	    }
-	}
+      if (mm == nn - 1 && ion[nn].istate != 1 && ion[mm].z == ion[nn].z && ion[mm].drflag > 0)
+      {
+        rate_matrix[mm][nn] += (xne * dr_coeffs[nn]);
+      }
     }
-	
-	
-	
-	for (mm=0; mm<n_inner_tot; mm++)  //There mare be several rates for each ion, so we loop over all the rates
-	{
-		if (inner_cross[mm].n_elec_yield != -1)  //we only want to treat ionization where we have info about the yield
-		{
-			ion_out=inner_cross[mm].nion;  //this is the ion which is being depopulated
-			rate_matrix[ion_out][ion_out]-=inner_rates[mm]; //This is the depopulation
-			n_elec=ion[ion_out].z-ion[ion_out].istate+1;
-			if (n_elec>11)
-				n_elec=11;
-			for (d_elec=1;d_elec<n_elec;d_elec++) //We do a loop over the number of remaining electrons
-			{
-				nn=ion_out+d_elec; //We will be populating a state d_elec stages higher
-				rate_matrix[nn][ion_out] += inner_rates[mm]*inner_elec_yield[inner_cross[mm].n_elec_yield].prob[d_elec-1];
-			}
-		}
-	}
-	
+  }
+
+
+
+  for (mm = 0; mm < n_inner_tot; mm++)  //There mare be several rates for each ion, so we loop over all the rates
+  {
+    if (inner_cross[mm].n_elec_yield != -1)     //we only want to treat ionization where we have info about the yield
+    {
+      ion_out = inner_cross[mm].nion;   //this is the ion which is being depopulated
+      rate_matrix[ion_out][ion_out] -= inner_rates[mm]; //This is the depopulation
+      n_elec = ion[ion_out].z - ion[ion_out].istate + 1;
+      if (n_elec > 11)
+        n_elec = 11;
+      for (d_elec = 1; d_elec < n_elec; d_elec++)       //We do a loop over the number of remaining electrons
+      {
+        nn = ion_out + d_elec;  //We will be populating a state d_elec stages higher
+        rate_matrix[nn][ion_out] += inner_rates[mm] * inner_elec_yield[inner_cross[mm].n_elec_yield].prob[d_elec - 1];
+      }
+    }
+  }
+
 
 
 
@@ -616,27 +605,27 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
      seperately.. Something to watch */
 
   for (nn = 0; nn < nions; nn++)
+  {
+    if (ion[nn].istate == 1)
     {
-      if (ion[nn].istate == 1)
-	{
-	  b_temp[nn] = nh * ele[xelem[nn]].abun;
-	  for (mm = 0; mm < nions; mm++)
-	    {
-	      if (ion[mm].z == ion[nn].z)
-		{
-		  rate_matrix[nn][mm] = 1.0;
-		}
-	      else
-		{
-		  rate_matrix[nn][mm] = 0.0;
-		}
-	    }
-	}
-      else
-	{
-	  b_temp[nn] = 0.0;
-	}
+      b_temp[nn] = nh * ele[xelem[nn]].abun;
+      for (mm = 0; mm < nions; mm++)
+      {
+        if (ion[mm].z == ion[nn].z)
+        {
+          rate_matrix[nn][mm] = 1.0;
+        }
+        else
+        {
+          rate_matrix[nn][mm] = 0.0;
+        }
+      }
     }
+    else
+    {
+      b_temp[nn] = 0.0;
+    }
+  }
 
   return (0);
 }
@@ -688,7 +677,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
      solution via gsl_linalg_LU_refine */
   double test_val;
   double det;
-  
+
   gsl_permutation *p;
   gsl_matrix_view m;
   gsl_vector_view b;
@@ -702,10 +691,10 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   m = gsl_matrix_view_array (a_data, nrows, nrows);
 
   /* these are used for testing the solution below */
-      test_matrix = gsl_matrix_alloc (nrows, nrows);
-	  test_vector = gsl_vector_alloc (nrows);
+  test_matrix = gsl_matrix_alloc (nrows, nrows);
+  test_vector = gsl_vector_alloc (nrows);
 
-	   gsl_matrix_memcpy (test_matrix, &m.matrix);	// create copy for testing 
+  gsl_matrix_memcpy (test_matrix, &m.matrix);   // create copy for testing 
 
 
   b = gsl_vector_view_array (b_data, nrows);
@@ -714,14 +703,14 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   populations = gsl_vector_alloc (nrows);
 
 
-  p = gsl_permutation_alloc (nrows);	// NEWKSL
+  p = gsl_permutation_alloc (nrows);    // NEWKSL
 
   gsl_linalg_LU_decomp (&m.matrix, p, &s);
 
-  det = gsl_linalg_LU_det(&m.matrix, s); // get the determinant to report to user
+  det = gsl_linalg_LU_det (&m.matrix, s);       // get the determinant to report to user
 
   if (det == 0)
-    Error("Rate Matrix Determinant is %8.4e for cell %i", det, nplasma);
+    Error ("Rate Matrix Determinant is %8.4e for cell %i", det, nplasma);
 
   gsl_linalg_LU_solve (&m.matrix, p, &b.vector, populations);
 
@@ -735,44 +724,39 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
      statement just says we do not do anything to test_matrix, and the 0.0 means we do not add a second matrix to the result
      If the solution has worked, then test_vector should be equal to b_temp */
 
-    ierr =
-		  gsl_blas_dgemv (CblasNoTrans, 1.0, test_matrix, populations, 0.0,
-			    test_vector);
+  ierr = gsl_blas_dgemv (CblasNoTrans, 1.0, test_matrix, populations, 0.0, test_vector);
 
-				if (ierr != 0)
-				{
-					Error
-					("solve_matrix: bad return when testing matrix solution to rate equations.\n");
-				}
+  if (ierr != 0)
+  {
+    Error ("solve_matrix: bad return when testing matrix solution to rate equations.\n");
+  }
 
   /* now cycle through and check the solution to y = m * populations really is (1, 0, 0 ... 0) */
 
-				for (mm = 0; mm < nrows; mm++)
-				{
+  for (mm = 0; mm < nrows; mm++)
+  {
 
-      /* get the element of the vector we want to check */
-					test_val = gsl_vector_get (test_vector, mm);
+    /* get the element of the vector we want to check */
+    test_val = gsl_vector_get (test_vector, mm);
 
-      /* b_data is (1,0,0,0..) when we do matom rates. test_val is normally something like
-         1e-16 if it's supposed to be 0. We have a different error check if b_data[mm] is 0 */
+    /* b_data is (1,0,0,0..) when we do matom rates. test_val is normally something like
+       1e-16 if it's supposed to be 0. We have a different error check if b_data[mm] is 0 */
 
-					if (b_data[mm] > 0.0)
-					{
-						if (fabs ((test_val - b_data[mm]) / test_val) > EPSILON)
-						{
-							Error("solve_matrix: test solution fails relative error for row %i %e != %e\n",
-								mm, test_val, b_data[mm]);
-							ierr = 2;
-						}
-					}
-					else if (fabs (test_val - b_data[mm]) > EPSILON)	// if b_data is 0, check absolute error
-						
-					{
-						Error("solve_matrix: test solution fails absolute error for row %i %e != %e\n",
-							mm, test_val, b_data[mm]);
-						ierr = 3;
-					}
-				}
+    if (b_data[mm] > 0.0)
+    {
+      if (fabs ((test_val - b_data[mm]) / test_val) > EPSILON)
+      {
+        Error ("solve_matrix: test solution fails relative error for row %i %e != %e\n", mm, test_val, b_data[mm]);
+        ierr = 2;
+      }
+    }
+    else if (fabs (test_val - b_data[mm]) > EPSILON)    // if b_data is 0, check absolute error
+
+    {
+      Error ("solve_matrix: test solution fails absolute error for row %i %e != %e\n", mm, test_val, b_data[mm]);
+      ierr = 3;
+    }
+  }
 
   /* copy the populations to a normal array */
   for (mm = 0; mm < nrows; mm++)

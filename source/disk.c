@@ -51,73 +51,70 @@ teff (t, x)
   int n;
 
 
-  q = 0.0;			/* NSH 130605 to remove o3 compile error */
+  q = 0.0;                      /* NSH 130605 to remove o3 compile error */
 
 
   if (x < 1)
-    {
-      Error ("teff: x %f less than 1.0\n", x);
-      return (0.0);
-    }
+  {
+    Error ("teff: x %f less than 1.0\n", x);
+    return (0.0);
+  }
 
 
-  if ((geo.disk_tprofile != 0)
-      && ((x * geo.rstar) < blmod.r[blmod.n_blpts - 1]))
-    {
+  if ((geo.disk_tprofile != 0) && ((x * geo.rstar) < blmod.r[blmod.n_blpts - 1]))
+  {
     /* This is the case where the temperature profile is read in as an array */
-      if ((r = (x * geo.rstar)) < blmod.r[0])
-	{
-	  return (blmod.t[0]);
-	}
-      else
-	{
-	  for (n = 1; n < blmod.n_blpts; n++)
-	    {
-	      if ((r < blmod.r[n]) && (r > blmod.r[n - 1]))
-		{
-		  return (blmod.t[n]);
-		}
-	    }
-	  Error
-	    ("tdisk: inside BL profile region but failed to identify temp.\n");
-	}
-    }
-  else
+    if ((r = (x * geo.rstar)) < blmod.r[0])
     {
-	/* This is a standard accretion disk */
-
-      q = (1.e0 - pow (x, -0.5e0)) / (x * x * x);
-      q = t * pow (q, 0.25e0);
-
-      if (geo.disk_illum == DISK_ILLUM_ABSORB_AND_HEAT && geo.wcycle > 0)	/* Absorb photons and increase t so that heat is radiated
-							   but only do this if there has been at least one
-							   ionization cycle */
-	{
-	  r = x * geo.rstar;	// 04aug -- Requires fix if disk does not extend to rstar
-	  kkk = 1;		// photon cannot hit the disk at r<qdisk.r[0]
-	  while (r > qdisk.r[kkk] && kkk < NRINGS - 1)
-	    kkk++;
-	  /* Note that disk has 2 sides */
-	  theat = qdisk.heat[kkk - 1] / (2. * PI * (qdisk.r[kkk] * qdisk.r[kkk] - qdisk.r[kkk - 1] * qdisk.r[kkk - 1]));
-
-	  /* T_eff is given by T_eff**4= T_disk**4+Heating/area/STEFAN_BOLTZMANN */
-	  q = pow (q * q * q * q + (theat / STEFAN_BOLTZMANN), 0.25);
-
-	}
-      else if (geo.disk_illum == DISK_ILLUM_HEATED_BY_STAR)	// Analytic approximation for disk heating by star; implemented for YSOs
-	{
-	  disk_heating_factor = pow (geo.tstar / t, 4.0);
-	  disk_heating_factor *=
-	    (asin (1. / x) - (pow ((1. - (1. / (x * x))), 0.5) / x));
-	  disk_heating_factor /= PI;
-	  disk_heating_factor *= x * x * x;
-	  disk_heating_factor /= (1 - sqrt (1. / x));
-	  disk_heating_factor += 1;
-
-	  q *= pow (disk_heating_factor, (1. / 4.));
-
-	}
+      return (blmod.t[0]);
     }
+    else
+    {
+      for (n = 1; n < blmod.n_blpts; n++)
+      {
+        if ((r < blmod.r[n]) && (r > blmod.r[n - 1]))
+        {
+          return (blmod.t[n]);
+        }
+      }
+      Error ("tdisk: inside BL profile region but failed to identify temp.\n");
+    }
+  }
+  else
+  {
+    /* This is a standard accretion disk */
+
+    q = (1.e0 - pow (x, -0.5e0)) / (x * x * x);
+    q = t * pow (q, 0.25e0);
+
+    if (geo.disk_illum == DISK_ILLUM_ABSORB_AND_HEAT && geo.wcycle > 0) /* Absorb photons and increase t so that heat is radiated
+                                                                           but only do this if there has been at least one
+                                                                           ionization cycle */
+    {
+      r = x * geo.rstar;        // 04aug -- Requires fix if disk does not extend to rstar
+      kkk = 1;                  // photon cannot hit the disk at r<qdisk.r[0]
+      while (r > qdisk.r[kkk] && kkk < NRINGS - 1)
+        kkk++;
+      /* Note that disk has 2 sides */
+      theat = qdisk.heat[kkk - 1] / (2. * PI * (qdisk.r[kkk] * qdisk.r[kkk] - qdisk.r[kkk - 1] * qdisk.r[kkk - 1]));
+
+      /* T_eff is given by T_eff**4= T_disk**4+Heating/area/STEFAN_BOLTZMANN */
+      q = pow (q * q * q * q + (theat / STEFAN_BOLTZMANN), 0.25);
+
+    }
+    else if (geo.disk_illum == DISK_ILLUM_HEATED_BY_STAR)       // Analytic approximation for disk heating by star; implemented for YSOs
+    {
+      disk_heating_factor = pow (geo.tstar / t, 4.0);
+      disk_heating_factor *= (asin (1. / x) - (pow ((1. - (1. / (x * x))), 0.5) / x));
+      disk_heating_factor /= PI;
+      disk_heating_factor *= x * x * x;
+      disk_heating_factor /= (1 - sqrt (1. / x));
+      disk_heating_factor += 1;
+
+      q *= pow (disk_heating_factor, (1. / 4.));
+
+    }
+  }
   return (q);
 }
 
@@ -126,9 +123,7 @@ gdisk (mass, mdot, rmin)
      double mass, rmin, mdot;
 {
   double g0;
-  g0 =
-    0.625 * log10 (mass / MSOL) - 1.875 * log10 (rmin / 1.e9) +
-    0.125 * log10 (mdot / 1.e16);
+  g0 = 0.625 * log10 (mass / MSOL) - 1.875 * log10 (rmin / 1.e9) + 0.125 * log10 (mdot / 1.e16);
   g0 = 5.96e5 * pow (10., g0);
   return (g0);
 }
@@ -188,8 +183,8 @@ vdisk (x, v)
   stuff_v (x, xhold);
   xhold[2] = 0.0;
   r = length (xhold);
-  linterp (r, disk.r, disk.v, NRINGS, &speed,0); //interpolate in linear space
-  cross (north, xhold, v);	/* The velocity vector direction is given by north x r */
+  linterp (r, disk.r, disk.v, NRINGS, &speed, 0);       //interpolate in linear space
+  cross (north, xhold, v);      /* The velocity vector direction is given by north x r */
   renorm (v, speed);
   return (speed);
 }
@@ -289,31 +284,31 @@ ds_to_disk (p, miss_return)
 
 
   if (geo.disk_type == DISK_NONE)
-    return (VERY_BIG);		/* There is no disk! */
+    return (VERY_BIG);          /* There is no disk! */
 
   if (ds_to_disk_init == 0)
-    {				/* Initialize 3 structures that define
-				   the plane of the disk, and two other
-				   planes that encompass the disk */
+  {                             /* Initialize 3 structures that define
+                                   the plane of the disk, and two other
+                                   planes that encompass the disk */
 
-      diskplane.x[0] = diskplane.x[1] = diskplane.x[2] = 0.0;
-      diskplane.lmn[0] = diskplane.lmn[1] = 0.0;
-      diskplane.lmn[2] = 1.0;	//changed by SS August 04
+    diskplane.x[0] = diskplane.x[1] = diskplane.x[2] = 0.0;
+    diskplane.lmn[0] = diskplane.lmn[1] = 0.0;
+    diskplane.lmn[2] = 1.0;     //changed by SS August 04
 
 
-      disktop.x[0] = disktop.x[1] = 0.0;
-      disktop.x[2] = geo.diskrad * geo.disk_z0;
-      disktop.lmn[0] = disktop.lmn[1] = 0.0;
-      disktop.lmn[2] = 1.0;	//changed by SS August 04
+    disktop.x[0] = disktop.x[1] = 0.0;
+    disktop.x[2] = geo.diskrad * geo.disk_z0;
+    disktop.lmn[0] = disktop.lmn[1] = 0.0;
+    disktop.lmn[2] = 1.0;       //changed by SS August 04
 
-      diskbottom.x[0] = diskbottom.x[1] = 0.0;
-      diskbottom.x[2] = (-geo.diskrad * geo.disk_z0);
-      diskbottom.lmn[0] = diskbottom.lmn[1] = 0.0;
-      diskbottom.lmn[2] = 1.0;	//changed by SS August 04
+    diskbottom.x[0] = diskbottom.x[1] = 0.0;
+    diskbottom.x[2] = (-geo.diskrad * geo.disk_z0);
+    diskbottom.lmn[0] = diskbottom.lmn[1] = 0.0;
+    diskbottom.lmn[2] = 1.0;    //changed by SS August 04
 
-      ds_to_disk_init++;	// Only initialize once
+    ds_to_disk_init++;          // Only initialize once
 
-    }
+  }
 
   /* Now calculate the place where the photon hits the diskplane */
 
@@ -324,11 +319,11 @@ ds_to_disk (p, miss_return)
 
 
   if (geo.disk_type == DISK_FLAT)
-    {
-      if (r_plane > geo.diskrad)
-	return (VERY_BIG);
-      return (s_plane);
-    }
+  {
+    if (r_plane > geo.diskrad)
+      return (VERY_BIG);
+    return (s_plane);
+  }
 
   /* OK now we have to deal with the hard case.  We would like to
    * avoid actually having to calculate the intercept to the disk
@@ -350,23 +345,23 @@ ds_to_disk (p, miss_return)
   /* Now if rtop and r_bottom are both greater than diskrad
    * then this photon missed the disk */
   if (r_top > geo.diskrad && r_bottom > geo.diskrad)
+  {
+    if (miss_return == 0)
     {
-      if (miss_return == 0)
-	{
-	  return (VERY_BIG);
-	}
-      else
-	{
-	  if (s_top > s_bottom)
-	    {
-	      return (s_top);
-	    }
-	  else
-	    {
-	      return (s_bottom);
-	    }
-	}
+      return (VERY_BIG);
     }
+    else
+    {
+      if (s_top > s_bottom)
+      {
+        return (s_top);
+      }
+      else
+      {
+        return (s_bottom);
+      }
+    }
+  }
 
   /* OK, at this point we know the photon is on a path that passes 
    * through (or passed through the disk) and we must locate it. 
@@ -389,38 +384,38 @@ ds_to_disk (p, miss_return)
 
   x1 = s_plane;
   if (p->x[2] > 0.0)
+  {
+    if (r_top < geo.diskrad)
     {
-      if (r_top < geo.diskrad)
-	{
-	  x2 = s_top;
-	}
-      else
-	{
-	  x2 = s_bottom;
-	}
+      x2 = s_top;
     }
+    else
+    {
+      x2 = s_bottom;
+    }
+  }
   else
+  {
+    if (r_bottom < geo.diskrad)
     {
-      if (r_bottom < geo.diskrad)
-	{
-	  x2 = s_bottom;
-	}
-      else
-	{
-	  x2 = s_top;
-	}
+      x2 = s_bottom;
     }
+    else
+    {
+      x2 = s_top;
+    }
+  }
 
-  if (fabs (x2) > fabs (x1))	//fabs added by SS August 04
-    {
-      smin = x1;
-      smax = x2;
-    }
+  if (fabs (x2) > fabs (x1))    //fabs added by SS August 04
+  {
+    smin = x1;
+    smax = x2;
+  }
   else
-    {
-      smin = x2;		//added by SS August 04
-      smax = x1;		//added by SS August 04
-    }
+  {
+    smin = x2;                  //added by SS August 04
+    smax = x1;                  //added by SS August 04
+  }
 
 
   stuff_phot (p, &ds_to_disk_photon);
@@ -441,12 +436,12 @@ ds_to_disk (p, miss_return)
   stuff_phot (p, &phit);
   move_phot (&phit, s_sphere);
   if (fabs (phit.x[2]) < geo.disk_z0 * geo.diskrad)
-    {
-      /* The photon actually hits the disk rim and you must then check whether it hits
-       * the disk before the rim */
-      if (fabs (s_sphere) < fabs (s_disk))
-	return (s_sphere);
-    }
+  {
+    /* The photon actually hits the disk rim and you must then check whether it hits
+     * the disk before the rim */
+    if (fabs (s_sphere) < fabs (s_disk))
+      return (s_sphere);
+  }
 
   return (s_disk);
 }
@@ -470,15 +465,15 @@ disk_deriv (s, value, derivative)
   stuff_phot (&ds_to_disk_photon, &phit);
   move_phot (&phit, s);
   r1 = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
-  z1 = zdisk (r1) - fabs (phit.x[2]);	// this is the function
+  z1 = zdisk (r1) - fabs (phit.x[2]);   // this is the function
 
   /* OK now calculate the derivative */
 
   ds = (z1) / 100.;
-  ds += 1;			// We must move it a little bit (in case z1 = 0) SS Aug 2004
-  move_phot (&phit, ds);	// Move the photon a bit more
+  ds += 1;                      // We must move it a little bit (in case z1 = 0) SS Aug 2004
+  move_phot (&phit, ds);        // Move the photon a bit more
   r2 = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
-  z2 = zdisk (r2) - fabs (phit.x[2]);	// this is the function
+  z2 = zdisk (r2) - fabs (phit.x[2]);   // this is the function
 
   *value = z1;
   *derivative = (z2 - z1) / ds;

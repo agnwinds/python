@@ -24,14 +24,14 @@ timer ()
   gettimeofday (&tv, &tz);
   t = tv.tv_sec + 1.e-6 * tv.tv_usec;
   if (t_init == 0.0)
-    {
-      t_init = t;
-      return (0.0);
-    }
+  {
+    t_init = t;
+    return (0.0);
+  }
   else
-    {
-      return (t - t_init);
-    }
+  {
+    return (t - t_init);
+  }
 }
 
 
@@ -58,6 +58,6 @@ get_time (curtime)
   time (&tloc);
   strcpy (curtime, "");
   strncpy (curtime, ctime (&tloc), 24);
-  curtime[24] = '\0';		// We need to end the string properly
+  curtime[24] = '\0';           // We need to end the string properly
   return (0);
 }

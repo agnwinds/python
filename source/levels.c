@@ -70,38 +70,38 @@ levels (xplasma, mode)
   double kt;
   double z;
 
-  if (mode == NEBULARMODE_TR)		// LTE with t_r
-    {
-      t = xplasma->t_r;
-      weight = 1;
-    }
-  else if (mode == NEBULARMODE_TE)		// LTE with t_e
-    {
-      t = xplasma->t_e;
-      weight = 1;
-    }
-  else if (mode == NEBULARMODE_ML93)		// non_LTE with t_r and weights
-    {
-      t = xplasma->t_r;
-      weight = xplasma->w;
-    }
-  else if (mode == NEBULARMODE_NLTE_SIM)	/* non_LTE with SS modification NSH 120912 - This mode is more or less defunct. 
-						   It can be romoved once all the viestiges of the original PL ioinzation scheme are removed */
-    {
-      t = xplasma->t_e;
-      weight = 1;
-    }
-  else if (mode == NEBULARMODE_LTE_GROUND)	/* A test mode - this is to allow all levels to be set to GS, in the event we dont have a 
-						   good idea of what the radiation field shoulb be. */
-    {
-      t = xplasma->t_e;
-      weight = 0;
-    }
+  if (mode == NEBULARMODE_TR)   // LTE with t_r
+  {
+    t = xplasma->t_r;
+    weight = 1;
+  }
+  else if (mode == NEBULARMODE_TE)      // LTE with t_e
+  {
+    t = xplasma->t_e;
+    weight = 1;
+  }
+  else if (mode == NEBULARMODE_ML93)    // non_LTE with t_r and weights
+  {
+    t = xplasma->t_r;
+    weight = xplasma->w;
+  }
+  else if (mode == NEBULARMODE_NLTE_SIM)        /* non_LTE with SS modification NSH 120912 - This mode is more or less defunct. 
+                                                   It can be romoved once all the viestiges of the original PL ioinzation scheme are removed */
+  {
+    t = xplasma->t_e;
+    weight = 1;
+  }
+  else if (mode == NEBULARMODE_LTE_GROUND)      /* A test mode - this is to allow all levels to be set to GS, in the event we dont have a 
+                                                   good idea of what the radiation field shoulb be. */
+  {
+    t = xplasma->t_e;
+    weight = 0;
+  }
   else
-    {
-      Error ("levels: Could not calculate levels for mode %d\n", mode);
-      exit (0);
-    }
+  {
+    Error ("levels: Could not calculate levels for mode %d\n", mode);
+    exit (0);
+  }
 
   /* Next calculation should be almost identical to that contained in
      the routine partition.  An error in one place implies one in the
@@ -111,33 +111,31 @@ levels (xplasma, mode)
   kt = BOLTZMANN * t;
 
   for (nion = 0; nion < nions; nion++)
+  {
+    if (ion[nion].nlte > 0)
+      /* Extra if statement added to prevent changing levden of macro atom populations (SS, Apr04) */
     {
-      if (ion[nion].nlte > 0)
-	/* Extra if statement added to prevent changing levden of macro atom populations (SS, Apr04) */
-	{
-	  if (ion[nion].macro_info == 0 || geo.macro_ioniz_mode == 0)
-	    {			//Then calculate levels for this ion 
+      if (ion[nion].macro_info == 0 || geo.macro_ioniz_mode == 0)
+      {                         //Then calculate levels for this ion 
 
-	      z = xplasma->partition[nion];
+        z = xplasma->partition[nion];
 
-	      /* N.B. partition functions will most likely have been 
-	         calculated from "lte" levels, at least for * now ??  */
+        /* N.B. partition functions will most likely have been 
+           calculated from "lte" levels, at least for * now ??  */
 
-	      m = ion[nion].first_nlte_level;
-	      m_ground = m;	//store the ground state index - allow for gs energy neq 0 (SS) 
-	      nlevden = ion[nion].first_levden;
-	      xplasma->levden[nlevden] = config[m].g / z;	//Assumes first level is ground state
-	      for (n = 1; n < ion[nion].nlte; n++)
-		{
-		  m++;
-		  nlevden++;
-		  xplasma->levden[nlevden] =
-		    weight * config[m].g *
-		    exp ((-config[m].ex + config[m_ground].ex) / kt) / z;
-		}
-	    }
-	}
+        m = ion[nion].first_nlte_level;
+        m_ground = m;           //store the ground state index - allow for gs energy neq 0 (SS) 
+        nlevden = ion[nion].first_levden;
+        xplasma->levden[nlevden] = config[m].g / z;     //Assumes first level is ground state
+        for (n = 1; n < ion[nion].nlte; n++)
+        {
+          m++;
+          nlevden++;
+          xplasma->levden[nlevden] = weight * config[m].g * exp ((-config[m].ex + config[m_ground].ex) / kt) / z;
+        }
+      }
     }
+  }
 
   return (0);
 

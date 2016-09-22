@@ -69,8 +69,7 @@ main ()
 
 
 
-  printf
-    ("This program reads a wind save file created by python and examine the wind structure\n");
+  printf ("This program reads a wind save file created by python and examine the wind structure\n");
 
   printf ("Root for wind file :");
   fgets (input, LINELENGTH, stdin);
@@ -96,11 +95,10 @@ main ()
 
 
   if (w == NULL)
-    {
-      printf
-	("There is a problem in allocating memory for the wind structure\n");
-      exit (0);
-    }
+  {
+    printf ("There is a problem in allocating memory for the wind structure\n");
+    exit (0);
+  }
 
 /* Read in the atomic data */
   strcpy (atomic, "atomic/standard");
@@ -123,29 +121,29 @@ main ()
 /* Should only need to do next step for certain wind types */
 
   if (geo.wind_type == 1)
-    {
+  {
 //        get_stellar_wind_params ();
-    }
+  }
   else if (geo.wind_type == 0)
-    {
+  {
 //        get_sv_wind_params ();
-    }
+  }
   else if (geo.wind_type == 3)
-    {
+  {
 //        get_proga_wind_params ();
-    }
+  }
   else if (geo.wind_type == 4)
-    {
+  {
 //        get_corona_params ();
-    }
+  }
   else if (geo.wind_type == 5)
-    {
+  {
 //        get_knigge_wind_params ();
-    }
+  }
   else if (geo.wind_type == 6)
-    {
-      get_thierry_params ();
-    }
+  {
+    get_thierry_params ();
+  }
 
 
 /* Initialize the remaining variables */
@@ -177,55 +175,54 @@ main ()
   smin = -smax / 2.;
   ds = smax / (array_dim - 1);
   for (i = 0; i < array_dim; i++)
+  {
+    p.x[0] = smin + i * ds;
+    for (j = 0; j < array_dim; j++)
     {
-      p.x[0] = smin + i * ds;
-      for (j = 0; j < array_dim; j++)
-	{
 
-	  p.x[1] = smin + j * ds;
-	  vwind_xyz (w, &p, v);	// vzero is the initial velocity of the photon
-	  vlos = dot (p.lmn, v);	// This is vlos as calulated from the grid
+      p.x[1] = smin + j * ds;
+      vwind_xyz (w, &p, v);     // vzero is the initial velocity of the photon
+      vlos = dot (p.lmn, v);    // This is vlos as calulated from the grid
 
 
-	  if (geo.wind_type == 1)
-	    {
-	      stellar_velocity (&p.x[0], vs);	//sv
-	    }
-	  else if (geo.wind_type == 0)
-	    {
-	      sv_velocity (&p.x[0], vs);	//sv
-	    }
-	  else if (geo.wind_type == 3)
-	    {
-	      proga_velocity (&p.x[0], vs);	//sv
-	    }
-	  else if (geo.wind_type == 4)
-	    {
-	      corona_velocity (&p.x[0], vs);	//sv
-	    }
-	  else if (geo.wind_type == 5)
-	    {
-	      kn_velocity (&p.x[0], vs);	//sv
-	    }
-	  else if (geo.wind_type == 6)
-	    {
-	      xthierry_velocity (&p.x[0], vs);	//thierry
-	    }
+      if (geo.wind_type == 1)
+      {
+        stellar_velocity (&p.x[0], vs); //sv
+      }
+      else if (geo.wind_type == 0)
+      {
+        sv_velocity (&p.x[0], vs);      //sv
+      }
+      else if (geo.wind_type == 3)
+      {
+        proga_velocity (&p.x[0], vs);   //sv
+      }
+      else if (geo.wind_type == 4)
+      {
+        corona_velocity (&p.x[0], vs);  //sv
+      }
+      else if (geo.wind_type == 5)
+      {
+        kn_velocity (&p.x[0], vs);      //sv
+      }
+      else if (geo.wind_type == 6)
+      {
+        xthierry_velocity (&p.x[0], vs);        //thierry
+      }
 // Note that kn_velocity etc return v in cylindrical coords at present
-	  if (p.x[0] == 0 && p.x[1] == 0)
-	    {
-	      vlos_exact = 0.0;
-	    }
-	  else
-	    {
-	      project_from_cyl_xyz (p.x, vs, vs_xyz);
-	      vlos_exact = dot (p.lmn, vs_xyz);	// This is vlos as calulated from the grid
-	    }
-	  fprintf (optr, "%d %d %8.3e %8.3e %8.3e %8.3e \n", i, j, p.x[0],
-		   p.x[1], vlos, vlos_exact);
-
-	}
+      if (p.x[0] == 0 && p.x[1] == 0)
+      {
+        vlos_exact = 0.0;
+      }
+      else
+      {
+        project_from_cyl_xyz (p.x, vs, vs_xyz);
+        vlos_exact = dot (p.lmn, vs_xyz);       // This is vlos as calulated from the grid
+      }
+      fprintf (optr, "%d %d %8.3e %8.3e %8.3e %8.3e \n", i, j, p.x[0], p.x[1], vlos, vlos_exact);
 
     }
+
+  }
   return (0);
 }

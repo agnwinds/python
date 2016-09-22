@@ -70,5 +70,3 @@ both roots were imaginary */
     return (root[i]);
   return (VERY_BIG);
 }
-
-

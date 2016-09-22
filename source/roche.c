@@ -122,8 +122,7 @@ binary_basics ()
   p_roche.lmn[0] = 1;
   p_roche.lmn[1] = p_roche.lmn[2] = 0;
 
-  geo.l1 = x =
-    rtsafe (roche_deriv, 0.01 * geo.a, 0.99 * geo.a, geo.a / 1000.);
+  geo.l1 = x = rtsafe (roche_deriv, 0.01 * geo.a, 0.99 * geo.a, geo.a / 1000.);
 
   geo.l1_from_m2 = geo.a - geo.l1;
 
@@ -138,7 +137,7 @@ binary_basics ()
 
   /* Now find the position of the far side of the star */
 
-  geo.phi = phi (geo.l1);	/* Set geo.phi so phi will be zero on Roche lobes */
+  geo.phi = phi (geo.l1);       /* Set geo.phi so phi will be zero on Roche lobes */
 
 
   /* Set geo.r2_far to be the radius of the secondary on the backside of the secondary */
@@ -153,9 +152,7 @@ binary_basics ()
   plane_m2_far.lmn[1] = plane_m2_far.lmn[2] = 0;
 
 
-  Log_silent
-    ("binary_basics: l1=%8.2e l2=%8.2e l1_from_m2=%8.2e r2_far %8.2e\n",
-     geo.l1, geo.l2, geo.l1_from_m2, geo.r2_far);
+  Log_silent ("binary_basics: l1=%8.2e l2=%8.2e l1_from_m2=%8.2e r2_far %8.2e\n", geo.l1, geo.l2, geo.l1_from_m2, geo.r2_far);
 
   /* Calculate the maximum half width of the secondary in the plane of the orbit */
   geo.r2_width = roche2_width_max ();
@@ -190,7 +187,7 @@ ds_to_roche_2 (p)
   double pillbox ();
 
   if ((s = pillbox (p, &smin, &smax)) == VERY_BIG)
-    return (0);			/* Missed secondary */
+    return (0);                 /* Missed secondary */
   stuff_phot (p, &p_roche);
 
 // So, after next line,  s is the minimum of the potential, between smin and smax
@@ -199,28 +196,26 @@ ds_to_roche_2 (p)
   potential = golden (smin, 0.5 * (smin + smax), smax, phi, 0.0001, &s);
 
   if (potential > 0.0)
-    return (VERY_BIG);		/*Missed secondary) */
+    return (VERY_BIG);          /*Missed secondary) */
 
 
   if (smin > s)
     Log ("Error Knoxy %e %e %e\n", smin, s, smax);
 
   if ((s = rtsafe (roche, smin, s, geo.a / 1000.)) < 0)
-    {
-      Log ("Problem located Roche surface s %6.2e\n", s);
-      Log ("smin %6.2e  phi %6.2e %6.2e %6.2e\n", smin, phi (smin),
-	      dphi_ds (smin), d2phi_ds2 (smin));
-      Log ("smax %6.2e  phi %6.2e %6.2e %6.2e\n", smax, phi (smax),
-	      dphi_ds (smax), d2phi_ds2 (smax));
-      stuff_phot (p, &pp);
-      move_phot (&pp, smin);
-      Log ("pmin %6.2e %6.2e %6.2e\n", pp.x[0], pp.x[1], pp.x[2]);
-      stuff_phot (p, &pp);
-      move_phot (&pp, smax);
-      Log ("pmax %6.2e %6.2e %6.2e\n", pp.x[0], pp.x[1], pp.x[2]);
+  {
+    Log ("Problem located Roche surface s %6.2e\n", s);
+    Log ("smin %6.2e  phi %6.2e %6.2e %6.2e\n", smin, phi (smin), dphi_ds (smin), d2phi_ds2 (smin));
+    Log ("smax %6.2e  phi %6.2e %6.2e %6.2e\n", smax, phi (smax), dphi_ds (smax), d2phi_ds2 (smax));
+    stuff_phot (p, &pp);
+    move_phot (&pp, smin);
+    Log ("pmin %6.2e %6.2e %6.2e\n", pp.x[0], pp.x[1], pp.x[2]);
+    stuff_phot (p, &pp);
+    move_phot (&pp, smax);
+    Log ("pmax %6.2e %6.2e %6.2e\n", pp.x[0], pp.x[1], pp.x[2]);
 
-      return (s);		/* This is an error return */
-    }
+    return (s);                 /* This is an error return */
+  }
 
   Log ("Distance to roche surface  %6.2e\n", s);
 
@@ -242,11 +237,11 @@ hit_secondary (p)
   double pillbox ();
 
   if (pillbox (p, &smin, &smax) == VERY_BIG)
-    return (0);			/* Missed secondary */
+    return (0);                 /* Missed secondary */
   stuff_phot (p, &p_roche);
   potential = golden (smin, 0.5 * (smin + smax), smax, phi, 0.0001, &s);
   if (potential > 0.0)
-    return (0);			/*Missed secondary) */
+    return (0);                 /*Missed secondary) */
 
 
   return (P_SEC);
@@ -293,7 +288,7 @@ pillbox (p, smin, smax)
   double ds_to_plane ();
 
 
-  n = 0;			// At this point no boundaries to the pillbox have been identified
+  n = 0;                        // At this point no boundaries to the pillbox have been identified
 
 /* If the photon is along the x-axis, then it will not intersect the cylinder anywhere, and
 the only possibility is that it hit the endcaps of the cylinder. But normally, it will
@@ -301,10 +296,10 @@ not be along the x axis and one must find if there are any intersections with th
 and determine where they are.  This calculation is carried out in the if section below. */
 
   if ((a = (p->lmn[0] * p->lmn[0])) < 1.0)
-    {
-      a = 1. - a;
-      b = 2. * (p->x[1] * p->lmn[1] + p->x[2] * p->lmn[2]);
-      c = p->x[1] * p->x[1] + p->x[2] * p->x[2] - geo.r2_width * geo.r2_width;
+  {
+    a = 1. - a;
+    b = 2. * (p->x[1] * p->lmn[1] + p->x[2] * p->lmn[2]);
+    c = p->x[1] * p->x[1] + p->x[2] * p->x[2] - geo.r2_width * geo.r2_width;
 
 /* After "quadratic", root contains the distances the photon pp would need to travel to 
 hit the edges of the cylinder. i is an index to the smallest positive root, if one exists.  
@@ -316,77 +311,77 @@ Note that the fact that the ray does hit the cylinder going in the positive dire
 does not necessarily mean that it hits the pillbox.  
 */
 
-      if ((i = quadratic (a, b, c, root)) < 0)
-	return (VERY_BIG);
+    if ((i = quadratic (a, b, c, root)) < 0)
+      return (VERY_BIG);
 
 /* If the intersection is in the part of the cylinder between the caps it is probably legitimate.
 So tranport pp to the intersection of the first root and check where that lies. And then
 do the same thing for the second root.  The "probably refers to the fact that a negative
 root is really only possible if the photon is already in the pillbox  */
 
-      stuff_phot (p, &pp);
-      move_phot (&pp, root[0]);
+    stuff_phot (p, &pp);
+    move_phot (&pp, root[0]);
 
-      if (geo.l1 <= pp.x[0] && pp.x[0] <= plane_m2_far.x[0])
-	{
-	  ss[n] = root[0];
-	  n++;
-	}
-
-
-      stuff_phot (p, &pp);
-      move_phot (&pp, root[1]);	/* So pp is now located at intersection of the second root */
-      if (geo.l1 <= pp.x[0] && pp.x[0] <= plane_m2_far.x[0])
-	{
-	  ss[n] = root[1];
-	  n++;
-	}
-
+    if (geo.l1 <= pp.x[0] && pp.x[0] <= plane_m2_far.x[0])
+    {
+      ss[n] = root[0];
+      n++;
     }
+
+
+    stuff_phot (p, &pp);
+    move_phot (&pp, root[1]);   /* So pp is now located at intersection of the second root */
+    if (geo.l1 <= pp.x[0] && pp.x[0] <= plane_m2_far.x[0])
+    {
+      ss[n] = root[1];
+      n++;
+    }
+
+  }
 
 /* Now find out if the photon hits the caps. This is done by translating to the
 planes of the two end caps and then checking the cylindrical radius. Negative
 distances are valid only if the photon is in the pillbox already */
 
-  x1 = ds_to_plane (&plane_l1, p);	/* Calculate the distance to the L1 plane */
+  x1 = ds_to_plane (&plane_l1, p);      /* Calculate the distance to the L1 plane */
   stuff_phot (p, &pp);
-  move_phot (&pp, x1);		/* So pp is now located at the l1 plane */
+  move_phot (&pp, x1);          /* So pp is now located at the l1 plane */
   if ((pp.x[1] * pp.x[1] + pp.x[2] * pp.x[2]) <= geo.r2_width * geo.r2_width)
-    {
-      ss[n] = x1;
-      n++;
-    }
+  {
+    ss[n] = x1;
+    n++;
+  }
 
-  x2 = ds_to_plane (&plane_m2_far, p);	/* Calculate the distance to the plane behind the the star.  */
+  x2 = ds_to_plane (&plane_m2_far, p);  /* Calculate the distance to the plane behind the the star.  */
   stuff_phot (p, &pp);
-  move_phot (&pp, x2);		/* So pp is now located at the r2_far plane */
+  move_phot (&pp, x2);          /* So pp is now located at the r2_far plane */
   if ((pp.x[1] * pp.x[1] + pp.x[2] * pp.x[2]) <= geo.r2_width * geo.r2_width)
-    {
-      ss[n] = x2;
-      n++;
-    }
+  {
+    ss[n] = x2;
+    n++;
+  }
 
 /* Finally sort it all out.  If n == 0, or if both s[0] and s[2] are negative 
 then the photon did not hit the pillbox ksl 02jan */
 
   if ((n == 0) || (ss[0] < 0 && ss[1] < 0))
-    return (VERY_BIG);		// The photon did not hit the pillbox
+    return (VERY_BIG);          // The photon did not hit the pillbox
 
   if (n == 2)
+  {
+    if (ss[0] < ss[1])
     {
-      if (ss[0] < ss[1])
-	{
-	  *smin = ss[0];
-	  *smax = ss[1];
-	}
-      else
-	{
-	  *smin = ss[1];
-	  *smax = ss[0];
-	}
-
-      return (*smin);
+      *smin = ss[0];
+      *smax = ss[1];
     }
+    else
+    {
+      *smin = ss[1];
+      *smax = ss[0];
+    }
+
+    return (*smin);
+  }
 
   Error ("pillbox %d interfaces to pillbox is impossible\n", n);
   return (VERY_BIG);
@@ -409,27 +404,25 @@ phi (s)
   double length ();
 
   if (phi_init == 0)
-    {
-      phi_gm1 = G * geo.mstar;
-      phi_gm2 = G * geo.m_sec;
-      phi_3 = (phi_gm1 + phi_gm2) / (geo.a * geo.a * geo.a);
-      phi_3 = 0.5 * phi_3;
-      phi_4 = geo.a * geo.m_sec / (geo.mstar + geo.m_sec);
+  {
+    phi_gm1 = G * geo.mstar;
+    phi_gm2 = G * geo.m_sec;
+    phi_3 = (phi_gm1 + phi_gm2) / (geo.a * geo.a * geo.a);
+    phi_3 = 0.5 * phi_3;
+    phi_4 = geo.a * geo.m_sec / (geo.mstar + geo.m_sec);
 //              Log_silent("phi: phi_gm1 %e phi_gm2 %e phi_3 %e phi_4 %e\n",phi_gm1,phi_gm2,phi_3,phi_4);
-      phi_init++;
-    }
+    phi_init++;
+  }
 
   stuff_phot (&p_roche, &pp);
-  move_phot (&pp, s);		/* So now we have the actuaal position of the photon relative to the WD */
+  move_phot (&pp, s);           /* So now we have the actuaal position of the photon relative to the WD */
 
   if ((x1 = length (&pp.x[0])) == 0)
     return (-VERY_BIG);
   z1 = -phi_gm1 / x1;
-  z3 =
-    -phi_3 * ((pp.x[0] - phi_4) * (pp.x[0] - phi_4) + pp.x[1] * pp.x[1]) -
-    geo.phi;
+  z3 = -phi_3 * ((pp.x[0] - phi_4) * (pp.x[0] - phi_4) + pp.x[1] * pp.x[1]) - geo.phi;
 
-  pp.x[0] -= geo.a;		/* Here we make pp refer to the positions w.r.t. the secondary */
+  pp.x[0] -= geo.a;             /* Here we make pp refer to the positions w.r.t. the secondary */
   if ((x2 = length (&pp.x[0])) == 0)
     return (-VERY_BIG);
 
@@ -508,10 +501,10 @@ roche_width (x)
   rho = rtsafe (roche, 1000., smax, geo.a / 1000.);
 
   if (rho < 0)
-    {
-      Error ("roche_with : rtsafe failure x=%6.2e\n", x);
-    }
-  return (-rho);		/* This is because we are going to search for a minimun not a maximum */
+  {
+    Error ("roche_with : rtsafe failure x=%6.2e\n", x);
+  }
+  return (-rho);                /* This is because we are going to search for a minimun not a maximum */
 
 }
 
@@ -530,17 +523,15 @@ roche2_width_max ()
   xmid = geo.a;
 //      xmid=(geo.l1+geo.a)*0.5;
 
-  Log_silent ("roche2_width_max: Search from %6.2e %6.2e %6.2e\n", xmin, xmid,
-	      xmax);
+  Log_silent ("roche2_width_max: Search from %6.2e %6.2e %6.2e\n", xmin, xmid, xmax);
 
   /* golden returns the value of the function it is evaluating; xbest is the position of the maximum */
 
   rmin = golden (xmin, xmid, xmax, roche_width, 0.0001, &xbest);
 
-  Log_silent ("roche2_width_max: Max width at %6.2e of %6.2e\n", xbest,
-	      -rmin);
+  Log_silent ("roche2_width_max: Max width at %6.2e of %6.2e\n", xbest, -rmin);
 
-  return (-rmin);		/* Because "golden" is designed to find a minimum rather than a maximum! */
+  return (-rmin);               /* Because "golden" is designed to find a minimum rather than a maximum! */
 }
 
 

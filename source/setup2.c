@@ -82,7 +82,7 @@ This program simulates radiative transfer in a (biconical) CV, YSO, quasar or (s
 	of the parameter file. \n\
 \n\
 \n\
-";				// End of string to provide one with help
+";                              // End of string to provide one with help
 
   printf ("%s\n", some_help);
 
@@ -135,14 +135,14 @@ History:
 int
 init_geo ()
 {
-  geo.ndomain = 0;		/*ndomain is a convenience variable so we do not always
-				   need to write geo.ndomain but it should nearly always
-				   be set to the same value as geo.ndomain */
-  geo.run_type = 0;		/* Indicates this is a run from scratch, which includes
-				   the case where we already have a wind model but want
-				   to change some of the parameters.  init_goe should not
-				   be called at all if we are simply continuing a previous
-				   run */
+  geo.ndomain = 0;              /*ndomain is a convenience variable so we do not always
+                                   need to write geo.ndomain but it should nearly always
+                                   be set to the same value as geo.ndomain */
+  geo.run_type = 0;             /* Indicates this is a run from scratch, which includes
+                                   the case where we already have a wind model but want
+                                   to change some of the parameters.  init_goe should not
+                                   be called at all if we are simply continuing a previous
+                                   run */
   geo.wind_domain_number = -1;
   geo.atmos_domain_number = -1;
 
@@ -151,25 +151,24 @@ init_geo ()
   zdom[0].coord_type = 1;
   zdom[0].ndim = 30;
   zdom[0].mdim = 30;
-  zdom[0].log_linear = 0;	/* Set intervals to be logarithmic */
+  zdom[0].log_linear = 0;       /* Set intervals to be logarithmic */
 
   zdom[1].coord_type = 1;
   zdom[1].ndim = 30;
   zdom[1].mdim = 10;
-  zdom[1].log_linear = 0;	/* Set intervals to be logarithmic */
+  zdom[1].log_linear = 0;       /* Set intervals to be logarithmic */
 
 
-  geo.disk_z0 = geo.disk_z1 = 0.0;	// 080518 - ksl - moved this up
-  geo.adiabatic = 1;		// Default is now set so that adiabatic cooling is included in the wind
-  geo.auger_ionization = 1;	//Default is on.
+  geo.disk_z0 = geo.disk_z1 = 0.0;      // 080518 - ksl - moved this up
+  geo.adiabatic = 1;            // Default is now set so that adiabatic cooling is included in the wind
+  geo.auger_ionization = 1;     //Default is on.
 
 
-  geo.run_type = 0;		// Not a restart of a previous run
+  geo.run_type = 0;             // Not a restart of a previous run
 
   geo.star_ion_spectype = geo.star_spectype
-    = geo.disk_ion_spectype = geo.disk_spectype
-    = geo.bl_ion_spectype = geo.bl_spectype = SPECTYPE_BB;
-  geo.agn_ion_spectype = SPECTYPE_POW;	// 130605 - nsh - moved from python.c
+    = geo.disk_ion_spectype = geo.disk_spectype = geo.bl_ion_spectype = geo.bl_spectype = SPECTYPE_BB;
+  geo.agn_ion_spectype = SPECTYPE_POW;  // 130605 - nsh - moved from python.c
 
 
   geo.rmax = 1e11;
@@ -182,21 +181,21 @@ init_geo ()
   geo.tstar = 40000;
   geo.twind = 40000;
 
-  geo.ioniz_mode = IONMODE_ML93;	/* default is on the spot and find the best t */
-  geo.line_mode = 3;		/* default is escape probabilites */
+  geo.ioniz_mode = IONMODE_ML93;        /* default is on the spot and find the best t */
+  geo.line_mode = 3;            /* default is escape probabilites */
 
-  geo.star_radiation = 1;	/* 1 implies star will radiate */
-  geo.disk_radiation = 1;	/* 1 implies disk will radiate */
-  geo.bl_radiation = 0;		/*1 implies boundary layer will radiate */
-  geo.wind_radiation = 0;	/* 1 implies wind will radiate */
+  geo.star_radiation = 1;       /* 1 implies star will radiate */
+  geo.disk_radiation = 1;       /* 1 implies disk will radiate */
+  geo.bl_radiation = 0;         /*1 implies boundary layer will radiate */
+  geo.wind_radiation = 0;       /* 1 implies wind will radiate */
 
-  geo.disk_type = DISK_FLAT;		/*1 implies existence of a disk for purposes of absorption */
+  geo.disk_type = DISK_FLAT;    /*1 implies existence of a disk for purposes of absorption */
   geo.diskrad = 2.4e10;
   geo.disk_mdot = 1.e-8 * MSOL / YR;
 
   geo.t_bl = 100000.;
 
-  geo.pl_geometry = PL_GEOMETRY_SPHERE;   // default to spherical geometry
+  geo.pl_geometry = PL_GEOMETRY_SPHERE; // default to spherical geometry
   geo.lamp_post_height = 0.0;   // should only be used if geo.pl_geometry is PL_GEOMETRY_LAMP_POST
 
 
@@ -267,48 +266,42 @@ photon_checks (p, freqmin, freqmax, comment)
   freqmax *= (1.8);
   freqmin *= (0.6);
   for (nn = 0; nn < NPHOT; nn++)
+  {
+    p[nn].np = nn;              /*  NSH 13/4/11 This is a line to populate the new internal photon pointer */
+    if (H * p[nn].freq > ion[0].ip)
     {
-      p[nn].np = nn;		/*  NSH 13/4/11 This is a line to populate the new internal photon pointer */
-      if (H * p[nn].freq > ion[0].ip)
-	{
-	  geo.lum_ioniz += p[nn].w;
-	  geo.n_ioniz += p[nn].w / (H * p[nn].freq);
-	}
-      if (sane_check (p[nn].freq) != 0 || sane_check (p[nn].w))
-	{
-	  if (nlabel == 0)
-	    {
-	      Error
-		("photon_checks: nphot  origin  freq     freqmin    freqmax\n");
-	      nlabel++;
-	    }
-	  Error
-	    ("photon_checks:sane_check %6d %5d %10.4e %10.4e %10.4e %5d w %10.4e \n",
-	     nn, p[nn].origin, p[nn].freq, freqmin, freqmax, p[nn].w);
-	  p[nn].freq = freqmax;
-	  nnn++;
-	}
-      if (p[nn].origin < 10 && (p[nn].freq < freqmin || freqmax < p[nn].freq))
-	{
-	  if (nlabel == 0)
-	    {
-	      Error
-		("photon_checks: nphot  origin  freq     freqmin    freqmax\n");
-	      nlabel++;
-	    }
-	  Error
-	    ("photon_checks: %6d %5d %10.4e %10.4e %10.4e freq out of range\n",
-	     nn, p[nn].origin, p[nn].freq, freqmin, freqmax);
-	  p[nn].freq = freqmax;
-	  nnn++;
-	}
-      if (nnn > 100)
-	{
-	  Error
-	    ("photon_checks: Exiting because too many bad photons generated\n");
-	  exit (0);
-	}
+      geo.lum_ioniz += p[nn].w;
+      geo.n_ioniz += p[nn].w / (H * p[nn].freq);
     }
+    if (sane_check (p[nn].freq) != 0 || sane_check (p[nn].w))
+    {
+      if (nlabel == 0)
+      {
+        Error ("photon_checks: nphot  origin  freq     freqmin    freqmax\n");
+        nlabel++;
+      }
+      Error
+        ("photon_checks:sane_check %6d %5d %10.4e %10.4e %10.4e %5d w %10.4e \n", nn, p[nn].origin, p[nn].freq, freqmin, freqmax, p[nn].w);
+      p[nn].freq = freqmax;
+      nnn++;
+    }
+    if (p[nn].origin < 10 && (p[nn].freq < freqmin || freqmax < p[nn].freq))
+    {
+      if (nlabel == 0)
+      {
+        Error ("photon_checks: nphot  origin  freq     freqmin    freqmax\n");
+        nlabel++;
+      }
+      Error ("photon_checks: %6d %5d %10.4e %10.4e %10.4e freq out of range\n", nn, p[nn].origin, p[nn].freq, freqmin, freqmax);
+      p[nn].freq = freqmax;
+      nnn++;
+    }
+    if (nnn > 100)
+    {
+      Error ("photon_checks: Exiting because too many bad photons generated\n");
+      exit (0);
+    }
+  }
   Log ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
 
   if (nnn == 0)
@@ -361,7 +354,7 @@ History:
 **************************************************************/
 
 
-char get_spectype_oldname[LINELENGTH] = "data/kurucz91.ls";	/*This is to assure that we read model lists in the same order everytime */
+char get_spectype_oldname[LINELENGTH] = "data/kurucz91.ls";     /*This is to assure that we read model lists in the same order everytime */
 int get_spectype_count = 0;
 int
 get_spectype (yesno, question, spectype)
@@ -371,54 +364,54 @@ get_spectype (yesno, question, spectype)
 {
   char model_list[LINELENGTH];
   int stype;
-  int get_models ();		// Note: Needed because get_models cannot be included in templates.h
+  int get_models ();            // Note: Needed because get_models cannot be included in templates.h
   if (yesno)
-    {
-      // XXX This is rather odd. Why are these steps needed? Why don't we fix the question here.  ksl
+  {
+    // XXX This is rather odd. Why are these steps needed? Why don't we fix the question here.  ksl
 
-      // First convert the spectype to the way the questionis supposed to be answered
-      if (*spectype == SPECTYPE_BB || *spectype == SPECTYPE_NONE)
-	stype = 0;
-      else if (*spectype == SPECTYPE_UNIFORM)
-	stype = 2;
-      else if (*spectype == SPECTYPE_POW)
-	stype = 3;
-      else
-	stype = 1;
-      /* Now get the response */
-      rdint (question, &stype);
-      /* Now convert the response back to the values which python uses */
-      if (stype == 0)
-	*spectype = SPECTYPE_BB;	// bb
-      else if (stype == 2)
-	*spectype = SPECTYPE_UNIFORM;	// uniform
-      else if (stype == 3)
-	*spectype = SPECTYPE_POW;	// power law
-      else if (stype == 4)
-	*spectype = SPECTYPE_CL_TAB;   // broken power law
-	  else if (stype == 5)
-	*spectype = SPECTYPE_BREM; // bremstrahlung
-      else
-	{
-	  if (geo.run_type == SYSTEM_TYPE_PREVIOUS)
-	    {			// Continuing an old model
-	      strcpy (model_list, geo.model_list[get_spectype_count]);
-	    }
-	  else
-	    {			// Starting a new model
-	      strcpy (model_list, get_spectype_oldname);
-	    }
-	  rdstr ("Model_file", model_list);
-	  get_models (model_list, 2, spectype);
-	  strcpy (geo.model_list[get_spectype_count], model_list);	// Copy it to geo 
-	  strcpy (get_spectype_oldname, model_list);	// Also copy it back to the old name
-	  get_spectype_count++;
-	}
-    }
-  else
+    // First convert the spectype to the way the questionis supposed to be answered
+    if (*spectype == SPECTYPE_BB || *spectype == SPECTYPE_NONE)
+      stype = 0;
+    else if (*spectype == SPECTYPE_UNIFORM)
+      stype = 2;
+    else if (*spectype == SPECTYPE_POW)
+      stype = 3;
+    else
+      stype = 1;
+    /* Now get the response */
+    rdint (question, &stype);
+    /* Now convert the response back to the values which python uses */
+    if (stype == 0)
+      *spectype = SPECTYPE_BB;  // bb
+    else if (stype == 2)
+      *spectype = SPECTYPE_UNIFORM;     // uniform
+    else if (stype == 3)
+      *spectype = SPECTYPE_POW; // power law
+    else if (stype == 4)
+      *spectype = SPECTYPE_CL_TAB;      // broken power law
+    else if (stype == 5)
+      *spectype = SPECTYPE_BREM;        // bremstrahlung
+    else
     {
-      *spectype = SPECTYPE_NONE;	// No radiation
+      if (geo.run_type == SYSTEM_TYPE_PREVIOUS)
+      {                         // Continuing an old model
+        strcpy (model_list, geo.model_list[get_spectype_count]);
+      }
+      else
+      {                         // Starting a new model
+        strcpy (model_list, get_spectype_oldname);
+      }
+      rdstr ("Model_file", model_list);
+      get_models (model_list, 2, spectype);
+      strcpy (geo.model_list[get_spectype_count], model_list);  // Copy it to geo 
+      strcpy (get_spectype_oldname, model_list);        // Also copy it back to the old name
+      get_spectype_count++;
     }
+  }
+  else
+  {
+    *spectype = SPECTYPE_NONE;  // No radiation
+  }
 
   return (*spectype);
 }
@@ -469,18 +462,18 @@ qdisk_init ()
 {
   int n;
   for (n = 0; n < NRINGS; n++)
-    {
-      qdisk.r[n] = disk.r[n];
-      qdisk.t[n] = disk.t[n];
-      qdisk.g[n] = disk.g[n];
-      qdisk.v[n] = disk.v[n];
-      qdisk.heat[n] = 0.0;
-      qdisk.nphot[n] = 0;
-      qdisk.nhit[n] = 0;
-      qdisk.w[n] = 0;
-      qdisk.ave_freq[n] = 0;
-      qdisk.t_hit[0] = 0;
-    }
+  {
+    qdisk.r[n] = disk.r[n];
+    qdisk.t[n] = disk.t[n];
+    qdisk.g[n] = disk.g[n];
+    qdisk.v[n] = disk.v[n];
+    qdisk.heat[n] = 0.0;
+    qdisk.nphot[n] = 0;
+    qdisk.nhit[n] = 0;
+    qdisk.w[n] = 0;
+    qdisk.ave_freq[n] = 0;
+    qdisk.t_hit[0] = 0;
+  }
   return (0);
 }
 
@@ -491,38 +484,30 @@ qdisk_save (diskfile, ztot)
 {
   FILE *qptr;
   int n;
-  double area, theat,ttot;
+  double area, theat, ttot;
   qptr = fopen (diskfile, "w");
-  fprintf (qptr,
-	   "r         zdisk     t_disk   heat       nhit nhit/nemit  t_heat    t_irrad  W_irrad  t_tot\n");
-  
+  fprintf (qptr, "r         zdisk     t_disk   heat       nhit nhit/nemit  t_heat    t_irrad  W_irrad  t_tot\n");
+
   for (n = 0; n < NRINGS; n++)
+  {
+    area = (2. * PI * (qdisk.r[n + 1] * qdisk.r[n + 1] - qdisk.r[n] * qdisk.r[n]));
+    theat = qdisk.heat[n] / area;
+    theat = pow (theat / STEFAN_BOLTZMANN, 0.25);       // theat is temperature if no internal energy production
+    if (qdisk.nhit[n] > 0)
     {
-      area =
-	(2. * PI *
-	 (qdisk.r[n + 1] * qdisk.r[n + 1] - qdisk.r[n] * qdisk.r[n]));
-      theat = qdisk.heat[n] / area;
-      theat = pow (theat / STEFAN_BOLTZMANN, 0.25);	// theat is temperature if no internal energy production
-      if (qdisk.nhit[n] > 0)
-	{
 
-	  qdisk.ave_freq[n] /= qdisk.heat[n];
-	  qdisk.t_hit[n] = H * qdisk.ave_freq[n] / (BOLTZMANN * 3.832);	// Basic conversion from freq to T
-	  qdisk.w[n] =
-	    qdisk.heat[n] / (4. * PI * STEFAN_BOLTZMANN * area *
-			     qdisk.t_hit[n] * qdisk.t_hit[n] *
-			     qdisk.t_hit[n] * qdisk.t_hit[n]);
-	}
-
-      ttot=pow(qdisk.t[n],4)+pow(theat,4);
-      ttot=pow(ttot,0.25);
-      fprintf (qptr,
-	       "%8.3e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
-	       qdisk.r[n], zdisk (qdisk.r[n]), qdisk.t[n],
-	       qdisk.heat[n], qdisk.nhit[n],
-	       qdisk.heat[n] * NRINGS / ztot, theat, qdisk.t_hit[n],
-	       qdisk.w[n],ttot);
+      qdisk.ave_freq[n] /= qdisk.heat[n];
+      qdisk.t_hit[n] = H * qdisk.ave_freq[n] / (BOLTZMANN * 3.832);     // Basic conversion from freq to T
+      qdisk.w[n] = qdisk.heat[n] / (4. * PI * STEFAN_BOLTZMANN * area * qdisk.t_hit[n] * qdisk.t_hit[n] * qdisk.t_hit[n] * qdisk.t_hit[n]);
     }
+
+    ttot = pow (qdisk.t[n], 4) + pow (theat, 4);
+    ttot = pow (ttot, 0.25);
+    fprintf (qptr,
+             "%8.3e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
+             qdisk.r[n], zdisk (qdisk.r[n]), qdisk.t[n],
+             qdisk.heat[n], qdisk.nhit[n], qdisk.heat[n] * NRINGS / ztot, theat, qdisk.t_hit[n], qdisk.w[n], ttot);
+  }
 
   fclose (qptr);
   return (0);
@@ -565,19 +550,19 @@ read_non_standard_disk_profile (tprofile)
   int dumint;
 
   if ((fptr = fopen (tprofile, "r")) == NULL)
-    {
-      Error ("Could not open filename %s\n", tprofile);
-      exit (0);
-    }
+  {
+    Error ("Could not open filename %s\n", tprofile);
+    exit (0);
+  }
 
   fscanf (fptr, "%d\n", &dumint);
   blmod.n_blpts = dumint;
   for (n = 0; n < blmod.n_blpts; n++)
-    {
-      fscanf (fptr, "%g %g", &dumflt1, &dumflt2);
-      blmod.r[n] = dumflt1 * 1.e11;
-      blmod.t[n] = dumflt2 * 1.e3;
-    }
+  {
+    fscanf (fptr, "%g %g", &dumflt1, &dumflt2);
+    blmod.r[n] = dumflt1 * 1.e11;
+    blmod.t[n] = dumflt2 * 1.e3;
+  }
 
   fclose (fptr);
 
@@ -612,26 +597,26 @@ History:
 int
 init_advanced_modes ()
 {
-  modes.iadvanced = 0;		// this is controlled by the -d flag, global mode control.
-  modes.save_cell_stats = 0;	// want to save photons statistics by cell
-  modes.ispy = 0;		// want to use the ispy function
-  modes.keep_ioncycle_windsaves = 0;	// want to save wind file each ionization cycle
-  modes.track_resonant_scatters = 0;	// want to track resonant scatters
-  modes.save_extract_photons = 0;	// we want to save details on extracted photons
-  modes.print_windrad_summary = 0;	// we want to print the wind rad summary each cycle
-  modes.adjust_grid = 0;	// the user wants to adjust the grid scale
-  modes.diag_on_off = 0;	// extra diagnostics
+  modes.iadvanced = 0;          // this is controlled by the -d flag, global mode control.
+  modes.save_cell_stats = 0;    // want to save photons statistics by cell
+  modes.ispy = 0;               // want to use the ispy function
+  modes.keep_ioncycle_windsaves = 0;    // want to save wind file each ionization cycle
+  modes.track_resonant_scatters = 0;    // want to track resonant scatters
+  modes.save_extract_photons = 0;       // we want to save details on extracted photons
+  modes.print_windrad_summary = 0;      // we want to print the wind rad summary each cycle
+  modes.adjust_grid = 0;        // the user wants to adjust the grid scale
+  modes.diag_on_off = 0;        // extra diagnostics
   modes.use_debug = 0;
-  modes.print_dvds_info = 0;	// print out information on velocity gradients
-  modes.quit_after_inputs = 0;	// testing mode which quits after reading in inputs
-  modes.fixed_temp = 0;		// do not attempt to change temperature - used for testing
-  modes.zeus_connect = 0;             // connect with zeus
-  
+  modes.print_dvds_info = 0;    // print out information on velocity gradients
+  modes.quit_after_inputs = 0;  // testing mode which quits after reading in inputs
+  modes.fixed_temp = 0;         // do not attempt to change temperature - used for testing
+  modes.zeus_connect = 0;       // connect with zeus
+
   //note write_atomicdata  is defined in atomic.h, rather than the modes structure 
-  write_atomicdata = 0;		// print out summary of atomic data 
+  write_atomicdata = 0;         // print out summary of atomic data 
 
 
-  modes.keep_photoabs = 1;	// keep photoabsorption in final spectrum
+  modes.keep_photoabs = 1;      // keep photoabsorption in final spectrum
 
   return (0);
 }
@@ -673,21 +658,21 @@ init_observers ()
   for (n = 4; n < NSPEC; n++)
     geo.angle[n] = 45;
   for (n = 0; n < NSPEC; n++)
-    {
-      geo.phase[n] = 0.5;
-      geo.scat_select[n] = 1000;
-      geo.top_bot_select[n] = 0;
-    }
+  {
+    geo.phase[n] = 0.5;
+    geo.scat_select[n] = 1000;
+    geo.top_bot_select[n] = 0;
+  }
   geo.swavemin = 850;
   geo.swavemax = 1850;
 
   rddoub ("spectrum_wavemin", &geo.swavemin);
   rddoub ("spectrum_wavemax", &geo.swavemax);
   if (geo.swavemin > geo.swavemax)
-    {
-      geo.swavemax = geo.swavemin;
-      geo.swavemin = geo.swavemax;
-    }
+  {
+    geo.swavemax = geo.swavemin;
+    geo.swavemin = geo.swavemax;
+  }
 
   /* SS June 04: convert these to frequencies and store for use
      in computing macro atom and k-packet emissivities. */
@@ -695,18 +680,17 @@ init_observers ()
   em_rnge.fmin = C / (geo.swavemax * 1.e-8);
   em_rnge.fmax = C / (geo.swavemin * 1.e-8);
 
-  geo.matom_radiation = 0;	//initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
+  geo.matom_radiation = 0;      //initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
 
 /* Note: Below here many of the variables which are read in are not currently part of geo stucture */
 
   rdint ("no_observers", &geo.nangles);
 
   if (geo.nangles < 1 || geo.nangles > NSPEC)
-    {
-      Error ("no_observers %d should not be > %d or <0\n", geo.nangles,
-	     NSPEC);
-      exit (0);
-    }
+  {
+    Error ("no_observers %d should not be > %d or <0\n", geo.nangles, NSPEC);
+    exit (0);
+  }
 
 
   for (n = 0; n < geo.nangles; n++)
@@ -719,23 +703,21 @@ init_observers ()
   /* JM 1502 -- change this so we only ask for phase if the system is a binary -- see #137 */
 
   if (geo.system_type == SYSTEM_TYPE_BINARY)
-    {
+  {
 
-      for (n = 0; n < geo.nangles; n++)
-	rddoub ("phase(0=inferior_conjunction)", &geo.phase[n]);
-    }
+    for (n = 0; n < geo.nangles; n++)
+      rddoub ("phase(0=inferior_conjunction)", &geo.phase[n]);
+  }
   else
-    Log
-      ("No phase information needed as system type %i is not a binary\n",
-       geo.system_type);
+    Log ("No phase information needed as system type %i is not a binary\n", geo.system_type);
 
 
   rdint ("live.or.die(0).or.extract(anything_else)", &geo.select_extract);
   if (geo.select_extract != 0)
-    {
-      geo.select_extract = 1;
-      Log ("OK, extracting from specific angles\n");
-    }
+  {
+    geo.select_extract = 1;
+    Log ("OK, extracting from specific angles\n");
+  }
   else
     Log ("OK, using live or die option\n");
 
@@ -744,52 +726,49 @@ init_observers ()
  * advanced commands*/
 
   if (modes.iadvanced)
+  {
+    strcpy (yesno, "n");
+    rdstr ("Select_specific_no_of_scatters_in_spectra(y/n)", yesno);
+    if (yesno[0] == 'y')
     {
-      strcpy (yesno, "n");
-      rdstr ("Select_specific_no_of_scatters_in_spectra(y/n)", yesno);
-      if (yesno[0] == 'y')
-	{
-	  Log
-	    ("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
-	  for (n = 0; n < geo.nangles; n++)
-	    {
-	      rdint ("Select_scatters", &geo.scat_select[n]);
-	    }
-	}
-      strcpy (yesno, "n");
-      rdstr ("Select_photons_by_position(y/n)", yesno);
-      if (yesno[0] == 'y')
-	{
-	  Log
-	    ("OK 0->all; -1 -> below; 1 -> above the disk, 2 -> specific location in wind\n");
-	  for (n = 0; n < geo.nangles; n++)
-	    {
-	      rdint ("Select_location", &geo.top_bot_select[n]);
-	      if (geo.top_bot_select[n] == 2)
-		{
-		  Log
-		    ("Warning: Make sure that position will be in wind, or no joy will be obtained\n");
-		  rddoub ("rho(cm)", &geo.rho_select[n]);
-		  rddoub ("z(cm)", &geo.z_select[n]);
-		  rddoub ("azimuth(deg)", &geo.az_select[n]);
-		  rddoub ("r(cm)", &geo.r_select[n]);
-
-		}
-	    }
-	}
+      Log ("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
+      for (n = 0; n < geo.nangles; n++)
+      {
+        rdint ("Select_scatters", &geo.scat_select[n]);
+      }
     }
+    strcpy (yesno, "n");
+    rdstr ("Select_photons_by_position(y/n)", yesno);
+    if (yesno[0] == 'y')
+    {
+      Log ("OK 0->all; -1 -> below; 1 -> above the disk, 2 -> specific location in wind\n");
+      for (n = 0; n < geo.nangles; n++)
+      {
+        rdint ("Select_location", &geo.top_bot_select[n]);
+        if (geo.top_bot_select[n] == 2)
+        {
+          Log ("Warning: Make sure that position will be in wind, or no joy will be obtained\n");
+          rddoub ("rho(cm)", &geo.rho_select[n]);
+          rddoub ("z(cm)", &geo.z_select[n]);
+          rddoub ("azimuth(deg)", &geo.az_select[n]);
+          rddoub ("r(cm)", &geo.r_select[n]);
+
+        }
+      }
+    }
+  }
 
   /* Select the units of the output spectra.  This is always needed */
 
   rdint ("spec.type(flambda(1),fnu(2),basic(other)", &geo.select_spectype);
   if (geo.select_spectype == 1)
-    {
-      Log ("OK, generating flambda at 100pc\n");
-    }
+  {
+    Log ("OK, generating flambda at 100pc\n");
+  }
   else if (geo.select_spectype == 2)
-    {
-      Log ("OK, generating fnu at 100 pc\n");
-    }
+  {
+    Log ("OK, generating fnu at 100 pc\n");
+  }
   else
     Log ("OK, basic Monte Carlo spectrum\n");
 
@@ -827,7 +806,7 @@ init_photons ()
 
   x = 100000;
   rddoub ("photons_per_cycle", &x);
-  NPHOT = x;			// NPHOT is photons/cycle
+  NPHOT = x;                    // NPHOT is photons/cycle
 
 #ifdef MPI_ON
   Log ("Photons per cycle per MPI task will be %d\n", NPHOT / np_mpi_global);
@@ -841,30 +820,28 @@ init_photons ()
 
 
   if (geo.wcycles == 0 && geo.pcycles == 0)
-    {
-      Log
-	("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
-      exit (0);			//There is really nothing to do!
-    }
+  {
+    Log ("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
+    exit (0);                   //There is really nothing to do!
+  }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */
 
   photmain = p = (PhotPtr) calloc (sizeof (p_dummy), NPHOT);
 
   if (p == NULL)
-    {
-      Error
-  ("There is a problem in allocating memory for the photon structure\n");
-      exit (0);
-    }
-  else 
-    {
-      /* JM 1605 -- large photon numbers can cause problems / runs to crash. Report to use (see #209) */
-      Log("Allocated %10d bytes for each of %5d elements of photon structure totaling %10.1f Mb \n",
+  {
+    Error ("There is a problem in allocating memory for the photon structure\n");
+    exit (0);
+  }
+  else
+  {
+    /* JM 1605 -- large photon numbers can cause problems / runs to crash. Report to use (see #209) */
+    Log ("Allocated %10d bytes for each of %5d elements of photon structure totaling %10.1f Mb \n",
          sizeof (p_dummy), NPHOT, 1.e-6 * NPHOT * sizeof (p_dummy));
-      if ( (NPHOT * sizeof (p_dummy)) > 1e9)
-        Error("Over 1 GIGABYTE of photon structure allocated. Could cause serious problems.\n");
-    }
+    if ((NPHOT * sizeof (p_dummy)) > 1e9)
+      Error ("Over 1 GIGABYTE of photon structure allocated. Could cause serious problems.\n");
+  }
 
 
   return (p);
@@ -900,20 +877,18 @@ init_ionization ()
   // XXX  I is unclear to me why all of this dwon to the next XXX is not moved to a single subroutine.  It all
   // pertains to how the radiatiate tranfer is carreid out
 
-  rdint
-    ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,6=pairwise_bb,7=pairwise_pow,8=matrix_bb,9=matrix_pow)",
-     &geo.ioniz_mode);
+  rdint ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,6=pairwise_bb,7=pairwise_pow,8=matrix_bb,9=matrix_pow)", &geo.ioniz_mode);
 
   if (geo.ioniz_mode == IONMODE_FIXED)
-    {
-      rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
-    }
-  if (geo.ioniz_mode == IONMODE_LTE_SIM || geo.ioniz_mode == 5 || geo.ioniz_mode > 9)	/*NSH CLOUDY test - remove once done */
-    {
-      Log ("The allowed ionization modes are 0, 1, 2, 3, 6, 7\n");
-      Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
-      exit (0);
-    }
+  {
+    rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
+  }
+  if (geo.ioniz_mode == IONMODE_LTE_SIM || geo.ioniz_mode == 5 || geo.ioniz_mode > 9)   /*NSH CLOUDY test - remove once done */
+  {
+    Log ("The allowed ionization modes are 0, 1, 2, 3, 6, 7\n");
+    Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
+    exit (0);
+  }
 
 
 
@@ -921,7 +896,7 @@ init_ionization ()
      full advantage of the data file.  This means that in calculating the partition functions, the information
      on levels and their multiplicities is taken into account.   */
 
-  geo.partition_mode = -1;	//?? Stuart, is there a reason not to move this earlier so it does not affect restart
+  geo.partition_mode = -1;      //?? Stuart, is there a reason not to move this earlier so it does not affect restart
 
 
   /* get_line_transfer_mode reads in the Line_transfer question from the user, 
@@ -933,39 +908,38 @@ init_ionization ()
 
 
 
-  thermal_opt = 0;		/* NSH 131213 Set the option to zero - the default. The lines allow allow the
-				   user to turn off mechanisms that affect the thermal balance. Adiabatic is the only one implemented
-				   to start off with. */
+  thermal_opt = 0;              /* NSH 131213 Set the option to zero - the default. The lines allow allow the
+                                   user to turn off mechanisms that affect the thermal balance. Adiabatic is the only one implemented
+                                   to start off with. */
 
-  rdint
-    ("Thermal_balance_options(0=everything.on,1=no.adiabatic)", &thermal_opt);
+  rdint ("Thermal_balance_options(0=everything.on,1=no.adiabatic)", &thermal_opt);
 
   if (thermal_opt == 1)
-    {
-      geo.adiabatic = 0;
-    }
+  {
+    geo.adiabatic = 0;
+  }
 
   else if (thermal_opt > 1 || thermal_opt < 0)
-    {
-      Error ("Unknown thermal balance mode %d\n", thermal_opt);
-      exit (0);
-    }
+  {
+    Error ("Unknown thermal balance mode %d\n", thermal_opt);
+    exit (0);
+  }
 
 
   /* 57h -- Next line prevents bf calculation of macro_estimaters when no macro atoms are present.   */
 
   if (nlevels_macro == 0)
-    geo.macro_simple = 1;	// Make everything simple if no macro atoms -- 57h
+    geo.macro_simple = 1;       // Make everything simple if no macro atoms -- 57h
 
   //SS - initalise the choice of handling for macro pops.
   if (geo.run_type == SYSTEM_TYPE_PREVIOUS)
-    {
-      geo.macro_ioniz_mode = 1;	// Now that macro atom properties are available for restarts
-    }
+  {
+    geo.macro_ioniz_mode = 1;   // Now that macro atom properties are available for restarts
+  }
   else
-    {
-      geo.macro_ioniz_mode = 0;
-    }
+  {
+    geo.macro_ioniz_mode = 0;
+  }
 
   return (0);
 

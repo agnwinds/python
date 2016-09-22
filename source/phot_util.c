@@ -54,7 +54,7 @@ stuff_phot (pin, pout)
   pout->w = pin->w;
   pout->freq = pin->freq;
   pout->tau = pin->tau;
-  pout->path = pin->path;   //0714 SWM - Added
+  pout->path = pin->path;       //0714 SWM - Added
 
   pout->lmn[0] = pin->lmn[0];
   pout->lmn[1] = pin->lmn[1];
@@ -104,7 +104,7 @@ move_phot (pp, ds)
   pp->x[0] += pp->lmn[0] * ds;
   pp->x[1] += pp->lmn[1] * ds;
   pp->x[2] += pp->lmn[2] * ds;
-  pp->path += fabs(ds);         /* SWM 31/7/14 - Added */
+  pp->path += fabs (ds);        /* SWM 31/7/14 - Added */
   return (0);
 }
 
@@ -180,21 +180,19 @@ phot_hist (p, iswitch)
     return (0);
 
   if (iswitch == 0)
-    {
-      n_phot_hist = 0;
-    }
+  {
+    n_phot_hist = 0;
+  }
 
   if (n_phot_hist < MAX_PHOT_HIST)
-    {
-      stuff_phot (p, &xphot_hist[n_phot_hist]);
-      n_phot_hist++;
-    }
+  {
+    stuff_phot (p, &xphot_hist[n_phot_hist]);
+    n_phot_hist++;
+  }
   else
-    {
-      Error
-	("phot_hist: The number of steps %d in phot_hist exceeds MAX_PHOT_HIST\n",
-	 MAX_PHOT_HIST);
-    }
+  {
+    Error ("phot_hist: The number of steps %d in phot_hist exceeds MAX_PHOT_HIST\n", MAX_PHOT_HIST);
+  }
 
   return (n_phot_hist);
 }
@@ -239,28 +237,26 @@ phot_history_summarize ()
   tau_old = p->tau;
 
   for (n = 1; n < n_phot_hist; n++)
+  {
+    p = &xphot_hist[n];
+
+    tau = p->tau;               // tau is tau after the scatter
+
+    nion = lin_ptr[p->nres]->nion;      // ion that scattered
+
+    x = p->w * (exp (-tau_old) - exp (-tau));   // energy removed by scatter
+
+    xplasma = &plasmamain[wmain[p->grid].nplasma];      // pointer to plasma cell where scattering occured
+
+    xplasma->xscatters[nion] += (x);
+
+    tau_old = tau;
+
+    if (xplasma->xscatters[nion] < 0.0)
     {
-      p = &xphot_hist[n];
-
-      tau = p->tau;		// tau is tau after the scatter
-
-      nion = lin_ptr[p->nres]->nion;	// ion that scattered
-
-      x = p->w * (exp (-tau_old) - exp (-tau));	// energy removed by scatter
-
-      xplasma = &plasmamain[wmain[p->grid].nplasma];	// pointer to plasma cell where scattering occured
-
-      xplasma->xscatters[nion] += (x);
-
-      tau_old = tau;
-
-      if (xplasma->xscatters[nion] < 0.0)
-	{
-	  Error
-	    ("phot_history_summarize:  n %d n_phot_hist %d phot_hist %d nplasma %d\n",
-	     n, n_phot_hist, p->grid, wmain[p->grid].nplasma);
-	}
+      Error ("phot_history_summarize:  n %d n_phot_hist %d phot_hist %d nplasma %d\n", n, n_phot_hist, p->grid, wmain[p->grid].nplasma);
     }
+  }
 
 
 
@@ -340,7 +336,7 @@ ds_to_cone (cc, p)
 {
   double dz, dzdr2;
   double a, b, c, root[2];
-  double s_to_zero;		/* The path length to the xy plane */
+  double s_to_zero;             /* The path length to the xy plane */
   int i;
   struct photon pp;
 
@@ -348,26 +344,22 @@ ds_to_cone (cc, p)
   stuff_phot (p, &pp);
 
   if (pp.x[2] < 0.0)
-    {				/*move the photon to the northen hemisphere */
-      pp.x[2] = -pp.x[2];
-      pp.lmn[2] = -pp.lmn[2];
-    }
+  {                             /*move the photon to the northen hemisphere */
+    pp.x[2] = -pp.x[2];
+    pp.lmn[2] = -pp.lmn[2];
+  }
 
   /* Set up and solve the quadratic equation that gives the cone intercept */
 
   dzdr2 = cc->dzdr * cc->dzdr;
   dz = pp.x[2] - cc->z;
 
-  a =
-    dzdr2 * (pp.lmn[0] * pp.lmn[0] + pp.lmn[1] * pp.lmn[1]) -
-    (pp.lmn[2] * pp.lmn[2]);
-  b =
-    2. * (dzdr2 * (pp.lmn[0] * pp.x[0] + pp.lmn[1] * pp.x[1]) -
-	  pp.lmn[2] * dz);
+  a = dzdr2 * (pp.lmn[0] * pp.lmn[0] + pp.lmn[1] * pp.lmn[1]) - (pp.lmn[2] * pp.lmn[2]);
+  b = 2. * (dzdr2 * (pp.lmn[0] * pp.x[0] + pp.lmn[1] * pp.x[1]) - pp.lmn[2] * dz);
   c = dzdr2 * (pp.x[0] * pp.x[0] + pp.x[1] * pp.x[1]) - dz * dz;
 
-  i = quadratic (a, b, c, root);	/* root[i] is the smallest positive root unless i is
-					   negative in which case either both roots were negative or both roots were imaginary */
+  i = quadratic (a, b, c, root);        /* root[i] is the smallest positive root unless i is
+                                           negative in which case either both roots were negative or both roots were imaginary */
 
   /* Calculate the positive path length to the xy plane.  If either the
      photon is travelling in the xy plane or if the intercept is in the negative
@@ -380,8 +372,8 @@ ds_to_cone (cc, p)
 
 
   if (i >= 0 && root[i] < s_to_zero)
-    return (root[i]);		/*Because that implies
-				   the ray hit the cone before hitting the xy plane */
+    return (root[i]);           /*Because that implies
+                                   the ray hit the cone before hitting the xy plane */
   return (s_to_zero);
 
 
@@ -428,8 +420,8 @@ both roots were imaginary */
 
 
   if (i >= 0)
-    return (root[i]);		/*Because that implies
-				   the ray hit the sphere */
+    return (root[i]);           /*Because that implies
+                                   the ray hit the sphere */
 
   return (VERY_BIG);
 }
@@ -471,13 +463,13 @@ ds_to_sphere2 (x, r, p)
   b = 2. * dot (delta, p->lmn);
   c = dot (delta, delta) - r * r;
 
-  i = quadratic (a, b, c, root);	/* root[i] is the smallest positive root unless i is
-					   negative in which case either both roots were negative or both roots were imaginary */
+  i = quadratic (a, b, c, root);        /* root[i] is the smallest positive root unless i is
+                                           negative in which case either both roots were negative or both roots were imaginary */
 
 
   if (i >= 0)
-    return (root[i]);		/*Because that implies
-				   the ray hit the sphere */
+    return (root[i]);           /*Because that implies
+                                   the ray hit the sphere */
 
   return (VERY_BIG);
 }
@@ -522,27 +514,27 @@ quadratic (a, b, c, r)
   double q, z;
 
   if (a == 0.0)
-    {				/* Then it's not really a quadratic but we can solve it
-				   anyway */
-      if (b == 0.0)
-	{
-	  r[0] = r[1] = -99.;
-	  return (-1);		/* The roots are extremely imaginary, since both a a b were 0 */
-	}
-
-      r[0] = r[1] = (-c / b);	// Then it was a linear equation. Setting both roots to the same thing could be a problem ksl
-      if (r[0] < 0.0)
-	return (-2);		/* Generally speaking we are not interested in
-				   negative distances */
-      else
-	return (0);
-    }
-
-  if ((q = b * b - 4. * a * c) < 0.0)
+  {                             /* Then it's not really a quadratic but we can solve it
+                                   anyway */
+    if (b == 0.0)
     {
       r[0] = r[1] = -99.;
-      return (-1);		/* both roots are imaginary */
+      return (-1);              /* The roots are extremely imaginary, since both a a b were 0 */
     }
+
+    r[0] = r[1] = (-c / b);     // Then it was a linear equation. Setting both roots to the same thing could be a problem ksl
+    if (r[0] < 0.0)
+      return (-2);              /* Generally speaking we are not interested in
+                                   negative distances */
+    else
+      return (0);
+  }
+
+  if ((q = b * b - 4. * a * c) < 0.0)
+  {
+    r[0] = r[1] = -99.;
+    return (-1);                /* both roots are imaginary */
+  }
   q = sqrt (q);
   z = 0.5 / a;
 
@@ -551,10 +543,10 @@ quadratic (a, b, c, r)
 
 
   if (r[0] > 0.0 && (r[0] < r[1] || r[1] <= 0.0))
-    return (0);			/* r[0] is smallest positive root */
+    return (0);                 /* r[0] is smallest positive root */
   if (r[1] > 0.0 && (r[1] < r[0] || r[0] <= 0.0))
-    return (1);			/* r[1] is smallest positive root */
-  return (-2);			/* both roots are negative */
+    return (1);                 /* r[1] is smallest positive root */
+  return (-2);                  /* both roots are negative */
 
   /* x1 should be the smallest positive root for most applications */
 }
@@ -646,9 +638,9 @@ ds_to_plane (pl, p)
 
 double
 ds_to_closest_approach (x, p, impact_parameter)
-     double x[];		/* point for which impact parameter is calculated */
-     struct photon *p;		/* Photon ptr of interest */
-     double *impact_parameter;	/* distance of ray to point a closest approach */
+     double x[];                /* point for which impact parameter is calculated */
+     struct photon *p;          /* Photon ptr of interest */
+     double *impact_parameter;  /* distance of ray to point a closest approach */
 {
   double diff[3], s, result[3];
   double length (), dot ();

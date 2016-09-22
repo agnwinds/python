@@ -68,16 +68,16 @@ main (argc, argv)
   if (argc == 1)
     strcpy (parfile, "simple.pf");
   else if (argc == 2)
-    {
-      strcpy (parfile, argv[1]);
-      if ((strstr (parfile, ".pf")) == NULL)
-	strcat (parfile, ".pf");
-    }
+  {
+    strcpy (parfile, argv[1]);
+    if ((strstr (parfile, ".pf")) == NULL)
+      strcat (parfile, ".pf");
+  }
   else
-    {
-      printf ("Usage: simple [file.pf]\n");
-      exit (0);
-    }
+  {
+    printf ("Usage: simple [file.pf]\n");
+    exit (0);
+  }
 
 /* Initialize variables that will be read by rdpar */
 
@@ -116,41 +116,32 @@ main (argc, argv)
 
 
   for (ff = -0.3; ff <= 1.3; ff += 0.1)
+  {
+    for (gg = -0.3; gg <= 1.3; gg += 0.1)
     {
-      for (gg = -0.3; gg <= 1.3; gg += 0.1)
-	{
 
 
-	  x[0] =
-	    (1. - gg) * ((1 - ff) * x00[0] + ff * x10[0]) +
-	    gg * ((1 - ff) * x01[0] + ff * x11[0]);
-	  x[2] =
-	    (1. - gg) * ((1 - ff) * x00[2] + ff * x10[2]) +
-	    gg * ((1 - ff) * x01[2] + ff * x11[2]);
+      x[0] = (1. - gg) * ((1 - ff) * x00[0] + ff * x10[0]) + gg * ((1 - ff) * x01[0] + ff * x11[0]);
+      x[2] = (1. - gg) * ((1 - ff) * x00[2] + ff * x10[2]) + gg * ((1 - ff) * x01[2] + ff * x11[2]);
 
 /* End of input section */
 
-	  i = bilin (x, x00, x01, x10, x11, &f, &g);
+      i = bilin (x, x00, x01, x10, x11, &f, &g);
 
-	  xx[0] =
-	    (1. - g) * ((1 - f) * x00[0] + f * x10[0]) +
-	    g * ((1 - f) * x01[0] + f * x11[0]);
-	  xx[2] =
-	    (1. - g) * ((1 - f) * x00[2] + f * x10[2]) +
-	    g * ((1 - f) * x01[2] + f * x11[2]);
+      xx[0] = (1. - g) * ((1 - f) * x00[0] + f * x10[0]) + g * ((1 - f) * x01[0] + f * x11[0]);
+      xx[2] = (1. - g) * ((1 - f) * x00[2] + f * x10[2]) + g * ((1 - f) * x01[2] + f * x11[2]);
 
-	  if (0.0 <= f && f <= 1 && 0.0 <= g && g <= 1 && i != 0)
-	    Error ("Next answer unexpected == Supposed to be in grid \n");
-	  if (i == 0 && (f < 0.0 || f > 1 || g < 0.0 || g > 1.0))
-	    Error ("Next answer unexpected -- Not supposed to be in grid\n");
+      if (0.0 <= f && f <= 1 && 0.0 <= g && g <= 1 && i != 0)
+        Error ("Next answer unexpected == Supposed to be in grid \n");
+      if (i == 0 && (f < 0.0 || f > 1 || g < 0.0 || g > 1.0))
+        Error ("Next answer unexpected -- Not supposed to be in grid\n");
 
-	  printf
-	    ("%8.3f %8.3f --> %9.2e %9.2e --> %9.3f %9.3f (Returned %2d) --> %9.2e %9.2e (Diff %9.2e %9.2e) \n",
-	     ff, gg, x[0], x[2], f, g, i, xx[0], xx[2], xx[0] - x[0],
-	     xx[2] - x[2]);
+      printf
+        ("%8.3f %8.3f --> %9.2e %9.2e --> %9.3f %9.3f (Returned %2d) --> %9.2e %9.2e (Diff %9.2e %9.2e) \n",
+         ff, gg, x[0], x[2], f, g, i, xx[0], xx[2], xx[0] - x[0], xx[2] - x[2]);
 
-	}
     }
+  }
 
 
 

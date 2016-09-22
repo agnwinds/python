@@ -56,9 +56,9 @@ and
 15aug	ksl	Minor changes for multiple domains
 */
 
-#define  TAU_TOP   10.0		/* tau above which we assume the angular distribution function
-				   no longer changes significantly, e.g above which the surface behaves
-				   like a solid surface */
+#define  TAU_TOP   10.0         /* tau above which we assume the angular distribution function
+                                   no longer changes significantly, e.g above which the surface behaves
+                                   like a solid surface */
 #define  TAU_BOT    0.01
 
 
@@ -73,7 +73,7 @@ randwind (p, lmn, north)
 {
 
   double xyz[3];
-  double n;			/* the individual direction cosines in the rotated frame */
+  double n;                     /* the individual direction cosines in the rotated frame */
   double q;
   double phi;
   double xlmn[3], dummy[3];
@@ -84,12 +84,10 @@ randwind (p, lmn, north)
 
 
   if (p->nres < 0)
-    {
-      Error
-	("randwind: Cannot calculate line scattering without nres %d of line\n",
-	 p->nres);
-      return (-1);
-    }
+  {
+    Error ("randwind: Cannot calculate line scattering without nres %d of line\n", p->nres);
+    return (-1);
+  }
 
 /* Get the position of the photon in the appropriated domain */
   k = where_in_grid (wmain[p->grid].ndom, p->x);
@@ -99,22 +97,22 @@ randwind (p, lmn, north)
   stuff_v (p->x, xyz);
 
   if (tau > TAU_TOP)
-    tau = TAU_TOP;		// 
+    tau = TAU_TOP;              // 
   if (tau < TAU_BOT)
     tau = TAU_BOT;
 
   if (fabs (tau - tau_randwind) > 0.01)
-    {				// (Re)create pdf
-      make_pdf_randwind (tau);
-      stuff_phot (p, &phot_randwind);
-    }
+  {                             // (Re)create pdf
+    make_pdf_randwind (tau);
+    stuff_phot (p, &phot_randwind);
+  }
 
   xlmn[0] = n = pdf_get_rand (pdf_randwind);
   if (sane_check (n))
-    {
-      Error ("anisowind:sane_check of pdf_get_rand returned %f\n", n);
-      xlmn[0] = n = pdf_get_rand (pdf_randwind);
-    }
+  {
+    Error ("anisowind:sane_check of pdf_get_rand returned %f\n", n);
+    xlmn[0] = n = pdf_get_rand (pdf_randwind);
+  }
 
   q = sqrt (1. - n * n);
 
@@ -152,10 +150,9 @@ the cartesian frame */
   project_from (&nbasis, xlmn, lmn);
 
   if (sane_check (lmn[0]) || sane_check (lmn[1]) || sane_check (lmn[2]))
-    {
-      Error ("Randwind:sane_check NAN problem lmn %f %f %f\n", lmn[0], lmn[1],
-	     lmn[2]);
-    }
+  {
+    Error ("Randwind:sane_check NAN problem lmn %f %f %f\n", lmn[0], lmn[1], lmn[2]);
+  }
 
   return (0);
 }
@@ -185,10 +182,10 @@ vrandwind (x)
   double abscos, z;
 
   abscos = fabs (x);
-  if (abscos == 0.0)		// Then at 90 degrees
-    {
-      return (VRANDWIND_FLOOR);
-    }
+  if (abscos == 0.0)            // Then at 90 degrees
+  {
+    return (VRANDWIND_FLOOR);
+  }
 
 
 /* The next lines generate a model for scattering in which
@@ -209,10 +206,10 @@ vrandwind (x)
       Completely isotropic
 */
   if (sane_check (z))
-    {
-      Error ("vrandwind:sane_check tau_randwind %f x %f\n", tau_randwind, x);
-      return (0.0);
-    }
+  {
+    Error ("vrandwind:sane_check tau_randwind %f x %f\n", tau_randwind, x);
+    return (0.0);
+  }
 
 
   return (z);
@@ -260,7 +257,7 @@ and the reweighting is returned.
 */
 
 #define REWEIGHTWIND_TAU_MAX 100.
-int reweightwind_init = 1;	//TRUE to start
+int reweightwind_init = 1;      //TRUE to start
 double reweightwind_zmax;
 
 double
@@ -279,13 +276,12 @@ reweightwind (p)
 /* Idea here is that if photon has moved from position where it was you must recalc. */
 
   if ((x = length (delta)) > DFUDGE)
-    {
-      k = where_in_grid (wmain[p->grid].ndom, p->x);
-      tau =
-	sobolev (&wmain[k], p->x, -1., lin_ptr[p->nres], wmain[k].dvds_max);
-      make_pdf_randwind (tau);	// Needed for the normalization
-      stuff_phot (p, &phot_randwind);
-    }
+  {
+    k = where_in_grid (wmain[p->grid].ndom, p->x);
+    tau = sobolev (&wmain[k], p->x, -1., lin_ptr[p->nres], wmain[k].dvds_max);
+    make_pdf_randwind (tau);    // Needed for the normalization
+    stuff_phot (p, &phot_randwind);
+  }
   else
     tau = 0.0;
 
@@ -314,12 +310,10 @@ what we do here */
   x = vrandwind (ctheta) * z;
 
   if (sane_check (x) || x > 2.0)
-    {
-      Error
-	("Reweightwind:sane_check x %f tau %f ctheta %f z %e pdf_randwind->norm %f\n",
-	 x, tau, ctheta, z, pdf_randwind->norm);
-      x = 2.0;
-    }
+  {
+    Error ("Reweightwind:sane_check x %f tau %f ctheta %f z %e pdf_randwind->norm %f\n", x, tau, ctheta, z, pdf_randwind->norm);
+    x = 2.0;
+  }
 
   p->w *= x;
   return (x);
@@ -360,37 +354,32 @@ make_pdf_randwind (tau)
 /* Initalize jumps the first time routine is called */
 
   if (init_make_pdf_randwind)
+  {
+    make_pdf_randwind_njumps = 0;
+    for (jj = -88; jj <= 88; jj += 2)
     {
-      make_pdf_randwind_njumps = 0;
-      for (jj = -88; jj <= 88; jj += 2)
-	{
-	  make_pdf_randwind_jumps[make_pdf_randwind_njumps] =
-	    sin (jj / 57.29578);
-	  make_pdf_randwind_njumps++;
-	}
-      pdf_randwind_dlogtau = (LOGTAUMAX - LOGTAUMIN) / 99.;
-      for (jj = 0; jj < 100; jj++)
-	{
-	  xtau = pow (10., LOGTAUMIN + pdf_randwind_dlogtau * jj);
-	  tau_randwind = xtau;	/* This is passed to vrandwind by an external variable */
-	  if ((echeck =
-	       pdf_gen_from_func (&pdf_randwind_store[jj], &vrandwind, -1.0,
-				  1.0, make_pdf_randwind_njumps,
-				  make_pdf_randwind_jumps)) != 0)
-	    {
-	      Error ("Randwind: return from pdf_gen_from_func %d\n", echeck);
-	    }
-	}
-      init_make_pdf_randwind = 0;
+      make_pdf_randwind_jumps[make_pdf_randwind_njumps] = sin (jj / 57.29578);
+      make_pdf_randwind_njumps++;
     }
+    pdf_randwind_dlogtau = (LOGTAUMAX - LOGTAUMIN) / 99.;
+    for (jj = 0; jj < 100; jj++)
+    {
+      xtau = pow (10., LOGTAUMIN + pdf_randwind_dlogtau * jj);
+      tau_randwind = xtau;      /* This is passed to vrandwind by an external variable */
+      if ((echeck =
+           pdf_gen_from_func (&pdf_randwind_store[jj], &vrandwind, -1.0, 1.0, make_pdf_randwind_njumps, make_pdf_randwind_jumps)) != 0)
+      {
+        Error ("Randwind: return from pdf_gen_from_func %d\n", echeck);
+      }
+    }
+    init_make_pdf_randwind = 0;
+  }
 
   if (sane_check (tau))
-    {
-      Error
-	("make_pdf_randwind:sane_check Need proper tau (%e) to make pdf_randwind\n",
-	 tau);
-      tau = 10.;		// Forces something close to isotropic
-    }
+  {
+    Error ("make_pdf_randwind:sane_check Need proper tau (%e) to make pdf_randwind\n", tau);
+    tau = 10.;                  // Forces something close to isotropic
+  }
 
   jj = (log10 (tau) - LOGTAUMIN) / pdf_randwind_dlogtau + 0.5;
 
@@ -400,7 +389,7 @@ make_pdf_randwind (tau)
     jj = 99;
 
   pdf_randwind = &pdf_randwind_store[jj];
-  tau_randwind = tau;		// This is passed to vrandwind by an external variable
+  tau_randwind = tau;           // This is passed to vrandwind by an external variable
 
   return (0);
 }
@@ -463,8 +452,7 @@ randwind_thermal_trapping (p, nnscat)
 
   /* Throw error if p_norm is 0 */
   if (p_norm <= 0)
-    Error ("randwind_thermal_trapping: p_norm is %8.4e in cell %i",
-	   p_norm, one->nplasma);
+    Error ("randwind_thermal_trapping: p_norm is %8.4e in cell %i", p_norm, one->nplasma);
 
   ztest = 1.0;
   z = 0.0;
@@ -478,20 +466,20 @@ randwind_thermal_trapping (p, nnscat)
 
   /* rejection method loop, which chooses direction and also calculated nnscat */
   while (ztest > z)
-    {
-      *nnscat = *nnscat + 1;	//- JM - see above 
-      randvec (z_prime, 1.0);	/* Get a new direction for the photon (isotropic */
-      stuff_v (z_prime, p->lmn);	// copy to photon pointer
+  {
+    *nnscat = *nnscat + 1;      //- JM - see above 
+    randvec (z_prime, 1.0);     /* Get a new direction for the photon (isotropic */
+    stuff_v (z_prime, p->lmn);  // copy to photon pointer
 
 
-      /* generate random number, normalised by p_norm with a 1.2 for 20% 
-         safety net (as dvds_max is worked out with a sample of directions) */
-      ztest = (rand () + 0.5) / MAXRAND * p_norm;
-      dvds = dvwind_ds (p);
-      tau = sobolev (one, p->x, -1.0, lin_ptr[p->nres], dvds);
+    /* generate random number, normalised by p_norm with a 1.2 for 20% 
+       safety net (as dvds_max is worked out with a sample of directions) */
+    ztest = (rand () + 0.5) / MAXRAND * p_norm;
+    dvds = dvwind_ds (p);
+    tau = sobolev (one, p->x, -1.0, lin_ptr[p->nres], dvds);
 
-      z = p_escape_from_tau (tau);	/* probability to see if it escapes in that direction */
-    }
+    z = p_escape_from_tau (tau);        /* probability to see if it escapes in that direction */
+  }
 
   return (0);
 }

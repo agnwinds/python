@@ -39,7 +39,7 @@ get_homologous_params (ndom)
   DomainPtr one_dom;
   one_dom = &zdom[ndom];
 
-  Log ("Creating a homolgous wind model in domain %d\n",ndom);
+  Log ("Creating a homolgous wind model in domain %d\n", ndom);
 
 
 
@@ -54,18 +54,17 @@ get_homologous_params (ndom)
   rddoub ("homologous_boundary_mdot(msol/yr)", &one_dom->stellar_wind_mdot);
   one_dom->stellar_wind_mdot *= MSOL / YR;
 
-  rddoub ("homologous.radmin(cm)", &one_dom->rmin);	/*Radius where wind begins */
+  rddoub ("homologous.radmin(cm)", &one_dom->rmin);     /*Radius where wind begins */
   if (one_dom->rmin < geo.rstar)
-    {
-      Error
-	("get_homologous_params: It is unreasonable to have the wind start inside the star!\n");
-      Log ("Setting geo.rmin to geo.rstar\n");
-      one_dom->rmin = geo.rstar;
-    }
+  {
+    Error ("get_homologous_params: It is unreasonable to have the wind start inside the star!\n");
+    Log ("Setting geo.rmin to geo.rstar\n");
+    one_dom->rmin = geo.rstar;
+  }
   one_dom->cl_rmin = one_dom->rmin;
 
-  rddoub ("homologous.vbase(cm)", &one_dom->cl_v_zero);	/* Velocity at base of the wind */
-  rddoub ("homologous.density_exponent", &one_dom->cl_beta);	/* Density law exponent */
+  rddoub ("homologous.vbase(cm)", &one_dom->cl_v_zero); /* Velocity at base of the wind */
+  rddoub ("homologous.density_exponent", &one_dom->cl_beta);    /* Density law exponent */
 
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
@@ -79,10 +78,10 @@ get_homologous_params (ndom)
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
-    {
-      one_dom->xlog_scale = 0.3 * geo.rstar;
-      one_dom->zlog_scale = 0.3 * geo.rstar;
-    }
+  {
+    one_dom->xlog_scale = 0.3 * geo.rstar;
+    one_dom->zlog_scale = 0.3 * geo.rstar;
+  }
 
   return (0);
 }
@@ -134,20 +133,20 @@ homologous_velocity (ndom, x, v)
   one_dom = &zdom[ndom];
 
   if ((r = length (x)) == 0.0)
-    {
-      v[0] = 0.0;
-      v[1] = 0.0;
-      v[2] = 0.0;
-      return (0.0);
-    }
+  {
+    v[0] = 0.0;
+    v[1] = 0.0;
+    v[2] = 0.0;
+    return (0.0);
+  }
 
 
   if (r <= geo.rstar || r <= one_dom->cl_rmin)
     speed = one_dom->cl_v_zero;
   else
-    {
-      speed = r * one_dom->cl_v_zero / one_dom->cl_rmin;
-    }
+  {
+    speed = r * one_dom->cl_v_zero / one_dom->cl_rmin;
+  }
   v[0] = speed * x[0] / r;
   v[1] = speed * x[1] / r;
   v[2] = speed * x[2] / r;
@@ -192,8 +191,7 @@ homologous_rho (ndom, x)
 
   rho =
     one_dom->stellar_wind_mdot / (4. * PI * one_dom->cl_rmin * one_dom->cl_rmin *
-			      one_dom->cl_v_zero) * pow ((r / one_dom->cl_rmin),
-						     -1. * one_dom->cl_beta);
+                                  one_dom->cl_v_zero) * pow ((r / one_dom->cl_rmin), -1. * one_dom->cl_beta);
 
   return (rho);
 }

@@ -6,7 +6,7 @@
 #include "python.h"
 
 int sdom;
-int sv_zero_r_ndom;   
+int sv_zero_r_ndom;
 
 /***********************************************************
                                        Space Telescope Science Institute
@@ -35,13 +35,13 @@ History:
 
 int
 get_sv_wind_params (ndom)
-    int ndom;
+     int ndom;
 {
   double windmin, windmax, theta_min, theta_max;
 
   Log ("Creating an SV wind in domain %d\n", ndom);
 
-  zdom[ndom].wind_mdot=0.1*geo.disk_mdot /(MSOL / YR);	// Convert to MSOL/YR for easy of data entry
+  zdom[ndom].wind_mdot = 0.1 * geo.disk_mdot / (MSOL / YR);     // Convert to MSOL/YR for easy of data entry
   rddoub ("wind.mdot(msol/yr)", &zdom[ndom].wind_mdot);
   zdom[ndom].wind_mdot *= MSOL / YR;
 
@@ -51,11 +51,11 @@ get_sv_wind_params (ndom)
   zdom[ndom].sv_thetamin = 20. / RADIAN;
   zdom[ndom].sv_thetamax = 65. / RADIAN;
   zdom[ndom].sv_gamma = 1.;
-  zdom[ndom].sv_v_zero = 6e5;		/* velocity at base of wind */
-  zdom[ndom].sv_r_scale = 7e10;		/*Accleration length scale for wind */
-  zdom[ndom].sv_alpha = 1.5;		/* Accleration scale exponent */
-  zdom[ndom].sv_v_infinity = 3;		/* Final speed of wind in units of escape velocity */
-  zdom[ndom].sv_lambda = 0.0;		/* Mass loss rate exponent */
+  zdom[ndom].sv_v_zero = 6e5;   /* velocity at base of wind */
+  zdom[ndom].sv_r_scale = 7e10; /*Accleration length scale for wind */
+  zdom[ndom].sv_alpha = 1.5;    /* Accleration scale exponent */
+  zdom[ndom].sv_v_infinity = 3; /* Final speed of wind in units of escape velocity */
+  zdom[ndom].sv_lambda = 0.0;   /* Mass loss rate exponent */
 
   windmin = zdom[ndom].sv_rmin / geo.rstar;
   windmax = zdom[ndom].sv_rmax / geo.rstar;
@@ -73,37 +73,36 @@ get_sv_wind_params (ndom)
   zdom[ndom].sv_thetamin = theta_min / RADIAN;
   zdom[ndom].sv_thetamax = theta_max / RADIAN;
 
-  rddoub ("sv.mdot_r_exponent", &zdom[ndom].sv_lambda);				/* Mass loss rate exponent */
-  rddoub ("sv.v_infinity(in_units_of_vescape", &zdom[ndom].sv_v_infinity);	/* Final speed of wind in units of escape velocity */
+  rddoub ("sv.mdot_r_exponent", &zdom[ndom].sv_lambda); /* Mass loss rate exponent */
+  rddoub ("sv.v_infinity(in_units_of_vescape", &zdom[ndom].sv_v_infinity);      /* Final speed of wind in units of escape velocity */
 
-  rddoub ("sv.acceleration_length(cm)", &zdom[ndom].sv_r_scale);		/*Accleration length scale for wind */
-  rddoub ("sv.acceleration_exponent", &zdom[ndom].sv_alpha);			/* Accleration scale exponent */
+  rddoub ("sv.acceleration_length(cm)", &zdom[ndom].sv_r_scale);        /*Accleration length scale for wind */
+  rddoub ("sv.acceleration_exponent", &zdom[ndom].sv_alpha);    /* Accleration scale exponent */
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
   zdom[ndom].rmin = geo.rstar;
-  zdom[ndom].rmax = 10.*zdom[ndom].sv_r_scale;  // Set rmax to something reasonable
+  zdom[ndom].rmax = 10. * zdom[ndom].sv_r_scale;        // Set rmax to something reasonable
   zdom[ndom].wind_rho_min = zdom[ndom].sv_rmin;
   zdom[ndom].wind_rho_max = zdom[ndom].sv_rmax;
   zdom[ndom].wind_thetamin = zdom[ndom].sv_thetamin;
   zdom[ndom].wind_thetamax = zdom[ndom].sv_thetamax;
 
- 
+
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
-    {
-     zdom[ndom].xlog_scale = zdom[ndom].sv_rmin;
-     zdom[ndom].zlog_scale = geo.rstar;
-    }
+  {
+    zdom[ndom].xlog_scale = zdom[ndom].sv_rmin;
+    zdom[ndom].zlog_scale = geo.rstar;
+  }
 
-  
 
-  /*Now calculate the normalization factor for the wind*/
-  
+
+  /*Now calculate the normalization factor for the wind */
+
   sdom = ndom;
 
-  zdom[ndom].mdot_norm =
-    qromb (sv_wind_mdot_integral, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 1e-6);
+  zdom[ndom].mdot_norm = qromb (sv_wind_mdot_integral, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, 1e-6);
   return (0);
 }
 
@@ -160,37 +159,35 @@ sv_velocity (x, v, ndom)
 
   /* Calculate the poloidal distance for a vertically extended disk ksl 111124 */
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
-    {
-      xtest[0] = r;		// Define xtest in the +z plane
-      xtest[1] = 0;
-      xtest[2] = fabs (x[2]);
-      ptest.x[0] = rzero;	// Define ptest to be the footpoint extended to xy plane
-      ptest.x[1] = 0.0;
-      ptest.x[2] = EPSILON;
-      ptest.lmn[0] = sin (theta);	// 56d -- ptest direction is along stream line
-      ptest.lmn[1] = 0.0;
-      ptest.lmn[2] = cos (theta);
-      s = ds_to_disk (&ptest, 1);
-      move_phot (&ptest, s);	// Now move the test photon to  disk surface
-      vsub (ptest.x, xtest, xtest);	// Poloidal distance is just the distance beteen these two points.
-      ldist = length (x);
-    }
+  {
+    xtest[0] = r;               // Define xtest in the +z plane
+    xtest[1] = 0;
+    xtest[2] = fabs (x[2]);
+    ptest.x[0] = rzero;         // Define ptest to be the footpoint extended to xy plane
+    ptest.x[1] = 0.0;
+    ptest.x[2] = EPSILON;
+    ptest.lmn[0] = sin (theta); // 56d -- ptest direction is along stream line
+    ptest.lmn[1] = 0.0;
+    ptest.lmn[2] = cos (theta);
+    s = ds_to_disk (&ptest, 1);
+    move_phot (&ptest, s);      // Now move the test photon to  disk surface
+    vsub (ptest.x, xtest, xtest);       // Poloidal distance is just the distance beteen these two points.
+    ldist = length (x);
+  }
 
 
   vl = zdom[ndom].sv_v_zero;
   if (ldist > 0)
-    {
-      zzz = pow (ldist / zdom[ndom].sv_r_scale, zdom[ndom].sv_alpha);
+  {
+    zzz = pow (ldist / zdom[ndom].sv_r_scale, zdom[ndom].sv_alpha);
 
-      if (rzero < geo.rstar)
-	v_escape = sqrt (2. * G * geo.mstar / geo.rstar);
-      else
-	v_escape = sqrt (2. * G * geo.mstar / rzero);
+    if (rzero < geo.rstar)
+      v_escape = sqrt (2. * G * geo.mstar / geo.rstar);
+    else
+      v_escape = sqrt (2. * G * geo.mstar / rzero);
 
-      vl =
-	zdom[ndom].sv_v_zero + (zdom[ndom].sv_v_infinity * v_escape -
-			 zdom[ndom].sv_v_zero) * zzz / (1. + zzz);
-    }
+    vl = zdom[ndom].sv_v_zero + (zdom[ndom].sv_v_infinity * v_escape - zdom[ndom].sv_v_zero) * zzz / (1. + zzz);
+  }
 
   v[0] = vl * sin (theta);
 
@@ -201,7 +198,7 @@ sv_velocity (x, v, ndom)
 
   v[2] = vl * cos (theta);
 
-  if (x[2] < 0)			//line added SS Nov 04 - is this correct?
+  if (x[2] < 0)                 //line added SS Nov 04 - is this correct?
     v[2] *= (-1);
   /* 04aug -- ksl --52 At this point we have calculated the velocity in the xz plane, which
    * is identical to the statement that we have calculated it in
@@ -209,21 +206,18 @@ sv_velocity (x, v, ndom)
    * coordinates if x was not originally in the xz plane.
    */
   if (x[1] != 0.0)
-    {
-      project_from_cyl_xyz (x, v, xtest);
-      stuff_v (xtest, v);
-    }
+  {
+    project_from_cyl_xyz (x, v, xtest);
+    stuff_v (xtest, v);
+  }
 
 
   speed = (sqrt (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]));
   if (sane_check (speed))
-    {
-      Error ("sv_velocity: x %f %f %f v %f %f %f\n", x[0], x[1], x[2], v[0],
-	     v[1], v[2]);
-      Error
-	("sv_velocity: rzero %f theta %f ldist %f zzz %f v_escape %f vl %f\n",
-	 rzero, theta, ldist, zzz, v_escape, vl);
-    }
+  {
+    Error ("sv_velocity: x %f %f %f v %f %f %f\n", x[0], x[1], x[2], v[0], v[1], v[2]);
+    Error ("sv_velocity: rzero %f theta %f ldist %f zzz %f v_escape %f vl %f\n", rzero, theta, ldist, zzz, v_escape, vl);
+  }
 
 
   return (speed);
@@ -275,29 +269,27 @@ sv_rho (ndom, x)
   r = sqrt (x[0] * x[0] + x[1] * x[1]);
   ldist = sqrt ((r - rzero) * (r - rzero) + x[2] * x[2]);
 
-  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)	/* These are corrections for a vertically extended disk */
-    {
-      xtest[0] = r;		// Define xtest in the +z plane
-      xtest[1] = 0;
-      xtest[2] = fabs (x[2]);
-      ptest.x[0] = rzero;
-      ptest.x[1] = 0.0;
-      ptest.x[2] = EPSILON;
-      ptest.lmn[0] = cos (theta);
-      ptest.lmn[1] = 0.0;
-      ptest.lmn[2] = sin (theta);
-      s = ds_to_disk (&ptest, 1);
-      move_phot (&ptest, s);	// Now test photon is at disk surface
-      vsub (ptest.x, xtest, xtest);
-      ldist = length (xtest);
-      rzero = length (ptest.x);
-    }
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)        /* These are corrections for a vertically extended disk */
+  {
+    xtest[0] = r;               // Define xtest in the +z plane
+    xtest[1] = 0;
+    xtest[2] = fabs (x[2]);
+    ptest.x[0] = rzero;
+    ptest.x[1] = 0.0;
+    ptest.x[2] = EPSILON;
+    ptest.lmn[0] = cos (theta);
+    ptest.lmn[1] = 0.0;
+    ptest.lmn[2] = sin (theta);
+    s = ds_to_disk (&ptest, 1);
+    move_phot (&ptest, s);      // Now test photon is at disk surface
+    vsub (ptest.x, xtest, xtest);
+    ldist = length (xtest);
+    rzero = length (ptest.x);
+  }
 
 
 /* Reduced by a factor of 2 to account for radiation on both sides of the disk */
-  dmdot_da =
-    zdom[ndom].wind_mdot * pow (rzero,
-			 zdom[ndom].sv_lambda) * cos (theta) / zdom[ndom].mdot_norm / 2.;
+  dmdot_da = zdom[ndom].wind_mdot * pow (rzero, zdom[ndom].sv_lambda) * cos (theta) / zdom[ndom].mdot_norm / 2.;
 
 /* Although the current definition of sv_theta_wind is continuous, the derivative is not continuous accross the
    outer boundary of the wind and thus dtheta_drzero would appear to change discontinuously.   This created
@@ -306,9 +298,7 @@ sv_rho (ndom, x)
 
   if (rzero > zdom[ndom].sv_rmax)
     rzero = zdom[ndom].sv_rmax;
-  dtheta_drzero =
-    (sv_theta_wind (ndom, rzero) - sv_theta_wind (ndom, (1. - EPSILON) * rzero)) 
-     / (EPSILON * rzero);
+  dtheta_drzero = (sv_theta_wind (ndom, rzero) - sv_theta_wind (ndom, (1. - EPSILON) * rzero)) / (EPSILON * rzero);
 
   dr_drzero = 1. + ldist * dtheta_drzero / cos (theta);
 /* Note VS93 eqn 8 is dr/drzero but equation  7 is drzero/dr   ksl 97 apr 19 */
@@ -353,27 +343,27 @@ History:
 double
 sv_find_wind_rzero (ndom, p)
      int ndom;
-     double p[];		/* Note that p is a 3 vector and not a photon structure */
+     double p[];                /* Note that p is a 3 vector and not a photon structure */
 {
   double x, z;
   double rho_min, rho_max, rho;
 
   /* thetamin and theta max are defined w.r.t  z axis */
 
-  z = fabs (p[2]);		/* This is necessary to get correct answer above
-				   and below plane */
+  z = fabs (p[2]);              /* This is necessary to get correct answer above
+                                   and below plane */
 
   if (z == 0)
-    {
-      x = (sqrt (p[0] * p[0] + p[1] * p[1]));	// If p is in the xy plane, there is no need to think further
-      return (x);
-    }
+  {
+    x = (sqrt (p[0] * p[0] + p[1] * p[1]));     // If p is in the xy plane, there is no need to think further
+    return (x);
+  }
 
 
-  sv_zero_init (p);		/* This initializes the routine sv_zero_r.  It is not
-				   actually needed unless zbrent is called, but it
-				   does allow you to check your answer otherwize
-				 */
+  sv_zero_init (p);             /* This initializes the routine sv_zero_r.  It is not
+                                   actually needed unless zbrent is called, but it
+                                   does allow you to check your answer otherwize
+                                 */
   /* The next lines provide a graceful answer in the case where the
    * position is actually outside the wind so that rzero returned is
    * continuous
@@ -384,15 +374,15 @@ sv_find_wind_rzero (ndom, p)
   rho = sqrt (p[0] * p[0] + p[1] * p[1]);
 
   if (rho <= rho_min)
-    {
-      x = zdom[ndom].sv_rmin * rho / rho_min;
-      return (x);
-    }
+  {
+    x = zdom[ndom].sv_rmin * rho / rho_min;
+    return (x);
+  }
   if (rho >= rho_max)
-    {
-      x = zdom[ndom].sv_rmax + rho - rho_max;
-      return (x);
-    }
+  {
+    x = zdom[ndom].sv_rmax + rho - rho_max;
+    return (x);
+  }
 
   /* 100 here means that zbrent will end if one has a guess of rzero which is
      correct ot 100 cm */
@@ -436,8 +426,8 @@ sv_zero_init (p)
      double p[];
 {
   stuff_v (p, zero_p);
-  zero_p[2] = fabs (zero_p[2]);	/* Required to get correct 
-				   answer below (in -z ) the disk */
+  zero_p[2] = fabs (zero_p[2]); /* Required to get correct 
+                                   answer below (in -z ) the disk */
   return (0);
 }
 
@@ -498,15 +488,14 @@ sv_theta_wind (ndom, r)
 {
   double theta;
 
-  
+
   if (r <= zdom[ndom].sv_rmin)
     return (atan (tan (zdom[ndom].sv_thetamin * r / zdom[ndom].sv_rmin)));
   if (r >= zdom[ndom].sv_rmax)
     return (zdom[ndom].sv_thetamax);
   theta = zdom[ndom].sv_thetamin +
     (zdom[ndom].sv_thetamax -
-     zdom[ndom].sv_thetamin) * pow ((r - zdom[ndom].sv_rmin) / (zdom[ndom].sv_rmax - zdom[ndom].sv_rmin),
-			     zdom[ndom].sv_gamma);
+     zdom[ndom].sv_thetamin) * pow ((r - zdom[ndom].sv_rmin) / (zdom[ndom].sv_rmax - zdom[ndom].sv_rmin), zdom[ndom].sv_gamma);
   return (theta);
 
 }

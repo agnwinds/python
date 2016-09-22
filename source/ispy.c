@@ -57,10 +57,10 @@ ispy_init (filename, icycle)
   ispy_cycle = icycle;
 
   if (ispy_start == 0)
-    {
-      ispy_ptr = fopen (wholename, "w");
-      ispy_start = 1;
-    }
+  {
+    ispy_ptr = fopen (wholename, "w");
+    ispy_start = 1;
+  }
   return (0);
 }
 
@@ -68,50 +68,49 @@ int
 ispy_close ()
 {
   if (ispy_start == 0)
-    {
-      Log ("ispy file is not open, why are you trying to close it?\n");
-    }
+  {
+    Log ("ispy file is not open, why are you trying to close it?\n");
+  }
   else
-    {
-      fclose (ispy_ptr);
-      ispy_start = 0;
-    }
+  {
+    fclose (ispy_ptr);
+    ispy_start = 0;
+  }
   return (0);
 }
 
-int ispy_grid_old = -1;		// The grid cell in which a photon was laast
+int ispy_grid_old = -1;         // The grid cell in which a photon was laast
 
-int ispy_phot_old = -1;		// The photon number of the last photon
+int ispy_phot_old = -1;         // The photon number of the last photon
 
 int
 ispy (p, n)
-     PhotPtr p;			//The photon
+     PhotPtr p;                 //The photon
 
-     int n;			//The photon number
+     int n;                     //The photon number
 
 {
   int i, m;
 
   if (ispy_start == 0)
-    {
-      Log ("ispy file is not open, why are you trying to write to it?\n");
-      exit (0);
-    }
+  {
+    Log ("ispy file is not open, why are you trying to write to it?\n");
+    exit (0);
+  }
 
   if (p->grid == ispy_grid_old && n == ispy_phot_old)
-    return (0);			// this photon has been seen in this cell previously
+    return (0);                 // this photon has been seen in this cell previously
 
   i = ispy_grid_old = p->grid;
   ispy_phot_old = n;
 
   for (m = 0; m < ispy_ncells; m++)
+  {
+    if (i == ispy_cell[m])
     {
-      if (i == ispy_cell[m])
-	{
-	  fprintf (ispy_ptr, "%2d %3d %8.2e %8.2e\n", ispy_cycle, i, p->w,
-		   p->freq);
-	  return (0);
-	}
+      fprintf (ispy_ptr, "%2d %3d %8.2e %8.2e\n", ispy_cycle, i, p->w, p->freq);
+      return (0);
     }
+  }
   return (0);
 }

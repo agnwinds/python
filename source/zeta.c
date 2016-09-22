@@ -113,95 +113,82 @@ compute_zeta (temp, nion, mode)
 #define MAX_FUDGE  10.
 //#define MIN_TEMP         100. //Put into python.h
 
-  zeta = 0.0;			/* NSH 130605 to remove o3 compile error */
+  zeta = 0.0;                   /* NSH 130605 to remove o3 compile error */
 
 
   /* now get the right place in the ground_frac tables  CK */
   dummy = temp / TMIN - 1.;
-  ilow = dummy;			/* have now truncated to integer below */
-  ihi = ilow + 1;		/*these are the indeces bracketing the true value */
-  interpfrac = (dummy - ilow);	/*this is the interpolation fraction */
+  ilow = dummy;                 /* have now truncated to integer below */
+  ihi = ilow + 1;               /*these are the indeces bracketing the true value */
+  interpfrac = (dummy - ilow);  /*this is the interpolation fraction */
   if (ilow < 0)
-    {
-      ilow = 0;
-      ihi = 0;
-      interpfrac = 1.;
-    }
+  {
+    ilow = 0;
+    ihi = 0;
+    interpfrac = 1.;
+  }
   if (ihi > 19)
-    {
-      ilow = 19;
-      ihi = 19;
-      interpfrac = 1.;
-    }
+  {
+    ilow = 19;
+    ihi = 19;
+    interpfrac = 1.;
+  }
 
 
   if (mode == 1)
-    {
-      /* This is the old method of getting zeta - just from the ground state tables computed by Christian */
+  {
+    /* This is the old method of getting zeta - just from the ground state tables computed by Christian */
 
-      zeta =
-	ground_frac[nion].frac[ilow] +
-	interpfrac * (ground_frac[nion].frac[ihi] -
-		      ground_frac[nion].frac[ilow]);
+    zeta = ground_frac[nion].frac[ilow] + interpfrac * (ground_frac[nion].frac[ihi] - ground_frac[nion].frac[ilow]);
     //Log ("for t_e=%f, ilow=%i, ihi=%i, interpfrac=%f, zeta=%f\n",temp,ilow,ihi,interpfrac,zeta);
-    }
+  }
 
 
 
   /* Best try at full blown zeta including DR, if we have the data, else default to the old way of doing things */
-  else if (mode == 2)		
+  else if (mode == 2)
+  {
+    /* We call this with the lower ion in a pair, so if that ion has only one electron, 
+       (ie. Carbon 6) then we cannot have DR into this ion, so there will be no DR rate 
+       associated with it. NSH 140317 We also do this if we dont have DR data at all. THE DR 
+       data is associated with the ion doing the recombining */
+    if (ion[nion].istate == ion[nion].z || ion[nion + 1].drflag == 0)   //Either we dont have DR data, or DR cannot happen       
     {
-      /* We call this with the lower ion in a pair, so if that ion has only one electron, 
-         (ie. Carbon 6) then we cannot have DR into this ion, so there will be no DR rate 
-         associated with it. NSH 140317 We also do this if we dont have DR data at all. THE DR 
-	data is associated with the ion doing the recombining */	
-      if (ion[nion].istate == ion[nion].z || ion[nion+1].drflag == 0)  //Either we dont have DR data, or DR cannot happen	
-	  {
-	  if (ion[nion+1].total_rrflag == 1)	//We have total RR data
-	    	{
-	    	zeta = gs_rrate (nion+1, temp) / total_rrate (nion+1, temp);
-            	}
-	  
-      	  else        //We dont have total RR data, so we must default back to the old way of doing things
-	        {
-                Error ("Compute zeta: total RR rate missing for element %i state %i\n",ion[nion+1].z,ion[nion+1].istate);
-	        zeta =
-		   ground_frac[nion].frac[ilow] +
-		   interpfrac * (ground_frac[nion].frac[ihi] -
-			      ground_frac[nion].frac[ilow]);
-		}
-	}
-      else  //We do have DR data, so we can include this in zeta
-	{
-	  if (ion[nion+1].drflag > 0 && ion[nion+1].total_rrflag == 1)	//We have total RR data
-	    {
-	      compute_dr_coeffs (temp);
-		  zeta =
-		    gs_rrate (nion+1,
-				 temp) / (total_rrate (nion+1,
-						       temp) +
-					  dr_coeffs[nion+1]);
+      if (ion[nion + 1].total_rrflag == 1)      //We have total RR data
+      {
+        zeta = gs_rrate (nion + 1, temp) / total_rrate (nion + 1, temp);
+      }
 
-		
-	    }
-	  else  //We dont have total RR data
-            {
-                Error ("Compute zeta: total RR rate missing for element %i state %i\n",ion[nion+1].z,ion[nion+1].istate);
-	      zeta =
-		ground_frac[nion].frac[ilow] +
-		interpfrac * (ground_frac[nion].frac[ihi] -
-			      ground_frac[nion].frac[ilow]);
-	    }
-	}
-}
-    
-
-
-  /* if we got here then we don't understand the mode and there must be a problem */  
-  else
-    {
-      Error ("Compute zeta: Unkown mode %i \n", mode);
+      else                      //We dont have total RR data, so we must default back to the old way of doing things
+      {
+        Error ("Compute zeta: total RR rate missing for element %i state %i\n", ion[nion + 1].z, ion[nion + 1].istate);
+        zeta = ground_frac[nion].frac[ilow] + interpfrac * (ground_frac[nion].frac[ihi] - ground_frac[nion].frac[ilow]);
+      }
     }
+    else                        //We do have DR data, so we can include this in zeta
+    {
+      if (ion[nion + 1].drflag > 0 && ion[nion + 1].total_rrflag == 1)  //We have total RR data
+      {
+        compute_dr_coeffs (temp);
+        zeta = gs_rrate (nion + 1, temp) / (total_rrate (nion + 1, temp) + dr_coeffs[nion + 1]);
+
+
+      }
+      else                      //We dont have total RR data
+      {
+        Error ("Compute zeta: total RR rate missing for element %i state %i\n", ion[nion + 1].z, ion[nion + 1].istate);
+        zeta = ground_frac[nion].frac[ilow] + interpfrac * (ground_frac[nion].frac[ihi] - ground_frac[nion].frac[ilow]);
+      }
+    }
+  }
+
+
+
+  /* if we got here then we don't understand the mode and there must be a problem */
+  else
+  {
+    Error ("Compute zeta: Unkown mode %i \n", mode);
+  }
 
 
   return (zeta);

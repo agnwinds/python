@@ -21,8 +21,8 @@
 
 
 
-int niterate;			// Make this a variable that all the subroutines cn see, 
-				// so we can decide if we need to recompute the numerators
+int niterate;                   // Make this a variable that all the subroutines cn see, 
+                                // so we can decide if we need to recompute the numerators
 
 
 
@@ -87,24 +87,24 @@ double xxxne, xip;
 int
 variable_temperature (xplasma, mode)
      PlasmaPtr xplasma;
-     int mode;			//   6=correct using dilute blackbody, 7=power law
+     int mode;                  //   6=correct using dilute blackbody, 7=power law
 {
-  int nion;			
+  int nion;
   double xnew, xsaha;
   double theta, x;
   double get_ne ();
   double t_e, t_r, xtemp, nh, xne, xxne;
   //OLD www not used double t_e, t_r, xtemp, nh, xne, xxne, www;
   double a, b;
-  double newden[NIONS];		//NSH 121217 - recoded so density is computed in a temperary array
+  double newden[NIONS];         //NSH 121217 - recoded so density is computed in a temperary array
   int nelem, first, last;
   double t_e_part_correct;
   double sum, big;
-  double pi_fudge, recomb_fudge, tot_fudge;	/*Two of the correction factors for photoionization rate, and recombination rate */
-  double gs_fudge[NIONS];	/*It can be expensive to calculate this, and it only depends on t_e - which is fixed for a run. So 
-				   //                 calculate it once, and store it in a temporary array */
+  double pi_fudge, recomb_fudge, tot_fudge;     /*Two of the correction factors for photoionization rate, and recombination rate */
+  double gs_fudge[NIONS];       /*It can be expensive to calculate this, and it only depends on t_e - which is fixed for a run. So 
+                                   //                 calculate it once, and store it in a temporary array */
 
-  nh = xplasma->rho * rho2nh;	//LTE
+  nh = xplasma->rho * rho2nh;   //LTE
   t_e = xplasma->t_e;
   t_r = xplasma->t_r;
   //OLD www not used ksl 160705: www = xplasma->w;
@@ -113,18 +113,18 @@ variable_temperature (xplasma, mode)
   /* Copy the current densities into the temporary array */
 
   for (nion = 0; nion < nions; nion++)
+  {
+    newden[nion] = xplasma->density[nion];
+
+    /* Here we populate the recombination to ground state correction factor used in the LM and Sim ionization
+     * equations.  Mode 2 imples we are include the dielectronic correction. There is no recombination fudge for 
+     * the neutral ion */
+
+    if (ion[nion].istate != 1)
     {
-      newden[nion] = xplasma->density[nion]; 
-
-      /* Here we populate the recombination to ground state correction factor used in the LM and Sim ionization
-       * equations.  Mode 2 imples we are include the dielectronic correction. There is no recombination fudge for 
-       * the neutral ion */
-
-      if (ion[nion].istate != 1)	
-	{
-	  gs_fudge[nion] = compute_zeta (t_e, nion - 1, 2);	//We call with nion-1, so when we address the array, we will want to ask for nion
-	}
+      gs_fudge[nion] = compute_zeta (t_e, nion - 1, 2); //We call with nion-1, so when we address the array, we will want to ask for nion
     }
+  }
 
 
 
@@ -138,231 +138,209 @@ variable_temperature (xplasma, mode)
      below.  
 
      Since this is an initial estimate, g factors are ignored
-   *
+     *
    */
 
   if (t_e < MIN_TEMP)
-    t_e = MIN_TEMP;		/* fudge to prevent divide by zeros */
+    t_e = MIN_TEMP;             /* fudge to prevent divide by zeros */
 
   xsaha = SAHA * pow (t_e, 1.5);
 
   theta = xsaha * exp (-ion[0].ip / (BOLTZMANN * t_e)) / nh;
 
   if (theta < THETAMAX)
-    {
-      x = (-theta + sqrt (theta * theta + 4 * theta)) / 2.;
-      xne = xxne = xxxne = x * nh;
-    }
+  {
+    x = (-theta + sqrt (theta * theta + 4 * theta)) / 2.;
+    xne = xxne = xxxne = x * nh;
+  }
   else
-    xne = xxne = xxxne = nh;	/*xxne is just a store so the error can report the starting value of ne. 
-                                  xxxne is the shared variable so the temperature solver routine can access it */
+    xne = xxne = xxxne = nh;    /*xxne is just a store so the error can report the starting value of ne. 
+                                   xxxne is the shared variable so the temperature solver routine can access it */
 
   if (xne < 1.e-6)
-    xne = xxxne = 1.e-6;	/* Set a minimum ne to assure we can calculate
-				   xne the first time through the loop */
+    xne = xxxne = 1.e-6;        /* Set a minimum ne to assure we can calculate
+                                   xne the first time through the loop */
 
 
   /* At this point we have an initial estimate of ne. */
 
   niterate = 0;
   while (niterate < MAXITERATIONS)
+  {
+    /* We loop over all elements */
+    for (nelem = 0; nelem < nelements; nelem++)
     {
-      /* We loop over all elements */
-      for (nelem = 0; nelem < nelements; nelem++)
-	{
 
-	  first = ele[nelem].firstion;	/*first and last identify the position in the array */
-	  last = first + ele[nelem].nions;	/*  So for H which has 2 ions, H1 and H2, first will 
-             					    generally be 0 and last will be 2 so the for loop 
-                                                    below will just be done once for nion = 1 */
+      first = ele[nelem].firstion;      /*first and last identify the position in the array */
+      last = first + ele[nelem].nions;  /*  So for H which has 2 ions, H1 and H2, first will 
+                                           generally be 0 and last will be 2 so the for loop 
+                                           below will just be done once for nion = 1 */
 
-	  if (first < 0 || first >= nions || last < 0 || last > nions)
-	    {
-	      Error
-		("variable_temperature: Confusion for element %d with first ion %d and last ion %d\n",
-		 nelem, first, last);
-	      exit (0);
-	    }
+      if (first < 0 || first >= nions || last < 0 || last > nions)
+      {
+        Error ("variable_temperature: Confusion for element %d with first ion %d and last ion %d\n", nelem, first, last);
+        exit (0);
+      }
 
 
-	  /* and now we loop over all the ions of this element */
-	  sum = newden[first] = 1.0;	/* set the density of the first ion of this element to 1.0 
+      /* and now we loop over all the ions of this element */
+      sum = newden[first] = 1.0;        /* set the density of the first ion of this element to 1.0 
                                            -this is (always??) the neutral ion */
 
-	  big = pow (10., 250. / (last - first));	/*make sure that we will not overflow the last ion */
+      big = pow (10., 250. / (last - first));   /*make sure that we will not overflow the last ion */
 
 
-	  for (nion = first + 1; nion < last; nion++)	/*nion is the upper ion of the pair, 
-                                                         last is one above the actual last ion, 
-                                                         so the last ion to be considered is last-1 */
-	    {
+      for (nion = first + 1; nion < last; nion++)       /*nion is the upper ion of the pair, 
+                                                           last is one above the actual last ion, 
+                                                           so the last ion to be considered is last-1 */
+      {
 
-	      tot_fudge = 0.0;	/* NSH 130605 to remove o3 compile error */
+        tot_fudge = 0.0;        /* NSH 130605 to remove o3 compile error */
 
-	      /* now we need to work out the correct temperature to use */
-	      xip = ion[nion - 1].ip;	//the IP is that from the lower to the upper of the pair
-	      xtemp = zbrent (temp_func, MIN_TEMP, 1e8, 10);	//work out correct temperature
-
-
-              /* given this temperature, we need the pair of partition functions for these ions */
-	      partition_functions_2 (xplasma, nion, xtemp, 1);	//weight of 1 give us the LTE populations.
+        /* now we need to work out the correct temperature to use */
+        xip = ion[nion - 1].ip; //the IP is that from the lower to the upper of the pair
+        xtemp = zbrent (temp_func, MIN_TEMP, 1e8, 10);  //work out correct temperature
 
 
-             /* and now we need the saha equation linking the two states at our chosen temp 
-                NB the partition function of the electron is included in the SAHA factor */
-
-	      xsaha = SAHA * pow (xtemp, 1.5);
-	      b = xsaha * xplasma->partition[nion]
-		* exp (-ion[nion - 1].ip / (BOLTZMANN * xtemp)) / (xne *
-								   xplasma->partition
-								   [nion -
-								    1]);
+        /* given this temperature, we need the pair of partition functions for these ions */
+        partition_functions_2 (xplasma, nion, xtemp, 1);        //weight of 1 give us the LTE populations.
 
 
-	      t_e_part_correct =
-		xplasma->partition[nion - 1] / xplasma->partition[nion];
-	      partition_functions_2 (xplasma, nion, t_e, 0);	/* Our only real guess here is that the 
-                                                                   electron temperature might give a good 
-                                                                   estimate of the partition function */
+        /* and now we need the saha equation linking the two states at our chosen temp 
+           NB the partition function of the electron is included in the SAHA factor */
 
-	      t_e_part_correct *=
-		(xplasma->partition[nion] / xplasma->partition[nion - 1]);
+        xsaha = SAHA * pow (xtemp, 1.5);
+        b = xsaha * xplasma->partition[nion] * exp (-ion[nion - 1].ip / (BOLTZMANN * xtemp)) / (xne * xplasma->partition[nion - 1]);
 
 
-	      /* we now correct b to take account of the temperature and photon field 
-		 t_r and www give the actual radiation field in the cell, xtemp is the temp we used
-  		 t_e is the actual electron temperature of the cell*/
+        t_e_part_correct = xplasma->partition[nion - 1] / xplasma->partition[nion];
+        partition_functions_2 (xplasma, nion, t_e, 0);  /* Our only real guess here is that the 
+                                                           electron temperature might give a good 
+                                                           estimate of the partition function */
 
-	      recomb_fudge = sqrt (t_e / xtemp);
-
-              /* Correct the SAHA equation abundance pair using an actual radiation field modelled as a dilute black body */
-	      if (mode == 6)	
-		{
-
-		  if (t_r / xtemp < 0.2)	
-                 /* If the true radiation temperature is much lower than the temperature at which 
-                    the ion is expected to exist, we wont see it, so save time and dont bother 
-                    calculating correction factors */
-		    {
-		      tot_fudge = 0.0;
-		    }
-
-		  else
-		    {
-
-		      pi_fudge = pi_correct (xtemp, nion, xplasma, mode);
-
-		      tot_fudge =
-			pi_fudge * recomb_fudge * (gs_fudge[nion] +
-						   xplasma->w * (1 -
-							  gs_fudge[nion]));
-		    }
-		}
-
-              /* correct the SAHA equation abundance pair using an actual radiation field modelled as a broken power law */
-
-	      else if (mode == 7)	
-		{
-		  pi_fudge = pi_correct (xtemp, nion, xplasma, mode);
+        t_e_part_correct *= (xplasma->partition[nion] / xplasma->partition[nion - 1]);
 
 
-		  tot_fudge =
-		    pi_fudge * recomb_fudge * gs_fudge[nion] *
-		    t_e_part_correct;
-		}
+        /* we now correct b to take account of the temperature and photon field 
+           t_r and www give the actual radiation field in the cell, xtemp is the temp we used
+           t_e is the actual electron temperature of the cell */
 
-	      else
-		{
-		  Error ("variable_temperature: unknown mode %d\n", mode);
-		  exit (0);
-		}
+        recomb_fudge = sqrt (t_e / xtemp);
+
+        /* Correct the SAHA equation abundance pair using an actual radiation field modelled as a dilute black body */
+        if (mode == 6)
+        {
+
+          if (t_r / xtemp < 0.2)
+            /* If the true radiation temperature is much lower than the temperature at which 
+               the ion is expected to exist, we wont see it, so save time and dont bother 
+               calculating correction factors */
+          {
+            tot_fudge = 0.0;
+          }
+
+          else
+          {
+
+            pi_fudge = pi_correct (xtemp, nion, xplasma, mode);
+
+            tot_fudge = pi_fudge * recomb_fudge * (gs_fudge[nion] + xplasma->w * (1 - gs_fudge[nion]));
+          }
+        }
+
+        /* correct the SAHA equation abundance pair using an actual radiation field modelled as a broken power law */
+
+        else if (mode == 7)
+        {
+          pi_fudge = pi_correct (xtemp, nion, xplasma, mode);
 
 
-	      /* apply correction factors */
-	      b *= tot_fudge;
-	      if (b > big)
-		b = big;	//limit step so there is no chance of overflow
-	      a = newden[nion - 1] * b;
-	      sum += newden[nion] = a;
+          tot_fudge = pi_fudge * recomb_fudge * gs_fudge[nion] * t_e_part_correct;
+        }
 
-	      if (newden[nion] < 0.0)
-		{
-		  Error
-		    ("variable_temperature: ion %i has a negative density %e\n",
-		     nion, newden[nion]);
-		}
-	      if (sane_check (sum))
-		Error
-		  ("variable_temperature:sane check failed for running density sum=%e, last ion=%i\n",
-		   sum, nion);
-	    }			//end of loop over ions - we now have a full set of ions for this element
+        else
+        {
+          Error ("variable_temperature: unknown mode %d\n", mode);
+          exit (0);
+        }
+
+
+        /* apply correction factors */
+        b *= tot_fudge;
+        if (b > big)
+          b = big;              //limit step so there is no chance of overflow
+        a = newden[nion - 1] * b;
+        sum += newden[nion] = a;
+
+        if (newden[nion] < 0.0)
+        {
+          Error ("variable_temperature: ion %i has a negative density %e\n", nion, newden[nion]);
+        }
+        if (sane_check (sum))
+          Error ("variable_temperature:sane check failed for running density sum=%e, last ion=%i\n", sum, nion);
+      }                         //end of loop over ions - we now have a full set of ions for this element
 
 
 
-	  a = nh * ele[nelem].abun / sum;	//the scaling factor to get the overall abundance right
-	  for (nion = first; nion < last; nion++)
-	    {
-	      newden[nion] *= a;	//apply scaling
-	      if (sane_check (newden[nion]))	//check nothing has gone crazy
-		Error
-		  ("variable_temperature:sane check failed for density newden=%e, for ion=%i\n",
-		   newden[nion], nion);
-	    }
+      a = nh * ele[nelem].abun / sum;   //the scaling factor to get the overall abundance right
+      for (nion = first; nion < last; nion++)
+      {
+        newden[nion] *= a;      //apply scaling
+        if (sane_check (newden[nion]))  //check nothing has gone crazy
+          Error ("variable_temperature:sane check failed for density newden=%e, for ion=%i\n", newden[nion], nion);
+      }
 
 
 
-         /* Re solve for the macro atom populations with the current guess for ne */
-         /* JM1308 -- note that unlike theabove, here we actually modify the xplasma
-	    structure for those ions which are being treated as macro ions. This means that the
-	    the newden array will contain wrong values for these particular macro ions, but due
-            to the if loop at the end of this subroutine they are never passed to xplasma */
+      /* Re solve for the macro atom populations with the current guess for ne */
+      /* JM1308 -- note that unlike theabove, here we actually modify the xplasma
+         structure for those ions which are being treated as macro ions. This means that the
+         the newden array will contain wrong values for these particular macro ions, but due
+         to the if loop at the end of this subroutine they are never passed to xplasma */
 
-	  if (geo.macro_ioniz_mode == 1)
-	    {
-	      macro_pops (xplasma, xne);
-	    }
+      if (geo.macro_ioniz_mode == 1)
+      {
+        macro_pops (xplasma, xne);
+      }
 
-	  for (nion = 0; nion < nions; nion++)
-	    {
-             
-               /* if the ion is being treated by macro_pops then use the populations just computed 
-                  JM1309 -- this was missing prior to python 76c */
-	      if ((ion[nion].macro_info == 1) && (geo.macro_simple == 0)
-		  && (geo.macro_ioniz_mode == 1))
-		{
-		  newden[nion] = xplasma->density[nion];
-		}
+      for (nion = 0; nion < nions; nion++)
+      {
 
-              /*Set some floor so future divisions are sensible */
-	      if (newden[nion] < DENSITY_MIN)
-		newden[nion] = DENSITY_MIN;
-	    }
+        /* if the ion is being treated by macro_pops then use the populations just computed 
+           JM1309 -- this was missing prior to python 76c */
+        if ((ion[nion].macro_info == 1) && (geo.macro_simple == 0) && (geo.macro_ioniz_mode == 1))
+        {
+          newden[nion] = xplasma->density[nion];
+        }
 
-	  /* Now determine the new value of ne from the ion abundances */
-	}			//end of loop over elements
+        /*Set some floor so future divisions are sensible */
+        if (newden[nion] < DENSITY_MIN)
+          newden[nion] = DENSITY_MIN;
+      }
 
-      xnew = get_ne (newden);	/* determine the electron density for this density distribution */
+      /* Now determine the new value of ne from the ion abundances */
+    }                           //end of loop over elements
 
-
-      if (xnew < DENSITY_MIN)
-	xnew = DENSITY_MIN;	/* fudge to keep a floor on ne */
-      if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6)
-	{
-	  break;
-	}
-      xne = xxxne = (xnew + xne) / 2.;	/*New value of ne */
-      niterate++;
+    xnew = get_ne (newden);     /* determine the electron density for this density distribution */
 
 
-      if (niterate == MAXITERATIONS)
-	{
-	  Error
-	    ("variable_temperature: failed to converge t %.2g nh %.2g xnew %.2g\n",
-	     t_e, nh, xnew);
-	  Error ("variable_temperature: xxne %e theta %e\n", xxne, theta);
-	  return (-1);
-	}
+    if (xnew < DENSITY_MIN)
+      xnew = DENSITY_MIN;       /* fudge to keep a floor on ne */
+    if (fabs ((xne - xnew) / (xnew)) < FRACTIONAL_ERROR || xnew < 1.e-6)
+    {
+      break;
     }
+    xne = xxxne = (xnew + xne) / 2.;    /*New value of ne */
+    niterate++;
+
+
+    if (niterate == MAXITERATIONS)
+    {
+      Error ("variable_temperature: failed to converge t %.2g nh %.2g xnew %.2g\n", t_e, nh, xnew);
+      Error ("variable_temperature: xxne %e theta %e\n", xxne, theta);
+      return (-1);
+    }
+  }
 
 
 /* Finally transfer the calculated densities to the real density array. This is only called if the code
@@ -370,23 +348,22 @@ variable_temperature (xplasma, mode)
 
   xplasma->ne = xnew;
   for (nion = 0; nion < nions; nion++)
+  {
+    /* If statement added here to suppress interference with macro populations (SS Apr 04) */
+    if (ion[nion].macro_info == 0 || geo.macro_ioniz_mode == 0 || geo.macro_simple == 1)
     {
-      /* If statement added here to suppress interference with macro populations (SS Apr 04) */
-      if (ion[nion].macro_info == 0 || geo.macro_ioniz_mode == 0
-	  || geo.macro_simple == 1)
-	{
-	  xplasma->density[nion] = newden[nion];
-	}
+      xplasma->density[nion] = newden[nion];
     }
+  }
 
 
 
 
 
-  partition_functions (xplasma, 4);	/*WARNING fudge NSH 11/5/14 - this is as a test. 
-                                         We really need a better implementation of partition functions and levels
-                                        for a power law illuminating spectrum. We found that if we didnt make this call, 
-                                        we would end up with undefined levels - which did really crazy things */
+  partition_functions (xplasma, 4);     /*WARNING fudge NSH 11/5/14 - this is as a test. 
+                                           We really need a better implementation of partition functions and levels
+                                           for a power law illuminating spectrum. We found that if we didnt make this call, 
+                                           we would end up with undefined levels - which did really crazy things */
 
   return (0);
 }
@@ -442,7 +419,7 @@ variable_temperature (xplasma, mode)
 int bb_correct_err = 0;
 
 double
-pi_correct (xtemp , nion, xplasma, mode)
+pi_correct (xtemp, nion, xplasma, mode)
      double xtemp;
      int nion;
      PlasmaPtr xplasma;
@@ -451,57 +428,57 @@ pi_correct (xtemp , nion, xplasma, mode)
   double q;
   int ion_lower;
   double numerator, denominator;
-  double w_store,t_r_store;
+  double w_store, t_r_store;
 
 
-numerator=denominator=0.0;
-  ion_lower = nion - 1;		/*the call uses nion, which is the upper ion in the pair */
-				/*This line is required because calc_pi_rate is called with the ion
-				which is being ionized */
+  numerator = denominator = 0.0;
+  ion_lower = nion - 1;         /*the call uses nion, which is the upper ion in the pair */
+  /*This line is required because calc_pi_rate is called with the ion
+     which is being ionized */
 
 
 
- if (niterate == 0)		/*first time of iterating this cycle, so calculate the numerator. This rate only depends on the model of J, which doesnt change during the iteration cycle*/
-    	{
-	if (mode==6)
-		{
-      		numerator = calc_pi_rate(ion_lower,xplasma,2, 1);	/*Call calc_pi_rate with mode 2, which returns the PI rate coeficient*/
-		}
-	else if (mode==7)  /*The mean intensity is modelled as a series of power laws and/or exponentials */
-		{
-		numerator=calc_pi_rate (ion_lower,xplasma,1, 1); /*NSH 0814 - the PI rate is now calculated by an external subroutine. Mode 1 means calulate using a PL/exp model of the mean intensity*/
-		}
-	xplasma->PWnumer[ion_lower] = numerator;	/* Store the calculated numerator for this cell - it wont change during one ionization cycle*/
-    	}				//End of if statement to decide if this is the first iteration
+  if (niterate == 0)            /*first time of iterating this cycle, so calculate the numerator. This rate only depends on the model of J, which doesnt change during the iteration cycle */
+  {
+    if (mode == 6)
+    {
+      numerator = calc_pi_rate (ion_lower, xplasma, 2, 1);      /*Call calc_pi_rate with mode 2, which returns the PI rate coeficient */
+    }
+    else if (mode == 7)         /*The mean intensity is modelled as a series of power laws and/or exponentials */
+    {
+      numerator = calc_pi_rate (ion_lower, xplasma, 1, 1);      /*NSH 0814 - the PI rate is now calculated by an external subroutine. Mode 1 means calulate using a PL/exp model of the mean intensity */
+    }
+    xplasma->PWnumer[ion_lower] = numerator;    /* Store the calculated numerator for this cell - it wont change during one ionization cycle */
+  }                             //End of if statement to decide if this is the first iteration
   else
-    	{
-      	numerator = xplasma->PWnumer[ion_lower];	// We are on the second iteration, so use the stored value
-    	}
-  if (numerator == 0.0) /*There is no PI for this ion*/
-    {
-      return (0.0);		//There is no need to waste time evaluating the denominator
-    }
+  {
+    numerator = xplasma->PWnumer[ion_lower];    // We are on the second iteration, so use the stored value
+  }
+  if (numerator == 0.0)         /*There is no PI for this ion */
+  {
+    return (0.0);               //There is no need to waste time evaluating the denominator
+  }
 
 
- if (pow (((xtemp - xplasma->PWdtemp[ion_lower]) / xplasma->PWdtemp[ion_lower]), 2) > 1e-6)	//If our guess temperature hasnt changed much, use denominator from last time
-    {
-      t_r_store=xplasma->t_r;	/*calc_pi_rate uses the value of t_r and w in the plasma structure to compute the rate coefficient, so we need to store the actual value of t_r and w so we can substititute our guess temperature and w=1 (to get LTE)*/	
-      w_store=xplasma->w;   
-      xplasma->t_r=xtemp;
-      xplasma->w=1.0;
-      denominator = calc_pi_rate(ion_lower,xplasma,2, 1); /*Now we can call calc_pi_rate, which will now calulate an LTE rate coefficient at our guess temperature */
-      xplasma->t_r=t_r_store; /*Put things back the way they were */
-      xplasma->w=w_store;
-      xplasma->PWdenom[ion_lower] = denominator;  /*Store the LTE rate coefficient for next time*/
-      xplasma->PWdtemp[ion_lower] = xtemp;  	/*And also the temperature at which it was calculated */
-    }
+  if (pow (((xtemp - xplasma->PWdtemp[ion_lower]) / xplasma->PWdtemp[ion_lower]), 2) > 1e-6)    //If our guess temperature hasnt changed much, use denominator from last time
+  {
+    t_r_store = xplasma->t_r;   /*calc_pi_rate uses the value of t_r and w in the plasma structure to compute the rate coefficient, so we need to store the actual value of t_r and w so we can substititute our guess temperature and w=1 (to get LTE) */
+    w_store = xplasma->w;
+    xplasma->t_r = xtemp;
+    xplasma->w = 1.0;
+    denominator = calc_pi_rate (ion_lower, xplasma, 2, 1);      /*Now we can call calc_pi_rate, which will now calulate an LTE rate coefficient at our guess temperature */
+    xplasma->t_r = t_r_store;   /*Put things back the way they were */
+    xplasma->w = w_store;
+    xplasma->PWdenom[ion_lower] = denominator;  /*Store the LTE rate coefficient for next time */
+    xplasma->PWdtemp[ion_lower] = xtemp;        /*And also the temperature at which it was calculated */
+  }
   else
-    {
-      denominator = xplasma->PWdenom[ion_lower]; /*The temperature hadnt changed much, so use the stored value*/
-    }
+  {
+    denominator = xplasma->PWdenom[ion_lower];  /*The temperature hadnt changed much, so use the stored value */
+  }
 
 
-  q = numerator / denominator;  /*This is the PI rate correction factor*/
+  q = numerator / denominator;  /*This is the PI rate correction factor */
 
 
   return (q);
@@ -527,11 +504,7 @@ temp_func (solv_temp)
      double solv_temp;
 {
   double answer;
-  answer =
-    log (SAHA / xxxne) + 1.5 * log (solv_temp) -
-    (xip / (BOLTZMANN * solv_temp));
+  answer = log (SAHA / xxxne) + 1.5 * log (solv_temp) - (xip / (BOLTZMANN * solv_temp));
 
   return (answer);
 }
-
-

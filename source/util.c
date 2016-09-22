@@ -101,28 +101,28 @@ History:
 
 int
 fraction (value, array, npts, ival, f, mode)
-     double array[];		// The array in we want to search
-     int npts, *ival;		// ival is the lower point
-     double value;		// The value we want to index
-     double *f;			// The fractional "distance" to the next point in the array
-     int mode;			// 0 = compute in linear space, 1=compute in log space
+     double array[];            // The array in we want to search
+     int npts, *ival;           // ival is the lower point
+     double value;              // The value we want to index
+     double *f;                 // The fractional "distance" to the next point in the array
+     int mode;                  // 0 = compute in linear space, 1=compute in log space
 {
   int imin, imax, ihalf;
 
   if (value < array[0])
-    {
-      *ival = 0;
-      *f = 0.0;
-      return (-1);
-    }
+  {
+    *ival = 0;
+    *f = 0.0;
+    return (-1);
+  }
 
   imax = npts - 1;
   if (value > array[imax])
-    {
-      *ival = npts - 2;
-      *f = 1.0;
-      return (1);
-    }
+  {
+    *ival = npts - 2;
+    *f = 1.0;
+    return (1);
+  }
 
 
 
@@ -135,26 +135,26 @@ on which the value sits, and to set the fraction to 1.  This was
 to reflect the behavior of the search routine in where_in_grid. */
 
   while (imax - imin > 1)
+  {
+    ihalf = (imin + imax) >> 1; // Compute a midpoint >> is a bitwise right shift
+    if (value > array[ihalf])
     {
-      ihalf = (imin + imax) >> 1;	// Compute a midpoint >> is a bitwise right shift
-      if (value > array[ihalf])
-	{
-	  imin = ihalf;
-	}
-      else
-	imax = ihalf;
+      imin = ihalf;
     }
+    else
+      imax = ihalf;
+  }
 
 // So array[imin] just <= value
-  if (mode==0)
-  	*f = (value - array[imin]) / (array[imax] - array[imin]);        //linear interpolation 
-  else if (mode==1)
-  	*f = (log(value) - log(array[imin])) / (log(array[imax]) - log(array[imin]));     //log interpolation
+  if (mode == 0)
+    *f = (value - array[imin]) / (array[imax] - array[imin]);   //linear interpolation 
+  else if (mode == 1)
+    *f = (log (value) - log (array[imin])) / (log (array[imax]) - log (array[imin]));   //log interpolation
   else
-	{
-	Error("Fraction - unknown mode %i\n",mode);
-	exit(0);
-	}
+  {
+    Error ("Fraction - unknown mode %i\n", mode);
+    exit (0);
+  }
 
   *ival = imin;
 
@@ -180,11 +180,11 @@ circumstances
 
 int
 linterp (x, xarray, yarray, xdim, y, mode)
-     double x;			// The value that we wish to index i
+     double x;                  // The value that we wish to index i
      double xarray[], yarray[];
      int xdim;
      double *y;
-     int mode;      //0 = linear, 1 = log
+     int mode;                  //0 = linear, 1 = log
 {
   int nelem;
   double frac;
@@ -192,18 +192,18 @@ linterp (x, xarray, yarray, xdim, y, mode)
   //  Note that fraction will return an integer if it is important
   //  to know whether you have asked for a value that is outsde the
   //  boudarry of the arrays
- 
+
   fraction (x, xarray, xdim, &nelem, &frac, mode);
 
-  if (mode==0)
-  	*y = (1. - frac) * yarray[nelem] + frac * yarray[nelem + 1];
-  else if (mode==1)
-	*y = exp((1. - frac) * log(yarray[nelem]) + frac * log(yarray[nelem + 1]));
+  if (mode == 0)
+    *y = (1. - frac) * yarray[nelem] + frac * yarray[nelem + 1];
+  else if (mode == 1)
+    *y = exp ((1. - frac) * log (yarray[nelem]) + frac * log (yarray[nelem + 1]));
   else
-	{
-	Error("linterp - unknown mode %i\n",mode);
-	exit(0);
-	}
+  {
+    Error ("linterp - unknown mode %i\n", mode);
+    exit (0);
+  }
 
   return (nelem);
 
@@ -299,7 +299,7 @@ int ierr_coord_fraction = 0;
 
 int
 coord_fraction (ndom, ichoice, x, ii, frac, nelem)
-	int ndom;
+     int ndom;
      int ichoice;
      double x[];
      int ii[];
@@ -316,19 +316,17 @@ coord_fraction (ndom, ichoice, x, ii, frac, nelem)
   /* Jump to special routine if CYLVAR coords */
 
   if (zdom[ndom].coord_type == CYLVAR)
+  {
+
+    n = cylvar_coord_fraction (ndom, ichoice, x, ii, frac, nelem);
+    if (n < 0 && ierr_coord_fraction < 1000)
     {
-
-      n = cylvar_coord_fraction (ndom, ichoice, x, ii, frac, nelem);
-      if (n < 0 && ierr_coord_fraction < 1000)
-	{
-	  Error
-	    ("coord_fraction: cylvar_coord fraction returning %d not in grid\n",
-	     n);
-	  ierr_coord_fraction++;
-	}
-      return (n);
-
+      Error ("coord_fraction: cylvar_coord fraction returning %d not in grid\n", n);
+      ierr_coord_fraction++;
     }
+    return (n);
+
+  }
 
   /* Assign pointers to the xx and zz depending on whether
    * one wants to interpolate on vertex points (0) or 
@@ -336,89 +334,87 @@ coord_fraction (ndom, ichoice, x, ii, frac, nelem)
    */
 
   if (ichoice == 0)
-    {
-      xx = zdom[ndom].wind_x;
-      zz = zdom[ndom].wind_z;
-    }
+  {
+    xx = zdom[ndom].wind_x;
+    zz = zdom[ndom].wind_z;
+  }
   else
-    {
-      xx = zdom[ndom].wind_midx;
-      zz = zdom[ndom].wind_midz;
-    }
+  {
+    xx = zdom[ndom].wind_midx;
+    zz = zdom[ndom].wind_midz;
+  }
 
   /* Now convert x to the appropriate coordinate system */
   if (zdom[ndom].coord_type == CYLIND)
-    {
-      r = sqrt (x[0] * x[0] + x[1] * x[1]);
-      z = fabs (x[2]);
-    }
+  {
+    r = sqrt (x[0] * x[0] + x[1] * x[1]);
+    z = fabs (x[2]);
+  }
   else if (zdom[ndom].coord_type == RTHETA)
-    {
-      r = length (x);
-      z = acos (fabs (x[2]) / r) * RADIAN;
-    }
+  {
+    r = length (x);
+    z = acos (fabs (x[2]) / r) * RADIAN;
+  }
   else if (zdom[ndom].coord_type == SPHERICAL)
-    {
-      r = length (x);
-      z = 0;			// To avoid -O3 warning
-    }
+  {
+    r = length (x);
+    z = 0;                      // To avoid -O3 warning
+  }
   else
-    {
-      Error
-	("coord_fraction: Unknown coordinate type %d for doman\n",
-	 zdom[ndom].coord_type,ndom);
-      exit (0);
-    }
+  {
+    Error ("coord_fraction: Unknown coordinate type %d for doman\n", zdom[ndom].coord_type, ndom);
+    exit (0);
+  }
 
   if (zdom[ndom].coord_type == SPHERICAL)
-    {				/* We are dealing with a 1d system */
-      fraction (r, xx, zdom[ndom].ndim, &ix, &dr, 0); //linear space
-      ii[0] = ix;
-      frac[0] = (1. - dr);
-      ii[1] = ix + 1;
-      frac[1] = dr;
-      *nelem = 2;
-      if (sane_check (dr))
-	{
-	  Error ("coord_frac:sane_check dr=%f for spherical coords. \n", dr);
-	}
+  {                             /* We are dealing with a 1d system */
+    fraction (r, xx, zdom[ndom].ndim, &ix, &dr, 0);     //linear space
+    ii[0] = ix;
+    frac[0] = (1. - dr);
+    ii[1] = ix + 1;
+    frac[1] = dr;
+    *nelem = 2;
+    if (sane_check (dr))
+    {
+      Error ("coord_frac:sane_check dr=%f for spherical coords. \n", dr);
     }
+  }
   else
-    {				/* We are dealing with a 2d system */
-      fraction (r, xx, zdom[ndom].ndim, &ix, &dr, 0);
-      fraction (z, zz, zdom[ndom].mdim, &iz, &dz, 0);
+  {                             /* We are dealing with a 2d system */
+    fraction (r, xx, zdom[ndom].ndim, &ix, &dr, 0);
+    fraction (z, zz, zdom[ndom].mdim, &iz, &dz, 0);
 
-      ii[0] = ix * zdom[ndom].mdim + iz;
-      frac[0] = (1. - dz) * (1. - dr);
+    ii[0] = ix * zdom[ndom].mdim + iz;
+    frac[0] = (1. - dz) * (1. - dr);
 
-      ii[1] = (ix + 1) * zdom[ndom].mdim+ iz;
-      frac[1] = (1. - dz) * dr;
+    ii[1] = (ix + 1) * zdom[ndom].mdim + iz;
+    frac[1] = (1. - dz) * dr;
 
-      ii[2] = ix * zdom[ndom].mdim+ iz + 1;
-      frac[2] = (dz) * (1. - dr);
+    ii[2] = ix * zdom[ndom].mdim + iz + 1;
+    frac[2] = (dz) * (1. - dr);
 
-      ii[3] = (ix + 1) * zdom[ndom].mdim + iz + 1;
-      frac[3] = (dz) * (dr);
-      *nelem = 4;
+    ii[3] = (ix + 1) * zdom[ndom].mdim + iz + 1;
+    frac[3] = (dz) * (dr);
+    *nelem = 4;
 
-      if (sane_check (dr) || sane_check (dz))
-	{
-	  Error ("coord_frac:sane_check dr=%f dz=%f for 2d coords\n", dr, dz);
-	}
+    if (sane_check (dr) || sane_check (dz))
+    {
+      Error ("coord_frac:sane_check dr=%f dz=%f for 2d coords\n", dr, dz);
     }
+  }
   /* At this point i,j are just outside the x position */
   /* Check to see if x is outside the region of the calculation */
   /* Note that this is a very incoplethe check in the sneste that 
    * the posision could be out of the grid in other directions */
 
   if (r > xx[zdom[ndom].ndim - 1])
-    {
-      return (-2);		/* x is outside grid */
-    }
+  {
+    return (-2);                /* x is outside grid */
+  }
   else if (r < xx[0])
-    {
-      return (-1);		/*x is inside grid */
-    }
+  {
+    return (-1);                /*x is inside grid */
+  }
 
   return (1);
 
@@ -470,49 +466,49 @@ int
 where_in_2dcell (ichoice, x, n, fx, fz)
      int ichoice;
      double x[];
-     int n;  // A known wind cell
+     int n;                     // A known wind cell
      double *fx, *fz;
 {
   double *x00, *x01, *x10, *x11;
   double z[3];
   int i;
-  int ndom, nstart, nstop,mdim;
+  int ndom, nstart, nstop, mdim;
 
-  ndom=wmain[n].ndom;
-  nstart=zdom[ndom].nstart;
-  nstop=zdom[ndom].nstop;
-  mdim=zdom[ndom].mdim;
+  ndom = wmain[n].ndom;
+  nstart = zdom[ndom].nstart;
+  nstop = zdom[ndom].nstop;
+  mdim = zdom[ndom].mdim;
 
 
   /* First check that n is reasonable. This semems almost impossible */
   if (n < nstart || n + mdim + 1 >= nstop)
+  {
+    if (ierr_where_in_2dcell < 100)
     {
-      if (ierr_where_in_2dcell < 100)
-	{
-	  Error ("where_in_2dcell: Unreasonable n %d This should not happen. Please investigate \n", n);
-	  ierr_where_in_2dcell++;
-	}
-      return (n);		// And hope that calling routine knows how to handle this.
+      Error ("where_in_2dcell: Unreasonable n %d This should not happen. Please investigate \n", n);
+      ierr_where_in_2dcell++;
     }
+    return (n);                 // And hope that calling routine knows how to handle this.
+  }
 
   /* Assign the corners ot the region we want to determin
    * the fractional position of
    */
 
   if (ichoice == 0)
-    {
-      x00 = wmain[n].x;
-      x01 = wmain[n + 1].x;
-      x10 = wmain[n + mdim].x;
-      x11 = wmain[n + mdim + 1].x;
-    }
+  {
+    x00 = wmain[n].x;
+    x01 = wmain[n + 1].x;
+    x10 = wmain[n + mdim].x;
+    x11 = wmain[n + mdim + 1].x;
+  }
   else
-    {
-      x00 = wmain[n].xcen;
-      x01 = wmain[n + 1].xcen;
-      x10 = wmain[n + mdim].xcen;
-      x11 = wmain[n + mdim + 1].xcen;
-    }
+  {
+    x00 = wmain[n].xcen;
+    x01 = wmain[n + 1].xcen;
+    x10 = wmain[n + mdim].xcen;
+    x11 = wmain[n + mdim + 1].xcen;
+  }
 
   /* Rotate the input vector onto the xz plane
    * which is the plane where the grid is defined
@@ -580,10 +576,10 @@ wind_n_to_ij (ndom, n, i, j)
 {
   int n_use;
   if (zdom[ndom].coord_type == SPHERICAL)
-    {
-      *i = n - zdom[ndom].nstart;
-      *j = 0;
-    }
+  {
+    *i = n - zdom[ndom].nstart;
+    *j = 0;
+  }
   n_use = n - zdom[ndom].nstart;
   *i = n_use / zdom[ndom].mdim;
   *j = n_use - (*i) * zdom[ndom].mdim;
@@ -595,13 +591,11 @@ wind_ij_to_n (ndom, i, j, n)
      int *n, i, j, ndom;
 {
   if (zdom[ndom].coord_type == SPHERICAL)
-    {
-      Error
-	("Warning: wind_ij_to_n being called for spherical coordinates %d %d\n",
-	 i, j);
-      *n = i;
-      return (*n);
-    }
-  *n = zdom[ndom].nstart + i * zdom[ndom].mdim + j;		// MDIM because the array is in z order
+  {
+    Error ("Warning: wind_ij_to_n being called for spherical coordinates %d %d\n", i, j);
+    *n = i;
+    return (*n);
+  }
+  *n = zdom[ndom].nstart + i * zdom[ndom].mdim + j;     // MDIM because the array is in z order
   return (*n);
 }

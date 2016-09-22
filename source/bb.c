@@ -164,9 +164,9 @@ History:
 			See version earlier than 74 for these old notes.
 **************************************************************/
 
-#define ALPHAMIN 0.4		// Region below which we will use a low frequency approximation
-#define ALPHAMAX 30.		// Region above which we will use a high frequency approximation
-#define ALPHABIG 100.		//  Region over which can maximmally integrate the Planck function
+#define ALPHAMIN 0.4            // Region below which we will use a low frequency approximation
+#define ALPHAMAX 30.            // Region above which we will use a high frequency approximation
+#define ALPHABIG 100.           //  Region over which can maximmally integrate the Planck function
 #define NMAX 		1000
 
 int ninit_planck = 0;
@@ -176,9 +176,9 @@ double old_t = 0;
 double old_freqmin = 0;
 double old_freqmax = 0;
 double alphamin, alphamax;
-double cdf_bb_lo, cdf_bb_hi, cdf_bb_tot;	// The precise boundaries in the the bb cdf 
-double cdf_bb_ylo, cdf_bb_yhi;	// The places in the CDF defined by freqmin & freqmax
-double lo_freq_alphamin, lo_freq_alphamax, hi_freq_alphamin, hi_freq_alphamax;	//  the limits to use for the low and high frequency values
+double cdf_bb_lo, cdf_bb_hi, cdf_bb_tot;        // The precise boundaries in the the bb cdf 
+double cdf_bb_ylo, cdf_bb_yhi;  // The places in the CDF defined by freqmin & freqmax
+double lo_freq_alphamin, lo_freq_alphamax, hi_freq_alphamin, hi_freq_alphamax;  //  the limits to use for the low and high frequency values
 
 // bb_set is thae array that pdf_gen_from_func uses to esablish the 
 // specific points in the cdf of the dimensionless bb function.
@@ -208,24 +208,22 @@ planck (t, freqmin, freqmax)
      Note calling pdf_gen_from func also defines ylo and yhi */
 
   if (ninit_planck == 0)
-    {				/* First time through p_alpha must be initialized */
-      if ((echeck =
-	   pdf_gen_from_func (&pdf_bb, &planck_d, ALPHAMIN, ALPHAMAX, 29,
-			      bb_set)) != 0)
-	{
-	  Error ("Planck: on return from pdf_gen_from_func %d\n", echeck);
-	}
-      /* We need the integral of the bb function outside of the regions of interest as well */
+  {                             /* First time through p_alpha must be initialized */
+    if ((echeck = pdf_gen_from_func (&pdf_bb, &planck_d, ALPHAMIN, ALPHAMAX, 29, bb_set)) != 0)
+    {
+      Error ("Planck: on return from pdf_gen_from_func %d\n", echeck);
+    }
+    /* We need the integral of the bb function outside of the regions of interest as well */
 
 
-      cdf_bb_tot = qromb (planck_d, 0, ALPHABIG, 1e-8);
-      cdf_bb_lo = qromb (planck_d, 0, ALPHAMIN, 1e-8) / cdf_bb_tot;	//position in the full cdf of low frequcny boundary
-      cdf_bb_hi = 1. - qromb (planck_d, ALPHAMAX, ALPHABIG, 1e-8) / cdf_bb_tot;	//postion in fhe full hi frequcny boundary
+    cdf_bb_tot = qromb (planck_d, 0, ALPHABIG, 1e-8);
+    cdf_bb_lo = qromb (planck_d, 0, ALPHAMIN, 1e-8) / cdf_bb_tot;       //position in the full cdf of low frequcny boundary
+    cdf_bb_hi = 1. - qromb (planck_d, ALPHAMAX, ALPHABIG, 1e-8) / cdf_bb_tot;   //postion in fhe full hi frequcny boundary
 
 //      pdf_to_file (&pdf_bb, "pdf.out");
-      ninit_planck++;
+    ninit_planck++;
 
-    }
+  }
 
 
 /* If temperatures or frequencies have changed since the last call to planck
@@ -236,54 +234,54 @@ reset.  A careful review of them is warranted.
 */
 
   if (t != old_t || freqmin != old_freqmin || freqmax != old_freqmax)
+  {
+
+    alphamin = H * freqmin / (BOLTZMANN * t);
+    alphamax = H * freqmax / (BOLTZMANN * t);
+
+    old_t = t;
+    old_freqmin = freqmin;
+    old_freqmax = freqmax;
+
+    cdf_bb_ylo = cdf_bb_yhi = 1.0;
+    if (alphamin < ALPHABIG)
     {
-
-      alphamin = H * freqmin / (BOLTZMANN * t);
-      alphamax = H * freqmax / (BOLTZMANN * t);
-
-      old_t = t;
-      old_freqmin = freqmin;
-      old_freqmax = freqmax;
-
-      cdf_bb_ylo = cdf_bb_yhi = 1.0;
-      if (alphamin < ALPHABIG)
-	{
-	  cdf_bb_ylo = qromb (planck_d, 0, alphamin, 1e-8) / cdf_bb_tot;	//position in the full cdf of current low frequcny boundary
-	  if (cdf_bb_ylo > 1.0)
-	    cdf_bb_ylo = 1.0;
-	}
-      if (alphamax < ALPHABIG)
-	{
-	  cdf_bb_yhi = qromb (planck_d, 0, alphamax, 1e-8) / cdf_bb_tot;	//position in the full cdf of currnt hi frequcny boundary
-	  if (cdf_bb_yhi > 1.0)
-	    cdf_bb_yhi = 1.0;
-	}
+      cdf_bb_ylo = qromb (planck_d, 0, alphamin, 1e-8) / cdf_bb_tot;    //position in the full cdf of current low frequcny boundary
+      if (cdf_bb_ylo > 1.0)
+        cdf_bb_ylo = 1.0;
+    }
+    if (alphamax < ALPHABIG)
+    {
+      cdf_bb_yhi = qromb (planck_d, 0, alphamax, 1e-8) / cdf_bb_tot;    //position in the full cdf of currnt hi frequcny boundary
+      if (cdf_bb_yhi > 1.0)
+        cdf_bb_yhi = 1.0;
+    }
 
 
 /* These variables are not always used */
-      lo_freq_alphamin = alphamin;	// Never used if 
-      lo_freq_alphamax = alphamax;
-      if (lo_freq_alphamax > ALPHAMIN)
-	lo_freq_alphamax = ALPHAMIN;
+    lo_freq_alphamin = alphamin;        // Never used if 
+    lo_freq_alphamax = alphamax;
+    if (lo_freq_alphamax > ALPHAMIN)
+      lo_freq_alphamax = ALPHAMIN;
 
-      hi_freq_alphamax = alphamax;
-      hi_freq_alphamin = alphamin;
-      if (hi_freq_alphamin < ALPHAMAX)
-	hi_freq_alphamin = ALPHAMAX;
+    hi_freq_alphamax = alphamax;
+    hi_freq_alphamin = alphamin;
+    if (hi_freq_alphamin < ALPHAMAX)
+      hi_freq_alphamin = ALPHAMAX;
 
 
-      if (alphamin < ALPHAMAX && alphamax > ALPHAMIN)
-	{
-	  pdf_limit (&pdf_bb, alphamin, alphamax);
-	}
-
+    if (alphamin < ALPHAMAX && alphamax > ALPHAMIN)
+    {
+      pdf_limit (&pdf_bb, alphamin, alphamax);
     }
+
+  }
   /* End of section redefining limits */
 
 
   y = rand () / (MAXRAND);
 
-  y = cdf_bb_ylo * (1. - y) + cdf_bb_yhi * y;	// y is now in an allowd place in the cdf
+  y = cdf_bb_ylo * (1. - y) + cdf_bb_yhi * y;   // y is now in an allowd place in the cdf
 
 /* There are 3 cases to worry about
 	The case where everything is in the low frequency limit
@@ -293,23 +291,23 @@ reset.  A careful review of them is warranted.
 */
 
   if (y <= cdf_bb_lo || alphamax < ALPHAMIN)
-    {
-      alpha = get_rand_pow (lo_freq_alphamin, lo_freq_alphamax, 2.);
-    }
+  {
+    alpha = get_rand_pow (lo_freq_alphamin, lo_freq_alphamax, 2.);
+  }
   else if (y >= cdf_bb_hi || alphamin > ALPHAMAX)
-    {
-      alpha = get_rand_exp (hi_freq_alphamin, hi_freq_alphamax);
-    }
+  {
+    alpha = get_rand_exp (hi_freq_alphamin, hi_freq_alphamax);
+  }
   else
-    {
-      alpha = pdf_get_rand_limit (&pdf_bb);
-    }
+  {
+    alpha = pdf_get_rand_limit (&pdf_bb);
+  }
 
   freq = BOLTZMANN * t / H * alpha;
   if (freq < freqmin || freqmax < freq)
-    {
-      Error ("planck: freq %g out of range %g %g\n", freq, freqmin, freqmax);
-    }
+  {
+    Error ("planck: freq %g out of range %g %g\n", freq, freqmin, freqmax);
+  }
   return (freq);
 }
 
@@ -425,10 +423,9 @@ get_rand_exp (alpha_min, alpha_max)
   a = alpha_min + delta_alpha;
 
   if (sane_check (a))
-    {
-      Error ("get_rand_exp:sane_check %e %e %e %e %e\n", a, aa, delta_alpha,
-	     x, r);
-    }
+  {
+    Error ("get_rand_exp:sane_check %e %e %e %e %e\n", a, aa, delta_alpha, x, r);
+  }
   return (a);
 }
 
@@ -469,40 +466,40 @@ integ_planck_d (alphamin, alphamax)
   int n;
   int init_integ_planck_d ();
   if (i_integ_planck_d == 0)
-    {				/*First time through integ_planck must be defined */
-      init_integ_planck_d ();
-      i_integ_planck_d++;
-    }
+  {                             /*First time through integ_planck must be defined */
+    init_integ_planck_d ();
+    i_integ_planck_d++;
+  }
 
   x = (alphamin - ALPHAMIN) / (ALPHAMAX - ALPHAMIN) * NMAX;
   if (x <= 0.0)
     z1 = 0.0;
   else if (x >= (NMAX))
-    {
-      return (0.0);		/* Because the minimum frequency is too high */
-    }
+  {
+    return (0.0);               /* Because the minimum frequency is too high */
+  }
   else
-    {
-      n = x;
-      x -= n;
-      z1 = integ_planck[n] * (1. - x) + integ_planck[n + 1] * x;
-    }
+  {
+    n = x;
+    x -= n;
+    z1 = integ_planck[n] * (1. - x) + integ_planck[n + 1] * x;
+  }
 
   x = (alphamax - ALPHAMIN) / (ALPHAMAX - ALPHAMIN) * NMAX;
   if (x < 0.0)
-    {
-      return (0.0);		/* Because the maximum frequency is too low */
-    }
+  {
+    return (0.0);               /* Because the maximum frequency is too low */
+  }
   else if (x >= (NMAX))
-    {
-      z2 = integ_planck[NMAX];
-    }
+  {
+    z2 = integ_planck[NMAX];
+  }
   else
-    {
-      n = x;
-      x -= n;
-      z2 = integ_planck[n] * (1. - x) + integ_planck[n + 1] * x;
-    }
+  {
+    n = x;
+    x -= n;
+    z2 = integ_planck[n] * (1. - x) + integ_planck[n + 1] * x;
+  }
 
   return (z2 - z1);
 }
@@ -541,11 +538,11 @@ init_integ_planck_d ()
   double planck_d (), qromb ();
   int n;
   for (n = 0; n <= NMAX + 1; n++)
-    {
-      x = ALPHAMIN + n * (ALPHAMAX - ALPHAMIN) / NMAX;
+  {
+    x = ALPHAMIN + n * (ALPHAMAX - ALPHAMIN) / NMAX;
 // 1e-7 is the fractional accuracy in my modified version of qromb -- ksl
-      integ_planck[n] = qromb (planck_d, 0.0, x, 1e-7);
-    }
+    integ_planck[n] = qromb (planck_d, 0.0, x, 1e-7);
+  }
 
   return (0);
 }
@@ -592,27 +589,24 @@ emittance_bb (freqmin, freqmax, t)
 {
   double alphamin, alphamax, q1;
   double integ_planck_d ();
-  q1 =
-    2. * PI * (BOLTZMANN *
-	       BOLTZMANN * BOLTZMANN * BOLTZMANN) / (H * H * H * C * C);
+  q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (H * H * H * C * C);
 
 
   alphamin = H * freqmin / (BOLTZMANN * t);
   alphamax = H * freqmax / (BOLTZMANN * t);
   if (alphamin > ALPHAMIN && alphamax < ALPHAMAX)
-    {
-      return (q1 * t * t * t * t * integ_planck_d (alphamin, alphamax));
-    }
+  {
+    return (q1 * t * t * t * t * integ_planck_d (alphamin, alphamax));
+  }
   else if (alphamax < ALPHAMIN)
-    {
-      return (q1 * t * t * t * t *
-	      qromb (planck_d, alphamin, alphamax, 1e-7));
-    }
+  {
+    return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7));
+  }
   else
-    {
+  {
 
-      return (q1 * t * t * t * t * integ_planck_d (alphamin, alphamax));
-    }
+    return (q1 * t * t * t * t * integ_planck_d (alphamin, alphamax));
+  }
 }
 
 
@@ -645,12 +639,12 @@ check_fmax (fmin, fmax, temp)
 {
   double bblim;
 
-  bblim = ALPHABIG * (temp / H_OVER_K);	/*This is the frequency at which the exponent in the 
-					   planck law will be -100. This will give a *very* small b(nu). */
+  bblim = ALPHABIG * (temp / H_OVER_K); /*This is the frequency at which the exponent in the 
+                                           planck law will be -100. This will give a *very* small b(nu). */
   if (bblim < fmax)
-    {
-      fmax = bblim;
-    }
+  {
+    fmax = bblim;
+  }
 
   return (fmax);
 

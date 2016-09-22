@@ -157,8 +157,7 @@ main (argc, argv)
   int ochoice;
   char c;
 
-  char root[LINELENGTH], input[LINELENGTH], wspecfile[LINELENGTH],
-    specfile[LINELENGTH];
+  char root[LINELENGTH], input[LINELENGTH], wspecfile[LINELENGTH], specfile[LINELENGTH];
   char windradfile[LINELENGTH], windsavefile[LINELENGTH];
   char parameter_file[LINELENGTH];
   char photfile[LINELENGTH];
@@ -169,51 +168,51 @@ main (argc, argv)
   // py_wind uses rdpar, but only in an interactive mode. As a result 
   // there is no associated .pf file
 
-  interactive = 1;		/* Default to the standard operating mofe for py_wind */
+  interactive = 1;              /* Default to the standard operating mofe for py_wind */
   strcpy (parameter_file, "NONE");
 
   /* Next command stops Debug statements printing out in py_wind */
   Log_set_verbosity (3);
 
   if (argc == 1)
-    {
-      printf ("Root for wind file :");
-      fgets (input, LINELENGTH, stdin);
-      get_root (root, input);
-    }
+  {
+    printf ("Root for wind file :");
+    fgets (input, LINELENGTH, stdin);
+    get_root (root, input);
+  }
   else
+  {
+    for (i = 1; i < argc; i++)
     {
-      for (i = 1; i < argc; i++)
-	{
-	  if (strcmp (argv[i], "-h") == 0)
-	    {
-	      py_wind_help ();
-	    }
-	  else if (strcmp (argv[i], "-d") == 0)
-	    {
-	      interactive = -1;
-	    }
+      if (strcmp (argv[i], "-h") == 0)
+      {
+        py_wind_help ();
+      }
+      else if (strcmp (argv[i], "-d") == 0)
+      {
+        interactive = -1;
+      }
 
-	  else if (strcmp (argv[i], "-s") == 0)
-	    {
-	      interactive = 0;
-	    }
-	  else if (strcmp (argv[i], "-p") == 0)
-	    {
-	      interactive = 0;
-	      i = i + 1;
-	      strcpy (parameter_file, argv[i]);
-	    }
-	  else if (strncmp (argv[i], "-", 1) == 0)
-	    {
-	      Error ("py_wind: unknown switch %s\n", argv[i]);
-	      py_wind_help ();
-	    }
-	}
-
-      strcpy (input, argv[argc - 1]);
-      get_root (root, input);
+      else if (strcmp (argv[i], "-s") == 0)
+      {
+        interactive = 0;
+      }
+      else if (strcmp (argv[i], "-p") == 0)
+      {
+        interactive = 0;
+        i = i + 1;
+        strcpy (parameter_file, argv[i]);
+      }
+      else if (strncmp (argv[i], "-", 1) == 0)
+      {
+        Error ("py_wind: unknown switch %s\n", argv[i]);
+        py_wind_help ();
+      }
     }
+
+    strcpy (input, argv[argc - 1]);
+    get_root (root, input);
+  }
 
 
   printf ("Reading data from file %s\n", root);
@@ -235,7 +234,7 @@ main (argc, argv)
 
   /* Initialize other variables here */
 
-  py_wind_project = 1;		// The default is to try to project onto a yz plane 
+  py_wind_project = 1;          // The default is to try to project onto a yz plane 
 
 /* Read in the wind file */
 
@@ -251,10 +250,10 @@ use of w is endemic in the program. and it is always called through main.
 I did not change this now.  Though it could be done.  02apr ksl */
 
   if (wind_read (windsavefile) < 0)
-    {
-      Error ("py_wind: Could not open %s", windsavefile);
-      exit (0);
-    }
+  {
+    Error ("py_wind: Could not open %s", windsavefile);
+    exit (0);
+  }
 
 /* aaa is used to store variable for writing to files for the purpose of plotting*/
   aaa = calloc (sizeof (freq), NDIM2);
@@ -270,49 +269,49 @@ I did not change this now.  Though it could be done.  02apr ksl */
   current_domain = 0;
   /*Set the current domain to zero */
 /* Produce a standard set of output files and exit*/
-    if (interactive == 0 && strcmp (parameter_file, "NONE") == 0)
-    {
-      zoom (1);			/* This affects the logfile */
-      ochoice = 1;
-      complete_file_summary (wmain, root, ochoice);
-      exit (0);
-    }
+  if (interactive == 0 && strcmp (parameter_file, "NONE") == 0)
+  {
+    zoom (1);                   /* This affects the logfile */
+    ochoice = 1;
+    complete_file_summary (wmain, root, ochoice);
+    exit (0);
+  }
   else if (interactive == -1)
+  {
+    /* In cases, where the windsave file was written out for 
+     * eaach ionization cycle Write the sumary ascii files 
+     * for each of the ionization cycles as 
+     * as well as the final cycle */
+    zoom (1);                   /* This affects the logfile */
+    ochoice = 1;
+    complete_file_summary (wmain, root, ochoice);
+    i = 0;
+    strcpy (root, "");
+    sprintf (root, "python%02d", i);
+    strcpy (windsavefile, "");
+    sprintf (windsavefile, "python%02d.wind_save", i);
+    while (wind_read (windsavefile) > 0)
     {
-      /* In cases, where the windsave file was written out for 
-       * eaach ionization cycle Write the sumary ascii files 
-       * for each of the ionization cycles as 
-       * as well as the final cycle */
-      zoom (1);			/* This affects the logfile */
-      ochoice = 1;
+      Log ("Trying %s %s\n", windsavefile, root);
       complete_file_summary (wmain, root, ochoice);
-      i = 0;
       strcpy (root, "");
       sprintf (root, "python%02d", i);
       strcpy (windsavefile, "");
       sprintf (windsavefile, "python%02d.wind_save", i);
-      while (wind_read (windsavefile) > 0)
-	{
-	  Log ("Trying %s %s\n", windsavefile, root);
-	  complete_file_summary (wmain, root, ochoice);
-	  strcpy (root, "");
-	  sprintf (root, "python%02d", i);
-	  strcpy (windsavefile, "");
-	  sprintf (windsavefile, "python%02d.wind_save", i);
-	  i++;
-	}
-      exit (0);
+      i++;
     }
+    exit (0);
+  }
 
 
 
 
   if (strcmp (parameter_file, "NONE") != 0)
-    {
-      zoom (1);			/* This affects the logfile */
-      ochoice = 1;
-      opar (parameter_file);
-    }
+  {
+    zoom (1);                   /* This affects the logfile */
+    ochoice = 1;
+    opar (parameter_file);
+  }
 
 
 /* Choices */
@@ -332,28 +331,28 @@ I did not change this now.  Though it could be done.  02apr ksl */
   rdchar ("Choice", &c);
 
   while (c != EOF)
+  {
+    if (c == 'Q')
     {
-      if (c == 'Q')
-	{
-	  printf ("There were %d domains.\n", geo.ndomain);
-	  rdint ("Domain_to_examine", &current_domain);
-	  if (current_domain < 0 || current_domain >= geo.ndomain)
-	    {
-	      printf ("Unkown Domain (forcing current_domain to 0\n");
-	      current_domain = 0;
-	    }
-	  else
-	    {
-	      printf ("Swithching to domain %d\n", current_domain);
-	    }
-      	  zoom (1);			/* Unzoom*/
-	  rdchar ("Choice", &c);
-	}
-
-      one_choice (c, root, ochoice);
-      printf ("%s\n", choice_options);
+      printf ("There were %d domains.\n", geo.ndomain);
+      rdint ("Domain_to_examine", &current_domain);
+      if (current_domain < 0 || current_domain >= geo.ndomain)
+      {
+        printf ("Unkown Domain (forcing current_domain to 0\n");
+        current_domain = 0;
+      }
+      else
+      {
+        printf ("Swithching to domain %d\n", current_domain);
+      }
+      zoom (1);                 /* Unzoom */
       rdchar ("Choice", &c);
     }
+
+    one_choice (c, root, ochoice);
+    printf ("%s\n", choice_options);
+    rdchar ("Choice", &c);
+  }
 
 
   return (0);
@@ -402,237 +401,237 @@ one_choice (choice, root, ochoice)
 
 
   switch (choice)
+  {
+  case 'a':                    /* Energy absorbed */
+    abs_summary (wmain, root, ochoice);
+    break;
+  case 'A':                    // Change the file defaults
+    rdint ("Make_files(0=no,1=original,2=regrid_to_linear)", &ochoice);
+    break;
+  case 'b':                    /*Adiabatic cooling */
+    adiabatic_cooling_summary (wmain, root, ochoice);
+    break;
+  case 'B':
+    plasma_cell (wmain, root, ochoice);
+    break;
+  case 'c':                    /*C4 emission */
+    line_summary (wmain, n, istate, root, ochoice);
+    break;
+  case 'C':                    /*the ratio cooling to heating */
+    coolheat_summary (wmain, root, ochoice);
+    break;
+  case 'd':
+    convergence_summary (wmain, root, ochoice);
+    break;
+  case 'D':                    /* dvds summary */
+    dvds_summary (wmain, root, ochoice);
+    break;
+  case 'E':
+    convergence_all (wmain, root, ochoice);
+    break;
+  case 'e':                    /* print out everything about an element */
+    wind_element (wmain);
+    break;
+  case 'f':                    /* Electron summary */
+    freq_summary (wmain, root, ochoice);
+    break;
+  case 'F':                    /* Complete file summary */
+    complete_file_summary (wmain, root, ochoice);
+    break;
+  case 'g':                    /*n photo */
+    photo_summary (wmain, root, ochoice);
+    break;
+  case 'G':                    /* inner shell summary */
+    inner_shell_summary (wmain, root, ochoice);
+    break;
+  case 'h':                    /*n photo */
+    Log ("Don't get discouraged.  This takes a little while!");
+    recomb_summary (wmain, root, ochoice);
+    break;
+  case 'H':                    /* heating and cooling mechanisms breakdown */
+    heatcool_summary (wmain, root, ochoice);
+    break;
+  case 'i':                    /* Allow user to display information about ions in the wind */
+
+    rdint ("Ion_info_type(0=fraction,1=density,2=scatters,3=abs", &iswitch);
+
+    n = 6;
+    istate = 4;
+
+    while (rdint ("element(0=return)", &n) != EOF)
     {
-    case 'a':			/* Energy absorbed */
-      abs_summary (wmain, root, ochoice);
-      break;
-    case 'A':			// Change the file defaults
-      rdint ("Make_files(0=no,1=original,2=regrid_to_linear)", &ochoice);
-      break;
-    case 'b':			/*Adiabatic cooling */
-      adiabatic_cooling_summary (wmain, root, ochoice);
-      break;
-    case 'B':
-      plasma_cell (wmain, root, ochoice);
-      break;
-    case 'c':			/*C4 emission */
-      line_summary (wmain, n, istate, root, ochoice);
-      break;
-    case 'C':			/*the ratio cooling to heating */
-      coolheat_summary (wmain, root, ochoice);
-      break;
-    case 'd':
-      convergence_summary (wmain, root, ochoice);
-      break;
-    case 'D':			/* dvds summary */
-      dvds_summary (wmain, root, ochoice);
-      break;
-    case 'E':
-      convergence_all (wmain, root, ochoice);
-      break;
-    case 'e':			/* print out everything about an element */
-      wind_element (wmain);
-      break;
-    case 'f':			/* Electron summary */
-      freq_summary (wmain, root, ochoice);
-      break;
-    case 'F':			/* Complete file summary */
-      complete_file_summary (wmain, root, ochoice);
-      break;
-    case 'g':			/*n photo */
-      photo_summary (wmain, root, ochoice);
-      break;
-    case 'G':			/* inner shell summary */
-      inner_shell_summary (wmain, root, ochoice);
-      break;
-    case 'h':			/*n photo */
-      Log ("Don't get discouraged.  This takes a little while!");
-      recomb_summary (wmain, root, ochoice);
-      break;
-    case 'H':			/* heating and cooling mechanisms breakdown */
-      heatcool_summary (wmain, root, ochoice);
-      break;
-    case 'i':			/* Allow user to display information about ions in the wind */
+      if (n <= 0)
+        break;
+      rdint ("ion", &istate);
+      ion_summary (wmain, n, istate, iswitch, root, ochoice);   // 0 implies ion fractions
+    }
+    break;
+  case 'I':
+    IP_summary (wmain, root, ochoice);
+    break;
 
-      rdint ("Ion_info_type(0=fraction,1=density,2=scatters,3=abs", &iswitch);
+  case 'j':                    /* Calculate the average tau at the center of a cell */
+    n = 6;
+    istate = 4;
+    lambda = 1550;
 
-      n = 6;
-      istate = 4;
+    rddoub ("wavelength", &lambda);
+    freq = C / (lambda * 1.e-8);
 
-      while (rdint ("element(0=return)", &n) != EOF)
-	{
-	  if (n <= 0)
-	    break;
-	  rdint ("ion", &istate);
-	  ion_summary (wmain, n, istate, iswitch, root, ochoice);	// 0 implies ion fractions
-	}
-      break;
-    case 'I':
-      IP_summary (wmain, root, ochoice);
-      break;
-
-    case 'j':			/* Calculate the average tau at the center of a cell */
-      n = 6;
-      istate = 4;
-      lambda = 1550;
-
-      rddoub ("wavelength", &lambda);
-      freq = C / (lambda * 1.e-8);
-
-      while (rdint ("element(0=return)", &n) != EOF)
-	{
-	  if (n <= 0)
-	    break;
-	  rdint ("ion", &istate);
-	  tau_ave_summary (wmain, n, istate, freq, root, ochoice);
-	}
-      break;
-    case 'J':			/* radiation density in cell */
-      J_summary (wmain, root, ochoice);
-      break;
-    case 'k':			/* tau at H edge */
-      tau_h_summary (wmain, root, ochoice);
-      break;
-    case 'K':			/* cell J split by direct photons and scattered photons */
-      J_scat_summary (wmain, root, ochoice);
-      break;
-    case 'l':			/* Lum of shell */
-      lum_summary (wmain, root, ochoice);
-      break;
-    case 'm':			/* Radiation force */
-      mo_summary (wmain, root, ochoice);
-      break;
-    case 'M':
-      macro_summary (wmain, root, ochoice);
-      break;
-    case 'n':			/* Electron summary */
-      electron_summary (wmain, root, ochoice);
-      break;
-    case 'N':			/* Read a different wind save file */
-      rdstr ("New.rootname", root);
-      strcpy (windsavefile, root);
-      strcat (windsavefile, ".wind_save");
-      if (wind_read (windsavefile) < 0)
-	{
-	  Error ("one_choice: Could not read %s", windsavefile);
-	}
+    while (rdint ("element(0=return)", &n) != EOF)
+    {
+      if (n <= 0)
+        break;
+      rdint ("ion", &istate);
+      tau_ave_summary (wmain, n, istate, freq, root, ochoice);
+    }
+    break;
+  case 'J':                    /* radiation density in cell */
+    J_summary (wmain, root, ochoice);
+    break;
+  case 'k':                    /* tau at H edge */
+    tau_h_summary (wmain, root, ochoice);
+    break;
+  case 'K':                    /* cell J split by direct photons and scattered photons */
+    J_scat_summary (wmain, root, ochoice);
+    break;
+  case 'l':                    /* Lum of shell */
+    lum_summary (wmain, root, ochoice);
+    break;
+  case 'm':                    /* Radiation force */
+    mo_summary (wmain, root, ochoice);
+    break;
+  case 'M':
+    macro_summary (wmain, root, ochoice);
+    break;
+  case 'n':                    /* Electron summary */
+    electron_summary (wmain, root, ochoice);
+    break;
+  case 'N':                    /* Read a different wind save file */
+    rdstr ("New.rootname", root);
+    strcpy (windsavefile, root);
+    strcat (windsavefile, ".wind_save");
+    if (wind_read (windsavefile) < 0)
+    {
+      Error ("one_choice: Could not read %s", windsavefile);
+    }
 
 
 /* aaa is used to store variable for writing to files for the purpose of plotting*/
-      if (aaa != NULL)
-	{
-	  free (aaa);
-	}
-      aaa = calloc (sizeof (freq), NDIM2);
-
-      printf ("Read wind_file %s\n", windsavefile);
-
-      get_atomic_data (geo.atomic_filename);
-
-      printf ("Read Atomic data from %s\n", geo.atomic_filename);
-
-      break;
-    case 'o':			/* overview */
-      overview (wmain, root);
-      break;
-    case 'O':			/* spectral model parameters */
-      model_bands (wmain, root, ochoice);
-      break;
-    case 'p':			/* nphot summary */
-      nphot_summary (wmain, root, ochoice);
-      break;
-    case 'P':			/* Allow user to display information about the wind */
-
-      n = 6;
-      istate = 4;
-
-      while (rdint ("element(0=return)", &n) != EOF)
-	{
-	  if (n <= 0)
-	    break;
-	  rdint ("ion", &istate);
-	  partial_measure_summary (wmain, n, istate, root, ochoice);
-	}
-      break;
-    case 'r':			/* Temp summary */
-      temp_rad (wmain, root, ochoice);
-      break;
-    case 'R':			/* Rho summary */
-      rho_summary (wmain, root, ochoice);
-      break;
-    case 's':			/* Volume summary */
-      vol_summary (wmain, root, ochoice);
-      break;
-    case 'S':
-      alpha_summary (wmain, root, ochoice);
-      break;
-    case 't':			/* Temp summary */
-      temp_summary (wmain, root, ochoice);
-      break;
-    case 'T':
-      thompson (wmain, root, ochoice);
-      break;
-    case 'v':			/* Velocity summary */
-      velocity_summary (wmain, root, ochoice);
-      break;
-    case 'V':			/* Split of scatters in the cell between electron and resonant */
-      nscat_split (wmain, root, ochoice);
-      break;
-    case 'w':			/* inten weight summary */
-      weight_summary (wmain, root, ochoice);
-      break;
-    case 'W':			/*Show regions in the wind */
-      wind_reg_summary (wmain, root, ochoice);
-      break;
-    case 'x':			/*Total emission */
-      total_emission_summary (wmain, root, ochoice);
-      break;
-    case 'X':			/* Position summary */
-      position_summary (wmain);
-      break;
-    case 'y':			/* Recalculate temperatures */
-      modify_te (wmain, root, ochoice);
-      break;
-    case 'Y':			/* Split of photons from different sources */
-      phot_split (wmain, root, ochoice);
-      break;
-    case 'z':			/* inspect a specific region */
-      zoom (0);
-      break;
-    case 'Z':			/* Switch between raw and projected mode */
-      if (py_wind_project == 0)
-	{
-	  py_wind_project = 1;
-	  Log ("Switching to raw display, whatever the coordinate system");
-	}
-      else if (py_wind_project == 1)
-	{
-	  py_wind_project = 0;
-	  Log ("Switching to projected y z display");
-	}
-      break;
-
-      /* JM -- typing 1 gives you a summary of everything in one file with
-         astropy.io.ascii compliant headers */
-
-    case '1':
-      complete_physical_summary (wmain, root, ochoice);	//
-      break;
-
-
-    case 'u':			/* Go back to full image */
-      zoom (1);
-      break;
-      case '2':
-      complete_ion_summary(wmain, root, ochoice);  //
-        break;
-    case 'q':			/* quit */
-      /* Write out a parameterfile that gives all of the commands used in this run */
-      cpar ("py_wind.pf");
-      exit (0);
-      break;
-
+    if (aaa != NULL)
+    {
+      free (aaa);
     }
+    aaa = calloc (sizeof (freq), NDIM2);
+
+    printf ("Read wind_file %s\n", windsavefile);
+
+    get_atomic_data (geo.atomic_filename);
+
+    printf ("Read Atomic data from %s\n", geo.atomic_filename);
+
+    break;
+  case 'o':                    /* overview */
+    overview (wmain, root);
+    break;
+  case 'O':                    /* spectral model parameters */
+    model_bands (wmain, root, ochoice);
+    break;
+  case 'p':                    /* nphot summary */
+    nphot_summary (wmain, root, ochoice);
+    break;
+  case 'P':                    /* Allow user to display information about the wind */
+
+    n = 6;
+    istate = 4;
+
+    while (rdint ("element(0=return)", &n) != EOF)
+    {
+      if (n <= 0)
+        break;
+      rdint ("ion", &istate);
+      partial_measure_summary (wmain, n, istate, root, ochoice);
+    }
+    break;
+  case 'r':                    /* Temp summary */
+    temp_rad (wmain, root, ochoice);
+    break;
+  case 'R':                    /* Rho summary */
+    rho_summary (wmain, root, ochoice);
+    break;
+  case 's':                    /* Volume summary */
+    vol_summary (wmain, root, ochoice);
+    break;
+  case 'S':
+    alpha_summary (wmain, root, ochoice);
+    break;
+  case 't':                    /* Temp summary */
+    temp_summary (wmain, root, ochoice);
+    break;
+  case 'T':
+    thompson (wmain, root, ochoice);
+    break;
+  case 'v':                    /* Velocity summary */
+    velocity_summary (wmain, root, ochoice);
+    break;
+  case 'V':                    /* Split of scatters in the cell between electron and resonant */
+    nscat_split (wmain, root, ochoice);
+    break;
+  case 'w':                    /* inten weight summary */
+    weight_summary (wmain, root, ochoice);
+    break;
+  case 'W':                    /*Show regions in the wind */
+    wind_reg_summary (wmain, root, ochoice);
+    break;
+  case 'x':                    /*Total emission */
+    total_emission_summary (wmain, root, ochoice);
+    break;
+  case 'X':                    /* Position summary */
+    position_summary (wmain);
+    break;
+  case 'y':                    /* Recalculate temperatures */
+    modify_te (wmain, root, ochoice);
+    break;
+  case 'Y':                    /* Split of photons from different sources */
+    phot_split (wmain, root, ochoice);
+    break;
+  case 'z':                    /* inspect a specific region */
+    zoom (0);
+    break;
+  case 'Z':                    /* Switch between raw and projected mode */
+    if (py_wind_project == 0)
+    {
+      py_wind_project = 1;
+      Log ("Switching to raw display, whatever the coordinate system");
+    }
+    else if (py_wind_project == 1)
+    {
+      py_wind_project = 0;
+      Log ("Switching to projected y z display");
+    }
+    break;
+
+    /* JM -- typing 1 gives you a summary of everything in one file with
+       astropy.io.ascii compliant headers */
+
+  case '1':
+    complete_physical_summary (wmain, root, ochoice);   //
+    break;
+
+
+  case 'u':                    /* Go back to full image */
+    zoom (1);
+    break;
+  case '2':
+    complete_ion_summary (wmain, root, ochoice);        //
+    break;
+  case 'q':                    /* quit */
+    /* Write out a parameterfile that gives all of the commands used in this run */
+    cpar ("py_wind.pf");
+    exit (0);
+    break;
+
+  }
 
   return (0);
 }

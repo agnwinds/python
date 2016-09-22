@@ -95,148 +95,146 @@ write_array (filename, choice)
   int i;
   int nn, nnn[4], nelem;
   double frac[4];
-  int ndom,ndim,mdim,nstart,ndomain;
-  ndom=current_domain;
-  ndim=zdom[ndom].ndim;
-  mdim=zdom[ndom].mdim;
-  nstart=zdom[ndom].nstart;
+  int ndom, ndim, mdim, nstart, ndomain;
+  ndom = current_domain;
+  ndim = zdom[ndom].ndim;
+  mdim = zdom[ndom].mdim;
+  nstart = zdom[ndom].nstart;
   float rin[ndim], zin[mdim];
 
 
 
-  if (choice == 0)		// Then we don't really want output files
-    {
-      return (0);
-    }
+  if (choice == 0)              // Then we don't really want output files
+  {
+    return (0);
+  }
 
 // Open the appropriate file
 
   strcpy (outfile, filename);
-  if (geo.ndomain>1){
-	  sprintf(extra,".%d",current_domain);
-	  strcat(outfile,extra);
+  if (geo.ndomain > 1)
+  {
+    sprintf (extra, ".%d", current_domain);
+    strcat (outfile, extra);
   }
-  strcat (outfile, ".dat");	// Add standard extension to filenames, i.e. the one used by tecplot
+  strcat (outfile, ".dat");     // Add standard extension to filenames, i.e. the one used by tecplot
   fptr = fopen (outfile, "w");
 
 
   /* Write out the header information for the file */
   fprintf (fptr, "# TITLE= \"%s\"\n", outfile);
   if (zdom[ndom].coord_type == SPHERICAL)
-    {
-      fprintf (fptr, "# Coord_Sys SPHERICAL\n");
-    }
+  {
+    fprintf (fptr, "# Coord_Sys SPHERICAL\n");
+  }
   else if (zdom[ndom].coord_type == CYLIND)
-    {
-      fprintf (fptr, "# Coord_Sys CYLIND\n");
-    }
+  {
+    fprintf (fptr, "# Coord_Sys CYLIND\n");
+  }
   else if (zdom[ndom].coord_type == RTHETA)
-    {
-      fprintf (fptr, "# Coord_Sys RTHETA\n");
-    }
+  {
+    fprintf (fptr, "# Coord_Sys RTHETA\n");
+  }
   else if (zdom[ndom].coord_type == CYLVAR)
-    {
-      fprintf (fptr, "# Coord_Sys CYLVAR\n");
-    }
+  {
+    fprintf (fptr, "# Coord_Sys CYLVAR\n");
+  }
   else
-    {
-      Error ("write_array: Unknown coordinaate system type: %d\n",
-	     zdom[ndom].coord_type);
-    }
+  {
+    Error ("write_array: Unknown coordinaate system type: %d\n", zdom[ndom].coord_type);
+  }
 
 
 // Put the r and z coord. grid  into easier to understand arrays
   for (i = 0; i < ndim; i++)
-    {
-      zin[i] = wmain[nstart+i].x[2];
-      rin[i] = wmain[nstart+i * mdim].x[0];
-    }
+  {
+    zin[i] = wmain[nstart + i].x[2];
+    rin[i] = wmain[nstart + i * mdim].x[0];
+  }
 
 
 /* In py_wind the filenames are set to start with z if the output coordinates
 are linear, and x otherwise.  This is not particularly transparent ?? ksl */
 
   if (choice == 1)
-    {				// print out the original array elements
+  {                             // print out the original array elements
 
-      if (zdom[ndom].coord_type == SPHERICAL)
-	{
-    
-    /* JM 1411 -- added header for reading with astropy ascii module */
-    fprintf (fptr, "r var inwind i\n");
+    if (zdom[ndom].coord_type == SPHERICAL)
+    {
 
-	  for (i = 0; i < ndim; i++)
-	    {
-	      fprintf (fptr, "%8.2e %8.2e %3d %3d \n", wmain[nstart+i].r, aaa[nstart+i],
-		       wmain[nstart+i].inwind, i);
-	    }
-	}
-      else
-	{
+      /* JM 1411 -- added header for reading with astropy ascii module */
+      fprintf (fptr, "r var inwind i\n");
 
-    /* JM 1411 -- added header for reading with astropy ascii module */
-    fprintf (fptr, "x z var inwind i j\n");
-
-	  for (i = 0; i < ndim*mdim; i++)
-	    {
-	      wind_n_to_ij (ndom,nstart+i, &ii, &jj);
-	      fprintf (fptr, "%8.4e %8.4e %8.5e %3d %3d %3d\n",
-		       wmain[nstart+i].xcen[0], wmain[nstart+i].xcen[2], aaa[nstart+i],
-		       wmain[nstart+i].inwind, ii, jj);
-
-	    }
-	}
-
+      for (i = 0; i < ndim; i++)
+      {
+        fprintf (fptr, "%8.2e %8.2e %3d %3d \n", wmain[nstart + i].r, aaa[nstart + i], wmain[nstart + i].inwind, i);
+      }
     }
+    else
+    {
+
+      /* JM 1411 -- added header for reading with astropy ascii module */
+      fprintf (fptr, "x z var inwind i j\n");
+
+      for (i = 0; i < ndim * mdim; i++)
+      {
+        wind_n_to_ij (ndom, nstart + i, &ii, &jj);
+        fprintf (fptr, "%8.4e %8.4e %8.5e %3d %3d %3d\n",
+                 wmain[nstart + i].xcen[0], wmain[nstart + i].xcen[2], aaa[nstart + i], wmain[nstart + i].inwind, ii, jj);
+
+      }
+    }
+
+  }
   else if (choice == 2)
-    {				// Then regrid to a linear grid
+  {                             // Then regrid to a linear grid
 /* Wind array is organized so that it increments up along z and then over */
 
 /* Want linearly spaced output array */
-      rmin = zmin = 0;
-      rmax = zmax = geo.rmax;
+    rmin = zmin = 0;
+    rmax = zmax = geo.rmax;
 
-      xx[1] = 0.0;
-      for (ii = 0; ii < ODIM; ii++)
-	{
-	  xx[0] = r = rmin + ii * (rmax - rmin) / (ODIM - 1);
-	  for (jj = 0; jj < ODIM; jj++)
-	    {
-	      xx[2] = z = zmin + jj * (zmax - zmin) / (ODIM - 1);
-	      if (where_in_wind (xx,&ndomain) == W_ALL_INWIND)
-		{		// Then the position is in the wind region
-		  coord_fraction (ndom, 0, xx, nnn, frac, &nelem);
-		  for (nn = 0; nn < nelem; nn++)
-		    {
-		      aout[ii][jj] += aaa[nnn[nn]] * frac[nn];
-		    }
-
-		}
-	    }
-	}
-
-      /* Now print out the array */
-      // fprintf (fptr, "VARIABLES= \"X\" \"Z\" \"Var1\" \n");
-      // fprintf (fptr, "ZONE I=%d J=%d DATAPACKING=POINT\n", ODIM, ODIM);
-      fprintf (fptr, "# Resampled outputs\n");
-      for (jj = 0; jj < ODIM; jj++)
-	{
-    /* JM 1411 -- added header for reading with astropy ascii module */
-    fprintf (fptr, "r z var\n");
-
-	  z = zmin + (zmax - zmin) * jj / (ODIM - 1);
-	  for (ii = 0; ii < ODIM; ii++)
-	    {
-	      r = rmin + (rmax - rmin) * ii / (ODIM - 1);
-	      fprintf (fptr, "%8.2e %8.2e %8.2e\n", r, z, aout[ii][jj]);
-	    }
-	}
-      /*Finished printing out the array */
-    }
-  else
+    xx[1] = 0.0;
+    for (ii = 0; ii < ODIM; ii++)
     {
-      Error ("write_array: Unknown choice %d\n", choice);
+      xx[0] = r = rmin + ii * (rmax - rmin) / (ODIM - 1);
+      for (jj = 0; jj < ODIM; jj++)
+      {
+        xx[2] = z = zmin + jj * (zmax - zmin) / (ODIM - 1);
+        if (where_in_wind (xx, &ndomain) == W_ALL_INWIND)
+        {                       // Then the position is in the wind region
+          coord_fraction (ndom, 0, xx, nnn, frac, &nelem);
+          for (nn = 0; nn < nelem; nn++)
+          {
+            aout[ii][jj] += aaa[nnn[nn]] * frac[nn];
+          }
+
+        }
+      }
     }
+
+    /* Now print out the array */
+    // fprintf (fptr, "VARIABLES= \"X\" \"Z\" \"Var1\" \n");
+    // fprintf (fptr, "ZONE I=%d J=%d DATAPACKING=POINT\n", ODIM, ODIM);
+    fprintf (fptr, "# Resampled outputs\n");
+    for (jj = 0; jj < ODIM; jj++)
+    {
+      /* JM 1411 -- added header for reading with astropy ascii module */
+      fprintf (fptr, "r z var\n");
+
+      z = zmin + (zmax - zmin) * jj / (ODIM - 1);
+      for (ii = 0; ii < ODIM; ii++)
+      {
+        r = rmin + (rmax - rmin) * ii / (ODIM - 1);
+        fprintf (fptr, "%8.2e %8.2e %8.2e\n", r, z, aout[ii][jj]);
+      }
+    }
+    /*Finished printing out the array */
+  }
+  else
+  {
+    Error ("write_array: Unknown choice %d\n", choice);
+  }
 
   fclose (fptr);
   return (0);
@@ -296,40 +294,40 @@ display (name)
      char name[];
 {
   int i, j, n;
-  int ndom,ndim,mdim,nstart;
+  int ndom, ndim, mdim, nstart;
 
-  ndom=current_domain;
-  ndim=zdom[ndom].ndim;
-  mdim=zdom[ndom].mdim;
-  nstart=zdom[ndom].nstart;
+  ndom = current_domain;
+  ndim = zdom[ndom].ndim;
+  mdim = zdom[ndom].mdim;
+  nstart = zdom[ndom].nstart;
 
-  Log("Check me now %d %d\n",py_wind_min,py_wind_max);
+  Log ("Check me now %d %d\n", py_wind_min, py_wind_max);
 
 
   Log ("\n %s \n", name);
   Log ("z/theta \\x/r");
   for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
     if (zdom[ndom].coord_type == 1 || py_wind_project == 1)
-      Log ("%8.2e ", wmain[nstart+i * mdim].x[0]);
+      Log ("%8.2e ", wmain[nstart + i * mdim].x[0]);
     else
-      Log ("%8.2e ", wmain[nstart+i * mdim].rcen);
+      Log ("%8.2e ", wmain[nstart + i * mdim].rcen);
 
   Log ("\n");
 
   for (j = 0; j < mdim; j++)
-    {
-      if (zdom[ndom].coord_type == 1 || py_wind_project == 1)
-	Log ("%8.2e ", wmain[nstart+j].x[2]);
-      else
-	Log ("%8.2e ", wmain[nstart+j].thetacen);
+  {
+    if (zdom[ndom].coord_type == 1 || py_wind_project == 1)
+      Log ("%8.2e ", wmain[nstart + j].x[2]);
+    else
+      Log ("%8.2e ", wmain[nstart + j].thetacen);
 
-      for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
-	{
-	  n = nstart+i * mdim + j;
-	  Log ("%8.2g ", aaa[n]);
-	}
-      Log ("\n");
+    for (i = py_wind_min; i < py_wind_max; i += py_wind_delta)
+    {
+      n = nstart + i * mdim + j;
+      Log ("%8.2g ", aaa[n]);
     }
+    Log ("\n");
+  }
 
   return (0);
 }
