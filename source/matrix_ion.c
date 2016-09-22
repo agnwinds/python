@@ -72,7 +72,7 @@ matrix_ion_populations (xplasma, mode)
      int mode;
 
 {
-  double elem_dens[200];        //The fdensity of each element - 200 should be enough!
+  double elem_dens[NELEMENTS];  //The fdensity of each element - 200 should be enough!
   int nn, mm, nrows;
   double rate_matrix[nions][nions];
   double newden[NIONS];
