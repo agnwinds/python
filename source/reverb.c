@@ -1,5 +1,5 @@
-/********************************************************//**
- * @file   reverb.c
+/***********************************************************/
+/** @file   reverb.c
  * @Author SWM
  * @date   July, 2015
  * @brief  Reverberation mapping functions.
@@ -19,8 +19,8 @@ int		delay_dump_bank_size = 65535, delay_dump_bank_curr = 0;
 PhotPtr	delay_dump_bank;
 int     *delay_dump_bank_ex;
 
-/********************************************************//*
- * @name 	delay_to_observer
+/**********************************************************/
+/** @name 	delay_to_observer
  * @brief	Calculates the delay to the observer plane
  *
  * @param [in] pp			Pointer to test photon
@@ -46,8 +46,8 @@ delay_to_observer(PhotPtr pp)
 	return (pp->path + ds_to_plane(&observer, pp));
 }
 
-/********************************************************//*
- * @name 	delay_dump_prep
+/**********************************************************/
+/** @name 	delay_dump_prep
  * @brief	Prepares delay dump output file
  *
  * @param [in] filename		File root for run
@@ -118,8 +118,8 @@ delay_dump_prep(int restart_stat, int i_rank)
 	return (0);
 }
 
-/********************************************************//*
- * @name 	delay_dump_finish
+/**********************************************************/
+/** @name 	delay_dump_finish
  * @brief	Finishes dumping tracked photons to file
  *
  * @return 					0
@@ -141,8 +141,8 @@ delay_dump_finish (void)
 	return (0);
 }
 
-/********************************************************//*
- * @name 	delay_dump_combine
+/**********************************************************/
+/** @name 	delay_dump_combine
  * @brief	Prepares delay dump output file
  *
  * @param [in] i_ranks		Number of parallel processes
@@ -186,8 +186,8 @@ delay_dump_combine(int i_ranks)
 	return (0);
 }
 
-/********************************************************//*
- * @name 	delay_dump
+/**********************************************************/
+/** @name 	delay_dump
  * @brief	Dumps tracked photons to file
  *
  * @param [in] np			Pointer to photon array tp dump
@@ -274,8 +274,8 @@ delay_dump(PhotPtr p, int np, int iExtracted)
 	return (0);
 }
 
-/********************************************************//*
- * @name 	delay_dump_single
+/**********************************************************/
+/** @name 	delay_dump_single
  * @brief	Preps a single photon to be dumped
  *
  * @param [in] pp			Pointer to extracted photon
