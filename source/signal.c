@@ -66,7 +66,6 @@ xsignal (char *root, char *format, ...)
 {
 
   va_list ap, ap2;
-  int result;
 
   char curtime[LINELENGTH];
   char message[LINELENGTH];
@@ -112,7 +111,7 @@ xsignal (char *root, char *format, ...)
 
   va_start (ap, format);
   va_copy (ap2, ap);		/* Added because vfprintf can change ap */
-  result = vfprintf (sptr, format, ap);
+  vfprintf (sptr, format, ap);
   va_end (ap);
 
 

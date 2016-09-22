@@ -58,6 +58,7 @@ int mdot_wind(WindPtr w, double z, double rmax);
 int get_random_location(int n, double x[]);
 int zero_scatters(void);
 int check_corners_inwind(int n);
+int check_grid(void);
 /* wind.c */
 int where_in_wind(double x[], int *ndomain);
 int wind_check(WindPtr www, int n);
@@ -242,8 +243,6 @@ int init_freebound(double t1, double t2, double f1, double f2);
 double get_nrecomb(double t, int nion);
 double get_fb(double t, int nion, int narray);
 double xinteg_fb(double t, double f1, double f2, int nion, int fb_choice);
-int fb_save(char filename[]);
-int fb_read(char filename[]);
 double total_rrate(int nion, double T);
 double gs_rrate(int nion, double T);
 /* diag.c */
@@ -532,6 +531,9 @@ double emittance_brem(double freqmin, double freqmax, double lum, double t);
 double integ_brem(double freq);
 double brem_d(double alpha);
 double get_rand_brem(double freqmin, double freqmax);
+/* search_light.c */
+int search_light_init(void);
+int photo_gen_search_light(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

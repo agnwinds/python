@@ -67,15 +67,13 @@ trans_phot (
 
 {
   int nphot;
-  int n;
   struct photon pp, pextract;
   int nnscat;
-  int disk_illum;
+  int disk_illum;  /* this is a variable used to store geo.disk_illum during exxtract */
   int nerr;
   double p_norm, tau_norm;
 
 
-  n = 0;			// To avoid -O3 warning
 
   /* 05jul -- not clear whether this is needed and why it is different from DEBUG */
   /* 1411 -- JM -- Debug usage has been altered. See #111, #120 */
@@ -165,10 +163,12 @@ trans_phot (
 
       if (iextract)
 	{
-	  // SS - for reflecting disk have to make sure disk photons are only extracted once!
-	  if (disk_illum == 1 && p[nphot].origin == PTYPE_DISK)
+	  // SS - for reflecting disk have to make sure disk photons are only extracted once.  Note we restore the
+	  // correct geo.disk_illum value as soon as the photons are extracted!
+
+	  if (disk_illum == DISK_ILLUM_SCATTER && p[nphot].origin == PTYPE_DISK)
 	    {
-	      geo.disk_illum = 0;
+	      geo.disk_illum = DISK_ILLUM_ABSORB_AND_DESTROY;
 	    }
 
 
@@ -220,10 +220,10 @@ trans_phot (
 	  extract (w, &pextract, pextract.origin);
 
 
-	  // SS if necessary put back the correcy disk illumination
-	  if (disk_illum == 1 && p[nphot].origin == PTYPE_DISK)
+	  // Restore the correct disk illumination
+	  if (disk_illum == DISK_ILLUM_SCATTER && p[nphot].origin == PTYPE_DISK)
 	    {
-	      geo.disk_illum = 1;
+	      geo.disk_illum = DISK_ILLUM_SCATTER;
 	    }
 	}
 
@@ -300,6 +300,9 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   istat = P_INWIND;
   tau = 0;
   icell = 0;
+
+  n=0;  // Needed to avoid 03 warning, but it is not clear that it is defined as expected.
+
 
 
   /* This is the beginning of the loop for each photon and executes until the photon leaves the wind */

@@ -1,4 +1,4 @@
-/**********************************************************/
+/***********************************************************/
 /** @file   paths.c
  * @Author SWM
  * @date   July, 2015
@@ -191,7 +191,7 @@ wind_paths_init(WindPtr wind)
 	return (0);
 }
 
-/**********************************************************/
+/****************************************************************/
 /** @name		line_paths_add_phot
  * @brief		Following a line emission, increments cell paths
  * 
@@ -253,7 +253,7 @@ line_paths_add_phot(WindPtr wind, PhotPtr pp, int *nres)
 	return (0);
 }
 
-/**********************************************************/
+/****************************************************************/
 /** @name		wind_paths_add_phot
  * @brief		Registers a photon passage with a wind cell.
  * 
@@ -472,7 +472,8 @@ line_paths_gen_phot(WindPtr wind, PhotPtr pp, int nres)
 	return (0);
 }
 
-/**********************************************************/
+
+/****************************************************************/
 /** @name 	wind_paths_evaluate_single
  * @brief	Evaluates individual wind cell paths
  *
@@ -510,7 +511,8 @@ wind_paths_evaluate_single(Wind_Paths_Ptr paths)
 	return (0);
 }
 
-/**********************************************************/
+
+/****************************************************************/
 /** @name 	wind_paths_evaluate
  * @brief	Evaluates wind path details for a cycle
  *
@@ -541,7 +543,8 @@ wind_paths_evaluate(WindPtr wind)
 	return (0);
 }
 
-/**********************************************************/
+
+/****************************************************************/
 /** @name 	wind_paths_dump
  * @brief	Dumps wind path arrays for a wind cell
  *
@@ -592,9 +595,9 @@ wind_paths_dump(WindPtr wind, int rank_global)
 }
 
 
-/**********************************************************/
-/** @name 	wind_paths_dump
- * @brief	Dumps wind path arrays for a wind cell
+/****************************************************************/
+/** @name 	wind_paths_output_dump
+ * @brief	Iterates through the wind, dumping cells of interest
  *
  * @param [in] wind		Wind array to dump from
  * @return 				0
@@ -617,7 +620,8 @@ wind_paths_output_dump(WindPtr wind, int rank_global)
 	return(0);
 }
 
-/**********************************************************/
+
+/****************************************************************/
 /** @name		wind_paths_point_index
  * @brief		Given trz index in wind, returns vtk data index.
  * 
@@ -643,10 +647,9 @@ wind_paths_point_index(int i, int j, int k, int i_top, int i_ndom)
 	return (n);
 }
 
-
-/**********************************************************/
+/****************************************************************/
 /** @name		wind_paths_sphere_point_index
- * @brief		Given trz index in wind, returns vtk data index.
+ * @brief		Given rtt index in wind, returns vtk data index.
  * 
  * @param [in] i 	Theta index of cell.
  * @param [in] j 	Radius index of cell.
@@ -670,8 +673,7 @@ wind_paths_sphere_point_index(int i, int j, int k)
 }
 
 
-
-/**********************************************************/
+/****************************************************************/
 /** @name		wind_paths_output_vtk
  * @brief		Outputs wind path information to vtk.
  * 

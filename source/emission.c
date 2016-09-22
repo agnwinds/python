@@ -117,7 +117,6 @@ wind_luminosity (f1, f2)
 
 	  if (x < 0)
 	  	Error("wind_luminosity: total emission %8.4e is < 0!\n", x);
-	    //mytrap ();  JM 1410 -- mytrap is deprecated
 
 	  if (recipes_error != 0)
 	    Error ("wind_luminosity: Received recipes error on cell %d\n", n);
@@ -563,7 +562,7 @@ one_line (one, freqmin, freqmax, nres)
   xlum = xplasma->lum_lines * (rand () / (MAXRAND - 0.5));
 
 
-// Using the precaclatuted line luminosity pdf's locate the portion of the lin_ptr array 
+// Using the pre-calculated line luminosity pdf's locate the portion of the lin_ptr array 
 // from which the photon will will be drawn
 
   n = 1;
@@ -580,7 +579,6 @@ space because the line luminosities contained in the line ptr arrays are not cur
   if ((xlumsum + lum_lines (one, lnmin, lnmax)) < xlum)
     {
       Error ("one_line: lumin from lum_lines insufficient\n");
-      //mytrap ();  JM 1410 -- mytrap is deprecated
     }
 
 

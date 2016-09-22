@@ -315,44 +315,39 @@ model_velocity (ndom, x, v)
 {
   double speed;
 
-
-
-
-
-
-  if (zdom[ndom].wind_type == 0)
+  if (zdom[ndom].wind_type == SV)
     {
       speed = sv_velocity (x, v, ndom);
     }
-  else if (zdom[ndom].wind_type == 1)
+  else if (zdom[ndom].wind_type == SPHERE)
     {
       speed = stellar_velocity (ndom, x, v);
     }
-  else if (zdom[ndom].wind_type == 3)
+  else if (zdom[ndom].wind_type == HYDRO)
     {
       speed = hydro_velocity (x, v);
     }
-  else if (zdom[ndom].wind_type == 4)
+  else if (zdom[ndom].wind_type == CORONA)
     {
       speed = corona_velocity (ndom, x, v);
     }
-  else if (zdom[ndom].wind_type == 5)
+  else if (zdom[ndom].wind_type == KNIGGE)
     {
       speed = kn_velocity (ndom, x, v);
     }
-  else if (zdom[ndom].wind_type == 6)
+  else if (zdom[ndom].wind_type == HOMOLOGOUS)
     {
       speed = homologous_velocity (ndom, x, v);
     }
-  else if (zdom[ndom].wind_type == 7)
+  else if (zdom[ndom].wind_type == YSO)
     {
       speed = yso_velocity (ndom, x, v);
     }
-  else if (zdom[ndom].wind_type == 8)
+  else if (zdom[ndom].wind_type == ELVIS)
     {
       speed = elvis_velocity (ndom, x, v);
     }
-  else if (zdom[ndom].wind_type == 9)
+  else if (zdom[ndom].wind_type == SHELL)
     {
       speed = stellar_velocity (ndom, x, v);
     }
@@ -475,10 +470,13 @@ model_rho (ndom, x)
     }
   else
     {
-      Error ("wind2d: Unknown windtype %d\n", geo.wind_type);
+      Error ("wind2d: Unknown windtype %d for domain %d\n", zdom[ndom].wind_type,ndom);
       exit (0);
     }
 
   return (rho);
 
 }
+
+
+

@@ -66,6 +66,12 @@ other situations within python
 Returns: 0 is the value asked for was within the bounds of the array,
 	-1 if below the lower bound, +1 if above the lower bound
 
+	Assuming the value asked for is within the domain, then the 
+	elment at the bottom of the bracketing interval and the fractional
+	"distance" to the next element of the array are returned as 
+	ival and f respectively
+     	
+
 Notes:  The routine is similar (I found aut afterward) to the numerical
 	recipes routine locate.  It is possible there should be a separate
 	routine locate to avoid the division at the bottom.
@@ -99,7 +105,7 @@ fraction (value, array, npts, ival, f, mode)
      int npts, *ival;		// ival is the lower point
      double value;		// The value we want to index
      double *f;			// The fractional "distance" to the next point in the array
-     int mode;        // 0 = compute in lin space, 1=compute in log space
+     int mode;			// 0 = compute in linear space, 1=compute in log space
 {
   int imin, imax, ihalf;
 
@@ -182,9 +188,12 @@ linterp (x, xarray, yarray, xdim, y, mode)
 {
   int nelem;
   double frac;
-  int ierr;
-  ierr = fraction (x, xarray, xdim, &nelem, &frac, mode);
 
+  //  Note that fraction will return an integer if it is important
+  //  to know whether you have asked for a value that is outsde the
+  //  boudarry of the arrays
+ 
+  fraction (x, xarray, xdim, &nelem, &frac, mode);
 
   if (mode==0)
   	*y = (1. - frac) * yarray[nelem] + frac * yarray[nelem + 1];

@@ -28,17 +28,18 @@ Arguments:
 		v to 5 causes the routine to print out all the information which outputs have
 		included previously.  The current default is set to 3 which suppresses Debug, Log_silent
 		and Error_silent
+	-e nnn	The program stops normally stops after 1e6 errors of any type.  This swtich allows one to
+		adjust this number
 	-d	Enters detailed or advanced mode. Allows one to access extra diagnositics and some
-	    other advanced commands
-    -f  Fixed temperature mode - does not attempt to chenge the temperature of cells.
-	-e  Alter the maximum number of errors before the program quits
-	-i  Diagnostic mode which quits after reading in inputs. Used for Travis test suite.
-	-z  Mode to connect with zeus - it either runs two cycles in this is the first call - in order
-         to obtain a good starting state, else it runs just one cycle. In both cases, it does
-		 not attempt to seek a new temperature, but it does output heating and cooling rates
-    --version print out python version, commit hash and if there were files with uncommitted
-	    changes
-	--seed set the random number seed to be time based, rather than fixed.
+	    	other advanced commands
+    	-f  	Fixed temperature mode - does not attempt to chenge the temperature of cells.
+	-i  	Diagnostic mode which quits after reading in inputs. Used for Travis test suite.
+	-z  	Mode to connect with zeus - it either runs two cycles in this is the first call - in order
+         	to obtain a good starting state, else it runs just one cycle. In both cases, it does
+		not attempt to seek a new temperature, but it does output heating and cooling rates
+    --version	print out python version, commit hash and if there were files with uncommitted
+	    	changes
+       --seed	set the random number seed to be time based, rather than fixed.
 
 	
 	if one simply types py or pyZZ where ZZ is the version number one is queried for a name
@@ -232,7 +233,6 @@ main (argc, argv)
      char *argv[];
 {
   WindPtr w;
-  PhotPtr p;
 
   double freqmin, freqmax;
   int n;
@@ -246,7 +246,6 @@ main (argc, argv)
 
   int my_rank;			// these two variables are used regardless of parallel mode
   int np_mpi;			// rank and number of processes, 0 and 1 in non-parallel
-  int time_to_quit;
   int ndomain = 0;		//Local variable for ndomain
   int ndom;
 
@@ -268,13 +267,10 @@ main (argc, argv)
   opar_stat = 0;		/* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
 				   the assumption is that we are reading from the command line */
   restart_stat = 0;		/* 67 -ksl - 08nov - Assume initially that these is a new run from scratch, and not 
-				   a restart
-				 */
+				   a restart */
   time_max = 13.8e9 * 3.2e7;	/* 67 - ksl - 08nov - The maximum time the program will run without stopping.  This
-				   is initially set to the lifetime of the universe
-				 */
+				   is initially set to the lifetime of the universe */
   time_max = -1;
-  time_to_quit = 100000;	// Initialise variable
 
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
@@ -283,7 +279,7 @@ main (argc, argv)
   verbosity = 3;
   Log_set_verbosity (verbosity);
 
-  /* initialise options for advanced mode (all set to 0) */
+  /* initialise the advanced mode flags (all set to 0) which is a structure in python.h*/
 
   init_advanced_modes ();
 
@@ -355,7 +351,7 @@ main (argc, argv)
 	  exit (0);
 	}
       w = wmain;
-      ndomain = geo.ndomain;	// XXX Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
+      ndomain = geo.ndomain;	// Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
 
       geo.run_type = SYSTEM_TYPE_PREVIOUS;	// We read the data from a file
 
@@ -382,7 +378,7 @@ main (argc, argv)
 	     &geo.system_type);
 
       init_geo ();   /* Set values in the geometry structure and the domain stucture to reasonable starting
-			values */      
+						values */      
 
       if (geo.system_type == SYSTEM_TYPE_PREVIOUS)
 	{
@@ -408,40 +404,36 @@ main (argc, argv)
 	      exit (0);
 	    }
 
-  if (p == NULL)
-    {
-      Error
-	("There is a problem in allocating memory for the photon structure\n");
-      exit (0);
-    }
-  else 
-    {
-      /* JM 1605 -- large photon numbers can cause problems / runs to crash. Report to use (see #209) */
-      Log("Allocated %10d bytes for each of %5d elements of photon structure totaling %10.1f Mb \n",
-	       sizeof (p_dummy), NPHOT, 1.e-6 * NPHOT * sizeof (p_dummy));
-      if ( (NPHOT * sizeof (p_dummy)) > 1e9)
-      	Error("Over 1 GIGABYTE of photon structure allocated. Could cause serious problems.\n");
-    }
-
-
+	  geo.run_type = SYSTEM_TYPE_PREVIOUS;	// after wind_read one will have a different wind_type otherwise
+	  w = wmain;
+	  ndomain = geo.ndomain;	// Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
+	  geo.wcycle=0;
+	  geo.pcycle=0;                 /* This is a new run of an old windsave file so we set the nunber of cycles already done to 0 */
 
 	}
 
       else
 	{	
-		/* This option is the most common one, where we are starting to define a completely new system */
+	/* This option is the most common one, where we are starting to define a completely new system.  Nothe
+	 * that wind_type 2 is no longer allowed here.  At one time, this was used as the way to read in 
+	 * a previous model but this is now down via geo.system_type above.  kxl
+	 */
 
 	  rdint
 	    ("Wind_type(0=SV,1=Sphere,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)",
 	     &zdom[ndomain].wind_type);
-	  if (zdom[ndomain].wind_type != 10)
+
+	  if (zdom[ndomain].wind_type==2) {
+		  Error("Wind_type 2, which was used to read in a previous model is no longer allowed! Use System_type instead!\n");
+		  exit(0);
+	  }
+
+	
+	  if (zdom[ndomain].wind_type != NONE)
 	    {
 	      strcat (zdom[ndomain].name, "Wind");
 	      geo.wind_domain_number = ndomain;
 	      get_grid_params (geo.wind_domain_number);
-	      // XXX This is temporary fix to set up DFUDGE
-	      geo.wind_type=zdom[ndomain].wind_type;
-
 	      ndomain++;
 	    }
 
@@ -475,10 +467,10 @@ main (argc, argv)
 	     this is defined in atomic.h, rather than the modes structure */
 
 	  if (modes.iadvanced) {
-	    rdint ("write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
 
-	  if (write_atomicdata)
-	    Log ("You have opted to save a summary of the atomic data\n");
+	    rdint ("write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
+	    if (write_atomicdata)
+	      Log ("You have opted to save a summary of the atomic data\n");
 	  }
 
 	  get_atomic_data (geo.atomic_filename);
@@ -490,11 +482,13 @@ main (argc, argv)
 
 
 
-/* Get the remainder of the data.  Note that this is done whether or not the windsave file was read in */
-/* Allocate the photons and read in the number of cycles.  Note XXX it is not at all clear whre we want this in the end, or that allocating
- * photons and getting the number of cycles goes together */
+/* Get the remainder of the input data.  Note that the next few lines are read from the input file whether or not the windsave file was read in,
+   because these are things one would like to be able to change even if we have read in an old windsave file.  init_photons reads in 
+   the numbers of ionization and spectral cycles and then instatiates PhotPtr.  It is possilbe that this should be moved to else where in
+   the flow of reading in data.
+ */
 
-  p = init_photons ();
+  init_photons ();
 
 
 
@@ -503,8 +497,10 @@ main (argc, argv)
   init_ionization ();
 
 
-  /* Determine what radiation sources there are.  
-     Note that most of these values are initilized in init_geo */
+  /* Determine what radiation sources are turned on.  
+     Note that most of the parameters, e.g T, or power_law index,  
+     that define the spectrum of the sources are set in init_geo 
+     */
 
   get_radiation_sources ();
 
@@ -534,7 +530,7 @@ main (argc, argv)
 
       get_wind_params (geo.wind_domain_number);
 
-      if (geo.atmos_domain_number>=0) {
+      if (geo.atmos_domain_number >= 0) {
 	      get_wind_params(geo.atmos_domain_number);
       }
 
@@ -568,8 +564,6 @@ main (argc, argv)
 
   /* Calculate additional parameters associated with the binary star system */
 
-  // XXX This may be a problem for restarts, now that we have changed the meaing of 
-  // SYSTEM type
   if (geo.system_type == SYSTEM_TYPE_BINARY)
     binary_basics ();
 
@@ -714,6 +708,7 @@ main (argc, argv)
     cpar ("python.pf");
 
 
+
   /* At this point, all inputs have been obtained at this point and the inputs have been copied to "mod.pf" or "python.pf"
    * If we have used, the -i flag, we quit; otherwise we continue on to run the model */
 
@@ -727,7 +722,6 @@ main (argc, argv)
 
   /* Print out some diagnositic infomration about the domains */
 
-  // XXX This is clearly wrong for repeats
 
   geo.ndomain = ndomain;	// Store ndomain in geo so that it can be saved
 
@@ -784,6 +778,9 @@ main (argc, argv)
   	   the argument is ndom, which I've set to geo.wind_domain_number as a placeholder. */
 	hydro_restart(geo.wind_domain_number);
   }
+
+  /* this routine checks, somewhat crudely, if the grid is well enough resolved */
+  check_grid();
 
   w = wmain;
 

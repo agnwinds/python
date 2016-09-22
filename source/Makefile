@@ -114,7 +114,7 @@ LDFLAGS= -L$(LIB) -lm -lcfitsio -lgsl -lgslcblas
 
 
 
-VERSION = 80_dom2
+VERSION = 81b_dev
 
 CHOICE=1             // Compress plasma as much as possible
 # CHOICE=0           //  Keep relation between plasma and wind identical
@@ -148,10 +148,12 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		spectral_estimators.o variable_temperature.o matom_diag.o \
 		log.o lineio.o rdpar.o direct_ion.o pi_rates.o matrix_ion.o para_update.o \
 		setup.o photo_gen_matom.o macro_gov.o \
-		reverb.o paths.o setup2.o run.o brem.o
+		reverb.o paths.o setup2.o run.o brem.o search_light.o
 		
 
 
+# For reasons that are unclear to me.  get_models.c cannot be included in the sources
+# Problems ocurr due to the prototypes that are generated.  ksl 160705
 python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		saha.c spectra.c wind2d.c wind.c  vvector.c debug.c recipes.c \
 		trans_phot.c phot_util.c resonate.c radiation.c \
@@ -166,7 +168,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		spectral_estimators.c variable_temperature.c matom_diag.c \
 		direct_ion.c pi_rates.c matrix_ion.c para_update.c setup.c \
 		photo_gen_matom.c macro_gov.c \
-		reverb.c paths.c setup2.c run.c brem.c
+		reverb.c paths.c setup2.c run.c brem.c search_light.c
 
 # kpar_source is now declared seaprately from python_source so that the file log.h 
 # can be made using cproto

@@ -17,8 +17,8 @@ Arguments:
   argc            command line arguments 
 
 Returns:
+
   restart_start   1 if restarting
- 
  
 Description:  
 
@@ -151,8 +151,7 @@ parse_command_line (argc, argv)
 
       /* This completes the parsing of the command line */
 
-      /* JM130722 we now store diag files in a subdirectory if in parallel */
-      /* ksl - I believe this is created in all cases, and that is what we want */
+      /* Create a subdirectory to store diaganostic files*/
 
       sprintf (files.diagfolder, "diag_%s/", files.root);
       mkdir (files.diagfolder, 0777);
@@ -260,15 +259,15 @@ get_grid_params (ndom)
 {
   int input_int;
 
-  // XXX - If we keep this error, then we need to assure that geo.ndomain is incremented
-  // before this statement
 
   if (ndom >= geo.ndomain)
     Error ("Trying to get grid params for a non-existent domain!\n");
 
   input_int = 1;
 
-  /* ksl - The if statement seems superflous.  Why are we entering this routine if we are continuing and earlier calculation? */
+  /* ksl - The if statement seems superflous.  Why are we entering this routine if 
+   * we are continuing and earlier calculation? */
+
   if (geo.run_type != SYSTEM_TYPE_PREVIOUS)
     {
       /* Define the coordinate system for the grid and allocate memory for the wind structure */
@@ -310,6 +309,9 @@ get_grid_params (ndom)
 	zdom[ndom].mdim = 1;
 
     }
+  else {
+	  Error("get_grid_parameters: Houston! Why are we reading the coordinate system if run type is SYSTEM_TYPE_PREVIOUS\n");
+  }
 
 /* 130405 ksl - Check that NDIM_MAX is greater than NDIM and MDIM.  */
 
@@ -452,13 +454,35 @@ Notes:
 
 History:
   1502  JM  Moved here from main()
+  1605	ksl Modified the logic of this so that different radiation
+  	    sources could be chosen for SYSTEM_TYPE_ONE_D
 
 **************************************************************/
 
 int
 get_radiation_sources ()
 {
-  if (geo.system_type != SYSTEM_TYPE_AGN)
+ if (geo.system_type == SYSTEM_TYPE_AGN) 				/* If it is an AGN */
+    {
+      geo.star_radiation = 0;	// 70b - AGN do not have a star at the center */
+      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+      geo.bl_radiation = 0;
+      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+      geo.agn_radiation = 1;
+      rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
+    }
+
+ else if (geo.system_type==SYSTEM_TYPE_ONE_D) 
+     {
+	     geo.search_light_radiation=1; // The point of this model is we need this
+	     geo.star_radiation = 0;
+	     rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+	     geo.bl_radiation = 0;
+	     rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+	     geo.agn_radiation = 0;
+     }
+
+ else 
     {				/* If is a stellar system */
       rdint ("Star_radiation(y=1)", &geo.star_radiation);
       if (geo.disk_type != DISK_NONE)
@@ -472,15 +496,6 @@ get_radiation_sources ()
       rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
       rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
       geo.agn_radiation = 0;	// So far at least, our star systems don't have a BH
-    }
-  else				/* If it is an AGN */
-    {
-      geo.star_radiation = 0;	// 70b - AGN do not have a star at the center */
-      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-      geo.bl_radiation = 0;
-      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-      geo.agn_radiation = 1;
-      rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
     }
 
   if (!geo.star_radiation && !geo.disk_radiation && !geo.bl_radiation
@@ -616,8 +631,6 @@ get_wind_params (ndom)
       geo.rmax = zdom[ndom].rmax;
     }
   geo.rmax_sq = geo.rmax * geo.rmax;
-  Log ("XXXX  size  %e  %e\n", geo.rmax, geo.rmax_sq);
-
 
 
   /* Now get parameters that are specific to a given wind model
@@ -627,56 +640,59 @@ get_wind_params (ndom)
      with the same basic wind geometry, without reading in all of the input parameters.  
    */
 
-  if (zdom[ndom].wind_type == 1)
+  if (zdom[ndom].wind_type == SPHERE)
     {
       get_stellar_wind_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 0)
+  else if (zdom[ndom].wind_type == SV)
     {
       get_sv_wind_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 3)
+  else if (zdom[ndom].wind_type == HYDRO)
     {
       get_hydro_wind_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 4)
+  else if (zdom[ndom].wind_type == CORONA)
     {
       get_corona_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 5)
+  else if (zdom[ndom].wind_type == KNIGGE)
     {
       get_knigge_wind_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 6)
+  else if (zdom[ndom].wind_type == HOMOLOGOUS)
     {
       get_homologous_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 7)
+  else if (zdom[ndom].wind_type == YSO)
     {
       get_yso_wind_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 8)
+  else if (zdom[ndom].wind_type == ELVIS)
     {
       get_elvis_wind_params (ndom);
     }
-  else if (zdom[ndom].wind_type == 9)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
+  else if (zdom[ndom].wind_type == SHELL)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
     {
       get_shell_wind_params (ndom);
     }
-  else if (zdom[ndom].wind_type != 2)
+  else 
     {
-      /* XXX this is part of the new problem with a previous wind model */
       Error ("python: Unknown wind type %d\n", zdom[ndom].wind_type);
       exit (0);
     }
 
   /* Get the filling factor of the wind */
-  // XXX  This is not in the right place.  It provides a gobal filling factor to our
-  // models
+  // XXX  This may  not in the right place to set the filling factor.  
 
-  geo.fill = 1.;
-  if (geo.wind_type != 3)	//At present, we wont ask this question if we have a read in hydro model.
-    rddoub ("wind.filling_factor(1=smooth,<1=clumped)", &geo.fill);
+  zdom[ndom].fill = 1.;
+
+  /* JM 1606 -- the filling factor is now specified on a domain by domain basis. See #212
+     XXX allows any domain to be allowed a filling factor but this should be modified when
+     we know what we are doing with inputs for multiple domains. Could create confusion */
+
+  rddoub ("filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
+
 
   /* Next lines are to assure that we have the largest possible value of the 
    * sphere surrounding the system
@@ -687,9 +703,6 @@ get_wind_params (ndom)
       geo.rmax = zdom[ndom].rmax;
     }
   geo.rmax_sq = geo.rmax * geo.rmax;
-  Log ("XXXX  size  %e  %e\n", geo.rmax, geo.rmax_sq);
-
-
 
   return (0);
 }
@@ -792,28 +805,17 @@ History:
 double
 get_disk_params ()
 {
-  // XXX Commenting lines out instead of fixing a problem is not good practice
-//        if (geo.disk_radiation) /*NSH 130906 - Commented out this if loop. It was causing problems with restart - bug #44
-//          {
   geo.disk_mdot /= (MSOL / YR);	// Convert to msol/yr to simplify input
   rddoub ("disk.mdot(msol/yr)", &geo.disk_mdot);
   geo.disk_mdot *= (MSOL / YR);
   rdint
-    ("Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=analytic)",
+    ("Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=extra.heating.from.star)",
      &geo.disk_illum);
   rdint ("Disk.temperature.profile(0=standard;1=readin)", &geo.disk_tprofile);
   if (geo.disk_tprofile == 1)
     {
       rdstr ("T_profile_file", files.tprofile);
     }
-//          }
-//        else
-//          {
-//            geo.disk_mdot = 0;
-//            disk_illum = 0;
-//          }
-
-
 
   /* Set a default for diskrad for an AGN */
   if (geo.system_type == SYSTEM_TYPE_AGN)
@@ -835,7 +837,7 @@ get_disk_params ()
     }
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
-    {				/* Get the additional variables need to describe a vertically extended disk */
+    {		/* Get the additional variables need to describe a vertically extended disk */
       rddoub ("disk.z0(fractional.height.at.diskrad)", &geo.disk_z0);
       rddoub ("disk.z1(powerlaw.index)", &geo.disk_z1);
     }
@@ -1174,20 +1176,46 @@ get_meta_params (void)
              University of Southampton
 
 Synopsis: 
+
   setup_dfudge works out dfudge and returns it to the user.
   the global variable DFUDGE is not altered here.
    
 Arguments:		
 
 Returns:
-  dfudge 	double	
-  			the push through distance
+  dfudge 	the push through distance 
+
 Description:	
 
+  DFUDGE is the push through distance when photons are not
+  travelling within wind cells.  (Inside a cell in a domain
+  the push through distance is defined on a cell by cell
+  basis)
+  
 Notes:
 
+  There are two competing factors in defining DFUDGE.  It
+  should be short enough so that the push through distane
+  goes only a small way into s cell.  It should be large
+  enough though that round-off errors do not prevent one
+  from actually getting into a cell.  When this happens
+  one can get "stuck photons".
+
+  Prior to domains, we had effectively 3 separate ways of
+  defining dfudge, one for the SHELL model, one for normal
+  stellar systems and one for AGN,  The shell model was
+  different because it can be thin but large scale.
+
+  The current version of setup_dfudge preserves the onld
+  value of dfudge as much as possible (except the it
+  senses the old SHELL case bu the differene between
+  gero.rmax and geo.rmin
+
+
 History:
-	1502  JM 	Moved here from main()
+	1502	JM 	Moved here from main()
+	1605	ksl	Revised to remove the dependence on
+			a specific geometry namely SHELL
 
 **************************************************************/
 
@@ -1195,37 +1223,24 @@ double
 setup_dfudge ()
 {
   double dfudge;
+  double delta;
 
-  /* 121219 NSH Set up DFUDGE to be a value that makes some kind of sense
-     given the scale of the wind. Up till py74b2 it was set to be fixed at
-     1e5, so we ensure that this is a minimum, so any winds of CV type scale
-     will keep the old dfudge, and hopefully look the same. We also need to
-     set dfudge slightly differently for the shell wind. */
+  delta=geo.rmax-geo.rmin;
 
-
- /* XXX this is really not correct for domains, or very food for anything
-  else. The fudge ought to be related to how big adjacent cells are.
-  160420 - ksl - I am currently make changes so that within wind cells
-  dfudge is defined by the size of the cell, and so DFUDGE will only be used
- in calculating travel outside of the wind.  */
-
-  if (geo.wind_type == SHELL)
+  if (delta < 1.e8)
     {
       dfudge = (geo.rmax - geo.rmin) / 1000.0;
     }
-  else
-    {
-      if (geo.rmax / 1.e10 < 1e5)
+  else if (delta  < 1e15)
 	{
 	  dfudge = 1e5;
-	  Log ("DFUDGE set to minimum value of %e\n", dfudge);
 	}
       else
 	{
 	  dfudge = geo.rmax / 1.e10;
-	  Log ("DFUDGE set to %e based on geo.rmax\n", dfudge);
 	}
-    }
+
+  Log ("DFUDGE set to %e based on geo.rmax\n", dfudge);
 
   return (dfudge);
 }
@@ -1408,12 +1423,20 @@ setup_created_files ()
 
   strcpy (basename, files.root);	//56d -- ksl --Added so filenames could be created by routines as necessary
 
-  strcpy (files.wspec, files.root);
-  strcpy (files.lspec, files.root);
-  strcpy (files.spec, files.root);
+  strcpy (files.wspec, files.root);  //generated photons
+  strcpy (files.lwspec, files.root);  //generated photon in log space
+  
   strcpy (files.wspec_wind, files.root);
-  strcpy (files.lspec_wind, files.root);
-  strcpy (files.spec_wind, files.root);
+  strcpy (files.lwspec_wind, files.root);
+  
+  strcpy (files.spec, files.root);  
+  strcpy (files.lspec, files.root);  
+  
+  strcpy (files.spec_wind, files.root);  
+  strcpy (files.lspec_wind, files.root); 
+  
+  
+  
 
   strcpy (files.windrad, "python");
   strcpy (files.windsave, files.root);
@@ -1426,11 +1449,19 @@ setup_created_files ()
   strcat (files.disk, files.root);
 
   strcat (files.wspec, ".spec_tot");
-  strcat (files.lspec, ".log_spec_tot");
+  strcat (files.lwspec, ".log_spec_tot");
+  
   strcat (files.wspec_wind, ".spec_tot_wind");
-  strcat (files.lspec_wind, ".log_spec_tot_wind");
+  strcat (files.lwspec_wind, ".log_spec_tot_wind");
+  
+  
   strcat (files.spec, ".spec");
+  strcat (files.lspec, ".log_spec");
+
   strcat (files.spec_wind, ".spec_wind");
+  strcat (files.lspec_wind, ".log_spec_wind");
+  
+  
   strcat (files.windrad, ".wind_rad");
   strcat (files.windsave, ".wind_save");
   strcat (files.specsave, ".spec_save");

@@ -60,18 +60,19 @@ kappa_comp (xplasma, freq)
 {
   double x;			// The opacity of the cell by the time we return it.
   double sigma;			/*The cross section, thompson, or KN if hnu/mec2 > 0.01 */
+  int ndom;
 
-/*	alpha=1/(1+freq*HRYD*(1.1792e-4+(7.084e-10*freq*HRYD))); NSH 130214 This is the approximate way of doing it.*/
+  /*alpha=1/(1+freq*HRYD*(1.1792e-4+(7.084e-10*freq*HRYD))); NSH 130214 This is the approximate way of doing it.*/
 
- //	sigma=THOMPSON/(1+freq*HRYD*(1.1792e-4+(7.084e-10*freq*HRYD)));
-
+  //sigma=THOMPSON/(1+freq*HRYD*(1.1792e-4+(7.084e-10*freq*HRYD)));
+  ndom = wmain[xplasma->nwind].ndom;
 
   sigma = klein_nishina (freq);	//NSH 130214 - full KN formula
 
   x = (sigma * H) / (MELEC * C * C);	//Calculate the constant
   x *= xplasma->ne * freq;	//Multiply by cell electron density and frequency of the packet.
 
-  x *= geo.fill;    // multiply by the filling factor- should cancel with density enhancement
+  x *= zdom[ndom].fill;    // multiply by the filling factor- should cancel with density enhancement
   return (x);
 }
 
@@ -111,7 +112,10 @@ kappa_ind_comp (xplasma, freq)
   double x;			// The opacity of the cell by the time we return it.
   double sigma;			/*The cross section, thompson, or KN if hnu/mec2 > 0.01 */
   double J;		//The estimated intensity in the cell
-//  int i;
+  int ndom;
+
+  ndom = wmain[xplasma->nplasma].ndom;
+  // int i;
 
   /* Previously, NSH had used the following formula whixch required ds and w to work  
      J=(4*PI*w*ds)/(C*xplasma->vol); //Calcuate the intensity NSH This works for a thin shell... Why? Dont know.
@@ -135,7 +139,7 @@ kappa_ind_comp (xplasma, freq)
   x *= sigma * J;		// NSH 130214 factor of THOMPSON removed, since alpha is now the actual compton cross section
   x *= 1 / (2 * freq * freq);
 
-  x *= geo.fill;    // multiply by the filling factor- should cancel with density enhancement
+  x *= zdom[ndom].fill;    // multiply by the filling factor- should cancel with density enhancement
 
   if (sane_check (x)) //For some reason we have a problem
     {

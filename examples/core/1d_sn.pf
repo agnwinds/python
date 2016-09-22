@@ -25,7 +25,7 @@ homologous.radmin(cm)                    1.23552e15
 homologous.radmax(cm)                    1.23552e17
 homologous.vbase(cm)                        1.1e9
 homologous.density_exponent                  7.0
-wind.filling_factor(1=smooth,<1=clumpted)		1
+filling_factor(1=smooth,<1=clumpted)		1
 Rad_type_for_star(0=bb,1=models,2=uniform)_in_final_spectrum                    0
 spectrum_wavemin                               200
 spectrum_wavemax                               20000

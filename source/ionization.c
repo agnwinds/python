@@ -106,33 +106,12 @@ to match heating and cooling in the wind element! */
 /* Convergence check */
       convergence (xplasma);
     }
-  else if (mode == 4)
+  else if (mode == IONMODE_LTE_SIM)
     {				//LTE with SIM correction this is called from define_wind, sim_alpha and sim_w are set to geo values in define_wind. Not sure this is ever called now, we thought it best to set the values to LTE when in define_wind.
       ireturn = nebular_concentrations (xplasma, 5);
     }
- // else if (mode == 5)     NSH 130626 removed mode
- //   {				// One shot at updating t_e before calculating densities using Stuart's power law correction
- //     ireturn = spectral_estimators (xplasma);	//Slight recoding - now this just computes the estimators - this was the code clogging up this mode. Now it looks like the others.
-
- //     xplasma->dt_e_old = xplasma->dt_e;
- //     xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;	//Must store this before others
- //     xplasma->t_e_old = xplasma->t_e;
- //     xplasma->t_r_old = xplasma->t_r;
- //     xplasma->lum_rad_old = xplasma->lum_rad;
 
 
-      /* Log ("NSH in this cell, we have %e AGN photons and %e disk photons\n",
-         xplasma->ntot_agn, xplasma->ntot_disk); Removed, no longer gives reasonable answers due to banding */
-
-   //   ireturn = one_shot (xplasma, mode);
-
-
-/* Convergence check */
-    //  convergence (xplasma);
-
-
-
-  //  }
   else if (mode == IONMODE_PAIRWISE_ML93 || mode == IONMODE_MATRIX_BB)
     {
       /* Feb 2012 new for mode 6. New abundances have been computed using pairwise Saha equation
@@ -156,7 +135,7 @@ to match heating and cooling in the wind element! */
 /* Feb 2012 NSH - new for mode 7. KSL has moved a lot of the mechanics that used to be here into
  power_abundances. This, once called, calculates the weight and alpha for each band in this cell. There is a lot of code that was clogging up this routine. Once this is done, one_shot gets called from within that routine. */
 
-	    ireturn = spectral_estimators (xplasma);	/*Aug 2012 NSH - slight change to help integrate this into balance, power_estimators does the work of getting banded W and alpha. Then oneshot gets called. */
+	ireturn = spectral_estimators (xplasma);	/*Aug 2012 NSH - slight change to help integrate this into balance, power_estimators does the work of getting banded W and alpha. Then oneshot gets called. */
       xplasma->dt_e_old = xplasma->dt_e;
       xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;	//Must store this before others
       xplasma->t_e_old = xplasma->t_e;
@@ -429,7 +408,7 @@ one_shot (xplasma, mode)
      int mode;
 
 {
-  double te_old, te_new, dte;
+  double te_old, te_new;
   double gain;
 
 
@@ -443,7 +422,6 @@ one_shot (xplasma, mode)
 		te_new = te_old; //We dont want to change the temperature
 		xxxplasma = xplasma;
 		zero_emit(te_old); //But we do still want to compute all heating and cooling rates
-		dte = xplasma->dt_e=0.0;	 
 	}
 	else //Do things to old way - look for a new temperature
 	{
@@ -455,12 +433,9 @@ one_shot (xplasma, mode)
 		{	
 			xplasma->t_e = TMAX;
 		}
-		dte = xplasma->dt_e;
 	}
 
 
-//  Log ("One_shot: %10.2f %10.2f %10.2f\n", te_old, te_new, w->t_e);
-//	xplasma->t_e=10000.0;      
 
 /* Modes in the driving routines are not identical to those in nebular concentrations.
 The next lines are an attempt to mediate this problem.  It might be better internally
@@ -498,7 +473,6 @@ meaning in nebular concentrations.
     {
       Error ("ionization_on_the_spot: t_r exceptionally small %g\n",
 	     xplasma->t_r);
-      //mytrap ();  JM 1410 -- mytrap is deprecated
       exit (0);
     }
 
@@ -545,7 +519,6 @@ calc_te (xplasma, tmin, tmax)
      PlasmaPtr xplasma;
      double tmin, tmax;
 {
-  double heat_tot;
   double z1, z2;
   int macro_pops ();
 		
@@ -556,7 +529,6 @@ calc_te (xplasma, tmin, tmax)
 
   xxxplasma = xplasma;
 
-  heat_tot = xplasma->heat_tot;
 
   xplasma->t_e = tmin;
   z1 = zero_emit (tmin);
@@ -583,7 +555,7 @@ calc_te (xplasma, tmin, tmax)
   /* With the new temperature in place for the cell, get the correct value of heat_tot.
      SS June  04 */
 
-  /* ksl - I basically don't undestand what is going on here.  If we start using
+  /* ksl - XXX I basically don't undestand what is going on here.  If we start using
    * macro atoms a lot we need to understand them better ??? - 
    * Look at zero emit as well 091611 */
 

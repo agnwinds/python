@@ -374,6 +374,8 @@ get_spectype (yesno, question, spectype)
   int get_models ();		// Note: Needed because get_models cannot be included in templates.h
   if (yesno)
     {
+      // XXX This is rather odd. Why are these steps needed? Why don't we fix the question here.  ksl
+
       // First convert the spectype to the way the questionis supposed to be answered
       if (*spectype == SPECTYPE_BB || *spectype == SPECTYPE_NONE)
 	stype = 0;
@@ -442,6 +444,9 @@ Description:
 		
 Notes:
 
+	The reason the qdisk is needed as well as disk structure is that whenever the
+	wavelength bands are changed the radii in the disk structure are recalibratied.
+	We want qdisk to have fixed boundaries when this happens.
 
 
 History:
@@ -453,6 +458,8 @@ History:
 	080519	ksl	60a - Added code to calculate the irradiation of the disk
 			in terms of t and w.  This should help to monitor the effect
 			of irradiation on the disk
+	160526	ksl	Modified output file in qdisk_save to be an
+			astropy table
 
 **************************************************************/
 
@@ -484,10 +491,11 @@ qdisk_save (diskfile, ztot)
 {
   FILE *qptr;
   int n;
-  double area, theat;
+  double area, theat,ttot;
   qptr = fopen (diskfile, "w");
   fprintf (qptr,
-	   "# r       zdisk     t_disk     heat      nhit nhit/nemit  t_heat    t_irrad  W_irrad\n");
+	   "r         zdisk     t_disk   heat       nhit nhit/nemit  t_heat    t_irrad  W_irrad  t_tot\n");
+  
   for (n = 0; n < NRINGS; n++)
     {
       area =
@@ -506,12 +514,14 @@ qdisk_save (diskfile, ztot)
 			     qdisk.t_hit[n] * qdisk.t_hit[n]);
 	}
 
+      ttot=pow(qdisk.t[n],4)+pow(theat,4);
+      ttot=pow(ttot,0.25);
       fprintf (qptr,
-	       "%8.3e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e\n",
+	       "%8.3e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
 	       qdisk.r[n], zdisk (qdisk.r[n]), qdisk.t[n],
 	       qdisk.heat[n], qdisk.nhit[n],
 	       qdisk.heat[n] * NRINGS / ztot, theat, qdisk.t_hit[n],
-	       qdisk.w[n]);
+	       qdisk.w[n],ttot);
     }
 
   fclose (qptr);
@@ -587,8 +597,8 @@ Arguments:
     none	
 
 Returns:
-    just initialises modes which is declared in python.h
- 
+    modes is a structure declared in python.h
+
 Description:	
 	
 Notes:
@@ -790,9 +800,9 @@ init_observers ()
 				Space Telescope Science Institute
 
 Synopsis:
-	init_photons gets information about how many photones 
-	there should be per cycle and then instantiates
-	PhotPtr
+	init_photons gets information about the number of 
+	cycles and how many photons there should be per cycle.
+        The routine then then instantiates PhotPtr
 
 Arguments:	
     none	
@@ -838,19 +848,26 @@ init_photons ()
     }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */
-  // XXX Not clear why we want to do this here; why not after all of the input data arre in hand
 
   photmain = p = (PhotPtr) calloc (sizeof (p_dummy), NPHOT);
 
   if (p == NULL)
     {
       Error
-	("There is a problem in allocating memory for the photon structure\n");
+  ("There is a problem in allocating memory for the photon structure\n");
       exit (0);
     }
+  else 
+    {
+      /* JM 1605 -- large photon numbers can cause problems / runs to crash. Report to use (see #209) */
+      Log("Allocated %10d bytes for each of %5d elements of photon structure totaling %10.1f Mb \n",
+         sizeof (p_dummy), NPHOT, 1.e-6 * NPHOT * sizeof (p_dummy));
+      if ( (NPHOT * sizeof (p_dummy)) > 1e9)
+        Error("Over 1 GIGABYTE of photon structure allocated. Could cause serious problems.\n");
+    }
+
 
   return (p);
-
 }
 
 
@@ -891,7 +908,7 @@ init_ionization ()
     {
       rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
     }
-  if (geo.ioniz_mode == 4 || geo.ioniz_mode == 5 || geo.ioniz_mode > 9)	/*NSH CLOUDY test - remove once done */
+  if (geo.ioniz_mode == IONMODE_LTE_SIM || geo.ioniz_mode == 5 || geo.ioniz_mode > 9)	/*NSH CLOUDY test - remove once done */
     {
       Log ("The allowed ionization modes are 0, 1, 2, 3, 6, 7\n");
       Error ("Unknown ionization mode %d\n", geo.ioniz_mode);

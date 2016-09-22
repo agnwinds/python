@@ -620,13 +620,11 @@ emittance_bb (freqmin, freqmax, t)
 	Southampton University
 
  Synopsis:
-check_fmax decides wether a maximum frequency requested for an integral is sensible.
+
+check_fmax decides whether a maximum frequency requested for an integral is sensible.
 If it is too far off the end of the planck function, qromb will malfunction. We
 just have to set it to a frequency where the BB function is tiny, say where hnu/kT =100.
 At this point the bb function is
-
-
-	
 
 Arguments:		
 

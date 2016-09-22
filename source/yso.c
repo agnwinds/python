@@ -54,6 +54,9 @@ Notes:
 	region since that wind cones define the regions where photons
 	are scattered.  
 
+	XXX The yso implemetentation works but could be reimplemented
+	XXX with domains.  
+
 
 History:
  	04jun	ksl	Added this possibility
@@ -70,23 +73,14 @@ int
 get_yso_wind_params (ndom)
 	int ndom;
 {
-/* XXX yso model needs testing with domains */
 
 /* The approach to get the input parameters is to call both input parameter routines
 one after the other*/
 
+  Log("The yso model has a two component wind a spherical stellar wind, and\n a KWD wind\n");
   get_stellar_wind_params (ndom);
   get_knigge_wind_params (ndom);
 
-/* Assign the generic parameters for the wind the generic parameters of the wind */
-//  These lines are unnecessary as these variables ahve already been assigned in knigge_wind_params, and
-//  we do not want to assign anything as being set to the global variables if we an avoid it.  ksl 160219
-//  zdom[ndom].rmin = geo.rstar;
-//  zdom[ndom].rmax = geo.rmax;
-//  zdom[ndom].wind_thetamin = 0.0;
-//  zdom[ndom].wind_thetamax = atan (geo.diskrad / (zdom[ndom].kn_dratio * geo.rstar));
-
-// Line above would be 90 degeres if we want a stellar wind outside the windcone
 
   /* Next lines added by SS Sep 04. Changed the wind shape so that the boundary touches the outer 
      corner of the disk rather than the intersection of the disk edge with the xy-plane. */
@@ -98,9 +92,6 @@ one after the other*/
 	      (((zdom[ndom].kn_dratio * geo.rstar) + zdisk (geo.diskrad))));
     }
 
-//  These global variables should not be defined within a domain specific routine which this is
-//  geo.wind_rho_min = geo.rstar;
-//  geo.wind_rho_max = geo.diskrad;
 
   /* The change in the boundary of the wind (as corner of disk -- see above) 
      means that wind_rho_max nees to be redefined so that it is used correctly
@@ -118,9 +109,9 @@ one after the other*/
       zdom[ndom].xlog_scale = geo.rstar;
       zdom[ndom].zlog_scale = 1e-4*geo.rstar;
       /*
-       * XXX -- ksl this is not explicitly associated with domains but zlog_scale was hard wired, which is not normally 
-       * what we want in python, as we would like variables like zlog_scale to depend on other input parameters.
-       * For the model calculated by Stuart, 1e7 below corresponds to a number of 2.6e-5, and but I arbitrarily
+       * 1605- ksl - When Stuart wrote the yso paper, he hardwired zlong_xscale. When implementing domains, I noticed
+       * this.  Generally, we would like variables like zlog_scale to depend on other input parameters, and so I fixed
+       * this.  For the model calculated by Stuart, 1e7 below corresponds to a number of 2.6e-5, and but I arbitrarily
        * rounded up to 1e-4
        *
       zdom[ndom].zlog_scale = 1e7;

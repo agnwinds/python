@@ -56,7 +56,7 @@ dvwind_ds (p)
 {
   double v_grad[3][3];
   double lmn[3], dvel_ds[3], dvds;
-  int j, k, n, nn;
+  int j, k, nn;
   double dot_tensor_vec ();
   struct photon pp;
   int nnn[4], nelem;		// At present the largest number of dimenssion in the grid is 2
@@ -117,7 +117,7 @@ dvwind_ds (p)
   else // for non spherical coords we interpolate on v_grad
     {
 
-      n = coord_fraction (ndom, 0, pp.x, nnn, frac, &nelem);
+      coord_fraction (ndom, 0, pp.x, nnn, frac, &nelem);
 
 
       for (j = 0; j < 3; j++)

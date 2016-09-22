@@ -330,9 +330,9 @@ calculate_ionization (restart_stat)
 #endif
 
 	  spectrum_summary (files.wspec, "w", 0, 6, 0, 1., 0, 0);
-	  spectrum_summary (files.lspec, "w", 0, 6, 0, 1., 1, 0);	/* output the log spectrum */
+	  spectrum_summary (files.lwspec, "w", 0, 6, 0, 1., 1, 0);	/* output the log spectrum */
 	  spectrum_summary (files.wspec_wind, "w", 0, 6, 0, 1., 0, 1);  /* These two are the spectra of wind photons */
-	  spectrum_summary (files.lspec_wind, "w", 0, 6, 0, 1., 1, 1);	/* output the log spectrum */
+	  spectrum_summary (files.lwspec_wind, "w", 0, 6, 0, 1., 1, 1);	/* output the log spectrum */
     phot_gen_sum (files.phot, "w"); /* Save info about the way photons are created and absorbed
              by the disk */
 #ifdef MPI_ON
@@ -599,8 +599,12 @@ int make_spectra(restart_stat)
 	{
 #endif
 	  spectrum_summary (files.spec, "w", 0, nspectra - 1, geo.select_spectype, renorm, 0, 0);
+	  spectrum_summary (files.lspec, "w", 0, nspectra - 1, geo.select_spectype, renorm, 1, 0);
+	  
 	  /* Next line is of spectrum just of the wind*/
 	  spectrum_summary (files.spec_wind, "w", 0, nspectra - 1, geo.select_spectype, renorm, 0, 1);
+	  spectrum_summary (files.lspec_wind, "w", 0, nspectra - 1, geo.select_spectype, renorm, 1, 1);
+	  
 #ifdef MPI_ON
 	}
 #endif
@@ -635,18 +639,6 @@ int make_spectra(restart_stat)
   phot_gen_sum (files.phot, "a");
 #ifdef MPI_ON
       }
-#endif
-
-
-/* 57h - 07jul -- ksl -- Write out the freebound information */
-
-#ifdef MPI_ON
-  if (rank_global == 0)
-    {
-#endif
-      fb_save ("recomb.save");
-#ifdef MPI_ON
-    }
 #endif
 
   /* SWM0215: Dump the last photon path details to file */

@@ -779,7 +779,6 @@ int rd_extra(firstword, answer, wordlength)
     double *answer;
     int *wordlength;
 { 
-  int nwords;
   char secondword[LINELEN];
   char line[LINELEN];
   char *ccc, *index ();
@@ -789,7 +788,7 @@ int rd_extra(firstword, answer, wordlength)
 	    return (1);		// get_extra_diagnostics uses this return value 
 	  }	
 
-  nwords = sscanf (line, "%s %s", firstword, secondword);
+  sscanf (line, "%s %s", firstword, secondword);
 
   if ((ccc = index (firstword, '(')) != NULL)
 	{

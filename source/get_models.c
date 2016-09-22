@@ -91,6 +91,8 @@
 	same name were modified and so the two sets of routines are no longer
 	in sync, even though they have the same name.
 
+	160705 - For reasons that are unclear to me these routines cannot be included in the prototypes
+
 
 
   History:

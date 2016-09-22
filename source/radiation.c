@@ -148,7 +148,7 @@ radiation (p, ds)
 
 	  
   
-  ndom=one->ndom;
+  ndom = one->ndom;
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "radiation");
 
@@ -271,15 +271,17 @@ if (freq > phot_freq_min)
       else if (ion[nion].phot_info == 0) // verner
 		    density = xplasma->density[nion];
 
-      else            // possibly a little conservative
+      else  {          // possibly a little conservative
         Error("radiation.c: No type (%i) for xsection!\n");
+	density=0.0;
+      }
 
 		  if (density > DENSITY_PHOT_MIN)
 		    {
 
-		      /* JM1411 -- added filling factor - density enhancement cancels with geo.fill */
+		      /* JM1411 -- added filling factor - density enhancement cancels with zdom[ndom].fill */
 		      kappa_tot += x =
-			sigma_phot (x_top_ptr, freq_xs) * density * frac_path * geo.fill;
+			sigma_phot (x_top_ptr, freq_xs) * density * frac_path * zdom[ndom].fill;
 		      /* I believe most of next steps are totally diagnsitic; it is possible if 
 		         statement could be deleted entirely 060802 -- ksl */
 
@@ -332,15 +334,16 @@ if (freq > phot_freq_min)
 						{
 							density = xplasma->density[nion];  //All these rates are from the ground state, so we just need the density of the ion.
 						}
-						else if (ion[nion].phot_info > 0) // topbase or hybrid
+						//OLD fix gcc-4 worning  else if (ion[nion].phot_info > 0) // topbase or hybrid
+						else 
 						{
 							nconf=phot_top[ion[nion].ntop_ground].nlev;  //The lower level of the ground state Pi cross section (should be GS!)
-					        density = den_config (xplasma, nconf);
+					        	density = den_config (xplasma, nconf);
 						}
 						if (density > DENSITY_PHOT_MIN)
 						{
 							kappa_tot += x =
-								sigma_phot (x_top_ptr, freq_xs) * density * frac_path * geo.fill;
+								sigma_phot (x_top_ptr, freq_xs) * density * frac_path * zdom[ndom].fill;
 							if (geo.ioniz_or_extract && x_top_ptr->n_elec_yield!=-1)	// 57h -- ksl -- 060715 Calculate during ionization cycles only
 							{
 								frac_auger += z = x * (inner_elec_yield[x_top_ptr->n_elec_yield].Ea/EV2ERGS) / (freq_xs*HEV);
@@ -586,6 +589,10 @@ kappa_ff (xplasma, freq)
   double x;
   double exp ();
   double x1, x2, x3;
+  int ndom;
+
+  /* get the domain number */
+  ndom = wmain[xplasma->nwind].ndom;
 
   if (gaunt_n_gsqrd == 0)	//Maintain old behaviour
     {
@@ -607,7 +614,7 @@ kappa_ff (xplasma, freq)
   x *= x2 = (1. - exp (-H_OVER_K * freq / xplasma->t_e));
   x /= x3 = (sqrt (xplasma->t_e) * freq * freq * freq);
 
-  x *= geo.fill;    // multiply by the filling factor- should cancel with density enhancement
+  x *= zdom[ndom].fill;    // multiply by the filling factor- should cancel with density enhancement
 
   return (x);
 }
@@ -1055,7 +1062,7 @@ mean_intensity (xplasma, freq, mode)
   J = 0.0;			// Avoid 03 error
 
 
-  if (geo.ioniz_mode == 5 || geo.ioniz_mode == 7)	/*If we are using power law ionization, use PL estimators */
+  if (geo.ioniz_mode == 5 || geo.ioniz_mode == IONMODE_PAIRWISE_SPECTRALMODEL)	/*If we are using power law ionization, use PL estimators */
     {
       if (geo.wcycle > 0)	/* there is only any point in worrying if we have had at least one cycle otherwise there is no model */
 	{
