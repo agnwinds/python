@@ -39,6 +39,7 @@ int   matrix_ion_populations (xplasma,mode)
   History:
 	2014Aug NSH - coded
 	2014 Nov NSH - tidied up
+	2016 Sep NSH - gone over to a relative abundance scheme
 
 **************************************************************/
 
@@ -71,6 +72,7 @@ matrix_ion_populations (xplasma, mode)
      int mode;
 
 {
+  double elem_dens[200];        //The fdensity of each element - 200 should be enough!
   int nn, mm, nrows;
   double rate_matrix[nions][nions];
   double newden[NIONS];
@@ -99,6 +101,20 @@ matrix_ion_populations (xplasma, mode)
   // t_r = xplasma->t_r;                // The radiation temperature - used for PI if we have a BB approximation
   // www = xplasma->w;          // The radiative weight in the cell - again for BB approximation for PI
 
+  /* We now calculate the total abundances for each element to allow us to use fractional abundances */
+
+  /* Belt and braces, we zero our array */
+  for (mm = 0; mm < ion[nions - 1].z + 1; mm++)
+  {
+    elem_dens[mm] = 0.0;
+  }
+
+  /* Now we poulate the elemental abundace array */
+  for (mm = 0; mm < nions; mm++)
+  {
+    elem_dens[ion[mm].z] = elem_dens[ion[mm].z] + xplasma->density[mm];
+  }
+
   /* Dielectronic recombination and direct ionization coefficients depend only on electron temperature, calculate them now -
      they will not change */
 
@@ -117,7 +133,7 @@ matrix_ion_populations (xplasma, mode)
 
   for (mm = 0; mm < nions; mm++)
   {
-    newden[mm] = xplasma->density[mm];  // newden is our local density array
+    newden[mm] = xplasma->density[mm] / elem_dens[ion[mm].z];   // newden is our local density array - now it is fractional
     xion[mm] = mm;              // xion is an array we use to track which ion is in which row of the matrix
     if (ion[mm].istate != 1)    // We can recombine since we are not in the first ionization stage
     {
@@ -200,7 +216,9 @@ matrix_ion_populations (xplasma, mode)
      the same result as the original procedure, or for successive calculations, it should be a better guess. I've leftin the
      original code, commented out...  */
 
-  xne = xxne = xxxne = get_ne (newden); // Set n_e to the current value. 
+//  xne = xxne = xxxne = get_ne (newden);       // Set n_e to the current value. 
+  xne = xxne = xxxne = get_ne (xplasma->density);       //Even though the abundances are fractional, we need the real electron density
+
 
   /* xne is the current working number xxne */
 
@@ -268,8 +286,6 @@ matrix_ion_populations (xplasma, mode)
       }
     }
 
-
-
     /* Replaced inline array allocaation with calloc, which will work with older version of c compilers calloc also sets the
        elements to zero, which is required */
 
@@ -312,12 +328,12 @@ matrix_ion_populations (xplasma, mode)
 
     for (nn = 0; nn < nions; nn++)
     {
-      newden[nn] = 0.0;         // initialise the arrayelement
+      newden[nn] = 0.0;         // initialise the array element
 
       /* if the ion is being treated by macro_pops then use the populations just computed */
       if ((ion[nn].macro_info == 1) && (geo.macro_simple == 0) && (geo.macro_ioniz_mode == 1))
       {
-        newden[nn] = xplasma->density[nn];
+        newden[nn] = xplasma->density[nn] / elem_dens[ion[nn].z];
       }
 
       for (mm = 0; mm < nrows; mm++)    // inner loop over the elements of the population array
@@ -333,7 +349,18 @@ matrix_ion_populations (xplasma, mode)
         newden[nn] = DENSITY_MIN;
     }
     free (populations);
-    xnew = get_ne (newden);     /* determine the electron density for this density distribution */
+//      xnew = get_ne (newden); /* determine the electron density for this density distribution */
+
+
+/* We need to get the 'true' new electron density so we need to do a little loop here to compute it */
+
+
+    xnew = 0.0;
+    for (nn = 0; nn < nions; nn++)
+    {
+      xnew += newden[nn] * (ion[nn].istate - 1) * elem_dens[ion[nn].z];
+    }
+
 
 
     if (xnew < DENSITY_MIN)
@@ -377,7 +404,7 @@ matrix_ion_populations (xplasma, mode)
     /* If statement added here to suppress interference with macro populations (SS Apr 04) */
     if (ion[nn].macro_info == 0 || geo.macro_ioniz_mode == 0 || geo.macro_simple == 1)
     {
-      xplasma->density[nn] = newden[nn];
+      xplasma->density[nn] = newden[nn] * elem_dens[ion[nn].z]; //We return to absolute densities here
     }
     if ((sane_check (xplasma->density[nn])) || (xplasma->density[nn] < 0.0))
       Error ("matrix_ion_populations: ion %i has population %8.4e in cell %i\n", nn, xplasma->density[nn], xplasma->nplasma);
@@ -608,7 +635,9 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
   {
     if (ion[nn].istate == 1)
     {
-      b_temp[nn] = nh * ele[xelem[nn]].abun;
+//        b_temp[nn] = nh * ele[xelem[nn]].abun;
+      b_temp[nn] = 1.0;         //In the relative abundance schene this equals one.
+
       for (mm = 0; mm < nions; mm++)
       {
         if (ion[mm].z == ion[nn].z)
@@ -710,7 +739,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   det = gsl_linalg_LU_det (&m.matrix, s);       // get the determinant to report to user
 
   if (det == 0)
-    Error ("Rate Matrix Determinant is %8.4e for cell %i", det, nplasma);
+    Error ("Rate Matrix Determinant is %8.4e for cell %i\n", det, nplasma);
 
   gsl_linalg_LU_solve (&m.matrix, p, &b.vector, populations);
 
