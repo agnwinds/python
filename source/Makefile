@@ -84,6 +84,20 @@ endif
 GIT_DIFF_STATUS := $(shell expr `git status --porcelain 2>/dev/null| grep "^ M" | wc -l`)
 GIT_COMMIT_HASH := $(shell expr `git rev-parse HEAD`)
 
+# record the indent version. We only want to run indent if it's GNU indent
+INDENT_VERSION := $(shell indent -version)
+
+ifeq (GNU,$(firstword $(INDENT_VERSION)))
+	INDENT_STRING = Indenting code with $(INDENT_VERSION)
+	# this command runs indent with GNU styling
+	INDENT_CMD = indent -gnu -l140 -bli0 -nut *.c *.h
+else
+	# if it is not GNU indent then do not run
+	INDENT_STRING = No GNU indent installed so not indenting code.
+	INDENT_CMD = 
+endif
+
+
 INCLUDE = ../include
 LIB = ../lib
 BIN = ../bin
@@ -123,6 +137,8 @@ startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information
 	@echo 'YOU ARE COMPILING FOR' $(PRINT_VAR)	# tells user if compiling for optimized or debug
 	@echo 'MPI_FLAG=' $(MPI_FLAG)
+	@echo $(INDENT_STRING)
+	$(INDENT_CMD)
 	echo "#define VERSION " \"$(VERSION)\" > version.h
 	echo "#define CHOICE"   $(CHOICE) >> version.h
 	echo "#define GIT_COMMIT_HASH" \"$(GIT_COMMIT_HASH)\" >> version.h

@@ -50,7 +50,7 @@ History:
 
 int
 get_stellar_wind_params (ndom)
-	int ndom;
+     int ndom;
 {
   Log ("Creating a wind model for a Star\n");
 
@@ -67,22 +67,21 @@ get_stellar_wind_params (ndom)
   rddoub ("stellar_wind_mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
   zdom[ndom].stellar_wind_mdot *= MSOL / YR;
 
-  rddoub ("stellar.wind.radmin(cm)", &zdom[ndom].rmin);	/*Radius where wind begins */
+  rddoub ("stellar.wind.radmin(cm)", &zdom[ndom].rmin); /*Radius where wind begins */
   if (zdom[ndom].rmin < geo.rstar)
-    {
-      Error
-	("get_stellar_wind_params: It is unreasonable to have the wind start inside the star!\n");
-      Log ("Setting geo.rmin to geo.rstar\n");
-      zdom[ndom].rmin = geo.rstar;
-    }
+  {
+    Error ("get_stellar_wind_params: It is unreasonable to have the wind start inside the star!\n");
+    Log ("Setting geo.rmin to geo.rstar\n");
+    zdom[ndom].rmin = geo.rstar;
+  }
   zdom[ndom].cl_rmin = zdom[ndom].rmin;
-  rddoub ("stellar.wind_vbase(cm)", &zdom[ndom].cl_v_zero);	/* Velocity at base of the wind */
-  rddoub ("stellar.wind.v_infinity(cm)", &zdom[ndom].cl_v_infinity);	/* Final speed of wind in units of escape velocity */
+  rddoub ("stellar.wind_vbase(cm)", &zdom[ndom].cl_v_zero);     /* Velocity at base of the wind */
+  rddoub ("stellar.wind.v_infinity(cm)", &zdom[ndom].cl_v_infinity);    /* Final speed of wind in units of escape velocity */
 
-  rddoub ("stellar.wind.acceleration_exponent", &zdom[ndom].cl_beta);	/* Accleration scale exponent */
+  rddoub ("stellar.wind.acceleration_exponent", &zdom[ndom].cl_beta);   /* Accleration scale exponent */
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
-  geo.rmin = zdom[ndom].rmin;	//71 ksl - Not modified this so that we did not waste cells
+  geo.rmin = zdom[ndom].rmin;   //71 ksl - Not modified this so that we did not waste cells
   zdom[ndom].rmax = geo.rmax;
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 90. / RADIAN;
@@ -95,11 +94,11 @@ get_stellar_wind_params (ndom)
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
-    {
-      zdom[ndom].xlog_scale = 0.3 * geo.rstar;
-      zdom[ndom].zlog_scale = 0.3 * geo.rstar;
-    }
-    
+  {
+    zdom[ndom].xlog_scale = 0.3 * geo.rstar;
+    zdom[ndom].zlog_scale = 0.3 * geo.rstar;
+  }
+
   return (0);
 }
 
@@ -147,28 +146,28 @@ History:
 
 double
 stellar_velocity (ndom, x, v)
-	int ndom;
+     int ndom;
      double x[], v[];
 {
   double r, speed, zzz;
   double length ();
 
   if ((r = length (x)) == 0.0)
-    {
-      v[0] = 0.0;
-      v[1] = 0.0;
-      v[2] = 0.0;
-      return (0.0);
-    }
+  {
+    v[0] = 0.0;
+    v[1] = 0.0;
+    v[2] = 0.0;
+    return (0.0);
+  }
 
 
   if (r <= geo.rstar || r <= zdom[ndom].cl_rmin)
     speed = zdom[ndom].cl_v_zero;
   else
-    {
-      zzz = pow (1. - zdom[ndom].cl_rmin / r, zdom[ndom].cl_beta);
-      speed = zdom[ndom].cl_v_zero + (zdom[ndom].cl_v_infinity - zdom[ndom].cl_v_zero) * zzz;
-    }
+  {
+    zzz = pow (1. - zdom[ndom].cl_rmin / r, zdom[ndom].cl_beta);
+    speed = zdom[ndom].cl_v_zero + (zdom[ndom].cl_v_infinity - zdom[ndom].cl_v_zero) * zzz;
+  }
   v[0] = speed * x[0] / r;
   v[1] = speed * x[1] / r;
   v[2] = speed * x[2] / r;
@@ -200,22 +199,20 @@ History:
 
 double
 stellar_rho (ndom, x)
-	int ndom;
+     int ndom;
      double x[];
 {
   double r, rho, v[3];
 
   r = length (x);
   if (r < zdom[ndom].cl_rmin)
-    {
-      rho = zdom[ndom].stellar_wind_mdot / (4. * PI * r * r * zdom[ndom].cl_v_zero);
-    }
+  {
+    rho = zdom[ndom].stellar_wind_mdot / (4. * PI * r * r * zdom[ndom].cl_v_zero);
+  }
   else
-    {
-      rho =
-	zdom[ndom].stellar_wind_mdot / (4. * PI * r * r * stellar_velocity (ndom,x, v));
-    }
+  {
+    rho = zdom[ndom].stellar_wind_mdot / (4. * PI * r * r * stellar_velocity (ndom, x, v));
+  }
 
   return (rho);
 }
-

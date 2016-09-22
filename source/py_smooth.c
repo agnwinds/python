@@ -87,13 +87,13 @@ main (argc, argv)
   float wwavmin, wwavmax;
   float lrescale, frescale, xsigma;
 
-  int nspec;			/* The actual number of spectra read in, not to be confused with NSPEC */
+  int nspec;                    /* The actual number of spectra read in, not to be confused with NSPEC */
   int nwords;
 
   char cont_file[LINELENGTH], out_file[LINELENGTH];
   char line[LINELENGTH];
 
-  int imax;			/* number of points in input spectrum */
+  int imax;                     /* number of points in input spectrum */
 
 
   int npts, i, n, nn;
@@ -110,15 +110,15 @@ main (argc, argv)
   imax = 0;
 
   if ((spec_in = (SpPtr) calloc (sizeof (s_dummy), NW)) == NULL)
-    {
-      printf ("Could not allocate spec_in\n");
-      exit (0);
-    }
+  {
+    printf ("Could not allocate spec_in\n");
+    exit (0);
+  }
   if ((spec_out = (SpPtr) calloc (sizeof (s_dummy), NW)) == NULL)
-    {
-      printf ("Could not allocate spec_out\n");
-      exit (0);
-    }
+  {
+    printf ("Could not allocate spec_out\n");
+    exit (0);
+  }
 
 
 /* Set initial values for everything */
@@ -137,56 +137,54 @@ main (argc, argv)
   if (argc == 1)
     strcpy (pffile, "py_smooth.pf");
   else
+  {
+
+    for (i = 1; i < argc; i++)
     {
 
-      for (i = 1; i < argc; i++)
-	{
+      if (strcmp (argv[i], "-h") == 0)
+      {
+        printf ("Usage: py_smooth [-s spec]  [file.pf]\n");
+        exit (0);
+      }
+      else if (strcmp (argv[i], "-s") == 0)
+      {
+        if (sscanf (argv[i + 1], "%s", cont_file) != 1)
+        {
+          Error ("py_smooth: Expected source spectrum  after -s switch\n");
+          exit (0);
+        }
+        if (strcmp (out_file, "mod.spec_smo") == 0)
+        {
+          strcpy (out_file, "construct");
+        }
+        i++;
 
-	  if (strcmp (argv[i], "-h") == 0)
-	    {
-	      printf ("Usage: py_smooth [-s spec]  [file.pf]\n");
-	      exit (0);
-	    }
-	  else if (strcmp (argv[i], "-s") == 0)
-	    {
-	      if (sscanf (argv[i + 1], "%s", cont_file) != 1)
-		{
-		  Error
-		    ("py_smooth: Expected source spectrum  after -s switch\n");
-		  exit (0);
-		}
-	      if (strcmp (out_file, "mod.spec_smo") == 0)
-		{
-		  strcpy (out_file, "construct");
-		}
-	      i++;
+      }
+      else if (strcmp (argv[i], "-o") == 0)
+      {
+        if (sscanf (argv[i + 1], "%s", out_file) != 1)
+        {
+          Error ("py_smooth: Expected output file  after -o switch\n");
+          exit (0);
+        }
+        i++;
 
-	    }
-	  else if (strcmp (argv[i], "-o") == 0)
-	    {
-	      if (sscanf (argv[i + 1], "%s", out_file) != 1)
-		{
-		  Error
-		    ("py_smooth: Expected output file  after -o switch\n");
-		  exit (0);
-		}
-	      i++;
-
-	    }
-	  else if (strncmp (argv[i], "-", 1) == 0)
-	    {
-	      Error ("python: Unknown switch %s\n", argv[i]);
-	      exit (0);
-	    }
+      }
+      else if (strncmp (argv[i], "-", 1) == 0)
+      {
+        Error ("python: Unknown switch %s\n", argv[i]);
+        exit (0);
+      }
 
 
 
-	}
-      /* The last argument is always the pf file */
-      strcpy (pffile, argv[argc - 1]);
-      if (strstr (pffile, ".pf") == NULL)
-	strcat (pffile, ".pf");
     }
+    /* The last argument is always the pf file */
+    strcpy (pffile, argv[argc - 1]);
+    if (strstr (pffile, ".pf") == NULL)
+      strcat (pffile, ".pf");
+  }
   printf ("Opening parameter file %s\n", pffile);
 
   opar (pffile);
@@ -211,40 +209,40 @@ main (argc, argv)
 
   lambda = wavmin;
   for (npts = 0; npts < NW; npts++)
-    {
-      spec_out[npts].wav = lambda;
-      spec_out[npts].freq = HC / (lambda * 1.e-8);
-      if (lambda > wavmax)
-	break;
-      lambda += res;
-    }
+  {
+    spec_out[npts].wav = lambda;
+    spec_out[npts].freq = HC / (lambda * 1.e-8);
+    if (lambda > wavmax)
+      break;
+    lambda += res;
+  }
 
   printf ("Number of points in output spectrum %d\n", npts);
 
 
   if (strcmp (cont_file, "mod.spec") == 0)
-    {
-      rdstr ("cont.file", cont_file);
-    }
+  {
+    rdstr ("cont.file", cont_file);
+  }
   else
-    {
-      Log ("Using spectrum %s\n", cont_file);
-    }
+  {
+    Log ("Using spectrum %s\n", cont_file);
+  }
 
 
   if (strcmp (out_file, "construct") == 0)
-    {
-      strcpy (out_file, "");
-      strcpy (out_file, cont_file);
-      strcat (out_file, "_smo");
-    }
+  {
+    strcpy (out_file, "");
+    strcpy (out_file, cont_file);
+    strcat (out_file, "_smo");
+  }
   else if (strcmp (out_file, "mod.spec_smo") == 0)
-    {
-      strcpy (out_file, "");
-      get_root (out_file, cont_file);
-      strcat (out_file, ".spec_smo");
-      rdstr ("out.file", out_file);
-    }
+  {
+    strcpy (out_file, "");
+    get_root (out_file, cont_file);
+    strcat (out_file, ".spec_smo");
+    rdstr ("out.file", out_file);
+  }
 
 
   if (strncmp (root, "mod", 3) == 0)
@@ -256,51 +254,50 @@ main (argc, argv)
 /* Generate the continuum */
 
   if (strncmp (cont_file, "none", 4) != 0)
+  {
+    if ((fp = fopen (cont_file, "r")) == NULL)
     {
-      if ((fp = fopen (cont_file, "r")) == NULL)
-	{
-	  printf ("Failed to open %s\n", cont_file);
-	  exit (0);
-	}
-      /* Now open the output file */
-      fout = fopen (out_file, "w");
-
-
-      imax = 0;
-      while (fgets (line, LINELENGTH, fp) != NULL)
-	{
-	  if (line[0] != '#')
-	    {
-	      if ((nwords =
-		   sscanf (line,
-			   "%e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e",
-			   &spec_in[imax].freq, &spec_in[imax].wav,
-			   &spec_in[imax].x[0], &spec_in[imax].x[1],
-			   &spec_in[imax].x[2], &spec_in[imax].x[3],
-			   &spec_in[imax].x[4], &spec_in[imax].x[5],
-			   &spec_in[imax].x[6], &spec_in[imax].x[7],
-			   &spec_in[imax].x[8], &spec_in[imax].x[9],
-			   &spec_in[imax].x[10], &spec_in[imax].x[11],
-			   &spec_in[imax].x[12], &spec_in[imax].x[13],
-			   &spec_in[imax].x[14], &spec_in[imax].x[15],
-			   &spec_in[imax].x[16], &spec_in[imax].x[17],
-			   &spec_in[imax].x[18], &spec_in[imax].x[19])) != 22)
-		{
-//                                              printf("Error: Incorrect number of spectra in input spectrum %d\n",nwords);
-		  //                                              exit(0);
-		}
-	      imax++;
-	      if (imax > NWAVE)
-		{
-		  printf ("Error: Reading input file imax > NWAVE\n");
-		  exit (0);
-
-		}
-	    }
-	  else
-	    fprintf (fout, "%s", line);
-	}
+      printf ("Failed to open %s\n", cont_file);
+      exit (0);
     }
+    /* Now open the output file */
+    fout = fopen (out_file, "w");
+
+
+    imax = 0;
+    while (fgets (line, LINELENGTH, fp) != NULL)
+    {
+      if (line[0] != '#')
+      {
+        if ((nwords =
+             sscanf (line,
+                     "%e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e",
+                     &spec_in[imax].freq, &spec_in[imax].wav,
+                     &spec_in[imax].x[0], &spec_in[imax].x[1],
+                     &spec_in[imax].x[2], &spec_in[imax].x[3],
+                     &spec_in[imax].x[4], &spec_in[imax].x[5],
+                     &spec_in[imax].x[6], &spec_in[imax].x[7],
+                     &spec_in[imax].x[8], &spec_in[imax].x[9],
+                     &spec_in[imax].x[10], &spec_in[imax].x[11],
+                     &spec_in[imax].x[12], &spec_in[imax].x[13],
+                     &spec_in[imax].x[14], &spec_in[imax].x[15],
+                     &spec_in[imax].x[16], &spec_in[imax].x[17], &spec_in[imax].x[18], &spec_in[imax].x[19])) != 22)
+        {
+//                                              printf("Error: Incorrect number of spectra in input spectrum %d\n",nwords);
+          //                                              exit(0);
+        }
+        imax++;
+        if (imax > NWAVE)
+        {
+          printf ("Error: Reading input file imax > NWAVE\n");
+          exit (0);
+
+        }
+      }
+      else
+        fprintf (fout, "%s", line);
+    }
+  }
 
 /* Now convolve the spectrum with an instrumental response function */
   imax--;
@@ -308,54 +305,50 @@ main (argc, argv)
   fclose (fp);
 
   for (n = 0; n < npts; n++)
+  {
+    wwavmin = spec_out[n].wav;
+    wwavmax = spec_out[n + 1].wav;
+
+    for (i = 0; i < imax; i++)
     {
-      wwavmin = spec_out[n].wav;
-      wwavmax = spec_out[n + 1].wav;
-
-      for (i = 0; i < imax; i++)
-	{
-	  if ((q = gauss (wwavmin, wwavmax, spec_in[i].wav, xsigma)) > 0.0)
-	    {
-	      for (nn = 0; nn < nspec; nn++)
-		{
-		  spec_out[n].x[nn] +=
-		    q * (spec_in[i].x[nn]) * (spec_in[i].wav -
-					      spec_in[i + 1].wav) / (wwavmax -
-								     wwavmin);
-		}
-	    }
-	}
-
+      if ((q = gauss (wwavmin, wwavmax, spec_in[i].wav, xsigma)) > 0.0)
+      {
+        for (nn = 0; nn < nspec; nn++)
+        {
+          spec_out[n].x[nn] += q * (spec_in[i].x[nn]) * (spec_in[i].wav - spec_in[i + 1].wav) / (wwavmax - wwavmin);
+        }
+      }
     }
+
+  }
 
 /* Now rescale the spectrum if desired */
   printf ("OK checking %e %e %e\n", wavmin, lrescale, wavmax);
   if (wavmin < lrescale && lrescale < wavmax)
+  {
+    printf ("OK rescaling to frescale %e at lrescle %e\n", frescale, lrescale);
+    for (i = 0; i < nspec; i++)
     {
-      printf ("OK rescaling to frescale %e at lrescle %e\n", frescale,
-	      lrescale);
-      for (i = 0; i < nspec; i++)
-	{
-	  n = 0;
-	  while (spec_out[n].wav < lrescale)
-	    n++;
-	  q = frescale / spec_out[n].x[i];
-	  for (n = 0; n < npts; n++)
-	    spec_out[n].x[i] *= q;
-	}
+      n = 0;
+      while (spec_out[n].wav < lrescale)
+        n++;
+      q = frescale / spec_out[n].x[i];
+      for (n = 0; n < npts; n++)
+        spec_out[n].x[i] *= q;
     }
+  }
 /* Now print out the spectrum */
 
   for (i = 0; i < npts; i++)
+  {
+    fprintf (fout, "%e %8.3f", spec_out[i].freq, spec_out[i].wav);
+    for (nn = 0; nn < nspec; nn++)
     {
-      fprintf (fout, "%e %8.3f", spec_out[i].freq, spec_out[i].wav);
-      for (nn = 0; nn < nspec; nn++)
-	{
-	  fprintf (fout, " %8.2e", spec_out[i].x[nn]);
-	}
-      fprintf (fout, "\n");
-
+      fprintf (fout, " %8.2e", spec_out[i].x[nn]);
     }
+    fprintf (fout, "\n");
+
+  }
   fclose (fout);
 
   return EXIT_SUCCESS;
@@ -396,10 +389,10 @@ gauss (xmin, xmax, x, sigma)
   a = 0.0;
 
   for (i = 0; i < ISTEPS; i++)
-    {
-      xx = (xmin + delta * (i + 0.5) - x) / sigma;
-      a += exp ((-0.5) * xx * xx);
-    }
+  {
+    xx = (xmin + delta * (i + 0.5) - x) / sigma;
+    a += exp ((-0.5) * xx * xx);
+  }
 
   a /= 2.5066283 * sigma;
   a *= delta;

@@ -16,41 +16,41 @@ ei (float x)
   if (x < FPMIN)
     return log (x) + EULER;
   if (x <= -log (EPS))
+  {
+    sum = 0.0;
+    fact = 1.0;
+    for (k = 1; k <= MAXIT; k++)
     {
-      sum = 0.0;
-      fact = 1.0;
-      for (k = 1; k <= MAXIT; k++)
-	{
-	  fact *= x / k;
-	  term = fact / k;
-	  sum += term;
-	  if (term < EPS * sum)
-	    break;
-	}
-      if (k > MAXIT)
-	nrerror ("Series failed in ei");
-      return sum + log (x) + EULER;
+      fact *= x / k;
+      term = fact / k;
+      sum += term;
+      if (term < EPS * sum)
+        break;
     }
+    if (k > MAXIT)
+      nrerror ("Series failed in ei");
+    return sum + log (x) + EULER;
+  }
   else
+  {
+    sum = 0.0;
+    term = 1.0;
+    for (k = 1; k <= MAXIT; k++)
     {
-      sum = 0.0;
-      term = 1.0;
-      for (k = 1; k <= MAXIT; k++)
-	{
-	  prev = term;
-	  term *= k / x;
-	  if (term < EPS)
-	    break;
-	  if (term < prev)
-	    sum += term;
-	  else
-	    {
-	      sum -= prev;
-	      break;
-	    }
-	}
-      return exp (x) * (1.0 + sum) / x;
+      prev = term;
+      term *= k / x;
+      if (term < EPS)
+        break;
+      if (term < prev)
+        sum += term;
+      else
+      {
+        sum -= prev;
+        break;
+      }
     }
+    return exp (x) * (1.0 + sum) / x;
+  }
 }
 
 #undef EPS

@@ -70,8 +70,8 @@ int
 randvcos (lmn, north)
      double lmn[], north[];
 {
-  double x[3];			/* the photon direction in the rotated frame */
-  double l, m, n;		/* the individual direction cosines in the rotated frame */
+  double x[3];                  /* the photon direction in the rotated frame */
+  double l, m, n;               /* the individual direction cosines in the rotated frame */
   double q, jumps[5];
 // double s;
   struct basis nbasis;
@@ -81,21 +81,20 @@ randvcos (lmn, north)
   double phi;
 
   if (init_vcos == 0)
-    {
-      jumps[0] = 0.01745;
-      jumps[1] = 0.03490;
-      jumps[2] = 0.05230;
-      jumps[3] = 0.06976;
-      jumps[4] = 0.08716;
+  {
+    jumps[0] = 0.01745;
+    jumps[1] = 0.03490;
+    jumps[2] = 0.05230;
+    jumps[3] = 0.06976;
+    jumps[4] = 0.08716;
 
-      if ((echeck =
-	   pdf_gen_from_func (&pdf_vcos, &vcos, 0., 1., 5, jumps)) != 0)
+    if ((echeck = pdf_gen_from_func (&pdf_vcos, &vcos, 0., 1., 5, jumps)) != 0)
 //old ksl 04mar  pdf_gen_from_func (&pdf_vcos, &vcos, 0., 1., 5, &jumps)) != 0)
-	{
-	  Error ("Randvcos: return from pdf_gen_from_func %d\n", echeck);;
-	}
-      init_vcos = 1;
+    {
+      Error ("Randvcos: return from pdf_gen_from_func %d\n", echeck);;
     }
+    init_vcos = 1;
+  }
 
 
   n = pdf_get_rand (&pdf_vcos);
@@ -120,26 +119,26 @@ direction in the cartesian frame.  If north is in the +-z direction
 this is simple. Otherwise one must do a coordinate rotation. */
 
   if (north[0] == 0 && north[1] == 0)
-    {				/* Deal with it as a special case */
-      lmn[0] = l;
-      lmn[1] = m;
-      if (north[2] > 0)
-	lmn[2] = n;
-      else
-	lmn[2] = -n;
-    }
+  {                             /* Deal with it as a special case */
+    lmn[0] = l;
+    lmn[1] = m;
+    if (north[2] > 0)
+      lmn[2] = n;
+    else
+      lmn[2] = -n;
+  }
   else
-    {
-      create_basis (north, zzz, &nbasis);	/* Create a basis with the first axis in 
-						   direction of "north" and the second axis in the 
-						   yz plane */
-      x[0] = n;
-      x[1] = l;
-      x[2] = m;
+  {
+    create_basis (north, zzz, &nbasis); /* Create a basis with the first axis in 
+                                           direction of "north" and the second axis in the 
+                                           yz plane */
+    x[0] = n;
+    x[1] = l;
+    x[2] = m;
 
-      project_from (&nbasis, x, lmn);	/* Project the vector back to the standard
-					   frame */
-    }
+    project_from (&nbasis, x, lmn);     /* Project the vector back to the standard
+                                           frame */
+  }
   return (0);
 
 }

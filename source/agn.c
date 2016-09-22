@@ -65,44 +65,44 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
 
 
   if (ioniz_or_final == 1)
-    spectype = geo.agn_spectype;	/* type for final spectrum */
+    spectype = geo.agn_spectype;        /* type for final spectrum */
   else
-    spectype = geo.agn_ion_spectype;	/*type for ionization calculation */
+    spectype = geo.agn_ion_spectype;    /*type for ionization calculation */
   if (spectype >= 0)
-    {
-      /* Assume that if we simulate the continuum for an AGN that emit is the luminosity in a specific range */
-      emit = emittance_continuum (spectype, freqmin, freqmax, lum, alpha);
-      *f = emit;
-    }
+  {
+    /* Assume that if we simulate the continuum for an AGN that emit is the luminosity in a specific range */
+    emit = emittance_continuum (spectype, freqmin, freqmax, lum, alpha);
+    *f = emit;
+  }
   else if (spectype == SPECTYPE_POW)
-    {
-      /* Emittance_pow actucally returns the specific luminosity directly */
-      emit = emittance_pow (freqmin, freqmax, lum, alpha);
-      *f = emit;
-    }
+  {
+    /* Emittance_pow actucally returns the specific luminosity directly */
+    emit = emittance_pow (freqmin, freqmax, lum, alpha);
+    *f = emit;
+  }
   else if (spectype == SPECTYPE_BB)
-    {
+  {
 
-      t = alpha;		/* For this case the second variable is t */
-      /* Note that emittane_bb is really the energy radiated per unit area  so
-       * this must be multiplied by the area of the object */
-      emit = emittance_bb (freqmin, freqmax, t);
-      *f = emit;
-      *f *= (4. * PI * r * r);
-    }
+    t = alpha;                  /* For this case the second variable is t */
+    /* Note that emittane_bb is really the energy radiated per unit area  so
+     * this must be multiplied by the area of the object */
+    emit = emittance_bb (freqmin, freqmax, t);
+    *f = emit;
+    *f *= (4. * PI * r * r);
+  }
   else if (spectype == SPECTYPE_CL_TAB)
-    {
-      /* Emittance_pow actucally returns the specific luminosity directly */
-      emit = emittance_bpow (freqmin, freqmax, lum, alpha);
-      *f = emit;
-    }
-	else if (spectype == SPECTYPE_BREM)
-	{
-		emit=qromb(integ_brem,freqmin,freqmax,1e-4);
-		*f=emit;
-	}
+  {
+    /* Emittance_pow actucally returns the specific luminosity directly */
+    emit = emittance_bpow (freqmin, freqmax, lum, alpha);
+    *f = emit;
+  }
+  else if (spectype == SPECTYPE_BREM)
+  {
+    emit = qromb (integ_brem, freqmin, freqmax, 1e-4);
+    *f = emit;
+  }
 
-  return (*f);			/* Return the luminosity    */
+  return (*f);                  /* Return the luminosity    */
 }
 
 
@@ -120,15 +120,13 @@ emittance_pow (freqmin, freqmax, lum, alpha)
 #define   XFREQMAX  2.42e18
 
   /* first we need to calculate the constant for the power law function */
-  constant = lum / (((pow (XFREQMAX, alpha + 1.)) - pow (XFREQMIN, alpha + 1.0)) / (alpha + 1.0));	/*NSH 1205 - this seems a bit unnecessary now. The constant is calculaed elsewhere, and with the broken power law we could probably get rid of this - is it even working properly now */
+  constant = lum / (((pow (XFREQMAX, alpha + 1.)) - pow (XFREQMIN, alpha + 1.0)) / (alpha + 1.0));      /*NSH 1205 - this seems a bit unnecessary now. The constant is calculaed elsewhere, and with the broken power law we could probably get rid of this - is it even working properly now */
 
   /* now we need to work out the luminosity between our limited frequency range */
   /* we may need some checking routines to make sure that the requested frequency range is within the defined range,
      or it could default to zero outside the defined range */
 
-  emit =
-    constant * ((pow (freqmax, alpha + 1.0) - pow (freqmin, alpha + 1.0)) /
-		(alpha + 1.0));
+  emit = constant * ((pow (freqmax, alpha + 1.0) - pow (freqmin, alpha + 1.0)) / (alpha + 1.0));
 
   return (emit);
 }
@@ -172,13 +170,11 @@ emittance_bpow (freqmin, freqmax, lum, alpha)
 
 #define   XFREQMIN  4.84e17
 #define   XFREQMAX  2.42e18
-  f1 = freqmin;			/* NSH - 130506 added to reomve 03 compile errors */
-  f2 = freqmax;			/* NSH - 130506 added to reomve 03 compile errors */
-  e1 = e2 = e3 = 0.0;		/* NSH - 130506 added to reomve 03 compile errors */
+  f1 = freqmin;                 /* NSH - 130506 added to reomve 03 compile errors */
+  f2 = freqmax;                 /* NSH - 130506 added to reomve 03 compile errors */
+  e1 = e2 = e3 = 0.0;           /* NSH - 130506 added to reomve 03 compile errors */
   /* first we need to calculate the constant for the 2-10 kev power law function */
-  constant =
-    lum / (((pow (XFREQMAX, alpha + 1.)) - pow (XFREQMIN, alpha + 1.0)) /
-	   (alpha + 1.0));
+  constant = lum / (((pow (XFREQMAX, alpha + 1.)) - pow (XFREQMIN, alpha + 1.0)) / (alpha + 1.0));
 
 
 /* convert broken power law bands to freq */
@@ -187,7 +183,7 @@ emittance_bpow (freqmin, freqmax, lum, alpha)
   pl_hi = geo.agn_cltab_hi / HEV;
 
 
-  constant_low = xband.pl_const[0];	//we have already worked out the constants
+  constant_low = xband.pl_const[0];     //we have already worked out the constants
   constant_hi = xband.pl_const[xband.nbands - 1];
 
 
@@ -198,102 +194,86 @@ emittance_bpow (freqmin, freqmax, lum, alpha)
 
   /* energy in low frequency tail */
   if (freqmin >= pl_low)
-    {
-      e1 = 0.0;			//Our frequencies start above the cutoff
-      Log
-	("Broken power law: Lowest frequency is above low frequency break\n");
-    }
-  else if (freqmax < pl_low)	//wierd situation, where all power is in the low frequency tail
-    {
-      atemp = geo.agn_cltab_low_alpha;
-      f1 = freqmin;
-      f2 = freqmax;
-      ctemp = constant_low;
-      e1 =
-	ctemp * ((pow (f2, atemp + 1.0) - pow (f1, atemp + 1.0)) /
-		 (atemp + 1.0));
-      Log ("Broken power law: Emittance below low frequency break is %e\n",
-	   e1);
-    }
+  {
+    e1 = 0.0;                   //Our frequencies start above the cutoff
+    Log ("Broken power law: Lowest frequency is above low frequency break\n");
+  }
+  else if (freqmax < pl_low)    //wierd situation, where all power is in the low frequency tail
+  {
+    atemp = geo.agn_cltab_low_alpha;
+    f1 = freqmin;
+    f2 = freqmax;
+    ctemp = constant_low;
+    e1 = ctemp * ((pow (f2, atemp + 1.0) - pow (f1, atemp + 1.0)) / (atemp + 1.0));
+    Log ("Broken power law: Emittance below low frequency break is %e\n", e1);
+  }
   else
-    {
-      atemp = geo.agn_cltab_low_alpha;
-      f1 = freqmin;
-      f2 = pl_low;
-      ctemp = constant_low;
-      e1 =
-	ctemp * ((pow (f2, atemp + 1.0) - pow (f1, atemp + 1.0)) /
-		 (atemp + 1.0));
-      Log ("Broken power law: Emittance below low frequency break is %e\n",
-	   e1);
-    }
+  {
+    atemp = geo.agn_cltab_low_alpha;
+    f1 = freqmin;
+    f2 = pl_low;
+    ctemp = constant_low;
+    e1 = ctemp * ((pow (f2, atemp + 1.0) - pow (f1, atemp + 1.0)) / (atemp + 1.0));
+    Log ("Broken power law: Emittance below low frequency break is %e\n", e1);
+  }
 
   /* energy in main frequency band */
-  if (freqmax > pl_low && freqmin < pl_hi)	//If there is any part of the required range between our central range
+  if (freqmax > pl_low && freqmin < pl_hi)      //If there is any part of the required range between our central range
+  {
+    if (freqmin <= pl_low && freqmax >= pl_hi)
     {
-      if (freqmin <= pl_low && freqmax >= pl_hi)
-	{
-	  f1 = pl_low;
-	  f2 = pl_hi;
-	}
-      else if (freqmin <= pl_low && freqmax < pl_hi)
-	{
-	  f1 = pl_low;
-	  f2 = freqmax;
-	}
-      else if (freqmin > pl_low && freqmax < pl_hi)
-	{
-	  f1 = freqmin;
-	  f2 = freqmax;
-	}
-      else if (freqmin > pl_low && freqmax >= pl_hi)
-	{
-	  f1 = freqmin;
-	  f2 = pl_hi;
-	}
-      atemp = alpha;
-      ctemp = constant;
-      e2 =
-	ctemp * ((pow (f2, atemp + 1.0) - pow (f1, atemp + 1.0)) /
-		 (atemp + 1.0));
-      Log ("Broken power law: Emittance in centre is %e\n", e2);
+      f1 = pl_low;
+      f2 = pl_hi;
     }
+    else if (freqmin <= pl_low && freqmax < pl_hi)
+    {
+      f1 = pl_low;
+      f2 = freqmax;
+    }
+    else if (freqmin > pl_low && freqmax < pl_hi)
+    {
+      f1 = freqmin;
+      f2 = freqmax;
+    }
+    else if (freqmin > pl_low && freqmax >= pl_hi)
+    {
+      f1 = freqmin;
+      f2 = pl_hi;
+    }
+    atemp = alpha;
+    ctemp = constant;
+    e2 = ctemp * ((pow (f2, atemp + 1.0) - pow (f1, atemp + 1.0)) / (atemp + 1.0));
+    Log ("Broken power law: Emittance in centre is %e\n", e2);
+  }
   else
-    {
-      Log ("Broken power law: No luminosity in central range\n");
-    }
+  {
+    Log ("Broken power law: No luminosity in central range\n");
+  }
 
   /* energy in high frequency tail */
   if (freqmax <= pl_hi)
-    {
-      e3 = 0.0;			//Our frequencies stop below the cutoff
-      Log
-	("Broken power law: Highest frequency is below high frequency break\n");
-    }
-  else if (freqmin > pl_hi)	//Odd situation where all power is in high frequency tail
-    {
-      atemp = geo.agn_cltab_hi_alpha;
-      f1 = freqmin;
-      f2 = freqmax;
-      ctemp = constant_hi;
-      e3 =
-	ctemp * ((pow (f2, atemp + 1.0) - pow (f1, atemp + 1.0)) /
-		 (atemp + 1.0));
-      Log ("Broken power law: Emittance above high frequency break is %e\n",
-	   e3);
-    }
-  else				//normal situation where we run from boundary to the max frequency
-    {
-      atemp = geo.agn_cltab_hi_alpha;
-      f1 = pl_hi;
-      f2 = freqmax;
-      ctemp = constant_hi;
-      e3 =
-	ctemp * ((pow (f2, atemp + 1.0) - pow (f1, atemp + 1.0)) /
-		 (atemp + 1.0));
-      Log ("Broken power law: Emittance above high frequency break is %e\n",
-	   e3);
-    }
+  {
+    e3 = 0.0;                   //Our frequencies stop below the cutoff
+    Log ("Broken power law: Highest frequency is below high frequency break\n");
+  }
+  else if (freqmin > pl_hi)     //Odd situation where all power is in high frequency tail
+  {
+    atemp = geo.agn_cltab_hi_alpha;
+    f1 = freqmin;
+    f2 = freqmax;
+    ctemp = constant_hi;
+    e3 = ctemp * ((pow (f2, atemp + 1.0) - pow (f1, atemp + 1.0)) / (atemp + 1.0));
+    Log ("Broken power law: Emittance above high frequency break is %e\n", e3);
+  }
+  else                          //normal situation where we run from boundary to the max frequency
+  {
+    atemp = geo.agn_cltab_hi_alpha;
+    f1 = pl_hi;
+    f2 = freqmax;
+    ctemp = constant_hi;
+    e3 = ctemp * ((pow (f2, atemp + 1.0) - pow (f1, atemp + 1.0)) / (atemp + 1.0));
+    Log ("Broken power law: Emittance above high frequency break is %e\n", e3);
+  }
 
   emit = e1 + e2 + e3;
 
@@ -312,35 +292,32 @@ int
 photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
      PhotPtr p;
      double r, alpha, weight;
-     double f1, f2;   /* The freqency mininimum and maximum if a uniform distribution is selected */
-     int spectype;    /*The spectrum type to generate: 0 is bb, 1 (or in fact anything but 0)
-           is uniform in frequency space */
-     int istart, nphot;   /* Respecitively the starting point in p and the number of photons to generate */
+     double f1, f2;             /* The freqency mininimum and maximum if a uniform distribution is selected */
+     int spectype;              /*The spectrum type to generate: 0 is bb, 1 (or in fact anything but 0)
+                                   is uniform in frequency space */
+     int istart, nphot;         /* Respecitively the starting point in p and the number of photons to generate */
 {
   double freqmin, freqmax, dfreq, t;
   int i, iend;
   int n;
   double ftest;
 
-  t = alpha;      /* NSH 130605, this is a slightly odd statmenent, put in to avoid 03 compilation 
-           errors, but stemming from the odd behaviour that one can give the AGN a 
-           themal spectral type, and the alpha parameter is then used to transmit 
-           the temperature. */
+  t = alpha;                    /* NSH 130605, this is a slightly odd statmenent, put in to avoid 03 compilation 
+                                   errors, but stemming from the odd behaviour that one can give the AGN a 
+                                   themal spectral type, and the alpha parameter is then used to transmit 
+                                   the temperature. */
 
 
   if ((iend = istart + nphot) > NPHOT)
-    {
-      Error ("photo_gen_agn: iend %d > NPHOT %d\n", iend, NPHOT);
-      exit (0);
-    }
+  {
+    Error ("photo_gen_agn: iend %d > NPHOT %d\n", iend, NPHOT);
+    exit (0);
+  }
   if (f2 < f1)
-    {
-      Error
-  ("photo_gen_agn: Cannot generate photons if freqmax %g < freqmin %g\n",
-   f2, f1);
-    }
-  Log_silent ("photo_gen_agn creates nphot %5d photons from %5d to %5d \n",
-        nphot, istart, iend);
+  {
+    Error ("photo_gen_agn: Cannot generate photons if freqmax %g < freqmin %g\n", f2, f1);
+  }
+  Log_silent ("photo_gen_agn creates nphot %5d photons from %5d to %5d \n", nphot, istart, iend);
   freqmin = f1;
   freqmax = f2;
   dfreq = (freqmax - freqmin) / MAXRAND;
@@ -353,119 +330,115 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
   /* Generate photons just outside the photosphere unnecessary for the AGN perhaps? */
   /* note this is only used in the spherical source */
 
-  if (spectype == SPECTYPE_CL_TAB)  /* If we have a broken PL, we need to work out which alpha to use */
-    {
-      ftest = (freqmin + freqmax) / 2.0;
-      for (n = 0; n < xband.nbands; n++)  /* work out what alpha and constant to use */
+  if (spectype == SPECTYPE_CL_TAB)      /* If we have a broken PL, we need to work out which alpha to use */
   {
-    if (xband.f1[n] < ftest && xband.f2[n] > ftest)
+    ftest = (freqmin + freqmax) / 2.0;
+    for (n = 0; n < xband.nbands; n++)  /* work out what alpha and constant to use */
+    {
+      if (xband.f1[n] < ftest && xband.f2[n] > ftest)
       {
         alpha = xband.alpha[n];
       }
-  }
     }
-	
-	
+  }
+
+
 
 
   for (i = istart; i < iend; i++)
+  {
+    p[i].origin = PTYPE_AGN;    // For BL photons this is corrected in photon_gen 
+    p[i].w = weight;
+    p[i].istat = p[i].nscat = p[i].nrscat = 0;
+    p[i].grid = 0;
+    p[i].tau = 0.0;
+    p[i].nres = -1;             // It's a continuum photon
+    p[i].nnscat = 1;
+
+    if (spectype == SPECTYPE_BB)
     {
-      p[i].origin = PTYPE_AGN;  // For BL photons this is corrected in photon_gen 
-      p[i].w = weight;
-      p[i].istat = p[i].nscat = p[i].nrscat = 0;
-      p[i].grid = 0;
-      p[i].tau = 0.0;
-      p[i].nres = -1;   // It's a continuum photon
-      p[i].nnscat = 1;
+      p[i].freq = planck (t, freqmin, freqmax);
+    }
+    else if (spectype == SPECTYPE_UNIFORM)
+    {                           /* Kurucz spectrum */
+      /*Produce a uniform distribution of frequencies */
+      p[i].freq = freqmin + rand () * dfreq;
+    }
+    else if (spectype == SPECTYPE_POW)  /* this is the call to the powerlaw routine 
+                                           we are most interested in */
+    {
+      p[i].freq = get_rand_pow (freqmin, freqmax, alpha);
+    }
+    else if (spectype == SPECTYPE_CL_TAB)
+    {
+      p[i].freq = get_rand_pow (freqmin, freqmax, alpha);
+    }
+    else if (spectype == SPECTYPE_BREM)
+    {
+      p[i].freq = get_rand_brem (freqmin, freqmax);
+    }
 
-      if (spectype == SPECTYPE_BB)
-  {
-    p[i].freq = planck (t, freqmin, freqmax);
-  }
-      else if (spectype == SPECTYPE_UNIFORM)
-  {     /* Kurucz spectrum */
-    /*Produce a uniform distribution of frequencies */
-    p[i].freq = freqmin + rand () * dfreq;
-  }
-      else if (spectype == SPECTYPE_POW)  /* this is the call to the powerlaw routine 
-               we are most interested in */
-  {
-    p[i].freq = get_rand_pow (freqmin, freqmax, alpha);
-  }
-      else if (spectype == SPECTYPE_CL_TAB)
-	{
-	  p[i].freq = get_rand_pow (freqmin, freqmax, alpha);
-	}
-	else if (spectype == SPECTYPE_BREM)
-	{
-		p[i].freq = get_rand_brem(freqmin,freqmax);
-	}
+    else
+    {
+      p[i].freq = one_continuum (spectype, t, geo.gstar, freqmin, freqmax);
+    }
 
-      else
-  {
-    p[i].freq =
-      one_continuum (spectype, t, geo.gstar, freqmin, freqmax);
-  }
-
-      if (p[i].freq < freqmin || freqmax < p[i].freq)
-  {
-    Error_silent
-      ("photo_gen_agn: phot no. %d freq %g out of range %g %g\n",
-       i, p[i].freq, freqmin, freqmax);
-  }
+    if (p[i].freq < freqmin || freqmax < p[i].freq)
+    {
+      Error_silent ("photo_gen_agn: phot no. %d freq %g out of range %g %g\n", i, p[i].freq, freqmin, freqmax);
+    }
 
 
     /* first option is for the original spherical X-ray source as used in e.g. Higginbottom+ 2013 */
 
-      if (geo.pl_geometry == PL_GEOMETRY_SPHERE)
-  {
-    randvec (p[i].x, r);
+    if (geo.pl_geometry == PL_GEOMETRY_SPHERE)
+    {
+      randvec (p[i].x, r);
 
-    /* Added by SS August 2004 for finite disk. */
-    if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
+      /* Added by SS August 2004 for finite disk. */
+      if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
       {
         /* JM XXX -- is this bit right? it seems to be that zdisk should use the x coordinate rather than
            magnitude of vector (r) */
         while (fabs (p[i].x[2]) < zdisk (r))
-    {
-      randvec (p[i].x, r);
-    }
+        {
+          randvec (p[i].x, r);
+        }
 
 
         if (fabs (p[i].x[2]) < zdisk (r))
-    {
-      Error ("Photon_agn: agn photon %d in disk %g %g %g %g %g\n",
-       i, p[i].x[0], p[i].x[1], p[i].x[2], zdisk (r), r);
-      exit (0);
-    }
+        {
+          Error ("Photon_agn: agn photon %d in disk %g %g %g %g %g\n", i, p[i].x[0], p[i].x[1], p[i].x[2], zdisk (r), r);
+          exit (0);
+        }
       }
-    /* this last bit is the direction, might need a change */
-    randvcos (p[i].lmn, p[i].x);
-  }
+      /* this last bit is the direction, might need a change */
+      randvcos (p[i].lmn, p[i].x);
+    }
 
 
 
-      /* if we have a lamp post geometry then we should generate isotropic photons at a height
-         above the disk plane */
-      else if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
-  {
-    /* x and y coordinates are 0 */
-    p[i].x[0] = p[i].x[1] = 0.0;
+    /* if we have a lamp post geometry then we should generate isotropic photons at a height
+       above the disk plane */
+    else if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
+    {
+      /* x and y coordinates are 0 */
+      p[i].x[0] = p[i].x[1] = 0.0;
 
-    /* need to set the z coordinate to the lamp post height, but allow it to be above or below */
-    if (rand () > MAXRAND / 2)
-      {     /* Then the photon emerges in the upper hemisphere */
+      /* need to set the z coordinate to the lamp post height, but allow it to be above or below */
+      if (rand () > MAXRAND / 2)
+      {                         /* Then the photon emerges in the upper hemisphere */
         p[i].x[2] = geo.lamp_post_height;
       }
-    else
+      else
       {
         p[i].x[2] = -geo.lamp_post_height;
       }
 
-    randvec (p[i].lmn, 1.0);  // lamp-post geometry is isotropic, so completely random vector
-  }
-
+      randvec (p[i].lmn, 1.0);  // lamp-post geometry is isotropic, so completely random vector
     }
+
+  }
 
   return (0);
 }

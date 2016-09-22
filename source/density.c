@@ -42,7 +42,7 @@ History:
 
 double
 get_ion_density (ndom, x, nion)
-int	ndom;
+     int ndom;
      double x[];
      int nion;
 {
@@ -57,20 +57,20 @@ structure that must be summed. We need to convert that to a position
 in the plasma structure*/
 
   if ((coord_fraction (ndom, 1, x, nnn, frac, &nelem)) > 0)
+  {
+
+    dd = 0;
+
+    for (nn = 0; nn < nelem; nn++)
     {
-
-      dd = 0;
-
-      for (nn = 0; nn < nelem; nn++)
-	{
-	  nplasma = wmain[nnn[nn]].nplasma;
-	  dd += plasmamain[nplasma].density[nion] * frac[nn];
-	}
+      nplasma = wmain[nnn[nn]].nplasma;
+      dd += plasmamain[nplasma].density[nion] * frac[nn];
     }
+  }
   else
-    {
-      dd = 0;
-    }
+  {
+    dd = 0;
+  }
 
 
   return (dd);

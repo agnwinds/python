@@ -56,22 +56,22 @@ sigma_phot (x_ptr, freq)
   double f1, f2, f3;
   double xsection;
 
-  ft = x_ptr->freq_t;		/* threshold frequency */
+  ft = x_ptr->freq_t;           /* threshold frequency */
 
   if (ft < freq && freq < x_ptr->freq_max)
-    {
-      x = freq / x_ptr->freq0 - x_ptr->y0;
-      y = sqrt (x * x + x_ptr->y1 * x_ptr->y1);
+  {
+    x = freq / x_ptr->freq0 - x_ptr->y0;
+    y = sqrt (x * x + x_ptr->y1 * x_ptr->y1);
 
-      /* This was line fixed by CK in 1998 Jul */
-      f1 = (x - 1.0) * (x - 1.0) + x_ptr->yw * x_ptr->yw;
+    /* This was line fixed by CK in 1998 Jul */
+    f1 = (x - 1.0) * (x - 1.0) + x_ptr->yw * x_ptr->yw;
 
-      f2 = pow (y, 0.5 * x_ptr->p - 5.5);
-      f3 = pow (1.0 + sqrt (y / x_ptr->ya), -x_ptr->p);
-      xsection = x_ptr->sigma * f1 * f2 * f3;	// the photoinization xsection
+    f2 = pow (y, 0.5 * x_ptr->p - 5.5);
+    f3 = pow (1.0 + sqrt (y / x_ptr->ya), -x_ptr->p);
+    xsection = x_ptr->sigma * f1 * f2 * f3;     // the photoinization xsection
 
-      return (xsection);
-    }
+    return (xsection);
+  }
   else
     return (0.0);
 }
@@ -85,7 +85,7 @@ sigma_phot (x_ptr, freq)
  *             99jan        ksl Modified so would shortcircuit calculation if 
  *                called multiple times for same a
  *                 */
-#define A21_CONSTANT 7.429297e-22	// 8 * PI * PI * E * E / (MELEC * C * C * C)
+#define A21_CONSTANT 7.429297e-22       // 8 * PI * PI * E * E / (MELEC * C * C * C)
 
 struct lines *a21_line_ptr;
 double a21_a;
@@ -97,13 +97,11 @@ a21 (line_ptr)
   double freq;
 
   if (a21_line_ptr != line_ptr)
-    {
-      freq = line_ptr->freq;
-      a21_a =
-	A21_CONSTANT * line_ptr->gl / line_ptr->gu * freq * freq *
-	line_ptr->f;
-      a21_line_ptr = line_ptr;
-    }
+  {
+    freq = line_ptr->freq;
+    a21_a = A21_CONSTANT * line_ptr->gl / line_ptr->gu * freq * freq * line_ptr->f;
+    a21_line_ptr = line_ptr;
+  }
 
   return (a21_a);
 }

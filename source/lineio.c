@@ -54,14 +54,14 @@ get_line (fptr, line)
 
 
 a:if (fgets (line, LINELEN, fptr) == NULL)
-    {
-      return (EOF);
-    }
+  {
+    return (EOF);
+  }
   j = sscanf (line, "%s", dummy);
   if (dummy[0] == '#' || j == 0)
-    {
-      goto a;
-    }
+  {
+    goto a;
+  }
 
 
   return (0);

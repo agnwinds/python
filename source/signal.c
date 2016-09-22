@@ -76,50 +76,50 @@ xsignal (char *root, char *format, ...)
 
   /* if we are in MPI mode we only want the master process to write to sig file */
 #ifdef MPI_ON
-  if (rank_global==0)
-    {
+  if (rank_global == 0)
+  {
 #endif
 
 
-  /* Make the filemne */
-  strcpy (filename, "");
-  strcpy (filename, root);
-  strcat (filename, ".sig");
+    /* Make the filemne */
+    strcpy (filename, "");
+    strcpy (filename, root);
+    strcat (filename, ".sig");
 
-  /* Open the file so that it will append if the file exists */
+    /* Open the file so that it will append if the file exists */
 
 
-  if ((sptr = fopen (filename, "a")) == NULL)
+    if ((sptr = fopen (filename, "a")) == NULL)
     {
       Error ("xsignal: Could not even open signal file %s\n", filename);
       exit (0);
     }
 
-  /* Now generate the message */
+    /* Now generate the message */
 
-  /* Get the current time */
-  get_time (curtime);
-
-
-  elapsed_time = timer ();
-
-  /* Get the time since the time was initiated */
+    /* Get the current time */
+    get_time (curtime);
 
 
-  fprintf (sptr, "%s %8.1f ", curtime, elapsed_time);
+    elapsed_time = timer ();
+
+    /* Get the time since the time was initiated */
 
 
-  va_start (ap, format);
-  va_copy (ap2, ap);		/* Added because vfprintf can change ap */
-  vfprintf (sptr, format, ap);
-  va_end (ap);
+    fprintf (sptr, "%s %8.1f ", curtime, elapsed_time);
 
 
-  vsprintf (message, format, ap2);
-  Log ("xxx %s %8.1f %s", curtime, elapsed_time, message);
+    va_start (ap, format);
+    va_copy (ap2, ap);          /* Added because vfprintf can change ap */
+    vfprintf (sptr, format, ap);
+    va_end (ap);
 
 
-  fclose (sptr);
+    vsprintf (message, format, ap2);
+    Log ("xxx %s %8.1f %s", curtime, elapsed_time, message);
+
+
+    fclose (sptr);
 
 #ifdef MPI_ON
   }
@@ -137,20 +137,20 @@ xsignal_rm (char *root)
 {
 
 #ifdef MPI_ON
-  if (rank_global==0)   // only remove sig file if 0th thread
-    {
+  if (rank_global == 0)         // only remove sig file if 0th thread
+  {
 #endif
 
-  char filename[LINELENGTH];
-  char command[LINELENGTH];
-  /* Make the filemne */
-  strcpy (filename, "");
-  strcpy (filename, root);
-  strcat (filename, ".sig");
+    char filename[LINELENGTH];
+    char command[LINELENGTH];
+    /* Make the filemne */
+    strcpy (filename, "");
+    strcpy (filename, root);
+    strcat (filename, ".sig");
 
-  strcpy (command, "rm ");
-  strcat (command, filename);
-  system (command);
+    strcpy (command, "rm ");
+    strcat (command, filename);
+    system (command);
 
 #ifdef MPI_ON
   }
@@ -216,11 +216,11 @@ check_time (char *root)
 {
   double t;
   if (max_time > 0.0 && (t = timer () > max_time))
-    {
-      error_summary ("Time allowed has expired expired\n");
-      xsignal (root, "COMMENT max_time %.1f exceeded\n", max_time);
-      exit (0);
-    };
+  {
+    error_summary ("Time allowed has expired expired\n");
+    xsignal (root, "COMMENT max_time %.1f exceeded\n", max_time);
+    exit (0);
+  };
 
   return (0);
 }

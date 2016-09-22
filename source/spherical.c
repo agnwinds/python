@@ -59,10 +59,10 @@ spherical_ds_in_cell (p)
   ndom = wmain[p->grid].ndom;
 
   if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
-    {
-      Error ("translate_in_wind: Photon not in grid when routine entered\n");
-      return (n);		/* Photon was not in wind */
-    }
+  {
+    Error ("translate_in_wind: Photon not in grid when routine entered\n");
+    return (n);                 /* Photon was not in wind */
+  }
 
   ix = n;
 
@@ -74,9 +74,9 @@ spherical_ds_in_cell (p)
     smax = s;
 
   if (smax <= 0)
-    {
-      Error ("spherical: ds_in_cell %f\n", smax);
-    }
+  {
+    Error ("spherical: ds_in_cell %f\n", smax);
+  }
   return (smax);
 }
 
@@ -115,52 +115,49 @@ spherical_make_grid (w, ndom)
      int ndom;
 {
   double dr, dlogr;
-  int j,n;
+  int j, n;
   int ndim;
 
-  ndim=zdom[ndom].ndim;
+  ndim = zdom[ndom].ndim;
 
   /* JM question -- shouldn't we be looping over nstart to nstop here? 
-    Or alternatively setting w[n + nstart] where nstart = zdom[ndom].nstart.
-   ksl anwswer -- Yes.  Changed 1605  */
+     Or alternatively setting w[n + nstart] where nstart = zdom[ndom].nstart.
+     ksl anwswer -- Yes.  Changed 1605  */
 
-  for (j=0; j < ndim; j++)
+  for (j = 0; j < ndim; j++)
+  {
     {
-      {
-	n=j+zdom[ndom].nstart; // This is the element in wmain
+      n = j + zdom[ndom].nstart;        // This is the element in wmain
 
-	/*Define the grid points */
-	if (zdom[ndom].log_linear == 1)
-	  {			// linear intervals
+      /*Define the grid points */
+      if (zdom[ndom].log_linear == 1)
+      {                         // linear intervals
 
-	    dr = (zdom[ndom].rmax - geo.rstar) / (ndim - 3);
-	    w[n].r = geo.rstar + j * dr;
-	    w[n].rcen = w[n].r + 0.5 * dr;
-	  }
-	else
-	  {			//logarithmic intervals
-
-	    dlogr =
-	      (log10 (zdom[ndom].rmax / zdom[ndom].rmin)) / (ndim - 3);
-	    w[n].r = zdom[ndom].rmin * pow (10., dlogr * (j - 1));
-	    w[n].rcen = 0.5 * zdom[ndom].rmin * (pow (10., dlogr * (j)) +
-						      pow (10.,
-							   dlogr * (j - 1)));
-	    Log ("New W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
-	  }
-
-	/* Now calculate the positions of these points in the xz plane.
-	   There is a choice about how one does this.  Here we  have elected
-	   to calculate this at a 45 degree angle.  in the hopes this will 
-	   be a reasonable portion of the wind in a biconical flow.
-	 */
-
-	w[n].x[1] = w[n].xcen[1] = 0.0;
-	w[n].x[0] = w[n].x[2] = w[n].r * sin (PI / 4.);
-	w[n].xcen[0] = w[n].xcen[2] = w[n].rcen * sin (PI / 4.);
-
+        dr = (zdom[ndom].rmax - geo.rstar) / (ndim - 3);
+        w[n].r = geo.rstar + j * dr;
+        w[n].rcen = w[n].r + 0.5 * dr;
       }
+      else
+      {                         //logarithmic intervals
+
+        dlogr = (log10 (zdom[ndom].rmax / zdom[ndom].rmin)) / (ndim - 3);
+        w[n].r = zdom[ndom].rmin * pow (10., dlogr * (j - 1));
+        w[n].rcen = 0.5 * zdom[ndom].rmin * (pow (10., dlogr * (j)) + pow (10., dlogr * (j - 1)));
+        Log ("New W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
+      }
+
+      /* Now calculate the positions of these points in the xz plane.
+         There is a choice about how one does this.  Here we  have elected
+         to calculate this at a 45 degree angle.  in the hopes this will 
+         be a reasonable portion of the wind in a biconical flow.
+       */
+
+      w[n].x[1] = w[n].xcen[1] = 0.0;
+      w[n].x[0] = w[n].x[2] = w[n].r * sin (PI / 4.);
+      w[n].xcen[0] = w[n].xcen[2] = w[n].rcen * sin (PI / 4.);
+
     }
+  }
 
   return (0);
 
@@ -209,10 +206,8 @@ spherical_wind_complete (ndom, w)
   for (i = 0; i < ndim - 1; i++)
     zdom[ndom].wind_midx[i] = w[nstart + i].rcen;
   /* Add something plausible for the edges */
-  zdom[ndom].wind_midx[ndim - 1] =
-    2. * zdom[ndom].wind_x[ndim - 1] - zdom[ndom].wind_midx[ndim - 2];
-  zdom[ndom].wind_midz[ndim - 1] =
-    2. * zdom[ndom].wind_z[ndim - 1] - zdom[ndom].wind_midz[ndim - 2];
+  zdom[ndom].wind_midx[ndim - 1] = 2. * zdom[ndom].wind_x[ndim - 1] - zdom[ndom].wind_midx[ndim - 2];
+  zdom[ndom].wind_midz[ndim - 1] = 2. * zdom[ndom].wind_z[ndim - 1] - zdom[ndom].wind_midz[ndim - 2];
 
   return (0);
 }
@@ -264,7 +259,7 @@ spherical_volumes (ndom, w)
   double rmin, rmax;
   double thetamin, thetamax;
   int jj, kk;
-  int ndim, nstart,ndomain;
+  int ndim, nstart, ndomain;
 
   ndim = zdom[ndom].ndim;
   nstart = zdom[ndom].nstart;
@@ -274,67 +269,66 @@ spherical_volumes (ndom, w)
   thetamax = 0.5 * PI;
 
   for (i = 0; i < ndim; i++)
+  {
     {
+      n = i + nstart;           // nstart is the offset into the wind cell
+      rmin = zdom[ndom].wind_x[i];
+      rmax = zdom[ndom].wind_x[i + 1];
+
+      w[n].vol = 4. / 3. * PI * (rmax * rmax * rmax - rmin * rmin * rmin);
+
+      if (i == ndim - 1)
       {
-	n = i + nstart; // nstart is the offset into the wind cell
-	rmin = zdom[ndom].wind_x[i];
-	rmax = zdom[ndom].wind_x[i + 1];
-
-	w[n].vol = 4. / 3. * PI * (rmax * rmax * rmax - rmin * rmin * rmin);
-
-	if (i == ndim - 1)
-	  {
-	    fraction = 0.0;	/* Force outside edge volues to zero */
-	    jj = 0;
-	    kk = RESOLUTION;
-	  }
-	else if (i == ndim - 2)
-	  {
-	    fraction = 0.0;	/* Force outside edge volues to zero */
-	    jj = 0;
-	    kk = RESOLUTION;
-	  }
-	else
-	  {			/* Determine whether the cell is in the wind */
-	    num = denom = 0;
-	    jj = kk = 0;
-	    dr = (rmax - rmin) / RESOLUTION;
-	    dtheta = (thetamax - thetamin) / RESOLUTION;
-	    for (r = rmin + dr / 2; r < rmax; r += dr)
-	      {
-		for (theta = thetamin + dtheta / 2; theta < thetamax;
-		     theta += dtheta)
-		  {
-		    denom += r * r * sin (theta);;
-		    kk++;
-		    x[0] = r * sin (theta);
-		    x[1] = 0;
-		    x[2] = r * cos (theta);;
-		    if (where_in_wind (x, &ndomain) == W_ALL_INWIND)
-		      {
-			num += r * r * sin (theta);	/* 0 implies in wind */
-			jj++;
-		      }
-		  }
-	      }
-	    fraction = num / denom;
-	  }
-	if (jj == 0)
-	  {
-	    w[n].inwind = W_NOT_INWIND;	// The cell is not in the wind
-	    w[n].vol = 0.0;
-	  }
-	else if (jj == kk)
-	  w[n].inwind = W_ALL_INWIND; // The cell is completely in the wind
-	else
-	  {
-	    w[n].inwind = W_PART_INWIND;      //The cell is partially in the wind
-	    w[n].vol *= fraction;
-	  }
-
-
+        fraction = 0.0;         /* Force outside edge volues to zero */
+        jj = 0;
+        kk = RESOLUTION;
       }
+      else if (i == ndim - 2)
+      {
+        fraction = 0.0;         /* Force outside edge volues to zero */
+        jj = 0;
+        kk = RESOLUTION;
+      }
+      else
+      {                         /* Determine whether the cell is in the wind */
+        num = denom = 0;
+        jj = kk = 0;
+        dr = (rmax - rmin) / RESOLUTION;
+        dtheta = (thetamax - thetamin) / RESOLUTION;
+        for (r = rmin + dr / 2; r < rmax; r += dr)
+        {
+          for (theta = thetamin + dtheta / 2; theta < thetamax; theta += dtheta)
+          {
+            denom += r * r * sin (theta);;
+            kk++;
+            x[0] = r * sin (theta);
+            x[1] = 0;
+            x[2] = r * cos (theta);;
+            if (where_in_wind (x, &ndomain) == W_ALL_INWIND)
+            {
+              num += r * r * sin (theta);       /* 0 implies in wind */
+              jj++;
+            }
+          }
+        }
+        fraction = num / denom;
+      }
+      if (jj == 0)
+      {
+        w[n].inwind = W_NOT_INWIND;     // The cell is not in the wind
+        w[n].vol = 0.0;
+      }
+      else if (jj == kk)
+        w[n].inwind = W_ALL_INWIND;     // The cell is completely in the wind
+      else
+      {
+        w[n].inwind = W_PART_INWIND;    //The cell is partially in the wind
+        w[n].vol *= fraction;
+      }
+
+
     }
+  }
 
   return (0);
 }
@@ -396,20 +390,20 @@ spherical_where_in_grid (ndom, x)
 
   /* Check to see if x is outside the region of the calculation */
   if (r > zdom[ndom].wind_x[ndim - 1])
-    {
-      return (-2);		/* x is outside grid */
-    }
+  {
+    return (-2);                /* x is outside grid */
+  }
   else if (r < zdom[ndom].wind_x[0])
-    {
-      return (-1);		/*x is inside grid */
-    }
+  {
+    return (-1);                /*x is inside grid */
+  }
 
   fraction (r, zdom[ndom].wind_x, ndim, &n, &f, 0);
 
   // n is the position with this domain, so zdom[ndom].nstart is added 
   // get to wmain
 
-  return (n+zdom[ndom].nstart);
+  return (n + zdom[ndom].nstart);
 }
 
 /***********************************************************
@@ -437,14 +431,14 @@ spherical_where_in_grid (ndom, x)
 
 int
 spherical_get_random_location (n, x)
-     int n;			// Cell in which to create position
-     double x[];		// Returned position
+     int n;                     // Cell in which to create position
+     double x[];                // Returned position
 {
   int i, j;
   int inwind;
   double r, rmin, rmax;
   double theta, phi;
-  int ndom,ndomain;
+  int ndom, ndomain;
 
   ndom = wmain[n].ndom;
   wind_n_to_ij (ndom, n, &i, &j);
@@ -455,20 +449,18 @@ spherical_get_random_location (n, x)
   /* Generate a position which is both in the cell and in the wind */
   inwind = W_NOT_INWIND;
   while (inwind != W_ALL_INWIND)
-    {
-      r = (rmin * rmin * rmin) +
-	(rmax * rmax * rmax -
-	 rmin * rmin * rmin) * (rand () / (MAXRAND - 0.5));
-      r = pow (r, (1. / 3.));
-      theta = acos (2. * (rand () / MAXRAND) - 1);
+  {
+    r = (rmin * rmin * rmin) + (rmax * rmax * rmax - rmin * rmin * rmin) * (rand () / (MAXRAND - 0.5));
+    r = pow (r, (1. / 3.));
+    theta = acos (2. * (rand () / MAXRAND) - 1);
 
-      phi = 2. * PI * (rand () / MAXRAND);
+    phi = 2. * PI * (rand () / MAXRAND);
 /* Project from r, theta phi to x y z  */
-      x[0] = r * cos (phi) * sin (theta);
-      x[1] = r * sin (phi) * sin (theta);
-      x[2] = r * cos (theta);
-      inwind = where_in_wind (x,&ndomain);	/* Some photons will not be in the wind */
-    }
+    x[0] = r * cos (phi) * sin (theta);
+    x[1] = r * sin (phi) * sin (theta);
+    x[2] = r * cos (theta);
+    inwind = where_in_wind (x, &ndomain);       /* Some photons will not be in the wind */
+  }
 
   return (inwind);
 }
@@ -517,15 +509,15 @@ spherical_get_random_location (n, x)
 
 int
 spherical_extend_density (ndom, w)
-	int ndom;
+     int ndom;
      WindPtr w;
 {
 
   int j, n, m;
-  int ndim,nstart;
+  int ndim, nstart;
 
-  ndim=zdom[ndom].ndim;
-  nstart=zdom[ndom].nstart;
+  ndim = zdom[ndom].ndim;
+  nstart = zdom[ndom].nstart;
   /* 
      Now we need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
      In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
@@ -533,28 +525,28 @@ spherical_extend_density (ndom, w)
    */
 
   for (j = 0; j < ndim - 1; j++)
+  {
+    n = nstart + j;
+    if (w[n].vol == 0)          // Then the grid point is not in the wind
+
     {
-      n = nstart+j;
-      if (w[n].vol == 0)	// Then the grid point is not in the wind
+      m = n + 1;
+      if (w[m].vol > 0)         // Then grid point n is just inside the wind
+      {                         // To extend we copy  copy the densities to the grid cell n
+        w[n].nplasma = w[m].nplasma;
 
-	{
-	  m = n + 1;
-	  if (w[m].vol > 0)	// Then grid point n is just inside the wind
-	    {			// To extend we copy  copy the densities to the grid cell n
-	      w[n].nplasma = w[m].nplasma;
+      }
+      else if (j > 0)
+      {
+        m = n - 1;
+        if (w[m].vol > 0)       // The grid point is just outside the wind
+        {
+          w[n].nplasma = w[m].nplasma;
 
-	    }
-	  else if (j > 0)
-	    {
-	      m = n - 1;
-	      if (w[m].vol > 0)	// The grid point is just outside the wind
-		{
-		  w[n].nplasma = w[m].nplasma;
-
-		}
-	    }
-	}
+        }
+      }
     }
+  }
 
   return (0);
 
@@ -596,15 +588,13 @@ shell_make_grid (w, ndom)
   int n;
   int ndim;
 
-  ndim=zdom[ndom].ndim;
+  ndim = zdom[ndom].ndim;
 
 
-  w[0].r =
-    zdom[ndom].rmin - (zdom[ndom].rmax - zdom[ndom].rmin);
+  w[0].r = zdom[ndom].rmin - (zdom[ndom].rmax - zdom[ndom].rmin);
   w[1].r = zdom[ndom].rmin;
   w[2].r = zdom[ndom].rmax;
-  w[3].r =
-    zdom[ndom].rmax + (zdom[ndom].rmax - zdom[ndom].rmin);
+  w[3].r = zdom[ndom].rmax + (zdom[ndom].rmax - zdom[ndom].rmin);
 
 
 
@@ -623,17 +613,16 @@ shell_make_grid (w, ndom)
      a biconical flow.
    */
   for (n = 0; n < ndim; n++)
-    {
-      Log ("Cell %i:  inner edge = %2.20e, centre = %2.20e\n", n, w[n].r,
-	   w[n].rcen);
-      w[n].x[1] = w[n].xcen[1] = 0.0;
+  {
+    Log ("Cell %i:  inner edge = %2.20e, centre = %2.20e\n", n, w[n].r, w[n].rcen);
+    w[n].x[1] = w[n].xcen[1] = 0.0;
 
-      //NSH Slight change here, using 1/root2 give more accurate results than sin45.
+    //NSH Slight change here, using 1/root2 give more accurate results than sin45.
 
 
-      w[n].x[0] = w[n].x[2] = w[n].r / pow (2.0, 0.5);
-      w[n].xcen[0] = w[n].xcen[2] = w[n].rcen / pow (2.0, 0.5);
-    }
+    w[n].x[0] = w[n].x[2] = w[n].r / pow (2.0, 0.5);
+    w[n].xcen[0] = w[n].xcen[2] = w[n].rcen / pow (2.0, 0.5);
+  }
 
 
   return (0);

@@ -116,10 +116,9 @@ dot (a, b)
   x = a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 
   if (sane_check (x))
-    {
-      Error ("dot:sane_check of x: a %f %f %f b %f %f %f\n",
-	     a[0], a[1], a[2], b[0], b[1], b[2]);
-    }
+  {
+    Error ("dot:sane_check of x: a %f %f %f b %f %f %f\n", a[0], a[1], a[2], b[0], b[1], b[2]);
+  }
   return (x);
 }
 
@@ -151,12 +150,12 @@ renorm (a, scalar)
   double dot ();
   x = (dot (a, a));
   if (x < EPS)
-    {
-      Log ("renorm: Cannot renormalize a vector of length 0\n");
-      Log ("renorm: %e %e %e\n", a[0], a[1], a[2]);
-      Log("renorm returning -1\n");
-      return (-1);
-    }
+  {
+    Log ("renorm: Cannot renormalize a vector of length 0\n");
+    Log ("renorm: %e %e %e\n", a[0], a[1], a[2]);
+    Log ("renorm returning -1\n");
+    return (-1);
+  }
   x = scalar / sqrt (x);
   a[0] *= x;
   a[1] *= x;
@@ -259,11 +258,10 @@ project_from_xyz_cyl (a, b, result)
   n_rho[1] = a[1];
   n_rho[2] = 0;
   if (renorm (n_rho, 1.0) == -1)
-    {
-      Log
-	("Position on z axis; conversion cylintrical coords indeterminate\n");
-      return (-1);
-    }
+  {
+    Log ("Position on z axis; conversion cylintrical coords indeterminate\n");
+    return (-1);
+  }
   n_z[0] = n_z[1] = 0;
   n_z[2] = 1;
   cross (n_z, n_rho, n_phi);
@@ -288,10 +286,9 @@ project_from_cyl_xyz (a, b, result)
   double x, ctheta, stheta;
 
   if ((x = sqrt (a[0] * a[0] + a[1] * a[1])) == 0)
-    {
-      Error ("project_from_cyl_xyz: indeterminate a =%f %f %f\n", a[0], a[1],
-	     a[2]);
-    }
+  {
+    Error ("project_from_cyl_xyz: indeterminate a =%f %f %f\n", a[0], a[1], a[2]);
+  }
   ctheta = a[0] / x;
   stheta = a[1] / x;
 
@@ -321,26 +318,26 @@ create_basis (u, v, basis_new)
   double dot ();
 
   for (i = 0; i < 3; i++)
-    {
-      x[i] = u[i];
-      y[i] = v[i];
-    }
+  {
+    x[i] = u[i];
+    y[i] = v[i];
+  }
   if (renorm (x, 1.) || renorm (y, 1.))
-    {
-      Log ("Problem creating basis: Either u or v had length 0\n");
-      Log ("create_basis: u %e %e %e\n", u[0], u[1], u[2]);
-      Log ("create_basis: v %e %e %e\n", v[0], v[1], v[2]);
-      return (-1);
-    }
+  {
+    Log ("Problem creating basis: Either u or v had length 0\n");
+    Log ("create_basis: u %e %e %e\n", u[0], u[1], u[2]);
+    Log ("create_basis: v %e %e %e\n", v[0], v[1], v[2]);
+    return (-1);
+  }
   if ((mu_x = dot (x, y)) > 1. - EPS)
-    {
-      Log ("Problem creating basis u,v parallel\n");
-      Log ("create_basis: u %e %e %e\n", u[0], u[1], u[2]);
-      Log ("create_basis: v %e %e %e\n", v[0], v[1], v[2]);
-      return (-1);
-    }
+  {
+    Log ("Problem creating basis u,v parallel\n");
+    Log ("create_basis: u %e %e %e\n", u[0], u[1], u[2]);
+    Log ("create_basis: v %e %e %e\n", v[0], v[1], v[2]);
+    return (-1);
+  }
   for (i = 0; i < 3; i++)
-    y[i] -= mu_x * x[i];	/* y=y-dot(x,y)*x is orthogonal to x */
+    y[i] -= mu_x * x[i];        /* y=y-dot(x,y)*x is orthogonal to x */
 
   renorm (y, 1.);
 
@@ -349,11 +346,11 @@ create_basis (u, v, basis_new)
 
 
   for (i = 0; i < 3; i++)
-    {
-      basis_new->a[i][0] = x[i];
-      basis_new->a[i][1] = y[i];
-      basis_new->a[i][2] = z[i];
-    }
+  {
+    basis_new->a[i][0] = x[i];
+    basis_new->a[i][1] = y[i];
+    basis_new->a[i][2] = z[i];
+  }
 
   return (0);
 }
@@ -362,38 +359,38 @@ create_basis (u, v, basis_new)
 
 int
 project_from (basis_from, v_in, v_out)
-     struct basis *basis_from;	/* direction cosines to go from rotated to unrotated frame */
-     double v_in[], v_out[];	/*v_in here is in rotated frame, v_out in unrotated frame */
+     struct basis *basis_from;  /* direction cosines to go from rotated to unrotated frame */
+     double v_in[], v_out[];    /*v_in here is in rotated frame, v_out in unrotated frame */
 
 {
   int i, j;
   for (i = 0; i < 3; i++)
+  {
+    v_out[i] = 0;
+    for (j = 0; j < 3; j++)
     {
-      v_out[i] = 0;
-      for (j = 0; j < 3; j++)
-	{
-	  v_out[i] += basis_from->a[i][j] * v_in[j];
-	}
+      v_out[i] += basis_from->a[i][j] * v_in[j];
     }
+  }
   return (0);
 }
 
 /* This routine projects a vector in the unrotated frame onto the rotated frame */
 int
 project_to (basis_from, v_in, v_out)
-     struct basis *basis_from;	/* direction cosines to go from rotated to unrotated frame */
-     double v_in[], v_out[];	/*v_in here is in unrotated frame, v_out in rotated frame */
+     struct basis *basis_from;  /* direction cosines to go from rotated to unrotated frame */
+     double v_in[], v_out[];    /*v_in here is in unrotated frame, v_out in rotated frame */
 
 {
   int i, j;
   for (i = 0; i < 3; i++)
+  {
+    v_out[i] = 0;
+    for (j = 0; j < 3; j++)
     {
-      v_out[i] = 0;
-      for (j = 0; j < 3; j++)
-	{
-	  v_out[i] += basis_from->a[j][i] * v_in[j];
-	}
+      v_out[i] += basis_from->a[j][i] * v_in[j];
     }
+  }
   return (0);
 }
 
@@ -410,23 +407,23 @@ reorient (basis_from, basis_to, v_from, v_to)
   double a[3][3];
   int i, j, k;
   for (i = 0; i < 3; i++)
+  {
+    for (j = 0; j < 3; j++)
     {
-      for (j = 0; j < 3; j++)
-	{
-	  a[i][j] = 0;
-	  for (k = 0; k < 3; k++)
-	    {
-	      a[i][j] += basis_to->a[k][i] * basis_from->a[k][j];
-	    }
-	}
+      a[i][j] = 0;
+      for (k = 0; k < 3; k++)
+      {
+        a[i][j] += basis_to->a[k][i] * basis_from->a[k][j];
+      }
     }
+  }
   for (i = 0; i < 3; i++)
+  {
+    v_to[i] = 0;
+    for (j = 0; j < 3; j++)
     {
-      v_to[i] = 0;
-      for (j = 0; j < 3; j++)
-	{
-	  v_to[i] += a[i][j] * v_from[j];
-	}
+      v_to[i] += a[i][j] * v_from[j];
     }
+  }
   return (0);
 }

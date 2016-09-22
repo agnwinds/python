@@ -51,7 +51,7 @@ main (argc, argv)
   int ochoice;
 
   char root[LINELENGTH], input[LINELENGTH];
-  char rootname[LINELENGTH];	// this takes into account domains
+  char rootname[LINELENGTH];    // this takes into account domains
   char outputfile[LINELENGTH];
   char windsavefile[LINELENGTH];
   char parameter_file[LINELENGTH];
@@ -68,16 +68,16 @@ main (argc, argv)
   Log_set_verbosity (3);
 
   if (argc == 1)
-    {
-      printf ("Root for wind file :");
-      fgets (input, LINELENGTH, stdin);
-      get_root (root, input);
-    }
+  {
+    printf ("Root for wind file :");
+    fgets (input, LINELENGTH, stdin);
+    get_root (root, input);
+  }
   else
-    {
-      strcpy (input, argv[argc - 1]);
-      get_root (root, input);
-    }
+  {
+    strcpy (input, argv[argc - 1]);
+    get_root (root, input);
+  }
 
 
   printf ("Reading data from file %s\n", root);
@@ -94,10 +94,10 @@ main (argc, argv)
 /* Read in the wind file */
 
   if (wind_read (windsavefile) < 0)
-    {
-      Error ("py_wind: Could not open %s", windsavefile);
-      exit (0);
-    }
+  {
+    Error ("py_wind: Could not open %s", windsavefile);
+    exit (0);
+  }
 
 
   printf ("Read wind_file %s\n", windsavefile);
@@ -111,17 +111,17 @@ main (argc, argv)
 
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
-    {
+  {
 
-      sprintf (rootname, "%s.%d", root, ndom);
+    sprintf (rootname, "%s.%d", root, ndom);
 
-      create_master_table (ndom, rootname);
-      create_ion_table (ndom, rootname, 6);
-      create_ion_table (ndom, rootname, 7);
-      create_ion_table (ndom, rootname, 8);
-      create_ion_table (ndom, rootname, 14);
-      create_ion_table (ndom, rootname, 26);
-    }
+    create_master_table (ndom, rootname);
+    create_ion_table (ndom, rootname, 6);
+    create_ion_table (ndom, rootname, 7);
+    create_ion_table (ndom, rootname, 8);
+    create_ion_table (ndom, rootname, 14);
+    create_ion_table (ndom, rootname, 26);
+  }
   return (0);
 }
 
@@ -257,87 +257,82 @@ create_master_table (ndom, rootname)
 
 
   if (zdom[ndom].coord_type == SPHERICAL)
+  {
+
+
+    /* First assemble the header line
+     */
+
+    sprintf (start, "%8s %4s %8s %6s %8s %8s %8s ", "r", "i", "inwind", "converge", "v_x", "v_y", "v_z");
+    strcpy (one_line, start);
+    n = 0;
+    while (n < ncols)
     {
+      sprintf (one_value, "%9s ", column_name[n]);
+      strcat (one_line, one_value);
+
+      n++;
+    }
+    fprintf (fptr, "%s\n", one_line);
 
 
-      /* First assemble the header line
-       */
+    /* Now assemble the lines of the table */
 
-      sprintf (start, "%8s %4s %8s %6s %8s %8s %8s ", "r", "i", "inwind",
-	       "converge", "v_x", "v_y", "v_z");
+    for (i = 0; i < ndim2; i++)
+    {
+      // This line is different from the two d case
+      sprintf (start, "%8.2e %4d %6d %8.0f %8.2e %8.2e %8.2e ",
+               wmain[nstart + i].r, i, wmain[nstart + i].inwind,
+               converge[i], wmain[nstart + i].v[0], wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
       strcpy (one_line, start);
       n = 0;
       while (n < ncols)
-	{
-	  sprintf (one_value, "%9s ", column_name[n]);
-	  strcat (one_line, one_value);
-
-	  n++;
-	}
+      {
+        sprintf (one_value, "%9.2e ", c[n][i]);
+        strcat (one_line, one_value);
+        n++;
+      }
       fprintf (fptr, "%s\n", one_line);
-
-
-      /* Now assemble the lines of the table */
-
-      for (i = 0; i < ndim2; i++)
-	{
-	  // This line is different from the two d case
-	  sprintf (start, "%8.2e %4d %6d %8.0f %8.2e %8.2e %8.2e ",
-		   wmain[nstart + i].r, i, wmain[nstart + i].inwind,
-		   converge[i], wmain[nstart + i].v[0],
-		   wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
-	  strcpy (one_line, start);
-	  n = 0;
-	  while (n < ncols)
-	    {
-	      sprintf (one_value, "%9.2e ", c[n][i]);
-	      strcat (one_line, one_value);
-	      n++;
-	    }
-	  fprintf (fptr, "%s\n", one_line);
-	}
     }
+  }
   else
+  {
+
+    /* First assemble the header line */
+
+    sprintf (start, "%8s %8s %4s %4s %6s %8s %8s %8s %8s ", "x", "z", "i", "j", "inwind", "converge", "v_x", "v_y", "v_z");
+    strcpy (one_line, start);
+    n = 0;
+    while (n < ncols)
     {
+      sprintf (one_value, "%9s ", column_name[n]);
+      strcat (one_line, one_value);
 
-      /* First assemble the header line */
+      n++;
+    }
+    fprintf (fptr, "%s\n", one_line);
 
-      sprintf (start, "%8s %8s %4s %4s %6s %8s %8s %8s %8s ", "x", "z", "i",
-	       "j", "inwind", "converge", "v_x", "v_y", "v_z");
+
+    /* Now assemble the lines of the table */
+
+    for (i = 0; i < ndim2; i++)
+    {
+      wind_n_to_ij (ndom, nstart + i, &ii, &jj);
+      sprintf (start,
+               "%8.2e %8.2e %4d %4d %6d %8.0f %8.2e %8.2e %8.2e ",
+               wmain[nstart + i].xcen[0], wmain[nstart + i].xcen[2], ii,
+               jj, wmain[nstart + i].inwind, converge[i], wmain[nstart + i].v[0], wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
       strcpy (one_line, start);
       n = 0;
       while (n < ncols)
-	{
-	  sprintf (one_value, "%9s ", column_name[n]);
-	  strcat (one_line, one_value);
-
-	  n++;
-	}
+      {
+        sprintf (one_value, "%9.2e ", c[n][i]);
+        strcat (one_line, one_value);
+        n++;
+      }
       fprintf (fptr, "%s\n", one_line);
-
-
-      /* Now assemble the lines of the table */
-
-      for (i = 0; i < ndim2; i++)
-	{
-	  wind_n_to_ij (ndom, nstart + i, &ii, &jj);
-	  sprintf (start,
-		   "%8.2e %8.2e %4d %4d %6d %8.0f %8.2e %8.2e %8.2e ",
-		   wmain[nstart + i].xcen[0], wmain[nstart + i].xcen[2], ii,
-		   jj, wmain[nstart + i].inwind, converge[i],
-		   wmain[nstart + i].v[0], wmain[nstart + i].v[1],
-		   wmain[nstart + i].v[2]);
-	  strcpy (one_line, start);
-	  n = 0;
-	  while (n < ncols)
-	    {
-	      sprintf (one_value, "%9.2e ", c[n][i]);
-	      strcat (one_line, one_value);
-	      n++;
-	    }
-	  fprintf (fptr, "%s\n", one_line);
-	}
     }
+  }
 
   return (0);
 }
@@ -380,7 +375,7 @@ int
 create_ion_table (ndom, rootname, iz)
      int ndom;
      char rootname[];
-     int iz;			// Where z is the element 
+     int iz;                    // Where z is the element 
 {
   char filename[132];
   double *get_one ();
@@ -400,13 +395,13 @@ create_ion_table (ndom, rootname, iz)
 
   i = 0;
   while (i < nelements)
+  {
+    if (ele[i].z == iz)
     {
-      if (ele[i].z == iz)
-	{
-	  break;
-	}
-      i++;
+      break;
     }
+    i++;
+  }
 
 
   first_ion = ele[i].firstion;
@@ -424,12 +419,12 @@ create_ion_table (ndom, rootname, iz)
 
   i = 0;
   while (i < number_ions)
-    {
-      istate[i] = ion[first_ion + i].istate;
+  {
+    istate[i] = ion[first_ion + i].istate;
 
-      c[i] = get_ion (ndom, iz, istate[i], 0);
-      i++;
-    }
+    c[i] = get_ion (ndom, iz, istate[i], 0);
+    i++;
+  }
 
   nstart = zdom[ndom].nstart;
   nstop = zdom[ndom].nstop;
@@ -438,81 +433,78 @@ create_ion_table (ndom, rootname, iz)
 
 
   if (zdom[ndom].coord_type == SPHERICAL)
+  {
+
+
+    /* First assemble the header line
+     */
+
+    sprintf (start, "%8s %4s %6s ", "r", "i", "inwind");
+    strcpy (one_line, start);
+    n = 0;
+    while (n < number_ions)
     {
+      sprintf (one_value, "     i%02d ", istate[n]);
+      strcat (one_line, one_value);
+
+      n++;
+    }
+    fprintf (fptr, "%s\n", one_line);
 
 
-      /* First assemble the header line
-       */
+    /* Now assemble the lines of the table */
 
-      sprintf (start, "%8s %4s %6s ", "r", "i", "inwind");
+    for (i = 0; i < ndim2; i++)
+    {
+      // This line is different from the two d case
+      sprintf (start, "%8.2e %4d %6d ", wmain[nstart + i].r, i, wmain[nstart + i].inwind);
       strcpy (one_line, start);
       n = 0;
       while (n < number_ions)
-	{
-	  sprintf (one_value, "     i%02d ", istate[n]);
-	  strcat (one_line, one_value);
-
-	  n++;
-	}
+      {
+        sprintf (one_value, "%8.2e ", c[n][i]);
+        strcat (one_line, one_value);
+        n++;
+      }
       fprintf (fptr, "%s\n", one_line);
-
-
-      /* Now assemble the lines of the table */
-
-      for (i = 0; i < ndim2; i++)
-	{
-	  // This line is different from the two d case
-	  sprintf (start, "%8.2e %4d %6d ", wmain[nstart + i].r, i,
-		   wmain[nstart + i].inwind);
-	  strcpy (one_line, start);
-	  n = 0;
-	  while (n < number_ions)
-	    {
-	      sprintf (one_value, "%8.2e ", c[n][i]);
-	      strcat (one_line, one_value);
-	      n++;
-	    }
-	  fprintf (fptr, "%s\n", one_line);
-	}
     }
+  }
   else
+  {
+
+
+    /* First assemble the header line */
+
+    sprintf (start, "%8s %8s %4s %4s %6s ", "x", "z", "i", "j", "inwind");
+    strcpy (one_line, start);
+    n = 0;
+    while (n < number_ions)
     {
+      sprintf (one_value, "     i%02d ", istate[n]);
+      strcat (one_line, one_value);
 
+      n++;
+    }
 
-      /* First assemble the header line */
+    fprintf (fptr, "%s\n", one_line);
 
-      sprintf (start, "%8s %8s %4s %4s %6s ", "x", "z", "i", "j", "inwind");
+    /* Now assemble the lines of the table */
+
+    for (i = 0; i < ndim2; i++)
+    {
+      wind_n_to_ij (ndom, nstart + i, &ii, &jj);
+      sprintf (start, "%8.2e %8.2e %4d %4d %6d ", wmain[nstart + i].xcen[0], wmain[nstart + i].xcen[2], ii, jj, wmain[nstart + i].inwind);
       strcpy (one_line, start);
       n = 0;
       while (n < number_ions)
-	{
-	  sprintf (one_value, "     i%02d ", istate[n]);
-	  strcat (one_line, one_value);
-
-	  n++;
-	}
-
+      {
+        sprintf (one_value, "%8.2e ", c[n][i]);
+        strcat (one_line, one_value);
+        n++;
+      }
       fprintf (fptr, "%s\n", one_line);
-
-      /* Now assemble the lines of the table */
-
-      for (i = 0; i < ndim2; i++)
-	{
-	  wind_n_to_ij (ndom, nstart + i, &ii, &jj);
-	  sprintf (start, "%8.2e %8.2e %4d %4d %6d ",
-		   wmain[nstart + i].xcen[0], wmain[nstart + i].xcen[2], ii,
-		   jj, wmain[nstart + i].inwind);
-	  strcpy (one_line, start);
-	  n = 0;
-	  while (n < number_ions)
-	    {
-	      sprintf (one_value, "%8.2e ", c[n][i]);
-	      strcat (one_line, one_value);
-	      n++;
-	    }
-	  fprintf (fptr, "%s\n", one_line);
-	}
     }
+  }
 
   return (0);
 
@@ -575,15 +567,13 @@ get_ion (ndom, element, istate, iswitch)
 /* Find the ion */
 
   nion = 0;
-  while (nion < nions
-	 && !(ion[nion].z == element && ion[nion].istate == istate))
+  while (nion < nions && !(ion[nion].z == element && ion[nion].istate == istate))
     nion++;
   if (nion == nions)
-    {
-      Log ("Error--element %d ion %d not found in define_wind\n", element,
-	   istate);
-      return (x);
-    }
+  {
+    Log ("Error--element %d ion %d not found in define_wind\n", element, istate);
+    return (x);
+  }
   nelem = 0;
   while (nelem < nelements && ele[nelem].z != element)
     nelem++;
@@ -593,45 +583,39 @@ get_ion (ndom, element, istate, iswitch)
   /* Now populate the array */
 
   for (n = 0; n < ndim2; n++)
+  {
+    x[n] = 0;
+    nplasma = wmain[nstart + n].nplasma;
+    if (wmain[nstart + n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
     {
-      x[n] = 0;
-      nplasma = wmain[nstart + n].nplasma;
-      if (wmain[nstart + n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
-	{
-	  if (iswitch == 0)
-	    {
-	      sprintf (name, "Element %d (%s) ion %d fractions\n", element,
-		       ele[nelem].name, istate);
-	      x[n] = plasmamain[nplasma].density[nion];
-	      x[n] /=
-		((plasmamain[nplasma].density[0] +
-		  plasmamain[nplasma].density[1]) * ele[nelem].abun);
-	    }
-	  else if (iswitch == 1)
-	    {
-	      sprintf (name, "Element %d (%s) ion %d density\n", element,
-		       ele[nelem].name, istate);
-	      x[n] = plasmamain[nplasma].density[nion];
-	    }
-	  else if (iswitch == 2)
-	    {
-	      sprintf (name, "Element %d (%s) ion %d  #scatters\n", element,
-		       ele[nelem].name, istate);
-	      x[n] = plasmamain[nplasma].scatters[nion];
-	    }
-	  else if (iswitch == 3)
-	    {
-	      sprintf (name, "Element %d (%s) ion %d scattered flux\n",
-		       element, ele[nelem].name, istate);
-	      x[n] = plasmamain[nplasma].xscatters[nion];
-	    }
-	  else
-	    {
-	      Error ("xion_summary : Unknown switch %d \n", iswitch);
-	      exit (0);
-	    }
-	}
+      if (iswitch == 0)
+      {
+        sprintf (name, "Element %d (%s) ion %d fractions\n", element, ele[nelem].name, istate);
+        x[n] = plasmamain[nplasma].density[nion];
+        x[n] /= ((plasmamain[nplasma].density[0] + plasmamain[nplasma].density[1]) * ele[nelem].abun);
+      }
+      else if (iswitch == 1)
+      {
+        sprintf (name, "Element %d (%s) ion %d density\n", element, ele[nelem].name, istate);
+        x[n] = plasmamain[nplasma].density[nion];
+      }
+      else if (iswitch == 2)
+      {
+        sprintf (name, "Element %d (%s) ion %d  #scatters\n", element, ele[nelem].name, istate);
+        x[n] = plasmamain[nplasma].scatters[nion];
+      }
+      else if (iswitch == 3)
+      {
+        sprintf (name, "Element %d (%s) ion %d scattered flux\n", element, ele[nelem].name, istate);
+        x[n] = plasmamain[nplasma].xscatters[nion];
+      }
+      else
+      {
+        Error ("xion_summary : Unknown switch %d \n", iswitch);
+        exit (0);
+      }
     }
+  }
 
   return (x);
 }
@@ -679,66 +663,66 @@ get_one (ndom, variable_name)
   x = (double *) calloc (sizeof (double), ndim2);
 
   for (n = 0; n < ndim2; n++)
+  {
+    x[n] = 0;
+    if (wmain[n + nstart].vol > 0.0)
     {
-      x[n] = 0;
-      if (wmain[n + nstart].vol > 0.0)
-	{
-	  nplasma = wmain[n + nstart].nplasma;
+      nplasma = wmain[n + nstart].nplasma;
 
 
-	  if (strcmp (variable_name, "ne") == 0)
-	    {
-	      x[n] = plasmamain[nplasma].ne;
-	    }
-	  else if (strcmp (variable_name, "rho") == 0)
-	    {
-	      x[n] = plasmamain[nplasma].rho;
-	    }
-	  else if (strcmp (variable_name, "vol") == 0)
-	    {
-	      x[n] = plasmamain[nplasma].vol;
-	    }
-	  else if (strcmp (variable_name, "t_e") == 0)
-	    {
-	      x[n] = plasmamain[nplasma].t_e;
-	    }
-	  else if (strcmp (variable_name, "t_r") == 0)
-	    {
-	      x[n] = plasmamain[nplasma].t_r;
-	    }
+      if (strcmp (variable_name, "ne") == 0)
+      {
+        x[n] = plasmamain[nplasma].ne;
+      }
+      else if (strcmp (variable_name, "rho") == 0)
+      {
+        x[n] = plasmamain[nplasma].rho;
+      }
+      else if (strcmp (variable_name, "vol") == 0)
+      {
+        x[n] = plasmamain[nplasma].vol;
+      }
+      else if (strcmp (variable_name, "t_e") == 0)
+      {
+        x[n] = plasmamain[nplasma].t_e;
+      }
+      else if (strcmp (variable_name, "t_r") == 0)
+      {
+        x[n] = plasmamain[nplasma].t_r;
+      }
 
-	  else if (strcmp (variable_name, "converge") == 0)
-	    {
-	      x[n] = plasmamain[nplasma].converge_whole;
-	    }
-	  else if (strcmp (variable_name, "dmo_dt_x") == 0)
-	    {
-	      x[n] = plasmamain[nplasma].dmo_dt[0];
-	    }
-	  else if (strcmp (variable_name, "dmo_dt_y") == 0)
-	    {
-	      x[n] = plasmamain[nplasma].dmo_dt[1];
-	    }
-	  else if (strcmp (variable_name, "dmo_dt_z") == 0)
-	    {
-	      x[n] = plasmamain[nplasma].dmo_dt[2];
-	    }
-	  else if (strcmp (variable_name, "ntot") == 0)
-	    {
-	      x[n] = plasmamain[nplasma].ntot;
-	    }
-	  else if (strcmp (variable_name, "ip") == 0)
-	    {
-	      x[n] = plasmamain[nplasma].ip;
-	    }
+      else if (strcmp (variable_name, "converge") == 0)
+      {
+        x[n] = plasmamain[nplasma].converge_whole;
+      }
+      else if (strcmp (variable_name, "dmo_dt_x") == 0)
+      {
+        x[n] = plasmamain[nplasma].dmo_dt[0];
+      }
+      else if (strcmp (variable_name, "dmo_dt_y") == 0)
+      {
+        x[n] = plasmamain[nplasma].dmo_dt[1];
+      }
+      else if (strcmp (variable_name, "dmo_dt_z") == 0)
+      {
+        x[n] = plasmamain[nplasma].dmo_dt[2];
+      }
+      else if (strcmp (variable_name, "ntot") == 0)
+      {
+        x[n] = plasmamain[nplasma].ntot;
+      }
+      else if (strcmp (variable_name, "ip") == 0)
+      {
+        x[n] = plasmamain[nplasma].ip;
+      }
 
 
-	  else
-	    {
-	      Error ("get_one: Unknown variable %s\n", variable_name);
-	    }
-	}
+      else
+      {
+        Error ("get_one: Unknown variable %s\n", variable_name);
+      }
     }
+  }
 
   return (x);
 

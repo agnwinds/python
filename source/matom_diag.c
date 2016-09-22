@@ -37,19 +37,17 @@ matom_emiss_report ()
   /* Cycle over macro atom levels and log emissivities */
 
   for (m = 0; m < nlevels_macro; m++)
+  {
+    emiss_sum = 0.0;
+    abs_sum = 0.0;
+    for (n = 0; n < NPLASMA; n++)
     {
-      emiss_sum = 0.0;
-      abs_sum = 0.0;
-      for (n = 0; n < NPLASMA; n++)
-	{
-	  emiss_sum += macromain[n].matom_emiss[m];
-	  abs_sum += macromain[n].matom_abs[m];
-	}
-
-      Log
-	("Macro Atom level emissivities (summed over cells): n %d matom_abs %8.4e matom_emiss %8.4e\n",
-	 m, abs_sum, emiss_sum);
+      emiss_sum += macromain[n].matom_emiss[m];
+      abs_sum += macromain[n].matom_abs[m];
     }
+
+    Log ("Macro Atom level emissivities (summed over cells): n %d matom_abs %8.4e matom_emiss %8.4e\n", m, abs_sum, emiss_sum);
+  }
 
 
 
@@ -58,15 +56,13 @@ matom_emiss_report ()
   abs_sum = 0.0;
 
   for (n = 0; n < NPLASMA; n++)
-    {
-      emiss_sum += plasmamain[n].kpkt_emiss;
-      abs_sum += plasmamain[n].kpkt_abs;
+  {
+    emiss_sum += plasmamain[n].kpkt_emiss;
+    abs_sum += plasmamain[n].kpkt_abs;
 
-    }
+  }
 
-  Log
-    ("Kpkt emissivities (summed over cells): kpkt_abs %8.4e kpkt_emiss %8.4e\n",
-     abs_sum, emiss_sum);
+  Log ("Kpkt emissivities (summed over cells): kpkt_abs %8.4e kpkt_emiss %8.4e\n", abs_sum, emiss_sum);
 
   /* Log totals */
   Log ("Totals: f_matom %le f_kpkt %le\n", geo.f_matom, geo.f_kpkt);

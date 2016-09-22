@@ -125,7 +125,7 @@ History:
 #include "log.h"
 
 #define LINELENGTH 132
-#define NERROR_MAX 500		// Number of different errors that are recorded
+#define NERROR_MAX 500          // Number of different errors that are recorded
 
 /* definitions of what is logged at what verboisty level */
 
@@ -137,12 +137,12 @@ History:
 #define SHOW_ERROR_SILENT	5
 
 
-//int n_mpi=1; 		// number of mpi processes, set to one
-int my_rank=0;		// rank of mpi process, set to zero
+//int n_mpi=1;          // number of mpi processes, set to one
+int my_rank = 0;                // rank of mpi process, set to zero
 
-int log_print_max=100;           // Maximum number of times a single error will be reported.  
-				                          // Note that it will still be counted.
-int time_to_quit=100000;	// Maximum number of times and error can occur before giving up
+int log_print_max = 100;        // Maximum number of times a single error will be reported.  
+                                                          // Note that it will still be counted.
+int time_to_quit = 100000;      // Maximum number of times and error can occur before giving up
 
 typedef struct error_log
 {
@@ -157,10 +157,10 @@ int nerrors;
 
 FILE *diagptr;
 int init_log = 0;
-int log_verbosity=5;   // A parameter which can be used to suppress what would normally be logged or printed
+int log_verbosity = 5;          // A parameter which can be used to suppress what would normally be logged or printed
 
 //1411 JM debug statements are controlled by verbosity now, so no need for Log_Debug
-//int log_debug=0;	//A parameter which is set to cause Debug commands to be logged
+//int log_debug=0;      //A parameter which is set to cause Debug commands to be logged
 
 int
 Log_init (filename)
@@ -169,21 +169,20 @@ Log_init (filename)
   FILE *fopen ();
 
   if ((diagptr = fopen (filename, "w")) == NULL)
-    {
-      printf ("Yikes: could not even open log file %s\n", filename);
-      exit (0);
-    }
+  {
+    printf ("Yikes: could not even open log file %s\n", filename);
+    exit (0);
+  }
   init_log = 1;
 
   nerrors = 0;
   errorlog = (ErrorPtr) calloc (sizeof (error_dummy), NERROR_MAX);
 
   if (errorlog == NULL)
-    {
-      printf
-	("There is a problem in allocating memory for the errorlog structure\n");
-      exit (0);
-    }
+  {
+    printf ("There is a problem in allocating memory for the errorlog structure\n");
+    exit (0);
+  }
 
   return (0);
 }
@@ -196,21 +195,20 @@ Log_append (filename)
   FILE *fopen ();
 
   if ((diagptr = fopen (filename, "a")) == NULL)
-    {
-      printf ("Yikes: could not even open log file %s\n", filename);
-      exit (0);
-    }
+  {
+    printf ("Yikes: could not even open log file %s\n", filename);
+    exit (0);
+  }
   init_log = 1;
 
   nerrors = 0;
   errorlog = (ErrorPtr) calloc (sizeof (error_dummy), NERROR_MAX);
 
   if (errorlog == NULL)
-    {
-      printf
-	("There is a problem in allocating memory for the errorlog structure\n");
-      exit (0);
-    }
+  {
+    printf ("There is a problem in allocating memory for the errorlog structure\n");
+    exit (0);
+  }
 
   return (0);
 }
@@ -220,7 +218,7 @@ Log_close ()
 {
   fclose (diagptr);
   init_log = 0;
-  free (errorlog);		// Release the error summary structure
+  free (errorlog);              // Release the error summary structure
   return (0);
 }
 
@@ -228,12 +226,13 @@ Log_close ()
  * carried out through the logging subroutines
  */
 
-int Log_set_verbosity(vlevel)
-	int vlevel;
+int
+Log_set_verbosity (vlevel)
+     int vlevel;
 {
-	log_verbosity=vlevel;
-  rdpar_set_verbose(vlevel);
-	return(0);
+  log_verbosity = vlevel;
+  rdpar_set_verbose (vlevel);
+  return (0);
 }
 
 
@@ -241,11 +240,12 @@ int Log_set_verbosity(vlevel)
  * carried out through the logging subroutines
  */
 
-int Log_print_max(print_max)
-	int print_max;
+int
+Log_print_max (print_max)
+     int print_max;
 {
-	log_print_max=print_max;
-	return(0);
+  log_print_max = print_max;
+  return (0);
 }
 
 
@@ -253,29 +253,30 @@ int Log_print_max(print_max)
  * carried out through the logging subroutines
  */
 
-int Log_quit_after_n_errors(n)
-	int n;
+int
+Log_quit_after_n_errors (n)
+     int n;
 {
-	time_to_quit=n;
-	return(0);
+  time_to_quit = n;
+  return (0);
 }
 
 int
 Log (char *format, ...)
 {
-  va_list ap,ap2;
+  va_list ap, ap2;
   int result;
 
   if (init_log == 0)
     Log_init ("logfile");
 
-  if (log_verbosity < SHOW_LOG) 
-	  return(0);
+  if (log_verbosity < SHOW_LOG)
+    return (0);
 
   va_start (ap, format);
-  va_copy (ap2,ap);  /* ap is not necessarily preserved by vprintf */
+  va_copy (ap2, ap);            /* ap is not necessarily preserved by vprintf */
 
-  if (my_rank==0)
+  if (my_rank == 0)
     result = vprintf (format, ap);
   result = vfprintf (diagptr, format, ap2);
   va_end (ap);
@@ -291,8 +292,8 @@ Log_silent (char *format, ...)
   if (init_log == 0)
     Log_init ("logfile");
 
-  if (log_verbosity < SHOW_LOG_SILENT) 
-	  return(0);
+  if (log_verbosity < SHOW_LOG_SILENT)
+    return (0);
   va_start (ap, format);
   result = vfprintf (diagptr, format, ap);
   va_end (ap);
@@ -302,18 +303,18 @@ Log_silent (char *format, ...)
 int
 Error (char *format, ...)
 {
-  va_list ap,ap2;
+  va_list ap, ap2;
   int result;
 
   if (init_log == 0)
     Log_init ("logfile");
 
-  if (error_count (format) > log_print_max || log_verbosity < SHOW_ERROR )
+  if (error_count (format) > log_print_max || log_verbosity < SHOW_ERROR)
     return (0);
 
   va_start (ap, format);
-  va_copy (ap2,ap); /*NSH 121212 - Line added to allow error logging to work */
-  if (my_rank==0)	// only want to print errors if master thread
+  va_copy (ap2, ap);            /*NSH 121212 - Line added to allow error logging to work */
+  if (my_rank == 0)             // only want to print errors if master thread
     result = vprintf (format, ap);
   fprintf (diagptr, "Error: ");
   result = vfprintf (diagptr, format, ap2);
@@ -347,18 +348,18 @@ Error_silent (char *format, ...)
 int
 Shout (char *format, ...)
 {
-  va_list ap,ap2;
+  va_list ap, ap2;
   int result;
 
   if (init_log == 0)
     Log_init ("logfile");
 
-  if (error_count (format) > log_print_max )
+  if (error_count (format) > log_print_max)
     return (0);
 
   printf ("Error: ");
   va_start (ap, format);
-  va_copy (ap2,ap);  /* ap is not necessarily preserved by vprintf */
+  va_copy (ap2, ap);            /* ap is not necessarily preserved by vprintf */
   result = vprintf (format, ap);
   fprintf (diagptr, "Error: ");
   result = vfprintf (diagptr, format, ap);
@@ -372,10 +373,10 @@ sane_check (x)
 {
   int i;
   if ((i = isfinite (x)) == 0)
-    {
-      Error ("sane_check: %d %e\n", i, x);
-      return (-1);
-    }
+  {
+    Error ("sane_check: %d %e\n", i, x);
+    return (-1);
+  }
   return (0);
 }
 
@@ -387,38 +388,38 @@ error_count (char *format)
   n = 0;
 
   while (n < nerrors)
-    {
-      if (strcmp (errorlog[n].description, (format)) == 0)
-	break;
-      n++;
-    }
+  {
+    if (strcmp (errorlog[n].description, (format)) == 0)
+      break;
+    n++;
+  }
 
   if (n == nerrors)
+  {
+    strcpy (errorlog[nerrors].description, format);
+    errorlog[n].n = 1;
+    if (nerrors < NERROR_MAX)
     {
-      strcpy (errorlog[nerrors].description, format);
-      errorlog[n].n = 1;
-      if (nerrors < NERROR_MAX)
-	{
-	  nerrors++;
-	}
-      else
-	{
-	  printf ("Exceeded number of different errors that can be stored\n");
-	  error_summary("Quitting because there are too many differnt types of errors\n");
-	  exit(0);
-	}
+      nerrors++;
     }
+    else
+    {
+      printf ("Exceeded number of different errors that can be stored\n");
+      error_summary ("Quitting because there are too many differnt types of errors\n");
+      exit (0);
+    }
+  }
   else
+  {
+    n = errorlog[n].n++;
+    if (n == log_print_max)
+      Error ("error_count: This error will no longer be logged: %s\n", format);
+    if (n == time_to_quit)
     {
-      n = errorlog[n].n++;
-      if (n == log_print_max)
-	Error ("error_count: This error will no longer be logged: %s\n",
-	       format);
-      if (n==time_to_quit){
-	      error_summary("Something is drastically wrong for any error to occur so much!\n");
-	      exit(0);
-      }
+      error_summary ("Something is drastically wrong for any error to occur so much!\n");
+      exit (0);
     }
+  }
   return (n + 1);
 }
 
@@ -432,24 +433,24 @@ error_summary (message)
   Log ("\nError summary: %s\n", message);
   Log ("Recurrences --  Description\n");
   for (n = 0; n < nerrors; n++)
-    {
-      Log ("%9d -- %s", errorlog[n].n, errorlog[n].description);
-    }
+  {
+    Log ("%9d -- %s", errorlog[n].n, errorlog[n].description);
+  }
 
-  return(0);
+  return (0);
 }
 
 
 /*NSH 121107 added a routine to flush the diagfile*/
 
 int
-Log_flush()
+Log_flush ()
 {
   if (init_log == 0)
     Log_init ("logfile");
 
-fflush(diagptr);
-return(0);
+  fflush (diagptr);
+  return (0);
 }
 
 
@@ -461,48 +462,50 @@ return(0);
  * if not in parallel mode then we set my_rank to zero
  */
 
-int Log_set_mpi_rank(rank, n_mpi)
-	int rank, n_mpi;
+int
+Log_set_mpi_rank (rank, n_mpi)
+     int rank, n_mpi;
 {
-	my_rank=rank;
-	rdpar_set_mpi_rank(rank);	//this just communicates the rank to rdpar	
+  my_rank = rank;
+  rdpar_set_mpi_rank (rank);    //this just communicates the rank to rdpar      
 
-	/* if in parallel mode we divide by the number of parallel processes for max errors */
-   //     time_to_quit /= n_mpi;		
-        //log_print_max /= n_mpi; for the moment we won'y change this as only master thread prints errors anyway
-	return(0);
+  /* if in parallel mode we divide by the number of parallel processes for max errors */
+  //     time_to_quit /= n_mpi;                
+  //log_print_max /= n_mpi; for the moment we won'y change this as only master thread prints errors anyway
+  return (0);
 }
 
 
 /* log statement that prints parallel statements to screen */
 
-int Log_parallel(char *format, ...)
+int
+Log_parallel (char *format, ...)
 {
-  va_list ap,ap2;
+  va_list ap, ap2;
   int result;
 
-  if (log_verbosity < SHOW_PARALLEL) 
-	  return(0);
+  if (log_verbosity < SHOW_PARALLEL)
+    return (0);
 
   va_start (ap, format);
-  va_copy (ap2,ap);  /* ap is not necessarily preserved by vprintf */
+  va_copy (ap2, ap);            /* ap is not necessarily preserved by vprintf */
 
-  if (my_rank==0)
+  if (my_rank == 0)
     result = vprintf (format, ap);
 
   fprintf (diagptr, "Para: ");
   result = vfprintf (diagptr, format, ap2);
-  
+
   return (result);
 }
 
 
 /* Set a flag to which cause Debug statements to be logged */
 // int Log_debug(value)
-// 	int value;
+//      int value;
 // {
-// 	log_debug=value;
-// 	return(0);
+//      log_debug=value;
+//      return(0);
 // }
 /* JM- Debug statements are controlled by verbosity now, so no need for Log_Debug */
 /* Log a debug statement if the external varialbe log_debug
@@ -512,25 +515,22 @@ int Log_parallel(char *format, ...)
 int
 Debug (char *format, ...)
 {
-  va_list ap,ap2;
+  va_list ap, ap2;
   int result;
 
-  if (log_verbosity < SHOW_DEBUG) 
-    return(0); 
+  if (log_verbosity < SHOW_DEBUG)
+    return (0);
 
   if (init_log == 0)
     Log_init ("logfile");
 
   va_start (ap, format);
-  va_copy (ap2,ap); /*NSH 121212 - Line added to allow error logging to work */
-  if (my_rank==0)	// only want to print errors if master thread
+  va_copy (ap2, ap);            /*NSH 121212 - Line added to allow error logging to work */
+  if (my_rank == 0)             // only want to print errors if master thread
     vprintf ("Debug: ", ap);
-    result = vprintf (format, ap);
+  result = vprintf (format, ap);
   fprintf (diagptr, "Debug: ");
   result = vfprintf (diagptr, format, ap2);
   va_end (ap);
   return (result);
 }
-
-
-

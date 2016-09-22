@@ -72,97 +72,93 @@ partition_functions (xplasma, mode)
   double t, weight;
 
   int n, m;
-  int m_ground;			/* added by SS Jan 05 */
+  int m_ground;                 /* added by SS Jan 05 */
   double z, kt;
 
 
   if (mode == NEBULARMODE_TR)
-    {
-      //LTE using t_r
-      t = xplasma->t_r;
-      weight = 1;
-    }
+  {
+    //LTE using t_r
+    t = xplasma->t_r;
+    weight = 1;
+  }
   else if (mode == NEBULARMODE_TE)
-    {
-      //LTE using t_e
-      t = xplasma->t_e;
-      weight = 1;
-    }
+  {
+    //LTE using t_e
+    t = xplasma->t_e;
+    weight = 1;
+  }
   else if (mode == NEBULARMODE_ML93)
-    {
-      //Non LTE calculation with radiative weights
-      t = xplasma->t_r;
-      weight = xplasma->w;
-    }
-  else if (mode == NEBULARMODE_NLTE_SIM)		/*NSH 120912 This mode is more or less defunct. When the last vestigies of the mode 3 ionizetion scheme (the original sim PL correction) is removed, this can go too */
-    {
-      //Non LTE calculation with non BB radiation field. Use T_e to get partition functions, same as mode 1- 
-      t = xplasma->t_e;
-      weight = 1;
-    }
-  else if (mode == NEBULARMODE_LTE_GROUND)		/*NSH 120912 This is a test mode, used to set partition functions to ground state only. This is achieved by setting W to 0. At this point, the temperature is a moot point, so lest go with t_e, since this is only going to be called if we are doing a power law calculation */
-    {
-      t = xplasma->t_e;
-      weight = 0;
-    }
+  {
+    //Non LTE calculation with radiative weights
+    t = xplasma->t_r;
+    weight = xplasma->w;
+  }
+  else if (mode == NEBULARMODE_NLTE_SIM)        /*NSH 120912 This mode is more or less defunct. When the last vestigies of the mode 3 ionizetion scheme (the original sim PL correction) is removed, this can go too */
+  {
+    //Non LTE calculation with non BB radiation field. Use T_e to get partition functions, same as mode 1- 
+    t = xplasma->t_e;
+    weight = 1;
+  }
+  else if (mode == NEBULARMODE_LTE_GROUND)      /*NSH 120912 This is a test mode, used to set partition functions to ground state only. This is achieved by setting W to 0. At this point, the temperature is a moot point, so lest go with t_e, since this is only going to be called if we are doing a power law calculation */
+  {
+    t = xplasma->t_e;
+    weight = 0;
+  }
 
   else
-    {
-      Error ("partition_functions: Unknown mode %d\n", mode);
-      exit (0);
-    }
+  {
+    Error ("partition_functions: Unknown mode %d\n", mode);
+    exit (0);
+  }
 
   /* Calculate the partition function for each ion in turn */
   kt = BOLTZMANN * t;
 
   for (nion = 0; nion < nions; nion++)
+  {
+
+    if (ion[nion].nlevels > 0)
+      //Calculate data on levels using a weighed BB assumption
     {
+      m = ion[nion].firstlevel;
+      m_ground = m;
+      //store ground state - in case energy neq 0(SS)
+      z = config[m].g;
+      //Makes explicit assumption that first level is ground
 
-      if (ion[nion].nlevels > 0)
-	//Calculate data on levels using a weighed BB assumption
-	{
-	  m = ion[nion].firstlevel;
-	  m_ground = m;
-	  //store ground state - in case energy neq 0(SS)
-	  z = config[m].g;
-	  //Makes explicit assumption that first level is ground
+      for (n = 1; n < ion[nion].nlevels; n++)
+      {
+        m++;
+        z += weight * config[m].g * exp ((-config[m].ex + config[m_ground].ex) / kt);
+      }
+    }
+    else if (ion[nion].nlte > 0)
+      //Calculate using "non-lte" levels
+    {
+      m = ion[nion].first_nlte_level;
+      m_ground = m;
+      //store ground state - in case energy neq 0(SS)
+      z = config[m].g;
+      //This statement makes an explicit assumption that first level is ground
 
-	  for (n = 1; n < ion[nion].nlevels; n++)
-	    {
-	      m++;
-	      z +=
-		weight * config[m].g *
-		exp ((-config[m].ex + config[m_ground].ex) / kt);
-	    }
-	}
-      else if (ion[nion].nlte > 0)
-	//Calculate using "non-lte" levels
-	{
-	  m = ion[nion].first_nlte_level;
-	  m_ground = m;
-	  //store ground state - in case energy neq 0(SS)
-	  z = config[m].g;
-	  //This statement makes an explicit assumption that first level is ground
-
-	  for (n = 1; n < ion[nion].nlte; n++)
-	    {
-	      m++;
-	      z +=
-		weight * config[m].g *
-		exp ((-config[m].ex + config[m_ground].ex) / kt);
-	    }
-	}
-      else
-	{
-	  z = ion[nion].g;
-	}
-
-
-      xplasma->partition[nion] = z;
-
+      for (n = 1; n < ion[nion].nlte; n++)
+      {
+        m++;
+        z += weight * config[m].g * exp ((-config[m].ex + config[m_ground].ex) / kt);
+      }
+    }
+    else
+    {
+      z = ion[nion].g;
     }
 
-  levels (xplasma, mode);	//levels from reduced BB
+
+    xplasma->partition[nion] = z;
+
+  }
+
+  levels (xplasma, mode);       //levels from reduced BB
 
   return (0);
 }
@@ -235,51 +231,47 @@ partition_functions_2 (xplasma, xnion, temp, weight)
   kt = BOLTZMANN * temp;
 
   for (nion = xnion - 1; nion < xnion + 1; nion++)
+  {
+
+    if (ion[nion].nlevels > 0)
+      //Calculate data on levels using a weighed BB assumption
     {
+      m = ion[nion].firstlevel;
+      m_ground = m;
+      //store ground state - in case energy neq 0(SS)
+      z = config[m].g;
+      //Makes explicit assumption that first level is ground
 
-      if (ion[nion].nlevels > 0)
-	//Calculate data on levels using a weighed BB assumption
-	{
-	  m = ion[nion].firstlevel;
-	  m_ground = m;
-	  //store ground state - in case energy neq 0(SS)
-	  z = config[m].g;
-	  //Makes explicit assumption that first level is ground
-
-	  for (n = 1; n < ion[nion].nlevels; n++)
-	    {
-	      m++;
-	      z +=
-		weight * config[m].g *
-		exp ((-config[m].ex + config[m_ground].ex) / kt);
-	    }
-	}
-      else if (ion[nion].nlte > 0)
-	//Calculate using "non-lte" levels
-	{
-	  m = ion[nion].first_nlte_level;
-	  m_ground = m;
-	  //store ground state - in case energy neq 0(SS)
-	  z = config[m].g;
-	  //This statement makes an explicit assumption that first level is ground
-
-	  for (n = 1; n < ion[nion].nlte; n++)
-	    {
-	      m++;
-	      z +=
-		weight * config[m].g *
-		exp ((-config[m].ex + config[m_ground].ex) / kt);
-	    }
-	}
-      else
-	{
-	  z = ion[nion].g;
-	}
-
-
-      xplasma->partition[nion] = z;
-
+      for (n = 1; n < ion[nion].nlevels; n++)
+      {
+        m++;
+        z += weight * config[m].g * exp ((-config[m].ex + config[m_ground].ex) / kt);
+      }
     }
+    else if (ion[nion].nlte > 0)
+      //Calculate using "non-lte" levels
+    {
+      m = ion[nion].first_nlte_level;
+      m_ground = m;
+      //store ground state - in case energy neq 0(SS)
+      z = config[m].g;
+      //This statement makes an explicit assumption that first level is ground
+
+      for (n = 1; n < ion[nion].nlte; n++)
+      {
+        m++;
+        z += weight * config[m].g * exp ((-config[m].ex + config[m_ground].ex) / kt);
+      }
+    }
+    else
+    {
+      z = ion[nion].g;
+    }
+
+
+    xplasma->partition[nion] = z;
+
+  }
 
 
 

@@ -46,15 +46,15 @@ reposition (p)
 
 
   if (p->nres < 0)
-    {				// Do nothing for non-resonant scatters
-      return (0);
-    }
+  {                             // Do nothing for non-resonant scatters
+    return (0);
+  }
 
   if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
-    {
-      Error ("reposition: Photon not in grid when routine entered %d \n", n);
-      return (n);		/* Photon was not in wind */
-    }
+  {
+    Error ("reposition: Photon not in grid when routine entered %d \n", n);
+    return (n);                 /* Photon was not in wind */
+  }
 
 
   move_phot (p, DFUDGE);

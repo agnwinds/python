@@ -35,7 +35,7 @@ History:
 
 int
 get_corona_params (ndom)
-	int ndom;
+     int ndom;
 {
   Log ("Creating a corona above a disk\n");
 
@@ -51,58 +51,59 @@ get_corona_params (ndom)
   zdom[ndom].corona_base_density = 1.e13;
   zdom[ndom].corona_scale_height = 1.e9;
 
-  rddoub ("corona.radmin(cm)", &zdom[ndom].corona_rmin);	/*Radius where corona begins */
+  rddoub ("corona.radmin(cm)", &zdom[ndom].corona_rmin);        /*Radius where corona begins */
   if (zdom[ndom].corona_rmin < geo.rstar)
-    {
-      Error
-	("get_corona_params: It is unreasonable to have the corona start inside the star!\n");
-      Log ("Setting geo.corona_rmin to geo.rstar\n");
-      zdom[ndom].corona_rmin = geo.rstar;
-    }
-  rddoub ("corona.radmax(cm)", &zdom[ndom].corona_rmax);	/*Radius where corona ends */
-  rddoub ("corona.zmax(cm)", &zdom[ndom].corona_zmax);		/*Veritical heighe where corona ends */
-  rddoub ("corona.base_den(cgs)", &zdom[ndom].corona_base_density);	/*Density at the base of the corona */
-  rddoub ("corona.scale_height(cm)", &zdom[ndom].corona_scale_height);	/*Scale height of corona */
-  rddoub ("corona.vel_frac", &zdom[ndom].corona_vel_frac);	/*fractional radial velocity of corona */
+  {
+    Error ("get_corona_params: It is unreasonable to have the corona start inside the star!\n");
+    Log ("Setting geo.corona_rmin to geo.rstar\n");
+    zdom[ndom].corona_rmin = geo.rstar;
+  }
+  rddoub ("corona.radmax(cm)", &zdom[ndom].corona_rmax);        /*Radius where corona ends */
+  rddoub ("corona.zmax(cm)", &zdom[ndom].corona_zmax);  /*Veritical heighe where corona ends */
+  rddoub ("corona.base_den(cgs)", &zdom[ndom].corona_base_density);     /*Density at the base of the corona */
+  rddoub ("corona.scale_height(cm)", &zdom[ndom].corona_scale_height);  /*Scale height of corona */
+  rddoub ("corona.vel_frac", &zdom[ndom].corona_vel_frac);      /*fractional radial velocity of corona */
 
   zdom[ndom].rmin = zdom[ndom].corona_rmin;
   /* rmax here is the defines a radius beyond which this region does not exist, if the vertical height is large
    * compared to the horizontal size then one needs to include both */
-  zdom[ndom].rmax = sqrt(zdom[ndom].corona_rmax*zdom[ndom].corona_rmax+zdom[ndom].corona_zmax*zdom[ndom].corona_zmax);
-  zdom[ndom].zmax=  zdom[ndom].corona_zmax;
+  zdom[ndom].rmax = sqrt (zdom[ndom].corona_rmax * zdom[ndom].corona_rmax + zdom[ndom].corona_zmax * zdom[ndom].corona_zmax);
+  zdom[ndom].zmax = zdom[ndom].corona_zmax;
   zdom[ndom].wind_rho_min = zdom[ndom].corona_rmin;
   zdom[ndom].wind_rho_max = zdom[ndom].corona_rmax;
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 0.0;
 
-  /* Set up wind planes for a layer with a specific height*/
+  /* Set up wind planes for a layer with a specific height */
 
-  zdom[ndom].windplane[0].x[0]  =zdom[ndom].windplane[0].x[1]=zdom[ndom].windplane[0].x[2]=0;
-  zdom[ndom].windplane[0].lmn[0]=zdom[ndom].windplane[0].lmn[1]=0;
-  zdom[ndom].windplane[0].lmn[2]=1;
+  zdom[ndom].windplane[0].x[0] = zdom[ndom].windplane[0].x[1] = zdom[ndom].windplane[0].x[2] = 0;
+  zdom[ndom].windplane[0].lmn[0] = zdom[ndom].windplane[0].lmn[1] = 0;
+  zdom[ndom].windplane[0].lmn[2] = 1;
 
-  zdom[ndom].windplane[1].x[0]  =zdom[ndom].windplane[0].x[1]=0;
-  zdom[ndom].windplane[1].x[2]  =zdom[ndom].corona_zmax;
-  zdom[ndom].windplane[1].lmn[0]=zdom[ndom].windplane[0].lmn[1]=0;
-  zdom[ndom].windplane[1].lmn[2]=1;
+  zdom[ndom].windplane[1].x[0] = zdom[ndom].windplane[0].x[1] = 0;
+  zdom[ndom].windplane[1].x[2] = zdom[ndom].corona_zmax;
+  zdom[ndom].windplane[1].lmn[0] = zdom[ndom].windplane[0].lmn[1] = 0;
+  zdom[ndom].windplane[1].lmn[2] = 1;
 
 
 
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
+  {
+    zdom[ndom].xlog_scale = 0.3 * zdom[ndom].corona_rmin;
+    if (zdom[ndom].corona_scale_height < zdom[ndom].corona_zmax)
+      zdom[ndom].zlog_scale = 0.3 * zdom[ndom].corona_scale_height;
+    else if (zdom[ndom].mdim > 0)
     {
-      zdom[ndom].xlog_scale = 0.3 * zdom[ndom].corona_rmin;
-      if  (zdom[ndom].corona_scale_height<zdom[ndom].corona_zmax)
-      	zdom[ndom].zlog_scale = 0.3 * zdom[ndom].corona_scale_height;
-      else if (zdom[ndom].mdim > 0) {
-	      zdom[ndom].zlog_scale=zdom[ndom].corona_zmax/zdom[ndom].mdim;
-      }
-      else {
-	      Error("corona: Cannot define z coordinates unless zdom[ndom].mdim is defined. Aborting\n");
-	      exit(0);
-      }
+      zdom[ndom].zlog_scale = zdom[ndom].corona_zmax / zdom[ndom].mdim;
     }
+    else
+    {
+      Error ("corona: Cannot define z coordinates unless zdom[ndom].mdim is defined. Aborting\n");
+      exit (0);
+    }
+  }
 
 
   zdom[ndom].wind_rho_min = zdom[ndom].corona_rmin;
@@ -143,7 +144,7 @@ History:
 
 double
 corona_velocity (ndom, x, v)
-	int ndom;
+     int ndom;
      double x[], v[];
 {
   double rho, speed;
@@ -166,10 +167,10 @@ corona_velocity (ndom, x, v)
    * coordinates if x was not originally in the xz plane.
    */
   if (x[1] != 0.0)
-    {
-      project_from_cyl_xyz (x, v, xtest);
-      stuff_v (xtest, v);
-    }
+  {
+    project_from_cyl_xyz (x, v, xtest);
+    stuff_v (xtest, v);
+  }
 
 
   return (speed);
@@ -209,11 +210,10 @@ corona_rho (ndom, x)
 //OLD not used ksl double zscale;
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
-    {
-      Error
-	("corona_rho: Quitting. Need to think more about coronal model more with vertically extended disk\n");
-      exit (0);
-    }
+  {
+    Error ("corona_rho: Quitting. Need to think more about coronal model more with vertically extended disk\n");
+    exit (0);
+  }
 //OLD not used 160705 ksl  tref = tdisk (geo.mstar, geo.disk_mdot, geo.rstar);
 //OLD not used 160705 ksl  t = teff (tref, x[0] / geo.rstar);
 
@@ -222,10 +222,10 @@ corona_rho (ndom, x)
 
 //OLD not used - ksl: zscale = BOLTZMANN * t / (MPROT * g);
 
-rho = zdom[ndom].corona_base_density * exp (-(x[2]) / zdom[ndom].corona_scale_height);
+  rho = zdom[ndom].corona_base_density * exp (-(x[2]) / zdom[ndom].corona_scale_height);
 
   if (rho < 1.e-10)
-    rho = 1.e-10;		// A floor to the density appears to be needed for some of the
+    rho = 1.e-10;               // A floor to the density appears to be needed for some of the
   // ionization calculations
 
   rho = rho / rho2nh;
