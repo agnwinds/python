@@ -418,10 +418,6 @@ get_rand_exp (alpha_min, alpha_max)
 
   x = exp (alpha_min - alpha_max);
 
-  //OLD 12nov ksl x1 = exp (-alpha_min);
-  //OLD 12nov ksl x2 = exp (-alpha_max);
-
-  //OLD 12nov ksl aa = (1. - r) * x1 + r * x2;
 
   aa = (1. - r) + r * x;
   delta_alpha = -(log (aa));
@@ -433,7 +429,6 @@ get_rand_exp (alpha_min, alpha_max)
       Error ("get_rand_exp:sane_check %e %e %e %e %e\n", a, aa, delta_alpha,
 	     x, r);
     }
-  //OLD 12 nov ksl return (-a);
   return (a);
 }
 
@@ -545,7 +540,6 @@ init_integ_planck_d ()
   double x;
   double planck_d (), qromb ();
   int n;
-  //OLD74b5 integ_planck[0] = 0;   JM130319: this should be set to ALPHAMIN- done in the for loop for simplicity (n=0).
   for (n = 0; n <= NMAX + 1; n++)
     {
       x = ALPHAMIN + n * (ALPHAMAX - ALPHAMIN) / NMAX;
@@ -626,13 +620,11 @@ emittance_bb (freqmin, freqmax, t)
 	Southampton University
 
  Synopsis:
-check_fmax decides wether a maximum frequency requested for an integral is sensible.
+
+check_fmax decides whether a maximum frequency requested for an integral is sensible.
 If it is too far off the end of the planck function, qromb will malfunction. We
 just have to set it to a frequency where the BB function is tiny, say where hnu/kT =100.
 At this point the bb function is
-
-
-	
 
 Arguments:		
 

@@ -54,7 +54,7 @@ stuff_phot (pin, pout)
   pout->w = pin->w;
   pout->freq = pin->freq;
   pout->tau = pin->tau;
-  pout->path = pin->path;   /* SWM 31/7/14 - Added */
+  pout->path = pin->path;   //0714 SWM - Added
 
   pout->lmn[0] = pin->lmn[0];
   pout->lmn[1] = pin->lmn[1];
@@ -68,8 +68,6 @@ stuff_phot (pin, pout)
   pout->origin = pin->origin;
   pout->nnscat = pin->nnscat;
   pout->np = pin->np;
-
-
 
   return (0);
 }

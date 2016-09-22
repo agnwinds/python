@@ -93,12 +93,11 @@ variable_temperature (xplasma, mode)
   double xnew, xsaha;
   double theta, x;
   double get_ne ();
-  double t_e, t_r, xtemp, nh, xne, xxne, www;
+  double t_e, t_r, xtemp, nh, xne, xxne;
+  //OLD www not used double t_e, t_r, xtemp, nh, xne, xxne, www;
   double a, b;
   double newden[NIONS];		//NSH 121217 - recoded so density is computed in a temperary array
-  // double xip; //ionzation potential of lower ion.
   int nelem, first, last;
-//  double t_r_part_correct, NSH 130401 - this variable no longer used in 75. It may come back tho!
   double t_e_part_correct;
   double sum, big;
   double pi_fudge, recomb_fudge, tot_fudge;	/*Two of the correction factors for photoionization rate, and recombination rate */
@@ -108,7 +107,7 @@ variable_temperature (xplasma, mode)
   nh = xplasma->rho * rho2nh;	//LTE
   t_e = xplasma->t_e;
   t_r = xplasma->t_r;
-  www = xplasma->w;
+  //OLD www not used ksl 160705: www = xplasma->w;
 
 
   /* Copy the current densities into the temporary array */
@@ -291,7 +290,6 @@ variable_temperature (xplasma, mode)
 		  Error
 		    ("variable_temperature: ion %i has a negative density %e\n",
 		     nion, newden[nion]);
-		  mytrap ();
 		}
 	      if (sane_check (sum))
 		Error

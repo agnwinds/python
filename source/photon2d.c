@@ -30,12 +30,17 @@ Notes:
 	used so that the calling routines for translate (trans_phot and extract) can be the same
 	in the 1 and 2d versions.
 
+	where_in_wind returns the correct domain for a given position, or domain 0 if the
+	position is not in the wind of a domain.  The photon structure does not have the domain
+	number directly incoded, but it can be obtained from the grid number, which where in_grid updates
+
 History:
  	1997	ksl	Coded and debugged as part of Python effort.
  	98nov	ksl	Modified call to where_in_wind 
 	05apr	ksl	55d -- Minor mod to get more info on problem case
 			of a photon not in wind or grid
 	11aug	ksl	70b - Incorporate mulitple components
+	15aug	ksl	Incorporate multiple domains
 
  
 **************************************************************/
@@ -49,14 +54,13 @@ translate (w, pp, tau_scat, tau, nres)
      int *nres;
 {
   int istat;
+  int ndomain;
 
-
-//Old 70b  if (where_in_wind (pp->x) != 0)
-  if (where_in_wind (pp->x) < 0)
+  if (where_in_wind (pp->x,&ndomain) < 0)
     {
       istat = translate_in_space (pp);
     }
-  else if ((pp->grid = where_in_grid (pp->x)) >= 0)
+  else if ((pp->grid = where_in_grid (ndomain,pp->x)) >= 0)
     {
 //		 printf ("photon %i start=%e %e %e %e",pp->np,pp->x[0], pp->x[1], pp->x[2],sqrt(pp->x[0]*pp->x[0]+pp->x[1]*pp->x[1]+pp->x[2]*pp->x[2]));
       istat = translate_in_wind (w, pp, tau_scat, tau, nres);
@@ -66,13 +70,12 @@ translate (w, pp, tau_scat, tau, nres)
   else
     {
       istat = pp->istat = -1;	/* It's not in the wind and it's not in the grid.  Bummer! */
-      Error ("translate: Found photon that was not in wind or grid\n");
+      Error
+	("translate: Found photon that was not in wind or grid, istat %i\n",
+	 where_in_wind (pp->x,&ndomain));
     }
 
-
   return (istat);
-
-
 }
 
 /***********************************************************
@@ -107,16 +110,10 @@ translate_in_space (pp)
      PhotPtr pp;
 {
   double ds, x;
-  double ds_to_wind (), ds_to_sphere ();
   int move_phot ();
 
   ds = ds_to_wind (pp);
 
-  /* Check whether the photon hit the torus first */
-  if (geo.compton_torus && (x = ds_to_torus (pp)) < ds)
-    {
-      ds = x;
-    }
 
 /* ?? The way in which a photon is identified as hitting the star seems
 a bit convoluted.  Despite the fact that it is already identified here
@@ -213,6 +210,10 @@ History:
 			currently unchanged.  
 	11nov	ksl	Modified to account for elvis wind model with
 			its pillbox at the bottom
+	15aug	ksl	Modifications for domains.  The asumption we make
+			is that the poton is not in any of the wind
+			regions at this point, and that we are looking
+			for the closest wind boundary.  
  
 **************************************************************/
 
@@ -224,17 +225,55 @@ ds_to_wind (pp)
 {
   struct photon ptest;
   double ds, x;
+  int ndom;
 
   stuff_phot (pp, &ptest);
-  ds = ds_to_sphere (geo.wind_rmax, &ptest);
-  if ((x = ds_to_sphere (geo.wind_rmin, &ptest)) < ds)
-    ds = x;
-  if ((x = ds_to_cone (&windcone[0], &ptest)) < ds)
-    ds = x;
-  if ((x = ds_to_cone (&windcone[1], &ptest)) < ds)
-    ds = x;
-  if (geo.wind_type == 8)
-    x = ds_to_pillbox (&ptest, geo.sv_rmin, geo.sv_rmax, geo.elvis_offset);
+
+  /* First calculated the distance to the edge of the of
+     all of the "computatational domain */
+
+  ds = ds_to_sphere (geo.rmax, &ptest);
+
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
+    {
+      /* Check if the photon hits the inner or outer radius of the wind */
+      if ((x = ds_to_sphere (zdom[ndom].rmax, &ptest)) < ds)
+	ds = x;
+
+      if ((x = ds_to_sphere (zdom[ndom].rmin, &ptest)) < ds)
+	ds = x;
+
+      /* Check if the photon hits the inner or outer windcone */
+
+      if ((x = ds_to_cone (&zdom[ndom].windcone[0], &ptest)) < ds)
+	ds = x;
+      if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
+	ds = x;
+
+      if (zdom[ndom].wind_type == CORONA)  {
+
+	      /* As currently written ds_to_plane can give a negative number */
+	      x = ds_to_plane (&zdom[ndom].windplane[0], &ptest);
+	      if (x>0 && x<ds){
+		      ds=x;
+	      }
+	      x = ds_to_plane (&zdom[ndom].windplane[1], &ptest);
+	      if (x>0 && x<ds){
+		      ds=x;
+	      }
+      }
+
+
+      /* Check if the photon hits the pillpox portion of an Elvis wind */
+      if (zdom[ndom].wind_type == ELVIS)
+	{
+	  x =
+	    ds_to_pillbox (&ptest, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax,
+			   zdom[ndom].elvis_offset);
+	  if (x < ds)
+	    ds = x;
+	}
+    }
 
   return (ds);
 }
@@ -284,6 +323,7 @@ History:
 			the numbers of errors for a photon
 			going through a region with negligibe
 			volume.  
+	15aug	ksl	Incorporate multiple domains
  
 **************************************************************/
 
@@ -310,6 +350,7 @@ translate_in_wind (w, p, tau_scat, tau, nres)
   double smax, s, ds_current;
   int istat;
   int nplasma;
+  int ndom;
 
   WindPtr one;
   PlasmaPtr xplasma;
@@ -318,7 +359,7 @@ translate_in_wind (w, p, tau_scat, tau, nres)
 /* First verify that the photon is in the grid, and if not
 return and record an error */
 
-  if ((p->grid = n = where_in_grid (p->x)) < 0)
+  if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
     {
       Error ("translate_in_wind: Photon not in grid when routine entered\n");
       return (n);		/* Photon was not in grid */
@@ -329,25 +370,26 @@ return and record an error */
   one = &wmain[n];		/* one is the grid cell where the photon is */
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
+  ndom=one->ndom;
 
 
 
 
 /* Calculate the maximum distance the photon can travel in the cell */
 
-  if (geo.coord_type == CYLIND)
+  if (zdom[ndom].coord_type == CYLIND)
     {
       smax = cylind_ds_in_cell (p);	// maximum distance the photon can travel in a cell
     }
-  else if (geo.coord_type == RTHETA)
+  else if (zdom[ndom].coord_type == RTHETA)
     {
       smax = rtheta_ds_in_cell (p);
     }
-  else if (geo.coord_type == SPHERICAL)
+  else if (zdom[ndom].coord_type == SPHERICAL)
     {
       smax = spherical_ds_in_cell (p);
     }
-  else if (geo.coord_type == CYLVAR)
+  else if (zdom[ndom].coord_type == CYLVAR)
     {
       smax = cylvar_ds_in_cell (p);
     }
@@ -355,7 +397,7 @@ return and record an error */
     {
       Error
 	("translate_in_wind: Don't know how to find ds_in_cell in this coord system %d\n",
-	 geo.coord_type);
+	 zdom[ndom].coord_type);
       exit (0);
     }
 
@@ -368,17 +410,7 @@ return and record an error */
       if (s > 0 && s < smax)
 	smax = s;
     }
-  // 110930 - ksl - Next section added to accommodate the torus 
-  if (geo.compton_torus && one->inwind == W_PART_INTORUS)
-    {
-      s = ds_to_torus (p);	//smax is set to be the distance to edge of the wind
-      if (s < smax)
-	smax = s;
-      s = ds_to_disk (p, 0);	// ds_to_disk can return a negative distance
-      if (s > 0 && s < smax)
-	smax = s;
-    }
-  else if (one->inwind == W_IGNORE)
+  if (one->inwind == W_IGNORE)
     {
       if ((neglible_vol_count % 100) == 0)
 	Error
@@ -404,7 +436,7 @@ error continues to appear, new investigations are required.
       Error
 	("translate_in_wind: Grid cell %d of photon is not in wind, moving photon %.2e\n",
 	 n, smax);
-      Error ("translate_in_wind: photon position: x %g y %g z %g\n", p->x[0],
+      Error ("translate_in_wind: photon %d position: x %g y %g z %g\n", p->np, p->x[0],
 	     p->x[1], p->x[2]);
       move_phot (p, smax);
       return (p->istat);
@@ -416,8 +448,9 @@ error continues to appear, new investigations are required.
 
 
 
-  smax += DFUDGE;		/* DFUDGE is to force the photon through the cell boundaries.
-				   Implies that phot is in another cell often.  */
+  smax += one->dfudge;    /* dfudge is to force the photon through the cell boundaries. */
+//OLD  smax += DFUDGE;		/* DFUDGE is to force the photon through the cell boundaries.
+//OLD				   Implies that phot is in another cell often.  */
 
 
 
@@ -541,24 +574,18 @@ int
 walls (p, pold)
      PhotPtr p, pold;
 {
-  double dot (), r, rho, rho_sq;
+  double r, rho, rho_sq;
   double xxx[3];
   double s, z;
-  int vmove (), stuff_phot (), move_phot ();
-  double zdisk (), ds_to_disk ();
 
   /* Check to see if the photon has hit the star */
   if ((r = dot (p->x, p->x)) < geo.rstar_sq)
     return (p->istat = P_HIT_STAR);
 
   /* Check to see if it has hit the disk. 
-   * There are several possibilities:
-   *  If disk_type==0, then there is no disk.
-   *  If disk_type==1, then the disk is in the xy plane
-   *  If disk_type==2, then the disk is vertically extended
    */
 
-  if (geo.disk_type == 2)
+  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
       if ((rho * rho) < geo.diskrad_sq && fabs (p->x[2]) <= (z = zdisk (rho)))
@@ -570,18 +597,17 @@ walls (p, pold)
 	  return (p->istat = P_HIT_DISK);
 	}
     }
-  if (geo.disk_type && p->x[2] * pold->x[2] < 0.0)
+  else if (geo.disk_type == DISK_FLAT && p->x[2] * pold->x[2] < 0.0)
     {				// Then the photon crossed the xy plane and probably hit the disk
       s = (-(pold->x[2])) / (pold->lmn[2]);
       if (s < 0)
 	{
-	  Error ("walls: distance %g<0.\n", s);
+	  Error ("walls: distance %g<0. Position %g %g %g \n", s,p->x[0],p->x[1],p->x[2]);
 	  return (-1);
-//        exit (0);
 	}
       // Check whether it hit the disk plane beyond the geo.diskrad**2
       vmove (pold->x, pold->lmn, s, xxx);
-      if (dot (xxx, xxx) < geo.diskrad_sq && geo.disk_illum != 1)
+      if (dot (xxx, xxx) < geo.diskrad_sq && geo.disk_illum != DISK_ILLUM_SCATTER)
 	{			/* The photon has hit the disk */
 	  stuff_phot (pold, p);	/* Move the photon to the point where it hits the disk */
 	  move_phot (p, s);

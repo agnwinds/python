@@ -64,6 +64,7 @@ History:
 			the doppler shift is carried out.)
 	09feb	ksl	68b - Added hooks to track energy deposition of extracted photons
 			in the wind 
+	15aug	ksl	Modifications to allow multiple domains.
 
 **************************************************************/
 
@@ -81,6 +82,7 @@ extract (w, p, itype)
   int vsub ();
   int yep;
   double xdiff[3];
+  int ndom;
 
 
   /* 68b -09021 - ksl - The next line selects the middle inclination angle for recording the absorbed enery */
@@ -149,7 +151,8 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 	  if (itype == PTYPE_WIND)
 	    {			/* If the photon was scattered in the wind, 
 				   the frequency also must be shifted */
-	      vwind_xyz (&pp, v);	/*  Get the velocity at the position of pp */
+		    ndom=wmain[p->grid].ndom;
+	      vwind_xyz (ndom, &pp, v);	/*  Get the velocity at the position of pp */
 	      doppler (p, &pp, v, pp.nres);	/*  Doppler shift the photon -- test! */
 
 /*  Doppler shift the photon (as nonresonant scatter) to new direction */
@@ -233,6 +236,7 @@ History:
  	97sep28	ksl	Modified weightings of extracted photons to be those in Knigge's thesis for
 			Eddington approximation
 	02jan2	ksl	Adapted extract to use photon types
+	16jun22 NSH Added lines to produce a logarithmically binned spectrum
 
 **************************************************************/
 
@@ -249,12 +253,13 @@ extract_one (w, pp, itype, nspec)
   struct photon pstart;
   double weight_min;
   int icell;
-  int k;
+  int k,k1;
   double x[3];
   double tau;
   double zz;
   double dvds;
-  int ishell;
+  double lfreqmin,lfreqmax,ldfreq;
+    int ishell;
 
 
   weight_min = EPSILON * pp->w;
@@ -321,7 +326,7 @@ have been changed */
 /* But in any event we have to reposition wind photons so thath they don't go through
 the same resonance again */
 
-      reposition (w, pp);	// Only reposition the photon if it was a wind photon
+      reposition (pp);	// Only reposition the photon if it was a wind photon
     }
 
   if (tau > TAU_MAX)
@@ -390,6 +395,24 @@ the same resonance again */
 	    k = 0;
 	  else if (k > NWAVE - 1)
 	    k = NWAVE - 1;
+	  
+	  
+	  lfreqmin = log10 (xxspec[nspec].freqmin);
+	  lfreqmax = log10 (xxspec[nspec].freqmax);
+	  ldfreq = (lfreqmax - lfreqmin) / NWAVE;
+	  
+	  
+	  
+    /* find out where we are in log space */
+      k1 = (log10 (pp->freq) - log10 (xxspec[nspec].freqmin)) / ldfreq;
+      if (k1 < 0)
+	{
+	  k1 = 0;
+	}
+      if (k1 > NWAVE-1)
+	{
+	  k1 = NWAVE-1;
+	}
 
 	  /* Increment the spectrum.  Note that the photon weight has not been diminished
 	   * by its passage through th wind, even though it may have encounterd a number
@@ -397,16 +420,28 @@ the same resonance again */
 	   */
 
 	  xxspec[nspec].f[k] += pp->w * exp (-(tau));	//OK increment the spectrum in question
+	  xxspec[nspec].lf[k1] += pp->w * exp (-(tau));  //And increment the log spectrum
+	  
 
-    	/* This seems very defensive.  Is tau ever less than 0? */
+	  /* If this photon was a wind photon, then also increment the "reflected" spectrum */
+	  if ( pp->origin == PTYPE_WIND || pp->origin == PTYPE_WIND_MATOM || pp->nscat > 0) {
+
+	  	xxspec[nspec].f_wind[k] += pp->w * exp (-(tau));	//OK increment the spectrum in question
+	  	xxspec[nspec].lf_wind[k1] += pp->w * exp (-(tau));	//OK increment the spectrum in question
+
+	    }
+			    
 	
-		if (pp->nrscat > 0)		// SWM - Records total distance travelled by extract photon
-		{
-			stuff_v(pstart.x, pp->x);	// Restore photon to initial position (necessary for reweighting schemes)
-			pp->path = pstart.path;
-
-			if (geo.reverb > REV_NONE)		// only want to dump photon if the reverb structures are set up
-			  delay_dump_single(pp, 1);	// Dump photon now weight has been modified
+		// SWM - Records total distance travelled by extract photon
+	  	if(geo.reverb != REV_NONE)
+	  	{	//If we are in reverb mode
+			//if (pp->nscat > 0 || pp->origin > 9 || (pp->nres > -1 && pp->nres < nlines))
+			if (pstart.nscat > 0 || pstart.origin > 9 || (pstart.nres > -1 && pstart.nres < nlines))
+			{	//If this photon has scattered, been reprocessed, or originated in the wind it's important
+				pstart.w = pp->w;				//Adjust weight to weight reduced by extraction
+				//pp->path = pstart.path;
+				delay_dump_single(&pstart, 1);	//Dump photon now weight has been modified by extraction
+			}
 		}
 
 

@@ -535,7 +535,6 @@ bands_init (imode, band)
     {
       Error ("bands_init: Unknown mode %d\n", mode);
       exit(0);
-      //mytrap ();  JM 1410 -- mytrap is deprecated
     }
 
 

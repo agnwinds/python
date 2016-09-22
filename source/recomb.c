@@ -167,6 +167,7 @@ fb_topbase_partial (freq)
   nion = fb_xtop->nion;
 
   /* JM -- below lines to address bug #195 */
+  gn = 1;
   if (ion[nion].phot_info > 0)	// it's a topbase record
     gn = config[fb_xtop->nlev].g;
   else if (ion[nion].phot_info == 0)	// it's a VFKY record, so shouldn't really use levels
@@ -175,8 +176,9 @@ fb_topbase_partial (freq)
   {
   	Error("fb_topbase_partial: Did not understand cross-section type %i for ion %i. Setting multiplicity to zero!\n",
   		   ion[nion].phot_info, nion);
-		gn = 0.0;   
-	   }
+  	gn = 0.0;
+  }
+
 
 
   gion = ion[nion + 1].g;	// Want the g factor of the next ion up
@@ -300,7 +302,6 @@ integ_fb (t, f1, f2, nion, fb_choice)
     }
 
   Error ("integ_fb: Unknown fb_choice(%d)\n", fb_choice);
-  mytrap ();
   exit (0);
 }
 
@@ -357,7 +358,7 @@ total_fb (one, t, f1, f2)
     return (0);			/* It's too cold to emit */
 
 // Initialize the free_bound structures if that is necessary
-  init_freebound (1.e3, 1.e9, f1, f2); //NSH 140121 increased limit to take account of hot plasmas
+  init_freebound (1.e3, 1.e9, f1, f2);	//NSH 140121 increased limit to take account of hot plasmas
 
 
 // Calculate the number of recombinations whenever calculating the fb_luminosities
@@ -373,11 +374,12 @@ total_fb (one, t, f1, f2)
 	{
 
 	  total += xplasma->lum_ion[nion] =
-	    xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t,
-									    f1,
-									    f2,
-									    nion,
-									    1);
+	    xplasma->vol * xplasma->ne * xplasma->density[nion +
+							  1] * integ_fb (t,
+									 f1,
+									 f2,
+									 nion,
+									 1);
 	  if (nion > 3)
 	    xplasma->lum_z += xplasma->lum_ion[nion];
 	}
@@ -528,7 +530,7 @@ use that instead if possible --  57h */
       dfreq = (f2 - f1) / 199;
       for (n = 0; n < 200; n++)
 	{
-    //Debug ("calling fb, n=%i\n", n);
+	  //Debug ("calling fb, n=%i\n", n);
 	  fb_x[n] = f1 + dfreq * n;
 	  fb_y[n] = fb (xplasma, xplasma->t_e, fb_x[n], nions, 0);
 	}
@@ -705,26 +707,26 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
 
   for (nion = nion_min; nion < nion_max; nion++)
     {
-      if (ion[nion].phot_info > 0) // topbase or VFKY+topbase
-        {
-          nmin = ion[nion].ntop_first;
-          nmax = nmin + ion[nion].ntop;
-        }
-      else if (ion[nion].phot_info == 0) // VFKY 
-        {
-          nmin = ion[nion].nxphot;
-          nmax = nmin + 1;
-        }
-      else 
-        nmin = nmax = 0; // no XS / ionized - don't do anything 
+      if (ion[nion].phot_info > 0)	// topbase or VFKY+topbase
+	{
+	  nmin = ion[nion].ntop_first;
+	  nmax = nmin + ion[nion].ntop;
+	}
+      else if (ion[nion].phot_info == 0)	// VFKY 
+	{
+	  nmin = ion[nion].nxphot;
+	  nmax = nmin + 1;
+	}
+      else
+	nmin = nmax = 0;	// no XS / ionized - don't do anything 
 
       //Debug("in fb for ion %i info %i, nmin nmax %i, %i\n", nion, ion[nion].phot_info, nmin, nmax);
 
       x = 0.0;
 
       /* Loop over relevent Topbase photoionization x-sections.  If 
-      an ion does not have Topbase photoionization x-sections then
-      ntmin and ntmax are the same and the loop will be skipped. */
+         an ion does not have Topbase photoionization x-sections then
+         ntmin and ntmax are the same and the loop will be skipped. */
 
       for (n = nmin; n < nmax; n++)
 	{
@@ -737,10 +739,10 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
 	      x += fb_topbase_partial (freq);
 	    }
 
-    fnu += xplasma->density[nion] * x;
+	  fnu += xplasma->density[nion] * x;
 	}
 
-  
+
       /* x is the emissivity from this ion. Add it to the total */
       fnu += xplasma->density[nion] * x;
     }
@@ -805,17 +807,6 @@ init_freebound (t1, t2, f1, f2)
   double xinteg_fb ();
   int nput;
 
-/* If init-freebound has never been called before initialize
-   the temperatures and calculate the
-    recombination rates.  Otherwise skip this section */
-
-
-/* First see if there is a recombination file that already exists that can be used*/
-
-  if (nfb == 0)
-    {
-      fb_read ("recomb.save");
-    }
 
   if (nfb == 0)
     {
@@ -866,7 +857,7 @@ been calculated for these conditions, and if so simply return.
     }
 
 /* We have to calculate a new set of freebound data */
-  if (i == NFB)
+  if (i == NFB -1 )
     {
       /* We've filled all the available space in freebound so we start recycling elements, assuming that the latest
        * ones are still likelyt to be needed
@@ -893,18 +884,17 @@ unless nfb had been set to 0.  The new set is added to the old
 on the assumption that the fb information will be reused.
 */
 
-  freebound[nput].f1 = f1;
-  freebound[nput].f2 = f2;
-
-/* So at this point, we know exactly what needs to be calculated */
 
   Log
     ("init_freebound: Creating recombination emissivites between %e and %e\n",
      f1, f2);
 
+
+  freebound[nput].f1 = f1;
+  freebound[nput].f2 = f2;
+
   for (nion = 0; nion < nions; nion++)
     {
-//      Log ("init_freebound:  ion %d\n", nion);
       for (j = 0; j < NTEMPS; j++)
 	{			//j covers the temps
 	  t = fb_t[j];
@@ -950,7 +940,7 @@ get_nrecomb (t, nion)
   int linterp ();
   double x;
 
-  linterp (t, fb_t, xnrecomb[nion], NTEMPS, &x,0); //Interpolate in linear space
+  linterp (t, fb_t, xnrecomb[nion], NTEMPS, &x, 0);	//Interpolate in linear space
   return (x);
 }
 
@@ -966,7 +956,7 @@ get_fb (t, nion, narray)
   int linterp ();
   double x;
 
-  linterp (t, fb_t, &freebound[narray].emiss[nion][0], NTEMPS, &x,0); //Interpolate in linear space
+  linterp (t, fb_t, &freebound[narray].emiss[nion][0], NTEMPS, &x, 0);	//Interpolate in linear space
   return (x);
 }
 
@@ -1013,34 +1003,33 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 {
   int n;
   double fnu;
-  double dnu;  //NSH 140120 - a parameter to allow one to restrict the integration limits.
+  double dnu;			//NSH 140120 - a parameter to allow one to restrict the integration limits.
   double fthresh, fmax;
   double den_config ();
   int nmin, nmax;		// These are the limits over which number xsections we will use 
   double qromb ();
 
-  dnu = 0.0; //Avoid compilation errors.
+  dnu = 0.0;			//Avoid compilation errors.
 
   if (-1 < nion && nion < nions)	//Get emissivity for this specific ion_number
     {
-      if (ion[nion].phot_info > 0) // topbase or hybrid
-        {
-          nmin = ion[nion].ntop_first;
-          nmax = nmin + ion[nion].ntop;
-        }
-      else if (ion[nion].phot_info == 0) // VFKY 
-        {
-          nmin = ion[nion].nxphot;
-          nmax = nmin + 1;
-        }
-      else 
-        // the ion is a fullt ionized ion / doesn't have a cross-section, so return 0
-        return (0.0);
+      if (ion[nion].phot_info > 0)	// topbase or hybrid
+	{
+	  nmin = ion[nion].ntop_first;
+	  nmax = nmin + ion[nion].ntop;
+	}
+      else if (ion[nion].phot_info == 0)	// VFKY 
+	{
+	  nmin = ion[nion].nxphot;
+	  nmax = nmin + 1;
+	}
+      else
+	// the ion is a fullt ionized ion / doesn't have a cross-section, so return 0
+	return (0.0);
     }
   else				// Get the total emissivity
     {
       Error ("integ_fb: %d is unacceptable value of nion\n", nion);
-      //mytrap ();      // JM 1410 -- mytrap is deprecated
       exit (0);
     }
 
@@ -1059,9 +1048,9 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
   fnu = 0.0;
 
-  
+
   for (n = nmin; n < nmax; n++)
-    {				
+    {
       // loop over relevent Topbase or VFKY photoionzation x-sections
       fb_xtop = &phot_top[n];
 
@@ -1078,15 +1067,15 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
 	  // Now calculate the emissivity as long as fmax exceeds xthreshold and there are ions to recombine
 	  if (fmax > fthresh)
-        {
-        //NSH 140120 - this is a test to ensure that the exponential will not go to zero in the integrations 
-     		dnu = 100.0 * (fbt / H_OVER_K);
-      		if (fthresh + dnu < fmax)
-			{
-	  		fmax = fthresh + dnu;
-			}
-	    	fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
-	    	}
+	    {
+	      //NSH 140120 - this is a test to ensure that the exponential will not go to zero in the integrations 
+	      dnu = 100.0 * (fbt / H_OVER_K);
+	      if (fthresh + dnu < fmax)
+		{
+		  fmax = fthresh + dnu;
+		}
+	      fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
+	    }
 	}
     }
 
@@ -1094,186 +1083,6 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
      for which we have Topbase x-sections, now do Verner */
 
   return (fnu);
-}
-
-
-/***********************************************************
-                                       Space Telescope Science Institute
-                                                                                                                                      
- Synopsis:
-        fb_save(w,filename)
-        fb_read(filename)
-                                                                                                                                      
-Arguments:
-                                                                                                                                      
-                                                                                                                                      
-Returns:
-                                                                                                                                      
-Description:
-                                                                                                                                      
-        The two routines in this file write and read the structure.
-	associated with fb emission in order to save a bit of time
-	calculating them.  This is semidangerous so we need to save
-	some additional information to see, whether this is a good
-        idea
-                                                                                                                                      
-Notes:
-	ksl 0810 - The freebound structure could be done in a way
-	that saves space on disk and in the program.  To save
-	space on disk one just needs to write and read the array
-	one elment at a time.  
-                                                                                                                                      
-History:
-        06jul   ksl     57h -- Began coding
-	08may	ksl	60a -- Added code to make sure that one
-			was only checking the first word in VERSION.
-			Previously, there was a problem with VERSION
-			having an extra space compared to the version
-			that was read back.  May be just an OS X
-			problem.
-                                                                                                                                      
-**************************************************************/
-
-int
-fb_save (filename)
-     char filename[];
-{
-  FILE *fptr, *fopen ();
-
-  char line[LINELENGTH];
-  int n;
-
-  return (0);
-
-  if ((fptr = fopen (filename, "w")) == NULL)
-    {
-      Error ("fb_save: Unable to open %s\n", filename);
-      exit (0);
-    }
-
-  sprintf (line, "Version %s\n", VERSION);
-  n = fwrite (line, sizeof (line), 1, fptr);
-  sprintf (line, "%s %d %d %d %d %d %d\n", geo.atomic_filename, nelements,
-	   nions, nlevels, nxphot, ntop_phot, nfb);
-  n += fwrite (line, sizeof (line), 1, fptr);
-
-  n += fwrite (fb_t, sizeof (fb_t), 1, fptr);
-  n += fwrite (xnrecomb, sizeof (xnrecomb), 1, fptr);
-  n += fwrite (freebound, sizeof (freebound), 1, fptr);
-
-  fclose (fptr);
-
-  Log ("Wrote fb information for %s to %s for %d frequency intervals \n",
-       geo.atomic_filename, filename, nfb);
-  Log
-    ("There are  %d elem, %d ions, %d levels, %d Verner, %d topbase xsections\n",
-     nelements, nions, nlevels, nxphot, ntop_phot);
-
-  return (0);
-
-}
-
-
-int
-fb_read (filename)
-     char filename[];
-{
-  FILE *fptr, *fopen ();
-  int n;
-  char line[LINELENGTH];
-  char version[LINELENGTH], oldversion[LINELENGTH];
-  char atomic_filename[LINELENGTH];
-
-  int xnelements, xnions, xnlevels, xnxphot, xntopphot, xnfb;
-
-  return (0);
-
-/* Initialize nfb to 0 so a return means that python will
-have to calcuate the coefficients */
-
-  nfb = 0;
-
-  if ((fptr = fopen (filename, "r")) == NULL)
-    {
-      Log ("fb_read: Unable to open %s\n", filename);
-      return (0);
-    }
-
-  n = fread (line, sizeof (line), 1, fptr);
-  sscanf (line, "%*s %s", version);
-  Log
-    ("Reading Windfile %s created with python version %s with python version %s\n",
-     filename, version, VERSION);
-  n += fread (line, sizeof (line), 1, fptr);
-  sscanf (line, "%s %d %d %d %d %d %d\n", atomic_filename, &xnelements,
-	  &xnions, &xnlevels, &xnxphot, &xntopphot, &xnfb);
-
-  Log ("Reading fb information for %s \n", atomic_filename);
-  Log
-    ("There are  %d elem, %d ions, %d levels, %d Verner, %d topbase, and %d freq intervals\n",
-     xnelements, xnions, xnlevels, xnxphot, xntopphot, xnfb);
-
-/* Check insofar as possible that this reconbination file was created with the same 
-inputs.  The next statement is intended to handle problems with extra spaces on the
-string that constitutes VERSION*/
-
-  sscanf (VERSION, "%s", oldversion);
-  if (strcmp (version, oldversion))
-    {
-      Log ("fb_read: Different versions of python  %s != %s or %d !=d %d \n",
-	   version, oldversion, strlen (version), strlen (oldversion));
-      return (0);
-    }
-  if (strcmp (atomic_filename, geo.atomic_filename) != 0)
-    {
-      Log ("fb_read: Different atomic_filename\n");
-      return (0);
-    }
-  if (xnelements != nelements)
-    {
-      Log ("fb_read: old %d  new %d  nelements\n", xnelements, nelements);
-      return (0);
-    }
-  if (xnlevels != nlevels)
-    {
-      Log ("fb_read: old %d  new %d  nions\n", xnions, nions);
-      return (0);
-    }
-  if (xnlevels != nlevels)
-    {
-      Log ("fb_read: old %d  new %d  nlevels\n", xnlevels, nlevels);
-      return (0);
-    }
-  if (xnxphot != nxphot)
-    {
-      Log ("fb_read: old %d  new %d  nnxphot\n", xnxphot, nxphot);
-      return (0);
-    }
-  if (xnlevels != nlevels)
-    {
-      Log ("fb_read: old %d  new %d  ntopphot\n", xntopphot, ntop_phot);
-
-      return (0);
-    }
-
-
-
-
-
-  nfb = xnfb;
-
-  n += fread (fb_t, sizeof (fb_t), 1, fptr);
-  n += fread (xnrecomb, sizeof (xnrecomb), 1, fptr);
-  n += fread (freebound, sizeof (freebound), 1, fptr);
-
-  fclose (fptr);
-
-
-  Log ("Read geometry and wind structures from windsavefile %s\n", filename);
-
-  return (n);
-
-
 }
 
 
@@ -1330,51 +1139,52 @@ total_rrate (nion, T)
   rate = 0.0;			/* NSH 130605 to remove o3 compile error */
 
 
-  if (ion[nion].total_rrflag == 1) /*We have some kind of total radiative rate data*/
-{
-  if (total_rr[ion[nion].nxtotalrr].type == RRTYPE_BADNELL)
+  if (ion[nion].total_rrflag == 1)	/*We have some kind of total radiative rate data */
     {
-      rrA = total_rr[ion[nion].nxtotalrr].params[0];
-      rrB = total_rr[ion[nion].nxtotalrr].params[1];
-      rrT0 = total_rr[ion[nion].nxtotalrr].params[2];
-      rrT1 = total_rr[ion[nion].nxtotalrr].params[3];
-      rrC = total_rr[ion[nion].nxtotalrr].params[4];
-      rrT2 = total_rr[ion[nion].nxtotalrr].params[5];
+      if (total_rr[ion[nion].nxtotalrr].type == RRTYPE_BADNELL)
+	{
+	  rrA = total_rr[ion[nion].nxtotalrr].params[0];
+	  rrB = total_rr[ion[nion].nxtotalrr].params[1];
+	  rrT0 = total_rr[ion[nion].nxtotalrr].params[2];
+	  rrT1 = total_rr[ion[nion].nxtotalrr].params[3];
+	  rrC = total_rr[ion[nion].nxtotalrr].params[4];
+	  rrT2 = total_rr[ion[nion].nxtotalrr].params[5];
 
 
-      rrB = rrB + rrC * exp ((-1.0 * rrT2) / T);	//If C=0, this does nothing
+	  rrB = rrB + rrC * exp ((-1.0 * rrT2) / T);	//If C=0, this does nothing
 
 
-      term1 = sqrt (T / rrT0);
-      term2 = 1.0 + sqrt (T / rrT0);
-      term2 = pow (term2, (1 - rrB));
-      term3 = 1.0 + sqrt (T / rrT1);
-      term3 = pow (term3, (1 + rrB));
+	  term1 = sqrt (T / rrT0);
+	  term2 = 1.0 + sqrt (T / rrT0);
+	  term2 = pow (term2, (1 - rrB));
+	  term3 = 1.0 + sqrt (T / rrT1);
+	  term3 = pow (term3, (1 + rrB));
 
 
-      rate = pow ((term1 * term2 * term3), -1.0);
-      rate *= rrA;
+	  rate = pow ((term1 * term2 * term3), -1.0);
+	  rate *= rrA;
+	}
+      else if (total_rr[ion[nion].nxtotalrr].type == RRTYPE_SHULL)
+	{
+	  rate =
+	    total_rr[ion[nion].nxtotalrr].params[0] * pow ((T / 1.0e4),-1.0*
+							   total_rr[ion
+								    [nion].nxtotalrr].params
+							   [1]);
+	}
+      else
+	{
+	  Error ("total_rrate: unknown parameter type for ion %i\n", nion);
+	  exit (0);		/* NSH This is a serious problem! */
+	}
     }
-  else if (total_rr[ion[nion].nxtotalrr].type == RRTYPE_SHULL)
+  else				/*NSH 140812 - We dont have coefficients - in this case we can use xinteg_fb with mode 2 to use the milne relation to obtain a value for this - it is worth throwing an error though, since there rreally should be data for all ions. xinteg_fb
+				   is called with the lower ion in the pair, since it uses the photionization cross sectiuon of the lower ion */
     {
-      rate =
-	total_rr[ion[nion].nxtotalrr].params[0] * pow ((T / 1.0e4),-1.0*
-						       total_rr[ion
-								[nion].
-								nxtotalrr].
-						       params[1]);
-    }
-  else
-    {
-      Error ("total_rrate: unknown parameter type for ion %i\n", nion);
-      exit(0);  /* NSH This is a serious problem! */
-    }
-}
-  else /*NSH 140812 - We dont have coefficients - in this case we can use xinteg_fb with mode 2 to use the milne relation to obtain a value for this - it is worth throwing an error though, since there rreally should be data for all ions. xinteg_fb
-is called with the lower ion in the pair, since it uses the photionization cross sectiuon of the lower ion */
-    {
-      Error ("total_rrate: No T_RR parameters for ion %i - using milne relation\n", nion);
-      rate = xinteg_fb (T, 3e12, 3e18, nion-1, 2);
+      Error
+	("total_rrate: No T_RR parameters for ion %i - using milne relation\n",
+	 nion);
+      rate = xinteg_fb (T, 3e12, 3e18, nion - 1, 2);
     }
 
 
@@ -1453,92 +1263,93 @@ gs_rrate (nion, T)
   if (ion[nion].bad_gs_rr_t_flag == 1 && ion[nion].bad_gs_rr_r_flag == 1)	//We have tabulated gs data
 
     //NSH force code to always use milne for a test REMOVE ME!!!
-    //if (ion[nion].bad_gs_rr_t_flag == 100 && ion[nion].bad_gs_rr_r_flag == 100)	//We have tabulated gs data
-     {
-    //printf("We are using the tabulations for GS recomb\n");
-    for (i = 0; i < BAD_GS_RR_PARAMS; i++)
-      {
-        rates[i] = bad_gs_rr[ion[nion].nxbadgsrr].rates[i];
-        temps[i] = bad_gs_rr[ion[nion].nxbadgsrr].temps[i];
-      }
+    //if (ion[nion].bad_gs_rr_t_flag == 100 && ion[nion].bad_gs_rr_r_flag == 100)       //We have tabulated gs data
+    {
+      //printf("We are using the tabulations for GS recomb\n");
+      for (i = 0; i < BAD_GS_RR_PARAMS; i++)
+	{
+	  rates[i] = bad_gs_rr[ion[nion].nxbadgsrr].rates[i];
+	  temps[i] = bad_gs_rr[ion[nion].nxbadgsrr].temps[i];
+	}
 
-    if (T < temps[0])		//we are below the range of GS data
-      {
-        Log_silent
-  	("bad_gs_rr: Requested temp %e is below limit of data for ion %i(Tmin= %e)\n",
-  	 T, nion, temps[0]);
-        //      rate = rates[0];
-       	imax=1;
-  	    imin=0;  
-      }
+      if (T < temps[0])		//we are below the range of GS data
+	{
+	  Log_silent
+	    ("bad_gs_rr: Requested temp %e is below limit of data for ion %i(Tmin= %e)\n",
+	     T, nion, temps[0]);
+	  //      rate = rates[0];
+	  imax = 1;
+	  imin = 0;
+	}
 
-    else if (T >= temps[BAD_GS_RR_PARAMS - 1])	//we are above the range of GS data
-      {
-        Log_silent
-  	("bad_gs_rr: Requested temp %e is above limit (%e) of data for ion %i\n",
-  	 T, nion, bad_gs_rr[ion[nion].nxbadgsrr].temps[BAD_GS_RR_PARAMS - 1]);
-    //     rate = rates[BAD_GS_RR_PARAMS - 1];
-  	imax=BAD_GS_RR_PARAMS - 1;
-  	imin=BAD_GS_RR_PARAMS - 2;
-    //We will try to extrapolate.
+      else if (T >= temps[BAD_GS_RR_PARAMS - 1])	//we are above the range of GS data
+	{
+	  Log_silent
+	    ("bad_gs_rr: Requested temp %e is above limit (%e) of data for ion %i\n",
+	     T, nion,
+	     bad_gs_rr[ion[nion].nxbadgsrr].temps[BAD_GS_RR_PARAMS - 1]);
+	  //     rate = rates[BAD_GS_RR_PARAMS - 1];
+	  imax = BAD_GS_RR_PARAMS - 1;
+	  imin = BAD_GS_RR_PARAMS - 2;
+	  //We will try to extrapolate.
 
 
 
-      }
-    else				//We must be within the range of tabulated data
-      {
-        for (i = 0; i < BAD_GS_RR_PARAMS - 1; i++)
-  	{
-          if (temps[i] <= T && T < temps[i + 1])	//We have bracketed the correct temperature
-  	    {
-  	      imin = i;
-  	      imax = i + 1;
-  	    }
-  	}
-  /* NSH 140313 - changed the following lines to interpolate in log space */
-      }
-        drdt = (log10(rates[imax]) - log10(rates[imin])) / (log10(temps[imax]) - log10(temps[imin]));
-        dt = (log10(T) - log10(temps[imin]));
-        rate = pow(10,(log10(rates[imin]) + drdt * dt));
-  }
+	}
+      else			//We must be within the range of tabulated data
+	{
+	  for (i = 0; i < BAD_GS_RR_PARAMS - 1; i++)
+	    {
+	      if (temps[i] <= T && T < temps[i + 1])	//We have bracketed the correct temperature
+		{
+		  imin = i;
+		  imax = i + 1;
+		}
+	    }
+	  /* NSH 140313 - changed the following lines to interpolate in log space */
+	}
+      drdt =
+	(log10 (rates[imax]) - log10 (rates[imin])) / (log10 (temps[imax]) -
+						       log10 (temps[imin]));
+      dt = (log10 (T) - log10 (temps[imin]));
+      rate = pow (10, (log10 (rates[imin]) + drdt * dt));
+    }
 
   /* we will need to use the milne relation - 
      NB - this is different from using xinteg_fb because 
      that routine does recombination to all excited levels (at least for topbase ions).
-  */
-  else  
-  {
-     //printf("We are using the milne relation for GS recomb\n");
-     rate = 0.0;			/* NSH 130605 to remove o3 compile error */
+   */
+  else
+    {
+      //printf("We are using the milne relation for GS recomb\n");
+      rate = 0.0;		/* NSH 130605 to remove o3 compile error */
 
-    fbt = T;
-    fbfr = 2;
+      fbt = T;
+      fbfr = 2;
 
-    if (ion[nion-1].phot_info > 0)	//topbase or hybrid
-      {
-        ntmin = ion[nion-1].ntop_ground;
-        fb_xtop = &phot_top[ntmin];
-      }
-    else if (ion[nion-1].phot_info == 0) //vfky 
-      {
-        fb_xtop = &phot_top[ion[nion-1].nxphot];
-      }
+      if (ion[nion - 1].phot_info > 0)	//topbase or hybrid
+	{
+	  ntmin = ion[nion - 1].ntop_ground;
+	  fb_xtop = &phot_top[ntmin];
+	}
+      else if (ion[nion - 1].phot_info == 0)	//vfky 
+	{
+	  fb_xtop = &phot_top[ion[nion - 1].nxphot];
+	}
 
-    fthresh = fb_xtop->freq[0];
-    fmax = fb_xtop->freq[fb_xtop->np - 1];
-    dnu = 100.0 * (fbt / H_OVER_K);
+      fthresh = fb_xtop->freq[0];
+      fmax = fb_xtop->freq[fb_xtop->np - 1];
+      dnu = 100.0 * (fbt / H_OVER_K);
 
-    if (fthresh + dnu < fmax)
-  	  {
-  	    fmax = fthresh + dnu;
-  	  }
-    
+      if (fthresh + dnu < fmax)
+	{
+	  fmax = fthresh + dnu;
+	}
 
-    rate = qromb (fb_topbase_partial, fthresh, fmax, 1e-5);
-  }
+
+      rate = qromb (fb_topbase_partial, fthresh, fmax, 1e-5);
+    }
 
 
   return (rate);
 }
-
-

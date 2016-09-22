@@ -111,6 +111,10 @@ History:
 			a series of commands and prints out the files associated with them.
 	111227	ksl	Added the capability to read a new wind file while the program
 			is running
+	160217	ksl	Began modification of the py_wind to account for multiple domains.  The
+			philosophy is to assign a current_domain to examine, and to modify 
+			output file names to include the domain number.  The current domain
+			is transmitted through and external variable current_domain in python.h
 
 **************************************************************/
 
@@ -140,7 +144,7 @@ char *choice_options = "\n\
    d=convergence status  E=convergence_all_info   B=PlasmaPtr  J=Radiation density\n\
    H=All Heating and Cooling mechanisms in one shot  O=Spectral model parameters S=Spectral models\n\
    z=Zoom,u=unZoom,Z=switch to/from raw and yz projected modes, F=Create files, A=Change file write defaults\n\
-   N=new.windfile q=quit (preferred over EOF)\n";
+   N=new.windfile q=quit (preferred over EOF) Q=switch domain\n";
 
 int
 main (argc, argv)
@@ -262,8 +266,11 @@ I did not change this now.  Though it could be done.  02apr ksl */
   printf ("Read Atomic data from %s\n", geo.atomic_filename);
 
 
+  printf ("There were %d domains.  Starting with domain 0\n", geo.ndomain);
+  current_domain = 0;
+  /*Set the current domain to zero */
 /* Produce a standard set of output files and exit*/
-  if (interactive == 0 && strcmp (parameter_file, "NONE") == 0)
+    if (interactive == 0 && strcmp (parameter_file, "NONE") == 0)
     {
       zoom (1);			/* This affects the logfile */
       ochoice = 1;
@@ -326,6 +333,23 @@ I did not change this now.  Though it could be done.  02apr ksl */
 
   while (c != EOF)
     {
+      if (c == 'Q')
+	{
+	  printf ("There were %d domains.\n", geo.ndomain);
+	  rdint ("Domain_to_examine", &current_domain);
+	  if (current_domain < 0 || current_domain >= geo.ndomain)
+	    {
+	      printf ("Unkown Domain (forcing current_domain to 0\n");
+	      current_domain = 0;
+	    }
+	  else
+	    {
+	      printf ("Swithching to domain %d\n", current_domain);
+	    }
+      	  zoom (1);			/* Unzoom*/
+	  rdchar ("Choice", &c);
+	}
+
       one_choice (c, root, ochoice);
       printf ("%s\n", choice_options);
       rdchar ("Choice", &c);
@@ -588,11 +612,11 @@ one_choice (choice, root, ochoice)
 	}
       break;
 
-    /* JM -- typing 1 gives you a summary of everything in one file with
-      astropy.io.ascii compliant headers */
+      /* JM -- typing 1 gives you a summary of everything in one file with
+         astropy.io.ascii compliant headers */
 
     case '1':
-      complete_physical_summary(wmain, root, ochoice);  //
+      complete_physical_summary (wmain, root, ochoice);	//
       break;
 
 

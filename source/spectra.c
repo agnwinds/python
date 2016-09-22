@@ -161,8 +161,8 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select,
   strcpy (xxspec[0].name, "Created");
   strcpy (xxspec[1].name, "Emitted");
   strcpy (xxspec[2].name, "CenSrc");
-  strcpy (xxspec[3].name, "Disk   ");
-  strcpy (xxspec[4].name, "Wind   ");
+  strcpy (xxspec[3].name, "Disk");
+  strcpy (xxspec[4].name, "Wind");
   strcpy (xxspec[5].name, "HitSurf");
   strcpy (xxspec[6].name, "Scattered");
   for (n = 0; n < MSPEC; n++)
@@ -333,6 +333,10 @@ History:
 			the original weights of the photons.  Photons
 			which hit a hard boudary and destroyed are
 			not recorded.
+	1604	ksl	Modifications to create a new set of spectra
+			for photons that were created in the wind or
+			modified by scatterin there
+
 **************************************************************/
 
 int
@@ -348,11 +352,11 @@ spectrum_create (p, f1, f2, nangle, select_extract)
   double freqmin, freqmax, dfreq;
   double lfreqmin, lfreqmax, ldfreq;
   double x1;
-  int wind_n_to_ij ();
   int mscat, mtopbot;
   double delta;
   double nlow, nhigh;
   int k_orig, k1_orig;
+  int iwind;			// Variable defining whether this is a wind photon
 
   freqmin = f1;
   freqmax = f2;
@@ -381,30 +385,41 @@ spectrum_create (p, f1, f2, nangle, select_extract)
       else
 	nres[j]++;
 
-    /* find out where we are in log space */
+      /* Determine whether this is a wind photon, that is was it created in the
+       * wind or scattered by the wind 
+       */
+
+      iwind = 0;
+      if (p[nphot].origin == PTYPE_WIND || p[nphot].origin == PTYPE_WIND_MATOM
+	  || p[nphot].nscat > 0)
+	{
+	  iwind = 1;
+	}
+
+      /* find out where we are in log space */
       k1 = (log10 (p[nphot].freq) - log10 (freqmin)) / ldfreq;
       if (k1 < 0)
 	{
 	  k1 = 0;
 	}
-      if (k1 > NWAVE)
+      if (k1 > NWAVE-1)
 	{
-	  k1 = NWAVE;
+	  k1 = NWAVE-1;
 	}
 
-	/* also need to work out where we are for photon's original wavelength */
+      /* also need to work out where we are for photon's original wavelength */
       k1_orig = (log10 (p[nphot].freq_orig) - log10 (freqmin)) / ldfreq;
       if (k1_orig < 0)
 	{
 	  k1_orig = 0;
 	}
-      if (k1_orig > NWAVE)
+      if (k1_orig > NWAVE-1)
 	{
-	  k1_orig = NWAVE;
+	  k1_orig = NWAVE-1;
 	}
 
 
-    /* lines to work out where we are in a normal spectrum with linear spacing */
+      /* lines to work out where we are in a normal spectrum with linear spacing */
       k = (p[nphot].freq - freqmin) / dfreq;
       if (k < 0)
 	{
@@ -419,51 +434,80 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	  k = NWAVE - 1;
 	}
 
-	/* also need to work out where we are for photon's original wavelength */
-	  k_orig = (p[nphot].freq_orig - freqmin) / dfreq;
-	  if (k_orig < 0)
+      /* also need to work out where we are for photon's original wavelength */
+      k_orig = (p[nphot].freq_orig - freqmin) / dfreq;
+      if (k_orig < 0)
 	{
-	  if (((1. - p[nphot].freq_orig / freqmin) > delta) && (geo.rt_mode != 2))
+	  if (((1. - p[nphot].freq_orig / freqmin) > delta)
+	      && (geo.rt_mode != 2))
 	    nlow = nlow + 1;
 	  k_orig = 0;
 	}
       else if (k_orig > NWAVE - 1)
 	{
-	  if (((1. - freqmax / p[nphot].freq_orig) > delta) && (geo.rt_mode != 2))
+	  if (((1. - freqmax / p[nphot].freq_orig) > delta)
+	      && (geo.rt_mode != 2))
 	    nhigh = nhigh + 1;
 	  k_orig = NWAVE - 1;
 	}
 
 
-    xxspec[0].f[k_orig] += p[nphot].w_orig;	/* created spectrum with original weights and wavelengths */
-	xxspec[0].lf[k1_orig] += p[nphot].w_orig;	/* logarithmic created spectrum */
-	
+      xxspec[0].f[k_orig] += p[nphot].w_orig;	/* created spectrum with original weights and wavelengths */
+      xxspec[0].lf[k1_orig] += p[nphot].w_orig;	/* logarithmic created spectrum */
+      if (iwind)
+	{
+	  xxspec[0].f_wind[k_orig] += p[nphot].w_orig;
+	  xxspec[0].lf_wind[k1_orig] += p[nphot].w_orig;
+	}
+
 
       if ((i = p[nphot].istat) == P_ESCAPE)
 	{
-      xxspec[0].nphot[i]++;
+	  xxspec[0].nphot[i]++;
 	  xxspec[1].f[k] += p[nphot].w;	/* emitted spectrum */
 	  xxspec[1].lf[k1] += p[nphot].w;	/* logarithmic emitted spectrum */
+	  if (iwind)
+	    {
+	      xxspec[1].f_wind[k] += p[nphot].w;	/* emitted spectrum */
+	      xxspec[1].lf_wind[k1] += p[nphot].w;	/* logarithmic emitted spectrum */
+	    }
 	  xxspec[1].nphot[i]++;
 	  spectype = p[nphot].origin;
-	  if (spectype >= 10)
+
+	  if (spectype >= 10)	/* This looks to be an undocumented correction for macroatoms XXX */
 	    spectype -= 10;
+
 	  if (spectype == PTYPE_STAR || spectype == PTYPE_BL || spectype == PTYPE_AGN)	// Then it came from the bl or the star
 	    {
 	      xxspec[2].f[k] += p[nphot].w;	/* emitted star (+bl) spectrum */
 	      xxspec[2].lf[k1] += p[nphot].w;	/* logarithmic emitted star (+bl) spectrum */
+	      if (iwind)
+		{
+		  xxspec[2].f_wind[k] += p[nphot].w;	/* emitted spectrum */
+		  xxspec[2].lf_wind[k1] += p[nphot].w;	/* logarithmic emitted spectrum */
+		}
 	      xxspec[2].nphot[i]++;
 	    }
 	  else if (spectype == PTYPE_DISK)	// Then it was a disk photon 
 	    {
 	      xxspec[3].f[k] += p[nphot].w;	/* transmitted disk spectrum */
 	      xxspec[3].lf[k1] += p[nphot].w;	/* logarithmic transmitted disk spectrum */
+	      if (iwind)
+		{
+		  xxspec[3].f_wind[k] += p[nphot].w;	/* emitted spectrum */
+		  xxspec[3].lf_wind[k1] += p[nphot].w;	/* logarithmic emitted spectrum */
+		}
 	      xxspec[3].nphot[i]++;
 	    }
 	  else if (spectype == PTYPE_WIND)
 	    {
 	      xxspec[4].f[k] += p[nphot].w;	/* wind spectrum */
 	      xxspec[4].lf[k1] += p[nphot].w;	/* logarithmic wind spectrum */
+	      if (iwind)
+		{
+		  xxspec[4].f_wind[k] += p[nphot].w;	/* emitted spectrum */
+		  xxspec[4].lf_wind[k1] += p[nphot].w;	/* logarithmic emitted spectrum */
+		}
 	      xxspec[4].nphot[i]++;
 	    }
 	  else
@@ -490,8 +534,15 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 
 		    {
 		      if (xxspec[n].mmin < x1 && x1 < xxspec[n].mmax)
-			xxspec[n].f[k] += p[nphot].w;
-		      xxspec[n].lf[k1] += p[nphot].w;	/* logarithmic spectrum */
+			{
+			  xxspec[n].f[k] += p[nphot].w;
+			  xxspec[n].lf[k1] += p[nphot].w;	/* logarithmic spectrum */
+			  if (iwind)
+			    {
+			      xxspec[n].f_wind[k] += p[nphot].w;	/* emitted spectrum */
+			      xxspec[n].lf_wind[k1] += p[nphot].w;	/* logarithmic emitted spectrum */
+			    }
+			}
 		    }
 
 		}
@@ -501,14 +552,24 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 	{
 	  xxspec[5].f[k] += p[nphot].w;	/*absorbed spectrum */
 	  xxspec[5].lf[k1] += p[nphot].w;	/*logarithmic absorbed spectrum */
+	  if (iwind)
+	    {
+	      xxspec[5].f_wind[k] += p[nphot].w;	/* emitted spectrum */
+	      xxspec[5].lf_wind[k1] += p[nphot].w;	/* logarithmic emitted spectrum */
+	    }
 	  xxspec[5].nphot[i]++;
 	}
 
-    if (p[nphot].nscat > 0 || p[nphot].nrscat > 0)
+      if (p[nphot].nscat > 0 || p[nphot].nrscat > 0)
 
 	{
 	  xxspec[6].f[k] += p[nphot].w;	/* j is the number of scatters so this constructs */
 	  xxspec[6].lf[k1] += p[nphot].w;	/* logarithmic j is the number of scatters so this constructs */
+	  if (iwind)
+	    {
+	      xxspec[6].f_wind[k] += p[nphot].w;	/* emitted spectrum */
+	      xxspec[6].lf_wind[k1] += p[nphot].w;	/* logarithmic emitted spectrum */
+	    }
 	  if (i < 0 || i > NSTAT - 1)
 	    xxspec[6].nphot[NSTAT - 1]++;
 	  else
@@ -575,11 +636,12 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 
 
   Log ("Photons contributing to the various spectra\n");
-  Log ("Inwin  Scat  Esc   Star  >nscat  err  Absor  Disk  sec  Adiab(matom)\n");
+  Log
+    ("Inwind   Scat    Esc     Star    >nscat    err    Absorb   Disk    sec    Adiab(matom)\n");
   for (n = 0; n < nspectra; n++)
     {
       for (i = 0; i < NSTAT; i++)
-	Log (" %5d", xxspec[n].nphot[i]);
+	Log (" %7d", xxspec[n].nphot[i]);
       Log ("\n");
 
     }
@@ -646,12 +708,13 @@ History:
 
 int
 spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
-		  loglin)
+		  loglin, iwind)
      char filename[], mode[];
      int loglin;		// switch to tell the code if we are outputting a log or a lin
      int nspecmin, nspecmax;
      int select_spectype;
      double renorm;		// parameter used to rescale spectrum as it is building up 
+     int iwind;
 
 {
   FILE *fopen (), *fptr;
@@ -693,7 +756,7 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
 
   /* Write the rest of the header for the spectrum file */
   /* JM 1411 -- Removed comment line for column headers, see #122 */
-  fprintf (fptr, "# \nFreq.        Lambda");
+  fprintf (fptr, "# \nFreq.        Lambda  ");
 
   for (n = nspecmin; n <= nspecmax; n++)
     {
@@ -708,7 +771,7 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
      as a result of the fact that the bb function generate some IR photons */
   dd = 4. * PI * (100. * PC) * (100. * PC);
 
-  if (loglin == 0)
+  if (loglin == 0)		/* Then were are writing out the linear version of the spectra */
     {
       freqmin = xxspec[nspecmin].freqmin;
       dfreq = (xxspec[nspecmin].freqmax - freqmin) / NWAVE;
@@ -719,6 +782,12 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
 	  for (n = nspecmin; n <= nspecmax; n++)
 	    {
 	      x = xxspec[n].f[i] * xxspec[n].renorm;
+	      if (iwind)
+		{
+		  x = xxspec[n].f_wind[i] * xxspec[n].renorm;
+		}
+
+
 	      if (select_spectype == 1)
 		{		/* flambda */
 		  x *= (freq * freq * 1e-8) / (dfreq * dd * C);
@@ -726,7 +795,11 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
 	      else if (select_spectype == 2)
 		{		/*fnu */
 		  x /= (dfreq * dd);
-		}
+		}		
+        else if (select_spectype == 0)
+		{		/*generated spectrum*/
+			x /= (dfreq);  //With log spectra implemented, we should divide by nu, so log and lin spectra agree
+  		}
 	      fprintf (fptr, " %8.3g", x * renorm);
 	    }
 
@@ -749,6 +822,11 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
 	  for (n = nspecmin; n <= nspecmax; n++)
 	    {
 	      x = xxspec[n].lf[i] * xxspec[n].renorm;
+	      if (iwind)
+		{
+		  x = xxspec[n].lf_wind[i] * xxspec[n].renorm;
+		}
+
 	      if (select_spectype == 1)
 		{		/* flambda */
 		  x *= (freq * freq * 1e-8) / (dfreq * dd * C);
@@ -757,7 +835,11 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm,
 		{		/*fnu */
 		  x /= (dfreq * dd);
 		}
-	      fprintf (fptr, " %8.3g", x * renorm);	/* this really shouldn't get called if we are outputting log data */
+        else if (select_spectype == 0)  
+  		{		/*generated spectrum*/
+  	  	  x /= (dfreq); 
+  		}
+	      fprintf (fptr, " %8.3g", x * renorm);
 	    }
 
 
@@ -804,24 +886,25 @@ History:
 
 **************************************************************/
 
-int spectrum_restart_renormalise(nangle)
-    int nangle;
+int
+spectrum_restart_renormalise (nangle)
+     int nangle;
 {
   double renorm_factor;
   int n, m, nspec;
 
   nspec = nangle + MSPEC;
-  renorm_factor = ( (double) geo.pcycle + 1.0) / ( (double) geo.pcycles + 1.0); 
+  renorm_factor = ((double) geo.pcycle + 1.0) / ((double) geo.pcycles + 1.0);
 
   /* loop over each spectrum column and each wavelength bin */
   for (n = MSPEC; n < nspec; n++)
-  {
-  	for (m = 0; m < NWAVE; m++)
-  	  {
-        xxspec[n].f[m] *= renorm_factor;
-        xxspec[n].lf[m] *= renorm_factor;
-  	  } 
-  }
+    {
+      for (m = 0; m < NWAVE; m++)
+	{
+	  xxspec[n].f[m] *= renorm_factor;
+	  xxspec[n].lf[m] *= renorm_factor;
+	}
+    }
 
   return (0);
 }

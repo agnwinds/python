@@ -46,10 +46,7 @@ script:
     - make clean
     - make CC=gcc py_wind
     - make clean
-    - cd ../examples/travis 
-    - Setup_Py_Dir
-    - py balmer_test > balmer_test.out
-    - cd ../core/
+    - cd ../examples/core/
     - Setup_Py_Dir
     - py -i cv_macro_benchmark
     - py -i cv_standard
@@ -60,3 +57,4 @@ script:
     - py -i agn_ss_2010_modela.pf
     - py -i ulx1
     - py -i ngc5548
+    - py -i lamp_post

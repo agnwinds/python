@@ -111,9 +111,7 @@ endif
 LDFLAGS= -L$(LIB) -lm -lcfitsio -lgsl -lgslcblas 
 
 #Note that version should be a single string without spaces. 
-
-
-VERSION = 81
+VERSION = 81a
 
 
 CHOICE=1             // Compress plasma as much as possible
@@ -147,11 +145,13 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		agn.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
 		spectral_estimators.o variable_temperature.o matom_diag.o \
 		log.o lineio.o rdpar.o direct_ion.o pi_rates.o matrix_ion.o para_update.o \
-		setup.o photo_gen_matom.o macro_gov.o brem.o\
-		reverb.o
+		setup.o photo_gen_matom.o macro_gov.o \
+		reverb.o paths.o setup2.o run.o brem.o search_light.o
 		
 
 
+# For reasons that are unclear to me.  get_models.c cannot be included in the sources
+# Problems ocurr due to the prototypes that are generated.  ksl 160705
 python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		saha.c spectra.c wind2d.c wind.c  vvector.c debug.c recipes.c \
 		trans_phot.c phot_util.c resonate.c radiation.c \
@@ -165,8 +165,8 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
 		spectral_estimators.c variable_temperature.c matom_diag.c \
 		direct_ion.c pi_rates.c matrix_ion.c para_update.c setup.c \
-		photo_gen_matom.c macro_gov.c brem.c\
-		reverb.c
+		photo_gen_matom.c macro_gov.c \
+		reverb.c paths.c setup2.c run.c brem.c search_light.c
 
 # kpar_source is now declared seaprately from python_source so that the file log.h 
 # can be made using cproto
@@ -176,7 +176,7 @@ additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_
 
 prototypes: 
 	cp templates.h templates.h.old
-	cproto -I$(INCLUDE) $(python_source) ${additional_py_wind_source} test_saha.c  > foo.h  
+	cproto -I$(INCLUDE) $(python_source) ${additional_py_wind_source} > foo.h  
 	cp foo.h templates.h
 	cproto -I$(INCLUDE) $(kpar_source) > log.h 
 
@@ -198,9 +198,9 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		matom.o estimators.o yso.o elvis.o photon2d.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
 		spectral_estimators.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
-        	variable_temperature.o bb.o rdpar.o log.o direct_ion.o diag.o matrix_ion.o \
+        variable_temperature.o bb.o rdpar.o log.o direct_ion.o diag.o matrix_ion.o \
 		pi_rates.o photo_gen_matom.o macro_gov.o \
-		time.o reverb.o
+		time.o reverb.o paths.o
 
 
 
@@ -225,7 +225,7 @@ table_objects = windsave2table.o get_atomicdata.o py_wind_sub.o windsave.o py_wi
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
 		spectral_estimators.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
         	variable_temperature.o bb.o rdpar.o log.o direct_ion.o diag.o matrix_ion.o \
-		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o time.o
+		pi_rates.o photo_gen_matom.o macro_gov.o reverb.o paths.o time.o
 
 
 
@@ -243,11 +243,6 @@ test_bb: bb.o test_bb.o pdf.o recipes.o bilinear.o time.o
 	
 test_pow: test_pow.o pdf.o recipes.o bilinear.o time.o 
 	$(CC)  ${CFLAGS} pdf.o test_pow.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_pow
-
-
-test_saha: test_saha.o $(python_objects)
-	$(CC) ${CFLAGS} test_saha.o $(python_objects) $(LDFLAGS) -o test_saha
-		mv $@ $(BIN)
 
 test_matrix: test_matrix.o $(python_objects)
 	$(CC) ${CFLAGS} test_matrix.o $(python_objects) $(LDFLAGS) -o test_matrix

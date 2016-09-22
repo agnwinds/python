@@ -28,7 +28,7 @@ tdisk (m, mdot, r)
    where rmin is the inner edge of the disk.
 
    Notes: Originally (up to about python_50 only a standard steady state disk
-   	was supported, for whihc a  reference is  Wade, 1984 MNRAS 208, 381.              
+   	was supported, for which for reference is  Wade, 1984 MNRAS 208, 381.              
 
    History: 
    04June	SS	Modified to include a correction factor to account for
@@ -64,6 +64,7 @@ teff (t, x)
   if ((geo.disk_tprofile != 0)
       && ((x * geo.rstar) < blmod.r[blmod.n_blpts - 1]))
     {
+    /* This is the case where the temperature profile is read in as an array */
       if ((r = (x * geo.rstar)) < blmod.r[0])
 	{
 	  return (blmod.t[0]);
@@ -83,33 +84,32 @@ teff (t, x)
     }
   else
     {
+	/* This is a standard accretion disk */
 
       q = (1.e0 - pow (x, -0.5e0)) / (x * x * x);
       q = t * pow (q, 0.25e0);
 
-      if (geo.disk_illum == 2)	// Absorb photons and increase t so that heat is radiated
+      if (geo.disk_illum == DISK_ILLUM_ABSORB_AND_HEAT && geo.wcycle > 0)	/* Absorb photons and increase t so that heat is radiated
+							   but only do this if there has been at least one
+							   ionization cycle */
 	{
 	  r = x * geo.rstar;	// 04aug -- Requires fix if disk does not extend to rstar
 	  kkk = 1;		// photon cannot hit the disk at r<qdisk.r[0]
 	  while (r > qdisk.r[kkk] && kkk < NRINGS - 1)
 	    kkk++;
 	  /* Note that disk has 2 sides */
-	  theat =
-	    qdisk.heat[kkk -
-		       1] / (2. * PI * (qdisk.r[kkk] * qdisk.r[kkk] -
-					qdisk.r[kkk - 1] * qdisk.r[kkk - 1]));
+	  theat = qdisk.heat[kkk - 1] / (2. * PI * (qdisk.r[kkk] * qdisk.r[kkk] - qdisk.r[kkk - 1] * qdisk.r[kkk - 1]));
 
 	  /* T_eff is given by T_eff**4= T_disk**4+Heating/area/STEFAN_BOLTZMANN */
 	  q = pow (q * q * q * q + (theat / STEFAN_BOLTZMANN), 0.25);
 
 	}
-      else if (geo.disk_illum == 3)	// Analytic approximation for disk heating by star; implemented for YSOs
+      else if (geo.disk_illum == DISK_ILLUM_HEATED_BY_STAR)	// Analytic approximation for disk heating by star; implemented for YSOs
 	{
 	  disk_heating_factor = pow (geo.tstar / t, 4.0);
 	  disk_heating_factor *=
 	    (asin (1. / x) - (pow ((1. - (1. / (x * x))), 0.5) / x));
 	  disk_heating_factor /= PI;
-
 	  disk_heating_factor *= x * x * x;
 	  disk_heating_factor /= (1 - sqrt (1. / x));
 	  disk_heating_factor += 1;
@@ -164,9 +164,6 @@ Description:
   
    Finally it rescales this to get the actual velocity.
   
-   is travelling in the
-   disk by interpolating on the velocities that are contained 
-
 Notes"
 
 	The routine projects the input variable x on to the xy plane
@@ -187,7 +184,7 @@ vdisk (x, v)
 {
   double xhold[3];
   double r, speed;
-  int linterp ();
+
   stuff_v (x, xhold);
   xhold[2] = 0.0;
   r = length (xhold);
@@ -196,6 +193,7 @@ vdisk (x, v)
   renorm (v, speed);
   return (speed);
 }
+
 
 /***********************************************************
              Space Telescope Science Institute
@@ -290,7 +288,7 @@ ds_to_disk (p, miss_return)
   void disk_deriv ();
 
 
-  if (geo.disk_type == 0)
+  if (geo.disk_type == DISK_NONE)
     return (VERY_BIG);		/* There is no disk! */
 
   if (ds_to_disk_init == 0)
@@ -325,7 +323,7 @@ ds_to_disk (p, miss_return)
   r_plane = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
 
 
-  if (geo.disk_type == 1)
+  if (geo.disk_type == DISK_FLAT)
     {
       if (r_plane > geo.diskrad)
 	return (VERY_BIG);
