@@ -378,7 +378,7 @@ main (argc, argv)
 	     &geo.system_type);
 
       init_geo ();   /* Set values in the geometry structure and the domain stucture to reasonable starting
-			values */      
+						values */      
 
       if (geo.system_type == SYSTEM_TYPE_PREVIOUS)
 	{
