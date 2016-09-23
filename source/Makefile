@@ -88,26 +88,28 @@ GIT_COMMIT_HASH := $(shell expr `git rev-parse HEAD`)
 OS_TYPE := $(shell uname -s)
 ifeq ($(OS_TYPE), Darwin)
 	INDENT_PATH := $(shell which gnuindent)
+	INDENT_VERSION = $(shell gnuindent -version)
 else
 	INDENT_PATH := $(shell which indent)
+	INDENT_VERSION := $(shell indent -version)
 endif
 
 ifeq (, $(INDENT_PATH))
 	#If indent is not installed, error
-	INDENT_STRING = Gnuindent not installed so not indenting code.
+	INDENT_STRING = Gnuindent not installed so not indenting code
 	INDENT_CMD = 
 else
-	#INDENT_VERSION := $(shell indent -version)
-	ifneq (GNU,$(firstword $(INDENT_VERSION)))
+	ifeq (GNU,$(firstword $(INDENT_VERSION)))
 		INDENT_STRING = Indenting code with $(INDENT_VERSION)
 		# this command runs indent with GNU styling
 		INDENT_CMD = $(INDENT_PATH) -gnu -l140 -bli0 -nut *.c *.h
 	else
 		# if it is not GNU indent then do not run
-		INDENT_STRING = $(INDENT_PATH) is not the GNU version.
+		INDENT_STRING = $(INDENT_PATH) is not the GNU version
 		INDENT_CMD = 
 	endif
 endif
+
 
 INCLUDE = ../include
 LIB = ../lib
