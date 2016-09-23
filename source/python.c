@@ -264,11 +264,11 @@ main (argc, argv)
   Log_set_mpi_rank (my_rank, np_mpi);   // communicates my_rank to kpar
 
 
-  opar_stat = 0;                /* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
+  opar_stat = 0;                /* Initialize opar_stat to indicate that if we do not open a rdpar file, 
                                    the assumption is that we are reading from the command line */
-  restart_stat = 0;             /* 67 -ksl - 08nov - Assume initially that these is a new run from scratch, and not 
+  restart_stat = 0;             /* Assume initially that these is a new run from scratch, and not 
                                    a restart */
-  time_max = 13.8e9 * 3.2e7;    /* 67 - ksl - 08nov - The maximum time the program will run without stopping.  This
+  time_max = 13.8e9 * 3.2e7;    /* The maximum time the program will run without stopping.  This
                                    is initially set to the lifetime of the universe */
   time_max = -1;
 
@@ -362,10 +362,10 @@ main (argc, argv)
   else if (restart_stat == 0)   /* We are starting a new run, which is the normal mode of operation */
   {
 
-    /* First,  establish the overall system type . 
-       Note 1509 - ksl - Exactly what we call a system type is a little bizarre. The original
-       intent of this was to allow one to ignore a secondary star, but with addition of AGN it, really
-       is a bit unclear what one would like to use here */
+    /* First,  establish the overall system type.  XXX System type should be a physical system,
+     * to make things easier for the user.  So really want system types to be something like
+     * CV, YSO, AGN so that defaults can be set. 
+     */
 
     geo.system_type = SYSTEM_TYPE_STAR;
 
@@ -479,12 +479,14 @@ main (argc, argv)
    the flow of reading in data.
  */
 
+  /* XXX- All operating modes */
   init_photons ();
 
 
 
   /* Define how ionization is going to be calculated */
 
+  /* XXX- All operating modes */
   init_ionization ();
 
 
@@ -493,8 +495,13 @@ main (argc, argv)
      that define the spectrum of the sources are set in init_geo 
    */
 
+  /* XXX - All operating modes */
   get_radiation_sources ();
 
+
+  /* Note: ksl - At this point, SYSTEM_TYPE_PREVIOUS refers both to a restart and to a situation where 
+   * one is starting from an early wind file as implemented this is quite restrictive about what one
+   * can change in the previous case.   */
 
   if (geo.run_type != SYSTEM_TYPE_PREVIOUS)     // Start of block to define a model for the first time
   {
@@ -647,18 +654,17 @@ main (argc, argv)
 
 /* Determine the frequency range which will be used to establish the ionization balance of the wind */
 
-  // Note that bands_init asks .pf file or user what kind of banding is desired 
+/* Set up the bands that are used to to create photons and also the spectral intervals that are used 
+ * to calculate crude spectra in each of the cells */
 
   bands_init (-1, &xband);
-
-  /*if we have changed min and max in bands_init, we need to make sure this is reflected in the frequency bounds */
   freqmin = xband.f1[0];
   freqmax = xband.f2[xband.nbands - 1];
 
-  /* 1112 - 71 - ksl Next routine sets up the frequencies that are used for charactizing the spectrum in a cell
-   * These need to be coordinated with the bands that are set up for spectral gneration
-   */
-  freqs_init (freqmin, freqmax);
+//OLD  /* Next routine sets up the frequencies that are used for charactizing the spectrum in a cell
+//OLD   * These need to be coordinated with the bands that are set up for spectral gneration
+//OLD   */
+//OLD moved into bands_init  freqs_init (freqmin, freqmax);
 
 
   if (modes.iadvanced)

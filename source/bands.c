@@ -450,6 +450,7 @@ bands_init (imode, band)
     band->f2[7] = band->f1[8] = 3.162e18;
     band->f2[8] = band->f1[9] = 1e19;
     band->f2[9] = 1e20;
+
     band->min_fraction[0] = 0.1;
     band->min_fraction[1] = 0.1;
     band->min_fraction[2] = 0.1;
@@ -460,9 +461,6 @@ bands_init (imode, band)
     band->min_fraction[7] = 0.1;
     band->min_fraction[8] = 0.1;
     band->min_fraction[9] = 0.1;
-
-
-
 
   }
   else if (mode == 8)           /* 1306 - ksl - Generaglized method to set up logarithmic bands */
@@ -499,9 +497,6 @@ bands_init (imode, band)
       ii++;
     }
 
-
-
-
   }
   else
   {
@@ -520,7 +515,11 @@ bands_init (imode, band)
          band->f1[nband] * H / (BOLTZMANN * tmax), band->f2[nband] * H / (BOLTZMANN * tmax), band->min_fraction[nband]);
   }
 
+  /* Finally called the routine freqs_init which initializes the the spectral bands that are used to establish the coarse
+   * spectra in each cell for ionization calculations
+   */
 
+  freqs_init (xband.f1[0], xband.f2[xband.nbands - 1]);
   return (0);
 }
 
@@ -566,15 +565,14 @@ freqs_init (freqmin, freqmax)
   int i, n, ngood, good[NXBANDS];
   double xfreq[NXBANDS];
   int nxfreq;
-//  double nupeak; //Weins law preak frequency from tstar
 
 
-  /* At present set up a single energy band for 2 - 10 keV */
-  /*NSH 70g - bands set up to match the bands we are currently using in the.pf files. This should probably end up tied together in the long run! */
+/* At present set up a single energy band for 2 - 10 keV */
+/*NSH 70g - bands set up to match the bands we are currently using in the.pf files. This should probably end up tied together in the long run! */
 /* nxfreq = 7;
-  xfreq[0] = 1.0 / HEV;
+ xfreq[0] = 1.0 / HEV;
  xfreq[1] = 13.6 / HEV;
-xfreq[2] = 54.42 / HEV;
+ xfreq[2] = 54.42 / HEV;
  xfreq[3] = 392. / HEV;
  xfreq[4] = 739. / HEV;
  xfreq[5] = 2000 / HEV;
@@ -593,8 +591,6 @@ xfreq[2] = 54.42 / HEV;
   }
 
 /* bands try to deal with a blackbody spectrum */
-/*nupeak=WIEN*geo.tstar;
-printf ("Tstar=%e, Nupeak=%e\n",geo.tstar,nupeak);*/
   else
   {
     nxfreq = 10;
@@ -618,7 +614,6 @@ printf ("Tstar=%e, Nupeak=%e\n",geo.tstar,nupeak);*/
   ngood = 0;
   for (i = 0; i < nxfreq; i++)
   {
-//      Log ("freqs_init: %10.2e %10.2e %10.2e\n", freqmin, freqmax, xfreq[i]);
     if (freqmin < xfreq[i] && xfreq[i] < freqmax)
     {
       good[i] = 1;
