@@ -301,7 +301,7 @@ struct geometry
      in python.c. We should not have to carry this forward */
 
   int wind_domain_number;
-  int atmos_domain_number;
+//OLD  int atmos_domain_number;
 
 
   /* 67 - ksl This section added to allow for restarting the program, and adds parameters used

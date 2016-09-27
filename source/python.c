@@ -443,10 +443,11 @@ main (argc, argv)
       }
       if (geo.disk_atmosphere != 0)
       {
-        geo.atmos_domain_number = ndomain;
+//OLD        geo.atmos_domain_number = ndomain;
         strcat (zdom[ndomain].name, "Disk Atmosphere");
-        geo.atmos_domain_number = ndomain;
-        get_grid_params (geo.atmos_domain_number);
+//OLD        geo.atmos_domain_number = ndomain;
+//OLD        get_grid_params (geo.atmos_domain_number);
+        get_grid_params (ndomain);
         zdom[ndomain].wind_type = CORONA;
         ndomain++;
       }
@@ -526,11 +527,10 @@ main (argc, argv)
     /* Describe the wind. This routine reads in geo.rmax and geo.twind
        and then gets params by calling e.g. get_sv_wind_params() */
 
-    get_wind_params (geo.wind_domain_number);
 
-    if (geo.atmos_domain_number >= 0)
+    for (n = 0; n < ndomain; n++)
     {
-      get_wind_params (geo.atmos_domain_number);
+      get_wind_params (n);
     }
 
   }                             // End of block to define a model for the first time
