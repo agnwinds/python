@@ -246,7 +246,8 @@ main (argc, argv)
 
   int my_rank;                  // these two variables are used regardless of parallel mode
   int np_mpi;                   // rank and number of processes, 0 and 1 in non-parallel
-  int ndomain = 0;              //Local variable for ndomain
+  int ndomain = 0;              // Local variable for current number of ndomain
+  int ndomains = 1;             // Local variable for the total number that are expected 
   int ndom;
 
 
@@ -405,30 +406,43 @@ main (argc, argv)
 
     }
 
-    else
+//OLD - change to make clearer what is going on    else
+    if (geo.system_type == !SYSTEM_TYPE_PREVIOUS)
+
+
     {
       /* This option is the most common one, where we are starting to define a completely new system.  Nothe
        * that wind_type 2 is no longer allowed here.  At one time, this was used as the way to read in 
        * a previous model but this is now down via geo.system_type above.  kxl
        */
 
-      rdint ("Wind_type(0=SV,1=Sphere,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)", &zdom[ndomain].wind_type);
-
-      if (zdom[ndomain].wind_type == 2)
-      {
-        Error ("Wind_type 2, which was used to read in a previous model is no longer allowed! Use System_type instead!\n");
-        exit (0);
-      }
-
-
-      if (zdom[ndomain].wind_type != NONE)
-      {
-        strcat (zdom[ndomain].name, "Wind");
-        get_grid_params (ndomain);
-        ndomain++;
-      }
-
       rdint ("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)", &geo.disk_type);
+
+
+
+      rdint ("Number.of.wind.components", &ndomains);
+
+      for (n = 0; n < ndomains; n++)
+      {
+
+        rdint ("Wind_type(0=SV,1=Sphere,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)", &zdom[ndomain].wind_type);
+
+        if (zdom[ndomain].wind_type == 2)
+        {
+          Error ("Wind_type 2, which was used to read in a previous model is no longer allowed! Use System_type instead!\n");
+          exit (0);
+        }
+
+
+        if (zdom[ndomain].wind_type != NONE)
+        {
+          strcat (zdom[ndomain].name, "Wind");
+          get_grid_params (ndomain);
+          ndomain++;
+        }
+
+      }
+
 
       if (geo.disk_type == DISK_NONE)
       {
@@ -442,10 +456,7 @@ main (argc, argv)
       }
       if (geo.disk_atmosphere != 0)
       {
-//OLD        geo.atmos_domain_number = ndomain;
         strcat (zdom[ndomain].name, "Disk Atmosphere");
-//OLD        geo.atmos_domain_number = ndomain;
-//OLD        get_grid_params (geo.atmos_domain_number);
         get_grid_params (ndomain);
         zdom[ndomain].wind_type = CORONA;
         ndomain++;
@@ -614,32 +625,22 @@ main (argc, argv)
 
 /* Completed initialization of this section.  Note that get_spectype uses the source of the
  * ratiation and then value given to return a spectrum type. The output is not the same 
- * number as one inputs. It's not obvious that this is a good idea. */
+ * number as one inputs. It' s not obvious that this is a good idea. */
 
   if (geo.pcycles > 0)
   {
 
     get_spectype (geo.star_radiation, "Rad_type_for_star(0=bb,1=models,2=uniform)_in_final_spectrum", &geo.star_spectype);
-
-
     get_spectype (geo.disk_radiation, "Rad_type_for_disk(0=bb,1=models,2=uniform)_in_final_spectrum", &geo.disk_spectype);
-
-
     get_spectype (geo.bl_radiation, "Rad_type_for_bl(0=bb,1=models,2=uniform)_in_final_spectrum", &geo.bl_spectype);
-
     geo.agn_spectype = 3;
     get_spectype (geo.agn_radiation, "Rad_type_for_agn(3=power_law,4=cloudy_table,5=bremsstrahlung)_in_final_spectrum", &geo.agn_spectype);
-
     init_observers ();
   }
 
   geo.matom_radiation = 0;      //initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
-
   get_standard_care_factors ();
-
   get_meta_params ();
-
-
 /* 081221 - 67c - Establish limits on the frequency intervals to be used by the ionization cycles and 
  * the fraquency bands for stratified sampling.  Changes here were made to allow more control
  * over statified sampling, since we have expanded the temperature ranges of the types of systems
@@ -647,28 +648,20 @@ main (argc, argv)
  * was put here so it would add on to existing .pf files.  It would be reasonble to consider moving
  * it to a more logical location
  */
-
-
 /* Determine the frequency range which will be used to establish the ionization balance of the wind */
-
 /* Set up the bands that are used to to create photons and also the spectral intervals that are used 
  * to calculate crude spectra in each of the cells */
-
   bands_init (-1, &xband);
   freqmin = xband.f1[0];
   freqmax = xband.f2[xband.nbands - 1];
-
 //OLD  /* Next routine sets up the frequencies that are used for charactizing the spectrum in a cell
 //OLD   * These need to be coordinated with the bands that are set up for spectral gneration
 //OLD   */
 //OLD moved into bands_init  freqs_init (freqmin, freqmax);
-
-
   if (modes.iadvanced)
   {
     /* Do we require extra diagnostics or not */
     rdint ("Extra.diagnostics(0=no,1=yes) ", &modes.diag_on_off);
-
     if (modes.diag_on_off)
     {
       get_extra_diagnostics ();
@@ -691,12 +684,8 @@ main (argc, argv)
   }
   else
     cpar ("python.pf");
-
-
-
   /* At this point, all inputs have been obtained at this point and the inputs have been copied to "mod.pf" or "python.pf"
    * If we have used, the -i flag, we quit; otherwise we continue on to run the model */
-
   if (modes.quit_after_inputs)
   {
     Log ("Run with -i flag, so quitting now inputs have been gathered.\n");
@@ -709,7 +698,6 @@ main (argc, argv)
 
 
   geo.ndomain = ndomain;        // Store ndomain in geo so that it can be saved
-
   Log ("There are %d domains\n", geo.ndomain);
   for (n = 0; n < geo.ndomain; n++)
   {
@@ -722,12 +710,8 @@ main (argc, argv)
    */
 
   DFUDGE = setup_dfudge ();
-
   /* Now define the wind cones generically. modifies the global windcone structure */
-
   setup_windcone ();
-
-
   /*NSH 130821 broken out into a seperate routine added these lines to fix bug41, where
      the cones are never defined for an rtheta grid if the model is restarted. 
 
@@ -737,7 +721,6 @@ main (argc, argv)
 
      XXX This looks wrong; we read all of this information in I think
    */
-
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
 
@@ -764,9 +747,7 @@ main (argc, argv)
 
   /* this routine checks, somewhat crudely, if the grid is well enough resolved */
   check_grid ();
-
   w = wmain;
-
   if (modes.save_cell_stats)
   {
     /* Open a diagnostic file or files (with hardwired names) */
@@ -786,13 +767,9 @@ main (argc, argv)
   }
   else
     srand (1084515760 + (13 * rank_global));
-
   /* 68b - 0902 - ksl - Start with photon history off */
-
   phot_hist_on = 0;
-
   /* If required, read in a non-standard disk temperature profile */
-
   if (geo.disk_tprofile == 1)
   {
     read_non_standard_disk_profile (files.tprofile);
@@ -816,32 +793,18 @@ main (argc, argv)
 
 
   disk_init (geo.rstar, geo.diskrad, geo.mstar, geo.disk_mdot, freqmin, freqmax, 0, &geo.f_disk);
-
   qdisk_init ();                /* Initialize a disk qdisk to store the information about photons impinging on the disk */
-
-
   xsignal (files.root, "%-20s Finished initialization for %s\n", "NOK", files.root);
   check_time (files.root);
-
-
 /* XXXX - THE CALCULATION OF THE IONIZATION OF THE WIND */
-
   geo.ioniz_or_extract = 1;     //SS July 04 - want to compute MC estimators during ionization cycles
-
   //1 simply implies we are in the ionization section of the code
   //and allows routines to act accordinaly.
-
 /* 67 -ksl- geo.wycle will start at zero unless we are completing an old run */
-
 /* XXXX -  CALCULATE THE IONIZATION OF THE WIND */
   calculate_ionization (restart_stat);
-
 /* XXXX - END OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
-
-
   Log (" Completed wind creation.  The elapsed TIME was %f\n", timer ());
-
-
   /* SWM - Evaluate wind paths for last iteration */
   if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
   {                             //If this is a mode in which we keep wind arrays, update them
@@ -852,16 +815,12 @@ main (argc, argv)
 
   freqmax = C / (geo.swavemin * 1.e-8);
   freqmin = C / (geo.swavemax * 1.e-8);
-
-
   /* Perform the initilizations required to handle macro-atoms during the detailed
      calculation of the spectrum.  
 
      Next lines turns off macro atom estimators and other portions of the code that are
      unnecessary during spectrum cycles.  */
-
   geo.ioniz_or_extract = 0;
-
 /* 57h -- 07jul -- Next steps to speed up extraction stage */
   if (!modes.keep_photoabs)
   {
@@ -882,9 +841,7 @@ main (argc, argv)
    */
 
   kbf_need (freqmin, freqmax);
-
   /* XXXX - Execute  CYCLES TO CREATE THE DETAILED SPECTRUM */
   make_spectra (restart_stat);
-
   return (0);
 }
