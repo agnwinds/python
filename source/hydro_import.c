@@ -124,6 +124,11 @@ get_hydro_wind_params (ndom)
 
   get_hydro (ndom);
 
+  /* updates_2d has special code related to zeus operations with zeus. The
+   * next line preserves information related to the domain number
+   */
+  geo.hydro_domain_number = ndom;
+
 /* Assign the generic parameters for the wind the generic parameters of the wind */
   geo.rmin = zdom[ndom].rmin = hydro_r_edge[0];
 

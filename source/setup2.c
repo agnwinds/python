@@ -143,8 +143,7 @@ init_geo ()
                                    to change some of the parameters.  init_goe should not
                                    be called at all if we are simply continuing a previous
                                    run */
-  geo.wind_domain_number = -1;
-//OLD  geo.atmos_domain_number = -1;
+  geo.hydro_domain_number = -1;
 
 /*  The domains have been created but have not been initialized at all */
 

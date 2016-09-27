@@ -424,8 +424,7 @@ main (argc, argv)
       if (zdom[ndomain].wind_type != NONE)
       {
         strcat (zdom[ndomain].name, "Wind");
-        geo.wind_domain_number = ndomain;
-        get_grid_params (geo.wind_domain_number);
+        get_grid_params (ndomain);
         ndomain++;
       }
 
@@ -535,7 +534,7 @@ main (argc, argv)
 
   }                             // End of block to define a model for the first time
 
-  else
+  else                          // This referes to a previous system and so geo is already defined
   {
     if (geo.disk_type)          /* Then a disk exists and it needs to be described */
     {
@@ -552,7 +551,7 @@ main (argc, argv)
     {
       /* Hydro takes the wind domain number as an argument in the current domains setup */
       Log ("We are going to read in the density and temperature from a zeus file\n");
-      get_hydro (geo.wind_domain_number);       //This line just populates the hydro structures  
+      get_hydro (geo.hydro_domain_number);      //This line just populates the hydro structures  
     }
   }
 
@@ -760,7 +759,7 @@ main (argc, argv)
   {
 
     /* Hydro takes the wind domain number as an argument in the current domains setup */
-    hydro_restart (geo.wind_domain_number);
+    hydro_restart (geo.hydro_domain_number);
   }
 
   /* this routine checks, somewhat crudely, if the grid is well enough resolved */

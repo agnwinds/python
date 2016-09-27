@@ -301,7 +301,14 @@ struct geometry
      in python.c. We should not have to carry this forward */
 
   int wind_domain_number;
-//OLD  int atmos_domain_number;
+  /* Ultimately the next variable should not be needed but to avoid a bad
+   * interaction with Nick's effort meld zeus calculations with Python
+   * I have added a new variable.  It is likely that the domain number for
+   * this will always be 0, but one could imagine cases where that might
+   * not be the case  ksl -160927
+   */
+
+  int hydro_domain_number;      // Created for the special case of runs with Zeus
 
 
   /* 67 - ksl This section added to allow for restarting the program, and adds parameters used
