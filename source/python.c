@@ -407,7 +407,7 @@ main (argc, argv)
     }
 
 //OLD - change to make clearer what is going on    else
-    if (geo.system_type == !SYSTEM_TYPE_PREVIOUS)
+    if (geo.system_type != SYSTEM_TYPE_PREVIOUS)
 
 
     {

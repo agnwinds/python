@@ -1,4 +1,6 @@
 System_type(0=star,1=binary,2=agn)                   0
+disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)                    1
+Number.of.wind.components                         1
 Wind_type()                  0 
 Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)   1
 Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)                    1
@@ -8,7 +10,6 @@ adjust_grid(0=no,1=yes)                       	1
 disk.atmosphere(0=no,1=yes)                     0 
 geo.xlog_scale 									1e7
 geo.zlog_scale 									1e7
-disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)                    1
 disk.atmosphere(0=no,1=yes)                                    0
 Atomic_data                       data/standard78
 write_atomicdata 					1

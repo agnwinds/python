@@ -1,8 +1,9 @@
 System_type(0=star,1=binary,2=agn)   2
+disk.type()                   0
+Number.of.wind.components                         1
 Wind_type() 9
 Coord.system()                   0
 Wind.dim.in.x_or_r.direction                     4
-disk.type()                   0
 Atomic_data                       data/standard78
 photons_per_cycle                           100000
 Ionization_cycles                               1

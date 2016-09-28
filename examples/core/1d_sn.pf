@@ -1,8 +1,9 @@
 System_type(0=star,1=binary,2=agn)   0
+disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)                   0
+Number.of.wind.components                                                              1
 Wind_type(0=SV,1=Sphere,2=Previous,3=Proga,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell)                   6
 Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)                   0
 Wind.dim.in.x_or_r.direction                     30
-disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)                   0
 Atomic_data                       data/standard_sn_kurucz
 photons_per_cycle                             80000
 Ionization_cycles                               20
