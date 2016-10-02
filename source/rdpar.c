@@ -340,6 +340,12 @@ rdpar_init ()
 
 /* General string processing routine for this version of rdpar.
  *
+ * This routine either poses the question on the command line
+ * or reads the variable from a file.
+ *
+ * The answere to the question is contained as a string in the
+ * character array "dummy"
+ *
  * When the routine returns NORMAL or OLD the input has been 
  * successfully processed
  * */
@@ -376,7 +382,7 @@ string_process (question, dummy)
     }
     else if (tdummy[0] == '!')
     {
-      system (&tdummy[1]);      /* Send a command to the stystem */
+      system (&tdummy[1]);      /* Send a command to the system */
       return (REISSUE);
     }
     else if (strncmp (tdummy, "done", 4) == 0)
@@ -395,6 +401,8 @@ string_process (question, dummy)
   a:strcpy (line, "");
     strcpy (firstword, "");
     strcpy (secondword, "");
+
+    // Read a line of the file
     if (fgets (line, LINELEN, rdin_ptr) == NULL)
     {
       printf ("Error: string_proces: Unexpectedly reached EOF\n");
@@ -403,26 +411,35 @@ string_process (question, dummy)
       goto b;
     }
 
+    // Echo the input file to the output file
     fprintf (rdout_ptr, "%s", line);
 
+    // Parse the first two words of the input line
     nwords = sscanf (line, "%s %s", firstword, secondword);
+
     wordlength = strlen (firstword);
     if (nwords < 2 || wordlength == 0)
-      goto a;
+      goto a;   // Read the next line in the file
+
+
     if ((ccc = index (firstword, '(')) != NULL)
     {
       wordlength = (int) (ccc - firstword);
       if (wordlength == 0)
         goto a;
     }
+
     if (strncmp (question, firstword, wordlength) != 0)
     {
       if (verbose && rd_rank == 0)
         printf ("Warning:  Question (%s) does not match word (%s) in file. Continuing!\n", question, firstword);
       goto a;
     }
+
+    // At this point we know we have the correct line in the input file
+
     if (strncmp (secondword, "$", 1) == 0 || nwords == 1)
-    {
+    {  // This if for the case where one wants to read this value only from the command line
       fprintf (rdout_ptr, "Here I am\n");
       fprintf (stderr, "%s (%s) :", question, dummy);
       fflush (stderr);
@@ -443,7 +460,7 @@ string_process (question, dummy)
 
       return (NORMAL);
     }
-    else
+    else // This handles the situation where the variable is actually read from the redpar file
       strcpy (dummy, secondword);
     rdpar_store_record (question, secondword);
     return (NORMAL);
@@ -484,7 +501,8 @@ rdpar_store_record (name, value)
 rdpar_save(file_ptr)  
 
 saves the stored parameter file vectors to an already open 
-file
+file, e.g. a spectrum file.  It allows one to attach the
+inputs variables to the file for future reference.
   
   
  */
