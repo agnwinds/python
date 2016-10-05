@@ -532,6 +532,7 @@ message (string)
   return (NORMAL);
 }
 
+
 /* These are the specific routines that are called to read in a variable */
 
 int
