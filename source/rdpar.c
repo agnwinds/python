@@ -391,7 +391,6 @@ cpar (filename)
     return 0;
 
   fclose (rdout_ptr);
-  fclose (rdin_ptr);
   rdpar_stat = 0;
 
 
