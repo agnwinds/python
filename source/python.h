@@ -1280,6 +1280,7 @@ struct filenames
   char diagfolder[LINELENGTH];  // diag folder
   char old_windsave[LINELENGTH];        // old windsave name
   char input[LINELENGTH];       // input name if creating new pf file
+  char new_pf[LINELENGTH];      // name of generated pf file
   char lwspec[LINELENGTH];      // log_spec_tot file name  
   char wspec[LINELENGTH];       // spectot file name
   char lwspec_wind[LINELENGTH]; // log_spec_tot filename for wind photons

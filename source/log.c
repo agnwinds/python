@@ -137,12 +137,11 @@ History:
 #define SHOW_ERROR_SILENT	5
 
 
-//int n_mpi=1;          // number of mpi processes, set to one
 int my_rank = 0;                // rank of mpi process, set to zero
 
 int log_print_max = 100;        // Maximum number of times a single error will be reported.  
-                                                          // Note that it will still be counted.
-int time_to_quit = 100000;      // Maximum number of times and error can occur before giving up
+                                // Note that it will still be counted.
+int max_errors = 100000;        // Maximum number of times an error can occur before giving up
 
 typedef struct error_log
 {
@@ -257,7 +256,7 @@ int
 Log_quit_after_n_errors (n)
      int n;
 {
-  time_to_quit = n;
+  max_errors = n;
   return (0);
 }
 
@@ -414,7 +413,7 @@ error_count (char *format)
     n = errorlog[n].n++;
     if (n == log_print_max)
       Error ("error_count: This error will no longer be logged: %s\n", format);
-    if (n == time_to_quit)
+    if (n == max_errors)
     {
       error_summary ("Something is drastically wrong for any error to occur so much!\n");
       exit (0);
@@ -470,7 +469,7 @@ Log_set_mpi_rank (rank, n_mpi)
   rdpar_set_mpi_rank (rank);    //this just communicates the rank to rdpar      
 
   /* if in parallel mode we divide by the number of parallel processes for max errors */
-  //     time_to_quit /= n_mpi;                
+  //     max_errors /= n_mpi;                
   //log_print_max /= n_mpi; for the moment we won'y change this as only master thread prints errors anyway
   return (0);
 }

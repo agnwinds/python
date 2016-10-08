@@ -38,7 +38,7 @@ parse_command_line (argc, argv)
      int argc;
      char *argv[];
 {
-  int restart_stat, verbosity, time_to_quit, i;
+  int restart_stat, verbosity, max_errors, i;
   char dummy[LINELENGTH];
   int mkdir ();
   double time_max;
@@ -90,12 +90,12 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-e") == 0)
       {
-        if (sscanf (argv[i + 1], "%d", &time_to_quit) != 1)
+        if (sscanf (argv[i + 1], "%d", &max_errors) != 1)
         {
           Error ("python: Expected max errors after -e switch\n");
           exit (0);
         }
-        Log_quit_after_n_errors (time_to_quit);
+        Log_quit_after_n_errors (max_errors);
         i++;
 
       }
@@ -119,6 +119,10 @@ parse_command_line (argc, argv)
         Log ("setting zeus_connect to %i\n", modes.zeus_connect);
       }
       else if (strcmp (argv[i], "-i") == 0)
+      {
+        modes.quit_after_inputs = 1;
+      }
+      else if (strcmp (argv[i], "--dry-run") == 0)
       {
         modes.quit_after_inputs = 1;
       }
@@ -1405,7 +1409,8 @@ setup_created_files ()
   strcpy (files.spec_wind, files.root);
   strcpy (files.lspec_wind, files.root);
 
-
+  strcpy (files.new_pf, files.root);
+  strcat (files.new_pf, ".out.pf");
 
 
   strcpy (files.windrad, "python");

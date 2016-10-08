@@ -78,7 +78,14 @@ This program simulates radiative transfer in a (biconical) CV, YSO, quasar or (s
 \n\
 	-v n	controls the amount of print out.  The default is 4.  Larger numbers increase  \n\
 		the amount printed; smaller numbers decrease it.   \n\
-	if one simply types py or pyZZ where ZZ is the version number one is queried for a name \n\
+   --dry-run	Create a new .pf file and stop \n\
+   --version	print out python version, commit hash and if there were files with uncommitted \n\
+                changes \n\
+      --rseed   set the random number seed to be time based, rather than fixed. \n\
+\n\
+(Certain other switches exist but these are largely diagnostic, or for special cases) \n\
+\n\
+If one simply types py or pyZZ where ZZ is the version number, one is queried for a name \n\
 	of the parameter file. \n\
 \n\
 \n\

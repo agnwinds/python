@@ -28,18 +28,19 @@ Arguments:
 		v to 5 causes the routine to print out all the information which outputs have
 		included previously.  The current default is set to 3 which suppresses Debug, Log_silent
 		and Error_silent
-	-e nnn	The program stops normally stops after 1e6 errors of any type.  This swtich allows one to
+	-e nnn	The program stops normally stops after 1e6 errors of any type.  This switch allows one to
 		adjust this number
 	-d	Enters detailed or advanced mode. Allows one to access extra diagnositics and some
 	    	other advanced commands
-    	-f  	Fixed temperature mode - does not attempt to chenge the temperature of cells.
+    	-f  	Fixed temperature mode - does not attempt to change the temperature of cells.
 	-i  	Diagnostic mode which quits after reading in inputs. Used for Travis test suite.
+  --dry-run	Create a new .pf file and stop (equivalent to -i)
 	-z  	Mode to connect with zeus - it either runs two cycles in this is the first call - in order
          	to obtain a good starting state, else it runs just one cycle. In both cases, it does
 		not attempt to seek a new temperature, but it does output heating and cooling rates
     --version	print out python version, commit hash and if there were files with uncommitted
 	    	changes
-       --seed	set the random number seed to be time based, rather than fixed.
+      --rseed	set the random number seed to be time based, rather than fixed.
 
 	
 	if one simply types py or pyZZ where ZZ is the version number one is queried for a name
@@ -682,12 +683,15 @@ main (argc, argv)
     cpar (files.input);
   }
   else
-    cpar ("python.pf");
+  {
+    cpar (files.new_pf);
+  }
+
   /* At this point, all inputs have been obtained at this point and the inputs have been copied to "mod.pf" or "python.pf"
    * If we have used, the -i flag, we quit; otherwise we continue on to run the model */
   if (modes.quit_after_inputs)
   {
-    Log ("Run with -i flag, so quitting now inputs have been gathered.\n");
+    Log ("This was was run with the -i or --dry_run flag set, so quitting now inputs have been gathered.\n");
     exit (0);
   }
 
