@@ -56,7 +56,7 @@ Description:
 	 Radiation from an optically thick disk, the WD star, a boundary layer and the wind itself
 	 may be included
 	
-	There are 4 basic portions to the program which are easy to see in the main program.
+	There are 3 basic portions to the program which are easy to see in the main program.
 	
 	1. A data gathering stage
 	
@@ -540,6 +540,7 @@ main (argc, argv)
 
     for (n = 0; n < ndomain; n++)
     {
+      rdpar_comment ("Parameters for Domain %d", n);
       get_wind_params (n);
     }
 
@@ -651,13 +652,11 @@ main (argc, argv)
 /* Determine the frequency range which will be used to establish the ionization balance of the wind */
 /* Set up the bands that are used to to create photons and also the spectral intervals that are used 
  * to calculate crude spectra in each of the cells */
+
   bands_init (-1, &xband);
   freqmin = xband.f1[0];
   freqmax = xband.f2[xband.nbands - 1];
-//OLD  /* Next routine sets up the frequencies that are used for charactizing the spectrum in a cell
-//OLD   * These need to be coordinated with the bands that are set up for spectral gneration
-//OLD   */
-//OLD moved into bands_init  freqs_init (freqmin, freqmax);
+
   if (modes.iadvanced)
   {
     /* Do we require extra diagnostics or not */

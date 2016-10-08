@@ -649,6 +649,7 @@ init_observers ()
   char yesno[20];
 
 
+  rdpar_comment ("Parameters defining the spectra seen by observers");
   geo.nangles = 4;
   geo.angle[0] = 10;
   geo.angle[1] = 30.;
@@ -665,6 +666,7 @@ init_observers ()
   geo.swavemin = 850;
   geo.swavemax = 1850;
 
+  rdpar_comment ("The minimum and maximum wavelengths in the final spectra");
   rddoub ("spectrum_wavemin", &geo.swavemin);
   rddoub ("spectrum_wavemax", &geo.swavemax);
   if (geo.swavemin > geo.swavemax)
@@ -683,6 +685,7 @@ init_observers ()
 
 /* Note: Below here many of the variables which are read in are not currently part of geo stucture */
 
+  rdpar_comment ("The observers and their location relative to the system");
   rdint ("no_observers", &geo.nangles);
 
   if (geo.nangles < 1 || geo.nangles > NSPEC)

@@ -1232,8 +1232,7 @@ Synopsis:
 Arguments:		
 
 Returns:
-  dfudge 	double	
-  			the push through distance
+
 Description:	
 
 Notes:
