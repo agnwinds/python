@@ -672,12 +672,10 @@ main (argc, argv)
   /* Wrap up and save all the inputs */
 
   if (strncmp (files.root, "mod", 3) == 0)
-    cpar ("mod.pf");
-  else if (strncmp (files.root, "dummy", 5) == 0)
   {
-    cpar ("dummy.pf");
-    exit (0);
+    cpar ("mod.pf");
   }
+
   else if (opar_stat == 1)
   {
     cpar (files.input);
@@ -691,7 +689,7 @@ main (argc, argv)
    * If we have used, the -i flag, we quit; otherwise we continue on to run the model */
   if (modes.quit_after_inputs)
   {
-    Log ("This was was run with the -i or --dry_run flag set, so quitting now inputs have been gathered.\n");
+    Log ("This was was run with the -i or --dry-run flag set, so quitting now inputs have been gathered.\n");
     exit (0);
   }
 

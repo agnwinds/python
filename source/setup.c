@@ -29,6 +29,10 @@ Notes:
 
 History:
   1502  JM  Moved here from main()
+  1610	ksl	Added a new switch -dry-run which is functionally
+  		equivalent to -i. Also dealt with the possibility
+		that all of the command line would be consumed in
+		switches with no parameter file specified.
 
 **************************************************************/
 
@@ -39,6 +43,7 @@ parse_command_line (argc, argv)
      char *argv[];
 {
   int restart_stat, verbosity, max_errors, i;
+  int j = 0;
   char dummy[LINELENGTH];
   int mkdir ();
   double time_max;
@@ -47,7 +52,7 @@ parse_command_line (argc, argv)
 
   if (argc == 1)
   {
-    printf ("Input file (interactive=stdin):");
+    printf ("Parameter file name (e.g. my_model.pf, or just my_model):");
     fgets (dummy, LINELENGTH, stdin);
     get_root (files.root, dummy);
     strcpy (files.diag, files.root);
@@ -66,6 +71,7 @@ parse_command_line (argc, argv)
       {
         Log ("Restarting %s\n", files.root);
         restart_stat = 1;
+        j = i;
       }
       else if (strcmp (argv[i], "-t") == 0)
       {
@@ -75,6 +81,7 @@ parse_command_line (argc, argv)
           exit (0);
         }
         i++;
+        j = i;
 
       }
       else if (strcmp (argv[i], "-v") == 0)
@@ -86,6 +93,7 @@ parse_command_line (argc, argv)
         }
         Log_set_verbosity (verbosity);
         i++;
+        j = i;
 
       }
       else if (strcmp (argv[i], "-e") == 0)
@@ -97,34 +105,41 @@ parse_command_line (argc, argv)
         }
         Log_quit_after_n_errors (max_errors);
         i++;
+        j = i;
 
       }
       else if (strcmp (argv[i], "-d") == 0)
       {
         modes.iadvanced = 1;
+        j = i;
       }
       else if (strcmp (argv[i], "-f") == 0)
       {
         modes.fixed_temp = 1;
+        j = i;
       }
 
       /* JM 1503 -- Sometimes it is useful to vary the random number seed. Set a mode for that */
       else if (strcmp (argv[i], "--rseed") == 0)
       {
         modes.rand_seed_usetime = 1;
+        j = i;
       }
       else if (strcmp (argv[i], "-z") == 0)
       {
         modes.zeus_connect = 1;
         Log ("setting zeus_connect to %i\n", modes.zeus_connect);
+        j = i;
       }
       else if (strcmp (argv[i], "-i") == 0)
       {
         modes.quit_after_inputs = 1;
+        j = i;
       }
       else if (strcmp (argv[i], "--dry-run") == 0)
       {
         modes.quit_after_inputs = 1;
+        j = i;
       }
 
       else if (strcmp (argv[i], "--version") == 0)
@@ -147,6 +162,13 @@ parse_command_line (argc, argv)
     }
 
     /* The last command line variable is always the .pf file */
+
+    if (j + 1 == argc)
+    {
+      Error ("All of the command line has been consumed without specifying a parameter file name, so exiting\n");
+      exit (0);
+    }
+
 
     strcpy (dummy, argv[argc - 1]);
     get_root (files.root, dummy);
@@ -1361,13 +1383,8 @@ setup_created_files ()
   opar_stat = 0;                /* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
                                    the assumption is that we are reading from the command line */
 
-  if (strncmp (files.root, "dummy", 5) == 0)
-  {
-    Log ("Proceeding to create rdpar file in dummy.pf, but will not run prog\n");
-  }
 
-  else if (strncmp (files.root, "stdin", 5) == 0
-           || strncmp (files.root, "rdpar", 5) == 0 || files.root[0] == ' ' || strlen (files.root) == 0)
+  if (strncmp (files.root, "stdin", 5) == 0 || strncmp (files.root, "rdpar", 5) == 0 || files.root[0] == ' ' || strlen (files.root) == 0)
   {
     strcpy (files.root, "mod");
     Log ("Proceeding in interactive mode\n Output files will have rootname mod\n");
