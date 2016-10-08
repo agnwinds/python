@@ -326,7 +326,7 @@ get_grid_params (ndom)
     {
       Log ("You have opted to adjust the grid scale lengths\n");
       rddoub ("geo.xlog_scale", &zdom[ndom].xlog_scale);
-      if (&zdom[ndom].coord_type)
+      if (zdom[ndom].coord_type != SPHERICAL)
         rddoub ("geo.zlog_scale", &zdom[ndom].zlog_scale);
     }
   }
