@@ -293,7 +293,7 @@ int current_domain;             // This integer is used by py_wind only
 struct geometry
 {
   int system_type;              /* See allowed types above. system_type should only be used for setp */
-  int binary;                   /* Indicates whether or not the system is a binary. TRUE or FALSE*/
+  int binary;                   /* Indicates whether or not the system is a binary. TRUE or FALSE */
 
   int ndomain;                  /*The number of domains in a model */
   int ndim2;                    /* The total number of windcells in all domains */
