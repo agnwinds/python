@@ -285,10 +285,15 @@ int current_domain;             // This integer is used by py_wind only
 #define	SYSTEM_TYPE_PREVIOUS   	   3
 #define	SYSTEM_TYPE_ONE_D  	   4
 
+#define TRUE  1
+#define FALSE 0
+
 
 
 struct geometry
 {
+  int system_type;              /* See allowed types above. system_type should only be used for setp */
+  int binary;                   /* Indicates whether or not the system is a binary. TRUE or FALSE*/
 
   int ndomain;                  /*The number of domains in a model */
   int ndim2;                    /* The total number of windcells in all domains */
@@ -344,7 +349,6 @@ struct geometry
   double tmax;                  /*NSH 120817 the maximum temperature of any element of the model 
                                    - used to help estimate things for an exponential representation of the spectrum in a cell */
 
-  int system_type;              /* See allowed types above */
 
 #define DISK_NONE   0
 #define DISK_FLAT   1

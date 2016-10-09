@@ -373,6 +373,10 @@ main (argc, argv)
 
     rdint ("System_type(0=star,1=binary,2=agn,3=previous)", &geo.system_type);
 
+    if (geo.system_type==SYSTEM_TYPE_BINARY){
+	    geo.binary=TRUE;
+    }
+
     init_geo ();                /* Set values in the geometry structure and the domain stucture to reasonable starting
                                    values */
 
