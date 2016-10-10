@@ -59,20 +59,23 @@
 #define	LINELEN 132
 
 
-char *old_names[]={"mstar","rstar"};
-char *new_names[]={"Central.object.mass","Central.object.radius"};
-int nunber_of_names=2;
+char *old_names[] = { "mstar", "rstar" };
+char *new_names[] = { "Central.object.mass", "Central.object.radius" };
+
+int nunber_of_names = 2;
 
 
 
 int
 check_synonyms (new_question, old_question)
-	char new_question[],old_question[];
+     char new_question[], old_question[];
 {
   int n;
   char *line;
   char firstword[LINELEN];
   int nwords, wordlength;
+  char *ccc, *index ();
+
 
 // Strip off any extra bits in the new question
   line = new_question;
@@ -80,23 +83,35 @@ check_synonyms (new_question, old_question)
   nwords = sscanf (line, "%s ", firstword);
   wordlength = strlen (firstword);
 
+
   if (nwords == 0)
-    {
+  {
+    return (0);
+  }
+
+
+// Strip off everthing in paren, or rather find out how much of the string to comapre
+  if ((ccc = index (firstword, '(')) != NULL)
+  {
+    wordlength = (int) (ccc - firstword);
+    if (wordlength == 0)
       return (0);
-    }
+  }
+
 
 
   for (n = 0; n < nunber_of_names; n++)
+  {
+    if (strncmp (new_names[n], firstword, wordlength) == 0)
     {
-      if (strncmp (new_question, firstword, wordlength) == 0)
-	{
-	  printf ("Matched keyword %s in .pf file to %s in current python version\n",new_question,old_names[n]);
-	  strcpy(old_question,old_names[n]);
-	  return (1);
-	}
-
+      printf ("Hello %d\n", wordlength);
+      printf ("Matched keyword %s in .pf file to %s in current python version\n", new_question, old_names[n]);
+      strcpy (old_question, old_names[n]);
+      return (1);
     }
 
-  return(0);
+  }
+
+  return (0);
 
 }

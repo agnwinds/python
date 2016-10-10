@@ -534,6 +534,8 @@ double get_rand_brem (double freqmin, double freqmax);
 /* search_light.c */
 int search_light_init (void);
 int photo_gen_search_light (PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
+/* synonyms.c */
+int check_synonyms (char new_question[], char old_question[]);
 /* py_wind_sub.c */
 int zoom (int direction);
 int overview (WindPtr w, char rootname[]);

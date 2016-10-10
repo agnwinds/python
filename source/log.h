@@ -42,3 +42,5 @@ int Log_flush (void);
 int Log_set_mpi_rank (int rank, int n_mpi);
 int Log_parallel (char *format, ...);
 int Debug (char *format, ...);
+/* synonyms.c */
+int check_synonyms (char new_question[], char old_question[]);
