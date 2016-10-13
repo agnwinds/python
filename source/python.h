@@ -368,9 +368,9 @@ struct geometry
   int disk_illum;               /*Treatment of effects of illumination on the disk. 
                                  */
 
-  int disk_atmosphere;          /* 0 --> no
-                                   1 --> yes
-                                 */
+//OLD  int disk_atmosphere;          /* 0 --> no
+//OLD                                   1 --> yes
+//OLD                                 */
   int disk_tprofile;            /* This is an variable used to specify a standard accretion disk (0) or
                                    one that has been read in and stored. */
   double disk_mdot;             /* mdot of  DISK */

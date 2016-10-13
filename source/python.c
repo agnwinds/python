@@ -431,7 +431,7 @@ main (argc, argv)
       for (n = 0; n < ndomains; n++)
       {
 
-        rdint ("Wind_type(0=SV,1=Sphere,3=Hydro,4=Corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)", &zdom[ndomain].wind_type);
+        rdint ("Wind_type(0=SV,1=Sphere,3=Hydro,4=corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)", &zdom[ndomain].wind_type);
 
         if (zdom[ndomain].wind_type == 2)
         {
@@ -452,21 +452,22 @@ main (argc, argv)
 
       if (geo.disk_type == DISK_NONE)
       {
-        geo.disk_atmosphere = 0;
+//OLD        geo.disk_atmosphere = 0;
         geo.disk_radiation = 0;
         geo.diskrad = 0;
       }
-      else
-      {
-        rdint ("disk.atmosphere(0=no,1=yes)", &geo.disk_atmosphere);
-      }
-      if (geo.disk_atmosphere != 0)
-      {
-        strcat (zdom[ndomain].name, "Disk Atmosphere");
-        get_grid_params (ndomain);
-        zdom[ndomain].wind_type = CORONA;
-        ndomain++;
-      }
+//OLD      else
+//OLD      {
+//OLD        rdint ("disk.atmosphere(0=no,1=yes)", &geo.disk_atmosphere);
+//OLD      }
+
+//OLD      if (geo.disk_atmosphere != 0)
+//OLD      {
+//OLD        strcat (zdom[ndomain].name, "Disk Atmosphere");
+//OLD        get_grid_params (ndomain);
+//OLD        zdom[ndomain].wind_type = CORONA;
+//OLD        ndomain++;
+//OLD      }
 
       rdstr ("Atomic_data", geo.atomic_filename);
 
