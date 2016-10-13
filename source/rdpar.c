@@ -638,7 +638,7 @@ string_process_from_file (question, dummy)
     }
 
     // Print a warning if the lines do not match
-    if (verbose && rd_rank == 0)
+    if (verbose > 1 && rd_rank == 0)
       printf ("Warning:  Question (%s) does not match word (%s) in file. Continuing!\n", question, firstword);
   }
 

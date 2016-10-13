@@ -412,7 +412,6 @@ main (argc, argv)
 
     }
 
-//OLD - change to make clearer what is going on    else
     if (geo.system_type != SYSTEM_TYPE_PREVIOUS)
 
 
@@ -452,22 +451,9 @@ main (argc, argv)
 
       if (geo.disk_type == DISK_NONE)
       {
-//OLD        geo.disk_atmosphere = 0;
         geo.disk_radiation = 0;
         geo.diskrad = 0;
       }
-//OLD      else
-//OLD      {
-//OLD        rdint ("disk.atmosphere(0=no,1=yes)", &geo.disk_atmosphere);
-//OLD      }
-
-//OLD      if (geo.disk_atmosphere != 0)
-//OLD      {
-//OLD        strcat (zdom[ndomain].name, "Disk Atmosphere");
-//OLD        get_grid_params (ndomain);
-//OLD        zdom[ndomain].wind_type = CORONA;
-//OLD        ndomain++;
-//OLD      }
 
       rdstr ("Atomic_data", geo.atomic_filename);
 
