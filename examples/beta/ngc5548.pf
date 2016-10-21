@@ -1,4 +1,6 @@
 System_type(0=star,1=binary,2=agn)                   2
+disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)   1
+Number.of.wind.components         1
 Wind_type(0=SV,1=Sphere,2=Previous,3=Proga,4=Corona,5=knigge,6=thierry,7=yso,8=elvis,9=shell)                    0
 Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)                    1
 Wind.dim.in.x_or_r.direction                     100
@@ -37,7 +39,7 @@ sv.mdot_r_exponent                                0
 sv.v_infinity(in_units_of_vescape                    1
 sv.acceleration_length(cm)                    1e16
 sv.acceleration_exponent                        1.0
-filling_factor(1=smooth,<1=clumpted)		1
+filling_factor(1=smooth,<1=clumpted)		0.01
 Rad_type_for_disk(0=bb,1=models,2=uniform)_in_final_spectrum                    0
 Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table)_in_final_spectrum                   3
 spectrum_wavemin                               200

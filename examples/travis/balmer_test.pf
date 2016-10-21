@@ -1,8 +1,9 @@
 System_type()   0
+disk.type()   0
+Number.of.wind.components 1
 Wind_type()   9
 Coord.system()   0
 Wind.dim.in.x_or_r.direction   1
-disk.type()   0
 Atomic_data   data/h20
 photons_per_cycle   100000
 Ionization_cycles   1
@@ -26,7 +27,7 @@ shell.wind.radmin(cm)   1e11
 shell.wind_v_at_rmin(cm)   1.00000
 shell.wind.v_at_rmax(cm)   1.000010
 shell.wind.acceleration_exponent   1
-wind.filling_factor(1=smooth,<1=clumpted)  1
+filling_factor(1=smooth,<1=clumpted)  1
 Rad_type_for_star()_in_final_spectrum   0
 spectrum_wavemin   3000
 spectrum_wavemax   7000
