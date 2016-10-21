@@ -150,12 +150,15 @@ startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information
 	@echo 'YOU ARE COMPILING FOR' $(PRINT_VAR)	# tells user if compiling for optimized or debug
 	@echo 'MPI_FLAG=' $(MPI_FLAG)
-	@echo $(INDENT_STRING)
-	$(INDENT_CMD)
 	echo "#define VERSION " \"$(VERSION)\" > version.h
 	echo "#define CHOICE"   $(CHOICE) >> version.h
 	echo "#define GIT_COMMIT_HASH" \"$(GIT_COMMIT_HASH)\" >> version.h
 	echo "#define GIT_DIFF_STATUS" $(GIT_DIFF_STATUS)\ >> version.h
+
+indent:
+	@echo $(INDENT_STRING)
+	$(INDENT_CMD)
+
 
 foo: foo.o signal.o time.o
 	$(CC) ${cfllags} foo.o signal.o time.o ${LDFLAGS}  -o foo
