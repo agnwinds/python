@@ -1162,12 +1162,6 @@ get_meta_params (void)
         }
       }
     }
-
-    //Should we filter any lines out?
-    //If -1, blacklist continuum, if >0 specify lines as above and whitelist
-    //Automatically include matom_lines
-    //THIS FUNCTIONALITY TBC
-    rdint ("reverb.filter_lines", &geo.reverb_filter_lines);
   }
   else if (geo.reverb == REV_WIND)
   {                             //For wind mode...
@@ -1175,6 +1169,14 @@ get_meta_params (void)
     {                           //Warn if this data is being gathered but not used (can be useful for debug)
       Error ("reverb.type: Wind radiation is off but wind-based path tracking is enabled!\n");
     }
+  }
+  if(geo.reverb != REV_NONE)
+  {
+    //Should we filter any lines out?
+    //If -1, blacklist continuum, if >0 specify lines as above and whitelist
+    //Automatically include matom_lines
+    //THIS FUNCTIONALITY TBC
+    rdint ("reverb.filter_lines", &geo.reverb_filter_lines);
   }
   return (0);
 }

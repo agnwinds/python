@@ -81,8 +81,7 @@ reverb_init (WindPtr wind)
   double r_rad_min = 0.0, r_rad_max = 0.0, r_rad_min_log, r_rad_max_log, r_delta;
 
   if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
-  {                             //Initialise the arrays that handle photon path data and wind paths
-
+  { //Initialise the arrays that handle photon path data and wind paths
 
     //Set the upper and lower bounds of the path bin array
     if (geo.rmin > 0)
@@ -112,13 +111,18 @@ reverb_init (WindPtr wind)
     wind_paths_init (wind);
 
     if (geo.reverb == REV_MATOM)
-    {                           //If this is matom mode, detail the line numbers being tracked for use with bindata
+    { //If this is matom mode, detail the line numbers being tracked for use with bindata
       sprintf (linelist, "reverb_init: Macro-atom line path tracking is enabled for lines %d", geo.reverb_line[0]);
       for (i = 1; i < geo.reverb_lines; i++)
       {
         sprintf (linelist, "%s, %d", linelist, geo.reverb_line[i]);
       }
       Log ("%s\n", linelist);
+
+      //Set the convergence fraction required before we start tracking photon paths for matoms
+			geo.fraction_converged=0.0;
+  		geo.reverb_fraction_converged = 0.90;
+
     }
     else if (geo.reverb == REV_WIND)
     {
