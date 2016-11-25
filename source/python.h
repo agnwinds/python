@@ -530,6 +530,7 @@ struct geometry
   char fixed_con_file[132];     /* 54e -- For fixed concentrations, the file specifying concentrations */
 
   //Added by SWM for reverberation mapping
+  int reverb_filter_lines;
   enum reverb_enum
   { REV_NONE = 0, REV_PHOTON = 1, REV_WIND = 2, REV_MATOM = 3 } reverb;
   enum reverb_vis_enum

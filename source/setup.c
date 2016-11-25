@@ -1162,6 +1162,12 @@ get_meta_params (void)
         }
       }
     }
+
+    //Should we filter any lines out?
+    //If -1, blacklist continuum, if >0 specify lines as above and whitelist
+    //Automatically include matom_lines
+    //THIS FUNCTIONALITY TBC
+    rdint ("reverb.filter_lines", &geo.reverb_filter_lines);
   }
   else if (geo.reverb == REV_WIND)
   {                             //For wind mode...

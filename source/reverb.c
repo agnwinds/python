@@ -283,6 +283,9 @@ delay_dump (PhotPtr p, int np, int iExtracted)
 int
 delay_dump_single (PhotPtr pp, int extract_phot)
 {
+  //If we're filtering out continuum photons and this is a continuum photon, throw it away.
+  if(geo.reverb_filter_lines == -1 && pp->nres == -1) return (1);
+
   stuff_phot (pp, &delay_dump_bank[delay_dump_bank_curr]);      //Bank single photon in temp array
   delay_dump_bank_ex[delay_dump_bank_curr] = extract_phot;      //Record if it's extract photon
   if (delay_dump_bank_curr == delay_dump_bank_size - 1) //If temp array is full
