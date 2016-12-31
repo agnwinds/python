@@ -1068,13 +1068,11 @@ rdline (question, answer)
   Synopsis:  
 
 	get_root takes the string in "total" and constructs the "root" name for 
-	a file by stripping off all characters after the last . or up to the 
-	(last) carriage return in the string. 
+	a file keeping all of the charcthers up to .pf.  If the file does not
+    include a .pf, the root is taken to be same as "total"
 
 
   Description:	
-
-  Arguments:  (Input via .pf file)		
 
 
   Returns:
@@ -1086,6 +1084,8 @@ rdline (question, answer)
 
   History:
 	99jul	ksl	Coded 
+    16dec   ksl Adjusted so that parameter files can have periods in them.
+                Previously get_root took the root 
 
  ************************************************************************/
 
@@ -1093,24 +1093,59 @@ int
 get_root (root, total)
      char root[], total[];
 {
-  int i, j;
-  i = strcspn (total, ".");
-  if ((j = strcspn (total, "\n")) < i)
-    i = j;
-  //JM 1503 -- we don't need this and it muddles output. 
-  //if (verbose)
-  //  printf ("number %d\n", i);
-  if (i == 0)
-  {
-    strcpy (root, "rdpar");
+//OLD  int i, j;
+  int j;
+  char *pf;
+  int position;
+
+  /* Check whether total is an empty string */
+
+  j=strcspn (total, "\n");
+  if (j==0) {
+      strcpy (root, "rdpar");
+      return(0);
   }
-  else
-  {
-    strncpy (root, total, strcspn (total, "."));
-    root[i] = '\0';
+
+  /* Check for .pf at the end of the string 
+   * Note that there is no easy way to actually
+   * check for the last occurence.  Here we
+   * assume there is only one occurrcne of .pf
+   */ 
+
+  pf=strstr(total,".pf");
+  if (pf != NULL) {
+      position=pf-total;
+      strncpy(root,total,position);
+      root[position]='\0';
+      printf("xxx %s\n",root);
+      return(0);
   }
-  if ((verbose) && (rd_rank == 0))
-    printf ("%s\n", root);
+
+  strncpy (root, total,j);
+  root[j]='\0';
+
+
+//OLD  Next section replaced 161231
+//OLD  // Locate the last period
+//OLD  i = strcspn (total, ".");
+
+//OLD  if ((j = strcspn (total, "\n")) < i)
+//OLD    i = j;
+//OLD  if (i == 0)
+//OLD  {
+//OLD    strcpy (root, "rdpar");
+//OLD  }
+//OLD  else
+//OLD  {
+//OLD
+//OLD
+//OLD    strncpy (root, total, strcspn (total, "."));
+//OLD    root[i] = '\0';
+//OLD  }
+
+//OLD  if ((verbose) && (rd_rank == 0))
+//OLD    printf ("%s\n", root);
+
   return (0);
 }
 
