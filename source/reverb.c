@@ -283,8 +283,17 @@ delay_dump (PhotPtr p, int np, int iExtracted)
 int
 delay_dump_single (PhotPtr pp, int extract_phot)
 {
-  //If we're filtering out continuum photons and this is a continuum photon, throw it away.
-  if(geo.reverb_filter_lines == -1 && pp->nres == -1) return (1);
+  if(geo.reverb_filter_lines == -1 && pp->nres == -1) 
+  { //If we're filtering out continuum photons and this is a continuum photon, throw it away.
+  
+    return (1);
+  } else {
+    //If we're filtering to *only* photons of given lines, is this one of them? If not, throw away
+    int i, bFound = 0;
+    for (i=0; i < geo.reverb_filter_lines; i++)
+      if(pp->nres == geo.reverb_filter_line[i]) bFound = 1;
+    if(!bFound) return(1);
+  }
 
   stuff_phot (pp, &delay_dump_bank[delay_dump_bank_curr]);      //Bank single photon in temp array
   delay_dump_bank_ex[delay_dump_bank_curr] = extract_phot;      //Record if it's extract photon

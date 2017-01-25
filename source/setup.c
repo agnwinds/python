@@ -1152,11 +1152,11 @@ get_meta_params (void)
         exit (0);
       }
       else
-      {                         //Otherwise, sift through the line list to find what this transition corresponds to
+      { //Otherwise, sift through the line list to find what this transition corresponds to
         for (j = 0; j < nlines_macro; j++)
-        {                       //And record the line position in geo for comparison purposes
+        { //And record the line position in geo for comparison purposes
           if (line[j].z == z && line[j].istate == istate && line[j].levu == levu && line[j].levl == levl)
-          {                     //We're matching z, ionisation state, and upper and lower level transitions
+          { //We're matching z, ionisation state, and upper and lower level transitions
             geo.reverb_line[i] = line[j].where_in_list;
           }
         }
@@ -1175,8 +1175,37 @@ get_meta_params (void)
     //Should we filter any lines out?
     //If -1, blacklist continuum, if >0 specify lines as above and whitelist
     //Automatically include matom_lines
-    //THIS FUNCTIONALITY TBC
     rdint ("reverb.filter_lines", &geo.reverb_filter_lines);
+    if(geo.reverb_filter_lines > 0) 
+    { //If we're given a whitelist, allocate temp storage (up to 256 lines!)
+      int temp[256], bFound;
+      for(i=0; i<geo.reverb_filter_lines; i++) 
+      { //For each provided line, read in
+        rdint ("reverb.filter_line",&temp[i]);
+      }
+      if(geo.reverb == REV_MATOM)
+      { //If we're in matom mode, check if those lines have already been included
+        for(i=0; i<geo.reverb_lines; i++) 
+        { //For each matom line
+          bFound = 0;
+          for(j=0; j<geo.reverb_filter_lines; j++)
+          { //Check if it's in the filter list
+            if(geo.reverb_line[i] == temp[j]) bFound = 1;
+          }
+          if(!bFound) 
+          { //If it's not, add it to the filter list and increment the total lines
+            temp[geo.reverb_filter_lines++] = geo.reverb_line[i];
+          }
+        }
+      } 
+      //Allocate enough space for the filter list
+      geo.reverb_filter_line = calloc(geo.reverb_filter_lines, sizeof(int));
+      for(i=0; i<geo.reverb_filter_lines; i++)
+      { //Populate the filter list from the temp list
+        geo.reverb_filter_line[i] = temp[i];
+      }
+    }
+
   }
   return (0);
 }

@@ -531,7 +531,7 @@ struct geometry
 
   //Added by SWM for reverberation mapping
   double fraction_converged, reverb_fraction_converged;
-  int reverb_filter_lines;
+  int reverb_filter_lines, *reverb_filter_line;
   enum reverb_enum
   { REV_NONE = 0, REV_PHOTON = 1, REV_WIND = 2, REV_MATOM = 3 } reverb;
   enum reverb_vis_enum
