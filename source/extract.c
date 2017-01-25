@@ -400,41 +400,42 @@ the same resonance again */
       /* find out where we are in log space */
       k1 = (log10 (pp->freq) - log10 (xxspec[nspec].freqmin)) / ldfreq;
       if (k1 < 0)
-      {
-        k1 = 0;
-      }
-      if (k1 > NWAVE - 1)
-      {
-        k1 = NWAVE - 1;
-      }
+	{
+	  k1 = 0;
+	}
+      if (k1 > NWAVE-1)
+	{
+	  k1 = NWAVE-1;
+	}
 
-      /* Increment the spectrum.  Note that the photon weight has not been diminished
-       * by its passage through th wind, even though it may have encounterd a number
-       * of resonance, and so the weight must be reduced by tau
-       */
+	  /* Increment the spectrum.  Note that the photon weight has not been diminished
+	   * by its passage through th wind, even though it may have encounterd a number
+	   * of resonance, and so the weight must be reduced by tau
+	   */
 
-      xxspec[nspec].f[k] += pp->w * exp (-(tau));       //OK increment the spectrum in question
-      xxspec[nspec].lf[k1] += pp->w * exp (-(tau));     //And increment the log spectrum
+	  xxspec[nspec].f[k] += pp->w * exp (-(tau));	//OK increment the spectrum in question
+	  xxspec[nspec].lf[k1] += pp->w * exp (-(tau));  //And increment the log spectrum
+	  
 
+	  /* If this photon was a wind photon, then also increment the "reflected" spectrum */
+	  if ( pp->origin == PTYPE_WIND || pp->origin == PTYPE_WIND_MATOM || pp->nscat > 0) {
 
-      /* If this photon was a wind photon, then also increment the "reflected" spectrum */
-      if (pp->origin == PTYPE_WIND || pp->origin == PTYPE_WIND_MATOM || pp->nscat > 0)
-      {
+	  	xxspec[nspec].f_wind[k] += pp->w * exp (-(tau));	//OK increment the spectrum in question
+	  	xxspec[nspec].lf_wind[k1] += pp->w * exp (-(tau));	//OK increment the spectrum in question
 
-        xxspec[nspec].f_wind[k] += pp->w * exp (-(tau));        //OK increment the spectrum in question
-        xxspec[nspec].lf_wind[k1] += pp->w * exp (-(tau));      //OK increment the spectrum in question
-
-      }
-
-      // SWM - Records total distance travelled by extract photon
-      if (geo.reverb != REV_NONE)
-      {                         //If we are in reverb mode
-        if (pstart.nscat > 0 || pstart.origin > 9 || (pstart.nres > -1 && pstart.nres < nlines))
-        {                       //If this photon has scattered, been reprocessed, or originated in the wind it's important
-          pstart.w = pp->w;     //Adjust weight to weight reduced by extraction
-          delay_dump_single (&pstart, 1);       //Dump photon now weight has been modified by extraction
-        }
-      }
+	    }
+			    
+	
+		// SWM - Records total distance travelled by extract photon
+	  	if(geo.reverb != REV_NONE)
+	  	{	//If we are in reverb mode
+			if (pstart.nscat > 0 || pstart.origin > 9 || (pstart.nres > -1 && pstart.nres < nlines))
+			{	//If this photon has scattered, been reprocessed, or originated in the wind it's important
+				pstart.w = pp->w * exp (-(tau));	//Adjust weight to weight reduced by extraction
+				stuff_v(xxspec[nspec].lmn, pstart.lmn);
+				delay_dump_single(&pstart, nspec);	//Dump photon now weight has been modified by extraction
+			}
+		}
 
 
 

@@ -1039,10 +1039,10 @@ Notes:
 History:
   1504  SWM   Added
 **************************************************************/
-
-int
+int 
 get_meta_params (void)
 {
+
   int meta_param, i, j, k, z, istate, levl, levu;
   char trackline[LINELENGTH];
 
@@ -1067,62 +1067,63 @@ get_meta_params (void)
       Valid modes are 0=None, 1=Photon, 2=Wind, 3=Macro-atom.\n");
   }
 
+  // ========== DEAL WITH DISK SETTINGS ==========
+  if(geo.disk_type > 0)
+  {
+    rdint("reverb.disk_type", &meta_param);
+    switch(meta_param) 
+    { //Read in reverb tyoe, if any
+      case 0: geo.reverb_disk = REV_DISK_CORRELATED;   break;
+      case 1: geo.reverb_disk = REV_DISK_UNCORRELATED; break;
+      case 2: geo.reverb_disk = REV_DISK_IGNORE;       break;
+      default:Error("reverb.disk_type: Invalid reverb disk mode.\n \
+        Valid modes are 0=Correlated with central source, 1=Uncorrelated, 2=Ignore.\n");
+    }
+  }
+
+  // ========== DEAL WITH VISUALISATION SETTINGS ==========
   if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
-  {                             //If this requires further parameters, set defaults
+  { //If this requires further parameters, set defaults
     geo.reverb_lines = 0;
-    geo.reverb_path_bins = 1000;
+    geo.reverb_path_bins = 100;
     geo.reverb_angle_bins = 100;
     geo.reverb_dump_cells = 0;
     geo.reverb_vis = REV_VIS_NONE;
-
-    //Read in the number of path bins to use (1000+ is recommended)
-    rdint ("reverb.path_bins", &geo.reverb_path_bins);
-
-    //Read in the visualisation setting
-    rdint ("reverb.visualisation", &meta_param);
-    switch (meta_param)
-    {                           //Select whether to produce 3d visualisation file and/or dump flat csvs of spread in cells
-    case 0:
-      geo.reverb_vis = REV_VIS_NONE;
-      break;
-    case 1:
-      geo.reverb_vis = REV_VIS_VTK;
-      break;
-    case 2:
-      geo.reverb_vis = REV_VIS_DUMP;
-      break;
-    case 3:
-      geo.reverb_vis = REV_VIS_BOTH;
-      break;
-    default:
-      Error ("reverb.visualisation: Invalid mode.\n \
+    rdint("reverb.path_bins", &geo.reverb_path_bins);
+    rdint("reverb.visualisation", &meta_param);
+    switch(meta_param)
+    { //Select whether to produce 3d visualisation file and/or dump flat csvs of spread in cells
+      case 0: geo.reverb_vis = REV_VIS_NONE;  break;
+      case 1: geo.reverb_vis = REV_VIS_VTK;   break;
+      case 2: geo.reverb_vis = REV_VIS_DUMP;  break;
+      case 3: geo.reverb_vis = REV_VIS_BOTH;  break;
+      default:Error("reverb.visualisation: Invalid mode.\n \
         Valid modes are 0=None, 1=VTK, 2=Cell dump, 3=Both.\n");
     }
 
-    if (geo.reverb_vis == REV_VIS_VTK || geo.reverb_vis == REV_VIS_BOTH)
-    {                           //If we're producing a 3d visualisation, select bins. This is just for aesthetics
-      rdint ("reverb.angle_bins", &geo.reverb_angle_bins);
-    }
-
-    if (geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
-    {                           //If we're dumping path arrays, read in the number of cells to dump them for and allocate space
-      rdint ("reverb.dump_cells", &geo.reverb_dump_cells);
-      geo.reverb_dump_x = (double *) calloc (geo.reverb_dump_cells, sizeof (int));
-      geo.reverb_dump_z = (double *) calloc (geo.reverb_dump_cells, sizeof (int));
-
-      for (k = 0; k < geo.reverb_dump_cells; k++)
-      {                         //For each we expect, read a paired cell coord as "[i]:[j]". May need to use py_wind to find indexes.
-        rdline ("reverb.dump_cell", trackline);
-        if (sscanf (trackline, "%lf:%lf", &geo.reverb_dump_x[k], &geo.reverb_dump_z[k]) == EOF)
-        {                       //If this line is malformed, warn the user and quit
-          Error ("reverb.dump_cell: Invalid position line '%s'\n \
-            Expected format '[x]:[z]'\n", trackline);
-          exit (0);
+    if(geo.reverb_vis == REV_VIS_VTK  || geo.reverb_vis == REV_VIS_BOTH)
+      //If we're producing a 3d visualisation, select bins. This is just for aesthetics
+      rdint("reverb.angle_bins", &geo.reverb_angle_bins);
+    if(geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
+    { //If we;re dumping path arrays, read in the number of cells to dump them for
+      rdint("reverb.dump_cells", &geo.reverb_dump_cells);
+      geo.reverb_dump_cell_x = (double *) calloc(geo.reverb_dump_cells, sizeof(double));
+      geo.reverb_dump_cell_z = (double *) calloc(geo.reverb_dump_cells, sizeof(double));
+      geo.reverb_dump_cell   = (int *)    calloc(geo.reverb_dump_cells, sizeof(int));
+      for(k=0; k<geo.reverb_dump_cells; k++)
+      { //For each we expect, read a paired cell coord as "[i]:[j]". May need to use py_wind to find indexes.
+        rdline("reverb.dump_cell", &trackline);
+        if(sscanf(trackline, "%lf:%lf", &geo.reverb_dump_cell_x[k], &geo.reverb_dump_cell_z[k]) == EOF)
+        { //If this line is malformed, warn the user
+          Error("reverb.dump_cell: Invalid position line '%s'\n \
+            Expected format '[x]:[z]'\n",trackline);
+          exit(0);
         }
       }
     }
   }
 
+  // ========== DEAL WITH MATOM LINES ==========
   if (geo.reverb == REV_MATOM)
   {                             //If this is macro-atom mode
     if (geo.rt_mode != 2)
@@ -1170,6 +1171,8 @@ get_meta_params (void)
       Error ("reverb.type: Wind radiation is off but wind-based path tracking is enabled!\n");
     }
   }
+
+  // ========== DEAL WITH LINE CULLING ==========
   if(geo.reverb != REV_NONE)
   {
     //Should we filter any lines out?
@@ -1205,10 +1208,10 @@ get_meta_params (void)
         geo.reverb_filter_line[i] = temp[i];
       }
     }
-
   }
   return (0);
 }
+
 
 
 /***********************************************************

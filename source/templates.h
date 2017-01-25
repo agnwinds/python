@@ -284,12 +284,22 @@ double reweightwind (PhotPtr p);
 int make_pdf_randwind (double tau);
 int randwind_thermal_trapping (PhotPtr p, int *nnscat);
 /* util.c */
+<<<<<<< HEAD
 int fraction (double value, double array[], int npts, int *ival, double *f, int mode);
 int linterp (double x, double xarray[], double yarray[], int xdim, double *y, int mode);
 int coord_fraction (int ndom, int ichoice, double x[], int ii[], double frac[], int *nelem);
 int where_in_2dcell (int ichoice, double x[], int n, double *fx, double *fz);
 int wind_n_to_ij (int ndom, int n, int *i, int *j);
 int wind_ij_to_n (int ndom, int i, int j, int *n);
+=======
+int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
+int linterp(double x, double xarray[], double yarray[], int xdim, double *y, int mode);
+int coord_fraction(int ndom, int ichoice, double x[], int ii[], double frac[], int *nelem);
+int where_in_2dcell(int ichoice, double x[], int n, double *fx, double *fz);
+int wind_n_to_ij(int ndom, int n, int *i, int *j);
+int wind_ij_to_n(int ndom, int i, int j, int *n);
+int wind_x_to_n(double x[], int *n);
+>>>>>>> domain2_rev
 /* density.c */
 double get_ion_density (int ndom, double x[], int nion);
 /* detail.c */
@@ -303,6 +313,7 @@ int freqs_init (double freqmin, double freqmax);
 double timer (void);
 int get_time (char curtime[]);
 /* matom.c */
+<<<<<<< HEAD
 int matom (PhotPtr p, int *nres, int *escape);
 double b12 (struct lines *line_ptr);
 double alpha_sp (struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
@@ -311,6 +322,17 @@ int kpkt (PhotPtr p, int *nres, int *escape);
 int fake_matom_bb (PhotPtr p, int *nres, int *escape);
 int fake_matom_bf (PhotPtr p, int *nres, int *escape);
 int emit_matom (WindPtr w, PhotPtr p, int *nres, int upper);
+=======
+int matom(PhotPtr p, int *nres, int *escape);
+double b12(struct lines *line_ptr);
+double alpha_sp(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
+double alpha_sp_integrand(double freq);
+int kpkt(PhotPtr p, int *nres, int *escape);
+int fake_matom_bb(PhotPtr p, int *nres, int *escape);
+int fake_matom_bf(PhotPtr p, int *nres, int *escape);
+int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper);
+double matom_emit_in_line_prob(WindPtr one, struct lines *line_ptr_emit);
+>>>>>>> domain2_rev
 /* estimators.c */
 int bf_estimators_increment (WindPtr one, PhotPtr p, double ds);
 int bb_estimators_increment (WindPtr one, PhotPtr p, double tau_sobolev, double dvds, int nn);
@@ -488,6 +510,7 @@ int photo_gen_matom (PhotPtr p, double weight, int photstart, int nphot);
 int macro_gov (PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 int macro_pops (PlasmaPtr xplasma, double xne);
 /* reverb.c */
+<<<<<<< HEAD
 double delay_to_observer (PhotPtr pp);
 int delay_dump_prep (int restart_stat, int i_rank);
 int delay_dump_finish (void);
@@ -511,6 +534,31 @@ int wind_paths_output_dump (WindPtr wind);
 int wind_paths_point_index (int i, int j, int k, int i_top, DomainPtr dom);
 int wind_paths_sphere_point_index (int i, int j, int k);
 int wind_paths_output_vtk (WindPtr wind, int ndom);
+=======
+double delay_to_observer(PhotPtr pp);
+int delay_dump_prep(char filename[], int restart_stat, int i_rank);
+int delay_dump_finish(void);
+int delay_dump_combine(int i_ranks);
+int delay_dump(PhotPtr p, int np);
+int delay_dump_single(PhotPtr pp, int i_spec);
+/* paths.c */
+Wind_Paths_Ptr wind_paths_constructor(WindPtr wind);
+int reverb_init(WindPtr wind);
+int wind_paths_init(WindPtr wind);
+int line_paths_add_phot(WindPtr wind, PhotPtr pp, int *nres);
+int wind_paths_add_phot(WindPtr wind, PhotPtr pp);
+int simple_paths_gen_phot(PhotPtr pp);
+double r_draw_from_path_histogram(Wind_Paths_Ptr PathPtr);
+int wind_paths_gen_phot(WindPtr wind, PhotPtr pp);
+int line_paths_gen_phot(WindPtr wind, PhotPtr pp, int nres);
+int wind_paths_evaluate_single(Wind_Paths_Ptr paths);
+int wind_paths_evaluate(WindPtr wind);
+int wind_paths_dump(WindPtr wind, int rank_global);
+int wind_paths_output_dump(WindPtr wind, int rank_global);
+int wind_paths_point_index(int i, int j, int k, int i_top, int i_ndom);
+int wind_paths_sphere_point_index(int i, int j, int k);
+int wind_paths_output_vtk(WindPtr wind, char c_file_in[], int nangles);
+>>>>>>> domain2_rev
 /* setup2.c */
 int help (void);
 int init_geo (void);
@@ -581,12 +629,21 @@ int find_ion (int element, int istate);
 int find_element (int element);
 int get_los_dvds (WindPtr w, char rootname[], int ochoice);
 /* py_wind_ion.c */
+<<<<<<< HEAD
 int ion_summary (WindPtr w, int element, int istate, int iswitch, char rootname[], int ochoice);
 int tau_ave_summary (WindPtr w, int element, int istate, double freq, char rootname[], int ochoice);
 int line_summary (WindPtr w, int element, int istate, char rootname[], int ochoice);
 int total_emission_summary (WindPtr w, char rootname[], int ochoice);
 int modify_te (WindPtr w, char rootname[], int ochoice);
 int partial_measure_summary (WindPtr w, int element, int istate, char rootname[], int ochoice);
+=======
+int ion_summary(WindPtr w, int element, int istate, int iswitch, char rootname[], int ochoice);
+int tau_ave_summary(WindPtr w, int element, int istate, double freq, char rootname[], int ochoice);
+int line_summary(WindPtr w, char rootname[], int ochoice);
+int total_emission_summary(WindPtr w, char rootname[], int ochoice);
+int modify_te(WindPtr w, char rootname[], int ochoice);
+int partial_measure_summary(WindPtr w, int element, int istate, char rootname[], int ochoice);
+>>>>>>> domain2_rev
 /* py_wind_write.c */
 int write_array (char filename[], int choice);
 int display (char name[]);

@@ -529,19 +529,21 @@ struct geometry
   char atomic_filename[132];    /* 54e -- The masterfile for the atomic data */
   char fixed_con_file[132];     /* 54e -- For fixed concentrations, the file specifying concentrations */
 
+  //Added by SWM for tracking C-IV/H-A hotspots
+  int nres_halpha;
+
   //Added by SWM for reverberation mapping
   double fraction_converged, reverb_fraction_converged;
   int reverb_filter_lines, *reverb_filter_line;
-  enum reverb_enum
-  { REV_NONE = 0, REV_PHOTON = 1, REV_WIND = 2, REV_MATOM = 3 } reverb;
-  enum reverb_vis_enum
-  { REV_VIS_NONE = 0, REV_VIS_VTK = 1, REV_VIS_DUMP = 2, REV_VIS_BOTH = 3
-  } reverb_vis;
+  enum reverb_disk_enum {REV_DISK_CORRELATED=0, REV_DISK_UNCORRELATED=1, REV_DISK_IGNORE=3} reverb_disk;
+  enum reverb_enum      {REV_NONE=0, REV_PHOTON=1, REV_WIND=2, REV_MATOM=3} reverb; 
+  enum reverb_vis_enum  {REV_VIS_NONE=0, REV_VIS_VTK=1, REV_VIS_DUMP=2, REV_VIS_BOTH=3} reverb_vis;
   int reverb_wind_cycles;
-  int reverb_path_bins, reverb_angle_bins;      //SWM - Number of bins for path arrays, vtk output angular bins
-  int reverb_dump_cells;        //SWM - Number of cells to dump, list of cells to dump 'nwind' values
-  double *reverb_dump_x, *reverb_dump_z;        //SWM - x & z values of the cells to dump
-  int reverb_lines, *reverb_line;       //SWM - Number of lines to track, and array of line 'nres' values
+  int reverb_path_bins, reverb_angle_bins;  //SWM - Number of bins for path arrays, vtk output angular bins
+  int reverb_dump_cells;                    //SWM - Number of cells to dump
+  double *reverb_dump_cell_x, *reverb_dump_cell_z;
+  int *reverb_dump_cell;
+  int reverb_lines, *reverb_line;           //SWM - Number of lines to track, and array of line 'nres' values
 }
 geo;
 
@@ -588,12 +590,17 @@ blmod;
 */
 typedef struct wind_paths
 {
-  double *ad_path_flux;         //Array[by frequency, then path] of total flux of photons with the given v&p
-  int *ai_path_num;             //Array[by frequency, then path] of the number of photons in this bin
-  double d_flux, d_path;        //Total flux, average path
-  int i_num;                    //Number of photons hitting this cell
+  double* ad_path_flux;  //Array[by frequency, then path] of total flux of photons with the given v&p
+  double* ad_path_flux_disk;
+  double* ad_path_flux_wind;
+  double* ad_path_flux_cent;  // As above, by source
+  int*    ai_path_num;   //Array [by frequency, then path] of the number of photons in this bin
+  int*    ai_path_num_disk;
+  int*    ai_path_num_wind;
+  int*    ai_path_num_cent;     // As above, by source
+  double  d_flux, d_path;     //Total flux, average path
+  int     i_num;              //Number of photons hitting this cell
 } wind_paths_dummy, *Wind_Paths_Ptr;
-
 /* 	This structure defines the wind.  The structure w is allocated in the main
 	routine.  The total size of the structure will be NDIM x MDIM, and the two
 	dimenssions do not need to be the same.  The order of the
@@ -778,7 +785,6 @@ typedef struct plasma
   double lum_fb, lum_z;         /*fb luminosity & fb of metals metals */
   double lum_rad, lum_rad_old;  /* The specfic radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
-
 
   double lum_ioniz;
   double lum_lines_ioniz, lum_ff_ioniz, lum_adiabatic_ioniz;
@@ -994,24 +1000,23 @@ typedef struct photon
                                    -2 implies outside the wind */
 
   enum origin_enum
-  { PTYPE_STAR = 0,
-    PTYPE_BL = 1,
-    PTYPE_DISK = 2,
-    PTYPE_WIND = 3,
-    PTYPE_AGN = 4,
-    PTYPE_STAR_MATOM = 10,
-    PTYPE_BL_MATOM = 11,
-    PTYPE_DISK_MATOM = 12,
-    PTYPE_WIND_MATOM = 13,
-    PTYPE_AGN_MATOM = 14
-  } origin;                     /* Where this photon originated.  If the photon has
-                                   scattered it's "origin" may be changed to "wind". */
-  /* note that we add 10 to origin when processed by a macro-atom
-     which means we need these values in the enum list */
-  int np;                       /*NSH 13/4/11 - an internal pointer to the photon number so 
-                                   so we can write out details of where the photon goes */
-  double path;                  /* SWM - Photon path length */
-
+  	{	PTYPE_STAR=0, 
+  		PTYPE_BL=1, 
+  		PTYPE_DISK=2,
+  		PTYPE_WIND=3,
+  		PTYPE_AGN=4,
+      PTYPE_STAR_MATOM=10,     
+      PTYPE_BL_MATOM=11, 
+      PTYPE_DISK_MATOM=12,
+      PTYPE_WIND_MATOM=13,
+      PTYPE_AGN_MATOM=14
+  	} 	origin, origin_orig;		/* Where this photon originated.  If the photon has
+		   		scattered it's "origin" may be changed to "wind".*/
+                      		/* note that we add 10 to origin when processed by a macro-atom
+                         	which means we need these values in the enum list */
+  int np;			/*NSH 13/4/11 - an internal pointer to the photon number so 
+				   so we can write out details of where the photon goes */
+  double path; 			/* SWM - Photon path length */
 }
 p_dummy, *PhotPtr;
 
