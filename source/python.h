@@ -1294,6 +1294,7 @@ struct filenames
   char spec_wind[LINELENGTH];   // .spec file for wind photons
   char lspec[LINELENGTH];       // .spec file
   char lspec_wind[LINELENGTH];  // .spec file for wind photons
+  char extra_input[LINELENGTH]; // extra input
 }
 files;
 

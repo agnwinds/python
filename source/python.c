@@ -463,7 +463,7 @@ main (argc, argv)
       if (modes.iadvanced)
       {
 
-        rdint ("write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
+        rdint_extra ("write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
         if (write_atomicdata)
           Log ("You have opted to save a summary of the atomic data\n");
       }

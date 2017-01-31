@@ -124,18 +124,21 @@ get_extra_diagnostics ()
 {
 
   if (modes.iadvanced == 0)
-    Error ("Getting extra_diagnostics but advanced mode is off!\n");
-
+  {
+    Error ("Trying to get extra_diagnostics but advanced mode is off!\n");
+    return 0;
+  }
+  
   Log ("get_extra_diagnostics: Getting extra diagnostics as requested...\n");
 
-  rdint ("save_cell_statistics", &modes.save_cell_stats);
-  rdint ("track_resonant_scatters", &modes.track_resonant_scatters);
-  rdint ("keep_ioncycle_windsaves", &modes.keep_ioncycle_windsaves);
-  rdint ("save_extract_photons", &modes.save_extract_photons);
-  rdint ("print_windrad_summary", &modes.print_windrad_summary);
-  rdint ("print_dvds_info", &modes.save_cell_stats);
-  rdint ("save_cell_statistics", &modes.save_cell_stats);
-  rdint ("ispymode", &modes.ispy);
+  rdint_extra ("save_cell_statistics", &modes.save_cell_stats);
+  rdint_extra ("track_resonant_scatters", &modes.track_resonant_scatters);
+  rdint_extra ("keep_ioncycle_windsaves", &modes.keep_ioncycle_windsaves);
+  rdint_extra ("save_extract_photons", &modes.save_extract_photons);
+  rdint_extra ("print_windrad_summary", &modes.print_windrad_summary);
+  rdint_extra ("print_dvds_info", &modes.save_cell_stats);
+  rdint_extra ("save_cell_statistics", &modes.save_cell_stats);
+  rdint_extra ("ispymode", &modes.ispy);
 
   return 0;
 }

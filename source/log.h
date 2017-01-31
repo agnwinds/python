@@ -22,7 +22,9 @@ int rdline (char question[], char answer[]);
 int get_root (char root[], char total[]);
 int rdpar_set_mpi_rank (int rank);
 int rdpar_set_verbose (int vlevel);
-int rd_extra (char firstword[], double *answer, int *wordlength);
+int rdint_extra (char question[], int *answer);
+int rddoub_extra (char question[], double *answer);
+int opar_extra (char filename[]);
 /* log.c */
 int Log_init (char *filename);
 int Log_append (char *filename);
