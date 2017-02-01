@@ -113,7 +113,7 @@ parse_command_line (argc, argv)
         modes.iadvanced = 1;
         j = i;
 
-        Log("Running in advanced mode!! see examples/core/cv_standard.extra for options.\n")
+        Log("Running in advanced mode!! see examples/core/cv_standard.extra for options.\n");
       }
       else if (strcmp (argv[i], "-f") == 0)
       {
