@@ -194,9 +194,11 @@ History:
 
 
 FILE *rdin_ptr, *rdout_ptr;     /* Pointers to the input and output files */
+FILE *extra_ptr;     /* Pointers to the input and output files */
 int rdpar_stat = 0;             /*rdpar_stat=0 initially, 
                                    rd_stat=1 while reading from stdin,
                                    rdpar_stat=2 if reading from file */
+int extra_stat = 0;
 int verbose = 1;                /* verbose = 1 -> printout all errors
                                    verbose=2 -->suppresses some error messages */
 
@@ -230,6 +232,16 @@ struct rdpar_raw
   int icheck;                   // Check off to indicate a line has been used
 }
 input[MAX_RECORDS];
+
+struct extra_raw
+{
+  char line[LINELEN];           // Raw input line 
+  int icheck;                   // Check off to indicate a line has been used
+}
+extra_input[MAX_RECORDS];
+
+int extra_cursor = 0;
+int extra_ntot = 0;
 
 
 
@@ -687,6 +699,137 @@ string_process_from_file (question, dummy)
   return (NORMAL);
 }
 
+
+/**************************************************************************
+                    Space Telescope Science Institute
+
+
+  Synopsis:  
+
+  string_process_from_file handles the case
+  where one is processing a line from the a file
+  
+ 
+  Description:  
+
+    Basically this routine reads information from the structure
+  called input, which was filed by calls now contained in
+  opar or rdpar.  
+
+
+  Returns:
+  When the routine returns NORMAL or OLD the input has been 
+  successfully processed
+
+  Notes:
+
+    When a keyword is missing the routine invokes the inteactive version
+  of rdpar, but it does not force all future inputs to come from
+  the command line version, as was the case for version of rdpar
+  prior to 16sept.
+
+  History:
+    16sept  ksl Moved from string_proces above, and significantly
+      modified.
+  16oct ksl Added a call to check_synonyms, which looks for
+      names that we have changed.
+
+ ************************************************************************/
+
+int
+string_process_extra (question, dummy)
+     char question[], dummy[];
+{
+
+  char firstword[LINELEN], secondword[LINELEN];
+  char *line;
+  char *ccc, *index (), *fgets ();
+  int nwords, wordlength;
+
+  for (extra_cursor = 0; extra_cursor < extra_ntot; extra_cursor++)
+  {
+    if (extra_input[extra_cursor].icheck == USED)
+    {
+      continue;
+    }
+
+    line = extra_input[extra_cursor].line;
+
+    // Parse the first two words of the input line
+
+    strcpy (firstword, "");
+    strcpy (secondword, "");
+    nwords = sscanf (line, "%s %s", firstword, secondword);
+
+    wordlength = strlen (firstword);
+    if (nwords < 2 || wordlength == 0)
+    {
+      continue;                 // Read the next line in the file
+    }
+
+    // Strip off everthing in paren
+    if ((ccc = index (firstword, '(')) != NULL)
+    {
+      wordlength = (int) (ccc - firstword);
+      if (wordlength == 0)
+      {
+        continue;
+      }
+    }
+
+
+    // If there is a match go to the section that handles the various possibilities
+
+    if (strncmp (question, firstword, wordlength) == 0)
+    {
+      break;                    // We have matched the keywords
+    }
+  }
+
+  // Handle the EOF since we were not successful in identifying the keyword
+  if (extra_cursor == extra_ntot)
+  {
+    // printf ("Error: string_proces: Unexpectedly reached EOF\n");
+    printf ("No advanced diagnostic entry for %s, keeping default\n", question);
+    return (NORMAL);
+  }
+  else
+  {
+    extra_input[extra_cursor].icheck = USED;
+    extra_cursor++;             // This is needed because we have already processed the earlier line
+  }
+
+
+  // At this point we know we have the correct line in the input file
+  if (strncmp (secondword, "$", 1) == 0 || nwords == 1)
+  {                             // This if for the case where one wants to read this value only from the command line
+    fprintf (stderr, "%s (%s) :", question, dummy);
+    fflush (stderr);
+
+    strcpy (secondword, dummy);
+
+    fgets (dummy, LINELEN, stdin);
+
+    if (strcmp (dummy, "\n") == 0)
+    {                           /* Store the provided value since \n */
+      rdpar_store_record (question, secondword);
+      fprintf (rdout_ptr, "%-40s   %s\n", question, secondword);
+    }
+    else
+    {                           /* Store the value received via the command line */
+
+      rdpar_store_record (question, dummy);
+      fprintf (rdout_ptr, "%-40s   %s\n", question, dummy);
+    }
+
+    return (NORMAL);
+  }
+  else                          // This handles the situation where the variable is actually read from the rdpar file
+    strcpy (dummy, secondword);
+  //rdpar_store_record (question, secondword);
+  fprintf (rdout_ptr, "%-40s   %s\n", question, secondword);
+  return (NORMAL);
+}
 
 
 
@@ -1204,39 +1347,93 @@ rdpar_set_verbose (vlevel)
 
 
 
-/* JM 141015 -- rd_extra is a function designed 
-   to help address #111. We want to implement 
-   extra diagnostics which can be supplied at the 
-   end of the file if extra_diagnostics is set to
-   1 in the parameter file. This function is used
-   by get_extra_diagnostics() to do this 
-
-   XXX - I am not sure that this is needed any longer
-   but have left it = ksl 1609
-*/
 
 
 int
-rd_extra (firstword, answer, wordlength)
-     char firstword[];
-     double *answer;
-     int *wordlength;
+rdint_extra (question, answer)
+     char question[];
+     int *answer;
 {
-  char secondword[LINELEN];
-  char line[LINELEN];
-  char *ccc, *index ();
-  if (fgets (line, LINELEN, rdin_ptr) == NULL)
+  int query;
+  char dummy[LINELEN];
+  query = REISSUE;
+
+  while (query == REISSUE)
   {
-    return (1);                 // get_extra_diagnostics uses this return value 
+    sprintf (dummy, "%d", *answer);
+    query = string_process_extra (question, dummy);
+    if (query == NORMAL)
+    {
+      sscanf (dummy, "%d", answer);
+      if (rd_rank == 0 && verbose == 1)
+        printf ("%s   %d\n", question, *answer);
+    }
+  }
+  return (query);
+}
+
+int
+rddoub_extra (question, answer)
+     char question[];
+     double *answer;
+{
+  int query;
+  char dummy[LINELEN];
+  query = REISSUE;
+
+  while (query == REISSUE)
+  {
+    sprintf (dummy, "%g", *answer);
+    query = string_process_extra (question, dummy);
+    if (query == NORMAL)
+    {
+      sscanf (dummy, "%le", answer);
+      if (rd_rank == 0 && verbose == 1)
+        printf ("%s   %e\n", question, *answer);
+    }
+  }
+  return (query);
+}
+
+
+int
+opar_extra (filename)
+     char filename[];
+{
+  FILE *fopen (), *tmp_ptr;
+  //int extra_init ();
+
+  /* Check that an input file is not currently open */
+  if (extra_stat == 2)
+  {
+    printf ("Error: opar_extra: A file for reading extra input is already open.\n");
+    return (extra_stat);
   }
 
-  sscanf (line, "%s %s", firstword, secondword);
-  if ((ccc = index (firstword, '(')) != NULL)
+  /*Open a temporary outbut file */
+  //extra_init ();
+  if ((tmp_ptr = fopen (filename, "r")) == NULL)
   {
-    *wordlength = (int) (ccc - firstword);
+    printf ("Error: opar_extra: Could not open filename %s\n", filename);
+    //printf ("               Proceeding in interactive mode\n");
+    return (-1);
   }
+
   else
-    *wordlength = strlen (firstword);
-  sscanf (secondword, "%le", answer);
-  return (0);
+  {
+    extra_ptr = tmp_ptr;
+    extra_stat = 2;             /* implies we are now trying to read from a file */
+    while (fgets (extra_input[extra_ntot].line, LINELEN, extra_ptr) != NULL)
+    {
+      extra_input[extra_ntot].icheck = UNUSED;
+      extra_ntot++;
+    }
+    fclose (extra_ptr);
+  }
+  strcpy (current_filename, filename);
+
+
+  return (extra_stat);
 }
+
+

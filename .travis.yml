@@ -22,8 +22,6 @@ compiler:
 branches:
   only:
     - dev
-    - enum
-    - domain2
 
 install:
     # first configure
@@ -50,7 +48,7 @@ script:
     - Setup_Py_Dir
     - py -i cv_macro_benchmark
     - py -i cv_standard
-    - py -i -d sv_detailedmode
+    - py -i -d cv_standard
     - py -i fiducial_agn
     - py -i 1d_sn
     - cd ../beta/

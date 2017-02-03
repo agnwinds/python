@@ -1,0 +1,15 @@
+adjust_grid(0=no,1=yes)             				1
+geo.xlog_scale 										1e7
+geo.zlog_scale 										1e7
+write_atomicdata 									1
+save_cell_statistics(1=yes) 						1
+ispymode(1=yes)             						1
+keep_ioncycle_windsaves(1=yes)     					1
+track_resonant_scatters(1=yes)      				1
+print_windrad_summary(1=yes) 						1
+print_dvds_info(1=yes) 								1
+save_extract_photons(1=yes) 						1
+Use.standard.care.factors(1=yes)    				0
+Fractional.distance.photon.may.travel 				0.5
+Lowest.ion.density.contributing.to.photoabsorption  1e-5
+Keep.photoabs.during.final.spectrum(1=yes) 			1

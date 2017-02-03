@@ -112,6 +112,8 @@ parse_command_line (argc, argv)
       {
         modes.iadvanced = 1;
         j = i;
+
+        Log("Running in advanced mode!! see examples/core/cv_standard.extra for options.\n");
       }
       else if (strcmp (argv[i], "-f") == 0)
       {
@@ -346,14 +348,14 @@ get_grid_params (ndom)
   /* If we are in advanced then allow the user to modify scale lengths */
   if (modes.iadvanced)
   {
-    rdint ("adjust_grid(0=no,1=yes)", &modes.adjust_grid);
+    rdint_extra ("adjust_grid(0=no,1=yes)", &modes.adjust_grid);
 
     if (modes.adjust_grid)
     {
       Log ("You have opted to adjust the grid scale lengths\n");
-      rddoub ("geo.xlog_scale", &zdom[ndom].xlog_scale);
+      rddoub_extra ("geo.xlog_scale", &zdom[ndom].xlog_scale);
       if (zdom[ndom].coord_type != SPHERICAL)
-        rddoub ("geo.zlog_scale", &zdom[ndom].zlog_scale);
+        rddoub_extra ("geo.zlog_scale", &zdom[ndom].zlog_scale);
     }
   }
 
@@ -946,7 +948,7 @@ get_bl_and_agn_params (lstar)
        only in advanced mode. default is zero which is checked before we call photo_gen_agn */
     geo.pl_low_cutoff = 0.0;
     if (modes.iadvanced)
-      rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
+      rddoub_extra ("agn_power_law_cutoff", &geo.pl_low_cutoff);
 
     rdint ("geometry_for_pl_source(0=sphere,1=lamp_post)", &geo.pl_geometry);
 
@@ -997,7 +999,7 @@ get_bl_and_agn_params (lstar)
        only in advanced mode. default is zero which is checked before we call photo_gen_agn */
     geo.pl_low_cutoff = 0.0;
     if (modes.iadvanced)
-      rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
+      rddoub_extra ("agn_power_law_cutoff", &geo.pl_low_cutoff);
 
 
     /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
@@ -1396,11 +1398,11 @@ History:
 int
 setup_created_files ()
 {
-  int opar_stat;
+  int opar_stat, opar_extra_stat;
 
   opar_stat = 0;                /* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
                                    the assumption is that we are reading from the command line */
-
+  opar_extra_stat = 0;
 
   if (strncmp (files.root, "stdin", 5) == 0 || strncmp (files.root, "rdpar", 5) == 0 || files.root[0] == ' ' || strlen (files.root) == 0)
   {
@@ -1421,6 +1423,21 @@ setup_created_files ()
     {
       Log ("Creating a new parameter file %s\n", files.input);
     }
+
+    if (modes.iadvanced)
+      {
+        strcpy (files.extra_input, files.root);
+        strcat (files.extra_input, ".extra");
+
+        if ((opar_extra_stat = opar_extra (files.extra_input)) == 2)
+        {
+          Log ("Reading extra diagnostics data from file %s\n", files.extra_input);
+        }
+        else
+        {
+          Log ("No extra diagnostics file %s provided, so ignoring.\n", files.extra_input);
+        }
+      }
 
   }
 
@@ -1520,13 +1537,13 @@ get_standard_care_factors ()
 
   if (modes.iadvanced)
   {
-    rdint ("Use.standard.care.factors(1=yes)", &istandard);
+    rdint_extra ("Use.standard.care.factors(1=yes)", &istandard);
 
     if (!istandard)
     {
-      rddoub ("Fractional.distance.photon.may.travel", &SMAX_FRAC);
-      rddoub ("Lowest.ion.density.contributing.to.photoabsorption", &DENSITY_PHOT_MIN);
-      rdint ("Keep.photoabs.during.final.spectrum(1=yes)", &modes.keep_photoabs);
+      rddoub_extra ("Fractional.distance.photon.may.travel", &SMAX_FRAC);
+      rddoub_extra ("Lowest.ion.density.contributing.to.photoabsorption", &DENSITY_PHOT_MIN);
+      rdint_extra ("Keep.photoabs.during.final.spectrum(1=yes)", &modes.keep_photoabs);
     }
   }
   return (0);
