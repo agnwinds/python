@@ -58,7 +58,7 @@ clean:
 	cd $(GSL); make clean;  
 	cd $(PYTHON)/source/; make clean
 	rm -rf $(PYTHON)/include/gsl/
-	rm -f lib/*
+	rm -f lib/lib*
 	
 
 
@@ -68,4 +68,4 @@ distclean:
 	cd $(GSL); make distclean 
 	cd $(PYTHON)/source/; make clean
 	rm -rf $(PYTHON)/include/gsl/
-	rm -f lib/*
+	rm -f lib/lib*
