@@ -330,12 +330,7 @@ line_summary (w, rootname, ochoice)
     nion++;
   if (nion == nions)
   {
-<<<<<<< HEAD
     Log ("Error--element %d ion %d not found in define_wind\n", element, istate);
-=======
-    Log ("Error--element %d ion %d not found in define_wind\n", element,
-        istate);
->>>>>>> domain2_rev
     return (-1);
   }
   nelem = 0;
@@ -347,14 +342,10 @@ line_summary (w, rootname, ochoice)
     return(-1);
   }
   nline = 0;
-<<<<<<< HEAD
-  freq_search = C / 1548.1949e-8;
+  freq_search = C / lambda;
 
   while (fabs (1. - lin_ptr[nline]->freq / freq_search) > 0.0001 && nline < nlines)
-=======
-  while (fabs (1. - lin_ptr[nline]->freq / freq_search) > 0.0001
-	 && nline < nlines)
->>>>>>> domain2_rev
+
     nline++;
   if (nline == nlines)
   {
@@ -383,15 +374,6 @@ line_summary (w, rootname, ochoice)
   tot = 0.0;
   for (n = 0; n < NDIM2; n++)
   {
-<<<<<<< HEAD
-    aaa[n] = 0;
-    if (w[n].vol > 0.0)
-    {
-      nplasma = w[n].nplasma;
-      dd = plasmamain[nplasma].density[lin_ptr[nline]->nion];
-      two_level_atom (lin_ptr[nline], &plasmamain[nplasma], &d1, &d2);
-      x = (d2) * a21 (lin_ptr[nline]) * H * lin_ptr[nline]->freq * w[n].vol;
-=======
     aaa[n] = 0.0;
     if (w[n].vol > 0.0)
     {
@@ -409,8 +391,6 @@ line_summary (w, rootname, ochoice)
         two_level_atom (lin_ptr[nline], &plasmamain[nplasma], &d1, &d2);
         x = (d2) * a21 (lin_ptr[nline]) * H * lin_ptr[nline]->freq * w[n].vol;
       }
-
->>>>>>> domain2_rev
       x *= z = scattering_fraction (lin_ptr[nline], &plasmamain[nplasma]);
 
       tot += x;
@@ -422,13 +402,8 @@ line_summary (w, rootname, ochoice)
 
   tot = 2. * tot;               // Why is there a factor of 2 here??? ksl
 
-<<<<<<< HEAD
-  Log ("The total CIV luminosity (flux) is %8.2g (%8.2g)\n", tot, tot / (4 * PI * 1e4 * PC * PC));
-
-=======
   Log ("The total %s ion %d luminosity (flux) is %8.2g (%8.2g)\n",
        ele[nelem].name, istate, tot, tot / (4 * PI * 1e4 * PC * PC));
->>>>>>> domain2_rev
 
   /* Store the appropriate values in a place where it does not matter */
   if (ochoice)
@@ -437,7 +412,6 @@ line_summary (w, rootname, ochoice)
     {
       // Here is the calculation of the effective collisions strength
       if (w[n].vol > 0.0)
-<<<<<<< HEAD
       {
         nplasma = w[n].nplasma;
         omega = 5.13 * pow (plasmamain[nplasma].t_e / 1.e5, 0.18);
@@ -447,31 +421,7 @@ line_summary (w, rootname, ochoice)
       else
         w[n].x[1] = 0;
     }
-=======
-	    {
-        nplasma = w[n].nplasma;
-	      omega = 5.13 * pow (plasmamain[nplasma].t_e / 1.e5, 0.18);
-	      rb = 8.629e-6 * exp (-energy /
-            (BOLTZMANN * plasmamain[nplasma].t_e)) /
-            sqrt (plasmamain[nplasma].t_e) * omega;
-        w[n].x[1] =
-            plasmamain[nplasma].density[nion] * plasmamain[nplasma].ne *
-            rb * energy * w[n].vol;
-	    }
-      else
-        w[n].x[1] = 0;
-    }
 
-    strcpy (filename, rootname);
-    strcpy (choice, ".line");
-    strcat (choice, ele[nelem].name);
-    sprintf (iname, "%d", istate);
-    strcat (choice, iname);
-
-    strcat (filename, choice);
-    write_array (filename, ochoice);
-  }
->>>>>>> domain2_rev
 
     strcpy (filename, rootname);
     strcpy (choice, ".line");

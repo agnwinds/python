@@ -461,7 +461,6 @@ one_choice (choice, root, ochoice)
 
     while (rdint ("element(0=return)", &n) != EOF)
     {
-<<<<<<< HEAD
       if (n <= 0)
         break;
       rdint ("ion", &istate);
@@ -471,121 +470,6 @@ one_choice (choice, root, ochoice)
   case 'I':
     IP_summary (wmain, root, ochoice);
     break;
-=======
-    case 'a':			/* Energy absorbed */
-      abs_summary (wmain, root, ochoice);
-      break;
-    case 'A':			// Change the file defaults
-      rdint ("Make_files(0=no,1=original,2=regrid_to_linear)", &ochoice);
-      break;
-    case 'b':			/*Adiabatic cooling */
-      adiabatic_cooling_summary (wmain, root, ochoice);
-      break;
-    case 'B':
-      plasma_cell (wmain, root, ochoice);
-      break;
-    case 'C':			/*the ratio cooling to heating */
-      coolheat_summary (wmain, root, ochoice);
-      break;
-    case 'd':
-      convergence_summary (wmain, root, ochoice);
-      break;
-    case 'D':			/* dvds summary */
-      dvds_summary (wmain, root, ochoice);
-      break;
-    case 'E':
-      convergence_all (wmain, root, ochoice);
-      break;
-    case 'e':			/* print out everything about an element */
-      wind_element (wmain);
-      break;
-    case 'f':			/* Electron summary */
-      freq_summary (wmain, root, ochoice);
-      break;
-    case 'F':			/* Complete file summary */
-      complete_file_summary (wmain, root, ochoice);
-      break;
-    case 'g':			/*n photo */
-      photo_summary (wmain, root, ochoice);
-      break;
-    case 'G':			/* inner shell summary */
-      inner_shell_summary (wmain, root, ochoice);
-      break;
-    case 'h':			/*n photo */
-      Log ("Don't get discouraged.  This takes a little while!");
-      recomb_summary (wmain, root, ochoice);
-      break;
-    case 'H':			/* heating and cooling mechanisms breakdown */
-      heatcool_summary (wmain, root, ochoice);
-      break;
-    case 'i':			/* Allow user to display information about ions in the wind */
-
-      rdint ("Ion_info_type(0=fraction,1=density,2=scatters,3=abs", &iswitch);
-
-      n = 6;
-      istate = 4;
-
-      while (rdint ("element(0=return)", &n) != EOF)
-	{
-	  if (n <= 0)
-	    break;
-	  rdint ("ion", &istate);
-	  ion_summary (wmain, n, istate, iswitch, root, ochoice);	// 0 implies ion fractions
-	}
-      break;
-    case 'I':
-      IP_summary (wmain, root, ochoice);
-      break;
-
-    case 'j':			/* Calculate the average tau at the center of a cell */
-      n = 6;
-      istate = 4;
-      lambda = 1550;
-
-      rddoub ("wavelength", &lambda);
-      freq = C / (lambda * 1.e-8);
-
-      while (rdint ("element(0=return)", &n) != EOF)
-	{
-	  if (n <= 0)
-	    break;
-	  rdint ("ion", &istate);
-	  tau_ave_summary (wmain, n, istate, freq, root, ochoice);
-	}
-      break;
-    case 'J':			/* radiation density in cell */
-      J_summary (wmain, root, ochoice);
-      break;
-    case 'k':			/* tau at H edge */
-      tau_h_summary (wmain, root, ochoice);
-      break;
-    case 'K':			/* cell J split by direct photons and scattered photons */
-      J_scat_summary (wmain, root, ochoice);
-      break;
-    case 'l':			/* Lum of shell */
-      lum_summary (wmain, root, ochoice);
-      break;
-    case 'L':     /*Line emission */
-      line_summary (wmain, root, ochoice);
-      break;
-    case 'm':			/* Radiation force */
-      mo_summary (wmain, root, ochoice);
-      break;
-    case 'M':
-      macro_summary (wmain, root, ochoice);
-      break;
-    case 'n':			/* Electron summary */
-      electron_summary (wmain, root, ochoice);
-      break;
-    case 'N':			/* Read a different wind save file */
-      rdstr ("New.rootname", root);
-      strcpy (windsavefile, root);
-      strcat (windsavefile, ".wind_save");
-      if (wind_read (windsavefile) < 0)
-	{
-	  Error ("one_choice: Could not read %s", windsavefile);
-	}
->>>>>>> domain2_rev
 
   case 'j':                    /* Calculate the average tau at the center of a cell */
     n = 6;

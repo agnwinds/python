@@ -64,7 +64,6 @@ delay_to_observer (PhotPtr pp)
  * 9/14	-	Written by SWM
 ***********************************************************/
 int
-<<<<<<< HEAD
 delay_dump_prep (int restart_stat, int i_rank)
 {
   FILE *fopen (), *fptr;
@@ -83,13 +82,9 @@ delay_dump_prep (int restart_stat, int i_rank)
 
   //Allocate and zero dump files and set extract status
   delay_dump_bank = (PhotPtr) calloc (sizeof (p_dummy), delay_dump_bank_size);
-  delay_dump_bank_ex = (int *) calloc (sizeof (int), delay_dump_bank_size);
+  delay_dump_spec = (int *) calloc (sizeof (int), delay_dump_bank_size);
   for (i = 0; i < delay_dump_bank_size; i++)
-    delay_dump_bank_ex[i] = 0;
-
-  //Set up convergence tracking
-	geo.fraction_converged=0.0;
-	geo.reverb_fraction_converged = 0.85;
+    delay_dump_spec[i] = 0;
 
   if (restart_stat == 1)
   {                             //Check whether the output file already has a header
@@ -113,7 +108,8 @@ delay_dump_prep (int restart_stat, int i_rank)
 		fprintf(fptr, "# \n#    Freq.     Lambda     Weight      Last X      Last Y      Last Z Scat. RScat      Delay Spec. Orig.  Res.\n");
 	}
 	fclose(fptr);
-	return (0);
+  }
+  return (0);
 }
 
 /**********************************************************/

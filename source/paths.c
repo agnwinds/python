@@ -160,7 +160,6 @@ reverb_init (WindPtr wind)
 	
 
   	return (0);
->>>>>>> domain2_rev
 }
 
 /**********************************************************/
@@ -530,7 +529,7 @@ wind_paths_evaluate_single (Wind_Paths_Ptr paths)
  * 24/7/15	-	Removed frequency
 *****************************************************************/
 int
-wind_paths_evaluate (WindPtr wind)
+wind_paths_evaluate (WindPtr wind, int i_rank)
 {
   int i, j;
   for (i = 0; i < geo.ndim2; i++)
@@ -555,7 +554,7 @@ wind_paths_evaluate (WindPtr wind)
   }
   if (geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
   {                           //Dump the path delay information for certain tracked cells to file
-    wind_paths_output_dump (wind);
+    wind_paths_output_dump (wind, i_rank);
   }
   
   Log (" Completed evaluating wind path arrays.");
@@ -581,7 +580,7 @@ wind_paths_dump (WindPtr wind, int rank_global)
 {
   FILE *fopen (), *fptr;
   char c_file[LINELENGTH];
-  int lin_pos, j, k;
+  int j, k;
 
   //Setup file name and open the file
   sprintf (c_file, "%s.wind_paths_%d.%d.csv", files.root, wind->nwind, rank_global);
@@ -633,22 +632,22 @@ wind_paths_dump (WindPtr wind, int rank_global)
  * 10/15	-	Written by SWM
 *****************************************************************/
 int
-wind_paths_output_dump (WindPtr wind)
+wind_paths_output_dump (WindPtr wind, int i_rank)
 {
   int i, d, n;
   double x[3];
   for (i = 0; i < geo.reverb_dump_cells; i++)
   {                             //For each location we want to dump the details for
-    x[0] = geo.reverb_dump_x[i];
+    x[0] = geo.reverb_dump_cell_x[i];
     x[1] = 0.0;
-    x[2] = geo.reverb_dump_z[i];
+    x[2] = geo.reverb_dump_cell_z[i];
 
     for (d = 0; d < geo.ndomain; d++)
     {                           //For each domain, check if this position is within it
       n = where_in_grid (d, x);
       if (n >= 0)
       {                         //If it is, then dump the delay information 
-        wind_paths_dump (&wind[n]);
+        wind_paths_dump (&wind[n], i_rank);
       }
     }
   }
