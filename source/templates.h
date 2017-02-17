@@ -489,7 +489,7 @@ int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 int macro_pops(PlasmaPtr xplasma, double xne);
 /* reverb.c */
 double delay_to_observer(PhotPtr pp);
-int delay_dump_prep(int restart_stat, int i_rank);
+int delay_dump_prep(int restart_stat);
 int delay_dump_finish(void);
 int delay_dump_combine(int i_ranks);
 int delay_dump(PhotPtr p, int np);

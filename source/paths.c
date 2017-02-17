@@ -556,8 +556,10 @@ wind_paths_evaluate (WindPtr wind, int i_rank)
   {                           //Dump the path delay information for certain tracked cells to file
     wind_paths_output_dump (wind, i_rank);
   }
-  
+
   Log (" Completed evaluating wind path arrays.");
+
+  return(0);
 }
 
 
@@ -594,13 +596,18 @@ wind_paths_dump (WindPtr wind, int rank_global)
   fprintf (fptr, "'Path Bin', 'Heating', 'Heating Central', 'Heating Disk', 'Heating Wind'");
   for (j = 0; j < geo.reverb_lines; j++)
   {
-  	fprintf(fptr, ", %d, %d Central, %d Disk, %d Wind", j,j,j,j);
+  	fprintf(fptr, ", 'Line %d', 'Line %d Central', 'Line %d Disk', 'Line %d Wind'", 
+  			geo.reverb_line[j], geo.reverb_line[j], geo.reverb_line[j], geo.reverb_line[j]);
   }
   fprintf (fptr, "\n");
 
   for (k = 0; k < geo.reverb_path_bins; k++)
   {                             //For each path bin, print the 'wind' weight 
-    fprintf (fptr, "%g, %g", reverb_path_bin[k], wind->paths->ad_path_flux[k]);
+    fprintf (fptr, "%g, %g, %g, %g, %g", reverb_path_bin[k], 
+    		wind->paths->ad_path_flux[k],
+    		wind->paths->ad_path_flux_cent[k],
+			wind->paths->ad_path_flux_disk[k],
+			wind->paths->ad_path_flux_wind[k]);
 
     for (j = 0; j < geo.reverb_lines; j++)
     {                           //For each tracked line, print the weight in this bin

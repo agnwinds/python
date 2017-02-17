@@ -306,7 +306,7 @@ line_summary (w, rootname, ochoice)
   int nplasma;
 
   iline=0;
-  rdint ("line (0=C-IV, 1=Hα)", &iline);
+  rdint ("line (0=C-IV, 1=Hα, 2=Hβ)", &iline);
   switch(iline)
   {
     case 0:
@@ -314,6 +314,9 @@ line_summary (w, rootname, ochoice)
       break;
     case 1:
       element = 1; istate = 1; lambda = 6562.7097e-8;
+      break;
+    case 2:
+      element = 1; istate = 1; lambda = 4861.363e-8;
       break;
     default:
       Error("line_summary: Not a valid line.");
@@ -415,8 +418,8 @@ line_summary (w, rootname, ochoice)
       {
         nplasma = w[n].nplasma;
         omega = 5.13 * pow (plasmamain[nplasma].t_e / 1.e5, 0.18);
-        rb = 8.629e-6 * exp (-energy_c4 / (BOLTZMANN * plasmamain[nplasma].t_e)) / sqrt (plasmamain[nplasma].t_e) * omega;
-        w[n].x[1] = plasmamain[nplasma].density[nion] * plasmamain[nplasma].ne * rb * energy_c4 * w[n].vol;
+        rb = 8.629e-6 * exp (-energy / (BOLTZMANN * plasmamain[nplasma].t_e)) / sqrt (plasmamain[nplasma].t_e) * omega;
+        w[n].x[1] = plasmamain[nplasma].density[nion] * plasmamain[nplasma].ne * rb * energy * w[n].vol;
       }
       else
         w[n].x[1] = 0;

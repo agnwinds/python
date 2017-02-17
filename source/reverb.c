@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <errno.h>
 #include "atomic.h"
 #include "python.h"
 
@@ -64,21 +65,21 @@ delay_to_observer (PhotPtr pp)
  * 9/14	-	Written by SWM
 ***********************************************************/
 int
-delay_dump_prep (int restart_stat, int i_rank)
+delay_dump_prep (int restart_stat)
 {
-  FILE *fopen (), *fptr;
-  char string[LINELENGTH], c_file[LINELENGTH], c_rank[LINELENGTH];
+  FILE *fptr;
+  char s_time[LINELENGTH];
   int i;
 
   //Get output filename
-  strcpy (c_file, files.root);  //Copy filename to new string
-  strcat (c_file, ".delay_dump");
-  if (i_rank > 0)
+  if (rank_global > 0)
   {
-    sprintf (c_rank, "%i", i_rank);     //Write thread to string
-    strcat (c_file, c_rank);    //Append thread to filename
+  	sprintf (delay_dump_file, "%s.delay_dump%d", files.root, rank_global);
   }
-  strcpy (delay_dump_file, c_file);     //Store modified filename for later
+  else
+  {
+  	sprintf (delay_dump_file, "%s.delay_dump", files.root);
+  }
 
   //Allocate and zero dump files and set extract status
   delay_dump_bank = (PhotPtr) calloc (sizeof (p_dummy), delay_dump_bank_size);
@@ -87,27 +88,31 @@ delay_dump_prep (int restart_stat, int i_rank)
     delay_dump_spec[i] = 0;
 
   if (restart_stat == 1)
-  {                             //Check whether the output file already has a header
+  { //Check whether the output file already has a header
     Log ("delay_dump_prep: Resume run, skipping writeout\n");
     return (0);
   }
 
-  if ((fptr = fopen (delay_dump_file, "w")) == NULL)
-  {                             //If this isn't a continue run, prep the output file
-
-
-	if (i_rank > 0) 
+  
+  if ((fptr = fopen(delay_dump_file, "w")) != NULL)
+  { //If this isn't a continue run, prep the output file
+	if (rank_global > 0) 
 	{
-		fprintf(fptr, "# Delay dump file for slave process %d\n", i_rank);
+		fprintf(fptr, "# Delay dump file for slave process %d\n", rank_global);
 	}
 	else
 	{	// Construct and write a header string for the output file
 		fprintf(fptr, "# Python Version %s\n", VERSION);
-		get_time(string);
-		fprintf(fptr, "# Date	%s\n#  \n", string);
+		get_time(s_time);
+		fprintf(fptr, "# Date	%s\n#  \n", s_time);
 		fprintf(fptr, "# \n#    Freq.     Lambda     Weight      Last X      Last Y      Last Z Scat. RScat      Delay Spec. Orig.  Res.\n");
 	}
 	fclose(fptr);
+	Log("delay_dump_prep: Thread %d successfully prepared file '%s' for writing\n", rank_global, delay_dump_file);
+  } 
+  else 
+  {
+  	Error("delay_dump_prep: Thread %d failed to open file '%s' due to error %d: %s\n", rank_global, delay_dump_file, errno, strerror(errno));
   }
   return (0);
 }
@@ -126,6 +131,7 @@ delay_dump_prep (int restart_stat, int i_rank)
 int
 delay_dump_finish (void)
 {
+	Log("delay_dump_finish: Dumping %d photons to file\n",delay_dump_bank_curr-1);
 	if (delay_dump_bank_curr > 0) 
 	{
 		delay_dump(delay_dump_bank, delay_dump_bank_curr - 1);
@@ -209,7 +215,7 @@ delay_dump(PhotPtr p, int np)
 	double delay;
 	subzero=0;
 
-	printf("delay_dump: Dumping %d photons\n",np);
+	Log("delay_dump: Dumping %d photons\n",np);
 	/*
 	 * Open a file for writing the spectrum
 	 */
@@ -278,7 +284,7 @@ delay_dump_single (PhotPtr pp, int i_spec)
   if(geo.reverb_filter_lines == -1 && pp->nres == -1) {
     //If we're filtering out continuum photons and this is a continuum photon, throw it away.
     return (1);
-  } else {
+  } else if (geo.reverb_filter_lines > 0) {
     //If we're filtering to *only* photons of given lines, is this one of them? If not, throw away
     int i, bFound = 0;
     for (i=0; i < geo.reverb_filter_lines; i++)
