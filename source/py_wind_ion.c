@@ -356,7 +356,7 @@ line_summary (w, rootname, ochoice)
     exit (0);
   }
 
-  rdint ("line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob)", &geo.line_mode);
+  rdint ("line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob, 4=off, diagnostic)", &geo.line_mode);
   if (geo.line_mode == 0)
     Log ("Pure_abs in line heating/cooling\n");
   else if (geo.line_mode == 1)
@@ -365,6 +365,8 @@ line_summary (w, rootname, ochoice)
     Log ("Single scat for line heating/cooling\n");
   else if (geo.line_mode == 3)
     Log ("Escape probabilities for line heating/cooling\n");
+  else if (geo.line_mode == 4)
+    Log ("No line transfer; diagnostic mode only\n");
   else
   {
     Log ("Unknown line mode\n");
@@ -398,7 +400,8 @@ line_summary (w, rootname, ochoice)
         two_level_atom (lin_ptr[nline], &plasmamain[nplasma], &d1, &d2);
         x = (d2) * a21 (lin_ptr[nline]) * H * lin_ptr[nline]->freq * w[n].vol;
       }
-      x *= z = scattering_fraction (lin_ptr[nline], &plasmamain[nplasma]);
+      if(geo.line_mode != 4)
+        x *= z = scattering_fraction (lin_ptr[nline], &plasmamain[nplasma]);
 
       tot += x;
       aaa[n] = x;
