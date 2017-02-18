@@ -499,6 +499,9 @@ one_choice (choice, root, ochoice)
   case 'l':                    /* Lum of shell */
     lum_summary (wmain, root, ochoice);
     break;
+  case 'L':                    /*Line emission */
+    line_summary (wmain, root, ochoice);
+    break;
   case 'm':                    /* Radiation force */
     mo_summary (wmain, root, ochoice);
     break;

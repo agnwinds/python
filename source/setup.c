@@ -1086,7 +1086,7 @@ get_meta_params (void)
   }
 
   // ========== DEAL WITH DISK SETTINGS ==========
-  if(geo.disk_type > 0)
+  if(geo.disk_type > 0 && geo.reverb != REV_NONE)
   {
     rdint("reverb.disk_type", &meta_param);
     switch(meta_param) 

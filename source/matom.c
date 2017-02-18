@@ -1523,9 +1523,10 @@ matom_emit_in_line_prob (WindPtr one, struct lines *line_ptr_emit)
 	penorm = 0.0;			//stores the total emission probability
 	eprbs_line = 0.0;
 	/* Finished zeroing. */
-
-	freqmin = line_ptr_emit->freq * 1e-6;
-	freqmax = line_ptr_emit->freq * 1e+6;
+  
+  // Set frequency range to search to be the spectral range
+  freqmin = C/(geo.swavemax*1e-8);
+  freqmax = C/(geo.swavemin*1e-8);
 
 	/* bb */
 	/* First downward jumps. */
@@ -1546,7 +1547,14 @@ matom_emit_in_line_prob (WindPtr one, struct lines *line_ptr_emit)
 		}
 	}
 
+  if(eprbs_line == 0.0)
+  {
+    Error("matom_emit_in_line_prob: Line frequency %g lies outside spectral range %g-%g!\n", line_ptr->freq, em_rnge.fmin, em_rnge.fmax);
+    return(-1.0);
+  }
+
 	/* bf */
+  /* There should be no bf jumps for Ha/Hb but included for potential use for other lines */
 	for (n = 0; n < nbfd; n++)
 	{
 		cont_ptr = &phot_top[config[uplvl].bfd_jump[n]];	//pointer to continuum

@@ -388,6 +388,10 @@ line_summary (w, rootname, ochoice)
         x = macromain[nplasma].matom_emiss[lin_ptr[nline]->nconfigu];
         //Calculate the probability of this upper level de-exciting into the line
         x *= matom_emit_in_line_prob(&(w[n]),lin_ptr[nline]);
+        if(x < 0) 
+        {
+          return(-1);
+        }
       }
       else
       { //If this is not a matom line
@@ -431,7 +435,11 @@ line_summary (w, rootname, ochoice)
     strcat (choice, ele[nelem].name);
     sprintf (iname, "%d", istate);
     strcat (choice, iname);
-
+    if(lin_ptr[nline]->macro_info == 1)
+    {
+      sprintf(iname, ".%d-%d",lin_ptr[nline]->levu, lin_ptr[nline]->levl);
+      strcat (choice, iname);      
+    }
     strcat (filename, choice);
     write_array (filename, ochoice);
   }
