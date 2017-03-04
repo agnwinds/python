@@ -386,22 +386,18 @@ line_summary (w, rootname, ochoice)
 
       if(lin_ptr[nline]->macro_info == 1)
       { //If this is a matom line
-        //Base matom emissivity for the upper level of the line
-        x = macromain[nplasma].matom_emiss[lin_ptr[nline]->nconfigu];
-        //Calculate the probability of this upper level de-exciting into the line
-        x *= matom_emit_in_line_prob(&(w[n]),lin_ptr[nline]);
-        if(x < 0) 
-        {
-          return(-1);
-        }
+        d2 = den_config (&plasmamain[nplasma], lin_ptr[nline]->nconfigu);
       }
       else
       { //If this is not a matom line
         two_level_atom (lin_ptr[nline], &plasmamain[nplasma], &d1, &d2);
-        x = (d2) * a21 (lin_ptr[nline]) * H * lin_ptr[nline]->freq * w[n].vol;
       }
+      x = (d2) * a21 (lin_ptr[nline]) * H * lin_ptr[nline]->freq * w[n].vol;
+      
       if(geo.line_mode != 4)
+      {
         x *= z = scattering_fraction (lin_ptr[nline], &plasmamain[nplasma]);
+      }
 
       tot += x;
       aaa[n] = x;
