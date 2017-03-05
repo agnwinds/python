@@ -293,7 +293,7 @@ line_summary (w, rootname, ochoice)
      int ochoice;
 {
   int nion, nelem;
-  int element, istate, iline;
+  int element, istate, iline, levu, levl, i_matom_search;
   int n;
   double x, lambda;
   char choice[LINELENGTH], iname[LINELENGTH];
@@ -306,7 +306,8 @@ line_summary (w, rootname, ochoice)
   int nplasma;
 
   iline=0;
-  rdint ("line (0=C-IV, 1=Hα, 2=Hβ)", &iline);
+  i_matom_search=0;
+  rdint ("line (0=C-IV, 1=Hα, 2=Hβ, 3=Matom", &iline);
   switch(iline)
   {
     case 0:
@@ -317,6 +318,14 @@ line_summary (w, rootname, ochoice)
       break;
     case 2:
       element = 1; istate = 1; lambda = 4861.363e-8;
+      break;
+    case 3: //Generic matom
+      i_matom_search=1;
+      element = 1; istate = 1; levu=2; levl=1;
+      rdint ("Element", &element);   
+      rdint ("Ion", &istate);
+      rdint ("Upper level", &levu);
+      rdint ("Lower level", &levl);
       break;
     default:
       Error("line_summary: Not a valid line.");
@@ -347,14 +356,25 @@ line_summary (w, rootname, ochoice)
   nline = 0;
   freq_search = C / lambda;
 
-  while (fabs (1. - lin_ptr[nline]->freq / freq_search) > 0.0001 && nline < nlines)
-
-    nline++;
+/* Find the line */
+  if(i_matom_search)
+  {
+    while(nline<nlines && !(lin_ptr[nline]->z == element && lin_ptr[nline]->istate == istate 
+          && lin_ptr[nline]->levu == levu && lin_ptr[nline]->levl == levl))
+    {
+      nline++;
+    }
+  }
+  else
+  {
+    while (fabs (1. - lin_ptr[nline]->freq / freq_search) > 0.0001 && nline < nlines)
+      nline++;
+  }
   if (nline == nlines)
   {
     Error ("line_summary: Could not find line in linelist\n");
     exit (0);
-  }
+  } 
 
   rdint ("line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob, 4=off, diagnostic)", &geo.line_mode);
   if (geo.line_mode == 0)
