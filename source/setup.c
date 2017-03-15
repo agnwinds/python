@@ -943,9 +943,10 @@ get_bl_and_agn_params (lstar)
     }
 
     /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
-       only in advanced mode. default is zero which is checked before we call photo_gen_agn */
+       only in advanced mode and for non broken power law. 
+       default is zero which is checked before we call photo_gen_agn */
     geo.pl_low_cutoff = 0.0;
-    if (modes.iadvanced)
+    if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
       rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
 
     rdint ("geometry_for_pl_source(0=sphere,1=lamp_post)", &geo.pl_geometry);
