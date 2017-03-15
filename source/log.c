@@ -285,7 +285,7 @@ Log (char *format, ...)
 int
 Log_silent (char *format, ...)
 {
-  va_list ap,ap2;
+  va_list ap, ap2;
   int result;
 
   if (init_log == 0)
@@ -295,7 +295,7 @@ Log_silent (char *format, ...)
     return (0);
   va_start (ap, format);
   va_copy (ap2, ap);            /* ap is not necessarily preserved by vprintf */
-  
+
   result = vfprintf (diagptr, format, ap);
   va_end (ap);
   return (result);
@@ -317,7 +317,7 @@ Error (char *format, ...)
   va_copy (ap2, ap);            /*NSH 121212 - Line added to allow error logging to work */
   if (my_rank == 0)             // only want to print errors if master thread
     result = vprintf (format, ap);
- 
+
   fprintf (diagptr, "Error: ");
   result = vfprintf (diagptr, format, ap2);
   va_end (ap);
@@ -329,7 +329,7 @@ Error (char *format, ...)
 int
 Error_silent (char *format, ...)
 {
-  va_list ap,ap2;
+  va_list ap, ap2;
   int result;
   if (init_log == 0)
     Log_init ("logfile");
@@ -339,9 +339,9 @@ Error_silent (char *format, ...)
 
   va_start (ap, format);
   va_copy (ap2, ap);            /* ap is not necessarily preserved by vprintf */
-  
+
   if (my_rank == 0)             // only want to print errors if master thread
-	  result = vprintf (format, ap);
+    result = vprintf (format, ap);
   fprintf (diagptr, "Error: ");
   result = vfprintf (diagptr, format, ap2);
   va_end (ap);
