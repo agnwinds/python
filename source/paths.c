@@ -41,21 +41,34 @@ double *reverb_path_bin;
 Wind_Paths_Ptr
 wind_paths_constructor (WindPtr wind)
 {
-  Wind_Paths_Ptr paths = (Wind_Paths_Ptr) calloc (sizeof (wind_paths_dummy), 1);
+	Wind_Paths_Ptr	paths =
+	(Wind_Paths_Ptr) calloc(sizeof(wind_paths_dummy), 1);
 
-  if (paths == NULL)
-  {
-    Error ("wind_paths_constructor: Could not allocate memory for cell %d\n", wind->nwind);
-    exit (0);
-  }
-  paths->ad_path_flux = (double *) calloc (sizeof (double), geo.reverb_path_bins);
-  paths->ai_path_num = (int *) calloc (sizeof (int), geo.reverb_path_bins);
-  if (paths->ad_path_flux == NULL || paths->ai_path_num == NULL)
-  {
-    Error ("wind_paths_constructor: Could not allocate memory for cell %d bins\n", wind->nwind);
-    exit (0);
-  }
-  return (paths);
+	if (paths == NULL) 
+	{
+		Error
+			("wind_paths_constructor: Could not allocate memory for cell %d\n",
+			 wind->nwind);
+		exit(0);
+	}
+
+	paths->ad_path_flux 		= 	(double *)	calloc(sizeof(double), 	geo.reverb_path_bins);
+	paths->ai_path_num  		=	(int *)		calloc(sizeof(int), 	geo.reverb_path_bins);
+	paths->ad_path_flux_cent 	= 	(double *)	calloc(sizeof(double), 	geo.reverb_path_bins);
+	paths->ai_path_num_cent		=	(int *)		calloc(sizeof(int), 	geo.reverb_path_bins);
+	paths->ad_path_flux_disk 	= 	(double *)	calloc(sizeof(double), 	geo.reverb_path_bins);
+	paths->ai_path_num_disk		=	(int *)		calloc(sizeof(int), 	geo.reverb_path_bins);
+	paths->ad_path_flux_wind 	= 	(double *)	calloc(sizeof(double), 	geo.reverb_path_bins);
+	paths->ai_path_num_wind		=	(int *)		calloc(sizeof(int), 	geo.reverb_path_bins);	
+
+	if (paths->ad_path_flux == NULL || paths->ai_path_num_wind == NULL) 
+	{
+		Error
+			("wind_paths_constructor: Could not allocate memory for cell %d bins\n",
+			 wind->nwind);
+		exit(0);
+	}
+	return (paths);
 }
 
 /**********************************************************/
@@ -63,74 +76,90 @@ wind_paths_constructor (WindPtr wind)
  * @brief	Initialises everything for reverb mapping
  *
  * @param [in,out] wind		Top-level wind cell array
+ * @param [in] nangles		Number of observers
  * @return 					0
  *
  * Reports back to user the reverb mode running, and then
  * calls the appropriate setup routines.
  *
- * @see wind_paths_init
+ * @see wind_paths_init()
  *
  * @notes
- * 03/15	-	Written by SWM
+ * 3/15	-	Written by SWM
 ***********************************************************/
 int
 reverb_init (WindPtr wind)
 {
-  char linelist[LINELENGTH];
-  int i;
-  double r_rad_min = 0.0, r_rad_max = 0.0, r_rad_min_log, r_rad_max_log, r_delta;
+	char linelist[LINELENGTH];
+	int i,n;
+	double x[3];
+	double r_rad_min=99e99, r_rad_max=0.0, r_rad_min_log, r_rad_max_log, r_delta;
 
-  if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
-  {                             //Initialise the arrays that handle photon path data and wind paths
+	if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM) 
+	{	//Initialise the arrays that handle photon path data and wind paths
+      	//Set the convergence fraction required before we start tracking photon paths for matoms
+		geo.fraction_converged=0.0;
+  		geo.reverb_fraction_converged = 0.90;
 
+		if(geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
+		{	//If we're dumping out arrays of paths per cell
+			for(i=0; i<geo.reverb_dump_cells;i++)
+			{	//For each x/z position, find the n and put it in the array
+				x[0] = geo.reverb_dump_cell_x[i];
+				x[1] = 0.0;
+				x[2] = geo.reverb_dump_cell_z[i];
+				wind_x_to_n(x, &n);
+				if(n<0 || n > geo.ndim2)
+				{
+					Error("reverb_init: Trying to dump info from a cell outside the grid\n");
+				}
+				geo.reverb_dump_cell[i] = n;
+			}
+		}
 
-    //Set the upper and lower bounds of the path bin array
-    if (geo.rmin > 0)
-      r_rad_min = geo.rmin;
-    else if (geo.rstar > 0)
-      r_rad_min = geo.rstar;
-    else if (geo.r_agn > 0)
-      r_rad_min = geo.r_agn;
-    else
-      r_rad_min = DFUDGE;
+		for(i=0; i<geo.ndomain; i++)
+		{	//Find the smallest and largest domain scales in the problem
+			if(zdom[i].rmin < r_rad_min) r_rad_min = zdom[i].rmin;
+			if(zdom[i].rmax > r_rad_max) r_rad_max = zdom[i].rmax;
+		}
 
-    r_rad_max = geo.rmax * 5.0;
+		//Allocate the array of bins
+		reverb_path_bin = (double *)calloc(sizeof(double), geo.reverb_path_bins + 1);
+		r_rad_min_log = log(r_rad_min);
+		r_rad_max_log = log(r_rad_max*10.0);
+		r_delta = (r_rad_max_log - r_rad_min_log) / (double) geo.reverb_path_bins;
+		for (i = 0; i <= geo.reverb_path_bins; i++) 
+		{	//Set up the bounds for these bins
+			reverb_path_bin[i] = exp(r_rad_min_log + i*r_delta);
+		}
 
-    //Allocate sufficient bin space
-    reverb_path_bin = (double *) calloc (sizeof (double), geo.reverb_path_bins + 1);
+		wind_paths_init(wind);
 
-    //Shift to log space, and calc the min/max and bin width in logspace
-    r_rad_min_log = log (r_rad_min);
-    r_rad_max_log = log (r_rad_max);
-    r_delta = (r_rad_max_log - r_rad_min_log) / (double) geo.reverb_path_bins;
-    for (i = 0; i <= geo.reverb_path_bins; i++)
-    {                           //Create an even bin spacing in log space
-      reverb_path_bin[i] = exp (r_rad_min_log + i * r_delta);
-    }
+		if(geo.reverb == REV_MATOM)
+		{	//If this is matom mode, detail the line numbers being tracked 
+			sprintf(linelist, "reverb_init: Macro-atom line path tracking is enabled for lines %d", geo.reverb_line[0]);
+			for(i=1; i<geo.reverb_lines; i++)
+			{
+				sprintf(linelist, "%s, %d",linelist, geo.reverb_line[i]);
+			}
+			Log("%s\n",linelist);
 
-    //Now, initialise the various wind path arrays
-    wind_paths_init (wind);
+			for(i=0; i<nlines_macro; i++)
+        	{ //Record the h-alpha line index for comparison purposes
+          		if(line[i].z == 1 && line[i].istate == 1 && line[i].levu == 3 && line[i].levl == 2)
+          		{
+          			geo.nres_halpha = line[i].where_in_list; break;
+          		}
+        	}
+		}
+	  	else if(geo.reverb == REV_WIND)
+	  		Log ("reverb_init: Wind cell-based path tracking is enabled\n");
+	}
+	else if (geo.reverb == REV_PHOTON)
+		Log("reverb_init: Photon-based path tracking is enabled.\n");
+	
 
-    if (geo.reverb == REV_MATOM)
-    {                           //If this is matom mode, detail the line numbers being tracked for use with bindata
-      sprintf (linelist, "reverb_init: Macro-atom line path tracking is enabled for lines %d", geo.reverb_line[0]);
-      for (i = 1; i < geo.reverb_lines; i++)
-      {
-        sprintf (linelist, "%s, %d", linelist, geo.reverb_line[i]);
-      }
-      Log ("%s\n", linelist);
-    }
-    else if (geo.reverb == REV_WIND)
-    {
-      Log ("reverb_init: Wind cell-based path tracking is enabled\n");
-    }
-  }
-  else if (geo.reverb == REV_PHOTON)
-  {
-    Log ("reverb_init: Photon-based path tracking is enabled.\n");
-  }
-
-  return (0);
+  	return (0);
 }
 
 /**********************************************************/
@@ -184,28 +213,47 @@ wind_paths_init (WindPtr wind)
 int
 line_paths_add_phot (WindPtr wind, PhotPtr pp, int *nres)
 {
-  int i, j;
+	int i, j;
 
-  if (*nres > nlines || *nres < 0)
-    return (0);                 //This is a continuum photon
+	if(geo.reverb_disk == REV_DISK_IGNORE && pp->origin_orig == PTYPE_DISK) return(0);
+	if(*nres > nlines || *nres < 0) return(0); //This is a continuum photon
 
-  for (i = 0; i < geo.reverb_lines; i++)
-  {                             //Iterate over each tracked line
-    if (lin_ptr[*nres]->where_in_list == geo.reverb_line[i])
-    {                           //If the passed line exists within the tracked line array
-      for (j = 0; j < geo.reverb_path_bins; j++)
-      {                         //Iterate over the path bins
-        if (pp->path >= reverb_path_bin[j] && pp->path <= reverb_path_bin[j + 1])
-        {                       //If the photon's path lies in this bin's bounds, record it
-          wind->line_paths[i]->ad_path_flux[j] += pp->w;
-          wind->line_paths[i]->ai_path_num[j]++;
-          break;
-          break;
-        }
-      }
-    }
-  }
-  return (0);
+	for (i = 0; i < geo.reverb_lines; i++)
+	{	//Iterate over each tracked line
+		if(lin_ptr[*nres]->where_in_list == geo.reverb_line[i])
+		{	//If the passed line exists within the tracked line array
+			for (j=0; j < geo.reverb_path_bins; j++) 
+			{	//Iterate over the path bins
+				if (pp->path >= reverb_path_bin[j] &&
+				    pp->path <= reverb_path_bin[j+1]) 
+				{	//If the photon's path lies in this bin's bounds, record it
+					//printf("DEBUG: Added to line %d in cell %d - path %g weight %g\n",geo.reverb_line[i], wind->nwind, pp->path, pp->w);
+					wind->line_paths[i]->ad_path_flux[j]+= pp->w;
+					wind->line_paths[i]->ai_path_num[ j]++;
+					switch(pp->origin)
+					{
+						case PTYPE_STAR:
+						case PTYPE_AGN:
+						case PTYPE_BL:
+							wind->line_paths[i]->ad_path_flux_cent[j]+= pp->w;
+							wind->line_paths[i]->ai_path_num_cent[ j]++;
+							break;
+						case PTYPE_DISK:
+							wind->line_paths[i]->ad_path_flux_disk[j]+= pp->w;
+							wind->line_paths[i]->ai_path_num_disk[ j]++;
+							break;
+						default:
+							wind->line_paths[i]->ad_path_flux_wind[j]+= pp->w;
+							wind->line_paths[i]->ai_path_num_wind[ j]++;
+							break;
+					}
+					//Exit out of this loop
+					return(0);
+				}
+			}
+		}
+	}
+	return (0);
 }
 
 /****************************************************************/
@@ -225,17 +273,38 @@ line_paths_add_phot (WindPtr wind, PhotPtr pp, int *nres)
 int
 wind_paths_add_phot (WindPtr wind, PhotPtr pp)
 {
-  int i;
-  for (i = 0; i < geo.reverb_path_bins; i++)
-  {                             //For each bin
-    if (pp->path >= reverb_path_bin[i] && pp->path <= reverb_path_bin[i + 1])
-    {                           //If the path falls within its bounds, add photon weight
-      wind->paths->ad_path_flux[i] += pp->w;
-      wind->paths->ai_path_num[i]++;
-      break;
-    }
-  }
-  return (0);
+	int i;
+	if(geo.reverb_disk == REV_DISK_IGNORE && pp->origin_orig == PTYPE_DISK) return(0);
+
+	for (i=0; i < geo.reverb_path_bins; i++) 
+	{	//For each bin
+		if (pp->path >= reverb_path_bin[i] &&
+		    pp->path <= reverb_path_bin[i+1]) 
+		{	//If the path falls within its bounds, add photon weight
+			wind->paths->ad_path_flux[i]+= pp->w;
+			wind->paths->ai_path_num[ i]++;
+
+			switch(pp->origin)
+			{
+				case PTYPE_STAR:
+				case PTYPE_AGN:
+				case PTYPE_BL:
+					wind->paths->ad_path_flux_cent[i]+= pp->w;
+					wind->paths->ai_path_num_cent[ i]++;
+					break;
+				case PTYPE_DISK:
+					wind->paths->ad_path_flux_disk[i]+= pp->w;
+					wind->paths->ai_path_num_disk[ i]++;
+					break;
+				default:
+					wind->paths->ad_path_flux_wind[i]+= pp->w;
+					wind->paths->ai_path_num_wind[ i]++;
+					break;
+			}
+			return(0);
+		}
+	}
+	return (0);
 }
 
 /**********************************************************/
@@ -311,8 +380,8 @@ r_draw_from_path_histogram (Wind_Paths_Ptr PathPtr)
  * this cell, then assigns a path from within that bin 
  * (from a uniform random distribution)
  *
- * @see r_draw_from_path_histogram
- * @see simple_paths_gen_phot
+ * @see r_draw_from_path_histogram()
+ * @see simple_paths_gen_phot()
  *
  * @notes
  * 26/2/15	-	Written by SWM
@@ -351,9 +420,9 @@ wind_paths_gen_phot (WindPtr wind, PhotPtr pp)
  * path histogram. If not, default to the regular path 
  * histogram. 
  *
- * @see r_draw_from_path_histogram
- * @see simple_paths_gen_phot
- * @see wind_paths_gen_phot
+ * @see r_draw_from_path_histogram()
+ * @see simple_paths_gen_phot()
+ * @see wind_paths_gen_phot()
  *
  * @notes
  * 26/2/15	-	Written by SWM
@@ -405,6 +474,7 @@ line_paths_gen_phot (WindPtr wind, PhotPtr pp, int nres)
   return (0);
 }
 
+
 /****************************************************************/
 /** @name 	wind_paths_evaluate_single
  * @brief	Evaluates individual wind cell paths
@@ -429,7 +499,7 @@ wind_paths_evaluate_single (Wind_Paths_Ptr paths)
   paths->i_num = 0;
 
   for (i = 0; i < geo.reverb_path_bins; i++)
-  {                             //For each path bin, add its contribution to total flux & avg path
+  { //For each path bin, add its contribution to total flux & avg path
     paths->d_flux += paths->ad_path_flux[i];
     paths->i_num += paths->ai_path_num[i];
     paths->d_path += paths->ad_path_flux[i] * (reverb_path_bin[i] + reverb_path_bin[i + 1]) / 2.0;
@@ -441,6 +511,7 @@ wind_paths_evaluate_single (Wind_Paths_Ptr paths)
 
   return (0);
 }
+
 
 /****************************************************************/
 /** @name 	wind_paths_evaluate
@@ -458,7 +529,7 @@ wind_paths_evaluate_single (Wind_Paths_Ptr paths)
  * 24/7/15	-	Removed frequency
 *****************************************************************/
 int
-wind_paths_evaluate (WindPtr wind)
+wind_paths_evaluate (WindPtr wind, int i_rank)
 {
   int i, j;
   for (i = 0; i < geo.ndim2; i++)
@@ -473,26 +544,24 @@ wind_paths_evaluate (WindPtr wind)
     }
   }
 
-  if (rank_global == 0)
-  {                             //If this is the head node and we're outputting data to vis, process it
-    if (geo.reverb_vis == REV_VIS_VTK || geo.reverb_vis == REV_VIS_BOTH)
-      Log ("wind_paths_evaluate: Outputting %d .vtk visualisations\n", geo.ndomain);
-    {                           //If we're visualising the delays in 3d
-      for (i = 0; i < geo.ndomain; i++)
-      {                         //For each domain, dump a vtk file of the grid & info
-        wind_paths_output_vtk (wind, i);
-      }
+  if (geo.reverb_vis == REV_VIS_VTK || geo.reverb_vis == REV_VIS_BOTH)
+  {                           //If we're visualising the delays in 3d
+    Log ("wind_paths_evaluate: Outputting %d .vtk visualisations\n", geo.ndomain);
+    for (i = 0; i < geo.ndomain; i++)
+    {                         //For each domain, dump a vtk file of the grid & info
+      wind_paths_output_vtk (wind, i);
     }
-    if (geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
-    {                           //Dump the path delay information for certain tracked cells to file
-      wind_paths_output_dump (wind);
-    }
+  }
+  if (geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
+  {                           //Dump the path delay information for certain tracked cells to file
+    wind_paths_output_dump (wind, i_rank);
   }
 
   Log (" Completed evaluating wind path arrays.");
 
-  return (0);
+  return(0);
 }
+
 
 /****************************************************************/
 /** @name 	wind_paths_dump
@@ -507,17 +576,16 @@ wind_paths_evaluate (WindPtr wind)
  *
  * @notes
  * 10/15	-	Written by SWM
- * 11/15	-	Updated to use domains by SWM
 *****************************************************************/
 int
-wind_paths_dump (WindPtr wind)
+wind_paths_dump (WindPtr wind, int rank_global)
 {
   FILE *fopen (), *fptr;
   char c_file[LINELENGTH];
-  int lin_pos, j, k;
+  int j, k;
 
   //Setup file name and open the file
-  sprintf (c_file, "%s.wind_paths_%d.csv", files.root, wind->nwind);
+  sprintf (c_file, "%s.wind_paths_%d.%d.csv", files.root, wind->nwind, rank_global);
   fptr = fopen (c_file, "w");
 
   //Print out metadata header specifying the domain and position
@@ -525,27 +593,36 @@ wind_paths_dump (WindPtr wind)
   fprintf (fptr, "'Wind domain', %d,'X',%g,'Y',%g\n", wind->ndom, wind->xcen[0], wind->xcen[2]);
 
   //Now print out the header for the actual path data for this wind cell 
-  fprintf (fptr, "'Path Bin', 'General'");
+  fprintf (fptr, "'Path Bin', 'Heating', 'Heating Central', 'Heating Disk', 'Heating Wind'");
   for (j = 0; j < geo.reverb_lines; j++)
-  {                             //For each line, print its information (z, istate, upper->lower)
-    lin_pos = geo.reverb_line[j];
-    fprintf (fptr, ", %d:%d:%d:%d", lin_ptr[lin_pos]->z, lin_ptr[lin_pos]->istate, lin_ptr[lin_pos]->levu, lin_ptr[lin_pos]->levl);
+  {
+  	fprintf(fptr, ", 'Line %d', 'Line %d Central', 'Line %d Disk', 'Line %d Wind'", 
+  			geo.reverb_line[j], geo.reverb_line[j], geo.reverb_line[j], geo.reverb_line[j]);
   }
   fprintf (fptr, "\n");
 
   for (k = 0; k < geo.reverb_path_bins; k++)
   {                             //For each path bin, print the 'wind' weight 
-    fprintf (fptr, "%g, %g", reverb_path_bin[k], wind->paths->ad_path_flux[k]);
+    fprintf (fptr, "%g, %g, %g, %g, %g", reverb_path_bin[k], 
+    		wind->paths->ad_path_flux[k],
+    		wind->paths->ad_path_flux_cent[k],
+			wind->paths->ad_path_flux_disk[k],
+			wind->paths->ad_path_flux_wind[k]);
 
     for (j = 0; j < geo.reverb_lines; j++)
     {                           //For each tracked line, print the weight in this bin
-      fprintf (fptr, ", %g", wind->line_paths[j]->ad_path_flux[k]);
+		fprintf(fptr, ", %g, %g, %g, %g", 
+			wind->line_paths[j]->ad_path_flux[k],
+			wind->line_paths[j]->ad_path_flux_cent[k],
+			wind->line_paths[j]->ad_path_flux_disk[k],
+			wind->line_paths[j]->ad_path_flux_wind[k]);
     }
     fprintf (fptr, "\n");
   }
   fclose (fptr);
   return (0);
 }
+
 
 /****************************************************************/
 /** @name 	wind_paths_output_dump
@@ -554,35 +631,36 @@ wind_paths_dump (WindPtr wind)
  * @param [in] wind		Wind array to dump from
  * @return 				0
  *
- * Calls wind_paths_dump() for each wind cell (in all domains)
- * at one of the xz positions where a dump is requested.
+ * Outputs a file "root.ngrid.csv" containing the path length bins
+ * and total flux in each for each line histogram (and the regular
+ * wind histogram) in the given cell.
  *
  * @notes
  * 10/15	-	Written by SWM
- * 11/15	- 	Updated to use domains by switching from ij to rz
 *****************************************************************/
 int
-wind_paths_output_dump (WindPtr wind)
+wind_paths_output_dump (WindPtr wind, int i_rank)
 {
   int i, d, n;
   double x[3];
   for (i = 0; i < geo.reverb_dump_cells; i++)
   {                             //For each location we want to dump the details for
-    x[0] = geo.reverb_dump_x[i];
+    x[0] = geo.reverb_dump_cell_x[i];
     x[1] = 0.0;
-    x[2] = geo.reverb_dump_z[i];
+    x[2] = geo.reverb_dump_cell_z[i];
 
     for (d = 0; d < geo.ndomain; d++)
     {                           //For each domain, check if this position is within it
       n = where_in_grid (d, x);
       if (n >= 0)
       {                         //If it is, then dump the delay information 
-        wind_paths_dump (&wind[n]);
+        wind_paths_dump (&wind[n], i_rank);
       }
     }
   }
   return (0);
 }
+
 
 /****************************************************************/
 /** @name		wind_paths_point_index
@@ -599,9 +677,7 @@ wind_paths_output_dump (WindPtr wind)
  * uses the standard wind location, theta is set as defined in
  * geo. Used in wind_paths_output() only.
  *
- * @notes
- * 04/15	-	Written by SWM
- * 11/15 	-	Updated to use domains by SWM
+ * @notes Written by SWM 4/15.
  *****************************************************************/
 int
 wind_paths_point_index (int i, int j, int k, int i_top, DomainPtr dom)
@@ -615,9 +691,9 @@ wind_paths_point_index (int i, int j, int k, int i_top, DomainPtr dom)
 /** @name		wind_paths_sphere_point_index
  * @brief		Given rtt index in wind, returns vtk data index.
  * 
- * @param [in] i 	Radius index of cell.
- * @param [in] j 	Theta index of cell.
- * @param [in] k 	Thi index of cell.
+ * @param [in] i 	Theta index of cell.
+ * @param [in] j 	Radius index of cell.
+ * @param [in] k 	Height index of cell.
  * @return			Index for vtk poly.
  * 
  * When given the position of a cell in the wind, returns the
@@ -641,18 +717,14 @@ wind_paths_sphere_point_index (int i, int j, int k)
  * @brief		Outputs wind path information to vtk.
  * 
  * @param [in] wind 		Pointer to wind array.
- * @param [in] ndom 		Index of the domain to plot
+ * @param [in] c_file_in	Name of input file.
  * @return 					0
  *  
  * When given a wind containing position and delay map information
  * generated using REVERB_WIND, outputs a 3d model of the wind to
- * file in ASCII .vtk format. Understanding this will require
- * familiarity with the VTK file format, documented here:
- * http://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf
+ * file in ASCII .vtk format.
  *
- * @notes
- *	04/15 	-	Written by SWM
- *	11/15 	-	Updated to domain by SWM
+ * @notes Written by SWM 4/15.
 *****************************************************************/
 int
 wind_paths_output_vtk (WindPtr wind, int ndom)
