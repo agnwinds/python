@@ -911,7 +911,12 @@ get_bl_and_agn_params (lstar)
     // set the default for the radius of the BH to be 6 R_Schwartschild.
     // rddoub("R_agn(cm)",&geo.r_agn);
 
-    rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
+    /* if we have a "blackbody agn" the luminosity is set by Stefan Boltzmann law
+       once the AGN blackbody temp is read in, otherwise set by user */
+    else if (geo.agn_ion_spectype != SPECTYPE_BB)
+      rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
+
+
     Log ("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
     if (geo.agn_ion_spectype == SPECTYPE_POW || geo.agn_ion_spectype == SPECTYPE_CL_TAB)
     {
@@ -941,11 +946,18 @@ get_bl_and_agn_params (lstar)
       Log ("AGN Input parameters give a Bremsstrahlung constant of %e\n", temp_const_agn);
 
     }
+    else if (geo.agn_ion_spectype == SPECTYPE_BB)
+    {
+      /* note that alpha_agn holds the temperature in the case of "blackbody agn" */
+      rddoub ("agn_blackbody_temp(K)", &geo.alpha_agn);
+      geo.lum_agn = 4 * PI * geo.r_agn * geo.r_agn * STEFAN_BOLTZMANN * pow (geo.alpha_agn, 4.);
+    }
 
     /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
-       only in advanced mode. default is zero which is checked before we call photo_gen_agn */
+       only in advanced mode and for non broken power law. 
+       default is zero which is checked before we call photo_gen_agn */
     geo.pl_low_cutoff = 0.0;
-    if (modes.iadvanced)
+    if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
       rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
 
     rdint ("geometry_for_pl_source(0=sphere,1=lamp_post)", &geo.pl_geometry);
