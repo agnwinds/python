@@ -44,7 +44,6 @@ Synopsis: agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
 	This is essentially a parallel routine that is set up for other types of 
 	sources.  It actually does not do very much.
 
- 
 	This routine calculates the luminosity of the star and the 
 	luminosity within the frequency boundaries.  BB functions are assumed 
 
