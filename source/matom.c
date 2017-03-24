@@ -1475,3 +1475,101 @@ emit_matom (w, p, nres, upper)
 /* The frequency and the value of nres have been set correctly. All done. */
 
 /********************************************************************************/
+
+
+/**********************************************************/
+/** @name   matom_emit_in_line_prob
+ * @brief Prob. of cell emitting in a given line
+ *
+ * @param [in] one            Pointer to cell of interest
+ * @param [in] line_ptr_emit  Pointer to line of interest
+ * @return     Probability of line emission
+ *
+ * Given a cell and a line, calculates the probabiltiy that
+ * that cell will emit in that line.
+ *
+ * @notes
+ * 6/15 - Written by SWM
+***********************************************************/
+double
+matom_emit_in_line_prob (WindPtr one, struct lines *line_ptr_emit)
+{
+	double eprbs, eprbs_line;
+	struct lines *line_ptr;
+	struct topbase_phot *cont_ptr;
+	int uplvl;
+	double alpha_sp ();
+	double penorm, freqmax, freqmin;
+	double sp_rec_rate;
+	int n;
+	int nbbd, nbfd;
+	double ne;
+	double bb_cont;
+	PlasmaPtr xplasma;
+
+	xplasma = &plasmamain[one->nplasma];
+	ne = xplasma->ne;		//electron number density
+
+
+	//We know the line we're de-exciting into, so find the upper level of this line
+	uplvl = line_ptr_emit->nconfigu;
+
+
+	//Now find the number of jumps available from this level
+	nbbd = config[uplvl].n_bbd_jump;	//store these for easy access -- number of bb downward jumps
+	nbfd = config[uplvl].n_bfd_jump;	// number of bf downared jumps from this transition
+
+	// Start by setting everything to 0
+	penorm = 0.0;			//stores the total emission probability
+	eprbs_line = 0.0;
+	/* Finished zeroing. */
+  
+  // Set frequency range to search to be the spectral range
+  freqmin = C/(geo.swavemax*1e-8);
+  freqmax = C/(geo.swavemin*1e-8);
+
+	/* bb */
+	/* First downward jumps. */
+	for (n = 0; n < nbbd; n++)
+	{
+		line_ptr = &line[config[uplvl].bbd_jump[n]];
+		/* Since we are only interested in making an r-packet here we can (a) ignore collisional
+			deactivation and (b) ignore lines outside the frequency range of interest. */
+		if ((line_ptr->freq > freqmin) && (line_ptr->freq < freqmax))	// correct range
+		{
+			bb_cont = (a21 (line_ptr) * p_escape (line_ptr, xplasma));
+			eprbs = bb_cont * (config[uplvl].ex - config[line[config[uplvl].bbd_jump[n]].nconfigl].ex);	//energy difference
+			penorm += eprbs;
+			if(line_ptr == line_ptr_emit)
+			{
+				eprbs_line = eprbs;
+			}
+		}
+	}
+
+  if(eprbs_line == 0.0)
+  {
+    Error("matom_emit_in_line_prob: Line frequency %g lies outside spectral range %g-%g!\n", line_ptr->freq, em_rnge.fmin, em_rnge.fmax);
+    return(-1.0);
+  }
+
+	/* bf */
+  /* There should be no bf jumps for Ha/Hb but included for potential use for other lines */
+	for (n = 0; n < nbfd; n++)
+	{
+		cont_ptr = &phot_top[config[uplvl].bfd_jump[n]];	//pointer to continuum
+
+		/* If the edge is above the frequency range we are interested in then we need not consider this
+			bf process. */
+		if (cont_ptr->freq[0] < freqmax)	//means that it may contribute
+		{
+			sp_rec_rate = alpha_sp (cont_ptr, xplasma, 0);
+			eprbs = sp_rec_rate * ne * (config[uplvl].ex - config[phot_top[config[uplvl].bfd_jump[n]].nlev].ex);	//energy difference
+			penorm += eprbs;
+		}
+	}
+	//We now have the total probability of all avenues the matom could de-excite into
+
+	//Return probability that the matom in this cell de-excites into this line
+	return(eprbs_line / penorm);
+}

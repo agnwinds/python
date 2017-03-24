@@ -802,7 +802,7 @@ main (argc, argv)
   /* SWM - Evaluate wind paths for last iteration */
   if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
   {                             //If this is a mode in which we keep wind arrays, update them
-    wind_paths_evaluate (w);
+    wind_paths_evaluate (w, my_rank);
   }
 
 /* XXXX - THE CALCULATION OF A DETAILED SPECTRUM IN A SPECIFIC REGION OF WAVELENGTH SPACE */

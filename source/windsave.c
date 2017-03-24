@@ -75,6 +75,19 @@ wind_save (filename)
   sprintf (line, "Version %s\n", VERSION);
   n = fwrite (line, sizeof (line), 1, fptr);
   n += fwrite (&geo, sizeof (geo), 1, fptr);
+  // for(m = 0; m < geo.reverb_lines; m++)
+  // {
+  //   n += fwrite( &geo.reverb_line[m], sizeof(int), 1, fptr);
+  // }
+  // for(m = 0; m < geo.reverb_filter_lines; m++)
+  // {
+  //   n += fwrite( &geo.reverb_filter_line[m], sizeof(int), 1, fptr);
+  // }
+  // for(m = 0; m < geo.reverb_dump_cells; m++)
+  // {
+  //   n += fwrite( &geo.reverb_dump_x[m], sizeof(int), 1, fptr);
+  //   n += fwrite( &geo.reverb_dump_z[m], sizeof(int), 1, fptr);
+  // }
   n += fwrite (zdom, sizeof (domain_dummy), geo.ndomain, fptr);
   n += fwrite (wmain, sizeof (wind_dummy), NDIM2, fptr);
   n += fwrite (&disk, sizeof (disk), 1, fptr);
@@ -179,6 +192,25 @@ wind_read (filename)
   Log ("Reading Windfile %s created with python version %s with python version %s\n", filename, version, VERSION);
 
   n += fread (&geo, sizeof (geo), 1, fptr);
+  // geo.reverb_line = calloc(geo.reverb_lines, sizeof(int));
+  // for (m = 0; m < geo.reverb_lines; m++)
+  // {
+  //   n += fread (&geo.reverb_line[m], sizeof(int), 1, fptr);
+  // }
+  // geo.reverb_filter_line = calloc(geo.reverb_filter_lines, sizeof(int));
+  //  for (m = 0; m < geo.reverb_filter_lines; m++)
+  // {
+  //   n += fread (&geo.reverb_filter_line[m], sizeof(int), 1, fptr);
+  // }
+  // geo.reverb_dump_x = calloc(geo.reverb_dump_cells, sizeof(int));
+  // geo.reverb_dump_z = calloc(geo.reverb_dump_cells, sizeof(int));
+  // for (m = 0; m < geo.reverb_dump_cells; m++)
+  // {
+  //   n += fread (&geo.reverb_dump_x[m], sizeof(int), 1, fptr);
+  //   n += fread (&geo.reverb_dump_z[m], sizeof(int), 1, fptr);
+  // }
+
+
 
   /* Read the atomic data file.  This is necessary to do here in order to establish the 
    * values for the dimensionality of some of the variable length structures, associated 
@@ -195,7 +227,6 @@ wind_read (filename)
 
   zdom = (DomainPtr) calloc (sizeof (domain_dummy), MaxDom);
   n += fread (zdom, sizeof (domain_dummy), geo.ndomain, fptr);
-
 
   calloc_wind (NDIM2);
   n += fread (wmain, sizeof (wind_dummy), NDIM2, fptr);

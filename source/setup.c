@@ -911,7 +911,12 @@ get_bl_and_agn_params (lstar)
     // set the default for the radius of the BH to be 6 R_Schwartschild.
     // rddoub("R_agn(cm)",&geo.r_agn);
 
-    rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
+    /* if we have a "blackbody agn" the luminosity is set by Stefan Boltzmann law
+       once the AGN blackbody temp is read in, otherwise set by user */
+    else if (geo.agn_ion_spectype != SPECTYPE_BB)
+      rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
+
+
     Log ("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
     if (geo.agn_ion_spectype == SPECTYPE_POW || geo.agn_ion_spectype == SPECTYPE_CL_TAB)
     {
@@ -941,11 +946,18 @@ get_bl_and_agn_params (lstar)
       Log ("AGN Input parameters give a Bremsstrahlung constant of %e\n", temp_const_agn);
 
     }
+    else if (geo.agn_ion_spectype == SPECTYPE_BB)
+    {
+      /* note that alpha_agn holds the temperature in the case of "blackbody agn" */
+      rddoub ("agn_blackbody_temp(K)", &geo.alpha_agn);
+      geo.lum_agn = 4 * PI * geo.r_agn * geo.r_agn * STEFAN_BOLTZMANN * pow (geo.alpha_agn, 4.);
+    }
 
     /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
-       only in advanced mode. default is zero which is checked before we call photo_gen_agn */
+       only in advanced mode and for non broken power law. 
+       default is zero which is checked before we call photo_gen_agn */
     geo.pl_low_cutoff = 0.0;
-    if (modes.iadvanced)
+    if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
       rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
 
     rdint ("geometry_for_pl_source(0=sphere,1=lamp_post)", &geo.pl_geometry);
@@ -1057,10 +1069,10 @@ Notes:
 History:
   1504  SWM   Added
 **************************************************************/
-
-int
+int 
 get_meta_params (void)
 {
+
   int meta_param, i, j, k, z, istate, levl, levu;
   char trackline[LINELENGTH];
 
@@ -1085,62 +1097,63 @@ get_meta_params (void)
       Valid modes are 0=None, 1=Photon, 2=Wind, 3=Macro-atom.\n");
   }
 
+  // ========== DEAL WITH DISK SETTINGS ==========
+  if(geo.disk_type > 0 && geo.reverb != REV_NONE)
+  {
+    rdint("reverb.disk_type", &meta_param);
+    switch(meta_param) 
+    { //Read in reverb tyoe, if any
+      case 0: geo.reverb_disk = REV_DISK_CORRELATED;   break;
+      case 1: geo.reverb_disk = REV_DISK_UNCORRELATED; break;
+      case 2: geo.reverb_disk = REV_DISK_IGNORE;       break;
+      default:Error("reverb.disk_type: Invalid reverb disk mode.\n \
+        Valid modes are 0=Correlated with central source, 1=Uncorrelated, 2=Ignore.\n");
+    }
+  }
+
+  // ========== DEAL WITH VISUALISATION SETTINGS ==========
   if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
-  {                             //If this requires further parameters, set defaults
+  { //If this requires further parameters, set defaults
     geo.reverb_lines = 0;
-    geo.reverb_path_bins = 1000;
+    geo.reverb_path_bins = 100;
     geo.reverb_angle_bins = 100;
     geo.reverb_dump_cells = 0;
     geo.reverb_vis = REV_VIS_NONE;
-
-    //Read in the number of path bins to use (1000+ is recommended)
-    rdint ("reverb.path_bins", &geo.reverb_path_bins);
-
-    //Read in the visualisation setting
-    rdint ("reverb.visualisation", &meta_param);
-    switch (meta_param)
-    {                           //Select whether to produce 3d visualisation file and/or dump flat csvs of spread in cells
-    case 0:
-      geo.reverb_vis = REV_VIS_NONE;
-      break;
-    case 1:
-      geo.reverb_vis = REV_VIS_VTK;
-      break;
-    case 2:
-      geo.reverb_vis = REV_VIS_DUMP;
-      break;
-    case 3:
-      geo.reverb_vis = REV_VIS_BOTH;
-      break;
-    default:
-      Error ("reverb.visualisation: Invalid mode.\n \
+    rdint("reverb.path_bins", &geo.reverb_path_bins);
+    rdint("reverb.visualisation", &meta_param);
+    switch(meta_param)
+    { //Select whether to produce 3d visualisation file and/or dump flat csvs of spread in cells
+      case 0: geo.reverb_vis = REV_VIS_NONE;  break;
+      case 1: geo.reverb_vis = REV_VIS_VTK;   break;
+      case 2: geo.reverb_vis = REV_VIS_DUMP;  break;
+      case 3: geo.reverb_vis = REV_VIS_BOTH;  break;
+      default:Error("reverb.visualisation: Invalid mode.\n \
         Valid modes are 0=None, 1=VTK, 2=Cell dump, 3=Both.\n");
     }
 
-    if (geo.reverb_vis == REV_VIS_VTK || geo.reverb_vis == REV_VIS_BOTH)
-    {                           //If we're producing a 3d visualisation, select bins. This is just for aesthetics
-      rdint ("reverb.angle_bins", &geo.reverb_angle_bins);
-    }
-
-    if (geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
-    {                           //If we're dumping path arrays, read in the number of cells to dump them for and allocate space
-      rdint ("reverb.dump_cells", &geo.reverb_dump_cells);
-      geo.reverb_dump_x = (double *) calloc (geo.reverb_dump_cells, sizeof (int));
-      geo.reverb_dump_z = (double *) calloc (geo.reverb_dump_cells, sizeof (int));
-
-      for (k = 0; k < geo.reverb_dump_cells; k++)
-      {                         //For each we expect, read a paired cell coord as "[i]:[j]". May need to use py_wind to find indexes.
-        rdline ("reverb.dump_cell", trackline);
-        if (sscanf (trackline, "%lf:%lf", &geo.reverb_dump_x[k], &geo.reverb_dump_z[k]) == EOF)
-        {                       //If this line is malformed, warn the user and quit
-          Error ("reverb.dump_cell: Invalid position line '%s'\n \
-            Expected format '[x]:[z]'\n", trackline);
-          exit (0);
+    if(geo.reverb_vis == REV_VIS_VTK  || geo.reverb_vis == REV_VIS_BOTH)
+      //If we're producing a 3d visualisation, select bins. This is just for aesthetics
+      rdint("reverb.angle_bins", &geo.reverb_angle_bins);
+    if(geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
+    { //If we;re dumping path arrays, read in the number of cells to dump them for
+      rdint("reverb.dump_cells", &geo.reverb_dump_cells);
+      geo.reverb_dump_cell_x = (double *) calloc(geo.reverb_dump_cells, sizeof(double));
+      geo.reverb_dump_cell_z = (double *) calloc(geo.reverb_dump_cells, sizeof(double));
+      geo.reverb_dump_cell   = (int *)    calloc(geo.reverb_dump_cells, sizeof(int));
+      for(k=0; k<geo.reverb_dump_cells; k++)
+      { //For each we expect, read a paired cell coord as "[i]:[j]". May need to use py_wind to find indexes.
+        rdline("reverb.dump_cell", &trackline);
+        if(sscanf(trackline, "%lf:%lf", &geo.reverb_dump_cell_x[k], &geo.reverb_dump_cell_z[k]) == EOF)
+        { //If this line is malformed, warn the user
+          Error("reverb.dump_cell: Invalid position line '%s'\n \
+            Expected format '[x]:[z]'\n",trackline);
+          exit(0);
         }
       }
     }
   }
 
+  // ========== DEAL WITH MATOM LINES ==========
   if (geo.reverb == REV_MATOM)
   {                             //If this is macro-atom mode
     if (geo.rt_mode != 2)
@@ -1170,11 +1183,11 @@ get_meta_params (void)
         exit (0);
       }
       else
-      {                         //Otherwise, sift through the line list to find what this transition corresponds to
+      { //Otherwise, sift through the line list to find what this transition corresponds to
         for (j = 0; j < nlines_macro; j++)
-        {                       //And record the line position in geo for comparison purposes
+        { //And record the line position in geo for comparison purposes
           if (line[j].z == z && line[j].istate == istate && line[j].levu == levu && line[j].levl == levl)
-          {                     //We're matching z, ionisation state, and upper and lower level transitions
+          { //We're matching z, ionisation state, and upper and lower level transitions
             geo.reverb_line[i] = line[j].where_in_list;
           }
         }
@@ -1188,8 +1201,47 @@ get_meta_params (void)
       Error ("reverb.type: Wind radiation is off but wind-based path tracking is enabled!\n");
     }
   }
+
+  // ========== DEAL WITH LINE CULLING ==========
+  if(geo.reverb != REV_NONE)
+  {
+    //Should we filter any lines out?
+    //If -1, blacklist continuum, if >0 specify lines as above and whitelist
+    //Automatically include matom_lines
+    rdint ("reverb.filter_lines", &geo.reverb_filter_lines);
+    if(geo.reverb_filter_lines > 0) 
+    { //If we're given a whitelist, allocate temp storage (up to 256 lines!)
+      int temp[256], bFound;
+      for(i=0; i<geo.reverb_filter_lines; i++) 
+      { //For each provided line, read in
+        rdint ("reverb.filter_line",&temp[i]);
+      }
+      if(geo.reverb == REV_MATOM)
+      { //If we're in matom mode, check if those lines have already been included
+        for(i=0; i<geo.reverb_lines; i++) 
+        { //For each matom line
+          bFound = 0;
+          for(j=0; j<geo.reverb_filter_lines; j++)
+          { //Check if it's in the filter list
+            if(geo.reverb_line[i] == temp[j]) bFound = 1;
+          }
+          if(!bFound) 
+          { //If it's not, add it to the filter list and increment the total lines
+            temp[geo.reverb_filter_lines++] = geo.reverb_line[i];
+          }
+        }
+      } 
+      //Allocate enough space for the filter list
+      geo.reverb_filter_line = calloc(geo.reverb_filter_lines, sizeof(int));
+      for(i=0; i<geo.reverb_filter_lines; i++)
+      { //Populate the filter list from the temp list
+        geo.reverb_filter_line[i] = temp[i];
+      }
+    }
+  }
   return (0);
 }
+
 
 
 /***********************************************************

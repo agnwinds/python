@@ -144,6 +144,13 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
                Therefore, if the frequency is suitable it should be recorded as a macro atom emission event for use in the 
                computation of the k-packet emissivity needed for the final spectrum calculation. */
             *which_out = 1;
+
+            //SWM - If reverb is on, and this is the last ionisation cycle, then track the photon path
+            if(geo.reverb == REV_MATOM && geo.ioniz_or_extract && geo.fraction_converged > geo.reverb_fraction_converged)
+            {
+              line_paths_add_phot(&(wmain[p->grid]), p, nres);
+            }
+            return (1);
             /* 0803 - ksl - 60 - Added code to modify the photon origin to indicate the packet has been processed
                by a macro atom */
             if (p->origin < 10)
