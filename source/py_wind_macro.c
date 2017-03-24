@@ -82,7 +82,7 @@ xadiabatic_cooling_summary (w, rootname, ochoice)
     if (w[n].vol > 0.0)
     {
       t_e = plasmamain[w[n].nplasma].t_e;
-      num_recomb (&plasmamain[w[n].nplasma], t_e);
+      num_recomb (&plasmamain[w[n].nplasma], t_e,1);
       tot += aaa[n] = adiabatic_cooling (&w[n], t_e);
     }
   }
@@ -527,6 +527,8 @@ int
 copy_plasma (x1, x2)
      PlasmaPtr x1, x2;
 {
+  int i;
+
   x2->nwind = x1->nwind;
   x2->nplasma = x1->nplasma;
   x2->ne = x1->ne;
@@ -536,17 +538,36 @@ copy_plasma (x1, x2)
   x2->t_e = x1->t_e;
   x2->w = x1->w;
 
-  /* JM 1409 -- added this for depcoef_overview_specific */
-  x2->partition = x1->partition;
-  x2->density = x1->density;
+  if ((x2->density = calloc (sizeof (double), nions)) == NULL)
+  {
+    Error ("calloc_dyn_plasma: Error in allocating memory for density\n");
+    exit (0);
+  }
+  if ((x2->partition = calloc (sizeof (double), nions)) == NULL)
+  {
+    Error ("calloc_dyn_plasma: Error in allocating memory for partition\n");
+    exit (0);
+  }
+  for(i=0; i<nions; i++)
+  {
+    x2->density[i] = x1->density[i];
+    x2->partition[i] = x1->partition[i];
+  }
+
 
   /* Note this isn't everything in the cell! 
      Only the things needed for these routines */
 
   return (0);
 }
-
-
+int
+dealloc_copied_plasma (xcopy)
+     PlasmaPtr xcopy;
+{
+  free(xcopy->density);
+  free(xcopy->partition);
+  return (0);
+}
 
 
 /**************************************************************************
@@ -624,6 +645,8 @@ depcoef_overview_specific (version, nconfig, w, rootname, ochoice)
       {
         aaa[n] = xden / lteden;
       }
+
+      dealloc_copied_plasma(xdummy);
     }
   }
 
@@ -745,7 +768,7 @@ level_popsoverview (nplasma, w, rootname, ochoice)
       fprintf (f, "%i %8.4e %8.4e\n", i + 1, xplasma->levden[i], xden / lteden);
   }
   fclose (f);
-
+  dealloc_copied_plasma(xdummy);
   return (0);
 }
 

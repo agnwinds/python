@@ -705,7 +705,7 @@ recomb_summary (w, rootname, ochoice)
     if (w[n].vol > 0.0)
     {
       nplasma = w[n].nplasma;
-      num_recomb (&plasmamain[nplasma], plasmamain[nplasma].t_e);
+      num_recomb (&plasmamain[nplasma], plasmamain[nplasma].t_e,1);
       aaa[n] = plasmamain[nplasma].recomb[ion];
     }
   }
@@ -3651,5 +3651,54 @@ get_los_dvds (w, rootname, ochoice)
 
   }
 
+  return (0);
+}
+
+/**********************************************************/
+/** @name   grid_summary
+ * @brief Prints grid boundaries to file
+ *
+ * @param [in] one            Pointer to cell of interest
+ * @param [in] line_ptr_emit  Pointer to line of interest
+ * @return     Probability of line emission
+ *
+ * Given a cell and a line, calculates the probabiltiy that
+ * that cell will emit in that line.
+ *
+ * @notes
+ * 6/15 - Written by SWM
+***********************************************************/
+int
+grid_summary (WindPtr w, char rootname[], int ochoice)
+{
+  char filename[LINELENGTH], suffix[LINELENGTH];
+  FILE *fopen (), *fptr;
+  int i, j;
+
+  printf ("Outputting grid boundaries to file.\n");
+
+  for (j=0; j<geo.ndomain; j++)
+  {
+    strcpy(filename, rootname);
+    sprintf(suffix,".dom%d.grid_x.txt", j);
+    strcat(filename, suffix);
+    fptr = fopen(filename, "w");
+    for (i=0; i<= zdom[j].ndim; i++)
+    {
+      fprintf(fptr,"%10.5g\n", zdom[j].wind_x[i]);
+    }
+    fclose(fptr);
+
+    strcpy(filename, rootname);
+    sprintf(suffix,".dom%d.grid_z.txt", j);
+    strcat(filename, suffix); 
+    fptr = fopen(filename, "w");
+    for (i=0; i<= zdom[j].mdim; i++)
+    {
+      fprintf(fptr,"%10.5g\n", zdom[j].wind_z[i]);
+    }
+    fclose(fptr);
+      
+  }
   return (0);
 }

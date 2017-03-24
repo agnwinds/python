@@ -136,15 +136,15 @@ History:
 
 char *choice_options = "\n\
     1=onefile summary 2=all ions in a given cell\n\
- 	   n=ne,  R=rho,  v=vel,        i=ion info, j=ave_tau, f=ave_freq, p=nphot, S=sim_alpha\n\
+ 	 n=ne,  R=rho,  v=vel,         i=ion info, j=ave_tau, f=ave_freq, p=nphot, S=sim_alpha\n\
    r=t_r, t=t_e,  w=rad_weight,  s=vol,     l=lum,     C=cooling/heating,  b=adiabatic cooling\n\
-   a=abs, c=c4,   g=photo,       h=recomb,  k=tau H,   l=lum,     m=F_rad, x=total, y=mod_te,\n\
-   o=overview,    e=everything, P=Partial emission meas, I=Ionisation parameter\n\
-   W=wind_region, D=dvds_ave, X=position summary, M=macro atom info, G=inner shell\n\
+   a=abs,         L=line lum,    g=photo,   h=recomb,  k=tau H,     m=F_rad, x=total, y=mod_te,\n\
+   o=overview,    e=everything,  P=Partial emission meas,  I=Ionisation parameter\n\
+   W=wind_region, D=dvds_ave,    X=position summary, M=macro atom info, G=inner shell\n\
    d=convergence status  E=convergence_all_info   B=PlasmaPtr  J=Radiation density\n\
    H=All Heating and Cooling mechanisms in one shot  O=Spectral model parameters S=Spectral models\n\
    z=Zoom,u=unZoom,Z=switch to/from raw and yz projected modes, F=Create files, A=Change file write defaults\n\
-   N=new.windfile q=quit (preferred over EOF) Q=switch domain\n";
+   #=Wind grid    N=new.windfile q=quit (preferred over EOF)  Q=switch domain\n";
 
 int
 main (argc, argv)
@@ -415,8 +415,8 @@ one_choice (choice, root, ochoice)
   case 'B':
     plasma_cell (wmain, root, ochoice);
     break;
-  case 'c':                    /*C4 emission */
-    line_summary (wmain, n, istate, root, ochoice);
+  case 'c':                    /*Line emission */
+    line_summary (wmain, root, ochoice);
     break;
   case 'C':                    /*the ratio cooling to heating */
     coolheat_summary (wmain, root, ochoice);
@@ -498,6 +498,9 @@ one_choice (choice, root, ochoice)
     break;
   case 'l':                    /* Lum of shell */
     lum_summary (wmain, root, ochoice);
+    break;
+  case 'L':                    /*Line emission */
+    line_summary (wmain, root, ochoice);
     break;
   case 'm':                    /* Radiation force */
     mo_summary (wmain, root, ochoice);
@@ -626,6 +629,10 @@ one_choice (choice, root, ochoice)
   case '2':
     complete_ion_summary (wmain, root, ochoice);        //
     break;
+  case '#':
+    grid_summary (wmain, root, ochoice);        //
+    break;
+ 
   case 'q':                    /* quit */
     /* Write out a parameterfile that gives all of the commands used in this run */
     cpar ("py_wind.pf");
