@@ -109,12 +109,19 @@ in the plasma structure */
 
     n += fwrite (plasmamain[m].ioniz, sizeof (double), nions, fptr);
     n += fwrite (plasmamain[m].recomb, sizeof (double), nions, fptr);
+    n += fwrite (plasmamain[m].inner_recomb, sizeof (double), nions, fptr);
+	
 
     n += fwrite (plasmamain[m].scatters, sizeof (int), nions, fptr);
     n += fwrite (plasmamain[m].xscatters, sizeof (double), nions, fptr);
 
     n += fwrite (plasmamain[m].heat_ion, sizeof (double), nions, fptr);
     n += fwrite (plasmamain[m].lum_ion, sizeof (double), nions, fptr);
+    n += fwrite (plasmamain[m].lum_inner_ion, sizeof (double), nions, fptr);
+	
+    n += fwrite (plasmamain[m].levden, sizeof (double), nlte_levels, fptr);
+    n += fwrite (plasmamain[m].recomb_simple, sizeof (double), nphot_total, fptr);
+    n += fwrite (plasmamain[m].kbf_use, sizeof (double), nphot_total, fptr);
   }
 
 /* Now write out the macro atom info */
@@ -251,12 +258,18 @@ wind_read (filename)
 
     n += fread (plasmamain[m].ioniz, sizeof (double), nions, fptr);
     n += fread (plasmamain[m].recomb, sizeof (double), nions, fptr);
+    n += fread (plasmamain[m].inner_recomb, sizeof (double), nions, fptr);
 
     n += fread (plasmamain[m].scatters, sizeof (int), nions, fptr);
     n += fread (plasmamain[m].xscatters, sizeof (double), nions, fptr);
 
     n += fread (plasmamain[m].heat_ion, sizeof (double), nions, fptr);
-    n += fread (plasmamain[m].lum_ion, sizeof (double), nions, fptr);
+    n += fread (plasmamain[m].lum_ion, sizeof (double), nions, fptr);    
+    n += fread (plasmamain[m].lum_inner_ion, sizeof (double), nions, fptr);
+	
+    n += fread (plasmamain[m].levden, sizeof (double), nlte_levels, fptr);
+    n += fread (plasmamain[m].recomb_simple, sizeof (double), nphot_total, fptr);
+    n += fread (plasmamain[m].kbf_use, sizeof (double), nphot_total, fptr);
   }
 
 
