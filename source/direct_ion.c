@@ -224,6 +224,7 @@ q_ioniz_dere (nion, t_e)
   double exp_int, dt, drdt, rate;
   int nrec, imax, imin, i;
 
+  imin = imax = -1;             //Set to avoid compiler warning
 
   nrec = ion[nion].nxderedi;
 

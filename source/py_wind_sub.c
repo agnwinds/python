@@ -705,7 +705,7 @@ recomb_summary (w, rootname, ochoice)
     if (w[n].vol > 0.0)
     {
       nplasma = w[n].nplasma;
-      num_recomb (&plasmamain[nplasma], plasmamain[nplasma].t_e,1);
+      num_recomb (&plasmamain[nplasma], plasmamain[nplasma].t_e, 1);
       aaa[n] = plasmamain[nplasma].recomb[ion];
     }
   }
@@ -3677,28 +3677,28 @@ grid_summary (WindPtr w, char rootname[], int ochoice)
 
   printf ("Outputting grid boundaries to file.\n");
 
-  for (j=0; j<geo.ndomain; j++)
+  for (j = 0; j < geo.ndomain; j++)
   {
-    strcpy(filename, rootname);
-    sprintf(suffix,".dom%d.grid_x.txt", j);
-    strcat(filename, suffix);
-    fptr = fopen(filename, "w");
-    for (i=0; i<= zdom[j].ndim; i++)
+    strcpy (filename, rootname);
+    sprintf (suffix, ".dom%d.grid_x.txt", j);
+    strcat (filename, suffix);
+    fptr = fopen (filename, "w");
+    for (i = 0; i <= zdom[j].ndim; i++)
     {
-      fprintf(fptr,"%10.5g\n", zdom[j].wind_x[i]);
+      fprintf (fptr, "%10.5g\n", zdom[j].wind_x[i]);
     }
-    fclose(fptr);
+    fclose (fptr);
 
-    strcpy(filename, rootname);
-    sprintf(suffix,".dom%d.grid_z.txt", j);
-    strcat(filename, suffix); 
-    fptr = fopen(filename, "w");
-    for (i=0; i<= zdom[j].mdim; i++)
+    strcpy (filename, rootname);
+    sprintf (suffix, ".dom%d.grid_z.txt", j);
+    strcat (filename, suffix);
+    fptr = fopen (filename, "w");
+    for (i = 0; i <= zdom[j].mdim; i++)
     {
-      fprintf(fptr,"%10.5g\n", zdom[j].wind_z[i]);
+      fprintf (fptr, "%10.5g\n", zdom[j].wind_z[i]);
     }
-    fclose(fptr);
-      
+    fclose (fptr);
+
   }
   return (0);
 }

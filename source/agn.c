@@ -115,7 +115,7 @@ emittance_pow (freqmin, freqmax, lum, alpha)
   /* if we have a PL cutoff, then we need to either adjust the minimum frequency,
      or return 0 luminosity if the cutoff is above our band */
   /* in advanced mode, this should always be zero */
-  fmin = freqmin;       // default is no cutoff
+  fmin = freqmin;               // default is no cutoff
   emit = 0.0;
   if (freqmax < geo.pl_low_cutoff)
   {
@@ -127,8 +127,8 @@ emittance_pow (freqmin, freqmax, lum, alpha)
   }
 
   /* conservative error check */
-  if ( (modes.iadvanced == 0) && (geo.pl_low_cutoff > 0))
-    Error("PL cutoff frequency is non-zero out of advanced mode!");
+  if ((modes.iadvanced == 0) && (geo.pl_low_cutoff > 0))
+    Error ("PL cutoff frequency is non-zero out of advanced mode!");
 
   /* we need to work out the luminosity between our limited frequency range */
   /* we may need some checking routines to make sure that the requested frequency range is within the defined range,
