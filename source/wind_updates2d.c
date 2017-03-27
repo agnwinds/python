@@ -1018,6 +1018,7 @@ wind_rad_init ()
     plasmamain[n].lum = plasmamain[n].lum_rad = plasmamain[n].lum_lines = plasmamain[n].lum_ff = 0.0;
     plasmamain[n].lum_fb = plasmamain[n].lum_z = 0.0;
     plasmamain[n].nrad = plasmamain[n].nioniz = 0;
+	plasmamain[n].comp_nujnu = -1e99;   //1701 NSH Zero the integrated specific intensity for the cell
     plasmamain[n].lum_comp = 0.0;       //1108 NSH Zero the compton luminosity for the cell
     plasmamain[n].heat_comp = 0.0;      //1108 NSH Zero the compton heating for the cell
     plasmamain[n].heat_ind_comp = 0.0;  //1108 NSH Zero the induced compton heating for the cell
