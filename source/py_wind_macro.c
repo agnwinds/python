@@ -82,7 +82,7 @@ xadiabatic_cooling_summary (w, rootname, ochoice)
     if (w[n].vol > 0.0)
     {
       t_e = plasmamain[w[n].nplasma].t_e;
-      num_recomb (&plasmamain[w[n].nplasma], t_e,1);
+      num_recomb (&plasmamain[w[n].nplasma], t_e, 1);
       tot += aaa[n] = adiabatic_cooling (&w[n], t_e);
     }
   }
@@ -548,7 +548,7 @@ copy_plasma (x1, x2)
     Error ("calloc_dyn_plasma: Error in allocating memory for partition\n");
     exit (0);
   }
-  for(i=0; i<nions; i++)
+  for (i = 0; i < nions; i++)
   {
     x2->density[i] = x1->density[i];
     x2->partition[i] = x1->partition[i];
@@ -560,12 +560,13 @@ copy_plasma (x1, x2)
 
   return (0);
 }
+
 int
 dealloc_copied_plasma (xcopy)
      PlasmaPtr xcopy;
 {
-  free(xcopy->density);
-  free(xcopy->partition);
+  free (xcopy->density);
+  free (xcopy->partition);
   return (0);
 }
 
@@ -646,7 +647,7 @@ depcoef_overview_specific (version, nconfig, w, rootname, ochoice)
         aaa[n] = xden / lteden;
       }
 
-      dealloc_copied_plasma(xdummy);
+      dealloc_copied_plasma (xdummy);
     }
   }
 
@@ -768,7 +769,7 @@ level_popsoverview (nplasma, w, rootname, ochoice)
       fprintf (f, "%i %8.4e %8.4e\n", i + 1, xplasma->levden[i], xden / lteden);
   }
   fclose (f);
-  dealloc_copied_plasma(xdummy);
+  dealloc_copied_plasma (xdummy);
   return (0);
 }
 

@@ -632,7 +632,7 @@ one_choice (choice, root, ochoice)
   case '#':
     grid_summary (wmain, root, ochoice);        //
     break;
- 
+
   case 'q':                    /* quit */
     /* Write out a parameterfile that gives all of the commands used in this run */
     cpar ("py_wind.pf");

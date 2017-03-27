@@ -603,23 +603,23 @@ wind_ij_to_n (ndom, i, j, n)
 int
 wind_x_to_n (double x[], int *n)
 {
-  int ndom,i,j;
-  for(ndom=0; ndom<geo.ndomain; ndom++)
+  int ndom, i, j;
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
-    for(i=0; i<zdom[ndom].ndim-1; i++)
+    for (i = 0; i < zdom[ndom].ndim - 1; i++)
     {
-      if(x[0] > zdom[ndom].wind_x[i] && x[0] < zdom[ndom].wind_x[i+1])
+      if (x[0] > zdom[ndom].wind_x[i] && x[0] < zdom[ndom].wind_x[i + 1])
       {
-        for(j=0; j<zdom[ndom].mdim-1; j++)
+        for (j = 0; j < zdom[ndom].mdim - 1; j++)
         {
-          if(x[2] > zdom[ndom].wind_z[j] && x[2] < zdom[ndom].wind_z[j+1])
+          if (x[2] > zdom[ndom].wind_z[j] && x[2] < zdom[ndom].wind_z[j + 1])
           {
-            wind_ij_to_n(ndom,i,j,n);
-            return(*n);
+            wind_ij_to_n (ndom, i, j, n);
+            return (*n);
           }
-        } 
+        }
       }
     }
   }
-  return(*n);
+  return (*n);
 }

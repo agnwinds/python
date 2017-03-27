@@ -281,7 +281,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
         /* See if the frequencies correspond to one previously calculated */
         if (f1 == freebound[n].f1 && f2 == freebound[n].f2)
         {
-          fnu = get_fb (t, nion, n,mode);
+          fnu = get_fb (t, nion, n, mode);
           return (fnu);
         }
       }
@@ -294,7 +294,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
       /* See if the frequencies correspond to one previously calculated */
       if (nfb > 0)
       {
-        fnu = get_nrecomb (t, nion,mode);
+        fnu = get_nrecomb (t, nion, mode);
         return (fnu);
       }
       /* If not calculate it here */
@@ -304,40 +304,40 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
     Error ("integ_fb: Unknown fb_choice(%d)\n", fb_choice);
     exit (0);
   }
-  
+
   else if (mode == 2)           // inner shell
   {
     if (fb_choice == 1)
     {
-        for (n = 0; n < nfb; n++)
+      for (n = 0; n < nfb; n++)
+      {
+        /* See if the frequencies correspond to one previously calculated */
+        if (f1 == freebound[n].f1 && f2 == freebound[n].f2)
         {
-          /* See if the frequencies correspond to one previously calculated */
-          if (f1 == freebound[n].f1 && f2 == freebound[n].f2)
-          {
-            fnu = get_fb (t, nion, n,mode);
-            return (fnu);
-          }
+          fnu = get_fb (t, nion, n, mode);
+          return (fnu);
         }
+      }
       fnu = xinteg_inner_fb (t, f1, f2, nion, fb_choice);
       return (fnu);
     }
     else if (fb_choice == 2)
     {
-        if (nfb > 0)
-        {
-          fnu = get_nrecomb (t, nion,mode);
-          return (fnu);
-        }
+      if (nfb > 0)
+      {
+        fnu = get_nrecomb (t, nion, mode);
+        return (fnu);
+      }
       fnu = xinteg_inner_fb (t, f1, f2, nion, fb_choice);
       return (fnu);
     }
     Error ("integ_fb: Unknown fb_choice(%d)\n", fb_choice);
     exit (0);
   }
-  
+
   Error ("integ_fb: Unknown mode(%d)\n", mode);
   exit (0);
-  
+
 }
 
 
@@ -380,7 +380,7 @@ double
 total_fb (one, t, f1, f2, mode)
      WindPtr one;
      double t, f1, f2;
-     int mode;               //inner=2 outer=1
+     int mode;                  //inner=2 outer=1
 {
   double total;
   int nion;
@@ -395,7 +395,7 @@ total_fb (one, t, f1, f2, mode)
 
 // Initialize the free_bound structures if that is necessary
   if (mode == 1)
-  init_freebound (1.e3, 1.e9, f1, f2);  //NSH 140121 increased limit to take account of hot plasmas
+    init_freebound (1.e3, 1.e9, f1, f2);        //NSH 140121 increased limit to take account of hot plasmas
 
 
 // Calculate the number of recombinations whenever calculating the fb_luminosities
@@ -650,7 +650,7 @@ int
 num_recomb (xplasma, t_e, mode)
      PlasmaPtr xplasma;
      double t_e;
-	 int mode;
+     int mode;
 {
   int nelem;
   int i, imin, imax;
@@ -660,14 +660,14 @@ num_recomb (xplasma, t_e, mode)
     imax = imin + ele[nelem].nions;
     for (i = imin; i < imax; i++)
     {
-        if (xplasma->density[i] > DENSITY_PHOT_MIN)
-        {
-          if (mode == 1)          //outer shell
-            xplasma->recomb[i] = xplasma->ne * xplasma->density[i + 1] * integ_fb (t_e, 0.0, 1e50, i, 2, mode);
-          else if (mode == 2)     //innershell
-            xplasma->inner_recomb[i] = xplasma->ne * xplasma->density[i + 1] * integ_fb (t_e, 0.0, 1e50, i, 2, mode);
+      if (xplasma->density[i] > DENSITY_PHOT_MIN)
+      {
+        if (mode == 1)          //outer shell
+          xplasma->recomb[i] = xplasma->ne * xplasma->density[i + 1] * integ_fb (t_e, 0.0, 1e50, i, 2, mode);
+        else if (mode == 2)     //innershell
+          xplasma->inner_recomb[i] = xplasma->ne * xplasma->density[i + 1] * integ_fb (t_e, 0.0, 1e50, i, 2, mode);
 
-        }
+      }
     }
     xplasma->recomb[imax] = 0.0;        // Can't recombine to highest i-state
     xplasma->inner_recomb[imax] = 0.0;  // Can't recombine to highest i-state
@@ -874,7 +874,7 @@ init_freebound (t1, t2, f1, f2)
       {
         t = fb_t[j];
         xnrecomb[nion][j] = xinteg_fb (t, 0.0, 1.e50, nion, 2);
-        xninnerrecomb[nion][j] = xinteg_inner_fb (t, 0.0, 1.e50, nion, 2);		
+        xninnerrecomb[nion][j] = xinteg_inner_fb (t, 0.0, 1.e50, nion, 2);
       }
     }
   }
@@ -937,7 +937,7 @@ on the assumption that the fb information will be reused.
       t = fb_t[j];
       freebound[nput].emiss[nion][j] = xinteg_fb (t, f1, f2, nion, 1);
       freebound[nput].emiss_inner[nion][j] = xinteg_inner_fb (t, f1, f2, nion, 1);
-	 
+
     }
   }
 
@@ -975,18 +975,18 @@ double
 get_nrecomb (t, nion, mode)
      double t;
      int nion;
-	 int mode;
+     int mode;
 {
   int linterp ();
   double x;
-  if (mode==1)
-  	linterp (t, fb_t, xnrecomb[nion], NTEMPS, &x, 0);     //Interpolate in linear space
-  else if (mode==2)
-	  linterp (t, fb_t, xninnerrecomb[nion], NTEMPS, &x, 0);     //Interpolate in linear space
-  else 
+  if (mode == 1)
+    linterp (t, fb_t, xnrecomb[nion], NTEMPS, &x, 0);   //Interpolate in linear space
+  else if (mode == 2)
+    linterp (t, fb_t, xninnerrecomb[nion], NTEMPS, &x, 0);      //Interpolate in linear space
+  else
   {
-	  Error ("Get_nrecomb - unkonwn mode %i",mode);
-	  exit (0);
+    Error ("Get_nrecomb - unkonwn mode %i", mode);
+    exit (0);
   }
   return (x);
 }
@@ -995,23 +995,23 @@ get_nrecomb (t, nion, mode)
 /* Return the specific emissivity due to recombination emission in an interval */
 
 double
-get_fb (t, nion, narray,mode)
+get_fb (t, nion, narray, mode)
      double t;
      int nion;
      int narray;
-	 int mode;
+     int mode;
 {
   int linterp ();
   double x;
-  if (mode==1)
-  linterp (t, fb_t, &freebound[narray].emiss[nion][0], NTEMPS, &x, 0);  //Interpolate in linear space
-  else if (mode==2)
-	  linterp (t, fb_t, &freebound[narray].emiss_inner[nion][0], NTEMPS, &x, 0);  //Interpolate in linear space
-	  
-  else 
+  if (mode == 1)
+    linterp (t, fb_t, &freebound[narray].emiss[nion][0], NTEMPS, &x, 0);        //Interpolate in linear space
+  else if (mode == 2)
+    linterp (t, fb_t, &freebound[narray].emiss_inner[nion][0], NTEMPS, &x, 0);  //Interpolate in linear space
+
+  else
   {
-	  Error ("Get_fb - unkonwn mode %i",mode);
-	  exit (0);
+    Error ("Get_fb - unkonwn mode %i", mode);
+    exit (0);
   }
   return (x);
 }
@@ -1100,7 +1100,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
   if (f2 > 3e18)                // 110819 nsh increase upper limits to include  highly ionised ions that we are now seeing in x-ray illuminated nebulas.
     f2 = 3e18;                  // This is 1 Angstroms  - ksl
   if (f2 < f1)
-    return (0.0);                 /* Because there is nothing to integrate */
+    return (0.0);               /* Because there is nothing to integrate */
 
   fnu = 0.0;
 

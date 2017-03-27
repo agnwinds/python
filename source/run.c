@@ -584,7 +584,7 @@ make_spectra (restart_stat)
 #endif
     Log ("Completed spectrum cycle %3d :  The elapsed TIME was %f\n", geo.pcycle, timer ());
 
-     /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
+    /* JM1304: moved geo.pcycle++ after xsignal to record cycles correctly. First cycle is cycle 0. */
 
     xsignal (files.root, "%-20s Finished %3d of %3d spectrum cycles \n", "OK", geo.pcycle, geo.pcycles);
 

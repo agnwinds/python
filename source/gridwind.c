@@ -750,21 +750,21 @@ calloc_dyn_plasma (nelem)
       Error ("calloc_dyn_plasma: Error in allocating memory for lum_inner_recomb\n");
       exit (0);
     }
-	
+
 //A few more variable length arrays 
-		
+
     if ((plasmamain[n].levden = calloc (sizeof (double), nlte_levels)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for levden\n");
       exit (0);
     }
-	
+
     if ((plasmamain[n].recomb_simple = calloc (sizeof (double), nphot_total)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for recomb_simple\n");
       exit (0);
     }
-	
+
     if ((plasmamain[n].kbf_use = calloc (sizeof (double), nphot_total)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for kbf_use\n");
@@ -774,7 +774,7 @@ calloc_dyn_plasma (nelem)
 
   Log
     ("Allocated %10d bytes for each of %5d elements variable length plasma arrays totaling %10.1f Mb \n",
-     sizeof (double) * nions * 12, (nelem + 1), 1.e-6 * (nelem + 1) * sizeof (double) * nions * 12);
+     sizeof (double) * nions * 14, (nelem + 1), 1.e-6 * (nelem + 1) * sizeof (double) * (nions * 14 + nlte_levels + nphot_total * 2));
 
   return (0);
 }
