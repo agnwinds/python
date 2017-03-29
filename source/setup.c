@@ -913,7 +913,7 @@ get_bl_and_agn_params (lstar)
 
     /* if we have a "blackbody agn" the luminosity is set by Stefan Boltzmann law
        once the AGN blackbody temp is read in, otherwise set by user */
-    else if (geo.agn_ion_spectype != SPECTYPE_BB)
+    if (geo.agn_ion_spectype != SPECTYPE_BB)
       rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
 
 
@@ -1158,7 +1158,7 @@ get_meta_params (void)
       geo.reverb_dump_cell = (int *) calloc (geo.reverb_dump_cells, sizeof (int));
       for (k = 0; k < geo.reverb_dump_cells; k++)
       {                         //For each we expect, read a paired cell coord as "[i]:[j]". May need to use py_wind to find indexes.
-        rdline ("reverb.dump_cell", &trackline);
+        rdline ("reverb.dump_cell", trackline);
         if (sscanf (trackline, "%lf:%lf", &geo.reverb_dump_cell_x[k], &geo.reverb_dump_cell_z[k]) == EOF)
         {                       //If this line is malformed, warn the user
           Error ("reverb.dump_cell: Invalid position line '%s'\n \
