@@ -247,7 +247,9 @@ typedef struct lines
                                    the estimator with which it is associated. The estimator is identified by the
                                    upper configuration (nconfigu) and then down_index (for deexcitation) or the lower
                                    configuration (nconfigl) and then up_index. (SS) */
-  int up_index;
+  int up_index;  
+  int coll_index;               /* A link into the collision strength data, if its -999 it means there is no data and van reg should be used */
+
 }
 line_dummy, *LinePtr;
 
@@ -262,6 +264,28 @@ int nline_min, nline_max, nline_delt;   /*For calculating which line are likely 
                                            the routine limit_lines */
 
 
+        /* coll_stren is the collision strength interpolation data extracted from Chianti */
+
+
+#define N_COLL_STREN_PTS	20      //The maximum number of parameters in the interpolations
+int n_coll_stren;
+
+typedef struct coll_stren
+{
+  int n;                        //Internal index
+  int lower;                    //The lower energy level - this is in Chianti notation and is currently unused
+  int upper;                    //The upper energy level - this is in Chianti notation and is currently unused
+  double energy;                //The energy of the transition
+  double gf;                    //The effective oscillator strength - NSH thinks this is oscillator strtength x lower level multiplicity
+  double hi_t_lim;              //The high temerature limit
+  double n_points;              //The number of points in the splie fit
+  int type;                     //The type of fit, this defines how one computes the scaled temperature and scaled coll strength
+  float scaling_param;          //The scaling parameter C used in the Burgess and Tully calculations
+  double sct[N_COLL_STREN_PTS]; //The scaled temperature points in the fit
+  double scups[N_COLL_STREN_PTS];       //The sclaed coll sttengths in ythe fit.
+} Coll_stren, *Coll_strenptr;
+
+Coll_stren coll_stren[NLINES];  //Set up the structure - we could in principle have as many of these as we have lines
 
 /*structure containing photoionization data */
 
