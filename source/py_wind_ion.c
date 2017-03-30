@@ -305,31 +305,40 @@ line_summary (w, rootname, ochoice)
   double d1, d2, z, energy, rb, tot, omega;
   int nplasma;
 
-  iline=0;
-  i_matom_search=0;
+  iline = 0;
+  i_matom_search = 0;
   rdint ("line (0=C-IV, 1=Hα, 2=Hβ, 3=Matom", &iline);
-  switch(iline)
+  switch (iline)
   {
-    case 0:
-      element = 6; istate = 4; lambda = 1548.1949e-8;
-      break;
-    case 1:
-      element = 1; istate = 1; lambda = 6562.7097e-8;
-      break;
-    case 2:
-      element = 1; istate = 1; lambda = 4861.363e-8;
-      break;
-    case 3: //Generic matom
-      i_matom_search=1;
-      element = 1; istate = 1; levu=2; levl=1;
-      rdint ("Element", &element);   
-      rdint ("Ion", &istate);
-      rdint ("Upper level", &levu);
-      rdint ("Lower level", &levl);
-      break;
-    default:
-      Error("line_summary: Not a valid line.");
-      exit(0);
+  case 0:
+    element = 6;
+    istate = 4;
+    lambda = 1548.1949e-8;
+    break;
+  case 1:
+    element = 1;
+    istate = 1;
+    lambda = 6562.7097e-8;
+    break;
+  case 2:
+    element = 1;
+    istate = 1;
+    lambda = 4861.363e-8;
+    break;
+  case 3:                      //Generic matom
+    i_matom_search = 1;
+    element = 1;
+    istate = 1;
+    levu = 2;
+    levl = 1;
+    rdint ("Element", &element);
+    rdint ("Ion", &istate);
+    rdint ("Upper level", &levu);
+    rdint ("Lower level", &levl);
+    break;
+  default:
+    Error ("line_summary: Not a valid line.");
+    exit (0);
   }
 
 /* Convert wavelength to energy and frequency */
@@ -348,19 +357,19 @@ line_summary (w, rootname, ochoice)
   nelem = 0;
   while (nelem < nelements && ele[nelem].z != element)
     nelem++;
-  if(nelem == nelements)
+  if (nelem == nelements)
   {
-    Log("line_summary: Could not find element %d",element);
-    return(-1);
+    Log ("line_summary: Could not find element %d", element);
+    return (-1);
   }
   nline = 0;
   freq_search = C / lambda;
 
 /* Find the line */
-  if(i_matom_search)
+  if (i_matom_search)
   {
-    while(nline<nlines && !(lin_ptr[nline]->z == element && lin_ptr[nline]->istate == istate 
-          && lin_ptr[nline]->levu == levu && lin_ptr[nline]->levl == levl))
+    while (nline < nlines && !(lin_ptr[nline]->z == element && lin_ptr[nline]->istate == istate
+                               && lin_ptr[nline]->levu == levu && lin_ptr[nline]->levl == levl))
     {
       nline++;
     }
@@ -374,7 +383,7 @@ line_summary (w, rootname, ochoice)
   {
     Error ("line_summary: Could not find line in linelist\n");
     exit (0);
-  } 
+  }
 
   rdint ("line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob, 4=off, diagnostic)", &geo.line_mode);
   if (geo.line_mode == 0)
@@ -404,17 +413,17 @@ line_summary (w, rootname, ochoice)
     {
       nplasma = w[n].nplasma;
 
-      if(lin_ptr[nline]->macro_info == 1)
-      { //If this is a matom line
+      if (lin_ptr[nline]->macro_info == 1)
+      {                         //If this is a matom line
         d2 = den_config (&plasmamain[nplasma], lin_ptr[nline]->nconfigu);
       }
       else
-      { //If this is not a matom line
+      {                         //If this is not a matom line
         two_level_atom (lin_ptr[nline], &plasmamain[nplasma], &d1, &d2);
       }
       x = (d2) * a21 (lin_ptr[nline]) * H * lin_ptr[nline]->freq * w[n].vol;
-      
-      if(geo.line_mode != 4)
+
+      if (geo.line_mode != 4)
       {
         x *= z = scattering_fraction (lin_ptr[nline], &plasmamain[nplasma]);
       }
@@ -428,8 +437,7 @@ line_summary (w, rootname, ochoice)
 
   tot = 2. * tot;               // Why is there a factor of 2 here??? ksl
 
-  Log ("The total %s ion %d luminosity (flux) is %8.2g (%8.2g)\n",
-       ele[nelem].name, istate, tot, tot / (4 * PI * 1e4 * PC * PC));
+  Log ("The total %s ion %d luminosity (flux) is %8.2g (%8.2g)\n", ele[nelem].name, istate, tot, tot / (4 * PI * 1e4 * PC * PC));
 
   /* Store the appropriate values in a place where it does not matter */
   if (ochoice)
@@ -454,10 +462,10 @@ line_summary (w, rootname, ochoice)
     strcat (choice, ele[nelem].name);
     sprintf (iname, "%d", istate);
     strcat (choice, iname);
-    if(lin_ptr[nline]->macro_info == 1)
+    if (lin_ptr[nline]->macro_info == 1)
     {
-      sprintf(iname, ".%d-%d",lin_ptr[nline]->levu, lin_ptr[nline]->levl);
-      strcat (choice, iname);      
+      sprintf (iname, ".%d-%d", lin_ptr[nline]->levu, lin_ptr[nline]->levl);
+      strcat (choice, iname);
     }
     strcat (filename, choice);
     write_array (filename, ochoice);

@@ -220,6 +220,7 @@ double scattering_fraction (struct lines *line_ptr, PlasmaPtr xplasma);
 double p_escape (struct lines *line_ptr, PlasmaPtr xplasma);
 double p_escape_from_tau (double tau);
 int line_heat (PlasmaPtr xplasma, PhotPtr pp, int nres);
+double upsilon (int n_coll, double u0);
 /* continuum.c */
 double one_continuum (int spectype, double t, double g, double freqmin, double freqmax);
 double emittance_continuum (int spectype, double freqmin, double freqmax, double t, double g);
