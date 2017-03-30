@@ -2559,7 +2559,7 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
               n_coll_stren++;
             }
           }
-		  break;
+          break;
 
         case 'c':              /* It was a comment line so do nothing */
           break;

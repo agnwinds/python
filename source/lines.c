@@ -266,8 +266,8 @@ q21 (line_ptr, t)
     else                        //otherwise use the collision strength directly. NB what we call omega, most people including hazy call upsilon.
     {
       omega = upsilon (line_ptr->coll_index, u0);
-      gbar = omega / ECS_CONSTANT / line_ptr->gl / line_ptr->f * line_ptr->freq;        
-	  //check the implied value of gbar
+      gbar = omega / ECS_CONSTANT / line_ptr->gl / line_ptr->f * line_ptr->freq;
+      //check the implied value of gbar
 //      if (gbar < 0.01 || gbar > 10)     //if it is odd (i.e. not about 1) throw an error
 //      {
 //        Error ("q21 - suspicious implied value of gbar for coll strength record %i of %e\n", line_ptr->coll_index, gbar);

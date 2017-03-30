@@ -247,7 +247,7 @@ typedef struct lines
                                    the estimator with which it is associated. The estimator is identified by the
                                    upper configuration (nconfigu) and then down_index (for deexcitation) or the lower
                                    configuration (nconfigl) and then up_index. (SS) */
-  int up_index;  
+  int up_index;
   int coll_index;               /* A link into the collision strength data, if its -999 it means there is no data and van reg should be used */
 
 }

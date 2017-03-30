@@ -819,24 +819,24 @@ WindPtr (w);
     t_e_ave_old /= iave;
     t_r_ave /= iave;
     t_e_ave /= iave;
-	
+
     if (nmax_r != -1)
-	{
-    wind_n_to_ij (wmain[nmax_r].ndom, nmax_r, &i, &j);
-    Log ("!!wind_update: Max change in t_r %6.0f at cell %4d (%d,%d)\n", dt_r, nmax_r, i, j);
-    Log ("!!wind_update: Ave change in t_r %6.0f from %6.0f to %6.0f\n", (t_r_ave - t_r_ave_old), t_r_ave_old, t_r_ave);
-}
-else
-    Log ("!!wind_update: t_r did not change in any cells this cycle\n");
-	
-if (nmax_e != -1)
-{
-    wind_n_to_ij (wmain[nmax_e].ndom, nmax_e, &i, &j);
-    Log ("!!wind_update: Max change in t_e %6.0f at cell %4d (%d,%d)\n", dt_e, nmax_e, i, j);
-    Log ("!!wind_update: Ave change in t_e %6.0f from %6.0f to %6.0f\n", (t_e_ave - t_e_ave_old), t_e_ave_old, t_e_ave);
-}
-	else
-	    Log ("!!wind_update: t_e did not change in any cells this cycle\n");
+    {
+      wind_n_to_ij (wmain[nmax_r].ndom, nmax_r, &i, &j);
+      Log ("!!wind_update: Max change in t_r %6.0f at cell %4d (%d,%d)\n", dt_r, nmax_r, i, j);
+      Log ("!!wind_update: Ave change in t_r %6.0f from %6.0f to %6.0f\n", (t_r_ave - t_r_ave_old), t_r_ave_old, t_r_ave);
+    }
+    else
+      Log ("!!wind_update: t_r did not change in any cells this cycle\n");
+
+    if (nmax_e != -1)
+    {
+      wind_n_to_ij (wmain[nmax_e].ndom, nmax_e, &i, &j);
+      Log ("!!wind_update: Max change in t_e %6.0f at cell %4d (%d,%d)\n", dt_e, nmax_e, i, j);
+      Log ("!!wind_update: Ave change in t_e %6.0f from %6.0f to %6.0f\n", (t_e_ave - t_e_ave_old), t_e_ave_old, t_e_ave);
+    }
+    else
+      Log ("!!wind_update: t_e did not change in any cells this cycle\n");
 
 
     Log ("Summary  t_r  %6.0f   %6.0f  #t_r and dt_r on this update\n", t_r_ave, (t_r_ave - t_r_ave_old));
@@ -1029,7 +1029,7 @@ wind_rad_init ()
     plasmamain[n].lum = plasmamain[n].lum_rad = plasmamain[n].lum_lines = plasmamain[n].lum_ff = 0.0;
     plasmamain[n].lum_fb = plasmamain[n].lum_z = 0.0;
     plasmamain[n].nrad = plasmamain[n].nioniz = 0;
-	plasmamain[n].comp_nujnu = -1e99;   //1701 NSH Zero the integrated specific intensity for the cell
+    plasmamain[n].comp_nujnu = -1e99;   //1701 NSH Zero the integrated specific intensity for the cell
     plasmamain[n].lum_comp = 0.0;       //1108 NSH Zero the compton luminosity for the cell
     plasmamain[n].heat_comp = 0.0;      //1108 NSH Zero the compton heating for the cell
     plasmamain[n].heat_ind_comp = 0.0;  //1108 NSH Zero the induced compton heating for the cell
