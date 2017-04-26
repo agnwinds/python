@@ -463,7 +463,7 @@ main (argc, argv)
       if (modes.iadvanced)
       {
 
-        rdint ("write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
+        rdint ("@write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
         if (write_atomicdata)
           Log ("You have opted to save a summary of the atomic data\n");
       }
@@ -653,7 +653,7 @@ main (argc, argv)
   if (modes.iadvanced)
   {
     /* Do we require extra diagnostics or not */
-    rdint ("Extra.diagnostics(0=no,1=yes) ", &modes.diag_on_off);
+    rdint ("@Extra.diagnostics(0=no,1=yes) ", &modes.diag_on_off);
     if (modes.diag_on_off)
     {
       get_extra_diagnostics ();

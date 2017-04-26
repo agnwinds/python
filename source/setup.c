@@ -346,14 +346,14 @@ get_grid_params (ndom)
   /* If we are in advanced then allow the user to modify scale lengths */
   if (modes.iadvanced)
   {
-    rdint ("adjust_grid(0=no,1=yes)", &modes.adjust_grid);
+    rdint ("@adjust_grid(0=no,1=yes)", &modes.adjust_grid);
 
     if (modes.adjust_grid)
     {
       Log ("You have opted to adjust the grid scale lengths\n");
-      rddoub ("geo.xlog_scale", &zdom[ndom].xlog_scale);
+      rddoub ("@geo.xlog_scale", &zdom[ndom].xlog_scale);
       if (zdom[ndom].coord_type != SPHERICAL)
-        rddoub ("geo.zlog_scale", &zdom[ndom].zlog_scale);
+        rddoub ("@geo.zlog_scale", &zdom[ndom].zlog_scale);
     }
   }
 
@@ -958,7 +958,7 @@ get_bl_and_agn_params (lstar)
        default is zero which is checked before we call photo_gen_agn */
     geo.pl_low_cutoff = 0.0;
     if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
-      rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
+      rddoub ("@agn_power_law_cutoff", &geo.pl_low_cutoff);
 
     rdint ("geometry_for_pl_source(0=sphere,1=lamp_post)", &geo.pl_geometry);
 
@@ -1009,7 +1009,7 @@ get_bl_and_agn_params (lstar)
        only in advanced mode. default is zero which is checked before we call photo_gen_agn */
     geo.pl_low_cutoff = 0.0;
     if (modes.iadvanced)
-      rddoub ("agn_power_law_cutoff", &geo.pl_low_cutoff);
+      rddoub ("@agn_power_law_cutoff", &geo.pl_low_cutoff);
 
 
     /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
@@ -1589,13 +1589,13 @@ get_standard_care_factors ()
 
   if (modes.iadvanced)
   {
-    rdint ("Use.standard.care.factors(1=yes)", &istandard);
+    rdint ("@Use.standard.care.factors(1=yes)", &istandard);
 
     if (!istandard)
     {
-      rddoub ("Fractional.distance.photon.may.travel", &SMAX_FRAC);
-      rddoub ("Lowest.ion.density.contributing.to.photoabsorption", &DENSITY_PHOT_MIN);
-      rdint ("Keep.photoabs.during.final.spectrum(1=yes)", &modes.keep_photoabs);
+      rddoub ("@Fractional.distance.photon.may.travel", &SMAX_FRAC);
+      rddoub ("@Lowest.ion.density.contributing.to.photoabsorption", &DENSITY_PHOT_MIN);
+      rdint ("@Keep.photoabs.during.final.spectrum(1=yes)", &modes.keep_photoabs);
     }
   }
   return (0);
