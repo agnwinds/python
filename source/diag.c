@@ -127,13 +127,13 @@ get_extra_diagnostics ()
   Log ("get_extra_diagnostics: Getting extra diagnostics as requested...\n");
 
   /* read the options. */
-  rdint("save_cell_statistics", &modes.save_cell_stats);
-  rdint("ispymode", &modes.ispy);
-  rdint("keep_ioncycle_windsaves", &modes.ispy);
-  rdint("save_extract_photons", &modes.ispy);
-  rdint("print_windrad_summary", &modes.ispy);
-  rdint("print_dvds_info", &modes.ispy);
-  rdint("track_resonant_scatters", &modes.ispy);
+  rdint("@save_cell_statistics", &modes.save_cell_stats);
+  rdint("@ispymode", &modes.ispy);
+  rdint("@keep_ioncycle_windsaves", &modes.ispy);
+  rdint("@save_extract_photons", &modes.ispy);
+  rdint("@print_windrad_summary", &modes.ispy);
+  rdint("@print_dvds_info", &modes.ispy);
+  rdint("@track_resonant_scatters", &modes.ispy);
 
   return 0;
 }
