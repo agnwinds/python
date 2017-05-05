@@ -129,11 +129,11 @@ get_extra_diagnostics ()
   /* read the options. */
   rdint("@save_cell_statistics", &modes.save_cell_stats);
   rdint("@ispymode", &modes.ispy);
-  rdint("@keep_ioncycle_windsaves", &modes.ispy);
-  rdint("@save_extract_photons", &modes.ispy);
-  rdint("@print_windrad_summary", &modes.ispy);
-  rdint("@print_dvds_info", &modes.ispy);
-  rdint("@track_resonant_scatters", &modes.ispy);
+  rdint("@keep_ioncycle_windsaves", &modes.keep_ioncycle_windsaves);
+  rdint("@save_extract_photons", &modes.save_extract_photons);
+  rdint("@print_windrad_summary", &modes.print_windrad_summary);
+  rdint("@print_dvds_info", &modes.print_dvds_info);
+  rdint("@track_resonant_scatters", &modes.track_resonant_scatters);
 
   return 0;
 }
