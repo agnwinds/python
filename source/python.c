@@ -32,12 +32,12 @@ Arguments:
 		adjust this number
 	-d	Enters detailed or advanced mode. Allows one to access extra diagnositics and some
 	    	other advanced commands
-    	-f  	Fixed temperature mode - does not attempt to change the temperature of cells.
+    -f  	Fixed temperature mode - does not attempt to change the temperature of cells.
 	-i  	Diagnostic mode which quits after reading in inputs. Used for Travis test suite.
-  --dry-run	Create a new .pf file and stop (equivalent to -i)
+    --dry-run	Create a new .pf file and stop (equivalent to -i)
 	-z  	Mode to connect with zeus - it either runs two cycles in this is the first call - in order
          	to obtain a good starting state, else it runs just one cycle. In both cases, it does
-		not attempt to seek a new temperature, but it does output heating and cooling rates
+    		not attempt to seek a new temperature, but it does output heating and cooling rates
     --version	print out python version, commit hash and if there were files with uncommitted
 	    	changes
       --rseed	set the random number seed to be time based, rather than fixed.

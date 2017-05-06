@@ -22,7 +22,7 @@ routines.
 History:
 
 	15sep 	ksl	Moved calculating of the ionization of the
-			wind to separate rooutines
+			wind to separate routines
 **************************************************************/
 
 
@@ -290,7 +290,7 @@ calculate_ionization (restart_stat)
 
     Log ("!!python: Number of ionizing photons %g lum of ionizing photons %g\n", geo.n_ioniz, geo.lum_ioniz);
 
-/* This step shoudl be MPI_parallelised too */
+/* This step should be MPI_parallelised too */
 
     wind_update (w);
 
