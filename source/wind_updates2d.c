@@ -782,7 +782,7 @@ WindPtr (w);
   }
   else if (modes.zeus_connect == 1 && geo.hydro_domain_number < 0)
   {
-    Error ("wind_updates2d.c Attempting to access a hydro domain in a non hydro run - not writing out hydro file\n");
+    Error ("wind_updates2d:  Attempting to access a hydro domain in a non hydro run - not writing out hydro file\n");
   }
 
   /* 1108 NSH Added commands to report compton heating */

@@ -226,11 +226,7 @@ then the photon frequency will be less. */
 
   if (fabs (dfreq) < EPSILON)
   {
-    Error ("translate: v same at both sides of cell %d\n", one->nwind); /*NSH 130724 shortened error statement, was causing issues with formatting */
-
-/* so dfreq is %2g,\n v_inner %.2g %.2g %.2g v_outer %.2g %.2g %.2g \n",
-	 one->nwind, dfreq, v_inner[0], v_inner[1], v_inner[2], v_outer[0],
-	 v_outer[1], v_outer[2]); This is the part of the above error statement cut out */
+    Error ("calculate_ds: v same at both sides of cell %d\n", one->nwind); 
     x = -1;
     return (smax);              // This is not really the best thing to do, but it avoids disaster below
 
@@ -285,12 +281,6 @@ method). If the macro atom method is not used just get kap_bf to 0 and move on).
 
 
   kap_cont = kap_es + kap_bf_tot + kap_ff;      //total continuum opacity 
-
-  /* To this point kappa is for the part ot the cell that is filled with material so
-   * we must reduce this to account for the filling factor 1409 - ksl */
-
-  //kap_cont*=zdom[ndom].fill;
-  //JM 1411 -- I've incorporated the filling factor directly into the kappa routines 
 
 
 
