@@ -989,97 +989,97 @@ typedef struct photon
     P_HIT_STAR = 3,             //absorbed by photosphere of star,
     P_HIT_DISK = 7,             //Banged into disk
     P_ABSORB = 6,               //Photoabsorbed within wind
-    P_TOO_MANY_SCATTERS = 4,    //in wind after MAXSCAT scatters
-    P_ERROR = 5,                //Too many calls to translate without something happening
-    P_SEC = 8,                  //Photon hit secondary
-    P_ADIABATIC = 9             //records that a photon created a kpkt which was destroyed by adiabatic cooling
-  } istat;                      /*status of photon. */
+        P_TOO_MANY_SCATTERS = 4,    //in wind after MAXSCAT scatters
+        P_ERROR = 5,                //Too many calls to translate without something happening
+        P_SEC = 8,                  //Photon hit secondary
+        P_ADIABATIC = 9             //records that a photon created a kpkt which was destroyed by adiabatic cooling
+      } istat;                      /*status of photon. */
 
-  int nscat;                    /*number of scatterings */
-  int nres;                     /*The line number in lin_ptr of last scatter or wind line creation. Continuum if > nlines. */
-  int nnscat;                   /* Used for the thermal trapping model of
-                                   anisotropic scattering to carry the number of
-                                   scattering to "extract" when needed for wind
-                                   generated photons SS05. */
-  int nrscat;                   /* number of resonance scatterings */
-  int grid;                     /*grid position of the photon in the wind, if
-                                   the photon is in the wind.  If the photon is not
-                                   in the wind, then -1 implies inside the wind cone and  
-                                   -2 implies outside the wind */
+      int nscat;                    /*number of scatterings */
+      int nres;                     /*The line number in lin_ptr of last scatter or wind line creation. Continuum if > nlines. */
+      int nnscat;                   /* Used for the thermal trapping model of
+                                       anisotropic scattering to carry the number of
+                                       scattering to "extract" when needed for wind
+                                       generated photons SS05. */
+      int nrscat;                   /* number of resonance scatterings */
+      int grid;                     /*grid position of the photon in the wind, if
+                                       the photon is in the wind.  If the photon is not
+                                       in the wind, then -1 implies inside the wind cone and  
+                                       -2 implies outside the wind */
 
-  enum origin_enum
-  { PTYPE_STAR = 0,
-    PTYPE_BL = 1,
-    PTYPE_DISK = 2,
-    PTYPE_WIND = 3,
-    PTYPE_AGN = 4,
-    PTYPE_STAR_MATOM = 10,
-    PTYPE_BL_MATOM = 11,
-    PTYPE_DISK_MATOM = 12,
-    PTYPE_WIND_MATOM = 13,
-    PTYPE_AGN_MATOM = 14
-  } origin, origin_orig;        /* Where this photon originated.  If the photon has
-                                   scattered it's "origin" may be changed to "wind". */
-  /* note that we add 10 to origin when processed by a macro-atom
-     which means we need these values in the enum list */
-  int np;                       /*NSH 13/4/11 - an internal pointer to the photon number so 
-                                   so we can write out details of where the photon goes */
-  double path;                  /* SWM - Photon path length */
-}
-p_dummy, *PhotPtr;
+      enum origin_enum
+      { PTYPE_STAR = 0,
+        PTYPE_BL = 1,
+        PTYPE_DISK = 2,
+        PTYPE_WIND = 3,
+        PTYPE_AGN = 4,
+        PTYPE_STAR_MATOM = 10,
+        PTYPE_BL_MATOM = 11,
+        PTYPE_DISK_MATOM = 12,
+        PTYPE_WIND_MATOM = 13,
+        PTYPE_AGN_MATOM = 14
+      } origin, origin_orig;        /* Where this photon originated.  If the photon has
+                                       scattered it's "origin" may be changed to "wind". */
+      /* note that we add 10 to origin when processed by a macro-atom
+         which means we need these values in the enum list */
+      int np;                       /*NSH 13/4/11 - an internal pointer to the photon number so 
+                                       so we can write out details of where the photon goes */
+      double path;                  /* SWM - Photon path length */
+    }
+    p_dummy, *PhotPtr;
 
-PhotPtr photmain;               /* A pointer to all of the photons that have been created in a subcycle. Added to ease 
-                                   breaking the main routine of python into separate rooutines for inputs and running the
-                                   program */
+    PhotPtr photmain;               /* A pointer to all of the photons that have been created in a subcycle. Added to ease 
+                                       breaking the main routine of python into separate rooutines for inputs and running the
+                                       program */
 
-/* minimum value for tau for p_escape_from_tau function- below this we 
-   set to p_escape_ to 1 */
+    /* minimum value for tau for p_escape_from_tau function- below this we 
+       set to p_escape_ to 1 */
 #define TAU_MIN 1e-6
 
 
-/* 68b - ksl - This is a structure in which the history of a single photon bundle can be recorded
- * See phot_util   phot_hist().  It needs to be used carefully.  if phot_hist_on is true
- * then photon histories will be attempted.
- */
+    /* 68b - ksl - This is a structure in which the history of a single photon bundle can be recorded
+     * See phot_util   phot_hist().  It needs to be used carefully.  if phot_hist_on is true
+     * then photon histories will be attempted.
+     */
 
 #define MAX_PHOT_HIST	1000
-int n_phot_hist, phot_hist_on, phot_history_spectrum;
-struct photon xphot_hist[MAX_PHOT_HIST];
+    int n_phot_hist, phot_hist_on, phot_history_spectrum;
+    struct photon xphot_hist[MAX_PHOT_HIST];
 
-struct basis
-{
-  double a[3][3];
+    struct basis
+    {
+      double a[3][3];
 
-}
-basis_cartesian;
+    }
+    basis_cartesian;
 
 
-/* The next section defines the spectrum arrays.  The spectrum structure contains
-   the selection criteria for each spectrum as well as the array in which to store the
-   spectrum.  The first MSPEC spectra are reserved for the total generated spectrum,
-   total emitted spectrum, the total spectrum of photons which are scattered and 
-   the total spectrum of photons which are absorbed.  The remainder of the spectra pertain 
-   to the spectrum as seen from various directions. Note that the space for the spectra 
-   are allocated using a calloc statement in spectrum_init.  1409-ksl-A new spectrum
-   was added.  This will be the first of the spectra.  It is simply the generated spectrum
-   before passing through the wind.  It has the orginal weights as generated.  */
+    /* The next section defines the spectrum arrays.  The spectrum structure contains
+       the selection criteria for each spectrum as well as the array in which to store the
+       spectrum.  The first MSPEC spectra are reserved for the total generated spectrum,
+       total emitted spectrum, the total spectrum of photons which are scattered and 
+       the total spectrum of photons which are absorbed.  The remainder of the spectra pertain 
+       to the spectrum as seen from various directions. Note that the space for the spectra 
+       are allocated using a calloc statement in spectrum_init.  1409-ksl-A new spectrum
+       was added.  This will be the first of the spectra.  It is simply the generated spectrum
+       before passing through the wind.  It has the orginal weights as generated.  */
 
 
 
 #define MSPEC                            7
-int nspectra;                   /* After create_spectrum, the number of elements allocated for s, or 
-                                   alternatively the number of spectra one has to work with.  Note that
-                                   general s[0],s[1] and s[2] are the escaping, scattered and absorbed photons,
-                                   while elements higher than this will contain spectra as seen by different observers */
+    int nspectra;                   /* After create_spectrum, the number of elements allocated for s, or 
+                                       alternatively the number of spectra one has to work with.  Note that
+                                       general s[0],s[1] and s[2] are the escaping, scattered and absorbed photons,
+                                       while elements higher than this will contain spectra as seen by different observers */
 
 
-int nscat[MAXSCAT + 1], nres[MAXSCAT + 1], nstat[NSTAT];
+    int nscat[MAXSCAT + 1], nres[MAXSCAT + 1], nstat[NSTAT];
 
-typedef struct spectrum
-{
-  char name[40];
-  float freqmin, freqmax, dfreq;
-  float lfreqmin, lfreqmax, ldfreq;     /* NSH 1302 - values for logarithmic spectra */
+    typedef struct spectrum
+    {
+      char name[40];
+      float freqmin, freqmax, dfreq;
+      float lfreqmin, lfreqmax, ldfreq;     /* NSH 1302 - values for logarithmic spectra */
   double lmn[3];
   double mmax, mmin;            /* Used only in live or die situations, mmax=cos(angle-DANG_LIVE_OR_DIE)
                                    and mmim=cos(angle+DANG_LIVE_OR_DIE).   In actually defining this
