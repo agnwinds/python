@@ -574,24 +574,6 @@ zero_emit (t)
   double macro_bb_heating (), macro_bf_heating ();
 
 
-  /* NOTE - IMPORTANT
-
-     SS May 04: I'm removing adiabatic cooling for now. I'll need to be put
-     back in once the heating/cooling tests are all sorted out. 
-
-     SS June 04: Adiabatic cooling is still not switched on. But it is now 
-     switched off in emission.c rather than here.
-
-     SS July 04: Adiabatic cooling is now switched back on. These comments can
-     all be deleted once this is tested (soon).
-   */
-
-  /* This block is not needed now - SS July 04
-     if (xxxplasma->lum_adiabatic > 0)
-     {
-     Error("zero_emit: adiabatic cooling is switched on.\n");
-     }
-   */
 
   /*Original method */
   xxxplasma->t_e = t;
