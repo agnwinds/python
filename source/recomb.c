@@ -390,12 +390,13 @@ total_fb (one, t, f1, f2, mode)
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
-  if (t < 1000. || f2 < f1)
-    return (0);                 /* It's too cold to emit */
+  if (t < 100. || f2 < f1)
+      t=100.;   /* Set the temperature to 100 K so that if there are free electrons emission by this process continues */ 
+//    return (0);                 /* It's too cold to emit */
 
 // Initialize the free_bound structures if that is necessary
   if (mode == 1)
-    init_freebound (1.e3, 1.e9, f1, f2);        //NSH 140121 increased limit to take account of hot plasmas
+    init_freebound (100., 1.e9, f1, f2);        //NSH 140121 increased limit to take account of hot plasmas
 
 
 // Calculate the number of recombinations whenever calculating the fb_luminosities
