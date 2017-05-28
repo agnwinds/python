@@ -419,14 +419,6 @@ return and record an error */
   else if (one->inwind == W_NOT_INWIND)
   {                             //The cell is not in the wind at all
 
-/* 
-061104--58b--ksl -- In previous versions of the program, this error could be ignored
-because of the fact that we used a volume integration to determine whether the cell
-was in the wind, but now we are explicitly handling this case, see above.  So if this
-error continues to appear, new investigations are required.
-*/
-
-
     Error ("translate_in_wind: Grid cell %d of photon is not in wind, moving photon %.2e\n", n, smax);
     Error ("translate_in_wind: photon %d position: x %g y %g z %g\n", p->np, p->x[0], p->x[1], p->x[2]);
     move_phot (p, smax);
@@ -437,19 +429,13 @@ error continues to appear, new investigations are required.
 
 /* At this point we now know how far the photon can travel in it's current grid cell */
 
-
-
   smax += one->dfudge;          /* dfudge is to force the photon through the cell boundaries. */
 
-
-
-
-/* The next set of limits the distance a photon can travel.  There are 
+/* Set limits the distance a photon can travel.  There are 
 a good many photons which travel more than this distance without this 
 limitation, at least in the standard 30 x 30 instantiation.  It does
-make small differences in the structure of lines in some cases.  It does 
-tend to slow the program down significantly because it forces more calls to 
-radiation, which is the single largest contributer to execution time.*/
+make small differences in the structure of lines in some cases.  
+The choice of SMAX_FRAC can affect execution time.*/
 
   if (smax > SMAX_FRAC * length (p->x))
   {
@@ -459,7 +445,7 @@ radiation, which is the single largest contributer to execution time.*/
   /* We now determine whether scattering prevents the photon from reaching the far edge of
      the cell.  calculate_ds calculates whether there are scatterings and makes use of the 
      current position of the photon and the position of the photon at the far edge of the 
-     shell.  It needs a "trial photon at the maximimum distance however */
+     shell.  It needs a "trial photon at the maximum distance however */
 
 
 /* Note that ds_current does not alter p in any way at present 02jan ksl */
@@ -476,32 +462,29 @@ radiation, which is the single largest contributer to execution time.*/
    things up If the photon is going to scatter in this cell, radiation also reduces 
    the weight of the photon due to continuum absorption, e.g. free free */
 
-/*04apr-ksl--In the macro-method, b-f and other continuum processes do not reduce the photon
-weight, but are treated as as scattering processes.  Therfore most of what was in the old
-subroutine radiation can be avoided. 
-
-
-*/
-
   if (geo.rt_mode == 2)
   {                             // Macro-method
+    /* In the macro-method, b-f and other continuum processes do not reduce the photon
+    weight, but are treated as as scattering processes.  Therfore most of what was in 
+    subroutine radiation can be avoided. 
+    */
 
-    one = &w[p->grid];          /* So one is the grid cell of interest */
+
+    one = &w[p->grid];         
     nplasma = one->nplasma;
     xplasma = &plasmamain[nplasma];
     xplasma->ntot++;
 
-/*57h -- ksl -- 071506 moved steps not needed in calculation of detailed spectrum inside if statement
-for consistency.  Delete comment when satisfied OK */
 
-    if (geo.ioniz_or_extract == 1)      //don't need to record estimators if this is set to 0 (spectrum cycle)
+    if (geo.ioniz_or_extract == 1)       
     {
+     /* For an ionization cycle */
       bf_estimators_increment (one, p, ds_current);
-/*photon weight times distance in the shell is proportional to the mean intensity */
+
+    /*photon weight times distance in the shell is proportional to the mean intensity */
       xplasma->j += p->w * ds_current;
 
-/* frequency weighted by the weights and distance       in the shell .  See eqn 2 ML93 */
-
+    /* frequency weighted by the weights and distance in the shell.  See eqn 2 ML93 */
       xplasma->ave_freq += p->freq * p->w * ds_current;
 
     }

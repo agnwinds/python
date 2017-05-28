@@ -209,7 +209,7 @@ matrix_ion_populations (xplasma, mode)
     partition_functions (xplasma, 4);   // Set to ground state 
   }
 
-  /* Next we need to obtain an initian guess for the electron density. In the past this has been done by calculating the
+  /* Next we need to obtain an initial guess for the electron density. In the past this has been done by calculating the
      hydrogen density directly from the Saha equation at the current electron temperature. In initial testing of this mode -
      this seemed to be a little unstable. At the moment, we use the last ionization state to compute n_e. For the first
      iteraion, this will just be calculated in LTE from the initial temperature structure of the wind, which will give almost

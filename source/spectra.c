@@ -594,7 +594,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
     if ((i % 10) == 9)
       Log ("\n");
   }
-  Log ("\nNo of photons and their fates\n");
+  Log ("\nNo of photons and their fates\n!!PhotFate: ");
   for (i = 0; i < NSTAT; i++)
   {
     Log ("%6d", nstat[i]);
