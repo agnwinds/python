@@ -190,7 +190,7 @@ cone_dummy, *ConePtr;
 
 /* End of structures which are used to define boundaries to the emission regions */
 
-#define NDIM_MAX 500            // maximum size of the grid in each dimension
+#define NDIM_MAX 10000          // maximum size of the grid in each dimension
 
 typedef struct domain
 {
@@ -413,7 +413,7 @@ struct geometry
                                    of emission, the emissivity will be the Einstein A coefficient
                                    1, the atmosphere is completely scattering, there will be no
                                    interchange of energy between the photons and the electrons
-                                   as a result of readiation transfer
+                                   as a result of radiation transfer
                                    2, then a simple single scattering approximation is applied in which
                                    case the scattered flux is just  A21/(C21+A21). 
                                    3, then radiation trapping is included as well.
