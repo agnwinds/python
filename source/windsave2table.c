@@ -264,7 +264,7 @@ create_master_table (ndom, rootname)
     /* First assemble the header line
      */
 
-    sprintf (start, "%8s %4s %8s %6s %8s %8s %8s ", "r", "i", "inwind", "converge", "v_x", "v_y", "v_z");
+    sprintf (start, "%9s %4s %8s %6s %8s %8s %8s ", "r", "i", "inwind", "converge", "v_x", "v_y", "v_z");
     strcpy (one_line, start);
     n = 0;
     while (n < ncols)
@@ -282,7 +282,7 @@ create_master_table (ndom, rootname)
     for (i = 0; i < ndim2; i++)
     {
       // This line is different from the two d case
-      sprintf (start, "%8.2e %4d %6d %8.0f %8.2e %8.2e %8.2e ",
+      sprintf (start, "%9.3e %4d %6d %8.0f %8.2e %8.2e %8.2e ",
                wmain[nstart + i].r, i, wmain[nstart + i].inwind,
                converge[i], wmain[nstart + i].v[0], wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
       strcpy (one_line, start);
@@ -478,7 +478,7 @@ create_heat_table (ndom, rootname)
     /* First assemble the header line
      */
 
-    sprintf (start, "%8s %4s %8s %6s %8s %8s %8s ", "r", "i", "inwind", "converge", "v_x", "v_y", "v_z");
+    sprintf (start, "%9s %4s %8s %6s %8s %8s %8s ", "r", "i", "inwind", "converge", "v_x", "v_y", "v_z");
     strcpy (one_line, start);
     n = 0;
     while (n < ncols)
@@ -496,7 +496,7 @@ create_heat_table (ndom, rootname)
     for (i = 0; i < ndim2; i++)
     {
       // This line is different from the two d case
-      sprintf (start, "%8.2e %4d %6d %8.0f %8.2e %8.2e %8.2e ",
+      sprintf (start, "%9.3e %4d %6d %8.0f %8.2e %8.2e %8.2e ",
                wmain[nstart + i].r, i, wmain[nstart + i].inwind,
                converge[i], wmain[nstart + i].v[0], wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
       strcpy (one_line, start);
