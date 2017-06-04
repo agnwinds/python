@@ -50,17 +50,13 @@ int   matrix_ion_populations (xplasma,mode)
 #include <string.h>
 #include <math.h>
 #include "atomic.h"
-// struct topbase_phot *xtop;
-// double g1, g2, xne, xip;
 #define SAHA 4.82907e15
-// double xip, xxxne, qromb_temp;
 #include "python.h"
 
 
 #include <gsl/gsl_block.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
-// #include <gsl/gsl_blas.h>
 #include "my_linalg.h"
 
 
@@ -76,18 +72,13 @@ matrix_ion_populations (xplasma, mode)
   int nn, mm, nrows;
   double rate_matrix[nions][nions];
   double newden[NIONS];
-  // double nh, t_e, t_r, www;  www is not really used 
-  // double nh, t_e, t_r; t_r is not used 
   double nh, t_e;
   double xne, xxne, xxxne;
-  //double xsaha, x, theta;
-  //int s;                                                                                                
   double b_temp[nions];
   double *b_data, *a_data;
   double *populations;
   int ierr, niterate;
   double xnew;
-  //double xden[nelements];
   int xion[nions];              // This array keeps track of what ion is in each line
   int xelem[nions];             // This array keeps track of the element for each ion
   double pi_rates[nions];
@@ -98,8 +89,6 @@ matrix_ion_populations (xplasma, mode)
 
   nh = xplasma->rho * rho2nh;   // The number density of hydrogen ions - computed from density
   t_e = xplasma->t_e;           // The electron temperature in the cell - used for collisional processes 
-  // t_r = xplasma->t_r;                // The radiation temperature - used for PI if we have a BB approximation
-  // www = xplasma->w;          // The radiative weight in the cell - again for BB approximation for PI
 
   /* We now calculate the total abundances for each element to allow us to use fractional abundances */
 
@@ -216,30 +205,10 @@ matrix_ion_populations (xplasma, mode)
      the same result as the original procedure, or for successive calculations, it should be a better guess. I've leftin the
      original code, commented out...  */
 
-//  xne = xxne = xxxne = get_ne (newden);       // Set n_e to the current value. 
   xne = xxne = xxxne = get_ne (xplasma->density);       //Even though the abundances are fractional, we need the real electron density
 
 
   /* xne is the current working number xxne */
-
-
-  /* These following commented out lines calculate the electron density from Saha given the current electron temperature */
-  // if (t_e < MIN_TEMP)
-  // t_e = MIN_TEMP;  fudge to prevent divide by zeros 
-  // xsaha = SAHA * pow (t_e, 1.5);
-  // theta = xsaha * exp (-ion[0].ip / (BOLTZMANN * t_e)) / nh;
-  // if (theta < THETAMAX)
-  // {
-  // x = (-theta + sqrt (theta * theta + 4 * theta)) / 2.;
-  // xne = xxne = xxxne = x * nh;
-  // }
-  // else
-  // xne = xxne = xxxne = nh; /*xxne is just a store so the error can report the starting value of ne. */
-  /* xxxne is the shared variable so the temperature solver routine can access it */
-  // if (xne < 1.e-6)
-  // xne = xxxne = 1.e-6; /* Set a minimum ne to assure we can calculate
-  // xne the first time through the loop 
-
 
 
   /* We are now going to iterate on the electron density - MAXITERATIONS is set in python.h and is currently (78) set to 200.
@@ -349,7 +318,6 @@ matrix_ion_populations (xplasma, mode)
         newden[nn] = DENSITY_MIN;
     }
     free (populations);
-//      xnew = get_ne (newden); /* determine the electron density for this density distribution */
 
 
 /* We need to get the 'true' new electron density so we need to do a little loop here to compute it */
@@ -635,7 +603,6 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
   {
     if (ion[nn].istate == 1)
     {
-//        b_temp[nn] = nh * ele[xelem[nn]].abun;
       b_temp[nn] = 1.0;         //In the relative abundance schene this equals one.
 
       for (mm = 0; mm < nions; mm++)
