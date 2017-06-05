@@ -249,7 +249,7 @@ summarize_atomic: summarize_atomic.o get_atomicdata.o log.o rdpar.o synonyms.o
 	mv $@ $(BIN)
 
 
-table_objects = windsave2table.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
+table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
 		emission.o recomb.o util.o detail.o \
 		pdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
