@@ -349,10 +349,15 @@ calculate_ionization (restart_stat)
       if (modes.keep_ioncycle_windsaves)
       {
         strcpy (dummy, "");
-        // sprintf (dummy, "diag_%s/python%02d.wind_save", files.root,geo.wcycle);
-        sprintf (dummy, "Z%s%02d.wind_save", files.root,geo.wcycle);
+        sprintf (dummy, "python%02d.wind_save", geo.wcycle);
         wind_save (dummy);
         Log ("Saved wind structure in %s\n", dummy);
+      }
+      if (modes.make_tables)
+      {
+          strcpy(dummy,"");
+          sprintf(dummy,"diag_%s/%s%02d",files.root,files.root,geo.wcycle);
+          do_windsave2table(dummy);
       }
 
 #ifdef MPI_ON

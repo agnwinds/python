@@ -49,6 +49,7 @@ do_windsave2table(root)
   int ndom;
   ochoice = 1;
   char rootname[LINELENGTH];
+  int create_master_table(), create_heat_table(), create_ion_table();
 
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
