@@ -365,42 +365,48 @@ create_heat_table (ndom, rootname)
   c[4] = get_one (ndom, "t_r");
   strcpy (column_name[4], "t_r");
 
-  c[5] = get_one (ndom, "heat_tot");
-  strcpy (column_name[5], "heat_tot");
+  c[5] = get_one (ndom, "w");
+  strcpy (column_name[5], "w");
 
-  c[6] = get_one (ndom, "heat_comp");
-  strcpy (column_name[6], "heat_comp");
+  c[6] = get_one (ndom, "heat_tot");
+  strcpy (column_name[6], "heat_tot");
 
-  c[7] = get_one (ndom, "heat_lines");
-  strcpy (column_name[7], "heat_lines");
+  c[7] = get_one (ndom, "heat_comp");
+  strcpy (column_name[7], "heat_comp");
 
-  c[8] = get_one (ndom, "heat_ff");
-  strcpy (column_name[8], "heat_ff");
+  c[8] = get_one (ndom, "heat_lines");
+  strcpy (column_name[8], "heat_lines");
 
-  c[9] = get_one (ndom, "heat_photo");
-  strcpy (column_name[9], "heat_photo");
+  c[9] = get_one (ndom, "heat_ff");
+  strcpy (column_name[9], "heat_ff");
 
-  c[10] = get_one (ndom, "heat_auger");
-  strcpy (column_name[10], "heat_auger");
+  c[10] = get_one (ndom, "heat_photo");
+  strcpy (column_name[10], "heat_photo");
 
-  c[11] = get_one (ndom, "lum_comp");
-  strcpy (column_name[11], "lum_comp");
+  c[11] = get_one (ndom, "heat_auger");
+  strcpy (column_name[11], "heat_auger");
 
-  c[12] = get_one (ndom, "lum_lines");
-  strcpy (column_name[12], "lum_lines");
+  c[12] = get_one (ndom, "lum_tot");
+  strcpy (column_name[12], "lum_tot");
 
-  c[13] = get_one (ndom, "lum_dr");
-  strcpy (column_name[13], "lum_dr");
+  c[13] = get_one (ndom, "lum_comp");
+  strcpy (column_name[13], "lum_comp");
 
-  c[14] = get_one (ndom, "lum_ff");
-  strcpy (column_name[14], "lum_ff");
+  c[14] = get_one (ndom, "lum_lines");
+  strcpy (column_name[14], "lum_lines");
+
+  c[15] = get_one (ndom, "lum_dr");
+  strcpy (column_name[15], "lum_dr");
+
+  c[16] = get_one (ndom, "lum_ff");
+  strcpy (column_name[16], "lum_ff");
 
 
-  c[15] = get_one (ndom, "lum_fb");
-  strcpy (column_name[15], "lum_fb");
+  c[17] = get_one (ndom, "lum_fb");
+  strcpy (column_name[17], "lum_fb");
 
   /* This should be the maxium number above +1 */
-  ncols = 16;
+  ncols = 18;
 
 
   converge = get_one (ndom, "converge");
@@ -915,6 +921,14 @@ get_one (ndom, variable_name)
       else if (strcmp (variable_name, "lum_dr") == 0)
       {
         x[n] = plasmamain[nplasma].lum_dr;
+      }
+      else if (strcmp (variable_name, "lum_tot") == 0)
+      {
+        x[n] = plasmamain[nplasma].lum_tot;
+      }
+      else if (strcmp (variable_name, "w") == 0)
+      {
+        x[n] = plasmamain[nplasma].w;
       }
 
 

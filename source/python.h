@@ -766,11 +766,12 @@ typedef struct plasma
   int *scatters;                /* 68b - The number of scatters in this cell for each ion. 78 - changed to dynamic allocation */
   double *xscatters;            /* 68b - Diagnostic measure of energy scattered out of beam on extract. 78 - changed to dynamic allocation */
   double *heat_ion;             /* The amount of energy being transferred to the electron pool
-                                   sby this ion via photoionization. 78 - changed to dynamic allocation */
+                                   by this ion via photoionization. 78 - changed to dynamic allocation */
   double *lum_ion;              /* The amount of energy being released from the electron pool
                                    by this ion via recombination. 78 - changed to dynamic allocation */
   double *lum_inner_ion;
-  double j, ave_freq, lum;      /*Respectively mean intensity, intensity_averaged frequency, 
+  //OLD double j, ave_freq, lum;      /*Respectively mean intensity, intensity_averaged frequency, 
+  double j, ave_freq;      /*Respectively mean intensity, intensity_averaged frequency, 
                                    luminosity and absorbed luminosity of shell */
   double xj[NXBANDS], xave_freq[NXBANDS];       /* 1108 NSH frequency limited versions of j and ave_freq */
   double fmin[NXBANDS];         /* the minimum freqneucy photon seen in a band - this is incremented during photon flight */
@@ -785,13 +786,14 @@ typedef struct plasma
   double xsd_freq[NXBANDS];     /*1208 NSH the standard deviation of the frequency in the band */
   int nxtot[NXBANDS];           /* 1108 NSH the total number of photon passages in frequency bands */
   double max_freq;              /*1208 NSH The maximum frequency photon seen in this cell */
+  double lum_tot;               /* The total luminosity of all processes in the cell (Not the same 
+                                   as what escapes the cell) */
   double lum_lines, lum_ff, lum_adiabatic;
-  double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to computecompton cooling-  only needs computing once per cycle */
   double lum_comp;              /* 1108 NSH The compton luminosity of the cell */
   double lum_di;                /* 1409 NSH The direct ionization luminosity */
   double lum_dr;                /* 1109 NSH The dielectronic recombination luminosity of the cell */
   double lum_fb, lum_z;         /*fb luminosity & fb of metals metals */
-  double lum_rad, lum_rad_old;  /* The specfic radiative luminosity in frequencies defined by freqmin
+  double lum_rad, lum_rad_old;  /* The specific radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
 
   double lum_ioniz;
@@ -803,6 +805,7 @@ typedef struct plasma
   double lum_rad_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
 
+  double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to computecompton cooling-  only needs computing once per cycle */
 
   double dmo_dt[3];             /*Radiative force of wind */
   int npdf;                     /* The number of points actually used in the luminosity pdf */

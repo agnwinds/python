@@ -411,7 +411,7 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].j_direct, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].j_scatt, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].ave_freq, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n].lum, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n].lum_tot, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].xj, NXBANDS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].xave_freq, NXBANDS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].xsd_freq, NXBANDS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -544,7 +544,7 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].j_direct, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].j_scatt, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].ave_freq, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_tot, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].xj, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].xave_freq, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].xsd_freq, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -709,7 +709,7 @@ WindPtr (w);
 
     /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
        cycles in the windsavefile even if the spectral cycles are run */
-    plasmamain[nplasma].lum_ioniz = plasmamain[nplasma].lum;
+    plasmamain[nplasma].lum_ioniz = plasmamain[nplasma].lum_tot;
     plasmamain[nplasma].lum_ff_ioniz = plasmamain[nplasma].lum_ff;
     plasmamain[nplasma].lum_fb_ioniz = plasmamain[nplasma].lum_fb;
     plasmamain[nplasma].lum_z_ioniz = plasmamain[nplasma].lum_z;
@@ -1027,7 +1027,7 @@ wind_rad_init ()
     plasmamain[n].heat_tot = plasmamain[n].heat_ff = plasmamain[n].heat_photo = plasmamain[n].heat_lines = 0.0;
     plasmamain[n].heat_z = 0.0;
     plasmamain[n].max_freq = 0.0;       //NSH 120814 Zero the counter which works out the maximum frequency seen in a cell and hence the maximum applicable frequency of the power law estimators.
-    plasmamain[n].lum = plasmamain[n].lum_rad = plasmamain[n].lum_lines = plasmamain[n].lum_ff = 0.0;
+    plasmamain[n].lum_tot = plasmamain[n].lum_rad = plasmamain[n].lum_lines = plasmamain[n].lum_ff = 0.0;
     plasmamain[n].lum_fb = plasmamain[n].lum_z = 0.0;
     plasmamain[n].nrad = plasmamain[n].nioniz = 0;
     plasmamain[n].comp_nujnu = -1e99;   //1701 NSH Zero the integrated specific intensity for the cell
@@ -1205,7 +1205,7 @@ wind_rad_summary (w, filename, mode)
              "%-3d %8.3e %8.3e %8.3e %8d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
              n, w[n].x[0], w[n].x[2], plasmamain[n].j,
              plasmamain[n].ntot, plasmamain[nplasma].ave_freq,
-             plasmamain[nplasma].t_r, plasmamain[nplasma].w, plasmamain[nplasma].lum, plasmamain[nplasma].heat_tot);
+             plasmamain[nplasma].t_r, plasmamain[nplasma].w, plasmamain[nplasma].lum_tot, plasmamain[nplasma].heat_tot);
 
   }
 

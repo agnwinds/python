@@ -63,7 +63,7 @@ History:
 			to remove the pointer call.  Ultimately rewrite
 			using plasma structure alone.
 	11aug	nsh	70 Modifications made to incorporate compton cooling
-        11sep   nsh     70 Modifications in incorporate DR cooling (very approximate at the moment)
+    11sep   nsh     70 Modifications in incorporate DR cooling (very approximate at the moment)
 	12sep	nsh	73 Added a counter for adiabatic luminosity (!)
  	13jul	nsh	76 Split up adiabatic luminosity into heating and cooling.
  
