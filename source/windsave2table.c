@@ -264,7 +264,7 @@ create_master_table (ndom, rootname)
     /* First assemble the header line
      */
 
-    sprintf (start, "%9s %4s %8s %6s %8s %8s %8s ", "r", "i", "inwind", "converge", "v_x", "v_y", "v_z");
+    sprintf (start, "%9s %4s %6s %6s %8s %8s %8s ", "r", "i", "inwind", "converge", "v_x", "v_y", "v_z");
     strcpy (one_line, start);
     n = 0;
     while (n < ncols)
@@ -478,7 +478,7 @@ create_heat_table (ndom, rootname)
     /* First assemble the header line
      */
 
-    sprintf (start, "%9s %4s %8s %6s %8s %8s %8s ", "r", "i", "inwind", "converge", "v_x", "v_y", "v_z");
+    sprintf (start, "%9s %4s %6s %6s %8s %8s %8s ", "r", "i", "inwind", "converge", "v_x", "v_y", "v_z");
     strcpy (one_line, start);
     n = 0;
     while (n < ncols)
