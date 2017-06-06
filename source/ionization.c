@@ -642,6 +642,8 @@ zero_emit (t)
   xxxplasma->lum_tot=xxxplasma->lum_adiabatic + xxxplasma->lum_dr + xxxplasma->lum_di + xxxplasma->lum_comp + total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);
 
   difference = xxxplasma->heat_tot - xxxplasma->lum_tot;
+  // Test for just ff
+  //difference = xxxplasma->heat_ff - xxxplasma->lum_ff;
   //
   // OLD difference = xxxplasma->heat_tot - xxxplasma->lum_adiabatic - xxxplasma->lum_dr - xxxplasma->lum_di - xxxplasma->lum_comp - total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);  //NSH 1110 - total emission no longer computes compton.*/
 
