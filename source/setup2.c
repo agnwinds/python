@@ -609,7 +609,6 @@ init_advanced_modes ()
   modes.keep_ioncycle_windsaves = 0;    // want to save wind file each ionization cycle
   modes.track_resonant_scatters = 0;    // want to track resonant scatters
   modes.save_extract_photons = 0;       // we want to save details on extracted photons
-  modes.print_windrad_summary = 0;      // we want to print the wind rad summary each cycle
   modes.adjust_grid = 0;        // the user wants to adjust the grid scale
   modes.diag_on_off = 0;        // extra diagnostics
   modes.use_debug = 0;

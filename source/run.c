@@ -244,8 +244,6 @@ calculate_ionization (restart_stat)
     if (geo.rt_mode == 2)
       Log ("Luminosity taken up by adiabatic kpkt destruction %18.12e number of packets %d\n", zz_adiab, nn_adiab);
 
-    if (modes.print_windrad_summary)
-      wind_rad_summary (w, files.windrad, "a");
 
 
 
@@ -556,8 +554,6 @@ make_spectra (restart_stat)
 
     trans_phot (w, p, geo.select_extract);
 
-    if (modes.print_windrad_summary)
-      wind_rad_summary (w, files.windrad, "a");
 
 
     spectrum_create (p, freqmin, freqmax, geo.nangles, geo.select_extract);

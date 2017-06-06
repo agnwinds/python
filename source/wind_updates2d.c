@@ -191,8 +191,6 @@ WindPtr (w);
     nwind = plasmamain[n].nwind;
     volume = w[nwind].vol;
 
-    //volume = plasmamain[n].vol;     // 1411 JM -- we want volume to be the filled volume
-    //1504 -- JM No we don't! The mean intensity shouldn't change if we *just* clump
 
 
     /* Start with a call to the routine which normalises all the macro atom 
@@ -263,7 +261,6 @@ WindPtr (w);
 
     /* 1108 NSH/KSL  This loop is to calculate the frequency banded j and ave_freq variables */
 
-    /* 71 - 111279 - ksl - Small modification to reflect the fact that nxfreq has been moved into the geo structure */
     for (i = 0; i < geo.nxfreq; i++)
     {                           /*loop over number of bands */
       if (plasmamain[n].nxtot[i] > 0)
@@ -1140,81 +1137,6 @@ wind_rad_init ()
 
   return (0);
 }
-
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis: wind_rad_summary(w,filename,mode) writes out a file which sumarizes the
-	the properties of the radiation field in each cell in the wind. 
-Arguments:		
-	WindPtr w;
-	char filename[]		Name of the output file
-	char mode[]		Either "w" to write a new file or "a" to append to
-						and existing file
-Returns:
- 
-Description:	
-	
-Notes:
-	There is not much point in calling this until you have propagated a few photons
-History:
- 	97jan      ksl	Coding on python began.
-	06may	ksl	57+: Began modificatioins to split structures.  Much of this
-			will end up in the plasma structure.
-
-**************************************************************/
-
-int istat_wind_rad_summary = 0;
-
-int
-wind_rad_summary (w, filename, mode)
-     WindPtr w;
-     char filename[], mode[];
-{
-  FILE *fopen (), *fptr;
-  int n;
-  int nplasma;
-
-
-  /* Open or reopen the file where you want to put the summary of the radiation properties of the wind */
-  if (istat_wind_rad_summary == 0)
-  {                             /*First time through recreate the file regardless */
-    if ((fptr = fopen (filename, "w")) == NULL)
-    {
-      Error ("wind_rad_summary: Unable to open %s\n", filename);
-      exit (0);
-    }
-
-  }
-  else
-  {
-    if ((fptr = fopen (filename, mode)) == NULL)
-    {
-      Error ("wind_rad_summary: Unable to reopen %s with mode %s\n", filename, mode);
-      exit (0);
-    }
-  }
-
-  istat_wind_rad_summary++;
-
-  fprintf (fptr, "n       x         z         j       ntot    ave_freq    T_rad      W       Lum     Lum_abs\n");
-  for (n = 0; n < NDIM2 - 1; n++)
-  {
-    nplasma = w[n].nplasma;
-    fprintf (fptr,
-             "%-3d %8.3e %8.3e %8.3e %8d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
-             n, w[n].x[0], w[n].x[2], plasmamain[n].j,
-             plasmamain[n].ntot, plasmamain[nplasma].ave_freq,
-             plasmamain[nplasma].t_r, plasmamain[nplasma].w, plasmamain[nplasma].lum_tot, plasmamain[nplasma].heat_tot);
-
-  }
-
-  fclose (fptr);
-
-  return (0);
-}
-
-
 
 
 
