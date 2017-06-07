@@ -757,7 +757,7 @@ typedef struct plasma
 
   double mean_ds;               /* NSH 6/9/12 Added to allow a check that a thin shell is really optcially thin */
   int n_ds;                     /* NSH 6/9/12 Added to allow the mean dsto be computed */
-  int nrad;                     /* Total number of photons radiated within the cell */
+  int nrad;                     /* Total number of photons created within the cell */
   int nioniz;                   /* Total number of photons capable of ionizing H */
   double *ioniz, *recomb;       /* Number of ionizations and recombinations for each ion.
                                    The sense is ionization from ion[n], and recombinations 

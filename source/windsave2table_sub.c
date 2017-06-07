@@ -178,15 +178,21 @@ create_master_table (ndom, rootname)
   c[12] = get_one (ndom, "dmo_dt_z");
   strcpy (column_name[12], "dmo_dt_z");
 
-  c[13] = get_one (ndom, "ntot");
-  strcpy (column_name[13], "ntot");
+  c[13] = get_one (ndom, "ip");
+  strcpy (column_name[13], "ip");
 
-  c[14] = get_one (ndom, "ip");
-  strcpy (column_name[14], "ip");
+  c[14] = get_one (ndom, "ntot");
+  strcpy (column_name[14], "ntot");
+
+  c[15] = get_one (ndom, "nrad");
+  strcpy (column_name[15], "nrad");
+
+  c[16] = get_one (ndom, "nioniz");
+  strcpy (column_name[16], "nioniz");
 
 
   /* This should be the maxium number above +1 */
-  ncols = 15;
+  ncols = 17;
 
 
   converge = get_one (ndom, "converge");
@@ -929,6 +935,14 @@ get_one (ndom, variable_name)
       else if (strcmp (variable_name, "w") == 0)
       {
         x[n] = plasmamain[nplasma].w;
+      }
+      else if (strcmp (variable_name, "nrad") == 0)
+      {
+        x[n] = plasmamain[nplasma].nrad;
+      }
+      else if (strcmp (variable_name, "nioniz") == 0)
+      {
+        x[n] = plasmamain[nplasma].nioniz;
       }
 
 

@@ -416,12 +416,6 @@ radiation (p, ds)
   }
 
 
-
-
-
-
-
-
   /*74a_ksl: 121215 -- Added to check on a problem photon */
   if (sane_check (p->w))
   {
