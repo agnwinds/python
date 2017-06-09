@@ -487,10 +487,24 @@ meaning in nebular concentrations.
 }
 
 
-/* calc_te determines and returns the electron temperature in the wind such that the energy emitted
-   by the wind is equal to energy emitted.
+/* 
+ 
+   Synopsis
+
+   calc_te determines and returns the electron temperature in the wind such that the energy emitted
+   by the wind is equal to energy emitted (asssuming it is in the interval bracketed by
+   tmin and tmax.)
+
+   Argumnets
+
+   xplasma  a pointer to a single PlasmaPtr (often a dummy)
+   tmin     the minimum allowed temperature
+   tmax     the mqximimu allowed temperature
 
    Description:
+
+   Notes:
+
    calc_te does not modify any abundances.  It simply takes the current value of the heating in the
    cell and attempts to find the value of the electron temperature which will result in cooling which
    matches the heating.
@@ -595,8 +609,6 @@ zero_emit (t)
   int macro_pops ();
   double macro_bb_heating (), macro_bf_heating ();
 
-
-
   /*Original method */
   xxxplasma->t_e = t;
 
@@ -614,8 +626,6 @@ zero_emit (t)
   xxxplasma->heat_photo_macro = macro_bf_heating (xxxplasma, t);
   xxxplasma->heat_tot += xxxplasma->heat_photo_macro;
   xxxplasma->heat_photo += xxxplasma->heat_photo_macro;
-
-  //  difference = (xxxplasma->heat_tot - total_emission (xxxplasma, 0., VERY_BIG));
 
 
   /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
@@ -641,13 +651,6 @@ zero_emit (t)
     }
 
 
-  /* difference =
-     xxxplasma->heat_tot - xxxplasma->lum_adiabatic -
-     total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG); */
-
-
-  /* 70g - nsh adding this line in next to calculate dielectronic recombination cooling without generating photons */
-
   /*81c - nsh - we now treat DR cooling as a recombinational process - still unsure as to how to treat emission, so at the moment
      it remains here */
 
@@ -657,8 +660,8 @@ zero_emit (t)
 
   xxxplasma->lum_di = total_di (&wmain[xxxplasma->nwind], t);
 
-
   /* 70g compton cooling calculated here to avoid generating photons */
+
   xxxplasma->lum_comp = total_comp (&wmain[xxxplasma->nwind], t);
 
   xxxplasma->lum_tot =
@@ -667,12 +670,9 @@ zero_emit (t)
 					  VERY_BIG);
 
   difference = xxxplasma->heat_tot - xxxplasma->lum_tot;
+  
   // Test for just ff
   //difference = xxxplasma->heat_ff - xxxplasma->lum_ff;
-  //
-  // OLD difference = xxxplasma->heat_tot - xxxplasma->lum_adiabatic - xxxplasma->lum_dr - xxxplasma->lum_di - xxxplasma->lum_comp - total_emission (&wmain[xxxplasma->nwind], 0., VERY_BIG);  //NSH 1110 - total emission no longer computes compton.*/
-
-
 
 
   return (difference);
