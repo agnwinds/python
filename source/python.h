@@ -939,10 +939,10 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define TMAX_FACTOR			1.5     /*Factor by which t_e can exceed
                                                    t_r in order for absorbed to 
                                                    match emitted flux */
-#define TMIN				2000.
+//OLD - moved to zeta.c #define TMIN				2000.
 /* ??? TMIN appears to be used both for the minimum temperature and for 
    calculating the fraction of recombinations that go to the ground state.  This
-   looks like a problem ksl-98jul???? */
+   looks like a problem ksl-98jul???? It is used in py_wind_updates2d, zeta.c, and py_wind_ion.c */
 
 #define TMAX    5e8             /*NSH 130725 - this is the maximum temperature permitted - this was introduced following problems with adaibatically heated cells increasing forever. The value was suggested by DP as a sensible compton teperature for the PK05/P05 Zeus models. */
 
@@ -952,7 +952,7 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define MAXITERATIONS	200     //The number of loops to do to try to converge in ne
 #define FRACTIONAL_ERROR 0.03   //The change in n_e which causes a break out of the loop for ne
 #define THETAMAX	 1e4    //Used in initial calculation of n_e
-#define MIN_TEMP	100.    //  ??? this is another minimum temperature - it is used as the minimum tempersture in (JM -- in what??)
+#define MIN_TEMP	100.    //  ??? this is another minimum temperature, which is used in saha.c and variable_temperature.c )
 
 // these definitions are for various ionization modes
 #define IONMODE_ML93_FIXTE 0    // Lucy Mazzali using existing t_e (no HC balance)

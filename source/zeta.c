@@ -52,8 +52,8 @@ incorporate a correction factor for dielectronic recombination.
                     Southampton University
                                                                                                    
                                                                                                    
-  Synopsis: compute_zeta calculates the correction term in the L+M and sim equations
-        for corrected saha.
+  Synopsis: compute_zeta calculates the correction term in the L+M and Sim equations
+        for corrected saha eaquation.
                                                                                                    
   Description:
 	mode 1 is the original version, it takes ilow, ihi and interpfrac and 
@@ -111,7 +111,7 @@ compute_zeta (temp, nion, mode)
 
 #define MIN_FUDGE  1.e-10
 #define MAX_FUDGE  10.
-//#define MIN_TEMP         100. //Put into python.h
+#define TMIN    2000.  /* Thia TMIN is specific to CK's ground fraction tables */
 
   zeta = 0.0;                   /* NSH 130605 to remove o3 compile error */
 
@@ -159,7 +159,7 @@ compute_zeta (temp, nion, mode)
         zeta = gs_rrate (nion + 1, temp) / total_rrate (nion + 1, temp);
       }
 
-      else                      //We dont have total RR data, so we must default back to the old way of doing things
+      else                      //We do not have total RR data, so we must default back to the old way of doing things
       {
         Error ("Compute zeta: total RR rate missing for element %i state %i\n", ion[nion + 1].z, ion[nion + 1].istate);
         zeta = ground_frac[nion].frac[ilow] + interpfrac * (ground_frac[nion].frac[ihi] - ground_frac[nion].frac[ilow]);
@@ -171,8 +171,6 @@ compute_zeta (temp, nion, mode)
       {
         compute_dr_coeffs (temp);
         zeta = gs_rrate (nion + 1, temp) / (total_rrate (nion + 1, temp) + dr_coeffs[nion + 1]);
-
-
       }
       else                      //We dont have total RR data
       {
@@ -181,10 +179,6 @@ compute_zeta (temp, nion, mode)
       }
     }
   }
-
-
-
-  /* if we got here then we don't understand the mode and there must be a problem */
   else
   {
     Error ("Compute zeta: Unkown mode %i \n", mode);

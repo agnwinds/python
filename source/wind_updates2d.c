@@ -226,11 +226,9 @@ WindPtr (w);
         Error ("wind_update:sane_check %d ave_freq %e j %e ntot %d\n", n, wtest, plasmamain[n].j, plasmamain[n].ntot);
       }
 
-      plasmamain[n].j /= (4. * PI * volume);    //Factor of 2 has been removed from this line (SS, May04)
+      plasmamain[n].j /= (4. * PI * volume);    
       plasmamain[n].j_direct /= (4. * PI * volume);
       plasmamain[n].j_scatt /= (4. * PI * volume);
-
-
 
       trad = plasmamain[n].t_r = H * plasmamain[n].ave_freq / (BOLTZMANN * 3.832);
       plasmamain[n].w = PI * plasmamain[n].j / (STEFAN_BOLTZMANN * trad * trad * trad * trad);
@@ -248,18 +246,18 @@ WindPtr (w);
       }
     }
     else
-    {                           // It is not clear what to do with no photons in a cell
+    {                           /* It is not clear what to do with no photons in a cell */
 
       plasmamain[n].j = plasmamain[n].j_direct = plasmamain[n].j_scatt = 0;
       trad = plasmamain[n].t_r;
       plasmamain[n].t_e *= 0.7;
-      if (plasmamain[n].t_e < TMIN)
-        plasmamain[n].t_e = TMIN;
+      if (plasmamain[n].t_e < MIN_TEMP)
+        plasmamain[n].t_e = MIN_TEMP;
       plasmamain[n].w = 0;
     }
 
 
-    /* 1108 NSH/KSL  This loop is to calculate the frequency banded j and ave_freq variables */
+    /* Calculate the frequency banded j and ave_freq variables */
 
     for (i = 0; i < geo.nxfreq; i++)
     {                           /*loop over number of bands */
@@ -286,7 +284,10 @@ WindPtr (w);
 
     nh = plasmamain[n].rho * rho2nh;
 
-/* 1110 NSH Normalise IP, which at this point should be the number of photons in a cell by dividing by volume and number density of hydrogen in the cell */
+/* 1110 NSH Normalise IP, which at this point should be 
+ * the number of photons in a cell by dividing by volume 
+ * and number density of hydrogen in the cell 
+ * */
 
     plasmamain[n].ip /= (C * volume * nh);
     plasmamain[n].ip_direct /= (C * volume * nh);

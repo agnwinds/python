@@ -29,6 +29,8 @@ Notes:
 History:
 	150428	ksl	Adapted from routines in py_wind.c
 	160216	ksl	Resolved issues with multiple domains
+    1706    ksl Refactored so that windsave2table_subs could be
+                called from within python
 
 **************************************************************/
 
@@ -48,16 +50,13 @@ main (argc, argv)
 {
 
 
-  // int ochoice;
 
   char root[LINELENGTH], input[LINELENGTH];
-  char rootname[LINELENGTH];    // this takes into account domains
   char outputfile[LINELENGTH];
   char windsavefile[LINELENGTH];
   char parameter_file[LINELENGTH];
   int create_master_table (), create_ion_table ();
   int do_windsave2table();
-  //int ndom;
 
 
   // py_wind uses rdpar, but only in an interactive mode. As a result 

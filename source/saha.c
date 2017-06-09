@@ -157,7 +157,7 @@ nebular_concentrations (xplasma, mode)
          in macro atom mode it also call macro_pops which is done correctly in this case, as lucy_mazzali, 
          which is called in lucy, does repopulate xplasma like saha does. This means that in this mode,
          it doesn't actually matter that concentrations does macro level populations wrong, as that is 
-         corrected here. It should be sorted veyr soon, however. */
+         corrected here. It should be sorted very soon, however. */
 
       m = lucy (xplasma);	// Main routine for running LucyMazzali
 
@@ -603,10 +603,10 @@ saha (xplasma, ne, t)
   History:
 
 	02jun	ksl	Made separate routine, removing it from nebular concentrations
-        04Apr   SS      If statement added to stop this routine from changing macro atom
-	                populations.
-        04May   SS      "If" statement modified for compatibility with the "macro_simple" option
-	                (i.e. all ions treated as simple).
+    04Apr   SS  If statement added to stop this routine from changing macro atom
+	            populations.
+    04May   SS  "If" statement modified for compatibility with the "macro_simple" option
+	            (i.e. all ions treated as simple).
 	07mar	ksl	Convert warnings to errors to stop many repeads
 
 
