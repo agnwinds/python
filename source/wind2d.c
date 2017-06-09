@@ -408,8 +408,8 @@ be optional which variables beyond here are moved to structures othere than Wind
 
     /* Determine the initial ionizations, either LTE or  fixed_concentrations */
     if (geo.ioniz_mode != IONMODE_FIXED)
-    {                           /* Carry out an LTE determination of the ionization */
-      ierr = ion_abundances (&plasmamain[n], IONMODE_LTE);
+    {                           /* Carry out an LTE determination of the ionization (using T_r */
+      ierr = ion_abundances (&plasmamain[n], IONMODE_LTE_TR);
     }
     else
     {                           /* Set the concentrations to specified values */
@@ -422,11 +422,10 @@ be optional which variables beyond here are moved to structures othere than Wind
          n, plasmamain[n].rho, plasmamain[n].t_r, plasmamain[n].t_e, plasmamain[n].w);
     }
 
-    /* 68b - Initialize the scatters array 73d - and the pariwise ionization denominator and temperature
+    /* Initialize arrays for scatters and the pairwise ionization denominator and temperature
      */
 
-    for (j = 0; j < nions; j++) /* NSH 1107 - changed this loop to loop over nions rather than NIONS. Dynamic
-                                   allocation means that these arrays are no longer of length NIONS */
+    for (j = 0; j < nions; j++) 
     {
       plasmamain[n].PWdenom[j] = 0.0;
       plasmamain[n].PWnumer[j] = 0.0;

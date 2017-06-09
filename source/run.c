@@ -38,7 +38,7 @@ History:
 
 
 /***********************************************************
-                                       Space Telescope Science Institute
+        Space Telescope Science Institute
 
 Synopsis: calculate_ionization execucutes the ionization cycles for a 
 	python model
@@ -77,11 +77,6 @@ calculate_ionization (restart_stat)
 #ifdef MPI_ON
   int ioniz_spec_helpers;
 #endif
-
-
-
-
-
 
 
   p = photmain;
@@ -129,9 +124,8 @@ calculate_ionization (restart_stat)
 
     xsignal (files.root, "%-20s Starting %d of %d ionization cycle \n", "NOK", geo.wcycle, geo.wcycles);
 
-
     Log ("!!Python: Beginning cycle %d of %d for defining wind\n", geo.wcycle, geo.wcycles);
-    Log_flush ();               /*NH June 13 Added call to flush logfile */
+    Log_flush ();               /* Flush the log file (so that we know where are if there are problems */
 
     /* Initialize all of the arrays, etc, that need initialization for each cycle
      */
@@ -139,25 +133,20 @@ calculate_ionization (restart_stat)
     spectrum_init (freqmin, freqmax, geo.nangles, geo.angle, geo.phase,
                    geo.scat_select, geo.top_bot_select, geo.select_extract, geo.rho_select, geo.z_select, geo.az_select, geo.r_select);
 
-
     wind_rad_init ();           /*Zero the parameters pertaining to the radiation field */
-
-
 
     if (modes.ispy)
       ispy_init ("python", geo.wcycle);
-
 
     geo.n_ioniz = 0.0;
     geo.lum_ioniz = 0.0;
     ztot = 0.0;                 /* ztot is the luminosity of the disk multipled by the number of cycles, which is used by save_disk_heating */
 
-    /* JM 1409 -- We used to execute subcycles here, but these have been removed */
-
     if (!geo.wind_radiation || (geo.wcycle == 0 && geo.run_type != SYSTEM_TYPE_PREVIOUS))
       iwind = -1;               /* Do not generate photons from wind */
     else
       iwind = 1;                /* Create wind photons and force a reinitialization of wind parms */
+
 
     /* Create the photons that need to be transported through the wind
      *
@@ -165,13 +154,6 @@ calculate_ionization (restart_stat)
      * 0 => for ionization calculation 
      */
 
-
-    /* JM 130306 need to convert photons_per_cycle to double precision for define_phot */
-    /* ksl 130410 - This is needed here not because we expect photons per cycle to 
-     * exceed the size of an integer, but because of the call to define phot in the
-     * spectrum cycle, which can exceed this
-     */
-    /* JM 1409 photons_per_cycle has been removed in favour of NPHOT */
 
     nphot_to_define = (long) NPHOT;
 
@@ -181,12 +163,10 @@ calculate_ionization (restart_stat)
 
     /* 080520 - ksl - There is a conundrum here.  One should really zero out the 
      * quantities below each time the wind structure is updated.  But relatively
-     * few photons hit the disk under normal situations, and therefore the statistcs
+     * few photons hit the disk under normal situations, and therefore the statistics
      * are not very good.  
      */
 
-    /* 130213 JM -- previously this was done before define_phot, which meant that
-       the ionization state was never computed with the heated disk */
 
     for (n = 0; n < NRINGS; n++)
     {
@@ -264,15 +244,13 @@ calculate_ionization (restart_stat)
     communicate_matom_estimators_para ();       // this will return 0 if nlevels_macro == 0
 #endif
 
-
-
-
     if (modes.ispy)
       ispy_close ();
 
 
     /* Calculate and store the amount of heating of the disk due to radiation impinging on the disk */
     /* We only want one process to write to the file */
+
 #ifdef MPI_ON
     if (rank_global == 0)
     {
@@ -295,7 +273,7 @@ calculate_ionization (restart_stat)
 
     Log ("Completed ionization cycle %d :  The elapsed TIME was %f\n", geo.wcycle, timer ());
 
-    Log_silent ("Finished creating spectra\n");
+//OLD - line seems unnecessary    Log_silent ("Finished creating spectra\n");
 
     /* Do an MPI reduce to get the spectra all gathered to the master thread */
 

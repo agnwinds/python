@@ -885,15 +885,15 @@ init_ionization ()
   // XXX  I is unclear to me why all of this dwon to the next XXX is not moved to a single subroutine.  It all
   // pertains to how the radiatiate tranfer is carreid out
 
-  rdint ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,6=pairwise_bb,7=pairwise_pow,8=matrix_bb,9=matrix_pow)", &geo.ioniz_mode);
+  rdint ("Wind_ionization(0=on.the.spot,1=LTE(tr),2=fixed,3=recalc_bb,4=LTE(t_e),6=pairwise_bb,7=pairwise_pow,8=matrix_bb,9=matrix_pow)", &geo.ioniz_mode);
 
   if (geo.ioniz_mode == IONMODE_FIXED)
   {
     rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
   }
-  if (geo.ioniz_mode == IONMODE_LTE_SIM || geo.ioniz_mode == 5 || geo.ioniz_mode > 9)   /*NSH CLOUDY test - remove once done */
+  if (geo.ioniz_mode == 5 || geo.ioniz_mode > 9)   
   {
-    Log ("The allowed ionization modes are 0, 1, 2, 3, 6, 7\n");
+    Log ("The allowed ionization modes are 0, 1, 2, 3, 4, 6, 7, 8 and 9\n");
     Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
     exit (0);
   }
