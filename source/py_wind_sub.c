@@ -3653,3 +3653,53 @@ get_los_dvds (w, rootname, ochoice)
 
   return (0);
 }
+
+
+/**********************************************************/
+/** @name   grid_summary
+ * @brief Prints grid boundaries to file
+ *
+ * @param [in] w              Pointer to wind array
+ * @param [in] rootname       Root name of simulation
+ * @param [in] ochoice        Whether or not to write out 
+ * @return     0
+ *
+ * Outputs the boundaries for the grids for each domain
+ *
+ * @notes
+ * 2/17 - Written by SWM
+***********************************************************/
+int
+grid_summary (WindPtr w, char rootname[], int ochoice)
+{
+  char filename[LINELENGTH], suffix[LINELENGTH];
+  FILE *fopen (), *fptr;
+  int i, j;
+
+  printf ("Outputting grid boundaries to file.\n");
+
+  for (j=0; j<geo.ndomain; j++)
+  {
+    strcpy(filename, rootname);
+    sprintf(suffix,".dom%d.grid_x.txt", j);
+    strcat(filename, suffix);
+    fptr = fopen(filename, "w");
+    for (i=0; i<= zdom[j].ndim; i++)
+    {
+      fprintf(fptr,"%10.5g\n", zdom[j].wind_x[i]);
+    }
+    fclose(fptr);
+
+    strcpy(filename, rootname);
+    sprintf(suffix,".dom%d.grid_z.txt", j);
+    strcat(filename, suffix); 
+    fptr = fopen(filename, "w");
+    for (i=0; i<= zdom[j].mdim; i++)
+    {
+      fprintf(fptr,"%10.5g\n", zdom[j].wind_z[i]);
+    }
+    fclose(fptr);
+      
+  }
+  return (0);
+}

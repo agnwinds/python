@@ -415,8 +415,8 @@ one_choice (choice, root, ochoice)
   case 'B':
     plasma_cell (wmain, root, ochoice);
     break;
-  case 'c':                    /*C4 emission */
-    line_summary (wmain, n, istate, root, ochoice);
+  case 'L':                    /*C4 emission */
+    line_summary (wmain,root, ochoice);
     break;
   case 'C':                    /*the ratio cooling to heating */
     coolheat_summary (wmain, root, ochoice);
@@ -632,6 +632,11 @@ one_choice (choice, root, ochoice)
     exit (0);
     break;
 
+	case '#':
+		
+		grid_summary(wmain, root, ochoice);
+		break;
+
   }
 
   return (0);
@@ -640,7 +645,6 @@ one_choice (choice, root, ochoice)
 //  goto a;
 
 //}
-
 
 
 /***********************************************************
