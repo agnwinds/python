@@ -1070,6 +1070,11 @@ typedef struct photon
 
 
 
+#define SPECTYPE_RAW        0    // As written this produces L_nu and so to get a Luminosity one needs to integrate
+#define SPECTYPE_FLAMBDA    1
+#define SPECTYPE_FNU        2
+#define D_SOURCE 100.0          // distance to the source in parsecs for genearating spectra
+
 #define MSPEC                            7
     int nspectra;                   /* After create_spectrum, the number of elements allocated for s, or 
                                        alternatively the number of spectra one has to work with.  Note that
@@ -1299,24 +1304,24 @@ struct filenames
 {
   char root[LINELENGTH];        // main rootname
   char windsave[LINELENGTH];    // wind save filename
+  char old_windsave[LINELENGTH];        // old windsave name
   char specsave[LINELENGTH];    // spec save filename
   char diag[LINELENGTH];        // diag file
   char diagfolder[LINELENGTH];  // diag folder
-  char old_windsave[LINELENGTH];        // old windsave name
   char input[LINELENGTH];       // input name if creating new pf file
   char new_pf[LINELENGTH];      // name of generated pf file
-  char lwspec[LINELENGTH];      // log_spec_tot file name  
-  char wspec[LINELENGTH];       // spectot file name
-  char lwspec_wind[LINELENGTH]; // log_spec_tot filename for wind photons
-  char wspec_wind[LINELENGTH];  // spectot filename for wind photons
+  char wspec[LINELENGTH];       // .spec_tot file (spectrum from last ionization cycle) 
+  char lwspec[LINELENGTH];      // .log_spec_tot file (spectra from last ionization cycle in log wavelength scale)  
+  char wspec_wind[LINELENGTH];  // .spec_tot_wind (spectra of wind photons in last ionization cycle on a linear scale limited to wind photons
+  char lwspec_wind[LINELENGTH]; // .log_spec_tot_wind (same as above but in log units) 
+  char spec[LINELENGTH];        // .spec file (extracted spectra on linear scale)
+  char lspec[LINELENGTH];       // .spec file (extracted spectra on a log scale)
+  char spec_wind[LINELENGTH];   // .spec file (extracted spectra limited to wind photons on a linear scale)
+  char lspec_wind[LINELENGTH];  // .spec file (extracted spectra limited to wind photons on a log scale)
   char disk[LINELENGTH];        // disk diag file name
   char tprofile[LINELENGTH];    // non standard tprofile fname
   char phot[LINELENGTH];        // photfile e.g. python.phot
   char windrad[LINELENGTH];     // wind rad file
-  char spec[LINELENGTH];        // .spec file
-  char spec_wind[LINELENGTH];   // .spec file for wind photons
-  char lspec[LINELENGTH];       // .spec file
-  char lspec_wind[LINELENGTH];  // .spec file for wind photons
 }
 files;
 

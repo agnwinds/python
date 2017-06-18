@@ -641,23 +641,24 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 
 Arguments:		
 
-	char filename[]		The name of the file to write
-	char mode[];		The mode in which the file should be opened, usually 'w', but
-					it could be 'a'
+	char filename[]         The name of the file to write
+	char mode[];            The mode in which the file should be opened, usually 'w', but
+                            it could be 'a'
 	int nspecmin,nspecmax	These two numbers define the spectra you want to write.    
-	int select_spectype	The type of spectral file you want to create, 
-					0 = raw, 1= flambda,2=fnu 
-        double	renorm		This is renormalization which incrementally decreases to
-				one as the detailed spectral calculation goes forward.  It
-				was added to allow one to print out the spectrum at the
-				end of each cycle, rather than the end of the entire
-				calculation.
-	char loglin[]		Are we outputting a log or a linear spectrum
+	int select_spectype     The type of spectral file you want to create, 
+					        SPECTYPE_RAW = raw, SPECTYPE_FLAMBA= flambda,SPECTYPE_FNU=fnu 
+    double renorm           This is renormalization which incrementally decreases to
+				            one as the detailed spectral calculation goes forward.  It
+				            was added to allow one to print out the spectrum at the
+				            end of each cycle, rather than the end of the entire
+				            calculation.
+	char loglin[]		    Are we outputting a log or a linear spectrum
 				
 
 Returns:
   
 Description:	
+
 	This simple routine simply writes the spectra to a file in an easily interpretable
 	ascii format. Normally one would write all of the spectra in one go, but  one can use 
 	spectrum summary to write various spectra to various files by using the variables
@@ -671,6 +672,10 @@ Description:
 	completed.
 			
 Notes:
+
+    170617 - XXX - it is not obvious that the mode is needed, now the file format is
+            switched to something resembling an astropy table. Conider deleting the
+            mode.  ksl
 
 History:
  	97jan      ksl	Coded and debugged as part of Python effort.
@@ -726,6 +731,21 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm, l
   get_time (string);
   fprintf (fptr, "# Date	%s\n#  \n", string);
 
+  if (select_spectype==SPECTYPE_RAW) {
+      fprintf (fptr, "\n# Units: L_nu spectrum (erg/s/Hz)\n\n");
+  }
+  else if (select_spectype==SPECTYPE_FLAMBDA) {  
+      fprintf (fptr, "\n# Units: flambda spectrum (erg/s/cm^-2/A) at %.1f parsecs\n\n", D_SOURCE);
+  }
+  else if (select_spectype==SPECTYPE_FNU) {
+      fprintf (fptr, "\n# Units: Lnu spectrum (erg/s/Hz) at %.1f parsecs\n\n", D_SOURCE);  
+  }
+  else {
+      Error("spectrum_summary: Unknown select_spectype %d\n",select_spectype);
+      exit(0);
+  }
+
+
   /* Save all of the parameter file information to the spectrum file */
 
   rdpar_save (fptr);
@@ -746,7 +766,7 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm, l
 
   /* Ignore the end bins because they include all photons outside the frequency range and there may be some
      as a result of the fact that the bb function generate some IR photons */
-  dd = 4. * PI * (100. * PC) * (100. * PC);
+  dd = 4. * PI * (D_SOURCE * PC) * (D_SOURCE * PC);
 
   if (loglin == 0)              /* Then were are writing out the linear version of the spectra */
   {
@@ -765,15 +785,15 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm, l
         }
 
 
-        if (select_spectype == 1)
+        if (select_spectype == SPECTYPE_FLAMBDA)
         {                       /* flambda */
           x *= (freq * freq * 1e-8) / (dfreq * dd * C);
         }
-        else if (select_spectype == 2)
+        else if (select_spectype == SPECTYPE_FNU)
         {                       /*fnu */
           x /= (dfreq * dd);
         }
-        else if (select_spectype == 0)
+        else if (select_spectype == SPECTYPE_RAW)
         {                       /*generated spectrum */
           x /= (dfreq);         //With log spectra implemented, we should divide by nu, so log and lin spectra agree
         }
@@ -804,15 +824,15 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm, l
           x = xxspec[n].lf_wind[i] * xxspec[n].renorm;
         }
 
-        if (select_spectype == 1)
+        if (select_spectype == SPECTYPE_FLAMBDA)
         {                       /* flambda */
           x *= (freq * freq * 1e-8) / (dfreq * dd * C);
         }
-        else if (select_spectype == 2)
+        else if (select_spectype == SPECTYPE_FNU)
         {                       /*fnu */
           x /= (dfreq * dd);
         }
-        else if (select_spectype == 0)
+        else if (select_spectype == SPECTYPE_RAW)
         {                       /*generated spectrum */
           x /= (dfreq);
         }

@@ -766,19 +766,27 @@ init_observers ()
     }
   }
 
-  /* Select the units of the output spectra.  This is always needed */
+  /* Select the units of the output spectra.  This is always needed.
+   * There are 3 basics choices flambda, fnu, and the internal units
+   * of the program.  The first two imply that output units are scaled
+   * to a distance of 100 pc. The internal units are basically a luminosity
+   * within a wavelength/frequency interval. */
 
   rdint ("spec.type(flambda(1),fnu(2),basic(other)", &geo.select_spectype);
+
   if (geo.select_spectype == 1)
   {
     Log ("OK, generating flambda at 100pc\n");
+    geo.select_spectype=SPECTYPE_FLAMBDA;
   }
   else if (geo.select_spectype == 2)
   {
     Log ("OK, generating fnu at 100 pc\n");
+    geo.select_spectype=SPECTYPE_FNU;
   }
   else
     Log ("OK, basic Monte Carlo spectrum\n");
+    geo.select_spectype=SPECTYPE_RAW;
 
   return (0);
 }
