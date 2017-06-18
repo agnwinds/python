@@ -462,7 +462,7 @@ The choice of SMAX_FRAC can affect execution time.*/
    things up If the photon is going to scatter in this cell, radiation also reduces 
    the weight of the photon due to continuum absorption, e.g. free free */
 
-  if (geo.rt_mode == 2)
+  if (geo.rt_mode == RT_MODE_MACRO)
   {                             // Macro-method
     /* In the macro-method, b-f and other continuum processes do not reduce the photon
     weight, but are treated as as scattering processes.  Therfore most of what was in 

@@ -199,7 +199,7 @@ WindPtr (w);
        terms) which were included during the monte carlo simulation so we want 
        to be sure that the SAME temperatures are used here. (SS - Mar 2004). */
 
-    if (geo.rt_mode == 2 && geo.macro_simple == 0)      //test for macro atoms
+    if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == 0)      //test for macro atoms
     {
       mc_estimator_normalise (nwind);
       macromain[n].kpkt_rates_known = -1;
@@ -697,6 +697,7 @@ WindPtr (w);
     /* 1108 NSH extra Sane check for compton heating */
     if (sane_check (plasmamain[nplasma].heat_comp))
       Error ("wind_update:sane_check w(%d).heat_comp is %e\n", nplasma, plasmamain[nplasma].heat_comp);
+
     xsum += plasmamain[nplasma].heat_tot;
     psum += plasmamain[nplasma].heat_photo;
     ausum += plasmamain[nplasma].heat_auger;
@@ -707,6 +708,7 @@ WindPtr (w);
 
     /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
        cycles in the windsavefile even if the spectral cycles are run */
+
     plasmamain[nplasma].lum_ioniz = plasmamain[nplasma].lum_tot;
     plasmamain[nplasma].lum_ff_ioniz = plasmamain[nplasma].lum_ff;
     plasmamain[nplasma].lum_fb_ioniz = plasmamain[nplasma].lum_fb;
@@ -783,23 +785,23 @@ WindPtr (w);
     Error ("wind_updates2d:  Attempting to access a hydro domain in a non hydro run - not writing out hydro file\n");
   }
 
-  /* 1108 NSH Added commands to report compton heating */
+  /* The lines differ only in that Wind_heating adds mechanical heating, that is adiabatic heating */
+
   Log
     ("!!wind_update: Absorbed flux    %8.2e  (photo %8.2e ff %8.2e compton %8.2e auger %8.2e induced_compton %8.2e lines %8.2e)\n",
      xsum, psum, fsum, csum, ausum, icsum, lsum);
 
-  /* 1306 Added line to split out absorbed flux from wind heating */
   Log
     ("!!wind_update: Wind heating     %8.2e  (photo %8.2e ff %8.2e compton %8.2e auger %8.2e induced_compton %8.2e lines %8.2e adiabatic %8.2e)\n",
      xsum + geo.heat_adiabatic, psum, fsum, csum, ausum, icsum, lsum, geo.heat_adiabatic);
 
   /* 1108 NSH added commands to report compton cooling 1110 removed, 
-   * this line now just reports cooling mechanisms that will generate photons */
+   * As was the case above, there are two almost identical lines.  Wind_cooling includes processes that do not produce photons, 
+   * not-only adiabatic cooling, but also goe.lum_comp, geo_lum_dr and geo.lum_di */
   Log
     ("!!wind_update: Wind luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n",
      asum, geo.lum_fb, geo.lum_ff, geo.lum_lines);
 
-  /* 1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons. */
   Log
     ("!!wind_update: Wind cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e DI %8.2e lines %8.2e adiabatic %8.2e) after update\n",
      asum + geo.lum_comp + geo.lum_dr + geo.lum_di + geo.lum_adiabatic,

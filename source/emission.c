@@ -212,7 +212,7 @@ total_emission (one, f1, f2)
   }
   else
   {
-    if (geo.rt_mode == 2)       //Switch for macro atoms (SS)
+    if (geo.rt_mode == RT_MODE_MACRO)       //Switch for macro atoms (SS)
     {
       xplasma->lum_fb = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, 1);        //outer shellrecombinations
       //The first term here is the fb cooling due to macro ions and the second gives

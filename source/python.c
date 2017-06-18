@@ -844,7 +844,7 @@ main (argc, argv)
 
   /*Switch on k-packet/macro atom emissivities  SS June 04 */
 
-  if (geo.rt_mode == 2)
+  if (geo.rt_mode == RT_MODE_MACRO)
   {
     geo.matom_radiation = 1;
   }

@@ -357,13 +357,7 @@ calloc_macro (nelem)
 {
 
   /* JM 1502 -- commented out this if loop because we want 
-     the macro structure to be allocated regardless in geo.rt_mode = 2. see #138 */
-  //  if (nlevels_macro == 0 && geo.nmacro == 0)
-  //    {   
-  //      Log
-  // ("calloc_macro: Allocated no space for macro since nlevels_macro==0 and geo.nmacro==0\n");
-  //      return (0);
-  //    }
+     the macro structure to be allocated regardless in geo.rt_mode = RT_MODE_MACRO. see #138 */
 
   if (macromain != NULL)
   {

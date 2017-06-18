@@ -426,6 +426,8 @@ struct geometry
                                    2  thermally broadened anisotropic
                                  */
 
+#define RT_MODE_2LEVEL  1
+#define RT_MODE_MACRO   2
   int rt_mode;                  /* radiative transfer mode. 2 for Macro Atom method,  1 for non-Macro Atom methods  */
 
   /* The frequency bands used when calculating parameters like a power law slope in limited regions. */

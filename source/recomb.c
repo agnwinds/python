@@ -348,7 +348,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
                                                                                                    
                                                                                                    
   Synopsis: total_fb returns the energy lost from the plasma due to fb emission in a
-	single wind cell at a temperture t between the frequncy limits f1 and f2.  
+	single wind cell at a temperature t between the frequncy limits f1 and f2.  
 	The energy lost is just the kinetic energy lost from the plasma 
 	because it does not include the ionization potential
 	associated with each recombination.  Python tracks effectively the kinetic energy
@@ -392,7 +392,6 @@ total_fb (one, t, f1, f2, mode)
 
   if (t < 100. || f2 < f1)
       t=100.;   /* Set the temperature to 100 K so that if there are free electrons emission by this process continues */ 
-//    return (0);                 /* It's too cold to emit */
 
 // Initialize the free_bound structures if that is necessary
   if (mode == 1)
@@ -776,7 +775,7 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
       fb_xtop = &phot_top[n];   /*Externally transmited to fb_topbase_partial */
       /* We don't want to include fb transitions associated with macro atoms here
          - they are separated out for now. (SS, Apr 04). "If" statement added. */
-      if (fb_xtop->macro_info == 0 || geo.macro_simple == 1 || geo.rt_mode == 1)
+      if (fb_xtop->macro_info == 0 || geo.macro_simple == 1 || geo.rt_mode == RT_MODE_2LEVEL)
       {
         x += fb_topbase_partial (freq);
       }
@@ -1113,7 +1112,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
     /* Adding an if statement here so that photoionization that's part of a macro atom is 
        not included here (these will be dealt with elsewhere). (SS, Apr04) */
-    if (fb_xtop->macro_info == 0 || geo.macro_simple == 1 || geo.rt_mode == 1)  //Macro atom check. (SS)
+    if (fb_xtop->macro_info == 0 || geo.macro_simple == 1 || geo.rt_mode == RT_MODE_2LEVEL)  //Macro atom check. (SS)
     {
       fthresh = fb_xtop->freq[0];
       fmax = fb_xtop->freq[fb_xtop->np - 1];    // Argues that this should be part of structure
@@ -1214,7 +1213,7 @@ xinteg_inner_fb (t, f1, f2, nion, fb_choice)
 
       /* Adding an if statement here so that photoionization that's part of a macro atom is 
          not included here (these will be dealt with elsewhere). (SS, Apr04) */
-      if (fb_xtop->macro_info == 0 || geo.macro_simple == 1 || geo.rt_mode == 1)        //Macro atom check. (SS)
+      if (fb_xtop->macro_info == 0 || geo.macro_simple == 1 || geo.rt_mode == RT_MODE_2LEVEL)        //Macro atom check. (SS)
       {
         fthresh = fb_xtop->freq[0];
         fmax = fb_xtop->freq[fb_xtop->np - 1];  // Argues that this should be part of structure

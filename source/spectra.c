@@ -412,13 +412,13 @@ spectrum_create (p, f1, f2, nangle, select_extract)
     k = (p[nphot].freq - freqmin) / dfreq;
     if (k < 0)
     {
-      if (((1. - p[nphot].freq / freqmin) > delta) && (geo.rt_mode != 2))
+      if (((1. - p[nphot].freq / freqmin) > delta) && (geo.rt_mode != RT_MODE_MACRO))
         nlow = nlow + 1;
       k = 0;
     }
     else if (k > NWAVE - 1)
     {
-      if (((1. - freqmax / p[nphot].freq) > delta) && (geo.rt_mode != 2))
+      if (((1. - freqmax / p[nphot].freq) > delta) && (geo.rt_mode != RT_MODE_MACRO))
         nhigh = nhigh + 1;
       k = NWAVE - 1;
     }
@@ -427,13 +427,13 @@ spectrum_create (p, f1, f2, nangle, select_extract)
     k_orig = (p[nphot].freq_orig - freqmin) / dfreq;
     if (k_orig < 0)
     {
-      if (((1. - p[nphot].freq_orig / freqmin) > delta) && (geo.rt_mode != 2))
+      if (((1. - p[nphot].freq_orig / freqmin) > delta) && (geo.rt_mode != RT_MODE_MACRO))
         nlow = nlow + 1;
       k_orig = 0;
     }
     else if (k_orig > NWAVE - 1)
     {
-      if (((1. - freqmax / p[nphot].freq_orig) > delta) && (geo.rt_mode != 2))
+      if (((1. - freqmax / p[nphot].freq_orig) > delta) && (geo.rt_mode != RT_MODE_MACRO))
         nhigh = nhigh + 1;
       k_orig = NWAVE - 1;
     }

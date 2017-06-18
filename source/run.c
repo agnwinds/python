@@ -221,7 +221,7 @@ calculate_ionization (restart_stat)
     }
 
     Log ("!!python: Total photon luminosity after transphot %18.12e (diff %18.12e). Radiated luminosity %18.12e\n", zzz, zzz - zz, zze);
-    if (geo.rt_mode == 2)
+    if (geo.rt_mode == RT_MODE_MACRO)
       Log ("Luminosity taken up by adiabatic kpkt destruction %18.12e number of packets %d\n", zz_adiab, nn_adiab);
 
 
@@ -439,7 +439,7 @@ make_spectra (restart_stat)
 
   /*Switch on k-packet/macro atom emissivities  SS June 04 */
 
-  if (geo.rt_mode == 2)
+  if (geo.rt_mode == RT_MODE_MACRO)
   {
     geo.matom_radiation = 1;
   }

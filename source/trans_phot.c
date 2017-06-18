@@ -47,8 +47,8 @@ History:
 			into the global spectrum and in live or die option.
 	04mar	ksl	Made small modifications (qdisk) to reflect fact that heating
 			of disk is now stored in a separate structure.
-        04Jun   SS      Small modification to kill photons when necessary during the 
-                        spectral cycles of macro atom runs.
+    04Jun   SS  Small modification to kill photons when necessary during the 
+                spectral cycles of macro atom runs.
 	1112	ksl	Made some changes in the logic to try to trap photons that
 			had somehow escaped the wind to correct a segmenation fault
 			that cropped up in spherical wind models
@@ -93,9 +93,8 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
   {
 
     // This is just a watchdog method to tell the user the program is still running
-    // 130306 - ksl since we don't really care what the frequencies are any more
+
     if (nphot % 50000 == 0)
-      // OLD 130718 fprintf (stderr, "\rPhoton %7d of %7d or %6.3f per cent ", nphot, NPHOT,
       Log ("Photon %7d of %7d or %6.3f per cent \n", nphot, NPHOT, nphot * 100. / NPHOT);
 
     Log_flush ();               /* NSH June 13 Added call to flush logfile */
@@ -111,13 +110,13 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
        this. */
 
 
-    if (geo.rt_mode == 2 && geo.scatter_mode == 1)
+    if (geo.rt_mode == RT_MODE_MACRO && geo.scatter_mode == 1)
     {
       if (p[nphot].origin == PTYPE_WIND)
       {
         if (p[nphot].nres > -1 && p[nphot].nres < NLINES)
         {
-          geo.rt_mode = 1;
+          geo.rt_mode = RT_MODE_2LEVEL;
           /* 74a_ksl Check to see when a photon weight is becoming unreal */
           if (sane_check (p[nphot].w))
           {
@@ -132,7 +131,7 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
           {
             Error ("trans_phot:sane_check photon %d has weight %e aftger scatter\n", nphot, p[nphot].w);
           }
-          geo.rt_mode = 2;
+          geo.rt_mode = RT_MODE_MACRO;
         }
       }
     }
@@ -168,6 +167,7 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
       {
         /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
            First find the sobolev optical depth along that vector */
+
         tau_norm = sobolev (&wmain[pextract.grid], pextract.x, -1.0, lin_ptr[pextract.nres], wmain[pextract.grid].dvds_max);
 
         /* then turn into a probability */
@@ -190,6 +190,7 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
       /* We then increase weight to account for number of scatters. This is done because in extract we multiply by the escape
          probability along a given direction, but we also need to divide the weight by the mean escape probability, which is
          equal to 1/nnscat */
+
       pextract.w *= p[nphot].nnscat / p_norm;
 
       if (sane_check (pextract.w))
@@ -212,6 +213,7 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
   }
 
   /* This is the end of the loop over all of the photons; after this the routine returns */
+  
   // 130624 ksl Line added to complete watchdog timer,
   Log ("\n\n");
 
@@ -303,10 +305,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     istat = walls (&pp, p);
     // pp is where the photon is going, p is where it was
 
-
     if (modes.ispy)
       ispy (&pp, n);
-
 
     if (istat == -1)
     {
@@ -327,7 +327,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       stuff_phot (&pp, p);
       break;
     }
-
 
     if (istat == P_HIT_DISK)
     {
@@ -350,7 +349,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
     if (istat == P_SCAT)
     {                           /* Cause the photon to scatter and reinitilize */
-
 
       /* 71 - 1112 - ksl - placed this line here to try to avoid an error I was seeing in scatter.  I believe the first if
          statement has a loophole that needs to be plugged, when it comes back with avalue of n = -1 */
@@ -440,7 +438,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
          'spectral cycles'. If photons activate macro-atoms they are destroyed, but we counter this by generating photons
          from deactivating macro-atoms with the already calculated emissivities. */
 
-      if (geo.matom_radiation == 1 && geo.rt_mode == 2 && pp.w < weight_min)
+      if (geo.matom_radiation == 1 && geo.rt_mode == RT_MODE_MACRO  && pp.w < weight_min)
         /* Flag for the spectrum calculations in a macro atom calculation SS */
       {
         istat = pp.istat = P_ABSORB;
@@ -468,7 +466,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
         plasmamain[wmain[n].nplasma].scatters[line[nres].nion] += pp.w;
 
-        if (geo.rt_mode == 1)   // only do next line for non-macro atom case
+        if (geo.rt_mode == RT_MODE_2LEVEL)   // only do next line for non-macro atom case
         {
           line_heat (&plasmamain[wmain[n].nplasma], &pp, nres);
         }

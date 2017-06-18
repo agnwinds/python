@@ -312,9 +312,9 @@ define_wind ()
   calloc_dyn_plasma (NPLASMA);  /*78a NSH 1407 - allocate space for dynamically sized arrays */
   create_maps (CHOICE);         /* Populate the maps from plasmamain & wmain */
 
-  /* JM 1502 -- we want the macro structure to be allocated in geo.rt_mode = 2. see #138  */
+  /* JM 1502 -- we want the macro structure to be allocated in geo.rt_mode = RT_MODE_MACRO. see #138  */
 
-  if (geo.rt_mode == 2)
+  if (geo.rt_mode == RT_MODE_MACRO)
   {
     calloc_macro (NPLASMA);
     calloc_estimators (NPLASMA);

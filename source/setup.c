@@ -416,7 +416,7 @@ get_line_transfer_mode ()
 
   /* For now handle scattering as part of a hidden line transfermode ?? */
   geo.scatter_mode = 0;		// isotropic
-  geo.rt_mode = 1;		// Not macro atom (SS)
+  geo.rt_mode = RT_MODE_2LEVEL;		// Not macro atom (SS)
   if (geo.line_mode == 0)
     {
       Log ("Line_transfer mode:  Simple, pure absorption\n");
@@ -440,7 +440,7 @@ get_line_transfer_mode ()
 	("Line_transfer mode:  Simple, anisotropic scattering, escape probabilities\n");
       geo.scatter_mode = 1;	// Turn on anisotropic scattering
       geo.line_mode = 3;	// Drop back to escape probabilities
-      geo.rt_mode = 1;		// Not macro atom (SS)
+      geo.rt_mode = RT_MODE_2LEVEL;		// Not macro atom (SS)
     }
   else if (geo.line_mode == 5)
     {
@@ -448,14 +448,14 @@ get_line_transfer_mode ()
 	("Line_transfer mode:  Simple, thermal trapping, Single scattering \n");
       geo.scatter_mode = 2;	// Thermal trapping model
       geo.line_mode = 3;	// Single scattering model is best for this mode
-      geo.rt_mode = 1;		// Not macro atom (SS) 
+      geo.rt_mode = RT_MODE_2LEVEL;		// Not macro atom (SS) 
     }
   else if (geo.line_mode == 6)
     {
       Log ("Line_transfer mode:  macro atoms, isotropic scattering  \n");
       geo.scatter_mode = 0;	// isotropic
       geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = 2;		// Identify macro atom treatment (SS)
+      geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment (SS)
       geo.macro_simple = 0;	// We don't want the all simple case (SS)
     }
   else if (geo.line_mode == 7)
@@ -463,7 +463,7 @@ get_line_transfer_mode ()
       Log ("Line_transfer mode:  macro atoms, anisotropic  scattering  \n");
       geo.scatter_mode = 2;	// thermal trapping
       geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = 2;		// Identify macro atom treatment (SS)
+      geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment (SS)
       geo.macro_simple = 0;	// We don't want the all simple case (SS)
     }
   else if (geo.line_mode == 8)
@@ -472,7 +472,7 @@ get_line_transfer_mode ()
 	("Line_transfer mode:  simple macro atoms, isotropic  scattering  \n");
       geo.scatter_mode = 0;	// isotropic
       geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = 2;		// Identify macro atom treatment i.e. indivisible packets
+      geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment i.e. indivisible packets
       geo.macro_simple = 1;	// This is for test runs with all simple ions (SS)
     }
   else if (geo.line_mode == 9)	// JM 1406 -- new mode, as mode 7, but scatter mode is 1
@@ -481,7 +481,7 @@ get_line_transfer_mode ()
 	("Line_transfer mode:  simple macro atoms, anisotropic  scattering  \n");
       geo.scatter_mode = 1;	// anisotropic scatter mode 1
       geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = 2;		// Identify macro atom treatment 
+      geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment 
       geo.macro_simple = 0;	// We don't want the all simple case 
     }
   else
@@ -568,7 +568,7 @@ get_radiation_sources ()
      bundles in the wind so switch it off here. (SS)
    */
 
-  if (geo.rt_mode == 2)
+  if (geo.rt_mode == RT_MODE_MACRO)
     {
       Log
 	("python: Using Macro Atom method so switching off wind radiation.\n");
@@ -1250,7 +1250,7 @@ get_meta_params (void)
   // ========== DEAL WITH MATOM LINES ==========
   if (geo.reverb == REV_MATOM)
     {				//If this is macro-atom mode
-      if (geo.rt_mode != 2)
+      if (geo.rt_mode != RT_MODE_MACRO)
 	{			//But we're not actually working in matom mode...
 	  Error ("reverb.type: Invalid reverb mode.\n \
       Macro-atom mode selected but macro-atom scattering not on.\n");

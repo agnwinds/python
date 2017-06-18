@@ -392,7 +392,7 @@ two_level_atom (line_ptr, xplasma, d1, d2)
 
   //Check and exit if this routine is called for a macro atom, since this should never happen
 
-  if (line_ptr->macro_info == 1 && geo.rt_mode == 2 && geo.macro_simple == 0)
+  if (line_ptr->macro_info == 1 && geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == 0)
   {
     Error ("Calling two_level_atom for macro atom line. Abort.\n");
     exit (0);
