@@ -226,6 +226,8 @@ recombinations per second of a particular ion.
 			the threshold energy.  This is the energy
 			associated with kinetic energy loss
 			2- the specific recombination rate.
+mode	inner or outer shell
+
                                                                                                    
                                                                                                    
   Returns:
@@ -256,11 +258,12 @@ recombinations per second of a particular ion.
 
 
 double
-integ_fb (t, f1, f2, nion, fb_choice)
+integ_fb (t, f1, f2, nion, fb_choice, mode)
      double t;                  // The temperature at which to calculate the emissivity
      double f1, f2;             // The frequencies overwhich to integrate the emissivity
      int nion;                  // The ion for which the "specific emissivity is calculateed
      int fb_choice;             // 0=full, otherwise reduced
+     int mode;                  // 1- outer shell 2-inner shell
 {
   double xinteg_fb ();
   double fnu;
@@ -268,38 +271,73 @@ integ_fb (t, f1, f2, nion, fb_choice)
   int n;
 
 
-
-
-  if (fb_choice == 1)
+  if (mode == 1)
   {
-    for (n = 0; n < nfb; n++)
+
+    if (fb_choice == 1)
     {
-      /* See if the frequencies correspond to one previously calculated */
-      if (f1 == freebound[n].f1 && f2 == freebound[n].f2)
+      for (n = 0; n < nfb; n++)
       {
-        fnu = get_fb (t, nion, n);
-        return (fnu);
+        /* See if the frequencies correspond to one previously calculated */
+        if (f1 == freebound[n].f1 && f2 == freebound[n].f2)
+        {
+          fnu = get_fb (t, nion, n, mode);
+          return (fnu);
+        }
       }
-    }
-    /* If not calculate it here */
-    fnu = xinteg_fb (t, f1, f2, nion, fb_choice);
-    return (fnu);
-  }
-  else if (fb_choice == 2)
-  {
-    /* See if the frequencies correspond to one previously calculated */
-    if (nfb > 0)
-    {
-      fnu = get_nrecomb (t, nion);
+      /* If not calculate it here */
+      fnu = xinteg_fb (t, f1, f2, nion, fb_choice);
       return (fnu);
     }
-    /* If not calculate it here */
-    fnu = xinteg_fb (t, f1, f2, nion, fb_choice);
-    return (fnu);
+    else if (fb_choice == 2)
+    {
+      /* See if the frequencies correspond to one previously calculated */
+      if (nfb > 0)
+      {
+        fnu = get_nrecomb (t, nion, mode);
+        return (fnu);
+      }
+      /* If not calculate it here */
+      fnu = xinteg_fb (t, f1, f2, nion, fb_choice);
+      return (fnu);
+    }
+    Error ("integ_fb: Unknown fb_choice(%d)\n", fb_choice);
+    exit (0);
   }
 
-  Error ("integ_fb: Unknown fb_choice(%d)\n", fb_choice);
+  else if (mode == 2)           // inner shell
+  {
+    if (fb_choice == 1)
+    {
+      for (n = 0; n < nfb; n++)
+      {
+        /* See if the frequencies correspond to one previously calculated */
+        if (f1 == freebound[n].f1 && f2 == freebound[n].f2)
+        {
+          fnu = get_fb (t, nion, n, mode);
+          return (fnu);
+        }
+      }
+      fnu = xinteg_inner_fb (t, f1, f2, nion, fb_choice);
+      return (fnu);
+    }
+    else if (fb_choice == 2)
+    {
+      if (nfb > 0)
+      {
+        fnu = get_nrecomb (t, nion, mode);
+        return (fnu);
+      }
+      fnu = xinteg_inner_fb (t, f1, f2, nion, fb_choice);
+      return (fnu);
+    }
+    Error ("integ_fb: Unknown fb_choice(%d)\n", fb_choice);
+    exit (0);
+  }
+
+  Error ("integ_fb: Unknown mode(%d)\n", mode);
   exit (0);
+
 }
 
 
@@ -339,9 +377,10 @@ integ_fb (t, f1, f2, nion, fb_choice)
 
 
 double
-total_fb (one, t, f1, f2)
+total_fb (one, t, f1, f2, mode)
      WindPtr one;
      double t, f1, f2;
+     int mode;                  //inner=2 outer=1
 {
   double total;
   int nion;
@@ -355,11 +394,12 @@ total_fb (one, t, f1, f2)
     return (0);                 /* It's too cold to emit */
 
 // Initialize the free_bound structures if that is necessary
-  init_freebound (1.e3, 1.e9, f1, f2);  //NSH 140121 increased limit to take account of hot plasmas
+  if (mode == 1)
+    init_freebound (1.e3, 1.e9, f1, f2);        //NSH 140121 increased limit to take account of hot plasmas
 
 
 // Calculate the number of recombinations whenever calculating the fb_luminosities
-  num_recomb (xplasma, t);
+  num_recomb (xplasma, t, mode);
 
   total = 0;
   xplasma->lum_z = 0.0;
@@ -369,10 +409,20 @@ total_fb (one, t, f1, f2)
   {
     if (xplasma->density[nion] > DENSITY_PHOT_MIN)
     {
+      if (mode == 1)
+      {
+        total += xplasma->lum_ion[nion] = xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, 1, mode);
+        {
+          if (ion[nion].z > 3)
+            xplasma->lum_z += xplasma->lum_ion[nion];
+        }
+      }
+      else if (mode == 2)
+        total += xplasma->lum_inner_ion[nion] =
+          xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, 1, mode);
 
-      total += xplasma->lum_ion[nion] = xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, 1);
-      if (nion > 3)
-        xplasma->lum_z += xplasma->lum_ion[nion];
+
+
     }
 
   }
@@ -571,6 +621,8 @@ generate photons */
   Description:
                                                                                                    
   Arguments:  
+
+		mode - wether we are coputing inner shell or outer shell rates
                                                                                                    
                                                                                                    
   Returns:
@@ -590,13 +642,15 @@ generate photons */
 	02jul	ksl	Modified so that integ_fb is the number of 
 			recombinations per ne and per ion
 	06may	ksl	57+ -- Modified to use plasma structure since on volume
+    17jan	nsh 81	Added a mode parameter to allow the same code to work for both inner shell and outer shell recomb
                                                                                                    
  ************************************************************************/
 
 int
-num_recomb (xplasma, t_e)
+num_recomb (xplasma, t_e, mode)
      PlasmaPtr xplasma;
      double t_e;
+     int mode;
 {
   int nelem;
   int i, imin, imax;
@@ -608,10 +662,15 @@ num_recomb (xplasma, t_e)
     {
       if (xplasma->density[i] > DENSITY_PHOT_MIN)
       {
-        xplasma->recomb[i] = xplasma->ne * xplasma->density[i + 1] * integ_fb (t_e, 3e14, 3e17, i, 2);
+        if (mode == 1)          //outer shell
+          xplasma->recomb[i] = xplasma->ne * xplasma->density[i + 1] * integ_fb (t_e, 0.0, 1e50, i, 2, mode);
+        else if (mode == 2)     //innershell
+          xplasma->inner_recomb[i] = xplasma->ne * xplasma->density[i + 1] * integ_fb (t_e, 0.0, 1e50, i, 2, mode);
+
       }
     }
     xplasma->recomb[imax] = 0.0;        // Can't recombine to highest i-state
+    xplasma->inner_recomb[imax] = 0.0;  // Can't recombine to highest i-state
 
   }
 
@@ -815,6 +874,7 @@ init_freebound (t1, t2, f1, f2)
       {
         t = fb_t[j];
         xnrecomb[nion][j] = xinteg_fb (t, 0.0, 1.e50, nion, 2);
+        xninnerrecomb[nion][j] = xinteg_inner_fb (t, 0.0, 1.e50, nion, 2);
       }
     }
   }
@@ -876,6 +936,8 @@ on the assumption that the fb information will be reused.
     {                           //j covers the temps
       t = fb_t[j];
       freebound[nput].emiss[nion][j] = xinteg_fb (t, f1, f2, nion, 1);
+      freebound[nput].emiss_inner[nion][j] = xinteg_inner_fb (t, f1, f2, nion, 1);
+
     }
   }
 
@@ -910,14 +972,22 @@ on the assumption that the fb information will be reused.
 
 
 double
-get_nrecomb (t, nion)
+get_nrecomb (t, nion, mode)
      double t;
      int nion;
+     int mode;
 {
   int linterp ();
   double x;
-
-  linterp (t, fb_t, xnrecomb[nion], NTEMPS, &x, 0);     //Interpolate in linear space
+  if (mode == 1)
+    linterp (t, fb_t, xnrecomb[nion], NTEMPS, &x, 0);   //Interpolate in linear space
+  else if (mode == 2)
+    linterp (t, fb_t, xninnerrecomb[nion], NTEMPS, &x, 0);      //Interpolate in linear space
+  else
+  {
+    Error ("Get_nrecomb - unkonwn mode %i", mode);
+    exit (0);
+  }
   return (x);
 }
 
@@ -925,15 +995,24 @@ get_nrecomb (t, nion)
 /* Return the specific emissivity due to recombination emission in an interval */
 
 double
-get_fb (t, nion, narray)
+get_fb (t, nion, narray, mode)
      double t;
      int nion;
      int narray;
+     int mode;
 {
   int linterp ();
   double x;
+  if (mode == 1)
+    linterp (t, fb_t, &freebound[narray].emiss[nion][0], NTEMPS, &x, 0);        //Interpolate in linear space
+  else if (mode == 2)
+    linterp (t, fb_t, &freebound[narray].emiss_inner[nion][0], NTEMPS, &x, 0);  //Interpolate in linear space
 
-  linterp (t, fb_t, &freebound[narray].emiss[nion][0], NTEMPS, &x, 0);  //Interpolate in linear space
+  else
+  {
+    Error ("Get_fb - unkonwn mode %i", mode);
+    exit (0);
+  }
   return (x);
 }
 
@@ -1021,7 +1100,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
   if (f2 > 3e18)                // 110819 nsh increase upper limits to include  highly ionised ions that we are now seeing in x-ray illuminated nebulas.
     f2 = 3e18;                  // This is 1 Angstroms  - ksl
   if (f2 < f1)
-    return (0);                 /* Because there is nothing to integrate */
+    return (0.0);               /* Because there is nothing to integrate */
 
   fnu = 0.0;
 
@@ -1061,6 +1140,109 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
   return (fnu);
 }
+
+
+/**************************************************************************
+                   KAVLI Institute
+                                                                                                   
+                                                                                                   
+  Synopsis: xinteg_inner_fb calculates the integrated emissivity of the plasma.  
+                                                                                                   
+  Description: A virtual copy of xinteg_fb but dones inner shell integrations.
+                                                                                                   
+  Arguments:  
+                                                                                                   
+                                                                                                   
+  Returns:
+                                                                                                   
+  Notes:
+It's unusual nature is determined
+by the need to use a modififed Numerical Recipes routine for integration of fb over
+a frequency range 
+                                                                                                   
+                                                                                                   
+  History:
+	16Jan NSH - coded
+                                                                                                   
+ ************************************************************************/
+
+
+double
+xinteg_inner_fb (t, f1, f2, nion, fb_choice)
+     double t;                  // The temperature at which to calculate the emissivity
+     double f1, f2;             // The frequencies overwhich to integrate the emissivity
+     int nion;                  // The ion for which the "specific emissivity is calculateed
+     int fb_choice;             // 0=full, otherwise reduced
+{
+  int n, nn;
+  double fnu;
+  double dnu;                   //NSH 140120 - a parameter to allow one to restrict the integration limits.
+  double fthresh, fmax;
+  double den_config ();
+  double qromb ();
+
+
+  dnu = 0.0;                    //Avoid compilation errors.
+
+  fnu = 0.0;
+
+  nn = -1;
+
+
+  if (f1 < 3e12)
+    f1 = 3e12;                  // 10000 Angstroms
+  if (f2 > 3e18)                // 110819 nsh increase upper limits to include  highly ionised ions that we are now seeing in x-ray illuminated nebulas.
+    f2 = 3e18;                  // This is 1 Angstroms  - ksl
+  if (f2 < f1)
+    return (0.0);               /* Because there is nothing to integrate */
+
+  for (n = 0; n < n_inner_tot; n++)
+  {
+    if (inner_cross[n].nion == nion)
+    {
+      nn = n;
+      fbt = t;
+      fbfr = fb_choice;
+
+      /* Limit the frequency range to one that is reasonable before integrating */
+
+
+
+      // loop over relevent Topbase or VFKY photoionzation x-sections
+      fb_xtop = &inner_cross[nn];
+
+      /* Adding an if statement here so that photoionization that's part of a macro atom is 
+         not included here (these will be dealt with elsewhere). (SS, Apr04) */
+      if (fb_xtop->macro_info == 0 || geo.macro_simple == 1 || geo.rt_mode == 1)        //Macro atom check. (SS)
+      {
+        fthresh = fb_xtop->freq[0];
+        fmax = fb_xtop->freq[fb_xtop->np - 1];  // Argues that this should be part of structure
+        if (f1 > fthresh)
+          fthresh = f1;
+        if (f2 < fmax)
+          fmax = f2;
+
+        // Now calculate the emissivity as long as fmax exceeds xthreshold and there are ions to recombine
+        if (fmax > fthresh)
+        {
+          //NSH 140120 - this is a test to ensure that the exponential will not go to zero in the integrations 
+          dnu = 100.0 * (fbt / H_OVER_K);
+          if (fthresh + dnu < fmax)
+          {
+            fmax = fthresh + dnu;
+          }
+          fnu += qromb (fb_topbase_partial, fthresh, fmax, 1.e-4);
+        }
+
+      }
+    }
+  }
+
+
+
+  return (fnu);
+}
+
 
 
 /***********************************************************

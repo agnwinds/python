@@ -1,4 +1,4 @@
-#define MAXHYDRO 155
+#define MAXHYDRO 1000
 #define IGHOST 0
 
 double hydro_r_cent[MAXHYDRO];
@@ -326,6 +326,7 @@ get_hydro (ndom)
 
   zdom[ndom].coord_type = RTHETA;       //At the moment we only deal with RTHETA - in the future we might want to do some clever stuff
   ndim = zdom[ndom].ndim = ihydro_r + 3;        //We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
+  zdom[ndom].ndim2= zdom[ndom].ndim * zdom[ndom].mdim;  // Make ndim2 consistent with the individual dimensions
   //geo.ndim2 = NDIM2 += zdom[ndom].ndim * zdom[ndom].mdim;
 
   /*

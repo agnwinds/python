@@ -99,9 +99,8 @@ open_diagfile ()
 
 Synopsis:
 	get_extra_diagnostics reads in extra diagnostics if 
-	the user has asked for them. It uses rd_extra() in rdpar.c
-	to get the actual lines, and then checks them against 
-	hardwired options via a number of if loops.
+	the user has asked for them. It uses rd_int() in rdpar.c
+	to get the modes, which should always be one or zero.
 
 Arguments:	
     none	
@@ -122,95 +121,19 @@ History:
 int
 get_extra_diagnostics ()
 {
-  int wordlength;
-  char firstword[LINELENGTH];
-  int noptions, rdstat;
-  double answer;
-
-
-  noptions = 0;
-  wordlength = 0;
-  rdstat = 0;
-
   if (modes.iadvanced == 0)
     Error ("Getting extra_diagnostics but advanced mode is off!\n");
 
   Log ("get_extra_diagnostics: Getting extra diagnostics as requested...\n");
 
-  while (noptions < NMAX_OPTIONS && rdstat == 0)
-  {
-
-    rdstat = rd_extra (firstword, &answer, &wordlength);
-
-
-    /* if rdstat is 1 we reached EOF, so exit this routine */
-    if (rdstat)
-    {
-      if (noptions == 0)
-        Error ("get_extra_diagnostics: EOF: %i options read, but extra diagnostics on!\n", noptions);
-
-      return (0);
-    }
-
-    Log ("%s %8.4e\n", firstword, answer);
-
-    /* would you like to save cell photon statistics */
-    if (strncmp ("save_cell_statistics", firstword, wordlength) == 0)
-    {
-      modes.save_cell_stats = answer;
-      Log ("You are tracking photon statistics by cell\n");
-    }
-
-    /* would you like to use ispy mode */
-    else if (strncmp ("ispymode", firstword, wordlength) == 0)
-    {
-      modes.ispy = answer;
-      Log ("ISPY mode is on\n");
-    }
-
-    /* would you like to track resonant scatters */
-    else if (strncmp ("track_resonant_scatters", firstword, wordlength) == 0)
-    {
-      modes.track_resonant_scatters = answer;
-      Log ("You are tracking resonant scatters\n");
-    }
-
-    /* would you like keep windsave files for each cycle */
-    else if (strncmp ("keep_ioncycle_windsaves", firstword, wordlength) == 0)
-    {
-      modes.keep_ioncycle_windsaves = answer;
-      Log ("You are keeping windsave files for each cycle\n");
-    }
-
-    /* would you like to save data on extract */
-    else if (strncmp ("save_extract_photons", firstword, wordlength) == 0)
-    {
-      modes.save_extract_photons = answer;
-      Log ("You are saving data on extract\n");
-    }
-
-    /* would you like to print wind_rad_summary */
-    else if (strncmp ("print_windrad_summary", firstword, wordlength) == 0)
-    {
-      modes.print_windrad_summary = answer;
-      Log ("You are printing wind_rad_summary\n");
-    }
-
-    /* would you like to print dvds_info */
-    else if (strncmp ("print_dvds_info", firstword, wordlength) == 0)
-    {
-      modes.print_dvds_info = answer;
-      Log ("You are printing dvds_info\n");
-    }
-
-    else
-    {
-      Error ("get_extra_diagnostics: didn't understand question %s, continuing!\n", firstword);
-      noptions--;               // this isn't a real option, so decrement it before we increment it...!
-    }
-
-    noptions++;                 // increment noptions
-  }
+  /* read the options. */
+  rdint("@save_cell_statistics", &modes.save_cell_stats);
+  rdint("@ispymode", &modes.ispy);
+  rdint("@keep_ioncycle_windsaves", &modes.keep_ioncycle_windsaves);
+  rdint("@save_extract_photons", &modes.save_extract_photons);
+  rdint("@print_windrad_summary", &modes.print_windrad_summary);
+  rdint("@print_dvds_info", &modes.print_dvds_info);
+  rdint("@track_resonant_scatters", &modes.track_resonant_scatters);
 
   return 0;
 }

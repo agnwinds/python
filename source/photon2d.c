@@ -62,10 +62,7 @@ translate (w, pp, tau_scat, tau, nres)
   }
   else if ((pp->grid = where_in_grid (ndomain, pp->x)) >= 0)
   {
-//               printf ("photon %i start=%e %e %e %e",pp->np,pp->x[0], pp->x[1], pp->x[2],sqrt(pp->x[0]*pp->x[0]+pp->x[1]*pp->x[1]+pp->x[2]*pp->x[2]));
     istat = translate_in_wind (w, pp, tau_scat, tau, nres);
-//       printf ("end=%e %e %e %e\n",pp->x[0], pp->x[1], pp->x[2],sqrt(pp->x[0]*pp->x[0]+pp->x[1]*pp->x[1]+pp->x[2]*pp->x[2]));
-
   }
   else
   {
@@ -443,8 +440,6 @@ error continues to appear, new investigations are required.
 
 
   smax += one->dfudge;          /* dfudge is to force the photon through the cell boundaries. */
-//OLD  smax += DFUDGE;          /* DFUDGE is to force the photon through the cell boundaries.
-//OLD                              Implies that phot is in another cell often.  */
 
 
 

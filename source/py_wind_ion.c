@@ -330,6 +330,7 @@ line_summary (w, rootname, ochoice)
     default:
       Error("line_summary: Not a valid line.");
       exit(0);
+
   }
 
 /* Convert wavelength to energy and frequency */
@@ -397,6 +398,7 @@ line_summary (w, rootname, ochoice)
 		}
 	}
 
+
   rdint ("line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob, 4=off, diagnostic)", &geo.line_mode);
   if (geo.line_mode == 0)
     Log ("Pure_abs in line heating/cooling\n");
@@ -433,17 +435,17 @@ line_summary (w, rootname, ochoice)
     {
       nplasma = w[n].nplasma;
 
-      if(lin_ptr[nline]->macro_info == 1)
-      { //If this is a matom line
+      if (lin_ptr[nline]->macro_info == 1)
+      {                         //If this is a matom line
         d2 = den_config (&plasmamain[nplasma], lin_ptr[nline]->nconfigu);
       }
       else
-      { //If this is not a matom line
+      {                         //If this is not a matom line
         two_level_atom (lin_ptr[nline], &plasmamain[nplasma], &d1, &d2);
       }
       x = (d2) * a21 (lin_ptr[nline]) * H * lin_ptr[nline]->freq * w[n].vol;
-      
-      if(geo.line_mode != 4)
+
+      if (geo.line_mode != 4)
       {
         x *= z = scattering_fraction (lin_ptr[nline], &plasmamain[nplasma]);
       }
@@ -457,8 +459,7 @@ line_summary (w, rootname, ochoice)
 
   tot = 2. * tot;               // Why is there a factor of 2 here??? ksl
 
-  Log ("The total %s ion %d luminosity (flux) is %8.2g (%8.2g)\n",
-       ele[nelem].name, istate, tot, tot / (4 * PI * 1e4 * PC * PC));
+  Log ("The total %s ion %d luminosity (flux) is %8.2g (%8.2g)\n", ele[nelem].name, istate, tot, tot / (4 * PI * 1e4 * PC * PC));
 
   /* Store the appropriate values in a place where it does not matter */
   if (ochoice)
@@ -483,10 +484,10 @@ line_summary (w, rootname, ochoice)
     strcat (choice, ele[nelem].name);
     sprintf (iname, "%d", istate);
     strcat (choice, iname);
-    if(lin_ptr[nline]->macro_info == 1)
+    if (lin_ptr[nline]->macro_info == 1)
     {
-      sprintf(iname, ".%d-%d",lin_ptr[nline]->levu, lin_ptr[nline]->levl);
-      strcat (choice, iname);      
+      sprintf (iname, ".%d-%d", lin_ptr[nline]->levu, lin_ptr[nline]->levl);
+      strcat (choice, iname);
     }
     strcat (filename, choice);
     write_array (filename, ochoice);

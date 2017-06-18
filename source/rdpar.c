@@ -1100,29 +1100,31 @@ get_root (root, total)
 
   /* Check whether total is an empty string */
 
-  j=strcspn (total, "\n");
-  if (j==0) {
-      strcpy (root, "rdpar");
-      return(0);
+  j = strcspn (total, "\n");
+  if (j == 0)
+  {
+    strcpy (root, "rdpar");
+    return (0);
   }
 
   /* Check for .pf at the end of the string 
    * Note that there is no easy way to actually
    * check for the last occurence.  Here we
    * assume there is only one occurrcne of .pf
-   */ 
+   */
 
-  pf=strstr(total,".pf");
-  if (pf != NULL) {
-      position=pf-total;
-      strncpy(root,total,position);
-      root[position]='\0';
-      printf("xxx %s\n",root);
-      return(0);
+  pf = strstr (total, ".pf");
+  if (pf != NULL)
+  {
+    position = pf - total;
+    strncpy (root, total, position);
+    root[position] = '\0';
+    printf ("xxx %s\n", root);
+    return (0);
   }
 
-  strncpy (root, total,j);
-  root[j]='\0';
+  strncpy (root, total, j);
+  root[j] = '\0';
 
 
 //OLD  Next section replaced 161231
@@ -1199,44 +1201,5 @@ rdpar_set_verbose (vlevel)
 {
   if (vlevel < 2)
     verbose = 0;
-  return (0);
-}
-
-
-
-/* JM 141015 -- rd_extra is a function designed 
-   to help address #111. We want to implement 
-   extra diagnostics which can be supplied at the 
-   end of the file if extra_diagnostics is set to
-   1 in the parameter file. This function is used
-   by get_extra_diagnostics() to do this 
-
-   XXX - I am not sure that this is needed any longer
-   but have left it = ksl 1609
-*/
-
-
-int
-rd_extra (firstword, answer, wordlength)
-     char firstword[];
-     double *answer;
-     int *wordlength;
-{
-  char secondword[LINELEN];
-  char line[LINELEN];
-  char *ccc, *index ();
-  if (fgets (line, LINELEN, rdin_ptr) == NULL)
-  {
-    return (1);                 // get_extra_diagnostics uses this return value 
-  }
-
-  sscanf (line, "%s %s", firstword, secondword);
-  if ((ccc = index (firstword, '(')) != NULL)
-  {
-    *wordlength = (int) (ccc - firstword);
-  }
-  else
-    *wordlength = strlen (firstword);
-  sscanf (secondword, "%le", answer);
   return (0);
 }

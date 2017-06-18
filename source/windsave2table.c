@@ -116,6 +116,7 @@ main (argc, argv)
     sprintf (rootname, "%s.%d", root, ndom);
 
     create_master_table (ndom, rootname);
+    create_heat_table (ndom, rootname);
     create_ion_table (ndom, rootname, 6);
     create_ion_table (ndom, rootname, 7);
     create_ion_table (ndom, rootname, 8);
@@ -244,6 +245,220 @@ create_master_table (ndom, rootname)
 
   /* This should be the maxium number above +1 */
   ncols = 15;
+
+
+  converge = get_one (ndom, "converge");
+
+  /* At this point oll of the data has been collected */
+
+
+  nstart = zdom[ndom].nstart;
+  nstop = zdom[ndom].nstop;
+  ndim2 = zdom[ndom].ndim2;
+
+
+  if (zdom[ndom].coord_type == SPHERICAL)
+  {
+
+
+    /* First assemble the header line
+     */
+
+    sprintf (start, "%8s %4s %8s %6s %8s %8s %8s ", "r", "i", "inwind", "converge", "v_x", "v_y", "v_z");
+    strcpy (one_line, start);
+    n = 0;
+    while (n < ncols)
+    {
+      sprintf (one_value, "%9s ", column_name[n]);
+      strcat (one_line, one_value);
+
+      n++;
+    }
+    fprintf (fptr, "%s\n", one_line);
+
+
+    /* Now assemble the lines of the table */
+
+    for (i = 0; i < ndim2; i++)
+    {
+      // This line is different from the two d case
+      sprintf (start, "%8.2e %4d %6d %8.0f %8.2e %8.2e %8.2e ",
+               wmain[nstart + i].r, i, wmain[nstart + i].inwind,
+               converge[i], wmain[nstart + i].v[0], wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
+      strcpy (one_line, start);
+      n = 0;
+      while (n < ncols)
+      {
+        sprintf (one_value, "%9.2e ", c[n][i]);
+        strcat (one_line, one_value);
+        n++;
+      }
+      fprintf (fptr, "%s\n", one_line);
+    }
+  }
+  else
+  {
+
+    /* First assemble the header line */
+
+    sprintf (start, "%8s %8s %4s %4s %6s %8s %8s %8s %8s ", "x", "z", "i", "j", "inwind", "converge", "v_x", "v_y", "v_z");
+    strcpy (one_line, start);
+    n = 0;
+    while (n < ncols)
+    {
+      sprintf (one_value, "%9s ", column_name[n]);
+      strcat (one_line, one_value);
+
+      n++;
+    }
+    fprintf (fptr, "%s\n", one_line);
+
+
+    /* Now assemble the lines of the table */
+
+    for (i = 0; i < ndim2; i++)
+    {
+      wind_n_to_ij (ndom, nstart + i, &ii, &jj);
+      sprintf (start,
+               "%8.2e %8.2e %4d %4d %6d %8.0f %8.2e %8.2e %8.2e ",
+               wmain[nstart + i].xcen[0], wmain[nstart + i].xcen[2], ii,
+               jj, wmain[nstart + i].inwind, converge[i], wmain[nstart + i].v[0], wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
+      strcpy (one_line, start);
+      n = 0;
+      while (n < ncols)
+      {
+        sprintf (one_value, "%9.2e ", c[n][i]);
+        strcat (one_line, one_value);
+        n++;
+      }
+      fprintf (fptr, "%s\n", one_line);
+    }
+  }
+
+  return (0);
+}
+
+
+
+
+/***********************************************************
+                                       Space Telescope Science Institute
+
+Synopsis:
+
+	create_heat_table writes a selected variables of in the windsave
+	file to an astropy table
+
+	It is intended to be easily modifible.
+
+Arguments:		
+
+	rootname of the file that will be written out
+
+
+Returns:
+ 
+Description:	
+
+	The routine reads data directly from wmain, and then calls 
+	get_one or get_ion multiple times to read info from the Plasma
+	structure.  
+	
+	It then writes the data to an  astropy file
+Notes:
+
+	To add a variable one just needs to define the column_name
+	and send the appropriate call to either get_one or get_ion.
+
+	There is some duplicated code in the routine that pertains
+	to whether one is dealing with a spherecial or a 2d coordinate
+	system.  It should be possible to delete this
+
+
+
+History:
+	150428	ksl	Adpated from routines in py_wind.c
+	150501	ksl	Cleaned this routine up, and added a few more variables
+
+**************************************************************/
+
+int
+create_heat_table (ndom, rootname)
+     int ndom;
+     char rootname[];
+{
+  char filename[132];
+  double *get_one ();
+  double *get_ion ();
+  double *c[50], *converge;
+  char column_name[50][20];
+  char one_line[1024], start[132], one_value[20];
+
+
+  int i, ii, jj;
+  int nstart, nstop, ndim2;
+  int n, ncols;
+  FILE *fopen (), *fptr;
+
+  strcpy (filename, rootname);
+  strcat (filename, ".heat.txt");
+
+
+  fptr = fopen (filename, "w");
+
+  /* Get the variables that one needs */
+
+  c[0] = get_one (ndom, "vol");
+  strcpy (column_name[0], "vol");
+
+  c[1] = get_one (ndom, "rho");
+  strcpy (column_name[1], "rho");
+
+  c[2] = get_one (ndom, "ne");
+  strcpy (column_name[2], "ne");
+
+  c[3] = get_one (ndom, "t_e");
+  strcpy (column_name[3], "t_e");
+
+  c[4] = get_one (ndom, "t_r");
+  strcpy (column_name[4], "t_r");
+
+  c[5] = get_one (ndom, "heat_tot");
+  strcpy (column_name[5], "heat_tot");
+
+  c[6] = get_one (ndom, "heat_comp");
+  strcpy (column_name[6], "heat_comp");
+
+  c[7] = get_one (ndom, "heat_lines");
+  strcpy (column_name[7], "heat_lines");
+
+  c[8] = get_one (ndom, "heat_ff");
+  strcpy (column_name[8], "heat_ff");
+
+  c[9] = get_one (ndom, "heat_photo");
+  strcpy (column_name[9], "heat_photo");
+
+  c[10] = get_one (ndom, "heat_auger");
+  strcpy (column_name[10], "heat_auger");
+
+  c[11] = get_one (ndom, "lum_comp");
+  strcpy (column_name[11], "lum_comp");
+
+  c[12] = get_one (ndom, "lum_lines");
+  strcpy (column_name[12], "lum_lines");
+
+  c[13] = get_one (ndom, "lum_dr");
+  strcpy (column_name[13], "lum_dr");
+
+  c[14] = get_one (ndom, "lum_ff");
+  strcpy (column_name[14], "lum_ff");
+
+
+  c[15] = get_one (ndom, "lum_fb");
+  strcpy (column_name[15], "lum_fb");
+
+  /* This should be the maxium number above +1 */
+  ncols = 16;
 
 
   converge = get_one (ndom, "converge");
@@ -714,6 +929,50 @@ get_one (ndom, variable_name)
       else if (strcmp (variable_name, "ip") == 0)
       {
         x[n] = plasmamain[nplasma].ip;
+      }
+      else if (strcmp (variable_name, "heat_tot") == 0)
+      {
+        x[n] = plasmamain[nplasma].heat_tot;
+      }
+      else if (strcmp (variable_name, "heat_comp") == 0)
+      {
+        x[n] = plasmamain[nplasma].heat_comp;
+      }
+      else if (strcmp (variable_name, "heat_lines") == 0)
+      {
+        x[n] = plasmamain[nplasma].heat_lines;
+      }
+      else if (strcmp (variable_name, "heat_ff") == 0)
+      {
+        x[n] = plasmamain[nplasma].heat_ff;
+      }
+      else if (strcmp (variable_name, "heat_photo") == 0)
+      {
+        x[n] = plasmamain[nplasma].heat_photo;
+      }
+      else if (strcmp (variable_name, "heat_auger") == 0)
+      {
+        x[n] = plasmamain[nplasma].heat_auger;
+      }
+      else if (strcmp (variable_name, "lum_comp") == 0)
+      {
+        x[n] = plasmamain[nplasma].lum_comp;
+      }
+      else if (strcmp (variable_name, "lum_lines") == 0)
+      {
+        x[n] = plasmamain[nplasma].lum_lines;
+      }
+      else if (strcmp (variable_name, "lum_ff") == 0)
+      {
+        x[n] = plasmamain[nplasma].lum_ff;
+      }
+      else if (strcmp (variable_name, "lum_fb") == 0)
+      {
+        x[n] = plasmamain[nplasma].lum_fb;
+      }
+      else if (strcmp (variable_name, "lum_dr") == 0)
+      {
+        x[n] = plasmamain[nplasma].lum_dr;
       }
 
 

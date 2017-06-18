@@ -535,15 +535,20 @@ struct geometry
   //Added by SWM for reverberation mapping
   double fraction_converged, reverb_fraction_converged;
   int reverb_filter_lines, *reverb_filter_line;
-  enum reverb_disk_enum {REV_DISK_CORRELATED=0, REV_DISK_UNCORRELATED=1, REV_DISK_IGNORE=3} reverb_disk;
-  enum reverb_enum      {REV_NONE=0, REV_PHOTON=1, REV_WIND=2, REV_MATOM=3} reverb; 
-  enum reverb_vis_enum  {REV_VIS_NONE=0, REV_VIS_VTK=1, REV_VIS_DUMP=2, REV_VIS_BOTH=3} reverb_vis;
+  enum reverb_disk_enum
+  { REV_DISK_CORRELATED = 0, REV_DISK_UNCORRELATED = 1, REV_DISK_IGNORE = 3 } reverb_disk;
+  enum reverb_enum
+  { REV_NONE = 0, REV_PHOTON = 1, REV_WIND = 2, REV_MATOM = 3 } reverb;
+  enum reverb_vis_enum
+  { REV_VIS_NONE = 0, REV_VIS_VTK = 1, REV_VIS_DUMP = 2, REV_VIS_BOTH = 3 } reverb_vis;
   int reverb_wind_cycles;
-  int reverb_path_bins, reverb_angle_bins;  //SWM - Number of bins for path arrays, vtk output angular bins
-  int reverb_dump_cells;                    //SWM - Number of cells to dump
+  int reverb_path_bins, reverb_angle_bins;      //SWM - Number of bins for path arrays, vtk output angular bins
+  int reverb_dump_cells;        //SWM - Number of cells to dump
   double *reverb_dump_cell_x, *reverb_dump_cell_z;
   int *reverb_dump_cell;
-  int reverb_lines, *reverb_line;           //SWM - Number of lines to track, and array of line 'nres' values
+  int reverb_lines, *reverb_line;       //SWM - Number of lines to track, and array of line 'nres' values
+
+  int spec_mod;                 //A flag to say that we do hav spectral models
 }
 geo;
 
@@ -590,16 +595,16 @@ blmod;
 */
 typedef struct wind_paths
 {
-  double* ad_path_flux;  //Array[by frequency, then path] of total flux of photons with the given v&p
-  double* ad_path_flux_disk;
-  double* ad_path_flux_wind;
-  double* ad_path_flux_cent;  // As above, by source
-  int*    ai_path_num;   //Array [by frequency, then path] of the number of photons in this bin
-  int*    ai_path_num_disk;
-  int*    ai_path_num_wind;
-  int*    ai_path_num_cent;     // As above, by source
-  double  d_flux, d_path;     //Total flux, average path
-  int     i_num;              //Number of photons hitting this cell
+  double *ad_path_flux;         //Array[by frequency, then path] of total flux of photons with the given v&p
+  double *ad_path_flux_disk;
+  double *ad_path_flux_wind;
+  double *ad_path_flux_cent;    // As above, by source
+  int *ai_path_num;             //Array [by frequency, then path] of the number of photons in this bin
+  int *ai_path_num_disk;
+  int *ai_path_num_wind;
+  int *ai_path_num_cent;        // As above, by source
+  double d_flux, d_path;        //Total flux, average path
+  int i_num;                    //Number of photons hitting this cell
 } wind_paths_dummy, *Wind_Paths_Ptr;
 /* 	This structure defines the wind.  The structure w is allocated in the main
 	routine.  The total size of the structure will be NDIM x MDIM, and the two
@@ -693,7 +698,7 @@ typedef struct plasma
   double *density;              /*The number density of a specific ion.  This needs to correspond
                                    to the ion order obtained by get_atomic_data. 78 - changed to dynamic allocation */
   double *partition;            /*The partition function for each  ion. 78 - changed to dynamic allocation */
-  double levden[NLTE_LEVELS];   /*The number density (occupation number?) of a specific level */
+  double *levden;               /*The number density (occupation number?) of a specific level */
 
   double *PWdenom;              /*The denominator in the pairwise ionization solver. Sicne this is computed at a temperature 
                                    chosen from basic ioinzation proerties to be good for this ion, it should not change
@@ -709,7 +714,7 @@ typedef struct plasma
   double kappa_ff_factor;       /* Multiplicative factor for calculating the FF heating for                                      a photon. */
 
 
-  double recomb_simple[NTOP_PHOT];      /* "alpha_e - alpha" (in Leon's notation) for b-f processes in simple atoms. */
+  double *recomb_simple;        /* "alpha_e - alpha" (in Leon's notation) for b-f processes in simple atoms. */
 
 /* Begining of macro information */
   double kpkt_emiss;            /*This is the specific emissivity due to the conversion k-packet -> r-packet in the cell
@@ -717,7 +722,7 @@ typedef struct plasma
 
   double kpkt_abs;              /* k-packet equivalent of matom_abs. (SS) */
 
-  int kbf_use[NTOP_PHOT];       /* List of the indices of the photoionization processes to be used for kappa_bf. (SS) */
+  int *kbf_use;                 /* List of the indices of the photoionization processes to be used for kappa_bf. (SS) */
   int kbf_nuse;                 /* Total number of photoionization processes to be used for kappa_bf. (SS) */
 
 /* End of macro information */
@@ -757,12 +762,14 @@ typedef struct plasma
   double *ioniz, *recomb;       /* Number of ionizations and recombinations for each ion.
                                    The sense is ionization from ion[n], and recombinations 
                                    to each ion[n] . 78 - changed to dynamic allocation */
+  double *inner_recomb;
   int *scatters;                /* 68b - The number of scatters in this cell for each ion. 78 - changed to dynamic allocation */
   double *xscatters;            /* 68b - Diagnostic measure of energy scattered out of beam on extract. 78 - changed to dynamic allocation */
   double *heat_ion;             /* The amount of energy being transferred to the electron pool
                                    sby this ion via photoionization. 78 - changed to dynamic allocation */
   double *lum_ion;              /* The amount of energy being released from the electron pool
                                    by this ion via recombination. 78 - changed to dynamic allocation */
+  double *lum_inner_ion;
   double j, ave_freq, lum;      /*Respectively mean intensity, intensity_averaged frequency, 
                                    luminosity and absorbed luminosity of shell */
   double xj[NXBANDS], xave_freq[NXBANDS];       /* 1108 NSH frequency limited versions of j and ave_freq */
@@ -779,6 +786,7 @@ typedef struct plasma
   int nxtot[NXBANDS];           /* 1108 NSH the total number of photon passages in frequency bands */
   double max_freq;              /*1208 NSH The maximum frequency photon seen in this cell */
   double lum_lines, lum_ff, lum_adiabatic;
+  double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to computecompton cooling-  only needs computing once per cycle */
   double lum_comp;              /* 1108 NSH The compton luminosity of the cell */
   double lum_di;                /* 1409 NSH The direct ionization luminosity */
   double lum_dr;                /* 1109 NSH The dielectronic recombination luminosity of the cell */
@@ -981,97 +989,97 @@ typedef struct photon
     P_HIT_STAR = 3,             //absorbed by photosphere of star,
     P_HIT_DISK = 7,             //Banged into disk
     P_ABSORB = 6,               //Photoabsorbed within wind
-    P_TOO_MANY_SCATTERS = 4,    //in wind after MAXSCAT scatters
-    P_ERROR = 5,                //Too many calls to translate without something happening
-    P_SEC = 8,                  //Photon hit secondary
-    P_ADIABATIC = 9             //records that a photon created a kpkt which was destroyed by adiabatic cooling
-  } istat;                      /*status of photon. */
+        P_TOO_MANY_SCATTERS = 4,    //in wind after MAXSCAT scatters
+        P_ERROR = 5,                //Too many calls to translate without something happening
+        P_SEC = 8,                  //Photon hit secondary
+        P_ADIABATIC = 9             //records that a photon created a kpkt which was destroyed by adiabatic cooling
+      } istat;                      /*status of photon. */
 
-  int nscat;                    /*number of scatterings */
-  int nres;                     /*The line number in lin_ptr of last scatter or wind line creation. Continuum if > nlines. */
-  int nnscat;                   /* Used for the thermal trapping model of
-                                   anisotropic scattering to carry the number of
-                                   scattering to "extract" when needed for wind
-                                   generated photons SS05. */
-  int nrscat;                   /* number of resonance scatterings */
-  int grid;                     /*grid position of the photon in the wind, if
-                                   the photon is in the wind.  If the photon is not
-                                   in the wind, then -1 implies inside the wind cone and  
-                                   -2 implies outside the wind */
+      int nscat;                    /*number of scatterings */
+      int nres;                     /*The line number in lin_ptr of last scatter or wind line creation. Continuum if > nlines. */
+      int nnscat;                   /* Used for the thermal trapping model of
+                                       anisotropic scattering to carry the number of
+                                       scattering to "extract" when needed for wind
+                                       generated photons SS05. */
+      int nrscat;                   /* number of resonance scatterings */
+      int grid;                     /*grid position of the photon in the wind, if
+                                       the photon is in the wind.  If the photon is not
+                                       in the wind, then -1 implies inside the wind cone and  
+                                       -2 implies outside the wind */
 
-  enum origin_enum
-  	{	PTYPE_STAR=0, 
-  		PTYPE_BL=1, 
-  		PTYPE_DISK=2,
-  		PTYPE_WIND=3,
-  		PTYPE_AGN=4,
-      PTYPE_STAR_MATOM=10,     
-      PTYPE_BL_MATOM=11, 
-      PTYPE_DISK_MATOM=12,
-      PTYPE_WIND_MATOM=13,
-      PTYPE_AGN_MATOM=14
-  	} 	origin, origin_orig;		/* Where this photon originated.  If the photon has
-		   		scattered it's "origin" may be changed to "wind".*/
-                      		/* note that we add 10 to origin when processed by a macro-atom
-                         	which means we need these values in the enum list */
-  int np;			/*NSH 13/4/11 - an internal pointer to the photon number so 
-				   so we can write out details of where the photon goes */
-  double path; 			/* SWM - Photon path length */
-}
-p_dummy, *PhotPtr;
+      enum origin_enum
+      { PTYPE_STAR = 0,
+        PTYPE_BL = 1,
+        PTYPE_DISK = 2,
+        PTYPE_WIND = 3,
+        PTYPE_AGN = 4,
+        PTYPE_STAR_MATOM = 10,
+        PTYPE_BL_MATOM = 11,
+        PTYPE_DISK_MATOM = 12,
+        PTYPE_WIND_MATOM = 13,
+        PTYPE_AGN_MATOM = 14
+      } origin, origin_orig;        /* Where this photon originated.  If the photon has
+                                       scattered it's "origin" may be changed to "wind". */
+      /* note that we add 10 to origin when processed by a macro-atom
+         which means we need these values in the enum list */
+      int np;                       /*NSH 13/4/11 - an internal pointer to the photon number so 
+                                       so we can write out details of where the photon goes */
+      double path;                  /* SWM - Photon path length */
+    }
+    p_dummy, *PhotPtr;
 
-PhotPtr photmain;               /* A pointer to all of the photons that have been created in a subcycle. Added to ease 
-                                   breaking the main routine of python into separate rooutines for inputs and running the
-                                   program */
+    PhotPtr photmain;               /* A pointer to all of the photons that have been created in a subcycle. Added to ease 
+                                       breaking the main routine of python into separate rooutines for inputs and running the
+                                       program */
 
-/* minimum value for tau for p_escape_from_tau function- below this we 
-   set to p_escape_ to 1 */
+    /* minimum value for tau for p_escape_from_tau function- below this we 
+       set to p_escape_ to 1 */
 #define TAU_MIN 1e-6
 
 
-/* 68b - ksl - This is a structure in which the history of a single photon bundle can be recorded
- * See phot_util   phot_hist().  It needs to be used carefully.  if phot_hist_on is true
- * then photon histories will be attempted.
- */
+    /* 68b - ksl - This is a structure in which the history of a single photon bundle can be recorded
+     * See phot_util   phot_hist().  It needs to be used carefully.  if phot_hist_on is true
+     * then photon histories will be attempted.
+     */
 
 #define MAX_PHOT_HIST	1000
-int n_phot_hist, phot_hist_on, phot_history_spectrum;
-struct photon xphot_hist[MAX_PHOT_HIST];
+    int n_phot_hist, phot_hist_on, phot_history_spectrum;
+    struct photon xphot_hist[MAX_PHOT_HIST];
 
-struct basis
-{
-  double a[3][3];
+    struct basis
+    {
+      double a[3][3];
 
-}
-basis_cartesian;
+    }
+    basis_cartesian;
 
 
-/* The next section defines the spectrum arrays.  The spectrum structure contains
-   the selection criteria for each spectrum as well as the array in which to store the
-   spectrum.  The first MSPEC spectra are reserved for the total generated spectrum,
-   total emitted spectrum, the total spectrum of photons which are scattered and 
-   the total spectrum of photons which are absorbed.  The remainder of the spectra pertain 
-   to the spectrum as seen from various directions. Note that the space for the spectra 
-   are allocated using a calloc statement in spectrum_init.  1409-ksl-A new spectrum
-   was added.  This will be the first of the spectra.  It is simply the generated spectrum
-   before passing through the wind.  It has the orginal weights as generated.  */
+    /* The next section defines the spectrum arrays.  The spectrum structure contains
+       the selection criteria for each spectrum as well as the array in which to store the
+       spectrum.  The first MSPEC spectra are reserved for the total generated spectrum,
+       total emitted spectrum, the total spectrum of photons which are scattered and 
+       the total spectrum of photons which are absorbed.  The remainder of the spectra pertain 
+       to the spectrum as seen from various directions. Note that the space for the spectra 
+       are allocated using a calloc statement in spectrum_init.  1409-ksl-A new spectrum
+       was added.  This will be the first of the spectra.  It is simply the generated spectrum
+       before passing through the wind.  It has the orginal weights as generated.  */
 
 
 
 #define MSPEC                            7
-int nspectra;                   /* After create_spectrum, the number of elements allocated for s, or 
-                                   alternatively the number of spectra one has to work with.  Note that
-                                   general s[0],s[1] and s[2] are the escaping, scattered and absorbed photons,
-                                   while elements higher than this will contain spectra as seen by different observers */
+    int nspectra;                   /* After create_spectrum, the number of elements allocated for s, or 
+                                       alternatively the number of spectra one has to work with.  Note that
+                                       general s[0],s[1] and s[2] are the escaping, scattered and absorbed photons,
+                                       while elements higher than this will contain spectra as seen by different observers */
 
 
-int nscat[MAXSCAT + 1], nres[MAXSCAT + 1], nstat[NSTAT];
+    int nscat[MAXSCAT + 1], nres[MAXSCAT + 1], nstat[NSTAT];
 
-typedef struct spectrum
-{
-  char name[40];
-  float freqmin, freqmax, dfreq;
-  float lfreqmin, lfreqmax, ldfreq;     /* NSH 1302 - values for logarithmic spectra */
+    typedef struct spectrum
+    {
+      char name[40];
+      float freqmin, freqmax, dfreq;
+      float lfreqmin, lfreqmax, ldfreq;     /* NSH 1302 - values for logarithmic spectra */
   double lmn[3];
   double mmax, mmin;            /* Used only in live or die situations, mmax=cos(angle-DANG_LIVE_OR_DIE)
                                    and mmim=cos(angle+DANG_LIVE_OR_DIE).   In actually defining this
@@ -1207,10 +1215,14 @@ struct fbstruc
 {
   double f1, f2;
   double emiss[NIONS][NTEMPS];
+  double emiss_inner[NIONS][NTEMPS];    //Emissivity of recombinations to inner shells
+  double emiss_upper[NIONS][NTEMPS];    //The emissivity of recombinations to the highest energy level we have
 }
 freebound[NFB];
 
 double xnrecomb[NIONS][NTEMPS]; // There is only one set of recombination coefficients
+double xninnerrecomb[NIONS][NTEMPS];    // There is only one set of recombination coefficients
+
 double fb_t[NTEMPS];
 int nfb;                        // Actual number of freqency intervals calculated
 

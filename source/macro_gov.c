@@ -146,9 +146,9 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
             *which_out = 1;
 
             //SWM - If reverb is on, and this is the last ionisation cycle, then track the photon path
-            if(geo.reverb == REV_MATOM && geo.ioniz_or_extract && geo.fraction_converged > geo.reverb_fraction_converged)
+            if (geo.reverb == REV_MATOM && geo.ioniz_or_extract && geo.fraction_converged > geo.reverb_fraction_converged)
             {
-              line_paths_add_phot(&(wmain[p->grid]), p, nres);
+              line_paths_add_phot (&(wmain[p->grid]), p, nres);
             }
             return (1);
             /* 0803 - ksl - 60 - Added code to modify the photon origin to indicate the packet has been processed

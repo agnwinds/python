@@ -151,6 +151,17 @@ rtheta_make_grid (w, ndom)
   int i, j, n;
   int mdim, ndim;
 
+  /* This lines are a catchall just ensure that zmax is set to something
+   * sensible as is done for the cylindrical grid.  zmax should have 
+   * been defined previously.  ksl 170506
+   */
+
+   if (zdom[ndom].zmax == 0)
+	{
+	/* Check if zmax has been set, and if not set it to rmax */
+	zdom[ndom].zmax = zdom[ndom].rmax;
+	}
+
   ndim = zdom[ndom].ndim;
   mdim = zdom[ndom].mdim;
 

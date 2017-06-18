@@ -154,8 +154,8 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
     p[n].w_orig = p[n].w;
     p[n].freq_orig = p[n].freq;
     p[n].origin_orig = p[n].origin;
-    if(geo.reverb != REV_NONE && p[n].path < 0.0) //SWM - Set path lengths for disk, star etc. 
-     	simple_paths_gen_phot(&p[n]);
+    if (geo.reverb != REV_NONE && p[n].path < 0.0)      //SWM - Set path lengths for disk, star etc. 
+      simple_paths_gen_phot (&p[n]);
   }
   return (0);
 
@@ -1087,14 +1087,14 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
   dfreq = (freqmax - freqmin) / MAXRAND;
   for (i = istart; i < iend; i++)
   {
-    p[i].origin = PTYPE_DISK;	// identify this as a disk photon
+    p[i].origin = PTYPE_DISK;   // identify this as a disk photon
     p[i].w = weight;
     p[i].istat = p[i].nscat = p[i].nrscat = 0;
     p[i].tau = 0;
-    p[i].nres = -1;		// It's a continuum photon
+    p[i].nres = -1;             // It's a continuum photon
     p[i].nnscat = 1;
-    if(geo.reverb_disk == REV_DISK_UNCORRELATED)
-      p[i].path = 0;  //If we're assuming disk photons are uncorrelated, leave them at 0
+    if (geo.reverb_disk == REV_DISK_UNCORRELATED)
+      p[i].path = 0;            //If we're assuming disk photons are uncorrelated, leave them at 0
 
 /* The ring boundaries are defined so that an equal number of photons are
  * generated in each ring.  Howver, there is a possibility that the number

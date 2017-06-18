@@ -219,6 +219,7 @@ double scattering_fraction(struct lines *line_ptr, PlasmaPtr xplasma);
 double p_escape(struct lines *line_ptr, PlasmaPtr xplasma);
 double p_escape_from_tau(double tau);
 int line_heat(PlasmaPtr xplasma, PhotPtr pp, int nres);
+double upsilon(int n_coll, double u0);
 /* continuum.c */
 double one_continuum(int spectype, double t, double g, double freqmin, double freqmax);
 double emittance_continuum(int spectype, double freqmin, double freqmax, double t, double g);
@@ -234,15 +235,16 @@ double one_ff(WindPtr one, double f1, double f2);
 double gaunt_ff(double gsquared);
 /* recomb.c */
 double fb_topbase_partial(double freq);
-double integ_fb(double t, double f1, double f2, int nion, int fb_choice);
-double total_fb(WindPtr one, double t, double f1, double f2);
+double integ_fb(double t, double f1, double f2, int nion, int fb_choice, int mode);
+double total_fb(WindPtr one, double t, double f1, double f2, int mode);
 double one_fb(WindPtr one, double f1, double f2);
-int num_recomb(PlasmaPtr xplasma, double t_e);
+int num_recomb(PlasmaPtr xplasma, double t_e, int mode);
 double fb(PlasmaPtr xplasma, double t, double freq, int ion_choice, int fb_choice);
 int init_freebound(double t1, double t2, double f1, double f2);
-double get_nrecomb(double t, int nion);
-double get_fb(double t, int nion, int narray);
+double get_nrecomb(double t, int nion, int mode);
+double get_fb(double t, int nion, int narray, int mode);
 double xinteg_fb(double t, double f1, double f2, int nion, int fb_choice);
+double xinteg_inner_fb(double t, double f1, double f2, int nion, int fb_choice);
 double total_rrate(int nion, double T);
 double gs_rrate(int nion, double T);
 /* diag.c */
@@ -420,6 +422,9 @@ double klein_nishina(double nu);
 int compton_dir(PhotPtr p, PlasmaPtr xplasma);
 double compton_func(double f);
 double sigma_compton_partial(double f, double x);
+double alpha(double nu);
+double beta(double nu);
+double comp_cool_integrand(double nu);
 /* torus.c */
 double ds_to_cylinder(double rho, struct photon *p);
 /* zeta.c */
