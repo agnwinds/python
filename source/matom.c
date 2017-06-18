@@ -1476,6 +1476,7 @@ emit_matom (w, p, nres, upper)
 
 /********************************************************************************/
 
+
 /**********************************************************/
 /** @name   matom_emit_in_line_prob
  * @brief Prob. of cell emitting in a given line

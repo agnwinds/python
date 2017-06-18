@@ -289,6 +289,7 @@ int coord_fraction(int ndom, int ichoice, double x[], int ii[], double frac[], i
 int where_in_2dcell(int ichoice, double x[], int n, double *fx, double *fz);
 int wind_n_to_ij(int ndom, int n, int *i, int *j);
 int wind_ij_to_n(int ndom, int i, int j, int *n);
+int wind_x_to_n(double x[], int *n);
 /* density.c */
 double get_ion_density(int ndom, double x[], int nion);
 /* detail.c */
@@ -488,11 +489,11 @@ int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 int macro_pops(PlasmaPtr xplasma, double xne);
 /* reverb.c */
 double delay_to_observer(PhotPtr pp);
-int delay_dump_prep(int restart_stat, int i_rank);
+int delay_dump_prep(int restart_stat);
 int delay_dump_finish(void);
 int delay_dump_combine(int i_ranks);
-int delay_dump(PhotPtr p, int np, int iExtracted);
-int delay_dump_single(PhotPtr pp, int extract_phot);
+int delay_dump(PhotPtr p, int np);
+int delay_dump_single(PhotPtr pp, int i_spec);
 /* paths.c */
 Wind_Paths_Ptr wind_paths_constructor(WindPtr wind);
 int reverb_init(WindPtr wind);
@@ -504,9 +505,9 @@ double r_draw_from_path_histogram(Wind_Paths_Ptr PathPtr);
 int wind_paths_gen_phot(WindPtr wind, PhotPtr pp);
 int line_paths_gen_phot(WindPtr wind, PhotPtr pp, int nres);
 int wind_paths_evaluate_single(Wind_Paths_Ptr paths);
-int wind_paths_evaluate(WindPtr wind);
-int wind_paths_dump(WindPtr wind);
-int wind_paths_output_dump(WindPtr wind);
+int wind_paths_evaluate(WindPtr wind, int i_rank);
+int wind_paths_dump(WindPtr wind, int rank_global);
+int wind_paths_output_dump(WindPtr wind, int i_rank);
 int wind_paths_point_index(int i, int j, int k, int i_top, DomainPtr dom);
 int wind_paths_sphere_point_index(int i, int j, int k);
 int wind_paths_output_vtk(WindPtr wind, int ndom);
@@ -597,6 +598,7 @@ int ion_overview(int icell);
 int config_overview(int n, int icell);
 int depcoef_overview(int icell);
 int copy_plasma(PlasmaPtr x1, PlasmaPtr x2);
+int dealloc_copied_plasma(PlasmaPtr xcopy);
 int depcoef_overview_specific(int version, int nconfig, WindPtr w, char rootname[], int ochoice);
 int level_popsoverview(int nplasma, WindPtr w, char rootname[], int ochoice);
 int level_emissoverview(int nlev, WindPtr w, char rootname[], int ochoice);

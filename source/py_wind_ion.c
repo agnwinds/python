@@ -396,6 +396,7 @@ line_summary (w, rootname, ochoice)
 		  exit (0);
 		}
 	}
+
   rdint ("line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob, 4=off, diagnostic)", &geo.line_mode);
   if (geo.line_mode == 0)
     Log ("Pure_abs in line heating/cooling\n");
