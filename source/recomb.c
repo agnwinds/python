@@ -142,8 +142,6 @@ described in terms of Topbase photoionization x-sections.
 	that integrates over frequency, most of the information for these routines
 	 has to be and is passed by the external structures. 
                                                                                                    
-                                                                                                   
-                                                                                                   
   History:
 	02jul	ksl	Removed all references to the wind cell.
                                                                                                    
@@ -185,12 +183,10 @@ fb_topbase_partial (freq)
   x = sigma_phot (fb_xtop, freq);
   // Now calculate emission using Ferland's expression
 
-
   partial = FBEMISS * gn / (2. * gion) * pow (freq * freq / fbt, 1.5) * exp (H_OVER_K * (fthresh - freq) / fbt) * x;
 
-
-
   // 0=emissivity, 1=heat loss from electrons, 2=photons emissivity
+
   if (fbfr == 1)
     partial *= (freq - fthresh) / freq;
   else if (fbfr == 2)
@@ -691,7 +687,9 @@ num_recomb (xplasma, t_e, mode)
 	ion_choice	Either the total emissivity or the emissivity for a specific
 			ion is caculated depending on whether ion_choice=nions, or 
 			a value less than the total number of ions
-                                                                                                   
+    fb_choice determines whether what is returned is the emissivity a specific frecuency 0
+            the emissivity reduced by the ionization potential 1, or the number of photons per
+            unit Hz
                                                                                                    
   Returns:
                                                                                                    
@@ -714,7 +712,7 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
      double t;                  // The temperature at which to calculate the emissivity
      double freq;               // The frequency at which to calculate the emissivity
      int ion_choice;            // Selects which ions the emissivity is to be calculated for (see above)
-     int fb_choice;             // 0=full, otherwise reduced
+     int fb_choice;             // 0=emissivity in the standard sense, 1 heat loss from electons, 2 number of photons
 {
   int n;
   double fnu, x;
@@ -1045,7 +1043,7 @@ a frequency range
 			renamed.  It actually calculates the emissivities, and integ_fb
 			has become a kind of steering routine that normally, e.g. often
 			reads the freebound arrays.
-        04May   SS      Minor changes to exclude fb from macro atoms (which are treated elsewhere)
+    04May   SS      Minor changes to exclude fb from macro atoms (which are treated elsewhere)
                                                                                                    
  ************************************************************************/
 
@@ -1443,8 +1441,6 @@ gs_rrate (nion, T)
       imin = BAD_GS_RR_PARAMS - 2;
       //We will try to extrapolate.
 
-
-
     }
     else                        //We must be within the range of tabulated data
     {
@@ -1469,7 +1465,6 @@ gs_rrate (nion, T)
    */
   else
   {
-    //printf("We are using the milne relation for GS recomb\n");
     rate = 0.0;                 /* NSH 130605 to remove o3 compile error */
 
     fbt = T;
