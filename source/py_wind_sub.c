@@ -138,7 +138,6 @@ overview (w, rootname)
      WindPtr w;
      char rootname[];
 {
-  //double lum, wind_luminosity (); JM130621: shouldn't really call this here
   int n;
   double heating, lines, ff, photo;
 
@@ -151,8 +150,7 @@ overview (w, rootname)
     photo += plasmamain[n].heat_photo;
     ff += plasmamain[n].heat_ff;
   }
-  /* lum = wind_luminosity (0., 1.e20); JM130621: shouldn't really call this here. windsave bug fix means
-     we should trust what is in the geo structure */
+
   Log (" Total emission %8.2e heating %8.2e\n", geo.lum_ioniz, heating);
   Log ("    ff emission %8.2e heating %8.2e\n", geo.lum_ff_ioniz, ff);
   Log ("    fb emission %8.2e heating %8.2e\n", geo.lum_fb_ioniz, photo);
@@ -2897,7 +2895,7 @@ heatcool_summary (w, rootname, ochoice)
   char filename[LINELENGTH];
   float x;
 
-  x = wind_luminosity (0.0, 1e20);
+  x = wind_luminosity (0.0, VERY_BIG);
 
   for (n = 0; n < NDIM2; n++)
   {
