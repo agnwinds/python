@@ -482,7 +482,6 @@ total_emission_summary (w, rootname, ochoice)
 {
   double tot;
   int n;
-  double total_emission ();
   char filename[LINELENGTH];
 
 

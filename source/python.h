@@ -89,7 +89,7 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 int NPHOT;                      /* The number of photon bundles created.  defined in python.c */
 
 #define NWAVE  			       10000    //Increasing from 4000 to 10000 (SS June 04)
-#define MAXSCAT 			50
+#define MAXSCAT 			500
 
 /* Define the structures */
 

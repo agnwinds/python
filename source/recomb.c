@@ -126,12 +126,15 @@ int fbfr;                       // fb_choice (see above)
                     Space Telescope Science Institute
                                                                                                    
                                                                                                    
-  Synopsis: fb_topbase_partial returns the partial (for a specific ion) emissivity for ions 
-described in terms of Topbase photoionization x-sections.
+  Synopsis: fb_topbase_partial returns the partial (for a specific ion) emissivity or 
+  recombination rate for ions described in terms of Topbase photoionization x-sections.
                                                                                                    
   Description:
                                                                                                    
   Arguments:  
+
+  Some arguments are externally passed, including fbfr which determines whether
+  one is computing the total emission (0), the reduced emission (1), or the rate
                                                                                                    
                                                                                                    
   Returns:
@@ -191,8 +194,6 @@ fb_topbase_partial (freq)
     partial *= (freq - fthresh) / freq;
   else if (fbfr == FB_RATE)
     partial /= (H * freq);
-
-
 
   return (partial);
 }
@@ -373,9 +374,10 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
 
 
 double
-total_fb (one, t, f1, f2, mode)
+total_fb (one, t, f1, f2, fb_choice, mode)
      WindPtr one;
      double t, f1, f2;
+     int fb_choice;
      int mode;                  //inner=2 outer=1
 {
   double total;
@@ -407,7 +409,7 @@ total_fb (one, t, f1, f2, mode)
     {
       if (mode == 1)
       {
-        total += xplasma->lum_ion[nion] = xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, FB_REDUCED, mode);
+        total += xplasma->lum_ion[nion] = xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, fb_choice, mode);
         {
           if (ion[nion].z > 3)
             xplasma->lum_z += xplasma->lum_ion[nion];
@@ -415,7 +417,7 @@ total_fb (one, t, f1, f2, mode)
       }
       else if (mode == 2)
         total += xplasma->lum_inner_ion[nion] =
-          xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, FB_REDUCED, mode);
+          xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, fb_choice, mode);
 
     }
 
@@ -1009,7 +1011,8 @@ get_fb (t, nion, narray, mode)
                     Space Telescope Science Institute
                                                                                                    
                                                                                                    
-  Synopsis: xinteg_fb calculates the integrated emissivity of the plasma.  
+  Synopsis: xinteg_fb calculates the integrated emissivity of 
+  an ion in the plasma.  
                                                                                                    
   Description:
                                                                                                    
@@ -1019,9 +1022,12 @@ get_fb (t, nion, narray, mode)
   Returns:
                                                                                                    
   Notes:
-It's unusual nature is determined
-by the need to use a modififed Numerical Recipes routine for integration of fb over
-a frequency range 
+
+  This routine is called by integ_fb.  It is not intended to be called 
+  directly. 
+
+  It's unusual nature is determined by the need to use a modififed 
+  Numerical Recipes routine for integration of fb over a frequency range 
                                                                                                    
                                                                                                    
   History:
@@ -1130,12 +1136,13 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
 
 /**************************************************************************
-                   KAVLI Institute
+                   Southampton University
                                                                                                    
                                                                                                    
-  Synopsis: xinteg_inner_fb calculates the integrated emissivity of the plasma.  
+  Synopsis: xinteg_inner_fb calculates the integrated fb emissivity of inner
+  shell transitions in an ion at a given temperature
                                                                                                    
-  Description: A virtual copy of xinteg_fb but dones inner shell integrations.
+  Description: 
                                                                                                    
   Arguments:  
                                                                                                    
@@ -1143,9 +1150,15 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
   Returns:
                                                                                                    
   Notes:
-It's unusual nature is determined
-by the need to use a modififed Numerical Recipes routine for integration of fb over
-a frequency range 
+
+  This routine is  virtual copy of xinteg_fb but dones inner shell integrations.
+
+  This routine is called by integ_fb.  It is not intended to be called 
+  directly. 
+
+  It's unusual nature is determined by the need to use a modififed 
+  Numerical Recipes routine for integration of fb over a frequency range 
+                                                                                                   
                                                                                                    
                                                                                                    
   History:

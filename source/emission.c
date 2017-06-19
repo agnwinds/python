@@ -212,7 +212,7 @@ total_emission (one, f1, f2)
   {
     if (geo.rt_mode == RT_MODE_MACRO)       //Switch for macro atoms (SS)
     {
-      xplasma->lum_fb = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, 1);        //outer shellrecombinations
+      xplasma->lum_fb = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_REDUCED, 1);        //outer shellrecombinations
       //The first term here is the fb cooling due to macro ions and the second gives
       //the fb cooling due to simple ions.
       //total_fb has been modified to exclude recombinations treated using macro atoms.
@@ -234,18 +234,10 @@ total_emission (one, f1, f2)
     {
       xplasma->lum_rad = xplasma->lum_lines = total_line_emission (one, f1, f2);
       xplasma->lum_rad += xplasma->lum_ff = total_free (one, t_e, f1, f2);
-      xplasma->lum_rad += xplasma->lum_fb = total_fb (one, t_e, f1, f2, 1);     //outer shell recombinations
+      xplasma->lum_rad += xplasma->lum_fb = total_fb (one, t_e, f1, f2, FB_REDUCED, 1);     //outer shell recombinations
 
 
     }
-    /* NSH 1108 - This line calls the function total_comp which returns the compton luminosity for the cell
-       this is then added to lum_rad, the total luminosity of the cell */
-    /* NSH 1110 - Ths line has now been commented out. It was adding the compton luminosity to the lum_rad 
-       variable. This was then generating line photons to fill the compton luminosity. We need to do something
-       better, but at the moment, simply removing this line, and putting the calculation of compton luminosity 
-       into calc_te with the adiabatic cooling and the new DR cooling is the way to make things a little more stable */
-    //OLD     xplasma->lum_rad += xplasma->lum_comp = total_comp (one, t_e); 
-    //XXX - ksl - A line was commented out here.  It was said this makes things more stable, but the question is what is correct
   }
 
 

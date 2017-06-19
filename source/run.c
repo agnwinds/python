@@ -369,7 +369,7 @@ calculate_ionization (restart_stat)
 /***********************************************************
                                        Space Telescope Science Institute
 
-Synopsis:  make_spectra generates the detailed spctra
+Synopsis:  make_spectra generates the detailed spectra
  
 Arguments:		
 
@@ -382,7 +382,8 @@ Notes:
 
 History:
 
-	15sep 	ksl	Moved calculating the detailed spectra to a separat routine
+	15sep 	ksl	Moved calculating the detailed spectra to a separata 
+                routine
 **************************************************************/
 
 int
