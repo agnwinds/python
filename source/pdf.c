@@ -426,7 +426,7 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
   for (n = 0; n < pdfsteps; n++)
   {
     x = xmin + (n + 0.5) * xstep;
-    if ((z = (*func) (x)) < 0 || z > 1.e50 || sane_check (z))
+    if ((z = (*func) (x)) < 0 || z > VERY_BIG || sane_check (z))
     {
       Error ("pdf_gen_from_func: probability density %g < 0 at %g\n", z, x);
     }

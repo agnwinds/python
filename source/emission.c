@@ -195,8 +195,6 @@ total_emission (one, f1, f2)
      double f1, f2;             /* The minimum and maximum frequency over which the emission is
                                    integrated */
 {
-  double total_line_emission (), total_free (), total_fb ();
-  double total_fb_matoms (), total_bb_cooling ();
   double t_e;
   int nplasma;
   PlasmaPtr xplasma;

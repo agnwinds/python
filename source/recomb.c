@@ -187,9 +187,9 @@ fb_topbase_partial (freq)
 
   // 0=emissivity, 1=heat loss from electrons, 2=photons emissivity
 
-  if (fbfr == 1)
+  if (fbfr == FB_REDUCED)
     partial *= (freq - fthresh) / freq;
-  else if (fbfr == 2)
+  else if (fbfr == FB_RATE)
     partial /= (H * freq);
 
 
@@ -207,21 +207,21 @@ recombinations per second of a particular ion.
   Description:
                                                                                                    
   Arguments:  
-	t		The temperature at which the emissivity 
-			or recombination rate is calculated
+	t		    The temperature at which the emissivity 
+			    or recombination rate is calculated
 	f1,f2		The frequency limits on the calculation 
-			of the emissivity (ignored if the number 
-			of recombinations is desired.
+			    of the emissivity (ignored if the number 
+			    of recombinations is desired.
 	nion		The ion for which the emissivity is returned
 	fb_choice	A switch which determines exactly what is to
-			be returned: 
-			0- the full emissivity including
-			the energy associated associated with the
-			threshold
-			1- the (reduced) emissivity, e.g. excluding
-			the threshold energy.  This is the energy
-			associated with kinetic energy loss
-			2- the specific recombination rate.
+			    be returned: 
+			    0- the full emissivity including
+			    the energy associated associated with the
+			    threshold
+			    1- the (reduced) emissivity, e.g. excluding
+			    the threshold energy.  This is the energy
+			    associated with kinetic energy loss
+			    2- the specific recombination rate.
 mode	inner or outer shell
 
                                                                                                    
@@ -258,7 +258,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
      double t;                  // The temperature at which to calculate the emissivity
      double f1, f2;             // The frequencies overwhich to integrate the emissivity
      int nion;                  // The ion for which the "specific emissivity is calculateed
-     int fb_choice;             // 0=full, otherwise reduced
+     int fb_choice;             // 0=full, 1=reduced, 2= rate
      int mode;                  // 1- outer shell 2-inner shell
 {
   double xinteg_fb ();
@@ -270,7 +270,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
   if (mode == 1)
   {
 
-    if (fb_choice == 1)
+    if (fb_choice == FB_REDUCED)
     {
       for (n = 0; n < nfb; n++)
       {
@@ -285,7 +285,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
       fnu = xinteg_fb (t, f1, f2, nion, fb_choice);
       return (fnu);
     }
-    else if (fb_choice == 2)
+    else if (fb_choice == FB_RATE)
     {
       /* See if the frequencies correspond to one previously calculated */
       if (nfb > 0)
@@ -303,7 +303,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
 
   else if (mode == 2)           // inner shell
   {
-    if (fb_choice == 1)
+    if (fb_choice == FB_REDUCED)
     {
       for (n = 0; n < nfb; n++)
       {
@@ -317,7 +317,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
       fnu = xinteg_inner_fb (t, f1, f2, nion, fb_choice);
       return (fnu);
     }
-    else if (fb_choice == 2)
+    else if (fb_choice == FB_RATE)
     {
       if (nfb > 0)
       {
@@ -407,7 +407,7 @@ total_fb (one, t, f1, f2, mode)
     {
       if (mode == 1)
       {
-        total += xplasma->lum_ion[nion] = xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, 1, mode);
+        total += xplasma->lum_ion[nion] = xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, FB_REDUCED, mode);
         {
           if (ion[nion].z > 3)
             xplasma->lum_z += xplasma->lum_ion[nion];
@@ -415,9 +415,7 @@ total_fb (one, t, f1, f2, mode)
       }
       else if (mode == 2)
         total += xplasma->lum_inner_ion[nion] =
-          xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, 1, mode);
-
-
+          xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, FB_REDUCED, mode);
 
     }
 
@@ -515,15 +513,9 @@ use that instead if possible --  57h */
   if (xphot->n < NSTORE && xphot->f1 == f1 && xphot->f2 == f2 && xphot->t == tt)
   {
     freq = xphot->freq[xphot->n];
-//TEST      Log("one_fb:  Using precalculated fb  %d \n",xphot->n);
     (xphot->n)++;
     return (freq);
   }
-//TEST  else {
-//TEST  Log("one_fb %3d %3d f %8.2e %8.2e %8.2e %8.2e t %6.1f %6.1f\n",nplasma,xphot->n,f1,f2,xphot->f1,xphot->f2,tt,xphot->t);
-//TEST
-//TEST}
-
 
   delta = 500;                  // Fudge factor to prevent generation a photon if t has changed only slightly
   /* Check to see if we have already generated a pdf */
@@ -659,9 +651,9 @@ num_recomb (xplasma, t_e, mode)
       if (xplasma->density[i] > DENSITY_PHOT_MIN)
       {
         if (mode == 1)          //outer shell
-          xplasma->recomb[i] = xplasma->ne * xplasma->density[i + 1] * integ_fb (t_e, 0.0, 1e50, i, 2, mode);
+          xplasma->recomb[i] = xplasma->ne * xplasma->density[i + 1] * integ_fb (t_e, 0.0, VERY_BIG, i, FB_RATE, mode);
         else if (mode == 2)     //innershell
-          xplasma->inner_recomb[i] = xplasma->ne * xplasma->density[i + 1] * integ_fb (t_e, 0.0, 1e50, i, 2, mode);
+          xplasma->inner_recomb[i] = xplasma->ne * xplasma->density[i + 1] * integ_fb (t_e, 0.0, VERY_BIG, i, FB_RATE, mode);
 
       }
     }
@@ -871,8 +863,8 @@ init_freebound (t1, t2, f1, f2)
       for (j = 0; j < NTEMPS; j++)
       {
         t = fb_t[j];
-        xnrecomb[nion][j] = xinteg_fb (t, 0.0, 1.e50, nion, 2);
-        xninnerrecomb[nion][j] = xinteg_inner_fb (t, 0.0, 1.e50, nion, 2);
+        xnrecomb[nion][j] = xinteg_fb (t, 0.0, VERY_BIG, nion, 2);
+        xninnerrecomb[nion][j] = xinteg_inner_fb (t, 0.0, VERY_BIG, nion, 2);
       }
     }
   }
@@ -914,8 +906,7 @@ been calculated for these conditions, and if so simply return.
   }
 
 
-
-/* Having reach this point, a new set of fb emissivities
+/* Having reached this point, a new set of fb emissivities
 must be calculated.  Note that old information is not destroyed
 unless nfb had been set to 0.  The new set is added to the old
 on the assumption that the fb information will be reused.
@@ -939,8 +930,6 @@ on the assumption that the fb information will be reused.
     }
   }
 
-
-  // OK we are done
   return (0);
 }
 
@@ -1181,9 +1170,7 @@ xinteg_inner_fb (t, f1, f2, nion, fb_choice)
 
 
   dnu = 0.0;                    //Avoid compilation errors.
-
   fnu = 0.0;
-
   nn = -1;
 
 
@@ -1339,11 +1326,7 @@ total_rrate (nion, T)
   }
 
 
-
-
-
   return (rate);
-
 
 }
 
@@ -1436,7 +1419,6 @@ gs_rrate (nion, T)
       Log_silent
         ("bad_gs_rr: Requested temp %e is above limit (%e) of data for ion %i\n",
          T, nion, bad_gs_rr[ion[nion].nxbadgsrr].temps[BAD_GS_RR_PARAMS - 1]);
-      //     rate = rates[BAD_GS_RR_PARAMS - 1];
       imax = BAD_GS_RR_PARAMS - 1;
       imin = BAD_GS_RR_PARAMS - 2;
       //We will try to extrapolate.
@@ -1468,7 +1450,7 @@ gs_rrate (nion, T)
     rate = 0.0;                 /* NSH 130605 to remove o3 compile error */
 
     fbt = T;
-    fbfr = 2;
+    fbfr = FB_RATE;
 
     if (ion[nion - 1].phot_info > 0)    //topbase or hybrid
     {
@@ -1489,10 +1471,8 @@ gs_rrate (nion, T)
       fmax = fthresh + dnu;
     }
 
-
     rate = qromb (fb_topbase_partial, fthresh, fmax, 1e-5);
   }
-
 
   return (rate);
 }

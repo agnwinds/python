@@ -15,7 +15,7 @@ is the controlling routine for creating the underlying photon distribution.
 Arguments:		
 	PhotPtr p;
 	WindPtr w;
-	double f1,f2;  		The freqency mininimum and maximum if a uniform distribution 
+	double f1,f2;  		The freqency minimum and maximum if a uniform distribution 
 				is selected 
 	long nphot_tot;		The total number of photons that need to be generated to reach 
 				the luminosity. This is not necessarily the number of photons 
@@ -31,7 +31,7 @@ Arguments:
 					This is necessary because after each ionization recalculation
 					one needs to recalculate the flux fraction from the wind.
      int freq_sampling		0 --> old uniform approach, currently used for detailed spectrum calculation
-				1 --> mininimum fractions ins various bins to better approximate heating
+				1 --> minimum fractions ins various bins to better approximate heating
 					of plasma
 Returns:
  
@@ -85,7 +85,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
      long nphot_tot;
      int ioniz_or_final;
      int iwind;
-     int freq_sampling;         // 0 --> old uniform approach, 1 --> mininimum fractions ins various bins
+     int freq_sampling;         // 0 --> old uniform approach, 1 --> minimum fractions ins various bins
 
 {
   double natural_weight, weight;

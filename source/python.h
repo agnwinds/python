@@ -428,7 +428,14 @@ struct geometry
 
 #define RT_MODE_2LEVEL  1
 #define RT_MODE_MACRO   2
+
   int rt_mode;                  /* radiative transfer mode. 2 for Macro Atom method,  1 for non-Macro Atom methods  */
+
+  /* Define the choices for calculating the FB, see, e.g. integ_fb */
+
+#define FB_FULL         0   /* Calculate fb emissivity including energy associated with the threshold*/
+#define FB_REDUCED      1   /* Calcuate the fb emissivity without the threshold energy */
+#define FB_RATE         2   /* Calulate the fb recombinarion rate  */
 
   /* The frequency bands used when calculating parameters like a power law slope in limited regions. */
 
@@ -838,7 +845,6 @@ typedef struct plasma
   } spec_mod_type[NXBANDS];     /* NSH 120817 A switch to say which type of representation we are using for this band in this cell. Negative means we have no useful representation, 0 means power law, 1 means exponential */
 
   double pl_alpha[NXBANDS];     /*Computed spectral index for a power law spectrum representing this cell NSH 120817 - changed name from sim_alpha to PL_alpha */
-//  double pl_w[NXBANDS];               /*This is the computed weight of a PL spectrum in this cell - not the same as the dilution factor NSH 120817 - changed name from sim_w to pl_w */
   double pl_log_w[NXBANDS];     /* NSH 131106 - this is the log version of the power law weight. It is in an attempt to allow very large values of alpha to work with the PL spectral model to avoide NAN problems. The pl_w version can be deleted once testing is complete */
 
 

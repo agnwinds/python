@@ -492,7 +492,7 @@ total_emission_summary (w, rootname, ochoice)
     aaa[n] = 0;
     if (w[n].vol > 0.0)
     {
-      tot += aaa[n] = total_emission (&w[n], 0.0, 1e50);
+      tot += aaa[n] = total_emission (&w[n], 0.0, VERY_BIG);
     }
   }
 
