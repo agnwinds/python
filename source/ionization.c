@@ -83,29 +83,11 @@ to match heating and cooling in the wind element! */
     {
 /* LTE using t_r */
       ireturn = nebular_concentrations (xplasma, NEBULARMODE_TR);
-
-/* Shift values to old */
-      xplasma->dt_e_old = xplasma->dt_e;
-      xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
-      xplasma->t_e_old = xplasma->t_e;
-      xplasma->t_r_old = xplasma->t_r;
-      xplasma->lum_rad_old = xplasma->lum_rad;
-
-      ireturn = one_shot (xplasma, mode);
     }
   else if (mode == IONMODE_LTE_TE)
     {
 /* LTE using t_e */
       ireturn = nebular_concentrations (xplasma, NEBULARMODE_TE);
-
-/* Shift values to old */
-      xplasma->dt_e_old = xplasma->dt_e;
-      xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
-      xplasma->t_e_old = xplasma->t_e;
-      xplasma->t_r_old = xplasma->t_r;
-      xplasma->lum_rad_old = xplasma->lum_rad;
-
-      ireturn = one_shot (xplasma, mode);
     }
   else if (mode == IONMODE_FIXED)
     {				//  Hardwired concentrations
@@ -468,7 +450,7 @@ meaning in nebular concentrations.
 
   if (mode == IONMODE_ML93)
     mode = NEBULARMODE_ML93;
-  else if (mode < 1 || mode == 5 || mode > 9)	
+  else if (mode <= 1 || mode == 5 || mode > 9)	
     {
       /* There is no mode 5 at present  - SIM + two new modes in Feb 2012  + mode 5 now removed */
 
