@@ -116,7 +116,7 @@ in the plasma structure */
     n += fwrite (plasmamain[m].xscatters, sizeof (double), nions, fptr);
 
     n += fwrite (plasmamain[m].heat_ion, sizeof (double), nions, fptr);
-    n += fwrite (plasmamain[m].lum_ion, sizeof (double), nions, fptr);
+    n += fwrite (plasmamain[m].cool_rr_ion, sizeof (double), nions, fptr);
     n += fwrite (plasmamain[m].lum_inner_ion, sizeof (double), nions, fptr);
 
     n += fwrite (plasmamain[m].levden, sizeof (double), nlte_levels, fptr);
@@ -264,7 +264,7 @@ wind_read (filename)
     n += fread (plasmamain[m].xscatters, sizeof (double), nions, fptr);
 
     n += fread (plasmamain[m].heat_ion, sizeof (double), nions, fptr);
-    n += fread (plasmamain[m].lum_ion, sizeof (double), nions, fptr);
+    n += fread (plasmamain[m].cool_rr_ion, sizeof (double), nions, fptr);
     n += fread (plasmamain[m].lum_inner_ion, sizeof (double), nions, fptr);
 
     n += fread (plasmamain[m].levden, sizeof (double), nlte_levels, fptr);

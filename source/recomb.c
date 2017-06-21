@@ -409,10 +409,10 @@ total_fb (one, t, f1, f2, fb_choice, mode)
     {
       if (mode == 1)
       {
-        total += xplasma->lum_ion[nion] = xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, fb_choice, mode);
+        total += xplasma->cool_rr_ion[nion] = xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, fb_choice, mode);
         {
           if (ion[nion].z > 3)
-            xplasma->lum_z += xplasma->lum_ion[nion];
+            xplasma->lum_z += xplasma->cool_rr_ion[nion];
         }
       }
       else if (mode == 2)

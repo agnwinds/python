@@ -289,7 +289,7 @@ pl_copy_conditions (win, wout)
   {
     wout->ioniz[n] = win->ioniz[n];
     wout->recomb[n] = win->recomb[n];
-    wout->lum_ion[n] = win->lum_ion[n];
+    wout->cool_rr_ion[n] = win->cool_rr_ion[n];
     wout->heat_ion[n] = win->heat_ion[n];
   }
   wout->j = win->j;

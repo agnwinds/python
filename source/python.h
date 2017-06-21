@@ -776,7 +776,7 @@ typedef struct plasma
   double *xscatters;            /* 68b - Diagnostic measure of energy scattered out of beam on extract. 78 - changed to dynamic allocation */
   double *heat_ion;             /* The amount of energy being transferred to the electron pool
                                    by this ion via photoionization. 78 - changed to dynamic allocation */
-  double *lum_ion;              /* The amount of energy being released from the electron pool
+  double *cool_rr_ion;              /* The amount of energy being released from the electron pool
                                    by this ion via recombination. 78 - changed to dynamic allocation */
   double *lum_inner_ion;
   //OLD double j, ave_freq, lum;      /*Respectively mean intensity, intensity_averaged frequency, 
