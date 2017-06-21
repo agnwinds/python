@@ -139,7 +139,7 @@ calculate_ionization (restart_stat)
       ispy_init ("python", geo.wcycle);
 
     geo.n_ioniz = 0.0;
-    geo.lum_ioniz = 0.0;
+    geo.cool_tot_ioniz = 0.0;
     ztot = 0.0;                 /* ztot is the luminosity of the disk multipled by the number of cycles, which is used by save_disk_heating */
 
     if (!geo.wind_radiation || (geo.wcycle == 0 && geo.run_type != SYSTEM_TYPE_PREVIOUS))
@@ -264,7 +264,7 @@ calculate_ionization (restart_stat)
 
 /* Completed writing file describing disk heating */
 
-    Log ("!!python: Number of ionizing photons %g lum of ionizing photons %g\n", geo.n_ioniz, geo.lum_ioniz);
+    Log ("!!python: Number of ionizing photons %g lum of ionizing photons %g\n", geo.n_ioniz, geo.cool_tot_ioniz);
 
 /* This step should be MPI_parallelised too */
 

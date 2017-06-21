@@ -190,7 +190,7 @@ cone_dummy, *ConePtr;
 
 /* End of structures which are used to define boundaries to the emission regions */
 
-#define NDIM_MAX 10000          // maximum size of the grid in each dimension
+#define NDIM_MAX 500          // maximum size of the grid in each dimension
 
 typedef struct domain
 {
@@ -485,22 +485,22 @@ struct geometry
   double agn_cltab_hi_alpha;    //photon index for the high frequency end       
 
 
-  double lum_ff, lum_fb, lum_lines;     /* The luminosity of the wind as a result of ff, fb, and line radiation */
-  double lum_comp;              /*1108 NSH The luminosity of the wind as a result of compton cooling */
-  double lum_di;                /* 1409 NSH The direct ionization luminosity */
-  double lum_dr;                /*1109 NSH The luminosity of the wind due to dielectronic recombination */
-  double lum_adiabatic;         /*1209 NSH The cooling of the wind due to adiabatic expansion */
-  double heat_adiabatic;        /*1307 NSH The heating of the wind due to adiabatic heating - split out from lum_adiabatic to get an accurate idea of whether it is important */
+  double lum_ff, cool_rr, lum_lines;     /* The luminosity of the wind as a result of ff, fb, and line radiation */
+  double cool_comp;              /*1108 NSH The luminosity of the wind as a result of compton cooling */
+  double cool_di;                /* 1409 NSH The direct ionization luminosity */
+  double cool_dr;                /*1109 NSH The luminosity of the wind due to dielectronic recombination */
+  double cool_adiabatic;         /*1209 NSH The cooling of the wind due to adiabatic expansion */
+  double heat_adiabatic;        /*1307 NSH The heating of the wind due to adiabatic heating - split out from cool_adiabatic to get an accurate idea of whether it is important */
   double f_tot, f_star, f_disk, f_bl, f_agn, f_wind;    /* The integrated specific L between a freq min and max which are
                                                            used to establish the fraction of photons of various types */
 
 /* These variables are copies of the lum variables above, and are only calculated during ionization cycles
    This is a bugfix for JM130621, windsave bug */
-  double lum_ff_ioniz, lum_fb_ioniz, lum_lines_ioniz;
-  double lum_comp_ioniz;
-  double lum_di_ioniz;          /* 1409 NSH The direct ionization luminosity */
-  double lum_dr_ioniz;
-  double lum_adiabatic_ioniz;
+  double lum_ff_ioniz, cool_rr_ioniz, lum_lines_ioniz;
+  double cool_comp_ioniz;
+  double cool_di_ioniz;          /* 1409 NSH The direct ionization luminosity */
+  double cool_dr_ioniz;
+  double cool_adiabatic_ioniz;
   double lum_wind_ioniz, lum_star_ioniz, lum_disk_ioniz, lum_bl_ioniz, lum_tot_ioniz;
 
   double f_matom, f_kpkt;       /*Added by SS Jun 2004 - to be used in computations of detailed spectra - the
@@ -530,9 +530,9 @@ struct geometry
   double d_agn;                 /* the distance to the agn - only used in balance to calculate the ioinsation fraction */
 
 
-//70i - nsh 111007 - put lum_ioniz and n_ioniz into the geo structure. This will allow a simple estimate of ionisation parameter to be computed;
+//70i - nsh 111007 - put cool_tot_ioniz and n_ioniz into the geo structure. This will allow a simple estimate of ionisation parameter to be computed;
 
-  double n_ioniz, lum_ioniz;
+  double n_ioniz, cool_tot_ioniz;
 
 // The next set of parameters describe the input datafiles that are read
   char atomic_filename[132];    /* 54e -- The masterfile for the atomic data */
@@ -776,9 +776,9 @@ typedef struct plasma
   double *xscatters;            /* 68b - Diagnostic measure of energy scattered out of beam on extract. 78 - changed to dynamic allocation */
   double *heat_ion;             /* The amount of energy being transferred to the electron pool
                                    by this ion via photoionization. 78 - changed to dynamic allocation */
-  double *lum_ion;              /* The amount of energy being released from the electron pool
+  double *cool_rr_ion;              /* The amount of energy being released from the electron pool
                                    by this ion via recombination. 78 - changed to dynamic allocation */
-  double *lum_inner_ion;
+  double *cool_dr_ion;
   //OLD double j, ave_freq, lum;      /*Respectively mean intensity, intensity_averaged frequency, 
   double j, ave_freq;      /*Respectively mean intensity, intensity_averaged frequency, 
                                    luminosity and absorbed luminosity of shell */
@@ -795,23 +795,24 @@ typedef struct plasma
   double xsd_freq[NXBANDS];     /*1208 NSH the standard deviation of the frequency in the band */
   int nxtot[NXBANDS];           /* 1108 NSH the total number of photon passages in frequency bands */
   double max_freq;              /*1208 NSH The maximum frequency photon seen in this cell */
-  double lum_tot;               /* The total luminosity of all processes in the cell (Not the same 
+  double cool_tot;              /*The total cooling in a cell */
+  /* The total luminosity of all processes in the cell (Not the same 
                                    as what escapes the cell) */
-  double lum_lines, lum_ff, lum_adiabatic;
-  double lum_comp;              /* 1108 NSH The compton luminosity of the cell */
-  double lum_di;                /* 1409 NSH The direct ionization luminosity */
-  double lum_dr;                /* 1109 NSH The dielectronic recombination luminosity of the cell */
-  double lum_fb, lum_z;         /*fb luminosity & fb of metals metals */
-  double lum_rad, lum_rad_old;  /* The specific radiative luminosity in frequencies defined by freqmin
+  double lum_lines, lum_ff, cool_adiabatic;
+  double cool_comp;              /* 1108 NSH The compton luminosity of the cell */
+  double cool_di;                /* 1409 NSH The direct ionization luminosity */
+  double cool_dr;                /* 1109 NSH The dielectronic recombination luminosity of the cell */
+  double cool_rr, cool_rr_metals;         /*fb luminosity & fb of metals metals */
+  double lum_tot, lum_tot_old;  /* The specific radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
 
-  double lum_ioniz;
-  double lum_lines_ioniz, lum_ff_ioniz, lum_adiabatic_ioniz;
-  double lum_comp_ioniz;        /* 1108 NSH The compton luminosity of the cell */
-  double lum_di_ioniz;          /* 1409 NSH The direct ionization luminosity */
-  double lum_dr_ioniz;          /* 1109 NSH The dielectronic recombination luminosity of the cell */
-  double lum_fb_ioniz, lum_z_ioniz;     /*fb luminosity & fb of metals metals */
-  double lum_rad_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
+  double cool_tot_ioniz;
+  double lum_lines_ioniz, lum_ff_ioniz, cool_adiabatic_ioniz;
+  double cool_comp_ioniz;        /* 1108 NSH The compton luminosity of the cell */
+  double cool_di_ioniz;          /* 1409 NSH The direct ionization luminosity */
+  double cool_dr_ioniz;          /* 1109 NSH The dielectronic recombination luminosity of the cell */
+  double cool_rr_ioniz, cool_rr_metals_ioniz;     /*fb luminosity & fb of metals metals */
+  double lum_tot_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
 
   double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to computecompton cooling-  only needs computing once per cycle */
@@ -933,7 +934,7 @@ typedef struct macro
   double cooling_normalisation;
   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
   double cooling_ff;
-  double cooling_adiabatic;     // this is just lum_adiabatic / vol / ne
+  double cooling_adiabatic;     // this is just cool_adiabatic / vol / ne
 
 
 } macro_dummy, *MacroPtr;

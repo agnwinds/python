@@ -73,7 +73,7 @@ double
 wind_luminosity (f1, f2)
      double f1, f2;             /* freqmin and freqmax */
 {
-  double lum, lum_lines, lum_fb, lum_ff, lum_comp, lum_dr, lum_di, lum_adiab, heat_adiab;       //1108 NSH Added a new variable for compton cooling 1408 NSH and for DI cooling
+  double lum, lum_lines, cool_rr, lum_ff, cool_comp, cool_dr, cool_di, lum_adiab, heat_adiab;       //1108 NSH Added a new variable for compton cooling 1408 NSH and for DI cooling
   //1109 NSH Added a new variable for dielectronic cooling
   //1307 NSH Added a new variable to split out negtive adiabatic cooling (i.e. heating).
   int n;
@@ -81,7 +81,7 @@ wind_luminosity (f1, f2)
   int nplasma;
 
 
-  lum = lum_lines = lum_fb = lum_ff = lum_comp = lum_dr = lum_di = lum_adiab = heat_adiab = 0;  //1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
+  lum = lum_lines = cool_rr = lum_ff = cool_comp = cool_dr = cool_di = lum_adiab = heat_adiab = 0;  //1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
   for (n = 0; n < NDIM2; n++)
   {
 
@@ -90,22 +90,22 @@ wind_luminosity (f1, f2)
       nplasma = wmain[n].nplasma;
       lum += x = total_emission (&wmain[n], f1, f2);
       lum_lines += plasmamain[nplasma].lum_lines;
-      lum_fb += plasmamain[nplasma].lum_fb;
+      cool_rr += plasmamain[nplasma].cool_rr;
       lum_ff += plasmamain[nplasma].lum_ff;
-      lum_comp += plasmamain[nplasma].lum_comp; //1108 NSH Increment the new counter by the compton luminosity for that cell.
-      lum_dr += plasmamain[nplasma].lum_dr;     //1109 NSH Increment the new counter by the DR luminosity for the cell.
-      lum_di += plasmamain[nplasma].lum_di;     //1408 NSH Increment the new counter by the DI luminosity for the cell.
+      cool_comp += plasmamain[nplasma].cool_comp; //1108 NSH Increment the new counter by the compton luminosity for that cell.
+      cool_dr += plasmamain[nplasma].cool_dr;     //1109 NSH Increment the new counter by the DR luminosity for the cell.
+      cool_di += plasmamain[nplasma].cool_di;     //1408 NSH Increment the new counter by the DI luminosity for the cell.
 
       if (geo.adiabatic)        //130722 NSH - slight change to allow for adiabatic heating effect - now logged in a new global variable for reporting.
       {
 
-        if (plasmamain[nplasma].lum_adiabatic >= 0.0)
+        if (plasmamain[nplasma].cool_adiabatic >= 0.0)
         {
-          lum_adiab += plasmamain[nplasma].lum_adiabatic;
+          lum_adiab += plasmamain[nplasma].cool_adiabatic;
         }
         else
         {
-          heat_adiab += plasmamain[nplasma].lum_adiabatic;
+          heat_adiab += plasmamain[nplasma].cool_adiabatic;
         }
       }
 
@@ -129,12 +129,12 @@ wind_luminosity (f1, f2)
 
   //geo.lum_wind=lum;
   geo.lum_lines = lum_lines;
-  geo.lum_fb = lum_fb;
+  geo.cool_rr = cool_rr;
   geo.lum_ff = lum_ff;
-  geo.lum_comp = lum_comp;      //1108 NSH The total compton luminosity of the wind is stored in the geo structure
-  geo.lum_dr = lum_dr;          //1109 NSH the total DR luminosity of the wind is stored in the geo structure
-  geo.lum_di = lum_di;          //1408 NSH the total DI luminosity of the wind is stored in the geo structure
-  geo.lum_adiabatic = lum_adiab;
+  geo.cool_comp = cool_comp;      //1108 NSH The total compton luminosity of the wind is stored in the geo structure
+  geo.cool_dr = cool_dr;          //1109 NSH the total DR luminosity of the wind is stored in the geo structure
+  geo.cool_di = cool_di;          //1408 NSH the total DI luminosity of the wind is stored in the geo structure
+  geo.cool_adiabatic = lum_adiab;
   geo.heat_adiabatic = heat_adiab;
 
   return (lum);
@@ -206,42 +206,42 @@ total_emission (one, f1, f2)
 
   if (f2 < f1)
   {
-    xplasma->lum_rad = xplasma->lum_lines = xplasma->lum_ff = xplasma->lum_fb = 0;      //NSH 1108 Zero the new lum_comp variable NSH 1101 - removed
+    xplasma->lum_tot = xplasma->lum_lines = xplasma->lum_ff = xplasma->cool_rr = 0;      //NSH 1108 Zero the new cool_comp variable NSH 1101 - removed
   }
   else
   {
     if (geo.rt_mode == RT_MODE_MACRO)       //Switch for macro atoms (SS)
     {
-      xplasma->lum_fb = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_REDUCED, 1);        //outer shellrecombinations
+      xplasma->cool_rr = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_REDUCED, 1);        //outer shellrecombinations
       //The first term here is the fb cooling due to macro ions and the second gives
       //the fb cooling due to simple ions.
       //total_fb has been modified to exclude recombinations treated using macro atoms.
-      xplasma->lum_rad = xplasma->lum_fb;
+      xplasma->lum_tot = xplasma->cool_rr;
       //Note: This the fb_matom call makes no use of f1 or f2. They are passed for
       //now in case they should be used in the future. But they could
       //also be removed.
       // (SS)
       xplasma->lum_lines = total_bb_cooling (xplasma, t_e);
-      xplasma->lum_rad += xplasma->lum_lines;
+      xplasma->lum_tot += xplasma->lum_lines;
       /* total_bb_cooling gives the total cooling rate due to bb transisions whether they
          are macro atoms or simple ions. */
       xplasma->lum_ff = total_free (one, t_e, f1, f2);
-      xplasma->lum_rad += xplasma->lum_ff;
+      xplasma->lum_tot += xplasma->lum_ff;
 
 
     }
     else                        //default (non-macro atoms) (SS)
     {
-      xplasma->lum_rad = xplasma->lum_lines = total_line_emission (one, f1, f2);
-      xplasma->lum_rad += xplasma->lum_ff = total_free (one, t_e, f1, f2);
-      xplasma->lum_rad += xplasma->lum_fb = total_fb (one, t_e, f1, f2, FB_REDUCED, 1);     //outer shell recombinations
+      xplasma->lum_tot = xplasma->lum_lines = total_line_emission (one, f1, f2);
+      xplasma->lum_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2);
+      xplasma->lum_tot += xplasma->cool_rr = total_fb (one, t_e, f1, f2, FB_REDUCED, 1);     //outer shell recombinations
 
 
     }
   }
 
 
-  return (xplasma->lum_rad);
+  return (xplasma->lum_tot);
 
 
 }
@@ -274,7 +274,7 @@ Notes:
 
         Note also that this function should only be called
         if geo.adiabatic == 1, in which case it populates
-        xplasma->lum_adiabatic. This is used in heating and cooling
+        xplasma->cool_adiabatic. This is used in heating and cooling
         balance. We also use it as a potential destruction choice for 
         kpkts in which case the kpkt is thrown away by setting its istat 
         to P_ADIABATIC.
@@ -402,7 +402,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       if (wmain[icell].vol > 0.0)       //only consider cells with volume greater than zero
       {
         nplasma = wmain[icell].nplasma; //get the plasma cell in this wind cell
-        xlumsum += plasmamain[nplasma].lum_rad; /*increment the xlumsum by the lum_rad in this plasma cell - note that due to the way wind_luminosity gets called, this is actually the band limited flux not the luminosity. */
+        xlumsum += plasmamain[nplasma].lum_tot; /*increment the xlumsum by the lum_tot in this plasma cell - note that due to the way wind_luminosity gets called, this is actually the band limited flux not the luminosity. */
       }
       icell++;                  /*If we are not yet up to xlum, go to the next cell */
     }
@@ -416,7 +416,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     /* Now generate a single photon in this cell */
 
     /*Get the total luminosity and MORE IMPORTANT populate xcol.pow and other parameters */
-    lum = plasmamain[nplasma].lum_rad;  /* Whilst this says lum - I'm (nsh) pretty sure this is actually a flux between two frequency limits) */
+    lum = plasmamain[nplasma].lum_tot;  /* Whilst this says lum - I'm (nsh) pretty sure this is actually a flux between two frequency limits) */
 
     xlum = lum * (rand () + 0.5) / (MAXRAND);   /*this makes a small test luminosity */
 
@@ -433,7 +433,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
         p[n].freq = 0.0;
       }
     }
-    else if ((xlumsum += plasmamain[nplasma].lum_fb) > xlum)    /*Do the same for fb */
+    else if ((xlumsum += plasmamain[nplasma].cool_rr) > xlum)    /*Do the same for fb */
     {
       p[n].freq = one_fb (&wmain[icell], freqmin, freqmax);
     }

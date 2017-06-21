@@ -80,7 +80,7 @@ communicate_estimators_para ()
     maxfreqhelper[mpi_i] = plasmamain[mpi_i].max_freq;
     redhelper[mpi_i] = plasmamain[mpi_i].j / np_mpi_global;
     redhelper[mpi_i + NPLASMA] = plasmamain[mpi_i].ave_freq / np_mpi_global;
-    redhelper[mpi_i + 2 * NPLASMA] = plasmamain[mpi_i].lum_tot / np_mpi_global;
+    redhelper[mpi_i + 2 * NPLASMA] = plasmamain[mpi_i].cool_tot / np_mpi_global;
     redhelper[mpi_i + 3 * NPLASMA] = plasmamain[mpi_i].heat_tot / np_mpi_global;
     redhelper[mpi_i + 4 * NPLASMA] = plasmamain[mpi_i].heat_lines / np_mpi_global;
     redhelper[mpi_i + 5 * NPLASMA] = plasmamain[mpi_i].heat_ff / np_mpi_global;
@@ -147,7 +147,7 @@ communicate_estimators_para ()
     plasmamain[mpi_i].max_freq = maxfreqhelper2[mpi_i];
     plasmamain[mpi_i].j = redhelper2[mpi_i];
     plasmamain[mpi_i].ave_freq = redhelper2[mpi_i + NPLASMA];
-    plasmamain[mpi_i].lum_tot = redhelper2[mpi_i + 2 * NPLASMA];
+    plasmamain[mpi_i].cool_tot = redhelper2[mpi_i + 2 * NPLASMA];
     plasmamain[mpi_i].heat_tot = redhelper2[mpi_i + 3 * NPLASMA];
     plasmamain[mpi_i].heat_lines = redhelper2[mpi_i + 4 * NPLASMA];
     plasmamain[mpi_i].heat_ff = redhelper2[mpi_i + 5 * NPLASMA];

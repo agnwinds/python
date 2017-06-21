@@ -103,7 +103,7 @@ to match heating and cooling in the wind element! */
       xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
       xplasma->t_e_old = xplasma->t_e;
       xplasma->t_r_old = xplasma->t_r;
-      xplasma->lum_rad_old = xplasma->lum_rad;
+      xplasma->lum_tot_old = xplasma->lum_tot;
 
       ireturn = one_shot (xplasma, mode);
 
@@ -121,7 +121,7 @@ to match heating and cooling in the wind element! */
       xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
       xplasma->t_e_old = xplasma->t_e;
       xplasma->t_r_old = xplasma->t_r;
-      xplasma->lum_rad_old = xplasma->lum_rad;
+      xplasma->lum_tot_old = xplasma->lum_tot;
 
       ireturn = one_shot (xplasma, mode);
 
@@ -140,7 +140,7 @@ to match heating and cooling in the wind element! */
       xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
       xplasma->t_e_old = xplasma->t_e;
       xplasma->t_r_old = xplasma->t_r;
-      xplasma->lum_rad_old = xplasma->lum_rad;
+      xplasma->lum_tot_old = xplasma->lum_tot;
 
 
       ireturn = one_shot (xplasma, mode);
@@ -239,14 +239,14 @@ convergence (xplasma)
 	xplasma->techeck = techeck = 1;
       if ((xplasma->converge_hc =
 	   fabs (xplasma->heat_tot -
-		 (xplasma->lum_adiabatic + xplasma->lum_rad +
-		  xplasma->lum_dr + xplasma->lum_di +
-		  xplasma->lum_comp)) / fabs (xplasma->heat_tot +
-					      xplasma->lum_comp +
-					      xplasma->lum_adiabatic +
-					      xplasma->lum_dr +
-					      xplasma->lum_di +
-					      xplasma->lum_rad)) > epsilon)
+		 (xplasma->cool_adiabatic + xplasma->lum_tot +
+		  xplasma->cool_dr + xplasma->cool_di +
+		  xplasma->cool_comp)) / fabs (xplasma->heat_tot +
+					      xplasma->cool_comp +
+					      xplasma->cool_adiabatic +
+					      xplasma->cool_dr +
+					      xplasma->cool_di +
+					      xplasma->lum_tot)) > epsilon)
 	xplasma->hccheck = hccheck = 1;
     }
   else				//If the cell has reached the maximum temperature
@@ -255,11 +255,11 @@ convergence (xplasma)
     }
 
 //110919 nsh modified line below to include the adiabatic cooling in the check that heating equals cooling
-//111004 nsh further modification to include DR and compton cooling, now moved out of lum_rad
+//111004 nsh further modification to include DR and compton cooling, now moved out of lum_tot
 
   /* Check whether the heating and colling balance to within epsilon and if so set hccheck to 1 */
   /* 130722 added a fabs to the bottom, since it is now conceivable that this could be negative if 
-     lum_adiabatic is large and negative - and hence heating */
+     cool_adiabatic is large and negative - and hence heating */
 
 /* NSH 130711 - also changed to have fabs on top and bottom, since heating can now be negative!) */
 
@@ -640,36 +640,36 @@ zero_emit (t)
 	     so we use the 'test' temperature to compute it. If div_v is less than zero, we don't do
 	     anything here, and so the existing value of adiabatic cooling is used - this was computed 
 	     in wind_updates2d before the call to ion_abundances. */
-	  xxxplasma->lum_adiabatic =
+	  xxxplasma->cool_adiabatic =
 	    adiabatic_cooling (&wmain[xxxplasma->nwind], t);
 	}
     }
 
   else
     {
-      xxxplasma->lum_adiabatic = 0.0;
+      xxxplasma->cool_adiabatic = 0.0;
     }
 
 
   /*81c - nsh - we now treat DR cooling as a recombinational process - still unsure as to how to treat emission, so at the moment
      it remains here */
 
-  xxxplasma->lum_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, 2);
+  xxxplasma->cool_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, 2);
 
   /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
 
-  xxxplasma->lum_di = total_di (&wmain[xxxplasma->nwind], t);
+  xxxplasma->cool_di = total_di (&wmain[xxxplasma->nwind], t);
 
   /* 70g compton cooling calculated here to avoid generating photons */
 
-  xxxplasma->lum_comp = total_comp (&wmain[xxxplasma->nwind], t);
+  xxxplasma->cool_comp = total_comp (&wmain[xxxplasma->nwind], t);
 
-  xxxplasma->lum_tot =
-    xxxplasma->lum_adiabatic + xxxplasma->lum_dr + xxxplasma->lum_di +
-    xxxplasma->lum_comp + total_emission (&wmain[xxxplasma->nwind], 0.,
+  xxxplasma->cool_tot =
+    xxxplasma->cool_adiabatic + xxxplasma->cool_dr + xxxplasma->cool_di +
+    xxxplasma->cool_comp + total_emission (&wmain[xxxplasma->nwind], 0.,
 					  VERY_BIG);
 
-  difference = xxxplasma->heat_tot - xxxplasma->lum_tot;
+  difference = xxxplasma->heat_tot - xxxplasma->cool_tot;
   
   // Test for just ff
   //difference = xxxplasma->heat_ff - xxxplasma->lum_ff;

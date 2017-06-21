@@ -392,24 +392,24 @@ create_heat_table (ndom, rootname)
   c[11] = get_one (ndom, "heat_auger");
   strcpy (column_name[11], "heat_auger");
 
-  c[12] = get_one (ndom, "lum_tot");
-  strcpy (column_name[12], "lum_tot");
+  c[12] = get_one (ndom, "cool_tot");
+  strcpy (column_name[12], "cool_tot");
 
-  c[13] = get_one (ndom, "lum_comp");
-  strcpy (column_name[13], "lum_comp");
+  c[13] = get_one (ndom, "cool_comp");
+  strcpy (column_name[13], "cool_comp");
 
   c[14] = get_one (ndom, "lum_lines");
   strcpy (column_name[14], "lum_lines");
 
-  c[15] = get_one (ndom, "lum_dr");
-  strcpy (column_name[15], "lum_dr");
+  c[15] = get_one (ndom, "cool_dr");
+  strcpy (column_name[15], "cool_dr");
 
   c[16] = get_one (ndom, "lum_ff");
   strcpy (column_name[16], "lum_ff");
 
 
-  c[17] = get_one (ndom, "lum_fb");
-  strcpy (column_name[17], "lum_fb");
+  c[17] = get_one (ndom, "cool_rr");
+  strcpy (column_name[17], "cool_rr");
 
   /* This should be the maxium number above +1 */
   ncols = 18;
@@ -908,9 +908,9 @@ get_one (ndom, variable_name)
       {
         x[n] = plasmamain[nplasma].heat_auger;
       }
-      else if (strcmp (variable_name, "lum_comp") == 0)
+      else if (strcmp (variable_name, "cool_comp") == 0)
       {
-        x[n] = plasmamain[nplasma].lum_comp;
+        x[n] = plasmamain[nplasma].cool_comp;
       }
       else if (strcmp (variable_name, "lum_lines") == 0)
       {
@@ -920,17 +920,17 @@ get_one (ndom, variable_name)
       {
         x[n] = plasmamain[nplasma].lum_ff;
       }
-      else if (strcmp (variable_name, "lum_fb") == 0)
+      else if (strcmp (variable_name, "cool_rr") == 0)
       {
-        x[n] = plasmamain[nplasma].lum_fb;
+        x[n] = plasmamain[nplasma].cool_rr;
       }
-      else if (strcmp (variable_name, "lum_dr") == 0)
+      else if (strcmp (variable_name, "cool_dr") == 0)
       {
-        x[n] = plasmamain[nplasma].lum_dr;
+        x[n] = plasmamain[nplasma].cool_dr;
       }
-      else if (strcmp (variable_name, "lum_tot") == 0)
+      else if (strcmp (variable_name, "cool_tot") == 0)
       {
-        x[n] = plasmamain[nplasma].lum_tot;
+        x[n] = plasmamain[nplasma].cool_tot;
       }
       else if (strcmp (variable_name, "w") == 0)
       {

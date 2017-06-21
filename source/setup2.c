@@ -248,12 +248,12 @@ photon_checks (p, freqmin, freqmax, comment)
      double freqmin, freqmax;
 {
   int nnn, nn;
-//  double lum_ioniz;  //NSH 16/2/2011 These are now declared externally to allow python to see them
+//  double cool_tot_ioniz;  //NSH 16/2/2011 These are now declared externally to allow python to see them
 //  int n_ioniz;
   int nlabel;
 
   geo.n_ioniz = 0;
-  geo.lum_ioniz = 0.0;
+  geo.cool_tot_ioniz = 0.0;
   nnn = 0;
   nlabel = 0;
 
@@ -276,7 +276,7 @@ photon_checks (p, freqmin, freqmax, comment)
     p[nn].np = nn;              /*  NSH 13/4/11 This is a line to populate the new internal photon pointer */
     if (H * p[nn].freq > ion[0].ip)
     {
-      geo.lum_ioniz += p[nn].w;
+      geo.cool_tot_ioniz += p[nn].w;
       geo.n_ioniz += p[nn].w / (H * p[nn].freq);
     }
     if (sane_check (p[nn].freq) != 0 || sane_check (p[nn].w))
