@@ -487,7 +487,7 @@ struct geometry
 
   double lum_ff, cool_rr, lum_lines;     /* The luminosity of the wind as a result of ff, fb, and line radiation */
   double cool_comp;              /*1108 NSH The luminosity of the wind as a result of compton cooling */
-  double lum_di;                /* 1409 NSH The direct ionization luminosity */
+  double cool_di;                /* 1409 NSH The direct ionization luminosity */
   double lum_dr;                /*1109 NSH The luminosity of the wind due to dielectronic recombination */
   double lum_adiabatic;         /*1209 NSH The cooling of the wind due to adiabatic expansion */
   double heat_adiabatic;        /*1307 NSH The heating of the wind due to adiabatic heating - split out from lum_adiabatic to get an accurate idea of whether it is important */
@@ -498,7 +498,7 @@ struct geometry
    This is a bugfix for JM130621, windsave bug */
   double lum_ff_ioniz, cool_rr_ioniz, lum_lines_ioniz;
   double cool_comp_ioniz;
-  double lum_di_ioniz;          /* 1409 NSH The direct ionization luminosity */
+  double cool_di_ioniz;          /* 1409 NSH The direct ionization luminosity */
   double lum_dr_ioniz;
   double lum_adiabatic_ioniz;
   double lum_wind_ioniz, lum_star_ioniz, lum_disk_ioniz, lum_bl_ioniz, lum_tot_ioniz;
@@ -799,7 +799,7 @@ typedef struct plasma
                                    as what escapes the cell) */
   double lum_lines, lum_ff, lum_adiabatic;
   double cool_comp;              /* 1108 NSH The compton luminosity of the cell */
-  double lum_di;                /* 1409 NSH The direct ionization luminosity */
+  double cool_di;                /* 1409 NSH The direct ionization luminosity */
   double lum_dr;                /* 1109 NSH The dielectronic recombination luminosity of the cell */
   double cool_rr, lum_z;         /*fb luminosity & fb of metals metals */
   double lum_rad, lum_rad_old;  /* The specific radiative luminosity in frequencies defined by freqmin
@@ -808,7 +808,7 @@ typedef struct plasma
   double lum_ioniz;
   double lum_lines_ioniz, lum_ff_ioniz, lum_adiabatic_ioniz;
   double cool_comp_ioniz;        /* 1108 NSH The compton luminosity of the cell */
-  double lum_di_ioniz;          /* 1409 NSH The direct ionization luminosity */
+  double cool_di_ioniz;          /* 1409 NSH The direct ionization luminosity */
   double lum_dr_ioniz;          /* 1109 NSH The dielectronic recombination luminosity of the cell */
   double cool_rr_ioniz, lum_z_ioniz;     /*fb luminosity & fb of metals metals */
   double lum_rad_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
