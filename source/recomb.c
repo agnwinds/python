@@ -298,6 +298,18 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
       fnu = xinteg_fb (t, f1, f2, nion, fb_choice);
       return (fnu);
     }
+    else if (fb_choice == FB_FULL)
+    {
+      for (n = 0; n < nfb; n++)
+      {
+        /* See if the frequencies correspond to one previously calculated */
+        if (f1 == freebound[n].f1 && f2 == freebound[n].f2)
+        {
+          fnu = get_fb (t, nion, n, mode);
+          return (fnu);
+        }
+      }
+    }
     Error ("integ_fb: Unknown fb_choice(%d)\n", fb_choice);
     exit (0);
   }
@@ -319,6 +331,16 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
       return (fnu);
     }
     else if (fb_choice == FB_RATE)
+    {
+      if (nfb > 0)
+      {
+        fnu = get_nrecomb (t, nion, mode);
+        return (fnu);
+      }
+      fnu = xinteg_inner_fb (t, f1, f2, nion, fb_choice);
+      return (fnu);
+    }
+    else if (fb_choice == FB_FULL)
     {
       if (nfb > 0)
       {
