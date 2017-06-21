@@ -530,9 +530,9 @@ struct geometry
   double d_agn;                 /* the distance to the agn - only used in balance to calculate the ioinsation fraction */
 
 
-//70i - nsh 111007 - put lum_ioniz and n_ioniz into the geo structure. This will allow a simple estimate of ionisation parameter to be computed;
+//70i - nsh 111007 - put cool_tot_ioniz and n_ioniz into the geo structure. This will allow a simple estimate of ionisation parameter to be computed;
 
-  double n_ioniz, lum_ioniz;
+  double n_ioniz, cool_tot_ioniz;
 
 // The next set of parameters describe the input datafiles that are read
   char atomic_filename[132];    /* 54e -- The masterfile for the atomic data */
@@ -805,7 +805,7 @@ typedef struct plasma
   double lum_rad, lum_rad_old;  /* The specific radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
 
-  double lum_ioniz;
+  double cool_tot_ioniz;
   double lum_lines_ioniz, lum_ff_ioniz, cool_adiabatic_ioniz;
   double cool_comp_ioniz;        /* 1108 NSH The compton luminosity of the cell */
   double cool_di_ioniz;          /* 1409 NSH The direct ionization luminosity */

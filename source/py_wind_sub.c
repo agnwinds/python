@@ -151,7 +151,7 @@ overview (w, rootname)
     ff += plasmamain[n].heat_ff;
   }
 
-  Log (" Total emission %8.2e heating %8.2e\n", geo.lum_ioniz, heating);
+  Log (" Total emission %8.2e heating %8.2e\n", geo.cool_tot_ioniz, heating);
   Log ("    ff emission %8.2e heating %8.2e\n", geo.lum_ff_ioniz, ff);
   Log ("    fb emission %8.2e heating %8.2e\n", geo.cool_rr_ioniz, photo);
   Log ("  line emission %8.2e heating %8.2e\n", geo.lum_lines_ioniz, lines);
@@ -3282,7 +3282,7 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
          plasmamain[np].rho, plasmamain[np].ne, plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot,
          plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].ip, plasmamain[np].converge_whole, 
          plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
-         plasmamain[np].lum_ioniz, plasmamain[np].lum_rad, plasmamain[np].cool_rr, 
+         plasmamain[np].cool_tot_ioniz, plasmamain[np].lum_rad, plasmamain[np].cool_rr, 
          plasmamain[np].lum_ff, plasmamain[np].lum_lines, plasmamain[np].cool_adiabatic, 
          plasmamain[np].cool_comp, plasmamain[np].cool_dr, plasmamain[np].heat_tot, plasmamain[np].heat_photo, 
          plasmamain[np].heat_lines , plasmamain[np].heat_ff , plasmamain[np].heat_comp, plasmamain[np].heat_ind_comp,
