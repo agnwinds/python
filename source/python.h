@@ -190,7 +190,7 @@ cone_dummy, *ConePtr;
 
 /* End of structures which are used to define boundaries to the emission regions */
 
-#define NDIM_MAX 10000          // maximum size of the grid in each dimension
+#define NDIM_MAX 500          // maximum size of the grid in each dimension
 
 typedef struct domain
 {
