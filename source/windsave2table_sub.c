@@ -392,8 +392,8 @@ create_heat_table (ndom, rootname)
   c[11] = get_one (ndom, "heat_auger");
   strcpy (column_name[11], "heat_auger");
 
-  c[12] = get_one (ndom, "lum_tot");
-  strcpy (column_name[12], "lum_tot");
+  c[12] = get_one (ndom, "cool_tot");
+  strcpy (column_name[12], "cool_tot");
 
   c[13] = get_one (ndom, "cool_comp");
   strcpy (column_name[13], "cool_comp");
@@ -928,9 +928,9 @@ get_one (ndom, variable_name)
       {
         x[n] = plasmamain[nplasma].cool_dr;
       }
-      else if (strcmp (variable_name, "lum_tot") == 0)
+      else if (strcmp (variable_name, "cool_tot") == 0)
       {
-        x[n] = plasmamain[nplasma].lum_tot;
+        x[n] = plasmamain[nplasma].cool_tot;
       }
       else if (strcmp (variable_name, "w") == 0)
       {

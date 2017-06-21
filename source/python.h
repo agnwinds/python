@@ -795,7 +795,8 @@ typedef struct plasma
   double xsd_freq[NXBANDS];     /*1208 NSH the standard deviation of the frequency in the band */
   int nxtot[NXBANDS];           /* 1108 NSH the total number of photon passages in frequency bands */
   double max_freq;              /*1208 NSH The maximum frequency photon seen in this cell */
-  double lum_tot;               /* The total luminosity of all processes in the cell (Not the same 
+  double cool_tot;              /*The total cooling in a cell */
+  /* The total luminosity of all processes in the cell (Not the same 
                                    as what escapes the cell) */
   double lum_lines, lum_ff, cool_adiabatic;
   double cool_comp;              /* 1108 NSH The compton luminosity of the cell */

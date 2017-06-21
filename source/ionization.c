@@ -664,12 +664,12 @@ zero_emit (t)
 
   xxxplasma->cool_comp = total_comp (&wmain[xxxplasma->nwind], t);
 
-  xxxplasma->lum_tot =
+  xxxplasma->cool_tot =
     xxxplasma->cool_adiabatic + xxxplasma->cool_dr + xxxplasma->cool_di +
     xxxplasma->cool_comp + total_emission (&wmain[xxxplasma->nwind], 0.,
 					  VERY_BIG);
 
-  difference = xxxplasma->heat_tot - xxxplasma->lum_tot;
+  difference = xxxplasma->heat_tot - xxxplasma->cool_tot;
   
   // Test for just ff
   //difference = xxxplasma->heat_ff - xxxplasma->lum_ff;
