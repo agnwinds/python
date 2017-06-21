@@ -73,7 +73,7 @@ double
 wind_luminosity (f1, f2)
      double f1, f2;             /* freqmin and freqmax */
 {
-  double lum, lum_lines, lum_fb, lum_ff, lum_comp, lum_dr, lum_di, lum_adiab, heat_adiab;       //1108 NSH Added a new variable for compton cooling 1408 NSH and for DI cooling
+  double lum, lum_lines, cool_rr, lum_ff, lum_comp, lum_dr, lum_di, lum_adiab, heat_adiab;       //1108 NSH Added a new variable for compton cooling 1408 NSH and for DI cooling
   //1109 NSH Added a new variable for dielectronic cooling
   //1307 NSH Added a new variable to split out negtive adiabatic cooling (i.e. heating).
   int n;
@@ -81,7 +81,7 @@ wind_luminosity (f1, f2)
   int nplasma;
 
 
-  lum = lum_lines = lum_fb = lum_ff = lum_comp = lum_dr = lum_di = lum_adiab = heat_adiab = 0;  //1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
+  lum = lum_lines = cool_rr = lum_ff = lum_comp = lum_dr = lum_di = lum_adiab = heat_adiab = 0;  //1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
   for (n = 0; n < NDIM2; n++)
   {
 
@@ -90,7 +90,7 @@ wind_luminosity (f1, f2)
       nplasma = wmain[n].nplasma;
       lum += x = total_emission (&wmain[n], f1, f2);
       lum_lines += plasmamain[nplasma].lum_lines;
-      lum_fb += plasmamain[nplasma].lum_fb;
+      cool_rr += plasmamain[nplasma].cool_rr;
       lum_ff += plasmamain[nplasma].lum_ff;
       lum_comp += plasmamain[nplasma].lum_comp; //1108 NSH Increment the new counter by the compton luminosity for that cell.
       lum_dr += plasmamain[nplasma].lum_dr;     //1109 NSH Increment the new counter by the DR luminosity for the cell.
@@ -129,7 +129,7 @@ wind_luminosity (f1, f2)
 
   //geo.lum_wind=lum;
   geo.lum_lines = lum_lines;
-  geo.lum_fb = lum_fb;
+  geo.cool_rr = cool_rr;
   geo.lum_ff = lum_ff;
   geo.lum_comp = lum_comp;      //1108 NSH The total compton luminosity of the wind is stored in the geo structure
   geo.lum_dr = lum_dr;          //1109 NSH the total DR luminosity of the wind is stored in the geo structure
@@ -206,17 +206,17 @@ total_emission (one, f1, f2)
 
   if (f2 < f1)
   {
-    xplasma->lum_rad = xplasma->lum_lines = xplasma->lum_ff = xplasma->lum_fb = 0;      //NSH 1108 Zero the new lum_comp variable NSH 1101 - removed
+    xplasma->lum_rad = xplasma->lum_lines = xplasma->lum_ff = xplasma->cool_rr = 0;      //NSH 1108 Zero the new lum_comp variable NSH 1101 - removed
   }
   else
   {
     if (geo.rt_mode == RT_MODE_MACRO)       //Switch for macro atoms (SS)
     {
-      xplasma->lum_fb = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_REDUCED, 1);        //outer shellrecombinations
+      xplasma->cool_rr = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_REDUCED, 1);        //outer shellrecombinations
       //The first term here is the fb cooling due to macro ions and the second gives
       //the fb cooling due to simple ions.
       //total_fb has been modified to exclude recombinations treated using macro atoms.
-      xplasma->lum_rad = xplasma->lum_fb;
+      xplasma->lum_rad = xplasma->cool_rr;
       //Note: This the fb_matom call makes no use of f1 or f2. They are passed for
       //now in case they should be used in the future. But they could
       //also be removed.
@@ -234,7 +234,7 @@ total_emission (one, f1, f2)
     {
       xplasma->lum_rad = xplasma->lum_lines = total_line_emission (one, f1, f2);
       xplasma->lum_rad += xplasma->lum_ff = total_free (one, t_e, f1, f2);
-      xplasma->lum_rad += xplasma->lum_fb = total_fb (one, t_e, f1, f2, FB_REDUCED, 1);     //outer shell recombinations
+      xplasma->lum_rad += xplasma->cool_rr = total_fb (one, t_e, f1, f2, FB_REDUCED, 1);     //outer shell recombinations
 
 
     }
@@ -433,7 +433,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
         p[n].freq = 0.0;
       }
     }
-    else if ((xlumsum += plasmamain[nplasma].lum_fb) > xlum)    /*Do the same for fb */
+    else if ((xlumsum += plasmamain[nplasma].cool_rr) > xlum)    /*Do the same for fb */
     {
       p[n].freq = one_fb (&wmain[icell], freqmin, freqmax);
     }

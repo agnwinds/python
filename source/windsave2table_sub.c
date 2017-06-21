@@ -408,8 +408,8 @@ create_heat_table (ndom, rootname)
   strcpy (column_name[16], "lum_ff");
 
 
-  c[17] = get_one (ndom, "lum_fb");
-  strcpy (column_name[17], "lum_fb");
+  c[17] = get_one (ndom, "cool_rr");
+  strcpy (column_name[17], "cool_rr");
 
   /* This should be the maxium number above +1 */
   ncols = 18;
@@ -920,9 +920,9 @@ get_one (ndom, variable_name)
       {
         x[n] = plasmamain[nplasma].lum_ff;
       }
-      else if (strcmp (variable_name, "lum_fb") == 0)
+      else if (strcmp (variable_name, "cool_rr") == 0)
       {
-        x[n] = plasmamain[nplasma].lum_fb;
+        x[n] = plasmamain[nplasma].cool_rr;
       }
       else if (strcmp (variable_name, "lum_dr") == 0)
       {

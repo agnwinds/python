@@ -300,7 +300,7 @@ pl_copy_conditions (win, wout)
   wout->lum_lines = wout->lum_lines;
   wout->lum_ff = wout->lum_ff;
   wout->lum_adiabatic = wout->lum_adiabatic;
-  wout->lum_fb = wout->lum_fb;
+  wout->cool_rr = wout->cool_rr;
   wout->lum_z = wout->lum_z;
   wout->heat_tot = wout->heat_tot;
   wout->heat_tot_old = wout->heat_tot_old;
