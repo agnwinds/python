@@ -628,46 +628,49 @@ zero_emit (t)
   xxxplasma->heat_photo += xxxplasma->heat_photo_macro;
 
 
-  /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
-   * are testing.  Adiabatic cooling is proportional to temperature
-   */
 
-  if (geo.adiabatic)
-    {
-      if (wmain[xxxplasma->nwind].div_v >= 0.0)
-	{
-	  /* This is the case where we have adiabatic cooling - we want to retain the old behaviour, 
-	     so we use the 'test' temperature to compute it. If div_v is less than zero, we don't do
-	     anything here, and so the existing value of adiabatic cooling is used - this was computed 
-	     in wind_updates2d before the call to ion_abundances. */
-	  xxxplasma->cool_adiabatic =
-	    adiabatic_cooling (&wmain[xxxplasma->nwind], t);
-	}
-    }
+//OLD  /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
+//OLD   * are testing.  Adiabatic cooling is proportional to temperature
+//OLD   */
 
-  else
-    {
-      xxxplasma->cool_adiabatic = 0.0;
-    }
+//OLD  if (geo.adiabatic)
+//OLD    {
+//OLD      if (wmain[xxxplasma->nwind].div_v >= 0.0)
+//OLD	{
+//OLD	  /* This is the case where we have adiabatic cooling - we want to retain the old behaviour, 
+//OLD	     so we use the 'test' temperature to compute it. If div_v is less than zero, we don't do
+//OLD	     anything here, and so the existing value of adiabatic cooling is used - this was computed 
+//OLD	     in wind_updates2d before the call to ion_abundances. */
+//OLD	  xxxplasma->cool_adiabatic =
+//OLD	    adiabatic_cooling (&wmain[xxxplasma->nwind], t);
+//OLD	}
+//OLD    }
+
+//OLD  else
+//OLD    {
+//OLD      xxxplasma->cool_adiabatic = 0.0;
+//OLD    }
 
 
   /*81c - nsh - we now treat DR cooling as a recombinational process - still unsure as to how to treat emission, so at the moment
      it remains here */
 
-  xxxplasma->cool_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, 2);
+//OLD  xxxplasma->cool_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, 2);
 
-  /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
+//OLD  /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
 
-  xxxplasma->cool_di = total_di (&wmain[xxxplasma->nwind], t);
+//OLD  xxxplasma->cool_di = total_di (&wmain[xxxplasma->nwind], t);
 
-  /* 70g compton cooling calculated here to avoid generating photons */
+//OLD  /* 70g compton cooling calculated here to avoid generating photons */
 
-  xxxplasma->cool_comp = total_comp (&wmain[xxxplasma->nwind], t);
+//OLD  xxxplasma->cool_comp = total_comp (&wmain[xxxplasma->nwind], t);
 
-  xxxplasma->cool_tot =
-    xxxplasma->cool_adiabatic + xxxplasma->cool_dr + xxxplasma->cool_di +
-    xxxplasma->cool_comp + total_emission (&wmain[xxxplasma->nwind], 0.,
-					  VERY_BIG);
+//OLD  xxxplasma->cool_tot =
+//OLD    xxxplasma->cool_adiabatic + xxxplasma->cool_dr + xxxplasma->cool_di +
+//OLD    xxxplasma->cool_comp + total_emission (&wmain[xxxplasma->nwind], 0.,
+//OLD					  VERY_BIG);
+
+  cooling(xxxplasma,t);
 
   difference = xxxplasma->heat_tot - xxxplasma->cool_tot;
   
@@ -675,5 +678,11 @@ zero_emit (t)
   //difference = xxxplasma->heat_ff - xxxplasma->lum_ff;
 
 
+
+
+
   return (difference);
 }
+
+
+
