@@ -802,7 +802,7 @@ typedef struct plasma
   double cool_comp;              /* 1108 NSH The compton luminosity of the cell */
   double cool_di;                /* 1409 NSH The direct ionization luminosity */
   double cool_dr;                /* 1109 NSH The dielectronic recombination luminosity of the cell */
-  double cool_rr, lum_z;         /*fb luminosity & fb of metals metals */
+  double cool_rr, cool_rr_metals;         /*fb luminosity & fb of metals metals */
   double lum_rad, lum_rad_old;  /* The specific radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
 
@@ -811,7 +811,7 @@ typedef struct plasma
   double cool_comp_ioniz;        /* 1108 NSH The compton luminosity of the cell */
   double cool_di_ioniz;          /* 1409 NSH The direct ionization luminosity */
   double cool_dr_ioniz;          /* 1109 NSH The dielectronic recombination luminosity of the cell */
-  double cool_rr_ioniz, lum_z_ioniz;     /*fb luminosity & fb of metals metals */
+  double cool_rr_ioniz, cool_rr_metals_ioniz;     /*fb luminosity & fb of metals metals */
   double lum_rad_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
 

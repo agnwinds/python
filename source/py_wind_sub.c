@@ -573,7 +573,7 @@ lum_summary (w, rootname, ochoice)
         x = plasmamain[nplasma].cool_rr_ion[3];
         break;
       case 'z':                /* Line luminosity */
-        x = plasmamain[nplasma].lum_z_ioniz;
+        x = plasmamain[nplasma].cool_rr_metals_ioniz;
         break;
       default:
         printf ("Not a valid choice\n");
@@ -1527,7 +1527,7 @@ a:printf ("There are %i wind elements in this model\n", NDIM2);
 
 
   Log ("Recombination cooling   HII>HI %8.2e HeII>HeI %8.2e HeIII>HeII %8.2e Metals %8.2e\n", xplasma->cool_rr_ion[0], xplasma->cool_rr_ion[2],
-       xplasma->cool_rr_ion[3], xplasma->lum_z);
+       xplasma->cool_rr_ion[3], xplasma->cool_rr_metals);
   Log ("Photoionization heating HI>HII %8.2e HeI>HeII %8.2e HeII>HeIII %8.2e Metals %8.2e\n", xplasma->heat_ion[0], xplasma->heat_ion[2],
        xplasma->heat_ion[3], xplasma->heat_z);
 

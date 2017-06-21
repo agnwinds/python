@@ -423,7 +423,7 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].cool_dr, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].cool_di, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].cool_rr, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n].lum_z, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n].cool_rr_metals, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_rad, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_rad_old, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].cool_tot_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -434,7 +434,7 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].cool_dr_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].cool_di_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].cool_rr_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n].lum_z_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n].cool_rr_metals_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_rad_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].dmo_dt, 3, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].npdf, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -556,7 +556,7 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_dr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_di, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_rr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_z, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_rr_metals, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_rad, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_rad_old, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_tot_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -567,7 +567,7 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_dr_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_di_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_rr_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_z_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_rr_metals_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_rad_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].dmo_dt, 3, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].npdf, 1, MPI_INT, MPI_COMM_WORLD);
@@ -712,7 +712,7 @@ WindPtr (w);
     plasmamain[nplasma].cool_tot_ioniz = plasmamain[nplasma].cool_tot;
     plasmamain[nplasma].lum_ff_ioniz = plasmamain[nplasma].lum_ff;
     plasmamain[nplasma].cool_rr_ioniz = plasmamain[nplasma].cool_rr;
-    plasmamain[nplasma].lum_z_ioniz = plasmamain[nplasma].lum_z;
+    plasmamain[nplasma].cool_rr_metals_ioniz = plasmamain[nplasma].cool_rr_metals;
     plasmamain[nplasma].lum_lines_ioniz = plasmamain[nplasma].lum_lines;
     plasmamain[nplasma].cool_comp_ioniz = plasmamain[nplasma].cool_comp;
     plasmamain[nplasma].cool_dr_ioniz = plasmamain[nplasma].cool_dr;
@@ -929,7 +929,7 @@ WindPtr (w);
       Log ("OUTPUT Wind_line_cooling(ergs-1cm-3)  HHe %8.2e Metals %8.2e\n", nsh_lum_hhe / w[n].vol, nsh_lum_metals / w[n].vol);
       Log ("OUTPUT Wind_recomb_cooling(ergs-1cm-3)  H %8.2e He %8.2e C %8.2e N %8.2e O %8.2e Fe %8.2e Metals %8.2e\n",
            plasmamain[nstart].cool_rr_ion[0] / w[n].vol, (plasmamain[nstart].cool_rr_ion[2] + plasmamain[nstart].cool_rr_ion[3]) / w[n].vol,
-           c_rec / w[n].vol, n_rec / w[n].vol, o_rec / w[n].vol, fe_rec / w[n].vol, plasmamain[nstart].lum_z / w[n].vol);
+           c_rec / w[n].vol, n_rec / w[n].vol, o_rec / w[n].vol, fe_rec / w[n].vol, plasmamain[nstart].cool_rr_metals / w[n].vol);
       /* 1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons. */
       Log
         ("OUTPUT Balance      Cooling=%8.2e Heating=%8.2e Lum=%8.2e T_e=%e after update\n",
@@ -1028,7 +1028,7 @@ wind_rad_init ()
     plasmamain[n].heat_z = 0.0;
     plasmamain[n].max_freq = 0.0;       //NSH 120814 Zero the counter which works out the maximum frequency seen in a cell and hence the maximum applicable frequency of the power law estimators.
     plasmamain[n].cool_tot = plasmamain[n].lum_rad = plasmamain[n].lum_lines = plasmamain[n].lum_ff = 0.0;
-    plasmamain[n].cool_rr = plasmamain[n].lum_z = 0.0;
+    plasmamain[n].cool_rr = plasmamain[n].cool_rr_metals = 0.0;
     plasmamain[n].nrad = plasmamain[n].nioniz = 0;
     plasmamain[n].comp_nujnu = -1e99;   //1701 NSH Zero the integrated specific intensity for the cell
     plasmamain[n].cool_comp = 0.0;       //1108 NSH Zero the compton luminosity for the cell

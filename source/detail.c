@@ -178,7 +178,7 @@ wind_update_after_detailed_balance (xplasma, nelem, newden)
 
     xplasma->heat_photo = xplasma->heat_ion[0] + xplasma->heat_ion[2] + xplasma->heat_ion[3] + xplasma->heat_z;
     xplasma->heat_tot = xplasma->heat_lines + xplasma->heat_ff + xplasma->heat_photo;
-    xplasma->cool_rr = xplasma->cool_rr_ion[0] + xplasma->cool_rr_ion[2] + xplasma->cool_rr_ion[3] + xplasma->lum_z;
+    xplasma->cool_rr = xplasma->cool_rr_ion[0] + xplasma->cool_rr_ion[2] + xplasma->cool_rr_ion[3] + xplasma->cool_rr_metals;
     xplasma->lum_rad = xplasma->lum_lines + xplasma->lum_ff + xplasma->cool_rr;
   }
   else if (nelem == 1)
@@ -187,7 +187,7 @@ wind_update_after_detailed_balance (xplasma, nelem, newden)
     xplasma->cool_rr_ion[3] *= newden[4] / xplasma->density[4];
     xplasma->heat_photo = xplasma->heat_ion[1] + xplasma->heat_ion[2] + xplasma->heat_ion[3] + xplasma->heat_z;
     xplasma->heat_tot = xplasma->heat_lines + xplasma->heat_ff + xplasma->heat_photo;
-    xplasma->cool_rr = xplasma->cool_rr_ion[0] + xplasma->cool_rr_ion[2] + xplasma->cool_rr_ion[3] + xplasma->lum_z;
+    xplasma->cool_rr = xplasma->cool_rr_ion[0] + xplasma->cool_rr_ion[2] + xplasma->cool_rr_ion[3] + xplasma->cool_rr_metals;
     xplasma->lum_rad = xplasma->lum_lines + xplasma->lum_ff + xplasma->cool_rr;
   }
   return (0);
