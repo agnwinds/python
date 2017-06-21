@@ -240,11 +240,11 @@ convergence (xplasma)
       if ((xplasma->converge_hc =
 	   fabs (xplasma->heat_tot -
 		 (xplasma->lum_adiabatic + xplasma->lum_rad +
-		  xplasma->lum_dr + xplasma->cool_di +
+		  xplasma->cool_dr + xplasma->cool_di +
 		  xplasma->cool_comp)) / fabs (xplasma->heat_tot +
 					      xplasma->cool_comp +
 					      xplasma->lum_adiabatic +
-					      xplasma->lum_dr +
+					      xplasma->cool_dr +
 					      xplasma->cool_di +
 					      xplasma->lum_rad)) > epsilon)
 	xplasma->hccheck = hccheck = 1;
@@ -654,7 +654,7 @@ zero_emit (t)
   /*81c - nsh - we now treat DR cooling as a recombinational process - still unsure as to how to treat emission, so at the moment
      it remains here */
 
-  xxxplasma->lum_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, 2);
+  xxxplasma->cool_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, 2);
 
   /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
 
@@ -665,7 +665,7 @@ zero_emit (t)
   xxxplasma->cool_comp = total_comp (&wmain[xxxplasma->nwind], t);
 
   xxxplasma->lum_tot =
-    xxxplasma->lum_adiabatic + xxxplasma->lum_dr + xxxplasma->cool_di +
+    xxxplasma->lum_adiabatic + xxxplasma->cool_dr + xxxplasma->cool_di +
     xxxplasma->cool_comp + total_emission (&wmain[xxxplasma->nwind], 0.,
 					  VERY_BIG);
 
