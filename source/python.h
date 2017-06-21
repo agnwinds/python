@@ -778,7 +778,7 @@ typedef struct plasma
                                    by this ion via photoionization. 78 - changed to dynamic allocation */
   double *cool_rr_ion;              /* The amount of energy being released from the electron pool
                                    by this ion via recombination. 78 - changed to dynamic allocation */
-  double *lum_inner_ion;
+  double *cool_dr_ion;
   //OLD double j, ave_freq, lum;      /*Respectively mean intensity, intensity_averaged frequency, 
   double j, ave_freq;      /*Respectively mean intensity, intensity_averaged frequency, 
                                    luminosity and absorbed luminosity of shell */

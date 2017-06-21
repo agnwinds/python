@@ -416,7 +416,7 @@ total_fb (one, t, f1, f2, fb_choice, mode)
         }
       }
       else if (mode == 2)
-        total += xplasma->lum_inner_ion[nion] =
+        total += xplasma->cool_dr_ion[nion] =
           xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, fb_choice, mode);
 
     }
