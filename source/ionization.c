@@ -241,8 +241,8 @@ convergence (xplasma)
 	   fabs (xplasma->heat_tot -
 		 (xplasma->lum_adiabatic + xplasma->lum_rad +
 		  xplasma->lum_dr + xplasma->lum_di +
-		  xplasma->lum_comp)) / fabs (xplasma->heat_tot +
-					      xplasma->lum_comp +
+		  xplasma->cool_comp)) / fabs (xplasma->heat_tot +
+					      xplasma->cool_comp +
 					      xplasma->lum_adiabatic +
 					      xplasma->lum_dr +
 					      xplasma->lum_di +
@@ -662,11 +662,11 @@ zero_emit (t)
 
   /* 70g compton cooling calculated here to avoid generating photons */
 
-  xxxplasma->lum_comp = total_comp (&wmain[xxxplasma->nwind], t);
+  xxxplasma->cool_comp = total_comp (&wmain[xxxplasma->nwind], t);
 
   xxxplasma->lum_tot =
     xxxplasma->lum_adiabatic + xxxplasma->lum_dr + xxxplasma->lum_di +
-    xxxplasma->lum_comp + total_emission (&wmain[xxxplasma->nwind], 0.,
+    xxxplasma->cool_comp + total_emission (&wmain[xxxplasma->nwind], 0.,
 					  VERY_BIG);
 
   difference = xxxplasma->heat_tot - xxxplasma->lum_tot;
