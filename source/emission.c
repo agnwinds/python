@@ -206,7 +206,7 @@ total_emission (one, f1, f2)
 
   if (f2 < f1)
   {
-    xplasma->lum_rad = xplasma->lum_lines = xplasma->lum_ff = xplasma->cool_rr = 0;      //NSH 1108 Zero the new cool_comp variable NSH 1101 - removed
+    xplasma->lum_tot = xplasma->lum_lines = xplasma->lum_ff = xplasma->cool_rr = 0;      //NSH 1108 Zero the new cool_comp variable NSH 1101 - removed
   }
   else
   {
@@ -216,32 +216,32 @@ total_emission (one, f1, f2)
       //The first term here is the fb cooling due to macro ions and the second gives
       //the fb cooling due to simple ions.
       //total_fb has been modified to exclude recombinations treated using macro atoms.
-      xplasma->lum_rad = xplasma->cool_rr;
+      xplasma->lum_tot = xplasma->cool_rr;
       //Note: This the fb_matom call makes no use of f1 or f2. They are passed for
       //now in case they should be used in the future. But they could
       //also be removed.
       // (SS)
       xplasma->lum_lines = total_bb_cooling (xplasma, t_e);
-      xplasma->lum_rad += xplasma->lum_lines;
+      xplasma->lum_tot += xplasma->lum_lines;
       /* total_bb_cooling gives the total cooling rate due to bb transisions whether they
          are macro atoms or simple ions. */
       xplasma->lum_ff = total_free (one, t_e, f1, f2);
-      xplasma->lum_rad += xplasma->lum_ff;
+      xplasma->lum_tot += xplasma->lum_ff;
 
 
     }
     else                        //default (non-macro atoms) (SS)
     {
-      xplasma->lum_rad = xplasma->lum_lines = total_line_emission (one, f1, f2);
-      xplasma->lum_rad += xplasma->lum_ff = total_free (one, t_e, f1, f2);
-      xplasma->lum_rad += xplasma->cool_rr = total_fb (one, t_e, f1, f2, FB_REDUCED, 1);     //outer shell recombinations
+      xplasma->lum_tot = xplasma->lum_lines = total_line_emission (one, f1, f2);
+      xplasma->lum_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2);
+      xplasma->lum_tot += xplasma->cool_rr = total_fb (one, t_e, f1, f2, FB_REDUCED, 1);     //outer shell recombinations
 
 
     }
   }
 
 
-  return (xplasma->lum_rad);
+  return (xplasma->lum_tot);
 
 
 }
@@ -402,7 +402,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       if (wmain[icell].vol > 0.0)       //only consider cells with volume greater than zero
       {
         nplasma = wmain[icell].nplasma; //get the plasma cell in this wind cell
-        xlumsum += plasmamain[nplasma].lum_rad; /*increment the xlumsum by the lum_rad in this plasma cell - note that due to the way wind_luminosity gets called, this is actually the band limited flux not the luminosity. */
+        xlumsum += plasmamain[nplasma].lum_tot; /*increment the xlumsum by the lum_tot in this plasma cell - note that due to the way wind_luminosity gets called, this is actually the band limited flux not the luminosity. */
       }
       icell++;                  /*If we are not yet up to xlum, go to the next cell */
     }
@@ -416,7 +416,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     /* Now generate a single photon in this cell */
 
     /*Get the total luminosity and MORE IMPORTANT populate xcol.pow and other parameters */
-    lum = plasmamain[nplasma].lum_rad;  /* Whilst this says lum - I'm (nsh) pretty sure this is actually a flux between two frequency limits) */
+    lum = plasmamain[nplasma].lum_tot;  /* Whilst this says lum - I'm (nsh) pretty sure this is actually a flux between two frequency limits) */
 
     xlum = lum * (rand () + 0.5) / (MAXRAND);   /*this makes a small test luminosity */
 

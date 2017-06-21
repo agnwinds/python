@@ -295,8 +295,8 @@ pl_copy_conditions (win, wout)
   wout->j = win->j;
   wout->ave_freq = wout->ave_freq;
   wout->lum = wout->lum;
-  wout->lum_rad = wout->lum_rad;
-  wout->lum_rad_old = wout->lum_rad_old;
+  wout->lum_tot = wout->lum_tot;
+  wout->lum_tot_old = wout->lum_tot_old;
   wout->lum_lines = wout->lum_lines;
   wout->lum_ff = wout->lum_ff;
   wout->cool_adiabatic = wout->cool_adiabatic;

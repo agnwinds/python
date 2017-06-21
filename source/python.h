@@ -803,7 +803,7 @@ typedef struct plasma
   double cool_di;                /* 1409 NSH The direct ionization luminosity */
   double cool_dr;                /* 1109 NSH The dielectronic recombination luminosity of the cell */
   double cool_rr, cool_rr_metals;         /*fb luminosity & fb of metals metals */
-  double lum_rad, lum_rad_old;  /* The specific radiative luminosity in frequencies defined by freqmin
+  double lum_tot, lum_tot_old;  /* The specific radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
 
   double cool_tot_ioniz;
@@ -812,7 +812,7 @@ typedef struct plasma
   double cool_di_ioniz;          /* 1409 NSH The direct ionization luminosity */
   double cool_dr_ioniz;          /* 1109 NSH The dielectronic recombination luminosity of the cell */
   double cool_rr_ioniz, cool_rr_metals_ioniz;     /*fb luminosity & fb of metals metals */
-  double lum_rad_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
+  double lum_tot_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
 
   double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to computecompton cooling-  only needs computing once per cycle */

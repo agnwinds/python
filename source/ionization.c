@@ -103,7 +103,7 @@ to match heating and cooling in the wind element! */
       xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
       xplasma->t_e_old = xplasma->t_e;
       xplasma->t_r_old = xplasma->t_r;
-      xplasma->lum_rad_old = xplasma->lum_rad;
+      xplasma->lum_tot_old = xplasma->lum_tot;
 
       ireturn = one_shot (xplasma, mode);
 
@@ -121,7 +121,7 @@ to match heating and cooling in the wind element! */
       xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
       xplasma->t_e_old = xplasma->t_e;
       xplasma->t_r_old = xplasma->t_r;
-      xplasma->lum_rad_old = xplasma->lum_rad;
+      xplasma->lum_tot_old = xplasma->lum_tot;
 
       ireturn = one_shot (xplasma, mode);
 
@@ -140,7 +140,7 @@ to match heating and cooling in the wind element! */
       xplasma->dt_e = xplasma->t_e - xplasma->t_e_old;
       xplasma->t_e_old = xplasma->t_e;
       xplasma->t_r_old = xplasma->t_r;
-      xplasma->lum_rad_old = xplasma->lum_rad;
+      xplasma->lum_tot_old = xplasma->lum_tot;
 
 
       ireturn = one_shot (xplasma, mode);
@@ -239,14 +239,14 @@ convergence (xplasma)
 	xplasma->techeck = techeck = 1;
       if ((xplasma->converge_hc =
 	   fabs (xplasma->heat_tot -
-		 (xplasma->cool_adiabatic + xplasma->lum_rad +
+		 (xplasma->cool_adiabatic + xplasma->lum_tot +
 		  xplasma->cool_dr + xplasma->cool_di +
 		  xplasma->cool_comp)) / fabs (xplasma->heat_tot +
 					      xplasma->cool_comp +
 					      xplasma->cool_adiabatic +
 					      xplasma->cool_dr +
 					      xplasma->cool_di +
-					      xplasma->lum_rad)) > epsilon)
+					      xplasma->lum_tot)) > epsilon)
 	xplasma->hccheck = hccheck = 1;
     }
   else				//If the cell has reached the maximum temperature
@@ -255,7 +255,7 @@ convergence (xplasma)
     }
 
 //110919 nsh modified line below to include the adiabatic cooling in the check that heating equals cooling
-//111004 nsh further modification to include DR and compton cooling, now moved out of lum_rad
+//111004 nsh further modification to include DR and compton cooling, now moved out of lum_tot
 
   /* Check whether the heating and colling balance to within epsilon and if so set hccheck to 1 */
   /* 130722 added a fabs to the bottom, since it is now conceivable that this could be negative if 
