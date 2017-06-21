@@ -453,10 +453,10 @@ be optional which variables beyond here are moved to structures othere than Wind
     if (geo.adiabatic)
     {
       nwind = plasmamain[i].nwind;
-      plasmamain[i].lum_adiabatic = adiabatic_cooling (&w[nwind], plasmamain[i].t_e);
+      plasmamain[i].cool_adiabatic = adiabatic_cooling (&w[nwind], plasmamain[i].t_e);
     }
     else
-      plasmamain[i].lum_adiabatic = 0.0;
+      plasmamain[i].cool_adiabatic = 0.0;
   }
 
   /* Calculate one over dvds */

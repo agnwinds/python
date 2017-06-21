@@ -299,7 +299,7 @@ pl_copy_conditions (win, wout)
   wout->lum_rad_old = wout->lum_rad_old;
   wout->lum_lines = wout->lum_lines;
   wout->lum_ff = wout->lum_ff;
-  wout->lum_adiabatic = wout->lum_adiabatic;
+  wout->cool_adiabatic = wout->cool_adiabatic;
   wout->cool_rr = wout->cool_rr;
   wout->lum_z = wout->lum_z;
   wout->heat_tot = wout->heat_tot;

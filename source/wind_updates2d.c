@@ -310,9 +310,9 @@ WindPtr (w);
      */
 
     if (geo.adiabatic)
-      plasmamain[n].lum_adiabatic = adiabatic_cooling (&w[nwind], plasmamain[n].t_e);
+      plasmamain[n].cool_adiabatic = adiabatic_cooling (&w[nwind], plasmamain[n].t_e);
     else
-      plasmamain[n].lum_adiabatic = 0.0;
+      plasmamain[n].cool_adiabatic = 0.0;
 
 
     /* Calculate the densities in various ways depending on the ioniz_mode */
@@ -417,7 +417,7 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].max_freq, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_lines, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_ff, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n].lum_adiabatic, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n].cool_adiabatic, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].comp_nujnu, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].cool_comp, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].cool_dr, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -429,7 +429,7 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].lum_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_lines_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].lum_ff_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n].lum_adiabatic_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n].cool_adiabatic_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].cool_comp_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].cool_dr_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].cool_di_ioniz, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -550,7 +550,7 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].max_freq, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_ff, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_adiabatic, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_adiabatic, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].comp_nujnu, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_comp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_dr, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -562,7 +562,7 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_lines_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_ff_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].lum_adiabatic_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_adiabatic_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_comp_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_dr_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].cool_di_ioniz, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -718,7 +718,7 @@ WindPtr (w);
     plasmamain[nplasma].cool_dr_ioniz = plasmamain[nplasma].cool_dr;
     plasmamain[nplasma].cool_di_ioniz = plasmamain[nplasma].cool_di;
     plasmamain[nplasma].lum_rad_ioniz = plasmamain[nplasma].lum_rad;
-    plasmamain[nplasma].lum_adiabatic_ioniz = plasmamain[nplasma].lum_adiabatic;
+    plasmamain[nplasma].cool_adiabatic_ioniz = plasmamain[nplasma].cool_adiabatic;
 
   }
 
@@ -732,7 +732,7 @@ WindPtr (w);
   geo.cool_comp_ioniz = geo.cool_comp;
   geo.cool_dr_ioniz = geo.cool_dr;
   geo.cool_di_ioniz = geo.cool_di;
-  geo.lum_adiabatic_ioniz = geo.lum_adiabatic;
+  geo.cool_adiabatic_ioniz = geo.cool_adiabatic;
   geo.lum_disk_ioniz = geo.lum_disk;
   geo.lum_star_ioniz = geo.lum_star;
   geo.lum_bl_ioniz = geo.lum_bl;
@@ -804,8 +804,8 @@ WindPtr (w);
 
   Log
     ("!!wind_update: Wind cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e DI %8.2e lines %8.2e adiabatic %8.2e) after update\n",
-     asum + geo.cool_comp + geo.cool_dr + geo.cool_di + geo.lum_adiabatic,
-     geo.cool_rr, geo.lum_ff, geo.cool_comp, geo.cool_dr, geo.cool_di, geo.lum_lines, geo.lum_adiabatic);
+     asum + geo.cool_comp + geo.cool_dr + geo.cool_di + geo.cool_adiabatic,
+     geo.cool_rr, geo.lum_ff, geo.cool_comp, geo.cool_dr, geo.cool_di, geo.lum_lines, geo.cool_adiabatic);
 
 
   /* Print out some diagnositics of the changes in the wind update */
@@ -899,9 +899,9 @@ WindPtr (w);
       Log
         ("OUTPUT Wind_cooling(ergs-1cm-3)     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e DI %8.2e adiabatic %8.2e lines %8.2e ) after update\n",
          (asum + geo.cool_comp + geo.cool_dr + geo.cool_di +
-          geo.lum_adiabatic) / w[n].vol, geo.cool_rr / w[n].vol,
+          geo.cool_adiabatic) / w[n].vol, geo.cool_rr / w[n].vol,
          geo.lum_ff / w[n].vol, geo.cool_comp / w[n].vol,
-         geo.cool_dr / w[n].vol, geo.cool_di / w[n].vol, geo.lum_adiabatic / w[n].vol, geo.lum_lines / w[n].vol);
+         geo.cool_dr / w[n].vol, geo.cool_di / w[n].vol, geo.cool_adiabatic / w[n].vol, geo.lum_lines / w[n].vol);
 
       /* NSH 1701 calculate the recombination cooling for other elements */
 
@@ -933,7 +933,7 @@ WindPtr (w);
       /* 1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons. */
       Log
         ("OUTPUT Balance      Cooling=%8.2e Heating=%8.2e Lum=%8.2e T_e=%e after update\n",
-         asum + geo.cool_comp + geo.cool_dr + geo.cool_di + geo.lum_adiabatic, xsum, asum, plasmamain[nstart].t_e);
+         asum + geo.cool_comp + geo.cool_dr + geo.cool_di + geo.cool_adiabatic, xsum, asum, plasmamain[nstart].t_e);
 
       for (n = 0; n < nelements; n++)
       {

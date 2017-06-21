@@ -239,11 +239,11 @@ convergence (xplasma)
 	xplasma->techeck = techeck = 1;
       if ((xplasma->converge_hc =
 	   fabs (xplasma->heat_tot -
-		 (xplasma->lum_adiabatic + xplasma->lum_rad +
+		 (xplasma->cool_adiabatic + xplasma->lum_rad +
 		  xplasma->cool_dr + xplasma->cool_di +
 		  xplasma->cool_comp)) / fabs (xplasma->heat_tot +
 					      xplasma->cool_comp +
-					      xplasma->lum_adiabatic +
+					      xplasma->cool_adiabatic +
 					      xplasma->cool_dr +
 					      xplasma->cool_di +
 					      xplasma->lum_rad)) > epsilon)
@@ -259,7 +259,7 @@ convergence (xplasma)
 
   /* Check whether the heating and colling balance to within epsilon and if so set hccheck to 1 */
   /* 130722 added a fabs to the bottom, since it is now conceivable that this could be negative if 
-     lum_adiabatic is large and negative - and hence heating */
+     cool_adiabatic is large and negative - and hence heating */
 
 /* NSH 130711 - also changed to have fabs on top and bottom, since heating can now be negative!) */
 
@@ -640,14 +640,14 @@ zero_emit (t)
 	     so we use the 'test' temperature to compute it. If div_v is less than zero, we don't do
 	     anything here, and so the existing value of adiabatic cooling is used - this was computed 
 	     in wind_updates2d before the call to ion_abundances. */
-	  xxxplasma->lum_adiabatic =
+	  xxxplasma->cool_adiabatic =
 	    adiabatic_cooling (&wmain[xxxplasma->nwind], t);
 	}
     }
 
   else
     {
-      xxxplasma->lum_adiabatic = 0.0;
+      xxxplasma->cool_adiabatic = 0.0;
     }
 
 
@@ -665,7 +665,7 @@ zero_emit (t)
   xxxplasma->cool_comp = total_comp (&wmain[xxxplasma->nwind], t);
 
   xxxplasma->lum_tot =
-    xxxplasma->lum_adiabatic + xxxplasma->cool_dr + xxxplasma->cool_di +
+    xxxplasma->cool_adiabatic + xxxplasma->cool_dr + xxxplasma->cool_di +
     xxxplasma->cool_comp + total_emission (&wmain[xxxplasma->nwind], 0.,
 					  VERY_BIG);
 

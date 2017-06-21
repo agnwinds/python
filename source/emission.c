@@ -99,13 +99,13 @@ wind_luminosity (f1, f2)
       if (geo.adiabatic)        //130722 NSH - slight change to allow for adiabatic heating effect - now logged in a new global variable for reporting.
       {
 
-        if (plasmamain[nplasma].lum_adiabatic >= 0.0)
+        if (plasmamain[nplasma].cool_adiabatic >= 0.0)
         {
-          lum_adiab += plasmamain[nplasma].lum_adiabatic;
+          lum_adiab += plasmamain[nplasma].cool_adiabatic;
         }
         else
         {
-          heat_adiab += plasmamain[nplasma].lum_adiabatic;
+          heat_adiab += plasmamain[nplasma].cool_adiabatic;
         }
       }
 
@@ -134,7 +134,7 @@ wind_luminosity (f1, f2)
   geo.cool_comp = cool_comp;      //1108 NSH The total compton luminosity of the wind is stored in the geo structure
   geo.cool_dr = cool_dr;          //1109 NSH the total DR luminosity of the wind is stored in the geo structure
   geo.cool_di = cool_di;          //1408 NSH the total DI luminosity of the wind is stored in the geo structure
-  geo.lum_adiabatic = lum_adiab;
+  geo.cool_adiabatic = lum_adiab;
   geo.heat_adiabatic = heat_adiab;
 
   return (lum);
@@ -274,7 +274,7 @@ Notes:
 
         Note also that this function should only be called
         if geo.adiabatic == 1, in which case it populates
-        xplasma->lum_adiabatic. This is used in heating and cooling
+        xplasma->cool_adiabatic. This is used in heating and cooling
         balance. We also use it as a potential destruction choice for 
         kpkts in which case the kpkt is thrown away by setting its istat 
         to P_ADIABATIC.
