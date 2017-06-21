@@ -785,8 +785,10 @@ init_observers ()
     geo.select_spectype=SPECTYPE_FNU;
   }
   else
+  {
     Log ("OK, basic Monte Carlo spectrum\n");
     geo.select_spectype=SPECTYPE_RAW;
+  }
 
   return (0);
 }
