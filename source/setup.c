@@ -405,8 +405,7 @@ get_line_transfer_mode ()
     ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,6=macro_atoms,7=macro_atoms+aniso.scattering)",
      &geo.line_mode);
 
-
-  /* ?? ksl Next section seems rather a kluge.  Why don't we specifty the underlying variables explicitly 
+		   /* ?? ksl Next section seems rather a kluge.  Why don't we specifty the underlying variables explicitly 
      It also seems likely that we have mixed usage of some things, e.g geo.rt_mode and geo.macro_simple */
 
   /* JM 1406 -- geo.rt_mode and geo.macro_simple control different things. geo.rt_mode controls the radiative
@@ -421,20 +420,20 @@ get_line_transfer_mode ()
     {
       Log ("Line_transfer mode:  Simple, pure absorption\n");
     }
-  if (geo.line_mode == 1)
+  else if (geo.line_mode == 1)
     {
       Log ("Line_transfer mode:  Simple, pure scattering\n");
     }
-  if (geo.line_mode == 2)
+  else if (geo.line_mode == 2)
     {
       Log ("Line_transfer mode:  Simple, single scattering\n");
     }
-  if (geo.line_mode == 3)
+  else if (geo.line_mode == 3)
     {
       Log
 	("Line_transfer mode:  Simple, isotropic scattering, escape probabilities\n");
     }
-  if (geo.line_mode == 4)
+  else if (geo.line_mode == 4)
     {
       Log
 	("Line_transfer mode:  Simple, anisotropic scattering, escape probabilities\n");
