@@ -433,7 +433,7 @@ struct geometry
 
   /* Define the choices for calculating the FB, see, e.g. integ_fb */
 
-#define FB_FULL         0   /* Calculate fb emissivity including energy associated with the threshold*/
+#define FB_FULL         1   /* Calculate fb emissivity including energy associated with the threshold*/
 #define FB_REDUCED      1   /* Calcuate the fb emissivity without the threshold energy */
 #define FB_RATE         2   /* Calulate the fb recombinarion rate  */
 
@@ -485,7 +485,8 @@ struct geometry
   double agn_cltab_hi_alpha;    //photon index for the high frequency end       
 
 
-  double lum_ff, cool_rr, lum_lines;     /* The luminosity of the wind as a result of ff, fb, and line radiation */
+  double lum_ff, lum_rr, lum_lines;     /* The luminosity of the wind as a result of ff, fb, and line radiation */
+  double cool_rr;				/*1706 NSH - the cooling rate due to radiative recombination - not the same as the luminosity */
   double cool_comp;              /*1108 NSH The luminosity of the wind as a result of compton cooling */
   double cool_di;                /* 1409 NSH The direct ionization luminosity */
   double cool_dr;                /*1109 NSH The luminosity of the wind due to dielectronic recombination */
@@ -496,7 +497,8 @@ struct geometry
 
 /* These variables are copies of the lum variables above, and are only calculated during ionization cycles
    This is a bugfix for JM130621, windsave bug */
-  double lum_ff_ioniz, cool_rr_ioniz, lum_lines_ioniz;
+  double lum_ff_ioniz, lum_rr_ioniz, lum_lines_ioniz;
+  double cool_rr_ioniz;
   double cool_comp_ioniz;
   double cool_di_ioniz;          /* 1409 NSH The direct ionization luminosity */
   double cool_dr_ioniz;
@@ -799,6 +801,7 @@ typedef struct plasma
   /* The total luminosity of all processes in the cell (Not the same 
                                    as what escapes the cell) */
   double lum_lines, lum_ff, cool_adiabatic;
+  double lum_rr;                 /* 1706 NSH - the radiative recobination luminosity - not the same as the cooling rate */
   double cool_comp;              /* 1108 NSH The compton luminosity of the cell */
   double cool_di;                /* 1409 NSH The direct ionization luminosity */
   double cool_dr;                /* 1109 NSH The dielectronic recombination luminosity of the cell */
@@ -808,6 +811,7 @@ typedef struct plasma
 
   double cool_tot_ioniz;
   double lum_lines_ioniz, lum_ff_ioniz, cool_adiabatic_ioniz;
+  double lum_rr_ioniz;
   double cool_comp_ioniz;        /* 1108 NSH The compton luminosity of the cell */
   double cool_di_ioniz;          /* 1409 NSH The direct ionization luminosity */
   double cool_dr_ioniz;          /* 1109 NSH The dielectronic recombination luminosity of the cell */

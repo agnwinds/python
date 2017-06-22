@@ -531,6 +531,8 @@ meaning in nebular concentrations.
    04June   SS  Modified so that changes in the heating rate due to changes in the
                 temperature are included for macro atoms.
 	06may	ksl	Modified for plasma structue
+	17jun	nsh	cooling calculations all gathered together into cooling which is in
+				cooling.c
  */
 
 
@@ -627,7 +629,7 @@ zero_emit (t)
   xxxplasma->heat_tot += xxxplasma->heat_photo_macro;
   xxxplasma->heat_photo += xxxplasma->heat_photo_macro;
 
-
+  /*81d - nsh - all cooling calculations moved into seperate routine.
 
 //OLD  /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
 //OLD   * are testing.  Adiabatic cooling is proportional to temperature

@@ -728,6 +728,7 @@ WindPtr (w);
      cycles in the windsavefile even if the spectral cycles are run */
   geo.lum_ff_ioniz = geo.lum_ff;
   geo.cool_rr_ioniz = geo.cool_rr;
+  geo.lum_rr_ioniz = geo.lum_rr;
   geo.lum_lines_ioniz = geo.lum_lines;
   geo.cool_comp_ioniz = geo.cool_comp;
   geo.cool_dr_ioniz = geo.cool_dr;
@@ -756,7 +757,7 @@ WindPtr (w);
 
 
 
-  asum = wind_luminosity (0.0, VERY_BIG);       /*We call wind_luminosity here to obtain an up to date set of cooling rates */
+  asum = wind_cooling (0.0, VERY_BIG);       /*We call wind_cooling here to obtain an up to date set of cooling rates */
 
 
   if (modes.zeus_connect == 1 && geo.hydro_domain_number > -1)  //If we are running in zeus connect mode, we output heating and cooling rates.
@@ -800,7 +801,7 @@ WindPtr (w);
    * not-only adiabatic cooling, but also goe.cool_comp, geo_cool_dr and geo.cool_di */
   Log
     ("!!wind_update: Wind luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n",
-     asum, geo.cool_rr, geo.lum_ff, geo.lum_lines);
+     asum, geo.lum_rr, geo.lum_ff, geo.lum_lines);
 
   Log
     ("!!wind_update: Wind cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e DI %8.2e lines %8.2e adiabatic %8.2e) after update\n",

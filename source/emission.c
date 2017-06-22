@@ -66,6 +66,7 @@ History:
     11sep   nsh     70 Modifications in incorporate DR cooling (very approximate at the moment)
 	12sep	nsh	73 Added a counter for adiabatic luminosity (!)
  	13jul	nsh	76 Split up adiabatic luminosity into heating and cooling.
+    17jun	nsh 81d - removed non photon producing processes - now in wind_cooling
  
 **************************************************************/
 
@@ -73,7 +74,8 @@ double
 wind_luminosity (f1, f2)
      double f1, f2;             /* freqmin and freqmax */
 {
-  double lum, lum_lines, cool_rr, lum_ff, cool_comp, cool_dr, cool_di, lum_adiab, heat_adiab;       //1108 NSH Added a new variable for compton cooling 1408 NSH and for DI cooling
+  double lum, lum_lines, lum_rr, lum_ff;
+	  //cool_comp, cool_dr, cool_di, lum_adiab, heat_adiab;       //1108 NSH Added a new variable for compton cooling 1408 NSH and for DI cooling
   //1109 NSH Added a new variable for dielectronic cooling
   //1307 NSH Added a new variable to split out negtive adiabatic cooling (i.e. heating).
   int n;
@@ -81,7 +83,8 @@ wind_luminosity (f1, f2)
   int nplasma;
 
 
-  lum = lum_lines = cool_rr = lum_ff = cool_comp = cool_dr = cool_di = lum_adiab = heat_adiab = 0;  //1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
+  lum = lum_lines = lum_rr = lum_ff = 0.0;
+	  //cool_comp = cool_dr = cool_di = lum_adiab = heat_adiab = 0;  //1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
   for (n = 0; n < NDIM2; n++)
   {
 
@@ -90,36 +93,36 @@ wind_luminosity (f1, f2)
       nplasma = wmain[n].nplasma;
       lum += x = total_emission (&wmain[n], f1, f2);
       lum_lines += plasmamain[nplasma].lum_lines;
-      cool_rr += plasmamain[nplasma].cool_rr;
+      lum_rr += plasmamain[nplasma].lum_rr;
       lum_ff += plasmamain[nplasma].lum_ff;
-      cool_comp += plasmamain[nplasma].cool_comp; //1108 NSH Increment the new counter by the compton luminosity for that cell.
-      cool_dr += plasmamain[nplasma].cool_dr;     //1109 NSH Increment the new counter by the DR luminosity for the cell.
-      cool_di += plasmamain[nplasma].cool_di;     //1408 NSH Increment the new counter by the DI luminosity for the cell.
+//      cool_comp += plasmamain[nplasma].cool_comp; //1108 NSH Increment the new counter by the compton luminosity for that cell.
+//      cool_dr += plasmamain[nplasma].cool_dr;     //1109 NSH Increment the new counter by the DR luminosity for the cell.
+//      cool_di += plasmamain[nplasma].cool_di;     //1408 NSH Increment the new counter by the DI luminosity for the cell.
 
-      if (geo.adiabatic)        //130722 NSH - slight change to allow for adiabatic heating effect - now logged in a new global variable for reporting.
-      {
+//      if (geo.adiabatic)        //130722 NSH - slight change to allow for adiabatic heating effect - now logged in a new global variable for reporting.
+//      {
 
-        if (plasmamain[nplasma].cool_adiabatic >= 0.0)
-        {
-          lum_adiab += plasmamain[nplasma].cool_adiabatic;
-        }
-        else
-        {
-          heat_adiab += plasmamain[nplasma].cool_adiabatic;
-        }
-      }
+//        if (plasmamain[nplasma].cool_adiabatic >= 0.0)
+//        {
+//          lum_adiab += plasmamain[nplasma].cool_adiabatic;
+//        }
+//        else
+//        {
+//          heat_adiab += plasmamain[nplasma].cool_adiabatic;
+//        }
+//      }
 
-      else
-      {
-        lum_adiab = 0.0;
-      }
+//      else
+//      {
+//        lum_adiab = 0.0;
+//      }
 
 
-      if (x < 0)
-        Error ("wind_luminosity: total emission %8.4e is < 0!\n", x);
+//      if (x < 0)
+//        Error ("wind_luminosity: total emission %8.4e is < 0!\n", x);
 
-      if (recipes_error != 0)
-        Error ("wind_luminosity: Received recipes error on cell %d\n", n);
+//      if (recipes_error != 0)
+//        Error ("wind_luminosity: Received recipes error on cell %d\n", n);
     }
   }
 
@@ -129,13 +132,13 @@ wind_luminosity (f1, f2)
 
   //geo.lum_wind=lum;
   geo.lum_lines = lum_lines;
-  geo.cool_rr = cool_rr;
+  geo.lum_rr = lum_rr;
   geo.lum_ff = lum_ff;
-  geo.cool_comp = cool_comp;      //1108 NSH The total compton luminosity of the wind is stored in the geo structure
-  geo.cool_dr = cool_dr;          //1109 NSH the total DR luminosity of the wind is stored in the geo structure
-  geo.cool_di = cool_di;          //1408 NSH the total DI luminosity of the wind is stored in the geo structure
-  geo.cool_adiabatic = lum_adiab;
-  geo.heat_adiabatic = heat_adiab;
+//  geo.cool_comp = cool_comp;      //1108 NSH The total compton luminosity of the wind is stored in the geo structure
+//  geo.cool_dr = cool_dr;          //1109 NSH the total DR luminosity of the wind is stored in the geo structure
+//  geo.cool_di = cool_di;          //1408 NSH the total DI luminosity of the wind is stored in the geo structure
+//  geo.cool_adiabatic = lum_adiab;
+//  geo.heat_adiabatic = heat_adiab;
 
   return (lum);
 }
@@ -206,13 +209,13 @@ total_emission (one, f1, f2)
 
   if (f2 < f1)
   {
-    xplasma->lum_tot = xplasma->lum_lines = xplasma->lum_ff = xplasma->cool_rr = 0;      //NSH 1108 Zero the new cool_comp variable NSH 1101 - removed
+    xplasma->lum_tot = xplasma->lum_lines = xplasma->lum_ff = xplasma->lum_rr = 0;      //NSH 1108 Zero the new cool_comp variable NSH 1101 - removed
   }
   else
   {
     if (geo.rt_mode == RT_MODE_MACRO)       //Switch for macro atoms (SS)
     {
-      xplasma->cool_rr = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_FULL, 1);        //outer shellrecombinations
+      xplasma->lum_rr = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_FULL, 1);        //outer shellrecombinations
       //The first term here is the fb cooling due to macro ions and the second gives
       //the fb cooling due to simple ions.
       //total_fb has been modified to exclude recombinations treated using macro atoms.
@@ -234,7 +237,9 @@ total_emission (one, f1, f2)
     {
       xplasma->lum_tot = xplasma->lum_lines = total_line_emission (one, f1, f2);
       xplasma->lum_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2);
-      xplasma->lum_tot += xplasma->cool_rr = total_fb (one, t_e, f1, f2, FB_FULL, 1);     //outer shell recombinations
+	  /* We compute the radiative recombination luminosirty - this is not the same as the rr cooling rate and
+	  	so is stored in a seperate variable */
+      xplasma->lum_tot += xplasma->lum_rr = total_fb (one, t_e, f1, f2, FB_FULL, 1);     //outer shell recombinations
 
 
     }

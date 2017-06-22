@@ -233,6 +233,9 @@ double one_ff(WindPtr one, double f1, double f2);
 double gaunt_ff(double gsquared);
 /* cooling.c */
 double cooling(PlasmaPtr xxxplasma, double t);
+double xtotal_emission(WindPtr one, double f1, double f2);
+double adiabatic_cooling(WindPtr one, double t);
+double wind_cooling(double f1, double f2);
 /* recomb.c */
 double fb_topbase_partial(double freq);
 double integ_fb(double t, double f1, double f2, int nion, int fb_choice, int mode);
@@ -267,8 +270,6 @@ int check_convergence(void);
 int one_shot(PlasmaPtr xplasma, int mode);
 double calc_te(PlasmaPtr xplasma, double tmin, double tmax);
 double zero_emit(double t);
-double xtotal_emission(WindPtr one, double f1, double f2);
-double adiabatic_cooling(WindPtr one, double t);
 /* ispy.c */
 int ispy_init(char filename[], int icycle);
 int ispy_close(void);
