@@ -734,6 +734,11 @@ calloc_dyn_plasma (nelem)
       Error ("calloc_dyn_plasma: Error in allocating memory for cool_rr_ion\n");
       exit (0);
     }
+    if ((plasmamain[n].lum_rr_ion = calloc (sizeof (double), nions)) == NULL)
+    {
+      Error ("calloc_dyn_plasma: Error in allocating memory for lum_rr_ion\n");
+      exit (0);
+    }
     if ((plasmamain[n].inner_recomb = calloc (sizeof (double), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for inner_recomb\n");

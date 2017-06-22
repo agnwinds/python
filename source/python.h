@@ -436,6 +436,12 @@ struct geometry
 #define FB_FULL         0   /* Calculate fb emissivity including energy associated with the threshold*/
 #define FB_REDUCED      1   /* Calcuate the fb emissivity without the threshold energy */
 #define FB_RATE         2   /* Calulate the fb recombinarion rate  */
+  
+  
+  /* Define the modes for free bound integrals */
+#define OUTER_SHELL  1
+
+#define INNER_SHELL  2
 
   /* The frequency bands used when calculating parameters like a power law slope in limited regions. */
 
@@ -485,7 +491,8 @@ struct geometry
   double agn_cltab_hi_alpha;    //photon index for the high frequency end       
 
 
-  double lum_ff, cool_rr, lum_lines;     /* The luminosity of the wind as a result of ff, fb, and line radiation */
+  double lum_ff, lum_rr, lum_lines;     /* The luminosity of the wind as a result of ff, fb, and line radiation */
+  double cool_rr;				/*1706 NSH - the cooling rate due to radiative recombination - not the same as the luminosity */
   double cool_comp;              /*1108 NSH The luminosity of the wind as a result of compton cooling */
   double cool_di;                /* 1409 NSH The direct ionization luminosity */
   double cool_dr;                /*1109 NSH The luminosity of the wind due to dielectronic recombination */
@@ -496,7 +503,8 @@ struct geometry
 
 /* These variables are copies of the lum variables above, and are only calculated during ionization cycles
    This is a bugfix for JM130621, windsave bug */
-  double lum_ff_ioniz, cool_rr_ioniz, lum_lines_ioniz;
+  double lum_ff_ioniz, lum_rr_ioniz, lum_lines_ioniz;
+  double cool_rr_ioniz;
   double cool_comp_ioniz;
   double cool_di_ioniz;          /* 1409 NSH The direct ionization luminosity */
   double cool_dr_ioniz;
@@ -778,6 +786,9 @@ typedef struct plasma
                                    by this ion via photoionization. 78 - changed to dynamic allocation */
   double *cool_rr_ion;              /* The amount of energy being released from the electron pool
                                    by this ion via recombination. 78 - changed to dynamic allocation */
+  double *lum_rr_ion;              /* The recombination luminosity
+	                                   by this ion via recombination. 78 - changed to dynamic allocation */
+	  
   double *cool_dr_ion;
   //OLD double j, ave_freq, lum;      /*Respectively mean intensity, intensity_averaged frequency, 
   double j, ave_freq;      /*Respectively mean intensity, intensity_averaged frequency, 
@@ -799,6 +810,7 @@ typedef struct plasma
   /* The total luminosity of all processes in the cell (Not the same 
                                    as what escapes the cell) */
   double lum_lines, lum_ff, cool_adiabatic;
+  double lum_rr;                 /* 1706 NSH - the radiative recobination luminosity - not the same as the cooling rate */
   double cool_comp;              /* 1108 NSH The compton luminosity of the cell */
   double cool_di;                /* 1409 NSH The direct ionization luminosity */
   double cool_dr;                /* 1109 NSH The dielectronic recombination luminosity of the cell */
@@ -808,6 +820,7 @@ typedef struct plasma
 
   double cool_tot_ioniz;
   double lum_lines_ioniz, lum_ff_ioniz, cool_adiabatic_ioniz;
+  double lum_rr_ioniz;
   double cool_comp_ioniz;        /* 1108 NSH The compton luminosity of the cell */
   double cool_di_ioniz;          /* 1409 NSH The direct ionization luminosity */
   double cool_dr_ioniz;          /* 1109 NSH The dielectronic recombination luminosity of the cell */
@@ -1232,9 +1245,9 @@ xband;
 struct fbstruc
 {
   double f1, f2;
-  double emiss[NIONS][NTEMPS];
-  double emiss_inner[NIONS][NTEMPS];    //Emissivity of recombinations to inner shells
-  double emiss_upper[NIONS][NTEMPS];    //The emissivity of recombinations to the highest energy level we have
+  double cool[NIONS][NTEMPS];		//cooling rate due to radiative recombination
+  double lum[NIONS][NTEMPS];           //emissivity due to radiative recombinaion
+  double cool_inner[NIONS][NTEMPS];    //cooling rate due to recombinations to inner shells
 }
 freebound[NFB];
 

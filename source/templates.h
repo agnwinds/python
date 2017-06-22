@@ -233,6 +233,9 @@ double one_ff(WindPtr one, double f1, double f2);
 double gaunt_ff(double gsquared);
 /* cooling.c */
 double cooling(PlasmaPtr xxxplasma, double t);
+double xtotal_emission(WindPtr one, double f1, double f2);
+double adiabatic_cooling(WindPtr one, double t);
+double wind_cooling(double f1, double f2);
 /* recomb.c */
 double fb_topbase_partial(double freq);
 double integ_fb(double t, double f1, double f2, int nion, int fb_choice, int mode);
@@ -242,7 +245,7 @@ int num_recomb(PlasmaPtr xplasma, double t_e, int mode);
 double fb(PlasmaPtr xplasma, double t, double freq, int ion_choice, int fb_choice);
 int init_freebound(double t1, double t2, double f1, double f2);
 double get_nrecomb(double t, int nion, int mode);
-double get_fb(double t, int nion, int narray, int mode);
+double get_fb(double t, int nion, int narray, int fb_choice, int mode);
 double xinteg_fb(double t, double f1, double f2, int nion, int fb_choice);
 double xinteg_inner_fb(double t, double f1, double f2, int nion, int fb_choice);
 double total_rrate(int nion, double T);
@@ -267,8 +270,6 @@ int check_convergence(void);
 int one_shot(PlasmaPtr xplasma, int mode);
 double calc_te(PlasmaPtr xplasma, double tmin, double tmax);
 double zero_emit(double t);
-double xtotal_emission(WindPtr one, double f1, double f2);
-double adiabatic_cooling(WindPtr one, double t);
 /* ispy.c */
 int ispy_init(char filename[], int icycle);
 int ispy_close(void);

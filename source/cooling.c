@@ -21,6 +21,8 @@
 
   History:
 2004	ksl	Coded as better.c
+2017	nsh - all cooling mechanisms gathered here, removed from the end of
+				ionization.c. 
 
  ************************************************************************/
 
@@ -38,8 +40,7 @@ cooling (xxxplasma, t)
      double t;
 {
 
-  /*Original method */
-  xxxplasma->t_e = t;
+	xxxplasma->t_e = t;
 
 
 
@@ -65,7 +66,7 @@ cooling (xxxplasma, t)
   /*81c - nsh - we now treat DR cooling as a recombinational process - still unsure as to how to treat emission, so at the moment
      it remains here */
 
-  xxxplasma->cool_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, 2);
+  xxxplasma->cool_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, INNER_SHELL);
 
   /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
 
@@ -74,6 +75,8 @@ cooling (xxxplasma, t)
   /* 70g compton cooling calculated here to avoid generating photons */
 
   xxxplasma->cool_comp = total_comp (&wmain[xxxplasma->nwind], t);
+
+  /* we now call xtotal emission which computes the cooling rates for processes which can, in principle, make photons. */
 
   xxxplasma->cool_tot =
     xxxplasma->cool_adiabatic + xxxplasma->cool_dr + xxxplasma->cool_di +
@@ -90,7 +93,8 @@ cooling (xxxplasma, t)
 /***********************************************************
              Space Telescope Science Institute
 
-Synopsis:  total_emission (one, f1, f2) Calculate the total emission of a single cell 
+Synopsis:  xtotal_emission (one, f1, f2) Calculate the total cooling of a single cell 
+			due to free free - line and recombination processes.
 
 Arguments:		
 
@@ -101,34 +105,21 @@ Description:
 	
 
 Notes:
-	Total emission gives the total enery loss due to photons.  It does
+	xtotal_emission gives the total enery loss due to photons.  It does
 	not include other coooling sources, e. g. adiabatic expansion.
 
-	It returns the total luminosity, but also stores the luminosity due
-	to various types of emssion, e.g ff, fb, lines, compton into the
-	Plasms cells
+	It returns the total cooling, but also stores the luminosity due
+	to various types of emssion, e.g ff and  lines into the
+	Plasms cells. The fb cooling calculated here is *not* equal to
+	the fb lumniosity and so this value is stored in cool_rr.
 
 	Comment: The call to this routine was changed when PlasmaPtrs
 	were introduced, but it appears that the various routines 
 	that were called were not changed.
 
 History:
-	97	ksl	Coded
-	98oct	ksl     Removed temperature limits within total_emission in
-			and attempt to concentrate the frequency limits elsewhere.
-	01nov	ksl	Removed superflous code
-	01nov	ksl	Changed call so t_e passed through wind structure.  Other
-			routines should be changed ALSO, BUT NOT NOW
-	04Mar   SS      Modified to divert if Macro Atoms being used.
-	04Apr   SS      Modified to include a collisional cooling term
-	                - this is getting very messy and confusing - I think
-                        I should probably put together a completely separte
-			set of routines for doing the heating and cooling in the
-			macro atom cases. (SS) since this is now not really a
-			total emission but total cooling.
-	05may	ksl	57+ -- To use plasma structure for most things.  If vol
-			is added to plasma then one can change the call
-	11aug	nsh	70 changes made to allow compton heating to be calculated.
+	2017 - copied from total_emission and modified for use in calculatingh
+			cooling alone.
  
  
 **************************************************************/
@@ -151,42 +142,46 @@ xtotal_emission (one, f1, f2)
 
   if (f2 < f1)
   {
-    xplasma->lum_tot = xplasma->lum_lines = xplasma->lum_ff = xplasma->cool_rr = 0;      //NSH 1108 Zero the new cool_comp variable NSH 1101 - removed
+    xplasma->cool_tot = xplasma->lum_lines = xplasma->lum_ff = xplasma->cool_rr = 0;      //NSH 1108 Zero the new cool_comp variable NSH 1101 - removed
   }
   else
   {
     if (geo.rt_mode == RT_MODE_MACRO)       //Switch for macro atoms (SS)
     {
-      xplasma->cool_rr = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_REDUCED, 1);        //outer shellrecombinations
+      xplasma->cool_rr = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_REDUCED, OUTER_SHELL);        //outer shellrecombinations
       //The first term here is the fb cooling due to macro ions and the second gives
       //the fb cooling due to simple ions.
       //total_fb has been modified to exclude recombinations treated using macro atoms.
-      xplasma->lum_tot = xplasma->cool_rr;
+      xplasma->cool_tot = xplasma->cool_rr;
       //Note: This the fb_matom call makes no use of f1 or f2. They are passed for
       //now in case they should be used in the future. But they could
       //also be removed.
       // (SS)
       xplasma->lum_lines = total_bb_cooling (xplasma, t_e);
-      xplasma->lum_tot += xplasma->lum_lines;
+      xplasma->cool_tot += xplasma->lum_lines;
       /* total_bb_cooling gives the total cooling rate due to bb transisions whether they
          are macro atoms or simple ions. */
       xplasma->lum_ff = total_free (one, t_e, f1, f2);
-      xplasma->lum_tot += xplasma->lum_ff;
+      xplasma->cool_tot += xplasma->lum_ff;
 
 
     }
     else                        //default (non-macro atoms) (SS)
     {
-      xplasma->lum_tot = xplasma->lum_lines = total_line_emission (one, f1, f2);
-      xplasma->lum_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2);
-      xplasma->lum_tot += xplasma->cool_rr = total_fb (one, t_e, f1, f2, FB_REDUCED, 1);     //outer shell recombinations
+		/*The line cooling is equal to the line emission */
+      xplasma->cool_tot = xplasma->lum_lines = total_line_emission (one, f1, f2);
+	  /* The free free cooling is equal to the free free emission */
+      xplasma->cool_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2);
+	  /*The free bound cooling is equal to the recomb rate x the electron energy - the boinding energy - this is computed 
+	  with the FB_REDUCED switch */
+      xplasma->cool_tot += xplasma->cool_rr = total_fb (one, t_e, f1, f2, FB_REDUCED, OUTER_SHELL);     //outer shell recombinations
 
 
     }
   }
 
 
-  return (xplasma->lum_tot);
+  return (xplasma->cool_tot);
 
 
 }
@@ -269,5 +264,108 @@ adiabatic_cooling (one, t)
   cooling = nparticles * BOLTZMANN * t * xplasma->vol * one->div_v;
 
   return (cooling);
+}
+
+
+/***********************************************************
+                                       Space Telescope Science Institute
+
+Synopsis:  wind_cooling (f1, f2) calculate the cooling rate of the entire 
+wind between freqencies f1 and f2 
+
+Arguments:		
+
+
+Returns:
+ 
+Description:	
+	
+
+Notes:
+
+History:
+	06may	ksl	57+ -- Changed to accommodate plasma structure.  
+			Note that the call for wind_luminostiy has changed
+			to remove the pointer call.  Ultimately rewrite
+			using plasma structure alone.
+	11aug	nsh	70 Modifications made to incorporate compton cooling
+    11sep   nsh     70 Modifications in incorporate DR cooling (very approximate at the moment)
+	12sep	nsh	73 Added a counter for adiabatic luminosity (!)
+ 	13jul	nsh	76 Split up adiabatic luminosity into heating and cooling.
+ 
+**************************************************************/
+
+double
+wind_cooling (f1, f2)
+     double f1, f2;             /* freqmin and freqmax */
+{
+  double cool, lum_lines, cool_rr, lum_ff, cool_comp, cool_dr, cool_di, cool_adiab, heat_adiab;       //1108 NSH Added a new variable for compton cooling 1408 NSH and for DI cooling
+  //1109 NSH Added a new variable for dielectronic cooling
+  //1307 NSH Added a new variable to split out negtive adiabatic cooling (i.e. heating).
+  int n;
+  double x;
+  int nplasma;
+
+
+  cool = lum_lines = cool_rr = lum_ff = cool_comp = cool_dr = cool_di = cool_adiab = heat_adiab = 0;  //1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
+  for (n = 0; n < NDIM2; n++)
+  {
+
+    if (wmain[n].vol > 0.0)
+    {
+      nplasma = wmain[n].nplasma;
+      cool += x = xtotal_emission (&wmain[n], f1, f2);
+      lum_lines += plasmamain[nplasma].lum_lines;
+      cool_rr += plasmamain[nplasma].cool_rr;
+      lum_ff += plasmamain[nplasma].lum_ff;
+      cool_comp += plasmamain[nplasma].cool_comp; //1108 NSH Increment the new counter by the compton luminosity for that cell.
+      cool_dr += plasmamain[nplasma].cool_dr;     //1109 NSH Increment the new counter by the DR luminosity for the cell.
+      cool_di += plasmamain[nplasma].cool_di;     //1408 NSH Increment the new counter by the DI luminosity for the cell.
+
+      if (geo.adiabatic)        //130722 NSH - slight change to allow for adiabatic heating effect - now logged in a new global variable for reporting.
+      {
+
+        if (plasmamain[nplasma].cool_adiabatic >= 0.0)
+        {
+          cool_adiab += plasmamain[nplasma].cool_adiabatic;
+        }
+        else
+        {
+          heat_adiab += plasmamain[nplasma].cool_adiabatic;
+        }
+      }
+
+      else
+      {
+        cool_adiab = 0.0;
+      }
+
+
+      if (x < 0)
+        Error ("wind_cooling: xtotal emission %8.4e is < 0!\n", x);
+
+      if (recipes_error != 0)
+        Error ("wind_cooling: Received recipes error on cell %d\n", n);
+    }
+  }
+
+/* Deciding which of these to fill is tricky because geo contains
+   values for geo.lum_wind and geo.f_wind separately.  Could be cleaner.
+   ksl 98mar6 */
+
+  //geo.lum_wind=lum;
+  geo.lum_lines = lum_lines;
+  geo.cool_rr = cool_rr;
+  geo.lum_ff = lum_ff;
+  geo.cool_comp = cool_comp;      //1108 NSH The total compton luminosity of the wind is stored in the geo structure
+  geo.cool_dr = cool_dr;          //1109 NSH the total DR luminosity of the wind is stored in the geo structure
+  geo.cool_di = cool_di;          //1408 NSH the total DI luminosity of the wind is stored in the geo structure
+  geo.cool_adiabatic = cool_adiab;
+  geo.heat_adiabatic = heat_adiab;
+  
+  
+  cool = cool+ cool_comp+cool_dr+cool_di+cool_adiab;
+
+  return (cool);
 }
 
