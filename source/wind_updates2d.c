@@ -102,6 +102,7 @@ WindPtr (w);
 
   /*1108 NSH csum added to sum compton heating 1204 NSH icsum added to sum induced compton heating */
   double wtest, xsum, asum, psum, fsum, lsum, csum, icsum, ausum;
+  double cool_sum,lum_sum; //1706 - the total cooling and luminosity of the wind
   double c_rec, n_rec, o_rec, fe_rec;   //1701- NSH more outputs to show cooling from a few other elements
   int nn;                       //1701 - loop variable to compute recomb cooling
 
@@ -757,7 +758,8 @@ WindPtr (w);
 
 
 
-  asum = wind_cooling (0.0, VERY_BIG);       /*We call wind_cooling here to obtain an up to date set of cooling rates */
+  cool_sum = wind_cooling (0.0, VERY_BIG);       /*We call wind_cooling here to obtain an up to date set of cooling rates */
+  lum_sum = wind_luminosity (0.0, VERY_BIG);       /*and we also call wind_luminosity to get the luminosities */
 
 
   if (modes.zeus_connect == 1 && geo.hydro_domain_number > -1)  //If we are running in zeus connect mode, we output heating and cooling rates.
@@ -801,11 +803,11 @@ WindPtr (w);
    * not-only adiabatic cooling, but also goe.cool_comp, geo_cool_dr and geo.cool_di */
   Log
     ("!!wind_update: Wind luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n",
-     asum, geo.lum_rr, geo.lum_ff, geo.lum_lines);
+     lum_sum, geo.lum_rr, geo.lum_ff, geo.lum_lines);
 
   Log
     ("!!wind_update: Wind cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e DI %8.2e lines %8.2e adiabatic %8.2e) after update\n",
-     asum + geo.cool_comp + geo.cool_dr + geo.cool_di + geo.cool_adiabatic,
+     cool_sum,
      geo.cool_rr, geo.lum_ff, geo.cool_comp, geo.cool_dr, geo.cool_di, geo.lum_lines, geo.cool_adiabatic);
 
 
@@ -899,11 +901,13 @@ WindPtr (w);
       /* 1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons. */
       Log
         ("OUTPUT Wind_cooling(ergs-1cm-3)     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e DI %8.2e adiabatic %8.2e lines %8.2e ) after update\n",
-         (asum + geo.cool_comp + geo.cool_dr + geo.cool_di +
-          geo.cool_adiabatic) / w[n].vol, geo.cool_rr / w[n].vol,
+         cool_sum / w[n].vol, geo.cool_rr / w[n].vol,
          geo.lum_ff / w[n].vol, geo.cool_comp / w[n].vol,
          geo.cool_dr / w[n].vol, geo.cool_di / w[n].vol, geo.cool_adiabatic / w[n].vol, geo.lum_lines / w[n].vol);
-
+         Log
+           ("OUTPUT Wind_luminosity(ergs-1cm-3)     %8.2e (recomb %8.2e ff %8.2e lines %8.2e ) after update\n",
+            cool_sum / w[n].vol, geo.cool_rr / w[n].vol,
+            geo.lum_ff / w[n].vol, geo.lum_lines / w[n].vol);
       /* NSH 1701 calculate the recombination cooling for other elements */
 
       c_rec = n_rec = o_rec = fe_rec = 0.0;
@@ -934,7 +938,7 @@ WindPtr (w);
       /* 1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons. */
       Log
         ("OUTPUT Balance      Cooling=%8.2e Heating=%8.2e Lum=%8.2e T_e=%e after update\n",
-         asum + geo.cool_comp + geo.cool_dr + geo.cool_di + geo.cool_adiabatic, xsum, asum, plasmamain[nstart].t_e);
+         cool_sum, xsum, lum_sum, plasmamain[nstart].t_e);
 
       for (n = 0; n < nelements; n++)
       {

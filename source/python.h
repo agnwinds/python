@@ -433,7 +433,7 @@ struct geometry
 
   /* Define the choices for calculating the FB, see, e.g. integ_fb */
 
-#define FB_FULL         1   /* Calculate fb emissivity including energy associated with the threshold*/
+#define FB_FULL         0   /* Calculate fb emissivity including energy associated with the threshold*/
 #define FB_REDUCED      1   /* Calcuate the fb emissivity without the threshold energy */
 #define FB_RATE         2   /* Calulate the fb recombinarion rate  */
 

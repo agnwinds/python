@@ -362,6 +362,9 @@ wind_cooling (f1, f2)
   geo.cool_di = cool_di;          //1408 NSH the total DI luminosity of the wind is stored in the geo structure
   geo.cool_adiabatic = cool_adiab;
   geo.heat_adiabatic = heat_adiab;
+  
+  
+  cool = cool+ cool_comp+cool_dr+cool_di+cool_adiab;
 
   return (cool);
 }
