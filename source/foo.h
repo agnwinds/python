@@ -245,7 +245,7 @@ int num_recomb(PlasmaPtr xplasma, double t_e, int mode);
 double fb(PlasmaPtr xplasma, double t, double freq, int ion_choice, int fb_choice);
 int init_freebound(double t1, double t2, double f1, double f2);
 double get_nrecomb(double t, int nion, int mode);
-double get_fb(double t, int nion, int narray, int mode);
+double get_fb(double t, int nion, int narray, int fb_choice, int mode);
 double xinteg_fb(double t, double f1, double f2, int nion, int fb_choice);
 double xinteg_inner_fb(double t, double f1, double f2, int nion, int fb_choice);
 double total_rrate(int nion, double T);

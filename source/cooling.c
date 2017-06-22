@@ -66,7 +66,7 @@ cooling (xxxplasma, t)
   /*81c - nsh - we now treat DR cooling as a recombinational process - still unsure as to how to treat emission, so at the moment
      it remains here */
 
-  xxxplasma->cool_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, 2);
+  xxxplasma->cool_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, INNER_SHELL);
 
   /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
 
@@ -148,7 +148,7 @@ xtotal_emission (one, f1, f2)
   {
     if (geo.rt_mode == RT_MODE_MACRO)       //Switch for macro atoms (SS)
     {
-      xplasma->cool_rr = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_REDUCED, 1);        //outer shellrecombinations
+      xplasma->cool_rr = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_REDUCED, OUTER_SHELL);        //outer shellrecombinations
       //The first term here is the fb cooling due to macro ions and the second gives
       //the fb cooling due to simple ions.
       //total_fb has been modified to exclude recombinations treated using macro atoms.
@@ -174,7 +174,7 @@ xtotal_emission (one, f1, f2)
       xplasma->cool_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2);
 	  /*The free bound cooling is equal to the recomb rate x the electron energy - the boinding energy - this is computed 
 	  with the FB_REDUCED switch */
-      xplasma->cool_tot += xplasma->cool_rr = total_fb (one, t_e, f1, f2, FB_REDUCED, 1);     //outer shell recombinations
+      xplasma->cool_tot += xplasma->cool_rr = total_fb (one, t_e, f1, f2, FB_REDUCED, OUTER_SHELL);     //outer shell recombinations
 
 
     }

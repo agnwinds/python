@@ -266,7 +266,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
   int n;
 
 
-  if (mode == 1)
+  if (mode == OUTER_SHELL)
   {
 
     if (fb_choice == FB_FULL)
@@ -276,7 +276,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
         /* See if the frequencies correspond to one previously calculated */
         if (f1 == freebound[n].f1 && f2 == freebound[n].f2)
         {
-          fnu = get_fb (t, nion, n, mode);
+          fnu = get_fb (t, nion, n, fb_choice, mode);
           return (fnu);
         }
       }
@@ -284,14 +284,14 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
       fnu = xinteg_fb (t, f1, f2, nion, fb_choice);
       return (fnu);
     }
-    if (fb_choice == FB_REDUCED)
+    else if (fb_choice == FB_REDUCED)
     {
       for (n = 0; n < nfb; n++)
       {
         /* See if the frequencies correspond to one previously calculated */
         if (f1 == freebound[n].f1 && f2 == freebound[n].f2)
         {
-          fnu = get_fb (t, nion, n, mode);
+          fnu = get_fb (t, nion, n, fb_choice, mode);
           return (fnu);
         }
       }
@@ -315,7 +315,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
     exit (0);
   }
 
-  else if (mode == 2)           // inner shell
+  else if (mode == INNER_SHELL)           // inner shell
   {
     if (fb_choice == FB_FULL)
     {
@@ -324,21 +324,21 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
         /* See if the frequencies correspond to one previously calculated */
         if (f1 == freebound[n].f1 && f2 == freebound[n].f2)
         {
-          fnu = get_fb (t, nion, n, mode);
+          fnu = get_fb (t, nion, n, fb_choice, mode);
           return (fnu);
         }
       }
       fnu = xinteg_inner_fb (t, f1, f2, nion, fb_choice);
       return (fnu);
     }
-    if (fb_choice == FB_REDUCED)
+    else if (fb_choice == FB_REDUCED)
     {
       for (n = 0; n < nfb; n++)
       {
         /* See if the frequencies correspond to one previously calculated */
         if (f1 == freebound[n].f1 && f2 == freebound[n].f2)
         {
-          fnu = get_fb (t, nion, n, mode);
+          fnu = get_fb (t, nion, n, fb_choice, mode);
           return (fnu);
         }
       }
@@ -419,8 +419,8 @@ total_fb (one, t, f1, f2, fb_choice, mode)
       t=100.;   /* Set the temperature to 100 K so that if there are free electrons emission by this process continues */ 
 
 // Initialize the free_bound structures if that is necessary
-  if (mode == 1)
-    init_freebound (100., 1.e9, f1, f2);        //NSH 140121 increased limit to take account of hot plasmas
+  if (mode == OUTER_SHELL)
+    init_freebound (100., 1.e9, f1, f2);        //NSH 140121 increased limit to take account of hot plasmas NSH 1706 -
 
 
 // Calculate the number of recombinations whenever calculating the fb_luminosities
@@ -434,15 +434,21 @@ total_fb (one, t, f1, f2, fb_choice, mode)
   {
     if (xplasma->density[nion] > DENSITY_PHOT_MIN)
     {
-      if (mode == 1)
+      if (mode == OUTER_SHELL)
       {
-        total += xplasma->cool_rr_ion[nion] = xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, fb_choice, mode);
-        {
-          if (ion[nion].z > 3)
-            xplasma->cool_rr_metals += xplasma->cool_rr_ion[nion];
-        }
+		  if (fb_choice == FB_FULL) // we are calculating a luminosity
+		  {
+             total += xplasma->lum_rr_ion[nion] = xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, fb_choice, mode);
+	      }
+	      else  // we are calculating a cooling rate
+	      {
+             total += xplasma->cool_rr_ion[nion] = xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, fb_choice, mode);
+		  	 if (ion[nion].z > 3)
+                  xplasma->cool_rr_metals += xplasma->cool_rr_ion[nion];
+		  
+	      } 
       }
-      else if (mode == 2)
+      else if (mode == INNER_SHELL)  // at present we do not compute a luminosity from DR
         total += xplasma->cool_dr_ion[nion] =
           xplasma->vol * xplasma->ne * xplasma->density[nion + 1] * integ_fb (t, f1, f2, nion, fb_choice, mode);
 
@@ -587,7 +593,7 @@ use that instead if possible --  57h */
     {
       //Debug ("calling fb, n=%i\n", n);
       fb_x[n] = f1 + dfreq * n;
-      fb_y[n] = fb (xplasma, xplasma->t_e, fb_x[n], nions, 0);
+      fb_y[n] = fb (xplasma, xplasma->t_e, fb_x[n], nions, FB_FULL);
     }
 
     if (pdf_gen_from_array (&pdf_fb, fb_x, fb_y, 200, f1, f2, fb_njumps, fb_jumps) != 0)
@@ -679,9 +685,9 @@ num_recomb (xplasma, t_e, mode)
     {
       if (xplasma->density[i] > DENSITY_PHOT_MIN)
       {
-        if (mode == 1)          //outer shell
+        if (mode == OUTER_SHELL)          //outer shell
           xplasma->recomb[i] = xplasma->ne * xplasma->density[i + 1] * integ_fb (t_e, 0.0, VERY_BIG, i, FB_RATE, mode);
-        else if (mode == 2)     //innershell
+        else if (mode == INNER_SHELL)     //innershell
           xplasma->inner_recomb[i] = xplasma->ne * xplasma->density[i + 1] * integ_fb (t_e, 0.0, VERY_BIG, i, FB_RATE, mode);
 
       }
@@ -892,8 +898,8 @@ init_freebound (t1, t2, f1, f2)
       for (j = 0; j < NTEMPS; j++)
       {
         t = fb_t[j];
-        xnrecomb[nion][j] = xinteg_fb (t, 0.0, VERY_BIG, nion, 2);
-        xninnerrecomb[nion][j] = xinteg_inner_fb (t, 0.0, VERY_BIG, nion, 2);
+        xnrecomb[nion][j] = xinteg_fb (t, 0.0, VERY_BIG, nion, FB_RATE);
+        xninnerrecomb[nion][j] = xinteg_inner_fb (t, 0.0, VERY_BIG, nion, FB_RATE);
       }
     }
   }
@@ -953,8 +959,9 @@ on the assumption that the fb information will be reused.
     for (j = 0; j < NTEMPS; j++)
     {                           //j covers the temps
       t = fb_t[j];
-      freebound[nput].emiss[nion][j] = xinteg_fb (t, f1, f2, nion, 1);
-      freebound[nput].emiss_inner[nion][j] = xinteg_inner_fb (t, f1, f2, nion, 1);
+      freebound[nput].lum[nion][j] = xinteg_fb (t, f1, f2, nion, FB_FULL);
+      freebound[nput].cool[nion][j] = xinteg_fb (t, f1, f2, nion, FB_REDUCED);
+      freebound[nput].cool_inner[nion][j] = xinteg_inner_fb (t, f1, f2, nion, FB_REDUCED);
 
     }
   }
@@ -1011,18 +1018,29 @@ get_nrecomb (t, nion, mode)
 /* Return the specific emissivity due to recombination emission in an interval */
 
 double
-get_fb (t, nion, narray, mode)
+get_fb (t, nion, narray, fb_choice, mode)
      double t;
      int nion;
      int narray;
+	 int fb_choice;
      int mode;
 {
   int linterp ();
   double x;
-  if (mode == 1)
-    linterp (t, fb_t, &freebound[narray].emiss[nion][0], NTEMPS, &x, 0);        //Interpolate in linear space
-  else if (mode == 2)
-    linterp (t, fb_t, &freebound[narray].emiss_inner[nion][0], NTEMPS, &x, 0);  //Interpolate in linear space
+  if (mode == OUTER_SHELL)
+  {
+	  if (fb_choice == FB_REDUCED)
+    linterp (t, fb_t, &freebound[narray].cool[nion][0], NTEMPS, &x, 0);        //Interpolate in linear space
+	  else if (fb_choice == FB_FULL)
+    linterp (t, fb_t, &freebound[narray].lum[nion][0], NTEMPS, &x, 0);        //Interpolate in linear space
+	  else
+	  {
+		  Error ("Get_fb - unexpected mode %i", mode);
+		  exit(0);
+		}
+  }
+  else if (mode == INNER_SHELL)
+    linterp (t, fb_t, &freebound[narray].cool_inner[nion][0], NTEMPS, &x, 0);  //Interpolate in linear space
 
   else
   {
@@ -1155,8 +1173,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
     }
   }
 
-  /* This completes the calculation of those levels 
-     for which we have Topbase x-sections, now do Verner */
+
 
   return (fnu);
 }

@@ -436,6 +436,12 @@ struct geometry
 #define FB_FULL         0   /* Calculate fb emissivity including energy associated with the threshold*/
 #define FB_REDUCED      1   /* Calcuate the fb emissivity without the threshold energy */
 #define FB_RATE         2   /* Calulate the fb recombinarion rate  */
+  
+  
+  /* Define the modes for free bound integrals */
+#define OUTER_SHELL  1
+
+#define INNER_SHELL  2
 
   /* The frequency bands used when calculating parameters like a power law slope in limited regions. */
 
@@ -780,6 +786,9 @@ typedef struct plasma
                                    by this ion via photoionization. 78 - changed to dynamic allocation */
   double *cool_rr_ion;              /* The amount of energy being released from the electron pool
                                    by this ion via recombination. 78 - changed to dynamic allocation */
+  double *lum_rr_ion;              /* The recombination luminosity
+	                                   by this ion via recombination. 78 - changed to dynamic allocation */
+	  
   double *cool_dr_ion;
   //OLD double j, ave_freq, lum;      /*Respectively mean intensity, intensity_averaged frequency, 
   double j, ave_freq;      /*Respectively mean intensity, intensity_averaged frequency, 
@@ -1236,9 +1245,9 @@ xband;
 struct fbstruc
 {
   double f1, f2;
-  double emiss[NIONS][NTEMPS];
-  double emiss_inner[NIONS][NTEMPS];    //Emissivity of recombinations to inner shells
-  double emiss_upper[NIONS][NTEMPS];    //The emissivity of recombinations to the highest energy level we have
+  double cool[NIONS][NTEMPS];		//cooling rate due to radiative recombination
+  double lum[NIONS][NTEMPS];           //emissivity due to radiative recombinaion
+  double cool_inner[NIONS][NTEMPS];    //cooling rate due to recombinations to inner shells
 }
 freebound[NFB];
 
