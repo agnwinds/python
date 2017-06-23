@@ -103,6 +103,7 @@ WindPtr (w);
   /*1108 NSH csum added to sum compton heating 1204 NSH icsum added to sum induced compton heating */
   double wtest, xsum, psum, fsum, lsum, csum, icsum, ausum;
   double cool_sum,lum_sum; //1706 - the total cooling and luminosity of the wind
+  double apsum,aausum,abstot; //Absorbed photon energy from PI and auger
   double c_rec, n_rec, o_rec, fe_rec;   //1701- NSH more outputs to show cooling from a few other elements
   int nn;                       //1701 - loop variable to compute recomb cooling
 
@@ -137,7 +138,7 @@ WindPtr (w);
      NIONS changed to nions for the 12 arrays in plasma that are now dynamically allocated 
   NSH 1703 changed NLTE_LEVELS to nlte_levels  and NTOP_PHOT to nphot_tot since they are dynamically allocated now */
   size_of_commbuffer =
-    8 * (13 * nions + nlte_levels + 2 * nphot_total + 12 * NXBANDS + 2 * LPDF + NAUGER + 109) * (floor (NPLASMA / np_mpi_global) + 1);
+    8 * (13 * nions + nlte_levels + 2 * nphot_total + 12 * NXBANDS + 2 * LPDF + NAUGER + 112) * (floor (NPLASMA / np_mpi_global) + 1);
   commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
 
   /* JM 1409 -- Initialise parallel only variables */
@@ -379,6 +380,7 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].dt_e, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].dt_e_old, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].heat_tot, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n].abs_tot, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].heat_tot_old, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].heat_lines, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].heat_ff, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -388,6 +390,8 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].heat_photo_macro, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].heat_photo, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].heat_auger, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n].abs_photo, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n].abs_auger, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].heat_z, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].w, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].ntot, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -515,6 +519,7 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].dt_e, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].dt_e_old, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].heat_tot, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].abs_tot, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].heat_tot_old, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].heat_lines, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].heat_ff, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -524,6 +529,8 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].heat_photo_macro, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].heat_photo, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].heat_auger, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].abs_photo, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].abs_auger, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].heat_z, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].w, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].ntot, 1, MPI_INT, MPI_COMM_WORLD);
@@ -683,7 +690,7 @@ WindPtr (w);
 
   /* Check the balance between the absorbed and the emitted flux */
 
-  xsum = psum = ausum = lsum = fsum = csum = icsum = 0; //1108 NSH zero the new csum counter for compton heating
+  xsum = psum = ausum = lsum = fsum = csum = icsum = apsum = aausum = abstot = 0; //1108 NSH zero the new csum counter for compton heating
 
   for (nplasma = 0; nplasma < NPLASMA; nplasma++)
   {
@@ -705,6 +712,7 @@ WindPtr (w);
     if (sane_check (plasmamain[nplasma].heat_comp))
       Error ("wind_update:sane_check w(%d).heat_comp is %e\n", nplasma, plasmamain[nplasma].heat_comp);
 
+	abstot += plasmamain[nplasma].abs_tot;
     xsum += plasmamain[nplasma].heat_tot;
     psum += plasmamain[nplasma].heat_photo;
     ausum += plasmamain[nplasma].heat_auger;
@@ -712,6 +720,8 @@ WindPtr (w);
     lsum += plasmamain[nplasma].heat_lines;
     csum += plasmamain[nplasma].heat_comp;      //1108 NSH Increment the compton heating counter
     icsum += plasmamain[nplasma].heat_ind_comp; //1205 NSH Increment the induced compton heating counter
+	apsum += plasmamain[nplasma].abs_photo;
+	aausum += plasmamain[nplasma].abs_auger;
 
     /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
        cycles in the windsavefile even if the spectral cycles are run */
@@ -799,7 +809,7 @@ WindPtr (w);
 
   Log
     ("!!wind_update: Absorbed flux    %8.2e  (photo %8.2e ff %8.2e compton %8.2e auger %8.2e induced_compton %8.2e lines %8.2e)\n",
-     xsum, psum, fsum, csum, ausum, icsum, lsum);
+     abstot, apsum, fsum, csum, aausum, icsum, lsum);
 
   Log
     ("!!wind_update: Wind heating     %8.2e  (photo %8.2e ff %8.2e compton %8.2e auger %8.2e induced_compton %8.2e lines %8.2e adiabatic %8.2e)\n",
@@ -1037,6 +1047,8 @@ wind_rad_init ()
     plasmamain[n].ntot_disk = plasmamain[n].ntot_agn = 0;       //NSH 15/4/11 counters to see where photons come from
     plasmamain[n].ntot_star = plasmamain[n].ntot_bl = plasmamain[n].ntot_wind = 0;
     plasmamain[n].heat_tot = plasmamain[n].heat_ff = plasmamain[n].heat_photo = plasmamain[n].heat_lines = 0.0;
+    plasmamain[n].abs_tot = plasmamain[n].abs_auger = plasmamain[n].abs_photo =  0.0;
+	
     plasmamain[n].heat_z = 0.0;
     plasmamain[n].max_freq = 0.0;       //NSH 120814 Zero the counter which works out the maximum frequency seen in a cell and hence the maximum applicable frequency of the power law estimators.
     plasmamain[n].cool_tot = plasmamain[n].lum_tot = plasmamain[n].lum_lines = plasmamain[n].lum_ff = 0.0;
