@@ -749,6 +749,7 @@ typedef struct plasma
   double t_e, t_e_old;          /*electron temperature of cell */
   double dt_e, dt_e_old;        /*How much t_e changed in the previous iteration */
   double heat_tot, heat_tot_old;        /* heating from all sources */
+  double abs_tot;
   double heat_lines, heat_ff;
   double heat_comp;             /* 1108 NSH The compton heating for the cell */
   double heat_ind_comp;         /* 1205 NSH The induced compton heatingfor the cell */
@@ -756,6 +757,7 @@ typedef struct plasma
                                                    and heat_photo. SS June 04. */
   double heat_photo, heat_z;    /*photoionization heating total and of metals */
   double heat_auger;            /* photoionization heating due to inner shell ionizations */
+  double abs_photo,abs_auger;    /* this is the energy absorbed from the photon filed by these processes - different to the heating rate because of the binding energy */
   double w;                     /*The dilution factor of the wind */
 
   int ntot;                     /*Total number of photon passages */
