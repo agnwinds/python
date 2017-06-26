@@ -77,7 +77,8 @@ xtemp_rad (w)
       if (mdim > 30)
 	py_wind_delta = 1 + mdim / 30;
 
-	  /*
+      /* XXX - Nick had commented the next secion out for reasons which are totally unclear */
+
       if (zdom[ndom].coord_type == SPHERICAL)
 	{
 	  Log ("\n R\n");
@@ -142,7 +143,6 @@ xtemp_rad (w)
 
 	  return (0);
 	}
-*/
       /* 2d coord systems */
       if (zdom[ndom].coord_type != CYLIND)
 	{
