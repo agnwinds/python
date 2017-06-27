@@ -238,15 +238,7 @@ convergence (xplasma)
 						     xplasma->t_e)) > epsilon)
 	xplasma->techeck = techeck = 1;
       if ((xplasma->converge_hc =
-	   fabs (xplasma->heat_tot -
-		 (xplasma->cool_adiabatic + xplasma->lum_tot +
-		  xplasma->cool_dr + xplasma->cool_di +
-		  xplasma->cool_comp)) / fabs (xplasma->heat_tot +
-					      xplasma->cool_comp +
-					      xplasma->cool_adiabatic +
-					      xplasma->cool_dr +
-					      xplasma->cool_di +
-					      xplasma->lum_tot)) > epsilon)
+	   fabs (xplasma->heat_tot - xplasma->cool_tot) / fabs (xplasma->heat_tot + xplasma->cool_tot)) > epsilon)
 	xplasma->hccheck = hccheck = 1;
     }
   else				//If the cell has reached the maximum temperature
@@ -629,7 +621,7 @@ zero_emit (t)
   xxxplasma->heat_tot += xxxplasma->heat_photo_macro;
   xxxplasma->heat_photo += xxxplasma->heat_photo_macro;
 
-  /*81d - nsh - all cooling calculations moved into seperate routine.
+  /*81d - nsh - all cooling calculations moved into seperate routine.*/
 
 //OLD  /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
 //OLD   * are testing.  Adiabatic cooling is proportional to temperature

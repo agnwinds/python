@@ -358,7 +358,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
         p[n].freq = 0.0;
       }
     }
-    else if ((xlumsum += plasmamain[nplasma].cool_rr) > xlum)    /*Do the same for fb */
+    else if ((xlumsum += plasmamain[nplasma].lum_rr) > xlum)    /*Do the same for fb */
     {
       p[n].freq = one_fb (&wmain[icell], freqmin, freqmax);
     }
