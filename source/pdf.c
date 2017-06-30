@@ -557,7 +557,7 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
     {
       if (jump[j] <= jump[j - 1])
       {
-        Error ("pdf_gen_from_array: jump[%d]=%g <=jump[%d]=%g out of order\n");
+        Error ("pdf_gen_from_array: jump[%d]=%g <=jump[%d]=%g out of order\n",j-1,jump[j-1],j,jump[j]);
         return (-1);
       }
     }

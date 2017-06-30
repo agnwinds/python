@@ -514,6 +514,7 @@ total_fb (one, t, f1, f2, fb_choice, mode)
 
 double fb_x[200], fb_y[200];
 double fb_jumps[NLEVELS];       // There is at most one jump per level
+double xfb_jumps[NLEVELS];     // This is just a dummy array that parallels fb_jumpts
 int fb_njumps = (-1);
 
 WindPtr ww_fb;
@@ -578,12 +579,23 @@ use that instead if possible --  57h */
           fb_njumps++;
         }
       }                         //IS THIS CORRECT? (SS, MAY04)
+
+
+      /* The next line sorts the fb_jumps by frequency and eliminates
+       * duplicate frequencies which is what was causing the error in
+       * pdf.c when more than one jump was intended
+       */
+
+
+      fb_njumps=sort_and_compress(fb_jumps,xfb_jumps,fb_njumps);
+
+
     }
 
 
     //!BUG SSMay04
     //It doesn't seem to work unless this is zero? (SS May04)
-    fb_njumps = 0;              // FUDGE (SS, May04)
+    // fb_njumps = 0;              // FUDGE (SS, May04)
 
     /* Note -- Need to fix this to get jumps properly, that is the
        frequencies need to allow for the jumps !! ??? */
@@ -1532,4 +1544,58 @@ gs_rrate (nion, T)
   }
 
   return (rate);
+}
+
+
+
+/* This routine takes an input array of doubles and sorts it into
+ * numberical order.  It then eliminates duplicates.  
+ * The input array is not destroyed
+ */
+
+int
+sort_and_compress (array_in, array_out, npts)
+     double *array_in, *array_out;
+     int npts;
+{
+  double *values;
+  int n, nfinal;
+  int compare_doubles ();
+
+  values = calloc (sizeof (double), npts);
+  for (n = 0; n < npts; n++)
+    {
+      values[n] = array_in[n];
+    }
+
+
+  /* Sort the array in place */
+  qsort (values, npts, sizeof (double), compare_doubles);
+  nfinal = 1;
+  for (n = 1; n < npts; n++)
+    {
+      if (values[n] > array_out[nfinal - 1])
+	{
+	  array_out[nfinal] = values[n];
+	  nfinal += 1;
+	}
+    }
+
+  return (nfinal);
+}
+
+/* This routine just compares two double precision numbers and
+ * returns 1 if a is greate than b, and 0 otherwise.  It is
+ * used by qsort
+ */
+
+int
+compare_doubles (const double *a, const double *b)
+{
+  if (*a > *b)
+    return 1;
+  else if (*a < *b)
+    return -1;
+  else
+    return 0;
 }
