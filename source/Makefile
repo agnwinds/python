@@ -290,6 +290,9 @@ test_dielectronic: test_dielectronic.o $(python_objects)
 t_bilinear:  t_bilinear.o bilinear.o  
 	$(CC) $(CFLAGS) t_bilinear.o  bilinear.o  $(LDFLAGS)  -o t_bilinear
 
+test: test.o
+	$(CC) $(CFLAGS) test.o  $(LDFLAGS) -o test
+
 	
 plot_roche: plot_roche.o roche.o vvector.o phot_util.o recipes.o 
 	${CC} ${CFLAGS} plot_roche.o roche.o vvector.o phot_util.o recipes.o  \
