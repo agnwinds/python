@@ -670,6 +670,14 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
    pdf_x
 */
 
+    /* Add a check that the pdf_z is monotoinic */
+
+    for  (n = 1; n < pdf_n; n++) {
+        if (pdf_z[n]<pdf_z[n-1]) {
+            Error("pdf_gen_from_array: pdf_z is not monotonic\n");
+        }
+    }
+
   }
 
   /* From this we construct the cumulative distribution function on our more uniform

@@ -588,6 +588,9 @@ use that instead if possible --  57h */
 
 
       fb_njumps=sort_and_compress(fb_jumps,xfb_jumps,fb_njumps);
+      for (n=0;n<fb_njumps;n++){
+          fb_jumps[n]=xfb_jumps[n];
+      }
 
 
     }
@@ -612,7 +615,7 @@ use that instead if possible --  57h */
     {
       Error ("one_fb after error: f1 %g f2 %g te %g ne %g nh %g vol %g\n",
              f1, f2, xplasma->t_e, xplasma->ne, xplasma->density[1], one->vol);
-      Error ("Giving up");
+      Error ("Giving up\n");
       exit (0);
     }
     one_fb_te = xplasma->t_e;
