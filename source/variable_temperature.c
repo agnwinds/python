@@ -360,10 +360,12 @@ variable_temperature (xplasma, mode)
 
 
 
-  partition_functions (xplasma, 4);     /*WARNING fudge NSH 11/5/14 - this is as a test. 
-                                           We really need a better implementation of partition functions and levels
-                                           for a power law illuminating spectrum. We found that if we didnt make this call, 
-                                           we would end up with undefined levels - which did really crazy things */
+  partition_functions (xplasma, NEBULARMODE_LTE_GROUND);     
+  
+  /* XXX WARNING fudge NSH 11/5/14 - this is as a test. 
+ We really need a better implementation of partition functions and levels
+ for a power law illuminating spectrum. We found that if we didnt make this call, 
+ we would end up with undefined levels - which did really crazy things */
 
   return (0);
 }

@@ -857,7 +857,8 @@ hydro_restart (ndom)
     model_vgrad (ndom, w[n].x, w[n].v_grad);
   }
 
-  /* JM XXX PLACEHOLDER -- unsure how we loop over the plasma cells just in one domain */
+  /* JM XXX PLACEHOLDER -- unsure how we loop over the plasma cells just in one domain 
+   * ksl This is an error clearly XXX */
   for (n = 0; n < NPLASMA; n++)
   {
     nwind = plasmamain[n].nwind;
@@ -872,11 +873,13 @@ hydro_restart (ndom)
     }
 
     plasmamain[n].ne = get_ne (plasmamain[n].density);  //get the new electron density
-    partition_functions (&plasmamain[n], 4);    //ensure the partition functions and level densities are correct
+    partition_functions (&plasmamain[n], NEBULARMODE_LTE_GROUND);    //ensure the partition functions and level densities are correct XXX ksl why this mode
 
   }
+
+  /* XXX what is going on here. this looks to be outside the grid altgogether */
   plasmamain[n].ne = get_ne (plasmamain[n].density);    //we also need to update the electron density
-  partition_functions (&plasmamain[n], 4);      /* WARNING fudge NSH 11/5/14 - this is as a test. We really need a better implementation
+  partition_functions (&plasmamain[n], NEBULARMODE_LTE_GROUND);      /* WARNING fudge NSH 11/5/14 - this is as a test. We really need a better implementation
                                                    of partition functions and levels for a power law illuminating spectrum. We found that
                                                    if we didnt make this call, we would end up with undefined levels - which did really
                                                    crazy things */

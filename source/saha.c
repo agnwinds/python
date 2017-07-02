@@ -1026,7 +1026,7 @@ fix_concentrations (xplasma, mode)
 
   xplasma->ne = get_ne (xplasma->density);
 
-  partition_functions (xplasma, 0);
+  partition_functions (xplasma, NEBULARMODE_TR);
 
   return (0);
 }
