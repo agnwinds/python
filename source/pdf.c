@@ -549,12 +549,16 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
   int echeck, pdf_check (), recalc_pdf_from_cdf ();
 
 
+
+
   /* Check the inputs */
   if (xmax < xmin)
     {
       Error ("pdf_gen_from_array: xmin %g <= xmax %g\n", xmin, xmax);
       return (-1);
     }
+	
+	
 
 /* Determine which jumps are in the range of xmin and xmax */
   njump_min = njump_max = 0;
@@ -604,6 +608,7 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
     }
   /* OK, all the input data seems OK, by which we maen that we have checked that the pdf is positive */
 
+	
 
   /* Now modify x so that there is a value of x that corresponds to each value of njump.  We make the
    * assumption that the jump is a positive jump, and so we want everthing up to this point to reflect
@@ -624,6 +629,34 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 
 	}
     }
+	
+
+	
+	
+    /* The next two checks look to see if there is a part of the CDF that is all zeros as the start or end of the distribution
+  
+    Start first */
+
+	n=0;
+	while (y[n]==0.0)
+	{
+		xmin=x[n];
+		n++;
+	}
+	
+	//Now at the end
+	
+	nn=n_xy;
+	while (y[n]==0.0)
+	{
+		xmax=x[n];
+		n--;
+	}
+	
+	
+	
+	//xmin and xmax now bracket the non zero parts of the input array
+	
 
 
 
@@ -690,6 +723,11 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 	  pdf_y[pdf_n] = y[m - 1];	//Again assume constant prob. density outside lims
 	}
       pdf_n++;
+	  
+	  
+	
+	  
+	  
 
 /* So at this point, have probability density in pdf_x, pdf_y for the points
  * specified by the input array but we want the cumulative distribution
@@ -712,6 +750,8 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
    the input array, or more explicitly, at the points specied in the array
    pdf_x
 */
+	  
+
 
       /* Add a check that the pdf_z is monotonic. This check should not really be necessary
        * since by construction this should be the case*/
@@ -771,6 +811,9 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
   pdf->y[NPDF] = 1.0;
   pdf->norm = sum;		/* The normalizing factor that would convert the function we
 				   have been given into a proper probability density function */
+	  
+	  
+
 
 /* Calculate the gradients */
   if ( recalc_pdf_from_cdf (pdf)){
@@ -791,6 +834,9 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
     }
   return (echeck);
 }
+
+
+
 
 
 /* 
