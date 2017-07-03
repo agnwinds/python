@@ -512,7 +512,7 @@ total_fb (one, t, f1, f2, fb_choice, mode)
  ************************************************************************/
 
 
-double fb_x[200], fb_y[200];
+double fb_x[300], fb_y[300];
 double fb_jumps[NLEVELS];       // There is at most one jump per level
 double xfb_jumps[NLEVELS];     // This is just a dummy array that parallels fb_jumpts
 int fb_njumps = (-1);
@@ -527,8 +527,8 @@ one_fb (one, f1, f2)
      double f1, f2;             /* freqmin and freqmax */
 {
   double freq, tt, delta;
-  int n;
-  double fthresh, dfreq;
+  int n,nn,nnn, npoints;
+  double fthresh, dfreq, deltav;
   int nplasma;
   PlasmaPtr xplasma;
   PhotStorePtr xphot;
@@ -536,6 +536,8 @@ one_fb (one, f1, f2)
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
   xphot = &photstoremain[nplasma];
+  
+  deltav=1e7; //The required resolution in velocity space - 1e5cm/s = 1 km/s
 
   if (f2 < f1)
   {
@@ -581,20 +583,22 @@ use that instead if possible --  57h */
       }                         //IS THIS CORRECT? (SS, MAY04)
 
 
+
       /* The next line sorts the fb_jumps by frequency and eliminates
        * duplicate frequencies which is what was causing the error in
        * pdf.c when more than one jump was intended
        */
 
-
+	  if (fb_njumps > 1) //We only need to sort and compress if we have more than one jump
+	  {
       fb_njumps=sort_and_compress(fb_jumps,xfb_jumps,fb_njumps);
       for (n=0;n<fb_njumps;n++){
           fb_jumps[n]=xfb_jumps[n];
+	  }
       }
 
 
     }
-
 
     //!BUG SSMay04
     //It doesn't seem to work unless this is zero? (SS May04)
@@ -602,16 +606,47 @@ use that instead if possible --  57h */
 
     /* Note -- Need to fix this to get jumps properly, that is the
        frequencies need to allow for the jumps !! ??? */
-
-    dfreq = (f2 - f1) / 199;
-    for (n = 0; n < 200; n++)
+	
+	/*NSH 1707 - modified the loop below to ensure we have points just below and above any jumps */
+	
+  nnn=0;   //Zero the index for elements in the flux array
+	nn=0;  //Zero the index for elements in the jump array
+	  n=0;  //Zero the counting element for equally spaced frequencies
+    dfreq = (f2 - f1) / 199; //This is the frequency spacing for the equally spaced elements
+    while (n < (200))   //We keep going until n=199, which will give the maximum required frequency
     {
-      //Debug ("calling fb, n=%i\n", n);
-      fb_x[n] = f1 + dfreq * n;
-      fb_y[n] = fb (xplasma, xplasma->t_e, fb_x[n], nions, FB_FULL);
+		freq=f1 + dfreq * n;  //The frequency of the arrayelement we would make in the normal rin of things
+		if (freq > fb_jumps[nn] && nn<fb_njumps) //The element we were going to make has a frequency abouve the jump
+		{
+			fb_x[nnn]=fb_jumps[nn]*(1.-deltav/(2.*C));  //We make one frequency point 1km/s below the jump
+			fb_y[nnn]=fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL); //And the flux for that point
+			nnn=nnn+1;			//increase the index of the created array
+			fb_x[nnn]=fb_jumps[nn]*(1.+deltav/(2*C));  //And one frequency point just above the jump
+			fb_y[nnn]=fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL); //And the flux for that point
+			nn=nn+1;    //We heave dealt with this jump - on to the next one
+			nnn=nnn+1;  //And we will be filling the next array element next time
+		}
+		else  //We havent hit a jump
+		{
+			if (freq > fb_x[nnn-1])  //Deal with the unusual case where the upper point in our 'jump' pair is above the next ragular point
+				{
+      			fb_x[nnn] = freq;   //Set the next array element frequency
+      			fb_y[nnn] = fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL); //And the flux
+				n=n+1;  //Increment the regular grid counter
+	  	  		nnn=nnn+1; //Increment the grnerated array counter
+  				}
+  	  		else //We dont need to make a new point, the upper frequency pair of the last jump did the trick
+  		  		{
+	  			n=n+1;  //We only need to increment our regualr grid counter
+  		  		}
+ 	 	}
     }
+	
+	
+	/* At this point, the variable nnn stores the number of points */
+	
 
-    if (pdf_gen_from_array (&pdf_fb, fb_x, fb_y, 200, f1, f2, fb_njumps, fb_jumps) != 0)
+    if (pdf_gen_from_array (&pdf_fb, fb_x, fb_y, nnn, f1, f2, fb_njumps, fb_jumps) != 0)
     {
       Error ("one_fb after error: f1 %g f2 %g te %g ne %g nh %g vol %g\n",
              f1, f2, xplasma->t_e, xplasma->ne, xplasma->density[1], one->vol);
