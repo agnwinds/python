@@ -1173,6 +1173,7 @@ typedef struct Pdf
                                    of the CDF to sample */
   double x1, x2;                /* limits if they exist on what is returned */
   double norm;                  //The scaling factor which would renormalize the pdf
+  int npdf;                     /* Size of this pdf */
 }
  *PdfPtr, pdf_dummy;
 
