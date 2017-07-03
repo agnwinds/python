@@ -345,7 +345,9 @@ pdf_gen_from_func (pdf, func, xmin, xmax, njumps, jump)
 				   normalization is 1.  110629 ksl */
 
 /* Calculate the gradients */
-  recalc_pdf_from_cdf (pdf);	// 57ib 
+  if ( recalc_pdf_from_cdf (pdf)){
+      Error("pdf_gen_from_func: Errro returned from recalc_pdf_from_cdf\n");
+  }// 57ib 
   /* Check the pdf */
   if ((icheck = pdf_check (pdf)) != 0)
     {
@@ -772,7 +774,18 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 				   have been given into a proper probability density function */
 
 /* Calculate the gradients */
-  recalc_pdf_from_cdf (pdf);	// 57ib 
+  if ( recalc_pdf_from_cdf (pdf)){
+      Error("pdf_gen_from_array: Error returned from recalc_pdf_from_cdf\n ");
+  for (n = njump_min; n < njump_max; n++)
+    {
+        Error("pdf_gen_from_array: njump %3d jump %11.6e\n",n,jump[n]);
+    }
+  if (njump_min==njump_max) {
+      Error("pdf_gen_from_array: There were no jumps in the pdf\n");
+  }
+
+
+  }// 57ib 
   if ((echeck = pdf_check (pdf)) != 0)
     {
       Error ("pdf_gen_from_array: error %d on pdf_check\n", echeck);
@@ -1149,8 +1162,10 @@ int
 recalc_pdf_from_cdf (pdf)
      PdfPtr pdf;
 {
-  int n;
+  int n,istat;
   double dx1, dx2, dy1, dy2;
+
+  istat=0;
   for (n = 1; n < NPDF; n++)
     {
       dy1 = pdf->y[n] - pdf->y[n - 1];
@@ -1173,13 +1188,14 @@ recalc_pdf_from_cdf (pdf)
 	{
 	  pdf->d[n] = 0.0;
 	  Error
-	    ("recalc_pdf_from_cdf: dx1 and dx2 both 0 at  %d %f\n", n,
+	    ("recalc_pdf_from_cdf: dx1 and dx2 both 0 at  %3d %11.6e\n", n,
 	     pdf->x[n]);
+      istat=1;
 	}
 
     }
   /* Fill in the ends */
   pdf->d[0] = pdf->d[1];
   pdf->d[NPDF] = pdf->d[NPDF - 1];
-  return (0);
+  return (istat);
 }
