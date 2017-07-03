@@ -559,6 +559,14 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
       Error ("pdf_gen_from_array: xmin %g <= xmax %g\n", xmin, xmax);
       return (-1);
     }
+  echeck=0;
+  for (n=1;n<n_xy;n++){
+      if (x[n]<=x[n-1]){
+              Error("pdf_gen_from_array: input x not in ascending order at element %5d/%5d  %11.6e %11.6e\n",n,n_xy,x[n-1],x[n]);
+              echeck=1;
+              }
+  }
+
 	
 	
 
@@ -758,13 +766,22 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
       /* Add a check that the pdf_z is monotonic. This check should not really be necessary
        * since by construction this should be the case*/
 
+      echeck=0;
       for (n = 1; n < pdf_n; n++)
 	{
 	  if (pdf_z[n] < pdf_z[n - 1])
 	    {
-	      Error ("pdf_gen_from_array: pdf_z is not monotonic\n");
+	      Error ("pdf_gen_from_array: pdf_z is not monotonic at %d\n",n);
+          echeck=1;
 	    }
 	}
+
+    if (echeck){
+        for (n=0;n<pdf_n;n++){
+            Log("pdf_gen_from_array: %5d %11.6e %11.6e %11.6e\n",n,pdf_x[n],pdf_y[n],pdf_z[n]);
+        }
+        echeck=0;
+    }
 
     }
 
