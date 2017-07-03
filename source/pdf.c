@@ -1119,11 +1119,11 @@ pdf_to_file (pdf, filename)
 	   "# x1 x2  Range(to.be.returned) %10.4g %10.4g\n",
 	   pdf->x1, pdf->x2);
   fprintf (fptr, "# norm   Scale.factor          %10.4g \n", pdf->norm);
-  fprintf (fptr, "#x y  1-y d\n");
+  fprintf (fptr, "#n x y  1-y d\n");
   for (n = 0; n <= pdf->npdf; n++)
     fprintf (fptr,
-	     "%10.4g	%14.8g %14.8e  %10.4g\n",
-	     pdf->x[n], pdf->y[n], 1. - pdf->y[n], pdf->d[n]);
+	     "%3d %14.8e	%14.8e %14.8e  %14.8e\n",
+	     n, pdf->x[n], pdf->y[n], 1. - pdf->y[n], pdf->d[n]);
   fclose (fptr);
   return (0);
 }
