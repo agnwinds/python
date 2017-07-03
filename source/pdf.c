@@ -746,7 +746,6 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
   nn = 1;			// nn refers to the non_jump points
   for (n = 1; n < NPDF; n++)
     {
-      ysum = ((double) nn) / (NPDF - njumps);	/* This is the target with no jumps */
       ysum = ((double) nn) / (NPDF);	/* This is the target with no jumps */
 
       while (pdf_z[m] < ysum)
@@ -775,7 +774,7 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 
 /* Calculate the gradients */
   if ( recalc_pdf_from_cdf (pdf)){
-      Error("pdf_gen_from_array: Error returned from recalc_pdf_from_cdf\n ");
+      Error("pdf_gen_from_array: Error returned from recalc_pdf_from_cdf\n");
   for (n = njump_min; n < njump_max; n++)
     {
         Error("pdf_gen_from_array: njump %3d jump %11.6e\n",n,jump[n]);
