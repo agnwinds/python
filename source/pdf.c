@@ -188,6 +188,8 @@ History:
 
 #include "atomic.h"
 #include "python.h"
+#include <gsl/gsl_sort.h>
+
 
 /*  The structure is defined in python.h.  Here for reference only */
 //#define NPDF 200
@@ -344,12 +346,13 @@ pdf_gen_from_func (pdf, func, xmin, xmax, njumps, jump)
   pdf->y[NPDF] = 1.0;
   pdf->norm = 1.;		/* pdf_gen_from array produces a properly nomalized cdf and so the
 				   normalization is 1.  110629 ksl */
-  pdf->npdf=NPDF;
+  pdf->npdf = NPDF;
 
 /* Calculate the gradients */
-  if ( recalc_pdf_from_cdf (pdf)){
-      Error("pdf_gen_from_func: Errro returned from recalc_pdf_from_cdf\n");
-  }// 57ib 
+  if (recalc_pdf_from_cdf (pdf))
+    {
+      Error ("pdf_gen_from_func: Errro returned from recalc_pdf_from_cdf\n");
+    }				// 57ib 
   /* Check the pdf */
   if ((icheck = pdf_check (pdf)) != 0)
     {
@@ -559,16 +562,48 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
       Error ("pdf_gen_from_array: xmin %g <= xmax %g\n", xmin, xmax);
       return (-1);
     }
-  echeck=0;
-  for (n=1;n<n_xy;n++){
-      if (x[n]<=x[n-1]){
-              Error("pdf_gen_from_array: input x not in ascending order at element %5d/%5d  %11.6e %11.6e\n",n,n_xy,x[n-1],x[n]);
-              echeck=1;
-              }
-  }
+  echeck = 0;
+  for (n = 1; n < n_xy; n++)
+    {
+      if (x[n] <= x[n - 1])
+	{
+	  Error
+	    ("pdf_gen_from_array: input x not in ascending order at element %5d/%5d  %11.6e %11.6e\n",
+	     n, n_xy, x[n - 1], x[n]);
+	  echeck = 1;
+	}
+      if (y[n] < 0)
+	{
+	  Error ("pdf_gen_from_array: input y not >= 0\n");
+	  exit (0);
+	}
+    }
 
-	
-	
+  if (echeck == 1)
+    {
+      Error ("pdf_from_array: Trying to fix the input array\n");
+
+      n=pdf_array_fixup (x, y, n_xy);
+
+      if (n!=n_xy) {
+          Log("pdf_gen_from_array: Reduced input array  %d to %d elements\n",n_xy,n);
+          n_xy=n;
+      }
+
+      for (n = 1; n < n_xy; n++)
+	{
+	  if (x[n] <= x[n - 1])
+	    {
+	      Error
+		("pdf_gen_from_array: Recheck: input x not in ascending order at element %5d/%5d  %11.6e %11.6e\n",
+		 n, n_xy, x[n - 1], x[n]);
+	      echeck = 1;
+	    }
+	}
+    }
+
+
+
 
 /* Determine which jumps are in the range of xmin and xmax */
   njump_min = njump_max = 0;
@@ -618,7 +653,7 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
     }
   /* OK, all the input data seems OK, by which we maen that we have checked that the pdf is positive */
 
-	
+
 
   /* Now modify x so that there is a value of x that corresponds to each value of njump.  We make the
    * assumption that the jump is a positive jump, and so we want everthing up to this point to reflect
@@ -639,34 +674,34 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 
 	}
     }
-	
 
-	
-	
-    /* The next two checks look to see if there is a part of the CDF that is all zeros as the start or end of the distribution
-  
-    Start first */
 
-	n=0;
-	while (y[n]==0.0)
-	{
-		xmin=x[n];
-		n++;
-	}
-	
-	//Now at the end
-	
-	nn=n_xy;
-	while (y[n]==0.0)
-	{
-		xmax=x[n];
-		n--;
-	}
-	
-	
-	
-	//xmin and xmax now bracket the non zero parts of the input array
-	
+
+
+  /* The next two checks look to see if there is a part of the CDF that is all zeros as the start or end of the distribution
+
+     Start first */
+
+  n = 0;
+  while (y[n] == 0.0)
+    {
+      xmin = x[n];
+      n++;
+    }
+
+  //Now at the end
+
+  nn = n_xy;
+  while (y[n] == 0.0)
+    {
+      xmax = x[n];
+      n--;
+    }
+
+
+
+  //xmin and xmax now bracket the non zero parts of the input array
+
 
 
 
@@ -733,11 +768,11 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 	  pdf_y[pdf_n] = y[m - 1];	//Again assume constant prob. density outside lims
 	}
       pdf_n++;
-	  
-	  
-	
-	  
-	  
+
+
+
+
+
 
 /* So at this point, have probability density in pdf_x, pdf_y for the points
  * specified by the input array but we want the cumulative distribution
@@ -760,28 +795,31 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
    the input array, or more explicitly, at the points specied in the array
    pdf_x
 */
-	  
+
 
 
       /* Add a check that the pdf_z is monotonic. This check should not really be necessary
        * since by construction this should be the case*/
 
-      echeck=0;
+      echeck = 0;
       for (n = 1; n < pdf_n; n++)
 	{
 	  if (pdf_z[n] < pdf_z[n - 1])
 	    {
-	      Error ("pdf_gen_from_array: pdf_z is not monotonic at %d\n",n);
-          echeck=1;
+	      Error ("pdf_gen_from_array: pdf_z is not monotonic at %d\n", n);
+	      echeck = 1;
 	    }
 	}
 
-    if (echeck){
-        for (n=0;n<pdf_n;n++){
-            Log("pdf_gen_from_array: %5d %11.6e %11.6e %11.6e\n",n,pdf_x[n],pdf_y[n],pdf_z[n]);
-        }
-        echeck=0;
-    }
+      if (echeck)
+	{
+	  for (n = 0; n < pdf_n; n++)
+	    {
+	      Log ("pdf_gen_from_array: %5d %11.6e %11.6e %11.6e\n", n,
+		   pdf_x[n], pdf_y[n], pdf_z[n]);
+	    }
+	  echeck = 0;
+	}
 
     }
 
@@ -803,26 +841,26 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
   j = njump_min;		// j refers to the jump points
   m = 0;			//m referest to points in pdf_x and pdf_y
   nn = 1;			// nn refers to the non_jump points
-  for (n = 1; n < NPDF && m< n_xy; n++)
+  for (n = 1; n < NPDF && m < n_xy; n++)
     {
       ysum = ((double) nn) / (NPDF);	/* This is the target with no jumps */
 
       while (pdf_z[m] < ysum)
 	{
-        if (pdf_x[m] == jump[j])
-          {
-	           pdf->x[n] = pdf_x[m];
-            pdf->y[n] = pdf_z[m];
-            n++;
-            j++;
-          }
+	  if (pdf_x[m] == jump[j])
+	    {
+	      pdf->x[n] = pdf_x[m];
+	      pdf->y[n] = pdf_z[m];
+	      n++;
+	      j++;
+	    }
 
 	  m++;			//increment m if necessary
 	}
 
       pdf->x[n] = pdf_x[m];
-      pdf->y[n] = pdf_z[m]; /* this is pdf_z because that is where the cdf is stored */
-      m++;  /* This assures that no two points will be the same x value */
+      pdf->y[n] = pdf_z[m];	/* this is pdf_z because that is where the cdf is stored */
+      m++;			/* This assures that no two points will be the same x value */
       nn++;
     }
 
@@ -832,23 +870,25 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
   pdf->y[nn] = 1.0;
   pdf->norm = sum;		/* The normalizing factor that would convert the function we
 				   have been given into a proper probability density function */
-	  
-	  
+
+
 
 
 /* Calculate the gradients */
-  if ( recalc_pdf_from_cdf (pdf)){
-      Error("pdf_gen_from_array: Error returned from recalc_pdf_from_cdf\n");
-  for (n = njump_min; n < njump_max; n++)
+  if (recalc_pdf_from_cdf (pdf))
     {
-        Error("pdf_gen_from_array: njump %3d jump %11.6e\n",n,jump[n]);
-    }
-  if (njump_min==njump_max) {
-      Error("pdf_gen_from_array: There were no jumps in the pdf\n");
-  }
+      Error ("pdf_gen_from_array: Error returned from recalc_pdf_from_cdf\n");
+      for (n = njump_min; n < njump_max; n++)
+	{
+	  Error ("pdf_gen_from_array: njump %3d jump %11.6e\n", n, jump[n]);
+	}
+      if (njump_min == njump_max)
+	{
+	  Error ("pdf_gen_from_array: There were no jumps in the pdf\n");
+	}
 
 
-  }// 57ib 
+    }				// 57ib 
   if ((echeck = pdf_check (pdf)) != 0)
     {
       Error ("pdf_gen_from_array: error %d on pdf_check\n", echeck);
@@ -886,7 +926,7 @@ pdf_get_rand (pdf)
   int xquadratic ();
 /* Find the interval within which x lies */
   r = rand () / MAXRAND;	/* r must be slightly less than 1 */
-  i = r * pdf->npdf;			/* so i initially lies between 0 and the size of the pdf array -1 */
+  i = r * pdf->npdf;		/* so i initially lies between 0 and the size of the pdf array -1 */
   while (pdf->y[i + 1] < r && i < pdf->npdf - 1)
     i++;
   while (pdf->y[i] > r && i > 0)
@@ -950,7 +990,8 @@ pdf_limit (pdf, xmin, xmax)
     }
   if (xmin >= pdf->x[pdf->npdf])
     {
-      Error ("pdf_limit: xmin %g > pdf->x[pdf->npdf] %g\n", xmin, pdf->x[pdf->npdf]);
+      Error ("pdf_limit: xmin %g > pdf->x[pdf->npdf] %g\n", xmin,
+	     pdf->x[pdf->npdf]);
 //      exit (0);
     }
   if (xmax <= pdf->x[0])
@@ -1231,10 +1272,10 @@ int
 recalc_pdf_from_cdf (pdf)
      PdfPtr pdf;
 {
-  int n,istat;
+  int n, istat;
   double dx1, dx2, dy1, dy2;
 
-  istat=0;
+  istat = 0;
   for (n = 1; n < pdf->npdf; n++)
     {
       dy1 = pdf->y[n] - pdf->y[n - 1];
@@ -1259,7 +1300,7 @@ recalc_pdf_from_cdf (pdf)
 	  Error
 	    ("recalc_pdf_from_cdf: dx1 and dx2 both 0 at  %3d %11.6e\n", n,
 	     pdf->x[n]);
-      istat=1;
+	  istat = 1;
 	}
 
     }
@@ -1267,4 +1308,48 @@ recalc_pdf_from_cdf (pdf)
   pdf->d[0] = pdf->d[1];
   pdf->d[pdf->npdf] = pdf->d[pdf->npdf - 1];
   return (istat);
+}
+
+
+int
+pdf_array_fixup (x, y, n_xy)
+     double *x, *y;
+     int n_xy;
+{
+  int n,m;
+  size_t *order;
+  double *xx, *yy;
+
+  order = calloc (sizeof (size_t), n_xy);
+  xx = calloc (sizeof (double), n_xy);
+  yy = calloc (sizeof (double), n_xy);
+
+  gsl_sort_index (order, x, 1,n_xy);
+
+  for (n = 0; n < n_xy; n++)
+    {
+      xx[n] = x[order[n]];
+      yy[n] = y[order[n]];
+    }
+
+  /* So now I know the order, but there could be two x values that are the same */
+
+  m=0;
+  x[0]=xx[0];
+  y[0]=yy[0];
+  for (n = 0; n < n_xy; n++)
+    {
+        if (m==0  && xx[n]>0){
+            x[0]=x[n];
+            y[0]=y[n];
+            m++;
+        }
+            else if (xx[n]>xx[n-1]) {
+        x[m] = xx[n];
+        y[m] = yy[n];
+        m++;
+      }
+    }
+
+  return(m);
 }

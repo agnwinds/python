@@ -663,14 +663,20 @@ generate photons */
 
   //Debug ("one_fb, got here 2\n");
 
-/* First generate the phton we need */
+/* First generate the photon we need */
   freq = pdf_get_rand (&pdf_fb);
+  if (freq<f1 || freq > f2) {
+      Error("one_fb:  freq %e  freqmin %e freqmax %e out of range\n",freq,f1,f2);
+  }
 
 /* Now create and store for future use a set of additonal photons */
 
   for (n = 0; n < NSTORE; n++)
   {
     xphot->freq[n] = pdf_get_rand (&pdf_fb);
+  if (xphot->freq[n]<f1 || xphot->freq[n] > f2) {
+      Error("one_fb:  freq %e  freqmin %e freqmax %e out of range\n",xphot->freq[n],f1,f2);
+  }
 
   }
   xphot->n = 0;

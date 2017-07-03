@@ -150,6 +150,7 @@ double pdf_get_rand_limit(PdfPtr pdf);
 int pdf_to_file(PdfPtr pdf, char filename[]);
 int pdf_check(PdfPtr pdf);
 int recalc_pdf_from_cdf(PdfPtr pdf);
+int pdf_array_fixup(double *x, double *y, int n_xy);
 /* roche.c */
 int binary_basics(void);
 double ds_to_roche_2(PhotPtr p);
