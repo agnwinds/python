@@ -198,6 +198,7 @@ History:
 //      double d(NPDF + 1];      
 //      double limit1,limit2;
 //      double norm;           //The scaling factor which would renormalize the pdf
+//      int npdf    
 //} *PdfPtr,pdf_dummy;
 
 
@@ -343,6 +344,7 @@ pdf_gen_from_func (pdf, func, xmin, xmax, njumps, jump)
   pdf->y[NPDF] = 1.0;
   pdf->norm = 1.;		/* pdf_gen_from array produces a properly nomalized cdf and so the
 				   normalization is 1.  110629 ksl */
+  pdf->npdf=NPDF;
 
 /* Calculate the gradients */
   if ( recalc_pdf_from_cdf (pdf)){
@@ -543,7 +545,7 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 {
   int allzero;
   int m, n, nn, j;
-  double sum, q, xx, yy;
+  double sum, q;
   int njump_min, njump_max;
   double ysum;
   int echeck, pdf_check (), recalc_pdf_from_cdf ();
@@ -784,7 +786,7 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
   j = njump_min;		// j refers to the jump points
   m = 0;			//m referest to points in pdf_x and pdf_y
   nn = 1;			// nn refers to the non_jump points
-  for (n = 1; n < NPDF; n++)
+  for (n = 1; n < NPDF && m< n_xy; n++)
     {
       ysum = ((double) nn) / (NPDF);	/* This is the target with no jumps */
 
@@ -803,12 +805,14 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 
       pdf->x[n] = pdf_x[m];
       pdf->y[n] = pdf_z[m]; /* this is pdf_z because that is where the cdf is stored */
+      m++;  /* This assures that no two points will be the same x value */
       nn++;
     }
 
 
-  pdf->x[NPDF] = xmax;
-  pdf->y[NPDF] = 1.0;
+  pdf->npdf = nn;
+  pdf->x[nn] = xmax;
+  pdf->y[nn] = 1.0;
   pdf->norm = sum;		/* The normalizing factor that would convert the function we
 				   have been given into a proper probability density function */
 	  
@@ -851,6 +855,7 @@ History:
 	06sep	ksl	57i -- Modified to account for the fact
 			that the probability density is not 
 			uniform between intervals.
+    17jun   ksl Modified for variable sizes of distribution function
 */
 
 double
@@ -864,8 +869,8 @@ pdf_get_rand (pdf)
   int xquadratic ();
 /* Find the interval within which x lies */
   r = rand () / MAXRAND;	/* r must be slightly less than 1 */
-  i = r * NPDF;			/* so i initially lies between 0 and NPDF-1 */
-  while (pdf->y[i + 1] < r && i < NPDF - 1)
+  i = r * pdf->npdf;			/* so i initially lies between 0 and the size of the pdf array -1 */
+  while (pdf->y[i + 1] < r && i < pdf->npdf - 1)
     i++;
   while (pdf->y[i] > r && i > 0)
     i--;
@@ -888,7 +893,7 @@ pdf_get_rand (pdf)
     }
 
   x = pdf->x[i] * (1. - q) + pdf->x[i + 1] * q;
-  if (!(pdf->x[0] <= x && x <= pdf->x[NPDF]))
+  if (!(pdf->x[0] <= x && x <= pdf->x[pdf->npdf]))
     {
       Error ("pdf_get_rand: %g %d %g %g\n", r, i, q, x);
     }
@@ -910,7 +915,8 @@ find that minimum and maximum value. Having done this one can call pdf_get_rand_
 Error Some of this is not quite right.  It's intended to let us generate limits in
 the CDF but we need x too
 
-	06sep	ksl	57i -- Added the xlimits to the pd
+	06sep	ksl	57i -- Added the xlimits to the pdf
+    17jun ksl Modified for variable sizes of distribution function
 */
 
 int
@@ -920,14 +926,14 @@ pdf_limit (pdf, xmin, xmax)
 {
   int i;
   double q;
-  if (pdf->y[NPDF] != 1.0)
+  if (pdf->y[pdf->npdf] != 1.0)
     {
       Error ("pdf_limit: pdf not defined!)");
       exit (0);
     }
-  if (xmin >= pdf->x[NPDF])
+  if (xmin >= pdf->x[pdf->npdf])
     {
-      Error ("pdf_limit: xmin %g > pdf->x[NPDF] %g\n", xmin, pdf->x[NPDF]);
+      Error ("pdf_limit: xmin %g > pdf->x[pdf->npdf] %g\n", xmin, pdf->x[pdf->npdf]);
 //      exit (0);
     }
   if (xmax <= pdf->x[0])
@@ -957,15 +963,15 @@ pdf_limit (pdf, xmin, xmax)
 
 /* Now set the limits for the maximum */
 
-  if (xmax >= pdf->x[NPDF])
+  if (xmax >= pdf->x[pdf->npdf])
     {
       pdf->limit2 = 1.0;
-      pdf->x2 = pdf->x[NPDF];
+      pdf->x2 = pdf->x[pdf->npdf];
     }
   else
     {
       pdf->x2 = xmax;
-      i = NPDF;
+      i = pdf->npdf;
       while (xmax <= pdf->x[i])
 	{
 	  i--;
@@ -984,6 +990,7 @@ History
 	06sep	ksl	57h -- Modified to account for the fact
 			that the probability density is not 
 			uniform between intervals.
+    17jul   ksl Modified for variable lengths of pdfs
 
 */
 double
@@ -997,8 +1004,8 @@ pdf_get_rand_limit (pdf)
   int xquadratic ();
   r = rand () / MAXRAND;	/* r must be slightly less than 1 */
   r = r * pdf->limit2 + (1. - r) * pdf->limit1;
-  i = r * NPDF;
-  while (pdf->y[i + 1] < r && i < NPDF - 1)
+  i = r * pdf->npdf;
+  while (pdf->y[i + 1] < r && i < pdf->npdf - 1)
     i++;
   while (pdf->y[i] > r && i > 0)
     i--;
@@ -1055,7 +1062,7 @@ pdf_to_file (pdf, filename)
 	   pdf->x1, pdf->x2);
   fprintf (fptr, "# norm   Scale.factor          %10.4g \n", pdf->norm);
   fprintf (fptr, "#x y  1-y d\n");
-  for (n = 0; n <= NPDF; n++)
+  for (n = 0; n <= pdf->npdf; n++)
     fprintf (fptr,
 	     "%10.4g	%14.8g %14.8e  %10.4g\n",
 	     pdf->x[n], pdf->y[n], 1. - pdf->y[n], pdf->d[n]);
@@ -1097,15 +1104,15 @@ pdf_check (pdf)
 	 y);
       hcheck = 1;
     }
-  if (pdf->y[NPDF] != 1.0)
+  if (pdf->y[pdf->npdf] != 1.0)
     {
       Error
 	("pdf_check: cumulative distribution function should end at 1 not %e\n",
-	 pdf->y[NPDF - 1]);
+	 pdf->y[pdf->npdf - 1]);
       icheck = 1;
     }
 
-  for (n = 1; n < NPDF + 1; n++)
+  for (n = 1; n < pdf->npdf + 1; n++)
     {
       // Note the equal sign here 
       if (x <= pdf->x[n])
@@ -1149,10 +1156,10 @@ pdf_check (pdf)
   if (hcheck != 0)
     pdf->y[0] = 0.0;
   if (icheck != 0)
-    pdf->y[NPDF] = 1.0;
+    pdf->y[pdf->npdf] = 1.0;
   if (jcheck != 0)
     {
-      for (n = 0; n < NPDF; n++)
+      for (n = 0; n < pdf->npdf; n++)
 	{
 	  if (pdf->x[n] >= pdf->x[n + 1])
 	    pdf->x[n + 1] = pdf->x[n] + 1.e-20;
@@ -1160,7 +1167,7 @@ pdf_check (pdf)
     }
   if (kcheck != 0)
     {
-      for (n = 0; n < NPDF; n++)
+      for (n = 0; n < pdf->npdf; n++)
 	{
 	  if (pdf->y[n] >= pdf->y[n] + 1)
 	    pdf->y[n + 1] = pdf->y[n] + 1.e-20;
@@ -1211,7 +1218,7 @@ recalc_pdf_from_cdf (pdf)
   double dx1, dx2, dy1, dy2;
 
   istat=0;
-  for (n = 1; n < NPDF; n++)
+  for (n = 1; n < pdf->npdf; n++)
     {
       dy1 = pdf->y[n] - pdf->y[n - 1];
       dx1 = pdf->x[n] - pdf->x[n - 1];
@@ -1241,6 +1248,6 @@ recalc_pdf_from_cdf (pdf)
     }
   /* Fill in the ends */
   pdf->d[0] = pdf->d[1];
-  pdf->d[NPDF] = pdf->d[NPDF - 1];
+  pdf->d[pdf->npdf] = pdf->d[pdf->npdf - 1];
   return (istat);
 }
