@@ -645,6 +645,15 @@ use that instead if possible --  57h */
 	
 	/* At this point, the variable nnn stores the number of points */
 	
+	
+  if (6e15 < f1 && f1 < 7e15)
+{
+	for (n=0;n<nnn+2;n++)
+		printf ("recomb %i x %e y %e\n",n,fb_x[n],fb_y[n]);
+}
+
+
+printf ("RECOMB GENERATION");
 
     if (pdf_gen_from_array (&pdf_fb, fb_x, fb_y, nnn, f1, f2, fb_njumps, fb_jumps) != 0)
     {

@@ -653,7 +653,11 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
     }
   /* OK, all the input data seems OK, by which we maen that we have checked that the pdf is positive */
 
-
+  if (6e15 < xmin && xmin < 7e15)
+{
+	for (n=0;n<n_xy;n++)
+		printf ("AFTER_CHECKS n %i x %e y %e\n",n,x[n],y[n]);
+}
 
   /* Now modify x so that there is a value of x that corresponds to each value of njump.  We make the
    * assumption that the jump is a positive jump, and so we want everthing up to this point to reflect
@@ -676,6 +680,11 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
     }
 
 
+  if (6e15 < xmin && xmin < 7e15)
+{
+	for (n=0;n<n_xy;n++)
+		printf ("AFTER_JUMP_MOD n %i x %e y %e\n",n,x[n],y[n]);
+}
 
 
   /* The next two checks look to see if there is a part of the CDF that is all zeros as the start or end of the distribution
@@ -702,8 +711,11 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 
   //xmin and xmax now bracket the non zero parts of the input array
 
-
-
+  if (6e15 < xmin && xmin < 7e15)
+{
+	for (n=0;n<n_xy;n++)
+		printf ("AFTER_ZERO_MOD n %i x %e y %e\n",n,x[n],y[n]);
+}
 
 /* Shuffle x and y into pdf_xx and pdf_yy allowing for xmin and xmax */
 
@@ -769,9 +781,11 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 	}
       pdf_n++;
 
-
-
-
+	  if (6e15 < xmin && xmin < 7e15)
+  {
+  	for (n=0;n<pdf_n;n++)
+  		printf ("AFTER_SHUFFLE n %i x %e y %e\n",n,pdf_x[n],pdf_y[n]);
+}
 
 
 /* So at this point, have probability density in pdf_x, pdf_y for the points
@@ -795,8 +809,11 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
    the input array, or more explicitly, at the points specied in the array
    pdf_x
 */
-
-
+	  if (6e15 < xmin && xmin < 7e15)
+  {
+    	for (n=0;n<pdf_n;n++)
+    		printf ("CDF n %i x %e y %e\n",n,pdf_x[n],pdf_z[n]);
+	}
 
       /* Add a check that the pdf_z is monotonic. This check should not really be necessary
        * since by construction this should be the case*/
@@ -841,7 +858,7 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
   j = njump_min;		// j refers to the jump points
   m = 0;			//m referest to points in pdf_x and pdf_y
   nn = 1;			// nn refers to the non_jump points
-  for (n = 1; n < NPDF && m < n_xy; n++)
+  for (n = 1; n < NPDF && m < pdf_n; n++)
     {
       ysum = ((double) nn) / (NPDF);	/* This is the target with no jumps */
 
@@ -863,6 +880,9 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
       m++;			/* This assures that no two points will be the same x value */
       nn++;
     }
+	
+	
+
 
 
   pdf->npdf = nn;
@@ -871,7 +891,11 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
   pdf->norm = sum;		/* The normalizing factor that would convert the function we
 				   have been given into a proper probability density function */
 
-
+	  if (6e15 < xmin && xmin < 7e15)
+  {
+  	for (n=0;n<NPDF;n++)
+  		printf ("PDF n %i x %e y %e\n",n,pdf->x[n],pdf->y[n]);
+}
 
 
 /* Calculate the gradients */
