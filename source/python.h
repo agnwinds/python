@@ -1181,7 +1181,7 @@ properly create the CDF, this was added for python_43.2  */
  
  /* NSH 17/7 - Structure renamed to reflect the fact that this is a CDF, also made dynamically allocated */
  
-#define NCDF 200
+#define NCDF 2000
  
  typedef struct Cdf
  {

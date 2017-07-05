@@ -189,6 +189,7 @@ History:
 #include "atomic.h"
 #include "python.h"
 #include <gsl/gsl_sort.h>
+#include <gsl/gsl_interp.h>
 
 
 /*  The structure is defined in python.h.  Here for reference only */
@@ -930,17 +931,21 @@ cdf_get_rand (cdf)
      CdfPtr cdf;
 {
   double x, r;
-  int i, j;
+  int i, j,i1;
   double q;
   double a, b, c, s[2];
   int xquadratic ();
 /* Find the interval within which x lies */
   r = rand () / MAXRAND;	/* r must be slightly less than 1 */
-  i = r * cdf->ncdf;		/* so i initially lies between 0 and the size of the pdf array -1 */
-  while (cdf->y[i + 1] < r && i < cdf->ncdf - 1)
-    i++;
-  while (cdf->y[i] > r && i > 0)
-    i--;
+//  i = r * cdf->ncdf;		/* so i initially lies between 0 and the size of the pdf array -1 */
+//  while (cdf->y[i + 1] < r && i < cdf->ncdf - 1)
+//    i++;
+//  while (cdf->y[i] > r && i > 0)
+//    i--;
+  
+    i=gsl_interp_bsearch(cdf->y,r,0,cdf->ncdf);
+  
+  
 /* Now calculate a place within that interval */
   q = rand () / MAXRAND;
   a = 0.5 * (cdf->d[i + 1] - cdf->d[i]);
