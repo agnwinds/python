@@ -735,7 +735,7 @@ History:
  
 **************************************************************/
 
-struct Pdf pdf_ff;
+//struct Cdf cdf_ff;
 double ff_x[200], ff_y[200];
 double one_ff_f1, one_ff_f2, one_ff_te; /* Old values */
 
@@ -773,10 +773,10 @@ one_ff (one, f1, f2)
 
 
 
-    if ((echeck = pdf_gen_from_array (&pdf_ff, ff_x, ff_y, 200, f1, f2, 0, &dummy)) != 0)
+    if ((echeck = cdf_gen_from_array (&cdf_ff, ff_x, ff_y, 200, f1, f2, 0, &dummy)) != 0)
     {
       Error
-        ("one_ff: pdf_gen_from_array error %d : f1 %g f2 %g te %g ne %g nh %g vol %g\n",
+        ("one_ff: cdf_gen_from_array error %d : f1 %g f2 %g te %g ne %g nh %g vol %g\n",
          echeck, f1, f2, xplasma->t_e, xplasma->ne, xplasma->density[1], one->vol);
       exit (0);
     }
@@ -784,7 +784,7 @@ one_ff (one, f1, f2)
     one_ff_f1 = f1;
     one_ff_f2 = f2;             /* Note that this may not be the best way to check for a previous pdf */
   }
-  freq = pdf_get_rand (&pdf_ff);
+  freq = cdf_get_rand (&cdf_ff);
   return (freq);
 }
 

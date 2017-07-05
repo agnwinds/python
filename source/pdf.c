@@ -188,7 +188,9 @@ History:
 
 #include "atomic.h"
 #include "python.h"
+#include "models.h"
 #include <gsl/gsl_sort.h>
+#include <gsl/gsl_interp.h>
 
 
 /*  The structure is defined in python.h.  Here for reference only */
@@ -231,8 +233,8 @@ This routine stores values of the function in  pdf_array
 
 */
 int
-pdf_gen_from_func (pdf, func, xmin, xmax, njumps, jump)
-     PdfPtr pdf;
+cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
+     CdfPtr cdf;
      double (*func) (double);
      double xmin, xmax;
      double jump[];
@@ -243,7 +245,7 @@ pdf_gen_from_func (pdf, func, xmin, xmax, njumps, jump)
   int j, m, mm, n;
   int njump_min, njump_max;
   int icheck, pdfsteps;
-  int pdf_check (), recalc_pdf_from_cdf ();
+  int cdf_check (), calc_cdf_array ();
   double gen_array_from_func (), delta;
 
   njump_min = njump_max = 0;
@@ -304,31 +306,36 @@ pdf_gen_from_func (pdf, func, xmin, xmax, njumps, jump)
   while (n < 3)
     {
       delta = gen_array_from_func (func, xmin, xmax, pdfsteps);
-      if (delta < 0.1 / NPDF)
+      if (delta < 0.1 / NCDF)
 	break;
       pdfsteps *= 10;
       n = n + 1;
     }
 
+
+
+
+
+
   xstep = (xmax - xmin) / pdfsteps;
 
 /* So at this point pdf_array contains an unnormalized version of the CDF for the function */
-  pdf->x[0] = xmin;
-  pdf->y[0] = 0;
+  cdf->x[0] = xmin;
+  cdf->y[0] = 0;
 
   n = 0;			//This is the position in pdf_array
   mm = 1;			//This is the index to a desired value of y, with no jumps
   j = njump_min;		//This refers to the jumps
-  for (m = 1; m < NPDF; m++)
+  for (m = 1; m < NCDF; m++)
     {
-      y = (float) mm / (NPDF - njumps);	// Desired value of y ignoring jumps
+      y = (float) mm / (NCDF - njumps);	// Desired value of y ignoring jumps
 
       while (pdf_array[n] < y && n < pdfsteps)	// Work one's way through pdf_array
 	{
 	  if (j < njump_max && jump[j] <= xmin + (n + 1) * xstep)
 	    {
-	      pdf->x[m] = xmin + (n + 1) * xstep;	//Not exactly jump but close
-	      pdf->y[m] = pdf_array[n];
+	      cdf->x[m] = xmin + (n + 1) * xstep;	//Not exactly jump but close
+	      cdf->y[m] = pdf_array[n];
 	      j++;		//increment the jump number
 	      m++;		//increment the pdf structure number
 	    }
@@ -336,27 +343,27 @@ pdf_gen_from_func (pdf, func, xmin, xmax, njumps, jump)
 	}
 
       /* So at this point pdf_array[n-1] < x and pdf_array[n]>x */
-      pdf->x[m] = xmin + (n + 1) * xstep;
-      pdf->y[m] = pdf_array[n];
+      cdf->x[m] = xmin + (n + 1) * xstep;
+      cdf->y[m] = pdf_array[n];
       mm++;			// increment the number associated with the desired y ignoring jumps
       /* So pdf->y will contain numbers from 0 to 1 */
     }
 
-  pdf->x[NPDF] = xmax;
-  pdf->y[NPDF] = 1.0;
-  pdf->norm = 1.;		/* pdf_gen_from array produces a properly nomalized cdf and so the
+  cdf->x[NCDF] = xmax;
+  cdf->y[NCDF] = 1.0;
+  cdf->norm = 1.;		/* pdf_gen_from array produces a properly nomalized cdf and so the
 				   normalization is 1.  110629 ksl */
-  pdf->npdf = NPDF;
+  cdf->ncdf = NCDF;
 
 /* Calculate the gradients */
-  if (recalc_pdf_from_cdf (pdf))
+  if (calc_cdf_gradient (cdf))
     {
-      Error ("pdf_gen_from_func: Errro returned from recalc_pdf_from_cdf\n");
+      Error ("cdf_gen_from_func: Errro returned from calc_cdf_gradient\n");
     }				// 57ib 
   /* Check the pdf */
-  if ((icheck = pdf_check (pdf)) != 0)
+  if ((icheck = cdf_check (cdf)) != 0)
     {
-      Error ("pdf_gen_from_function: error %d on pdf_check\n", icheck);
+      Error ("cdf_gen_from_function: error %d on cdf_check\n", icheck);
     }
   return (icheck);
 
@@ -538,8 +545,8 @@ double pdf_x[PDF_ARRAY], pdf_y[PDF_ARRAY], pdf_z[PDF_ARRAY];
 int pdf_n;
 
 int
-pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
-     PdfPtr pdf;
+cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
+     CdfPtr cdf;
      double x[], y[];
      int n_xy;
      double xmin, xmax;
@@ -551,7 +558,7 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
   double sum, q;
   int njump_min, njump_max;
   double ysum;
-  int echeck, pdf_check (), recalc_pdf_from_cdf ();
+  int echeck, cdf_check (), recalc_pdf_from_cdf ();
 
 
 
@@ -559,7 +566,7 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
   /* Check the inputs */
   if (xmax < xmin)
     {
-      Error ("pdf_gen_from_array: xmin %g <= xmax %g\n", xmin, xmax);
+      Error ("cdf_gen_from_array: xmin %g <= xmax %g\n", xmin, xmax);
       return (-1);
     }
   echeck = 0;
@@ -568,25 +575,25 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
       if (x[n] <= x[n - 1])
 	{
 	  Error
-	    ("pdf_gen_from_array: input x not in ascending order at element %5d/%5d  %11.6e %11.6e\n",
+	    ("cdf_gen_from_array: input x not in ascending order at element %5d/%5d  %11.6e %11.6e\n",
 	     n, n_xy, x[n - 1], x[n]);
 	  echeck = 1;
 	}
       if (y[n] < 0)
 	{
-	  Error ("pdf_gen_from_array: input y not >= 0\n");
+	  Error ("cdf_gen_from_array: input y not >= 0\n");
 	  exit (0);
 	}
     }
 
   if (echeck == 1)
     {
-      Error ("pdf_from_array: Trying to fix the input array\n");
+      Error ("cdf_from_array: Trying to fix the input array\n");
 
-      n=pdf_array_fixup (x, y, n_xy);
+      n=cdf_array_fixup (x, y, n_xy);
 
       if (n!=n_xy) {
-          Log("pdf_gen_from_array: Reduced input array  %d to %d elements\n",n_xy,n);
+          Log("cdf_gen_from_array: Reduced input array  %d to %d elements\n",n_xy,n);
           n_xy=n;
       }
 
@@ -595,7 +602,7 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 	  if (x[n] <= x[n - 1])
 	    {
 	      Error
-		("pdf_gen_from_array: Recheck: input x not in ascending order at element %5d/%5d  %11.6e %11.6e\n",
+		("cdf_gen_from_array: Recheck: input x not in ascending order at element %5d/%5d  %11.6e %11.6e\n",
 		 n, n_xy, x[n - 1], x[n]);
 	      echeck = 1;
 	    }
@@ -614,7 +621,7 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 	  if (jump[j] <= jump[j - 1])
 	    {
 	      Error
-		("pdf_gen_from_array: jump[%d]=%g <=jump[%d]=%g out of order\n",
+		("cdf_gen_from_array: jump[%d]=%g <=jump[%d]=%g out of order\n",
 		 j - 1, jump[j - 1], j, jump[j]);
 	      return (-1);
 	    }
@@ -642,7 +649,7 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
       if (y[n] < 0)
 	{
 	  Error
-	    ("pdf_gen_from_array: probability density %g < 0 at element %d\n",
+	    ("cdf_gen_from_array: probability density %g < 0 at element %d\n",
 	     y[n], n);
 	  return (-1);
 	}
@@ -678,6 +685,7 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 
 
 
+
   /* The next two checks look to see if there is a part of the CDF that is all zeros as the start or end of the distribution
 
      Start first */
@@ -701,7 +709,6 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 
 
   //xmin and xmax now bracket the non zero parts of the input array
-
 
 
 
@@ -746,13 +753,13 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 	  if (pdf_n > PDF_ARRAY)
 	    {
 	      Error
-		("pdf_gen_from_array: pdf_n (%d) exceeded maximum array size PDF_ARRAY (%d) \n",
+		("cdf_gen_from_array: pdf_n (%d) exceeded maximum array size PDF_ARRAY (%d) \n",
 		 pdf_n, PDF_ARRAY);
 	      Error
-		("pdf_gen_from_array: n_xy %d xmin %f xmax %f njumps %d\n",
+		("cdf_gen_from_array: n_xy %d xmin %f xmax %f njumps %d\n",
 		 n_xy, xmin, xmax, njumps);
 	      Error
-		("pdf_gen_from_array: Consider increasing PDF_ARRAY to a value > n_xy + njumps, and recompiling\n");
+		("cdf_gen_from_array: Consider increasing PDF_ARRAY to a value > n_xy + njumps, and recompiling\n");
 	      exit (0);
 	    }
 	}
@@ -768,8 +775,6 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 	  pdf_y[pdf_n] = y[m - 1];	//Again assume constant prob. density outside lims
 	}
       pdf_n++;
-
-
 
 
 
@@ -797,7 +802,6 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 */
 
 
-
       /* Add a check that the pdf_z is monotonic. This check should not really be necessary
        * since by construction this should be the case*/
 
@@ -806,7 +810,7 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 	{
 	  if (pdf_z[n] < pdf_z[n - 1])
 	    {
-	      Error ("pdf_gen_from_array: pdf_z is not monotonic at %d\n", n);
+	      Error ("cdf_gen_from_array: pdf_z is not monotonic at %d\n", n);
 	      echeck = 1;
 	    }
 	}
@@ -815,7 +819,7 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 	{
 	  for (n = 0; n < pdf_n; n++)
 	    {
-	      Log ("pdf_gen_from_array: %5d %11.6e %11.6e %11.6e\n", n,
+	      Log ("cdf_gen_from_array: %5d %11.6e %11.6e %11.6e\n", n,
 		   pdf_x[n], pdf_y[n], pdf_z[n]);
 	    }
 	  echeck = 0;
@@ -835,22 +839,23 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 
 
 
-  pdf->x[0] = xmin;
-  pdf->y[0] = 0;
+
+  cdf->x[0] = xmin;
+  cdf->y[0] = 0;
 
   j = njump_min;		// j refers to the jump points
   m = 0;			//m referest to points in pdf_x and pdf_y
   nn = 1;			// nn refers to the non_jump points
-  for (n = 1; n < NPDF && m < n_xy; n++)
+  for (n = 1; n < NCDF && m < pdf_n; n++)
     {
-      ysum = ((double) nn) / (NPDF);	/* This is the target with no jumps */
+      ysum = ((double) nn) / (NCDF);	/* This is the target with no jumps */
 
       while (pdf_z[m] < ysum)
 	{
 	  if (pdf_x[m] == jump[j])
 	    {
-	      pdf->x[n] = pdf_x[m];
-	      pdf->y[n] = pdf_z[m];
+	      cdf->x[n] = pdf_x[m];
+	      cdf->y[n] = pdf_z[m];
 	      n++;
 	      j++;
 	    }
@@ -858,40 +863,43 @@ pdf_gen_from_array (pdf, x, y, n_xy, xmin, xmax, njumps, jump)
 	  m++;			//increment m if necessary
 	}
 
-      pdf->x[n] = pdf_x[m];
-      pdf->y[n] = pdf_z[m];	/* this is pdf_z because that is where the cdf is stored */
+      cdf->x[n] = pdf_x[m];
+      cdf->y[n] = pdf_z[m];	/* this is pdf_z because that is where the cdf is stored */
       m++;			/* This assures that no two points will be the same x value */
       nn++;
     }
+	
+	
 
 
-  pdf->npdf = nn;
-  pdf->x[nn] = xmax;
-  pdf->y[nn] = 1.0;
-  pdf->norm = sum;		/* The normalizing factor that would convert the function we
+
+  cdf->ncdf = nn;
+  cdf->x[nn] = xmax;
+  cdf->y[nn] = 1.0;
+  cdf->norm = sum;		/* The normalizing factor that would convert the function we
 				   have been given into a proper probability density function */
 
 
 
 
 /* Calculate the gradients */
-  if (recalc_pdf_from_cdf (pdf))
+  if (calc_cdf_gradient (cdf))
     {
-      Error ("pdf_gen_from_array: Error returned from recalc_pdf_from_cdf\n");
+      Error ("cdf_gen_from_array: Error returned from calc_cdf_gradient\n");
       for (n = njump_min; n < njump_max; n++)
 	{
-	  Error ("pdf_gen_from_array: njump %3d jump %11.6e\n", n, jump[n]);
+	  Error ("cdf_gen_from_array: njump %3d jump %11.6e\n", n, jump[n]);
 	}
       if (njump_min == njump_max)
 	{
-	  Error ("pdf_gen_from_array: There were no jumps in the pdf\n");
+	  Error ("cdf_gen_from_array: There were no jumps in the pdf\n");
 	}
 
 
     }				// 57ib 
-  if ((echeck = pdf_check (pdf)) != 0)
+  if ((echeck = cdf_check (cdf)) != 0)
     {
-      Error ("pdf_gen_from_array: error %d on pdf_check\n", echeck);
+      Error ("cdf_gen_from_array: error %d on cdf_check\n", echeck);
     }
   return (echeck);
 }
@@ -916,8 +924,8 @@ History:
 */
 
 double
-pdf_get_rand (pdf)
-     PdfPtr pdf;
+cdf_get_rand (cdf)
+     CdfPtr cdf;
 {
   double x, r;
   int i, j;
@@ -926,33 +934,37 @@ pdf_get_rand (pdf)
   int xquadratic ();
 /* Find the interval within which x lies */
   r = rand () / MAXRAND;	/* r must be slightly less than 1 */
-  i = r * pdf->npdf;		/* so i initially lies between 0 and the size of the pdf array -1 */
-  while (pdf->y[i + 1] < r && i < pdf->npdf - 1)
-    i++;
-  while (pdf->y[i] > r && i > 0)
-    i--;
+//  i = r * cdf->ncdf;		/* so i initially lies between 0 and the size of the pdf array -1 */
+//  while (cdf->y[i + 1] < r && i < cdf->ncdf - 1)
+//    i++;
+//  while (cdf->y[i] > r && i > 0)
+//    i--;
+  
+    i=gsl_interp_bsearch(cdf->y,r,0,cdf->ncdf);
+  
+  
 /* Now calculate a place within that interval */
   q = rand () / MAXRAND;
-  a = 0.5 * (pdf->d[i + 1] - pdf->d[i]);
-  b = pdf->d[i];
-  c = (-0.5) * (pdf->d[i + 1] + pdf->d[i]) * q;
+  a = 0.5 * (cdf->d[i + 1] - cdf->d[i]);
+  b = cdf->d[i];
+  c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
   if ((j = xquadratic (a, b, c, s)) < 0)
     {
-      Error ("pdf_get_rand: %d\n", j);
+      Error ("cdf_get_rand: %d\n", j);
     }
   else
     {
       q = s[j];
       if (q < 0 || q > 1)
 	{
-	  Error ("pdf_get_rand: q out of range %d  %f\n", j, q);
+	  Error ("cdf_get_rand: q out of range %d  %f\n", j, q);
 	}
     }
 
-  x = pdf->x[i] * (1. - q) + pdf->x[i + 1] * q;
-  if (!(pdf->x[0] <= x && x <= pdf->x[pdf->npdf]))
+  x = cdf->x[i] * (1. - q) + cdf->x[i + 1] * q;
+  if (!(cdf->x[0] <= x && x <= cdf->x[cdf->ncdf]))
     {
-      Error ("pdf_get_rand: %g %d %g %g\n", r, i, q, x);
+      Error ("cdf_get_rand: %g %d %g %g\n", r, i, q, x);
     }
   return (x);
 }
@@ -960,7 +972,7 @@ pdf_get_rand (pdf)
 
 
 /* 
-We have defined the pdf in such a way that one can generate a random number 0 and
+We have defined the cdf in such a way that one can generate a random number 0 and
 1, find the place in the y array that corresponds to this and map back onto the 
 x values (which is what is returned. We now want to limit the range of the returned
 x values, but we need to know in terms of the original array where thiese values
@@ -974,86 +986,88 @@ the CDF but we need x too
 
 	06sep	ksl	57i -- Added the xlimits to the pdf
     17jun ksl Modified for variable sizes of distribution function
+	7 Jul nsh Modified to make everything refer to CDFs as they should be
 */
 
 int
-pdf_limit (pdf, xmin, xmax)
-     PdfPtr pdf;
+cdf_limit (cdf, xmin, xmax)
+     CdfPtr cdf;
      double xmin, xmax;
 {
   int i;
   double q;
-  if (pdf->y[pdf->npdf] != 1.0)
+  if (cdf->y[cdf->ncdf] != 1.0)
     {
-      Error ("pdf_limit: pdf not defined!)");
+      Error ("cdf_limit: cdf not defined!)");
       exit (0);
     }
-  if (xmin >= pdf->x[pdf->npdf])
+  if (xmin >= cdf->x[cdf->ncdf])
     {
-      Error ("pdf_limit: xmin %g > pdf->x[pdf->npdf] %g\n", xmin,
-	     pdf->x[pdf->npdf]);
+      Error ("cdf_limit: xmin %g > cdf->x[cdf->ncdf] %g\n", xmin,
+	     cdf->x[cdf->ncdf]);
 //      exit (0);
     }
-  if (xmax <= pdf->x[0])
+  if (xmax <= cdf->x[0])
     {
-      Error ("pdf_limit: xmax %g < pdf->x[0] %g\n", xmax, pdf->x[0]);
+      Error ("cdf_limit: xmax %g < cdf->x[0] %g\n", xmax, cdf->x[0]);
       exit (0);
     }
 
 /* Set the limits for the minimum */
 
-  if (xmin <= pdf->x[0])
+  if (xmin <= cdf->x[0])
     {
-      pdf->limit1 = 0;
-      pdf->x1 = pdf->x[0];
+      cdf->limit1 = 0;
+      cdf->x1 = cdf->x[0];
     }
   else
     {
-      pdf->x1 = xmin;
+      cdf->x1 = xmin;
       i = 0;
-      while (xmin > pdf->x[i])
+      while (xmin > cdf->x[i])
 	{
 	  i++;
 	}
-      q = (xmin - pdf->x[i - 1]) / (pdf->x[i] - pdf->x[i - 1]);
-      pdf->limit1 = pdf->y[i - 1] + q * (pdf->y[i] - pdf->y[i - 1]);
+      q = (xmin - cdf->x[i - 1]) / (cdf->x[i] - cdf->x[i - 1]);
+      cdf->limit1 = cdf->y[i - 1] + q * (cdf->y[i] - cdf->y[i - 1]);
     }
 
 /* Now set the limits for the maximum */
 
-  if (xmax >= pdf->x[pdf->npdf])
+  if (xmax >= cdf->x[cdf->ncdf])
     {
-      pdf->limit2 = 1.0;
-      pdf->x2 = pdf->x[pdf->npdf];
+      cdf->limit2 = 1.0;
+      cdf->x2 = cdf->x[cdf->ncdf];
     }
   else
     {
-      pdf->x2 = xmax;
-      i = pdf->npdf;
-      while (xmax <= pdf->x[i])
+      cdf->x2 = xmax;
+      i = cdf->ncdf;
+      while (xmax <= cdf->x[i])
 	{
 	  i--;
 	}
-      q = (xmax - pdf->x[i]) / (pdf->x[i + 1] - pdf->x[i]);
-      pdf->limit2 = pdf->y[i] + q * (pdf->y[i + 1] - pdf->y[i]);
+      q = (xmax - cdf->x[i]) / (cdf->x[i + 1] - cdf->x[i]);
+      cdf->limit2 = cdf->y[i] + q * (cdf->y[i + 1] - cdf->y[i]);
     }
 
   return (0);
 }
 
 /*
-pdf_get_rand_limit (pdf)
+cdf_get_rand_limit (cdf)
 
 History
 	06sep	ksl	57h -- Modified to account for the fact
 			that the probability density is not 
 			uniform between intervals.
     17jul   ksl Modified for variable lengths of pdfs
+	17jul   nsh Changed terminology to CDF
 
 */
 double
-pdf_get_rand_limit (pdf)
-     PdfPtr pdf;
+cdf_get_rand_limit (cdf)
+     CdfPtr cdf;
 {
   double x, r;
   int i, j;
@@ -1061,18 +1075,18 @@ pdf_get_rand_limit (pdf)
   double a, b, c, s[2];
   int xquadratic ();
   r = rand () / MAXRAND;	/* r must be slightly less than 1 */
-  r = r * pdf->limit2 + (1. - r) * pdf->limit1;
-  i = r * pdf->npdf;
-  while (pdf->y[i + 1] < r && i < pdf->npdf - 1)
+  r = r * cdf->limit2 + (1. - r) * cdf->limit1;
+  i = r * cdf->ncdf;
+  while (cdf->y[i + 1] < r && i < cdf->ncdf - 1)
     i++;
-  while (pdf->y[i] > r && i > 0)
+  while (cdf->y[i] > r && i > 0)
     i--;
   while (TRUE)
     {
       q = rand () / MAXRAND;
-      a = 0.5 * (pdf->d[i + 1] - pdf->d[i]);
-      b = pdf->d[i];
-      c = (-0.5) * (pdf->d[i + 1] + pdf->d[i]) * q;
+      a = 0.5 * (cdf->d[i + 1] - cdf->d[i]);
+      b = cdf->d[i];
+      c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
       if ((j = xquadratic (a, b, c, s)) < 0)
 	{
 	  Error ("pdf_get_rand: %d\n", j);
@@ -1082,12 +1096,12 @@ pdf_get_rand_limit (pdf)
 	  q = s[j];
 	  if (q < 0 || q > 1)
 	    {
-	      Error ("pdf_get_rand: q out of range %d  %f\n", j, q);
+	      Error ("cdf_get_rand_limit: q out of range %d  %f\n", j, q);
 	    }
 	}
 
-      x = pdf->x[i] * (1. - q) + pdf->x[i + 1] * q;
-      if (pdf->x1 < x && x < pdf->x2)
+      x = cdf->x[i] * (1. - q) + cdf->x[i + 1] * q;
+      if (cdf->x1 < x && x < cdf->x2)
 	break;
     }
 
@@ -1105,8 +1119,8 @@ a file
 */
 
 int
-pdf_to_file (pdf, filename)
-     PdfPtr pdf;
+cdf_to_file (cdf, filename)
+     CdfPtr cdf;
      char filename[];
 {
   FILE *fopen (), *fptr;
@@ -1114,16 +1128,16 @@ pdf_to_file (pdf, filename)
   fptr = fopen (filename, "w");
   fprintf (fptr,
 	   "# limits (portion.to.sample)   %10.4g %10.4g\n",
-	   pdf->limit1, pdf->limit2);
+	   cdf->limit1, cdf->limit2);
   fprintf (fptr,
 	   "# x1 x2  Range(to.be.returned) %10.4g %10.4g\n",
-	   pdf->x1, pdf->x2);
-  fprintf (fptr, "# norm   Scale.factor          %10.4g \n", pdf->norm);
+	   cdf->x1, cdf->x2);
+  fprintf (fptr, "# norm   Scale.factor          %10.4g \n", cdf->norm);
   fprintf (fptr, "#n x y  1-y d\n");
-  for (n = 0; n <= pdf->npdf; n++)
+  for (n = 0; n <= cdf->ncdf; n++)
     fprintf (fptr,
 	     "%3d %14.8e	%14.8e %14.8e  %14.8e\n",
-	     n, pdf->x[n], pdf->y[n], 1. - pdf->y[n], pdf->d[n]);
+	     n, cdf->x[n], cdf->y[n], 1. - cdf->y[n], cdf->d[n]);
   fclose (fptr);
   return (0);
 }
@@ -1146,89 +1160,89 @@ pdf_to_file (pdf, filename)
  */
 
 int
-pdf_check (pdf)
-     PdfPtr pdf;
+cdf_check (cdf)
+     CdfPtr cdf;
 {
   int n;
   double x, y;
   int hcheck, icheck, jcheck, kcheck, fcheck;
   hcheck = icheck = jcheck = kcheck = fcheck = 0;
-  x = pdf->x[0];
-  y = pdf->y[0];
+  x = cdf->x[0];
+  y = cdf->y[0];
   if (y != 0.0)
     {
       Error
-	("pdf_check: cumulative distribution function should start at 0 not %e\n",
+	("cdf_check: cumulative distribution function should start at 0 not %e\n",
 	 y);
       hcheck = 1;
     }
-  if (pdf->y[pdf->npdf] != 1.0)
+  if (cdf->y[cdf->ncdf] != 1.0)
     {
       Error
-	("pdf_check: cumulative distribution function should end at 1 not %e\n",
-	 pdf->y[pdf->npdf - 1]);
+	("cdf_check: cumulative distribution function should end at 1 not %e\n",
+	 cdf->y[cdf->ncdf - 1]);
       icheck = 1;
     }
 
-  for (n = 1; n < pdf->npdf + 1; n++)
+  for (n = 1; n < cdf->ncdf + 1; n++)
     {
       // Note the equal sign here 
-      if (x <= pdf->x[n])
-	x = pdf->x[n];
+      if (x <= cdf->x[n])
+	x = cdf->x[n];
       else
 	{
 	  jcheck = 1;
-	  Error ("pdf_check: x problem n %d x %f pdf->x[n] %f\n", n,
-		 x, pdf->x[n]);
+	  Error ("cdf_check: x problem n %d x %f pdf->x[n] %f\n", n,
+		 x, cdf->x[n]);
 	}
       // Note the equal sign here 
-      if (y <= pdf->y[n])
-	y = pdf->y[n];
+      if (y <= cdf->y[n])
+	y = cdf->y[n];
       else
 	{
 	  kcheck = 1;
-	  Error ("pdf_check: y problem n %d y %f pdf->y[n] %f\n", n,
-		 y, pdf->y[n]);
+	  Error ("cdf_check: y problem n %d y %f pdf->y[n] %f\n", n,
+		 y, cdf->y[n]);
 	}
     }
   if (jcheck == 1)
     {
-      Error ("pdf_check: x values in pdf should be monotonic\n");
+      Error ("cdf_check: x values in pdf should be monotonic\n");
     }
   if (kcheck == 1)
     {
       Error
-	("pdf_check: cumulative distribution function should be monotonic\n");
+	("cdf_check: cumulative distribution function should be monotonic\n");
     }
 
   if (hcheck != 0 || icheck != 0 || jcheck != 0 || kcheck != 0)
     {
-      pdf_to_file (pdf, "pdf.diag");
+      cdf_to_file (cdf, "cdf.diag");
       fcheck = hcheck * 1000 + icheck * 100 + jcheck * 10 + kcheck;
-      Error ("pdf_check %d %d %d %d %d\n", fcheck, hcheck,
+      Error ("cdf_check %d %d %d %d %d\n", fcheck, hcheck,
 	     icheck, jcheck, kcheck);
     }
 
-/* Next section is a dangerous attempt to repair the pdf  */
+/* Next section is a dangerous attempt to repair the cdf  */
 
   if (hcheck != 0)
-    pdf->y[0] = 0.0;
+    cdf->y[0] = 0.0;
   if (icheck != 0)
-    pdf->y[pdf->npdf] = 1.0;
+    cdf->y[cdf->ncdf] = 1.0;
   if (jcheck != 0)
     {
-      for (n = 0; n < pdf->npdf; n++)
+      for (n = 0; n < cdf->ncdf; n++)
 	{
-	  if (pdf->x[n] >= pdf->x[n + 1])
-	    pdf->x[n + 1] = pdf->x[n] + 1.e-20;
+	  if (cdf->x[n] >= cdf->x[n + 1])
+	    cdf->x[n + 1] = cdf->x[n] + 1.e-20;
 	}
     }
   if (kcheck != 0)
     {
-      for (n = 0; n < pdf->npdf; n++)
+      for (n = 0; n < cdf->ncdf; n++)
 	{
-	  if (pdf->y[n] >= pdf->y[n] + 1)
-	    pdf->y[n + 1] = pdf->y[n] + 1.e-20;
+	  if (cdf->y[n] >= cdf->y[n] + 1)
+	    cdf->y[n + 1] = cdf->y[n] + 1.e-20;
 	}
     }
 
@@ -1240,7 +1254,7 @@ pdf_check (pdf)
                 Space Telescope Science Institute
                                                                                              
 Synopsis:
-	recalc_pdf_from_cdf(pdf)
+	calc_cdf_gradient(cdf)
                                                                                              
 Arguments:
                                                                                              
@@ -1248,7 +1262,7 @@ Returns:
                                                                                              
 Description:
 
-	Calculate the pdf form a cdf 
+	Calculate the gradient of a cdf at each point
 	allow one to calculate a first order correction
 	to a uniform distibution between the points
 	where the gradient has been calculated.
@@ -1265,54 +1279,55 @@ History:
 			within a pdf interval.
 	06nov	ksl	58b: Fixed problem occuring when there
 			were two points in cdf with same x
+	17jul	nsh modified name to better relfect what it does
                                                                                              
 **************************************************************/
 
 int
-recalc_pdf_from_cdf (pdf)
-     PdfPtr pdf;
+calc_cdf_gradient (cdf)
+     CdfPtr cdf;
 {
   int n, istat;
   double dx1, dx2, dy1, dy2;
 
   istat = 0;
-  for (n = 1; n < pdf->npdf; n++)
+  for (n = 1; n < cdf->ncdf; n++)
     {
-      dy1 = pdf->y[n] - pdf->y[n - 1];
-      dx1 = pdf->x[n] - pdf->x[n - 1];
-      dy2 = pdf->y[n + 1] - pdf->y[n];
-      dx2 = pdf->x[n + 1] - pdf->x[n];
+      dy1 = cdf->y[n] - cdf->y[n - 1];
+      dx1 = cdf->x[n] - cdf->x[n - 1];
+      dy2 = cdf->y[n + 1] - cdf->y[n];
+      dx2 = cdf->x[n + 1] - cdf->x[n];
       if (dx1 != 0.0 && dx2 != 0.0)
 	{
-	  pdf->d[n] = 0.5 * (dy1 / dx1 + dy2 / dx2);
+	  cdf->d[n] = 0.5 * (dy1 / dx1 + dy2 / dx2);
 	}
       else if (dx1 != 0.0)
 	{
-	  pdf->d[n] = dy1 / dx1;
+	  cdf->d[n] = dy1 / dx1;
 	}
       else if (dx2 != 0.0)
 	{
-	  pdf->d[n] = dy2 / dx2;
+	  cdf->d[n] = dy2 / dx2;
 	}
       else
 	{
-	  pdf->d[n] = 0.0;
+	  cdf->d[n] = 0.0;
 	  Error
-	    ("recalc_pdf_from_cdf: dx1 and dx2 both 0 at  %3d %11.6e\n", n,
-	     pdf->x[n]);
+	    ("calc_cdf_gradient: dx1 and dx2 both 0 at  %3d %11.6e\n", n,
+	     cdf->x[n]);
 	  istat = 1;
 	}
 
     }
   /* Fill in the ends */
-  pdf->d[0] = pdf->d[1];
-  pdf->d[pdf->npdf] = pdf->d[pdf->npdf - 1];
+  cdf->d[0] = cdf->d[1];
+  cdf->d[cdf->ncdf] = cdf->d[cdf->ncdf - 1];
   return (istat);
 }
 
 
 int
-pdf_array_fixup (x, y, n_xy)
+cdf_array_fixup (x, y, n_xy)
      double *x, *y;
      int n_xy;
 {
@@ -1350,6 +1365,111 @@ pdf_array_fixup (x, y, n_xy)
         m++;
       }
     }
+	free(order);
+	free(xx);
+	free(yy);
+		
+		
 
   return(m);
 }
+
+int
+	calloc_cdf()
+{
+	int i;
+	int iprob;
+	
+	iprob=0;
+/* Allocate CDFs arrays for free free photon generation */
+	
+    if ((cdf_ff.x = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	if ((cdf_ff.y = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;  
+	if ((cdf_ff.d = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	
+/* Allocate CDF arrays for recombination photon generation */	
+	
+	if ((cdf_fb.x = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	if ((cdf_fb.y = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;  
+	if ((cdf_fb.d = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	
+	
+/* Allocate CDF arrays for isotropic photon generation */	
+	
+	if ((cdf_vcos.x = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	if ((cdf_vcos.y = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;  
+	if ((cdf_vcos.d = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	
+	
+/* Allocate CDF arrays for blackbody photon generation */	
+	
+	if ((cdf_bb.x = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	if ((cdf_bb.y = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;  
+	if ((cdf_bb.d = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	
+/* Allocate CDF arrays for bremsrahlumnf  photon generation */	
+	
+	if ((cdf_brem.x = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	if ((cdf_brem.y = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;  
+	if ((cdf_brem.d = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	
+	
+/* Allocate CDF arrays for stellar atmoshperes models */	
+		
+	for (i=0;i<NCOMPS;i++)
+	{
+		if ((comp[i].xcdf.x = calloc (sizeof (double), NCDF+1)) == NULL)
+			iprob++;
+		if ((comp[i].xcdf.y = calloc (sizeof (double), NCDF+1)) == NULL)
+			iprob++;  
+		if ((comp[i].xcdf.d = calloc (sizeof (double), NCDF+1)) == NULL)
+			iprob++;
+	}
+		
+/* Allocate CDF arrays for aniostropic scattering */
+		
+	for (i=0;i<100;i++)
+	{
+		if ((cdf_randwind_store[i].x = calloc (sizeof (double), NCDF+1)) == NULL)
+			iprob++;
+		if ((cdf_randwind_store[i].y = calloc (sizeof (double), NCDF+1)) == NULL)
+			iprob++;  
+		if ((cdf_randwind_store[i].d = calloc (sizeof (double), NCDF+1)) == NULL)
+			iprob++;
+	}
+		
+		
+	if (iprob > 0)
+	{
+		Error ("calloc_cdf: Error in allocating memory for a CDF\n");
+		exit(0);
+	}
+		
+    Log
+      ("Allocated %10d bytes for each of %5d variable length CDF arrays totaling %10.3f Mb \n",
+       sizeof (double) * (NCDF+1), 15+NCOMPS+100, 1.e-6  * sizeof (double) * (NCDF+1)*(15+NCOMPS+100));
+		
+		
+
+			return(iprob);
+		
+	
+	
+}
+
+

@@ -59,7 +59,6 @@ brem_d (alpha)
 #define NMAX 		1000
 
 int ninit_brem = 0;
-struct Pdf pdf_brem;
 
 double old_brem_t = 0;
 double old_brem_freqmin = 0;
@@ -69,7 +68,7 @@ double cdf_brem_lo, cdf_brem_hi, cdf_brem_tot;  // The precise boundaries in the
 double cdf_brem_ylo, cdf_brem_yhi;      // The places in the CDF defined by freqmin & freqmax
 double brem_lo_freq_alphamin, brem_lo_freq_alphamax, brem_hi_freq_alphamin, brem_hi_freq_alphamax;      //  the limits to use for the low and high frequency values
 
-// bb_set is the array that pdf_gen_from_func uses to esablish the 
+// bb_set is the array that cdf_gen_from_func uses to esablish the 
 // specific points in the cdf of the dimensionless bb function.
 double brem_set[] = {
   0.05, 0.1, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45,
@@ -91,13 +90,13 @@ get_rand_brem (freqmin, freqmax)
 
 
   /*First time through create the array containing the proper boundaries for the integral of the brem function,
-     Note calling pdf_gen_from func also defines ylo and yhi */
+     Note calling cdf_gen_from func also defines ylo and yhi */
 
   if (ninit_brem == 0)
   {                             /* First time through p_alpha must be initialized */
-    if ((echeck = pdf_gen_from_func (&pdf_brem, &brem_d, BREM_ALPHAMIN, BREM_ALPHAMAX, 10, brem_set)) != 0)
+    if ((echeck = cdf_gen_from_func (&cdf_brem, &brem_d, BREM_ALPHAMIN, BREM_ALPHAMAX, 10, brem_set)) != 0)
     {
-      Error ("get_rand_brem: on return from pdf_gen_from_func %d\n", echeck);
+      Error ("get_rand_brem: on return from cdf_gen_from_func %d\n", echeck);
     }
 
     /* We need the integral of the brem function outside of the regions of interest as well */
@@ -112,7 +111,7 @@ get_rand_brem (freqmin, freqmax)
   }
 
 /* If temperatures or frequencies have changed since the last call to planck
-redefine various limitsi, including the region of the pdf  to be used
+redefine various limitsi, including the region of the cdf  to be used
 
 Note - ksl - 1211 - It is not obvious why all of these parameters need to be
 reset.  A careful review of them is warranted.
@@ -171,7 +170,7 @@ reset.  A careful review of them is warranted.
 
     if (brem_alphamin < BREM_ALPHAMAX && brem_alphamax > BREM_ALPHAMIN)
     {
-      pdf_limit (&pdf_brem, brem_alphamin, brem_alphamax);
+      cdf_limit (&cdf_brem, brem_alphamin, brem_alphamax);
     }
 
   }
@@ -198,7 +197,7 @@ reset.  A careful review of them is warranted.
   }
   else
   {
-    alpha = pdf_get_rand_limit (&pdf_brem);
+    alpha = cdf_get_rand_limit (&cdf_brem);
   }
 
   freq = BOLTZMANN * geo.brem_temp / H * alpha;

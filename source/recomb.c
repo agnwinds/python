@@ -508,6 +508,7 @@ total_fb (one, t, f1, f2, fb_choice, mode)
 			the same conditions.  This reduces very significantly
 			the number of times one has to construct a pdf, which is
 			the main time sink for the program
+	17jul	NSH - changed references from PDF to CDF
                                                                                                    
  ************************************************************************/
 
@@ -518,7 +519,7 @@ double xfb_jumps[NLEVELS];     // This is just a dummy array that parallels fb_j
 int fb_njumps = (-1);
 
 WindPtr ww_fb;
-struct Pdf pdf_fb;
+struct Cdf cdf_fb;
 double one_fb_f1, one_fb_f2, one_fb_te; /* Old values */
 
 double
@@ -555,12 +556,12 @@ use that instead if possible --  57h */
     return (freq);
   }
 
-  delta = 500;                  // Fudge factor to prevent generation a photon if t has changed only slightly
-  /* Check to see if we have already generated a pdf */
+  delta = 500;                  // Fudge factor to prevent generation of a CDF if t has changed only slightly
+  /* Check to see if we have already generated a cdf */
   if (tt > (one_fb_te + delta) || tt < (one_fb_te - delta) || f1 != one_fb_f1 || f2 != one_fb_f2)
   {
 
-/* Then need to generate a new pdf */
+/* Then need to generate a new cdf */
 
     ww_fb = one;
 
@@ -586,7 +587,7 @@ use that instead if possible --  57h */
 
       /* The next line sorts the fb_jumps by frequency and eliminates
        * duplicate frequencies which is what was causing the error in
-       * pdf.c when more than one jump was intended
+       * cdf.c when more than one jump was intended
        */
 
 	  if (fb_njumps > 1) //We only need to sort and compress if we have more than one jump
@@ -645,8 +646,12 @@ use that instead if possible --  57h */
 	
 	/* At this point, the variable nnn stores the number of points */
 	
+	
 
-    if (pdf_gen_from_array (&pdf_fb, fb_x, fb_y, nnn, f1, f2, fb_njumps, fb_jumps) != 0)
+
+printf ("RECOMB GENERATION");
+
+    if (cdf_gen_from_array (&cdf_fb, fb_x, fb_y, nnn, f1, f2, fb_njumps, fb_jumps) != 0)
     {
       Error ("one_fb after error: f1 %g f2 %g te %g ne %g nh %g vol %g\n",
              f1, f2, xplasma->t_e, xplasma->ne, xplasma->density[1], one->vol);
@@ -655,16 +660,16 @@ use that instead if possible --  57h */
     }
     one_fb_te = xplasma->t_e;
     one_fb_f1 = f1;
-    one_fb_f2 = f2;             /* Note that this may not be the best way to check for a previous pdf */
+    one_fb_f2 = f2;             /* Note that this may not be the best way to check for a previous cdf */
   }
 
-/* OK, we have not created a new pdf, cdf actually.  We are in a position to
+/* OK, we have not created a new cdf actually.  We are in a position to
 generate photons */
 
   //Debug ("one_fb, got here 2\n");
 
 /* First generate the photon we need */
-  freq = pdf_get_rand (&pdf_fb);
+  freq = cdf_get_rand (&cdf_fb);
   if (freq<f1 || freq > f2) {
       Error("one_fb:  freq %e  freqmin %e freqmax %e out of range\n",freq,f1,f2);
   }
@@ -673,7 +678,7 @@ generate photons */
 
   for (n = 0; n < NSTORE; n++)
   {
-    xphot->freq[n] = pdf_get_rand (&pdf_fb);
+    xphot->freq[n] = cdf_get_rand (&cdf_fb);
   if (xphot->freq[n]<f1 || xphot->freq[n] > f2) {
       Error("one_fb:  freq %e  freqmin %e freqmax %e out of range\n",xphot->freq[n],f1,f2);
   }

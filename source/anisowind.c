@@ -53,7 +53,9 @@ and
 		when calculating pdf_rand.  ?? It might be more
 		computationally efficient to switch to isotropic
 		in this case ??
-15aug	ksl	Minor changes for multiple domains
+15aug	ksl	Minor changes for multiple 
+17jun	nsh - changed references from PDFs to CDFs - because
+		this is what they actually are!
 */
 
 #define  TAU_TOP   10.0         /* tau above which we assume the angular distribution function
@@ -102,16 +104,16 @@ randwind (p, lmn, north)
     tau = TAU_BOT;
 
   if (fabs (tau - tau_randwind) > 0.01)
-  {                             // (Re)create pdf
-    make_pdf_randwind (tau);
+  {                             // (Re)create cdf
+    make_cdf_randwind (tau);
     stuff_phot (p, &phot_randwind);
   }
 
-  xlmn[0] = n = pdf_get_rand (pdf_randwind);
+  xlmn[0] = n = cdf_get_rand (cdf_randwind);
   if (sane_check (n))
   {
-    Error ("anisowind:sane_check of pdf_get_rand returned %f\n", n);
-    xlmn[0] = n = pdf_get_rand (pdf_randwind);
+    Error ("anisowind:sane_check of cdf_get_rand returned %f\n", n);
+    xlmn[0] = n = cdf_get_rand (cdf_randwind);
   }
 
   q = sqrt (1. - n * n);
@@ -157,7 +159,7 @@ the cartesian frame */
   return (0);
 }
 
-/* This is the function that is used to generate the pdf for scattering.  It
+/* This is the function that is used to generate the cdf for scattering.  It
 basically is calculating a function that is proportional to the probability
 density.  dP/dcos(theta) for the photon. 
 
@@ -170,6 +172,7 @@ double vrandwind (x)
 	02feb14	ksl	Made changes to set a minimum for vrandwind in
 			in an attempt to prevent problems with pdf
 			generation
+	17jul	nsh	changed PDFs to CDF
 */
 
 #define VRANDWIND_FLOOR 1e-5
@@ -279,7 +282,7 @@ reweightwind (p)
   {
     k = where_in_grid (wmain[p->grid].ndom, p->x);
     tau = sobolev (&wmain[k], p->x, -1., lin_ptr[p->nres], wmain[k].dvds_max);
-    make_pdf_randwind (tau);    // Needed for the normalization
+    make_cdf_randwind (tau);    // Needed for the normalization
     stuff_phot (p, &phot_randwind);
   }
   else
@@ -306,12 +309,12 @@ what we do here */
 // ?? It's definitely needed to make a uniform distribution work
 // but is this reason really right
 
-  z = 2. / pdf_randwind->norm;
+  z = 2. / cdf_randwind->norm;
   x = vrandwind (ctheta) * z;
 
   if (sane_check (x) || x > 2.0)
   {
-    Error ("Reweightwind:sane_check x %f tau %f ctheta %f z %e pdf_randwind->norm %f\n", x, tau, ctheta, z, pdf_randwind->norm);
+    Error ("Reweightwind:sane_check x %f tau %f ctheta %f z %e cdf_randwind->norm %f\n", x, tau, ctheta, z, cdf_randwind->norm);
     x = 2.0;
   }
 
@@ -324,71 +327,72 @@ what we do here */
 /*
  
 
-   make_pdf_rand_wind(tau)
+   make_cdf_rand_wind(tau)
 
    History
 	02june	ksl	Modified make_pdf_randwind so that the first time
 			the program is entered an array of cumulative
 			distribution functions is created.  This is 
 			designed to speed the program up significantly
+	17july 	nsh - modified to call CDFs cdfs as they should be!
 */
 
-int init_make_pdf_randwind = 1;
-int make_pdf_randwind_njumps;
-double make_pdf_randwind_jumps[180];
+int init_make_cdf_randwind = 1;
+int make_cdf_randwind_njumps;
+double make_cdf_randwind_jumps[180];
 #define LOGTAUMIN -2.
 #define LOGTAUMAX 1.
-double pdf_randwind_dlogtau;
+double cdf_randwind_dlogtau;
 
 int
-make_pdf_randwind (tau)
+make_cdf_randwind (tau)
      double tau;
 {
   int jj;
   int echeck;
-  int pdf_gen_from_func ();
+  int cdf_gen_from_func ();
   double vrandwind ();
   double xtau;
   double log10 ();
 
 /* Initalize jumps the first time routine is called */
 
-  if (init_make_pdf_randwind)
+  if (init_make_cdf_randwind)
   {
-    make_pdf_randwind_njumps = 0;
+    make_cdf_randwind_njumps = 0;
     for (jj = -88; jj <= 88; jj += 2)
     {
-      make_pdf_randwind_jumps[make_pdf_randwind_njumps] = sin (jj / 57.29578);
-      make_pdf_randwind_njumps++;
+      make_cdf_randwind_jumps[make_cdf_randwind_njumps] = sin (jj / 57.29578);
+      make_cdf_randwind_njumps++;
     }
-    pdf_randwind_dlogtau = (LOGTAUMAX - LOGTAUMIN) / 99.;
+    cdf_randwind_dlogtau = (LOGTAUMAX - LOGTAUMIN) / 99.;
     for (jj = 0; jj < 100; jj++)
     {
-      xtau = pow (10., LOGTAUMIN + pdf_randwind_dlogtau * jj);
+      xtau = pow (10., LOGTAUMIN + cdf_randwind_dlogtau * jj);
       tau_randwind = xtau;      /* This is passed to vrandwind by an external variable */
       if ((echeck =
-           pdf_gen_from_func (&pdf_randwind_store[jj], &vrandwind, -1.0, 1.0, make_pdf_randwind_njumps, make_pdf_randwind_jumps)) != 0)
+           cdf_gen_from_func (&cdf_randwind_store[jj], &vrandwind, -1.0, 1.0, make_cdf_randwind_njumps, make_cdf_randwind_jumps)) != 0)
       {
-        Error ("Randwind: return from pdf_gen_from_func %d\n", echeck);
+        Error ("Randwind: return from cdf_gen_from_func %d\n", echeck);
       }
     }
-    init_make_pdf_randwind = 0;
+    init_make_cdf_randwind = 0;
   }
 
   if (sane_check (tau))
   {
-    Error ("make_pdf_randwind:sane_check Need proper tau (%e) to make pdf_randwind\n", tau);
+    Error ("make_cdf_randwind:sane_check Need proper tau (%e) to make cdf_randwind\n", tau);
     tau = 10.;                  // Forces something close to isotropic
   }
 
-  jj = (log10 (tau) - LOGTAUMIN) / pdf_randwind_dlogtau + 0.5;
+  jj = (log10 (tau) - LOGTAUMIN) / cdf_randwind_dlogtau + 0.5;
 
   if (jj < 0)
     jj = 0;
   if (jj > 99)
     jj = 99;
 
-  pdf_randwind = &pdf_randwind_store[jj];
+  cdf_randwind = &cdf_randwind_store[jj];
   tau_randwind = tau;           // This is passed to vrandwind by an external variable
 
   return (0);

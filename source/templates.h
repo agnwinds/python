@@ -141,16 +141,17 @@ int spec_read(char filename[]);
 int extract(WindPtr w, PhotPtr p, int itype);
 int extract_one(WindPtr w, PhotPtr pp, int itype, int nspec);
 /* pdf.c */
-int pdf_gen_from_func(PdfPtr pdf, double (*func)(double), double xmin, double xmax, int njumps, double jump[]);
+int cdf_gen_from_func(CdfPtr cdf, double (*func)(double), double xmin, double xmax, int njumps, double jump[]);
 double gen_array_from_func(double (*func)(double), double xmin, double xmax, int pdfsteps);
-int pdf_gen_from_array(PdfPtr pdf, double x[], double y[], int n_xy, double xmin, double xmax, int njumps, double jump[]);
-double pdf_get_rand(PdfPtr pdf);
-int pdf_limit(PdfPtr pdf, double xmin, double xmax);
-double pdf_get_rand_limit(PdfPtr pdf);
-int pdf_to_file(PdfPtr pdf, char filename[]);
-int pdf_check(PdfPtr pdf);
-int recalc_pdf_from_cdf(PdfPtr pdf);
-int pdf_array_fixup(double *x, double *y, int n_xy);
+int cdf_gen_from_array(CdfPtr cdf, double x[], double y[], int n_xy, double xmin, double xmax, int njumps, double jump[]);
+double cdf_get_rand(CdfPtr cdf);
+int cdf_limit(CdfPtr cdf, double xmin, double xmax);
+double cdf_get_rand_limit(CdfPtr cdf);
+int cdf_to_file(CdfPtr cdf, char filename[]);
+int cdf_check(CdfPtr cdf);
+int calc_cdf_gradient(CdfPtr cdf);
+int cdf_array_fixup(double *x, double *y, int n_xy);
+int calloc_cdf(void);
 /* roche.c */
 int binary_basics(void);
 double ds_to_roche_2(PhotPtr p);
@@ -288,7 +289,7 @@ int reposition(PhotPtr p);
 int randwind(PhotPtr p, double lmn[3], double north[3]);
 double vrandwind(double x);
 double reweightwind(PhotPtr p);
-int make_pdf_randwind(double tau);
+int make_cdf_randwind(double tau);
 int randwind_thermal_trapping(PhotPtr p, int *nnscat);
 /* util.c */
 int fraction(double value, double array[], int npts, int *ival, double *f, int mode);

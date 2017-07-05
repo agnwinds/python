@@ -1160,22 +1160,49 @@ generated from a function which is usually only proportional to the probability 
 function.  It is sometimes useful, e.g. in calculating the reweighting function to
 have access to the proper normalization.  Since the one needs the normalization to
 properly create the CDF, this was added for python_43.2  */
-#define NPDF 200
 
-typedef struct Pdf
-{
-  double x[NPDF + 1];           /* Positions for which the probability density
-                                   is calculated */
-  double y[NPDF + 1];           /* The value of the CDF at x */
-  double d[NPDF + 1];           /* 57i -- the rate of change of the probability
-                                   density at x */
-  double limit1, limit2;        /* Limits (running from 0 to 1) that define a portion
-                                   of the CDF to sample */
-  double x1, x2;                /* limits if they exist on what is returned */
-  double norm;                  //The scaling factor which would renormalize the pdf
-  int npdf;                     /* Size of this pdf */
-}
- *PdfPtr, pdf_dummy;
+//#define NPDF 200
+
+//typedef struct Pdf
+//{
+//  double x[NPDF + 1];           /* Positions for which the probability density
+//                                   is calculated */
+//  double y[NPDF + 1];           /* The value of the CDF at x */
+//  double d[NPDF + 1];           /* 57i -- the rate of change of the probability
+//                                   density at x */
+//  double limit1, limit2;        /* Limits (running from 0 to 1) that define a portion
+//                                   of the CDF to sample */
+//  double x1, x2;                /* limits if they exist on what is returned */
+//  double norm;                  //The scaling factor which would renormalize the pdf
+//  int npdf;                     /* Size of this pdf */
+//}
+// *PdfPtr, pdf_dummy;
+ 
+ 
+ /* NSH 17/7 - Structure renamed to reflect the fact that this is a CDF, also made dynamically allocated */
+ 
+#define NCDF 200 //The default size for these arrays
+ 
+ typedef struct Cdf
+ {
+   double *x;           /* Positions for which the CDF is calculated */
+   double *y;           /* The value of the CDF at x */
+   double *d;           /* 57i -- the rate of change of the CDF at x */
+   double limit1, limit2;        /* Limits (running from 0 to 1) that define a portion
+                                    of the CDF to sample */
+   double x1, x2;                /* limits if they exist on what is returned */
+   double norm;                  //The scaling factor which would renormalize the CDF
+   int ncdf;                     /* Size of this CDF */
+ }
+  *CdfPtr, cdf_dummy; 
+  
+  struct Cdf cdf_ff; 
+  struct Cdf cdf_fb; 
+  struct Cdf cdf_vcos;
+  struct Cdf cdf_bb;
+  struct Cdf cdf_brem;
+  
+ 
 
 
 /* Variable used to allow something to be printed out the first few times
@@ -1198,11 +1225,11 @@ FILE *epltptr;                  //TEST
 /* Allow for the transfer of tau info to scattering routine */
 
 
-struct Pdf pdf_randwind_store[100];
-PdfPtr pdf_randwind;
+struct Cdf cdf_randwind_store[100];
+CdfPtr cdf_randwind;
 struct photon phot_randwind;
 
-/* N.B. pdf_randwind and phot_randwind are used in the routine anisowind for 
+/* N.B. cdf_randwind and phot_randwind are used in the routine anisowind for 
 as part of effort to incorporate anisotropic scattering in to python.  
 Added for python_43.2 */
 

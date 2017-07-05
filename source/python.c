@@ -729,6 +729,11 @@ main (argc, argv)
     }
   }
 
+  /* Allocate arrays for various CDFs */
+  
+  calloc_cdf();
+
+
 
   /* Next line finally defines the wind if this is the initial time this model is being run */
 
