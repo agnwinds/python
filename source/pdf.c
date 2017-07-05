@@ -1454,6 +1454,15 @@ int
 	}
 		
 		
+	if (iprob > 0)
+	{
+		Error ("calloc_cdf: Error in allocating memory for a CDF\n");
+		exit(0);
+	}
+		
+    Log
+      ("Allocated %10d bytes for each of %5d variable length CDF arrays totaling %10.3f Mb \n",
+       sizeof (double) * (NCDF+1), 15+NCOMPS+100, 1.e-6  * sizeof (double) * (NCDF+1)*(15+NCOMPS+100));
 		
 		
 
