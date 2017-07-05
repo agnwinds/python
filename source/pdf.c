@@ -800,11 +800,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
    the input array, or more explicitly, at the points specied in the array
    pdf_x
 */
-	  if (6e15 < xmin && xmin < 7e15)
-  {
-    	for (n=0;n<pdf_n;n++)
-    		printf ("CDF n %i x %e y %e\n",n,pdf_x[n],pdf_z[n]);
-	}
+
 
       /* Add a check that the pdf_z is monotonic. This check should not really be necessary
        * since by construction this should be the case*/
