@@ -52,7 +52,7 @@ struct ModSum
   double max[NPARS];
   int nwaves;                   //All models in each comp should have same wavelengths;
   struct Model xmod;            //The current intepolated model of this type 
-  struct Pdf xpdf;              //The current cumulative distribution function for this component
+  struct Cdf xcdf;              //The current cumulative distribution function for this component
 }
 comp[NCOMPS];
 

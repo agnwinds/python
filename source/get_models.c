@@ -167,8 +167,8 @@ get_models (modellist, npars, spectype)
   strcpy (comp[ncomps].name, modellist);
   comp[ncomps].modstart = nmods_tot;
   comp[ncomps].npars = npars;
-  comp[ncomps].xpdf.limit1 = -99.;
-  comp[ncomps].xpdf.limit2 = -99.;
+  comp[ncomps].xcdf.limit1 = -99.;
+  comp[ncomps].xcdf.limit2 = -99.;
 
 /* Now get all the models of this type */
   n = nmods_tot;                // This is the starting point since may have read models in before
