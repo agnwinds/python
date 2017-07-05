@@ -59,7 +59,6 @@ brem_d (alpha)
 #define NMAX 		1000
 
 int ninit_brem = 0;
-struct Cdf cdf_brem;
 
 double old_brem_t = 0;
 double old_brem_freqmin = 0;

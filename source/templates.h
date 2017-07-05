@@ -151,6 +151,7 @@ int cdf_to_file(CdfPtr cdf, char filename[]);
 int cdf_check(CdfPtr cdf);
 int calc_cdf_gradient(CdfPtr cdf);
 int cdf_array_fixup(double *x, double *y, int n_xy);
+int calloc_cdf(void);
 /* roche.c */
 int binary_basics(void);
 double ds_to_roche_2(PhotPtr p);

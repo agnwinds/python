@@ -171,7 +171,6 @@ History:
 #define NMAX 		1000
 
 int ninit_planck = 0;
-struct Cdf cdf_bb;
 
 double old_t = 0;
 double old_freqmin = 0;

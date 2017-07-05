@@ -1181,13 +1181,13 @@ properly create the CDF, this was added for python_43.2  */
  
  /* NSH 17/7 - Structure renamed to reflect the fact that this is a CDF, also made dynamically allocated */
  
-#define NCDF 2000
+#define NCDF 200 //The default size for these arrays
  
  typedef struct Cdf
  {
-   double x[NCDF+1];           /* Positions for which the CDF is calculated */
-   double y[NCDF+1];           /* The value of the CDF at x */
-   double d[NCDF+1];           /* 57i -- the rate of change of the CDF at x */
+   double *x;           /* Positions for which the CDF is calculated */
+   double *y;           /* The value of the CDF at x */
+   double *d;           /* 57i -- the rate of change of the CDF at x */
    double limit1, limit2;        /* Limits (running from 0 to 1) that define a portion
                                     of the CDF to sample */
    double x1, x2;                /* limits if they exist on what is returned */
@@ -1195,6 +1195,13 @@ properly create the CDF, this was added for python_43.2  */
    int ncdf;                     /* Size of this CDF */
  }
   *CdfPtr, cdf_dummy; 
+  
+  struct Cdf cdf_ff; 
+  struct Cdf cdf_fb; 
+  struct Cdf cdf_vcos;
+  struct Cdf cdf_bb;
+  struct Cdf cdf_brem;
+  
  
 
 

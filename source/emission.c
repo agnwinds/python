@@ -735,7 +735,7 @@ History:
  
 **************************************************************/
 
-struct Cdf cdf_ff;
+//struct Cdf cdf_ff;
 double ff_x[200], ff_y[200];
 double one_ff_f1, one_ff_f2, one_ff_te; /* Old values */
 

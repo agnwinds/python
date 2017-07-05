@@ -57,5 +57,7 @@ struct ModSum
 comp[NCOMPS];
 
 
+
+
 /* In modsum, current[0] often refers to a normalization.  Therefore for parallism, a set of
 models which really only have one parameter, e.g. T, will store that parmeter in .par[1] */

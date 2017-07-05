@@ -63,7 +63,7 @@ History:
 
 double zzz[] = { 0.0, 0.0, 1.0 };
 
-struct Cdf cdf_vcos;
+
 int init_vcos = 0;
 
 int
@@ -75,9 +75,9 @@ randvcos (lmn, north)
   double q, jumps[5];
 // double s;
   struct basis nbasis;
-  int echeck, pdf_gen_from_func ();
+  int echeck, cdf_gen_from_func ();
   int create_basis (), project_from ();
-  double vcos (), pdf_get_rand ();
+  double vcos (), cdf_get_rand ();
   double phi;
 
   if (init_vcos == 0)

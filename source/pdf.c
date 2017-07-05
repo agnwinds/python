@@ -188,6 +188,7 @@ History:
 
 #include "atomic.h"
 #include "python.h"
+#include "models.h"
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_interp.h>
 
@@ -931,7 +932,7 @@ cdf_get_rand (cdf)
      CdfPtr cdf;
 {
   double x, r;
-  int i, j,i1;
+  int i, j;
   double q;
   double a, b, c, s[2];
   int xquadratic ();
@@ -1376,3 +1377,94 @@ cdf_array_fixup (x, y, n_xy)
 
   return(m);
 }
+
+int
+	calloc_cdf()
+{
+	int i;
+	int iprob;
+	
+	iprob=0;
+/* Allocate CDFs arrays for free free photon generation */
+	
+    if ((cdf_ff.x = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	if ((cdf_ff.y = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;  
+	if ((cdf_ff.d = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	
+/* Allocate CDF arrays for recombination photon generation */	
+	
+	if ((cdf_fb.x = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	if ((cdf_fb.y = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;  
+	if ((cdf_fb.d = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	
+	
+/* Allocate CDF arrays for isotropic photon generation */	
+	
+	if ((cdf_vcos.x = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	if ((cdf_vcos.y = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;  
+	if ((cdf_vcos.d = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	
+	
+/* Allocate CDF arrays for blackbody photon generation */	
+	
+	if ((cdf_bb.x = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	if ((cdf_bb.y = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;  
+	if ((cdf_bb.d = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	
+/* Allocate CDF arrays for bremsrahlumnf  photon generation */	
+	
+	if ((cdf_brem.x = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	if ((cdf_brem.y = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;  
+	if ((cdf_brem.d = calloc (sizeof (double), NCDF+1)) == NULL)
+		iprob++;
+	
+	
+/* Allocate CDF arrays for stellar atmoshperes models */	
+		
+	for (i=0;i<NCOMPS;i++)
+	{
+		if ((comp[i].xcdf.x = calloc (sizeof (double), NCDF+1)) == NULL)
+			iprob++;
+		if ((comp[i].xcdf.y = calloc (sizeof (double), NCDF+1)) == NULL)
+			iprob++;  
+		if ((comp[i].xcdf.d = calloc (sizeof (double), NCDF+1)) == NULL)
+			iprob++;
+	}
+		
+/* Allocate CDF arrays for aniostropic scattering */
+		
+	for (i=0;i<100;i++)
+	{
+		if ((cdf_randwind_store[i].x = calloc (sizeof (double), NCDF+1)) == NULL)
+			iprob++;
+		if ((cdf_randwind_store[i].y = calloc (sizeof (double), NCDF+1)) == NULL)
+			iprob++;  
+		if ((cdf_randwind_store[i].d = calloc (sizeof (double), NCDF+1)) == NULL)
+			iprob++;
+	}
+		
+		
+		
+		
+
+			return(iprob);
+		
+	
+	
+}
+
+
