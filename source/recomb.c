@@ -579,6 +579,7 @@ use that instead if possible --  57h */
         {
           fb_jumps[fb_njumps] = fthresh;
           fb_njumps++;
+		  printf ("JUMP found a jump at %e now %i jumps %e %e\n",fb_jumps[fb_njumps-1],fb_njumps,f1,f2);
         }
       }                         //IS THIS CORRECT? (SS, MAY04)
 
@@ -599,6 +600,11 @@ use that instead if possible --  57h */
 
 
     }
+	
+	for (n=0;n<fb_njumps;n++)
+	{
+		printf ("JUMPS %i %e\n",n,fb_jumps[n]);
+	}
 
     //!BUG SSMay04
     //It doesn't seem to work unless this is zero? (SS May04)
@@ -1649,23 +1655,25 @@ sort_and_compress (array_in, array_out, npts)
   int compare_doubles ();
 
   values = calloc (sizeof (double), npts);
-  for (n = 0; n < npts; n++)
-    {
-      values[n] = array_in[n];
-    }
 
 
   /* Sort the array in place */
   qsort (values, npts, sizeof (double), compare_doubles);
+  
+
+  array_out[0]=values[0]; //Copy the first jump into the output array  
+  
   nfinal = 1;
-  for (n = 1; n < npts; n++)
+  for (n = 1; n < npts; n++) //Loop over the remaining jumps in the array
     {
-      if (values[n] > array_out[nfinal - 1])
+      if (values[n] > array_out[nfinal - 1])  //In the next point in the array is larger than the last one (i.e. not equal)
 	{
-	  array_out[nfinal] = values[n];
-	  nfinal += 1;
+	  array_out[nfinal] = values[n]; //Put the next point into the array
+	  nfinal += 1;  //Increment the size of the array
 	}
     }
+	
+
 
   return (nfinal);
 }

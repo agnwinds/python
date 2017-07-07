@@ -736,7 +736,7 @@ History:
 **************************************************************/
 
 //struct Cdf cdf_ff;
-double ff_x[200], ff_y[200];
+double ff_x[NCDF], ff_y[NCDF];  //We initialise the arrays that will contain the unscaled PDF to that of the default CDF lengths
 double one_ff_f1, one_ff_f2, one_ff_te; /* Old values */
 
 double
@@ -764,8 +764,8 @@ one_ff (one, f1, f2)
   if (xplasma->t_e != one_ff_te || f1 != one_ff_f1 || f2 != one_ff_f2)
   {                             /* Generate a new pdf */
 
-    dfreq = (f2 - f1) / 199;
-    for (n = 0; n < 200; n++)
+    dfreq = (f2 - f1) / NCDF-1;
+    for (n = 0; n < NCDF; n++)
     {
       ff_x[n] = f1 + dfreq * n;
       ff_y[n] = ff (one, xplasma->t_e, ff_x[n]);
