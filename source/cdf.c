@@ -777,10 +777,10 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
 	pdf_z[n] /= sum;
 	  
 	  
-	for (n=0;n<pdf_n;n++)
-	{
-		printf ("scaledCDF %i x %.10e y %.10e\n",n,pdf_x[n],pdf_z[n]);
-	}
+//	for (n=0;n<pdf_n;n++)
+//	{
+//		printf ("scaledCDF %i x %.10e y %.10e\n",n,pdf_x[n],pdf_z[n]);
+//	}
 
 /* So pdf_z contains a properly normalized cdf on the points specified by
    the input array, or more explicitly, at the points specied in the array
@@ -823,10 +823,10 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
      to me that this is the most elegant way to deal with this problem.  
    */
 	
-	for (n=0;n<pdf_n;n++)
-	{
-		printf ("CDF_test %i x %.10e y %.10e\n",n,cdf->x[n],cdf->y[n]);
-	}
+//	for (n=0;n<pdf_n;n++)
+//	{
+//		printf ("CDF_test %i x %.10e y %.10e\n",n,cdf->x[n],cdf->y[n]);
+//	}
 
 
 	if (njumps==0)
@@ -836,19 +836,12 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
 		for (n=1;n<pdf_n;n++)
 		{
   	      cdf->x[n] = pdf_x[n];
-  	      cdf->y[n] = pdf_z[n];
-		printf ("%i %e %e %e %e\n",n,cdf->x[n],pdf_x[n],cdf->y[n],pdf_z[n]);
-		  
+  	      cdf->y[n] = pdf_z[n];  
 		}
 	    cdf->ncdf = pdf_n;
 	    cdf->x[n] = xmax;
 	    cdf->y[n] = 1.0;
 	    cdf->norm = sum;
-		
-		for (n=0;n<cdf->ncdf;n++)
-		{
-			printf ("CDF %i x %.10e y %.10e\n",n,cdf->x[n],cdf->y[n]);
-		}
 		
 	}
 	else
@@ -894,7 +887,10 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
 }
 
 
-
+//	for (n=0;n<cdf->ncdf;n++)
+//		{
+//			printf ("CDF_test %i x %.10e y %.10e\n",n,cdf->x[n],cdf->y[n]);
+//		}
 
 
 

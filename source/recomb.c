@@ -194,6 +194,10 @@ fb_topbase_partial (freq)
     partial *= (freq - fthresh) / freq;
   else if (fbfr == FB_RATE)
     partial /= (H * freq);
+ // else
+ // printf ("WOW freq %e partial %e\n",freq,partial);
+  
+  
 
   return (partial);
 }
@@ -264,7 +268,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
 {
   double fnu;
   int n;
-
+  printf ("INTEG_FB f1=%e f2=%e\n",f1,f2);
 
   if (mode == OUTER_SHELL)
   {
@@ -276,6 +280,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
         /* See if the frequencies correspond to one previously calculated */
         if (f1 == freebound[n].f1 && f2 == freebound[n].f2)
         {
+			  printf ("We have this already\n");
           fnu = get_fb (t, nion, n, fb_choice, mode);
           return (fnu);
         }
@@ -579,7 +584,6 @@ use that instead if possible --  57h */
         {
           fb_jumps[fb_njumps] = fthresh;
           fb_njumps++;
-		  printf ("JUMP found a jump at %e now %i jumps %e %e\n",fb_jumps[fb_njumps-1],fb_njumps,f1,f2);
         }
       }                         //IS THIS CORRECT? (SS, MAY04)
 
@@ -601,10 +605,6 @@ use that instead if possible --  57h */
 
     }
 	
-	for (n=0;n<fb_njumps;n++)
-	{
-		printf ("JUMPS %i %e\n",n,fb_jumps[n]);
-	}
 
     //!BUG SSMay04
     //It doesn't seem to work unless this is zero? (SS May04)
@@ -624,7 +624,6 @@ use that instead if possible --  57h */
 		freq=f1 + dfreq * n;  //The frequency of the arrayelement we would make in the normal rin of things
 		if (freq > fb_jumps[nn] && nn<fb_njumps) //The element we were going to make has a frequency abouve the jump
 		{
-			printf ("making a jump at nnn=%i coz %e > %e and %i < %i\n",nnn,freq,fb_jumps[nn],nn,fb_njumps);
 			fb_x[nnn]=fb_jumps[nn]*(1.-DELTA_V/(2.*C));  //We make one frequency point 1km/s below the jump
 			fb_y[nnn]=fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL); //And the flux for that point
 			nnn=nnn+1;			//increase the index of the created array
@@ -658,7 +657,6 @@ use that instead if possible --  57h */
 	
 	if (nnn > cdf_fb.ncdf)
 	{
-		printf ("BLAH Extending size of fb array from %i to %i\n",cdf_fb.ncdf,nnn);
 		free(cdf_fb.x);
 		free(cdf_fb.y);
 		free(cdf_fb.d);
@@ -678,21 +676,14 @@ use that instead if possible --  57h */
 	
 	
 
+	
+//	for (n=0;n<nnn;n++)
+//	{
+//		printf ("Unscaled_PDF %i x %.10e y %.10e\n",n,fb_x[n],fb_y[n]);
+//	}
 
-	for (n=0;n<nnn;n++)
-	{
-		printf ("Unscaled_PDF %i x %.10e y %.10e\n",n,fb_x[n],fb_y[n]);
-		cdf_fb.x[n]=fb_x[n];
-		cdf_fb.y[n]=fb_y[n];
-		
-	}
 
-	for (n=0;n<nnn;n++)
-	{
-		printf ("Unscaled_PDF2 %i x %.10e y %.10e\n",n,cdf_fb.x[n],cdf_fb.y[n]);
-
-		
-	}
+	
 
     if (cdf_gen_from_array (&cdf_fb, fb_x, fb_y, nnn, f1, f2, fb_njumps, fb_jumps) != 0)
     {
@@ -1207,6 +1198,9 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
   int nmin, nmax;               // These are the limits over which number xsections we will use 
   double qromb ();
 
+
+  printf ("XINTEG_FB f1=%e f2=%e t=%e\n",f1,f2,t);
+
   dnu = 0.0;                    //Avoid compilation errors.
 
   if (-1 < nion && nion < nions)        //Get emissivity for this specific ion_number
@@ -1257,12 +1251,13 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
     if (fb_xtop->macro_info == 0 || geo.macro_simple == 1 || geo.rt_mode == RT_MODE_2LEVEL)  //Macro atom check. (SS)
     {
       fthresh = fb_xtop->freq[0];
+		printf ("INTEGRATING thresh %e\n",fthresh);
       fmax = fb_xtop->freq[fb_xtop->np - 1];    // Argues that this should be part of structure
       if (f1 > fthresh)
         fthresh = f1;
       if (f2 < fmax)
         fmax = f2;
-
+		printf ("INTEGRATING BETWEEN %e and %e\n",fthresh,fmax);
       // Now calculate the emissivity as long as fmax exceeds xthreshold and there are ions to recombine
       if (fmax > fthresh)
       {
@@ -1276,7 +1271,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
       }
     }
   }
-
+  printf ("fnu=%e\n",fnu);
 
 
   return (fnu);
@@ -1655,7 +1650,10 @@ sort_and_compress (array_in, array_out, npts)
   int compare_doubles ();
 
   values = calloc (sizeof (double), npts);
-
+  for (n = 0; n < npts; n++)
+    {
+      values[n] = array_in[n];
+    }
 
   /* Sort the array in place */
   qsort (values, npts, sizeof (double), compare_doubles);

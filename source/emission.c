@@ -240,6 +240,8 @@ total_emission (one, f1, f2)
 	  /* We compute the radiative recombination luminosirty - this is not the same as the rr cooling rate and
 	  	so is stored in a seperate variable */
       xplasma->lum_tot += xplasma->lum_rr = total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL);     //outer shell recombinations
+		printf ("BLAH2 f1 %e f2 %e total_fb %e %i\n",f1,f2,total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL),geo.rt_mode);
+		
 
 
     }
