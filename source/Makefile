@@ -169,7 +169,7 @@ foo: foo.o signal.o time.o
 python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 		saha.o spectra.o wind2d.o wind.o  vvector.o debug.o recipes.o \
 		trans_phot.o phot_util.o resonate.o radiation.o \
-		wind_updates2d.o windsave.o extract.o pdf.o roche.o random.o \
+		wind_updates2d.o windsave.o extract.o cdf.o roche.o random.o \
 		stellar_wind.o homologous.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o  continuum.o get_models.o emission.o cooling.o recomb.o diag.o \
 		sv.o ionization.o  ispy.o   levels.o gradv.o reposition.o \
@@ -189,7 +189,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
 		saha.c spectra.c wind2d.c wind.c  vvector.c debug.c recipes.c \
 		trans_phot.c phot_util.c resonate.c radiation.c \
-		wind_updates2d.c windsave.c extract.c pdf.c roche.c random.c \
+		wind_updates2d.c windsave.c extract.c cdf.c roche.c random.c \
 		stellar_wind.c homologous.c hydro_import.c corona.c knigge.c  disk.c\
 		lines.c  continuum.c emission.c cooling.c recomb.c diag.c \
 		sv.c ionization.c  ispy.c  levels.c gradv.c reposition.c \
@@ -226,7 +226,7 @@ D:
 
 py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
 		emission.o recomb.o util.o detail.o \
-		pdf.o random.o recipes.o saha.o \
+		cdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
 		radiation.o gradv.o phot_util.o anisowind.o resonate.o density.o \
@@ -252,7 +252,7 @@ summarize_atomic: summarize_atomic.o get_atomicdata.o log.o rdpar.o synonyms.o
 
 table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
 		emission.o recomb.o util.o detail.o \
-		pdf.o random.o recipes.o saha.o \
+		cdf.o random.o recipes.o saha.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
 		radiation.o gradv.o phot_util.o anisowind.o resonate.o density.o \
@@ -273,11 +273,11 @@ py_smooth: py_smooth.o
 	$(CC) $(CFLAGS) py_smooth.o  $(LDFLAGS)  -o py_smooth
 		mv $@ $(BIN)
 
-test_bb: bb.o test_bb.o pdf.o recipes.o bilinear.o time.o 
-	$(CC)  ${CFLAGS} bb.o pdf.o test_bb.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_bb
+test_bb: bb.o test_bb.o cdf.o recipes.o bilinear.o time.o 
+	$(CC)  ${CFLAGS} bb.o cdf.o test_bb.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_bb
 	
-test_pow: test_pow.o pdf.o recipes.o bilinear.o time.o 
-	$(CC)  ${CFLAGS} pdf.o test_pow.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_pow
+test_pow: test_pow.o cdf.o recipes.o bilinear.o time.o 
+	$(CC)  ${CFLAGS} cdf.o test_pow.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_pow
 
 test_matrix: test_matrix.o $(python_objects)
 	$(CC) ${CFLAGS} test_matrix.o $(python_objects) $(LDFLAGS) -o test_matrix
@@ -305,7 +305,7 @@ plot_roche: plot_roche.o roche.o vvector.o phot_util.o recipes.o
 py_grid: bb.o get_atomicdata.o py_grid.o photon2d.o photon_gen.o \
 		saha.o spectra.o wind2d.o wind.o  vvector.o debug.o recipes.o \
 		trans_phot.o phot_util.o resonate.o radiation.o \
-		wind_updates2d.o windsave.o extract.o pdf.o roche.o random.o \
+		wind_updates2d.o windsave.o extract.o cdf.o roche.o random.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o continuum.o get_models.o emission.o recomb.o util.o anisowind.o \
 		sv.o ionization.o  ispy.o   levels.o gradv.o reposition.o \
@@ -318,7 +318,7 @@ py_grid: bb.o get_atomicdata.o py_grid.o photon2d.o photon_gen.o \
 		trans_phot.o phot_util.o resonate.o radiation.o \
 		stellar_wind.o homologous.o  corona.o util.o anisowind.o \
 		wind_updates2d.o windsave.o extract.o ispy.o bands.o\
-		pdf.o roche.o random.o continuum.o get_models.o  \
+		cdf.o roche.o random.o continuum.o get_models.o  \
 		lines.o ionization.o emission.o  recomb.o reposition.o \
 		sv.o hydro_import.o knigge.o disk.o  levels.o gradv.o density.o \
 		yso.o elvis.o cylindrical.o rtheta.o \

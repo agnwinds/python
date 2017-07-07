@@ -513,13 +513,13 @@ total_fb (one, t, f1, f2, fb_choice, mode)
  ************************************************************************/
 
 
-double fb_x[300], fb_y[300];
+double fb_x[3000], fb_y[3000];
 double fb_jumps[NLEVELS];       // There is at most one jump per level
 double xfb_jumps[NLEVELS];     // This is just a dummy array that parallels fb_jumpts
 int fb_njumps = (-1);
 
 WindPtr ww_fb;
-struct Cdf cdf_fb;
+//struct Cdf cdf_fb;
 double one_fb_f1, one_fb_f2, one_fb_te; /* Old values */
 
 double
@@ -529,7 +529,7 @@ one_fb (one, f1, f2)
 {
   double freq, tt, delta;
   int n,nn,nnn, npoints;
-  double fthresh, dfreq, deltav;
+  double fthresh, dfreq;
   int nplasma;
   PlasmaPtr xplasma;
   PhotStorePtr xphot;
@@ -538,7 +538,6 @@ one_fb (one, f1, f2)
   xplasma = &plasmamain[nplasma];
   xphot = &photstoremain[nplasma];
   
-  deltav=1e7; //The required resolution in velocity space - 1e5cm/s = 1 km/s
 
   if (f2 < f1)
   {
@@ -613,28 +612,29 @@ use that instead if possible --  57h */
   nnn=0;   //Zero the index for elements in the flux array
 	nn=0;  //Zero the index for elements in the jump array
 	  n=0;  //Zero the counting element for equally spaced frequencies
-    dfreq = (f2 - f1) / 199; //This is the frequency spacing for the equally spaced elements
-    while (n < (200))   //We keep going until n=199, which will give the maximum required frequency
+    dfreq = (f2 - f1) / 1999; //This is the frequency spacing for the equally spaced elements
+    while (n < (2000))   //We keep going until n=199, which will give the maximum required frequency
     {
 		freq=f1 + dfreq * n;  //The frequency of the arrayelement we would make in the normal rin of things
 		if (freq > fb_jumps[nn] && nn<fb_njumps) //The element we were going to make has a frequency abouve the jump
 		{
-			fb_x[nnn]=fb_jumps[nn]*(1.-deltav/(2.*C));  //We make one frequency point 1km/s below the jump
+			printf ("making a jump at nnn=%i coz %e > %e and %i < %i\n",nnn,freq,fb_jumps[nn],nn,fb_njumps);
+			fb_x[nnn]=fb_jumps[nn]*(1.-DELTA_V/(2.*C));  //We make one frequency point 1km/s below the jump
 			fb_y[nnn]=fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL); //And the flux for that point
 			nnn=nnn+1;			//increase the index of the created array
-			fb_x[nnn]=fb_jumps[nn]*(1.+deltav/(2*C));  //And one frequency point just above the jump
+			fb_x[nnn]=fb_jumps[nn]*(1.+DELTA_V/(2*C));  //And one frequency point just above the jump
 			fb_y[nnn]=fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL); //And the flux for that point
 			nn=nn+1;    //We heave dealt with this jump - on to the next one
 			nnn=nnn+1;  //And we will be filling the next array element next time
 		}
-		else  //We havent hit a jump
+		else  //We haven't hit a jump
 		{
 			if (freq > fb_x[nnn-1])  //Deal with the unusual case where the upper point in our 'jump' pair is above the next ragular point
 				{
       			fb_x[nnn] = freq;   //Set the next array element frequency
       			fb_y[nnn] = fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL); //And the flux
 				n=n+1;  //Increment the regular grid counter
-	  	  		nnn=nnn+1; //Increment the grnerated array counter
+	  	  		nnn=nnn+1; //Increment the generated array counter
   				}
   	  		else //We dont need to make a new point, the upper frequency pair of the last jump did the trick
   		  		{
@@ -646,10 +646,47 @@ use that instead if possible --  57h */
 	
 	/* At this point, the variable nnn stores the number of points */
 	
+	fb_njumps=0;
+	
+	/* Check to see if the new number of points will exceed the number of points allocated in the cdf - if so, extend */
+	
+	if (nnn > cdf_fb.ncdf)
+	{
+		printf ("BLAH Extending size of fb array from %i to %i\n",cdf_fb.ncdf,nnn);
+		free(cdf_fb.x);
+		free(cdf_fb.y);
+		free(cdf_fb.d);
+
+
+		if ((cdf_fb.x = calloc (sizeof (double), nnn+1)) == NULL)
+			Error("one_fb - error extending fb array\n");
+		if ((cdf_fb.y = calloc (sizeof (double), nnn+1)) == NULL)
+			Error("one_fb - error extending fb array\n");
+		if ((cdf_fb.d = calloc (sizeof (double), nnn+1)) == NULL)
+			Error("one_fb - error extending fb array\n");
+		
+		cdf_fb.ncdf=nnn;
+	}
+	
+	
+	
 	
 
 
-printf ("RECOMB GENERATION");
+	for (n=0;n<nnn;n++)
+	{
+		printf ("Unscaled_PDF %i x %.10e y %.10e\n",n,fb_x[n],fb_y[n]);
+		cdf_fb.x[n]=fb_x[n];
+		cdf_fb.y[n]=fb_y[n];
+		
+	}
+
+	for (n=0;n<nnn;n++)
+	{
+		printf ("Unscaled_PDF2 %i x %.10e y %.10e\n",n,cdf_fb.x[n],cdf_fb.y[n]);
+
+		
+	}
 
     if (cdf_gen_from_array (&cdf_fb, fb_x, fb_y, nnn, f1, f2, fb_njumps, fb_jumps) != 0)
     {
