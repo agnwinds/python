@@ -1303,7 +1303,6 @@ calc_cdf_gradient (cdf)
   int n, istat;
   double dx1, dx2, dy1, dy2;
 
-  printf ("In calc_cdf_gradient ncdf=%i\n",cdf->ncdf);
   istat = 0;
   for (n = 1; n < cdf->ncdf; n++)
     {

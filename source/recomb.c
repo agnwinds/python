@@ -194,8 +194,6 @@ fb_topbase_partial (freq)
     partial *= (freq - fthresh) / freq;
   else if (fbfr == FB_RATE)
     partial /= (H * freq);
- // else
- // printf ("WOW freq %e partial %e\n",freq,partial);
   
   
 
@@ -268,7 +266,6 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
 {
   double fnu;
   int n;
-  printf ("INTEG_FB f1=%e f2=%e\n",f1,f2);
 
   if (mode == OUTER_SHELL)
   {
@@ -280,7 +277,6 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
         /* See if the frequencies correspond to one previously calculated */
         if (f1 == freebound[n].f1 && f2 == freebound[n].f2)
         {
-			  printf ("We have this already\n");
           fnu = get_fb (t, nion, n, fb_choice, mode);
           return (fnu);
         }
@@ -672,16 +668,6 @@ use that instead if possible --  57h */
 		cdf_fb.ncdf=nnn;
 	}
 	
-	
-	
-	
-
-	
-//	for (n=0;n<nnn;n++)
-//	{
-//		printf ("Unscaled_PDF %i x %.10e y %.10e\n",n,fb_x[n],fb_y[n]);
-//	}
-
 
 	
 
@@ -900,12 +886,12 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
         x += fb_topbase_partial (freq);
       }
 
-      fnu += xplasma->density[nion] * x;
+//      fnu += xplasma->density[nion] * x;
     }
 
 
     /* x is the emissivity from this ion. Add it to the total */
-    fnu += xplasma->density[nion] * x;
+    fnu += xplasma->density[nion+1] * x;
   }
 
   fnu *= xplasma->ne;           // Correct from specific emissivity to the total fb emissivity
@@ -1199,8 +1185,6 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
   double qromb ();
 
 
-  printf ("XINTEG_FB f1=%e f2=%e t=%e\n",f1,f2,t);
-
   dnu = 0.0;                    //Avoid compilation errors.
 
   if (-1 < nion && nion < nions)        //Get emissivity for this specific ion_number
@@ -1251,13 +1235,11 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
     if (fb_xtop->macro_info == 0 || geo.macro_simple == 1 || geo.rt_mode == RT_MODE_2LEVEL)  //Macro atom check. (SS)
     {
       fthresh = fb_xtop->freq[0];
-		printf ("INTEGRATING thresh %e\n",fthresh);
       fmax = fb_xtop->freq[fb_xtop->np - 1];    // Argues that this should be part of structure
       if (f1 > fthresh)
         fthresh = f1;
       if (f2 < fmax)
         fmax = f2;
-		printf ("INTEGRATING BETWEEN %e and %e\n",fthresh,fmax);
       // Now calculate the emissivity as long as fmax exceeds xthreshold and there are ions to recombine
       if (fmax > fthresh)
       {
@@ -1271,7 +1253,6 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
       }
     }
   }
-  printf ("fnu=%e\n",fnu);
 
 
   return (fnu);
@@ -1555,8 +1536,7 @@ gs_rrate (nion, T)
     //NSH force code to always use milne for a test REMOVE ME!!!
     //if (ion[nion].bad_gs_rr_t_flag == 100 && ion[nion].bad_gs_rr_r_flag == 100)       //We have tabulated gs data
   {
-    //printf("We are using the tabulations for GS recomb\n");
-    for (i = 0; i < BAD_GS_RR_PARAMS; i++)
+	  for (i = 0; i < BAD_GS_RR_PARAMS; i++)
     {
       rates[i] = bad_gs_rr[ion[nion].nxbadgsrr].rates[i];
       temps[i] = bad_gs_rr[ion[nion].nxbadgsrr].temps[i];
