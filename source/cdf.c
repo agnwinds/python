@@ -558,7 +558,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
   double sum, q;
   int njump_min, njump_max;
   double ysum;
-  int echeck, cdf_check (), recalc_pdf_from_cdf ();
+  int echeck,cdf_check (), recalc_pdf_from_cdf ();
 
 
 
@@ -567,9 +567,10 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
   if (xmax < xmin)
     {
       Error ("cdf_gen_from_array: xmin %g <= xmax %g\n", xmin, xmax);
-      return (-1);
+      exit (0);
     }
-  echeck = 0;
+    allzero = 0;
+	
   for (n = 1; n < n_xy; n++)
     {
       if (x[n] <= x[n - 1])
@@ -577,40 +578,19 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
 	  Error
 	    ("cdf_gen_from_array: input x not in ascending order at element %5d/%5d  %11.6e %11.6e\n",
 	     n, n_xy, x[n - 1], x[n]);
-	  echeck = 1;
+	  exit (0);
 	}
       if (y[n] < 0)
 	{
-	  Error ("cdf_gen_from_array: input y not >= 0\n");
-	  exit (0);
+	  Error ("cdf_gen_from_array: probability density %g < 0 at element %d\n",y[n], n);
+	  exit(0);
 	}
-    }
-
-  if (echeck == 1)
-    {
-      Error ("cdf_from_array: Trying to fix the input array\n");
-
-      n=cdf_array_fixup (x, y, n_xy);
-
-      if (n!=n_xy) {
-          Log("cdf_gen_from_array: Reduced input array  %d to %d elements\n",n_xy,n);
-          n_xy=n;
-      }
-
-      for (n = 1; n < n_xy; n++)
+    else if (y[n] > 0)
 	{
-	  if (x[n] <= x[n - 1])
-	    {
-	      Error
-		("cdf_gen_from_array: Recheck: input x not in ascending order at element %5d/%5d  %11.6e %11.6e\n",
-		 n, n_xy, x[n - 1], x[n]);
-	      echeck = 1;
-	    }
+  	  allzero = 1;
 	}
     }
-
-
-
+	
 
 /* Determine which jumps are in the range of xmin and xmax */
   njump_min = njump_max = 0;
@@ -795,6 +775,12 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
 
       for (n = 1; n < pdf_n; n++)
 	pdf_z[n] /= sum;
+	  
+	  
+//	for (n=0;n<pdf_n;n++)
+//	{
+//		printf ("scaledCDF %i x %.10e y %.10e\n",n,pdf_x[n],pdf_z[n]);
+//	}
 
 /* So pdf_z contains a properly normalized cdf on the points specified by
    the input array, or more explicitly, at the points specied in the array
@@ -836,12 +822,35 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
      shuffled the pdf when it would otherwise be monotonic.  It is not obvious
      to me that this is the most elegant way to deal with this problem.  
    */
+	
+//	for (n=0;n<pdf_n;n++)
+//	{
+//		printf ("CDF_test %i x %.10e y %.10e\n",n,cdf->x[n],cdf->y[n]);
+//	}
+
+
+	if (njumps==0)
+	{
+	    cdf->x[0] = xmin;
+	    cdf->y[0] = 0;
+		for (n=1;n<pdf_n;n++)
+		{
+  	      cdf->x[n] = pdf_x[n];
+  	      cdf->y[n] = pdf_z[n];  
+		}
+	    cdf->ncdf = pdf_n;
+	    cdf->x[n] = xmax;
+	    cdf->y[n] = 1.0;
+	    cdf->norm = sum;
+		
+	}
+	else
+	{
 
 
 
-
-  cdf->x[0] = xmin;
-  cdf->y[0] = 0;
+    cdf->x[0] = xmin;
+    cdf->y[0] = 0;
 
   j = njump_min;		// j refers to the jump points
   m = 0;			//m referest to points in pdf_x and pdf_y
@@ -869,15 +878,19 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
       nn++;
     }
 	
-	
+
+    cdf->ncdf = nn;
+    cdf->x[nn] = xmax;
+    cdf->y[nn] = 1.0;
+    cdf->norm = sum;		/* The normalizing factor that would convert the function we
+  				   have been given into a proper probability density function */
+}
 
 
-
-  cdf->ncdf = nn;
-  cdf->x[nn] = xmax;
-  cdf->y[nn] = 1.0;
-  cdf->norm = sum;		/* The normalizing factor that would convert the function we
-				   have been given into a proper probability density function */
+//	for (n=0;n<cdf->ncdf;n++)
+//		{
+//			printf ("CDF_test %i x %.10e y %.10e\n",n,cdf->x[n],cdf->y[n]);
+//		}
 
 
 

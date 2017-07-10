@@ -81,6 +81,8 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 #define VMAX                		1.e9
 #define TAU_MAX				20.     /* Sets an upper limit in extract on when
                                                    a photon can be assumed to be completely absorbed */
+	
+#define DELTA_V				1.		/*This is the accuracy in velocity space (cm/s) that we sample edges when producing freebound photons*/	
 
 #define DANG_LIVE_OR_DIE   2.0  /* If constructing photons from a live or die run of the code, the
                                    angle over which photons will be accepted must be defined */

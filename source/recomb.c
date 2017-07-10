@@ -194,6 +194,8 @@ fb_topbase_partial (freq)
     partial *= (freq - fthresh) / freq;
   else if (fbfr == FB_RATE)
     partial /= (H * freq);
+  
+  
 
   return (partial);
 }
@@ -264,7 +266,6 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
 {
   double fnu;
   int n;
-
 
   if (mode == OUTER_SHELL)
   {
@@ -513,13 +514,13 @@ total_fb (one, t, f1, f2, fb_choice, mode)
  ************************************************************************/
 
 
-double fb_x[300], fb_y[300];
+double fb_x[3000], fb_y[3000];
 double fb_jumps[NLEVELS];       // There is at most one jump per level
 double xfb_jumps[NLEVELS];     // This is just a dummy array that parallels fb_jumpts
 int fb_njumps = (-1);
 
 WindPtr ww_fb;
-struct Cdf cdf_fb;
+//struct Cdf cdf_fb;
 double one_fb_f1, one_fb_f2, one_fb_te; /* Old values */
 
 double
@@ -529,7 +530,7 @@ one_fb (one, f1, f2)
 {
   double freq, tt, delta;
   int n,nn,nnn, npoints;
-  double fthresh, dfreq, deltav;
+  double fthresh, dfreq;
   int nplasma;
   PlasmaPtr xplasma;
   PhotStorePtr xphot;
@@ -538,7 +539,6 @@ one_fb (one, f1, f2)
   xplasma = &plasmamain[nplasma];
   xphot = &photstoremain[nplasma];
   
-  deltav=1e7; //The required resolution in velocity space - 1e5cm/s = 1 km/s
 
   if (f2 < f1)
   {
@@ -600,6 +600,7 @@ use that instead if possible --  57h */
 
 
     }
+	
 
     //!BUG SSMay04
     //It doesn't seem to work unless this is zero? (SS May04)
@@ -613,28 +614,28 @@ use that instead if possible --  57h */
   nnn=0;   //Zero the index for elements in the flux array
 	nn=0;  //Zero the index for elements in the jump array
 	  n=0;  //Zero the counting element for equally spaced frequencies
-    dfreq = (f2 - f1) / 199; //This is the frequency spacing for the equally spaced elements
-    while (n < (200))   //We keep going until n=199, which will give the maximum required frequency
+    dfreq = (f2 - f1) / 1999; //This is the frequency spacing for the equally spaced elements
+    while (n < (2000))   //We keep going until n=199, which will give the maximum required frequency
     {
 		freq=f1 + dfreq * n;  //The frequency of the arrayelement we would make in the normal rin of things
 		if (freq > fb_jumps[nn] && nn<fb_njumps) //The element we were going to make has a frequency abouve the jump
 		{
-			fb_x[nnn]=fb_jumps[nn]*(1.-deltav/(2.*C));  //We make one frequency point 1km/s below the jump
+			fb_x[nnn]=fb_jumps[nn]*(1.-DELTA_V/(2.*C));  //We make one frequency point 1km/s below the jump
 			fb_y[nnn]=fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL); //And the flux for that point
 			nnn=nnn+1;			//increase the index of the created array
-			fb_x[nnn]=fb_jumps[nn]*(1.+deltav/(2*C));  //And one frequency point just above the jump
+			fb_x[nnn]=fb_jumps[nn]*(1.+DELTA_V/(2*C));  //And one frequency point just above the jump
 			fb_y[nnn]=fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL); //And the flux for that point
 			nn=nn+1;    //We heave dealt with this jump - on to the next one
 			nnn=nnn+1;  //And we will be filling the next array element next time
 		}
-		else  //We havent hit a jump
+		else  //We haven't hit a jump
 		{
 			if (freq > fb_x[nnn-1])  //Deal with the unusual case where the upper point in our 'jump' pair is above the next ragular point
 				{
       			fb_x[nnn] = freq;   //Set the next array element frequency
       			fb_y[nnn] = fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL); //And the flux
 				n=n+1;  //Increment the regular grid counter
-	  	  		nnn=nnn+1; //Increment the grnerated array counter
+	  	  		nnn=nnn+1; //Increment the generated array counter
   				}
   	  		else //We dont need to make a new point, the upper frequency pair of the last jump did the trick
   		  		{
@@ -646,10 +647,29 @@ use that instead if possible --  57h */
 	
 	/* At this point, the variable nnn stores the number of points */
 	
+	fb_njumps=0;
+	
+	/* Check to see if the new number of points will exceed the number of points allocated in the cdf - if so, extend */
+	
+	if (nnn > cdf_fb.ncdf)
+	{
+		free(cdf_fb.x);
+		free(cdf_fb.y);
+		free(cdf_fb.d);
+
+
+		if ((cdf_fb.x = calloc (sizeof (double), nnn+1)) == NULL)
+			Error("one_fb - error extending fb array\n");
+		if ((cdf_fb.y = calloc (sizeof (double), nnn+1)) == NULL)
+			Error("one_fb - error extending fb array\n");
+		if ((cdf_fb.d = calloc (sizeof (double), nnn+1)) == NULL)
+			Error("one_fb - error extending fb array\n");
+		
+		cdf_fb.ncdf=nnn;
+	}
 	
 
-
-printf ("RECOMB GENERATION");
+	
 
     if (cdf_gen_from_array (&cdf_fb, fb_x, fb_y, nnn, f1, f2, fb_njumps, fb_jumps) != 0)
     {
@@ -866,12 +886,12 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
         x += fb_topbase_partial (freq);
       }
 
-      fnu += xplasma->density[nion] * x;
+//      fnu += xplasma->density[nion] * x;
     }
 
 
     /* x is the emissivity from this ion. Add it to the total */
-    fnu += xplasma->density[nion] * x;
+    fnu += xplasma->density[nion+1] * x;
   }
 
   fnu *= xplasma->ne;           // Correct from specific emissivity to the total fb emissivity
@@ -1164,6 +1184,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
   int nmin, nmax;               // These are the limits over which number xsections we will use 
   double qromb ();
 
+
   dnu = 0.0;                    //Avoid compilation errors.
 
   if (-1 < nion && nion < nions)        //Get emissivity for this specific ion_number
@@ -1219,7 +1240,6 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
         fthresh = f1;
       if (f2 < fmax)
         fmax = f2;
-
       // Now calculate the emissivity as long as fmax exceeds xthreshold and there are ions to recombine
       if (fmax > fthresh)
       {
@@ -1233,7 +1253,6 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
       }
     }
   }
-
 
 
   return (fnu);
@@ -1517,8 +1536,7 @@ gs_rrate (nion, T)
     //NSH force code to always use milne for a test REMOVE ME!!!
     //if (ion[nion].bad_gs_rr_t_flag == 100 && ion[nion].bad_gs_rr_r_flag == 100)       //We have tabulated gs data
   {
-    //printf("We are using the tabulations for GS recomb\n");
-    for (i = 0; i < BAD_GS_RR_PARAMS; i++)
+	  for (i = 0; i < BAD_GS_RR_PARAMS; i++)
     {
       rates[i] = bad_gs_rr[ion[nion].nxbadgsrr].rates[i];
       temps[i] = bad_gs_rr[ion[nion].nxbadgsrr].temps[i];
@@ -1617,18 +1635,23 @@ sort_and_compress (array_in, array_out, npts)
       values[n] = array_in[n];
     }
 
-
   /* Sort the array in place */
   qsort (values, npts, sizeof (double), compare_doubles);
+  
+
+  array_out[0]=values[0]; //Copy the first jump into the output array  
+  
   nfinal = 1;
-  for (n = 1; n < npts; n++)
+  for (n = 1; n < npts; n++) //Loop over the remaining jumps in the array
     {
-      if (values[n] > array_out[nfinal - 1])
+      if (values[n] > array_out[nfinal - 1])  //In the next point in the array is larger than the last one (i.e. not equal)
 	{
-	  array_out[nfinal] = values[n];
-	  nfinal += 1;
+	  array_out[nfinal] = values[n]; //Put the next point into the array
+	  nfinal += 1;  //Increment the size of the array
 	}
     }
+	
+
 
   return (nfinal);
 }

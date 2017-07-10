@@ -41,6 +41,8 @@ cooling (xxxplasma, t)
 {
 
 	xxxplasma->t_e = t;
+	
+
 
 
 
@@ -65,8 +67,26 @@ cooling (xxxplasma, t)
 
   /*81c - nsh - we now treat DR cooling as a recombinational process - still unsure as to how to treat emission, so at the moment
      it remains here */
-
   xxxplasma->cool_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, INNER_SHELL);
+  
+//  f1=2.641e15;
+//  f2=1.523e16;
+  
+//  df=(f2-f1)/200;
+//  printf ("FB_TEST total %e\n",total_fb (&wmain[xxxplasma->nwind], t, f1, f2, FB_FULL, OUTER_SHELL));
+//  for (n=1;n<200;n++)
+//  {
+//	  lower= total_fb (&wmain[xxxplasma->nwind], t, f1, f1+(n*df), FB_FULL, OUTER_SHELL);
+//	  upper= total_fb (&wmain[xxxplasma->nwind], t, f1+(n*df), f2, FB_FULL, OUTER_SHELL);
+//	  test= total_fb (&wmain[xxxplasma->nwind], t, f1+((n-1)*df), f1+((n)*df), FB_FULL, OUTER_SHELL);
+//	  printf ("FB_TEST1 break %e lower %e upper %e total %e\n",f1+(n*df),lower,upper,lower+upper);
+//	  printf ("FB_TEST2 %e to %e = %e\n",f1+((n-1)*df), f1+((n)*df),test);
+//	  printf ("FB_TEST3 %e %e \n",f1+((n-1)*df),fb (xxxplasma, t, f1+((n-1)*df), nions, FB_FULL));
+//  	}  
+  
+  
+//  exit(0);
+  
 
   /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
 
