@@ -764,8 +764,7 @@ one_ff (one, f1, f2)
 
   if (xplasma->t_e != one_ff_te || f1 != one_ff_f1 || f2 != one_ff_f2)
   {                             /* Generate a new pdf */
-
-    dfreq = (f2 - f1) / NCDF-1;
+    dfreq = (f2 - f1) / (double)(NCDF-1); //NSH we need to cast the NCDF-1 as a double, otherwise rounding errors cause a proble,
     for (n = 0; n < NCDF; n++)
     {
       ff_x[n] = f1 + dfreq * n;
@@ -773,8 +772,7 @@ one_ff (one, f1, f2)
     }
 
 
-
-    if ((echeck = cdf_gen_from_array (&cdf_ff, ff_x, ff_y, 200, f1, f2)) != 0)
+    if ((echeck = cdf_gen_from_array (&cdf_ff, ff_x, ff_y, NCDF, f1, f2)) != 0)
     {
       Error
         ("one_ff: cdf_gen_from_array error %d : f1 %g f2 %g te %g ne %g nh %g vol %g\n",

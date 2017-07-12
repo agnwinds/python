@@ -624,9 +624,9 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   //xmin and xmax now bracket the non zero parts of the input array
   printf ("PDF1 fmin %e fmax %e\n",xmin,xmax);
 
-	for (n=0;n<n_xy+1;n++)
+	for (n=0;n<n_xy;n++)
 	{
-		printf ("PDF1 %e %e\n",x[n],y[n]);
+		printf ("PDF1 %i %e %e\n",n,x[n],y[n]);
 	}
 
 
@@ -681,7 +681,9 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 		("cdf_gen_from_array: Consider increasing PDF_ARRAY to a value > n_xy + njumps, and recompiling\n");
 	      exit (0);
 	    }
+		 printf ("TESTPDF %e %e x[m]-xmax %e m %i nxy %i %e %e\n",x[m],xmax,x[m]-xmax,m,n_xy,pdf_x[pdf_n-1],pdf_y[pdf_n-1]);
 	}
+	printf ("TESTPDF jumped out of loop m=%i pdf_n=%i x[m]=%e xmax=%e\n",m,pdf_n,x[m],xmax);
       // Now worry about the last element
       pdf_x[pdf_n] = xmax;
       if (m < n_xy - 1)  //We are not at the limit of the supplied data, so we interpolate
@@ -691,7 +693,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 	}
       else  //xmax is outside the supplied data
 	{
-	  pdf_y[pdf_n] = y[m - 1];	//Again assume constant prob. density outside lims
+	  pdf_y[pdf_n] = y[m];	//Again assume constant prob. density outside lims - we know that m<n_xy from the while loop before we added one, so not at worst m=n_xy
 	}
       pdf_n++;
 
