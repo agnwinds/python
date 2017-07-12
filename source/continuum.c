@@ -79,7 +79,7 @@ one_continuum (spectype, t, g, freqmin, freqmax)
     lambdamin = C * 1e8 / freqmax;
     lambdamax = C * 1e8 / freqmin;
     if (cdf_gen_from_array
-        (&comp[spectype].xcdf, comp[spectype].xmod.w, comp[spectype].xmod.f, comp[spectype].nwaves, lambdamin, lambdamax, 1, jump) != 0)
+        (&comp[spectype].xcdf, comp[spectype].xmod.w, comp[spectype].xmod.f, comp[spectype].nwaves, lambdamin, lambdamax) != 0)
     {
       Error ("In one_continuum after return from cdf_gen_from_array\n");
     }

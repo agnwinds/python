@@ -745,7 +745,7 @@ one_ff (one, f1, f2)
      WindPtr one;               /* a single cell */
      double f1, f2;             /* freqmin and freqmax */
 {
-  double dummy, freq, dfreq;
+  double freq, dfreq;
   int n;
   int nplasma;
   PlasmaPtr xplasma;
@@ -774,7 +774,7 @@ one_ff (one, f1, f2)
 
 
 
-    if ((echeck = cdf_gen_from_array (&cdf_ff, ff_x, ff_y, 200, f1, f2, 0, &dummy)) != 0)
+    if ((echeck = cdf_gen_from_array (&cdf_ff, ff_x, ff_y, 200, f1, f2)) != 0)
     {
       Error
         ("one_ff: cdf_gen_from_array error %d : f1 %g f2 %g te %g ne %g nh %g vol %g\n",

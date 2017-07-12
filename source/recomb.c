@@ -614,8 +614,8 @@ use that instead if possible --  57h */
   nnn=0;   //Zero the index for elements in the flux array
 	nn=0;  //Zero the index for elements in the jump array
 	  n=0;  //Zero the counting element for equally spaced frequencies
-    dfreq = (f2 - f1) / 1999; //This is the frequency spacing for the equally spaced elements
-    while (n < (2000))   //We keep going until n=199, which will give the maximum required frequency
+    dfreq = (f2 - f1) / 199; //This is the frequency spacing for the equally spaced elements
+    while (n < (200))   //We keep going until n=199, which will give the maximum required frequency
     {
 		freq=f1 + dfreq * n;  //The frequency of the arrayelement we would make in the normal rin of things
 		if (freq > fb_jumps[nn] && nn<fb_njumps) //The element we were going to make has a frequency abouve the jump
@@ -644,34 +644,24 @@ use that instead if possible --  57h */
  	 	}
     }
 	
+	printf ("CDF_1 fmin %e fmax %e\n",f1,f2);
+	for (n=0;n<nnn;n++)
+	{
+		printf ("CDF_2 %e %e\n",fb_x[n],fb_y[n]);
+	}
+	
+	
 	
 	/* At this point, the variable nnn stores the number of points */
 	
-	fb_njumps=0;
 	
 	/* Check to see if the new number of points will exceed the number of points allocated in the cdf - if so, extend */
 	
-	if (nnn > cdf_fb.ncdf)
-	{
-		free(cdf_fb.x);
-		free(cdf_fb.y);
-		free(cdf_fb.d);
 
-
-		if ((cdf_fb.x = calloc (sizeof (double), nnn+1)) == NULL)
-			Error("one_fb - error extending fb array\n");
-		if ((cdf_fb.y = calloc (sizeof (double), nnn+1)) == NULL)
-			Error("one_fb - error extending fb array\n");
-		if ((cdf_fb.d = calloc (sizeof (double), nnn+1)) == NULL)
-			Error("one_fb - error extending fb array\n");
-		
-		cdf_fb.ncdf=nnn;
-	}
-	
 
 	
 
-    if (cdf_gen_from_array (&cdf_fb, fb_x, fb_y, nnn, f1, f2, fb_njumps, fb_jumps) != 0)
+    if (cdf_gen_from_array (&cdf_fb, fb_x, fb_y, nnn, f1, f2) != 0)
     {
       Error ("one_fb after error: f1 %g f2 %g te %g ne %g nh %g vol %g\n",
              f1, f2, xplasma->t_e, xplasma->ne, xplasma->density[1], one->vol);

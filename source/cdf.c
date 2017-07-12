@@ -317,9 +317,18 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
 
 
 
+
+
   xstep = (xmax - xmin) / pdfsteps;
 
 /* So at this point pdf_array contains an unnormalized version of the CDF for the function */
+  
+  
+  
+  
+  
+  
+  
   cdf->x[0] = xmin;
   cdf->y[0] = 0;
 
@@ -537,6 +546,7 @@ History:
 			so that problems with this would be easier to update in
 			future.
 	1405	JM -- Increased PDF array for use with disk14 models
+	1707	NSH -- Removed code for jumps - we now just supply asuitable unscaled pdf
 */
 
 #define PDF_ARRAY  28000
@@ -545,19 +555,15 @@ double pdf_x[PDF_ARRAY], pdf_y[PDF_ARRAY], pdf_z[PDF_ARRAY];
 int pdf_n;
 
 int
-cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
+cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
      CdfPtr cdf;
      double x[], y[];
      int n_xy;
      double xmin, xmax;
-     int njumps;
-     double jump[];
 {
   int allzero;
-  int m, n, nn, j;
+  int m, n, nn;
   double sum, q;
-  int njump_min, njump_max;
-  double ysum;
   int echeck,cdf_check (), recalc_pdf_from_cdf ();
 
 
@@ -592,79 +598,6 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
     }
 	
 
-/* Determine which jumps are in the range of xmin and xmax */
-  njump_min = njump_max = 0;
-  if (njumps > 0)
-    {
-      for (j = 1; j < njumps; j++)
-	{
-	  if (jump[j] <= jump[j - 1])
-	    {
-	      Error
-		("cdf_gen_from_array: jump[%d]=%g <=jump[%d]=%g out of order\n",
-		 j - 1, jump[j - 1], j, jump[j]);
-	      return (-1);
-	    }
-	}
-      njump_min = 0;
-      while (njump_min < njumps && jump[njump_min] <= xmin)
-	njump_min++;
-      njump_max = 0;
-      while (njump_max < njumps && jump[njump_max] < xmax)
-	njump_max++;
-      /* So at this point njump_min will point to the first jump which is betewen xmin and
-         xmax or it will equal to njumps in which case there were no jumps which were greater
-         than xmin.
-
-         Similarly njump_max will be the point to the first jump above xmax or if there are
-         no jumps above xmax, then it will be njumps. */
-
-      njumps = njump_max - njump_min;
-    }
-/* Finished inital processing of jumps.  So in future we only use jumps from njump_min to njump_max */
-
-  allzero = 0;
-  for (n = 0; n < n_xy; n++)
-    {
-      if (y[n] < 0)
-	{
-	  Error
-	    ("cdf_gen_from_array: probability density %g < 0 at element %d\n",
-	     y[n], n);
-	  return (-1);
-	}
-      if (y[n] > 0)
-	{
-	  allzero = 1;
-	};
-    }
-  /* OK, all the input data seems OK, by which we maen that we have checked that the pdf is positive */
-
-
-
-  /* Now modify x so that there is a value of x that corresponds to each value of njump.  We make the
-   * assumption that the jump is a positive jump, and so we want everthing up to this point to reflect
-   * the low side of the scale.  We do this on the pdf, rather than the cdf*/
-
-  for (n = njump_min; n < njump_max; n++)
-    {
-      j = 1;
-      while (j < n_xy)
-	{
-	  if (x[j] >= jump[n])
-	    {
-	      x[j] = jump[n];
-	      y[j] = y[j - 1];	/* This choice says we use the last value below the jump for this point */
-	      break;
-	    }
-	  j++;
-
-	}
-    }
-
-
-
-
 
   /* The next two checks look to see if there is a part of the CDF that is all zeros as the start or end of the distribution
 
@@ -689,6 +622,12 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
 
 
   //xmin and xmax now bracket the non zero parts of the input array
+  printf ("PDF1 fmin %e fmax %e\n",xmin,xmax);
+
+	for (n=0;n<n_xy+1;n++)
+	{
+		printf ("PDF1 %e %e\n",x[n],y[n]);
+	}
 
 
 
@@ -710,16 +649,16 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
   else
     {
       m = 0;
-      while (x[m] < xmin)
+      while (x[m] <= xmin)
 	m++;			// Find the bottom boundary
       pdf_x[0] = xmin;
-      if (m == 0)
+      if (m == 0)  //This is hit if the bottom boundary is outside the supplied data
 	{
 	  pdf_y[0] = y[0];	//Assume prob. density is constant outside array lims.
 	}
-      else
+      else  //We interpolate between supplied data points to get the value of the PDF at exactly xmin
 	{
-	  q = (xmin - x[m - 1]) / (x[m] - x[m - 1]);
+	  q = (xmin - x[m - 1]) / (x[m] - x[m - 1]);  
 	  pdf_y[0] = q * y[m] + (1. - q) * y[m - 1];
 	}
       pdf_n = 1;
@@ -736,8 +675,8 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
 		("cdf_gen_from_array: pdf_n (%d) exceeded maximum array size PDF_ARRAY (%d) \n",
 		 pdf_n, PDF_ARRAY);
 	      Error
-		("cdf_gen_from_array: n_xy %d xmin %f xmax %f njumps %d\n",
-		 n_xy, xmin, xmax, njumps);
+		("cdf_gen_from_array: n_xy %d xmin %f xmax %f\n",
+		 n_xy, xmin, xmax);
 	      Error
 		("cdf_gen_from_array: Consider increasing PDF_ARRAY to a value > n_xy + njumps, and recompiling\n");
 	      exit (0);
@@ -745,21 +684,25 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
 	}
       // Now worry about the last element
       pdf_x[pdf_n] = xmax;
-      if (m < n_xy - 1)
+      if (m < n_xy - 1)  //We are not at the limit of the supplied data, so we interpolate
 	{
 	  q = (xmax - x[m]) / (x[m + 1] - x[m]);
 	  pdf_y[pdf_n] = q * y[m + 1] + (1. - q) * y[m];
 	}
-      else
+      else  //xmax is outside the supplied data
 	{
 	  pdf_y[pdf_n] = y[m - 1];	//Again assume constant prob. density outside lims
 	}
       pdf_n++;
 
+	  printf ("PDF2 fmin %e fmax %e\n",xmin,xmax);
+  	for (n=0;n<pdf_n;n++)
+  	{
+  		printf ("PDF2 %e %e\n",pdf_x[n],pdf_y[n]);
+  	}
 
 
-
-/* So at this point, have probability density in pdf_x, pdf_y for the points
+/* So at this point, have unscaled probability density in pdf_x, pdf_y for the points
  * specified by the input array but we want the cumulative distribution
  * We also have assured that there is one value of pdf_x that corresponds to all of the jumps
  */
@@ -776,11 +719,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
       for (n = 1; n < pdf_n; n++)
 	pdf_z[n] /= sum;
 	  
-	  
-//	for (n=0;n<pdf_n;n++)
-//	{
-//		printf ("scaledCDF %i x %.10e y %.10e\n",n,pdf_x[n],pdf_z[n]);
-//	}
+
 
 /* So pdf_z contains a properly normalized cdf on the points specified by
    the input array, or more explicitly, at the points specied in the array
@@ -827,10 +766,14 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
 //	{
 //		printf ("CDF_test %i x %.10e y %.10e\n",n,cdf->x[n],cdf->y[n]);
 //	}
+	
+	//We now check that the CDF array previously allocated is going to be big enough for the new array
+	
+	cdf_check_size(cdf,pdf_n);
 
 
-	if (njumps==0)
-	{
+	//We now simply put the CDF into the CDF array
+
 	    cdf->x[0] = xmin;
 	    cdf->y[0] = 0;
 		for (n=1;n<pdf_n;n++)
@@ -843,54 +786,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
 	    cdf->y[n] = 1.0;
 	    cdf->norm = sum;
 		
-	}
-	else
-	{
 
-
-
-    cdf->x[0] = xmin;
-    cdf->y[0] = 0;
-
-  j = njump_min;		// j refers to the jump points
-  m = 0;			//m referest to points in pdf_x and pdf_y
-  nn = 1;			// nn refers to the non_jump points
-  for (n = 1; n < NCDF && m < pdf_n; n++)
-    {
-      ysum = ((double) nn) / (NCDF);	/* This is the target with no jumps */
-
-      while (pdf_z[m] < ysum)
-	{
-	  if (pdf_x[m] == jump[j])
-	    {
-	      cdf->x[n] = pdf_x[m];
-	      cdf->y[n] = pdf_z[m];
-	      n++;
-	      j++;
-	    }
-
-	  m++;			//increment m if necessary
-	}
-
-      cdf->x[n] = pdf_x[m];
-      cdf->y[n] = pdf_z[m];	/* this is pdf_z because that is where the cdf is stored */
-      m++;			/* This assures that no two points will be the same x value */
-      nn++;
-    }
-	
-
-    cdf->ncdf = nn;
-    cdf->x[nn] = xmax;
-    cdf->y[nn] = 1.0;
-    cdf->norm = sum;		/* The normalizing factor that would convert the function we
-  				   have been given into a proper probability density function */
-}
-
-
-//	for (n=0;n<cdf->ncdf;n++)
-//		{
-//			printf ("CDF_test %i x %.10e y %.10e\n",n,cdf->x[n],cdf->y[n]);
-//		}
 
 
 
@@ -899,16 +795,6 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax, njumps, jump)
   if (calc_cdf_gradient (cdf))
     {
       Error ("cdf_gen_from_array: Error returned from calc_cdf_gradient\n");
-      for (n = njump_min; n < njump_max; n++)
-	{
-	  Error ("cdf_gen_from_array: njump %3d jump %11.6e\n", n, jump[n]);
-	}
-      if (njump_min == njump_max)
-	{
-	  Error ("cdf_gen_from_array: There were no jumps in the pdf\n");
-	}
-
-
     }				// 57ib 
   if ((echeck = cdf_check (cdf)) != 0)
     {
@@ -1502,5 +1388,29 @@ int
 	
 	
 }
+
+int cdf_check_size(cdf,n)
+    CdfPtr cdf;
+	int n;
+	{
+		if (n > cdf->ncdf)
+		{
+			free(cdf->x);
+			free(cdf->y);
+			free(cdf->d);
+
+
+			if ((cdf->x = calloc (sizeof (double), n+1)) == NULL)
+				Error("cdf_check_size - error extending fb array\n");
+			if ((cdf->y = calloc (sizeof (double), n+1)) == NULL)
+				Error("cdf_check_size - error extending fb array\n");
+			if ((cdf->d = calloc (sizeof (double), n+1)) == NULL)
+				Error("cdf_check_size - error extending fb array\n");
+	
+			cdf->ncdf=pdf_n;
+		}
+		return(0);
+	}
+	
 
 
