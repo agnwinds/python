@@ -142,7 +142,6 @@ int extract(WindPtr w, PhotPtr p, int itype);
 int extract_one(WindPtr w, PhotPtr pp, int itype, int nspec);
 /* cdf.c */
 int cdf_gen_from_func(CdfPtr cdf, double (*func)(double), double xmin, double xmax, int njumps, double jump[]);
-double gen_array_from_func(double (*func)(double), double xmin, double xmax, int pdfsteps);
 int cdf_gen_from_array(CdfPtr cdf, double x[], double y[], int n_xy, double xmin, double xmax);
 double cdf_get_rand(CdfPtr cdf);
 int cdf_limit(CdfPtr cdf, double xmin, double xmax);
@@ -254,7 +253,7 @@ double xinteg_inner_fb(double t, double f1, double f2, int nion, int fb_choice);
 double total_rrate(int nion, double T);
 double gs_rrate(int nion, double T);
 int sort_and_compress(double *array_in, double *array_out, int npts);
-int compare_doubles(const double *a, const double *b);
+int compare_doubles(const void *a, const void *b);
 /* diag.c */
 int open_diagfile(void);
 int get_extra_diagnostics(void);

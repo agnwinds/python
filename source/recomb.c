@@ -529,7 +529,7 @@ one_fb (one, f1, f2)
      double f1, f2;             /* freqmin and freqmax */
 {
   double freq, tt, delta;
-  int n,nn,nnn, npoints;
+  int n,nn,nnn;
   double fthresh, dfreq;
   int nplasma;
   PlasmaPtr xplasma;
@@ -614,8 +614,8 @@ use that instead if possible --  57h */
   nnn=0;   //Zero the index for elements in the flux array
 	nn=0;  //Zero the index for elements in the jump array
 	  n=0;  //Zero the counting element for equally spaced frequencies
-    dfreq = (f2 - f1) / 199; //This is the frequency spacing for the equally spaced elements
-    while (n < (200))   //We keep going until n=199, which will give the maximum required frequency
+    dfreq = (f2 - f1) / 1999; //This is the frequency spacing for the equally spaced elements
+    while (n < (2000))   //We keep going until n=199, which will give the maximum required frequency
     {
 		freq=f1 + dfreq * n;  //The frequency of the arrayelement we would make in the normal rin of things
 		if (freq > fb_jumps[nn] && nn<fb_njumps) //The element we were going to make has a frequency abouve the jump
@@ -639,16 +639,12 @@ use that instead if possible --  57h */
   				}
   	  		else //We dont need to make a new point, the upper frequency pair of the last jump did the trick
   		  		{
-	  			n=n+1;  //We only need to increment our regualr grid counter
+	  			n=n+1;  //We only need to increment our regular grid counter
   		  		}
  	 	}
     }
 	
-	printf ("CDF_1 fmin %e fmax %e\n",f1,f2);
-	for (n=0;n<nnn;n++)
-	{
-		printf ("CDF_2 %e %e\n",fb_x[n],fb_y[n]);
-	}
+
 	
 	
 	
@@ -659,7 +655,6 @@ use that instead if possible --  57h */
 	
 
 
-	
 
     if (cdf_gen_from_array (&cdf_fb, fb_x, fb_y, nnn, f1, f2) != 0)
     {
@@ -1647,16 +1642,18 @@ sort_and_compress (array_in, array_out, npts)
 }
 
 /* This routine just compares two double precision numbers and
- * returns 1 if a is greate than b, and 0 otherwise.  It is
+ * returns 1 if a is greater than b, and 0 otherwise.  It is
  * used by qsort
  */
 
+
+
 int
-compare_doubles (const double *a, const double *b)
+compare_doubles (const void *a, const void *b)
 {
-  if (*a > *b)
+  if (*(double*)a > *(double*)b)
     return 1;
-  else if (*a < *b)
+  else if (*(double*)a < *(double*)b)
     return -1;
   else
     return 0;

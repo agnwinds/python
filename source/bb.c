@@ -212,21 +212,30 @@ planck (t, freqmin, freqmax)
 
   if (ninit_planck == 0)
   {                             /* First time through p_alpha must be initialized */
+	  printf ("CDF initialising planck\n");
     if ((echeck = cdf_gen_from_func (&cdf_bb, &planck_d, ALPHAMIN, ALPHAMAX, 29, bb_set)) != 0)
     {
       Error ("Planck: on return from cdf_gen_from_func %d\n", echeck);
     }
+	
+	
+
     /* We need the integral of the bb function outside of the regions of interest as well */
 
 
-    cdf_bb_tot = qromb (planck_d, 0, ALPHABIG, 1e-8);
+    cdf_bb_tot = qromb (planck_d, 0, ALPHAMAX, 1e-8)+qromb (brem_d, ALPHAMAX, ALPHABIG, 1e-8);
     cdf_bb_lo = qromb (planck_d, 0, ALPHAMIN, 1e-8) / cdf_bb_tot;       //position in the full cdf of low frequcny boundary
-    cdf_bb_hi = 1. - qromb (planck_d, ALPHAMAX, ALPHABIG, 1e-8) / cdf_bb_tot;   //postion in fhe full hi frequcny boundary
+    cdf_bb_hi = 1. - qromb (brem_d, ALPHAMAX, ALPHABIG, 1e-8) / cdf_bb_tot;   //postion in fhe full hi frequcny boundary
+
+	printf ("CDF TEST %e %e\n",qromb (brem_d,ALPHAMAX,ALPHABIG,1e-8),qromb (planck_d, ALPHAMAX, ALPHABIG, 1e-8));
+
 
 //      cdf_to_file (&cdf_bb, "cdf.out");
     ninit_planck++;
 
   }
+  
+
 
 
 /* If temperatures or frequencies have changed since the last call to planck
@@ -278,6 +287,14 @@ reset.  A careful review of them is warranted.
       cdf_limit (&cdf_bb, alphamin, alphamax);
     }
 
+
+	if (freqmin<2e16 && freqmax>2e16)
+	{
+		printf ("CDF runs from %e to %e\n",cdf_bb.x[0],cdf_bb.x[cdf_bb.ncdf-1]);
+		printf ("CDF limited cdf to %e (%e) %e (%e)\n",cdf_bb.x1/H*BOLTZMANN*4e4,cdf_bb.x1,cdf_bb.x2/H*BOLTZMANN*4e4,cdf_bb.x2);
+	}
+
+
   }
   /* End of section redefining limits */
 
@@ -292,7 +309,6 @@ reset.  A careful review of them is warranted.
 	The case where some photons are in the low regime and some are
 	in the normal regime
 */
-
   if (y <= cdf_bb_lo || alphamax < ALPHAMIN)
   {
     alpha = get_rand_pow (lo_freq_alphamin, lo_freq_alphamax, 2.);
@@ -305,6 +321,7 @@ reset.  A careful review of them is warranted.
   {
     alpha = cdf_get_rand_limit (&cdf_bb);
   }
+  
 
   freq = BOLTZMANN * t / H * alpha;
   if (freq < freqmin || freqmax < freq)

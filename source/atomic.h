@@ -1,6 +1,7 @@
 
 #define MAXRAND 2147486748.
 #define VERY_BIG 1e50           // Replaced INFINITY 58g
+#define VERY_SMALL 1e-50
 #define TRUE		1
 #define FALSE		0
 

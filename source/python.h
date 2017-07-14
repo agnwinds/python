@@ -1192,7 +1192,7 @@ properly create the CDF, this was added for python_43.2  */
    double *d;           /* 57i -- the rate of change of the CDF at x */
    double limit1, limit2;        /* Limits (running from 0 to 1) that define a portion
                                     of the CDF to sample */
-   double x1, x2;                /* limits if they exist on what is returned */
+   double x1, x2;                /* limits in the x domain if they exist on what is returned */
    double norm;                  //The scaling factor which would renormalize the CDF
    int ncdf;                     /* Size of this CDF */
  }
@@ -1272,7 +1272,7 @@ xband;
 #define NTEMPS	60              // The number of temperatures which are stored in each fbstruct
                                 /* NSH this was increased from 30 to 60 to take account of 3 extra OOM 
                                    intemperature we wanted to have in fb */
-#define NFB	10              // The maximum number of frequency intervals for which the fb emission is calculated
+#define NFB	20              // The maximum number of frequency intervals for which the fb emission is calculated
 
 struct fbstruc
 {
