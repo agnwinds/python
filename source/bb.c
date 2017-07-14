@@ -165,7 +165,7 @@ History:
 	17jul	nsh - changed references to PDFs to CDFs
 **************************************************************/
 
-#define ALPHAMIN 0.4            // Region below which we will use a low frequency approximation
+#define ALPHAMIN 0.05            // Region below which we will use a low frequency approximation //NSH 1707 - changed to reflect the bb_set values
 #define ALPHAMAX 30.            // Region above which we will use a high frequency approximation
 #define ALPHABIG 100.           //  Region over which can maximmally integrate the Planck function
 #define NMAX 		1000
@@ -223,11 +223,11 @@ planck (t, freqmin, freqmax)
     /* We need the integral of the bb function outside of the regions of interest as well */
 
 
-    cdf_bb_tot = qromb (planck_d, 0, ALPHAMAX, 1e-8)+qromb (brem_d, ALPHAMAX, ALPHABIG, 1e-8);
+    cdf_bb_tot = qromb (planck_d, 0, ALPHABIG, 1e-8);
     cdf_bb_lo = qromb (planck_d, 0, ALPHAMIN, 1e-8) / cdf_bb_tot;       //position in the full cdf of low frequcny boundary
-    cdf_bb_hi = 1. - qromb (brem_d, ALPHAMAX, ALPHABIG, 1e-8) / cdf_bb_tot;   //postion in fhe full hi frequcny boundary
+    cdf_bb_hi = 1. - qromb (planck_d, ALPHAMAX, ALPHABIG, 1e-8) / cdf_bb_tot;   //postion in fhe full hi frequcny boundary
 
-	printf ("CDF TEST %e %e\n",qromb (brem_d,ALPHAMAX,ALPHABIG,1e-8),qromb (planck_d, ALPHAMAX, ALPHABIG, 1e-8));
+
 
 
 //      cdf_to_file (&cdf_bb, "cdf.out");
@@ -611,32 +611,65 @@ planck_d (alpha)
   return (x);
 }
 
+
+
 // Calculate the emittance of a bb between freqmin and freqmax
 // Should integrate to sigma 
+
+//XXXXXXX NSH - this is not properly written, surely there should be cases where the limits are entirely within the tabulated bb function (use the tabulated values) - entirely outside (use the exp or pl approximations) or partly in/out - use some kind of sum... At the moment it just uses the tabulation, or the complete integral...
 double
 emittance_bb (freqmin, freqmax, t)
      double freqmin, freqmax, t;
 {
   double alphamin, alphamax, q1;
   double integ_planck_d ();
+  double emittance;
   q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (H * H * H * C * C);
 
-
+  emittance=0.0;
   alphamin = H * freqmin / (BOLTZMANN * t);
   alphamax = H * freqmax / (BOLTZMANN * t);
-  if (alphamin > ALPHAMIN && alphamax < ALPHAMAX)
+  if (alphamin > ALPHAMIN && alphamax < ALPHAMAX) //The requested limits are *both* between ALPHAMIN and ALPHAMAX, the limits of the 'lookup' integration
   {
     return (q1 * t * t * t * t * integ_planck_d (alphamin, alphamax));
   }
-  else if (alphamax < ALPHAMIN)
+    else if (alphamax < ALPHAMIN) //We are completely below the limit of the hardcoded integral - surely at this point we should use a power law approximation...
   {
     return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7));
   }
+  else if (alphamin > ALPHAMAX) //We are completely outside the limits of the hardcoded integral - out the top)
+  {
+    return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7)); //nsh changed, this was pointng to integ_planck_d which we already know is wrong 
+  }
+  else if (alphamin < ALPHAMIN && alphamax < ALPHAMAX) //The lower limit is outside the limits of the precomputed integral but the upper limit is inside
+  {
+	  emittance+=q1 * t * t * t * t * qromb (planck_d, alphamin, ALPHAMIN, 1e-7);
+	  emittance+=q1 * t * t * t * t * integ_planck_d (ALPHAMIN, alphamax);
+	  return (emittance);
+  }
+  else if (alphamin > ALPHAMIN && alphamax > ALPHAMAX) //The lower limit is inside the precomuted intrgeal and the upper limit is outside
+  {
+	  emittance+=q1 * t * t * t * t * integ_planck_d (alphamin, ALPHAMAX);
+	  emittance+=q1 * t * t * t * t * qromb (planck_d, ALPHAMAX, alphamax, 1e-7);
+	  return (emittance);
+	  
+  }
+  else if (alphamin<ALPHAMIN && alphamax>ALPHAMAX) //This is a huge frequency band! 
+  {
+	  emittance+=q1 * t * t * t * t * qromb (planck_d, alphamin, ALPHAMIN, 1e-7);
+	  emittance+=q1 * t * t * t * t * integ_planck_d (ALPHAMIN, ALPHAMAX);
+	  emittance+=q1 * t * t * t * t * qromb (planck_d, ALPHAMAX, alphamax, 1e-7);
+	  return (emittance);
+  }
   else
   {
-
-    return (q1 * t * t * t * t * integ_planck_d (alphamin, alphamax));
+	  Error ("emittance_bb: Limits are not dealt with correctly\n");
+		  exit(0);
   }
+	  
+			  
+	  
+  
 }
 
 
