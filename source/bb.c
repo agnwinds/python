@@ -188,7 +188,7 @@ ensure important parts of the CDF have points */
 double bb_set[] = {
   0.05, 0.1, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45,
   10.3, 11.3, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0,
-  19., 20., 21., 22., 23., 24., 25., 26., 27., 28., 29.
+  19., 20., 21., 22., 23., 24., 25., 26., 27., 28., 29., 30.
 };
 
 
@@ -213,7 +213,7 @@ planck (t, freqmin, freqmax)
   if (ninit_planck == 0)
   {                             /* First time through p_alpha must be initialized */
 	  printf ("CDF initialising planck\n");
-    if ((echeck = cdf_gen_from_func (&cdf_bb, &planck_d, ALPHAMIN, ALPHAMAX, 29, bb_set)) != 0)
+    if ((echeck = cdf_gen_from_func (&cdf_bb, &planck_d, ALPHAMIN, ALPHAMAX, 30, bb_set)) != 0)
     {
       Error ("Planck: on return from cdf_gen_from_func %d\n", echeck);
     }
@@ -287,12 +287,6 @@ reset.  A careful review of them is warranted.
       cdf_limit (&cdf_bb, alphamin, alphamax);
     }
 
-
-	if (freqmin<2e16 && freqmax>2e16)
-	{
-		printf ("CDF runs from %e to %e\n",cdf_bb.x[0],cdf_bb.x[cdf_bb.ncdf-1]);
-		printf ("CDF limited cdf to %e (%e) %e (%e)\n",cdf_bb.x1/H*BOLTZMANN*4e4,cdf_bb.x1,cdf_bb.x2/H*BOLTZMANN*4e4,cdf_bb.x2);
-	}
 
 
   }
@@ -487,6 +481,8 @@ History:
 
 
 double integ_planck[NMAX + 1];
+double integ_planck_x[NMAX + 1];
+
 int i_integ_planck_d = 0;
 double
 integ_planck_d (alphamin, alphamax)
@@ -516,13 +512,14 @@ integ_planck_d (alphamin, alphamax)
   }
 
   x = (alphamax - ALPHAMIN) / (ALPHAMAX - ALPHAMIN) * NMAX;
+  
   if (x < 0.0)
   {
     return (0.0);               /* Because the maximum frequency is too low */
   }
   else if (x >= (NMAX))
   {
-    z2 = integ_planck[NMAX];
+    z2 = integ_planck[NMAX];	
   }
   else
   {
@@ -572,7 +569,8 @@ init_integ_planck_d ()
     x = ALPHAMIN + n * (ALPHAMAX - ALPHAMIN) / NMAX;
 // 1e-7 is the fractional accuracy in my modified version of qromb -- ksl
     integ_planck[n] = qromb (planck_d, 0.0, x, 1e-7);
-  }
+	integ_planck_x[n] = x;
+   }  
 
   return (0);
 }
@@ -629,34 +627,40 @@ emittance_bb (freqmin, freqmax, t)
   emittance=0.0;
   alphamin = H * freqmin / (BOLTZMANN * t);
   alphamax = H * freqmax / (BOLTZMANN * t);
+  
+  
+  //NSH - I think this is called so infrequently, we may as well just use qromb, and get the right answer!
+  
+  //return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7));
+  
   if (alphamin > ALPHAMIN && alphamax < ALPHAMAX) //The requested limits are *both* between ALPHAMIN and ALPHAMAX, the limits of the 'lookup' integration
   {
     return (q1 * t * t * t * t * integ_planck_d (alphamin, alphamax));
   }
+   
     else if (alphamax < ALPHAMIN) //We are completely below the limit of the hardcoded integral - surely at this point we should use a power law approximation...
   {
     return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7));
   }
   else if (alphamin > ALPHAMAX) //We are completely outside the limits of the hardcoded integral - out the top)
   {
-    return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7)); //nsh changed, this was pointng to integ_planck_d which we already know is wrong 
+   	return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7)); //nsh changed, this was pointng to integ_planck_d which we already know is wrong 
   }
   else if (alphamin < ALPHAMIN && alphamax < ALPHAMAX) //The lower limit is outside the limits of the precomputed integral but the upper limit is inside
   {
-	  emittance+=q1 * t * t * t * t * qromb (planck_d, alphamin, ALPHAMIN, 1e-7);
+	  emittance=q1 * t * t * t * t * qromb (planck_d, alphamin, ALPHAMIN, 1e-7);
 	  emittance+=q1 * t * t * t * t * integ_planck_d (ALPHAMIN, alphamax);
 	  return (emittance);
   }
-  else if (alphamin > ALPHAMIN && alphamax > ALPHAMAX) //The lower limit is inside the precomuted intrgeal and the upper limit is outside
+  else if (alphamin > ALPHAMIN && alphamax > ALPHAMAX) //The lower limit is inside the precomputed integral and the upper limit is outside
   {
-	  emittance+=q1 * t * t * t * t * integ_planck_d (alphamin, ALPHAMAX);
+	  emittance=q1 * t * t * t * t * integ_planck_d (alphamin, ALPHAMAX);
 	  emittance+=q1 * t * t * t * t * qromb (planck_d, ALPHAMAX, alphamax, 1e-7);
-	  return (emittance);
-	  
+	  return (emittance);  
   }
   else if (alphamin<ALPHAMIN && alphamax>ALPHAMAX) //This is a huge frequency band! 
   {
-	  emittance+=q1 * t * t * t * t * qromb (planck_d, alphamin, ALPHAMIN, 1e-7);
+	  emittance=q1 * t * t * t * t * qromb (planck_d, alphamin, ALPHAMIN, 1e-7);
 	  emittance+=q1 * t * t * t * t * integ_planck_d (ALPHAMIN, ALPHAMAX);
 	  emittance+=q1 * t * t * t * t * qromb (planck_d, ALPHAMAX, alphamax, 1e-7);
 	  return (emittance);

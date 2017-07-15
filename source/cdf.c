@@ -245,7 +245,7 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
   int j,  n, nn,nnn,nnnn;
 //  int m, mm;
   int njump_min, njump_max;
-  int icheck, pdfsteps;
+  int pdfsteps;
   int cdf_check (), calc_cdf_array ();
   double gen_array_from_func (), delta;
   double *pdf_x,*pdf_y,total;
@@ -319,9 +319,11 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
   
   
   /*generate PDF array, taking care to include jumps*/
+  /*We are going to progressively refine the gridding until the worst step in the PDF is the same as we used to use - this could be done more clerverly, 
+  perhaps refining specific steps to include finer gridding where the functions change quickly*/
   
 
-for (nnnn=1;nnnn<10;nnnn++)	  
+for (nnnn=1;nnnn<10;nnnn++)	  //We are only going to keep going until we get to 2000 
 {
 	pdfsteps=pdfsteps*nnnn;  //refine the grid
 	
@@ -356,17 +358,23 @@ for (nnnn=1;nnnn<10;nnnn++)
 		n=n+1;  //Increment the regular grid counter
 	}
 	if ((pdf_y[nnn]+pdf_y[nnn-1])*dx>delta)
-		delta=(pdf_y[nnn]+pdf_y[nnn-1])*dx;
+		delta=(pdf_y[nnn]+pdf_y[nnn-1])*dx; //This is the stop in the CDF which will be made
 	
   	nnn=nnn+1; //Increment the generated array counter
 	
   }
   
-  if (delta<total/200)
+  if (delta<total/200) //If the largest jump in the PDF is 0.5% of the total we are done
 	  break;
   
   
 }
+
+if (nnnn==9)
+	Error ("cdf_gen_from_func: Reached the maximum level of discretisation without getting stutable discreizetion in CDF\n");
+
+
+//We now have an array that is suitabe to make a CDF from
 
   
  cdf_gen_from_array (cdf, pdf_x, pdf_y, nnn-1, xmin, xmax);
@@ -458,7 +466,7 @@ for (nnnn=1;nnnn<10;nnnn++)
  
  
  
-  return (icheck);
+  return (0);
 
 }
 
