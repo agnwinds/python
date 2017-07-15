@@ -479,7 +479,7 @@ History:
 	06aug	ksl	Recommented
 **************************************************************/
 
-
+/*
 double integ_planck[NMAX + 1];
 double integ_planck_x[NMAX + 1];
 
@@ -492,7 +492,7 @@ integ_planck_d (alphamin, alphamax)
   int n;
   int init_integ_planck_d ();
   if (i_integ_planck_d == 0)
-  {                             /*First time through integ_planck must be defined */
+  {                             //First time through integ_planck must be defined 
     init_integ_planck_d ();
     i_integ_planck_d++;
   }
@@ -502,7 +502,7 @@ integ_planck_d (alphamin, alphamax)
     z1 = 0.0;
   else if (x >= (NMAX))
   {
-    return (0.0);               /* Because the minimum frequency is too high */
+    return (0.0);               // Because the minimum frequency is too high 
   }
   else
   {
@@ -515,7 +515,7 @@ integ_planck_d (alphamin, alphamax)
   
   if (x < 0.0)
   {
-    return (0.0);               /* Because the maximum frequency is too low */
+    return (0.0);               // Because the maximum frequency is too low 
   }
   else if (x >= (NMAX))
   {
@@ -530,7 +530,7 @@ integ_planck_d (alphamin, alphamax)
 
   return (z2 - z1);
 }
-
+*/
 
 /***********************************************************
        Space Telescope Science Institute
@@ -558,22 +558,22 @@ History:
 
 **************************************************************/
 
-int
-init_integ_planck_d ()
-{
-  double x;
-  double planck_d (), qromb ();
-  int n;
-  for (n = 0; n < NMAX + 1; n++)
-  {
-    x = ALPHAMIN + n * (ALPHAMAX - ALPHAMIN) / NMAX;
+//int
+//init_integ_planck_d ()/
+//{
+//  double x;
+//  double planck_d (), qromb ();
+//  int n;
+//  for (n = 0; n < NMAX + 1; n++)
+//  {
+//    x = ALPHAMIN + n * (ALPHAMAX - ALPHAMIN) / NMAX;
 // 1e-7 is the fractional accuracy in my modified version of qromb -- ksl
-    integ_planck[n] = qromb (planck_d, 0.0, x, 1e-7);
-	integ_planck_x[n] = x;
-   }  
+//    integ_planck[n] = qromb (planck_d, 0.0, x, 1e-7);
+//	integ_planck_x[n] = x;
+//   }  
 
-  return (0);
-}
+//  return (0);
+//}
 
 
 /***********************************************************
@@ -631,7 +631,9 @@ emittance_bb (freqmin, freqmax, t)
   
   //NSH - I think this is called so infrequently, we may as well just use qromb, and get the right answer!
   
-  //return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7));
+  return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7));
+  
+  /*
   
   if (alphamin > ALPHAMIN && alphamax < ALPHAMAX) //The requested limits are *both* between ALPHAMIN and ALPHAMAX, the limits of the 'lookup' integration
   {
@@ -671,7 +673,7 @@ emittance_bb (freqmin, freqmax, t)
 		  exit(0);
   }
 	  
-			  
+		*/	  
 	  
   
 }

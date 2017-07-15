@@ -1291,6 +1291,7 @@ Notes:
 	calculated is f.  ioniz_or_final is not used, and lum_bl which
 	is returned is only the luminosity that was passed.
 
+
 History:
 
 **************************************************************/
@@ -1302,12 +1303,14 @@ bl_init (lum_bl, t_bl, freqmin, freqmax, ioniz_or_final, f)
      int ioniz_or_final;
 {
   double q1;
-  double integ_planck_d ();
+  double planck_d ();
   double alphamin, alphamax;
 
   q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (H * H * H * C * C);
   alphamin = H * freqmin / (BOLTZMANN * t_bl);
   alphamax = H * freqmax / (BOLTZMANN * t_bl);
-  *f = q1 * integ_planck_d (alphamin, alphamax) * lum_bl / STEFAN_BOLTZMANN;
+//  *f = q1 * integ_planck_d (alphamin, alphamax) * lum_bl / STEFAN_BOLTZMANN;
+*f = q1 * qromb (planck_d,alphamin, alphamax, 1e-7) * lum_bl / STEFAN_BOLTZMANN;
+
   return (lum_bl);
 }
