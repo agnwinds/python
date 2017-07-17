@@ -315,7 +315,7 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
   total=qromb(func, xmin, xmax, 1e-7); //This is the total, we can use it to check that we have a suitably discretized function
   
   
-  pdfsteps=200.; //Ideally we get the correct resolution here
+  pdfsteps=200.; //This is a starting level of discreization
   
   
   /*generate PDF array, taking care to include jumps*/
@@ -323,11 +323,11 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
   perhaps refining specific steps to include finer gridding where the functions change quickly*/
   
 
-for (nnnn=1;nnnn<10;nnnn++)	  //We are only going to keep going until we get to 2000 
+for (nnnn=1;nnnn<10;nnnn++)	  //We are only going to keep going until we get to 2000 we will throw an error if we cant get fine enough this way
 {
-	pdfsteps=pdfsteps*nnnn;  //refine the grid
+	pdfsteps=pdfsteps*nnnn;  //refine the grid - start off with our initial griding
 	
-    pdf_x=calloc(pdfsteps+njumps,sizeof(double));
+    pdf_x=calloc(pdfsteps+njumps,sizeof(double)); //Allocate arrays
     pdf_y=calloc(pdfsteps+njumps,sizeof(double));
 	
     delta=total/201.;  //This is the starting value of the increment in the CDF - its smaller than our old requirement
@@ -349,7 +349,7 @@ for (nnnn=1;nnnn<10;nnnn++)	  //We are only going to keep going until we get to 
 	{
 		pdf_x[nnn]=jump[nn];  //We make a point at the jump
 		pdf_y[nnn]=(*func) (pdf_x[nnn]); //And the unscaled PDF value for that point
-		nn=nn+1;    //We have dealt with this jump - on to the next one, ut dont increment the main counter
+		nn=nn+1;    //We have dealt with this jump - on to the next one, but dont increment the main counter
 	}
 	else  //We haven't hit a jump
 	{
@@ -358,7 +358,7 @@ for (nnnn=1;nnnn<10;nnnn++)	  //We are only going to keep going until we get to 
 		n=n+1;  //Increment the regular grid counter
 	}
 	if ((pdf_y[nnn]+pdf_y[nnn-1])*dx>delta)
-		delta=(pdf_y[nnn]+pdf_y[nnn-1])*dx; //This is the stop in the CDF which will be made
+		delta=(pdf_y[nnn]+pdf_y[nnn-1])*dx; //This is the jump in the CDF which will be made - suggests perhaps tha we should actually just make the CDF here!
 	
   	nnn=nnn+1; //Increment the generated array counter
 	
@@ -371,7 +371,7 @@ for (nnnn=1;nnnn<10;nnnn++)	  //We are only going to keep going until we get to 
 }
 
 if (nnnn==9)
-	Error ("cdf_gen_from_func: Reached the maximum level of discretisation without getting stutable discreizetion in CDF\n");
+	Error ("cdf_gen_from_func: Reached the maximum level of discretisation without getting suitable discreizetion in CDF\n");
 
 
 //We now have an array that is suitabe to make a CDF from
@@ -379,6 +379,10 @@ if (nnnn==9)
   
  cdf_gen_from_array (cdf, pdf_x, pdf_y, nnn-1, xmin, xmax);
   
+ //free the arrays we used
+  
+ free(pdf_x);
+ free(pdf_y);
   
   
  /*
@@ -501,7 +505,7 @@ History
 
 10oct	ksl(python_69)	Coded to enable one to adaptively increase the density of points
 11jun	ksl(69d)	This routine creates a properly normalized CDF.
-17jul	nsh(81d)	Modified to make an unnormalised PDF - this is so we can call CDF_from_array afterwards, and avoid complex duplicated code
+17jul	nsh(81d)	commented out - no longer used
 
 */
 /*
