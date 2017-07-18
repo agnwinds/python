@@ -306,7 +306,11 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   int icell;
   int nplasma;
   int nnscat;
-  int ndom;
+  int ndom;  
+  int nline[NPLASMA],nff[NPLASMA],nfb[NPLASMA];
+  
+  for (n=0;n<NPLASMA;n++)
+  	nline[n]=nff[n]=nfb[n]=0;
 
 
   photstop = photstart + nphot;
@@ -353,6 +357,8 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     if ((xlumsum += plasmamain[nplasma].lum_ff) > xlum) /*Add the free free luminosity of the cell to the running total. If it is more than our small test luminosity, then we need to make some ff photons */
     {
       p[n].freq = one_ff (&wmain[icell], freqmin, freqmax);     /*Get the frequency of one ff photon */
+    	nff[nplasma]++;
+	  
       if (p[n].freq <= 0.0)
       {
         Error_silent ("photo_gen_wind: On return from one_ff: icell %d vol %g t_e %g\n", icell, wmain[icell].vol, plasmamain[nplasma].t_e);
@@ -362,13 +368,20 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     else if ((xlumsum += plasmamain[nplasma].lum_rr) > xlum)    /*Do the same for fb */
     {
       p[n].freq = one_fb (&wmain[icell], freqmin, freqmax);
+	nfb[nplasma]++;
+	  
     }
     else
     {
       p[n].freq = one_line (&wmain[icell], freqmin, freqmax, &p[n].nres);       /*And fill all the rest of the luminosity up with line photons */
+  	nline[nplasma]++;
+
     }
     p[n].w = weight;
     /* Determine the position of the photon in the moving frame */
+	
+    for (n=0;n<NPLASMA;n++)
+    	printf ("NPHOT_TEST line %i ff %i fb %i\n",nline[n],nff[n],nfb[n]);
 
 
     get_random_location (icell, p[n].x);
