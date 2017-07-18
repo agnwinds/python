@@ -299,7 +299,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
      double freqmin, freqmax;
      int photstart, nphot;
 {
-  int n;
+  int n,nn,np;
   int photstop;
   double xlum, xlumsum, lum;
   double v[3];
@@ -307,10 +307,13 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   int nplasma;
   int nnscat;
   int ndom;  
-  int nline[NPLASMA],nff[NPLASMA],nfb[NPLASMA];
+  int ptype[NPLASMA][3]; //Store for the types of photons we want, ff first, fb next, line third
   
   for (n=0;n<NPLASMA;n++)
-  	nline[n]=nff[n]=nfb[n]=0;
+  {
+	  for (nn=0;nn<3;nn++)
+  	ptype[n][nn]=0;
+  }
 
 
   photstop = photstart + nphot;
@@ -356,37 +359,51 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     p[n].nnscat = 1;
     if ((xlumsum += plasmamain[nplasma].lum_ff) > xlum) /*Add the free free luminosity of the cell to the running total. If it is more than our small test luminosity, then we need to make some ff photons */
     {
-      p[n].freq = one_ff (&wmain[icell], freqmin, freqmax);     /*Get the frequency of one ff photon */
-    	nff[nplasma]++;
-	  
-      if (p[n].freq <= 0.0)
-      {
-        Error_silent ("photo_gen_wind: On return from one_ff: icell %d vol %g t_e %g\n", icell, wmain[icell].vol, plasmamain[nplasma].t_e);
-        p[n].freq = 0.0;
-      }
+    	ptype[nplasma][0]++;	  
     }
     else if ((xlumsum += plasmamain[nplasma].lum_rr) > xlum)    /*Do the same for fb */
     {
-      p[n].freq = one_fb (&wmain[icell], freqmin, freqmax);
-	nfb[nplasma]++;
-	  
+		ptype[nplasma][1]++;	  
     }
     else
     {
-      p[n].freq = one_line (&wmain[icell], freqmin, freqmax, &p[n].nres);       /*And fill all the rest of the luminosity up with line photons */
-  	nline[nplasma]++;
-
+  		ptype[nplasma][2]++;
     }
-    p[n].w = weight;
     /* Determine the position of the photon in the moving frame */
-	
-    for (n=0;n<NPLASMA;n++)
-    	printf ("NPHOT_TEST line %i ff %i fb %i\n",nline[n],nff[n],nfb[n]);
+}
 
 
-    get_random_location (icell, p[n].x);
+photstop=photstart;
 
-    p[n].grid = icell;
+for (n=0;n<NPLASMA;n++)
+{
+	photstart=photstop;   //first time round, this gets set to photstart, afterwards we start the photon number from the end of the last cell
+	photstop=photstart+ptype[n][0]+ptype[n][1]+ptype[n][2]; //This is the number of photons in this cell	
+	for (np=photstart;np<photstop;np++)
+	{	
+	icell=plasmamain[n].nwind;
+    ndom = wmain[icell].ndom;
+	if (np<photstart+ptype[n][0])
+	{
+		p[np].freq = one_ff (&wmain[icell], freqmin, freqmax);     /*Get the frequency of one ff photon */
+		if (p[np].freq <= 0.0)
+		{
+  		  Error_silent ("photo_gen_wind: On return from one_ff: icell %d vol %g t_e %g\n", icell, wmain[icell].vol, plasmamain[nplasma].t_e);
+  		p[np].freq = 0.0;
+		}
+	}
+	else if (np<photstart+ptype[n][0]+ptype[n][1])
+	{
+		p[np].freq = one_fb (&wmain[icell], freqmin, freqmax);
+	}
+	else
+	{
+		p[np].freq = one_line (&wmain[icell], freqmin, freqmax, &p[n].nres);       /*And fill all the rest of the luminosity up with line photons */
+	}
+
+    p[np].w = weight;
+    get_random_location (icell, p[np].x);
+    p[np].grid = icell;
 
     /*
        Determine the direction of the photon
@@ -396,49 +413,51 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
        to allow for isotropic BF continuum emission
      */
     nnscat = 1;
-    if (p[n].nres < 0 || geo.scatter_mode != 1)
+    if (p[np].nres < 0 || geo.scatter_mode != 1)
     {
 /*  It was either an electron scatter so the  distribution is isotropic, or it
 was a resonant scatter but we want isotropic scattering anyway.  */
-      randvec (p[n].lmn, 1.0);  /* The photon is emitted isotropically */
+      randvec (p[np].lmn, 1.0);  /* The photon is emitted isotropically */
     }
     else if (geo.scatter_mode == 1)
     {                           // It was a line photon and we want anisotropic scattering mode 1
 
 /* -1. forces a full reinitialization of the pdf for anisotropic scattering  */
 
-      randwind (&p[n], p[n].lmn, wmain[icell].lmn);
+      randwind (&p[np], p[np].lmn, wmain[icell].lmn);
 
     }
     else if (geo.scatter_mode == 2)
     {                           // It was a line photon and we want anisotropic scattering mode 2
-      randwind_thermal_trapping (&p[n], &nnscat);
+      randwind_thermal_trapping (&p[np], &nnscat);
     }
-    p[n].nnscat = nnscat;
+    p[np].nnscat = nnscat;
 
 
     /* The next two lines correct the frequency to first order, but do not result in
        forward scattering of the distribution */
 
-    vwind_xyz (ndom, &p[n], v);
-    p[n].freq *= (1. + dot (v, p[n].lmn) / C);
+    vwind_xyz (ndom, &p[np], v);
+    p[np].freq *= (1. + dot (v, p[np].lmn) / C);
 
-    p[n].istat = 0;
-    p[n].tau = p[n].nscat = p[n].nrscat = 0;
-    p[n].origin = PTYPE_WIND;   // A wind photon
+    p[np].istat = 0;
+    p[np].tau = p[np].nscat = p[np].nrscat = 0;
+    p[np].origin = PTYPE_WIND;   // A wind photon
     switch (geo.reverb)
     {                           // SWM 26-3-15: Added wind paths
     case REV_WIND:
     case REV_MATOM:
-      wind_paths_gen_phot (&wmain[icell], &p[n]);
+      wind_paths_gen_phot (&wmain[icell], &p[np]);
       break;
     case REV_PHOTON:
-      simple_paths_gen_phot (&p[n]);
+      simple_paths_gen_phot (&p[np]);
       break;
     case REV_NONE:
     default:
       break;
     }
+    }
+	
   }
 
 
