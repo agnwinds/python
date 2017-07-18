@@ -560,6 +560,7 @@ use that instead if possible --  57h */
   /* Check to see if we have already generated a cdf */
   if (tt > (one_fb_te + delta) || tt < (one_fb_te - delta) || f1 != one_fb_f1 || f2 != one_fb_f2)
   {
+	  printf ("BLAH Making a new pdf tt=%e one_fb_te=%e f1=%e one_fb_f1=%e f2=%e one_fb_f2=%e\n",tt,one_fb_te,f1,one_fb_f1,f2,one_fb_f2);
 
 /* Then need to generate a new cdf */
 

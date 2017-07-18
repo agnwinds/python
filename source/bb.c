@@ -212,7 +212,6 @@ planck (t, freqmin, freqmax)
 
   if (ninit_planck == 0)
   {                             /* First time through p_alpha must be initialized */
-	  printf ("CDF initialising planck\n");
     if ((echeck = cdf_gen_from_func (&cdf_bb, &planck_d, ALPHAMIN, ALPHAMAX, 30, bb_set)) != 0)
     {
       Error ("Planck: on return from cdf_gen_from_func %d\n", echeck);

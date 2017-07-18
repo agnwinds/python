@@ -251,7 +251,6 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
   double *pdf_x,*pdf_y,total;
   double dx;
 	  
-	  printf ("CDF making a cdf from func xmin=%e (%e) xmax=%e (%e)\n",xmin/H*BOLTZMANN*4e4,xmin,xmax/H*BOLTZMANN*4e4,xmax);
 
   njump_min = njump_max = 0;
   /* Check the input data before proceeding */
