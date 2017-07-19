@@ -2,8 +2,6 @@
 double planck(double t, double freqmin, double freqmax);
 double get_rand_pow(double x1, double x2, double alpha);
 double get_rand_exp(double alpha_min, double alpha_max);
-double integ_planck_d(double alphamin, double alphamax);
-int init_integ_planck_d(void);
 double planck_d(double alpha);
 double emittance_bb(double freqmin, double freqmax, double t);
 double check_fmax(double fmin, double fmax, double temp);
