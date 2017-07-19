@@ -478,7 +478,7 @@ History:
 	06aug	ksl	Recommented
 **************************************************************/
 
-/*
+
 double integ_planck[NMAX + 1];
 double integ_planck_x[NMAX + 1];
 
@@ -529,7 +529,7 @@ integ_planck_d (alphamin, alphamax)
 
   return (z2 - z1);
 }
-*/
+
 
 /***********************************************************
        Space Telescope Science Institute
@@ -557,22 +557,22 @@ History:
 
 **************************************************************/
 
-//int
-//init_integ_planck_d ()/
-//{
-//  double x;
-//  double planck_d (), qromb ();
-//  int n;
-//  for (n = 0; n < NMAX + 1; n++)
-//  {
-//    x = ALPHAMIN + n * (ALPHAMAX - ALPHAMIN) / NMAX;
-// 1e-7 is the fractional accuracy in my modified version of qromb -- ksl
-//    integ_planck[n] = qromb (planck_d, 0.0, x, 1e-7);
-//	integ_planck_x[n] = x;
-//   }  
+int
+init_integ_planck_d ()
+{
+  double x;
+  double planck_d (), qromb ();
+  int n;
+  for (n = 0; n < NMAX + 1; n++)
+  {
+    x = ALPHAMIN + n * (ALPHAMAX - ALPHAMIN) / NMAX;
+	// 1e-7 is the fractional accuracy in my modified version of qromb -- ksl
+    integ_planck[n] = qromb (planck_d, 0.0, x, 1e-7);
+	integ_planck_x[n] = x;
+   }  
 
-//  return (0);
-//}
+  return (0);
+}
 
 
 /***********************************************************
@@ -630,9 +630,11 @@ emittance_bb (freqmin, freqmax, t)
   
   //NSH - I think this is called so infrequently, we may as well just use qromb, and get the right answer!
   
-  return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7));
+  printf ("Computing the BB funxction between %e and %e for t=%e\n",freqmin,freqmax,t);
   
-  /*
+  //return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7));
+  
+  
   
   if (alphamin > ALPHAMIN && alphamax < ALPHAMAX) //The requested limits are *both* between ALPHAMIN and ALPHAMAX, the limits of the 'lookup' integration
   {
@@ -672,7 +674,7 @@ emittance_bb (freqmin, freqmax, t)
 		  exit(0);
   }
 	  
-		*/	  
+  
 	  
   
 }
