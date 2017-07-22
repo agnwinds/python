@@ -1183,13 +1183,16 @@ properly create the CDF, this was added for python_43.2  */
  
  /* NSH 17/7 - Structure renamed to reflect the fact that this is a CDF, also made dynamically allocated */
  
-#define NCDF 200 //The default size for these arrays
+#define NCDF 2000 //The default size for these arrays
+#define FUNC_CDF  200 //The size for CDFs made from functional form CDFs
+#define ARRAY_PDF 1000 //The size for PDFs to be turned into CDFs from arrays
+
  
  typedef struct Cdf
  {
-   double *x;           /* Positions for which the CDF is calculated */
-   double *y;           /* The value of the CDF at x */
-   double *d;           /* 57i -- the rate of change of the CDF at x */
+   double x[NCDF];           /* Positions for which the CDF is calculated */
+   double y[NCDF];           /* The value of the CDF at x */
+   double d[NCDF];           /* 57i -- the rate of change of the CDF at x */
    double limit1, limit2;        /* Limits (running from 0 to 1) that define a portion
                                     of the CDF to sample */
    double x1, x2;                /* limits if they exist on what is returned */

@@ -737,7 +737,7 @@ History:
 **************************************************************/
 
 //struct Cdf cdf_ff;
-double ff_x[NCDF], ff_y[NCDF];  //We initialise the arrays that will contain the unscaled PDF to that of the default CDF lengths
+double ff_x[ARRAY_PDF], ff_y[ARRAY_PDF];  //We initialise the arrays that will contain the unscaled PDF 
 double one_ff_f1, one_ff_f2, one_ff_te; /* Old values */
 
 double
@@ -765,8 +765,8 @@ one_ff (one, f1, f2)
   if (xplasma->t_e != one_ff_te || f1 != one_ff_f1 || f2 != one_ff_f2)
   {                             /* Generate a new pdf */
 
-    dfreq = (f2 - f1) / NCDF-1;
-    for (n = 0; n < NCDF; n++)
+    dfreq = (f2 - f1) / ARRAY_PDF-1;
+    for (n = 0; n < ARRAY_PDF; n++)
     {
       ff_x[n] = f1 + dfreq * n;
       ff_y[n] = ff (one, xplasma->t_e, ff_x[n]);
@@ -774,7 +774,7 @@ one_ff (one, f1, f2)
 
 
 
-    if ((echeck = cdf_gen_from_array (&cdf_ff, ff_x, ff_y, 200, f1, f2)) != 0)
+    if ((echeck = cdf_gen_from_array (&cdf_ff, ff_x, ff_y, ARRAY_PDF, f1, f2)) != 0)
     {
       Error
         ("one_ff: cdf_gen_from_array error %d : f1 %g f2 %g te %g ne %g nh %g vol %g\n",

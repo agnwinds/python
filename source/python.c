@@ -729,9 +729,7 @@ main (argc, argv)
     }
   }
 
-  /* Allocate arrays for various CDFs */
-  
-  calloc_cdf();
+
 
 
 

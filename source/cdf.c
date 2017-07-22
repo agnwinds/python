@@ -306,7 +306,7 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
   while (n < 3)
     {
       delta = gen_array_from_func (func, xmin, xmax, pdfsteps);
-      if (delta < 0.1 / NCDF)
+      if (delta < 0.1 / FUNC_CDF)
 	break;
       pdfsteps *= 10;
       n = n + 1;
@@ -335,9 +335,9 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
   n = 0;			//This is the position in pdf_array
   mm = 1;			//This is the index to a desired value of y, with no jumps
   j = njump_min;		//This refers to the jumps
-  for (m = 1; m < NCDF; m++)
+  for (m = 1; m < FUNC_CDF; m++)
     {
-      y = (float) mm / (NCDF - njumps);	// Desired value of y ignoring jumps
+      y = (float) mm / (FUNC_CDF - njumps);	// Desired value of y ignoring jumps
 
       while (pdf_array[n] < y && n < pdfsteps)	// Work one's way through pdf_array
 	{
@@ -358,11 +358,11 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
       /* So pdf->y will contain numbers from 0 to 1 */
     }
 
-  cdf->x[NCDF] = xmax;
-  cdf->y[NCDF] = 1.0;
+  cdf->x[FUNC_CDF] = xmax;
+  cdf->y[FUNC_CDF] = 1.0;
   cdf->norm = 1.;		/* pdf_gen_from array produces a properly nomalized cdf and so the
 				   normalization is 1.  110629 ksl */
-  cdf->ncdf = NCDF;
+  cdf->ncdf = FUNC_CDF;
 
 /* Calculate the gradients */
   if (calc_cdf_gradient (cdf))
@@ -762,14 +762,11 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
      to me that this is the most elegant way to deal with this problem.  
    */
 	
-//	for (n=0;n<pdf_n;n++)
-//	{
-//		printf ("CDF_test %i x %.10e y %.10e\n",n,cdf->x[n],cdf->y[n]);
-//	}
+
 	
 	//We now check that the CDF array previously allocated is going to be big enough for the new array
 	
-	cdf_check_size(cdf,pdf_n);
+
 
 
 	//We now simply put the CDF into the CDF array
@@ -1273,144 +1270,6 @@ cdf_array_fixup (x, y, n_xy)
   return(m);
 }
 
-int
-	calloc_cdf()
-{
-	int i;
-	int iprob;
-	
-	iprob=0;
-/* Allocate CDFs arrays for free free photon generation */
-	
-    if ((cdf_ff.x = calloc (sizeof (double), NCDF+1)) == NULL)
-		iprob++;
-	if ((cdf_ff.y = calloc (sizeof (double), NCDF+1)) == NULL)
-		iprob++;  
-	if ((cdf_ff.d = calloc (sizeof (double), NCDF+1)) == NULL)
-		iprob++;
-	
-	cdf_ff.ncdf = NCDF+1;
-	
-/* Allocate CDF arrays for recombination photon generation */	
-	
-	if ((cdf_fb.x = calloc (sizeof (double), NCDF+1)) == NULL)
-		iprob++;
-	if ((cdf_fb.y = calloc (sizeof (double), NCDF+1)) == NULL)
-		iprob++;  
-	if ((cdf_fb.d = calloc (sizeof (double), NCDF+1)) == NULL)
-		iprob++;
-	
-	cdf_fb.ncdf = NCDF+1;
-	
-/* Allocate CDF arrays for isotropic photon generation */	
-	
-	if ((cdf_vcos.x = calloc (sizeof (double), NCDF+1)) == NULL)
-		iprob++;
-	if ((cdf_vcos.y = calloc (sizeof (double), NCDF+1)) == NULL)
-		iprob++;  
-	if ((cdf_vcos.d = calloc (sizeof (double), NCDF+1)) == NULL)
-		iprob++;
-	
-	cdf_vcos.ncdf = NCDF+1;
-	
-	
-	
-/* Allocate CDF arrays for blackbody photon generation */	
-	
-	if ((cdf_bb.x = calloc (sizeof (double), NCDF+1)) == NULL)
-		iprob++;
-	if ((cdf_bb.y = calloc (sizeof (double), NCDF+1)) == NULL)
-		iprob++;  
-	if ((cdf_bb.d = calloc (sizeof (double), NCDF+1)) == NULL)
-		iprob++;
-	
-	cdf_bb.ncdf = NCDF+1;
-	
-	
-/* Allocate CDF arrays for bremsrahlumnf  photon generation */	
-	
-	if ((cdf_brem.x = calloc (sizeof (double), NCDF+1)) == NULL)
-		iprob++;
-	if ((cdf_brem.y = calloc (sizeof (double), NCDF+1)) == NULL)
-		iprob++;  
-	if ((cdf_brem.d = calloc (sizeof (double), NCDF+1)) == NULL)
-		iprob++;
-	
-	cdf_brem.ncdf = NCDF+1;
-	
-	
-	
-/* Allocate CDF arrays for stellar atmoshperes models */	
-		
-	for (i=0;i<NCOMPS;i++)
-	{
-		if ((comp[i].xcdf.x = calloc (sizeof (double), NCDF+1)) == NULL)
-			iprob++;
-		if ((comp[i].xcdf.y = calloc (sizeof (double), NCDF+1)) == NULL)
-			iprob++;  
-		if ((comp[i].xcdf.d = calloc (sizeof (double), NCDF+1)) == NULL)
-			iprob++;
-		
-		comp[i].xcdf.ncdf = NCDF+1;
-		
-	}
-		
-/* Allocate CDF arrays for aniostropic scattering */
-		
-	for (i=0;i<100;i++)
-	{
-		if ((cdf_randwind_store[i].x = calloc (sizeof (double), NCDF+1)) == NULL)
-			iprob++;
-		if ((cdf_randwind_store[i].y = calloc (sizeof (double), NCDF+1)) == NULL)
-			iprob++;  
-		if ((cdf_randwind_store[i].d = calloc (sizeof (double), NCDF+1)) == NULL)
-			iprob++;
-		
-		cdf_randwind_store[i].ncdf = NCDF+1;
-		
-	}
-		
-		
-	if (iprob > 0)
-	{
-		Error ("calloc_cdf: Error in allocating memory for a CDF\n");
-		exit(0);
-	}
-		
-    Log
-      ("Allocated %10d bytes for each of %5d variable length CDF arrays totaling %10.3f Mb \n",
-       sizeof (double) * (NCDF+1), 15+NCOMPS+100, 1.e-6  * sizeof (double) * (NCDF+1)*(15+NCOMPS+100));
-		
-		
 
-			return(iprob);
-		
-	
-	
-}
-
-int cdf_check_size(cdf,n)
-    CdfPtr cdf;
-	int n;
-	{
-		if (n > cdf->ncdf)
-		{
-			free(cdf->x);
-			free(cdf->y);
-			free(cdf->d);
-
-
-			if ((cdf->x = calloc (sizeof (double), n+1)) == NULL)
-				Error("cdf_check_size - error extending fb array\n");
-			if ((cdf->y = calloc (sizeof (double), n+1)) == NULL)
-				Error("cdf_check_size - error extending fb array\n");
-			if ((cdf->d = calloc (sizeof (double), n+1)) == NULL)
-				Error("cdf_check_size - error extending fb array\n");
-	
-			cdf->ncdf=pdf_n;
-		}
-		return(0);
-	}
-	
 
 

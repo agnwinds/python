@@ -514,7 +514,7 @@ total_fb (one, t, f1, f2, fb_choice, mode)
  ************************************************************************/
 
 
-double fb_x[3000], fb_y[3000];
+double fb_x[NCDF], fb_y[NCDF];
 double fb_jumps[NLEVELS];       // There is at most one jump per level
 double xfb_jumps[NLEVELS];     // This is just a dummy array that parallels fb_jumpts
 int fb_njumps = (-1);
@@ -614,11 +614,11 @@ use that instead if possible --  57h */
   nnn=0;   //Zero the index for elements in the flux array
 	nn=0;  //Zero the index for elements in the jump array
 	  n=0;  //Zero the counting element for equally spaced frequencies
-    dfreq = (f2 - f1) / 199; //This is the frequency spacing for the equally spaced elements
-    while (n < (200))   //We keep going until n=199, which will give the maximum required frequency
+    dfreq = (f2 - f1) / ARRAY_PDF; //This is the frequency spacing for the equally spaced elements
+    while (n < (ARRAY_PDF) && nnn < NCDF)   //We keep going until n=ARRAY_PDF-1, which will give the maximum required frequency
     {
-		freq=f1 + dfreq * n;  //The frequency of the arrayelement we would make in the normal rin of things
-		if (freq > fb_jumps[nn] && nn<fb_njumps) //The element we were going to make has a frequency abouve the jump
+		freq=f1 + dfreq * n;  //The frequency of the array element we would make in the normal run of things
+		if (freq > fb_jumps[nn] && nn < fb_njumps) //The element we were going to make has a frequency abouve the jump
 		{
 			fb_x[nnn]=fb_jumps[nn]*(1.-DELTA_V/(2.*C));  //We make one frequency point 1km/s below the jump
 			fb_y[nnn]=fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL); //And the flux for that point
@@ -643,19 +643,16 @@ use that instead if possible --  57h */
   		  		}
  	 	}
     }
-	
-	printf ("CDF_1 fmin %e fmax %e\n",f1,f2);
-	for (n=0;n<nnn;n++)
+
+	if (nnn > NCDF)
 	{
-		printf ("CDF_2 %e %e\n",fb_x[n],fb_y[n]);
+		Error ("one _fb: Overflow of working array\n");
+		exit (0);
 	}
-	
-	
-	
+ 
+		
 	/* At this point, the variable nnn stores the number of points */
 	
-	
-	/* Check to see if the new number of points will exceed the number of points allocated in the cdf - if so, extend */
 	
 
 
