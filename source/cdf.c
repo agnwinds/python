@@ -567,7 +567,12 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   int echeck,cdf_check (), recalc_pdf_from_cdf ();
 
 
-
+  if (n_xy > NCDF)
+	  {
+		Error ("cdf_gen_from_array: supplied data %i is larger than default aray size %i - increase NCDF\n",n_xy,NCDF);
+		exit(0);
+			}
+			  
 
   /* Check the inputs */
   if (xmax < xmin)
@@ -621,13 +626,6 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 
 
 
-  //xmin and xmax now bracket the non zero parts of the input array
-  printf ("PDF1 fmin %e fmax %e\n",xmin,xmax);
-
-	for (n=0;n<n_xy+1;n++)
-	{
-		printf ("PDF1 %e %e\n",x[n],y[n]);
-	}
 
 
 
@@ -695,11 +693,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 	}
       pdf_n++;
 
-	  printf ("PDF2 fmin %e fmax %e\n",xmin,xmax);
-  	for (n=0;n<pdf_n;n++)
-  	{
-  		printf ("PDF2 %e %e\n",pdf_x[n],pdf_y[n]);
-  	}
+
 
 
 /* So at this point, have unscaled probability density in pdf_x, pdf_y for the points

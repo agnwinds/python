@@ -529,7 +529,7 @@ one_fb (one, f1, f2)
      double f1, f2;             /* freqmin and freqmax */
 {
   double freq, tt, delta;
-  int n,nn,nnn, npoints;
+  int n,nn,nnn;
   double fthresh, dfreq;
   int nplasma;
   PlasmaPtr xplasma;
@@ -1649,11 +1649,11 @@ sort_and_compress (array_in, array_out, npts)
  */
 
 int
-compare_doubles (const double *a, const double *b)
+compare_doubles (const void *a, const void *b)
 {
-  if (*a > *b)
+  if (*(double*)a > *(double*)b)
     return 1;
-  else if (*a < *b)
+  else if (*(double*)a < *(double*)b)
     return -1;
   else
     return 0;

@@ -611,15 +611,11 @@ emittance_bb (freqmin, freqmax, t)
   {
     return (q1 * t * t * t * t * integ_planck_d (alphamin, alphamax));
   }
-  else if (alphamax < ALPHAMIN)
+  else 
   {
     return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7));
   }
-  else
-  {
 
-    return (q1 * t * t * t * t * integ_planck_d (alphamin, alphamax));
-  }
 }
 
 

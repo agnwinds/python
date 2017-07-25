@@ -151,8 +151,6 @@ int cdf_to_file(CdfPtr cdf, char filename[]);
 int cdf_check(CdfPtr cdf);
 int calc_cdf_gradient(CdfPtr cdf);
 int cdf_array_fixup(double *x, double *y, int n_xy);
-int calloc_cdf(void);
-int cdf_check_size(CdfPtr cdf, int n);
 /* roche.c */
 int binary_basics(void);
 double ds_to_roche_2(PhotPtr p);
@@ -254,7 +252,7 @@ double xinteg_inner_fb(double t, double f1, double f2, int nion, int fb_choice);
 double total_rrate(int nion, double T);
 double gs_rrate(int nion, double T);
 int sort_and_compress(double *array_in, double *array_out, int npts);
-int compare_doubles(const double *a, const double *b);
+int compare_doubles(const void *a, const void *b);
 /* diag.c */
 int open_diagfile(void);
 int get_extra_diagnostics(void);
