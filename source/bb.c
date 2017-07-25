@@ -165,7 +165,7 @@ History:
 	17jul	nsh - changed references to PDFs to CDFs
 **************************************************************/
 
-#define ALPHAMIN 0.05            // Region below which we will use a low frequency approximation
+#define ALPHAMIN 0.4            // Region below which we will use a low frequency approximation
 #define ALPHAMAX 30.            // Region above which we will use a high frequency approximation
 #define ALPHABIG 100.           //  Region over which can maximmally integrate the Planck function
 #define NJUMPS 30
@@ -187,10 +187,10 @@ double lo_freq_alphamin, lo_freq_alphamax, hi_freq_alphamin, hi_freq_alphamax;  
 /* These are what we call 'jumps' and are used by cdf_gen_from_func to 
 ensure important parts of the CDF have points */
 double bb_set[] = {
-	
-  10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0,
-  19., 20., 21., 22., 23., 24., 25., 26., 27., 28., 29., 30.
-};
+	0.4,0.5,0.6,0.7,0.8,0.9,1,
+	  10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0,
+	  19., 20., 21., 22., 23., 24., 25., 26., 27., 28., 29.
+	};
 
 
 int error_bb_hi = 0;
@@ -215,7 +215,7 @@ planck (t, freqmin, freqmax)
 
   if (ninit_planck == 0)
   {                             /* First time through p_alpha must be initialized */
-    if ((echeck = cdf_gen_from_func (&cdf_bb, &planck_d, ALPHAMIN, ALPHAMAX, 21, bb_set)) != 0)
+    if ((echeck = cdf_gen_from_func (&cdf_bb, &planck_d, ALPHAMIN, ALPHAMAX, 27, bb_set)) != 0)
     {
       Error ("Planck: on return from cdf_gen_from_func %d\n", echeck);
     }
