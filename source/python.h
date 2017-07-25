@@ -1183,7 +1183,7 @@ properly create the CDF, this was added for python_43.2  */
  
  /* NSH 17/7 - Structure renamed to reflect the fact that this is a CDF, also made dynamically allocated */
  
-#define NCDF 2000 //The default size for these arrays
+#define NCDF 30000 //The default size for these arrays
 #define FUNC_CDF  200 //The size for CDFs made from functional form CDFs
 #define ARRAY_PDF 1000 //The size for PDFs to be turned into CDFs from arrays
 
