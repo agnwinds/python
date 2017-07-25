@@ -746,21 +746,6 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 
     }
 
-  /* From this we construct the cumulative distribution function on our more uniform
-     grid.  04March -- ksl -- There is a problem that is sometimes appearing that
-     appears to be due to the jumps.  The basic problem arises because of jumps
-     and the fact that q is calculated differently for jumps than for non-jump
-     situations.  The effect is a non-monotonic pdf in some situations where one
-     has to deal with jumps.  To avoid this problem, I have added a check and 
-     shuffled the pdf when it would otherwise be monotonic.  It is not obvious
-     to me that this is the most elegant way to deal with this problem.  
-   */
-	
-
-	
-	//We now check that the CDF array previously allocated is going to be big enough for the new array
-	
-
 
 
 	//We now simply put the CDF into the CDF array
