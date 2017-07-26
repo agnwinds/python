@@ -873,13 +873,16 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
         x += fb_topbase_partial (freq);
       }
 
-//      fnu += xplasma->density[nion] * x;
+
+//      fnu += xplasma->density[nion] * x;  //NSH 17Jul - this seems to be an error - we multiply by the ion density below
+
     }
 
 
     /* x is the emissivity from this ion. Add it to the total */
-    fnu += xplasma->density[nion+1] * x;
-  }
+
+    fnu += xplasma->density[nion+1] * x; //NSH 17Jul - this was a bug - used to be nion, should be nion+1, the ion doing the recombining
+
 
   fnu *= xplasma->ne;           // Correct from specific emissivity to the total fb emissivity
 
