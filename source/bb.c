@@ -59,9 +59,9 @@ Description:
 		bb_emittance continues to access the array integ_plank through integ_planck_d every 
 		future time is is called.
 
-		planck does the same thing albeit more indirectly. It sets up a pdf each time new frequency 
+		planck does the same thing albeit more indirectly. It sets up a cdf each time new frequency 
 		limits are placed on it.  planck therefore really uses the
-		pdf.
+		cdf.
 
 		
 Notes:
@@ -162,15 +162,16 @@ History:
 			frequency special cases
 	12nov	ksl	Removed some of the old Notes assocaited with this routine.
 			See version earlier than 74 for these old notes.
+	17jul	nsh - changed references to PDFs to CDFs
 **************************************************************/
 
 #define ALPHAMIN 0.4            // Region below which we will use a low frequency approximation
 #define ALPHAMAX 30.            // Region above which we will use a high frequency approximation
 #define ALPHABIG 100.           //  Region over which can maximmally integrate the Planck function
+#define NJUMPS 30
 #define NMAX 		1000
 
 int ninit_planck = 0;
-struct Pdf pdf_bb;
 
 double old_t = 0;
 double old_freqmin = 0;
@@ -180,13 +181,16 @@ double cdf_bb_lo, cdf_bb_hi, cdf_bb_tot;        // The precise boundaries in the
 double cdf_bb_ylo, cdf_bb_yhi;  // The places in the CDF defined by freqmin & freqmax
 double lo_freq_alphamin, lo_freq_alphamax, hi_freq_alphamin, hi_freq_alphamax;  //  the limits to use for the low and high frequency values
 
-// bb_set is thae array that pdf_gen_from_func uses to esablish the 
+// bb_set is thae array that cdf_gen_from_func uses to esablish the 
 // specific points in the cdf of the dimensionless bb function.
+
+/* These are what we call 'jumps' and are used by cdf_gen_from_func to 
+ensure important parts of the CDF have points */
 double bb_set[] = {
-  0.05, 0.1, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45,
-  10.3, 11.3, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0,
-  19., 20., 21., 22., 23., 24., 25., 26., 27., 28., 29.
-};
+
+	  10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0,
+	  19., 20., 21., 22., 23., 24., 25., 26., 27., 28., 29.
+	};
 
 
 int error_bb_hi = 0;
@@ -198,20 +202,22 @@ planck (t, freqmin, freqmax)
 {
   FILE *fopen ();
   double freq, alpha, y;
-  double planck_d (), pdf_get_rand_limit ();
+  double planck_d (), cdf_get_rand_limit ();
   double get_rand_pow ();
-  int pdf_gen_from_func (), pdf_to_file (), echeck;
-  int pdf_limit ();
+  int cdf_gen_from_func (), cdf_to_file (), echeck;
+  int cdf_limit ();
+  
+  
 
 
   /*First time through create the array containing the proper boundaries for the integral of the BB function,
-     Note calling pdf_gen_from func also defines ylo and yhi */
+     Note calling cdf_gen_from func also defines ylo and yhi */
 
   if (ninit_planck == 0)
   {                             /* First time through p_alpha must be initialized */
-    if ((echeck = pdf_gen_from_func (&pdf_bb, &planck_d, ALPHAMIN, ALPHAMAX, 29, bb_set)) != 0)
+    if ((echeck = cdf_gen_from_func (&cdf_bb, &planck_d, ALPHAMIN, ALPHAMAX, 20, bb_set)) != 0)
     {
-      Error ("Planck: on return from pdf_gen_from_func %d\n", echeck);
+      Error ("Planck: on return from cdf_gen_from_func %d\n", echeck);
     }
     /* We need the integral of the bb function outside of the regions of interest as well */
 
@@ -220,14 +226,14 @@ planck (t, freqmin, freqmax)
     cdf_bb_lo = qromb (planck_d, 0, ALPHAMIN, 1e-8) / cdf_bb_tot;       //position in the full cdf of low frequcny boundary
     cdf_bb_hi = 1. - qromb (planck_d, ALPHAMAX, ALPHABIG, 1e-8) / cdf_bb_tot;   //postion in fhe full hi frequcny boundary
 
-//      pdf_to_file (&pdf_bb, "pdf.out");
+//      cdf_to_file (&cdf_bb, "cdf.out");
     ninit_planck++;
 
   }
 
 
 /* If temperatures or frequencies have changed since the last call to planck
-redefine various limitsi, including the region of the pdf  to be used
+redefine various limitsi, including the region of the pcdfdf  to be used
 
 Note - ksl - 1211 - It is not obvious why all of these parameters need to be
 reset.  A careful review of them is warranted.
@@ -235,7 +241,7 @@ reset.  A careful review of them is warranted.
 
   if (t != old_t || freqmin != old_freqmin || freqmax != old_freqmax)
   {
-
+	  
     alphamin = H * freqmin / (BOLTZMANN * t);
     alphamax = H * freqmax / (BOLTZMANN * t);
 
@@ -244,44 +250,51 @@ reset.  A careful review of them is warranted.
     old_freqmax = freqmax;
 
     cdf_bb_ylo = cdf_bb_yhi = 1.0;
-    if (alphamin < ALPHABIG)
+    if (alphamin < ALPHABIG)  //check to make sure we get a sensible number - planck_d(ALPHAMAX is too small to sensibly integrate)
     {
-      cdf_bb_ylo = qromb (planck_d, 0, alphamin, 1e-8) / cdf_bb_tot;    //position in the full cdf of current low frequcny boundary
+      cdf_bb_ylo = qromb (planck_d, 0, alphamin, 1e-8) / cdf_bb_tot;    //position in the full cdf of current low frequency boundary
       if (cdf_bb_ylo > 1.0)
         cdf_bb_ylo = 1.0;
     }
-    if (alphamax < ALPHABIG)
+    if (alphamax < ALPHABIG)  //again, check to see that the integral will be sensible 
     {
-      cdf_bb_yhi = qromb (planck_d, 0, alphamax, 1e-8) / cdf_bb_tot;    //position in the full cdf of currnt hi frequcny boundary
+      cdf_bb_yhi = qromb (planck_d, 0, alphamax, 1e-8) / cdf_bb_tot;    //position in the full cdf of currnet hi frequency boundary
       if (cdf_bb_yhi > 1.0)
         cdf_bb_yhi = 1.0;
     }
 
-
 /* These variables are not always used */
-    lo_freq_alphamin = alphamin;        // Never used if 
-    lo_freq_alphamax = alphamax;
-    if (lo_freq_alphamax > ALPHAMIN)
-      lo_freq_alphamax = ALPHAMIN;
+    lo_freq_alphamin = alphamin;        //Set the minimum frequency to use the low frequency approximation to the lower band limit
+    lo_freq_alphamax = alphamax;        //Set to a default value
+    if (lo_freq_alphamax > ALPHAMIN)    //If the upper alpha for this band is above the loew frequency approximation lower limit
+      lo_freq_alphamax = ALPHAMIN;      //Set the maximum alpha we will use the low frequency approximation to the default value
 
-    hi_freq_alphamax = alphamax;
-    hi_freq_alphamin = alphamin;
-    if (hi_freq_alphamin < ALPHAMAX)
-      hi_freq_alphamin = ALPHAMAX;
+    hi_freq_alphamax = alphamax;         //Set the maximum frequency to use the high frequency approximation to to the upper band limit
+    hi_freq_alphamin = alphamin;         //Set to a default value
+    if (hi_freq_alphamin < ALPHAMAX)     //If the lower band limit is less than the high frequency limit
+      hi_freq_alphamin = ALPHAMAX;       //Se the minimum alpha value to use the high frequency limit to the default value
 
 
-    if (alphamin < ALPHAMAX && alphamax > ALPHAMIN)
+    if (alphamin < ALPHAMAX && alphamax > ALPHAMIN) //Since alphamin is always below alphamax, this is saying we are within the 'normal' bb range.
     {
-      pdf_limit (&pdf_bb, alphamin, alphamax);
+      cdf_limit (&cdf_bb, alphamin, alphamax);
     }
 
   }
   /* End of section redefining limits */
 
 
-  y = rand () / (MAXRAND);
 
-  y = cdf_bb_ylo * (1. - y) + cdf_bb_yhi * y;   // y is now in an allowd place in the cdf
+
+
+
+
+  y = rand () / (MAXRAND);   //We get a random number between 0 and 1
+
+  y = cdf_bb_ylo * (1. - y) + cdf_bb_yhi * y;   // y is now in an allowed place in the cdf
+  
+
+	  
 
 /* There are 3 cases to worry about
 	The case where everything is in the low frequency limit
@@ -290,17 +303,17 @@ reset.  A careful review of them is warranted.
 	in the normal regime
 */
 
-  if (y <= cdf_bb_lo || alphamax < ALPHAMIN)
+  if (y <= cdf_bb_lo || alphamax < ALPHAMIN) //we are in the low frequency limit
   {
     alpha = get_rand_pow (lo_freq_alphamin, lo_freq_alphamax, 2.);
   }
-  else if (y >= cdf_bb_hi || alphamin > ALPHAMAX)
+  else if (y >= cdf_bb_hi || alphamin > ALPHAMAX) //We are in the high frequency limit
   {
     alpha = get_rand_exp (hi_freq_alphamin, hi_freq_alphamax);
   }
-  else
+  else 
   {
-    alpha = pdf_get_rand_limit (&pdf_bb);
+    alpha = cdf_get_rand_limit (&cdf_bb); //We are in the region where we use the BB function
   }
 
   freq = BOLTZMANN * t / H * alpha;
@@ -593,6 +606,8 @@ planck_d (alpha)
 
 // Calculate the emittance of a bb between freqmin and freqmax
 // Should integrate to sigma 
+
+//NSH - 17Jul - made change to if/else statement so that qromb used whenever bounds are not completely withing the tabulated bands.
 double
 emittance_bb (freqmin, freqmax, t)
      double freqmin, freqmax, t;
@@ -602,20 +617,21 @@ emittance_bb (freqmin, freqmax, t)
   q1 = 2. * PI * (BOLTZMANN * BOLTZMANN * BOLTZMANN * BOLTZMANN) / (H * H * H * C * C);
 
 
+
+
   alphamin = H * freqmin / (BOLTZMANN * t);
   alphamax = H * freqmax / (BOLTZMANN * t);
-  if (alphamin > ALPHAMIN && alphamax < ALPHAMAX)
+  
+  
+  
+  
+  if (alphamin > ALPHAMIN && alphamax < ALPHAMAX) 
   {
     return (q1 * t * t * t * t * integ_planck_d (alphamin, alphamax));
-  }
-  else if (alphamax < ALPHAMIN)
-  {
-    return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7));
   }
   else
   {
-
-    return (q1 * t * t * t * t * integ_planck_d (alphamin, alphamax));
+    return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7));
   }
 }
 

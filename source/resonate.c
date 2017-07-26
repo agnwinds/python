@@ -248,14 +248,14 @@ then the photon frequency will be less. */
 
 
 /* Next part deals with computation of bf opacity. In the macro atom method this is needed.
-In the old method it is not. This section activates if geo.rt_mode==2 (switch for macro atom
+In the old method it is not. This section activates if geo.rt_mode==RT_MODE_MACRO (switch for macro atom
 method). If the macro atom method is not used just get kap_bf to 0 and move on). SS*/
 
   kap_bf_tot = 0;
   kap_ff = 0;
 
 
-  if (geo.rt_mode == 2)
+  if (geo.rt_mode == RT_MODE_MACRO)
   {
     /* Potentially several continuum may contribute in a given frequency range so the kap_bf is an array. 
        Also need to store the total - kap_bf_tot. */
@@ -372,7 +372,7 @@ process. */
            * extraction cycles.  Could you check. It shouldn't be necessary.  ???
            */
 
-          if (geo.rt_mode == 2) //Macro Atom case (SS)
+          if (geo.rt_mode == RT_MODE_MACRO) //Macro Atom case (SS)
           {
 
             /*
@@ -553,7 +553,7 @@ select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma)
        If a non-macro-atom run is being done this part should never be reached.
        Just do a check that all is well - this can be removed eventually (SS)
      */
-    if (geo.rt_mode == 1)
+    if (geo.rt_mode == RT_MODE_2LEVEL)
     {
       Error ("calculate_ds: Not using macro atoms but trying to excite one? Aboort.\n");
       exit (0);                 //hopefully this will never happen and this check can be deleted at some
@@ -864,7 +864,7 @@ sobolev (one, x, den_ion, lptr, dvds)
     Error ("Sobolev: Surprise tau = VERY_BIG\n");
   }
 
-  else if (lptr->macro_info == 1 && geo.rt_mode == 2 && geo.macro_simple == 0)
+  else if (lptr->macro_info == 1 && geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == 0)
   {
     // macro atom case SS 
     d1 = den_config (xplasma, lptr->nconfigl);
@@ -1029,7 +1029,7 @@ doppler (pin, pout, v, nres)
        If a 2-level atom run, one should never arrive here.
        Just do a check that all is well - this can be removed eventually (SS)
      */
-    if (geo.rt_mode == 1)
+    if (geo.rt_mode == RT_MODE_2LEVEL)
     {
       Error ("doppler: Not using macro atoms but trying to deexcite one? Abort.\n");
       exit (0);
@@ -1171,7 +1171,7 @@ scatter (p, nres, nnscat)
      deactivation process is always the same as the activation process and so
      nothing needs to be done. */
 
-  if (geo.rt_mode == 2)         //check if macro atom method in use
+  if (geo.rt_mode == RT_MODE_MACRO)         //check if macro atom method in use
   {
 
 

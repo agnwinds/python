@@ -2980,6 +2980,8 @@ index_phot_top ()
   for (n = 0; n < ntop_phot + nxphot; n++)
   {
     phot_top_ptr[n] = &phot_top[index[n + 1] - 1];
+  	printf ("NPHOT test n=%i f_0=%e z=%i state=%i\n",n,phot_top_ptr[n]->freq[0],phot_top_ptr[n]->z,phot_top_ptr[n]->istate);
+	
   }
 
   /* Free the memory for the arrays */
@@ -3094,6 +3096,8 @@ indexx (n, arrin, indx)
   if (n < 2)
   {
     Log_silent ("Nothing for indexx to do! Only one element\n");
+	indx[0]=0;
+	indx[1]=1;  /* NSH 1707 - We still need to populate the array */
     return;
   }
 

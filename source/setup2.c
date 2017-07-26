@@ -248,12 +248,12 @@ photon_checks (p, freqmin, freqmax, comment)
      double freqmin, freqmax;
 {
   int nnn, nn;
-//  double lum_ioniz;  //NSH 16/2/2011 These are now declared externally to allow python to see them
+//  double cool_tot_ioniz;  //NSH 16/2/2011 These are now declared externally to allow python to see them
 //  int n_ioniz;
   int nlabel;
 
   geo.n_ioniz = 0;
-  geo.lum_ioniz = 0.0;
+  geo.cool_tot_ioniz = 0.0;
   nnn = 0;
   nlabel = 0;
 
@@ -276,7 +276,7 @@ photon_checks (p, freqmin, freqmax, comment)
     p[nn].np = nn;              /*  NSH 13/4/11 This is a line to populate the new internal photon pointer */
     if (H * p[nn].freq > ion[0].ip)
     {
-      geo.lum_ioniz += p[nn].w;
+      geo.cool_tot_ioniz += p[nn].w;
       geo.n_ioniz += p[nn].w / (H * p[nn].freq);
     }
     if (sane_check (p[nn].freq) != 0 || sane_check (p[nn].w))
@@ -609,7 +609,6 @@ init_advanced_modes ()
   modes.keep_ioncycle_windsaves = 0;    // want to save wind file each ionization cycle
   modes.track_resonant_scatters = 0;    // want to track resonant scatters
   modes.save_extract_photons = 0;       // we want to save details on extracted photons
-  modes.print_windrad_summary = 0;      // we want to print the wind rad summary each cycle
   modes.adjust_grid = 0;        // the user wants to adjust the grid scale
   modes.diag_on_off = 0;        // extra diagnostics
   modes.use_debug = 0;
@@ -767,19 +766,29 @@ init_observers ()
     }
   }
 
-  /* Select the units of the output spectra.  This is always needed */
+  /* Select the units of the output spectra.  This is always needed.
+   * There are 3 basics choices flambda, fnu, and the internal units
+   * of the program.  The first two imply that output units are scaled
+   * to a distance of 100 pc. The internal units are basically a luminosity
+   * within a wavelength/frequency interval. */
 
   rdint ("spec.type(flambda(1),fnu(2),basic(other)", &geo.select_spectype);
+
   if (geo.select_spectype == 1)
   {
     Log ("OK, generating flambda at 100pc\n");
+    geo.select_spectype=SPECTYPE_FLAMBDA;
   }
   else if (geo.select_spectype == 2)
   {
     Log ("OK, generating fnu at 100 pc\n");
+    geo.select_spectype=SPECTYPE_FNU;
   }
   else
+  {
     Log ("OK, basic Monte Carlo spectrum\n");
+    geo.select_spectype=SPECTYPE_RAW;
+  }
 
   return (0);
 }
@@ -886,15 +895,15 @@ init_ionization ()
   // XXX  I is unclear to me why all of this dwon to the next XXX is not moved to a single subroutine.  It all
   // pertains to how the radiatiate tranfer is carreid out
 
-  rdint ("Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,6=pairwise_bb,7=pairwise_pow,8=matrix_bb,9=matrix_pow)", &geo.ioniz_mode);
+  rdint ("Wind_ionization(0=on.the.spot,1=LTE(tr),2=fixed,3=recalc_bb,4=LTE(t_e),6=pairwise_bb,7=pairwise_pow,8=matrix_bb,9=matrix_pow)", &geo.ioniz_mode);
 
   if (geo.ioniz_mode == IONMODE_FIXED)
   {
     rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
   }
-  if (geo.ioniz_mode == IONMODE_LTE_SIM || geo.ioniz_mode == 5 || geo.ioniz_mode > 9)   /*NSH CLOUDY test - remove once done */
+  if (geo.ioniz_mode == 5 || geo.ioniz_mode > 9)   
   {
-    Log ("The allowed ionization modes are 0, 1, 2, 3, 6, 7\n");
+    Log ("The allowed ionization modes are 0, 1, 2, 3, 4, 6, 7, 8 and 9\n");
     Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
     exit (0);
   }

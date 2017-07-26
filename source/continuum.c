@@ -66,7 +66,7 @@ one_continuum (spectype, t, g, freqmin, freqmax)
   //OLD not used in routine double par[2];              // For python we assume only two parameter models
   double lambdamin, lambdamax;
   double f;
-  double pdf_get_rand ();
+  double cdf_get_rand ();
   // int model (), nwav;
   int model ();
 
@@ -78,10 +78,10 @@ one_continuum (spectype, t, g, freqmin, freqmax)
     /*  Get_model returns wavelengths in Ang and flux in ergs/cm**2/Ang */
     lambdamin = C * 1e8 / freqmax;
     lambdamax = C * 1e8 / freqmin;
-    if (pdf_gen_from_array
-        (&comp[spectype].xpdf, comp[spectype].xmod.w, comp[spectype].xmod.f, comp[spectype].nwaves, lambdamin, lambdamax, 1, jump) != 0)
+    if (cdf_gen_from_array
+        (&comp[spectype].xcdf, comp[spectype].xmod.w, comp[spectype].xmod.f, comp[spectype].nwaves, lambdamin, lambdamax) != 0)
     {
-      Error ("In one_continuum after return from pdf_gen_from_array\n");
+      Error ("In one_continuum after return from cdf_gen_from_array\n");
     }
     old_t = t;
     old_g = g;
@@ -89,7 +89,7 @@ one_continuum (spectype, t, g, freqmin, freqmax)
     old_freqmax = freqmax;
   }
 
-  f = (C * 1.e8 / pdf_get_rand (&comp[spectype].xpdf));
+  f = (C * 1.e8 / cdf_get_rand (&comp[spectype].xcdf));
   if (f > freqmax)
   {
     Error ("one_continuum: f too large %e\n");

@@ -63,7 +63,7 @@ History:
 
 double zzz[] = { 0.0, 0.0, 1.0 };
 
-struct Pdf pdf_vcos;
+
 int init_vcos = 0;
 
 int
@@ -75,9 +75,9 @@ randvcos (lmn, north)
   double q, jumps[5];
 // double s;
   struct basis nbasis;
-  int echeck, pdf_gen_from_func ();
+  int echeck, cdf_gen_from_func ();
   int create_basis (), project_from ();
-  double vcos (), pdf_get_rand ();
+  double vcos (), cdf_get_rand ();
   double phi;
 
   if (init_vcos == 0)
@@ -88,16 +88,16 @@ randvcos (lmn, north)
     jumps[3] = 0.06976;
     jumps[4] = 0.08716;
 
-    if ((echeck = pdf_gen_from_func (&pdf_vcos, &vcos, 0., 1., 5, jumps)) != 0)
+    if ((echeck = cdf_gen_from_func (&cdf_vcos, &vcos, 0., 1., 5, jumps)) != 0)
 //old ksl 04mar  pdf_gen_from_func (&pdf_vcos, &vcos, 0., 1., 5, &jumps)) != 0)
     {
-      Error ("Randvcos: return from pdf_gen_from_func %d\n", echeck);;
+      Error ("Randvcos: return from cdf_gen_from_func %d\n", echeck);;
     }
     init_vcos = 1;
   }
 
 
-  n = pdf_get_rand (&pdf_vcos);
+  n = cdf_get_rand (&cdf_vcos);
   q = sqrt (1. - n * n);
 
 //  The next set of lines are all wrong
