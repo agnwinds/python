@@ -369,6 +369,13 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
     {
       Error ("cdf_gen_from_func: Errro returned from calc_cdf_gradient\n");
     }				// 57ib 
+	
+	
+	printf ("BLAH %e %e %e\n",cdf->x[0],cdf->y[0],cdf->d[0]);
+	printf ("BLAH %e %e %e\n",cdf->x[1],cdf->y[1],cdf->d[1]);
+	printf ("BLAH %e %e %e\n",cdf->x[2],cdf->y[2],cdf->d[2]);
+	
+	
   /* Check the pdf */
   if ((icheck = cdf_check (cdf)) != 0)
     {
@@ -1195,7 +1202,12 @@ calc_cdf_gradient (cdf)
 
     }
   /* Fill in the ends */
-  cdf->d[0] = cdf->d[1];
+	  cdf->d[0] = cdf->d[1];
+	  
+//NSH - a couple of other ways of doing this - linear interpolation from the previous points, or just the gradient of the current interval - none works great.	  
+	  
+//	  cdf->d[0]=cdf->d[1]-((cdf->d[2]-cdf->d[1])/(cdf->x[2]-cdf->x[1]))*(cdf->x[1]-cdf->x[0]);
+//	cdf->d[0]=(cdf->y[1] - cdf->y[0])/(cdf->x[1] - cdf->x[0]);
   cdf->d[cdf->ncdf] = cdf->d[cdf->ncdf - 1];
   return (istat);
 }

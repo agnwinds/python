@@ -187,7 +187,7 @@ double lo_freq_alphamin, lo_freq_alphamax, hi_freq_alphamin, hi_freq_alphamax;  
 /* These are what we call 'jumps' and are used by cdf_gen_from_func to 
 ensure important parts of the CDF have points */
 double bb_set[] = {
-	0.4,0.5,0.6,0.7,0.8,0.9,1,
+
 	  10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0,
 	  19., 20., 21., 22., 23., 24., 25., 26., 27., 28., 29.
 	};
@@ -215,7 +215,7 @@ planck (t, freqmin, freqmax)
 
   if (ninit_planck == 0)
   {                             /* First time through p_alpha must be initialized */
-    if ((echeck = cdf_gen_from_func (&cdf_bb, &planck_d, ALPHAMIN, ALPHAMAX, 27, bb_set)) != 0)
+    if ((echeck = cdf_gen_from_func (&cdf_bb, &planck_d, ALPHAMIN, ALPHAMAX, 20, bb_set)) != 0)
     {
       Error ("Planck: on return from cdf_gen_from_func %d\n", echeck);
     }
@@ -262,9 +262,6 @@ reset.  A careful review of them is warranted.
       if (cdf_bb_yhi > 1.0)
         cdf_bb_yhi = 1.0;
     }
-    printf ("BLAH ALPHAMIN %f cdf_bb_lo %1.20e ALPHAMAX %f cdf_bb_hi %1.20e\n",ALPHAMIN,cdf_bb_lo,ALPHAMAX,cdf_bb_hi);
-
-	printf ("BLAH alphamin %f %e cdf_bb_ylo %1.20e alphamax %f %e cdf_bb_yhi %1.20e\n",alphamin,freqmin*HEV,cdf_bb_ylo,alphamax,freqmax*HEV,cdf_bb_yhi);
 
 /* These variables are not always used */
     lo_freq_alphamin = alphamin;        //Set the minimum frequency to use the low frequency approximation to the lower band limit
