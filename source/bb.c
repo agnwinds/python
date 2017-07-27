@@ -625,11 +625,18 @@ emittance_bb (freqmin, freqmax, t)
   
   
   
-  if (alphamin > ALPHAMIN && alphamax < ALPHAMAX) 
+  if (alphamin > ALPHAMIN && alphamax < ALPHAMAX) //We are within the tabulated range
   {
     return (q1 * t * t * t * t * integ_planck_d (alphamin, alphamax));
   }
-  else
+  else if (alphamax > ALPHABIG) 
+  {
+	  if (alphamin > ALPHABIG) //The whole band is above the poitn where we can sensibly integrate the BB function
+	  	return(0);
+	  else   //only the upper part of the band is above ALPHABIG
+	      return (q1 * t * t * t * t * qromb (planck_d, alphamin, ALPHABIG, 1e-7));
+  }
+  else //We are outside the tabulated range and must integrate
   {
     return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7));
   }
