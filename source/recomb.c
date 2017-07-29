@@ -601,6 +601,12 @@ use that instead if possible --  57h */
 
     }
 	
+	
+//	f2=1e16;
+//	f1=1e15;
+//	xplasma->t_e=5000;
+	
+	
 
     //!BUG SSMay04
     //It doesn't seem to work unless this is zero? (SS May04)
@@ -653,10 +659,10 @@ use that instead if possible --  57h */
 		
 	/* At this point, the variable nnn stores the number of points */
 	
+//	for (n=0;n<nnn;n++)
+//		printf ("FB_TEST te=%e freq %e emittance %e out\n",xplasma->t_e,fb_x[n],fb_y[n]);
 	
-
-
-	
+//	exit(0);
 
     if (cdf_gen_from_array (&cdf_fb, fb_x, fb_y, nnn, f1, f2) != 0)
     {
