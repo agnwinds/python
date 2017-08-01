@@ -371,9 +371,9 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
     }				// 57ib 
 	
 	
-	printf ("BLAH %e %e %e\n",cdf->x[0],cdf->y[0],cdf->d[0]);
-	printf ("BLAH %e %e %e\n",cdf->x[1],cdf->y[1],cdf->d[1]);
-	printf ("BLAH %e %e %e\n",cdf->x[2],cdf->y[2],cdf->d[2]);
+//	printf ("BLAH %e %e %e\n",cdf->x[0],cdf->y[0],cdf->d[0]);
+//	printf ("BLAH %e %e %e\n",cdf->x[1],cdf->y[1],cdf->d[1]);
+//	printf ("BLAH %e %e %e\n",cdf->x[2],cdf->y[2],cdf->d[2]);
 	
 	
   /* Check the pdf */

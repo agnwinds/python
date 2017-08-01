@@ -725,7 +725,8 @@ WindPtr (w);
 
     /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
        cycles in the windsavefile even if the spectral cycles are run */
-
+	if (nplasma==62)
+		printf("BLAH nwing=%i nplasma=%i lum_rr=%e\n",plasmamain[nplasma].nwind,nplasma,plasmamain[nplasma].lum_rr);
     plasmamain[nplasma].cool_tot_ioniz = plasmamain[nplasma].cool_tot;
     plasmamain[nplasma].lum_ff_ioniz = plasmamain[nplasma].lum_ff;
     plasmamain[nplasma].cool_rr_ioniz = plasmamain[nplasma].cool_rr;

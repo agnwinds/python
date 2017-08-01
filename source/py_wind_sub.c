@@ -1516,6 +1516,12 @@ a:printf ("There are %i wind elements in this model\n", NDIM2);
   /*70g compton removed from luminosity reporting, it is now a cooling mechanism but does not produce photons
      DR cooling also added in to report */
   Log
+    ("t_e  %8.2e lum_tot %8.2e lum_lines  %8.2e lum_ff  %8.2e lum_rr     %8.2e \n",
+     xplasma->t_e, xplasma->lum_tot_ioniz, xplasma->lum_lines_ioniz, xplasma->lum_ff_ioniz, xplasma->lum_rr_ioniz);
+     Log
+       ("t_e  %8.2e lum_tot %8.2e lum_lines  %8.2e lum_ff  %8.2e lum_rr     %8.2e \n",
+        xplasma->t_e, xplasma->lum_tot, xplasma->lum_lines, xplasma->lum_ff, xplasma->lum_rr);
+  Log
     ("t_e %8.2e cool_tot %8.2e lum_lines  %8.2e lum_ff  %8.2e cool_rr     %8.2e cool_comp %8.2e cool_adiab %8.2e cool_DR %8.2e \n",
      xplasma->t_e, xplasma->cool_tot_ioniz + xplasma->cool_comp_ioniz + xplasma->cool_adiabatic_ioniz + xplasma->cool_dr_ioniz,
      xplasma->lum_lines_ioniz, xplasma->lum_ff_ioniz, xplasma->cool_rr_ioniz, xplasma->cool_comp_ioniz, xplasma->cool_adiabatic_ioniz,

@@ -409,20 +409,20 @@ for (n=0;n<NPLASMA;n++)
   		  Error_silent ("photo_gen_wind: On return from one_ff: icell %d vol %g t_e %g\n", icell, wmain[icell].vol, plasmamain[nplasma].t_e);
   		p[np].freq = 0.0;
 		}
-	    if (icell==1100)
-	  	  printf ("PHOT FF freq %e weight %e out\n",p[np].freq,weight);
+//	    if (icell==1100)
+//	  	  printf ("PHOT FF freq %e weight %e out\n",p[np].freq,weight);
 	}
 	else if (np<photstart+ptype[n][0]+ptype[n][1])
 	{
 		p[np].freq = one_fb (&wmain[icell], freqmin, freqmax);
-	    if (icell==1100)
-	  	  printf ("PHOT FB freq %e weight %e out\n",p[np].freq,weight);
+//	    if (icell==1100)
+//	  	  printf ("PHOT FB freq %e weight %e out\n",p[np].freq,weight);
 	}
 	else
 	{
 		p[np].freq = one_line (&wmain[icell], freqmin, freqmax, &p[n].nres);       /*And fill all the rest of the luminosity up with line photons */
-	    if (icell==1100)
-	  	  printf ("PHOT LI freq %e weight %e out\n",p[np].freq,weight);
+//	    if (icell==1100)
+//	  	  printf ("PHOT LI freq %e weight %e out\n",p[np].freq,weight);
 	}
 
     p[np].w = weight;
