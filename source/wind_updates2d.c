@@ -689,6 +689,12 @@ WindPtr (w);
   }
 
   /* Check the balance between the absorbed and the emitted flux */
+  
+  //NSH 0717 - first we need to ensure the cooling and luminosities reflect the current temperature
+  
+  cool_sum = wind_cooling (0.0, VERY_BIG);       /*We call wind_cooling here to obtain an up to date set of cooling rates */
+  lum_sum = wind_luminosity (0.0, VERY_BIG);       /*and we also call wind_luminosity to get the luminosities */
+  
 
   xsum = psum = ausum = lsum = fsum = csum = icsum = apsum = aausum = abstot = 0; //1108 NSH zero the new csum counter for compton heating
 
@@ -725,8 +731,7 @@ WindPtr (w);
 
     /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
        cycles in the windsavefile even if the spectral cycles are run */
-	if (nplasma==62)
-		printf("BLAH nwing=%i nplasma=%i lum_rr=%e\n",plasmamain[nplasma].nwind,nplasma,plasmamain[nplasma].lum_rr);
+	
     plasmamain[nplasma].cool_tot_ioniz = plasmamain[nplasma].cool_tot;
     plasmamain[nplasma].lum_ff_ioniz = plasmamain[nplasma].lum_ff;
     plasmamain[nplasma].cool_rr_ioniz = plasmamain[nplasma].cool_rr;
@@ -776,8 +781,7 @@ WindPtr (w);
 
 
 
-  cool_sum = wind_cooling (0.0, VERY_BIG);       /*We call wind_cooling here to obtain an up to date set of cooling rates */
-  lum_sum = wind_luminosity (0.0, VERY_BIG);       /*and we also call wind_luminosity to get the luminosities */
+
 
 
   if (modes.zeus_connect == 1 && geo.hydro_domain_number > -1)  //If we are running in zeus connect mode, we output heating and cooling rates.

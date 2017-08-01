@@ -430,6 +430,7 @@ one_shot (xplasma, mode)
 	{
 	  xplasma->t_e = TMAX;
 	}
+	zero_emit(xplasma->t_e);  //Get the heating and cooling rates correctly for the new temperature
     }
 
 
