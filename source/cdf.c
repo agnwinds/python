@@ -689,6 +689,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 	}
       // Now worry about the last element
       pdf_x[pdf_n] = xmax;
+      m--;  /* Reduce m so that x[m] is les than xmax ksl 170801 */
       if (m < n_xy - 1)  //We are not at the limit of the supplied data, so we interpolate
 	{
 	  q = (xmax - x[m]) / (x[m + 1] - x[m]);
