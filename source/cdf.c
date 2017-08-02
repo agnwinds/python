@@ -569,7 +569,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
      double xmin, xmax;
 {
   int allzero;
-  int m, n, nn;
+  int m, n;
   double sum, q;
   int echeck,cdf_check (), recalc_pdf_from_cdf ();
 
@@ -624,7 +624,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 
   //Now at the end
 
-  nn = n_xy;
+  n = n_xy-1;
   while (y[n] == 0.0)
     {
       xmax = x[n];
@@ -718,7 +718,10 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
       sum = pdf_z[pdf_n - 1];
 
       for (n = 1; n < pdf_n; n++)
+	  {
+		  printf ("%e %e\n",pdf_x[n],pdf_z[n]);
 	pdf_z[n] /= sum;
+	  }
 	  
 
 
@@ -781,7 +784,13 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
     }				// 57ib 
   if ((echeck = cdf_check (cdf)) != 0)
     {
-      Error ("cdf_gen_from_array: error %d on cdf_check\n", echeck);
+      Error ("cdf_gen_from_array: error %d on cdf_check\n", echeck);	  
+	  for (n=0;n<n_xy;n++)
+		  printf ("pdf_n=%i %e %e\n",pdf_n,x[n],y[n]);
+	  
+	  
+	  
+	  exit(0);
     }
   return (echeck);
 }
