@@ -8,14 +8,14 @@
  	
  	The main routines are
  	
-		pdf_gen_from_func	(&pdf,&func,xmin,xmax,njumps,jump)		
+		cdf_gen_from_func	(&cdf,&func,xmin,xmax,njumps,jump)		
 			Generate a cumulative distrubution function (cdf) from a function
  	          
-		pdf_gen_from_array(&pdf,x,y,n_xy,xmin,xmax,njumps,jump)		
+		cdf_gen_from_array(&cdf,x,y,n_xy,xmin,xmax,njumps,jump)		
 			Generate a cumulative distribution function (cdf) from an
  			array of values
 
-		pdf_get_rand(&pdf)				
+		cdf_get_rand(&cdf)				
 			Generate a single sample from a cdf defined by either of the first
  			two routines 	
  	
@@ -27,10 +27,10 @@
  	pdf.  Note that pdf_gen-from_func or pdf_gen_from_array should have been
  	called previously!
  
-		pdf_limit(&pdf,xmin,xmax)  sets limit1 and limit2 so that one can generate
- 			distributions from a limited range within a previously created pdf.
+		cdf_limit(&pdf,xmin,xmax)  sets limit1 and limit2 so that one can generate
+ 			distributions from a limited range within a previously created cdf.
 
-		pdf_get_rand_limit(&pdf) will samples the pdf but limits the range of
+		cdf_get_rand_limit(&pdf) will samples the cdf but limits the range of
 			the return to lie between xmin and xmax from pdf_limit.
 
 	
@@ -41,18 +41,18 @@
 			number of points.
 
  	There is also a simple diagnostic routine
-		pdf_check(&pdf)
+		cdf_check(&cdf)
 
-	which returns a nonzero number if certain checks of the pdf fail
+	which returns a nonzero number if certain checks of the cdf fail
 	and a routine  
 
-		pdf_to_file(&pdf,filename)				
- 		  	to write a pdf structure to a file
+		cdf_to_file(&cdf,filename)				
+ 		  	to write a cdf structure to a file
 
 
 								
-Arguments for pdf_gen_from_func
-	PdfPtr pdf;		A ptr to a pdf structure (see below)
+Arguments for cdf_gen_from_func
+	CdfPtr cdf;		A ptr to a cdf structure (see below)
 	double (*func)()	The probablility density function to be integrated 
 				to create the pdf
 	double xmin,xmax;	The range over which the function is to be 
@@ -63,32 +63,30 @@ Arguments for pdf_gen_from_func
 				and xmax
 	int njumps;		The size of jumps[]
 
-Arguments for pdf_gen_from_array are same as above except
+Arguments for cdf_gen_from_array are same as above except
  	
-	double x[],y[]		The one dimensional arrays containg the places x where the cumulative 
-				distribution function density has been evaluated.  The array need not 
-				be uniformly spaced. y is the value of the cdf at the point x 
-	double d[]		The rate of change of the probability density at x, which is calculated
-				from the CDF. -- Added 57i
+	double x[],y[]		The one dimensional arrays containg the places x where the probability 
+				density function density has been evaluated.  The array need not 
+				be uniformly spaced. y is the value of the pdf at the point x 
 	int n_xy		The size of x[] and y[]
 
 Arguments for pdf_get_rand
-	PdfPtr pdf		pdf (See below)	is a structure which contains the cumulative
+	CdfPtr cdf		cdf (See below)	is a structure which contains the cumulative
 				distribution function.
 
-Arguments for pdf_limit
-	double xmin,xmax	Here xmin and xmax will cause pdf[].limit1 and pdf[].limit2 to be set
+Arguments for cdf_limit
+	double xmin,xmax	Here xmin and xmax will cause cdf[].limit1 and cdf[].limit2 to be set
 				in such a way that when you call pdf_get_rand_limit the distribution
 				will be sampled only between xmin and xmax.  Watch out though
 				because if xmin and xmax lie outside of the original value of xmin
 				and xmax then the distribution will not extend this far.							
 Arguments for pdf_to_file
-	PdfPtr pdf
+	PdfPtr cdf
 	char filename[]		If you can't figure this out, you are in deep trouble!
 				
 Returns:
-	All of the routines return 0 on successful completion, except pdf_get_rand which returns
-	a random value between xmin and xmax.  Multiple calls to pdf_get_rand should regenerate
+	All of the routines return 0 on successful completion, except cdf_get_rand which returns
+	a random value between xmin and xmax.  Multiple calls to cdf_get_rand should regenerate
 	the probability density function.
 	
 	If there is an error the routines usually send an error message to the screen and logfile
@@ -101,38 +99,36 @@ Description:
 	and then allow one to sample that distribution function.  The procedure is either
 	to call pdf_gen_from_func if you have a function whose probability distribution you
 	want (as might be the case if you were generating bremsstrahlung photons and you knew
-	the formula)  or pdf_gen_from_array (as might be the case if you were trying to
+	the formula)  or cdf_gen_from_array (as might be the case if you were trying to
 	generate Monte Carlo spectra from precalculated Kurucz models).
 	
 	The result of calling either of these routines will be to populate a structure of
-	the form Pdf
-		pdf->x[]  will contain NPDF values of x between xmin and xmax.  The values will be
+	the form Cdf
+		cdf->x[]  will contain NPDF values of x between xmin and xmax.  The values will be
 			spaced so that it is almost but not quite true that if you generate a uniform
 			number n between 0 and NPDF you could just read off the value pdf[n].x and
 			that by doing this multiple times you could regenerate the distribution function
-		pdf->y[]  will contain values between 0 and 1 and is the integral of the cumulative
+		cdf->y[]  will contain values between 0 and 1 and is the integral of the cumulative
 			distribution function from xmin to pdf[].x
 			
-	Once a pdf has been generated, one samples the pdf by calls to pdf_get_rand which 
-	creates a random number between 0 and 1, finds the elements in pdf which surround
+	Once a cdf has been generated, one samples the cdf by calls to cdf_get_rand which 
+	creates a random number between 0 and 1, finds the elements in cdf which surround
 	the random number and interpolates to return a value x. 
 	
 	It is possible to force specific values of x to appear in the pdf.  This is desirable
 	if there are edges where the probability density changes rapidly, as for example
 	at the Lyman edge in a stellar spectrum.  By using jumps properly you can assure
-	that edges will be sharp in the regenerated distribution (since otherwse pdf_get_rand
+	that edges will be sharp in the regenerated distribution (since otherwse cdf_get_rand
 	will linearly interpolate between two points on the opposite sides of the edge).
 
 Notes:
 	Must be compiled with log.c since it makes use of the "python" logging routines for
 	errors.
 
-	The fact that these routines start with pdf... is historical and represents a poor
-	choice of nomenclature.  We reallly mean comulative distribution functions
-
 	It would probably be desirable to modify this so that the size of the parallel 
 	arrays being generated could be determined from inside the program.  In that case
-	NPDF would have to become the maximum size.
+	NPDF would have to become the maximum size. - NSH stis was tried in Jul 2017 - turns
+	out to be very hard!
 
 
 	Error??: For Kurucz models, The probability distribution beyond the He edge  
@@ -142,7 +138,9 @@ Notes:
 	everything down.  This is an another argument that the whole routine pdf_gen_from_array
 	neeeds to be rewritten to avoid using NPDF altogether.  One way to do this
 	would be simply to use the values of x and y in creating an inital pdf.  There
-	is however a question of resampling.
+	is however a question of resampling. - NSH Jul 2017 - this has been addressed
+	by removing the sampling aspect. Turns out with the faster machines we dont
+	need to be so careful about making it easy to find the right point in a CDF.
 	
 
 History:
@@ -180,6 +178,9 @@ History:
 			the number of points that are used in the array pdf_array in situations
 			where the binning is too course.  In the process, eliminated pdf_init.  
 			It was only called by one routine.  
+	17Jul   nsh Modified to make everything refer to CDFs as they should be, also changed
+			cdf_gen_from_array to work on a supplied array - no jumps.
+
  
 **************************************************************/
 
@@ -215,7 +216,7 @@ double *pdf_array;
 
 Description:
 
-This routine stores values of the function in  pdf_array
+This routine stores values of the function in  cdf_array
 
 	02feb	ksl	Modified to handle a problem in which the
 			pdf was not monotonic because of the 
@@ -391,7 +392,7 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
 gen_array_from_func
 
 
-This is a routine which is called by pdf_gen_from_func which simply calculates the cumulative
+This is a routine which is called by cdf_gen_from_func which simply calculates the cumulative
 distribution of the function in equally spaced steps between xmin and xmax.  The CDF is properly
 normalized.
 
@@ -515,7 +516,7 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
 
 
 /*  
-pdf_gen_from_array
+cdf_gen_from_array
 
 The one dimensional arrays containg the places x where the probability
 density y has been evaluated.  The array need not be uniformly spaced.  
@@ -525,7 +526,7 @@ one can linearly interpolate between points
 Notes:
 
 
-	06sep -- There are differences between this and pdf_gen_from_func
+	06sep -- There are differences between this and cdf_gen_from_func
 	that look historical -- ksl
 
 
@@ -553,7 +554,7 @@ History:
 			so that problems with this would be easier to update in
 			future.
 	1405	JM -- Increased PDF array for use with disk14 models
-	1707	NSH -- Removed code for jumps - we now just supply asuitable unscaled pdf
+	1707	NSH -- Removed code for jumps - we now just supply a suitable unscaled pdf
 */
 
 #define PDF_ARRAY  28000
@@ -801,7 +802,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 
 
 /* 
-pdf_get_rand
+cdf_get_rand
 
 
 Our searching routine assumes we can predict roughly where in the
@@ -812,7 +813,8 @@ History:
 	06sep	ksl	57i -- Modified to account for the fact
 			that the probability density is not 
 			uniform between intervals.
-    17jun   ksl Modified for variable sizes of distribution function
+    17jun   ksl Modified for variable sizes of distribution function	
+	17jul	nsh Modified to use gsl routine to find the right point in the CDF.
 */
 
 double
@@ -876,9 +878,8 @@ find that minimum and maximum value. Having done this one can call pdf_get_rand_
 Error Some of this is not quite right.  It's intended to let us generate limits in
 the CDF but we need x too
 
-	06sep	ksl	57i -- Added the xlimits to the pdf
+	06sep	ksl	57i -- Added the xlimits to the cdf
     17jun ksl Modified for variable sizes of distribution function
-	7 Jul nsh Modified to make everything refer to CDFs as they should be
 */
 
 int
@@ -954,7 +955,6 @@ History
 			that the probability density is not 
 			uniform between intervals.
     17jul   ksl Modified for variable lengths of pdfs
-	17jul   nsh Changed terminology to CDF
 
 */
 double
@@ -1158,7 +1158,13 @@ Description:
 	allow one to calculate a first order correction
 	to a uniform distibution between the points
 	where the gradient has been calculated.
-                                                                                             
+                                            
+	XXX NSH - the way that the ends are dealt with is bot
+		great - we should really try to come up with an
+		extrapolation rather than just fill in the same gradients
+		for the second and penultimate cells into the 
+		forst and last cells.
+											 											
 Notes:
 
 	d is calculated by differencing the cdf.  Thus
