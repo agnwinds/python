@@ -89,13 +89,19 @@ one_continuum (spectype, t, g, freqmin, freqmax)
 	  
 	  for (n=0;n<comp[spectype].nwaves;n++)
 	  {
-			  
+//		  printf ("%e %e ",comp[spectype].xmod.w[n],comp[spectype].xmod.f[n]);
 		  if (comp[spectype].xmod.w[n] > lambdamin && comp[spectype].xmod.w[n] <= lambdamax)
 		  {
+//			  printf (" inserted %e %e\n",lambdamin,lambdamax);
 			  w_local[nwave]=comp[spectype].xmod.w[n];
 			  f_local[nwave]=comp[spectype].xmod.f[n];
 			  nwave++;
 		  }
+//		  else
+//		  {
+//		  printf ("\n ");
+//	  		}
+		  
 	  }
 	  
 	  if (comp[spectype].xmod.w[0] < lambdamax && lambdamax < comp[spectype].xmod.w[comp[spectype].nwaves-1])
@@ -105,6 +111,26 @@ one_continuum (spectype, t, g, freqmin, freqmax)
 		  f_local[nwave]=y;
 		  nwave++;
 	  }
+	  
+	  
+	  //There are two pathological cases to deal with, when we only have one non zero point, we need to make an extra point just up/dpown from the penultimate/zecond point so we can make a sensible CDF.
+	  
+	  
+	  if (f_local[nwave-2]==0.0) //We have a zero just inside the end
+	  {
+		  nwave++;
+		  w_local[nwave-1]=w_local[nwave-2];
+		  f_local[nwave-1]=f_local[nwave-2];
+		  w_local[nwave-2]=w_local[nwave-3]/(1.-DELTA_V/(2.*C));
+		  linterp(w_local[nwave-2], comp[spectype].xmod.w, comp[spectype].xmod.f, comp[spectype].nwaves, &y, 0);
+		  f_local[nwave-2]=y;
+	  }
+	  
+	  
+	  
+	  
+	  
+	  
 //	  printf ("BLAH min %e max %e\n",lambdamin,lambdamax);
 //	  printf ("BLAH wmin %e wmax %e\n",comp[spectype].xmod.w[0],comp[spectype].xmod.w[comp[spectype].nwaves-1]);
 	  

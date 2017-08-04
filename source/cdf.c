@@ -570,9 +570,14 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
      double xmin, xmax;
 {
   int allzero;
+ int nmin,nmax,cdf_n;
   int m, n;
   double sum, q;
-  int echeck,cdf_check (), recalc_pdf_from_cdf ();
+//  int echeck,cdf_check (), recalc_pdf_from_cdf ();
+  int echeck;
+  
+
+  
 
 
   if (n_xy > NCDF)
@@ -589,6 +594,16 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
       exit (0);
     }
     allzero = 0;
+	
+	
+	if (x[0]!=xmin || x[n_xy-1]!=xmax)
+	{
+		Error("cdf_gen_from_array: input array does not run exactly from xmin to xmax %e != %e or %e != %e\n",x[0],xmin,x[n_xy-1],xmax);
+		for (n=0;n<n_xy;n++)
+			printf ("%i %i %e %e %e %e\n",n_xy,n,xmin,xmax,x[n],y[n]);
+		exit(0);
+		
+	}
 	
   for (n = 1; n < n_xy; n++)
     {
@@ -610,170 +625,91 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 	}
     }
 	
+	
+	
+	
+ /* The next two checks look to see if there is a part of the CDF that is all zeros as the start or end of the distribution
 
+    Start first */
 
-  /* The next two checks look to see if there is a part of the CDF that is all zeros as the start or end of the distribution
+ n = 0;
+ nmin=-1;
+ while (y[n] == 0.0)
+   {
+     nmin = n;
+     n++;
+   }
 
-     Start first */
-
-  n = 0;
-  while (y[n] == 0.0)
-    {
-      xmin = x[n];
-      n++;
-    }
-
-  //Now at the end
-
-  n = n_xy-1;
-  while (y[n] == 0.0)
-    {
-      xmax = x[n];
-      n--;
-    }
+nmin++;
 
 
 
+ //Now at the end
 
+ n = n_xy-1;
+ nmax=n_xy;
+ while (y[n] == 0.0)
+   {
+     nmax = n;
+     n--;
+   }
 
-
-/* Shuffle x and y into pdf_xx and pdf_yy allowing for xmin and xmax */
-
-  if (xmax < x[0] || xmin > x[n_xy - 1] || allzero == 0)
-    {				// These are special (probably nonsensical) cases
-      pdf_x[0] = xmin;
-      pdf_z[0] = 0.;
-      pdf_x[1] = xmax;
-      pdf_z[0] = 1.;
-      sum = 1.0;
-      pdf_n = 2;
-      Error
-	("pdf_gen_from_array: all y's were zero or xmin xmax out of range of array x-- returning uniform distribution %d\n",
-	 allzero);
-
-    }
-  else
-    {
-      m = 0;
-      while (x[m] <= xmin)
-	m++;			// Find the bottom boundary
-      pdf_x[0] = xmin;
-      if (m == 0)  //This is hit if the bottom boundary is outside the supplied data
+nmax--;
+	
+	if (nmax==nmin)
 	{
-	  pdf_y[0] = y[0];	//Assume prob. density is constant outside array lims.
+		Error ("cdf_gen_from_array - only one point in supplied PDF\n");
+			exit(0);
 	}
-      else  //We interpolate between supplied data points to get the value of the PDF at exactly xmin
-	{
-	  q = (xmin - x[m - 1]) / (x[m] - x[m - 1]);  
-	  pdf_y[0] = q * y[m] + (1. - q) * y[m - 1];
-	}
-      pdf_n = 1;
-      // Completed first element; now do those that are completely in the grid
-      while (x[m] < xmax && m < n_xy)
-	{
-	  pdf_x[pdf_n] = x[m];
-	  pdf_y[pdf_n] = y[m];
-	  m++;
-	  pdf_n++;
-	  if (pdf_n > PDF_ARRAY)
-	    {
-	      Error
-		("cdf_gen_from_array: pdf_n (%d) exceeded maximum array size PDF_ARRAY (%d) \n",
-		 pdf_n, PDF_ARRAY);
-	      Error
-		("cdf_gen_from_array: n_xy %d xmin %f xmax %f\n",
-		 n_xy, xmin, xmax);
-	      Error
-		("cdf_gen_from_array: Consider increasing PDF_ARRAY to a value > n_xy + njumps, and recompiling\n");
-	      exit (0);
-	    }
-	}
-      // Now worry about the last element
-      pdf_x[pdf_n] = xmax;
-      m--;  /* Reduce m so that x[m] is les than xmax ksl 170801 */
-      if (m < n_xy - 1)  //We are not at the limit of the supplied data, so we interpolate
-	{
-	  q = (xmax - x[m]) / (x[m + 1] - x[m]);
-	  pdf_y[pdf_n] = q * y[m + 1] + (1. - q) * y[m];
-	}
-      else  //xmax is outside the supplied data
-	{
-	  pdf_y[pdf_n] = y[m - 1];	//Again assume constant prob. density outside lims
-	}
-      pdf_n++;
 
+    if (xmax < x[0] || xmin > x[n_xy - 1] || allzero == 0 )
+      {				// These are special (probably nonsensical) cases
+        cdf->x[0] = xmin;
+        cdf->y[0] = 0.;
+        cdf->x[1] = xmax;
+        cdf->y[1] = 1.;
+        cdf->norm = 1.0;
+        cdf->ncdf = 1;
+        Error
+  	("cdf_gen_from_array: all y's were zero or xmin xmax out of range of array x-- returning uniform distribution %d\n",
+  	 allzero);
 
-
-
+      }
+	  else
+	  {
 /* So at this point, have unscaled probability density in pdf_x, pdf_y for the points
  * specified by the input array but we want the cumulative distribution
  * We also have assured that there is one value of pdf_x that corresponds to all of the jumps
  */
+	  
+	  // The following lines perform an integration via the trapezoid rule - each point contains
+	  // the integral up to that poont, so it starts at 0 and ends at the total
 
-      pdf_z[0] = 0.;
-      for (n = 1; n < pdf_n; n++)
+	  cdf_n=(nmax-nmin);
+
+      cdf->x[0] = x[nmin];
+	  cdf->y[0] = 0.0;
+      for (n = 1; n < cdf_n+1; n++)
 	{
-	  pdf_z[n] =
-	    pdf_z[n - 1] + 0.5 * (pdf_y[n - 1] + pdf_y[n]) * (pdf_x[n] -
-							      pdf_x[n - 1]);
+		cdf->x[n]=x[nmin+n];
+	  cdf->y[n] =
+	    cdf->y[n-1] + 0.5 * (y[nmin + n - 1] + y[nmin + n]) * (x[nmin + n] -
+							      x[nmin + n - 1]);
 	}
-      sum = pdf_z[pdf_n - 1];
+	
+      sum = cdf->y[cdf_n - 1]; //the total integrated pdf
 
-      for (n = 1; n < pdf_n; n++)
+      for (n = 1; n < cdf_n; n++)
 	  {
-		  printf ("%e %e\n",pdf_x[n],pdf_z[n]);
-	pdf_z[n] /= sum;
+		  cdf->y[n] /= sum;   //this is now a cdf - we go from 0 to 1.
 	  }
 	  
-
-
-/* So pdf_z contains a properly normalized cdf on the points specified by
-   the input array, or more explicitly, at the points specied in the array
-   pdf_x
-*/
-
-
-      /* Add a check that the pdf_z is monotonic. This check should not really be necessary
-       * since by construction this should be the case*/
-
-      echeck = 0;
-      for (n = 1; n < pdf_n; n++)
-	{
-	  if (pdf_z[n] < pdf_z[n - 1])
-	    {
-	      Error ("cdf_gen_from_array: pdf_z is not monotonic at %d\n", n);
-	      echeck = 1;
-	    }
-	}
-
-      if (echeck)
-	{
-	  for (n = 0; n < pdf_n; n++)
-	    {
-	      Log ("cdf_gen_from_array: %5d %11.6e %11.6e %11.6e\n", n,
-		   pdf_x[n], pdf_y[n], pdf_z[n]);
-	    }
-	  echeck = 0;
-	}
-
-    }
-
-
-
-	//We now simply put the CDF into the CDF array
-
-	    cdf->x[0] = xmin;
-	    cdf->y[0] = 0;
-		for (n=1;n<pdf_n;n++)
-		{
-  	      cdf->x[n] = pdf_x[n];
-  	      cdf->y[n] = pdf_z[n];  
-		}
-	    cdf->ncdf = pdf_n;
-	    cdf->x[n] = xmax;
-	    cdf->y[n] = 1.0;
-	    cdf->norm = sum;
-		
+    cdf->ncdf = cdf_n;
+    cdf->x[cdf->ncdf] = x[nmax];
+    cdf->y[cdf->ncdf] = 1.0;
+    cdf->norm = sum;
+	  
+}
 
 
 
@@ -789,7 +725,8 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
       Error ("cdf_gen_from_array: error %d on cdf_check\n", echeck);	  
 	  for (n=0;n<n_xy;n++)
 		  printf ("pdf_n=%i %e %e\n",pdf_n,x[n],y[n]);
-	  
+	  for (n=0;n<cdf->ncdf+1;n++)
+		  printf ("cdf_n=%i %e %e\n",n,cdf->x[n],cdf->y[n]);
 	  
 	  
 	  exit(0);
@@ -1067,6 +1004,7 @@ cdf_check (cdf)
 	("cdf_check: cumulative distribution function should start at 0 not %e\n",
 	 y);
       hcheck = 1;
+	  printf ("%e %e %e %e\n",cdf->x[0],cdf->y[0],cdf->x[1],cdf->y[1]);
     }
   if (cdf->y[cdf->ncdf] != 1.0)
     {

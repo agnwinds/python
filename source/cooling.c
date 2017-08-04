@@ -153,8 +153,10 @@ xtotal_emission (one, f1, f2)
 {
   double t_e;
   int nplasma;
+  double cooling;
   PlasmaPtr xplasma;
 
+  cooling=0.0;
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
@@ -172,36 +174,36 @@ xtotal_emission (one, f1, f2)
       //The first term here is the fb cooling due to macro ions and the second gives
       //the fb cooling due to simple ions.
       //total_fb has been modified to exclude recombinations treated using macro atoms.
-      xplasma->cool_tot = xplasma->cool_rr;
+      cooling = xplasma->cool_rr;
       //Note: This the fb_matom call makes no use of f1 or f2. They are passed for
       //now in case they should be used in the future. But they could
       //also be removed.
       // (SS)
       xplasma->lum_lines = total_bb_cooling (xplasma, t_e);
-      xplasma->cool_tot += xplasma->lum_lines;
+      cooling += xplasma->lum_lines;
       /* total_bb_cooling gives the total cooling rate due to bb transisions whether they
          are macro atoms or simple ions. */
       xplasma->lum_ff = total_free (one, t_e, f1, f2);
-      xplasma->cool_tot += xplasma->lum_ff;
+      cooling += xplasma->lum_ff;
 
 
     }
     else                        //default (non-macro atoms) (SS)
     {
 		/*The line cooling is equal to the line emission */
-      xplasma->cool_tot = xplasma->lum_lines = total_line_emission (one, f1, f2);
+      cooling = xplasma->lum_lines = total_line_emission (one, f1, f2);
 	  /* The free free cooling is equal to the free free emission */
-      xplasma->cool_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2);
+      cooling += xplasma->lum_ff = total_free (one, t_e, f1, f2);
 	  /*The free bound cooling is equal to the recomb rate x the electron energy - the boinding energy - this is computed 
 	  with the FB_REDUCED switch */
-      xplasma->cool_tot += xplasma->cool_rr = total_fb (one, t_e, f1, f2, FB_REDUCED, OUTER_SHELL);     //outer shell recombinations
+      cooling += xplasma->cool_rr = total_fb (one, t_e, f1, f2, FB_REDUCED, OUTER_SHELL);     //outer shell recombinations
 
 
     }
   }
 
 
-  return (xplasma->cool_tot);
+  return (cooling);
 
 
 }
@@ -334,7 +336,7 @@ wind_cooling (f1, f2)
     if (wmain[n].vol > 0.0)
     {
       nplasma = wmain[n].nplasma;
-      cool += x = xtotal_emission (&wmain[n], f1, f2);
+      cool += x = cooling (&plasmamain[nplasma],plasmamain[nplasma].t_e);
       lum_lines += plasmamain[nplasma].lum_lines;
       cool_rr += plasmamain[nplasma].cool_rr;
       lum_ff += plasmamain[nplasma].lum_ff;

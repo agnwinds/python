@@ -821,13 +821,15 @@ one_ff (one, f1, f2)
 
   if (xplasma->t_e != one_ff_te || f1 != one_ff_f1 || f2 != one_ff_f2)
   {                             /* Generate a new pdf */
-
-    dfreq = (f2 - f1) / ARRAY_PDF-1;
-    for (n = 0; n < ARRAY_PDF; n++)
+    dfreq = (f2 - f1) / (ARRAY_PDF-1);
+    for (n = 0; n < ARRAY_PDF-1; n++)
     {
       ff_x[n] = f1 + dfreq * n;
       ff_y[n] = ff (one, xplasma->t_e, ff_x[n]);
     }
+	
+	ff_x[ARRAY_PDF-1] = f2;
+    ff_y[ARRAY_PDF-1] = ff (one, xplasma->t_e, ff_x[ARRAY_PDF-1]);
 
 
 

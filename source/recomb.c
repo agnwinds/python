@@ -620,13 +620,13 @@ use that instead if possible --  57h */
   nnn=0;   //Zero the index for elements in the flux array
 	nn=0;  //Zero the index for elements in the jump array
 	  n=0;  //Zero the counting element for equally spaced frequencies
-    dfreq = (f2 - f1) / ARRAY_PDF; //This is the frequency spacing for the equally spaced elements
+    dfreq = (f2 - f1) / (ARRAY_PDF-1); //This is the frequency spacing for the equally spaced elements
     while (n < (ARRAY_PDF) && nnn < NCDF)   //We keep going until n=ARRAY_PDF-1, which will give the maximum required frequency
     {
 		freq=f1 + dfreq * n;  //The frequency of the array element we would make in the normal run of things
 		if (freq > fb_jumps[nn] && nn < fb_njumps) //The element we were going to make has a frequency abouve the jump
 		{
-			fb_x[nnn]=fb_jumps[nn]*(1.-DELTA_V/(2.*C));  //We make one frequency point 1km/s below the jump
+			fb_x[nnn]=fb_jumps[nn]*(1.-DELTA_V/(2.*C));  //We make one frequency point DELTA_V cm/s below the jump
 			fb_y[nnn]=fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL); //And the flux for that point
 			nnn=nnn+1;			//increase the index of the created array
 			fb_x[nnn]=fb_jumps[nn]*(1.+DELTA_V/(2*C));  //And one frequency point just above the jump
@@ -636,7 +636,7 @@ use that instead if possible --  57h */
 		}
 		else  //We haven't hit a jump
 		{
-			if (freq > fb_x[nnn-1])  //Deal with the unusual case where the upper point in our 'jump' pair is above the next ragular point
+			if (freq > fb_x[nnn-1])  //Deal with the unusual case where the upper point in our 'jump' pair is above the next regular point
 				{
       			fb_x[nnn] = freq;   //Set the next array element frequency
       			fb_y[nnn] = fb (xplasma, xplasma->t_e, fb_x[nnn], nions, FB_FULL); //And the flux
@@ -649,6 +649,12 @@ use that instead if possible --  57h */
   		  		}
  	 	}
     }
+	
+	//Ensure the last point lines up exatly with f2
+	
+	fb_x[nnn-1]=f2;
+	fb_y[nnn-1]=fb (xplasma, xplasma->t_e, f2, nions, FB_FULL);
+	
 
 	if (nnn > NCDF)
 	{
