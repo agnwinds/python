@@ -554,7 +554,10 @@ History:
 			so that problems with this would be easier to update in
 			future.
 	1405	JM -- Increased PDF array for use with disk14 models
-	1707	NSH -- Removed code for jumps - we now just supply a suitable unscaled pdf
+	1707	NSH -- Removed code for jumps - we now just supply a suitable unscaled pdf, 
+			The code expects data between xmin and xmax - it scan cope with 
+			leading ro training zeros, but does require at least two non zero
+			points, otherwise it cannt make a CDF.
 */
 
 #define PDF_ARRAY  28000
@@ -710,9 +713,6 @@ nmax--;
     cdf->norm = sum;
 	  
 }
-
-
-
 
 
 /* Calculate the gradients */
@@ -1157,6 +1157,9 @@ calc_cdf_gradient (cdf)
     }
   /* Fill in the ends */
 	  cdf->d[0] = cdf->d[1];
+	  
+	  
+	  //XXX NSH - this routine does not treat the ends of the array very well - it just asumes the same gradient - we could do better...
 	  
 //NSH - a couple of other ways of doing this - linear interpolation from the previous points, or just the gradient of the current interval - none works great.	  
 	  
