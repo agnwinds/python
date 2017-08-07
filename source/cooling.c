@@ -67,26 +67,8 @@ cooling (xxxplasma, t)
 
   /*81c - nsh - we now treat DR cooling as a recombinational process - still unsure as to how to treat emission, so at the moment
      it remains here */
-  xxxplasma->cool_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, INNER_SHELL);
-  
-//  f1=2.641e15;
-//  f2=1.523e16;
-  
-//  df=(f2-f1)/200;
-//  printf ("FB_TEST total %e\n",total_fb (&wmain[xxxplasma->nwind], t, f1, f2, FB_FULL, OUTER_SHELL));
-//  for (n=1;n<200;n++)
-//  {
-//	  lower= total_fb (&wmain[xxxplasma->nwind], t, f1, f1+(n*df), FB_FULL, OUTER_SHELL);
-//	  upper= total_fb (&wmain[xxxplasma->nwind], t, f1+(n*df), f2, FB_FULL, OUTER_SHELL);
-//	  test= total_fb (&wmain[xxxplasma->nwind], t, f1+((n-1)*df), f1+((n)*df), FB_FULL, OUTER_SHELL);
-//	  printf ("FB_TEST1 break %e lower %e upper %e total %e\n",f1+(n*df),lower,upper,lower+upper);
-//	  printf ("FB_TEST2 %e to %e = %e\n",f1+((n-1)*df), f1+((n)*df),test);
-//	  printf ("FB_TEST3 %e %e \n",f1+((n-1)*df),fb (xxxplasma, t, f1+((n-1)*df), nions, FB_FULL));
-//  	}  
-  
-  
-//  exit(0);
-  
+	
+  xxxplasma->cool_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, INNER_SHELL);  
 
   /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
 
@@ -153,8 +135,10 @@ xtotal_emission (one, f1, f2)
 {
   double t_e;
   int nplasma;
+  double cooling;
   PlasmaPtr xplasma;
 
+  cooling=0.0;
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
@@ -172,36 +156,36 @@ xtotal_emission (one, f1, f2)
       //The first term here is the fb cooling due to macro ions and the second gives
       //the fb cooling due to simple ions.
       //total_fb has been modified to exclude recombinations treated using macro atoms.
-      xplasma->cool_tot = xplasma->cool_rr;
       //Note: This the fb_matom call makes no use of f1 or f2. They are passed for
       //now in case they should be used in the future. But they could
       //also be removed.
       // (SS)
+      cooling = xplasma->cool_rr;
       xplasma->lum_lines = total_bb_cooling (xplasma, t_e);
-      xplasma->cool_tot += xplasma->lum_lines;
+      cooling += xplasma->lum_lines;
       /* total_bb_cooling gives the total cooling rate due to bb transisions whether they
          are macro atoms or simple ions. */
       xplasma->lum_ff = total_free (one, t_e, f1, f2);
-      xplasma->cool_tot += xplasma->lum_ff;
+      cooling += xplasma->lum_ff;
 
 
     }
     else                        //default (non-macro atoms) (SS)
     {
 		/*The line cooling is equal to the line emission */
-      xplasma->cool_tot = xplasma->lum_lines = total_line_emission (one, f1, f2);
+      cooling = xplasma->lum_lines = total_line_emission (one, f1, f2);
 	  /* The free free cooling is equal to the free free emission */
-      xplasma->cool_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2);
+      cooling += xplasma->lum_ff = total_free (one, t_e, f1, f2);
 	  /*The free bound cooling is equal to the recomb rate x the electron energy - the boinding energy - this is computed 
 	  with the FB_REDUCED switch */
-      xplasma->cool_tot += xplasma->cool_rr = total_fb (one, t_e, f1, f2, FB_REDUCED, OUTER_SHELL);     //outer shell recombinations
+      cooling += xplasma->cool_rr = total_fb (one, t_e, f1, f2, FB_REDUCED, OUTER_SHELL);     //outer shell recombinations
 
 
     }
   }
 
 
-  return (xplasma->cool_tot);
+  return (cooling);
 
 
 }
@@ -312,6 +296,7 @@ History:
     11sep   nsh     70 Modifications in incorporate DR cooling (very approximate at the moment)
 	12sep	nsh	73 Added a counter for adiabatic luminosity (!)
  	13jul	nsh	76 Split up adiabatic luminosity into heating and cooling.
+    17aug   nsh xchanges to wind cooling to reflect the way we now
  
 **************************************************************/
 
@@ -334,7 +319,8 @@ wind_cooling (f1, f2)
     if (wmain[n].vol > 0.0)
     {
       nplasma = wmain[n].nplasma;
-      cool += x = xtotal_emission (&wmain[n], f1, f2);
+      cool += x = cooling (&plasmamain[nplasma],plasmamain[nplasma].t_e);  //1708 - changed this call - now computes cooling rather than luminosity - also we popultate a local
+	  //array called cool, rather than the xplasma array - this was overrwting the xplasma array with incorrect data. 
       lum_lines += plasmamain[nplasma].lum_lines;
       cool_rr += plasmamain[nplasma].cool_rr;
       lum_ff += plasmamain[nplasma].lum_ff;

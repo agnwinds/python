@@ -199,13 +199,31 @@ total_emission (one, f1, f2)
                                    integrated */
 {
   double t_e;
-  int nplasma;
+  int nplasma,n;
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
   t_e = xplasma->t_e;           // Change so calls to total emission are simpler
+  
+  
+
+//f2=1e16;
+//f1=1e15;
+//t_e=400;
+
+//for (n=200;n<600;n++)
+//{
+//	t_e=pow(10.,n/100.);
+//	printf ("FB_FULL temp %e total_fb %e %e\n",t_e,total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL),total_fb (one, t_e, f1, f2, FB_REDUCED, OUTER_SHELL));
+	
+  //}
+ //exit(0); 
+ 
+ 
+ 
+  
 
   if (f2 < f1)
   {
@@ -391,14 +409,20 @@ for (n=0;n<NPLASMA;n++)
   		  Error_silent ("photo_gen_wind: On return from one_ff: icell %d vol %g t_e %g\n", icell, wmain[icell].vol, plasmamain[nplasma].t_e);
   		p[np].freq = 0.0;
 		}
+//	    if (icell==1100)
+//	  	  printf ("PHOT FF freq %e weight %e out\n",p[np].freq,weight);
 	}
 	else if (np<photstart+ptype[n][0]+ptype[n][1])
 	{
 		p[np].freq = one_fb (&wmain[icell], freqmin, freqmax);
+//	    if (icell==1100)
+//	  	  printf ("PHOT FB freq %e weight %e out\n",p[np].freq,weight);
 	}
 	else
 	{
 		p[np].freq = one_line (&wmain[icell], freqmin, freqmax, &p[n].nres);       /*And fill all the rest of the luminosity up with line photons */
+//	    if (icell==1100)
+//	  	  printf ("PHOT LI freq %e weight %e out\n",p[np].freq,weight);
 	}
 
     p[np].w = weight;
@@ -459,6 +483,8 @@ was a resonant scatter but we want isotropic scattering anyway.  */
     }
 	
   }
+  
+
 
 
   return (nphot);               /* Return the number of photons generated */
@@ -795,13 +821,15 @@ one_ff (one, f1, f2)
 
   if (xplasma->t_e != one_ff_te || f1 != one_ff_f1 || f2 != one_ff_f2)
   {                             /* Generate a new pdf */
-
-    dfreq = (f2 - f1) / ARRAY_PDF-1;
-    for (n = 0; n < ARRAY_PDF; n++)
+    dfreq = (f2 - f1) / (ARRAY_PDF-1);
+    for (n = 0; n < ARRAY_PDF-1; n++)
     {
       ff_x[n] = f1 + dfreq * n;
       ff_y[n] = ff (one, xplasma->t_e, ff_x[n]);
     }
+	
+	ff_x[ARRAY_PDF-1] = f2;
+    ff_y[ARRAY_PDF-1] = ff (one, xplasma->t_e, ff_x[ARRAY_PDF-1]);
 
 
 

@@ -163,6 +163,7 @@ History:
 	12nov	ksl	Removed some of the old Notes assocaited with this routine.
 			See version earlier than 74 for these old notes.
 	17jul	nsh - changed references to PDFs to CDFs
+    17jul 	nsh - also changed how the BB cdf is generated - low alpha jumps were not really doing anything!
 **************************************************************/
 
 #define ALPHAMIN 0.4            // Region below which we will use a low frequency approximation
@@ -607,7 +608,7 @@ planck_d (alpha)
 // Calculate the emittance of a bb between freqmin and freqmax
 // Should integrate to sigma 
 
-//NSH - 17Jul - made change to if/else statement so that qromb used whenever bounds are not completely withing the tabulated bands.
+//NSH - 17Jul - made change to if/else statement so that qromb used whenever bounds are not completely within the tabulated bands.
 double
 emittance_bb (freqmin, freqmax, t)
      double freqmin, freqmax, t;
@@ -625,11 +626,18 @@ emittance_bb (freqmin, freqmax, t)
   
   
   
-  if (alphamin > ALPHAMIN && alphamax < ALPHAMAX) 
+  if (alphamin > ALPHAMIN && alphamax < ALPHAMAX) //We are within the tabulated range
   {
     return (q1 * t * t * t * t * integ_planck_d (alphamin, alphamax));
   }
-  else
+  else if (alphamax > ALPHABIG) 
+  {
+	  if (alphamin > ALPHABIG) //The whole band is above the point where we can sensibly integrate the BB function
+	  	return(0);
+	  else   //only the upper part of the band is above ALPHABIG
+	      return (q1 * t * t * t * t * qromb (planck_d, alphamin, ALPHABIG, 1e-7));
+  }
+  else //We are outside the tabulated range and must integrate
   {
     return (q1 * t * t * t * t * qromb (planck_d, alphamin, alphamax, 1e-7));
   }

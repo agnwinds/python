@@ -65,21 +65,85 @@ one_continuum (spectype, t, g, freqmin, freqmax)
 {
   //OLD not used in routine double par[2];              // For python we assume only two parameter models
   double lambdamin, lambdamax;
-  double f;
+  double w_local[NCDF],f_local[NCDF];
+  double f,y;
   double cdf_get_rand ();
   // int model (), nwav;
   int model ();
+  int n,nwave;
 
   if (old_t != t || old_g != g || old_freqmin != freqmin || old_freqmax != freqmax)
   {                             /* Then we must initialize */
+//	  printf ("Initialising coz %e ne %e or %e ne %e or %e ne %e or %e ne %e\n",old_t,t,old_g,g,old_freqmin,freqmin,old_freqmax,freqmax);
+	  
+      lambdamin = C * 1e8 / freqmax;
+      lambdamax = C * 1e8 / freqmin;
+	  nwave=0;
+	  if (comp[spectype].xmod.w[0] < lambdamin && lambdamin < comp[spectype].xmod.w[comp[spectype].nwaves-1])
+	  {
+		  w_local[nwave]=lambdamin;
+		  linterp(lambdamin, comp[spectype].xmod.w, comp[spectype].xmod.f, comp[spectype].nwaves, &y, 0);
+		  f_local[nwave]=y;
+		  nwave++;
+	  }
+	  
+	  for (n=0;n<comp[spectype].nwaves;n++)
+	  {
+//		  printf ("%e %e ",comp[spectype].xmod.w[n],comp[spectype].xmod.f[n]);
+		  if (comp[spectype].xmod.w[n] > lambdamin && comp[spectype].xmod.w[n] <= lambdamax)
+		  {
+//			  printf (" inserted %e %e\n",lambdamin,lambdamax);
+			  w_local[nwave]=comp[spectype].xmod.w[n];
+			  f_local[nwave]=comp[spectype].xmod.f[n];
+			  nwave++;
+		  }
+//		  else
+//		  {
+//		  printf ("\n ");
+//	  		}
+		  
+	  }
+	  
+	  if (comp[spectype].xmod.w[0] < lambdamax && lambdamax < comp[spectype].xmod.w[comp[spectype].nwaves-1])
+	  {
+		  w_local[nwave]=lambdamax;
+		  linterp(lambdamax, comp[spectype].xmod.w, comp[spectype].xmod.f, comp[spectype].nwaves, &y, 0);
+		  f_local[nwave]=y;
+		  nwave++;
+	  }
+	  
+	  
+	  //There are two pathological cases to deal with, when we only have one non zero point, we need to make an extra point just up/dpown from the penultimate/zecond point so we can make a sensible CDF.
+	  
+	  
+	  if (f_local[nwave-2]==0.0) //We have a zero just inside the end
+	  {
+		  nwave++;
+		  w_local[nwave-1]=w_local[nwave-2];
+		  f_local[nwave-1]=f_local[nwave-2];
+		  w_local[nwave-2]=w_local[nwave-3]/(1.-DELTA_V/(2.*C));
+		  linterp(w_local[nwave-2], comp[spectype].xmod.w, comp[spectype].xmod.f, comp[spectype].nwaves, &y, 0);
+		  f_local[nwave-2]=y;
+	  }
+	  
+	  
+	  
+	  
+	  
+	  
+//	  printf ("BLAH min %e max %e\n",lambdamin,lambdamax);
+//	  printf ("BLAH wmin %e wmax %e\n",comp[spectype].xmod.w[0],comp[spectype].xmod.w[comp[spectype].nwaves-1]);
+	  
+//	  for (n=0;n<nwave;n++)
+//		  printf ("BLAH %e %e\n",w_local[n],f_local[n]);
+	  
     //OLD not used in routine par[0] = t;
     //OLD not used in routine par[1] = g;
     //OLD nwav not used here ksl.  nwav = model (spectype, par);
     /*  Get_model returns wavelengths in Ang and flux in ergs/cm**2/Ang */
-    lambdamin = C * 1e8 / freqmax;
-    lambdamax = C * 1e8 / freqmin;
+
     if (cdf_gen_from_array
-        (&comp[spectype].xcdf, comp[spectype].xmod.w, comp[spectype].xmod.f, comp[spectype].nwaves, lambdamin, lambdamax) != 0)
+        (&comp[spectype].xcdf, w_local, f_local, nwave, lambdamin, lambdamax) != 0)
     {
       Error ("In one_continuum after return from cdf_gen_from_array\n");
     }
