@@ -85,7 +85,6 @@ cooling (xxxplasma, t)
     xxxplasma->cool_comp + xtotal_emission (&wmain[xxxplasma->nwind], 0.,
 					  VERY_BIG);
 
-
   return (xxxplasma->cool_tot);
 }
 
@@ -369,8 +368,7 @@ wind_cooling (f1, f2)
   geo.cool_adiabatic = cool_adiab;
   geo.heat_adiabatic = heat_adiab;
   
-  
-  cool = cool+ cool_comp+cool_dr+cool_di+cool_adiab;
+//  cool = cool+ cool_comp+cool_dr+cool_di+cool_adiab; //1708 NSH we no longer need to add these things on - its done in cooli ng
 
   return (cool);
 }
