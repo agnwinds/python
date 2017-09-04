@@ -170,6 +170,8 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
         170903  ksl Bagan work
         170904  ksl Updated how routine looks for input directories
                     and attempted to get a more readable stderr output
+                    Also, eliminted pf files with the extension .out.pf
+                    because these are mostlikely duplicates
 
     '''
 
@@ -198,6 +200,14 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
         print('Error: The pf directory %s does not appear to exist' % pf_dir)
         return
 
+    # screen out the .out.pf files because we may be running this on a directory
+    # in which python has already been done
+
+    select=[]
+    for one in pf_files:
+        if one.count('.out.pf')==0:
+            select.append(one)
+    pf_files=select
 
     if len(pf_files)==0:
         print ('No input files found for %s search' % (pf_dir+'/*pf'))
@@ -258,11 +268,13 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
             string='No stderrs were reported'
             print(string)
             f.write('%s\n' % string)
+            # time.sleep(5.)   #  Pause to make sure all of the output files have been written
             check_one(f,root_names[i])
 
         string='Finished %s' % one
         print(string)
         f.write('%s\n\n'% string)
+        f.flush()
         i+=1
 
 
