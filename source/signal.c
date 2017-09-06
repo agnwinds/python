@@ -156,7 +156,6 @@ xsignal_rm (char *root)
 
     if ((tmp_ptr = fopen (filename, "r")) == NULL)
           {
-              fclose(tmp_ptr);
               return(0);
           }
 
