@@ -192,16 +192,7 @@ get_hydro (ndom)
     hydro_r_cent[k] = 0;
     hydro_theta_cent[k] = 0;
   }
-  /*
-     hydro_ptr = (HydroPtr) calloc (sizeof (hydro_dummy), MAXHYDRO * MAXHYDRO);
 
-     if (hydro_ptr == NULL)
-     {
-     Error
-     ("There is a problem in allocating memory for the hydro structure\n");
-     exit (0);
-     }
-   */
   rdstr ("hydro_file", datafile);
   if ((fptr = fopen (datafile, "r")) == NULL)
   {
@@ -273,11 +264,6 @@ get_hydro (ndom)
              density above the disk */
           rho = rho_input[i * MAXHYDRO + j_hydro_thetamax];
         }
-//        hydro_ptr[i * MAXHYDRO + j].temp = temp;
-//        hydro_ptr[i * MAXHYDRO + j].rho = rho;
-//        hydro_ptr[i * MAXHYDRO + j].v[0] = vr;
-//        hydro_ptr[i * MAXHYDRO + j].v[1] = vtheta;
-//        hydro_ptr[i * MAXHYDRO + j].v[2] = vphi;
         rho_input[i * MAXHYDRO + j] = rho;
         temp_input[i * MAXHYDRO + j] = temp;
         v_r_input[i * MAXHYDRO + j] = vr;
@@ -327,18 +313,7 @@ get_hydro (ndom)
   zdom[ndom].coord_type = RTHETA;       //At the moment we only deal with RTHETA - in the future we might want to do some clever stuff
   ndim = zdom[ndom].ndim = ihydro_r + 3;        //We need an inner radial cell to bridge the star and the inside of the wind, and an outer cell
   zdom[ndom].ndim2= zdom[ndom].ndim * zdom[ndom].mdim;  // Make ndim2 consistent with the individual dimensions
-  //geo.ndim2 = NDIM2 += zdom[ndom].ndim * zdom[ndom].mdim;
 
-  /*
-     for (i=0;i<MDIM;i++)
-     {
-     printf ("hydro_grid i=%i theta_edge=%f theta_cen=%f\n",i,hydro_theta_edge[i]*RADIAN,hydro_theta_cent[i]*RADIAN);
-     }
-     for (i=0;i<NDIM;i++)
-     {
-     printf ("hydro_grid i=%i r_edge=%f r_cen=%f\n",i,hydro_r_edge[i],hydro_r_cent[i]);
-     }
-   */
 
   return (0);
 }
@@ -377,7 +352,7 @@ hydro_velocity (x, v)
   double v_r_interp, v_theta_interp, v_phi_interp;
   double speed;
   double xxx;
-//printf ("Proga_velocity x=%e,%e,%e, v=%e,%e,%e ",x[0],x[1],x[2],v[0],v[1],v[2]);
+
   if ((r = length (x)) == 0.0)
   {
     v[0] = v[1] = v[2] = 0.0;
@@ -396,7 +371,6 @@ hydro_velocity (x, v)
 
 
 
-  // printf ("Proga_theta x %.2g %.2g %.2g  -> r= %.2g theta = %.5g\n", x[0], x[1], x[2], r,theta);
   im = jm = ii = jj = 0;
   f1 = f2 = 0.0;
   hydro_frac (r, hydro_r_cent, ihydro_r, &im, &ii, &f1);
@@ -418,7 +392,6 @@ hydro_velocity (x, v)
   hydro_frac (theta, hydro_theta_cent, ihydro_theta, &jm, &jj, &f2);
   v_phi_interp = hydro_interp_value (v_phi_input, im, ii, jm, jj, f1, f2);
 
-//printf ("TEST7 %e cos %e sin %e\n",theta,cos(theta),sin(theta));
 
   v[0] = v_r_interp * sin (theta) + v_theta_interp * cos (theta);
   v[1] = v_phi_interp;
@@ -448,7 +421,6 @@ hydro_rho (x)
   double f1, f2;
   r = length (x);
   theta = asin (sqrt (x[0] * x[0] + x[1] * x[1]) / r);
-  //printf ("NSH hydro_rho x %e %e %e  -> r= %e theta = %f ", x[0], x[1], x[2], r,        theta);
 
   if ((hydro_r_cent[ihydro_r] - r) / r < -1e-6)
   {
@@ -505,8 +477,6 @@ hydro_temp (x)
   double f1, f2;
   r = length (x);
   theta = asin (sqrt (x[0] * x[0] + x[1] * x[1]) / r);
-  // printf ("x %.2g %.2g %.2g  -> r= %.2g theta = %.2g\n", x[0], x[1], x[2], r,
-//        theta);
 
 
   im = jm = ii = jj = 0;
@@ -678,7 +648,6 @@ rtheta_hydro_volumes (ndom, w)
   DomainPtr one_dom;
 
   one_dom = &zdom[ndom];
-  //printf ("NSH here in hydro_volumes\n");
 
   for (i = 0; i < one_dom->ndim; i++)
   {
@@ -696,7 +665,6 @@ rtheta_hydro_volumes (ndom, w)
 
         //leading factor of 2 added to allow for volume above and below plane (SSMay04)
         w[n].vol = 2. * 2. / 3. * PI * (rmax * rmax * rmax - rmin * rmin * rmin) * (cos (thetamin) - cos (thetamax));
-        //printf ("NSH_vols %i %i rmin %e rmax %e thetamin %e thatmax %e vol %e\n",i,j,rmin,rmax,thetamin,thetamax,w[n].vol);
 
         if (w[n].vol == 0.0)
         {
@@ -760,16 +728,8 @@ hydro_frac (coord, coord_array, imax, cell1, cell2, frac)
     ii++;
 
 
-
-
-
-
-
-//if (ii > 0 && ii < imax)
-
   if (ii > imax)
   {                             // r is greater than anything in Proga's model
-//  printf ("I DONT THINK WE CAN EVER GET HERE\n");
     *frac = 1;                  //If we are outside the model set fractional position to 1
     *cell1 = *cell2 = imax;     //And the bin to the outermost
     return (0);
@@ -788,9 +748,6 @@ hydro_frac (coord, coord_array, imax, cell1, cell2, frac)
     *cell2 = ii;
     return (0);
   }
-
-
-
 
   return (0);
 }
@@ -831,15 +788,12 @@ hydro_interp_value (array, im, ii, jm, jj, f1, f2)
   double value;
   double d1, d2;
 
-//        printf ("TEST7b %i %i %i %i %e %e %e\n",im,ii,jm,jj,f1,f2,array[im * MAXHYDRO + jm]);
 
   d1 = array[im * MAXHYDRO + jm] + f1 * (array[ii * MAXHYDRO + jm] - array[im * MAXHYDRO + jm]);
   d2 = array[im * MAXHYDRO + jj] + f1 * (array[ii * MAXHYDRO + jj] - array[im * MAXHYDRO + jj]);
   value = d1 + f2 * (d2 - d1);
-//                printf ("TEST3 %e %e %e\n",d1,d2,value);
 
 
-//                       f1 *  ((1. - f2) * array[ii * MAXHYDRO + jm] + f2 * array[ii * MAXHYDRO + jj]);
   return (value);
 }
 
@@ -903,7 +857,8 @@ hydro_restart (ndom)
     model_vgrad (ndom, w[n].x, w[n].v_grad);
   }
 
-  /* JM XXX PLACEHOLDER -- unsure how we loop over the plasma cells just in one domain */
+  /* JM XXX PLACEHOLDER -- unsure how we loop over the plasma cells just in one domain 
+   * ksl This is an error clearly XXX */
   for (n = 0; n < NPLASMA; n++)
   {
     nwind = plasmamain[n].nwind;
@@ -918,11 +873,13 @@ hydro_restart (ndom)
     }
 
     plasmamain[n].ne = get_ne (plasmamain[n].density);  //get the new electron density
-    partition_functions (&plasmamain[n], 4);    //ensure the partition functions and level densities are correct
+    partition_functions (&plasmamain[n], NEBULARMODE_LTE_GROUND);    //ensure the partition functions and level densities are correct XXX ksl why this mode
 
   }
+
+  /* XXX what is going on here. this looks to be outside the grid altgogether */
   plasmamain[n].ne = get_ne (plasmamain[n].density);    //we also need to update the electron density
-  partition_functions (&plasmamain[n], 4);      /* WARNING fudge NSH 11/5/14 - this is as a test. We really need a better implementation
+  partition_functions (&plasmamain[n], NEBULARMODE_LTE_GROUND);      /* WARNING fudge NSH 11/5/14 - this is as a test. We really need a better implementation
                                                    of partition functions and levels for a power law illuminating spectrum. We found that
                                                    if we didnt make this call, we would end up with undefined levels - which did really
                                                    crazy things */

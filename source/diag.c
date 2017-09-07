@@ -130,8 +130,8 @@ get_extra_diagnostics ()
   rdint("@save_cell_statistics", &modes.save_cell_stats);
   rdint("@ispymode", &modes.ispy);
   rdint("@keep_ioncycle_windsaves", &modes.keep_ioncycle_windsaves);
+  rdint("@make_ioncycle_tables",&modes.make_tables);
   rdint("@save_extract_photons", &modes.save_extract_photons);
-  rdint("@print_windrad_summary", &modes.print_windrad_summary);
   rdint("@print_dvds_info", &modes.print_dvds_info);
   rdint("@track_resonant_scatters", &modes.track_resonant_scatters);
 

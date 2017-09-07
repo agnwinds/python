@@ -63,9 +63,10 @@ History:
 			to remove the pointer call.  Ultimately rewrite
 			using plasma structure alone.
 	11aug	nsh	70 Modifications made to incorporate compton cooling
-        11sep   nsh     70 Modifications in incorporate DR cooling (very approximate at the moment)
+    11sep   nsh     70 Modifications in incorporate DR cooling (very approximate at the moment)
 	12sep	nsh	73 Added a counter for adiabatic luminosity (!)
  	13jul	nsh	76 Split up adiabatic luminosity into heating and cooling.
+    17jun	nsh 81d - removed non photon producing processes - now in wind_cooling
  
 **************************************************************/
 
@@ -73,7 +74,8 @@ double
 wind_luminosity (f1, f2)
      double f1, f2;             /* freqmin and freqmax */
 {
-  double lum, lum_lines, lum_fb, lum_ff, lum_comp, lum_dr, lum_di, lum_adiab, heat_adiab;       //1108 NSH Added a new variable for compton cooling 1408 NSH and for DI cooling
+  double lum, lum_lines, lum_rr, lum_ff;
+	  //cool_comp, cool_dr, cool_di, lum_adiab, heat_adiab;       //1108 NSH Added a new variable for compton cooling 1408 NSH and for DI cooling
   //1109 NSH Added a new variable for dielectronic cooling
   //1307 NSH Added a new variable to split out negtive adiabatic cooling (i.e. heating).
   int n;
@@ -81,7 +83,8 @@ wind_luminosity (f1, f2)
   int nplasma;
 
 
-  lum = lum_lines = lum_fb = lum_ff = lum_comp = lum_dr = lum_di = lum_adiab = heat_adiab = 0;  //1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
+  lum = lum_lines = lum_rr = lum_ff = 0.0;
+	  //cool_comp = cool_dr = cool_di = lum_adiab = heat_adiab = 0;  //1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
   for (n = 0; n < NDIM2; n++)
   {
 
@@ -90,36 +93,36 @@ wind_luminosity (f1, f2)
       nplasma = wmain[n].nplasma;
       lum += x = total_emission (&wmain[n], f1, f2);
       lum_lines += plasmamain[nplasma].lum_lines;
-      lum_fb += plasmamain[nplasma].lum_fb;
+      lum_rr += plasmamain[nplasma].lum_rr;
       lum_ff += plasmamain[nplasma].lum_ff;
-      lum_comp += plasmamain[nplasma].lum_comp; //1108 NSH Increment the new counter by the compton luminosity for that cell.
-      lum_dr += plasmamain[nplasma].lum_dr;     //1109 NSH Increment the new counter by the DR luminosity for the cell.
-      lum_di += plasmamain[nplasma].lum_di;     //1408 NSH Increment the new counter by the DI luminosity for the cell.
+//      cool_comp += plasmamain[nplasma].cool_comp; //1108 NSH Increment the new counter by the compton luminosity for that cell.
+//      cool_dr += plasmamain[nplasma].cool_dr;     //1109 NSH Increment the new counter by the DR luminosity for the cell.
+//      cool_di += plasmamain[nplasma].cool_di;     //1408 NSH Increment the new counter by the DI luminosity for the cell.
 
-      if (geo.adiabatic)        //130722 NSH - slight change to allow for adiabatic heating effect - now logged in a new global variable for reporting.
-      {
+//      if (geo.adiabatic)        //130722 NSH - slight change to allow for adiabatic heating effect - now logged in a new global variable for reporting.
+//      {
 
-        if (plasmamain[nplasma].lum_adiabatic >= 0.0)
-        {
-          lum_adiab += plasmamain[nplasma].lum_adiabatic;
-        }
-        else
-        {
-          heat_adiab += plasmamain[nplasma].lum_adiabatic;
-        }
-      }
+//        if (plasmamain[nplasma].cool_adiabatic >= 0.0)
+//        {
+//          lum_adiab += plasmamain[nplasma].cool_adiabatic;
+//        }
+//        else
+//        {
+//          heat_adiab += plasmamain[nplasma].cool_adiabatic;
+//        }
+//      }
 
-      else
-      {
-        lum_adiab = 0.0;
-      }
+//      else
+//      {
+//        lum_adiab = 0.0;
+//      }
 
 
-      if (x < 0)
-        Error ("wind_luminosity: total emission %8.4e is < 0!\n", x);
+//      if (x < 0)
+//        Error ("wind_luminosity: total emission %8.4e is < 0!\n", x);
 
-      if (recipes_error != 0)
-        Error ("wind_luminosity: Received recipes error on cell %d\n", n);
+//      if (recipes_error != 0)
+//        Error ("wind_luminosity: Received recipes error on cell %d\n", n);
     }
   }
 
@@ -129,13 +132,13 @@ wind_luminosity (f1, f2)
 
   //geo.lum_wind=lum;
   geo.lum_lines = lum_lines;
-  geo.lum_fb = lum_fb;
+  geo.lum_rr = lum_rr;
   geo.lum_ff = lum_ff;
-  geo.lum_comp = lum_comp;      //1108 NSH The total compton luminosity of the wind is stored in the geo structure
-  geo.lum_dr = lum_dr;          //1109 NSH the total DR luminosity of the wind is stored in the geo structure
-  geo.lum_di = lum_di;          //1408 NSH the total DI luminosity of the wind is stored in the geo structure
-  geo.lum_adiabatic = lum_adiab;
-  geo.heat_adiabatic = heat_adiab;
+//  geo.cool_comp = cool_comp;      //1108 NSH The total compton luminosity of the wind is stored in the geo structure
+//  geo.cool_dr = cool_dr;          //1109 NSH the total DR luminosity of the wind is stored in the geo structure
+//  geo.cool_di = cool_di;          //1408 NSH the total DI luminosity of the wind is stored in the geo structure
+//  geo.cool_adiabatic = lum_adiab;
+//  geo.heat_adiabatic = heat_adiab;
 
   return (lum);
 }
@@ -195,145 +198,76 @@ total_emission (one, f1, f2)
      double f1, f2;             /* The minimum and maximum frequency over which the emission is
                                    integrated */
 {
-  double total_line_emission (), total_free (), total_fb ();
-  double total_fb_matoms (), total_bb_cooling ();
   double t_e;
-  int nplasma;
+  int nplasma,n;
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
   t_e = xplasma->t_e;           // Change so calls to total emission are simpler
+  
+  
+
+//f2=1e16;
+//f1=1e15;
+//t_e=400;
+
+//for (n=200;n<600;n++)
+//{
+//	t_e=pow(10.,n/100.);
+//	printf ("FB_FULL temp %e total_fb %e %e\n",t_e,total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL),total_fb (one, t_e, f1, f2, FB_REDUCED, OUTER_SHELL));
+	
+  //}
+ //exit(0); 
+ 
+ 
+ 
+  
 
   if (f2 < f1)
   {
-    xplasma->lum_rad = xplasma->lum_lines = xplasma->lum_ff = xplasma->lum_fb = 0;      //NSH 1108 Zero the new lum_comp variable NSH 1101 - removed
+    xplasma->lum_tot = xplasma->lum_lines = xplasma->lum_ff = xplasma->lum_rr = 0;      //NSH 1108 Zero the new cool_comp variable NSH 1101 - removed
   }
   else
   {
-    if (geo.rt_mode == 2)       //Switch for macro atoms (SS)
+    if (geo.rt_mode == RT_MODE_MACRO)       //Switch for macro atoms (SS)
     {
-      xplasma->lum_fb = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, 1);        //outer shellrecombinations
+      xplasma->lum_rr = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL);        //outer shellrecombinations
       //The first term here is the fb cooling due to macro ions and the second gives
       //the fb cooling due to simple ions.
       //total_fb has been modified to exclude recombinations treated using macro atoms.
-      xplasma->lum_rad = xplasma->lum_fb;
+      xplasma->lum_tot = xplasma->cool_rr;
       //Note: This the fb_matom call makes no use of f1 or f2. They are passed for
       //now in case they should be used in the future. But they could
       //also be removed.
       // (SS)
       xplasma->lum_lines = total_bb_cooling (xplasma, t_e);
-      xplasma->lum_rad += xplasma->lum_lines;
+      xplasma->lum_tot += xplasma->lum_lines;
       /* total_bb_cooling gives the total cooling rate due to bb transisions whether they
          are macro atoms or simple ions. */
       xplasma->lum_ff = total_free (one, t_e, f1, f2);
-      xplasma->lum_rad += xplasma->lum_ff;
+      xplasma->lum_tot += xplasma->lum_ff;
 
 
     }
     else                        //default (non-macro atoms) (SS)
     {
-      xplasma->lum_rad = xplasma->lum_lines = total_line_emission (one, f1, f2);
-      xplasma->lum_rad += xplasma->lum_ff = total_free (one, t_e, f1, f2);
-      xplasma->lum_rad += xplasma->lum_fb = total_fb (one, t_e, f1, f2, 1);     //outer shell recombinations
+      xplasma->lum_tot = xplasma->lum_lines = total_line_emission (one, f1, f2);
+      xplasma->lum_tot += xplasma->lum_ff = total_free (one, t_e, f1, f2);
+	  /* We compute the radiative recombination luminosirty - this is not the same as the rr cooling rate and
+	  	so is stored in a seperate variable */
+      xplasma->lum_tot += xplasma->lum_rr = total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL);     //outer shell recombinations
+		
 
 
     }
-    /* NSH 1108 - This line calls the function total_comp which returns the compton luminosity for the cell
-       this is then added to lum_rad, the total luminosity of the cell */
-    /* NSH 1110 - Ths line has now been commented out. It was adding the compton luminosity to the lum_rad 
-       variable. This was then generating line photons to fill the compton luminosity. We need to do something
-       better, but at the moment, simply removing this line, and putting the calculation of compton luminosity 
-       into calc_te with the adiabatic cooling and the new DR cooling is the way to make things a little more stable */
-    //OLD     xplasma->lum_rad += xplasma->lum_comp = total_comp (one, t_e); 
-    //XXX - ksl - A line was commented out here.  It was said this makes things more stable, but the question is what is correct
   }
 
 
-  return (xplasma->lum_rad);
+  return (xplasma->lum_tot);
 
 
-}
-
-
-
-/***********************************************************
-                                       Space Telescope Science Institute
-
-Synopsis:  
-	adiabatic_cooling (one, t) determines the amount of 
-	adiabatic cooling in a cell, in units of luminosity.
-
-Arguments:		
-	WindPtr one;	pointer to wind cell
-	double t;		electron temperature
-
-Returns:
- 
-Description:	
-   Adiabatic cooling is clearly the amount of PdV work done by
-   a fluid element, per unit time dt. Thus it is equal to P dV/dt.  
-   The only real question is whether dV/dt is given by the volume * div v.
-   div v here is the divergence of the velocity field.
-	
-Notes:
-  JM 1401 -- I've rederived the expression for dv/dT. It follows
-        directly from the continuity equation and is indeed equal 
-        to volume * div_v. 
-
-        Note also that this function should only be called
-        if geo.adiabatic == 1, in which case it populates
-        xplasma->lum_adiabatic. This is used in heating and cooling
-        balance. We also use it as a potential destruction choice for 
-        kpkts in which case the kpkt is thrown away by setting its istat 
-        to P_ADIABATIC.
-
-
-History:
-	04nov	ksl	Stuart had switched adiabatic cooling off
-  			by commenting out the entire program.  I have
-  			reinstated the calculation, but created a new
-  			variable geo.adiabatic to determine whether this
-  			routine is called in python.  At present, even
-  			if the routine is called it has no effect.  The
-  			or more properly, one issue is how to meld adiabatic 
-  			cooling with the macro atom approach.
-	06may	ksl	57+ -- Adapted to include plasma structure
-	11aug	ksl	70 - Adiabatic cooling returns the cooling but
-			does not store it.
- 
- 
-**************************************************************/
-
-
-double
-adiabatic_cooling (one, t)
-     WindPtr one;
-     double t;
-{
-  double cooling;
-  int nplasma, nion;
-  double nparticles;
-  PlasmaPtr xplasma;
-
-  nplasma = one->nplasma;
-  xplasma = &plasmamain[nplasma];
-
-  //JM 1401 -- here was an old factor of 3/2 which KSL and JM believe to be incorrect. 
-  //JM 1601 -- this should include the pressure from all particles, rather than just ne
-  //cooling = xplasma->ne * BOLTZMANN * t * xplasma->vol * one->div_v;
-  nparticles = xplasma->ne;
-
-  for (nion = 0; nion < nions; nion++)
-  {
-    /* loop over all ions as they all contribute to the pressure */
-    nparticles += xplasma->density[nion];
-  }
-
-  cooling = nparticles * BOLTZMANN * t * xplasma->vol * one->div_v;
-
-  return (cooling);
 }
 
 
@@ -383,14 +317,21 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
      double freqmin, freqmax;
      int photstart, nphot;
 {
-  int n;
+  int n,nn,np;
   int photstop;
   double xlum, xlumsum, lum;
   double v[3];
   int icell;
   int nplasma;
   int nnscat;
-  int ndom;
+  int ndom;  
+  int ptype[NPLASMA][3]; //Store for the types of photons we want, ff first, fb next, line third
+  
+  for (n=0;n<NPLASMA;n++)
+  {
+	  for (nn=0;nn<3;nn++)
+  	ptype[n][nn]=0;
+  }
 
 
   photstop = photstart + nphot;
@@ -412,7 +353,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       if (wmain[icell].vol > 0.0)       //only consider cells with volume greater than zero
       {
         nplasma = wmain[icell].nplasma; //get the plasma cell in this wind cell
-        xlumsum += plasmamain[nplasma].lum_rad; /*increment the xlumsum by the lum_rad in this plasma cell - note that due to the way wind_luminosity gets called, this is actually the band limited flux not the luminosity. */
+        xlumsum += plasmamain[nplasma].lum_tot; /*increment the xlumsum by the lum_tot in this plasma cell - note that due to the way wind_luminosity gets called, this is actually the band limited flux not the luminosity. */
       }
       icell++;                  /*If we are not yet up to xlum, go to the next cell */
     }
@@ -420,12 +361,13 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 
     nplasma = wmain[icell].nplasma;
     ndom = wmain[icell].ndom;
+    plasmamain[nplasma].nrad+=1;  /* Increment the counter for the number of photons generatd in the cell */
 
 
     /* Now generate a single photon in this cell */
 
     /*Get the total luminosity and MORE IMPORTANT populate xcol.pow and other parameters */
-    lum = plasmamain[nplasma].lum_rad;  /* Whilst this says lum - I'm (nsh) pretty sure this is actually a flux between two frequency limits) */
+    lum = plasmamain[nplasma].lum_tot;  /* Whilst this says lum - I'm (nsh) pretty sure this is actually a flux between two frequency limits) */
 
     xlum = lum * (rand () + 0.5) / (MAXRAND);   /*this makes a small test luminosity */
 
@@ -435,28 +377,57 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     p[n].nnscat = 1;
     if ((xlumsum += plasmamain[nplasma].lum_ff) > xlum) /*Add the free free luminosity of the cell to the running total. If it is more than our small test luminosity, then we need to make some ff photons */
     {
-      p[n].freq = one_ff (&wmain[icell], freqmin, freqmax);     /*Get the frequency of one ff photon */
-      if (p[n].freq <= 0.0)
-      {
-        Error_silent ("photo_gen_wind: On return from one_ff: icell %d vol %g t_e %g\n", icell, wmain[icell].vol, plasmamain[nplasma].t_e);
-        p[n].freq = 0.0;
-      }
+    	ptype[nplasma][0]++;	  
     }
-    else if ((xlumsum += plasmamain[nplasma].lum_fb) > xlum)    /*Do the same for fb */
+    else if ((xlumsum += plasmamain[nplasma].lum_rr) > xlum)    /*Do the same for fb */
     {
-      p[n].freq = one_fb (&wmain[icell], freqmin, freqmax);
+		ptype[nplasma][1]++;	  
     }
     else
     {
-      p[n].freq = one_line (&wmain[icell], freqmin, freqmax, &p[n].nres);       /*And fill all the rest of the luminosity up with line photons */
+  		ptype[nplasma][2]++;
     }
-    p[n].w = weight;
     /* Determine the position of the photon in the moving frame */
+}
 
 
-    get_random_location (icell, p[n].x);
+photstop=photstart;
 
-    p[n].grid = icell;
+for (n=0;n<NPLASMA;n++)
+{
+	photstart=photstop;   //first time round, this gets set to photstart, afterwards we start the photon number from the end of the last cell
+	photstop=photstart+ptype[n][0]+ptype[n][1]+ptype[n][2]; //This is the number of photons in this cell	
+	for (np=photstart;np<photstop;np++)
+	{	
+	icell=plasmamain[n].nwind;
+    ndom = wmain[icell].ndom;
+	if (np<photstart+ptype[n][0])
+	{
+		p[np].freq = one_ff (&wmain[icell], freqmin, freqmax);     /*Get the frequency of one ff photon */
+		if (p[np].freq <= 0.0)
+		{
+  		  Error_silent ("photo_gen_wind: On return from one_ff: icell %d vol %g t_e %g\n", icell, wmain[icell].vol, plasmamain[nplasma].t_e);
+  		p[np].freq = 0.0;
+		}
+//	    if (icell==1100)
+//	  	  printf ("PHOT FF freq %e weight %e out\n",p[np].freq,weight);
+	}
+	else if (np<photstart+ptype[n][0]+ptype[n][1])
+	{
+		p[np].freq = one_fb (&wmain[icell], freqmin, freqmax);
+//	    if (icell==1100)
+//	  	  printf ("PHOT FB freq %e weight %e out\n",p[np].freq,weight);
+	}
+	else
+	{
+		p[np].freq = one_line (&wmain[icell], freqmin, freqmax, &p[n].nres);       /*And fill all the rest of the luminosity up with line photons */
+//	    if (icell==1100)
+//	  	  printf ("PHOT LI freq %e weight %e out\n",p[np].freq,weight);
+	}
+
+    p[np].w = weight;
+    get_random_location (icell, p[np].x);
+    p[np].grid = icell;
 
     /*
        Determine the direction of the photon
@@ -466,56 +437,59 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
        to allow for isotropic BF continuum emission
      */
     nnscat = 1;
-    if (p[n].nres < 0 || geo.scatter_mode != 1)
+    if (p[np].nres < 0 || geo.scatter_mode != 1)
     {
 /*  It was either an electron scatter so the  distribution is isotropic, or it
 was a resonant scatter but we want isotropic scattering anyway.  */
-      randvec (p[n].lmn, 1.0);  /* The photon is emitted isotropically */
+      randvec (p[np].lmn, 1.0);  /* The photon is emitted isotropically */
     }
     else if (geo.scatter_mode == 1)
     {                           // It was a line photon and we want anisotropic scattering mode 1
 
 /* -1. forces a full reinitialization of the pdf for anisotropic scattering  */
 
-      randwind (&p[n], p[n].lmn, wmain[icell].lmn);
+      randwind (&p[np], p[np].lmn, wmain[icell].lmn);
 
     }
     else if (geo.scatter_mode == 2)
     {                           // It was a line photon and we want anisotropic scattering mode 2
-      randwind_thermal_trapping (&p[n], &nnscat);
+      randwind_thermal_trapping (&p[np], &nnscat);
     }
-    p[n].nnscat = nnscat;
+    p[np].nnscat = nnscat;
 
 
     /* The next two lines correct the frequency to first order, but do not result in
        forward scattering of the distribution */
 
-    vwind_xyz (ndom, &p[n], v);
-    p[n].freq *= (1. + dot (v, p[n].lmn) / C);
+    vwind_xyz (ndom, &p[np], v);
+    p[np].freq *= (1. + dot (v, p[np].lmn) / C);
 
-    p[n].istat = 0;
-    p[n].tau = p[n].nscat = p[n].nrscat = 0;
-    p[n].origin = PTYPE_WIND;   // A wind photon
+    p[np].istat = 0;
+    p[np].tau = p[np].nscat = p[np].nrscat = 0;
+    p[np].origin = PTYPE_WIND;   // A wind photon
     switch (geo.reverb)
     {                           // SWM 26-3-15: Added wind paths
     case REV_WIND:
     case REV_MATOM:
-      wind_paths_gen_phot (&wmain[icell], &p[n]);
+      wind_paths_gen_phot (&wmain[icell], &p[np]);
       break;
     case REV_PHOTON:
-      simple_paths_gen_phot (&p[n]);
+      simple_paths_gen_phot (&p[np]);
       break;
     case REV_NONE:
     default:
       break;
     }
+    }
+	
   }
+  
+
 
 
   return (nphot);               /* Return the number of photons generated */
 
 }
-
 
 /***********************************************************
                                        Space Telescope Science Institute
@@ -646,8 +620,10 @@ total_free (one, t_e, f1, f2)
 
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
-  if (t_e < 100.)
-    return (0.0);
+  /* 170526 - Elimiated the temperature limit on calculating t_e at low temperatures */
+  //if (t_e < 100.)
+  //  return (0.0);
+
   if (f2 < f1)
   {
     return (0.0);
@@ -817,8 +793,8 @@ History:
  
 **************************************************************/
 
-struct Pdf pdf_ff;
-double ff_x[200], ff_y[200];
+//struct Cdf cdf_ff;
+double ff_x[ARRAY_PDF], ff_y[ARRAY_PDF];  //We initialise the arrays that will contain the unscaled PDF 
 double one_ff_f1, one_ff_f2, one_ff_te; /* Old values */
 
 double
@@ -826,7 +802,7 @@ one_ff (one, f1, f2)
      WindPtr one;               /* a single cell */
      double f1, f2;             /* freqmin and freqmax */
 {
-  double dummy, freq, dfreq;
+  double freq, dfreq;
   int n;
   int nplasma;
   PlasmaPtr xplasma;
@@ -845,20 +821,22 @@ one_ff (one, f1, f2)
 
   if (xplasma->t_e != one_ff_te || f1 != one_ff_f1 || f2 != one_ff_f2)
   {                             /* Generate a new pdf */
-
-    dfreq = (f2 - f1) / 199;
-    for (n = 0; n < 200; n++)
+    dfreq = (f2 - f1) / (ARRAY_PDF-1);
+    for (n = 0; n < ARRAY_PDF-1; n++)
     {
       ff_x[n] = f1 + dfreq * n;
       ff_y[n] = ff (one, xplasma->t_e, ff_x[n]);
     }
+	
+	ff_x[ARRAY_PDF-1] = f2;
+    ff_y[ARRAY_PDF-1] = ff (one, xplasma->t_e, ff_x[ARRAY_PDF-1]);
 
 
 
-    if ((echeck = pdf_gen_from_array (&pdf_ff, ff_x, ff_y, 200, f1, f2, 0, &dummy)) != 0)
+    if ((echeck = cdf_gen_from_array (&cdf_ff, ff_x, ff_y, ARRAY_PDF, f1, f2)) != 0)
     {
       Error
-        ("one_ff: pdf_gen_from_array error %d : f1 %g f2 %g te %g ne %g nh %g vol %g\n",
+        ("one_ff: cdf_gen_from_array error %d : f1 %g f2 %g te %g ne %g nh %g vol %g\n",
          echeck, f1, f2, xplasma->t_e, xplasma->ne, xplasma->density[1], one->vol);
       exit (0);
     }
@@ -866,7 +844,7 @@ one_ff (one, f1, f2)
     one_ff_f1 = f1;
     one_ff_f2 = f2;             /* Note that this may not be the best way to check for a previous pdf */
   }
-  freq = pdf_get_rand (&pdf_ff);
+  freq = cdf_get_rand (&cdf_ff);
   return (freq);
 }
 

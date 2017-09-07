@@ -14,7 +14,7 @@ Arguments:
 
 Returns:
 	Always returns 0.  The pieces of the wind structure which are updated are
-	j,ave_freq,ntot,  heat_photo,heat_ff,heat_h,heat_he1,heat_he2, heat_z,
+	j,ave_freq,ntot, heat_photo, heat_ff, heat_h, heat_he1, heat_he2, heat_z,
 	nioniz, and ioniz[].
  
 Description:	 
@@ -66,9 +66,9 @@ History:
 			that one does not attempt to calculate photoionization
 			cross-sections below threshold.  Both of these changes
 			are intended to speed this routine.
-        01oct   ksl     Modifications begun to incorporate Topbase photoionization
+    01oct   ksl     Modifications begun to incorporate Topbase photoionization
                         x-sections.
-        01oct   ksl     Moved fb_cooling to balance_abso.  It's only used by
+    01oct   ksl     Moved fb_cooling to balance_abso.  It's only used by
                         balance and probably should not be there either.
 	02jun	ksl	Improved/fixed treatment of calculation of number of ionizations.
 	04apr	ksl	SS had modified this routine to allow for macro-atoms in python_47, but his modifications
@@ -115,7 +115,6 @@ radiation (p, ds)
      PhotPtr p;
      double ds;
 {
-  //PhotoionizationPtr x_ptr;
   TopPhotPtr x_top_ptr;
 
   WindPtr one;
@@ -126,6 +125,7 @@ radiation (p, ds)
   double frac_z, frac_comp;     /* nsh 1108 added frac_comp - the heating in the cell due to compton heating */
   double frac_ind_comp;         /* nsh 1205 added frac_ind_comp - the heating due to induced compton heating */
   double frac_auger;
+  double frac_tot_abs,frac_auger_abs,z_abs;
   double kappa_ion[NIONS];
   double frac_ion[NIONS];
   double density, ft, tau, tau2;
@@ -145,9 +145,6 @@ radiation (p, ds)
 
   one = &wmain[p->grid];        /* So one is the grid cell of interest */
 
-
-
-
   ndom = one->ndom;
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "radiation");
@@ -164,6 +161,7 @@ radiation (p, ds)
 
   /* Create phot, a photon at the position we are moving to 
      note that the actual movement of the photon gets done after the call to radiation */
+
   stuff_phot (p, &phot);        // copy photon ptr
 
   move_phot (&phot, ds);        // move it by ds
@@ -172,15 +170,13 @@ radiation (p, ds)
 
   v2 = dot (phot.lmn, v_outer); // get direction cosine
 
-
   /* calculate photon frequencies in rest frame of cell */
+
   freq_inner = p->freq * (1. - v1 / C);
   freq_outer = phot.freq * (1. - v2 / C);
 
   /* take the average of the frequencies at original position and original+ds */
   freq = 0.5 * (freq_inner + freq_outer);
-
-
 
   /* calculate free-free, compton and ind-compton opacities 
      note that we also call these with the average frequency along ds */
@@ -188,14 +184,14 @@ radiation (p, ds)
   kappa_tot = frac_ff = kappa_ff (xplasma, freq);       /* Add ff opacity */
   kappa_tot += frac_comp = kappa_comp (xplasma, freq);  /* 70 NSH 1108 calculate compton opacity, store it in kappa_comp and also add it to kappa_tot, the total opacity for the photon path */
   kappa_tot += frac_ind_comp = kappa_ind_comp (xplasma, freq);
+
   frac_tot = frac_z = 0;        /* 59a - ksl - Moved this line out of loop to avoid warning, but notes 
                                    indicate this is all diagnostic and might be removed */
   frac_auger = 0;
+  frac_tot_abs=frac_auger_abs=0.0;
 
+  /* JM 1405 -- Check which of the frequencies is larger.  */
 
-  /* JM 1405 -- Check which of the frequencies is larger.
-     if freq_max is always larger this can be removed. My checks
-     indicate that it isn't */
   if (freq_outer > freq_inner)
   {
     freq_max = freq_outer;
@@ -218,6 +214,7 @@ radiation (p, ds)
         frac_ion[nion] = 0;
       }
     }
+
     /* Next section is for photoionization with Topbase.  There may be more
        than one x-section associated with an ion, and so one has to keep track
        of the energy that goes into heating electrons carefully.  */
@@ -242,6 +239,7 @@ radiation (p, ds)
         {
           /* then the shifting of the photon causes it to cross an edge. 
              Find out where between fmin and fmax the edge would be in freq space.
+             frac_path is the fraction of the total path length above the absorption edge
              freq_xs is freq halfway between the edge and the max freq if an edge gets crossed */
           frac_path = (freq_max - ft) / (freq_max - freq_min);
           freq_xs = 0.5 * (ft + freq_max);
@@ -252,7 +250,7 @@ radiation (p, ds)
 
         else if (ft < freq_min)
         {
-          frac_path = 1.0;      // then all frequency along ds are above edge
+          frac_path = 1.0;      // then the frequency of the photon is above the threshold all along the path
           freq_xs = freq;       // use the average frequency
         }
 
@@ -282,13 +280,14 @@ radiation (p, ds)
 
             /* JM1411 -- added filling factor - density enhancement cancels with zdom[ndom].fill */
             kappa_tot += x = sigma_phot (x_top_ptr, freq_xs) * density * frac_path * zdom[ndom].fill;
-            /* I believe most of next steps are totally diagnsitic; it is possible if 
-               statement could be deleted entirely 060802 -- ksl */
+
 
             if (geo.ioniz_or_extract)   // 57h -- ksl -- 060715
             {                   // Calculate during ionization cycles only
 
-              frac_tot += z = x * (freq_xs - ft) / freq_xs;
+              frac_tot += z = x * (freq_xs - ft) / freq_xs; //This is the heating effect - i.e. the absorbed photon energy less the binding energy of the lost electron
+              frac_tot_abs += z_abs = x; //This is the absorbed energy fraction
+			  
               if (nion > 3)
               {
                 frac_z += z;
@@ -302,7 +301,9 @@ radiation (p, ds)
 
 
         }
-      }                         /* NSH loop over all inner shell cross sections as well! But only for VFKY ions - topbase has those edges in */
+      }                         
+      
+      /* NSH loop over all inner shell cross sections as well! But only for VFKY ions - topbase has those edges in */
 
       if (freq > inner_freq_min)
       {
@@ -334,7 +335,6 @@ radiation (p, ds)
                 {
                   density = xplasma->density[nion];     //All these rates are from the ground state, so we just need the density of the ion.
                 }
-                //OLD fix gcc-4 worning  else if (ion[nion].phot_info > 0) // topbase or hybrid
                 else
                 {
                   nconf = phot_top[ion[nion].ntop_ground].nlev; //The lower level of the ground state Pi cross section (should be GS!)
@@ -346,6 +346,8 @@ radiation (p, ds)
                   if (geo.ioniz_or_extract && x_top_ptr->n_elec_yield != -1)    // 57h -- ksl -- 060715 Calculate during ionization cycles only
                   {
                     frac_auger += z = x * (inner_elec_yield[x_top_ptr->n_elec_yield].Ea / EV2ERGS) / (freq_xs * HEV);
+	                frac_auger_abs += z_abs = x; //This is the absorbed energy fraction
+					
                     if (nion > 3)
                     {
                       frac_z += z;
@@ -416,12 +418,6 @@ radiation (p, ds)
   }
 
 
-
-
-
-
-
-
   /*74a_ksl: 121215 -- Added to check on a problem photon */
   if (sane_check (p->w))
   {
@@ -435,9 +431,6 @@ radiation (p, ds)
 /* Update the radiation parameters used ultimately in calculating t_r */
 
   xplasma->ntot++;
-
-
-
 
 /* NSH 15/4/11 Lines added to try to keep track of where the photons are coming from, 
  * and hence get an idea of how 'agny' or 'disky' the cell is. */
@@ -482,16 +475,21 @@ radiation (p, ds)
     Error ("radiation:sane_check Problem with j %g or ave_freq %g\n", xplasma->j, xplasma->ave_freq);
   }
 
-
   if (kappa_tot > 0)
   {
+	  
     //If statement added 01mar18 ksl to correct problem of zero divide
     //  in odd situations where no continuum opacity
     z = (energy_abs) / kappa_tot;
     xplasma->heat_ff += z * frac_ff;
     xplasma->heat_tot += z * frac_ff;
+	xplasma->abs_tot += z * frac_ff;   /* The energy absorbed from the photon field in this cell */
+	
     xplasma->heat_comp += z * frac_comp;        /* NSH 1108 Calculate the heating in the cell due to compton heating */
     xplasma->heat_tot += z * frac_comp; /* NSH 1108 Add the compton heating to the total heating for the cell */
+	xplasma->abs_tot += z * frac_comp;   /* The energy absorbed from the photon field in this cell */
+	xplasma->abs_tot += z * frac_ind_comp;   /* The energy absorbed from the photon field in this cell */
+
     xplasma->heat_tot += z * frac_ind_comp;     /* NSH 1205 Calculate the heating in the celldue to induced compton heating */
     xplasma->heat_ind_comp += z * frac_ind_comp;        /* NSH 1205 Increment the induced compton heating counter for the cell */
     if (freq > phot_freq_min)
@@ -502,6 +500,11 @@ radiation (p, ds)
        * unpredictable and serious errors.
        */
     {
+		xplasma->abs_photo += z * frac_tot_abs;  //Here we store the energy absorbed from the photon flux - different from the heating by the binding energy
+		xplasma->abs_auger += z * frac_auger_abs; //same for auger
+		xplasma->abs_tot += z * frac_tot_abs;   /* The energy absorbed from the photon field in this cell */
+		xplasma->abs_tot += z * frac_auger_abs;   /* The energy absorbed from the photon field in this cell */
+
       xplasma->heat_photo += z * frac_tot;
       xplasma->heat_z += z * frac_z;
       xplasma->heat_tot += z * frac_tot;        //All of the photoinization opacities
@@ -529,10 +532,8 @@ radiation (p, ds)
   for (n = 0; n < nauger; n++)
   {
     ft = augerion[n].freq_t;
-    //Log("Auger tests: %g %g %g\n", augerion[n].freq_t, freq, p->freq);
     if (p->freq > ft)
     {
-      //Log("Adding a packet to AUGER via radiation %g \n", freq);
 
       weight_of_packet = w_ave;
       x = sigma_phot_verner (&augerion[n], freq);       //this is the cross section

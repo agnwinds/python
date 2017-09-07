@@ -130,7 +130,6 @@ double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
 /* wind_updates2d.c */
 int wind_update(WindPtr (w));
 int wind_rad_init(void);
-int wind_rad_summary(WindPtr w, char filename[], char mode[]);
 int wind_ip(void);
 /* windsave.c */
 int wind_save(char filename[]);
@@ -141,16 +140,17 @@ int spec_read(char filename[]);
 /* extract.c */
 int extract(WindPtr w, PhotPtr p, int itype);
 int extract_one(WindPtr w, PhotPtr pp, int itype, int nspec);
-/* pdf.c */
-int pdf_gen_from_func(PdfPtr pdf, double (*func)(double), double xmin, double xmax, int njumps, double jump[]);
+/* cdf.c */
+int cdf_gen_from_func(CdfPtr cdf, double (*func)(double), double xmin, double xmax, int njumps, double jump[]);
 double gen_array_from_func(double (*func)(double), double xmin, double xmax, int pdfsteps);
-int pdf_gen_from_array(PdfPtr pdf, double x[], double y[], int n_xy, double xmin, double xmax, int njumps, double jump[]);
-double pdf_get_rand(PdfPtr pdf);
-int pdf_limit(PdfPtr pdf, double xmin, double xmax);
-double pdf_get_rand_limit(PdfPtr pdf);
-int pdf_to_file(PdfPtr pdf, char filename[]);
-int pdf_check(PdfPtr pdf);
-int recalc_pdf_from_cdf(PdfPtr pdf);
+int cdf_gen_from_array(CdfPtr cdf, double x[], double y[], int n_xy, double xmin, double xmax);
+double cdf_get_rand(CdfPtr cdf);
+int cdf_limit(CdfPtr cdf, double xmin, double xmax);
+double cdf_get_rand_limit(CdfPtr cdf);
+int cdf_to_file(CdfPtr cdf, char filename[]);
+int cdf_check(CdfPtr cdf);
+int calc_cdf_gradient(CdfPtr cdf);
+int cdf_array_fixup(double *x, double *y, int n_xy);
 /* roche.c */
 int binary_basics(void);
 double ds_to_roche_2(PhotPtr p);
@@ -226,27 +226,33 @@ double emittance_continuum(int spectype, double freqmin, double freqmax, double 
 /* emission.c */
 double wind_luminosity(double f1, double f2);
 double total_emission(WindPtr one, double f1, double f2);
-double adiabatic_cooling(WindPtr one, double t);
 int photo_gen_wind(PhotPtr p, double weight, double freqmin, double freqmax, int photstart, int nphot);
 double one_line(WindPtr one, double freqmin, double freqmax, int *nres);
 double total_free(WindPtr one, double t_e, double f1, double f2);
 double ff(WindPtr one, double t_e, double freq);
 double one_ff(WindPtr one, double f1, double f2);
 double gaunt_ff(double gsquared);
+/* cooling.c */
+double cooling(PlasmaPtr xxxplasma, double t);
+double xtotal_emission(WindPtr one, double f1, double f2);
+double adiabatic_cooling(WindPtr one, double t);
+double wind_cooling(double f1, double f2);
 /* recomb.c */
 double fb_topbase_partial(double freq);
 double integ_fb(double t, double f1, double f2, int nion, int fb_choice, int mode);
-double total_fb(WindPtr one, double t, double f1, double f2, int mode);
+double total_fb(WindPtr one, double t, double f1, double f2, int fb_choice, int mode);
 double one_fb(WindPtr one, double f1, double f2);
 int num_recomb(PlasmaPtr xplasma, double t_e, int mode);
 double fb(PlasmaPtr xplasma, double t, double freq, int ion_choice, int fb_choice);
 int init_freebound(double t1, double t2, double f1, double f2);
 double get_nrecomb(double t, int nion, int mode);
-double get_fb(double t, int nion, int narray, int mode);
+double get_fb(double t, int nion, int narray, int fb_choice, int mode);
 double xinteg_fb(double t, double f1, double f2, int nion, int fb_choice);
 double xinteg_inner_fb(double t, double f1, double f2, int nion, int fb_choice);
 double total_rrate(int nion, double T);
 double gs_rrate(int nion, double T);
+int sort_and_compress(double *array_in, double *array_out, int npts);
+int compare_doubles(const void *a, const void *b);
 /* diag.c */
 int open_diagfile(void);
 int get_extra_diagnostics(void);
@@ -282,7 +288,7 @@ int reposition(PhotPtr p);
 int randwind(PhotPtr p, double lmn[3], double north[3]);
 double vrandwind(double x);
 double reweightwind(PhotPtr p);
-int make_pdf_randwind(double tau);
+int make_cdf_randwind(double tau);
 int randwind_thermal_trapping(PhotPtr p, int *nnscat);
 /* util.c */
 int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
@@ -492,6 +498,13 @@ int photo_gen_matom(PhotPtr p, double weight, int photstart, int nphot);
 /* macro_gov.c */
 int macro_gov(PhotPtr p, int *nres, int matom_or_kpkt, int *which_out);
 int macro_pops(PlasmaPtr xplasma, double xne);
+/* windsave2table_sub.c */
+int do_windsave2table(char *root);
+int create_master_table(int ndom, char rootname[]);
+int create_heat_table(int ndom, char rootname[]);
+int create_ion_table(int ndom, char rootname[], int iz);
+double *get_ion(int ndom, int element, int istate, int iswitch);
+double *get_one(int ndom, char variable_name[]);
 /* reverb.c */
 double delay_to_observer(PhotPtr pp);
 int delay_dump_prep(int restart_stat);

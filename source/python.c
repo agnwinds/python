@@ -413,9 +413,7 @@ main (argc, argv)
 
     if (geo.run_type != SYSTEM_TYPE_PREVIOUS)
     {
-      /* This option is the most common one, where we are starting to define a completely new system.  Nothe
-       * that wind_type 2 is no longer allowed here.  At one time, this was used as the way to read in 
-       * a previous model but this is now down via geo.system_type above.  kxl
+      /* This option is the most common one, where we are starting to define a completely new system.  
        */
 
       rdint ("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)", &geo.disk_type);
@@ -426,6 +424,10 @@ main (argc, argv)
 
       for (n = 0; n < ndomains; n++)
       {
+
+       /* Note that wind_type 2 is no longer allowed here.  At one time, this was used as the way to read in 
+       * a previous model but this is now down via geo.system_type above.  ksl
+       */
 
         rdint ("Wind_type(0=SV,1=Sphere,3=Hydro,4=corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)", &zdom[ndomain].wind_type);
 
@@ -536,7 +538,7 @@ main (argc, argv)
 
   }                             // End of block to define a model for the first time
 
-  else                          // This referes to a previous system and so geo is already defined
+  else                          // This refers to a previous system and so geo is already defined
   {
     if (geo.disk_type)          /* Then a disk exists and it needs to be described */
     {
@@ -573,7 +575,7 @@ main (argc, argv)
   if (geo.t_bl <= 0.0 || geo.lum_bl <= 0.0)
     geo.bl_radiation = 0;
 
-  /* Next block added by SS August 04 in case diskrad = 0 is used to mean no disk at any point. */
+  /* If the disk radius is <0, assume no disk was intended. */
 
   if (geo.diskrad <= 0.0)
   {
@@ -632,16 +634,16 @@ main (argc, argv)
   geo.matom_radiation = 0;      //initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
   get_standard_care_factors ();
   get_meta_params ();
-/* 081221 - 67c - Establish limits on the frequency intervals to be used by the ionization cycles and 
- * the fraquency bands for stratified sampling.  Changes here were made to allow more control
- * over statified sampling, since we have expanded the temperature ranges of the types of systems
- * we would like to calculate.  This section of inputs might logically go earlier in the code, but
+
+/* Establish limits on the frequency intervals to be used by the ionization cycles and 
+ * the fraquency bands for stratified sampling. These bands are alos used as the spectral
+ * intervals for creating crude spectra in each of the cells
+ *
+ * This section of inputs might logically go earlier in the code, but
  * was put here so it would add on to existing .pf files.  It would be reasonble to consider moving
  * it to a more logical location
  */
-/* Determine the frequency range which will be used to establish the ionization balance of the wind */
-/* Set up the bands that are used to to create photons and also the spectral intervals that are used 
- * to calculate crude spectra in each of the cells */
+
 
   bands_init (-1, &xband);
   freqmin = xband.f1[0];
@@ -701,8 +703,10 @@ main (argc, argv)
    */
 
   DFUDGE = setup_dfudge ();
+
   /* Now define the wind cones generically. modifies the global windcone structure */
   setup_windcone ();
+
   /*NSH 130821 broken out into a seperate routine added these lines to fix bug41, where
      the cones are never defined for an rtheta grid if the model is restarted. 
 
@@ -712,6 +716,7 @@ main (argc, argv)
 
      XXX This looks wrong; we read all of this information in I think
    */
+
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
 
@@ -720,6 +725,9 @@ main (argc, argv)
       rtheta_make_cones (ndom, wmain);
     }
   }
+
+
+
 
 
   /* Next line finally defines the wind if this is the initial time this model is being run */
@@ -738,6 +746,7 @@ main (argc, argv)
 
   /* this routine checks, somewhat crudely, if the grid is well enough resolved */
   check_grid ();
+
   w = wmain;
   if (modes.save_cell_stats)
   {
@@ -747,10 +756,15 @@ main (argc, argv)
   }
 
   /* initialize the random number generator */
-  /* JM 1503 -- Sometimes it is useful to vary the random number seed. 
-     Default is fixed, but will vary with different processor numbers */
-  /* We don't want to run the same photons each cycle in zeus mode, so 
-     everytime we are using zeus we also set to use the clock */
+  /* By default, the random number generator start with fixed seeds (differnt
+   * for each processor, but this can be changed using a command line
+   * switch.  
+   *
+   * An exception is when we are in zeus mode, where it would be inappropriate
+   * to use the same phtons in ezch cycle.  There we initiate the seeds unsing
+   * the clock
+   */
+
   if ((modes.rand_seed_usetime == 1) || (modes.zeus_connect == 1))
   {
     n = (unsigned int) clock () * (rank_global + 1);
@@ -758,8 +772,10 @@ main (argc, argv)
   }
   else
     srand (1084515760 + (13 * rank_global));
-  /* 68b - 0902 - ksl - Start with photon history off */
+
+  /* Start with photon history off */
   phot_hist_on = 0;
+
   /* If required, read in a non-standard disk temperature profile */
   if (geo.disk_tprofile == 1)
   {
@@ -787,13 +803,16 @@ main (argc, argv)
   qdisk_init ();                /* Initialize a disk qdisk to store the information about photons impinging on the disk */
   xsignal (files.root, "%-20s Finished initialization for %s\n", "NOK", files.root);
   check_time (files.root);
+
 /* XXXX - THE CALCULATION OF THE IONIZATION OF THE WIND */
   geo.ioniz_or_extract = 1;     //SS July 04 - want to compute MC estimators during ionization cycles
   //1 simply implies we are in the ionization section of the code
   //and allows routines to act accordinaly.
 /* 67 -ksl- geo.wycle will start at zero unless we are completing an old run */
+
 /* XXXX -  CALCULATE THE IONIZATION OF THE WIND */
   calculate_ionization (restart_stat);
+
 /* XXXX - END OF CYCLE TO CALCULATE THE IONIZATION OF THE WIND */
   Log (" Completed wind creation.  The elapsed TIME was %f\n", timer ());
   /* SWM - Evaluate wind paths for last iteration */
@@ -806,13 +825,18 @@ main (argc, argv)
 
   freqmax = C / (geo.swavemin * 1.e-8);
   freqmin = C / (geo.swavemax * 1.e-8);
+
   /* Perform the initilizations required to handle macro-atoms during the detailed
      calculation of the spectrum.  
 
      Next lines turns off macro atom estimators and other portions of the code that are
      unnecessary during spectrum cycles.  */
+
   geo.ioniz_or_extract = 0;
-/* 57h -- 07jul -- Next steps to speed up extraction stage */
+
+
+/* Next step speeds up extraction stage */
+
   if (!modes.keep_photoabs)
   {
     DENSITY_PHOT_MIN = -1.0;    // Do not calculated photoabsorption in detailed spectrum 
@@ -820,7 +844,7 @@ main (argc, argv)
 
   /*Switch on k-packet/macro atom emissivities  SS June 04 */
 
-  if (geo.rt_mode == 2)
+  if (geo.rt_mode == RT_MODE_MACRO)
   {
     geo.matom_radiation = 1;
   }
@@ -832,7 +856,9 @@ main (argc, argv)
    */
 
   kbf_need (freqmin, freqmax);
+
   /* XXXX - Execute  CYCLES TO CREATE THE DETAILED SPECTRUM */
   make_spectra (restart_stat);
+
   return (0);
 }

@@ -906,7 +906,7 @@ kpkt (p, nres, escape)
 
     /* note the units here- we divide the total luminosity of the cell by volume and ne to give cooling rate */
 
-    cooling_adiabatic = xplasma->lum_adiabatic / xplasma->vol / xplasma->ne;    // JM 1411 - changed to use filled volume
+    cooling_adiabatic = xplasma->cool_adiabatic / xplasma->vol / xplasma->ne;    // JM 1411 - changed to use filled volume
 
     if (geo.adiabatic == 0 && cooling_adiabatic > 0.0)
     {

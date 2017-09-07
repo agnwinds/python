@@ -51,141 +51,144 @@ parse_command_line (argc, argv)
   restart_stat = 0;
 
   if (argc == 1)
-  {
-    printf ("Parameter file name (e.g. my_model.pf, or just my_model):");
-    fgets (dummy, LINELENGTH, stdin);
-    get_root (files.root, dummy);
-    strcpy (files.diag, files.root);
-    strcat (files.diag, ".diag");
-  }
+    {
+      printf ("Parameter file name (e.g. my_model.pf, or just my_model):");
+      fgets (dummy, LINELENGTH, stdin);
+      get_root (files.root, dummy);
+      strcpy (files.diag, files.root);
+      strcat (files.diag, ".diag");
+    }
   else
-  {
-
-    for (i = 1; i < argc; i++)
     {
-      if (strcmp (argv[i], "-h") == 0)
-      {
-        help ();
-      }
-      else if (strcmp (argv[i], "-r") == 0)
-      {
-        Log ("Restarting %s\n", files.root);
-        restart_stat = 1;
-        j = i;
-      }
-      else if (strcmp (argv[i], "-t") == 0)
-      {
-        if (sscanf (argv[i + 1], "%lf", &time_max) != 1)
-        {
-          Error ("python: Expected time after -t switch\n");
-          exit (0);
-        }
-        i++;
-        j = i;
 
-      }
-      else if (strcmp (argv[i], "-v") == 0)
-      {
-        if (sscanf (argv[i + 1], "%d", &verbosity) != 1)
-        {
-          Error ("python: Expected verbosity after -v switch\n");
-          exit (0);
-        }
-        Log_set_verbosity (verbosity);
-        i++;
-        j = i;
+      for (i = 1; i < argc; i++)
+	{
+	  if (strcmp (argv[i], "-h") == 0)
+	    {
+	      help ();
+	    }
+	  else if (strcmp (argv[i], "-r") == 0)
+	    {
+	      Log ("Restarting %s\n", files.root);
+	      restart_stat = 1;
+	      j = i;
+	    }
+	  else if (strcmp (argv[i], "-t") == 0)
+	    {
+	      if (sscanf (argv[i + 1], "%lf", &time_max) != 1)
+		{
+		  Error ("python: Expected time after -t switch\n");
+		  exit (0);
+		}
+	      i++;
+	      j = i;
 
-      }
-      else if (strcmp (argv[i], "-e") == 0)
-      {
-        if (sscanf (argv[i + 1], "%d", &max_errors) != 1)
-        {
-          Error ("python: Expected max errors after -e switch\n");
-          exit (0);
-        }
-        Log_quit_after_n_errors (max_errors);
-        i++;
-        j = i;
+	    }
+	  else if (strcmp (argv[i], "-v") == 0)
+	    {
+	      if (sscanf (argv[i + 1], "%d", &verbosity) != 1)
+		{
+		  Error ("python: Expected verbosity after -v switch\n");
+		  exit (0);
+		}
+	      Log_set_verbosity (verbosity);
+	      i++;
+	      j = i;
 
-      }
-      else if (strcmp (argv[i], "-d") == 0)
-      {
-        modes.iadvanced = 1;
-        j = i;
-      }
-      else if (strcmp (argv[i], "-f") == 0)
-      {
-        modes.fixed_temp = 1;
-        j = i;
-      }
+	    }
+	  else if (strcmp (argv[i], "-e") == 0)
+	    {
+	      if (sscanf (argv[i + 1], "%d", &max_errors) != 1)
+		{
+		  Error ("python: Expected max errors after -e switch\n");
+		  exit (0);
+		}
+	      Log_quit_after_n_errors (max_errors);
+	      i++;
+	      j = i;
 
-      /* JM 1503 -- Sometimes it is useful to vary the random number seed. Set a mode for that */
-      else if (strcmp (argv[i], "--rseed") == 0)
-      {
-        modes.rand_seed_usetime = 1;
-        j = i;
-      }
-      else if (strcmp (argv[i], "-z") == 0)
-      {
-        modes.zeus_connect = 1;
-        Log ("setting zeus_connect to %i\n", modes.zeus_connect);
-        j = i;
-      }
-      else if (strcmp (argv[i], "-i") == 0)
-      {
-        modes.quit_after_inputs = 1;
-        j = i;
-      }
-      else if (strcmp (argv[i], "--dry-run") == 0)
-      {
-        modes.quit_after_inputs = 1;
-        j = i;
-      }
+	    }
+	  else if (strcmp (argv[i], "-d") == 0)
+	    {
+	      modes.iadvanced = 1;
+	      j = i;
+	    }
+	  else if (strcmp (argv[i], "-f") == 0)
+	    {
+	      modes.fixed_temp = 1;
+	      j = i;
+	    }
 
-      else if (strcmp (argv[i], "--version") == 0)
-      {
-        /* give information about the pyhon version, such as commit hash */
-        Log ("Python Version %s \n", VERSION);  //54f -- ksl -- Now read from version.h
-        Log ("Built from git commit hash %s\n", GIT_COMMIT_HASH);
-        /* warn the user if there are uncommited changes */
-        int git_diff_status = GIT_DIFF_STATUS;
-        if (git_diff_status > 0)
-          Log ("This version was compiled with %i files with uncommitted changes.\n", git_diff_status);
-        exit (0);
-      }
+	  /* JM 1503 -- Sometimes it is useful to vary the random number seed. Set a mode for that */
+	  else if (strcmp (argv[i], "--rseed") == 0)
+	    {
+	      modes.rand_seed_usetime = 1;
+	      j = i;
+	    }
+	  else if (strcmp (argv[i], "-z") == 0)
+	    {
+	      modes.zeus_connect = 1;
+	      Log ("setting zeus_connect to %i\n", modes.zeus_connect);
+	      j = i;
+	    }
+	  else if (strcmp (argv[i], "-i") == 0)
+	    {
+	      modes.quit_after_inputs = 1;
+	      j = i;
+	    }
+	  else if (strcmp (argv[i], "--dry-run") == 0)
+	    {
+	      modes.quit_after_inputs = 1;
+	      j = i;
+	    }
 
-      else if (strncmp (argv[i], "-", 1) == 0)
-      {
-        Error ("python: Unknown switch %s\n", argv[i]);
-        help ();
-      }
+	  else if (strcmp (argv[i], "--version") == 0)
+	    {
+	      /* give information about the pyhon version, such as commit hash */
+	      Log ("Python Version %s \n", VERSION);	//54f -- ksl -- Now read from version.h
+	      Log ("Built from git commit hash %s\n", GIT_COMMIT_HASH);
+	      /* warn the user if there are uncommited changes */
+	      int git_diff_status = GIT_DIFF_STATUS;
+	      if (git_diff_status > 0)
+		Log
+		  ("This version was compiled with %i files with uncommitted changes.\n",
+		   git_diff_status);
+	      exit (0);
+	    }
+
+	  else if (strncmp (argv[i], "-", 1) == 0)
+	    {
+	      Error ("python: Unknown switch %s\n", argv[i]);
+	      help ();
+	    }
+	}
+
+      /* The last command line variable is always the .pf file */
+
+      if (j + 1 == argc)
+	{
+	  Error
+	    ("All of the command line has been consumed without specifying a parameter file name, so exiting\n");
+	  exit (0);
+	}
+
+
+      strcpy (dummy, argv[argc - 1]);
+      get_root (files.root, dummy);
+
+      /* This completes the parsing of the command line */
+
+      /* Create a subdirectory to store diaganostic files */
+
+      sprintf (files.diagfolder, "diag_%s/", files.root);
+      mkdir (files.diagfolder, 0777);
+      strcpy (files.diag, files.diagfolder);
+      sprintf (dummy, "_%d.diag", rank_global);
+      strcat (files.diag, files.root);
+      strcat (files.diag, dummy);
+
+
     }
-
-    /* The last command line variable is always the .pf file */
-
-    if (j + 1 == argc)
-    {
-      Error ("All of the command line has been consumed without specifying a parameter file name, so exiting\n");
-      exit (0);
-    }
-
-
-    strcpy (dummy, argv[argc - 1]);
-    get_root (files.root, dummy);
-
-    /* This completes the parsing of the command line */
-
-    /* Create a subdirectory to store diaganostic files */
-
-    sprintf (files.diagfolder, "diag_%s/", files.root);
-    mkdir (files.diagfolder, 0777);
-    strcpy (files.diag, files.diagfolder);
-    sprintf (dummy, "_%d.diag", rank_global);
-    strcat (files.diag, files.root);
-    strcat (files.diag, dummy);
-
-
-  }
 
   return (restart_stat);
 }
@@ -221,35 +224,35 @@ init_log_and_windsave (restart_stat)
   FILE *fopen (), *qptr;
 
   if (restart_stat == 0)
-  {                             // Then we are simply running from a new model
-    xsignal_rm (files.root);    // Any old signal file
-    xsignal (files.root, "%-20s %s \n", "START", files.root);
-    Log_init (files.diag);
-  }
-  else
-  {
-    /* Note that alghough we chekc that we dan open the windsave file, it is not read here.   */
-
-    strcpy (files.windsave, files.root);
-    strcat (files.windsave, ".wind_save");
-    qptr = fopen (files.windsave, "r");
-
-    if (qptr != NULL)
-    {
-      /* Then the file does exist and we can restart */
-      fclose (qptr);
-      xsignal (files.root, "%-20s %s\n", "RESTART", files.root);
-      Log_append (files.diag);
-    }
-    else
-    {
-      /* It does not exist and so we start from scratch */
-      restart_stat = 0;
-      xsignal_rm (files.root);  // Any old signal file
+    {				// Then we are simply running from a new model
+      xsignal_rm (files.root);	// Any old signal file
       xsignal (files.root, "%-20s %s \n", "START", files.root);
       Log_init (files.diag);
     }
-  }
+  else
+    {
+      /* Note that alghough we chekc that we dan open the windsave file, it is not read here.   */
+
+      strcpy (files.windsave, files.root);
+      strcat (files.windsave, ".wind_save");
+      qptr = fopen (files.windsave, "r");
+
+      if (qptr != NULL)
+	{
+	  /* Then the file does exist and we can restart */
+	  fclose (qptr);
+	  xsignal (files.root, "%-20s %s\n", "RESTART", files.root);
+	  Log_append (files.diag);
+	}
+      else
+	{
+	  /* It does not exist and so we start from scratch */
+	  restart_stat = 0;
+	  xsignal_rm (files.root);	// Any old signal file
+	  xsignal (files.root, "%-20s %s \n", "START", files.root);
+	  Log_init (files.diag);
+	}
+    }
 
   return (0);
 }
@@ -293,69 +296,76 @@ get_grid_params (ndom)
    * we are continuing and earlier calculation? */
 
   if (geo.run_type != SYSTEM_TYPE_PREVIOUS)
-  {
-    /* Define the coordinate system for the grid and allocate memory for the wind structure */
-    rdint ("Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)", &input_int);
-    switch (input_int)
     {
-    case 0:
-      zdom[ndom].coord_type = SPHERICAL;
-      break;
-    case 1:
-      zdom[ndom].coord_type = CYLIND;
-      break;
-    case 2:
-      zdom[ndom].coord_type = RTHETA;
-      break;
-    case 3:
-      zdom[ndom].coord_type = CYLVAR;
-      break;
-    default:
-      Error ("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
+      /* Define the coordinate system for the grid and allocate memory for the wind structure */
+      rdint
+	("Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)",
+	 &input_int);
+      switch (input_int)
+	{
+	case 0:
+	  zdom[ndom].coord_type = SPHERICAL;
+	  break;
+	case 1:
+	  zdom[ndom].coord_type = CYLIND;
+	  break;
+	case 2:
+	  zdom[ndom].coord_type = RTHETA;
+	  break;
+	case 3:
+	  zdom[ndom].coord_type = CYLVAR;
+	  break;
+	default:
+	  Error
+	    ("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
           0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
-    }
+	}
 
-    rdint ("Wind.dim.in.x_or_r.direction", &zdom[ndom].ndim);
-    if (zdom[ndom].coord_type)
-    {
-      rdint ("Wind.dim.in.z_or_theta.direction", &zdom[ndom].mdim);
-      if (zdom[ndom].mdim < 4)
-      {
-        Error ("python: domain mdim must be at least 4 to allow for boundaries\n");
-        exit (0);
-      }
-    }
-    else
-      zdom[ndom].mdim = 1;
+      rdint ("Wind.dim.in.x_or_r.direction", &zdom[ndom].ndim);
+      if (zdom[ndom].coord_type)
+	{
+	  rdint ("Wind.dim.in.z_or_theta.direction", &zdom[ndom].mdim);
+	  if (zdom[ndom].mdim < 4)
+	    {
+	      Error
+		("python: domain mdim must be at least 4 to allow for boundaries\n");
+	      exit (0);
+	    }
+	}
+      else
+	zdom[ndom].mdim = 1;
 
-  }
+    }
   else
-  {
-    Error ("get_grid_parameters: Houston! Why are we reading the coordinate system if run type is SYSTEM_TYPE_PREVIOUS\n");
-  }
+    {
+      Error
+	("get_grid_parameters: Houston! Why are we reading the coordinate system if run type is SYSTEM_TYPE_PREVIOUS\n");
+    }
 
 /* 130405 ksl - Check that NDIM_MAX is greater than NDIM and MDIM.  */
 
   if ((zdom[ndom].ndim > NDIM_MAX) || (zdom[ndom].mdim > NDIM_MAX))
-  {
-    Error ("NDIM_MAX %d is less than NDIM %d or MDIM %d. Fix in python.h and recompile\n", NDIM_MAX, zdom[ndom].ndim, zdom[ndom].mdim);
-    exit (0);
-  }
+    {
+      Error
+	("NDIM_MAX %d is less than NDIM %d or MDIM %d. Fix in python.h and recompile\n",
+	 NDIM_MAX, zdom[ndom].ndim, zdom[ndom].mdim);
+      exit (0);
+    }
 
 
   /* If we are in advanced then allow the user to modify scale lengths */
   if (modes.iadvanced)
-  {
-    rdint ("@adjust_grid(0=no,1=yes)", &modes.adjust_grid);
-
-    if (modes.adjust_grid)
     {
-      Log ("You have opted to adjust the grid scale lengths\n");
-      rddoub ("@geo.xlog_scale", &zdom[ndom].xlog_scale);
-      if (zdom[ndom].coord_type != SPHERICAL)
-        rddoub ("@geo.zlog_scale", &zdom[ndom].zlog_scale);
+      rdint ("@adjust_grid(0=no,1=yes)", &modes.adjust_grid);
+
+      if (modes.adjust_grid)
+	{
+	  Log ("You have opted to adjust the grid scale lengths\n");
+	  rddoub ("@geo.xlog_scale", &zdom[ndom].xlog_scale);
+	  if (zdom[ndom].coord_type != SPHERICAL)
+	    rddoub ("@geo.zlog_scale", &zdom[ndom].zlog_scale);
+	}
     }
-  }
 
   zdom[ndom].ndim2 = zdom[ndom].ndim * zdom[ndom].mdim;
 
@@ -391,10 +401,11 @@ History:
 int
 get_line_transfer_mode ()
 {
-  rdint ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,6=macro_atoms,7=macro_atoms+aniso.scattering)", &geo.line_mode);
+  rdint
+    ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,6=macro_atoms,7=macro_atoms+aniso.scattering)",
+     &geo.line_mode);
 
-
-  /* ?? ksl Next section seems rather a kluge.  Why don't we specifty the underlying variables explicitly 
+		   /* ?? ksl Next section seems rather a kluge.  Why don't we specifty the underlying variables explicitly 
      It also seems likely that we have mixed usage of some things, e.g geo.rt_mode and geo.macro_simple */
 
   /* JM 1406 -- geo.rt_mode and geo.macro_simple control different things. geo.rt_mode controls the radiative
@@ -403,51 +414,80 @@ get_line_transfer_mode ()
      treatment and treat everything as 2-level simple ions inside the macro atom formalism */
 
   /* For now handle scattering as part of a hidden line transfermode ?? */
-  if (geo.line_mode == 4)
-  {
-    geo.scatter_mode = 1;       // Turn on anisotropic scattering
-    geo.line_mode = 3;          // Drop back to escape probabilities
-    geo.rt_mode = 1;            // Not macro atom (SS)
-  }
+  geo.scatter_mode = 0;		// isotropic
+  geo.rt_mode = RT_MODE_2LEVEL;		// Not macro atom (SS)
+  if (geo.line_mode == 0)
+    {
+      Log ("Line_transfer mode:  Simple, pure absorption\n");
+    }
+  else if (geo.line_mode == 1)
+    {
+      Log ("Line_transfer mode:  Simple, pure scattering\n");
+    }
+  else if (geo.line_mode == 2)
+    {
+      Log ("Line_transfer mode:  Simple, single scattering\n");
+    }
+  else if (geo.line_mode == 3)
+    {
+      Log
+	("Line_transfer mode:  Simple, isotropic scattering, escape probabilities\n");
+    }
+  else if (geo.line_mode == 4)
+    {
+      Log
+	("Line_transfer mode:  Simple, anisotropic scattering, escape probabilities\n");
+      geo.scatter_mode = 1;	// Turn on anisotropic scattering
+      geo.line_mode = 3;	// Drop back to escape probabilities
+      geo.rt_mode = RT_MODE_2LEVEL;		// Not macro atom (SS)
+    }
   else if (geo.line_mode == 5)
-  {
-    geo.scatter_mode = 2;       // Thermal trapping model
-    geo.line_mode = 3;          // Single scattering model is best for this mode
-    geo.rt_mode = 1;            // Not macro atom (SS) 
-  }
+    {
+      Log
+	("Line_transfer mode:  Simple, thermal trapping, Single scattering \n");
+      geo.scatter_mode = 2;	// Thermal trapping model
+      geo.line_mode = 3;	// Single scattering model is best for this mode
+      geo.rt_mode = RT_MODE_2LEVEL;		// Not macro atom (SS) 
+    }
   else if (geo.line_mode == 6)
-  {
-    geo.scatter_mode = 0;       // isotropic
-    geo.line_mode = 3;          // Single scattering
-    geo.rt_mode = 2;            // Identify macro atom treatment (SS)
-    geo.macro_simple = 0;       // We don't want the all simple case (SS)
-  }
+    {
+      Log ("Line_transfer mode:  macro atoms, isotropic scattering  \n");
+      geo.scatter_mode = 0;	// isotropic
+      geo.line_mode = 3;	// Single scattering
+      geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment (SS)
+      geo.macro_simple = 0;	// We don't want the all simple case (SS)
+    }
   else if (geo.line_mode == 7)
-  {
-    geo.scatter_mode = 2;       // thermal trapping
-    geo.line_mode = 3;          // Single scattering
-    geo.rt_mode = 2;            // Identify macro atom treatment (SS)
-    geo.macro_simple = 0;       // We don't want the all simple case (SS)
-  }
+    {
+      Log ("Line_transfer mode:  macro atoms, anisotropic  scattering  \n");
+      geo.scatter_mode = 2;	// thermal trapping
+      geo.line_mode = 3;	// Single scattering
+      geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment (SS)
+      geo.macro_simple = 0;	// We don't want the all simple case (SS)
+    }
   else if (geo.line_mode == 8)
-  {
-    geo.scatter_mode = 0;       // isotropic
-    geo.line_mode = 3;          // Single scattering
-    geo.rt_mode = 2;            // Identify macro atom treatment i.e. indivisible packets
-    geo.macro_simple = 1;       // This is for test runs with all simple ions (SS)
-  }
-  else if (geo.line_mode == 9)  // JM 1406 -- new mode, as mode 7, but scatter mode is 1
-  {
-    geo.scatter_mode = 1;       // anisotropic scatter mode 1
-    geo.line_mode = 3;          // Single scattering
-    geo.rt_mode = 2;            // Identify macro atom treatment 
-    geo.macro_simple = 0;       // We don't want the all simple case 
-  }
+    {
+      Log
+	("Line_transfer mode:  simple macro atoms, isotropic  scattering  \n");
+      geo.scatter_mode = 0;	// isotropic
+      geo.line_mode = 3;	// Single scattering
+      geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment i.e. indivisible packets
+      geo.macro_simple = 1;	// This is for test runs with all simple ions (SS)
+    }
+  else if (geo.line_mode == 9)	// JM 1406 -- new mode, as mode 7, but scatter mode is 1
+    {
+      Log
+	("Line_transfer mode:  simple macro atoms, anisotropic  scattering  \n");
+      geo.scatter_mode = 1;	// anisotropic scatter mode 1
+      geo.line_mode = 3;	// Single scattering
+      geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment 
+      geo.macro_simple = 0;	// We don't want the all simple case 
+    }
   else
-  {
-    geo.scatter_mode = 0;       // isotropic
-    geo.rt_mode = 1;            // Not macro atom (SS)
-  }
+    {
+      Error ("Unknown line_transfer mode\n");
+      exit (0);
+    }
 
   return (0);
 }
@@ -479,58 +519,60 @@ History:
 int
 get_radiation_sources ()
 {
-  if (geo.system_type == SYSTEM_TYPE_AGN)       /* If it is an AGN */
-  {
-    geo.star_radiation = 0;     // 70b - AGN do not have a star at the center */
-    rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-    geo.bl_radiation = 0;
-    rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-    geo.agn_radiation = 1;
-    rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
-  }
+  if (geo.system_type == SYSTEM_TYPE_AGN)	/* If it is an AGN */
+    {
+      geo.star_radiation = 0;	// 70b - AGN do not have a star at the center */
+      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+      geo.bl_radiation = 0;
+      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+      geo.agn_radiation = 1;
+      rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
+    }
 
   else if (geo.system_type == SYSTEM_TYPE_ONE_D)
-  {
-    geo.search_light_radiation = 1;     // The point of this model is we need this
-    geo.star_radiation = 0;
-    rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-    geo.bl_radiation = 0;
-    rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-    geo.agn_radiation = 0;
-  }
+    {
+      geo.search_light_radiation = 1;	// The point of this model is we need this
+      geo.star_radiation = 0;
+      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+      geo.bl_radiation = 0;
+      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+      geo.agn_radiation = 0;
+    }
 
   else
-  {                             /* If is a stellar system */
-    rdint ("Star_radiation(y=1)", &geo.star_radiation);
-    if (geo.disk_type != DISK_NONE)
-    {
-      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+    {				/* If is a stellar system */
+      rdint ("Star_radiation(y=1)", &geo.star_radiation);
+      if (geo.disk_type != DISK_NONE)
+	{
+	  rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+	}
+      else
+	{
+	  geo.disk_radiation = 0;
+	}
+      rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
+      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+      geo.agn_radiation = 0;	// So far at least, our star systems don't have a BH
     }
-    else
-    {
-      geo.disk_radiation = 0;
-    }
-    rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
-    rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-    geo.agn_radiation = 0;      // So far at least, our star systems don't have a BH
-  }
 
-  if (!geo.star_radiation && !geo.disk_radiation && !geo.bl_radiation && !geo.bl_radiation && !geo.agn_radiation)
-  {
-    Error ("python: No radiation sources so nothing to do but quit!\n");
-    exit (0);
-  }
+  if (!geo.star_radiation && !geo.disk_radiation && !geo.bl_radiation
+      && !geo.bl_radiation && !geo.agn_radiation)
+    {
+      Error ("python: No radiation sources so nothing to do but quit!\n");
+      exit (0);
+    }
 
   /* 
      With the macro atom approach we won't want to generate photon 
      bundles in the wind so switch it off here. (SS)
    */
 
-  if (geo.rt_mode == 2)
-  {
-    Log ("python: Using Macro Atom method so switching off wind radiation.\n");
-    geo.wind_radiation = 0;
-  }
+  if (geo.rt_mode == RT_MODE_MACRO)
+    {
+      Log
+	("python: Using Macro Atom method so switching off wind radiation.\n");
+      geo.wind_radiation = 0;
+    }
 
 
   /* 080517 - ksl - Reassigning bb to -1, etc is to make room for reading in model
@@ -540,13 +582,20 @@ get_radiation_sources ()
      in as 0.  Also need to store each of these model list names in geo structure.
    */
 
-  get_spectype (geo.star_radiation, "Rad_type_for_star(0=bb,1=models)_to_make_wind", &geo.star_ion_spectype);
+  get_spectype (geo.star_radiation,
+		"Rad_type_for_star(0=bb,1=models)_to_make_wind",
+		&geo.star_ion_spectype);
 
-  get_spectype (geo.disk_radiation, "Rad_type_for_disk(0=bb,1=models)_to_make_wind", &geo.disk_ion_spectype);
+  get_spectype (geo.disk_radiation,
+		"Rad_type_for_disk(0=bb,1=models)_to_make_wind",
+		&geo.disk_ion_spectype);
 
-  get_spectype (geo.bl_radiation, "Rad_type_for_bl(0=bb,1=models,3=pow)_to_make_wind", &geo.bl_ion_spectype);
+  get_spectype (geo.bl_radiation,
+		"Rad_type_for_bl(0=bb,1=models,3=pow)_to_make_wind",
+		&geo.bl_ion_spectype);
   get_spectype (geo.agn_radiation,
-                "Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind", &geo.agn_ion_spectype);
+		"Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind",
+		&geo.agn_ion_spectype);
 
   /* 130621 - ksl - This is a kluge to add a power law to stellar systems.  What id done
      is to remove the bl emission, which we always assume to some kind of temperature
@@ -557,16 +606,17 @@ get_radiation_sources ()
    */
 
   if (geo.bl_ion_spectype == SPECTYPE_POW)
-  {
-    geo.agn_radiation = 1;
-    geo.agn_ion_spectype = SPECTYPE_POW;
-    geo.bl_radiation = 0;
-    Log ("Trying to make a start with a power law boundary layer\n");
-  }
+    {
+      geo.agn_radiation = 1;
+      geo.agn_ion_spectype = SPECTYPE_POW;
+      geo.bl_radiation = 0;
+      Log ("Trying to make a start with a power law boundary layer\n");
+    }
   else
-  {
-    Log ("Not Trying to make a start with a power law boundary layer %d\n", geo.bl_ion_spectype);
-  }
+    {
+      Log ("Not Trying to make a start with a power law boundary layer %d\n",
+	   geo.bl_ion_spectype);
+    }
 
   return (0);
 }
@@ -605,9 +655,9 @@ get_wind_params (ndom)
   zdom[ndom].twind = 1e5;
 
   if (geo.system_type == SYSTEM_TYPE_AGN)
-  {
-    zdom[ndom].rmax = 50. * geo.r_agn;
-  }
+    {
+      zdom[ndom].rmax = 50. * geo.r_agn;
+    }
 
 
   /* XXX - This should be part of the individual get_wind_parameters, not here */
@@ -634,9 +684,9 @@ get_wind_params (ndom)
    */
 
   if (zdom[ndom].rmax > geo.rmax)
-  {
-    geo.rmax = zdom[ndom].rmax;
-  }
+    {
+      geo.rmax = zdom[ndom].rmax;
+    }
   geo.rmax_sq = geo.rmax * geo.rmax;
 
 
@@ -648,46 +698,46 @@ get_wind_params (ndom)
    */
 
   if (zdom[ndom].wind_type == SPHERE)
-  {
-    get_stellar_wind_params (ndom);
-  }
+    {
+      get_stellar_wind_params (ndom);
+    }
   else if (zdom[ndom].wind_type == SV)
-  {
-    get_sv_wind_params (ndom);
-  }
+    {
+      get_sv_wind_params (ndom);
+    }
   else if (zdom[ndom].wind_type == HYDRO)
-  {
-    get_hydro_wind_params (ndom);
-  }
+    {
+      get_hydro_wind_params (ndom);
+    }
   else if (zdom[ndom].wind_type == CORONA)
-  {
-    get_corona_params (ndom);
-  }
+    {
+      get_corona_params (ndom);
+    }
   else if (zdom[ndom].wind_type == KNIGGE)
-  {
-    get_knigge_wind_params (ndom);
-  }
+    {
+      get_knigge_wind_params (ndom);
+    }
   else if (zdom[ndom].wind_type == HOMOLOGOUS)
-  {
-    get_homologous_params (ndom);
-  }
+    {
+      get_homologous_params (ndom);
+    }
   else if (zdom[ndom].wind_type == YSO)
-  {
-    get_yso_wind_params (ndom);
-  }
+    {
+      get_yso_wind_params (ndom);
+    }
   else if (zdom[ndom].wind_type == ELVIS)
-  {
-    get_elvis_wind_params (ndom);
-  }
-  else if (zdom[ndom].wind_type == SHELL)       //NSH 18/2/11 This is a new wind type to produce a thin shell.
-  {
-    get_shell_wind_params (ndom);
-  }
+    {
+      get_elvis_wind_params (ndom);
+    }
+  else if (zdom[ndom].wind_type == SHELL)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
+    {
+      get_shell_wind_params (ndom);
+    }
   else
-  {
-    Error ("python: Unknown wind type %d\n", zdom[ndom].wind_type);
-    exit (0);
-  }
+    {
+      Error ("python: Unknown wind type %d\n", zdom[ndom].wind_type);
+      exit (0);
+    }
 
   /* Get the filling factor of the wind */
   // XXX  This may  not in the right place to set the filling factor.  
@@ -706,9 +756,9 @@ get_wind_params (ndom)
    */
 
   if (zdom[ndom].rmax > geo.rmax)
-  {
-    geo.rmax = zdom[ndom].rmax;
-  }
+    {
+      geo.rmax = zdom[ndom].rmax;
+    }
   geo.rmax_sq = geo.rmax * geo.rmax;
 
   return (0);
@@ -743,7 +793,7 @@ get_stellar_params ()
 
   /* Describe the basic binary star system */
 
-  geo.mstar /= MSOL;            // Convert to MSOL for ease of data entry
+  geo.mstar /= MSOL;		// Convert to MSOL for ease of data entry
   rddoub ("mstar(msol)", &geo.mstar);
   geo.mstar *= MSOL;
 
@@ -752,34 +802,35 @@ get_stellar_params ()
    */
 
   if (geo.system_type == SYSTEM_TYPE_AGN)
-  {
-    geo.rstar = 6. * G * geo.mstar / (C * C);   //correction - ISCO is 6x Rg NSH 121025
-  }
+    {
+      geo.rstar = 6. * G * geo.mstar / (C * C);	//correction - ISCO is 6x Rg NSH 121025
+    }
 
   rddoub ("rstar(cm)", &geo.rstar);
 
 
-  geo.r_agn = geo.rstar;        /* At present just set geo.r_agn to geo.rstar */
+  geo.r_agn = geo.rstar;	/* At present just set geo.r_agn to geo.rstar */
   geo.rstar_sq = geo.rstar * geo.rstar;
   if (geo.star_radiation)
     rddoub ("tstar", &geo.tstar);
 
-  lstar = 4 * PI * geo.rstar * geo.rstar * STEFAN_BOLTZMANN * pow (geo.tstar, 4.);
+  lstar =
+    4 * PI * geo.rstar * geo.rstar * STEFAN_BOLTZMANN * pow (geo.tstar, 4.);
 
 
   /* Describe the secondary if that is required */
 
-  if (geo.system_type == SYSTEM_TYPE_BINARY)    /* It's a binary system */
-  {
+  if (geo.system_type == SYSTEM_TYPE_BINARY)	/* It's a binary system */
+    {
 
-    geo.m_sec /= MSOL;          // Convert units for ease of data entry
-    rddoub ("msec(msol)", &geo.m_sec);
-    geo.m_sec *= MSOL;
+      geo.m_sec /= MSOL;	// Convert units for ease of data entry
+      rddoub ("msec(msol)", &geo.m_sec);
+      geo.m_sec *= MSOL;
 
-    geo.period /= 3600.;        // Convert units to hours for easy of data entry
-    rddoub ("period(hr)", &geo.period);
-    geo.period *= 3600.;        // Put back to cgs immediately                   
-  }
+      geo.period /= 3600.;	// Convert units to hours for easy of data entry
+      rddoub ("period(hr)", &geo.period);
+      geo.period *= 3600.;	// Put back to cgs immediately                   
+    }
 
   return (lstar);
 }
@@ -811,21 +862,23 @@ History:
 double
 get_disk_params ()
 {
-  geo.disk_mdot /= (MSOL / YR); // Convert to msol/yr to simplify input
+  geo.disk_mdot /= (MSOL / YR);	// Convert to msol/yr to simplify input
   rddoub ("disk.mdot(msol/yr)", &geo.disk_mdot);
   geo.disk_mdot *= (MSOL / YR);
-  rdint ("Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=extra.heating.from.star)", &geo.disk_illum);
+  rdint
+    ("Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=extra.heating.from.star)",
+     &geo.disk_illum);
   rdint ("Disk.temperature.profile(0=standard;1=readin)", &geo.disk_tprofile);
   if (geo.disk_tprofile == 1)
-  {
-    rdstr ("T_profile_file", files.tprofile);
-  }
+    {
+      rdstr ("T_profile_file", files.tprofile);
+    }
 
   /* Set a default for diskrad for an AGN */
   if (geo.system_type == SYSTEM_TYPE_AGN)
-  {
-    geo.diskrad = 100. * geo.r_agn;
-  }
+    {
+      geo.diskrad = 100. * geo.r_agn;
+    }
 
   rddoub ("disk.radmax(cm)", &geo.diskrad);
   Log ("geo.diskrad  %e\n", geo.diskrad);
@@ -835,16 +888,16 @@ get_disk_params ()
 /* If diskrad <= geo.rstar set geo.disk_type = DISK_NONE to make any disk transparent anyway. */
 
   if (geo.diskrad < geo.rstar)
-  {
-    Log ("Disk radius is less than star radius, so assuming no disk)\n");
-    geo.disk_type = DISK_NONE;
-  }
+    {
+      Log ("Disk radius is less than star radius, so assuming no disk)\n");
+      geo.disk_type = DISK_NONE;
+    }
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
-  {                             /* Get the additional variables need to describe a vertically extended disk */
-    rddoub ("disk.z0(fractional.height.at.diskrad)", &geo.disk_z0);
-    rddoub ("disk.z1(powerlaw.index)", &geo.disk_z1);
-  }
+    {				/* Get the additional variables need to describe a vertically extended disk */
+      rddoub ("disk.z0(fractional.height.at.diskrad)", &geo.disk_z0);
+      rddoub ("disk.z1(powerlaw.index)", &geo.disk_z1);
+    }
   return (0);
 }
 
@@ -882,171 +935,190 @@ get_bl_and_agn_params (lstar)
 
   //OLD 130622      if (geo.bl_radiation )    Change made to allow a power law boundary layer
   if (geo.bl_radiation && geo.bl_ion_spectype != SPECTYPE_POW)
-  {
-    xbl = geo.lum_bl = 0.5 * G * geo.mstar * geo.disk_mdot / geo.rstar;
+    {
+      xbl = geo.lum_bl = 0.5 * G * geo.mstar * geo.disk_mdot / geo.rstar;
 
-    rddoub ("lum_bl(ergs/s)", &geo.lum_bl);
-    Log ("OK, the bl lum will be about %.2e the disk lum\n", geo.lum_bl / xbl);
-    rddoub ("t_bl", &geo.t_bl);
-  }
+      rddoub ("lum_bl(ergs/s)", &geo.lum_bl);
+      Log ("OK, the bl lum will be about %.2e the disk lum\n",
+	   geo.lum_bl / xbl);
+      rddoub ("t_bl", &geo.t_bl);
+    }
   else
-  {
-    geo.lum_bl = 0;
-    geo.t_bl = 0;
-  }
+    {
+      geo.lum_bl = 0;
+      geo.t_bl = 0;
+    }
 
   /* Describe the agn */
 
-  if (geo.agn_radiation && geo.system_type == SYSTEM_TYPE_AGN)  /* This peculiar line is to enamble us to add a star with a power law component */
-  {
-    xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
-
-    /* If there is no disk, initilize geo.lum to the luminosity of a star */
-    if (geo.disk_type == DISK_NONE)
+  if (geo.agn_radiation && geo.system_type == SYSTEM_TYPE_AGN)	/* This peculiar line is to enamble us to add a star with a power law component */
     {
-      geo.lum_agn = lstar;
+      xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
+
+      /* If there is no disk, initilize geo.lum to the luminosity of a star */
+      if (geo.disk_type == DISK_NONE)
+	{
+	  geo.lum_agn = lstar;
+	}
+
+      // At present we have set geo.r_agn = geo.rstar, and encouraged the user
+      // set the default for the radius of the BH to be 6 R_Schwartschild.
+      // rddoub("R_agn(cm)",&geo.r_agn);
+
+      /* if we have a "blackbody agn" the luminosity is set by Stefan Boltzmann law
+         once the AGN blackbody temp is read in, otherwise set by user */
+      if (geo.agn_ion_spectype != SPECTYPE_BB)
+	rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
+
+
+      Log ("OK, the agn lum will be about %.2e the disk lum\n",
+	   geo.lum_agn / xbl);
+      if (geo.agn_ion_spectype == SPECTYPE_POW
+	  || geo.agn_ion_spectype == SPECTYPE_CL_TAB)
+	{
+	  geo.alpha_agn = (-1.5);
+	  rddoub ("agn_power_law_index", &geo.alpha_agn);
+
+	  if (geo.alpha_agn == -1.0)	//deal with the pathological case
+	    {
+	      geo.const_agn = geo.lum_agn / (log (2.42e18) - log (4.84e17));
+	    }
+	  else
+	    {
+	      geo.const_agn =
+		geo.lum_agn /
+		(((pow (2.42e18, geo.alpha_agn + 1.)) -
+		  pow (4.84e17,
+		       geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
+	    }
+	  Log ("AGN Input parameters give a power law constant of %e\n",
+	       geo.const_agn);
+	}
+      else if (geo.agn_ion_spectype == SPECTYPE_BREM)
+	{
+
+	  geo.brem_temp = 1.16e8;	//10kev
+	  geo.brem_alpha = -0.2;	//This is the cloudy form of bremstrahlung
+	  geo.const_agn = 1.0;
+	  rddoub ("agn_bremsstrahlung_temp(K)", &geo.brem_temp);
+	  rddoub ("agn_bremsstrahlung_alpha", &geo.brem_alpha);
+	  temp_const_agn =
+	    geo.lum_agn / qromb (integ_brem, 4.84e17, 2.42e18, 1e-4);
+	  geo.const_agn = temp_const_agn;
+	  Log ("AGN Input parameters give a Bremsstrahlung constant of %e\n",
+	       temp_const_agn);
+
+	}
+      else if (geo.agn_ion_spectype == SPECTYPE_BB)
+	{
+	  /* note that alpha_agn holds the temperature in the case of "blackbody agn" */
+	  rddoub ("agn_blackbody_temp(K)", &geo.alpha_agn);
+	  geo.lum_agn =
+	    4 * PI * geo.r_agn * geo.r_agn * STEFAN_BOLTZMANN *
+	    pow (geo.alpha_agn, 4.);
+	}
+
+      /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
+         only in advanced mode and for non broken power law. 
+         default is zero which is checked before we call photo_gen_agn */
+      geo.pl_low_cutoff = 0.0;
+      if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
+	rddoub ("@agn_power_law_cutoff", &geo.pl_low_cutoff);
+
+      rdint ("geometry_for_pl_source(0=sphere,1=lamp_post)",
+	     &geo.pl_geometry);
+
+      if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
+	{
+	  rddoub ("lamp_post.height(r_g)", &geo.lamp_post_height);
+	  geo.lamp_post_height *= G * geo.mstar / C / C;	//get it in CGS units 
+	  Log ("lamp_post_height is cm is %g\n", geo.lamp_post_height);
+	}
+      else if (geo.pl_geometry != PL_GEOMETRY_SPHERE)	// only two options at the moment
+	{
+	  Error ("Did not understand power law geometry %i. Fatal.\n",
+		 geo.pl_geometry);
+	  exit (0);
+	}
+
+
+
+      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
+         This is only used in the sim correction factor for the first time through. 
+         Afterwards, the photons are used to compute the sim parameters. */
+
+
+
+      if (geo.agn_ion_spectype == SPECTYPE_CL_TAB)	/*NSH 0412 - option added to allow direct comparison with cloudy power law table option */
+	{
+	  geo.agn_cltab_low = 1.0;
+	  geo.agn_cltab_hi = 10000;
+	  rddoub ("low_energy_break(ev)", &geo.agn_cltab_low);	/*lo frequency break - in ev */
+	  rddoub ("high_energy_break(ev)", &geo.agn_cltab_hi);
+	  geo.agn_cltab_low_alpha = 2.5;	//this is the default value in cloudy
+	  geo.agn_cltab_hi_alpha = -2.0;	//this is the default value in cloudy
+	}
     }
-
-    // At present we have set geo.r_agn = geo.rstar, and encouraged the user
-    // set the default for the radius of the BH to be 6 R_Schwartschild.
-    // rddoub("R_agn(cm)",&geo.r_agn);
-
-    /* if we have a "blackbody agn" the luminosity is set by Stefan Boltzmann law
-       once the AGN blackbody temp is read in, otherwise set by user */
-    if (geo.agn_ion_spectype != SPECTYPE_BB)
-      rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
-
-
-    Log ("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
-    if (geo.agn_ion_spectype == SPECTYPE_POW || geo.agn_ion_spectype == SPECTYPE_CL_TAB)
+  else if (geo.agn_radiation)	/* We want to add a power law to something other than an AGN */
     {
+      xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
+
+      // At present we have set geo.r_agn = geo.rstar, and encouraged the user
+      // set the default for the radius of the BH to be 6 R_Schwartschild.
+      // rddoub("R_agn(cm)",&geo.r_agn);
+
+      rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
+      Log ("OK, the agn lum will be about %.2e the disk lum\n",
+	   geo.lum_agn / xbl);
       geo.alpha_agn = (-1.5);
       rddoub ("agn_power_law_index", &geo.alpha_agn);
 
-      if (geo.alpha_agn == -1.0)        //deal with the pathological case
-      {
-        geo.const_agn = geo.lum_agn / (log (2.42e18) - log (4.84e17));
-      }
+      /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
+         only in advanced mode. default is zero which is checked before we call photo_gen_agn */
+      geo.pl_low_cutoff = 0.0;
+      if (modes.iadvanced)
+	rddoub ("@agn_power_law_cutoff", &geo.pl_low_cutoff);
+
+
+      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
+         This is only used in the sim correction factor for the first time through. 
+         Afterwards, the photons are used to compute the sim parameters. */
+
+
+      if (geo.alpha_agn == -1.0)	//deal with the pathological case
+	{
+	  geo.const_agn = geo.lum_agn / (log (2.42e18) - log (4.84e17));
+	}
       else
-      {
-        geo.const_agn = geo.lum_agn / (((pow (2.42e18, geo.alpha_agn + 1.)) - pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
-      }
-      Log ("AGN Input parameters give a power law constant of %e\n", geo.const_agn);
+	{
+	  geo.const_agn =
+	    geo.lum_agn /
+	    (((pow (2.42e18, geo.alpha_agn + 1.)) -
+	      pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
+	}
+
+
+      Log ("AGN Input parameters give a power law constant of %e\n",
+	   geo.const_agn);
+
+      if (geo.agn_ion_spectype == SPECTYPE_CL_TAB)	/*NSH 0412 - option added to allow direct comparison with cloudy power law table option */
+	{
+	  geo.agn_cltab_low = 1.0;
+	  geo.agn_cltab_hi = 10000;
+	  rddoub ("low_energy_break(ev)", &geo.agn_cltab_low);	/*lo frequency break - in ev */
+	  rddoub ("high_energy_break(ev)", &geo.agn_cltab_hi);
+	  geo.agn_cltab_low_alpha = 2.5;	//this is the default value in cloudy
+	  geo.agn_cltab_hi_alpha = -2.0;	//this is the default value in cloudy
+	}
     }
-    else if (geo.agn_ion_spectype == SPECTYPE_BREM)
-    {
-
-      geo.brem_temp = 1.16e8;   //10kev
-      geo.brem_alpha = -0.2;    //This is the cloudy form of bremstrahlung
-      geo.const_agn = 1.0;
-      rddoub ("agn_bremsstrahlung_temp(K)", &geo.brem_temp);
-      rddoub ("agn_bremsstrahlung_alpha", &geo.brem_alpha);
-      temp_const_agn = geo.lum_agn / qromb (integ_brem, 4.84e17, 2.42e18, 1e-4);
-      geo.const_agn = temp_const_agn;
-      Log ("AGN Input parameters give a Bremsstrahlung constant of %e\n", temp_const_agn);
-
-    }
-    else if (geo.agn_ion_spectype == SPECTYPE_BB)
-    {
-      /* note that alpha_agn holds the temperature in the case of "blackbody agn" */
-      rddoub ("agn_blackbody_temp(K)", &geo.alpha_agn);
-      geo.lum_agn = 4 * PI * geo.r_agn * geo.r_agn * STEFAN_BOLTZMANN * pow (geo.alpha_agn, 4.);
-    }
-
-    /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
-       only in advanced mode and for non broken power law. 
-       default is zero which is checked before we call photo_gen_agn */
-    geo.pl_low_cutoff = 0.0;
-    if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
-      rddoub ("@agn_power_law_cutoff", &geo.pl_low_cutoff);
-
-    rdint ("geometry_for_pl_source(0=sphere,1=lamp_post)", &geo.pl_geometry);
-
-    if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
-    {
-      rddoub ("lamp_post.height(r_g)", &geo.lamp_post_height);
-      geo.lamp_post_height *= G * geo.mstar / C / C;    //get it in CGS units 
-      Log ("lamp_post_height is cm is %g\n", geo.lamp_post_height);
-    }
-    else if (geo.pl_geometry != PL_GEOMETRY_SPHERE)     // only two options at the moment
-    {
-      Error ("Did not understand power law geometry %i. Fatal.\n", geo.pl_geometry);
-      exit (0);
-    }
-
-
-
-    /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
-       This is only used in the sim correction factor for the first time through. 
-       Afterwards, the photons are used to compute the sim parameters. */
-
-
-
-    if (geo.agn_ion_spectype == SPECTYPE_CL_TAB)        /*NSH 0412 - option added to allow direct comparison with cloudy power law table option */
-    {
-      geo.agn_cltab_low = 1.0;
-      geo.agn_cltab_hi = 10000;
-      rddoub ("low_energy_break(ev)", &geo.agn_cltab_low);      /*lo frequency break - in ev */
-      rddoub ("high_energy_break(ev)", &geo.agn_cltab_hi);
-      geo.agn_cltab_low_alpha = 2.5;    //this is the default value in cloudy
-      geo.agn_cltab_hi_alpha = -2.0;    //this is the default value in cloudy
-    }
-  }
-  else if (geo.agn_radiation)   /* We want to add a power law to something other than an AGN */
-  {
-    xbl = geo.lum_agn = 0.5 * G * geo.mstar * geo.disk_mdot / geo.r_agn;
-
-    // At present we have set geo.r_agn = geo.rstar, and encouraged the user
-    // set the default for the radius of the BH to be 6 R_Schwartschild.
-    // rddoub("R_agn(cm)",&geo.r_agn);
-
-    rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
-    Log ("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
-    geo.alpha_agn = (-1.5);
-    rddoub ("agn_power_law_index", &geo.alpha_agn);
-
-    /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
-       only in advanced mode. default is zero which is checked before we call photo_gen_agn */
-    geo.pl_low_cutoff = 0.0;
-    if (modes.iadvanced)
-      rddoub ("@agn_power_law_cutoff", &geo.pl_low_cutoff);
-
-
-    /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
-       This is only used in the sim correction factor for the first time through. 
-       Afterwards, the photons are used to compute the sim parameters. */
-
-
-    if (geo.alpha_agn == -1.0)  //deal with the pathological case
-    {
-      geo.const_agn = geo.lum_agn / (log (2.42e18) - log (4.84e17));
-    }
-    else
-    {
-      geo.const_agn = geo.lum_agn / (((pow (2.42e18, geo.alpha_agn + 1.)) - pow (4.84e17, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
-    }
-
-
-    Log ("AGN Input parameters give a power law constant of %e\n", geo.const_agn);
-
-    if (geo.agn_ion_spectype == SPECTYPE_CL_TAB)        /*NSH 0412 - option added to allow direct comparison with cloudy power law table option */
-    {
-      geo.agn_cltab_low = 1.0;
-      geo.agn_cltab_hi = 10000;
-      rddoub ("low_energy_break(ev)", &geo.agn_cltab_low);      /*lo frequency break - in ev */
-      rddoub ("high_energy_break(ev)", &geo.agn_cltab_hi);
-      geo.agn_cltab_low_alpha = 2.5;    //this is the default value in cloudy
-      geo.agn_cltab_hi_alpha = -2.0;    //this is the default value in cloudy
-    }
-  }
 
   else
-  {
-    geo.r_agn = 0.0;
-    geo.lum_agn = 0.0;
-    geo.alpha_agn = 0.0;
-    geo.const_agn = 0.0;
-  }
+    {
+      geo.r_agn = 0.0;
+      geo.lum_agn = 0.0;
+      geo.alpha_agn = 0.0;
+      geo.const_agn = 0.0;
+    }
   return (0);
 }
 
@@ -1076,186 +1148,195 @@ get_meta_params (void)
   int meta_param, i, j, k, z, istate, levl, levu;
   char trackline[LINELENGTH];
 
-  meta_param = 0;               // initialize to no reverberation tracking
+  meta_param = 0;		// initialize to no reverberation tracking
   rdint ("reverb.type", &meta_param);
   switch (meta_param)
-  {                             //Read in reverb tyoe, if any
-  case 0:
-    geo.reverb = REV_NONE;
-    break;
-  case 1:
-    geo.reverb = REV_PHOTON;
-    break;
-  case 2:
-    geo.reverb = REV_WIND;
-    break;
-  case 3:
-    geo.reverb = REV_MATOM;
-    break;
-  default:
-    Error ("reverb.type: Invalid reverb mode.\n \
+    {				//Read in reverb tyoe, if any
+    case 0:
+      geo.reverb = REV_NONE;
+      break;
+    case 1:
+      geo.reverb = REV_PHOTON;
+      break;
+    case 2:
+      geo.reverb = REV_WIND;
+      break;
+    case 3:
+      geo.reverb = REV_MATOM;
+      break;
+    default:
+      Error ("reverb.type: Invalid reverb mode.\n \
       Valid modes are 0=None, 1=Photon, 2=Wind, 3=Macro-atom.\n");
-  }
+    }
 
   // ========== DEAL WITH DISK SETTINGS ==========
   if (geo.disk_type > 0 && geo.reverb != REV_NONE)
-  {
-    rdint ("reverb.disk_type", &meta_param);
-    switch (meta_param)
-    {                           //Read in reverb tyoe, if any
-    case 0:
-      geo.reverb_disk = REV_DISK_CORRELATED;
-      break;
-    case 1:
-      geo.reverb_disk = REV_DISK_UNCORRELATED;
-      break;
-    case 2:
-      geo.reverb_disk = REV_DISK_IGNORE;
-      break;
-    default:
-      Error ("reverb.disk_type: Invalid reverb disk mode.\n \
+    {
+      rdint ("reverb.disk_type", &meta_param);
+      switch (meta_param)
+	{			//Read in reverb tyoe, if any
+	case 0:
+	  geo.reverb_disk = REV_DISK_CORRELATED;
+	  break;
+	case 1:
+	  geo.reverb_disk = REV_DISK_UNCORRELATED;
+	  break;
+	case 2:
+	  geo.reverb_disk = REV_DISK_IGNORE;
+	  break;
+	default:
+	  Error ("reverb.disk_type: Invalid reverb disk mode.\n \
         Valid modes are 0=Correlated with central source, 1=Uncorrelated, 2=Ignore.\n");
+	}
     }
-  }
 
   // ========== DEAL WITH VISUALISATION SETTINGS ==========
   if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
-  {                             //If this requires further parameters, set defaults
-    geo.reverb_lines = 0;
-    geo.reverb_path_bins = 100;
-    geo.reverb_angle_bins = 100;
-    geo.reverb_dump_cells = 0;
-    geo.reverb_vis = REV_VIS_NONE;
-    rdint ("reverb.path_bins", &geo.reverb_path_bins);
-    rdint ("reverb.visualisation", &meta_param);
-    switch (meta_param)
-    {                           //Select whether to produce 3d visualisation file and/or dump flat csvs of spread in cells
-    case 0:
+    {				//If this requires further parameters, set defaults
+      geo.reverb_lines = 0;
+      geo.reverb_path_bins = 100;
+      geo.reverb_angle_bins = 100;
+      geo.reverb_dump_cells = 0;
       geo.reverb_vis = REV_VIS_NONE;
-      break;
-    case 1:
-      geo.reverb_vis = REV_VIS_VTK;
-      break;
-    case 2:
-      geo.reverb_vis = REV_VIS_DUMP;
-      break;
-    case 3:
-      geo.reverb_vis = REV_VIS_BOTH;
-      break;
-    default:
-      Error ("reverb.visualisation: Invalid mode.\n \
+      rdint ("reverb.path_bins", &geo.reverb_path_bins);
+      rdint ("reverb.visualisation", &meta_param);
+      switch (meta_param)
+	{			//Select whether to produce 3d visualisation file and/or dump flat csvs of spread in cells
+	case 0:
+	  geo.reverb_vis = REV_VIS_NONE;
+	  break;
+	case 1:
+	  geo.reverb_vis = REV_VIS_VTK;
+	  break;
+	case 2:
+	  geo.reverb_vis = REV_VIS_DUMP;
+	  break;
+	case 3:
+	  geo.reverb_vis = REV_VIS_BOTH;
+	  break;
+	default:
+	  Error ("reverb.visualisation: Invalid mode.\n \
         Valid modes are 0=None, 1=VTK, 2=Cell dump, 3=Both.\n");
-    }
+	}
 
-    if (geo.reverb_vis == REV_VIS_VTK || geo.reverb_vis == REV_VIS_BOTH)
-      //If we're producing a 3d visualisation, select bins. This is just for aesthetics
-      rdint ("reverb.angle_bins", &geo.reverb_angle_bins);
-    if (geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
-    {                           //If we;re dumping path arrays, read in the number of cells to dump them for
-      rdint ("reverb.dump_cells", &geo.reverb_dump_cells);
-      geo.reverb_dump_cell_x = (double *) calloc (geo.reverb_dump_cells, sizeof (double));
-      geo.reverb_dump_cell_z = (double *) calloc (geo.reverb_dump_cells, sizeof (double));
-      geo.reverb_dump_cell = (int *) calloc (geo.reverb_dump_cells, sizeof (int));
-      for (k = 0; k < geo.reverb_dump_cells; k++)
-      {                         //For each we expect, read a paired cell coord as "[i]:[j]". May need to use py_wind to find indexes.
-        rdline ("reverb.dump_cell", trackline);
-        if (sscanf (trackline, "%lf:%lf", &geo.reverb_dump_cell_x[k], &geo.reverb_dump_cell_z[k]) == EOF)
-        {                       //If this line is malformed, warn the user
-          Error ("reverb.dump_cell: Invalid position line '%s'\n \
+      if (geo.reverb_vis == REV_VIS_VTK || geo.reverb_vis == REV_VIS_BOTH)
+	//If we're producing a 3d visualisation, select bins. This is just for aesthetics
+	rdint ("reverb.angle_bins", &geo.reverb_angle_bins);
+      if (geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
+	{			//If we;re dumping path arrays, read in the number of cells to dump them for
+	  rdint ("reverb.dump_cells", &geo.reverb_dump_cells);
+	  geo.reverb_dump_cell_x =
+	    (double *) calloc (geo.reverb_dump_cells, sizeof (double));
+	  geo.reverb_dump_cell_z =
+	    (double *) calloc (geo.reverb_dump_cells, sizeof (double));
+	  geo.reverb_dump_cell =
+	    (int *) calloc (geo.reverb_dump_cells, sizeof (int));
+	  for (k = 0; k < geo.reverb_dump_cells; k++)
+	    {			//For each we expect, read a paired cell coord as "[i]:[j]". May need to use py_wind to find indexes.
+	      rdline ("reverb.dump_cell", trackline);
+	      if (sscanf
+		  (trackline, "%lf:%lf", &geo.reverb_dump_cell_x[k],
+		   &geo.reverb_dump_cell_z[k]) == EOF)
+		{		//If this line is malformed, warn the user
+		  Error ("reverb.dump_cell: Invalid position line '%s'\n \
             Expected format '[x]:[z]'\n", trackline);
-          exit (0);
-        }
-      }
+		  exit (0);
+		}
+	    }
+	}
     }
-  }
 
   // ========== DEAL WITH MATOM LINES ==========
   if (geo.reverb == REV_MATOM)
-  {                             //If this is macro-atom mode
-    if (geo.rt_mode != 2)
-    {                           //But we're not actually working in matom mode...
-      Error ("reverb.type: Invalid reverb mode.\n \
+    {				//If this is macro-atom mode
+      if (geo.rt_mode != RT_MODE_MACRO)
+	{			//But we're not actually working in matom mode...
+	  Error ("reverb.type: Invalid reverb mode.\n \
       Macro-atom mode selected but macro-atom scattering not on.\n");
-      exit (0);
-    }
+	  exit (0);
+	}
 
-    //Read in the number of lines to be tracked and allocate space for them
-    rdint ("reverb.matom_lines", &geo.reverb_lines);
-    geo.reverb_line = (int *) calloc (geo.reverb_lines, sizeof (int));
-    if (geo.reverb_lines < 1)
-    {                           //If this is <1, then warn the user and quit
-      Error ("reverb.matom_lines: \
+      //Read in the number of lines to be tracked and allocate space for them
+      rdint ("reverb.matom_lines", &geo.reverb_lines);
+      geo.reverb_line = (int *) calloc (geo.reverb_lines, sizeof (int));
+      if (geo.reverb_lines < 1)
+	{			//If this is <1, then warn the user and quit
+	  Error ("reverb.matom_lines: \
       Must specify 1 or more lines to watch in macro-atom mode.\n");
-      exit (0);
-    }
+	  exit (0);
+	}
 
-    for (i = 0; i < geo.reverb_lines; i++)
-    {                           //Finally, for each line we expect, read it in
-      rdline ("reverb.matom_line", trackline);
-      if (sscanf (trackline, "%d:%d:%d:%d", &z, &istate, &levu, &levl) == EOF)
-      {                         //If this line is malformed, warn the user
-        Error ("reverb.matom_line: Malformed line '%s'\n \
+      for (i = 0; i < geo.reverb_lines; i++)
+	{			//Finally, for each line we expect, read it in
+	  rdline ("reverb.matom_line", trackline);
+	  if (sscanf (trackline, "%d:%d:%d:%d", &z, &istate, &levu, &levl) ==
+	      EOF)
+	    {			//If this line is malformed, warn the user
+	      Error ("reverb.matom_line: Malformed line '%s'\n \
           Expected format '[z]:[istate]:[upper level]:[lower level]'\n", trackline);
-        exit (0);
-      }
-      else
-      {                         //Otherwise, sift through the line list to find what this transition corresponds to
-        for (j = 0; j < nlines_macro; j++)
-        {                       //And record the line position in geo for comparison purposes
-          if (line[j].z == z && line[j].istate == istate && line[j].levu == levu && line[j].levl == levl)
-          {                     //We're matching z, ionisation state, and upper and lower level transitions
-            geo.reverb_line[i] = line[j].where_in_list;
-          }
-        }
-      }
+	      exit (0);
+	    }
+	  else
+	    {			//Otherwise, sift through the line list to find what this transition corresponds to
+	      for (j = 0; j < nlines_macro; j++)
+		{		//And record the line position in geo for comparison purposes
+		  if (line[j].z == z && line[j].istate == istate
+		      && line[j].levu == levu && line[j].levl == levl)
+		    {		//We're matching z, ionisation state, and upper and lower level transitions
+		      geo.reverb_line[i] = line[j].where_in_list;
+		    }
+		}
+	    }
+	}
     }
-  }
   else if (geo.reverb == REV_WIND)
-  {                             //For wind mode...
-    if (geo.wind_radiation == 0)
-    {                           //Warn if this data is being gathered but not used (can be useful for debug)
-      Error ("reverb.type: Wind radiation is off but wind-based path tracking is enabled!\n");
+    {				//For wind mode...
+      if (geo.wind_radiation == 0)
+	{			//Warn if this data is being gathered but not used (can be useful for debug)
+	  Error
+	    ("reverb.type: Wind radiation is off but wind-based path tracking is enabled!\n");
+	}
     }
-  }
 
   // ========== DEAL WITH LINE CULLING ==========
   if (geo.reverb != REV_NONE)
-  {
-    //Should we filter any lines out?
-    //If -1, blacklist continuum, if >0 specify lines as above and whitelist
-    //Automatically include matom_lines
-    rdint ("reverb.filter_lines", &geo.reverb_filter_lines);
-    if (geo.reverb_filter_lines > 0)
-    {                           //If we're given a whitelist, allocate temp storage (up to 256 lines!)
-      int temp[256], bFound;
-      for (i = 0; i < geo.reverb_filter_lines; i++)
-      {                         //For each provided line, read in
-        rdint ("reverb.filter_line", &temp[i]);
-      }
-      if (geo.reverb == REV_MATOM)
-      {                         //If we're in matom mode, check if those lines have already been included
-        for (i = 0; i < geo.reverb_lines; i++)
-        {                       //For each matom line
-          bFound = 0;
-          for (j = 0; j < geo.reverb_filter_lines; j++)
-          {                     //Check if it's in the filter list
-            if (geo.reverb_line[i] == temp[j])
-              bFound = 1;
-          }
-          if (!bFound)
-          {                     //If it's not, add it to the filter list and increment the total lines
-            temp[geo.reverb_filter_lines++] = geo.reverb_line[i];
-          }
-        }
-      }
-      //Allocate enough space for the filter list
-      geo.reverb_filter_line = calloc (geo.reverb_filter_lines, sizeof (int));
-      for (i = 0; i < geo.reverb_filter_lines; i++)
-      {                         //Populate the filter list from the temp list
-        geo.reverb_filter_line[i] = temp[i];
-      }
+    {
+      //Should we filter any lines out?
+      //If -1, blacklist continuum, if >0 specify lines as above and whitelist
+      //Automatically include matom_lines
+      rdint ("reverb.filter_lines", &geo.reverb_filter_lines);
+      if (geo.reverb_filter_lines > 0)
+	{			//If we're given a whitelist, allocate temp storage (up to 256 lines!)
+	  int temp[256], bFound;
+	  for (i = 0; i < geo.reverb_filter_lines; i++)
+	    {			//For each provided line, read in
+	      rdint ("reverb.filter_line", &temp[i]);
+	    }
+	  if (geo.reverb == REV_MATOM)
+	    {			//If we're in matom mode, check if those lines have already been included
+	      for (i = 0; i < geo.reverb_lines; i++)
+		{		//For each matom line
+		  bFound = 0;
+		  for (j = 0; j < geo.reverb_filter_lines; j++)
+		    {		//Check if it's in the filter list
+		      if (geo.reverb_line[i] == temp[j])
+			bFound = 1;
+		    }
+		  if (!bFound)
+		    {		//If it's not, add it to the filter list and increment the total lines
+		      temp[geo.reverb_filter_lines++] = geo.reverb_line[i];
+		    }
+		}
+	    }
+	  //Allocate enough space for the filter list
+	  geo.reverb_filter_line =
+	    calloc (geo.reverb_filter_lines, sizeof (int));
+	  for (i = 0; i < geo.reverb_filter_lines; i++)
+	    {			//Populate the filter list from the temp list
+	      geo.reverb_filter_line[i] = temp[i];
+	    }
+	}
     }
-  }
   return (0);
 }
 
@@ -1317,17 +1398,17 @@ setup_dfudge ()
   delta = geo.rmax - geo.rmin;
 
   if (delta < 1.e8)
-  {
-    dfudge = (geo.rmax - geo.rmin) / 1000.0;
-  }
+    {
+      dfudge = (geo.rmax - geo.rmin) / 1000.0;
+    }
   else if (delta < 1e15)
-  {
-    dfudge = 1e5;
-  }
+    {
+      dfudge = 1e5;
+    }
   else
-  {
-    dfudge = geo.rmax / 1.e10;
-  }
+    {
+      dfudge = geo.rmax / 1.e10;
+    }
 
   Log ("DFUDGE set to %e based on geo.rmax\n", dfudge);
 
@@ -1374,31 +1455,33 @@ setup_windcone ()
   int ndom;
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
-  {
+    {
 
-    if (zdom[ndom].wind_thetamin > 0.0)
-    {
-      zdom[ndom].windcone[0].dzdr = 1. / tan (zdom[ndom].wind_thetamin);
-      zdom[ndom].windcone[0].z = (-zdom[ndom].wind_rho_min / tan (zdom[ndom].wind_thetamin));
-    }
-    else
-    {
-      zdom[ndom].windcone[0].dzdr = VERY_BIG;
-      zdom[ndom].windcone[0].z = -VERY_BIG;;
-    }
+      if (zdom[ndom].wind_thetamin > 0.0)
+	{
+	  zdom[ndom].windcone[0].dzdr = 1. / tan (zdom[ndom].wind_thetamin);
+	  zdom[ndom].windcone[0].z =
+	    (-zdom[ndom].wind_rho_min / tan (zdom[ndom].wind_thetamin));
+	}
+      else
+	{
+	  zdom[ndom].windcone[0].dzdr = VERY_BIG;
+	  zdom[ndom].windcone[0].z = -VERY_BIG;;
+	}
 
 
-    if (zdom[ndom].wind_thetamax > 0.0)
-    {
-      zdom[ndom].windcone[1].dzdr = 1. / tan (zdom[ndom].wind_thetamax);
-      zdom[ndom].windcone[1].z = (-zdom[ndom].wind_rho_max / tan (zdom[ndom].wind_thetamax));
+      if (zdom[ndom].wind_thetamax > 0.0)
+	{
+	  zdom[ndom].windcone[1].dzdr = 1. / tan (zdom[ndom].wind_thetamax);
+	  zdom[ndom].windcone[1].z =
+	    (-zdom[ndom].wind_rho_max / tan (zdom[ndom].wind_thetamax));
+	}
+      else
+	{
+	  zdom[ndom].windcone[1].dzdr = VERY_BIG;
+	  zdom[ndom].windcone[1].z = -VERY_BIG;;
+	}
     }
-    else
-    {
-      zdom[ndom].windcone[1].dzdr = VERY_BIG;
-      zdom[ndom].windcone[1].z = -VERY_BIG;;
-    }
-  }
   return (0);
 }
 
@@ -1467,31 +1550,34 @@ setup_created_files ()
 {
   int opar_stat;
 
-  opar_stat = 0;                /* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
-                                   the assumption is that we are reading from the command line */
+  opar_stat = 0;		/* 59a - ksl - 08aug - Initialize opar_stat to indicate that if we do not open a rdpar file, 
+				   the assumption is that we are reading from the command line */
 
 
-  if (strncmp (files.root, "stdin", 5) == 0 || strncmp (files.root, "rdpar", 5) == 0 || files.root[0] == ' ' || strlen (files.root) == 0)
-  {
-    strcpy (files.root, "mod");
-    Log ("Proceeding in interactive mode\n Output files will have rootname mod\n");
-  }
+  if (strncmp (files.root, "stdin", 5) == 0
+      || strncmp (files.root, "rdpar", 5) == 0 || files.root[0] == ' '
+      || strlen (files.root) == 0)
+    {
+      strcpy (files.root, "mod");
+      Log
+	("Proceeding in interactive mode\n Output files will have rootname mod\n");
+    }
 
   else
-  {
-    strcpy (files.input, files.root);
-    strcat (files.input, ".pf");
-
-    if ((opar_stat = opar (files.input)) == 2)
     {
-      Log ("Reading data from file %s\n", files.input);
-    }
-    else
-    {
-      Log ("Creating a new parameter file %s\n", files.input);
-    }
+      strcpy (files.input, files.root);
+      strcat (files.input, ".pf");
 
-  }
+      if ((opar_stat = opar (files.input)) == 2)
+	{
+	  Log ("Reading data from file %s\n", files.input);
+	}
+      else
+	{
+	  Log ("Creating a new parameter file %s\n", files.input);
+	}
+
+    }
 
 
   /* Now create the names of all the files which will be written.  Note that some files
@@ -1499,10 +1585,10 @@ setup_created_files ()
      This is intended so that files which you really want to keep have unique names, while
      those which are for short-term diagnostics are overwritten.  ksl 97aug. */
 
-  strcpy (basename, files.root);        //56d -- ksl --Added so filenames could be created by routines as necessary
+  strcpy (basename, files.root);	//56d -- ksl --Added so filenames could be created by routines as necessary
 
-  strcpy (files.wspec, files.root);     //generated photons
-  strcpy (files.lwspec, files.root);    //generated photon in log space
+  strcpy (files.wspec, files.root);	//generated photons
+  strcpy (files.lwspec, files.root);	//generated photon in log space
 
   strcpy (files.wspec_wind, files.root);
   strcpy (files.lwspec_wind, files.root);
@@ -1588,15 +1674,17 @@ get_standard_care_factors ()
   /* 141116 - ksl - Made care factors and advanced command as this is clearly somethng that is diagnostic */
 
   if (modes.iadvanced)
-  {
-    rdint ("@Use.standard.care.factors(1=yes)", &istandard);
-
-    if (!istandard)
     {
-      rddoub ("@Fractional.distance.photon.may.travel", &SMAX_FRAC);
-      rddoub ("@Lowest.ion.density.contributing.to.photoabsorption", &DENSITY_PHOT_MIN);
-      rdint ("@Keep.photoabs.during.final.spectrum(1=yes)", &modes.keep_photoabs);
+      rdint ("@Use.standard.care.factors(1=yes)", &istandard);
+
+      if (!istandard)
+	{
+	  rddoub ("@Fractional.distance.photon.may.travel", &SMAX_FRAC);
+	  rddoub ("@Lowest.ion.density.contributing.to.photoabsorption",
+		  &DENSITY_PHOT_MIN);
+	  rdint ("@Keep.photoabs.during.final.spectrum(1=yes)",
+		 &modes.keep_photoabs);
+	}
     }
-  }
   return (0);
 }

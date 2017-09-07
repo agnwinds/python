@@ -471,7 +471,7 @@ depcoef_overview (icell)
     copy_plasma (x, xdummy);
     geo.macro_ioniz_mode = 0;
 
-    partition_functions (xdummy, 1);
+    partition_functions (xdummy, NEBULARMODE_TE);
     saha (xdummy, xdummy->ne, xdummy->t_e);
     geo.macro_ioniz_mode = 1;
   }
@@ -623,7 +623,7 @@ depcoef_overview_specific (version, nconfig, w, rootname, ochoice)
       copy_plasma (xplasma, xdummy);
       geo.macro_ioniz_mode = 0;
 
-      partition_functions (xdummy, 1);
+      partition_functions (xdummy, NEBULARMODE_TE);
       saha (xdummy, xdummy->ne, xdummy->t_e);
 
       geo.macro_ioniz_mode = 1;
@@ -756,7 +756,7 @@ level_popsoverview (nplasma, w, rootname, ochoice)
 
   for (i = 0; i < nlevels_macro; i++)
   {
-    partition_functions (xdummy, 1);
+    partition_functions (xdummy, NEBULARMODE_TE);
     saha (xdummy, xdummy->ne, xdummy->t_e);
 
     geo.macro_ioniz_mode = 1;
