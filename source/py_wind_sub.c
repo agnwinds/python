@@ -1518,14 +1518,11 @@ a:printf ("There are %i wind elements in this model\n", NDIM2);
   Log
     ("t_e  %8.2e lum_tot %8.2e lum_lines  %8.2e lum_ff  %8.2e lum_rr     %8.2e \n",
      xplasma->t_e, xplasma->lum_tot_ioniz, xplasma->lum_lines_ioniz, xplasma->lum_ff_ioniz, xplasma->lum_rr_ioniz);
-     Log
-       ("t_e  %8.2e lum_tot %8.2e lum_lines  %8.2e lum_ff  %8.2e lum_rr     %8.2e \n",
-        xplasma->t_e, xplasma->lum_tot, xplasma->lum_lines, xplasma->lum_ff, xplasma->lum_rr);
   Log
-    ("t_e %8.2e cool_tot %8.2e lum_lines  %8.2e lum_ff  %8.2e cool_rr     %8.2e cool_comp %8.2e cool_adiab %8.2e cool_DR %8.2e \n",
-     xplasma->t_e, xplasma->cool_tot_ioniz,
+    ("t_e %8.2e cool_tot %8.2e lum_lines  %8.2e lum_ff  %8.2e cool_rr     %8.2e cool_comp %8.2e cool_adiab %8.2e cool_DR %8.2e cool_DI %8.2e\n",
+     xplasma->t_e, xplasma->cool_tot_ioniz + xplasma->cool_comp_ioniz + xplasma->cool_adiabatic_ioniz + xplasma->cool_dr_ioniz,
      xplasma->lum_lines_ioniz, xplasma->lum_ff_ioniz, xplasma->cool_rr_ioniz, xplasma->cool_comp_ioniz, xplasma->cool_adiabatic_ioniz,
-     xplasma->cool_dr_ioniz);
+     xplasma->cool_dr_ioniz, xplasma->cool_di_ioniz);
   Log ("t_r %8.2e heat_tot %8.2e heat_lines %8.2e heat_ff %8.2e heat_photo %8.2e heat_auger %8.2e heat_comp %8.2e heat_icomp %8.2e\n",
        xplasma->t_r, xplasma->heat_tot, xplasma->heat_lines, xplasma->heat_ff, xplasma->heat_photo, xplasma->heat_auger, xplasma->heat_comp,
        xplasma->heat_ind_comp);
@@ -1606,7 +1603,7 @@ a:printf ("There are %i wind elements in this model\n", NDIM2);
   Log ("Spectral model details:\n");
   for (nn = 0; nn < geo.nxfreq; nn++)
   {
-    Log ("numin= %8.2e (%8.2e) numax= %8.2e (%8.2e) Model= %2d PL_log_w= %9.2e PL_alpha= %9.2e Exp_w= %9.2e EXP_temp= %9.2e\n",
+    Log ("numin= %9.2e (%9.2e) numax= %9.2e (%9.2e) Model= %2d PL_log_w= %9.2e PL_alpha= %9.2e Exp_w= %9.2e EXP_temp= %9.2e\n",
          xplasma->fmin_mod[nn], geo.xfreq[nn], xplasma->fmax_mod[nn], geo.xfreq[nn + 1], xplasma->spec_mod_type[nn], xplasma->pl_log_w[nn],
          xplasma->pl_alpha[nn], xplasma->exp_w[nn], xplasma->exp_temp[nn]);
   }
@@ -3242,6 +3239,7 @@ complete_physical_summary (w, rootname, ochoice)
 rho\tne\tte\ttr\tnphot\tw\tave_freq\tIP\tconv\tconv_tr\tconv_te\tconv_hc\t \
 cool_tot\tlum_tot\tlum_rr\tcool_rr\tlum_ff\tlum_lines\tcool_adiabatic\tcool_comp\tcool_dr\tabs_tot\t \
 heat_tot\theat_photo\theat_auger\theat_lines\theat_ff\theat_comp\theat_ind_comp\tenergy_in\tenergy_out\t \
+
 ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\n");
 
   if (ochoice)
@@ -3249,6 +3247,7 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
 rho\tne\tte\ttr\tnphot\tw\tave_freq\tIP\tXi\tconv\tconv_tr\tconv_te\tconv_hc\t \
 cool_tot\tlum_tot\tlum_rr\tcool_rr\tlum_ff\tlum_lines\tcool_adiabatic\tcool_comp\tcool_dr\tabs_tot\t \
 heat_tot\theat_photo\theat_auger\theat_lines\theat_ff\theat_comp\theat_ind_comp\tenergy_in\tenergy_out\t \
+
 ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\n");
 
 
@@ -3301,6 +3300,7 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
             %18.14e %18.14e %18.14e %18.14e %18.14e %18.14e %18.14e %18.14e %18.14e %18.14e\
             %18.14e %18.14e %18.14e %18.14e %18.14e %18.14e %18.14e %18.14e %18.14e \
             %18.14e %18.14e %18.14e %18.14e %18.14e %18.14e %18.14e %18.14e %18.14e %18.14e\n", n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2], w[n].rcen, 
+
 	  w[n].thetacen / RADIAN, vtot, w[n].v[0], w[n].v[1], w[n].v[2], w[n].dvds_ave, w[n].vol, plasmamain[np].rho, plasmamain[np].ne, 
 	  plasmamain[np].t_e, plasmamain[np].t_r, plasmamain[np].ntot, plasmamain[np].w, plasmamain[np].ave_freq, plasmamain[np].ip, plasmamain[np].xi, 
 	  plasmamain[np].converge_whole, plasmamain[np].converge_t_r, plasmamain[np].converge_t_e, plasmamain[np].converge_hc, 
@@ -3310,6 +3310,7 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
 	  plasmamain[np].heat_photo,
 	  plasmamain[np].heat_auger, plasmamain[np].heat_lines, plasmamain[np].heat_ff, plasmamain[np].heat_comp, plasmamain[np].heat_ind_comp, plasmamain[np].energy_in,
 	  plasmamain[np].energy_out,
+
 	  h1den, h2den, he1den, 
 	  he2den, he3den, c3den, c4den, c5den, n5den, o6den, si4den);
     }
@@ -3327,7 +3328,7 @@ ionH1\tionH2\tionHe1\tionHe2\tionHe3\tionC3\tionC4\tionC5\tionN5\tionO6\tionSi4\
 
       if (ochoice)
         fprintf (fptr, "%i %i %i %i %i %8.4e %8.4e 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
-            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
+            0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
             0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 \
             0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\
             0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n", n, np, w[n].inwind, ii, jj, w[n].x[0], w[n].x[2]);
