@@ -607,6 +607,8 @@ stellar photons */
         photo_gen_agn (p, geo.r_agn, geo.alpha_agn, weight, agn_f1, f2, geo.agn_ion_spectype, iphot_start, nphot);
     }
     iphot_start += nphot;
+	
+	
   }
 
   /* Now do macro atoms and k-packets. SS June 04 */
@@ -766,8 +768,9 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
   {
     p[i].origin = PTYPE_STAR;   // For BL photons this is corrected in photon_gen 
     p[i].w = weight;
+	p[i].np=i; //NSH 1708 - set the internal counter
     p[i].istat = p[i].nscat = p[i].nrscat = 0;
-    p[i].grid = 0;
+//    p[i].grid = 0;      // NSH 1708, we now set the *actual* cell the photon starts in - it will still =0 if there is a grid cell right at the star
     p[i].tau = 0.0;
     p[i].nres = -1;             // It's a continuum photon
     p[i].nnscat = 1;
@@ -785,12 +788,10 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
     {
       p[i].freq = one_continuum (spectype, t, geo.gstar, freqmin, freqmax);
     }
-
     if (p[i].freq < freqmin || freqmax < p[i].freq)
     {
       Error_silent ("photo_gen_star: phot no. %d freq %g out of range %g %g\n", i, p[i].freq, freqmin, freqmax);
     }
-
     randvec (p[i].x, r);
 
     if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
@@ -799,16 +800,14 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
       {
         randvec (p[i].x, r);
       }
-
-
       if (fabs (p[i].x[2]) < zdisk (r))
       {
         Error ("Photon_gen: stellar photon %d in disk %g %g %g %g %g\n", i, p[i].x[0], p[i].x[1], p[i].x[2], zdisk (r), r);
         exit (0);
       }
     }
-
     randvcos (p[i].lmn, p[i].x);
+	phot_cell (&p[i],0);	
   }
   return (0);
 }
@@ -1109,6 +1108,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
   {
     p[i].origin = PTYPE_DISK;   // identify this as a disk photon
     p[i].w = weight;
+	p[i].np=i; //NSH 1708 - set the internal counter
     p[i].istat = p[i].nscat = p[i].nrscat = 0;
     p[i].tau = 0;
     p[i].nres = -1;             // It's a continuum photon
@@ -1122,7 +1122,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
  * generate photon.  04march -- ksl
  */
 
-    nring = ((rand () / MAXRAND) * (NRINGS - 1));
+    nring = ((rand () / MAXRAND) * (NRINGS - 1));	
 
     if ((nring < 0) || (nring > NRINGS - 2))
     {
@@ -1212,6 +1212,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
 
     vdisk (p[i].x, v);
     p[i].freq /= (1. - dot (v, p[i].lmn) / C);
+	phot_cell (&p[i],0);	//Finally work out which cell the photon starts in 
 
   }
   return (0);
@@ -1311,3 +1312,11 @@ bl_init (lum_bl, t_bl, freqmin, freqmax, ioniz_or_final, f)
   *f = q1 * integ_planck_d (alphamin, alphamax) * lum_bl / STEFAN_BOLTZMANN;
   return (lum_bl);
 }
+
+
+
+
+
+
+
+

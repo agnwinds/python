@@ -66,11 +66,12 @@ xtemp_rad (w)
       ndim = zdom[ndom].ndim;
       mdim = zdom[ndom].mdim;
       nstart = zdom[ndom].nstart;
+	  printf ("%i %i %i\n",ndim,mdim,nstart);
 
 
 
       py_wind_min = 0;
-      py_wind_max = ndim;
+      py_wind_max = ndim-3; //We dont want to print out ghost zones
 
       /* py_wind_delta can be used to subsample the array */
       py_wind_delta = 1;
@@ -85,7 +86,8 @@ xtemp_rad (w)
 	  j = 1;
 	  for (i = py_wind_min; i < py_wind_max; i += 1)
 	    {
-	      Log ("%8.2e ", w[nstart + i * mdim].r);
+			n = nstart+ i;
+	      Log ("%8.2e ", w[plasmamain[n].nwind].r);
 	      if (j % 10 == 0)
 		{
 		  Log ("\n");

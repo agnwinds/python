@@ -129,7 +129,7 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
           /* 74a_ksl Check to see when a photon weight is becoming unreal */
           if (sane_check (p[nphot].w))
           {
-            Error ("trans_phot:sane_check photon %d has weight %e aftger scatter\n", nphot, p[nphot].w);
+            Error ("trans_phot:sane_check photon %d has weight %e after scatter\n", nphot, p[nphot].w);
           }
           geo.rt_mode = RT_MODE_MACRO;
         }
@@ -208,6 +208,7 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
     }
 
     p[nphot].np = nphot;
+	
     trans_phot_single (w, &p[nphot], iextract);
 
   }
@@ -280,6 +281,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   istat = P_INWIND;
   tau = 0;
   icell = 0;
+  
+
 
   n = 0;                        // Needed to avoid 03 warning, but it is not clear that it is defined as expected.
 
@@ -298,11 +301,36 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
 
     istat = translate (w, &pp, tau_scat, &tau, &nres);
+	
+	
+
     /* nres is the resonance at which the photon was stopped.  At present the same value is also stored in pp->nres, but I have 
        not yet eliminated it from translate. ?? 02jan ksl */
+	
 
     icell++;
     istat = walls (&pp, p);
+	
+
+	if (p->grid != pp.grid )   // The photon had moved from one cell to another
+	{
+		if (p->grid>0)
+		{
+			if (wmain[p->grid].vol > 0.0) //The old cell was in the wind - the initial if is to avoid segfaults if photon is off grid!
+			{
+				plasmamain[wmain[p->grid].nplasma].energy_out += pp.w; //We add the energy of the leaving photon to the output counter
+			}
+		}
+		if (pp.grid>0)
+		{
+			if (wmain[pp.grid].vol > 0.0) //The new cell was in the wind and the cell has real volume
+			{
+				plasmamain[wmain[pp.grid].nplasma].energy_in += pp.w; //We add the energy of the photon to the input counter	
+			}	
+		}
+	}
+	
+	
     // pp is where the photon is going, p is where it was
 
     if (modes.ispy)
@@ -335,6 +363,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       /* Store the energy of the photon bundle into a disk structure so that one can determine later how much and where the
          disk was heated by photons */
       /* Note that the disk is defined from 0 to NRINGS-2. NRINGS-1 contains the position of the outer radius of the disk. */
+		
+		
       stuff_phot (&pp, p);
       rrr = sqrt (dot (pp.x, pp.x));
       kkk = 0;
@@ -352,14 +382,16 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
       /* 71 - 1112 - ksl - placed this line here to try to avoid an error I was seeing in scatter.  I believe the first if
          statement has a loophole that needs to be plugged, when it comes back with avalue of n = -1 */
-
-      pp.grid = n = where_in_grid (wmain[pp.grid].ndom, pp.x);
+		
+//      pp.grid = n = where_in_grid (wmain[pp.grid].ndom, pp.x); //NSH 1709 - this was causing a segfault if the photon was outside the grid
+		n=pp.grid; //NSH 1709 - we no longer need to check where the photon is, it is now updated earlier. 
+  
 
       if (n < 0)
       {
         Error ("trans_phot: Trying to scatter a photon which is not in the wind\n");
         Error ("trans_phot: grid %3d x %8.2e %8.2e %8.2e\n", pp.grid, pp.x[0], pp.x[1], pp.x[2]);
-        Error ("trans_phot: This photon is effectively lost!\n");
+        Error ("trans_phot: This photon (w=%e) is effectively lost!\n",pp.w);
         istat = pp.istat = p->istat = P_ERROR;
         stuff_phot (&pp, p);
         break;
@@ -374,7 +406,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       {
         Error ("trans_phot: Trying to scatter a photon which is not in a cell in the plasma structure\n");
         Error ("trans_phot: grid %3d x %8.2e %8.2e %8.2e\n", pp.grid, pp.x[0], pp.x[1], pp.x[2]);
-        Error ("trans_phot: This photon is effectively lost!\n");
+        Error ("trans_phot: This photon (w=%e) is effectively lost!\n",pp.w);
         istat = pp.istat = p->istat = P_ERROR;
         stuff_phot (&pp, p);
         break;
@@ -414,7 +446,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       /* 74a_ksl - Check added to search for error in weights */
       if (sane_check (pp.w))
       {
-        Error ("trans_phot:sane_checl photon %d has weight %e before scatter\n", p->np, pp.w);
+        Error ("trans_phot:sane_check photon %d has weight %e before scatter\n", p->np, pp.w);
       }
       if ((nerr = scatter (&pp, ptr_nres, &nnscat)) != 0)
       {
@@ -437,6 +469,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       /* JM 1504 -- This is correct. It's one of the odd things about combining the macro-atom approach with our way of doing 
          'spectral cycles'. If photons activate macro-atoms they are destroyed, but we counter this by generating photons
          from deactivating macro-atoms with the already calculated emissivities. */
+
 
       if (geo.matom_radiation == 1 && geo.rt_mode == RT_MODE_MACRO  && pp.w < weight_min)
         /* Flag for the spectrum calculations in a macro atom calculation SS */
@@ -589,14 +622,21 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       stuff_phot (&pp, p);
       break;
     }
+	  
+
 
     /* This appears partly to be an insurance policy. It is not obvious that for example nscat and nrscat need to be updated */
     p->istat = istat;
     p->nscat = pp.nscat;
     p->nrscat = pp.nrscat;
+	
     p->w = pp.w;                // Assure that final weight of photon is returned.
+	p->grid = pp.grid;         //Update ther curreclt location of the photon
+
+
 
   }
+
   /* This is the end of the loop over individual photons */
   return (0);
 }

@@ -110,6 +110,7 @@ double ds_to_sphere2(double x[], double r, struct photon *p);
 int quadratic(double a, double b, double c, double r[]);
 double ds_to_plane(struct plane *pl, struct photon *p);
 double ds_to_closest_approach(double x[], struct photon *p, double *impact_parameter);
+int phot_cell(PhotPtr p, int mode);
 /* resonate.c */
 double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nres, double smax, int *istat);
 int select_continuum_scattering_process(double kap_cont, double kap_es, double kap_ff, PlasmaPtr xplasma);

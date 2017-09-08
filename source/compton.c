@@ -376,7 +376,12 @@ compton_dir (p, xplasma)
   }
 
   p->freq = p->freq / f;        //reduce the photon frequency
+  
+  xplasma->heat_comp_scatt+=(p->w-p->w / f);
+	  
   p->w = p->w / f;              //reduce the photon weight by the same ammount to conserve photon numbers
+	  
+  
   return (0);
 }
 

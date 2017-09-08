@@ -100,11 +100,10 @@ move_phot (pp, ds)
      PhotPtr pp;
      double ds;
 {
-
   pp->x[0] += pp->lmn[0] * ds;
   pp->x[1] += pp->lmn[1] * ds;
   pp->x[2] += pp->lmn[2] * ds;
-  pp->path += fabs (ds);        /* SWM 31/7/14 - Added */
+  pp->path += fabs (ds);        /* SWM 31/7/14 - Added */  
   return (0);
 }
 
@@ -654,4 +653,50 @@ ds_to_closest_approach (x, p, impact_parameter)
 
 
   return (s);
+}
+
+
+/**************************************************************************
+
+
+  Synopsis:  
+	This routine calculates the current location of a photon. 
+
+
+  Description:	
+
+  Arguments:  photon pointer p - this is the photon we are interested in
+				int mode - 0 means we want to add the energy input, 1 means we only want location
+
+  Returns:
+
+  Notes:
+
+  History:
+
+ ************************************************************************/
+
+int
+	phot_cell (PhotPtr p, int mode)
+{
+int ndomain;	
+
+		
+if (where_in_wind (p->x, &ndomain) < 0)  //This is executed if the photon is anywhere outside the grid , also finds domain of photon
+{
+	p->grid=-1;   //Photon is outside the grid at the moment
+}
+else if ((p->grid = where_in_grid (ndomain, p->x)) >= 0) //By definition, it must be in the wind
+{
+  	if (wmain[p->grid].vol>0.0 && mode==0)
+	{
+		plasmamain[wmain[p->grid].nplasma].energy_in+=p->w; //We are maing a photon that is in a cell in the wind, this should be added to the energy flow
+	}
+}
+else
+{
+	p->grid=-1;   //Photon is outside the grid at the moment - this is really an insurance
+}
+
+return(0);
 }

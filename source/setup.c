@@ -322,7 +322,7 @@ get_grid_params (ndom)
 	}
 
       rdint ("Wind.dim.in.x_or_r.direction", &zdom[ndom].ndim);
-      if (zdom[ndom].coord_type)
+      if (zdom[ndom].coord_type)   //Slightly risky test to see if coord_type is not equal to zero - zero is spherical, i.e. 1D
 	{
 	  rdint ("Wind.dim.in.z_or_theta.direction", &zdom[ndom].mdim);
 	  if (zdom[ndom].mdim < 4)

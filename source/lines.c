@@ -770,6 +770,7 @@ line_heat (xplasma, pp, nres)
   x = pp->w * (1. - sf);
   xplasma->heat_lines += x;
   xplasma->heat_tot += x;
+  xplasma->abs_tot += x;
 
   // Reduce the weight of the photon bundle
 

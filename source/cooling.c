@@ -370,7 +370,7 @@ wind_cooling (f1, f2)
   geo.heat_adiabatic = heat_adiab;
   
   
-  cool = cool+ cool_comp+cool_dr+cool_di+cool_adiab;
+//  cool = cool+ cool_comp+cool_dr+cool_di+cool_adiab; 1709 - no longer needed since cooloing adds all this on now
 
   return (cool);
 }

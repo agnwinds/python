@@ -754,6 +754,8 @@ typedef struct plasma
   double abs_tot;
   double heat_lines, heat_ff;
   double heat_comp;             /* 1108 NSH The compton heating for the cell */
+  double heat_comp_scatt;             /* 1108 NSH The compton heating for the cell as computed from scattering events */
+  
   double heat_ind_comp;         /* 1205 NSH The induced compton heatingfor the cell */
   double heat_lines_macro, heat_photo_macro;    /* bb and bf heating due to macro atoms. Subset of heat_lines 
                                                    and heat_photo. SS June 04. */
@@ -872,6 +874,7 @@ typedef struct plasma
   double ferland_ip;            /* IP calculaterd from equation 5.4 in hazy1 - assuming allphotons come from 0,0,0 and the wind is transparent */
   double ip;                    /*NSH 111004 Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
   double xi;                    /*NSH 151109 Ionization parameter as defined by Tartar et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
+  double energy_in,energy_out;  //NSH 170930 Two new parameters to track the energy balance in a cell
 } plasma_dummy, *PlasmaPtr;
 
 PlasmaPtr plasmamain;
@@ -1036,7 +1039,6 @@ typedef struct photon
                                        the photon is in the wind.  If the photon is not
                                        in the wind, then -1 implies inside the wind cone and  
                                        -2 implies outside the wind */
-
       enum origin_enum
       { PTYPE_STAR = 0,
         PTYPE_BL = 1,

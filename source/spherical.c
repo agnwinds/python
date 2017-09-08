@@ -155,7 +155,7 @@ spherical_make_grid (w, ndom)
       w[n].x[1] = w[n].xcen[1] = 0.0;
       w[n].x[0] = w[n].x[2] = w[n].r * sin (PI / 4.);
       w[n].xcen[0] = w[n].xcen[2] = w[n].rcen * sin (PI / 4.);
-
+	  printf ("BLASH %i %e \n",n,w[n].r);
     }
   }
 

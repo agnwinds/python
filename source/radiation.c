@@ -145,6 +145,8 @@ radiation (p, ds)
 
   one = &wmain[p->grid];        /* So one is the grid cell of interest */
 
+
+
   ndom = one->ndom;
   xplasma = &plasmamain[one->nplasma];
   check_plasma (xplasma, "radiation");
@@ -483,12 +485,12 @@ radiation (p, ds)
     z = (energy_abs) / kappa_tot;
     xplasma->heat_ff += z * frac_ff;
     xplasma->heat_tot += z * frac_ff;
-	xplasma->abs_tot += z * frac_ff;   /* The energy absorbed from the photon field in this cell */
+//	xplasma->abs_tot += z * frac_ff;   /* The energy absorbed from the photon field in this cell */
 	
     xplasma->heat_comp += z * frac_comp;        /* NSH 1108 Calculate the heating in the cell due to compton heating */
     xplasma->heat_tot += z * frac_comp; /* NSH 1108 Add the compton heating to the total heating for the cell */
-	xplasma->abs_tot += z * frac_comp;   /* The energy absorbed from the photon field in this cell */
-	xplasma->abs_tot += z * frac_ind_comp;   /* The energy absorbed from the photon field in this cell */
+//	xplasma->abs_tot += z * frac_comp;   /* The energy absorbed from the photon field in this cell */
+//	xplasma->abs_tot += z * frac_ind_comp;   /* The energy absorbed from the photon field in this cell */
 
     xplasma->heat_tot += z * frac_ind_comp;     /* NSH 1205 Calculate the heating in the celldue to induced compton heating */
     xplasma->heat_ind_comp += z * frac_ind_comp;        /* NSH 1205 Increment the induced compton heating counter for the cell */
@@ -502,8 +504,8 @@ radiation (p, ds)
     {
 		xplasma->abs_photo += z * frac_tot_abs;  //Here we store the energy absorbed from the photon flux - different from the heating by the binding energy
 		xplasma->abs_auger += z * frac_auger_abs; //same for auger
-		xplasma->abs_tot += z * frac_tot_abs;   /* The energy absorbed from the photon field in this cell */
-		xplasma->abs_tot += z * frac_auger_abs;   /* The energy absorbed from the photon field in this cell */
+//		xplasma->abs_tot += z * frac_tot_abs;   /* The energy absorbed from the photon field in this cell */
+//		xplasma->abs_tot += z * frac_auger_abs;   /* The energy absorbed from the photon field in this cell */
 
       xplasma->heat_photo += z * frac_tot;
       xplasma->heat_z += z * frac_z;
@@ -526,7 +528,9 @@ radiation (p, ds)
       }
 
     }
+	xplasma->abs_tot += energy_abs;
   }
+
 
   /* Now for contribution to inner shell ionization estimators (SS, Dec 08) */
   for (n = 0; n < nauger; n++)

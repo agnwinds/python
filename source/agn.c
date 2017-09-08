@@ -362,11 +362,14 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
   {
     p[i].origin = PTYPE_AGN;    // For BL photons this is corrected in photon_gen 
     p[i].w = weight;
+	p[i].np=i; //NSH 1708 - set the internal counter
+	
     p[i].istat = p[i].nscat = p[i].nrscat = 0;
-    p[i].grid = 0;
+//    p[i].grid = 0;
     p[i].tau = 0.0;
     p[i].nres = -1;             // It's a continuum photon
     p[i].nnscat = 1;
+	
 
     if (spectype == SPECTYPE_BB)
     {
@@ -450,7 +453,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
 
       randvec (p[i].lmn, 1.0);  // lamp-post geometry is isotropic, so completely random vector
     }
-
+	phot_cell(&p[i],0);
   }
 
   return (0);

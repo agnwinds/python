@@ -617,11 +617,12 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 
 
   Log ("Photons contributing to the various spectra\n");
-  Log ("Inwind   Scat    Esc     Star    >nscat    err    Absorb   Disk    sec    Adiab(matom)\n");
+  Log ("         Inwind   Scat    Esc     Star    >nscat    err    Absorb   Disk    sec    Adiab(matom)\n");
   for (n = 0; n < nspectra; n++)
   {
+	  Log ("%9s ", xxspec[n].name);
     for (i = 0; i < NSTAT; i++)
-      Log (" %7d", xxspec[n].nphot[i]);
+      Log ("%7d", xxspec[n].nphot[i]);
     Log ("\n");
 
   }

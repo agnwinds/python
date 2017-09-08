@@ -329,6 +329,7 @@ process. */
            can do better except  at the edges of the grid.   01apr07 ksl.  ??? One could still do 
            better than this since even if we can usually interpolate in one direction if not two ???
          */
+		
         stuff_phot (p, &p_now);
         move_phot (&p_now, ds_current); // So p_now contains the current position of the photon
 
@@ -1144,11 +1145,10 @@ scatter (p, nres, nnscat)
   MacroPtr mplasma;
   int ndom;
 
-  // printf ("nres=%i\n",*nres);
-
 
   stuff_phot (p, &pold);
   n = where_in_grid (wmain[pold.grid].ndom, pold.x);    // Find out where we are
+
 
   //71 - 1112 Check added to test out spherical wind models 
   if (n < 0)
@@ -1157,6 +1157,7 @@ scatter (p, nres, nnscat)
     return (-1);
   }
 
+//  w_init=p->w;
   one = &wmain[p->grid];
   xplasma = &plasmamain[one->nplasma];
 
@@ -1368,7 +1369,6 @@ scatter (p, nres, nnscat)
 
   else if (geo.scatter_mode == 1)
   {                             // It was a line photon and we want anisotropic scattering model 1
-
     randwind (p, z_prime, wmain[n].lmn);
     stuff_v (z_prime, p->lmn);
 
@@ -1378,7 +1378,7 @@ scatter (p, nres, nnscat)
 
     /* JM 1906 -- added normalisation of the below rejection method. We normalise
        to the escape probability of along the direction of dvds_max, with a safety net of 
-       20% in case we missed the maximum */
+       20% in case we missed the maximum */	  
     randwind_thermal_trapping (p, nnscat);
   }
 
@@ -1429,6 +1429,8 @@ detailed spectrum calculation ??
   {
     xplasma->dmo_dt[i] += dp_cyl[i];
   }
+  
+
 
 
   return (0);

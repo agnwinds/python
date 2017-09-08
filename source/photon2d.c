@@ -53,14 +53,16 @@ translate (w, pp, tau_scat, tau, nres)
      double *tau;
      int *nres;
 {
-  int istat;
+  int istat,grid_old,status;
   int ndomain;
+  
+  grid_old=pp->grid;
 
-  if (where_in_wind (pp->x, &ndomain) < 0)
+  if ((status=where_in_wind (pp->x, &ndomain)) < 0)  //This is executed if the photon is anywhere outside the grid 
   {
     istat = translate_in_space (pp);
   }
-  else if ((pp->grid = where_in_grid (ndomain, pp->x)) >= 0)
+  else if ((pp->grid = where_in_grid (ndomain, pp->x)) >= 0) //By definition, it must be in the wind
   {
     istat = translate_in_wind (w, pp, tau_scat, tau, nres);
   }
@@ -109,7 +111,6 @@ translate_in_space (pp)
 
   ds = ds_to_wind (pp);
 
-
 /* ?? The way in which a photon is identified as hitting the star seems
 a bit convoluted.  Despite the fact that it is already identified here
 as being a photon that hits the star, another determination of this 
@@ -122,7 +123,14 @@ photon hit the star in its passage from pold to the current position */
     x = ds;
     pp->istat = P_HIT_STAR;     /* Signifying that photon is hitting star */
   }
+  
+  
+  
   move_phot (pp, ds + DFUDGE);
+  
+  
+  phot_cell(pp,1);
+  
 
 
   return (pp->istat);
@@ -413,6 +421,7 @@ return and record an error */
 
     neglible_vol_count++;
     move_phot (p, smax);
+    phot_cell(p,1);
     return (p->istat);
 
   }
@@ -422,6 +431,8 @@ return and record an error */
     Error ("translate_in_wind: Grid cell %d of photon is not in wind, moving photon %.2e\n", n, smax);
     Error ("translate_in_wind: photon %d position: x %g y %g z %g\n", p->np, p->x[0], p->x[1], p->x[2]);
     move_phot (p, smax);
+    phot_cell(p,1);
+	
     return (p->istat);
 
   }
@@ -449,8 +460,13 @@ The choice of SMAX_FRAC can affect execution time.*/
 
 
 /* Note that ds_current does not alter p in any way at present 02jan ksl */
+  
+
 
   ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
+  
+
+
 
   if (p->nres < 0)
     xplasma->nscat_es++;
@@ -491,12 +507,16 @@ The choice of SMAX_FRAC can affect execution time.*/
 
   }
   else
-  {
-    radiation (p, ds_current);
+	  {
+    radiation (p, ds_current);	
   }
 
 
   move_phot (p, ds_current);
+  phot_cell(p,1);
+  
+  
+
 
   p->nres = (*nres);
 
@@ -552,7 +572,10 @@ walls (p, pold)
 
   /* Check to see if the photon has hit the star */
   if ((r = dot (p->x, p->x)) < geo.rstar_sq)
+  {
+	  p->grid=-1; //We are outside the grid
     return (p->istat = P_HIT_STAR);
+}
 
   /* Check to see if it has hit the disk. 
    */
@@ -566,6 +589,7 @@ walls (p, pold)
       s = ds_to_disk (pold, 0);
       stuff_phot (pold, p);
       move_phot (p, s);
+	  p->grid=-1; //We are outside the grid
       return (p->istat = P_HIT_DISK);
     }
   }
@@ -582,6 +606,8 @@ walls (p, pold)
     if (dot (xxx, xxx) < geo.diskrad_sq && geo.disk_illum != DISK_ILLUM_SCATTER)
     {                           /* The photon has hit the disk */
       stuff_phot (pold, p);     /* Move the photon to the point where it hits the disk */
+	  p->grid=-1; //We are outside the grid
+	  
       move_phot (p, s);
       return (p->istat = P_HIT_DISK);
     }
@@ -595,8 +621,14 @@ walls (p, pold)
 
   rho_sq = (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
   if (rho_sq > geo.rmax_sq)
+  {
+	  p->grid=-1; //We are outside the grid
     return (p->istat = P_ESCAPE);       /* The photon is coursing through the universe */
+}
   if (fabs (p->x[2]) > geo.rmax)
+  {
+	  p->grid=-1; //We are outside the grid
     return (p->istat = P_ESCAPE);
+}
   return (p->istat);            /* The photon is still in the wind */
 }

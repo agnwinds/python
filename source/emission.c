@@ -199,7 +199,7 @@ total_emission (one, f1, f2)
                                    integrated */
 {
   double t_e;
-  int nplasma,n;
+  int nplasma;
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
@@ -207,24 +207,6 @@ total_emission (one, f1, f2)
 
   t_e = xplasma->t_e;           // Change so calls to total emission are simpler
   
-  
-
-//f2=1e16;
-//f1=1e15;
-//t_e=400;
-
-//for (n=200;n<600;n++)
-//{
-//	t_e=pow(10.,n/100.);
-//	printf ("FB_FULL temp %e total_fb %e %e\n",t_e,total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL),total_fb (one, t_e, f1, f2, FB_REDUCED, OUTER_SHELL));
-	
-  //}
- //exit(0); 
- 
- 
- 
-  
-
   if (f2 < f1)
   {
     xplasma->lum_tot = xplasma->lum_lines = xplasma->lum_ff = xplasma->lum_rr = 0;      //NSH 1108 Zero the new cool_comp variable NSH 1101 - removed
@@ -361,7 +343,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 
     nplasma = wmain[icell].nplasma;
     ndom = wmain[icell].ndom;
-    plasmamain[nplasma].nrad+=1;  /* Increment the counter for the number of photons generatd in the cell */
+    plasmamain[nplasma].nrad+=1;  /* Increment the counter for the number of photons generated in the cell */
 
 
     /* Now generate a single photon in this cell */
@@ -427,8 +409,10 @@ for (n=0;n<NPLASMA;n++)
 
     p[np].w = weight;
     get_random_location (icell, p[np].x);
-    p[np].grid = icell;
-
+    p[np].grid = icell;	
+	p[np].np=np; //NSH 1708 - set the internal counter
+	
+	
     /*
        Determine the direction of the photon
        ?? Need to allow for anisotropic emission here
