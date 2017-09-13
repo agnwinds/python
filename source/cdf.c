@@ -765,9 +765,13 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 								   1]);
 	}
 
-      sum = cdf->y[cdf_n - 1];	//the total integrated pdf
+      cdf->y[cdf_n]=cdf->y[n-1]+y[nmin+cdf_n]*(x[nmax]-x[nmax-1]);
 
-      for (n = 1; n < cdf_n; n++)
+      // sum = cdf->y[cdf_n - 1];	//the total integrated pdf
+      sum = cdf->y[cdf_n];	//the total integrated pdf
+
+      // for (n = 1; n < cdf_n; n++)
+      for (n = 1; n <= cdf_n; n++)
 	{
 	  cdf->y[n] /= sum;	//this is now a cdf - we go from 0 to 1.
 	}
@@ -796,7 +800,10 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 
       exit (0);
     }
+
+  cdf_to_file(cdf,"foo.diag");
   return (echeck);
+
 }
 
 
