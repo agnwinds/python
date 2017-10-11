@@ -53,8 +53,6 @@ History:
  
 **************************************************************/
 
-
-
 double old_t, old_g, old_freqmin, old_freqmax;
 double jump[] = { 913.8 };
 
@@ -63,79 +61,65 @@ one_continuum (spectype, t, g, freqmin, freqmax)
      int spectype;
      double t, g, freqmin, freqmax;
 {
-  //OLD not used in routine double par[2];              // For python we assume only two parameter models
   double lambdamin, lambdamax;
   double w_local[NCDF],f_local[NCDF];
   double f,y;
-  double cdf_get_rand ();
-  // int model (), nwav;
-  int model ();
   int n,nwave;
 
+  /* Check if the parameters are the same as the stored ones, otherwise initialise */  
   if (old_t != t || old_g != g || old_freqmin != freqmin || old_freqmax != freqmax)
-  {                             /* Then we must initialize */
-//	  printf ("Initialising coz %e ne %e or %e ne %e or %e ne %e or %e ne %e\n",old_t,t,old_g,g,old_freqmin,freqmin,old_freqmax,freqmax);
-	  
-      lambdamin = C * 1e8 / freqmax;
-      lambdamax = C * 1e8 / freqmin;
-	  nwave=0;
+  {                             /* Then we must initialize */	  
+    lambdamin = C * 1e8 / freqmax;
+    lambdamax = C * 1e8 / freqmin;
+	  nwave = 0;
+
+    /* if the first wavelength in the model is below the wavelength range in the simulation,
+       interpolate on the model flux to get the flux at lambdamin. copy relevant wavelengths and
+       fluxes to w_local and f_local  */
 	  if (comp[spectype].xmod.w[0] < lambdamin && lambdamin < comp[spectype].xmod.w[comp[spectype].nwaves-1])
 	  {
-		  w_local[nwave]=lambdamin;
+		  w_local[nwave] = lambdamin;
 		  linterp(lambdamin, comp[spectype].xmod.w, comp[spectype].xmod.f, comp[spectype].nwaves, &y, 0);
-		  f_local[nwave]=y;
+		  f_local[nwave] = y;
 		  nwave++;
 	  }
-	  
-	  for (n=0;n<comp[spectype].nwaves;n++)
+
+    /* loop over rest of model wavelengths and fluxes and copy to w_local and f_local */
+	  for (n = 0; n < comp[spectype].nwaves; n++)
 	  {
-//		  printf ("%e %e ",comp[spectype].xmod.w[n],comp[spectype].xmod.f[n]);
 		  if (comp[spectype].xmod.w[n] > lambdamin && comp[spectype].xmod.w[n] <= lambdamax)
 		  {
-//			  printf (" inserted %e %e\n",lambdamin,lambdamax);
-			  w_local[nwave]=comp[spectype].xmod.w[n];
-			  f_local[nwave]=comp[spectype].xmod.f[n];
+			  w_local[nwave] = comp[spectype].xmod.w[n];
+			  f_local[nwave] = comp[spectype].xmod.f[n];
 			  nwave++;
 		  }
-//		  else
-//		  {
-//		  printf ("\n ");
-//	  		}
-		  
 	  }
 	  
+    /* now check if upper bound is beyond lambdamax, and if so, interpolate to get appropriate flux
+       at lambda max. copy to w_local and f_local */
 	  if (comp[spectype].xmod.w[0] < lambdamax && lambdamax < comp[spectype].xmod.w[comp[spectype].nwaves-1])
 	  {
-		  w_local[nwave]=lambdamax;
+		  w_local[nwave] = lambdamax;
 		  linterp(lambdamax, comp[spectype].xmod.w, comp[spectype].xmod.f, comp[spectype].nwaves, &y, 0);
-		  f_local[nwave]=y;
+		  f_local[nwave] = y;
 		  nwave++;
 	  }
 	  
+	  /* There are two pathological cases to deal with, when we only have one non zero point, 
+       we need to make an extra point just up/down from the penultimate/second point so we 
+       can make a sensible CDF. */
 	  
-	  //There are two pathological cases to deal with, when we only have one non zero point, we need to make an extra point just up/dpown from the penultimate/zecond point so we can make a sensible CDF.
-	  
-	  
-	  if (f_local[nwave-2]==0.0) //We have a zero just inside the end
+	  if (f_local[nwave-2] == 0.0) //We have a zero just inside the end
 	  {
 		  nwave++;
-		  w_local[nwave-1]=w_local[nwave-2];
-		  f_local[nwave-1]=f_local[nwave-2];
-		  w_local[nwave-2]=w_local[nwave-3]/(1.-DELTA_V/(2.*C));
+		  w_local[nwave-1] = w_local[nwave-2];
+		  f_local[nwave-1] = f_local[nwave-2];
+		  w_local[nwave-2] = w_local[nwave-3] / (1. - DELTA_V / (2. * C) );
 		  linterp(w_local[nwave-2], comp[spectype].xmod.w, comp[spectype].xmod.f, comp[spectype].nwaves, &y, 0);
-		  f_local[nwave-2]=y;
-	  }
-	  
-	  
-	  
-	  
-	  
-	  
-//	  printf ("BLAH min %e max %e\n",lambdamin,lambdamax);
-//	  printf ("BLAH wmin %e wmax %e\n",comp[spectype].xmod.w[0],comp[spectype].xmod.w[comp[spectype].nwaves-1]);
-	  
-//	  for (n=0;n<nwave;n++)
-//		  printf ("BLAH %e %e\n",w_local[n],f_local[n]);
+		  f_local[nwave-2] = y;
+	  }	  
+
+    /* we should now have our arrays w_local and f_local which can be used to generate a cdf */
 	  
     //OLD not used in routine par[0] = t;
     //OLD not used in routine par[1] = g;
@@ -153,7 +137,11 @@ one_continuum (spectype, t, g, freqmin, freqmax)
     old_freqmax = freqmax;
   }
 
+  /* generate the frequency from the CDF that has been built up from the model fluxes */
+
   f = (C * 1.e8 / cdf_get_rand (&comp[spectype].xcdf));
+
+  /* check if the frequency is too small or too large, and default to simulation limits */
   if (f > freqmax)
   {
     Error ("one_continuum: f too large %e\n");

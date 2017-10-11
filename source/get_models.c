@@ -592,8 +592,8 @@ even, and so for those cases we want to make sure to calculate the ratio of qs d
 
 
 
-/* End of section to reweight the spectra. we can now copy fluxes to structure */
-qptr=fopen("MODEL.txt","w");
+  /* End of section to reweight the spectra. we can now copy fluxes to structure */
+  qptr=fopen("MODEL.txt","w");
 
   for (j = 0; j < nwaves; j++)
   {
