@@ -185,7 +185,7 @@ init_geo ()
   geo.m_sec = 0.4 * MSOL;
   geo.period = 3.2 * 3600;
   geo.tstar = 40000;
-  geo.twind = 40000;
+  geo.twind_init = 40000;
 
   geo.ioniz_mode = IONMODE_ML93;        /* default is on the spot and find the best t */
   geo.line_mode = 3;            /* default is escape probabilites */
@@ -929,6 +929,9 @@ init_ionization ()
   thermal_opt = 0;              /* NSH 131213 Set the option to zero - the default. The lines allow allow the
                                    user to turn off mechanisms that affect the thermal balance. Adiabatic is the only one implemented
                                    to start off with. */
+
+  rdint ("Surface.reflection.or.absorption(0=no.rerad,1=high.albedo,2=thermalized.rerad)",
+                  &geo.absorb_reflect);
 
   rdint ("Thermal_balance_options(0=everything.on,1=no.adiabatic)", &thermal_opt);
 

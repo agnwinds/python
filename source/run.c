@@ -159,13 +159,11 @@ calculate_ionization (restart_stat)
 
     define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
 
-    /* Zero the arrays that store the heating of the disk */
+    /* Zero the arrays, and other variables that need to be zeroed after the photons are generated. */
 
-    /* 080520 - ksl - There is a conundrum here.  One should really zero out the 
-     * quantities below each time the wind structure is updated.  But relatively
-     * few photons hit the disk under normal situations, and therefore the statistics
-     * are not very good.  
-     */
+
+    geo.lum_star_back=0;
+    geo.lum_disk_back=0;
 
 
     for (n = 0; n < NRINGS; n++)

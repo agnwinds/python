@@ -652,7 +652,9 @@ get_wind_params (ndom)
   // it is not obvious that is happenning
 
   zdom[ndom].rmax = 1e12;
-  zdom[ndom].twind = 1e5;
+/*  ksl - this line is not used anywhre and so has been commened out. Currenly
+ *  we initialize all of the plasma temperatures to geo.twind_init  */
+//  zdom[ndom].twind_init = 1e5;   
 
   if (geo.system_type == SYSTEM_TYPE_AGN)
     {
@@ -663,7 +665,7 @@ get_wind_params (ndom)
   /* XXX - This should be part of the individual get_wind_parameters, not here */
 
   rddoub ("wind.radmax(cm)", &zdom[ndom].rmax);
-  rddoub ("wind.t.init", &geo.twind);
+  rddoub ("wind.t.init", &geo.twind_init);
 
   /* ksl XXX - There is something of a philosophical problem that needs to be worked
    * out with geo.rmax and zdom[ndom].rmax for the general case of winds.  Suppose
@@ -789,7 +791,6 @@ History:
 double
 get_stellar_params ()
 {
-  double lstar;
 
   /* Describe the basic binary star system */
 
@@ -812,9 +813,13 @@ get_stellar_params ()
   geo.r_agn = geo.rstar;	/* At present just set geo.r_agn to geo.rstar */
   geo.rstar_sq = geo.rstar * geo.rstar;
   if (geo.star_radiation)
-    rddoub ("tstar", &geo.tstar);
+    rddoub ("tstar", &geo.tstar_init);
 
-  lstar =
+  /* tstar_init and lum_star_init refer to values without the effects of backscattering */
+
+  geo.tstar=geo.tstar_init;
+
+  geo.lum_star_init=
     4 * PI * geo.rstar * geo.rstar * STEFAN_BOLTZMANN * pow (geo.tstar, 4.);
 
 
@@ -832,7 +837,7 @@ get_stellar_params ()
       geo.period *= 3600.;	// Put back to cgs immediately                   
     }
 
-  return (lstar);
+  return (geo.lum_star_init);
 }
 
 /***********************************************************
@@ -865,11 +870,8 @@ get_disk_params ()
   geo.disk_mdot /= (MSOL / YR);	// Convert to msol/yr to simplify input
   rddoub ("disk.mdot(msol/yr)", &geo.disk_mdot);
   geo.disk_mdot *= (MSOL / YR);
-  rdint
-    ("Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=extra.heating.from.star)",
-     &geo.disk_illum);
-  rdint ("Disk.temperature.profile(0=standard;1=readin)", &geo.disk_tprofile);
-  if (geo.disk_tprofile == 1)
+  rdint ("Disk.temperature.profile(0=standard;1=readin,2=analytic)", &geo.disk_tprofile);
+  if (geo.disk_tprofile == DISK_TPROFILE_READIN)
     {
       rdstr ("T_profile_file", files.tprofile);
     }

@@ -29,7 +29,7 @@ int define_phot(PhotPtr p, double f1, double f2, long nphot_tot, int ioniz_or_fi
 double populate_bands(double f1, double f2, int ioniz_or_final, int iwind, struct xbands *band);
 int xdefine_phot(double f1, double f2, int ioniz_or_final, int iwind);
 int xmake_phot(PhotPtr p, double f1, double f2, int ioniz_or_final, int iwind, double weight, int iphot_start, int nphotons);
-double star_init(double r, double tstar, double freqmin, double freqmax, int ioniz_or_final, double *f);
+int star_init(double freqmin, double freqmax, int ioniz_or_final, double *f);
 int photo_gen_star(PhotPtr p, double r, double t, double weight, double f1, double f2, int spectype, int istart, int nphot);
 double disk_init(double rmin, double rmax, double m, double mdot, double freqmin, double freqmax, int ioniz_or_final, double *ftot);
 int photo_gen_disk(PhotPtr p, double weight, double f1, double f2, int spectype, int istart, int nphot);
@@ -606,6 +606,7 @@ int line_summary(WindPtr w, char rootname[], int ochoice);
 int total_emission_summary(WindPtr w, char rootname[], int ochoice);
 int modify_te(WindPtr w, char rootname[], int ochoice);
 int partial_measure_summary(WindPtr w, int element, int istate, char rootname[], int ochoice);
+int collision_summary(WindPtr w, char rootname[], int ochoice);
 /* py_wind_write.c */
 int write_array(char filename[], int choice);
 int display(char name[]);

@@ -71,9 +71,6 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 #define RMAX   				3.e10
 #define VWIND  				2.e8
 #define MDOT  				1.e-9*MSOL/YR
-#define TSTAR 				30000.  /*Sets a floor on the frequency range used to calculate
-                                                   ionization balance in the wind.  Only used in python.c.  May 
-                                                   be superfluous */
 #define BETA  				1.0
 #define KAPPA_CONT 			4.
 #define EPSILON  			1.e-6   /* A general purpose fairly small number */
@@ -232,7 +229,7 @@ typedef struct domain
   double wind_thetamin, wind_thetamax;  /*Angles defining inner and outer cones of wind, measured from disk plane */
   double mdot_norm;             /*A normalization factor used in SV wind, and Knigge wind */
 
-  double twind;                 // ksl 1508 -- added in case domains have different initial temperatures
+//  double twind;                 // ksl 1508 -- added in case domains have different initial temperatures
 
   /* Parameters defining Shlossman & Vitello Wind */
   double sv_lambda;             /* power law exponent describing from  what portion of disk wind is radiated */
@@ -346,8 +343,11 @@ struct geometry
 
 /* Basic paremeters of the system, as opposed to elements of the wind or winds */
 
-  double mstar, rstar, rstar_sq, tstar, gstar;  /* Basic parameters for the WD */
-  double twind;                 /* temperature of wind */
+  double mstar, rstar, rstar_sq, tstar, gstar;  /* Basic parameters for the star (often a WD) in the system */
+  double tstar_init;                    /* The temperature of the star, before backscattering is taken into account*/
+  double lum_star_init, lum_star_back;  /* The luminosity of the star as determined by tstar_init */
+
+  double twind_init;                 /* initial temperature of wind.  As written applies to all domains */
   double tmax;                  /*NSH 120817 the maximum temperature of any element of the model 
                                    - used to help estimate things for an exponential representation of the spectrum in a cell */
 
@@ -358,23 +358,25 @@ struct geometry
 
   int disk_type;
 
-#define DISK_ILLUM_ABSORB_AND_DESTROY  0        /* Disk simply absorbs the radiation and it is lost */
-#define DISK_ILLUM_SCATTER             1        /* Disk reradiates the radiation immediately via electron scattering
-                                                 */
-#define DISK_ILLUM_ABSORB_AND_HEAT     2        /* Correct disk temperature for illumination by photons 
+#define BACK_RAD_ABSORB_AND_DESTROY  0        /* Disk simply absorbs the radiation and it is lost */
+#define BACK_RAD_SCATTER            1        /* Disk reradiates the radiation immediately via electron scattering */
+#define BACK_RAD_ABSORB_AND_HEAT     2        /* Correct disk temperature for illumination by photons 
                                                    which hit the dsik.  Disk radiation is absorbed and changes 
                                                    the temperature of the disk for future ionization cycles
                                                  */
-#define DISK_ILLUM_HEATED_BY_STAR      3        /* Correct disk temperature for illumination by star */
 
-  int disk_illum;               /*Treatment of effects of illumination on the disk. 
+  int absorb_reflect;            /*Controls what happens when a photong hits the disk or star
                                  */
 
+#define DISK_TPROFILE_STANDARD          0
+#define DISK_TPROFILE_READIN            1
+#define DISK_TPROFILE_ANALYTIC          2
   int disk_tprofile;            /* This is an variable used to specify a standard accretion disk (0) or
                                    one that has been read in and stored. */
   double disk_mdot;             /* mdot of  DISK */
   double diskrad, diskrad_sq;
   double disk_z0, disk_z1;      /* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 */
+  double lum_disk_init, lum_disk_back;  /* The intrinsic luminosity of the disk, the back scattered luminosity */
   int run_type;                 /*1508 - New variable that describes whether this is a continuation of a previous run 
                                    Added in order to separate the question of whether we are continuing an old run fro
                                    the type of wind model.  Bascially if run_type is 0, this is a run from scratch,
@@ -442,7 +444,6 @@ struct geometry
   
   /* Define the modes for free bound integrals */
 #define OUTER_SHELL  1
-
 #define INNER_SHELL  2
 
   /* The frequency bands used when calculating parameters like a power law slope in limited regions. */

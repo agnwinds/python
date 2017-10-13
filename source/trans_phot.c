@@ -64,7 +64,7 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
   int nphot;
   struct photon pp, pextract;
   int nnscat;
-  int disk_illum;               /* this is a variable used to store geo.disk_illum during exxtract */
+  int absorb_reflect;               /* this is a variable used to store geo.absorb_reflect during exxtract */
   int nerr;
   double p_norm, tau_norm;
 
@@ -141,7 +141,7 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
 
 
     stuff_phot (&p[nphot], &pp);
-    disk_illum = geo.disk_illum;
+    absorb_reflect = geo.absorb_reflect;
 
     /* The next if statement is executed if we are calculating the detailed spectrum and makes sure we always run extract on
        the original photon no matter where it was generated */
@@ -149,11 +149,11 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
     if (iextract)
     {
       // SS - for reflecting disk have to make sure disk photons are only extracted once.  Note we restore the
-      // correct geo.disk_illum value as soon as the photons are extracted!
+      // correct geo.absorb_reflect value as soon as the photons are extracted!
 
-      if (disk_illum == DISK_ILLUM_SCATTER && p[nphot].origin == PTYPE_DISK)
+      if (absorb_reflect == BACK_RAD_SCATTER && p[nphot].origin == PTYPE_DISK)
       {
-        geo.disk_illum = DISK_ILLUM_ABSORB_AND_DESTROY;
+        geo.absorb_reflect = BACK_RAD_ABSORB_AND_DESTROY;
       }
 
 
@@ -201,9 +201,9 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
 
 
       // Restore the correct disk illumination
-      if (disk_illum == DISK_ILLUM_SCATTER && p[nphot].origin == PTYPE_DISK)
+      if (absorb_reflect == BACK_RAD_SCATTER && p[nphot].origin == PTYPE_DISK)
       {
-        geo.disk_illum = DISK_ILLUM_SCATTER;
+        geo.absorb_reflect = BACK_RAD_SCATTER;
       }
     }
 
@@ -325,6 +325,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     if (istat == P_HIT_STAR)
     {                           /* It was absorbed by the star */
       stuff_phot (&pp, p);
+      geo.lum_star_back+=pp.w;
       break;
     }
 
@@ -342,7 +343,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         kkk++;
       kkk--;                    // So that the heating refers to the heating between kkk and kkk+1
       qdisk.nhit[kkk]++;
-      qdisk.heat[kkk] += pp.w;  // 60a - ksl - Added to be able to calculate illum of disk
+      geo.lum_disk_back=qdisk.heat[kkk] += pp.w;  // 60a - ksl - Added to be able to calculate illum of disk
       qdisk.ave_freq[kkk] += pp.w * pp.freq;
       break;
     }

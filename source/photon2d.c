@@ -6,7 +6,6 @@
 #include <math.h>
 
 #include "atomic.h"
-
 #include "python.h"
 /***********************************************************
                                        Space Telescope Science Institute
@@ -539,8 +538,14 @@ History:
  	1997nov	ksl	Corrected problem which caused mistakes in the calculation of the disk
  	 		intercept.	 
 	04aug	ksl	Added checks for a vertically extended disk
+    17oct   ksl Modified the way things work to "reflect" photons from
+                the disk and added reflection for stars.  Now both
+                are redirected as if they were emitted from the photospher,
+                however note that frequencies are not changed.
 
 **************************************************************/
+double xnorth[]={0.,0.,1.};
+double xsouth[]={0.,0.,-1.};
 
 int
 walls (p, pold)
@@ -550,12 +555,23 @@ walls (p, pold)
   double xxx[3];
   double s, z;
 
-  /* Check to see if the photon has hit the star */
-  if ((r = dot (p->x, p->x)) < geo.rstar_sq)
+  /* Check to see if the photon has hit the star. If we plan to
+   * scatter the photon and not simply destroy, put the photon
+   * at the photoshper and reorient it. */
+  if ((r = dot (p->x, p->x)) < geo.rstar_sq) {
+      if (geo.absorb_reflect==BACK_RAD_SCATTER){
+      /* Put photon at the star surface */
+      s=ds_to_sphere(geo.rstar,pold);
+      stuff_phot(pold,p);
+      move_phot(p,s);
+      /* Now reorient the photon*/
+      randvcos(p->lmn,p->x);
+      }
     return (p->istat = P_HIT_STAR);
+    return(p->istat); // XXX - Not sure we want to simply ignore how many photons have hit star
+  }
 
-  /* Check to see if it has hit the disk. 
-   */
+  /* Check to see if it has hit the disk.  */
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
   {
@@ -579,12 +595,31 @@ walls (p, pold)
     }
     // Check whether it hit the disk plane beyond the geo.diskrad**2
     vmove (pold->x, pold->lmn, s, xxx);
-    if (dot (xxx, xxx) < geo.diskrad_sq && geo.disk_illum != DISK_ILLUM_SCATTER)
+
+    if (dot (xxx, xxx) < geo.diskrad_sq )
     {                           /* The photon has hit the disk */
       stuff_phot (pold, p);     /* Move the photon to the point where it hits the disk */
-      move_phot (p, s);
-      return (p->istat = P_HIT_DISK);
+      move_phot (p, s - DFUDGE);
+      if (geo.absorb_reflect == BACK_RAD_SCATTER){
+          if (pold->x[2]>0) {
+          randvcos(p->lmn,xnorth);
+          }
+          else {
+          randvcos(p->lmn,xsouth);
+          }
+          return (p->istat);
+      }
+      else {
+          return (p->istat = P_HIT_DISK);
+      }
     }
+
+//OLD    if (dot (xxx, xxx) < geo.diskrad_sq && geo.absorb_reflect != BACK_RAD_SCATTER)
+//OLD    {                           /* The photon has hit the disk */
+//OLD      stuff_phot (pold, p);     /* Move the photon to the point where it hits the disk */
+//OLD      move_phot (p, s);
+//OLD      return (p->istat = P_HIT_DISK);
+//OLD    }
   }
 
   /* At this point we know the photon has not hit the disk or the star, so we now

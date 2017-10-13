@@ -34,7 +34,7 @@ tdisk (m, mdot, r)
    04June	SS	Modified to include a correction factor to account for
    			heating of the disk by the star following Proga et al. 1999, MNRAS, 310, 476. 
    			for now only used in the YSO model.
-   04Aug	ksl	Modified so that geo.disk_illum controls how modifications
+   04Aug	ksl	Modified so that geo.absorb_reflect controls how modifications
    			to the temperature are treated.  This is in preparation to allowing
 			for a variety of disk illumination possibilities
    06Jan	ksl	Fixed problem with absorbing disk
@@ -61,7 +61,7 @@ teff (t, x)
   }
 
 
-  if ((geo.disk_tprofile != 0) && ((x * geo.rstar) < blmod.r[blmod.n_blpts - 1]))
+  if ((geo.disk_tprofile == DISK_TPROFILE_READIN) && ((x * geo.rstar) < blmod.r[blmod.n_blpts - 1]))
   {
     /* This is the case where the temperature profile is read in as an array */
     if ((r = (x * geo.rstar)) < blmod.r[0])
@@ -87,7 +87,7 @@ teff (t, x)
     q = (1.e0 - pow (x, -0.5e0)) / (x * x * x);
     q = t * pow (q, 0.25e0);
 
-    if (geo.disk_illum == DISK_ILLUM_ABSORB_AND_HEAT && geo.wcycle > 0) /* Absorb photons and increase t so that heat is radiated
+    if (geo.absorb_reflect ==  BACK_RAD_ABSORB_AND_HEAT && geo.wcycle > 0) /* Absorb photons and increase t so that heat is radiated
                                                                            but only do this if there has been at least one
                                                                            ionization cycle */
     {
@@ -102,7 +102,7 @@ teff (t, x)
       q = pow (q * q * q * q + (theat / STEFAN_BOLTZMANN), 0.25);
 
     }
-    else if (geo.disk_illum == DISK_ILLUM_HEATED_BY_STAR)       // Analytic approximation for disk heating by star; implemented for YSOs
+    else if (geo.disk_tprofile ==  DISK_TPROFILE_ANALYTIC)       // Analytic approximation for disk heating by star; implemented for YSOs
     {
       disk_heating_factor = pow (geo.tstar / t, 4.0);
       disk_heating_factor *= (asin (1. / x) - (pow ((1. - (1. / (x * x))), 0.5) / x));

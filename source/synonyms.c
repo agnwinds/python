@@ -59,10 +59,10 @@
 #define	LINELEN 132
 
 
-char *old_names[] = { "mstar", "rstar" };
-char *new_names[] = { "Central.object.mass", "Central.object.radius" };
+char *old_names[] = { "mstar", "rstar","Disk.illumination.treatment" };
+char *new_names[] = { "Central.object.mass", "Central.object.radius","Surface.reflection.or.absorption" };
 
-int nunber_of_names = 2;
+int nunber_of_names = 3;
 
 
 

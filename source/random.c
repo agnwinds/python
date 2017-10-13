@@ -73,12 +73,16 @@ randvcos (lmn, north)
   double x[3];                  /* the photon direction in the rotated frame */
   double l, m, n;               /* the individual direction cosines in the rotated frame */
   double q, jumps[5];
-// double s;
   struct basis nbasis;
   int echeck, cdf_gen_from_func ();
   int create_basis (), project_from ();
   double vcos (), cdf_get_rand ();
   double phi;
+
+  /* XXX - It seems unlikely that jumps are necessary with the current verisonof 
+   * pdf_gen_gen_from_func, which does not resample the orginal grid.  But this
+   * should be checked.  171012 ksl 
+   */
 
   if (init_vcos == 0)
   {
@@ -89,7 +93,6 @@ randvcos (lmn, north)
     jumps[4] = 0.08716;
 
     if ((echeck = cdf_gen_from_func (&cdf_vcos, &vcos, 0., 1., 5, jumps)) != 0)
-//old ksl 04mar  pdf_gen_from_func (&pdf_vcos, &vcos, 0., 1., 5, &jumps)) != 0)
     {
       Error ("Randvcos: return from cdf_gen_from_func %d\n", echeck);;
     }
@@ -100,13 +103,6 @@ randvcos (lmn, north)
   n = cdf_get_rand (&cdf_vcos);
   q = sqrt (1. - n * n);
 
-//  The next set of lines are all wrong
-//  l = 2. * (rand () / MAXRAND - 0.5);
-//  m = 2. * (rand () / MAXRAND - 0.5);
-//  s = sqrt (l * l + m * m);   /* In principle this could be zero, but I have not worried about this */
-
-//  l *= q / s;
-//  m *= q / s;                 /* So at this point we have the direction cosines in the rotated frame */
 // The is the correct approach to generating a uniform azimuthal distribution
 
   phi = 2. * PI * (rand () / MAXRAND);

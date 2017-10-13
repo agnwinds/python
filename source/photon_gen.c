@@ -322,7 +322,7 @@ xdefine_phot (f1, f2, ioniz_or_final, iwind)
 
   if (geo.star_radiation)
   {
-    star_init (geo.rstar, geo.tstar, f1, f2, ioniz_or_final, &geo.f_star);
+    star_init (f1, f2, ioniz_or_final, &geo.f_star);
   }
   if (geo.disk_radiation)
   {
@@ -395,6 +395,10 @@ iwind = -1 	Don't generate any wind photons at all
 
   Log
     ("!! xdefine_phot: wind  ff %8.2e       fb %8.2e   lines %8.2e  for freq %8.2e %8.2e\n", geo.lum_ff, geo.lum_rr, geo.lum_lines, f1, f2);
+  Log
+    ("!! xdefine_phot: star  tstar  %8.2e   %8.2e   lum_star %8.2e %8.2e  %8.2e \n", geo.tstar, geo.tstar_init, geo.lum_star, geo.lum_star_init, geo.lum_star_back);
+  Log
+    ("!! xdefine_phot: disk                          lum_disk %8.2e %8.2e  %8.2e \n", geo.lum_disk, geo.lum_disk_init, geo.lum_disk_back);
 
 
 
@@ -457,7 +461,7 @@ xmake_phot (p, f1, f2, ioniz_or_final, iwind, weight, iphot_start, nphotons)
   double agn_f1;
 
 /* Determine the number of photons of each type 
-Error ?? -- This is a kluge.  It is intended to preserve what was done with versions earlier than
+Error XXX -- This is a kluge.  It is intended to preserve what was done with versions earlier than
 python 40 but it is not really what one wants.
 */
   nstar = nbl = nwind = ndisk = 0;
@@ -653,7 +657,8 @@ stellar photons */
 /***********************************************************
               Space Telescope Science Institute
 
-Synopsis: star_init (r, tstar, freqmin, freqmax, ioniz_or_final, f)
+// OLD Synopsis: star_init (r, tstar, freqmin, freqmax, ioniz_or_final, f)
+Synopsis: star_init (freqmin, freqmax, ioniz_or_final, f)
 
 
   
@@ -670,24 +675,36 @@ Description:
 Notes:
 
 History:
+    171013  ksl Modified to allow for backscattering heating the
+                star.  At the same time I revised the imputs
+                to the code to reflect our increased reliance
+                on the geo strucure
 
 **************************************************************/
 
 
 
-double
-star_init (r, tstar, freqmin, freqmax, ioniz_or_final, f)
-     double r, tstar, freqmin, freqmax, *f;
+
+int
+star_init (freqmin, freqmax, ioniz_or_final, f)
+     double freqmin, freqmax, *f;
      int ioniz_or_final;
 {
-  double lumstar;
-  double log_g;
+//  double lumstar;
+  double r,tstar, log_g;
   double emit, emittance_bb (), emittance_continuum ();
   int spectype;
 
 /* 57g -- 07jul -- fixed error calculating gravity of star that has been here forever -- ksl */
   log_g = geo.gstar = log10 (G * geo.mstar / (geo.rstar * geo.rstar));
-  lumstar = 4 * PI * STEFAN_BOLTZMANN * r * r * tstar * tstar * tstar * tstar;
+  r=geo.rstar;
+
+  tstar=geo.tstar=geo.tstar_init; 
+  if (geo.absorb_reflect==BACK_RAD_ABSORB_AND_HEAT && geo.lum_star_back > 0){
+      geo.lum_star=geo.lum_star_init+geo.lum_star_back;
+      tstar=geo.tstar=pow(geo.lum_star/(4 * PI * STEFAN_BOLTZMANN * r * r),0.25);
+  }
+
 
   if (ioniz_or_final == 1)
     spectype = geo.star_spectype;       /* type for final spectrum */
@@ -706,8 +723,9 @@ star_init (r, tstar, freqmin, freqmax, ioniz_or_final, f)
   *f = emit;                    // Calculate the surface flux between freqmin and freqmax
   *f *= (4. * PI * r * r);
 
-  geo.lum_star = lumstar;
-  return (lumstar);
+
+  return(0);
+
 }
 
 /* Generate nphot photons from the star in the frequency interval f1 to f2 */

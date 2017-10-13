@@ -199,30 +199,13 @@ total_emission (one, f1, f2)
                                    integrated */
 {
   double t_e;
-  int nplasma,n;
+  int nplasma;
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
   t_e = xplasma->t_e;           // Change so calls to total emission are simpler
-  
-  
-
-//f2=1e16;
-//f1=1e15;
-//t_e=400;
-
-//for (n=200;n<600;n++)
-//{
-//	t_e=pow(10.,n/100.);
-//	printf ("FB_FULL temp %e total_fb %e %e\n",t_e,total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL),total_fb (one, t_e, f1, f2, FB_REDUCED, OUTER_SHELL));
-	
-  //}
- //exit(0); 
- 
- 
- 
   
 
   if (f2 < f1)

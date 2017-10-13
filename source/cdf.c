@@ -314,20 +314,9 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
     }
 
 
-
-
-
-
-
-
   xstep = (xmax - xmin) / pdfsteps;
 
 /* So at this point pdf_array contains an unnormalized version of the CDF for the function */
-
-
-
-
-
 
 
   cdf->x[0] = xmin;
@@ -370,11 +359,6 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
     {
       Error ("cdf_gen_from_func: Errro returned from calc_cdf_gradient\n");
     }				// 57ib 
-
-
-//      printf ("BLAH %e %e %e\n",cdf->x[0],cdf->y[0],cdf->d[0]);
-//      printf ("BLAH %e %e %e\n",cdf->x[1],cdf->y[1],cdf->d[1]);
-//      printf ("BLAH %e %e %e\n",cdf->x[2],cdf->y[2],cdf->d[2]);
 
 
   /* Check the pdf */
@@ -574,8 +558,8 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 {
   int allzero;
   int nmin, nmax, cdf_n;
-  int m, n;
-  double sum, q;
+  int n;
+  double sum;
   int echeck;
 
 /* Perform various checks on the inputs */

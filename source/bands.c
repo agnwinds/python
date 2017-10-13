@@ -56,7 +56,7 @@ Description:
 		
 Notes:
 
-	10nov - ksl - Some of the choices have checks to see whether the bands
+	10nov - ksl - XXX Some of the choices have checks to see whether the bands
 	that are being set up lie within f1 and f2.  Others do
 	not.  This seems like an error.
 
@@ -119,11 +119,12 @@ bands_init (imode, band)
   double f1_log, f2_log, df;
   int ii;
 
-  // 59 - Increased to 20,000 A so could go further into NIR 
   freqmin = C / 12000e-8;       /*20000 A */
-  tmax = TSTAR;
-  if (geo.twind > tmax)
-    tmax = geo.twind;
+
+  tmax = 30000.;  /* This sets a floor on freqmax */
+
+  if (geo.twind_init > tmax)
+    tmax = geo.twind_init;
   if (geo.tstar > tmax)
     tmax = geo.tstar;
   if (geo.t_bl > tmax && geo.lum_bl > 0.0)
@@ -138,7 +139,7 @@ bands_init (imode, band)
   }
   else
     Log ("Maximum frequency %8.2e determined by T %8.2e\n", freqmax, tmax);
-  geo.tmax = tmax;              /*NSH 120817 NSH made this a global varaible so it is available to the code to make informed guesses as to the possible location of any BB driven exponential dropoff in the spectrum */
+  geo.tmax = tmax;              /*NSH 120817 NSH made this a global variable so it is available to the code to make informed guesses as to the possible location of any BB driven exponential dropoff in the spectrum */
   t = tmax;
   f1 = freqmin;
   f2 = freqmax;

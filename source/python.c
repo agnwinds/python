@@ -544,8 +544,8 @@ main (argc, argv)
     {
       if (geo.disk_radiation)
       {
-        rdint ("Disk.temperature.profile(0=standard;1=readin)", &geo.disk_tprofile);
-        if (geo.disk_tprofile == 1)
+        rdint ("Disk.temperature.profile(0=standard;1=readin,2=analyatic)", &geo.disk_tprofile);
+        if (geo.disk_tprofile == DISK_TPROFILE_READIN)
         {
           rdstr ("T_profile_file", files.tprofile);
         }
