@@ -4,7 +4,7 @@ Number.of.wind.components         1
 Wind_type(0=SV,1=Sphere,2=Previous,3=Proga,4=Corona,5=knigge,6=thierry,7=yso,8=elvis,9=shell)   0
 Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)   1
 Wind.dim.in.x_or_r.direction       30
-Wind.dim.in.z_or_theta.direction   30
+Wind.dim.in.z_or_theta.direction   10
 disk.atmosphere(0=no,1=yes)  0 
 Atomic_data   data/standard78
 photons_per_cycle   100000
@@ -26,7 +26,7 @@ tstar   40000
 msec(msol) 0.6
 period(hr) 5.57
 disk.mdot(msol/yr)   1e-8
-Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=analytic)   0
+Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=analytic)   2
 Disk.temperature.profile(0=standard;1=readin)   0
 disk.radmax(cm)   2.4e+10
 wind.radmax(cm)   1e+12
