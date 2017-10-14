@@ -26,7 +26,7 @@ tstar   40000
 msec(msol) 0.6
 period(hr) 5.57
 disk.mdot(msol/yr)   1e-8
-Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=analytic)   0
+Disk.illumination.treatment(0=no.rerad,1=high.albedo,2=thermalized.rerad,3=analytic)   1
 Disk.temperature.profile(0=standard;1=readin)   0
 disk.radmax(cm)   2.4e+10
 wind.radmax(cm)   1e+12
