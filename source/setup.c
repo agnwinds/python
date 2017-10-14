@@ -405,8 +405,9 @@ get_line_transfer_mode ()
     ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,6=macro_atoms,7=macro_atoms+aniso.scattering)",
      &geo.line_mode);
 
-		   /* ?? ksl Next section seems rather a kluge.  Why don't we specifty the underlying variables explicitly 
-     It also seems likely that we have mixed usage of some things, e.g geo.rt_mode and geo.macro_simple */
+/* ksl XXX  This approach is inherently dangerous and should be fixed.  We read in the line mode but then
+ * change the number to accommodate a line mode and the way scattering is treated.  We should define 
+ * a new variable which we keep as is, and use it to define geo.line_mode and geo.scatter_mode. */
 
   /* JM 1406 -- geo.rt_mode and geo.macro_simple control different things. geo.rt_mode controls the radiative
      transfer and whether or not you are going to use the indivisible packet constraint, so you can have all simple 
@@ -414,7 +415,7 @@ get_line_transfer_mode ()
      treatment and treat everything as 2-level simple ions inside the macro atom formalism */
 
   /* For now handle scattering as part of a hidden line transfermode ?? */
-  geo.scatter_mode = 0;		// isotropic
+  geo.scatter_mode = SCATTER_MODE_ISOTROPIC;		// isotropic
   geo.rt_mode = RT_MODE_2LEVEL;		// Not macro atom (SS)
   if (geo.line_mode == 0)
     {
@@ -437,7 +438,7 @@ get_line_transfer_mode ()
     {
       Log
 	("Line_transfer mode:  Simple, anisotropic scattering, escape probabilities\n");
-      geo.scatter_mode = 1;	// Turn on anisotropic scattering
+      geo.scatter_mode = SCATTER_MODE_ANISOTROPIC;	// Turn on anisotropic scattering
       geo.line_mode = 3;	// Drop back to escape probabilities
       geo.rt_mode = RT_MODE_2LEVEL;		// Not macro atom (SS)
     }
@@ -445,14 +446,14 @@ get_line_transfer_mode ()
     {
       Log
 	("Line_transfer mode:  Simple, thermal trapping, Single scattering \n");
-      geo.scatter_mode = 2;	// Thermal trapping model
+      geo.scatter_mode = SCATTER_MODE_THERMAL;	// Thermal trapping model
       geo.line_mode = 3;	// Single scattering model is best for this mode
       geo.rt_mode = RT_MODE_2LEVEL;		// Not macro atom (SS) 
     }
   else if (geo.line_mode == 6)
     {
       Log ("Line_transfer mode:  macro atoms, isotropic scattering  \n");
-      geo.scatter_mode = 0;	// isotropic
+      geo.scatter_mode = SCATTER_MODE_ISOTROPIC;	// isotropic
       geo.line_mode = 3;	// Single scattering
       geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment (SS)
       geo.macro_simple = 0;	// We don't want the all simple case (SS)
@@ -460,7 +461,7 @@ get_line_transfer_mode ()
   else if (geo.line_mode == 7)
     {
       Log ("Line_transfer mode:  macro atoms, anisotropic  scattering  \n");
-      geo.scatter_mode = 2;	// thermal trapping
+      geo.scatter_mode = SCATTER_MODE_THERMAL;	// thermal trapping
       geo.line_mode = 3;	// Single scattering
       geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment (SS)
       geo.macro_simple = 0;	// We don't want the all simple case (SS)
@@ -469,7 +470,7 @@ get_line_transfer_mode ()
     {
       Log
 	("Line_transfer mode:  simple macro atoms, isotropic  scattering  \n");
-      geo.scatter_mode = 0;	// isotropic
+      geo.scatter_mode = SCATTER_MODE_ISOTROPIC;	// isotropic
       geo.line_mode = 3;	// Single scattering
       geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment i.e. indivisible packets
       geo.macro_simple = 1;	// This is for test runs with all simple ions (SS)
@@ -478,7 +479,7 @@ get_line_transfer_mode ()
     {
       Log
 	("Line_transfer mode:  simple macro atoms, anisotropic  scattering  \n");
-      geo.scatter_mode = 1;	// anisotropic scatter mode 1
+      geo.scatter_mode = SCATTER_MODE_ANISOTROPIC;	// anisotropic scatter mode 1
       geo.line_mode = 3;	// Single scattering
       geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment 
       geo.macro_simple = 0;	// We don't want the all simple case 

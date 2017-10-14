@@ -80,12 +80,6 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
   }
 
 
-  /* 130624 -- ksl - Chaanged the way the watchdog timeer works, so that it does not continually add to what is printed out, but 
-     overwrites it.  The printf statemen below is just so th we do not overwrite the last line before the routine is entered.
-     Note tha fprintf(stdeerr is required because stderr is flused immediately, whereas printf is normally only flushed by \n.
-     NOte that I also increased the interval where items are bing printed out to 50,000, so this would be a bit less active */
-  /* 130718 -- jm -for the moment I've changed this back, as we agreed that printing to stderr was bad practice. */
-
 
   Log ("\n");
 
@@ -97,7 +91,7 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
     if (nphot % 50000 == 0)
       Log ("Photon %7d of %7d or %6.3f per cent \n", nphot, NPHOT, nphot * 100. / NPHOT);
 
-    Log_flush ();               /* NSH June 13 Added call to flush logfile */
+    Log_flush ();               
 
     /* 74a_ksl Check that the weights are real */
 
@@ -110,7 +104,7 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
        this. */
 
 
-    if (geo.rt_mode == RT_MODE_MACRO && geo.scatter_mode == 1)
+    if (geo.rt_mode == RT_MODE_MACRO && geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
     {
       if (p[nphot].origin == PTYPE_WIND)
       {
@@ -137,9 +131,6 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
     }
 
 
-
-
-
     stuff_phot (&p[nphot], &pp);
     absorb_reflect = geo.absorb_reflect;
 
@@ -163,7 +154,7 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
       /* We then increase weight to account for number of scatters. This is done because in extract we multiply by the escape
          probability along a given direction, but we also need to divide the weight by the mean escape probability, which is
          equal to 1/nnscat */
-      if (geo.scatter_mode == 2 && pextract.nres <= NLINES && pextract.nres > 0)
+      if (geo.scatter_mode == SCATTER_MODE_THERMAL && pextract.nres <= NLINES && pextract.nres > 0)
       {
         /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
            First find the sobolev optical depth along that vector */
@@ -181,7 +172,7 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
         /* throw an error if nnscat does not equal 1 */
         if (pextract.nnscat != 1)
           Error
-            ("nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
+            ("trans_phot: nnscat is %i for photon %i in scatter mode %i! nres %i NLINES %i\n",
              pextract.nnscat, nphot, geo.scatter_mode, pextract.nres, NLINES);
       }
 
@@ -219,7 +210,7 @@ int trans_phot (WindPtr w, PhotPtr p, int iextract      /* 0 means do not extrac
 
   /* sometimes photons scatter near the edge of the wind and get pushed out by DFUDGE. We record these */
   if (n_lost_to_dfudge > 0)
-    Error ("%ld photons were lost due to DFUDGE (=%8.4e) pushing them outside of the wind after scatter\n", n_lost_to_dfudge, DFUDGE);
+    Error ("trans_phot: %ld photons were lost due to DFUDGE (=%8.4e) pushing them outside of the wind after scatter\n", n_lost_to_dfudge, DFUDGE);
 
   n_lost_to_dfudge = 0;         // reset the counter
 
@@ -415,7 +406,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       /* 74a_ksl - Check added to search for error in weights */
       if (sane_check (pp.w))
       {
-        Error ("trans_phot:sane_checl photon %d has weight %e before scatter\n", p->np, pp.w);
+        Error ("trans_phot:sane_check photon %d has weight %e before scatter\n", p->np, pp.w);
       }
       if ((nerr = scatter (&pp, ptr_nres, &nnscat)) != 0)
       {
@@ -497,7 +488,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
         /* JM 1407 -- This next loop is required because in anisotropic scattering mode 2 we have normalised our rejection 
            method. This means that we have to adjust nnscat by this factor, since nnscat will be lower by a factor of
            1/p_norm */
-        if (geo.scatter_mode == 2 && pextract.nres <= NLINES && pextract.nres > 0)
+        if (geo.scatter_mode == SCATTER_MODE_THERMAL && pextract.nres <= NLINES && pextract.nres > 0)
         {
           /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
              First find the sobolev optical depth along that vector */

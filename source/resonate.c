@@ -1355,10 +1355,7 @@ scatter (p, nres, nnscat)
 
   }
 
-  else if (*nres == -2 || *nres > NLINES || geo.scatter_mode == 0 || geo.scatter_mode > 2)
-    //geo.scatter_mode > 2 should never happen but to keep consistency with what was here before I've
-    //added it as a possibility  SS.  ?? I'm not sure about the geo.scatter mode > 2 stuff.  Seems
-    // as if we should put an error check at the end and bail.  ksl 04dec.
+  else if (*nres == -2 || *nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC )
   {
     /*  It was either an electron scatter, bf emission or ff emission so the  distribution is isotropic, 
        or it was a line photon but we want isotropic scattering anyway.  */
@@ -1366,9 +1363,8 @@ scatter (p, nres, nnscat)
     stuff_v (z_prime, p->lmn);
   }
 
-  else if (geo.scatter_mode == 1)
-  {                             // It was a line photon and we want anisotropic scattering model 1
-
+  else if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
+  {                             
     randwind (p, z_prime, wmain[n].lmn);
     stuff_v (z_prime, p->lmn);
 

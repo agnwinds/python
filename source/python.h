@@ -424,6 +424,12 @@ struct geometry
                                    6, If set to 6 initially, this switches on the macro atom stuff
                                    and then behaves like 3. (SS)
                                  */
+/* Note that the scatter_mode is actually a subsidiary variable of the line_mode.  Chooising a line_mode
+ * results in the selection of a scatter_mode */
+#define SCATTER_MODE_ISOTROPIC    0
+#define SCATTER_MODE_ANISOTROPIC  1
+#define SCATTER_MODE_THERMAL      2
+
   int scatter_mode;             /*The way in which scattering for resonance lines is treated 
                                    0  isotropic
                                    1  anisotropic

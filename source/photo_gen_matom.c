@@ -607,13 +607,13 @@ photo_gen_kpkt (p, weight, photstart, nphot)
     nnscat = 1;
     // Determine the direction of the photon
     // Need to allow for anisotropic emission here
-    if (p[n].nres < 0 || p[n].nres > NLINES || geo.scatter_mode == 0)
+    if (p[n].nres < 0 || p[n].nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
     {
       /*  It was either an electron scatter so the  distribution is isotropic, or it
          was a resonant scatter but we want isotropic scattering anyway.  */
       randvec (p[n].lmn, 1.0);  /* The photon is emitted isotropically */
     }
-    else if (geo.scatter_mode == 1)
+    else if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
     {                           // It was a line photon and we want anisotropic scattering
 
       // -1. forces a full reinitialization of the pdf for anisotropic scattering
@@ -621,7 +621,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
       randwind (&p[n], p[n].lmn, wmain[icell].lmn);
 
     }
-    else if (geo.scatter_mode == 2)
+    else if (geo.scatter_mode == SCATTER_MODE_THERMAL)
     {                           //It was a line photon and we want the thermal trapping anisotropic model
 
       randwind_thermal_trapping (&p[n], &nnscat);
@@ -822,13 +822,13 @@ photo_gen_matom (p, weight, photstart, nphot)
      */
 
     nnscat = 1;
-    if (p[n].nres < 0 || p[n].nres > NLINES || geo.scatter_mode == 0)
+    if (p[n].nres < 0 || p[n].nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
     {
       /*  It was either an electron scatter so the  distribution is isotropic, or it
          was a resonant scatter but we want isotropic scattering anyway.  */
       randvec (p[n].lmn, 1.0);  /* The photon is emitted isotropically */
     }
-    else if (geo.scatter_mode == 1)
+    else if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
     {                           // It was a line photon and we want anisotropic scattering
 
       // -1. forces a full reinitialization of the pdf for anisotropic scattering
@@ -836,7 +836,7 @@ photo_gen_matom (p, weight, photstart, nphot)
       randwind (&p[n], p[n].lmn, wmain[icell].lmn);
 
     }
-    else if (geo.scatter_mode == 2)
+    else if (geo.scatter_mode == SCATTER_MODE_THERMAL)
     {                           //It was a line photon and we want the thermal trapping anisotropic model
 
       randwind_thermal_trapping (&p[n], &nnscat);

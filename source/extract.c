@@ -288,27 +288,24 @@ to entering extract */
   {
 
 /* It was a wind photon.  In this case, what we do depends
-on whether it is a photon which arose via line radiation or some other process.
+on whether it is a photon which arose via line radiation or 
+some other process.
 
-If geo.scatter_mode==0 then there is no need to reweight.  This is the
-isotropic assumption.
+If geo.scatter_mode==SCATTER_MODE_ISOTROPIC then there is no need 
+to reweight.  This is the isotropic assumption.  Otherwise, one
+needs to reweight
 
 NB--It is important that reweightwind be called after scatter, as there
 are variables which are set in scatter and in aniosowind that are
 used by reweightwind.  02may ksl
 */
 
-    if (geo.scatter_mode == 1)
-    {                           // Then we have anisotropic scattering
-/* In new call it is important to realize that pp->lmn must be
-the new photon direction, and that the weight of the photon will
-have been changed */
+    if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
+    {                          
       reweightwind (pp);
     }
 
-    else if (geo.scatter_mode == 2)     /* Then we have anisotropic
-                                           scattering based on a random number of scatters at the scattering
-                                           site */
+    else if (geo.scatter_mode == SCATTER_MODE_THERMAL)     
     {
 
       dvds = dvwind_ds (pp);

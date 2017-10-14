@@ -405,7 +405,7 @@ make_cdf_randwind (tau)
 
 Synopsis:   
   randwind_thermal_trapping is the routine which chooses
-  a new anisotropic direction in geo.scatter_mode = 2.
+  a new anisotropic direction in geo.scatter_mode = SCATTER_MODE_THEMAL
   
 Arguments:   
 

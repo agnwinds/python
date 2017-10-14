@@ -332,7 +332,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     icell = 0;
     while (xlumsum < xlum)
     {
-//?? 57+ This is not the best way to do this.  We should be able to sum over the plasma structure
+//?? 57+ XXX This is not the best way to do this.  We should be able to sum over the plasma structure
       if (wmain[icell].vol > 0.0)       //only consider cells with volume greater than zero
       {
         nplasma = wmain[icell].nplasma; //get the plasma cell in this wind cell
@@ -378,7 +378,7 @@ photstop=photstart;
 
 for (n=0;n<NPLASMA;n++)
 {
-	photstart=photstop;   //first time round, this gets set to photstart, afterwards we start the photon number from the end of the last cell
+	photstart=photstop;   //initially set to photstart, afterwards we start the photon number from the end of the last cell
 	photstop=photstart+ptype[n][0]+ptype[n][1]+ptype[n][2]; //This is the number of photons in this cell	
 	for (np=photstart;np<photstop;np++)
 	{	
@@ -392,20 +392,14 @@ for (n=0;n<NPLASMA;n++)
   		  Error_silent ("photo_gen_wind: On return from one_ff: icell %d vol %g t_e %g\n", icell, wmain[icell].vol, plasmamain[nplasma].t_e);
   		p[np].freq = 0.0;
 		}
-//	    if (icell==1100)
-//	  	  printf ("PHOT FF freq %e weight %e out\n",p[np].freq,weight);
 	}
 	else if (np<photstart+ptype[n][0]+ptype[n][1])
 	{
 		p[np].freq = one_fb (&wmain[icell], freqmin, freqmax);
-//	    if (icell==1100)
-//	  	  printf ("PHOT FB freq %e weight %e out\n",p[np].freq,weight);
 	}
 	else
 	{
 		p[np].freq = one_line (&wmain[icell], freqmin, freqmax, &p[n].nres);       /*And fill all the rest of the luminosity up with line photons */
-//	    if (icell==1100)
-//	  	  printf ("PHOT LI freq %e weight %e out\n",p[np].freq,weight);
 	}
 
     p[np].w = weight;
@@ -415,27 +409,27 @@ for (n=0;n<NPLASMA;n++)
     /*
        Determine the direction of the photon
        ?? Need to allow for anisotropic emission here
-       JM 1406 -- I think there's a mistake here. I believe this should be
-       if (p[n].nres < 0 || p[n].nres > NLINES || geo.scatter_mode == 0)
+       JM 1406 -- XXX I think there's a mistake here. I believe this should be
+       if (p[n].nres < 0 || p[n].nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
        to allow for isotropic BF continuum emission
      */
     nnscat = 1;
-    if (p[np].nres < 0 || geo.scatter_mode != 1)
+    if (p[np].nres < 0 || geo.scatter_mode != SCATTER_MODE_ANISOTROPIC)
     {
 /*  It was either an electron scatter so the  distribution is isotropic, or it
 was a resonant scatter but we want isotropic scattering anyway.  */
       randvec (p[np].lmn, 1.0);  /* The photon is emitted isotropically */
     }
-    else if (geo.scatter_mode == 1)
-    {                           // It was a line photon and we want anisotropic scattering mode 1
+    else if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
+    {                           // It was a line photon and we want anisotropic scattering 
 
 /* -1. forces a full reinitialization of the pdf for anisotropic scattering  */
 
       randwind (&p[np], p[np].lmn, wmain[icell].lmn);
 
     }
-    else if (geo.scatter_mode == 2)
-    {                           // It was a line photon and we want anisotropic scattering mode 2
+    else if (geo.scatter_mode == SCATTER_MODE_THERMAL)
+    {                           // It was a line photon and we want anisotropic scattering 
       randwind_thermal_trapping (&p[np], &nnscat);
     }
     p[np].nnscat = nnscat;
