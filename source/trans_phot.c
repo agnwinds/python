@@ -323,6 +323,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
           tau_scat = -log (1. - (rand () + 0.5) / MAXRAND);
           istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
           tau = 0;
+          if (iextract) {
+              stuff_phot (&pp, &pextract);
+              extract (w, &pextract, PTYPE_STAR);     // Treat as wind photon for purpose of extraction
+          }
       }
       else {  /*This is the end of the line for this photon */
           stuff_phot (&pp, p);
@@ -353,6 +357,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
           tau_scat = -log (1. - (rand () + 0.5) / MAXRAND);
           istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
           tau = 0;
+          if (iextract) {
+              stuff_phot (&pp, &pextract);
+              extract (w, &pextract, PTYPE_DISK);     // Treat as wind photon for purpose of extraction
+          }
       }
       else {  /*This is the end of the line for this photon */
           stuff_phot (&pp, p);
