@@ -315,29 +315,24 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     }
 
     if (istat == P_HIT_STAR)
-    {                           /* It was absorbed by the star */
+    {                           /* It hit the star */
+      geo.lum_star_back+=pp.w;
       if (geo.absorb_reflect==BACK_RAD_SCATTER){
           randvcos(pp.lmn,normal);
+          stuff_phot (&pp, p);
           tau_scat = -log (1. - (rand () + 0.5) / MAXRAND);
           istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
           tau = 0;
       }
-      stuff_phot (&pp, p);
-      geo.lum_star_back+=pp.w;
-      break;
+      else {  /*This is the end of the line for this photon */
+          stuff_phot (&pp, p);
+          break;
+      }
     }
 
     if (istat == P_HIT_DISK)
     {
-      /* It was absorbed by the disk */
-
-      if (geo.absorb_reflect==BACK_RAD_SCATTER){
-          randvcos(pp.lmn,normal);
-          tau_scat = -log (1. - (rand () + 0.5) / MAXRAND);
-          istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
-          tau = 0;
-      }
-      stuff_phot (&pp, p);
+      /* It hit the disk */
 
       /* Store the energy of the photon bundle into a disk structure so that one can determine later how much and where the
          disk was heated by photons.
@@ -351,7 +346,18 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       qdisk.nhit[kkk]++;
       geo.lum_disk_back=qdisk.heat[kkk] += pp.w;  // 60a - ksl - Added to be able to calculate illum of disk
       qdisk.ave_freq[kkk] += pp.w * pp.freq;
-      break;
+
+      if (geo.absorb_reflect==BACK_RAD_SCATTER){
+          randvcos(pp.lmn,normal);
+          stuff_phot (&pp, p);
+          tau_scat = -log (1. - (rand () + 0.5) / MAXRAND);
+          istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
+          tau = 0;
+      }
+      else {  /*This is the end of the line for this photon */
+          stuff_phot (&pp, p);
+          break;
+      }
     }
 
     if (istat == P_SCAT)

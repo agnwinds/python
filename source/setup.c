@@ -820,7 +820,7 @@ get_stellar_params ()
 
   geo.tstar=geo.tstar_init;
 
-  geo.lum_star_init=
+  geo.lum_star=geo.lum_star_init=
     4 * PI * geo.rstar * geo.rstar * STEFAN_BOLTZMANN * pow (geo.tstar, 4.);
 
 
