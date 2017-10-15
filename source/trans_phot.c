@@ -263,6 +263,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   double p_norm, tau_norm;
   double x_dfudge_check[3];
   int ndom;
+  double normal[3];
 
   /* Initialize parameters that are needed for the flight of the photon through the wind */
   stuff_phot (p, &pp);
@@ -293,7 +294,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
        not yet eliminated it from translate. ?? 02jan ksl */
 
     icell++;
-    istat = walls (&pp, p);
+    istat = walls (&pp, p,normal);
     // pp is where the photon is going, p is where it was
 
     if (modes.ispy)
@@ -315,6 +316,12 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
     if (istat == P_HIT_STAR)
     {                           /* It was absorbed by the star */
+      if (geo.absorb_reflect==BACK_RAD_SCATTER){
+          randvcos(pp.lmn,normal);
+          tau_scat = -log (1. - (rand () + 0.5) / MAXRAND);
+          istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
+          tau = 0;
+      }
       stuff_phot (&pp, p);
       geo.lum_star_back+=pp.w;
       break;
@@ -324,10 +331,18 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     {
       /* It was absorbed by the disk */
 
-      /* Store the energy of the photon bundle into a disk structure so that one can determine later how much and where the
-         disk was heated by photons */
-      /* Note that the disk is defined from 0 to NRINGS-2. NRINGS-1 contains the position of the outer radius of the disk. */
+      if (geo.absorb_reflect==BACK_RAD_SCATTER){
+          randvcos(pp.lmn,normal);
+          tau_scat = -log (1. - (rand () + 0.5) / MAXRAND);
+          istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
+          tau = 0;
+      }
       stuff_phot (&pp, p);
+
+      /* Store the energy of the photon bundle into a disk structure so that one can determine later how much and where the
+         disk was heated by photons.
+         Note that the disk is defined from 0 to NRINGS-2. NRINGS-1 contains the position of the outer radius of the disk. */
+
       rrr = sqrt (dot (pp.x, pp.x));
       kkk = 0;
       while (rrr > qdisk.r[kkk] && kkk < NRINGS - 1)
@@ -542,7 +557,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
          after scattering. Note that walls updates the istat in pp as well.
          This may not be necessary but I think to account for every eventuality 
          it should be done */
-      istat = walls (&pp, p);
+      istat = walls (&pp, p,normal);
 
       /* This *does not* update istat if the photon scatters outside of the wind-
          I guess P_INWIND is really in wind or empty space but not escaped.

@@ -123,6 +123,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   int nplasma;
   PlasmaPtr xplasma, xplasma2;
   int ndom;
+  double normal[3];
 
   one = &w[p->grid];            //Get a pointer to the cell where the photon bundle is located.
   nplasma = one->nplasma;
@@ -381,7 +382,7 @@ process. */
                it's still in the wind and second get a pointer to the grid cell where the resonance really happens.
              */
 
-            check_in_grid = walls (&p_now, p);
+            check_in_grid = walls (&p_now, p, normal);
 
             if (check_in_grid != P_HIT_STAR && check_in_grid != P_HIT_DISK && check_in_grid != P_ESCAPE)
             {

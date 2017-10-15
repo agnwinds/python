@@ -398,7 +398,7 @@ iwind = -1 	Don't generate any wind photons at all
   Log
     ("!! xdefine_phot: star  tstar  %8.2e   %8.2e   lum_star %8.2e %8.2e  %8.2e \n", geo.tstar, geo.tstar_init, geo.lum_star, geo.lum_star_init, geo.lum_star_back);
   Log
-    ("!! xdefine_phot: disk                          lum_disk %8.2e %8.2e  %8.2e \n", geo.lum_disk, geo.lum_disk_init, geo.lum_disk_back);
+    ("!! xdefine_phot: disk                                lum_disk %8.2e %8.2e  %8.2e \n", geo.lum_disk, geo.lum_disk_init, geo.lum_disk_back);
 
 
 

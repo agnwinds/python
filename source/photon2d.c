@@ -548,27 +548,27 @@ double xnorth[]={0.,0.,1.};
 double xsouth[]={0.,0.,-1.};
 
 int
-walls (p, pold)
+walls (p, pold,normal)
      PhotPtr p, pold;
+     double *normal;
 {
   double r, rho, rho_sq;
   double xxx[3];
   double s, z;
 
-  /* Check to see if the photon has hit the star. If we plan to
-   * scatter the photon and not simply destroy, put the photon
-   * at the photoshper and reorient it. */
+  /* Check to see if the photon has hit the star. If so
+   * put the photon at the star surface and use that position
+   * to determine the normal to the surface, the assumption
+   * being that the star is located at the center of the
+   * coordiante grid.
+   */
+  
   if ((r = dot (p->x, p->x)) < geo.rstar_sq) {
-      if (geo.absorb_reflect==BACK_RAD_SCATTER){
-      /* Put photon at the star surface */
       s=ds_to_sphere(geo.rstar,pold);
       stuff_phot(pold,p);
       move_phot(p,s);
-      /* Now reorient the photon*/
-      randvcos(p->lmn,p->x);
-      }
-    return (p->istat = P_HIT_STAR);
-    return(p->istat); // XXX - Not sure we want to simply ignore how many photons have hit star
+      stuff_v(p->x,normal); 
+      return (p->istat = P_HIT_STAR);
   }
 
   /* Check to see if it has hit the disk.  */
@@ -581,6 +581,8 @@ walls (p, pold)
       // We are inside the disk
       s = ds_to_disk (pold, 0);
       stuff_phot (pold, p);
+      // XXX Vertically extended disk needs to be fixed here
+      Error("walls: We are not calculating the where we hit the vertically extended disk correctly\n");
       move_phot (p, s);
       return (p->istat = P_HIT_DISK);
     }
@@ -599,27 +601,18 @@ walls (p, pold)
     if (dot (xxx, xxx) < geo.diskrad_sq )
     {                           /* The photon has hit the disk */
       stuff_phot (pold, p);     /* Move the photon to the point where it hits the disk */
-      move_phot (p, s - DFUDGE);
-      if (geo.absorb_reflect == BACK_RAD_SCATTER){
-          if (pold->x[2]>0) {
+      move_phot (p, s - DFUDGE); 
+      if (pold->x[2]>0) {
           randvcos(p->lmn,xnorth);
+          stuff_v(xnorth,normal);
           }
-          else {
+     else {
           randvcos(p->lmn,xsouth);
+          stuff_v(xsouth,normal);
           }
-          return (p->istat);
-      }
-      else {
-          return (p->istat = P_HIT_DISK);
-      }
+     return (p->istat = P_HIT_DISK);
     }
 
-//OLD    if (dot (xxx, xxx) < geo.diskrad_sq && geo.absorb_reflect != BACK_RAD_SCATTER)
-//OLD    {                           /* The photon has hit the disk */
-//OLD      stuff_phot (pold, p);     /* Move the photon to the point where it hits the disk */
-//OLD      move_phot (p, s);
-//OLD      return (p->istat = P_HIT_DISK);
-//OLD    }
   }
 
   /* At this point we know the photon has not hit the disk or the star, so we now

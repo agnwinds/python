@@ -256,6 +256,7 @@ extract_one (w, pp, itype, nspec)
   double dvds;
   double lfreqmin, lfreqmax, ldfreq;
   int ishell;
+  double normal[3];
 
 
   weight_min = EPSILON * pp->w;
@@ -344,7 +345,7 @@ the same resonance again */
     istat = translate (w, pp, 20., &tau, &nres);
     icell++;
 
-    istat = walls (pp, &pstart);
+    istat = walls (pp, &pstart,normal);
     if (istat == -1)
     {
       Error ("Extract_one: Abnormal return from translate\n");
