@@ -67,14 +67,15 @@ get_homologous_params (ndom)
   rddoub ("homologous.density_exponent", &one_dom->cl_beta);    /* Density law exponent */
 
 
-/* Assign the generic parameters for the wind the generic parameters of the wind */
+  /* Assign the generic parameters for the wind the generic parameters of the wind */
   one_dom->wind_thetamin = 0.0;
   one_dom->wind_thetamax = 90. / RADIAN;
 
-/* define the the variables that determine the gridding */
+  /* define the the variables that determine the gridding */
   one_dom->wind_rho_min = 0;
-  one_dom->wind_rho_max = geo.rmax;
-  one_dom->zmax = geo.rmax;
+  /* JM 1710 -- fixed these to use domain value rather than geo value see #305 */
+  one_dom->wind_rho_max = one_dom->rmax;
+  one_dom->zmax = one_dom->rmax;
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)

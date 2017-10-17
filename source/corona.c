@@ -39,7 +39,7 @@ get_corona_params (ndom)
 {
   Log ("Creating a corona above a disk\n");
 
-// Start with reasonable values for everything which is important
+  // Start with reasonable values for everything which is important
 
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 0.0;

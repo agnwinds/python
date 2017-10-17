@@ -82,7 +82,6 @@ get_sv_wind_params (ndom)
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
   zdom[ndom].rmin = geo.rstar;
-  zdom[ndom].rmax = 10. * zdom[ndom].sv_r_scale;        // Set rmax to something reasonable
   zdom[ndom].wind_rho_min = zdom[ndom].sv_rmin;
   zdom[ndom].wind_rho_max = zdom[ndom].sv_rmax;
   zdom[ndom].wind_thetamin = zdom[ndom].sv_thetamin;

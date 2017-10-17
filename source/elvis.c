@@ -125,7 +125,9 @@ get_elvis_wind_params (ndom)
 
 
   zdom[ndom].rmin = geo.rstar;
-  zdom[ndom].rmax = zdom[ndom].elvis_offset + 10. * zdom[ndom].sv_r_scale;
+  /* JM 1710 -- removed for issue #305 
+  //zdom[ndom].rmax = zdom[ndom].elvis_offset + 10. * zdom[ndom].sv_r_scale;
+  */
   zdom[ndom].wind_rho_min = zdom[ndom].sv_rmin - (zdom[ndom].elvis_offset * tan (zdom[ndom].sv_thetamin));
   zdom[ndom].wind_rho_max = zdom[ndom].sv_rmax - (zdom[ndom].elvis_offset * tan (zdom[ndom].sv_thetamin));
   zdom[ndom].wind_thetamin = zdom[ndom].sv_thetamin;

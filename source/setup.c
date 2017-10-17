@@ -653,9 +653,9 @@ get_wind_params (ndom)
   // it is not obvious that is happenning
 
   zdom[ndom].rmax = 1e12;
-/*  ksl - this line is not used anywhre and so has been commened out. Currenly
- *  we initialize all of the plasma temperatures to geo.twind_init  */
-//  zdom[ndom].twind_init = 1e5;   
+  /*  ksl - this line is not used anywhre and so has been commented out. Currently
+   *  we initialize all of the plasma temperatures to geo.twind_init  */
+  //  zdom[ndom].twind_init = 1e5;   
 
   if (geo.system_type == SYSTEM_TYPE_AGN)
     {
@@ -677,16 +677,15 @@ get_wind_params (ndom)
    * wind to be geo.rmax regardless, in routines like get_stellar_wind_params and get_sv_wind
    * This is not what we want.  What should happen is that for each componetn where it is
    * relevant we should ask for the outer edge of the domain and then at the end we should determine
-   * what geo.rmax should be set to.  There are some cases, e.g. get_hydor_wind where one should not
+   * what geo.rmax should be set to.  There are some cases, e.g. get_hydro_wind where one should not
    * need to ask the question about rmax, but others where it is necessary
    */
 
-
   /* Next lines are to assure that we have the largest possible value of the 
    * sphere surrounding the system
+   * JM 1710 -- if this is the first domain, then initialise geo.rmax see #305
    */
-
-  if (zdom[ndom].rmax > geo.rmax)
+  if ( (ndom == 0) || (zdom[ndom].rmax > geo.rmax) )
     {
       geo.rmax = zdom[ndom].rmax;
     }
@@ -752,17 +751,6 @@ get_wind_params (ndom)
      we know what we are doing with inputs for multiple domains. Could create confusion */
 
   rddoub ("filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
-
-
-  /* Next lines are to assure that we have the largest possible value of the 
-   * sphere surrounding the system
-   */
-
-  if (zdom[ndom].rmax > geo.rmax)
-    {
-      geo.rmax = zdom[ndom].rmax;
-    }
-  geo.rmax_sq = geo.rmax * geo.rmax;
 
   return (0);
 }
