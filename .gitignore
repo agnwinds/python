@@ -33,17 +33,20 @@ bin/py*
 *.hex
 
 
-#things from gsl
-
-
-
+# things from gsl, may not be necessary 
+software/gsl-1.15/Makefile
+software/gsl-1.15/*/Makefile
+software/gsl-1.15/*.dSYM
+software/gsl-1.15/*/*.dSYM
 
 # python and system files
 *.pyc
 *~
 *.DS_Store
 
-
 # some gsl files
 *.Plo
 *.Po
+
+# atomic data files should not be tracked by this repository 
+data/
