@@ -57,15 +57,14 @@ clean:
 	rm -f *.o *~
 	cd $(GSL); make clean;  
 	cd $(PYTHON)/source/; make clean
-	rm -rf $(PYTHON)/include/gsl/
-	rm -f $(PYTHON)/lib/lib*
-	
-
 
 # runs a more rigorous clean in gsl
 distclean:
 	rm -f *.o *~
 	cd $(GSL); make distclean 
 	cd $(PYTHON)/source/; make clean
+
+# actually removes the compiled libraries
+rm_lib:
 	rm -rf $(PYTHON)/include/gsl/
 	rm -f $(PYTHON)/lib/lib*
