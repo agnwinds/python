@@ -413,12 +413,36 @@ main (argc, argv)
 
     if (geo.run_type != SYSTEM_TYPE_PREVIOUS)
     {
+    /* get_stellar_params gets information like mstar, rstar, tstar etc.
+       it returns the luminosity of the star */
+
+    rdpar_comment("Parameters for the Central Object");
+    lstar = get_stellar_params ();
+
+    /* Describe the disk */
       /* This option is the most common one, where we are starting to define a completely new system.  
        */
 
+    rdpar_comment("Parameters for the Disk (if there is one)");
       rdint ("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)", &geo.disk_type);
 
 
+
+    if (geo.disk_type)          /* Then a disk exists and it needs to be described */
+    {
+      get_disk_params ();
+    }
+
+    /* describe the boundary layer / agn components to the spectrum if they exist. 
+       reads in information specified by the user and sets variables in geo structure */
+
+    get_bl_and_agn_params (lstar);
+
+    /* Describe the wind. This routine reads in geo.rmax and geo.twind
+       and then gets params by calling e.g. get_sv_wind_params() */
+
+
+    rdpar_comment("Parameters descibing the various winds or coronae in the system");
 
       rdint ("Number.of.wind.components", &ndomains);
 
@@ -509,22 +533,22 @@ main (argc, argv)
   if (geo.run_type != SYSTEM_TYPE_PREVIOUS)     // Start of block to define a model for the first time
   {
 
-    /* get_stellar_params gets information like mstar, rstar, tstar etc.
-       it returns the luminosity of the star */
+//OLD    /* get_stellar_params gets information like mstar, rstar, tstar etc.
+//OLD       it returns the luminosity of the star */
 
-    lstar = get_stellar_params ();
+//OLD    lstar = get_stellar_params ();
 
-    /* Describe the disk */
+//OLD    /* Describe the disk */
 
-    if (geo.disk_type)          /* Then a disk exists and it needs to be described */
-    {
-      get_disk_params ();
-    }
+//OLD    if (geo.disk_type)          /* Then a disk exists and it needs to be described */
+//OLD    {
+//OLD      get_disk_params ();
+//OLD    }
 
-    /* describe the boundary layer / agn components to the spectrum if they exist. 
-       reads in information specified by the user and sets variables in geo structure */
+//OLD    /* describe the boundary layer / agn components to the spectrum if they exist. 
+//OLD       reads in information specified by the user and sets variables in geo structure */
 
-    get_bl_and_agn_params (lstar);
+//OLD    get_bl_and_agn_params (lstar);
 
     /* Describe the wind. This routine reads in geo.rmax and geo.twind
        and then gets params by calling e.g. get_sv_wind_params() */
