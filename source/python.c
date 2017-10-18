@@ -411,6 +411,16 @@ main (argc, argv)
       geo.pcycle = 0;           /* This is a new run of an old windsave file so we set the nunber of cycles already done to 0 */
     }
 
+
+  /* Determine what radiation sources are turned on.  
+     Note that most of the parameters, e.g T, or power_law index,  
+     that define the spectrum of the sources are set in init_geo 
+   */
+
+  /* XXX - All operating modes */
+  get_radiation_sources ();
+
+
     if (geo.run_type != SYSTEM_TYPE_PREVIOUS)
     {
     /* get_stellar_params gets information like mstar, rstar, tstar etc.
@@ -517,13 +527,13 @@ main (argc, argv)
   init_ionization ();
 
 
-  /* Determine what radiation sources are turned on.  
-     Note that most of the parameters, e.g T, or power_law index,  
-     that define the spectrum of the sources are set in init_geo 
-   */
+//OLD  /* Determine what radiation sources are turned on.  
+//OLD     Note that most of the parameters, e.g T, or power_law index,  
+//OLD     that define the spectrum of the sources are set in init_geo 
+//OLD   */
 
-  /* XXX - All operating modes */
-  get_radiation_sources ();
+//OLD  /* XXX - All operating modes */
+//OLD  get_radiation_sources ();
 
 
   /* Note: ksl - At this point, SYSTEM_TYPE_PREVIOUS refers both to a restart and to a situation where 
