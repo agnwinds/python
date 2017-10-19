@@ -495,132 +495,6 @@ get_line_transfer_mode ()
 
 
 
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_radiation_sources
-   
-Arguments:    
-
-Returns:
- 
- 
-Description:  
-
-Notes:
-
-History:
-  1502  JM  Moved here from main()
-  1605	ksl Modified the logic of this so that different radiation
-  	    sources could be chosen for SYSTEM_TYPE_ONE_D
-
-**************************************************************/
-
-int
-get_radiation_sources ()
-{
-  if (geo.system_type == SYSTEM_TYPE_AGN)	/* If it is an AGN */
-    {
-      geo.star_radiation = 0;	// 70b - AGN do not have a star at the center */
-      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-      geo.bl_radiation = 0;
-      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-      geo.agn_radiation = 1;
-      rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
-    }
-
-  else if (geo.system_type == SYSTEM_TYPE_ONE_D)
-    {
-      geo.search_light_radiation = 1;	// The point of this model is we need this
-      geo.star_radiation = 0;
-      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-      geo.bl_radiation = 0;
-      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-      geo.agn_radiation = 0;
-    }
-
-  else
-    {				/* If is a stellar system */
-      rdint ("Star_radiation(y=1)", &geo.star_radiation);
-      if (geo.disk_type != DISK_NONE)
-	{
-	  rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-	}
-      else
-	{
-	  geo.disk_radiation = 0;
-	}
-      rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
-      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-      geo.agn_radiation = 0;	// So far at least, our star systems don't have a BH
-    }
-
-  if (!geo.star_radiation && !geo.disk_radiation && !geo.bl_radiation
-      && !geo.bl_radiation && !geo.agn_radiation)
-    {
-      Error ("python: No radiation sources so nothing to do but quit!\n");
-      exit (0);
-    }
-
-  /* 
-     With the macro atom approach we won't want to generate photon 
-     bundles in the wind so switch it off here. (SS)
-   */
-
-  if (geo.rt_mode == RT_MODE_MACRO)
-    {
-      Log
-	("python: Using Macro Atom method so switching off wind radiation.\n");
-      geo.wind_radiation = 0;
-    }
-
-
-  /* 080517 - ksl - Reassigning bb to -1, etc is to make room for reading in model
-     grids, but complicates what happens if one tries to restart a model.  This needs
-     to be updated so one can re-read the geo file, proabbly by defining variaables 
-     BB etc, and then by checking whether or not the type is assigned to BB or read
-     in as 0.  Also need to store each of these model list names in geo structure.
-   */
-
-  get_spectype (geo.star_radiation,
-		"Rad_type_for_star(0=bb,1=models)_to_make_wind",
-		&geo.star_ion_spectype);
-
-  get_spectype (geo.disk_radiation,
-		"Rad_type_for_disk(0=bb,1=models)_to_make_wind",
-		&geo.disk_ion_spectype);
-
-  get_spectype (geo.bl_radiation,
-		"Rad_type_for_bl(0=bb,1=models,3=pow)_to_make_wind",
-		&geo.bl_ion_spectype);
-  get_spectype (geo.agn_radiation,
-		"Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind",
-		&geo.agn_ion_spectype);
-
-  /* 130621 - ksl - This is a kluge to add a power law to stellar systems.  What id done
-     is to remove the bl emission, which we always assume to some kind of temperature
-     driven source, and replace it with a power law source
-
-     Note that the next 3 or 4 lines just tell you that there is supposed to be a power
-     law source.  They don't teel you what the parameters are.
-   */
-
-  if (geo.bl_ion_spectype == SPECTYPE_POW)
-    {
-      geo.agn_radiation = 1;
-      geo.agn_ion_spectype = SPECTYPE_POW;
-      geo.bl_radiation = 0;
-      Log ("Trying to make a start with a power law boundary layer\n");
-    }
-  else
-    {
-      Log ("Not Trying to make a start with a power law boundary layer %d\n",
-	   geo.bl_ion_spectype);
-    }
-
-  return (0);
-}
 
 
 
@@ -801,8 +675,19 @@ get_stellar_params ()
 
   geo.r_agn = geo.rstar;	/* At present just set geo.r_agn to geo.rstar */
   geo.rstar_sq = geo.rstar * geo.rstar;
+  if (geo.system_type!= SYSTEM_TYPE_AGN) {
+      rdint ("Star_radiation(y=1)", &geo.star_radiation);
+      get_spectype (geo.star_radiation,
+		"Rad_type_for_star(0=bb,1=models)_to_make_wind",
+		&geo.star_ion_spectype);
+
   if (geo.star_radiation)
-    rddoub ("tstar", &geo.tstar_init);
+       rddoub ("tstar", &geo.tstar_init);
+  }
+  else {
+      geo.star_radiation=0;
+      geo.tstar_init=0;
+  }
 
   /* tstar_init and lum_star_init refer to values without the effects of backscattering */
 
@@ -922,9 +807,52 @@ get_bl_and_agn_params (lstar)
   double xbl;
   double temp_const_agn;
 
+  rdpar_comment("Parameters for BL or AGN");
+
+  if (geo.system_type == SYSTEM_TYPE_AGN)	/* If it is an AGN */
+    {
+      geo.star_radiation = 0;	// 70b - AGN do not have a star at the center */
+      geo.bl_radiation = 0;
+      geo.agn_radiation = 1;
+      rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
+    }
+  else {
+    rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
+    geo.agn_radiation = 0;	// So far at least, our star systems don't have a BH
+  }
+
+
+  get_spectype (geo.bl_radiation,
+		"Rad_type_for_bl(0=bb,1=models,3=pow)_to_make_wind",
+		&geo.bl_ion_spectype);
+  get_spectype (geo.agn_radiation,
+		"Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind",
+		&geo.agn_ion_spectype);
+
+  /* 130621 - ksl - This is a kluge to add a power law to stellar systems.  What id done
+     is to remove the bl emission, which we always assume to some kind of temperature
+     driven source, and replace it with a power law source
+
+     Note that the next 3 or 4 lines just tell you that there is supposed to be a power
+     law source.  They don't teel you what the parameters are.
+   */
+
+  if (geo.bl_ion_spectype == SPECTYPE_POW)
+    {
+      geo.agn_radiation = 1;
+      geo.agn_ion_spectype = SPECTYPE_POW;
+      geo.bl_radiation = 0;
+      Log ("Trying to make a start with a power law boundary layer\n");
+    }
+  else
+    {
+      Log ("Not Trying to make a start with a power law boundary layer %d\n",
+	   geo.bl_ion_spectype);
+    }
+
+
   /* Describe the boundary layer */
 
-  //OLD 130622      if (geo.bl_radiation )    Change made to allow a power law boundary layer
   if (geo.bl_radiation && geo.bl_ion_spectype != SPECTYPE_POW)
     {
       xbl = geo.lum_bl = 0.5 * G * geo.mstar * geo.disk_mdot / geo.rstar;

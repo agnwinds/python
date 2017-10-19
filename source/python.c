@@ -412,14 +412,6 @@ main (argc, argv)
     }
 
 
-  /* Determine what radiation sources are turned on.  
-     Note that most of the parameters, e.g T, or power_law index,  
-     that define the spectrum of the sources are set in init_geo 
-   */
-
-  /* XXX - All operating modes */
-  get_radiation_sources ();
-
 
     if (geo.run_type != SYSTEM_TYPE_PREVIOUS)
     {
@@ -435,6 +427,17 @@ main (argc, argv)
 
     rdpar_comment("Parameters for the Disk (if there is one)");
       rdint ("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)", &geo.disk_type);
+    if (geo.disk_type != DISK_NONE)
+     {
+      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+    }
+    else
+    {
+    geo.disk_radiation = 0;
+    }
+     get_spectype (geo.disk_radiation,
+           "Rad_type_for_disk(0=bb,1=models)_to_make_wind",
+           &geo.disk_ion_spectype);
 
 
 
@@ -448,13 +451,38 @@ main (argc, argv)
 
     get_bl_and_agn_params (lstar);
 
+      /* At this point we check whether we have any sources of radiation and exit if we do not */
+
+    if (!geo.star_radiation && !geo.disk_radiation && !geo.bl_radiation
+                && !geo.bl_radiation && !geo.agn_radiation)
+          {
+               Error ("python: No radiation sources so nothing to do but quit!\n");
+               exit (0);
+            }
+
+    /* With the macro atom approach we won't want to generate photon 
+     bundles in the wind so switch it off here. (SS) */
+
+    if (geo.rt_mode == RT_MODE_MACRO)
+         {
+              Log ("python: Using Macro Atom method so switching off wind radiation.\n");
+              geo.wind_radiation = 0;
+          }
+
+
+
     /* Describe the wind. This routine reads in geo.rmax and geo.twind
        and then gets params by calling e.g. get_sv_wind_params() */
 
 
     rdpar_comment("Parameters descibing the various winds or coronae in the system");
 
+      rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+
+
+
       rdint ("Number.of.wind.components", &ndomains);
+
 
       for (n = 0; n < ndomains; n++)
       {
@@ -527,13 +555,6 @@ main (argc, argv)
   init_ionization ();
 
 
-//OLD  /* Determine what radiation sources are turned on.  
-//OLD     Note that most of the parameters, e.g T, or power_law index,  
-//OLD     that define the spectrum of the sources are set in init_geo 
-//OLD   */
-
-//OLD  /* XXX - All operating modes */
-//OLD  get_radiation_sources ();
 
 
   /* Note: ksl - At this point, SYSTEM_TYPE_PREVIOUS refers both to a restart and to a situation where 
@@ -543,22 +564,6 @@ main (argc, argv)
   if (geo.run_type != SYSTEM_TYPE_PREVIOUS)     // Start of block to define a model for the first time
   {
 
-//OLD    /* get_stellar_params gets information like mstar, rstar, tstar etc.
-//OLD       it returns the luminosity of the star */
-
-//OLD    lstar = get_stellar_params ();
-
-//OLD    /* Describe the disk */
-
-//OLD    if (geo.disk_type)          /* Then a disk exists and it needs to be described */
-//OLD    {
-//OLD      get_disk_params ();
-//OLD    }
-
-//OLD    /* describe the boundary layer / agn components to the spectrum if they exist. 
-//OLD       reads in information specified by the user and sets variables in geo structure */
-
-//OLD    get_bl_and_agn_params (lstar);
 
     /* Describe the wind. This routine reads in geo.rmax and geo.twind
        and then gets params by calling e.g. get_sv_wind_params() */
