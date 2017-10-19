@@ -1,4 +1,4 @@
-The .pf files in this directroy are intended for testing out
+The .pf files in this directory are intended for testing out
 various verisons of python using the script regression.py which 
 is in py_progs.  
 
@@ -27,3 +27,5 @@ Ideally, the history of these changes would be documented here:
 Surface.reflection is now always requested, where as in earlier versions of python it was 
 not needed, in situations where there was no disk.  AS a result, this rdpar line has been added
 to 1d_sn.pf and star.pf
+
+
