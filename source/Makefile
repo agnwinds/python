@@ -164,7 +164,7 @@ foo: foo.o signal.o time.o
 
 # these are the objects required for compiltion of python
 # note that the kpar_source is now separate from this
-python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
+python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o parse.o init.o \
 		saha.o spectra.o wind2d.o wind.o  vvector.o debug.o recipes.o \
 		trans_phot.o phot_util.o resonate.o radiation.o \
 		wind_updates2d.o windsave.o extract.o cdf.o roche.o random.o \
@@ -184,9 +184,9 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o \
 
 # For reasons that are unclear to me.  get_models.c cannot be included in the sources
 # Problems ocurr due to the prototypes that are generated.  ksl 160705
-python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c \
+python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 		saha.c spectra.c wind2d.c wind.c  vvector.c debug.c recipes.c \
-		trans_phot.c phot_util.c resonate.c radiation.c \
+		trans_phot.c phot_util.c resonate.c radiation.c init.c \
 		wind_updates2d.c windsave.c extract.c cdf.c roche.c random.c \
 		stellar_wind.c homologous.c hydro_import.c corona.c knigge.c  disk.c\
 		lines.c  continuum.c emission.c cooling.c recomb.c diag.c \

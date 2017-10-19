@@ -35,6 +35,8 @@ double disk_init(double rmin, double rmax, double m, double mdot, double freqmin
 int photo_gen_disk(PhotPtr p, double weight, double f1, double f2, int spectype, int istart, int nphot);
 int phot_gen_sum(char filename[], char mode[]);
 double bl_init(double lum_bl, double t_bl, double freqmin, double freqmax, int ioniz_or_final, double *f);
+/* parse.c */
+int parse_command_line(int argc, char *argv[]);
 /* saha.c */
 int nebular_concentrations(PlasmaPtr xplasma, int mode);
 int concentrations(PlasmaPtr xplasma, int mode);
@@ -476,7 +478,6 @@ int communicate_estimators_para(void);
 int gather_spectra_para(int nspec_helper, int nspecs);
 int communicate_matom_estimators_para(void);
 /* setup.c */
-int parse_command_line(int argc, char *argv[]);
 int init_log_and_windsave(int restart_stat);
 int get_grid_params(int ndom);
 int get_line_transfer_mode(void);
