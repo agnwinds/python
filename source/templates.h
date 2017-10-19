@@ -480,7 +480,6 @@ int parse_command_line(int argc, char *argv[]);
 int init_log_and_windsave(int restart_stat);
 int get_grid_params(int ndom);
 int get_line_transfer_mode(void);
-int get_radiation_sources(void);
 int get_wind_params(int ndom);
 double get_stellar_params(void);
 double get_disk_params(void);

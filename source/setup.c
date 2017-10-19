@@ -415,8 +415,8 @@ get_line_transfer_mode ()
      treatment and treat everything as 2-level simple ions inside the macro atom formalism */
 
   /* For now handle scattering as part of a hidden line transfermode ?? */
-  geo.scatter_mode = SCATTER_MODE_ISOTROPIC;		// isotropic
-  geo.rt_mode = RT_MODE_2LEVEL;		// Not macro atom (SS)
+  geo.scatter_mode = SCATTER_MODE_ISOTROPIC;	// isotropic
+  geo.rt_mode = RT_MODE_2LEVEL;	// Not macro atom (SS)
   if (geo.line_mode == 0)
     {
       Log ("Line_transfer mode:  Simple, pure absorption\n");
@@ -440,7 +440,7 @@ get_line_transfer_mode ()
 	("Line_transfer mode:  Simple, anisotropic scattering, escape probabilities\n");
       geo.scatter_mode = SCATTER_MODE_ANISOTROPIC;	// Turn on anisotropic scattering
       geo.line_mode = 3;	// Drop back to escape probabilities
-      geo.rt_mode = RT_MODE_2LEVEL;		// Not macro atom (SS)
+      geo.rt_mode = RT_MODE_2LEVEL;	// Not macro atom (SS)
     }
   else if (geo.line_mode == 5)
     {
@@ -448,14 +448,14 @@ get_line_transfer_mode ()
 	("Line_transfer mode:  Simple, thermal trapping, Single scattering \n");
       geo.scatter_mode = SCATTER_MODE_THERMAL;	// Thermal trapping model
       geo.line_mode = 3;	// Single scattering model is best for this mode
-      geo.rt_mode = RT_MODE_2LEVEL;		// Not macro atom (SS) 
+      geo.rt_mode = RT_MODE_2LEVEL;	// Not macro atom (SS) 
     }
   else if (geo.line_mode == 6)
     {
       Log ("Line_transfer mode:  macro atoms, isotropic scattering  \n");
       geo.scatter_mode = SCATTER_MODE_ISOTROPIC;	// isotropic
       geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment (SS)
+      geo.rt_mode = RT_MODE_MACRO;	// Identify macro atom treatment (SS)
       geo.macro_simple = 0;	// We don't want the all simple case (SS)
     }
   else if (geo.line_mode == 7)
@@ -463,7 +463,7 @@ get_line_transfer_mode ()
       Log ("Line_transfer mode:  macro atoms, anisotropic  scattering  \n");
       geo.scatter_mode = SCATTER_MODE_THERMAL;	// thermal trapping
       geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment (SS)
+      geo.rt_mode = RT_MODE_MACRO;	// Identify macro atom treatment (SS)
       geo.macro_simple = 0;	// We don't want the all simple case (SS)
     }
   else if (geo.line_mode == 8)
@@ -472,7 +472,7 @@ get_line_transfer_mode ()
 	("Line_transfer mode:  simple macro atoms, isotropic  scattering  \n");
       geo.scatter_mode = SCATTER_MODE_ISOTROPIC;	// isotropic
       geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment i.e. indivisible packets
+      geo.rt_mode = RT_MODE_MACRO;	// Identify macro atom treatment i.e. indivisible packets
       geo.macro_simple = 1;	// This is for test runs with all simple ions (SS)
     }
   else if (geo.line_mode == 9)	// JM 1406 -- new mode, as mode 7, but scatter mode is 1
@@ -481,7 +481,7 @@ get_line_transfer_mode ()
 	("Line_transfer mode:  simple macro atoms, anisotropic  scattering  \n");
       geo.scatter_mode = SCATTER_MODE_ANISOTROPIC;	// anisotropic scatter mode 1
       geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = RT_MODE_MACRO;		// Identify macro atom treatment 
+      geo.rt_mode = RT_MODE_MACRO;	// Identify macro atom treatment 
       geo.macro_simple = 0;	// We don't want the all simple case 
     }
   else
@@ -559,7 +559,7 @@ get_wind_params (ndom)
    * sphere surrounding the system
    * JM 1710 -- if this is the first domain, then initialise geo.rmax see #305
    */
-  if ( (ndom == 0) || (zdom[ndom].rmax > geo.rmax) )
+  if ((ndom == 0) || (zdom[ndom].rmax > geo.rmax))
     {
       geo.rmax = zdom[ndom].rmax;
     }
@@ -675,25 +675,27 @@ get_stellar_params ()
 
   geo.r_agn = geo.rstar;	/* At present just set geo.r_agn to geo.rstar */
   geo.rstar_sq = geo.rstar * geo.rstar;
-  if (geo.system_type!= SYSTEM_TYPE_AGN) {
+  if (geo.system_type != SYSTEM_TYPE_AGN)
+    {
       rdint ("Star_radiation(y=1)", &geo.star_radiation);
       get_spectype (geo.star_radiation,
-		"Rad_type_for_star(0=bb,1=models)_to_make_wind",
-		&geo.star_ion_spectype);
+		    "Rad_type_for_star(0=bb,1=models)_to_make_wind",
+		    &geo.star_ion_spectype);
 
-  if (geo.star_radiation)
-       rddoub ("tstar", &geo.tstar_init);
-  }
-  else {
-      geo.star_radiation=0;
-      geo.tstar_init=0;
-  }
+      if (geo.star_radiation)
+	rddoub ("tstar", &geo.tstar_init);
+    }
+  else
+    {
+      geo.star_radiation = 0;
+      geo.tstar_init = 0;
+    }
 
   /* tstar_init and lum_star_init refer to values without the effects of backscattering */
 
-  geo.tstar=geo.tstar_init;
+  geo.tstar = geo.tstar_init;
 
-  geo.lum_star=geo.lum_star_init=
+  geo.lum_star = geo.lum_star_init =
     4 * PI * geo.rstar * geo.rstar * STEFAN_BOLTZMANN * pow (geo.tstar, 4.);
 
 
@@ -744,7 +746,8 @@ get_disk_params ()
   geo.disk_mdot /= (MSOL / YR);	// Convert to msol/yr to simplify input
   rddoub ("disk.mdot(msol/yr)", &geo.disk_mdot);
   geo.disk_mdot *= (MSOL / YR);
-  rdint ("Disk.temperature.profile(0=standard;1=readin,2=analytic)", &geo.disk_tprofile);
+  rdint ("Disk.temperature.profile(0=standard;1=readin,2=analytic)",
+	 &geo.disk_tprofile);
   if (geo.disk_tprofile == DISK_TPROFILE_READIN)
     {
       rdstr ("T_profile_file", files.tprofile);
@@ -807,7 +810,7 @@ get_bl_and_agn_params (lstar)
   double xbl;
   double temp_const_agn;
 
-  rdpar_comment("Parameters for BL or AGN");
+  rdpar_comment ("Parameters for BL or AGN");
 
   if (geo.system_type == SYSTEM_TYPE_AGN)	/* If it is an AGN */
     {
@@ -816,10 +819,11 @@ get_bl_and_agn_params (lstar)
       geo.agn_radiation = 1;
       rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
     }
-  else {
-    rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
-    geo.agn_radiation = 0;	// So far at least, our star systems don't have a BH
-  }
+  else
+    {
+      rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
+      geo.agn_radiation = 0;	// So far at least, our star systems don't have a BH
+    }
 
 
   get_spectype (geo.bl_radiation,

@@ -1093,7 +1093,6 @@ int
 get_root (root, total)
      char root[], total[];
 {
-//OLD  int i, j;
   int j;
   char *pf;
   int position;
@@ -1126,27 +1125,6 @@ get_root (root, total)
   strncpy (root, total, j);
   root[j] = '\0';
 
-
-//OLD  Next section replaced 161231
-//OLD  // Locate the last period
-//OLD  i = strcspn (total, ".");
-
-//OLD  if ((j = strcspn (total, "\n")) < i)
-//OLD    i = j;
-//OLD  if (i == 0)
-//OLD  {
-//OLD    strcpy (root, "rdpar");
-//OLD  }
-//OLD  else
-//OLD  {
-//OLD
-//OLD
-//OLD    strncpy (root, total, strcspn (total, "."));
-//OLD    root[i] = '\0';
-//OLD  }
-
-//OLD  if ((verbose) && (rd_rank == 0))
-//OLD    printf ("%s\n", root);
 
   return (0);
 }
