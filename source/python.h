@@ -144,7 +144,7 @@ enum coord_type_enum
 #define KNIGGE			5
 #define	HOMOLOGOUS 		6
 #define	YSO 			7
-#define	ELVIS 			8
+//OLD #define	ELVIS 			8  Deleted option
 #define	SHELL 			9
 #define	NONE 			10
 #define	DISK_ATMOS 		11

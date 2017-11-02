@@ -202,8 +202,6 @@ History:
 	05jul	ksl	Changed call from ds_to_cone to ds_to_cone as
 			added cylvar coord system.  Otherwise routine is
 			currently unchanged.  
-	11nov	ksl	Modified to account for elvis wind model with
-			its pillbox at the bottom
 	15aug	ksl	Modifications for domains.  The asumption we make
 			is that the poton is not in any of the wind
 			regions at this point, and that we are looking
@@ -260,14 +258,6 @@ ds_to_wind (pp)
       }
     }
 
-
-    /* Check if the photon hits the pillpox portion of an Elvis wind */
-    if (zdom[ndom].wind_type == ELVIS)
-    {
-      x = ds_to_pillbox (&ptest, zdom[ndom].sv_rmin, zdom[ndom].sv_rmax, zdom[ndom].elvis_offset);
-      if (x < ds)
-        ds = x;
-    }
   }
 
   return (ds);

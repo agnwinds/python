@@ -210,6 +210,7 @@ History:
 	1502		Major reorganisation of input gathering and setup. See setup.c, #136 and #139
 	1508	ksl	Instroduction of the concept of domains to handle the disk and wind as separate
 			domains
+    1711    ksl Removed the Elvis wind option
  	
  	Look in Readme.c for more text concerning the early history of the program.
 
@@ -504,7 +505,7 @@ main (argc, argv)
 	       */
 
 	      rdint
-		("Wind_type(0=SV,1=Sphere,3=Hydro,4=corona,5=knigge,6=homologous,7=yso,8=elvis,9=shell,10=None)",
+		("Wind_type(0=SV,1=Sphere,3=Hydro,4=corona,5=knigge,6=homologous,7=yso,9=shell,10=None)",
 		 &zdom[ndomain].wind_type);
 
 	      if (zdom[ndomain].wind_type == 2)
