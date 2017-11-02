@@ -172,7 +172,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o parse.o init.o \
 		lines.o  continuum.o get_models.o emission.o cooling.o recomb.o diag.o \
 		sv.o ionization.o  ispy.o   levels.o gradv.o reposition.o \
 		anisowind.o util.o density.o  detail.o bands.o time.o \
-		matom.o estimators.o wind_sum.o yso.o elvis.o cylindrical.o rtheta.o spherical.o  \
+		matom.o estimators.o wind_sum.o yso.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o auger_ionization.o \
 		agn.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
 		spectral_estimators.o variable_temperature.o matom_diag.o \
@@ -192,7 +192,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 		lines.c  continuum.c emission.c cooling.c recomb.c diag.c \
 		sv.c ionization.c  ispy.c  levels.c gradv.c reposition.c \
 		anisowind.c util.c density.c  detail.c bands.c time.c \
-		matom.c estimators.c wind_sum.c yso.c elvis.c cylindrical.c rtheta.c spherical.c  \
+		matom.c estimators.c wind_sum.c yso.c cylindrical.c rtheta.c spherical.c  \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c auger_ionization.c \
 		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
 		spectral_estimators.c variable_temperature.c matom_diag.c \
@@ -228,7 +228,7 @@ py_wind_objects = py_wind.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_io
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
 		radiation.o gradv.o phot_util.o anisowind.o resonate.o density.o \
-		matom.o estimators.o yso.o elvis.o photon2d.o cylindrical.o rtheta.o spherical.o  \
+		matom.o estimators.o yso.o photon2d.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
 		spectral_estimators.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
         variable_temperature.o bb.o rdpar.o log.o direct_ion.o diag.o matrix_ion.o \
@@ -254,7 +254,7 @@ table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_s
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o vvector.o wind2d.o wind.o  ionization.o  py_wind_write.o levels.o \
 		radiation.o gradv.o phot_util.o anisowind.o resonate.o density.o \
-		matom.o estimators.o yso.o elvis.o photon2d.o cylindrical.o rtheta.o spherical.o  \
+		matom.o estimators.o yso.o photon2d.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o py_wind_macro.o partition.o auger_ionization.o\
 		spectral_estimators.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
         	variable_temperature.o bb.o rdpar.o log.o direct_ion.o diag.o matrix_ion.o \
@@ -307,7 +307,7 @@ py_grid: bb.o get_atomicdata.o py_grid.o photon2d.o photon_gen.o \
 		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o continuum.o get_models.o emission.o recomb.o util.o anisowind.o \
 		sv.o ionization.o  ispy.o   levels.o gradv.o reposition.o \
-		yso.o elvis.o cylindrical.o rtheta.o \
+		yso.o cylindrical.o rtheta.o \
 		matom.o estimators.o wind_sum.o \
 		density.o bands.o detail.o 
 	$(CC)  ${CFLAGS} py_grid.o get_atomicdata.o photon2d.o photon_gen.o \
@@ -319,7 +319,7 @@ py_grid: bb.o get_atomicdata.o py_grid.o photon2d.o photon_gen.o \
 		cdf.o roche.o random.o continuum.o get_models.o  \
 		lines.o ionization.o emission.o  recomb.o reposition.o \
 		sv.o hydro_import.o knigge.o disk.o  levels.o gradv.o density.o \
-		yso.o elvis.o cylindrical.o rtheta.o \
+		yso.o cylindrical.o rtheta.o \
 		matom.o estimators.o wind_sum.o \
 		detail.o \
 		$(LDFLAGS) -o py_grid

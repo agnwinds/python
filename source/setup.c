@@ -347,10 +347,6 @@ get_wind_params (ndom)
     {
       get_yso_wind_params (ndom);
     }
-  else if (zdom[ndom].wind_type == ELVIS)
-    {
-      get_elvis_wind_params (ndom);
-    }
   else if (zdom[ndom].wind_type == SHELL)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
     {
       get_shell_wind_params (ndom);

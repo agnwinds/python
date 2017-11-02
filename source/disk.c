@@ -237,7 +237,7 @@ zdisk (r)
  
  
  Returns:
-        The distance to the disk.  The photon is not going to
+    The distance to the disk.  The photon is not going to
 	hit the disk travelling in either direction
 	returns VERY_BIG.
 
@@ -252,7 +252,7 @@ Notes:
  
 History:
         04aug   ksl     52--Coded as part of effort to put 
-			disks with vertical extent into python
+			            disks with vertical extent into python
         04Aug   SS      Several minor modifications made.
                         ds_to_disk now also takes a second
                         input "miss_return" which tells it what

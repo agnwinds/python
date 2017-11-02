@@ -147,27 +147,7 @@ where_in_wind (x, ndomain)
       continue;                 /*the position is beyond the wind radially */
     }
 
-    /* Now for the elvis wind model, check to see if the position is
-     * inside all of the wind or if it is in the vertical section of the wind
-     *
-     * Note the use of sv_rmax and sv_rmin here, because thise are not the
-     * same as for the windcones gescribed by geo.rmin and geo.rmax
-     * 111124 ksl
-     */
 
-    if (one_dom->wind_type == ELVIS)
-    {
-      if (rho < one_dom->sv_rmin)
-      {
-        continue;
-      }
-      if (rho < one_dom->sv_rmax && z < one_dom->elvis_offset)
-      {
-        *ndomain = ndom;
-        ireturn = W_ALL_INWIND;
-        break;                  /* The position is in the cap */
-      }
-    }
 
 
     /* Check if one is inside the inner windcone */
@@ -179,7 +159,6 @@ where_in_wind (x, ndomain)
     /* Finally check if positon is outside the outer windcone */
     /* NSH 130401 - The check below was taking a long time if geo.wind_thetamax was very close to pi/2.
        check inserted to simply return INWIND if geo.wind_thetamax is within machine precision of pi/2. */
-    //XXX PLACEHOLDER -- ksl -- I am not clear on why this is sufficient for elvis mdodel, since it seems like you could get something to the side of the cap
 
     if (fabs (one_dom->wind_thetamax - PI / 2.0) > 1e-6)        /* Only perform the next check if thetamax is not equal to pi/2 */
     {
@@ -332,10 +311,6 @@ model_velocity (ndom, x, v)
   {
     speed = yso_velocity (ndom, x, v);
   }
-  else if (zdom[ndom].wind_type == ELVIS)
-  {
-    speed = elvis_velocity (ndom, x, v);
-  }
   else if (zdom[ndom].wind_type == SHELL)
   {
     speed = stellar_velocity (ndom, x, v);
@@ -447,10 +422,6 @@ model_rho (ndom, x)
   else if (zdom[ndom].wind_type == YSO)
   {
     rho = yso_rho (ndom, x);
-  }
-  else if (zdom[ndom].wind_type == ELVIS)
-  {
-    rho = elvis_rho (ndom, x);
   }
   else if (zdom[ndom].wind_type == SHELL)
   {
