@@ -35,8 +35,10 @@ double disk_init(double rmin, double rmax, double m, double mdot, double freqmin
 int photo_gen_disk(PhotPtr p, double weight, double f1, double f2, int spectype, int istart, int nphot);
 int phot_gen_sum(char filename[], char mode[]);
 double bl_init(double lum_bl, double t_bl, double freqmin, double freqmax, int ioniz_or_final, double *f);
+int photon_checks(PhotPtr p, double freqmin, double freqmax, char *comment);
 /* parse.c */
 int parse_command_line(int argc, char *argv[]);
+int help(void);
 /* saha.c */
 int nebular_concentrations(PlasmaPtr xplasma, int mode);
 int concentrations(PlasmaPtr xplasma, int mode);
@@ -129,6 +131,11 @@ double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
 int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave);
 double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
+/* init.c */
+int init_log_and_windsave(int restart_stat);
+double setup_dfudge(void);
+int setup_windcone(void);
+int setup_created_files(void);
 /* wind_updates2d.c */
 int wind_update(WindPtr (w));
 int wind_rad_init(void);
@@ -208,6 +215,9 @@ double vdisk(double x[], double v[]);
 double zdisk(double r);
 double ds_to_disk(struct photon *p, int miss_return);
 void disk_deriv(double s, double *value, double *derivative);
+int qdisk_init(void);
+int qdisk_save(char *diskfile, double ztot);
+int read_non_standard_disk_profile(char *tprofile);
 /* lines.c */
 double total_line_emission(WindPtr one, double f1, double f2);
 double lum_lines(WindPtr one, int nmin, int nmax);
@@ -478,7 +488,6 @@ int communicate_estimators_para(void);
 int gather_spectra_para(int nspec_helper, int nspecs);
 int communicate_matom_estimators_para(void);
 /* setup.c */
-int init_log_and_windsave(int restart_stat);
 int get_grid_params(int ndom);
 int get_line_transfer_mode(void);
 int get_wind_params(int ndom);
@@ -486,9 +495,6 @@ double get_stellar_params(void);
 double get_disk_params(void);
 int get_bl_and_agn_params(double lstar);
 int get_meta_params(void);
-double setup_dfudge(void);
-int setup_windcone(void);
-int setup_created_files(void);
 int get_standard_care_factors(void);
 /* photo_gen_matom.c */
 double get_kpkt_f(void);
@@ -530,13 +536,8 @@ int wind_paths_point_index(int i, int j, int k, int i_top, DomainPtr dom);
 int wind_paths_sphere_point_index(int i, int j, int k);
 int wind_paths_output_vtk(WindPtr wind, int ndom);
 /* setup2.c */
-int help(void);
 int init_geo(void);
-int photon_checks(PhotPtr p, double freqmin, double freqmax, char *comment);
 int get_spectype(int yesno, char *question, int *spectype);
-int qdisk_init(void);
-int qdisk_save(char *diskfile, double ztot);
-int read_non_standard_disk_profile(char *tprofile);
 int init_advanced_modes(void);
 int init_observers(void);
 PhotPtr init_photons(void);

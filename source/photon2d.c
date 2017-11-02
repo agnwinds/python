@@ -578,12 +578,13 @@ walls (p, pold,normal)
     rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
     if ((rho * rho) < geo.diskrad_sq && fabs (p->x[2]) <= (z = zdisk (rho)))
     {
-      // We are inside the disk
+      // We are inside a vertically extended disk.  So call ds_to_disk to find out where we hit it
       s = ds_to_disk (pold, 0);
+      if (s <= 0){
+          Error("walls: We seem to have ben inside the disk before now\n");
+      }
       stuff_phot (pold, p);
-      // XXX Vertically extended disk needs to be fixed here
-      Error("walls: We are not calculating the where we hit the vertically extended disk correctly\n");
-      move_phot (p, s);
+      move_phot (p, s-DFUDGE);
       return (p->istat = P_HIT_DISK);
     }
   }
