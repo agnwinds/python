@@ -532,21 +532,21 @@ main (argc, argv)
 	      geo.diskrad = 0;
 	    }
 
-	  rdstr ("Atomic_data", geo.atomic_filename);
+//OLD	  rdstr ("Atomic_data", geo.atomic_filename);
 
-	  /* read a variable which controls whether to save a summary of atomic data
-	     this is defined in atomic.h, rather than the modes structure */
+//OLD	  /* read a variable which controls whether to save a summary of atomic data
+//OLD	     this is defined in atomic.h, rather than the modes structure */
 
-	  if (modes.iadvanced)
-	    {
+//OLD	  if (modes.iadvanced)
+//OLD	    {
 
-	      rdint ("@write_atomicdata(0=no,anything_else=yes)",
-		     &write_atomicdata);
-	      if (write_atomicdata)
-		Log ("You have opted to save a summary of the atomic data\n");
-	    }
+//OLD	      rdint ("@write_atomicdata(0=no,anything_else=yes)",
+//OLD		     &write_atomicdata);
+//OLD	      if (write_atomicdata)
+//OLD		Log ("You have opted to save a summary of the atomic data\n");
+//OLD	    }
 
-	  get_atomic_data (geo.atomic_filename);
+//OLD	  get_atomic_data (geo.atomic_filename);
 
 	}
 
