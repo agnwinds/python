@@ -248,8 +248,6 @@ main (argc, argv)
 
   int my_rank;			// these two variables are used regardless of parallel mode
   int np_mpi;			// rank and number of processes, 0 and 1 in non-parallel
-  int ndomain = 0;		// Local variable for current number of ndomain
-  int ndomains = 1;		// Local variable for the total number that are expected 
   int ndom;
 
 
@@ -354,7 +352,6 @@ main (argc, argv)
 	  exit (0);
 	}
       w = wmain;
-      ndomain = geo.ndomain;	// Needed because currently we set geo.ndomain=ndomain at the end of the inputs
 
       geo.run_type = SYSTEM_TYPE_PREVIOUS;	// We read the data from a file
 
@@ -414,7 +411,6 @@ main (argc, argv)
 
 	  geo.run_type = SYSTEM_TYPE_PREVIOUS;	// after wind_read one will have a different wind_type otherwise
 	  w = wmain;
-	  ndomain = geo.ndomain;	// Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
 	  geo.wcycle = 0;
 	  geo.pcycle = 0;	/* This is a new run of an old windsave file so we set the nunber of cycles already done to 0 */
 	}
@@ -450,7 +446,6 @@ main (argc, argv)
 			&geo.disk_ion_spectype);
 
 
-
 	  if (geo.disk_type)	/* Then a disk exists and it needs to be described */
 	    {
 	      get_disk_params ();
@@ -482,7 +477,6 @@ main (argc, argv)
 	    }
 
 
-
 	  /* Describe the wind. This routine reads in geo.rmax and geo.twind
 	     and then gets params by calling e.g. get_sv_wind_params() */
 
@@ -492,40 +486,13 @@ main (argc, argv)
 
 	  rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
 
+	  rdint ("Number.of.wind.components", &geo.ndomain);
 
 
-	  rdint ("Number.of.wind.components", &ndomains);
-
-
-	  for (n = 0; n < ndomains; n++)
+	  for (n = 0; n < geo.ndomain; n++)
 	    {
 
 	      get_domain_params (n);
-	      ndomain++;
-
-//OLD         /* Note that wind_type 2 is no longer allowed here.  At one time, this was used as the way to read in 
-//OLD          * a previous model but this is now down via geo.system_type above.  ksl
-//OLD          */
-
-//OLD         rdint
-//OLD           ("Wind_type(0=SV,1=Star,3=Hydro,4=corona,5=knigge,6=homologous,7=yso,9=shell,11=imported)",
-//OLD            &zdom[ndomain].wind_type);
-
-//OLD         if (zdom[ndomain].wind_type == 2)
-//OLD           {
-//OLD             Error
-//OLD               ("Wind_type 2, which was used to read in a previous model is no longer allowed! Use System_type instead!\n");
-//OLD             exit (0);
-//OLD           }
-
-
-//OLD         if (zdom[ndomain].wind_type != NONE)
-//OLD           {
-//OLD             strcat (zdom[ndomain].name, "Wind");
-//OLD             get_grid_params (ndomain);
-//OLD             ndomain++;
-//OLD       }
-
 
 	    }
 
@@ -575,7 +542,7 @@ main (argc, argv)
          and then gets params by calling e.g. get_sv_wind_params() */
 
 
-      for (n = 0; n < ndomain; n++)
+      for (n = 0; n < geo.ndomain; n++)
 	{
 	  rdpar_comment ("Parameters for Domain %d", n);
 	  get_wind_params (n);
@@ -747,7 +714,6 @@ main (argc, argv)
   /* Print out some diagnositic infomration about the domains */
 
 
-  geo.ndomain = ndomain;	// Store ndomain in geo so that it can be saved
   Log ("There are %d domains\n", geo.ndomain);
   for (n = 0; n < geo.ndomain; n++)
     {
