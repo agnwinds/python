@@ -148,8 +148,8 @@ import_1d (ndom, filename)
 
   if ((fptr = fopen (filename, "r")) == NULL)
     {
-      printf ("Error: No such file\n");
-      return (-1);
+      Error ("import_1d: No such file\n");
+      exit(0);
     }
 
 
@@ -185,7 +185,7 @@ import_1d (ndom, filename)
 
   xx_1d.ndim = ncell;
   zdom[ndom].ndim = ncell + 3;	// ADD Buffer
-  zdom[ndom].mdim = 0;
+  zdom[ndom].mdim = 1;
 
 
 
@@ -246,8 +246,8 @@ import_cylindrical (ndom, filename)
 
   if ((fptr = fopen (filename, "r")) == NULL)
     {
-      printf ("Error: No such file\n");
-      return (-1);
+      Error ("import_cylindrical: No such file\n");
+      exit(0);
     }
 
 
@@ -351,8 +351,8 @@ import_polar (ndom, filename)
 
   if ((fptr = fopen (filename, "r")) == NULL)
     {
-      printf ("Error: No such file\n");
-      return (-1);
+      Error ("import_polar: No such file\n");
+      exit(0);
     }
 
 
@@ -435,6 +435,13 @@ spherical_make_grid_import (w, ndom)
   for (j = 0; j < zdom[ndom].ndim; j++)
     {
       n = j + zdom[ndom].nstart;
+      /* Need to define the midpoints of the grid */
+      if (j<zdom[ndom].ndim-1){
+      	w[n].rcen=w[n].r+w[n+1].r;
+      }
+      else {
+	      w[n].rcen=w[n].r*1.05;
+      }
       w[n].x[1] = w[n].xcen[1] = 0.0;
       w[n].x[0] = w[n].x[2] = w[n].r * sin (PI / 4.);
       w[n].xcen[0] = w[n].xcen[2] = w[n].rcen * sin (PI / 4.);
@@ -551,3 +558,9 @@ double velocity_polar(ndom,x,v)
     return(speed);
 }
 
+
+int  get_import_wind_params (ndom) 
+	int ndom;
+{
+	Log("get_import_wind_params is currently a NOP\n");
+}

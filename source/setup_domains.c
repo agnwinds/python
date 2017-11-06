@@ -250,7 +250,7 @@ get_wind_params (ndom)
     }
   else if (zdom[ndom].wind_type == IMPORT)	//Read in the wind model.
     {
-      get_shell_wind_params (ndom);
+      get_import_wind_params (ndom);
     }
   else
     {
