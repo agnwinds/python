@@ -177,7 +177,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o parse.o init.o \
 		agn.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
 		spectral_estimators.o variable_temperature.o matom_diag.o \
 		xlog.o lineio.o rdpar.o direct_ion.o pi_rates.o matrix_ion.o para_update.o \
-		setup.o photo_gen_matom.o macro_gov.o windsave2table_sub.o \
+		setup.o photo_gen_matom.o macro_gov.o windsave2table_sub.o import.o \
 		reverb.o paths.o setup2.o run.o brem.o search_light.o synonyms.o 
 		
 
@@ -197,7 +197,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
 		spectral_estimators.c variable_temperature.c matom_diag.c \
 		direct_ion.c pi_rates.c matrix_ion.c para_update.c setup.c \
-		photo_gen_matom.c macro_gov.c windsave2table_sub.c \
+		photo_gen_matom.c macro_gov.c windsave2table_sub.c import.c \
 		reverb.c paths.c setup2.c run.c brem.c search_light.c synonyms.c 
 
 #

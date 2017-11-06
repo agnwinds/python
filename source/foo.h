@@ -357,16 +357,6 @@ int xtemp_rad(WindPtr w);
 int get_yso_wind_params(int ndom);
 double yso_velocity(int ndom, double x[], double v[]);
 double yso_rho(int ndom, double x[]);
-/* elvis.c */
-int get_elvis_wind_params(int ndom);
-double elvis_velocity(int ndom, double x[], double v[]);
-double elvis_rho(int ndom, double x[]);
-double elvis_find_wind_rzero(int ndom, double p[]);
-int elvis_zero_init(double p[]);
-double elvis_zero_r(double r);
-double elvis_theta_wind(int ndom, double r);
-double elvis_wind_mdot_integral(double r);
-double ds_to_pillbox(PhotPtr pp, double rmin, double rmax, double height);
 /* cylindrical.c */
 double cylind_ds_in_cell(PhotPtr p);
 int cylind_make_grid(int ndom, WindPtr w);
@@ -488,7 +478,7 @@ int communicate_estimators_para(void);
 int gather_spectra_para(int nspec_helper, int nspecs);
 int communicate_matom_estimators_para(void);
 /* setup.c */
-int get_grid_params(int ndom);
+int get_domain_params(int ndom);
 int get_line_transfer_mode(void);
 int get_wind_params(int ndom);
 double get_stellar_params(void);
@@ -511,6 +501,12 @@ int create_heat_table(int ndom, char rootname[]);
 int create_ion_table(int ndom, char rootname[], int iz);
 double *get_ion(int ndom, int element, int istate, int iswitch);
 double *get_one(int ndom, char variable_name[]);
+/* import.c */
+int import_wind(int ndom);
+int import_1d(int ndom, char *filename);
+int import_cylindrical(int ndom, char *filename);
+int import_polar(int ndom, char *filename);
+int spherical_make_grid_import(WindPtr w, int ndom);
 /* reverb.c */
 double delay_to_observer(PhotPtr pp);
 int delay_dump_prep(int restart_stat);

@@ -134,7 +134,7 @@ enum coord_type_enum
 /* List of possible wind_types */
 
 #define SV   			0
-#define	SPHERE  		1
+#define	STAR    		1
 /* PREVIOUS is no longer an allowed type. Reading in an early model is now
  * handled as a system_type 
  */
@@ -148,6 +148,7 @@ enum coord_type_enum
 #define	SHELL 			9
 #define	NONE 			10
 #define	DISK_ATMOS 		11
+#define IMPORT          12      // Model that is read in from a file
 
 
 #define MaxDom			10
@@ -238,9 +239,6 @@ typedef struct domain
   double sv_r_scale, sv_alpha;  /* the scale length and power law exponent for the velocity law */
   double sv_v_infinity;         /* the factor by which the velocity at infinity exceeds the excape velocity */
 
-  /* Paramater for the Elvis AGN wind - closely based on SV */
-  double elvis_offset;          /*This is a vertical offset for a region where the
-                                   wind rises vertically from the disk */
 
   /* Parameters defining Knigge Wind */
   double kn_dratio;             /* parameter describing collimation of wind */

@@ -354,7 +354,7 @@ main (argc, argv)
 	  exit (0);
 	}
       w = wmain;
-      ndomain = geo.ndomain;	// Needed because currently we set geo.ndomain=ndomain at the end of the inpusts
+      ndomain = geo.ndomain;	// Needed because currently we set geo.ndomain=ndomain at the end of the inputs
 
       geo.run_type = SYSTEM_TYPE_PREVIOUS;	// We read the data from a file
 
@@ -500,28 +500,32 @@ main (argc, argv)
 	  for (n = 0; n < ndomains; n++)
 	    {
 
-	      /* Note that wind_type 2 is no longer allowed here.  At one time, this was used as the way to read in 
-	       * a previous model but this is now down via geo.system_type above.  ksl
-	       */
+	      get_domain_params (n);
+	      ndomain++;
 
-	      rdint
-		("Wind_type(0=SV,1=Sphere,3=Hydro,4=corona,5=knigge,6=homologous,7=yso,9=shell,10=None)",
-		 &zdom[ndomain].wind_type);
+//OLD         /* Note that wind_type 2 is no longer allowed here.  At one time, this was used as the way to read in 
+//OLD          * a previous model but this is now down via geo.system_type above.  ksl
+//OLD          */
 
-	      if (zdom[ndomain].wind_type == 2)
-		{
-		  Error
-		    ("Wind_type 2, which was used to read in a previous model is no longer allowed! Use System_type instead!\n");
-		  exit (0);
-		}
+//OLD         rdint
+//OLD           ("Wind_type(0=SV,1=Star,3=Hydro,4=corona,5=knigge,6=homologous,7=yso,9=shell,11=imported)",
+//OLD            &zdom[ndomain].wind_type);
+
+//OLD         if (zdom[ndomain].wind_type == 2)
+//OLD           {
+//OLD             Error
+//OLD               ("Wind_type 2, which was used to read in a previous model is no longer allowed! Use System_type instead!\n");
+//OLD             exit (0);
+//OLD           }
 
 
-	      if (zdom[ndomain].wind_type != NONE)
-		{
-		  strcat (zdom[ndomain].name, "Wind");
-		  get_grid_params (ndomain);
-		  ndomain++;
-		}
+//OLD         if (zdom[ndomain].wind_type != NONE)
+//OLD           {
+//OLD             strcat (zdom[ndomain].name, "Wind");
+//OLD             get_grid_params (ndomain);
+//OLD             ndomain++;
+//OLD       }
+
 
 	    }
 
@@ -532,21 +536,6 @@ main (argc, argv)
 	      geo.diskrad = 0;
 	    }
 
-//OLD	  rdstr ("Atomic_data", geo.atomic_filename);
-
-//OLD	  /* read a variable which controls whether to save a summary of atomic data
-//OLD	     this is defined in atomic.h, rather than the modes structure */
-
-//OLD	  if (modes.iadvanced)
-//OLD	    {
-
-//OLD	      rdint ("@write_atomicdata(0=no,anything_else=yes)",
-//OLD		     &write_atomicdata);
-//OLD	      if (write_atomicdata)
-//OLD		Log ("You have opted to save a summary of the atomic data\n");
-//OLD	    }
-
-//OLD	  get_atomic_data (geo.atomic_filename);
 
 	}
 

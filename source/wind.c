@@ -287,7 +287,7 @@ model_velocity (ndom, x, v)
   {
     speed = sv_velocity (x, v, ndom);
   }
-  else if (zdom[ndom].wind_type == SPHERE)
+  else if (zdom[ndom].wind_type == STAR)
   {
     speed = stellar_velocity (ndom, x, v);
   }
@@ -399,7 +399,7 @@ model_rho (ndom, x)
   {
     rho = sv_rho (ndom, x);
   }
-  else if (zdom[ndom].wind_type == SPHERE)
+  else if (zdom[ndom].wind_type == STAR)
   {
     rho = stellar_rho (ndom, x);
   }

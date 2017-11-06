@@ -31,10 +31,29 @@ History:
 **************************************************************/
 
 int
-get_grid_params (ndom)
+get_domain_params (ndom)
      int ndom;
 {
   int input_int;
+
+
+  rdint
+    ("Wind_type(0=SV,1=Star,3=Hydro,4=corona,5=knigge,6=homologous,7=yso,9=shell,11=imported)",
+     &zdom[ndom].wind_type);
+
+  if (zdom[ndom].wind_type == 2)
+    {
+      Error
+	("Wind_type 2, which was used to read in a previous model is no longer allowed! Use System_type instead!\n");
+      exit (0);
+    }
+
+
+  strcat (zdom[ndom].name, "Wind");
+
+
+
+
 
 
   if (ndom >= geo.ndomain)
@@ -333,7 +352,7 @@ get_wind_params (ndom)
      with the same basic wind geometry, without reading in all of the input parameters.  
    */
 
-  if (zdom[ndom].wind_type == SPHERE)
+  if (zdom[ndom].wind_type == STAR)
     {
       get_stellar_wind_params (ndom);
     }
@@ -362,6 +381,10 @@ get_wind_params (ndom)
       get_yso_wind_params (ndom);
     }
   else if (zdom[ndom].wind_type == SHELL)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
+    {
+      get_shell_wind_params (ndom);
+    }
+  else if (zdom[ndom].wind_type == IMPORT)	//Read in the wind model.
     {
       get_shell_wind_params (ndom);
     }
