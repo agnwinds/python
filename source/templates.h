@@ -187,7 +187,7 @@ double homologous_rho(int ndom, double x[]);
 /* hydro_import.c */
 int get_hydro_wind_params(int ndom);
 int get_hydro(int ndom);
-double hydro_velocity(double x[], double v[]);
+double hydro_velocity(int ndom, double x[], double v[]);
 double hydro_rho(double x[]);
 double hydro_temp(double x[]);
 int rtheta_make_hydro_grid(WindPtr w, int ndom);
@@ -478,14 +478,15 @@ int communicate_estimators_para(void);
 int gather_spectra_para(int nspec_helper, int nspecs);
 int communicate_matom_estimators_para(void);
 /* setup.c */
-int get_domain_params(int ndom);
-int get_line_transfer_mode(void);
-int get_wind_params(int ndom);
 double get_stellar_params(void);
 double get_disk_params(void);
 int get_bl_and_agn_params(double lstar);
 int get_meta_params(void);
 int get_standard_care_factors(void);
+/* setup_domains.c */
+int get_domain_params(int ndom);
+int get_wind_params(int ndom);
+int get_line_transfer_mode(void);
 /* photo_gen_matom.c */
 double get_kpkt_f(void);
 double get_matom_f(int mode);
@@ -507,6 +508,12 @@ int import_1d(int ndom, char *filename);
 int import_cylindrical(int ndom, char *filename);
 int import_polar(int ndom, char *filename);
 int spherical_make_grid_import(WindPtr w, int ndom);
+int cylindrical_make_grid_import(WindPtr w, int ndom);
+int polar_make_grid_import(WindPtr w, int ndom);
+double import_velocity(int ndom, double *x, double *v);
+double velocity_1d(int ndom, double *x, double *v);
+double velocity_cylindrical(int ndom, double *x, double *v);
+double velocity_polar(int ndom, double *x, double *v);
 /* reverb.c */
 double delay_to_observer(PhotPtr pp);
 int delay_dump_prep(int restart_stat);

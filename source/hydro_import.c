@@ -137,9 +137,9 @@ get_hydro_wind_params (ndom)
   Log ("rmax=%e\n", geo.rmax);
   geo.rmax_sq = geo.rmax * geo.rmax;
   Log ("rmax_sq=%e\n", geo.rmax);
-  geo.wind_rho_min = zdom[ndom].wind_rho_min = 0.0;	//Set wind_rmin 0.0, otherwise wind cones dont work properly 
+  zdom[ndom].wind_rho_min = 0.0;	//Set wind_rmin 0.0, otherwise wind cones dont work properly 
   Log ("rho_min=%e\n", zdom[ndom].wind_rho_min);
-  geo.wind_rho_max = zdom[ndom].wind_rho_max = zdom[ndom].rmax;	//This is the outer edge of the
+  zdom[ndom].wind_rho_max = zdom[ndom].rmax;	//This is the outer edge of the
   Log ("rho_max=%e\n", zdom[ndom].wind_rho_max);
   zdom[ndom].zmax = zdom[ndom].rmax;	//This is the outer edge of the
   Log ("zmax=%e\n", zdom[ndom].zmax);
@@ -346,9 +346,12 @@ History:
       r=0.0, and NaN when xxx>1.0;
 **************************************************************/
 
+// ksl - Added ndom here for symmetry with other modles.  
+// The hydro models do not understand domains XXX
 
 double
-hydro_velocity (x, v)
+hydro_velocity (ndom,x, v)
+    int ndom;
      double x[];
      double v[];
 {

@@ -293,7 +293,7 @@ model_velocity (ndom, x, v)
   }
   else if (zdom[ndom].wind_type == HYDRO)
   {
-    speed = hydro_velocity (x, v);
+    speed = hydro_velocity (ndom,x, v);
   }
   else if (zdom[ndom].wind_type == CORONA)
   {
@@ -315,9 +315,13 @@ model_velocity (ndom, x, v)
   {
     speed = stellar_velocity (ndom, x, v);
   }
+  else if  (zdom[ndom].wind_type == IMPORT)
+  {
+      speed=import_velocity(ndom,x,v);
+  }
   else
   {
-    Error ("wind: Unknown windtype %d\n", zdom[ndom].wind_type);
+    Error ("wind: Unknown windtype %d for doman %d\n", zdom[ndom].wind_type,ndom);
     exit (0);
   }
 

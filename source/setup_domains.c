@@ -44,7 +44,7 @@ get_domain_params (ndom)
 
 
   rdint
-    ("Wind_type(0=SV,1=Star,3=Hydro,4=corona,5=knigge,6=homologous,7=yso,9=shell,11=imported)",
+    ("Wind_type(0=SV,1=Star,3=Hydro,4=corona,5=knigge,6=homologous,7=yso,9=shell,10=imported)",
      &zdom[ndom].wind_type);
 
   if (zdom[ndom].wind_type == 2)
@@ -60,21 +60,7 @@ get_domain_params (ndom)
 
   input_int = 1;
 
-  /* ksl - The if statement seems superflous.  Why are we entering this routine if 
-   * we are continuing and earlier calculation? */
-  if (geo.run_type == SYSTEM_TYPE_PREVIOUS)
-    {
-      Error
-	("get_grid_parameters: Houston! Why are we reading the coordinate system if run type is SYSTEM_TYPE_PREVIOUS\n");
-      exit (0);
-    }
-  else if (zdom[ndom].wind_type == IMPORT)
-    {
-        import_wind(ndom);
-    }
-  else
 
-    {
       /* Define the coordinate system for the grid and allocate memory for the wind structure */
       rdint
 	("Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)",
@@ -99,6 +85,14 @@ get_domain_params (ndom)
           0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
 	}
 
+
+  if (zdom[ndom].wind_type == IMPORT)
+    {
+        import_wind(ndom);
+    }
+  else
+
+    {
       rdint ("Wind.dim.in.x_or_r.direction", &zdom[ndom].ndim);
       if (zdom[ndom].coord_type)
 	{

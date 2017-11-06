@@ -34,12 +34,14 @@ History:
 
 struct
 {
+  int ndim;
   int element[NDIM_MAX];
   double r[NDIM_MAX], v[NDIM_MAX], rho[NDIM_MAX], t[NDIM_MAX];
 } xx_1d;
 
 struct
 {
+  int ndim, mdim;
   int ele_row[NDIM_MAX], ele_col[NDIM_MAX];
   double r[NDIM_MAX * NDIM_MAX], z[NDIM_MAX * NDIM_MAX];
   double v_x[NDIM_MAX * NDIM_MAX], v_y[NDIM_MAX * NDIM_MAX],
@@ -49,6 +51,7 @@ struct
 
 struct
 {
+  int ndim, mdim;
   int ele_row[NDIM_MAX], ele_col[NDIM_MAX];
   double r[NDIM_MAX * NDIM_MAX], theta[NDIM_MAX * NDIM_MAX];
   double v_r[NDIM_MAX * NDIM_MAX], v_theta[NDIM_MAX * NDIM_MAX],
@@ -58,6 +61,8 @@ struct
 
 
 /* End of section defining where the raw input variables are stored */
+
+/* The next routine just reads in the model into the right structure */
 
 int
 import_wind (ndom)
@@ -91,7 +96,7 @@ import_wind (ndom)
 
 
 
-  exit (0);
+  return (0);
 }
 
 
@@ -177,11 +182,12 @@ import_1d (ndom, filename)
 	}
     }
 
-/* Having read in the data define some initial variables concerning the model. We cannot create
- * the wind grid or other things at this point, because we do not at this point know what
- * wind cells correspnd to whate elements of the grid */
 
-  zdom[ndom].ndim = ncell + 3;
+  xx_1d.ndim = ncell;
+  zdom[ndom].ndim = ncell + 3;	// ADD Buffer
+  zdom[ndom].mdim = 0;
+
+
 
 
 
@@ -286,7 +292,13 @@ import_cylindrical (ndom, filename)
  * the wind grid or other things at this point, because we do not at this point know what
  * wind cells correspnd to whate elements of the grid */
 
-  zdom[ndom].ndim = ncell + 3;
+  zdom[ndom].ndim = xx_cyl.ndim = icell;
+  zdom[ndom].mdim = xx_cyl.mdim = jcell;
+
+  zdom[ndom].ndim += 3;
+  zdom[ndom].mdim += 3;
+
+
 
   return (0);
 }
@@ -379,17 +391,24 @@ import_polar (ndom, filename)
 	}
     }
 
-/* Having read in the data define some initial variables concerning the model. We cannot create
- * the wind grid or other things at this point, because we do not at this point know what
- * wind cells correspnd to whate elements of the grid */
+  zdom[ndom].ndim = xx_polar.ndim = icell;
+  zdom[ndom].mdim = xx_polar.mdim = jcell;
 
-  zdom[ndom].ndim = ncell + 3;
+  zdom[ndom].ndim += 3;
+  zdom[ndom].mdim += 3;
+
+
 
   return (0);
 }
 
 
-/* The next section contains routines to make the grids for imported models */
+/* The next section contains routines to make the grids for imported models.
+
+   We make some assumptions here.  We assume that every cell is in the wind.
+   and we assume that r refers to the inside edge of the cell.
+
+ * */
 
 int
 spherical_make_grid_import (w, ndom)
@@ -397,30 +416,138 @@ spherical_make_grid_import (w, ndom)
      int ndom;
 {
 
-  int j, n, ndim;
+  int j, n;
 
-  ndim = zdom[ndom].ndim - 3;
-  for (j = 0; j < ndim; j++)
+  for (j = 0; j < xx_1d.ndim; j++)
     {
       n = j + zdom[ndom].nstart;
-    w[n].r = xx_1d.r[j];}
+      w[n].r = xx_1d.r[j];
+    }
 
+  /* We have already added a buffer to zdom[ndom].ndim
+   * so we can extend the grid
+   */
+  
   w[n].r = 1.01 * w[n - 1].r;
   w[n + 1].r = 1.02 * w[n - 1].r;
-  w[n + 2].r = 1.03 * w[n - 1].r;
 
-  ndim = zdom[ndom].ndim;	// Go now to the edge including buffer cells
-  for (j = 0; j < ndim; j++)
+
+  for (j = 0; j < zdom[ndom].ndim; j++)
     {
       n = j + zdom[ndom].nstart;
       w[n].x[1] = w[n].xcen[1] = 0.0;
       w[n].x[0] = w[n].x[2] = w[n].r * sin (PI / 4.);
       w[n].xcen[0] = w[n].xcen[2] = w[n].rcen * sin (PI / 4.);
-
     }
-
-
-
 
   return (0);
 }
+
+int
+cylindrical_make_grid_import (w, ndom)
+     WindPtr w;
+     int ndom;
+{
+
+    Log("Cannot make cylindrical grid from model yet\n");
+
+  return (0);
+}
+
+int
+polar_make_grid_import (w, ndom)
+     WindPtr w;
+     int ndom;
+{
+
+    Log("Cannot make rtheta grid from model yet\n");
+
+  return (0);
+}
+
+
+/* The next section calculates velocites.  We follow the hydro approach of
+ * getting those velocities from the original grid.  This is really only
+ * used for setting up the grid
+ */
+
+
+double import_velocity(ndom,x,v)
+    int ndom;
+    double *x, *v;
+{
+    double speed;
+
+
+  if (zdom[ndom].coord_type == SPHERICAL)
+    {
+      speed=velocity_1d (ndom, x,v);
+    }
+  else if (zdom[ndom].coord_type == CYLIND)
+    {
+      speed=velocity_cylindrical (ndom, x,v);
+    }
+  else if (zdom[ndom].coord_type == RTHETA)
+    {
+      speed=velocity_polar (ndom, x,v);
+    }
+  else
+    {
+      Error
+	("import_velocity: Do not know how to create velocities from model of coor_type %d\n",
+	 zdom[ndom].coord_type);
+      exit (0);
+    }
+
+
+    return (speed);
+}
+
+
+double velocity_1d(ndom,x,v)
+    int ndom;
+    double *x, *v;
+{
+    double speed;
+    double r;
+
+    int icell;
+
+    r=length(x);
+
+    icell=linterp(r,xx_1d.r,xx_1d.v,xx_1d.ndim,&speed,0);  
+
+    v[0]=x[0]/r*speed;
+    v[1]=x[1]/r*speed;
+    v[2]=x[2]/r*speed;
+
+
+    return(speed);
+}
+
+
+double velocity_cylindrical(ndom,x,v)
+    int ndom;
+    double *x, *v;
+{
+    double speed=0;
+
+    Log("Cannot make velocities for cylindrical grid from model yet\n");
+
+    return(speed);
+}
+
+
+double velocity_polar(ndom,x,v)
+    int ndom;
+    double *x, *v;
+{
+    double speed=0;
+
+
+    Log("Cannot make velocities for polar grid from model yet\n");
+
+
+    return(speed);
+}
+

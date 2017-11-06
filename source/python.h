@@ -146,9 +146,8 @@ enum coord_type_enum
 #define	YSO 			7
 //OLD #define	ELVIS 			8  Deleted option
 #define	SHELL 			9
-#define	NONE 			10
+#define IMPORT          10      // Model that is read in from a file
 #define	DISK_ATMOS 		11
-#define IMPORT          12      // Model that is read in from a file
 
 
 #define MaxDom			10
@@ -336,7 +335,7 @@ struct geometry
  */
 
   double rmin, rmax, rmax_sq;   /* The maximum distance to which a photon should be followed */
-  double wind_rho_min, wind_rho_max;    /*Min/Max rho for wind in disk plane */
+//OLD  double wind_rho_min, wind_rho_max;    /*Min/Max rho for wind in disk plane */
 
 
 /* Basic paremeters of the system, as opposed to elements of the wind or winds */
