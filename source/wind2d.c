@@ -321,6 +321,7 @@ define_wind ()
     calloc_estimators (NPLASMA);
   }
 
+
 /* 06may -- At this point we have calculated the volumes of all of the cells and it should
 be optional which variables beyond here are moved to structures othere than Wind */
 
@@ -433,6 +434,8 @@ be optional which variables beyond here are moved to structures othere than Wind
     }
   }
 
+  // XXX - Get rid of this once happy that can read in 
+  do_windsave2table("XTEST");
 
 /* Calculate the the divergence of the wind at the center of each grid cell */
   wind_div_v (w);

@@ -149,7 +149,7 @@ import_1d (ndom, filename)
   if ((fptr = fopen (filename, "r")) == NULL)
     {
       Error ("import_1d: No such file\n");
-      exit(0);
+      exit (0);
     }
 
 
@@ -157,10 +157,8 @@ import_1d (ndom, filename)
   while (fgets (line, 512, fptr) != NULL)
     {
       n = sscanf (line, " %d %le %le %le %le", &icell, &q1, &q2, &q3, &q4);
-      printf ("ok %d\n", n);
       if (n < 4)
 	{
-	  printf ("Error. Ignore %s \n", line);
 	  continue;
 	}
       else
@@ -186,6 +184,8 @@ import_1d (ndom, filename)
   xx_1d.ndim = ncell;
   zdom[ndom].ndim = ncell + 3;	// ADD Buffer
   zdom[ndom].mdim = 1;
+  zdom[ndom].rmin=xx_1d.r[0];
+  zdom[ndom].rmax=xx_1d.r[ncell-1];
 
 
 
@@ -247,7 +247,7 @@ import_cylindrical (ndom, filename)
   if ((fptr = fopen (filename, "r")) == NULL)
     {
       Error ("import_cylindrical: No such file\n");
-      exit(0);
+      exit (0);
     }
 
 
@@ -352,7 +352,7 @@ import_polar (ndom, filename)
   if ((fptr = fopen (filename, "r")) == NULL)
     {
       Error ("import_polar: No such file\n");
-      exit(0);
+      exit (0);
     }
 
 
@@ -362,10 +362,8 @@ import_polar (ndom, filename)
       n =
 	sscanf (line, " %d %d %le %le %le %le %le %le %le", &icell, &jcell,
 		&q1, &q2, &q3, &q4, &q5, &q6, &q7);
-      printf ("ok %d\n", n);
       if (n < 4)
 	{
-	  printf ("Error. Ignore %s \n", line);
 	  continue;
 	}
       else
@@ -422,26 +420,31 @@ spherical_make_grid_import (w, ndom)
     {
       n = j + zdom[ndom].nstart;
       w[n].r = xx_1d.r[j];
+
     }
 
   /* We have already added a buffer to zdom[ndom].ndim
    * so we can extend the grid
    */
-  
+
+
   w[n].r = 1.01 * w[n - 1].r;
   w[n + 1].r = 1.02 * w[n - 1].r;
+  w[n + 2].r = 1.03 * w[n - 1].r;
 
 
   for (j = 0; j < zdom[ndom].ndim; j++)
     {
       n = j + zdom[ndom].nstart;
       /* Need to define the midpoints of the grid */
-      if (j<zdom[ndom].ndim-1){
-      	w[n].rcen=w[n].r+w[n+1].r;
-      }
-      else {
-	      w[n].rcen=w[n].r*1.05;
-      }
+      if (j < zdom[ndom].ndim - 1)
+	{
+	  w[n].rcen = 0.5*(w[n].r + w[n + 1].r);
+	}
+      else
+	{
+	  w[n].rcen = w[n].r * 1.005;
+	}
       w[n].x[1] = w[n].xcen[1] = 0.0;
       w[n].x[0] = w[n].x[2] = w[n].r * sin (PI / 4.);
       w[n].xcen[0] = w[n].xcen[2] = w[n].rcen * sin (PI / 4.);
@@ -456,7 +459,7 @@ cylindrical_make_grid_import (w, ndom)
      int ndom;
 {
 
-    Log("Cannot make cylindrical grid from model yet\n");
+  Log ("Cannot make cylindrical grid from model yet\n");
 
   return (0);
 }
@@ -467,7 +470,7 @@ polar_make_grid_import (w, ndom)
      int ndom;
 {
 
-    Log("Cannot make rtheta grid from model yet\n");
+  Log ("Cannot make rtheta grid from model yet\n");
 
   return (0);
 }
@@ -479,24 +482,25 @@ polar_make_grid_import (w, ndom)
  */
 
 
-double import_velocity(ndom,x,v)
-    int ndom;
-    double *x, *v;
+double
+import_velocity (ndom, x, v)
+     int ndom;
+     double *x, *v;
 {
-    double speed;
+  double speed;
 
 
   if (zdom[ndom].coord_type == SPHERICAL)
     {
-      speed=velocity_1d (ndom, x,v);
+      speed = velocity_1d (ndom, x, v);
     }
   else if (zdom[ndom].coord_type == CYLIND)
     {
-      speed=velocity_cylindrical (ndom, x,v);
+      speed = velocity_cylindrical (ndom, x, v);
     }
   else if (zdom[ndom].coord_type == RTHETA)
     {
-      speed=velocity_polar (ndom, x,v);
+      speed = velocity_polar (ndom, x, v);
     }
   else
     {
@@ -507,60 +511,66 @@ double import_velocity(ndom,x,v)
     }
 
 
-    return (speed);
+  return (speed);
 }
 
 
-double velocity_1d(ndom,x,v)
-    int ndom;
-    double *x, *v;
+double
+velocity_1d (ndom, x, v)
+     int ndom;
+     double *x, *v;
 {
-    double speed;
-    double r;
+  double speed;
+  double r;
 
-    int icell;
+  int icell;
 
-    r=length(x);
+  r = length (x);
 
-    icell=linterp(r,xx_1d.r,xx_1d.v,xx_1d.ndim,&speed,0);  
+  icell = linterp (r, xx_1d.r, xx_1d.v, xx_1d.ndim, &speed, 0);
 
-    v[0]=x[0]/r*speed;
-    v[1]=x[1]/r*speed;
-    v[2]=x[2]/r*speed;
+  v[0] = x[0] / r * speed;
+  v[1] = x[1] / r * speed;
+  v[2] = x[2] / r * speed;
 
 
-    return(speed);
+
+  return (speed);
 }
 
 
-double velocity_cylindrical(ndom,x,v)
-    int ndom;
-    double *x, *v;
+double
+velocity_cylindrical (ndom, x, v)
+     int ndom;
+     double *x, *v;
 {
-    double speed=0;
+  double speed = 0;
 
-    Log("Cannot make velocities for cylindrical grid from model yet\n");
+  Log ("Cannot make velocities for cylindrical grid from model yet\n");
 
-    return(speed);
+  return (speed);
 }
 
 
-double velocity_polar(ndom,x,v)
-    int ndom;
-    double *x, *v;
+double
+velocity_polar (ndom, x, v)
+     int ndom;
+     double *x, *v;
 {
-    double speed=0;
+  double speed = 0;
 
 
-    Log("Cannot make velocities for polar grid from model yet\n");
+  Log ("Cannot make velocities for polar grid from model yet\n");
 
 
-    return(speed);
+  return (speed);
 }
 
 
-int  get_import_wind_params (ndom) 
-	int ndom;
+int
+get_import_wind_params (ndom)
+     int ndom;
 {
-	Log("get_import_wind_params is currently a NOP\n");
+  Log ("get_import_wind_params is currently a NOP\n");
+  return (0);
 }
