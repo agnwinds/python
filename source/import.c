@@ -650,7 +650,7 @@ rho_1d (ndom, x)
   }
   
 
-  Log ("Cannot make rho for 1d grid from model yet\n");
+  Log ("rho %e \n",rho);
 
 
   return (rho);

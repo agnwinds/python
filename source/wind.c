@@ -399,6 +399,8 @@ model_rho (ndom, x)
 {
   double rho;
 
+  Log("XXX wind_type %d\n",zdom[ndom].wind_type);
+
   if (zdom[ndom].wind_type == SV)
   {
     rho = sv_rho (ndom, x);
@@ -433,6 +435,7 @@ model_rho (ndom, x)
   }
   else if (zdom[ndom].wind_type == IMPORT)
   {
+      Log("Got here\n");
       rho=import_rho(ndom,x);
   }
   else
