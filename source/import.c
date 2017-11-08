@@ -428,9 +428,13 @@ spherical_make_grid_import (w, ndom)
    */
 
 
-  w[n].r = 1.01 * w[n - 1].r;
-  w[n + 1].r = 1.02 * w[n - 1].r;
-  w[n + 2].r = 1.03 * w[n - 1].r;
+  /* n has not been incremented past the end of input array
+   * so we have to add 1 here 
+   */
+
+  w[n + 1].r = 1.01 * w[n - 1].r;
+  w[n + 2].r = 1.02 * w[n - 1].r;
+  w[n + 3].r = 1.03 * w[n - 1].r;
 
 
   for (j = 0; j < zdom[ndom].ndim; j++)
