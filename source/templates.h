@@ -515,6 +515,10 @@ double velocity_1d(int ndom, double *x, double *v);
 double velocity_cylindrical(int ndom, double *x, double *v);
 double velocity_polar(int ndom, double *x, double *v);
 int get_import_wind_params(int ndom);
+double import_rho(int ndom, double *x);
+double rho_1d(int ndom, double *x);
+double rho_cylindrical(int ndom, double *x);
+double rho_polar(int ndom, double *x);
 /* reverb.c */
 double delay_to_observer(PhotPtr pp);
 int delay_dump_prep(int restart_stat);

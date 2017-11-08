@@ -431,6 +431,10 @@ model_rho (ndom, x)
   {
     rho = stellar_rho (ndom, x);
   }
+  else if (zdom[ndom].wind_type == IMPORT)
+  {
+      rho=import_rho(ndom,x);
+  }
   else
   {
     Error ("wind2d: Unknown windtype %d for domain %d\n", zdom[ndom].wind_type, ndom);

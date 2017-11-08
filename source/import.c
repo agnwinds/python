@@ -574,3 +574,111 @@ get_import_wind_params (ndom)
   Log ("get_import_wind_params is currently a NOP\n");
   return (0);
 }
+
+
+/* Fill in plasma ptrs with deesities.   
+ *
+ * For this we assume that the densities read in are 
+ * given at the * midpoints of the grid
+ *
+ * 
+ * */
+
+
+double
+import_rho(ndom, x)
+
+     int ndom;
+     double *x;
+{
+  double rho;
+
+
+  if (zdom[ndom].coord_type == SPHERICAL)
+    {
+      rho = rho_1d (ndom, x);
+    }
+  else if (zdom[ndom].coord_type == CYLIND)
+    {
+      rho = rho_cylindrical (ndom, x);
+    }
+  else if (zdom[ndom].coord_type == RTHETA)
+    {
+      rho = rho_polar (ndom, x);
+    }
+  else
+    {
+      Error
+	("import_rho:  Do not know how to create velocities from model of coor_type %d\n",
+	 zdom[ndom].coord_type);
+      exit (0);
+    }
+
+
+  return (rho);
+}
+
+
+double
+rho_1d (ndom, x)
+     int ndom;
+     double *x;
+{
+  double rho = 0;
+  double r;
+  int n;
+
+  r=length(x);
+
+  n=0;
+  while (r<xx_1d.r[n] && n<xx_1d.ndim)
+  {
+      n++;
+  }
+
+  if (n<xx_1d.ndim) 
+  {
+      rho=xx_1d.rho[n];
+  }
+  else
+  {
+      rho=xx_1d.rho[xx_1d.ndim-1];
+  }
+  
+
+  Log ("Cannot make rho for 1d grid from model yet\n");
+
+
+  return (rho);
+}
+
+
+double
+rho_cylindrical (ndom, x)
+     int ndom;
+     double *x;
+{
+  double rho = 0;
+
+
+  Log ("Cannot make rho for cylindrical  grid from model yet\n");
+
+
+  return (rho);
+}
+
+
+double
+rho_polar (ndom, x)
+     int ndom;
+     double *x;
+{
+  double rho = 0;
+
+
+  Log ("Cannot make rho for polar grid from model yet\n");
+
+
+  return (rho);
+}
+
