@@ -184,7 +184,8 @@ import_1d (ndom, filename)
   xx_1d.ndim = ncell;
   zdom[ndom].ndim = ncell + 3;	// ADD Buffer
   zdom[ndom].mdim = 1;
-  zdom[ndom].wind_rho_min = zdom[ndom].rho_min = zdom[ndom].rmin = xx_1d.r[0];
+  zdom[ndom].wind_rho_min = zdom[ndom].rho_min = 0;
+  zdom[ndom].rmin = xx_1d.r[0];
   zdom[ndom].wind_rho_max = zdom[ndom].zmax = zdom[ndom].rho_max =
     zdom[ndom].rmax = xx_1d.r[ncell - 1];
   zdom[ndom].wind_thetamin = zdom[ndom].wind_thetamax = 0.;
@@ -431,13 +432,9 @@ spherical_make_grid_import (w, ndom)
    */
 
 
-  /* n has not been incremented past the end of input array
-   * so we have to add 1 here 
-   */
-
-  w[n + 1].r = 1.01 * w[n - 1].r;
-  w[n + 2].r = 1.02 * w[n - 1].r;
-  w[n + 3].r = 1.03 * w[n - 1].r;
+  w[n + 1].r = 1.01 * w[n].r;
+  w[n + 2].r = 1.02 * w[n].r;
+  w[n + 3].r = 1.03 * w[n].r;
 
 
   for (j = 0; j < zdom[ndom].ndim; j++)
