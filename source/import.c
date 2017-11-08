@@ -184,8 +184,10 @@ import_1d (ndom, filename)
   xx_1d.ndim = ncell;
   zdom[ndom].ndim = ncell + 3;	// ADD Buffer
   zdom[ndom].mdim = 1;
-  zdom[ndom].rmin=xx_1d.r[0];
-  zdom[ndom].rmax=xx_1d.r[ncell-1];
+  zdom[ndom].rho_min=zdom[ndom].rmin=xx_1d.r[0];
+  zdom[ndom].zmax=zdom[ndom].rho_max=zdom[ndom].rmax=xx_1d.r[ncell-1];
+  zdom[ndom].wind_thetamin = zdom[ndom].wind_thetamax=0.;
+
 
 
 
@@ -578,6 +580,66 @@ get_import_wind_params (ndom)
   Log ("get_import_wind_params is currently a NOP\n");
   return (0);
 }
+
+
+/* Fill in the volumes */
+
+//HOLD  int
+//HOLD  import_volumes(ndom)
+
+//HOLD       int ndom;
+//HOLD  {
+
+
+//HOLD    if (zdom[ndom].coord_type == SPHERICAL)
+//HOLD      {
+//HOLD        import_1d_volumes(ndom);
+//HOLD      }
+//HOLD    else if (zdom[ndom].coord_type == CYLIND)
+//HOLD      {
+//HOLD        import_cylindrical_volumes (ndom);
+//HOLD      }
+//HOLD    else if (zdom[ndom].coord_type == RTHETA)
+//HOLD      {
+//HOLD        import_polar_volumes(ndom);
+//HOLD      }
+//HOLD    else
+//HOLD      {
+//HOLD        Error
+//HOLD  	("import_rho:  Do not know how to create velocities from model of coor_type %d\n",
+//HOLD  	 zdom[ndom].coord_type);
+//HOLD        exit (0);
+//HOLD      }
+
+//HOLD    return (0);
+//HOLD  }
+
+//HOLD  int import_1d_volumes(ndom)
+//HOLD      int ndom;
+//HOLD  {
+//HOLD    Log ("Cannot make volumes for 1d  grid from model yet\n");
+//HOLD    return(0);
+//HOLD  }
+
+
+
+//HOLD  int import_cylindrical_volumes(ndom)
+//HOLD      int ndom;
+//HOLD  {
+//HOLD    Log ("Cannot make volumes for cylindrical  grid from model yet\n");
+//HOLD    return(0);
+//HOLD  }
+
+
+
+//HOLD  int import_polar_volumes(ndom)
+//HOLD      int ndom;
+//HOLD  {
+//HOLD    Log ("Cannot make volumes for polar grid from model yet\n");
+//HOLD    return(0);
+//HOLD  }
+
+
 
 
 /* Fill in plasma ptrs with deesities.   

@@ -210,7 +210,13 @@ define_wind ()
   for (ndom = 0; ndom < geo.ndomain; ndom++)
 
   {
-    if (zdom[ndom].coord_type == SPHERICAL)
+//HOLD      if (zdom[ndom].wind_type==IMPORT) {
+          
+//HOLD             import_volumes(ndom); 
+//HOLD      }
+
+//HOLD      else if (zdom[ndom].coord_type == SPHERICAL)
+      if (zdom[ndom].coord_type == SPHERICAL)
     {
       spherical_volumes (ndom, w);
     }
