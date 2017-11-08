@@ -370,34 +370,51 @@ hydro_velocity (x, v)
     theta = asin (xxx);
 
 
+  /* We compute the radial velocity - in zeus this is defined at the 
+  cell centre in the theta dimension and the edge in the r dimension */
+
 
   im = jm = ii = jj = 0;
   f1 = f2 = 0.0;
-  hydro_frac (r, hydro_r_cent, ihydro_r, &im, &ii, &f1);
+  hydro_frac (r, hydro_r_edge, ihydro_r, &im, &ii, &f1);
   hydro_frac (theta, hydro_theta_cent, ihydro_theta, &jm, &jj, &f2);
   v_r_interp = hydro_interp_value (v_r_input, im, ii, jm, jj, f1, f2);
+  
+  
+  /* We compute the theta velocity - in zeus this is defined at the 
+  cell centre in the r dimension and the edge in the theta dimension */
 
   im = jm = ii = jj = 0;
   f1 = f2 = 0.0;
-
   hydro_frac (r, hydro_r_cent, ihydro_r, &im, &ii, &f1);
-  hydro_frac (theta, hydro_theta_cent, ihydro_theta, &jm, &jj, &f2);
-
-
+  hydro_frac (theta, hydro_theta_edge, ihydro_theta, &jm, &jj, &f2);
   v_theta_interp = hydro_interp_value (v_theta_input, im, ii, jm, jj, f1, f2);
+  
+  
+  /* We compute the phi velocity - in zeus this is defined at the 
+  cell centre in both the r and theta dimension */
+  
 
   im = jm = ii = jj = 0;
   f1 = f2 = 0.0;
   hydro_frac (r, hydro_r_cent, ihydro_r, &im, &ii, &f1);
   hydro_frac (theta, hydro_theta_cent, ihydro_theta, &jm, &jj, &f2);
   v_phi_interp = hydro_interp_value (v_phi_input, im, ii, jm, jj, f1, f2);
+  
+  
+  /* Convert to carteisian velocity */
 
 
   v[0] = v_r_interp * sin (theta) + v_theta_interp * cos (theta);
   v[1] = v_phi_interp;
   v[2] = v_r_interp * cos (theta) - v_theta_interp * sin (theta);
+  
+  
+  /*Compute the speed */
 
   speed = sqrt (v[0] * v[0] + v[1] * v[1] * v[2] * v[2]);
+  
+  
 
   if (sane_check (speed))
   {
@@ -428,6 +445,9 @@ hydro_rho (x)
     rrho = 1.e-23;
     return (rrho);
   }
+
+
+  /* The density is a cell centred quantity in zeus */
 
   im = jm = ii = jj = 0;
   f1 = f2 = 0.0;
@@ -489,6 +509,10 @@ hydro_temp (x)
     temp = 1e4;
     return (temp);
   }
+  
+  
+  /* The density is a cell centred quantity in zeus */
+  
 
 
   hydro_frac (r, hydro_r_cent, ihydro_r, &im, &ii, &f1);
