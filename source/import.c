@@ -42,7 +42,8 @@ struct
 struct
 {
   int ndim, mdim, ncell;
-  int ele_row[NDIM_MAX], ele_col[NDIM_MAX], inwind[NDIM_MAX * NDIM_MAX];
+  int ele_row[NDIM_MAX * NDIM_MAX], ele_col[NDIM_MAX * NDIM_MAX],
+    inwind[NDIM_MAX * NDIM_MAX];
   double x[NDIM_MAX * NDIM_MAX], z[NDIM_MAX * NDIM_MAX];
   double v_x[NDIM_MAX * NDIM_MAX], v_y[NDIM_MAX * NDIM_MAX],
     v_z[NDIM_MAX * NDIM_MAX];
@@ -55,7 +56,7 @@ struct
 struct
 {
   int ndim, mdim, ncell;
-  int ele_row[NDIM_MAX], ele_col[NDIM_MAX];
+  int ele_row[NDIM_MAX * NDIM_MAX], ele_col[NDIM_MAX * NDIM_MAX];
   double r[NDIM_MAX * NDIM_MAX], theta[NDIM_MAX * NDIM_MAX];
   double v_r[NDIM_MAX * NDIM_MAX], v_theta[NDIM_MAX * NDIM_MAX],
     v_phi[NDIM_MAX * NDIM_MAX];
@@ -553,7 +554,7 @@ spherical_make_grid_import (w, ndom)
 
 // struct
 // {
-//   int ndim, mdim,ncell;
+//   int ndim, mdim, ncell;
 //   int ele_row[NDIM_MAX], ele_col[NDIM_MAX], inwind[NDIM_MAX * NDIM_MAX];
 //   double x[NDIM_MAX * NDIM_MAX], z[NDIM_MAX * NDIM_MAX];
 //   double v_x[NDIM_MAX * NDIM_MAX], v_y[NDIM_MAX * NDIM_MAX],
@@ -566,14 +567,15 @@ cylindrical_make_grid_import (w, ndom)
      WindPtr w;
      int ndom;
 {
-  int j, n;
+  int n;
   int jz, jx;
+  int kz, kx;
+  int nn;
 
 
   jz = jx = 0;
   for (n = 0; n < xx_cyl.ncell; n++)
     {
-        Log("%d %d\n",xx_cyl.ele_row[n],xx_cyl.ele_col[n]);
       if (xx_cyl.ele_row[n] == 0)
 	{
 	  xx_cyl.wind_z[jz] = xx_cyl.z[n];
@@ -582,35 +584,100 @@ cylindrical_make_grid_import (w, ndom)
       if (xx_cyl.ele_col[n] == 0)
 	{
 	  xx_cyl.wind_x[jx] = xx_cyl.x[n];
-      Log("gotcha %d\n",jx);
 	  jx++;
 	}
     }
 
 
-  Log ("Gotcha %d %d %d\n", xx_cyl.ncell,jz, jx);
-
-
-  exit (0);
-
-//  for (j = 0; j < xx_cyl.ndim; j++)
-//    {
-//      n = j + zdom[ndom].nstart;
-//      w[n].r = xx_1d.r[j];
-
-//    }
-
-//  for (n=0;n<xx_cyl.ncell;n++){
-//      j=n+zdom[ndom].nstart;
-//      w[j].x[0]=xx_cyl.x[n];
-//      w[j].x[1]=0.;
-//      w[j].x[2]=xx_cyl.z[n];
-//  }
 
 
 
+  Log ("Gotcha %d %d %d\n", xx_cyl.ncell, jz, jx);
 
-//HOLD  return (0);
+  /* Now we need to add some cells to wind_x and wind_y
+   */
+
+  xx_cyl.wind_x[jx] = 1.01 * xx_cyl.wind_x[jx - 1];
+  xx_cyl.wind_x[jx + 1] = 1.02 * xx_cyl.wind_x[jx - 1];
+  xx_cyl.wind_x[jx + 2] = 1.03 * xx_cyl.wind_x[jx - 1];
+
+  xx_cyl.wind_z[jz] = 1.01 * xx_cyl.wind_z[jz - 1];
+  xx_cyl.wind_z[jz + 1] = 1.02 * xx_cyl.wind_z[jz - 1];
+  xx_cyl.wind_z[jz + 2] = 1.03 * xx_cyl.wind_z[jz - 1];
+
+  jx += 3;
+  jz += 3;
+
+
+  /* At this point we should be able to fill the wind array with
+   * positions */
+
+  n = zdom[ndom].nstart;
+  for (kx = 0; kx < jx; kx++)
+    {
+      for (kz = 0; kz < jz; kz++)
+	{
+	  w[n].x[0] = xx_cyl.wind_x[kx];
+	  w[n].x[1] = 0;
+	  w[n].x[2] = xx_cyl.wind_z[kz];
+	  n++;
+	}
+
+    }
+
+  Log ("filled %d %d %d\n", n - zdom[ndom].nstart, jz, jx);
+
+
+  /* Now add information used in zdom */
+
+  for (n = 0; n < jx; n++)
+    {
+      zdom[ndom].wind_x[n] = xx_cyl.wind_x[n];
+      if (n < jx - 1)
+	{
+	  zdom[ndom].wind_midx[n] =
+	    0.5 * (xx_cyl.wind_x[n] + xx_cyl.wind_x[n + 1]);
+	}
+      else
+	{
+	  zdom[ndom].wind_midx[n] = 1.005 * xx_cyl.wind_x[n];
+	}
+    }
+
+
+
+  for (n = 0; n < jz; n++)
+    {
+      zdom[ndom].wind_z[n] = xx_cyl.wind_z[n];
+      if (n < jz - 1)
+	{
+	  zdom[ndom].wind_midz[n] =
+	    0.5 * (xx_cyl.wind_z[n] + xx_cyl.wind_z[n + 1]);
+	}
+      else
+	{
+	  zdom[ndom].wind_midz[n] = 1.005 * xx_cyl.wind_z[n];
+	}
+    }
+
+/* Now that we have the grid we can be clever and stuff the velocities in.  Then
+ * We will be able to use interpolation routines */
+
+
+  for (n = 0; n < xx_cyl.ncell; n++)
+    {
+      wind_ij_to_n (ndom, xx_cyl.ele_row[n], xx_cyl.ele_col[n], &nn);
+      w[nn].x[0] = xx_cyl.v_x[n];
+      w[nn].x[1] = xx_cyl.v_y[n];
+      w[nn].x[2] = xx_cyl.v_z[n];
+    }
+
+  /* We have to do something about the velocities of the edge cells */
+
+
+
+
+  return (0);
 }
 
 int
@@ -620,7 +687,6 @@ polar_make_grid_import (w, ndom)
 {
 
   Log ("Cannot make rtheta grid from model yet\n");
-
   return (0);
 }
 
@@ -637,8 +703,6 @@ import_velocity (ndom, x, v)
      double *x, *v;
 {
   double speed;
-
-
   if (zdom[ndom].coord_type == SPHERICAL)
     {
       speed = velocity_1d (ndom, x, v);
@@ -671,21 +735,17 @@ velocity_1d (ndom, x, v)
 {
   double speed;
   double r;
-
   int icell;
-
   r = length (x);
-
   icell = linterp (r, xx_1d.r, xx_1d.v, xx_1d.ndim, &speed, 0);
-
   v[0] = x[0] / r * speed;
   v[1] = x[1] / r * speed;
   v[2] = x[2] / r * speed;
-
-
-
   return (speed);
 }
+
+/* velocity for cylindrical coordinates only interpolates.  One has to
+ * interpoalte for vgrad */
 
 
 double
@@ -693,10 +753,20 @@ velocity_cylindrical (ndom, x, v)
      int ndom;
      double *x, *v;
 {
-  double speed = 0;
+  int j;
+  int nn;
+  int nnn[4], nelem;
+  double frac[4];
+  double speed;
+  coord_fraction (ndom, 0, x, nnn, frac, &nelem);
+  for (j = 0; j < 3; j++)
+    {
+      v[j] = 0;
+      for (nn = 0; nn < nelem; nn++)
+	v[j] += wmain[zdom[ndom].nstart + nnn[nn]].v[j] * frac[nn];
+    }
 
-  Log ("Cannot make velocities for cylindrical grid from model yet\n");
-
+  speed = length (v);
   return (speed);
 }
 
@@ -707,11 +777,7 @@ velocity_polar (ndom, x, v)
      double *x, *v;
 {
   double speed = 0;
-
-
   Log ("Cannot make velocities for polar grid from model yet\n");
-
-
   return (speed);
 }
 
@@ -752,8 +818,6 @@ import_rho (ndom, x)
      double *x;
 {
   double rho;
-
-
   if (zdom[ndom].coord_type == SPHERICAL)
     {
       rho = rho_1d (ndom, x);
@@ -787,9 +851,7 @@ rho_1d (ndom, x)
   double rho = 0;
   double r;
   int n;
-
   r = length (x);
-
   n = 0;
   while (r > xx_1d.r[n] && n < xx_1d.ndim)
     {
@@ -807,8 +869,6 @@ rho_1d (ndom, x)
 
 
   Log ("rho %e \n", rho);
-
-
   return (rho);
 }
 
@@ -819,11 +879,7 @@ rho_cylindrical (ndom, x)
      double *x;
 {
   double rho = 0;
-
-
   Log ("Cannot make rho for cylindrical  grid from model yet\n");
-
-
   return (rho);
 }
 
@@ -834,10 +890,6 @@ rho_polar (ndom, x)
      double *x;
 {
   double rho = 0;
-
-
   Log ("Cannot make rho for polar grid from model yet\n");
-
-
   return (rho);
 }
