@@ -118,10 +118,6 @@ spherical_make_grid (w, ndom)
   int j, n;
   int ndim;
 
-  if (zdom[ndom].wind_type==IMPORT){
-      j=spherical_make_grid_import(w,ndom);
-      return(j);
-  }
 
   ndim = zdom[ndom].ndim;
 

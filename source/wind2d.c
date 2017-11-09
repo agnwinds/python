@@ -149,7 +149,10 @@ define_wind ()
       Log ("Define wind coord_type %d for domain %d\n", zdom[ndom].coord_type,
 	   ndom);
 
-      if (zdom[ndom].wind_type == SHELL)	/* nsh: This is the mode where we want the wind and the grid carefully 
+      if (zdom[ndom].wind_type == IMPORT) {
+              import_make_grid(w,ndom);
+              }
+      else if (zdom[ndom].wind_type == SHELL)	/* nsh: This is the mode where we want the wind and the grid carefully 
 						   controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
 						 */
 	{

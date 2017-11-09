@@ -41,17 +41,20 @@ struct
 
 struct
 {
-  int ndim, mdim;
-  int ele_row[NDIM_MAX], ele_col[NDIM_MAX];
-  double r[NDIM_MAX * NDIM_MAX], z[NDIM_MAX * NDIM_MAX];
+  int ndim, mdim, ncell;
+  int ele_row[NDIM_MAX], ele_col[NDIM_MAX], inwind[NDIM_MAX * NDIM_MAX];
+  double x[NDIM_MAX * NDIM_MAX], z[NDIM_MAX * NDIM_MAX];
   double v_x[NDIM_MAX * NDIM_MAX], v_y[NDIM_MAX * NDIM_MAX],
     v_z[NDIM_MAX * NDIM_MAX];
   double rho[NDIM_MAX * NDIM_MAX], t[NDIM_MAX * NDIM_MAX];
+
+  double wind_x[NDIM_MAX], wind_z[NDIM_MAX], wind_midx[NDIM_MAX],
+    wind_midz[NDIM_MAX];
 } xx_cyl;
 
 struct
 {
-  int ndim, mdim;
+  int ndim, mdim, ncell;
   int ele_row[NDIM_MAX], ele_col[NDIM_MAX];
   double r[NDIM_MAX * NDIM_MAX], theta[NDIM_MAX * NDIM_MAX];
   double v_r[NDIM_MAX * NDIM_MAX], v_theta[NDIM_MAX * NDIM_MAX],
@@ -239,8 +242,10 @@ import_cylindrical (ndom, filename)
 {
   FILE *fopen (), *fptr;
   char line[LINELEN];
-  int n, icell, jcell, ncell;
+  int n, icell, jcell, ncell, inwind;
   double q1, q2, q3, q4, q5, q6, q7;
+  double rho_min, rho_max, zmax;
+  double r, rmin, rmax, x[3];
 
 
 
@@ -260,9 +265,8 @@ import_cylindrical (ndom, filename)
   while (fgets (line, 512, fptr) != NULL)
     {
       n =
-	sscanf (line, " %d %d %le %le %le %le %le %le %le", &icell, &jcell,
-		&q1, &q2, &q3, &q4, &q5, &q6, &q7);
-      printf ("ok %d\n", n);
+	sscanf (line, " %d %d %d %le %le %le %le %le %le %le", &icell, &jcell,
+		&inwind, &q1, &q2, &q3, &q4, &q5, &q6, &q7);
       if (n < 4)
 	{
 	  printf ("Error. Ignore %s \n", line);
@@ -272,13 +276,14 @@ import_cylindrical (ndom, filename)
 	{
 	  xx_cyl.ele_row[ncell] = icell;
 	  xx_cyl.ele_col[ncell] = jcell;
-	  xx_cyl.r[ncell] = q1;
+	  xx_cyl.inwind[ncell] = inwind;
+	  xx_cyl.x[ncell] = q1;
 	  xx_cyl.z[ncell] = q2;
 	  xx_cyl.v_x[ncell] = q3;
 	  xx_cyl.v_y[ncell] = q4;
 	  xx_cyl.v_z[ncell] = q5;
 	  xx_cyl.rho[ncell] = q6;
-	  if (n > 9)
+	  if (n > 10)
 	    {
 	      xx_cyl.t[ncell] = q7;
 	    }
@@ -296,12 +301,70 @@ import_cylindrical (ndom, filename)
  * the wind grid or other things at this point, because we do not at this point know what
  * wind cells correspnd to whate elements of the grid */
 
-  zdom[ndom].ndim = xx_cyl.ndim = icell;
-  zdom[ndom].mdim = xx_cyl.mdim = jcell;
+  zdom[ndom].ndim = xx_cyl.ndim = icell + 1;
+  zdom[ndom].mdim = xx_cyl.mdim = jcell + 1;
+  xx_cyl.ncell = ncell;
+
+  Log ("XX Dimensions of read in model: %d %d\n", zdom[ndom].ndim,
+       zdom[ndom].mdim);
 
   zdom[ndom].ndim += 3;
   zdom[ndom].mdim += 3;
 
+
+  rmax = rho_max = zmax = 0;
+  rmin = rho_min = VERY_BIG;
+  for (n = 0; n < ncell; n++)
+
+    {
+      x[0] = xx_cyl.x[n];
+      x[1] = 0;
+      x[2] = xx_cyl.z[n];
+
+      r = length (x);
+
+      if (xx_cyl.inwind[n] >= 0)
+	{
+	  if (xx_cyl.x[n] > rho_max)
+	    {
+	      rho_max = xx_cyl.x[n];
+	    }
+	  if (xx_cyl.z[n] > zmax)
+	    {
+	      zmax = xx_cyl.z[n];
+	    }
+	  if (r > rmax)
+	    {
+	      rmax = r;
+	    }
+	}
+      else
+	{
+	  if (rho_min > xx_cyl.x[n])
+	    {
+	      rho_min = xx_cyl.x[n];
+	    }
+	  if (rmin > r)
+	    {
+	      rmin = r;
+	    }
+	}
+    }
+
+
+
+
+
+
+
+
+  zdom[ndom].wind_rho_min = zdom[ndom].rho_min = rho_min;
+  zdom[ndom].wind_rho_max = zdom[ndom].rho_max = rho_max;
+  zdom[ndom].zmax = zmax;
+
+  zdom[ndom].rmax = rmax;
+  zdom[ndom].rmin = rmin;
+  zdom[ndom].wind_thetamin = zdom[ndom].wind_thetamax = 0.;
 
 
   return (0);
@@ -413,6 +476,36 @@ import_polar (ndom, filename)
  * */
 
 int
+import_make_grid (w, ndom)
+     WindPtr w;
+     int ndom;
+{
+  if (zdom[ndom].coord_type == SPHERICAL)
+    {
+      spherical_make_grid_import (w, ndom);
+    }
+  else if (zdom[ndom].coord_type == CYLIND)
+    {
+      cylindrical_make_grid_import (w, ndom);
+    }
+  else if (zdom[ndom].coord_type == RTHETA)
+    {
+      polar_make_grid_import (w, ndom);
+    }
+  else
+    {
+      Error
+	("import_wind: Do not know how to import a model of coor_type %d\n",
+	 zdom[ndom].coord_type);
+      exit (0);
+    }
+
+
+
+  return (0);
+}
+
+int
 spherical_make_grid_import (w, ndom)
      WindPtr w;
      int ndom;
@@ -457,15 +550,67 @@ spherical_make_grid_import (w, ndom)
   return (0);
 }
 
+
+// struct
+// {
+//   int ndim, mdim,ncell;
+//   int ele_row[NDIM_MAX], ele_col[NDIM_MAX], inwind[NDIM_MAX * NDIM_MAX];
+//   double x[NDIM_MAX * NDIM_MAX], z[NDIM_MAX * NDIM_MAX];
+//   double v_x[NDIM_MAX * NDIM_MAX], v_y[NDIM_MAX * NDIM_MAX],
+//     v_z[NDIM_MAX * NDIM_MAX];
+//   double rho[NDIM_MAX * NDIM_MAX], t[NDIM_MAX * NDIM_MAX];
+// } xx_cyl;
+
 int
 cylindrical_make_grid_import (w, ndom)
      WindPtr w;
      int ndom;
 {
+  int j, n;
+  int jz, jx;
 
-  Log ("Cannot make cylindrical grid from model yet\n");
 
-  return (0);
+  jz = jx = 0;
+  for (n = 0; n < xx_cyl.ncell; n++)
+    {
+        Log("%d %d\n",xx_cyl.ele_row[n],xx_cyl.ele_col[n]);
+      if (xx_cyl.ele_row[n] == 0)
+	{
+	  xx_cyl.wind_z[jz] = xx_cyl.z[n];
+	  jz++;
+	}
+      if (xx_cyl.ele_col[n] == 0)
+	{
+	  xx_cyl.wind_x[jx] = xx_cyl.x[n];
+      Log("gotcha %d\n",jx);
+	  jx++;
+	}
+    }
+
+
+  Log ("Gotcha %d %d %d\n", xx_cyl.ncell,jz, jx);
+
+
+  exit (0);
+
+//  for (j = 0; j < xx_cyl.ndim; j++)
+//    {
+//      n = j + zdom[ndom].nstart;
+//      w[n].r = xx_1d.r[j];
+
+//    }
+
+//  for (n=0;n<xx_cyl.ncell;n++){
+//      j=n+zdom[ndom].nstart;
+//      w[j].x[0]=xx_cyl.x[n];
+//      w[j].x[1]=0.;
+//      w[j].x[2]=xx_cyl.z[n];
+//  }
+
+
+
+
+//HOLD  return (0);
 }
 
 int
@@ -580,17 +725,19 @@ get_import_wind_params (ndom)
 }
 
 
-/* Fill in the volumes.  Volumes use the standard routines
- * for each coordiante system since the volumes just depend
+/* XXX This is a placeholder for Fill in the volumes.  Hopefully
+ * it will not need to be used and Volumes use the standard 
+ * routines for each coordinate system since the volumes just depend
  * on quantities if zdom, and can be calculated after these
  * are properly determined.  There may be a need to exclude
- * domplicated regions, but this has not been addressed yet/
+ * complicated regions, but this has not been addressed yet
+ */
 
 
 
 
 
-/* Fill in plasma ptrs with deesities.   
+/* Fill in plasma ptrs with densities.   
  *
  * For this we assume that the densities read in are 
  * given at the * midpoints of the grid
