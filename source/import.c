@@ -583,6 +583,21 @@ cylindrical_make_grid_import (w, ndom)
   int nn;
 
 
+/*  XXX This is an attempt to make the grid directly.  It's inconistent,
+ *  somewhat with a separate attempt below.  The problem all
+ *  has to do with what one does with the edge cells.
+ *  */
+  for (n=0;n<xx_cyl.ncell;n++){
+      wind_ij_to_n(ndom,xx_cyl.ele_row[n],xx_cyl.ele_col[n],&nn);
+      w[nn].x[0]=xx_cyl.wind_x[n];
+      w[nn].x[1]=0;
+      w[nn].x[2]=xx_cyl.wind_z[n];
+      w[nn].v[0]=xx_cyl.v_x[n];
+      w[nn].v[1]=xx_cyl.v_y[n];
+      w[nn].v[2]=xx_cyl.v_z[n];
+  }
+
+
   jz = jx = 0;
   for (n = 0; n < xx_cyl.ncell; n++)
     {
@@ -620,16 +635,19 @@ cylindrical_make_grid_import (w, ndom)
 
 
   /* At this point we should be able to fill the wind array with
-   * positions */
+   * positions 
+   * XXX This is my original attempt.  It does deal with the
+   * edge cells, does not put the velocities in
+   * */
 
   n = zdom[ndom].nstart;
   for (kx = 0; kx < jx; kx++)
     {
       for (kz = 0; kz < jz; kz++)
 	{
-	  w[n].x[0] = xx_cyl.wind_x[kx];
+//	  w[n].x[0] = xx_cyl.wind_x[kx];
 	  w[n].x[1] = 0;
-	  w[n].x[2] = xx_cyl.wind_z[kz];
+//	  w[n].x[2] = xx_cyl.wind_z[kz];
 	  n++;
 	}
 
