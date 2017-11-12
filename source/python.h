@@ -195,7 +195,7 @@ typedef struct domain
 {
   char name[LINELENGTH];
   int wind_type;
-  int ndim, mdim, ndim2;
+  int ndim, mdim, ndim2;       //ndim is the size in the x direction, while mdim is the size in z or theta direction
   int nstart, nstop;            //the beginning and end (-1) location in wmain of this component
   enum coord_type_enum coord_type;
   int log_linear;               /*0 -> the grid spacing will be logarithmic in x and z, 1-> linear */

@@ -225,11 +225,21 @@ Notes:
     i, j, r z  v_x v_y v_z rho (and optionally T)
 
     where v_x,_v_y,v_z are the velocities in the x,z plane
+    and where
+
+    i is the column number  (Thus i corresponds to ndim)
+    j is the row number     (and z coresponds to mdim)
 
     We assume that all of the variables are centered, that is
     we are not assuming that we are giving rho at the center of
     a cell, but that r and v_r are at the edges of a cell. 
     This is someghing that would presumable be easy to change
+
+    Note that we assume that the data are being read in in the
+    same order as printed out by windsave2table, that is that
+    the first "column" is read in, and then the second "column".
+
+
 
 
 History:
@@ -872,6 +882,24 @@ rho_1d (ndom, x)
   return (rho);
 }
 
+//OLD struct
+//OLD {
+//OLD   int ndim, mdim, ncell;
+//OLD   int ele_row[NDIM_MAX * NDIM_MAX], ele_col[NDIM_MAX * NDIM_MAX],
+//OLD     inwind[NDIM_MAX * NDIM_MAX];
+//OLD   double x[NDIM_MAX * NDIM_MAX], z[NDIM_MAX * NDIM_MAX];
+//OLD   double v_x[NDIM_MAX * NDIM_MAX], v_y[NDIM_MAX * NDIM_MAX],
+//OLD     v_z[NDIM_MAX * NDIM_MAX];
+//OLD   double rho[NDIM_MAX * NDIM_MAX], t[NDIM_MAX * NDIM_MAX];
+//OLD 
+//OLD   double wind_x[NDIM_MAX], wind_z[NDIM_MAX], wind_midx[NDIM_MAX],
+//OLD     wind_midz[NDIM_MAX];
+//OLD } xx_cyl;
+
+/*  This routine should only be called to set up the plasma cells,
+ *  and we assume that rho that was imported is the center of the 
+ *  plasma cell, so there is no need to interpolate.
+ */
 
 double
 rho_cylindrical (ndom, x)
@@ -879,7 +907,26 @@ rho_cylindrical (ndom, x)
      double *x;
 {
   double rho = 0;
-  Log ("Cannot make rho for cylindrical  grid from model yet\n");
+  double r,z;
+  int i,j,n;
+
+  r=sqrt(x[0]*x[0]+x[1]*x[1]);
+  z=fabs(x[2]);
+
+  i=0;
+  while (z>xx_cyl.wind_z[i] && i<xx_cyl.mdim-1) {
+      i++;
+  }
+  j=0;
+  while (r>xx_cyl.wind_x[j] && j<xx_cyl.ndim-1) {
+      j++;
+  }
+
+  n=j*xx_cyl.mdim+i;
+
+  rho=xx_cyl.rho[n];
+
+
   return (rho);
 }
 
