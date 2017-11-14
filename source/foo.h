@@ -504,21 +504,24 @@ double *get_ion(int ndom, int element, int istate, int iswitch);
 double *get_one(int ndom, char variable_name[]);
 /* import.c */
 int import_wind(int ndom);
-int import_1d(int ndom, char *filename);
-int import_cylindrical(int ndom, char *filename);
-int import_polar(int ndom, char *filename);
 int import_make_grid(WindPtr w, int ndom);
-int spherical_make_grid_import(WindPtr w, int ndom);
-int cylindrical_make_grid_import(WindPtr w, int ndom);
-int polar_make_grid_import(WindPtr w, int ndom);
 double import_velocity(int ndom, double *x, double *v);
-double velocity_1d(int ndom, double *x, double *v);
-double velocity_cylindrical(int ndom, double *x, double *v);
-double velocity_polar(int ndom, double *x, double *v);
 int get_import_wind_params(int ndom);
 double import_rho(int ndom, double *x);
+/* import_spherical.c */
+int import_1d(int ndom, char *filename);
+int spherical_make_grid_import(WindPtr w, int ndom);
+double velocity_1d(int ndom, double *x, double *v);
 double rho_1d(int ndom, double *x);
+/* import_cylindrical.c */
+int import_cylindrical(int ndom, char *filename);
+int cylindrical_make_grid_import(WindPtr w, int ndom);
+double velocity_cylindrical(int ndom, double *x, double *v);
 double rho_cylindrical(int ndom, double *x);
+/* import_rtheta.c */
+int import_polar(int ndom, char *filename);
+int polar_make_grid_import(WindPtr w, int ndom);
+double velocity_polar(int ndom, double *x, double *v);
 double rho_polar(int ndom, double *x);
 /* reverb.c */
 double delay_to_observer(PhotPtr pp);
