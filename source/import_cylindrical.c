@@ -100,8 +100,7 @@ import_cylindrical (ndom, filename)
   int n, icell, jcell, ncell, inwind;
   double q1, q2, q3, q4, q5, q6, q7;
   int jz, jx;
-
-
+  double delta;
 
   Log ("Reading a model in cylindrical coordinates %s\n", filename);
 
@@ -174,9 +173,34 @@ import_cylindrical (ndom, filename)
     }
 
 
+  /* Now fill in wind_midx and midz. Given how we construct
+   * the mdpts we need to add one more on the end, though it
+   * is not entirely obvious that this is needed, given the
+   * assumption that we do not need extra buffer cells */
+
+  for (n=0;n<jz-1;n++){
+      xx_cyl.wind_midz[n]=0.5*(xx_cyl.wind_z[n]+xx_cyl.wind_z[n+1]);
+  }
+
+  delta=(xx_cyl.wind_z[jz-1]-xx_cyl.wind_z[jz-2]);
+  xx_cyl.wind_midz[jz]=xx_cyl.wind_z[jz-1]+0.5*delta;
+
+
+
+  for (n=0;n<jx-1;n++){
+      xx_cyl.wind_midx[n]=0.5*(xx_cyl.wind_x[n]+xx_cyl.wind_x[n+1]);
+  }
+
+  delta=(xx_cyl.wind_x[n-1]-xx_cyl.wind_x[n-2]);
+  xx_cyl.wind_midx[jx]=xx_cyl.wind_x[jx-1]+0.5*delta;
+
+
+
 
 
   Log ("Gotcha %d %d %d\n", xx_cyl.ncell, jz, jx);
+
+
 
 
 
@@ -211,18 +235,33 @@ cylindrical_make_grid_import (w, ndom)
 /*  XXX This is an attempt to make the grid directly.  It's inconistent,
  *  somewhat with a separate attempt below.  The problem all
  *  has to do with what one does with the edge cells.
+ *
+ *  Note also that none of this will work unless a complete grid is read 
+ *  in
  *  */
   for (n = 0; n < xx_cyl.ncell; n++)
     {
       wind_ij_to_n (ndom, xx_cyl.i[n], xx_cyl.j[n], &nn);
-      w[nn].x[0] = xx_cyl.wind_x[n];
+      w[nn].x[0] = xx_cyl.x[n];
       w[nn].x[1] = 0;
-      w[nn].x[2] = xx_cyl.wind_z[n];
+      w[nn].x[2] = xx_cyl.z[n];
       w[nn].v[0] = xx_cyl.v_x[n];
       w[nn].v[1] = xx_cyl.v_y[n];
       w[nn].v[2] = xx_cyl.v_z[n];
+
+      w[nn].xcen[0]=xx_cyl.wind_midx[xx_cyl.i[n]];
+      w[nn].xcen[1]=0;
+      w[nn].xcen[2]=xx_cyl.wind_midz[xx_cyl.j[n]];
     }
 
+  /* We now need to fill in the w[],cen */
+
+  for (n = 0; n < zdom[ndom].ndim2; n++)
+    {
+      wind_ij_to_n (ndom, xx_cyl.i[n], xx_cyl.j[n], &nn);
+
+    }
+  
 
   /* Now add information used in zdom */
 
