@@ -121,14 +121,6 @@ import_1d (ndom, filename)
 
 
   xx_1d.ndim = ncell;
-  zdom[ndom].ndim = ncell + 3;	// ADD Buffer
-  zdom[ndom].mdim = 1;
-  zdom[ndom].wind_rho_min = zdom[ndom].rho_min = 0;
-  zdom[ndom].rmin = xx_1d.r[0];
-  zdom[ndom].wind_rho_max = zdom[ndom].zmax = zdom[ndom].rho_max =
-    zdom[ndom].rmax = xx_1d.r[ncell - 1];
-  zdom[ndom].wind_thetamin = zdom[ndom].wind_thetamax = 0.;
-
 
 
 
@@ -153,6 +145,14 @@ spherical_make_grid_import (w, ndom)
 {
 
   int j, n;
+
+  zdom[ndom].ndim = xx_1d.ndim + 3;	// ADD Buffer
+  zdom[ndom].mdim = 1;
+  zdom[ndom].wind_rho_min = zdom[ndom].rho_min = 0;
+  zdom[ndom].rmin = xx_1d.r[0];
+  zdom[ndom].wind_rho_max = zdom[ndom].zmax = zdom[ndom].rho_max =
+    zdom[ndom].rmax = xx_1d.r[xx_1d.ndim - 1];
+  zdom[ndom].wind_thetamin = zdom[ndom].wind_thetamax = 0.;
 
   for (j = 0; j < xx_1d.ndim; j++)
     {
