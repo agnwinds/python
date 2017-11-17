@@ -372,7 +372,7 @@ cylind_volumes (ndom, w)
       cell_volume = 2 * PI * (rmax * rmax - rmin * rmin) * (zmax - zmin);
 
       // XXX Why is it necessary to do the check indicated by the if statement.   
-      /* 70b - only try to assign the cell if it has not already been assigned */
+      /* JM 1711 -- only try to assign the cell if it has not already been assigned */
       if (w[n].inwind == W_NOT_ASSIGNED)
       {
         if (one_dom->wind_type == IMPORT) {
@@ -438,17 +438,16 @@ cylind_volumes (ndom, w)
         }
       }
 
-      /* the following two if statements are for if the inwind values are
+      /* JM 1711 -- the following two if statements are for if the inwind values are
          already assigned, for example by an imported model */
       /* need to zero volumes for cells not in the wind */
       else if (w[n].inwind == W_NOT_INWIND) {
-          w[n].vol = 0.0;
-        }
+        w[n].vol = 0.0;
+      }
 
       else if (w[n].inwind == W_ALL_INWIND) {
-        //leading factor of 2 added to allow for volume above and below plane (SSMay04)
         w[n].vol = cell_volume;
-       }
+      }
     }
   }
 

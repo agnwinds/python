@@ -130,6 +130,10 @@ where_in_wind (x, ndomain)
 
     one_dom = &zdom[ndom];
 
+    /* JM 1711 -- if we have an imported model, then we don't have angles defined
+       and the "inwind" variable must instead be calculated by querying the
+       grid covered by this domain with where_in_grid */
+
     if (one_dom->wind_type == IMPORT) 
     {
         one_dom = &zdom[ndom];

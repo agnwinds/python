@@ -248,16 +248,18 @@ cylindrical_make_grid_import (w, ndom)
       w[nn].v[0] = xx_cyl.v_x[n];
       w[nn].v[1] = xx_cyl.v_y[n];
       w[nn].v[2] = xx_cyl.v_z[n];
-      w[nn].inwind=xx_cyl.inwind[n];
-
-      w[nn].xcen[0]=xx_cyl.wind_midx[xx_cyl.i[n]];
-      w[nn].xcen[1]=0;
-      w[nn].xcen[2]=xx_cyl.wind_midz[xx_cyl.j[n]];
-
-      /* JM 1711 -- copy across the inwind variable */
       w[nn].inwind = xx_cyl.inwind[n];
 
-      /* JM 1711 -- you're either in, or you're out. No part in wind cells allowed! */
+      w[nn].xcen[0] = xx_cyl.wind_midx[xx_cyl.i[n]];
+      w[nn].xcen[1] = 0;
+      w[nn].xcen[2] = xx_cyl.wind_midz[xx_cyl.j[n]];
+
+      /* JM 1711 -- copy across the inwind variable to the wind pointer */
+      w[nn].inwind = xx_cyl.inwind[n];
+
+      /* JM 1711 -- you're either in, or you're out. No part in wind cells allowed! 
+         there is a question here about which choice (of not in wind or all in 
+         wind) is most appropriate */
       if (w[nn].inwind == W_PART_INWIND)
         w[nn].inwind = W_NOT_INWIND;
     }
