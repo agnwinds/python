@@ -202,6 +202,14 @@ import_cylindrical (ndom, filename)
 
 
 
+  /* Although the initialization of most of zdom should be postponed
+   * one has to give zdom the dimensions of the array; otherwise 
+   * the wrong number of elements in wmains wind will be allocated
+   */
+
+  zdom[ndom].ndim = xx_cyl.ndim;
+  zdom[ndom].mdim = xx_cyl.mdim;
+  zdom[ndom].ndim2=xx_cyl.ndim*xx_cyl.mdim;
 
 
 
@@ -226,9 +234,6 @@ cylindrical_make_grid_import (w, ndom)
   double r, rmin, rmax, rho_min, rho_max, zmax;
   double x[3];
 
-  zdom[ndom].ndim = xx_cyl.ndim;
-  zdom[ndom].mdim = xx_cyl.mdim;
-  zdom[ndom].ndim2=xx_cyl.ndim*xx_cyl.mdim;
   Log ("XX Dimensions of read in model: %d %d\n", zdom[ndom].ndim,
        zdom[ndom].mdim);
 

@@ -122,6 +122,12 @@ import_1d (ndom, filename)
 
   xx_1d.ndim = ncell;
 
+  /* Although much of the initialization of zdom can be postponeed
+   * one has to define mdim and ndim of zdom here, so that the correct
+   * number of wind cells will be allocated */
+
+  zdom[ndom].ndim2=zdom[ndom].ndim = xx_1d.ndim;
+  zdom[ndom].mdim = 1;
 
   return (0);
 }
@@ -142,8 +148,8 @@ spherical_make_grid_import (w, ndom)
 
   int j, n;
 
-  zdom[ndom].ndim = xx_1d.ndim;	// ADD Buffer
-  zdom[ndom].mdim = 1;
+//  zdom[ndom].ndim2=zdom[ndom].ndim = xx_1d.ndim;	// ADD Buffer
+//  zdom[ndom].mdim = 1;
   zdom[ndom].wind_rho_min = zdom[ndom].rho_min = 0;
   zdom[ndom].rmin = xx_1d.r[0];
   zdom[ndom].wind_rho_max = zdom[ndom].zmax = zdom[ndom].rho_max =
@@ -177,6 +183,7 @@ spherical_make_grid_import (w, ndom)
       w[n].xcen[0] = w[n].xcen[2] = w[n].rcen * sin (PI / 4.);
     }
 
+  spherical_wind_complete(ndom,w);
   return (0);
 }
 
