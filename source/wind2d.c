@@ -139,7 +139,7 @@ define_wind ()
   /* initialize inwind and dfudge to a known state for all wind cells */
   for (n = 0; n < NDIM2; n++)
     {
-      w[n].inwind = W_NOT_INWIND;
+      w[n].inwind = W_NOT_ASSIGNED;
       w[n].dfudge = DFUDGE;
     }
 
@@ -284,11 +284,12 @@ define_wind ()
 	 ndom, zdom[ndom].ndim2, n_inwind, n_part, n_vol);
 
 
-      if (zdom[ndom].coord_type != SPHERICAL)
+      if (zdom[ndom].coord_type != SPHERICAL && zdom[ndom].wind_type != IMPORT)
 	{
 	  for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
 	    {
 	      n_inwind = check_corners_inwind (n);
+
 	      if (w[n].vol == 0 && n_inwind > 0)
 		{
 		  wind_n_to_ij (ndom, n, &i, &j);
@@ -307,10 +308,17 @@ define_wind ()
 	    }
 
 	}
-      else
+      else if (zdom[ndom].coord_type == SPHERICAL)
 	{
 	  Log
-	    ("Not checking  corners_in_wind for SPHERICAL coordinates used in domain %d\n",
+	    ("Not checking corners_in_wind for SPHERICAL coordinates used in domain %d\n",
+	     ndom);
+	}
+	  else if (zdom[ndom].wind_type == IMPORT)
+	{
+	  /* JM 1711 -- we don't want to check corners in the case of an imported model */
+	  Log
+	    ("Not checking corners_in_wind for imported model, domain %d\n",
 	     ndom);
 	}
     }

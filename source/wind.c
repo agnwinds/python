@@ -93,7 +93,7 @@ where_in_wind (x, ndomain)
 {
   double rho, rad, rho_min, rho_max, z;
   int ireturn;
-  int ndom;
+  int ndom, n;
   DomainPtr one_dom;
 
 
@@ -130,50 +130,68 @@ where_in_wind (x, ndomain)
 
     one_dom = &zdom[ndom];
 
+    /* JM 1711 -- if we have an imported model, then we don't have angles defined
+       and the "inwind" variable must instead be calculated by querying the
+       grid covered by this domain with where_in_grid */
 
-    /* First check to see if photon is inside or outside wind */
-
-    if (rad < one_dom->rmin)
+    if (one_dom->wind_type == IMPORT) 
     {
-      continue;                 /*x is inside the wind  radially */
-    }
-    if (rad > one_dom->rmax)
-    {
-      continue;                 /*the position is beyond the wind radially */
-    }
+        one_dom = &zdom[ndom];
 
-    if (z > one_dom->zmax)
-    {
-      continue;                 /*the position is beyond the wind radially */
-    }
-
-
-
-
-    /* Check if one is inside the inner windcone */
-    if (rho < (rho_min = one_dom->wind_rho_min + z * tan (one_dom->wind_thetamin)))
-    {
-      continue;
+        n = where_in_grid (ndom, x);
+        if (n >= 0) {
+          ireturn = wmain[n].inwind;
+          *ndomain = ndom;
+          break;
+        }
     }
 
-    /* Finally check if positon is outside the outer windcone */
-    /* NSH 130401 - The check below was taking a long time if geo.wind_thetamax was very close to pi/2.
-       check inserted to simply return INWIND if geo.wind_thetamax is within machine precision of pi/2. */
-
-    if (fabs (one_dom->wind_thetamax - PI / 2.0) > 1e-6)        /* Only perform the next check if thetamax is not equal to pi/2 */
+    else 
     {
-      if (rho > (rho_max = one_dom->wind_rho_max + z * tan (one_dom->wind_thetamax)))
+      /* First check to see if photon is inside or outside wind */
+
+      if (rad < one_dom->rmin)
+      {
+        continue;                 /*x is inside the wind  radially */
+      }
+      if (rad > one_dom->rmax)
+      {
+        continue;                 /*the position is beyond the wind radially */
+      }
+
+      if (z > one_dom->zmax)
+      {
+        continue;                 /*the position is beyond the wind radially */
+      }
+
+
+
+
+      /* Check if one is inside the inner windcone */
+      if (rho < (rho_min = one_dom->wind_rho_min + z * tan (one_dom->wind_thetamin)))
       {
         continue;
       }
+
+      /* Finally check if positon is outside the outer windcone */
+      /* NSH 130401 - The check below was taking a long time if geo.wind_thetamax was very close to pi/2.
+         check inserted to simply return INWIND if geo.wind_thetamax is within machine precision of pi/2. */
+
+      if (fabs (one_dom->wind_thetamax - PI / 2.0) > 1e-6)        /* Only perform the next check if thetamax is not equal to pi/2 */
+      {
+        if (rho > (rho_max = one_dom->wind_rho_max + z * tan (one_dom->wind_thetamax)))
+        {
+          continue;
+        }
+      }
+
+      /* At this point we have passed all of the tests for being in the wind */
+
+      *ndomain = ndom;
+      ireturn = W_ALL_INWIND;
+      break;
+
     }
-
-    /* At this point we have passed all of the tests for being in the wind */
-
-    *ndomain = ndom;
-    ireturn = W_ALL_INWIND;
-    break;
-
   }
   return (ireturn);
 }
