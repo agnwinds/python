@@ -193,7 +193,12 @@ define_wind ()
 	}
       for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
 	{
-	  model_velocity (ndom, w[n].x, w[n].v);
+        /* For imported models we we have already set the velocities
+         * at the edges of cells so this should not be done again
+         */
+	  if (zdom[ndom].wind_type!=IMPORT){
+          model_velocity (ndom, w[n].x, w[n].v);
+      }
 	  model_vgrad (ndom, w[n].x, w[n].v_grad);
 	}
 

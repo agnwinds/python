@@ -123,10 +123,6 @@ import_1d (ndom, filename)
   xx_1d.ndim = ncell;
 
 
-
-
-
-
   return (0);
 }
 
@@ -146,7 +142,7 @@ spherical_make_grid_import (w, ndom)
 
   int j, n;
 
-  zdom[ndom].ndim = xx_1d.ndim + 3;	// ADD Buffer
+  zdom[ndom].ndim = xx_1d.ndim;	// ADD Buffer
   zdom[ndom].mdim = 1;
   zdom[ndom].wind_rho_min = zdom[ndom].rho_min = 0;
   zdom[ndom].rmin = xx_1d.r[0];
@@ -158,23 +154,16 @@ spherical_make_grid_import (w, ndom)
     {
       n = j + zdom[ndom].nstart;
       w[n].r = xx_1d.r[j];
-
+      /* Put the radial velocity in v[0] */
+      w[n].v[0]=xx_1d.v[j];
     }
 
-  /* We have already added a buffer to zdom[ndom].ndim
-   * so we can extend the grid
-   */
 
-
-  w[n + 1].r = 1.01 * w[n].r;
-  w[n + 2].r = 1.02 * w[n].r;
-  w[n + 3].r = 1.03 * w[n].r;
-
+      /* Need to define the midpoints of the grid */
 
   for (j = 0; j < zdom[ndom].ndim; j++)
     {
       n = j + zdom[ndom].nstart;
-      /* Need to define the midpoints of the grid */
       if (j < zdom[ndom].ndim - 1)
 	{
 	  w[n].rcen = 0.5 * (w[n].r + w[n + 1].r);
@@ -192,9 +181,13 @@ spherical_make_grid_import (w, ndom)
 }
 
 
-/* The next section calculates velocites.  We follow the hydro approach of
- * getting those velocities from the original grid.  This is really only
- * used for setting up the grid
+/* The next section calculates velocites.  
+ *
+ * One could follow the zeus_hydro approach of getting those velocities from the original grid.  
+ * but for consistency with the 2d case we get it by interpolating on values in the cells
+ *
+ * Note that v_r is stored in v_0
+ *
  */
 
 double
@@ -204,9 +197,22 @@ velocity_1d (ndom, x, v)
 {
   double speed;
   double r;
-  int icell;
+  int nelem,nn, nnn[4];
+  double frac[4];
+  //
+//OLD  int icell;
   r = length (x);
-  icell = linterp (r, xx_1d.r, xx_1d.v, xx_1d.ndim, &speed, 0);
+
+  
+  coord_fraction (ndom, 0, x, nnn, frac, &nelem);
+  speed=0;
+  for (nn = 0; nn < nelem; nn++)
+  {
+      speed+=wmain[zdom[ndom].nstart + nnn[nn]].v[0] * frac[nn];
+  }
+
+//OLD  icell = linterp (r, xx_1d.r, xx_1d.v, xx_1d.ndim, &speed, 0);
+
   v[0] = x[0] / r * speed;
   v[1] = x[1] / r * speed;
   v[2] = x[2] / r * speed;
