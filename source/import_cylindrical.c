@@ -196,12 +196,6 @@ import_cylindrical (ndom, filename)
 
 
 
-
-
-  Log ("Gotcha %d %d %d\n", xx_cyl.ncell, jz, jx);
-
-
-
   /* Although the initialization of most of zdom should be postponed
    * one has to give zdom the dimensions of the array; otherwise 
    * the wrong number of elements in wmains wind will be allocated
@@ -209,8 +203,7 @@ import_cylindrical (ndom, filename)
 
   zdom[ndom].ndim = xx_cyl.ndim;
   zdom[ndom].mdim = xx_cyl.mdim;
-  zdom[ndom].ndim2=xx_cyl.ndim*xx_cyl.mdim;
-
+  zdom[ndom].ndim2=zdom[ndom].ndim * zdom[ndom].mdim;
 
 
   return (0);
@@ -237,9 +230,7 @@ cylindrical_make_grid_import (w, ndom)
   Log ("XX Dimensions of read in model: %d %d\n", zdom[ndom].ndim,
        zdom[ndom].mdim);
 
-/*  XXX This is an attempt to make the grid directly.  It's inconistent,
- *  somewhat with a separate attempt below.  The problem all
- *  has to do with what one does with the edge cells.
+/*  This is an attempt to make the grid directly.  
  *
  *  Note also that none of this will work unless a complete grid is read 
  *  in
@@ -269,13 +260,14 @@ cylindrical_make_grid_import (w, ndom)
         w[nn].inwind = W_NOT_INWIND;
     }
 
-  /* We now need to fill in the w[],cen */
+// ksl - Next few lines do not do anything
+//OLD  /* We now need to fill in the w[],cen */
 
-  for (n = 0; n < zdom[ndom].ndim2; n++)
-    {
-      wind_ij_to_n (ndom, xx_cyl.i[n], xx_cyl.j[n], &nn);
-
-    }
+//OLD  for (n = 0; n < zdom[ndom].ndim2; n++)
+//OLD    {
+//OLD      wind_ij_to_n (ndom, xx_cyl.i[n], xx_cyl.j[n], &nn);
+//OLD
+//OLD    }
   
 
   /* Now add information used in zdom */
@@ -293,8 +285,12 @@ cylindrical_make_grid_import (w, ndom)
     }
 
 
-  /* We have to do something about the velocities of the edge cells */
-
+  /* Now set up wind boundaries so they are harmless.  
+   * Note that given that we have already filled out
+   * the WindPtr it seems like we could do this
+   * without needing the internal structure
+   * I am attempting this in the rtheta model in 
+   * this fashion - ksl  */
 
 
   rmax = rho_max = zmax = 0;

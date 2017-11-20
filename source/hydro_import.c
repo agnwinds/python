@@ -740,7 +740,8 @@ Returns:
  
 Description:
 
-  
+XXX - ksl - It is very unclear why this routine is necessary
+coor_frac should be able to do this in one go.
 
 
 History:
@@ -808,7 +809,9 @@ Returns:
  
 Description:
 
-  
+XXX - ksl - It is not obvious why this was really needed, assuming that
+the model has been proper installed in the WindStruct.  Possibly it
+has to do with where values are centered.  
 
 
 History:
