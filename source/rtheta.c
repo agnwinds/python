@@ -426,7 +426,7 @@ rtheta_volumes (ndom, w)
     for (j = 0; j < mdim; j++)
     {
       wind_ij_to_n (ndom, i, j, &n);
-      if (w[n].inwind == W_NOT_INWIND)
+      if (w[n].inwind == W_NOT_ASSIGNED)
       {
 
         rmin = zdom[ndom].wind_x[i];
