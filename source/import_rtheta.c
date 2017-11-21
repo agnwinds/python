@@ -143,6 +143,7 @@ import_rtheta (ndom, filename)
 	{
 	  xx_rtheta.i[ncell] = icell;
 	  xx_rtheta.j[ncell] = jcell;
+	  xx_rtheta.inwind[ncell] = inwind;
 	  xx_rtheta.r[ncell] = q1;
 	  xx_rtheta.theta[ncell] = q2;
 	  xx_rtheta.v_x[ncell] = q3;
@@ -187,16 +188,24 @@ import_rtheta (ndom, filename)
 	0.5 * (xx_rtheta.wind_z[n] + xx_rtheta.wind_z[n + 1]);
     }
 
-  delta = (xx_rtheta.wind_z[jz - 1] - xx_rtheta.wind_z[jz - 2]);
-  xx_rtheta.wind_midz[jz] = xx_rtheta.wind_z[jz - 1] + 0.5 * delta;
+//OLD  delta = (xx_rtheta.wind_z[jz - 1] - xx_rtheta.wind_z[jz - 2]);
+//OLD  xx_rtheta.wind_midz[jz] = xx_rtheta.wind_z[jz - 1] + 0.5 * delta;
+
+  delta = (xx_rtheta.wind_z[n - 1] - xx_rtheta.wind_z[n - 2]);
+  xx_rtheta.wind_midz[n] = xx_rtheta.wind_z[n - 1] + 0.5 * delta;
+
   for (n = 0; n < jx - 1; n++)
     {
       xx_rtheta.wind_midx[n] =
 	0.5 * (xx_rtheta.wind_x[n] + xx_rtheta.wind_x[n + 1]);
     }
 
+//OLD  delta = (xx_rtheta.wind_x[n - 1] - xx_rtheta.wind_x[n - 2]);
+//OLD  xx_rtheta.wind_midx[jx] = xx_rtheta.wind_x[jx - 1] + 0.5 * delta;
+
   delta = (xx_rtheta.wind_x[n - 1] - xx_rtheta.wind_x[n - 2]);
-  xx_rtheta.wind_midx[jx] = xx_rtheta.wind_x[jx - 1] + 0.5 * delta;
+  xx_rtheta.wind_midx[n] = xx_rtheta.wind_x[n - 1] + 0.5 * delta;
+
   return (0);
 }
 
@@ -237,12 +246,15 @@ rtheta_make_grid_import (w, ndom)
       w[nn].v[2] = xx_rtheta.v_z[n];
       w[nn].inwind = xx_rtheta.inwind[n];
 
-      theta = xx_rtheta.wind_midz[xx_rtheta.j[n]] / RADIAN;
+      w[nn].thetacen= xx_rtheta.wind_midz[xx_rtheta.j[n]];
+      theta = w[nn].thetacen / RADIAN;
+
+      w[nn].rcen=xx_rtheta.wind_midx[xx_rtheta.i[n]];
 
 
-      w[nn].xcen[0] = xx_rtheta.wind_midx[xx_rtheta.i[n]] * sin (theta);
+      w[nn].xcen[0] =  w[nn].rcen * sin (theta);
       w[nn].xcen[1] = 0;
-      w[nn].xcen[2] = xx_rtheta.wind_midx[xx_rtheta.i[n]] * cos (theta);
+      w[nn].xcen[2] =  w[nn].rcen * cos (theta);
 
       /* JM 1711 -- copy across the inwind variable to the wind pointer */
       w[nn].inwind = xx_rtheta.inwind[n];
@@ -318,6 +330,10 @@ rtheta_make_grid_import (w, ndom)
   zdom[ndom].rmin = rmin;
   zdom[ndom].wind_thetamin = zdom[ndom].wind_thetamax = 0.;
 
+  /* The next line is necessary for calculating distances in a cell in rthota coordiatnes */
+
+  rtheta_make_cones (ndom, w);
+
   return (0);
 }
 
@@ -383,12 +399,16 @@ rho_rtheta (ndom, x)
   double rho = 0;
   double r, z;
   int i, j, n;
+  double ctheta,angle;
 
-  r = sqrt (x[0] * x[0] + x[1] * x[1]);
+  r=length(x);
+
   z = fabs (x[2]);
+  ctheta=z/r;
+  angle=acos(ctheta)*RADIAN;
 
   i = 0;
-  while (z > xx_rtheta.wind_z[i] && i < xx_rtheta.mdim - 1)
+  while (angle > xx_rtheta.wind_z[i] && i < xx_rtheta.mdim - 1)
     {
       i++;
     }

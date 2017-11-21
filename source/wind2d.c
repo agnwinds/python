@@ -250,7 +250,7 @@ define_wind ()
       else
 	{
 	  Error
-	    ("wind2d.c: Don't know how to make volumes for coordinate type %d\n",
+	    ("define_wind: Don't know how to make volumes for coordinate type %d\n",
 	     zdom[ndom].coord_type);
 	}
     }
@@ -869,19 +869,20 @@ wind_div_v (w)
     {
       /* Find the center of the cell */
 
-      /* stuff_v (w->xcen, x_zero); OLD NSH 130322 - this line seems to assume w is a cell, rather than the whole wind structure */
-      stuff_v (w[icell].xcen, x_zero);	/*NEW NSH 130322 - now gets the centre of the current cell in the loop */
+      stuff_v (w[icell].xcen, x_zero);	/*Gget the centre of the current cell in the loop */
       ndom = wmain[icell].ndom;
 
-      delta = 0.01 * x_zero[2];	//new 04mar ksl -- delta is the distance across which we measure e.g. dv_x/dx
+      delta = 0.01 * x_zero[2];	//delta is the distance across which we measure e.g. dv_x/dx
+      if (delta == 0) {
+	      Error("wind_div_v: Cell %d has xcen[2]==0.  This is surprising\n",icell);
+	      delta=wmain[icell].dfudge;
+      }
 
-      /* JM 1302 -- This has now been changed so instead of taking the midpoint and comparing to a point 
-         delta in the +v direction, we now fo delta/2 in either direction. This is in order to correctly 
-         evaluate dv/dy -- see bug report #70 */
 
       /* for each of x,y,z we first create a copy of the vector at the center. We then step 0.5*delta
          in positive and negative directions and evaluate the difference in velocities. Dividing this by
-         delta gives the value of dv_x/dx, and the sum of these gives the divergence */
+         delta gives the value of dv_x/dx, and the sum of these gives the divergence. If issues arise
+	 see bug report #70. */
 
 
       /* Calculate dv_x/dx at this position */
@@ -913,8 +914,6 @@ wind_div_v (w)
       /* we have now evaluated the divergence, so can store in the wind pointer */
       w[icell].div_v = div;
 
-
-      /*NSH 130322 another fix needed here the inwind check was w->inwind and was returning the wrong value */
       if (div < 0 && (wind_div_err < 0 || w[icell].inwind == W_ALL_INWIND))
 	{
 	  Error

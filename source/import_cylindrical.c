@@ -182,8 +182,11 @@ import_cylindrical (ndom, filename)
       xx_cyl.wind_midz[n]=0.5*(xx_cyl.wind_z[n]+xx_cyl.wind_z[n+1]);
   }
 
-  delta=(xx_cyl.wind_z[jz-1]-xx_cyl.wind_z[jz-2]);
-  xx_cyl.wind_midz[jz]=xx_cyl.wind_z[jz-1]+0.5*delta;
+//OLD  delta=(xx_cyl.wind_z[jz-1]-xx_cyl.wind_z[jz-2]);
+//OLD  xx_cyl.wind_midz[jz]=xx_cyl.wind_z[jz-1]+0.5*delta;
+
+  delta=(xx_cyl.wind_z[n-1]-xx_cyl.wind_z[n-2]);
+  xx_cyl.wind_midz[n]=xx_cyl.wind_z[n-1]+0.5*delta;
 
 
 
@@ -191,9 +194,12 @@ import_cylindrical (ndom, filename)
       xx_cyl.wind_midx[n]=0.5*(xx_cyl.wind_x[n]+xx_cyl.wind_x[n+1]);
   }
 
-  delta=(xx_cyl.wind_x[n-1]-xx_cyl.wind_x[n-2]);
-  xx_cyl.wind_midx[jx]=xx_cyl.wind_x[jx-1]+0.5*delta;
+//OLD  delta=(xx_cyl.wind_x[n-1]-xx_cyl.wind_x[n-2]);
+//OLD  xx_cyl.wind_midx[jx]=xx_cyl.wind_x[jx-1]+0.5*delta;
 
+
+  delta=(xx_cyl.wind_x[n-1]-xx_cyl.wind_x[n-2]);
+  xx_cyl.wind_midx[n]=xx_cyl.wind_x[n-1]+0.5*delta;
 
 
   /* Although the initialization of most of zdom should be postponed
