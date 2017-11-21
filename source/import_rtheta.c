@@ -54,7 +54,8 @@ History:
 struct
 {
   int ndim, mdim, ncell;
-  int i[NDIM_MAX * NDIM_MAX], j[NDIM_MAX * NDIM_MAX], inwind[NDIM_MAX * NDIM_MAX];
+  int i[NDIM_MAX * NDIM_MAX], j[NDIM_MAX * NDIM_MAX],
+    inwind[NDIM_MAX * NDIM_MAX];
   double r[NDIM_MAX * NDIM_MAX], theta[NDIM_MAX * NDIM_MAX];
 //OLD  double v_r[NDIM_MAX * NDIM_MAX], v_theta[NDIM_MAX * NDIM_MAX],
 //OLD    v_phi[NDIM_MAX * NDIM_MAX];
@@ -69,7 +70,7 @@ struct
   double wind_x[NDIM_MAX], wind_z[NDIM_MAX], wind_midx[NDIM_MAX],
     wind_midz[NDIM_MAX];
 
-} xx_polar;
+} xx_rtheta;
 
 
 
@@ -106,7 +107,7 @@ History:
 **************************************************************/
 
 int
-import_polar (ndom, filename)
+import_rtheta (ndom, filename)
      int ndom;
      char *filename;
 {
@@ -123,7 +124,7 @@ import_polar (ndom, filename)
 
   if ((fptr = fopen (filename, "r")) == NULL)
     {
-      Error ("import_polar: No such file\n");
+      Error ("import_rtheta: No such file\n");
       exit (0);
     }
 
@@ -140,62 +141,62 @@ import_polar (ndom, filename)
 	}
       else
 	{
-	  xx_polar.i[ncell] = icell;
-	  xx_polar.j[ncell] = jcell;
-	  xx_polar.r[ncell] = q1;
-	  xx_polar.theta[ncell] = q2;
-	  xx_polar.v_x[ncell] = q3;
-	  xx_polar.v_y[ncell] = q4;
-	  xx_polar.v_z[ncell] = q5;
-	  xx_polar.rho[ncell] = q6;
+	  xx_rtheta.i[ncell] = icell;
+	  xx_rtheta.j[ncell] = jcell;
+	  xx_rtheta.r[ncell] = q1;
+	  xx_rtheta.theta[ncell] = q2;
+	  xx_rtheta.v_x[ncell] = q3;
+	  xx_rtheta.v_y[ncell] = q4;
+	  xx_rtheta.v_z[ncell] = q5;
+	  xx_rtheta.rho[ncell] = q6;
 	  if (n > 9)
 	    {
-	      xx_polar.t[ncell] = q7;
+	      xx_rtheta.t[ncell] = q7;
 	    }
 	  else
 	    {
-	      xx_polar.t[ncell] = 10000.;
+	      xx_rtheta.t[ncell] = 10000.;
 	    }
 	  ncell++;
 
 	}
     }
 
-  zdom[ndom].ndim = xx_polar.ndim = icell + 1;
-  zdom[ndom].mdim = xx_polar.mdim = jcell + 1;
-  xx_polar.ncell = ncell;
+  zdom[ndom].ndim = xx_rtheta.ndim = icell + 1;
+  zdom[ndom].mdim = xx_rtheta.mdim = jcell + 1;
+  xx_rtheta.ncell = ncell;
   zdom[ndom].ndim2 = zdom[ndom].ndim * zdom[ndom].mdim;
   jz = jx = 0;
-  for (n = 0; n < xx_polar.ncell; n++)
+  for (n = 0; n < xx_rtheta.ncell; n++)
     {
-      if (xx_polar.i[n] == 0)
+      if (xx_rtheta.i[n] == 0)
 	{
-	  xx_polar.wind_z[jz] = xx_polar.theta[n];
+	  xx_rtheta.wind_z[jz] = xx_rtheta.theta[n];
 	  jz++;
 	}
-      if (xx_polar.j[n] == 0)
+      if (xx_rtheta.j[n] == 0)
 	{
-	  xx_polar.wind_x[jx] = xx_polar.r[n];
+	  xx_rtheta.wind_x[jx] = xx_rtheta.r[n];
 	  jx++;
 	}
     }
 
   for (n = 0; n < jz - 1; n++)
     {
-      xx_polar.wind_midz[n] =
-	0.5 * (xx_polar.wind_z[n] + xx_polar.wind_z[n + 1]);
+      xx_rtheta.wind_midz[n] =
+	0.5 * (xx_rtheta.wind_z[n] + xx_rtheta.wind_z[n + 1]);
     }
 
-  delta = (xx_polar.wind_z[jz - 1] - xx_polar.wind_z[jz - 2]);
-  xx_polar.wind_midz[jz] = xx_polar.wind_z[jz - 1] + 0.5 * delta;
+  delta = (xx_rtheta.wind_z[jz - 1] - xx_rtheta.wind_z[jz - 2]);
+  xx_rtheta.wind_midz[jz] = xx_rtheta.wind_z[jz - 1] + 0.5 * delta;
   for (n = 0; n < jx - 1; n++)
     {
-      xx_polar.wind_midx[n] =
-	0.5 * (xx_polar.wind_x[n] + xx_polar.wind_x[n + 1]);
+      xx_rtheta.wind_midx[n] =
+	0.5 * (xx_rtheta.wind_x[n] + xx_rtheta.wind_x[n + 1]);
     }
 
-  delta = (xx_polar.wind_x[n - 1] - xx_polar.wind_x[n - 2]);
-  xx_polar.wind_midx[jx] = xx_polar.wind_x[jx - 1] + 0.5 * delta;
+  delta = (xx_rtheta.wind_x[n - 1] - xx_rtheta.wind_x[n - 2]);
+  xx_rtheta.wind_midx[jx] = xx_rtheta.wind_x[jx - 1] + 0.5 * delta;
   return (0);
 }
 
@@ -206,7 +207,7 @@ import_polar (ndom, filename)
  * */
 
 int
-polar_make_grid_import (w, ndom)
+rtheta_make_grid_import (w, ndom)
      WindPtr w;
      int ndom;
 {
@@ -220,31 +221,31 @@ polar_make_grid_import (w, ndom)
    * we can put a lot of information in directly
    */
 
-  for (n = 0; n < xx_polar.ncell; n++)
+  for (n = 0; n < xx_rtheta.ncell; n++)
     {
-      wind_ij_to_n (ndom, xx_polar.i[n], xx_polar.j[n], &nn);
-      w[nn].r = xx_polar.r[n];
-      w[nn].theta = theta = xx_polar.theta[n];
+      wind_ij_to_n (ndom, xx_rtheta.i[n], xx_rtheta.j[n], &nn);
+      w[nn].r = xx_rtheta.r[n];
+      w[nn].theta = theta = xx_rtheta.theta[n];
 
       theta /= RADIAN;
 
       w[nn].x[0] = w[nn].r * sin (theta);
       w[nn].x[1] = 0;
       w[nn].x[2] = w[nn].r * cos (theta);
-      w[nn].v[0] = xx_polar.v_x[n];
-      w[nn].v[1] = xx_polar.v_y[n];
-      w[nn].v[2] = xx_polar.v_z[n];
-      w[nn].inwind = xx_polar.inwind[n];
+      w[nn].v[0] = xx_rtheta.v_x[n];
+      w[nn].v[1] = xx_rtheta.v_y[n];
+      w[nn].v[2] = xx_rtheta.v_z[n];
+      w[nn].inwind = xx_rtheta.inwind[n];
 
-      theta = xx_polar.wind_midz[xx_polar.j[n]] / RADIAN;
+      theta = xx_rtheta.wind_midz[xx_rtheta.j[n]] / RADIAN;
 
 
-      w[nn].xcen[0] = xx_polar.wind_midx[xx_polar.i[n]] * sin (theta);
+      w[nn].xcen[0] = xx_rtheta.wind_midx[xx_rtheta.i[n]] * sin (theta);
       w[nn].xcen[1] = 0;
-      w[nn].xcen[2] = xx_polar.wind_midx[xx_polar.i[n]] * cos (theta);
+      w[nn].xcen[2] = xx_rtheta.wind_midx[xx_rtheta.i[n]] * cos (theta);
 
       /* JM 1711 -- copy across the inwind variable to the wind pointer */
-      w[nn].inwind = xx_polar.inwind[n];
+      w[nn].inwind = xx_rtheta.inwind[n];
 
       /* JM 1711 -- you're either in, or you're out. No part in wind cells allowed! 
        *          there is a question here about which choice (of not in wind or all in 
@@ -257,14 +258,14 @@ polar_make_grid_import (w, ndom)
 
   for (n = 0; n < zdom[ndom].ndim; n++)
     {
-      zdom[ndom].wind_x[n] = xx_polar.wind_x[n];
+      zdom[ndom].wind_x[n] = xx_rtheta.wind_x[n];
     }
 
 
 
   for (n = 0; n < zdom[ndom].mdim; n++)
     {
-      zdom[ndom].wind_z[n] = xx_polar.wind_z[n];
+      zdom[ndom].wind_z[n] = xx_rtheta.wind_z[n];
     }
 
   /* Now set up wind boundaries so they are harmless */
@@ -272,11 +273,11 @@ polar_make_grid_import (w, ndom)
 
   rmax = rho_max = zmax = 0;
   rmin = rho_min = VERY_BIG;
-    for (n = 0; n < xx_polar.ncell; n++)
-            {
-                      wind_ij_to_n (ndom, xx_polar.i[n], xx_polar.j[n], &nn);
+  for (n = 0; n < xx_rtheta.ncell; n++)
+    {
+      wind_ij_to_n (ndom, xx_rtheta.i[n], xx_rtheta.j[n], &nn);
 
-      r=length(w[nn].x);
+      r = length (w[nn].x);
 
 
       if (w[nn].inwind >= 0)
@@ -324,15 +325,38 @@ polar_make_grid_import (w, ndom)
 /* The next section calculates velocites.  We follow the hydro approach of
  * getting those velocities from the original grid.  This is really only
  * used for setting up the grid
+ *
+ * The code here is identical to that in velocity_cylindrical, which suggests
+ * that it could be used for any regular 2d grid 
  */
 
 double
-velocity_polar (ndom, x, v)
+velocity_rtheta (ndom, x, v)
      int ndom;
      double *x, *v;
 {
-  double speed = 0;
-  Log ("Cannot make velocities for polar grid from model yet\n");
+  int j;
+  int nn;
+  int nnn[4], nelem;
+  double frac[4];
+  double vv[3];
+  double speed;
+  coord_fraction (ndom, 0, x, nnn, frac, &nelem);
+  for (j = 0; j < 3; j++)
+    {
+      vv[j] = 0;
+      for (nn = 0; nn < nelem; nn++)
+	vv[j] += wmain[zdom[ndom].nstart + nnn[nn]].v[j] * frac[nn];
+    }
+
+  speed = length (vv);
+
+  /* Now copy the result into v, which is very necessary if refilling wmain.v */
+
+  v[0] = vv[0];
+  v[1] = vv[1];
+  v[2] = vv[2];
+
   return (speed);
 }
 
@@ -346,16 +370,37 @@ velocity_polar (ndom, x, v)
  * For this we assume that the densities read in are 
  * given at the * midpoints of the grid
  *
- * 
+ * Except for the structure involved the code here is identical
+ * to that used for a cylindrical grid. 
  * */
 
 
 double
-rho_polar (ndom, x)
+rho_rtheta (ndom, x)
      int ndom;
      double *x;
 {
   double rho = 0;
-  Log ("Cannot make rho for polar grid from model yet\n");
+  double r, z;
+  int i, j, n;
+
+  r = sqrt (x[0] * x[0] + x[1] * x[1]);
+  z = fabs (x[2]);
+
+  i = 0;
+  while (z > xx_rtheta.wind_z[i] && i < xx_rtheta.mdim - 1)
+    {
+      i++;
+    }
+  j = 0;
+  while (r > xx_rtheta.wind_x[j] && j < xx_rtheta.ndim - 1)
+    {
+      j++;
+    }
+
+  n = j * xx_rtheta.mdim + i;
+
+  rho = xx_rtheta.rho[n];
+
   return (rho);
 }

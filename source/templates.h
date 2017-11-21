@@ -519,10 +519,10 @@ int cylindrical_make_grid_import(WindPtr w, int ndom);
 double velocity_cylindrical(int ndom, double *x, double *v);
 double rho_cylindrical(int ndom, double *x);
 /* import_rtheta.c */
-int import_polar(int ndom, char *filename);
-int polar_make_grid_import(WindPtr w, int ndom);
-double velocity_polar(int ndom, double *x, double *v);
-double rho_polar(int ndom, double *x);
+int import_rtheta(int ndom, char *filename);
+int rtheta_make_grid_import(WindPtr w, int ndom);
+double velocity_rtheta(int ndom, double *x, double *v);
+double rho_rtheta(int ndom, double *x);
 /* reverb.c */
 double delay_to_observer(PhotPtr pp);
 int delay_dump_prep(int restart_stat);

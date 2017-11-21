@@ -55,7 +55,7 @@ import_wind (ndom)
     }
   else if (zdom[ndom].coord_type == RTHETA)
     {
-      import_polar (ndom, filename);
+      import_rtheta (ndom, filename);
     }
   else
     {
@@ -87,7 +87,7 @@ import_make_grid (w, ndom)
     }
   else if (zdom[ndom].coord_type == RTHETA)
     {
-      polar_make_grid_import (w, ndom);
+      rtheta_make_grid_import (w, ndom);
     }
   else
     {
@@ -123,7 +123,7 @@ import_velocity (ndom, x, v)
     }
   else if (zdom[ndom].coord_type == RTHETA)
     {
-      speed = velocity_polar (ndom, x, v);
+      speed = velocity_rtheta (ndom, x, v);
     }
   else
     {
@@ -171,7 +171,7 @@ import_rho (ndom, x)
     }
   else if (zdom[ndom].coord_type == RTHETA)
     {
-      rho = rho_polar (ndom, x);
+      rho = rho_rtheta (ndom, x);
     }
   else
     {
