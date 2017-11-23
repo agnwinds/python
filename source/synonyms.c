@@ -104,7 +104,6 @@ check_synonyms (new_question, old_question)
   {
     if (strncmp (new_names[n], firstword, wordlength) == 0)
     {
-      printf ("Hello %d\n", wordlength);
       printf ("Matched keyword %s in .pf file to %s in current python version\n", new_question, old_names[n]);
       strcpy (old_question, old_names[n]);
       return (1);
