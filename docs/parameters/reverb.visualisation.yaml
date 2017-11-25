@@ -1,0 +1,12 @@
+name: reverb.visualisation
+description: |
+  Multi-line description, must keep indentation.
+type: Enum (Int)
+values:
+  0: none
+  1: .vtk
+  2: cell_dump
+  3: both
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: setup.c

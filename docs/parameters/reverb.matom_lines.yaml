@@ -1,0 +1,9 @@
+name: reverb.matom_lines
+description: |
+  number
+type: Int
+unit: None
+values: Condition e.g. >0 or list e.g. [1, 2, 5]
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: setup.c

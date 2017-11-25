@@ -1,0 +1,11 @@
+name: disk.type
+description: |
+  Multi-line description, must keep indentation.
+type: Enum (Int)
+values:
+  0: no.disk
+  1: standard.flat.disk
+  2: vertically.extended.disk
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: python.c

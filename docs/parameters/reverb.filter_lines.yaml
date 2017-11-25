@@ -1,0 +1,11 @@
+name: reverb.filter_lines
+description: |
+  Multi-line description, must keep indentation.
+type: Enum (Int)
+values:
+  0: 'off'
+  '>0': count
+  -1: continuum
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: setup.c

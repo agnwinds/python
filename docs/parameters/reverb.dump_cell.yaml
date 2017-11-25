@@ -1,0 +1,7 @@
+name: reverb.dump_cell
+description: |
+  x:z_position
+type: Line
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: setup.c

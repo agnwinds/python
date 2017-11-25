@@ -1,0 +1,10 @@
+name: Thermal_balance_options
+description: |
+  Multi-line description, must keep indentation.
+type: Enum (Int)
+values:
+  0: everything.on
+  1: no.adiabatic
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: setup2.c

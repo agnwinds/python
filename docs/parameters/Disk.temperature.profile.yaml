@@ -1,0 +1,11 @@
+name: Disk.temperature.profile
+description: |
+  Multi-line description, must keep indentation.
+type: Enum (Int)
+values:
+  0: standard
+  1: readin
+  2: analyatic
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: python.c

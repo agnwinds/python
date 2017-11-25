@@ -1,0 +1,7 @@
+name: reverb.matom_line
+description: |
+  line_index
+type: Line
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: setup.c

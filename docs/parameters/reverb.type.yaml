@@ -1,0 +1,12 @@
+name: reverb.type
+description: |
+  Multi-line description, must keep indentation.
+type: Enum (Int)
+values:
+  0: 'off'
+  1: photon
+  2: wind
+  3: matom
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: setup.c

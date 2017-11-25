@@ -1,0 +1,8 @@
+name: Select_photons_by_position
+description: |
+  Multi-line description, must keep indentation.
+type: Boolean (Y/N)
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: setup2.c
+advanced: true
