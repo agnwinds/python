@@ -1,9 +1,12 @@
 name: reverb.matom_lines
 description: |
-  number
+  Number of macro-atom lines to track paths for individually. This many
+  reverb.matom_line entries are required, and the line associated with each has
+  the path of photons deexciting into it recorded in its own array. Note: This
+  doesn't give rise to any noticable differences to the pure wind mode in most
+  simulations.
 type: Int
-unit: None
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: >0
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  reverb.type: 3
 file: setup.c

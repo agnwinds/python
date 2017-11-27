@@ -1,8 +1,8 @@
 name: agn_blackbody_temp
 description: |
-  Multi-line description, must keep indentation.
+  K
 type: Double
-unit: K
+unit: None
 values: Condition e.g. >0 or list e.g. [1, 2, 5]
 parent:
   parameter: Condition e.g. >0 or list e.g. [1, 2, 5]

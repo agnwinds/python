@@ -1,9 +1,15 @@
 name: reverb.path_bins
 description: |
-  Multi-line description, must keep indentation.
+  Number of bins for photon paths. Reverb modes that record the distribution of
+  path lengths in every wind cell bin them in this number of bins. Bins are
+  logarithmically spaced between the minimum scale in the system (the smallest
+  'minimum radius' in any domain) and the 10 * the maximum scale in the system
+  (10 * the 'maximum radius' in any domain). Default value is 1000, going much
+  higher does not lead to qualitative differences in TF, going lower makes the
+  bin boundaries show up in the TF.
 type: Int
-unit: None
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: >0
+default: 1000
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  reverb.type: [2, 3]
 file: setup.c

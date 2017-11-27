@@ -30,7 +30,6 @@ unit_types = OrderedDict([
                 ("deg",'Degrees'),
                 ("msol/yr",u"M☉/year"),
                 ("msol",u"M☉"),
-                ("k","K"),
                 ("hr","Hours"),
                 ("r_star","co.radius"),
                 ("rstar","co.radius"),
@@ -48,7 +47,7 @@ bool_types = {  "1=yes":"Boolean (1/0)",
 # Build a list of input files
 input_files = []
 try:
-    # Try making the folder if it doesn't exist 
+    # Try making the folder if it doesn't exist
     os.makedirs(os.fsencode(output_folder))
 except:
     pass
