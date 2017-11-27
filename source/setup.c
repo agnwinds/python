@@ -10,16 +10,16 @@
 /***********************************************************
              University of Southampton
 
-Synopsis: 
+Synopsis:
   get_stellar_params sets rstar, mstar, tstar as well
   as secondary parameters based on user inputs
-   
-Arguments:		
+
+Arguments:
 
 Returns:
- 
- 
-Description:	
+
+
+Description:
 
 Notes:
 
@@ -87,7 +87,7 @@ get_stellar_params ()
 
       geo.period /= 3600.;	// Convert units to hours for easy of data entry
       rddoub ("period(hr)", &geo.period);
-      geo.period *= 3600.;	// Put back to cgs immediately                   
+      geo.period *= 3600.;	// Put back to cgs immediately
     }
 
   return (geo.lum_star_init);
@@ -96,16 +96,16 @@ get_stellar_params ()
 /***********************************************************
              University of Southampton
 
-Synopsis: 
-  get_disk_params sets up the disk parameters according to user inputs, 
+Synopsis:
+  get_disk_params sets up the disk parameters according to user inputs,
   e.g. the temperature profile, accretion rate etc.
-   
-Arguments:		
+
+Arguments:
 
 Returns:
   disk_illum - this is used by python.c and so needs to be returned
- 
-Description:	
+
+Description:
 
 Notes:
 
@@ -162,16 +162,16 @@ get_disk_params ()
 /***********************************************************
              University of Southampton
 
-Synopsis: 
+Synopsis:
   get_bl_and_agn_params sets up the boundary layer and agn power law parameters
   based on user input and system type
-   
-Arguments:		
-  lstar     double 
+
+Arguments:
+  lstar     double
             star luminosity as calculated by get_stellar_params
 Returns:
- 
-Description:	
+
+Description:
 
 Notes:
 
@@ -319,7 +319,7 @@ get_bl_and_agn_params (lstar)
 	}
 
       /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
-         only in advanced mode and for non broken power law. 
+         only in advanced mode and for non broken power law.
          default is zero which is checked before we call photo_gen_agn */
       geo.pl_low_cutoff = 0.0;
       if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
@@ -331,7 +331,7 @@ get_bl_and_agn_params (lstar)
       if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
 	{
 	  rddoub ("lamp_post.height(r_g)", &geo.lamp_post_height);
-	  geo.lamp_post_height *= G * geo.mstar / C / C;	//get it in CGS units 
+	  geo.lamp_post_height *= G * geo.mstar / C / C;	//get it in CGS units
 	  Log ("lamp_post_height is cm is %g\n", geo.lamp_post_height);
 	}
       else if (geo.pl_geometry != PL_GEOMETRY_SPHERE)	// only two options at the moment
@@ -343,8 +343,8 @@ get_bl_and_agn_params (lstar)
 
 
 
-      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
-         This is only used in the sim correction factor for the first time through. 
+      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity.
+         This is only used in the sim correction factor for the first time through.
          Afterwards, the photons are used to compute the sim parameters. */
 
 
@@ -380,8 +380,8 @@ get_bl_and_agn_params (lstar)
 	rddoub ("@agn_power_law_cutoff", &geo.pl_low_cutoff);
 
 
-      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
-         This is only used in the sim correction factor for the first time through. 
+      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity.
+         This is only used in the sim correction factor for the first time through.
          Afterwards, the photons are used to compute the sim parameters. */
 
 
@@ -428,15 +428,15 @@ get_bl_and_agn_params (lstar)
 
 /***********************************************************
              University of Southampton
-Synopsis: 
+Synopsis:
   get_meta_params reads in data pertaining to simulation meta-
   properties like reverberation mapping settings and variance
   reduction techniques.
-   
-Arguments:    
+
+Arguments:
 Returns:
- 
-Description:  
+
+Description:
 Notes:
 History:
   1504  SWM   Added
@@ -645,15 +645,15 @@ get_meta_params (void)
 /***********************************************************
              University of Southampton
 
-Synopsis: 
+Synopsis:
   get_standard_care_factors provides more control over how the program is
   run
-   
-Arguments:    
+
+Arguments:
 
 Returns:
 
-Description:  
+Description:
 
 Notes:
 
@@ -661,7 +661,7 @@ History:
   1502  JM  Moved here from main()
 
 **************************************************************/
-v int
+int
 get_standard_care_factors ()
 {
   int istandard;
@@ -681,7 +681,7 @@ get_standard_care_factors ()
 	  rddoub ("@Lowest.ion.density.contributing.to.photoabsorption",
 		  &DENSITY_PHOT_MIN);
 	  rdint ("@Keep.photoabs.during.final.spectrum(1=yes)",
-		 &modes.keep_photoabs);,
+		 &modes.keep_photoabs);
 	}
     }
   return (0);
