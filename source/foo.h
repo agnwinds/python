@@ -487,6 +487,8 @@ int get_standard_care_factors(void);
 int get_domain_params(int ndom);
 int get_wind_params(int ndom);
 int get_line_transfer_mode(void);
+/* setup_disk.c */
+double get_disk_params(void);
 /* photo_gen_matom.c */
 double get_kpkt_f(void);
 double get_matom_f(int mode);
