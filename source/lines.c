@@ -77,9 +77,13 @@ total_line_emission (one, f1, f2)
   if (t_e <= 0 || f2 < f1)
     return (0);
 
-  limit_lines (f1, f2);
+  /* Update nline_min and nline_max in atomic.h which define which
+   * lines lie in the frequency range f1-f2 in the frepeuncy ordered
+   * version of the lines 
+   */
 
-//  lum = lum_lines (ww, t_e, nline_min, nline_max);
+  limit_lines (f1, f2);  
+
   lum = lum_lines (one, nline_min, nline_max);
 
 //Now populate the crude pdf for this wind element

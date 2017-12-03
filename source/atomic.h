@@ -260,8 +260,12 @@ LinePtr line, lin_ptr[NLINES];  /* line[] is the actual structure array that con
                                    rapid transition used in the macro atoms to stabilise level populations */
 struct lines fast_line;
 
-int nline_min, nline_max, nline_delt;   /*For calculating which line are likely to be in resonance, see
-                                           the routine limit_lines */
+int nline_min, nline_max, nline_delt;   /* Used to select a range of lines in a frequency band from the lin_ptr array 
+                                           in situations where the frequency range of interest is limited, including for defining which
+                                           lines come into play for resonant scattering along a line of sight, and in
+                                           calculating band_limit luminosities.  The limits are established by the
+                                           routine limit_lines.
+                                           */
 
 
         /* coll_stren is the collision strength interpolation data extracted from Chianti */
