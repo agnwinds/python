@@ -647,9 +647,9 @@ done to make it easier to control the size of the entire structure   06jul-ksl
  */
 #define NIONIZ	5               /*The number of ions (normally H and He) for which one separately tracks ionization 
                                    and recombinations */
-#define LPDF   3                /*The number of bins into which the line luminosity is divided in the course pdf
-                                   created by total_line_emission 
-                                   Reduced from 10 to 3 by SS for testing data with few lines. */
+//OLD #define LPDF   3                /*The number of bins into which the line luminosity is divided in the course pdf
+//OLD                                    created by total_line_emission 
+//OLD                                    Reduced from 10 to 3 by SS for testing data with few lines. */
 
 
 /* 061104 -- 58b -- ksl -- Added definitions to characterize whether a cell is in the wind. */
@@ -839,9 +839,9 @@ typedef struct plasma
   double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to computecompton cooling-  only needs computing once per cycle */
 
   double dmo_dt[3];             /*Radiative force of wind */
-  int npdf;                     /* The number of points actually used in the luminosity pdf */
-  int pdf_x[LPDF];              /* The line numbers of *line_ptr which form the boundaries the luminosity pdf */
-  double pdf_y[LPDF];           /* Where the pdf is stored -- values between 0 and 1 */
+//OLD  int npdf;                     /* The number of points actually used in the luminosity pdf */
+//OLD  int pdf_x[LPDF];              /* The line numbers of *line_ptr which form the boundaries the luminosity pdf */
+//OLD  double pdf_y[LPDF];           /* Where the pdf is stored -- values between 0 and 1 */
   double gain;                  /* The gain being used in interations of the structure */
   double converge_t_r, converge_t_e, converge_hc;       /* Three measures of whether the program believes the grid is converged.
                                                            The first wo  are the fraction changes in t_r, t_e between this and the last cycle. The third

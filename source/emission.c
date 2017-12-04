@@ -414,13 +414,18 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 	    }
 	  else
 	    {
-	      p[np].freq = one_line (&wmain[icell], freqmin, freqmax, &p[n].nres);	/*And fill all the rest of the luminosity up with line photons */
+	      p[np].freq = one_line (&wmain[icell], &p[n].nres);	/*And fill all the rest of the luminosity up with line photons */
+	      if (p[np].freq == 0)
+		{
+		  Error
+		    ("photo_gen_wind: one_line returned 0 for freq %g %g\n",
+		     freqmin, freqmax);
+		}
 	    }
 
 	  p[np].w = weight;
 	  get_random_location (icell, p[np].x);
 	  p[np].grid = icell;
-
 	  /*
 	     Determine the direction of the photon
 	     ?? Need to allow for anisotropic emission here
@@ -441,21 +446,16 @@ was a resonant scatter but we want isotropic scattering anyway.  */
 /* -1. forces a full reinitialization of the pdf for anisotropic scattering  */
 
 	      randwind (&p[np], p[np].lmn, wmain[icell].lmn);
-
 	    }
 	  else if (geo.scatter_mode == SCATTER_MODE_THERMAL)
 	    {			// It was a line photon and we want anisotropic scattering 
 	      randwind_thermal_trapping (&p[np], &nnscat);
 	    }
 	  p[np].nnscat = nnscat;
-
-
 	  /* The next two lines correct the frequency to first order, but do not result in
 	     forward scattering of the distribution */
-
 	  vwind_xyz (ndom, &p[np], v);
 	  p[np].freq *= (1. + dot (v, p[np].lmn) / C);
-
 	  p[np].istat = 0;
 	  p[np].tau = p[np].nscat = p[np].nrscat = 0;
 	  p[np].origin = PTYPE_WIND;	// A wind photon
@@ -480,13 +480,12 @@ was a resonant scatter but we want isotropic scattering anyway.  */
 
 
   return (nphot);		/* Return the number of photons generated */
-
 }
 
 /***********************************************************
                                        Space Telescope Science Institute
 
-Synopsis: one_line (one, freqmin, freqmax, nres) gets the frequency of a 
+Synopsis: one_line (one, nres) gets the frequency of a 
 single collisionally excited line photon in a particular cell
 of the wind.
 
@@ -504,59 +503,84 @@ History:
 	06may	ksl	57+ -- Modified to partially account for plasma structue
 			but a further change will be needed when move volume to
 			plasma
+    17nov   ksl Cleaned up
  
 **************************************************************/
 
 
 double
-one_line (one, freqmin, freqmax, nres)
+one_line (one, nres)
      WindPtr one;
-     double freqmin, freqmax;
      int *nres;
 {
   double xlum, xlumsum;
-  int m, n;
-  int lnmin, lnmax;
+//OLD  int m, n;
+  int m;
+//OLD  int lnmin, lnmax;
   int nplasma;
   PlasmaPtr xplasma;
-
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
-
-  xlum = xplasma->lum_lines * (rand () / (MAXRAND - 0.5));
-
-
-// Using the pre-calculated line luminosity pdf's locate the portion of the lin_ptr array 
-// from which the photon will will be drawn
-
-  n = 1;
-  while (xlum > xplasma->pdf_y[n] && n < LPDF)
-    n++;
-  lnmin = xplasma->pdf_x[n - 1];
-  lnmax = xplasma->pdf_x[n];
-  xlumsum = xplasma->pdf_y[n - 1];
-
-/* At this point we know from the line pdf roughly where the line will be located in
-frequency space but we need to recalculate the line luminosities within this frequency
-space because the line luminosities contained in the line ptr arrays are not current */
-
-  if ((xlumsum + lum_lines (one, lnmin, lnmax)) < xlum)
+  /* Put in a bunch of checks */
+  if (xplasma->lum_lines <= 0)
     {
-      Error ("one_line: lumin from lum_lines insufficient\n");
+      Error ("one_line: requesting a line when line lum is 0\n");
+      return (0);
+    }
+  if (nline_min == nline_max)
+    {
+      Error ("one_line: no lines %d %d\n", nline_min, nline_max);
+      return (0);
     }
 
-
-  m = lnmin;
-  while (xlumsum <= xlum)
+  xlum = xplasma->lum_lines * (rand () / (MAXRAND - 0.5));
+  xlumsum = 0;
+  m = nline_min;
+  while (xlumsum < xlum && m < nline_max)
     {
       xlumsum += lin_ptr[m]->pow;
       m++;
     }
-
-  *nres = m - 1;
-
-  return (lin_ptr[m - 1]->freq);
+  m--;
+  *nres = m;
+  return (lin_ptr[m]->freq);
 }
+
+
+
+
+
+//OLD // Using the pre-calculated line luminosity pdf's locate the portion of the lin_ptr array 
+//OLD // from which the photon will will be drawn
+
+//OLD   n = 1;
+//OLD   while (xlum > xplasma->pdf_y[n] && n < LPDF)
+//OLD     n++;
+//OLD   lnmin = xplasma->pdf_x[n - 1];
+//OLD   lnmax = xplasma->pdf_x[n];
+//OLD   xlumsum = xplasma->pdf_y[n - 1];
+
+//OLD /* At this point we know from the line pdf roughly where the line will be located in
+//OLD frequency space but we need to recalculate the line luminosities within this frequency
+//OLD space because the line luminosities contained in the line ptr arrays are not current */
+
+//OLD   if ((xlumsum + lum_lines (one, lnmin, lnmax)) < xlum)
+//OLD     {
+//OLD       Error ("one_line: lumin from lum_lines insufficient\n");
+//OLD     }
+
+
+//OLD   m = lnmin;
+//OLD   while (xlumsum <= xlum)
+//OLD     {
+//OLD       xlumsum += lin_ptr[m]->pow;
+//OLD       m++;
+//OLD     }
+
+//OLD   *nres = m - 1;
+
+//OLD   return (lin_ptr[m - 1]->freq);
+//OLD }
 
 /* Next section deals with bremsstrahlung radiation */
 #define BREMS_CONSTANT 6.85e-38	/*4*PI* 8/3* sqrt(2*PI/3)*e**6/m**2/c**3 sqrt(m/kT) or
@@ -609,13 +633,11 @@ total_free (one, t_e, f1, f2)
   double gsqrd;			/*The scaled inverse temperature experienced by an ion - used to compute the gaunt factor */
   int nplasma, nion;
   PlasmaPtr xplasma;
-
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
   /* 170526 - Elimiated the temperature limit on calculating t_e at low temperatures */
   //if (t_e < 100.)
   //  return (0.0);
-
   if (f2 < f1)
     {
       return (0.0);
@@ -634,15 +656,16 @@ total_free (one, t_e, f1, f2)
       if (nelements > 1)
 	{
 	  x =
-	    BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h +
+	    BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] *
+					    g_ff_h +
 					    4. * xplasma->density[4] *
 					    g_ff_he) / H_OVER_K;
 	}
       else
 	{
 	  x =
-	    BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h) /
-	    H_OVER_K;
+	    BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] *
+					    g_ff_h) / H_OVER_K;
 	}
     }
   else
@@ -673,7 +696,6 @@ total_free (one, t_e, f1, f2)
      one gets an extra factor of (k*t_e/h) when one does the integral */
   x *= sqrt (t_e) * xplasma->vol;
   x *= (exp (-H_OVER_K * f1 / t_e) - exp (-H_OVER_K * f2 / t_e));
-
   return (x);
 }
 
@@ -720,23 +742,18 @@ ff (one, t_e, freq)
   int nplasma;
   int nion;
   PlasmaPtr xplasma;
-
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
-
-
   if (t_e < 100.)
     return (0.0);
-
-
-
   if (gaunt_n_gsqrd == 0)	//Maintain old behaviour
     {
       g_ff_h = g_ff_he = 1.0;
       if (nelements > 1)
 	{
 	  fnu =
-	    BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] * g_ff_h +
+	    BREMS_CONSTANT * xplasma->ne * (xplasma->density[1] *
+					    g_ff_h +
 					    4. * xplasma->density[4] *
 					    g_ff_he);
 	}
@@ -770,9 +787,7 @@ ff (one, t_e, freq)
 
 
   fnu *= exp (-H_OVER_K * freq / t_e) / sqrt (t_e) * xplasma->vol;
-
   return (fnu);
-
 }
 
 
@@ -804,7 +819,6 @@ History:
 //struct Cdf cdf_ff;
 double ff_x[ARRAY_PDF], ff_y[ARRAY_PDF];	//We initialise the arrays that will contain the unscaled PDF 
 double one_ff_f1, one_ff_f2, one_ff_te;	/* Old values */
-
 double
 one_ff (one, f1, f2)
      WindPtr one;		/* a single cell */
@@ -815,14 +829,13 @@ one_ff (one, f1, f2)
   int nplasma;
   PlasmaPtr xplasma;
   int echeck;
-
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
-
   if (f2 < f1)
     {
-      Error ("one_ff: Bad inputs f2 %g < f1 %g returning 0.0  t_e %g\n", f2,
-	     f1, xplasma->t_e);
+      Error
+	("one_ff: Bad inputs f2 %g < f1 %g returning 0.0  t_e %g\n",
+	 f2, f1, xplasma->t_e);
       return (-1.0);
     }
 
@@ -839,16 +852,13 @@ one_ff (one, f1, f2)
 
       ff_x[ARRAY_PDF - 1] = f2;
       ff_y[ARRAY_PDF - 1] = ff (one, xplasma->t_e, ff_x[ARRAY_PDF - 1]);
-
-
-
       if ((echeck =
 	   cdf_gen_from_array (&cdf_ff, ff_x, ff_y, ARRAY_PDF, f1, f2)) != 0)
 	{
 	  Error
 	    ("one_ff: cdf_gen_from_array error %d : f1 %g f2 %g te %g ne %g nh %g vol %g\n",
-	     echeck, f1, f2, xplasma->t_e, xplasma->ne, xplasma->density[1],
-	     one->vol);
+	     echeck, f1, f2, xplasma->t_e, xplasma->ne,
+	     xplasma->density[1], one->vol);
 	  exit (0);
 	}
       one_ff_te = xplasma->t_e;
@@ -892,12 +902,9 @@ gaunt_ff (gsquared)
   double gaunt;
   double log_g2;
   double delta;			//The log difference between our G2 and the one in the table
-
   delta = 0.0;			/* NSH 130605 to remove o3 compile error */
   index = 0;			/* NSH 130605 to remove o3 compile error */
-
   log_g2 = log10 (gsquared);	//The data is in log format
-
   if (log_g2 < gaunt_total[0].log_gsqrd
       || log_g2 > gaunt_total[gaunt_n_gsqrd - 1].log_gsqrd)
     {
@@ -916,12 +923,8 @@ gaunt_ff (gsquared)
 
   gaunt =
     gaunt_total[index].gff + delta * (gaunt_total[index].s1 +
-				      delta * (gaunt_total[index].s2 +
-					       gaunt_total[index].s3));
-
-
-
-
-
+				      delta *
+				      (gaunt_total[index].s2 +
+				       gaunt_total[index].s3));
   return (gaunt);
 }
