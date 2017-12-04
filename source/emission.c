@@ -635,7 +635,7 @@ total_free (one, t_e, f1, f2)
   PlasmaPtr xplasma;
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
-  /* 170526 - Elimiated the temperature limit on calculating t_e at low temperatures */
+  /* 170526 - Eliminated the temperature limit on calculating t_e at low temperatures */
   //if (t_e < 100.)
   //  return (0.0);
   if (f2 < f1)
