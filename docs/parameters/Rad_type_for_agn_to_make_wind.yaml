@@ -1,4 +1,4 @@
-name: Rad_type_for_agn
+name: Rad_type_for_agn_to_make_wind
 description: |
   Multi-line description, must keep indentation.
 type: Enum (Int)

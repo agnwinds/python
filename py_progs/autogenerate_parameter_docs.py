@@ -4,6 +4,7 @@ Script for automatically generating documentation from Python *.c files
 # -*- coding: <utf-8> -*-
 import yaml
 import os
+import sys
 from collections import OrderedDict
 
 # Set up input and output folders. Requires PYTHON environment variable.
@@ -11,7 +12,7 @@ input_folder = os.environ["PYTHON"]+"/source"
 output_folder = os.environ["PYTHON"]+"/docs/parameters"
 
 # Do not generate documentation for inputs in files containing these substrings
-blacklist = [ "py_wind", "plot_roche" ]
+blacklist = [ "py_wind", "plot_roche", "py_grid" ]
 
 # Types of parameter read functions and the type they correspond to.
 # Must include 'wrappers' e.g. get_spectype.
@@ -120,6 +121,11 @@ for input_file in input_files:
                         continue
                     else:
                         param_dict["name"] = text[0:text.find('(')]
+                        if param_dict["name"] in output_dict:
+                            print("Extra copy of {} in {} (first: {})!".format(
+                                    param_dict["name"],
+                                    input_file,
+                                    output_dict[param_dict["name"]]["file"]))
                         output_dict[param_dict["name"]] = param_dict
                         text = text[text.find('(')+1:text.rfind(')')].replace(';',',')
                         if param_dict["name"].endswith('exponent'):
@@ -232,5 +238,5 @@ for key, value in output_dict.items():
     with open("{}/{}.yaml".format(output_folder,key), "w") as file_object:
         # For each key, open a yaml file and write to it.
         print("File: {}/{}.yaml".format(output_folder,key))
-        print(yaml.dump(value, default_flow_style=False, allow_unicode=True))
+        #print(yaml.dump(value, default_flow_style=False, allow_unicode=True))
         yaml.dump(value, file_object, default_flow_style=False, allow_unicode=True)
