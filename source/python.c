@@ -429,27 +429,29 @@ main (argc, argv)
 	  /* This option is the most common one, where we are starting to define a completely new system.  
 	   */
 
-	  rdpar_comment ("Parameters for the Disk (if there is one)");
-	  rdint
-	    ("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
-	     &geo.disk_type);
-	  if (geo.disk_type != DISK_NONE)
-	    {
-	      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-	    }
-	  else
-	    {
-	      geo.disk_radiation = 0;
-	    }
-	  get_spectype (geo.disk_radiation,
-			"Rad_type_for_disk(0=bb,1=models)_to_make_wind",
-			&geo.disk_ion_spectype);
+      get_disk_params();
+
+//OLD	  rdpar_comment ("Parameters for the Disk (if there is one)");
+//OLD	  rdint
+//OLD	    ("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
+//OLD	     &geo.disk_type);
+//OLD	  if (geo.disk_type != DISK_NONE)
+//OLD	    {
+//OLD	      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
+//OLD	    }
+//OLD	  else
+//OLD	    {
+//OLD	      geo.disk_radiation = 0;
+//OLD	    }
+//OLD	  get_spectype (geo.disk_radiation,
+//OLD			"Rad_type_for_disk(0=bb,1=models)_to_make_wind",
+//OLD			&geo.disk_ion_spectype);
 
 
-	  if (geo.disk_type)	/* Then a disk exists and it needs to be described */
-	    {
-	      get_disk_params ();
-	    }
+//OLD	  if (geo.disk_type)	/* Then a disk exists and it needs to be described */
+//OLD	    {
+//OLD	      get_disk_params ();
+//OLD	    }
 
 	  /* describe the boundary layer / agn components to the spectrum if they exist. 
 	     reads in information specified by the user and sets variables in geo structure */

@@ -239,7 +239,7 @@ double emittance_continuum(int spectype, double freqmin, double freqmax, double 
 double wind_luminosity(double f1, double f2);
 double total_emission(WindPtr one, double f1, double f2);
 int photo_gen_wind(PhotPtr p, double weight, double freqmin, double freqmax, int photstart, int nphot);
-double one_line(WindPtr one, double freqmin, double freqmax, int *nres);
+double one_line(WindPtr one, int *nres);
 double total_free(WindPtr one, double t_e, double f1, double f2);
 double ff(WindPtr one, double t_e, double freq);
 double one_ff(WindPtr one, double f1, double f2);
@@ -479,7 +479,6 @@ int gather_spectra_para(int nspec_helper, int nspecs);
 int communicate_matom_estimators_para(void);
 /* setup.c */
 double get_stellar_params(void);
-double get_disk_params(void);
 int get_bl_and_agn_params(double lstar);
 int get_meta_params(void);
 int get_standard_care_factors(void);
@@ -487,6 +486,8 @@ int get_standard_care_factors(void);
 int get_domain_params(int ndom);
 int get_wind_params(int ndom);
 int get_line_transfer_mode(void);
+/* setup_disk.c */
+double get_disk_params(void);
 /* photo_gen_matom.c */
 double get_kpkt_f(void);
 double get_matom_f(int mode);
