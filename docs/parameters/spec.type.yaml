@@ -1,0 +1,11 @@
+name: spec.type
+description: |
+  Multi-line description, must keep indentation.
+type: Enum (Int)
+values:
+  1: flambda
+  2: fnu
+  other: basic
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: setup2.c

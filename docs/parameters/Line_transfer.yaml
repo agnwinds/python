@@ -1,0 +1,14 @@
+name: Line_transfer
+description: |
+  Multi-line description, must keep indentation.
+type: Enum (Int)
+values:
+  0: pure.abs
+  1: pure.scat
+  2: sing.scat
+  3: escape.prob
+  6: macro_atoms
+  7: macro_atoms+aniso.scattering
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: setup_domains.c

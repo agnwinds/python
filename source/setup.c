@@ -10,16 +10,16 @@
 /***********************************************************
              University of Southampton
 
-Synopsis: 
+Synopsis:
   get_stellar_params sets rstar, mstar, tstar as well
   as secondary parameters based on user inputs
-   
-Arguments:		
+
+Arguments:
 
 Returns:
- 
- 
-Description:	
+
+
+Description:
 
 Notes:
 
@@ -87,7 +87,7 @@ get_stellar_params ()
 
       geo.period /= 3600.;	// Convert units to hours for easy of data entry
       rddoub ("period(hr)", &geo.period);
-      geo.period *= 3600.;	// Put back to cgs immediately                   
+      geo.period *= 3600.;	// Put back to cgs immediately
     }
 
   return (geo.lum_star_init);
@@ -97,16 +97,16 @@ get_stellar_params ()
 /***********************************************************
              University of Southampton
 
-Synopsis: 
+Synopsis:
   get_bl_and_agn_params sets up the boundary layer and agn power law parameters
   based on user input and system type
-   
-Arguments:		
-  lstar     double 
+
+Arguments:
+  lstar     double
             star luminosity as calculated by get_stellar_params
 Returns:
- 
-Description:	
+
+Description:
 
 Notes:
 
@@ -254,7 +254,7 @@ get_bl_and_agn_params (lstar)
 	}
 
       /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
-         only in advanced mode and for non broken power law. 
+         only in advanced mode and for non broken power law.
          default is zero which is checked before we call photo_gen_agn */
       geo.pl_low_cutoff = 0.0;
       if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
@@ -266,7 +266,7 @@ get_bl_and_agn_params (lstar)
       if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
 	{
 	  rddoub ("lamp_post.height(r_g)", &geo.lamp_post_height);
-	  geo.lamp_post_height *= G * geo.mstar / C / C;	//get it in CGS units 
+	  geo.lamp_post_height *= G * geo.mstar / C / C;	//get it in CGS units
 	  Log ("lamp_post_height is cm is %g\n", geo.lamp_post_height);
 	}
       else if (geo.pl_geometry != PL_GEOMETRY_SPHERE)	// only two options at the moment
@@ -278,8 +278,8 @@ get_bl_and_agn_params (lstar)
 
 
 
-      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
-         This is only used in the sim correction factor for the first time through. 
+      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity.
+         This is only used in the sim correction factor for the first time through.
          Afterwards, the photons are used to compute the sim parameters. */
 
 
@@ -315,8 +315,8 @@ get_bl_and_agn_params (lstar)
 	rddoub ("@agn_power_law_cutoff", &geo.pl_low_cutoff);
 
 
-      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
-         This is only used in the sim correction factor for the first time through. 
+      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity.
+         This is only used in the sim correction factor for the first time through.
          Afterwards, the photons are used to compute the sim parameters. */
 
 
@@ -363,15 +363,15 @@ get_bl_and_agn_params (lstar)
 
 /***********************************************************
              University of Southampton
-Synopsis: 
+Synopsis:
   get_meta_params reads in data pertaining to simulation meta-
   properties like reverberation mapping settings and variance
   reduction techniques.
-   
-Arguments:    
+
+Arguments:
 Returns:
- 
-Description:  
+
+Description:
 Notes:
 History:
   1504  SWM   Added
@@ -384,7 +384,7 @@ get_meta_params (void)
   char trackline[LINELENGTH];
 
   meta_param = 0;		// initialize to no reverberation tracking
-  rdint ("reverb.type", &meta_param);
+  rdint ("reverb.type(0=off,1=photon,2=wind,3=matom)", &meta_param);
   switch (meta_param)
     {				//Read in reverb tyoe, if any
     case 0:
@@ -407,7 +407,7 @@ get_meta_params (void)
   // ========== DEAL WITH DISK SETTINGS ==========
   if (geo.disk_type > 0 && geo.reverb != REV_NONE)
     {
-      rdint ("reverb.disk_type", &meta_param);
+      rdint ("reverb.disk_type(0=correlated_with_co,1=uncorrelated,2=ignore_disk_photons)", &meta_param);
       switch (meta_param)
 	{			//Read in reverb tyoe, if any
 	case 0:
@@ -434,7 +434,7 @@ get_meta_params (void)
       geo.reverb_dump_cells = 0;
       geo.reverb_vis = REV_VIS_NONE;
       rdint ("reverb.path_bins", &geo.reverb_path_bins);
-      rdint ("reverb.visualisation", &meta_param);
+      rdint ("reverb.visualisation(0=none,1=.vtk,2=cell_dump,3=both)", &meta_param);
       switch (meta_param)
 	{			//Select whether to produce 3d visualisation file and/or dump flat csvs of spread in cells
 	case 0:
@@ -456,10 +456,10 @@ get_meta_params (void)
 
       if (geo.reverb_vis == REV_VIS_VTK || geo.reverb_vis == REV_VIS_BOTH)
 	//If we're producing a 3d visualisation, select bins. This is just for aesthetics
-	rdint ("reverb.angle_bins", &geo.reverb_angle_bins);
+	rdint ("reverb.angle_bins(for_vtk)", &geo.reverb_angle_bins);
       if (geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
 	{			//If we;re dumping path arrays, read in the number of cells to dump them for
-	  rdint ("reverb.dump_cells", &geo.reverb_dump_cells);
+	  rdint ("reverb.dump_cells(number)", &geo.reverb_dump_cells);
 	  geo.reverb_dump_cell_x =
 	    (double *) calloc (geo.reverb_dump_cells, sizeof (double));
 	  geo.reverb_dump_cell_z =
@@ -468,7 +468,7 @@ get_meta_params (void)
 	    (int *) calloc (geo.reverb_dump_cells, sizeof (int));
 	  for (k = 0; k < geo.reverb_dump_cells; k++)
 	    {			//For each we expect, read a paired cell coord as "[i]:[j]". May need to use py_wind to find indexes.
-	      rdline ("reverb.dump_cell", trackline);
+	      rdline ("reverb.dump_cell(x:z_position)", trackline);
 	      if (sscanf
 		  (trackline, "%lf:%lf", &geo.reverb_dump_cell_x[k],
 		   &geo.reverb_dump_cell_z[k]) == EOF)
@@ -492,7 +492,7 @@ get_meta_params (void)
 	}
 
       //Read in the number of lines to be tracked and allocate space for them
-      rdint ("reverb.matom_lines", &geo.reverb_lines);
+      rdint ("reverb.matom_lines(number)", &geo.reverb_lines);
       geo.reverb_line = (int *) calloc (geo.reverb_lines, sizeof (int));
       if (geo.reverb_lines < 1)
 	{			//If this is <1, then warn the user and quit
@@ -503,7 +503,7 @@ get_meta_params (void)
 
       for (i = 0; i < geo.reverb_lines; i++)
 	{			//Finally, for each line we expect, read it in
-	  rdline ("reverb.matom_line", trackline);
+	  rdline ("reverb.matom_line(line_index)", trackline);
 	  if (sscanf (trackline, "%d:%d:%d:%d", &z, &istate, &levu, &levl) ==
 	      EOF)
 	    {			//If this line is malformed, warn the user
@@ -539,13 +539,13 @@ get_meta_params (void)
       //Should we filter any lines out?
       //If -1, blacklist continuum, if >0 specify lines as above and whitelist
       //Automatically include matom_lines
-      rdint ("reverb.filter_lines", &geo.reverb_filter_lines);
+      rdint ("reverb.filter_lines(0=off,-1=continuum,>0=count)", &geo.reverb_filter_lines);
       if (geo.reverb_filter_lines > 0)
 	{			//If we're given a whitelist, allocate temp storage (up to 256 lines!)
 	  int temp[256], bFound;
 	  for (i = 0; i < geo.reverb_filter_lines; i++)
 	    {			//For each provided line, read in
-	      rdint ("reverb.filter_line", &temp[i]);
+	      rdint ("reverb.filter_line(line_index)", &temp[i]);
 	    }
 	  if (geo.reverb == REV_MATOM)
 	    {			//If we're in matom mode, check if those lines have already been included
@@ -580,15 +580,15 @@ get_meta_params (void)
 /***********************************************************
              University of Southampton
 
-Synopsis: 
+Synopsis:
   get_standard_care_factors provides more control over how the program is
   run
-   
-Arguments:    
+
+Arguments:
 
 Returns:
 
-Description:  
+Description:
 
 Notes:
 
@@ -596,7 +596,6 @@ History:
   1502  JM  Moved here from main()
 
 **************************************************************/
-
 int
 get_standard_care_factors ()
 {
