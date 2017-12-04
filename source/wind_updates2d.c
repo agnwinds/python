@@ -1105,7 +1105,7 @@ wind_rad_init ()
     plasmamain[n].heat_ind_comp = 0.0;  //1108 NSH Zero the induced compton heating for the cell
     plasmamain[n].heat_auger = 0.0;     //1108 NSH Zero the auger heating for the cell
 
-    if (nlevels_macro > 1)
+    if (nlevels_macro > 1 && geo.macro_simple == 0)
       macromain[n].kpkt_rates_known = -1;
 
 /* 1108 NSH Loop to zero the frequency banded radiation estimators */

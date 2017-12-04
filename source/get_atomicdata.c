@@ -697,7 +697,7 @@ than Ion. It might be simpler for now just to use this to declare we want this
 particular ion to be part of the macro-levels.  The alternative, if one does
 not want to proliferate types of keywords is to use a switch in the line.  
 
-I have changed this aprt of the code so that it recognizes IonM as a macro-ion.
+I have changed this part of the code so that it recognizes IonM as a macro-ion.
 
 2.  Exactly how are the number of LTE and nLTE configurations used in the
 code.  
