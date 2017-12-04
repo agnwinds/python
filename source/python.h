@@ -335,7 +335,6 @@ struct geometry
  */
 
   double rmin, rmax, rmax_sq;   /* The maximum distance to which a photon should be followed */
-//OLD  double wind_rho_min, wind_rho_max;    /*Min/Max rho for wind in disk plane */
 
 
 /* Basic paremeters of the system, as opposed to elements of the wind or winds */
