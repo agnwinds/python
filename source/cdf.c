@@ -564,6 +564,8 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 
 /* Perform various checks on the inputs */
 
+
+
   if (n_xy > NCDF)
     {
       Error
@@ -640,7 +642,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
       exit(0);
   }
 
-  // if xmin is equal to ove of the values in the x array then nmin will point to that value, but otherwise it 
+  // if xmin is equal to one of the values in the x array then nmin will point to that value, but otherwise it 
   // will be slightly larger and we will need to fix this
   // if nmin=0 then it is also possible that the xmin was below the array
   nmax=nmin;
@@ -648,12 +650,23 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
       nmax++;
   }
 
-  /* In general, nmax should be one past the last element */
+
+  /* In general, nmax should be one past the last required element */
+  
+  /*now deal with a few pathological cases */
 
   if (nmax==nmin)
   {
       Error("cdf_gen_from_array: nmin and mnax are identical which is not desirable\n");
       exit(0);
+  }
+  
+  if (nmax==n_xy) /*We have run past the end of the array in finding the uppermost xvalue why? */
+  {
+	  if (x[nmax-1]<xmax);  /*We have the situation where the array does not go right up to the uper band limit */ 
+	  {
+	  nmax--;
+  }
   }
 
 
@@ -712,6 +725,11 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
       Error ("cdf_gen_from_array - only one point in supplied PDF\n");
       exit (0);
     }
+	 
+	
+	
+
+	 
 
   if (xmax < x[0] || xmin > x[n_xy - 1] || allzero == 0)
     {				// These are special (probably nonsensical) cases
@@ -749,11 +767,11 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 								   1]);
 	}
 
-      cdf->y[cdf_n]=cdf->y[n-1]+y[nmin+cdf_n]*(x[nmax]-x[nmax-1]);
+      cdf->y[cdf_n]=cdf->y[n-1]+y[nmin+cdf_n]*(x[nmax]-x[nmax-1]);  //This interpolates to get the last point in the CDF
 
       // sum = cdf->y[cdf_n - 1];	//the total integrated pdf
       sum = cdf->y[cdf_n];	//the total integrated pdf
-
+		printf ("BLAH sum=%e\n",sum);
       // for (n = 1; n < cdf_n; n++)
       for (n = 1; n <= cdf_n; n++)
 	{
