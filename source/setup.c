@@ -10,385 +10,16 @@
 /***********************************************************
              University of Southampton
 
-Synopsis: 
-  get_grid_params reads information on the coordinate system
-  and grid dimensions and sets the corresponding variables
-  in the geo structure
-   
-Arguments:    
-
-Returns:
- 
- 
-Description:  
-
-Notes:
-
-History:
-  1502  JM  Moved here from main()
-  1508	ksl	Updated for domains
-
-**************************************************************/
-
-int
-get_grid_params (ndom)
-     int ndom;
-{
-  int input_int;
-
-
-  if (ndom >= geo.ndomain)
-    Error ("Trying to get grid params for a non-existent domain!\n");
-
-  input_int = 1;
-
-  /* ksl - The if statement seems superflous.  Why are we entering this routine if 
-   * we are continuing and earlier calculation? */
-
-  if (geo.run_type != SYSTEM_TYPE_PREVIOUS)
-    {
-      /* Define the coordinate system for the grid and allocate memory for the wind structure */
-      rdint
-	("Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)",
-	 &input_int);
-      switch (input_int)
-	{
-	case 0:
-	  zdom[ndom].coord_type = SPHERICAL;
-	  break;
-	case 1:
-	  zdom[ndom].coord_type = CYLIND;
-	  break;
-	case 2:
-	  zdom[ndom].coord_type = RTHETA;
-	  break;
-	case 3:
-	  zdom[ndom].coord_type = CYLVAR;
-	  break;
-	default:
-	  Error
-	    ("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
-          0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
-	}
-
-      rdint ("Wind.dim.in.x_or_r.direction", &zdom[ndom].ndim);
-      if (zdom[ndom].coord_type)
-	{
-	  rdint ("Wind.dim.in.z_or_theta.direction", &zdom[ndom].mdim);
-	  if (zdom[ndom].mdim < 4)
-	    {
-	      Error
-		("python: domain mdim must be at least 4 to allow for boundaries\n");
-	      exit (0);
-	    }
-	}
-      else
-	zdom[ndom].mdim = 1;
-
-    }
-  else
-    {
-      Error
-	("get_grid_parameters: Houston! Why are we reading the coordinate system if run type is SYSTEM_TYPE_PREVIOUS\n");
-    }
-
-/* 130405 ksl - Check that NDIM_MAX is greater than NDIM and MDIM.  */
-
-  if ((zdom[ndom].ndim > NDIM_MAX) || (zdom[ndom].mdim > NDIM_MAX))
-    {
-      Error
-	("NDIM_MAX %d is less than NDIM %d or MDIM %d. Fix in python.h and recompile\n",
-	 NDIM_MAX, zdom[ndom].ndim, zdom[ndom].mdim);
-      exit (0);
-    }
-
-
-  /* If we are in advanced then allow the user to modify scale lengths */
-  if (modes.iadvanced)
-    {
-      rdint ("@adjust_grid(0=no,1=yes)", &modes.adjust_grid);
-
-      if (modes.adjust_grid)
-	{
-	  Log ("You have opted to adjust the grid scale lengths\n");
-	  rddoub ("@geo.xlog_scale", &zdom[ndom].xlog_scale);
-	  if (zdom[ndom].coord_type != SPHERICAL)
-	    rddoub ("@geo.zlog_scale", &zdom[ndom].zlog_scale);
-	}
-    }
-
-  zdom[ndom].ndim2 = zdom[ndom].ndim * zdom[ndom].mdim;
-
-
-  return (0);
-}
-
-
-
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_line_transfer_mode reads in the variable geo.line_mode
-  and sets the variables geo.line_mode, geo.scatter_mode,
-  geo.rt_mode and geo.macro_simple accordingly
-   
-Arguments:		
-
-Returns:
- 
- 
-Description:	
-
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-
-**************************************************************/
-
-
-int
-get_line_transfer_mode ()
-{
-  rdint
-    ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,6=macro_atoms,7=macro_atoms+aniso.scattering)",
-     &geo.line_mode);
-
-/* ksl XXX  This approach is inherently dangerous and should be fixed.  We read in the line mode but then
- * change the number to accommodate a line mode and the way scattering is treated.  We should define 
- * a new variable which we keep as is, and use it to define geo.line_mode and geo.scatter_mode. */
-
-  /* JM 1406 -- geo.rt_mode and geo.macro_simple control different things. geo.rt_mode controls the radiative
-     transfer and whether or not you are going to use the indivisible packet constraint, so you can have all simple 
-     ions, all macro-atoms or a mix of the two. geo.macro_simple just means one can turn off the full macro atom 
-     treatment and treat everything as 2-level simple ions inside the macro atom formalism */
-
-  /* For now handle scattering as part of a hidden line transfermode ?? */
-  geo.scatter_mode = SCATTER_MODE_ISOTROPIC;	// isotropic
-  geo.rt_mode = RT_MODE_2LEVEL;	// Not macro atom (SS)
-  if (geo.line_mode == 0)
-    {
-      Log ("Line_transfer mode:  Simple, pure absorption\n");
-    }
-  else if (geo.line_mode == 1)
-    {
-      Log ("Line_transfer mode:  Simple, pure scattering\n");
-    }
-  else if (geo.line_mode == 2)
-    {
-      Log ("Line_transfer mode:  Simple, single scattering\n");
-    }
-  else if (geo.line_mode == 3)
-    {
-      Log
-	("Line_transfer mode:  Simple, isotropic scattering, escape probabilities\n");
-    }
-  else if (geo.line_mode == 4)
-    {
-      Log
-	("Line_transfer mode:  Simple, anisotropic scattering, escape probabilities\n");
-      geo.scatter_mode = SCATTER_MODE_ANISOTROPIC;	// Turn on anisotropic scattering
-      geo.line_mode = 3;	// Drop back to escape probabilities
-      geo.rt_mode = RT_MODE_2LEVEL;	// Not macro atom (SS)
-    }
-  else if (geo.line_mode == 5)
-    {
-      Log
-	("Line_transfer mode:  Simple, thermal trapping, Single scattering \n");
-      geo.scatter_mode = SCATTER_MODE_THERMAL;	// Thermal trapping model
-      geo.line_mode = 3;	// Single scattering model is best for this mode
-      geo.rt_mode = RT_MODE_2LEVEL;	// Not macro atom (SS) 
-    }
-  else if (geo.line_mode == 6)
-    {
-      Log ("Line_transfer mode:  macro atoms, isotropic scattering  \n");
-      geo.scatter_mode = SCATTER_MODE_ISOTROPIC;	// isotropic
-      geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = RT_MODE_MACRO;	// Identify macro atom treatment (SS)
-      geo.macro_simple = 0;	// We don't want the all simple case (SS)
-    }
-  else if (geo.line_mode == 7)
-    {
-      Log ("Line_transfer mode:  macro atoms, anisotropic  scattering  \n");
-      geo.scatter_mode = SCATTER_MODE_THERMAL;	// thermal trapping
-      geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = RT_MODE_MACRO;	// Identify macro atom treatment (SS)
-      geo.macro_simple = 0;	// We don't want the all simple case (SS)
-    }
-  else if (geo.line_mode == 8)
-    {
-      Log
-	("Line_transfer mode:  simple macro atoms, isotropic  scattering  \n");
-      geo.scatter_mode = SCATTER_MODE_ISOTROPIC;	// isotropic
-      geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = RT_MODE_MACRO;	// Identify macro atom treatment i.e. indivisible packets
-      geo.macro_simple = 1;	// This is for test runs with all simple ions (SS)
-    }
-  else if (geo.line_mode == 9)	// JM 1406 -- new mode, as mode 7, but scatter mode is 1
-    {
-      Log
-	("Line_transfer mode:  simple macro atoms, anisotropic  scattering  \n");
-      geo.scatter_mode = SCATTER_MODE_ANISOTROPIC;	// anisotropic scatter mode 1
-      geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = RT_MODE_MACRO;	// Identify macro atom treatment 
-      geo.macro_simple = 0;	// We don't want the all simple case 
-    }
-  else
-    {
-      Error ("Unknown line_transfer mode\n");
-      exit (0);
-    }
-
-  return (0);
-}
-
-
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_wind_params calls the relevant subroutine to get wind parameters
-  according to the wind type specified 
-   
-Arguments:		
-
-Returns:
- 
- 
-Description:	
-
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-
-**************************************************************/
-
-int
-get_wind_params (ndom)
-     int ndom;
-{
-  // XXX These need to be initalized sensibly and 
-  // it is not obvious that is happenning
-
-  zdom[ndom].rmax = 1e12;
-  /*  ksl - this line is not used anywhre and so has been commented out. Currently
-   *  we initialize all of the plasma temperatures to geo.twind_init  */
-  //  zdom[ndom].twind_init = 1e5;   
-
-  if (geo.system_type == SYSTEM_TYPE_AGN)
-    {
-      zdom[ndom].rmax = 50. * geo.r_agn;
-    }
-
-
-  /* XXX - This should be part of the individual get_wind_parameters, not here */
-
-  rddoub ("wind.radmax(cm)", &zdom[ndom].rmax);
-  rddoub ("wind.t.init", &geo.twind_init);
-
-  /* ksl XXX - There is something of a philosophical problem that needs to be worked
-   * out with geo.rmax and zdom[ndom].rmax for the general case of winds.  Suppose
-   * we wish to create, say a spherical outflow with two domains one going from 
-   * r1 to r2 and the other going from r2 to r3.  Then we want to keep geo.rmax which is 
-   * intended to be the distance beyond which photons are moving through free space separate
-   * from the values in the wind zones.  Right now we are setting the outer limit of each
-   * wind to be geo.rmax regardless, in routines like get_stellar_wind_params and get_sv_wind
-   * This is not what we want.  What should happen is that for each componetn where it is
-   * relevant we should ask for the outer edge of the domain and then at the end we should determine
-   * what geo.rmax should be set to.  There are some cases, e.g. get_hydro_wind where one should not
-   * need to ask the question about rmax, but others where it is necessary
-   */
-
-  /* Next lines are to assure that we have the largest possible value of the 
-   * sphere surrounding the system
-   * JM 1710 -- if this is the first domain, then initialise geo.rmax see #305
-   */
-  if ((ndom == 0) || (zdom[ndom].rmax > geo.rmax))
-    {
-      geo.rmax = zdom[ndom].rmax;
-    }
-  geo.rmax_sq = geo.rmax * geo.rmax;
-
-
-  /* Now get parameters that are specific to a given wind model
-
-     Note: When one adds a new model, the only things that should be read in and modified
-     are parameters in geo.  This is in order to preserve the ability to continue a calculation
-     with the same basic wind geometry, without reading in all of the input parameters.  
-   */
-
-  if (zdom[ndom].wind_type == SPHERE)
-    {
-      get_stellar_wind_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == SV)
-    {
-      get_sv_wind_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == HYDRO)
-    {
-      get_hydro_wind_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == CORONA)
-    {
-      get_corona_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == KNIGGE)
-    {
-      get_knigge_wind_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == HOMOLOGOUS)
-    {
-      get_homologous_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == YSO)
-    {
-      get_yso_wind_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == ELVIS)
-    {
-      get_elvis_wind_params (ndom);
-    }
-  else if (zdom[ndom].wind_type == SHELL)	//NSH 18/2/11 This is a new wind type to produce a thin shell.
-    {
-      get_shell_wind_params (ndom);
-    }
-  else
-    {
-      Error ("python: Unknown wind type %d\n", zdom[ndom].wind_type);
-      exit (0);
-    }
-
-  /* Get the filling factor of the wind */
-  // XXX  This may  not in the right place to set the filling factor.  
-
-  zdom[ndom].fill = 1.;
-
-  /* JM 1606 -- the filling factor is now specified on a domain by domain basis. See #212
-     XXX allows any domain to be allowed a filling factor but this should be modified when
-     we know what we are doing with inputs for multiple domains. Could create confusion */
-
-  rddoub ("filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
-
-  return (0);
-}
-
-
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
+Synopsis:
   get_stellar_params sets rstar, mstar, tstar as well
   as secondary parameters based on user inputs
-   
-Arguments:		
+
+Arguments:
 
 Returns:
- 
- 
-Description:	
+
+
+Description:
 
 Notes:
 
@@ -456,91 +87,26 @@ get_stellar_params ()
 
       geo.period /= 3600.;	// Convert units to hours for easy of data entry
       rddoub ("period(hr)", &geo.period);
-      geo.period *= 3600.;	// Put back to cgs immediately                   
+      geo.period *= 3600.;	// Put back to cgs immediately
     }
 
   return (geo.lum_star_init);
 }
 
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_disk_params sets up the disk parameters according to user inputs, 
-  e.g. the temperature profile, accretion rate etc.
-   
-Arguments:		
-
-Returns:
-  disk_illum - this is used by python.c and so needs to be returned
- 
-Description:	
-
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-	1510	ksl	Modified to restore illumination
-			options, which were brokedn
-
-**************************************************************/
-
-
-double
-get_disk_params ()
-{
-  geo.disk_mdot /= (MSOL / YR);	// Convert to msol/yr to simplify input
-  rddoub ("disk.mdot(msol/yr)", &geo.disk_mdot);
-  geo.disk_mdot *= (MSOL / YR);
-  rdint ("Disk.temperature.profile(0=standard;1=readin,2=analytic)",
-	 &geo.disk_tprofile);
-  if (geo.disk_tprofile == DISK_TPROFILE_READIN)
-    {
-      rdstr ("T_profile_file", files.tprofile);
-    }
-
-  /* Set a default for diskrad for an AGN */
-  if (geo.system_type == SYSTEM_TYPE_AGN)
-    {
-      geo.diskrad = 100. * geo.r_agn;
-    }
-
-  rddoub ("disk.radmax(cm)", &geo.diskrad);
-  Log ("geo.diskrad  %e\n", geo.diskrad);
-
-  geo.diskrad_sq = geo.diskrad * geo.diskrad;
-
-/* If diskrad <= geo.rstar set geo.disk_type = DISK_NONE to make any disk transparent anyway. */
-
-  if (geo.diskrad < geo.rstar)
-    {
-      Log ("Disk radius is less than star radius, so assuming no disk)\n");
-      geo.disk_type = DISK_NONE;
-    }
-
-  if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
-    {				/* Get the additional variables need to describe a vertically extended disk */
-      rddoub ("disk.z0(fractional.height.at.diskrad)", &geo.disk_z0);
-      rddoub ("disk.z1(powerlaw.index)", &geo.disk_z1);
-    }
-  return (0);
-}
-
-
 
 /***********************************************************
              University of Southampton
 
-Synopsis: 
+Synopsis:
   get_bl_and_agn_params sets up the boundary layer and agn power law parameters
   based on user input and system type
-   
-Arguments:		
-  lstar     double 
+
+Arguments:
+  lstar     double
             star luminosity as calculated by get_stellar_params
 Returns:
- 
-Description:	
+
+Description:
 
 Notes:
 
@@ -688,7 +254,7 @@ get_bl_and_agn_params (lstar)
 	}
 
       /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
-         only in advanced mode and for non broken power law. 
+         only in advanced mode and for non broken power law.
          default is zero which is checked before we call photo_gen_agn */
       geo.pl_low_cutoff = 0.0;
       if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
@@ -700,7 +266,7 @@ get_bl_and_agn_params (lstar)
       if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
 	{
 	  rddoub ("lamp_post.height(r_g)", &geo.lamp_post_height);
-	  geo.lamp_post_height *= G * geo.mstar / C / C;	//get it in CGS units 
+	  geo.lamp_post_height *= G * geo.mstar / C / C;	//get it in CGS units
 	  Log ("lamp_post_height is cm is %g\n", geo.lamp_post_height);
 	}
       else if (geo.pl_geometry != PL_GEOMETRY_SPHERE)	// only two options at the moment
@@ -712,8 +278,8 @@ get_bl_and_agn_params (lstar)
 
 
 
-      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
-         This is only used in the sim correction factor for the first time through. 
+      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity.
+         This is only used in the sim correction factor for the first time through.
          Afterwards, the photons are used to compute the sim parameters. */
 
 
@@ -749,8 +315,8 @@ get_bl_and_agn_params (lstar)
 	rddoub ("@agn_power_law_cutoff", &geo.pl_low_cutoff);
 
 
-      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity. 
-         This is only used in the sim correction factor for the first time through. 
+      /* Computes the constant for the power law spectrum from the input alpha and 2-10 luminosity.
+         This is only used in the sim correction factor for the first time through.
          Afterwards, the photons are used to compute the sim parameters. */
 
 
@@ -797,15 +363,15 @@ get_bl_and_agn_params (lstar)
 
 /***********************************************************
              University of Southampton
-Synopsis: 
+Synopsis:
   get_meta_params reads in data pertaining to simulation meta-
   properties like reverberation mapping settings and variance
   reduction techniques.
-   
-Arguments:    
+
+Arguments:
 Returns:
- 
-Description:  
+
+Description:
 Notes:
 History:
   1504  SWM   Added
@@ -818,7 +384,7 @@ get_meta_params (void)
   char trackline[LINELENGTH];
 
   meta_param = 0;		// initialize to no reverberation tracking
-  rdint ("reverb.type", &meta_param);
+  rdint ("reverb.type(0=off,1=photon,2=wind,3=matom)", &meta_param);
   switch (meta_param)
     {				//Read in reverb tyoe, if any
     case 0:
@@ -841,7 +407,7 @@ get_meta_params (void)
   // ========== DEAL WITH DISK SETTINGS ==========
   if (geo.disk_type > 0 && geo.reverb != REV_NONE)
     {
-      rdint ("reverb.disk_type", &meta_param);
+      rdint ("reverb.disk_type(0=correlated_with_co,1=uncorrelated,2=ignore_disk_photons)", &meta_param);
       switch (meta_param)
 	{			//Read in reverb tyoe, if any
 	case 0:
@@ -868,7 +434,7 @@ get_meta_params (void)
       geo.reverb_dump_cells = 0;
       geo.reverb_vis = REV_VIS_NONE;
       rdint ("reverb.path_bins", &geo.reverb_path_bins);
-      rdint ("reverb.visualisation", &meta_param);
+      rdint ("reverb.visualisation(0=none,1=.vtk,2=cell_dump,3=both)", &meta_param);
       switch (meta_param)
 	{			//Select whether to produce 3d visualisation file and/or dump flat csvs of spread in cells
 	case 0:
@@ -890,10 +456,10 @@ get_meta_params (void)
 
       if (geo.reverb_vis == REV_VIS_VTK || geo.reverb_vis == REV_VIS_BOTH)
 	//If we're producing a 3d visualisation, select bins. This is just for aesthetics
-	rdint ("reverb.angle_bins", &geo.reverb_angle_bins);
+	rdint ("reverb.angle_bins(for_vtk)", &geo.reverb_angle_bins);
       if (geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
 	{			//If we;re dumping path arrays, read in the number of cells to dump them for
-	  rdint ("reverb.dump_cells", &geo.reverb_dump_cells);
+	  rdint ("reverb.dump_cells(number)", &geo.reverb_dump_cells);
 	  geo.reverb_dump_cell_x =
 	    (double *) calloc (geo.reverb_dump_cells, sizeof (double));
 	  geo.reverb_dump_cell_z =
@@ -902,7 +468,7 @@ get_meta_params (void)
 	    (int *) calloc (geo.reverb_dump_cells, sizeof (int));
 	  for (k = 0; k < geo.reverb_dump_cells; k++)
 	    {			//For each we expect, read a paired cell coord as "[i]:[j]". May need to use py_wind to find indexes.
-	      rdline ("reverb.dump_cell", trackline);
+	      rdline ("reverb.dump_cell(x:z_position)", trackline);
 	      if (sscanf
 		  (trackline, "%lf:%lf", &geo.reverb_dump_cell_x[k],
 		   &geo.reverb_dump_cell_z[k]) == EOF)
@@ -926,7 +492,7 @@ get_meta_params (void)
 	}
 
       //Read in the number of lines to be tracked and allocate space for them
-      rdint ("reverb.matom_lines", &geo.reverb_lines);
+      rdint ("reverb.matom_lines(number)", &geo.reverb_lines);
       geo.reverb_line = (int *) calloc (geo.reverb_lines, sizeof (int));
       if (geo.reverb_lines < 1)
 	{			//If this is <1, then warn the user and quit
@@ -937,7 +503,7 @@ get_meta_params (void)
 
       for (i = 0; i < geo.reverb_lines; i++)
 	{			//Finally, for each line we expect, read it in
-	  rdline ("reverb.matom_line", trackline);
+	  rdline ("reverb.matom_line(line_index)", trackline);
 	  if (sscanf (trackline, "%d:%d:%d:%d", &z, &istate, &levu, &levl) ==
 	      EOF)
 	    {			//If this line is malformed, warn the user
@@ -973,13 +539,13 @@ get_meta_params (void)
       //Should we filter any lines out?
       //If -1, blacklist continuum, if >0 specify lines as above and whitelist
       //Automatically include matom_lines
-      rdint ("reverb.filter_lines", &geo.reverb_filter_lines);
+      rdint ("reverb.filter_lines(0=off,-1=continuum,>0=count)", &geo.reverb_filter_lines);
       if (geo.reverb_filter_lines > 0)
 	{			//If we're given a whitelist, allocate temp storage (up to 256 lines!)
 	  int temp[256], bFound;
 	  for (i = 0; i < geo.reverb_filter_lines; i++)
 	    {			//For each provided line, read in
-	      rdint ("reverb.filter_line", &temp[i]);
+	      rdint ("reverb.filter_line(line_index)", &temp[i]);
 	    }
 	  if (geo.reverb == REV_MATOM)
 	    {			//If we're in matom mode, check if those lines have already been included
@@ -1014,15 +580,15 @@ get_meta_params (void)
 /***********************************************************
              University of Southampton
 
-Synopsis: 
+Synopsis:
   get_standard_care_factors provides more control over how the program is
   run
-   
-Arguments:    
+
+Arguments:
 
 Returns:
 
-Description:  
+Description:
 
 Notes:
 
@@ -1030,7 +596,6 @@ History:
   1502  JM  Moved here from main()
 
 **************************************************************/
-
 int
 get_standard_care_factors ()
 {

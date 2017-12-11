@@ -59,10 +59,15 @@
 #define	LINELEN 132
 
 
-char *old_names[] = { "mstar", "rstar","Disk.illumination.treatment" };
-char *new_names[] = { "Central.object.mass", "Central.object.radius","Surface.reflection.or.absorption" };
+char *old_names[] =
+  { "mstar", "rstar", "Disk.illumination.treatment", "disk.type",
+"Disk_radiation", "Rad_type_for_disk", "disk.mdot", "T_profile_file", "disk.radmax" };
+char *new_names[] =
+  { "Central.object.mass", "Central.object.radius",
+"Surface.reflection.or.absorption", "Disk.type", "Disk.radiation", "Disk.rad_type",
+"Disk.mdot", "Disk.T_profile_file" , "Disk.radmax"};
 
-int nunber_of_names = 3;
+int nunber_of_names = 9;
 
 
 
@@ -85,32 +90,33 @@ check_synonyms (new_question, old_question)
 
 
   if (nwords == 0)
-  {
-    return (0);
-  }
+    {
+      return (0);
+    }
 
 
 // Strip off everthing in paren, or rather find out how much of the string to comapre
   if ((ccc = index (firstword, '(')) != NULL)
-  {
-    wordlength = (int) (ccc - firstword);
-    if (wordlength == 0)
-      return (0);
-  }
+    {
+      wordlength = (int) (ccc - firstword);
+      if (wordlength == 0)
+	return (0);
+    }
 
 
 
   for (n = 0; n < nunber_of_names; n++)
-  {
-    if (strncmp (new_names[n], firstword, wordlength) == 0)
     {
-      printf ("Hello %d\n", wordlength);
-      printf ("Matched keyword %s in .pf file to %s in current python version\n", new_question, old_names[n]);
-      strcpy (old_question, old_names[n]);
-      return (1);
-    }
+      if (strncmp (new_names[n], firstword, wordlength) == 0)
+	{
+	  printf
+	    ("Matched keyword %s in .pf file to %s in current python version\n",
+	     new_question, old_names[n]);
+	  strcpy (old_question, old_names[n]);
+	  return (1);
+	}
 
-  }
+    }
 
   return (0);
 

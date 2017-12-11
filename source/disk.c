@@ -102,7 +102,7 @@ teff (t, x)
       q = pow (q * q * q * q + (theat / STEFAN_BOLTZMANN), 0.25);
 
     }
-    else if (geo.disk_tprofile ==  DISK_TPROFILE_ANALYTIC)       // Analytic approximation for disk heating by star; implemented for YSOs
+    else if (geo.disk_tprofile ==  DISK_TPROFILE_YSO)       // Analytic approximation for disk heating by star; implemented for YSOs
     {
       disk_heating_factor = pow (geo.tstar / t, 4.0);
       disk_heating_factor *= (asin (1. / x) - (pow ((1. - (1. / (x * x))), 0.5) / x));
@@ -237,7 +237,7 @@ zdisk (r)
  
  
  Returns:
-        The distance to the disk.  The photon is not going to
+    The distance to the disk.  The photon is not going to
 	hit the disk travelling in either direction
 	returns VERY_BIG.
 
@@ -252,7 +252,7 @@ Notes:
  
 History:
         04aug   ksl     52--Coded as part of effort to put 
-			disks with vertical extent into python
+			            disks with vertical extent into python
         04Aug   SS      Several minor modifications made.
                         ds_to_disk now also takes a second
                         input "miss_return" which tells it what

@@ -496,7 +496,7 @@ python 40 but it is not really what one wants.
 
   nphot = ndisk + nwind + nbl + nstar + nagn + nkpkt + nmatom;
 
-  /* Error - This appears to be an attempt to make sure we have the right number of photons
+  /* Error - XXXX This appears to be an attempt to make sure we have the right number of photons
    * but this looks as iff it could end up with the sum of the photons exceeding the number that
    * are desired.  Why isn't this a problem.  Error - ksl 101029
    */
@@ -830,7 +830,7 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
   }
   return (0);
 }
-
+        
 
 /* THE NEXT FEW ROUTINES PERTAIN ONLY TO THE DISK */
 /***********************************************************

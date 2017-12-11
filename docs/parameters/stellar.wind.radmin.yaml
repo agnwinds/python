@@ -1,0 +1,9 @@
+name: stellar.wind.radmin
+description: |
+  Multi-line description, must keep indentation.
+type: Double
+unit: cm
+values: Condition e.g. >0 or list e.g. [1, 2, 5]
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: stellar_wind.c

@@ -1,0 +1,9 @@
+name: sv.thetamin
+description: |
+  Multi-line description, must keep indentation.
+type: Double
+unit: Degrees
+values: Condition e.g. >0 or list e.g. [1, 2, 5]
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: sv.c

@@ -77,16 +77,20 @@ total_line_emission (one, f1, f2)
   if (t_e <= 0 || f2 < f1)
     return (0);
 
-  limit_lines (f1, f2);
+  /* Update nline_min and nline_max in atomic.h which define which
+   * lines lie in the frequency range f1-f2 in the frepeuncy ordered
+   * version of the lines 
+   */
 
-//  lum = lum_lines (ww, t_e, nline_min, nline_max);
+  limit_lines (f1, f2);  
+
   lum = lum_lines (one, nline_min, nline_max);
 
-//Now populate the crude pdf for this wind element
+//OLD//Now populate the crude pdf for this wind element
 
 
-  if (xxxpdfwind == 1)
-    lum_pdf (&plasmamain[one->nplasma], lum);
+//OLD  if (xxxpdfwind == 1)
+//OLD    lum_pdf (&plasmamain[one->nplasma], lum);
 
 
   return (lum);
@@ -161,40 +165,40 @@ lum_lines (one, nmin, nmax)
   return (lum);
 }
 
-/* This routine creates a luminosty pdf */
-int
-lum_pdf (xplasma, lumlines)
-     PlasmaPtr xplasma;
-     double lumlines;
-{
-  int n, m;
-  double xsum, vsum;
+//OLD /* This routine creates a luminosty pdf */
+//OLD int
+//OLD lum_pdf (xplasma, lumlines)
+//OLD      PlasmaPtr xplasma;
+//OLD      double lumlines;
+//OLD {
+//OLD   int n, m;
+//OLD   double xsum, vsum;
 
-  xplasma->pdf_x[0] = nline_min;
-  xplasma->pdf_y[0] = 0;
+//OLD   xplasma->pdf_x[0] = nline_min;
+//OLD   xplasma->pdf_y[0] = 0;
 
-  n = nline_min;
-  vsum = 0.0;
-  for (m = 1; m < LPDF; m++)
-  {
-    xsum = m * lumlines / (LPDF - 1);   /* This is the target */
-    while ((vsum += lin_ptr[n]->pow) < xsum && n < nline_max)
-      n++;
-    n++;                        // otherwise one will add lin_ptr[n]->pow twice
-/* Why this is done this way is tricky.  The important point is that
+//OLD   n = nline_min;
+//OLD   vsum = 0.0;
+//OLD   for (m = 1; m < LPDF; m++)
+//OLD   {
+//OLD     xsum = m * lumlines / (LPDF - 1);   /* This is the target */
+//OLD     while ((vsum += lin_ptr[n]->pow) < xsum && n < nline_max)
+//OLD       n++;
+//OLD     n++;                        // otherwise one will add lin_ptr[n]->pow twice
+//OLD /* Why this is done this way is tricky.  The important point is that
 
-xplasma->pdf_y[m]= sum lin_ptr[mm]->pow  where mm runs from pdf_x[m-1] to
-pdf_x[m]-1
+//OLD xplasma->pdf_y[m]= sum lin_ptr[mm]->pow  where mm runs from pdf_x[m-1] to
+//OLD pdf_x[m]-1
 
-*/
-    xplasma->pdf_x[m] = n;
-    xplasma->pdf_y[m] = vsum;
+//OLD */
+//OLD     xplasma->pdf_x[m] = n;
+//OLD     xplasma->pdf_y[m] = vsum;
 
 
-  }
+//OLD   }
 
-  return (0);
-}
+//OLD   return (0);
+//OLD }
 
 
 

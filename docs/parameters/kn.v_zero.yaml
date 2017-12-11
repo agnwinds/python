@@ -1,0 +1,9 @@
+name: kn.v_zero
+description: |
+  multiple_of_sound_speed_at_base
+type: Double
+unit: None
+values: Condition e.g. >0 or list e.g. [1, 2, 5]
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: knigge.c

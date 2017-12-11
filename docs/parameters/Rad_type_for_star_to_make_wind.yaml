@@ -1,0 +1,10 @@
+name: Rad_type_for_star_to_make_wind
+description: |
+  Multi-line description, must keep indentation.
+type: Enum (Int)
+values:
+  0: bb
+  1: models
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: setup.c
