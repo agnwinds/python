@@ -16,7 +16,7 @@ LIBS = True
 
 ifeq (True, $(GIT))
 	CLONE_DATA =  mkdir $(PYTHON)/data; cd $(PYTHON)/data; git clone https://github.com/agnwinds/python.git -b data .
-	CLONE_RELEASE = mkdir $(PYTHON)/progs; cd $(PYTHON)/progs; git clone https://github.com/agnwinds/python.git; cd python; make CC=$(CMAKE) python; make CC=$(CMAKE) py_wind
+	CLONE_RELEASE = mkdir $(PYTHON)/progs; cd $(PYTHON)/progs; git clone https://github.com/agnwinds/python.git; cd python; make CC=$(CMAKE) python; make CC=$(CMAKE) py_wind; make CC=$(CMAKE) windsave2table
 	PRINT_CLONE = 'Cloning Git Release'
 else
 	CLONE_DATA = 
@@ -24,7 +24,7 @@ else
 	PRINT_CLONE = 'No git installed- have to obtain release and data manually from releases page on github. Exiting.'
 endif
 
-MAKE_SOURCE = cd $(PYTHON)/source; make CC=$(CMAKE) python; make CC=$(CMAKE) py_wind;
+MAKE_SOURCE = cd $(PYTHON)/source; make CC=$(CMAKE) python; make CC=$(CMAKE) py_wind; make CC=$(CMAKE) windsave2table
 
 
 
