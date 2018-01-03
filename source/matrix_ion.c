@@ -386,7 +386,6 @@ matrix_ion_populations (xplasma, mode)
                                            crazy things */
 
 
-
   return (0);
 }
 
@@ -452,8 +451,6 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
 
 
   nh = xplasma->rho * rho2nh;   // The number density of hydrogen ions - computed from density
-
-
 
   /* First we initialise the matrix */
   for (nn = 0; nn < nions; nn++)
@@ -606,7 +603,6 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
   {
     if (ion[nn].istate == 1)
     {
-<<<<<<< HEAD
       b_temp[nn] = 1.0;         //In the relative abundance schene this equals one.
 
       for (mm = 0; mm < nions; mm++)
@@ -624,28 +620,6 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
     else
     {
       b_temp[nn] = 0.0;
-=======
-      if (ion[nn].istate == 1)
-	{
-//			  b_temp[nn] = nh * ele[xelem[nn]].abun;
-		b_temp[nn]=1.0;
-	  for (mm = 0; mm < nions; mm++)
-	    {
-	      if (ion[mm].z == ion[nn].z)
-		{
-		  rate_matrix[nn][mm] = 1.0;
-		}
-	      else
-		{
-		  rate_matrix[nn][mm] = 0.0;
-		}
-	    }
-	}
-      else
-	{
-	  b_temp[nn] = 0.0;
-	}
->>>>>>> 30913c31324cde00754eb2b2e68609cddb5e0f3d
     }
   }
 
@@ -703,7 +677,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   gsl_permutation *p;
   gsl_matrix_view m;
   gsl_vector_view b;
-  gsl_vector *test_vector, *populations, *residuals;
+  gsl_vector *test_vector, *populations;
   gsl_matrix *test_matrix;
 
   ierr = 0;
@@ -716,42 +690,25 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   test_matrix = gsl_matrix_alloc (nrows, nrows);
   test_vector = gsl_vector_alloc (nrows);
 
-<<<<<<< HEAD
   gsl_matrix_memcpy (test_matrix, &m.matrix);   // create copy for testing 
-=======
-  gsl_matrix_memcpy (test_matrix, &m.matrix);	// create copy for testing 
->>>>>>> 30913c31324cde00754eb2b2e68609cddb5e0f3d
 
 
   b = gsl_vector_view_array (b_data, nrows);
 
   /* the populations vector will be a gsl vector which stores populations */
   populations = gsl_vector_alloc (nrows);
-  residuals = gsl_vector_alloc (nrows);
 
 
   p = gsl_permutation_alloc (nrows);    // NEWKSL
 
   gsl_linalg_LU_decomp (&m.matrix, p, &s);
   
-  
-
   det = gsl_linalg_LU_det (&m.matrix, s);       // get the determinant to report to user
 
   if (det == 0)
-<<<<<<< HEAD
     Error ("Rate Matrix Determinant is %8.4e for cell %i\n", det, nplasma);
-=======
-    Error("Rate Matrix Determinant is %8.4e for cell %i\n", det, nplasma);
->>>>>>> 30913c31324cde00754eb2b2e68609cddb5e0f3d
 
   gsl_linalg_LU_solve (&m.matrix, p, &b.vector, populations);
-
-
-//  gsl_linalg_LU_refine (test_matrix,&m.matrix,p,&b.vector,populations,residuals);
-
-
-
 
   gsl_permutation_free (p);
 
@@ -772,7 +729,6 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
   /* now cycle through and check the solution to y = m * populations really is (1, 0, 0 ... 0) */
 
-<<<<<<< HEAD
   for (mm = 0; mm < nrows; mm++)
   {
 
@@ -797,48 +753,10 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
       ierr = 3;
     }
   }
-=======
-				for (mm = 0; mm < nrows; mm++)
-				{
-      /* get the element of the vector we want to check */
-					test_val = gsl_vector_get (test_vector, mm);
-//					printf ("%e %e\n",test_val,b_data[mm]);
-      /* b_data is (1,0,0,0..) when we do matom rates. test_val is normally something like
-         1e-16 if it's supposed to be 0. We have a different error check if b_data[mm] is 0 */
-
-					if (b_data[mm] > 0.0)
-					{
-						if (fabs ((test_val - b_data[mm]) / test_val) > EPSILON)
-						{
-							Error("solve_matrix: test solution fails relative error for row %i %e != %e\n",
-								mm, test_val, b_data[mm]);
-							ierr = 2;
-						}
-					}
-					else if (fabs (test_val - b_data[mm]) > EPSILON)	// if b_data is 0, check absolute error
-						
-					{
-						Error("solve_matrix: test solution fails absolute error for row %i %e != %e\n",
-							mm, test_val, b_data[mm]);
-						ierr = 3;
-					}
-				}
->>>>>>> 30913c31324cde00754eb2b2e68609cddb5e0f3d
 
   /* copy the populations to a normal array */
   for (mm = 0; mm < nrows; mm++)
-  {
     x[mm] = gsl_vector_get (populations, mm);
-//  printf ("%30.25e \n",x[mm]);
-}
-//printf ("REsiduals");
-//  for (mm = 0; mm < nrows; mm++)
-//  {
-//    res = gsl_vector_get (residuals, mm);
-//  printf ("%30.25e \n",res);
-//}
- 
- 
  
   /* free memory */
   gsl_vector_free (test_vector);
