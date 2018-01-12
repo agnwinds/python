@@ -1,9 +1,11 @@
 name: stellar.wind_vbase
 description: |
-  Multi-line description, must keep indentation.
+  Velocity v_o in cm/s at the base of a stellar wind described by
+  the Casters and Larmers (1979) prescription
+  v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
 type: Double
-unit: cm
+unit: cm/s
 values: Condition e.g. >0 or list e.g. [1, 2, 5]
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: Required when the wind_type is set to 1, a stellar wind
 file: stellar_wind.c

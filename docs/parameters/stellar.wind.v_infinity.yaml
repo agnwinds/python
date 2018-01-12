@@ -1,9 +1,11 @@
 name: stellar.wind.v_infinity
 description: |
-  Multi-line description, must keep indentation.
+  The velocity at large distance of a stellar wind described in terms
+  of the Casters and Larmers equation
+  v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
 type: Double
 unit: cm
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: >0 
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: Required when the wind_type is set to 1, a stellar wind
 file: stellar_wind.c

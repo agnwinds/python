@@ -1,9 +1,10 @@
 name: stellar_wind_mdot
 description: |
-  Multi-line description, must keep indentation.
+  Mass loss rate for a wind modelled in terms of the 
+  Caster and Lamemers prescription for a stellar wind.
 type: Double
-unit: M☉/year
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+unit: M_sol/year
+values: >0 
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: Required when the wind_type is set to 1, a stellar wind
 file: stellar_wind.c

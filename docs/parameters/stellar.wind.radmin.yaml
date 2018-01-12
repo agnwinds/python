@@ -1,9 +1,10 @@
 name: stellar.wind.radmin
 description: |
-  Multi-line description, must keep indentation.
+  Inner edge in cm for a stellar wind, normally the 
+  radius of the star.
 type: Double
 unit: cm
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: >= radius of the central object
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: Required when the wind_type is set to 1, a stellar wind
 file: stellar_wind.c
