@@ -66,7 +66,8 @@ char *old_names[] =
   "stellar_wind_mdot", "stellar.wind.radmin", "stellar.wind_vbase",
     "stellar.wind.v_infinity", "stellar.wind.acceleration_exponent",
     "spectrum_wavemin","spectrum_wavemax","no_observers","angle",
-    "phase","live.or.die","spec.type"
+    "phase","live.or.die","spec.type","mstar","rstar","Star_radiation",
+    "tstar"
 };
 
 char *new_names[] = { "Central.object.mass", "Central.object.radius",
@@ -77,10 +78,11 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
     "Stellar_wind.v_infinity", "Stellar_wind.acceleration_exponent",
     "Spectrum.wavemin","Spectrum.wavemax","Spectrum.no_observers",
     "Spectrum.angle","Spectrum.orbit_phase","Spectrum.live_or_die",
-    "Spectrum.type"
+    "Spectrum.type","Central_object.mass","Central_object.radius",
+    "Central_object.radiation","Central_object.temp"
 };
 
-int nunber_of_names = 21;
+int nunber_of_names = 25;
 
 
 

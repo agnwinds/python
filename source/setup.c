@@ -35,7 +35,7 @@ get_stellar_params ()
   /* Describe the basic binary star system */
 
   geo.mstar /= MSOL;		// Convert to MSOL for ease of data entry
-  rddoub ("mstar(msol)", &geo.mstar);
+  rddoub ("Central_object.mass(msol)", &geo.mstar);
   geo.mstar *= MSOL;
 
   /* If a BH we want geo.rstar to be at least as large as the last stable orbit for
@@ -47,20 +47,20 @@ get_stellar_params ()
       geo.rstar = 6. * G * geo.mstar / (C * C);	//correction - ISCO is 6x Rg NSH 121025
     }
 
-  rddoub ("rstar(cm)", &geo.rstar);
+  rddoub ("Central_object.radius(cm)", &geo.rstar);
 
 
   geo.r_agn = geo.rstar;	/* At present just set geo.r_agn to geo.rstar */
   geo.rstar_sq = geo.rstar * geo.rstar;
   if (geo.system_type != SYSTEM_TYPE_AGN)
     {
-      rdint ("Star_radiation(y=1)", &geo.star_radiation);
+      rdint ("Central_object.radiation(y=1)", &geo.star_radiation);
       get_spectype (geo.star_radiation,
 		    "Rad_type_for_star(0=bb,1=models)_to_make_wind",
 		    &geo.star_ion_spectype);
 
       if (geo.star_radiation)
-	rddoub ("tstar", &geo.tstar_init);
+	rddoub ("Central_object.temp", &geo.tstar_init);
     }
   else
     {
