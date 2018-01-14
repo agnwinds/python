@@ -1,0 +1,13 @@
+name: Spectrum.type
+description: |
+  The type of spectra that are produced in the final spectra. The current choices are flambda, fnu, or basic,
+  where basic implies simply summmung up the energy packets that escape within a particularly wavelength/
+  frequency bin..
+type: Enum (Int)
+values:
+  1: flambda
+  2: fnu
+  other: basic
+parent:
+  parameter: Called whenever detailed spectra are generated.
+file: setup2.c

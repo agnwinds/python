@@ -61,15 +61,26 @@
 
 char *old_names[] =
   { "mstar", "rstar", "Disk.illumination.treatment", "disk.type",
-"Disk_radiation", "Rad_type_for_disk", "disk.mdot", "T_profile_file", "disk.radmax",
- "stellar_wind_mdot","stellar.wind.radmin","stellar.wind_vbase","stellar.wind.v_infinity","stellar.wind.acceleration_exponent" };
-char *new_names[] =
-  { "Central.object.mass", "Central.object.radius",
-"Surface.reflection.or.absorption", "Disk.type", "Disk.radiation", "Disk.rad_type",
-"Disk.mdot", "Disk.T_profile_file" , "Disk.radmax",
-  "Stellar_wind.mdot","Stellar_wind.radmin","Stellar_wind.vbase","Stellar_wind.v_infinity","Stellar_wind.acceleration_exponent"};
+  "Disk_radiation", "Rad_type_for_disk", "disk.mdot", "T_profile_file",
+    "disk.radmax",
+  "stellar_wind_mdot", "stellar.wind.radmin", "stellar.wind_vbase",
+    "stellar.wind.v_infinity", "stellar.wind.acceleration_exponent",
+    "spectrum_wavemin","spectrum_wavemax","no_observers","angle",
+    "phase","live.or.die","spec.type"
+};
 
-int nunber_of_names = 14;
+char *new_names[] = { "Central.object.mass", "Central.object.radius",
+  "Surface.reflection.or.absorption", "Disk.type", "Disk.radiation",
+    "Disk.rad_type",
+  "Disk.mdot", "Disk.T_profile_file", "Disk.radmax",
+  "Stellar_wind.mdot", "Stellar_wind.radmin", "Stellar_wind.vbase",
+    "Stellar_wind.v_infinity", "Stellar_wind.acceleration_exponent",
+    "Spectrum.wavemin","Spectrum.wavemax","Spectrum.no_observers",
+    "Spectrum.angle","Spectrum.orbit_phase","Spectrum.live_or_die",
+    "Spectrum.type"
+};
+
+int nunber_of_names = 21;
 
 
 
