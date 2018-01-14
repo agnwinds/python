@@ -1,4 +1,4 @@
-name: stellar.wind_vbase
+name: Stellar_wind.vbase
 description: |
   Velocity v_o in cm/s at the base of a stellar wind described by
   the Casters and Larmers (1979) prescription

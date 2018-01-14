@@ -1,4 +1,4 @@
-name: stellar.wind.radmin
+name: Stellar_wind.radmin
 description: |
   Inner edge in cm for a stellar wind, normally the 
   radius of the star.

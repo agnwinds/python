@@ -69,7 +69,7 @@ char *new_names[] =
 "Disk.mdot", "Disk.T_profile_file" , "Disk.radmax",
   "Stellar_wind.mdot","Stellar_wind.radmin","Stellar_wind.vbase","Stellar_wind.v_infinity","Stellar_wind.acceleration_exponent"};
 
-int nunber_of_names = 9;
+int nunber_of_names = 14;
 
 
 

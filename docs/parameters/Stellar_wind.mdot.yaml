@@ -1,4 +1,4 @@
-name: stellar_wind_mdot
+name: Stellar_wind.mdot
 description: |
   Mass loss rate for a wind modelled in terms of the 
   Caster and Lamemers prescription for a stellar wind.
