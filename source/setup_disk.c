@@ -50,7 +50,7 @@ get_disk_params ()
       geo.disk_radiation = 0;
     }
   get_spectype (geo.disk_radiation,
-		"Disk.rad_type(0=bb,1=models)_to_make_wind",
+		"Disk.rad_type_to_make_wind(0=bb,1=models)",
 		&geo.disk_ion_spectype);
 
 

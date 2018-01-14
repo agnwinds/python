@@ -56,7 +56,8 @@ get_stellar_params ()
     {
       rdint ("Central_object.radiation(y=1)", &geo.star_radiation);
       get_spectype (geo.star_radiation,
-		    "Rad_type_for_star(0=bb,1=models)_to_make_wind",
+		    //"Rad_type_for_star(0=bb,1=models)_to_make_wind",
+		    "Central_object.rad_type_to_make_wind(0=bb,1=models)",
 		    &geo.star_ion_spectype);
 
       if (geo.star_radiation)
@@ -133,13 +134,14 @@ get_bl_and_agn_params (lstar)
     }
   else
     {
-      rdint ("Boundary_layer_radiation(y=1)", &geo.bl_radiation);
+      rdint ("Boundary_layer.radiation(y=1)", &geo.bl_radiation);
       geo.agn_radiation = 0;	// So far at least, our star systems don't have a BH
     }
 
 
   get_spectype (geo.bl_radiation,
-		"Rad_type_for_bl(0=bb,1=models,3=pow)_to_make_wind",
+		//"Rad_type_for_bl(0=bb,1=models,3=pow)_to_make_wind",
+		"Boundary_layer.rad_type_to_make_wind(0=bb,1=models,3=pow)",
 		&geo.bl_ion_spectype);
   get_spectype (geo.agn_radiation,
 		"Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind",
@@ -173,10 +175,10 @@ get_bl_and_agn_params (lstar)
     {
       xbl = geo.lum_bl = 0.5 * G * geo.mstar * geo.disk_mdot / geo.rstar;
 
-      rddoub ("lum_bl(ergs/s)", &geo.lum_bl);
+      rddoub ("Boundary_layer.luminosity(ergs/s)", &geo.lum_bl);
       Log ("OK, the bl lum will be about %.2e the disk lum\n",
 	   geo.lum_bl / xbl);
-      rddoub ("t_bl", &geo.t_bl);
+      rddoub ("Boundary_layer.temp(K)", &geo.t_bl);
     }
   else
     {
