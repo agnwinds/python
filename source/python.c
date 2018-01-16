@@ -377,14 +377,6 @@ main (argc, argv)
       rdint ("System_type(0=star,1=binary,2=agn,3=previous)",
 	     &geo.system_type);
 
-      if (geo.system_type == SYSTEM_TYPE_BINARY)
-	{
-	  geo.binary = TRUE;
-	}
-
-      init_geo ();		/* Set values in the geometry structure and the domain stucture to reasonable starting
-				   values */
-
       if (geo.system_type == SYSTEM_TYPE_PREVIOUS)
 	{
 	  /* This option is for the confusing case where we want to start with a previous wind 
@@ -419,6 +411,11 @@ main (argc, argv)
 
       if (geo.run_type != SYSTEM_TYPE_PREVIOUS)
 	{
+
+
+	  init_geo ();		/* Set values in the geometry structure and the domain stucture to reasonable starting
+				   values */
+
 	  /* get_stellar_params gets information like mstar, rstar, tstar etc.
 	     it returns the luminosity of the star */
 
@@ -429,7 +426,7 @@ main (argc, argv)
 	  /* This option is the most common one, where we are starting to define a completely new system.  
 	   */
 
-      get_disk_params();
+	  get_disk_params ();
 
 
 	  /* describe the boundary layer / agn components to the spectrum if they exist. 
@@ -519,8 +516,10 @@ main (argc, argv)
     {
 
 
-      /* Describe the wind. This routine reads in geo.rmax and geo.twind
-         and then gets params by calling e.g. get_sv_wind_params() */
+      /* Describe the wind, by calling get_wind_params one or more times
+         and then gets params by calling e.g. get_sv_wind_params() 
+         XXX - There is currently an issue that geo.ramax is scked for
+         multiple times. */
 
 
       for (n = 0; n < geo.ndomain; n++)
@@ -531,28 +530,12 @@ main (argc, argv)
 
     }				// End of block to define a model for the first time
 
-  else				// This refers to a previous system and so geo is already defined
+  else if (modes.zeus_connect == 1)	/* We are in rad-hydro mode, we want the new density and temperature */
     {
-      if (geo.disk_type)	/* Then a disk exists and it needs to be described */
-	{
-	  if (geo.disk_radiation)
-	    {
-	      rdint
-		("Disk.temperature.profile(0=standard;1=readin,2=analyatic)",
-		 &geo.disk_tprofile);
-	      if (geo.disk_tprofile == DISK_TPROFILE_READIN)
-		{
-		  rdstr ("T_profile_file", files.tprofile);
-		}
-	    }
-	}
-      if (modes.zeus_connect == 1)	/* We are in rad-hydro mode, we want the new density and temperature */
-	{
-	  /* Hydro takes the wind domain number as an argument in the current domains setup */
-	  Log
-	    ("We are going to read in the density and temperature from a zeus file\n");
-	  get_hydro (geo.hydro_domain_number);	//This line just populates the hydro structures  
-	}
+      /* Hydro takes the wind domain number as an argument in the current domains setup */
+      Log
+	("We are going to read in the density and temperature from a zeus file\n");
+      get_hydro (geo.hydro_domain_number);	//This line just populates the hydro structures  
     }
 
 
@@ -619,7 +602,7 @@ main (argc, argv)
   if (geo.pcycles > 0)
     {
 
-     rdpar_comment ("Parameters defining the spectra seen by observers\n");
+      rdpar_comment ("Parameters defining the spectra seen by observers\n");
 
       get_spectype (geo.star_radiation,
 		    //"Rad_type_for_star(0=bb,1=models,2=uniform)_in_final_spectrum",
@@ -654,7 +637,7 @@ main (argc, argv)
  */
 
 
-  rdpar_comment("Other parameters");
+  rdpar_comment ("Other parameters");
 
   bands_init (-1, &xband);
   freqmin = xband.f1[0];
