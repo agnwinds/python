@@ -418,8 +418,10 @@ main (argc, argv)
 	   */
 
 
+        if (geo.run_type==RUN_TYPE_NEW) {
 	  init_geo ();		/* Set values in the geometry structure and the domain stucture to reasonable starting
 				   values */
+        }
 
 	  /* get_stellar_params gets information like mstar, rstar, tstar etc.
 	     it returns the luminosity of the star */
