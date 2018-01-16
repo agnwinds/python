@@ -353,7 +353,7 @@ main (argc, argv)
 	}
       w = wmain;
 
-      geo.run_type = SYSTEM_TYPE_PREVIOUS;	// We read the data from a file
+      geo.run_type = RUN_TYPE_RESTART;	// We are continuing an old run
 
       xsignal (files.root, "%-20s Read %s\n", "COMMENT", files.old_windsave);
 
@@ -373,12 +373,14 @@ main (argc, argv)
        */
 
       geo.system_type = SYSTEM_TYPE_STAR;
+      geo.run_type=RUN_TYPE_NEW;
 
       rdint ("System_type(0=star,1=binary,2=agn,3=previous)",
 	     &geo.system_type);
 
       if (geo.system_type == SYSTEM_TYPE_PREVIOUS)
 	{
+
 	  /* This option is for the confusing case where we want to start with a previous wind 
 	     model,(presumably because that run produced a wind close to the one we are looking for, 
 	     but we are going to change some parameters that do not affect the wind geometry,  
@@ -401,7 +403,8 @@ main (argc, argv)
 	      exit (0);
 	    }
 
-	  geo.run_type = SYSTEM_TYPE_PREVIOUS;	// after wind_read one will have a different wind_type otherwise
+	  geo.run_type = RUN_TYPE_PREVIOUS;	// after wind_read one will have a different wind_type otherwise
+
 	  w = wmain;
 	  geo.wcycle = 0;
 	  geo.pcycle = 0;	/* This is a new run of an old windsave file so we set the nunber of cycles already done to 0 */
@@ -409,8 +412,10 @@ main (argc, argv)
 
 
 
-      if (geo.run_type != SYSTEM_TYPE_PREVIOUS)
+      if (geo.run_type == RUN_TYPE_NEW || geo.run_type == RUN_TYPE_PREVIOUS)
 	{
+	  /* This option is the most common one, where we are starting to define a completely new system.  
+	   */
 
 
 	  init_geo ();		/* Set values in the geometry structure and the domain stucture to reasonable starting
@@ -419,18 +424,17 @@ main (argc, argv)
 	  /* get_stellar_params gets information like mstar, rstar, tstar etc.
 	     it returns the luminosity of the star */
 
-	  rdpar_comment ("Parameters for the Central Object");
 	  lstar = get_stellar_params ();
 
 	  /* Describe the disk */
-	  /* This option is the most common one, where we are starting to define a completely new system.  
-	   */
 
 	  get_disk_params ();
 
 
 	  /* describe the boundary layer / agn components to the spectrum if they exist. 
-	     reads in information specified by the user and sets variables in geo structure */
+	     So that initial condiditions for the bl and agn are initialized sensibly this has
+	     to come after the disk is defined.
+	   */
 
 	  get_bl_and_agn_params (lstar);
 
@@ -464,22 +468,20 @@ main (argc, argv)
 
 	  rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
 
-	  rdint ("Number.of.wind.components", &geo.ndomain);
-
-
-	  for (n = 0; n < geo.ndomain; n++)
+	  if (geo.run_type == RUN_TYPE_NEW)
 	    {
+	      rdint ("Number.of.wind.components", &geo.ndomain);
 
-	      get_domain_params (n);
 
+	      for (n = 0; n < geo.ndomain; n++)
+		{
+
+		  get_domain_params (n);
+
+		}
 	    }
 
 
-	  if (geo.disk_type == DISK_NONE)
-	    {
-	      geo.disk_radiation = 0;
-	      geo.diskrad = 0;
-	    }
 
 
 	}
@@ -512,7 +514,7 @@ main (argc, argv)
    * one is starting from an early wind file as implemented this is quite restrictive about what one
    * can change in the previous case.   */
 
-  if (geo.run_type != SYSTEM_TYPE_PREVIOUS)	// Start of block to define a model for the first time
+  if (geo.run_type != RUN_TYPE_PREVIOUS)	// Start of block to define a model for the first time
     {
 
 
@@ -727,7 +729,7 @@ main (argc, argv)
 
   /* Next line finally defines the wind if this is the initial time this model is being run */
 
-  if (geo.run_type != SYSTEM_TYPE_PREVIOUS)	// Define the wind and allocate the arrays the first time
+  if (geo.run_type != RUN_TYPE_PREVIOUS)	// Define the wind and allocate the arrays the first time
     {
       define_wind ();
     }

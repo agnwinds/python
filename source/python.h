@@ -279,7 +279,16 @@ int current_domain;             // This integer is used by py_wind only
 #define SYSTEM_TYPE_BINARY 1
 #define SYSTEM_TYPE_AGN    2
 #define	SYSTEM_TYPE_PREVIOUS   	   3
-#define	SYSTEM_TYPE_ONE_D  	   4
+
+/* RUN_TYPE differs from SYSTEM_TYPE in that
+  it has implications on how the program is run
+  wherease SYSTEM_TYPE refers (mainly) to the type
+  of sytem, with the exception 
+*/
+
+#define RUN_TYPE_NEW       0   
+#define RUN_TYPE_RESTART   1
+#define RUN_TYPE_PREVIOUS  3
 
 #define TRUE  1
 #define FALSE 0

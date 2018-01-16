@@ -32,6 +32,8 @@ double
 get_stellar_params ()
 {
 
+    rdpar_comment ("Parameters for the Central Object");
+
   /* Describe the basic binary star system */
 
   geo.mstar /= MSOL;		// Convert to MSOL for ease of data entry

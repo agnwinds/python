@@ -241,7 +241,7 @@ get_spectype (yesno, question, spectype)
 	*spectype = SPECTYPE_BREM;	// bremstrahlung
       else
 	{
-	  if (geo.run_type == SYSTEM_TYPE_PREVIOUS)
+	  if (geo.run_type == RUN_TYPE_PREVIOUS)
 	    {			// Continuing an old model
 	      strcpy (model_list, geo.model_list[get_spectype_count]);
 	    }
@@ -653,7 +653,7 @@ init_ionization ()
     geo.macro_simple = 1;	// Make everything simple if no macro atoms -- 57h
 
   //SS - initalise the choice of handling for macro pops.
-  if (geo.run_type == SYSTEM_TYPE_PREVIOUS)
+  if (geo.run_type == RUN_TYPE_PREVIOUS)
     {
       geo.macro_ioniz_mode = 1;	// Now that macro atom properties are available for restarts
     }
