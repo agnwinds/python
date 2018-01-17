@@ -517,7 +517,7 @@ main (argc, argv)
    * one is starting from an early wind file as implemented this is quite restrictive about what one
    * can change in the previous case.   */
 
-  if (geo.run_type != RUN_TYPE_PREVIOUS)	// Start of block to define a model for the first time
+  if (geo.run_type == RUN_TYPE_NEW)	// Start of block to define a model for the first time
     {
 
 
@@ -732,7 +732,8 @@ main (argc, argv)
 
   /* Next line finally defines the wind if this is the initial time this model is being run */
 
-  if (geo.run_type != RUN_TYPE_PREVIOUS)	// Define the wind and allocate the arrays the first time
+
+  if (geo.run_type == RUN_TYPE_NEW &&  modes.zeus_connect != 1)	// Define the wind and allocate the arrays the first time
     {
       define_wind ();
     }
