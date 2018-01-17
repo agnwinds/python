@@ -272,6 +272,7 @@ main (argc, argv)
   time_max = 13.8e9 * 3.2e7;	/* The maximum time the program will run without stopping.  This
 				   is initially set to the lifetime of the universe */
   time_max = -1;
+   set_max_time (files.root, time_max);
 
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
@@ -315,11 +316,11 @@ main (argc, argv)
 
   Debug ("Debug statements are on. To turn off use lower verbosity (< 5).\n");
 
-  /* Set the maximum time if it was defined */
-  if (time_max > 0)
-    {
-      set_max_time (files.root, time_max);
-    }
+//OLD  /* Set the maximum time if it was defined */
+//OLD  if (time_max > 0)
+//OLD    {
+//OLD      set_max_time (files.root, time_max);
+//OLD    }
 
   xsignal (files.root, "%-20s Initializing variables for %s\n", "NOK",
 	   files.root);
