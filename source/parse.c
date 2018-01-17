@@ -80,6 +80,7 @@ parse_command_line (argc, argv)
 		  Error ("python: Expected time after -t switch\n");
 		  exit (0);
 		}
+          set_max_time(files.root,time_max);  
 	      i++;
 	      j = i;
 
