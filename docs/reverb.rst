@@ -13,6 +13,10 @@ with larger filesizes.
 
 **Value:** Greater than 0
 
+**Parent(s)**
+	reverb.mode
+		1, 3
+
 **File:** setup_reverb.c
 
 reverb.disk_type
@@ -53,6 +57,10 @@ distributions for wind cells.
 	distributions, this will slightly bias them towards the longer delays
 	associated with wind self-heating/excitation.
 
+**Parent(s)**
+	reverb.type
+		2, 3
+
 **File:** setup_reverb.c
 
 reverb.dump_cell
@@ -69,6 +77,11 @@ idenfity where wind locations are.
 **Value:** >0:>0
 
 
+**Parent(s)**
+	reverb.dump_cells
+		Greater than 0
+
+
 **File:** setup_reverb.c
 
 reverb.dump_cells
@@ -81,6 +94,10 @@ provided.
 **Type:** Int
 
 **Value:** 0 or N
+
+**Parent(s)**
+	reverb.visualisation
+		2, 3
 
 **File:** setup_reverb.c
 
@@ -98,6 +115,11 @@ wavelength!
 **Type:** Int
 
 **Value:** Any valid line index
+
+**Parent(s)**
+	reverb.filter_lines
+		Greater than 0
+
 
 **File:** setup_reverb.c
 
@@ -128,6 +150,11 @@ N. **Filter lines**
 	line to keep in the output file. If reverb.matom_lines is >0, all macro-atom
 	lines of interest are automatically included in the filter list.
 
+**Parent(s)**
+	reverb.type
+		Greater than 0
+
+
 **File:** setup_reverb.c
 
 reverb.matom_line
@@ -142,6 +169,11 @@ line is specified as Element:Ion:Upper level:Lower level.
 
 
 **Value:** >0:>0:>1:>0
+
+
+**Parent(s)**
+	reverb.matom_lines
+		Greater than 0
 
 
 **File:** setup_reverb.c
@@ -159,6 +191,10 @@ simulations.
 
 **Value:** 0 or N
 
+**Parent(s)**
+	reverb.type
+		3
+
 **File:** setup_reverb.c
 
 reverb.path_bins
@@ -175,6 +211,10 @@ bin boundaries show up in the TF.
 **Type:** Int
 
 **Value:** Greater than 0
+
+**Parent(s)**
+	reverb.type
+		2, 3
 
 **File:** setup_reverb.c
 
@@ -247,6 +287,10 @@ diagnostics.
 	specified by X & Z position using the reverb.dump_cells/reverb.dump_cell options.
 
 3. **Both**
+
+**Parent(s)**
+	reverb.type
+		2, 3
 
 **File:** setup_reverb.c
 
