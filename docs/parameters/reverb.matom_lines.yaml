@@ -6,7 +6,7 @@ description: |
   doesn't give rise to any noticable differences to the pure wind mode in most
   simulations.
 type: Int
-values: >0
+values: 0 or N
 parent:
   reverb.type: 3
 file: setup_reverb.c
