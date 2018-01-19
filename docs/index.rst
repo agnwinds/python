@@ -6,11 +6,17 @@
 Welcome to python's documentation!
 ==================================
 
+Contents:
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :glob:
 
+   *
 
+Introduction
+============
+Blah blah blah
 
 Indices and tables
 ==================
