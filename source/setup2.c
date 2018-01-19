@@ -337,7 +337,6 @@ init_observers ()
   char yesno[20];
 
 
-  rdpar_comment ("Parameters defining the spectra seen by observers");
   geo.nangles = 4;
   geo.angle[0] = 10;
   geo.angle[1] = 30.;
