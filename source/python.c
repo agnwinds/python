@@ -738,7 +738,7 @@ main (argc, argv)
       define_wind ();
     }
 
-  else if (modes.zeus_connect == 1)	//We have restarted, but are in zeus connect mode, so we want to update density, temp and velocities
+  if (modes.zeus_connect == 1)	//We have restarted, but are in zeus connect mode, so we want to update density, temp and velocities
     {
 
       /* Hydro takes the wind domain number as an argument in the current domains setup */
