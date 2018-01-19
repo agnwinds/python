@@ -337,7 +337,6 @@ init_observers ()
   char yesno[20];
 
 
-  rdpar_comment ("Parameters defining the spectra seen by observers");
   geo.nangles = 4;
   geo.angle[0] = 10;
   geo.angle[1] = 30.;
@@ -355,8 +354,8 @@ init_observers ()
   geo.swavemax = 1850;
 
   rdpar_comment ("The minimum and maximum wavelengths in the final spectra");
-  rddoub ("spectrum_wavemin", &geo.swavemin);
-  rddoub ("spectrum_wavemax", &geo.swavemax);
+  rddoub ("Spectrum.wavemin(Angstroms)", &geo.swavemin);
+  rddoub ("Spectrum.wavemax(Angstroms)", &geo.swavemax);
   if (geo.swavemin > geo.swavemax)
   {
     geo.swavemax = geo.swavemin;
@@ -371,10 +370,9 @@ init_observers ()
 
   geo.matom_radiation = 0;      //initialise for ionization cycles - don't use pre-computed emissivities for macro-atom levels/ k-packets.
 
-/* Note: Below here many of the variables which are read in are not currently part of geo stucture */
 
   rdpar_comment ("The observers and their location relative to the system");
-  rdint ("no_observers", &geo.nangles);
+  rdint ("Spectrum.no_observers", &geo.nangles);
 
   if (geo.nangles < 1 || geo.nangles > NSPEC)
   {
@@ -384,25 +382,23 @@ init_observers ()
 
 
   for (n = 0; n < geo.nangles; n++)
-    rddoub ("angle(0=pole)", &geo.angle[n]);
+    rddoub ("Spectrum.angle(0=pole)", &geo.angle[n]);
 
-  /* 05apr-ksl-56--For diagnostic reasons I have left questions regarding phase
-   * even for systems which are not binaries.  Phase 0 in this case corresponds to
+   /* Phase 0 in this case corresponds to
    * an extraction direction which is in the xz plane
    */
-  /* JM 1502 -- change this so we only ask for phase if the system is a binary -- see #137 */
 
   if (geo.system_type == SYSTEM_TYPE_BINARY)
   {
 
     for (n = 0; n < geo.nangles; n++)
-      rddoub ("phase(0=inferior_conjunction)", &geo.phase[n]);
+      rddoub ("Spectrum.orbit_phase(0=inferior_conjunction)", &geo.phase[n]);
   }
   else
     Log ("No phase information needed as system type %i is not a binary\n", geo.system_type);
 
 
-  rdint ("live.or.die(0).or.extract(anything_else)", &geo.select_extract);
+  rdint ("Spectrum.live_or_die(0=live.or.die,extract=anything_else)", &geo.select_extract);
   if (geo.select_extract != 0)
   {
     geo.select_extract = 1;
@@ -454,7 +450,7 @@ init_observers ()
    * to a distance of 100 pc. The internal units are basically a luminosity
    * within a wavelength/frequency interval. */
 
-  rdint ("spec.type(flambda(1),fnu(2),basic(other)", &geo.select_spectype);
+  rdint ("Spectrum.type(flambda(1),fnu(2),basic(other)", &geo.select_spectype);
 
   if (geo.select_spectype == 1)
   {

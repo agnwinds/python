@@ -179,7 +179,8 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o parse.o init.o \
 		xlog.o lineio.o rdpar.o direct_ion.o pi_rates.o matrix_ion.o para_update.o \
 		setup.o setup_domains.o setup_disk.o photo_gen_matom.o macro_gov.o windsave2table_sub.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o \
-		reverb.o paths.o setup2.o run.o brem.o search_light.o synonyms.o 
+		reverb.o paths.o setup2.o run.o brem.o search_light.o synonyms.o \
+		setup_reverb.o
 		
 
 
@@ -200,7 +201,8 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 		direct_ion.c pi_rates.c matrix_ion.c para_update.c setup.c setup_domains.c \
 		setup_disk.c photo_gen_matom.c macro_gov.c windsave2table_sub.c \
 		import.c import_spherical.c import_cylindrical.c import_rtheta.c\
-		reverb.c paths.c setup2.c run.c brem.c search_light.c synonyms.c 
+		reverb.c paths.c setup2.c run.c brem.c search_light.c synonyms.c \
+		setup_reverb.c
 
 #
 # kpar_source is now declared seaprately from python_source so that the file log.h 

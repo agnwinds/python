@@ -12,4 +12,4 @@ values: >0
 default: 1000
 parent:
   reverb.type: [2, 3]
-file: setup.c
+file: setup_reverb.c

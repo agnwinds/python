@@ -1,0 +1,10 @@
+name: Boundary_layer.temp
+description: |
+  The temperature of the boundary layer in situations where temperature 
+  is meaningful in generating the spectrum
+type: Double
+unit: Degress Kelvin
+values: >0 
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: setup.c

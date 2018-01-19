@@ -221,7 +221,6 @@ int read_non_standard_disk_profile(char *tprofile);
 /* lines.c */
 double total_line_emission(WindPtr one, double f1, double f2);
 double lum_lines(WindPtr one, int nmin, int nmax);
-int lum_pdf(PlasmaPtr xplasma, double lumlines);
 double q21(struct lines *line_ptr, double t);
 double q12(struct lines *line_ptr, double t);
 double a21(struct lines *line_ptr);
@@ -480,7 +479,6 @@ int communicate_matom_estimators_para(void);
 /* setup.c */
 double get_stellar_params(void);
 int get_bl_and_agn_params(double lstar);
-int get_meta_params(void);
 int get_standard_care_factors(void);
 /* setup_domains.c */
 int get_domain_params(int ndom);
@@ -568,6 +566,8 @@ int search_light_init(void);
 int photo_gen_search_light(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
 /* synonyms.c */
 int check_synonyms(char new_question[], char old_question[]);
+/* setup_reverb.c */
+int get_meta_params(void);
 /* py_wind_sub.c */
 int zoom(int direction);
 int overview(WindPtr w, char rootname[]);

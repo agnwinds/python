@@ -58,16 +58,42 @@
 
 #define	LINELEN 132
 
+/* Note that there can be multiple old names that are the same due
+ * to some old input formats that were not syntaciticaly perfect
+ * See #319
+ */
+
 
 char *old_names[] =
   { "mstar", "rstar", "Disk.illumination.treatment", "disk.type",
-"Disk_radiation", "Rad_type_for_disk", "disk.mdot", "T_profile_file", "disk.radmax" };
-char *new_names[] =
-  { "Central.object.mass", "Central.object.radius",
-"Surface.reflection.or.absorption", "Disk.type", "Disk.radiation", "Disk.rad_type",
-"Disk.mdot", "Disk.T_profile_file" , "Disk.radmax"};
+  "Disk_radiation", "Rad_type_for_disk", "disk.mdot", "T_profile_file",
+    "disk.radmax",
+  "stellar_wind_mdot", "stellar.wind.radmin", "stellar.wind_vbase",
+    "stellar.wind.v_infinity", "stellar.wind.acceleration_exponent",
+    "spectrum_wavemin","spectrum_wavemax","no_observers","angle",
+    "phase","live.or.die","spec.type","mstar","rstar","Star_radiation",
+    "tstar","Rad_type_for_star","Rad_type_for_star",
+    "Rad_type_for_disk","Rad_type_for_bl","Boundary_layer_radiation",
+    "Rad_type_for_bl","t_bl","lum_bl"
+};
 
-int nunber_of_names = 9;
+char *new_names[] = { "Central.object.mass", "Central.object.radius",
+  "Surface.reflection.or.absorption", "Disk.type", "Disk.radiation",
+    "Disk.rad_type_to_make_wind",
+  "Disk.mdot", "Disk.T_profile_file", "Disk.radmax",
+  "Stellar_wind.mdot", "Stellar_wind.radmin", "Stellar_wind.vbase",
+    "Stellar_wind.v_infinity", "Stellar_wind.acceleration_exponent",
+    "Spectrum.wavemin","Spectrum.wavemax","Spectrum.no_observers",
+    "Spectrum.angle","Spectrum.orbit_phase","Spectrum.live_or_die",
+    "Spectrum.type","Central_object.mass","Central_object.radius",
+    "Central_object.radiation","Central_object.temp","Central_object.rad_type_to_make_wind",
+    "Central_object.rad_type_in_final_spectrum",
+    "Disk.rad_type_in_final_spectrum","Boundary_layer.rad_type_in_final_spectrum",
+    "Boundary_layer.radiation","Boundary_layer.rad_type_to_make_wind","Boundary_layer.temp",
+    "Boundary_layer.luminosity"
+};
+
+int nunber_of_names = 33;
 
 
 

@@ -16,4 +16,4 @@ values:
   3: Output to both .vtk and .dump_cell.
 parent:
   reverb.type: [2, 3]
-file: setup.c
+file: setup_reverb.c

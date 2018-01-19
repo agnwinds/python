@@ -37,4 +37,4 @@ values:
 default: 2
 parent:
   reverb.type: [2, 3]
-file: setup.c
+file: setup_reverb.c

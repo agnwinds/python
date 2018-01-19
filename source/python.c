@@ -272,6 +272,7 @@ main (argc, argv)
   time_max = 13.8e9 * 3.2e7;	/* The maximum time the program will run without stopping.  This
 				   is initially set to the lifetime of the universe */
   time_max = -1;
+   set_max_time (files.root, time_max);
 
 
   /* Set the verbosity level for logging.  To get more info raise the verbosity level to a higher number. To
@@ -315,11 +316,11 @@ main (argc, argv)
 
   Debug ("Debug statements are on. To turn off use lower verbosity (< 5).\n");
 
-  /* Set the maximum time if it was defined */
-  if (time_max > 0)
-    {
-      set_max_time (files.root, time_max);
-    }
+//OLD  /* Set the maximum time if it was defined */
+//OLD  if (time_max > 0)
+//OLD    {
+//OLD      set_max_time (files.root, time_max);
+//OLD    }
 
   xsignal (files.root, "%-20s Initializing variables for %s\n", "NOK",
 	   files.root);
@@ -431,27 +432,6 @@ main (argc, argv)
 
       get_disk_params();
 
-//OLD	  rdpar_comment ("Parameters for the Disk (if there is one)");
-//OLD	  rdint
-//OLD	    ("disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
-//OLD	     &geo.disk_type);
-//OLD	  if (geo.disk_type != DISK_NONE)
-//OLD	    {
-//OLD	      rdint ("Disk_radiation(y=1)", &geo.disk_radiation);
-//OLD	    }
-//OLD	  else
-//OLD	    {
-//OLD	      geo.disk_radiation = 0;
-//OLD	    }
-//OLD	  get_spectype (geo.disk_radiation,
-//OLD			"Rad_type_for_disk(0=bb,1=models)_to_make_wind",
-//OLD			&geo.disk_ion_spectype);
-
-
-//OLD	  if (geo.disk_type)	/* Then a disk exists and it needs to be described */
-//OLD	    {
-//OLD	      get_disk_params ();
-//OLD	    }
 
 	  /* describe the boundary layer / agn components to the spectrum if they exist. 
 	     reads in information specified by the user and sets variables in geo structure */
@@ -640,14 +620,19 @@ main (argc, argv)
   if (geo.pcycles > 0)
     {
 
+     rdpar_comment ("Parameters defining the spectra seen by observers\n");
+
       get_spectype (geo.star_radiation,
-		    "Rad_type_for_star(0=bb,1=models,2=uniform)_in_final_spectrum",
+		    //"Rad_type_for_star(0=bb,1=models,2=uniform)_in_final_spectrum",
+		    "Central_object.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)",
 		    &geo.star_spectype);
       get_spectype (geo.disk_radiation,
-		    "Rad_type_for_disk(0=bb,1=models,2=uniform)_in_final_spectrum",
+		    //"Rad_type_for_disk(0=bb,1=models,2=uniform)_in_final_spectrum",
+		    "Disk.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)",
 		    &geo.disk_spectype);
       get_spectype (geo.bl_radiation,
-		    "Rad_type_for_bl(0=bb,1=models,2=uniform)_in_final_spectrum",
+		    //"Rad_type_for_bl(0=bb,1=models,2=uniform)_in_final_spectrum",
+		    "Boundary_layer.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)",
 		    &geo.bl_spectype);
       geo.agn_spectype = 3;
       get_spectype (geo.agn_radiation,
@@ -669,6 +654,8 @@ main (argc, argv)
  * it to a more logical location
  */
 
+
+  rdpar_comment("Other parameters");
 
   bands_init (-1, &xband);
   freqmin = xband.f1[0];

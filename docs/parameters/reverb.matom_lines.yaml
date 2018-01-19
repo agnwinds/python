@@ -9,4 +9,4 @@ type: Int
 values: >0
 parent:
   reverb.type: 3
-file: setup.c
+file: setup_reverb.c

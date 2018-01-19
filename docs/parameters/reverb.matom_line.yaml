@@ -10,4 +10,4 @@ values: |
   >0:>0:>1:>0
 parent:
   reverb.matom_lines: >0
-file: setup.c
+file: setup_reverb.c
