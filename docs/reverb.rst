@@ -26,4 +26,4 @@ Reverb.visualisation
 
 Blah blah.
 
-Depends on :ref:`ref-Reverb_type`
+Depends on :ref:`ref-Reverb_disk_type`
