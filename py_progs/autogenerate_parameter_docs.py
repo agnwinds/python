@@ -18,8 +18,8 @@ def parse_param_to_dict(found_parameters, text, input_file, param_type):
         ('description', 'Multi-line description, must keep indentation.\n'),
         ('type', param_type),
         ('unit', 'None'),
-        ('values', 'Condition e.g. >0 or list e.g. [1, 2, 5]'),
-        ('parent', {"parameter": "Condition e.g. >0 or list e.g. [1, 2, 5]"}),
+        ('values', 'Condition e.g. greater than 0 or list e.g. [1, 2, 5]'),
+        ('parent', {"parameter": "Condition e.g. greater than 0 or list e.g. [1, 2, 5]"}),
         ('file', input_file)
     ])
 
