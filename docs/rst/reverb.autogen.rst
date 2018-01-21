@@ -168,7 +168,7 @@ simulations.
 **Value:** 0 or N
 
 **Parent(s):**
-  *reverb.type:* 3
+  reverb.type_: 3
 
 
 **File:** setup_reverb.c

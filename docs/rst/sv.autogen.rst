@@ -52,6 +52,23 @@ Multi-line description, must keep indentation.
 **File:** sv.c
 
 
+sv.diskmin
+==========
+Multi-line description, must keep indentation.
+
+**Type:** Double
+
+**Unit:** co.radius
+
+**Value:** Condition e.g. >0 or list e.g. [1, 2, 5]
+
+**Parent(s):**
+  parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
+
+
+**File:** sv.c
+
+
 sv.mdot_r_exponent
 ==================
 Multi-line description, must keep indentation.

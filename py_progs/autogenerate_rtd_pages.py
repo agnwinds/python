@@ -79,7 +79,7 @@ def output_parameter(output_file, parameter, level=0):
                     list_text = ', '.join([str(x) for x in value])
                     write_str_indent(type_file, "  {}_: {}".format(key, list_text, indent="    "))
                 else:
-                    type_file.write("  *{}:* {}\n\n".format(key, value))
+                    type_file.write("  {}_: {}\n\n".format(key, value))
             type_file.write("\n")
 
         elif isinstance(parameter['parent'], list):

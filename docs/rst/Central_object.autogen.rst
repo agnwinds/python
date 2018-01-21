@@ -90,7 +90,7 @@ Radius of the central object in the system, e.g the white dwarf or black hole
 **Value:** Greater than 0
 
 **Parent(s):**
-  *parameter:* None
+  parameter_: None
 
 
 **File:** setup.c
