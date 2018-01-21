@@ -85,6 +85,7 @@ def output_parameter(output_file, parameter, level=0):
             type_file.write("**Parent(s):** {}\n\n".format(parameter['parent']))
 
     type_file.write("**File:** {}\n\n\n".format(parameter['file']))
+    type_file.write("----------\n\n")
 
     # Go through all the children and output them
     if parameter.get('children'):
