@@ -47,6 +47,8 @@ our 'tfpy' Python (no relation) library.
 **File:** setup_reverb.c
 
 
+----------
+
 reverb.disk_type
 --------------------
 Setting for how photons generated in the disk are treated when generating path
@@ -92,6 +94,8 @@ distributions for wind cells.
 **File:** setup_reverb.c
 
 
+----------
+
 reverb.filter_lines
 --------------------
 Whether or not to filter any lines out of the output file. This is used to keep output
@@ -126,6 +130,8 @@ N. **Filter lines**
 **File:** setup_reverb.c
 
 
+----------
+
 reverb.filter_line
 ^^^^^^^^^^^^^^^^^^^^
 Line number of one line to include in the output .delay_dump file. This is
@@ -147,6 +153,8 @@ wavelength!
 **File:** setup_reverb.c
 
 
+----------
+
 reverb.matom_lines
 --------------------
 Number of macro-atom lines to track paths for individually. This many
@@ -165,6 +173,8 @@ simulations.
 
 **File:** setup_reverb.c
 
+
+----------
 
 reverb.matom_line
 ^^^^^^^^^^^^^^^^^^^^
@@ -186,6 +196,8 @@ line is specified as Element:Ion:Upper level:Lower level.
 **File:** setup_reverb.c
 
 
+----------
+
 reverb.path_bins
 --------------------
 Number of bins for photon paths. Reverb modes that record the distribution of
@@ -206,6 +218,8 @@ bin boundaries show up in the TF.
 
 **File:** setup_reverb.c
 
+
+----------
 
 reverb.visualisation
 --------------------
@@ -241,6 +255,8 @@ diagnostics.
 **File:** setup_reverb.c
 
 
+----------
+
 reverb.angle_bins
 ^^^^^^^^^^^^^^^^^^^^
 Used when generating 3d .vtk output files for visualisation. Sets the number
@@ -258,6 +274,8 @@ with larger filesizes.
 **File:** setup_reverb.c
 
 
+----------
+
 reverb.dump_cells
 ^^^^^^^^^^^^^^^^^^^^
 Number of cells to dump. When dumping the path distribution info for a range
@@ -274,6 +292,8 @@ provided.
 
 **File:** setup_reverb.c
 
+
+----------
 
 reverb.dump_cell
 ^^^^^^^^^^^^^^^^^^^^
@@ -297,4 +317,6 @@ idenfity where wind locations are.
 
 **File:** setup_reverb.c
 
+
+----------
 
