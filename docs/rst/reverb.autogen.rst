@@ -1,10 +1,10 @@
 
-====================
-Reverb
-====================
+======
+reverb
+======
 
 reverb.type
-====================
+===========
 Whether to perform reverberation mapping. Reverberation mapping tracks the
 path of photons emitted in the simulation as they travel through the geometry,
 assuming that any delays from recombination etc. are negligible and all delays
@@ -47,10 +47,10 @@ our 'tfpy' Python (no relation) library.
 **File:** setup_reverb.c
 
 
-----------
+----------------------------------------
 
 reverb.disk_type
---------------------
+----------------
 Setting for how photons generated in the disk are treated when generating path
 distributions for wind cells.
 
@@ -88,16 +88,16 @@ distributions for wind cells.
 
 
 **Parent(s):**
-  *reverb.type:* 2, 3
+  reverb.type_: 2, 3
 
 
 **File:** setup_reverb.c
 
 
-----------
+----------------------------------------
 
 reverb.filter_lines
---------------------
+-------------------
 Whether or not to filter any lines out of the output file. This is used to keep output
 file sizes down, and avoid them overwhelming the user.
 
@@ -124,16 +124,16 @@ N. **Filter lines**
 
 
 **Parent(s):**
-  *reverb.type:* Greater than 0
+  reverb.type_: Greater than 0
 
 
 **File:** setup_reverb.c
 
 
-----------
+----------------------------------------
 
 reverb.filter_line
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^
 Line number of one line to include in the output .delay_dump file. This is
 the python internal line number. It can be found using either the macro-atom
 mode (which prints out the line number once it's found one) or by doing an
@@ -147,16 +147,16 @@ wavelength!
 **Value:** Any valid line index
 
 **Parent(s):**
-  *reverb.filter_lines:* Greater than 0
+  reverb.filter_lines_: Greater than 0
 
 
 **File:** setup_reverb.c
 
 
-----------
+----------------------------------------
 
 reverb.matom_lines
---------------------
+------------------
 Number of macro-atom lines to track paths for individually. This many
 reverb.matom_line entries are required, and the line associated with each has
 the path of photons deexciting into it recorded in its own array. Note: This
@@ -174,10 +174,10 @@ simulations.
 **File:** setup_reverb.c
 
 
-----------
+----------------------------------------
 
 reverb.matom_line
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 Specifies a line associated with a given macro-atom transition. The species
 and transition involved are specified. The internal line associated with this
 transition will be printed to standard-out for use when processing outputs. A
@@ -190,16 +190,16 @@ line is specified as Element:Ion:Upper level:Lower level.
 
 
 **Parent(s):**
-  *reverb.matom_lines:* Greater than 0
+  reverb.matom_lines_: Greater than 0
 
 
 **File:** setup_reverb.c
 
 
-----------
+----------------------------------------
 
 reverb.path_bins
---------------------
+----------------
 Number of bins for photon paths. Reverb modes that record the distribution of
 path lengths in every wind cell bin them in this number of bins. Bins are
 logarithmically spaced between the minimum scale in the system (the smallest
@@ -213,13 +213,13 @@ bin boundaries show up in the TF.
 **Value:** Greater than 0
 
 **Parent(s):**
-  *reverb.type:* 2, 3
+  reverb.type_: 2, 3
 
 
 **File:** setup_reverb.c
 
 
-----------
+----------------------------------------
 
 reverb.visualisation
 --------------------
@@ -249,16 +249,16 @@ diagnostics.
 
 
 **Parent(s):**
-  *reverb.type:* 2, 3
+  reverb.type_: 2, 3
 
 
 **File:** setup_reverb.c
 
 
-----------
+----------------------------------------
 
 reverb.angle_bins
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 Used when generating 3d .vtk output files for visualisation. Sets the number
 of angle bins used in the output. Aesthetic only; bigger makes prettier meshes
 with larger filesizes.
@@ -268,16 +268,16 @@ with larger filesizes.
 **Value:** Greater than 0
 
 **Parent(s):**
-  *reverb.visualisation:* 1, 3
+  reverb.visualisation_: 1, 3
 
 
 **File:** setup_reverb.c
 
 
-----------
+----------------------------------------
 
 reverb.dump_cells
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 Number of cells to dump. When dumping the path distribution info for a range
 of cells, this specifies the number of lines of reverb.dump_cell that will be
 provided.
@@ -287,16 +287,16 @@ provided.
 **Value:** 0 or N
 
 **Parent(s):**
-  *reverb.visualisation:* 2, 3
+  reverb.visualisation_: 2, 3
 
 
 **File:** setup_reverb.c
 
 
-----------
+----------------------------------------
 
-reverb.dump_cell
-^^^^^^^^^^^^^^^^^^^^
+**reverb.dump_cell**
+""""""""""""""""""""
 Position for a cell, listed as a pair of R:Z coordinates. Will accept any
 position that falls within a grid, will error out on ones that don't. This can
 be slightly awkward and you may want to run a quick test then use py_wind to
@@ -312,11 +312,9 @@ idenfity where wind locations are.
 
 
 **Parent(s):**
-  *reverb.dump_cells:* Greater than 0
+  reverb.dump_cells_: Greater than 0
 
 
 **File:** setup_reverb.c
 
-
-----------
 

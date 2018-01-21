@@ -5,7 +5,7 @@ description: |
   v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
 type: Double
 unit: cm
-values: >0 
+values: Greater than 0 
 parent:
   parameter: Required when the wind_type is set to 1, a stellar wind
 file: stellar_wind.c

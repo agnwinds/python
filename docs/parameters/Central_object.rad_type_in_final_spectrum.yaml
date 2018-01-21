@@ -1,4 +1,4 @@
-name: Central_object.ad_type_in_final_spectrum
+name: Central_object.rad_type_in_final_spectrum
 description: |
   The type of spectral models used to simulate radiation from the central object, where bb inplies
   bb radiation, models implies spectra from models that are read in, and uniform means a flat spectrum
