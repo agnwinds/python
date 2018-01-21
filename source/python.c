@@ -733,7 +733,8 @@ main (argc, argv)
   /* Next line finally defines the wind if this is the initial time this model is being run */
 
 
-  if (geo.run_type == RUN_TYPE_NEW &&  modes.zeus_connect != 1)	// Define the wind and allocate the arrays the first time
+//Old  if (geo.run_type == RUN_TYPE_NEW &&  modes.zeus_connect != 1)	// Define the wind and allocate the arrays the first time
+  if (geo.run_type == RUN_TYPE_NEW)	// Define the wind and allocate the arrays the first time
     {
       define_wind ();
     }
