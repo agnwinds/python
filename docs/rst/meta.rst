@@ -16,10 +16,18 @@ flexible structure. A full example outline is:
 
 .. literalinclude:: reference_yaml.txt
    :language: yaml
+   :lines: 1-12
 
 
 The **required** keys that must be present in any file are ``name``, ``description``, ``type``
 and ``file``.
+
+For enumerators, a more complex setup can be used for the ``values`` key outlining all the
+possible choices:
+
+.. literalinclude:: reference_yaml.txt
+   :language: yaml
+   :lines: 14-25
 
 
 autogenerate_parameter_docs.py

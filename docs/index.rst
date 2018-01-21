@@ -9,8 +9,7 @@
 --------------------------------------
 Radiative transfer and ionisation code
 --------------------------------------
-Reference to assorted python papers `Link name
-<http://www.python.org/>`_.
+TODO: Describe python, link to papers as `Link name <http://www.python.org/>`_.
 
 Input files
 -----------
