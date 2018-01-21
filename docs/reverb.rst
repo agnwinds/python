@@ -1,3 +1,4 @@
+
 =====
 Reverb
 =====
@@ -10,11 +11,15 @@ of angle bins used in the output. Aesthetic only; bigger makes prettier meshes
 with larger filesizes.
 
 **Type:** Int
+
 **Value:** Greater than 0
+
 **Parent(s):**
-*reverb.mode:* 1, 3
+  *reverb.mode:* 1, 3
+
 
 **File:** setup_reverb.c
+
 reverb.disk_type
 ==============================
 
@@ -22,7 +27,9 @@ Setting for how photons generated in the disk are treated when generating path
 distributions for wind cells.
 
 **Type:** Enum (Int)
+
 **Values:**
+
 0. **Correlated**
    
    This mode assumes that disk emission is correlated with the
@@ -51,10 +58,13 @@ distributions for wind cells.
    distributions, this will slightly bias them towards the longer delays
    associated with wind self-heating/excitation.
 
+
 **Parent(s):**
-*reverb.type:* 2, 3
+  *reverb.type:* 2, 3
+
 
 **File:** setup_reverb.c
+
 reverb.dump_cell
 ==============================
 
@@ -65,12 +75,19 @@ idenfity where wind locations are.
 
 **Type:** Float:Float
 
+
+**Unit:** cm:cm
+
+
 **Value:** >0:>0
 
+
 **Parent(s):**
-*reverb.dump_cells:* Greater than 0
+  *reverb.dump_cells:* Greater than 0
+
 
 **File:** setup_reverb.c
+
 reverb.dump_cells
 ==============================
 
@@ -79,11 +96,15 @@ of cells, this specifies the number of lines of reverb.dump_cell that will be
 provided.
 
 **Type:** Int
+
 **Value:** 0 or N
+
 **Parent(s):**
-*reverb.visualisation:* 2, 3
+  *reverb.visualisation:* 2, 3
+
 
 **File:** setup_reverb.c
+
 reverb.filter_line
 ==============================
 
@@ -96,11 +117,15 @@ should almost certainly be changed to be specified using a species and
 wavelength!
 
 **Type:** Int
+
 **Value:** Any valid line index
+
 **Parent(s):**
-*reverb.filter_lines:* Greater than 0
+  *reverb.filter_lines:* Greater than 0
+
 
 **File:** setup_reverb.c
+
 reverb.filter_lines
 ==============================
 
@@ -108,7 +133,9 @@ Whether or not to filter any lines out of the output file. This is used to keep 
 file sizes down, and avoid them overwhelming the user.
 
 **Type:** Int
+
 **Values:**
+
 0. **No filtering**
    
    Include *all* photons that contribute to the spectra in the output
@@ -126,10 +153,13 @@ N. **Filter lines**
    line to keep in the output file. If reverb.matom_lines is >0, all macro-atom
    lines of interest are automatically included in the filter list.
 
+
 **Parent(s):**
-*reverb.type:* Greater than 0
+  *reverb.type:* Greater than 0
+
 
 **File:** setup_reverb.c
+
 reverb.matom_line
 ==============================
 
@@ -140,12 +170,16 @@ line is specified as Element:Ion:Upper level:Lower level.
 
 **Type:** Int:Int:Int:Int
 
+
 **Value:** >0:>0:>1:>0
 
+
 **Parent(s):**
-*reverb.matom_lines:* Greater than 0
+  *reverb.matom_lines:* Greater than 0
+
 
 **File:** setup_reverb.c
+
 reverb.matom_lines
 ==============================
 
@@ -156,10 +190,14 @@ doesn't give rise to any noticable differences to the pure wind mode in most
 simulations.
 
 **Type:** Int
+
 **Value:** 0 or N
+
 **Parent(s):**
   *reverb.type:* 3
+
 **File:** setup_reverb.c
+
 reverb.path_bins
 ==============================
 
@@ -172,11 +210,15 @@ higher does not lead to qualitative differences in TF, going lower makes the
 bin boundaries show up in the TF.
 
 **Type:** Int
+
 **Value:** Greater than 0
+
 **Parent(s):**
-*reverb.type:* 2, 3
+  *reverb.type:* 2, 3
+
 
 **File:** setup_reverb.c
+
 reverb.type
 ==============================
 
@@ -188,7 +230,9 @@ photons are output to a '.delay_dump' file that can then be processed using
 our 'tfpy' Python (no relation) library.
 
 **Type:** Enum (Int)
+
 **Values:**
+
 0. **Off**
 
 1. **Simple 'photon' mode**
@@ -216,7 +260,9 @@ our 'tfpy' Python (no relation) library.
    This mode gives pretty much identical results to wind mode, but at least we
    made it to check rather than just assuming it would be fine.
 
+
 **File:** setup_reverb.c
+
 reverb.visualisation
 ==============================
 
@@ -226,7 +272,9 @@ as a selection of flat text files with full bin-by-bin breakdowns. Useful for
 diagnostics.
 
 **Type:** Enum (Int)
+
 **Values:**
+
 0. None
 
 1. **Mesh visualisation**
@@ -242,7 +290,10 @@ diagnostics.
 
 3. **Both**
 
+
 **Parent(s):**
-*reverb.type:* 2, 3
+  *reverb.type:* 2, 3
+
 
 **File:** setup_reverb.c
+

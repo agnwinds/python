@@ -68,17 +68,19 @@ for parameter_type, parameters in dox_unstructured.items():
 
 for parameter_type, type_parameters in dox_root.items():
     with open(os.path.join(output_folder, "{}.rst".format(parameter_type)), 'w') as type_file:
-        type_file.write("=====\n{}\n=====\n\n".format(parameter_type.title()))
+        type_file.write("\n=====\n{}\n=====\n\n".format(parameter_type.title()))
         for parameter_name, parameter in type_parameters.items():
             type_file.write("{}\n==============================\n\n".format(parameter['name']))
             type_file.write("{}\n".format(parameter['description']))
 
             if parameter.get('type'):
-                type_file.write("**Type:** {}\n".format(parameter['type']))
+                type_file.write("**Type:** {}\n\n".format(parameter['type']))
+            if parameter.get('unit'):
+                type_file.write("**Unit:** {}\n\n".format(parameter['unit']))
 
             if parameter.get('values'):
                 if isinstance(parameter['values'], dict):
-                    type_file.write("**Values:**\n")
+                    type_file.write("**Values:**\n\n")
                     for key, value in parameter['values'].items():
                         if isinstance(value, str):
                             write_str_indent(type_file, "{}. {}".format(key, value), indent="   ")
@@ -90,22 +92,23 @@ for parameter_type, type_parameters in dox_root.items():
 
                 elif isinstance(parameter['values'], list):
                     # If this is a list of values, write each out as a bullet-point
-                    type_file.write("**Values:**\n")
+                    type_file.write("**Values:**\n\n")
                     for value in parameter['values'].items():
                         write_str_indent(type_file, "* {}".format(value), indent="  ")
 
                 else:
                     type_file.write("**Value:** {}\n".format(parameter['values']))
+                type_file.write("\n")
 
             if parameter.get('parent'):
                 if isinstance(parameter['parent'], dict):
                     type_file.write("**Parent(s):**\n")
                     for key, value in parameter['parent'].items():
                         if isinstance(value, str):
-                            write_str_indent(type_file, "*{}:* {}".format(key, value), indent="   ")
+                            write_str_indent(type_file, "  *{}:* {}".format(key, value), indent="    ")
                         elif isinstance(value, list):
                             list_text = ', '.join([str(x) for x in value])
-                            write_str_indent(type_file, "*{}:* {}".format(key, list_text, indent="   "))
+                            write_str_indent(type_file, "  *{}:* {}".format(key, list_text, indent="    "))
                         else:
                             type_file.write("  *{}:* {}\n".format(key, value))
 
@@ -116,5 +119,6 @@ for parameter_type, type_parameters in dox_root.items():
                         write_str_indent(type_file, "* {}".format(value), indent="  ")
                 else:
                     type_file.write("**Parent(s):** {}\n".format(parameter['parent']))
+                type_file.write("\n")
 
-            type_file.write("**File:** {}\n".format(parameter.get('file')))
+            type_file.write("**File:** {}\n\n".format(parameter.get('file')))
