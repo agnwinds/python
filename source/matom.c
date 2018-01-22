@@ -1,5 +1,11 @@
-
-
+/***********************************************************/
+/** @file  matom.c
+ * @Author SWM
+ * @date   February, 2004
+ * @brief  Macro-atom functions
+ *
+ * File containing Macro-atom functions.
+ ***********************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -12,89 +18,80 @@
 //#include <gsl/gsl_blas.h>
 #include "my_linalg.h"
 
-/*****************************************************************************
-
-                                    Imperial College London
-Synopsis:
-	Matom is the core of the implementation of Leon Lucy's Macro Atom
-	approach to dealing with radiation-matter interactions. It is called whenever
-	a photon packet activates a macro atom. As input it takes the process by
-	which activation occurred (identified by the label "nres") which allow it 
-	to deduce the level that has been excited. It then calculates all the 
-	Macro Atom jumping/deactivaion probabilities following Lucy and so deduces
-	the process by which deactivation occurs. At output "nres" identifies this 
-	process and the packet information has been updates. 
-
-Arguments:
-
-       WindPtr w                   the ptr to the structure defining the wind
-       PhotPtr p                   the packet at the point of activation
-       int nres                    the process which activates the Macro Atom
-  
-Returns:
-       int nres                    the process by which deactivation occurs
-       PhotPtr p                   the packet following deactivation
-       int escape                  to tell us whether the de-activation of the
-                                   macro atom is via an r-packet (escape = 1) or
-                                   a k-packet (escape = 0)
-
-Description:
-
-
-Notes: 
-
-ksl-- There is a lot of arithmetic required to keep track of indices.  I would
-be inclined to figure out a way to avoid this.  One possibility would be to record the
-go_to level in an array when one is calculating the emission probabilities. This would
-make it easier to add new processes, I suspect. 
-
-It would be possible to convert the for loop to a while statement.  This would avoid the
-break statement in the middle.  
-
-History:
-          Feb 04  SS   Coding began.
-          Mar 04  SS   Minor changes made (based on comments from ksl)
-	04apr	ksl	A. Eliminated some unnecessary if statements.  These are indicated
-			by the words extra.  Stuart should remove the lines assuming he
-			agrees.
-			B. Changed the logic of the major do loop so that the break is moved
-			higher in the do loop.  Stuart, the intent is to make the
-			code more readable, and to reduce the level of nesting. 
-			C. Corrected an errror that on upward bb transitions seemed to leave
-			the macro-atom in the same state as previously.
-			D. Shamelessly modified some of the comments to make it more
-			straightforward for me to understand.
-			E. m = m + 1 --> m++ in several places
-			F. Modified selections to allow simple lines to be read in but
-			not to affect matom.  nlines_macro is the number on macro-lines
-			read in and these are the first elements in the line structure
-			G. Modified the way matom determines that a transition is a photo
-			ionization transition bo be consitent with change made in
-			resonate.
-          Apr 04   SS   Modifications to include collisional jumps/deactivation included.
-          May 04   SS   Bug corrected for identification of line (nres is the place of the
-                        line in the ORDERED list, not the input list).
-          Jun 04   SS   Modified to carry the "escape" variable to identify de-activation
-                        via r-packets and k-packets - avoids the need to call kpkt from
-                        within this routine
-          Jun 04   SS   Adding collisional ionization as an upwards jump possibility. No collisional
-                        recombination for the moment.
-          Jun 04   SS   Now putting in collisional recombination too.
-          July04   SS   Modifying so that this routine does not call alpha_sp but rather uses 
-                        pre-computed (stored values) for the spontaneous recombination coefficient.
-                        This is an effort to speed up the code.
-	06may	ksl	57+ -- Adapted for use with plsama structure.  Changed call to
-			eliminate passing entire w array
-	06jun	ksl	57g -- Split macro variables into a separate structure. The structue
-			which is createdin gridwind, is only created if there are macroatoms.
-	06jul	ksl	57h -- In the process of speeding up the program in the simple 
-			non-macro atom case, I tried to make sure that matom and the 
-			derivative routiens were not called at all.  Note that at present
-			the macroatom case is quite slow, due to what is happening in
-			matom.  I am suspicious that it could be speeded up a lot.
-        07jul     SS    Experimenting with retaining jumping/emission probabilities to save time.
-
-************************************************************/
+/**********************************************************/
+/** @name matom
+ * @brief The core of the implementation of Macro Atoms in python
+ *
+ * @param [in]     WindPtr w   the ptr to the structure defining the wind
+ * @param [inout]  PhotPtr p   the packet at the point of activation and deactivation
+ * @param [inout]  int nres    the process which activates and deactivates the Macro Atom
+ * @param [inout]  int escape  to tell us whether the matom de-activation
+ *                             is via an r-packet (1) or a k-packet (0)
+ * @return 0
+ *
+ * Matom is the core of the implementation of Leon Lucy's Macro Atom
+ * approach to dealing with radiation-matter interactions. It is called whenever
+ * a photon packet activates a macro atom. As input it takes the process by
+ * which activation occurred (identified by the label "nres") which allow it 
+ * to deduce the level that has been excited. It then calculates all the 
+ * Macro Atom jumping/deactivaion probabilities following Lucy and so deduces
+ * the process by which deactivation occurs. At output "nres" identifies this 
+ * process and the packet information has been updated.
+ * 
+ *
+ * @notes
+ * ksl-- There is a lot of arithmetic required to keep track of indices.  I would
+ * be inclined to figure out a way to avoid this.  One possibility would be to record the
+ * go_to level in an array when one is calculating the emission probabilities. This would
+ * make it easier to add new processes, I suspect. 
+ * 
+ * It would be possible to convert the for loop to a while statement.  This would avoid the
+ * break statement in the middle.  
+ * 
+ * History:
+ *   Feb 04  SS   Coding began.
+ *   Mar 04  SS   Minor changes made (based on comments from ksl)
+ *   04apr ksl A. Eliminated some unnecessary if statements.  These are indicated
+ *       by the words extra.  Stuart should remove the lines assuming he
+ *       agrees.
+ *       B. Changed the logic of the major do loop so that the break is moved
+ *       higher in the do loop.  Stuart, the intent is to make the
+ *       code more readable, and to reduce the level of nesting. 
+ *       C. Corrected an errror that on upward bb transitions seemed to leave
+ *       the macro-atom in the same state as previously.
+ *       D. Shamelessly modified some of the comments to make it more
+ *       straightforward for me to understand.
+ *       E. m = m + 1 --> m++ in several places
+ *       F. Modified selections to allow simple lines to be read in but
+ *       not to affect matom.  nlines_macro is the number on macro-lines
+ *       read in and these are the first elements in the line structure
+ *       G. Modified the way matom determines that a transition is a photo
+ *       ionization transition bo be consitent with change made in
+ *       resonate.
+ *           Apr 04   SS   Modifications to include collisional jumps/deactivation included.
+ *           May 04   SS   Bug corrected for identification of line (nres is the place of the
+ *                         line in the ORDERED list, not the input list).
+ *           Jun 04   SS   Modified to carry the "escape" variable to identify de-activation
+ *                         via r-packets and k-packets - avoids the need to call kpkt from
+ *                         within this routine
+ *           Jun 04   SS   Adding collisional ionization as an upwards jump possibility. No collisional
+ *                         recombination for the moment.
+ *           Jun 04   SS   Now putting in collisional recombination too.
+ *           July04   SS   Modifying so that this routine does not call alpha_sp but rather uses 
+ *                         pre-computed (stored values) for the spontaneous recombination coefficient.
+ *                         This is an effort to speed up the code.
+ *   06may ksl 57+ -- Adapted for use with plsama structure.  Changed call to
+ *       eliminate passing entire w array
+ *   06jun ksl 57g -- Split macro variables into a separate structure. The structue
+ *       which is createdin gridwind, is only created if there are macroatoms.
+ *   06jul ksl 57h -- In the process of speeding up the program in the simple 
+ *       non-macro atom case, I tried to make sure that matom and the 
+ *       derivative routiens were not called at all.  Note that at present
+ *       the macroatom case is quite slow, due to what is happening in
+ *       matom.  I am suspicious that it could be speeded up a lot.
+ *         07jul     SS    Experimenting with retaining jumping/emission probabilities to save time.
+ * 
+***********************************************************/
 
 int
 matom (p, nres, escape)
@@ -495,16 +492,24 @@ matom (p, nres, escape)
   return (0);
 }
 
-/********************************************************************************/
 
-/*
-  b12  very similar to a21 - returns the b12 Einstein coefficient.
-  History:
-  2004feb       coded by S Sim
-*/
 
-// !! ksl OK, Probably should be moved to atomic.c for consistency, but that can be done
-// later.  
+
+
+/************************************
+** @name b12 
+* @brief the b12 Einstein coefficient.
+*
+* @param struct lines line_ptr line pointer to calculate
+* 
+* @notes 
+* History:
+* 2004feb       coded by S Sim
+* ksl OK, Probably should be moved to lines.c for consistency, but that can be done
+* later.
+* Define B12_CONSTANT
+***********************************/
+ 
 #define B12_CONSTANT 5.01983e25
 
 struct lines *b12_line_ptr;
@@ -527,37 +532,41 @@ b12 (line_ptr)
 }
 
 /************************************************************/
-
-
 /* As for similar routines in recomb.c, in order to use the integrator the 
    following external structures are used (SS)*/
-
 /* This relates to the alpha_sp routines at the end of this file */
 
 struct topbase_phot *cont_ext_ptr;      //continuum pointer passed externally
-double temp_ext;                //temperature passed externally
-int temp_choice;                //choice of type of calcualation for alpha_sp
+double temp_ext;                        //temperature passed externally
+int temp_choice;                        //choice of type of calcualation for alpha_sp
 
 /*****************************************************************************/
 
-/*
-alpha_sp - to govern the calculation of the spontaneous recombination rate.
 
-The rate is given by (4 pi /c2) (gu/gl) (h2/2 pi m k T)^(3/2) 
-times the integral of   a(nu) nu2 exp [(chi- h nu)/kT].
 
-04jul30	ksl	Modified so that one does not need to have multiple versions
-		of the code depending on how whether the integrand is 
-		multiplied by 1, f/fthresh, or f/fthresh-1.  This was
-		done eliminate alpha_sp_e as a separate set of routines
-		and to assure that bf rates are positive 
-			ichoice = 0   --> spontanous recombination
-			ichoice = 1   --> energy weighted recombination 
-			ichoice = 2   --> the difference between energy_weighted
-					and spontaneous
 
-	06may	ksl	57+ -- Modified to use plasma structure
-*/
+/**********************************************************/
+/** @name  alpha_sp 
+ *  @brief the matom estimator for the spontaneous recombination rate.
+ * 
+ * The rate is given by 
+ * 
+ *    (4 pi /c2) (gu/gl) (h2/2 pi m k T)^(3/2) 
+ * times the integral of   a(nu) nu2 exp [(chi- h nu)/kT].
+ * 
+ * @notes
+ * 04jul30	ksl	Modified so that one does not need to have multiple versions
+ * 		of the code depending on how whether the integrand is 
+ * 		multiplied by 1, f/fthresh, or f/fthresh-1.  This was
+ * 		done eliminate alpha_sp_e as a separate set of routines
+ * 		and to assure that bf rates are positive 
+ * 			ichoice = 0   --> spontanous recombination
+ * 			ichoice = 1   --> energy weighted recombination 
+ * 			ichoice = 2   --> the difference between energy_weighted
+ * 					and spontaneous
+ * 
+ * 	06may	ksl	57+ -- Modified to use plasma structure
+***********************************************************/
 #define ALPHA_SP_CONSTANT 5.79618e-36
 
 double
@@ -596,10 +605,10 @@ alpha_sp (cont_ptr, xplasma, ichoice)
 
 
 
-/******************************************************************************/
-
-/* alpha_sp_integrand. This returns the integrand for alpha_sp at a chosen
-   frequency*/
+/**********************************************************/
+/** @name  alpha_sp_integrand
+ *  @brief This returns the integrand for alpha_sp at a chosen frequency - 
+***********************************************************/
 
 double
 alpha_sp_integrand (freq)
@@ -626,55 +635,40 @@ alpha_sp_integrand (freq)
   return (integrand);           //spontanoues case
 }
 
-/*****************************************************************************/
-/****************************************************************************/
 
 
-/* kpkt
-This deals with the elimination of k-packets. Whenever a k-packet is created it is
-immediately destroyed insitu by this routine. At output "nres" identified the process
-that destroys the k-packet and the packet information has been updated in the same
-way as at the end of matom. */
 
-/************************************************************
-                                    Imperial College London
-Synopsis:
-
-Arguments:
-
-       WindPtr w                   the ptr to the structure defining the wind
-       PhotPtr p                   the packet at the point of activation
-       int nres                    the process which activates the Macro Atom
-
-Returns:
-       int nres                    the process by which deactivation occurs
-       PhotPtr p                   the packet following deactivation
-       int escape                  indicated whether removal of k-packet was by creating
-                                   an r-packet (escape = 1) or by exciting a macro atom
-                                   (escape = 0)
-
-Description:
-
-
-Notes: 
-
-
-History:
-          Mar 04  SS   Coding began.
-          Apr 04  SS   Various improvements including the addition of ff and collisions.
-          May 04  SS   Minor changes made to collisional cooling rates (bug fixed)
-                       and fb cooling for simple continua.
-          May 04  SS   Modified to work for case with all "simple" ions.
-          May 04  SS   Modified to use "scattering probability" formalism for 
-                       simple ion cooling rates.
-          Jun 04  SS   Modified to include the "escape" variable to identify excitation of
-                       macro atoms. This removes the need to call matom from within this routine.
-          Jun 04  SS   Modified to include collisional ionization as a cooling term.
-          July04  SS   Modified to use recomb_sp(_e) rather than alpha_sp(_e) to speed up.
-	06may	ksl	57+ -- Modified to use new plasma array.  Eliminated passing
-			entire w array
-	131030	JM 		-- Added adiabatic cooling as possible kpkt destruction choice
-          
+/**********************************************************/
+/** @name kpkt
+ * @brief deals with the elimination of k-packets.
+ *
+ * Whenever a k-packet is created it is
+ * immediately destroyed insitu by this routine. At output "nres" identified the process
+ * that destroys the k-packet and the packet information has been updated in the same
+ * way as at the end of matom
+ *
+ * @param [in]     WindPtr w   the ptr to the structure defining the wind
+ * @param [inout]  PhotPtr p   the packet at the point of activation and deactivation
+ * @param [inout]  int nres    the process which activates and deactivates the Macro Atom
+ * @param [inout]  int escape  to tell us whether the matom de-activation
+ *                             is via an r-packet (1) or a k-packet (0)
+ * @return 0
+ *
+ * @notes
+ *          Mar 04  SS   Coding began.
+ *          Apr 04  SS   Various improvements including the addition of ff and collisions.
+ *          May 04  SS   Minor changes made to collisional cooling rates (bug fixed)
+ *                       and fb cooling for simple continua.
+ *          May 04  SS   Modified to work for case with all "simple" ions.
+ *          May 04  SS   Modified to use "scattering probability" formalism for 
+ *                       simple ion cooling rates.
+ *          Jun 04  SS   Modified to include the "escape" variable to identify excitation of
+ *                       macro atoms. This removes the need to call matom from within this routine.
+ *          Jun 04  SS   Modified to include collisional ionization as a cooling term.
+ *          July04  SS   Modified to use recomb_sp(_e) rather than alpha_sp(_e) to speed up.
+ *	06may	ksl	57+ -- Modified to use new plasma array.  Eliminated passing
+ *			entire w array
+ *	131030	JM 		-- Added adiabatic cooling as possible kpkt destruction choice
 ************************************************************/
 #define ALPHA_FF 100.     // maximum h nu / kT to create the free free CDF 
 
@@ -1115,41 +1109,37 @@ kpkt (p, nres, escape)
 
 
 /************************************************************
-                                    Imperial College London
-Synopsis:
-       fake_matom_bb is the macro atom routine that deals with line events involving
-       simple ions (i.e. ions for which a full macro atom treatment is not employed.
-       When this routine is called a simple line has absorbed a packet. This routine 
-       creates a fake two-level macro atom and determines whether the packet energy
-       is simply re-emitted in the line or is thermalised. If it is thermalised it
-       turns into a k-packet and the appropriate routine is called. 
-
-
-Arguments:
-
-       WindPtr w                   the ptr to the structure defining the wind
-       PhotPtr p                   the packet at the point of activation
-       int nres                    the process which activates the Macro Atom
-
-Returns:
-       int nres                    the process by which deactivation occurs
-       PhotPtr p                   the packet following deactivation
-       int escape                  identifies whether the macro atom deactivated via an
-                                   r-packet (escape = 1) or a k-packet (escape = 0). If
-                                   a k-packet then the call to this routine should be
-                                   followed by a call to kpkt.
-
-Description:
-
-
-Notes: 
-
-History:
-          Apr 04  SS   Coding began.
-          Jun 04  SS   Modified to return escape = 1 for r-packet and 2 for k-packet
-                       to avoid call to k-packet within this routine.
-	06may	ksl	57+ -- Eliminationg passing entire w structure
-
+ ** @name fake_matom_bb
+ * @brief routine for dealing with bound-bound "simple ions" within the hybrid macro-atom framework
+ *
+ *
+ * fake_matom_bb is the macro atom routine that deals with line events involving
+ * simple ions (i.e. ions for which a full macro atom treatment is not employed.
+ * When this routine is called a simple line has absorbed a packet. This routine 
+ * creates a fake two-level macro atom and determines whether the packet energy
+ * is simply re-emitted in the line or is thermalised. If it is thermalised it
+ * turns into a k-packet and the appropriate routine is called. 
+ * 
+ * 
+ * Arguments:
+ * 
+ *        WindPtr w                   the ptr to the structure defining the wind
+ *        PhotPtr p                   the packet at the point of activation
+ *        int nres                    the process which activates the Macro Atom
+ * 
+ * Returns:
+ *        int nres                    the process by which deactivation occurs
+ *        PhotPtr p                   the packet following deactivation
+ *        int escape                  identifies whether the macro atom deactivated via an
+ *                                    r-packet (escape = 1) or a k-packet (escape = 0). If
+ *                                    a k-packet then the call to this routine should be
+ *                                    followed by a call to kpkt.
+ * 
+ * @notes
+ * Apr 04  SS   Coding began.
+ * Jun 04  SS   Modified to return escape = 1 for r-packet and 2 for k-packet
+ * to avoid call to k-packet within this routine.
+ * 06may	ksl	57+ -- Eliminationg passing entire w structure
 ************************************************************/
 
 int
@@ -1229,48 +1219,42 @@ fake_matom_bb (p, nres, escape)
 
 
 /************************************************************
-                                    Imperial College London
-Synopsis:
-       fake_matom_bf is the macro atom routine that deals with photoionisation 
-       events involving simple ions (i.e. ions for which a full macro atom treatment 
-       is not employed).
-       When this routine is called a photoionisation has absorbed a packet. 
-       The idea of this routine is to deal with the subsequenct
-       by creating a fake two-level atom. 
-       However, in the absense of collisional recombination (or something
-       similar) there's only one thing that can happen - radiative 
-       recombination. Therefore there's no need to do anything here unless
-       collisional recombination is to be introduced at some point in the
-       future.
-       All this routine does for now is choose a new frequency for the 
-       emitted r-packet.
-
-
-Arguments:
-
-       WindPtr w                   the ptr to the structure defining the wind
-       PhotPtr p                   the packet at the point of activation
-       int nres                    the process which activates the Macro Atom
-
-Returns:
-       int nres                    the process by which deactivation occurs
-       PhotPtr p                   the packet following deactivation
-       int escape                  in principle this tells us whether de-activation is
-                                   via an r-packet or a k-packet. For this routine at the 
-                                   moment only r-packets are possible so it always returns
-                                   escape = 1
-
-Description:
-
-
-Notes:    
-
-History:
-          Apr 04  SS   Coding began.
-          Jun 04  SS   Modified to include "escape" being set to 1
-	06may	ksl	57+ -- Modified for new structure.  Have not
-			fixed the call to fake_atom
-
+ ** @name fake_matom_bf
+ *  @brief routine for dealing with bound-free "simple ions" within the hybrid macro-atom framework
+ *
+ * fake_matom_bf is the macro atom routine that deals with photoionisation 
+ * events involving simple ions (i.e. ions for which a full macro atom treatment 
+ * is not employed).
+ * When this routine is called a photoionisation has absorbed a packet. 
+ * The idea of this routine is to deal with the subsequenct
+ * by creating a fake two-level atom. 
+ * However, in the absense of collisional recombination (or something
+ * similar) there's only one thing that can happen - radiative 
+ * recombination. Therefore there's no need to do anything here unless
+ * collisional recombination is to be introduced at some point in the
+ * future.
+ * All this routine does for now is choose a new frequency for the 
+ * emitted r-packet.
+ * 
+ * 
+ * Arguments:
+ * 
+ *        WindPtr w                   the ptr to the structure defining the wind
+ *        PhotPtr p                   the packet at the point of activation
+ *        int nres                    the process which activates the Macro Atom
+ * 
+ * Returns:
+ *        int nres                    the process by which deactivation occurs
+ *        PhotPtr p                   the packet following deactivation
+ *        int escape                  in principle this tells us whether de-activation is
+ *                                    via an r-packet or a k-packet. For this routine at the 
+ *                                    moment only r-packets are possible so it always returns
+ *                                    escape = 1
+ * @notes:
+ * Apr 04  SS   Coding began.
+ * Jun 04  SS   Modified to include "escape" being set to 1
+ * 06may	ksl	57+ -- Modified for new structure.  Have not fixed the call to fake_atom
+ * !!! Currently this assumes hydrogenic shape cross-section - Improve.
 ************************************************************/
 
 int
@@ -1292,40 +1276,31 @@ fake_matom_bf (p, nres, escape)
 
   p->freq = phot_top[*nres - NLINES - 1].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e / H_OVER_K);
 
-  /*Currently this assumes hydrogenic shape cross-section - Improve */
+  /* Currently this assumes hydrogenic shape cross-section - Improve */
 
   return (0);
 
 }
 
 
-/************************************************************
-                                    Imperial College London
-Synopsis:
-	emit_matom is a scaled down version of matom which deals with the emission due
-        to deactivating macro atoms in the detailed spectrum part of the calculation.
 
 
-Arguments:
-
-       WindPtr w                   the ptr to the structure defining the wind
-       PhotPtr p                   the packet at the point of activation
-       int upper                   the upper level that we deactivate from
-
-Returns:
-       int nres                    the process by which deactivation occurs
-       PhotPtr p                   the packet following deactivation
-    
-Description:
-
-
-Notes: 
-
-History:
-        June 04  -   coding began
-	06may	ksl	57+ -- Initial adaptation to plasma structure
-
-************************************************************/
+/**********************************************************/
+/** @name emit_matom
+ * @brief a scaled down version of matom which deals with deactivation only for spectral cycles.
+ *
+ * @param [in]     WindPtr w   the ptr to the structure defining the wind
+ * @param [in]     int upper   the upper level that we deactivate from
+ * @param [inout]  PhotPtr p   the packet at the point of activation and deactivation
+ * @param [inout]  int nres    the process by which deactivation occurs
+ * @return 0
+ *
+ * emit_matom is a scaled down version of matom which deals with the emission due
+ * to deactivating macro atoms in the detailed spectrum part of the calculation.
+ * 
+ *
+ * @notes
+***********************************************************/
 
 int
 emit_matom (w, p, nres, upper)
@@ -1477,7 +1452,10 @@ emit_matom (w, p, nres, upper)
 
 /* The frequency and the value of nres have been set correctly. All done. */
 
-/********************************************************************************/
+
+
+
+
 
 
 /**********************************************************/
