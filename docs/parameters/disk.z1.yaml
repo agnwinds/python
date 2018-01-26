@@ -1,9 +1,9 @@
-name: disk.z1
+name: Disk.z1
 description: |
   powerlaw.index
-type: Double
+type: rddoub
 unit: None
 values: Condition e.g. >0 or list e.g. [1, 2, 5]
 parent:
   parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
-file: setup.c
+file: setup_disk.c
