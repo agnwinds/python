@@ -142,7 +142,7 @@ calculate_ionization (restart_stat)
     geo.cool_tot_ioniz = 0.0;
     ztot = 0.0;                 /* ztot is the luminosity of the disk multipled by the number of cycles, which is used by save_disk_heating */
 
-    if (!geo.wind_radiation || (geo.wcycle == 0 && geo.run_type != SYSTEM_TYPE_PREVIOUS))
+    if (!geo.wind_radiation || (geo.wcycle == 0 && geo.run_type != RUN_TYPE_PREVIOUS))
       iwind = -1;               /* Do not generate photons from wind */
     else
       iwind = 1;                /* Create wind photons and force a reinitialization of wind parms */
