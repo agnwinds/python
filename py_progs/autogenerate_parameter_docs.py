@@ -124,7 +124,7 @@ output_folder = os.path.join(os.environ["PYTHON"], "docs", "parameters")
 output_old_folder = os.path.join(os.environ["PYTHON"], "docs", "parameters", "old")
 
 # Do not generate documentation for inputs in files containing these substrings
-blacklist = ["py_wind", "plot_roche", "py_grid", "synonyms.c"]
+blacklist = ["py_wind", "plot_roche", "py_grid", "synonyms", "t_bilinear"]
 
 # Types of parameter read functions and the type they correspond to.
 # Must include 'wrappers' e.g. get_spectype.
