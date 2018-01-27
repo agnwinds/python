@@ -55,6 +55,8 @@ Notes:
 History:
 
 180123 ksl Coding begun
+180127 ksl Added the file blocks, which are needed for doxygen to actually
+           work
 
 '''
 
@@ -95,7 +97,7 @@ def get_modules(filename='emission.c'):
     stdout=stdout.decode()
     stdout=stdout.split('\n')
 
-    print(stdout)
+    # print(stdout)
 
     records=[]
     i=1
@@ -105,7 +107,7 @@ def get_modules(filename='emission.c'):
         z=z.replace(',',' ')
         z=z.replace(';',' ')
         words=z.split()
-        print(words)
+        # print(words)
         one_record=[stdout[i]]+words
         records.append(one_record)
         # records.append([stdout[i],words[0],words[1]])
@@ -115,16 +117,15 @@ def get_modules(filename='emission.c'):
     return(records)
 
 file_string='''
-
 /***********************************************************/
-/** @file   reverb.c
-* @Author SWM
-* @date   July, 2015
-* @brief  Reverberation mapping functions.
-*
-* File containing reverberation mapping functions.
-***********************************************************/
-
+/** @file   %s
+ * @Author ksl
+ * @date   January, 2018
+ *
+ * @brief  ???
+ *
+ * ??? More extended description ???.
+ ***********************************************************/
 '''
 
 module_string_start='''
@@ -136,8 +137,7 @@ module_string_start='''
 '''
 module_string_param='''* @param [in]  %s  %s   ???
 '''
-module_string_end='''
-* @return       %s
+module_string_end='''* @return       %s
 *
 * %s
 *
@@ -175,7 +175,10 @@ def doit(filename='emission.c',outputfile=''):
 
     modules=get_modules(filename)
 
-    print(modules)
+    print('These are the functions found in the file\n')
+    for one in modules:
+        print(one[0])
+    print('\n')
 
 
 
@@ -186,36 +189,36 @@ def doit(filename='emission.c',outputfile=''):
     header_end=[]
     module_start=[]
     while i<len(lines)-1:
-        line=lines[i]
+        line=lines[i].strip()
         # print(line)
         header=False
 
         if line[0:24]=='/***********************':
-            print('This is the beginning of a header')
+            # print('This is the beginning of a header')
             header_start.append(i)
             header=True
         if line[0:20]=='********************':
-            print('Found the end of a header')
+            # print('Found the end of a header')
             header_end.append(i)
             header=False
         if header==False and j<len(modules):
             # Look for the begining of a module
             x=line.strip()
             y=lines[i+1].strip()
-            print('test',x,y)
+            # print('test',x,y)
             x=x.split()
             y=y.split()
-            print('test2',x,'y',y)
+            # print('test2',x,'y',y)
             if len(x)>0 and len(y)>0 and x[0]==modules[j][1] and y[0]==modules[j][2]:
                 module_start.append(i)
-                print('Found module start')
+                # print('Found module start')
                 j+=1
 
         i+=1
 
-    print(header_start)
-    print(header_end)
-    print(module_start)
+    print('line where header starts   :',header_start)
+    print('line_where header_ends     :',header_end)
+    print('lines where function_starts:',module_start)
 
 
     # Now we need to try to match the current headers with the modules because
@@ -238,10 +241,12 @@ def doit(filename='emission.c',outputfile=''):
             k+=1
         j+=1
 
-    print('xmatch',xmatch)
+    print('xmatch betwen headers and functions',xmatch)
 
 
     x=open(outputfile,'w')
+
+    x.write(file_string % (outputfile))
 
     i=0
     kk=0
@@ -266,7 +271,7 @@ def doit(filename='emission.c',outputfile=''):
                 ii=istart
                 while ii<istop:
                     if lines[ii].count('Synopsis:'):
-                        print('gotcha')
+                        # print('gotcha')
                         synopsis_string=lines[ii].replace('Synopsis:','')
                         synopsis=True
                     elif lines[ii].count('Arguments:') or lines[ii].count('Returns:'):
@@ -274,7 +279,7 @@ def doit(filename='emission.c',outputfile=''):
                     elif synopsis==True:
                         synopsis_string=synopsis_string+lines[ii]
                     ii+=1
-            print('test',synopsis_string)
+            # print('test',synopsis_string)
 
             if synopsis_string=='':
                 synopsis_string='???'
@@ -295,7 +300,7 @@ def doit(filename='emission.c',outputfile=''):
                 ii=istart
                 while ii<istop:
                     if lines[ii].count('Returns:'):
-                        print('gotcha')
+                        # print('gotcha')
                         return_string=lines[ii].replace('Returns:','')
                         xreturn=True
                     elif lines[ii].count('Description:'):
@@ -303,7 +308,7 @@ def doit(filename='emission.c',outputfile=''):
                     elif xreturn==True:
                         return_string=return_string+lines[ii]
                     ii+=1
-            print('test',return_string)
+            # print('test',return_string)
 
             return_string=return_string.strip()
             if return_string=='':
@@ -324,7 +329,7 @@ def doit(filename='emission.c',outputfile=''):
                 ii=istart
                 while ii<istop:
                     if lines[ii].count('Description:'):
-                        print('gotcha')
+                        # print('gotcha')
                         description_string=lines[ii].replace('Description:','')
                         description=True
                     elif lines[ii].count('Notes:'):
@@ -332,7 +337,7 @@ def doit(filename='emission.c',outputfile=''):
                     elif description==True:
                         description_string=description_string+lines[ii]
                     ii+=1
-            print('test',description_string)
+            # print('test',description_string)
 
             description_string=description_string.strip()
             if description_string=='':
@@ -354,7 +359,7 @@ def doit(filename='emission.c',outputfile=''):
                 ii=istart
                 while ii<istop:
                     if lines[ii].count('Notes:'):
-                        print('gotcha')
+                        # print('gotcha')
                         notes_string=lines[ii].replace('Notes:','')
                         notes=True
                     elif lines[ii].count('History:'):
@@ -362,7 +367,7 @@ def doit(filename='emission.c',outputfile=''):
                     elif notes==True:
                         notes_string=notes_string+lines[ii]
                     ii+=1
-            print('Notes_test',notes_string)
+            # print('Notes_test',notes_string)
 
             notes_string=notes_string.strip()
             if notes_string=='':
@@ -373,7 +378,7 @@ def doit(filename='emission.c',outputfile=''):
                 
 
             kkk=2
-            print(proto_string)
+            # print(proto_string)
             while kkk<len(proto_string):
                 x.write(module_string_param % (proto_string[kkk-1],proto_string[kkk]))
                 kkk+=2
