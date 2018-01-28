@@ -1,10 +1,10 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 
 
 '''
                     Space Telescope Science Institute
 
-Synopsis:  
+Synopsis:
 
 Replace current informational headers with one that can
 be parsed with doxygen
@@ -14,12 +14,12 @@ Command line usage (if any):
 
     usage: doxygen.py whatever.c
 
-Description:  
+Description:
 
     This is an attempt to write a parser which will read one of the
     .c files used in Python and locate the headers that are supposed
     to be at the top of every function call.  Parsing these headers
-    and also using information from cproto the routine attemps to 
+    and also using information from cproto the routine attemps to
     create a partially populated doxygen block for each routine.
 
     The routine writes out a new file, new_whatever.c containging
@@ -34,7 +34,7 @@ Primary routines:
 
 Notes:
 
-    The routine has to be run in a directory that contains the header 
+    The routine has to be run in a directory that contains the header
     files, e.g atomic.h, so that cproto will perform properly.
 
     The routine will not work with 'non-standard' old headers, so
@@ -47,11 +47,11 @@ Notes:
     If there was not old_header, there will still be a partially filled out
     doxygen block in front of each routine in the file
 
-    Right now there is a lot of repetive code for populating the various 
+    Right now there is a lot of repetive code for populating the various
     blocks.  ksl suspects this should be systemetized
 
 
-                                       
+
 History:
 
 180123 ksl Coding begun
@@ -66,10 +66,38 @@ import numpy
 import subprocess
 
 
+def is_installed(program):
+    """
+    Tests to see if a program has been installed. Code taken from:
+    https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
+
+    Args:
+        program (str): Program name to test
+    Returns:
+        Either returns True or raises an OSError
+    """
+    import os
+
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return True
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return True
+
+    raise(OSError("Executable '{}' could not be found!".format(program)))
+
+
 def read_file(filename,char=''):
     '''
     Read a file
-    
+
     '''
 
     try:
@@ -78,14 +106,14 @@ def read_file(filename,char=''):
         f.close()
     except IOError :
         print ("The file %s does not exist" % filename)
-        return []   
+        return []
 
     return xlines
 
 
 def get_modules(filename='emission.c'):
     '''
-    use cproto to capture the functions etc that 
+    use cproto to capture the functions etc that
     are contained in the routine.  Split what is
     returned into something which can be incorporated
     into a search
@@ -142,7 +170,7 @@ module_string_end='''* @return       %s
 * %s
 *
 * @notes
-* 
+*
 * %s
 *
 ***********************************************************/
@@ -317,7 +345,7 @@ def doit(filename='emission.c',outputfile=''):
                 return_string=return_string.replace('\n','\n*      ')
 
 
-        # Now try to get the description   
+        # Now try to get the description
         if kk<len(module_start) and i==module_start[kk]:
             proto_string=modules[kk]
             if xmatch[kk]!=-1:
@@ -347,7 +375,7 @@ def doit(filename='emission.c',outputfile=''):
 
 
 
-        # Now try to get the notes   
+        # Now try to get the notes
         if kk<len(module_start) and i==module_start[kk]:
             proto_string=modules[kk]
             if xmatch[kk]!=-1:
@@ -375,7 +403,7 @@ def doit(filename='emission.c',outputfile=''):
             else:
                 notes_string=notes_string.replace('\n','\n*      ')
 
-                
+
 
             kkk=2
             # print(proto_string)
@@ -385,7 +413,7 @@ def doit(filename='emission.c',outputfile=''):
             x.write(module_string_end % (return_string,description_string,notes_string))
             kk+=1
 
-        
+
         x.write(line)
         i+=1
 
@@ -394,12 +422,12 @@ def doit(filename='emission.c',outputfile=''):
 
 
 
-    
+
 
     return
 
 
-    
+
 
 
 
@@ -408,7 +436,9 @@ def doit(filename='emission.c',outputfile=''):
 # Next lines permit one to run the routine from the command line
 if __name__ == "__main__":
     import sys
-     
+
+    is_installed('cproto')
+
     if len(sys.argv)==1 or sys.argv[1]=='-h':
         print(__doc__)
     elif len(sys.argv)>1:
