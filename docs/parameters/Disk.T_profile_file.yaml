@@ -1,7 +1,9 @@
 name: Disk.T_profile_file
 description: |
-  Multi-line description, must keep indentation.
+  When the user chooses to read in the temperature profile as a 
+  function of radius, the user is asked the name of the file that
+  contains the desired profile. 
 type: rdstr
-parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+parent:  Disk.temperature.profile
+  parameter: 
 file: setup_disk.c
