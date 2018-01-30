@@ -1,6 +1,9 @@
 name: Select_specific_no_of_scatters_in_spectra
 description: |
-  Multi-line description, must keep indentation.
+  Advanced command which allows one to place additional
+  constraints on the detailed spectra which are extract.  
+  This includes selectiong photons from above or below the
+  disk, only photons which have scttered, etc.  
 type: Boolean (Y/N)
 parent:
   parameter: Condition e.g. >0 or list e.g. [1, 2, 5]

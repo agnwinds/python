@@ -1143,7 +1143,9 @@ typedef struct photon
   int top_bot;                  /* 0 ->select photons regardless of location 
                                    >0     -> select only photons whose "last" position is above the disk
                                    <0    -> select only photons whose last position is below the disk */
-  double x[3], r;               /* The position and radius of a special region from which to extract spectra  */
+  double x[3], r;               /* The position and radius of a special region from which to extract spectra. 
+                                x is taken to be the center of the region and r is taken to be the radius of
+                               the region.   */
   double f[NWAVE];
   double lf[NWAVE];             /* a second array to hole the extracted spectrum in log units */
   double lfreq[NWAVE];          /* We need to hold what freqeuncy intervals our logarithmic spectrum has been taken over */
