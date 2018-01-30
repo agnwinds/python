@@ -1,0 +1,9 @@
+name: Disk.T_profile_file
+description: |
+  When the user chooses to read in the temperature profile as a 
+  function of radius, the user is asked the name of the file that
+  contains the desired profile. 
+type: rdstr
+parent:  Disk.temperature.profile
+  parameter: 
+file: setup_disk.c

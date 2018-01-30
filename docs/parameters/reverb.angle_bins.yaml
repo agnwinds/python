@@ -8,4 +8,4 @@ values: >0
 default: 100
 parent:
   reverb.mode: [1, 3]
-file: setup.c
+file: setup_reverb.c

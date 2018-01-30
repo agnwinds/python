@@ -64,10 +64,10 @@ get_stellar_wind_params (ndom)
   zdom[ndom].cl_v_zero = 200e5;
   zdom[ndom].cl_v_infinity = 3000e5;
 
-  rddoub ("stellar_wind_mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
+  rddoub ("Stellar_wind.mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
   zdom[ndom].stellar_wind_mdot *= MSOL / YR;
 
-  rddoub ("stellar.wind.radmin(cm)", &zdom[ndom].rmin); /*Radius where wind begins */
+  rddoub ("Stellar_wind.radmin(cm)", &zdom[ndom].rmin); /*Radius where wind begins */
   if (zdom[ndom].rmin < geo.rstar)
   {
     Error ("get_stellar_wind_params: It is unreasonable to have the wind start inside the star!\n");
@@ -75,10 +75,10 @@ get_stellar_wind_params (ndom)
     zdom[ndom].rmin = geo.rstar;
   }
   zdom[ndom].cl_rmin = zdom[ndom].rmin;
-  rddoub ("stellar.wind_vbase(cm)", &zdom[ndom].cl_v_zero);     /* Velocity at base of the wind */
-  rddoub ("stellar.wind.v_infinity(cm)", &zdom[ndom].cl_v_infinity);    /* Final speed of wind in units of escape velocity */
+  rddoub ("Stellar_wind.vbase(cm)", &zdom[ndom].cl_v_zero);     /* Velocity at base of the wind */
+  rddoub ("Stellar_wind.v_infinity(cm)", &zdom[ndom].cl_v_infinity);    /* Final speed of wind in units of escape velocity */
 
-  rddoub ("stellar.wind.acceleration_exponent", &zdom[ndom].cl_beta);   /* Accleration scale exponent */
+  rddoub ("Stellar_wind.acceleration_exponent", &zdom[ndom].cl_beta);   /* Accleration scale exponent */
 
   /* Assign the generic parameters for the wind the generic parameters of the wind */
   geo.rmin = zdom[ndom].rmin;    // 71 ksl - Not modified this so that we did not waste cells

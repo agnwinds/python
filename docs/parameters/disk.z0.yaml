@@ -1,9 +1,9 @@
-name: disk.z0
+name: Disk.z0
 description: |
   fractional.height.at.diskrad
-type: Double
+type: rddoub
 unit: None
 values: Condition e.g. >0 or list e.g. [1, 2, 5]
 parent:
   parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
-file: setup.c
+file: setup_disk.c

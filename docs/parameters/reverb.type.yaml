@@ -34,4 +34,4 @@ values:
 
     This mode gives pretty much identical results to wind mode, but at least we
     made it to check rather than just assuming it would be fine.
-file: setup.c
+file: setup_reverb.c

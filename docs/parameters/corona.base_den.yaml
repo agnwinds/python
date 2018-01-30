@@ -1,9 +1,10 @@
 name: corona.base_den
 description: |
-  Multi-line description, must keep indentation.
+  The coronal model is defined in terms of a base density
+  and a scale height
 type: Double
-unit: cgs
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
-parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+unit: number/cm**3
+values: >0
+parent: Wind.type
+  parameter: Selected as one of the choces for this variable
 file: corona.c

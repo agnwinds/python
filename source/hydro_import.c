@@ -639,9 +639,7 @@ rtheta_make_hydro_grid (w, ndom)
 
   /* Now set up the wind cones that are needed for calclating ds in a cell */
 
-  rtheta_make_cones (ndom, w);	//NSH 130821 broken out into a seperate routine
-
-
+  rtheta_make_cones (ndom, w);
 
 
   /* OK finished successfuly */
@@ -890,6 +888,11 @@ hydro_restart (ndom)
   w = wmain;
   zdom[ndom].wind_type = 3;	//Temporarily set the wind type to hydro, so we can use the normal routines
 
+  /* XXX ksl Some of what is here is quite odd. If this is really a restart one should not have
+   * to recreate wmain.  The only thing you should need to do in the zeus case is to modify existing
+   * values such as the densities. 
+   */
+
   /* note that we will have passed the wind domain number as default */
   nstart = zdom[ndom].nstart;
   nstop = zdom[ndom].nstop;
@@ -933,6 +936,10 @@ hydro_restart (ndom)
 								   if we didnt make this call, we would end up with undefined levels - which did really
 								   crazy things */
 
+
+  /* Recreate the wind cones because these are not part of the windsave file */
+
+  rtheta_make_cones (ndom, w);
 
   return (0);
 

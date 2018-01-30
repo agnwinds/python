@@ -92,7 +92,8 @@ extract (w, p, itype)
   {
     /* If statement allows one to choose whether to construct the spectrum
        from all photons or just from photons that have scattered a specific number
-       of times or in specific regions of the wind. */
+       of times or in specific regions of the wind. A region is specified by a position
+       and a radius. */
 
     yep = 1;                    // Start by assuming it is a good photon for extraction
 

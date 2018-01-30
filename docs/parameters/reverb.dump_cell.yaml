@@ -12,4 +12,4 @@ values: |
   >0:>0
 parent:
   reverb.dump_cells: >0
-file: setup.c
+file: setup_reverb.c

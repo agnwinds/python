@@ -1,4 +1,4 @@
-name: disk.type
+name: Disk.type
 description: |
   Multi-line description, must keep indentation.
 type: Enum (Int)
@@ -8,4 +8,4 @@ values:
   2: vertically.extended.disk
 parent:
   parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
-file: python.c
+file: setup_disk.c
