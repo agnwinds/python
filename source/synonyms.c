@@ -54,6 +54,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include "log.h"
 
 
 #define	LINELEN 132
@@ -121,7 +122,10 @@ check_synonyms (new_question, old_question)
     }
 
 
-// Strip off everthing in paren, or rather find out how much of the string to comapre
+/* Strip off everthing prior to open paren, leaving the bare parameter name that was passed as the new
+ * question
+ */
+
   if ((ccc = index (firstword, '(')) != NULL)
     {
       wordlength = (int) (ccc - firstword);
@@ -130,12 +134,16 @@ check_synonyms (new_question, old_question)
     }
 
 
+/* firstword is the bare parameter name for the current way the parameter is expressed elsewhere.
+ * We must find this in the list of new_names
+ */
+
 
   for (n = 0; n < nunber_of_names; n++)
     {
       if (strncmp (new_names[n], firstword, wordlength) == 0)
 	{
-	  printf
+	  Log
 	    ("Matched keyword %s in .pf file to %s in current python version\n",
 	     new_question, old_names[n]);
 	  strcpy (old_question, old_names[n]);
