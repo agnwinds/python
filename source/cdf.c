@@ -549,6 +549,29 @@ History:
 double pdf_x[PDF_ARRAY], pdf_y[PDF_ARRAY], pdf_z[PDF_ARRAY];
 int pdf_n;
 
+/**********************************************************/
+/** @name 	cdf_gen_from_array
+ * @brief	Calucates a cumlative density function from supplied data
+ *
+ * @param [in] cdf			Pointer to the cdf that will be populated here
+ * @param [in] x			Locations of points in supplied data - usually wavelength or freuency
+ * @param [in] y			Data - e.g. cross section or emissivity
+ * @param [in] n_xy			Number of data points
+ * @param [in] xmin			Lower limit to required cdf
+ * @param [in] xmin			Upper limit to required cdf
+ * @return 		echeck		the reutrn value from cdf_check
+ *
+ * Takes a two arrays of some values of a function y at locations
+ * x and turns it into a cumlative density function to allow 
+ * random values to be obtained from the function. There is no 
+ * resampling.
+ *
+ * @notes
+ * Heavily modified in the summer of 2017 to remove jumps
+***********************************************************/
+
+
+
 int
 cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
      CdfPtr cdf;
@@ -566,7 +589,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 
 
 
-  if (n_xy > NCDF)
+  if (n_xy > NCDF) //If the supplied data array is larger than the output array - fixed as NCDF
     {
       Error
 	("cdf_gen_from_array: supplied data %i is larger than default aray size %i - increase NCDF\n",
@@ -575,33 +598,37 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
     }
 
 
-  if (xmax < xmin)
+  if (xmax < xmin) //This must be a mistake, the limits are reversed
     {
       Error ("cdf_gen_from_array: xmin %g <= xmax %g\n", xmin, xmax);
       exit (0);
     }
 
-  allzero = 0;
+	//We are now going to crawl down the input array, checking for mistakes.
+	//Firstly we want to see if all the array values are equal to zero. 
 
-  for (n = 1; n < n_xy; n++)
+
+  allzero = 0; 
+
+  for (n = 1; n < n_xy; n++)  //Go over all elements
     {
-      if (x[n] <= x[n - 1])
+      if (x[n] <= x[n - 1]) //One x-point is less than the one above - this will cause problems later
 	{
 	  Error
 	    ("cdf_gen_from_array: input x not in ascending order at element %5d/%5d  %11.6e %11.6e\n",
 	     n, n_xy, x[n - 1], x[n]);
 	  exit (0);
 	}
-      if (y[n] < 0)
+      if (y[n] < 0)   //A negative point!
 	{
 	  Error
 	    ("cdf_gen_from_array: probability density %g < 0 at element %d\n",
 	     y[n], n);
 	  exit (0);
 	}
-      else if (y[n] > 0)
+      else if (y[n] > 0)  //At least one point is positive
 	{
-	  allzero = 1;
+	  allzero = 1; //So they are not all zero.
 	}
     }
 
@@ -631,20 +658,32 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
    */
 
 
+	/*Firstly, find the point in the input array that matches the required start point
+	we step up thruogh the input data until we reach a point where the x-point is greater
+	than xmin, or we reach the end of the array */
+
   nmin=0;
-  while (x[nmin]<xmin && nmin<n_xy) {
+  while (x[nmin]<xmin && nmin<n_xy) 
+  {
       nmin++;
   }
+  
+  /*This next deals with what happens if we ran off the end of the array in the last loop */
 
   if (nmin==n_xy)
   {
-      Error("cdf_gen_from_array: xmin greater tahn all array values\n");
+      Error("cdf_gen_from_array: xmin greater than all array values\n");
       exit(0);
   }
 
-  // if xmin is equal to one of the values in the x array then nmin will point to that value, but otherwise it 
-  // will be slightly larger and we will need to fix this
-  // if nmin=0 then it is also possible that the xmin was below the array
+  /* if xmin is equal to one of the values in the x array then nmin will point to that value, but otherwise it 
+      will be slightly larger and we will need to fix this*/
+
+  // if nmin=0 then it is also possible that the xmin was below the array XXXXX we should deal with this case then!
+  
+  
+  /* The next loop finds the location of the uppermost required x-value in the supplied array */
+  
   nmax=nmin;
   while (x[nmax]<xmax && nmax<n_xy) {
       nmax++;
@@ -661,17 +700,20 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
       exit(0);
   }
   
-  if (nmax==n_xy) /*We have run past the end of the array in finding the uppermost xvalue why? */
+  if (nmax==n_xy) /*We have run past the end of the array in finding the uppermost xvalue
+	  this will cause issues later, so we need to work out what a sensible value for nmax
+	  should be*/
   {
-	  if (x[nmax-1]<xmax);  /*We have the situation where the array does not go right up to the uper band limit */ 
+	  if (x[nmax-1]<=xmax) /* hopefully the last X value is less than or equal to xmax */ 
 	  {
 	  nmax--;
-  }
+  	  }
   }
 
 
   /* Now we want to deal with situations where xmin and xmax are between elements. For now
-   * we do not worry about interpolating*/
+   * we do not worry about interpolating XXXXX this needs fixing up - if we are going to
+  interpolate, we should do it- in pathological cases this can go very wrong*/
 
   if (nmin>0 && x[nmin]>xmin){
       nmin--;
