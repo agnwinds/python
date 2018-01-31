@@ -1,9 +1,11 @@
 name: Disk.radmax
 description: |
-  Multi-line description, must keep indentation.
+  The outer edge of the disk.  Photons inside this radius are
+  absorbed or re-radiated.  Photons which are outside this radius
+  pass through the disk plane.
 type: rddoub
 unit: cm
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
-parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: >0 
+parent: disk.type 
+  parameter: disktype must be 1 or 2, standard or vertically extended disk
 file: setup_disk.c

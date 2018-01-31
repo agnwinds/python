@@ -1,9 +1,10 @@
 name: Disk.z0
 description: |
-  fractional.height.at.diskrad
+  fractional.height.at.diskrad.  The physical height at the
+  outer disk will be this * disk.radmax
 type: rddoub
 unit: None
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
-parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: >0 
+parent: disk_type
+  parameter: disk_type=vertically extended
 file: setup_disk.c

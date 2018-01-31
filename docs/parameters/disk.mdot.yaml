@@ -1,5 +1,5 @@
 name: Disk.mdot
 description: |
-  Multi-line description, must keep indentation.
+    The mass transfer rate in the disk when considering a standard Shakura-disk.  
 type: rddoub
-unit: 
+unit:  msol/yr
