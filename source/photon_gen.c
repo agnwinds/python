@@ -700,8 +700,10 @@ star_init (freqmin, freqmax, ioniz_or_final, f)
   r=geo.rstar;
 
   tstar=geo.tstar=geo.tstar_init; 
+  geo.lum_star=geo.lum_star_init;
+  
   if (geo.absorb_reflect==BACK_RAD_ABSORB_AND_HEAT && geo.lum_star_back > 0){
-      geo.lum_star=geo.lum_star_init+geo.lum_star_back;
+      geo.lum_star=geo.lum_star+geo.lum_star_back;
       tstar=geo.tstar=pow(geo.lum_star/(4 * PI * STEFAN_BOLTZMANN * r * r),0.25);
   }
 
