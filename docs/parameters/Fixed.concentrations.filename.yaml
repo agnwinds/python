@@ -1,7 +1,9 @@
 name: Fixed.concentrations.filename
 description: |
-  Multi-line description, must keep indentation.
+  The filename for the fixed ion concentrations if you have 
+  set Wind_ionization to 2 (fixed). This file has format 
+  [atomic_number  ionizationstage   ion fraction]. 
 type: String
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: Wind_ionization
 file: setup2.c

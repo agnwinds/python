@@ -1,6 +1,7 @@
 name: adjust_grid
 description: |
-  Multi-line description, must keep indentation.
+  Choose whether or not you would like to adjust the scale length
+  for the logarithmic grid. Advanced command. 
 type: Boolean (1/0)
 parent:
   parameter: Condition e.g. >0 or list e.g. [1, 2, 5]

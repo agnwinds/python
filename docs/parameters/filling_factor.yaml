@@ -1,6 +1,8 @@
 name: filling_factor
 description: |
-  Multi-line description, must keep indentation.
+  The volume filling factor of the outflow. The implementation
+  of clumping (microclumping) is described in 
+  Matthews et al. (2016), 2016MNRAS.458..293M. 
 type: Enum (Int)
 values:
   1: smooth
