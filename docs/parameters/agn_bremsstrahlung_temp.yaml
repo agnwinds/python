@@ -1,9 +1,10 @@
 name: agn_bremsstrahlung_temp
 description: |
-  K
+  The temperature T in bremstrahlung SED of the form
+  L_nu=nu**alpha exp(-hnu/kT)
 type: Double
-unit: None
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+unit: K
+values: >0
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: 
 file: setup.c
