@@ -1,6 +1,6 @@
 name: Coord.system
 description: |
-  Multi-line description, must keep indentation.
+  The coordinate system used for the simulatuion
 type: Enum (Int)
 values:
   0: spherical
@@ -8,5 +8,5 @@ values:
   2: spherical_polar
   3: cyl_var
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: 
 file: setup_domains.c

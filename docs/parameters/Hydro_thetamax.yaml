@@ -1,9 +1,12 @@
 name: Hydro_thetamax
 description: |
-  Multi-line description, must keep indentation.
+  The maximum theta value to be read in from a hydrodynamic snapshot.
+  This is typically used to excise a dense disk from the midplane of
+  such a snapshot. Use a negative value to tell the code to use all
+  the data.
 type: Double
 unit: Degrees
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: -1 : use all data, positive number - use up to that angle (typically less than 90)
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: 
 file: hydro_import.c
