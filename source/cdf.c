@@ -813,7 +813,6 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 
       // sum = cdf->y[cdf_n - 1];	//the total integrated pdf
       sum = cdf->y[cdf_n];	//the total integrated pdf
-		printf ("BLAH sum=%e\n",sum);
       // for (n = 1; n < cdf_n; n++)
       for (n = 1; n <= cdf_n; n++)
 	{
