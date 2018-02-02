@@ -5,7 +5,7 @@ description: |
   central object radii) is used as this provides a more natural parameter.
 type: Double
 unit: co.radius
-values: >0
+values: Greater than 0
 parent:
   parameter:
 file: knigge.c

@@ -1,10 +1,10 @@
 name: no_observers
 description: |
   The number of diffirent inclination angles for which spectra
-  will be extracted.  
+  will be extracted.
 type: Int
 unit: None
-values: Normally > 0                            
+values: Normally > 0
 parent:
-  parameter: >0 
+  parameter: Greater than 0 
 file: setup2.c

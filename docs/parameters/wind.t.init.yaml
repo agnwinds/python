@@ -4,7 +4,7 @@ description: |
   refers to all domains).
 type: Double
 unit: None
-values: >0 
+values: Greater than 0 
 parent:
   parameter: This question is asked whenever there is a wind, that is to say essentially always
 file: setup_domains.c

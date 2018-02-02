@@ -5,7 +5,7 @@ description: |
   pass through the disk plane.
 type: rddoub
 unit: cm
-values: >0 
-parent: disk.type 
-  parameter: disktype must be 1 or 2, standard or vertically extended disk
+values: Greater than 0
+parent:
+  disk.type: disktype must be 1 or 2, standard or vertically extended disk
 file: setup_disk.c

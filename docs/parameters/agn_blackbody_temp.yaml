@@ -3,7 +3,7 @@ description: |
   The temperature of a blackbody SED to be used for the central AGN source
 type: Double
 unit: K
-values: >0
+values: Greater than 0
 parent:
-  parameter: 
+  parameter:
 file: setup.c

@@ -6,7 +6,9 @@ description: |
   the data.
 type: Double
 unit: Degrees
-values: -1 : use all data, positive number - use up to that angle (typically less than 90)
+values:
+  -1: use all data
+  X: use up to that angle (typically less than 90)
 parent:
-  parameter: 
+  parameter:
 file: hydro_import.c

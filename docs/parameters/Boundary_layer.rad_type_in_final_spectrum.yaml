@@ -7,5 +7,5 @@ values:
   1: models
   2: uniform
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 file: python.c

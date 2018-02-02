@@ -1,10 +1,9 @@
 name: geo.zlog_scale
 description: |
-  Multi-line description, must keep indentation.
+  Choose the logarithmic scale length for the grid in the z-direction.
 type: Double
-unit: None
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+unit: cm
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: adjust_grid
 file: setup_domains.c
 advanced: true

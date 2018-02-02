@@ -4,7 +4,7 @@ description: |
   KWD model.
 type: Double
 unit: cm
-values: >0
+values: Greater than 0
 parent:
   parameter:
 file: knigge.c

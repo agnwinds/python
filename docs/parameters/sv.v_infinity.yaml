@@ -1,9 +1,11 @@
 name: sv.v_infinity
 description: |
-  Multi-line description, must keep indentation.
+  Asymptotic (i.e. final) velocity of a line driven wind in a Shlosman & Vitello CV disk wind model.
+  Assumed to scale with the local velocity at the base of the streamline.
+  See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
 type: Double
 unit: Escape velocity
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: Greater than 0
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  wind_type: 0
 file: sv.c

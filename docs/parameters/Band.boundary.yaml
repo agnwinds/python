@@ -3,7 +3,7 @@ description: |
   The boundaries between bands of energies at which photons will be generated
 type: Double
 unit: eV
-values: >0
+values: Greater than 0
 parent:
   parameter: 
 file: bands.c

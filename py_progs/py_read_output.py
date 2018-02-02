@@ -224,7 +224,9 @@ def read_pywind(filename, return_inwind=False, mode="2d", complete=True):
     #d = np.loadtxt(filename, comments="#", dtype = "float", unpack = True)
     d = ascii.read(filename)
 
-    return util.wind_to_masked(d, "var", return_inwind=return_inwind)
+
+    return util.wind_to_masked(d, "var", return_inwind=return_inwind, mode=mode)
+
 
 
 
