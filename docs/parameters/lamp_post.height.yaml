@@ -1,9 +1,9 @@
 name: lamp_post.height
 description: |
-  Multi-line description, must keep indentation.
+  The height above the disc for the lamp post source in units 
+  of gravitational radii (typical value ~10). 
 type: Double
 unit: co.gravitational_radius
-values: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 parent:
-  parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  parameter: geometry_for_pl_source
 file: setup.c
