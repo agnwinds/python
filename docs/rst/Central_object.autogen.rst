@@ -110,6 +110,6 @@ Multi-line description, must keep indentation.
   parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
 
 
-**File:** setup.c
+**File:** setup_star_bh.c
 
 

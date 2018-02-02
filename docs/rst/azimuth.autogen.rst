@@ -5,7 +5,9 @@ azimuth
 
 azimuth
 =======
-Multi-line description, must keep indentation.
+Advance command which along with several other parameters
+specifies an spherical region of space.  Photons which 
+scatter (or othewise created) in this region are extracted
 
 **Type:** Double
 

@@ -1,9 +1,10 @@
 name: kn.rmax
 description: |
-  Multi-line description, must keep indentation.
+  The radius at which the disk wind terminates, in units of central object
+  radii. This has to be greater than rmin.
 type: Double
 unit: co.radius
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: >0
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter:
 file: knigge.c

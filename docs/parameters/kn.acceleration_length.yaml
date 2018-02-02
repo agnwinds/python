@@ -1,9 +1,10 @@
 name: kn.acceleration_length
 description: |
-  Multi-line description, must keep indentation.
+  The size of the acceleration length scale for a disk wind described by the
+  KWD model.
 type: Double
 unit: cm
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: >0
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter:
 file: knigge.c

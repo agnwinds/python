@@ -67,15 +67,15 @@ as a blackbody, from a model, or as a power law.
 
 Boundary_layer.radiation
 ========================
-Multi-line description, must keep indentation.
+Says whether the boundary layer will radiate 0=no, 1=yes
 
 **Type:** Boolean (1/0)
 
 **Parent(s):**
-  parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter_: None
 
 
-**File:** setup.c
+**File:** setup_star_bh.c
 
 
 Boundary_layer.temp

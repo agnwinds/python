@@ -5,16 +5,17 @@ agn_power_law_index
 
 agn_power_law_index
 ===================
-Multi-line description, must keep indentation.
+The exponent alpha in a power las SED applied to an AGN
+central source of the form L_nu=K nu**alpha
 
 **Type:** Double
 
 **Unit:** None
 
-**Value:** Condition e.g. >0 or list e.g. [1, 2, 5]
+**Value:** Any - but sign is not assumed, so for negative index use a negative value
 
 **Parent(s):**
-  parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter_: None
 
 
 **File:** setup.c

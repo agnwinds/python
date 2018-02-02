@@ -1,7 +1,7 @@
 name: Atomic_data
 description: |
-  Multi-line description, must keep indentation.
+  This is the relative path to the Atomic Data header file
 type: String
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: none
 file: setup_domains.c

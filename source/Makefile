@@ -138,7 +138,7 @@ endif
 LDFLAGS= -L$(LIB) -lm -lgsl -lgslcblas 
 
 #Note that version should be a single string without spaces. 
-VERSION = 82d
+VERSION = 82e
 
 
 CHOICE=1             // Compress plasma as much as possible
@@ -177,7 +177,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o parse.o init.o \
 		agn.o shell_wind.o compton.o torus.o zeta.o dielectronic.o \
 		spectral_estimators.o variable_temperature.o matom_diag.o \
 		xlog.o lineio.o rdpar.o direct_ion.o pi_rates.o matrix_ion.o para_update.o \
-		setup.o setup_domains.o setup_disk.o photo_gen_matom.o macro_gov.o windsave2table_sub.o \
+		setup_star_bh.o setup_domains.o setup_disk.o photo_gen_matom.o macro_gov.o windsave2table_sub.o \
 		import.o import_spherical.o import_cylindrical.o import_rtheta.o \
 		reverb.o paths.o setup2.o run.o brem.o search_light.o synonyms.o \
 		setup_reverb.o
@@ -198,7 +198,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c auger_ionization.c \
 		agn.c shell_wind.c compton.c torus.c zeta.c dielectronic.c \
 		spectral_estimators.c variable_temperature.c matom_diag.c \
-		direct_ion.c pi_rates.c matrix_ion.c para_update.c setup.c setup_domains.c \
+		direct_ion.c pi_rates.c matrix_ion.c para_update.c setup_star_bh.c setup_domains.c \
 		setup_disk.c photo_gen_matom.c macro_gov.c windsave2table_sub.c \
 		import.c import_spherical.c import_cylindrical.c import_rtheta.c\
 		reverb.c paths.c setup2.c run.c brem.c search_light.c synonyms.c \
@@ -277,60 +277,7 @@ py_smooth: py_smooth.o
 	$(CC) $(CFLAGS) py_smooth.o  $(LDFLAGS)  -o py_smooth
 		mv $@ $(BIN)
 
-test_bb: bb.o test_bb.o cdf.o recipes.o bilinear.o time.o 
-	$(CC)  ${CFLAGS} bb.o cdf.o test_bb.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_bb
-	
-test_pow: test_pow.o cdf.o recipes.o bilinear.o time.o 
-	$(CC)  ${CFLAGS} cdf.o test_pow.o  recipes.o bilinear.o time.o $(LDFLAGS) -o test_pow
 
-test_matrix: test_matrix.o $(python_objects)
-	$(CC) ${CFLAGS} test_matrix.o $(python_objects) $(LDFLAGS) -o test_matrix
-		mv $@ $(BIN)
-
-test_dielectronic: test_dielectronic.o $(python_objects)
-	$(CC) ${CFLAGS} test_dielectronic.o $(python_objects) $(LDFLAGS) -o test_dielectronic
-		mv $@ $(BIN)
-
-t_bilinear:  t_bilinear.o bilinear.o  
-	$(CC) $(CFLAGS) t_bilinear.o  bilinear.o  $(LDFLAGS)  -o t_bilinear
-
-test: test.o
-	$(CC) $(CFLAGS) test.o  $(LDFLAGS) -o test
-
-	
-plot_roche: plot_roche.o roche.o vvector.o phot_util.o recipes.o 
-	${CC} ${CFLAGS} plot_roche.o roche.o vvector.o phot_util.o recipes.o  \
-		$(LDFLAGS) -o plot_roche
-		mv $@ $(BIN)/plot_roche
-
-
-
-# This diagnostic routine has not been kept up to date
-py_grid: bb.o get_atomicdata.o py_grid.o photon2d.o photon_gen.o \
-		saha.o spectra.o wind2d.o wind.o  vvector.o debug.o recipes.o \
-		trans_phot.o phot_util.o resonate.o radiation.o \
-		wind_updates2d.o windsave.o extract.o cdf.o roche.o random.o \
-		stellar_wind.o homologous.o sv.o hydro_import.o corona.o knigge.o  disk.o\
-		lines.o continuum.o get_models.o emission.o recomb.o util.o anisowind.o \
-		sv.o ionization.o  ispy.o   levels.o gradv.o reposition.o \
-		yso.o cylindrical.o rtheta.o \
-		matom.o estimators.o wind_sum.o \
-		density.o bands.o detail.o 
-	$(CC)  ${CFLAGS} py_grid.o get_atomicdata.o photon2d.o photon_gen.o \
-		bb.o\
-		saha.o spectra.o wind2d.o wind.o  vvector.o debug.o recipes.o \
-		trans_phot.o phot_util.o resonate.o radiation.o \
-		stellar_wind.o homologous.o  corona.o util.o anisowind.o \
-		wind_updates2d.o windsave.o extract.o ispy.o bands.o\
-		cdf.o roche.o random.o continuum.o get_models.o  \
-		lines.o ionization.o emission.o  recomb.o reposition.o \
-		sv.o hydro_import.o knigge.o disk.o  levels.o gradv.o density.o \
-		yso.o cylindrical.o rtheta.o \
-		matom.o estimators.o wind_sum.o \
-		detail.o \
-		$(LDFLAGS) -o py_grid
-		cp $@ $(BIN)/py_grid
-		mv $@ $(BIN)/py_grid$(VERSION)
 
 
 FILE = get_atomicdata.o atomic.o

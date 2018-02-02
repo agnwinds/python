@@ -159,7 +159,6 @@ corona_velocity (ndom, x, v)
   v[0] = -zdom[ndom].corona_vel_frac * speed;
   v[2] = 0.0;
   v[1] = speed;
-  v[2] *= (-1);
 
   /* 04aug -- ksl --52 At this point we have calculated the velocity in the xz plane, which
    * is identical to the statement that we have calculated it in

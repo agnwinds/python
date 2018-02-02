@@ -5,7 +5,7 @@ Coord
 
 Coord.system
 ============
-Multi-line description, must keep indentation.
+The coordinate system used for the simulatuion
 
 **Type:** Enum (Int)
 
@@ -21,7 +21,7 @@ Multi-line description, must keep indentation.
 
 
 **Parent(s):**
-  parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter_: None
 
 
 **File:** setup_domains.c
