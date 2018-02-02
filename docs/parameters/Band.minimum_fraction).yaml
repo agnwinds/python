@@ -1,9 +1,0 @@
-name: Band.minimum_fraction)
-description: |
-  The minimium fraction of photons that should be made per band
-type: Double
-unit: None
-values: >0 and should sum to less than 1 over all bands
-parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
-file: bands.c

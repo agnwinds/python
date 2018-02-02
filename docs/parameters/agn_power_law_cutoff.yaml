@@ -5,7 +5,7 @@ description: |
   applied to low frequencies and giving an odd SED.
 type: Double
 unit: Hz
-values: >0
+values: Greater than 0
 parent:
   parameter: 
 file: setup.c

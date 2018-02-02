@@ -4,7 +4,7 @@ description: |
   radii. This has to be greater than rmin.
 type: Double
 unit: co.radius
-values: >0
+values: Greater than 0
 parent:
   parameter:
 file: knigge.c

@@ -1,0 +1,11 @@
+name: Rad_type_for_bl_in_final_spectrum
+description: |
+  Multi-line description, must keep indentation.
+type: Enum (Int)
+values:
+  0: bb
+  1: models
+  2: uniform
+parent:
+  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+file: python.c

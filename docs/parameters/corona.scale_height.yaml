@@ -3,8 +3,8 @@ description: |
   The coronal model is defined in terms of a base density
   and a scale height
 type: Double
-unit: cm          
-values: >0
-parent: Wind.type
-  parameter: Selected as one of the choces for this variable
+unit: cm
+values: Greater than 0
+parent:
+  Wind.type: Selected as one of the choces for this variable
 file: corona.c

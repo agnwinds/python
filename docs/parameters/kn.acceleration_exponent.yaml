@@ -5,7 +5,7 @@ description: |
   stellar wind, 
   v(r) = v_0 + (v_inf - v_0) * (1 - R_s/r) ** beta. 
 type: Double
-values: >0
+values: Greater than 0
 parent:
   parameter:
 file: knigge.c

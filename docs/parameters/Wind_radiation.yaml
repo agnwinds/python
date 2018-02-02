@@ -4,9 +4,8 @@ description: |
   sometimes called diffuse radiations, is
   included in the calculation both of the ionization state
   of the wind, and in the final spectrum.  This parameter is
-  only relevant when radiative transfer is carried out in the 
+  only relevant when radiative transfer is carried out in the
   two level approximation.
 type: Boolean (1/0)
 parent: This question is always asked.
-  parameter: N/A
 file: python.c
