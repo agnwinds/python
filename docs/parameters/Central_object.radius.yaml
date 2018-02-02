@@ -3,7 +3,7 @@ description: |
   Radius of the central object in the system, e.g the white dwarf or black hole
 type: Double
 unit: cm
-values: >0 
+values: Greater than 0 
 parent:
-  parameter: 
+  parameter:
 file: setup.c

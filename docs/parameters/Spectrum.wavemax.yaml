@@ -3,7 +3,7 @@ description: |
   The maximum waveleenght of the detailed spectra that are to be produced
 type: Double
 unit: Angstroms
-values: >0 and > than Spectrum.wavemin
+values: Greater than 0 and greater than Spectrum.wavemin
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 file: setup2.c

@@ -1,10 +1,12 @@
 name: agn_power_law_cutoff
 description: |
-  Multi-line description, must keep indentation.
+  An advanced option - this is a low frequency cutoff for an 
+  AGN power law spectrum. It prevents the powerlaw being 
+  applied to low frequencies and giving an odd SED.
 type: Double
-unit: None
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+unit: Hz
+values: Greater than 0
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: 
 file: setup.c
 advanced: true

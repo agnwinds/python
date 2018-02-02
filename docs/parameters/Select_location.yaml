@@ -1,10 +1,14 @@
 name: Select_location
 description: |
-  Multi-line description, must keep indentation.
+  One of several related parameters that permit one to apply
+  additional conditions on the extracted photons.
 type: Int
 unit: None
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values:
+  -1: Select only photons above the disk
+  0: Select all photons
+  1: Select only photons as viewed by the observer
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  Select_photons_by_position: y
 file: setup2.c
 advanced: true

@@ -8,7 +8,7 @@ description: |
   should almost certainly be changed to be specified using a species and
   wavelength!
 type: Int
-values: >0
+values: Any valid line index
 parent:
-  reverb.filter_lines: >0
+  reverb.filter_lines: Greater than 0
 file: setup_reverb.c

@@ -1,10 +1,13 @@
 name: keep_ioncycle_windsaves
 description: |
-  Multi-line description, must keep indentation.
+  Decide whether or not to keep a copy of the windsave file after
+  each ionization cycle in order to track the changes as the 
+  code converges. Produces files of format python01.wind_save and so 
+  on (02,03...) for subsequent cycles. 
 type: Int
 unit: None
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: 0,1
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: Extra_diagnostics
 file: diag.c
 advanced: true

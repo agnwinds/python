@@ -1,10 +1,14 @@
 name: Select_scatters
 description: |
-  Multi-line description, must keep indentation.
+  Advaned command that allows one to extract photons that
+  have undergone a certain number of scatters.  If n > MAXSCAT,
+  that is to say a very large number then all scatters are slected.
+  If lies between 0 and MAXSCAT then photons will be extracted only
+  at the point a photon has undergone this number of scatters.  If
+  n is < 0 then photons with n or greater scattters will be extracted.
 type: Int
-unit: None
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  Select_no_of_scatters_in_spectra: If 'y' then ask how many scatters
 file: setup2.c
 advanced: true

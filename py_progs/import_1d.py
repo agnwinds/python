@@ -5,16 +5,22 @@
 
 Synopsis:  
 
-Read the master file produced by windwave2table for a
-stellar-type model and produce a file to be read by 
-import in python
+Read the master file produced by windsave2table for a
+1d spherical  model and produce a file which can be  
+be imported into python
 
 
 Command line usage (if any):
 
-    usage: import_1d.py filename
+    usage: import_1d.py root     
+
+    where root is the rootname of the mastertable
 
 Description:  
+
+   The routine is intended to provide examples of the types
+   of files Python can read, and to allow regression tests
+   for importing models
 
 Primary routines:
 
@@ -109,7 +115,10 @@ def read_table(filename='foo.txt',format=''):
 
 def doit(root='star',outputfile=''):
     '''
-    Do something magnificent
+    Read the table produced by running wind
+    save2table on a model for a spherical wind
+    and produce a table which python can import
+
 
     Description:
 

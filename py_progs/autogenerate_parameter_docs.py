@@ -18,8 +18,8 @@ def parse_param_to_dict(found_parameters, text, input_file, param_type):
         ('description', 'Multi-line description, must keep indentation.\n'),
         ('type', param_type),
         ('unit', 'None'),
-        ('values', 'Condition e.g. >0 or list e.g. [1, 2, 5]'),
-        ('parent', {"parameter": "Condition e.g. >0 or list e.g. [1, 2, 5]"}),
+        ('values', 'Condition e.g. greater than 0 or list e.g. [1, 2, 5]'),
+        ('parent', {"parameter": "Condition e.g. greater than 0 or list e.g. [1, 2, 5]"}),
         ('file', input_file)
     ])
 
@@ -124,7 +124,7 @@ output_folder = os.path.join(os.environ["PYTHON"], "docs", "parameters")
 output_old_folder = os.path.join(os.environ["PYTHON"], "docs", "parameters", "old")
 
 # Do not generate documentation for inputs in files containing these substrings
-blacklist = ["py_wind", "plot_roche", "py_grid", "synonyms.c"]
+blacklist = ["py_wind", "plot_roche", "py_grid", "synonyms", "t_bilinear"]
 
 # Types of parameter read functions and the type they correspond to.
 # Must include 'wrappers' e.g. get_spectype.

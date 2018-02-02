@@ -1,11 +1,11 @@
 name: Rad_type_for_agn_in_final_spectrum
 description: |
-  Multi-line description, must keep indentation.
+  The SED of radiation from a central AGN source to be used in the final sptectrum 
 type: Enum (Int)
 values:
   3: power_law
   4: cloudy_table
   5: bremsstrahlung
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: 
 file: python.c
