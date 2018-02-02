@@ -29,6 +29,7 @@ possible choices:
    :language: yaml
    :lines: 14-25
 
+TODO: Make structure of parent explicit.
 
 autogenerate_parameter_docs.py
 ------------------------------

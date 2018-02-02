@@ -27,7 +27,6 @@ Documentation
 For more information on how this page was generated and how to create documentation for *python*,
 look at the page for :doc:`documentation on the documentation <rst/meta>`.
 
-
 Authors
 -------
 The authors of the *python* code and their institutions are:
