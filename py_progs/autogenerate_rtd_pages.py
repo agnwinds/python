@@ -115,6 +115,8 @@ except OSError:
         if "autogen" in filename:
             os.remove(os.path.join(output_folder, filename))
 
+call(["git", "rm", "-f", os.path.join(output_folder, "*.autogen.rst")])
+
 # Then, read the directory to get all the input files
 input_files = []
 for filename in os.listdir(input_folder):
@@ -159,17 +161,18 @@ for parameter_name, parameter in dox_all.items():
     if parameter.get('parent'):
         # If it has parents
         found_parent = False
-        for parent_name, value in parameter['parent'].items():
-            # Check each parent.
-            if parent_name in dox_all.keys():
-                # If it's parent is another parameter (i.e. in .keys())
-                if parameter_type == dox_all[parent_name]['root_type']:
-                    # If both the parameter and its parents are in the same class
-                    # We assign this parameter to the children's list of its parent
-                    dox_all[parent_name]["children"][parameter_name] = parameter
-                    # And then 'continue' on, skipping other parents
-                    found_parent = True
-                    continue
+        if isinstance(parameter['parent'], dict):
+            for parent_name, value in parameter['parent'].items():
+                # Check each parent.
+                if parent_name in dox_all.keys():
+                    # If it's parent is another parameter (i.e. in .keys())
+                    if parameter_type == dox_all[parent_name]['root_type']:
+                        # If both the parameter and its parents are in the same class
+                        # We assign this parameter to the children's list of its parent
+                        dox_all[parent_name]["children"][parameter_name] = parameter
+                        # And then 'continue' on, skipping other parents
+                        found_parent = True
+                        continue
 
         if not found_parent:
             # If we didn't find the parameter's parent elsewhere,
@@ -189,4 +192,5 @@ for parameter_type, type_parameters in dox_structured.items():
             output_parameter(type_file, parameter, level=0)
 
 call(["sphinx-build", "-b", "html", docs_folder, html_folder])
+call(["git", "add", os.path.join(output_folder, "*.autogen.rst")])
 webbrowser.open(os.path.join(html_folder, "index.html"))

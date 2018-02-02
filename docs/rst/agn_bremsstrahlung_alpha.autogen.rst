@@ -15,7 +15,7 @@ L_nu=nu**alpha exp(-hnu/kT)
 **Value:** Any - sign is not asssumed so use negative if you want negative
 
 **Parent(s):**
-  parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup.c

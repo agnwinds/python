@@ -13,10 +13,10 @@ scatter (or othewise created) in this region are extracted
 
 **Unit:** Degrees
 
-**Value:** Condition e.g. >0 or list e.g. [1, 2, 5]
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup2.c

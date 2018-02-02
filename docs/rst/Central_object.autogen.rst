@@ -38,7 +38,7 @@ regardless of parameters like temperature.
 
 
 **Parent(s):**
-  parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** python.c
@@ -59,7 +59,7 @@ have been read in separately.
 
 
 **Parent(s):**
-  parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup.c
@@ -73,7 +73,7 @@ survace as a star would.
 **Type:** Boolean (1/0)
 
 **Parent(s):**
-  parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup.c
@@ -104,10 +104,10 @@ Multi-line description, must keep indentation.
 
 **Unit:** None
 
-**Value:** Condition e.g. >0 or list e.g. [1, 2, 5]
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup_star_bh.c

@@ -11,10 +11,10 @@ Multi-line description, must keep indentation.
 
 **Unit:** None
 
-**Value:** Condition e.g. >0 or list e.g. [1, 2, 5]
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** py_smooth.c

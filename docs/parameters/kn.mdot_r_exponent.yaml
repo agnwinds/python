@@ -6,7 +6,7 @@ description: |
   value of 0 sets a uniform mass loss rate.
 type: Double
 unit: None
-values: >=0
+values: Greater than=0
 parent:
   parameter:
 file: knigge.c

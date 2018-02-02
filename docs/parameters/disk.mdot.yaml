@@ -1,5 +1,6 @@
 name: Disk.mdot
 description: |
-    The mass transfer rate in the disk when considering a standard Shakura-disk.  
+    The mass transfer rate in the disk when considering a standard Shakura-disk.
 type: rddoub
 unit:  msol/yr
+file: setup_disk.c

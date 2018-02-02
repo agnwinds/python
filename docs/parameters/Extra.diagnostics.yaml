@@ -3,6 +3,6 @@ description: |
   Multi-line description, must keep indentation.
 type: Boolean (1/0)
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 file: python.c
 advanced: true

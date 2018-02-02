@@ -4,7 +4,7 @@ description: |
   wind models, e.g SV or KWD.
 type: Double
 unit: Msol/year
-values: Greater than 0 
-parent: wind_type
-  parameter: Varios of the kinematic mdoes for the wind
+values: Greater than 0
+parent:
+  wind_type: Various of the kinematic mdoes for the wind
 file: sv.c, knigge.c

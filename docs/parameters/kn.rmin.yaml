@@ -4,7 +4,7 @@ description: |
   This has to be less than rmax.
 type: Double
 unit: co.radius
-values: >0
+values: Greater than 0
 parent:
   parameter:
 file: knigge.c

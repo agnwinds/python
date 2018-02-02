@@ -4,7 +4,7 @@ description: |
   L_nu=nu**alpha exp(-hnu/kT)
 type: Double
 unit: K
-values: >0
+values: Greater than 0
 parent:
   parameter: 
 file: setup.c

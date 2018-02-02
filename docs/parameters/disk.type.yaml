@@ -6,6 +6,6 @@ values:
   0: no.disk
   1: standard.flat.disk
   2: vertically.extended.disk
-parent:  N/A
-  parameter: This question is always asked       
+parent:
+  parameter: This question is always asked
 file: setup_disk.c

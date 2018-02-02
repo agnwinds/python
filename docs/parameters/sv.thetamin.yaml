@@ -5,7 +5,7 @@ description: |
   See figure 1 of Shlossman & Vitello 1993, ApJ, 409, 372.
 type: Double
 unit: Degrees
-values: >= 0
+values: Greater than= 0
 parent:
   parameter: required when the wind_type is set to 0, a SV wind.
 file: sv.c

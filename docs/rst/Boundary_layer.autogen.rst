@@ -11,10 +11,10 @@ The luminosity of the boundary layer
 
 **Unit:** ergs/s
 
-**Value:** Condition e.g. >0 or list e.g. [1, 2, 5]
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup.c
@@ -36,7 +36,7 @@ Multi-line description, must keep indentation.
 
 
 **Parent(s):**
-  parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** python.c
@@ -59,7 +59,7 @@ as a blackbody, from a model, or as a power law.
 
 
 **Parent(s):**
-  parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup.c
@@ -90,7 +90,7 @@ is meaningful in generating the spectrum
 **Value:** Greater than 0
 
 **Parent(s):**
-  parameter_: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup.c
