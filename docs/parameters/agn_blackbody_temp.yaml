@@ -1,9 +1,9 @@
 name: agn_blackbody_temp
 description: |
-  K
+  The temperature of a blackbody SED to be used for the central AGN source
 type: Double
-unit: None
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+unit: K
+values: Greater than 0
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter:
 file: setup.c

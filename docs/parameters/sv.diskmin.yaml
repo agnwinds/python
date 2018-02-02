@@ -1,9 +1,12 @@
 name: sv.diskmin
 description: |
-  Multi-line description, must keep indentation.
+  The innermost radius from which the wind rises in a Shlossman-Vitello type disk wind.
+  This radius is measured along the radial disk (r) direction i.e. zero describes the centre of the central object
+  (white dwarf)
+  See figure 1 of Shlosman & Vitello 1993, ApJ 409,372.
 type: Double
-unit: co.radius
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+unit: cm
+values: Greater than or equal to the radius of the central object (white dwarf)
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  wind_type: 0.
 file: sv.c

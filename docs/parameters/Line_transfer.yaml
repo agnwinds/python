@@ -86,5 +86,6 @@ values:
     as mode 8, but we use semi-analytic scattering mode
 
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 file: setup_domains.c
+

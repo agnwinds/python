@@ -1,13 +1,14 @@
 name: Select_location
 description: |
   One of several related parameters that permit one to apply
-  additional conditions on the extracted photons.  Select_locations 
-  allows one to select all photons (0), only photons below the disk
-  (-1), or only photons above the disk (1) as viewed by the observer
+  additional conditions on the extracted photons.
 type: Int
 unit: None
-values: [-1,0,1]
-parent:  Select_photons_by_position
-  parameter: y
+values:
+  -1: Select only photons above the disk
+  0: Select all photons
+  1: Select only photons as viewed by the observer
+parent:
+  Select_photons_by_position: y
 file: setup2.c
 advanced: true

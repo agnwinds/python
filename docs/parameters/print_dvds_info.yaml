@@ -4,7 +4,7 @@ description: |
   cells to a file root.dvds.diag.
 type: Int
 unit: None
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 parent:
   parameter: Extra_diagnostics
 file: diag.c

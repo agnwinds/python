@@ -4,7 +4,7 @@ description: |
   outer disk will be this * disk.radmax
 type: rddoub
 unit: None
-values: >0 
-parent: disk_type
-  parameter: disk_type=vertically extended
+values: Greater than 0
+parent:
+  disk_type: disk_type=vertically extended
 file: setup_disk.c

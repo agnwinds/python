@@ -1,9 +1,9 @@
 name: Band.boundary
 description: |
-  Multi-line description, must keep indentation.
+  The boundaries between bands of energies at which photons will be generated
 type: Double
 unit: eV
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: Greater than 0
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: 
 file: bands.c
