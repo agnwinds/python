@@ -599,7 +599,16 @@ Notes:
 	Originally part of main routine; moved to separate routine
 	by ksl sometime in the fall of 08
 
+    XXXX - This routine which was written for the YSO study 
+    needs to be made less YSO centric, and it needs to be 
+    tested.  It is not obvious this is the right format.
 
+    Currently, the format for the file is to read in a number
+    which gives the number of data poins and then to read in
+    two columns one for radius and one for T and then the 
+    numbers are multiplied by 1e11 and 1e3 respectively.  It 
+    should be possible to put this in straight cgs units and
+    to avoid having to read in the number of lines
 
 History:
 

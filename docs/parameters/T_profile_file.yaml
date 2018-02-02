@@ -1,7 +1,0 @@
-name: T_profile_file
-description: |
-  Multi-line description, must keep indentation.
-type: String
-parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
-file: setup.c

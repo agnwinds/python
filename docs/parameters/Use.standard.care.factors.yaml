@@ -1,6 +1,9 @@
 name: Use.standard.care.factors
 description: |
-  Multi-line description, must keep indentation.
+  Advanced command which allows one to change 
+  various other defaults associated with 
+  radiative transfer, inclusing the fractional distance
+  in a cell that a photon can travel
 type: Boolean (1/0)
 parent:
   parameter: Condition e.g. >0 or list e.g. [1, 2, 5]

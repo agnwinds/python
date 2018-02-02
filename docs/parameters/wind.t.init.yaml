@@ -1,9 +1,10 @@
 name: wind.t.init
 description: |
-  Multi-line description, must keep indentation.
+  This parameter sets the initial temperature of the wind.  (It currently
+  refers to all domains).
 type: Double
 unit: None
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: >0 
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: This question is asked whenever there is a wind, that is to say essentially always
 file: setup_domains.c

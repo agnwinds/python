@@ -1,6 +1,7 @@
 name: rho
 description: |
-  Multi-line description, must keep indentation.
+  Advanced command which is part of a spherical region of
+  space from which photons can be extracted.
 type: Double
 unit: cm
 values: Condition e.g. >0 or list e.g. [1, 2, 5]

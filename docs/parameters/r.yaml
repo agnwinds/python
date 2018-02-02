@@ -1,6 +1,7 @@
 name: r
 description: |
-  Multi-line description, must keep indentation.
+  Part of a set of parameters which define a sphericalregion of space from which 
+  photons are to be extracted.
 type: Double
 unit: cm
 values: Condition e.g. >0 or list e.g. [1, 2, 5]

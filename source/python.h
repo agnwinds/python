@@ -279,7 +279,16 @@ int current_domain;             // This integer is used by py_wind only
 #define SYSTEM_TYPE_BINARY 1
 #define SYSTEM_TYPE_AGN    2
 #define	SYSTEM_TYPE_PREVIOUS   	   3
-#define	SYSTEM_TYPE_ONE_D  	   4
+
+/* RUN_TYPE differs from SYSTEM_TYPE in that
+  it has implications on how the program is run
+  wherease SYSTEM_TYPE refers (mainly) to the type
+  of sytem, with the exception 
+*/
+
+#define RUN_TYPE_NEW       0   
+#define RUN_TYPE_RESTART   1
+#define RUN_TYPE_PREVIOUS  3
 
 #define TRUE  1
 #define FALSE 0
@@ -1134,7 +1143,9 @@ typedef struct photon
   int top_bot;                  /* 0 ->select photons regardless of location 
                                    >0     -> select only photons whose "last" position is above the disk
                                    <0    -> select only photons whose last position is below the disk */
-  double x[3], r;               /* The position and radius of a special region from which to extract spectra  */
+  double x[3], r;               /* The position and radius of a special region from which to extract spectra. 
+                                x is taken to be the center of the region and r is taken to be the radius of
+                               the region.   */
   double f[NWAVE];
   double lf[NWAVE];             /* a second array to hole the extracted spectrum in log units */
   double lfreq[NWAVE];          /* We need to hold what freqeuncy intervals our logarithmic spectrum has been taken over */

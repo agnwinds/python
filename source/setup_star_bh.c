@@ -32,6 +32,8 @@ double
 get_stellar_params ()
 {
 
+    rdpar_comment ("Parameters for the Central Object");
+
   /* Describe the basic binary star system */
 
   geo.mstar /= MSOL;		// Convert to MSOL for ease of data entry
@@ -93,6 +95,8 @@ get_stellar_params ()
 
   return (geo.lum_star_init);
 }
+
+
 
 
 /***********************************************************
@@ -376,6 +380,20 @@ Returns:
 Description:
 
 Notes:
+    ksl - It is not obvious that much recent thought has been
+    given to the choices that are here.  The fractional distance
+    that a photon travel is intended to make sure the velocity
+    along the line of sight can be approximated linearly.  If 
+    a photon travels too far in an azimuthal direction the sense
+    of the velocity can change and this prevensts this
+
+    The lowest ion density contributing to photoionization is used
+    to determine what ions one has to calculate the photoionzation
+    xsection for.  The lower this density; the more that have to be
+    calculated, and as a result the slower the program.
+
+    Keeping photoionizaion during final spectrum allows one to
+    check the contribution of photoabsorption.
 
 History:
   1502  JM  Moved here from main()

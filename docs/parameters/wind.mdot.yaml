@@ -1,9 +1,10 @@
 name: wind.mdot
 description: |
-  Multi-line description, must keep indentation.
+  The mass lost rate of the wind in several of the kinematic
+  wind models, e.g SV or KWD.
 type: Double
-unit: M☉/year
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
-parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
-file: sv.c
+unit: Msol/year
+values: >0 
+parent: wind_type 
+  parameter: Varios of the kinematic mdoes for the wind
+file: sv.c, knigge.c

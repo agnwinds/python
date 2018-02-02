@@ -1,9 +1,7 @@
-name: x00[0]
+name: Disk.radiation
 description: |
   Multi-line description, must keep indentation.
-type: Double
-unit: None
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+type: Boolean (1/0)
 parent:
   parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
-file: t_bilinear.c
+file: setup_disk.c
