@@ -375,27 +375,31 @@ return and record an error */
 
 /* Calculate the maximum distance the photon can travel in the cell */
 
-  if (zdom[ndom].coord_type == CYLIND)
-  {
-    smax = cylind_ds_in_cell (p);       // maximum distance the photon can travel in a cell
-  }
-  else if (zdom[ndom].coord_type == RTHETA)
-  {
-    smax = rtheta_ds_in_cell (p);
-  }
-  else if (zdom[ndom].coord_type == SPHERICAL)
-  {
-    smax = spherical_ds_in_cell (p);
-  }
-  else if (zdom[ndom].coord_type == CYLVAR)
-  {
-    smax = cylvar_ds_in_cell (p);
-  }
-  else
-  {
-    Error ("translate_in_wind: Don't know how to find ds_in_cell in this coord system %d\n", zdom[ndom].coord_type);
-    exit (0);
-  }
+if ((smax=ds_in_cell(p))<0){
+	return((int) smax);
+}
+
+//OLD if (zdom[ndom].coord_type == CYLIND)
+//OLD {
+//OLD smax = cylind_ds_in_cell (p);       // maximum distance the photon can travel in a cell
+//OLD }
+//OLD else if (zdom[ndom].coord_type == RTHETA)
+//OLD {
+//OLD smax = rtheta_ds_in_cell (p);
+//OLD }
+//OLD else if (zdom[ndom].coord_type == SPHERICAL)
+//OLD {
+//OLD smax = spherical_ds_in_cell (p);
+//OLD }
+//OLD else if (zdom[ndom].coord_type == CYLVAR)
+//OLD {
+//OLD smax = cylvar_ds_in_cell (p);
+//OLD }
+//OLD else
+//OLD {
+//OLD Error ("translate_in_wind: Don't know how to find ds_in_cell in this coord system %d\n", zdom[ndom].coord_type);
+//OLD exit (0);
+//OLD }
 
   if (one->inwind == W_PART_INWIND)
   {                             // The cell is partially in the wind
@@ -506,6 +510,87 @@ The choice of SMAX_FRAC can affect execution time.*/
 
 
 }
+
+
+/***********************************************************
+                                       Space Telescope Science Institute
+
+ Synopsis:   
+	ds_in_cell calculates the distance photon can travel within the cell
+	that it is currently in.
+  
+ Arguments:		
+
+	
+ Returns:
+  
+Description:	
+
+Notes:
+
+
+History:
+	18feb	ksl	Split out of translate_in_wind as part of
+			effort to handle imporded models better
+ 
+**************************************************************/
+
+
+double
+ds_in_cell (p)
+     PhotPtr p;
+
+{
+
+  int n;
+  double smax;
+  int ndom;
+
+  WindPtr one;
+
+
+/* First verify that the photon is in the grid, and if not
+return and record an error */
+
+  if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
+  {
+    Error ("translate_in_wind: Photon not in grid when routine entered\n");
+    return (n);                 /* Photon was not in grid */
+  }
+
+/* Assign the pointers for the cell containing the photon */
+
+  one = &wmain[n];              /* one is the grid cell where the photon is */
+  ndom = one->ndom;
+
+
+/* Calculate the maximum distance the photon can travel in the cell */
+
+  if (zdom[ndom].coord_type == CYLIND)
+  {
+    smax = cylind_ds_in_cell (p);       // maximum distance the photon can travel in a cell
+  }
+  else if (zdom[ndom].coord_type == RTHETA)
+  {
+    smax = rtheta_ds_in_cell (p);
+  }
+  else if (zdom[ndom].coord_type == SPHERICAL)
+  {
+    smax = spherical_ds_in_cell (p);
+  }
+  else if (zdom[ndom].coord_type == CYLVAR)
+  {
+    smax = cylvar_ds_in_cell (p);
+  }
+  else
+  {
+    Error ("ds_in_cell: Don't know how to find ds_in_cell in this coord system %d\n", zdom[ndom].coord_type);
+    exit (0);
+  }
+
+  return(smax);
+}
+
 
 /***********************************************************
                                        Space Telescope Science Institute
