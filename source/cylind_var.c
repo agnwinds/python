@@ -76,7 +76,7 @@ cylvar_ds_in_cell (p)
   //
   if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
   {
-    Error ("translate_in_wind: Photon not in grid when routine entered\n");
+    Error ("cylvar_ds_in_cell: Photon not in grid when routine entered\n");
     return (n);                 /* Photon was not in wind */
   }
 

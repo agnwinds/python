@@ -97,7 +97,7 @@ where_in_wind (x, ndomain)
   DomainPtr one_dom;
 
 
-  /* First check for items, like the diks that are not domain
+  /* First check for items, like the disk that are not domain
    * related, like the disk */
 
   z = fabs (x[2]);              /* Necessary to get correct answer above

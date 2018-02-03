@@ -118,14 +118,14 @@ translate_in_space (pp)
   if (ndom >= 0 && zdom[ndom].wind_type == IMPORT)
     {
       stuff_phot (pp, &ptest);
-      move_phot (&ptest, ds + DFUDGE);
-      if (where_in_grid (ndom, ptest.x) < 0)
+      move_phot (&ptest, ds + DFUDGE);	/* So now ptest is at the edge of the wind as defined by cones */
+      if (where_in_wind (ptest.x, &ndom_next) < 0)
 	{
 
 	  smax = ds_to_wind (&ptest, &ndom_next);	// This is the maximum distance can go in this domain
 
 	  s = 0;
-	  while (s < smax && where_in_grid (ndom, ptest.x) < 0)
+	  while (s < smax && where_in_wind (ptest.x, &ndom_next) < 0)
 	    {
 	      delta = ds_in_cell (&ptest);
 	      move_phot (&ptest, delta + DFUDGE);
@@ -594,7 +594,7 @@ return and record an error */
 
   if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
     {
-      Error ("translate_in_wind: Photon not in grid when routine entered\n");
+      Error ("ds_in_cell: Photon not in grid when routine entered\n");
       return (n);		/* Photon was not in grid */
     }
 
