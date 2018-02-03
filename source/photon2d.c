@@ -242,7 +242,7 @@ ds_to_wind (pp)
     if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
       ds = x;
 
-    if (zdom[ndom].wind_type == CORONA)
+    if (zdom[ndom].wind_type == CORONA || zdom[ndom].wind_type == IMPORT)
     {
 
       /* As currently written ds_to_plane can give a negative number */
@@ -256,6 +256,19 @@ ds_to_wind (pp)
       {
         ds = x;
       }
+
+      x=ds_to_cylinder(zdom[ndom].wind_rho_min, &ptest);
+      if (x > 0 && x < ds)
+      {
+        ds = x;
+      }
+
+      x=ds_to_cylinder(zdom[ndom].wind_rho_max, &ptest);
+      if (x > 0 && x < ds)
+      {
+        ds = x;
+      }
+
     }
 
   }

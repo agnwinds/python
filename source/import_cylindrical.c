@@ -178,28 +178,30 @@ import_cylindrical (ndom, filename)
    * is not entirely obvious that this is needed, given the
    * assumption that we do not need extra buffer cells */
 
-  for (n=0;n<jz-1;n++){
-      xx_cyl.wind_midz[n]=0.5*(xx_cyl.wind_z[n]+xx_cyl.wind_z[n+1]);
-  }
+  for (n = 0; n < jz - 1; n++)
+    {
+      xx_cyl.wind_midz[n] = 0.5 * (xx_cyl.wind_z[n] + xx_cyl.wind_z[n + 1]);
+    }
 
 //OLD  delta=(xx_cyl.wind_z[jz-1]-xx_cyl.wind_z[jz-2]);
 //OLD  xx_cyl.wind_midz[jz]=xx_cyl.wind_z[jz-1]+0.5*delta;
 
-  delta=(xx_cyl.wind_z[n-1]-xx_cyl.wind_z[n-2]);
-  xx_cyl.wind_midz[n]=xx_cyl.wind_z[n-1]+0.5*delta;
+  delta = (xx_cyl.wind_z[n - 1] - xx_cyl.wind_z[n - 2]);
+  xx_cyl.wind_midz[n] = xx_cyl.wind_z[n - 1] + 0.5 * delta;
 
 
 
-  for (n=0;n<jx-1;n++){
-      xx_cyl.wind_midx[n]=0.5*(xx_cyl.wind_x[n]+xx_cyl.wind_x[n+1]);
-  }
+  for (n = 0; n < jx - 1; n++)
+    {
+      xx_cyl.wind_midx[n] = 0.5 * (xx_cyl.wind_x[n] + xx_cyl.wind_x[n + 1]);
+    }
 
 //OLD  delta=(xx_cyl.wind_x[n-1]-xx_cyl.wind_x[n-2]);
 //OLD  xx_cyl.wind_midx[jx]=xx_cyl.wind_x[jx-1]+0.5*delta;
 
 
-  delta=(xx_cyl.wind_x[n-1]-xx_cyl.wind_x[n-2]);
-  xx_cyl.wind_midx[n]=xx_cyl.wind_x[n-1]+0.5*delta;
+  delta = (xx_cyl.wind_x[n - 1] - xx_cyl.wind_x[n - 2]);
+  xx_cyl.wind_midx[n] = xx_cyl.wind_x[n - 1] + 0.5 * delta;
 
 
   /* Although the initialization of most of zdom should be postponed
@@ -209,7 +211,7 @@ import_cylindrical (ndom, filename)
 
   zdom[ndom].ndim = xx_cyl.ndim;
   zdom[ndom].mdim = xx_cyl.mdim;
-  zdom[ndom].ndim2=zdom[ndom].ndim * zdom[ndom].mdim;
+  zdom[ndom].ndim2 = zdom[ndom].ndim * zdom[ndom].mdim;
 
 
   return (0);
@@ -263,7 +265,7 @@ cylindrical_make_grid_import (w, ndom)
          there is a question here about which choice (of not in wind or all in 
          wind) is most appropriate */
       if (w[nn].inwind == W_PART_INWIND)
-        w[nn].inwind = W_NOT_INWIND;
+	w[nn].inwind = W_NOT_INWIND;
     }
 
 // ksl - Next few lines do not do anything
@@ -274,7 +276,7 @@ cylindrical_make_grid_import (w, ndom)
 //OLD      wind_ij_to_n (ndom, xx_cyl.i[n], xx_cyl.j[n], &nn);
 //OLD
 //OLD    }
-  
+
 
   /* Now add information used in zdom */
 
@@ -347,6 +349,19 @@ cylindrical_make_grid_import (w, ndom)
   zdom[ndom].rmax = rmax;
   zdom[ndom].rmin = rmin;
   zdom[ndom].wind_thetamin = zdom[ndom].wind_thetamax = 0.;
+
+  /* Set up wind planes for a layer with a specific height */
+
+  zdom[ndom].windplane[0].x[0] = zdom[ndom].windplane[0].x[1] =
+    zdom[ndom].windplane[0].x[2] = 0;
+  zdom[ndom].windplane[0].lmn[0] = zdom[ndom].windplane[0].lmn[1] = 0;
+  zdom[ndom].windplane[0].lmn[2] = 1;
+
+  zdom[ndom].windplane[1].x[0] = zdom[ndom].windplane[0].x[1] = 0;
+  zdom[ndom].windplane[1].x[2] = zdom[ndom].zmax;
+  zdom[ndom].windplane[1].lmn[0] = zdom[ndom].windplane[0].lmn[1] = 0;
+  zdom[ndom].windplane[1].lmn[2] = 1;
+
 
   return (0);
 }
