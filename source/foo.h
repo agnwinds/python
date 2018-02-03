@@ -114,6 +114,7 @@ double ds_to_sphere2(double x[], double r, struct photon *p);
 int quadratic(double a, double b, double c, double r[]);
 double ds_to_plane(struct plane *pl, struct photon *p);
 double ds_to_closest_approach(double x[], struct photon *p, double *impact_parameter);
+double ds_to_cylinder(double rho, struct photon *p);
 /* resonate.c */
 double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nres, double smax, int *istat);
 int select_continuum_scattering_process(double kap_cont, double kap_es, double kap_ff, PlasmaPtr xplasma);
@@ -432,8 +433,6 @@ double sigma_compton_partial(double f, double x);
 double alpha(double nu);
 double beta(double nu);
 double comp_cool_integrand(double nu);
-/* torus.c */
-double ds_to_cylinder(double rho, struct photon *p);
 /* zeta.c */
 double compute_zeta(double temp, int nion, int mode);
 /* dielectronic.c */
@@ -476,7 +475,7 @@ int solve_matrix(double *a_data, double *b_data, int nrows, double *x, int nplas
 int communicate_estimators_para(void);
 int gather_spectra_para(int nspec_helper, int nspecs);
 int communicate_matom_estimators_para(void);
-/* setup.c */
+/* setup_star_bh.c */
 double get_stellar_params(void);
 int get_bl_and_agn_params(double lstar);
 int get_standard_care_factors(void);
