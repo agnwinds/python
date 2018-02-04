@@ -40,7 +40,8 @@ History:
 
 
 double
-cylind_ds_in_cell (p)
+cylind_ds_in_cell (ndom,p)
+	int ndom;
      PhotPtr p;
 
 
@@ -50,9 +51,7 @@ cylind_ds_in_cell (p)
   double a, b, c, root[2];
   double z1, z2, q;
   double smax;
-  int ndom;
 
-  ndom = wmain[p->grid].ndom;
 
 
   /* XXX -- The next lines may be unnecessary; they effectively recheck whether

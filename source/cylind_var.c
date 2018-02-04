@@ -57,7 +57,8 @@ History:
 
 
 double
-cylvar_ds_in_cell (p)
+cylvar_ds_in_cell (ndom,p)
+  int ndom;
      PhotPtr p;
 
 
@@ -66,9 +67,7 @@ cylvar_ds_in_cell (p)
   int n, ix, iz, iroot;
   double a, b, c, root[2];
   double s, smax;
-  int ndom;
 
-  ndom = wmain[p->grid].ndom;
 
 
   // XXX  Next lines are just a check and one can probbly delette

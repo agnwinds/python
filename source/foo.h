@@ -23,7 +23,7 @@ int translate(WindPtr w, PhotPtr pp, double tau_scat, double *tau, int *nres);
 int translate_in_space(PhotPtr pp);
 double ds_to_wind(PhotPtr pp, int *ndom_current);
 int translate_in_wind(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nres);
-double ds_in_cell(PhotPtr p);
+double ds_in_cell(int ndom, PhotPtr p);
 int walls(PhotPtr p, PhotPtr pold, double *normal);
 /* photon_gen.c */
 int define_phot(PhotPtr p, double f1, double f2, long nphot_tot, int ioniz_or_final, int iwind, int freq_sampling);
@@ -359,7 +359,7 @@ int get_yso_wind_params(int ndom);
 double yso_velocity(int ndom, double x[], double v[]);
 double yso_rho(int ndom, double x[]);
 /* cylindrical.c */
-double cylind_ds_in_cell(PhotPtr p);
+double cylind_ds_in_cell(int ndom, PhotPtr p);
 int cylind_make_grid(int ndom, WindPtr w);
 int cylind_wind_complete(int ndom, WindPtr w);
 int cylind_volumes(int ndom, WindPtr w);
@@ -368,7 +368,7 @@ int cylind_get_random_location(int n, double x[]);
 int cylind_extend_density(int ndom, WindPtr w);
 int cylind_is_cell_in_wind(int n);
 /* rtheta.c */
-double rtheta_ds_in_cell(PhotPtr p);
+double rtheta_ds_in_cell(int ndom, PhotPtr p);
 int rtheta_make_grid(WindPtr w, int ndom);
 int rtheta_make_cones(int ndom, WindPtr w);
 int rtheta_wind_complete(int ndom, WindPtr w);
@@ -378,7 +378,7 @@ int rtheta_get_random_location(int n, double x[]);
 int rtheta_extend_density(int ndom, WindPtr w);
 int rtheta_is_cell_in_wind(int n);
 /* spherical.c */
-double spherical_ds_in_cell(PhotPtr p);
+double spherical_ds_in_cell(int ndom, PhotPtr p);
 int spherical_make_grid(WindPtr w, int ndom);
 int spherical_wind_complete(int ndom, WindPtr w);
 int spherical_volumes(int ndom, WindPtr w);
@@ -387,7 +387,7 @@ int spherical_get_random_location(int n, double x[]);
 int spherical_extend_density(int ndom, WindPtr w);
 int shell_make_grid(WindPtr w, int ndom);
 /* cylind_var.c */
-double cylvar_ds_in_cell(PhotPtr p);
+double cylvar_ds_in_cell(int ndom, PhotPtr p);
 int cylvar_make_grid(WindPtr w, int ndom);
 int cylvar_wind_complete(int ndom, WindPtr w);
 int cylvar_volumes(int ndom, WindPtr w);

@@ -232,7 +232,7 @@ cylindrical_make_grid_import (w, ndom)
 {
   int n;
   int nn;
-  double r, rmin, rmax, rho_min, rho_max, zmax;
+  double r, rmin, rmax, rho_min, rho_max, zmin, zmax;
   double x[3];
 
   Log ("XX Dimensions of read in model: %d %d\n", zdom[ndom].ndim,
@@ -268,14 +268,6 @@ cylindrical_make_grid_import (w, ndom)
 	w[nn].inwind = W_NOT_INWIND;
     }
 
-// ksl - Next few lines do not do anything
-//OLD  /* We now need to fill in the w[],cen */
-
-//OLD  for (n = 0; n < zdom[ndom].ndim2; n++)
-//OLD    {
-//OLD      wind_ij_to_n (ndom, xx_cyl.i[n], xx_cyl.j[n], &nn);
-//OLD
-//OLD    }
 
 
   /* Now add information used in zdom */
@@ -302,7 +294,7 @@ cylindrical_make_grid_import (w, ndom)
 
 
   rmax = rho_max = zmax = 0;
-  rmin = rho_min = VERY_BIG;
+  rmin = rho_min = zmin = VERY_BIG;
   for (n = 0; n < xx_cyl.ncell; n++)
 
     {
@@ -321,6 +313,10 @@ cylindrical_make_grid_import (w, ndom)
 	  if (xx_cyl.z[n] > zmax)
 	    {
 	      zmax = xx_cyl.z[n];
+	    }
+	  if (xx_cyl.z[n] < zmin)
+	    {
+	      zmin = xx_cyl.z[n];
 	    }
 	  if (r > rmax)
 	    {
@@ -345,20 +341,24 @@ cylindrical_make_grid_import (w, ndom)
   zdom[ndom].wind_rho_min = zdom[ndom].rho_min = rho_min;
   zdom[ndom].wind_rho_max = zdom[ndom].rho_max = rho_max;
   zdom[ndom].zmax = zmax;
+  zdom[ndom].zmin = zmin;
 
   zdom[ndom].rmax = rmax;
   zdom[ndom].rmin = rmin;
   zdom[ndom].wind_thetamin = zdom[ndom].wind_thetamax = 0.;
 
-  /* Set up wind planes for a layer with a specific height */
+  /* Set up wind planes around the cells which in the wind.  This can be
+   * smaller than the entire grid.*/
 
-  zdom[ndom].windplane[0].x[0] = zdom[ndom].windplane[0].x[1] =
-    zdom[ndom].windplane[0].x[2] = 0;
+  zdom[ndom].windplane[0].x[0] = zdom[ndom].windplane[0].x[1]=0;
+    zdom[ndom].windplane[0].x[2] = zdom[ndom].zmin;
+
   zdom[ndom].windplane[0].lmn[0] = zdom[ndom].windplane[0].lmn[1] = 0;
   zdom[ndom].windplane[0].lmn[2] = 1;
 
   zdom[ndom].windplane[1].x[0] = zdom[ndom].windplane[0].x[1] = 0;
   zdom[ndom].windplane[1].x[2] = zdom[ndom].zmax;
+
   zdom[ndom].windplane[1].lmn[0] = zdom[ndom].windplane[0].lmn[1] = 0;
   zdom[ndom].windplane[1].lmn[2] = 1;
 

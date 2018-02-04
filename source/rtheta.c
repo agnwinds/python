@@ -39,7 +39,8 @@ History:
 
 
 double
-rtheta_ds_in_cell (p)
+rtheta_ds_in_cell (ndom,p)
+  int ndom;
      PhotPtr p;
 
 
@@ -47,9 +48,7 @@ rtheta_ds_in_cell (p)
 
   int n, ix, iz;
   double s, smax;
-  int ndom;
 
-  ndom = wmain[p->grid].ndom;
 
 
   /* XXX Note clear that next lines are necessary as they effectively recheck
