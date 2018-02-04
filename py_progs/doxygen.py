@@ -93,7 +93,7 @@ def read_file(filename):
     '''
     Read a file
 
-    Args:
+    Arguments:
         filename (str): Name of the file to read
     Returns:
         list: Lines within the file
@@ -112,6 +112,10 @@ def read_file(filename):
 
 def write_header(function):
     """
+    Given a function dictionary, writes it to string
+
+    Arguments:
+        function: Dictionary describing the function header
 
     Returns:
         String: The header to be written to file
@@ -391,26 +395,37 @@ def doit(filename='emission.c', outputfile=None):
     j = 0  # Index for the position in the header array
     header_start = []  # Position of the header start lines
     header_end = []    # Position of the header end lines
+    header_assigned = [] # Has this header been assigned to a function?
     module_start = []  # Position of the module start lines
     module_end = []    # Position of the module end lines
     module_name = []   # Name of the module for each start-end
 
     # This section scans through the file, looking for header starts and ends.
+    found_header = False
+    found_module = False
     while i < len(lines)-1:
         line = lines[i].strip()
-        found_header = False
-        found_module = False
 
         if line[0:24] == '/***********************':
             # print('This is the beginning of a header')
             header_start.append(i)
-            header = True
-        elif line[0:20] == '********************':
-            # print('Found the end of a header')
-            header_end.append(i)
-            header = False
+            found_header = True
 
-        elif not (found_header or found_module) and j < len(modules):
+        elif found_header:
+            if line[0:20] == '********************':
+                # print('Found the end of a header')
+                header_end.append(i)
+                found_header = False
+
+        elif found_module and line:
+            # If we've found the start of a module, we want to know where it ends.
+            # If this line isn't just whitespace...
+            if lines[i][0] == '}':
+                # If we find a line that starts with '}', we've found the end (almost certainly)
+                module_end.append(i)
+                found_module = False
+
+        elif not found_header and not found_module and j < len(modules):
             # To try to match this header to a module, we peek at pairs of lines
             # As most of our functions are defined as 'type \n name (arguments)'
             x = line.strip()
@@ -427,35 +442,55 @@ def doit(filename='emission.c', outputfile=None):
                 j += 1
                 found_module = True
 
-        elif found_module and line[0] == '}':
-            # If we've found the start of a module, we want to know where it ends.
-            # If we find a line that starts with '}', we've found the end (almost certainly)
-            module_end.append(i)
-            found_module = False
-
         i += 1
+
+    if len(module_end) != len(module_start):
+        # Since the loop only goes to the line *before* the end of the file,
+        # if we never caught the end of the last function it must be the last line.
+        module_end.append(i)
 
     print('line where header starts   :', header_start)
     print('line_where header_ends     :', header_end)
     print('lines where function_starts:', module_start)
+    print('lines where function_ends:', module_end)
 
     # Now we need to try to match the current headers with the modules because
     # some may be missing
 
     # xmatch is the array used to cross-match the headers in the code and their associated modules
-    xmatch = [-1] * len(modules)
+    xmatch = [-1] * len(module_start)
+    header_assigned = [False] * len(header_start)
 
-    isep = 20
     for header_index, header_line in enumerate(header_end):
         # We iterate through the array of headers
         for module_index, module_line in enumerate(module_start):
             # If the start line of this module is after the end of the current header, *and*
             # there's no other module between it and the header.
-            if header_line < module_line and header_start[header_index-1] < header_line:
-                xmatch[module_index] = header_index
-                break
+            if not header_assigned[header_index]:
+                # If this header hasn't already been assigned to another module
+                if header_line < module_line:
+                    # Is it before this module?
+                    header_assigned[header_index] = True
+                    xmatch[module_index] = header_index
+                    break
 
     print('xmatch betwen headers and functions', xmatch)
+
+    # Now we have the start and end points of each header, and the crossmatch between headers and
+    # functions, we can parse the input file.
+    for index, module in enumerate(mod_dict.values()):
+        # We iterate over the dictionary of modules, looking up what header range corresponds to
+        # them using the xmatch array, and passing that to parse_header.
+        if xmatch[index] > -1:
+            # If there *is* a header for this module, pass it the text
+            module = parse_header(lines[header_start[xmatch[index]]:header_end[xmatch[index]]], module)
+        else:
+            # Else, pass it a blank string and let it set up a default one
+            module = parse_header('', module)
+
+        with open('tempdox_{}.c'.format(module['name']), 'w') as outfile:
+            outfile.write(write_header(module))
+
 
     x = open(outputfile, 'w')
 
@@ -598,20 +633,6 @@ def doit(filename='emission.c', outputfile=None):
 
         x.write(line)
         i+=1
-
-    import json
-    for index, module in enumerate(mod_dict.values()):
-        # We iterate over the dictionary of modules, looking up what header range corresponds to
-        # them using the xmatch array, and passing that to parse_header.
-        if xmatch[index] > -1:
-            # If there *is* a header for this module, pass it the text
-            module = parse_header(lines[header_start[xmatch[index]]:header_end[xmatch[index]]], module)
-        else:
-            # Else, pass it a blank string and let it set up a default one
-            module = parse_header('', module)
-
-        with open('tempdox_{}.c'.format(module['name']), 'w') as outfile:
-            outfile.write(write_header(module))
 
     return
 
