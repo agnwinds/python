@@ -99,7 +99,6 @@ History:
 	110930	ksl	Added check for torus
  
 **************************************************************/
-int translate_in_space_failure = 0;
 
 
 int
@@ -120,17 +119,24 @@ translate_in_space (pp)
   if (ndom >= 0 && zdom[ndom].wind_type == IMPORT)
     {
       stuff_phot (pp, &ptest);
-      move_phot (&ptest, ds + DFUDGE);	/* So now ptest is at the edge of the wind as defined by cones */
-      /* this is a test */
+      move_phot (&ptest, ds + DFUDGE);	/* So now ptest is at the edge of the wind as defined by the boundary
+      From here on we should be in the grid  */
+
+      /* XXX this is a test.  We check at the start whether we are in the grid */
+
       if ((ifail = where_in_grid (ndom, ptest.x)) < 0)
 	{
-	  if (translate_in_space_failure < 1000)
-	    {
-	      Error ("translate_in_space: Failure %d %d\n", ifail, xxxbound);
-	      translate_in_space_failure += 1;
-	    }
+	      Error ("translate_in_space: Failure %10.3e %10.3e %10.3e %d %d %d\n",  ptest.x[0], ptest.x[1], ptest.x[2],ptest.np,ifail, xxxbound);
 	};
-      /* this ends the test */
+
+      /* XXX this ends the test */
+
+
+
+      /* XXX - Note there is a possiblity that we reach the other side of the grid without actually encoutering a
+       * wind cell
+       */
+
 
       if (where_in_wind (ptest.x, &ndom_next) < 0)
 	{
@@ -148,8 +154,8 @@ translate_in_space (pp)
 	      else
 		{
 		  Error
-		    ("translate_in_space: Photon not in grid: %10.4e %10.4e %10.4e\n",
-		     ptest.x[0], ptest.x[1], ptest.x[2]);
+		    ("translate_in_space: Photon not in grid: %10.3e %10.3e %10.3e %03d %10.3e %10.3e\n",
+		     ptest.x[0], ptest.x[1], ptest.x[2],ptest.np,s,smax);
 		  break;
 		}
 	    }
@@ -225,7 +231,7 @@ Description:
 	model.  However this routine does not require this to be the case, since it just
 	calculates where the edges are.
 	
-	 In any event, f you are inside the wind already ds_to_wind calculates the distance to the edge of the wind. 
+	In any event, if you are inside the wind already ds_to_wind calculates the distance to the edge of the wind. 
 	If you are outside, It will also be to the nearest edge.  	
 
 	The routine distinguishes between  two basic cases.  Either the photon is already in the wind
@@ -234,6 +240,11 @@ Description:
 	VERY_BIG) 
 Notes:
 	There is no guarantee that you will still be in the region defined by the grid.
+
+	1802 -ksl - At present this routine for imported models this routine only deals with
+	cylindrical models.  Additionally for imported models we skip all of the
+	uwd of wind_cones.  This is inefficient, and needs to be corrected for
+	rtheta and spherical models which can easily be handled using wind cones.
 
 History:
  	1997	ksl	Coded and debugged as part of Python effort. 
@@ -345,7 +356,8 @@ ds_to_wind (pp, ndom_current)
 	  if (x > 0 && x < ds)
 	    {
 	      stuff_phot (pp, &qtest);
-	      move_phot (&qtest, ds + DFUDGE);
+	      //OLD move_phot (&qtest, ds + DFUDGE);
+	      move_phot (&qtest, x);
 	      rho = sqrt (qtest.x[0] * qtest.x[0] + qtest.x[1] * qtest.x[1]);
 	      if (zdom[ndom].wind_rho_min <= rho
 		  && rho <= zdom[ndom].wind_rho_min)
@@ -360,7 +372,8 @@ ds_to_wind (pp, ndom_current)
 	  if (x > 0 && x < ds)
 	    {
 	      stuff_phot (pp, &qtest);
-	      move_phot (&qtest, ds + DFUDGE);
+	      //OLD move_phot (&qtest, ds + DFUDGE);
+	      move_phot (&qtest, x);
 	      rho = sqrt (qtest.x[0] * qtest.x[0] + qtest.x[1] * qtest.x[1]);
 	      if (zdom[ndom].wind_rho_min <= rho
 		  && rho <= zdom[ndom].wind_rho_min)
@@ -376,7 +389,8 @@ ds_to_wind (pp, ndom_current)
 	  if (x > 0 && x < ds)
 	    {
 	      stuff_phot (pp, &qtest);
-	      move_phot (&qtest, ds + DFUDGE);
+	      //OLD move_phot (&qtest, ds + DFUDGE);
+	      move_phot (&qtest, x);
 	      z = fabs (qtest.x[2]);
 	      if (zdom[ndom].zmin <= z && z <= zdom[ndom].zmax)
 
@@ -392,7 +406,8 @@ ds_to_wind (pp, ndom_current)
 	  if (x > 0 && x < ds)
 	    {
 	      stuff_phot (pp, &qtest);
-	      move_phot (&qtest, ds + DFUDGE);
+	      //OLD move_phot (&qtest, ds + DFUDGE);
+	      move_phot (&qtest, x);
 	      z = fabs (qtest.x[2]);
 	      if (zdom[ndom].zmin <= z && z <= zdom[ndom].zmax)
 		{

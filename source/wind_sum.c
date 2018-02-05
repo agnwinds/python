@@ -220,7 +220,8 @@ xtemp_rad (w)
 		  ntot = plasmamain[nplasma].ntot;
 		}
 	      else
-		ntot = 0;
+		// ntot = 0;
+		ntot = -99;
 	      Log ("%8d ", ntot);
 	    }
 	  Log ("\n");
