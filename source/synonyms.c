@@ -78,7 +78,11 @@ char *old_names[] =
     "Rad_type_for_bl","t_bl","lum_bl","homologous_boundary_mdot","msec",
     "period","shell_wind_mdot","Photon.sampling.approach","Num.of.frequency.bands",
     "Lowest_energy_to_be_considered","Highest_energy_to_be_considered","Band.boundary",
-    "Band.minimum_fraction"
+    "Band.minimum_fraction",
+    "agn_bremsstrahlung_temp","agn_bremsstrahlung_alpha","agn_blackbody_temp",
+    "agn_power_law_cutoff","geometry_for_pl_source","lamp_post.height",
+    "Select_specific_no_of_scatters_in_spectra","Select_scatters","Select_photons_by_position",
+    "Select_location","rho","z","azimuth","r"
 };
 
 char *new_names[] = { "Central.object.mass", "Central.object.radius",
@@ -97,10 +101,14 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
     "Boundary_layer.luminosity","homologous.boundary_mdot","Binary.mass_sec",
     "Binary.period","shell.wind_mdot","Photon_sampling.approach","Photon_sampling.nbands",
     "Photon_sampling.low_energy_limit","Photon_sampling.high_energy_limit","Photon_sampling.band_boundary",
-    "Photon_sampling,band_min_frac"
+    "Photon_sampling,band_min_frac",
+    "AGN.bremsstrahlung_temp","AGN.bremsstrahlung_alpha","AGN.blackbody_temp",
+    "AGN.power_law_cutoff","AGN.geometry_for_pl_source","AGN.lamp_post_height"
+    "Spectrum.select_specific_no_of_scatters_in_spectra","Spectrum.select_scatters","Spectrum.select_photons_by_position",
+    "Spectrum.select_location","Spectrum.select_rho","Spectrum.select_z","Spectrum.select_azimuth","Spectrum.select_r"
 };
 
-int nunber_of_names = 43;
+int nunber_of_names = 57;
 
 
 

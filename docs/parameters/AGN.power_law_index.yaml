@@ -1,4 +1,4 @@
-name: agn_power_law_index
+name: AGN.power_law_index
 description: |
   The exponent alpha in a power las SED applied to an AGN
   central source of the form L_nu=K nu**alpha
@@ -7,4 +7,4 @@ unit: None
 values: Any - but sign is not assumed, so for negative index use a negative value
 parent:
   parameter: 
-file: setup.c
+file: setup_star_bh.c

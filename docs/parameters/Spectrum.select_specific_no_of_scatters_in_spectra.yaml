@@ -1,4 +1,4 @@
-name: Select_specific_no_of_scatters_in_spectra
+name: Spectrum.select_specific_no_of_scatters_in_spectra
 description: |
   Advanced command which allows one to place additional
   constraints on the detailed spectra which are extract.  

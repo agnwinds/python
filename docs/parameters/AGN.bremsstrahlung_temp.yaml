@@ -1,4 +1,4 @@
-name: agn_bremsstrahlung_temp
+name: AGN.bremsstrahlung_temp
 description: |
   The temperature T in bremstrahlung SED of the form
   L_nu=nu**alpha exp(-hnu/kT)
@@ -7,4 +7,4 @@ unit: K
 values: Greater than 0
 parent:
   parameter: 
-file: setup.c
+file: setup_star_bh.c

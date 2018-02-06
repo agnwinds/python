@@ -1,4 +1,4 @@
-name: lamp_post.height
+name: AGN.lamp_post.height
 description: |
   The height above the disc for the lamp post source in units 
   of gravitational radii (typical value ~10). 
@@ -6,4 +6,4 @@ type: Double
 unit: co.gravitational_radius
 parent:
   parameter: geometry_for_pl_source
-file: setup.c
+file: setup_star_bh.c

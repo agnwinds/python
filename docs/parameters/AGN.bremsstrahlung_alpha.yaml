@@ -1,4 +1,4 @@
-name: agn_bremsstrahlung_alpha
+name: AGN.bremsstrahlung_alpha
 description: |
   The frequency exponent alpha in bremstrahlung SED of the form
   L_nu=nu**alpha exp(-hnu/kT)
@@ -7,4 +7,4 @@ unit: None
 values: Any - sign is not asssumed so use negative if you want negative
 parent:
   parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-file: setup.c
+file: setup_star_bh.c

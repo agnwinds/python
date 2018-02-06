@@ -1,4 +1,4 @@
-name: geometry_for_pl_source
+name: AGN.geometry_for_pl_source
 description: |
   Choose the geometry for the power law source.
 type: Enum (Int)
@@ -18,4 +18,4 @@ values:
     a subsequent parameter, lamp_post.height. 
 parent:
   parameter: QSO_BH_radiation
-file: setup.c
+file: setup_star_bh.c

@@ -1,4 +1,4 @@
-name: Select_scatters
+name: Spectrum.select_scatters
 description: |
   Advaned command that allows one to extract photons that
   have undergone a certain number of scatters.  If n > MAXSCAT,
