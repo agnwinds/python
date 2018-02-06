@@ -1,4 +1,4 @@
-name: track_resonant_scatters
+name: Diag.make_ioncycle_tables
 description: |
   Multi-line description, must keep indentation.
 type: Int

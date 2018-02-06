@@ -1,4 +1,4 @@
-name: save_extract_photons
+name: Diag.save_extract_photons
 description: |
   Multi-line description, must keep indentation.
 type: Int

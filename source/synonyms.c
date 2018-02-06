@@ -82,7 +82,11 @@ char *old_names[] =
     "agn_bremsstrahlung_temp","agn_bremsstrahlung_alpha","agn_blackbody_temp",
     "agn_power_law_cutoff","geometry_for_pl_source","lamp_post.height",
     "Select_specific_no_of_scatters_in_spectra","Select_scatters","Select_photons_by_position",
-    "Select_location","rho","z","azimuth","r"
+    "Select_location","rho","z","azimuth","r",
+    "save_cell_statistics","ispymode","keep_ioncycle_windsaves","make_ioncycle_tables",
+    "save_extract_photons", "print_dvds_info","track_resonant_scatters",
+    "Use.standard.care.factors","Fractional.distance.photon.may.travel",
+    "Lowest.ion.density.contributing.to.photoabsorption", "Keep.photoabs.during.final.spectrum"
 };
 
 char *new_names[] = { "Central.object.mass", "Central.object.radius",
@@ -106,9 +110,13 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
     "AGN.power_law_cutoff","AGN.geometry_for_pl_source","AGN.lamp_post_height"
     "Spectrum.select_specific_no_of_scatters_in_spectra","Spectrum.select_scatters","Spectrum.select_photons_by_position",
     "Spectrum.select_location","Spectrum.select_rho","Spectrum.select_z","Spectrum.select_azimuth","Spectrum.select_r"
+    "Diag.save_cell_statistics","Diag.ispymode","Diag.keep_ioncycle_windsaves","Diag.make_ioncycle_tables",
+    "Diag.save_extract_photons", "Diag.print_dvds_info","Diag.track_resonant_scatters"
+    "Diag.use_standard_care_factors","Diag.fractional_distance_photon_may_travel",
+    "Diag.lowest_ion_density_for_photoabs", "Diag.keep_photoabs_in_final_spectra"
 };
 
-int nunber_of_names = 57;
+int nunber_of_names = 68;
 
 
 

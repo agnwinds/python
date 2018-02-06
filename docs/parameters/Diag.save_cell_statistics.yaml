@@ -1,4 +1,4 @@
-name: save_cell_statistics
+name: Diag.save_cell_statistics
 description: |
   Choose whether to save the statistics for a selection of save_cell_statistics.
   If yes, it looks for a file called "diag_cells.dat" which contains the cells to track,

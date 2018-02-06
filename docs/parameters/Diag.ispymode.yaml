@@ -1,4 +1,4 @@
-name: ispymode
+name: Diag.ispymode
 description: |
   creates a file root.ispy which contains information about cell
   statistics for a given set of cells. Very similar to 

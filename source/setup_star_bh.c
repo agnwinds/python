@@ -411,14 +411,14 @@ get_standard_care_factors ()
 
   if (modes.iadvanced)
     {
-      rdint ("@Use.standard.care.factors(1=yes)", &istandard);
+      rdint ("@Diag.use_standard_care_factors(1=yes)", &istandard);
 
       if (!istandard)
 	{
-	  rddoub ("@Fractional.distance.photon.may.travel", &SMAX_FRAC);
-	  rddoub ("@Lowest.ion.density.contributing.to.photoabsorption",
+	  rddoub ("@Diag.fractional_distance_photon_may_travel", &SMAX_FRAC);
+	  rddoub ("@Diag.lowest_ion_density_for_photoabs",
 		  &DENSITY_PHOT_MIN);
-	  rdint ("@Keep.photoabs.during.final.spectrum(1=yes)",
+	  rdint ("@Diag.keep_photoabs_in_final_spectra(1=yes)",
 		 &modes.keep_photoabs);
 	}
     }

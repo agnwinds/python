@@ -1,4 +1,4 @@
-name: keep_ioncycle_windsaves
+name: Diag.keep_ioncycle_windsaves
 description: |
   Decide whether or not to keep a copy of the windsave file after
   each ionization cycle in order to track the changes as the 

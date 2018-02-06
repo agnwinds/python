@@ -1,4 +1,4 @@
-name: print_dvds_info
+name: Diag.print_dvds_info
 description: |
   Print out information about the velocity gradients in the 
   cells to a file root.dvds.diag.
