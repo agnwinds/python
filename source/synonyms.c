@@ -76,7 +76,9 @@ char *old_names[] =
     "tstar","Rad_type_for_star","Rad_type_for_star",
     "Rad_type_for_disk","Rad_type_for_bl","Boundary_layer_radiation",
     "Rad_type_for_bl","t_bl","lum_bl","homologous_boundary_mdot","msec",
-    "period"
+    "period","shell_wind_mdot","Photon.sampling.approach","Num.of.frequency.bands",
+    "Lowest_energy_to_be_considered","Highest_energy_to_be_considered","Band.boundary",
+    "Band.minimum_fraction"
 };
 
 char *new_names[] = { "Central.object.mass", "Central.object.radius",
@@ -93,10 +95,12 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
     "Disk.rad_type_in_final_spectrum","Boundary_layer.rad_type_in_final_spectrum",
     "Boundary_layer.radiation","Boundary_layer.rad_type_to_make_wind","Boundary_layer.temp",
     "Boundary_layer.luminosity","homologous.boundary_mdot","Binary.mass_sec",
-    "Binary.period"
+    "Binary.period","shell.wind_mdot","Photon_sampling.approach","Photon_sampling.nbands",
+    "Photon_sampling.low_energy_limit","Photon_sampling.high_energy_limit","Photon_sampling.band_boundary",
+    "Photon_sampling,band_min_frac"
 };
 
-int nunber_of_names = 36;
+int nunber_of_names = 43;
 
 
 
