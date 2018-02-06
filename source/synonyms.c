@@ -75,7 +75,7 @@ char *old_names[] =
     "phase","live.or.die","spec.type","mstar","rstar","Star_radiation",
     "tstar","Rad_type_for_star","Rad_type_for_star",
     "Rad_type_for_disk","Rad_type_for_bl","Boundary_layer_radiation",
-    "Rad_type_for_bl","t_bl","lum_bl"
+    "Rad_type_for_bl","t_bl","lum_bl","homologous_boundary_mdot"
 };
 
 char *new_names[] = { "Central.object.mass", "Central.object.radius",
@@ -91,10 +91,10 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
     "Central_object.rad_type_in_final_spectrum",
     "Disk.rad_type_in_final_spectrum","Boundary_layer.rad_type_in_final_spectrum",
     "Boundary_layer.radiation","Boundary_layer.rad_type_to_make_wind","Boundary_layer.temp",
-    "Boundary_layer.luminosity"
+    "Boundary_layer.luminosity","homologous.boundary_mdot"
 };
 
-int nunber_of_names = 33;
+int nunber_of_names = 34;
 
 
 
