@@ -85,11 +85,11 @@ get_stellar_params ()
     {
 
       geo.m_sec /= MSOL;	// Convert units for ease of data entry
-      rddoub ("msec(msol)", &geo.m_sec);
+      rddoub ("Binary.mass_sec(msol)", &geo.m_sec);
       geo.m_sec *= MSOL;
 
       geo.period /= 3600.;	// Convert units to hours for easy of data entry
-      rddoub ("period(hr)", &geo.period);
+      rddoub ("Binary.period(hr)", &geo.period);
       geo.period *= 3600.;	// Put back to cgs immediately
     }
 
