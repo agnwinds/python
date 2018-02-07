@@ -1,0 +1,23 @@
+
+=================
+Ionization_cycles
+=================
+
+Ionization_cycles
+=================
+The number of ionization cycles to execute - 
+these are cycles to determine the ionization and thermal state of the wind
+
+**Type:** Int
+
+**Unit:** None
+
+**Value:** greater than 0
+
+**Parent(s):**
+  parameter_: none
+
+
+**File:** setup2.c
+
+

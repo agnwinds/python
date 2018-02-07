@@ -1,0 +1,21 @@
+
+=====
+Extra
+=====
+
+Extra.diagnostics
+=================
+Decide whether or not to use extra diagnostics in advanced mode.
+If set to 1, this triggers a load of extra questions that allow one to investigate 
+things such as photon cell statistics, the velocity gradients in cells and 
+the resonant scatters in the wind
+
+**Type:** Boolean (1/0)
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** python.c
+
+
