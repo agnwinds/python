@@ -86,7 +86,9 @@ char *old_names[] =
     "save_cell_statistics","ispymode","keep_ioncycle_windsaves","make_ioncycle_tables",
     "save_extract_photons", "print_dvds_info","track_resonant_scatters",
     "Use.standard.care.factors","Fractional.distance.photon.may.travel",
-    "Lowest.ion.density.contributing.to.photoabsorption", "Keep.photoabs.during.final.spectrum"
+    "Lowest.ion.density.contributing.to.photoabsorption", "Keep.photoabs.during.final.spectrum",
+    NULL
+
 };
 
 char *new_names[] = { "Central.object.mass", "Central.object.radius",
@@ -107,28 +109,52 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
     "Photon_sampling.low_energy_limit","Photon_sampling.high_energy_limit","Photon_sampling.band_boundary",
     "Photon_sampling,band_min_frac",
     "AGN.bremsstrahlung_temp","AGN.bremsstrahlung_alpha","AGN.blackbody_temp",
-    "AGN.power_law_cutoff","AGN.geometry_for_pl_source","AGN.lamp_post_height"
+    "AGN.power_law_cutoff","AGN.geometry_for_pl_source","AGN.lamp_post_height",
     "Spectrum.select_specific_no_of_scatters_in_spectra","Spectrum.select_scatters","Spectrum.select_photons_by_position",
-    "Spectrum.select_location","Spectrum.select_rho","Spectrum.select_z","Spectrum.select_azimuth","Spectrum.select_r"
+    "Spectrum.select_location","Spectrum.select_rho","Spectrum.select_z","Spectrum.select_azimuth","Spectrum.select_r",
     "Diag.save_cell_statistics","Diag.ispymode","Diag.keep_ioncycle_windsaves","Diag.make_ioncycle_tables",
-    "Diag.save_extract_photons", "Diag.print_dvds_info","Diag.track_resonant_scatters"
+    "Diag.save_extract_photons", "Diag.print_dvds_info","Diag.track_resonant_scatters",
     "Diag.use_standard_care_factors","Diag.fractional_distance_photon_may_travel",
-    "Diag.lowest_ion_density_for_photoabs", "Diag.keep_photoabs_in_final_spectra"
+    "Diag.lowest_ion_density_for_photoabs", "Diag.keep_photoabs_in_final_spectra",
+    NULL
 };
 
-int nunber_of_names = 68;
 
 
+int number_of_names = 68;
+
+#define MIN(a,b) ((a)<b ? a:b)
 
 int
 check_synonyms (new_question, old_question)
      char new_question[], old_question[];
 {
-  int n;
+  int i,n;
   char *line;
   char firstword[LINELEN];
   int nwords, wordlength;
   char *ccc, *index ();
+
+  /* First check that the synonyms list has the smae number of entries in both lists and that 
+   * this agrees with the number that it is supposed to have
+   */
+
+  int n_old_names = -1;
+  while (old_names[++n_old_names] != NULL) { /* do nothing */}
+
+  int n_new_names = -1;
+  while (new_names[++n_new_names] != NULL) { /* do nothing */}
+
+  if (n_new_names!=n_old_names || number_of_names != n_old_names){
+	Error("check_synonums: %d %d %d\n",number_of_names,n_old_names,n_new_names);
+	n=MIN(n_new_names,n_old_names);
+	for (i=0;i<n;i++){
+		Log("%3d %40s %40s\n",i,old_names[i],new_names[i]);
+	}
+	exit(0);
+  }
+
+
 
 
 // Strip off any extra bits in the new question
@@ -161,7 +187,7 @@ check_synonyms (new_question, old_question)
  */
 
 
-  for (n = 0; n < nunber_of_names; n++)
+  for (n = 0; n < number_of_names; n++)
     {
       if (strncmp (new_names[n], firstword, wordlength) == 0)
 	{
