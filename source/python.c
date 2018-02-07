@@ -17,7 +17,7 @@ Arguments:
 	and the switches have the following meanings
 
 	-h 	to get this help message
-	-r 	restart a run of the progarm reading the file xxx.windsave
+	-r 	restart a run of the program reading the file xxx.windsave
 
 	-t time_max	limit the total time to approximately time_max seconds.  Note that the program checks
 		for this limit somewhat infrequently, usually at the ends of cycles, because it
@@ -750,11 +750,11 @@ main (argc, argv)
   check_grid ();
 
   w = wmain;
-  if (modes.save_cell_stats)
+  if (modes.extra_diagnostics)
     {
       /* Open a diagnostic file or files (with hardwired names) */
 
-      open_diagfile ();
+      init_extra_diagnostics ();
     }
 
   /* initialize the random number generator */

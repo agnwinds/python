@@ -1233,11 +1233,6 @@ char hubeny_list[132];          //Location of listing of files representing hube
 
 
 
-// Allow for a diagnostic file 
-
-FILE *epltptr;                  //TEST
-// diag_on_off is deprecated see #111, #120
-//int diag_on_off;              // on is non-zero  //TEST
 
 
 /* These variables are stored or used by the routines for anisotropic scattering */
@@ -1347,6 +1342,7 @@ struct advanced_modes
 {
   /* these are all 0=off, 1=yes */
   int iadvanced;                // this is controlled by the -d flag, global mode control.
+  int extra_diagnostics;        // when set various extra files will be written out depending what one wants to check
   int save_cell_stats;          // want to save photons statistics by cell
   int ispy;                     // want to use the ispy function
   int keep_ioncycle_windsaves;  // want to save wind file each ionization cycle
