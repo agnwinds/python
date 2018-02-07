@@ -161,10 +161,11 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 
       if (modes.save_extract_photons && 1545.0 < 2.997925e18 / pp.freq && 2.997925e18 / pp.freq < 1565.0)
       {
-        fprintf (epltptr,
-                 "%3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %7.2f %7.2f \n",
-                 n, p->x[0], p->x[1], p->x[2], v[0], v[1], v[2],
-                 p->lmn[0], p->lmn[1], p->lmn[2], pp.lmn[0], pp.lmn[1], pp.lmn[2], 2.997925e18 / p->freq, 2.997925e18 / pp.freq);
+          save_extract_photons(n,p,&pp,v);
+//OLD        fprintf (epltptr,
+//OLD                 "%3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %7.2f %7.2f \n",
+//OLD                 n, p->x[0], p->x[1], p->x[2], v[0], v[1], v[2],
+//OLD                 p->lmn[0], p->lmn[1], p->lmn[2], pp.lmn[0], pp.lmn[1], pp.lmn[2], 2.997925e18 / p->freq, 2.997925e18 / pp.freq);
       }
 
 /* 68b - 0902 - ksl - turn phot_history on for the middle spectrum.  Note that we have to wait
