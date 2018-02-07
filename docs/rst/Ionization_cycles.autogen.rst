@@ -5,16 +5,17 @@ Ionization_cycles
 
 Ionization_cycles
 =================
-Multi-line description, must keep indentation.
+The number of ionization cycles to execute - 
+these are cycles to determine the ionization and thermal state of the wind
 
 **Type:** Int
 
 **Unit:** None
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** greater than 0
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  parameter_: none
 
 
 **File:** setup2.c

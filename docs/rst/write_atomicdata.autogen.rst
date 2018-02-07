@@ -5,7 +5,8 @@ write_atomicdata
 
 write_atomicdata
 ================
-Multi-line description, must keep indentation.
+Choose whether to write the atomic data that is being used to 
+an output file.
 
 **Type:** Boolean (1/0)
 

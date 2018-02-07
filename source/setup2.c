@@ -424,33 +424,33 @@ init_observers ()
   if (modes.iadvanced)
     {
       strcpy (yesno, "n");
-      rdstr ("@Select_specific_no_of_scatters_in_spectra(y/n)", yesno);
+      rdstr ("@Spectrum.select_specific_no_of_scatters_in_spectra(y/n)", yesno);
       if (yesno[0] == 'y')
 	{
 	  Log
 	    ("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
 	  for (n = 0; n < geo.nangles; n++)
 	    {
-	      rdint ("@Select_scatters", &geo.scat_select[n]);
+	      rdint ("@Spectrum.select_scatters", &geo.scat_select[n]);
 	    }
 	}
       strcpy (yesno, "n");
-      rdstr ("@Select_photons_by_position(y/n)", yesno);
+      rdstr ("@Spectrum.select_photons_by_position(y/n)", yesno);
       if (yesno[0] == 'y')
 	{
 	  Log
 	    ("OK 0->all; -1 -> below; 1 -> above the disk, 2 -> specific location in wind\n");
 	  for (n = 0; n < geo.nangles; n++)
 	    {
-	      rdint ("@Select_location", &geo.top_bot_select[n]);
+	      rdint ("@Spectrum.select_location", &geo.top_bot_select[n]);
 	      if (geo.top_bot_select[n] == 2)
 		{
 		  Log
 		    ("Warning: Make sure that position will be in wind, or no joy will be obtained\n");
-		  rddoub ("@rho(cm)", &geo.rho_select[n]);
-		  rddoub ("@z(cm)", &geo.z_select[n]);
-		  rddoub ("@azimuth(deg)", &geo.az_select[n]);
-		  rddoub ("@r(cm)", &geo.r_select[n]);
+		  rddoub ("@Spectrum.select_rho(cm)", &geo.rho_select[n]);
+		  rddoub ("@Spectrum.select_z(cm)", &geo.z_select[n]);
+		  rddoub ("@Spectrum.select_azimuth(deg)", &geo.az_select[n]);
+		  rddoub ("@Spectrum.select_r(cm)", &geo.r_select[n]);
 
 		}
 	    }

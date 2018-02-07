@@ -5,12 +5,15 @@ QSO_BH_radiation
 
 QSO_BH_radiation
 ================
-Multi-line description, must keep indentation.
+A switch to define wether or not the central source in an AGN type simulation
+radiates
 
 **Type:** Boolean (1/0)
 
+**Value:** 1 means that the source radiates
+
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  System_Type_: 2
 
 
 **File:** setup.c

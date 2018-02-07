@@ -5,14 +5,18 @@ sv
 
 sv.acceleration_exponent
 ========================
-Multi-line description, must keep indentation.
+Power-law acceleration exponent (i.e. alpha) of a line driven wind in a Shlosman & Vitello (SV) CV disk wind model.
+Sets the length scale over which the accleration to v_inf is accomplished. 
+This value is a constant; when equal to 1 the results resemble those of a linear velocity law.
+Typically for an SV type wind this power law exponent is 1.5.
+See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
 
 **Type:** Double
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** Greater than 0
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  wind_type_: 0
 
 
 **File:** sv.c
@@ -20,16 +24,17 @@ Multi-line description, must keep indentation.
 
 sv.acceleration_length
 ======================
-Multi-line description, must keep indentation.
+The size of the acceleration length scale for a disk wind described by the
+Shlosman Vitelo model. See equation (2) Shlosman & Vitelo ApJ (1993),409,372 
 
 **Type:** Double
 
 **Unit:** cm
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** Greater than 0
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  wind_type_: 0
 
 
 **File:** sv.c
@@ -37,16 +42,19 @@ Multi-line description, must keep indentation.
 
 sv.diskmax
 ==========
-Multi-line description, must keep indentation.
+The outermost radius from which the wind rises in a Shlossman-Vitello type disk wind.
+This radius is measured along the radial disk (r) direction i.e. zero describes the centre of the central object
+(white dwarf)
+See figure 1 of Shlosman & Vitello 1993, ApJ 409,372.
 
 **Type:** Double
 
-**Unit:** co.radius
+**Unit:** cm
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** Greater than or equal to sv.diskmin (inner radius disk wind)
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  wind_type_: 0
 
 
 **File:** sv.c
@@ -54,16 +62,19 @@ Multi-line description, must keep indentation.
 
 sv.diskmin
 ==========
-Multi-line description, must keep indentation.
+The innermost radius from which the wind rises in a Shlossman-Vitello type disk wind.
+This radius is measured along the radial disk (r) direction i.e. zero describes the centre of the central object
+(white dwarf)
+See figure 1 of Shlosman & Vitello 1993, ApJ 409,372.
 
 **Type:** Double
 
-**Unit:** co.radius
+**Unit:** cm
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** Greater than or equal to the radius of the central object (white dwarf)
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  wind_type_: 0.0
 
 
 **File:** sv.c
@@ -71,14 +82,16 @@ Multi-line description, must keep indentation.
 
 sv.mdot_r_exponent
 ==================
-Multi-line description, must keep indentation.
+The exponent for the mass loss rate as defined in the Shlosman Vitelo model,
+See lambda in equation (4) Shlosman & Vitelo,ApJ,1993,409,372.
+A value of 0 sets a uniform mass loss rate.
 
 **Type:** Double
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** Greater than=0
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  wind_type_: 0
 
 
 **File:** sv.c
@@ -113,10 +126,10 @@ See figure 1 of Shlossman & Vitello 1993, ApJ, 409, 372.
 
 **Unit:** Degrees
 
-**Value:** Greater than= 0
+**Value:** Greater than 0
 
 **Parent(s):**
-  parameter_: required when the wind_type is set to 0, a SV wind.
+  wind_type_: 0
 
 
 **File:** sv.c
@@ -124,16 +137,18 @@ See figure 1 of Shlossman & Vitello 1993, ApJ, 409, 372.
 
 sv.v_infinity
 =============
-Multi-line description, must keep indentation.
+Asymptotic (i.e. final) velocity of a line driven wind in a Shlosman & Vitello CV disk wind model.
+Assumed to scale with the local velocity at the base of the streamline.
+See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
 
 **Type:** Double
 
 **Unit:** Escape velocity
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** Greater than 0
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  wind_type_: 0
 
 
 **File:** sv.c
