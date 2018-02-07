@@ -273,10 +273,6 @@ windsave2table: $(table_objects)
 	cp $@ $(BIN)
 	mv $@ $(BIN)/windsave2table$(VERSION)
 
-py_smooth: py_smooth.o 
-	$(CC) $(CFLAGS) py_smooth.o  $(LDFLAGS)  -o py_smooth
-		mv $@ $(BIN)
-
 
 
 

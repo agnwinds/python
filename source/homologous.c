@@ -1,4 +1,38 @@
 
+/***********************************************************
+                                       Space Telescope Science Institute
+
+ Synopsis:
+	Routines describing a homologous flow in Python.
+
+Arguments:		
+
+Returns:
+ 
+Description:	
+
+    A homlogous flow is a flow in which the velocity is proportional
+    to the distance from the central source.  In this case, the
+    density is taken to have the form of a power law.
+
+Notes:
+
+    Homlogous flows were added to allow comparisons with SN codes,
+    such as Tardis
+
+    These routines were largely adapted from those associated with stellar
+    winds, and some of the variables use those that are associated with stellar
+    winds.  With domains, it would be clearer to give them there own variable
+   names.  Note that the maximum radius is not, as it should be defined here, but
+   rather relies on geo.rmax.  This should be fixed.
+
+
+
+History:
+
+**************************************************************/
+
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,6 +60,7 @@ Description:
 Notes:
 
 
+
 History:
         13jul   sas     Created for SN test problem. Based on stellar_wind.c
 	15aug	ksl	Modified to accept a domain number
@@ -51,8 +86,14 @@ get_homologous_params (ndom)
   one_dom->cl_beta = 7.0;
 
   one_dom->stellar_wind_mdot /= MSOL / YR;
-  rddoub ("homologous_boundary_mdot(msol/yr)", &one_dom->stellar_wind_mdot);
+  rddoub ("homologous.boundary_mdot(msol/yr)", &one_dom->stellar_wind_mdot);
   one_dom->stellar_wind_mdot *= MSOL / YR;
+
+/* XXXX ksl 1802 - The maximum radius of the wind here seems to be defined externally
+ * and it is not clear that this is what one wants in a situation with multiple domains
+ * Conisder adding an maximu radius as an imput variable
+ */
+
 
   rddoub ("homologous.radmin(cm)", &one_dom->rmin);     /*Radius where wind begins */
   if (one_dom->rmin < geo.rstar)

@@ -1,0 +1,10 @@
+name: Diag.keep_photoabs_in_final_spectra
+description: |
+  This advanced options allows you to include or exclude photoabsorpiotn
+  in calculating the final spectra.  (but ksl does not know what the
+  default is)
+type: Boolean (1/0)
+parent:
+  parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+file: setup.c
+advanced: true

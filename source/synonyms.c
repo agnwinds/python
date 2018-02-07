@@ -75,7 +75,18 @@ char *old_names[] =
     "phase","live.or.die","spec.type","mstar","rstar","Star_radiation",
     "tstar","Rad_type_for_star","Rad_type_for_star",
     "Rad_type_for_disk","Rad_type_for_bl","Boundary_layer_radiation",
-    "Rad_type_for_bl","t_bl","lum_bl"
+    "Rad_type_for_bl","t_bl","lum_bl","homologous_boundary_mdot","msec",
+    "period","shell_wind_mdot","Photon.sampling.approach","Num.of.frequency.bands",
+    "Lowest_energy_to_be_considered","Highest_energy_to_be_considered","Band.boundary",
+    "Band.minimum_fraction",
+    "agn_bremsstrahlung_temp","agn_bremsstrahlung_alpha","agn_blackbody_temp",
+    "agn_power_law_cutoff","geometry_for_pl_source","lamp_post.height",
+    "Select_specific_no_of_scatters_in_spectra","Select_scatters","Select_photons_by_position",
+    "Select_location","rho","z","azimuth","r",
+    "save_cell_statistics","ispymode","keep_ioncycle_windsaves","make_ioncycle_tables",
+    "save_extract_photons", "print_dvds_info","track_resonant_scatters",
+    "Use.standard.care.factors","Fractional.distance.photon.may.travel",
+    "Lowest.ion.density.contributing.to.photoabsorption", "Keep.photoabs.during.final.spectrum"
 };
 
 char *new_names[] = { "Central.object.mass", "Central.object.radius",
@@ -91,10 +102,21 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
     "Central_object.rad_type_in_final_spectrum",
     "Disk.rad_type_in_final_spectrum","Boundary_layer.rad_type_in_final_spectrum",
     "Boundary_layer.radiation","Boundary_layer.rad_type_to_make_wind","Boundary_layer.temp",
-    "Boundary_layer.luminosity"
+    "Boundary_layer.luminosity","homologous.boundary_mdot","Binary.mass_sec",
+    "Binary.period","shell.wind_mdot","Photon_sampling.approach","Photon_sampling.nbands",
+    "Photon_sampling.low_energy_limit","Photon_sampling.high_energy_limit","Photon_sampling.band_boundary",
+    "Photon_sampling,band_min_frac",
+    "AGN.bremsstrahlung_temp","AGN.bremsstrahlung_alpha","AGN.blackbody_temp",
+    "AGN.power_law_cutoff","AGN.geometry_for_pl_source","AGN.lamp_post_height"
+    "Spectrum.select_specific_no_of_scatters_in_spectra","Spectrum.select_scatters","Spectrum.select_photons_by_position",
+    "Spectrum.select_location","Spectrum.select_rho","Spectrum.select_z","Spectrum.select_azimuth","Spectrum.select_r"
+    "Diag.save_cell_statistics","Diag.ispymode","Diag.keep_ioncycle_windsaves","Diag.make_ioncycle_tables",
+    "Diag.save_extract_photons", "Diag.print_dvds_info","Diag.track_resonant_scatters"
+    "Diag.use_standard_care_factors","Diag.fractional_distance_photon_may_travel",
+    "Diag.lowest_ion_density_for_photoabs", "Diag.keep_photoabs_in_final_spectra"
 };
 
-int nunber_of_names = 33;
+int nunber_of_names = 68;
 
 
 
