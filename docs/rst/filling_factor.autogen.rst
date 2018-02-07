@@ -5,7 +5,9 @@ filling_factor
 
 filling_factor
 ==============
-Multi-line description, must keep indentation.
+The volume filling factor of the outflow. The implementation
+of clumping (microclumping) is described in 
+Matthews et al. (2016), 2016MNRAS.458..293M. Asked once per domain. 
 
 **Type:** Enum (Int)
 

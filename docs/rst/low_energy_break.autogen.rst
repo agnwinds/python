@@ -5,16 +5,22 @@ low_energy_break
 
 low_energy_break
 ================
-Multi-line description, must keep indentation.
+This is a command to define a cloudy type broken power 
+law SED - mainly used for testing the code against cloudy. 
+This SED has hardwired frequency exponents of 2.5 below the
+low energy break and -2.0 abov e the high energy break. This
+parameter defines the energy of the low energy break.
 
 **Type:** Double
 
 **Unit:** eV
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** Greater than zero
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  QSO_BH_radiation_: 1
+
+  Rad_type_for_agn_: 4
 
 
 **File:** setup.c

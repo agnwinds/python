@@ -5,16 +5,14 @@ geo
 
 geo.xlog_scale
 ==============
-Multi-line description, must keep indentation.
+Choose the logarithmic scale length for the grid in the x-direction.
 
 **Type:** Double
 
-**Unit:** None
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Unit:** cm
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  parameter_: adjust_grid
 
 
 **File:** setup_domains.c
@@ -22,16 +20,14 @@ Multi-line description, must keep indentation.
 
 geo.zlog_scale
 ==============
-Multi-line description, must keep indentation.
+Choose the logarithmic scale length for the grid in the z-direction.
 
 **Type:** Double
 
-**Unit:** None
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Unit:** cm
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  parameter_: adjust_grid
 
 
 **File:** setup_domains.c

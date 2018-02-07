@@ -1,9 +1,11 @@
 name: shell_wind_mdot
 description: |
-  Multi-line description, must keep indentation.
+  The massloss thruogh a diagnostic shell type wind. One normally sets
+  this experimentally in order to get a required hydrogen density in
+  the shell
 type: Double
 unit: M☉/year
-values: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+values: Greater than 0
 parent:
-  parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  Wind_type: 9
 file: shell_wind.c

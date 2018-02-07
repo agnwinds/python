@@ -5,7 +5,8 @@ adjust_grid
 
 adjust_grid
 ===========
-Multi-line description, must keep indentation.
+Choose whether or not you would like to adjust the scale length
+for the logarithmic grid. Advanced command. 
 
 **Type:** Boolean (1/0)
 
