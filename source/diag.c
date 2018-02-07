@@ -171,7 +171,7 @@ init_extra_diagnostics ()
   FILE *cellfile;		/*File that may or may not exist, pointing to cells we want to write out photon stats for */
   int cell;			/*Temporary storage of cell to use */
 
-  if (eplinit == 0 && modes.save_extract_photons)
+  if (eplinit == 0 && modes.extra_diagnostics)
     {
       epltptr = fopen ("python.ext", "w");
       eplinit = 1;
@@ -294,12 +294,10 @@ save_photons (p, comment)
      PhotPtr p;
      char comment[];
 {
-//  fprintf (epltptr,
-//	   "PHOTON %3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %s \n",
-//	   p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
-//	   p->lmn[2], comment);
-  fprintf (epltptr,
-	   "PHOTON\n");
+fprintf (epltptr,
+"PHOTON %3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %s \n",
+p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
+p->lmn[2], comment);
 	   
 return(0);
 }
