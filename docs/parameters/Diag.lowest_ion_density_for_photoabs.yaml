@@ -8,5 +8,5 @@ unit: None
 values: greater than 0 
 parent:
   parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-file: setup.c
+file: diag.c
 advanced: true
