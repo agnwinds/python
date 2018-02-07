@@ -767,7 +767,7 @@ main (argc, argv)
    * the clock
    */
 
-  if ((modes.rand_seed_usetime == 1) || (modes.zeus_connect == 1))
+  if (modes.rand_seed_usetime == 1)
     {
       n = (unsigned int) clock () * (rank_global + 1);
       srand (n);
