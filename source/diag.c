@@ -137,11 +137,12 @@ get_extra_diagnostics ()
   rdint ("@Diag.ispymode", &modes.ispy);
   rdint ("@Diag.keep_ioncycle_windsaves", &modes.keep_ioncycle_windsaves);
   rdint ("@Diag.make_ioncycle_tables", &modes.make_tables);
+  rdint ("@Diag.save_photons", &modes.save_photons);
   rdint ("@Diag.save_extract_photons", &modes.save_extract_photons);
   rdint ("@Diag.print_dvds_info", &modes.print_dvds_info);
   rdint ("@Diag.track_resonant_scatters", &modes.track_resonant_scatters);
 
-  if (modes.save_cell_stats || modes.ispy
+  if (modes.save_cell_stats || modes.ispy || modes.save_photons
       || modes.save_extract_photons | modes.track_resonant_scatters)
     {
       modes.extra_diagnostics = 1;
@@ -274,16 +275,31 @@ save_photon_stats (one, p, ds, w_ave)
 }
 
 int
-save_extract_photons (n,p, pp, v)
-    int n;
+save_extract_photons (n, p, pp, v)
+     int n;
      PhotPtr p, pp;
      double *v;
-     {
-       fprintf (epltptr,
-		"EXTRACT %3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %7.2f %7.2f \n",
-		n, p->x[0], p->x[1], p->x[2], v[0], v[1], v[2],
-		p->lmn[0], p->lmn[1], p->lmn[2], pp->lmn[0], pp->lmn[1],
-		pp->lmn[2], 2.997925e18 / p->freq, 2.997925e18 / pp->freq);
+{
+  fprintf (epltptr,
+	   "EXTRACT %3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %7.2f %7.2f \n",
+	   n, p->x[0], p->x[1], p->x[2], v[0], v[1], v[2],
+	   p->lmn[0], p->lmn[1], p->lmn[2], pp->lmn[0], pp->lmn[1],
+	   pp->lmn[2], 2.997925e18 / p->freq, 2.997925e18 / pp->freq);
 
-       return(0);
-     }
+  return (0);
+}
+
+int
+save_photons (p, comment)
+     PhotPtr p;
+     char comment[];
+{
+//  fprintf (epltptr,
+//	   "PHOTON %3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %s \n",
+//	   p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
+//	   p->lmn[2], comment);
+  fprintf (epltptr,
+	   "PHOTON\n");
+	   
+return(0);
+}

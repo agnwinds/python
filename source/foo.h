@@ -272,6 +272,7 @@ int get_extra_diagnostics(void);
 int init_extra_diagnostics(void);
 int save_photon_stats(WindPtr one, PhotPtr p, double ds, double w_ave);
 int save_extract_photons(int n, PhotPtr p, PhotPtr pp, double *v);
+int save_photons(PhotPtr p, char comment[]);
 /* sv.c */
 int get_sv_wind_params(int ndom);
 double sv_velocity(double x[], double v[], int ndom);

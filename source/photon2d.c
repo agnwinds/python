@@ -58,10 +58,18 @@ translate (w, pp, tau_scat, tau, nres)
   if (where_in_wind (pp->x, &ndomain) < 0)
     {
       istat = translate_in_space (pp);
+      if (modes.save_photons)
+      {
+          save_photons(pp,"Space");
+      }
     }
   else if ((pp->grid = where_in_grid (ndomain, pp->x)) >= 0)
     {
       istat = translate_in_wind (w, pp, tau_scat, tau, nres);
+      if (modes.save_photons)
+      {
+          save_photons(pp,"Wind");
+      }
     }
   else
     {
