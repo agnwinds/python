@@ -218,7 +218,7 @@ get_bl_and_agn_params (lstar)
 	  || geo.agn_ion_spectype == SPECTYPE_CL_TAB)
 	{
 	  geo.alpha_agn = (-1.5);
-	  rddoub ("agn_power_law_index", &geo.alpha_agn);
+	  rddoub ("AGN.power_law_index", &geo.alpha_agn);
 
 	  if (geo.alpha_agn == -1.0)	//deal with the pathological case
 	    {
@@ -264,7 +264,7 @@ get_bl_and_agn_params (lstar)
          default is zero which is checked before we call photo_gen_agn */
       geo.pl_low_cutoff = 0.0;
       if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
-	rddoub ("@agn_power_law_cutoff", &geo.pl_low_cutoff);
+	rddoub ("@AGN.power_law_cutoff", &geo.pl_low_cutoff);
 
       rdint ("AGN.geometry_for_pl_source(0=sphere,1=lamp_post)",
 	     &geo.pl_geometry);

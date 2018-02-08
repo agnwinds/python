@@ -252,7 +252,7 @@ bands_init (imode, band)
 
     for (nband = 0; nband < band->nbands; nband++)
     {
-      rddoub ("Photon_sampling,band_min_frac)", &band->min_fraction[nband]);
+      rddoub ("Photon_sampling.band_min_frac)", &band->min_fraction[nband]);
     }
     for (nband = 0; nband < band->nbands; nband++)
     {
@@ -269,7 +269,7 @@ bands_init (imode, band)
       Error ("Trying to use a broken power law banding without setting spectype to broken power law - must set spectype to 4\n");
       exit (0);
     }
-    rddoub ("Lowest_energy_to_be_considered(eV)", &xx);
+    rddoub ("Photon_sampling.low_energy_limit(eV)", &xx);
 
     if (xx > geo.agn_cltab_low)
     {
@@ -277,7 +277,7 @@ bands_init (imode, band)
       Log ("Lowest  frequency reset to 1/10 of low frequency break\n");
     }
     f1 = xx / HEV;
-    rddoub ("Highest_energy_to_be_considered(eV)", &xx);
+    rddoub ("Photon_sampling.high_energy_limit(eV)", &xx);
 
     if (xx < geo.agn_cltab_hi)
     {
