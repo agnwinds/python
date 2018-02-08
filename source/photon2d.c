@@ -58,18 +58,18 @@ translate (w, pp, tau_scat, tau, nres)
   if (where_in_wind (pp->x, &ndomain) < 0)
     {
       istat = translate_in_space (pp);
-      if (modes.save_photons)
-      {
-          save_photons(pp,"Space");
-      }
+     if (modes.save_photons)
+	{
+	  save_photons (pp, "Space");
+	}
     }
   else if ((pp->grid = where_in_grid (ndomain, pp->x)) >= 0)
     {
       istat = translate_in_wind (w, pp, tau_scat, tau, nres);
       if (modes.save_photons)
-      {
-          save_photons(pp,"Wind");
-      }
+	{
+	  save_photons (pp, "Wind");
+	}
     }
   else
     {
@@ -128,14 +128,17 @@ translate_in_space (pp)
     {
       stuff_phot (pp, &ptest);
       move_phot (&ptest, ds + DFUDGE);	/* So now ptest is at the edge of the wind as defined by the boundary
-      From here on we should be in the grid  */
+					   From here on we should be in the grid  */
 
       /* XXX this is a test.  We check at the start whether we are in the grid */
 
       if ((ifail = where_in_grid (ndom, ptest.x)) < 0)
 	{
-	      Error ("translate_in_space: Failure %10.3e %10.3e %10.3e %d %d %d\n",  ptest.x[0], ptest.x[1], ptest.x[2],ptest.np,ifail, xxxbound);
-	};
+	  if (modes.save_photons)
+	    {
+	      save_photons (pp, "NotInGrid_translate_in_space1");
+	    }
+	}
 
       /* XXX this ends the test */
 
@@ -161,10 +164,11 @@ translate_in_space (pp)
 		}
 	      else
 		{
-		  Error
-		    ("translate_in_space: Photon not in grid: %10.3e %10.3e %10.3e %03d %10.3e %10.3e\n",
-		     ptest.x[0], ptest.x[1], ptest.x[2],ptest.np,s,smax);
-		  break;
+		  if (modes.save_photons)
+		    {
+		      save_photons (pp, "NotInGrid_translate_in_space2");
+		    }
+          break;
 		}
 	    }
 
@@ -527,9 +531,10 @@ return and record an error */
     {
       if (translate_in_wind_failure < 1000)
 	{
-	  Error
-	    ("translate_in_wind: Photon not in grid when routine entered\n");
-	  translate_in_wind_failure += 1;
+	  if (modes.save_photons)
+	    {
+	      save_photons (p, "NotInGrid_translate_in_wind");
+	    }
 	}
       return (n);		/* Photon was not in grid */
     }
@@ -578,8 +583,8 @@ return and record an error */
       Error
 	("translate_in_wind: Grid cell %d of photon is not in wind, moving photon %.2e\n",
 	 n, smax);
-      Error ("translate_in_wind: photon %d position: x %g y %g z %g\n", p->np,
-	     p->x[0], p->x[1], p->x[2]);
+      Error ("translate_in_wind: photon %d position: x %g y %g z %g\n",
+	     p->np, p->x[0], p->x[1], p->x[2]);
       move_phot (p, smax);
       return (p->istat);
 
@@ -707,8 +712,11 @@ return and record an error */
 
   if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
     {
-      Error ("ds_in_cell: Photon not in grid when routine entered\n");
-      return (n);		/* Photon was not in grid */
+     if (modes.save_photons)
+	{
+	  save_photons (p, "NotInGrid_ds_in_cell");
+	}
+     return(n);
     }
 
 /* Assign the pointers for the cell containing the photon */

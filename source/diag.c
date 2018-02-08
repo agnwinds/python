@@ -173,7 +173,7 @@ init_extra_diagnostics ()
 
   if (eplinit == 0 && modes.extra_diagnostics)
     {
-      epltptr = fopen ("python.ext", "w");
+      epltptr = fopen ("python.ext.txt", "w");
       eplinit = 1;
     }
 
@@ -274,6 +274,28 @@ save_photon_stats (one, p, ds, w_ave)
   return (0);
 }
 
+
+/***********************************************************
+                Space Telescope Science Insittue
+
+Synopsis: 
+	save_extract_photons saves informations about phtoons in
+    a particulare wavelength gange
+
+Arguments:	
+Returns:
+ 
+Description:
+
+Notes:
+   Moved here to save duplicating code between bf_estimators_increment and radiation.
+
+History:
+   1802 ksl Functionality moved from extract.c to consolidiate how extra
+            diagnostics were carried out.
+ 
+**************************************************************/
+
 int
 save_extract_photons (n, p, pp, v)
      int n;
@@ -289,15 +311,40 @@ save_extract_photons (n, p, pp, v)
   return (0);
 }
 
+/***********************************************************
+             Space Telescope Science Institute
+
+Synopsis: 
+	save_photon
+
+Arguments:	
+	p 			Photon pointer
+	comment 	An arbitrary comment
+
+Returns:
+ 
+Description:
+   This is a diagnositc that allows one to print out information about
+   a photon at any time.  It was written as part of the effort to
+   debub imports for the fu_ori project.
+
+Notes:
+
+History:
+   !802 ksl Coded
+ 
+**************************************************************/
+
+
 int
 save_photons (p, comment)
      PhotPtr p;
      char comment[];
 {
 fprintf (epltptr,
-"PHOTON %3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %s \n",
+"PHOTON %3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %3d %3d %s \n",
 p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
-p->lmn[2], comment);
+p->lmn[2], p->grid, p->istat,comment);
 	   
 return(0);
 }
