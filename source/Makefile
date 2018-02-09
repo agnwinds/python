@@ -170,7 +170,7 @@ python_objects = bb.o get_atomicdata.o photon2d.o photon_gen.o parse.o init.o \
 		wind_updates2d.o windsave.o extract.o cdf.o roche.o random.o \
 		stellar_wind.o homologous.o hydro_import.o corona.o knigge.o  disk.o\
 		lines.o  continuum.o get_models.o emission.o cooling.o recomb.o diag.o \
-		sv.o ionization.o  ispy.o   levels.o gradv.o reposition.o \
+		sv.o ionization.o  levels.o gradv.o reposition.o \
 		anisowind.o util.o density.o  detail.o bands.o time.o \
 		matom.o estimators.o wind_sum.o yso.o cylindrical.o rtheta.o spherical.o  \
 		cylind_var.o bilinear.o gridwind.o partition.o signal.o auger_ionization.o \
@@ -192,7 +192,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 		wind_updates2d.c windsave.c extract.c cdf.c roche.c random.c \
 		stellar_wind.c homologous.c hydro_import.c corona.c knigge.c  disk.c\
 		lines.c  continuum.c emission.c cooling.c recomb.c diag.c \
-		sv.c ionization.c  ispy.c  levels.c gradv.c reposition.c \
+		sv.c ionization.c  levels.c gradv.c reposition.c \
 		anisowind.c util.c density.c  detail.c bands.c time.c \
 		matom.c estimators.c wind_sum.c yso.c cylindrical.c rtheta.c spherical.c  \
 		cylind_var.c bilinear.c gridwind.c partition.c signal.c auger_ionization.c \
