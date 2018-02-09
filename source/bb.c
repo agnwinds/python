@@ -101,6 +101,8 @@ History:
 #include <math.h>
 #include "atomic.h"
 #include "python.h"
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 /***********************************************************
                                        Space Telescope Science Institute
@@ -290,7 +292,8 @@ reset.  A careful review of them is warranted.
 
 
 
-  y = rand () / (MAXRAND);   //We get a random number between 0 and 1
+//  y = rand () / (MAXRAND);   //We get a random number between 0 and 1 - DONE
+  y= gsl_rng_get(rng)/randmax; //We get a random number between 0 and 1 
 
   y = cdf_bb_ylo * (1. - y) + cdf_bb_yhi * y;   // y is now in an allowed place in the cdf
   
@@ -352,7 +355,8 @@ get_rand_pow (x1, x2, alpha)
   double r;
   double a;
 
-  r = rand () / MAXRAND;
+//  r = rand () / MAXRAND; DONE
+  r = gsl_rng_get(rng)/randmax;
 
   if (alpha == -1)
   {
@@ -436,7 +440,8 @@ get_rand_exp (alpha_min, alpha_max)
   double a, aa;
   double delta_alpha;
 
-  r = rand () / MAXRAND;
+//  r = rand () / MAXRAND; //DONE
+  r = gsl_rng_get(rng)/randmax;
 
   x = exp (alpha_min - alpha_max);
 

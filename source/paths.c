@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 #include "atomic.h"
 #include "python.h"
 
@@ -349,7 +351,8 @@ r_draw_from_path_histogram (Wind_Paths_Ptr PathPtr)
   int i_path = -1;
 
   r_total = 0.0;
-  r_rand = PathPtr->d_flux * rand () / MAXRAND;
+//  r_rand = PathPtr->d_flux * rand () / MAXRAND; DONE
+  r_rand = PathPtr->d_flux * gsl_rng_get(rng) / randmax;
   i_path = -1;
 
   //printf("DEBUG: r_rand %g out of total %g\n",r_rand, PathPtr->d_flux);
@@ -361,7 +364,8 @@ r_draw_from_path_histogram (Wind_Paths_Ptr PathPtr)
   //Assign photon path to a random position within the bin.
   r_bin_min = reverb_path_bin[i_path - 1];
   r_bin_max = reverb_path_bin[i_path];
-  r_bin_rand = (rand () / MAXRAND) * (r_bin_max - r_bin_min);
+//  r_bin_rand = (rand () / MAXRAND) * (r_bin_max - r_bin_min); DONE
+  r_bin_rand = (gsl_rng_get(rng) / randmax) * (r_bin_max - r_bin_min);
   r_path = r_bin_min + r_bin_rand;
   return (r_path);
 }
