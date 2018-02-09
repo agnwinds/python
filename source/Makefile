@@ -285,16 +285,6 @@ libatomic.a:  get_atomicdata.o atomic.o
 	cp atomic.h  $(INCLUDE)
 
 
-saha_sources = saha_inv.c get_atomicdata.c
-
-startup_saha: startup $(saha_sources)
-	cproto -I$(INCLUDE) $(saha_sources) > saha_templates.h
-
-saha_inv: saha_inv.o get_atomicdata.c
-	$(CC) ${CFLAGS} saha_inv.o get_atomicdata.o
-	cp $@ $(BIN)/saha_inv
-	mv $@ $(BIN)/saha_inv$(VERSION)
-
 
 clean :
 	rm -f *.o  *~ 
