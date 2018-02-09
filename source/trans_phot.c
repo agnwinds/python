@@ -102,49 +102,40 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
       /* 74a_ksl Check that the weights are real */
 
-      if (sane_check (p[nphot].w))
-	{
-	  Error ("trans_phot:sane_check photon %d has weight %e\n", nphot,
-		 p[nphot].w);
-	}
-      /* Next block added by SS Jan 05 - for anisotropic scattering with extract we want to be sure that everything is
-         initialised (by scatter?) before calling extract for macro atom photons. Insert this call to scatter which should do
-         this. */
+    if (sane_check (p[nphot].w))
+    {
+      Error ("trans_phot:sane_check photon %d has weight %e\n", nphot, p[nphot].w);
+    }
 
+    /* Next block added by SS Jan 05 - for anisotropic scattering with extract we want to be sure that everything is
+       initialised (by scatter?) before calling extract for macro atom photons. Insert this call to scatter which should do
+       this. */
 
-      if (geo.rt_mode == RT_MODE_MACRO
-	  && geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
-	{
-	  if (p[nphot].origin == PTYPE_WIND)
-	    {
-	      if (p[nphot].nres > -1 && p[nphot].nres < NLINES)
-		{
-		  geo.rt_mode = RT_MODE_2LEVEL;
-		  /* 74a_ksl Check to see when a photon weight is becoming unreal */
-		  if (sane_check (p[nphot].w))
-		    {
-		      Error
-			("trans_phot:sane_check photon %d has weight %e before scatter\n",
-			 nphot, p[nphot].w);
-		    }
-		  if ((nerr =
-		       scatter (&p[nphot], &p[nphot].nres, &nnscat)) != 0)
-		    {
-		      Error
-			("trans_phot: Bad return from scatter %d at point 1",
-			 nerr);
-		    }
-		  /* 74a_ksl Check to see when a photon weight is becoming unreal */
-		  if (sane_check (p[nphot].w))
-		    {
-		      Error
-			("trans_phot:sane_check photon %d has weight %e aftger scatter\n",
-			 nphot, p[nphot].w);
-		    }
-		  geo.rt_mode = RT_MODE_MACRO;
-		}
-	    }
-	}
+    if (geo.rt_mode == RT_MODE_MACRO && geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
+    {
+      if (p[nphot].origin == PTYPE_WIND)
+      {
+        if (p[nphot].nres > -1 && p[nphot].nres < NLINES)
+        {
+          geo.rt_mode = RT_MODE_2LEVEL;
+          /* 74a_ksl Check to see when a photon weight is becoming unreal */
+          if (sane_check (p[nphot].w))
+          {
+            Error ("trans_phot:sane_check photon %d has weight %e before scatter\n", nphot, p[nphot].w);
+          }
+          if ((nerr = scatter (&p[nphot], &p[nphot].nres, &nnscat)) != 0)
+          {
+            Error ("trans_phot: Bad return from scatter %d at point 1", nerr);
+          }
+          /* 74a_ksl Check to see when a photon weight is becoming unreal */
+          if (sane_check (p[nphot].w))
+          {
+            Error ("trans_phot:sane_check photon %d has weight %e aftger scatter\n", nphot, p[nphot].w);
+          }
+          geo.rt_mode = RT_MODE_MACRO;
+        }
+      }
+    }
 
 
       stuff_phot (&p[nphot], &pp);
@@ -168,14 +159,13 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 	  stuff_phot (&p[nphot], &pextract);
 
 
-	  /* We then increase weight to account for number of scatters. This is done because in extract we multiply by the escape
-	     probability along a given direction, but we also need to divide the weight by the mean escape probability, which is
-	     equal to 1/nnscat */
-	  if (geo.scatter_mode == SCATTER_MODE_THERMAL
-	      && pextract.nres <= NLINES && pextract.nres > 0)
-	    {
-	      /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
-	         First find the sobolev optical depth along that vector */
+      /* We then increase weight to account for number of scatters. This is done because in extract we multiply by the escape
+         probability along a given direction, but we also need to divide the weight by the mean escape probability, which is
+         equal to 1/nnscat */
+      if (geo.scatter_mode == SCATTER_MODE_THERMAL && pextract.nres <= NLINES && pextract.nres > -1)
+      {
+        /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
+           First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
 
 	      tau_norm =
 		sobolev (&wmain[pextract.grid], pextract.x, -1.0,
@@ -565,18 +555,14 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	      stuff_phot (&pp, &pextract);
 
 
-	      /* JM 1407 -- This next loop is required because in anisotropic scattering mode 2 we have normalised our rejection 
-	         method. This means that we have to adjust nnscat by this factor, since nnscat will be lower by a factor of
-	         1/p_norm */
-	      if (geo.scatter_mode == SCATTER_MODE_THERMAL
-		  && pextract.nres <= NLINES && pextract.nres > 0)
-		{
-		  /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
-		     First find the sobolev optical depth along that vector */
-		  tau_norm =
-		    sobolev (&wmain[pextract.grid], pextract.x, -1.0,
-			     lin_ptr[pextract.nres],
-			     wmain[pextract.grid].dvds_max);
+        /* JM 1407 -- This next loop is required because in anisotropic scattering mode 2 we have normalised our rejection 
+           method. This means that we have to adjust nnscat by this factor, since nnscat will be lower by a factor of
+           1/p_norm */
+        if (geo.scatter_mode == SCATTER_MODE_THERMAL && pextract.nres <= NLINES && pextract.nres > -1)
+        {
+          /* we normalised our rejection method by the escape probability along the vector of maximum velocity gradient.
+             First find the sobolev optical depth along that vector. The -1 enforces calculation of the ion density */
+          tau_norm = sobolev (&wmain[pextract.grid], pextract.x, -1.0, lin_ptr[pextract.nres], wmain[pextract.grid].dvds_max);
 
 		  /* then turn into a probability */
 		  p_norm = p_escape_from_tau (tau_norm);
