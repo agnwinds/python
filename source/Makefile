@@ -248,10 +248,6 @@ py_wind: startup $(py_wind_objects)
 	mv $@ $(BIN)/py_wind$(VERSION)
 
 
-summarize_atomic: summarize_atomic.o get_atomicdata.o xlog.o rdpar.o synonyms.o  
-	$(CC) $(CFLAGS) summarize_atomic.o get_atomicdata.o xlog.o rdpar.o  synonyms.o  -o summarize_atomic
-	mv $@ $(BIN)
-
 
 table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
 		emission.o recomb.o util.o detail.o \
