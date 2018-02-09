@@ -62,6 +62,7 @@ do_windsave2table(root)
     create_ion_table (ndom, rootname, 6);
     create_ion_table (ndom, rootname, 7);
     create_ion_table (ndom, rootname, 8);
+    create_ion_table (ndom, rootname, 11);
     create_ion_table (ndom, rootname, 14);
     create_ion_table (ndom, rootname, 26);
   }
