@@ -516,10 +516,11 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
 	      /* This next statement writes out the position of every resonant scattering event to a file */
 	      if (modes.track_resonant_scatters)
-		fprintf (pltptr,
-			 "Photon %i has resonant scatter at %.2e %.2e %.2e in wind cell %i (grid cell=%i). Freq=%e Weight=%e\n",
-			 p->np, pp.x[0], pp.x[1], pp.x[2], wmain[n].nplasma,
-			 pp.grid, pp.freq, pp.w);
+              track_scatters(&pp,wmain[n].nplasma,"Resonant");
+//OLD		fprintf (pltptr,
+//OLD			 "Photon %i has resonant scatter at %.2e %.2e %.2e in wind cell %i (grid cell=%i). Freq=%e Weight=%e\n",
+//OLD			 p->np, pp.x[0], pp.x[1], pp.x[2], wmain[n].nplasma,
+//OLD			 pp.grid, pp.freq, pp.w);
 
 	      /* 68a - 090124 - ksl - Increment the number of scatters by this ion in this cell */
 	      /* 68c - 090408 - ksl - Changed this to the weight of the photon at the time of the scatter */

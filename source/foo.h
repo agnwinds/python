@@ -273,6 +273,7 @@ int init_extra_diagnostics(void);
 int save_photon_stats(WindPtr one, PhotPtr p, double ds, double w_ave);
 int save_extract_photons(int n, PhotPtr p, PhotPtr pp, double *v);
 int save_photons(PhotPtr p, char comment[]);
+int track_scatters(PhotPtr p, int nplasma, char *comment);
 /* sv.c */
 int get_sv_wind_params(int ndom);
 double sv_velocity(double x[], double v[], int ndom);
@@ -289,10 +290,6 @@ int check_convergence(void);
 int one_shot(PlasmaPtr xplasma, int mode);
 double calc_te(PlasmaPtr xplasma, double tmin, double tmax);
 double zero_emit(double t);
-/* ispy.c */
-int ispy_init(char filename[], int icycle);
-int ispy_close(void);
-int ispy(PhotPtr p, int n);
 /* levels.c */
 int levels(PlasmaPtr xplasma, int mode);
 /* gradv.c */

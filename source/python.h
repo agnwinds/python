@@ -1344,7 +1344,6 @@ struct advanced_modes
   int iadvanced;                // this is controlled by the -d flag, global mode control.
   int extra_diagnostics;        // when set various extra files will be written out depending what one wants to check
   int save_cell_stats;          // want to save photons statistics by cell
-  int ispy;                     // want to use the ispy function
   int keep_ioncycle_windsaves;  // want to save wind file each ionization cycle
   int make_tables;              // create tables showing various parameters for each cycle
   int track_resonant_scatters;  // want to track resonant scatters
