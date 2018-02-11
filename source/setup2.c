@@ -249,7 +249,7 @@ get_spectype (yesno, question, spectype)
 	    {			// Starting a new model
 	      strcpy (model_list, get_spectype_oldname);
 	    }
-	  rdstr ("Model_file", model_list);
+	  rdstr ("Input_spectra.model_file", model_list);
 	  get_models (model_list, 2, spectype);
 	  strcpy (geo.model_list[get_spectype_count], model_list);	// Copy it to geo 
 	  strcpy (get_spectype_oldname, model_list);	// Also copy it back to the old name
@@ -598,7 +598,7 @@ init_ionization ()
 
   if (geo.ioniz_mode == IONMODE_FIXED)
     {
-      rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
+      rdstr ("wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
     }
   if (geo.ioniz_mode == 5 || geo.ioniz_mode > 9)
     {

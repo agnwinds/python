@@ -389,7 +389,7 @@ main (argc, argv)
 	   */
 
 	  strcpy (files.old_windsave, "earlier.run");
-	  rdstr ("Old_windfile(root_only)", files.old_windsave);
+	  rdstr ("Wind.old_windfile(root_only)", files.old_windsave);
 	  strcat (files.old_windsave, ".wind_save");
 
 
@@ -473,7 +473,7 @@ main (argc, argv)
 
 	  if (geo.run_type == RUN_TYPE_NEW)
 	    {
-	      rdint ("Number.of.wind.components", &geo.ndomain);
+	      rdint ("Wind.number_of_components", &geo.ndomain);
 
 
 	      for (n = 0; n < geo.ndomain; n++)
@@ -651,7 +651,7 @@ main (argc, argv)
   if (modes.iadvanced)
     {
       /* Do we require extra diagnostics or not */
-      rdint ("@Extra.diagnostics(0=no,1=yes) ", &modes.diag_on_off);
+      rdint ("@Diag.extra(0=no,1=yes) ", &modes.diag_on_off);
       if (modes.diag_on_off)
 	{
 	  get_extra_diagnostics ();
