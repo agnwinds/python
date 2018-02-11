@@ -1,4 +1,4 @@
-name: filling_factor
+name: Wind.filling_factor
 description: |
   The volume filling factor of the outflow. The implementation
   of clumping (microclumping) is described in 
@@ -8,5 +8,5 @@ values:
   1: smooth
   <1: clumped
 parent:
-  parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  parameter: Asked whenever there is a wind                       
 file: setup_domains.c

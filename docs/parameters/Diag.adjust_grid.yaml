@@ -1,4 +1,4 @@
-name: adjust_grid
+name: Diag.adjust_grid
 description: |
   Choose whether or not you would like to adjust the scale length
   for the logarithmic grid. Advanced command. 

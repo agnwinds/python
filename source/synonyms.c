@@ -87,6 +87,10 @@ char *old_names[] =
     "save_extract_photons", "print_dvds_info","track_resonant_scatters",
     "Use.standard.care.factors","Fractional.distance.photon.may.travel",
     "Lowest.ion.density.contributing.to.photoabsorption", "Keep.photoabs.during.final.spectrum",
+    "adjust_grid",
+    "filling_factor","Coord.system","write_atomicdata","Fixed.concentrations.filename",
+    "Extra.diagnostics","File.with.model2read","Number.of.wind.components","Old_windfile",
+    "Model_file",
     NULL
 
 };
@@ -116,12 +120,16 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
     "Diag.save_extract_photons", "Diag.print_dvds_info","Diag.track_resonant_scatters",
     "Diag.use_standard_care_factors","Diag.fractional_distance_photon_may_travel",
     "Diag.lowest_ion_density_for_photoabs", "Diag.keep_photoabs_in_final_spectra",
+    "Diag.adjust_grid",
+    "Wind.filling_factor","Wind.coord_system","Diag.write_atomicdata", "Wind.fixed_concntrations_file",
+    "Diag.extra","Wind.model2import","Wind.number_of_components","Wind.old_windfile",
+    "Input_spectra.model_file",
     NULL
 };
 
 
 
-int number_of_names = 68;
+int number_of_names = 78;
 
 #define MIN(a,b) ((a)<b ? a:b)
 

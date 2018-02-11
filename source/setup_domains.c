@@ -63,7 +63,7 @@ get_domain_params (ndom)
 
       /* Define the coordinate system for the grid and allocate memory for the wind structure */
       rdint
-	("Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)",
+	("Wind.coord_system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)",
 	 &input_int);
       switch (input_int)
 	{
@@ -123,7 +123,7 @@ get_domain_params (ndom)
   /* If we are in advanced then allow the user to modify scale lengths */
   if (modes.iadvanced)
     {
-      rdint ("@adjust_grid(0=no,1=yes)", &modes.adjust_grid);
+      rdint ("@Diag.adjust_grid(0=no,1=yes)", &modes.adjust_grid);
 
       if (modes.adjust_grid)
 	{
@@ -267,7 +267,7 @@ get_wind_params (ndom)
      XXX allows any domain to be allowed a filling factor but this should be modified when
      we know what we are doing with inputs for multiple domains. Could create confusion */
 
-  rddoub ("filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
+  rddoub ("Wind.filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
 
   return (0);
 }
@@ -397,7 +397,7 @@ get_line_transfer_mode ()
   if (modes.iadvanced)
     {
 
-      rdint ("@write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
+      rdint ("@Diag.write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
       if (write_atomicdata)
 	Log ("You have opted to save a summary of the atomic data\n");
     }
