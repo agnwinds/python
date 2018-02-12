@@ -6,8 +6,11 @@
 #include "atomic.h"
 #include "python.h"
 
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
-#
+
+
 /* A basis is defined such that if x is a 3 vector as expressed an unprimed cartesian coordinate
    frame, and if y is the same vector in some rotated frame, then
    x[i] = a[i][j] y[j]
@@ -36,10 +39,12 @@ randvec (a, r)
 
   double costheta, sintheta, phi, sinphi, cosphi;
 
-  phi = 2. * PI * (rand () / MAXRAND);
+//  phi = 2. * PI * (rand () / MAXRAND); //DONE
+  phi = 2. * PI *gsl_rng_get(rng)/randmax;
   sinphi = sin (phi);
   cosphi = cos (phi);
-  costheta = 2. * (rand () / MAXRAND) - 1.;
+//  costheta = 2. * (rand () / MAXRAND) - 1.; //DONE
+  costheta = 2. * (gsl_rng_get(rng)/randmax) -1.;
   sintheta = sqrt (1. - costheta * costheta);
   a[0] = r * cosphi * sintheta;
   a[1] = r * sinphi * sintheta;
@@ -105,7 +110,8 @@ randvcos (lmn, north)
 
 // The is the correct approach to generating a uniform azimuthal distribution
 
-  phi = 2. * PI * (rand () / MAXRAND);
+//  phi = 2. * PI * (rand () / MAXRAND); //DONE
+  phi = 2. * PI * gsl_rng_get(rng)/randmax;
   l = q * cos (phi);
   m = q * sin (phi);
 

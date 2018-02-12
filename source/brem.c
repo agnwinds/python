@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include "atomic.h"
 #include "python.h"
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 #include "log.h"
 
@@ -176,7 +178,8 @@ reset.  A careful review of them is warranted.
   }
   /* End of section redefining limits */
 
-  y = rand () / (MAXRAND);
+//  y = rand () / (MAXRAND); //DONE
+  y = gsl_rng_get(rng)/randmax;
 
   y = cdf_brem_ylo * (1. - y) + cdf_brem_yhi * y;       // y is now in an allowd place in the cdf
 

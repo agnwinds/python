@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 #include "atomic.h"
 
@@ -585,22 +587,25 @@ cylind_get_random_location (n, x)
   inwind = W_NOT_INWIND;
   while (inwind != W_ALL_INWIND || ndomain != ndom)
   {
-    r = sqrt (rmin * rmin + (rand () / (MAXRAND - 0.5)) * (rmax * rmax - rmin * rmin));
+//    r = sqrt (rmin * rmin + (rand () / (MAXRAND - 0.5)) * (rmax * rmax - rmin * rmin)); //DONE
+    r = sqrt (rmin * rmin + (gsl_rng_get(rng) / (randmax - 0.5)) * (rmax * rmax - rmin * rmin));
 
 // Generate the azimuthal location
-    phi = 2. * PI * (rand () / MAXRAND);
+//    phi = 2. * PI * (rand () / MAXRAND);//DONE
+    phi = 2. * PI * (gsl_rng_get(rng) / randmax );
     x[0] = r * cos (phi);
     x[1] = r * sin (phi);
 
 
 
-    x[2] = zmin + (zmax - zmin) * (rand () / (MAXRAND - 0.5));
+ //   x[2] = zmin + (zmax - zmin) * (rand () / (MAXRAND - 0.5)); //DONE
+    x[2] = zmin + (zmax - zmin) * (gsl_rng_get(rng) / (randmax - 0.5));
     inwind = where_in_wind (x, &ndomain);       /* Some photons will not be in the wind
                                                    because the boundaries of the wind split the grid cell */
   }
 
-  zz = rand () / MAXRAND - 0.5; //positions above are all at +z distances
-
+//  zz = rand () / MAXRAND - 0.5; //positions above are all at +z distances //DONE
+  zz = gsl_rng_get(rng) / randmax  - 0.5; //positions above are all at +z distances
   if (zz < 0)
     x[2] *= -1;                 /* The photon is in the bottom half of the wind */
 

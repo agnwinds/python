@@ -192,6 +192,8 @@ History:
 #include "models.h"
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_interp.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 
 /*  The structure is defined in python.h.  Here for reference only */
@@ -879,7 +881,9 @@ cdf_get_rand (cdf)
   double a, b, c, s[2];
   int xquadratic ();
 /* Find the interval within which x lies */
-  r = rand () / MAXRAND;	/* r must be slightly less than 1 */
+//  r = rand () / MAXRAND;	/* r must be slightly less than 1 */ //DONE
+  r=(gsl_rng_get(rng)-0.5)/randmax; //NSH - this actually is now less than one as a maximum
+
 //  i = r * cdf->ncdf;          /* so i initially lies between 0 and the size of the pdf array -1 */
 //  while (cdf->y[i + 1] < r && i < cdf->ncdf - 1)
 //    i++;
@@ -890,7 +894,8 @@ cdf_get_rand (cdf)
 
 
 /* Now calculate a place within that interval */
-  q = rand () / MAXRAND;
+//  q = rand () / MAXRAND;//DONE
+  q=(gsl_rng_get(rng))/randmax;
   a = 0.5 * (cdf->d[i + 1] - cdf->d[i]);
   b = cdf->d[i];
   c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
@@ -1018,7 +1023,9 @@ cdf_get_rand_limit (cdf)
   double q;
   double a, b, c, s[2];
   int xquadratic ();
-  r = rand () / MAXRAND;	/* r must be slightly less than 1 */
+//  r = rand () / MAXRAND;	/* r must be slightly less than 1 */ //DONE
+  r=(gsl_rng_get(rng)-0.5)/randmax; //NSH - this actually is now less than one as a maximum
+  
   r = r * cdf->limit2 + (1. - r) * cdf->limit1;
   i = r * cdf->ncdf;
   while (cdf->y[i + 1] < r && i < cdf->ncdf - 1)
@@ -1027,7 +1034,8 @@ cdf_get_rand_limit (cdf)
     i--;
   while (TRUE)
     {
-      q = rand () / MAXRAND;
+//      q = rand () / MAXRAND; //DONE
+	  q=(gsl_rng_get(rng))/randmax;
       a = 0.5 * (cdf->d[i + 1] - cdf->d[i]);
       b = cdf->d[i];
       c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;

@@ -224,10 +224,14 @@ History:
 #include <math.h>
 #include "atomic.h"
 #include <time.h>		//To allow the used of the clock command without errors!!
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 
 #include "python.h"
 #define NSPEC	20
+
+
 
 int
 main (argc, argv)
@@ -249,6 +253,10 @@ main (argc, argv)
   int my_rank;			// these two variables are used regardless of parallel mode
   int np_mpi;			// rank and number of processes, 0 and 1 in non-parallel
   int ndom;
+  
+  rng = gsl_rng_alloc(gsl_rng_mt19937); //Set the random number generator to the GSL Meursenne twirster
+  randmax=gsl_rng_max (rng);  //Store the maximum value of the generator
+  
 
 
 #ifdef MPI_ON
@@ -771,9 +779,13 @@ main (argc, argv)
     {
       n = (unsigned int) clock () * (rank_global + 1);
       srand (n);
+	  gsl_rng_set(rng, n);
+	  
     }
   else
     srand (1084515760 + (13 * rank_global));
+    gsl_rng_set (rng,1084515760 + (13 * rank_global));
+  
 
   /* Start with photon history off */
   phot_hist_on = 0;
