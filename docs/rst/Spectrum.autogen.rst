@@ -22,77 +22,36 @@ for each desired incliniation
 **File:** setup2.c
 
 
-Spectrum.live.or.die
-====================
-Normally in creating detailed spectrum Python "extracts" photons in a certain
-direction rewithing them to account for the fact that they have been extracted
-in a certain direction.  It is possible to just count the photons that are emitted
-in a single angle range. The two methods should yield the same or very similar results 
-but the extraction method is much more efficient and live or die is basically a 
-diagnostic mode.  For historical reaaons the live or die method is called with 0
-and anything else rsults in the standard extract method being used.
-
-**Type:** Boolean (1/0)
-
-**Parent(s):**
-  parameter_: Called anytime detialed spectra are two be created.
-
-
-**File:** setup2.c
-
-
-Spectrum.orbit_phase
-====================
-For binary systems, the orbital phase at which the spectrum
-is to be extracted (so the effects of an eclipse can be taken
-into account in creating the spectrum. Phase 0 corresponds to
-inferior conjunciton, that is with the secondary in front (or 
-depending on inclination angle, partially in front of) the
-primary
+Spectrum.select_z
+=================
+Advanced command which defines a spherical  region of
+space from which photons are to be extracted in constructing a detailed
+spectrum.  The region is defined by a cylindrical distance, and z height
+and an aximuth, and a radius r.  This parameter defines the z coordiante
+of the region.
 
 **Type:** Double
 
-**Unit:** None
+**Unit:** cm
 
-**Value:** Normally between 0 and 1
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Only required when the system is a described as a binary
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup2.c
 
 
-Spectrum.select_azimuth
-=======================
-Advance command which along with several other parameters
-specifies a spherical region of space in cylindrical coordinates.
-This parameter desribes the azimuth of the region.  When
-this general option is used, a detailed spectrum is constructed
-just from photons that originate or scatter int he region
+Spectrum.wavemin
+================
+The minimum wavelength of the final spectra in Angstroms
 
 **Type:** Double
 
-**Unit:** Degrees
+**Unit:** Angstroms
 
-**Value:** Normally a number between 0, and 360 or -180 to 180
-
-**Parent(s):**
-  parameter_: Required when extracting photons by position.
-
-
-**File:** setup2.c
-
-
-Spectrum.select_photons_by_position
-===================================
-Advanced command associated with adding conditions for 
-the detailed spectra that are extracted.  This command simply
-asks whether one would like to select photons by position.  If
-so one will be asked to define a spheical region in interms of
-its cylindrical coordinates.
-
-**Type:** Boolean (Y/N)
+**Value:** Greater than 0
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
@@ -119,6 +78,44 @@ photons are to be extracted. select_r defines the radius of the spherical region
 **File:** setup2.c
 
 
+Spectrum.select_azimuth
+=======================
+Advance command which along with several other parameters
+specifies a spherical region of space in cylindrical coordinates.
+This parameter desribes the azimuth of the region.  When
+this general option is used, a detailed spectrum is constructed
+just from photons that originate or scatter int he region
+
+**Type:** Double
+
+**Unit:** Degrees
+
+**Value:** Normally a number between 0, and 360 or -180 to 180
+
+**Parent(s):**
+  parameter_: Required when extracting photons by position.
+
+
+**File:** setup2.c
+
+
+Spectrum.wavemax
+================
+The maximum waveleenght of the detailed spectra that are to be produced
+
+**Type:** Double
+
+**Unit:** Angstroms
+
+**Value:** Greater than 0 and greater than Spectrum.wavemin
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** setup2.c
+
+
 Spectrum.select_rho
 ===================
 Advanced command which defines a spherical  region of
@@ -132,6 +129,47 @@ of the region.
 **Unit:** cm
 
 **Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** setup2.c
+
+
+Spectrum.type
+=============
+The type of spectra that are produced in the final spectra. The current choices are flambda, fnu, or basic,
+where basic implies simply summmung up the energy packets that escape within a particularly wavelength/
+frequency bin..
+
+**Type:** Enum (Int)
+
+**Values:**
+
+other. basic
+
+1. flambda
+
+2. fnu
+
+
+**Parent(s):**
+  parameter_: Called whenever detailed spectra are generated.
+
+
+**File:** setup2.c
+
+
+Spectrum.select_photons_by_position
+===================================
+Advanced command associated with adding conditions for 
+the detailed spectra that are extracted.  This command simply
+asks whether one would like to select photons by position.  If
+so one will be asked to define a spheical region in interms of
+its cylindrical coordinates.
+
+**Type:** Boolean (Y/N)
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
@@ -176,80 +214,42 @@ disk, only photons which have scttered, etc.
 **File:** setup2.c
 
 
-Spectrum.select_z
-=================
-Advanced command which defines a spherical  region of
-space from which photons are to be extracted in constructing a detailed
-spectrum.  The region is defined by a cylindrical distance, and z height
-and an aximuth, and a radius r.  This parameter defines the z coordiante
-of the region.
+Spectrum.live.or.die
+====================
+Normally in creating detailed spectrum Python "extracts" photons in a certain
+direction rewithing them to account for the fact that they have been extracted
+in a certain direction.  It is possible to just count the photons that are emitted
+in a single angle range. The two methods should yield the same or very similar results 
+but the extraction method is much more efficient and live or die is basically a 
+diagnostic mode.  For historical reaaons the live or die method is called with 0
+and anything else rsults in the standard extract method being used.
 
-**Type:** Double
-
-**Unit:** cm
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Type:** Boolean (1/0)
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  parameter_: Called anytime detialed spectra are two be created.
 
 
 **File:** setup2.c
 
 
-Spectrum.type
-=============
-The type of spectra that are produced in the final spectra. The current choices are flambda, fnu, or basic,
-where basic implies simply summmung up the energy packets that escape within a particularly wavelength/
-frequency bin..
-
-**Type:** Enum (Int)
-
-**Values:**
-
-1. flambda
-
-2. fnu
-
-other. basic
-
-
-**Parent(s):**
-  parameter_: Called whenever detailed spectra are generated.
-
-
-**File:** setup2.c
-
-
-Spectrum.wavemax
-================
-The maximum waveleenght of the detailed spectra that are to be produced
+Spectrum.orbit_phase
+====================
+For binary systems, the orbital phase at which the spectrum
+is to be extracted (so the effects of an eclipse can be taken
+into account in creating the spectrum. Phase 0 corresponds to
+inferior conjunciton, that is with the secondary in front (or 
+depending on inclination angle, partially in front of) the
+primary
 
 **Type:** Double
 
-**Unit:** Angstroms
+**Unit:** None
 
-**Value:** Greater than 0 and greater than Spectrum.wavemin
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup2.c
-
-
-Spectrum.wavemin
-================
-The minimum wavelength of the final spectra in Angstroms
-
-**Type:** Double
-
-**Unit:** Angstroms
-
-**Value:** Greater than 0
+**Value:** Normally between 0 and 1
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  parameter_: Only required when the system is a described as a binary
 
 
 **File:** setup2.c

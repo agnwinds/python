@@ -36,6 +36,43 @@ models which are read in and sampled.
 **File:** python.c
 
 
+Disk.radmax
+===========
+The outer edge of the disk.  Photons inside this radius are
+absorbed or re-radiated.  Photons which are outside this radius
+pass through the disk plane.
+
+**Type:** rddoub
+
+**Unit:** cm
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  disk.type_: disktype must be 1 or 2, standard or vertically extended disk
+
+
+**File:** setup_disk.c
+
+
+Disk.z0
+=======
+fractional.height.at.diskrad.  The physical height at the
+outer disk will be this * disk.radmax
+
+**Type:** rddoub
+
+**Unit:** None
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  disk_type_: disk_type=vertically extended
+
+
+**File:** setup_disk.c
+
+
 Disk.radiation
 ==============
 Multi-line description, must keep indentation.
@@ -90,25 +127,6 @@ contains the desired profile.
 **File:** setup_disk.c
 
 
-Disk.radmax
-===========
-The outer edge of the disk.  Photons inside this radius are
-absorbed or re-radiated.  Photons which are outside this radius
-pass through the disk plane.
-
-**Type:** rddoub
-
-**Unit:** cm
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  disk.type_: disktype must be 1 or 2, standard or vertically extended disk
-
-
-**File:** setup_disk.c
-
-
 Disk.type
 =========
 Parameter defining whether there is a disk in the system
@@ -147,24 +165,6 @@ is the power law index
 
 **Parent(s):**
   Disk.type_: This question is ascked whenever the Disk.type is vertically extended
-
-
-**File:** setup_disk.c
-
-
-Disk.z0
-=======
-fractional.height.at.diskrad.  The physical height at the
-outer disk will be this * disk.radmax
-
-**Type:** rddoub
-
-**Unit:** None
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  disk_type_: disk_type=vertically extended
 
 
 **File:** setup_disk.c

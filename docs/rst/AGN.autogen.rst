@@ -3,18 +3,29 @@
 AGN
 ===
 
-AGN.blackbody_temp
-==================
-The temperature of a blackbody SED to be used for the central AGN source
+AGN.geometry_for_pl_source
+==========================
+Choose the geometry for the power law source.
 
-**Type:** Double
+**Type:** Enum (Int)
 
-**Unit:** K
+**Values:**
 
-**Value:** Greater than 0
+0. *sphere*
+   
+   The power law source is a sphere with radius equal to 
+   the radius of the central object. In a BH system this is 
+   often set to the ISCO.
+
+1. *lamp_post* 
+   
+   The power law source is a single point at some height above the origin. 
+   Photons radiate isotropically from this point. The height is specified in 
+   a subsequent parameter, lamp_post.height.
+
 
 **Parent(s):**
-  parameter_: None
+  parameter_: QSO_BH_radiation
 
 
 **File:** setup_star_bh.c
@@ -56,34 +67,6 @@ L_nu=nu**alpha exp(-hnu/kT)
 **File:** setup_star_bh.c
 
 
-AGN.geometry_for_pl_source
-==========================
-Choose the geometry for the power law source.
-
-**Type:** Enum (Int)
-
-**Values:**
-
-0. *sphere*
-   
-   The power law source is a sphere with radius equal to 
-   the radius of the central object. In a BH system this is 
-   often set to the ISCO.
-
-1. *lamp_post* 
-   
-   The power law source is a single point at some height above the origin. 
-   Photons radiate isotropically from this point. The height is specified in 
-   a subsequent parameter, lamp_post.height.
-
-
-**Parent(s):**
-  parameter_: QSO_BH_radiation
-
-
-**File:** setup_star_bh.c
-
-
 AGN.lamp_post.height
 ====================
 The height above the disc for the lamp post source in units 
@@ -95,6 +78,24 @@ of gravitational radii (typical value ~10).
 
 **Parent(s):**
   parameter_: geometry_for_pl_source
+
+
+**File:** setup_star_bh.c
+
+
+AGN.power_law_index
+===================
+The exponent alpha in a power las SED applied to an AGN
+central source of the form L_nu=K nu**alpha
+
+**Type:** Double
+
+**Unit:** None
+
+**Value:** Any - but sign is not assumed, so for negative index use a negative value
+
+**Parent(s):**
+  parameter_: None
 
 
 **File:** setup_star_bh.c
@@ -119,16 +120,15 @@ applied to low frequencies and giving an odd SED.
 **File:** setup_star_bh.c
 
 
-AGN.power_law_index
-===================
-The exponent alpha in a power las SED applied to an AGN
-central source of the form L_nu=K nu**alpha
+AGN.blackbody_temp
+==================
+The temperature of a blackbody SED to be used for the central AGN source
 
 **Type:** Double
 
-**Unit:** None
+**Unit:** K
 
-**Value:** Any - but sign is not assumed, so for negative index use a negative value
+**Value:** Greater than 0
 
 **Parent(s):**
   parameter_: None

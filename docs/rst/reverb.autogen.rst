@@ -49,6 +49,29 @@ our 'tfpy' Python (no relation) library.
 
 ----------------------------------------
 
+reverb.path_bins
+----------------
+Number of bins for photon paths. Reverb modes that record the distribution of
+path lengths in every wind cell bin them in this number of bins. Bins are
+logarithmically spaced between the minimum scale in the system (the smallest
+'minimum radius' in any domain) and the 10 * the maximum scale in the system
+(10 * the 'maximum radius' in any domain). Default value is 1000, going much
+higher does not lead to qualitative differences in TF, going lower makes the
+bin boundaries show up in the TF.
+
+**Type:** Int
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  reverb.type_: 2, 3
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
 reverb.disk_type
 ----------------
 Setting for how photons generated in the disk are treated when generating path
@@ -89,65 +112,6 @@ distributions for wind cells.
 
 **Parent(s):**
   reverb.type_: 2, 3
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
-reverb.filter_lines
--------------------
-Whether or not to filter any lines out of the output file. This is used to keep output
-file sizes down, and avoid them overwhelming the user.
-
-**Type:** Int
-
-**Values:**
-
-0. **No filtering**
-   
-   Include *all* photons that contribute to the spectra in the output
-   file. Not recommended as it leads to gargantuan file sizes.
-
--1. **Filter continuum**
-   
-   Include all photons whose last interaction was scatter
-   or emission in a line. Recommended setting for exploratory runs where you'd
-   like to identify which lines are the easiest to process.
-
-N. **Filter lines**
-   
-   Include N reverb.filter_line entries, each specifying one
-   line to keep in the output file. If reverb.matom_lines is >0, all macro-atom
-   lines of interest are automatically included in the filter list.
-
-
-**Parent(s):**
-  reverb.type_: Greater than 0
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
-reverb.filter_line
-^^^^^^^^^^^^^^^^^^
-Line number of one line to include in the output .delay_dump file. This is
-the python internal line number. It can be found using either the macro-atom
-mode (which prints out the line number once it's found one) or by doing an
-exploratory run with reverb.filter_lines = -1, then looking through the delay
-dump file for photons of the right wavelength to see what their line is. This
-should almost certainly be changed to be specified using a species and
-wavelength!
-
-**Type:** Int
-
-**Value:** Any valid line index
-
-**Parent(s):**
-  reverb.filter_lines_: Greater than 0
 
 
 **File:** setup_reverb.c
@@ -198,29 +162,6 @@ line is specified as Element:Ion:Upper level:Lower level.
 
 ----------------------------------------
 
-reverb.path_bins
-----------------
-Number of bins for photon paths. Reverb modes that record the distribution of
-path lengths in every wind cell bin them in this number of bins. Bins are
-logarithmically spaced between the minimum scale in the system (the smallest
-'minimum radius' in any domain) and the 10 * the maximum scale in the system
-(10 * the 'maximum radius' in any domain). Default value is 1000, going much
-higher does not lead to qualitative differences in TF, going lower makes the
-bin boundaries show up in the TF.
-
-**Type:** Int
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  reverb.type_: 2, 3
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
 reverb.visualisation
 --------------------
 Which type of visualisation to output, if any. Reverb modes that keep arrays
@@ -250,25 +191,6 @@ diagnostics.
 
 **Parent(s):**
   reverb.type_: 2, 3
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
-reverb.angle_bins
-^^^^^^^^^^^^^^^^^
-Used when generating 3d .vtk output files for visualisation. Sets the number
-of angle bins used in the output. Aesthetic only; bigger makes prettier meshes
-with larger filesizes.
-
-**Type:** Int
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  reverb.visualisation_: 1, 3
 
 
 **File:** setup_reverb.c
@@ -313,6 +235,84 @@ idenfity where wind locations are.
 
 **Parent(s):**
   reverb.dump_cells_: Greater than 0
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
+reverb.angle_bins
+^^^^^^^^^^^^^^^^^
+Used when generating 3d .vtk output files for visualisation. Sets the number
+of angle bins used in the output. Aesthetic only; bigger makes prettier meshes
+with larger filesizes.
+
+**Type:** Int
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  reverb.visualisation_: 1, 3
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
+reverb.filter_lines
+-------------------
+Whether or not to filter any lines out of the output file. This is used to keep output
+file sizes down, and avoid them overwhelming the user.
+
+**Type:** Int
+
+**Values:**
+
+0. **No filtering**
+   
+   Include *all* photons that contribute to the spectra in the output
+   file. Not recommended as it leads to gargantuan file sizes.
+
+N. **Filter lines**
+   
+   Include N reverb.filter_line entries, each specifying one
+   line to keep in the output file. If reverb.matom_lines is >0, all macro-atom
+   lines of interest are automatically included in the filter list.
+
+-1. **Filter continuum**
+   
+   Include all photons whose last interaction was scatter
+   or emission in a line. Recommended setting for exploratory runs where you'd
+   like to identify which lines are the easiest to process.
+
+
+**Parent(s):**
+  reverb.type_: Greater than 0
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
+reverb.filter_line
+^^^^^^^^^^^^^^^^^^
+Line number of one line to include in the output .delay_dump file. This is
+the python internal line number. It can be found using either the macro-atom
+mode (which prints out the line number once it's found one) or by doing an
+exploratory run with reverb.filter_lines = -1, then looking through the delay
+dump file for photons of the right wavelength to see what their line is. This
+should almost certainly be changed to be specified using a species and
+wavelength!
+
+**Type:** Int
+
+**Value:** Any valid line index
+
+**Parent(s):**
+  reverb.filter_lines_: Greater than 0
 
 
 **File:** setup_reverb.c
