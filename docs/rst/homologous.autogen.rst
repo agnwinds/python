@@ -3,6 +3,23 @@
 homologous
 ==========
 
+homologous.vbase
+================
+Multi-line description, must keep indentation.
+
+**Type:** Double
+
+**Unit:** cm
+
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** homologous.c
+
+
 homologous.boundary_mdot
 ========================
 The mass loss rate at the base of the wind in a homlogous flow model, a flow
@@ -52,23 +69,6 @@ which the velocity at any radius is proportional to the radius
 
 **Parent(s):**
   parameter_: A required parameter for defining a homologous flow
-
-
-**File:** homologous.c
-
-
-homologous.vbase
-================
-Multi-line description, must keep indentation.
-
-**Type:** Double
-
-**Unit:** cm
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** homologous.c

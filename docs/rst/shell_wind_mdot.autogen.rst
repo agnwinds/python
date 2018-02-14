@@ -11,7 +11,7 @@ the shell
 
 **Type:** Double
 
-**Unit:** M☉/year
+**Unit:** Msol/year
 
 **Value:** Greater than 0
 

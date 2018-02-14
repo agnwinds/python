@@ -16,9 +16,9 @@ the data.
 
 **Values:**
 
--1. use all data
-
 X. use up to that angle (typically less than 90)
+
+-1. use all data
 
 
 **Parent(s):**
