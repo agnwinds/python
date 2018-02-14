@@ -224,7 +224,7 @@ typedef struct domain
   /* Generic parameters for the wind */
   double wind_mdot, stellar_wind_mdot;  /* Mass loss rate in disk and stellar wind */
   double rmin, rmax;            /*Spherical extent of the wind */
-  double zmax;                  /* Vertical extent of the wind, often the same as rmas */
+  double zmin,zmax;                  /* Vertical extent of the wind, often the same as rmas */
   double wind_rho_min, wind_rho_max;    /*Min/Max rho for wind in disk plane */
   double wind_thetamin, wind_thetamax;  /*Angles defining inner and outer cones of wind, measured from disk plane */
   double mdot_norm;             /*A normalization factor used in SV wind, and Knigge wind */
@@ -1233,11 +1233,6 @@ char hubeny_list[132];          //Location of listing of files representing hube
 
 
 
-// Allow for a diagnostic file 
-
-FILE *epltptr;                  //TEST
-// diag_on_off is deprecated see #111, #120
-//int diag_on_off;              // on is non-zero  //TEST
 
 
 /* These variables are stored or used by the routines for anisotropic scattering */
@@ -1347,6 +1342,7 @@ struct advanced_modes
 {
   /* these are all 0=off, 1=yes */
   int iadvanced;                // this is controlled by the -d flag, global mode control.
+  int extra_diagnostics;        // when set various extra files will be written out depending what one wants to check
   int save_cell_stats;          // want to save photons statistics by cell
   int ispy;                     // want to use the ispy function
   int keep_ioncycle_windsaves;  // want to save wind file each ionization cycle
@@ -1405,3 +1401,24 @@ files;
    whether it has already calculated the matom emissivities or not. */
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
+
+
+
+/* DIAGNOSTIC for understanding problems imported models
+ *
+ */
+
+
+#define BOUND_NONE   0
+#define BOUND_INNER_CONE  1
+#define BOUND_OUTER_CONE  2
+#define BOUND_RMAX 3
+#define BOUND_RMIN 4
+#define BOUND_ZMIN 5
+#define BOUND_ZMAX 6
+#define BOUND_INNER_RHO 7
+#define BOUND_OUTER_RHO 8
+
+int xxxbound;
+
+ 

@@ -5,16 +5,17 @@ lum_agn
 
 lum_agn
 =======
-Multi-line description, must keep indentation.
+The luminosity of an AGN component. This is defined as the luminosity
+from 2-10keV. 
 
 **Type:** Double
 
 **Unit:** ergs/s
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** Greater than 0
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  QSO_BH_radiation_: 1
 
 
 **File:** setup.c

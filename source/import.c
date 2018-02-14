@@ -43,7 +43,7 @@ import_wind (ndom)
 {
   char filename[LINELEN];
 
-  rdstr ("File.with.model2read", filename);
+  rdstr ("Wind.model2import", filename);
 
   if (zdom[ndom].coord_type == SPHERICAL)
     {

@@ -149,7 +149,7 @@ bands_init (imode, band)
   if (imode == -1)
   {
     mode = 2;
-    rdint ("Photon.sampling.approach(0=T,1=(f1,f2),2=cv,3=yso,4=user_defined,5=cloudy_test,6=wide,7=AGN,8=logarithmic)", &mode);
+    rdint ("Photon_sampling.approach(0=T,1=(f1,f2),2=cv,3=yso,4=user_defined,5=cloudy_test,6=wide,7=AGN,8=logarithmic)", &mode);
   }
   else
   {
@@ -222,16 +222,16 @@ bands_init (imode, band)
   }
   else if (mode == 4)
   {
-    rdint ("Num.of.frequency.bands", &band->nbands);
+    rdint ("Photon_sampling.nbands", &band->nbands);
     Log ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV, f1);
     Log ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV, f2);
     Log ("Enter band boundaries in increasing eV, and assure they are between lowest and highest energy\n");
 
 
-    rddoub ("Lowest_energy_to_be_considered(eV)", &xx);
+    rddoub ("Photon_sampling.low_energy_limit(eV)", &xx);
     f1 = xx / HEV;
 
-    rddoub ("Highest_energy_to_be_considered(eV)", &xx);
+    rddoub ("Photon_sampling.high_energy_limit(eV)", &xx);
     f2 = xx / HEV;
 
     Log ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV, f1);
@@ -242,7 +242,7 @@ bands_init (imode, band)
 
     for (nband = 0; nband < band->nbands - 1; nband++)
     {
-      rddoub ("Band.boundary(eV)", &xx);
+      rddoub ("Photon_sampling.band_boundary(eV)", &xx);
       band->f2[nband] = band->f1[nband + 1] = xx / HEV;
 
     }
@@ -252,7 +252,7 @@ bands_init (imode, band)
 
     for (nband = 0; nband < band->nbands; nband++)
     {
-      rddoub ("Band.minimum_fraction)", &band->min_fraction[nband]);
+      rddoub ("Photon_sampling.band_min_frac)", &band->min_fraction[nband]);
     }
     for (nband = 0; nband < band->nbands; nband++)
     {
@@ -269,7 +269,7 @@ bands_init (imode, band)
       Error ("Trying to use a broken power law banding without setting spectype to broken power law - must set spectype to 4\n");
       exit (0);
     }
-    rddoub ("Lowest_energy_to_be_considered(eV)", &xx);
+    rddoub ("Photon_sampling.low_energy_limit(eV)", &xx);
 
     if (xx > geo.agn_cltab_low)
     {
@@ -277,7 +277,7 @@ bands_init (imode, band)
       Log ("Lowest  frequency reset to 1/10 of low frequency break\n");
     }
     f1 = xx / HEV;
-    rddoub ("Highest_energy_to_be_considered(eV)", &xx);
+    rddoub ("Photon_sampling.high_energy_limit(eV)", &xx);
 
     if (xx < geo.agn_cltab_hi)
     {
@@ -327,8 +327,6 @@ bands_init (imode, band)
       ii++;
     }
 
-    //     band->f1[9] = geo.agn_cltab_hi / HEV;
-    //     band->f2[9] = f2;
 
     //Set number of photons in each band
 

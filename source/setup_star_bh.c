@@ -85,11 +85,11 @@ get_stellar_params ()
     {
 
       geo.m_sec /= MSOL;	// Convert units for ease of data entry
-      rddoub ("msec(msol)", &geo.m_sec);
+      rddoub ("Binary.mass_sec(msol)", &geo.m_sec);
       geo.m_sec *= MSOL;
 
       geo.period /= 3600.;	// Convert units to hours for easy of data entry
-      rddoub ("period(hr)", &geo.period);
+      rddoub ("Binary.period(hr)", &geo.period);
       geo.period *= 3600.;	// Put back to cgs immediately
     }
 
@@ -218,7 +218,7 @@ get_bl_and_agn_params (lstar)
 	  || geo.agn_ion_spectype == SPECTYPE_CL_TAB)
 	{
 	  geo.alpha_agn = (-1.5);
-	  rddoub ("agn_power_law_index", &geo.alpha_agn);
+	  rddoub ("AGN.power_law_index", &geo.alpha_agn);
 
 	  if (geo.alpha_agn == -1.0)	//deal with the pathological case
 	    {
@@ -241,8 +241,8 @@ get_bl_and_agn_params (lstar)
 	  geo.brem_temp = 1.16e8;	//10kev
 	  geo.brem_alpha = -0.2;	//This is the cloudy form of bremstrahlung
 	  geo.const_agn = 1.0;
-	  rddoub ("agn_bremsstrahlung_temp(K)", &geo.brem_temp);
-	  rddoub ("agn_bremsstrahlung_alpha", &geo.brem_alpha);
+	  rddoub ("AGN.bremsstrahlung_temp(K)", &geo.brem_temp);
+	  rddoub ("AGN.bremsstrahlung_alpha", &geo.brem_alpha);
 	  temp_const_agn =
 	    geo.lum_agn / qromb (integ_brem, 4.84e17, 2.42e18, 1e-4);
 	  geo.const_agn = temp_const_agn;
@@ -253,7 +253,7 @@ get_bl_and_agn_params (lstar)
       else if (geo.agn_ion_spectype == SPECTYPE_BB)
 	{
 	  /* note that alpha_agn holds the temperature in the case of "blackbody agn" */
-	  rddoub ("agn_blackbody_temp(K)", &geo.alpha_agn);
+	  rddoub ("AGN.blackbody_temp(K)", &geo.alpha_agn);
 	  geo.lum_agn =
 	    4 * PI * geo.r_agn * geo.r_agn * STEFAN_BOLTZMANN *
 	    pow (geo.alpha_agn, 4.);
@@ -264,14 +264,14 @@ get_bl_and_agn_params (lstar)
          default is zero which is checked before we call photo_gen_agn */
       geo.pl_low_cutoff = 0.0;
       if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
-	rddoub ("@agn_power_law_cutoff", &geo.pl_low_cutoff);
+	rddoub ("@AGN.power_law_cutoff", &geo.pl_low_cutoff);
 
-      rdint ("geometry_for_pl_source(0=sphere,1=lamp_post)",
+      rdint ("AGN.geometry_for_pl_source(0=sphere,1=lamp_post)",
 	     &geo.pl_geometry);
 
       if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
 	{
-	  rddoub ("lamp_post.height(r_g)", &geo.lamp_post_height);
+	  rddoub ("AGN.lamp_post.height(r_g)", &geo.lamp_post_height);
 	  geo.lamp_post_height *= G * geo.mstar / C / C;	//get it in CGS units
 	  Log ("lamp_post_height is cm is %g\n", geo.lamp_post_height);
 	}
@@ -365,62 +365,3 @@ get_bl_and_agn_params (lstar)
 
 
 
-
-/***********************************************************
-             University of Southampton
-
-Synopsis:
-  get_standard_care_factors provides more control over how the program is
-  run
-
-Arguments:
-
-Returns:
-
-Description:
-
-Notes:
-    ksl - It is not obvious that much recent thought has been
-    given to the choices that are here.  The fractional distance
-    that a photon travel is intended to make sure the velocity
-    along the line of sight can be approximated linearly.  If 
-    a photon travels too far in an azimuthal direction the sense
-    of the velocity can change and this prevensts this
-
-    The lowest ion density contributing to photoionization is used
-    to determine what ions one has to calculate the photoionzation
-    xsection for.  The lower this density; the more that have to be
-    calculated, and as a result the slower the program.
-
-    Keeping photoionizaion during final spectrum allows one to
-    check the contribution of photoabsorption.
-
-History:
-  1502  JM  Moved here from main()
-
-**************************************************************/
-int
-get_standard_care_factors ()
-{
-  int istandard;
-  istandard = 1;
-  SMAX_FRAC = 0.5;
-  DENSITY_PHOT_MIN = 1.e-10;
-
-  /* 141116 - ksl - Made care factors and advanced command as this is clearly somethng that is diagnostic */
-
-  if (modes.iadvanced)
-    {
-      rdint ("@Use.standard.care.factors(1=yes)", &istandard);
-
-      if (!istandard)
-	{
-	  rddoub ("@Fractional.distance.photon.may.travel", &SMAX_FRAC);
-	  rddoub ("@Lowest.ion.density.contributing.to.photoabsorption",
-		  &DENSITY_PHOT_MIN);
-	  rdint ("@Keep.photoabs.during.final.spectrum(1=yes)",
-		 &modes.keep_photoabs);
-	}
-    }
-  return (0);
-}

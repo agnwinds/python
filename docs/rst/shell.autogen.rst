@@ -3,16 +3,21 @@
 shell
 =====
 
-shell.wind.acceleration_exponent
-================================
-Multi-line description, must keep indentation.
+shell.wind_v_at_rmin
+====================
+The velocity of a shell wind at the inner edge of the 
+shell - the variation of the velocity in the shell is
+set by the velocity law exponent. It allows a gradient 
+to be enforced.
 
 **Type:** Double
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Unit:** cm/s
+
+**Value:** Greater than or equal to zero.
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  Wind_type_: 9
 
 
 **File:** shell_wind.c
@@ -20,16 +25,17 @@ Multi-line description, must keep indentation.
 
 shell.wind.radmin
 =================
-Multi-line description, must keep indentation.
+The innermost edge of a diagnostic type of wind made up of a single
+(ideally thin) shell.
 
 **Type:** Double
 
 **Unit:** cm
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** greater than zero, less than wind.radmax
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  Wind_type_: 9
 
 
 **File:** shell_wind.c
@@ -37,33 +43,35 @@ Multi-line description, must keep indentation.
 
 shell.wind.v_at_rmax
 ====================
-Multi-line description, must keep indentation.
+The velocity of a shell wind at the outer edge of the 
+shell - the variation of the velocity in the shell is
+set by the velocity law exponent. It allows a gradient 
+to be enforced.
 
 **Type:** Double
 
-**Unit:** cm
+**Unit:** cm/s
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** Greater than or equal to zero.
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  Wind_type_: 9
 
 
 **File:** shell_wind.c
 
 
-shell.wind_v_at_rmin
-====================
-Multi-line description, must keep indentation.
+shell.wind.acceleration_exponent
+================================
+Exponent beta for the Caster and Lamers description of a stellar wind
+v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta for a shell wind.
 
 **Type:** Double
 
-**Unit:** cm
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** Greater than or equal to 0
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  Wind_type_: 9
 
 
 **File:** shell_wind.c

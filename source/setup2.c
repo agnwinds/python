@@ -249,7 +249,7 @@ get_spectype (yesno, question, spectype)
 	    {			// Starting a new model
 	      strcpy (model_list, get_spectype_oldname);
 	    }
-	  rdstr ("Model_file", model_list);
+	  rdstr ("Input_spectra.model_file", model_list);
 	  get_models (model_list, 2, spectype);
 	  strcpy (geo.model_list[get_spectype_count], model_list);	// Copy it to geo 
 	  strcpy (get_spectype_oldname, model_list);	// Also copy it back to the old name
@@ -292,6 +292,7 @@ int
 init_advanced_modes ()
 {
   modes.iadvanced = 0;		// this is controlled by the -d flag, global mode control.
+  modes.extra_diagnostics=0; //  when set, want to save some extra diagnostic info
   modes.save_cell_stats = 0;	// want to save photons statistics by cell
   modes.ispy = 0;		// want to use the ispy function
   modes.keep_ioncycle_windsaves = 0;	// want to save wind file each ionization cycle
@@ -424,33 +425,33 @@ init_observers ()
   if (modes.iadvanced)
     {
       strcpy (yesno, "n");
-      rdstr ("@Select_specific_no_of_scatters_in_spectra(y/n)", yesno);
+      rdstr ("@Spectrum.select_specific_no_of_scatters_in_spectra(y/n)", yesno);
       if (yesno[0] == 'y')
 	{
 	  Log
 	    ("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
 	  for (n = 0; n < geo.nangles; n++)
 	    {
-	      rdint ("@Select_scatters", &geo.scat_select[n]);
+	      rdint ("@Spectrum.select_scatters", &geo.scat_select[n]);
 	    }
 	}
       strcpy (yesno, "n");
-      rdstr ("@Select_photons_by_position(y/n)", yesno);
+      rdstr ("@Spectrum.select_photons_by_position(y/n)", yesno);
       if (yesno[0] == 'y')
 	{
 	  Log
 	    ("OK 0->all; -1 -> below; 1 -> above the disk, 2 -> specific location in wind\n");
 	  for (n = 0; n < geo.nangles; n++)
 	    {
-	      rdint ("@Select_location", &geo.top_bot_select[n]);
+	      rdint ("@Spectrum.select_location", &geo.top_bot_select[n]);
 	      if (geo.top_bot_select[n] == 2)
 		{
 		  Log
 		    ("Warning: Make sure that position will be in wind, or no joy will be obtained\n");
-		  rddoub ("@rho(cm)", &geo.rho_select[n]);
-		  rddoub ("@z(cm)", &geo.z_select[n]);
-		  rddoub ("@azimuth(deg)", &geo.az_select[n]);
-		  rddoub ("@r(cm)", &geo.r_select[n]);
+		  rddoub ("@Spectrum.select_rho(cm)", &geo.rho_select[n]);
+		  rddoub ("@Spectrum.select_z(cm)", &geo.z_select[n]);
+		  rddoub ("@Spectrum.select_azimuth(deg)", &geo.az_select[n]);
+		  rddoub ("@Spectrum.select_r(cm)", &geo.r_select[n]);
 
 		}
 	    }
@@ -597,7 +598,7 @@ init_ionization ()
 
   if (geo.ioniz_mode == IONMODE_FIXED)
     {
-      rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
+      rdstr ("wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
     }
   if (geo.ioniz_mode == 5 || geo.ioniz_mode > 9)
     {

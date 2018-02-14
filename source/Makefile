@@ -248,10 +248,6 @@ py_wind: startup $(py_wind_objects)
 	mv $@ $(BIN)/py_wind$(VERSION)
 
 
-summarize_atomic: summarize_atomic.o get_atomicdata.o xlog.o rdpar.o synonyms.o  
-	$(CC) $(CFLAGS) summarize_atomic.o get_atomicdata.o xlog.o rdpar.o  synonyms.o  -o summarize_atomic
-	mv $@ $(BIN)
-
 
 table_objects = windsave2table.o windsave2table_sub.o get_atomicdata.o py_wind_sub.o windsave.o py_wind_ion.o \
 		emission.o recomb.o util.o detail.o \
@@ -273,10 +269,6 @@ windsave2table: $(table_objects)
 	cp $@ $(BIN)
 	mv $@ $(BIN)/windsave2table$(VERSION)
 
-py_smooth: py_smooth.o 
-	$(CC) $(CFLAGS) py_smooth.o  $(LDFLAGS)  -o py_smooth
-		mv $@ $(BIN)
-
 
 
 
@@ -288,16 +280,6 @@ libatomic.a:  get_atomicdata.o atomic.o
 	mv libatomic.a $(LIB)
 	cp atomic.h  $(INCLUDE)
 
-
-saha_sources = saha_inv.c get_atomicdata.c
-
-startup_saha: startup $(saha_sources)
-	cproto -I$(INCLUDE) $(saha_sources) > saha_templates.h
-
-saha_inv: saha_inv.o get_atomicdata.c
-	$(CC) ${CFLAGS} saha_inv.o get_atomicdata.o
-	cp $@ $(BIN)/saha_inv
-	mv $@ $(BIN)/saha_inv$(VERSION)
 
 
 clean :

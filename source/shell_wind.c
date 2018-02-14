@@ -85,7 +85,7 @@ get_shell_wind_params (ndom)
   shell_vmin = zdom[ndom].cl_v_zero = 200e5;
   shell_vmax = zdom[ndom].cl_v_infinity = 3000e5;
 
-  rddoub ("shell_wind_mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
+  rddoub ("shell.wind_mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
   zdom[ndom].stellar_wind_mdot *= MSOL / YR;
 
   rddoub ("shell.wind.radmin(cm)", &zdom[ndom].rmin);   /*Radius where wind begins */
