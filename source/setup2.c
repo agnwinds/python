@@ -249,7 +249,7 @@ get_spectype (yesno, question, spectype)
 	    {			// Starting a new model
 	      strcpy (model_list, get_spectype_oldname);
 	    }
-	  rdstr ("Model_file", model_list);
+	  rdstr ("Input_spectra.model_file", model_list);
 	  get_models (model_list, 2, spectype);
 	  strcpy (geo.model_list[get_spectype_count], model_list);	// Copy it to geo 
 	  strcpy (get_spectype_oldname, model_list);	// Also copy it back to the old name
@@ -292,6 +292,7 @@ int
 init_advanced_modes ()
 {
   modes.iadvanced = 0;		// this is controlled by the -d flag, global mode control.
+  modes.extra_diagnostics=0; //  when set, want to save some extra diagnostic info
   modes.save_cell_stats = 0;	// want to save photons statistics by cell
   modes.ispy = 0;		// want to use the ispy function
   modes.keep_ioncycle_windsaves = 0;	// want to save wind file each ionization cycle
@@ -597,7 +598,7 @@ init_ionization ()
 
   if (geo.ioniz_mode == IONMODE_FIXED)
     {
-      rdstr ("Fixed.concentrations.filename", &geo.fixed_con_file[0]);
+      rdstr ("wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
     }
   if (geo.ioniz_mode == 5 || geo.ioniz_mode > 9)
     {

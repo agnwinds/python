@@ -267,9 +267,11 @@ double gs_rrate(int nion, double T);
 int sort_and_compress(double *array_in, double *array_out, int npts);
 int compare_doubles(const void *a, const void *b);
 /* diag.c */
-int open_diagfile(void);
+int get_standard_care_factors(void);
 int get_extra_diagnostics(void);
+int init_extra_diagnostics(void);
 int save_photon_stats(WindPtr one, PhotPtr p, double ds, double w_ave);
+int save_extract_photons(int n, PhotPtr p, PhotPtr pp, double *v);
 /* sv.c */
 int get_sv_wind_params(int ndom);
 double sv_velocity(double x[], double v[], int ndom);
@@ -481,7 +483,6 @@ int communicate_matom_estimators_para(void);
 /* setup_star_bh.c */
 double get_stellar_params(void);
 int get_bl_and_agn_params(double lstar);
-int get_standard_care_factors(void);
 /* setup_domains.c */
 int get_domain_params(int ndom);
 int get_wind_params(int ndom);

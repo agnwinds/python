@@ -218,7 +218,7 @@ get_bl_and_agn_params (lstar)
 	  || geo.agn_ion_spectype == SPECTYPE_CL_TAB)
 	{
 	  geo.alpha_agn = (-1.5);
-	  rddoub ("agn_power_law_index", &geo.alpha_agn);
+	  rddoub ("AGN.power_law_index", &geo.alpha_agn);
 
 	  if (geo.alpha_agn == -1.0)	//deal with the pathological case
 	    {
@@ -264,7 +264,7 @@ get_bl_and_agn_params (lstar)
          default is zero which is checked before we call photo_gen_agn */
       geo.pl_low_cutoff = 0.0;
       if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
-	rddoub ("@agn_power_law_cutoff", &geo.pl_low_cutoff);
+	rddoub ("@AGN.power_law_cutoff", &geo.pl_low_cutoff);
 
       rdint ("AGN.geometry_for_pl_source(0=sphere,1=lamp_post)",
 	     &geo.pl_geometry);
@@ -365,62 +365,3 @@ get_bl_and_agn_params (lstar)
 
 
 
-
-/***********************************************************
-             University of Southampton
-
-Synopsis:
-  get_standard_care_factors provides more control over how the program is
-  run
-
-Arguments:
-
-Returns:
-
-Description:
-
-Notes:
-    ksl - It is not obvious that much recent thought has been
-    given to the choices that are here.  The fractional distance
-    that a photon travel is intended to make sure the velocity
-    along the line of sight can be approximated linearly.  If 
-    a photon travels too far in an azimuthal direction the sense
-    of the velocity can change and this prevensts this
-
-    The lowest ion density contributing to photoionization is used
-    to determine what ions one has to calculate the photoionzation
-    xsection for.  The lower this density; the more that have to be
-    calculated, and as a result the slower the program.
-
-    Keeping photoionizaion during final spectrum allows one to
-    check the contribution of photoabsorption.
-
-History:
-  1502  JM  Moved here from main()
-
-**************************************************************/
-int
-get_standard_care_factors ()
-{
-  int istandard;
-  istandard = 1;
-  SMAX_FRAC = 0.5;
-  DENSITY_PHOT_MIN = 1.e-10;
-
-  /* 141116 - ksl - Made care factors and advanced command as this is clearly somethng that is diagnostic */
-
-  if (modes.iadvanced)
-    {
-      rdint ("@Diag.use_standard_care_factors(1=yes)", &istandard);
-
-      if (!istandard)
-	{
-	  rddoub ("@Diag.fractional_distance_photon_may_travel", &SMAX_FRAC);
-	  rddoub ("@Diag.lowest_ion_density_for_photoabs",
-		  &DENSITY_PHOT_MIN);
-	  rdint ("@Diag.keep_photoabs_in_final_spectra(1=yes)",
-		 &modes.keep_photoabs);
-	}
-    }
-  return (0);
-}
