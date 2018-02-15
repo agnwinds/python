@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -535,7 +537,9 @@ select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma)
   double run_tot;
   int ncont;
 
-  threshold = ((rand () + 0.5) / MAXRAND) * (kap_cont);
+//  threshold = ((rand () + 0.5) / MAXRAND) * (kap_cont); DONE
+  threshold = ((gsl_rng_get(rng) + 0.5) / randmax) * (kap_cont);
+
 
   /* First check for electron scattering. */
   if (kap_es > threshold)
@@ -1274,7 +1278,8 @@ scatter (p, nres, nnscat)
         /* Having got here we have calculated the probability of a k-packet
            being created. Now either make a k-packet or excite a macro atom. */
 
-        kpkt_choice = ((rand () + 0.5) / MAXRAND);      //random number for kpkt choice
+//        kpkt_choice = ((rand () + 0.5) / MAXRAND);      //random number for kpkt choice DONE
+        kpkt_choice = ((gsl_rng_get(rng) + 0.5) / randmax);      //random number for kpkt choice
 
         if (prob_kpkt > kpkt_choice)
         {
@@ -1299,7 +1304,9 @@ scatter (p, nres, nnscat)
 
         /* Now choose whether or not to make a k-packet. */
 
-        kpkt_choice = ((rand () + 0.5) / MAXRAND);      //random number for kpkt choice
+//        kpkt_choice = ((rand () + 0.5) / MAXRAND);      //random number for kpkt choice DONE
+        kpkt_choice = ((gsl_rng_get(rng) + 0.5) / randmax);      //random number for kpkt choice
+		
 
         if (prob_kpkt > kpkt_choice)
         {

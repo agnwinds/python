@@ -1,5 +1,8 @@
 #ifdef MPI_ON
 #include "mpi.h"
+#include "gsl/gsl_rng.h"
+#include "gsl/gsl_randist.h"
+
 #endif
 
 int np_mpi_global;              /// Global variable which holds the number of MPI processes
@@ -18,6 +21,11 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
 /* In python_43 the assignment of the WindPtr size has been moved from a fixed
 value determined by values in python.h to a values which are adjustable from
 within python */
+
+gsl_rng * rng;  // pointer to a global random number generator
+
+double randmax;
+
 
 
 /* With domains NDIM and MDIM need to be removed but NDIM2 is the total number of cells in wmain, and there

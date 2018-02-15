@@ -30,6 +30,8 @@
 #include <stdlib.h>
 #include "atomic.h"
 #include "python.h"
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 #include "log.h"
 
@@ -375,7 +377,8 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
     else if (spectype == SPECTYPE_UNIFORM)
     {                           /* Kurucz spectrum */
       /*Produce a uniform distribution of frequencies */
-      p[i].freq = freqmin + rand () * dfreq;
+//      p[i].freq = freqmin + rand () * dfreq; DONE
+	  p[i].freq = freqmin + gsl_rng_get(rng) * dfreq; //XXXXXX Can this be correct? it seems like we should actually have to divide by randmax...
     }
     else if (spectype == SPECTYPE_POW)  /* this is the call to the powerlaw routine 
                                            we are most interested in */
@@ -439,7 +442,9 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
       p[i].x[0] = p[i].x[1] = 0.0;
 
       /* need to set the z coordinate to the lamp post height, but allow it to be above or below */
-      if (rand () > MAXRAND / 2)
+//      if (rand () > MAXRAND / 2) // DONE
+	  if (gsl_rng_get(rng) > randmax / 2)
+		  
       {                         /* Then the photon emerges in the upper hemisphere */
         p[i].x[2] = geo.lamp_post_height;
       }

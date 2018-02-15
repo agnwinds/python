@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -799,7 +801,9 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
     else if (spectype == SPECTYPE_UNIFORM)
     {                           /* Kurucz spectrum */
       /*Produce a uniform distribution of frequencies */
-      p[i].freq = freqmin + rand () * dfreq;
+//      p[i].freq = freqmin + rand () * dfreq; //DONE
+      p[i].freq = freqmin + gsl_rng_get(rng) * dfreq; //XXXXXX Check this - it seems odd to not be dividing by randmax!!
+	  
     }
     else
     {
@@ -1142,7 +1146,9 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
  * generate photon.  04march -- ksl
  */
 
-    nring = ((rand () / MAXRAND) * (NRINGS - 1));
+//    nring = ((rand () / MAXRAND) * (NRINGS - 1)); DONE
+    nring = ((gsl_rng_get(rng) / randmax) * (NRINGS - 1));
+	
 
     if ((nring < 0) || (nring > NRINGS - 2))
     {
@@ -1156,12 +1162,16 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
  * should account for the area.  But haven't fixed this yet ?? 04Dec
  */
 
-    r = disk.r[nring] + (disk.r[nring + 1] - disk.r[nring]) * rand () / MAXRAND;
+//    r = disk.r[nring] + (disk.r[nring + 1] - disk.r[nring]) * rand () / MAXRAND; DONE
+    r = disk.r[nring] + (disk.r[nring + 1] - disk.r[nring]) * gsl_rng_get(rng) / randmax;
+	
     /* Generate a photon in the plane of the disk a distance r */
 
 // This is the correct way to generate an azimuthal distribution
 
-    phi = 2. * PI * (rand () / MAXRAND);
+//    phi = 2. * PI * (rand () / MAXRAND); DONE
+    phi = 2. * PI * (gsl_rng_get(rng) / randmax);
+	
     p[i].x[0] = r * cos (phi);
     p[i].x[1] = r * sin (phi);
 
@@ -1192,7 +1202,8 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
 
     }
 
-    if (rand () > MAXRAND / 2)
+//    if (rand () > MAXRAND / 2) DONE
+    if (gsl_rng_get(rng) > randmax / 2)
     {                           /* Then the photon emerges in the upper hemisphere */
       p[i].x[2] = (z + EPSILON);
     }
@@ -1215,7 +1226,8 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     else if (spectype == SPECTYPE_UNIFORM)
     {                           //Produce a uniform distribution of frequencies
 
-      p[i].freq = freqmin + rand () * dfreq;
+//      p[i].freq = freqmin + rand () * dfreq; DONE
+      p[i].freq = freqmin + gsl_rng_get(rng) * dfreq; //XXXXX CXheck this - no divide by randmax??
     }
 
     else

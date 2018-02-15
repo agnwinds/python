@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 #include "atomic.h"
 #include "python.h"
 
@@ -674,12 +676,15 @@ rtheta_get_random_location (n, x)
     {
       r =
 	sqrt (rmin * rmin +
-	      (rand () / (MAXRAND - 0.5)) * (rmax * rmax - rmin * rmin));
+//	      (rand () / (MAXRAND - 0.5)) * (rmax * rmax - rmin * rmin)); DONE
+      (gsl_rng_get(rng) / (randmax - 0.5)) * (rmax * rmax - rmin * rmin));
 
-      theta =
-	asin (sthetamin + (rand () / MAXRAND) * (sthetamax - sthetamin));
+//      theta = asin (sthetamin + (rand () / MAXRAND) * (sthetamax - sthetamin)); DONE
+      theta = asin (sthetamin + (gsl_rng_get(rng) / randmax) * (sthetamax - sthetamin));
 
-      phi = 2. * PI * (rand () / MAXRAND);
+
+//      phi = 2. * PI * (rand () / MAXRAND); DONE
+      phi = 2. * PI * (gsl_rng_get(rng) / randmax);
 
 /* Project from r, theta phi to x y z  */
 
@@ -690,7 +695,9 @@ rtheta_get_random_location (n, x)
 						   because the boundaries of the wind split the grid cell */
     }
 
-  zz = rand () / MAXRAND - 0.5;	//positions above are all at +z distances
+//  zz = rand () / MAXRAND - 0.5;	//positions above are all at +z distances DONE
+  zz = gsl_rng_get(rng) / randmax - 0.5;	//positions above are all at +z distances
+  
 
   if (zz < 0)
     x[2] *= -1;			/* The photon is in the bottom half of the wind */

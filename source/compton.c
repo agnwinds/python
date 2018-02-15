@@ -28,6 +28,7 @@
 #include "atomic.h"
 #include "python.h"
 #include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 PlasmaPtr xplasma;              // Pointer to current plasma cell
 
@@ -330,7 +331,8 @@ compton_dir (p, xplasma)
   }
   else
   {
-    z_rand = rand () / MAXRAND; //Generate a random number between 0 and 1 - this is the random location in the klein nishina scattering distribution - it gives the energy loss and also direction.
+//    z_rand = rand () / MAXRAND; //Generate a random number between 0 and 1 - this is the random location in the klein nishina scattering distribution - it gives the energy loss and also direction.// DONE
+	  z_rand=gsl_rng_get(rng)/randmax;
     f_min = 1.;                 //The minimum energy loss - i.e. no energy loss
     f_max = 1. + (2. * x1);     //The maximum energy loss
 
