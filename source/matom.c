@@ -9,8 +9,6 @@
 #include <gsl/gsl_block.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
 //#include <gsl/gsl_blas.h>
 #include "my_linalg.h"
 
@@ -337,7 +335,7 @@ matom (p, nres, escape)
        event will occur. */
 
 //    threshold = ((rand () + 0.5) / MAXRAND); DONE
-    threshold = ((gsl_rng_get(rng) + 0.5) / randmax);
+    threshold = random_number(0.0,1.0);
 
     if ((pjnorm_known[uplvl] + penorm_known[uplvl]) <= 0.0)
     {
@@ -357,7 +355,7 @@ matom (p, nres, escape)
 
     n = 0;
 //    threshold = ((rand () + 0.5) / MAXRAND); //DONE
-    threshold = ((gsl_rng_get(rng) + 0.5) / randmax);
+    threshold = random_number(0.0,1.0);
 	
     threshold = threshold * pjnorm_known[uplvl_old];
     while (run_tot < threshold)
@@ -419,7 +417,7 @@ matom (p, nres, escape)
   run_tot = 0;
   n = 0;
 //  threshold = ((rand () + 0.5) / MAXRAND); //DONE
-  threshold = ((gsl_rng_get(rng) + 0.5) / randmax);
+  threshold = random_number(0.0,1.0);
   
   threshold = threshold * penorm_known[uplvl];  //normalise to total emission prob.
   while (run_tot < threshold)
@@ -436,7 +434,7 @@ matom (p, nres, escape)
        emission probability to the (already known) collisional+radiative probability to decide whether
        collisional or radiative deactivation occurs. */
 //    choice = ((rand () + 0.5) / MAXRAND);       // the random number //DONE
-    choice = ((gsl_rng_get(rng) + 0.5) / randmax);
+    choice = random_number(0.0,1.0);
 	
 
     line_ptr = &line[config[uplvl].bbd_jump[n]];        //pointer for the bb transition
@@ -479,7 +477,7 @@ matom (p, nres, escape)
     coll_rate = q_recomb (cont_ptr, t_e) * ne;
 
 //    choice = ((rand () + 0.5) / MAXRAND);       // the random number//DONE
-    choice = ((gsl_rng_get(rng) + 0.5) / randmax);
+    choice = random_number(0.0,1.0);
 	
 
     if (choice > (coll_rate / (rad_rate + coll_rate)))
@@ -488,7 +486,7 @@ matom (p, nres, escape)
       *nres = config[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
       /* continuua are indicated by nres > NLINES */
 //      p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e / H_OVER_K); //DONE
-      p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - (gsl_rng_get(rng) + 0.5) / randmax) * xplasma->t_e / H_OVER_K);
+      p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. -  random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
 	  
       /* Co-moving frequency - changed to rest frequency by doppler */
       /*Currently this assumed hydrogenic shape cross-section - Improve */
@@ -962,7 +960,7 @@ kpkt (p, nres, escape)
      Choose which process destroys the k-packet with a random number. */
 
 //  destruction_choice = ((rand () + 0.5) / MAXRAND) * mplasma->cooling_normalisation; //DONE
-  destruction_choice = ((gsl_rng_get(rng) + 0.5) / randmax) * mplasma->cooling_normalisation;
+  destruction_choice = random_number(0.0,1.0) * mplasma->cooling_normalisation;
 
   if (destruction_choice < mplasma->cooling_bftot)
   {                             //destruction by bf
@@ -992,7 +990,7 @@ kpkt (p, nres, escape)
         /* Now (as in matom) choose a frequency for the new packet. */
 
 //        p->freq = phot_top[i].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e / H_OVER_K); //DONE
-        p->freq = phot_top[i].freq[0] - (log (1. - (gsl_rng_get(rng) + 0.5) / randmax) * xplasma->t_e / H_OVER_K);
+        p->freq = phot_top[i].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
 		
         /* Co-moving frequency - changed to rest frequency by doppler */
         /*Currently this assumed hydrogenic shape cross-section - Improve */
@@ -1215,7 +1213,7 @@ fake_matom_bb (p, nres, escape)
   /* Now just use a random number to decide what happens. */
 
 //  choice = ((rand () + 0.5) / MAXRAND); //DONE
-  choice = ((gsl_rng_get(rng) + 0.5) / randmax);
+  choice = random_number(0.0,1.0);
 
 
   /* If "choice" is less than rprb then we have chosen a radiative decay - for this fake macro atom there 
@@ -1308,7 +1306,7 @@ fake_matom_bf (p, nres, escape)
   *escape = 1;                  //always an r-packet here
 
 //  p->freq = phot_top[*nres - NLINES - 1].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e / H_OVER_K); DONE
-  p->freq = phot_top[*nres - NLINES - 1].freq[0] - (log (1. - (gsl_rng_get(rng) + 0.5) / randmax) * xplasma->t_e / H_OVER_K);
+  p->freq = phot_top[*nres - NLINES - 1].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
   
 
   /*Currently this assumes hydrogenic shape cross-section - Improve */
@@ -1460,7 +1458,7 @@ emit_matom (w, p, nres, upper)
      event will occur. */
 
 //  threshold = ((rand () + 0.5) / MAXRAND); DONE
-  threshold = ((gsl_rng_get(rng) + 0.5) / randmax);
+  threshold = random_number(0.0,1.0);
   
 
   run_tot = 0;
@@ -1485,7 +1483,7 @@ emit_matom (w, p, nres, upper)
     *nres = config[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
     /* continuua are indicated by nres > NLINES */
 //    p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * t_e / H_OVER_K); DONE
-    p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - (gsl_rng_get(rng) + 0.5) / randmax) * t_e / H_OVER_K);
+    p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - random_number(0.0,1.0)) * t_e / H_OVER_K);
 	
     /* Co-moving frequency - changed to rest frequency by doppler */
     /*Currently this assumed hydrogenic shape cross-section - Improve */

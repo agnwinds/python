@@ -1,7 +1,6 @@
 #ifdef MPI_ON
 #include "mpi.h"
-#include "gsl/gsl_rng.h"
-#include "gsl/gsl_randist.h"
+
 
 #endif
 
@@ -22,9 +21,7 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
 value determined by values in python.h to a values which are adjustable from
 within python */
 
-gsl_rng * rng;  // pointer to a global random number generator
 
-double randmax;
 
 
 

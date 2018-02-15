@@ -33,8 +33,6 @@ History:
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -332,7 +330,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
          we make sure that xlum is not == 0 or to geo.f_wind. */
 
 //      xlum = (rand () + 0.5) / (MAXRAND) * geo.f_wind; //DONE
-      xlum = (gsl_rng_get(rng) + 0.5) / (randmax) * geo.f_wind;
+      xlum = random_number(0.0,1.0) * geo.f_wind;
 	  
 
       xlumsum = 0;
@@ -365,7 +363,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 
       lum = plasmamain[nplasma].lum_tot;
 //      xlum = lum * (rand () + 0.5) / (MAXRAND); //DONE
-      xlum = lum * (gsl_rng_get(rng) + 0.5) / (randmax);
+      xlum = lum * random_number(0.0,1.0);
       xlumsum = 0;
 
       p[n].nres = -1;
@@ -538,7 +536,7 @@ one_line (one, nres)
     }
 
 //  xlum = xplasma->lum_lines * (rand () / (MAXRAND - 0.5)); //DONE
-  xlum = xplasma->lum_lines * (gsl_rng_get(rng) / (randmax - 0.5));
+  xlum = xplasma->lum_lines * random_number(0.0,1.0);
   
   xlumsum = 0;
   m = nline_min;

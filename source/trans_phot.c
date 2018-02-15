@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
 
 #include "atomic.h"
 #include "python.h"
@@ -269,8 +267,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
   /* Initialize parameters that are needed for the flight of the photon through the wind */
   stuff_phot (p, &pp);
-//  tau_scat = -log (1. - (rand () + 0.5) / MAXRAND); DONE
-  tau_scat = -log (1. - (gsl_rng_get(rng) + 0.5) / randmax);
+//  tau_scat = -log (1. - (rand () + 0.5) / MAXRAND); DONE - this would have got a random number exluding zero
+  tau_scat = -log (1. - random_number(0.0,1.0)); 
   
   weight_min = EPSILON * pp.w;
   istat = P_INWIND;
@@ -325,7 +323,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
           randvcos(pp.lmn,normal);
           stuff_phot (&pp, p);
 //          tau_scat = -log (1. - (rand () + 0.5) / MAXRAND); DONE
-          tau_scat = -log (1. - (gsl_rng_get(rng) + 0.5) / randmax);
+          tau_scat = -log (1. - random_number(0.0,1.0));
           istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
           tau = 0;
           if (iextract) {
@@ -360,7 +358,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
           randvcos(pp.lmn,normal);
           stuff_phot (&pp, p);
 //          tau_scat = -log (1. - (rand () + 0.5) / MAXRAND); DONE
-          tau_scat = -log (1. - (gsl_rng_get(rng) + 0.5) / randmax);
+          tau_scat = -log (1. - random_number(0.0,1.0));
           istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
           tau = 0;
           if (iextract) {
@@ -566,7 +564,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
          so that the photon can continue throug the wind */
 
 //      tau_scat = -log (1. - (rand () + 0.5) / MAXRAND); DONE
-      tau_scat = -log (1. - (gsl_rng_get(rng) + 0.5) / randmax);
+      tau_scat = -log (1. - random_number(0.0,1.0));
       istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
       tau = 0;
 

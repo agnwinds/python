@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
 #include "atomic.h"
 #include "python.h"
 
@@ -677,14 +675,14 @@ rtheta_get_random_location (n, x)
       r =
 	sqrt (rmin * rmin +
 //	      (rand () / (MAXRAND - 0.5)) * (rmax * rmax - rmin * rmin)); DONE
-      (gsl_rng_get(rng) / (randmax - 0.5)) * (rmax * rmax - rmin * rmin));
+     random_number(0.0,1.0) * (rmax * rmax - rmin * rmin));
 
 //      theta = asin (sthetamin + (rand () / MAXRAND) * (sthetamax - sthetamin)); DONE
-      theta = asin (sthetamin + (gsl_rng_get(rng) / randmax) * (sthetamax - sthetamin));
+      theta = asin (sthetamin + random_number(0.0,1.0) * (sthetamax - sthetamin));
 
 
 //      phi = 2. * PI * (rand () / MAXRAND); DONE
-      phi = 2. * PI * (gsl_rng_get(rng) / randmax);
+      phi = 2. * PI * random_number(0.0,1.0);
 
 /* Project from r, theta phi to x y z  */
 
@@ -696,7 +694,7 @@ rtheta_get_random_location (n, x)
     }
 
 //  zz = rand () / MAXRAND - 0.5;	//positions above are all at +z distances DONE
-  zz = gsl_rng_get(rng) / randmax - 0.5;	//positions above are all at +z distances
+  zz = random_number(-1.0,1.0);	//positions above are all at +z distances
   
 
   if (zz < 0)

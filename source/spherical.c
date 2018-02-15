@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
 #include "atomic.h"
 #include "python.h"
 
@@ -451,14 +449,14 @@ spherical_get_random_location (n, x)
   while (inwind != W_ALL_INWIND)
   {
 //    r = (rmin * rmin * rmin) + (rmax * rmax * rmax - rmin * rmin * rmin) * (rand () / (MAXRAND - 0.5)); DONE
-    r = (rmin * rmin * rmin) + (rmax * rmax * rmax - rmin * rmin * rmin) * (gsl_rng_get(rng) / (randmax - 0.5));
+    r = (rmin * rmin * rmin) + (rmax * rmax * rmax - rmin * rmin * rmin) * random_number(0.0,1.0);
 	
     r = pow (r, (1. / 3.));
 //    theta = acos (2. * (rand () / MAXRAND) - 1); DONE
-    theta = acos (2. * (gsl_rng_get(rng) / randmax) - 1);
+    theta = acos (random_number(-1.0,1.0));
 
 //    phi = 2. * PI * (rand () / MAXRAND);   DONE 
-    phi = 2. * PI * (gsl_rng_get(rng) / randmax);
+    phi = 2. * PI * random_number(0.0,1.0);
 
 /* Project from r, theta phi to x y z  */
     x[0] = r * cos (phi) * sin (theta);

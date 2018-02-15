@@ -176,6 +176,8 @@ void roche_deriv(double s, double *value, double *derivative);
 int randvec(double a[], double r);
 int randvcos(double lmn[], double north[]);
 double vcos(double x);
+int init_rand(int seed);
+double random_number(double min, double max);
 /* stellar_wind.c */
 int get_stellar_wind_params(int ndom);
 double stellar_velocity(int ndom, double x[], double v[]);
@@ -476,7 +478,7 @@ int solve_matrix(double *a_data, double *b_data, int nrows, double *x, int nplas
 int communicate_estimators_para(void);
 int gather_spectra_para(int nspec_helper, int nspecs);
 int communicate_matom_estimators_para(void);
-/* setup.c */
+/* setup_star_bh.c */
 double get_stellar_params(void);
 int get_bl_and_agn_params(double lstar);
 int get_standard_care_factors(void);

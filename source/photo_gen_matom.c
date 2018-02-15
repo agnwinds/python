@@ -13,8 +13,6 @@
 #include <gsl/gsl_block.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
 //#include <gsl/gsl_blas.h>
 #include "my_linalg.h"
 
@@ -556,7 +554,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
     /* locate the wind_cell in which the photon bundle originates. */
 
 //    xlum = (rand () + 0.5) / (MAXRAND) * geo.f_kpkt; DONE
-    xlum = (gsl_rng_get(rng) + 0.5) / (randmax) * geo.f_kpkt;
+    xlum = random_number(0.0,1.0) * geo.f_kpkt;
 
     xlumsum = 0;
     icell = 0;
@@ -746,7 +744,7 @@ photo_gen_matom (p, weight, photstart, nphot)
        atom levels will be sampled (identify that level as "upper"). */
 
 //    xlum = (rand () + 0.5) / (MAXRAND) * geo.f_matom; DONE
-    xlum = (gsl_rng_get(rng) + 0.5) / (randmax) * geo.f_matom;
+    xlum = random_number(0.0,1.0) * geo.f_matom;
 	
 
     xlumsum = 0;

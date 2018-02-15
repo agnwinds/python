@@ -224,8 +224,7 @@ History:
 #include <math.h>
 #include "atomic.h"
 #include <time.h>		//To allow the used of the clock command without errors!!
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
+
 
 
 #include "python.h"
@@ -254,8 +253,7 @@ main (argc, argv)
   int np_mpi;			// rank and number of processes, 0 and 1 in non-parallel
   int ndom;
   
-  rng = gsl_rng_alloc(gsl_rng_mt19937); //Set the random number generator to the GSL Meursenne twirster
-  randmax=gsl_rng_max (rng);  //Store the maximum value of the generator
+
   
 
 
@@ -696,6 +694,8 @@ main (argc, argv)
   /* INPUTS ARE FINALLY COMPLETE */
 
   /* Print out some diagnositic infomration about the domains */
+	
+	
 
 
   Log ("There are %d domains\n", geo.ndomain);
@@ -704,6 +704,8 @@ main (argc, argv)
       Log ("%20s type: %d  ndim: %d mdim: %d ndim2: %d\n", zdom[n].name,
 	   zdom[n].wind_type, zdom[n].ndim, zdom[n].mdim, zdom[n].ndim2);
     }
+	
+	
 
 
   /* DFUDGE is a distance that assures we can "push through" boundaries.  setup_dfudge
@@ -714,6 +716,8 @@ main (argc, argv)
 
   /* Now define the wind cones generically. modifies the global windcone structure */
   setup_windcone ();
+  
+  
 
   /*NSH 130821 broken out into a seperate routine added these lines to fix bug41, where
      the cones are never defined for an rtheta grid if the model is restarted. 
@@ -735,17 +739,40 @@ main (argc, argv)
     }
 
 
+   /* initialize the random number generator */
+   /* By default, the random number generator start with fixed seeds (differnt
+    * for each processor, but this can be changed using a command line
+    * switch.  
+    *
+    * An exception is when we are in zeus mode, where it would be inappropriate
+    * to use the same phtons in ezch cycle.  There we initiate the seeds unsing
+    * the clock
+    */
+   if (modes.rand_seed_usetime == 1)
+     {
+       n = (unsigned int) clock () * (rank_global + 1);
+ //      srand (n);
+ 	  init_rand(n);
+	  
+     }
+   else
+   {
+ //    srand (1084515760 + (13 * rank_global));
+ 	  printf ("BLAH going to initialise seed\n");
+     init_rand(1084515760 + (13 * rank_global));
+ }
 
 
 
   /* Next line finally defines the wind if this is the initial time this model is being run */
-
 
 //Old  if (geo.run_type == RUN_TYPE_NEW &&  modes.zeus_connect != 1)	// Define the wind and allocate the arrays the first time
   if (geo.run_type == RUN_TYPE_NEW)	// Define the wind and allocate the arrays the first time
     {
       define_wind ();
     }
+	
+	
 
   if (modes.zeus_connect == 1)	//We have restarted, but are in zeus connect mode, so we want to update density, temp and velocities
     {
@@ -765,26 +792,7 @@ main (argc, argv)
       open_diagfile ();
     }
 
-  /* initialize the random number generator */
-  /* By default, the random number generator start with fixed seeds (differnt
-   * for each processor, but this can be changed using a command line
-   * switch.  
-   *
-   * An exception is when we are in zeus mode, where it would be inappropriate
-   * to use the same phtons in ezch cycle.  There we initiate the seeds unsing
-   * the clock
-   */
 
-  if (modes.rand_seed_usetime == 1)
-    {
-      n = (unsigned int) clock () * (rank_global + 1);
-      srand (n);
-	  gsl_rng_set(rng, n);
-	  
-    }
-  else
-    srand (1084515760 + (13 * rank_global));
-    gsl_rng_set (rng,1084515760 + (13 * rank_global));
   
 
   /* Start with photon history off */

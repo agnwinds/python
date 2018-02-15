@@ -882,8 +882,8 @@ cdf_get_rand (cdf)
   int xquadratic ();
 /* Find the interval within which x lies */
 //  r = rand () / MAXRAND;	/* r must be slightly less than 1 */ //DONE
-  r=(gsl_rng_get(rng)-0.5)/randmax; //NSH - this actually is now less than one as a maximum
-
+  r=random_number(0.0,1.0); //This now exludes 0.0 asnd 1.0.
+  
 //  i = r * cdf->ncdf;          /* so i initially lies between 0 and the size of the pdf array -1 */
 //  while (cdf->y[i + 1] < r && i < cdf->ncdf - 1)
 //    i++;
@@ -895,7 +895,7 @@ cdf_get_rand (cdf)
 
 /* Now calculate a place within that interval */
 //  q = rand () / MAXRAND;//DONE
-  q=(gsl_rng_get(rng))/randmax;
+  q=random_number(0.0,1.0);
   a = 0.5 * (cdf->d[i + 1] - cdf->d[i]);
   b = cdf->d[i];
   c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
@@ -1024,7 +1024,7 @@ cdf_get_rand_limit (cdf)
   double a, b, c, s[2];
   int xquadratic ();
 //  r = rand () / MAXRAND;	/* r must be slightly less than 1 */ //DONE
-  r=(gsl_rng_get(rng)-0.5)/randmax; //NSH - this actually is now less than one as a maximum
+  r=random_number(0.0,1.0); //
   
   r = r * cdf->limit2 + (1. - r) * cdf->limit1;
   i = r * cdf->ncdf;
@@ -1035,7 +1035,7 @@ cdf_get_rand_limit (cdf)
   while (TRUE)
     {
 //      q = rand () / MAXRAND; //DONE
-	  q=(gsl_rng_get(rng))/randmax;
+	  q=random_number(0.0,1.0);
       a = 0.5 * (cdf->d[i + 1] - cdf->d[i]);
       b = cdf->d[i];
       c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
