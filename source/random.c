@@ -189,7 +189,6 @@ int
 {
     rng = gsl_rng_alloc(gsl_rng_mt19937); //Set the random number generator to the GSL Meursenne twirster
 	gsl_rng_set(rng, seed);
-	printf ("BLAH allocated seed\n");
 	return(0);
 }
 
@@ -212,8 +211,6 @@ int
 double random_number(double min, double max)
 
 {
-	printf ("BLAH trying to get rand %e %e\n",min,max);
-	
 	double num = gsl_rng_uniform_pos(rng);
 	double x = min + ((max - min) * num);
 	return(x);

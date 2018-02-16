@@ -757,8 +757,7 @@ main (argc, argv)
      }
    else
    {
- //    srand (1084515760 + (13 * rank_global));
- 	  printf ("BLAH going to initialise seed\n");
+ //OLD    srand (1084515760 + (13 * rank_global));
      init_rand(1084515760 + (13 * rank_global));
  }
 
