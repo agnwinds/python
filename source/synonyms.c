@@ -90,7 +90,7 @@ char *old_names[] =
     "adjust_grid",
     "filling_factor","Coord.system","write_atomicdata","Fixed.concentrations.filename",
     "Extra.diagnostics","File.with.model2read","Number.of.wind.components","Old_windfile",
-    "Model_file",
+    "Model_file","agn_power_law_index",
     NULL
 
 };
@@ -123,13 +123,13 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
     "Diag.adjust_grid",
     "Wind.filling_factor","Wind.coord_system","Diag.write_atomicdata", "Wind.fixed_concntrations_file",
     "Diag.extra","Wind.model2import","Wind.number_of_components","Wind.old_windfile",
-    "Input_spectra.model_file",
+    "Input_spectra.model_file","AGN.power_law_index",
     NULL
 };
 
 
 
-int number_of_names = 78;
+int number_of_names = 79;
 
 #define MIN(a,b) ((a)<b ? a:b)
 
