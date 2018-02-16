@@ -271,7 +271,7 @@ get_bl_and_agn_params (lstar)
 
       if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
 	{
-	  rddoub ("AGN.lamp_post.height(r_g)", &geo.lamp_post_height);
+	  rddoub ("AGN.lamp_post_height(r_g)", &geo.lamp_post_height);
 	  geo.lamp_post_height *= G * geo.mstar / C / C;	//get it in CGS units
 	  Log ("lamp_post_height is cm is %g\n", geo.lamp_post_height);
 	}
