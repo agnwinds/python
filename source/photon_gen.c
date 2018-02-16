@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+
 #include "atomic.h"
 #include "python.h"
 
@@ -766,7 +767,7 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
                                    is uniform in frequency space */
      int istart, nphot;         /* Respecitively the starting point in p and the number of photons to generate */
 {
-  double freqmin, freqmax, dfreq;
+  double freqmin, freqmax;
   int i, iend;
   if ((iend = istart + nphot) > NPHOT)
   {
@@ -780,7 +781,7 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
   Log_silent ("photo_gen_star creates nphot %5d photons from %5d to %5d \n", nphot, istart, iend);
   freqmin = f1;
   freqmax = f2;
-  dfreq = (freqmax - freqmin) / MAXRAND;
+//  dfreq = (freqmax - freqmin) / MAXRAND; //No longer needed - we compute a random frequency directly.
   r = (1. + EPSILON) * r;       /* Generate photons just outside the photosphere */
   for (i = istart; i < iend; i++)
   {
@@ -799,7 +800,9 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
     else if (spectype == SPECTYPE_UNIFORM)
     {                           /* Kurucz spectrum */
       /*Produce a uniform distribution of frequencies */
-      p[i].freq = freqmin + rand () * dfreq;
+//      p[i].freq = freqmin + rand () * dfreq; //DONE
+      p[i].freq = random_number(freqmin,freqmax); //Generate a random frequency - this will exclude freqmin,freqmax.
+	  
     }
     else
     {
@@ -1105,7 +1108,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
      int istart, nphot;
 {
 
-  double freqmin, freqmax, dfreq;
+  double freqmin, freqmax;
   int i, iend;
   double planck ();
   double t, r, z, theta, phi;
@@ -1124,7 +1127,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
   Log_silent ("photo_gen_disk creates nphot %5d photons from %5d to %5d \n", nphot, istart, iend);
   freqmin = f1;
   freqmax = f2;
-  dfreq = (freqmax - freqmin) / MAXRAND;
+//  dfreq = (freqmax - freqmin) / MAXRAND;
   for (i = istart; i < iend; i++)
   {
     p[i].origin = PTYPE_DISK;   // identify this as a disk photon
@@ -1142,7 +1145,9 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
  * generate photon.  04march -- ksl
  */
 
-    nring = ((rand () / MAXRAND) * (NRINGS - 1));
+//    nring = ((rand () / MAXRAND) * (NRINGS - 1)); DONE
+    nring = random_number(0.0,1.0) * (NRINGS - 1);
+	
 
     if ((nring < 0) || (nring > NRINGS - 2))
     {
@@ -1156,12 +1161,16 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
  * should account for the area.  But haven't fixed this yet ?? 04Dec
  */
 
-    r = disk.r[nring] + (disk.r[nring + 1] - disk.r[nring]) * rand () / MAXRAND;
+//    r = disk.r[nring] + (disk.r[nring + 1] - disk.r[nring]) * rand () / MAXRAND; DONE
+    r = disk.r[nring] + (disk.r[nring + 1] - disk.r[nring]) * random_number(0.0,1.0);
+	
     /* Generate a photon in the plane of the disk a distance r */
 
 // This is the correct way to generate an azimuthal distribution
 
-    phi = 2. * PI * (rand () / MAXRAND);
+//    phi = 2. * PI * (rand () / MAXRAND); DONE
+    phi = 2. * PI * random_number(0.0,1.0);
+	
     p[i].x[0] = r * cos (phi);
     p[i].x[1] = r * sin (phi);
 
@@ -1192,7 +1201,8 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
 
     }
 
-    if (rand () > MAXRAND / 2)
+//    if (rand () > MAXRAND / 2) DONE
+    if (random_number(-0.5,0.5) > 0.0) //Get a uniform random number brtween -0.5 and 0.5- use sign to toss a coin.
     {                           /* Then the photon emerges in the upper hemisphere */
       p[i].x[2] = (z + EPSILON);
     }
@@ -1215,7 +1225,8 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     else if (spectype == SPECTYPE_UNIFORM)
     {                           //Produce a uniform distribution of frequencies
 
-      p[i].freq = freqmin + rand () * dfreq;
+//      p[i].freq = freqmin + rand () * dfreq; DONE
+      p[i].freq = random_number(freqmin,freqmax); //Get a random frequency between fmin and fmax (exluding the ends)
     }
 
     else
