@@ -3,14 +3,18 @@
 shell
 =====
 
-shell.wind.acceleration_exponent
-================================
-Exponent beta for the Caster and Lamers description of a stellar wind
-v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta for a shell wind.
+shell.wind_v_at_rmin
+====================
+The velocity of a shell wind at the inner edge of the 
+shell - the variation of the velocity in the shell is
+set by the velocity law exponent. It allows a gradient 
+to be enforced.
 
 **Type:** Double
 
-**Value:** Greater than or equal to 0
+**Unit:** cm/s
+
+**Value:** Greater than or equal to zero.
 
 **Parent(s):**
   Wind_type_: 9
@@ -57,18 +61,14 @@ to be enforced.
 **File:** shell_wind.c
 
 
-shell.wind_v_at_rmin
-====================
-The velocity of a shell wind at the inner edge of the 
-shell - the variation of the velocity in the shell is
-set by the velocity law exponent. It allows a gradient 
-to be enforced.
+shell.wind.acceleration_exponent
+================================
+Exponent beta for the Caster and Lamers description of a stellar wind
+v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta for a shell wind.
 
 **Type:** Double
 
-**Unit:** cm/s
-
-**Value:** Greater than or equal to zero.
+**Value:** Greater than or equal to 0
 
 **Parent(s):**
   Wind_type_: 9

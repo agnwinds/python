@@ -1,7 +1,0 @@
-name: Old_windfile
-description: |
-  root_only
-type: String
-parent:
-  parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-file: python.c

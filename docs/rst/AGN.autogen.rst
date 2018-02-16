@@ -3,6 +3,24 @@
 AGN
 ===
 
+AGN.bremsstrahlung_temp
+=======================
+The temperature T in bremstrahlung SED of the form
+L_nu=nu**alpha exp(-hnu/kT)
+
+**Type:** Double
+
+**Unit:** K
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  parameter_: None
+
+
+**File:** setup_star_bh.c
+
+
 AGN.blackbody_temp
 ==================
 The temperature of a blackbody SED to be used for the central AGN source
@@ -33,68 +51,6 @@ L_nu=nu**alpha exp(-hnu/kT)
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup_star_bh.c
-
-
-AGN.bremsstrahlung_temp
-=======================
-The temperature T in bremstrahlung SED of the form
-L_nu=nu**alpha exp(-hnu/kT)
-
-**Type:** Double
-
-**Unit:** K
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  parameter_: None
-
-
-**File:** setup_star_bh.c
-
-
-AGN.geometry_for_pl_source
-==========================
-Choose the geometry for the power law source.
-
-**Type:** Enum (Int)
-
-**Values:**
-
-0. *sphere*
-   
-   The power law source is a sphere with radius equal to 
-   the radius of the central object. In a BH system this is 
-   often set to the ISCO.
-
-1. *lamp_post* 
-   
-   The power law source is a single point at some height above the origin. 
-   Photons radiate isotropically from this point. The height is specified in 
-   a subsequent parameter, lamp_post.height.
-
-
-**Parent(s):**
-  parameter_: QSO_BH_radiation
-
-
-**File:** setup_star_bh.c
-
-
-AGN.lamp_post.height
-====================
-The height above the disc for the lamp post source in units 
-of gravitational radii (typical value ~10). 
-
-**Type:** Double
-
-**Unit:** co.gravitational_radius
-
-**Parent(s):**
-  parameter_: geometry_for_pl_source
 
 
 **File:** setup_star_bh.c
@@ -132,6 +88,34 @@ central source of the form L_nu=K nu**alpha
 
 **Parent(s):**
   parameter_: None
+
+
+**File:** setup_star_bh.c
+
+
+AGN.geometry_for_pl_source
+==========================
+Choose the geometry for the power law source.
+
+**Type:** Enum (Int)
+
+**Values:**
+
+0. *sphere*
+   
+   The power law source is a sphere with radius equal to 
+   the radius of the central object. In a BH system this is 
+   often set to the ISCO.
+
+1. *lamp_post* 
+   
+   The power law source is a single point at some height above the origin. 
+   Photons radiate isotropically from this point. The height is specified in 
+   a subsequent parameter, lamp_post.height.
+
+
+**Parent(s):**
+  parameter_: QSO_BH_radiation
 
 
 **File:** setup_star_bh.c

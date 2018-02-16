@@ -129,6 +129,7 @@ for filename in os.listdir(input_folder):
 
 # Read in all parameters from the input files
 for input_file in input_files:
+    print(input_file)
     with open(os.path.join(input_folder, input_file), "r") as file_object:
         # For each key, open a yaml file and load from it.
         try:

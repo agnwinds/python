@@ -10,5 +10,5 @@ unit: None
 values:  0 to 1
 parent:
   parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-file: setup.c
+file: diag.c
 advanced: true

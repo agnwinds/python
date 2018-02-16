@@ -1,9 +1,0 @@
-name: write_atomicdata
-description: |
-  Choose whether to write the atomic data that is being used to 
-  an output file.
-type: Boolean (1/0)
-parent:
-  parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-file: setup_domains.c
-advanced: true
