@@ -447,11 +447,16 @@ spherical_get_random_location (n, x)
   inwind = W_NOT_INWIND;
   while (inwind != W_ALL_INWIND)
   {
-    r = (rmin * rmin * rmin) + (rmax * rmax * rmax - rmin * rmin * rmin) * (rand () / (MAXRAND - 0.5));
+//    r = (rmin * rmin * rmin) + (rmax * rmax * rmax - rmin * rmin * rmin) * (rand () / (MAXRAND - 0.5)); DONE
+    r = (rmin * rmin * rmin) + (rmax * rmax * rmax - rmin * rmin * rmin) * random_number(0.0,1.0);
+	
     r = pow (r, (1. / 3.));
-    theta = acos (2. * (rand () / MAXRAND) - 1);
+//    theta = acos (2. * (rand () / MAXRAND) - 1); DONE
+    theta = acos (random_number(-1.0,1.0));
 
-    phi = 2. * PI * (rand () / MAXRAND);
+//    phi = 2. * PI * (rand () / MAXRAND);   DONE 
+    phi = 2. * PI * random_number(0.0,1.0);
+
 /* Project from r, theta phi to x y z  */
     x[0] = r * cos (phi) * sin (theta);
     x[1] = r * sin (phi) * sin (theta);

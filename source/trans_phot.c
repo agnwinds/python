@@ -286,7 +286,9 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
   /* Initialize parameters that are needed for the flight of the photon through the wind */
   stuff_phot (p, &pp);
-  tau_scat = -log (1. - (rand () + 0.5) / MAXRAND);
+//  tau_scat = -log (1. - (rand () + 0.5) / MAXRAND); DONE - this would have got a random number exluding zero
+  tau_scat = -log (1. - random_number(0.0,1.0)); 
+  
   weight_min = EPSILON * pp.w;
   istat = P_INWIND;
   tau = 0;
@@ -333,28 +335,26 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	  break;
 	}
 
-      if (istat == P_HIT_STAR)
-	{			/* It hit the star */
-	  geo.lum_star_back += pp.w;
-	  if (geo.absorb_reflect == BACK_RAD_SCATTER)
-	    {
-	      randvcos (pp.lmn, normal);
-	      stuff_phot (&pp, p);
-	      tau_scat = -log (1. - (rand () + 0.5) / MAXRAND);
-	      istat = pp.istat = P_INWIND;	// if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
-	      tau = 0;
-	      if (iextract)
-		{
-		  stuff_phot (&pp, &pextract);
-		  extract (w, &pextract, PTYPE_STAR);	// Treat as wind photon for purpose of extraction
-		}
-	    }
-	  else
-	    {			/*This is the end of the line for this photon */
-	      stuff_phot (&pp, p);
-	      break;
-	    }
-	}
+    if (istat == P_HIT_STAR)
+    {                           /* It hit the star */
+      geo.lum_star_back+=pp.w;
+      if (geo.absorb_reflect==BACK_RAD_SCATTER){
+          randvcos(pp.lmn,normal);
+          stuff_phot (&pp, p);
+//          tau_scat = -log (1. - (rand () + 0.5) / MAXRAND); DONE
+          tau_scat = -log (1. - random_number(0.0,1.0));
+          istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
+          tau = 0;
+          if (iextract) {
+              stuff_phot (&pp, &pextract);
+              extract (w, &pextract, PTYPE_STAR);     // Treat as wind photon for purpose of extraction
+          }
+      }
+      else {  /*This is the end of the line for this photon */
+          stuff_phot (&pp, p);
+          break;
+      }
+    }
 
       if (istat == P_HIT_DISK)
 	{
@@ -373,25 +373,23 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	  geo.lum_disk_back = qdisk.heat[kkk] += pp.w;	// 60a - ksl - Added to be able to calculate illum of disk
 	  qdisk.ave_freq[kkk] += pp.w * pp.freq;
 
-	  if (geo.absorb_reflect == BACK_RAD_SCATTER)
-	    {
-	      randvcos (pp.lmn, normal);
-	      stuff_phot (&pp, p);
-	      tau_scat = -log (1. - (rand () + 0.5) / MAXRAND);
-	      istat = pp.istat = P_INWIND;	// if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
-	      tau = 0;
-	      if (iextract)
-		{
-		  stuff_phot (&pp, &pextract);
-		  extract (w, &pextract, PTYPE_DISK);	// Treat as wind photon for purpose of extraction
-		}
-	    }
-	  else
-	    {			/*This is the end of the line for this photon */
-	      stuff_phot (&pp, p);
-	      break;
-	    }
-	}
+      if (geo.absorb_reflect==BACK_RAD_SCATTER){
+          randvcos(pp.lmn,normal);
+          stuff_phot (&pp, p);
+//          tau_scat = -log (1. - (rand () + 0.5) / MAXRAND); DONE
+          tau_scat = -log (1. - random_number(0.0,1.0));
+          istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
+          tau = 0;
+          if (iextract) {
+              stuff_phot (&pp, &pextract);
+              extract (w, &pextract, PTYPE_DISK);     // Treat as wind photon for purpose of extraction
+          }
+      }
+      else {  /*This is the end of the line for this photon */
+          stuff_phot (&pp, p);
+          break;
+      }
+    }
 
       if (istat == P_SCAT)
 	{			/* Cause the photon to scatter and reinitilize */
@@ -603,9 +601,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
        * The next steps reinitialize parameters
 	     so that the photon can continue throug the wind */
 
-	  tau_scat = -log (1. - (rand () + 0.5) / MAXRAND);
-	  istat = pp.istat = P_INWIND;	// if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
-	  tau = 0;
+//      tau_scat = -log (1. - (rand () + 0.5) / MAXRAND); DONE
+      tau_scat = -log (1. - random_number(0.0,1.0));
+      istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
+      tau = 0;
 
 	  stuff_v (pp.x, x_dfudge_check);	// this is a vector we use to see if dfudge moved the photon outside the wind cone
 	  reposition (&pp);

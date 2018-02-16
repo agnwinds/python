@@ -178,6 +178,8 @@ void roche_deriv(double s, double *value, double *derivative);
 int randvec(double a[], double r);
 int randvcos(double lmn[], double north[]);
 double vcos(double x);
+int init_rand(int seed);
+double random_number(double min, double max);
 /* stellar_wind.c */
 int get_stellar_wind_params(int ndom);
 double stellar_velocity(int ndom, double x[], double v[]);

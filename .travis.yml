@@ -52,6 +52,7 @@ script:
     - py -i 1d_sn
     - py -i -d sv_detailedmode
     - cd ../beta/
+    - Setup_Py_Dir
     - py -i agn_ss_2010_modela
     - py -i ulx1
     - py -i ngc5548

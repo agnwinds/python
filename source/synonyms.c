@@ -81,16 +81,16 @@ char *old_names[] =
     "Band.minimum_fraction",
     "agn_bremsstrahlung_temp","agn_bremsstrahlung_alpha","agn_blackbody_temp",
     "agn_power_law_cutoff","geometry_for_pl_source","lamp_post.height",
-    "Select_specific_no_of_scatters_in_spectra","Select_scatters","Select_photons_by_position",
-    "Select_location","rho","z","azimuth","r",
-    "save_cell_statistics","ispymode","keep_ioncycle_windsaves","make_ioncycle_tables",
-    "save_extract_photons", "print_dvds_info","track_resonant_scatters",
-    "Use.standard.care.factors","Fractional.distance.photon.may.travel",
-    "Lowest.ion.density.contributing.to.photoabsorption", "Keep.photoabs.during.final.spectrum",
-    "adjust_grid",
-    "filling_factor","Coord.system","write_atomicdata","Fixed.concentrations.filename",
-    "Extra.diagnostics","File.with.model2read","Number.of.wind.components","Old_windfile",
-    "Model_file",
+    "@Select_specific_no_of_scatters_in_spectra","@Select_scatters","@Select_photons_by_position",
+    "@Select_location","@rho","@z","@azimuth","@r",
+    "@save_cell_statistics","@ispymode","@keep_ioncycle_windsaves","@make_ioncycle_tables",
+    "@save_extract_photons", "@print_dvds_info","@track_resonant_scatters",
+    "@Use.standard.care.factors","@Fractional.distance.photon.may.travel",
+    "@Lowest.ion.density.contributing.to.photoabsorption", "@Keep.photoabs.during.final.spectrum",
+    "@adjust_grid",
+    "filling_factor","Coord.system","@write_atomicdata","Fixed.concentrations.filename",
+    "@Extra.diagnostics","File.with.model2read","Number.of.wind.components","Old_windfile",
+    "Model_file","agn_power_law_index",
     NULL
 
 };
@@ -114,22 +114,22 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
     "Photon_sampling.band_min_frac",
     "AGN.bremsstrahlung_temp","AGN.bremsstrahlung_alpha","AGN.blackbody_temp",
     "AGN.power_law_cutoff","AGN.geometry_for_pl_source","AGN.lamp_post_height",
-    "Spectrum.select_specific_no_of_scatters_in_spectra","Spectrum.select_scatters","Spectrum.select_photons_by_position",
-    "Spectrum.select_location","Spectrum.select_rho","Spectrum.select_z","Spectrum.select_azimuth","Spectrum.select_r",
-    "Diag.save_cell_statistics","Diag.ispymode","Diag.keep_ioncycle_windsaves","Diag.make_ioncycle_tables",
-    "Diag.save_extract_photons", "Diag.print_dvds_info","Diag.track_resonant_scatters",
-    "Diag.use_standard_care_factors","Diag.fractional_distance_photon_may_travel",
-    "Diag.lowest_ion_density_for_photoabs", "Diag.keep_photoabs_in_final_spectra",
-    "Diag.adjust_grid",
-    "Wind.filling_factor","Wind.coord_system","Diag.write_atomicdata", "Wind.fixed_concntrations_file",
-    "Diag.extra","Wind.model2import","Wind.number_of_components","Wind.old_windfile",
-    "Input_spectra.model_file",
+    "@Spectrum.select_specific_no_of_scatters_in_spectra","@Spectrum.select_scatters","@Spectrum.select_photons_by_position",
+    "@Spectrum.select_location","@Spectrum.select_rho","@Spectrum.select_z","@Spectrum.select_azimuth","@Spectrum.select_r",
+    "@Diag.save_cell_statistics","@Diag.ispymode","@Diag.keep_ioncycle_windsaves","@Diag.make_ioncycle_tables",
+    "@Diag.save_extract_photons", "@Diag.print_dvds_info","@Diag.track_resonant_scatters",
+    "@Diag.use_standard_care_factors","@Diag.fractional_distance_photon_may_travel",
+    "@Diag.lowest_ion_density_for_photoabs", "@Diag.keep_photoabs_in_final_spectra",
+    "@Diag.adjust_grid",
+    "Wind.filling_factor","Wind.coord_system","@Diag.write_atomicdata", "Wind.fixed_concntrations_file",
+    "@Diag.extra","Wind.model2import","Wind.number_of_components","Wind.old_windfile",
+    "Input_spectra.model_file","AGN.power_law_index",
     NULL
 };
 
 
 
-int number_of_names = 78;
+int number_of_names = 79;
 
 #define MIN(a,b) ((a)<b ? a:b)
 
