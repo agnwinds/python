@@ -164,4 +164,4 @@ if __name__ == "__main__":
         # doit(int(sys.argv[1]))
         doit(sys.argv[1])
     else:
-        print ('usage: import_1d.py filename')
+        print ('usage: import_cyl.py filename')
