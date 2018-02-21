@@ -23,8 +23,19 @@ branches:
   only:
     - dev
 
+# specify email notifications
+notifications:
+  email:
+    recipients:
+      - james.matthews@physics.ox.ac.uk
+      - long@stsci.edu
+      - nick_higginbottom@fastmail.fm
+    on_success: never      # default: change
+    on_failure: always      # default: always
+
 install:
     # first configure
+    - breakthecode
     - export PYTHON=$TRAVIS_BUILD_DIR
     - export PATH=$PATH:$PYTHON/bin 
     - ./configure
