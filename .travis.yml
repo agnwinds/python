@@ -35,7 +35,6 @@ notifications:
 
 install:
     # first configure
-    - breakthecode
     - export PYTHON=$TRAVIS_BUILD_DIR
     - export PATH=$PATH:$PYTHON/bin 
     - ./configure
