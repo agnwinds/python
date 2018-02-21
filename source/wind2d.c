@@ -123,6 +123,8 @@ define_wind ()
     }
 
 
+
+
   calloc_wind (NDIM2);
 
   w = wmain;
@@ -335,7 +337,6 @@ define_wind ()
   /* Allocate space for the plasma arrays */
 
   calloc_plasma (NPLASMA);
-  printf ("GOING TO CALLOC PLASMA\n");
   calloc_dyn_plasma (NPLASMA);	/*78a NSH 1407 - allocate space for dynamically sized arrays */
   create_maps (CHOICE);		/* Populate the maps from plasmamain & wmain */
 
@@ -468,6 +469,9 @@ be optional which variables beyond here are moved to structures othere than Wind
 
 /* Calculate the the divergence of the wind at the center of each grid cell */
   wind_div_v (w);
+  
+
+  
 
 /* Now calculate the adiabatic cooling.  Note: adiabatic cooling is not used in
  * the program at present.  There are issues concerning how to incorporate it
@@ -489,9 +493,15 @@ be optional which variables beyond here are moved to structures othere than Wind
 	plasmamain[i].cool_adiabatic = 0.0;
     }
 
+
   /* Calculate one over dvds */
   dvds_ave ();
+  
+  
   wind_check (w, -1);		// Check the wind for reasonability
+  
+  
+  
 
   /* zero the counters which record diagnositcs from mean_intensity */
   nerr_Jmodel_wrong_freq = 0;

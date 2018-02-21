@@ -23,6 +23,16 @@ branches:
   only:
     - dev
 
+# specify email notifications
+notifications:
+  email:
+    recipients:
+      - james.matthews@physics.ox.ac.uk
+      - long@stsci.edu
+      - nick_higginbottom@fastmail.fm
+    on_success: never      # default: change
+    on_failure: always      # default: always
+
 install:
     # first configure
     - export PYTHON=$TRAVIS_BUILD_DIR
@@ -52,6 +62,7 @@ script:
     - py -i 1d_sn
     - py -i -d sv_detailedmode
     - cd ../beta/
+    - Setup_Py_Dir
     - py -i agn_ss_2010_modela
     - py -i ulx1
     - py -i ngc5548
