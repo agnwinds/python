@@ -112,27 +112,31 @@ def read_file(filename):
 
 def write_header(function):
     """
-    Given a function dictionary, writes it to string
+    Given a function dictionary, writes it to an array of strings
 
     Arguments:
         function: Dictionary describing the function header
 
     Returns:
-        String: The header to be written to file
+        list (string): The header to be written to file
     """
-    header = module_string_start.replace(r'%s', r'{}').replace(r'???', r'{}')\
-        .format(function['name'], function['synopsis'].replace('\n', '\n * '))
+    header = module_string_start.format(
+        function['name'],
+        function['synopsis'].replace('\n', '\n * ')
+    )
 
     for name, argument in function['arguments'].items():
-        header += module_string_param.replace(r'%s', r'{}').replace(r'???', r'{}')\
-            .format(argument['type'], argument['name'],
-                    argument['description'].replace('\n', '\n * '))
+        header += module_string_param.format(
+            argument['type'], argument['name'],
+            argument['description'].replace('\n', '\n * ')
+        )
 
-    header += module_string_end.replace(r'%s', r'{}').replace(r'???', r'{}')\
-        .format(function['returns'].replace('\n', '\n * '),
-                function['description'].replace('\n', '\n * '),
-                function['notes'].replace('\n', '\n * '))
-    return header
+    header += module_string_end.replace(r'%s', r'{}').format(
+        function['returns'].replace('\n', '\n * '),
+        function['description'].replace('\n', '\n * '),
+        function['notes'].replace('\n', '\n * ')
+    )
+    return header.splitlines(True)
 
 
 def parse_header_block(header, title, strip=True, default=None):
@@ -330,32 +334,32 @@ def get_modules(filename='emission.c'):
 
 file_string = '''
 /***********************************************************/
-/** @file   %s
+/** @file  %s
  * @Author ksl
  * @date   January, 2018
  *
  * @brief  ???
  *
- * ??? More extended description ???.
+ * ???
  ***********************************************************/
 '''
 
 module_string_start = '''
 /**********************************************************/
-/** @name      %s
- * @brief      %s
+/** @name      {}
+ * @brief      {}
  *
  * <NOTE: The [in out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
 '''
-module_string_param = ''' * @param [in out] %s  %s   %s
+module_string_param = ''' * @param [in out] {}  {}   {}
 '''
-module_string_end = ''' * @return     %s
+module_string_end = ''' * @return     {}
  *
- * %s
+ * {}
  *
  * @notes
  *
- * %s
+ * {}
  *
  **********************************************************/
 
@@ -492,151 +496,23 @@ def doit(filename='emission.c', outputfile=None):
             module = parse_header('', module)
 
         with open('tempdox_{}.c'.format(module['name']), 'w') as outfile:
-            outfile.write(write_header(module))
-
+            outfile.write(''.join(write_header(module)))
 
     x = open(outputfile, 'w')
 
     x.write(file_string % (outputfile))
 
-    i = 0
-    kk = 0
-    while i < len(lines):
-        line = lines[i]
-        k = 0
-        while k<len(header_end):
-            if header_start[k]<=i and i<= header_end[k]:
-                line='//OLD '+line
-                kcurrent=k
-                break
-            k+=1
+    # Prepend '//OLD' to all the lines between all the identified header start-end pairs
+    for start, end in zip(header_start, header_end):
+        for i in range(start, end+1):
+            lines[i] = '//OLD '+lines[i]
 
-        if kk<len(module_start) and i==module_start[kk]:
-            proto_string=modules[kk]
-            if xmatch[kk]!=-1:
-                istart=header_start[kcurrent]
-                istop=header_end[kcurrent]
-                # Try to get the synopusis
-                synopsis_string=''
-                synopsis=False
-                ii=istart
-                while ii<istop:
-                    if lines[ii].count('Synopsis:'):
-                        # print('gotcha')
-                        synopsis_string=lines[ii].replace('Synopsis:','')
-                        synopsis=True
-                    elif lines[ii].count('Arguments:') or lines[ii].count('Returns:'):
-                        synopsis=False
-                    elif synopsis==True:
-                        synopsis_string=synopsis_string+lines[ii]
-                    ii+=1
-            # print('test',synopsis_string)
+    # Now go through the list and stick our new headers into place
+    for index, start in reversed(list(enumerate(module_start))):
+        # We go through in reverse order to avoid having to deal with changing line numbers
+        lines = lines[:start]+write_header(list(mod_dict.values())[index])+lines[start:]
 
-            if synopsis_string=='':
-                synopsis_string='???'
-            else:
-                synopsis_string=synopsis_string.replace('\n','\n*      ')
-            x.write(module_string_start % (proto_string[2],synopsis_string))
-
-
-        # Now try to get the return string
-        if kk<len(module_start) and i==module_start[kk]:
-            proto_string=modules[kk]
-            if xmatch[kk]!=-1:
-                istart=header_start[kcurrent]
-                istop=header_end[kcurrent]
-                # Try to get the synopusis
-                return_string=''
-                xreturn=False
-                ii=istart
-                while ii<istop:
-                    if lines[ii].count('Returns:'):
-                        # print('gotcha')
-                        return_string=lines[ii].replace('Returns:','')
-                        xreturn=True
-                    elif lines[ii].count('Description:'):
-                        xreturn=False
-                    elif xreturn==True:
-                        return_string=return_string+lines[ii]
-                    ii+=1
-            # print('test',return_string)
-
-            return_string=return_string.strip()
-            if return_string=='':
-                return_string='???'
-            else:
-                return_string=return_string.replace('\n','\n*      ')
-
-
-        # Now try to get the description
-        if kk<len(module_start) and i==module_start[kk]:
-            proto_string=modules[kk]
-            if xmatch[kk]!=-1:
-                istart=header_start[kcurrent]
-                istop=header_end[kcurrent]
-                # Try to get the synopusis
-                description_string=''
-                description=False
-                ii=istart
-                while ii<istop:
-                    if lines[ii].count('Description:'):
-                        # print('gotcha')
-                        description_string=lines[ii].replace('Description:','')
-                        description=True
-                    elif lines[ii].count('Notes:'):
-                        description=False
-                    elif description==True:
-                        description_string=description_string+lines[ii]
-                    ii+=1
-            # print('test',description_string)
-
-            description_string=description_string.strip()
-            if description_string=='':
-                description_string='???'
-            else:
-                description_string=description_string.replace('\n','\n*      ')
-
-
-
-        # Now try to get the notes
-        if kk<len(module_start) and i==module_start[kk]:
-            proto_string=modules[kk]
-            if xmatch[kk]!=-1:
-                istart=header_start[kcurrent]
-                istop=header_end[kcurrent]
-                # Try to get the synopusis
-                notes_string=''
-                notes=False
-                ii=istart
-                while ii<istop:
-                    if lines[ii].count('Notes:'):
-                        # print('gotcha')
-                        notes_string=lines[ii].replace('Notes:','')
-                        notes=True
-                    elif lines[ii].count('History:'):
-                        notes=False
-                    elif notes==True:
-                        notes_string=notes_string+lines[ii]
-                    ii+=1
-            # print('Notes_test',notes_string)
-
-            notes_string=notes_string.strip()
-            if notes_string=='':
-                notes_string='None'
-            else:
-                notes_string=notes_string.replace('\n','\n*      ')
-
-            kkk=2
-            # print(proto_string)
-            while kkk<len(proto_string):
-                x.write(module_string_param % (proto_string[kkk-1],proto_string[kkk], '?!?'))
-                kkk+=2
-            x.write(module_string_end % (return_string,description_string,notes_string))
-            kk+=1
-
-        x.write(line)
-        i+=1
-
+    x.write(''.join(lines))
     return
 
 
