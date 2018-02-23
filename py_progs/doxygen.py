@@ -235,6 +235,8 @@ def parse_header(header, func_dict):
                 else:
                     description = block[name_index:].strip()
 
+
+                print('{}: ARG-> {}: {}'.format(func_dict['name'], name, description))
                 # Did we ever actually find a description?
                 if description:
                     parameter['description'] = description
@@ -343,8 +345,9 @@ module_string_start = '''
 /** @name      %s
  * @brief      %s
  *
+ * <NOTE: The [in out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
 '''
-module_string_param = ''' * @param [in] %s  %s   ???
+module_string_param = ''' * @param [in out] %s  %s   %s
 '''
 module_string_end = ''' * @return     %s
  *
@@ -626,7 +629,7 @@ def doit(filename='emission.c', outputfile=None):
             kkk=2
             # print(proto_string)
             while kkk<len(proto_string):
-                x.write(module_string_param % (proto_string[kkk-1],proto_string[kkk]))
+                x.write(module_string_param % (proto_string[kkk-1],proto_string[kkk], '?!?'))
                 kkk+=2
             x.write(module_string_end % (return_string,description_string,notes_string))
             kk+=1
