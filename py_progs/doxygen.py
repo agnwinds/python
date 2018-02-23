@@ -239,8 +239,6 @@ def parse_header(header, func_dict):
                 else:
                     description = block[name_index:].strip()
 
-
-                print('{}: ARG-> {}: {}'.format(func_dict['name'], name, description))
                 # Did we ever actually find a description?
                 if description:
                     parameter['description'] = description
@@ -494,9 +492,6 @@ def doit(filename='emission.c', outputfile=None):
         else:
             # Else, pass it a blank string and let it set up a default one
             module = parse_header('', module)
-
-        with open('tempdox_{}.c'.format(module['name']), 'w') as outfile:
-            outfile.write(''.join(write_header(module)))
 
     x = open(outputfile, 'w')
 
