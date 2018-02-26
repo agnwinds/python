@@ -3,18 +3,20 @@
 Spectrum
 ========
 
-Spectrum.wavemin
-================
-The minimum wavelength of the final spectra in Angstroms
+Spectrum.angle
+==============
+The inclination angle with respect to the polar axis for
+obtaining a spectrum.  This question will be repeated once
+for each desired incliniation
 
 **Type:** Double
 
-**Unit:** Angstroms
+**Unit:** Degrees
 
-**Value:** Greater than 0
+**Value:** Normally betwween 0 and 99 degrees
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  parameter_: Spectrum.no_observers
 
 
 **File:** setup2.c
@@ -37,19 +39,44 @@ its cylindrical coordinates.
 **File:** setup2.c
 
 
-Spectrum.select_r
+Spectrum.orbit_phase
+====================
+For binary systems, the orbital phase at which the spectrum
+is to be extracted (so the effects of an eclipse can be taken
+into account in creating the spectrum. Phase 0 corresponds to
+inferior conjunciton, that is with the secondary in front (or 
+depending on inclination angle, partially in front of) the
+primary
+
+**Type:** Double
+
+**Unit:** None
+
+**Value:** Normally between 0 and 1
+
+**Parent(s):**
+  parameter_: Only required when the system is a described as a binary
+
+
+**File:** setup2.c
+
+
+Spectrum.select_z
 =================
-Part of a set of parameters which define a spherical region of space from which 
-photons are to be extracted. select_r defines the radius of the spherical region
+Advanced command which defines a spherical  region of
+space from which photons are to be extracted in constructing a detailed
+spectrum.  The region is defined by a cylindrical distance, and z height
+and an aximuth, and a radius r.  This parameter defines the z coordiante
+of the region.
 
 **Type:** Double
 
 **Unit:** cm
 
-**Value:** greater than 0
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Required when one asks to to extract photons from a spherical region in the wind
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup2.c
@@ -71,6 +98,58 @@ just from photons that originate or scatter int he region
 
 **Parent(s):**
   parameter_: Required when extracting photons by position.
+
+
+**File:** setup2.c
+
+
+Spectrum.select_specific_no_of_scatters_in_spectra
+==================================================
+Advanced command which allows one to place additional
+constraints on the detailed spectra which are extract.  
+This includes selectiong photons from above or below the
+disk, only photons which have scttered, etc.  
+
+**Type:** Boolean (Y/N)
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** setup2.c
+
+
+Spectrum.wavemin
+================
+The minimum wavelength of the final spectra in Angstroms
+
+**Type:** Double
+
+**Unit:** Angstroms
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** setup2.c
+
+
+Spectrum.live.or.die
+====================
+Normally in creating detailed spectrum Python "extracts" photons in a certain
+direction rewithing them to account for the fact that they have been extracted
+in a certain direction.  It is possible to just count the photons that are emitted
+in a single angle range. The two methods should yield the same or very similar results 
+but the extraction method is much more efficient and live or die is basically a 
+diagnostic mode.  For historical reaaons the live or die method is called with 0
+and anything else rsults in the standard extract method being used.
+
+**Type:** Boolean (1/0)
+
+**Parent(s):**
+  parameter_: Called anytime detialed spectra are two be created.
 
 
 **File:** setup2.c
@@ -100,14 +179,19 @@ other. basic
 **File:** setup2.c
 
 
-Spectrum.select_specific_no_of_scatters_in_spectra
-==================================================
-Advanced command which allows one to place additional
-constraints on the detailed spectra which are extract.  
-This includes selectiong photons from above or below the
-disk, only photons which have scttered, etc.  
+Spectrum.select_rho
+===================
+Advanced command which defines a spherical  region of
+space from which photons are to be extracted in constructing a detailed
+spectrum.  The region is defined by a cylindrical distance, and z height
+and an aximuth, and a radius r.  This parameter defines the rho coordiante
+of the region.
 
-**Type:** Boolean (Y/N)
+**Type:** Double
+
+**Unit:** cm
+
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
@@ -116,61 +200,19 @@ disk, only photons which have scttered, etc.
 **File:** setup2.c
 
 
-Spectrum.live.or.die
-====================
-Normally in creating detailed spectrum Python "extracts" photons in a certain
-direction rewithing them to account for the fact that they have been extracted
-in a certain direction.  It is possible to just count the photons that are emitted
-in a single angle range. The two methods should yield the same or very similar results 
-but the extraction method is much more efficient and live or die is basically a 
-diagnostic mode.  For historical reaaons the live or die method is called with 0
-and anything else rsults in the standard extract method being used.
-
-**Type:** Boolean (1/0)
-
-**Parent(s):**
-  parameter_: Called anytime detialed spectra are two be created.
-
-
-**File:** setup2.c
-
-
-Spectrum.angle
-==============
-The inclination angle with respect to the polar axis for
-obtaining a spectrum.  This question will be repeated once
-for each desired incliniation
+Spectrum.select_r
+=================
+Part of a set of parameters which define a spherical region of space from which 
+photons are to be extracted. select_r defines the radius of the spherical region
 
 **Type:** Double
 
-**Unit:** Degrees
+**Unit:** cm
 
-**Value:** Normally betwween 0 and 99 degrees
-
-**Parent(s):**
-  parameter_: Spectrum.no_observers
-
-
-**File:** setup2.c
-
-
-Spectrum.orbit_phase
-====================
-For binary systems, the orbital phase at which the spectrum
-is to be extracted (so the effects of an eclipse can be taken
-into account in creating the spectrum. Phase 0 corresponds to
-inferior conjunciton, that is with the secondary in front (or 
-depending on inclination angle, partially in front of) the
-primary
-
-**Type:** Double
-
-**Unit:** None
-
-**Value:** Normally between 0 and 1
+**Value:** greater than 0
 
 **Parent(s):**
-  parameter_: Only required when the system is a described as a binary
+  parameter_: Required when one asks to to extract photons from a spherical region in the wind
 
 
 **File:** setup2.c
@@ -208,48 +250,6 @@ n is < 0 then photons with n or greater scattters will be extracted.
 
 **Parent(s):**
   Select_no_of_scatters_in_spectra_: If 'y' then ask how many scatters
-
-
-**File:** setup2.c
-
-
-Spectrum.select_z
-=================
-Advanced command which defines a spherical  region of
-space from which photons are to be extracted in constructing a detailed
-spectrum.  The region is defined by a cylindrical distance, and z height
-and an aximuth, and a radius r.  This parameter defines the z coordiante
-of the region.
-
-**Type:** Double
-
-**Unit:** cm
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup2.c
-
-
-Spectrum.select_rho
-===================
-Advanced command which defines a spherical  region of
-space from which photons are to be extracted in constructing a detailed
-spectrum.  The region is defined by a cylindrical distance, and z height
-and an aximuth, and a radius r.  This parameter defines the rho coordiante
-of the region.
-
-**Type:** Double
-
-**Unit:** cm
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup2.c
