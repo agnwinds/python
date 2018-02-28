@@ -1174,17 +1174,14 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     p[i].x[0] = r * cos (phi);
     p[i].x[1] = r * sin (phi);
 
-    /*04aug--ksl--Creating photons above the disk. One should actually
-     * change the directionality of the photons too by modifying north */
-    /*05jul -- ksl -- 56d -- Added modification to correct photon direction of a
-     * vertically extended disk
-     */
-
 
     z = 0.0;
     north[0] = 0;
     north[1] = 0;
     north[2] = 1;
+
+    /* Correct photon direction of a vertically extended disk
+     */
 
     if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
@@ -1193,7 +1190,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
       else
       {
         z = zdisk (r);
-        theta = asin ((zdisk (r * (1. + EPSILON)) - z) / (EPSILON * r));
+        theta = atan ((zdisk (r * (1. + EPSILON)) - z) / (EPSILON * r));
       }
       north[0] = (-cos (phi) * sin (theta));
       north[1] = (-sin (phi) * sin (theta));
