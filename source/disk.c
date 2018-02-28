@@ -234,6 +234,7 @@ zdisk (r)
    
  Arguments:
         p       a photon pointer.
+        miss_return 
  
  
  Returns:
