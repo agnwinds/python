@@ -302,7 +302,7 @@ ds_to_disk (p, allow_negative)
   double x1, x2;
   double s, s_negative, s_test;
   double s_plane, s_top, s_bottom, s_sphere;
-  double s_disk=0;
+  double s_disk = 0;
   double r, r_top, r_bottom;
   double smin, smax;
   struct photon phit;
@@ -360,180 +360,179 @@ ds_to_disk (p, allow_negative)
 	  return (s_plane);
 	  return (VERY_BIG);
 	}
+    }
 
-      /* At this point, we have completed the simple case.  It is simple
-       * because there is only one possible intersection with the disk
-       * boundary
-       *
-       * For the vertically extended disk we have to keep track of
-       * the smallest postive value and the smallest (in absolute
-       * terms negative value.  
-       * OK now we have to deal with the hard case.  We would like to
-       * avoid actually having to calculate the intercept to the disk
-       * if we can because this is likely time consuming. So we first
-       * determine this, by checking where the ray hits a sphere that 
-       * just encompasses the disk 
-       */
+  /* At this point, we have completed the simple case.  It is simple
+   * because there is only one possible intersection with the disk
+   * boundary
+   *
+   * For the vertically extended disk we have to keep track of
+   * the smallest postive value and the smallest (in absolute
+   * terms negative value.  
+   * OK now we have to deal with the hard case.  We would like to
+   * avoid actually having to calculate the intercept to the disk
+   * if we can because this is likely time consuming. So we first
+   * determine this, by checking where the ray hits a sphere that 
+   * just encompasses the disk 
+   */
 
-      s = VERY_BIG;
-      s_negative = -VERY_BIG;
+  s = VERY_BIG;
+  s_negative = -VERY_BIG;
 
-      s_test = s_top = ds_to_plane (&disktop, p);
-      stuff_phot (p, &phit);
-      move_phot (&phit, s_test);
-      r = r_top = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
+  s_test = s_top = ds_to_plane (&disktop, p);
+  stuff_phot (p, &phit);
+  move_phot (&phit, s_test);
+  r = r_top = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
 
-      if (r < geo.diskrad)
+  if (r < geo.diskrad)
+    {
+      if (s_test >= 0)
 	{
-	  if (s_test >= 0)
-	    {
-	      s = s_top;
-	    }
-	  else
-	    {
-	      s_negative = s_top;
-	    }
+	  s = s_top;
+	}
+      else
+	{
+	  s_negative = s_top;
+	}
+    }
+
+
+
+  s_test = s_bottom = ds_to_plane (&diskbottom, p);
+  stuff_phot (p, &phit);
+  move_phot (&phit, s_test);
+  r = r_bottom = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
+
+  if (r < geo.diskrad)
+    {
+      if (s_test >= 0 && s_test < s)
+	{
+	  s = s_test;
+	}
+      else if (s_test < 0 && s_test > s_negative)
+	{
+	  s_negative = s_test;
+	}
+    }
+
+  s_test = s_sphere = ds_to_sphere (geo.diskrad, p);
+  stuff_phot (p, &phit);
+  move_phot (&phit, s_test);
+
+  /* At this point phit is on the sphere but our check here is whether its on the diks or not
+   */
+
+  if (fabs (phit.x[2]) < geo.disk_z0 * geo.diskrad)
+    {
+      if (s_test >= 0 && s_test < s)
+	{
+	  s = s_test;
+	}
+      else if (s_test < 0 && s_test > s_negative)
+	{
+	  s_negative = s_test;
 	}
 
+    }
+
+  /* So at this point we have the smallest positive and smallest negative values.  If we
+   * have missed the boundary, we have s as VERY_BIG and s_negative as -VERY_BIG */
 
 
-      s_test = s_bottom = ds_to_plane (&diskbottom, p);
-      stuff_phot (p, &phit);
-      move_phot (&phit, s_test);
-      r = r_bottom = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
-
-      if (r < geo.diskrad)
+  if (s == VERY_BIG)
+    {
+      if (s_negative == -VERY_BIG || allow_negative == 0)
 	{
-	  if (s_test >= 0 && s_test < s)
-	    {
-	      s = s_test;
-	    }
-	  else if (s_test < 0 && s_test > s_negative)
-	    {
-	      s_negative = s_test;
-	    }
+	  return (VERY_BIG);
 	}
-
-      s_test = s_sphere = ds_to_sphere (geo.diskrad, p);
-      stuff_phot (p, &phit);
-      move_phot (&phit, s_test);
-
-      /* At this point phit is on the sphere but our check here is whether its on the diks or not
-       */
-
-      if (fabs (phit.x[2]) < geo.disk_z0 * geo.diskrad)
+      else
 	{
-	  if (s_test >= 0 && s_test < s)
-	    {
-	      s = s_test;
-	    }
-	  else if (s_test < 0 && s_test > s_negative)
-	    {
-	      s_negative = s_test;
-	    }
-
+	  // This is the case where we allow s to be negative, and there was no positive intercept
+	  s_negative = s;
 	}
-
-      /* So at this point we have the smallest positive and smallest negative values.  If we
-       * have missed the boundary, we have s as VERY_BIG and s_negative as -VERY_BIG */
-
-
-      if (s == VERY_BIG)
-	{
-	  if (s_negative == -VERY_BIG || allow_negative == 0)
-	    {
-	      return (VERY_BIG);
-	    }
-	  else
-	    {
-	      // This is the case where we allow s to be negative, and there was no positive intercept
-	      s_negative = s;
-	    }
-	}
+    }
 
 
 /* At this point we must find the intercept with the disk */
 
 
-      /*  First we check the unlikely case that the photon hit the edge of the
-       *  disk.  This is easy because if so s will be the same as s_sphere
-       *  */
+  /*  First we check the unlikely case that the photon hit the edge of the
+   *  disk.  This is easy because if so s will be the same as s_sphere
+   *  */
 
-      if (s == s_sphere)
-	{
-	  return (s);
-	}
-
-      /*  Now we need to find exactly where we have hit the disk.  This
-       *  is not trivial.  Basically we need to bracket the possibilites
-       *  
-       *
-       * OK, at this point we know the photon is on a path that passes 
-       * through (or passed through the disk) and we must locate it. 
-       * There are two possibilities.  It hit the disk edge, or it hit
-       * the face of the disk.  Most of the time it will hit the disk face
-       * so we will calculate this first, and then check if s is less
-       * than s_sphere. 
-       *
-       * To setup rtsafe, we have to find distances which bracket what
-       * we want.  smax should be no more than the distance to the
-       * disk_plane (assuming we have a photon headed toward the plane)
-       *
-       * Note that the next little section is inted to select between the
-       * top and bottom face of the disk
-       */
-
-      /* I've modified the next if statement to try and get it to choose
-         the correct x2 (have to be careful about the r's being less
-         than diskrad. SS August 04. */
-
-      x1 = s_plane;
-      if (p->x[2] > 0.0)
-	{
-	  if (r_top < geo.diskrad)
-	    {
-	      x2 = s_top;
-	    }
-	  else
-	    {
-	      x2 = s_bottom;
-	    }
-	}
-      else
-	{
-	  if (r_bottom < geo.diskrad)
-	    {
-	      x2 = s_bottom;
-	    }
-	  else
-	    {
-	      x2 = s_top;
-	    }
-	}
-
-      if (fabs (x2) > fabs (x1))	//fabs added by SS August 04
-	{
-	  smin = x1;
-	  smax = x2;
-	}
-      else
-	{
-	  smin = x2;		//added by SS August 04
-	  smax = x1;		//added by SS August 04
-	}
-
-
-      stuff_phot (p, &ds_to_disk_photon);
-      move_phot (&ds_to_disk_photon, smin);
-
-      s_disk =
-	rtsafe (disk_deriv, 0.0, smax - smin, fabs (smax - smin) / 1000.);
-      //fabs added by SS August 04 - want convergence test quantity to be +ve 
-      s_disk += smin;
-
-      /* Note that s_disk can still be negative */
-
+  if (s == s_sphere)
+    {
+      return (s);
     }
+
+  /*  Now we need to find exactly where we have hit the disk.  This
+   *  is not trivial.  Basically we need to bracket the possibilites
+   *  
+   *
+   * OK, at this point we know the photon is on a path that passes 
+   * through (or passed through the disk) and we must locate it. 
+   * There are two possibilities.  It hit the disk edge, or it hit
+   * the face of the disk.  Most of the time it will hit the disk face
+   * so we will calculate this first, and then check if s is less
+   * than s_sphere. 
+   *
+   * To setup rtsafe, we have to find distances which bracket what
+   * we want.  smax should be no more than the distance to the
+   * disk_plane (assuming we have a photon headed toward the plane)
+   *
+   * Note that the next little section is inted to select between the
+   * top and bottom face of the disk
+   */
+
+  /* I've modified the next if statement to try and get it to choose
+     the correct x2 (have to be careful about the r's being less
+     than diskrad. SS August 04. */
+
+  x1 = s_plane;
+  if (p->x[2] > 0.0)
+    {
+      if (r_top < geo.diskrad)
+	{
+	  x2 = s_top;
+	}
+      else
+	{
+	  x2 = s_bottom;
+	}
+    }
+  else
+    {
+      if (r_bottom < geo.diskrad)
+	{
+	  x2 = s_bottom;
+	}
+      else
+	{
+	  x2 = s_top;
+	}
+    }
+
+  if (fabs (x2) > fabs (x1))	//fabs added by SS August 04
+    {
+      smin = x1;
+      smax = x2;
+    }
+  else
+    {
+      smin = x2;		//added by SS August 04
+      smax = x1;		//added by SS August 04
+    }
+
+
+  stuff_phot (p, &ds_to_disk_photon);
+  move_phot (&ds_to_disk_photon, smin);
+
+  s_disk = rtsafe (disk_deriv, 0.0, smax - smin, fabs (smax - smin) / 1000.);
+  //fabs added by SS August 04 - want convergence test quantity to be +ve 
+  s_disk += smin;
+
+  /* Note that s_disk can still be negative */
+
 
   return (s_disk);
 }
