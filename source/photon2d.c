@@ -596,6 +596,7 @@ walls (p, pold,normal)
       }
       else if (s==VERY_BIG){
           Error("walls: Should not miss disk at this position %e %e %e\n",pold->x[0],pold->x[1],pold->x[2]);
+          s = ds_to_disk (pold, 0);
       }
       stuff_phot (pold, p);
       move_phot (p, s-DFUDGE);
