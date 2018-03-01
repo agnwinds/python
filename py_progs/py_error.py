@@ -48,7 +48,7 @@ def doit(root, diagfolder_name=''):
         diagfolder_name = 'diag_' + root
 
 
-    string ='%s/*_*.diag' % diagfolder_name
+    string ='%s/%s_*.diag' % (diagfolder_name,root)
     files=glob(string)
 
     if len(files)==0:
@@ -58,6 +58,8 @@ def doit(root, diagfolder_name=''):
     # number of processors and therefore diag files provided as argument
     nfiles = len(files)
     nprocessors = nfiles
+
+    print('test',files)
 
 
     # create some arrays to store the error logs and increment the counters
@@ -119,13 +121,16 @@ def doit(root, diagfolder_name=''):
     # print the output to screen
     print("Error summary: "+root)
     print("Collated errors for " + str(nprocessors) + " processors")
-    print("Recurrences --  number of threads with error -- Description")
-    for i in range(n_logs):
-        print("\t%5d -- %5d -- %s" % (error_count[i], thread_count[i],error_log[i]))
 
 
     x=Table([error_count,thread_count,error_log],names=['ErrorCount','ThreadCount','Error'])
     x.write('%s_error_sum.txt' % root, format='ascii.fixed_width_two_line', overwrite=True) 
+    x.sort(keys=['ErrorCount'])
+    x.reverse()  # put in order of the most errors first
+
+    print("Recurrences --  number of threads with error -- Description")
+    for one in x:
+        print("\t%5d -- %5d -- %s" % (one['ErrorCount'],one['ThreadCount'],one['Error']))
     # all done.
                     
 
