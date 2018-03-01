@@ -584,7 +584,7 @@ walls (p, pold,normal)
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
   {
     rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
-    if ((rho * rho) < geo.diskrad_sq && fabs (p->x[2]) <= (z = zdisk (rho)))
+    if ((rho) < geo.diskrad && fabs (p->x[2]) <= (z = zdisk (rho)))
     {
         /* 0 here means to return VERY_BIG if one has missed the disk, something
          * that should not happen

@@ -51,70 +51,76 @@ teff (t, x)
   int n;
 
 
-  q = 0.0;                      /* NSH 130605 to remove o3 compile error */
+  q = 0.0;			/* NSH 130605 to remove o3 compile error */
 
 
   if (x < 1)
-  {
-    Error ("teff: x %f less than 1.0\n", x);
-    return (0.0);
-  }
+    {
+      Error ("teff: x %f less than 1.0\n", x);
+      return (0.0);
+    }
 
 
-  if ((geo.disk_tprofile == DISK_TPROFILE_READIN) && ((x * geo.rstar) < blmod.r[blmod.n_blpts - 1]))
-  {
-    /* This is the case where the temperature profile is read in as an array */
-    if ((r = (x * geo.rstar)) < blmod.r[0])
+  if ((geo.disk_tprofile == DISK_TPROFILE_READIN)
+      && ((x * geo.rstar) < blmod.r[blmod.n_blpts - 1]))
     {
-      return (blmod.t[0]);
+      /* This is the case where the temperature profile is read in as an array */
+      if ((r = (x * geo.rstar)) < blmod.r[0])
+	{
+	  return (blmod.t[0]);
+	}
+      else
+	{
+	  for (n = 1; n < blmod.n_blpts; n++)
+	    {
+	      if ((r < blmod.r[n]) && (r > blmod.r[n - 1]))
+		{
+		  return (blmod.t[n]);
+		}
+	    }
+	  Error
+	    ("tdisk: inside BL profile region but failed to identify temp.\n");
+	}
     }
-    else
-    {
-      for (n = 1; n < blmod.n_blpts; n++)
-      {
-        if ((r < blmod.r[n]) && (r > blmod.r[n - 1]))
-        {
-          return (blmod.t[n]);
-        }
-      }
-      Error ("tdisk: inside BL profile region but failed to identify temp.\n");
-    }
-  }
   else
-  {
-    /* This is a standard accretion disk */
-
-    q = (1.e0 - pow (x, -0.5e0)) / (x * x * x);
-    q = t * pow (q, 0.25e0);
-
-    if (geo.absorb_reflect ==  BACK_RAD_ABSORB_AND_HEAT && geo.wcycle > 0) /* Absorb photons and increase t so that heat is radiated
-                                                                           but only do this if there has been at least one
-                                                                           ionization cycle */
     {
-      r = x * geo.rstar;        // 04aug -- Requires fix if disk does not extend to rstar
-      kkk = 1;                  // photon cannot hit the disk at r<qdisk.r[0]
-      while (r > qdisk.r[kkk] && kkk < NRINGS - 1)
-        kkk++;
-      /* Note that disk has 2 sides */
-      theat = qdisk.heat[kkk - 1] / (2. * PI * (qdisk.r[kkk] * qdisk.r[kkk] - qdisk.r[kkk - 1] * qdisk.r[kkk - 1]));
+      /* This is a standard accretion disk */
 
-      /* T_eff is given by T_eff**4= T_disk**4+Heating/area/STEFAN_BOLTZMANN */
-      q = pow (q * q * q * q + (theat / STEFAN_BOLTZMANN), 0.25);
+      q = (1.e0 - pow (x, -0.5e0)) / (x * x * x);
+      q = t * pow (q, 0.25e0);
 
+      if (geo.absorb_reflect == BACK_RAD_ABSORB_AND_HEAT && geo.wcycle > 0)	/* Absorb photons and increase t so that heat is radiated
+										   but only do this if there has been at least one
+										   ionization cycle */
+	{
+	  r = x * geo.rstar;	// 04aug -- Requires fix if disk does not extend to rstar
+	  kkk = 1;		// photon cannot hit the disk at r<qdisk.r[0]
+	  while (r > qdisk.r[kkk] && kkk < NRINGS - 1)
+	    kkk++;
+	  /* Note that disk has 2 sides */
+	  theat =
+	    qdisk.heat[kkk -
+		       1] / (2. * PI * (qdisk.r[kkk] * qdisk.r[kkk] -
+					qdisk.r[kkk - 1] * qdisk.r[kkk - 1]));
+
+	  /* T_eff is given by T_eff**4= T_disk**4+Heating/area/STEFAN_BOLTZMANN */
+	  q = pow (q * q * q * q + (theat / STEFAN_BOLTZMANN), 0.25);
+
+	}
+      else if (geo.disk_tprofile == DISK_TPROFILE_YSO)	// Analytic approximation for disk heating by star; implemented for YSOs
+	{
+	  disk_heating_factor = pow (geo.tstar / t, 4.0);
+	  disk_heating_factor *=
+	    (asin (1. / x) - (pow ((1. - (1. / (x * x))), 0.5) / x));
+	  disk_heating_factor /= PI;
+	  disk_heating_factor *= x * x * x;
+	  disk_heating_factor /= (1 - sqrt (1. / x));
+	  disk_heating_factor += 1;
+
+	  q *= pow (disk_heating_factor, (1. / 4.));
+
+	}
     }
-    else if (geo.disk_tprofile ==  DISK_TPROFILE_YSO)       // Analytic approximation for disk heating by star; implemented for YSOs
-    {
-      disk_heating_factor = pow (geo.tstar / t, 4.0);
-      disk_heating_factor *= (asin (1. / x) - (pow ((1. - (1. / (x * x))), 0.5) / x));
-      disk_heating_factor /= PI;
-      disk_heating_factor *= x * x * x;
-      disk_heating_factor /= (1 - sqrt (1. / x));
-      disk_heating_factor += 1;
-
-      q *= pow (disk_heating_factor, (1. / 4.));
-
-    }
-  }
   return (q);
 }
 
@@ -123,7 +129,9 @@ gdisk (mass, mdot, rmin)
      double mass, rmin, mdot;
 {
   double g0;
-  g0 = 0.625 * log10 (mass / MSOL) - 1.875 * log10 (rmin / 1.e9) + 0.125 * log10 (mdot / 1.e16);
+  g0 =
+    0.625 * log10 (mass / MSOL) - 1.875 * log10 (rmin / 1.e9) +
+    0.125 * log10 (mdot / 1.e16);
   g0 = 5.96e5 * pow (10., g0);
   return (g0);
 }
@@ -183,8 +191,8 @@ vdisk (x, v)
   stuff_v (x, xhold);
   xhold[2] = 0.0;
   r = length (xhold);
-  linterp (r, disk.r, disk.v, NRINGS, &speed, 0);       //interpolate in linear space
-  cross (north, xhold, v);      /* The velocity vector direction is given by north x r */
+  linterp (r, disk.r, disk.v, NRINGS, &speed, 0);	//interpolate in linear space
+  cross (north, xhold, v);	/* The velocity vector direction is given by north x r */
   renorm (v, speed);
   return (speed);
 }
@@ -234,7 +242,7 @@ zdisk (r)
    
  Arguments:
         p       a photon pointer.
-        miss_return 
+        allow_negative   
  
  
  Returns:
@@ -242,8 +250,23 @@ zdisk (r)
 	hit the disk travelling in either direction
 	returns VERY_BIG.
 
+    ds_to_disk is used for a variaty of reasons.  The most
+    common is to determine whether a photon has hit the disk.
+    It is also used hower to calculate footpoonts for a flow,
+    and in this case one wants to return a number evem if 
+    the foopoint appears to lie outside of the disk.  This 
+    accounts for the variable allow_negative.  (It is not clear
+    that this was a good approach, but that is the rationale)
+
+    Generaly speaking we do not want a negative return, except 
+    for locating a footpoint.  This is also the only time
+    one really wants to allow negative distances, I believe
+
+
    
 Description:
+
+    This 
  
 Notes:
 	There are other routines that will return a negative distance, 
@@ -256,7 +279,7 @@ History:
 			            disks with vertical extent into python
         04Aug   SS      Several minor modifications made.
                         ds_to_disk now also takes a second
-                        input "miss_return" which tells it what
+                        input "allow_negative" which tells it what
                         to return for trajectories that miss the
                         disk. 0 = return infinity while anything
                         else gives a return of the distance to 
@@ -272,177 +295,245 @@ struct photon ds_to_disk_photon;
 struct plane diskplane, disktop, diskbottom;
 
 double
-ds_to_disk (p, miss_return)
+ds_to_disk (p, allow_negative)
      struct photon *p;
-     int miss_return;
+     int allow_negative;
 {
   double x1, x2;
-  double s_plane, s_top, s_bottom, s_sphere, s_disk;
-  double r_plane, r_top, r_bottom;
+  double s, s_negative, s_test;
+  double s_plane, s_top, s_bottom, s_sphere;
+  double s_disk=0;
+  double r, r_top, r_bottom;
   double smin, smax;
   struct photon phit;
   void disk_deriv ();
 
 
   if (geo.disk_type == DISK_NONE)
-    return (VERY_BIG);          /* There is no disk! */
+    return (VERY_BIG);		/* There is no disk! */
+
+  /* Initialize 3 structures that define
+     the plane of the disk, and two other
+     planes that encompass the disk */
 
   if (ds_to_disk_init == 0)
-  {                             /* Initialize 3 structures that define
-                                   the plane of the disk, and two other
-                                   planes that encompass the disk */
-
-    diskplane.x[0] = diskplane.x[1] = diskplane.x[2] = 0.0;
-    diskplane.lmn[0] = diskplane.lmn[1] = 0.0;
-    diskplane.lmn[2] = 1.0;     //changed by SS August 04
+    {
+      diskplane.x[0] = diskplane.x[1] = diskplane.x[2] = 0.0;
+      diskplane.lmn[0] = diskplane.lmn[1] = 0.0;
+      diskplane.lmn[2] = 1.0;	//changed by SS August 04
 
 
-    disktop.x[0] = disktop.x[1] = 0.0;
-    disktop.x[2] = geo.diskrad * geo.disk_z0;
-    disktop.lmn[0] = disktop.lmn[1] = 0.0;
-    disktop.lmn[2] = 1.0;       //changed by SS August 04
+      disktop.x[0] = disktop.x[1] = 0.0;
+      disktop.x[2] = geo.diskrad * geo.disk_z0;
+      disktop.lmn[0] = disktop.lmn[1] = 0.0;
+      disktop.lmn[2] = 1.0;	//changed by SS August 04
 
-    diskbottom.x[0] = diskbottom.x[1] = 0.0;
-    diskbottom.x[2] = (-geo.diskrad * geo.disk_z0);
-    diskbottom.lmn[0] = diskbottom.lmn[1] = 0.0;
-    diskbottom.lmn[2] = 1.0;    //changed by SS August 04
+      diskbottom.x[0] = diskbottom.x[1] = 0.0;
+      diskbottom.x[2] = (-geo.diskrad * geo.disk_z0);
+      diskbottom.lmn[0] = diskbottom.lmn[1] = 0.0;
+      diskbottom.lmn[2] = 1.0;	//changed by SS August 04
 
-    ds_to_disk_init++;          // Only initialize once
+      ds_to_disk_init++;	// Only initialize once
 
-  }
+    }
 
   /* Now calculate the place where the photon hits the diskplane */
 
-  s_plane = ds_to_plane (&diskplane, p);
+  s_test = s_plane = ds_to_plane (&diskplane, p);
   stuff_phot (p, &phit);
-  move_phot (&phit, s_plane);
-  r_plane = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
+  move_phot (&phit, s_test);
+  r = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
 
+
+  s = VERY_BIG;
 
   if (geo.disk_type == DISK_FLAT)
-  {
-    if (r_plane > geo.diskrad)
-      return (VERY_BIG);
-    return (s_plane);
-  }
-
-  /* OK now we have to deal with the hard case.  We would like to
-   * avoid actually having to calculate the intercept to the disk
-   * if we can because this is likely time consuming. So we first
-   * determine this, by checking where the ray hits a sphere that 
-   * just encompasses the disk 
-   */
-
-  s_top = ds_to_plane (&disktop, p);
-  stuff_phot (p, &phit);
-  move_phot (&phit, s_top);
-  r_top = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
-
-  s_bottom = ds_to_plane (&diskbottom, p);
-  stuff_phot (p, &phit);
-  move_phot (&phit, s_bottom);
-  r_bottom = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
-
-  /* Now if rtop and r_bottom are both greater than diskrad
-   * then this photon missed the disk */
-  if (r_top > geo.diskrad && r_bottom > geo.diskrad)
-  {
-    if (miss_return == 0)
     {
-      return (VERY_BIG);
-    }
-    else
-    {
-      if (s_top > s_bottom)
-      {
-        return (s_top);
-      }
+      if (r > geo.diskrad)
+	return (VERY_BIG);
+      else if (allow_negative)
+	{
+	  return (s_plane);
+	}
+      else if (s_plane > 0)
+	{
+	  return (s_plane);
+	  return (VERY_BIG);
+	}
+
+      /* At this point, we have completed the simple case.  It is simple
+       * because there is only one possible intersection with the disk
+       * boundary
+       *
+       * For the vertically extended disk we have to keep track of
+       * the smallest postive value and the smallest (in absolute
+       * terms negative value.  
+       * OK now we have to deal with the hard case.  We would like to
+       * avoid actually having to calculate the intercept to the disk
+       * if we can because this is likely time consuming. So we first
+       * determine this, by checking where the ray hits a sphere that 
+       * just encompasses the disk 
+       */
+
+      s = VERY_BIG;
+      s_negative = -VERY_BIG;
+
+      s_test = s_top = ds_to_plane (&disktop, p);
+      stuff_phot (p, &phit);
+      move_phot (&phit, s_test);
+      r = r_top = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
+
+      if (r < geo.diskrad)
+	{
+	  if (s_test >= 0)
+	    {
+	      s = s_top;
+	    }
+	  else
+	    {
+	      s_negative = s_top;
+	    }
+	}
+
+
+
+      s_test = s_bottom = ds_to_plane (&diskbottom, p);
+      stuff_phot (p, &phit);
+      move_phot (&phit, s_test);
+      r = r_bottom = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
+
+      if (r < geo.diskrad)
+	{
+	  if (s_test >= 0 && s_test < s)
+	    {
+	      s = s_test;
+	    }
+	  else if (s_test < 0 && s_test > s_negative)
+	    {
+	      s_negative = s_test;
+	    }
+	}
+
+      s_test = s_sphere = ds_to_sphere (geo.diskrad, p);
+      stuff_phot (p, &phit);
+      move_phot (&phit, s_test);
+
+      /* At this point phit is on the sphere but our check here is whether its on the diks or not
+       */
+
+      if (fabs (phit.x[2]) < geo.disk_z0 * geo.diskrad)
+	{
+	  if (s_test >= 0 && s_test < s)
+	    {
+	      s = s_test;
+	    }
+	  else if (s_test < 0 && s_test > s_negative)
+	    {
+	      s_negative = s_test;
+	    }
+
+	}
+
+      /* So at this point we have the smallest positive and smallest negative values.  If we
+       * have missed the boundary, we have s as VERY_BIG and s_negative as -VERY_BIG */
+
+
+      if (s == VERY_BIG)
+	{
+	  if (s_negative == -VERY_BIG || allow_negative == 0)
+	    {
+	      return (VERY_BIG);
+	    }
+	  else
+	    {
+	      // This is the case where we allow s to be negative, and there was no positive intercept
+	      s_negative = s;
+	    }
+	}
+
+
+/* At this point we must find the intercept with the disk */
+
+
+      /*  First we check the unlikely case that the photon hit the edge of the
+       *  disk.  This is easy because if so s will be the same as s_sphere
+       *  */
+
+      if (s == s_sphere)
+	{
+	  return (s);
+	}
+
+      /*  Now we need to find exactly where we have hit the disk.  This
+       *  is not trivial.  Basically we need to bracket the possibilites
+       *  
+       *
+       * OK, at this point we know the photon is on a path that passes 
+       * through (or passed through the disk) and we must locate it. 
+       * There are two possibilities.  It hit the disk edge, or it hit
+       * the face of the disk.  Most of the time it will hit the disk face
+       * so we will calculate this first, and then check if s is less
+       * than s_sphere. 
+       *
+       * To setup rtsafe, we have to find distances which bracket what
+       * we want.  smax should be no more than the distance to the
+       * disk_plane (assuming we have a photon headed toward the plane)
+       *
+       * Note that the next little section is inted to select between the
+       * top and bottom face of the disk
+       */
+
+      /* I've modified the next if statement to try and get it to choose
+         the correct x2 (have to be careful about the r's being less
+         than diskrad. SS August 04. */
+
+      x1 = s_plane;
+      if (p->x[2] > 0.0)
+	{
+	  if (r_top < geo.diskrad)
+	    {
+	      x2 = s_top;
+	    }
+	  else
+	    {
+	      x2 = s_bottom;
+	    }
+	}
       else
-      {
-        return (s_bottom);
-      }
+	{
+	  if (r_bottom < geo.diskrad)
+	    {
+	      x2 = s_bottom;
+	    }
+	  else
+	    {
+	      x2 = s_top;
+	    }
+	}
+
+      if (fabs (x2) > fabs (x1))	//fabs added by SS August 04
+	{
+	  smin = x1;
+	  smax = x2;
+	}
+      else
+	{
+	  smin = x2;		//added by SS August 04
+	  smax = x1;		//added by SS August 04
+	}
+
+
+      stuff_phot (p, &ds_to_disk_photon);
+      move_phot (&ds_to_disk_photon, smin);
+
+      s_disk =
+	rtsafe (disk_deriv, 0.0, smax - smin, fabs (smax - smin) / 1000.);
+      //fabs added by SS August 04 - want convergence test quantity to be +ve 
+      s_disk += smin;
+
+      /* Note that s_disk can still be negative */
+
     }
-  }
-
-  /* OK, at this point we know the photon is on a path that passes 
-   * through (or passed through the disk) and we must locate it. 
-   * There are two possibilities.  It hit the disk edge, or it hit
-   * the face of the disk.  Most of the time it will hit the disk face
-   * so we will calculate this first, and then check if s is less
-   * than s_sphere. 
-   *
-   * To setup rtsafe, we have to find distances which bracket what
-   * we want.  smax should be no more than the distance to the
-   * disk_plane (assuming we have a photon headed toward the plane)
-   *
-   * Note that the next little section is inted to select between the
-   * top and bottom face of the disk
-   */
-
-  /* I've modified the next if statement to try and get it to choose
-     the correct x2 (have to be careful about the r's being less
-     than diskrad. SS August 04. */
-
-  x1 = s_plane;
-  if (p->x[2] > 0.0)
-  {
-    if (r_top < geo.diskrad)
-    {
-      x2 = s_top;
-    }
-    else
-    {
-      x2 = s_bottom;
-    }
-  }
-  else
-  {
-    if (r_bottom < geo.diskrad)
-    {
-      x2 = s_bottom;
-    }
-    else
-    {
-      x2 = s_top;
-    }
-  }
-
-  if (fabs (x2) > fabs (x1))    //fabs added by SS August 04
-  {
-    smin = x1;
-    smax = x2;
-  }
-  else
-  {
-    smin = x2;                  //added by SS August 04
-    smax = x1;                  //added by SS August 04
-  }
-
-
-  stuff_phot (p, &ds_to_disk_photon);
-  move_phot (&ds_to_disk_photon, smin);
-
-  s_disk = rtsafe (disk_deriv, 0.0, smax - smin, fabs (smax - smin) / 1000.);
-  //fabs added by SS August 04 - want convergence test quantity to be +ve 
-  s_disk += smin;
-
-  /* Note that s_disk can still be negative */
-
-  /* Now we have the distance to the disk and the only question which rmains
-   * is whether we encounter the outside edge of the disk first.  This is pretty
-   * unlikely, but ...
-   */
-
-  s_sphere = ds_to_sphere (geo.diskrad, p);
-  stuff_phot (p, &phit);
-  move_phot (&phit, s_sphere);
-  if (fabs (phit.x[2]) < geo.disk_z0 * geo.diskrad)
-  {
-    /* The photon actually hits the disk rim and you must then check whether it hits
-     * the disk before the rim */
-    if (fabs (s_sphere) < fabs (s_disk))
-      return (s_sphere);
-  }
 
   return (s_disk);
 }
@@ -466,15 +557,15 @@ disk_deriv (s, value, derivative)
   stuff_phot (&ds_to_disk_photon, &phit);
   move_phot (&phit, s);
   r1 = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
-  z1 = zdisk (r1) - fabs (phit.x[2]);   // this is the function
+  z1 = zdisk (r1) - fabs (phit.x[2]);	// this is the function
 
   /* OK now calculate the derivative */
 
   ds = (z1) / 100.;
-  ds += 1;                      // We must move it a little bit (in case z1 = 0) SS Aug 2004
-  move_phot (&phit, ds);        // Move the photon a bit more
+  ds += 1;			// We must move it a little bit (in case z1 = 0) SS Aug 2004
+  move_phot (&phit, ds);	// Move the photon a bit more
   r2 = sqrt (phit.x[0] * phit.x[0] + phit.x[1] * phit.x[1]);
-  z2 = zdisk (r2) - fabs (phit.x[2]);   // this is the function
+  z2 = zdisk (r2) - fabs (phit.x[2]);	// this is the function
 
   *value = z1;
   *derivative = (z2 - z1) / ds;
@@ -529,18 +620,18 @@ qdisk_init ()
 {
   int n;
   for (n = 0; n < NRINGS; n++)
-  {
-    qdisk.r[n] = disk.r[n];
-    qdisk.t[n] = disk.t[n];
-    qdisk.g[n] = disk.g[n];
-    qdisk.v[n] = disk.v[n];
-    qdisk.heat[n] = 0.0;
-    qdisk.nphot[n] = 0;
-    qdisk.nhit[n] = 0;
-    qdisk.w[n] = 0;
-    qdisk.ave_freq[n] = 0;
-    qdisk.t_hit[0] = 0;
-  }
+    {
+      qdisk.r[n] = disk.r[n];
+      qdisk.t[n] = disk.t[n];
+      qdisk.g[n] = disk.g[n];
+      qdisk.v[n] = disk.v[n];
+      qdisk.heat[n] = 0.0;
+      qdisk.nphot[n] = 0;
+      qdisk.nhit[n] = 0;
+      qdisk.w[n] = 0;
+      qdisk.ave_freq[n] = 0;
+      qdisk.t_hit[0] = 0;
+    }
   return (0);
 }
 
@@ -553,28 +644,35 @@ qdisk_save (diskfile, ztot)
   int n;
   double area, theat, ttot;
   qptr = fopen (diskfile, "w");
-  fprintf (qptr, "r         zdisk     t_disk   heat       nhit nhit/nemit  t_heat    t_irrad  W_irrad  t_tot\n");
+  fprintf (qptr,
+	   "r         zdisk     t_disk   heat       nhit nhit/nemit  t_heat    t_irrad  W_irrad  t_tot\n");
 
   for (n = 0; n < NRINGS; n++)
-  {
-    area = (2. * PI * (qdisk.r[n + 1] * qdisk.r[n + 1] - qdisk.r[n] * qdisk.r[n]));
-    theat = qdisk.heat[n] / area;
-    theat = pow (theat / STEFAN_BOLTZMANN, 0.25);       // theat is temperature if no internal energy production
-    if (qdisk.nhit[n] > 0)
     {
+      area =
+	(2. * PI *
+	 (qdisk.r[n + 1] * qdisk.r[n + 1] - qdisk.r[n] * qdisk.r[n]));
+      theat = qdisk.heat[n] / area;
+      theat = pow (theat / STEFAN_BOLTZMANN, 0.25);	// theat is temperature if no internal energy production
+      if (qdisk.nhit[n] > 0)
+	{
 
-      qdisk.ave_freq[n] /= qdisk.heat[n];
-      qdisk.t_hit[n] = H * qdisk.ave_freq[n] / (BOLTZMANN * 3.832);     // Basic conversion from freq to T
-      qdisk.w[n] = qdisk.heat[n] / (4. * PI * STEFAN_BOLTZMANN * area * qdisk.t_hit[n] * qdisk.t_hit[n] * qdisk.t_hit[n] * qdisk.t_hit[n]);
+	  qdisk.ave_freq[n] /= qdisk.heat[n];
+	  qdisk.t_hit[n] = H * qdisk.ave_freq[n] / (BOLTZMANN * 3.832);	// Basic conversion from freq to T
+	  qdisk.w[n] =
+	    qdisk.heat[n] / (4. * PI * STEFAN_BOLTZMANN * area *
+			     qdisk.t_hit[n] * qdisk.t_hit[n] *
+			     qdisk.t_hit[n] * qdisk.t_hit[n]);
+	}
+
+      ttot = pow (qdisk.t[n], 4) + pow (theat, 4);
+      ttot = pow (ttot, 0.25);
+      fprintf (qptr,
+	       "%8.3e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
+	       qdisk.r[n], zdisk (qdisk.r[n]), qdisk.t[n],
+	       qdisk.heat[n], qdisk.nhit[n], qdisk.heat[n] * NRINGS / ztot,
+	       theat, qdisk.t_hit[n], qdisk.w[n], ttot);
     }
-
-    ttot = pow (qdisk.t[n], 4) + pow (theat, 4);
-    ttot = pow (ttot, 0.25);
-    fprintf (qptr,
-             "%8.3e %8.3e %8.3e %8.3e %5d %8.3e %8.3e %8.3e %8.3e %8.3e\n",
-             qdisk.r[n], zdisk (qdisk.r[n]), qdisk.t[n],
-             qdisk.heat[n], qdisk.nhit[n], qdisk.heat[n] * NRINGS / ztot, theat, qdisk.t_hit[n], qdisk.w[n], ttot);
-  }
 
   fclose (qptr);
   return (0);
@@ -626,23 +724,21 @@ read_non_standard_disk_profile (tprofile)
   int dumint;
 
   if ((fptr = fopen (tprofile, "r")) == NULL)
-  {
-    Error ("Could not open filename %s\n", tprofile);
-    exit (0);
-  }
+    {
+      Error ("Could not open filename %s\n", tprofile);
+      exit (0);
+    }
 
   fscanf (fptr, "%d\n", &dumint);
   blmod.n_blpts = dumint;
   for (n = 0; n < blmod.n_blpts; n++)
-  {
-    fscanf (fptr, "%g %g", &dumflt1, &dumflt2);
-    blmod.r[n] = dumflt1 * 1.e11;
-    blmod.t[n] = dumflt2 * 1.e3;
-  }
+    {
+      fscanf (fptr, "%g %g", &dumflt1, &dumflt2);
+      blmod.r[n] = dumflt1 * 1.e11;
+      blmod.t[n] = dumflt2 * 1.e3;
+    }
 
   fclose (fptr);
 
   return (0);
 }
-
-
