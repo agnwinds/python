@@ -1,4 +1,14 @@
 
+/***********************************************************/
+/** @file  disk.c
+ * @Author ksl
+ * @date   January, 2018
+ *
+ * @brief  Various routines related setting up the disk and calculating 
+ * when a photon encounters the disk surface
+ *
+ ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -7,9 +17,26 @@
 #include "python.h"
 
 
-/* The reference temperature for the disk in degrees.  The maximum temperature
-   actuallly seen in the disk is 0.488 tdisk
- */
+
+/**********************************************************/
+/** @name      tdisk
+ * @brief      Calculate the reference temperarure for a standard Shakura-Sunyaeev disk
+ *
+ * @param [in] double  m   mass of the central object
+ * @param [in] double  mdot   mass accretion rate of the disk
+ * @param [in] double  r   radiis of the central object
+ * @return     The reference temperature for the disk
+ *
+ * All of the inputs are in cgs units
+ *
+ * @notes
+ *
+ * For an SS disk,  The maximum temperature
+ *    actuallly seen in the disk is 0.488 tdisk
+ *
+ *
+ **********************************************************/
+
 double
 tdisk (m, mdot, r)
      double m, mdot, r;
@@ -21,37 +48,48 @@ tdisk (m, mdot, r)
 }
 
 
-/* effective temperature of accretion disk as a function of r
-   inputs:      
-   	t    reference temperature of the disk in degrees.
-   	x    distance from center of disk in units of r/rmin
-   where rmin is the inner edge of the disk.
 
-   Notes: Originally (up to about python_50 only a standard steady state disk
-   	was supported, for which for reference is  Wade, 1984 MNRAS 208, 381.              
 
-   History: 
-   04June	SS	Modified to include a correction factor to account for
-   			heating of the disk by the star following Proga et al. 1999, MNRAS, 310, 476. 
-   			for now only used in the YSO model.
-   04Aug	ksl	Modified so that geo.absorb_reflect controls how modifications
-   			to the temperature are treated.  This is in preparation to allowing
-			for a variety of disk illumination possibilities
-   06Jan	ksl	Fixed problem with absorbing disk
-*/
+/**********************************************************/
+/** @name      teff
+ * @brief      Calculate the temperature of the disk at a normalised distance x 
+ *
+ * @param [in] double  t   reference temperature of the disk in degrees
+ * @param [in] double  x   distance from center of disk in units of r/rmin
+ * @return     The temperature 
+ *
+ * The routine returns the effective temperature for the disk as a distance
+ * which is measured in terms of the ratio of the actual distance to the inner
+ * edge of the disk (rmin).
+ *
+ * A number of modifications to a simple steady state disk are possible, depending
+ * on the variable geo.disk_tprofile: 
+ *
+ *  - DISK_TPROFILE_READIN  the returned temperature is interpolated from values that 
+ *    been read in 
+ *  - DISK_TPROFILE_YSO an analytic profile implemented for YSOs 
+ *
+ *  In addition for a standard profile, this is where disk heading can optionally
+ *  be taken into account
+ *
+ *
+ * @notes
+ *
+ * A reference for the standard steady state disk is Wade, 1984 MNRAS 208, 381
+ *
+ **********************************************************/
 
 double
 teff (t, x)
      double t, x;
 {
-  double q, theat, r;
+  double q=0;
+  double theat, r;
   double pow ();
   double disk_heating_factor;
   int kkk;
   int n;
 
-
-  q = 0.0;			/* NSH 130605 to remove o3 compile error */
 
 
   if (x < 1)
@@ -97,6 +135,7 @@ teff (t, x)
 	  kkk = 1;		// photon cannot hit the disk at r<qdisk.r[0]
 	  while (r > qdisk.r[kkk] && kkk < NRINGS - 1)
 	    kkk++;
+
 	  /* Note that disk has 2 sides */
 	  theat =
 	    qdisk.heat[kkk -
@@ -124,6 +163,28 @@ teff (t, x)
   return (q);
 }
 
+
+/**********************************************************/
+/** @name      gdisk
+ * @brief      Calculate a reference gravity for the disk
+ *
+ * @param [in] double  mass   Mass of the central object
+ * @param [in] double  mdot   Mass accretion rate of the disk
+ * @param [in] double  rmin   Minimum radius for the disk
+ * @return     A fiducial gravity for the disk
+ *
+ * The gravity is needed when one constructs a disk spectrum
+ * from spectra from a grid of stellar atmospheres
+ *
+ * The input units are all cgs
+ *
+ * @notes
+ *
+ * See Long & Knigge for details
+ *
+ *
+ **********************************************************/
+
 double
 gdisk (mass, mdot, rmin)
      double mass, rmin, mdot;
@@ -136,13 +197,27 @@ gdisk (mass, mdot, rmin)
   return (g0);
 }
 
+
+/**********************************************************/
+/** @name      geff
+ * @brief      Calculate the effective gravity at a specfic position in the disk
+ *
+ * @param [in] double  g0  reference gravity in cm s**-2
+ * @param [in] double  x   distance from center in units of r/rmin
+ * @return     gravity at x in cm s**-2
+ *
+ * The gravity is needed when one constructs a disk spectrum
+ * from spectra from a grid of stellar atmospheres
+ *
+ *
+ * @notes
+ *
+ * See Long & Knigge for details
+ *
+ **********************************************************/
+
 double
 geff (g0, x)
-/* effective gravity of standard accretion disk as a function of r
-	inputs:         g 	reference gravity in cm s**-2
-			x	distance from center in units of r/rmin
-
-*/
      double g0, x;
 {
   double q;
@@ -153,32 +228,39 @@ geff (g0, x)
 }
 
 
-/* vdisk calculate the speed and velocity v at which material given
-   specific position in the disk.
-  
-Description:
-
-   The routine determines the speed by interpolating on stored
-   values in the structure disk
-  
-   It then takes the xproduct of a unit vector pointing north and
-   the position, to determine the direction of motion at this point
-   in the disk
-  
-   Finally it rescales this to get the actual velocity.
-  
-Notes"
-
-	The routine projects the input variable x on to the xy plane
-	before it calculates velocities.  
-
-History:
-
-	08mar	ksl	Added explanation of what the routine does. The
-			routine was not changed.
-        13sep	nsh	Changed linterp call to reflect a new log option.
- */
 double north[] = { 0.0, 0.0, 1.0 };
+
+
+/**********************************************************/
+/** @name      vdisk
+ * @brief      Calculate the speed and velocity v at which material given
+ *    specific position in the disk
+ *
+ * @param [in] double  x[]   A position in the disk
+ * @param [out] double  v[]   The velocity at that position
+ * @return     The speed      
+ *
+ * This routine interpolates the velocities from a grid which gives
+ * the run of velocity with radius. Although the we generally 
+ * assume keplerian velocities for the disk those velocities
+ * are not calculated here.
+ *
+ * @notes
+ *
+ * The routine projects the input variable x on to the xy plane
+ * before it calculates velocities
+ *
+ * It then takes the xproduct of a unit vector pointing north and
+ * the position, to determine the direction of motion at this point
+ * in the disk
+ * 
+ *
+ *  Finally it rescales this to get the actual velocity.
+ *
+ *
+ * 
+ *
+ **********************************************************/
 
 double
 vdisk (x, v)
@@ -198,30 +280,32 @@ vdisk (x, v)
 }
 
 
-/***********************************************************
-             Space Telescope Science Institute
- 
- Synopsis:  zdisk
-   
- Arguments:
-        r       a radial position in the disk.
- 
- 
- Returns:
-        The veritical height of the disk at that point in the xy
-	plane. The number should be positive or zero
-   
-Description:
- 
-Notes:
- 
- 
-History:
-        04aug   ksl     52--Coded as part of effort to put 
-			disks with vertical extent into python
-        04Aug   SS      Multiply by "geo.diskrad" added.
-                                                                                         
-**************************************************************/
+
+
+/**********************************************************/
+/** @name      zdisk
+ * @brief      Calculate the height of the disk at a certain radius
+ *
+ * @param [in] double  r   a radial position in the disk.
+ * @return     The vertical height of the disk at that point in the xy
+ * 	plane. 
+ *
+ *
+ * If the disk is vertically extended then the disk surface is
+ * defined in terms of the h the fraction of the disk radius
+ * at the edge of the disk, and a power law exponent.  So
+ * a disk thst us a sunoke wedgge wiykd gave an exponent 
+ * of 1. A flat but thick disk would have an exponent of 0.
+ * A flared disk wouuld generally have an exponent greater than
+ * 1.  
+ *
+ * @notes
+ *
+ * 	zdisk returns a number that will positive or zero, so one
+ * 	often needs to take this account if for example one has 
+ * 	a photon that hits the disk below the z=0 plane.
+ *
+ **********************************************************/
 
 double
 zdisk (r)
@@ -233,66 +317,54 @@ zdisk (r)
 }
 
 
-/***********************************************************
-             Space Telescope Science Institute
- 
- Synopsis: ds_to_disk calculates the distance that a photon
- 	would need to travel from its current position to hit 
-	disk. Negative distances are allowed.
-   
- Arguments:
-        p       a photon pointer.
-        allow_negative   
- 
- 
- Returns:
-    The distance to the disk.  The photon is not going to
-	hit the disk travelling in either direction
-	returns VERY_BIG.
-
-    ds_to_disk is used for a variaty of reasons.  The most
-    common is to determine whether a photon has hit the disk.
-    It is also used hower to calculate footpoonts for a flow,
-    and in this case one wants to return a number evem if 
-    the foopoint appears to lie outside of the disk.  This 
-    accounts for the variable allow_negative.  (It is not clear
-    that this was a good approach, but that is the rationale)
-
-    Generaly speaking we do not want a negative return, except 
-    for locating a footpoint.  This is also the only time
-    one really wants to allow negative distances, I believe
-
-
-   
-Description:
-
-    This 
- 
-Notes:
-	There are other routines that will return a negative distance, 
-	but this is not one of them, since at present we have not 
-	identified a reason to separate 
- 
- 
-History:
-        04aug   ksl     52--Coded as part of effort to put 
-			            disks with vertical extent into python
-        04Aug   SS      Several minor modifications made.
-                        ds_to_disk now also takes a second
-                        input "allow_negative" which tells it what
-                        to return for trajectories that miss the
-                        disk. 0 = return infinity while anything
-                        else gives a return of the distance to 
-                        the horizontal plane that touched the
-                        edge of the disk. Only important for
-                        non-flat disks: it influences what happens when
-                        the disk is initialised.
-                                                                                       
-**************************************************************/
 
 int ds_to_disk_init = 0;
 struct photon ds_to_disk_photon;
 struct plane diskplane, disktop, diskbottom;
+
+
+/**********************************************************/
+/** @name      ds_to_disk
+ * @brief      Calculates the distance that a photon
+ *  	would need to travel from its current position to hit disk. 
+ *
+ * @param [in] struct photon *  p   a photon pointer.
+ * @param [in] int  allow_negative   permits a negative number to 
+ *          be returned in certain circumstances
+ * @return     The distance to the disk.  
+ *
+ *
+ * Usually, ds_to_disk returns the distance along the line of
+ * sight to the disk in the direction a photon is currently travelling.
+ *
+ * Usually, if the photon misses the disk going in the positive 
+ * direction, a very large number is returned.
+ *
+ * If allow_negative is non-zero (true), then ds_to_disk returns
+ * a negative distance if it has not hit the disk going in the 
+ * positive direction.
+ *
+ * The routine allows both for a flat disk, and a vertically
+ * extended disk
+ *
+ *
+ *
+ * @notes
+ *
+ * The need to allow for negative distances arises
+ * because several of the parameterization for the wind (SV, KWD) depend
+ * on the distance between the current position and footpoint
+ * along a streamline.  (It is not clear
+ * that this was a good approach, but that is the rationale)
+ *
+ * Generally, there should not be an issue with this, though 
+ * one can imagine that one might get into trouble for a very
+ * flared (bowl-shaped) disk.
+ *
+ * Significant portions of the routine were rewritten in 1802 by
+ * ksl to better handle flared disks.
+ *
+ **********************************************************/
 
 double
 ds_to_disk (p, allow_negative)
@@ -320,18 +392,18 @@ ds_to_disk (p, allow_negative)
     {
       diskplane.x[0] = diskplane.x[1] = diskplane.x[2] = 0.0;
       diskplane.lmn[0] = diskplane.lmn[1] = 0.0;
-      diskplane.lmn[2] = 1.0;	//changed by SS August 04
+      diskplane.lmn[2] = 1.0;	
 
 
       disktop.x[0] = disktop.x[1] = 0.0;
       disktop.x[2] = geo.diskrad * geo.disk_z0;
       disktop.lmn[0] = disktop.lmn[1] = 0.0;
-      disktop.lmn[2] = 1.0;	//changed by SS August 04
+      disktop.lmn[2] = 1.0;	
 
       diskbottom.x[0] = diskbottom.x[1] = 0.0;
       diskbottom.x[2] = (-geo.diskrad * geo.disk_z0);
       diskbottom.lmn[0] = diskbottom.lmn[1] = 0.0;
-      diskbottom.lmn[2] = 1.0;	//changed by SS August 04
+      diskbottom.lmn[2] = 1.0;	
 
       ds_to_disk_init++;	// Only initialize once
 
@@ -468,8 +540,7 @@ ds_to_disk (p, allow_negative)
   /*  Now we need to find exactly where we have hit the disk.  This
    *  is not trivial.  Basically we need to bracket the possibilites
    *  
-   *
-   * OK, at this point we know the photon is on a path that passes 
+   * At this point we know the photon is on a path that passes 
    * through (or passed through the disk) and we must locate it. 
    * There are two possibilities.  It hit the disk edge, or it hit
    * the face of the disk.  Most of the time it will hit the disk face
@@ -484,9 +555,6 @@ ds_to_disk (p, allow_negative)
    * top and bottom face of the disk
    */
 
-  /* I've modified the next if statement to try and get it to choose
-     the correct x2 (have to be careful about the r's being less
-     than diskrad. SS August 04. */
 
   x1 = s_plane;
   if (p->x[2] > 0.0)
@@ -512,15 +580,15 @@ ds_to_disk (p, allow_negative)
 	}
     }
 
-  if (fabs (x2) > fabs (x1))	//fabs added by SS August 04
+  if (fabs (x2) > fabs (x1))	
     {
       smin = x1;
       smax = x2;
     }
   else
     {
-      smin = x2;		//added by SS August 04
-      smax = x1;		//added by SS August 04
+      smin = x2;		
+      smax = x1;		
     }
 
 
@@ -528,7 +596,6 @@ ds_to_disk (p, allow_negative)
   move_phot (&ds_to_disk_photon, smin);
 
   s_disk = rtsafe (disk_deriv, 0.0, smax - smin, fabs (smax - smin) / 1000.);
-  //fabs added by SS August 04 - want convergence test quantity to be +ve 
   s_disk += smin;
 
   /* Note that s_disk can still be negative */
@@ -537,13 +604,27 @@ ds_to_disk (p, allow_negative)
   return (s_disk);
 }
 
-/* This is the function used by the Recipes routine rtsafe to locate the intercept 
-   between the photon and the disk.  The function we are trying to zero is the
-   difference between the height of the disk and the z height of the photon. 
 
-   Minor modification by SS August 04 in case z1 = 0.
 
-*/
+/**********************************************************/
+/** @name      disk_deriv
+ * @brief      Calculate the change in disk height as s function of s
+ *
+ * @param [in] double  s  A distance along the path of a photon
+ * @param [out] double *  value   the disk height at s
+ * @param [out] double *  derivative   the derivative of the disk heith at s
+ * @return     N/A
+ *
+ * Used in ds_to_disk by rtsafe as part of the procedure to locate
+ * the place a photon hits a vertically extended disk
+ *
+ * @notes
+ *
+ * 
+ *  The function we are trying to zero is the
+ *  difference between the height of the disk and the z height of the photon. 
+ *
+ **********************************************************/
 
 void
 disk_deriv (s, value, derivative)
@@ -574,45 +655,27 @@ disk_deriv (s, value, derivative)
 
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-	The next couple of routines are for recording information about photons/energy impinging
-	on the disk, which is stored in a disk structure called qdisk.
-
-	qdisk_init() just initializes the structure (once the disk structue has been initialized.
-
-	qdisk_save records the results in a file
-
-Arguments:		
-
-Returns:
- 
-Description:	
-
-		
-Notes:
-
-	The reason the qdisk is needed as well as disk structure is that whenever the
-	wavelength bands are changed the radii in the disk structure are recalibratied.
-	We want qdisk to have fixed boundaries when this happens.
 
 
-History:
-	04mar	ksl	add section to dump heating of disk.  
- 			Factor of 2 in area calculation reflects
- 			fact that disk has two sides
-	04dec	ksl	created variable ztot so fractional heating
-			is correct if multiple subcyles
-	080519	ksl	60a - Added code to calculate the irradiation of the disk
-			in terms of t and w.  This should help to monitor the effect
-			of irradiation on the disk
-	160526	ksl	Modified output file in qdisk_save to be an
-			astropy table
 
-**************************************************************/
-
+/**********************************************************/
+/** @name      qdisk_init
+ * @brief      Initialize a structure (qdisk) for recording information about photons/energy impinging
+ * 	on the disk, which is stored in a disk structure called qdisk.
+ * 
+ * @return     Always return zero
+ *
+ *
+ * @notes
+ *
+ * The information stored in qdisk can be used to modify the effective temperature
+ * of the disk
+ *
+ * The reason the qdisk is needed as well as disk structure is that whenever the
+ * 	wavelength bands are changed the radii in the disk structure are recalibratied.
+ * 	We want qdisk to have fixed boundaries when this happens.
+ *
+ **********************************************************/
 
 int
 qdisk_init ()
@@ -633,6 +696,29 @@ qdisk_init ()
     }
   return (0);
 }
+
+
+/**********************************************************/
+/** @name      qdisk_save
+ * @brief      Save the information in the qdisk structure to a file
+ *
+ * @param [in] char *  diskfile   Name of the file whihc is writteen
+ * @param [in] double  ztot   The total luminosity of the disk as
+ *                      calculate over multiple cycles
+ * @return     Always returns 0
+ *
+ * The routine reformats the data about disk heating which has
+ * been accumulated and writes it to a file
+ *
+ * @notes
+ *
+ * The data concerning heating by the disk is built up during
+ * a the ionization cycles 
+ *
+ * The file that is produced should be readable as an astropy
+ * table
+ *
+ **********************************************************/
 
 int
 qdisk_save (diskfile, ztot)
@@ -679,38 +765,31 @@ qdisk_save (diskfile, ztot)
 
 
 
-/***********************************************************
-	Space Telescope Science Institute
 
-Synopsis:
-	Stuart's routine to read a non-standard disk profile
-	for YSO effort
 
-Arguments:		
-
-Returns:
- 
-Description:	
-
-		
-Notes:
-	Originally part of main routine; moved to separate routine
-	by ksl sometime in the fall of 08
-
-    XXXX - This routine which was written for the YSO study 
-    needs to be made less YSO centric, and it needs to be 
-    tested.  It is not obvious this is the right format.
-
-    Currently, the format for the file is to read in a number
-    which gives the number of data poins and then to read in
-    two columns one for radius and one for T and then the 
-    numbers are multiplied by 1e11 and 1e3 respectively.  It 
-    should be possible to put this in straight cgs units and
-    to avoid having to read in the number of lines
-
-History:
-
-**************************************************************/
+/**********************************************************/
+/** @name      read_non_standard_disk_profile
+ * @brief      Read the temperature profile from a file
+ *
+ * @param [in out] char *  tprofile   Name of the input file
+ * @return     Always returns 0
+ *
+ * The input format for the file to be read in is quite spefic
+ * The first line should contina the number of points n
+ * the profile
+ *
+ * Subsequent lines should contian a radius and a temperarue
+ *
+ * The radius values shoule be in units of 1e11 cm
+ * The temperature should be in units of 1000K
+ *
+ * @notes
+ *
+ * @bug This routine which was written for the YSO study 
+ *  needs to be made less YSO centric. It should also be
+ *  retested.
+ *
+ **********************************************************/
 
 int
 read_non_standard_disk_profile (tprofile)
