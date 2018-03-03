@@ -775,6 +775,18 @@ return and record an error */
  p->istat 
  
 Description:	
+
+
+    pold is the place where the photon was before the last attempt to move the photon forward.
+    p on input is a proposed location for photon before considering whethe one has hit a boundary. The
+    location of p is either at the edge of a cell, or at the position of a resonance.  So pold should
+   be a valid position for the photon, but p may need to be adjusted. 
+
+   If one of the walls has been hit, the routine should have moved the photon to that wall, but not
+   othewise changed it.  
+
+   The routine does calculate the normal to the surface that was hit, which is inteneded to
+   be used by trans_phot to redirect the photon
  	
 
 Notes:
@@ -810,12 +822,13 @@ walls (p, pold, normal)
   double r, rho, rho_sq;
   double xxx[3];
   double s, z;
+  double theta, phi;
 
   /* Check to see if the photon has hit the star. If so
    * put the photon at the star surface and use that position
    * to determine the normal to the surface, the assumption
    * being that the star is located at the center of the
-   * coordiante grid.
+   * coordiante grid.  
    */
 
   if ((r = dot (p->x, p->x)) < geo.rstar_sq)
@@ -827,22 +840,55 @@ walls (p, pold, normal)
       return (p->istat = P_HIT_STAR);
     }
 
-  /* Check to see if it has hit the disk.  */
+  /* Check to see if it has hit the disk.  
+   *
+   * For a vertically extended disk these means checking whether
+   * we are inside the maximum radius of the disk and then lookng
+   * comparing the z position of z to the height of the disk at
+   * that point*/
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
     {
       rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
-      if ((rho * rho) < geo.diskrad_sq && fabs (p->x[2]) <= (z = zdisk (rho)))
+      if ((rho) < geo.diskrad && fabs (p->x[2]) <= (z = zdisk (rho)))
 	{
-	  // We are inside a vertically extended disk.  So call ds_to_disk to find out where we hit it
+	  /* 0 here means to return VERY_BIG if one has missed the disk, something
+	   * that should not happen
+	   */
+
 	  s = ds_to_disk (pold, 0);
 	  if (s <= 0)
 	    {
 	      Error
-		("walls: We seem to have ben inside the disk before now\n");
+		("walls: The previous position %e %e %e was inside the disk, correcting by  %e \n",
+		 pold->x[0], pold->x[1], pold->x[2], s);
+	      s = ds_to_disk (pold, 0);
+	    }
+	  else if (s == VERY_BIG)
+	    {
+	      Error
+		("walls: Should not miss disk at this position %e %e %e\n",
+		 pold->x[0], pold->x[1], pold->x[2]);
+	      s = ds_to_disk (pold, 0);
 	    }
 	  stuff_phot (pold, p);
 	  move_phot (p, s - DFUDGE);
+
+	  /* Finally, we must calculate the normal to the disk at this point */
+
+	  theta = atan ((zdisk (r * (1. + EPSILON)) - z) / (EPSILON * r));
+	  phi = atan2 (p->x[0], p->x[1]);
+
+	  normal[0] = (-cos (phi) * sin (theta));
+	  normal[1] = (-sin (phi) * sin (theta));
+	  normal[2] = cos (theta);
+
+	  if (p->x[2] < 0)
+	    {
+	      normal[2] *= -1;
+	    }
+
+
 	  return (p->istat = P_HIT_DISK);
 	}
     }
@@ -862,14 +908,17 @@ walls (p, pold, normal)
 	{			/* The photon has hit the disk */
 	  stuff_phot (pold, p);	/* Move the photon to the point where it hits the disk */
 	  move_phot (p, s - DFUDGE);
+
+	  /* Now fill in the direction for the normal to the surface */
 	  if (pold->x[2] > 0)
 	    {
-	      randvcos (p->lmn, xnorth);
+	      // Next line has been removed, so the new scattering direction is calculated elsewehre
+	      // randvcos(p->lmn,xnorth);
 	      stuff_v (xnorth, normal);
 	    }
 	  else
 	    {
-	      randvcos (p->lmn, xsouth);
+	      // randvcos(p->lmn,xsouth);
 	      stuff_v (xsouth, normal);
 	    }
 	  return (p->istat = P_HIT_DISK);

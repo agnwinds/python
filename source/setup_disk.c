@@ -1,3 +1,15 @@
+
+/***********************************************************/
+/** @file   setup_disk.c
+ * @Author ksl
+ * @date   January, 2018
+ *
+ * @brief  Read parameters that define a disk
+ *
+ * File containing reverberation mapping functions.
+ ***********************************************************/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +28,6 @@ Synopsis:
 Arguments:		
 
 Returns:
-  disk_illum - this is used by python.c and so needs to be returned
  
 Description:	
 
@@ -31,6 +42,23 @@ History:
                 input fil names to be more uniform
 
 **************************************************************/
+
+/**********************************************************/
+/** @name       get_disk_params   
+ * @brief       get the parameters need to define a disk  
+ *
+ * @param [in] None                     
+ * @return    
+ *
+ * Read the parameters, such as the type of disk, the 
+ * temperature profile, that define a disk
+ * 
+ * The parameters fill variables defined in the geo
+ * data structure.
+ *
+ * @notes
+ * 1712 - Refactored into a separate routine by ksl
+***********************************************************/
 
 
 double

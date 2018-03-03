@@ -1,122 +1,80 @@
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
-	These are a simple series of routines designed to store comments and errors
-	in a diagnostic file.
-		
-		int Log_init(filename)				Open a logfile
-		int Log_append(filename)			Append to a logfile
-
-		int Shout( char *format, ...)			Send a message to the screen and logfile that cannot be
-								suppressed.
-
-		int Log ( char *format, ...)			Send a message to the screen and logfile
-		int Log_silent ( char *format, ...)		Send a message to the logfile
-
-
-		int Error ( char *format, ...)			Send a message prefaced by the word "Error:" to
-										the screen and to the logfile.
-		int Error_silent ( char *format, ...)		Send a message prefaced by the word "Error:" to
-										the logfile
-		
-		int Log_close()					Close the current logfile
-
-		int error_summary(char *format)			Summarize all of the erors that have been
-								logged to this point in time
-		int Log_set_verbosity(vlevel)			Set the verbosity of the what is printed to
-								the cren and the log file
-
-		int Log_print_max(print_max)			Set the number of times a single error will be
-								output to the scren and the log file
-
-   		int Log_flush()					simply flushes the logfile to disk
-
-
-                int Log_set_mpi_rank(rank, n_mpi)		Tells kpar the rank of the parallel process in parallel mode,
-								and divides max errors by n_mpi
-
-		int Log_parallel(message)			Log statement for parallel reporting
-
-    JM- Debug statements are controlled by verbosity now, so no need for Log_Debug
-		int Log_debug(value)				Turn on logging of Debug statements if value is non-zero
-
-		int Debug( char *format, ...) 			Log an statement to the screen.  This is essentially a 
-								intended to replace a printf statement in situations where
-								one is debugging code.  The use of Debug instead of log
-								means that a future developer should be free to remove the
-								Debug statement from the code
-
-
-Arguments:		
-
-
-Returns:
- 
-Description:	
-	
-	Normally, one would begin by issuing a Log_init (or Log_append) command.  This will open a
-	file which will be used for logging.  If the user does not issue a Log_init command
-	but attempts to use one of the other routines in the file, then Log_init will
-	be issued internally but the and the which will used for logging will be called
-	"logfile".
-	
-	All of the Log... and Error... allow one to send what is essentially fprintf and/if desired
-	printf commands.  They are designed to handle variable numbers of arguments.  So
-	for example if you want to send a message to the log file only, which includes the
-	variables i, and j, one would say:
-		
-		Log_silent("This message writes i (%d) and j (%d) to the screen\n",i,j);
-		
-	Log_close will close the existing log file.  If one actually uses Log_close, one should
-	be sure not to try and reopen the same file for logging because this will overwrite
-	the original file.
-
-	What is actually recorded depends on the verbosity, which is currently set to 5.  Lower levels
-	of verbosity will print or record less.  In particular:
-
-	The longer term plan is to introduce something that will always be recorded.  
-	
-	
-
-Notes:
-	These is used more generally than in python.  
-
-History:
-  	98feb	ksl	Coding of these subroutines began.
-	99dec	ksl	Rewrote sane_check for linux using routine finite
-	06nov	ksl	Added error logging
-	07aug	ksl	Added a total error count to cause the program to die
-			I had a situation that the number of times an error
-			occured seemed to get to be so many that the
-			integer values wrapped.
-	08nov	ksl	Added a new Log_append command in order to allow
-			restarts.
-	09feb	ksl	Added a new capability to control the verbosity of what 
-			is printed or recorded
-	09mar	ksl	Added capability to change the number of times the same
-			error is logged to the screen, and to cause the 
-			program to quit.
-	12dec	nsh	Added Log_flush() which flushed the logfile to disk. This
-			is to help in following jobs on the Soton Iridis cluster 
-			which seems to have a very large write buffer meaning 	
-			nothing gets written out for a long time
-	12dec	nsh	Added some lines to error - since ap not preserved, and 
-			error logging to diag file was giving crazy results.
-	13jul	jm	Added Log_set_mpi_rank and Log_parallel statements for parallel 
-			reporting. Also added new verbosity setting, LOG_PARALLEL, and 
-			divided max errors by n_mpi processors which is communicated
-			via log_set_mpi_rank. The verbosity and rank are also communicated
-			to rdpar from this thread.
-	13sep	nsh	Added a new class of reporting - warnings. Things we would like to 
-			know about (no photons in band, no model in band) but do not want 
-			to crash the code.
-  1407 JM removed warning - we would like to throw errors
-  1411 JM debug statements are controlled by verbosity now, 
-          so no need for Log_Debug
-
- 
-**************************************************************/
+/***********************************************************/
+/** @file  xlog.c
+ * @Author ksl
+ * @date   January, 2018
+ *
+ * @brief  These are a series of routines designed to store comments and errors
+ * in a diagnostic file or files.  The routines also provide a mechanism for tracking the numbers of erorrs
+ * of each type
+ *
+ * Instead of using printf and fprintf statements throughout varius subroutines, the set of routines
+ * here are intended to provide a standard interface to various diagnostic files, and to manage the inteaction of 
+ * logging with the various mpi threads that can exist when running Python in multiprocessor mode.  The routines
+ * also contain a verbosity mechanism to allow one to control how much information is written to the screen, and a 
+ * mechanism to keep track of the number of times a particular error message has been generated.  The overall goal 
+ * is to keep the log files produced by Python a manageable size.
+ *
+ * Messages in Python runs are sent to the screen and to diagnostic files.  During multiprocessing runs, a diagnostic 
+ * file is opened for each thread.  With some exceptions, messages to the screen arise from thread 0.  
+ * 		
+ *  The routines that control what files are open and closed for logging are as follows.
+ * 	- Log_init(filename)			Open a logfile
+ * 	- Log_append(filename)			Repoane an existing log file (so that one can continue to log to it)
+ * 	- Log_close()					Close the current logfile
+ *
+ *   The routines that write to the log files (and optionally the screen) for informational reasons are:
+ *  - Log ( char *format, ...)			Send a message to the screen and logfile
+ * 	- Log_silent ( char *format, ...)		Send a message to the logfile
+ *
+ * 	The routines that are designed to report errors are as follows: 
+ * 	- Shout( char *format, ...)	   Send a message to the screen and logfile that cannot be suppressed.
+ *  - Error ( char *format, ...)			Send a message prefaced by the word "Error:" to the screen and to the logfile.
+ * 	- Error_silent ( char *format, ...)		Send a message prefaced by the word "Error:" to
+ * 										the logfile
+ *
+ *  One can control how much information is printed to the screen and how many times a specific error message is logged 
+ *  to a file with several routines
+ *  - Log_set_verbosity(vlevel)			Set the verbosity of the what is printed to the screen and the log file
+ * 	- Log_print_max(print_max)			Set the number of times a single error will be 
+ * 	    output to the scren and the log file
+ *
+ *  In most cases, it is sufficient to log to the screen only from thread 0.  there are a few times, one might want to 
+ *  send a message to the screen from any thread. For this purpose there is a specific command:
+ *  - Log_parallel(message)			Log statement for parallel reporting
+ *
+ *
+ *  There are several specific commands that have been included for debugging problems:
+ *  - Log_flush()					simply flushes the logfile to disk (before the program crashes).
+ *	- Debug( char *format, ...) 			Log an statement to the screen and to a file.  This is essentially a 
+ *								intended to replace a printf statement in situations where
+ *							one is debugging code.  The use of Debug instead of log
+ *							means that a future developer should be free to remove the
+ *							Debug statement from the code.  Because the command prepends the word Debug to 
+ *							the write staatement, it should be easy to grep debug statements out of the log files
+ *
+ *
+ *  For errors, the logging routines keep track of how many times a particular error has been reported, using the format 
+ *  statement as a proxy for the error.  After a certin number of times a particular error has been roported the error is
+ *  no longer written out to the diag file, but the routens still keep trank of the nubmer of times the error is reported.
+ *  If this number becomes too large then, the progam exits, and when it does it indicates why. There are a nubmer of 
+ *  routines associated with this.
+ *
+ *
+ *  - error_summary(char *format)			Summarize all of the erors that have been
+ * 								logged to this point in time
+ *
+ *
+ *  In addition there are several routines that largely internal
+ *
+ *  - Log_set_mpi_rank(rank, n_mpi)		Tells  the rank of the parallel process in parallel mode,
+ * 								and divides max errors by n_mpi
+ *     
+ *
+ *
+ *	
+ *
+ ***********************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -158,8 +116,19 @@ FILE *diagptr;
 int init_log = 0;
 int log_verbosity = 5;          // A parameter which can be used to suppress what would normally be logged or printed
 
-//1411 JM debug statements are controlled by verbosity now, so no need for Log_Debug
-//int log_debug=0;      //A parameter which is set to cause Debug commands to be logged
+
+
+/**********************************************************/
+/** @name      Log_init
+ * @brief      Open a log file 
+ * 		
+ * @param [in] char *  filename   The name of the file where logging will occur
+ * @return     Always returns 0
+ *
+ * @notes
+ *
+ *
+ **********************************************************/
 
 int
 Log_init (filename)
@@ -187,6 +156,25 @@ Log_init (filename)
 }
 
 
+
+/**********************************************************/
+/** @name      Log_append
+ * @brief      Opens an existing log file so that diagnostic message can be added to it.
+ *
+ * @param [in] char *  filename   Name of the existing file to reopen
+ * @return     0 unless the log file cannot be reopened in which case the program terminates
+ *
+ * The routine opens a logfile that should have existed previously so that one 
+ * can continue an early run of python 
+ *
+ * @notes
+ *
+ * This routine is called on a restart of a run, if for example one
+ * needed to checkpoint a run because a limitation on the time for running
+ * an individual program 
+ *
+ **********************************************************/
+
 int
 Log_append (filename)
      char *filename;
@@ -212,6 +200,20 @@ Log_append (filename)
   return (0);
 }
 
+
+/**********************************************************/
+/** @name      Log_close
+ * @brief      Close a log file 
+ *
+ * @return     Always returns 0
+ *
+ * Close the current log file
+ *
+ * @notes
+ *
+ *
+ **********************************************************/
+
 int
 Log_close ()
 {
@@ -225,6 +227,20 @@ Log_close ()
  * carried out through the logging subroutines
  */
 
+
+/**********************************************************/
+/** @name      Log_set_verbosity
+ * @brief      Control the range of messages which are logged to the command line
+ *
+ * @param [in] int  vlevel   An integer which controls what level of loggng goes to the screen
+ * @return     Always returns 0
+ *
+ *
+ * @notes
+ *
+ *
+ **********************************************************/
+
 int
 Log_set_verbosity (vlevel)
      int vlevel;
@@ -235,9 +251,22 @@ Log_set_verbosity (vlevel)
 }
 
 
-/* The next routine allows the user to change the amount of reporting that is
- * carried out through the logging subroutines
- */
+
+
+/**********************************************************/
+/** @name      Log_print_max
+ * @brief      Limit the number of times an error is printed out
+ *
+ * @param [in] int  print_max   a number which specifies the number of times an error message is logged
+ * @return     Always returns 0
+ *
+ * This routines allows the user to change the number of times an error message is printed out
+ *
+ *
+ * @notes
+ *
+ *
+ **********************************************************/
 
 int
 Log_print_max (print_max)
@@ -248,9 +277,24 @@ Log_print_max (print_max)
 }
 
 
-/* The next routine allows the user to change the amount of reporting that is
- * carried out through the logging subroutines
- */
+
+/**********************************************************/
+/** @name      Log_quit_after_n_errors
+ * @brief      Set the number of errors of a specific type which will cause the program to exit
+ *
+ * @param [in] int  n   the maximum number of errors
+ * @return     0               
+ *
+ * When running the program keeps track of how many errors of any type have been issues, the assumption
+ * being that if there are two many errors something is drastically wrong and the code should
+ * exit gracefully.  This routine resets that number from the default
+ *
+ * @notes
+ *
+ * The current default is 1e6.
+ *
+ *
+ **********************************************************/
 
 int
 Log_quit_after_n_errors (n)
@@ -259,6 +303,23 @@ Log_quit_after_n_errors (n)
   max_errors = n;
   return (0);
 }
+
+
+/**********************************************************/
+/** @name      Log
+ * @brief      Print/write an informational message
+ *
+ * @param [in] char *  format   The format string for the message
+ * @param [in]   ...   The various values which fill out the format screen
+ * @return     The number of characters sucessfully written
+ *
+ * This is the standard way of printing a message to screen and to the diag file
+ *
+ * @notes
+ *
+ * Printing to the screen can be suppressed by setting the verbosity level
+ *
+ **********************************************************/
 
 int
 Log (char *format, ...)
@@ -282,6 +343,23 @@ Log (char *format, ...)
   return (result);
 }
 
+
+/**********************************************************/
+/** @name      Log_silent
+ * @brief      Write a message to the diagnostic file
+ *
+ * @param [in] char *  format   The format string for the message
+ * @param [in]   ...   The various values which fill out the format screen
+ * @return     The number of characters sucessfully written
+ *
+ * This is the standard way of writing a message to the diag file (without also writing to the screen)
+ *
+ * @notes
+ *
+ * Printing to the screen can be enabled if the level of verbosity is set to high enough a level
+ *
+ **********************************************************/
+
 int
 Log_silent (char *format, ...)
 {
@@ -300,6 +378,25 @@ Log_silent (char *format, ...)
   va_end (ap);
   return (result);
 }
+
+
+/**********************************************************/
+/** @name      Error
+ * @brief      Print/write out an error message
+ *
+ * @param [in] char *  format   The format string for the message
+ * @param [in]   ...   The various values which fill out the format statement
+ * @return     The number of characters sucessfully written
+ *
+ *
+ * This is the standard way of writing an error message to the screen and to
+ * a file
+ *
+ * @notes
+ *
+ * Writing to the screen can be suppressed depending on the level of verbosity
+ *
+ **********************************************************/
 
 int
 Error (char *format, ...)
@@ -326,6 +423,24 @@ Error (char *format, ...)
 
 
 
+
+/**********************************************************/
+/** @name      Error_silent
+ * @brief      Write an error message to the diag file
+ *
+ * @param [in] char *  format   The format string for the message
+ * @param [in]   ...   The various values which fill out the format statement
+ * @return     The number of characters sucessfully written
+ *
+ *
+ * These routine normally only writes an error message to the diag file
+ *
+ * @notes
+ *
+ * Writing the message to the screen can be enabled using the verbosity settings
+ *
+ **********************************************************/
+
 int
 Error_silent (char *format, ...)
 {
@@ -350,6 +465,25 @@ Error_silent (char *format, ...)
 
 
 
+
+/**********************************************************/
+/** @name      Shout
+ * @brief      Write an error message to the screen and to a file
+ *
+ * @param [in] char *  format   The format string for the message
+ * @param [in]   ...   The various values which fill out the format statement
+ * @return     The number of characters sucessfully written
+ *
+ *
+ * This routine writes and error message to the screen and to the diagnostic file.
+ * This message is not suppressed by any of the verbosity flags and is intended
+ * to be for the most important errors
+ *
+ * @notes
+ *
+ *
+ **********************************************************/
+
 int
 Shout (char *format, ...)
 {
@@ -372,6 +506,24 @@ Shout (char *format, ...)
   return (result);
 }
 
+
+/**********************************************************/
+/** @name      sane_check
+ * @brief      Check that a variable is valid double precision number
+ *
+ * @param [in] double  x   the variable to check
+ * @return     0 if the number is valid, -1 if it is a NAN, or infinity
+ *
+ * This is a diagnostic routine to allow one to check whether NANs or 
+ * infinities have crept into a calculation.  
+ *
+ * @notes
+ *
+ * The routine was intended to make it easy to set break points when 
+ * something untoward is happening.
+ *
+ **********************************************************/
+
 int
 sane_check (x)
      double x;
@@ -385,6 +537,32 @@ sane_check (x)
   return (0);
 }
 
+
+
+/**********************************************************/
+/** @name      error_count
+ * @brief      track the number of errors of each type
+ *
+ * @param [in out] char *  format   A format statement for an error message
+ * @return     The number of errors wwith associated with a certain format
+ *
+ * When an error message is received, the format statement is used to identify the
+ * error.  Here the format statement is compared to the format statement associated
+ * with previous errors and a counter is kept of the number of times a particular error
+ * has occured.
+ *
+ * Once the error count for a particular error has been reached then the error is no
+ * longer printed out; once the error count has reached a much larger number the
+ * program terminates on the assumption that something is drastically wrong.
+ *
+ * @notes
+ *
+ * The number for stopping the print out is contolled by NERROR_MAX and is hardcoded
+ *
+ * The number for stopping  the program is controled by max_errors and can be altered, see
+ * log_set_max_errors 
+ *
+ **********************************************************/
 
 int
 error_count (char *format)
@@ -429,6 +607,25 @@ error_count (char *format)
 
 
 
+
+/**********************************************************/
+/** @name      error_summary
+ * @brief      Summparise the errors that have occurred 
+ *
+ * @param [in] char *  message   A message that can accompany the error summary
+ * @return     Always returns 0
+ *
+ * Print out the errors that have occured and the number of times each 
+ * error has occured
+ *
+ * @notes
+ *
+ * This is printed out at the end of all Python runs.  When running in multiprocessor mode, 
+ * the number of 
+ * errors referes only to the errors that have occurred in that particular theread.
+ *
+ **********************************************************/
+
 int
 error_summary (message)
      char *message;
@@ -447,6 +644,22 @@ error_summary (message)
 
 /*NSH 121107 added a routine to flush the diagfile*/
 
+
+/**********************************************************/
+/** @name      Log_flush
+ * @brief      Flush the diagnostic file to assure that one has an up-to-date version of the log file
+ *
+ * @return     Always returns 0
+ *
+ * This routine is intended to assure that the log file is complete before
+ * a possilbe program crash
+ *
+ * @notes
+ *
+ *  
+ *
+ **********************************************************/
+
 int
 Log_flush ()
 {
@@ -458,13 +671,26 @@ Log_flush ()
 }
 
 
-/* JM130717 the next set of routines are designed to clean up the code 
- * in parallel mode
- */
 
-/* The next routine simply sets the rank of the process 
+
+
+/**********************************************************/
+/** @name      Log_set_mpi_rank
+ * @brief      Store the rank of this particular thread
+ *
+ * @param [in] int  rank   The rank of this thread
+ * @param [in] int  n_mpi   The total number of threads 
+ * @return     Always returns 0
+ *
+ * The routine simply sets the rank of the process 
  * if not in parallel mode then we set my_rank to zero
- */
+ *
+ * @notes
+ *
+ * The number of thread is not used by the program even though it
+ * is passed.
+ *
+ **********************************************************/
 
 int
 Log_set_mpi_rank (rank, n_mpi)
@@ -473,14 +699,30 @@ Log_set_mpi_rank (rank, n_mpi)
   my_rank = rank;
   rdpar_set_mpi_rank (rank);    //this just communicates the rank to rdpar      
 
-  /* if in parallel mode we divide by the number of parallel processes for max errors */
-  //     max_errors /= n_mpi;                
-  //log_print_max /= n_mpi; for the moment we won'y change this as only master thread prints errors anyway
   return (0);
 }
 
 
 /* log statement that prints parallel statements to screen */
+
+
+/**********************************************************/
+/** @name      Log_parallel
+ * @brief      In addition to writing to the diag file, print a message to the screen from all threads
+ *
+ * @param [in] char *  format   The format string for the message
+ * @param [in]   ...   The various values which fill out the format statement
+ * @return     The number of characters sucessfully written
+ *
+ *
+ * The normal logging routines write a message to the diagnositc file associated
+ * with a paticular thread, and write messages to the screen only for thread 
+ * zero.  This routine writes a message to the screen from all threads.
+ *
+ * @notes
+ *
+ *
+ **********************************************************/
 
 int
 Log_parallel (char *format, ...)
@@ -492,7 +734,7 @@ Log_parallel (char *format, ...)
     return (0);
 
   va_start (ap, format);
-  va_copy (ap2, ap);            /* ap is not necessarily preserved by vprintf */
+  va_copy (ap2, ap);            
 
   if (my_rank == 0)
     result = vprintf (format, ap);
@@ -504,17 +746,28 @@ Log_parallel (char *format, ...)
 }
 
 
-/* Set a flag to which cause Debug statements to be logged */
-// int Log_debug(value)
-//      int value;
-// {
-//      log_debug=value;
-//      return(0);
-// }
-/* JM- Debug statements are controlled by verbosity now, so no need for Log_Debug */
-/* Log a debug statement if the external varialbe log_debug
- * has been set to a non-zero value
- */
+
+
+/**********************************************************/
+/** @name      Debug
+ * @brief      Print/write to a file a special message for debugging
+ *
+ * @param [in] char *  format   The format string for the message
+ * @param [in]   ...   The various values which fill out the format statement
+ * @return     The number of characters sucessfully written
+ *
+ * Straight  printf and fprintf states are strongly discouraged in Python except
+ * as issued withing the routines here.  This routine preface an fprintf statement
+ * with Dobug so such statements are issue to grep out of a log file, and in the code
+ *
+ * The intention that this routine would be used to log messages when one
+ * is trying to debug a problme and that these lines would be removed from
+ * the code once the debugging was completed. 
+ *
+ * @notes
+ *
+ *
+ **********************************************************/
 
 int
 Debug (char *format, ...)
@@ -529,8 +782,8 @@ Debug (char *format, ...)
     Log_init ("logfile");
 
   va_start (ap, format);
-  va_copy (ap2, ap);            /*NSH 121212 - Line added to allow error logging to work */
-  if (my_rank == 0)             // only want to print errors if master thread
+  va_copy (ap2, ap);            
+  if (my_rank == 0)             
     vprintf ("Debug: ", ap);
   result = vprintf (format, ap);
   fprintf (diagptr, "Debug: ");

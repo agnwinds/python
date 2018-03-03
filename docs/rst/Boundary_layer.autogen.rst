@@ -25,28 +25,21 @@ Multi-line description, must keep indentation.
 **File:** python.c
 
 
-Boundary_layer.radiation
-========================
-Says whether the boundary layer will radiate 0=no, 1=yes
+Boundary_layer.rad_type_to_make_wind
+====================================
+When the system contains a boundary layer, the spectrum of the boundary layer can be simulated
+as a blackbody, from a model, or as a power law.
 
-**Type:** Boolean (1/0)
+**Type:** Enum (Int)
 
-**Parent(s):**
-  parameter_: None
+**Values:**
 
+0. bb
 
-**File:** setup_star_bh.c
+1. models
 
+3. pow
 
-Boundary_layer.luminosity
-=========================
-The luminosity of the boundary layer          
-
-**Type:** Double
-
-**Unit:** ergs/s
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
@@ -73,26 +66,33 @@ is meaningful in generating the spectrum
 **File:** setup.c
 
 
-Boundary_layer.rad_type_to_make_wind
-====================================
-When the system contains a boundary layer, the spectrum of the boundary layer can be simulated
-as a blackbody, from a model, or as a power law.
+Boundary_layer.luminosity
+=========================
+The luminosity of the boundary layer          
 
-**Type:** Enum (Int)
+**Type:** Double
 
-**Values:**
+**Unit:** ergs/s
 
-0. bb
-
-1. models
-
-3. pow
-
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup.c
+
+
+Boundary_layer.radiation
+========================
+Says whether the boundary layer will radiate 0=no, 1=yes
+
+**Type:** Boolean (1/0)
+
+**Parent(s):**
+  parameter_: None
+
+
+**File:** setup_star_bh.c
 
 
