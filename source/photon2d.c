@@ -519,6 +519,7 @@ translate_in_wind (w, p, tau_scat, tau, nres)
   int istat;
   int nplasma;
   int ndom, ndom_current;
+  int inwind;
 
   WindPtr one;
   PlasmaPtr xplasma;
@@ -545,6 +546,8 @@ return and record an error */
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
   ndom = one->ndom;
+  inwind=one->inwind;
+  
 
 
 
@@ -556,6 +559,14 @@ return and record an error */
       return ((int) smax);
     }
 
+  //XXXX this is a kluge.  it should be set by DFUDGE somehow
+  if (smax<1e7) {
+      Error("translate_in_wind: photon not moving\n");
+      Error ("translate_in_wind: photon %d position: x %g y %g z %g\n",
+	     p->np, p->x[0], p->x[1], p->x[2]);
+      smax=1e7;
+  }
+
   if (one->inwind == W_PART_INWIND)
     {				// The cell is partially in the wind
       s = ds_to_wind (p, &ndom_current);	//smax is set to be the distance to edge of the wind
@@ -565,14 +576,14 @@ return and record an error */
       if (s > 0 && s < smax)
 	smax = s;
     }
-  if (one->inwind == W_IGNORE)
+  else if (one->inwind == W_IGNORE)
     {
-      if ((neglible_vol_count % 100) == 0)
-	Error
-	  ("translate_in_wind: Photon is in cell %d with negligible volume, moving photon %.2e  Occurrences %d\n",
-	   n, smax, neglible_vol_count + 1);
+    //OLD  if ((neglible_vol_count % 100) == 0)
+	//OLDError
+	//OLD  ("translate_in_wind: Photon is in cell %d with negligible volume, moving photon %.2e  Occurrences %d\n",
+	//OLD    n, smax, neglible_vol_count + 1);
 
-      neglible_vol_count++;
+   //OLD    neglible_vol_count++;
       move_phot (p, smax);
       return (p->istat);
 

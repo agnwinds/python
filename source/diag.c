@@ -385,13 +385,17 @@ History:
    !802 ksl Coded
  
 **************************************************************/
-
+int save_photon_number=0;
 
 int
 save_photons (p, comment)
      PhotPtr p;
      char comment[];
 {
+    save_photon_number+=1;
+    if (save_photon_number>100000) 
+        return(0);
+
 fprintf (epltptr,
 "PHOTON %3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %3d %3d %s \n",
 p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],

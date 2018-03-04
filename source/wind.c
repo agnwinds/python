@@ -187,7 +187,8 @@ where_in_wind (x, ndomain)
 	  if (n >= 0)
 	    {
 	      *ndomain = ndom;
-	      ireturn = wmain[n].inwind;
+	      //OLD ireturn = wmain[n].inwind;
+          ireturn = W_ALL_INWIND;
 	      break;
 	    }
 	}

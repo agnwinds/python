@@ -403,7 +403,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	    {
 	      Error
 		("trans_phot: Trying to scatter a photon which is not in the wind\n");
-	      Error ("trans_phot: grid %3d x %8.2e %8.2e %8.2e\n", pp.grid,
+	      Error ("trans_phot: %d grid %3d x %8.2e %8.2e %8.2e\n", pp.np, pp.grid,
+	      //OLD Error ("trans_phot: grid %3d x %8.2e %8.2e %8.2e\n", pp.grid,
 		     pp.x[0], pp.x[1], pp.x[2]);
 	      Error ("trans_phot: This photon is effectively lost!\n");
 	      istat = pp.istat = p->istat = P_ERROR;
@@ -420,7 +421,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	    {
 	      Error
 		("trans_phot: Trying to scatter a photon which is not in a cell in the plasma structure\n");
-	      Error ("trans_phot: grid %3d x %8.2e %8.2e %8.2e\n", pp.grid,
+	      Error ("trans_phot: %d grid %3d x %8.2e %8.2e %8.2e\n", pp.np, pp.grid,
 		     pp.x[0], pp.x[1], pp.x[2]);
 	      Error ("trans_phot: This photon is effectively lost!\n");
 	      istat = pp.istat = p->istat = P_ERROR;
@@ -434,7 +435,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	    {
 	      Error
 		("trans_phot: Trying to scatter a photon in a cell with no wind volume\n");
-	      Error ("trans_phot: grid %3d x %8.2e %8.2e %8.2e\n", pp.grid,
+	      Error ("trans_phot: %d grid %3d x %8.2e %8.2e %8.2e\n", pp.np, pp.grid,
+	      //OLD Error ("trans_phot: grid %3d x %8.2e %8.2e %8.2e\n", pp.grid,
 		     pp.x[0], pp.x[1], pp.x[2]);
 	      Log ("istat %d\n", pp.istat);
 	      Error ("trans_phot: This photon is effectively lost!\n");
