@@ -584,6 +584,7 @@ return and record an error */
 	//OLD    n, smax, neglible_vol_count + 1);
 
    //OLD    neglible_vol_count++;
+      smax += one->dfudge;
       move_phot (p, smax);
       return (p->istat);
 
