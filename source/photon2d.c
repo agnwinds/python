@@ -559,13 +559,13 @@ return and record an error */
       return ((int) smax);
     }
 
-  //XXXX this is a kluge.  it should be set by DFUDGE somehow
-  if (smax<1e7) {
-      Error("translate_in_wind: photon not moving\n");
-      Error ("translate_in_wind: photon %d position: x %g y %g z %g\n",
-	     p->np, p->x[0], p->x[1], p->x[2]);
-      smax=1e7;
-  }
+//OLD  //XXXX this is a kluge.  it should be set by DFUDGE somehow
+//OLD  if (smax<1e7) {
+//OLD      Error("translate_in_wind: photon not moving\n");
+//OLD      Error ("translate_in_wind: photon %d position: x %g y %g z %g\n",
+//OLD	     p->np, p->x[0], p->x[1], p->x[2]);
+//OLD      smax=1e7;
+//OLD  }
 
   if (one->inwind == W_PART_INWIND)
     {				// The cell is partially in the wind
