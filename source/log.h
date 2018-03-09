@@ -15,7 +15,6 @@ int message(char string[]);
 int rdstr(char question[], char answer[]);
 int rdchar(char question[], char *answer);
 int rdint(char question[], int *answer);
-int rdint2(char question[], int *answer1, int *answer2);
 int rdflo(char question[], float *answer);
 int rddoub(char question[], double *answer);
 int rdline(char question[], char answer[]);

@@ -217,7 +217,7 @@ double gdisk(double mass, double mdot, double rmin);
 double geff(double g0, double x);
 double vdisk(double x[], double v[]);
 double zdisk(double r);
-double ds_to_disk(struct photon *p, int miss_return);
+double ds_to_disk(struct photon *p, int allow_negative);
 void disk_deriv(double s, double *value, double *derivative);
 int qdisk_init(void);
 int qdisk_save(char *diskfile, double ztot);
