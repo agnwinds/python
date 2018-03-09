@@ -56,7 +56,7 @@ History:
  * The parameters fill variables defined in the geo
  * data structure.
  *
- * @notes
+ * ###Notes###
  * 1712 - Refactored into a separate routine by ksl
 ***********************************************************/
 

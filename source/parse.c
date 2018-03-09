@@ -32,7 +32,7 @@
  * The routine also creates the diag folder, which is where most
  * of the log files are written 
  *
- * @notes
+ * ###Notes###
  *
  * The general purpose of each of the command line options
  * should be fairly obvious from reading the code.
@@ -215,7 +215,7 @@ parse_command_line (argc, argv)
  *
  * This simply prints out a hardwired multi-line string to the command line.
  *
- * @notes
+ * ###Notes###
  *
  * An improved version of this routine would simply read and print and external 
  * file.

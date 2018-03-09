@@ -29,7 +29,7 @@
  * @return     Always returns zero
  *
  *
- * @notes
+ * ###Notes###
  *
  * Although it seems natural to assume that the wind starts at the photosphere, this
  * 	is not required (and in Mauche and Raymond's spherical model for a CV wind they set
@@ -120,7 +120,7 @@ get_stellar_wind_params (ndom)
  * - R:			zdom[ndom].cl_rmin;	       	the inner radius of the wind
  * - beta:			zdom[ndom].cl_beta;		power law exponent for the velocity law
  *
- * @notes
+ * ###Notes###
  *
  * v is set to V_o inside of rstar or w_rscale, even though the should not really exist there!
  * 
@@ -172,7 +172,7 @@ stellar_velocity (ndom, x, v)
  *
  * rho=mdot/(4PI*r*r*v);
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
