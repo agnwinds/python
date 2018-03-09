@@ -1,3 +1,15 @@
+/***********************************************************/
+/** @file   hydro_import.c.c
+ * @Author KSL/NSH
+ * @date   Dec, 1999
+ * @brief  Routines to import hydro-dynamic snapshots.
+ *
+ * Routines to import hydro-dynamic snapshots
+ ***********************************************************/
+
+
+
+
 #define MAXHYDRO 1000
 #define IGHOST 0
 
@@ -66,6 +78,8 @@ HydroPtr hydro_ptr;
   
 
  ************************************************************************/
+
+
 #include  <stdio.h>
 #include  <stdlib.h>
 #include  <strings.h>
@@ -117,6 +131,23 @@ History:
 **************************************************************/
 
 
+/**********************************************************/
+/** @name 	get_hydro_wind_params
+ * @brief	Sets up geometry ready to accept a hydro-dynamic model
+ *
+ * @param [in] ndom			The number of the domain which will be populated by the geometry
+ * @return 					0 if successful
+ *
+ * Sets up the geometry - max and min - for the hydro-dynamic
+ * snapshot. It uses limits read in from the file to fill in 
+ * things more usually read in from the command line.
+ *
+ *
+ * @notes
+ * 12/99	-	Written by KSL
+***********************************************************/
+
+
 int
 get_hydro_wind_params (ndom)
      int ndom;
@@ -164,6 +195,23 @@ get_hydro_wind_params (ndom)
   return (0);
 }
 
+
+/**********************************************************/
+/** @name 	get_hydro
+ * @brief	Reads in and decodes a hydro-dynamic model
+ *
+ * @param [in] ndom			The number of the domain which will be populated by the geometry
+ * @return 					0 if successful
+ *
+ * This deals with importing the hydro-dynamic snapshot
+ * It asks the user the filename and the maximum theta to be used 
+ * It also works out the maximum theta bin to be used, and
+ * interpolates if this doesnt quite line up.
+ *
+ *
+ * @notes
+ * 12/99	-	Written by KSL
+***********************************************************/
 
 
 int
@@ -349,6 +397,29 @@ History:
 // ksl - Added ndom here for symmetry with other modles.  
 // The hydro models do not understand domains XXX
 
+
+/**********************************************************/
+/** @name 	hydro_velocity
+ * @brief	Interpolates on supplied data file to get velocity at all vertices
+ *
+ * @param [in] ndom			The number of the domain which will be populated by the geometry
+ * @param [in] x			The x location we need a velocity for
+ * @param [in] v			The velocity we are returning
+ * @return 					The speed - relating the velocity we have computed
+ *
+ * The velocities in a zeus hydro-grid are defined on the middle of cell 
+ * edges, wgheras in python we require them at the verticies. This routine
+ * interpolates on rhe supplied grid to make the python grid.
+ *
+ *
+ * @notes
+ * 12/99	-	Written by KSL
+ * 12/04	-	Mod to prevent divide by zero when r=0.0, and NaN when xxx>1.0;
+ * 04/13	-	Heavily modified by NSH
+***********************************************************/
+
+
+
 double
 hydro_velocity (ndom,x, v)
     int ndom;
@@ -436,6 +507,26 @@ hydro_velocity (ndom,x, v)
 }
 
 
+/**********************************************************/
+/** @name 	hydro_rho
+ * @brief	Interpolates on supplied data file to get cell densities
+ *
+ * @param [in] x			The x location we need a density for
+ * @return 	rrho			The density at the requested loc ation
+ *
+ * This is a routine which allows the density in a supplied
+ * hydro-dynamic snapshot to be used to populate a python
+ * model. Often the grids overlap, but this should work whatever
+ * the case.
+ *
+ *
+ * @notes
+ * 12/99	-	Written by KSL
+ * 12/04	-	Mod to prevent divide by zero when r=0.0, and NaN when xxx>1.0;
+ * 04/13	-	Heavily modified by NSH
+***********************************************************/
+
+
 
 double
 hydro_rho (x)
@@ -496,6 +587,25 @@ History:
         also now common code removed to subroutines
   
 **************************************************************/
+
+/**********************************************************/
+/** @name 	hydro_temp
+ * @brief	Interpolates on supplied data file to get cell tempertaures
+ *
+ * @param [in] x			The x location we need a temperature for
+ * @return 	temp			The temperature at the requested loc ation
+ *
+ * This is a routine which allows the temperature in a supplied
+ * hydro-dynamic snapshot to be used to populate a python
+ * model. Often the grids overlap, but this should work whatever
+ * the case.
+ *
+ *
+ * @notes
+ * 04/13	-	NSH - began work
+ * 01/15	-	NSH - temperature is now computed by a helper script, also now common code removed to subroutines
+***********************************************************/
+
 
 
 double
@@ -567,6 +677,25 @@ History:
 
 
 **************************************************************/
+
+
+
+/**********************************************************/
+/** @name 	rtheta_make_hydro_grid
+ * @brief	Defines an r-theta grid to accept a hydro model
+ * 
+ * @param [in] w			The wind pointer
+ * @param [in] ndom			The number of the domain which will be populated by the geometry
+ * @return 	§				0 if successful
+ *
+ * rtheta_make_zeus_grid defines the cells in a rtheta grid based 
+ * upon the coordinates that can be read in from a zeus 
+ * (the hydrocode used by Proga for some simulations)            
+ *
+ * @notes
+ * 06/13	-	NSH - Coded and debugged.
+***********************************************************/
+
 
 
 int
@@ -671,6 +800,24 @@ History:
 
 **************************************************************/
 
+/**********************************************************/
+/** @name 	rtheta_hydro_volumes
+ * @brief	Computes volumes for cells in an r-theta hydro model
+ * 
+ * @param [in] ndom			The number of the domain which will be populated by the geometry
+ * @param [in] w			The wind pointer
+ * @return 					0 if successful
+ *
+ *   rtheta_zeus_volumes replaces rtheta_volumes for a zeus model. 
+ * We know wether cells are in the wimnd
+ * so all we need to do is work out the volumes.
+ *          
+ *
+ * @notes
+ * 06/13	-	NSH - Coded and debugged.
+ * 08/15	-	KSL - Updated for domains
+***********************************************************/
+
 
 int
 rtheta_hydro_volumes (ndom, w)
@@ -749,6 +896,32 @@ History:
 **************************************************************/
 
 
+/** @name 	hydro_frac
+ * @brief	Helper routine to interpolate on a grid
+ * 
+ * @param [in] coord			The coordinate we want a value for
+ * @param [in] coord_array		The array of grid points
+ * @param [in] imax				The maximum extent of the array
+ * @param [in] *cell1			One of the two bracketing cells (computed)
+ * @param [in] *cell2			The other bracketing cell (computed)
+ * @param [in] *frac			The fraction along the coord between the two cells (computed)
+ * @return 					0 if successful
+
+ *
+ * hydro_frac replaces many lines of identical code, all of which
+ * interpolate on the input grid to get value for the python grid.
+ * This code find out the fraction along a coord array where the centre
+ * or edge of the python grid cell lies on the hydro grid
+ * XXX - ksl - It is very unclear why this routine is necessary
+ * coor_frac should be able to do this in one go.
+ *          
+ *
+ * @notes
+ * 09/15	-	NSH - Coded and debugged.
+ * 08/15	-	KSL - Updated for domains
+***********************************************************/
+
+
 
 
 int
@@ -819,6 +992,29 @@ History:
 **************************************************************/
 
 
+/** @name 	hydro_interp_value
+ * @brief	Helper routine to interpolate on a grid
+ * 
+ * @param [in] array			the array of input data
+ * @param [in] im,ii			the two cells surrounding the cell in the first dim (r)
+ * @param [in] jm,jj			the two cells surrounding the cell in the second dim (theta)
+ * @param [in] f1,f2			the fraction between the two values in first and second dim
+ * @return 		value			the interplated number
+
+ *
+ * hydro_interp_value replaces many lines of identical code, all of which
+ * interpolate on the input grid to get value for the python grid.
+ * This returns the actuak value of an interpolated array
+ * XXX - ksl - It is not obvious why this was really needed, assuming that
+ * the model has been proper installed in the WindStruct.  Possibly it
+ * has to do with where values are centered.  
+ *          
+ *
+ * @notes
+ * 09/15	-	NSH - Coded and debugged.
+***********************************************************/
+
+
 
 double
 hydro_interp_value (array, im, ii, jm, jj, f1, f2)
@@ -869,6 +1065,24 @@ History:
 
 
 **************************************************************/
+
+
+/** @name 	hydro_restart
+ * @brief	Allows a previous windsave to be used in a new hydro simulation
+ * 
+ * @param [in] ndom			The number of the domain which will be populated by the geometry
+ * @return 					0 if successful
+
+ *
+ * hydro_restart is a subrotine which permits a previous wind save 
+ * file to be used in a hydro simulation. The density and temperature
+ * for each cell are those from the hydro simulation. The ion fractions
+ * are taken from the windsave file
+ *          
+ *
+ * @notes
+ * 02/16	-	NSH - Coded and debugged.
+***********************************************************/
 
 
 

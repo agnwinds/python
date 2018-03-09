@@ -18,9 +18,9 @@ parameter defines the energy of the low energy break.
 **Value:** Greater than zero
 
 **Parent(s):**
-  Rad_type_for_agn_: 4
-
   QSO_BH_radiation_: 1
+
+  Rad_type_for_agn_: 4
 
 
 **File:** setup.c

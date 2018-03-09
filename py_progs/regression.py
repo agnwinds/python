@@ -46,10 +46,21 @@ Notes:
 
     Regression here means to run a series of models. These routines do not compare the
     models to earlier runs
+
+    It is possible to add special tests for regression, either to because models must be 
+    run in a certain order or because special options must be used.  These should
+    be added in a special section of doit, and should be self-contained.  
+
                                        
 History:
 
 170903 ksl Coding begun
+180225 ksl nsh had added a special test for hydro.  This is useful in the sense that
+           it allows one to deal with situations where several runs must be carreid out
+           sequentially but but the mechanism that he chose makes
+           it difficult to add new tests, because the standard and speciial tests are 
+           not sufficently isolated from one another.
+
 
 '''
 
@@ -61,6 +72,7 @@ import time
 import subprocess
 import os
 import shutil
+import py_error
 
 
 
@@ -148,9 +160,10 @@ def check_one(xfile,root):
             xfile.write('%10d -- %s\n' % (one[1],one[0]))
     else:
         xfile.write('No diagnostic errors were reported\n')
-
+    py_error.doit(root)
     return
-    
+	
+	    
     
 
 
@@ -176,6 +189,7 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
     '''
 
     date=time.strftime("%y%m%d", time.gmtime())
+    
 
     if out_dir=='':
         out_dir='%s_%s' % (version,date)
@@ -191,15 +205,16 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
     print(PYTHON)
 
     if pf_dir=='':
-        pf_files=glob(PYTHON+'/examples/regress/*pf')
-    elif os.path.isdir(pf_dir):
+        pf_dir=PYTHON+'/examples/regress'
+		
+    if os.path.isdir(pf_dir):
         pf_files=glob(pf_dir+'/*pf')
     elif os.path('%s/%s' % (PYTHON,pf_dir)):
         pf_files=glob('%s/%s' % (PYTHON,pf_dir))
     else:
         print('Error: The pf directory %s does not appear to exist' % pf_dir)
         return
-
+		
     # screen out the .out.pf files because we may be running this on a directory
     # in which python has already been done
 
@@ -231,8 +246,8 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
         else:
             command='mpirun -np %d %s %s >%s.stdout.txt' % (np,version,pf,root_name)
         commands.append(command)
-
         root_names.append(root_name)
+    			
 
     print('The commands that will be executed will be:')
     for one in commands:
@@ -245,7 +260,40 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
     proc=subprocess.Popen('Setup_Py_Dir',shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 
     f=open(outputfile,'w')
+    f.close()
 
+
+    run_cmds(commands,root_names,outputfile)
+
+    # Special tests (those which cannot be run as above should be
+    # placed here.  The special tests should generally be self
+    # contained, that is to say one_liners here.
+	
+    #  Run a special test on hydro
+
+    # htest=0
+    # if os.path.exists(pf_dir+'/hydro'):
+    #     print("Hydro directory exists")
+    #     hydro_dir=pf_dir+'/hydro'
+    #     hydro_files=glob(hydro_dir+'/*')
+		
+    #     htest=1
+		
+    # if htest:
+    #     for one in hydro_files:
+    #         shutil.copy(one,'../'+out_dir)
+    #     py_hydro(version,outputfile)
+
+    py_hydro(version,pf_dir,outputfile)
+
+
+    # Return to the place where the code was made from
+    os.chdir(cwd)
+    return
+	
+def run_cmds(commands,root_names,outputfile):
+    f=open(outputfile,'a')
+    
     i=0
     while i<len(commands):
         one=commands[i]
@@ -276,17 +324,91 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
         f.write('%s\n\n'% string)
         f.flush()
         i+=1
-
-
     f.close()
-    # Return to the place where the code was made from
-    os.chdir(cwd)
+		
+    return
+	
+	
+	
+def py_hydro(version,pf_dir,outputfile):
+	
+    '''
+    This is a self contained script to perform specialised tests of
+    the py_hydro models. We need to run on one processor, otherwise
+    the test of the heatcool wont work - but its quick!
+
+    Notes:
+
+    This routine is run from within the current working directory,
+    which is the directory created earlier be doit
 
 
+    History
 
+    1801  nsh
+    1802  ksl Modified this routine so that it is more standalone
+              than previously.  Special regression tests need to
+              be isolated from the internal logic of doit so they
+              can be added/removed easily.
+    '''
+
+    out_dir=os.getcwd()
+
+    htest=0
+    hydro_dir=pf_dir+'/hydro'
+    if os.path.exists(hydro_dir):
+        print("\nHydro directory exists")
+        hydro_files=glob(hydro_dir+'/*')
+        htest=1
+    else:
+        print('The Hydro directory %s doues not appear to exist' % hydro_dir)
+        return
+		
+    if htest:
+        for one in hydro_files:
+            shutil.copy(one,out_dir)
+
+    root_name=['py_hydro']
+    hydro_command=['%s -z %s  >%s.stdout.txt' % (version,root_name[0]+'.pf',root_name[0])]
+    run_cmds(hydro_command,root_name,outputfile)
+	
+    cmd='cp py_hydro.wind_save py_hydro_restart.wind_save'
+    subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+	
+    cmd='diff py_heatcool.dat model_heatcool.dat'
+    proc=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    stdout,stderr=proc.communicate()
+	
+    if len(stdout):
+        string="py_heatcool.dat has changed from model - important to investigate"
+    else:
+        string="py_heatcool.dat is unchanged - test passed"
+    print(string)
+    f1=open('Summary.txt','a')
+    f1.write('%s\n'% string)
+    f1.close()
+	
+		
+    root_name=['py_hydro_restart']
+    hydro_command=['%s -z -r %s  >%s.stdout.txt' % (version,root_name[0]+'.pf',root_name[0])]
+    run_cmds(hydro_command,root_name,outputfile)
+	
+    cmd='diff py_heatcool.dat model_restart_heatcool.dat'
+    proc=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    stdout,stderr=proc.communicate()
+	
+    if len(stdout):
+        string="restart py_heatcool.dat has changed from model - important to investigate"
+    else:
+        string="restart py_heatcool.dat is unchanged - test passed"
+    print(string)
+    f1=open('Summary.txt','a')
+    f1.write('%s\n'% string)
+    f1.close()
 
 
     return
+
 
 
 def steer(argv):

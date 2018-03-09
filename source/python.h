@@ -385,7 +385,7 @@ struct geometry
                                    one that has been read in and stored. */
   double disk_mdot;             /* mdot of  DISK */
   double diskrad, diskrad_sq;
-  double disk_z0, disk_z1;      /* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 */
+  double disk_z0, disk_z1;      /* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 *diskrad */
   double lum_disk_init, lum_disk_back;  /* The intrinsic luminosity of the disk, the back scattered luminosity */
   int run_type;                 /*1508 - New variable that describes whether this is a continuation of a previous run 
                                    Added in order to separate the question of whether we are continuing an old run fro

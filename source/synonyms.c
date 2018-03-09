@@ -1,53 +1,70 @@
 
+/***********************************************************/
+/** @file  synonyms.c
+ * @Author ksl
+ * @date   January, 2018
+ *
+ * @brief  Translate the keywords used in previous versions of Python to the current keywords
+ *
+ * The input variable used in Python have evolved over time.  The routine provided hre
+ * is intened to make it possible to associte a new keyword with one that was used in 
+ * an earlier version of Python.  As long as the keyword has simply been renamed then one 
+ * can use a synomym to allow one to extact information from the old parameter file and translate
+ * it so, one can use an old parmeter file with a new version of Python.  
+ *
+ * It is important to note that this process cannot continue indefinitely because , one may want
+ * to change keyword/parameters so that they are not simple rplacements.
+ ***********************************************************/
 
 
-/**************************************************************************
-                    Space Telescope Science Institute
 
-
-  Synopsis:  
-
-  This is a routine which is intended to help with program updates that
-  change the name of a keyword in a parameter file.  It is called from
-  rdpar.string_process_from_file
-
-  Description:	
-
-  The routine simply matches the string in new_question to a string in
-  the array new_names, below.  If it finds a match, the old_name is 
-  returned in old_question.
-
-
-
-  Arguments:  	
-
-
-  Returns:
-
-  	0 if there was no match
-	1 if there was a match of a name in the parameter file to
-	  one of the new_names, and in old_question the name of
-	  the old_value
-
-  Notes:
-
-  To add another variable to the list, just record the new_name and the
-  old_name in the arrays below, and increase the number of names by 1
-
-  Do not include the material that is in paren, that is for
-
-  xxx(many_choices) -->  xxxx
-
-  The routine is completely hardwired as wrtten though clearly this 
-  could be changed.
-  	
-
-
-  History:
-	16sept	ksl	Coded as part of an effort to make python more 
-			robust to changes in parameter file names
-
- ************************************************************************/
+//OLD /**************************************************************************
+//OLD                     Space Telescope Science Institute
+//OLD 
+//OLD 
+//OLD   Synopsis:  
+//OLD 
+//OLD   This is a routine which is intended to help with program updates that
+//OLD   change the name of a keyword in a parameter file.  It is called from
+//OLD   rdpar.string_process_from_file
+//OLD 
+//OLD   Description:	
+//OLD 
+//OLD   The routine simply matches the string in new_question to a string in
+//OLD   the array new_names, below.  If it finds a match, the old_name is 
+//OLD   returned in old_question.
+//OLD 
+//OLD 
+//OLD 
+//OLD   Arguments:  	
+//OLD 
+//OLD 
+//OLD   Returns:
+//OLD 
+//OLD   	0 if there was no match
+//OLD 	1 if there was a match of a name in the parameter file to
+//OLD 	  one of the new_names, and in old_question the name of
+//OLD 	  the old_value
+//OLD 
+//OLD   Notes:
+//OLD 
+//OLD   To add another variable to the list, just record the new_name and the
+//OLD   old_name in the arrays below, and increase the number of names by 1
+//OLD 
+//OLD   Do not include the material that is in paren, that is for
+//OLD 
+//OLD   xxx(many_choices) -->  xxxx
+//OLD 
+//OLD   The routine is completely hardwired as wrtten though clearly this 
+//OLD   could be changed.
+//OLD   	
+//OLD 
+//OLD 
+//OLD   History:
+//OLD 	16sept	ksl	Coded as part of an effort to make python more 
+//OLD 			robust to changes in parameter file names
+//OLD 
+//OLD  ************************************************************************/
 
 #include <stdio.h>
 #include <strings.h>
@@ -58,11 +75,6 @@
 
 
 #define	LINELEN 132
-
-/* Note that there can be multiple old names that are the same due
- * to some old input formats that were not syntaciticaly perfect
- * See #319
- */
 
 
 char *old_names[] =
@@ -132,6 +144,43 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
 int number_of_names = 79;
 
 #define MIN(a,b) ((a)<b ? a:b)
+
+
+/**********************************************************/
+/** @name      check_synonyms
+ * @brief      This is a routine which is intended to help with program updates that
+ *   change the name of a keyword in a parameter file.  It is called from
+ *   rdpar.string_process_from_file
+ *
+ * @param [in] char  new_question[]   The currnt keyword
+ * @param [out] char  old_question[]   The keyword in an earlier version of Python
+ * @return     0 if there was no match;
+ * 	1 if there was a match of a name in the parameter file to
+ * 	  one of the new_names, and in old_question the name of
+ * 	  the old_value
+ *
+ * The routine simply matches the string in new_question to a string in
+ *   the array new_names, below.  If it finds a match, the old_name is 
+ *   returned in old_question.
+ *
+ * @notes
+ *
+ * To add another variable to the list, just record the new_name and the
+ *   old_name in the arrays below, and increase the number of names by 1
+ * 
+ *   Do not include the material that is in paren, that is for
+ * 
+ *   xxx(many_choices) -->  xxxx
+ * 
+ *   The routine is completely hardwired as wrtten though clearly this 
+ *   could be changed, so that information was read from a file.
+ *
+ * Note that there can be multiple old names that are the same due
+ * to some old input formats that were not syntaciticaly perfect
+ * See #319
+
+ *
+ **********************************************************/
 
 int
 check_synonyms (new_question, old_question)

@@ -51,7 +51,7 @@ Arguments:</tt></p>
 <a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
 <a href="py_read_output.html">py_read_output</a><br>
 <a href="numpy.core.records.html">numpy.core.records</a><br>
-</td><td width="25%" valign=top><a href="matplotlib.externals.six.html">matplotlib.externals.six</a><br>
+</td><td width="25%" valign=top><a href="six.html">six</a><br>
 <a href="matplotlib.style.html">matplotlib.style</a><br>
 <a href="sys.html">sys</a><br>
 <a href="time.html">time</a><br>
@@ -148,35 +148,43 @@ Examples<br>
 <a href="#-array">array</a>([3,&nbsp;4,&nbsp;5,&nbsp;6])<br>
 &gt;&gt;&gt;&nbsp;np.<a href="#-arange">arange</a>(3,7,2)<br>
 <a href="#-array">array</a>([3,&nbsp;5])</tt></dd></dl>
- <dl><dt><a name="-array"><strong>array</strong></a>(...)</dt><dd><tt><a href="#-array">array</a>(object,&nbsp;dtype=None,&nbsp;copy=True,&nbsp;order=None,&nbsp;subok=False,&nbsp;ndmin=0)<br>
+ <dl><dt><a name="-array"><strong>array</strong></a>(...)</dt><dd><tt><a href="#-array">array</a>(object,&nbsp;dtype=None,&nbsp;copy=True,&nbsp;order='K',&nbsp;subok=False,&nbsp;ndmin=0)<br>
 &nbsp;<br>
 Create&nbsp;an&nbsp;array.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
 object&nbsp;:&nbsp;array_like<br>
-&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array,&nbsp;any&nbsp;object&nbsp;exposing&nbsp;the&nbsp;array&nbsp;interface,&nbsp;an<br>
-&nbsp;&nbsp;&nbsp;&nbsp;object&nbsp;whose&nbsp;__array__&nbsp;method&nbsp;returns&nbsp;an&nbsp;array,&nbsp;or&nbsp;any<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(nested)&nbsp;sequence.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array,&nbsp;any&nbsp;object&nbsp;exposing&nbsp;the&nbsp;array&nbsp;interface,&nbsp;an&nbsp;object&nbsp;whose<br>
+&nbsp;&nbsp;&nbsp;&nbsp;__array__&nbsp;method&nbsp;returns&nbsp;an&nbsp;array,&nbsp;or&nbsp;any&nbsp;(nested)&nbsp;sequence.<br>
 dtype&nbsp;:&nbsp;data-type,&nbsp;optional<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;desired&nbsp;data-type&nbsp;for&nbsp;the&nbsp;array.&nbsp;&nbsp;If&nbsp;not&nbsp;given,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;type&nbsp;will&nbsp;be&nbsp;determined&nbsp;as&nbsp;the&nbsp;minimum&nbsp;type&nbsp;required<br>
-&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;hold&nbsp;the&nbsp;objects&nbsp;in&nbsp;the&nbsp;sequence.&nbsp;&nbsp;This&nbsp;argument&nbsp;can&nbsp;only<br>
-&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;used&nbsp;to&nbsp;'upcast'&nbsp;the&nbsp;array.&nbsp;&nbsp;For&nbsp;downcasting,&nbsp;use&nbsp;the<br>
-&nbsp;&nbsp;&nbsp;&nbsp;.astype(t)&nbsp;method.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;desired&nbsp;data-type&nbsp;for&nbsp;the&nbsp;array.&nbsp;&nbsp;If&nbsp;not&nbsp;given,&nbsp;then&nbsp;the&nbsp;type&nbsp;will<br>
+&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;determined&nbsp;as&nbsp;the&nbsp;minimum&nbsp;type&nbsp;required&nbsp;to&nbsp;hold&nbsp;the&nbsp;objects&nbsp;in&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sequence.&nbsp;&nbsp;This&nbsp;argument&nbsp;can&nbsp;only&nbsp;be&nbsp;used&nbsp;to&nbsp;'upcast'&nbsp;the&nbsp;array.&nbsp;&nbsp;For<br>
+&nbsp;&nbsp;&nbsp;&nbsp;downcasting,&nbsp;use&nbsp;the&nbsp;.astype(t)&nbsp;method.<br>
 copy&nbsp;:&nbsp;bool,&nbsp;optional<br>
-&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;true&nbsp;(default),&nbsp;then&nbsp;the&nbsp;object&nbsp;is&nbsp;copied.&nbsp;&nbsp;Otherwise,&nbsp;a&nbsp;copy<br>
-&nbsp;&nbsp;&nbsp;&nbsp;will&nbsp;only&nbsp;be&nbsp;made&nbsp;if&nbsp;__array__&nbsp;returns&nbsp;a&nbsp;copy,&nbsp;if&nbsp;obj&nbsp;is&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;nested&nbsp;sequence,&nbsp;or&nbsp;if&nbsp;a&nbsp;copy&nbsp;is&nbsp;needed&nbsp;to&nbsp;satisfy&nbsp;any&nbsp;of&nbsp;the&nbsp;other<br>
-&nbsp;&nbsp;&nbsp;&nbsp;requirements&nbsp;(`dtype`,&nbsp;`order`,&nbsp;etc.).<br>
-order&nbsp;:&nbsp;{'C',&nbsp;'F',&nbsp;'A'},&nbsp;optional<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Specify&nbsp;the&nbsp;order&nbsp;of&nbsp;the&nbsp;array.&nbsp;&nbsp;If&nbsp;order&nbsp;is&nbsp;'C',&nbsp;then&nbsp;the&nbsp;array<br>
-&nbsp;&nbsp;&nbsp;&nbsp;will&nbsp;be&nbsp;in&nbsp;C-contiguous&nbsp;order&nbsp;(last-index&nbsp;varies&nbsp;the&nbsp;fastest).<br>
-&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;order&nbsp;is&nbsp;'F',&nbsp;then&nbsp;the&nbsp;returned&nbsp;array&nbsp;will&nbsp;be&nbsp;in<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Fortran-contiguous&nbsp;order&nbsp;(first-index&nbsp;varies&nbsp;the&nbsp;fastest).<br>
-&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;order&nbsp;is&nbsp;'A'&nbsp;(default),&nbsp;then&nbsp;the&nbsp;returned&nbsp;array&nbsp;may&nbsp;be<br>
-&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;any&nbsp;order&nbsp;(either&nbsp;C-,&nbsp;Fortran-contiguous,&nbsp;or&nbsp;even&nbsp;discontiguous),<br>
-&nbsp;&nbsp;&nbsp;&nbsp;unless&nbsp;a&nbsp;copy&nbsp;is&nbsp;required,&nbsp;in&nbsp;which&nbsp;case&nbsp;it&nbsp;will&nbsp;be&nbsp;C-contiguous.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;true&nbsp;(default),&nbsp;then&nbsp;the&nbsp;object&nbsp;is&nbsp;copied.&nbsp;&nbsp;Otherwise,&nbsp;a&nbsp;copy&nbsp;will<br>
+&nbsp;&nbsp;&nbsp;&nbsp;only&nbsp;be&nbsp;made&nbsp;if&nbsp;__array__&nbsp;returns&nbsp;a&nbsp;copy,&nbsp;if&nbsp;obj&nbsp;is&nbsp;a&nbsp;nested&nbsp;sequence,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;or&nbsp;if&nbsp;a&nbsp;copy&nbsp;is&nbsp;needed&nbsp;to&nbsp;satisfy&nbsp;any&nbsp;of&nbsp;the&nbsp;other&nbsp;requirements<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(`dtype`,&nbsp;`order`,&nbsp;etc.).<br>
+order&nbsp;:&nbsp;{'K',&nbsp;'A',&nbsp;'C',&nbsp;'F'},&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Specify&nbsp;the&nbsp;memory&nbsp;layout&nbsp;of&nbsp;the&nbsp;array.&nbsp;If&nbsp;object&nbsp;is&nbsp;not&nbsp;an&nbsp;array,&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;newly&nbsp;created&nbsp;array&nbsp;will&nbsp;be&nbsp;in&nbsp;C&nbsp;order&nbsp;(row&nbsp;major)&nbsp;unless&nbsp;'F'&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;specified,&nbsp;in&nbsp;which&nbsp;case&nbsp;it&nbsp;will&nbsp;be&nbsp;in&nbsp;Fortran&nbsp;order&nbsp;(column&nbsp;major).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;object&nbsp;is&nbsp;an&nbsp;array&nbsp;the&nbsp;following&nbsp;holds.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=====&nbsp;=========&nbsp;===================================================<br>
+&nbsp;&nbsp;&nbsp;&nbsp;order&nbsp;&nbsp;no&nbsp;copy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;copy=True<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=====&nbsp;=========&nbsp;===================================================<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'K'&nbsp;&nbsp;&nbsp;unchanged&nbsp;F&nbsp;&amp;&nbsp;C&nbsp;order&nbsp;preserved,&nbsp;otherwise&nbsp;most&nbsp;similar&nbsp;order<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'A'&nbsp;&nbsp;&nbsp;unchanged&nbsp;F&nbsp;order&nbsp;if&nbsp;input&nbsp;is&nbsp;F&nbsp;and&nbsp;not&nbsp;C,&nbsp;otherwise&nbsp;C&nbsp;order<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'C'&nbsp;&nbsp;&nbsp;C&nbsp;order&nbsp;&nbsp;&nbsp;C&nbsp;order<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'F'&nbsp;&nbsp;&nbsp;F&nbsp;order&nbsp;&nbsp;&nbsp;F&nbsp;order<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=====&nbsp;=========&nbsp;===================================================<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;When&nbsp;``copy=False``&nbsp;and&nbsp;a&nbsp;copy&nbsp;is&nbsp;made&nbsp;for&nbsp;other&nbsp;reasons,&nbsp;the&nbsp;result&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;same&nbsp;as&nbsp;if&nbsp;``copy=True``,&nbsp;with&nbsp;some&nbsp;exceptions&nbsp;for&nbsp;`A`,&nbsp;see&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Notes&nbsp;section.&nbsp;The&nbsp;default&nbsp;order&nbsp;is&nbsp;'K'.<br>
 subok&nbsp;:&nbsp;bool,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;True,&nbsp;then&nbsp;sub-classes&nbsp;will&nbsp;be&nbsp;passed-through,&nbsp;otherwise<br>
 &nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;returned&nbsp;array&nbsp;will&nbsp;be&nbsp;forced&nbsp;to&nbsp;be&nbsp;a&nbsp;base-class&nbsp;array&nbsp;(default).<br>
@@ -192,7 +200,13 @@ out&nbsp;:&nbsp;ndarray<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
-empty,&nbsp;empty_like,&nbsp;zeros,&nbsp;zeros_like,&nbsp;ones,&nbsp;ones_like,&nbsp;fill<br>
+empty,&nbsp;empty_like,&nbsp;zeros,&nbsp;zeros_like,&nbsp;ones,&nbsp;ones_like,&nbsp;full,&nbsp;full_like<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+When&nbsp;order&nbsp;is&nbsp;'A'&nbsp;and&nbsp;`object`&nbsp;is&nbsp;an&nbsp;array&nbsp;in&nbsp;neither&nbsp;'C'&nbsp;nor&nbsp;'F'&nbsp;order,<br>
+and&nbsp;a&nbsp;copy&nbsp;is&nbsp;forced&nbsp;by&nbsp;a&nbsp;change&nbsp;in&nbsp;dtype,&nbsp;then&nbsp;the&nbsp;order&nbsp;of&nbsp;the&nbsp;result&nbsp;is<br>
+not&nbsp;necessarily&nbsp;'C'&nbsp;as&nbsp;expected.&nbsp;This&nbsp;is&nbsp;likely&nbsp;a&nbsp;bug.<br>
 &nbsp;<br>
 Examples<br>
 --------<br>
@@ -255,21 +269,21 @@ It&nbsp;is&nbsp;often&nbsp;seen&nbsp;in&nbsp;Bayesian&nbsp;inference&nbsp;and&nb
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-a&nbsp;:&nbsp;float<br>
+a&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Alpha,&nbsp;non-negative.<br>
-b&nbsp;:&nbsp;float<br>
+b&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Beta,&nbsp;non-negative.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``a``&nbsp;and&nbsp;``b``&nbsp;are&nbsp;both&nbsp;scalars.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(a,&nbsp;b).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-out&nbsp;:&nbsp;ndarray<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Array&nbsp;of&nbsp;the&nbsp;given&nbsp;shape,&nbsp;containing&nbsp;values&nbsp;drawn&nbsp;from&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Beta&nbsp;distribution.</tt></dd></dl>
- <dl><dt><a name="-bincount"><strong>bincount</strong></a>(...)</dt><dd><tt><a href="#-bincount">bincount</a>(x,&nbsp;weights=None,&nbsp;minlength=None)<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;beta&nbsp;distribution.</tt></dd></dl>
+ <dl><dt><a name="-bincount"><strong>bincount</strong></a>(...)</dt><dd><tt><a href="#-bincount">bincount</a>(x,&nbsp;weights=None,&nbsp;minlength=0)<br>
 &nbsp;<br>
 Count&nbsp;number&nbsp;of&nbsp;occurrences&nbsp;of&nbsp;each&nbsp;value&nbsp;in&nbsp;array&nbsp;of&nbsp;non-negative&nbsp;ints.<br>
 &nbsp;<br>
@@ -303,7 +317,7 @@ Raises<br>
 ------<br>
 ValueError<br>
 &nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;the&nbsp;input&nbsp;is&nbsp;not&nbsp;1-dimensional,&nbsp;or&nbsp;contains&nbsp;elements&nbsp;with&nbsp;negative<br>
-&nbsp;&nbsp;&nbsp;&nbsp;values,&nbsp;or&nbsp;if&nbsp;`minlength`&nbsp;is&nbsp;non-positive.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;values,&nbsp;or&nbsp;if&nbsp;`minlength`&nbsp;is&nbsp;negative.<br>
 TypeError<br>
 &nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;the&nbsp;type&nbsp;of&nbsp;the&nbsp;input&nbsp;is&nbsp;float&nbsp;or&nbsp;complex.<br>
 &nbsp;<br>
@@ -348,24 +362,27 @@ input&nbsp;as&nbsp;a&nbsp;float,&nbsp;but&nbsp;it&nbsp;is&nbsp;truncated&nbsp;to
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-n&nbsp;:&nbsp;float&nbsp;(but&nbsp;truncated&nbsp;to&nbsp;an&nbsp;integer)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parameter,&nbsp;&gt;=&nbsp;0.<br>
-p&nbsp;:&nbsp;float<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parameter,&nbsp;&gt;=&nbsp;0&nbsp;and&nbsp;&lt;=1.<br>
+n&nbsp;:&nbsp;int&nbsp;or&nbsp;array_like&nbsp;of&nbsp;ints<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Parameter&nbsp;of&nbsp;the&nbsp;distribution,&nbsp;&gt;=&nbsp;0.&nbsp;Floats&nbsp;are&nbsp;also&nbsp;accepted,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;but&nbsp;they&nbsp;will&nbsp;be&nbsp;truncated&nbsp;to&nbsp;integers.<br>
+p&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Parameter&nbsp;of&nbsp;the&nbsp;distribution,&nbsp;&gt;=&nbsp;0&nbsp;and&nbsp;&lt;=1.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``n``&nbsp;and&nbsp;``p``&nbsp;are&nbsp;both&nbsp;scalars.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(n,&nbsp;p).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;the&nbsp;values&nbsp;are&nbsp;all&nbsp;integers&nbsp;in&nbsp;&nbsp;[0,&nbsp;n].<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;binomial&nbsp;distribution,&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;each&nbsp;sample&nbsp;is&nbsp;equal&nbsp;to&nbsp;the&nbsp;number&nbsp;of&nbsp;successes&nbsp;over&nbsp;the&nbsp;n&nbsp;trials.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
-scipy.stats.distributions.binom&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;distribution&nbsp;or&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
+scipy.stats.binom&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,&nbsp;distribution&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -395,7 +412,7 @@ References<br>
 ..&nbsp;[4]&nbsp;Weisstein,&nbsp;Eric&nbsp;W.&nbsp;"Binomial&nbsp;Distribution."&nbsp;From&nbsp;MathWorld--A<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Wolfram&nbsp;Web&nbsp;Resource.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://mathworld.wolfram.com/BinomialDistribution.html">http://mathworld.wolfram.com/BinomialDistribution.html</a><br>
-..&nbsp;[5]&nbsp;Wikipedia,&nbsp;"Binomial-distribution",<br>
+..&nbsp;[5]&nbsp;Wikipedia,&nbsp;"Binomial&nbsp;distribution",<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://en.wikipedia.org/wiki/Binomial_distribution">http://en.wikipedia.org/wiki/Binomial_distribution</a><br>
 &nbsp;<br>
 Examples<br>
@@ -675,18 +692,18 @@ is&nbsp;often&nbsp;used&nbsp;in&nbsp;hypothesis&nbsp;testing.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-df&nbsp;:&nbsp;int<br>
+df&nbsp;:&nbsp;int&nbsp;or&nbsp;array_like&nbsp;of&nbsp;ints<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;degrees&nbsp;of&nbsp;freedom.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``df``&nbsp;is&nbsp;a&nbsp;scalar.&nbsp;&nbsp;Otherwise,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``np.<a href="#-array">array</a>(df).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-output&nbsp;:&nbsp;ndarray<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Samples&nbsp;drawn&nbsp;from&nbsp;the&nbsp;distribution,&nbsp;packed&nbsp;in&nbsp;a&nbsp;`size`-shaped<br>
-&nbsp;&nbsp;&nbsp;&nbsp;array.<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;chi-square&nbsp;distribution.<br>
 &nbsp;<br>
 Raises<br>
 ------<br>
@@ -733,7 +750,7 @@ Parameters<br>
 -----------<br>
 a&nbsp;:&nbsp;1-D&nbsp;array-like&nbsp;or&nbsp;int<br>
 &nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;an&nbsp;ndarray,&nbsp;a&nbsp;random&nbsp;sample&nbsp;is&nbsp;generated&nbsp;from&nbsp;its&nbsp;elements.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;an&nbsp;int,&nbsp;the&nbsp;random&nbsp;sample&nbsp;is&nbsp;generated&nbsp;as&nbsp;if&nbsp;a&nbsp;was&nbsp;np.<a href="#-arange">arange</a>(n)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;an&nbsp;int,&nbsp;the&nbsp;random&nbsp;sample&nbsp;is&nbsp;generated&nbsp;as&nbsp;if&nbsp;a&nbsp;were&nbsp;np.<a href="#-arange">arange</a>(a)<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
 &nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
@@ -747,7 +764,7 @@ p&nbsp;:&nbsp;1-D&nbsp;array-like,&nbsp;optional<br>
 &nbsp;<br>
 Returns<br>
 --------<br>
-samples&nbsp;:&nbsp;1-D&nbsp;ndarray,&nbsp;shape&nbsp;(size,)<br>
+samples&nbsp;:&nbsp;single&nbsp;item&nbsp;or&nbsp;ndarray<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;generated&nbsp;random&nbsp;samples<br>
 &nbsp;<br>
 Raises<br>
@@ -895,30 +912,6 @@ where&nbsp;:&nbsp;array_like&nbsp;of&nbsp;bool,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;boolean&nbsp;array&nbsp;which&nbsp;is&nbsp;broadcasted&nbsp;to&nbsp;match&nbsp;the&nbsp;dimensions<br>
 &nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;`dst`,&nbsp;and&nbsp;selects&nbsp;elements&nbsp;to&nbsp;copy&nbsp;from&nbsp;`src`&nbsp;to&nbsp;`dst`<br>
 &nbsp;&nbsp;&nbsp;&nbsp;wherever&nbsp;it&nbsp;contains&nbsp;the&nbsp;value&nbsp;True.</tt></dd></dl>
- <dl><dt><a name="-count_nonzero"><strong>count_nonzero</strong></a>(...)</dt><dd><tt><a href="#-count_nonzero">count_nonzero</a>(a)<br>
-&nbsp;<br>
-Counts&nbsp;the&nbsp;number&nbsp;of&nbsp;non-zero&nbsp;values&nbsp;in&nbsp;the&nbsp;array&nbsp;``a``.<br>
-&nbsp;<br>
-Parameters<br>
-----------<br>
-a&nbsp;:&nbsp;array_like<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;for&nbsp;which&nbsp;to&nbsp;count&nbsp;non-zeros.<br>
-&nbsp;<br>
-Returns<br>
--------<br>
-count&nbsp;:&nbsp;int&nbsp;or&nbsp;array&nbsp;of&nbsp;int<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;non-zero&nbsp;values&nbsp;in&nbsp;the&nbsp;array.<br>
-&nbsp;<br>
-See&nbsp;Also<br>
---------<br>
-nonzero&nbsp;:&nbsp;Return&nbsp;the&nbsp;coordinates&nbsp;of&nbsp;all&nbsp;the&nbsp;non-zero&nbsp;values.<br>
-&nbsp;<br>
-Examples<br>
---------<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-count_nonzero">count_nonzero</a>(np.eye(4))<br>
-4<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-count_nonzero">count_nonzero</a>([[0,1,7,0,0],[3,0,0,2,19]])<br>
-5</tt></dd></dl>
  <dl><dt><a name="-datetime_as_string"><strong>datetime_as_string</strong></a>(...)</dt></dl>
  <dl><dt><a name="-datetime_data"><strong>datetime_data</strong></a>(...)</dt></dl>
  <dl><dt><a name="-digitize"><strong>digitize</strong></a>(...)</dt><dd><tt><a href="#-digitize">digitize</a>(x,&nbsp;bins,&nbsp;right=False)<br>
@@ -930,13 +923,13 @@ Each&nbsp;index&nbsp;``i``&nbsp;returned&nbsp;is&nbsp;such&nbsp;that&nbsp;``bins
 `bins`&nbsp;is&nbsp;monotonically&nbsp;decreasing.&nbsp;If&nbsp;values&nbsp;in&nbsp;`x`&nbsp;are&nbsp;beyond&nbsp;the<br>
 bounds&nbsp;of&nbsp;`bins`,&nbsp;0&nbsp;or&nbsp;``len(bins)``&nbsp;is&nbsp;returned&nbsp;as&nbsp;appropriate.&nbsp;If&nbsp;right<br>
 is&nbsp;True,&nbsp;then&nbsp;the&nbsp;right&nbsp;bin&nbsp;is&nbsp;closed&nbsp;so&nbsp;that&nbsp;the&nbsp;index&nbsp;``i``&nbsp;is&nbsp;such<br>
-that&nbsp;``bins[i-1]&nbsp;&lt;&nbsp;x&nbsp;&lt;=&nbsp;bins[i]``&nbsp;or&nbsp;bins[i-1]&nbsp;&gt;=&nbsp;x&nbsp;&gt;&nbsp;bins[i]``&nbsp;if&nbsp;`bins`<br>
+that&nbsp;``bins[i-1]&nbsp;&lt;&nbsp;x&nbsp;&lt;=&nbsp;bins[i]``&nbsp;or&nbsp;``bins[i-1]&nbsp;&gt;=&nbsp;x&nbsp;&gt;&nbsp;bins[i]``&nbsp;if&nbsp;`bins`<br>
 is&nbsp;monotonically&nbsp;increasing&nbsp;or&nbsp;decreasing,&nbsp;respectively.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
 x&nbsp;:&nbsp;array_like<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;array&nbsp;to&nbsp;be&nbsp;binned.&nbsp;Prior&nbsp;to&nbsp;Numpy&nbsp;1.10.0,&nbsp;this&nbsp;array&nbsp;had&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;array&nbsp;to&nbsp;be&nbsp;binned.&nbsp;Prior&nbsp;to&nbsp;NumPy&nbsp;1.10.0,&nbsp;this&nbsp;array&nbsp;had&nbsp;to<br>
 &nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;1-dimensional,&nbsp;but&nbsp;can&nbsp;now&nbsp;have&nbsp;any&nbsp;shape.<br>
 bins&nbsp;:&nbsp;array_like<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Array&nbsp;of&nbsp;bins.&nbsp;It&nbsp;has&nbsp;to&nbsp;be&nbsp;1-dimensional&nbsp;and&nbsp;monotonic.<br>
@@ -961,7 +954,7 @@ TypeError<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
-bincount,&nbsp;histogram,&nbsp;unique<br>
+bincount,&nbsp;histogram,&nbsp;unique,&nbsp;searchsorted<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -1123,221 +1116,6 @@ For&nbsp;2-D&nbsp;arrays&nbsp;it&nbsp;is&nbsp;the&nbsp;matrix&nbsp;product:<br>
 499128<br>
 &gt;&gt;&gt;&nbsp;sum(a[2,3,2,:]&nbsp;*&nbsp;b[1,2,:,2])<br>
 499128</tt></dd></dl>
- <dl><dt><a name="-einsum"><strong>einsum</strong></a>(...)</dt><dd><tt><a href="#-einsum">einsum</a>(subscripts,&nbsp;*operands,&nbsp;out=None,&nbsp;dtype=None,&nbsp;order='K',&nbsp;casting='safe')<br>
-&nbsp;<br>
-Evaluates&nbsp;the&nbsp;Einstein&nbsp;summation&nbsp;convention&nbsp;on&nbsp;the&nbsp;operands.<br>
-&nbsp;<br>
-Using&nbsp;the&nbsp;Einstein&nbsp;summation&nbsp;convention,&nbsp;many&nbsp;common&nbsp;multi-dimensional<br>
-array&nbsp;operations&nbsp;can&nbsp;be&nbsp;represented&nbsp;in&nbsp;a&nbsp;simple&nbsp;fashion.&nbsp;&nbsp;This&nbsp;function<br>
-provides&nbsp;a&nbsp;way&nbsp;to&nbsp;compute&nbsp;such&nbsp;summations.&nbsp;The&nbsp;best&nbsp;way&nbsp;to&nbsp;understand&nbsp;this<br>
-function&nbsp;is&nbsp;to&nbsp;try&nbsp;the&nbsp;examples&nbsp;below,&nbsp;which&nbsp;show&nbsp;how&nbsp;many&nbsp;common&nbsp;NumPy<br>
-functions&nbsp;can&nbsp;be&nbsp;implemented&nbsp;as&nbsp;calls&nbsp;to&nbsp;`einsum`.<br>
-&nbsp;<br>
-Parameters<br>
-----------<br>
-subscripts&nbsp;:&nbsp;str<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Specifies&nbsp;the&nbsp;subscripts&nbsp;for&nbsp;summation.<br>
-operands&nbsp;:&nbsp;list&nbsp;of&nbsp;array_like<br>
-&nbsp;&nbsp;&nbsp;&nbsp;These&nbsp;are&nbsp;the&nbsp;arrays&nbsp;for&nbsp;the&nbsp;operation.<br>
-out&nbsp;:&nbsp;ndarray,&nbsp;optional<br>
-&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;provided,&nbsp;the&nbsp;calculation&nbsp;is&nbsp;done&nbsp;into&nbsp;this&nbsp;array.<br>
-dtype&nbsp;:&nbsp;data-type,&nbsp;optional<br>
-&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;provided,&nbsp;forces&nbsp;the&nbsp;calculation&nbsp;to&nbsp;use&nbsp;the&nbsp;data&nbsp;type&nbsp;specified.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Note&nbsp;that&nbsp;you&nbsp;may&nbsp;have&nbsp;to&nbsp;also&nbsp;give&nbsp;a&nbsp;more&nbsp;liberal&nbsp;`casting`<br>
-&nbsp;&nbsp;&nbsp;&nbsp;parameter&nbsp;to&nbsp;allow&nbsp;the&nbsp;conversions.<br>
-order&nbsp;:&nbsp;{'C',&nbsp;'F',&nbsp;'A',&nbsp;'K'},&nbsp;optional<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Controls&nbsp;the&nbsp;memory&nbsp;layout&nbsp;of&nbsp;the&nbsp;output.&nbsp;'C'&nbsp;means&nbsp;it&nbsp;should<br>
-&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;C&nbsp;contiguous.&nbsp;'F'&nbsp;means&nbsp;it&nbsp;should&nbsp;be&nbsp;Fortran&nbsp;contiguous,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;'A'&nbsp;means&nbsp;it&nbsp;should&nbsp;be&nbsp;'F'&nbsp;if&nbsp;the&nbsp;inputs&nbsp;are&nbsp;all&nbsp;'F',&nbsp;'C'&nbsp;otherwise.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;'K'&nbsp;means&nbsp;it&nbsp;should&nbsp;be&nbsp;as&nbsp;close&nbsp;to&nbsp;the&nbsp;layout&nbsp;as&nbsp;the&nbsp;inputs&nbsp;as<br>
-&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;possible,&nbsp;including&nbsp;arbitrarily&nbsp;permuted&nbsp;axes.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Default&nbsp;is&nbsp;'K'.<br>
-casting&nbsp;:&nbsp;{'no',&nbsp;'equiv',&nbsp;'safe',&nbsp;'same_kind',&nbsp;'unsafe'},&nbsp;optional<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Controls&nbsp;what&nbsp;kind&nbsp;of&nbsp;data&nbsp;casting&nbsp;may&nbsp;occur.&nbsp;&nbsp;Setting&nbsp;this&nbsp;to<br>
-&nbsp;&nbsp;&nbsp;&nbsp;'unsafe'&nbsp;is&nbsp;not&nbsp;recommended,&nbsp;as&nbsp;it&nbsp;can&nbsp;adversely&nbsp;affect&nbsp;accumulations.<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'no'&nbsp;means&nbsp;the&nbsp;data&nbsp;types&nbsp;should&nbsp;not&nbsp;be&nbsp;cast&nbsp;at&nbsp;all.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'equiv'&nbsp;means&nbsp;only&nbsp;byte-order&nbsp;changes&nbsp;are&nbsp;allowed.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'safe'&nbsp;means&nbsp;only&nbsp;casts&nbsp;which&nbsp;can&nbsp;preserve&nbsp;values&nbsp;are&nbsp;allowed.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'same_kind'&nbsp;means&nbsp;only&nbsp;safe&nbsp;casts&nbsp;or&nbsp;casts&nbsp;within&nbsp;a&nbsp;kind,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;like&nbsp;float64&nbsp;to&nbsp;float32,&nbsp;are&nbsp;allowed.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;'unsafe'&nbsp;means&nbsp;any&nbsp;data&nbsp;conversions&nbsp;may&nbsp;be&nbsp;done.<br>
-&nbsp;<br>
-Returns<br>
--------<br>
-output&nbsp;:&nbsp;ndarray<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;calculation&nbsp;based&nbsp;on&nbsp;the&nbsp;Einstein&nbsp;summation&nbsp;convention.<br>
-&nbsp;<br>
-See&nbsp;Also<br>
---------<br>
-dot,&nbsp;inner,&nbsp;outer,&nbsp;tensordot<br>
-&nbsp;<br>
-Notes<br>
------<br>
-..&nbsp;versionadded::&nbsp;1.6.0<br>
-&nbsp;<br>
-The&nbsp;subscripts&nbsp;string&nbsp;is&nbsp;a&nbsp;comma-separated&nbsp;list&nbsp;of&nbsp;subscript&nbsp;labels,<br>
-where&nbsp;each&nbsp;label&nbsp;refers&nbsp;to&nbsp;a&nbsp;dimension&nbsp;of&nbsp;the&nbsp;corresponding&nbsp;operand.<br>
-Repeated&nbsp;subscripts&nbsp;labels&nbsp;in&nbsp;one&nbsp;operand&nbsp;take&nbsp;the&nbsp;diagonal.&nbsp;&nbsp;For&nbsp;example,<br>
-``np.<a href="#-einsum">einsum</a>('ii',&nbsp;a)``&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;``np.trace(a)``.<br>
-&nbsp;<br>
-Whenever&nbsp;a&nbsp;label&nbsp;is&nbsp;repeated,&nbsp;it&nbsp;is&nbsp;summed,&nbsp;so&nbsp;``np.<a href="#-einsum">einsum</a>('i,i',&nbsp;a,&nbsp;b)``<br>
-is&nbsp;equivalent&nbsp;to&nbsp;``np.<a href="#-inner">inner</a>(a,b)``.&nbsp;&nbsp;If&nbsp;a&nbsp;label&nbsp;appears&nbsp;only&nbsp;once,<br>
-it&nbsp;is&nbsp;not&nbsp;summed,&nbsp;so&nbsp;``np.<a href="#-einsum">einsum</a>('i',&nbsp;a)``&nbsp;produces&nbsp;a&nbsp;view&nbsp;of&nbsp;``a``<br>
-with&nbsp;no&nbsp;changes.<br>
-&nbsp;<br>
-The&nbsp;order&nbsp;of&nbsp;labels&nbsp;in&nbsp;the&nbsp;output&nbsp;is&nbsp;by&nbsp;default&nbsp;alphabetical.&nbsp;&nbsp;This<br>
-means&nbsp;that&nbsp;``np.<a href="#-einsum">einsum</a>('ij',&nbsp;a)``&nbsp;doesn't&nbsp;affect&nbsp;a&nbsp;2D&nbsp;array,&nbsp;while<br>
-``np.<a href="#-einsum">einsum</a>('ji',&nbsp;a)``&nbsp;takes&nbsp;its&nbsp;transpose.<br>
-&nbsp;<br>
-The&nbsp;output&nbsp;can&nbsp;be&nbsp;controlled&nbsp;by&nbsp;specifying&nbsp;output&nbsp;subscript&nbsp;labels<br>
-as&nbsp;well.&nbsp;&nbsp;This&nbsp;specifies&nbsp;the&nbsp;label&nbsp;order,&nbsp;and&nbsp;allows&nbsp;summing&nbsp;to<br>
-be&nbsp;disallowed&nbsp;or&nbsp;forced&nbsp;when&nbsp;desired.&nbsp;&nbsp;The&nbsp;call&nbsp;``np.<a href="#-einsum">einsum</a>('i-&gt;',&nbsp;a)``<br>
-is&nbsp;like&nbsp;``np.sum(a,&nbsp;axis=-1)``,&nbsp;and&nbsp;``np.<a href="#-einsum">einsum</a>('ii-&gt;i',&nbsp;a)``<br>
-is&nbsp;like&nbsp;``np.diag(a)``.&nbsp;&nbsp;The&nbsp;difference&nbsp;is&nbsp;that&nbsp;`einsum`&nbsp;does&nbsp;not<br>
-allow&nbsp;broadcasting&nbsp;by&nbsp;default.<br>
-&nbsp;<br>
-To&nbsp;enable&nbsp;and&nbsp;control&nbsp;broadcasting,&nbsp;use&nbsp;an&nbsp;ellipsis.&nbsp;&nbsp;Default<br>
-NumPy-style&nbsp;broadcasting&nbsp;is&nbsp;done&nbsp;by&nbsp;adding&nbsp;an&nbsp;ellipsis<br>
-to&nbsp;the&nbsp;left&nbsp;of&nbsp;each&nbsp;term,&nbsp;like&nbsp;``np.<a href="#-einsum">einsum</a>('...ii-&gt;...i',&nbsp;a)``.<br>
-To&nbsp;take&nbsp;the&nbsp;trace&nbsp;along&nbsp;the&nbsp;first&nbsp;and&nbsp;last&nbsp;axes,<br>
-you&nbsp;can&nbsp;do&nbsp;``np.<a href="#-einsum">einsum</a>('i...i',&nbsp;a)``,&nbsp;or&nbsp;to&nbsp;do&nbsp;a&nbsp;matrix-matrix<br>
-product&nbsp;with&nbsp;the&nbsp;left-most&nbsp;indices&nbsp;instead&nbsp;of&nbsp;rightmost,&nbsp;you&nbsp;can&nbsp;do<br>
-``np.<a href="#-einsum">einsum</a>('ij...,jk...-&gt;ik...',&nbsp;a,&nbsp;b)``.<br>
-&nbsp;<br>
-When&nbsp;there&nbsp;is&nbsp;only&nbsp;one&nbsp;operand,&nbsp;no&nbsp;axes&nbsp;are&nbsp;summed,&nbsp;and&nbsp;no&nbsp;output<br>
-parameter&nbsp;is&nbsp;provided,&nbsp;a&nbsp;view&nbsp;into&nbsp;the&nbsp;operand&nbsp;is&nbsp;returned&nbsp;instead<br>
-of&nbsp;a&nbsp;new&nbsp;array.&nbsp;&nbsp;Thus,&nbsp;taking&nbsp;the&nbsp;diagonal&nbsp;as&nbsp;``np.<a href="#-einsum">einsum</a>('ii-&gt;i',&nbsp;a)``<br>
-produces&nbsp;a&nbsp;view.<br>
-&nbsp;<br>
-An&nbsp;alternative&nbsp;way&nbsp;to&nbsp;provide&nbsp;the&nbsp;subscripts&nbsp;and&nbsp;operands&nbsp;is&nbsp;as<br>
-``<a href="#-einsum">einsum</a>(op0,&nbsp;sublist0,&nbsp;op1,&nbsp;sublist1,&nbsp;...,&nbsp;[sublistout])``.&nbsp;The&nbsp;examples<br>
-below&nbsp;have&nbsp;corresponding&nbsp;`einsum`&nbsp;calls&nbsp;with&nbsp;the&nbsp;two&nbsp;parameter&nbsp;methods.<br>
-&nbsp;<br>
-..&nbsp;versionadded::&nbsp;1.10.0<br>
-&nbsp;<br>
-Views&nbsp;returned&nbsp;from&nbsp;einsum&nbsp;are&nbsp;now&nbsp;writeable&nbsp;whenever&nbsp;the&nbsp;input&nbsp;array<br>
-is&nbsp;writeable.&nbsp;For&nbsp;example,&nbsp;``np.<a href="#-einsum">einsum</a>('ijk...-&gt;kji...',&nbsp;a)``&nbsp;will&nbsp;now<br>
-have&nbsp;the&nbsp;same&nbsp;effect&nbsp;as&nbsp;``np.swapaxes(a,&nbsp;0,&nbsp;2)``&nbsp;and<br>
-``np.<a href="#-einsum">einsum</a>('ii-&gt;i',&nbsp;a)``&nbsp;will&nbsp;return&nbsp;a&nbsp;writeable&nbsp;view&nbsp;of&nbsp;the&nbsp;diagonal<br>
-of&nbsp;a&nbsp;2D&nbsp;array.<br>
-&nbsp;<br>
-Examples<br>
---------<br>
-&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(25).reshape(5,5)<br>
-&gt;&gt;&gt;&nbsp;b&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(5)<br>
-&gt;&gt;&gt;&nbsp;c&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(6).reshape(2,3)<br>
-&nbsp;<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>('ii',&nbsp;a)<br>
-60<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>(a,&nbsp;[0,0])<br>
-60<br>
-&gt;&gt;&gt;&nbsp;np.trace(a)<br>
-60<br>
-&nbsp;<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>('ii-&gt;i',&nbsp;a)<br>
-<a href="#-array">array</a>([&nbsp;0,&nbsp;&nbsp;6,&nbsp;12,&nbsp;18,&nbsp;24])<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>(a,&nbsp;[0,0],&nbsp;[0])<br>
-<a href="#-array">array</a>([&nbsp;0,&nbsp;&nbsp;6,&nbsp;12,&nbsp;18,&nbsp;24])<br>
-&gt;&gt;&gt;&nbsp;np.diag(a)<br>
-<a href="#-array">array</a>([&nbsp;0,&nbsp;&nbsp;6,&nbsp;12,&nbsp;18,&nbsp;24])<br>
-&nbsp;<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>('ij,j',&nbsp;a,&nbsp;b)<br>
-<a href="#-array">array</a>([&nbsp;30,&nbsp;&nbsp;80,&nbsp;130,&nbsp;180,&nbsp;230])<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>(a,&nbsp;[0,1],&nbsp;b,&nbsp;[1])<br>
-<a href="#-array">array</a>([&nbsp;30,&nbsp;&nbsp;80,&nbsp;130,&nbsp;180,&nbsp;230])<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-dot">dot</a>(a,&nbsp;b)<br>
-<a href="#-array">array</a>([&nbsp;30,&nbsp;&nbsp;80,&nbsp;130,&nbsp;180,&nbsp;230])<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>('...j,j',&nbsp;a,&nbsp;b)<br>
-<a href="#-array">array</a>([&nbsp;30,&nbsp;&nbsp;80,&nbsp;130,&nbsp;180,&nbsp;230])<br>
-&nbsp;<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>('ji',&nbsp;c)<br>
-<a href="#-array">array</a>([[0,&nbsp;3],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[1,&nbsp;4],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[2,&nbsp;5]])<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>(c,&nbsp;[1,0])<br>
-<a href="#-array">array</a>([[0,&nbsp;3],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[1,&nbsp;4],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[2,&nbsp;5]])<br>
-&gt;&gt;&gt;&nbsp;c.T<br>
-<a href="#-array">array</a>([[0,&nbsp;3],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[1,&nbsp;4],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[2,&nbsp;5]])<br>
-&nbsp;<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>('...,&nbsp;...',&nbsp;3,&nbsp;c)<br>
-<a href="#-array">array</a>([[&nbsp;0,&nbsp;&nbsp;3,&nbsp;&nbsp;6],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;9,&nbsp;12,&nbsp;15]])<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>(3,&nbsp;[Ellipsis],&nbsp;c,&nbsp;[Ellipsis])<br>
-<a href="#-array">array</a>([[&nbsp;0,&nbsp;&nbsp;3,&nbsp;&nbsp;6],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;9,&nbsp;12,&nbsp;15]])<br>
-&gt;&gt;&gt;&nbsp;np.multiply(3,&nbsp;c)<br>
-<a href="#-array">array</a>([[&nbsp;0,&nbsp;&nbsp;3,&nbsp;&nbsp;6],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;9,&nbsp;12,&nbsp;15]])<br>
-&nbsp;<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>('i,i',&nbsp;b,&nbsp;b)<br>
-30<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>(b,&nbsp;[0],&nbsp;b,&nbsp;[0])<br>
-30<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-inner">inner</a>(b,b)<br>
-30<br>
-&nbsp;<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>('i,j',&nbsp;np.<a href="#-arange">arange</a>(2)+1,&nbsp;b)<br>
-<a href="#-array">array</a>([[0,&nbsp;1,&nbsp;2,&nbsp;3,&nbsp;4],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0,&nbsp;2,&nbsp;4,&nbsp;6,&nbsp;8]])<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>(np.<a href="#-arange">arange</a>(2)+1,&nbsp;[0],&nbsp;b,&nbsp;[1])<br>
-<a href="#-array">array</a>([[0,&nbsp;1,&nbsp;2,&nbsp;3,&nbsp;4],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0,&nbsp;2,&nbsp;4,&nbsp;6,&nbsp;8]])<br>
-&gt;&gt;&gt;&nbsp;np.outer(np.<a href="#-arange">arange</a>(2)+1,&nbsp;b)<br>
-<a href="#-array">array</a>([[0,&nbsp;1,&nbsp;2,&nbsp;3,&nbsp;4],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0,&nbsp;2,&nbsp;4,&nbsp;6,&nbsp;8]])<br>
-&nbsp;<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>('i...-&gt;...',&nbsp;a)<br>
-<a href="#-array">array</a>([50,&nbsp;55,&nbsp;60,&nbsp;65,&nbsp;70])<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>(a,&nbsp;[0,Ellipsis],&nbsp;[Ellipsis])<br>
-<a href="#-array">array</a>([50,&nbsp;55,&nbsp;60,&nbsp;65,&nbsp;70])<br>
-&gt;&gt;&gt;&nbsp;np.sum(a,&nbsp;axis=0)<br>
-<a href="#-array">array</a>([50,&nbsp;55,&nbsp;60,&nbsp;65,&nbsp;70])<br>
-&nbsp;<br>
-&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(60.).reshape(3,4,5)<br>
-&gt;&gt;&gt;&nbsp;b&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(24.).reshape(4,3,2)<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>('ijk,jil-&gt;kl',&nbsp;a,&nbsp;b)<br>
-<a href="#-array">array</a>([[&nbsp;4400.,&nbsp;&nbsp;4730.],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;4532.,&nbsp;&nbsp;4874.],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;4664.,&nbsp;&nbsp;5018.],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;4796.,&nbsp;&nbsp;5162.],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;4928.,&nbsp;&nbsp;5306.]])<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>(a,&nbsp;[0,1,2],&nbsp;b,&nbsp;[1,0,3],&nbsp;[2,3])<br>
-<a href="#-array">array</a>([[&nbsp;4400.,&nbsp;&nbsp;4730.],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;4532.,&nbsp;&nbsp;4874.],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;4664.,&nbsp;&nbsp;5018.],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;4796.,&nbsp;&nbsp;5162.],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;4928.,&nbsp;&nbsp;5306.]])<br>
-&gt;&gt;&gt;&nbsp;np.tensordot(a,b,&nbsp;axes=([1,0],[0,1]))<br>
-<a href="#-array">array</a>([[&nbsp;4400.,&nbsp;&nbsp;4730.],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;4532.,&nbsp;&nbsp;4874.],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;4664.,&nbsp;&nbsp;5018.],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;4796.,&nbsp;&nbsp;5162.],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;4928.,&nbsp;&nbsp;5306.]])<br>
-&nbsp;<br>
-&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(6).reshape((3,2))<br>
-&gt;&gt;&gt;&nbsp;b&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(12).reshape((4,3))<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>('ki,jk-&gt;ij',&nbsp;a,&nbsp;b)<br>
-<a href="#-array">array</a>([[10,&nbsp;28,&nbsp;46,&nbsp;64],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[13,&nbsp;40,&nbsp;67,&nbsp;94]])<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>('ki,...k-&gt;i...',&nbsp;a,&nbsp;b)<br>
-<a href="#-array">array</a>([[10,&nbsp;28,&nbsp;46,&nbsp;64],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[13,&nbsp;40,&nbsp;67,&nbsp;94]])<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>('k...,jk',&nbsp;a,&nbsp;b)<br>
-<a href="#-array">array</a>([[10,&nbsp;28,&nbsp;46,&nbsp;64],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[13,&nbsp;40,&nbsp;67,&nbsp;94]])<br>
-&nbsp;<br>
-&gt;&gt;&gt;&nbsp;#&nbsp;since&nbsp;version&nbsp;1.10.0<br>
-&gt;&gt;&gt;&nbsp;a&nbsp;=&nbsp;np.<a href="#-zeros">zeros</a>((3,&nbsp;3))<br>
-&gt;&gt;&gt;&nbsp;np.<a href="#-einsum">einsum</a>('ii-&gt;i',&nbsp;a)[:]&nbsp;=&nbsp;1<br>
-&gt;&gt;&gt;&nbsp;a<br>
-<a href="#-array">array</a>([[&nbsp;1.,&nbsp;&nbsp;0.,&nbsp;&nbsp;0.],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;0.,&nbsp;&nbsp;1.,&nbsp;&nbsp;0.],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;0.,&nbsp;&nbsp;0.,&nbsp;&nbsp;1.]])</tt></dd></dl>
  <dl><dt><a name="-empty"><strong>empty</strong></a>(...)</dt><dd><tt><a href="#-empty">empty</a>(shape,&nbsp;dtype=float,&nbsp;order='C')<br>
 &nbsp;<br>
 Return&nbsp;a&nbsp;new&nbsp;array&nbsp;of&nbsp;given&nbsp;shape&nbsp;and&nbsp;type,&nbsp;without&nbsp;initializing&nbsp;entries.<br>
@@ -1454,20 +1232,26 @@ between&nbsp;page&nbsp;requests&nbsp;to&nbsp;Wikipedia&nbsp;[2]_.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-scale&nbsp;:&nbsp;float<br>
+scale&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;scale&nbsp;parameter,&nbsp;:math:`\beta&nbsp;=&nbsp;1/\lambda`.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``scale``&nbsp;is&nbsp;a&nbsp;scalar.&nbsp;&nbsp;Otherwise,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``np.<a href="#-array">array</a>(scale).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;exponential&nbsp;distribution.<br>
 &nbsp;<br>
 References<br>
 ----------<br>
 ..&nbsp;[1]&nbsp;Peyton&nbsp;Z.&nbsp;Peebles&nbsp;Jr.,&nbsp;"Probability,&nbsp;Random&nbsp;Variables&nbsp;and<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Random&nbsp;Signal&nbsp;Principles",&nbsp;4th&nbsp;ed,&nbsp;2001,&nbsp;p.&nbsp;57.<br>
-..&nbsp;[2]&nbsp;"Poisson&nbsp;Process",&nbsp;Wikipedia,<br>
+..&nbsp;[2]&nbsp;Wikipedia,&nbsp;"Poisson&nbsp;process",<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://en.wikipedia.org/wiki/Poisson_process">http://en.wikipedia.org/wiki/Poisson_process</a><br>
-..&nbsp;[3]&nbsp;"Exponential&nbsp;Distribution,&nbsp;Wikipedia,<br>
+..&nbsp;[3]&nbsp;Wikipedia,&nbsp;"Exponential&nbsp;distribution",<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://en.wikipedia.org/wiki/Exponential_distribution">http://en.wikipedia.org/wiki/Exponential_distribution</a></tt></dd></dl>
  <dl><dt><a name="-f"><strong>f</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of <a href="numpy.random.mtrand.html#RandomState">mtrand.RandomState</a> instance</font></font></dt><dd><tt><a href="#-f">f</a>(dfnum,&nbsp;dfden,&nbsp;size=None)<br>
 &nbsp;<br>
@@ -1485,24 +1269,25 @@ variates.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-dfnum&nbsp;:&nbsp;float<br>
+dfnum&nbsp;:&nbsp;int&nbsp;or&nbsp;array_like&nbsp;of&nbsp;ints<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Degrees&nbsp;of&nbsp;freedom&nbsp;in&nbsp;numerator.&nbsp;Should&nbsp;be&nbsp;greater&nbsp;than&nbsp;zero.<br>
-dfden&nbsp;:&nbsp;float<br>
+dfden&nbsp;:&nbsp;int&nbsp;or&nbsp;array_like&nbsp;of&nbsp;ints<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Degrees&nbsp;of&nbsp;freedom&nbsp;in&nbsp;denominator.&nbsp;Should&nbsp;be&nbsp;greater&nbsp;than&nbsp;zero.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``dfnum``&nbsp;and&nbsp;``dfden``&nbsp;are&nbsp;both&nbsp;scalars.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(dfnum,&nbsp;dfden).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Samples&nbsp;from&nbsp;the&nbsp;Fisher&nbsp;distribution.<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;Fisher&nbsp;distribution.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
-scipy.stats.distributions.f&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;distribution&nbsp;or&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
+scipy.stats.f&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,&nbsp;distribution&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -1561,7 +1346,7 @@ dtype&nbsp;:&nbsp;data-type,&nbsp;optional<br>
 count&nbsp;:&nbsp;int,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;items&nbsp;to&nbsp;read.&nbsp;``-1``&nbsp;means&nbsp;all&nbsp;data&nbsp;in&nbsp;the&nbsp;buffer.<br>
 offset&nbsp;:&nbsp;int,&nbsp;optional<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Start&nbsp;reading&nbsp;the&nbsp;buffer&nbsp;from&nbsp;this&nbsp;offset;&nbsp;default:&nbsp;0.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Start&nbsp;reading&nbsp;the&nbsp;buffer&nbsp;from&nbsp;this&nbsp;offset&nbsp;(in&nbsp;bytes);&nbsp;default:&nbsp;0.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -1682,7 +1467,7 @@ Examples<br>
 <a href="#-array">array</a>([&nbsp;&nbsp;0.,&nbsp;&nbsp;&nbsp;1.,&nbsp;&nbsp;&nbsp;4.,&nbsp;&nbsp;&nbsp;9.,&nbsp;&nbsp;16.])</tt></dd></dl>
  <dl><dt><a name="-frompyfunc"><strong>frompyfunc</strong></a>(...)</dt><dd><tt><a href="#-frompyfunc">frompyfunc</a>(func,&nbsp;nin,&nbsp;nout)<br>
 &nbsp;<br>
-Takes&nbsp;an&nbsp;arbitrary&nbsp;Python&nbsp;function&nbsp;and&nbsp;returns&nbsp;a&nbsp;Numpy&nbsp;ufunc.<br>
+Takes&nbsp;an&nbsp;arbitrary&nbsp;Python&nbsp;function&nbsp;and&nbsp;returns&nbsp;a&nbsp;NumPy&nbsp;ufunc.<br>
 &nbsp;<br>
 Can&nbsp;be&nbsp;used,&nbsp;for&nbsp;example,&nbsp;to&nbsp;add&nbsp;broadcasting&nbsp;to&nbsp;a&nbsp;built-in&nbsp;Python<br>
 function&nbsp;(see&nbsp;Examples&nbsp;section).<br>
@@ -1699,7 +1484,11 @@ nout&nbsp;:&nbsp;int<br>
 Returns<br>
 -------<br>
 out&nbsp;:&nbsp;ufunc<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;a&nbsp;Numpy&nbsp;universal&nbsp;function&nbsp;(``ufunc``)&nbsp;object.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;a&nbsp;NumPy&nbsp;universal&nbsp;function&nbsp;(``ufunc``)&nbsp;object.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+vectorize&nbsp;:&nbsp;evaluates&nbsp;pyfunc&nbsp;over&nbsp;input&nbsp;arrays&nbsp;using&nbsp;broadcasting&nbsp;rules&nbsp;of&nbsp;numpy<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -1772,24 +1561,26 @@ Samples&nbsp;are&nbsp;drawn&nbsp;from&nbsp;a&nbsp;Gamma&nbsp;distribution&nbsp;w
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-shape&nbsp;:&nbsp;scalar&nbsp;&gt;&nbsp;0<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;shape&nbsp;of&nbsp;the&nbsp;gamma&nbsp;distribution.<br>
-scale&nbsp;:&nbsp;scalar&nbsp;&gt;&nbsp;0,&nbsp;optional<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;scale&nbsp;of&nbsp;the&nbsp;gamma&nbsp;distribution.&nbsp;&nbsp;Default&nbsp;is&nbsp;equal&nbsp;to&nbsp;1.<br>
+shape&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;shape&nbsp;of&nbsp;the&nbsp;gamma&nbsp;distribution.&nbsp;Should&nbsp;be&nbsp;greater&nbsp;than&nbsp;zero.<br>
+scale&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;scale&nbsp;of&nbsp;the&nbsp;gamma&nbsp;distribution.&nbsp;Should&nbsp;be&nbsp;greater&nbsp;than&nbsp;zero.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Default&nbsp;is&nbsp;equal&nbsp;to&nbsp;1.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``shape``&nbsp;and&nbsp;``scale``&nbsp;are&nbsp;both&nbsp;scalars.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(shape,&nbsp;scale).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-out&nbsp;:&nbsp;ndarray,&nbsp;float<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;one&nbsp;sample&nbsp;unless&nbsp;`size`&nbsp;parameter&nbsp;is&nbsp;specified.<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;gamma&nbsp;distribution.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
-scipy.stats.distributions.gamma&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;distribution&nbsp;or&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
+scipy.stats.gamma&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,&nbsp;distribution&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -1809,14 +1600,14 @@ References<br>
 ..&nbsp;[1]&nbsp;Weisstein,&nbsp;Eric&nbsp;W.&nbsp;"Gamma&nbsp;Distribution."&nbsp;From&nbsp;MathWorld--A<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Wolfram&nbsp;Web&nbsp;Resource.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://mathworld.wolfram.com/GammaDistribution.html">http://mathworld.wolfram.com/GammaDistribution.html</a><br>
-..&nbsp;[2]&nbsp;Wikipedia,&nbsp;"Gamma-distribution",<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://en.wikipedia.org/wiki/Gamma-distribution">http://en.wikipedia.org/wiki/Gamma-distribution</a><br>
+..&nbsp;[2]&nbsp;Wikipedia,&nbsp;"Gamma&nbsp;distribution",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://en.wikipedia.org/wiki/Gamma_distribution">http://en.wikipedia.org/wiki/Gamma_distribution</a><br>
 &nbsp;<br>
 Examples<br>
 --------<br>
 Draw&nbsp;samples&nbsp;from&nbsp;the&nbsp;distribution:<br>
 &nbsp;<br>
-&gt;&gt;&gt;&nbsp;shape,&nbsp;scale&nbsp;=&nbsp;2.,&nbsp;2.&nbsp;#&nbsp;mean&nbsp;and&nbsp;dispersion<br>
+&gt;&gt;&gt;&nbsp;shape,&nbsp;scale&nbsp;=&nbsp;2.,&nbsp;2.&nbsp;&nbsp;#&nbsp;mean=4,&nbsp;std=2*sqrt(2)<br>
 &gt;&gt;&gt;&nbsp;s&nbsp;=&nbsp;np.random.<a href="#-gamma">gamma</a>(shape,&nbsp;scale,&nbsp;1000)<br>
 &nbsp;<br>
 Display&nbsp;the&nbsp;histogram&nbsp;of&nbsp;the&nbsp;samples,&nbsp;along&nbsp;with<br>
@@ -1847,18 +1638,18 @@ where&nbsp;`p`&nbsp;is&nbsp;the&nbsp;probability&nbsp;of&nbsp;success&nbsp;of&nb
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-p&nbsp;:&nbsp;float<br>
+p&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;probability&nbsp;of&nbsp;success&nbsp;of&nbsp;an&nbsp;individual&nbsp;trial.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``p``&nbsp;is&nbsp;a&nbsp;scalar.&nbsp;&nbsp;Otherwise,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``np.<a href="#-array">array</a>(p).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-out&nbsp;:&nbsp;ndarray<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Samples&nbsp;from&nbsp;the&nbsp;geometric&nbsp;distribution,&nbsp;shaped&nbsp;according&nbsp;to<br>
-&nbsp;&nbsp;&nbsp;&nbsp;`size`.<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;geometric&nbsp;distribution.<br>
 &nbsp;<br>
 Examples<br>
 --------<br>
@@ -1926,7 +1717,7 @@ the&nbsp;user&nbsp;should&nbsp;know&nbsp;exactly&nbsp;what&nbsp;he/she&nbsp;is&n
 Return&nbsp;the&nbsp;current&nbsp;object&nbsp;that&nbsp;defines&nbsp;floating-point&nbsp;error&nbsp;handling.<br>
 &nbsp;<br>
 The&nbsp;error&nbsp;object&nbsp;contains&nbsp;all&nbsp;information&nbsp;that&nbsp;defines&nbsp;the&nbsp;error&nbsp;handling<br>
-behavior&nbsp;in&nbsp;Numpy.&nbsp;`geterrobj`&nbsp;is&nbsp;used&nbsp;internally&nbsp;by&nbsp;the&nbsp;other<br>
+behavior&nbsp;in&nbsp;NumPy.&nbsp;`geterrobj`&nbsp;is&nbsp;used&nbsp;internally&nbsp;by&nbsp;the&nbsp;other<br>
 functions&nbsp;that&nbsp;get&nbsp;and&nbsp;set&nbsp;error&nbsp;handling&nbsp;behavior&nbsp;(`geterr`,&nbsp;`seterr`,<br>
 `geterrcall`,&nbsp;`seterrcall`).<br>
 &nbsp;<br>
@@ -1990,18 +1781,20 @@ Notes&nbsp;and&nbsp;References&nbsp;below.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-loc&nbsp;:&nbsp;float<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;location&nbsp;of&nbsp;the&nbsp;mode&nbsp;of&nbsp;the&nbsp;distribution.<br>
-scale&nbsp;:&nbsp;float<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;scale&nbsp;parameter&nbsp;of&nbsp;the&nbsp;distribution.<br>
+loc&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;location&nbsp;of&nbsp;the&nbsp;mode&nbsp;of&nbsp;the&nbsp;distribution.&nbsp;Default&nbsp;is&nbsp;0.<br>
+scale&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;scale&nbsp;parameter&nbsp;of&nbsp;the&nbsp;distribution.&nbsp;Default&nbsp;is&nbsp;1.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``loc``&nbsp;and&nbsp;``scale``&nbsp;are&nbsp;both&nbsp;scalars.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(loc,&nbsp;scale).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;Gumbel&nbsp;distribution.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
@@ -2097,27 +1890,29 @@ than&nbsp;or&nbsp;equal&nbsp;to&nbsp;the&nbsp;sum&nbsp;ngood&nbsp;+&nbsp;nbad.<b
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-ngood&nbsp;:&nbsp;int&nbsp;or&nbsp;array_like<br>
+ngood&nbsp;:&nbsp;int&nbsp;or&nbsp;array_like&nbsp;of&nbsp;ints<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;ways&nbsp;to&nbsp;make&nbsp;a&nbsp;good&nbsp;selection.&nbsp;&nbsp;Must&nbsp;be&nbsp;nonnegative.<br>
-nbad&nbsp;:&nbsp;int&nbsp;or&nbsp;array_like<br>
+nbad&nbsp;:&nbsp;int&nbsp;or&nbsp;array_like&nbsp;of&nbsp;ints<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;ways&nbsp;to&nbsp;make&nbsp;a&nbsp;bad&nbsp;selection.&nbsp;&nbsp;Must&nbsp;be&nbsp;nonnegative.<br>
-nsample&nbsp;:&nbsp;int&nbsp;or&nbsp;array_like<br>
+nsample&nbsp;:&nbsp;int&nbsp;or&nbsp;array_like&nbsp;of&nbsp;ints<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;items&nbsp;sampled.&nbsp;&nbsp;Must&nbsp;be&nbsp;at&nbsp;least&nbsp;1&nbsp;and&nbsp;at&nbsp;most<br>
 &nbsp;&nbsp;&nbsp;&nbsp;``ngood&nbsp;+&nbsp;nbad``.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``ngood``,&nbsp;``nbad``,&nbsp;and&nbsp;``nsample``<br>
+&nbsp;&nbsp;&nbsp;&nbsp;are&nbsp;all&nbsp;scalars.&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(ngood,&nbsp;nbad,&nbsp;nsample).size``<br>
+&nbsp;&nbsp;&nbsp;&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;values&nbsp;are&nbsp;all&nbsp;integers&nbsp;in&nbsp;&nbsp;[0,&nbsp;n].<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;hypergeometric&nbsp;distribution.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
-scipy.stats.distributions.hypergeom&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;distribution&nbsp;or&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
+scipy.stats.hypergeom&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,&nbsp;distribution&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -2148,7 +1943,7 @@ References<br>
 ..&nbsp;[2]&nbsp;Weisstein,&nbsp;Eric&nbsp;W.&nbsp;"Hypergeometric&nbsp;Distribution."&nbsp;From<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MathWorld--A&nbsp;Wolfram&nbsp;Web&nbsp;Resource.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://mathworld.wolfram.com/HypergeometricDistribution.html">http://mathworld.wolfram.com/HypergeometricDistribution.html</a><br>
-..&nbsp;[3]&nbsp;Wikipedia,&nbsp;"Hypergeometric-distribution",<br>
+..&nbsp;[3]&nbsp;Wikipedia,&nbsp;"Hypergeometric&nbsp;distribution",<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://en.wikipedia.org/wiki/Hypergeometric_distribution">http://en.wikipedia.org/wiki/Hypergeometric_distribution</a><br>
 &nbsp;<br>
 Examples<br>
@@ -2297,18 +2092,20 @@ random&nbsp;variables.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-loc&nbsp;:&nbsp;float,&nbsp;optional<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;position,&nbsp;:math:`\mu`,&nbsp;of&nbsp;the&nbsp;distribution&nbsp;peak.<br>
-scale&nbsp;:&nbsp;float,&nbsp;optional<br>
-&nbsp;&nbsp;&nbsp;&nbsp;:math:`\lambda`,&nbsp;the&nbsp;exponential&nbsp;decay.<br>
+loc&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;position,&nbsp;:math:`\mu`,&nbsp;of&nbsp;the&nbsp;distribution&nbsp;peak.&nbsp;Default&nbsp;is&nbsp;0.<br>
+scale&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;:math:`\lambda`,&nbsp;the&nbsp;exponential&nbsp;decay.&nbsp;Default&nbsp;is&nbsp;1.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``loc``&nbsp;and&nbsp;``scale``&nbsp;are&nbsp;both&nbsp;scalars.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(loc,&nbsp;scale).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;float<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;Laplace&nbsp;distribution.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -2334,7 +2131,7 @@ References<br>
 ..&nbsp;[3]&nbsp;Weisstein,&nbsp;Eric&nbsp;W.&nbsp;"Laplace&nbsp;Distribution."<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;From&nbsp;MathWorld--A&nbsp;Wolfram&nbsp;Web&nbsp;Resource.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://mathworld.wolfram.com/LaplaceDistribution.html">http://mathworld.wolfram.com/LaplaceDistribution.html</a><br>
-..&nbsp;[4]&nbsp;Wikipedia,&nbsp;"Laplace&nbsp;Distribution",<br>
+..&nbsp;[4]&nbsp;Wikipedia,&nbsp;"Laplace&nbsp;distribution",<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://en.wikipedia.org/wiki/Laplace_distribution">http://en.wikipedia.org/wiki/Laplace_distribution</a><br>
 &nbsp;<br>
 Examples<br>
@@ -2452,24 +2249,26 @@ parameters,&nbsp;loc&nbsp;(location&nbsp;or&nbsp;mean,&nbsp;also&nbsp;median),&n
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-loc&nbsp;:&nbsp;float<br>
-&nbsp;<br>
-scale&nbsp;:&nbsp;float&nbsp;&gt;&nbsp;0.<br>
-&nbsp;<br>
+loc&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Parameter&nbsp;of&nbsp;the&nbsp;distribution.&nbsp;Default&nbsp;is&nbsp;0.<br>
+scale&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Parameter&nbsp;of&nbsp;the&nbsp;distribution.&nbsp;Should&nbsp;be&nbsp;greater&nbsp;than&nbsp;zero.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Default&nbsp;is&nbsp;1.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``loc``&nbsp;and&nbsp;``scale``&nbsp;are&nbsp;both&nbsp;scalars.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(loc,&nbsp;scale).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;the&nbsp;values&nbsp;are&nbsp;all&nbsp;integers&nbsp;in&nbsp;&nbsp;[0,&nbsp;n].<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;logistic&nbsp;distribution.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
-scipy.stats.distributions.logistic&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;distribution&nbsp;or&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
+scipy.stats.logistic&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,&nbsp;distribution&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -2522,20 +2321,21 @@ underlying&nbsp;normal&nbsp;distribution&nbsp;it&nbsp;is&nbsp;derived&nbsp;from.
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-mean&nbsp;:&nbsp;float<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Mean&nbsp;value&nbsp;of&nbsp;the&nbsp;underlying&nbsp;normal&nbsp;distribution<br>
-sigma&nbsp;:&nbsp;float,&nbsp;&gt;&nbsp;0.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Standard&nbsp;deviation&nbsp;of&nbsp;the&nbsp;underlying&nbsp;normal&nbsp;distribution<br>
+mean&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Mean&nbsp;value&nbsp;of&nbsp;the&nbsp;underlying&nbsp;normal&nbsp;distribution.&nbsp;Default&nbsp;is&nbsp;0.<br>
+sigma&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Standard&nbsp;deviation&nbsp;of&nbsp;the&nbsp;underlying&nbsp;normal&nbsp;distribution.&nbsp;Should<br>
+&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;greater&nbsp;than&nbsp;zero.&nbsp;Default&nbsp;is&nbsp;1.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``mean``&nbsp;and&nbsp;``sigma``&nbsp;are&nbsp;both&nbsp;scalars.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(mean,&nbsp;sigma).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;float<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;desired&nbsp;samples.&nbsp;An&nbsp;array&nbsp;of&nbsp;the&nbsp;same&nbsp;shape&nbsp;as&nbsp;`size`&nbsp;if&nbsp;given,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;`size`&nbsp;is&nbsp;None&nbsp;a&nbsp;float&nbsp;is&nbsp;returned.<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;log-normal&nbsp;distribution.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
@@ -2620,24 +2420,23 @@ shape&nbsp;parameter,&nbsp;0&nbsp;&lt;&nbsp;``p``&nbsp;&lt;&nbsp;1.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-loc&nbsp;:&nbsp;float<br>
-&nbsp;<br>
-scale&nbsp;:&nbsp;float&nbsp;&gt;&nbsp;0.<br>
-&nbsp;<br>
+p&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Shape&nbsp;parameter&nbsp;for&nbsp;the&nbsp;distribution.&nbsp;&nbsp;Must&nbsp;be&nbsp;in&nbsp;the&nbsp;range&nbsp;(0,&nbsp;1).<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``p``&nbsp;is&nbsp;a&nbsp;scalar.&nbsp;&nbsp;Otherwise,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``np.<a href="#-array">array</a>(p).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;the&nbsp;values&nbsp;are&nbsp;all&nbsp;integers&nbsp;in&nbsp;&nbsp;[0,&nbsp;n].<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;logarithmic&nbsp;series&nbsp;distribution.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
-scipy.stats.distributions.logser&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;distribution&nbsp;or&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
+scipy.stats.logser&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,&nbsp;distribution&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -2664,8 +2463,8 @@ References<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Journal&nbsp;of&nbsp;Animal&nbsp;Ecology,&nbsp;12:42-58.<br>
 ..&nbsp;[3]&nbsp;D.&nbsp;J.&nbsp;Hand,&nbsp;F.&nbsp;Daly,&nbsp;D.&nbsp;Lunn,&nbsp;E.&nbsp;Ostrowski,&nbsp;A&nbsp;Handbook&nbsp;of&nbsp;Small<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Data&nbsp;Sets,&nbsp;CRC&nbsp;Press,&nbsp;1994.<br>
-..&nbsp;[4]&nbsp;Wikipedia,&nbsp;"Logarithmic-distribution",<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://en.wikipedia.org/wiki/Logarithmic-distribution">http://en.wikipedia.org/wiki/Logarithmic-distribution</a><br>
+..&nbsp;[4]&nbsp;Wikipedia,&nbsp;"Logarithmic&nbsp;distribution",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://en.wikipedia.org/wiki/Logarithmic_distribution">http://en.wikipedia.org/wiki/Logarithmic_distribution</a><br>
 &nbsp;<br>
 Examples<br>
 --------<br>
@@ -2710,7 +2509,7 @@ vectors,&nbsp;but&nbsp;matmul&nbsp;will&nbsp;not&nbsp;recognize&nbsp;it&nbsp;as&
 &nbsp;&nbsp;were&nbsp;elements.<br>
 &nbsp;<br>
 ..&nbsp;warning::<br>
-&nbsp;&nbsp;&nbsp;This&nbsp;function&nbsp;is&nbsp;preliminary&nbsp;and&nbsp;included&nbsp;in&nbsp;Numpy&nbsp;1.10&nbsp;for&nbsp;testing<br>
+&nbsp;&nbsp;&nbsp;This&nbsp;function&nbsp;is&nbsp;preliminary&nbsp;and&nbsp;included&nbsp;in&nbsp;NumPy&nbsp;1.10.0&nbsp;for&nbsp;testing<br>
 &nbsp;&nbsp;&nbsp;and&nbsp;documentation.&nbsp;Its&nbsp;semantics&nbsp;will&nbsp;not&nbsp;change,&nbsp;but&nbsp;the&nbsp;number&nbsp;and<br>
 &nbsp;&nbsp;&nbsp;order&nbsp;of&nbsp;the&nbsp;optional&nbsp;arguments&nbsp;will.<br>
 &nbsp;<br>
@@ -2947,7 +2746,7 @@ not&nbsp;like:<br>
 &nbsp;<br>
 &gt;&gt;&gt;&nbsp;np.random.<a href="#-multinomial">multinomial</a>(100,&nbsp;[1.0,&nbsp;2.0])&nbsp;&nbsp;#&nbsp;WRONG<br>
 <a href="#-array">array</a>([100,&nbsp;&nbsp;&nbsp;0])</tt></dd></dl>
- <dl><dt><a name="-multivariate_normal"><strong>multivariate_normal</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of <a href="numpy.random.mtrand.html#RandomState">mtrand.RandomState</a> instance</font></font></dt><dd><tt><a href="#-multivariate_normal">multivariate_normal</a>(mean,&nbsp;cov[,&nbsp;size])<br>
+ <dl><dt><a name="-multivariate_normal"><strong>multivariate_normal</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of <a href="numpy.random.mtrand.html#RandomState">mtrand.RandomState</a> instance</font></font></dt><dd><tt><a href="#-multivariate_normal">multivariate_normal</a>(mean,&nbsp;cov[,&nbsp;size,&nbsp;check_valid,&nbsp;tol])<br>
 &nbsp;<br>
 Draw&nbsp;random&nbsp;samples&nbsp;from&nbsp;a&nbsp;multivariate&nbsp;normal&nbsp;distribution.<br>
 &nbsp;<br>
@@ -2970,6 +2769,10 @@ size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;generated,&nbsp;and&nbsp;packed&nbsp;in&nbsp;an&nbsp;`m`-by-`n`-by-`k`&nbsp;arrangement.&nbsp;&nbsp;Because<br>
 &nbsp;&nbsp;&nbsp;&nbsp;each&nbsp;sample&nbsp;is&nbsp;`N`-dimensional,&nbsp;the&nbsp;output&nbsp;shape&nbsp;is&nbsp;``(m,n,k,N)``.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;no&nbsp;shape&nbsp;is&nbsp;specified,&nbsp;a&nbsp;single&nbsp;(`N`-D)&nbsp;sample&nbsp;is&nbsp;returned.<br>
+check_valid&nbsp;:&nbsp;{&nbsp;'warn',&nbsp;'raise',&nbsp;'ignore'&nbsp;},&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Behavior&nbsp;when&nbsp;the&nbsp;covariance&nbsp;matrix&nbsp;is&nbsp;not&nbsp;positive&nbsp;semidefinite.<br>
+tol&nbsp;:&nbsp;float,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Tolerance&nbsp;when&nbsp;checking&nbsp;the&nbsp;singular&nbsp;values&nbsp;in&nbsp;covariance&nbsp;matrix.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
@@ -2997,8 +2800,8 @@ The&nbsp;element&nbsp;:math:`C_{ii}`&nbsp;is&nbsp;the&nbsp;variance&nbsp;of&nbsp
 Instead&nbsp;of&nbsp;specifying&nbsp;the&nbsp;full&nbsp;covariance&nbsp;matrix,&nbsp;popular<br>
 approximations&nbsp;include:<br>
 &nbsp;<br>
-&nbsp;&nbsp;-&nbsp;Spherical&nbsp;covariance&nbsp;(*cov*&nbsp;is&nbsp;a&nbsp;multiple&nbsp;of&nbsp;the&nbsp;identity&nbsp;matrix)<br>
-&nbsp;&nbsp;-&nbsp;Diagonal&nbsp;covariance&nbsp;(*cov*&nbsp;has&nbsp;non-negative&nbsp;elements,&nbsp;and&nbsp;only&nbsp;on<br>
+&nbsp;&nbsp;-&nbsp;Spherical&nbsp;covariance&nbsp;(`cov`&nbsp;is&nbsp;a&nbsp;multiple&nbsp;of&nbsp;the&nbsp;identity&nbsp;matrix)<br>
+&nbsp;&nbsp;-&nbsp;Diagonal&nbsp;covariance&nbsp;(`cov`&nbsp;has&nbsp;non-negative&nbsp;elements,&nbsp;and&nbsp;only&nbsp;on<br>
 &nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;diagonal)<br>
 &nbsp;<br>
 This&nbsp;geometrical&nbsp;property&nbsp;can&nbsp;be&nbsp;seen&nbsp;in&nbsp;two&nbsp;dimensions&nbsp;by&nbsp;plotting<br>
@@ -3049,19 +2852,24 @@ integer&nbsp;&gt;&nbsp;0&nbsp;and&nbsp;`p`&nbsp;is&nbsp;in&nbsp;the&nbsp;interva
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-n&nbsp;:&nbsp;int<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Parameter,&nbsp;&gt;&nbsp;0.<br>
-p&nbsp;:&nbsp;float<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Parameter,&nbsp;&gt;=&nbsp;0&nbsp;and&nbsp;&lt;=1.<br>
+n&nbsp;:&nbsp;int&nbsp;or&nbsp;array_like&nbsp;of&nbsp;ints<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Parameter&nbsp;of&nbsp;the&nbsp;distribution,&nbsp;&gt;&nbsp;0.&nbsp;Floats&nbsp;are&nbsp;also&nbsp;accepted,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;but&nbsp;they&nbsp;will&nbsp;be&nbsp;truncated&nbsp;to&nbsp;integers.<br>
+p&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Parameter&nbsp;of&nbsp;the&nbsp;distribution,&nbsp;&gt;=&nbsp;0&nbsp;and&nbsp;&lt;=1.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``n``&nbsp;and&nbsp;``p``&nbsp;are&nbsp;both&nbsp;scalars.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(n,&nbsp;p).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;int&nbsp;or&nbsp;ndarray&nbsp;of&nbsp;ints<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples.<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;negative&nbsp;binomial&nbsp;distribution,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;each&nbsp;sample&nbsp;is&nbsp;equal&nbsp;to&nbsp;N,&nbsp;the&nbsp;number&nbsp;of&nbsp;trials&nbsp;it&nbsp;took&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;achieve&nbsp;n&nbsp;-&nbsp;1&nbsp;successes,&nbsp;N&nbsp;-&nbsp;(n&nbsp;-&nbsp;1)&nbsp;failures,&nbsp;and&nbsp;a&nbsp;success&nbsp;on&nbsp;the,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(N&nbsp;+&nbsp;n)th&nbsp;trial.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -3111,15 +2919,21 @@ the&nbsp;:math:`\chi^2`&nbsp;distribution.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-df&nbsp;:&nbsp;int<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Degrees&nbsp;of&nbsp;freedom,&nbsp;should&nbsp;be&nbsp;&gt;&nbsp;0&nbsp;as&nbsp;of&nbsp;Numpy&nbsp;1.10,<br>
+df&nbsp;:&nbsp;int&nbsp;or&nbsp;array_like&nbsp;of&nbsp;ints<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Degrees&nbsp;of&nbsp;freedom,&nbsp;should&nbsp;be&nbsp;&gt;&nbsp;0&nbsp;as&nbsp;of&nbsp;NumPy&nbsp;1.10.0,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;should&nbsp;be&nbsp;&gt;&nbsp;1&nbsp;for&nbsp;earlier&nbsp;versions.<br>
-nonc&nbsp;:&nbsp;float<br>
+nonc&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Non-centrality,&nbsp;should&nbsp;be&nbsp;non-negative.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``df``&nbsp;and&nbsp;``nonc``&nbsp;are&nbsp;both&nbsp;scalars.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(df,&nbsp;nonc).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;noncentral&nbsp;chi-square&nbsp;distribution.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -3183,21 +2997,23 @@ freedom&nbsp;in&nbsp;denominator),&nbsp;where&nbsp;both&nbsp;parameters&nbsp;&gt
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-dfnum&nbsp;:&nbsp;int<br>
+dfnum&nbsp;:&nbsp;int&nbsp;or&nbsp;array_like&nbsp;of&nbsp;ints<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Parameter,&nbsp;should&nbsp;be&nbsp;&gt;&nbsp;1.<br>
-dfden&nbsp;:&nbsp;int<br>
+dfden&nbsp;:&nbsp;int&nbsp;or&nbsp;array_like&nbsp;of&nbsp;ints<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Parameter,&nbsp;should&nbsp;be&nbsp;&gt;&nbsp;1.<br>
-nonc&nbsp;:&nbsp;float<br>
+nonc&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Parameter,&nbsp;should&nbsp;be&nbsp;&gt;=&nbsp;0.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``dfnum``,&nbsp;``dfden``,&nbsp;and&nbsp;``nonc``<br>
+&nbsp;&nbsp;&nbsp;&nbsp;are&nbsp;all&nbsp;scalars.&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(dfnum,&nbsp;dfden,&nbsp;nonc).size``<br>
+&nbsp;&nbsp;&nbsp;&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;scalar&nbsp;or&nbsp;ndarray<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples.<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;noncentral&nbsp;Fisher&nbsp;distribution.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -3212,7 +3028,7 @@ References<br>
 ..&nbsp;[1]&nbsp;Weisstein,&nbsp;Eric&nbsp;W.&nbsp;"Noncentral&nbsp;F-Distribution."<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;From&nbsp;MathWorld--A&nbsp;Wolfram&nbsp;Web&nbsp;Resource.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://mathworld.wolfram.com/NoncentralF-Distribution.html">http://mathworld.wolfram.com/NoncentralF-Distribution.html</a><br>
-..&nbsp;[2]&nbsp;Wikipedia,&nbsp;"Noncentral&nbsp;F&nbsp;distribution",<br>
+..&nbsp;[2]&nbsp;Wikipedia,&nbsp;"Noncentral&nbsp;F-distribution",<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://en.wikipedia.org/wiki/Noncentral_F-distribution">http://en.wikipedia.org/wiki/Noncentral_F-distribution</a><br>
 &nbsp;<br>
 Examples<br>
@@ -3249,19 +3065,25 @@ unique&nbsp;distribution&nbsp;[2]_.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-loc&nbsp;:&nbsp;float<br>
+loc&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Mean&nbsp;("centre")&nbsp;of&nbsp;the&nbsp;distribution.<br>
-scale&nbsp;:&nbsp;float<br>
+scale&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Standard&nbsp;deviation&nbsp;(spread&nbsp;or&nbsp;"width")&nbsp;of&nbsp;the&nbsp;distribution.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``loc``&nbsp;and&nbsp;``scale``&nbsp;are&nbsp;both&nbsp;scalars.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(loc,&nbsp;scale).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;normal&nbsp;distribution.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
-scipy.stats.distributions.norm&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;distribution&nbsp;or&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
+scipy.stats.norm&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,&nbsp;distribution&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -3321,7 +3143,8 @@ The&nbsp;result&nbsp;is&nbsp;padded&nbsp;to&nbsp;full&nbsp;bytes&nbsp;by&nbsp;in
 Parameters<br>
 ----------<br>
 myarray&nbsp;:&nbsp;array_like<br>
-&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;integer&nbsp;type&nbsp;array&nbsp;whose&nbsp;elements&nbsp;should&nbsp;be&nbsp;packed&nbsp;to&nbsp;bits.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array&nbsp;of&nbsp;integers&nbsp;or&nbsp;booleans&nbsp;whose&nbsp;elements&nbsp;should&nbsp;be&nbsp;packed&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bits.<br>
 axis&nbsp;:&nbsp;int,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;dimension&nbsp;over&nbsp;which&nbsp;bit-packing&nbsp;is&nbsp;done.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;``None``&nbsp;implies&nbsp;packing&nbsp;the&nbsp;flattened&nbsp;array.<br>
@@ -3375,19 +3198,25 @@ remaining&nbsp;80&nbsp;percent&nbsp;of&nbsp;the&nbsp;range.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-shape&nbsp;:&nbsp;float,&nbsp;&gt;&nbsp;0.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Shape&nbsp;of&nbsp;the&nbsp;distribution.<br>
+a&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Shape&nbsp;of&nbsp;the&nbsp;distribution.&nbsp;Should&nbsp;be&nbsp;greater&nbsp;than&nbsp;zero.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``a``&nbsp;is&nbsp;a&nbsp;scalar.&nbsp;&nbsp;Otherwise,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``np.<a href="#-array">array</a>(a).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;Pareto&nbsp;distribution.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
-scipy.stats.distributions.lomax.pdf&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;distribution&nbsp;or&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
-scipy.stats.distributions.genpareto.pdf&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;distribution&nbsp;or&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
+scipy.stats.lomax&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,&nbsp;distribution&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
+scipy.stats.genpareto&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,&nbsp;distribution&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -3482,18 +3311,19 @@ for&nbsp;large&nbsp;N.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-lam&nbsp;:&nbsp;float&nbsp;or&nbsp;sequence&nbsp;of&nbsp;float<br>
+lam&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Expectation&nbsp;of&nbsp;interval,&nbsp;should&nbsp;be&nbsp;&gt;=&nbsp;0.&nbsp;A&nbsp;sequence&nbsp;of&nbsp;expectation<br>
 &nbsp;&nbsp;&nbsp;&nbsp;intervals&nbsp;must&nbsp;be&nbsp;broadcastable&nbsp;over&nbsp;the&nbsp;requested&nbsp;size.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``lam``&nbsp;is&nbsp;a&nbsp;scalar.&nbsp;Otherwise,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``np.<a href="#-array">array</a>(lam).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;drawn&nbsp;samples,&nbsp;of&nbsp;shape&nbsp;*size*,&nbsp;if&nbsp;it&nbsp;was&nbsp;provided.<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;Poisson&nbsp;distribution.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -3543,17 +3373,18 @@ Also&nbsp;known&nbsp;as&nbsp;the&nbsp;power&nbsp;function&nbsp;distribution.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-a&nbsp;:&nbsp;float<br>
-&nbsp;&nbsp;&nbsp;&nbsp;parameter,&nbsp;&gt;&nbsp;0<br>
+a&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Parameter&nbsp;of&nbsp;the&nbsp;distribution.&nbsp;Should&nbsp;be&nbsp;greater&nbsp;than&nbsp;zero.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``a``&nbsp;is&nbsp;a&nbsp;scalar.&nbsp;&nbsp;Otherwise,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``np.<a href="#-array">array</a>(a).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;returned&nbsp;samples&nbsp;lie&nbsp;in&nbsp;[0,&nbsp;1].<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;power&nbsp;distribution.<br>
 &nbsp;<br>
 Raises<br>
 ------<br>
@@ -3755,8 +3586,8 @@ Parameters<br>
 ----------<br>
 low&nbsp;:&nbsp;int<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Lowest&nbsp;(signed)&nbsp;integer&nbsp;to&nbsp;be&nbsp;drawn&nbsp;from&nbsp;the&nbsp;distribution&nbsp;(unless<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``high=None``,&nbsp;in&nbsp;which&nbsp;case&nbsp;this&nbsp;parameter&nbsp;is&nbsp;the&nbsp;*highest*&nbsp;such<br>
-&nbsp;&nbsp;&nbsp;&nbsp;integer).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``high=None``,&nbsp;in&nbsp;which&nbsp;case&nbsp;this&nbsp;parameter&nbsp;is&nbsp;one&nbsp;above&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;*highest*&nbsp;such&nbsp;integer).<br>
 high&nbsp;:&nbsp;int,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;provided,&nbsp;one&nbsp;above&nbsp;the&nbsp;largest&nbsp;(signed)&nbsp;integer&nbsp;to&nbsp;be&nbsp;drawn<br>
 &nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;the&nbsp;distribution&nbsp;(see&nbsp;above&nbsp;for&nbsp;behavior&nbsp;if&nbsp;``high=None``).<br>
@@ -3936,7 +3767,7 @@ Examples<br>
 4<br>
 &gt;&gt;&gt;&nbsp;type(np.random.<a href="#-random_integers">random_integers</a>(5))<br>
 &lt;type&nbsp;'int'&gt;<br>
-&gt;&gt;&gt;&nbsp;np.random.<a href="#-random_integers">random_integers</a>(5,&nbsp;size=(3.,2.))<br>
+&gt;&gt;&gt;&nbsp;np.random.<a href="#-random_integers">random_integers</a>(5,&nbsp;size=(3,2))<br>
 <a href="#-array">array</a>([[5,&nbsp;4],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[3,&nbsp;3],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[4,&nbsp;5]])<br>
@@ -4098,12 +3929,18 @@ Rayleigh.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-scale&nbsp;:&nbsp;scalar<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Scale,&nbsp;also&nbsp;equals&nbsp;the&nbsp;mode.&nbsp;Should&nbsp;be&nbsp;&gt;=&nbsp;0.<br>
+scale&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Scale,&nbsp;also&nbsp;equals&nbsp;the&nbsp;mode.&nbsp;Should&nbsp;be&nbsp;&gt;=&nbsp;0.&nbsp;Default&nbsp;is&nbsp;1.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``scale``&nbsp;is&nbsp;a&nbsp;scalar.&nbsp;&nbsp;Otherwise,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``np.<a href="#-array">array</a>(scale).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;Rayleigh&nbsp;distribution.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -4350,7 +4187,7 @@ References<br>
 Set&nbsp;the&nbsp;object&nbsp;that&nbsp;defines&nbsp;floating-point&nbsp;error&nbsp;handling.<br>
 &nbsp;<br>
 The&nbsp;error&nbsp;object&nbsp;contains&nbsp;all&nbsp;information&nbsp;that&nbsp;defines&nbsp;the&nbsp;error&nbsp;handling<br>
-behavior&nbsp;in&nbsp;Numpy.&nbsp;`seterrobj`&nbsp;is&nbsp;used&nbsp;internally&nbsp;by&nbsp;the&nbsp;other<br>
+behavior&nbsp;in&nbsp;NumPy.&nbsp;`seterrobj`&nbsp;is&nbsp;used&nbsp;internally&nbsp;by&nbsp;the&nbsp;other<br>
 functions&nbsp;that&nbsp;set&nbsp;error&nbsp;handling&nbsp;behavior&nbsp;(`seterr`,&nbsp;`seterrcall`).<br>
 &nbsp;<br>
 Parameters<br>
@@ -4439,6 +4276,10 @@ False</tt></dd></dl>
 &nbsp;<br>
 Modify&nbsp;a&nbsp;sequence&nbsp;in-place&nbsp;by&nbsp;shuffling&nbsp;its&nbsp;contents.<br>
 &nbsp;<br>
+This&nbsp;function&nbsp;only&nbsp;shuffles&nbsp;the&nbsp;array&nbsp;along&nbsp;the&nbsp;first&nbsp;axis&nbsp;of&nbsp;a<br>
+multi-dimensional&nbsp;array.&nbsp;The&nbsp;order&nbsp;of&nbsp;sub-arrays&nbsp;is&nbsp;changed&nbsp;but<br>
+their&nbsp;contents&nbsp;remains&nbsp;the&nbsp;same.<br>
+&nbsp;<br>
 Parameters<br>
 ----------<br>
 x&nbsp;:&nbsp;array_like<br>
@@ -4455,8 +4296,7 @@ Examples<br>
 &gt;&gt;&gt;&nbsp;arr<br>
 [1&nbsp;7&nbsp;5&nbsp;2&nbsp;9&nbsp;4&nbsp;3&nbsp;6&nbsp;0&nbsp;8]<br>
 &nbsp;<br>
-This&nbsp;function&nbsp;only&nbsp;shuffles&nbsp;the&nbsp;array&nbsp;along&nbsp;the&nbsp;first&nbsp;index&nbsp;of&nbsp;a<br>
-multi-dimensional&nbsp;array:<br>
+Multi-dimensional&nbsp;arrays&nbsp;are&nbsp;only&nbsp;shuffled&nbsp;along&nbsp;the&nbsp;first&nbsp;axis:<br>
 &nbsp;<br>
 &gt;&gt;&gt;&nbsp;arr&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(9).reshape((3,&nbsp;3))<br>
 &gt;&gt;&gt;&nbsp;np.random.<a href="#-shuffle">shuffle</a>(arr)<br>
@@ -4555,22 +4395,23 @@ shape&nbsp;(sometimes&nbsp;designated&nbsp;"k")&nbsp;and&nbsp;scale=1.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-shape&nbsp;:&nbsp;float<br>
+shape&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Parameter,&nbsp;should&nbsp;be&nbsp;&gt;&nbsp;0.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``shape``&nbsp;is&nbsp;a&nbsp;scalar.&nbsp;&nbsp;Otherwise,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``np.<a href="#-array">array</a>(shape).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;drawn&nbsp;samples.<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;standard&nbsp;gamma&nbsp;distribution.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
-scipy.stats.distributions.gamma&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;distribution&nbsp;or&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
+scipy.stats.gamma&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,&nbsp;distribution&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -4590,8 +4431,8 @@ References<br>
 ..&nbsp;[1]&nbsp;Weisstein,&nbsp;Eric&nbsp;W.&nbsp;"Gamma&nbsp;Distribution."&nbsp;From&nbsp;MathWorld--A<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Wolfram&nbsp;Web&nbsp;Resource.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://mathworld.wolfram.com/GammaDistribution.html">http://mathworld.wolfram.com/GammaDistribution.html</a><br>
-..&nbsp;[2]&nbsp;Wikipedia,&nbsp;"Gamma-distribution",<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://en.wikipedia.org/wiki/Gamma-distribution">http://en.wikipedia.org/wiki/Gamma-distribution</a><br>
+..&nbsp;[2]&nbsp;Wikipedia,&nbsp;"Gamma&nbsp;distribution",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://en.wikipedia.org/wiki/Gamma_distribution">http://en.wikipedia.org/wiki/Gamma_distribution</a><br>
 &nbsp;<br>
 Examples<br>
 --------<br>
@@ -4648,17 +4489,18 @@ distribution&nbsp;(`standard_normal`).<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-df&nbsp;:&nbsp;int<br>
+df&nbsp;:&nbsp;int&nbsp;or&nbsp;array_like&nbsp;of&nbsp;ints<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Degrees&nbsp;of&nbsp;freedom,&nbsp;should&nbsp;be&nbsp;&gt;&nbsp;0.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``df``&nbsp;is&nbsp;a&nbsp;scalar.&nbsp;&nbsp;Otherwise,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``np.<a href="#-array">array</a>(df).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples.<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;standard&nbsp;Student's&nbsp;t&nbsp;distribution.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -4673,7 +4515,7 @@ the&nbsp;sample&nbsp;mean&nbsp;(that&nbsp;is&nbsp;the&nbsp;mean&nbsp;calculated&
 a&nbsp;good&nbsp;estimate&nbsp;of&nbsp;the&nbsp;true&nbsp;mean.<br>
 &nbsp;<br>
 The&nbsp;derivation&nbsp;of&nbsp;the&nbsp;t-distribution&nbsp;was&nbsp;first&nbsp;published&nbsp;in<br>
-1908&nbsp;by&nbsp;William&nbsp;Gisset&nbsp;while&nbsp;working&nbsp;for&nbsp;the&nbsp;Guinness&nbsp;Brewery<br>
+1908&nbsp;by&nbsp;William&nbsp;Gosset&nbsp;while&nbsp;working&nbsp;for&nbsp;the&nbsp;Guinness&nbsp;Brewery<br>
 in&nbsp;Dublin.&nbsp;Due&nbsp;to&nbsp;proprietary&nbsp;issues,&nbsp;he&nbsp;had&nbsp;to&nbsp;publish&nbsp;under<br>
 a&nbsp;pseudonym,&nbsp;and&nbsp;so&nbsp;he&nbsp;used&nbsp;the&nbsp;name&nbsp;Student.<br>
 &nbsp;<br>
@@ -4722,7 +4564,8 @@ So&nbsp;the&nbsp;p-value&nbsp;is&nbsp;about&nbsp;0.009,&nbsp;which&nbsp;says&nbs
 probability&nbsp;of&nbsp;about&nbsp;99%&nbsp;of&nbsp;being&nbsp;true.</tt></dd></dl>
  <dl><dt><a name="-triangular"><strong>triangular</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of <a href="numpy.random.mtrand.html#RandomState">mtrand.RandomState</a> instance</font></font></dt><dd><tt><a href="#-triangular">triangular</a>(left,&nbsp;mode,&nbsp;right,&nbsp;size=None)<br>
 &nbsp;<br>
-Draw&nbsp;samples&nbsp;from&nbsp;the&nbsp;triangular&nbsp;distribution.<br>
+Draw&nbsp;samples&nbsp;from&nbsp;the&nbsp;triangular&nbsp;distribution&nbsp;over&nbsp;the<br>
+interval&nbsp;``[left,&nbsp;right]``.<br>
 &nbsp;<br>
 The&nbsp;triangular&nbsp;distribution&nbsp;is&nbsp;a&nbsp;continuous&nbsp;probability<br>
 distribution&nbsp;with&nbsp;lower&nbsp;limit&nbsp;left,&nbsp;peak&nbsp;at&nbsp;mode,&nbsp;and&nbsp;upper<br>
@@ -4731,22 +4574,24 @@ directly&nbsp;define&nbsp;the&nbsp;shape&nbsp;of&nbsp;the&nbsp;pdf.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-left&nbsp;:&nbsp;scalar<br>
+left&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Lower&nbsp;limit.<br>
-mode&nbsp;:&nbsp;scalar<br>
+mode&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;value&nbsp;where&nbsp;the&nbsp;peak&nbsp;of&nbsp;the&nbsp;distribution&nbsp;occurs.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;value&nbsp;should&nbsp;fulfill&nbsp;the&nbsp;condition&nbsp;``left&nbsp;&lt;=&nbsp;mode&nbsp;&lt;=&nbsp;right``.<br>
-right&nbsp;:&nbsp;scalar<br>
+right&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Upper&nbsp;limit,&nbsp;should&nbsp;be&nbsp;larger&nbsp;than&nbsp;`left`.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``left``,&nbsp;``mode``,&nbsp;and&nbsp;``right``<br>
+&nbsp;&nbsp;&nbsp;&nbsp;are&nbsp;all&nbsp;scalars.&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(left,&nbsp;mode,&nbsp;right).size``<br>
+&nbsp;&nbsp;&nbsp;&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;returned&nbsp;samples&nbsp;all&nbsp;lie&nbsp;in&nbsp;the&nbsp;interval&nbsp;[left,&nbsp;right].<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;triangular&nbsp;distribution.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -4787,21 +4632,22 @@ by&nbsp;`uniform`.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-low&nbsp;:&nbsp;float,&nbsp;optional<br>
+low&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Lower&nbsp;boundary&nbsp;of&nbsp;the&nbsp;output&nbsp;interval.&nbsp;&nbsp;All&nbsp;values&nbsp;generated&nbsp;will&nbsp;be<br>
 &nbsp;&nbsp;&nbsp;&nbsp;greater&nbsp;than&nbsp;or&nbsp;equal&nbsp;to&nbsp;low.&nbsp;&nbsp;The&nbsp;default&nbsp;value&nbsp;is&nbsp;0.<br>
-high&nbsp;:&nbsp;float<br>
+high&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Upper&nbsp;boundary&nbsp;of&nbsp;the&nbsp;output&nbsp;interval.&nbsp;&nbsp;All&nbsp;values&nbsp;generated&nbsp;will&nbsp;be<br>
 &nbsp;&nbsp;&nbsp;&nbsp;less&nbsp;than&nbsp;high.&nbsp;&nbsp;The&nbsp;default&nbsp;value&nbsp;is&nbsp;1.0.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``low``&nbsp;and&nbsp;``high``&nbsp;are&nbsp;both&nbsp;scalars.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(low,&nbsp;high).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-out&nbsp;:&nbsp;ndarray<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples,&nbsp;with&nbsp;shape&nbsp;`size`.<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;uniform&nbsp;distribution.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
@@ -4821,6 +4667,12 @@ The&nbsp;probability&nbsp;density&nbsp;function&nbsp;of&nbsp;the&nbsp;uniform&nb
 ..&nbsp;math::&nbsp;p(x)&nbsp;=&nbsp;\frac{1}{b&nbsp;-&nbsp;a}<br>
 &nbsp;<br>
 anywhere&nbsp;within&nbsp;the&nbsp;interval&nbsp;``[a,&nbsp;b)``,&nbsp;and&nbsp;zero&nbsp;elsewhere.<br>
+&nbsp;<br>
+When&nbsp;``high``&nbsp;==&nbsp;``low``,&nbsp;values&nbsp;of&nbsp;``low``&nbsp;will&nbsp;be&nbsp;returned.<br>
+If&nbsp;``high``&nbsp;&lt;&nbsp;``low``,&nbsp;the&nbsp;results&nbsp;are&nbsp;officially&nbsp;undefined<br>
+and&nbsp;may&nbsp;eventually&nbsp;raise&nbsp;an&nbsp;error,&nbsp;i.e.&nbsp;do&nbsp;not&nbsp;rely&nbsp;on&nbsp;this<br>
+function&nbsp;to&nbsp;behave&nbsp;when&nbsp;passed&nbsp;arguments&nbsp;satisfying&nbsp;that<br>
+inequality&nbsp;condition.<br>
 &nbsp;<br>
 Examples<br>
 --------<br>
@@ -4982,24 +4834,25 @@ distribution.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-mu&nbsp;:&nbsp;float<br>
+mu&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Mode&nbsp;("center")&nbsp;of&nbsp;the&nbsp;distribution.<br>
-kappa&nbsp;:&nbsp;float<br>
+kappa&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Dispersion&nbsp;of&nbsp;the&nbsp;distribution,&nbsp;has&nbsp;to&nbsp;be&nbsp;&gt;=0.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``mu``&nbsp;and&nbsp;``kappa``&nbsp;are&nbsp;both&nbsp;scalars.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(mu,&nbsp;kappa).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;scalar&nbsp;or&nbsp;ndarray<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;returned&nbsp;samples,&nbsp;which&nbsp;are&nbsp;in&nbsp;the&nbsp;interval&nbsp;[-pi,&nbsp;pi].<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;von&nbsp;Mises&nbsp;distribution.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
-scipy.stats.distributions.vonmises&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;distribution,&nbsp;or&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
+scipy.stats.vonmises&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,&nbsp;distribution,&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -5056,19 +4909,20 @@ unit&nbsp;distance&nbsp;and&nbsp;distance&nbsp;covered&nbsp;in&nbsp;unit&nbsp;ti
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-mean&nbsp;:&nbsp;scalar<br>
+mean&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Distribution&nbsp;mean,&nbsp;should&nbsp;be&nbsp;&gt;&nbsp;0.<br>
-scale&nbsp;:&nbsp;scalar<br>
+scale&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Scale&nbsp;parameter,&nbsp;should&nbsp;be&nbsp;&gt;=&nbsp;0.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``mean``&nbsp;and&nbsp;``scale``&nbsp;are&nbsp;both&nbsp;scalars.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Otherwise,&nbsp;``np.broadcast(mean,&nbsp;scale).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;sample,&nbsp;all&nbsp;greater&nbsp;than&nbsp;zero.<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;Wald&nbsp;distribution.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -5115,22 +4969,24 @@ The&nbsp;more&nbsp;common&nbsp;2-parameter&nbsp;Weibull,&nbsp;including&nbsp;a&n
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-a&nbsp;:&nbsp;float<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Shape&nbsp;of&nbsp;the&nbsp;distribution.<br>
+a&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Shape&nbsp;of&nbsp;the&nbsp;distribution.&nbsp;Should&nbsp;be&nbsp;greater&nbsp;than&nbsp;zero.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``a``&nbsp;is&nbsp;a&nbsp;scalar.&nbsp;&nbsp;Otherwise,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``np.<a href="#-array">array</a>(a).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;ndarray<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;Weibull&nbsp;distribution.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
-scipy.stats.distributions.weibull_max<br>
-scipy.stats.distributions.weibull_min<br>
-scipy.stats.distributions.genextreme<br>
+scipy.stats.weibull_max<br>
+scipy.stats.weibull_min<br>
+scipy.stats.genextreme<br>
 gumbel<br>
 &nbsp;<br>
 Notes<br>
@@ -5197,8 +5053,8 @@ Parameters<br>
 condition&nbsp;:&nbsp;array_like,&nbsp;bool<br>
 &nbsp;&nbsp;&nbsp;&nbsp;When&nbsp;True,&nbsp;yield&nbsp;`x`,&nbsp;otherwise&nbsp;yield&nbsp;`y`.<br>
 x,&nbsp;y&nbsp;:&nbsp;array_like,&nbsp;optional<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Values&nbsp;from&nbsp;which&nbsp;to&nbsp;choose.&nbsp;`x`&nbsp;and&nbsp;`y`&nbsp;need&nbsp;to&nbsp;have&nbsp;the&nbsp;same<br>
-&nbsp;&nbsp;&nbsp;&nbsp;shape&nbsp;as&nbsp;`condition`.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Values&nbsp;from&nbsp;which&nbsp;to&nbsp;choose.&nbsp;`x`,&nbsp;`y`&nbsp;and&nbsp;`condition`&nbsp;need&nbsp;to&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;broadcastable&nbsp;to&nbsp;some&nbsp;shape.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
@@ -5245,7 +5101,7 @@ Examples<br>
 Find&nbsp;the&nbsp;indices&nbsp;of&nbsp;elements&nbsp;of&nbsp;`x`&nbsp;that&nbsp;are&nbsp;in&nbsp;`goodvalues`.<br>
 &nbsp;<br>
 &gt;&gt;&gt;&nbsp;goodvalues&nbsp;=&nbsp;[3,&nbsp;4,&nbsp;7]<br>
-&gt;&gt;&gt;&nbsp;ix&nbsp;=&nbsp;np.in1d(x.ravel(),&nbsp;goodvalues).reshape(x.shape)<br>
+&gt;&gt;&gt;&nbsp;ix&nbsp;=&nbsp;np.isin(x,&nbsp;goodvalues)<br>
 &gt;&gt;&gt;&nbsp;ix<br>
 <a href="#-array">array</a>([[False,&nbsp;False,&nbsp;False],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;True,&nbsp;&nbsp;True,&nbsp;False],<br>
@@ -5333,22 +5189,23 @@ frequency&nbsp;table.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
-a&nbsp;:&nbsp;float&nbsp;&gt;&nbsp;1<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Distribution&nbsp;parameter.<br>
+a&nbsp;:&nbsp;float&nbsp;or&nbsp;array_like&nbsp;of&nbsp;floats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Distribution&nbsp;parameter.&nbsp;Should&nbsp;be&nbsp;greater&nbsp;than&nbsp;1.<br>
 size&nbsp;:&nbsp;int&nbsp;or&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;optional<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;shape.&nbsp;&nbsp;If&nbsp;the&nbsp;given&nbsp;shape&nbsp;is,&nbsp;e.g.,&nbsp;``(m,&nbsp;n,&nbsp;k)``,&nbsp;then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;Default&nbsp;is&nbsp;None,&nbsp;in&nbsp;which&nbsp;case&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;single&nbsp;value&nbsp;is&nbsp;returned.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``m&nbsp;*&nbsp;n&nbsp;*&nbsp;k``&nbsp;samples&nbsp;are&nbsp;drawn.&nbsp;&nbsp;If&nbsp;size&nbsp;is&nbsp;``None``&nbsp;(default),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;single&nbsp;value&nbsp;is&nbsp;returned&nbsp;if&nbsp;``a``&nbsp;is&nbsp;a&nbsp;scalar.&nbsp;Otherwise,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;``np.<a href="#-array">array</a>(a).size``&nbsp;samples&nbsp;are&nbsp;drawn.<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-samples&nbsp;:&nbsp;scalar&nbsp;or&nbsp;ndarray<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;returned&nbsp;samples&nbsp;are&nbsp;greater&nbsp;than&nbsp;or&nbsp;equal&nbsp;to&nbsp;one.<br>
+out&nbsp;:&nbsp;ndarray&nbsp;or&nbsp;scalar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drawn&nbsp;samples&nbsp;from&nbsp;the&nbsp;parameterized&nbsp;Zipf&nbsp;distribution.<br>
 &nbsp;<br>
 See&nbsp;Also<br>
 --------<br>
-scipy.stats.distributions.zipf&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;distribution,&nbsp;or&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
+scipy.stats.zipf&nbsp;:&nbsp;probability&nbsp;density&nbsp;function,&nbsp;distribution,&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cumulative&nbsp;density&nbsp;function,&nbsp;etc.<br>
 &nbsp;<br>
 Notes<br>
 -----<br>
@@ -5379,11 +5236,13 @@ Display&nbsp;the&nbsp;histogram&nbsp;of&nbsp;the&nbsp;samples,&nbsp;along&nbsp;w
 the&nbsp;probability&nbsp;density&nbsp;function:<br>
 &nbsp;<br>
 &gt;&gt;&gt;&nbsp;import&nbsp;matplotlib.pyplot&nbsp;as&nbsp;plt<br>
-&gt;&gt;&gt;&nbsp;import&nbsp;scipy.special&nbsp;as&nbsp;sps<br>
-Truncate&nbsp;s&nbsp;values&nbsp;at&nbsp;50&nbsp;so&nbsp;plot&nbsp;is&nbsp;interesting<br>
+&gt;&gt;&gt;&nbsp;from&nbsp;scipy&nbsp;import&nbsp;special<br>
+&nbsp;<br>
+Truncate&nbsp;s&nbsp;values&nbsp;at&nbsp;50&nbsp;so&nbsp;plot&nbsp;is&nbsp;interesting:<br>
+&nbsp;<br>
 &gt;&gt;&gt;&nbsp;count,&nbsp;bins,&nbsp;ignored&nbsp;=&nbsp;plt.hist(s[s&lt;50],&nbsp;50,&nbsp;normed=True)<br>
 &gt;&gt;&gt;&nbsp;x&nbsp;=&nbsp;np.<a href="#-arange">arange</a>(1.,&nbsp;50.)<br>
-&gt;&gt;&gt;&nbsp;y&nbsp;=&nbsp;x**(-a)/sps.zetac(a)<br>
+&gt;&gt;&gt;&nbsp;y&nbsp;=&nbsp;x**(-a)&nbsp;/&nbsp;special.zetac(a)<br>
 &gt;&gt;&gt;&nbsp;plt.plot(x,&nbsp;y/max(y),&nbsp;linewidth=2,&nbsp;color='r')<br>
 &gt;&gt;&gt;&nbsp;plt.show()</tt></dd></dl>
 </td></tr></table><p>
@@ -5434,7 +5293,7 @@ Truncate&nbsp;s&nbsp;values&nbsp;at&nbsp;50&nbsp;so&nbsp;plot&nbsp;is&nbsp;inter
 <strong>SHIFT_OVERFLOW</strong> = 3<br>
 <strong>SHIFT_UNDERFLOW</strong> = 6<br>
 <strong>SU</strong> = SU<br>
-<strong>ScalarType</strong> = (&lt;class 'int'&gt;, &lt;class 'float'&gt;, &lt;class 'complex'&gt;, &lt;class 'int'&gt;, &lt;class 'bool'&gt;, &lt;class 'bytes'&gt;, &lt;class 'str'&gt;, &lt;class 'memoryview'&gt;, &lt;class 'numpy.int32'&gt;, &lt;class 'numpy.bytes_'&gt;, &lt;class 'numpy.timedelta64'&gt;, &lt;class 'numpy.float16'&gt;, &lt;class 'numpy.uint8'&gt;, &lt;class 'numpy.int8'&gt;, &lt;class 'numpy.complex256'&gt;, &lt;class 'numpy.float128'&gt;, &lt;class 'numpy.uint64'&gt;, &lt;class 'numpy.int64'&gt;, &lt;class 'numpy.str_'&gt;, &lt;class 'numpy.complex64'&gt;, ...)<br>
+<strong>ScalarType</strong> = (&lt;class 'int'&gt;, &lt;class 'float'&gt;, &lt;class 'complex'&gt;, &lt;class 'int'&gt;, &lt;class 'bool'&gt;, &lt;class 'bytes'&gt;, &lt;class 'str'&gt;, &lt;class 'memoryview'&gt;, &lt;class 'numpy.uint64'&gt;, &lt;class 'numpy.int64'&gt;, &lt;class 'numpy.str_'&gt;, &lt;class 'numpy.complex64'&gt;, &lt;class 'numpy.float32'&gt;, &lt;class 'numpy.uint16'&gt;, &lt;class 'numpy.int16'&gt;, &lt;class 'numpy.object_'&gt;, &lt;class 'numpy.datetime64'&gt;, &lt;class 'numpy.uint64'&gt;, &lt;class 'numpy.int64'&gt;, &lt;class 'numpy.void'&gt;, ...)<br>
 <strong>TH</strong> = TH<br>
 <strong>TU</strong> = TU<br>
 <strong>True_</strong> = True<br>
@@ -5459,7 +5318,7 @@ Truncate&nbsp;s&nbsp;values&nbsp;at&nbsp;50&nbsp;so&nbsp;plot&nbsp;is&nbsp;inter
 <strong>bitwise_or</strong> = &lt;ufunc 'bitwise_or'&gt;<br>
 <strong>bitwise_xor</strong> = &lt;ufunc 'bitwise_xor'&gt;<br>
 <strong>c_</strong> = &lt;numpy.lib.index_tricks.CClass object&gt;<br>
-<strong>cast</strong> = {&lt;class 'numpy.int32'&gt;: &lt;function &lt;lambda&gt; at 0x...mpy.uint32'&gt;: &lt;function &lt;lambda&gt; at 0x10a21ac80&gt;}<br>
+<strong>cast</strong> = {&lt;class 'numpy.uint64'&gt;: &lt;function &lt;lambda&gt; at 0...y.float128'&gt;: &lt;function &lt;lambda&gt; at 0x10b82ed08&gt;}<br>
 <strong>cbrt</strong> = &lt;ufunc 'cbrt'&gt;<br>
 <strong>ceil</strong> = &lt;ufunc 'ceil'&gt;<br>
 <strong>conj</strong> = &lt;ufunc 'conjugate'&gt;<br>
@@ -5471,6 +5330,7 @@ Truncate&nbsp;s&nbsp;values&nbsp;at&nbsp;50&nbsp;so&nbsp;plot&nbsp;is&nbsp;inter
 <strong>degrees</strong> = &lt;ufunc 'degrees'&gt;<br>
 <strong>divide</strong> = &lt;ufunc 'true_divide'&gt;<br>
 <strong>division</strong> = _Feature((2, 2, 0, 'alpha', 2), (3, 0, 0, 'alpha', 0), 8192)<br>
+<strong>divmod</strong> = &lt;ufunc 'divmod'&gt;<br>
 <strong>e</strong> = 2.718281828459045<br>
 <strong>equal</strong> = &lt;ufunc 'equal'&gt;<br>
 <strong>euler_gamma</strong> = 0.5772156649015329<br>
@@ -5478,6 +5338,7 @@ Truncate&nbsp;s&nbsp;values&nbsp;at&nbsp;50&nbsp;so&nbsp;plot&nbsp;is&nbsp;inter
 <strong>exp2</strong> = &lt;ufunc 'exp2'&gt;<br>
 <strong>expm1</strong> = &lt;ufunc 'expm1'&gt;<br>
 <strong>fabs</strong> = &lt;ufunc 'fabs'&gt;<br>
+<strong>float_power</strong> = &lt;ufunc 'float_power'&gt;<br>
 <strong>floor</strong> = &lt;ufunc 'floor'&gt;<br>
 <strong>floor_divide</strong> = &lt;ufunc 'floor_divide'&gt;<br>
 <strong>fmax</strong> = &lt;ufunc 'fmax'&gt;<br>
@@ -5486,6 +5347,7 @@ Truncate&nbsp;s&nbsp;values&nbsp;at&nbsp;50&nbsp;so&nbsp;plot&nbsp;is&nbsp;inter
 <strong>frexp</strong> = &lt;ufunc 'frexp'&gt;<br>
 <strong>greater</strong> = &lt;ufunc 'greater'&gt;<br>
 <strong>greater_equal</strong> = &lt;ufunc 'greater_equal'&gt;<br>
+<strong>heaviside</strong> = &lt;ufunc 'heaviside'&gt;<br>
 <strong>hypot</strong> = &lt;ufunc 'hypot'&gt;<br>
 <strong>index_exp</strong> = &lt;numpy.lib.index_tricks.IndexExpression object&gt;<br>
 <strong>inf</strong> = inf<br>
@@ -5495,6 +5357,7 @@ Truncate&nbsp;s&nbsp;values&nbsp;at&nbsp;50&nbsp;so&nbsp;plot&nbsp;is&nbsp;inter
 <strong>isfinite</strong> = &lt;ufunc 'isfinite'&gt;<br>
 <strong>isinf</strong> = &lt;ufunc 'isinf'&gt;<br>
 <strong>isnan</strong> = &lt;ufunc 'isnan'&gt;<br>
+<strong>isnat</strong> = &lt;ufunc 'isnat'&gt;<br>
 <strong>ldexp</strong> = &lt;ufunc 'ldexp'&gt;<br>
 <strong>left_shift</strong> = &lt;ufunc 'left_shift'&gt;<br>
 <strong>less</strong> = &lt;ufunc 'less'&gt;<br>
@@ -5517,31 +5380,32 @@ Truncate&nbsp;s&nbsp;values&nbsp;at&nbsp;50&nbsp;so&nbsp;plot&nbsp;is&nbsp;inter
 <strong>modf</strong> = &lt;ufunc 'modf'&gt;<br>
 <strong>multiply</strong> = &lt;ufunc 'multiply'&gt;<br>
 <strong>nan</strong> = nan<br>
-<strong>nbytes</strong> = {&lt;class 'numpy.int32'&gt;: 4, &lt;class 'numpy.bytes_'...ass 'numpy.bool_'&gt;: 1, &lt;class 'numpy.uint32'&gt;: 4}<br>
+<strong>nbytes</strong> = {&lt;class 'numpy.uint64'&gt;: 8, &lt;class 'numpy.int64'...y.complex256'&gt;: 32, &lt;class 'numpy.float128'&gt;: 16}<br>
 <strong>negative</strong> = &lt;ufunc 'negative'&gt;<br>
 <strong>newaxis</strong> = None<br>
 <strong>nextafter</strong> = &lt;ufunc 'nextafter'&gt;<br>
 <strong>not_equal</strong> = &lt;ufunc 'not_equal'&gt;<br>
 <strong>ogrid</strong> = &lt;numpy.lib.index_tricks.nd_grid object&gt;<br>
 <strong>pi</strong> = 3.141592653589793<br>
+<strong>positive</strong> = &lt;ufunc 'positive'&gt;<br>
 <strong>print_function</strong> = _Feature((2, 6, 0, 'alpha', 2), (3, 0, 0, 'alpha', 0), 65536)<br>
 <strong>r_</strong> = &lt;numpy.lib.index_tricks.RClass object&gt;<br>
 <strong>rad2deg</strong> = &lt;ufunc 'rad2deg'&gt;<br>
 <strong>radians</strong> = &lt;ufunc 'radians'&gt;<br>
-<strong>rcParams</strong> = RcParams({'agg.path.chunksize': 0,
-          'an...ble': False,
-          'ytick.minor.width': 0.5})<br>
-<strong>rcParamsDefault</strong> = RcParams({'agg.path.chunksize': 0,
-          'an...ble': False,
-          'ytick.minor.width': 0.5})<br>
+<strong>rcParams</strong> = RcParams({'_internal.classic_mode': False,
+     ...nor.width': 0.6,
+          'ytick.right': False})<br>
+<strong>rcParamsDefault</strong> = RcParams({'_internal.classic_mode': False,
+     ...nor.width': 0.6,
+          'ytick.right': False})<br>
 <strong>reciprocal</strong> = &lt;ufunc 'reciprocal'&gt;<br>
 <strong>remainder</strong> = &lt;ufunc 'remainder'&gt;<br>
 <strong>right_shift</strong> = &lt;ufunc 'right_shift'&gt;<br>
 <strong>rint</strong> = &lt;ufunc 'rint'&gt;<br>
 <strong>s_</strong> = &lt;numpy.lib.index_tricks.IndexExpression object&gt;<br>
-<strong>sctypeDict</strong> = {0: &lt;class 'numpy.bool_'&gt;, 1: &lt;class 'numpy.int8'&gt;, 2: &lt;class 'numpy.uint8'&gt;, 3: &lt;class 'numpy.int16'&gt;, 'double': &lt;class 'numpy.float64'&gt;, 5: &lt;class 'numpy.int32'&gt;, 6: &lt;class 'numpy.uint32'&gt;, 7: &lt;class 'numpy.int64'&gt;, 8: &lt;class 'numpy.uint64'&gt;, 9: &lt;class 'numpy.int64'&gt;, ...}<br>
-<strong>sctypeNA</strong> = {'V': 'Void0', 'f4': 'Float32', &lt;class 'numpy.timedelta64'&gt;: 'Timedelta64', 'i2': &lt;class 'numpy.int16'&gt;, &lt;class 'numpy.uint8'&gt;: 'UInt8', 'Object0': &lt;class 'numpy.object_'&gt;, &lt;class 'numpy.int64'&gt;: 'Int64', 'Q': 'UInt64', &lt;class 'numpy.complex64'&gt;: 'Complex32', 'F': 'Complex32', ...}<br>
-<strong>sctypes</strong> = {'complex': [&lt;class 'numpy.complex64'&gt;, &lt;class 'numpy.complex128'&gt;, &lt;class 'numpy.complex256'&gt;], 'float': [&lt;class 'numpy.float16'&gt;, &lt;class 'numpy.float32'&gt;, &lt;class 'numpy.float64'&gt;, &lt;class 'numpy.float128'&gt;], 'int': [&lt;class 'numpy.int8'&gt;, &lt;class 'numpy.int16'&gt;, &lt;class 'numpy.int32'&gt;, &lt;class 'numpy.int64'&gt;], 'others': [&lt;class 'bool'&gt;, &lt;class 'object'&gt;, &lt;class 'str'&gt;, &lt;class 'str'&gt;, &lt;class 'numpy.void'&gt;], 'uint': [&lt;class 'numpy.uint8'&gt;, &lt;class 'numpy.uint16'&gt;, &lt;class 'numpy.uint32'&gt;, &lt;class 'numpy.uint64'&gt;]}<br>
+<strong>sctypeDict</strong> = {0: &lt;class 'numpy.bool_'&gt;, 1: &lt;class 'numpy.int8'&gt;, 2: &lt;class 'numpy.uint8'&gt;, 3: &lt;class 'numpy.int16'&gt;, 4: &lt;class 'numpy.uint16'&gt;, 5: &lt;class 'numpy.int32'&gt;, 6: &lt;class 'numpy.uint32'&gt;, 7: &lt;class 'numpy.int64'&gt;, 8: &lt;class 'numpy.uint64'&gt;, 9: &lt;class 'numpy.int64'&gt;, ...}<br>
+<strong>sctypeNA</strong> = {&lt;class 'numpy.uint64'&gt;: 'UInt64', '?': 'Bool', 'c8': 'Complex32', &lt;class 'numpy.str_'&gt;: 'Str0', 'Str0': &lt;class 'numpy.str_'&gt;, 'F': 'Complex32', 'f2': 'Float16', 'Int16': &lt;class 'numpy.int16'&gt;, 'Bytes0': &lt;class 'numpy.bytes_'&gt;, 'u4': &lt;class 'numpy.uint32'&gt;, ...}<br>
+<strong>sctypes</strong> = {'complex': [&lt;class 'numpy.complex64'&gt;, &lt;class 'numpy.complex128'&gt;, &lt;class 'numpy.complex256'&gt;], 'float': [&lt;class 'numpy.float16'&gt;, &lt;class 'numpy.float32'&gt;, &lt;class 'numpy.float64'&gt;, &lt;class 'numpy.float128'&gt;], 'int': [&lt;class 'numpy.int8'&gt;, &lt;class 'numpy.int16'&gt;, &lt;class 'numpy.int32'&gt;, &lt;class 'numpy.int64'&gt;], 'others': [&lt;class 'bool'&gt;, &lt;class 'object'&gt;, &lt;class 'bytes'&gt;, &lt;class 'str'&gt;, &lt;class 'numpy.void'&gt;], 'uint': [&lt;class 'numpy.uint8'&gt;, &lt;class 'numpy.uint16'&gt;, &lt;class 'numpy.uint32'&gt;, &lt;class 'numpy.uint64'&gt;]}<br>
 <strong>sign</strong> = &lt;ufunc 'sign'&gt;<br>
 <strong>signbit</strong> = &lt;ufunc 'signbit'&gt;<br>
 <strong>sin</strong> = &lt;ufunc 'sin'&gt;<br>
@@ -5549,15 +5413,16 @@ Truncate&nbsp;s&nbsp;values&nbsp;at&nbsp;50&nbsp;so&nbsp;plot&nbsp;is&nbsp;inter
 <strong>spacing</strong> = &lt;ufunc 'spacing'&gt;<br>
 <strong>sqrt</strong> = &lt;ufunc 'sqrt'&gt;<br>
 <strong>square</strong> = &lt;ufunc 'square'&gt;<br>
-<strong>standard_cmds</strong> = array(['1', 'n', 't', 'r', 'v', '1', '2', '3', '...6', '4', '6', '5', '0', 'q'], 
+<strong>standard_cmds</strong> = array(['1', 'n', 't', 'r', 'v', '1', '2', '3', '...'6', '4', '6', '5', '0', 'q'],
       dtype='&lt;U2')<br>
 <strong>subtract</strong> = &lt;ufunc 'subtract'&gt;<br>
 <strong>tan</strong> = &lt;ufunc 'tan'&gt;<br>
 <strong>tanh</strong> = &lt;ufunc 'tanh'&gt;<br>
+<strong>tracemalloc_domain</strong> = 389047<br>
 <strong>true_divide</strong> = &lt;ufunc 'true_divide'&gt;<br>
 <strong>trunc</strong> = &lt;ufunc 'trunc'&gt;<br>
-<strong>typeDict</strong> = {0: &lt;class 'numpy.bool_'&gt;, 1: &lt;class 'numpy.int8'&gt;, 2: &lt;class 'numpy.uint8'&gt;, 3: &lt;class 'numpy.int16'&gt;, 'double': &lt;class 'numpy.float64'&gt;, 5: &lt;class 'numpy.int32'&gt;, 6: &lt;class 'numpy.uint32'&gt;, 7: &lt;class 'numpy.int64'&gt;, 8: &lt;class 'numpy.uint64'&gt;, 9: &lt;class 'numpy.int64'&gt;, ...}<br>
-<strong>typeNA</strong> = {'V': 'Void0', 'f4': 'Float32', &lt;class 'numpy.timedelta64'&gt;: 'Timedelta64', 'i2': &lt;class 'numpy.int16'&gt;, &lt;class 'numpy.uint8'&gt;: 'UInt8', 'Object0': &lt;class 'numpy.object_'&gt;, &lt;class 'numpy.int64'&gt;: 'Int64', 'Q': 'UInt64', &lt;class 'numpy.complex64'&gt;: 'Complex32', 'F': 'Complex32', ...}<br>
+<strong>typeDict</strong> = {0: &lt;class 'numpy.bool_'&gt;, 1: &lt;class 'numpy.int8'&gt;, 2: &lt;class 'numpy.uint8'&gt;, 3: &lt;class 'numpy.int16'&gt;, 4: &lt;class 'numpy.uint16'&gt;, 5: &lt;class 'numpy.int32'&gt;, 6: &lt;class 'numpy.uint32'&gt;, 7: &lt;class 'numpy.int64'&gt;, 8: &lt;class 'numpy.uint64'&gt;, 9: &lt;class 'numpy.int64'&gt;, ...}<br>
+<strong>typeNA</strong> = {&lt;class 'numpy.uint64'&gt;: 'UInt64', '?': 'Bool', 'c8': 'Complex32', &lt;class 'numpy.str_'&gt;: 'Str0', 'Str0': &lt;class 'numpy.str_'&gt;, 'F': 'Complex32', 'f2': 'Float16', 'Int16': &lt;class 'numpy.int16'&gt;, 'Bytes0': &lt;class 'numpy.bytes_'&gt;, 'u4': &lt;class 'numpy.uint32'&gt;, ...}<br>
 <strong>typecodes</strong> = {'All': '?bhilqpBHILQPefdgFDGSUVOMm', 'AllFloat': 'efdgFDG', 'AllInteger': 'bBhHiIlLqQpP', 'Character': 'c', 'Complex': 'FDG', 'Datetime': 'Mm', 'Float': 'efdg', 'Integer': 'bhilqp', 'UnsignedInteger': 'BHILQP'}<br>
 <strong>unicode_literals</strong> = _Feature((2, 6, 0, 'alpha', 2), (3, 0, 0, 'alpha', 0), 131072)<br>
 <strong>using_mklfft</strong> = False</td></tr></table>

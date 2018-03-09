@@ -49,35 +49,20 @@ our 'tfpy' Python (no relation) library.
 
 ----------------------------------------
 
-reverb.filter_lines
--------------------
-Whether or not to filter any lines out of the output file. This is used to keep output
-file sizes down, and avoid them overwhelming the user.
+reverb.matom_lines
+------------------
+Number of macro-atom lines to track paths for individually. This many
+reverb.matom_line entries are required, and the line associated with each has
+the path of photons deexciting into it recorded in its own array. Note: This
+doesn't give rise to any noticable differences to the pure wind mode in most
+simulations.
 
 **Type:** Int
 
-**Values:**
-
-0. **No filtering**
-   
-   Include *all* photons that contribute to the spectra in the output
-   file. Not recommended as it leads to gargantuan file sizes.
-
-N. **Filter lines**
-   
-   Include N reverb.filter_line entries, each specifying one
-   line to keep in the output file. If reverb.matom_lines is >0, all macro-atom
-   lines of interest are automatically included in the filter list.
-
--1. **Filter continuum**
-   
-   Include all photons whose last interaction was scatter
-   or emission in a line. Recommended setting for exploratory runs where you'd
-   like to identify which lines are the easiest to process.
-
+**Value:** 0 or N
 
 **Parent(s):**
-  reverb.type_: Greater than 0
+  reverb.type_: 3
 
 
 **File:** setup_reverb.c
@@ -85,22 +70,21 @@ N. **Filter lines**
 
 ----------------------------------------
 
-reverb.filter_line
-^^^^^^^^^^^^^^^^^^
-Line number of one line to include in the output .delay_dump file. This is
-the python internal line number. It can be found using either the macro-atom
-mode (which prints out the line number once it's found one) or by doing an
-exploratory run with reverb.filter_lines = -1, then looking through the delay
-dump file for photons of the right wavelength to see what their line is. This
-should almost certainly be changed to be specified using a species and
-wavelength!
+reverb.matom_line
+^^^^^^^^^^^^^^^^^
+Specifies a line associated with a given macro-atom transition. The species
+and transition involved are specified. The internal line associated with this
+transition will be printed to standard-out for use when processing outputs. A
+line is specified as Element:Ion:Upper level:Lower level.
 
-**Type:** Int
+**Type:** Int:Int:Int:Int
 
-**Value:** Any valid line index
+
+**Value:** >0:>0:>1:>0
+
 
 **Parent(s):**
-  reverb.filter_lines_: Greater than 0
+  reverb.matom_lines_: Greater than 0
 
 
 **File:** setup_reverb.c
@@ -155,22 +139,58 @@ distributions for wind cells.
 
 ----------------------------------------
 
-reverb.path_bins
-----------------
-Number of bins for photon paths. Reverb modes that record the distribution of
-path lengths in every wind cell bin them in this number of bins. Bins are
-logarithmically spaced between the minimum scale in the system (the smallest
-'minimum radius' in any domain) and the 10 * the maximum scale in the system
-(10 * the 'maximum radius' in any domain). Default value is 1000, going much
-higher does not lead to qualitative differences in TF, going lower makes the
-bin boundaries show up in the TF.
+reverb.filter_lines
+-------------------
+Whether or not to filter any lines out of the output file. This is used to keep output
+file sizes down, and avoid them overwhelming the user.
 
 **Type:** Int
 
-**Value:** Greater than 0
+**Values:**
+
+0. **No filtering**
+   
+   Include *all* photons that contribute to the spectra in the output
+   file. Not recommended as it leads to gargantuan file sizes.
+
+N. **Filter lines**
+   
+   Include N reverb.filter_line entries, each specifying one
+   line to keep in the output file. If reverb.matom_lines is >0, all macro-atom
+   lines of interest are automatically included in the filter list.
+
+-1. **Filter continuum**
+   
+   Include all photons whose last interaction was scatter
+   or emission in a line. Recommended setting for exploratory runs where you'd
+   like to identify which lines are the easiest to process.
+
 
 **Parent(s):**
-  reverb.type_: 2, 3
+  reverb.type_: Greater than 0
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
+reverb.filter_line
+^^^^^^^^^^^^^^^^^^
+Line number of one line to include in the output .delay_dump file. This is
+the python internal line number. It can be found using either the macro-atom
+mode (which prints out the line number once it's found one) or by doing an
+exploratory run with reverb.filter_lines = -1, then looking through the delay
+dump file for photons of the right wavelength to see what their line is. This
+should almost certainly be changed to be specified using a species and
+wavelength!
+
+**Type:** Int
+
+**Value:** Any valid line index
+
+**Parent(s):**
+  reverb.filter_lines_: Greater than 0
 
 
 **File:** setup_reverb.c
@@ -277,42 +297,22 @@ with larger filesizes.
 
 ----------------------------------------
 
-reverb.matom_lines
-------------------
-Number of macro-atom lines to track paths for individually. This many
-reverb.matom_line entries are required, and the line associated with each has
-the path of photons deexciting into it recorded in its own array. Note: This
-doesn't give rise to any noticable differences to the pure wind mode in most
-simulations.
+reverb.path_bins
+----------------
+Number of bins for photon paths. Reverb modes that record the distribution of
+path lengths in every wind cell bin them in this number of bins. Bins are
+logarithmically spaced between the minimum scale in the system (the smallest
+'minimum radius' in any domain) and the 10 * the maximum scale in the system
+(10 * the 'maximum radius' in any domain). Default value is 1000, going much
+higher does not lead to qualitative differences in TF, going lower makes the
+bin boundaries show up in the TF.
 
 **Type:** Int
 
-**Value:** 0 or N
+**Value:** Greater than 0
 
 **Parent(s):**
-  reverb.type_: 3
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
-reverb.matom_line
-^^^^^^^^^^^^^^^^^
-Specifies a line associated with a given macro-atom transition. The species
-and transition involved are specified. The internal line associated with this
-transition will be printed to standard-out for use when processing outputs. A
-line is specified as Element:Ion:Upper level:Lower level.
-
-**Type:** Int:Int:Int:Int
-
-
-**Value:** >0:>0:>1:>0
-
-
-**Parent(s):**
-  reverb.matom_lines_: Greater than 0
+  reverb.type_: 2, 3
 
 
 **File:** setup_reverb.c

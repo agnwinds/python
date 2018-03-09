@@ -1,3 +1,15 @@
+
+/***********************************************************/
+/** @file  stellar_wind.c
+ * @Author ksl
+ * @date   January, 2018
+ *
+ * @brief  Routines needed to define a spherical wind with a Castor and Larmors velocity law
+ *
+ * The Castor and Lamors' velocity law has
+ *
+ * v(r)=V_o + (V_infinity-V_o) (1-R/r)**beta
+ ***********************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -5,48 +17,30 @@
 #include "atomic.h"
 #include "python.h"
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-	get_stellar_wind_params gets input data which is necessary for a Castor and Larmors'
-	(1979) description of an O star wind, e.g.
-   		v(r)=V_o + (V_infinity-V_o) (1-R/r)**beta
-
-Arguments:		
-
-Returns:
- 
-Description:	
-	The parameters, zdom[ndom].cl...,  obtained here are only used in the routines in stellar_winds.c
-	which calculate the velocity and density of the wind during the initialization process.
-	Other portions of the structure, zdom[ndom] defined here are more general purpose.
-
-Notes:
-	Although it seems natural to assume that the wind starts at the photosphere, this
-	is not required (and in Mauche and Raymond's spherical model for a CV wind they set
-	the inner radius of the wind at several WD radii. (04jun--ksl-It does not look to me
-	as if the code as written really implements the possibility of a wind that starts
-	at a radius larger than the star.  This should be checked if one really wants to
-	do this.)
 
 
-History:
- 	98dec	ksl	Coded and debugged as part of major change in IO structure required when
- 			adding a spherical wind
-	99dec	ksl	Corrected coding error, which resulted in geo.cl_rmin not being set
-			to geo.wind_rmin.  Note that it is not clear that geo.wind_rmind,
-			and goe.cl_rmin are needed separately (and someday this should be corrected.)
-	04jun	ksl	Moved from python.c to this file for consistency, and moved reading
-			of wind.mdot to this file.  Also added a new variable to geo, namely
-			geo.stellar_wind_modt so that could distinguish from stellar and
-			disk_wind...which is needed for the yso models.  This implies that
-			old .pf files for stellar winds will have to be modified, but there
-			are few of these.  Deleted lines which eliminated the disk for 
-			stellar models.
-	15aug	ksl	Change to accomodate multiple domains
-**************************************************************/
 
+/**********************************************************/
+/** @name      get_stellar_wind_params
+ * @brief      gets input data which is necessary for a Castor and Larmors'
+ * 	(1979) description of an O star wind, 
+ *
+ * @param [in] int  ndom   The domaain number
+ * @return     Always returns zero
+ *
+ *
+ * @notes
+ *
+ * Although it seems natural to assume that the wind starts at the photosphere, this
+ * 	is not required (and in Mauche and Raymond's spherical model for a CV wind they set
+ * 	the inner radius of the wind at several WD radii.  That possibility is allowed for
+ *
+ * 	@bug There was an old note here indicating that the ksl was unsure(04j) whether 
+ * 	as if the code as written really implements the possibility of a wind that starts
+ * 	at a radius larger than the star.  This should be checked
+ * 	
+ *
+ **********************************************************/
 
 int
 get_stellar_wind_params (ndom)
@@ -54,15 +48,15 @@ get_stellar_wind_params (ndom)
 {
   Log ("Creating a wind model for a Star\n");
 
-
-
-
+  /* Initialize some of the parameters */
   zdom[ndom].stellar_wind_mdot = 1.e-6;
   zdom[ndom].rmin = geo.rstar;
   zdom[ndom].cl_beta = 1.0;
   zdom[ndom].cl_rmin = 2.8e9;
   zdom[ndom].cl_v_zero = 200e5;
   zdom[ndom].cl_v_infinity = 3000e5;
+
+  /* Get the parameters needed to define the wind */
 
   rddoub ("Stellar_wind.mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
   zdom[ndom].stellar_wind_mdot *= MSOL / YR;
@@ -81,8 +75,7 @@ get_stellar_wind_params (ndom)
   rddoub ("Stellar_wind.acceleration_exponent", &zdom[ndom].cl_beta);   /* Accleration scale exponent */
 
   /* Assign the generic parameters for the wind the generic parameters of the wind */
-  geo.rmin = zdom[ndom].rmin;    // 71 ksl - Not modified this so that we did not waste cells
-  //zdom[ndom].rmax = geo.rmax;  // This was already assigned, by the line wind.radmax ksl 170530 (see also #305)
+  geo.rmin = zdom[ndom].rmin;    
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 90. / RADIAN;
 
@@ -104,45 +97,37 @@ get_stellar_wind_params (ndom)
 
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
-	double stellar_velocity(ndom, x,v) calulates the v the wind at a position 
-	x (where both x and v in cartesian coordinates)
-Arguments:		
-	ndom 			The domain number
-	double x[]		the postion where for the which one desires the velocity
-Returns:
-	double v[]		the calculated velocity
-	
-	The amplitude of the velocity is returned 
-	
-Description:	
-	The model is that of Castor and Lamars 1979  where
 
-	v(r)=V_o + (V_infinity-V_o) (1-R/r)**beta
-	
-	The values of the individiual constants should all be part of the structure zdom[ndom].
-
-	V_o:  			zdom[ndom].cl_v_zero;		velocity at base of wind 
-	V_infinity:		zdom[ndom].cl_v_infinity;	the velocity at infinity
-	R			zdom[ndom].cl_rmin	       	the inner radius of the wind
-	beta			zdom[ndom].cl_beta		power law exponent for the velocity law
-
-		
-Notes:
-	v is set to V_o inside of rstar or w_rscale, even though the should not really exist there!
-
-	Since this is a radial wind, it is not affected by the disk at all. In particular there
-	are no modifications to this routine if the disk is vertically extended.
-
-History:
- 	98dec	ksl	Coded as part of effort to add a stellar wind option to python
-	04jun	ksl	Caused routine to return 0 velocity at origin to avoid clutter of irrelevant
-			error messages.
- 
-**************************************************************/
+/**********************************************************/
+/** @name      stellar_velocity
+ * @brief      Calbulate the wind velocity at a position
+ *
+ * @param [in] int  ndom   The domain number
+ * @param [in] double  x[]   the postion (in cartesian coordinates)
+ * @param [out] double  v[]  the resulting velocity (in cartesain coordiantes
+ * @return   the speed at the position               
+ * 	
+ *
+ * The model is that of Castor and Lamars 1979  where
+ * 
+ * v(r)=V_o + (V_infinity-V_o) (1-R/r)**beta
+ * 	
+ * The values of the individiual constants should all be part of the structure zdom[ndom].
+ * 
+ * - V_o:  			zdom[ndom].cl_v_zero;		velocity at base of wind 
+ * - V_infinity:		zdom[ndom].cl_v_infinity;	the velocity at infinity
+ * - R:			zdom[ndom].cl_rmin;	       	the inner radius of the wind
+ * - beta:			zdom[ndom].cl_beta;		power law exponent for the velocity law
+ *
+ * @notes
+ *
+ * v is set to V_o inside of rstar or w_rscale, even though the should not really exist there!
+ * 
+ * Since this is a radial wind, it is not affected by the disk at all. In particular there
+ * are no modifications to this routine if the disk is vertically extended.
+ *
+ **********************************************************/
 
 double
 stellar_velocity (ndom, x, v)
@@ -176,26 +161,21 @@ stellar_velocity (ndom, x, v)
 
 }
 
-/***********************************************************
-		Space Telescope Science Institute
 
- Synopsis:
-	double stellar_rho(x) calculates the density of an stellar_wind at a position x
-Arguments:		
-	double x[]	the position where for the which one desires the density
-Returns:
-	The density at x is returned in gram/cm**3
-	
-Description:
-
-	rho=mdot/(4PI*r*r*v);	
-		
-Notes:
-
-History:
- 	98dec	ksl	Modified from sv.c portions of the code.
- 
-**************************************************************/
+/**********************************************************/
+/** @name      stellar_rho
+ * @brief      Calculate the density of an stellar_wind at a position x
+ *
+ * @param [in] int  ndom   The domain number
+ * @param [in] double  x[]   the position where for the which one desires the density
+ * @return     The density at x is returned in gram/cm**3
+ *
+ * rho=mdot/(4PI*r*r*v);
+ *
+ * @notes
+ *
+ *
+ **********************************************************/
 
 double
 stellar_rho (ndom, x)
