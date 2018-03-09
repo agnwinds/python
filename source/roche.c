@@ -23,7 +23,7 @@
  *    or not.  If it misses, hit_secondary returns 0, if it hits, the return is
  *    P_SEC (or hit secondary as contained in python.h).
  *
- * @notes
+ * ###Notes###
  *
  * The secondary is located along the x, i.e. 0, axis
  * 
@@ -171,7 +171,7 @@ binary_basics ()
  * Instead of simply determining whether the photon hits the Roche surface, this routine determine
  * how far the photon would need to travel to hit the Roche surface.
  *
- * @notes
+ * ###Notes###
  *
  * This routine is currently not used in Python.  It would be important
  * if one actually wished to calculate the heating of the secondary.
@@ -249,7 +249,7 @@ ds_to_roche_2 (p)
  *
  * The routine chacks whether a photon hits the Roche lobe of the secondary star.
  *
- * @notes
+ * ###Notes###
  *
  * The routine first checks if the photon encounters a pill_box that surrouds the secondary.  Photons
  * that do not encounter this pill box do not hit the secondar.  If  the photon enters the pill box, then 
@@ -302,7 +302,7 @@ hit_secondary (p)
  * If the photon does pass through the secondary, then the routine returns the distances of entry and exit which
  * are used to limit the range of root finding that then must take place.
  *
- * @notes
+ * ###Notes###
  *
  * The pillbox is defined by a plane at L1, a plane on the backside of the star and a cylinder whose radius
  * is the maximum (half) width of the star in the plane of the orbit.
@@ -448,7 +448,7 @@ double phi_gm1, phi_gm2, phi_3, phi_4;
  *
  * Given a photon stored in p_roche and a distance s to move the photone, phi returns the roche potentail at that point
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -508,7 +508,7 @@ phi (s)
  *
  * This is a brute force calculation of the first derivative of the Roche potentail
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -539,7 +539,7 @@ dphi_ds (s)
  * @return     The second deritave
  *
  *
- * @notes
+ * ###Notes###
  *
  * This is a brute force calculation of the derivative
  *
@@ -574,7 +574,7 @@ d2phi_ds2 (s)
  * Calculate the half width of the Roche lobe at the position x along the 
  *   x axis in the plane of the orbit.  
  *
- * @notes
+ * ###Notes###
  *   There is no real guarantee that this would
  *   work if you were outside L2 or L3. 
  *
@@ -622,7 +622,7 @@ roche_width (x)
  * Find the maximum half width of the Roche lobe of the secondary.   This routine
  *   uses the NR routine golden to find the point in x where the Roche lobe is maximized.  
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -667,7 +667,7 @@ roche2_width_max ()
  *   phi has to be set in advance through geo.phi and would normally be that of
  *   the Roche lobe 
  *
- * @notes
+ * ###Notes###
  *
  * The routime simply calls phi and dphi_ds
  *
@@ -698,7 +698,7 @@ roche (s, value, derivative)
  *  *derivative is the second derivative 
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/

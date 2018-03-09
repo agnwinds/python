@@ -163,7 +163,7 @@ int number_of_names = 79;
  *   the array new_names, below.  If it finds a match, the old_name is 
  *   returned in old_question.
  *
- * @notes
+ * ###Notes###
  *
  * To add another variable to the list, just record the new_name and the
  *   old_name in the arrays below, and increase the number of names by 1

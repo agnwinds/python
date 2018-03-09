@@ -4,7 +4,7 @@
  * @Author ksl
  * @date   January, 2018
  *
- * @brief  Various routines related setting up the disk and calculating 
+ * @brief  Various routines related setting up the disk and calculating
  * when a photon encounters the disk surface
  *
  ***********************************************************/
@@ -27,10 +27,10 @@
  * @param [in] double  r   radiis of the central object
  * @return     The reference temperature for the disk
  *
+ * @details
  * All of the inputs are in cgs units
  *
- * @notes
- *
+ * ### Notes ###
  * For an SS disk,  The maximum temperature
  *    actuallly seen in the disk is 0.488 tdisk
  *
@@ -52,28 +52,28 @@ tdisk (m, mdot, r)
 
 /**********************************************************/
 /** @name      teff
- * @brief      Calculate the temperature of the disk at a normalised distance x 
+ * @brief      Calculate the temperature of the disk at a normalised distance x
  *
  * @param [in] double  t   reference temperature of the disk in degrees
  * @param [in] double  x   distance from center of disk in units of r/rmin
- * @return     The temperature 
+ * @return     The temperature
  *
  * The routine returns the effective temperature for the disk as a distance
  * which is measured in terms of the ratio of the actual distance to the inner
  * edge of the disk (rmin).
  *
  * A number of modifications to a simple steady state disk are possible, depending
- * on the variable geo.disk_tprofile: 
+ * on the variable geo.disk_tprofile:
  *
- *  - DISK_TPROFILE_READIN  the returned temperature is interpolated from values that 
- *    been read in 
- *  - DISK_TPROFILE_YSO an analytic profile implemented for YSOs 
+ *  - DISK_TPROFILE_READIN  the returned temperature is interpolated from values that
+ *    been read in
+ *  - DISK_TPROFILE_YSO an analytic profile implemented for YSOs
  *
  *  In addition for a standard profile, this is where disk heading can optionally
  *  be taken into account
  *
  *
- * @notes
+ * ###Notes###
  *
  * A reference for the standard steady state disk is Wade, 1984 MNRAS 208, 381
  *
@@ -178,7 +178,7 @@ teff (t, x)
  *
  * The input units are all cgs
  *
- * @notes
+ * ###Notes###
  *
  * See Long & Knigge for details
  *
@@ -210,7 +210,7 @@ gdisk (mass, mdot, rmin)
  * from spectra from a grid of stellar atmospheres
  *
  *
- * @notes
+ * ###Notes###
  *
  * See Long & Knigge for details
  *
@@ -238,14 +238,14 @@ double north[] = { 0.0, 0.0, 1.0 };
  *
  * @param [in] double  x[]   A position in the disk
  * @param [out] double  v[]   The velocity at that position
- * @return     The speed      
+ * @return     The speed
  *
  * This routine interpolates the velocities from a grid which gives
- * the run of velocity with radius. Although the we generally 
+ * the run of velocity with radius. Although the we generally
  * assume keplerian velocities for the disk those velocities
  * are not calculated here.
  *
- * @notes
+ * ###Notes###
  *
  * The routine projects the input variable x on to the xy plane
  * before it calculates velocities
@@ -253,12 +253,12 @@ double north[] = { 0.0, 0.0, 1.0 };
  * It then takes the xproduct of a unit vector pointing north and
  * the position, to determine the direction of motion at this point
  * in the disk
- * 
+ *
  *
  *  Finally it rescales this to get the actual velocity.
  *
  *
- * 
+ *
  *
  **********************************************************/
 
@@ -288,21 +288,21 @@ vdisk (x, v)
  *
  * @param [in] double  r   a radial position in the disk.
  * @return     The vertical height of the disk at that point in the xy
- * 	plane. 
+ * 	plane.
  *
  *
  * If the disk is vertically extended then the disk surface is
  * defined in terms of the h the fraction of the disk radius
  * at the edge of the disk, and a power law exponent.  So
- * a disk thst us a sunoke wedgge wiykd gave an exponent 
+ * a disk thst us a sunoke wedgge wiykd gave an exponent
  * of 1. A flat but thick disk would have an exponent of 0.
  * A flared disk wouuld generally have an exponent greater than
- * 1.  
+ * 1.
  *
- * @notes
+ * ###Notes###
  *
  * 	zdisk returns a number that will positive or zero, so one
- * 	often needs to take this account if for example one has 
+ * 	often needs to take this account if for example one has
  * 	a photon that hits the disk below the z=0 plane.
  *
  **********************************************************/
@@ -326,22 +326,22 @@ struct plane diskplane, disktop, diskbottom;
 /**********************************************************/
 /** @name      ds_to_disk
  * @brief      Calculates the distance that a photon
- *  	would need to travel from its current position to hit disk. 
+ *  	would need to travel from its current position to hit disk.
  *
  * @param [in] struct photon *  p   a photon pointer.
- * @param [in] int  allow_negative   permits a negative number to 
+ * @param [in] int  allow_negative   permits a negative number to
  *          be returned in certain circumstances
- * @return     The distance to the disk.  
+ * @return     The distance to the disk.
  *
  *
  * Usually, ds_to_disk returns the distance along the line of
  * sight to the disk in the direction a photon is currently travelling.
  *
- * Usually, if the photon misses the disk going in the positive 
+ * Usually, if the photon misses the disk going in the positive
  * direction, a very large number is returned.
  *
  * If allow_negative is non-zero (true), then ds_to_disk returns
- * a negative distance if it has not hit the disk going in the 
+ * a negative distance if it has not hit the disk going in the
  * positive direction.
  *
  * The routine allows both for a flat disk, and a vertically
@@ -349,7 +349,7 @@ struct plane diskplane, disktop, diskbottom;
  *
  *
  *
- * @notes
+ * ###Notes###
  *
  * The need to allow for negative distances arises
  * because several of the parameterization for the wind (SV, KWD) depend
@@ -357,7 +357,7 @@ struct plane diskplane, disktop, diskbottom;
  * along a streamline.  (It is not clear
  * that this was a good approach, but that is the rationale)
  *
- * Generally, there should not be an issue with this, though 
+ * Generally, there should not be an issue with this, though
  * one can imagine that one might get into trouble for a very
  * flared (bowl-shaped) disk.
  *
@@ -392,18 +392,18 @@ ds_to_disk (p, allow_negative)
     {
       diskplane.x[0] = diskplane.x[1] = diskplane.x[2] = 0.0;
       diskplane.lmn[0] = diskplane.lmn[1] = 0.0;
-      diskplane.lmn[2] = 1.0;	
+      diskplane.lmn[2] = 1.0;
 
 
       disktop.x[0] = disktop.x[1] = 0.0;
       disktop.x[2] = geo.diskrad * geo.disk_z0;
       disktop.lmn[0] = disktop.lmn[1] = 0.0;
-      disktop.lmn[2] = 1.0;	
+      disktop.lmn[2] = 1.0;
 
       diskbottom.x[0] = diskbottom.x[1] = 0.0;
       diskbottom.x[2] = (-geo.diskrad * geo.disk_z0);
       diskbottom.lmn[0] = diskbottom.lmn[1] = 0.0;
-      diskbottom.lmn[2] = 1.0;	
+      diskbottom.lmn[2] = 1.0;
 
       ds_to_disk_init++;	// Only initialize once
 
@@ -440,12 +440,12 @@ ds_to_disk (p, allow_negative)
    *
    * For the vertically extended disk we have to keep track of
    * the smallest postive value and the smallest (in absolute
-   * terms negative value.  
+   * terms negative value.
    * OK now we have to deal with the hard case.  We would like to
    * avoid actually having to calculate the intercept to the disk
    * if we can because this is likely time consuming. So we first
-   * determine this, by checking where the ray hits a sphere that 
-   * just encompasses the disk 
+   * determine this, by checking where the ray hits a sphere that
+   * just encompasses the disk
    */
 
   s = VERY_BIG;
@@ -539,13 +539,13 @@ ds_to_disk (p, allow_negative)
 
   /*  Now we need to find exactly where we have hit the disk.  This
    *  is not trivial.  Basically we need to bracket the possibilites
-   *  
-   * At this point we know the photon is on a path that passes 
-   * through (or passed through the disk) and we must locate it. 
+   *
+   * At this point we know the photon is on a path that passes
+   * through (or passed through the disk) and we must locate it.
    * There are two possibilities.  It hit the disk edge, or it hit
    * the face of the disk.  Most of the time it will hit the disk face
    * so we will calculate this first, and then check if s is less
-   * than s_sphere. 
+   * than s_sphere.
    *
    * To setup rtsafe, we have to find distances which bracket what
    * we want.  smax should be no more than the distance to the
@@ -580,15 +580,15 @@ ds_to_disk (p, allow_negative)
 	}
     }
 
-  if (fabs (x2) > fabs (x1))	
+  if (fabs (x2) > fabs (x1))
     {
       smin = x1;
       smax = x2;
     }
   else
     {
-      smin = x2;		
-      smax = x1;		
+      smin = x2;
+      smax = x1;
     }
 
 
@@ -618,11 +618,11 @@ ds_to_disk (p, allow_negative)
  * Used in ds_to_disk by rtsafe as part of the procedure to locate
  * the place a photon hits a vertically extended disk
  *
- * @notes
+ * ###Notes###
  *
- * 
+ *
  *  The function we are trying to zero is the
- *  difference between the height of the disk and the z height of the photon. 
+ *  difference between the height of the disk and the z height of the photon.
  *
  **********************************************************/
 
@@ -662,11 +662,11 @@ disk_deriv (s, value, derivative)
 /** @name      qdisk_init
  * @brief      Initialize a structure (qdisk) for recording information about photons/energy impinging
  * 	on the disk, which is stored in a disk structure called qdisk.
- * 
+ *
  * @return     Always return zero
  *
  *
- * @notes
+ * ###Notes###
  *
  * The information stored in qdisk can be used to modify the effective temperature
  * of the disk
@@ -710,10 +710,10 @@ qdisk_init ()
  * The routine reformats the data about disk heating which has
  * been accumulated and writes it to a file
  *
- * @notes
+ * ###Notes###
  *
  * The data concerning heating by the disk is built up during
- * a the ionization cycles 
+ * a the ionization cycles
  *
  * The file that is produced should be readable as an astropy
  * table
@@ -783,9 +783,9 @@ qdisk_save (diskfile, ztot)
  * The radius values shoule be in units of 1e11 cm
  * The temperature should be in units of 1000K
  *
- * @notes
+ * ###Notes###
  *
- * @bug This routine which was written for the YSO study 
+ * @bug This routine which was written for the YSO study
  *  needs to be made less YSO centric. It should also be
  *  retested.
  *

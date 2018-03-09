@@ -39,7 +39,7 @@
  * process and the packet information has been updated.
  * 
  *
- * @notes
+ * ###Notes###
  * ksl-- There is a lot of arithmetic required to keep track of indices.  I would
  * be inclined to figure out a way to avoid this.  One possibility would be to record the
  * go_to level in an array when one is calculating the emission probabilities. This would
@@ -513,7 +513,7 @@ matom (p, nres, escape)
 *
 * @param struct lines line_ptr line pointer to calculate
 * 
-* @notes 
+* ###Notes### 
 * History:
 * 2004feb       coded by S Sim
 * ksl OK, Probably should be moved to lines.c for consistency, but that can be done
@@ -565,7 +565,7 @@ int temp_choice;                        //choice of type of calcualation for alp
  *    (4 pi /c2) (gu/gl) (h2/2 pi m k T)^(3/2) 
  * times the integral of   a(nu) nu2 exp [(chi- h nu)/kT].
  * 
- * @notes
+ * ###Notes###
  * 04jul30	ksl	Modified so that one does not need to have multiple versions
  * 		of the code depending on how whether the integrand is 
  * 		multiplied by 1, f/fthresh, or f/fthresh-1.  This was
@@ -665,7 +665,7 @@ alpha_sp_integrand (freq)
  *                             is via an r-packet (1) or a k-packet (0)
  * @return 0
  *
- * @notes
+ * ###Notes###
  *          Mar 04  SS   Coding began.
  *          Apr 04  SS   Various improvements including the addition of ff and collisions.
  *          May 04  SS   Minor changes made to collisional cooling rates (bug fixed)
@@ -1148,7 +1148,7 @@ kpkt (p, nres, escape)
  *                                    a k-packet then the call to this routine should be
  *                                    followed by a call to kpkt.
  * 
- * @notes
+ * ###Notes###
  * Apr 04  SS   Coding began.
  * Jun 04  SS   Modified to return escape = 1 for r-packet and 2 for k-packet
  * to avoid call to k-packet within this routine.
@@ -1265,7 +1265,7 @@ fake_matom_bb (p, nres, escape)
  *                                    via an r-packet or a k-packet. For this routine at the 
  *                                    moment only r-packets are possible so it always returns
  *                                    escape = 1
- * @notes:
+ * ###Notes###:
  * Apr 04  SS   Coding began.
  * Jun 04  SS   Modified to include "escape" being set to 1
  * 06may	ksl	57+ -- Modified for new structure.  Have not fixed the call to fake_atom
@@ -1316,7 +1316,7 @@ fake_matom_bf (p, nres, escape)
  * to deactivating macro atoms in the detailed spectrum part of the calculation.
  * 
  *
- * @notes
+ * ###Notes###
 ***********************************************************/
 
 int
@@ -1490,7 +1490,7 @@ emit_matom (w, p, nres, upper)
  * Given a cell and a line, calculates the probabiltiy that
  * that cell will emit in that line.
  *
- * @notes
+ * ###Notes###
  * 6/15 - Written by SWM
 ***********************************************************/
 double

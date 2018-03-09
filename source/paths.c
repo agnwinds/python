@@ -20,7 +20,7 @@
  * Set in reverb_init(), contains the boundaries for each 
  * path bin.
  *
- * @notes
+ * ###Notes###
  * 10/15	-	Written by SWM
 ***********************************************************/
 double *reverb_path_bin;
@@ -35,7 +35,7 @@ double *reverb_path_bin;
  * Allocates path bins for a passed wind cell and returns a
  * pointer to the allocated space.
  *
- * @notes
+ * ###Notes###
  * 9/3/15	-	Written by SWM
 ***********************************************************/
 Wind_Paths_Ptr
@@ -79,7 +79,7 @@ wind_paths_constructor (WindPtr wind)
  *
  * @see wind_paths_init()
  *
- * @notes
+ * ###Notes###
  * 3/15	-	Written by SWM
 ***********************************************************/
 int
@@ -172,7 +172,7 @@ reverb_init (WindPtr wind)
  * incident photons in. Also declares a 'wind path' array
  * for each specific line of interest in matom mode.
  *
- * @notes
+ * ###Notes###
  * 10/2/15	-	Written by SWM
 ***********************************************************/
 int
@@ -205,7 +205,7 @@ wind_paths_init (WindPtr wind)
  * over the list of tracked lines to see if the transition is in 
  * it. If so adds the weight to the path array for that line.
  *
- * @notes
+ * ###Notes###
  * 27/2/15	-	 Written by SWM
 *****************************************************************/
 int
@@ -266,7 +266,7 @@ line_paths_add_phot (WindPtr wind, PhotPtr pp, int *nres)
  * When given a wind cell and photon, adds the photon's weight to
  * the appropriate delay bin.
  *
- * @notes 
+ * ###Notes### 
  * 27/2/15 	-	Written by SWM 2/15.
 *****************************************************************/
 int
@@ -317,7 +317,7 @@ wind_paths_add_phot (WindPtr wind, PhotPtr pp)
  * outer star radius, sets minimum path to that. Used in 
  * photon mode, and in all modes for non-wind starting paths.
  *
- * @notes
+ * ###Notes###
  * 20/8/15	-	Written by SWM
 ***********************************************************/
 int
@@ -338,7 +338,7 @@ simple_paths_gen_phot (PhotPtr pp)
  * this cell, then assigns a path from within that bin 
  * (from a uniform random distribution)
  *
- * @notes
+ * ###Notes###
  * 26/2/15	-	Written by SWM
  * 24/7/15	-	Removed frequency
 ***********************************************************/
@@ -384,7 +384,7 @@ r_draw_from_path_histogram (Wind_Paths_Ptr PathPtr)
  * @see r_draw_from_path_histogram()
  * @see simple_paths_gen_phot()
  *
- * @notes
+ * ###Notes###
  * 26/2/15	-	Written by SWM
  * 24/7/15	-	Removed frequency
 ***********************************************************/
@@ -425,7 +425,7 @@ wind_paths_gen_phot (WindPtr wind, PhotPtr pp)
  * @see simple_paths_gen_phot()
  * @see wind_paths_gen_phot()
  *
- * @notes
+ * ###Notes###
  * 26/2/15	-	Written by SWM
  * 24/7/15	-	Removed frequency
 ***********************************************************/
@@ -487,7 +487,7 @@ line_paths_gen_phot (WindPtr wind, PhotPtr pp, int nres)
  *
  * @see wind_paths_evaluate()
  *
- * @notes
+ * ###Notes###
  * 26/2/15	-	Written by SWM
  * 24/7/15	-	Removed frequency
 *****************************************************************/
@@ -525,7 +525,7 @@ wind_paths_evaluate_single (Wind_Paths_Ptr paths)
  * 
  * @see wind_paths_evaluate_single()
  *
- * @notes
+ * ###Notes###
  * 26/2/15	-	Written by SWM
  * 24/7/15	-	Removed frequency
 *****************************************************************/
@@ -575,7 +575,7 @@ wind_paths_evaluate (WindPtr wind, int i_rank)
  * length bins and total flux in each for each line histogram (and
  * the regular wind histogram) in the given cell.
  *
- * @notes
+ * ###Notes###
  * 10/15	-	Written by SWM
 *****************************************************************/
 int
@@ -633,7 +633,7 @@ wind_paths_dump (WindPtr wind, int rank_global)
  * and total flux in each for each line histogram (and the regular
  * wind histogram) in the given cell.
  *
- * @notes
+ * ###Notes###
  * 10/15	-	Written by SWM
 *****************************************************************/
 int
@@ -675,7 +675,7 @@ wind_paths_output_dump (WindPtr wind, int i_rank)
  * uses the standard wind location, theta is set as defined in
  * geo. Used in wind_paths_output() only.
  *
- * @notes Written by SWM 4/15.
+ * ###Notes### Written by SWM 4/15.
  *****************************************************************/
 int
 wind_paths_point_index (int i, int j, int k, int i_top, DomainPtr dom)
@@ -699,7 +699,7 @@ wind_paths_point_index (int i, int j, int k, int i_top, DomainPtr dom)
  * uses the standard wind location, theta is set as defined in
  * geo. Used in wind_paths_output() only.
  *
- * @notes Written by SWM 4/15.
+ * ###Notes### Written by SWM 4/15.
  *****************************************************************/
 int
 wind_paths_sphere_point_index (int i, int j, int k)
@@ -722,7 +722,7 @@ wind_paths_sphere_point_index (int i, int j, int k)
  * generated using REVERB_WIND, outputs a 3d model of the wind to
  * file in ASCII .vtk format.
  *
- * @notes Written by SWM 4/15.
+ * ###Notes### Written by SWM 4/15.
 *****************************************************************/
 int
 wind_paths_output_vtk (WindPtr wind, int ndom)

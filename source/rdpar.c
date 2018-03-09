@@ -102,7 +102,7 @@
  *      The output files use current parameter file names.
  *
  *  		
- *  @notes
+ *  ###Notes###
  *  
  *  	The original rdpar was written at SAO for handling the reduction programs
  *  	assocated with Einstein data.  C and Fortran versions of the code exist.
@@ -200,7 +200,7 @@ input[MAX_RECORDS];
  * Open and read (or try to read) a parameter file and the information
  * in the input structure
  *
- * @notes
+ * ###Notes###
  *
  * If a parameter file is currently opened, the routine prints an
  * error message, but continues to read from the current file. If one
@@ -264,7 +264,7 @@ opar (filename)
  * This routines reads an auxiliary .pf file and appends data to the primary one,
  * or more correctly appends data to the input data structure
  *
- * @notes
+ * ###Notes###
  *
  *  This is intended for the case where one would like to use a second parameter
  * 	file for extra parameters or to add a parameter to an old file. 
@@ -323,7 +323,7 @@ add_par (filename)
  * a file tmp.rdpar. This routine usually just closes tmp.rdpar and
  * renames it to rootname.out.pf
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -369,7 +369,7 @@ cpar (filename)
  *
  * Simply open a ptr to tmp.rdapr
  *
- * @notes
+ * ###Notes###
  *
  * Storing information in a temporaray file prevents overwriting 
  * a permannt one before one is ready.
@@ -408,7 +408,7 @@ rdpar_init ()
  * 	successfully processed
  *
  *
- * @notes
+ * ###Notes###
  *
  * At present this is merely a steering routine
  *
@@ -460,7 +460,7 @@ string_process (question, dummy)
  *
  *
  *
- * @notes
+ * ###Notes###
  *
  * This routine is a low level routine called by string_process
  *
@@ -522,7 +522,7 @@ string_process_from_command_line (question, dummy)
  *  locates the appropriate line in the input structure 
  *  and returns the value theer as a string 
  *
- * @notes
+ * ###Notes###
  *
  *  When a keyword is missing the routine first checks to see if 
  *  the keyword corresponds to an name that was changed by calling
@@ -668,7 +668,7 @@ string_process_from_file (question, dummy)
  * rdpar_store_record(name,value) adds a line to the structrue rdpar_record,
  * which records the accepted values for all of the variables.
  *
- * @notes
+ * ###Notes###
  *
  * rdpar_save is the routine that writes out the parameters 
  * to a file.  
@@ -700,7 +700,7 @@ rdpar_store_record (name, value)
  * 	file, e.g. a spectrum file.  It allows one to attach the
  * 	inputs variables to the file for future reference.
  *
- * @notes
+ * ###Notes###
  *
  *  The input is a file_ptr because generally this is intended simply
  * 	to document the inputs that were used to produce a model
@@ -739,7 +739,7 @@ rdpar_save (file_ptr)
  * This routine allows one to add comments to the root.out.pf file
  * which represents a cleaned up version of the input.pf file
  *
- * @notes
+ * ###Notes###
  *
  * 
  *
@@ -777,7 +777,7 @@ rdpar_comment (char *format, ...)
  * @return     NORMAL           
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -804,7 +804,7 @@ message (string)
  *
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -848,7 +848,7 @@ rdstr (question, answer)
  * @return    A status, indicating whether the answering string was successuly captured.
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -894,7 +894,7 @@ rdchar (question, answer)
  * @return    A status, indicating whether the answering string was successuly captured.
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -939,7 +939,7 @@ rdint (question, answer)
  * @return    A status, indicating whether the answering string was successuly captured.
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -983,7 +983,7 @@ rdflo (question, answer)
  * @return    A status, indicating whether the answering string was successuly captured.
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -1027,7 +1027,7 @@ rddoub (question, answer)
  * @return    A status, indicating whether the answering string was successuly captured.
  *
  *
- * @notes
+ * ###Notes###
  *
  * This is used by setup_reverb
  *
@@ -1074,7 +1074,7 @@ rdline (question, answer)
  * Bascially the point of this is just to get a base or root name
  * for various files produced by Python.
  *
- * @notes
+ * ###Notes###
  *
  * The routine just strips off the .pf if it exists
  * and returns the rest of the name
@@ -1139,7 +1139,7 @@ get_root (root, total)
  * The next routine simply sets the rank of the process 
  * if not in parallel mode then we set rd_rank to zero
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -1164,7 +1164,7 @@ rdpar_set_mpi_rank (rank)
  * if vlevel is 2 or greater then more diagnostic information
  * will be printed out from the various rdpar toutines
  *
- * @notes
+ * ###Notes###
  *
  * In writing to log files, Python allows one to control the
  * amount of information which is wrtten out by defining a verbosity

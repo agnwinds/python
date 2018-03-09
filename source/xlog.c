@@ -125,7 +125,7 @@ int log_verbosity = 5;          // A parameter which can be used to suppress wha
  * @param [in] char *  filename   The name of the file where logging will occur
  * @return     Always returns 0
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -167,7 +167,7 @@ Log_init (filename)
  * The routine opens a logfile that should have existed previously so that one 
  * can continue an early run of python 
  *
- * @notes
+ * ###Notes###
  *
  * This routine is called on a restart of a run, if for example one
  * needed to checkpoint a run because a limitation on the time for running
@@ -209,7 +209,7 @@ Log_append (filename)
  *
  * Close the current log file
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -236,7 +236,7 @@ Log_close ()
  * @return     Always returns 0
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -263,7 +263,7 @@ Log_set_verbosity (vlevel)
  * This routines allows the user to change the number of times an error message is printed out
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -289,7 +289,7 @@ Log_print_max (print_max)
  * being that if there are two many errors something is drastically wrong and the code should
  * exit gracefully.  This routine resets that number from the default
  *
- * @notes
+ * ###Notes###
  *
  * The current default is 1e6.
  *
@@ -315,7 +315,7 @@ Log_quit_after_n_errors (n)
  *
  * This is the standard way of printing a message to screen and to the diag file
  *
- * @notes
+ * ###Notes###
  *
  * Printing to the screen can be suppressed by setting the verbosity level
  *
@@ -354,7 +354,7 @@ Log (char *format, ...)
  *
  * This is the standard way of writing a message to the diag file (without also writing to the screen)
  *
- * @notes
+ * ###Notes###
  *
  * Printing to the screen can be enabled if the level of verbosity is set to high enough a level
  *
@@ -392,7 +392,7 @@ Log_silent (char *format, ...)
  * This is the standard way of writing an error message to the screen and to
  * a file
  *
- * @notes
+ * ###Notes###
  *
  * Writing to the screen can be suppressed depending on the level of verbosity
  *
@@ -435,7 +435,7 @@ Error (char *format, ...)
  *
  * These routine normally only writes an error message to the diag file
  *
- * @notes
+ * ###Notes###
  *
  * Writing the message to the screen can be enabled using the verbosity settings
  *
@@ -479,7 +479,7 @@ Error_silent (char *format, ...)
  * This message is not suppressed by any of the verbosity flags and is intended
  * to be for the most important errors
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -517,7 +517,7 @@ Shout (char *format, ...)
  * This is a diagnostic routine to allow one to check whether NANs or 
  * infinities have crept into a calculation.  
  *
- * @notes
+ * ###Notes###
  *
  * The routine was intended to make it easy to set break points when 
  * something untoward is happening.
@@ -555,7 +555,7 @@ sane_check (x)
  * longer printed out; once the error count has reached a much larger number the
  * program terminates on the assumption that something is drastically wrong.
  *
- * @notes
+ * ###Notes###
  *
  * The number for stopping the print out is contolled by NERROR_MAX and is hardcoded
  *
@@ -618,7 +618,7 @@ error_count (char *format)
  * Print out the errors that have occured and the number of times each 
  * error has occured
  *
- * @notes
+ * ###Notes###
  *
  * This is printed out at the end of all Python runs.  When running in multiprocessor mode, 
  * the number of 
@@ -654,7 +654,7 @@ error_summary (message)
  * This routine is intended to assure that the log file is complete before
  * a possilbe program crash
  *
- * @notes
+ * ###Notes###
  *
  *  
  *
@@ -685,7 +685,7 @@ Log_flush ()
  * The routine simply sets the rank of the process 
  * if not in parallel mode then we set my_rank to zero
  *
- * @notes
+ * ###Notes###
  *
  * The number of thread is not used by the program even though it
  * is passed.
@@ -719,7 +719,7 @@ Log_set_mpi_rank (rank, n_mpi)
  * with a paticular thread, and write messages to the screen only for thread 
  * zero.  This routine writes a message to the screen from all threads.
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -764,7 +764,7 @@ Log_parallel (char *format, ...)
  * is trying to debug a problme and that these lines would be removed from
  * the code once the debugging was completed. 
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/

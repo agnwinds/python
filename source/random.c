@@ -178,7 +178,7 @@ vcos (x)
  * set in the call to gsl_rng_alloc - currently a meursenne
  * twister
  *
- * @notes
+ * ###Notes###
  * 2/18	-	Written by NSH
 ***********************************************************/
 
@@ -203,7 +203,7 @@ int
  *
  * Produces a number from min to max (exclusive).
  *
- * @notes
+ * ###Notes###
  * 2/18	-	Written by NSH
 ***********************************************************/
 
