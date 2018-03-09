@@ -568,7 +568,7 @@ int pdf_n;
  * random values to be obtained from the function. There is no 
  * resampling.
  *
- * @notes
+ * ###Notes###
  * Heavily modified in the summer of 2017 to remove jumps
 ***********************************************************/
 

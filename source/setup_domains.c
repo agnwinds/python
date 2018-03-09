@@ -57,7 +57,7 @@ History:
  * If the wind is to be imported from a file, it is imported in this
  * routine.
  *
- * @notes
+ * ###Notes###
  * 1801 -   Refactored into this file in 1801.  Updates in the
  *          fall of 17 were made to allow for importing models.
  *          Note that cyl_var coordinates are not currently 
@@ -212,7 +212,7 @@ History:
  * particular wind domain.
  *
  *
- * @notes
+ * ###Notes###
  * 1801 -   Refactored into this file in 1801.  
 
 ***********************************************************/
@@ -361,7 +361,7 @@ History:
  * data.
  *
  *
- * @notes
+ * ###Notes###
  * 1801 -   Refactored into this file in 1801.  It is
  *          not obvioous this is the best place for this
  *          routine since it refers to all components

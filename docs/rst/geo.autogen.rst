@@ -3,9 +3,9 @@
 geo
 ===
 
-geo.zlog_scale
+geo.xlog_scale
 ==============
-Choose the logarithmic scale length for the grid in the z-direction.
+Choose the logarithmic scale length for the grid in the x-direction.
 
 **Type:** Double
 
@@ -18,9 +18,9 @@ Choose the logarithmic scale length for the grid in the z-direction.
 **File:** setup_domains.c
 
 
-geo.xlog_scale
+geo.zlog_scale
 ==============
-Choose the logarithmic scale length for the grid in the x-direction.
+Choose the logarithmic scale length for the grid in the z-direction.
 
 **Type:** Double
 

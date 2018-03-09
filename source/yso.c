@@ -35,7 +35,7 @@
  * Basically this routine just reads the inputs from the two separate
  * 	wind models, since this is a combination of the two.
  *
- * @notes
+ * ###Notes###
  *
  * The model has a spherical wind on the interior.  The windcones
  * 	are set to include the region from the polar axis to the outside
@@ -113,7 +113,7 @@ one after the other*/
  * 	
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -156,7 +156,7 @@ the disk.  If it does not, then we calculate the velocity for a stellar wind */
  * @return     The density at x is returned in gram/cm**3
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/

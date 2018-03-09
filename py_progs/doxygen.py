@@ -353,10 +353,10 @@ module_string_param = ''' * @param [in out] {}  {}   {}
 '''
 module_string_end = ''' * @return     {}
  *
+ * @details
  * {}
  *
- * @notes
- *
+ * ### Notes ###
  * {}
  *
  **********************************************************/
@@ -395,12 +395,11 @@ def doit(filename='emission.c', outputfile=None):
         print(one[0])
     print('\n')
 
-    xlines = 0
     i = 0  # Index for iterating over the array of lines
     j = 0  # Index for the position in the header array
     header_start = []  # Position of the header start lines
     header_end = []    # Position of the header end lines
-    header_assigned = [] # Has this header been assigned to a function?
+    header_assigned = []  # Has this header been assigned to a function?
     module_start = []  # Position of the module start lines
     module_end = []    # Position of the module end lines
     module_name = []   # Name of the module for each start-end

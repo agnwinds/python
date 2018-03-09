@@ -22,18 +22,20 @@ for each desired incliniation
 **File:** setup2.c
 
 
-Spectrum.select_photons_by_position
-===================================
-Advanced command associated with adding conditions for 
-the detailed spectra that are extracted.  This command simply
-asks whether one would like to select photons by position.  If
-so one will be asked to define a spheical region in interms of
-its cylindrical coordinates.
+Spectrum.live.or.die
+====================
+Normally in creating detailed spectrum Python "extracts" photons in a certain
+direction rewithing them to account for the fact that they have been extracted
+in a certain direction.  It is possible to just count the photons that are emitted
+in a single angle range. The two methods should yield the same or very similar results 
+but the extraction method is much more efficient and live or die is basically a 
+diagnostic mode.  For historical reaaons the live or die method is called with 0
+and anything else rsults in the standard extract method being used.
 
-**Type:** Boolean (Y/N)
+**Type:** Boolean (1/0)
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  parameter_: Called anytime detialed spectra are two be created.
 
 
 **File:** setup2.c
@@ -61,27 +63,6 @@ primary
 **File:** setup2.c
 
 
-Spectrum.select_z
-=================
-Advanced command which defines a spherical  region of
-space from which photons are to be extracted in constructing a detailed
-spectrum.  The region is defined by a cylindrical distance, and z height
-and an aximuth, and a radius r.  This parameter defines the z coordiante
-of the region.
-
-**Type:** Double
-
-**Unit:** cm
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup2.c
-
-
 Spectrum.select_azimuth
 =======================
 Advance command which along with several other parameters
@@ -103,6 +84,82 @@ just from photons that originate or scatter int he region
 **File:** setup2.c
 
 
+Spectrum.select_photons_by_position
+===================================
+Advanced command associated with adding conditions for 
+the detailed spectra that are extracted.  This command simply
+asks whether one would like to select photons by position.  If
+so one will be asked to define a spheical region in interms of
+its cylindrical coordinates.
+
+**Type:** Boolean (Y/N)
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** setup2.c
+
+
+Spectrum.select_r
+=================
+Part of a set of parameters which define a spherical region of space from which 
+photons are to be extracted. select_r defines the radius of the spherical region
+
+**Type:** Double
+
+**Unit:** cm
+
+**Value:** greater than 0
+
+**Parent(s):**
+  parameter_: Required when one asks to to extract photons from a spherical region in the wind
+
+
+**File:** setup2.c
+
+
+Spectrum.select_rho
+===================
+Advanced command which defines a spherical  region of
+space from which photons are to be extracted in constructing a detailed
+spectrum.  The region is defined by a cylindrical distance, and z height
+and an aximuth, and a radius r.  This parameter defines the rho coordiante
+of the region.
+
+**Type:** Double
+
+**Unit:** cm
+
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** setup2.c
+
+
+Spectrum.select_scatters
+========================
+Advaned command that allows one to extract photons that
+have undergone a certain number of scatters.  If n > MAXSCAT,
+that is to say a very large number then all scatters are slected.
+If lies between 0 and MAXSCAT then photons will be extracted only
+at the point a photon has undergone this number of scatters.  If
+n is < 0 then photons with n or greater scattters will be extracted.
+
+**Type:** Int
+
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+**Parent(s):**
+  Select_no_of_scatters_in_spectra_: If 'y' then ask how many scatters
+
+
+**File:** setup2.c
+
+
 Spectrum.select_specific_no_of_scatters_in_spectra
 ==================================================
 Advanced command which allows one to place additional
@@ -119,37 +176,22 @@ disk, only photons which have scttered, etc.
 **File:** setup2.c
 
 
-Spectrum.wavemin
-================
-The minimum wavelength of the final spectra in Angstroms
+Spectrum.select_z
+=================
+Advanced command which defines a spherical  region of
+space from which photons are to be extracted in constructing a detailed
+spectrum.  The region is defined by a cylindrical distance, and z height
+and an aximuth, and a radius r.  This parameter defines the z coordiante
+of the region.
 
 **Type:** Double
 
-**Unit:** Angstroms
+**Unit:** cm
 
-**Value:** Greater than 0
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup2.c
-
-
-Spectrum.live.or.die
-====================
-Normally in creating detailed spectrum Python "extracts" photons in a certain
-direction rewithing them to account for the fact that they have been extracted
-in a certain direction.  It is possible to just count the photons that are emitted
-in a single angle range. The two methods should yield the same or very similar results 
-but the extraction method is much more efficient and live or die is basically a 
-diagnostic mode.  For historical reaaons the live or die method is called with 0
-and anything else rsults in the standard extract method being used.
-
-**Type:** Boolean (1/0)
-
-**Parent(s):**
-  parameter_: Called anytime detialed spectra are two be created.
 
 
 **File:** setup2.c
@@ -179,45 +221,6 @@ other. basic
 **File:** setup2.c
 
 
-Spectrum.select_rho
-===================
-Advanced command which defines a spherical  region of
-space from which photons are to be extracted in constructing a detailed
-spectrum.  The region is defined by a cylindrical distance, and z height
-and an aximuth, and a radius r.  This parameter defines the rho coordiante
-of the region.
-
-**Type:** Double
-
-**Unit:** cm
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup2.c
-
-
-Spectrum.select_r
-=================
-Part of a set of parameters which define a spherical region of space from which 
-photons are to be extracted. select_r defines the radius of the spherical region
-
-**Type:** Double
-
-**Unit:** cm
-
-**Value:** greater than 0
-
-**Parent(s):**
-  parameter_: Required when one asks to to extract photons from a spherical region in the wind
-
-
-**File:** setup2.c
-
-
 Spectrum.wavemax
 ================
 The maximum waveleenght of the detailed spectra that are to be produced
@@ -235,21 +238,18 @@ The maximum waveleenght of the detailed spectra that are to be produced
 **File:** setup2.c
 
 
-Spectrum.select_scatters
-========================
-Advaned command that allows one to extract photons that
-have undergone a certain number of scatters.  If n > MAXSCAT,
-that is to say a very large number then all scatters are slected.
-If lies between 0 and MAXSCAT then photons will be extracted only
-at the point a photon has undergone this number of scatters.  If
-n is < 0 then photons with n or greater scattters will be extracted.
+Spectrum.wavemin
+================
+The minimum wavelength of the final spectra in Angstroms
 
-**Type:** Int
+**Type:** Double
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Unit:** Angstroms
+
+**Value:** Greater than 0
 
 **Parent(s):**
-  Select_no_of_scatters_in_spectra_: If 'y' then ask how many scatters
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup2.c
