@@ -49,49 +49,6 @@ our 'tfpy' Python (no relation) library.
 
 ----------------------------------------
 
-reverb.matom_lines
-------------------
-Number of macro-atom lines to track paths for individually. This many
-reverb.matom_line entries are required, and the line associated with each has
-the path of photons deexciting into it recorded in its own array. Note: This
-doesn't give rise to any noticable differences to the pure wind mode in most
-simulations.
-
-**Type:** Int
-
-**Value:** 0 or N
-
-**Parent(s):**
-  reverb.type_: 3
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
-reverb.matom_line
-^^^^^^^^^^^^^^^^^
-Specifies a line associated with a given macro-atom transition. The species
-and transition involved are specified. The internal line associated with this
-transition will be printed to standard-out for use when processing outputs. A
-line is specified as Element:Ion:Upper level:Lower level.
-
-**Type:** Int:Int:Int:Int
-
-
-**Value:** >0:>0:>1:>0
-
-
-**Parent(s):**
-  reverb.matom_lines_: Greater than 0
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
 reverb.disk_type
 ----------------
 Setting for how photons generated in the disk are treated when generating path
@@ -153,17 +110,17 @@ file sizes down, and avoid them overwhelming the user.
    Include *all* photons that contribute to the spectra in the output
    file. Not recommended as it leads to gargantuan file sizes.
 
-N. **Filter lines**
-   
-   Include N reverb.filter_line entries, each specifying one
-   line to keep in the output file. If reverb.matom_lines is >0, all macro-atom
-   lines of interest are automatically included in the filter list.
-
 -1. **Filter continuum**
    
    Include all photons whose last interaction was scatter
    or emission in a line. Recommended setting for exploratory runs where you'd
    like to identify which lines are the easiest to process.
+
+N. **Filter lines**
+   
+   Include N reverb.filter_line entries, each specifying one
+   line to keep in the output file. If reverb.matom_lines is >0, all macro-atom
+   lines of interest are automatically included in the filter list.
 
 
 **Parent(s):**
@@ -191,6 +148,72 @@ wavelength!
 
 **Parent(s):**
   reverb.filter_lines_: Greater than 0
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
+reverb.matom_lines
+------------------
+Number of macro-atom lines to track paths for individually. This many
+reverb.matom_line entries are required, and the line associated with each has
+the path of photons deexciting into it recorded in its own array. Note: This
+doesn't give rise to any noticable differences to the pure wind mode in most
+simulations.
+
+**Type:** Int
+
+**Value:** 0 or N
+
+**Parent(s):**
+  reverb.type_: 3
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
+reverb.matom_line
+^^^^^^^^^^^^^^^^^
+Specifies a line associated with a given macro-atom transition. The species
+and transition involved are specified. The internal line associated with this
+transition will be printed to standard-out for use when processing outputs. A
+line is specified as Element:Ion:Upper level:Lower level.
+
+**Type:** Int:Int:Int:Int
+
+
+**Value:** >0:>0:>1:>0
+
+
+**Parent(s):**
+  reverb.matom_lines_: Greater than 0
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
+reverb.path_bins
+----------------
+Number of bins for photon paths. Reverb modes that record the distribution of
+path lengths in every wind cell bin them in this number of bins. Bins are
+logarithmically spaced between the minimum scale in the system (the smallest
+'minimum radius' in any domain) and the 10 * the maximum scale in the system
+(10 * the 'maximum radius' in any domain). Default value is 1000, going much
+higher does not lead to qualitative differences in TF, going lower makes the
+bin boundaries show up in the TF.
+
+**Type:** Int
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  reverb.type_: 2, 3
 
 
 **File:** setup_reverb.c
@@ -227,6 +250,25 @@ diagnostics.
 
 **Parent(s):**
   reverb.type_: 2, 3
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
+reverb.angle_bins
+^^^^^^^^^^^^^^^^^
+Used when generating 3d .vtk output files for visualisation. Sets the number
+of angle bins used in the output. Aesthetic only; bigger makes prettier meshes
+with larger filesizes.
+
+**Type:** Int
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  reverb.visualisation_: 1, 3
 
 
 **File:** setup_reverb.c
@@ -271,48 +313,6 @@ idenfity where wind locations are.
 
 **Parent(s):**
   reverb.dump_cells_: Greater than 0
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
-reverb.angle_bins
-^^^^^^^^^^^^^^^^^
-Used when generating 3d .vtk output files for visualisation. Sets the number
-of angle bins used in the output. Aesthetic only; bigger makes prettier meshes
-with larger filesizes.
-
-**Type:** Int
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  reverb.visualisation_: 1, 3
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
-reverb.path_bins
-----------------
-Number of bins for photon paths. Reverb modes that record the distribution of
-path lengths in every wind cell bin them in this number of bins. Bins are
-logarithmically spaced between the minimum scale in the system (the smallest
-'minimum radius' in any domain) and the 10 * the maximum scale in the system
-(10 * the 'maximum radius' in any domain). Default value is 1000, going much
-higher does not lead to qualitative differences in TF, going lower makes the
-bin boundaries show up in the TF.
-
-**Type:** Int
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  reverb.type_: 2, 3
 
 
 **File:** setup_reverb.c
