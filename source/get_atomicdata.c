@@ -1,4 +1,13 @@
 
+/***********************************************************/
+/** @file  get_atomicdata.c
+ * @Author ksl
+ * @date   March, 2018
+ *
+ * @brief  Read in all of the atomic data for use with Python
+ *
+ ***********************************************************/
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,148 +18,206 @@
 #include "log.h"
 
 
-// DEBUG is deprecated as described by #111
-//#define DEBUG  0              /* nonzero implies debug */
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
-Synopsis:
- 	get_atomic_data(masterfile) is a generalized subroutine for reading atomic data 
- 	into a set of structures defined in "atomic.h"   (Space for the structures is 
-	also allocated in this routine. 
-   
- 
-  
-Arguments:
-	masterfile is a file which contains the names of the files which will be read
-	as atomic data.  (This allows one to group the atomic data into logical units.)
-
-Returns:
- 
- 
-Description:	
-	get_atomic_data reads in all the atomic data.  It also converts the data to cgs units unless
-	otherwise noted, e.g ionization potentials are converted to ergs.  
-	
-	The order of the data is important.  Elements should be defined before ions; ions
-	before levels, levels before  lines etc.  In most if not all cases, one can either define all 
-        of the elements first, all of the ions, etc ... or the first element and its ions, the 
-        second element and its ions etc. Commenting out an element in the datafile has the effect of
-	eliminating all of the data associated with that element, e.g ions, lines, etc.
-
-	The program assumes that the ions for a given element are grouped together,
-        that the levels for a given element are grouped together, etc.  
-
-	If one wants to read both Topbase and VFKY photoionization x-sections, then the topbase
-	x-sections should be read first.  The routine will ignore data in the VFKY list if there
-	is a pre-existing Topbase data.  The routine will stop if you but a VFKY x-section first
-	on the assumption that Topbase data should trump VFKY data. (Making the program more flexible
-	would be difficult because you would have to drop various bits of Topbase data out of the 
-        middle of the structure or mark it NG or something.)
-
-	Similarly, as a general rule the macro information should be provided before the simple
-	ions are described, and the macro lines should be presented before simple lines.  
-
-	The only data which can be mixed up completely is the line array.
-	
-	Finally, get_atomic_data creates a pointer array to  lines, which has the lines in 
-	frequency ascending order.   This is actually done by a small subroutine index_lines
-	which in turn calls a Numerical Recipes routine.
-		
-Notes:
-	NOTHING IN THESE ROUTINES SHOULD SPECIFIC TO THE WAY IN WHICH THE ATOMIC DATA 
-	IS TO BE USED.  Specifically nothing here should be specific to the Monte Carlo calculations
-	for which the routines were written. These routines are just ways to read in the atomic data 
-
-	For completeness the macro atom information should be probably be printed to the data file,
-	or alteranatively the printing to the data file should be eliminated altogether as a waste
-	of time -- ksl 
-History:
- 	97jan	ksl	Coded and debugged as part of Python effort.  
- 	97oct2	ck	Added steps to read in recombination fractions
- 	98feb27	ksl	Revised photoionization inputs so now use Verner, Ferland, Korista, & Yakolev
- 			formalism
- 	98apr4	ksl	Modified to read multiplicites of lower and upper states of resonance lines, and
- 			to exclude lines in which the oscillator strengths or frequencies etc were zero
- 	98may23	ksl	Corrected error which allowed ions to be read for which there were no elements.
- 			Also fixed initialization of phot_info
-	99jan4	ksl	Added code to keep track of the lowest frequency for which photoionization
-			can occur (phot_freq_min).
-	99nov28	ksl	Modified so that the datafiles it looks for are now in a subdirectory atomic.
-			This follows the approach I have been adopting in other programs of putting
-			data into a subdirectory of the program in which the program is being run.  This
-			way one can merely link to the appropriate directory
-	00nov27	ksl	Updated program to make it easier to consider different sets of atomic data
-			Also converted program so that it would use the standard logging procedures.
-        00nov28 ksl	Updated program to accept transitions which do not arise from ground states
-	01jul11	ksl	Updated program to accept levels as produced by kurucz, using for example
-			gfall.dat .  This was in preparation for incorporating some non-LTE aspects
-			into python 
-	01sep24	ksl	Updated program to define some levels to use in a non_lte calculation.  I
-			assume that the number of levels to consider in non_lte is the last integer
-			on the ion line.
-	01sep24	ksl	Elimated use of foo_ion and foo_ele.  These were simply confusing.
-	01sep25	ksl	Incorporated topbase levels and photoinization cross sections.
-	01nov22	ksl	Hopefully sorted out all of the various read formats to allow for use
-			of the output files of various programs in py_atomic.
-	01dec12	ksl	Have split the configurations into to indentifiable groups, those which are
-			to be treated on the fly -- aka LTE --  and those which in principle can
-			be treated in detail -- aka non-LTE.  In practice, we are also making modifica-
-			tions to the lines on the fly.  Any configureation with is "non-LTE" has space
-			in the levden array for that ion.
-	02jun	ksl	Converted all multiplicities from integers to doubles, since in some cases
-			one may have non-integer g's and also to prevent gu/gl divisions from giving
-			incorrect answer.
-        04Feb19 SS      Made modifications to read atomic data in format suitable for the proposed implementation
-                        of Macro Atoms. Modifications should preserve all the previous options and place Macro
-                        Atoms data at top of hierarchy - i.e. other data read later should be ignored. 
-        04Mar   SS      Minor changes (following suggestions of ksl). 
-	04Apr	ksl	Added macro_info to lines, configs.  (1 is a line used by a macro atom, 0 is a line 
-			that is not part of a macro atom.).  Simplified inputs so that when one reads IonM
-			it is assumed to be a macro-ion.  If it is just Ion or IonV, then the assumption is that
-			it is a "simple" ion
-	04Dec	ksl	Made use of DEBUG to eliminate printout of many error in get_atomic_data that
-			are really part of normal flow of program.  To print out these lines, set
-			DEBUG to a nonzero value at top of program
-	04dec	ksl	54a-Modified the macro atom reading portion of the program so that one can limit levels
-			in the elements_ions section of the input and "seamlessly" avoid reading them in 
-			elsewhere.  This makes the macro portion of the program consistent with the
-			"simple" atom approach.
-	04dec	ksl	54b-Added a bit clearer set of comments and reorganized a bit to collect all of the
-			indexing in one place. There is no change in funtionality regarding this.
-	05jul	ksl	56d -- Added if DEBUG lines so that data.out is not normally printed
-	06jul	ksl	57+ -- Modified so that calloc is used to allocate space for structures
-	06aug	ksl	57h -- Added checks to ensure that macro_info which is set to -1 in various
-			of the structures, is set to 0 or 1 somewhere in the process.  This simplifies
-			some of the switches in the program.  Note that I did not check for self-consitency
-			just that the value is not -1, which it was initially.
-	080810	ksl	62 -- Modified the way in which levels are read in.  Basically the routine assumes
-			and prevents one from reading in more than one level type, e.g macro_atom, top_base
-			record, kurucz record etc.  One cannot use more than one type anymore.  
-	080812	ksl	62 -- Made additional changes to make sure photoionization records were only
-			linked to levels for which the density could be calculated.  (Note, that there
-			may be a problem if we decide to use topbase data for ions with 0 nlte levels
-			allowed, i.e. zero levels in which we keep track of the density.  
-        081115  nsh     70 -- added in structures and routines to read in data to implement
-			dielectronic recombination.
-	11dec	ksl	71 - Added calls to free memory and reallocate the atomic data structures if one calls this more
-	12jun   nsh	72 - added structures and routines to read in partition function data from 
-			cardona 2010
-			than once
-	12jul   nsh	73 - added structures and routines to read in badnell style total recombination rate data
-        12sept	nsh	73 - added structures and routines to read in gaunt factor data from sutherland 1997
-  14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120. 
-	14nov	nsh	78b - added DERE direct ionizaion data, and changed al recomb data to refer to state being left
-                 Also used write_atomicdata to control if summary is written to file.
-  15apr JM  79b -- VFKY cross-sections are now tabulated. Multiple changes here, see pull #143
-  17jan NSH 81c -- Added collision strengths
-**************************************************************/
+//OLD /***********************************************************
+//OLD                                        Space Telescope Science Institute
+//OLD 
+//OLD Synopsis:
+//OLD  	get_atomic_data(masterfile) is a generalized subroutine for reading atomic data 
+//OLD  	into a set of structures defined in "atomic.h"   (Space for the structures is 
+//OLD 	also allocated in this routine. 
+//OLD    
+//OLD  
+//OLD   
+//OLD Arguments:
+//OLD 	masterfile is a file which contains the names of the files which will be read
+//OLD 	as atomic data.  (This allows one to group the atomic data into logical units.)
+//OLD 
+//OLD Returns:
+//OLD  
+//OLD  
+//OLD Description:	
+//OLD 	get_atomic_data reads in all the atomic data.  It also converts the data to cgs units unless
+//OLD 	otherwise noted, e.g ionization potentials are converted to ergs.  
+//OLD 	
+//OLD 	The order of the data is important.  Elements should be defined before ions; ions
+//OLD 	before levels, levels before  lines etc.  In most if not all cases, one can either define all 
+//OLD         of the elements first, all of the ions, etc ... or the first element and its ions, the 
+//OLD         second element and its ions etc. Commenting out an element in the datafile has the effect of
+//OLD 	eliminating all of the data associated with that element, e.g ions, lines, etc.
+//OLD 
+//OLD 	The program assumes that the ions for a given element are grouped together,
+//OLD         that the levels for a given element are grouped together, etc.  
+//OLD 
+//OLD 	If one wants to read both Topbase and VFKY photoionization x-sections, then the topbase
+//OLD 	x-sections should be read first.  The routine will ignore data in the VFKY list if there
+//OLD 	is a pre-existing Topbase data.  The routine will stop if you but a VFKY x-section first
+//OLD 	on the assumption that Topbase data should trump VFKY data. (Making the program more flexible
+//OLD 	would be difficult because you would have to drop various bits of Topbase data out of the 
+//OLD         middle of the structure or mark it NG or something.)
+//OLD 
+//OLD 	Similarly, as a general rule the macro information should be provided before the simple
+//OLD 	ions are described, and the macro lines should be presented before simple lines.  
+//OLD 
+//OLD 	The only data which can be mixed up completely is the line array.
+//OLD 	
+//OLD 	Finally, get_atomic_data creates a pointer array to  lines, which has the lines in 
+//OLD 	frequency ascending order.   This is actually done by a small subroutine index_lines
+//OLD 	which in turn calls a Numerical Recipes routine.
+//OLD 		
+//OLD Notes:
+//OLD 	NOTHING IN THESE ROUTINES SHOULD SPECIFIC TO THE WAY IN WHICH THE ATOMIC DATA 
+//OLD 	IS TO BE USED.  Specifically nothing here should be specific to the Monte Carlo calculations
+//OLD 	for which the routines were written. These routines are just ways to read in the atomic data 
+//OLD 
+//OLD 	For completeness the macro atom information should be probably be printed to the data file,
+//OLD 	or alteranatively the printing to the data file should be eliminated altogether as a waste
+//OLD 	of time -- ksl 
+//OLD History:
+//OLD  	97jan	ksl	Coded and debugged as part of Python effort.  
+//OLD  	97oct2	ck	Added steps to read in recombination fractions
+//OLD  	98feb27	ksl	Revised photoionization inputs so now use Verner, Ferland, Korista, & Yakolev
+//OLD  			formalism
+//OLD  	98apr4	ksl	Modified to read multiplicites of lower and upper states of resonance lines, and
+//OLD  			to exclude lines in which the oscillator strengths or frequencies etc were zero
+//OLD  	98may23	ksl	Corrected error which allowed ions to be read for which there were no elements.
+//OLD  			Also fixed initialization of phot_info
+//OLD 	99jan4	ksl	Added code to keep track of the lowest frequency for which photoionization
+//OLD 			can occur (phot_freq_min).
+//OLD 	99nov28	ksl	Modified so that the datafiles it looks for are now in a subdirectory atomic.
+//OLD 			This follows the approach I have been adopting in other programs of putting
+//OLD 			data into a subdirectory of the program in which the program is being run.  This
+//OLD 			way one can merely link to the appropriate directory
+//OLD 	00nov27	ksl	Updated program to make it easier to consider different sets of atomic data
+//OLD 			Also converted program so that it would use the standard logging procedures.
+//OLD         00nov28 ksl	Updated program to accept transitions which do not arise from ground states
+//OLD 	01jul11	ksl	Updated program to accept levels as produced by kurucz, using for example
+//OLD 			gfall.dat .  This was in preparation for incorporating some non-LTE aspects
+//OLD 			into python 
+//OLD 	01sep24	ksl	Updated program to define some levels to use in a non_lte calculation.  I
+//OLD 			assume that the number of levels to consider in non_lte is the last integer
+//OLD 			on the ion line.
+//OLD 	01sep24	ksl	Elimated use of foo_ion and foo_ele.  These were simply confusing.
+//OLD 	01sep25	ksl	Incorporated topbase levels and photoinization cross sections.
+//OLD 	01nov22	ksl	Hopefully sorted out all of the various read formats to allow for use
+//OLD 			of the output files of various programs in py_atomic.
+//OLD 	01dec12	ksl	Have split the configurations into to indentifiable groups, those which are
+//OLD 			to be treated on the fly -- aka LTE --  and those which in principle can
+//OLD 			be treated in detail -- aka non-LTE.  In practice, we are also making modifica-
+//OLD 			tions to the lines on the fly.  Any configureation with is "non-LTE" has space
+//OLD 			in the levden array for that ion.
+//OLD 	02jun	ksl	Converted all multiplicities from integers to doubles, since in some cases
+//OLD 			one may have non-integer g's and also to prevent gu/gl divisions from giving
+//OLD 			incorrect answer.
+//OLD         04Feb19 SS      Made modifications to read atomic data in format suitable for the proposed implementation
+//OLD                         of Macro Atoms. Modifications should preserve all the previous options and place Macro
+//OLD                         Atoms data at top of hierarchy - i.e. other data read later should be ignored. 
+//OLD         04Mar   SS      Minor changes (following suggestions of ksl). 
+//OLD 	04Apr	ksl	Added macro_info to lines, configs.  (1 is a line used by a macro atom, 0 is a line 
+//OLD 			that is not part of a macro atom.).  Simplified inputs so that when one reads IonM
+//OLD 			it is assumed to be a macro-ion.  If it is just Ion or IonV, then the assumption is that
+//OLD 			it is a "simple" ion
+//OLD 	04Dec	ksl	Made use of DEBUG to eliminate printout of many error in get_atomic_data that
+//OLD 			are really part of normal flow of program.  To print out these lines, set
+//OLD 			DEBUG to a nonzero value at top of program
+//OLD 	04dec	ksl	54a-Modified the macro atom reading portion of the program so that one can limit levels
+//OLD 			in the elements_ions section of the input and "seamlessly" avoid reading them in 
+//OLD 			elsewhere.  This makes the macro portion of the program consistent with the
+//OLD 			"simple" atom approach.
+//OLD 	04dec	ksl	54b-Added a bit clearer set of comments and reorganized a bit to collect all of the
+//OLD 			indexing in one place. There is no change in funtionality regarding this.
+//OLD 	05jul	ksl	56d -- Added if DEBUG lines so that data.out is not normally printed
+//OLD 	06jul	ksl	57+ -- Modified so that calloc is used to allocate space for structures
+//OLD 	06aug	ksl	57h -- Added checks to ensure that macro_info which is set to -1 in various
+//OLD 			of the structures, is set to 0 or 1 somewhere in the process.  This simplifies
+//OLD 			some of the switches in the program.  Note that I did not check for self-consitency
+//OLD 			just that the value is not -1, which it was initially.
+//OLD 	080810	ksl	62 -- Modified the way in which levels are read in.  Basically the routine assumes
+//OLD 			and prevents one from reading in more than one level type, e.g macro_atom, top_base
+//OLD 			record, kurucz record etc.  One cannot use more than one type anymore.  
+//OLD 	080812	ksl	62 -- Made additional changes to make sure photoionization records were only
+//OLD 			linked to levels for which the density could be calculated.  (Note, that there
+//OLD 			may be a problem if we decide to use topbase data for ions with 0 nlte levels
+//OLD 			allowed, i.e. zero levels in which we keep track of the density.  
+//OLD         081115  nsh     70 -- added in structures and routines to read in data to implement
+//OLD 			dielectronic recombination.
+//OLD 	11dec	ksl	71 - Added calls to free memory and reallocate the atomic data structures if one calls this more
+//OLD 	12jun   nsh	72 - added structures and routines to read in partition function data from 
+//OLD 			cardona 2010
+//OLD 			than once
+//OLD 	12jul   nsh	73 - added structures and routines to read in badnell style total recombination rate data
+//OLD         12sept	nsh	73 - added structures and routines to read in gaunt factor data from sutherland 1997
+//OLD   14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120. 
+//OLD 	14nov	nsh	78b - added DERE direct ionizaion data, and changed al recomb data to refer to state being left
+//OLD                  Also used write_atomicdata to control if summary is written to file.
+//OLD   15apr JM  79b -- VFKY cross-sections are now tabulated. Multiple changes here, see pull #143
+//OLD   17jan NSH 81c -- Added collision strengths
+//OLD **************************************************************/
 
 
 
 #define LINELENGTH 400
 #define MAXWORDS    20
+
+
+/**********************************************************/
+/** @name      get_atomic_data
+ * @brief      generalized subroutine for reading atomic data 
+ *  	into a set of structures defined in "atomic.h"   
+ *
+ *
+ * @param [in] char  masterfile[]   The name of the "masterfile" which refers to other files which contain the data
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * get_atomic_data reads in all the atomic data.  It also converts the data to cgs units unless
+ * 	otherwise noted, e.g ionization potentials are converted to ergs.  
+ *
+ *
+ *
+ * 	The masterfile is a list of other files, which contain atomic data for specific puruposes.
+ *
+ * 	All of the files are ascii.  The information is keyword based.
+ * 	
+ * 	The order of the data is important.  Elements should be defined before ions; ions
+ * 	before levels, levels before  lines etc.  In most if not all cases, one can either define all 
+ *         of the elements first, all of the ions, etc ... or the first element and its ions, the 
+ *         second element and its ions etc. Commenting out an element in the datafile has the effect of
+ * 	eliminating all of the data associated with that element, e.g ions, lines, etc.
+ * 
+ * 	The program assumes that the ions for a given element are grouped together,
+ *  that the levels for a given element are grouped together, etc.  
+ * 
+ * 	If one wants to read both Topbase and VFKY photoionization x-sections, then the topbase
+ * 	x-sections should be read first.  The routine will ignore data in the VFKY list if there
+ * 	is a pre-existing Topbase data.  The routine will stop if you but a VFKY x-section first
+ * 	on the assumption that Topbase data should trump VFKY data. (Making the program more flexible
+ * 	would be difficult because you would have to drop various bits of Topbase data out of the 
+ *         middle of the structure or mark it NG or something.)
+ * 
+ * 	Similarly, as a general rule the macro information should be provided before the simple
+ * 	ions are described, and the macro lines should be presented before simple lines.  
+ * 
+ * 	The only data which can be mixed up completely is the line array.
+ * 	
+ * 	Finally, get_atomic_data creates a pointer array to  lines, which has the lines in 
+ * 	frequency ascending order.   This is actually done by a small subroutine index_lines
+ * 	which in turn calls a Numerical Recipes routine.
+ *
+ * ### Notes ###
+ *
+ * get_atomic data is intended to be stand-alone, that is one should be able to use it for routines
+ * other than Python, e.g for another routine intended to calculate the ionization state of
+ * a plasma in colissional equlibrium
+ *
+ * 
+ * To this end, the routines populate stuctures in atomic.h, which are not part of python.h.  It's imporant
+ * that future modificatiosn to get_atomic_data maintain this indepence..
+ *
+ *
+ *
+ **********************************************************/
 
 int
 get_atomic_data (masterfile)
@@ -187,10 +254,8 @@ get_atomic_data (masterfile)
   int index_collisions (), index_lines (), index_phot_top (), index_inner_cross (), index_phot_verner (), check_xsections ();
   int nwords;
   int nlte, nmax;
-  //  
   int mflag;                    //flag to identify reading data for macro atoms
   int nconfigl, nconfigu;       //internal labels for configurations
-  //
   int islp, ilv, np;
   char configname[15];
   double e, rl;
@@ -360,8 +425,9 @@ get_atomic_data (masterfile)
   nlevels = nxphot = nphot_total = ntop_phot = nauger = ndrecomb = ncpart = n_inner_tot = 0;    //Added counter for DR//
   n_elec_yield_tot = n_fluor_yield_tot = 0;     //Counters for electron and fluorescent photon yields
 
-  //This initialisese the top_phot array - it is used for all ionization processes so some elements
-  //are only used in some circumstances
+  /*This initialisese the top_phot array - it is used for all ionization processes so some elements
+  are only used in some circumstances
+  */
 
   for (n = 0; n < NLEVELS; n++)
   {
@@ -432,7 +498,7 @@ get_atomic_data (masterfile)
     line[n].coll_index = -999;
   }
 
-/* 081115 nsh The following lines initialise the dielectronic recombination structure */
+/* The following lines initialise the dielectronic recombination structure */
   for (n = 0; n < NIONS; n++)
   {
     drecomb[n].nion = -1;
@@ -444,7 +510,7 @@ get_atomic_data (masterfile)
     }
   }
 
-/* 0612 nsh The following lines initialise the cardona partition function  structure */
+/* The following lines initialise the cardona partition function  structure */
   for (n = 0; n < NIONS; n++)
   {
     cpart[n].nion = -1;
@@ -453,7 +519,7 @@ get_atomic_data (masterfile)
     cpart[n].part_m = -1;
   }
 
-/* 0712 nsh The following lines initialise the badnell total radiative recombination rate structure */
+/* The following lines initialise the badnell total radiative recombination rate structure */
   for (n = 0; n < NIONS; n++)
   {
     total_rr[n].nion = -1;
@@ -465,7 +531,7 @@ get_atomic_data (masterfile)
   }
 
 
-/* 0712 nsh The following lines initialise the badnell total radiative recombination rate structure */
+/* The following lines initialise the badnell total radiative recombination rate structure */
   for (n = 0; n < NIONS; n++)
   {
     bad_gs_rr[n].nion = -1;
@@ -480,7 +546,7 @@ get_atomic_data (masterfile)
   gstmax = 1e99;
 
 
-/* 0814 nsh The following lines initialise the dere direct ionization rate struture */
+/* The following lines initialise the dere direct ionization rate struture */
   for (n = 0; n < NIONS; n++)
   {
     dere_di_rate[n].nion = -1;
@@ -497,7 +563,7 @@ get_atomic_data (masterfile)
 
 
 
-/* 0912 nsh the following lines initialise the sutherland gaunt factors */
+/* The following lines initialise the sutherland gaunt factors */
   gaunt_n_gsqrd = 0;            //The number of sets of scaled temperatures we have data for
   for (n = 0; n < MAX_GAUNT_N_GSQRD; n++)
   {
@@ -509,7 +575,7 @@ get_atomic_data (masterfile)
   }
 
 
-/* 0117 nsh the following lines initialise the collision strengths */
+/* The following lines initialise the collision strengths */
   n_coll_stren = 0;             //The number of data sets
   for (n = 0; n < NLINES; n++)
   {
@@ -652,7 +718,7 @@ structure does not have this property! */
 
         switch (choice)
         {
-// Elements
+/* Elements */
         case 'e':
           if (sscanf (aline, "%*s %d %s %le", &ele[nelements].z, ele[nelements].name, &ele[nelements].abun) != 3)
           {
@@ -671,8 +737,7 @@ structure does not have this property! */
           break;
 
 
-//Ions
-/* 
+/*Ions
 
 Until mid-2001, very little use was made of configurations or levels in Python
 and hence the original ion specification contained no control parameters associated
@@ -780,8 +845,8 @@ ksl 04Apr  ??
           }
           break;
 
-//Levels or Configurations  
-/* This version of get_atomicdata can read various types of configuration inputs, some of which should gradually be
+/* Levels or Configurations  
+This version of get_atomicdata can read various types of configuration inputs, some of which should gradually be
 exsized from the program.  Originally, the idea was that Levels would immediately follow an ion, and in that case
 all that was need to describe a level, was a level number, a multiplicity, and an energy for the level.  An example
 of this type of line follows:
@@ -883,7 +948,7 @@ Col
 
         case 'N':
 /*  
-	080809 - It's a non-lte level, i.e. one for which we are going to calculate populations, at least for some number of these.
+    It's a non-lte level, i.e. one for which we are going to calculate populations, at least for some number of these.
 	For these, we have to set aside space in the levden array in the plasma structure.  This is used for topbase
 	photoionization and macro atoms
 */
@@ -951,10 +1016,6 @@ a level type has not been established
           }
           else if (ion[n].lev_type != lev_type)
           {
-            //XXX Why are these lines commented out?  ksl 160212
-//OLD                 Error
-//OLD                   ("Get_atomic_data: file %s  Reading lev_type (%d) for ion %d with lev_type (%d). Not allowed\n",
-//OLD                    file, lev_type, n, ion[n].lev_type);
             break;
           }
 
@@ -1054,7 +1115,6 @@ a level type has not been established
 /* Now associate this config with the levden array where appropriate.  The -1 is because ion[].nlte
 is already incremented 
 
-080810 -- 62 -- Also want to treat these as simple levels in cases where we want to sum everything
 */
 
           if (ion[n].firstlevel < 0)
@@ -1124,9 +1184,6 @@ is already incremented
           }
           else if (ion[n].lev_type != lev_type)
           {
-//OLD                 Error
-//OLD                   ("Get_atomic_data: file %s  Reading lev_type (%d) for ion %d with lev_type (%d). Not allowed\n",
-//OLD                    file, lev_type, n, ion[n].lev_type)
 
             break;
           }
@@ -1178,7 +1235,7 @@ described as macro-levels. */
             ion[n].nlevels++;
 
 
-/* 080808 - ksl - Now declare that this level has no corresponding element in the levden array which is part 
+/* Now declare that this level has no corresponding element in the levden array which is part 
    of the plasma stucture.  To do this set config[].ndent to -1
 */
 
@@ -1197,8 +1254,7 @@ described as macro-levels. */
 
 
 
-// Photoionization
-/* 
+/* Photoionization
 Until at least Oct 2001, Python used photoionization crossections from Verner, Ferland, Korista, and Yakolev (DFKY)
 The routine sigma_phot(xptr, freq) calculates the crossection based on this.
 
@@ -1234,10 +1290,7 @@ The main changes from the original records are that energy levels
 have been converted to eV, cross sections to cm**2, and the electron
 number has been converted to conventional astronomical notiation
 for the ionstate.
-*/
 
-
-/*
   Macro atoms (SS)
   =================
   
@@ -1353,7 +1406,7 @@ for the ionstate.
               ion[config[m].nion].ntop_first = ntop_phot;
             }
 
-            /* JM 1508 -- next line sees if the topbase level just read in is the ground state - 
+            /* next line sees if the topbase level just read in is the ground state - 
                if it is, the ion structure element ntop_ground is set to that topbase level number
                note that m is the lower level here */
             if (m == config[ion[config[n].nion].first_nlte_level].ilv)
@@ -1378,7 +1431,6 @@ for the ionstate.
             ntop_phot++;
             nphot_total++;
 
-            /* 080812 - Added check to assure we did not exceed the allowed number of photoionization records */
             if (nphot_total > NTOP_PHOT)
             {
               Error ("get_atomicdata: More macro photoionization cross sections that NTOP_PHOT (%d).  Increase in atomic.h\n", NTOP_PHOT);
@@ -1409,7 +1461,7 @@ for the ionstate.
             n = 0;
 
 
-            /* 080812 - 63 - ksl - added additional check to assure that records were
+            /* additional check to assure that records were
              * only matched with levels whose density was being tracked in levden.  This
              * is now necesary since a change was made to use topbase levels for calculating
              * partition functions 
@@ -1434,7 +1486,7 @@ for the ionstate.
               phot_top[ntop_phot].nlast = -1;
               phot_top[ntop_phot].macro_info = 0;
 
-              /* NSH 0312 - next line sees if the topbase level just read in is the ground state - 
+              /* next line sees if the topbase level just read in is the ground state - 
                  if it is, the ion structure element ntop_ground is set to that topbase level number */
               if (islp == config[ion[config[n].nion].first_nlte_level].isp && ilv == config[ion[config[n].nion].first_nlte_level].ilv)
               {
@@ -1471,7 +1523,7 @@ for the ionstate.
               ntop_phot++;
               nphot_total++;
 
-              /* 080812 - Added check to assure we did not exceed the allowed number of photoionization records */
+              /* check to assure we did not exceed the allowed number of photoionization records */
               if (nphot_total > NTOP_PHOT)
               {
                 Error
@@ -1541,8 +1593,8 @@ for the ionstate.
 
                 else if (ion[nion].phot_info == 1 && ion[nion].macro_info != 1)
                   /* We already have a topbase cross section, but the VFKY 
-                     data is superior for the ground state, so we replace that data with the current data */
-                  /* JM 1508 -- don't do this with macro-atoms for the moment */
+                     data is superior for the ground state, so we replace that data with the current data 
+                  JM 1508 -- don't do this with macro-atoms for the moment */
                 {
                   phot_top[ion[nion].ntop_ground].nlev = ion[nion].firstlevel;  // ground state
                   phot_top[ion[nion].ntop_ground].nion = nion;
@@ -1559,7 +1611,6 @@ for the ionstate.
                   }
                   if (phot_freq_min > phot_top[ion[nion].ntop_ground].freq[0])
                     phot_freq_min = phot_top[ion[nion].ntop_ground].freq[0];
-//                              
                   Debug
                     ("Get_atomic_data: file %s  Replacing ground state topbase photoionization for ion %d with VFKY photoionization\n",
                      file, nion);
@@ -1695,8 +1746,7 @@ for the ionstate.
                     augerion[nauger].l = nl;
                     augerion[nauger].freq_t = dumE_th / HEV;
                     augerion[nauger].E_0 = dumE_0;
-                    augerion[nauger].Sigma = dumSigma * 1.e-18; //input
-                    //in megabarns
+                    augerion[nauger].Sigma = dumSigma * 1.e-18; //input in megabarns
                     augerion[nauger].ya = dumya;
                     augerion[nauger].yw = dumyw;
                     augerion[nauger].P = dumP;
@@ -1747,8 +1797,9 @@ for the ionstate.
 
 
 
-// Lines
-/* There are various types of line files which get_atomicdata must parse
+/* Lines
+
+here are various types of line files which get_atomicdata must parse
 This is the original format
 Line 1 1 1215.673584 0.139000  2  2
 Line 1 1 1215.668213 0.277000  2  4
@@ -1922,7 +1973,7 @@ Col
               }
               //
               //define macro atom case (SS)
-/* ?? 04 April ksl -- Right now have enforced a clean separation between macro-ions and simple-ions
+/* XXXX  04 April ksl -- Right now have enforced a clean separation between macro-ions and simple-ions
 but this is proably not what we want if we move all bf & fb transitions to macro-ion approach.  We
 would like to have simple lines for macro-ions */
               if (ion[n].macro_info == 1 && mflag == -1)
@@ -2046,7 +2097,6 @@ would like to have simple lines for macro-ions */
           }
 
           istate = ne;          //         get the ionisation state we are recombining from
-//                istate--;     //    we will associate the rate with the ion we are recombining to
 
           for (n = 0; n < nions; n++)   //Loop over ions to find the correct place to put the data
           {
@@ -2099,7 +2149,6 @@ would like to have simple lines for macro-ions */
           }
 
           istate = ne;          //         get the ionisation state we are recombining from
-//                istate--;     //    we will associate the rate with the ion we are recombining to
 
           for (n = 0; n < nions; n++)   //Loop over ions to find the correct place to put the data
           {
@@ -2189,7 +2238,6 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
           }
 
           istate = ne;          //         get the traditional ionisation state
-//                istate--;     //    we will associate the rate with the ion we are recombining to
           for (n = 0; n < nions; n++)   //Loop over ions to find the correct place to put the data
           {
             if (ion[n].z == z && ion[n].istate == istate)       // this works out which ion we are dealing with
@@ -2236,7 +2284,6 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
           }
 
           istate = ne;          //         get the traditional ionisation state
-//                istate--;     //    we will associate the rate with the ion we are recombining to
           for (n = 0; n < nions; n++)   //Loop over ions to find the correct place to put the data
           {
             if (ion[n].z == z && ion[n].istate == istate)       // this works out which ion we are dealing with
@@ -2282,7 +2329,6 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
             exit (0);
           }
           istate = z - ne + 1;  //         get the traditional ionisation state
-//                istate--;     //    we will associate the rate with the ion we are recombining to
           for (n = 0; n < nions; n++)   //Loop over ions to find the correct place to put the data
           {
             if (ion[n].z == z && ion[n].istate == istate)       // this works out which ion we are dealing with
@@ -2351,7 +2397,7 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
           }                     //end of loop over ions
 
           break;
-/* NSH 120921 The following are lines to read in temperature averaged gaunt factors from the data of Sutherland (1997). The atomic file is basically unchanged 
+/* The following are lines to read in temperature averaged gaunt factors from the data of Sutherland (1997). The atomic file is basically unchanged 
  * from the data on the website, just with the top few lines commented out, and a label prepended to each line */
 
         case 'g':
@@ -2553,7 +2599,6 @@ BAD_T_RR  5  0  1  1  4.647E-10  0.7484  6.142E+01  1.753E+07*/
                 exit (0);
               }
 
-              /* JM 1709 -- increased number of entries read up to max of 20 */
               nparam = sscanf (aline, "%*s %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le",
                                &temp[0], &temp[1], &temp[2], &temp[3], &temp[4], &temp[5], &temp[6], &temp[7], &temp[8], &temp[9],
                                &temp[10], &temp[11], &temp[12], &temp[13], &temp[14], &temp[15], &temp[16], &temp[17], &temp[18], &temp[19]);
@@ -2706,7 +2751,7 @@ a total emission oscillator strength for the level....really ought to be radiati
     }
   }
 
-/* 57h -- Check that all of the macro_info variables are initialized to 1
+/* Check that all of the macro_info variables are initialized to 1
 or zero so that simple checks of true and false can be used for them */
 
   for (n = 0; n < nions; n++)
@@ -2773,7 +2818,7 @@ or zero so that simple checks of true and false can be used for them */
   Log ("get_atomic_data: Evaluation:  The maximum value bf jumps is %d while %d are currently allowed\n", bb_max, NBBJUMPS);
 
 /* Now, write the data to a file so you can check it later if you wish */
-/* JM 1411 -- this is now controlled by one of the -d flag modes, defined in atomic.h */
+/* this is controlled by one of the -d flag modes, defined in atomic.h */
   if (write_atomicdata)
   {
 
@@ -2860,12 +2905,6 @@ or zero so that simple checks of true and false can be used for them */
   /* Index the collisions */
   index_collisions ();
 
-/* Index the verner photionization structure by threshold frequecy -- 57h -- 06jul ksl */
-//   if (nxphot > 0)
-//      {
-//     /index_phot_verner ();
-// tabulate_verner(); //Create a tabulated version of the data
-//      }
 
 /* Index the topbase photoionization structure by threshold freqeuncy */
   if (ntop_phot + nxphot > 0)
@@ -2880,34 +2919,20 @@ or zero so that simple checks of true and false can be used for them */
   return (0);
 }
 
-/**************************************************************************
-                    Space Telescope Science Institute
-                                                                                                   
-                                                                                                   
-  Synopsis:
-	The next set of routines index_... simply provide ways to created pointer
-arrays that are ordered a useful frequency order.  
-                                                                                                   
-  Description:
-                                                                                                   
-  Arguments:  
-                                                                                                   
-                                                                                                   
-  Returns:
-                                                                                                   
-  Notes:
-	All use a Numerical recipes routine indexx for this 
-                                                                                                   
-  History:
-                                                                                                   
- ************************************************************************/
 
 
-/* index_lines sorts the lines into frequency order
-   History:
-   97aug27	ksl	Modified to allocate space for freqs and index since MAC
-			compiler does not allocate a very large stack.
- */
+/**********************************************************/
+/** @name      index_lines
+ * @brief      sort the lines into frequency order
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * ### Notes ###
+ * All use a Numerical recipes routine indexx for this
+ *
+ **********************************************************/
 
 int
 index_lines ()
@@ -2952,11 +2977,24 @@ index_lines ()
   return (0);
 }
 
-/* Index the topbase photoionzation crossections by frequency
 
-	01oct	ksl	Adapted from index_lines as part to topbase 
-			addition to python 
-*/
+/**********************************************************/
+/** @name      index_phot_top
+ * @brief      Index the topbase photoionzation crossections by frequency
+ *
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * The results are stored in phot_top_ptr
+ *
+ * ### Notes ###
+ * Adapted from index_lines as part to topbase 
+ *             addition to python
+ *
+ **********************************************************/
+
 int
 index_phot_top ()
 {
@@ -2995,6 +3033,21 @@ index_phot_top ()
   return (0);
 
 }
+
+
+/**********************************************************/
+/** @name      index_inner_cross
+ * @brief      Index inner shell xsections in frequency order
+ *
+ * @return     Alwasy returns 0
+ *
+ * @details
+ * The rusults are stored in inner_cross_ptr
+ *
+ * ### Notes ###
+ * ??? NOTES ???
+ *
+ **********************************************************/
 
 int
 index_inner_cross ()
@@ -3037,12 +3090,22 @@ index_inner_cross ()
 
 
 
-/* index_xcol sorts the collisional lines into frequency order
-   History:
-	98mar8	ksl	Copied and adapted from index lines.  Note that it is possible
-			that one could accomplish this in a more generic fashion
 
- */
+
+/**********************************************************/
+/** @name      index_collisions
+ * @brief      sorts the collisional lines into frequency order
+ *
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ * The results are stored in xcol_ptr
+ *
+ **********************************************************/
 
 int
 index_collisions ()
@@ -3088,6 +3151,25 @@ index_collisions ()
 
 
 /* Numerical recipes routine used by index_lines which in turn is used by get_atomic_data */
+
+
+/**********************************************************/
+/** @name      indexx
+ * @brief      Numerical recipes routine used by various routines to sort the atomic data                    
+ *
+ * @param [in] int  n   The dimension of the array that needs sorting
+ * @param [in] float  arrin[]   The array to sort
+ * @param [out] int  indx[]   The array that contains poionters to the sorted array
+ * @return     N/A              
+ *
+ * @details
+ *
+ * ### Notes ###
+ * See nuerical recipes
+ *
+ * @bug Should probably replaces this with the equivalent gsl routine
+ *
+ **********************************************************/
 
 void
 indexx (n, arrin, indx)
@@ -3141,53 +3223,90 @@ indexx (n, arrin, indx)
   }
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
+//OLD /***********************************************************
+//OLD                                        Space Telescope Science Institute
+//OLD 
+//OLD  Synopsis:
+//OLD 	limit_lines(freqmin,freqmax)  sets the the current values of line_min and line_max in atomic.h  
+//OLD 	which can be used to limit the lines searched for resonances to a specific 
+//OLD 	frequency range.
+//OLD    
+//OLD Arguments:		
+//OLD 	double freqmin, freqmax  a range of frequencies in which one is interested in the lines
+//OLD 
+//OLD Returns:
+//OLD 	limit_lines returns the number of lines that are potentially in resonance.  If limit_lines 
+//OLD 	returns 0 there are no lines of interest and one does not need to worry about any 
+//OLD 	resonaces at this frequency.  If limit_lines returns a number greater than 0, then 
+//OLD 	the lines of interest are defined by nline_min and nline_max (inclusive) in atomic.h
+//OLD 	nline_delt is also set which is the number of lines that are in the specified range
+//OLD 
+//OLD Description:	
+//OLD 	limit_lines  define the lines that are close to a given frequency.  The degree of closeness
+//OLD 	is defined by v. The routine must be used in conjuction with get_atomic_data which 
+//OLD 	will have created an ordered list of the lines.   
+//OLD Notes:
+//OLD 	Limit_lines needs to be used somewhat carefully.  Carefully means checking the
+//OLD 	return value of limit_lines or equivalently nline_delt=0.  If nline_delt=0 then there
+//OLD 	were no lines in the region of interest.  Assuming there were lines in thte range,
+//OLD 	one must sum over lines from nline_min to nline_max inclusive.  
+//OLD 	
+//OLD 	One might wonder why nline_max is not set to one larger than the last line which
+//OLD 	is in range.  This is because depending on how the velocity is trending you may
+//OLD 	want to sum from the highest frequency line to the lowest.
+//OLD 
+//OLD ?? It is unclear to me whether given that limit lines is very similar 
+//OLD from call to call
+//OLD that it would not be more efficeint to expand from previous 
+//OLD limits rather than adopt the approach hre 02may
+//OLD 
+//OLD History:
+//OLD  	97jan      ksl	Coded and debugged as part of Python effort.  
+//OLD  	98apr4	ksl	Modified inputs so one gives freqmin and freqmax directly
+//OLD 	01nov	ksl	Rewritten to handle large numbers of lines more
+//OLD 			efficiently
+//OLD 
+//OLD **************************************************************/
 
- Synopsis:
-	limit_lines(freqmin,freqmax)  sets the the current values of line_min and line_max in atomic.h  
-	which can be used to limit the lines searched for resonances to a specific 
-	frequency range.
-   
-Arguments:		
-	double freqmin, freqmax  a range of frequencies in which one is interested in the lines
-
-Returns:
-	limit_lines returns the number of lines that are potentially in resonance.  If limit_lines 
-	returns 0 there are no lines of interest and one does not need to worry about any 
-	resonaces at this frequency.  If limit_lines returns a number greater than 0, then 
-	the lines of interest are defined by nline_min and nline_max (inclusive) in atomic.h
-	nline_delt is also set which is the number of lines that are in the specified range
-
-Description:	
-	limit_lines  define the lines that are close to a given frequency.  The degree of closeness
-	is defined by v. The routine must be used in conjuction with get_atomic_data which 
-	will have created an ordered list of the lines.   
-Notes:
-	Limit_lines needs to be used somewhat carefully.  Carefully means checking the
-	return value of limit_lines or equivalently nline_delt=0.  If nline_delt=0 then there
-	were no lines in the region of interest.  Assuming there were lines in thte range,
-	one must sum over lines from nline_min to nline_max inclusive.  
-	
-	One might wonder why nline_max is not set to one larger than the last line which
-	is in range.  This is because depending on how the velocity is trending you may
-	want to sum from the highest frequency line to the lowest.
-
-?? It is unclear to me whether given that limit lines is very similar 
-from call to call
-that it would not be more efficeint to expand from previous 
-limits rather than adopt the approach hre 02may
-
-History:
- 	97jan      ksl	Coded and debugged as part of Python effort.  
- 	98apr4	ksl	Modified inputs so one gives freqmin and freqmax directly
-	01nov	ksl	Rewritten to handle large numbers of lines more
-			efficiently
-
-**************************************************************/
 
 
 
+
+/**********************************************************/
+/** @name      limit_lines
+ * @brief      (freqmin,freqmax)  sets the the current values of line_min and line_max in atomic.h  
+ * 	which can be used to limit the lines searched for resonances to a specific 
+ * 	frequency range.
+ *
+ * @param [in out] double  freqmin   The minimum frequency we are interested in
+ * @param [in out] double  freqmax   The maximum frequency we are interested in                            
+ * @return     the number of lines that are potentially in resonance.  
+ *
+ *
+ *
+ * If limit_lines 
+ * 	returns 0 there are no lines of interest and one does not need to worry about any 
+ * 	resonances at this frequency.  If limit_lines returns a number greater than 0, then 
+ * 	the lines of interest are defined by nline_min and nline_max (inclusive) in atomic.h
+ * 	nline_delt is also set which is the number of lines that are in the specified range
+ *
+ * @details
+ * limit_lines  define the lines that are close to a given frequency.  The degree of closeness
+ * 	is defined by v. The routine must be used in conjuction with get_atomic_data which 
+ * 	will have created an ordered list of the lines.
+ *
+ * ### Notes ###
+ * Limit_lines needs to be used somewhat carefully.  Carefully means checking the
+ * 	return value of limit_lines or equivalently nline_delt=0.  If nline_delt=0 then there
+ * 	were no lines in the region of interest.  Assuming there were lines in thte range,
+ * 	one must sum over lines from nline_min to nline_max inclusive.  
+ * 	
+ * 	One might wonder why nline_max is not set to one larger than the last line which
+ * 	is in range.  This is because depending on how the velocity is trending you may
+ * 	want to sum from the highest frequency line to the lowest.
+ * 
+ *
+ **********************************************************/
 
 int
 limit_lines (freqmin, freqmax)
@@ -3244,8 +3363,22 @@ limit_lines (freqmin, freqmax)
 }
 
 
-/* check_xsections is  a routine which checks xsections are ok.
-   Only prints out each xsection with verbosity > 4 as uses Debug function */
+
+
+/**********************************************************/
+/** @name      check_xsections
+ * @brief      Perform sanity checks on xsection data
+ *
+ * @return     Alway returns 0; errors are written to the log file
+ *
+ * @details
+ * Results are written to the log file
+ *
+ * ### Notes ###
+ *
+ * @bug  A careful look at this routine is warranted as get_atomic_data has changed over the years.
+ *
+ **********************************************************/
 
 int
 check_xsections ()
@@ -3268,13 +3401,11 @@ check_xsections ()
     {
       Error ("get_atomicdata: not tracking levels for ion %i z %i istate %i, yet marked as topbase xsection!\n",
              nion, ion[nion].z, ion[nion].istate);
-      //exit(0);
     }
     if (ion[nion].phot_info != 1 && ion[nion].macro_info)
     {
       Error ("get_atomicdata: macro atom but no topbase xsection! ion %i z %i istate %i, yet marked as topbase xsection!\n",
              nion, ion[nion].z, ion[nion].istate);
-      //exit(0);
     }
   }
 
