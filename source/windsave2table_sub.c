@@ -801,7 +801,9 @@ get_ion (ndom, element, istate, iswitch)
   {
     x[n] = 0;
     nplasma = wmain[nstart + n].nplasma;
-    if (wmain[nstart + n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+//OLD    if (wmain[nstart + n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+    if (wmain[nstart + n].vol > 0.0 && plasmamain[nplasma].ne > 0.0)
+//OLD    if (wmain[nstart + n].vol > 0.0)
     {
       if (iswitch == 0)
       {

@@ -53,16 +53,15 @@ script:
     - cd source/
     - make clean
     - make CC=gcc py_wind
+    - make CC=gcc windsave2table
     - make clean
-    - cd ../examples/core/
+    - cd ../examples/travis/
     - Setup_Py_Dir
     - py -i cv_macro_benchmark
     - py -i cv_standard
     - py -i fiducial_agn
     - py -i 1d_sn
     - py -i -d sv_detailedmode
-    - cd ../beta/
-    - Setup_Py_Dir
     - py -i agn_ss_2010_modela
     - py -i ulx1
     - py -i ngc5548

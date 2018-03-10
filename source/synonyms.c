@@ -248,9 +248,9 @@ check_synonyms (new_question, old_question)
     {
       if (strncmp (new_names[n], firstword, wordlength) == 0)
 	{
-	  Log
-	    ("Matched keyword %s in .pf file to %s in current python version\n",
-	     new_question, old_names[n]);
+//OLD	  Log
+//OLD	    ("Matched keyword %s in .pf file to %s in current python version\n",
+//OLD     new_question, old_names[n]);
 	  strcpy (old_question, old_names[n]);
 	  return (1);
 	}
