@@ -21,60 +21,60 @@
 
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD Synopsis:
-//OLD   get_atomic_data(masterfile) is a generalized subroutine for reading atomic data 
-//OLD   into a set of structures defined in "atomic.h"   (Space for the structures is 
-//OLD   also allocated in this routine. 
-//OLD    
-//OLD  
-//OLD   
+//OLD   get_atomic_data(masterfile) is a generalized subroutine for reading atomic data
+//OLD   into a set of structures defined in "atomic.h"   (Space for the structures is
+//OLD   also allocated in this routine.
+//OLD
+//OLD
+//OLD
 //OLD Arguments:
 //OLD   masterfile is a file which contains the names of the files which will be read
 //OLD   as atomic data.  (This allows one to group the atomic data into logical units.)
-//OLD 
+//OLD
 //OLD Returns:
-//OLD  
-//OLD  
-//OLD Description:      
+//OLD
+//OLD
+//OLD Description:
 //OLD   get_atomic_data reads in all the atomic data.  It also converts the data to cgs units unless
-//OLD   otherwise noted, e.g ionization potentials are converted to ergs.  
-//OLD   
+//OLD   otherwise noted, e.g ionization potentials are converted to ergs.
+//OLD
 //OLD   The order of the data is important.  Elements should be defined before ions; ions
-//OLD   before levels, levels before  lines etc.  In most if not all cases, one can either define all 
-//OLD         of the elements first, all of the ions, etc ... or the first element and its ions, the 
+//OLD   before levels, levels before  lines etc.  In most if not all cases, one can either define all
+//OLD         of the elements first, all of the ions, etc ... or the first element and its ions, the
 //OLD         second element and its ions etc. Commenting out an element in the datafile has the effect of
 //OLD   eliminating all of the data associated with that element, e.g ions, lines, etc.
-//OLD 
+//OLD
 //OLD   The program assumes that the ions for a given element are grouped together,
-//OLD         that the levels for a given element are grouped together, etc.  
-//OLD 
+//OLD         that the levels for a given element are grouped together, etc.
+//OLD
 //OLD   If one wants to read both Topbase and VFKY photoionization x-sections, then the topbase
 //OLD   x-sections should be read first.  The routine will ignore data in the VFKY list if there
 //OLD   is a pre-existing Topbase data.  The routine will stop if you but a VFKY x-section first
 //OLD   on the assumption that Topbase data should trump VFKY data. (Making the program more flexible
-//OLD   would be difficult because you would have to drop various bits of Topbase data out of the 
+//OLD   would be difficult because you would have to drop various bits of Topbase data out of the
 //OLD         middle of the structure or mark it NG or something.)
-//OLD 
+//OLD
 //OLD   Similarly, as a general rule the macro information should be provided before the simple
-//OLD   ions are described, and the macro lines should be presented before simple lines.  
-//OLD 
+//OLD   ions are described, and the macro lines should be presented before simple lines.
+//OLD
 //OLD   The only data which can be mixed up completely is the line array.
-//OLD   
-//OLD   Finally, get_atomic_data creates a pointer array to  lines, which has the lines in 
+//OLD
+//OLD   Finally, get_atomic_data creates a pointer array to  lines, which has the lines in
 //OLD   frequency ascending order.   This is actually done by a small subroutine index_lines
 //OLD   which in turn calls a Numerical Recipes routine.
-//OLD           
+//OLD
 //OLD Notes:
-//OLD   NOTHING IN THESE ROUTINES SHOULD SPECIFIC TO THE WAY IN WHICH THE ATOMIC DATA 
+//OLD   NOTHING IN THESE ROUTINES SHOULD SPECIFIC TO THE WAY IN WHICH THE ATOMIC DATA
 //OLD   IS TO BE USED.  Specifically nothing here should be specific to the Monte Carlo calculations
-//OLD   for which the routines were written. These routines are just ways to read in the atomic data 
-//OLD 
+//OLD   for which the routines were written. These routines are just ways to read in the atomic data
+//OLD
 //OLD   For completeness the macro atom information should be probably be printed to the data file,
 //OLD   or alteranatively the printing to the data file should be eliminated altogether as a waste
-//OLD   of time -- ksl 
+//OLD   of time -- ksl
 //OLD History:
-//OLD   97jan   ksl     Coded and debugged as part of Python effort.  
+//OLD   97jan   ksl     Coded and debugged as part of Python effort.
 //OLD   97oct2  ck      Added steps to read in recombination fractions
 //OLD   98feb27 ksl     Revised photoionization inputs so now use Verner, Ferland, Korista, & Yakolev
 //OLD                   formalism
@@ -93,7 +93,7 @@
 //OLD         00nov28 ksl       Updated program to accept transitions which do not arise from ground states
 //OLD   01jul11 ksl     Updated program to accept levels as produced by kurucz, using for example
 //OLD                   gfall.dat .  This was in preparation for incorporating some non-LTE aspects
-//OLD                   into python 
+//OLD                   into python
 //OLD   01sep24 ksl     Updated program to define some levels to use in a non_lte calculation.  I
 //OLD                   assume that the number of levels to consider in non_lte is the last integer
 //OLD                   on the ion line.
@@ -111,9 +111,9 @@
 //OLD                   incorrect answer.
 //OLD         04Feb19 SS      Made modifications to read atomic data in format suitable for the proposed implementation
 //OLD                         of Macro Atoms. Modifications should preserve all the previous options and place Macro
-//OLD                         Atoms data at top of hierarchy - i.e. other data read later should be ignored. 
-//OLD         04Mar   SS      Minor changes (following suggestions of ksl). 
-//OLD   04Apr   ksl     Added macro_info to lines, configs.  (1 is a line used by a macro atom, 0 is a line 
+//OLD                         Atoms data at top of hierarchy - i.e. other data read later should be ignored.
+//OLD         04Mar   SS      Minor changes (following suggestions of ksl).
+//OLD   04Apr   ksl     Added macro_info to lines, configs.  (1 is a line used by a macro atom, 0 is a line
 //OLD                   that is not part of a macro atom.).  Simplified inputs so that when one reads IonM
 //OLD                   it is assumed to be a macro-ion.  If it is just Ion or IonV, then the assumption is that
 //OLD                   it is a "simple" ion
@@ -121,7 +121,7 @@
 //OLD                   are really part of normal flow of program.  To print out these lines, set
 //OLD                   DEBUG to a nonzero value at top of program
 //OLD   04dec   ksl     54a-Modified the macro atom reading portion of the program so that one can limit levels
-//OLD                   in the elements_ions section of the input and "seamlessly" avoid reading them in 
+//OLD                   in the elements_ions section of the input and "seamlessly" avoid reading them in
 //OLD                   elsewhere.  This makes the macro portion of the program consistent with the
 //OLD                   "simple" atom approach.
 //OLD   04dec   ksl     54b-Added a bit clearer set of comments and reorganized a bit to collect all of the
@@ -134,20 +134,20 @@
 //OLD                   just that the value is not -1, which it was initially.
 //OLD   080810  ksl     62 -- Modified the way in which levels are read in.  Basically the routine assumes
 //OLD                   and prevents one from reading in more than one level type, e.g macro_atom, top_base
-//OLD                   record, kurucz record etc.  One cannot use more than one type anymore.  
+//OLD                   record, kurucz record etc.  One cannot use more than one type anymore.
 //OLD   080812  ksl     62 -- Made additional changes to make sure photoionization records were only
 //OLD                   linked to levels for which the density could be calculated.  (Note, that there
 //OLD                   may be a problem if we decide to use topbase data for ions with 0 nlte levels
-//OLD                   allowed, i.e. zero levels in which we keep track of the density.  
+//OLD                   allowed, i.e. zero levels in which we keep track of the density.
 //OLD         081115  nsh     70 -- added in structures and routines to read in data to implement
 //OLD                   dielectronic recombination.
 //OLD   11dec   ksl     71 - Added calls to free memory and reallocate the atomic data structures if one calls this more
-//OLD   12jun   nsh     72 - added structures and routines to read in partition function data from 
+//OLD   12jun   nsh     72 - added structures and routines to read in partition function data from
 //OLD                   cardona 2010
 //OLD                   than once
 //OLD   12jul   nsh     73 - added structures and routines to read in badnell style total recombination rate data
 //OLD         12sept    nsh     73 - added structures and routines to read in gaunt factor data from sutherland 1997
-//OLD   14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120. 
+//OLD   14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120.
 //OLD   14nov   nsh     78b - added DERE direct ionizaion data, and changed al recomb data to refer to state being left
 //OLD                  Also used write_atomicdata to control if summary is written to file.
 //OLD   15apr JM  79b -- VFKY cross-sections are now tabulated. Multiple changes here, see pull #143
@@ -162,8 +162,8 @@
 
 /**********************************************************/
 /** @name      get_atomic_data
- * @brief      generalized subroutine for reading atomic data 
- *  	into a set of structures defined in "atomic.h"   
+ * @brief      generalized subroutine for reading atomic data
+ *  	into a set of structures defined in "atomic.h"
  *
  *
  * @param [in] char  masterfile[]   The name of the "masterfile" which refers to other files which contain the data
@@ -172,36 +172,36 @@
  * @details
  *
  * get_atomic_data reads in all the atomic data.  It also converts the data to cgs units unless
- * 	otherwise noted, e.g ionization potentials are converted to ergs.  
+ * 	otherwise noted, e.g ionization potentials are converted to ergs.
  *
  *
  *
  * The masterfile is a list of other files, which contain atomic data for specific puruposes.
  *
  * All of the files are ascii.  The information is keyword based.
- * 	
+ *
  * The order of the data is important.  Elements should be defined before ions; ions
- * before levels, levels before  lines etc.  In most if not all cases, one can either define all 
- * of the elements first, all of the ions, etc ... or the first element and its ions, the 
+ * before levels, levels before  lines etc.  In most if not all cases, one can either define all
+ * of the elements first, all of the ions, etc ... or the first element and its ions, the
  * second element and its ions etc. Commenting out an element in the datafile has the effect of
  * eliminating all of the data associated with that element, e.g ions, lines, etc.
- * 
+ *
  * The program assumes that the ions for a given element are grouped together,
- * that the levels for a given element are grouped together, etc.  
- * 
+ * that the levels for a given element are grouped together, etc.
+ *
  * If one wants to read both Topbase and VFKY photoionization x-sections, then the topbase
  * x-sections should be read first.  The routine will ignore data in the VFKY list if there
  * is a pre-existing Topbase data.  The routine will stop if you but a VFKY x-section first
  * on the assumption that Topbase data should trump VFKY data. (Making the program more flexible
- * would be difficult because you would have to drop various bits of Topbase data out of the 
+ * would be difficult because you would have to drop various bits of Topbase data out of the
  * middle of the structure or mark it NG or something.)
- * 
+ *
  * Similarly, as a general rule the macro information should be provided before the simple
- * ions are described, and the macro lines should be presented before simple lines.  
- * 
+ * ions are described, and the macro lines should be presented before simple lines.
+ *
  * The only data which can be mixed up completely is the line array.
- * 	
- * Finally, get_atomic_data creates a pointer array to  lines, which has the lines in 
+ *
+ * Finally, get_atomic_data creates a pointer array to  lines, which has the lines in
  * frequency ascending order.   This is actually done by a small subroutine index_lines
  * which in turn calls a Numerical Recipes routine.
  *
@@ -211,7 +211,7 @@
  * other than Python, e.g for another routine intended to calculate the ionization state of
  * a plasma in colissional equlibrium
  *
- * 
+ *
  * To this end, the routines populate stuctures in atomic.h, which are not part of python.h.  It's imporant
  * that future modificatiosn to get_atomic_data maintain this indepence..
  *
@@ -410,7 +410,7 @@ get_atomic_data (masterfile)
       ion[n].nlte = (-1);
       ion[n].phot_info = (-1);
       ion[n].macro_info = (-1);	//Initialise - don't know if using Macro Atoms or not: set to -1 (SS)
-      ion[n].ntop_first = 0;	// The fact that ntop_first and ntop  are initialized to 0 and not -1 is important 
+      ion[n].ntop_first = 0;	// The fact that ntop_first and ntop  are initialized to 0 and not -1 is important
       ion[n].ntop_ground = 0;	//NSH 0312 initialize the new pointer for GS cross sections
       ion[n].ntop = 0;
       ion[n].nxphot = (-1);
@@ -418,10 +418,10 @@ get_atomic_data (masterfile)
       ion[n].drflag = 0;	//Initialise to indicate as far as we know, there are no dielectronic recombination parameters associated with this ion.
       ion[n].cpartflag = 0;	//Initialise to indicate this ion has cardona partition function data
       ion[n].nxcpart = -1;
-      ion[n].total_rrflag = 0;	//Initialise to say this ion has no Badnell total recombination data 
-      ion[n].nxtotalrr = -1;	//Initialise the pointer into the bad_t_rr structure. 
-      ion[n].bad_gs_rr_t_flag = 0;	//Initialise to say this ion has no Badnell ground state recombination data 
-      ion[n].bad_gs_rr_r_flag = 0;	//Initialise to say this ion has no Badnell ground state recombination data       
+      ion[n].total_rrflag = 0;	//Initialise to say this ion has no Badnell total recombination data
+      ion[n].nxtotalrr = -1;	//Initialise the pointer into the bad_t_rr structure.
+      ion[n].bad_gs_rr_t_flag = 0;	//Initialise to say this ion has no Badnell ground state recombination data
+      ion[n].bad_gs_rr_r_flag = 0;	//Initialise to say this ion has no Badnell ground state recombination data
       ion[n].nxbadgsrr = -1;	//Initialise the pointer into the bad_gs_rr structure.
       ion[n].dere_di_flag = 0;	//Initialise to say this ion has no Dere DI rate data
       ion[n].nxderedi = -1;	//Initialise the pointer into the Dere DI rate structure
@@ -732,8 +732,8 @@ structure does not have this property! */
 	      switch (choice)
 		{
 /**
- * @section Elements 
- * 
+ * @section Elements
+ *
  * A typical element has the following format
  *
  *  Element    6    C    8.56
@@ -773,7 +773,7 @@ structure does not have this property! */
  *  @verbatim
  *  IonV    C   6   4   2   64.49400 1000   10     1s^22s(2S_{1/2})
  *  @endverbatim
- * 
+ *
  * where C is the elment name, 6 is the elemnt z, 4 is the ionization state (in conventional
  * astrophysics notation, 2 is the mulitplicity  of the ground state, and 1000 and 10 refer
  * to maximum number of allowed LTE and nLTE configurations.  The configuration is not actually
@@ -867,13 +867,13 @@ structure does not have this property! */
 		  break;
 
 /**
- * @section Levels or Configurations
+ * @section levels Levels or Configurations
  *
  * This version of get_atomicdata can read various types of configuration inputs, some of which should gradually be
  * exsized from the program.  Originally, the idea was that Levels would immediately follow an ion, and in that case
  * all that was need to describe a level, was a level number, a multiplicity, and an energy for the level.  An example
  * of this type of line follows:
- * 
+ *
  *  @verbatim
  *  Ion	He	2	1	1	24.587  6 2
  *  Level 1 1 0.0
@@ -887,7 +887,7 @@ structure does not have this property! */
  * have to be immediately after the ion line.
  *
  * It was developed to allow one to use levels developed from the Kurucz
- * line list, and the new Verner level file.  
+ * line list, and the new Verner level file.
  *
  * A typical KURUCZSTYLE record would look like:
  *
@@ -901,50 +901,50 @@ structure does not have this property! */
  *  @endverbatim
  * where the colums are z, istate (in conventianal notation), a unique level no,
  * the multiplicity of the level and the exitation energy of the level in eV
- * 
- * 
- * 
+ *
+ *
+ *
  * The new Topbase style records (created by py_parse_levels) look like this:
- * 
- * 
+ *
+ *
  *  @verbatim
  *  ======================================================================================
  *  #      i NZ NE iSLP iLV iCONF                 E(RYD)      TE(RYD)   gi     EQN    RL(NS)
  *  # ======================================================================================
  *  # ======================================================================================
- *  LevTop  1  1  200  1 -13.605698   0.000000  2  1.0000 1.00e+21 () 1s           
- *  LevTop  1  1  200  2  -3.401425  10.204273  2  2.0000 1.00e+21 () 2s           
- *  LevTop  1  1  211  1  -3.401425  10.204273  6  2.0000 1.60e-09 () 2p           
- *  LevTop  1  1  220  1  -1.511743  12.093955 10  3.0000 1.55e-08 () 3d           
- *  LevTop  1  1  200  3  -1.511743  12.093955  2  3.0000 1.59e-07 () 3s           
- *  LevTop  1  1  211  2  -1.511743  12.093955  6  3.0000 5.28e-09 () 3p           
- *  LevTop  2  1  100  1 -24.310389   0.000000  1  0.7481 1.00e+21 1s2             
- *  LevTop  2  1  300  1  -4.766334  19.544041  3  1.6895 1.00e+21 1s 2s           
- *  LevTop  2  1  100  2  -3.941516  20.368818  1  1.8579 1.00e+21 1s 2s           
+ *  LevTop  1  1  200  1 -13.605698   0.000000  2  1.0000 1.00e+21 () 1s
+ *  LevTop  1  1  200  2  -3.401425  10.204273  2  2.0000 1.00e+21 () 2s
+ *  LevTop  1  1  211  1  -3.401425  10.204273  6  2.0000 1.60e-09 () 2p
+ *  LevTop  1  1  220  1  -1.511743  12.093955 10  3.0000 1.55e-08 () 3d
+ *  LevTop  1  1  200  3  -1.511743  12.093955  2  3.0000 1.59e-07 () 3s
+ *  LevTop  1  1  211  2  -1.511743  12.093955  6  3.0000 5.28e-09 () 3p
+ *  LevTop  2  1  100  1 -24.310389   0.000000  1  0.7481 1.00e+21 1s2
+ *  LevTop  2  1  300  1  -4.766334  19.544041  3  1.6895 1.00e+21 1s 2s
+ *  LevTop  2  1  100  2  -3.941516  20.368818  1  1.8579 1.00e+21 1s 2s
  *  @endverbatim
- * 
- * 
- * Col
- * 
- *  * 2     NZ  the atomic number of the level
- *  * 3     NE  the ionization state according to the usual astronomical convention.  Note
- * 	that Topbase uses the number of electrons but this is fixed in my reformatting
- * 	program.
- *  * 4   iSLP  A coded version of the angular momentum
- *  * 5   iLV   The level number (starts with 1)
- *  * 6   E(Ryd)  The energy in eV  relative to the continuum
- *  * 7   TE(Ryd) The energy in ev  realative to the ground state
- *  * 8   gi     The multiplicity
- *  * 9   eqn    The equivalent quantum number  (Not necessarily an integer)
- *  * 10  rl	   The radiative lifetime
- *  * 11  config  A string showing the configuration
- * 
- * 
- * Macro Atoms (SS)
- * 
+ *
+ * The details are:
+ *
+ * | Col | Name    | Description
+ * | --- | ------- | -----------
+ * | 2   |  NZ     | the atomic number of the level
+ * | 3   |  NE     | the ionization state according to the usual astronomical convention.
+ * |     |         | Note that Topbase uses the number of electrons but this is fixed in my reformatting program.
+ * | 4   | iSLP    | A coded version of the angular momentum
+ * | 5   | iLV     | The level number (starts with 1)
+ * | 6   | E(Ryd)  | The energy in eV  relative to the continuum
+ * | 7   | TE(Ryd) | The energy in ev  realative to the ground state
+ * | 8   | gi      | The multiplicity
+ * | 9   | eqn     | The equivalent quantum number  (Not necessarily an integer)
+ * | 10  | rl	     | The radiative lifetime
+ * | 11  | config  | A string showing the configuration
+ *
+ *
+ * \subsection matoms Macro Atoms (SS)
+ *
  * When the macro atom method is to be used the level data should look like:
  * e.g.
- * 
+ *
  *  @verbatim
  *  #         z ion lvl ion_pot   ex_energy  g  rad_rate
  *  LevMacro  1  1  1 -13.605698   0.000000  2  1.00e+21 () n=1
@@ -953,30 +953,29 @@ structure does not have this property! */
  *  LevMacro  1  1  4  -0.850356  12.755342 32  1.00e-08 () n=4
  *  LevMacro  1  2  1   0.000000  13.605698  1  1.00e+21 () cnt
  *  @endverbatim
- * 
- * 
+ *
+ *
  * The details are:
- * 
- * Col
- * * 2      Atomic number 
- * * 3      Ionisation state (usual astronomical convention: neutral=1)
- * * 4      An index for the level: this index must be assigned consistently in all
- *        the macro input files (i.e. also in photoionisation data)
- *        Each level index in a particular ion must be unique.
- * * 5      ionisation potential (electron volts)
- * * 6      excitation energy (electron volts). A consistent definition of energy=0
- *        must be used for all ions of the same element: ground state energy for the
- *        neutral species = 0.
- * * 7      statistical weight
- * * 8      radiative lifetime
- * * 9      a string giving a name for the level (not used by code)
- * 
- * 
+ *
+ * | Col | Name      | Description
+ * |---- | --------- | ------------
+ * | 2   | z         | Atomic number
+ * | 3   | ion       | Ionisation state (usual astronomical convention: neutral=1)
+ * | 4   | lvl       | An index for the level: this index must be assigned consistently in all the macro input files
+ * |     |           | (i.e. also in photoionisation data). Each level index in a particular ion must be unique.
+ * | 5   | ion_pot   | Ionisation potential (electron volts)
+ * | 6   | ex_energy | Excitation energy (electron volts). A consistent definition of energy=0 must be used for all ions of the same element:
+ * |     |           | ground state energy for the neutral species = 0.
+ * | 7   | g         | Statistical weight
+ * | 8   | rad_rate  | Radiative lifetime
+ * | 9   |           | A string giving a name for the level (not used by code)
+ *
+ *
  * */
 
 
 		case 'N':
-/*  
+/*
     It's a non-lte level, i.e. one for which we are going to calculate populations, at least for some number of these.
 	For these, we have to set aside space in the levden array in the plasma structure.  This is used for topbase
 	photoionization and macro atoms
@@ -987,7 +986,7 @@ topbase level densities in some of the same arrays in python.  Leave for now, bu
 the program working in both cases, and certainly mixed cases  04apr ksl  */
 
 /* 080810 -- ksl -- 62 -- I have changed the way levels are created so that one can only read one type
- * of levels for each ion.  Note also that all of the confiruations for a single ion need to be read together.  
+ * of levels for each ion.  Note also that all of the confiruations for a single ion need to be read together.
  * It will be possible to read other types of records but one should not mix levels of different ions (This
  * last bit is not actually new.
  */
@@ -1044,7 +1043,7 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
 
 /*  So now we know that this level can be associated with an ion
 
-Now either set the type of level that will be used for this ion or set it if 
+Now either set the type of level that will be used for this ion or set it if
 a level type has not been established
 		   */
 
@@ -1057,9 +1056,9 @@ a level type has not been established
 		      break;
 		    }
 
-/* 
- Now check 1) if it was a LevMacro that there isn't already a LevTop (if there was then 
- something has gone wrong in the input order). 
+/*
+ Now check 1) if it was a LevMacro that there isn't already a LevTop (if there was then
+ something has gone wrong in the input order).
  2) if it was a LevTop that there wasn't already a LevMacro.If there was then ignore the new LevTop data
  for this ion. (SS)
 */
@@ -1123,7 +1122,7 @@ a level type has not been established
 		  config[nlevels].ex = exx;
 		  config[nlevels].rad_rate = rl;
 		  /* SS Aug 2005
-		     Previously, the line above set the rad_rate to 0 and is was never used. 
+		     Previously, the line above set the rad_rate to 0 and is was never used.
 		     Now I'm setting it to the radiative lifetime of the level.
 		     It will now be used in the macro atom calculation - if the lifetime is
 		     set to be long (infinite) in the input data, the level is assumed to be
@@ -1133,7 +1132,7 @@ a level type has not been established
 
 
 		  if (ion[n].n_lte_max > 0)
-		    {		// Then this ion wants nlte levels 
+		    {		// Then this ion wants nlte levels
 		      if (ion[n].first_nlte_level < 0)
 			{	// Then this is the first one that has been found
 			  ion[n].first_nlte_level = nlevels;
@@ -1158,7 +1157,7 @@ a level type has not been established
 
 
 /* Now associate this config with the levden array where appropriate.  The -1 is because ion[].nlte
-is already incremented 
+is already incremented
 
 */
 
@@ -1227,7 +1226,7 @@ is already incremented
 
 		    }
 
-		  /* Now either set the type of level that will be used for this ion or set it if 
+		  /* Now either set the type of level that will be used for this ion or set it if
 		   * a level type has not been established
 		   */
 
@@ -1244,7 +1243,7 @@ is already incremented
 
 
 /* Check whether this is a macro-ion.  If it is a macro-ion, but the level appears to be described as a
-simple level (i.e without a keyword LeVMacro), then skip it, since a macro-ion has to have all the levels 
+simple level (i.e without a keyword LeVMacro), then skip it, since a macro-ion has to have all the levels
 described as macro-levels. */
 		  if (ion[n].macro_info == 1)
 		    {
@@ -1254,7 +1253,7 @@ described as macro-levels. */
 		      break;
 		    }
 /* Check to prevent one from adding simple levels to an ionized that already has some nlte levels.  Note that
-   an ion may have simple levels, i.e. levels with no entries in the plasma structure levden array, but this 
+   an ion may have simple levels, i.e. levels with no entries in the plasma structure levden array, but this
    will only be the case if there are too many of this type of level.
 */
 		  if (ion[n].nlte > 0)
@@ -1294,7 +1293,7 @@ described as macro-levels. */
 		    ion[n].nlevels++;
 
 
-/* Now declare that this level has no corresponding element in the levden array which is part 
+/* Now declare that this level has no corresponding element in the levden array which is part
    of the plasma stucture.  To do this set config[].ndent to -1
 */
 
@@ -1320,8 +1319,8 @@ described as macro-levels. */
  *
  * Until at least Oct 2001, Python used photoionization crossections from Verner, Ferland, Korista, and Yakolev (DFKY)
  * The routine sigma_phot(xptr, freq) calculates the crossection based on this.
- * 
- * 
+ *
+ *
  * The original topbase records look like this
  *
  * @verbatim
@@ -1336,12 +1335,12 @@ described as macro-levels. */
  *   4.311536E+00 1.289E+00
  *   4.420684E+00 1.206E+00
  * @endverbatim
- * 
- * They are converted to something that is more compatible with Topbase 
+ *
+ * They are converted to something that is more compatible with Topbase
  * by py_top_phot
- * 
- * The new topbase style records look like this.  
- * 
+ *
+ * The new topbase style records look like this.
+ *
  * @verbatim
  * PhotTopS  2  1 200    1    54.422791 101
  * PhotTop    54.422791 1.576e-18
@@ -1354,19 +1353,19 @@ described as macro-levels. */
  * PhotTop   139.024658 1.155e-19
  * PhotTop   151.110639 9.057e-20
  * @endverbatim
- * 
+ *
  * The main changes from the original records are that energy levels
  * have been converted to eV, cross sections to cm**2, and the electron
  * number has been converted to conventional astronomical notiation
  * for the ionstate.
- * 
+ *
  * ### Macro atoms (SS)
- *   
+ *
  * For the Macro Atom method the input photoionisation data should look like
  * (one entry for every photoionisation process):
- *   
+ *
  * @verbatim
- * z  ion ll ul   threshold  npts  
+ * z  ion ll ul   threshold  npts
  * PhotMacS  1  1  1  1    13.605698  50
  * PhotMac    13.605698 6.304e-18
  * PhotMac    16.627193 3.679e-18
@@ -1377,23 +1376,22 @@ described as macro-levels. */
  * PhotMac    31.734669 6.006e-19
  * PhotMac    34.756165 4.618e-19
  * @endverbatim
- *   
- * Details:
- * Col (first row of entry)
- * * 2     atomic number
- * * 3     ionisation stage (astronomical convention): LOWER ION (i.e. the one that GETS IONISED)
- *       it is always assumed that the upper stage is this+1!
- * * 4     index for the level in the LOWER ION (must match the index given to the level in 
- *       input level data)
- * * 5     index for the level in the UPPER ION (must match the index given to the level in the 
- *       input level data)
- * * 6     threshold energy of edge (in eV)
- * * 7     npts: number of data points in the following table
- * 
+ *
+ * Details for the first row of each entry:
+ * | Col | Name  | Description
+ * | --- | ----- | -----------
+ * | 2   | z     | Atomic number
+ * | 3   | ion   | Ionisation stage (astronomical convention): LOWER ION (i.e. the one that GETS IONISED)
+ * |     |       | it is always assumed that the upper stage is this+1!
+ * | 4   | ll    | index for the level in the LOWER ION (must match the index given to the level in input level data)
+ * | 5   | ul    | index for the level in the UPPER ION (must match the index given to the level in the input level data)
+ * | 6   | thresh| threshold energy of edge (in eV)
+ * | 7   | npts  | number of data points in the following table
+ *
  * * Then follows the table of energy and cross-section values (same as TopBase above)
  * * 04dec	ksl	Modified this section so that "unknown" level information is skipped so that
  *   		one need modify only the higher level elements_ions file
-*/
+ */
 
 		case 'w':
 		  if (strncmp (word, "PhotMacS", 8) == 0)
@@ -1434,7 +1432,7 @@ described as macro-levels. */
 
 		      // Locate lower state
 		      m = 0;
-		      while ((config[m].z != z || config[m].istate != istate	//Now searching for the lower 
+		      while ((config[m].z != z || config[m].istate != istate	//Now searching for the lower
 			      || config[m].ilv != levl) && m < nlevels)	//configuration (SS)
 			m++;
 		      if (m == nlevels)
@@ -1486,7 +1484,7 @@ described as macro-levels. */
 			  ion[config[m].nion].ntop_first = ntop_phot;
 			}
 
-		      /* next line sees if the topbase level just read in is the ground state - 
+		      /* next line sees if the topbase level just read in is the ground state -
 		         if it is, the ion structure element ntop_ground is set to that topbase level number
 		         note that m is the lower level here */
 		      if (m ==
@@ -1549,7 +1547,7 @@ described as macro-levels. */
 		      /* additional check to assure that records were
 		       * only matched with levels whose density was being tracked in levden.  This
 		       * is now necesary since a change was made to use topbase levels for calculating
-		       * partition functions 
+		       * partition functions
 		       */
 
 		      while ((config[n].nden == -1
@@ -1566,7 +1564,7 @@ described as macro-levels. */
 			     file, lineno);
 			  break;	// There was no pre-existing ion
 			}
-		      if (ion[config[n].nion].macro_info == 0)	//this is not a macro atom level (SS) 
+		      if (ion[config[n].nion].macro_info == 0)	//this is not a macro atom level (SS)
 			{
 			  phot_top[ntop_phot].nlev = n;	// level associated with this crossection.
 			  phot_top[ntop_phot].nion = config[n].nion;
@@ -1576,7 +1574,7 @@ described as macro-levels. */
 			  phot_top[ntop_phot].nlast = -1;
 			  phot_top[ntop_phot].macro_info = 0;
 
-			  /* next line sees if the topbase level just read in is the ground state - 
+			  /* next line sees if the topbase level just read in is the ground state -
 			     if it is, the ion structure element ntop_ground is set to that topbase level number */
 			  if (islp ==
 			      config[ion[config[n].nion].first_nlte_level].isp
@@ -1637,7 +1635,7 @@ described as macro-levels. */
 		    }
 
 
-		  /* Check that there is an ion which has the same ionization state as this record 
+		  /* Check that there is an ion which has the same ionization state as this record
 		     otherwise it must be a VFKY style record and so read with that format */
 
 		  else if (strncmp (word, "PhotVfkyS", 8) == 0)
@@ -1693,8 +1691,8 @@ described as macro-levels. */
 
 			      else if (ion[nion].phot_info == 1
 				       && ion[nion].macro_info != 1)
-				/* We already have a topbase cross section, but the VFKY 
-				   data is superior for the ground state, so we replace that data with the current data 
+				/* We already have a topbase cross section, but the VFKY
+				   data is superior for the ground state, so we replace that data with the current data
 				   JM 1508 -- don't do this with macro-atoms for the moment */
 				{
 				  phot_top[ion[nion].ntop_ground].nlev = ion[nion].firstlevel;	// ground state
@@ -1933,7 +1931,7 @@ described as macro-levels. */
 
 
 
-/** 
+/**
  * @section Lines
  *
  * here are various types of line files which get_atomicdata must parse
@@ -1953,7 +1951,7 @@ described as macro-levels. */
  * Line  6  3 1175.590000    0.069804   3   3    6.496462   17.044369
  * @endverbatim
  *
- * Finally there is a new format developed to link lines to configurations.  
+ * Finally there is a new format developed to link lines to configurations.
  *
  * @verbatim
  * Line  1  1 1215.673584  0.139000   2   2     0.000000    10.200121    0    1
@@ -1964,8 +1962,8 @@ described as macro-levels. */
  * ### Macro Atoms (SS)
  *
  * For the macro atom method the lines are input in the following format:
- * 
- * 
+ *
+ *
  * @verbatim
  * # z = element, ion= ionstage, f = osc. str., gl(gu) = stat. we. lower(upper) level
  * # el(eu) = energy lower(upper) level (eV), ll(lu) = lvl index lower(upper) level
@@ -1977,28 +1975,26 @@ described as macro-levels. */
  * LinMacro  1  1 4861.320000  0.119300   8  32    10.200143    12.755342    2    4
  * LinMacro  1  1 18751.00000  0.842100  18  32    12.089062    12.755342    3    4
  * @endverbatim
- * 
+ *
  * Details:
- * 
- * Col
- * 
- * * 2    Atomic Number
- * * 3    Ionisation stage (astronomical convention)
- * * 4    Wavelength of transition (AA)
- * * 5    oscillator strength
- * * 6    stat. weight for lower level of transition
- * * 7    stat. weight for upper level of transition
- * * 8    energy of lower level of transition (eV)
- * * 9    energy of upper level of transition (eV)
- * * 10   index for lower level of transition (MUST match the index assigned to this level in
- *      level data
- * * 11   index for upper level of transition (MUST match the index assigned to this level in
- *      level data
- * 
+ *
+ * | Col | Description
+ * | --- | -----------
+ * | 2   | Atomic Number
+ * | 3   | Ionisation stage (astronomical convention)
+ * | 4   | Wavelength of transition (AA)
+ * | 5   | oscillator strength
+ * | 6   | stat. weight for lower level of transition
+ * | 7   | stat. weight for upper level of transition
+ * | 8   | energy of lower level of transition (eV)
+ * | 9   | energy of upper level of transition (eV)
+ * | 10  | index for lower level of transition (MUST match the index assigned to this level in level data
+ * | 11  | index for upper level of transition (MUST match the index assigned to this level in level data
+ *
  *   04dec ksl -- I have modified the next section to try to conform to the "philosophy" of
  *   get_atomic_data which is that one does not need to modify the more detailed files, e.g
- *   the LinMacro file, if one has eliminated a particular level in the elements ion file.  
- *   Basically this was accomplished by checking both the upper and lower level and breaking 
+ *   the LinMacro file, if one has eliminated a particular level in the elements ion file.
+ *   Basically this was accomplished by checking both the upper and lower level and breaking
  *   out if either was not accounted for.
 */
 		case 'r':
@@ -2300,13 +2296,13 @@ would like to have simple lines for macro-ions */
 			    {
 			      drecomb[ndrecomb].nion = n;	//put the ion number into the DR structure
 			      drecomb[ndrecomb].nparam = nparam;	//Put the number of parameters we ware going to read in, into the DR structure so we know what to iterate over later
-			      ion[n].nxdrecomb = ndrecomb;	//put the number of the DR into the ion                            
+			      ion[n].nxdrecomb = ndrecomb;	//put the number of the DR into the ion
 			      drecomb[ndrecomb].type = DRTYPE_BADNELL;	//define the type of data
 			      ndrecomb++;	//increment the counter of number of dielectronic recombination parameter sets
 			      ion[n].drflag++;	//increment the flag by 1. We will do this rather than simply setting it to 1 so we will get errors if we do this more than once....
 
 			    }
-			  if (drflag == 'E')	// this ion has no parameters, so it must be the first time through        
+			  if (drflag == 'E')	// this ion has no parameters, so it must be the first time through
 			    {
 
 			      n1 = ion[n].nxdrecomb;	//     Get the pointer to the correct bit of the recombination coefficient array. This should already be set from the first time through
@@ -2354,7 +2350,7 @@ would like to have simple lines for macro-ions */
 			    {
 			      drecomb[ndrecomb].nion = n;	//put the ion number into the DR structure
 			      drecomb[ndrecomb].nparam = nparam;	//Put the number of parameters we ware going to read in, into the DR structure so we know what to iterate over later
-			      ion[n].nxdrecomb = ndrecomb;	//put the number of the DR into the ion                            
+			      ion[n].nxdrecomb = ndrecomb;	//put the number of the DR into the ion
 			      drecomb[ndrecomb].type = DRTYPE_SHULL;	//define the type of data
 			      ndrecomb++;	//increment the counter of number of dielectronic recombination parameter sets
 			      ion[n].drflag++;	//increment the flag by 1. We will do this rather than simply setting it to 1 so we will get errors if we do this more than once....
@@ -2376,7 +2372,7 @@ would like to have simple lines for macro-ions */
  * @section Partition function
  *
  * Parametrised partition function data read in. At the moment, the data we are using comes from Cardona et al (2010). The file currently used(paert_cardona.dat) is saved from the internet, with a couple of changes. The word CPART is prepended to each line of data, and any comment lines are prepended with an #. This is the general format:
-* 
+*
 * @verbatim
 * CPART   1       0       150991.49       278     2
 * CPART   2       0       278302.52       556     4
@@ -2387,7 +2383,7 @@ would like to have simple lines for macro-ions */
 * CPART   4       0       96994.39        318     7
 * CPART   4       1       183127.29       250     2
 * @endverbatim
-* the first number is the element number, then the ion, then the three parameters 
+* the first number is the element number, then the ion, then the three parameters
 * */
 
 
@@ -2453,7 +2449,7 @@ would like to have simple lines for macro-ions */
 		    {
 		      if (ion[n].z == z && ion[n].istate == istate)	// this works out which ion we are dealing with
 			{
-			  if (ion[n].total_rrflag == 0)	// this ion has no parameters, so it must be the first time through        
+			  if (ion[n].total_rrflag == 0)	// this ion has no parameters, so it must be the first time through
 			    {
 			      total_rr[n_total_rr].nion = n;	//put the ion number into the bad_t_rr structure
 			      ion[n].nxtotalrr = n_total_rr;	/*put the number of the bad_t_rr into the ion
@@ -2507,7 +2503,7 @@ would like to have simple lines for macro-ions */
 		    {
 		      if (ion[n].z == z && ion[n].istate == istate)	// this works out which ion we are dealing with
 			{
-			  if (ion[n].total_rrflag == 0)	// this ion has no parameters, so it must be the first time through        
+			  if (ion[n].total_rrflag == 0)	// this ion has no parameters, so it must be the first time through
 			    {
 			      total_rr[n_total_rr].nion = n;	//put the ion number into the bad_t_rr structure
 			      ion[n].nxtotalrr = n_total_rr;	/*put the number of the bad_t_rr into the ion
@@ -2628,7 +2624,7 @@ would like to have simple lines for macro-ions */
 		    }		//end of loop over ions
 
 		  break;
-/* The following are lines to read in temperature averaged gaunt factors from the data of Sutherland (1997). The atomic file is basically unchanged 
+/* The following are lines to read in temperature averaged gaunt factors from the data of Sutherland (1997). The atomic file is basically unchanged
  * from the data on the website, just with the top few lines commented out, and a label prepended to each line */
 /**
  * @section gaunt factor
@@ -2636,7 +2632,7 @@ would like to have simple lines for macro-ions */
  */
 		case 'g':
 		  nparam = sscanf (aline, "%*s %le %le %le %le %le", &gsqrdtemp, &gfftemp, &s1temp, &s2temp, &s3temp);	//split and assign the line
-		  if (nparam > 5 || nparam < 1)	//     trap errors 
+		  if (nparam > 5 || nparam < 1)	//     trap errors
 		    {
 		      Error ("Something wrong with sutherland gaunt data\n");
 		      Error ("Get_atomic_data: %s\n", aline);
@@ -2668,7 +2664,7 @@ would like to have simple lines for macro-ions */
 		case 'd':
 		  nparam = sscanf (aline, "%*s %d %d %d %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le", &z, &istate, &nspline, &et, &tmin, &temp[0], &temp[1], &temp[2], &temp[3], &temp[4], &temp[5], &temp[6], &temp[7], &temp[8], &temp[9], &temp[10], &temp[11], &temp[12], &temp[13], &temp[14], &temp[15], &temp[16], &temp[17], &temp[18], &temp[19], &temp[20], &temp[21], &temp[22], &temp[23], &temp[24], &temp[25], &temp[26], &temp[27], &temp[28], &temp[29], &temp[30], &temp[31], &temp[32], &temp[33], &temp[34], &temp[35], &temp[36], &temp[37], &temp[38], &temp[39]);	//split and assign the line
 
-		  if (nparam != 5 + (nspline * 2))	//     trap errors 
+		  if (nparam != 5 + (nspline * 2))	//     trap errors
 		    {
 		      Error ("Something wrong with Dere DI data\n");
 		      Error ("Get_atomic_data: %s\n", aline);
@@ -2814,7 +2810,7 @@ would like to have simple lines for macro-ions */
  *		  approach, all of the line data is stored on the same line as the collision strength data in
  *		  the file, so it is possible to make a very accurate match. It does mean quite a lot is read in
  *		  from a line, but most is thrown away. Currently the code below matches based on z, state, upper and
- *		  lower level numbers and oscillator strength 
+ *		  lower level numbers and oscillator strength
  *		@bug This needs a better description including what each of the entries is
  *		  */
 
@@ -2965,7 +2961,7 @@ would like to have simple lines for macro-ions */
   Log ("We have read in %3d photoionization cross sections\n", nphot_total);
   Log ("                %3d are topbase \n", ntop_phot);
   Log ("                %3d are VFKY \n", nxphot);
-  Log ("We have read in %5d   Chiantic collision strengths\n", n_coll_stren);	//1701 nsh collision strengths 
+  Log ("We have read in %5d   Chiantic collision strengths\n", n_coll_stren);	//1701 nsh collision strengths
   Log ("We have read in %3d Inner shell photoionization cross sections\n", n_inner_tot);	//110818 nsh added a reporting line about dielectronic recombination coefficients
   Log ("                %3d have matching electron yield data\n",
        n_elec_yield_tot);
@@ -3004,7 +3000,7 @@ somewhat inexact  because it assumes all elements have equal neutrons and proton
   rho2nh = 1. / q;
 
 
-/* Now find the first and last ion associated with each named element and 
+/* Now find the first and last ion associated with each named element and
 exit if there is an element with no ions */
 
   for (nelem = 0; nelem < nelements; nelem++)
@@ -3019,7 +3015,7 @@ exit if there is an element with no ions */
       if (ele[nelem].firstion == nions)
 	{
 	  ele[nelem].firstion = -1;	/* There were no ions for this element */
-// In principle, there might be a program which uses elements but not ions, but it seems unlikely, 
+// In principle, there might be a program which uses elements but not ions, but it seems unlikely,
 // therefore stop if there is not at least one ion for each element
 	  Error ("Get_atomic_data: There were no ions for element %d %s\n",
 		 nelem, ele[nelem].name);
@@ -3032,9 +3028,9 @@ exit if there is an element with no ions */
 a total emission oscillator strength for the level....really ought to be radiative lifefime */
 
 
-/* This next loop is connects levels to configurations for "simple atoms". 
- For Macro Atoms files, the data files already contain this infomration and 
- so the check is avoided by checking tte macro_info flag SS 
+/* This next loop is connects levels to configurations for "simple atoms".
+ For Macro Atoms files, the data files already contain this infomration and
+ so the check is avoided by checking tte macro_info flag SS
 */
 
 
@@ -3297,16 +3293,16 @@ index_lines ()
 
   freqs[0] = 0;
   for (n = 0; n < nlines; n++)
-    freqs[n + 1] = line[n].freq;	/* So filled matrix 
+    freqs[n + 1] = line[n].freq;	/* So filled matrix
 					   elements run from 1 to nlines */
 
-  indexx (nlines, freqs, index);	/* Note that this math recipes routine 
+  indexx (nlines, freqs, index);	/* Note that this math recipes routine
 					   expects arrays to run from 1 to nlines inclusive */
 
-  /* The for loop indices are complicated by the numerical recipes routine, 
+  /* The for loop indices are complicated by the numerical recipes routine,
      which is a simple translation of a fortran routine.
-     Specifically, index array elements 1 to nlines are now filled, 
-     and the numbers run from 1 to nlines, but the 
+     Specifically, index array elements 1 to nlines are now filled,
+     and the numbers run from 1 to nlines, but the
      pointer array is only filled from elements 0 to nlines -1 */
 
   /* SS - adding quantity "where_in_list" to line structure so that it is easy to from emission
@@ -3339,7 +3335,7 @@ index_lines ()
  * The results are stored in phot_top_ptr
  *
  * ### Notes ###
- * Adapted from index_lines as part to topbase 
+ * Adapted from index_lines as part to topbase
  *             addition to python
  *
  **********************************************************/
@@ -3358,16 +3354,16 @@ index_phot_top ()
 
   freqs[0] = 0;
   for (n = 0; n < ntop_phot + nxphot; n++)
-    freqs[n + 1] = phot_top[n].freq[0];	/* So filled matrix 
+    freqs[n + 1] = phot_top[n].freq[0];	/* So filled matrix
 					   elements run from 1 to ntop_phot */
 
-  indexx (ntop_phot + nxphot, freqs, index);	/* Note that this math recipes routine 
+  indexx (ntop_phot + nxphot, freqs, index);	/* Note that this math recipes routine
 						   expects arrays to run from 1 to nlines inclusive */
 
-  /* The for loop indices are complicated by the numerical recipes routine, 
+  /* The for loop indices are complicated by the numerical recipes routine,
      which is a simple translation of a fortran routine.
-     Specifically, index array elements 1 to nlines are now filled, 
-     and the numbers run from 1 to nlines, but the 
+     Specifically, index array elements 1 to nlines are now filled,
+     and the numbers run from 1 to nlines, but the
      pointer array is only filled from elements 0 to nlines -1 */
 
   for (n = 0; n < ntop_phot + nxphot; n++)
@@ -3412,16 +3408,16 @@ index_inner_cross ()
 
   freqs[0] = 0;
   for (n = 0; n < n_inner_tot; n++)
-    freqs[n + 1] = inner_cross[n].freq[0];	/* So filled matrix 
+    freqs[n + 1] = inner_cross[n].freq[0];	/* So filled matrix
 						   elements run from 1 to ntop_phot */
 
-  indexx (n_inner_tot, freqs, index);	/* Note that this math recipes routine 
+  indexx (n_inner_tot, freqs, index);	/* Note that this math recipes routine
 					   expects arrays to run from 1 to nlines inclusive */
 
-  /* The for loop indices are complicated by the numerical recipes routine, 
+  /* The for loop indices are complicated by the numerical recipes routine,
      which is a simple translation of a fortran routine.
-     Specifically, index array elements 1 to nlines are now filled, 
-     and the numbers run from 1 to nlines, but the 
+     Specifically, index array elements 1 to nlines are now filled,
+     and the numbers run from 1 to nlines, but the
      pointer array is only filled from elements 0 to nlines -1 */
 
   for (n = 0; n < n_inner_tot; n++)
@@ -3470,20 +3466,20 @@ index_collisions ()
 
   freqs[0] = 0;
   for (n = 0; n < nxcol; n++)
-    freqs[n + 1] = xcol[n].freq;	/* So filled matrix 
+    freqs[n + 1] = xcol[n].freq;	/* So filled matrix
 					   elements run from 1 to ntrans */
 
   if (nxcol > 0)		//if statement added (SS, feb 04)
     {
-      indexx (nxcol, freqs, index);	/* Note that this math recipes routine 
+      indexx (nxcol, freqs, index);	/* Note that this math recipes routine
 					   expects arrays to run from 1 to nlines inclusive */
     }
 
 
-  /* The for loop indices are complicated by the numerical recipes routine, 
+  /* The for loop indices are complicated by the numerical recipes routine,
      which is a simple translation of a fortran routine.
-     Specifically, index array elements 1 to nlines are now filled, 
-     and the numbers run from 1 to nlines, but the 
+     Specifically, index array elements 1 to nlines are now filled,
+     and the numbers run from 1 to nlines, but the
      pointer array is only filled from elements 0 to nlines -1 */
 
   for (n = 0; n < nxcol; n++)
@@ -3504,12 +3500,12 @@ index_collisions ()
 
 /**********************************************************/
 /** @name      indexx
- * @brief      Numerical recipes routine used by various routines to sort the atomic data                    
+ * @brief      Numerical recipes routine used by various routines to sort the atomic data
  *
  * @param [in] int  n   The dimension of the array that needs sorting
  * @param [in] float  arrin[]   The array to sort
  * @param [out] int  indx[]   The array that contains poionters to the sorted array
- * @return     N/A              
+ * @return     N/A
  *
  * @details
  *
@@ -3574,47 +3570,47 @@ indexx (n, arrin, indx)
 
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
-//OLD   limit_lines(freqmin,freqmax)  sets the the current values of line_min and line_max in atomic.h  
-//OLD   which can be used to limit the lines searched for resonances to a specific 
+//OLD   limit_lines(freqmin,freqmax)  sets the the current values of line_min and line_max in atomic.h
+//OLD   which can be used to limit the lines searched for resonances to a specific
 //OLD   frequency range.
-//OLD    
-//OLD Arguments:                
+//OLD
+//OLD Arguments:
 //OLD   double freqmin, freqmax  a range of frequencies in which one is interested in the lines
-//OLD 
+//OLD
 //OLD Returns:
-//OLD   limit_lines returns the number of lines that are potentially in resonance.  If limit_lines 
-//OLD   returns 0 there are no lines of interest and one does not need to worry about any 
-//OLD   resonaces at this frequency.  If limit_lines returns a number greater than 0, then 
+//OLD   limit_lines returns the number of lines that are potentially in resonance.  If limit_lines
+//OLD   returns 0 there are no lines of interest and one does not need to worry about any
+//OLD   resonaces at this frequency.  If limit_lines returns a number greater than 0, then
 //OLD   the lines of interest are defined by nline_min and nline_max (inclusive) in atomic.h
 //OLD   nline_delt is also set which is the number of lines that are in the specified range
-//OLD 
-//OLD Description:      
+//OLD
+//OLD Description:
 //OLD   limit_lines  define the lines that are close to a given frequency.  The degree of closeness
-//OLD   is defined by v. The routine must be used in conjuction with get_atomic_data which 
-//OLD   will have created an ordered list of the lines.   
+//OLD   is defined by v. The routine must be used in conjuction with get_atomic_data which
+//OLD   will have created an ordered list of the lines.
 //OLD Notes:
 //OLD   Limit_lines needs to be used somewhat carefully.  Carefully means checking the
 //OLD   return value of limit_lines or equivalently nline_delt=0.  If nline_delt=0 then there
 //OLD   were no lines in the region of interest.  Assuming there were lines in thte range,
-//OLD   one must sum over lines from nline_min to nline_max inclusive.  
-//OLD   
+//OLD   one must sum over lines from nline_min to nline_max inclusive.
+//OLD
 //OLD   One might wonder why nline_max is not set to one larger than the last line which
 //OLD   is in range.  This is because depending on how the velocity is trending you may
 //OLD   want to sum from the highest frequency line to the lowest.
-//OLD 
-//OLD ?? It is unclear to me whether given that limit lines is very similar 
+//OLD
+//OLD ?? It is unclear to me whether given that limit lines is very similar
 //OLD from call to call
-//OLD that it would not be more efficeint to expand from previous 
+//OLD that it would not be more efficeint to expand from previous
 //OLD limits rather than adopt the approach hre 02may
-//OLD 
+//OLD
 //OLD History:
-//OLD   97jan      ksl  Coded and debugged as part of Python effort.  
+//OLD   97jan      ksl  Coded and debugged as part of Python effort.
 //OLD   98apr4  ksl     Modified inputs so one gives freqmin and freqmax directly
 //OLD   01nov   ksl     Rewritten to handle large numbers of lines more
 //OLD                   efficiently
-//OLD 
+//OLD
 //OLD **************************************************************/
 
 
@@ -3623,37 +3619,37 @@ indexx (n, arrin, indx)
 
 /**********************************************************/
 /** @name      limit_lines
- * @brief      (freqmin,freqmax)  sets the the current values of line_min and line_max in atomic.h  
- * 	which can be used to limit the lines searched for resonances to a specific 
+ * @brief      (freqmin,freqmax)  sets the the current values of line_min and line_max in atomic.h
+ * 	which can be used to limit the lines searched for resonances to a specific
  * 	frequency range.
  *
  * @param [in out] double  freqmin   The minimum frequency we are interested in
- * @param [in out] double  freqmax   The maximum frequency we are interested in                            
- * @return     the number of lines that are potentially in resonance.  
+ * @param [in out] double  freqmax   The maximum frequency we are interested in
+ * @return     the number of lines that are potentially in resonance.
  *
  *
  *
- * If limit_lines 
- * 	returns 0 there are no lines of interest and one does not need to worry about any 
- * 	resonances at this frequency.  If limit_lines returns a number greater than 0, then 
+ * If limit_lines
+ * 	returns 0 there are no lines of interest and one does not need to worry about any
+ * 	resonances at this frequency.  If limit_lines returns a number greater than 0, then
  * 	the lines of interest are defined by nline_min and nline_max (inclusive) in atomic.h
  * 	nline_delt is also set which is the number of lines that are in the specified range
  *
  * @details
  * limit_lines  define the lines that are close to a given frequency.  The degree of closeness
- * 	is defined by v. The routine must be used in conjuction with get_atomic_data which 
+ * 	is defined by v. The routine must be used in conjuction with get_atomic_data which
  * 	will have created an ordered list of the lines.
  *
  * ### Notes ###
  * Limit_lines needs to be used somewhat carefully.  Carefully means checking the
  * 	return value of limit_lines or equivalently nline_delt=0.  If nline_delt=0 then there
  * 	were no lines in the region of interest.  Assuming there were lines in thte range,
- * 	one must sum over lines from nline_min to nline_max inclusive.  
- * 	
+ * 	one must sum over lines from nline_min to nline_max inclusive.
+ *
  * 	One might wonder why nline_max is not set to one larger than the last line which
  * 	is in range.  This is because depending on how the velocity is trending you may
  * 	want to sum from the highest frequency line to the lowest.
- * 
+ *
  *
  **********************************************************/
 
