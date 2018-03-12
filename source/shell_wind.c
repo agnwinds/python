@@ -85,7 +85,7 @@ get_shell_wind_params (ndom)
   shell_vmin = zdom[ndom].cl_v_zero = 200e5;
   shell_vmax = zdom[ndom].cl_v_infinity = 3000e5;
 
-  rddoub ("shell_wind_mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
+  rddoub ("shell.wind_mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
   zdom[ndom].stellar_wind_mdot *= MSOL / YR;
 
   rddoub ("shell.wind.radmin(cm)", &zdom[ndom].rmin);   /*Radius where wind begins */
@@ -110,24 +110,25 @@ get_shell_wind_params (ndom)
 
   shell_rmax = zdom[ndom].rmax;
 
-/*120130 NSH These next lines invert the cl velocity equation to get the cl factors from the local shell factors */
+  /* 120130 NSH These next lines invert the cl velocity equation to get the cl factors from the local shell factors */
 
   zdom[ndom].cl_v_zero = shell_vmin;
   factor = pow ((1 - (zdom[ndom].rmin / zdom[ndom].rmax)), zdom[ndom].cl_beta);
   zdom[ndom].cl_v_infinity = (shell_vmax - shell_vmin + shell_vmin * factor) / factor;
 
 
-/* Assign the generic parameters for the wind the generic parameters of the wind */
+  /* Assign the generic parameters for the wind the generic parameters of the wind */
 
   geo.rmin = zdom[ndom].rmin;
-  zdom[ndom].rmax = geo.rmax;
+  /* JM 1710 -- this is set by the quesiton wind.radmax */
+  //zdom[ndom].rmax = geo.rmax;
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 90. / RADIAN;
 
-/* define the the variables that determine the gridding */
+  /* define the the variables that determine the gridding */
   zdom[ndom].wind_rho_min = 0;
   zdom[ndom].wind_rho_max = zdom[ndom].rmax;
-  zdom[ndom].zmax = geo.rmax;
+  zdom[ndom].zmax = zdom[ndom].rmax;
 
   /* if modes.adjust_grid is 1 then we have already adjusted the grid manually */
   if (modes.adjust_grid == 0)
@@ -136,7 +137,7 @@ get_shell_wind_params (ndom)
     zdom[ndom].zlog_scale = 0.3 * geo.rstar;
   }
 
-/* Since this is a diagnostic routine, we will write out some information to check it is doing what we think) */
+  /* Since this is a diagnostic routine, we will write out some information to check it is doing what we think) */
 
   Log ("shell rmin=%f shell rmax=%f\n", shell_rmin, shell_rmax);
   dr = (shell_rmax - shell_rmin) / 100.0000;

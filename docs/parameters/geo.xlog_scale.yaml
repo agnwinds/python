@@ -1,0 +1,9 @@
+name: geo.xlog_scale
+description: |
+  Choose the logarithmic scale length for the grid in the x-direction.
+type: Double
+unit: cm
+parent:
+  parameter: adjust_grid
+file: setup_domains.c
+advanced: true

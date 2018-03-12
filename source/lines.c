@@ -77,16 +77,20 @@ total_line_emission (one, f1, f2)
   if (t_e <= 0 || f2 < f1)
     return (0);
 
-  limit_lines (f1, f2);
+  /* Update nline_min and nline_max in atomic.h which define which
+   * lines lie in the frequency range f1-f2 in the frepeuncy ordered
+   * version of the lines 
+   */
 
-//  lum = lum_lines (ww, t_e, nline_min, nline_max);
+  limit_lines (f1, f2);  
+
   lum = lum_lines (one, nline_min, nline_max);
 
-//Now populate the crude pdf for this wind element
+//OLD//Now populate the crude pdf for this wind element
 
 
-  if (xxxpdfwind == 1)
-    lum_pdf (&plasmamain[one->nplasma], lum);
+//OLD  if (xxxpdfwind == 1)
+//OLD    lum_pdf (&plasmamain[one->nplasma], lum);
 
 
   return (lum);
@@ -161,40 +165,40 @@ lum_lines (one, nmin, nmax)
   return (lum);
 }
 
-/* This routine creates a luminosty pdf */
-int
-lum_pdf (xplasma, lumlines)
-     PlasmaPtr xplasma;
-     double lumlines;
-{
-  int n, m;
-  double xsum, vsum;
+//OLD /* This routine creates a luminosty pdf */
+//OLD int
+//OLD lum_pdf (xplasma, lumlines)
+//OLD      PlasmaPtr xplasma;
+//OLD      double lumlines;
+//OLD {
+//OLD   int n, m;
+//OLD   double xsum, vsum;
 
-  xplasma->pdf_x[0] = nline_min;
-  xplasma->pdf_y[0] = 0;
+//OLD   xplasma->pdf_x[0] = nline_min;
+//OLD   xplasma->pdf_y[0] = 0;
 
-  n = nline_min;
-  vsum = 0.0;
-  for (m = 1; m < LPDF; m++)
-  {
-    xsum = m * lumlines / (LPDF - 1);   /* This is the target */
-    while ((vsum += lin_ptr[n]->pow) < xsum && n < nline_max)
-      n++;
-    n++;                        // otherwise one will add lin_ptr[n]->pow twice
-/* Why this is done this way is tricky.  The important point is that
+//OLD   n = nline_min;
+//OLD   vsum = 0.0;
+//OLD   for (m = 1; m < LPDF; m++)
+//OLD   {
+//OLD     xsum = m * lumlines / (LPDF - 1);   /* This is the target */
+//OLD     while ((vsum += lin_ptr[n]->pow) < xsum && n < nline_max)
+//OLD       n++;
+//OLD     n++;                        // otherwise one will add lin_ptr[n]->pow twice
+//OLD /* Why this is done this way is tricky.  The important point is that
 
-xplasma->pdf_y[m]= sum lin_ptr[mm]->pow  where mm runs from pdf_x[m-1] to
-pdf_x[m]-1
+//OLD xplasma->pdf_y[m]= sum lin_ptr[mm]->pow  where mm runs from pdf_x[m-1] to
+//OLD pdf_x[m]-1
 
-*/
-    xplasma->pdf_x[m] = n;
-    xplasma->pdf_y[m] = vsum;
+//OLD */
+//OLD     xplasma->pdf_x[m] = n;
+//OLD     xplasma->pdf_y[m] = vsum;
 
 
-  }
+//OLD   }
 
-  return (0);
-}
+//OLD   return (0);
+//OLD }
 
 
 
@@ -392,7 +396,7 @@ two_level_atom (line_ptr, xplasma, d1, d2)
 
   //Check and exit if this routine is called for a macro atom, since this should never happen
 
-  if (line_ptr->macro_info == 1 && geo.rt_mode == 2 && geo.macro_simple == 0)
+  if (line_ptr->macro_info == 1 && geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == 0)
   {
     Error ("Calling two_level_atom for macro atom line. Abort.\n");
     exit (0);
@@ -800,7 +804,6 @@ Returns:
  
 Description:
 	
-
 History:
 	17	nsh	Coded
 	
@@ -812,17 +815,15 @@ upsilon (n_coll, u0)
      int n_coll;
      double u0;
 {
-  double x;                     //The scaled tamperature
+  double x;                     //The scaled temperature
   double y;                     //The scaled collision sterngth
   double upsilon;               //The actual collision strength
 
-
-
-//First we compute x    
-
+  /* first we compute x. This is the "reduced temperature" from
+     Burgess & Tully 1992. */ 
   if (coll_stren[n_coll].type == 1 || coll_stren[n_coll].type == 4)
   {
-    x = 1. - log (coll_stren[n_coll].scaling_param) / log (u0 + coll_stren[n_coll].scaling_param);
+    x = 1. - (log (coll_stren[n_coll].scaling_param) / log (u0 + coll_stren[n_coll].scaling_param) );
   }
   else if (coll_stren[n_coll].type == 2 || coll_stren[n_coll].type == 3)
   {
@@ -835,11 +836,11 @@ upsilon (n_coll, u0)
   }
 
 
-//we now compute y from the interpolation formulae      
-
+  /* we now compute y from the interpolation formulae 
+     y is the reduced upsilong from Burgess & Tully 1992. */     
   linterp (x, coll_stren[n_coll].sct, coll_stren[n_coll].scups, coll_stren[n_coll].n_points, &y, 0);
 
-//now we extract upsilon from y 
+  /*  now we extract upsilon from y  */  
 
   if (coll_stren[n_coll].type == 1)
   {

@@ -1,16 +1,18 @@
 # Python
 
 Python is a (confusingly named) Monte Carlo radiative transfer code which uses the Sobolev approximation.
-It has been developed by Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom and James Matthews. 
+It has been developed by Knox Long, Christian Knigge, Stuart Sim, Nick Higginbottom, James Matthews and Sam Mangham. 
+The code has been used for a variety of research projects invovling the winds of cataclysmic variables, of young stellar 
+objects, and of AGN.
 
-The code is not yet ready for use and should not be installed yet. If you are interested in using
-Python please contact long@stsci.edu.
+The code is under active development, but we are looking for beta users to test the code, and potentially use it 
+for their own research. If you are interested in using Python please email the collaboration at agn-winds[at]googlegroups[dot]com or contact Knox Long via long[at]stsci[dot]edu. 
+
+Documentation of input parameters is hosted on [ReadTheDocs](http://agnwinds.readthedocs.io/en/dev/).
 
 ## Travis Build Status
 
 [![Build Status](https://travis-ci.org/agnwinds/python.png?branch=dev)](https://travis-ci.org/agnwinds/python)
-
-
 
 ## Installation
 

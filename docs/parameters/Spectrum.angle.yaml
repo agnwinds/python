@@ -1,0 +1,11 @@
+name: Spectrum.angle
+description: |
+  The inclination angle with respect to the polar axis for
+  obtaining a spectrum.  This question will be repeated once
+  for each desired incliniation
+type: Double
+unit: Degrees
+values: Normally betwween 0 and 99 degrees
+parent:
+  parameter: Spectrum.no_observers
+file: setup2.c

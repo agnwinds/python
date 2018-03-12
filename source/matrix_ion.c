@@ -50,17 +50,13 @@ int   matrix_ion_populations (xplasma,mode)
 #include <string.h>
 #include <math.h>
 #include "atomic.h"
-// struct topbase_phot *xtop;
-// double g1, g2, xne, xip;
 #define SAHA 4.82907e15
-// double xip, xxxne, qromb_temp;
 #include "python.h"
 
 
 #include <gsl/gsl_block.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
-// #include <gsl/gsl_blas.h>
 #include "my_linalg.h"
 
 
@@ -76,18 +72,13 @@ matrix_ion_populations (xplasma, mode)
   int nn, mm, nrows;
   double rate_matrix[nions][nions];
   double newden[NIONS];
-  // double nh, t_e, t_r, www;  www is not really used 
-  // double nh, t_e, t_r; t_r is not used 
   double nh, t_e;
   double xne, xxne, xxxne;
-  //double xsaha, x, theta;
-  //int s;                                                                                                
   double b_temp[nions];
   double *b_data, *a_data;
   double *populations;
   int ierr, niterate;
   double xnew;
-  //double xden[nelements];
   int xion[nions];              // This array keeps track of what ion is in each line
   int xelem[nions];             // This array keeps track of the element for each ion
   double pi_rates[nions];
@@ -98,8 +89,6 @@ matrix_ion_populations (xplasma, mode)
 
   nh = xplasma->rho * rho2nh;   // The number density of hydrogen ions - computed from density
   t_e = xplasma->t_e;           // The electron temperature in the cell - used for collisional processes 
-  // t_r = xplasma->t_r;                // The radiation temperature - used for PI if we have a BB approximation
-  // www = xplasma->w;          // The radiative weight in the cell - again for BB approximation for PI
 
   /* We now calculate the total abundances for each element to allow us to use fractional abundances */
 
@@ -117,7 +106,7 @@ matrix_ion_populations (xplasma, mode)
 
   /* Dielectronic recombination and direct ionization coefficients depend only on electron temperature, calculate them now -
      they will not change */
-
+  
   compute_dr_coeffs (t_e);
   compute_di_coeffs (t_e);
 
@@ -206,40 +195,20 @@ matrix_ion_populations (xplasma, mode)
   }
   else if (mode == NEBULARMODE_MATRIX_SPECTRALMODEL)
   {
-    partition_functions (xplasma, 4);   // Set to ground state 
+    partition_functions (xplasma, NEBULARMODE_LTE_GROUND);   // Set to ground state 
   }
 
-  /* Next we need to obtain an initian guess for the electron density. In the past this has been done by calculating the
+  /* Next we need to obtain an initial guess for the electron density. In the past this has been done by calculating the
      hydrogen density directly from the Saha equation at the current electron temperature. In initial testing of this mode -
      this seemed to be a little unstable. At the moment, we use the last ionization state to compute n_e. For the first
      iteraion, this will just be calculated in LTE from the initial temperature structure of the wind, which will give almost
      the same result as the original procedure, or for successive calculations, it should be a better guess. I've leftin the
      original code, commented out...  */
 
-//  xne = xxne = xxxne = get_ne (newden);       // Set n_e to the current value. 
   xne = xxne = xxxne = get_ne (xplasma->density);       //Even though the abundances are fractional, we need the real electron density
 
 
   /* xne is the current working number xxne */
-
-
-  /* These following commented out lines calculate the electron density from Saha given the current electron temperature */
-  // if (t_e < MIN_TEMP)
-  // t_e = MIN_TEMP;  fudge to prevent divide by zeros 
-  // xsaha = SAHA * pow (t_e, 1.5);
-  // theta = xsaha * exp (-ion[0].ip / (BOLTZMANN * t_e)) / nh;
-  // if (theta < THETAMAX)
-  // {
-  // x = (-theta + sqrt (theta * theta + 4 * theta)) / 2.;
-  // xne = xxne = xxxne = x * nh;
-  // }
-  // else
-  // xne = xxne = xxxne = nh; /*xxne is just a store so the error can report the starting value of ne. */
-  /* xxxne is the shared variable so the temperature solver routine can access it */
-  // if (xne < 1.e-6)
-  // xne = xxxne = 1.e-6; /* Set a minimum ne to assure we can calculate
-  // xne the first time through the loop 
-
 
 
   /* We are now going to iterate on the electron density - MAXITERATIONS is set in python.h and is currently (78) set to 200.
@@ -276,15 +245,15 @@ matrix_ion_populations (xplasma, mode)
     /* This next line produces an array of the correct size to hold the rate matrix */
 
     a_data = (double *) calloc (sizeof (double), nrows * nrows);
-
-    /* We now copy our rate matrix into the prepared matrix */
-    for (mm = 0; mm < nrows; mm++)
-    {
-      for (nn = 0; nn < nrows; nn++)
-      {
-        a_data[mm * nrows + nn] = rate_matrix[mm][nn];
-      }
-    }
+      /* We now copy our rate matrix into the prepared matrix */
+      for (mm = 0; mm < nrows; mm++)
+	{
+	  for (nn = 0; nn < nrows; nn++)
+	    {
+//						printf ("%30.25e ",rate_matrix[mm][nn]);
+	      a_data[mm * nrows + nn] = rate_matrix[mm][nn];
+	    }
+	}
 
     /* Replaced inline array allocaation with calloc, which will work with older version of c compilers calloc also sets the
        elements to zero, which is required */
@@ -357,7 +326,6 @@ matrix_ion_populations (xplasma, mode)
         newden[nn] = DENSITY_MIN;
     }
     free (populations);
-//      xnew = get_ne (newden); /* determine the electron density for this density distribution */
 
 
 /* We need to get the 'true' new electron density so we need to do a little loop here to compute it */
@@ -418,12 +386,12 @@ matrix_ion_populations (xplasma, mode)
       Error ("matrix_ion_populations: ion %i has population %8.4e in cell %i\n", nn, xplasma->density[nn], xplasma->nplasma);
   }
 
+  xplasma->ne= get_ne (xplasma->density);
 
-  partition_functions (xplasma, 4);     /* WARNING fudge NSH 11/5/14 - this is as a test. We really need a better implementation
+  partition_functions (xplasma, NEBULARMODE_LTE_GROUND);     /* WARNING fudge XXX NSH 11/5/14 - this is as a test. We really need a better implementation
                                            of partition functions and levels for a power law illuminating spectrum. We found that
                                            if we didnt make this call, we would end up with undefined levels - which did really
                                            crazy things */
-
 
 
   return (0);
@@ -643,7 +611,6 @@ populate_ion_rate_matrix (xplasma, rate_matrix, pi_rates, inner_rates, rr_rates,
   {
     if (ion[nn].istate == 1)
     {
-//        b_temp[nn] = nh * ele[xelem[nn]].abun;
       b_temp[nn] = 1.0;         //In the relative abundance schene this equals one.
 
       for (mm = 0; mm < nions; mm++)
@@ -743,7 +710,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   p = gsl_permutation_alloc (nrows);    // NEWKSL
 
   gsl_linalg_LU_decomp (&m.matrix, p, &s);
-
+  
   det = gsl_linalg_LU_det (&m.matrix, s);       // get the determinant to report to user
 
   if (det == 0){
@@ -800,7 +767,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   /* copy the populations to a normal array */
   for (mm = 0; mm < nrows; mm++)
     x[mm] = gsl_vector_get (populations, mm);
-
+ 
   /* free memory */
   gsl_vector_free (test_vector);
   gsl_matrix_free (test_matrix);

@@ -224,7 +224,9 @@ def read_pywind(filename, return_inwind=False, mode="2d", complete=True):
     #d = np.loadtxt(filename, comments="#", dtype = "float", unpack = True)
     d = ascii.read(filename)
 
-    return util.wind_to_masked(d, "var", return_inwind=return_inwind)
+
+    return util.wind_to_masked(d, "var", return_inwind=return_inwind, mode=mode)
+
 
 
 
@@ -255,7 +257,7 @@ def read_pf(root):
     if not ".pf" in root:
         root = root + ".pf"
 
-    params, vals = np.loadtxt(root, dtype="string", unpack=True)
+    params, vals = np.loadtxt(root, dtype=str, unpack=True)
 
     if OrderedDict_present:
         pf_dict = OrderedDict()
