@@ -57,7 +57,7 @@ int nelements;                  /* The actual number of ions read from the data 
 int nions;                      /*The actual number of ions read from the datafile */
 #define NLEVELS 	12000   /* Maximum number of levels for all elements and ions */
 int nlevels;                    /*These are the actual number of levels which were read in */
-#define NLTE_LEVELS	1000    /* Maximum number of levels to treat explicitly */
+#define NLTE_LEVELS	12000    /* Maximum number of levels to treat explicitly */
 int nlte_levels;                /* Actual number of levels to treat explicityly */
 #define NLEVELS_MACRO   200     /* Maximum number of macro atom levels. (SS, June 04) */
 int nlevels_macro;              /* Actual number of macro atom levels. (SS, June 04) */
@@ -260,8 +260,12 @@ LinePtr line, lin_ptr[NLINES];  /* line[] is the actual structure array that con
                                    rapid transition used in the macro atoms to stabilise level populations */
 struct lines fast_line;
 
-int nline_min, nline_max, nline_delt;   /*For calculating which line are likely to be in resonance, see
-                                           the routine limit_lines */
+int nline_min, nline_max, nline_delt;   /* Used to select a range of lines in a frequency band from the lin_ptr array 
+                                           in situations where the frequency range of interest is limited, including for defining which
+                                           lines come into play for resonant scattering along a line of sight, and in
+                                           calculating band_limit luminosities.  The limits are established by the
+                                           routine limit_lines.
+                                           */
 
 
         /* coll_stren is the collision strength interpolation data extracted from Chianti */

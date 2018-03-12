@@ -89,7 +89,8 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
   {
     aaa[n] = 0;
     nplasma = w[n].nplasma;
-    if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+//OLD    if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+    if (w[n].vol > 0.0 )
     {
       if (iswitch == 0)
       {
@@ -131,7 +132,8 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
     for (n = 0; n < NDIM2; n++)
     {
       nplasma = w[n].nplasma;
-      if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+//OLD      if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+      if (w[n].vol > 0.0 )
       {
         if (iswitch == 0)
           x /= ((plasmamain[nplasma].density[0] + plasmamain[nplasma].density[1]) * ele[nelem].abun);
@@ -305,10 +307,11 @@ line_summary (w, rootname, ochoice)
   double d1, d2, z, energy, rb, tot, omega;
   int nplasma;
 
-  iline=0;
-  i_matom_search=0;
-  rdint ("line (0=C-IV, 1=Hα, 2=Hβ, 3=Matom line)", &iline);
-  switch(iline)
+  iline = 0;
+  lambda=0;
+  i_matom_search = 0;
+  rdint ("line (0=C-IV, 1=Hα, 2=Hβ, 3=Matom", &iline);
+  switch (iline)
   {
     case 0: //Carbon-IV
       element = 6; istate = 4; lambda = 1548.1949e-8;
@@ -503,7 +506,6 @@ total_emission_summary (w, rootname, ochoice)
 {
   double tot;
   int n;
-  double total_emission ();
   char filename[LINELENGTH];
 
 
@@ -513,7 +515,7 @@ total_emission_summary (w, rootname, ochoice)
     aaa[n] = 0;
     if (w[n].vol > 0.0)
     {
-      tot += aaa[n] = total_emission (&w[n], 0.0, 1e50);
+      tot += aaa[n] = total_emission (&w[n], 0.0, VERY_BIG);
     }
   }
 
@@ -552,7 +554,8 @@ modify_te (w, rootname, ochoice)
     aaa[n] = 0;
     if (w[n].vol > 0.0 && (x = plasmamain[nplasma].heat_tot) > 1.0)
     {
-      aaa[n] = t_e = calc_te (&plasmamain[nplasma], TMIN, 1.2 * plasmamain[nplasma].t_r);
+      //OLD aaa[n] = t_e = calc_te (&plasmamain[nplasma], TMIN, 1.2 * plasmamain[nplasma].t_r);
+      aaa[n] = t_e = calc_te (&plasmamain[nplasma], MIN_TEMP, 1.2 * plasmamain[nplasma].t_r);
     }
   }
 
@@ -643,3 +646,67 @@ partial_measure_summary (w, element, istate, rootname, ochoice)
   return (0);
 }
 
+
+int collision_summary (w, rootname, ochoice)
+     WindPtr w;
+     char rootname[];
+     int ochoice;
+{
+  int nline, int_te;
+  double t_e, qup, qdown, A, wavelength;
+  char filename[LINELENGTH], suffix[LINELENGTH];
+  FILE *fopen (), *fptr;
+
+  t_e = 10000.0;
+
+  /* Input from user to request temperature */
+  rddoub ("electron temperature for calculation:", &t_e);
+  int_te = (int) t_e; // for file label.
+
+  if (ochoice) {
+    /* open filename root.coll.dat */
+    strcpy (filename, rootname);
+    sprintf (suffix, ".t%d.coll.dat", int_te);
+    strcat (filename, suffix);
+    fptr = fopen (filename, "w");
+
+    Log("\nWriting collision strengths to file %s...\n\n", filename);
+
+    fprintf (fptr, "# Collision strengths at electron temperature %.1fK\n", t_e);
+    fprintf (fptr, "# For atomic data file %s\n", geo.atomic_filename);
+    fprintf (fptr, "line wavelength z istate levu levl q12 q21 a21 macro_info\n");
+  }
+  else {
+    Log ("Collision strengths at electron temperature %.1fK\n", t_e);
+    Log ("line wavelength z istate levu levl q12 q21 a21 macro_info\n");
+  }
+
+  nline = 0;
+
+  while (nline < nlines)
+  {
+    wavelength = C / lin_ptr[nline]->freq / ANGSTROM;
+    
+    qup = q12(lin_ptr[nline], t_e);
+    qdown = q21(lin_ptr[nline], t_e);
+    A = a21 (lin_ptr[nline]);
+
+    if (ochoice) {
+      fprintf(fptr, "%d %8.4e %d %d %d %d %8.4e %8.4e %8.4e %d\n",
+               nline, wavelength, lin_ptr[nline]->z, 
+               lin_ptr[nline]->istate, lin_ptr[nline]->levu, lin_ptr[nline]->levl,
+               qup, qdown, A, lin_ptr[nline]->macro_info);
+    }
+    else {
+      Log("%d %8.4e %d %d %d %d %8.4e %8.4e %8.4e %d\n",
+              nline, wavelength, lin_ptr[nline]->z, 
+              lin_ptr[nline]->istate, lin_ptr[nline]->levu, lin_ptr[nline]->levl,
+              qup, qdown, A, lin_ptr[nline]->macro_info);
+    }
+    nline++;
+  }
+
+  if (ochoice) fclose (fptr);
+
+  return (0);
+}

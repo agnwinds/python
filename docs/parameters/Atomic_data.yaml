@@ -1,0 +1,7 @@
+name: Atomic_data
+description: |
+  This is the relative path to the Atomic Data header file
+type: String
+parent:
+  parameter: none
+file: setup_domains.c

@@ -15,14 +15,13 @@ int message(char string[]);
 int rdstr(char question[], char answer[]);
 int rdchar(char question[], char *answer);
 int rdint(char question[], int *answer);
-int rdint2(char question[], int *answer1, int *answer2);
 int rdflo(char question[], float *answer);
 int rddoub(char question[], double *answer);
 int rdline(char question[], char answer[]);
 int get_root(char root[], char total[]);
 int rdpar_set_mpi_rank(int rank);
 int rdpar_set_verbose(int vlevel);
-/* log.c */
+/* xlog.c */
 int Log_init(char *filename);
 int Log_append(char *filename);
 int Log_close(void);

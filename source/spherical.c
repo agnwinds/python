@@ -47,20 +47,19 @@ History:
 **************************************************************/
 
 double
-spherical_ds_in_cell (p)
+spherical_ds_in_cell (ndom,p)
+  int ndom;
      PhotPtr p;
 
 {
 
   int n, ix;
   double s, smax;
-  int ndom;
 
-  ndom = wmain[p->grid].ndom;
 
   if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
   {
-    Error ("translate_in_wind: Photon not in grid when routine entered\n");
+    Error ("spherical_ds_in_cell: Photon not in grid when routine entered\n");
     return (n);                 /* Photon was not in wind */
   }
 
@@ -118,11 +117,9 @@ spherical_make_grid (w, ndom)
   int j, n;
   int ndim;
 
+
   ndim = zdom[ndom].ndim;
 
-  /* JM question -- shouldn't we be looping over nstart to nstop here? 
-     Or alternatively setting w[n + nstart] where nstart = zdom[ndom].nstart.
-     ksl anwswer -- Yes.  Changed 1605  */
 
   for (j = 0; j < ndim; j++)
   {
@@ -450,11 +447,16 @@ spherical_get_random_location (n, x)
   inwind = W_NOT_INWIND;
   while (inwind != W_ALL_INWIND)
   {
-    r = (rmin * rmin * rmin) + (rmax * rmax * rmax - rmin * rmin * rmin) * (rand () / (MAXRAND - 0.5));
+//    r = (rmin * rmin * rmin) + (rmax * rmax * rmax - rmin * rmin * rmin) * (rand () / (MAXRAND - 0.5)); DONE
+    r = (rmin * rmin * rmin) + (rmax * rmax * rmax - rmin * rmin * rmin) * random_number(0.0,1.0);
+	
     r = pow (r, (1. / 3.));
-    theta = acos (2. * (rand () / MAXRAND) - 1);
+//    theta = acos (2. * (rand () / MAXRAND) - 1); DONE
+    theta = acos (random_number(-1.0,1.0));
 
-    phi = 2. * PI * (rand () / MAXRAND);
+//    phi = 2. * PI * (rand () / MAXRAND);   DONE 
+    phi = 2. * PI * random_number(0.0,1.0);
+
 /* Project from r, theta phi to x y z  */
     x[0] = r * cos (phi) * sin (theta);
     x[1] = r * sin (phi) * sin (theta);

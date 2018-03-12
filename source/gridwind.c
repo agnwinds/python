@@ -357,13 +357,7 @@ calloc_macro (nelem)
 {
 
   /* JM 1502 -- commented out this if loop because we want 
-     the macro structure to be allocated regardless in geo.rt_mode = 2. see #138 */
-  //  if (nlevels_macro == 0 && geo.nmacro == 0)
-  //    {   
-  //      Log
-  // ("calloc_macro: Allocated no space for macro since nlevels_macro==0 and geo.nmacro==0\n");
-  //      return (0);
-  //    }
+     the macro structure to be allocated regardless in geo.rt_mode = RT_MODE_MACRO. see #138 */
 
   if (macromain != NULL)
   {
@@ -735,9 +729,14 @@ calloc_dyn_plasma (nelem)
       Error ("calloc_dyn_plasma: Error in allocating memory for heat_ion\n");
       exit (0);
     }
-    if ((plasmamain[n].lum_ion = calloc (sizeof (double), nions)) == NULL)
+    if ((plasmamain[n].cool_rr_ion = calloc (sizeof (double), nions)) == NULL)
     {
-      Error ("calloc_dyn_plasma: Error in allocating memory for lum_ion\n");
+      Error ("calloc_dyn_plasma: Error in allocating memory for cool_rr_ion\n");
+      exit (0);
+    }
+    if ((plasmamain[n].lum_rr_ion = calloc (sizeof (double), nions)) == NULL)
+    {
+      Error ("calloc_dyn_plasma: Error in allocating memory for lum_rr_ion\n");
       exit (0);
     }
     if ((plasmamain[n].inner_recomb = calloc (sizeof (double), nions)) == NULL)
@@ -745,7 +744,7 @@ calloc_dyn_plasma (nelem)
       Error ("calloc_dyn_plasma: Error in allocating memory for inner_recomb\n");
       exit (0);
     }
-    if ((plasmamain[n].lum_inner_ion = calloc (sizeof (double), nions)) == NULL)
+    if ((plasmamain[n].cool_dr_ion = calloc (sizeof (double), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for lum_inner_recomb\n");
       exit (0);

@@ -289,19 +289,19 @@ pl_copy_conditions (win, wout)
   {
     wout->ioniz[n] = win->ioniz[n];
     wout->recomb[n] = win->recomb[n];
-    wout->lum_ion[n] = win->lum_ion[n];
+    wout->cool_rr_ion[n] = win->cool_rr_ion[n];
     wout->heat_ion[n] = win->heat_ion[n];
   }
   wout->j = win->j;
   wout->ave_freq = wout->ave_freq;
   wout->lum = wout->lum;
-  wout->lum_rad = wout->lum_rad;
-  wout->lum_rad_old = wout->lum_rad_old;
+  wout->lum_tot = wout->lum_tot;
+  wout->lum_tot_old = wout->lum_tot_old;
   wout->lum_lines = wout->lum_lines;
   wout->lum_ff = wout->lum_ff;
-  wout->lum_adiabatic = wout->lum_adiabatic;
-  wout->lum_fb = wout->lum_fb;
-  wout->lum_z = wout->lum_z;
+  wout->cool_adiabatic = wout->cool_adiabatic;
+  wout->cool_rr = wout->cool_rr;
+  wout->cool_rr_metals = wout->cool_rr_metals;
   wout->heat_tot = wout->heat_tot;
   wout->heat_tot_old = wout->heat_tot_old;
   wout->heat_lines = wout->heat_lines;

@@ -1,0 +1,9 @@
+name: Central_object.mass
+description: |
+  Mass of the central object
+type: Double
+unit: Solar masses
+values: Greater than 0 
+parent:
+  parameter: None
+file: setup.c

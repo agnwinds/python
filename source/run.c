@@ -38,7 +38,7 @@ History:
 
 
 /***********************************************************
-                                       Space Telescope Science Institute
+        Space Telescope Science Institute
 
 Synopsis: calculate_ionization execucutes the ionization cycles for a 
 	python model
@@ -77,11 +77,6 @@ calculate_ionization (restart_stat)
 #ifdef MPI_ON
   int ioniz_spec_helpers;
 #endif
-
-
-
-
-
 
 
   p = photmain;
@@ -129,9 +124,8 @@ calculate_ionization (restart_stat)
 
     xsignal (files.root, "%-20s Starting %d of %d ionization cycle \n", "NOK", geo.wcycle, geo.wcycles);
 
-
     Log ("!!Python: Beginning cycle %d of %d for defining wind\n", geo.wcycle, geo.wcycles);
-    Log_flush ();               /*NH June 13 Added call to flush logfile */
+    Log_flush ();               /* Flush the log file (so that we know where are if there are problems */
 
     /* Initialize all of the arrays, etc, that need initialization for each cycle
      */
@@ -139,25 +133,18 @@ calculate_ionization (restart_stat)
     spectrum_init (freqmin, freqmax, geo.nangles, geo.angle, geo.phase,
                    geo.scat_select, geo.top_bot_select, geo.select_extract, geo.rho_select, geo.z_select, geo.az_select, geo.r_select);
 
-
     wind_rad_init ();           /*Zero the parameters pertaining to the radiation field */
 
 
-
-    if (modes.ispy)
-      ispy_init ("python", geo.wcycle);
-
-
     geo.n_ioniz = 0.0;
-    geo.lum_ioniz = 0.0;
+    geo.cool_tot_ioniz = 0.0;
     ztot = 0.0;                 /* ztot is the luminosity of the disk multipled by the number of cycles, which is used by save_disk_heating */
 
-    /* JM 1409 -- We used to execute subcycles here, but these have been removed */
-
-    if (!geo.wind_radiation || (geo.wcycle == 0 && geo.run_type != SYSTEM_TYPE_PREVIOUS))
+    if (!geo.wind_radiation || (geo.wcycle == 0 && geo.run_type != RUN_TYPE_PREVIOUS))
       iwind = -1;               /* Do not generate photons from wind */
     else
       iwind = 1;                /* Create wind photons and force a reinitialization of wind parms */
+
 
     /* Create the photons that need to be transported through the wind
      *
@@ -166,27 +153,16 @@ calculate_ionization (restart_stat)
      */
 
 
-    /* JM 130306 need to convert photons_per_cycle to double precision for define_phot */
-    /* ksl 130410 - This is needed here not because we expect photons per cycle to 
-     * exceed the size of an integer, but because of the call to define phot in the
-     * spectrum cycle, which can exceed this
-     */
-    /* JM 1409 photons_per_cycle has been removed in favour of NPHOT */
-
     nphot_to_define = (long) NPHOT;
 
     define_phot (p, freqmin, freqmax, nphot_to_define, 0, iwind, 1);
 
-    /* Zero the arrays that store the heating of the disk */
+    /* Zero the arrays, and other variables that need to be zeroed after the photons are generated. */
 
-    /* 080520 - ksl - There is a conundrum here.  One should really zero out the 
-     * quantities below each time the wind structure is updated.  But relatively
-     * few photons hit the disk under normal situations, and therefore the statistcs
-     * are not very good.  
-     */
 
-    /* 130213 JM -- previously this was done before define_phot, which meant that
-       the ionization state was never computed with the heated disk */
+    geo.lum_star_back=0;
+    geo.lum_disk_back=0;
+
 
     for (n = 0; n < NRINGS; n++)
     {
@@ -241,11 +217,9 @@ calculate_ionization (restart_stat)
     }
 
     Log ("!!python: Total photon luminosity after transphot %18.12e (diff %18.12e). Radiated luminosity %18.12e\n", zzz, zzz - zz, zze);
-    if (geo.rt_mode == 2)
+    if (geo.rt_mode == RT_MODE_MACRO)
       Log ("Luminosity taken up by adiabatic kpkt destruction %18.12e number of packets %d\n", zz_adiab, nn_adiab);
 
-    if (modes.print_windrad_summary)
-      wind_rad_summary (w, files.windrad, "a");
 
 
 
@@ -268,13 +242,9 @@ calculate_ionization (restart_stat)
 
 
 
-
-    if (modes.ispy)
-      ispy_close ();
-
-
     /* Calculate and store the amount of heating of the disk due to radiation impinging on the disk */
     /* We only want one process to write to the file */
+
 #ifdef MPI_ON
     if (rank_global == 0)
     {
@@ -288,7 +258,7 @@ calculate_ionization (restart_stat)
 
 /* Completed writing file describing disk heating */
 
-    Log ("!!python: Number of ionizing photons %g lum of ionizing photons %g\n", geo.n_ioniz, geo.lum_ioniz);
+    Log ("!!python: Number of ionizing photons %g lum of ionizing photons %g\n", geo.n_ioniz, geo.cool_tot_ioniz);
 
 /* This step should be MPI_parallelised too */
 
@@ -296,8 +266,6 @@ calculate_ionization (restart_stat)
 
 
     Log ("Completed ionization cycle %d :  The elapsed TIME was %f\n", geo.wcycle, timer ());
-
-    Log_silent ("Finished creating spectra\n");
 
     /* Do an MPI reduce to get the spectra all gathered to the master thread */
 
@@ -314,10 +282,15 @@ calculate_ionization (restart_stat)
     {
 #endif
 
-      spectrum_summary (files.wspec, "w", 0, 6, 0, 1., 0, 0);
-      spectrum_summary (files.lwspec, "w", 0, 6, 0, 1., 1, 0);  /* output the log spectrum */
-      spectrum_summary (files.wspec_wind, "w", 0, 6, 0, 1., 0, 1);      /* These two are the spectra of wind photons */
-      spectrum_summary (files.lwspec_wind, "w", 0, 6, 0, 1., 1, 1);     /* output the log spectrum */
+/* The variables for spectrum_sumamry are the filename, the attribute for the file write, the minimum and maximum spectra to write out, 
+ * the type of spectrum (RAW meaning internal luminosity units, the amount by which to renormalize (1 means use the existing
+ * values, loglin (0=linear, 1=log for the wavelength scale), all photons or just wind photons
+ */
+
+      spectrum_summary (files.wspec,       "w", 0, 6, SPECTYPE_RAW, 1., 0, 0);  /* .spec_tot */ 
+      spectrum_summary (files.lwspec,      "w", 0, 6, SPECTYPE_RAW, 1., 1, 0);  /* .log_spec_tot */
+      spectrum_summary (files.wspec_wind,  "w", 0, 6, SPECTYPE_RAW, 1., 0, 1);  /* .spec_tot_wind  */
+      spectrum_summary (files.lwspec_wind, "w", 0, 6, SPECTYPE_RAW, 1., 1, 1);  /* .log_spec_tot_wind */
       phot_gen_sum (files.phot, "w");   /* Save info about the way photons are created and absorbed
                                            by the disk */
 #ifdef MPI_ON
@@ -334,7 +307,7 @@ calculate_ionization (restart_stat)
     geo.wcycle++;               //Increment ionisation cycles
 
 
-/* NSH 1408 - Save only the windsave file from thread 0, to prevent many processors from writing to the same
+/* Save only the windsave file from thread 0, to prevent many processors from writing to the same
  * file. */
 
 #ifdef MPI_ON
@@ -352,6 +325,12 @@ calculate_ionization (restart_stat)
         sprintf (dummy, "python%02d.wind_save", geo.wcycle);
         wind_save (dummy);
         Log ("Saved wind structure in %s\n", dummy);
+      }
+      if (modes.make_tables)
+      {
+          strcpy(dummy,"");
+          sprintf(dummy,"diag_%s/%s%02d",files.root,files.root,geo.wcycle);
+          do_windsave2table(dummy);
       }
 
 #ifdef MPI_ON
@@ -384,7 +363,7 @@ calculate_ionization (restart_stat)
 /***********************************************************
                                        Space Telescope Science Institute
 
-Synopsis:  make_spectra generates the detailed spctra
+Synopsis:  make_spectra generates the detailed spectra
  
 Arguments:		
 
@@ -397,7 +376,8 @@ Notes:
 
 History:
 
-	15sep 	ksl	Moved calculating the detailed spectra to a separat routine
+	15sep 	ksl	Moved calculating the detailed spectra to a separata 
+                routine
 **************************************************************/
 
 int
@@ -454,7 +434,7 @@ make_spectra (restart_stat)
 
   /*Switch on k-packet/macro atom emissivities  SS June 04 */
 
-  if (geo.rt_mode == 2)
+  if (geo.rt_mode == RT_MODE_MACRO)
   {
     geo.matom_radiation = 1;
   }
@@ -512,8 +492,6 @@ make_spectra (restart_stat)
 
     xsignal (files.root, "%-20s Starting %d of %d spectral cycle \n", "NOK", geo.pcycle, geo.pcycles);
 
-    if (modes.ispy)
-      ispy_init ("python", geo.pcycle + 1000);
 
 
     Log ("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle, geo.pcycles);
@@ -550,8 +528,6 @@ make_spectra (restart_stat)
 
     trans_phot (w, p, geo.select_extract);
 
-    if (modes.print_windrad_summary)
-      wind_rad_summary (w, files.windrad, "a");
 
 
     spectrum_create (p, freqmin, freqmax, geo.nangles, geo.select_extract);
@@ -572,10 +548,11 @@ make_spectra (restart_stat)
     if (rank_global == 0)
     {
 #endif
+
       spectrum_summary (files.spec, "w", 0, nspectra - 1, geo.select_spectype, renorm, 0, 0);
       spectrum_summary (files.lspec, "w", 0, nspectra - 1, geo.select_spectype, renorm, 1, 0);
 
-      /* Next line is of spectrum just of the wind */
+      /* Next lines  produce spectra from photons in the wind only */
       spectrum_summary (files.spec_wind, "w", 0, nspectra - 1, geo.select_spectype, renorm, 0, 1);
       spectrum_summary (files.lspec_wind, "w", 0, nspectra - 1, geo.select_spectype, renorm, 1, 1);
 

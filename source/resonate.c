@@ -123,6 +123,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   int nplasma;
   PlasmaPtr xplasma, xplasma2;
   int ndom;
+  double normal[3];
 
   one = &w[p->grid];            //Get a pointer to the cell where the photon bundle is located.
   nplasma = one->nplasma;
@@ -248,14 +249,14 @@ then the photon frequency will be less. */
 
 
 /* Next part deals with computation of bf opacity. In the macro atom method this is needed.
-In the old method it is not. This section activates if geo.rt_mode==2 (switch for macro atom
+In the old method it is not. This section activates if geo.rt_mode==RT_MODE_MACRO (switch for macro atom
 method). If the macro atom method is not used just get kap_bf to 0 and move on). SS*/
 
   kap_bf_tot = 0;
   kap_ff = 0;
 
 
-  if (geo.rt_mode == 2)
+  if (geo.rt_mode == RT_MODE_MACRO)
   {
     /* Potentially several continuum may contribute in a given frequency range so the kap_bf is an array. 
        Also need to store the total - kap_bf_tot. */
@@ -372,7 +373,7 @@ process. */
            * extraction cycles.  Could you check. It shouldn't be necessary.  ???
            */
 
-          if (geo.rt_mode == 2) //Macro Atom case (SS)
+          if (geo.rt_mode == RT_MODE_MACRO) //Macro Atom case (SS)
           {
 
             /*
@@ -381,7 +382,7 @@ process. */
                it's still in the wind and second get a pointer to the grid cell where the resonance really happens.
              */
 
-            check_in_grid = walls (&p_now, p);
+            check_in_grid = walls (&p_now, p, normal);
 
             if (check_in_grid != P_HIT_STAR && check_in_grid != P_HIT_DISK && check_in_grid != P_ESCAPE)
             {
@@ -534,7 +535,9 @@ select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma)
   double run_tot;
   int ncont;
 
-  threshold = ((rand () + 0.5) / MAXRAND) * (kap_cont);
+//  threshold = ((rand () + 0.5) / MAXRAND) * (kap_cont); DONE
+  threshold = random_number(0.0,1.0) * (kap_cont);
+
 
   /* First check for electron scattering. */
   if (kap_es > threshold)
@@ -553,7 +556,7 @@ select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma)
        If a non-macro-atom run is being done this part should never be reached.
        Just do a check that all is well - this can be removed eventually (SS)
      */
-    if (geo.rt_mode == 1)
+    if (geo.rt_mode == RT_MODE_2LEVEL)
     {
       Error ("calculate_ds: Not using macro atoms but trying to excite one? Aboort.\n");
       exit (0);                 //hopefully this will never happen and this check can be deleted at some
@@ -864,7 +867,7 @@ sobolev (one, x, den_ion, lptr, dvds)
     Error ("Sobolev: Surprise tau = VERY_BIG\n");
   }
 
-  else if (lptr->macro_info == 1 && geo.rt_mode == 2 && geo.macro_simple == 0)
+  else if (lptr->macro_info == 1 && geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == 0)
   {
     // macro atom case SS 
     d1 = den_config (xplasma, lptr->nconfigl);
@@ -1029,7 +1032,7 @@ doppler (pin, pout, v, nres)
        If a 2-level atom run, one should never arrive here.
        Just do a check that all is well - this can be removed eventually (SS)
      */
-    if (geo.rt_mode == 1)
+    if (geo.rt_mode == RT_MODE_2LEVEL)
     {
       Error ("doppler: Not using macro atoms but trying to deexcite one? Abort.\n");
       exit (0);
@@ -1171,7 +1174,7 @@ scatter (p, nres, nnscat)
      deactivation process is always the same as the activation process and so
      nothing needs to be done. */
 
-  if (geo.rt_mode == 2)         //check if macro atom method in use
+  if (geo.rt_mode == RT_MODE_MACRO)         //check if macro atom method in use
   {
 
 
@@ -1273,7 +1276,8 @@ scatter (p, nres, nnscat)
         /* Having got here we have calculated the probability of a k-packet
            being created. Now either make a k-packet or excite a macro atom. */
 
-        kpkt_choice = ((rand () + 0.5) / MAXRAND);      //random number for kpkt choice
+//        kpkt_choice = ((rand () + 0.5) / MAXRAND);      //random number for kpkt choice DONE
+        kpkt_choice = random_number(0.0,1.0);      //random number for kpkt choice
 
         if (prob_kpkt > kpkt_choice)
         {
@@ -1298,7 +1302,9 @@ scatter (p, nres, nnscat)
 
         /* Now choose whether or not to make a k-packet. */
 
-        kpkt_choice = ((rand () + 0.5) / MAXRAND);      //random number for kpkt choice
+//        kpkt_choice = ((rand () + 0.5) / MAXRAND);      //random number for kpkt choice DONE
+        kpkt_choice = random_number(0.0,1.0);      //random number for kpkt choice
+		
 
         if (prob_kpkt > kpkt_choice)
         {
@@ -1355,10 +1361,7 @@ scatter (p, nres, nnscat)
 
   }
 
-  else if (*nres == -2 || *nres > NLINES || geo.scatter_mode == 0 || geo.scatter_mode > 2)
-    //geo.scatter_mode > 2 should never happen but to keep consistency with what was here before I've
-    //added it as a possibility  SS.  ?? I'm not sure about the geo.scatter mode > 2 stuff.  Seems
-    // as if we should put an error check at the end and bail.  ksl 04dec.
+  else if (*nres == -2 || *nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC )
   {
     /*  It was either an electron scatter, bf emission or ff emission so the  distribution is isotropic, 
        or it was a line photon but we want isotropic scattering anyway.  */
@@ -1366,9 +1369,8 @@ scatter (p, nres, nnscat)
     stuff_v (z_prime, p->lmn);
   }
 
-  else if (geo.scatter_mode == 1)
-  {                             // It was a line photon and we want anisotropic scattering model 1
-
+  else if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
+  {                             
     randwind (p, z_prime, wmain[n].lmn);
     stuff_v (z_prime, p->lmn);
 

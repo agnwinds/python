@@ -1,0 +1,8 @@
+name: Central_object.radiation
+description: |
+  A booliean variable stating whether of not the central object should radiate from its
+  survace as a star would. 
+type: Boolean (1/0)
+parent:
+  parameter: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+file: setup.c

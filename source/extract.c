@@ -92,7 +92,8 @@ extract (w, p, itype)
   {
     /* If statement allows one to choose whether to construct the spectrum
        from all photons or just from photons that have scattered a specific number
-       of times or in specific regions of the wind. */
+       of times or in specific regions of the wind. A region is specified by a position
+       and a radius. */
 
     yep = 1;                    // Start by assuming it is a good photon for extraction
 
@@ -160,10 +161,11 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 
       if (modes.save_extract_photons && 1545.0 < 2.997925e18 / pp.freq && 2.997925e18 / pp.freq < 1565.0)
       {
-        fprintf (epltptr,
-                 "%3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %7.2f %7.2f \n",
-                 n, p->x[0], p->x[1], p->x[2], v[0], v[1], v[2],
-                 p->lmn[0], p->lmn[1], p->lmn[2], pp.lmn[0], pp.lmn[1], pp.lmn[2], 2.997925e18 / p->freq, 2.997925e18 / pp.freq);
+          save_extract_photons(n,p,&pp,v);
+//OLD        fprintf (epltptr,
+//OLD                 "%3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %7.2f %7.2f \n",
+//OLD                 n, p->x[0], p->x[1], p->x[2], v[0], v[1], v[2],
+//OLD                 p->lmn[0], p->lmn[1], p->lmn[2], pp.lmn[0], pp.lmn[1], pp.lmn[2], 2.997925e18 / p->freq, 2.997925e18 / pp.freq);
       }
 
 /* 68b - 0902 - ksl - turn phot_history on for the middle spectrum.  Note that we have to wait
@@ -256,6 +258,7 @@ extract_one (w, pp, itype, nspec)
   double dvds;
   double lfreqmin, lfreqmax, ldfreq;
   int ishell;
+  double normal[3];
 
 
   weight_min = EPSILON * pp->w;
@@ -288,27 +291,24 @@ to entering extract */
   {
 
 /* It was a wind photon.  In this case, what we do depends
-on whether it is a photon which arose via line radiation or some other process.
+on whether it is a photon which arose via line radiation or 
+some other process.
 
-If geo.scatter_mode==0 then there is no need to reweight.  This is the
-isotropic assumption.
+If geo.scatter_mode==SCATTER_MODE_ISOTROPIC then there is no need 
+to reweight.  This is the isotropic assumption.  Otherwise, one
+needs to reweight
 
 NB--It is important that reweightwind be called after scatter, as there
 are variables which are set in scatter and in aniosowind that are
 used by reweightwind.  02may ksl
 */
 
-    if (geo.scatter_mode == 1)
-    {                           // Then we have anisotropic scattering
-/* In new call it is important to realize that pp->lmn must be
-the new photon direction, and that the weight of the photon will
-have been changed */
+    if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
+    {                          
       reweightwind (pp);
     }
 
-    else if (geo.scatter_mode == 2)     /* Then we have anisotropic
-                                           scattering based on a random number of scatters at the scattering
-                                           site */
+    else if (geo.scatter_mode == SCATTER_MODE_THERMAL)     
     {
 
       dvds = dvwind_ds (pp);
@@ -347,7 +347,7 @@ the same resonance again */
     istat = translate (w, pp, 20., &tau, &nres);
     icell++;
 
-    istat = walls (pp, &pstart);
+    istat = walls (pp, &pstart,normal);
     if (istat == -1)
     {
       Error ("Extract_one: Abnormal return from translate\n");

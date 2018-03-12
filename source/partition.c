@@ -100,7 +100,10 @@ partition_functions (xplasma, mode)
     t = xplasma->t_e;
     weight = 1;
   }
-  else if (mode == NEBULARMODE_LTE_GROUND)      /*NSH 120912 This is a test mode, used to set partition functions to ground state only. This is achieved by setting W to 0. At this point, the temperature is a moot point, so lest go with t_e, since this is only going to be called if we are doing a power law calculation */
+  else if (mode == NEBULARMODE_LTE_GROUND)      /*NSH 120912 This is a test mode, used to set partition functions 
+                                                  to ground state only. This is achieved by setting W to 0. At this point, 
+                                                  the temperature is a moot point, so lest go with t_e, since this is only 
+                                                  going to be called if we are doing a power law calculation */
   {
     t = xplasma->t_e;
     weight = 0;
@@ -173,7 +176,7 @@ partition_functions (xplasma, mode)
 Synopsis:
 	partition_functions_2 calculates the partition functions
 	for a pair of states for a given temperature. This is needed
-	to support the pairwise ioinzation state calculaions where 
+	to support the pairwise ioinization state calculations where 
 	the saha equation is applied to a pair of states at a
 	useful temperature, then corrected. Part of this is 
 	a requirement to get the partition functions at that 
@@ -206,7 +209,8 @@ Notes:
 
 History:
 	2012Feb	nsh - began coding
-	2012Sep	nsh - added weight as a calling value - this allows one to produce gs only with w=0, or LTE with w=1 or to produce a correction factor with W = the measured value	
+	2012Sep	nsh - added weight as a calling value - this allows one to produce gs 
+                only with w=0, or LTE with w=1 or to produce a correction factor with W = the measured value	
 
 **************************************************************/
 

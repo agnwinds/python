@@ -91,7 +91,7 @@ photo_gen_search_light (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
                                    is uniform in frequency space */
      int istart, nphot;         /* Respecitively the starting point in p and the number of photons to generate */
 {
-  double freqmin, freqmax, dfreq, t;
+  double freqmin, freqmax, t;
   int i, iend;
   int n;
   double ftest;
@@ -114,7 +114,6 @@ photo_gen_search_light (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
   Log_silent ("photo_gen_agn creates nphot %5d photons from %5d to %5d \n", nphot, istart, iend);
   freqmin = f1;
   freqmax = f2;
-  dfreq = (freqmax - freqmin) / MAXRAND;
 
   /* XXX - this line had been deleted from agn.c in domain, but it still exists in dev, so adding it back
    * as part of test of template_ionloop.pf.  It looks like agn.c in the two places have diverged */
@@ -156,7 +155,9 @@ photo_gen_search_light (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
     else if (spectype == SPECTYPE_UNIFORM)
     {                           /* Kurucz spectrum */
       /*Produce a uniform distribution of frequencies */
-      p[i].freq = freqmin + rand () * dfreq;
+//      p[i].freq = freqmin + rand () * dfreq; DONE
+      p[i].freq = random_number(freqmin,freqmax);
+	  
     }
     else if (spectype == SPECTYPE_POW)  /* this is the call to the powerlaw routine 
                                            we are most interested in */
@@ -220,7 +221,9 @@ photo_gen_search_light (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
       p[i].x[0] = p[i].x[1] = 0.0;
 
       /* need to set the z coordinate to the lamp post height, but allow it to be above or below */
-      if (rand () > MAXRAND / 2)
+//      if (rand () > MAXRAND / 2) DONE
+      if (random_number(-1.0,1.0) > 0.0)
+		  
       {                         /* Then the photon emerges in the upper hemisphere */
         p[i].x[2] = geo.lamp_post_height;
       }
