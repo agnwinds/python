@@ -1,9 +1,12 @@
 name: shell.wind_v_at_rmin
 description: |
-  Multi-line description, must keep indentation.
+  The velocity of a shell wind at the inner edge of the 
+  shell - the variation of the velocity in the shell is
+  set by the velocity law exponent. It allows a gradient 
+  to be enforced.
 type: Double
-unit: cm
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+unit: cm/s
+values: Greater than or equal to zero.
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  Wind_type: 9
 file: shell_wind.c

@@ -1,5 +1,7 @@
 #ifdef MPI_ON
 #include "mpi.h"
+
+
 #endif
 
 int np_mpi_global;              /// Global variable which holds the number of MPI processes
@@ -18,6 +20,9 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
 /* In python_43 the assignment of the WindPtr size has been moved from a fixed
 value determined by values in python.h to a values which are adjustable from
 within python */
+
+
+
 
 
 /* With domains NDIM and MDIM need to be removed but NDIM2 is the total number of cells in wmain, and there
@@ -224,7 +229,7 @@ typedef struct domain
   /* Generic parameters for the wind */
   double wind_mdot, stellar_wind_mdot;  /* Mass loss rate in disk and stellar wind */
   double rmin, rmax;            /*Spherical extent of the wind */
-  double zmax;                  /* Vertical extent of the wind, often the same as rmas */
+  double zmin,zmax;                  /* Vertical extent of the wind, often the same as rmas */
   double wind_rho_min, wind_rho_max;    /*Min/Max rho for wind in disk plane */
   double wind_thetamin, wind_thetamax;  /*Angles defining inner and outer cones of wind, measured from disk plane */
   double mdot_norm;             /*A normalization factor used in SV wind, and Knigge wind */
@@ -279,7 +284,16 @@ int current_domain;             // This integer is used by py_wind only
 #define SYSTEM_TYPE_BINARY 1
 #define SYSTEM_TYPE_AGN    2
 #define	SYSTEM_TYPE_PREVIOUS   	   3
-#define	SYSTEM_TYPE_ONE_D  	   4
+
+/* RUN_TYPE differs from SYSTEM_TYPE in that
+  it has implications on how the program is run
+  wherease SYSTEM_TYPE refers (mainly) to the type
+  of sytem, with the exception 
+*/
+
+#define RUN_TYPE_NEW       0   
+#define RUN_TYPE_RESTART   1
+#define RUN_TYPE_PREVIOUS  3
 
 #define TRUE  1
 #define FALSE 0
@@ -371,7 +385,7 @@ struct geometry
                                    one that has been read in and stored. */
   double disk_mdot;             /* mdot of  DISK */
   double diskrad, diskrad_sq;
-  double disk_z0, disk_z1;      /* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 */
+  double disk_z0, disk_z1;      /* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 *diskrad */
   double lum_disk_init, lum_disk_back;  /* The intrinsic luminosity of the disk, the back scattered luminosity */
   int run_type;                 /*1508 - New variable that describes whether this is a continuation of a previous run 
                                    Added in order to separate the question of whether we are continuing an old run fro
@@ -1134,7 +1148,9 @@ typedef struct photon
   int top_bot;                  /* 0 ->select photons regardless of location 
                                    >0     -> select only photons whose "last" position is above the disk
                                    <0    -> select only photons whose last position is below the disk */
-  double x[3], r;               /* The position and radius of a special region from which to extract spectra  */
+  double x[3], r;               /* The position and radius of a special region from which to extract spectra. 
+                                x is taken to be the center of the region and r is taken to be the radius of
+                               the region.   */
   double f[NWAVE];
   double lf[NWAVE];             /* a second array to hole the extracted spectrum in log units */
   double lfreq[NWAVE];          /* We need to hold what freqeuncy intervals our logarithmic spectrum has been taken over */
@@ -1222,11 +1238,6 @@ char hubeny_list[132];          //Location of listing of files representing hube
 
 
 
-// Allow for a diagnostic file 
-
-FILE *epltptr;                  //TEST
-// diag_on_off is deprecated see #111, #120
-//int diag_on_off;              // on is non-zero  //TEST
 
 
 /* These variables are stored or used by the routines for anisotropic scattering */
@@ -1336,11 +1347,12 @@ struct advanced_modes
 {
   /* these are all 0=off, 1=yes */
   int iadvanced;                // this is controlled by the -d flag, global mode control.
+  int extra_diagnostics;        // when set various extra files will be written out depending what one wants to check
   int save_cell_stats;          // want to save photons statistics by cell
-  int ispy;                     // want to use the ispy function
   int keep_ioncycle_windsaves;  // want to save wind file each ionization cycle
   int make_tables;              // create tables showing various parameters for each cycle
   int track_resonant_scatters;  // want to track resonant scatters
+  int save_photons;             // want to track photons (in photon2d)
   int save_extract_photons;     // we want to save details on extracted photons
   int adjust_grid;              // the user wants to adjust the grid scale
   int diag_on_off;              // extra diagnostics
@@ -1394,3 +1406,24 @@ files;
    whether it has already calculated the matom emissivities or not. */
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
+
+
+
+/* DIAGNOSTIC for understanding problems imported models
+ *
+ */
+
+
+#define BOUND_NONE   0
+#define BOUND_INNER_CONE  1
+#define BOUND_OUTER_CONE  2
+#define BOUND_RMAX 3
+#define BOUND_RMIN 4
+#define BOUND_ZMIN 5
+#define BOUND_ZMAX 6
+#define BOUND_INNER_RHO 7
+#define BOUND_OUTER_RHO 8
+
+int xxxbound;
+
+ 

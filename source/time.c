@@ -1,3 +1,13 @@
+/***********************************************************/
+/** @file  time.c
+ * @Author ksl
+ * @date   January, 2018
+ *
+ * @brief  A few simple routines relating to estimate
+ * wallclock time for the program to run and to get the current
+ * date an time
+ *
+ ***********************************************************/
 
 #include <stdio.h>
 #include <strings.h>
@@ -13,6 +23,25 @@ Return the time in seconds since the timer was initiated
 */
 
 double t_init = 0.0;
+
+
+/**********************************************************/
+/** @name      timer
+ * @brief      Return the time in seconds since the timer was initiated
+ *
+ * @return     The time since t_init
+ *
+ * The first time the routine is called it gets the time in seconds
+ * sets t_init to this * and returns 0,  Subsequently it returns 
+ * the differecne
+ *
+ *
+ * ###Notes###
+ *
+ * Uses gettimeofday
+ *
+ *
+ **********************************************************/
 
 double
 timer ()
@@ -35,20 +64,25 @@ timer ()
 }
 
 
-/* 
-Get the current time.  as an ascii string
-
-Notes:
-
-ctime returns a string with a trailing \n, which we need
-to strip off.  This accounts for the rather bizarre handling
-of the string.
 
 
-0811	ksl	67 - As part of effort to make python more 
-		friendly to running on Royal
-
- */
+/**********************************************************/
+/** @name      get_time
+ * @brief      Get the current time as an ascii string
+ *
+ * @param [out] char  curtime[]   The current time and datae
+ * @return     Always returns 0  
+ *
+ * This simply gets the data and time
+ *
+ * ###Notes###
+ *
+ * Uses ctime.  ctime returns a string with a trailing \n, which we need
+ * to strip off.  This accounts for the rather bizarre handling
+ * of the string.
+ *
+ *
+ **********************************************************/
 
 int
 get_time (curtime)

@@ -6,8 +6,11 @@
 #include "atomic.h"
 #include "python.h"
 
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
-#
+
+
 /* A basis is defined such that if x is a 3 vector as expressed an unprimed cartesian coordinate
    frame, and if y is the same vector in some rotated frame, then
    x[i] = a[i][j] y[j]
@@ -29,6 +32,9 @@
 
  */
 
+gsl_rng * rng;  // pointer to a global random number generator
+
+
 int
 randvec (a, r)
      double a[], r;
@@ -36,10 +42,12 @@ randvec (a, r)
 
   double costheta, sintheta, phi, sinphi, cosphi;
 
-  phi = 2. * PI * (rand () / MAXRAND);
+//  phi = 2. * PI * (rand () / MAXRAND); //DONE
+  phi = 2. * PI *random_number(0.0,1.0);
   sinphi = sin (phi);
   cosphi = cos (phi);
-  costheta = 2. * (rand () / MAXRAND) - 1.;
+//  costheta = 2. * (rand () / MAXRAND) - 1.; //DONE - this makes a number from -1 to 1
+  costheta = random_number(-1.0,1.0);
   sintheta = sqrt (1. - costheta * costheta);
   a[0] = r * cosphi * sintheta;
   a[1] = r * sinphi * sintheta;
@@ -105,7 +113,8 @@ randvcos (lmn, north)
 
 // The is the correct approach to generating a uniform azimuthal distribution
 
-  phi = 2. * PI * (rand () / MAXRAND);
+//  phi = 2. * PI * (rand () / MAXRAND); //DONE
+  phi = 2. * PI * random_number(0.0,1.0);
   l = q * cos (phi);
   m = q * sin (phi);
 
@@ -154,3 +163,55 @@ vcos (x)
   z = x * (a * (1. + b * x));
   return (z);
 }
+
+
+/**********************************************************/
+/** @name 	init_rand
+ * @brief	Sets up a random number generator 
+ *
+ * @param [in] seed			The seed to set up the generator
+ * @return 					0
+ *
+ * Sets up a random number generator. The resulting generator
+ * is addressed by the pointer rng, which is set up as a local
+ * variable at the top of the file. The type of generator is
+ * set in the call to gsl_rng_alloc - currently a meursenne
+ * twister
+ *
+ * ###Notes###
+ * 2/18	-	Written by NSH
+***********************************************************/
+
+
+int
+	init_rand(seed)
+		int seed;
+{
+    rng = gsl_rng_alloc(gsl_rng_mt19937); //Set the random number generator to the GSL Meursenne twirster
+	gsl_rng_set(rng, seed);
+	return(0);
+}
+
+
+/**********************************************************/
+/** @name 	random_number
+ * @brief	Gets a random number from the generator set up in init_rand
+ *
+ * @param [in] min			The minimum value to be generated 
+ * @param [in] max			The maximum value to be generated 
+ * @return [out] x 			The generated number
+ *
+ * Produces a number from min to max (exclusive).
+ *
+ * ###Notes###
+ * 2/18	-	Written by NSH
+***********************************************************/
+
+			
+double random_number(double min, double max)
+
+{
+	double num = gsl_rng_uniform_pos(rng);
+	double x = min + ((max - min) * num);
+	return(x);
+}		

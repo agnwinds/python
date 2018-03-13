@@ -22,14 +22,14 @@ This is the routine that initializes the bands.    There are
 a number of possiblilities for setting up the bands
 
 
-   
-Arguments:		
+
+Arguments:
      double t;			A temperature which can be used to set absolute limits on the bands
      double f1, f2;		frequency limits that can overide any other limits
      int imode;			A switch used for determining how the bands are to be populated
      struct xbands *band;	A poointer to the structure that holds the band information
 
-     The currently allow modes are 
+     The currently allow modes are
 
 	imode	0	Use temperature to define a single band
 		1	Use f1 and f2 to define a single band
@@ -41,19 +41,19 @@ Arguments:
 		3	Bands tuned for yso
 		4	Query the user to specify an arbitrary
 			set of bands
-		5      	Hardwired very wide bands for testing 
-		6 	Bands set up by nsh to test cloudy   
+		5      	Hardwired very wide bands for testing
+		6 	Bands set up by nsh to test cloudy
 		7	Bands hardwired for AGN paper1 by nsh
 		8       Define bands in logarithmic intervals
 Returns:
 
 	The outputs are passed to other routines through the pointer
 	to xbands.  The routine itself simply returns 0 on success
- 
- 
-Description:	
 
-		
+
+Description:
+
+
 Notes:
 
 	10nov - ksl - XXX Some of the choices have checks to see whether the bands
@@ -70,7 +70,7 @@ History:
 			at balance
 	0812	ksl	67c - Changed names to bands_init to make
 			it clear other routines created for diagnostic
-			purposes had to be updated, as modified 
+			purposes had to be updated, as modified
 			to handle yso and cv type models in same
 			code
 	1112	ksl	71 - Moved material that was in python having
@@ -149,7 +149,7 @@ bands_init (imode, band)
   if (imode == -1)
   {
     mode = 2;
-    rdint ("Photon.sampling.approach(0=T,1=(f1,f2),2=cv,3=yso,4=user_defined,5=cloudy_test,6=wide,7=AGN,8=logarithmic)", &mode);
+    rdint ("Photon_sampling.approach(0=T,1=(f1,f2),2=cv,3=yso,4=user_defined,5=cloudy_test,6=wide,7=AGN,8=logarithmic)", &mode);
   }
   else
   {
@@ -222,16 +222,16 @@ bands_init (imode, band)
   }
   else if (mode == 4)
   {
-    rdint ("Num.of.frequency.bands", &band->nbands);
+    rdint ("Photon_sampling.nbands", &band->nbands);
     Log ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV, f1);
     Log ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV, f2);
     Log ("Enter band boundaries in increasing eV, and assure they are between lowest and highest energy\n");
 
 
-    rddoub ("Lowest_energy_to_be_considered(eV)", &xx);
+    rddoub ("Photon_sampling.low_energy_limit(eV)", &xx);
     f1 = xx / HEV;
 
-    rddoub ("Highest_energy_to_be_considered(eV)", &xx);
+    rddoub ("Photon_sampling.high_energy_limit(eV)", &xx);
     f2 = xx / HEV;
 
     Log ("Lowest photon energy is ev (freq) is %f (%.2e)\n", f1 * HEV, f1);
@@ -242,7 +242,7 @@ bands_init (imode, band)
 
     for (nband = 0; nband < band->nbands - 1; nband++)
     {
-      rddoub ("Band.boundary(eV)", &xx);
+      rddoub ("Photon_sampling.band_boundary(eV)", &xx);
       band->f2[nband] = band->f1[nband + 1] = xx / HEV;
 
     }
@@ -252,7 +252,7 @@ bands_init (imode, band)
 
     for (nband = 0; nband < band->nbands; nband++)
     {
-      rddoub ("Band.minimum_fraction)", &band->min_fraction[nband]);
+      rddoub ("Photon_sampling.band_min_frac", &band->min_fraction[nband]);
     }
     for (nband = 0; nband < band->nbands; nband++)
     {
@@ -269,7 +269,7 @@ bands_init (imode, band)
       Error ("Trying to use a broken power law banding without setting spectype to broken power law - must set spectype to 4\n");
       exit (0);
     }
-    rddoub ("Lowest_energy_to_be_considered(eV)", &xx);
+    rddoub ("Photon_sampling.low_energy_limit(eV)", &xx);
 
     if (xx > geo.agn_cltab_low)
     {
@@ -277,7 +277,7 @@ bands_init (imode, band)
       Log ("Lowest  frequency reset to 1/10 of low frequency break\n");
     }
     f1 = xx / HEV;
-    rddoub ("Highest_energy_to_be_considered(eV)", &xx);
+    rddoub ("Photon_sampling.high_energy_limit(eV)", &xx);
 
     if (xx < geo.agn_cltab_hi)
     {
@@ -327,8 +327,6 @@ bands_init (imode, band)
       ii++;
     }
 
-    //     band->f1[9] = geo.agn_cltab_hi / HEV;
-    //     band->f2[9] = f2;
 
     //Set number of photons in each band
 
@@ -475,7 +473,7 @@ bands_init (imode, band)
     Log ("Highest photon energy is ev (freq) is %f (%.2e)\n", f2 * HEV, f2);
 
     band->nbands = 5;
-    rdint ("Num.of.frequency.bands", &band->nbands);
+    rdint ("Photon_sampling.nbands", &band->nbands);
 
     if (band->nbands > NBANDS)
     {
@@ -484,11 +482,11 @@ bands_init (imode, band)
     }
 
     xx = f1 * HEV;
-    rddoub ("Lowest_energy_to_be_considered(eV)", &xx);
+    rddoub ("Photon_sampling.low_energy_limit(eV)", &xx);
     f1 = xx / HEV;
 
     xx = f1 * HEV;
-    rddoub ("Highest_energy_to_be_considered(eV)", &xx);
+    rddoub ("Photon_sampling.high_energy_limit(eV)", &xx);
     f2 = xx / HEV;
 
     f1_log = log10 (f1);
@@ -535,21 +533,21 @@ bands_init (imode, band)
 
 Synopsis:
 
-	This is the routine where the frequency 
+	This is the routine where the frequency
 	boundaries for course spectra are established
 
 
 
-   
-Arguments:		
+
+Arguments:
 
 Returns:
 
- 
- 
-Description:	
 
-		
+
+Description:
+
+
 Notes:
 	1112 - At present everything is hardwired
 
@@ -558,7 +556,7 @@ Notes:
 History:
 	1112	ksl	Moved from main routine here
 	111227	ksl	Smalle modifications to reflect my moving the main
-			variables into the geo.structure so that they 
+			variables into the geo.structure so that they
 			could be read by py_oind
 	111227	ksl	First attempt to limit the frequency intervals to
 			regions where photons are being generated

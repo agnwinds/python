@@ -1,0 +1,14 @@
+name: Spectrum.select_azimuth
+description: |
+  Advance command which along with several other parameters
+  specifies a spherical region of space in cylindrical coordinates.
+  This parameter desribes the azimuth of the region.  When
+  this general option is used, a detailed spectrum is constructed
+  just from photons that originate or scatter int he region
+type: Double
+unit: Degrees
+values: Normally a number between 0, and 360 or -180 to 180 
+parent:
+  parameter: Required when extracting photons by position.        
+file: setup2.c
+advanced: true

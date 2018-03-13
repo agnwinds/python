@@ -1,9 +1,10 @@
 name: lum_agn
 description: |
-  Multi-line description, must keep indentation.
+  The luminosity of an AGN component. This is defined as the luminosity
+  from 2-10keV. 
 type: Double
 unit: ergs/s
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: Greater than 0
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  QSO_BH_radiation: 1
 file: setup.c

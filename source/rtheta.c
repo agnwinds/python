@@ -39,7 +39,8 @@ History:
 
 
 double
-rtheta_ds_in_cell (p)
+rtheta_ds_in_cell (ndom,p)
+  int ndom;
      PhotPtr p;
 
 
@@ -47,9 +48,7 @@ rtheta_ds_in_cell (p)
 
   int n, ix, iz;
   double s, smax;
-  int ndom;
 
-  ndom = wmain[p->grid].ndom;
 
 
   /* XXX Note clear that next lines are necessary as they effectively recheck
@@ -57,7 +56,7 @@ rtheta_ds_in_cell (p)
 
   if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
     {
-      Error ("translate_in_wind: Photon not in grid when routine entered\n");
+      Error ("rtheta_ds_in_cell: Photon not in grid when routine entered\n");
       return (n);		/* Photon was not in wind */
     }
 
@@ -674,12 +673,15 @@ rtheta_get_random_location (n, x)
     {
       r =
 	sqrt (rmin * rmin +
-	      (rand () / (MAXRAND - 0.5)) * (rmax * rmax - rmin * rmin));
+//	      (rand () / (MAXRAND - 0.5)) * (rmax * rmax - rmin * rmin)); DONE
+     random_number(0.0,1.0) * (rmax * rmax - rmin * rmin));
 
-      theta =
-	asin (sthetamin + (rand () / MAXRAND) * (sthetamax - sthetamin));
+//      theta = asin (sthetamin + (rand () / MAXRAND) * (sthetamax - sthetamin)); DONE
+      theta = asin (sthetamin + random_number(0.0,1.0) * (sthetamax - sthetamin));
 
-      phi = 2. * PI * (rand () / MAXRAND);
+
+//      phi = 2. * PI * (rand () / MAXRAND); DONE
+      phi = 2. * PI * random_number(0.0,1.0);
 
 /* Project from r, theta phi to x y z  */
 
@@ -690,7 +692,9 @@ rtheta_get_random_location (n, x)
 						   because the boundaries of the wind split the grid cell */
     }
 
-  zz = rand () / MAXRAND - 0.5;	//positions above are all at +z distances
+//  zz = rand () / MAXRAND - 0.5;	//positions above are all at +z distances DONE
+  zz = random_number(-1.0,1.0);	//positions above are all at +z distances
+  
 
   if (zz < 0)
     x[2] *= -1;			/* The photon is in the bottom half of the wind */

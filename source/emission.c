@@ -329,7 +329,9 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
          geo.f_wind refers to the specific flux between freqmin and freqmax.  Note that
          we make sure that xlum is not == 0 or to geo.f_wind. */
 
-      xlum = (rand () + 0.5) / (MAXRAND) * geo.f_wind;
+//      xlum = (rand () + 0.5) / (MAXRAND) * geo.f_wind; //DONE
+      xlum = random_number(0.0,1.0) * geo.f_wind;
+	  
 
       xlumsum = 0;
       icell = 0;
@@ -360,8 +362,8 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
        * each photon type to be made in each cell */
 
       lum = plasmamain[nplasma].lum_tot;
-      xlum = lum * (rand () + 0.5) / (MAXRAND);
-
+//      xlum = lum * (rand () + 0.5) / (MAXRAND); //DONE
+      xlum = lum * random_number(0.0,1.0);
       xlumsum = 0;
 
       p[n].nres = -1;
@@ -533,7 +535,9 @@ one_line (one, nres)
       return (0);
     }
 
-  xlum = xplasma->lum_lines * (rand () / (MAXRAND - 0.5));
+//  xlum = xplasma->lum_lines * (rand () / (MAXRAND - 0.5)); //DONE
+  xlum = xplasma->lum_lines * random_number(0.0,1.0);
+  
   xlumsum = 0;
   m = nline_min;
   while (xlumsum < xlum && m < nline_max)

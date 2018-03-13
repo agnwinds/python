@@ -5,16 +5,21 @@
 
 Synopsis:  
 
-Read the master file produced by windwave2table for a
-stellar-type model and produce a file to be read by 
-import in python
+Read the master file produced by windsave2table for a
+ model created in cylindrical coordinates and produce 
+ a file which can be imported into Python and run
 
 
 Command line usage (if any):
 
-    usage: import_1d.py filename
+    usage: import_1d.py rootname
+
+    where rootname is the rootname of the mastertable
+    or windsave file
 
 Description:  
+
+    This operates on the mastertable produced by windsavetable
 
 Primary routines:
 
@@ -109,8 +114,8 @@ def read_table(filename='foo.txt',format=''):
 
 def doit(root='cv',outputfile=''):
     '''
-    Read a master.txt file and produce a file
-    which can be read in to python
+    Read a master.txt file for models in cylindrical coordinates
+    and produce a file which can be read in to python
     
 
     Description:
@@ -159,4 +164,4 @@ if __name__ == "__main__":
         # doit(int(sys.argv[1]))
         doit(sys.argv[1])
     else:
-        print ('usage: import_1d.py filename')
+        print ('usage: import_cyl.py filename')

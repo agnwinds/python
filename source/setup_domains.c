@@ -1,3 +1,16 @@
+
+/***********************************************************/
+/** @file   setup_domains.c
+ * @Author ksl
+ * @date   January, 2018
+ * @brief  Get the parameters needed to describe winds
+ *
+ * File containing several routines that collectively
+ * define the components to a wind in python. Each component
+ * of the wind is said to be a domain, and the information
+ * for each domain is stored in the elements of zdom
+ ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,7 +24,7 @@
              University of Southampton
 
 Synopsis: 
-  get_grid_params reads information on the coordinate system
+  get_domain_params reads information on the coordinate system
   and grid dimensions and sets the corresponding variables
   in the geo structure
    
@@ -29,6 +42,28 @@ History:
   1508	ksl	Updated for domains
 
 **************************************************************/
+
+/**********************************************************/
+/** @name       get_domain_params
+ * @brief       Get inputs that describe a particular component of the wind
+ *
+ * @param [in] ndom  The number (begining with 0) of this particular domain
+ * @return  0 
+ *
+ * Sets up the one domain, which includes defining wind type, e.g whether
+ * it is a shell, or a biconical flow, or an imported model, as well
+ * as the type of coordinate system and its simensions.
+ *
+ * If the wind is to be imported from a file, it is imported in this
+ * routine.
+ *
+ * ###Notes###
+ * 1801 -   Refactored into this file in 1801.  Updates in the
+ *          fall of 17 were made to allow for importing models.
+ *          Note that cyl_var coordinates are not currently 
+ *          working
+***********************************************************/
+
 
 int
 get_domain_params (ndom)
@@ -63,7 +98,7 @@ get_domain_params (ndom)
 
       /* Define the coordinate system for the grid and allocate memory for the wind structure */
       rdint
-	("Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)",
+	("Wind.coord_system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)",
 	 &input_int);
       switch (input_int)
 	{
@@ -123,7 +158,7 @@ get_domain_params (ndom)
   /* If we are in advanced then allow the user to modify scale lengths */
   if (modes.iadvanced)
     {
-      rdint ("@adjust_grid(0=no,1=yes)", &modes.adjust_grid);
+      rdint ("@Diag.adjust_grid(0=no,1=yes)", &modes.adjust_grid);
 
       if (modes.adjust_grid)
 	{
@@ -162,6 +197,26 @@ History:
 
 **************************************************************/
 
+
+/**********************************************************/
+/** @name       get_wind_paraams  
+ * @brief       Get detailed particular component of the wind
+ *
+ * @param [in] ndom  The number (begining with 0) of this particular domain
+ * @return  0 
+ *
+ * Continues the setup of a single domain begun in get_domain_params.    
+ *
+ * Much of this routine is a steering routine that calls other
+ * subroutines depending on the type of wind, e.g sv, for this
+ * particular wind domain.
+ *
+ *
+ * ###Notes###
+ * 1801 -   Refactored into this file in 1801.  
+
+***********************************************************/
+
 int
 get_wind_params (ndom)
      int ndom;
@@ -170,9 +225,6 @@ get_wind_params (ndom)
   // it is not obvious that is happenning
 
   zdom[ndom].rmax = 1e12;
-  /*  ksl - this line is not used anywhre and so has been commented out. Currently
-   *  we initialize all of the plasma temperatures to geo.twind_init  */
-  //  zdom[ndom].twind_init = 1e5;   
 
   if (geo.system_type == SYSTEM_TYPE_AGN)
     {
@@ -267,7 +319,7 @@ get_wind_params (ndom)
      XXX allows any domain to be allowed a filling factor but this should be modified when
      we know what we are doing with inputs for multiple domains. Could create confusion */
 
-  rddoub ("filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
+  rddoub ("Wind.filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
 
   return (0);
 }
@@ -295,6 +347,28 @@ History:
 	1502  JM 	Moved here from main()
 
 **************************************************************/
+
+/**********************************************************/
+/** @name       get_line_transfer_mode
+ * @brief       Get the line transfer mode for the wind
+ *
+ * @param [in] None
+ * @return  0 
+ *
+ * This rontinues simply gets the line tranfer mode for
+ * all componensts of the wind.  After logging this
+ * information the routine also reads in the atomic 
+ * data.
+ *
+ *
+ * ###Notes###
+ * 1801 -   Refactored into this file in 1801.  It is
+ *          not obvioous this is the best place for this
+ *          routine since it refers to all components
+ *          of the wind.
+
+***********************************************************/
+
 
 
 int
@@ -397,7 +471,7 @@ get_line_transfer_mode ()
   if (modes.iadvanced)
     {
 
-      rdint ("@write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
+      rdint ("@Diag.write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
       if (write_atomicdata)
 	Log ("You have opted to save a summary of the atomic data\n");
     }

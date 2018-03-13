@@ -1,7 +1,7 @@
 name: hydro_file
 description: |
-  Multi-line description, must keep indentation.
+  Relative path to a hydrodynamic snapshot file to be imported.
 type: String
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: 
 file: hydro_import.c

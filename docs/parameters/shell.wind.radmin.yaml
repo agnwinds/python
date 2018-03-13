@@ -1,9 +1,10 @@
 name: shell.wind.radmin
 description: |
-  Multi-line description, must keep indentation.
+  The innermost edge of a diagnostic type of wind made up of a single
+  (ideally thin) shell.
 type: Double
 unit: cm
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: greater than zero, less than wind.radmax
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  Wind_type: 9
 file: shell_wind.c

@@ -1,3 +1,12 @@
+
+/***********************************************************/
+/** @file  sv.c
+ * @Author ksl
+ * @date   January, 2018
+ *
+ * @brief  The collection of routines needed to define a Shlossman-Vitello wind 
+ *
+ ***********************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -8,30 +17,24 @@
 int sdom;
 int sv_zero_r_ndom;
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-	get_sv_wind_params gets input data which is necessary for a Shlossman & Vitello 
-	description of the wind
-Arguments:		
-
-Returns:
- 
-Description:	
-	The parameters, zdom[ndom].sv...,  obtained here are only used in the routines in stellar_winds.c
-	which calculate the velocity and density of the wind during the initialization process.
-	Other portions of the structure, geo defined here are more general purpose.		
-Notes:
 
 
-History:
- 	98dec	ksl	Coded and debugged as part of major change in IO structure required when
- 				adding a spherical wind
-        080518  ksl     60a - geo should contain only cgs units
-	11aug	ksl	70b - kluge to get better xscale with compton torus
-	15aug	ksl	Updates for multiple domains
-**************************************************************/
+/**********************************************************/
+/** @name      get_sv_wind_params
+ * @brief      gets input data which is necessary for a Shlossman & Vitello 
+ * 	description of the wind
+ *
+ * @param [in] int  ndom   The domain number
+ * @return     Always returns 0
+ *
+ *  Gets mdot for this wind component, initialize the parameters needed to define a SV wind, and then request those
+ *  parameters as inputs.   Calculate the normalization factor needed to convert the global mass loss rate to the
+ *  mass loss rate per unite area.
+ *
+ * ###Notes###
+ *
+ *
+ **********************************************************/
 
 int
 get_sv_wind_params (ndom)
@@ -96,7 +99,6 @@ get_sv_wind_params (ndom)
   }
 
 
-
   /*Now calculate the normalization factor for the wind */
 
   sdom = ndom;
@@ -105,35 +107,23 @@ get_sv_wind_params (ndom)
   return (0);
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
-	double sv_velocity(x,v) calulates the v of a Schlossman Vitello wind from a position
-	x
-Arguments:		
-	double x[]		the postion for which one desires the velocity
-Returns:
-	double v[]		the calculated velocity
-	
-	The amplitude of the velocity is returned 
-	
-Description:	
-		
-Notes:
 
-History:
- 	98dec	ksl	Coded as part of effort to isolate SV portions of the code.
-	01mar	ksl	Moved mdot_norm calculation from sv_rho to get_sv_params() 
-			since it doesn't need to be recalulated every time
-	04aug	ksl	52 -- Modified to allow for s thick disk, and to return
-			the velocity in cartesian rather than cylindrical coords.
-			These are the same if x is in xz plane.
-	04dec	ksl	54a  -- Minor mod to avoid -O3 warning
-	05jul	ksl	56d  -- Corrected error in the direction calculated for
-			ptest
- 
-**************************************************************/
+/**********************************************************/
+/** @name      sv_velocity
+ * @brief      Calulate the v of a Schlossman Vitello wind at a position
+ * 	x
+ *
+ * @param [in] double  x[]   the position for which one desires the velocity
+ * @param [out] double  v[]  the calcualted velocity at that postion
+ * @param [in out] int  ndom the domain number 
+ * @return     The amplitude of the velocity is returned
+ * 	
+ *
+ * ###Notes###
+ *
+ *
+ **********************************************************/
 
 double
 sv_velocity (x, v, ndom)
@@ -197,13 +187,15 @@ sv_velocity (x, v, ndom)
 
   v[2] = vl * cos (theta);
 
-  if (x[2] < 0)                 //line added SS Nov 04 - is this correct?
+  if (x[2] < 0)                 
     v[2] *= (-1);
-  /* 04aug -- ksl --52 At this point we have calculated the velocity in the xz plane, which
+
+  /* At this point we have calculated the velocity in the xz plane, which
    * is identical to the statement that we have calculated it in
-   * cylindrical coordinates.  The next bit projects back to xyz 
+   * cylindrical coordinates.  Now project the velocity back to  
    * coordinates if x was not originally in the xz plane.
    */
+
   if (x[1] != 0.0)
   {
     project_from_cyl_xyz (x, v, xtest);
@@ -223,27 +215,24 @@ sv_velocity (x, v, ndom)
 
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
-	double sv_rho(x) calculates the density of an sv_wind at a position x
-Arguments:		
-	double x[]	the position where for the which one desires the denisty
-Returns:
-	The density at x is returned in gram/cm**3
-	
-Description:	
-		
-Notes:
-	52 -- If the disk is thick, our intention is that the stream lines
-	trace back to the disk, and have the same properties at that radius
-	as they would have had except for a vertical offset.
 
-History:
- 	98dec	ksl	Coded as part of effort to isolate SV portions of the code.
- 
-**************************************************************/
+/**********************************************************/
+/** @name      sv_rho
+ * @brief      Calculate the density of an sv_wind at a position x
+ *
+ * @param [in] int  ndom   The domain number
+ * @param [in] double  x[] The position where for the which one desires the denisty
+ * @return     The density at x in gram/cm**3
+ *
+ *
+ * ###Notes###
+ *
+ * 52 -- If the disk is thick, our intention is that the stream lines
+ * 	trace back to the disk, and have the same properties at that radius
+ * 	as they would have had except for a vertical offset.
+ *
+ **********************************************************/
 
 double
 sv_rho (ndom, x)
@@ -300,44 +289,40 @@ sv_rho (ndom, x)
   dtheta_drzero = (sv_theta_wind (ndom, rzero) - sv_theta_wind (ndom, (1. - EPSILON) * rzero)) / (EPSILON * rzero);
 
   dr_drzero = 1. + ldist * dtheta_drzero / cos (theta);
-/* Note VS93 eqn 8 is dr/drzero but equation  7 is drzero/dr   ksl 97 apr 19 */
   rho = rzero * dmdot_da / (dr_drzero * r * v[2]);
 
   return (rho);
 }
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
-	sv_find_wind_rzero(p) locates the radial position in the disk from which the 
-	stream line arises.  
- 
-Arguments:		
-	double p[]	    A 3 vector position, and not a photon structure
-Returns:
-	sv_find_wind_rzero returns the radius of the footpoint of the stream line
- 
-Description:	
-	In our models, which follows Shlossman and Vitello the wind is expected to arise in a cone.  
-	However, we have also defined r_o in a sensible way for any position regardless of whether it
-	is in the cone or not.   The routine should be accurate even if p[2] is negative, i.e if we
-	are trying to calculate r in the -z hemisphere.	
 
-	More specifically, if the point is a distance drho outside of the windcone then rzero
-	will be rmax+drho. Alternatively if the point is inside the wind cone then, rzero
-	will rmin*rho/rho_min where rho_min is the minimum value of rho to be in the windcone
-	at that height.
-		
-Notes:
 
-History:
- 	97jan      ksl	Coding on python began.
-	15aug	ksl	Adapted for domains
- 
-**************************************************************/
-
+/**********************************************************/
+/** @name      sv_find_wind_rzero
+ * @brief      Locates the radial position in the disk from which the 
+ * 	stream line arises.
+ *
+ * @param [in] int  ndom   The domain number
+ * @param [in] double  p[]   A position in cartesian coordinates
+ *
+ * @return     the radius of the footpoint of the stream line
+ *
+ * ###Notes###
+ *
+ * In our models, which follows Shlossman and Vitello the wind is expected to arise in a cone.  
+ * 	However, we have also defined r_o in a sensible way for any position regardless of whether it
+ * 	is in the cone or not.   The routine should be accurate even if p[2] is negative, i.e if we
+ * 	are trying to calculate r in the -z hemisphere.	
+ * 
+ * 	More specifically, if the point is a distance drho outside of the windcone then rzero
+ * 	will be rmax+drho. Alternatively if the point is inside the wind cone then, rzero
+ * 	will rmin*rho/rho_min where rho_min is the minimum value of rho to be in the windcone
+ * 	at that height.
+ *
+ *
+ *
+ **********************************************************/
 
 double
 sv_find_wind_rzero (ndom, p)
@@ -384,7 +369,7 @@ sv_find_wind_rzero (ndom, p)
   }
 
   /* 100 here means that zbrent will end if one has a guess of rzero which is
-     correct ot 100 cm */
+     correct at 100 cm */
 
   /* change the global variable sv_zero_r_ndom before we call zbrent */
   sv_zero_r_ndom = ndom;
@@ -393,32 +378,27 @@ sv_find_wind_rzero (ndom, p)
 
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-	The next two subroutines are used to guess the position in the disk
-	from which a streamline arises.  sv_zero_r is the routine called by
-	the numerical recipes routine zbrent to walk down on the actual value
-	of r in the disk.  sv_zero_init is required to set the portions of the routine
-	which do not change in calls from zbrent.  sv_zero_r returns the difference
-	between rho actual (sqrt x*x + y *y ) and rho_guessed
- 
-Arguments:		
-
-Returns:
- 
-Description:	
-	
-		
-Notes:
-
-History:
- 	97jan      ksl	Coding on python began.
- 
-**************************************************************/
 
 double zero_p[3];
+
+
+/**********************************************************/
+/** @name      sv_zero_init
+ * @brief      A setup routine for finding the footpoint of a stream line in a SV model
+ *
+ *
+ * @param [in] double  p[]   A position in cartesian coordiantes
+ * @return     The routine simply returns 0
+ *
+ * One of two routines used to find the postion on the disk from which a steamline
+ * arises. This routine is just a setup routine, to make the position an external
+ * variable so it can be accessed by sv_zero_r 
+ *
+ * ###Notes###
+ *
+ * The routine stores the position in zero_p
+ *
+ **********************************************************/
 
 int
 sv_zero_init (p)
@@ -430,9 +410,31 @@ sv_zero_init (p)
   return (0);
 }
 
-/* This routine is used to test whether a guess of r_zero is correct.  If
-   you have the answer exactly then sv_zero_r will return 0 */
 
+
+
+/**********************************************************/
+/** @name      sv_zero_r
+ * @brief      Routine used by zbrent to find a footpoint of a streamline in an SV model
+ *
+ * @param [in] double  r   A position along the surface of the disk
+ * @return     0 if r is the footpoint
+ *
+ * This routine is used to test whether a guess of r_zero is correct.  If
+ * you have the answer exactly then sv_zero_r will return 0
+ *
+ * sv_zero_r is the routine called by
+ * the numerical recipes routine zbrent to walk down on the actual value
+ * of r in the disk.   
+ *
+ * sv_zero_r returns the difference
+ * between rho actual (sqrt x*x + y *y ) and rho_guessed
+ *
+ *
+ * ###Notes###
+ *
+ *
+ **********************************************************/
 
 double
 sv_zero_r (r)
@@ -449,36 +451,32 @@ sv_zero_r (r)
   rho_guess = r + tan (theta) * zero_p[2];
   return (rho_guess - rho);
 
-
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
-	double sv_theta_wind(r) finds the angle at which the wind emerges from at a specific
-	radius r on surface of the disk
- 
-Arguments:
-	double r	a radial distance on the surface of the disk		
 
-Returns:
-	As long as r is between sv_rmin and sv_rmax, sv_theta_wind returns the
-	angle given by the SV prescription.
-	
-	Inside sv_rmin, it returns a value which smoothly goes from thetamin to 0
-	as the radius goes to 0
-	
-	Outside sv_rmax, it returns sv_thetamax
- 
-Description:	
-		
-Notes:
-
-History:
- 	97jan      ksl	Coding on python began.
- 
-**************************************************************/
+/**********************************************************/
+/** @name      sv_theta_wind
+ * @brief      double (r) finds the angle at which the wind emerges from at a specific
+ * 	radius r on surface of the disk
+ *
+ * @param [in] int  ndom   The domain number
+ * @param [in] double  r   a radial distance on the surface of the disk
+ * @return   An angle (in radians) 
+ *
+ * As long as r is between sv_rmin and sv_rmax, sv_theta_wind returns the
+ * 	angle given by the SV prescription.
+ * 	
+ * 	Inside sv_rmin, it returns a value which smoothly goes from thetamin to 0
+ * 	as the radius goes to 0.
+ * 	
+ * 	Outside sv_rmax, it returns sv_thetamax
+ *
+ *
+ * ###Notes###
+ *
+ *
+ **********************************************************/
 
 double
 sv_theta_wind (ndom, r)
@@ -499,30 +497,24 @@ sv_theta_wind (ndom, r)
 
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
-	double sv_wind_mdot_integral(r) is the integrand of SV model for mdot as ation
-	of radius
-Arguments:		
-	double r;
- 
-Returns:
- 
-Description:	
-	
-		
-Notes:
-	This routine should be further down in the file but at one point this created
-	an error for reasons I do not understand (97sept13).  I moved it to the bottom
-	of the file on 12/14/97.
 
-History:
- 	97jan      ksl	Coding on python began.
- 
-**************************************************************/
 
+/**********************************************************/
+/** @name      sv_wind_mdot_integral
+ * @brief      The integrand required to calculate the normalization factor between the global mass loss rate and the mass loss per unit area at a particular place on the disk
+ *
+ * @param [in] double  r   A position (radius) on the disk
+ * @return     The value of the integrand 
+ *
+ * The SV model is defined in terms of a mass loss rate per unit area.  mdot is the total mass loss rate from the disk.  In order to connect the local and global rates one
+ * must integrate the local mass loss rate and renormalize this.  
+ *
+ * ###Notes###
+ *
+ * The integration is carried out in get get_sv_wind_params
+ *
+ **********************************************************/
 
 double
 sv_wind_mdot_integral (r)

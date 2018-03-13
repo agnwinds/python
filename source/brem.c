@@ -176,7 +176,8 @@ reset.  A careful review of them is warranted.
   }
   /* End of section redefining limits */
 
-  y = rand () / (MAXRAND);
+//  y = rand () / (MAXRAND); //DONE
+  y = random_number(0.0,1.0);
 
   y = cdf_brem_ylo * (1. - y) + cdf_brem_yhi * y;       // y is now in an allowd place in the cdf
 

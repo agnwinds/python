@@ -135,14 +135,12 @@ calculate_ionization (restart_stat)
 
     wind_rad_init ();           /*Zero the parameters pertaining to the radiation field */
 
-    if (modes.ispy)
-      ispy_init ("python", geo.wcycle);
 
     geo.n_ioniz = 0.0;
     geo.cool_tot_ioniz = 0.0;
     ztot = 0.0;                 /* ztot is the luminosity of the disk multipled by the number of cycles, which is used by save_disk_heating */
 
-    if (!geo.wind_radiation || (geo.wcycle == 0 && geo.run_type != SYSTEM_TYPE_PREVIOUS))
+    if (!geo.wind_radiation || (geo.wcycle == 0 && geo.run_type != RUN_TYPE_PREVIOUS))
       iwind = -1;               /* Do not generate photons from wind */
     else
       iwind = 1;                /* Create wind photons and force a reinitialization of wind parms */
@@ -242,8 +240,6 @@ calculate_ionization (restart_stat)
     communicate_matom_estimators_para ();       // this will return 0 if nlevels_macro == 0
 #endif
 
-    if (modes.ispy)
-      ispy_close ();
 
 
     /* Calculate and store the amount of heating of the disk due to radiation impinging on the disk */
@@ -496,8 +492,6 @@ make_spectra (restart_stat)
 
     xsignal (files.root, "%-20s Starting %d of %d spectral cycle \n", "NOK", geo.pcycle, geo.pcycles);
 
-    if (modes.ispy)
-      ispy_init ("python", geo.pcycle + 1000);
 
 
     Log ("!!Cycle %d of %d to calculate a detailed spectrum\n", geo.pcycle, geo.pcycles);

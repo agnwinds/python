@@ -1,9 +1,10 @@
 name: corona.radmin
 description: |
-  Multi-line description, must keep indentation.
+    The corona is a box-shaped region which sits immediately
+    above the disk.  radmin defines the inner edge of the box.
 type: Double
 unit: cm
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: Greater than that the radius of the central object
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  Wind.type: Selected as one of the choces for this variable
 file: corona.c

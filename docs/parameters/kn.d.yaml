@@ -1,9 +1,11 @@
 name: kn.d
 description: |
-  Multi-line description, must keep indentation.
+  The ratio d/d_min is used to describe the degree of geometric collimation of 
+  the disk wind in the KWD model. However, d (the distance to the focal point in
+  central object radii) is used as this provides a more natural parameter.
 type: Double
 unit: co.radius
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: Greater than 0
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter:
 file: knigge.c

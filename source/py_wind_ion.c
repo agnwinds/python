@@ -89,7 +89,8 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
   {
     aaa[n] = 0;
     nplasma = w[n].nplasma;
-    if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+//OLD    if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+    if (w[n].vol > 0.0 )
     {
       if (iswitch == 0)
       {
@@ -131,7 +132,8 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
     for (n = 0; n < NDIM2; n++)
     {
       nplasma = w[n].nplasma;
-      if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+//OLD      if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+      if (w[n].vol > 0.0 )
       {
         if (iswitch == 0)
           x /= ((plasmamain[nplasma].density[0] + plasmamain[nplasma].density[1]) * ele[nelem].abun);

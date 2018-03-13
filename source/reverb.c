@@ -30,7 +30,7 @@ PhotPtr delay_dump_bank;
  * from the current photon to it. Uses ds_to_plane() for
  * reliability.
  *
- * @notes
+ * ###Notes###
  * 9/14	-	Written by SWM
 ***********************************************************/
 double
@@ -61,7 +61,7 @@ delay_to_observer (PhotPtr pp)
  * thread. The file is then built up in batches using
  * delay_dump() in increments of #delay_dump_bank_size.
  *
- * @notes
+ * ###Notes###
  * 9/14	-	Written by SWM
 ***********************************************************/
 int
@@ -126,7 +126,7 @@ delay_dump_prep (int restart_stat)
  *
  * Dumps the remaining tracked photons to file, frees memory.
  *
- * @notes
+ * ###Notes###
  * 6/15	-	Written by SWM
 ***********************************************************/
 int
@@ -152,7 +152,7 @@ delay_dump_finish (void)
  * Collects all the delay dump files together at the end. 
  * Called by the master thread. Uses 'cat' for simplicity.
  *
- * @notes
+ * ###Notes###
  * 6/15	-	Written by SWM
 ***********************************************************/
 int
@@ -205,7 +205,7 @@ delay_dump_combine (int i_ranks)
  * contribute to the delay map. Uses the same filters as 
  * the spectra_create() function for scatters & angles.
  *
- * @notes
+ * ###Notes###
  * 6/15	-	Written by SWM
 ***********************************************************/
 int
@@ -273,7 +273,7 @@ delay_dump (PhotPtr p, int np)
  * Takes a photon and copies it to the staging arrays for 
  * delay dumping, to be output to file later.
  *
- * @notes
+ * ###Notes###
  * 6/15	-	Written by SWM
 ***********************************************************/
 int
