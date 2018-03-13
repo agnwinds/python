@@ -36,7 +36,8 @@ notifications:
 install:
     # first configure
     - export PYTHON=$TRAVIS_BUILD_DIR
-    - export PATH=$PATH:$PYTHON/bin 
+    - export PATH=$PATH:$PYTHON/bin:$PYTHON/py_progs
+    - export PYTHONPATH=$PYTHONPATH:$PYTHON/py_progs
     - ./configure
 
     # do installation
@@ -67,3 +68,5 @@ script:
     - py -i ngc5548
     - py -i lamp_post
     - py -i cv_import
+    - py balmer_test
+    - balmer_decrement.py balmer_test
