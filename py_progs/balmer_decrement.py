@@ -18,7 +18,6 @@ Requirements:
 	py_plot_util, py_read_output from $PYTHON/py_progs in the python path 
 '''
 import numpy as np 
-import matplotlib.pyplot as plt 
 import py_plot_util as util 
 import py_read_output as rd 
 import sys, os
@@ -87,8 +86,16 @@ if __name__ == "__main__":
 			print (__doc__)
 		else:
 			root = sys.argv[1]
+			plotit=True
 
-			ifail = BalmerTest(root, plotit=True)
+			# only plot if matplotlib installed 
+			try:
+				import matplotlib.pyplot as plt 
+			except:
+				print ("No matplotlib, so not making plot.")
+				plotit = False
+
+			ifail = BalmerTest(root, plotit=plotit)
 			print ("\nTest passed?:", ifail) 
 			if ifail == False:
 				sys.exit(-1)
