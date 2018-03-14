@@ -23,7 +23,6 @@ Arguments:
 # we need the classes and numpy modules 
 import py_classes as cls
 import numpy as np
-import matplotlib.pyplot as plt
 import subprocess
 import py_plot_util as util
 
@@ -351,6 +350,8 @@ def setpars():
     '''
     set some standard parameters for plotting
     '''
+    import matplotlib.pyplot as plt
+    
     print('Setting plot parameters for matplotlib.')
     plt.rcParams['lines.linewidth'] = 1.0
     plt.rcParams['axes.linewidth'] = 1.3
