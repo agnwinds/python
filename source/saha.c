@@ -947,7 +947,7 @@ struct force_con
   int z, istate;
   float frac;
 }
-con_force[10];
+con_force[1000];
 int nforce;
 
 int
@@ -981,7 +981,7 @@ fix_concentrations (xplasma, mode)
 	}
 
       nforce = 0;
-      while (fgets (line, LINELENGTH, cptr) != NULL && nforce < 10)
+      while (fgets (line, LINELENGTH, cptr) != NULL && nforce < 1000)
 	{
 	  if ((n =
 	       sscanf (line, "%d %d %f", &con_force[nforce].z,
@@ -1021,6 +1021,7 @@ fix_concentrations (xplasma, mode)
 	    nelem++;
 	  /* Increment the ion density and the electron density */
 	  xplasma->density[nion] = nh * ele[nelem].abun * con_force[n].frac;
+	  printf ("ion %i z %i state %i abund %e\n",nion,ion[nion].z,ion[nion].istate,xplasma->density[nion]);
 	}
     }
 
