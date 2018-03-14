@@ -1803,7 +1803,7 @@ described as macro-levels. */
 		     Auger effect */
 /**
  * @section Auger
- * @bug Needs description
+ * @bug Needs description - this is a type of data that is no longer used 
  */
 		case 'A':
 		  if (sscanf (aline,
@@ -2180,7 +2180,7 @@ would like to have simple lines for macro-ions */
 		  break;
 
 /** @section Ground state fractions
- * @bug This needs a description
+ * @bug This needs a description - it is very old - CK's ground state recombination tables used to compute the zeta term.		  
  */
 		case 'f':
 		  if (sscanf
@@ -2254,10 +2254,23 @@ would like to have simple lines for macro-ions */
 
 
 
-/** @section Dielectronic Recombination
- * @bug This needs a description
+/** @section Dielectronic Recombination - type 1
+ * This section reads in dielectronic recombination rates.
+ * The data comes from Chianti, and there are two types of dielectronic data.
+ * This is type 1 - which has fis decribed by Arnaud & Raymond (1992)
+ * There are two fitting parameters, E and C which represent different
+ * degrees in the fit - one sums over a set of parameters.
  *
- * What is the difference between D and S, which also seems to be about dielectronic recombination
+ * A typical ion data would look like this
+ * 		
+ *	  
+ @verbatim
+ * DR_BADNL E 2 2 4.5560e+05 5.5520e+05 8.9820e+05 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00 
+ * DR_BADNL C 2 2 5.9660e-04 1.6130e-04 -2.2230e-05 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00 
+ @endverbatim
+ * 
+ * where there are two lines for a given ion - this is for helium (z=2) 2 (istate=2)		
+ *
  */
 
 		case 'D':	/* Dielectronic recombination data read in. */
@@ -2314,6 +2327,24 @@ would like to have simple lines for macro-ions */
 
 		  break;
 
+/** @section Dielectronic Recombination - type 2
+ * This section reads in type 2 dielectronic recombination rates.
+ * The data comes from Chianti, and there are two types of dielectronic data.
+ * This is type 2 - which has a fit decribed by Shull & van Steenberg (1982)
+ * There are four fitting parameters. 
+ * A typical ion data would look like this
+ * 		
+ *	  
+ @verbatim
+ * DR_SHULL 17 2 2.6510e-03 2.9300e-02 2.4120e+05 4.9410e+05 
+ @endverbatim
+ * 
+ * where there are two lines for a given ion - this is for z=17 (istate=2)		
+ *
+ */
+
+
+
 		case 'S':
 		  nparam = sscanf (aline, "%*s %d %d %le %le %le %le ", &z, &ne, &drp[0], &drp[1], &drp[2], &drp[3]);	//split and assign the line
 		  nparam -= 2;	//take 4 off the nparam to give the number of actual parameters
@@ -2352,13 +2383,15 @@ would like to have simple lines for macro-ions */
 		  break;
 
 /**
- * @section Recombination
+ * @section total radiative Recombination rates from Chianti - type 1 and 2
  * !RR RATE COEFFICIENT FITS (C)20110412 N. R. BADNELL, DEPARTMENT OF PHYSICS, UNIVERSITY OF STRATHCLYDE, GLASGOW G4 0NG, UK.
  * !This is total radiative rate into all possible states or the recombined ion.
  * !This data was downloaded from http://amdpp.phys.strath.ac.uk/tamoc/DATA/RR/ on 13/July/2013
  * !It is described in http://adsabs.harvard.edu/abs/2006ApJS..167..334B
  * !Only modification to original file is to insert the BAD_T_RR label to the front of each line and comments
  * !There are metastable levels in here, M=1 means we are recombining from the ground state, which is what we tend to want.
+ * Some of these have one four parameters, a fit introduced by Verner & Ferland (1996) and
+ * some have six, which is from Gu (2003). A four parameter data type is shown below
  *
  * @verbatim
  * !  Z  N  M  W      A        B        T0         T1        C        T2
@@ -2422,9 +2455,22 @@ would like to have simple lines for macro-ions */
 		  break;
 
 /**
- * @section Unknown
- * @bug This case needs a description
+ * @section Total radiative recombination - type 3
+ * These are some rare ion recombination rates that have
+ * a two parameter fit by Aldrovandi & Pequignot (1973)
+ * They have data like
+ * @verbatim
+ * RR_SHULL 22 2 1.0965e-11 6.9901e-01 
+ * RR_SHULL 22 3 1.8600e-11 7.2800e-01 
+ * @endverbatim
+ * 
+ * For erroneous historical reasons they are referred to as SHULL 
+ * 
  */
+		  
+		  
+		  
+	
 		case 's':
 		  nparam = sscanf (aline, "%*s %d %d %le %le ", &z, &ne, &btrr[0], &btrr[1]);	//split and assign the line
 		  nparam -= 2;	//take 4 off the nparam to give the number of actual parameters
@@ -2474,8 +2520,21 @@ would like to have simple lines for macro-ions */
 
 
 /**
- * @section Unknown
- * @bug This case needs a description
+ * @section Ground state recombination rate data
+ * !RR RATE COEFFICIENT FITS (C)20110412 N. R. BADNELL, DEPARTMENT OF PHYSICS, UNIVERSITY OF STRATHCLYDE, GLASGOW G4 0NG, UK.
+ * !This is resolved radiative rate from ground state to ground state.
+ * !This data was downloaded from http://amdpp.phys.strath.ac.uk/tamoc/DATA/RR/ on 13/July/2013
+ * !It is described in http://adsabs.harvard.edu/abs/2006ApJS..167..334B
+ * !THe data comes as one file for each ion, with many rates. This file contains the first rate line in each file
+ * ! which should relate to the ground state of the upper ion recombining into the ground state of the recombined ion.
+ * !The data is tabulated in temperature, first line for each ion is temp, second is rate.
+ * !As with other Badnell data, first number is z, second is number of remianing electrons.
+ *
+ * @verbatim
+ * BAD_GS_RR T 1 0 1.00E+01 2.00E+01 5.00E+01 1.00E+02 2.00E+02 5.00E+02 1.00E+03 2.00E+03 5.00E+03 1.00E+04 2.00E+04 5.00E+04 1.00E+05 2.00E+05 5.00E+05 1.00E+06 2.00E+06 5.00E+06 1.00E+07
+ * BAD_GS_RR R 1 0 5.21E-12 3.68E-12 2.33E-12 1.65E-12 1.16E-12 7.35E-13 5.18E-13 3.65E-13 2.28E-13 1.58E-13 1.08E-13 6.21E-14 3.88E-14 2.28E-14 1.01E-14 5.05E-15 2.36E-15 7.90E-16 3.27E-16
+ * @endverbatim
+ 
  */
 
 		case 'G':
@@ -2562,11 +2621,24 @@ would like to have simple lines for macro-ions */
 		    }		//end of loop over ions
 
 		  break;
-/* The following are lines to read in temperature averaged gaunt factors from the data of Sutherland (1997). The atomic file is basically unchanged
- * from the data on the website, just with the top few lines commented out, and a label prepended to each line */
+
 /**
  * @section gaunt factor
- * @bug This case needs a description
+ * The following are lines to read in temperature averaged free-free gaunt factors 
+ * from the data of Sutherland (1997). The atomic file is basically unchanged
+ * from the data on the website, just with the top few lines commented out, 
+ * and a label prepended to each line 
+ * The data is a spline fit to the gaunt factor as a function of g - the reduced 
+ * temperature.
+ * @verbatim
+ * # log(g^2) <gff(g^2)>       s1           s2            s3
+ * # ------------------------------------------------------------
+ * FF_GAUNT -4.00 1.113883E+00  1.348000E-02  1.047100E-02 -1.854972E-03
+ * FF_GAUNT -3.80 1.116983E+00  1.744580E-02  9.358014E-03  5.564917E-03
+ * FF_GAUNT -3.60 1.120891E+00  2.185680E-02  1.269696E-02  4.970250E-03
+ * FF_GAUNT -3.40 1.125810E+00  2.753201E-02  1.567911E-02  6.429140E-03
+* @endverbatim
+		  
  */
 		case 'g':
 		  nparam = sscanf (aline, "%*s %le %le %le %le %le", &gsqrdtemp, &gfftemp, &s1temp, &s2temp, &s3temp);	//split and assign the line
@@ -2596,8 +2668,17 @@ would like to have simple lines for macro-ions */
 
 		  break;
 /**
- * @section Unknown
- * @bug This case needs a description
+ * @section direct (collisional) ionization data from Dere 07.
+ * #Title: Ionization rate coefficients for elements H to Zn (Dere+, 2007)
+ * #Table  J_A_A_466_771_table29:
+ * #Title: Spline fits, multiplied by a factor of 10^6^, to the scaled ionization rate coefficients
+ * #Column Z       (I2)    [1/30] Nuclear charge   [ucd=phys.atmol.element]
+ * #Column Ion     (I2)    [1/30] Ion (spectroscopic notation)     [ucd=phys.atmol.ionStage]
+ * #Column Nspl    (I2)    [15/20] Number of splines       [ucd=meta.number]
+ * #Column I       (F9.3)  Ionization potential    [ucd=phys.energy;phys.atmol.ionization]
+ * #Column Tmin    (E10.3) Minimum temperature     [ucd=phys.temperature]
+ * #Column x1-X20      (F7.4)  Scaled temperature 1 (1)        [ucd=phys.temperature]
+ * #Column rho1 -rho20   (F8.4)  ? Scaled rate coefficient 1 (2) [ucd=arith.rate;phys.atmol.collisional]
  */
 		case 'd':
 		  nparam = sscanf (aline, "%*s %d %d %d %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le", &z, &istate, &nspline, &et, &tmin, &temp[0], &temp[1], &temp[2], &temp[3], &temp[4], &temp[5], &temp[6], &temp[7], &temp[8], &temp[9], &temp[10], &temp[11], &temp[12], &temp[13], &temp[14], &temp[15], &temp[16], &temp[17], &temp[18], &temp[19], &temp[20], &temp[21], &temp[22], &temp[23], &temp[24], &temp[25], &temp[26], &temp[27], &temp[28], &temp[29], &temp[30], &temp[31], &temp[32], &temp[33], &temp[34], &temp[35], &temp[36], &temp[37], &temp[38], &temp[39]);	//split and assign the line
@@ -2641,8 +2722,17 @@ would like to have simple lines for macro-ions */
 		  break;
 
 /**
-* @section Unknown
-* @bug This case needs a description
+ * @section Electron yield - goes with auger ionization rates
+ * #This is electron yield data from Kaastra & Mewe (1993) -1993A&AS...97..443K
+ * #It is processed from data downloaded from http://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=J/A+AS/97/443
+ * #Via the python script kaastra_2_py.py. Example lines of file below
+ * #
+ * @verbatim
+ * #Label z state n l IP mean_electron_energy Prob_of_1e Prob_of_2e Prob_of_3e ....
+ * Kelecyield 4 1 1 0 1.1500e+02 9.280e+01 0.000e+00 1.000e+04 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00
+ * Kelecyield 5 1 1 0 1.9200e+02 1.639e+02 6.000e+00 9.994e+03 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00
+ * @endverbatim
+		  
 */
 
 		case 'K':
@@ -2694,8 +2784,17 @@ would like to have simple lines for macro-ions */
 		    }
 		  break;
 /**
- * @section Unknown
- * @bug This case needs a description
+ * @section Fluorescent photon yield from inner shell ionization - not currently used but read in.
+ * #This is fluorescent yield data from Kaastra & Mewe (1993) -1993A&AS...97..443K
+ * #It is processed from data downloaded from http://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=J/A+AS/97/443
+ * #Via the python script kaastra_2_py.py.
+ * Data format below
+ * #
+ * @verbatim
+ * #Label z state n l photon_energy yield
+ * Kphotyield 5 1 1 0 1.837e+02 6.000e-04
+ * Kphotyield 5 1 1 0 1.690e+01 7.129e-01
+ * @endverbatim
  */
 		case 'F':
 		  nparam =
@@ -2749,7 +2848,18 @@ would like to have simple lines for macro-ions */
  *		  the file, so it is possible to make a very accurate match. It does mean quite a lot is read in
  *		  from a line, but most is thrown away. Currently the code below matches based on z, state, upper and
  *		  lower level numbers and oscillator strength
- *		@bug This needs a better description including what each of the entries is
+ * Each line is defned with a set of three lines
+ * first line is CSTREN - this contains line data to try and match 
+ * Second two lines are collision strength data from Burgess and Tully 1992A&A...254..436B
+ * These are generally 5 pojnt but up to 20 point spline fits of the T vs upsilon data. Typical lines are below
+ * @verbatim		  
+CSTREN Line  1  1 1215.673584  0.139000   2   2     0.000000    10.200121    0    1       1      3   7.500e-01   2.772e-01   1.478e+00    5    1   1.700e+00
+SCT   0.000e+00   2.500e-01   5.000e-01   7.500e-01   1.000e+00
+SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00		  
+ * @endverbatim
+		  
+		  
+		  
  *		  */
 
 		case 'C':
