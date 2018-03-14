@@ -58,7 +58,7 @@ def BalmerTest(root, plotit=True):
 	# read the emissivities
 	ratios = np.zeros(nlevels)
 	for i in range(nlevels):
-		ratios[i] = rd.read_pywind("{}.lev{}_emiss.dat".format(root,i+3), mode="1d")[2][1]
+		ratios[i] = read_pywind("{}.lev{}_emiss.dat".format(root,i+3), mode="1d")[2][1]
 
 
 
@@ -86,8 +86,8 @@ if __name__ == "__main__":
 			print (__doc__)
 		else:
 			root = sys.argv[1]
-			plotit=True
 
+			plotit=True
 			# only plot if matplotlib installed 
 			try:
 				import matplotlib.pyplot as plt 
@@ -95,9 +95,12 @@ if __name__ == "__main__":
 				print ("No matplotlib, so not making plot.")
 				plotit = False
 
+			# run the test 
 			ifail = BalmerTest(root, plotit=plotit)
+
+			# Tell the user whether the test is passed. 
 			print ("\nTest passed?:", ifail) 
-			if ifail == False:
+			if ifail == False: # possible this should be an exception instead?
 				sys.exit(-1)
 	else: 
 		print (__doc__)
