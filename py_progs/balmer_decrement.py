@@ -58,7 +58,7 @@ def BalmerTest(root, plotit=True):
 	# read the emissivities
 	ratios = np.zeros(nlevels)
 	for i in range(nlevels):
-		ratios[i] = read_pywind("{}.lev{}_emiss.dat".format(root,i+3), mode="1d")[2][1]
+		ratios[i] = rd.read_pywind("{}.lev{}_emiss.dat".format(root,i+3), mode="1d")[2][1]
 
 
 
