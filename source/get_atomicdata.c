@@ -274,8 +274,6 @@ get_atomic_data (masterfile)
     target_index;
   double yield, dumE_th, dumE_0, dumya, dumyw, dumSigma, dumP, arad, etarad;
   double adi, t0di, bdi, t1di;
-  double part_eps;		//Temporary storage for partition function epsilon data
-  int J, part_G, part_m;	//Temporary storage for partiton function J, G and m data
   double gstemp[BAD_GS_RR_PARAMS];	//Temporary storage for badnell resolved GS RR rates
   double temp[LINELENGTH];	//Temporary storage for data read in off a line this is enogh if every character on the
   char gsflag, drflag;		//Flags to say what part of data is being read in for DR and RR
@@ -416,8 +414,6 @@ get_atomic_data (masterfile)
       ion[n].nxphot = (-1);
       ion[n].lev_type = (-1);	// Initialise to indicate we don't know what types of configurations will be read
       ion[n].drflag = 0;	//Initialise to indicate as far as we know, there are no dielectronic recombination parameters associated with this ion.
-      ion[n].cpartflag = 0;	//Initialise to indicate this ion has cardona partition function data
-      ion[n].nxcpart = -1;
       ion[n].total_rrflag = 0;	//Initialise to say this ion has no Badnell total recombination data
       ion[n].nxtotalrr = -1;	//Initialise the pointer into the bad_t_rr structure.
       ion[n].bad_gs_rr_t_flag = 0;	//Initialise to say this ion has no Badnell ground state recombination data
@@ -430,7 +426,7 @@ get_atomic_data (masterfile)
 	ion[n].nxinner[i] = -1;	//Inintialise the inner shell pointer array
     }
 
-  nlevels = nxphot = nphot_total = ntop_phot = nauger = ndrecomb = ncpart = n_inner_tot = 0;	//Added counter for DR//
+  nlevels = nxphot = nphot_total = ntop_phot = nauger = ndrecomb = n_inner_tot = 0;	//Added counter for DR//
   n_elec_yield_tot = n_fluor_yield_tot = 0;	//Counters for electron and fluorescent photon yields
 
   /*This initializes the top_phot array - it is used for all ionization processes so some elements
@@ -522,14 +518,6 @@ get_atomic_data (masterfile)
 	}
     }
 
-/* The following lines initialise the cardona partition function  structure */
-  for (n = 0; n < NIONS; n++)
-    {
-      cpart[n].nion = -1;
-      cpart[n].part_eps = -1.0;	//Mean energy term
-      cpart[n].part_G = -1;	//Mean multiplicity term
-      cpart[n].part_m = -1;
-    }
 
 /* The following lines initialise the badnell total radiative recombination rate structure */
   for (n = 0; n < NIONS; n++)
@@ -707,8 +695,6 @@ structure does not have this property! */
 		choice = 'D';
 	      else if (strncmp (word, "DR_SHULL", 8) == 0)	/*its a schull type dielectronic recombination */
 		choice = 'S';
-	      else if (strncmp (word, "CPART", 5) == 0)	/* It's a cardona partition function file */
-		choice = 'P';
 	      else if (strncmp (word, "RR_BADNL", 8) == 0)	/*Its a badnell type line in the total RR file */
 		choice = 'T';
 	      else if (strncmp (word, "DI_DERE", 7) == 0)	/*Its a data file giving direct ionization rates from Dere (2007) */
@@ -2365,54 +2351,6 @@ would like to have simple lines for macro-ions */
 		    }
 		  break;
 
-
-
-/**
- *
- * @section Partition function
- *
- * Parametrised partition function data read in. At the moment, the data we are using comes from Cardona et al (2010). The file currently used(paert_cardona.dat) is saved from the internet, with a couple of changes. The word CPART is prepended to each line of data, and any comment lines are prepended with an #. This is the general format:
-*
-* @verbatim
-* CPART   1       0       150991.49       278     2
-* CPART   2       0       278302.52       556     4
-* CPART   2       1       604233.37       278     2
-* CPART   3       0       52534.09        124     2
-* CPART   3       1       839918.28       299     4
-* CPART   3       2       1359687.21      278     2
-* CPART   4       0       96994.39        318     7
-* CPART   4       1       183127.29       250     2
-* @endverbatim
-* the first number is the element number, then the ion, then the three parameters
-* */
-
-
-		case 'P':	/* Partition function data */
-		  if (sscanf
-		      (aline, "%*s %d %d %le %d %d ", &z, &J, &part_eps,
-		       &part_G, &part_m) != 5)
-		    {
-		      Error ("Something wrong with cardona partition function data\n", file, lineno);	/*Standard error state */
-		      Error ("Get_atomic_data: %s\n", aline);
-		      exit (0);
-		    }
-		  istate = J + 1;	//
-		  for (n = 0; n < nions; n++)
-		    {
-		      if (ion[n].z == z && ion[n].istate == istate)
-			{	/* Then there is a match */
-			  cpart[ncpart].nion = n;
-			  cpart[ncpart].part_eps = part_eps;	//Mean energy term
-			  cpart[ncpart].part_G = part_G;	//Mean multiplicity term
-			  cpart[ncpart].part_m = part_m;
-			  ion[n].cpartflag = 1;	//Set the flag to say we have data for this ion
-			  ion[n].nxcpart = ncpart;	//Set the pointer
-			  ncpart++;	//increment the pointer
-
-			}
-		    }
-		  break;
-
 /**
  * @section Recombination
  * !RR RATE COEFFICIENT FITS (C)20110412 N. R. BADNELL, DEPARTMENT OF PHYSICS, UNIVERSITY OF STRATHCLYDE, GLASGOW G4 0NG, UK.
@@ -2969,8 +2907,6 @@ would like to have simple lines for macro-ions */
        n_fluor_yield_tot);
 
   Log ("We have read in %3d Dielectronic recombination coefficients\n", ndrecomb);	//110818 nsh added a reporting line about dielectronic recombination coefficients
-  Log ("We have read in %3d Cardona partition functions coefficients\n",
-       ncpart);
   Log ("We have read in %3d Badnell totl Radiative rate coefficients\n",
        n_total_rr);
   Log
