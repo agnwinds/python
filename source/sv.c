@@ -31,7 +31,7 @@ int sv_zero_r_ndom;
  *  parameters as inputs.   Calculate the normalization factor needed to convert the global mass loss rate to the
  *  mass loss rate per unite area.
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -120,7 +120,7 @@ get_sv_wind_params (ndom)
  * @return     The amplitude of the velocity is returned
  * 	
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -226,7 +226,7 @@ sv_velocity (x, v, ndom)
  * @return     The density at x in gram/cm**3
  *
  *
- * @notes
+ * ###Notes###
  *
  * 52 -- If the disk is thick, our intention is that the stream lines
  * 	trace back to the disk, and have the same properties at that radius
@@ -308,7 +308,7 @@ sv_rho (ndom, x)
  *
  * @return     the radius of the footpoint of the stream line
  *
- * @notes
+ * ###Notes###
  *
  * In our models, which follows Shlossman and Vitello the wind is expected to arise in a cone.  
  * 	However, we have also defined r_o in a sensible way for any position regardless of whether it
@@ -394,7 +394,7 @@ double zero_p[3];
  * arises. This routine is just a setup routine, to make the position an external
  * variable so it can be accessed by sv_zero_r 
  *
- * @notes
+ * ###Notes###
  *
  * The routine stores the position in zero_p
  *
@@ -431,7 +431,7 @@ sv_zero_init (p)
  * between rho actual (sqrt x*x + y *y ) and rho_guessed
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -473,7 +473,7 @@ sv_zero_r (r)
  * 	Outside sv_rmax, it returns sv_thetamax
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -510,7 +510,7 @@ sv_theta_wind (ndom, r)
  * The SV model is defined in terms of a mass loss rate per unit area.  mdot is the total mass loss rate from the disk.  In order to connect the local and global rates one
  * must integrate the local mass loss rate and renormalize this.  
  *
- * @notes
+ * ###Notes###
  *
  * The integration is carried out in get get_sv_wind_params
  *

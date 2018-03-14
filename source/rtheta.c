@@ -39,7 +39,8 @@ History:
 
 
 double
-rtheta_ds_in_cell (p)
+rtheta_ds_in_cell (ndom,p)
+  int ndom;
      PhotPtr p;
 
 
@@ -47,9 +48,7 @@ rtheta_ds_in_cell (p)
 
   int n, ix, iz;
   double s, smax;
-  int ndom;
 
-  ndom = wmain[p->grid].ndom;
 
 
   /* XXX Note clear that next lines are necessary as they effectively recheck
@@ -57,7 +56,7 @@ rtheta_ds_in_cell (p)
 
   if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
     {
-      Error ("translate_in_wind: Photon not in grid when routine entered\n");
+      Error ("rtheta_ds_in_cell: Photon not in grid when routine entered\n");
       return (n);		/* Photon was not in wind */
     }
 

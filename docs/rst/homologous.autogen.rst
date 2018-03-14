@@ -23,18 +23,17 @@ the trend in density.
 **File:** homologous.c
 
 
-homologous.vbase
-================
-Multi-line description, must keep indentation.
+homologous.density_exponent
+===========================
+The power law exponent which defines the decline in density of
+a homologous flow as a function of radious.
 
 **Type:** Double
 
-**Unit:** cm
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** greater than 0 for a density that declines with radius
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  parameter_: A basic paameter needed to define a homlogous flow
 
 
 **File:** homologous.c
@@ -58,17 +57,18 @@ which the velocity at any radius is proportional to the radius
 **File:** homologous.c
 
 
-homologous.density_exponent
-===========================
-The power law exponent which defines the decline in density of
-a homologous flow as a function of radious.
+homologous.vbase
+================
+Multi-line description, must keep indentation.
 
 **Type:** Double
 
-**Value:** greater than 0 for a density that declines with radius
+**Unit:** cm
+
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: A basic paameter needed to define a homlogous flow
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** homologous.c

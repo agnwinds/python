@@ -45,7 +45,7 @@ double kn_lambda;               //kn_lambda required for the intgration
  * @return     Alwasys returns 0
  *
  *
- * @notes
+ * ###Notes###
  *
  * The routine first obtains wind_mdot and then the various parameters
  * required for the KWD model.   It then integrates the mass loss rate per unit area over
@@ -190,7 +190,7 @@ in units of WD radii */
  *
  *
  *
- * @notes
+ * ###Notes###
  *
  * For a contant poloidal velocity along a stream line, kn_alpha should
  * be set to 0
@@ -338,7 +338,7 @@ test programs.
  * @return     The density at x is returned in gram/cm**3
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -406,7 +406,7 @@ kn_rho (ndom, x)
  *
  * For KWD, the launch speed is the sound velocity
  *
- * @notes
+ * ###Notes###
  *
  * Prior to calling this routine the properties of the disk must have been entered
  *
@@ -449,7 +449,7 @@ kn_vzero (r)
  * has to be integrated over radius to normalize the local
  * mdot to the integrated value.
  *
- * @notes
+ * ###Notes###
  *
  * The integration is carrid out in  get_knigge_wind_params
  *
@@ -487,7 +487,7 @@ kn_wind_mdot_integral (r)
  * @return     The mass density at the base of the wind
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/

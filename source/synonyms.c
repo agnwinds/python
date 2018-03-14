@@ -163,7 +163,7 @@ int number_of_names = 79;
  *   the array new_names, below.  If it finds a match, the old_name is 
  *   returned in old_question.
  *
- * @notes
+ * ###Notes###
  *
  * To add another variable to the list, just record the new_name and the
  *   old_name in the arrays below, and increase the number of names by 1
@@ -248,9 +248,9 @@ check_synonyms (new_question, old_question)
     {
       if (strncmp (new_names[n], firstword, wordlength) == 0)
 	{
-	  Log
-	    ("Matched keyword %s in .pf file to %s in current python version\n",
-	     new_question, old_names[n]);
+//OLD	  Log
+//OLD	    ("Matched keyword %s in .pf file to %s in current python version\n",
+//OLD     new_question, old_names[n]);
 	  strcpy (old_question, old_names[n]);
 	  return (1);
 	}

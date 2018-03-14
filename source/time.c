@@ -36,7 +36,7 @@ double t_init = 0.0;
  * the differecne
  *
  *
- * @notes
+ * ###Notes###
  *
  * Uses gettimeofday
  *
@@ -75,7 +75,7 @@ timer ()
  *
  * This simply gets the data and time
  *
- * @notes
+ * ###Notes###
  *
  * Uses ctime.  ctime returns a string with a trailing \n, which we need
  * to strip off.  This accounts for the rather bizarre handling

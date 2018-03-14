@@ -10,7 +10,7 @@
  * to the distance from the central source.  In this case, the
  * density is taken to have the form of a power law.
  * 
- * @notes
+ * ###Notes###
  * Homlogous flows were added to allow comparisons with SN codes,
  * such as Tardis
  * 
@@ -47,7 +47,7 @@
  * @return     Always returns 0
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -135,7 +135,7 @@ get_homologous_params (ndom)
  * - Vmin:  			cl_v_zero;		velocity at base of wind 
  * - R:			cl_rmin;	       	the inner radius of the wind
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -184,7 +184,7 @@ homologous_velocity (ndom, x, v)
  * @return     The density at x is returned in gram/cm**3
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/

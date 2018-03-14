@@ -655,3 +655,68 @@ ds_to_closest_approach (x, p, impact_parameter)
 
   return (s);
 }
+
+
+
+
+
+
+/**************************************************************************
+                    Space Telescope Science Institute
+
+
+  Synopsis:  
+
+  calculate the distance a photon must travel to encouter a cylinder
+  that is centered on the z axis.
+
+  Description:	
+
+  Given a position and a direction the distance to a cylinder can
+  be solved as a simple quadratic equation
+
+  Arguments:  
+
+  rho is the size of the cylinder
+  p is a photon ptr
+
+
+  Returns:
+
+  The smallest positive distance to the cylinder. If the 
+  ray does not hit the cylinder a large postive number is
+  returned.
+
+  Notes:
+
+ 
+
+  History:
+11aug	ksl	Coding began     
+
+ ************************************************************************/
+
+
+
+double
+ds_to_cylinder (rho, p)
+     double rho;
+     struct photon *p;
+{
+  double a, b, c, root[2];
+  int i;
+
+  a = 1. - p->lmn[2] * p->lmn[2];
+  b = 2. * (p->lmn[0] * p->x[0] + p->lmn[1] * p->x[1]);
+  c = (p->x[0] * p->x[0] + p->x[1] * p->x[1]) - rho * rho;
+
+  i = quadratic (a, b, c, root);
+
+/* root[i] is the smallest positive root unless i is
+negative in which case either both roots were negative or 
+both roots were imaginary */
+
+  if (i >= 0)
+    return (root[i]);
+  return (VERY_BIG);
+}

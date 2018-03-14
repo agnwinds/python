@@ -76,7 +76,7 @@ History:
  * @return     The resulting dot product
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -106,7 +106,7 @@ dot (a, b)
  * @return     The leencth of the vector
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -138,7 +138,7 @@ length (a)
  * @return     Always returns 0 
  *
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -176,7 +176,7 @@ renorm (a, scalar)
  *
  * c = a x b 
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -207,7 +207,7 @@ cross (a, b, c)
  *
  * result = u + s * lmn
  *
- * @notes
+ * ###Notes###
  *
  * lmn must be a normalized direction vector.
  *
@@ -234,7 +234,7 @@ vmove (u, lmn, s, result)
  * @return     Always returns 0
  *
  * result = u - v
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -261,7 +261,7 @@ vsub (u, v, result)
  * @return     Always returns 0
  *
  * result = u + v
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -288,7 +288,7 @@ vadd (u, v, result)
  *
  *  vout = vin
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -317,7 +317,7 @@ stuff_v (vin, vout)
  * @return     The dot product of vin and vout
  *
  *
- * @notes
+ * ###Notes###
  *
  * The program returns the dot product of the 
  * resultant, so if for example the tensor is the velocity
@@ -356,7 +356,7 @@ dot_tensor_vec (tensor, vin, vout)
  * express v in cylindrical coordinates 
  * velocity at some position in a flow.
  *
- * @notes
+ * ###Notes###
  *
  **********************************************************/
 
@@ -404,7 +404,7 @@ project_from_xyz_cyl (a, b, result)
  * Star with a vector b in cylindrical coordinates, and a position a, expressed in
  * cartesian coordiantes, and express b in cartesian coordinates.
  *
- * @notes
+ * ###Notes###
  *
  * Note this is clearly different
  * from the situation where both a and b are in cylindrical coordinates.
@@ -450,7 +450,7 @@ project_from_cyl_xyz (a, b, result)
  *  y axis in the uv plane, and the the third axis in the perpendicular direction.  The
  *  system is right-handed 
  *
- * @notes
+ * ###Notes###
  *
  *
  **********************************************************/
@@ -515,7 +515,7 @@ create_basis (u, v, basis_new)
  * @return     0                   
  *
  *
- * @notes
+ * ###Notes###
  *
  * basis from contains the direction cosines to go from rotated to unrotated fram
  *
@@ -550,7 +550,7 @@ project_from (basis_from, v_in, v_out)
  * @return     Always returns 0
  *
  *
- * @notes
+ * ###Notes###
  *
  * basis_from contains the directon cosines to go from rotated to unrotated frame
  *
@@ -590,7 +590,7 @@ project_to (basis_from, v_in, v_out)
  * 
  *  projects a vector in one rotated frame to another rotated frame.  
  *
- * @notes
+ * ###Notes###
  *
  *  a[i][j] is always the project from a rotated frame to the unrotated (Master) 
  *  frame.  The projection in the other direction is just the transpose of this

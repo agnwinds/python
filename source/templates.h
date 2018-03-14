@@ -21,8 +21,9 @@ int main(int argc, char *argv[]);
 /* photon2d.c */
 int translate(WindPtr w, PhotPtr pp, double tau_scat, double *tau, int *nres);
 int translate_in_space(PhotPtr pp);
-double ds_to_wind(PhotPtr pp);
+double ds_to_wind(PhotPtr pp, int *ndom_current);
 int translate_in_wind(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nres);
+double ds_in_cell(int ndom, PhotPtr p);
 int walls(PhotPtr p, PhotPtr pold, double *normal);
 /* photon_gen.c */
 int define_phot(PhotPtr p, double f1, double f2, long nphot_tot, int ioniz_or_final, int iwind, int freq_sampling);
@@ -114,6 +115,7 @@ double ds_to_sphere2(double x[], double r, struct photon *p);
 int quadratic(double a, double b, double c, double r[]);
 double ds_to_plane(struct plane *pl, struct photon *p);
 double ds_to_closest_approach(double x[], struct photon *p, double *impact_parameter);
+double ds_to_cylinder(double rho, struct photon *p);
 /* resonate.c */
 double calculate_ds(WindPtr w, PhotPtr p, double tau_scat, double *tau, int *nres, double smax, int *istat);
 int select_continuum_scattering_process(double kap_cont, double kap_es, double kap_ff, PlasmaPtr xplasma);
@@ -215,7 +217,7 @@ double gdisk(double mass, double mdot, double rmin);
 double geff(double g0, double x);
 double vdisk(double x[], double v[]);
 double zdisk(double r);
-double ds_to_disk(struct photon *p, int miss_return);
+double ds_to_disk(struct photon *p, int allow_negative);
 void disk_deriv(double s, double *value, double *derivative);
 int qdisk_init(void);
 int qdisk_save(char *diskfile, double ztot);
@@ -272,6 +274,8 @@ int get_extra_diagnostics(void);
 int init_extra_diagnostics(void);
 int save_photon_stats(WindPtr one, PhotPtr p, double ds, double w_ave);
 int save_extract_photons(int n, PhotPtr p, PhotPtr pp, double *v);
+int save_photons(PhotPtr p, char comment[]);
+int track_scatters(PhotPtr p, int nplasma, char *comment);
 /* sv.c */
 int get_sv_wind_params(int ndom);
 double sv_velocity(double x[], double v[], int ndom);
@@ -288,10 +292,6 @@ int check_convergence(void);
 int one_shot(PlasmaPtr xplasma, int mode);
 double calc_te(PlasmaPtr xplasma, double tmin, double tmax);
 double zero_emit(double t);
-/* ispy.c */
-int ispy_init(char filename[], int icycle);
-int ispy_close(void);
-int ispy(PhotPtr p, int n);
 /* levels.c */
 int levels(PlasmaPtr xplasma, int mode);
 /* gradv.c */
@@ -361,7 +361,7 @@ int get_yso_wind_params(int ndom);
 double yso_velocity(int ndom, double x[], double v[]);
 double yso_rho(int ndom, double x[]);
 /* cylindrical.c */
-double cylind_ds_in_cell(PhotPtr p);
+double cylind_ds_in_cell(int ndom, PhotPtr p);
 int cylind_make_grid(int ndom, WindPtr w);
 int cylind_wind_complete(int ndom, WindPtr w);
 int cylind_volumes(int ndom, WindPtr w);
@@ -370,7 +370,7 @@ int cylind_get_random_location(int n, double x[]);
 int cylind_extend_density(int ndom, WindPtr w);
 int cylind_is_cell_in_wind(int n);
 /* rtheta.c */
-double rtheta_ds_in_cell(PhotPtr p);
+double rtheta_ds_in_cell(int ndom, PhotPtr p);
 int rtheta_make_grid(WindPtr w, int ndom);
 int rtheta_make_cones(int ndom, WindPtr w);
 int rtheta_wind_complete(int ndom, WindPtr w);
@@ -380,7 +380,7 @@ int rtheta_get_random_location(int n, double x[]);
 int rtheta_extend_density(int ndom, WindPtr w);
 int rtheta_is_cell_in_wind(int n);
 /* spherical.c */
-double spherical_ds_in_cell(PhotPtr p);
+double spherical_ds_in_cell(int ndom, PhotPtr p);
 int spherical_make_grid(WindPtr w, int ndom);
 int spherical_wind_complete(int ndom, WindPtr w);
 int spherical_volumes(int ndom, WindPtr w);
@@ -389,7 +389,7 @@ int spherical_get_random_location(int n, double x[]);
 int spherical_extend_density(int ndom, WindPtr w);
 int shell_make_grid(WindPtr w, int ndom);
 /* cylind_var.c */
-double cylvar_ds_in_cell(PhotPtr p);
+double cylvar_ds_in_cell(int ndom, PhotPtr p);
 int cylvar_make_grid(WindPtr w, int ndom);
 int cylvar_wind_complete(int ndom, WindPtr w);
 int cylvar_volumes(int ndom, WindPtr w);
@@ -436,8 +436,6 @@ double sigma_compton_partial(double f, double x);
 double alpha(double nu);
 double beta(double nu);
 double comp_cool_integrand(double nu);
-/* torus.c */
-double ds_to_cylinder(double rho, struct photon *p);
 /* zeta.c */
 double compute_zeta(double temp, int nion, int mode);
 /* dielectronic.c */

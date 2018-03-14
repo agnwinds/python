@@ -57,7 +57,8 @@ History:
 
 
 double
-cylvar_ds_in_cell (p)
+cylvar_ds_in_cell (ndom,p)
+  int ndom;
      PhotPtr p;
 
 
@@ -66,9 +67,7 @@ cylvar_ds_in_cell (p)
   int n, ix, iz, iroot;
   double a, b, c, root[2];
   double s, smax;
-  int ndom;
 
-  ndom = wmain[p->grid].ndom;
 
 
   // XXX  Next lines are just a check and one can probbly delette
@@ -76,7 +75,7 @@ cylvar_ds_in_cell (p)
   //
   if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
   {
-    Error ("translate_in_wind: Photon not in grid when routine entered\n");
+    Error ("cylvar_ds_in_cell: Photon not in grid when routine entered\n");
     return (n);                 /* Photon was not in wind */
   }
 

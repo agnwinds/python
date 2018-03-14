@@ -58,10 +58,18 @@ translate (w, pp, tau_scat, tau, nres)
   if (where_in_wind (pp->x, &ndomain) < 0)
     {
       istat = translate_in_space (pp);
+     if (modes.save_photons)
+	{
+	  save_photons (pp, "Space");
+	}
     }
   else if ((pp->grid = where_in_grid (ndomain, pp->x)) >= 0)
     {
       istat = translate_in_wind (w, pp, tau_scat, tau, nres);
+      if (modes.save_photons)
+	{
+	  save_photons (pp, "Wind");
+	}
     }
   else
     {
@@ -105,10 +113,81 @@ int
 translate_in_space (pp)
      PhotPtr pp;
 {
-  double ds, x;
-  int move_phot ();
+  double ds, delta, x, s, smax;
+  int ndom, ndom_next;
+  struct photon ptest;
+  int ifail;
 
-  ds = ds_to_wind (pp);
+  ds = ds_to_wind (pp, &ndom);
+
+  /* For IMPORT, although we have reached the edge of the wind, we may be in a cell that is
+   * not really in the wind, so we have to address this situtation here.  The first problem
+   * we have though is that we do not know hat domain we are in.*/
+
+  if (ndom >= 0 && zdom[ndom].wind_type == IMPORT)
+    {
+      stuff_phot (pp, &ptest);
+      move_phot (&ptest, ds + DFUDGE);	/* So now ptest is at the edge of the wind as defined by the boundary
+					   From here on we should be in the grid  */
+
+      /* XXX this is a test.  We check at the start whether we are in the grid */
+
+      if ((ifail = where_in_grid (ndom, ptest.x)) < 0)
+	{
+	  if (modes.save_photons)
+	    {
+	      save_photons (pp, "NotInGrid_translate_in_space1");
+	    }
+	}
+
+      /* XXX this ends the test */
+
+
+
+      /* XXX - Note there is a possiblity that we reach the other side of the grid without actually encoutering a
+       * wind cell
+       */
+
+
+      if (where_in_wind (ptest.x, &ndom_next) < 0)
+	{
+
+	  smax = ds_to_wind (&ptest, &ndom_next);	// This is the maximum distance can go in this domain
+
+	  s = 0;
+	  while (s < smax && where_in_wind (ptest.x, &ndom_next) < 0)
+	    {
+	      if ((delta = ds_in_cell (ndom, &ptest)) > 0)
+		{
+		  move_phot (&ptest, delta + DFUDGE);
+		  s += delta + DFUDGE;	// The distance the photon has moved 
+		}
+	      else
+		{
+		  if (modes.save_photons)
+		    {
+		      save_photons (pp, "NotInGrid_translate_in_space2");
+		    }
+          break;
+		}
+	    }
+
+	  /* So at this point we have either gotten out of the domain or we have found a cell that
+	   * is actually in the wind or we encoutered the error above
+	   */
+
+	  if (s > 0)
+	    {
+
+	      ds += s - DFUDGE;	/* We are going to add DFUDGE back later */
+	    }
+	}
+
+    }
+
+
+
+
 
 
 /* ?? The way in which a photon is identified as hitting the star seems
@@ -134,14 +213,17 @@ photon hit the star in its passage from pold to the current position */
 
 Synopsis:   
 
-	double ds_to_wind(pp)  calculates the photon pathlength to the edge of the wind.  
+	double ds_to_wind(pp,ndom)  calculates the photon pathlength to the edge of the wind.  
    
 Arguments:		
 	PhotPtr pp;.
+
 	
 Returns:
 
- 	The distance to the nearest boundary of the wind.  
+ 	The distance to the nearest boundary of the wind and the domain for which
+	the boudary applies.  
+	
   
 Description:
 
@@ -161,7 +243,7 @@ Description:
 	model.  However this routine does not require this to be the case, since it just
 	calculates where the edges are.
 	
-	 In any event, f you are inside the wind already ds_to_wind calculates the distance to the edge of the wind. 
+	In any event, if you are inside the wind already ds_to_wind calculates the distance to the edge of the wind. 
 	If you are outside, It will also be to the nearest edge.  	
 
 	The routine distinguishes between  two basic cases.  Either the photon is already in the wind
@@ -170,6 +252,11 @@ Description:
 	VERY_BIG) 
 Notes:
 	There is no guarantee that you will still be in the region defined by the grid.
+
+	1802 -ksl - At present this routine for imported models this routine only deals with
+	cylindrical models.  Additionally for imported models we skip all of the
+	uwd of wind_cones.  This is inefficient, and needs to be corrected for
+	rtheta and spherical models which can easily be handled using wind cones.
 
 History:
  	1997	ksl	Coded and debugged as part of Python effort. 
@@ -205,7 +292,7 @@ History:
 			added cylvar coord system.  Otherwise routine is
 			currently unchanged.  
 	15aug	ksl	Modifications for domains.  The asumption we make
-			is that the poton is not in any of the wind
+			is that the photon is not in any of the wind
 			regions at this point, and that we are looking
 			for the closest wind boundary.  
  
@@ -214,11 +301,12 @@ History:
 
 
 double
-ds_to_wind (pp)
+ds_to_wind (pp, ndom_current)
      PhotPtr pp;
+     int *ndom_current;
 {
-  struct photon ptest;
-  double ds, x;
+  struct photon ptest, qtest;
+  double ds, x, rho, z;
   int ndom;
 
   stuff_phot (pp, &ptest);
@@ -227,40 +315,132 @@ ds_to_wind (pp)
      all of the "computatational domain */
 
   ds = ds_to_sphere (geo.rmax, &ptest);
+  *ndom_current = (-1);
+  xxxbound = BOUND_NONE;
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
-      /* Check if the photon hits the inner or outer radius of the wind */
-      if ((x = ds_to_sphere (zdom[ndom].rmax, &ptest)) < ds)
-	ds = x;
+      if (zdom[ndom].wind_type != IMPORT)
+	{
+	  /* Check if the photon hits the inner or outer radius of the wind */
+	  if ((x = ds_to_sphere (zdom[ndom].rmax, &ptest)) < ds)
+	    {
+	      ds = x;
+	      *ndom_current = ndom;
+	      xxxbound = BOUND_RMIN;
+	    }
 
-      if ((x = ds_to_sphere (zdom[ndom].rmin, &ptest)) < ds)
-	ds = x;
+	  if ((x = ds_to_sphere (zdom[ndom].rmin, &ptest)) < ds)
+	    {
+	      ds = x;
+	      *ndom_current = ndom;
+	      xxxbound = BOUND_RMAX;
+	    }
 
-      /* Check if the photon hits the inner or outer windcone */
+	  /* Check if the photon hits the inner or outer windcone */
 
-      if ((x = ds_to_cone (&zdom[ndom].windcone[0], &ptest)) < ds)
-	ds = x;
-      if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
-	ds = x;
+	  if ((x = ds_to_cone (&zdom[ndom].windcone[0], &ptest)) < ds)
+	    {
+	      ds = x;
+	      *ndom_current = ndom;
+	      xxxbound = BOUND_INNER_CONE;
+	    }
+	  if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
+	    {
+	      ds = x;
+	      *ndom_current = ndom;
+	      xxxbound = BOUND_OUTER_CONE;
+	    }
+	}
 
-      if (zdom[ndom].wind_type == CORONA)
+      /* For this rectangular region we check whether we are in side the grid,
+       * which should effectively.  For * an imported region file we may not be 
+       * inside the wind, since some cells may be empty
+       */
+
+      else if (zdom[ndom].wind_type == CORONA
+	       || (zdom[ndom].wind_type == IMPORT
+		   && zdom[ndom].coord_type == CYLIND))
 	{
 
-	  /* As currently written ds_to_plane can give a negative number */
+
 	  x = ds_to_plane (&zdom[ndom].windplane[0], &ptest);
 	  if (x > 0 && x < ds)
 	    {
-	      ds = x;
+	      stuff_phot (pp, &qtest);
+	      //OLD move_phot (&qtest, ds + DFUDGE);
+	      move_phot (&qtest, x);
+	      rho = sqrt (qtest.x[0] * qtest.x[0] + qtest.x[1] * qtest.x[1]);
+	      if (zdom[ndom].wind_rho_min <= rho
+		  && rho <= zdom[ndom].wind_rho_min)
+		{
+
+		  ds = x;
+		  *ndom_current = ndom;
+		  xxxbound = BOUND_ZMIN;
+		}
 	    }
 	  x = ds_to_plane (&zdom[ndom].windplane[1], &ptest);
 	  if (x > 0 && x < ds)
 	    {
-	      ds = x;
+	      stuff_phot (pp, &qtest);
+	      //OLD move_phot (&qtest, ds + DFUDGE);
+	      move_phot (&qtest, x);
+	      rho = sqrt (qtest.x[0] * qtest.x[0] + qtest.x[1] * qtest.x[1]);
+	      if (zdom[ndom].wind_rho_min <= rho
+		  && rho <= zdom[ndom].wind_rho_min)
+		{
+
+		  ds = x;
+		  *ndom_current = ndom;
+		  xxxbound = BOUND_ZMAX;
+		}
 	    }
+
+	  x = ds_to_cylinder (zdom[ndom].wind_rho_min, &ptest);
+	  if (x > 0 && x < ds)
+	    {
+	      stuff_phot (pp, &qtest);
+	      //OLD move_phot (&qtest, ds + DFUDGE);
+	      move_phot (&qtest, x);
+	      z = fabs (qtest.x[2]);
+	      if (zdom[ndom].zmin <= z && z <= zdom[ndom].zmax)
+
+		{
+
+		  ds = x;
+		  *ndom_current = ndom;
+		  xxxbound = BOUND_INNER_RHO;
+		}
+	    }
+
+	  x = ds_to_cylinder (zdom[ndom].wind_rho_max, &ptest);
+	  if (x > 0 && x < ds)
+	    {
+	      stuff_phot (pp, &qtest);
+	      //OLD move_phot (&qtest, ds + DFUDGE);
+	      move_phot (&qtest, x);
+	      z = fabs (qtest.x[2]);
+	      if (zdom[ndom].zmin <= z && z <= zdom[ndom].zmax)
+		{
+
+		  ds = x;
+		  *ndom_current = ndom;
+		  xxxbound = BOUND_OUTER_RHO;
+		}
+	    }
+
+	}
+      else if (zdom[ndom].wind_type == IMPORT)
+	{
+	  Error
+	    ("ds_to_wind:Do not know how to deal with this coordinate type\n");
+	  exit (0);
+
 	}
 
     }
+
 
   return (ds);
 }
@@ -322,6 +502,7 @@ History:
  */
 
 int neglible_vol_count = 0;
+int translate_in_wind_failure = 0;
 
 int
 translate_in_wind (w, p, tau_scat, tau, nres)
@@ -337,7 +518,8 @@ translate_in_wind (w, p, tau_scat, tau, nres)
   double smax, s, ds_current;
   int istat;
   int nplasma;
-  int ndom;
+  int ndom, ndom_current;
+  int inwind;
 
   WindPtr one;
   PlasmaPtr xplasma;
@@ -348,7 +530,13 @@ return and record an error */
 
   if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
     {
-      Error ("translate_in_wind: Photon not in grid when routine entered\n");
+      if (translate_in_wind_failure < 1000)
+	{
+	  if (modes.save_photons)
+	    {
+	      save_photons (p, "NotInGrid_translate_in_wind");
+	    }
+	}
       return (n);		/* Photon was not in grid */
     }
 
@@ -358,53 +546,45 @@ return and record an error */
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
   ndom = one->ndom;
+  inwind=one->inwind;
+  
 
 
 
 
 /* Calculate the maximum distance the photon can travel in the cell */
 
-  if (zdom[ndom].coord_type == CYLIND)
+  if ((smax = ds_in_cell (ndom, p)) < 0)
     {
-      smax = cylind_ds_in_cell (p);	// maximum distance the photon can travel in a cell
+      return ((int) smax);
     }
-  else if (zdom[ndom].coord_type == RTHETA)
-    {
-      smax = rtheta_ds_in_cell (p);
-    }
-  else if (zdom[ndom].coord_type == SPHERICAL)
-    {
-      smax = spherical_ds_in_cell (p);
-    }
-  else if (zdom[ndom].coord_type == CYLVAR)
-    {
-      smax = cylvar_ds_in_cell (p);
-    }
-  else
-    {
-      Error
-	("translate_in_wind: Don't know how to find ds_in_cell in this coord system %d\n",
-	 zdom[ndom].coord_type);
-      exit (0);
-    }
+
+//OLD  //XXXX this is a kluge.  it should be set by DFUDGE somehow
+//OLD  if (smax<1e7) {
+//OLD      Error("translate_in_wind: photon not moving\n");
+//OLD      Error ("translate_in_wind: photon %d position: x %g y %g z %g\n",
+//OLD	     p->np, p->x[0], p->x[1], p->x[2]);
+//OLD      smax=1e7;
+//OLD  }
 
   if (one->inwind == W_PART_INWIND)
     {				// The cell is partially in the wind
-      s = ds_to_wind (p);	//smax is set to be the distance to edge of the wind
+      s = ds_to_wind (p, &ndom_current);	//smax is set to be the distance to edge of the wind
       if (s < smax)
 	smax = s;
       s = ds_to_disk (p, 0);	// ds_to_disk can return a negative distance
       if (s > 0 && s < smax)
 	smax = s;
     }
-  if (one->inwind == W_IGNORE)
+  else if (one->inwind == W_IGNORE)
     {
-      if ((neglible_vol_count % 100) == 0)
-	Error
-	  ("translate_in_wind: Photon is in cell %d with negligible volume, moving photon %.2e  Occurrences %d\n",
-	   n, smax, neglible_vol_count + 1);
+    //OLD  if ((neglible_vol_count % 100) == 0)
+	//OLDError
+	//OLD  ("translate_in_wind: Photon is in cell %d with negligible volume, moving photon %.2e  Occurrences %d\n",
+	//OLD    n, smax, neglible_vol_count + 1);
 
-      neglible_vol_count++;
+   //OLD    neglible_vol_count++;
+      smax += one->dfudge;
       move_phot (p, smax);
       return (p->istat);
 
@@ -415,8 +595,8 @@ return and record an error */
       Error
 	("translate_in_wind: Grid cell %d of photon is not in wind, moving photon %.2e\n",
 	 n, smax);
-      Error ("translate_in_wind: photon %d position: x %g y %g z %g\n", p->np,
-	     p->x[0], p->x[1], p->x[2]);
+      Error ("translate_in_wind: photon %d position: x %g y %g z %g\n",
+	     p->np, p->x[0], p->x[1], p->x[2]);
       move_phot (p, smax);
       return (p->istat);
 
@@ -501,6 +681,91 @@ The choice of SMAX_FRAC can affect execution time.*/
 
 }
 
+
+/***********************************************************
+                                       Space Telescope Science Institute
+
+ Synopsis:   
+	ds_in_cell calculates the distance photon can travel within the cell
+	that it is currently in.
+  
+ Arguments:		
+
+	
+ Returns:
+  
+Description:	
+
+Notes:
+
+
+History:
+	18feb	ksl	Split out of translate_in_wind as part of
+			effort to handle imporded models better
+ 
+**************************************************************/
+
+
+double
+ds_in_cell (ndom, p)
+     int ndom;
+     PhotPtr p;
+
+{
+
+  int n;
+  double smax;
+
+  WindPtr one;
+
+
+/* First verify that the photon is in the grid, and if not
+return and record an error */
+
+  if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
+    {
+     if (modes.save_photons)
+	{
+	  save_photons (p, "NotInGrid_ds_in_cell");
+	}
+     return(n);
+    }
+
+/* Assign the pointers for the cell containing the photon */
+
+  one = &wmain[n];		/* one is the grid cell where the photon is */
+
+
+/* Calculate the maximum distance the photon can travel in the cell */
+
+  if (zdom[ndom].coord_type == CYLIND)
+    {
+      smax = cylind_ds_in_cell (ndom, p);	// maximum distance the photon can travel in a cell
+    }
+  else if (zdom[ndom].coord_type == RTHETA)
+    {
+      smax = rtheta_ds_in_cell (ndom, p);
+    }
+  else if (zdom[ndom].coord_type == SPHERICAL)
+    {
+      smax = spherical_ds_in_cell (ndom, p);
+    }
+  else if (zdom[ndom].coord_type == CYLVAR)
+    {
+      smax = cylvar_ds_in_cell (ndom, p);
+    }
+  else
+    {
+      Error
+	("ds_in_cell: Don't know how to find ds_in_cell in this coord system %d\n",
+	 zdom[ndom].coord_type);
+      exit (0);
+    }
+
+  return (smax);
+}
+
+
 /***********************************************************
                                        Space Telescope Science Institute
 
@@ -553,8 +818,13 @@ History:
                 however note that frequencies are not changed.
 
 **************************************************************/
-double xnorth[] = { 0., 0., 1. };
-double xsouth[] = { 0., 0., -1. };
+double xnorth[] = {
+  0., 0., 1.
+};
+
+double xsouth[] = {
+  0., 0., -1.
+};
 
 int
 walls (p, pold, normal)

@@ -3676,7 +3676,7 @@ get_los_dvds (w, rootname, ochoice)
  * Given a cell and a line, calculates the probabiltiy that
  * that cell will emit in that line.
  *
- * @notes
+ * ###Notes###
  * 6/15 - Written by SWM
 ***********************************************************/
 int

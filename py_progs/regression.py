@@ -73,6 +73,7 @@ import subprocess
 import os
 import shutil
 import py_error
+import balmer_decrement 
 
 
 
@@ -284,7 +285,10 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
     #         shutil.copy(one,'../'+out_dir)
     #     py_hydro(version,outputfile)
 
-    py_hydro(version,pf_dir,outputfile)
+    py_hydro(version, pf_dir, outputfile)
+
+    # run a special macro-atom test -- XXX needs fixing 
+    # balmer_decrement.BalmerTest(glob(pf_dir+'/matom_balmer/balmer_test.pf', plotit=True)
 
 
     # Return to the place where the code was made from

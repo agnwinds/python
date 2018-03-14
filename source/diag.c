@@ -1,31 +1,60 @@
-/* diag.c contains a number of routines relating to extra diagnositics
-   and related file i/o. 
-   JM 1410 -- moved a few routines here relating to extra diagnostics
-*/
 
 /***********************************************************
-                                       Southampton
+                          Space Telescope Science Insittute
 
  Synopsis:
-	 open_diagfile sets up diagnostic files for use in python when the extra.diagnostics flag is 
+	 diag.c  consolidates an approach to providing extra diagnositcs 
+     for debugging python, Some of the diagnostics allow one to change
+     defaults in python while others allow traking of and contains initialization routines
+     that control which diagnosics are a
 
 Arguments:
 
-	PhotPtr p;	the photon
-	double ds	the distance the photon has travelled in the cell
 
 Returns:
 	Always returns 0.  .
  
 Description:	 
+
+    The first few functions are associated with gather information about what
+    one wants to track
+
+    The basic idea for the extra diagnositics routines are as follows:
+
+    There is one file to which all of the diagnostics are written.
+    Which diagnositica are written depends on how varaious of the modes
+    variables are set.
+
+    All of the various diagnostic routines should be line oriented and begin
+    with a unique identifier to allow easy parsing of the outputs.
+
+
+    To add a new diagnostic one should 
+    
+    (0) check that one of the existing diagnostics is insuffient for your needs 
+    (1) add a routine here that writes to the diagnostic file.  
+    (2) add a rdpar statement in get_extra_diagnostics
+    (3) Assure that your new routine has the appropriate doxygne description, 
+    (4) Add a yaml file for the new rdpare statemnt), and 
+    (5) call the routine with the approriate condidtions from wherever you wish.
+
+    As written, you must put your routine here.  This is done on purpose
+    so that we will not proliferate extra diagnostics around the various
+    subroutines.
+
+
 Notes:
+
+    The unified approach makes most sense when one wants similar information
+    spread out over several routines.  There will be places where one
+    wishes to print out detailed information within a certain routine.  
+    A current example is print_dvds_info, which is totally contained within 
+    gradv.c
 	
 
 History:
+    180102 - Adopted the approach above based, as discussed in #338
 
-	12jun 	nsh	72 Added lines to set up a file for outputting photons in given cells. The cells are read in from a file called diag_cells.dat. The existance of this file defined wether the diagnostic takes place.
-	13jul	jm	changed print statements to logs and made more descriptive
-	14oct   jm  changed to reflect move to 'advanced mode', see #111 and #120
 
 **************************************************************/
 
@@ -134,14 +163,14 @@ get_extra_diagnostics ()
 
   /* read the options. */
   rdint ("@Diag.save_cell_statistics", &modes.save_cell_stats);
-  rdint ("@Diag.ispymode", &modes.ispy);
   rdint ("@Diag.keep_ioncycle_windsaves", &modes.keep_ioncycle_windsaves);
   rdint ("@Diag.make_ioncycle_tables", &modes.make_tables);
+  rdint ("@Diag.save_photons", &modes.save_photons);
   rdint ("@Diag.save_extract_photons", &modes.save_extract_photons);
   rdint ("@Diag.print_dvds_info", &modes.print_dvds_info);
   rdint ("@Diag.track_resonant_scatters", &modes.track_resonant_scatters);
 
-  if (modes.save_cell_stats || modes.ispy
+  if (modes.save_cell_stats || modes.save_photons
       || modes.save_extract_photons | modes.track_resonant_scatters)
     {
       modes.extra_diagnostics = 1;
@@ -155,9 +184,32 @@ get_extra_diagnostics ()
 }
 
 
-/* the next few variables indicate whether certain diagnostic files have
- * already been opened
- */
+
+/***********************************************************
+				University of Southampton
+
+Synopsis:
+	init_extra_diagnositics opons a file for writing out 
+    extra diagnostics and in some cases reads a file
+    that specifies in which cells ones wants diagnostics
+
+Arguments:	
+
+    none	
+
+Returns:
+ 
+Description:	
+	
+Notes:
+    see #111 and #120
+
+    The diagnostic filename is hardwired
+
+History:
+    1410 -- JM -- Coded
+**************************************************************/
+
 
 int eplinit = 0;
 int pstatinit = 0;		/*To say if we have checked to see if we need to log photons */
@@ -170,9 +222,9 @@ init_extra_diagnostics ()
   FILE *cellfile;		/*File that may or may not exist, pointing to cells we want to write out photon stats for */
   int cell;			/*Temporary storage of cell to use */
 
-  if (eplinit == 0 && modes.save_extract_photons)
+  if (eplinit == 0 && modes.extra_diagnostics)
     {
-      epltptr = fopen ("python.ext", "w");
+      epltptr = fopen ("python.ext.txt", "w");
       eplinit = 1;
     }
 
@@ -273,17 +325,122 @@ save_photon_stats (one, p, ds, w_ave)
   return (0);
 }
 
+
+/***********************************************************
+                Space Telescope Science Insittue
+
+Synopsis: 
+	save_extract_photons saves informations about phtoons in
+    a particulare wavelength gange
+
+Arguments:	
+Returns:
+ 
+Description:
+
+Notes:
+   Moved here to save duplicating code between bf_estimators_increment and radiation.
+
+History:
+   1802 ksl Functionality moved from extract.c to consolidiate how extra
+            diagnostics were carried out.
+ 
+**************************************************************/
+
 int
-save_extract_photons (n,p, pp, v)
-    int n;
+save_extract_photons (n, p, pp, v)
+     int n;
      PhotPtr p, pp;
      double *v;
-     {
-       fprintf (epltptr,
-		"EXTRACT %3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %7.2f %7.2f \n",
-		n, p->x[0], p->x[1], p->x[2], v[0], v[1], v[2],
-		p->lmn[0], p->lmn[1], p->lmn[2], pp->lmn[0], pp->lmn[1],
-		pp->lmn[2], 2.997925e18 / p->freq, 2.997925e18 / pp->freq);
+{
+  fprintf (epltptr,
+	   "EXTRACT %3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %7.2f %7.2f \n",
+	   n, p->x[0], p->x[1], p->x[2], v[0], v[1], v[2],
+	   p->lmn[0], p->lmn[1], p->lmn[2], pp->lmn[0], pp->lmn[1],
+	   pp->lmn[2], 2.997925e18 / p->freq, 2.997925e18 / pp->freq);
 
-       return(0);
-     }
+  return (0);
+}
+
+/***********************************************************
+             Space Telescope Science Institute
+
+Synopsis: 
+	save_photon
+
+Arguments:	
+	p 			Photon pointer
+	comment 	An arbitrary comment
+
+Returns:
+ 
+Description:
+   This is a diagnostic that allows one to print out information about
+   a photon at any time.  It was written as part of the effort to
+   debub imports for the fu_ori project.
+
+Notes:
+
+History:
+   !802 ksl Coded
+ 
+**************************************************************/
+int save_photon_number=0;
+
+int
+save_photons (p, comment)
+     PhotPtr p;
+     char comment[];
+{
+    save_photon_number+=1;
+    if (save_photon_number>100000) 
+        return(0);
+
+fprintf (epltptr,
+"PHOTON %3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %3d %3d %s \n",
+p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
+p->lmn[2], p->grid, p->istat,comment);
+	   
+return(0);
+}
+
+
+
+/***********************************************************
+             Space Telescope Science Institute
+
+Synopsis: 
+	track_scatters
+
+Arguments:	
+	p 			Photon pointer
+    nplasma     the cell in which the photon resides
+	comment 	An arbitrary comment
+
+Returns:
+ 
+Description:
+   Another way to track photons. This one is focussed on what happens
+   during scatterin events.
+
+Notes:
+
+History:
+   1802 ksl Coded, to move this from transphot to better 
+            reflect our unified scheme for writing extra
+            diagnostics.
+ 
+**************************************************************/
+
+
+int 
+track_scatters(p,nplasma,comment)
+    PhotPtr p;
+    int nplasma;
+    char *comment;
+{
+
+ fprintf (epltptr, "Scattter %i %.2e %.2e %.2e  %i %e %e %i %s\n", p->np, p->x[0], p->x[1], p->x[2], p->grid,p->freq,p->w, nplasma,comment);
+
+ return(0);
+}

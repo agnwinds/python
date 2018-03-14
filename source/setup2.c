@@ -294,7 +294,6 @@ init_advanced_modes ()
   modes.iadvanced = 0;		// this is controlled by the -d flag, global mode control.
   modes.extra_diagnostics=0; //  when set, want to save some extra diagnostic info
   modes.save_cell_stats = 0;	// want to save photons statistics by cell
-  modes.ispy = 0;		// want to use the ispy function
   modes.keep_ioncycle_windsaves = 0;	// want to save wind file each ionization cycle
   modes.track_resonant_scatters = 0;	// want to track resonant scatters
   modes.save_extract_photons = 0;	// we want to save details on extracted photons

@@ -2,7 +2,7 @@
 '''
 	University of Southampton -- JM -- November 2014
 
-				py_wind_plot.py
+				py_plot_util.py
 
 Synopsis:
 	various utilities for processing Python outputs and plotting
@@ -13,8 +13,6 @@ Usage:
 Arguments:
 '''
 
-#import pylab as p 
-from pylab import *
 import py_read_output as r 
 import numpy as np 
 import os, sys
@@ -28,8 +26,6 @@ standard_cmds = np.array(["1", "n","t", "r","v","1","2","3","-1",\
 
 
 ion_standard_variables = ["ionh1", "ionhe1", "ionhe2", "ionc4", "ionc5"]
-
-ion_standard_variables
 
 def get_pywind_summary (fname, vers="", den_or_frac=0):
 
@@ -61,8 +57,8 @@ def run_py_wind (fname, vers="", cmds=None, ilv=None):
 	x = cmds
 	np.savetxt("_tempcmd.txt", x, fmt = "%s")
 
-	print ("RUNNING PY_WIND...")
-	print ("COMMANDS={}".format(cmds))
+	print ("Running py_wind...")
+	print ("commands = {}".format(cmds))
 	isys = os.system('py_wind'+vers+' '+fname+' < _tempcmd.txt > tempfile')
 	time.sleep(3)
 
@@ -269,8 +265,7 @@ def parse_rcparams(fname = "params.rc"):
 def get_flux_at_wavelength(lambda_array, flux_array, w):
 
 	'''
-    turn a table, one of whose colnames is value_string,
-    into a masked array based on values of inwind 
+    Find the flux at wavelength w
 
     Parameters
     ----------

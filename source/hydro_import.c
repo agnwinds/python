@@ -143,7 +143,7 @@ History:
  * things more usually read in from the command line.
  *
  *
- * @notes
+ * ###Notes###
  * 12/99	-	Written by KSL
 ***********************************************************/
 
@@ -209,7 +209,7 @@ get_hydro_wind_params (ndom)
  * interpolates if this doesnt quite line up.
  *
  *
- * @notes
+ * ###Notes###
  * 12/99	-	Written by KSL
 ***********************************************************/
 
@@ -412,7 +412,7 @@ History:
  * interpolates on rhe supplied grid to make the python grid.
  *
  *
- * @notes
+ * ###Notes###
  * 12/99	-	Written by KSL
  * 12/04	-	Mod to prevent divide by zero when r=0.0, and NaN when xxx>1.0;
  * 04/13	-	Heavily modified by NSH
@@ -520,7 +520,7 @@ hydro_velocity (ndom,x, v)
  * the case.
  *
  *
- * @notes
+ * ###Notes###
  * 12/99	-	Written by KSL
  * 12/04	-	Mod to prevent divide by zero when r=0.0, and NaN when xxx>1.0;
  * 04/13	-	Heavily modified by NSH
@@ -601,7 +601,7 @@ History:
  * the case.
  *
  *
- * @notes
+ * ###Notes###
  * 04/13	-	NSH - began work
  * 01/15	-	NSH - temperature is now computed by a helper script, also now common code removed to subroutines
 ***********************************************************/
@@ -692,7 +692,7 @@ History:
  * upon the coordinates that can be read in from a zeus 
  * (the hydrocode used by Proga for some simulations)            
  *
- * @notes
+ * ###Notes###
  * 06/13	-	NSH - Coded and debugged.
 ***********************************************************/
 
@@ -813,7 +813,7 @@ History:
  * so all we need to do is work out the volumes.
  *          
  *
- * @notes
+ * ###Notes###
  * 06/13	-	NSH - Coded and debugged.
  * 08/15	-	KSL - Updated for domains
 ***********************************************************/
@@ -916,7 +916,7 @@ History:
  * coor_frac should be able to do this in one go.
  *          
  *
- * @notes
+ * ###Notes###
  * 09/15	-	NSH - Coded and debugged.
  * 08/15	-	KSL - Updated for domains
 ***********************************************************/
@@ -1010,7 +1010,7 @@ History:
  * has to do with where values are centered.  
  *          
  *
- * @notes
+ * ###Notes###
  * 09/15	-	NSH - Coded and debugged.
 ***********************************************************/
 
@@ -1080,7 +1080,7 @@ History:
  * are taken from the windsave file
  *          
  *
- * @notes
+ * ###Notes###
  * 02/16	-	NSH - Coded and debugged.
 ***********************************************************/
 
