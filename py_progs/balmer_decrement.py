@@ -19,8 +19,9 @@ Requirements:
 '''
 import numpy as np 
 import py_plot_util as util 
-import py_read_output as rd 
 import sys, os
+import py_read_output as rd 
+
 
 # some global parameters to test against
 osterbrock_ratios = np.array([2.86,1.0,0.470,0.262,0.159,0.107,0.0748,0.0544])
