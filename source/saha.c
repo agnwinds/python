@@ -1021,7 +1021,6 @@ fix_concentrations (xplasma, mode)
 	    nelem++;
 	  /* Increment the ion density and the electron density */
 	  xplasma->density[nion] = nh * ele[nelem].abun * con_force[n].frac;
-	  printf ("ion %i z %i state %i abund %e\n",nion,ion[nion].z,ion[nion].istate,xplasma->density[nion]);
 	}
     }
 
