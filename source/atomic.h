@@ -151,10 +151,6 @@ typedef struct ions
                                    place - this is trapped in get_atomicdata.c */
   int nxdrecomb;                /* link into the drecomb structure to give the location of the dielectronic
                                    recombination coefficients for this ion */
-  int cpartflag;                /* Flag to say wether partition function data from the cardona2010
-                                   paper exists for this ion */
-  int nxcpart;                  /* index into the cpart structure to give the location of the cardona2010
-                                   data for this ion, if it exists */
   int total_rrflag;             /* Flag to say wether we have badnell style total radiative rate 
                                    coefficients for this ion */
   int nxtotalrr;                /* index into the bad_t_rr structure to give the location of the
@@ -498,17 +494,6 @@ Drecomb drecomb[NIONS];         //set up the actual structure
 
 double dr_coeffs[NIONS];        //this will be an array to temprarily store the volumetric dielectronic recombination rate coefficients for the current cell under interest. We may want to make this 2D and store the coefficients for a range of temperatures to interpolate.
 
-int ncpart;
-
-typedef struct cardona_partition
-{
-  int nion;                     //Internal cross refernce to the ion in the ion strcutrure that this refers to
-  double part_eps;              //Mean energy term
-  int part_G;                   //Mean multiplicity term
-  int part_m;                   //Structure factor
-} Cpart, *Cpartptr;
-
-Cpart cpart[NIONS];
 
 #define T_RR_PARAMS 6           //This is the number of parameters.
 #define RRTYPE_BADNELL	    0
