@@ -731,11 +731,13 @@ main (argc, argv)
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
-
-      if (zdom[ndom].coord_type == RTHETA && geo.run_type == SYSTEM_TYPE_PREVIOUS)	//We need to generate an rtheta wind cone if we are restarting
-	{
-	  rtheta_make_cones (ndom, wmain);
-	}
+      if (zdom[ndom].coord_type == RTHETA)
+	  {
+		  if (geo.run_type == RUN_TYPE_RESTART || geo.run_type == SYSTEM_TYPE_PREVIOUS)	//We need to generate an rtheta wind cone if we are restarting
+		  {
+		  	rtheta_make_cones (ndom, wmain);
+		  }
+	  }
     }
 
 
