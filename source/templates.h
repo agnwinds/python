@@ -420,7 +420,7 @@ int check_time(char *root);
 int auger_ionization(PlasmaPtr xplasma);
 /* agn.c */
 double agn_init(double r, double lum, double alpha, double freqmin, double freqmax, int ioniz_or_final, double *f);
-double emittance_pow(double freqmin, double freqmax, double lum, double alpha);
+double emittance_pow(double freqmin, double freqmax, double alpha);
 double emittance_bpow(double freqmin, double freqmax, double lum, double alpha);
 int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
 /* shell_wind.c */
@@ -558,7 +558,6 @@ int init_ionization(void);
 int calculate_ionization(int restart_stat);
 int make_spectra(int restart_stat);
 /* brem.c */
-double emittance_brem(double freqmin, double freqmax, double lum, double t);
 double integ_brem(double freq);
 double brem_d(double alpha);
 double get_rand_brem(double freqmin, double freqmax);
