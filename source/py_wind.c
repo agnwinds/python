@@ -6,19 +6,19 @@
 	py_wind is a program which can be used to display various parameters of a wind
 		as calculated by python.  This is the main routine.
 
-Arguments:		
+Arguments:
 
 	py_wind [-h] [-s] [-p parameter_file] [root]
 
 	where
 		-h 	prints out a short help file and exits (see help routine below)
-		-s	causes certain parameters in the windsave file to be printed out 
+		-s	causes certain parameters in the windsave file to be printed out
 			as individual ascii files after which the program exits
-	 	-d	In cases where a windsavefile was made for each ionization 
+	 	-d	In cases where a windsavefile was made for each ionization
 			cycle, this prints out ascii files for "certain" parameters
 			for each of the ionization cycles, as well as the ascii files
 			for the final ionization cycle (if windsave files for each
-			ionization cycle were not created then -s and -d are 
+			ionization cycle were not created then -s and -d are
 			equivalent).
 		-p parameter file
 			Instead of reading the choices from the command line read them
@@ -28,33 +28,33 @@ Arguments:
 
 
 Returns:
- 
-Description:	
-	
-	Py_wind simply reads and then displays portions of the wind file created by python.  
+
+Description:
+
+	Py_wind simply reads and then displays portions of the wind file created by python.
 	It can select various parameters from the wind and it can write them to files so that
-	the variables can be plotted. 
-       
+	the variables can be plotted.
+
 	The normal mode of running py_wind is to run it interactively.  As you run it interactively
 	the variables you select are displayed ont the screen.  The variables that you display
-	can also be written to files (depending on the answer to the question Make_files) 
+	can also be written to files (depending on the answer to the question Make_files)
 
-	The commands that were executed in the interactive will be stored in py_wind.pf (if you end 
-	with a "q", and not an EOF response to the choice question)  EOF terminates the program 
+	The commands that were executed in the interactive will be stored in py_wind.pf (if you end
+	with a "q", and not an EOF response to the choice question)  EOF terminates the program
 	at that point before the command file is written to py_wind.pf
-	
-	The py_wind.pf file is useful if you want to run the exact same set of commands on another 
-	windfile. You should rename py_wind.pf to something_else.pf and run py_wind on that 
+
+	The py_wind.pf file is useful if you want to run the exact same set of commands on another
+	windfile. You should rename py_wind.pf to something_else.pf and run py_wind on that
 	data set using the -p something_else.pf option
 
 	The command_line switches -d and -s are intended to produce a standard set of output files sufficient
-	for many purposes.  
+	for many purposes.
 
-	
+
 Notes:
 
-	The files that are produced  can contain either the original gridding which was used by python, in which 
-	case the file prefix will be "x.", or "z", in which case it will be regridded to a 
+	The files that are produced  can contain either the original gridding which was used by python, in which
+	case the file prefix will be "x.", or "z", in which case it will be regridded to a
 	linear array.  This option is intended so one can create a contour plot more easily.
 
 
@@ -69,14 +69,14 @@ History:
 			against one another
 	98oct	ksl	Modified abs_sum and lum_suim so that the various processes which go
 				into heating and cooling the plasma can be displayed individually.
-	99nov	ksl	Added an additional option to create a fixed set of output files. 
+	99nov	ksl	Added an additional option to create a fixed set of output files.
 	00mar	ksl	Updated main routine and write_array subroutine to allow one to choose
 			whether to relinearize the grid or to leave it in as it was in the windfile
 			Added output files for velocity.
 	01sep	ksl	Updated ion_summary so that either concentrations or ion fractions could be
 			examined.
-	02apr	ksl	Fixed so could read wind_save files with various sizes 
-	02jun	ksl	Fixed and so could read diagnostic outputs when one had printed out 
+	02apr	ksl	Fixed so could read wind_save files with various sizes
+	02jun	ksl	Fixed and so could read diagnostic outputs when one had printed out
 			results at each iteration of the ionization cycle
 	04nov	ksl     Made major modification to eliminate duplicative code, by adding new
 			task display.  Also introduced variable py_wind_project to switch
@@ -85,10 +85,10 @@ History:
 	04nov	ksl	Added a choice to explore what is the situation at a specific position
 			in the grid.  This was added to see how different coordinate systems
 			compared.
-	05jan	ksl	54f -- Modified			
-	05apr	ksl	56 -- Eliminated MDIM from the routines in this file.  
+	05jan	ksl	54f -- Modified
+	05apr	ksl	56 -- Eliminated MDIM from the routines in this file.
 			MDIM is isolated to routines like display.  Added swithches to
-			change choices regarding what, if anything is printed to a 
+			change choices regarding what, if anything is printed to a
 			file.
 	05jul	ksl	56d -- Moved all of the subroutines to a separate routine py_wind_sub.c
 			This is intended to facilitate the create of templates by Makefile.
@@ -112,7 +112,7 @@ History:
 	111227	ksl	Added the capability to read a new wind file while the program
 			is running
 	160217	ksl	Began modification of the py_wind to account for multiple domains.  The
-			philosophy is to assign a current_domain to examine, and to modify 
+			philosophy is to assign a current_domain to examine, and to modify
 			output file names to include the domain number.  The current domain
 			is transmitted through and external variable current_domain in python.h
 
@@ -165,7 +165,7 @@ main (argc, argv)
   int interactive;
 
 
-  // py_wind uses rdpar, but only in an interactive mode. As a result 
+  // py_wind uses rdpar, but only in an interactive mode. As a result
   // there is no associated .pf file
 
   interactive = 1;              /* Default to the standard operating mofe for py_wind */
@@ -234,7 +234,7 @@ main (argc, argv)
 
   /* Initialize other variables here */
 
-  py_wind_project = 1;          // The default is to try to project onto a yz plane 
+  py_wind_project = 1;          // The default is to try to project onto a yz plane
 
 /* Read in the wind file */
 
@@ -279,9 +279,9 @@ I did not change this now.  Though it could be done.  02apr ksl */
   }
   else if (interactive == -1)
   {
-    /* In cases, where the windsave file was written out for 
-     * eaach ionization cycle Write the sumary ascii files 
-     * for each of the ionization cycles as 
+    /* In cases, where the windsave file was written out for
+     * eaach ionization cycle Write the sumary ascii files
+     * for each of the ionization cycles as
      * as well as the final cycle */
     zoom (1);                   /* This affects the logfile */
     ochoice = 1;
@@ -323,7 +323,7 @@ I did not change this now.  Though it could be done.  02apr ksl */
 
 
 
-/* 111126 - Consolodated choice statements into a string that is an external variable 
+/* 111126 - Consolodated choice statements into a string that is an external variable
  * so that it can be printed out whenever necessary.
  */
 
@@ -365,16 +365,16 @@ I did not change this now.  Though it could be done.  02apr ksl */
 
 Synopsis:
 
-Arguments:		
+Arguments:
 
 
 
 Returns:
- 
-Description:	
+
+Description:
 
 
-		
+
 Notes:
 
 History:
@@ -414,9 +414,6 @@ one_choice (choice, root, ochoice)
     break;
   case 'B':
     plasma_cell (wmain, root, ochoice);
-    break;
-  case 'L':                    /*Line emission */
-    line_summary (wmain,root, ochoice);
     break;
   case 'C':                    /*the ratio cooling to heating */
     coolheat_summary (wmain, root, ochoice);
@@ -642,11 +639,6 @@ one_choice (choice, root, ochoice)
     exit (0);
     break;
 
-	case '#':
-		
-		grid_summary(wmain, root, ochoice);
-		break;
-
   }
 
   return (0);
@@ -664,16 +656,16 @@ Synopsis:
 	py_wind_help simply prints out help to the screen
 	and exits
 
-Arguments:		
+Arguments:
 
 
 
 Returns:
- 
-Description:	
+
+Description:
 
 
-		
+
 Notes:
 	Unfortunately unlike python the program language
 	c is not self documenting
