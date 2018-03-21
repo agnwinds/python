@@ -447,9 +447,6 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
   freqmin = f1;
   freqmax = f2;
 
-  /* XXX - this line had been deleted from agn.c in domain, but it still exists in dev, so adding it back
-   * as part of test of template_ionloop.pf.  It looks like agn.c in the two places have diverged */
-
   r = (1. + EPSILON) * r;       /* Generate photons just outside the photosphere unnecessary for the AGN perhaps? */
 
   /* Generate photons just outside the photosphere unnecessary for the AGN perhaps? */
@@ -523,8 +520,8 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
       /* Added by SS August 2004 for finite disk. */
       if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
       {
-        /* JM XXX -- is this bit right? it seems to be that zdisk should use the x coordinate rather than
-           magnitude of vector (r) - NSH looks like that has been fixed! but comment not removed.*/
+        /* JM XX -- is this bit right? it seems to be that zdisk should use the x coordinate rather than
+           magnitude of vector (r).*/
         while (fabs (p[i].x[2]) < zdisk (r)) //We just need to make sure that the photon isn't submerged in the extneded disk
         {
           randvec (p[i].x, r);
