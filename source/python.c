@@ -251,7 +251,6 @@ main (argc, argv)
 
   int my_rank;			// these two variables are used regardless of parallel mode
   int np_mpi;			// rank and number of processes, 0 and 1 in non-parallel
-  int ndom;
   
 
   

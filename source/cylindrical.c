@@ -1,4 +1,14 @@
 
+/***********************************************************/
+/** @file  cylindrical.c
+ * @Author ksl
+ * @date   March, 2018
+ *
+ * @brief  Generic routines for handling cylindrical coordinate
+ * systems
+ *
+ ***********************************************************/
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,35 +19,37 @@
 #include "python.h"
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-	cylin_ds_in_cell calculates the distance to the far
-        boundary of the cell in which the photon bundle resides.  	
-  
- Arguments:		
- 	p	Photon pointer
-
-	
- Returns:
- 	Distance to the far boundary of the cell in which the photon
-	currently resides.  Negative numbers (and zero) should be
-	regarded as errors.
-  
-Description:	
-
-Notes:
 
 
-History:
- 	04aug	ksl	This code was removed from translate_in_wind
-       			in python_52 as part of effort to isolate
-			dependencies on coordinate grids
- 
-**************************************************************/
 
-
+/**********************************************************/
+/** @name      cylind_ds_in_cell
+ * @brief      calculate the distance to the far
+ * boundary of the cell in which the photon bundle when dealing
+ * with a cylindrical domain
+ *
+ * @param [in out] int  ndom   The number of the domain of interest
+ * @param [in out] PhotPtr  p   Photon pointer
+ * @return     distance to the far boundary of the cell 
+ *
+ * Negative numbers (and zero) should be
+ * regarded as errors.
+ *
+ * @details
+ * 
+ * This routine solves the quadratic equaitons that allow one
+ * to determine the distance a photon can travel within a cylindrical
+ * cell before hitting the edge of the cell.  
+ *
+ *
+ * ### Notes ###
+ *
+ * The distance if the smallest positive root of the quadratic 
+ * equation.
+ *
+ *
+ *
+ **********************************************************/
 
 double
 cylind_ds_in_cell (ndom, p)
@@ -54,10 +66,8 @@ cylind_ds_in_cell (ndom, p)
 
 
 
-  /* XXX -- The next lines may be unnecessary; they effectively recheck whether
-   * the grid cell has changed, which should not be happening.  But we do have
-   * the issue that we need to be sure to check what cell we are in at the right
-   * time
+  /* The next lines should be unnecessary; they check/update 
+   * the cell number for the photon.   
    */
 
 
@@ -68,13 +78,12 @@ cylind_ds_in_cell (ndom, p)
 	  save_photons (p, "NotInGrid_cylind_ds_in_cell");
 	}
 
-//OLD    Error ("cylind_ds_in_cell: Photon not in grid when routine entered\n");
       return (n);		/* Photon was not in wind */
     }
 
   wind_n_to_ij (ndom, n, &ix, &iz);	/*Convert the index n to two dimensions */
 
-  smax = VERY_BIG;		//initialize smax to a large number
+  smax = VERY_BIG;		
 
   /* Set up the quadratic equations in the radial rho direction */
 
@@ -122,31 +131,27 @@ cylind_ds_in_cell (ndom, p)
 }
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-	cylind_make_grid defines the cells in a cylindrical grid              
-
-Arguments:		
-	WindPtr w;	The structure which defines the wind in Python
- 
-Returns:
- 
-Description:
 
 
-History:
-	04aug	ksl	52a -- moved from define wind, and modeified so
-			that calculates midpoints (xcen) as well as vertex
-			points for cell.
-	04dec	ksl	54a -- Minor mod to eliminate warnings when compiled
-			with 03
-	05jun	ksl	56d -- Fixed minor problem with linear grid for 
-			w[n].xcen[2]
 
-**************************************************************/
-
+/**********************************************************/
+/** @name      cylind_make_grid
+ * @brief      defines the cells in a cylindrical grid
+ *
+ * @param [in] int  ndom   The domain number of interest
+ * @param [in] WindPtr  w   The structure which defines the wind in Python
+ * @return   Always returns 0 
+ *
+ * @details
+ *
+ * Creates the boundaries of cells for a cylindrical domain.
+ *
+ * Depending on the value of log_linear for the domain, the
+ * cells are linearly or logarithmically spaced in x and z
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
 int
 cylind_make_grid (ndom, w)
@@ -167,12 +172,12 @@ cylind_make_grid (ndom, w)
     }
 
 
-  Log ("Making cylindrical grid %d\n", ndom);
-  Log ("XXX rmax %e for domain %d\n", one_dom->rmax, ndom);
+  Log ("cylind_make_grid: Making cylindrical grid %d\n", ndom);
+  Log ("cylind_make_grid: rmax %e for domain %d\n", one_dom->rmax, ndom);
 
   /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
-     to propagate.  This is the reason we divide by NDIM-2 here, rather than NDIM-1 */
+     to propagate.  */
 
 
   /* First calculate parameters that are to be calculated at the edge of the grid cell.  This is
@@ -182,7 +187,7 @@ cylind_make_grid (ndom, w)
       for (j = 0; j < one_dom->mdim; j++)
 	{
 	  wind_ij_to_n (ndom, i, j, &n);
-	  w[n].x[1] = w[n].xcen[1] = 0;	//The cells are all defined in the xz plane
+	  w[n].x[1] = w[n].xcen[1] = 0;	/*The cells are all defined in the xz plane */
 
 	  /*Define the grid points */
 	  if (one_dom->log_linear == 1)
@@ -262,15 +267,27 @@ cylind_make_grid (ndom, w)
 }
 
 
-/* This simple little routine just populates two one dimensional arrays that are used for interpolation.
- * It could be part of the routine above, except that the arrays are  not tranferred to py_wind in wind_save
- * It's left that way for now, but when one cleans up the program, it might be more sensible to do it the other
- * way
+
+
+/**********************************************************/
+/** @name      cylind_wind_complete
+ * @brief      Create arrays that are used for interpolating
+ * quantities, such as density and velocity 
  *
-History
-04aug	ksl	Routine was removed from windsave,  wind_complete is now just a driver.
-15sep	ksl	Update for domains
- */
+ * @param [in] int  ndom   The domain number of interest
+ * @param [in] WindPtr  w   The entire wind
+ * @return     Always returns 0
+ *
+ *
+ * @details
+ * This simple little routine just populates two one dimensional arrays that are used for interpolation.
+ *
+ * ### Notes ###
+ * 
+ * There is an analogous routine for each different type of coordinate
+ * system
+ *
+ **********************************************************/
 
 int
 cylind_wind_complete (ndom, w)
@@ -314,53 +331,37 @@ cylind_wind_complete (ndom, w)
   return (0);
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
- 	cylind_volume(w) calculates the wind volume of a cylindrical cell
-	allowing for the fact that some cells 
 
- Arguments:		
-	WindPtr w;    the entire wind
- Returns:
 
- Description:
-	This is a brute-froce integration of the volume 
-
-	ksl--04aug--some of the machinations regarding what to to at the 
-	edge of the wind seem bizarre, like a substiture for figuring out
-	what one actually should be doing.  However, volume > 0 is used
-	for making certain choices in the existing code, and so one does
-	need to be careful.  
-	
-		
- Notes:
-	Where_in grid does not tell you whether the photon is in the wind or not. 
- History:
- 	04aug	ksl	52a -- Moved from wind2d
-	04aug	ksl	52a -- Made the weighting of the integration accurate. In 
-			the process, I introduced variables to make the code
-			more readable.
-	05apr	ksl	55d -- Modified to include the determination of whether
-			a cell was completely in the wind or not.  This
-			functionality had been in define_wind.
-	06nov	ksl	58b: Minor modification to use W_ALL_INWIND, etc.
-			instead of hardcoded values
-	09mar	ksl	68c: Modified so that integration is only carried
-			out when the cell is partially in the wind as
-			evidenced by the fact that only some of the
-			corners of the cell are in the wind.  The intent
-			is to avoid wasting time
-	11aug	ksl	Add ability to determine the volume for different
-			components.  See python.h for explanation of
-			relatinship between PART and ALL
-	15sep	ksl	Modified to account for mulitple domains
- 
-**************************************************************/
+/**********************************************************/
+/** @name      cylind_volumes
+ * @brief      Calculates the wind volume for cells in a cylindrical domain
+ * 	allowing for the fact that some cells are not necessarily entirely in
+ * 	the wind
+ *
+ * @param [in out] int  ndom   The domain of interest
+ * @param [in out] WindPtr  w   the entire wind
+ * @return     Always returns 0
+ *
+ * @details
+ * This is a brute-froce integration of the volume 
+ * 
+ * 	ksl--04aug--some of the machinations regarding what to to at the 
+ * 	edge of the wind seem bizarre, like a substiture for figuring out
+ * 	what one actually should be doing.  However, volume > 0 is used
+ * 	for making certain choices in the existing code, and so one does
+ * 	need to be careful.
+ *
+ * ### Notes ###
+ * Where_in grid does not tell you whether the photon is in the wind or not.
+ *
+ * @bug  This routine has unresolved XXX questions that need to be
+ * resolved
+ *
+ **********************************************************/
 
 #define RESOLUTION   1000
-
 
 int
 cylind_volumes (ndom, w)
@@ -486,41 +487,32 @@ cylind_volumes (ndom, w)
   return (0);
 }
 
-/***********************************************************
-                     Space Telescope Science Institute
-
- Synopsis:
- 	cylind_where_in_grid locates the grid position of the vector,
-	when one is using cylindrical coordinates.   
-
- Arguments:		
-	double x[];
- Returns:
- 	where_in_grid normally  returns the element number in wmain associated with
- 		a position.  If the position is in the grid this will be a positive
- 		integer 
- 	x is inside the grid        -1
-	x is outside the grid       -2
- Description:	
-	
-		
- Notes:
-	Where_in grid does not tell you whether the x is in the wind or not. 
-
-	What one means by inside or outside the grid may well be different
-	for different coordinate systems.
 
 
-
- History:
-	04aug	ksl	52a -- Moved from where_in_wind as incorporated
-			multiple coordinate systems
-  	13sep	nsh	76b -- changed calls to fraction to take account
-			of multiple modes.
- 
-**************************************************************/
-
-
+/**********************************************************/
+/** @name      cylind_where_in_grid
+ * @brief      locates the grid position of the vector,
+ * 	when one is using cylindrical coordinates.
+ *
+ * @param [in] int  ndom   The domain number
+ * @param [in out] double  x[]   A postion
+ * @return     the element number in wmain associated with
+ *  a position.  If the position is in the grid this will be a positive
+ *  integer 
+ *
+ *  if the number is -1 then the position is inside (has rho less than
+ *  rhomin) the grid.  If -2, then it is outside the grid.
+ *
+ * @details
+ * ??? DESCRIPTION ???
+ *
+ * ### Notes ###
+ *
+ *  The routine does not tell you whether the x is in the wind or not,
+ *  just that it is in the region covered by the grid. 
+ * 
+ *
+ **********************************************************/
 
 int
 cylind_where_in_grid (ndom, x)
@@ -555,6 +547,7 @@ cylind_where_in_grid (ndom, x)
   fraction (z, one_dom->wind_z, one_dom->mdim, &j, &f, 0);
 
   /* At this point i,j are just outside the x position */
+
   wind_ij_to_n (ndom, i, j, &n);
 
   /* n is the array element in wmain */
@@ -563,37 +556,39 @@ cylind_where_in_grid (ndom, x)
 
 
 
-/***********************************************************
-                     Space Telescope Science Institute
 
- Synopsis:
- 	cylind_get_random_location
-
- Arguments:		
- 	int n -- Cell in which random poition is to be generated
-	int ndom - The component, e. g. the wind in which the
-		location is to be generated.
- Returns:
- 	double x -- the position
- Description:	
-	
-		
- Notes:
-
-
-
- History:
-	04aug	ksl	52a -- Moved from where_in_wind as incorporated
-			multiple coordinate systems
-	15sep	ksl	Modified so that the random location has to be
-			in the wind in a particular domain
- 
-**************************************************************/
+/**********************************************************/
+/** @name      cylind_get_random_location
+ * @brief      Generate a position at a random location within a specific
+ * cell of a domain with cylindrical coordinates
+ *
+ * @param [in] int  n  Cell in wmain in which random position is to be generated
+ * @param [out] double  x[] The random postion generated by the routine
+ * @return     double x -- the position
+ *
+ * @details
+ * The routine generates a position somewhere in the (wind portion of the) volumme defined
+ * by a cell.  
+ *
+ * ### Notes ###
+ *
+ * The routine generates a position within the entire volume, checks
+ * that this position is in the wind region of the domain, and if
+ * not, continues to generate new positons until it finds one
+ * in the wind region.
+ *
+ * Comment: The routine does not check to see whehter there
+ * if the cell contains any valid wind region, and if this
+ * is not the case, would end up in an infinite loop
+ *
+ *
+ *
+ **********************************************************/
 
 int
 cylind_get_random_location (n, x)
-     int n;			// Cell in which to create postion
-     double x[];		// Returned position
+     int n;			
+     double x[];		
 {
   int i, j;
   int inwind;
@@ -615,27 +610,24 @@ cylind_get_random_location (n, x)
   zmax = one_dom->wind_z[j + 1];
 
   /* Generate a position which is both in the cell and in the wind */
+
   inwind = W_NOT_INWIND;
   while (inwind != W_ALL_INWIND || ndomain != ndom)
   {
-//    r = sqrt (rmin * rmin + (rand () / (MAXRAND - 0.5)) * (rmax * rmax - rmin * rmin)); //DONE
     r = sqrt (rmin * rmin + random_number(0.0,1.0) * (rmax * rmax - rmin * rmin));
 
-// Generate the azimuthal location
-//    phi = 2. * PI * (rand () / MAXRAND);//DONE
+/* Generate the azimuthal location */
     phi = 2. * PI * random_number(0.0,1.0);
     x[0] = r * cos (phi);
     x[1] = r * sin (phi);
 
 
 
- //   x[2] = zmin + (zmax - zmin) * (rand () / (MAXRAND - 0.5)); //DONE
     x[2] = zmin + (zmax - zmin) * random_number(0.0,1.0);
     inwind = where_in_wind (x, &ndomain);       /* Some photons will not be in the wind
                                                    because the boundaries of the wind split the grid cell */
   }
 
-//  zz = rand () / MAXRAND - 0.5; //positions above are all at +z distances //DONE
   zz = random_number(-0.5,0.5); //positions above are all at +z distances
   if (zz < 0)
     x[2] *= -1;			/* The photon is in the bottom half of the wind */
@@ -644,33 +636,42 @@ cylind_get_random_location (n, x)
 }
 
 
-/***********************************************************
-                     Space Telescope Science Institute
-
- Synopsis:
- 	cylind_extend_density  extends the density to
-	regions just outside the wind regiions so that
-	extrapolations of density can be made there
-
- Arguments:		
- Returns:
- Description:	
-	
-		
- Notes:
 
 
-
- History:
-	05apr	ksl	56 -- Moved functionality from wind updates   
-	06may	ksl	57+ -- Changed to a mapping for plasma.  The
-				idea is that we always can use a mapping
-				to define what is in an adjascent cell.
-				This will need to be verified.
-	15aug	ksl	Modified for multipel domains
- 
-**************************************************************/
-
+/**********************************************************/
+/** @name      cylind_extend_density
+ * @brief      extends the density to
+ * 	regions just outside the wind regiions so that
+ * 	extrapolations of density can be made there
+ *
+ * @param [in] int  ndom   The domain of interest
+ * @param [in] WindPtr  w   The entire wind
+ * @return     Always returns 0
+ *
+ * @details
+ * 
+ * Densities and other parameters for wind cells are actually
+ * in the PlasmaPtrs and elements wmain with any valid wind region 
+ * have an associated element in the Plasma structure, which
+ * contains denisties, etc, for that cell.  For the purpose
+ * of extapolating quantities, like density to the very edge
+ * of the wind, this routine just assigns an element of the plasma
+ * to a wind cell that is just outside the domain.  This allows
+ * one to use the same linear interpolation routines throughout the
+ * wind.
+ *
+ * ### Notes ###
+ *
+ * In principle one can interpolate over any variable contained
+ * in the plasma pointer so that it is continuous within the wind.
+ * In practive, the main thing that is interpolated are densities
+ * of ions.
+ * 
+ * Comment: One must be careful never to do anything to the values
+ * in the Plasma element as a reult of anything happening outside
+ * the wind. 
+ *
+ **********************************************************/
 
 int
 cylind_extend_density (ndom, w)
@@ -683,19 +684,6 @@ cylind_extend_density (ndom, w)
   ndim = zdom[ndom].ndim;
   mdim = zdom[ndom].mdim;
 
-  /* Now we need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
-     In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
-     cell that is just inside (or outside) the wind. 
-
-     SS asked whether we should also be extending the wind for other parameters, especially ne.  At present we do not interpolate
-     on ne so this is not necessary.  If we did do that it would be required.
-
-     In cylindrical coordinates, the fast dimension is z; grid positions increase up in z, and then out in r.
-     In spperical polar coordinates, the fast dimension is theta; the grid increases in theta (measured)
-     from the z axis), and then in r.
-     In spherical coordinates, the grid increases as one might expect in r..
-     *
-   */
 
   for (i = 0; i < ndim - 1; i++)
     {
@@ -704,12 +692,13 @@ cylind_extend_density (ndom, w)
 	  wind_ij_to_n (ndom, i, j, &n);
 	  if (w[n].vol == 0)
 
-	    {			//Then this grid point is not in the wind 
+	    {/*Then this grid point is not in the wind  */
 
 	      wind_ij_to_n (ndom, i + 1, j, &m);
 	      if (w[m].vol > 0)
-		{		//Then the windcell in the +x direction is in the wind and
-		  // we can copy the densities to the grid cell n
+		{		/*Then the windcell in the +x direction is in the wind and
+		  we associate that plasma element with this grid cell
+          */
 		  w[n].nplasma = w[m].nplasma;
 
 		}
@@ -717,8 +706,9 @@ cylind_extend_density (ndom, w)
 		{
 		  wind_ij_to_n (ndom, i - 1, j, &m);
 		  if (w[m].vol > 0)
-		    {		//Then the grid cell in the -x direction is in the wind and
-		      // we can copy the densities to the grid cell n
+		    {		/*Then the grid cell in the -x direction is in the wind and
+		      we associate that plasma element with this grid cell
+              */
 		      w[n].nplasma = w[m].nplasma;
 
 		    }
@@ -735,10 +725,6 @@ cylind_extend_density (ndom, w)
 
 cylind_is_cell_in_wind (n)
 
-This routine performs is a robust check of whether a cell is in the wind or not.  
-It was created to speed up the evaluation of the volumes for the wind.  It
-checks each of the four boundaries of the wind to see whether any portions
-of these are in the wind
 
 Note that it simply calls where_in_wind multiple times.
 
@@ -752,6 +738,35 @@ History:
 	
 
 */
+
+
+/**********************************************************/
+/** @name      cylind_is_cell_in_wind
+ * @brief      Check whether this cell is in the wind or not
+ *
+ * @param [in] int  n   The number of an element in the wind structure
+ * @return     Various intergers depending on whether the cell is W_ALL_INWIND,
+ * W_NOT_INWIND, W_PART_INWIND, etc.
+ *
+ * @details
+ * 
+ * This routine performs is a robust check of whether a cell is in the wind or not,
+ * by looking at the four corners of the cell as defined in wmain.  
+ * It was created to speed up the evaluation of the volumes for the wind.  It
+ * checks each of the four boundaries of the wind to see whether any portions
+ * of these are in the wind
+ *
+ * ### Notes ###
+ * 
+ * This rooutine gets the domain number from wmain[n].ndom, and uses the 
+ * wind_x and wind_y postions to get the coreners, and then 
+ * calls where in wind multiple times.
+ * 
+ * Comment: As with the case of a number of other routines the logic
+ * of this is quite convoluted, reflecting the fact that much 
+ * of the code was written prior to the introduction of domains
+ *
+ **********************************************************/
 
 int
 cylind_is_cell_in_wind (n)
@@ -797,7 +812,7 @@ cylind_is_cell_in_wind (n)
   dr = (rmax - rmin) / RESOLUTION;
   dz = (zmax - zmin) / RESOLUTION;
 
-  // Check inner and outer boundary in the z direction
+  /* Check inner and outer boundary in the z direction */
 
   x[1] = 0;
 
@@ -821,7 +836,7 @@ cylind_is_cell_in_wind (n)
     }
 
 
-  // Check inner and outer boundary in the z direction
+  /* Check inner and outer boundary in the z direction */
 
   for (r = rmin + dr / 2; r < rmax; r += dr)
     {
