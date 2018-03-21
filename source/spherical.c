@@ -187,9 +187,9 @@ spherical_make_grid (w, ndom)
 
 
 int
-spherical_wind_complete (ndom, w)
+spherical_wind_complete (ndom,w)
      int ndom;
-     WindPtr w;
+	WindPtr w;    
 {
   int i;
   int ndim, nstart;
