@@ -97,51 +97,6 @@ rtheta_ds_in_cell (ndom,p)
 
 
 
-//OLD /***********************************************************
-//OLD                                        Space Telescope Science Institute
-//OLD 
-//OLD  Synopsis:
-//OLD 	rtheta_make_grid defines the cells in a rtheta grid              
-//OLD 
-//OLD Arguments:		
-//OLD 	WindPtr w;	The structure which defines the wind in Python
-//OLD  
-//OLD Returns:
-//OLD  
-//OLD Description:
-//OLD 
-//OLD 	In the implementation of cylindrical coordinates, we have defined
-//OLD 	the wind so that as (n = i * MDIM + j) is incremented, the positions 
-//OLD 	move in the z direction and then in the x direction, so that that 
-//OLD 	[i][j] correspond to the x, z position of the cell.
-//OLD 
-//OLD 	For spherical polar, components we have defined the grid so that
-//OLD 	i corresponds to a radial distance, and j corresponds to an angle,
-//OLD 	e.g r theta.  increasing i corresponds to increasing distance,
-//OLD 	and increasing theta corresponds to increasing angle measured from
-//OLD 	the z axis. (This it should be fairly easy to implement true 
-//OLD 	spherical coordinates in the future.
-//OLD 
-//OLD 	For now, we will assume that logarithmic intervals only affect the
-//OLD 	radial direction and do not affect theta.  It is not obvious that
-//OLD 	is what you want, and it is also not obvious that when you have 
-//OLD 	a vertically extended disk that theta should go over the full 90
-//OLD 	degrees.
-//OLD 
-//OLD 
-//OLD History:
-//OLD 	04aug	ksl	52a -- Coded and debugged.
-//OLD 	04dec	ksl	54a -- Made minor change to eliminate warning
-//OLD 			when compiled with 03
-//OLD 	13jun	ksl	Modify the rtheta grid so that no cells extend
-//OLD 			into the -z plane.  There were problems associted
-//OLD 			with the fact that somoe of the dummy cells
-//OLD 			extended into the -z plane. This change amoutns to changing 
-//OLD 			the way the boundary contintion are set up.
-//OLD 
-//OLD **************************************************************/
-
-
 
 /**********************************************************/
 /** @name      rtheta_make_grid
@@ -272,10 +227,6 @@ rtheta_make_grid (w, ndom)
 }
 
 
-
-
-
-
 /**********************************************************/
 /** @name      rtheta_make_cones
  * @brief      defines the wind cones that are needed to calculate ds in a cell
@@ -291,7 +242,7 @@ rtheta_make_grid (w, ndom)
  *
  * ### Notes ###
  * 
- * @bug It is not entirely clear why we don't use fixed arrays for the cones
+ * Comment:  It is not entirely clear why we don't use fixed arrays for the cones
  * in the domains. The data volume is small, and this would simplify windsave
  * and windread.
  *
@@ -337,15 +288,21 @@ rtheta_make_cones (ndom, w)
 /** @name      rtheta_wind_complete
  * @brief      Complete the creation of an rtheta wind comain by populating certain arrays used for interpolation
  *
- * @param [in out] int  ndom   The domain containing this wind component
- * @param [in out] WindPtr  w   The entire wind
+ * @param [in] int  ndom   The domain containing this wind component
+ * @param [in] WindPtr  w   The entire wind
  * @return     Always returns 0
  *
  * @details
- * ??? DESCRIPTION ???
  *
  * ### Notes ###
- * @bug It is not clear why make_wind_cones is not called from this routine
+ *
+ * This routine sets up a few arrays in domains that have rtheta
+ * coordiantes.  These arrays are used to determine where in 
+ * a cell one is, and how far it is to the edge of the cell
+ * for photon bundles.  
+ *
+ * The routine is called when the domain is set up, and called
+ * again whenever the windsave file is read in.  
  *
  **********************************************************/
 
@@ -380,7 +337,7 @@ rtheta_wind_complete (ndom, w)
     zdom[ndom].wind_midz[j] = w[nstart + j].thetacen;
 
   /* Add something plausible for the edges */
-  /* ?? It is bizarre that one needs to do anything like this ???. wind should be defined to include NDIM -1 */
+
   zdom[ndom].wind_midx[ndim - 1] =
     2. * zdom[ndom].wind_x[ndim - 1] - zdom[ndom].wind_midx[ndim - 2];
   zdom[ndom].wind_midz[mdim - 1] =
