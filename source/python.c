@@ -728,7 +728,7 @@ main (argc, argv)
 
      XXX This looks wrong; we read all of this information in I think
    */
-
+  /*
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
       if (zdom[ndom].coord_type == RTHETA)
@@ -739,7 +739,7 @@ main (argc, argv)
 		  }
 	  }
     }
-
+*/
 
    /* initialize the random number generator */
    /* By default, the random number generator start with fixed seeds (differnt

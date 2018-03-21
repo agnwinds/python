@@ -357,6 +357,13 @@ rtheta_wind_complete (ndom, w)
     2. * zdom[ndom].wind_x[ndim - 1] - zdom[ndom].wind_midx[ndim - 2];
   zdom[ndom].wind_midz[mdim - 1] =
     2. * zdom[ndom].wind_z[mdim - 1] - zdom[ndom].wind_midz[mdim - 2];
+  
+  
+  /* Finally, in order to complete the r-theta wind we need to make a set of wind-cones. This is 
+  to allow use to use the cones routines to work out if photonds leave a cell in the theta direction */
+
+  	rtheta_make_cones (ndom, w);
+  
 
   return (0);
 }
