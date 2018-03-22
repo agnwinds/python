@@ -249,7 +249,7 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
   int idiag;
   double delta;
 
-  xstep = (xmax - xmin) / pdfsteps;
+  xstep = (xmax - xmin) / pdfsteps;  //The size of the step in the x variable
   idiag = 0;
 
   /* First, allocate an array for internal use, if that
@@ -272,18 +272,20 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
     }
 
 
-  for (n = 0; n < pdfsteps; n++)
+  for (n = 0; n < pdfsteps; n++) //Loop over the required number of steps in the cdf
     {
-      x = xmin + (n + 0.5) * xstep;
-      if ((z = (*func) (x)) < 0 || z > VERY_BIG || sane_check (z))
+      x = xmin + (n + 0.5) * xstep;  /*The next value of x - it is midway between points on the required cdf because we 
+		  will be adding the new z value onto the cumlative total, we assume the function is best approximated over the
+		  whole rage from x[n] to x[n+1] by using the value of the function between the two */
+      if ((z = (*func) (x)) < 0 || z > VERY_BIG || sane_check (z))  //check the function return is sensible
 	{
 	  Error ("pdf_gen_from_func: probability density %g < 0 at %g\n", z,
 		 x);
 	}
-      if (n == 0)
+      if (n == 0) //We are at the start of the cdf
 	pdf_array[0] = z;
       else
-	pdf_array[n] = pdf_array[n - 1] + z;
+	pdf_array[n] = pdf_array[n - 1] + z;  //increment the cdf by the value of the function at the modpoint between points
       /* Check to see if the integral seems too large */
       if (pdf_array[n] > 1.0e100 && idiag == 0)
 	{
@@ -301,7 +303,7 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
   /* Thus, pdf_array is proportional to  the definite integral from xmin to x 
      (where x=xmin+(n+1)*xstep) */
 
-  sum = pdf_array[pdfsteps - 1];
+  sum = pdf_array[pdfsteps - 1]; //The total integral is just the last point
 
   if (sane_check (sum))
     {
@@ -318,7 +320,9 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
 	  x = pdf_array[n] - pdf_array[n - 1];
 	  if (x > delta)
 	    {
-	      delta = x;
+	      delta = x; /*This is the difference in cumlative probability between 
+		  adjacent points - it is a measure of the discretisation. If it is too 
+		large then we may want to use a finer grid to get a smoother cdf. */
 	    }
 	}
 
@@ -327,17 +331,6 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
 
   return (delta);
 }
-
-
-
-/*  
-cdf_gen_from_array
-
-The one dimensional arrays containg the places x where the probability
-density y has been evaluated.  The array need not be uniformly spaced.  
-The assumption made is that y is the probability at the point x and that 
-one can linearly interpolate between points 
-
 
 
 #define PDF_ARRAY  28000
@@ -594,10 +587,6 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
       exit (0);
     }
 	 
-	
-	
-
-	 
 
   if (xmax < x[0] || xmin > x[n_xy - 1] || allzero == 0)
     {				// These are special (probably nonsensical) cases
@@ -622,17 +611,16 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
       // The following lines perform an integration via the trapezoid rule - each point contains
       // the integral up to that poont, so it starts at 0 and ends at the total
 
-      cdf_n = (nmax - nmin);
-
-      cdf->x[0] = x[nmin];
-      cdf->y[0] = 0.0;
-      for (n = 1; n < cdf_n + 1; n++)
+      cdf_n = (nmax - nmin); //The number of points in the integration
+      cdf->x[0] = x[nmin];  //The initial x - point in the cdf 
+      cdf->y[0] = 0.0;      //The initial y value of the cdf - must be zero at the start
+      for (n = 1; n < cdf_n + 1; n++)  //Loop over all the CDF
 	{
-	  cdf->x[n] = x[nmin + n];
+	  cdf->x[n] = x[nmin + n];  //The next point in the cdf is just the next point in the input array - no regridding
 	  cdf->y[n] =
 	    cdf->y[n - 1] + 0.5 * (y[nmin + n - 1] +
 				   y[nmin + n]) * (x[nmin + n] - x[nmin + n -
-								   1]);
+								   1]);   //Just the average value of y over the interval.
 	}
 
       cdf->y[cdf_n]=cdf->y[n-1]+y[nmin+cdf_n]*(x[nmax]-x[nmax-1]);  //This interpolates to get the last point in the CDF
@@ -640,7 +628,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
       // sum = cdf->y[cdf_n - 1];	//the total integrated pdf
       sum = cdf->y[cdf_n];	//the total integrated pdf
       // for (n = 1; n < cdf_n; n++)
-      for (n = 1; n <= cdf_n; n++)
+      for (n = 1; n <= cdf_n; n++) //Loop over the CDF and divide each poont by the max (final) point
 	{
 	  cdf->y[n] /= sum;	//this is now a cdf - we go from 0 to 1.
 	}
@@ -670,7 +658,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
       exit (0);
     }
 
-  cdf_to_file(cdf,"foo.diag");
+  cdf_to_file(cdf,"foo.diag"); //output the CDF to a file
   return (echeck);
 
 }
@@ -701,10 +689,10 @@ cdf_get_rand (cdf)
   int xquadratic ();
 /* Find the interval within which x lies */
   r=random_number(0.0,1.0); //This *exludes* 0.0 and 1.0.
-  i = gsl_interp_bsearch (cdf->y, r, 0, cdf->ncdf);
+  i = gsl_interp_bsearch (cdf->y, r, 0, cdf->ncdf); //find the interval in the CDF where this number lies
 
-/* Now calculate a place within that interval */
-  q=random_number(0.0,1.0);
+/* Now calculate a place within that interval - we use the gradient of the CDF to get a more accurate value between the CDF points */
+  q=random_number(0.0,1.0);  
   a = 0.5 * (cdf->d[i + 1] - cdf->d[i]);
   b = cdf->d[i];
   c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
@@ -1124,7 +1112,7 @@ cdf_check (cdf)
  * 	to a uniform distibution between the points
  * 	where the gradient has been calculated.
  *                                             
- * 	XXX NSH - the way that the ends are dealt with is bot
+ * 	XXX NSH - the way that the ends are dealt with is not
  * 		great - we should really try to come up with an
  * 		extrapolation rather than just fill in the same gradients
  * 		for the second and penultimate cells into the 
