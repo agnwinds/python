@@ -1176,31 +1176,14 @@ SpecPtr xxspec;
 int py_wind_min, py_wind_max, py_wind_delta, py_wind_project;
 double *aaa;                    // A pointer to an array used by py_wind
 
-/* This is the structure needed for a cumulative distribution function. The CDFs are
+/* This is the structure for storing cumulative distribution functions. The CDFs are
 generated from a function which is usually only proportional to the probability density
-function.  It is sometimes useful, e.g. in calculating the reweighting function to
-have access to the proper normalization.  Since the one needs the normalization to
-properly create the CDF, this was added for python_43.2  */
+function or from an array.  It is sometimes useful, e.g. in calculating the reweighting function to
+have access to the proper normalization.  
 
-//#define NPDF 200
 
-//typedef struct Pdf
-//{
-//  double x[NPDF + 1];           /* Positions for which the probability density
-//                                   is calculated */
-//  double y[NPDF + 1];           /* The value of the CDF at x */
-//  double d[NPDF + 1];           /* 57i -- the rate of change of the probability
-//                                   density at x */
-//  double limit1, limit2;        /* Limits (running from 0 to 1) that define a portion
-//                                   of the CDF to sample */
-//  double x1, x2;                /* limits if they exist on what is returned */
-//  double norm;                  //The scaling factor which would renormalize the pdf
-//  int npdf;                     /* Size of this pdf */
-//}
-// *PdfPtr, pdf_dummy;
- 
- 
- /* NSH 17/7 - Structure renamed to reflect the fact that this is a CDF, also made dynamically allocated */
+*/
+
  
 #define NCDF 30000 //The default size for these arrays
 #define FUNC_CDF  200 //The size for CDFs made from functional form CDFs
@@ -1230,7 +1213,7 @@ properly create the CDF, this was added for python_43.2  */
 
 
 /* Variable used to allow something to be printed out the first few times
-   an even occurs */
+   an event occurs */
 int itest, jtest;
 
 char hubeny_list[132];          //Location of listing of files representing hubeny atmospheres
