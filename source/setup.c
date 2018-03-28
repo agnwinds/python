@@ -1,22 +1,23 @@
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
- 
-Arguments:		
-
-Returns:
- 
-Description:	
-	
-		
-Notes:
-
-History:
-	15sep	ksl	Setup and other ancillary routines that were part
-			of python.c
-**************************************************************/
-
+/***********************************************************/
+/** @file  setup.c
+ * @Author ksl
+ * @date   March, 2018
+ *
+ * @brief  Various intialization routines, including a number
+ * that read values from the parameter files
+ *
+ * ### Notes ###
+ *
+ * Because the input and setup of Python is relatively complex,
+ * we have over time moved much of this out of main into
+ * subroutines, and we have generally tried to collect
+ * related portion of the initialization into different setup
+ * routines, such as setup_disk or setup_files. 
+ *
+ * This file contains a collection of these setup routines, 
+ * that either stand-alone or have not been moved into their
+ * own files.  
+ ***********************************************************/
 
 
 #include <stdio.h>
@@ -28,48 +29,32 @@ History:
 
 #include "python.h"
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-	init_geo initializes the geo structure to something that is semi-reasonable
-Arguments:		
-
-Returns:
- 
-Description:	
-	Initial values for all of the variables that are not part of the individual
-	wind descriptions that are actully read(!) into the program should be 
-	created here.  The derived values are not needed.
-
-		
-Notes:
-
-	When initializing geo, be sure to initialize to cgs units, since this cgs units
-	are the working units for the program.  This is necessary for consistncy when
-	one tries to restart the program.
-
-	Note that init_geo is set up for CVs and Stars and not AGN
-
-	XXX init_geo ought to be particularized for the system type.
 
 
-History:
- 	98dec	ksl	Coded and debugged.  Much of code was copied from old main routine for
-			python
-	04dec	ksl	This is probably still not completely up to date, but have
-			added some initializations 
-	080518	ksl	60a - modified to set all spectypes to SPECTYPE_BB, as part of 
-			effort to get restarting models to work better
-	080518	ksl	60a - modified all inputs to be in cgs units.  Added a small
-      			amount of code to initialize model_list	
-	081112	ksl	67 - moved more of initializaiton of geo into
-			this routine as part of genearl cleanup of the main
-			routine
-	1508	ksl	A number of changes have been made in order to accommodate
-			domains
-
-**************************************************************/
+/**********************************************************/
+/** @name      init_geo
+ * @brief      initializes the geo structure to something that is semi-reasonable
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ * Initial values for all of the variables that are not part of the individual
+ * wind descriptions that are actully read(!) into the program should be 
+ * created here.  The derived values are not needed.
+ *
+ * ### Notes ###
+ *
+ * In general, cgs units are the working units for Python.  Thus all 
+ * intialization should be converted to these units.
+ * 
+ * @bug Currently init_geo is set up for CVs and Stars and not AGN.  We now
+ * read in the system type as the first variable. The intent was to 
+ * allow one to use the system type to particularize how geo (aqnd
+ * other variables) were intialized. But this has yet to be carreid
+ * out.
+ * 
+ *
+ **********************************************************/
 
 int
 init_geo ()
@@ -102,7 +87,7 @@ init_geo ()
   zdom[1].log_linear = 0;	/* Set intervals to be logarithmic */
 
 
-  geo.disk_z0 = geo.disk_z1 = 0.0;	// 080518 - ksl - moved this up
+  geo.disk_z0 = geo.disk_z1 = 0.0;	
   geo.adiabatic = 1;		// Default is now set so that adiabatic cooling is included in the wind
   geo.auger_ionization = 1;	//Default is on.
 
@@ -112,7 +97,7 @@ init_geo ()
   geo.star_ion_spectype = geo.star_spectype
     = geo.disk_ion_spectype = geo.disk_spectype = geo.bl_ion_spectype =
     geo.bl_spectype = SPECTYPE_BB;
-  geo.agn_ion_spectype = SPECTYPE_POW;	// 130605 - nsh - moved from python.c
+  geo.agn_ion_spectype = SPECTYPE_POW;	
 
 
   geo.rmax = 1e11;
@@ -162,48 +147,42 @@ init_geo ()
   return (0);
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
-	Generalized routine to get the spectrum type and read the model files 
-Arguments:		
 
-Returns:
- 
-Description:	
-
-		
-Notes:
-
-	The routine is slightly dangerous in the sense that if assumes that
-	rdint always wants 0 for BB, models for 1, and 2 for uniform.  If
-	we were to add another internally generated spectrum type one would
-	have to carefull consider how to do this.  
-
-	For models we have to handle two cases:
-		A new model.  Here we want to start with a default value and
-			to keep track of what was entered since it is likely
-			we will want that together
-		The continuation of an old model.  Here we need to expect the
-			same choices as previously
-081026 - Actual routine is still a mess.  
-		* yesno is a statment of whether the component exists
-		* question is really tightly associted with the way the program is 
-		written
-		* The progam returns the component type two ways, on through the call
-		* and the other through the return.  It ssems like one would do.:
-
-History:
-	080518	ksl	Coded as part of effort to make models restart more
-			easily, but also simplifies some of the code
-        121025  nsh	added a mode for power law
-
-**************************************************************/
-
+/**********************************************************/
+/** @name      get_spectype
+ * @brief      Generalized routine to get the spectrum type for a radiation source
+ * and if necessary read a set of precalculated spectra
+ *
+ * @param [in] int  yesno  An integer used to decide whether to ask for a spectrum type
+ * @param [in out] char *  question  The query for a spectrum type for this component
+ * @param [in out] int *  spectype   The type of spectrum to assign
+ * @return    the spectype, a number that says what type of spectrum (bb, power law, etc) 
+ * to generate for this source
+ *
+ * @details
+ * 
+ * If yesno is non-zero, the user will be asked for the type of spectrum
+ * for a radation source.  If yesno is 0, we presume that this radiation souce (a star
+ * a disk or the wind itself) is not to radiate in the calculation, and the spectrum
+ * type is set to SPECTYPE_NONE.
+ *
+ * If one wants to geneate spectra from a seriels of models (such as synthetic spectra 
+ * caluclated for stars), this routine calls routines to read the models. 
+ *
+ * ### Notes ###
+ *
+ * This routine is awkwardly constructed. For reasons that are probably
+ * historical the routine converts the internally stored values to different
+ * values in order to ask what type of spectrum the user wants, and then
+ * translates these back to the internal value.
+ *
+ *
+ **********************************************************/
 
 char get_spectype_oldname[LINELENGTH] = "data/kurucz91.ls";	/*This is to assure that we read model lists in the same order everytime */
 int get_spectype_count = 0;
+
 int
 get_spectype (yesno, question, spectype)
      int yesno;
@@ -213,6 +192,7 @@ get_spectype (yesno, question, spectype)
   char model_list[LINELENGTH];
   int stype;
   int get_models ();		// Note: Needed because get_models cannot be included in templates.h
+
   if (yesno)
     {
       // XXX This is rather odd. Why are these steps needed? Why don't we fix the question here.  ksl
@@ -226,8 +206,10 @@ get_spectype (yesno, question, spectype)
 	stype = 3;
       else
 	stype = 1;
+
       /* Now get the response */
       rdint (question, &stype);
+
       /* Now convert the response back to the values which python uses */
       if (stype == 0)
 	*spectype = SPECTYPE_BB;	// bb
@@ -264,29 +246,37 @@ get_spectype (yesno, question, spectype)
   return (*spectype);
 }
 
-/***********************************************************
-				University of Southampton
 
-Synopsis:
-	init_advanced_modes simply initialises the set of 
-	advanced modes stored in the modes structure to a 
-	default value. For now, this is 0 (off).
 
-Arguments:	
-    none	
 
-Returns:
-    modes is a structure declared in python.h
-
-Description:	
-	
-Notes:
-    see #111 and #120
-
-History:
-    1410 -- JM -- Coded
-**************************************************************/
-
+/**********************************************************/
+/** @name      init_advanced_modes
+ * @brief      simply initialises the set of 
+ * advanced modes stored in the modes structure to a 
+ * default value. 
+ *
+ * @return   Allways returns 0   
+ *
+ *
+ * @details
+ *
+ * ### Notes ###
+ * modes is a structure declared in python.h
+ *
+ * Most of the modes are initialized to 0, which means that
+ * activites that could be uddertaken for this mode, will
+ * not be.  
+ *
+ * Advanced modes are turned off by default, unless the
+ * -d flag is invoked at runtime.  If it is invoked,
+ * one will be asked whether to turn-on an advanced mode.
+ *
+ * In most cases, the advanced modes cause extra diagnostic
+ * information to be saved. 
+ *
+ * see #111 and #120 for recent work 
+ *
+ **********************************************************/
 
 int
 init_advanced_modes ()
@@ -314,27 +304,27 @@ init_advanced_modes ()
   return (0);
 }
 
-/***********************************************************
-				University of Southampton
-
-Synopsis:
-	init_observers sets up the parameter for the final parameters
-	to be extracted extracted as
 
 
-Arguments:	
-    none	
-
-Returns:
- 
-Description:	
-	
-Notes:
-
-History:
-    1509	ksl	Code moved from main after puttting the
-    			parameters into the goe structure
-**************************************************************/
+/**********************************************************/
+/** @name      init_observers
+ * @brief      get inputs that describe the detailed spectra that
+ * one intends to extract.
+ *
+ * @return   Always returns 0   
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ * There are inputs here both for a normal extaction and in
+ * advanced mode for selecting spectra from photons with specific numbers
+ * of scatters, or from a certain reagion.  It is also possible
+ * to extact spectra in the 'live or die" mode, in which one
+ * simply tracks photons that emerge in a certain inclination
+ * range.
+ *
+ **********************************************************/
 
 int
 init_observers ()
@@ -368,7 +358,7 @@ init_observers ()
       geo.swavemin = geo.swavemax;
     }
 
-  /* SS June 04: convert these to frequencies and store for use
+  /* convert wavelengths to frequencies and store for use
      in computing macro atom and k-packet emissivities. */
 
   em_rnge.fmin = C / (geo.swavemax * 1.e-8);
@@ -417,9 +407,9 @@ init_observers ()
   else
     Log ("OK, using live or die option\n");
 
-/* Select spectra with certain numbers of scatterings.  See extract 1997 aug 28 ksl 
- * 141116 - ksl The following options are clealy diagnostic and have been relegated to 
- * advanced commands*/
+/* In advanced mode, select spectra with certain numbers of scatteringsi, and or other
+ * characteristics
+ */  
 
   if (modes.iadvanced)
     {
@@ -485,33 +475,31 @@ init_observers ()
   return (0);
 }
 
-/***********************************************************
-				Space Telescope Science Institute
 
-Synopsis:
-	init_photons gets information about the number of 
-	cycles and how many photons there should be per cycle.
-        The routine then then instantiates PhotPtr
+/**********************************************************/
+/** @name      init_photons
+ * @brief      gets information about the number of 
+ * 	cycles and how many photons there should be per cycle.
+ *
+ * @return     Generally returns 0
+ *
+ * @details
+ * ??? DESCRIPTION ???
+ *
+ * ### Notes ###
+ * The routine also allocates memory for the photon structure.
+ * If the routine is unable to allocate this membory, the routine
+ * will exit.
+ *
+ **********************************************************/
 
-Arguments:	
-    none	
-
-Returns:
- 
-Description:	
-	
-Notes:
-
-History:
-    1509   ksl    Moved the code from python.c
-**************************************************************/
 PhotPtr
 init_photons ()
 {
   PhotPtr p;
   double x;
 
-  /* 140907 - ksl - Although photons_per_cycle is really an integer, 
+  /* Although photons_per_cycle is really an integer, 
      read in as a double so it is easier for input */
 
   x = 100000;
@@ -543,12 +531,12 @@ init_photons ()
   if (p == NULL)
     {
       Error
-	("There is a problem in allocating memory for the photon structure\n");
+	("init_photons: There is a problem in allocating memory for the photon structure\n");
       exit (0);
     }
   else
     {
-      /* JM 1605 -- large photon numbers can cause problems / runs to crash. Report to use (see #209) */
+      /* large photon numbers can cause problems / runs to crash. Report to use (see #209) */
       Log
 	("Allocated %10d bytes for each of %5d elements of photon structure totaling %10.1f Mb \n",
 	 sizeof (p_dummy), NPHOT, 1.e-6 * NPHOT * sizeof (p_dummy));
@@ -564,24 +552,27 @@ init_photons ()
 
 
 
-/***********************************************************
-				Space Telescope Science Institute
 
-Synopsis:
-	init_ioinization
+/**********************************************************/
+/** @name      init_ionization
+ * @brief      Select the ionization and line transfer modes, along
+ * with various other parameters about ionization
+ *
+ * @return   Always returns 0  
+ *
+ * @details
+ * The routine queries for a variety of parameters which describe
+ * how ionization and line transfer are handled.  This includes
+ * whether surfaces reflect
+ *
+ * ### Notes ###
+ * 
+ * The routine is not particular well named, and it is not 
+ * immediately obvious that all of the parmenters that are queried
+ * for here are related.  
+ *
+ **********************************************************/
 
-Arguments:	
-    none	
-
-Returns:
- 
-Description:	
-	
-Notes:
-
-History:
-    1509   ksl    Moved the code from python.c
-**************************************************************/
 int
 init_ionization ()
 {
@@ -647,12 +638,12 @@ init_ionization ()
     }
 
 
-  /* 57h -- Next line prevents bf calculation of macro_estimaters when no macro atoms are present.   */
+  /* Prevent bf calculation of macro_estimaters when no macro atoms are present.   */
 
   if (nlevels_macro == 0)
     geo.macro_simple = 1;	// Make everything simple if no macro atoms -- 57h
 
-  //SS - initalise the choice of handling for macro pops.
+  /* initialise the choice of handling for macro pops. */
   if (geo.run_type == RUN_TYPE_PREVIOUS)
     {
       geo.macro_ioniz_mode = 1;	// Now that macro atom properties are available for restarts
@@ -665,3 +656,68 @@ init_ionization ()
   return (0);
 
 }
+
+
+
+
+
+/**********************************************************/
+/** @name      setup_dfudge
+ * @brief      Sets a global "push_through_distance" designed
+ * to prevent photons from being trapped at boundaries
+ *
+ * @return     dfudge 	the push through distance
+ *
+ * @details
+ *
+ * dfudge is intended to be a small positive number that prevents
+ * photons from being trapped at the edges of cells or wind cones.
+ * It is often added to the distance to an "edge" to push the photon
+ * thorough whatever boundary is being calculated.
+ *
+ * ### Notes ###
+ *
+ * setup_dfudge is used to modify the variable DFUDGE which
+ * can be found in python.h.  
+ *
+ * Originally, DFUDGE was the only number used to push through
+ * boundariies, but today DFUDGE is used sparingly, if at all,
+ * as push tryough distances within wind cells are defined
+ * differently for each cell.  
+ *
+ * There are two competing factors in defining DFUDGE.  It
+ * should be short enough so that the push through distane
+ * goes only a small way into s cell.  It should be large
+ * enough though that round-off errors do not prevent one
+ * from actually getting into a cell.  
+ * 
+ * @bug This routine does not really belong in this file. It
+ * should be moved.
+ **********************************************************/
+
+double
+setup_dfudge ()
+{
+  double dfudge;
+  double delta;
+
+  delta = geo.rmax - geo.rmin;
+
+  if (delta < 1.e8)
+    {
+      dfudge = (geo.rmax - geo.rmin) / 1000.0;
+    }
+  else if (delta < 1e15)
+    {
+      dfudge = 1e5;
+    }
+  else
+    {
+      dfudge = geo.rmax / 1.e10;
+    }
+
+  Log ("DFUDGE set to %e based on geo.rmax\n", dfudge);
+
+  return (dfudge);
+}
+
