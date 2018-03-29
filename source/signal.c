@@ -5,7 +5,7 @@
  * @date   March, 2018
  *
  * @brief  Routines indicating  how  many ionization or spectal
- * generation files have been completed in 
+ * generation cycles have been completed in 
  * in a file named root.sig where 
  * root is the rootname of the .pf file and which stop the
  * program if one has set a maximum execution time and this

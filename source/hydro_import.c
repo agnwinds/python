@@ -1,5 +1,5 @@
 /***********************************************************/
-/** @file   hydro_import.c.c
+/** @file   hydro_import.c
  * @Author KSL/NSH
  * @date   Dec, 1999
  * @brief  Routines to import hydro-dynamic snapshots.

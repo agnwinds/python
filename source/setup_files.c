@@ -1,5 +1,5 @@
 /***********************************************************/
-/** @file  init.c
+/** @file  setup_files.c
  * @Author ksl
  * @date   March, 2018
  *
