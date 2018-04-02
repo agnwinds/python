@@ -1,5 +1,32 @@
-/* Coordinate system dependences removed 04aug -- ksl 
- */
+
+/***********************************************************/
+/** @file  photon2d.c
+ * @Author ksl
+ * @date   April, 2018
+ *
+ * @brief  This file contains the routines which translate
+ * photons, both inside and outside of the domains.  
+ *
+ * Except for translating the photon the routines do as
+ * litle as possible w.r.t modifying any of the other 
+ * information in the photon structure.
+ *
+ * There is a steering routine translate which calle
+ * either translate_in_wind or translate_in_space, depending
+ * on whether a photon bundle is in a wind domain or in space.
+ * The routines translate the photon until hits something,
+ * either the edge of the wind, or the edge of a cell, or
+ * a resonance and then return with a status noting what
+ * has happened.
+ *
+ * ### Notes ###
+ *
+ * Some of these routines pass the WindPtor for the entire
+ * wind which should not be necessary and had been removed
+ * in favor of using wmain.  It would probably be a good idea
+ * to that here.
+ *
+ ***********************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,42 +34,43 @@
 
 #include "atomic.h"
 #include "python.h"
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:   
-
-	translate either calls translate_in_space or translate_in_wind  depending upon the
-	current location of the photon.  
-  
- Arguments:		
-
-	
- Returns:
-  
-Description:	
- 	
-
-Notes:
-	In Monte, translate controls the flow of the photon through one grid cell.  In Python,
-	there are additional possibilities since there are wind free regions.  This construction is
-	used so that the calling routines for translate (trans_phot and extract) can be the same
-	in the 1 and 2d versions.
-
-	where_in_wind returns the correct domain for a given position, or domain 0 if the
-	position is not in the wind of a domain.  The photon structure does not have the domain
-	number directly incoded, but it can be obtained from the grid number, which where in_grid updates
-
-History:
- 	1997	ksl	Coded and debugged as part of Python effort.
- 	98nov	ksl	Modified call to where_in_wind 
-	05apr	ksl	55d -- Minor mod to get more info on problem case
-			of a photon not in wind or grid
-	11aug	ksl	70b - Incorporate mulitple components
-	15aug	ksl	Incorporate multiple domains
-
- 
-**************************************************************/
+/**********************************************************/
+/** @name      translate
+ * @brief      a steering routine that either calls _in_space or _in_wind  depending upon the
+ * 	current location of the photon.
+ *
+ * @param [in] WindPtr  w   A pointer to the wind
+ * @param [in out] PhotPtr  pp   A photon 
+ * @param [in] double  tau_scat   the depth at which the photon should scatter
+ * @param [ out] double *  tau   The optical depth associated with a resonanant scatter when
+ * this is the reason the photon has stopped
+ * @param [in out] int *  nres   The number of the resonance if the photon stopped.
+ * due to reaching the scattering optical depth
+ * @return     A status that states what caused the photon to stp as it did
+ *
+ * @details
+ * 
+ * The routine takes the current position of the photon and determines 
+ * where it is.  Depending on this it calls either translate_in_space
+ * or translate_in_wind
+ *
+ * On exit, the position of the photon will have been updated.
+ *
+ * ### Notes ###
+ * Translate controls the flow of the photon through one grid cell.  In Python,
+ * there are additional possibilities since there are wind free regions.  
+ *
+ * The routine first calls where_in_wind which returns the correct domain for a given position, or domain 0 if the
+ * position is not in the wind of a domain.  The photon structure does not have the domain
+ * number directly encoded, but it can be obtained from the grid number, which where in_grid updates
+ *
+ *
+ * This construction is
+ * used so that the calling routines for translate (trans_phot and extract) can be the same
+ * in the 1 and 2d versions.
+ * 
+ **********************************************************/
 
 int
 translate (w, pp, tau_scat, tau, nres)
@@ -58,7 +86,7 @@ translate (w, pp, tau_scat, tau, nres)
   if (where_in_wind (pp->x, &ndomain) < 0)
     {
       istat = translate_in_space (pp);
-     if (modes.save_photons)
+      if (modes.save_photons)
 	{
 	  save_photons (pp, "Space");
 	}
@@ -82,32 +110,32 @@ translate (w, pp, tau_scat, tau, nres)
   return (istat);
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
-Synopsis:   
 
-	int translate_in_space(pp) translates the photon from its current position to the 
-	edge of the wind. 
 
-Arguments:		
-	PhotPtr pp; 
-	
-Returns:
-  
-Description:	
- 	
-
-Notes:
-	?? Why is it necessary to check whether the photon has hit the star at 
-	this point??
-
-History:
- 	1997	ksl	Coded and debugged as part of Python effort. 
-	110930	ksl	Added check for torus
- 
-**************************************************************/
-
+/**********************************************************/
+/** @name      translate_in_space
+ * @brief      translates the photon from its current position to the 
+ * 	edge of the wind.
+ *
+ * @param [in out] PhotPtr  pp   A photon 
+ * @return     A status flag indication why the photon stopped    
+ *
+ * @details
+ * The routine translate the photon (which is assumed to be 
+ * in the wind, but not in an active wind cell) to the closest
+ * boundary.
+ *
+ * The photon position is updated in the process.
+ *
+ *
+ * ### Notes ###
+ * @bug  There are questions in the comments about why an additonal
+ * check is needed as to whther the photon as hit the star. It seems
+ * superfluous so someone should check whether this addtional check
+ * can be removed.
+ *
+ **********************************************************/
 
 int
 translate_in_space (pp)
@@ -168,7 +196,7 @@ translate_in_space (pp)
 		    {
 		      save_photons (pp, "NotInGrid_translate_in_space2");
 		    }
-          break;
+		  break;
 		}
 	    }
 
@@ -184,11 +212,6 @@ translate_in_space (pp)
 	}
 
     }
-
-
-
-
-
 
 /* ?? The way in which a photon is identified as hitting the star seems
 a bit convoluted.  Despite the fact that it is already identified here
@@ -208,97 +231,142 @@ photon hit the star in its passage from pold to the current position */
   return (pp->istat);
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
+//OLD /***********************************************************
+//OLD                                        Space Telescope Science Institute
+//OLD 
+//OLD Synopsis:   
+//OLD 
+//OLD   double ds_to_wind(pp,ndom)  calculates the photon pathlength to the edge of the wind.  
+//OLD    
+//OLD Arguments:                
+//OLD   PhotPtr pp;.
+//OLD 
+//OLD   
+//OLD Returns:
+//OLD 
+//OLD   The distance to the nearest boundary of the wind and the domain for which
+//OLD   the boudary applies.  
+//OLD   
+//OLD   
+//OLD Description:
+//OLD 
+//OLD   Python defines the boundaries of the wind in term of the intersection
+//OLD   of a biconical flow (defined by an inner and outer windcone) and 
+//OLD   an inner and outer radius centered on the star.  If the user is interested
+//OLD   in a biconical flow, he/she will most likely set the radii so that they
+//OLD   do not truncate the wind.  Similarly, by choosing parameters for the windcones
+//OLD   properly, one can assure that one has a completely spherical flow.  However,
+//OLD   the user may also perversely set the parameters to that both the conical
+//OLD   flow boundaries and the min and maximum radius come into play.
+//OLD   
+//OLD    Usually, one would
+//OLD   define the two types of The two types of boundaries are
+//OLD   usually defined so that one includes the other and so the cones apply when one is
+//OLD   dealing with a CV type wind, while the inner and outer radius applies for a spherical
+//OLD   model.  However this routine does not require this to be the case, since it just
+//OLD   calculates where the edges are.
+//OLD   
+//OLD   In any event, if you are inside the wind already ds_to_wind calculates the distance to the edge of the wind. 
+//OLD   If you are outside, It will also be to the nearest edge.        
+//OLD 
+//OLD   The routine distinguishes between  two basic cases.  Either the photon is already in the wind
+//OLD   in which case one looks for the nearest boundary, or the photon is not currently
+//OLD   in the wind and you have to translate it until it reaches the the boundary (or
+//OLD   VERY_BIG) 
+//OLD Notes:
+//OLD   There is no guarantee that you will still be in the region defined by the grid.
+//OLD 
+//OLD   1802 -ksl - At present this routine for imported models this routine only deals with
+//OLD   cylindrical models.  Additionally for imported models we skip all of the
+//OLD   uwd of wind_cones.  This is inefficient, and needs to be corrected for
+//OLD   rtheta and spherical models which can easily be handled using wind cones.
+//OLD 
+//OLD History:
+//OLD   1997    ksl     Coded and debugged as part of Python effort. 
+//OLD   98dec   ksl     Updated to add an inner and outer radial boundary.
+//OLD   99oct   ksl     The existing version of this code appears to contain
+//OLD                   an attempt to deal with what looks to be a roundoff
+//OLD                   problem when the intersection point is at large radii
+//OLD                   but at a radii less than VERY_BIG.  I have made the 
+//OLD                   fudge bigger in an attempt to push through the boundary
+//OLD                   and logged the error.  There ought to be a better fix
+//OLD                   involving not letting the photon get too far from
+//OLD                   the WD but I am worried about interactions between
+//OLD                   this routine and other portions of the code. ???
+//OLD 
+//OLD         I have been trying to understand the behavior of ds_to_wind which 
+//OLD         calculates the distance to the edge of the wind (from outside the
+//OLD         wind.  There were two problems I believe neither of which is solved
+//OLD         to my satisfaction.  The first, simpler, problem is that at very
+//OLD         large distances adding DFUDGE to ds does not "punch through" since 
+//OLD         DFUDGE is so small relative to DS that it is lost in roundoff errors.
+//OLD         The second problem is that ds_to_wind includes calculates the distance
+//OLD         to the outer radius of the wind, but that where_in_wind says that
+//OLD         the photon is still in the wind at the outer boundary.  where_in_wind
+//OLD         does not have a separate return value to say that the photon is still
+//OLD         in the wind_cone but beyond the outer boundary.  What to do needs 
+//OLD         researching because a photon can be eclipsed even if it is beyond
+//OLD         the outer boundary.  AT present ds_to_wind is set up so that it 
+//OLD         it keeps calculating ds_to_wind until it punches thourh this outer
+//OLD         sphere.  I have simplified the logic for this from the previous program
+//OLD         but exactly what should be done needs to be determined! ????              
+//OLD 
+//OLD   05jul   ksl     Changed call from ds_to_cone to ds_to_cone as
+//OLD                   added cylvar coord system.  Otherwise routine is
+//OLD                   currently unchanged.  
+//OLD   15aug   ksl     Modifications for domains.  The asumption we make
+//OLD                   is that the photon is not in any of the wind
+//OLD                   regions at this point, and that we are looking
+//OLD                   for the closest wind boundary.  
+//OLD  
+//OLD **************************************************************/
 
-Synopsis:   
-
-	double ds_to_wind(pp,ndom)  calculates the photon pathlength to the edge of the wind.  
-   
-Arguments:		
-	PhotPtr pp;.
-
-	
-Returns:
-
- 	The distance to the nearest boundary of the wind and the domain for which
-	the boudary applies.  
-	
-  
-Description:
-
-	Python defines the boundaries of the wind in term of the intersection
-	of a biconical flow (defined by an inner and outer windcone) and 
-	an inner and outer radius centered on the star.	 If the user is interested
-	in a biconical flow, he/she will most likely set the radii so that they
-	do not truncate the wind.  Similarly, by choosing parameters for the windcones
-	properly, one can assure that one has a completely spherical flow.  However,
-	the user may also perversely set the parameters to that both the conical
-	flow boundaries and the min and maximum radius come into play.
-	
-	 Usually, one would
-	define the two types of The two types of boundaries are
-	usually defined so that one includes the other and so the cones apply when one is
-	dealing with a CV type wind, while the inner and outer radius applies for a spherical
-	model.  However this routine does not require this to be the case, since it just
-	calculates where the edges are.
-	
-	In any event, if you are inside the wind already ds_to_wind calculates the distance to the edge of the wind. 
-	If you are outside, It will also be to the nearest edge.  	
-
-	The routine distinguishes between  two basic cases.  Either the photon is already in the wind
-	in which case one looks for the nearest boundary, or the photon is not currently
-	in the wind and you have to translate it until it reaches the the boundary (or
-	VERY_BIG) 
-Notes:
-	There is no guarantee that you will still be in the region defined by the grid.
-
-	1802 -ksl - At present this routine for imported models this routine only deals with
-	cylindrical models.  Additionally for imported models we skip all of the
-	uwd of wind_cones.  This is inefficient, and needs to be corrected for
-	rtheta and spherical models which can easily be handled using wind cones.
-
-History:
- 	1997	ksl	Coded and debugged as part of Python effort. 
- 	98dec	ksl	Updated to add an inner and outer radial boundary.
-	99oct	ksl	The existing version of this code appears to contain
-			an attempt to deal with what looks to be a roundoff
-			problem when the intersection point is at large radii
-			but at a radii less than VERY_BIG.  I have made the 
-			fudge bigger in an attempt to push through the boundary
-			and logged the error.  There ought to be a better fix
-			involving not letting the photon get too far from
-			the WD but I am worried about interactions between
-			this routine and other portions of the code. ???
-
-        I have been trying to understand the behavior of ds_to_wind which 
-        calculates the distance to the edge of the wind (from outside the
-        wind.  There were two problems I believe neither of which is solved
-        to my satisfaction.  The first, simpler, problem is that at very
-        large distances adding DFUDGE to ds does not "punch through" since 
-        DFUDGE is so small relative to DS that it is lost in roundoff errors.
-        The second problem is that ds_to_wind includes calculates the distance
-        to the outer radius of the wind, but that where_in_wind says that
-        the photon is still in the wind at the outer boundary.  where_in_wind
-        does not have a separate return value to say that the photon is still
-        in the wind_cone but beyond the outer boundary.  What to do needs 
-        researching because a photon can be eclipsed even if it is beyond
-        the outer boundary.  AT present ds_to_wind is set up so that it 
-        it keeps calculating ds_to_wind until it punches thourh this outer
-        sphere.  I have simplified the logic for this from the previous program
-        but exactly what should be done needs to be determined! ????		
-
-	05jul	ksl	Changed call from ds_to_cone to ds_to_cone as
-			added cylvar coord system.  Otherwise routine is
-			currently unchanged.  
-	15aug	ksl	Modifications for domains.  The asumption we make
-			is that the photon is not in any of the wind
-			regions at this point, and that we are looking
-			for the closest wind boundary.  
- 
-**************************************************************/
 
 
+
+/**********************************************************/
+/** @name      ds_to_wind
+ * @brief      calculates the photon pathlength to the edge of the wind.
+ *
+ * @param [in out] PhotPtr  pp   A photon
+ * @param [in out] int *  ndom_current   The current domain
+ * @return     The distance to the nearest boundary of the wind and the domain for which
+ * 	the boudary applies.
+ *
+ * @details
+ * Python defines the boundaries of the wind in term of the intersection
+ * of a biconical flow (defined by an inner and outer windcone) and 
+ * an inner and outer radius centered on the star.	 If the user is interested
+ * in a biconical flow, he/she will most likely set the radii so that they
+ * do not truncate the wind.  Similarly, by choosing parameters for the windcones
+ * properly, one can assure that one has a completely spherical flow.  However,
+ * the user may also perversely set the parameters to that both the conical
+ * flow boundaries and the min and maximum radius come into play.
+ * 	
+ * Usually, one would
+ * efine the two types of The two types of boundaries are
+ * sually defined so that one includes the other and so the cones apply when one is
+ * ealing with a CV type wind, while the inner and outer radius applies for a spherical
+ * odel.  However this routine does not require this to be the case, since it just
+ * alculates where the edges are.
+ * 	
+ * n any event, if you are inside the wind already ds_to_wind calculates the distance to the edge of the wind. 
+ * If you are outside, It will also be to the nearest edge.  	
+ * 
+ * The routine distinguishes between  two basic cases.  Either the photon is already in the wind
+ * in which case one looks for the nearest boundary, or the photon is not currently
+ * in the wind and you have to translate it until it reaches the the boundary (or
+ * VERY_BIG)
+ *
+ * ### Notes ###
+ * There is no guarantee that you will still be in the region defined by the grid.
+ * 
+ * @bug 1802 -ksl - At present this routine for imported models this routine only deals with
+ * cylindrical models.  Additionally for imported models we skip all of the
+ * of the wind_cones.  This is inefficient, and needs to be corrected for
+ * rtheta and spherical models which can easily be handled using wind cones.
+ *
+ **********************************************************/
 
 double
 ds_to_wind (pp, ndom_current)
@@ -368,7 +436,6 @@ ds_to_wind (pp, ndom_current)
 	  if (x > 0 && x < ds)
 	    {
 	      stuff_phot (pp, &qtest);
-	      //OLD move_phot (&qtest, ds + DFUDGE);
 	      move_phot (&qtest, x);
 	      rho = sqrt (qtest.x[0] * qtest.x[0] + qtest.x[1] * qtest.x[1]);
 	      if (zdom[ndom].wind_rho_min <= rho
@@ -384,7 +451,6 @@ ds_to_wind (pp, ndom_current)
 	  if (x > 0 && x < ds)
 	    {
 	      stuff_phot (pp, &qtest);
-	      //OLD move_phot (&qtest, ds + DFUDGE);
 	      move_phot (&qtest, x);
 	      rho = sqrt (qtest.x[0] * qtest.x[0] + qtest.x[1] * qtest.x[1]);
 	      if (zdom[ndom].wind_rho_min <= rho
@@ -401,7 +467,6 @@ ds_to_wind (pp, ndom_current)
 	  if (x > 0 && x < ds)
 	    {
 	      stuff_phot (pp, &qtest);
-	      //OLD move_phot (&qtest, ds + DFUDGE);
 	      move_phot (&qtest, x);
 	      z = fabs (qtest.x[2]);
 	      if (zdom[ndom].zmin <= z && z <= zdom[ndom].zmax)
@@ -418,7 +483,6 @@ ds_to_wind (pp, ndom_current)
 	  if (x > 0 && x < ds)
 	    {
 	      stuff_phot (pp, &qtest);
-	      //OLD move_phot (&qtest, ds + DFUDGE);
 	      move_phot (&qtest, x);
 	      z = fabs (qtest.x[2]);
 	      if (zdom[ndom].zmin <= z && z <= zdom[ndom].zmax)
@@ -447,54 +511,36 @@ ds_to_wind (pp, ndom_current)
 
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
+/**********************************************************/
+/** @name      translate_in_wind
+ * @brief      translates the photon within a single cell in the wind.
+ *
+ * @param [in] WindPtr  w   The entire wind
+ * @param [in out] PhotPtr  p   A photon
+ * @param [in] double  tau_scat   The depth at which the photon will scatter
+ * @param [out] double *  tau   The tau of a resonance 
+ * @param [out] int *  nres   The resonaance which caused the photon to stop
+ * @return     A status indicated whether the photon has stopped for a scattering
+ * even of for some other teason
+ *
+ * @details
+ * It calculates and updates the final position of the photon p, the optical depth tau after 
+ * 	having translated the photon, and, if the photon is scattered, the number of the resonance
+ * 	responsible for scattering (or absorbing) the photon bundle.  
+ * 
+ * 	These last two quantities are calculated in ds_calculate and simply passed back.  
+ * 
+ * 	translate_in_wind returns that status directly to the calling routine.
+ *
+ * ### Notes ###
+ *
+ * In addition to moving the photon, the routine also updates some values
+ * having to do with the radiation filed both in and out of macro atom 
+ * mode.  
+ *
+ **********************************************************/
 
- Synopsis:   
-	translate_in_wind translates the photon within a single cell in the wind.  
-  
- Arguments:		
-
-	
- Returns:
-  
-Description:	
- 	It calculates and updates the final position of the photon p, the optical depth tau after 
-	having translated the photon, and, if the photon is scattered, the number of the resonance
-	responsible for scattering (or absorbing) the photon bundle.  
-
-	These last two quantities are calculated in ds_calculate and simply passed back.  
-
-	translate_in_wind returns that status directly to the calling routine.	
-
-Notes:
-
-
-History:
- 	1997	ksl	Coded and debugged as part of Python effort. 
-	04aug	ksl	Removed portions of routine that depend on
-			cylindrical geometry to a separate routine
-			and added logic to look for disk vertical 
-			extent (for python_52).  
-	05apr	ksl	55d -- Enabled spherical coordinates
-	05apr	ksl	55d -- Modifed the order of the processing to address issue
-			of some grid cells having very small volumes in the wind
-			that are not picked up by the calculation of volumes.  Basically
-			there was an option to kill these photons off entirely or
-			to allow than to proceed to the next cell.  
-	06nov	ksl	58b -- Modified to recognize case in which
-			we want to ignore a cell because the portion
-			of the volume of that cell is negligibly
-			small
-	09mar	ksl	Provided a capability to count reduce
-			the numbers of errors for a photon
-			going through a region with negligibe
-			volume.  
-	15aug	ksl	Incorporate multiple domains
- 
-**************************************************************/
-
-/* 68c - The variable below was added because there were cases where the number
+/* The variable below was added because there were cases where the number
  * of photons passing through a cell with a neglible volume was becoming
  * too large and stopping the program.  This is a bandaide since if this
  * is occurring a lot we should be doing a better job at calculating the
@@ -503,6 +549,7 @@ History:
 
 int neglible_vol_count = 0;
 int translate_in_wind_failure = 0;
+
 
 int
 translate_in_wind (w, p, tau_scat, tau, nres)
@@ -546,10 +593,7 @@ return and record an error */
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
   ndom = one->ndom;
-  inwind=one->inwind;
-  
-
-
+  inwind = one->inwind;
 
 
 /* Calculate the maximum distance the photon can travel in the cell */
@@ -559,38 +603,25 @@ return and record an error */
       return ((int) smax);
     }
 
-//OLD  //XXXX this is a kluge.  it should be set by DFUDGE somehow
-//OLD  if (smax<1e7) {
-//OLD      Error("translate_in_wind: photon not moving\n");
-//OLD      Error ("translate_in_wind: photon %d position: x %g y %g z %g\n",
-//OLD	     p->np, p->x[0], p->x[1], p->x[2]);
-//OLD      smax=1e7;
-//OLD  }
 
   if (one->inwind == W_PART_INWIND)
-    {				// The cell is partially in the wind
-      s = ds_to_wind (p, &ndom_current);	//smax is set to be the distance to edge of the wind
+    {				/* The cell is partially in the wind */
+      s = ds_to_wind (p, &ndom_current);	/* smax is set to be the distance to edge of the wind */
       if (s < smax)
 	smax = s;
-      s = ds_to_disk (p, 0);	// ds_to_disk can return a negative distance
+      s = ds_to_disk (p, 0);	/* ds_to_disk can return a negative distance */
       if (s > 0 && s < smax)
 	smax = s;
     }
   else if (one->inwind == W_IGNORE)
     {
-    //OLD  if ((neglible_vol_count % 100) == 0)
-	//OLDError
-	//OLD  ("translate_in_wind: Photon is in cell %d with negligible volume, moving photon %.2e  Occurrences %d\n",
-	//OLD    n, smax, neglible_vol_count + 1);
-
-   //OLD    neglible_vol_count++;
       smax += one->dfudge;
       move_phot (p, smax);
       return (p->istat);
 
     }
   else if (one->inwind == W_NOT_INWIND)
-    {				//The cell is not in the wind at all
+    {				/* The cell is not in the wind at all */
 
       Error
 	("translate_in_wind: Grid cell %d of photon is not in wind, moving photon %.2e\n",
@@ -624,7 +655,7 @@ The choice of SMAX_FRAC can affect execution time.*/
      shell.  It needs a "trial photon at the maximum distance however */
 
 
-/* Note that ds_current does not alter p in any way at present 02jan ksl */
+/* Note that ds_current does not alter p in any way */
 
   ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
 
@@ -682,29 +713,27 @@ The choice of SMAX_FRAC can affect execution time.*/
 }
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:   
-	ds_in_cell calculates the distance photon can travel within the cell
-	that it is currently in.
-  
- Arguments:		
-
-	
- Returns:
-  
-Description:	
-
-Notes:
 
 
-History:
-	18feb	ksl	Split out of translate_in_wind as part of
-			effort to handle imporded models better
- 
-**************************************************************/
-
+/**********************************************************/
+/** @name      ds_in_cell
+ * @brief      calculates the distance photon can travel within the cell
+ * 	that it is currently in.
+ *
+ * @param [in out] int  ndom   The current domain
+ * @param [in out] PhotPtr  p   A photon
+ * @return     A distance indicating how far the photon can travel
+ *
+ * @details
+ * The routine is basically just a steering routine
+ * and calls ds_in_whatever for various coordinate systems
+ *
+ * ### Notes ###
+ *
+ * The other routines are contained in routines like cylindrical.c,
+ * rtheta.c etc.
+ *
+ **********************************************************/
 
 double
 ds_in_cell (ndom, p)
@@ -724,11 +753,11 @@ return and record an error */
 
   if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
     {
-     if (modes.save_photons)
+      if (modes.save_photons)
 	{
 	  save_photons (p, "NotInGrid_ds_in_cell");
 	}
-     return(n);
+      return (n);
     }
 
 /* Assign the pointers for the cell containing the photon */
@@ -766,58 +795,54 @@ return and record an error */
 }
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
+/**********************************************************/
+/** @name      walls
+ * @brief      determines whether the photon has encountered the star of disk or
+ * reached the edges of the grid and returns the appropriate
+ * tatus.
+ *
+ * @param [in out] PhotPtr  p   A photon at its new proposed location.  On exiting the routine
+ * this will contain the position of the photon after taking wind boundaries (e.g wind cones)
+ * into account.
+ * @param [in out] PhotPtr  pold   the current and previous description of the photon bundle.
+ * beore the lates movee
+ * @param [out] double *  normal   A vector when the star or disk has been hit, which contains
+ * the normal for the reflecting surface at the point the photon encountered the the boundary
+ * @return   A status
+ *
+ * * The photon has hit the star				P_HIT_STAR
+ * * The photon has hit the disk				P_HIT_DISK
+ * * The photon has reached the edge of grid 		P_ESCAPE
+ * * The status is undeterminable                    5
+ *          
+ * If a photon does not fall into one of these categories, walls returns the old status, which is stored in
+ * p->istat
+ *
+ * @details
+ *
+ * walls is generally called after one has calculated how far a photon can travel in a cell
+ * in order to see whether it has exited the wind region.  This is necessary because some
+ * grid cells are not actually part of the wind, even though they are needed so that the 
+ * grid is regular.
+ *
+ * pold is the place where the photon was before the last attempt to move the photon forward.
+ * p on input is a proposed location for photon before considering whethe one has hit a boundary. The
+ * location of p is either at the edge of a cell, or at the position of a resonance.  So pold should
+ * be a valid position for the photon, but p may need to be adjusted. 
+ * 
+ * If one of the walls has been hit, the routine should have moved the photon to that wall, but not
+ * othewise changed it.  
+ * 
+ * The routine also calculates the normal to the surface that was hit, which is inteneded to
+ * be used by trans_phot to redirect the photon
+ *
+ * ### Notes ###
+ *
+ * This really does determine whether the photon is in the grid, as opposed to whether the photon
+ * has reached a radial distance geo.rwind.  I am not sure whether this is what we want???.
+ *
+ **********************************************************/
 
- Synopsis:   
-	 walls determines whether the photon has encountered the star of disk or
-	 reached the edges of the grid and returns the appropriate
-	status.  
-  
- Arguments:		
-	PhotPtr p,pold		the current and previous description of the photon bundle.
-	
- Returns:
-         The photon has hit the star				P_HIT_STAR
-         The photon has hit the disk				P_HIT_DISK
-         The photon has reached the edge of grid 		P_ESCAPE
-         The status is undeterminable                    5
-         
- If a photon does not fall into one of these categories, walls returns the old status, which is stored in
- p->istat 
- 
-Description:	
-
-
-    pold is the place where the photon was before the last attempt to move the photon forward.
-    p on input is a proposed location for photon before considering whethe one has hit a boundary. The
-    location of p is either at the edge of a cell, or at the position of a resonance.  So pold should
-   be a valid position for the photon, but p may need to be adjusted. 
-
-   If one of the walls has been hit, the routine should have moved the photon to that wall, but not
-   othewise changed it.  
-
-   The routine does calculate the normal to the surface that was hit, which is inteneded to
-   be used by trans_phot to redirect the photon
- 	
-
-Notes:
-
-This really does determine whether the photon is in the grid, as opposed to whether the photon
-has reached a radial distance geo.rwind.  I am not sure whether this is what we want???.
-
-
-History:
- 	1997	ksl	Coded and debugged as part of Python effort. 
- 	1997nov	ksl	Corrected problem which caused mistakes in the calculation of the disk
- 	 		intercept.	 
-	04aug	ksl	Added checks for a vertically extended disk
-    17oct   ksl Modified the way things work to "reflect" photons from
-                the disk and added reflection for stars.  Now both
-                are redirected as if they were emitted from the photospher,
-                however note that frequencies are not changed.
-
-**************************************************************/
 double xnorth[] = {
   0., 0., 1.
 };
@@ -825,6 +850,7 @@ double xnorth[] = {
 double xsouth[] = {
   0., 0., -1.
 };
+
 
 int
 walls (p, pold, normal)
@@ -905,7 +931,7 @@ walls (p, pold, normal)
 	}
     }
   else if (geo.disk_type == DISK_FLAT && p->x[2] * pold->x[2] < 0.0)
-    {				// Then the photon crossed the xy plane and probably hit the disk
+    {				/* Then the photon crossed the xy plane and probably hit the disk */
       s = (-(pold->x[2])) / (pold->lmn[2]);
       if (s < 0)
 	{
@@ -913,7 +939,7 @@ walls (p, pold, normal)
 		 p->x[1], p->x[2]);
 	  return (-1);
 	}
-      // Check whether it hit the disk plane beyond the geo.diskrad**2
+      /* Check whether it hit the disk plane beyond the geo.diskrad**2 */
       vmove (pold->x, pold->lmn, s, xxx);
 
       if (dot (xxx, xxx) < geo.diskrad_sq)
@@ -924,13 +950,10 @@ walls (p, pold, normal)
 	  /* Now fill in the direction for the normal to the surface */
 	  if (pold->x[2] > 0)
 	    {
-	      // Next line has been removed, so the new scattering direction is calculated elsewehre
-	      // randvcos(p->lmn,xnorth);
 	      stuff_v (xnorth, normal);
 	    }
 	  else
 	    {
-	      // randvcos(p->lmn,xsouth);
 	      stuff_v (xsouth, normal);
 	    }
 	  return (p->istat = P_HIT_DISK);
