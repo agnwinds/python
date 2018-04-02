@@ -1,29 +1,21 @@
-/***********************************************************
-                                       Space Telescope Science Institute
 
-Synopsis:  These are very simple utilities within python that do not
-	fall into a larger catergory like those in vector.c
-
-
-Description:	 
-
-int
-locate (x, xarray, xdim, nelem, frac)
-
-double 
-linterp(x,xarray,yarray,xdim)
-
-
-Notes:
-
-
-History:
- 	02feb  ksl      Coded as part of python effort
-	02mar	ksl	Eliminated ndim in favor of xdim so 
-			that ndim could be used as a global 
-			variable
-
-**************************************************************/
+/***********************************************************/
+/** @file  util.c
+ * @Author ksl
+ * @date   April, 2018
+ *
+ * @brief  These are very simple utilities within Python that do not
+ *   fall into a larger catergory like those in vector.
+ *
+ * ### Notes ###
+ *
+ * These routines should probably be refactored into other routines
+ *
+ * It may be useful to rethink them in addition, as they were all
+ * written prior to the existence of domains, and domains are 
+ * just grafted on.
+ * 
+ ***********************************************************/
 
 
 
@@ -35,70 +27,61 @@ History:
 #include "python.h"
 
 
-#define EPS 1.e-10
-
-
-
-/* 
-This routine is intended to locate the array element that is just below the
-value of x and give one the appropriate "fraction" for interpolation between
-array elements.  The idea behind this is that one wants to predict the velocity
-at a position x and one has a structure tha contains the velocities at specific
-values of x
-
-The array "array" must be monotonically increasing and have dimension
-xdim (with array elements 0 to xdim filled.  
-
-The program returns 0 if the desired x is contained in the array, -1
-if x is below the value of the first element and -2 if the element is above
-the highest element.  
-
-the array element in question and the fractional position 
-for interpolation 
-*/
 
 
 
 
-/* fraction is a utility to speed up the search for the bracketing
-topbase photionization x-sections, but in principle it should work in
-other situations within python 
 
-Returns: 0 is the value asked for was within the bounds of the array,
-	-1 if below the lower bound, +1 if above the lower bound
-
-	Assuming the value asked for is within the domain, then the 
-	elment at the bottom of the bracketing interval and the fractional
-	"distance" to the next element of the array are returned as 
-	ival and f respectively
-     	
-
-Notes:  The routine is similar (I found aut afterward) to the numerical
-	recipes routine locate.  It is possible there should be a separate
-	routine locate to avoid the division at the bottom.
-
-	This approach may not be ideal for many applications, especially
-	those in which we have a good idea of where in the array
-	the new value is located.
-
-History:
-	01dec	ksl	Added limits. fraction now produces an error
-			if the value is out of range.  It also now
-			assumes that it should return the limits when 
-			a value is out of range.
-	01dec	ksl	Changed calls so that fraction returns 0 if
-			OK, -1 if the point is below the limit
-			1 if it is above the maximum.  Since in many
-			cases you don't care that you are asking for
-			things out of range, I've suppressed the errors
-			after the first 10.
-	02feb	ksl	Modified slightly.  Note that this routine is
-			a substantial fraction of time it takes to
-			run python and it needs to be absolutely as
-			efficient as possible.
-*/
-
-
+/**********************************************************/
+/** @name      fraction
+ * @brief Perform linear/logarithmic interpolation of an array    
+ *
+ * @param [in] double  value   The value used for interpoaltion
+ * @param [in] double  array[]   An array containing a set of asceding values
+ * @param [in] int  npts   The size of the array
+ * @param [out] int *  ival  The lower index to use in the interpolation
+ * of the array which need to be used to interpolate on
+ * @param [out] double *  f   The fraction of the upper point to use in the interpolation
+ * @param [in] int  mode  A switch to choose linear(0)  or lograrithmic(1) interpolation
+ * @return     Usually returns 0, but returns -1 if the input value is less
+ * than the first elememnt in the array, and 1 if it is greater than the
+ * last element int he array.  In either of these cases, the fractions are
+ * set up only to access one array element
+ *
+ * @details
+ * 
+ *
+ * Typically one has two parallel arrays, one containing a set of values,
+ * in the original case frequencies, and another containing some function
+ * of those values.  This routine finds the fraction of the function at
+ * two point in the data array to interpolate.  
+ *
+ * The values for the input array can be interpolated linear or logarithmically.
+ * that is the fraction that is returned are based on the values in the
+ * array or the logarithm of them. 
+ *
+ *
+ * The routine uses bisection 
+ *
+ * 
+ *
+ * ### Notes ###
+ * 
+ * fraction is a utility written to speed up the search for the bracketing
+ * topbase photionization x-sections, but in principle it should work in
+ * other situations within python (which at one time at least contributed
+ * significantly to the runtime for Python).  
+ *
+ * Today, fraction is called directly in the routines that are used to set up coordinate
+ * systems, and indirectly through linterp (below) which should be inspected
+ * to see how the logarithmic interpolation is supposed to work.
+ *
+ * The routine is similar to the numerical * recipes routine locate.   
+ * There may be a gsl routine as well.  The routine
+ * should probably be replaced.
+ *
+ *
+ **********************************************************/
 
 int
 fraction (value, array, npts, ival, f, mode)
@@ -147,6 +130,7 @@ to reflect the behavior of the search routine in where_in_grid. */
   }
 
 // So array[imin] just <= value
+
   if (mode == 0)
     *f = (value - array[imin]) / (array[imax] - array[imin]);   //linear interpolation 
   else if (mode == 1)
@@ -166,18 +150,45 @@ to reflect the behavior of the search routine in where_in_grid. */
 
 
 
-/* 
-Given a number x, and an array of x's in xarray, and functional
-values y = f(x) in yarray and the dimension of xarray and yarray,
-linterp calculates y, the linearly interpolated value of y(x). It
-also returns the element in the xarray so that one can consider
-not doing a search to find the right array element in certain 
-circumstances
 
-	02feb	ksl	Changed call so error could be returned
-	02jul	ksl	Actually included the error in the return.
-	02jul	ksl	Modified again so now it returns nelem.
-*/
+
+/**********************************************************/
+/** @name      linterp
+ * @brief      Perform a linear interpolation on two parallel arrays, the fist
+ * of which contains a set of values to be interpolated and the second of
+ * which has the function at those values
+ *
+ * @param [in] double  x   A value 
+ * @param [in] double  xarray[]   The array that is interplated
+ * @param [in] double  yarray[]   The array that contains a function of the values in xaray
+ * @param [in] int  xdim   The length of the two arrays
+ * @param [out] double *  y   The resulting intepolated value
+ * @param [in] int  mode   A switch to choose linear(0) or "logarithmic" (1) 
+ * interpolation
+ *
+ * @return     The number of the array element that is used for the lower of the two
+ * elements taht are intepolated on.
+ *
+ * @details
+ * Given a number x, and an array of x's in xarray, and functional
+ * values y = f(x) in yarray and the dimension of xarray and yarray,
+ * linterp calculates y, the linearly interpolated value of y(x). It
+ * also returns the element in the xarray so that one can consider
+ * not doing a search to find the right array element in certain 
+ * circumstances
+
+ *
+ * ### Notes ###
+ * 
+ * For mode 0, the value that is retuned is
+ *
+ * (1-f)*y[nelem]+f*[nelem+1)
+ *
+ * For mode 1, the value returned is
+ * exp ((1. - f) * log (y[nelem]) + f * log (y[nelem + 1]))
+ *
+ *
+ **********************************************************/
 
 int
 linterp (x, xarray, yarray, xdim, y, mode)
@@ -190,9 +201,6 @@ linterp (x, xarray, yarray, xdim, y, mode)
   int nelem;
   double frac;
 
-  //  Note that fraction will return an integer if it is important
-  //  to know whether you have asked for a value that is outsde the
-  //  boudarry of the arrays
 
   fraction (x, xarray, xdim, &nelem, &frac, mode);
 
@@ -213,89 +221,57 @@ linterp (x, xarray, yarray, xdim, y, mode)
 
 
 
-/***********************************************************
-           Space Telescope Science Institute
 
-Synopsis:  coord_fraction() is used to calculate the fractional 
-	contributions in interpolations of values of quantities,
-	such as electron density, by various cells in the 
-	grid in a coordinate system independent way. 
-
-
-
-Description:	 
-	ichoice=0 --> interpolate on vertices
-	ichoice=1 --> interpolate on centers
-
-	x --> the 3-vector position for which you want
-		the fractinal position
-Returns:
-	ii[] --> an array that contains the 1-d element
-		numbers that must be summed  
-	frac[] --> the array that contains the fractional
-		contribution of the corresponding 
-		element
-	nelem --> the number of elements that must be
-		summed, nominally 2 for a spherical grid
-		and 4 for a two dimensional grid.  (For
-		a 3 d grid it would be 6, but we have not
-		implemented this.
-
-	 1 if  inside the grid
-	-2 if outside the grid
-	-1 if inside the grid
-
-Notes:
-	There are numerous times when one wants the value
-	of an interpoalted  variable in the wind.  There
-	is no easy way to interpolate the variable easily.
-	What this routine does is calculate the fractional
-	contributions of elements in the array to that
-	position.  Then one must sum up the actual variable
-	else where
-
-	If positions are outside the grid, coord_fraction
-	attempts to give you the value at the edge of teh
-	grid.
-
-	It's possible that coord_fraction could be used 
-	to interpolate beyond the edge of the grid where
-	a variable is defined, although this is not done
-	at present!
-
-History:
-	04aug	ksl	52a -- Coded as a generic routine
-			to get the location in the grid
-			and the fractions that can be
-			used for interpolation
-	04dec	ksl	54a -- Minor mod to exit if don't
-			understand coord type
-	05apr	ksl	55d -- Made a significant change
-			to the way coord_fraction works
-			to concentrate variations due to different
-			coordinate systems here. Note that the
-			variables for coord_fraction were changed
-			significantly
-	05jul	ksl	56d -- Modified so that for cylvar coords
-			one simple calls the a special routine
-			which is in cylindvar.c.  PROBABLY THIS ROUTINE
-			SHOULD BE REWRITTEN SO THIS IS THE CASE
-			FOR ALL COORDINATE SYSTEMS.
-	13sep	nsh	76b -- Modified calls to fraction to take
-			account of new mode.
-	15aug	ksl	Modified to handle multiple domains.  This
-			routine could yield errors if we are asked
-			for positions outside one of the active 
-			wind regions, so for now it finds the 
-			domain, and prints and error if not
-			in any domain.  Ultimately added the domain
-			to one of the input variables because 
-			there are times when we want coordinates
-			which are outside the wind region.
-		       	
-
-**************************************************************/
-
+/**********************************************************/
+/** @name      coord_fraction
+ * @brief      calculate the fractional 
+ * 	contributions in interpolations of values of quantities,
+ * 	such as electron density, by various cells in the 
+ * 	grid in a coordinate system independent way.
+ *
+ * @param [in out] int  ndom   The domain in where the interpolation will take place
+ * @param [in out] int  ichoice  interpolate on vertices (0), interpolate on
+ * centers (1)>
+ * @param [in out] double  x[]   the 3-vector position for which you want
+ * the fractinal position
+ * @param [in out] int  ii[]    an array that contains the 1-d element
+ * numbers that must be summed 
+ * @param [in out] double  frac[]   the array that contains the fractional
+ * contribution of the corresponding 
+ * element
+ * @param [in out] int *  nelem   the number of elements that must be
+ * summed, nominally 2 for a spherical grid
+ * and 4 for a two dimensional grid.  (For
+ * a 3 d grid it would be 6, but we have not
+ * implemented this.
+ *
+ * @return
+ * 	 1 if  inside the grid
+ * 	-2 if outside the grid
+ * 	-1 if inside the grid
+ *
+ * 
+ * @details
+ *
+ * ### Notes ###
+ * There are numerous times when one wants the value
+ * 	of an interpoalted  variable in the wind.  There
+ * 	is no easy way to interpolate the variable easily.
+ * 	What this routine does is calculate the fractional
+ * 	contributions of elements in the array to that
+ * 	position.  Then one must sum up the actual variable
+ * 	else where
+ * 
+ * 	If positions are outside the grid, coord_fraction
+ * 	attempts to give you the value at the edge of the
+ * 	grid.
+ * 
+ * 	It's possible that coord_fraction could be used 
+ * 	to interpolate beyond the edge of the grid where
+ * 	a variable is defined, although this is not done
+ * 	at present!
+ *
+ **********************************************************/
 int ierr_coord_fraction = 0;
 
 int
@@ -422,45 +398,47 @@ coord_fraction (ndom, ichoice, x, ii, frac, nelem)
 }
 
 
-/***********************************************************
-           Space Telescope Science Institute
 
-Synopsis:  where_in_2dcell calculates the fractional
-	location of a position in any 2d grid.  
 
-Description:	 
-	ichoice=0 --> interpolate on vertices
-	ichoice=1 --> interpolate on centers
 
-	x --> the 3-vector position for which you want
-		the fractinal position
-Returns:
-	fracpos[] --> the array that contains the fractional
-		position 
-
-	 0 (FALSE) if the position is in the cell
-	!0 (TRUE)  if the position is not in the cell
-
-Notes:
-	This routine is general.  It does not rely on the
-	predefined arrays that just contain the grid vertices
-	and centers. On the other hand, it does not calculate
-	which grid cell x lies in. It only tells you that x
-	is not in a particular cell if that is the case.
-
-	A cell is organized as follows:
-
-		x01	x11
-		x00	x10
-	
-History:
-	05jul	ksl	56d -- Created in the context of incorporating
-			CYLVAR coordinates.
-	15aug	ksl	Began attempt to incorporate domains
-		       	
-
-**************************************************************/
-
+/**********************************************************/
+/** @name      where_in_2dcell
+ * @brief      calculates the fractional
+ * 	location of a position in any 2d grid.
+ *
+ * @param [in] int  ichoice   interpolate on vertices (0) or centers (1)
+ * @param [in] double  x[]   the 3-vector position for which you want
+ * the fractinal position
+ * @param [inout] int  n   The cell number in wmain
+ * @param [out] double *  fx   Fractional position in the x (1st) direction
+ * @param [out] double *  fz   fracitionl postion in the z (2nd) direction
+ * @return     0 if the positiion is within the cell as defined, non-zero otherwise
+ *
+ * @details
+ *
+ * The routine provides the fractions need to interpopolate
+ * variables, such as ne, in the wind.  It is called when one
+ * already knows what cell one is in.  Like many other routines 
+ * one can intepolate using the boundaries of the wind cell for
+ * values which are defined there (like velocity), and values 
+ * defined at the cell centeres (like densities)
+ * 
+ *
+ * ### Notes ###
+ * This routine is general.  It does not rely on the
+ * predefined arrays that just contain the grid vertices
+ * and centers. On the other hand, it does not calculate
+ * which grid cell x lies in. It only tells you that x
+ * is not in a particular cell if that is the case.
+ * 
+ * A cell is organized as follows:
+ * 
+ * * x01	x11
+ * * x00	x10
+ *
+ * This routine was written to account for cylind_var coordiantes
+ *
+ **********************************************************/
 int ierr_where_in_2dcell = 0;
 
 int
@@ -492,7 +470,7 @@ where_in_2dcell (ichoice, x, n, fx, fz)
     return (n);                 // And hope that calling routine knows how to handle this.
   }
 
-  /* Assign the corners ot the region we want to determin
+  /* Assign the corners ot the region we want to determine
    * the fractional position of
    */
 
@@ -529,47 +507,35 @@ where_in_2dcell (ichoice, x, n, fx, fz)
 
 
 
-
-/***********************************************************
-          Space Telescope Science Institute
-
-Synopsis: wind_n_to_ij(ndom, n,i,j) and wind_ij_to_n(i,j,n) are two 
-routines which effectively translate between the one dimensional 
-wind structure and the two dimensional physical grid 
-
-Arguments: 
-
-the element in the wind structure i,j the position in the 
-two dimensional grid
-
-Returns:
-
-i,j position in a given domain
-
-Description:
-
-Notes:
-
-For 2d, the underlying 1-d grid is organized so that as n increases, 
-one goes up in z, and then steps out in rho., or in theta and then
-z as the case may be.
-
-With domains, this routine has to be used carefully, and a better
-statement would be that these routines map to and from the element 
-in wmain to the normally 2d element in an individual domain.
-
-So this means that if you want to get the ith and jth element of
-domain 1, then one needs to give nstart+whatever to wind_n_to_ij
-
- 
-History:
-	97jan	ksl	Coding on python began.
-	02feb	ksl	Allowed for different dimensions in x and z
-	05apr	ksl	Added error_check to verify routine 
-			is not called with spherical coordiantes
-	15aug	jm/ksl	Modified to account for domains
-**************************************************************/
-
+/**********************************************************/
+/** @name      wind_n_to_ij
+ * @brief      Translate a cell number in the wind to the two-d grid 
+ * position in a specific domain
+ *
+ * @param [in] int  ndom   The domain of interest
+ * @param [in] int  n   The 1-d position in the wind domain 
+ * @param [out] int *  i   The first index for a 2d position in a given domain
+ * @param [out] int *  j   The second index for a 2d postion in a given domain
+ * @return     i,j position in a given domain
+ *
+ * @details
+ * wmain contains elements for the entire winds.  This routine translates
+ * from a wmain index to the two-d index of a specific domain so that one
+ * can interpolate.  
+ *
+ * ### Notes ###
+ * For 2d, the underlying 1-d grid is organized so that as n increases, 
+ * one goes up in z, and then steps out in rho., or in theta and then
+ * z as the case may be.
+ * 
+ * With domains, this routine has to be used carefully, and a better
+ * statement would be that these routines map to and from the element 
+ * in wmain to the normally 2d element in an individual domain.
+ * 
+ * So this means that if you want to get the ith and jth element of
+ * domain 1, then one needs to give nstart+whatever to wind_n_to_ij
+ *
+ **********************************************************/
 
 int
 wind_n_to_ij (ndom, n, i, j)
@@ -587,6 +553,26 @@ wind_n_to_ij (ndom, n, i, j)
   return (0);
 }
 
+
+/**********************************************************/
+/** @name      wind_ij_to_n
+ * @brief      Translate from the 2d element for an individual domain to the wind
+ * element number
+ *
+ * @param [in out] int  ndom   The domain of interest
+ * @param [in out] int  i   The element number for the first (x) dimension
+ * @param [in out] int  j   The element number fro the second (z or theta) dimension
+ * @param [in out] int *  n   The element number in the wind
+ * @return     The element number is returned
+ *
+ * @details
+ * This is just a simple translation to find the wind domain element
+ * number 
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
 int
 wind_ij_to_n (ndom, i, j, n)
      int *n, i, j, ndom;
@@ -600,6 +586,27 @@ wind_ij_to_n (ndom, i, j, n)
   *n = zdom[ndom].nstart + i * zdom[ndom].mdim + j;     // MDIM because the array is in z order
   return (*n);
 }
+
+
+/**********************************************************/
+/** @name      wind_x_to_n
+ * @brief      Determine the wind domain element number from a postion
+ *
+ * @param [in] double  x[]   A three vector describing a position
+ * @param [out] int *  n   The element number in the wind domain
+ * @return     Also retruns the element number in the wind domain
+ *
+ * @details
+ * 
+ * The routine simply cycles through the various domains until
+ * if finds one in where x is in that domain.
+ *
+ * ### Notes ###
+ *
+ * @bug  There are no checks for whether x is within the wind.
+ * This seems very dangerous.
+ *
+ **********************************************************/
 
 int
 wind_x_to_n (double x[], int *n)
@@ -624,8 +631,6 @@ wind_x_to_n (double x[], int *n)
   }
   return (*n);
 }
-
-
 
 
 
