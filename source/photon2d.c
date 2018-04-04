@@ -26,6 +26,9 @@
  * in favor of using wmain.  It would probably be a good idea
  * to that here.
  *
+ * These routines are called from trans_phot.  One could argue
+ * that the filename is misnamed for that reason.
+ *
  ***********************************************************/
 
 #include <stdio.h>

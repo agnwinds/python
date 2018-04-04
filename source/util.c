@@ -229,17 +229,17 @@ linterp (x, xarray, yarray, xdim, y, mode)
  * 	such as electron density, by various cells in the 
  * 	grid in a coordinate system independent way.
  *
- * @param [in out] int  ndom   The domain in where the interpolation will take place
- * @param [in out] int  ichoice  interpolate on vertices (0), interpolate on
+ * @param [in] int  ndom   The domain in where the interpolation will take place
+ * @param [in] int  ichoice  interpolate on vertices (0), interpolate on
  * centers (1)>
- * @param [in out] double  x[]   the 3-vector position for which you want
+ * @param [in] double  x[]   the 3-vector position for which you want
  * the fractinal position
- * @param [in out] int  ii[]    an array that contains the 1-d element
+ * @param [out] int  ii[]    an array that contains the 1-d element
  * numbers that must be summed 
- * @param [in out] double  frac[]   the array that contains the fractional
+ * @param [out] double  frac[]   the array that contains the fractional
  * contribution of the corresponding 
  * element
- * @param [in out] int *  nelem   the number of elements that must be
+ * @param [out] int *  nelem   the number of elements that must be
  * summed, nominally 2 for a spherical grid
  * and 4 for a two dimensional grid.  (For
  * a 3 d grid it would be 6, but we have not
