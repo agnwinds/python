@@ -1,4 +1,19 @@
 
+/***********************************************************/
+/** @file  wind_sum.c
+ * @Author ksl
+ * @date   April, 2018
+ *
+ * @brief  Just prints a subset of quantities to the screen
+ *
+ * ### Notes ###
+ *
+ * At some level, a separate file for this does not seem
+ * merited.  One should consider either adding other routines
+ * to this file, or adding it to wind_updates2d.c 
+ *
+ ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,43 +23,33 @@
 #include "atomic.h"
 #include "python.h"
 
-/***********************************************************
-                         Space Telescope Science Institute
 
- Synopsis:
-	xtemp_rad (w) prints out t_r and t_e in the grid
-
- Arguments:		
-	WindPtr w;
-
-Returns:
- 
-Description:	
-	
-	This is just a logging routine
-	
-Notes:
-	This was added in spring 2004 to try to understand how the
-	temperature was evolving in the models
-
-	This routine is adapted from a very simillar routine in py_wind 
-
-	The routine won't fail but the output may be less useful
-	when coodinates sysstems other than cylindrical are
-	used.
-History:
- 	04mar	ksl	Coding on python began.
-        04May	SS	Modified so that Te is given too.
-	06may	ksl	57+ -- to reflect plasma structure
-	09feb	ksl	68b - Added back subsampling when dimensions
-			are very large, and a warning about
-			the display when not using cylindrical 
-			coords.
-	15aug	ksl	Modified for domains, on the assumption
-			that we wanted to print out results for
-			all of the domians
-
-**************************************************************/
+/**********************************************************/
+/** @name      xtemp_rad
+ * @brief      Prints out t_r and t_e and the total number of photons
+ * in a subsample of the the grid that fits on a typical output terminal
+ *
+ * @param [in] WindPtr  w   The entire wind
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * This is just a logging routine that prints out a few key parameters
+ * at the end of each ionization cycle so that one can get a crude overview
+ * of what is happening.  
+ *
+ * ### Notes ###
+ * 
+ * This routine is adapted from a very similar routine in py_wind 
+ *
+ * If the number of grid cells in the x direction is less more than 30 
+ * the grid gets subsampled in the x direction
+ * 
+ * The routine won't fail but the output is less useful
+ * when coodinates systems other than cylindrical are
+ * used.
+ *
+ **********************************************************/
 
 int
 xtemp_rad (w)
@@ -77,7 +82,6 @@ xtemp_rad (w)
       if (mdim > 30)
 	py_wind_delta = 1 + mdim / 30;
 
-      /* XXX - Nick had commented the next secion out for reasons which are totally unclear */
 
       if (zdom[ndom].coord_type == SPHERICAL)
 	{
@@ -220,14 +224,12 @@ xtemp_rad (w)
 		  ntot = plasmamain[nplasma].ntot;
 		}
 	      else
-		// ntot = 0;
 		ntot = -99;
 	      Log ("%8d ", ntot);
 	    }
 	  Log ("\n");
 	}
     }
-
 
 
   return (0);

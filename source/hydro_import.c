@@ -686,7 +686,7 @@ History:
  * 
  * @param [in] w			The wind pointer
  * @param [in] ndom			The number of the domain which will be populated by the geometry
- * @return 	§				0 if successful
+ * @return 					0 if successful
  *
  * rtheta_make_zeus_grid defines the cells in a rtheta grid based 
  * upon the coordinates that can be read in from a zeus 

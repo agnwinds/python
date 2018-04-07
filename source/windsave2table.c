@@ -1,38 +1,57 @@
 
-/***********************************************************
-                                       Space Telescope Science Institute
+/***********************************************************/
+/** @file  windsave2table.c
+ * @Author ksl
+ * @date   April, 2018
+ *
+ * @brief  A standalone routine for writing a standard set of data
+ * from a windsavefile to ascii tables all readable with as astropy.io.ascii
+ *
+ * This routine is run from the command line, as follows
+ *
+ * windsave2table  windsave_root
+ *
+ * where windsave_root is the root name for a python run, or more precisel
+ * the rootname of a windsave file.
+ *
+ * The routine reads the windsavefile and then writes out a selected 
+ * set of variables into a variety of number of files, each of which
+ * are readable as astropy tables, where each row corresponds to one
+ * element of the wind.   
+ *
+ * All of the files begin
+ * with the rootname and the domain number.
+ * If Python run that created the windsave file
+ * has multiple domains a sepearate output file is created for each
+ * domain
+ *
+ * All of the files, begin with
+ *
+ *        x        z    i    j inwind 
+ *
+ * where x and z correspond to the position of the cell, i and j correspond to 
+ * the cell number and inwind says whether the cell was in the wind, so that it is
+ * fairly straightforward to create plotting routines for various parameters
+ * that are contained in the remaining columns.  
+ *
+ * The files include a so-called masterfile which records basic parameters
+ * like n_e, velocity,  rho, t_e, t_r, and ionization fractions
+ * for a few key ions in each cell when the windsave file was written
+ *
+ * ### Notes ###
+ *
+ * Whereas py_wind is intended to be run interactively, windsave2table is
+ * entirely hardwired so that it produces a standard set of output
+ * files.  To change the outputs one has to modify the routine
+ *
+ * This file just contains the driving routine.  All of the 
+ * real work is carried out in windsave2table_sub.c  Indeed so 
+ * little of the real work is done here that it might be sensible
+ * to move some portion of that code here.
+ *
+ *
+ ***********************************************************/
 
- Synopsis:
-	windsave2table writes key variables in a wind save file to an astropy table    
-		as calculated by python.  This is the main routine.
-
-Arguments:		
-
-	py_wind  windsave_root
-
-
-
-Returns:
- 
-Description:	
-	
-
-	
-Notes:
-
-	The main difficulty with this program is that one needs to be consistent
-	regarding the size of the arrays that one stuffs the variables into.  
-	As now written, if one wants to access a variable in wmain, one needs to
-	include and offset, generally called nstart.
-
-
-History:
-	150428	ksl	Adapted from routines in py_wind.c
-	160216	ksl	Resolved issues with multiple domains
-    1706    ksl Refactored so that windsave2table_subs could be
-                called from within python
-
-**************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,6 +61,33 @@ History:
 #include "python.h"
 
 
+
+
+/**********************************************************/
+/** @name      main
+ * @brief      windsave2table writes key variables in a windsave file 
+ * to an astropy table calculated Python.  This is the  main routine.
+ *
+ * @param [in] int  argc   The number of argments in the command line
+ * @param [in] char *  argv[]   The command line
+ * @return     Always returns 0  
+ *
+ * @details
+ * argc and argv[] are the standard variables provided to main 
+ * in a c-program.  * Only the first command line argument is 
+ * parsed and this should be rootname of the windsave file
+ *
+ * ### Notes ###
+ *
+ * This routine is a supervisory routine. The real work 
+ * is in do_windsave2table
+ *
+ * The routine does not read the .pf file.  It reads only 
+ * the windsave file (and the associated atomic data file,
+ * which is necessary to cause the appropriated arrays
+ * to be allocated).
+ *
+ **********************************************************/
 
 int
 main (argc, argv)
@@ -59,8 +105,6 @@ main (argc, argv)
   int do_windsave2table();
 
 
-  // py_wind uses rdpar, but only in an interactive mode. As a result 
-  // there is no associated .pf file
 
   strcpy (parameter_file, "NONE");
 
@@ -107,5 +151,7 @@ main (argc, argv)
   printf ("Read Atomic data from %s\n", geo.atomic_filename);
 
   do_windsave2table(root);
+
+  return(0);
 }
 
