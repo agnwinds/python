@@ -1,3 +1,45 @@
+
+/***********************************************************/
+/** @file  trans_phot.c
+ * @Author ksl
+ * @date   April, 2018
+ *
+ * @brief  This file contains high level routines which carry
+ * out the propagation of photons through the wind/wind domains
+ * both for ionization and spectrum (extract) cycles
+ *
+ * ### Notes ###
+ *
+ * The routines contained here are central to Python, and anyone
+ * who wants to understand Python in general should spend time
+ * understanding how they work
+ *
+ * There are two basic options associated with the routines.
+ *
+ * * live or die is the case in which one is only concerned
+ * with how a photon goes through the wind and random numbers
+ * are used to generate the scattering directions.  The photon is
+ * followed until it leaves the system.  This is the only option
+ * used in ionization cycles (currently).  
+ *
+ * * extract is the mode where whenever a photon scatters we
+ * also calculate what the photon weight would be if it scattered 
+ * in a set of certain directions.  When this happens the weight
+ * of the photon is changed to reflect the fact that the direction
+ * is not random.
+ *
+ * The extract option is used
+ * normaly during the spectral extraction cycles.  
+ * However, as an advanced option one can use the live or die
+ * to construct the detailed spectrum.  One would not normally 
+ * want to do this, as many photons are "wasted" since they 
+ * don't scatter at the desired angle.  With sufficient numbers
+ * of photons however the results of the two methods should 
+ * (by construction) be identical (or at least very very
+ * similar). 
+ *
+ * 
+ ***********************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -5,63 +47,39 @@
 #include "atomic.h"
 #include "python.h"
 
-/***********************************************************
-                                       Space Telescope Science Institute
- Synopsis:
- int trans_phot(w,p,iextract) oversees the propagation of a "flight" of photons
-Arguments:		
-	PhotPtr p;
-	WindPtr w;
-	int iextract	0  -> the live or die option and therefore no need to call extract 
-                       !0  -> the normal option for python and hence the need to call "extract"
- 
-Returns:
-
-    At the end of the routine p is the last point where the photon was in the wind,
-    not the outer boundary of the radiative transfer
-  
-Description:	
-This routine oversees the propagation of  individual photons.  The main loop 
-covers an entire "flight" of photons.   The routine generates the random
-optical depth a photon can travel before scattering and monitors the
-progress of the photon through the grid.  The real physics is done else
-where, in "translate" or "scatter".
-		
-Notes:
-History:
- 	97jan	ksl	Coded and debugged as part of Python effort.  
- 	98mar	ksl	Modified to allow for photons which are created in the wind
-	00nov	ksl	Cleaned up some of the logic when a photon was scattered
-			and assured that photon did not continue when pure absorption
-			was used.
-	01aug	ksl	Modified Error messages (and made silent) when a photon was
-			detected out of the cell in which it was originally.  This
-			is a possible outcome (because a photon moves as far as the
-			boundary + DFUDGE, but if this happens a lot one should worry.
-	01dec	ksl	Modified calls to extract to use .origin where possible
-			and to change meaning of itype in extract to conform	
-			to that of origin.  This mainly just separates star + bl
-			into individual sources.
-	02jan	ksl	Added line to assure that trans_phot returns the final weight of
-			all photons, even though the position may be the position of
-			last scatter, or in the absence of scatters the originating 
-			position of the photon.  This was to assure that photoabsorption
-			and other pure absorption processes, are properly incoporated
-			into the global spectrum and in live or die option.
-	04mar	ksl	Made small modifications (qdisk) to reflect fact that heating
-			of disk is now stored in a separate structure.
-    04Jun   SS  Small modification to kill photons when necessary during the 
-                spectral cycles of macro atom runs.
-	1112	ksl	Made some changes in the logic to try to trap photons that
-			had somehow escaped the wind to correct a segmenation fault
-			that cropped up in spherical wind models
-**************************************************************/
 
 FILE *pltptr;
 int plinit = 0;
 long n_lost_to_dfudge = 0;
 
-/* 0 means do not extract along specific angles; nonzero implies to extract */
+
+
+/**********************************************************/
+/** @name      trans_phot
+ * @brief      int (w,p,iextract) oversees the propagation of a "flight" of photons
+ *
+ * @param [in] WindPtr  w   The entire wind domain
+ * @param [in out] PhotPtr  p   A pointer to a "fligh" of photons
+ * @param [in] int  iextract   An integer controlling whether we are to process the
+ * flight in the live or die option (0) or whether we also need to extract photons in 
+ * specific directions (which is usually the case in constructing spectra
+ * @return   Normally returns 0  
+ *
+ * @details
+ * This routine oversees the propagation of  individual photons.  The main loop 
+ * covers an entire "flight" of photons.   The routine generates the random
+ * optical depth a photon can travel before scattering and monitors the
+ * progress of the photon through the grid.  
+ *
+ * The real physics is done elsewhere, in lower level routines.
+ *
+ * ### Notes ###
+ *
+ * At the end of the routine the position for each of the photons in p is the 
+ * last point where the photon was in the wind, * not the outer boundary of 
+ * the radiative transfer
+ *
+ **********************************************************/
 
 int
 trans_phot (WindPtr w, PhotPtr p, int iextract)
@@ -75,8 +93,6 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
 
 
-  /* 05jul -- not clear whether this is needed and why it is different from DEBUG */
-  /* 1411 -- JM -- Debug usage has been altered. See #111, #120 */
   /* 1802 XXX ksl - This needs to be incoropratred into diag.c */
 
   if (modes.track_resonant_scatters && plinit == 0)
@@ -89,10 +105,12 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
   Log ("\n");
 
+  /* Beginning of loop over photons */
+
   for (nphot = 0; nphot < NPHOT; nphot++)
     {
 
-      // This is just a watchdog method to tell the user the program is still running
+      /* This is just a watchdog method to tell the user the program is still running */
 
       if (nphot % 50000 == 0)
 	Log ("Photon %7d of %7d or %6.3f per cent \n", nphot, NPHOT,
@@ -100,7 +118,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
       Log_flush ();
 
-      /* 74a_ksl Check that the weights are real */
+      /* Verify that the weights are real, a check that is proably unnecessary */
 
     if (sane_check (p[nphot].w))
     {
@@ -159,7 +177,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 	  stuff_phot (&p[nphot], &pextract);
 
 
-      /* We then increase weight to account for number of scatters. This is done because in extract we multiply by the escape
+      /* We increase weight to account for number of scatters. This is done because in extract we multiply by the escape
          probability along a given direction, but we also need to divide the weight by the mean escape probability, which is
          equal to 1/nnscat */
       if (geo.scatter_mode == SCATTER_MODE_THERMAL && pextract.nres <= NLINES && pextract.nres > -1)
@@ -205,7 +223,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 	  extract (w, &pextract, pextract.origin);
 
 
-	  // Restore the correct disk illumination
+	  /* Restore the correct disk illumination */
 	  if (absorb_reflect == BACK_RAD_SCATTER
 	      && p[nphot].origin == PTYPE_DISK)
 	    {
@@ -214,15 +232,15 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 	}			/* End of extract loop */
 
       p[nphot].np = nphot;
+
+      /* Transport a single photon */
       trans_phot_single (w, &p[nphot], iextract);
-
-
 
     }
 
   /* This is the end of the loop over all of the photons; after this the routine returns */
 
-  // 130624 ksl Line added to complete watchdog timer,
+  /* Line to complete watchdog timer */
   Log ("\n\n");
 
   /* sometimes photons scatter near the edge of the wind and get pushed out by DFUDGE. We record these */
@@ -237,34 +255,47 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 }
 
 
-/***********************************************************
-                                       University of Southampton
- Synopsis:
-   trans_phot_single takes care of the single passage of each photon through the wind.
-   It is called by trans_phot for each photon.
-
- Arguments:		
-	PhotPtr p;
-	WindPtr w;
-	int iextract	0  -> the live or die option and therefore no need to call extract 
-                    !0  -> the normal option for python and hence the need to call "extract"
- 
-Returns:
-  
-Description:	
-This routine oversees the propagation of  individual photons.  
-The routine generates the random
-optical depth a photon can travel before scattering and monitors the
-progress of the photon through the grid.  The real physics is done else
-where, in "translate" or "scatter".
-		
-Notes:
-History:
- 	1505 	SWM Coded 
-**************************************************************/
 
 
 
+
+/**********************************************************/
+/** @name      trans_phot_single
+ * @brief      Transport a single photon photon through the wind.
+ *
+ * @param [in] WindPtr  w   The entire wind
+ * @param [in out] PhotPtr  p   A single photon
+ * @param [in] int  iextract   If 0, then process this photon in the live or die option, without
+ * calling extract
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ * This routine oversees the propagation of an individual photon through
+ * the wind.  As the photon moves through the wind, its position, direction 
+ * and weight are updated.  In reverberation mode, the flight time is also
+ * tracked.
+ *
+ * Basically what the routine does is generate a random number whihc is used to
+ * determine the optical depth to a scatter, and then it calles translate
+ * multiple times.   translate involves moving the photon only a single cell 
+ * (or alternatively a single tranfer in the windless region), and returns
+ * a status.  Depending on what this status is, trans_phot_single calls
+ * trans_phot again doing nothing, but if the scattering depth has been
+ * reached, then trans_phot_single causes the photon to scatter,
+ * which changes its direction.  This process continues until the photon
+ * exits the system or hits a barrier.  If the photon hits a radiating
+ * surface, the disk or star, then the photon may either be absorbed,
+ * or scattered depending on the reflection/absorption mode.    
+ *
+ *
+ *
+ * ### Notes ###
+ * 
+ * This routine is called by trans_phot once for each photon in a flight of photons
+ * 
+ *
+ **********************************************************/
 
 int
 trans_phot_single (WindPtr w, PhotPtr p, int iextract)
@@ -285,8 +316,8 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   double normal[3];
 
   /* Initialize parameters that are needed for the flight of the photon through the wind */
+
   stuff_phot (p, &pp);
-//  tau_scat = -log (1. - (rand () + 0.5) / MAXRAND); DONE - this would have got a random number exluding zero
   tau_scat = -log (1. - random_number(0.0,1.0)); 
   
   weight_min = EPSILON * pp.w;
@@ -294,7 +325,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   tau = 0;
   icell = 0;
 
-  n = 0;			// Needed to avoid 03 warning, but it is not clear that it is defined as expected.
+  n = 0;			/* Avoid 03 warning */
 
 
 
@@ -316,7 +347,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
       icell++;
       istat = walls (&pp, p, normal);
-      // pp is where the photon is going, p is where it was
+      /* pp is where the photon is going, p is where it was  */
 
 
       if (istat == -1)
@@ -339,18 +370,21 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
     {                           /* It hit the star */
       geo.lum_star_back+=pp.w;
       if (geo.absorb_reflect==BACK_RAD_SCATTER){
+          /* If we got here, the a new photon direction needs to be defined that will cause the photon 
+           * to continue in the wind.  Since this is effectively a scattering event we also have to
+           * extract a photon to consturct the detailed spectrum 
+           */
           randvcos(pp.lmn,normal);
           stuff_phot (&pp, p);
-//          tau_scat = -log (1. - (rand () + 0.5) / MAXRAND); DONE
           tau_scat = -log (1. - random_number(0.0,1.0));
-          istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
+          istat = pp.istat = P_INWIND;      /* Set the status back to P_INWIND so the photon will continue */ 
           tau = 0;
           if (iextract) {
               stuff_phot (&pp, &pextract);
-              extract (w, &pextract, PTYPE_STAR);     // Treat as wind photon for purpose of extraction
+              extract (w, &pextract, PTYPE_STAR);     // Treat as stellar photon for purpose of extraction
           }
       }
-      else {  /*This is the end of the line for this photon */
+      else {  /*Photons that hit the star are simply absorbed so this is the end of the line for this photon */
           stuff_phot (&pp, p);
           break;
       }
@@ -368,24 +402,27 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	  kkk = 0;
 	  while (rrr > qdisk.r[kkk] && kkk < NRINGS - 1)
 	    kkk++;
-	  kkk--;		// So that the heating refers to the heating between kkk and kkk+1
+	  kkk--;		/* So that the heating refers to the heating between kkk and kkk+1 */
 	  qdisk.nhit[kkk]++;
-	  geo.lum_disk_back = qdisk.heat[kkk] += pp.w;	// 60a - ksl - Added to be able to calculate illum of disk
+	  geo.lum_disk_back = qdisk.heat[kkk] += pp.w;	
 	  qdisk.ave_freq[kkk] += pp.w * pp.freq;
 
       if (geo.absorb_reflect==BACK_RAD_SCATTER){
+          /* If we got here, the a new photon direction needs to be defined that will cause the photon 
+           * to continue in the wind.  Since this is effectively a scattering event we also have to
+           * extract a photon to consturct the detailed spectrum 
+           */
           randvcos(pp.lmn,normal);
           stuff_phot (&pp, p);
-//          tau_scat = -log (1. - (rand () + 0.5) / MAXRAND); DONE
           tau_scat = -log (1. - random_number(0.0,1.0));
-          istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
+          istat = pp.istat = P_INWIND;      
           tau = 0;
           if (iextract) {
               stuff_phot (&pp, &pextract);
-              extract (w, &pextract, PTYPE_DISK);     // Treat as wind photon for purpose of extraction
+              extract (w, &pextract, PTYPE_DISK);     
           }
       }
-      else {  /*This is the end of the line for this photon */
+      else {  /* Photons that hit the disk are to be absorbed so this is the end of the line for this photon */
           stuff_phot (&pp, p);
           break;
       }
@@ -394,8 +431,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       if (istat == P_SCAT)
 	{			/* Cause the photon to scatter and reinitilize */
 
-	  /* 71 - 1112 - ksl - placed this line here to try to avoid an error I was seeing in scatter.  I believe the first if
-	     statement has a loophole that needs to be plugged, when it comes back with avalue of n = -1 */
 
 	  pp.grid = n = where_in_grid (wmain[pp.grid].ndom, pp.x);
 
@@ -404,7 +439,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	      Error
 		("trans_phot: Trying to scatter a photon which is not in the wind\n");
 	      Error ("trans_phot: %d grid %3d x %8.2e %8.2e %8.2e\n", pp.np, pp.grid,
-	      //OLD Error ("trans_phot: grid %3d x %8.2e %8.2e %8.2e\n", pp.grid,
 		     pp.x[0], pp.x[1], pp.x[2]);
 	      Error ("trans_phot: This photon is effectively lost!\n");
 	      istat = pp.istat = p->istat = P_ERROR;
@@ -412,10 +446,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	      break;
 	    }
 
-	  /* 57+ -- ksl -- Add check to see if there is a cell in the plasma structure for this.  This is a problem that needs
-	     fixing */
-	  /* 1506 JM -- this appeared to happen due to a rather convoluted problem involving DFUDGE
-	     and not updating the istat variable properly. See Issue #154 for discussion */
+	  /* 1506 JM -- If the next errors reoccur, see Issue #154 for discussion */
 
 	  if (wmain[n].nplasma == NPLASMA)
 	    {
@@ -429,14 +460,12 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	      break;
 	    }
 
-	  /* 57h -- ksl -- Add check to verify the cell has some volume */
 
 	  if (wmain[n].vol <= 0)
 	    {
 	      Error
 		("trans_phot: Trying to scatter a photon in a cell with no wind volume\n");
 	      Error ("trans_phot: %d grid %3d x %8.2e %8.2e %8.2e\n", pp.np, pp.grid,
-	      //OLD Error ("trans_phot: grid %3d x %8.2e %8.2e %8.2e\n", pp.grid,
 		     pp.x[0], pp.x[1], pp.x[2]);
 	      Log ("istat %d\n", pp.istat);
 	      Error ("trans_phot: This photon is effectively lost!\n");
@@ -446,7 +475,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
 	    }
 
-	  /* 0215 SWM - Added cell-based reverberation mapping */
+	  /* Add path lengths for reverberation mapping */
 	  if ((geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
 	      && geo.ioniz_or_extract && geo.wcycle == geo.wcycles - 1)
 	    {
@@ -456,15 +485,14 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
 	  /* SS July 04 - next lines modified so that the "thermal trapping" model of anisotropic scattering is included in the
 	     macro atom method. What happens now is all in scatter - within that routine the "thermal trapping" model is used to
-	     decide what the direction of emission is before returning here.  54b-ksl -- To see what the code did previously see
-	     py46.  I've confirmed that the current version of scattering really does what the old code did for two-level lines */
+	     decide what the direction of emission is before returning here.  
+         */
 
 
 	  nnscat = 0;
 	  nnscat++;
 	  ptr_nres = &nres;
 
-	  /* 74a_ksl - Check added to search for error in weights */
 	  if (sane_check (pp.w))
 	    {
 	      Error
@@ -477,7 +505,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 		     nerr);
 	    }
 	  pp.nscat++;
-	  /* 74a_ksl - Check added to search for error in weights */
+
 
 	  if (sane_check (pp.w))
 	    {
@@ -507,7 +535,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	    }
 
 	  // Calculate the line heating and if the photon was absorbed break finish up
-	  // ??? Need to modify line_heat for multiple scattering but not yet
+	  // XXXX ??? Need to modify line_heat for multiple scattering but not yet
 	  // Condition that nres < nlines added (SS) 
 
 	  if (nres > -1 && nres < nlines)
@@ -517,13 +545,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	      /* This next statement writes out the position of every resonant scattering event to a file */
 	      if (modes.track_resonant_scatters)
               track_scatters(&pp,wmain[n].nplasma,"Resonant");
-//OLD		fprintf (pltptr,
-//OLD			 "Photon %i has resonant scatter at %.2e %.2e %.2e in wind cell %i (grid cell=%i). Freq=%e Weight=%e\n",
-//OLD			 p->np, pp.x[0], pp.x[1], pp.x[2], wmain[n].nplasma,
-//OLD			 pp.grid, pp.freq, pp.w);
 
-	      /* 68a - 090124 - ksl - Increment the number of scatters by this ion in this cell */
-	      /* 68c - 090408 - ksl - Changed this to the weight of the photon at the time of the scatter */
 
 	      plasmamain[wmain[n].nplasma].scatters[line[nres].nion] += pp.w;
 
@@ -571,9 +593,6 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 		{
 		  p_norm = 1.0;
 
-		  /* throw an error if nnscat does not equal 1 */
-		  /* JM 1504-- originally I'd used the wrong value of nnscat here. This would throw large amounts of errors which 
-		     weren't actually errors */
 		  /* nnscat is the quantity associated with this photon being extracted */
 		  if (nnscat != 1)
 		    Error
@@ -585,6 +604,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	      /* We then increase weight to account for number of scatters. This is done because in extract we multiply by the
 	         escape probability along a given direction, but we also need to divide the weight by the mean escape
 	         probability, which is equal to 1/nnscat */
+
 	      pextract.w *= nnscat / p_norm;
 
 	      if (sane_check (pextract.w))
@@ -597,15 +617,12 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	    }
 
 
-
-
 	  /* OK we are ready to continue the processing of a photon which has scattered. 
        * The next steps reinitialize parameters
 	     so that the photon can continue throug the wind */
 
-//      tau_scat = -log (1. - (rand () + 0.5) / MAXRAND); DONE
       tau_scat = -log (1. - random_number(0.0,1.0));
-      istat = pp.istat = P_INWIND;      // if we got here, the photon stays in the wind- make sure istat doesn't say scattered still! 
+      istat = pp.istat = P_INWIND;      
       tau = 0;
 
 	  stuff_v (pp.x, x_dfudge_check);	// this is a vector we use to see if dfudge moved the photon outside the wind cone
@@ -638,15 +655,13 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 	  icell = 0;
 	}
 
-
-
       /* This completes the portion of the code that handles the scattering of a photon. 
        * What follows is a simple check to see if
-         this particular photon has gotten stuck in the wind 54b-ksl */
+       * this particular photon has gotten stuck in the wind */
 
       if (pp.nscat == MAXSCAT)
 	{
-	  istat = pp.istat = P_TOO_MANY_SCATTERS;	/* Scattered too many times */
+	  istat = pp.istat = P_TOO_MANY_SCATTERS;	
 	  stuff_phot (&pp, p);
 	  break;
 	}
@@ -671,12 +686,13 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 
   /* The next section is for diagnostic purpposes.  There are two possibilities.  If you wish to know where 
    * the photon was last while in the wind, you want to track p; if you wish to know where it hits the
-   * outer boundary of the calculation you would want pp */
+   * outer boundary of the calculation you would want pp.  So one should keep both lines below, and comment
+   * out the one you do not want. */
 
   if (modes.save_photons)
     {
       // save_photons (p, "Final");  // Where the last position of the photon in the wind
-      save_photons (&pp, "Final"); //The postion of the photon where it exits the calculation
+      save_photons (&pp, "Final"); //The position of the photon where it exits the calculation
     }
   return (0);
 }

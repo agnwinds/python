@@ -30,13 +30,20 @@ notifications:
       - james.matthews@physics.ox.ac.uk
       - long@stsci.edu
       - nick_higginbottom@fastmail.fm
-    on_success: never      # default: change
+    on_success: never       # default: change
     on_failure: always      # default: always
+
+# install numpy for test scripts
+before_install:                                                                                                                                                                                                                     
+  - sudo apt-get update -qq                                                                                                                                                                                                         
+  - sudo apt-get install -qq python3-numpy 
+  - sudo apt-get install -qq python3-astropy
 
 install:
     # first configure
     - export PYTHON=$TRAVIS_BUILD_DIR
-    - export PATH=$PATH:$PYTHON/bin 
+    - export PATH=$PATH:$PYTHON/bin:$PYTHON/py_progs
+    - export PYTHONPATH=$PYTHONPATH:$PYTHON/py_progs
     - ./configure
 
     # do installation
@@ -57,6 +64,8 @@ script:
     - make clean
     - cd ../examples/travis/
     - Setup_Py_Dir
+    - py -f balmer_test
+    - python3 ../../py_progs/balmer_decrement.py balmer_test
     - py -i cv_macro_benchmark
     - py -i cv_standard
     - py -i fiducial_agn

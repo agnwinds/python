@@ -20,28 +20,6 @@
 #include "python.h"
 
 
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_domain_params reads information on the coordinate system
-  and grid dimensions and sets the corresponding variables
-  in the geo structure
-   
-Arguments:    
-
-Returns:
- 
- 
-Description:  
-
-Notes:
-
-History:
-  1502  JM  Moved here from main()
-  1508	ksl	Updated for domains
-
-**************************************************************/
 
 /**********************************************************/
 /** @name       get_domain_params
@@ -144,7 +122,7 @@ get_domain_params (ndom)
 
     }
 
-/* 130405 ksl - Check that NDIM_MAX is greater than NDIM and MDIM.  */
+/* Check that NDIM_MAX is greater than NDIM and MDIM.  */
 
   if ((zdom[ndom].ndim > NDIM_MAX) || (zdom[ndom].mdim > NDIM_MAX))
     {
@@ -176,26 +154,6 @@ get_domain_params (ndom)
 }
 
 
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_wind_params calls the relevant subroutine to get wind parameters
-  according to the wind type specified 
-   
-Arguments:		
-
-Returns:
- 
- 
-Description:	
-
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-
-**************************************************************/
 
 
 /**********************************************************/
@@ -326,27 +284,6 @@ get_wind_params (ndom)
 
 
 
-/***********************************************************
-             University of Southampton
-
-Synopsis: 
-  get_line_transfer_mode reads in the variable geo.line_mode
-  and sets the variables geo.line_mode, geo.scatter_mode,
-  geo.rt_mode and geo.macro_simple accordingly
-   
-Arguments:		
-
-Returns:
- 
- 
-Description:	
-
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-
-**************************************************************/
 
 /**********************************************************/
 /** @name       get_line_transfer_mode
@@ -479,4 +416,85 @@ get_line_transfer_mode ()
   get_atomic_data (geo.atomic_filename);
   return (0);
 }
+
+
+
+
+/**********************************************************/
+/** @name      setup_windcone
+ * @brief      sets up the windcones for each domain
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ * 
+ * This routine takes input variables, the minimim and maximum
+ * radius of the wind at the disk, and the flow angles bounding
+ * the wind, and calculates the variables used to define the cones
+ * that bound each wind domain involving biconical flows.
+ *
+ * ### Notes ###
+ *
+ * The routine cycles through all of the existing domains, and
+ * uses variables which have been read in or entered previously.
+ *
+ * The input variables that are used are typicall, wind_rho_min, wind_rho_max
+ * and wind_thetamin and max.  They are defined in routines like,
+ * get_sv_parameters.
+ *
+ * The angles thetamin and
+ * thetamax are all defined from the z axis, so that an angle of 0
+ * is a flow that is perpindicular to to the disk and one that is
+ * close to 90 degrees will be parallel to the plane of the disk
+ *
+ * The routine files a structure of type cone, that contain, an element
+ * z,  the place where the windcone intercepts the z axis, and an element
+ * dzdr is the slope of the cone
+ *
+ * Wind cones are defined azimuthally around the z axis.
+ *
+ * For models that are not biconical flows, the windcones are set 
+ * to include the entire domain.
+ * 
+ *
+ **********************************************************/
+
+int
+setup_windcone ()
+{
+  int ndom;
+
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
+    {
+
+      if (zdom[ndom].wind_thetamin > 0.0)
+	{
+	  zdom[ndom].windcone[0].dzdr = 1. / tan (zdom[ndom].wind_thetamin);
+	  zdom[ndom].windcone[0].z =
+	    (-zdom[ndom].wind_rho_min / tan (zdom[ndom].wind_thetamin));
+	}
+      else
+	{
+	  zdom[ndom].windcone[0].dzdr = VERY_BIG;
+	  zdom[ndom].windcone[0].z = -VERY_BIG;;
+	}
+
+
+      if (zdom[ndom].wind_thetamax > 0.0)
+	{
+	  zdom[ndom].windcone[1].dzdr = 1. / tan (zdom[ndom].wind_thetamax);
+	  zdom[ndom].windcone[1].z =
+	    (-zdom[ndom].wind_rho_max / tan (zdom[ndom].wind_thetamax));
+	}
+      else
+	{
+	  zdom[ndom].windcone[1].dzdr = VERY_BIG;
+	  zdom[ndom].windcone[1].z = -VERY_BIG;;
+	}
+    }
+  return (0);
+}
+
+
+
 

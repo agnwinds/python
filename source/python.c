@@ -251,7 +251,6 @@ main (argc, argv)
 
   int my_rank;			// these two variables are used regardless of parallel mode
   int np_mpi;			// rank and number of processes, 0 and 1 in non-parallel
-  int ndom;
   
 
   
@@ -728,16 +727,18 @@ main (argc, argv)
 
      XXX This looks wrong; we read all of this information in I think
    */
-
+  /*
   for (ndom = 0; ndom < geo.ndomain; ndom++)
     {
-
-      if (zdom[ndom].coord_type == RTHETA && geo.run_type == SYSTEM_TYPE_PREVIOUS)	//We need to generate an rtheta wind cone if we are restarting
-	{
-	  rtheta_make_cones (ndom, wmain);
-	}
+      if (zdom[ndom].coord_type == RTHETA)
+	  {
+		  if (geo.run_type == RUN_TYPE_RESTART || geo.run_type == SYSTEM_TYPE_PREVIOUS)	//We need to generate an rtheta wind cone if we are restarting
+		  {
+		  	rtheta_make_cones (ndom, wmain);
+		  }
+	  }
     }
-
+*/
 
    /* initialize the random number generator */
    /* By default, the random number generator start with fixed seeds (differnt

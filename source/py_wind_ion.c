@@ -89,7 +89,6 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
   {
     aaa[n] = 0;
     nplasma = w[n].nplasma;
-//OLD    if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
     if (w[n].vol > 0.0 )
     {
       if (iswitch == 0)
@@ -132,7 +131,6 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
     for (n = 0; n < NDIM2; n++)
     {
       nplasma = w[n].nplasma;
-//OLD      if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
       if (w[n].vol > 0.0 )
       {
         if (iswitch == 0)
@@ -310,7 +308,7 @@ line_summary (w, rootname, ochoice)
   iline = 0;
   lambda=0;
   i_matom_search = 0;
-  rdint ("line (0=C-IV, 1=Hα, 2=Hβ, 3=Matom", &iline);
+  rdint ("line (0=C-IV, 1=Ha, 2=Hb, 3=Matom", &iline);
   switch (iline)
   {
     case 0: //Carbon-IV
@@ -554,7 +552,6 @@ modify_te (w, rootname, ochoice)
     aaa[n] = 0;
     if (w[n].vol > 0.0 && (x = plasmamain[nplasma].heat_tot) > 1.0)
     {
-      //OLD aaa[n] = t_e = calc_te (&plasmamain[nplasma], TMIN, 1.2 * plasmamain[nplasma].t_r);
       aaa[n] = t_e = calc_te (&plasmamain[nplasma], MIN_TEMP, 1.2 * plasmamain[nplasma].t_r);
     }
   }

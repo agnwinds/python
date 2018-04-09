@@ -947,7 +947,7 @@ struct force_con
   int z, istate;
   float frac;
 }
-con_force[10];
+con_force[1000];
 int nforce;
 
 int
@@ -981,7 +981,7 @@ fix_concentrations (xplasma, mode)
 	}
 
       nforce = 0;
-      while (fgets (line, LINELENGTH, cptr) != NULL && nforce < 10)
+      while (fgets (line, LINELENGTH, cptr) != NULL && nforce < 1000)
 	{
 	  if ((n =
 	       sscanf (line, "%d %d %f", &con_force[nforce].z,

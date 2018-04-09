@@ -66,10 +66,10 @@ int check_corners_inwind(int n);
 int check_grid(void);
 /* wind.c */
 int where_in_wind(double x[], int *ndomain);
-int wind_check(WindPtr www, int n);
 double model_velocity(int ndom, double x[], double v[]);
 int model_vgrad(int ndom, double x[], double v_grad[][3]);
 double model_rho(int ndom, double x[]);
+int wind_check(WindPtr www, int n);
 /* vvector.c */
 double dot(double a[], double b[]);
 double length(double a[]);
@@ -133,10 +133,8 @@ double den_config(PlasmaPtr xplasma, int nconf);
 double pop_kappa_ff_array(void);
 int update_banded_estimators(PlasmaPtr xplasma, PhotPtr p, double ds, double w_ave);
 double mean_intensity(PlasmaPtr xplasma, double freq, int mode);
-/* init.c */
+/* setup_files.c */
 int init_log_and_windsave(int restart_stat);
-double setup_dfudge(void);
-int setup_windcone(void);
 int setup_created_files(void);
 /* wind_updates2d.c */
 int wind_update(WindPtr (w));
@@ -420,7 +418,7 @@ int check_time(char *root);
 int auger_ionization(PlasmaPtr xplasma);
 /* agn.c */
 double agn_init(double r, double lum, double alpha, double freqmin, double freqmax, int ioniz_or_final, double *f);
-double emittance_pow(double freqmin, double freqmax, double lum, double alpha);
+double emittance_pow(double freqmin, double freqmax, double alpha);
 double emittance_bpow(double freqmin, double freqmax, double lum, double alpha);
 int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
 /* shell_wind.c */
@@ -485,6 +483,7 @@ int get_bl_and_agn_params(double lstar);
 int get_domain_params(int ndom);
 int get_wind_params(int ndom);
 int get_line_transfer_mode(void);
+int setup_windcone(void);
 /* setup_disk.c */
 double get_disk_params(void);
 /* photo_gen_matom.c */
@@ -547,18 +546,18 @@ int wind_paths_output_dump(WindPtr wind, int i_rank);
 int wind_paths_point_index(int i, int j, int k, int i_top, DomainPtr dom);
 int wind_paths_sphere_point_index(int i, int j, int k);
 int wind_paths_output_vtk(WindPtr wind, int ndom);
-/* setup2.c */
+/* setup.c */
 int init_geo(void);
 int get_spectype(int yesno, char *question, int *spectype);
 int init_advanced_modes(void);
 int init_observers(void);
 PhotPtr init_photons(void);
 int init_ionization(void);
+double setup_dfudge(void);
 /* run.c */
 int calculate_ionization(int restart_stat);
 int make_spectra(int restart_stat);
 /* brem.c */
-double emittance_brem(double freqmin, double freqmax, double lum, double t);
 double integ_brem(double freq);
 double brem_d(double alpha);
 double get_rand_brem(double freqmin, double freqmax);

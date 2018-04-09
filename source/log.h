@@ -1,5 +1,3 @@
-/* lineio.c */
-int get_line(FILE *fptr, char line[]);
 /* rdpar.c */
 int opar(char filename[]);
 int add_par(char filename[]);

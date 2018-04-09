@@ -1,33 +1,35 @@
 
+/***********************************************************/
+/** @file  signal.c
+ * @Author ksl
+ * @date   March, 2018
+ *
+ * @brief  Routines indicating  how  many ionization or spectal
+ * generation cycles have been completed in 
+ * in a file named root.sig where 
+ * root is the rootname of the .pf file and which stop the
+ * program if one has set a maximum execution time and this
+ * has been exceeded. 
+ *
+ * The purpose of these routines are to give a very high level
+ * view of where the program is at any time, and in particular
+ * whether the program was complete at the time the program exited.
+ *
+ * The were written for running models on systems whre there 
+ * are time limits on how long a program can run, such as 
+ * beowulf clusters.  
+ *
+ * They permit you to stop (checkpoint) 
+ * the program after a certain time, and then using scripts
+ * to easily determine whether the program ran to completion
+ * and if not
+ * to restart the program to finish a run
+ *
+ *
+ ***********************************************************/
 
 
-/**************************************************************************
-                    Space Telescope Science Institute
 
-
-  Synopsis:  
-
-  These are routines which provide a very brief summary of 
-  how the program is proceeding, mainly information about
-  how many cycles have completed.  They are used for restarting
-  python, primarily.
-
-  Description:	
-
-  Arguments:  
-
-
-  Returns:
-
-  Notes:
-
- 
-
-  History:
-08nov	ksl	Coded as part of effort to be able to restart jobs
-		on the Royal cluster
-
- ************************************************************************/
 
 #include <stdio.h>
 #include <strings.h>
@@ -41,25 +43,36 @@
 #include "python.h"
 
 
-/* 
-
-xsignal generates a single line message to a file names root.sig
-
-All of the messages hae the format of
-
-Mon Nov 10 09:05:34 2008     10.0  message 
-
-where the message is determined by the format and the extra variables 
-that are passed to the program.  This portion of the routine
-operates in the same way that an fprintf statement operates
-and was derived from the routines used for logging.
 
 
-0811	ksl	Created as part of effort to make the program work on
-		on Royal where there are time limits for how long a
-		single process can run
- 
-*/
+/**********************************************************/
+/** @name      xsignal
+ * @brief      xsignal generates a single line message to a file names root.sig
+ *
+ * @param [in] char *  root   root name of the file to wirte to
+ * @param [in] char *  format   A format string
+ * @param [in]   ...   The remaining inputs for the fprintf statement
+ * @return     Always  returns 0
+ *
+ * If one cannot write to the .sig file, Python will exit
+ *
+ * @details
+ * 
+ * ### Notes ###
+ * In principle almost anything can be written to the .sig file, as this 
+ * uses vfprintf to write to the file.  In pracitce all of the messages
+ * have the format 
+ *
+ * 
+ * Mon Nov 10 09:05:34 2008     10.0  message 
+ * 
+ * where the message is determined by the format and the extra variables 
+ * that are passed to the program.  
+ *
+ * The messages are all written from the rank 0 thread.
+ * 
+ *
+ **********************************************************/
 
 int
 xsignal (char *root, char *format, ...)
@@ -128,12 +141,24 @@ xsignal (char *root, char *format, ...)
   return (0);
 }
 
-/* 
- * rm the old signal file so one can begin again
+
+
+/**********************************************************/
+/** @name      xsignal_rm
+ * @brief      Remove the old signal file so that one can begin again
  *
- * 170904   ksl Added check to see if the file exists, so we don't
- *              try to remove a non-existent file
- */
+ * @param [in out] char *  root   Root name of the .sig file
+ * @return     Always returns 0
+ *
+ * @details
+ * The routine checks whether a .sig file exists, and if so 
+ * removes it
+ *
+ * ### Notes ###
+ *
+ * Thread 0 is responsible for executing the removal.
+ *
+ **********************************************************/
 
 int
 xsignal_rm (char *root)
@@ -173,25 +198,26 @@ xsignal_rm (char *root)
 }
 
 
-/* 
-max_time is the amount of time in seconds that one wantts the program to run 
-without stopping.  It can be updated at any point.
-
-Note
-
-check_time is the routine that halts the process if it runs too long.
-
-The first call to the routine timer() sets the time.  It is fine to call this
-directly but that is not necessary, as timeer will be called every time xsignal
-is invoked.
-
-0811	ksl	Created as part of efYort to make the program work on
-		on Royal where there are time limits for how long a
-		single process can run
-*/
 
 
 double max_time = -1.0;
+
+
+/**********************************************************/
+/** @name      set_max_time
+ * @brief      Set the maximum time the program should run
+ *
+ * @param [in out] char *  root   Root name of the .sig file where the max time is recorded
+ * @param [in out] double  t   The maximum time one wants to proposal to run
+ * @return     Always returns 0
+ *
+ * @details
+ * The routine simple sets the max_time (an external variable) and
+ * writs information about this to .sig and log files.
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
 int
 set_max_time (char *root, double t)
@@ -203,25 +229,33 @@ set_max_time (char *root, double t)
 }
 
 
-/*
 
-   check_time checks whether the elapsed time is greater than the max_time
-   and terminates the program if that is the case.
 
-   If the current time is greater than the allowed time. Then the program is
-   stopped, and a signal is sent to the .sig file that the program can be 
-   restarted
-
-   If the maximum time has not been set then this routine is a NOP
-
-Note:
-	Generally speaking one should send a message to xsignal before
-	invoking check_time to record the status of the signal file
-
-0811	ksl	Created as part of efYort to make the program work on
-		on Royal where there are time limits for how long a
-		single process can run
-*/
+/**********************************************************/
+/** @name      check_time
+ * @brief      check whether the elapsed time is greater than the max_time
+ *   and terminate the program if that is the case.
+ *
+ * @param [in] char *  root   root name of the files where information is logged
+ * @return     Returns 0, unless the time has exeeded the maximum time in which case
+ * the program writes a comment to .sig file and exits
+ *
+ * @details
+ *
+ *  If the current time is greater than the allowed time. Then the program is
+ *  stopped, and a signal is sent to the .sig file that the program can be 
+ *  restarted
+ *
+ *  If the maximum time has not been set then this routine is a NOP
+ *
+ *
+ * ### Notes ###
+ *
+ * Generally speaking one should send a message to xsignal before
+ * invoking check_time to record the status of the signal file
+ *
+ *
+ **********************************************************/
 
 int
 check_time (char *root)
