@@ -209,7 +209,7 @@ python_source= bb.c get_atomicdata.c python.c photon2d.c photon_gen.c parse.c \
 # can be made using cproto
 kpar_source = rdpar.c xlog.c synonyms.c
 
-additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c 
+additional_py_wind_source = py_wind_sub.c py_wind_ion.c py_wind_write.c py_wind_macro.c py_wind.c windsave2table.c windsave2table_sub.c
 
 prototypes: 
 	cp templates.h templates.h.old
