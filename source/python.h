@@ -1227,9 +1227,10 @@ char hubeny_list[132];          //Location of listing of files representing hube
 /* Allow for the transfer of tau info to scattering routine */
 
 
-struct Cdf cdf_randwind_store[100];
-CdfPtr cdf_randwind;
-struct photon phot_randwind;
+//180414-ksl-moved to anisowind.c which is the only place they were called.
+//OLD struct Cdf cdf_randwind_store[100];
+//OLD CdfPtr cdf_randwind;
+//OLD struct photon phot_randwind;
 
 /* N.B. cdf_randwind and phot_randwind are used in the routine anisowind for 
 as part of effort to incorporate anisotropic scattering in to python.  
