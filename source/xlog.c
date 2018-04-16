@@ -82,7 +82,7 @@
 #include <math.h>
 #include "log.h"
 
-#define LINELENGTH 132
+#define LINELENGTH 256
 #define NERROR_MAX 500          // Number of different errors that are recorded
 
 /* definitions of what is logged at what verboisty level */
