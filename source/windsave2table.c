@@ -70,11 +70,13 @@
  *
  * @param [in] int  argc   The number of argments in the command line
  * @param [in] char *  argv[]   The command line
- * @return     Always returns 0  
+ * @return     Always returns 0, unless the windsave file is not
+ * found in which case the routine will issue and error before
+ * exiting.  
  *
  * @details
  * argc and argv[] are the standard variables provided to main 
- * in a c-program.  * Only the first command line argument is 
+ * in a c-program.  Only the first command line argument is 
  * parsed and this should be rootname of the windsave file
  *
  * ### Notes ###
@@ -82,10 +84,9 @@
  * This routine is a supervisory routine. The real work 
  * is in do_windsave2table
  *
- * The routine does not read the .pf file.  It reads only 
- * the windsave file (and the associated atomic data file,
- * which is necessary to cause the appropriated arrays
- * to be allocated).
+ * The routine does not read the .pf file.  It does read  
+ * the windsave file and the associated atomic data file
+ * before calling do_windsave2table.
  *
  **********************************************************/
 

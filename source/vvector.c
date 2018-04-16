@@ -392,19 +392,25 @@ project_from_xyz_cyl (a, b, result)
 
 /**********************************************************/
 /** @name      project_from_cyl_xyz
- * @brief      Trans form a vector in cylindrical coordinates at a postion in xyz coordinates and convert the vector to
+ * @brief      Transform a vector in cylindrical coordinates at a position in xyz coordinates and convert the vector to
  * cartesian coordinates
  *
- * @param [in out] double  a[]   The position at which one wishes to proeect the vector 
- * @param [in out] double  b[]   The vector one wishes to project
- * @param [in out] double  result[]   The resulting vector in cartesian coordiantes
+ * @param [in] double  a[]   The position at which one wishes to project the vector 
+ * @param [in] double  b[]   The vector one wishes to project
+ * @param [out] double  result[]   The resulting vector in cartesian coordiantes
  * @return     0
  *
  * 
- * Star with a vector b in cylindrical coordinates, and a position a, expressed in
- * cartesian coordiantes, and express b in cartesian coordinates.
+ * Start with a vector b in cylindrical coordinates, and a position a, expressed in
+ * cartesian coordinates, and express b in cartesian coordinates.
  *
  * ###Notes###
+ * The naming and nomeclature are confusing.  a is a position in cartesian coordinates.
+ * b is a 3 vector whose direction relative to a cylindrically symmetric coordianate
+ * system is fixed.  The routine rotates b so it is in the correct direction in at the
+ * postion given by a.  When a is in the xz plane no rotation is required.
+ *
+ *
  *
  * Note this is clearly different
  * from the situation where both a and b are in cylindrical coordinates.

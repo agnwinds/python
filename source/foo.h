@@ -641,3 +641,12 @@ int level_tauoverview(int nlev, WindPtr w, char rootname[], int ochoice);
 int main(int argc, char *argv[]);
 int one_choice(int choice, char *root, int ochoice);
 int py_wind_help(void);
+/* windsave2table.c */
+int main(int argc, char *argv[]);
+/* windsave2table_sub.c */
+int do_windsave2table(char *root);
+int create_master_table(int ndom, char rootname[]);
+int create_heat_table(int ndom, char rootname[]);
+int create_ion_table(int ndom, char rootname[], int iz);
+double *get_ion(int ndom, int element, int istate, int iswitch);
+double *get_one(int ndom, char variable_name[]);
