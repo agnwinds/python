@@ -364,7 +364,7 @@ module_string_end = ''' * @return     {}
 '''
 
 
-def doit(filename='emission.c', outputfile=None):
+def doit(filename='emission.c', outputfile=None, verbose=False):
     '''
     Do something magnificent
 
@@ -388,6 +388,7 @@ def doit(filename='emission.c', outputfile=None):
     if len(lines) == 0:
         raise(EOFError('File {} has no lines!').format(filename))
 
+    # Get the filled dictionary of modules and the list of module names and components (for old method)
     modules, mod_dict = get_modules(filename)
 
     print('These are the functions found in the file\n')
@@ -453,10 +454,15 @@ def doit(filename='emission.c', outputfile=None):
         # if we never caught the end of the last function it must be the last line.
         module_end.append(i)
 
-    print('line where header starts   :', header_start)
-    print('line_where header_ends     :', header_end)
-    print('lines where function_starts:', module_start)
-    print('lines where function_ends:', module_end)
+    print('line where header starts   :', len(header_start), header_start)
+    print('line where header ends     :', len(header_end), header_end)
+    print('lines where function starts:', len(module_start), module_start)
+    print('lines where function ends:', len(module_end), module_end)
+
+    assert len(header_start) == len(header_end),\
+        "Error: Uneven number of header starts and ends. This is probably down to an insufficient number of *.\nHeaders must start '/(>=23*)' and end with '(>20*)/'"
+    assert len(module_start) == len(module_end),\
+        "Error: Uneven number of module starts and ends."
 
     # Now we need to try to match the current headers with the modules because
     # some may be missing
@@ -485,6 +491,7 @@ def doit(filename='emission.c', outputfile=None):
     for index, module in enumerate(mod_dict.values()):
         # We iterate over the dictionary of modules, looking up what header range corresponds to
         # them using the xmatch array, and passing that to parse_header.
+        print('index: ', index)
         if xmatch[index] > -1:
             # If there *is* a header for this module, pass it the text
             module = parse_header(lines[header_start[xmatch[index]]:header_end[xmatch[index]]], module)
@@ -519,6 +526,6 @@ if __name__ == "__main__":
     if len(sys.argv) == 1 or sys.argv[1] == '-h':
         print(__doc__)
     elif len(sys.argv) > 1:
-        doit(sys.argv[1])
+        doit(sys.argv[1], verbose=('-v' in sys.argv))
     else:
         print('usage: doxygen.py [-h] filename')
