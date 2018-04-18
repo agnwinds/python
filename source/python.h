@@ -119,7 +119,7 @@ int NPHOT;                      /* The number of photon bundles created.  define
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10
-#define LINELENGTH 	160
+#define LINELENGTH 	256
 
 /* This structure contains the information needed for each separate region of space, e.g the
  * wind and the disk

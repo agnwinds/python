@@ -10,7 +10,7 @@
 
 #include "atomic.h"
 #include "python.h"
-#define LINELEN 132
+#define LINELEN 256
 
 /***********************************************************
                                        Space Telescope Science Institute

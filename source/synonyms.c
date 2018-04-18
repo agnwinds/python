@@ -74,7 +74,7 @@
 #include "log.h"
 
 
-#define	LINELEN 132
+#define	LINELEN 256
 
 
 char *old_names[] =
