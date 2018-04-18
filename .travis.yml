@@ -22,6 +22,7 @@ compiler:
 branches:
   only:
     - dev
+    - travis
 
 # specify email notifications
 notifications:
