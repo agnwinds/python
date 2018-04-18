@@ -312,7 +312,7 @@ int
 get_line_transfer_mode ()
 {
   rdint
-    ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,4=anisotryopic,5=thermal_trapping,6=macro_atoms,7=macro_atoms+aniso.scattering)",
+    ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,6=macro_atoms,7=macro_atoms+aniso.scattering)",
      &geo.line_mode);
 
 /* ksl XXX  This approach is inherently dangerous and should be fixed.  We read in the line mode but then
