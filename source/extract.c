@@ -4,9 +4,9 @@
  * @Author ksl
  * @date   April, 2018
  *
- * @brief  ???
+ * @brief  Maing routines for extracting photons during the 
+ * spectral generation phase.
  *
- * ???
  ***********************************************************/
 
 #include <stdio.h>
