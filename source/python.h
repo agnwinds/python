@@ -275,9 +275,12 @@ DomainPtr zdom;                 //This is the array pointer that contains the do
 int current_domain;             // This integer is used by py_wind only
 
 
-/* the geometry structure contains information that applies to all domains or alternatimve
- a single domain.  Information that is domain specific should be placed directly in the domain
- structure.  ksl
+/* the geometry structure contains information that applies to all domains, including
+ * the basic system geometry, descriptions of the radition sources, and truly 
+ * global information including how ionization calculations are caried out. 
+ *
+ * Information that is domain specific should be placed directly in the domain
+ * structure.  ksl
  */
 
 #define SYSTEM_TYPE_STAR   0
@@ -305,9 +308,9 @@ struct geometry
   int system_type;              /* See allowed types above. system_type should only be used for setp */
   int binary;                   /* Indicates whether or not the system is a binary. TRUE or FALSE */
 
-  int ndomain;                  /*The number of domains in a model */
+  int ndomain;                  /* The number of domains in a model */
   int ndim2;                    /* The total number of windcells in all domains */
-  int nplasma, nmacro;          /*The total number of cells in the plasma and macro structures in all domains */
+  int nplasma, nmacro;          /* The total number of cells in the plasma and macro structures in all domains */
 
   /* variables which store the domain numbers of the wind, disk atmosphere.
      Other components should be added here.  Right now we need a wind_domain 
@@ -326,14 +329,16 @@ struct geometry
   int hydro_domain_number;      // Created for the special case of runs with Zeus
 
 
-  /* 67 - ksl This section added to allow for restarting the program, and adds parameters used
+  /* This section allows for restarting the program, and adds parameters used
    * in the calculation */
 
   int wcycle, pcycle;           /* The number of completed ionization and spectrum cycles */
   int wcycles, pcycles;         /* The number of ionization and spectrum cycles desired */
 
-  /* 1509 - ksl - Moved parameters which describe the spectra to be extracted from main into the
-   * geometry structure */
+  /* This section stores information whihc specifies the spectra to be extracted.  Some of the parameters
+   * are used only in advanced modes.  
+   */
+
 #define NSPEC   20
   int nangles;
   double angle[NSPEC], phase[NSPEC];
@@ -562,13 +567,14 @@ struct geometry
   double n_ioniz, cool_tot_ioniz;
 
 // The next set of parameters describe the input datafiles that are read
-  char atomic_filename[132];    /* 54e -- The masterfile for the atomic data */
-  char fixed_con_file[132];     /* 54e -- For fixed concentrations, the file specifying concentrations */
+  char atomic_filename[132];    /* The masterfile for the atomic data */
+  char fixed_con_file[132];     /* For fixed concentrations, the file specifying concentrations */
 
   //Added by SWM for tracking C-IV/H-A hotspots
   int nres_halpha;
 
-  //Added by SWM for reverberation mapping
+  /* Variables used for revereration mapping */
+
   double fraction_converged, reverb_fraction_converged;
   int reverb_filter_lines, *reverb_filter_line;
   enum reverb_disk_enum
@@ -584,11 +590,12 @@ struct geometry
   int *reverb_dump_cell;
   int reverb_lines, *reverb_line;       //SWM - Number of lines to track, and array of line 'nres' values
 
-  int spec_mod;                 //A flag to say that we do hav spectral models
+  int spec_mod;                 //A flag to say that we do hav spectral models  ??? What does this mean???
 }
 geo;
 
 
+/* xdisk is a structure that is used to store information about the disk in a system */
 #define NRINGS	301             /* The actual number of rings completely defined
                                    is NRINGS-1 ... or from 0 to NRINGS-2.  This is
                                    because you need an outer radius...but the rest
@@ -601,14 +608,15 @@ struct xdisk
   double g[NRINGS];             /* The gravity at the middle of the annulus */
   double v[NRINGS];             /* The velocity at the middle of the annulus */
   double heat[NRINGS];          /* The total energy flux of photons hitting each annulus */
-  double ave_freq[NRINGS];      /* The flux weighted average of frequency of photons hiiting each annulus */
+  double ave_freq[NRINGS];      /* The flux weighted average of frequency of photons hitting each annulus */
   double w[NRINGS];             /* The radiative weight of the photons that hit the disk */
   double t_hit[NRINGS];         /* The effective T of photons hitting the disk */
   int nphot[NRINGS];            /*The number of photons created in each annulus */
   int nhit[NRINGS];             /*The number of photons which hit each annulus */
 }
 disk, qdisk;                    /* disk defines zones in the disk which in a specified frequency band emit equal amounts
-                                   of radiation. qdisk stores the amount of heating of the disk as a result of
+                                   of radiation. disk gets reinitialized whenever the frequency interval of interest
+                                   is changed.  qdisk stores the amount of heating of the disk as a result of
                                    illumination by the star or wind. It's boundaries are fixed throughout a cycle */
 
 #define NBLMODEL 100
@@ -623,6 +631,7 @@ blmod;
 
 
 /*
+ * The next structure is associated with reverberation mappping.
     SWN 6-2-15
     Wind paths is defined per cell and contains a binned array holding the spectrum of paths. Layers are
     For each frequency:
@@ -642,6 +651,7 @@ typedef struct wind_paths
   double d_flux, d_path;        //Total flux, average path
   int i_num;                    //Number of photons hitting this cell
 } wind_paths_dummy, *Wind_Paths_Ptr;
+
 /* 	This structure defines the wind.  The structure w is allocated in the main
 	routine.  The total size of the structure will be NDIM x MDIM, and the two
 	dimenssions do not need to be the same.  The order of the
@@ -684,12 +694,12 @@ typedef struct wind
   int nwind;                    /*A self-reference to this cell in the wind structure */
   int nplasma;                  /*A cross refrence to the corresponding cell in the plasma structure */
   double x[3];                  /*position of inner vertex of cell */
-  double xcen[3];               /*position of the "center" of a cell (Added by ksl for 52a--04Aug) */
+  double xcen[3];               /*position of the "center" of a cell */
   double r, rcen;               /*radial location of cell (Used for spherical, spherical polar
-                                   coordinates. (Added by ksl for 52a --04Aug) */
+                                   coordinates. */
   double theta, thetacen;       /*Angle of coordinate from z axis in degrees  */
   double dtheta, dr;            /* widths of bins, used in hydro import mode */
-  struct cone wcone;            /*56d -- cone structure that defines the bottom edge of the cell in 
+  struct cone wcone;            /* cone structure that defines the bottom edge of the cell in 
                                    CYLVAR coordinates */
   double v[3];                  /*velocity at inner vertex of cell.  For 2d coordinate systems this
                                    is defined in the xz plane */
@@ -712,7 +722,7 @@ wind_dummy, *WindPtr;
 
 WindPtr wmain;
 
-/* 57+ - 06jun -- plasma is a new structure that contains information about the properties of the
+/* Plasma is a structure that contains information about the properties of the
 plasma in regions of the geometry that are actually included n the wind */
 
 /* 70 - 1108 - Define wavelengths in which to record gross spectrum in a cell, see also xave_freq and xj in plasma structure */
@@ -811,7 +821,6 @@ typedef struct plasma
 	                                   by this ion via recombination. 78 - changed to dynamic allocation */
 	  
   double *cool_dr_ion;
-  //OLD double j, ave_freq, lum;      /*Respectively mean intensity, intensity_averaged frequency, 
   double j, ave_freq;      /*Respectively mean intensity, intensity_averaged frequency, 
                                    luminosity and absorbed luminosity of shell */
   double xj[NXBANDS], xave_freq[NXBANDS];       /* 1108 NSH frequency limited versions of j and ave_freq */
@@ -1005,7 +1014,7 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define IONMODE_ML93 3          // Lucy Mazzali
 //OLD #define IONMODE_LTE_SIM 4 // LTE with SIM correction
 #define IONMODE_PAIRWISE_ML93 6 // pairwise version of Lucy Mazzali
-#define IONMODE_PAIRWISE_SPECTRALMODEL 7        // pariwise modeled J_nu approach
+#define IONMODE_PAIRWISE_SPECTRALMODEL 7        // pairwise modeled J_nu approach
 #define IONMODE_MATRIX_BB 8     // matrix solver BB model
 #define IONMODE_MATRIX_SPECTRALMODEL 9  // matrix solver spectral model
 

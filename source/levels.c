@@ -1,12 +1,12 @@
 
 /***********************************************************/
-/** @file  new_levels.c
+/** @file  levels.c
  * @Author ksl
  * @date   January, 2018
  *
- * @brief  ???
+ * @brief  This file contains a routine to calculate level populations
+ * in ions for LTE and related assumptions.
  *
- * ???
  ***********************************************************/
 
 //OLD /**************************************************************************
