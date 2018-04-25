@@ -4,8 +4,8 @@
  * @Author ksl
  * @date   April, 2018
  *
- * @brief  Rotuines to update radiation field parameters and to
- * calculate various opacities (free-free, bound-free, etc.
+ * @brief  Routines to update radiation field parameters and to
+ * calculate vutious opacities (free-free, bound-free, etc.
  *
  ***********************************************************/
 
@@ -129,8 +129,8 @@ int iicount = 0;
  * also keeps track of the number of photoionizations for H and He in the
  * cell.
  *
- * @param [in out] PhotPtr  p   the photon
- * @param [in out] double  ds   the distance the photon has travelled in the cell
+ * @param [in,out] PhotPtr  p   the photon
+ * @param [in] double  ds   the distance the photon has travelled in the cell
  * @return     Always returns 0.  The pieces of the wind structure which are updated are
  * 	j,ave_freq,ntot, heat_photo, heat_ff, heat_h, heat_he1, heat_he2, heat_z,
  * 	nioniz, and ioniz[].
@@ -707,9 +707,9 @@ kappa_ff (xplasma, freq)
  * 	photionization crossection due to a Topbase level associated with
  * 	x_ptr at frequency freq
  *
- * @param [in out] struct topbase_phot *  x_ptr   The structure that contains
+ * @param [in,out] struct topbase_phot *  x_ptr   The structure that contains
  * TopBase information about the photoionization x-section
- * @param [in out] double  freq   The frequency where the x-section is to be calculated
+ * @param [in] double  freq   The frequency where the x-section is to be calculated
  *
  * @return     The x-section   
  *
@@ -792,9 +792,9 @@ sigma_phot (x_ptr, freq)
  * @brief      double (x_ptr,freq)	calculates the photionization crossection due to the transition 
  *  	associated with x_ptr at frequency freq (when the data is in the form of the Verner x-sections
  *
- * @param [in] struct innershell *  x_ptr   The stucture that contains infomation in the format of Verner for 
- * a paticular ion level
- * @param [in out] double  freq   The frequency where the x-section is calculaed
+ * @param [in] struct innershell *  x_ptr   The stucture that contains information in the format of Verner for 
+ * a particular ion level
+ * @param [in,out] double  freq   The frequency where the x-section is calculated
  * @return     The photoinization x-section
  *
  * @details
@@ -1053,7 +1053,7 @@ pop_kappa_ff_array ()
  * @brief      updates the estimators required for determining crude
  * spectra in each Plasma cell
  *
- * @param [in out] PlasmaPtr  xplasma   PlasmaPtr for the cell of interest
+ * @param [in,out] PlasmaPtr  xplasma   PlasmaPtr for the cell of interest
  * @param [in] PhotPtr  p   Photon pointer
  * @param [in] double  ds   ds travelled
  * @param [in] double  w_ave   the weight of the photon in the cell. 
