@@ -5,7 +5,7 @@
  * @date   April, 2018
  *
  * @brief  Routines to update radiation field parameters and to
- * calculate vutious opacities (free-free, bound-free, etc.
+ * calculate various opacities (free-free, bound-free, etc.
  *
  ***********************************************************/
 
@@ -188,7 +188,7 @@ radiation (p, ds)
   check_plasma (xplasma, "radiation");
 
   /* JM 140321 -- #73 Bugfix
-     In previous version we were comparing these frequencies in the global rest fram
+     In previous version we were comparing these frequencies in the global rest frame
      The photon frequency should be shifted to the rest frame of the cell in question
      We currently take the average of this frequency along ds. In principle
      this could be improved, so we throw an error if the difference between v1 and v2 is large */
@@ -628,7 +628,10 @@ radiation (p, ds)
  * and did not include a gaunt factor
  *
  * More recent versions include all ions and a gaunt factor, as calculated in 
- * pop_kappa_ff_array and stored in kappa_ff_factor
+ * pop_kappa_ff_array and stored in kappa_ff_factor. The gaunt factor as currewntly
+ * implemented is a frequency averaged one, and so is approximate (but better than 
+ * just using 1). A future upgrade would use a more complex implementation where we 
+ * use the frequency dependant gaunt factor.
  *
  **********************************************************/
 
@@ -798,9 +801,12 @@ sigma_phot (x_ptr, freq)
  * @return     The photoinization x-section
  *
  * @details
- * Same as sigma_phot but using the older compitation from Verner that includes inner shells
+ * Same as sigma_phot but using the older compilation from Verner that includes inner shells
  *
  * ### Notes ###
+ * 
+ * I (NSH) think this routine has been largely superceeded by the new inner shell formulation of auger ionization.
+ * At some poi nt we may wish to expunge the old augerion perts of python.
  *
  **********************************************************/
 
@@ -873,7 +879,7 @@ sigma_phot_verner (x_ptr, freq)
  *
  * @details
  * The first case is when the density of the particular level
- * is in the wind array The second caseis when the density of the levels
+ * is in the wind array The second case is when the density of the levels
  * for an ion are not tracked, and hence only the total density for the
  * ion is known.  In that case, we assume the ion is in it's ground state.
  *
@@ -1234,7 +1240,7 @@ update_banded_estimators (xplasma, p, ds, w_ave)
  * to avoid code duplication.
  *
  * For ionization models that make use of the crude spectra accumulated
- * in crude spectral bands, the routine uses these these bands to
+ * in crude spectral bands, the routine uses these bands to
  * get the mean intensity.  If however, one is using one of the other
  * (older) ionization modes, then the input variable mode drives how
  * the mean intensity is calculated.mode appears to be used 

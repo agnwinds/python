@@ -12,7 +12,7 @@
  *
  * These routines are quite complex representing a lot of work by
  * various of us over a long period of time, and it is not entirely 
- * clear that they are quite * what we want at present.  It would be 
+ * clear that they are quite what we want at present.  It would be 
  * worthwhile to think about
  * their structure the next time we make consider adding a physical
  * process involving recombination.
@@ -385,7 +385,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
  * 	The energy lost is just the kinetic energy lost from the plasma 
  * 	because it does not include the ionization potential
  * 	associated with each recombination.  Python tracks effectively the kinetic energy
- * 	of the plasma (not the potential energy available if everything recombined.
+ * 	of the plasma (not the potential energy available if everything recombined).
  *
  * @param [in] WindPtr  one   The wind cell of interest
  * @param [in] double  t   The temperature of the cell
@@ -1115,7 +1115,7 @@ on the assumption that the fb information will be reused.
  * @return     The recombination coefficient
  *
  * @details
- * Uses data from Badnell or another source to get a recongiantion rate
+ * Uses data from Badnell or another source to get a recombination rate
  *
  * ### Notes ###
  *
@@ -1453,7 +1453,7 @@ xinteg_inner_fb (t, f1, f2, nion, fb_choice)
  * @details
  * Generates a total recombination rate for 
  * a given ion at a given temperature using 
- * based on data, obtained from sources such as Badnell
+ * data, obtained from sources such as Badnell
  * or Shull. 
  *
  * If these are not present, an error is generated, and a
