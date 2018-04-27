@@ -16,22 +16,19 @@
 
 /**********************************************************/
 /** @name      communicate_estimators_para
- * @brief      averages the spectral
- *   estimators between tasks using MPI_Reduce. 
- *   It should only be called if the MPI_ON flag was present 
- *   in compilation. It communicates all the information
- *   required for the spectral model ionization scheme, and 
- *   also heating and cooling quantities in cells.
- *
- * <NOTE: The [in out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
- * @return     ??? RETURNS ???
+ * @brief      communicates the MC estimators between tasks
  *
  * @details
- * ??? DESCRIPTION ???
- *
- * ### Notes ###
- * This was originally done in python.c but I've moved here for more readable code.
- *
+ * communicates the MC estimators between tasks relating to 
+ * spectral models, heating and cooling and cell diagnostics like IP. 
+ * In the case of some variables, the quantities are maxima and minima so the 
+ * flag MPI_MAX or MPI_MIN is used in MPI_Reduce. For summed
+ * quantities like heating we use MPI_SUM.
+ *  
+ * This routine should only do anything if the MPI_ON flag was present 
+ * in compilation. It communicates all the information
+ * required for the spectral model ionization scheme, and 
+ * also heating and cooling quantities in cells.
  **********************************************************/
 
 int
@@ -271,18 +268,17 @@ communicate_estimators_para ()
 
 /**********************************************************/
 /** @name      gather_spectra_para
- * @brief      
- *
- * <NOTE: The [in out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
- * @param [in out] int  nspec_helper   ???
- * @param [in out] int  nspecs   ???
- * @return     ??? RETURNS ???
+ * @brief sum up the synthetic spectra between threads.   
+ * 
+ * @param [in] int  nspecs number of spectra to compute 
+ * @param [in] int nspec_helper the length of the big arrays 
+ *                  to help with the MPI reductions of the spectra 
+ *                  equal to 2 * number of spectra (NSPEC) * number of wavelengths.
  *
  * @details
- * ??? DESCRIPTION ???
- *
- * ### Notes ###
- * ??? NOTES ???
+ * sum up the synthetic spectra between threads. Does an
+ * MPI_Reduce then an MPI_Bcast for each element of the 
+ * linear and log spectra arrays (xxspec) 
  *
  **********************************************************/
 
@@ -339,21 +335,13 @@ gather_spectra_para (nspec_helper, nspecs)
 
 /**********************************************************/
 /** @name      communicate_matom_estimators_para
- * @brief      averages the macro-atom 
- *   estimators between tasks using MPI_Reduce. 
+ * @brief      
+ *
+ * @details averages the macro-atom estimators between tasks using MPI_Reduce. 
  *   It should only be called if the MPI_ON flag was present 
  *   in compilation, and returns 0 immediately if no macro atom levels.
  *   This should probably be improved by working out exactly
  *   what is needed in simple-ion only mode.
- *
- * <NOTE: The [in out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
- * @return     ??? RETURNS ???
- *
- * @details
- * ??? DESCRIPTION ???
- *
- * ### Notes ###
- * ??? NOTES ???
  *
  **********************************************************/
 
