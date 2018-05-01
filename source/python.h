@@ -1024,8 +1024,8 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define NEBULARMODE_ML93 2      // ML93 using correction
 #define NEBULARMODE_NLTE_SIM 3  // Non_LTE with SS modification (Probably could be removed)
 #define NEBULARMODE_LTE_GROUND 4        // A test mode which forces all levels to the GS (Probably could be removed)
-#define NEBULARMODE_PAIRWISE_ML93 6     // pairwise ML93
-#define NEBULARMODE_PAIRWISE_SPECTRALMODEL 7    // pairwise spectral models
+#define NEBULARMODE_PAIRWISE_ML93 6     // pairwise ML93 (diffuse BB)
+#define NEBULARMODE_PAIRWISE_SPECTRALMODEL 7    // pairwise spectral models (power law or expoentials)
 #define NEBULARMODE_MATRIX_BB 8 // matrix solver BB model
 #define NEBULARMODE_MATRIX_SPECTRALMODEL 9      // matrix solver spectral model
 
