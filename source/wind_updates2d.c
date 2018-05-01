@@ -1,6 +1,15 @@
-/* The routines in this file are generic.  There is no dependence on a particlar wind model or
+
+/***********************************************************/
+/** @file  wind_updates2d.c
+ * @author ksl
+ * @date   May, 2018
+ *
+ * @brief  This file contains the main routines for updating
+ * and then reinitializing the wind after an ionization cycle
+ *
+ * The routines in this file are generic.  There is no dependence on a particlar wind model or
  * any coordinate system dependences.
- */
+ ***********************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,85 +21,43 @@
 #include "python.h"
 #define LINELEN 256
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis: wind_update(w) updates the parameters in the wind that are 
-	affected by radiation.
-
- Arguments:		
-	WindPtr w;
-
-Returns:
- 
-Description:	
-	
-Notes:
-	There is not much point in calling this until you have propagated a few photons
-	The routine should not be called until at least some photons have been propagated 
-	through the wind because the radiation and electron temperatures are calculated from 
-	the frequency moment
-History:
- 	97jan      ksl	Coding on python began.
- 	97sep13	ksl	Added the possibility of fixing the concentrations of the ions to specific
- 			values, but this really should not be called because in that case there
- 			is little point in updating the wind since the only thing which wind_update
- 			really does is to change the ionization fractions.  This change was really
- 			for consistency.
- 	97oct2	ksl	Modified relation between t_e and t_r to use CK's prescription derived from
- 			Cloudy comparisons.
- 	98may3	ksl	Fixed problems with the portion of the routine which placed new densities in
- 			the regions just outside the wind.  These densities are used for interpolation
- 			purposes.
- 	98may16	ksl	Added some checks to indicate how great the changes in t_e and t_r in each
- 			wind_update
- 	98may17	ksl	Changed some of the logic to (hopefully) eliminate some calculations outside
- 			the wind which should not be necessary.   Added some additional tracking of 
- 			changes to see how things converge, and where the biggest changes in t_e 
- 			and t_r are.
- 	98may24	ksl	Changed code so that w[].vol > 0 is the primary criterion for attempting to
- 			recalculate the ionization abundances
- 	98may31 ksl	Corrected error in calculating dilution factor because cells are actually two 
- 			cells one above and one below the plane of the disk.
- 	98dec	ksl	Relocated section of code which chose between various ways of calculating
- 			ion abundances 	to a subroutine ion_abundances.  Removed section of code
- 			in which contained estimates of what t_e ought to be based on t_r, w, etc.
-	99jan	ksl	Modified how t_e and t_r change in the event there were no photons in
-			a cell.  Old solution was to set t_e and t_r to zero; new solution was
-			to leave t_r at old value and drop t_e by the maximum amount 0.7*t_e_old
-			being used in one_shot.  
-        04May   SS      Removed extra factor of two in calculation of the radiation density since 
-			the cell
-                        volume now includes ares both above and below the plane.
-	05apr	ksl	55d: Began work to make more compatible with 1-d coordinate systems.
-	05apr	ksl	56: Moved functionality that extends the ion densityies
-			to cylindrical.c, rtheta.c, and spherical.c in 
-			continuing effort to isolate difference between
-			coordinate system types.
-	06may	ksl	57+: Began splitting of wind and plasma structure.  This routine loops
-			over the entire grid and ultimately eveything here is likely to be
-			contained in the plasma structure.  Therefore here we want to use
-			plasmamain
-	11aug	nsh	70: modifications made to wind_update  and wind_rad_init to incorporate 
-			compton heating and cooling.
-        12apr	nh	72: modifications makde to wind_update and wind_rad_init to incoprorate
-			induced copmton heating.
-        130621  jm      76: added lines to store luminosities from ionization cycles in geo and plasma
-			structure to solve windsave bug
-   	13jul	nsh	76: added lines to deal with the case when adiacaitc cooling becomes heating in
-			complex wind geometries
-	13nov	nsh	77: Some changes in the parallel communications for new variables.
-	14jul	nsh	78a: Changed the length of the communications array to take account of
-			dynamically allocated arrays in plasma structure. Also changed some of the pack
-			and unpack commands for the same reason.
-	14sept	nsh	78b: Changes to deal with the inclusion of direct recombination
-	14nov 	JM 78b: Changed volume to be the filled volume
-	15aug	ksl	Updated for domains
 
 
-**************************************************************/
 
 
+/**********************************************************/
+/** @name      wind_update
+ * @brief      updates the parameters in the wind that are 
+ * 	affected by radiation, including ion densities.
+ *
+ * @param [in] WindPtr  The entire wind
+ * @return     Always returns 0
+ *
+ * @details
+ * This is the main routine used to update the wind at the end of
+ * an ionization cycle (in preparation for a new cycle).  The routine
+ * is parallelized to save time
+ *
+ * ### Notes ###
+ * At the time wind_update is called the various quantities that are accumulated
+ * during the photon transfer part of the cycle has been accumulated  
+ * and shared between the threads.  Here certain plasma cells are assigned to
+ * each thread so that the ionization structure can be updated, and each thread
+ * is responsible for calculaing the updates for a certain set of cells.  At
+ * the end of the routine the updates are collected and reshared.
+ *
+ * The real need for prallelising the routine is the work done in ion_abundances
+ *
+ * Once this is done, various checks are made to determined what happened as a 
+ * function of the updates, various variables in geo are updated,  and for 
+ * a hydro model the results are written to a file
+ *
+ * This routine is nearly 1000 lines long and might beneifit from breaking
+ * it into functionl blocks, e.g by separating out the mpi communicaiton
+ * into their own routines.
+ *
+ *
+ **********************************************************/
 int num_updates = 0;
 
 int
@@ -1020,58 +987,29 @@ WindPtr (w);
   }
 
 
-
-
-
-
-
   return (0);
 }
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis: wind_rad_init(w) zeros those portions of the wind which contain the radiation properties 
-	of the wind, i.e those portions which should be set to zeroed when the structure of the 
-	wind has been changed or when you simply want to start off a calculation in a known state
 
- Arguments:		
-	WindPtr w;
-
-Returns:
- 
-Description:	
-	
-Notes:
-	The routine is called by the main program at the beginning of each ionization calculation
-	cycle.  It should zero all heating and radiation induced cooling in the wind array.  Since
-	cooling is recalculated in wind_update, one needs to be sure that all of the appropriate
-	cooling terms are also rezeroed there as well.
-	
-
-History:
- 	97jan	ksl	Coding on python began.
- 	98apr	ksl	Fixed major problem with this routine, previously I had only been 
- 			reinitializing the first NDIM portions of the wind.
- 	98may	ksl	Added initialization for .ioniz and .recomb
- 	98sept	ksl	Added initialization for heating of h, he1, he2,z. and also for the remaining
- 			luminosities.
-	03jul	ksl	Updated to reflect modified wind structure with heat and cooling
-			for all ions
-	04mar	ss	Added additional quantities to zero for macro-atoms
-        04July  SS      Modified to include setting the spontaneous recombination rates.
-        04 Nov  SS      Modified to include setting the recomb_simple rates (needed for cooling in
-                        simple continuua).
-	06may	ksl	Modified to use wmain and plasmamain, in process of redefining all of
-			the structures.  Most if not all of this will end up in plasmamain
-	06jul	ksl	57+ -- Added to changes to allow for a separate macro structure
-	06aug	ksl	57h -- Additional changes to allow for the fact that marcomain
-			is not created at all if no macro atoms.
-	13dec	nsh	77 zero various new plasma variables
-
-**************************************************************/
-
+/**********************************************************/
+/** @name      wind_rad_init
+ * @brief      zeros those portions of the wind which contain the radiation properties 
+ * 	of the wind, i.e those portions which should be set to zeroed when the structure of the 
+ * 	wind has been changed or when you simply want to start off a calculation in a known state
+ *
+ * @return    Always returns 0
+ *
+ * @details
+ * The routine is called at the beginning of each ionization calculation
+ * cycle.  It should zero all heating and radiation induced cooling in the wind array.  Since
+ * cooling is recalculated in wind_update, one needs to be sure that all of the appropriate
+ * cooling terms are also rezeroed there as well.
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
 int
 wind_rad_init ()
@@ -1214,28 +1152,20 @@ wind_rad_init ()
 
 
 
-
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis: wind_ip() populates the plasma object ferland_ip which is intended to be an 
-      estimate of the ionization parameter for that cell. It assumes all ionizaing photons
-      are produces from the origin.
-
-Arguments:		
-
-Returns:
- 
-Description:	
-	
-Notes:
-	There is not much point in calling this until you have propagated a few photons
-History:
- 	11Oct - NSH Coded to try and provide a 'correct' ionisation parameter for the wind,
-               calculated exactly as per the ionization parameter in hazy1 (eq 5.4)
-
-**************************************************************/
-
+/**********************************************************/
+/** @name      wind_ip
+ * @brief      calculates a version of the ionization parameter using Ferland's definition, but one that also assumes that the
+ * wind is optically thin everywhere, and that all photons arise for the central source.
+ *
+ * @return     Always retrusn 0
+ *
+ * @details
+ *
+ * ### Notes ###
+ * @bug It is likely that this routine should simply be deleted. According to Nick it was
+ * just an experiment.  There is a git issue for this.
+ *
+ **********************************************************/
 
 int
 wind_ip ()

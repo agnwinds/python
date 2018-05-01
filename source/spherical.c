@@ -361,7 +361,7 @@ spherical_volumes (ndom, w)
 
 /**********************************************************/
 /** @name      spherical_where_in_grid
- * @brief      locates the element in wmain corrosponding to a postion
+ * @brief      locates the element in wmain corrosponding to a position
  * 	when one is using spherical coordinates.
  *
  * @param [in] int  ndom   The domain number

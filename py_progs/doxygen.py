@@ -59,6 +59,7 @@ History:
 
 import sys
 import subprocess
+import os
 
 
 def is_installed(program):
@@ -333,7 +334,7 @@ def get_modules(filename='emission.c'):
 file_string = '''
 /***********************************************************/
 /** @file  %s
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  ???
@@ -382,6 +383,9 @@ def doit(filename='emission.c', outputfile=None):
 
     if not outputfile:
         outputfile = 'new_'+filename
+    if os.path.isfile(outputfile):
+        print('Error %s already exists, exiting' % outputfile)
+        return
 
     lines = read_file(filename)
 
