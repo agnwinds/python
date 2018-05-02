@@ -69,10 +69,13 @@ def doit():
            
 
     print('These files do not have doxygen comments:')
+    x=open('dox_missing.txt','w')
     for one in missing:
         print(one)
+        x.write('%s\n' % one)
+    x.close()
 
-    print('Of the %d .c files in this directory, \n %3d have doxygen comments, \n %3d do not'
+    print('\nOf the %d .c files in this directory, \n %3d have doxygen comments, \n %3d do not'
             % (len(files),ngood,len(missing)))
     
     

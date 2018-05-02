@@ -1,4 +1,15 @@
 
+/***********************************************************/
+/** @file  corona.c
+ * @author ksl
+ * @date   May, 2018
+ *
+ * @brief  Routines specific to setting up disk corona defined as
+ * a region that rotates witht he underlying disk and has an 
+ * expoential density distribution
+ *
+ ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -6,32 +17,41 @@
 #include "atomic.h"
 #include "python.h"
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-	get_corona_params gets input data which is necessary to describe a corona above
-	the surface of the disk.        
-Arguments:		
-
-Returns:
- 
-Description:	
-	The parameters obtained here are only used in the routines in corona.c
-	Initially, we define it as a gaussian ring with and exponetial density distribution.   
-Notes:
-	The terminology here is a bit confusing because rmin and rmax as read in to the routine
-	refer actually to rho, which is easy to get confused with other parameters like zdom[ndom].rmax
-	which really are radii for the central source.
 
 
-History:
- 	00sep	ksl	Coding begun
-	04jun	ksl	Moved from python.c to provide better uniformity of what files contain.
-	15aug	ksl	Began mods to accomodate domains
-	16apr	ksl	Added modifications for a uniform density grid
-**************************************************************/
 
+/**********************************************************/
+/** @name      get_corona_params
+ * @brief      gets input data which is necessary to describe a corona above
+ * 	the surface of the disk.
+ *
+ * @param [in] int  ndom   The domain number for the corona
+ * @return  Always returns 0     
+ *
+ * @details
+ * The routine initializes variables that are needed to define a corona (to
+ * values that are appropriate for a WD system) and then queries the 
+ * .pf or the user for the same variables, which are then stored in one
+ * of the Domain elements
+ *
+ * The corona is assumed to exist between rmin and rmax, and between 0
+ * and zmax.  Within this region it has a density specified by the density
+ * at the base and an exponential scale height.
+ *
+ * Azimuthally the velocity will be set to the velocity of the disk, but one
+ * can give it a outward velocity which is specifed as a fraction of the
+ * azimuthal velocity
+ *
+ * ### Notes ###
+ * The parameters obtained here are only used in the routines in corona.c
+ * Initially, we define it as a gaussian ring with and exponetial density distribution.
+ *
+ * The terminology here is a bit confusing because rmin and rmax as read in to the routine
+ * refer actually to the cylindrical rho, which is easy to get confused with other parameters like 
+ * zdom[ndom].rmax
+ * which really are radii for the central source.
+ *
+ **********************************************************/
 
 int
 get_corona_params (ndom)
@@ -39,7 +59,7 @@ get_corona_params (ndom)
 {
   Log ("Creating a corona above a disk\n");
 
-  // Start with reasonable values for everything which is important
+  /* Start with reasonable values for a WD system */
 
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 0.0;
@@ -114,33 +134,27 @@ get_corona_params (ndom)
   return (0);
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
-	double corona_velocity(x,v) calulates the v the wind at a position r
-	x
-Arguments:		
-	ndom 			The domain number in which the corona is descibed
-	double x[]		the position where for the which one desires the velocity
-Returns:
-	double v[]		the calculated velocity
-	
-	The amplitude of the velocity is returned 
-	
-Description:	
 
-		
-Notes:
-	v is set to the Keplerian velocity at this radius
-
-History:
- 	00sept	ksl	Coded as part of effort to add a stellar wind option to python
-	04aug	ksl	52 -- Modified to return xyz velocity in all
-			cases.
-	08aug	ksl	Modified for use with multiple domans
- 
-**************************************************************/
+/**********************************************************/
+/** @name      corona_velocity
+ * @brief      double (x,v) calulates the v the wind at a position r
+ * 	x
+ *
+ * @param [in] int  ndom   The domain number in which the corona is descibed
+ * @param [in] double  x[]   the position where for the which one desires the velocity
+ * @param [out] double  v[]   The calculated velocity in cartesian coordineates
+ * @return     double v[]	The amplitude of the velocity is returned
+ *
+ * @details
+ * Given a position, the azimuthal (v_phi) velocity is set to the velocity
+ * of the underlying disk.  The outward (v_rho) velocity is set to a 
+ * fraction of the disk velocity as specifed by corona_vel_frac
+ *
+ * ### Notes ###
+ * The routine is valid even if x is not in the xz plane.
+ *
+ **********************************************************/
 
 double
 corona_velocity (ndom, x, v)
@@ -160,7 +174,7 @@ corona_velocity (ndom, x, v)
   v[2] = 0.0;
   v[1] = speed;
 
-  /* 04aug -- ksl --52 At this point we have calculated the velocity in the xz plane, which
+  /* At this point we have calculated the velocity in the xz plane, which
    * is identical to the statement that we have calculated it in
    * cylindrical coordinates.  The next bit projects back to xyz 
    * coordinates if x was not originally in the xz plane.
@@ -176,52 +190,41 @@ corona_velocity (ndom, x, v)
 
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
-	double corona_rho(x) calculates the density of a corona at a position x
-Arguments:		
-	ndom 		The domain where the corona is descibed
-	double x[]		the postion where for the which one desires the denisty
-Returns:
-	The density at x is returned in gram/cm**3
-	
-Description:
-
-	At present the function is simply and exponential distribution with a constant
-        scale height
-		
-Notes:
-
-History:
- 	00sept	ksl	Coded as part of effort to understand the FUSE data on U Gem.
- 
-**************************************************************/
+/**********************************************************/
+/** @name      corona_rho
+ * @brief      double (x) calculates the density of a corona at a position x
+ *
+ * @param [in] int  ndom   The domain where the corona is described
+ * @param [in] double  x[]   the position at which one desires the denisty
+ * @return     The density at x is returned in gram/cm**3
+ *
+ * @details
+ * The function is simply and exponential distribution with a constant
+ *         scale height
+ *
+ * ### Notes ###
+ * The routine does not check whether the x is within the region
+ * described by the corona
+ *
+ * @bug This and the other routines that describe a coronal model
+ * do not handle the case of the vertically extended disk
+ *
+ **********************************************************/
 
 double
 corona_rho (ndom, x)
      double x[];
 {
   double rho;
-//OLD not used. 160705 ksl  double tref, t;
-//OLD not used. 160705 ksl  double gref, g;
-//OLD not used ksl double zscale;
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
   {
     Error ("corona_rho: Quitting. Need to think more about coronal model more with vertically extended disk\n");
     exit (0);
   }
-//OLD not used 160705 ksl  tref = tdisk (geo.mstar, geo.disk_mdot, geo.rstar);
-//OLD not used 160705 ksl  t = teff (tref, x[0] / geo.rstar);
 
-//OLD not used 160705 ksl  gref = gdisk (geo.mstar, geo.disk_mdot, geo.rstar);
-//OLD not used 160705 ksl  g = geff (gref, x[0] / geo.rstar);
-
-//OLD not used - ksl: zscale = BOLTZMANN * t / (MPROT * g);
-
-  rho = zdom[ndom].corona_base_density * exp (-(x[2]) / zdom[ndom].corona_scale_height);
+  rho = zdom[ndom].corona_base_density * exp (-(fabs(x[2])) / zdom[ndom].corona_scale_height);
 
   if (rho < 1.e-10)
     rho = 1.e-10;               // A floor to the density appears to be needed for some of the
