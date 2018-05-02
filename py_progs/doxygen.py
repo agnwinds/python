@@ -348,7 +348,6 @@ module_string_start = '''
 /** @name      {}
  * @brief      {}
  *
- * <NOTE: The [in out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
 '''
 module_string_param = ''' * @param [in out] {}  {}   {}
 '''
@@ -460,7 +459,7 @@ def doit(filename='emission.c', outputfile=None):
     print('line where header starts   :', header_start)
     print('line_where header_ends     :', header_end)
     print('lines where function_starts:', module_start)
-    print('lines where function_ends:', module_end)
+    print('lines where function_ends  :', module_end)
 
     # Now we need to try to match the current headers with the modules because
     # some may be missing
