@@ -1,29 +1,12 @@
-/***********************************************************
-                        University of Southampton
 
-Synopsis:   
-  communicate_estimators_para averages the spectral
-  estimators between tasks using MPI_Reduce. 
-  It should only be called if the MPI_ON flag was present 
-  in compilation. It communicates all the information
-  required for the spectral model ionization scheme, and 
-  also heating and cooling quantities in cells.
-
-Arguments:		
-
-Returns:
- 
-Description:	
-	
-Notes:
-  This was originally done in python.c but I've moved here for more readable code.
-
-History:
-    JM Coded as part of fix to #132
-
-
-
-**************************************************************/
+/***********************************************************/
+/** @file  new_para_update.c
+ * @Author ksl, jm
+ * @date   January, 2018
+ *
+ * @brief  routines for communicating MC estimators and spectra between MPI threads.
+ *
+ ***********************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +14,22 @@ History:
 #include "atomic.h"
 #include "python.h"
 
+/**********************************************************/
+/** @name      communicate_estimators_para
+ * @brief      communicates the MC estimators between tasks
+ *
+ * @details
+ * communicates the MC estimators between tasks relating to 
+ * spectral models, heating and cooling and cell diagnostics like IP. 
+ * In the case of some variables, the quantities are maxima and minima so the 
+ * flag MPI_MAX or MPI_MIN is used in MPI_Reduce. For summed
+ * quantities like heating we use MPI_SUM.
+ *  
+ * This routine should only do anything if the MPI_ON flag was present 
+ * in compilation. It communicates all the information
+ * required for the spectral model ionization scheme, and 
+ * also heating and cooling quantities in cells.
+ **********************************************************/
 
 int
 communicate_estimators_para ()
@@ -267,30 +266,21 @@ communicate_estimators_para ()
 }
 
 
-/***********************************************************
-                        University of Southampton
-
-Synopsis: gather_spectra_para
-
-Arguments:	
-  int nspec_helper
-    size of the helper arrays used by the MPI_Reduce and Broadcast routines
-
-  int nspecs
-    the number of spectra computed. This is longer for the spectral cycles than
-    the ionization cycles 	
-
-Returns:
- 
-Description:	
-	
-Notes:
-
-History:
-    JM Coded as part of fix to #132
-
-**************************************************************/
-
+/**********************************************************/
+/** @name      gather_spectra_para
+ * @brief sum up the synthetic spectra between threads.   
+ * 
+ * @param [in] int  nspecs number of spectra to compute 
+ * @param [in] int nspec_helper the length of the big arrays 
+ *                  to help with the MPI reductions of the spectra 
+ *                  equal to 2 * number of spectra (NSPEC) * number of wavelengths.
+ *
+ * @details
+ * sum up the synthetic spectra between threads. Does an
+ * MPI_Reduce then an MPI_Bcast for each element of the 
+ * linear and log spectra arrays (xxspec) 
+ *
+ **********************************************************/
 
 int
 gather_spectra_para (nspec_helper, nspecs)
@@ -341,31 +331,19 @@ gather_spectra_para (nspec_helper, nspecs)
 
 
 
-/***********************************************************
-                        University of Southampton
-
-Synopsis: 
-  communicate_matom_estimators_para averages the macro-atom 
-  estimators between tasks using MPI_Reduce. 
-  It should only be called if the MPI_ON flag was present 
-  in compilation, and returns 0 immediately if no macro atom levels.
-  This should probably be improved by working out exactly
-  what is needed in simple-ion only mode. 
-
-Arguments:		
-
-Returns:
- 
-Description:	
-	
-Notes:
-
-History:
-    JM Coded as part of fix to #132
 
 
-**************************************************************/
-
+/**********************************************************/
+/** @name      communicate_matom_estimators_para
+ * @brief      
+ *
+ * @details averages the macro-atom estimators between tasks using MPI_Reduce. 
+ *   It should only be called if the MPI_ON flag was present 
+ *   in compilation, and returns 0 immediately if no macro atom levels.
+ *   This should probably be improved by working out exactly
+ *   what is needed in simple-ion only mode.
+ *
+ **********************************************************/
 
 int
 communicate_matom_estimators_para ()
