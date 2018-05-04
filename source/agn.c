@@ -11,30 +11,6 @@
  * name of the file.
  ***********************************************************/
 
-
-
-//OLD /**************************************************************************
-//OLD                     Space Telescope Science Institute
-//OLD 
-//OLD 
-//OLD   Synopsis:  These are routines needed to implement AGN into python
-//OLD 
-//OLD   Description:	
-//OLD 
-//OLD   Arguments:  
-//OLD 
-//OLD 
-//OLD   Returns:
-//OLD 
-//OLD   Notes:
-//OLD 
-//OLD 
-//OLD   History:
-//OLD   10oct	nsh	coded as part of initial effort to include a power law component
-//OLD 		to AGN
-//OLD 
-//OLD  ************************************************************************/
-
 #include <stdio.h>
 #include <strings.h>
 #include <math.h>
@@ -44,26 +20,6 @@
 #include "python.h"
 
 #include "log.h"
-
-//OLD /***********************************************************
-//OLD Space Telescope Science Institute
-//OLD 
-//OLD Synopsis: agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
-//OLD 
-//OLD  Arguments:              
-//OLD  Returns:
-//OLD  Description:    
-//OLD 	This is essentially a parallel routine that is set up for other types of 
-//OLD 	sources.  It actually does not do very much.
-//OLD 
-//OLD 	This routine calculates the luminosity of the star and the 
-//OLD 	luminosity within the frequency boundaries.  BB functions are assumed 
-//OLD 
-//OLD Notes:
-//OLD History:
-//OLD **************************************************************/
-
-
 
 /**********************************************************/
 /** @name      agn_init
@@ -520,7 +476,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
       /* Added by SS August 2004 for finite disk. */
       if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
       {
-        /* JM XX -- is this bit right? it seems to be that zdisk should use the x coordinate rather than
+        /* JM XXX -- is this bit right? it seems to be that zdisk should use the x coordinate rather than
            magnitude of vector (r).*/
         while (fabs (p[i].x[2]) < zdisk (r)) //We just need to make sure that the photon isn't submerged in the extneded disk
         {

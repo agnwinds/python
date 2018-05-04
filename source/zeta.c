@@ -1,39 +1,16 @@
-/**************************************************************************
-                    Southampton University
-                                                                                                   
-                                                                                                   
-  Synopsis:
 
-The routines in this file are to do with computing the correction to the saha equation.
-
-
-
-  Description:
-
-Zeta is the term in lucy and mazzali which corrects for the proportion of recombinations
-going directly to the ground state. 
-
-nsh: I'm experimenting with moving it out of saha and stuart_sim
-since the same factor will be used in both, and I'm going to add in some more options to
-incorporate a correction factor for dielectronic recombination.
-
-
-                                                                                                   
-  Arguments:  
-                                                                                                   
-                                                                                                   
-  Returns:
-                                                                                                   
-  Notes:
-                                                                                                   
-                                                                                                   
-                                                                                                   
-  History:
-	11aug	nsh	Began work
-	111211	ksl	Began to comment on it
-
-                                                                                                   
- ************************************************************************/
+/***********************************************************/
+/** @file  zeta.c
+ * @Author ksl,nsh
+ * @date   April, 2018
+ *
+ * @brief  The routines in this file are to do with computing the 
+ * correction to the Saha equation for a modified on the spot
+ * approach to ionization.  
+ *
+ *
+ *
+ ***********************************************************/
 
 
 #include <stdio.h>
@@ -46,60 +23,42 @@ incorporate a correction factor for dielectronic recombination.
 #include "recipes.h"
 
 
-
-
-/**************************************************************************
-                    Southampton University
-                                                                                                   
-                                                                                                   
-  Synopsis: compute_zeta calculates the correction term in the L+M and Sim equations
-        for corrected saha eaquation.
-                                                                                                   
-  Description:
-	mode 1 is the original version, it takes ilow, ihi and interpfrac and 
-        interpolates in the ground state fraction table.
-        mode 2 attempts to modify zeta by application of the dielectronic recombination
- 	rate - this calculates zeta from first principles using ground state recombination
-		rates and total recombination rates. It defaults to mode 1 if is it missing data
-		but it returns an error
-                                                                                                   
-  Arguments:  
-	temperature - the temperature of the cell
-	nion - the ion we are recombining to
-  	ilow,ihi - the bracketing elements in the interpfrac table (can be the same in at extremes)
-        interpfrac - the distnce between the two bracketing temps
-	f1,f2 - the frequency band over which we are interested - NB this doesnt really do that much, 
-	since integ_fb ends up resetting the limits.
-	mode - this will allow control here, so we can have the 
-		1: interpfrac type, 
-		2: calculate zeta using rates including dielectrinic recombination
-                                                                                                   
-                                                                                                   
-  Returns:
-	zeta, the correction factor to the recombination rates. 
-                                                                                                   
-  Notes: When compute_zeta is called, nion is the lower ion in the pair whose abundances are being calculated.
-	Calls to the various recombination rate coefficient subroutines are made with nion+1, since these
-	rates are tabulated for the recombining ion.
-
-                                                                                                   
-                                                                                                   
-                                                                                                   
- History:	
-		Aug 2011 NSH - coding started to try to incorportate DR into python
-		Feb 2012 NSH - modified to include code to find the interpfrac parameter here
-				this is to improve the new code for using multiple temperature
-				saha equaions - each equaion needs its own correction factor, 
-				so it makes better code to call it.
-		Jul 2012 NSH - modified to include use of Badnell recombination coefficients
-				to allow dielectronic recombination to be included in the 
-				zeta term.
-		Aug 2014 NSH - some modifications made to take account of changes to the 
-				recombination rate coefficient calculations which were 
-				introduced to facilitate rate matrix ionization scheme
-
-                                                                                                   
- ************************************************************************/
+/**********************************************************/
+/** @name      compute_zeta
+ * @brief      calculates the correction term used in in the L+M and 
+ * Sim equations as a modfication to the Saha equation
+ *
+ * @param [in] double  temp   The temperature for the calculation
+ * @param [in] int  nion  the ion we are recombining to
+ * @param [in] int  mode  The mode  allow that controls how zeta is calcuated
+ * @return     zeta, the correction factor to the recombination rates.
+ *
+ * @details
+ *
+ * zeta is part of correction factor suggested in LM93 in a modified version
+ * of the on-the spot approximation.  Specifically it is the
+ * fraction of recombinations that go directly to the ground state
+ * Saha equation.  
+ *
+ * * mode 1 is the original version, it takes ilow, ihi and interpfrac and 
+ *  interpolates in the ground state fraction table.
+ * * mode 2 attempts to modify zeta by application of the dielectronic recombination
+ *  rate - this calculates zeta from first principles using ground state recombination
+ * 	rates and total recombination rates. It defaults to mode 1 if is it missing data
+ * 	but it returns an error.
+ *
+ * 	The program will exit if the mode is unknown.
+ *
+ * ### Notes ###
+ *
+ * Values for zeta were tabulated by CK (circa 2000)
+ *
+ * When compute_zeta is called, nion is the lower ion in the pair whose abundances are being calculated.
+ * Calls to the various recombination rate coefficient subroutines are made with nion+1, since these
+ * rates are tabulated for the recombining ion.
+ *
+ * The data are read in by get_atomicdata.c (around line 2100)
+ **********************************************************/
 
 double
 compute_zeta (temp, nion, mode)
@@ -137,12 +96,10 @@ compute_zeta (temp, nion, mode)
 
   if (mode == 1)
   {
-    /* This is the old method of getting zeta - just from the ground state tables computed by Christian */
+    /* This is the original method of getting zeta - just from the ground state tables computed by Christian */
 
     zeta = ground_frac[nion].frac[ilow] + interpfrac * (ground_frac[nion].frac[ihi] - ground_frac[nion].frac[ilow]);
-    //Log ("for t_e=%f, ilow=%i, ihi=%i, interpfrac=%f, zeta=%f\n",temp,ilow,ihi,interpfrac,zeta);
   }
-
 
 
   /* Best try at full blown zeta including DR, if we have the data, else default to the old way of doing things */
@@ -182,6 +139,7 @@ compute_zeta (temp, nion, mode)
   else
   {
     Error ("Compute zeta: Unkown mode %i \n", mode);
+    exit(0);
   }
 
 

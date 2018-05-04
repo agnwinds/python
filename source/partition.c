@@ -1,4 +1,18 @@
 
+/***********************************************************/
+/** @file  partition.c
+ * @Author ksl,nsh
+ * @date   April 2018
+ *
+ * @brief  This file includes calculations of  partition functions
+ * for ions in plasma cells under a number of assumptions
+ *
+ * @bug It seems likely that this file and levels.c should be combined
+ * into a single file.  There are very comments (by nsh) about eliminating
+ * some of the modes that need investigation as well.  
+ *
+ ***********************************************************/
+
 
 
 #include <stdio.h>
@@ -11,56 +25,85 @@
 #include "python.h"
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
+//OLD /***********************************************************
+//OLD                                        Space Telescope Science Institute
+//OLD 
+//OLD Synopsis:
+//OLD 	partition_functions calculates the partition functions
+//OLD 	for a single cell in the grid
+//OLD 
+//OLD Arguments:
+//OLD 
+//OLD 
+//OLD Returns:
+//OLD 	
+//OLD Description:
+//OLD 
+//OLD Mode here is identical to that used by nebular_concentrations, e.g
+//OLD 
+//OLD 0 = LTE using t_r
+//OLD 1 = LTE using t_e
+//OLD 2 = Lucy and Mazzali
+//OLD 
+//OLD 
+//OLD 
+//OLD Notes:
+//OLD 
+//OLD 	0800802 - This is a rewritten version of two routines, do_partitions
+//OLD 	and partition.   It is still true that levels is almost identical
+//OLD 	to some of the code here and therefore it is unclear why it is needed.
+//OLD 	levels is always called from partition_functions
+//OLD 
+//OLD 
+//OLD History:
+//OLD 	080802	ksl	60b -- Brought levels routine into
+//OLD 			do_partitions since they are always
+//OLD 			called one after the other.  The routines
+//OLD 			are almost identical and it remains
+//OLD 			unclear why this was coded twice
+//OLD 	080802	ksl	Combined two routines do_partitions
+//OLD 			and partition into one in order to
+//OLD 			make this routine very similar to
+//OLD 			levels
+//OLD 	080804	ksl	Removed hubeny calculation of g from
+//OLD 			this code.  The advantage of the 
+//OLD 			Hubeny calculation was that it had
+//OLD 			a correction for density that we
+//OLD 			no longer had, but it was not being
+//OLD 			accessed by the code at all.
+//OLD 
+//OLD **************************************************************/
 
-Synopsis:
-	partition_functions calculates the partition functions
-	for a single ceell in the grid
-
-Arguments:
-
-
-Returns:
-	
-Description:
-
-Mode here is identical to that used by nebular_concentrations, e.g
-
-0 = LTE using t_r
-1 = LTE using t_e
-2 = Lucy and Mazzali
 
 
 
-Notes:
-
-	0800802 - This is a rewritten version of two routines, do_partitions
-	and partition.   It is still true that levels is almost identical
-	to some of the code here and therefore it is unclear why it is needed.
-	levels is always called from partition_functions
-
-
-History:
-	080802	ksl	60b -- Brought levels routine into
-			do_partitions since they are always
-			called one after the other.  The routines
-			are almost identical and it remains
-			unclear why this was coded twice
-	080802	ksl	Combined two routines do_partitions
-			and partition into one in order to
-			make this routine very similar to
-			levels
-	080804	ksl	Removed hubeny calculation of g from
-			this code.  The advantage of the 
-			Hubeny calculation was that it had
-			a correction for density that we
-			no longer had, but it was not being
-			accessed by the code at all.
-
-**************************************************************/
-
-
+/**********************************************************/
+/** @name      partition_functions
+ * @brief      calculates the partition functions
+ * 	for a single cell in the grid (and then calls a routine that
+ * 	calculates the level populations
+ *
+ * @param [in] PlasmaPtr  xplasma   A plasma cell in the wind
+ * @param [in] int  mode   An integer which determines the way in which the partition funciton will be calculated
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * The possibilites are:
+ * * NEBULARMODE_TR 0        LTE using t_r
+ * * NEBULARMODE_TE 1        LTE using t_e
+ * * NEBULARMODE_ML93 2      ML93 using a nebular approximation correction to LTE
+ * * NEBULARMODE_NLTE_SIM 3  // Non_LTE with SS modification (Probably could be removed)
+ * * NEBULARMODE_LTE_GROUND 4        // A test mode which forces all levels to the GS (Probably could be removed)
+ *
+ *
+ * ### Notes ###
+ * 0800802 - This is a rewritten version of two routines, do_partitions
+ * 	and partition.   It is still true that levels is almost identical
+ * 	to some of the code here and therefore it is unclear why it is needed.
+ * 	levels is always called from partition_functions
+ *
+ **********************************************************/
 
 int
 partition_functions (xplasma, mode)
@@ -170,51 +213,86 @@ partition_functions (xplasma, mode)
 
 
 
-/***********************************************************
-                                       Southampton university
+//OLD /***********************************************************
+//OLD                                        Southampton university
+//OLD 
+//OLD Synopsis:
+//OLD 	partition_functions_2 calculates the partition functions
+//OLD 	for a pair of states for a given temperature. This is needed
+//OLD 	to support the pairwise ioinization state calculations where 
+//OLD 	the saha equation is applied to a pair of states at a
+//OLD 	useful temperature, then corrected. Part of this is 
+//OLD 	a requirement to get the partition functions at that 
+//OLD 	temperature for just tow two states of interest. It is 
+//OLD 	wasteful to calculate all of the states at each temperature.
+//OLD 
+//OLD Arguments:
+//OLD 
+//OLD 	xplasma - the cell we are interested in. Used to communicate back
+//OLD 		the new partition functions.
+//OLD 	xnion - the upper ion in the pair we are currently working on
+//OLD 	temp - the temperature we are using for the saha equation. In the
+//OLD 		original formulation of partition, this is got from xplasma,
+//OLD 		in this case we don't want to use the cell temperature.
+//OLD 
+//OLD Returns:
+//OLD 
+//OLD 	changes the partition functions of just two ions we are currently working on
+//OLD 	
+//OLD Description:
+//OLD 
+//OLD 
+//OLD 
+//OLD Notes:
+//OLD 
+//OLD 	There is no need for the weight term in the calculation since this is only called when
+//OLD 		we are making the assumption that we are in LTE for the saha equation. 
+//OLD 
+//OLD 
+//OLD 
+//OLD History:
+//OLD 	2012Feb	nsh - began coding
+//OLD 	2012Sep	nsh - added weight as a calling value - this allows one to produce gs 
+//OLD                 only with w=0, or LTE with w=1 or to produce a correction factor with W = the measured value	
+//OLD 
+//OLD **************************************************************/
 
-Synopsis:
-	partition_functions_2 calculates the partition functions
-	for a pair of states for a given temperature. This is needed
-	to support the pairwise ioinization state calculations where 
-	the saha equation is applied to a pair of states at a
-	useful temperature, then corrected. Part of this is 
-	a requirement to get the partition functions at that 
-	temperature for just tow two states of interest. It is 
-	wasteful to calculate all of the states at each temperature.
-
-Arguments:
-
-	xplasma - the cell we are interested in. Used to communicate back
-		the new partition functions.
-	xnion - the upper ion in the pair we are currently working on
-	temp - the temperature we are using for the saha equation. In the
-		original formulation of partition, this is got from xplasma,
-		in this case we don't want to use the cell temperature.
-
-Returns:
-
-	changes the partition functions of just two ions we are currently working on
-	
-Description:
 
 
 
-Notes:
-
-	There is no need for the weight term in the calculation since this is only called when
-		we are making the assumption that we are in LTE for the saha equation. 
-
-
-
-History:
-	2012Feb	nsh - began coding
-	2012Sep	nsh - added weight as a calling value - this allows one to produce gs 
-                only with w=0, or LTE with w=1 or to produce a correction factor with W = the measured value	
-
-**************************************************************/
-
-
+/**********************************************************/
+/** @name      partition_functions_2
+ * @brief      calculates the partition functions
+ * 	for a pair of ions at a given temperature. 
+ *
+ *
+ * @param [in] PlasmaPtr  xplasma   - the cell we are interested in. Used to communicate back
+ * @param [in] int  xnion   The ion number for the upper ion of a pair 
+ * @param [in] double  temp  the temperature we are using for the saha equation. 
+ * @param [in] double  weight The ratio of the intensity of the radiation field to that of a BB
+ * @return     changes the partition functions of just two ions we are currently working on
+ *
+ * @details
+ * 	This routine is used 
+ * 	to support the pairwise ioinization state calculations where 
+ * 	the saha equation is applied to a pair of states at a
+ * 	temperature, then corrected. Part of this is 
+ * 	a requirement to get the partition functions at that 
+ * 	temperature for just two states of interest. It is 
+ * 	wasteful to calculate all of the states at each temperature.
+ *
+ * 	The results are stored in xplasma->partition[nion]
+ *
+ * ### Notes ###
+ * @bug According to the historical notes, there is no need for the weight term in the calculation 
+ * since this is only called when
+ * we are making the assumption that we are in LTE for the saha equation.
+ *
+ * One of the ways in which this routine differs from partition_functions is that
+ * here the temperature and weight are passed to the routing directly instead of
+ * being taken from the Plasma structure.
+ *
+ **********************************************************/
 
 int
 partition_functions_2 (xplasma, xnion, temp, weight)
@@ -276,11 +354,6 @@ partition_functions_2 (xplasma, xnion, temp, weight)
     xplasma->partition[nion] = z;
 
   }
-
-
-
-
-
 
   return (0);
 }

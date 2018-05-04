@@ -66,6 +66,7 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
   char filename[LINELENGTH];
   double x;
   int nplasma;
+  double nh;
 
 
 
@@ -95,7 +96,8 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
       {
         sprintf (name, "Element %d (%s) ion %d fractions\n", element, ele[nelem].name, istate);
         aaa[n] = plasmamain[nplasma].density[nion];
-        aaa[n] /= ((plasmamain[nplasma].density[0] + plasmamain[nplasma].density[1]) * ele[nelem].abun);
+        nh = rho2nh * plasmamain[nplasma].rho;
+        aaa[n] /= (nh * ele[nelem].abun);
       }
       else if (iswitch == 1)
       {

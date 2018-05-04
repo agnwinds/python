@@ -59,6 +59,7 @@ History:
 
 import sys
 import subprocess
+import os
 
 
 def is_installed(program):
@@ -333,7 +334,7 @@ def get_modules(filename='emission.c'):
 file_string = '''
 /***********************************************************/
 /** @file  %s
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  ???
@@ -347,7 +348,6 @@ module_string_start = '''
 /** @name      {}
  * @brief      {}
  *
- * <NOTE: The [in out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
 '''
 module_string_param = ''' * @param [in out] {}  {}   {}
 '''
@@ -382,6 +382,9 @@ def doit(filename='emission.c', outputfile=None, verbose=False):
 
     if not outputfile:
         outputfile = 'new_'+filename
+    if os.path.isfile(outputfile):
+        print('Error %s already exists, exiting' % outputfile)
+        return
 
     lines = read_file(filename)
 

@@ -1148,7 +1148,9 @@ hydro_restart (ndom)
   partition_functions (&plasmamain[n], NEBULARMODE_LTE_GROUND);	/* WARNING fudge NSH 11/5/14 - this is as a test. We really need a better implementation
 								   of partition functions and levels for a power law illuminating spectrum. We found that
 								   if we didnt make this call, we would end up with undefined levels - which did really
-								   crazy things */
+								   crazy things.  NEBULARMODE_LTE_GROUND puts everythin into the ground state.  Note
+                                  from ksl - It is a bit unclear what is happening here.  I thought that levels were established
+                                 just before photons were going throught the grid, and so partition_functions should be called later */
 
 
   /* Recreate the wind cones because these are not part of the windsave file */

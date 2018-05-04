@@ -210,8 +210,8 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
 		
     if os.path.isdir(pf_dir):
         pf_files=glob(pf_dir+'/*pf')
-    elif os.path('%s/%s' % (PYTHON,pf_dir)):
-        pf_files=glob('%s/%s' % (PYTHON,pf_dir))
+    elif os.path.isdir('%s/examples/%s' % (PYTHON,pf_dir)):
+        pf_files=glob('%s/examples/%s/*pf' % (PYTHON,pf_dir))
     else:
         print('Error: The pf directory %s does not appear to exist' % pf_dir)
         return
@@ -238,6 +238,7 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
     commands=[]
     root_names=[]
     for one in pf_files:
+        print('Copy',one)
         shutil.copy(one,out_dir)
         words=one.split('/')
         pf=(words[len(words)-1])
