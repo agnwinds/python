@@ -873,6 +873,7 @@ double
   int nplasma;
   double *x;
   int nstart, nstop, ndim2;
+  double nh;
 
 
   nstart = zdom[ndom].nstart;
@@ -903,13 +904,14 @@ double
   {
     x[n] = 0;
     nplasma = wmain[nstart + n].nplasma;
-    if (wmain[nstart + n].vol > 0.0 && plasmamain[nplasma].ne > 0.0)
+    if (wmain[nstart + n].vol > 0.0 && plasmamain[nplasma].rho > 0.0)
     {
       if (iswitch == 0)
       {
         sprintf (name, "Element %d (%s) ion %d fractions\n", element, ele[nelem].name, istate);
         x[n] = plasmamain[nplasma].density[nion];
-        x[n] /= ((plasmamain[nplasma].density[0] + plasmamain[nplasma].density[1]) * ele[nelem].abun);
+        nh = rho2nh * plasmamain[nplasma].rho;
+        x[n] /= (nh * ele[nelem].abun);
       }
       else if (iswitch == 1)
       {
