@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  brem.c
- * @Author nsh
+ * @author nsh
  * @date   October, 2015
  *
  * @brief  Functions to allow a Bremstrahlung type input spectrum

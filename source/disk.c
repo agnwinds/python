@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  disk.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  Various routines related setting up the disk and calculating

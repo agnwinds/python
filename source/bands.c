@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  bands.c
- * @Author ksl
+ * @author ksl
  * @date   March  , 2018
  *
  * @brief  Setup the frequency bands used for stratified sampling and

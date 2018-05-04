@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  get_atomicdata.c
- * @Author ksl
+ * @author ksl
  * @date   March, 2018
  *
  * @brief  Read in all of the atomic data for use with Python

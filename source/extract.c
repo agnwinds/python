@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  extract.c
- * @Author ksl
+ * @author ksl
  * @date   April, 2018
  *
  * @brief  Maing routines for extracting photons during the 

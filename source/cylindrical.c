@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  cylindrical.c
- * @Author ksl
+ * @author ksl
  * @date   March, 2018
  *
  * @brief  Generic routines for handling cylindrical coordinate

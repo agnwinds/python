@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  new_pi_rates.c
- * @Author nsh
+ * @author nsh
  * @date   Aug, 2014
  *
  * @brief  Routines associated with calculating photionization rates

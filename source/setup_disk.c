@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file   setup_disk.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  Read parameters that define a disk

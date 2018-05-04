@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  zeta.c
- * @Author ksl,nsh
+ * @author ksl,nsh
  * @date   April, 2018
  *
  * @brief  The routines in this file are to do with computing the 

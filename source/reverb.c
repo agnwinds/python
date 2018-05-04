@@ -1,6 +1,6 @@
 /***********************************************************/
 /** @file   reverb.c
- * @Author SWM
+ * @author SWM
  * @date   July, 2015
  * @brief  Reverberation mapping functions.
  *

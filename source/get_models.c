@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  get_models.c
- * @Author ksl
+ * @author ksl
  * @date   March, 2018
  *
  * @brief  The routines here provide a way to read grids of models and

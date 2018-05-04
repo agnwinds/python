@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  new_gradv.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  Routines related to calculating velocity gradients

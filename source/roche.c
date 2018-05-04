@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  roche.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief      These routines are used to describe the Roche geometry and are intended to allow one

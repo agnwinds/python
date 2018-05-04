@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  agn.c
- * @Author nsh
+ * @author nsh
  * @date   2011
  *
  * @brief  Subroutines relating to power law radiation sources

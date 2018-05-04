@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  synonyms.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  Translate the keywords used in previous versions of Python to the current keywords

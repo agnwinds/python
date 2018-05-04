@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  rtheta.c
- * @Author ksl
+ * @author ksl
  * @date   March, 2018
  *
  * @brief  Generic routines for use with an azimuthally-symmetric
