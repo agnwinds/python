@@ -287,10 +287,10 @@ calculate_ionization (restart_stat)
  * values, loglin (0=linear, 1=log for the wavelength scale), all photons or just wind photons
  */
 
-      spectrum_summary (files.wspec,       "w", 0, 6, SPECTYPE_RAW, 1., 0, 0);  /* .spec_tot */ 
-      spectrum_summary (files.lwspec,      "w", 0, 6, SPECTYPE_RAW, 1., 1, 0);  /* .log_spec_tot */
-      spectrum_summary (files.wspec_wind,  "w", 0, 6, SPECTYPE_RAW, 1., 0, 1);  /* .spec_tot_wind  */
-      spectrum_summary (files.lwspec_wind, "w", 0, 6, SPECTYPE_RAW, 1., 1, 1);  /* .log_spec_tot_wind */
+      spectrum_summary (files.wspec,       0, 6, SPECTYPE_RAW, 1., 0, 0);  /* .spec_tot */ 
+      spectrum_summary (files.lwspec,      0, 6, SPECTYPE_RAW, 1., 1, 0);  /* .log_spec_tot */
+      spectrum_summary (files.wspec_wind,  0, 6, SPECTYPE_RAW, 1., 0, 1);  /* .spec_tot_wind  */
+      spectrum_summary (files.lwspec_wind, 0, 6, SPECTYPE_RAW, 1., 1, 1);  /* .log_spec_tot_wind */
       phot_gen_sum (files.phot, "w");   /* Save info about the way photons are created and absorbed
                                            by the disk */
 #ifdef MPI_ON
@@ -549,12 +549,12 @@ make_spectra (restart_stat)
     {
 #endif
 
-      spectrum_summary (files.spec, "w", 0, nspectra - 1, geo.select_spectype, renorm, 0, 0);
-      spectrum_summary (files.lspec, "w", 0, nspectra - 1, geo.select_spectype, renorm, 1, 0);
+      spectrum_summary (files.spec,  0, nspectra - 1, geo.select_spectype, renorm, 0, 0);
+      spectrum_summary (files.lspec, 0, nspectra - 1, geo.select_spectype, renorm, 1, 0);
 
       /* Next lines  produce spectra from photons in the wind only */
-      spectrum_summary (files.spec_wind, "w", 0, nspectra - 1, geo.select_spectype, renorm, 0, 1);
-      spectrum_summary (files.lspec_wind, "w", 0, nspectra - 1, geo.select_spectype, renorm, 1, 1);
+      spectrum_summary (files.spec_wind,  0, nspectra - 1, geo.select_spectype, renorm, 0, 1);
+      spectrum_summary (files.lspec_wind, 0, nspectra - 1, geo.select_spectype, renorm, 1, 1);
 
 #ifdef MPI_ON
     }

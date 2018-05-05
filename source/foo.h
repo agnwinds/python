@@ -51,7 +51,7 @@ double get_ne(double density[]);
 /* spectra.c */
 int spectrum_init(double f1, double f2, int nangle, double angle[], double phase[], int scat_select[], int top_bot_select[], int select_extract, double rho_select[], double z_select[], double az_select[], double r_select[]);
 int spectrum_create(PhotPtr p, double f1, double f2, int nangle, int select_extract);
-int spectrum_summary(char filename[], char mode[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin, int iwind);
+int spectrum_summary(char filename[], int nspecmin, int nspecmax, int select_spectype, double renorm, int loglin, int iwind);
 int spectrum_restart_renormalise(int nangle);
 /* wind2d.c */
 int define_wind(void);
@@ -86,16 +86,11 @@ int create_basis(double u[], double v[], struct basis *basis_new);
 int project_from(struct basis *basis_from, double v_in[], double v_out[]);
 int project_to(struct basis *basis_from, double v_in[], double v_out[]);
 int reorient(struct basis *basis_from, struct basis *basis_to, double v_from[], double v_to[]);
-/* debug.c */
-int DebugStr(char *string);
 /* recipes.c */
 double qromb(double (*func)(double), double a, double b, double eps);
 double trapzd(double (*func)(double), double a, double b, int n);
 void polint(double xa[], double ya[], int n, double x, double *y, double *dy);
 double zbrent(double (*func)(double), double x1, double x2, double tol);
-void spline(double x[], double y[], int n, double yp1, double ypn, double y2[]);
-void splint(double xa[], double ya[], double y2a[], int n, double x, double *y);
-double expint(int n, double x);
 double *vector(int i, int j);
 void free_vector(double *a, int i, int j);
 double rtsafe(void (*funcd)(double, double *, double *), double x1, double x2, double xacc);
@@ -313,10 +308,6 @@ int wind_ij_to_n(int ndom, int i, int j, int *n);
 int wind_x_to_n(double x[], int *n);
 /* density.c */
 double get_ion_density(int ndom, double x[], int nion);
-/* detail.c */
-int detailed_balance(PlasmaPtr xplasma, int nelem, double newden[]);
-int rebalance(double rates_up[], double rates_down[], double fraction[], int ntot);
-int wind_update_after_detailed_balance(PlasmaPtr xplasma, int nelem, double newden[]);
 /* bands.c */
 int bands_init(int imode, struct xbands *band);
 int freqs_init(double freqmin, double freqmax);
