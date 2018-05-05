@@ -752,13 +752,11 @@ main (argc, argv)
    if (modes.rand_seed_usetime == 1)
      {
        n = (unsigned int) clock () * (rank_global + 1);
- //      srand (n);
  	  init_rand(n);
 	  
      }
    else
    {
- //OLD    srand (1084515760 + (13 * rank_global));
      init_rand(1084515760 + (13 * rank_global));
  }
 
@@ -766,7 +764,6 @@ main (argc, argv)
 
   /* Next line finally defines the wind if this is the initial time this model is being run */
 
-//Old  if (geo.run_type == RUN_TYPE_NEW &&  modes.zeus_connect != 1)	// Define the wind and allocate the arrays the first time
   if (geo.run_type == RUN_TYPE_NEW)	// Define the wind and allocate the arrays the first time
     {
       define_wind ();
