@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  partition.c
- * @Author ksl,nsh
+ * @author ksl,nsh
  * @date   April 2018
  *
  * @brief  This file includes calculations of  partition functions

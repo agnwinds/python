@@ -797,7 +797,7 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm, l
         {                       /*generated spectrum */
           x /= (dfreq);         //With log spectra implemented, we should divide by nu, so log and lin spectra agree
         }
-        fprintf (fptr, " %8.3g", x * renorm);
+        fprintf (fptr, " %10.5g", x * renorm);
       }
 
 
@@ -836,7 +836,7 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm, l
         {                       /*generated spectrum */
           x /= (dfreq);
         }
-        fprintf (fptr, " %8.3g", x * renorm);
+        fprintf (fptr, " %10.5g", x * renorm);
       }
 
 

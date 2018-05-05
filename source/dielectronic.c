@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  new_dielectronic.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  ???

@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  homologous.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  Routines describing a homologous flow in Python.

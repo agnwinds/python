@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  spherical.c
- * @Author ksl
+ * @author ksl
  * @date   March, 2018
  *
  * @brief  These are generic routines for setting up 1d spherical

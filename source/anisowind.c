@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  anisowind.c
- * @Author ksl
+ * @author ksl
  * @date   March, 2018
  *
  * @brief  Routines to implement anisotropic scattering in 

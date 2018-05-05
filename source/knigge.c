@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  knigge.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  Routines needed to define a KWD wind

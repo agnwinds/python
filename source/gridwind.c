@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  gridwind.c
- * @Author ksl,sss,jm
+ * @author ksl,sss,jm
  * @date   April, 2018
  *
  * @brief  This file contains routines for allocating space for most

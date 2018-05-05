@@ -7,7 +7,7 @@
  * @brief  Routines that are used to define the wind initially
  *
  * The file also contains a number of utility routines, several of
- * which are steering routines to coordinate system specific 
+ * which are steering routines to coordinate system specific
  * routines.
  ***********************************************************/
 #include <stdio.h>
@@ -57,7 +57,7 @@ define_wind ()
   WindPtr w;
 
 
-  /* Determine the size of the structure, we need to allocate 
+  /* Determine the size of the structure, we need to allocate
      from the individual domains and then allocatee the space */
 
   /*
@@ -88,7 +88,7 @@ define_wind ()
     {
       for (n = zdom[ndom].nstart; n < zdom[ndom].nstop; n++)
 	{
-	  w[n].ndom = ndom;	// Assign each wind cell to a domain                                       
+	  w[n].ndom = ndom;	// Assign each wind cell to a domain
 	}
     }
 
@@ -108,8 +108,8 @@ define_wind ()
       if (zdom[ndom].wind_type == IMPORT) {
               import_make_grid(w,ndom);
               }
-      else if (zdom[ndom].wind_type == SHELL)	/* nsh: This is the mode where we want the wind and the grid carefully 
-						   controlled to allow a very thin shell. We ensure that the coordinate type is spherical. 
+      else if (zdom[ndom].wind_type == SHELL)	/* nsh: This is the mode where we want the wind and the grid carefully
+						   controlled to allow a very thin shell. We ensure that the coordinate type is spherical.
 						 */
 	{
 	  Log
@@ -126,8 +126,8 @@ define_wind ()
 	}
       else if (zdom[ndom].coord_type == RTHETA)
 	{
-	  if (zdom[ndom].wind_type == HYDRO)	/* 13jun -- nsh - 76 - This is a switch to allow one to use the 
-						   actual zeus grid in the special case of a 'proga' wind in rtheta 
+	  if (zdom[ndom].wind_type == HYDRO)	/* 13jun -- nsh - 76 - This is a switch to allow one to use the
+						   actual zeus grid in the special case of a 'proga' wind in rtheta
 						   coordinates
 						 */
 	    {
@@ -178,9 +178,9 @@ define_wind ()
 	}
       else if (zdom[ndom].coord_type == RTHETA)
 	{
-	  /* 13jun -- nsh - 76 - This is a switch to allow one to use 
-	     the actual zeus grid in the special case of a 'proga' wind 
-	     in rtheta coordinates We dont need to work out if cells are 
+	  /* 13jun -- nsh - 76 - This is a switch to allow one to use
+	     the actual zeus grid in the special case of a 'proga' wind
+	     in rtheta coordinates We dont need to work out if cells are
 	     in the wind, they are known to be in the wind. */
 	  if (zdom[ndom].wind_type == HYDRO)
 	    {
@@ -315,15 +315,15 @@ be optional which variables beyond here are moved to structures othere than Wind
 
       for (nn = 0; nn < NXBANDS; nn++)
 	{
-	  plasmamain[n].spec_mod_type[nn] = SPEC_MOD_FAIL;	/*NSH 120817 - setting this to 
-								   a negative number means that at the outset, we assume we do not have a 
+	  plasmamain[n].spec_mod_type[nn] = SPEC_MOD_FAIL;	/*NSH 120817 - setting this to
+								   a negative number means that at the outset, we assume we do not have a
 								   suitable model for the cell */
-	  plasmamain[n].exp_temp[nn] = geo.tmax;	/*NSH 120817 - as an initial guess, 
-							   set this number to the hottest part of the model - 
+	  plasmamain[n].exp_temp[nn] = geo.tmax;	/*NSH 120817 - as an initial guess,
+							   set this number to the hottest part of the model -
 							   this should define where any exponential dropoff becomes important */
 	  plasmamain[n].exp_w[nn] = 0.0;	/* 120817 Who knows what this should be! */
-	  plasmamain[n].pl_alpha[nn] = geo.alpha_agn;	/*As an initial guess we assume the whole wind is 
-							   optically thin and so the spectral index for a PL illumination will be the 
+	  plasmamain[n].pl_alpha[nn] = geo.alpha_agn;	/*As an initial guess we assume the whole wind is
+							   optically thin and so the spectral index for a PL illumination will be the
 							   same everywhere.  */
 	  plasmamain[n].pl_log_w[nn] = -1e99;	/*131114 - a tiny weight - just to fill the variable */
 
@@ -334,7 +334,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 	}
 
 
-/* NSH 130530 Next few lines allow the use of the temperature which can be computed from Zeus models to be 
+/* NSH 130530 Next few lines allow the use of the temperature which can be computed from Zeus models to be
  * used as an initial guess for the wind temperature */
 
       if (zdom[ndom].wind_type == HYDRO)
@@ -357,7 +357,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 	  a fixed temprature calculation,then the wind temperature is set to be the wind temperature so the
 	  user gets what they are expecting */
 
-      if (modes.fixed_temp == 0 && modes.zeus_connect == 0)	//NSH 151126 - dont multply by 0.9 in zeus connect or fixed temp modes 
+      if (modes.fixed_temp == 0 && modes.zeus_connect == 0)	//NSH 151126 - dont multply by 0.9 in zeus connect or fixed temp modes
 	plasmamain[n].t_e = plasmamain[n].t_e_old = 0.9 * plasmamain[n].t_r;	//Lucy guess
       else
 	plasmamain[n].t_e = plasmamain[n].t_e_old = plasmamain[n].t_r;
@@ -413,7 +413,6 @@ be optional which variables beyond here are moved to structures othere than Wind
 
 /* Calculate the the divergence of the wind at the center of each grid cell */
   wind_div_v (w);
-  
 
 /* Now calculate the adiabatic cooling.  Note: adiabatic cooling is not used in
  * the program at present.  There are issues concerning how to incorporate it
@@ -438,10 +437,10 @@ be optional which variables beyond here are moved to structures othere than Wind
 
   /* Calculate one over dvds */
   dvds_ave ();
-  
-  
+
+
   wind_check (w, -1);		// Check the wind for reasonability
-  
+
   /* zero the counters which record diagnostics for mean_intensity */
   nerr_Jmodel_wrong_freq = 0;
   nerr_no_Jmodel = 0;
@@ -452,7 +451,7 @@ be optional which variables beyond here are moved to structures othere than Wind
      much better approach is needed, e.g. to calculate the mass flow in a spherical shell at the edge
      of the disk.  In addition, it uses a very inexact way to determine which grid points are in the
      wind.  Today, I simply modified the routine so the flux was calculated mid-way in grid space
-     through the wind. ??? ksl 01mar15  
+     through the wind. ??? ksl 01mar15
 
      04aug -- I have not written the routine to do the check that with cooridnate systems
      other than spherical, we are getting the correct mdot.  It should be possible to do this
@@ -461,7 +460,7 @@ be optional which variables beyond here are moved to structures othere than Wind
      it for now.
 
      05apr -- Looked at this again.  It is clearly a straightforwrd thing to do use the rho function
-     which is below. One would simply integrate over various surface integrals to make it happen.  
+     which is below. One would simply integrate over various surface integrals to make it happen.
 
      15aug -- ksl - It's not clear this it really correct with dommains, but the following compiles
 */
@@ -519,29 +518,29 @@ be optional which variables beyond here are moved to structures othere than Wind
 
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
-//OLD  	where_in_grid locates the 1-d grid position of the photon. 
-//OLD 
-//OLD  Arguments:		
+//OLD  	where_in_grid locates the 1-d grid position of the photon.
+//OLD
+//OLD  Arguments:
 //OLD  	ndom		The domain number for the search
 //OLD 	double x[];     The position
 //OLD  Returns:
 //OLD  	where_in_grid normally  returns element in wmain  associated with
-//OLD  		a position.  If the photon is in the grid this will 
+//OLD  		a position.  If the photon is in the grid this will
 //OLD 		be a positive integer.
 //OLD  	photon is inside the grid        -1
 //OLD 	photon is outside the grid       -2
-//OLD  Description:	
-//OLD 	
-//OLD 		
+//OLD  Description:
+//OLD
+//OLD
 //OLD  Notes:
-//OLD 	Where_in grid does not tell you whether the photon is in the wind!. 
-//OLD 
+//OLD 	Where_in grid does not tell you whether the photon is in the wind!.
+//OLD
 //OLD 	What one means by inside or outside the grid may well be different
 //OLD 	for different coordinate systems..
-//OLD 
-//OLD 
+//OLD
+//OLD
 //OLD  History:
 //OLD  	97jan	ksl	Coding on python began.
 //OLD 	98jul	ksl	Removed WindPtr as one of arguments since not used
@@ -553,7 +552,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 //OLD 			multiple coordinate systems
 //OLD 	05apr	ksl	55d -- Added spherical as a possiblity
 //OLD 	15aug	ksl	Modified so that a domain number is requried
-//OLD  
+//OLD
 //OLD **************************************************************/
 
 int wig_n;
@@ -565,8 +564,8 @@ double wig_x, wig_y, wig_z;
  *
  * @param [in] int  ndom   The domain number for the search
  * @param [in] double  x[]   The position
- * @return     where_in_grid normally  returns the element in wmain associated 
- * with a position.  If the positions is in the grid (of one of the domains) 
+ * @return     where_in_grid normally  returns the element in wmain associated
+ * with a position.  If the positions is in the grid (of one of the domains)
  * this will be a positive integer.  If the position is not in the grid of one
  * of the domains,
  * a negative number -1 will be returned if the position is inside athe grid,
@@ -576,10 +575,10 @@ double wig_x, wig_y, wig_z;
  *
  * ### Notes ###
  * where in grid is mainly a steering routine that calls other various
- * coordinate system specific routines.  
+ * coordinate system specific routines.
  *
- * Where_in grid does not tell you whether the position is in the wind!. 
- * 
+ * Where_in grid does not tell you whether the position is in the wind!.
+ *
  * What one means by inside or outside the grid may well be different
  * for different coordinate systems.
  *
@@ -639,32 +638,32 @@ where_in_grid (ndom, x)
 
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
-//OLD 	vwind_xyz(ndom,p,v) finds the velocity vector v for the wind in cartesian 
+//OLD 	vwind_xyz(ndom,p,v) finds the velocity vector v for the wind in cartesian
 //OLD 	coordinates at the position of the photon p.
-//OLD  
-//OLD  Arguments:		
-//OLD 	int ndom;  
+//OLD
+//OLD  Arguments:
+//OLD 	int ndom;
 //OLD 	PhotPtr p;
 //OLD 	double v[];
-//OLD 
+//OLD
 //OLD Returns:
 //OLD 	0 	on successful completion
 //OLD 		the value of where in grid if the photon outside the wind grid.
-//OLD  
+//OLD
 //OLD Description:
 //OLD 	This routine carries out a bilinear interpolation of the wind velocity.  The velocities
 //OLD 	at the edges of the grid cells must have been defined elsewhere (e.g in wind_define).
-//OLD 	
-//OLD 	If the position is outside the wind grid, then the velocities will be returned as 0.	
-//OLD 	
+//OLD
+//OLD 	If the position is outside the wind grid, then the velocities will be returned as 0.
+//OLD
 //OLD Notes:
 //OLD 	For all of the 2d coordinate systems, the positions in the WindPtr array are
 //OLD 	caclulated in the xz plane.  As a result, the velocities in that array are
 //OLD 	calcuated there as well.  Hence, to obtain the velocity in cartesion coordinates
-//OLD 	one needs to do a simple rotation of the velocity vector.  
-//OLD 
+//OLD 	one needs to do a simple rotation of the velocity vector.
+//OLD
 //OLD 	For spherical (1d) coordinates the situation is complex, the philosopy that
 //OLD 	has been adopted is to let the program run even if the wind model is intrinsically
 //OLD 	2d.   The xyz positions of the grid are defined are defined so that
@@ -675,38 +674,38 @@ where_in_grid (ndom, x)
 //OLD 	that has been made is to assume that v[1] is preserved as a non zero value in
 //OLD 	making the projection.  An alternative might have been to preserve the angular
 //OLD 	rotation rate.
-//OLD 	
-//OLD 	Regardless, the fundamental challenge is to make sure the program works correctly 
+//OLD
+//OLD 	Regardless, the fundamental challenge is to make sure the program works correctly
 //OLD 	for the spherically symmetric case, e.g a simple stellar wind, which it did not
-//OLD 	before 56b.  
-//OLD 
+//OLD 	before 56b.
+//OLD
 //OLD 	If we ever implement a real 3d coordinate system, one will need to look at
 //OLD 	this routine again.
-//OLD 
+//OLD
 //OLD History:
 //OLD  	97jan	ksl	Coding on python began.
-//OLD 	02feb	ksl	Modified to use new general purpose fraction routine.  
+//OLD 	02feb	ksl	Modified to use new general purpose fraction routine.
 //OLD 	04aug	ksl	52a -- Made a shell for choosing what coordinate
 //OLD 			system to calculate this in
 //OLD 	05jun	ksl	56b -- Despite the note above nothing had been done
 //OLD 			to fix vwind_xyz to handle spherical coordinates
-//OLD 			properly.  It was OK for any two-d system.  This 
+//OLD 			properly.  It was OK for any two-d system.  This
 //OLD 			is now fixed, but see the notes above.
 //OLD 	06may	ksl	57+ -- Changed call to elimatnate passing the
 //OLD 			Wind array.  Use wmain instead.
 //OLD 	15aug	ksl	Added a variable for the domain
-//OLD  
+//OLD
 //OLD **************************************************************/
 int ierr_vwind = 0;
 
 
 /**********************************************************/
 /** @name      vwind_xyz
- * @brief      finds the velocity vector v for the wind in cartesian 
+ * @brief      finds the velocity vector v for the wind in cartesian
  * 	coordinates at the position of the photon p.
  *
  * @param [in] int  ndom   The domain of interest
- * @param [in] PhotPtr  p   A photon 
+ * @param [in] PhotPtr  p   A photon
  * @param [out] double  v[]   The velocity at the postion given by phtoon???
  * @return     0 	on successful completion, or a negative number if
  * photon position is not in the in the grid for the domain of interest.
@@ -714,15 +713,15 @@ int ierr_vwind = 0;
  * @details
  * This routine carries out a bilinear interpolation of the wind velocity.  The velocities
  * at the edges of the grid cells must have been defined elsewhere (e.g in wind_define).
- * 	
+ *
  * If the position is outside the wind grid, then the velocities will be returned as 0.
  *
  * ### Notes ###
  * For all of the 2d coordinate systems, the positions in the WindPtr array are
  * calculated in the xz plane.  As a result, the velocities in that array are
  * calcuated there as well.  Hence, to obtain the velocity in cartesion coordinates
- * one needs to do a simple rotation of the velocity vector.  
- * 
+ * one needs to do a simple rotation of the velocity vector.
+ *
  * For spherical (1d) coordinates the situation is complex, the philosopy that
  * has been adopted is to let the program run as if the wind model is intrinsically
  * 2d.   The xyz positions of the grid are defined are defined so that
@@ -733,7 +732,7 @@ int ierr_vwind = 0;
  * that has been made is to assume that v[1] is preserved as a non zero value in
  * making the projection.  An alternative might have been to preserve the angular
  * rotation rate.
- * 
+ *
  * If we ever implement a real 3d coordinate system, one will need to look at
  * this routine again.
  *
@@ -792,7 +791,7 @@ vwind_xyz (ndom, p, v)
       return (0);
     }
 
-  /* Now we have v in cylindrical coordinates, but we would like it in cartesian coordinates.  
+  /* Now we have v in cylindrical coordinates, but we would like it in cartesian coordinates.
      Note that could use project_from_cyl_xyz(p->x,vv,v) ?? */
 
   ctheta = p->x[0] / rho;
@@ -818,18 +817,18 @@ vwind_xyz (ndom, p, v)
  * @brief      calculates the divergence of the velocity at the center of all the grid cells.
  *
  * @param [in,out] WindPtr  w   The entire wind domain
- * @return     Always returns 0 
+ * @return     Always returns 0
  *
  * The results are stored in wmain[].div_v
  *
  * @details
- * This is one of the initialization routines for the wind.   
- * The divergence of velocity of the wind is used to calculated PdV cooling of a grid cell 
+ * This is one of the initialization routines for the wind.
+ * The divergence of velocity of the wind is used to calculated PdV cooling of a grid cell
  *
  * ### Notes ###
- * 
- * Because the routine calls vwind_xyz, one must have previously 
- * populated w[].v.  Also as a result of this fact, the routine 
+ *
+ * Because the routine calls vwind_xyz, one must have previously
+ * populated w[].v.  Also as a result of this fact, the routine
  * is not tightly tied to any particular wind model.
  *
  * The divergence, like othe scalar quantities, does not
@@ -925,13 +924,13 @@ wind_div_v (w)
  *
  * @param [in out] WindPtr  w   The entire wind
  * @param [in out] double  x[]   A position
- * @return     
+ * @return
  * The density at x, if the postion is in the active region of the wind.
  * If the postion is not in the active region of one of the domains, then
  * 0 is returned.  No error is reported for this
  *
  * @details
- * The routine first determines what domain the position is located in, 
+ * The routine first determines what domain the position is located in,
  * and then intepolates to find the density at a specific position
  *
  * ### Notes ###
@@ -995,7 +994,7 @@ rho (w, x)
  *
  * @details
  * The routine calculates the mass loss rate in two ways, one in a plane with
- * a zheight of 0 above the disk (out to a distance rmax, and one at a spherical 
+ * a zheight of 0 above the disk (out to a distance rmax, and one at a spherical
  * radius rmax
  *
  * ### Notes ###
@@ -1003,7 +1002,7 @@ rho (w, x)
  * @bug  This routine has errors.  It is only correct if there is
  * a single domain.  In particular rho(w,x) gives the correct answer
  * for rho regardless of domains, but nodom is set to 0 for  vind(ndom,&p,v).
- * This should be fixed.  
+ * This should be fixed.
  *
  **********************************************************/
 #define NSTEPS 100
@@ -1051,7 +1050,7 @@ mdot_wind (w, z, rmax)
     }
 
   mplane = 2. * mdot;
-  
+
 /* Calculate the mass loss rate in a sphere */
 
   dtheta = PI / (2 * NSTEPS);
@@ -1135,14 +1134,14 @@ get_random_location (n, x)
 /**********************************************************/
 /** @name      zero_scatters
  * @brief      zero out the portion of plasmamain that records
- * the number of scatters in each cell 
+ * the number of scatters in each cell
  *
  * @return     Always returns 0
  *
  * @details
  *
  * ### Notes ###
- * The routine is called at the point where we begin to 
+ * The routine is called at the point where we begin to
  * calculate the detailed spectrum.  It's a little unclear
  * why it is simply not incorporated into spectrum_init
  *
@@ -1153,7 +1152,7 @@ zero_scatters ()
 {
   int n, j;
 
-  for (n = 0; n < NPLASMA; n++)	/*NSH 1107 - changed loop to only run over nions to avoid running over the 
+  for (n = 0; n < NPLASMA; n++)	/*NSH 1107 - changed loop to only run over nions to avoid running over the
 				   end of the array after the arry was dynamically allocated in 78a */
     {
       for (j = 0; j < nions; j++)
@@ -1166,39 +1165,39 @@ zero_scatters ()
 }
 
 
-//OLD /*************************************************************  
+//OLD /*************************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD 	Check how many corners  of a wind cell are in the wind defined by this
 //OLD 	particular domain
-//OLD 
+//OLD
 //OLD Synopsis:
-//OLD 
+//OLD
 //OLD 	The routine basically just calls where_in_wind for each of the 4 corners
 //OLD 	of the cell.
-//OLD 
-//OLD 
-//OLD Arguments:		
-//OLD 
+//OLD
+//OLD
+//OLD Arguments:
+//OLD
 //OLD 	int n where n is the cell number
-//OLD 
+//OLD
 //OLD Returns:
-//OLD 
-//OLD 	The routine simply returns the number of corners of the cell that 
+//OLD
+//OLD 	The routine simply returns the number of corners of the cell that
 //OLD 	is in the wind
-//OLD  
-//OLD Description:	
+//OLD
+//OLD Description:
 //OLD 	This is really just a driver routine for coordinate system specific
 //OLD 	routines
-//OLD  
-//OLD 	It is intended to standardize this check so that one can 
-//OLD 	use such a routin in the volumes calculations.  
-//OLD 
+//OLD
+//OLD 	It is intended to standardize this check so that one can
+//OLD 	use such a routin in the volumes calculations.
+//OLD
 //OLD Notes:
-//OLD 
+//OLD
 //OLD 	It has not been implemented for a spherical (1d)
 //OLD 	coordinate system.
-//OLD 
+//OLD
 //OLD 	The fact that none of the corners of a cell are in
 //OLD 	the wind is not necessarily a guarantee that the wind
 //OLD 	does not pass through the cell.  This is not only
@@ -1206,13 +1205,13 @@ zero_scatters ()
 //OLD 	a logarithmic spacing for the wind cells and thus
 //OLD 	the dimensions of the cells get quite large as one
 //OLD 	gets far from the center.
-//OLD 	
-//OLD 	The only way to verify this is to check all four 
+//OLD
+//OLD 	The only way to verify this is to check all four
 //OLD 	surfaces of the wind.
-//OLD   
+//OLD
 //OLD History
 //OLD 	080403	ksl	68c - Added, or more correctly simply
-//OLD 			moved code into a separate routine so 
+//OLD 			moved code into a separate routine so
 //OLD 			could be called from elsewhere
 //OLD 	15sep	ksl	Modifidy so that it n_inwind is incremented
 //OLD 			only if we are in the domain associated with
@@ -1226,14 +1225,14 @@ zero_scatters ()
  * 	of the cell.
  *
  * @param [in] int  n   the cell number in wmain
- * @return     the number of corners of the cell that 
+ * @return     the number of corners of the cell that
  * are in the wind
  *
  * @details
  * This is really just a driver routine which calls coordinate system specific
  * routines
- *  
- * It is intended to standardize this check so that one can 
+ *
+ * It is intended to standardize this check so that one can
  * use such a routine in the volumes calculations.
  *
  * ### Notes ###
@@ -1284,8 +1283,8 @@ check_corners_inwind (n)
 /**********************************************************/
 /** @name      check_grid
  * @brief check whether some quantities in a grid cell are
- * changing so rapidly in the grid cell that one might 
- * wish to have smaller grid cells   
+ * changing so rapidly in the grid cell that one might
+ * wish to have smaller grid cells
  *
  * @return     Always returns 0
  *
@@ -1302,7 +1301,7 @@ check_corners_inwind (n)
  * Must be called after define wind so NPLASMA and densities are set up.
  *
  * The information that is checked is very basic and it is clear that
- * someone was thinking about doing somewhat better checks.  
+ * someone was thinking about doing somewhat better checks.
  *
  * Errors are not generated, or rather have been commented out, and
  * so one needs to consider whether this is useful or not.  If so there

@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  util.c
- * @Author ksl
+ * @author ksl
  * @date   April, 2018
  *
  * @brief  These are very simple utilities within Python that do not

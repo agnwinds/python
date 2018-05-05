@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  trans_phot.c
- * @Author ksl
+ * @author ksl
  * @date   April, 2018
  *
  * @brief  This file contains high level routines which carry

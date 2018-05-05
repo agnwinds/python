@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  bb.c
- * @Author ksl
+ * @author ksl
  * @date   March, 2018
  *
  * @brief  Routines concerning the generation of photons from blackbodies

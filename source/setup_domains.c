@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file   setup_domains.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  * @brief  Get the parameters needed to describe winds
  *

@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  wind.c
- * @Author ksl
+ * @author ksl
  * @date   April, 2018
  *
  * @brief  Except for where_in_wind, these are convenience routines

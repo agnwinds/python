@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  windsave.c
- * @Author ksl
+ * @author ksl
  * @date   March, 2018
  *
  * @brief  Routines to save and read in the structues the constitute

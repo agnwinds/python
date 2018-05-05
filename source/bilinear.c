@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  bilinear.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  As the name indicates the routines solve for 

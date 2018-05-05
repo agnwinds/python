@@ -1,6 +1,6 @@
 /***********************************************************/
 /** @file  cdf.c
- * @Author ksl,nsh
+ * @author ksl,nsh
  * @date   March, 2018
  *
  * @brief  Routines to create a cumulatimve distribution (CDF) from a function or array, and then to

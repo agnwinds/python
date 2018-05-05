@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  levels.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  This file contains a routine to calculate level populations

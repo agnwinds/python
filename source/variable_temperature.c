@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  variable_temperature.c
- * @Author nsh,ksl
+ * @author nsh,ksl
  * @date   May, 2018
  *
  * @brief 

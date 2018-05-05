@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  new_windsave2table_sub.c
- * @Author ksl
+ * @author ksl
  * @date   April, 2018
  *
  * @brief  Subroutines for windsave2table

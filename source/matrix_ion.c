@@ -278,10 +278,18 @@ matrix_ion_populations (xplasma, mode)
       Error ("matrix_ion_populations: some matrix rows failing relative error check\n");
     else if (ierr == 3)
       Error ("matrix_ion_populations: some matrix rows failing absolute error check\n");
+		else if (ierr == 4)
+			Error ("matrix_ion_populations: Unsolvable matrix! Determinant is zero. Defaulting to no change.\n");
 
     /* free memory */
     free (a_data);
     free (b_data);
+
+		if(ierr == 4)
+		{
+			free(populations);
+			return(-1);
+		}
 
     /* Calculate level populations for macro-atoms */
     if (geo.macro_ioniz_mode == 1)
@@ -705,8 +713,10 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   
   det = gsl_linalg_LU_det (&m.matrix, s);       // get the determinant to report to user
 
-  if (det == 0)
+  if (det == 0){
     Error ("Rate Matrix Determinant is %8.4e for cell %i\n", det, nplasma);
+		return(4);
+  }
 
   gsl_linalg_LU_solve (&m.matrix, p, &b.vector, populations);
 
