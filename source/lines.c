@@ -926,38 +926,12 @@ line_heat (xplasma, pp, nres)
 }
 
 
-
-//OLD /***********************************************************
-//OLD                                        Kavli Institute for Theoretical Physics
-//OLD 
-//OLD upsilon (n_coll,u0) calculates the thermally averaged collision strength
-//OLD   for thermally excited line emission. It uses data extracted from Chianti
-//OLD   stored in coll_stren. The paper to consult is Burgess and Tully A&A 254,436 (1992).
-//OLD 
-//OLD Arguments:        
-//OLD 
-//OLD           n_coll - the index of the collision strength record we are working with
-//OLD           u_0  - kT_e/hnu - T_
-//OLD 
-//OLD Returns:
-//OLD 
-//OLD           upsilon - the thermally averaged collision strength for a given line at a given temp
-//OLD  
-//OLD Description:
-//OLD   
-//OLD History:
-//OLD   17      nsh     Coded
-//OLD   
-//OLD **************************************************/
-
-
-
 /**********************************************************/
 /** @name      upsilon
  * @brief      calculates the thermally averaged collision strength thermally excited line emission. 
  *
  * @param [in out] int  n_coll   the index of the collision strength record we are working with
- * @param [in out] double  u0   kT_e/hnu - T_
+ * @param [in out] double  u0  - kT_e/hnu - where nu is the transition frequency for the line of interest and T_e is the electron temperature
  * @return     upsilon - the thermally averaged collision strength for a given line at a given temp
  *
  * @details
@@ -965,6 +939,8 @@ line_heat (xplasma, pp, nres)
  * ### Notes ###
  * It uses data extracted from Chianti stored in coll_stren. 
  * The paper to consult is Burgess and Tully A&A 254,436 (1992).
+ * u0 is the ratio of Boltzmans constant times the electron temperature in the cell
+ * divided by Plancks constant times the frequency of the line under analysis.
  *
  * @Nick - Please decribe u0 more accurately
  *
@@ -1001,11 +977,11 @@ upsilon (n_coll, u0)
 
 
   /* we now compute y from the interpolation formulae 
-     y is the reduced upsilong from Burgess & Tully 1992. */
+     y is the reduced upsilon from Burgess & Tully 1992. */
   linterp (x, coll_stren[n_coll].sct, coll_stren[n_coll].scups,
 	   coll_stren[n_coll].n_points, &y, 0);
 
-  /*  now we extract upsilon from y  */
+  /*  now we extract upsilon from y  - there are four different parametrisations */
 
   if (coll_stren[n_coll].type == 1)
     {
