@@ -942,7 +942,6 @@ line_heat (xplasma, pp, nres)
  * u0 is the ratio of Boltzmans constant times the electron temperature in the cell
  * divided by Plancks constant times the frequency of the line under analysis.
  *
- * @Nick - Please decribe u0 more accurately
  *
  **********************************************************/
 
