@@ -352,7 +352,7 @@ calculate_ionization (restart_stat)
 /** 
  * @brief      generates the detailed spectra
  *
- * @param [in out] int  restart_stat   0 if the is run is beginning from
+ * @param [in, out] int  restart_stat   0 if the is run is beginning from
  * scratch, non-zero if this was a restart 
  * @return     Always returns EXIT_SUCCESS
  *

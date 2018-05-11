@@ -82,7 +82,7 @@ stuff_phot (pin, pout)
 /** 
  * @brief      move a photon by a distance ds
  *
- * @param [in out] PhotPtr  pp   A photon bundle
+ * @param [in, out] PhotPtr  pp   A photon bundle
  * @param [in] double  ds   The distance to move the photon
  * @return     Always returns 0
  *
@@ -179,8 +179,8 @@ comp_phot (p1, p2)
  * 
  *   Unless phot_hist_on is true, then this routine is a NOP
  *
- * @param [in out] PhotPtr  p   A photon to track
- * @param [in out] int  iswitch   A switch that resets 
+ * @param [in, out] PhotPtr  p   A photon to track
+ * @param [in, out] int  iswitch   A switch that resets 
  * @return     Returns the number of photons which have been stored
  *
  * @details
@@ -261,7 +261,7 @@ phot_hist (p, iswitch)
  * @brief      The next routine is designed to update a portion of the PlasmaPtr to reflect where
  *  	photons along the line of sight to the observer were absorbed in the wind
  *
- * <NOTE: The [in out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
+ * <NOTE: The [in, out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
  * @return     ??? RETURNS ???
  *
  * @details
@@ -387,9 +387,9 @@ phot_history_summarize ()
  *    allow cylvar coordinates  Eventually it is intended to replace ds_to_windcone 
  *    completely, or at least the guts of ds_to_windcone.
  *
- * <NOTE: The [in out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
- * @param [in out] ConePtr  cc   ???
- * @param [in out] struct photon *  p   ???
+ * <NOTE: The [in, out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
+ * @param [in, out] ConePtr  cc   ???
+ * @param [in, out] struct photon *  p   ???
  * @return     ??? RETURNS ???
  *
  * @details
@@ -512,8 +512,8 @@ ds_to_cone (cc, p)
  * @brief      Calculate the pathlenth along a line of sight defined by
  * 	a photon p to a sphere centered on the origin.  
  *
- * @param [in out] double  r   The radius of the sphere
- * @param [in out] struct photon *  p   The photon
+ * @param [in, out] double  r   The radius of the sphere
+ * @param [in, out] struct photon *  p   The photon
  * @return     The distance to the sphere.
  * 	If
  * 	the photon does not hit the sphere return a large number VERY_BIG
@@ -581,9 +581,9 @@ both roots were imaginary */
  * @brief      Find the positive distance to
  *    	a sphere centered at x with radius r
  *
- * @param [in out] double  x[]   The center of the sphere
- * @param [in out] double  r   The radius of the sphere
- * @param [in out] struct photon *  p   A photon
+ * @param [in, out] double  x[]   The center of the sphere
+ * @param [in, out] double  r   The radius of the sphere
+ * @param [in, out] struct photon *  p   A photon
  * @return     The distance to the sphere.
  * 	If
  * 	the photon does not hit the sphere return a large number VERY_BIG
@@ -773,8 +773,8 @@ quadratic (a, b, c, r)
 /** 
  * @brief      calculates the distance of a photon must travel to hit the plane.
  *
- * @param [in out] struct plane *  pl   A structure which descibes a plane in terms of a position and vector normal to the surface
- * @param [in out] struct photon *  p   A photon
+ * @param [in, out] struct plane *  pl   A structure which descibes a plane in terms of a position and vector normal to the surface
+ * @param [in, out] struct photon *  p   A photon
  * @return     The distance to the plane, or VERY_BIG if the photon does not hit the plane (in the positive direction)
  *
  * @details
@@ -921,8 +921,8 @@ ds_to_closest_approach (x, p, impact_parameter)
  * @brief      calculate the distance a photon must travel to encouter a cylinder
  *   that is centered on the z axis.
  *
- * @param [in out] double  rho   the size of the cylinder
- * @param [in out] struct photon *  p   a photon ptr
+ * @param [in, out] double  rho   the size of the cylinder
+ * @param [in, out] struct photon *  p   a photon ptr
  * @return     The smallest positive distance to the cylinder. If the 
  *   ray does not hit the cylinder a VERY_BIG is
  *   returned.

@@ -579,8 +579,8 @@ bands_init (imode, band)
  * @brief      This is the routine where the frequency
  * 	boundaries for course spectra are established
  *
- * @param [in out] double  freqmin   The minimum frequency
- * @param [in out] double  freqmax   The maximum frequency
+ * @param [in, out] double  freqmin   The minimum frequency
+ * @param [in, out] double  freqmax   The maximum frequency
  * @return     Always returns 0
  *
  * @details

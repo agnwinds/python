@@ -462,7 +462,7 @@ get_matom_f (mode)
  *      energy emitted in this way in the wavelength range in question is well known
  *      (calculated in the ionization cycles).
  *
- * @param [in out] PhotPtr  p   the ptr to the structire for the photons
+ * @param [in, out] PhotPtr  p   the ptr to the structire for the photons
  * @param [in] double  weight   the photon weight
  * @param [in] int  photstart   ???
  * @param [in] int  nphot   the number of the first photon to be generated and
@@ -627,7 +627,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
  *      once the total energy emitted in this way in the wavelength range in question is well known
  *      (calculated in the ionization cycles).
  *
- * @param [in out] PhotPtr  p   the ptr to the structire for the photons
+ * @param [in, out] PhotPtr  p   the ptr to the structire for the photons
  * @param [in] double  weight   the photon weight
  * @param [in] int  photstart   ???
  * @param [in] int  nphot   the number of the first photon to be generated and

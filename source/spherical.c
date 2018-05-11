@@ -64,7 +64,7 @@
  *         boundary of the cell in which the photon bundle resides.
  *
  * @param [in] int  ndom   The domain in which the photon resides
- * @param [in out] PhotPtr  p   Photon pointer
+ * @param [in, out] PhotPtr  p   Photon pointer
  * @return     Distance to the far boundary of the cell in which the photon
  * 	currently resides.  Negative numbers (and zero) should be
  * 	regarded as errors.
@@ -564,8 +564,8 @@ spherical_extend_density (ndom, w)
 /** 
  * @brief      defines the cells in a thin shell, a special case of a spherical wind. 
  *
- * @param [in out] WindPtr  w   The structure which defines the wind in Python
- * @param [in out] int  ndom   The domain number
+ * @param [in, out] WindPtr  w   The structure which defines the wind in Python
+ * @param [in, out] int  ndom   The domain number
  * @return     Always retunrs 0
  *
  * @details

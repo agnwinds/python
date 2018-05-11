@@ -71,8 +71,8 @@ History:
 /** 
  * @brief      The dot product of two vectors
  * 		
- * @param [in out] double  a[]   the first vector
- * @param [in out] double  b[]   the second vector 
+ * @param [in, out] double  a[]   the first vector
+ * @param [in, out] double  b[]   the second vector 
  * @return     The resulting dot product
  *
  *
@@ -102,7 +102,7 @@ dot (a, b)
 /** 
  * @brief      The length of a 3 vector
  *
- * @param [in out] double  a[]   a vector
+ * @param [in, out] double  a[]   a vector
  * @return     The leencth of the vector
  *
  *
@@ -133,7 +133,7 @@ length (a)
 /** 
  * @brief      renormalize a vector to a length
  *
- * @param [in out] double  a[]  the vector
+ * @param [in, out] double  a[]  the vector
  * @param [in] double  scalar   the desired length
  * @return     Always returns 0 
  *
@@ -346,9 +346,9 @@ dot_tensor_vec (tensor, vin, vout)
  * @brief       Project a vector b in xyz coords from position a in xyz coords
  * into cylindrical coordinates
  *
- * @param [in out] double  a[]   The position of the vector in cartesiona coords
- * @param [in out] double  b[]   The vector (also in cartesiona coordinates)
- * @param [in out] double  result[]   The result in cylindrical coordinates
+ * @param [in, out] double  a[]   The position of the vector in cartesiona coords
+ * @param [in, out] double  b[]   The vector (also in cartesiona coordinates)
+ * @param [in, out] double  result[]   The result in cylindrical coordinates
  * @return     Always returns 0    
  *
  * Start with two vectors a and b in cartesiona coordinates, where a is a position

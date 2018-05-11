@@ -543,7 +543,7 @@ sane_check (x)
 /** 
  * @brief      track the number of errors of each type
  *
- * @param [in out] char *  format   A format statement for an error message
+ * @param [in, out] char *  format   A format statement for an error message
  * @return     The number of errors wwith associated with a certain format
  *
  * When an error message is received, the format statement is used to identify the

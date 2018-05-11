@@ -116,7 +116,7 @@ get_sv_wind_params (ndom)
  *
  * @param [in] double  x[]   the position for which one desires the velocity
  * @param [out] double  v[]  the calcualted velocity at that postion
- * @param [in out] int  ndom the domain number 
+ * @param [in, out] int  ndom the domain number 
  * @return     The amplitude of the velocity is returned
  * 	
  *

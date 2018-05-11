@@ -922,8 +922,8 @@ wind_div_v (w)
 /** 
  * @brief      find the density of the wind at x
  *
- * @param [in out] WindPtr  w   The entire wind
- * @param [in out] double  x[]   A position
+ * @param [in, out] WindPtr  w   The entire wind
+ * @param [in, out] double  x[]   A position
  * @return
  * The density at x, if the postion is in the active region of the wind.
  * If the postion is not in the active region of one of the domains, then

@@ -44,11 +44,11 @@
  * 	current location of the photon.
  *
  * @param [in] WindPtr  w   A pointer to the wind
- * @param [in out] PhotPtr  pp   A photon
+ * @param [in, out] PhotPtr  pp   A photon
  * @param [in] double  tau_scat   the depth at which the photon should scatter
  * @param [ out] double *  tau   The optical depth associated with a resonanant scatter when
  * this is the reason the photon has stopped
- * @param [in out] int *  nres   The number of the resonance if the photon stopped.
+ * @param [in, out] int *  nres   The number of the resonance if the photon stopped.
  * due to reaching the scattering optical depth
  * @return     A status that states what caused the photon to stp as it did
  *
@@ -121,7 +121,7 @@ translate (w, pp, tau_scat, tau, nres)
  * @brief      translates the photon from its current position to the
  * 	edge of the wind.
  *
- * @param [in out] PhotPtr  pp   A photon
+ * @param [in, out] PhotPtr  pp   A photon
  * @return     A status flag indication why the photon stopped
  *
  * @details
@@ -331,8 +331,8 @@ photon hit the star in its passage from pold to the current position */
 /**
  * @brief      calculates the photon pathlength to the edge of the wind.
  *
- * @param [in out] PhotPtr  pp   A photon
- * @param [in out] int *  ndom_current   The current domain
+ * @param [in, out] PhotPtr  pp   A photon
+ * @param [in, out] int *  ndom_current   The current domain
  * @return     The distance to the nearest boundary of the wind and the domain for which
  * 	the boudary applies.
  *
@@ -528,7 +528,7 @@ int translate_in_wind_failure = 0;
  * @brief      translates the photon within a single cell in the wind.
  *
  * @param [in] WindPtr  w   The entire wind
- * @param [in out] PhotPtr  p   A photon
+ * @param [in, out] PhotPtr  p   A photon
  * @param [in] double  tau_scat   The depth at which the photon will scatter
  * @param [out] double *  tau   The tau of a resonance
  * @param [out] int *  nres   The resonaance which caused the photon to stop
@@ -720,8 +720,8 @@ The choice of SMAX_FRAC can affect execution time.*/
  * @brief      calculates the distance photon can travel within the cell
  * 	that it is currently in.
  *
- * @param [in out] int  ndom   The current domain
- * @param [in out] PhotPtr  p   A photon
+ * @param [in, out] int  ndom   The current domain
+ * @param [in, out] PhotPtr  p   A photon
  * @return     A distance indicating how far the photon can travel
  *
  * @details
@@ -810,10 +810,10 @@ double xsouth[] = {
  * reached the edges of the grid and returns the appropriate
  * tatus.
  *
- * @param [in out] PhotPtr  p   A photon at its new proposed location.  On exiting the routine
+ * @param [in, out] PhotPtr  p   A photon at its new proposed location.  On exiting the routine
  * this will contain the position of the photon after taking wind boundaries (e.g wind cones)
  * into account.
- * @param [in out] PhotPtr  pold   the current and previous description of the photon bundle.
+ * @param [in, out] PhotPtr  pold   the current and previous description of the photon bundle.
  * beore the lates movee
  * @param [out] double *  normal   A vector when the star or disk has been hit, which contains
  * the normal for the reflecting surface at the point the photon encountered the the boundary

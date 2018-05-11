@@ -247,9 +247,9 @@ planck (t, freqmin, freqmax)
  * @brief      obtains a random number between x1 and x2 
  *  	for a power law densiity distribution with index alpha
  *
- * @param [in out] double  x1   the minimum allowed value to return
- * @param [in out] double  x2   the maximum allowed value to return
- * @param [in out] double  alpha   the index of the power law
+ * @param [in, out] double  x1   the minimum allowed value to return
+ * @param [in, out] double  x2   the maximum allowed value to return
+ * @param [in, out] double  alpha   the index of the power law
  * @return     A single value taken from a power law distribution
  *
  * @details

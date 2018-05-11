@@ -206,9 +206,9 @@ fb_topbase_partial (freq)
  * @param [in] double  t   The temperature at which the emissivity
  * @param [in] double  f1   The minimum frequency
  * @param [in] double  f2   The maximum frequency                   
- * @param [in out] int  nion   The ion for which the emissivity is returned
- * @param [in out] int  fb_choice   A switch which determines exactly what is to be returned
- * @param [in out] int  mode   A switch which indicates whether one is interested in normal 
+ * @param [in, out] int  nion   The ion for which the emissivity is returned
+ * @param [in, out] int  fb_choice   A switch which determines exactly what is to be returned
+ * @param [in, out] int  mode   A switch which indicates whether one is interested in normal 
  * radiative recombination (OUTER_SHELL) or inner shell recombinaiton (INNER_SHELL)
  * @return     The routine returns the specific emissivity, e.g. the emissivity and
  * 	or recombination rate per electron and per ion.
@@ -1109,9 +1109,9 @@ on the assumption that the fb information will be reused.
 /** 
  * @brief      Return the recombination coefficient
  *
- * @param [in out] double  t   The temperature
- * @param [in out] int  nion   The ion of interest
- * @param [in out] int  mode   A switch to choose normal (OUTER_SHELL) or inner shell (INNER_SHELL) recombiantion
+ * @param [in, out] double  t   The temperature
+ * @param [in, out] int  nion   The ion of interest
+ * @param [in, out] int  mode   A switch to choose normal (OUTER_SHELL) or inner shell (INNER_SHELL) recombiantion
  * @return     The recombination coefficient
  *
  * @details
@@ -1214,11 +1214,11 @@ get_fb (t, nion, narray, fb_choice, mode)
  * @brief      calculates the integrated emissivity of 
  *   an ion in the plasma.
  *
- * @param [in out] double  t   The temperature of interest
- * @param [in out] double  f1   The minimum frequency
- * @param [in out] double  f2   The maximum frequency
- * @param [in out] int  nion   The ion of interest
- * @param [in out] int  fb_choice   A switch which determined exactly what is returned
+ * @param [in, out] double  t   The temperature of interest
+ * @param [in, out] double  f1   The minimum frequency
+ * @param [in, out] double  f2   The maximum frequency
+ * @param [in, out] int  nion   The ion of interest
+ * @param [in, out] int  fb_choice   A switch which determined exactly what is returned
  * @return     The integrated emissivity, depending on the fb_choice.  The possibilites are
  *
  * * FB_FULL         Calculate fb emissivity including energy associated with the threshold

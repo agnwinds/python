@@ -559,10 +559,10 @@ wind_n_to_ij (ndom, n, i, j)
  * @brief      Translate from the 2d element for an individual domain to the wind
  * element number
  *
- * @param [in out] int  ndom   The domain of interest
- * @param [in out] int  i   The element number for the first (x) dimension
- * @param [in out] int  j   The element number fro the second (z or theta) dimension
- * @param [in out] int *  n   The element number in the wind
+ * @param [in, out] int  ndom   The domain of interest
+ * @param [in, out] int  i   The element number for the first (x) dimension
+ * @param [in, out] int  j   The element number fro the second (z or theta) dimension
+ * @param [in, out] int *  n   The element number in the wind
  * @return     The element number is returned
  *
  * @details

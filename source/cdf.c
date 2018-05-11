@@ -60,7 +60,7 @@ double *pdf_array;			//Pointer to pdf_array - made external because it is used i
 /** 
  * @brief      Generate a cumulative distrubution function (cdf) from a function
 
- * @param [in out] CdfPtr  cdf    	A ptr to a cdf structure 
+ * @param [in, out] CdfPtr  cdf    	A ptr to a cdf structure 
  * @param [in] double *func  		The probablility density function to be integrated  to create the pdf
  * @param [in] double xmin,xmax		The range over which the function is to be integrated
  * @param [in] int njumps			The number of points at which we want to force a break in the cdf
@@ -794,7 +794,7 @@ cdf_limit (cdf, xmin, xmax)
 /** 
  * @brief      get a random number for a cdf inside limits set by cdf_limit.
  *
- * @param [in out] CdfPtr  cdf   A ptr to a cdf structure 
+ * @param [in, out] CdfPtr  cdf   A ptr to a cdf structure 
  * @return     A random number drawn from the Cdf, but within inside limits which have been set previously
  *
  * @details
@@ -896,7 +896,7 @@ cdf_to_file (cdf, filename)
  * @brief      a simple routine to check some basics of the cumulative distribution function.
  * 	
  *
- * @param [in out] CdfPtr  cdf   A ptr to a cdf structure 
+ * @param [in, out] CdfPtr  cdf   A ptr to a cdf structure 
  * @return     0 if eveything is OK, a positive number otherwise
  *
  * @details
@@ -1080,9 +1080,9 @@ calc_cdf_gradient (cdf)
  * @brief      Given two paralel arrays, x and y, this routine reorders the array
  * in ascending order of x
  *
- * @param [in out] double *  x   The array that is sorted
- * @param [in out] double *  y   The parallel array that is sorted in order of x
- * @param [in out] int  n_xy   The length of the two arrays
+ * @param [in, out] double *  x   The array that is sorted
+ * @param [in, out] double *  y   The parallel array that is sorted in order of x
+ * @param [in, out] int  n_xy   The length of the two arrays
  * @return     The length of the input array
  *
  * @details

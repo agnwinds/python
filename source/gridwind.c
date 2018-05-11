@@ -191,7 +191,7 @@ calloc_wind (nelem)
  * @brief      Allocate memory for plasmamain, which contains temperature, densities, etc.
  * for cells which are in the wind
  *
- * @param [in out] int  nelem   The number of elements of plasmamain to allocate
+ * @param [in, out] int  nelem   The number of elements of plasmamain to allocate
  * @return     Returns 0, unless the program is unable to allocate the requested memory 
  * in which case the program exits
  *

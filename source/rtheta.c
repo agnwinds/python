@@ -26,7 +26,7 @@
  *         boundary of the cell in which the photon bundle resides.
  *
  * @param [in] int  ndom   The domain in which the photon bundle is though to exist
- * @param [in out] PhotPtr  p   Photon pointer
+ * @param [in, out] PhotPtr  p   Photon pointer
  * @return     Distance to the far boundary of the cell in which the photon
  * 	currently resides.  Negative numbers (and zero) should be
  * 	regarded as errors.
@@ -231,8 +231,8 @@ rtheta_make_grid (w, ndom)
 /** 
  * @brief      defines the wind cones that are needed to calculate ds in a cell
  *
- * @param [in out] int  ndom   The domain to populate with the cone structures
- * @param [in out] WindPtr  w   The structure which defines the wind in Python
+ * @param [in, out] int  ndom   The domain to populate with the cone structures
+ * @param [in, out] WindPtr  w   The structure which defines the wind in Python
  * @return     Always returns 0
  *
  * @details
@@ -406,7 +406,7 @@ rtheta_wind_complete (ndom, w)
  * 	allowing for the fact that some cells may not be in the active wind region
  *
  * @param [in] int  ndom   The domain of interest
- * @param [in out] WindPtr  w   the entire wind
+ * @param [in, out] WindPtr  w   the entire wind
  * @return     Always returns 0
  *
  * @details
@@ -610,8 +610,8 @@ rtheta_volumes (ndom, w)
  * @brief      locates the grid position of the vector,
  * 	when one is using rtheta coordinates.
  *
- * @param [in out] int  ndom   The domain of interest
- * @param [in out] double  x[]   A three-vector defining a position
+ * @param [in, out] int  ndom   The domain of interest
+ * @param [in, out] double  x[]   A three-vector defining a position
  * @return     Returns the cell number associated with
  *  		a position. If x is inside the grid, the routine
  *  		returns -1, if outside -2 
@@ -697,9 +697,9 @@ rtheta_where_in_grid (ndom, x)
 /** 
  * @brief      
  *
- * <NOTE: The [in out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
- * @param [in out] int  n   -- Cell in which random poition is to be generated
- * @param [in out] double  x[]   ???
+ * <NOTE: The [in, out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
+ * @param [in, out] int  n   -- Cell in which random poition is to be generated
+ * @param [in, out] double  x[]   ???
  * @return     double x -- the position
  *
  * @details
@@ -814,9 +814,9 @@ rtheta_get_random_location (n, x)
  * 	regions just outside the wind regiions so that
  * 	extrapolations of density can be made there
  *
- * <NOTE: The [in out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
- * @param [in out] int  ndom   ???
- * @param [in out] WindPtr  w   ???
+ * <NOTE: The [in, out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
+ * @param [in, out] int  ndom   ???
+ * @param [in, out] WindPtr  w   ???
  * @return     ??? RETURNS ???
  *
  * @details

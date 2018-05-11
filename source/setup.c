@@ -155,8 +155,8 @@ init_geo ()
  * and if necessary read a set of precalculated spectra
  *
  * @param [in] int  yesno  An integer used to decide whether to ask for a spectrum type
- * @param [in out] char *  question  The query for a spectrum type for this component
- * @param [in out] int *  spectype   The type of spectrum to assign
+ * @param [in, out] char *  question  The query for a spectrum type for this component
+ * @param [in, out] int *  spectype   The type of spectrum to assign
  * @return    the spectype, a number that says what type of spectrum (bb, power law, etc) 
  * to generate for this source
  *

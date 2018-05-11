@@ -28,8 +28,8 @@
  * boundary of the cell in which the photon bundle when dealing
  * with a cylindrical domain
  *
- * @param [in out] int  ndom   The number of the domain of interest
- * @param [in out] PhotPtr  p   Photon pointer
+ * @param [in, out] int  ndom   The number of the domain of interest
+ * @param [in, out] PhotPtr  p   Photon pointer
  * @return     distance to the far boundary of the cell 
  *
  * Negative numbers (and zero) should be
@@ -340,8 +340,8 @@ cylind_wind_complete (ndom, w)
  * 	allowing for the fact that some cells are not necessarily entirely in
  * 	the wind
  *
- * @param [in out] int  ndom   The domain of interest
- * @param [in out] WindPtr  w   the entire wind
+ * @param [in, out] int  ndom   The domain of interest
+ * @param [in, out] WindPtr  w   the entire wind
  * @return     Always returns 0
  *
  * @details
@@ -495,7 +495,7 @@ cylind_volumes (ndom, w)
  * 	when one is using cylindrical coordinates.
  *
  * @param [in] int  ndom   The domain number
- * @param [in out] double  x[]   A postion
+ * @param [in, out] double  x[]   A postion
  * @return     the element number in wmain associated with
  *  a position.  If the position is in the grid this will be a positive
  *  integer 

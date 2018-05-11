@@ -348,7 +348,7 @@ module_string_start = '''
  * @brief      {}
  *
 '''
-module_string_param = ''' * @param [in out] {}  {}   {}
+module_string_param = ''' * @param [in, out] {}  {}   {}
 '''
 module_string_end = ''' * @return     {}
  *

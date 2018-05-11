@@ -192,7 +192,7 @@ input[MAX_RECORDS];
 /** 
  * @brief      Open a parameter file for reading
  *
- * @param [in out] char  filename[]   string giving the name of the parameter file
+ * @param [in, out] char  filename[]   string giving the name of the parameter file
  * @return     A status indicating whether one is 
  * reading an existing parameter file or proceegin interactivley
  *
@@ -258,7 +258,7 @@ opar (filename)
  * @brief      open another parameter file and append information from that parameter 
  * file to a previous one
  *
- * @param [in out] char  filename[]   name of the file
+ * @param [in, out] char  filename[]   name of the file
  * @return     A status indicating whether the file was read
  *
  * This routines reads an auxiliary .pf file and appends data to the primary one,
@@ -402,8 +402,8 @@ rdpar_init ()
  * 	routines, like rdpar for processing a line of input whether
  * 	it comes from the command line or from a .pf file
  *
- * @param [in out] char  question[]   ???
- * @param [in out] char  dummy[]   ???
+ * @param [in, out] char  question[]   ???
+ * @param [in, out] char  dummy[]   ???
  * @return     When the routine returns NORMAL or OLD the input has been 
  * 	successfully processed
  *
@@ -445,7 +445,7 @@ string_process (question, dummy)
  * @brief      Ask for and process one input from the command line 
  *
  * @param [in ] char  question[]   parameter for which an answer is sought
- * @param [in out] char  dummy[]   current value of parameter which the user may change
+ * @param [in, out] char  dummy[]   current value of parameter which the user may change
  * @return     When the routine returns NORMAL or OLD the input has been 
  * 	successfully processed
  *
@@ -512,7 +512,7 @@ string_process_from_command_line (question, dummy)
  * @brief      locate a keyword in the parameter file and retrieve the string associated with it
  *
  *  @param [in ] char  question[]   parameter for which an answer is sought
- *  @param [in out] char  dummy[]   current value of parameter which the user may change
+ *  @param [in, out] char  dummy[]   current value of parameter which the user may change
  *
  * @return     When the routine returns NORMAL or OLD the input has been 
  * 	successfully processed
@@ -799,7 +799,7 @@ message (string)
  * @brief      process a input line where the answer is expected to be string
  * 
  * @param [in] char  question[]   the name of the parameter for which an answer is sought
- * @param [in out] char  answer[]   The current/final value of the string
+ * @param [in, out] char  answer[]   The current/final value of the string
  * @return    A status, indicating whether the answering string was successuly captured.
  *
  *
@@ -844,7 +844,7 @@ rdstr (question, answer)
  * @brief      process a input line where the answer is expected to be a single character
  *
  * @param [in] char  question[]   the name of the parameter for which an answer is sought
- * @param [in out] char  answer[]   The current/final value of the parameter
+ * @param [in, out] char  answer[]   The current/final value of the parameter
  * @return    A status, indicating whether the answering string was successuly captured.
  *
  *
@@ -890,7 +890,7 @@ rdchar (question, answer)
  * @brief      process a input line where the answer is expected to be an integer
  *
  * @param [in] char  question[]   the name of the parameter for which an answer is sought
- * @param [in out] char  answer[]   The current/final value of the parameter
+ * @param [in, out] char  answer[]   The current/final value of the parameter
  * @return    A status, indicating whether the answering string was successuly captured.
  *
  *
@@ -935,7 +935,7 @@ rdint (question, answer)
  * @brief      process a input line where the answer is expected to be a float
  *
  * @param [in] char  question[]   the name of the parameter for which an answer is sought
- * @param [in out] char  answer[]   The current/final value of the string
+ * @param [in, out] char  answer[]   The current/final value of the string
  * @return    A status, indicating whether the answering string was successuly captured.
  *
  *
@@ -979,7 +979,7 @@ rdflo (question, answer)
  * @brief      process a input line where the answer is expected to be double precision number
  *
  * @param [in] char  question[]   the name of the parameter for which an answer is sought
- * @param [in out] char  answer[]   The value of the parameter
+ * @param [in, out] char  answer[]   The value of the parameter
  * @return    A status, indicating whether the answering string was successuly captured.
  *
  *
@@ -1023,7 +1023,7 @@ rddoub (question, answer)
  * @brief      process a input line where the answer is expected be an entire line with multipe words
  *
  * @param [in] char  question[]   the name of the parameter for which an answer is sought
- * @param [in out] char  answer[]   The current/final value of the line   
+ * @param [in, out] char  answer[]   The current/final value of the line   
  * @return    A status, indicating whether the answering string was successuly captured.
  *
  *
@@ -1133,7 +1133,7 @@ get_root (root, total)
 /** 
  * @brief      Comminicate the mpi_rank to rdpar  
  *
- * @param [in out] int  rank   an integer that givves the process number rdapr should use
+ * @param [in, out] int  rank   an integer that givves the process number rdapr should use
  * @return     0
  *
  * The next routine simply sets the rank of the process 
@@ -1158,7 +1158,7 @@ rdpar_set_mpi_rank (rank)
 /** 
  * @brief      Set the level of verbosity for logging within the rdpar routines
  *
- * @param [in out] int  vlevel   
+ * @param [in, out] int  vlevel   
  * @return     Always returns 0
  *
  * if vlevel is 2 or greater then more diagnostic information

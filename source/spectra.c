@@ -398,11 +398,11 @@ disk. The minus sign in the terms associated with phase are to make this happen.
  *  	after each flight of photons is processed (during ionization
  *  	cycles and for detailed spectra in the Live or Die option).
  *
- * @param [in out] PhotPtr  p   A flight of photons
- * @param [in out] double  f1   The minimum frequncy in the spectrum
- * @param [in out] double  f2   The maximum frequency in the spectrum
- * @param [in out] int  nangle  The number of different angles and phases for which to create detailed spectra
- * @param [in out] int  select_extract   The integer stating whether the Live or Die option has
+ * @param [in, out] PhotPtr  p   A flight of photons
+ * @param [in, out] double  f1   The minimum frequncy in the spectrum
+ * @param [in, out] double  f2   The maximum frequency in the spectrum
+ * @param [in, out] int  nangle  The number of different angles and phases for which to create detailed spectra
+ * @param [in, out] int  select_extract   The integer stating whether the Live or Die option has
  * @return     Alwasy returns 0
  *
  * @details
@@ -794,7 +794,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
  * @param [in] int  nspecmin   The number of the first spectrum to write
  * @param [in] int  nspecmax   The number of the last spectrum to wtie               .
  * @param [in] int  select_spectype   The type of spectral file you want to create
- * @param [in out] double  renorm   This is renormalization which incrementally decreases to
+ * @param [in, out] double  renorm   This is renormalization which incrementally decreases to
  * one as the detailed spectral calculation goes forward.  It
  * was added to allow one to print out the spectrum at the
  * end of each cycle, rather than the end of the entire

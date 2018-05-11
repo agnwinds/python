@@ -59,7 +59,7 @@ long n_lost_to_dfudge = 0;
  * @brief      int (w,p,iextract) oversees the propagation of a "flight" of photons
  *
  * @param [in] WindPtr  w   The entire wind domain
- * @param [in out] PhotPtr  p   A pointer to a "fligh" of photons
+ * @param [in, out] PhotPtr  p   A pointer to a "fligh" of photons
  * @param [in] int  iextract   An integer controlling whether we are to process the
  * flight in the live or die option (0) or whether we also need to extract photons in 
  * specific directions (which is usually the case in constructing spectra
@@ -264,7 +264,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
  * @brief      Transport a single photon photon through the wind.
  *
  * @param [in] WindPtr  w   The entire wind
- * @param [in out] PhotPtr  p   A single photon
+ * @param [in, out] PhotPtr  p   A single photon
  * @param [in] int  iextract   If 0, then process this photon in the live or die option, without
  * calling extract
  *

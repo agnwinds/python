@@ -120,9 +120,9 @@ get_homologous_params (ndom)
 /** 
  * @brief      Calulate the velocity the wind at a position 
  *
- * @param [in out] int  ndom   The domain number
- * @param [in out] double  x[]   the position (in cartesian coordinates)                   
- * @param [in out] double  v[]   the calculated velocity (in cartesian coordinates)
+ * @param [in, out] int  ndom   The domain number
+ * @param [in, out] double  x[]   the position (in cartesian coordinates)                   
+ * @param [in, out] double  v[]   the calculated velocity (in cartesian coordinates)
  * @return     The amplitude of the velocity is returned
  * 	
  *

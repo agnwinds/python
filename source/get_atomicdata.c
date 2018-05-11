@@ -3669,8 +3669,8 @@ indexx (n, arrin, indx)
  * 	which can be used to limit the lines searched for resonances to a specific
  * 	frequency range.
  *
- * @param [in out] double  freqmin   The minimum frequency we are interested in
- * @param [in out] double  freqmax   The maximum frequency we are interested in
+ * @param [in, out] double  freqmin   The minimum frequency we are interested in
+ * @param [in, out] double  freqmax   The maximum frequency we are interested in
  * @return     the number of lines that are potentially in resonance.
  *
  *

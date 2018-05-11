@@ -771,7 +771,7 @@ qdisk_save (diskfile, ztot)
 /** 
  * @brief      Read the temperature profile from a file
  *
- * @param [in out] char *  tprofile   Name of the input file
+ * @param [in, out] char *  tprofile   Name of the input file
  * @return     Always returns 0
  *
  * The input format for the file to be read in is quite spefic

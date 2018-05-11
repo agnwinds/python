@@ -435,8 +435,8 @@ model_rho (ndom, x)
 /** 
  * @brief      Simple checks of the wind structure for reasonability
  *
- * @param [in out] WindPtr  www   The entire wind
- * @param [in out] int  n   n >= 0  then an element of the array will be checked
+ * @param [in, out] WindPtr  www   The entire wind
+ * @param [in, out] int  n   n >= 0  then an element of the array will be checked
  * @return     Always returns 0
  *
  * @details

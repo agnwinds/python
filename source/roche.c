@@ -567,7 +567,7 @@ d2phi_ds2 (s)
 /** 
  * @brief      Calculate the width of the Roche potentiil at a position x along the x axis
  *
- * @param [in out] double  x   The distance the phtoon has traveled from its initial position  
+ * @param [in, out] double  x   The distance the phtoon has traveled from its initial position  
  *
  * @return     the width             
  *

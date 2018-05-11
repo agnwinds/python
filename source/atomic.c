@@ -31,8 +31,8 @@
  * @brief      double (x_ptr,freq)	calculates the photionization crossection due to the transition 
  * 	associated with x_ptr at frequency freq
  *
- * @param [in out] struct photoionization *  x_ptr   structure containing the x-section information
- * @param [in out] double  freq   frequency at which the x-section should be calculated
+ * @param [in, out] struct photoionization *  x_ptr   structure containing the x-section information
+ * @param [in, out] double  freq   frequency at which the x-section should be calculated
  * @return     xsection for this ion at the given frequency
  *
  * @details
@@ -81,7 +81,7 @@ sigma_phot (x_ptr, freq)
 /** 
  * @brief      Calculate the Einstein A coefficient for a transition
  *
- * @param [in out] struct lines *  line_ptr   Ptr containing data describing the line
+ * @param [in, out] struct lines *  line_ptr   Ptr containing data describing the line
  * @return     The Einsten (a21) value
  *
  * @details

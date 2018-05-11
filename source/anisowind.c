@@ -328,7 +328,7 @@ double reweightwind_zmax;
  * @brief      calculates the weight of a photon in the wind that
  * is forced to scatter along a specific line of sight. 
  *
- * @param [in out] PhotPtr  p   The photon being scattered
+ * @param [in, out] PhotPtr  p   The photon being scattered
  * @return     The number corresponding to the reweighting is returned.  The
  * revised weight is also stored in p
  *
@@ -579,8 +579,8 @@ make_cdf_randwind (tau)
  * @brief      is the routine which chooses
  *   a new anisotropic direction in geo.scatter_mode = SCATTER_MODE_THERMAL
  *
- * @param [in out] PhotPtr  p   The photon being scattered
- * @param [in out] int *  nnscat   The number of times the phton
+ * @param [in, out] PhotPtr  p   The photon being scattered
+ * @param [in, out] int *  nnscat   The number of times the phton
  * scattered internally before escaping the local scattering region
  *
  * @return     0 for success. Also modifies the photon ptr p

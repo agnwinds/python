@@ -426,7 +426,7 @@ create_master_table (ndom, rootname)
  * 
  *
  * @param [in] int  ndom   The domain of interest
- * @param [in out] char  rootname[]   The rootname of the windsave file 
+ * @param [in, out] char  rootname[]   The rootname of the windsave file 
  * @return     Always returns 0
  *
  * @details
@@ -850,10 +850,10 @@ create_ion_table (ndom, rootname, iz)
 /** 
  * @brief      Get get density, etc for one particular ion
  *
- * @param [in out] int  ndom   the domain number
- * @param [in out] int  element   the element number
- * @param [in out] int  istate   the ionization state
- * @param [in out] int  iswitch   a switch controlling exactly what is returned for that ion
+ * @param [in, out] int  ndom   the domain number
+ * @param [in, out] int  element   the element number
+ * @param [in, out] int  istate   the ionization state
+ * @param [in, out] int  iswitch   a switch controlling exactly what is returned for that ion
  * @return     Normally returns an array with values associated with what is requested
  *    	This will return an array with all zeros if there is no such ion
  *
@@ -969,8 +969,8 @@ double
 /** 
  * @brief      Get a simple variable from the PlasmaPtr array
  *
- * @param [in out] int  ndom   The domain in question
- * @param [in out] char  variable_name[]   The name of the variable
+ * @param [in, out] int  ndom   The domain in question
+ * @param [in, out] char  variable_name[]   The name of the variable
  * @return     The values in the plasma pointer for this variable. A double
  * 	will be returned even if the PlasmaPtr varible is an integer
  *

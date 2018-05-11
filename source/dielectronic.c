@@ -89,7 +89,7 @@
  * @brief      returns the volumetric dielectronic rate
  *  	coefficients for a given temperature.
  *
- * <NOTE: The [in out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
+ * <NOTE: The [in, out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
  * @param [in ] double  temp   the temperature at which to compute the coefficients
  * @return     nothing, but populates the array dr_coeffs
  *
