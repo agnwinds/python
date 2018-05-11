@@ -1,26 +1,19 @@
-/*
 
-                                       Space Telescope Science Institute
-
-Synopsis:
-	These are all of the routines necessary to define a YSO wind, which comprises
-	a KWD wind in some places and a stellar wind elsewhere.  The model is for
-	a stellar wind within the inner windcone.
-Arguments:		
-
-Returns:
- 
-Description:	
-
-Notes:
-
-
-History:
- 	04jun	ksl	Added this possibility, beginning with the same code for a kwd wind
-			Where possible, I have simply chosen to get the data needed
-			from the original kwd or stellar wind routines.
-
- */
+/***********************************************************/
+/** @file  yso.c
+ * @author ksl
+ * @date   January, 2018
+ *
+ * @brief  Simulate a young stellar object
+ *
+ * These are all of the routines necessary to define a YSO wind, which comprises
+ * a KWD wind in some places and a stellar wind elsewhere.  The model is for
+ * a stellar wind within the inner windcone.
+ *
+ * 	XXX The yso implemetentation works but could be reimplemented
+ * 	with domains.
+ * 
+ ***********************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,44 +23,31 @@ History:
 #include "python.h"
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
-Synopsis:
-	get_yso_wind_params gets input data that are necessary for a YSO
-	comprising a region that resembles a KWD wind and a region outside
-	this that contins a speherical wind
-Arguments:		
-
-Returns:
- 
-Description:	
-	Basically this routine just reads the inputs from the two separate
-	wind models, since this is a combination of the two.
-Notes:
-	The model has a spherical wind on the interior.  The windcones
-	are set to include the region from the polar axis to the outside
-	edge of the wind.  (Note that when filling out the grid regions
-	outside the wind may have non-zero values of quantities, such
-	as density.  This allows for interpolation to occur. But there
-	will not be (should not be) any scattering or whatever in this
-	region since that wind cones define the regions where photons
-	are scattered.  
-
-	XXX The yso implemetentation works but could be reimplemented
-	XXX with domains.  
-
-
-History:
- 	04jun	ksl	Added this possibility
-        04Sep   SS      Changed finite disk case to cut off wind
-                        at the top (rather than bottom) outer edge of disk.
-	16aug	ksl	Modifications to accommodate domains begun
-	16feb	ksl	Removed assignment of global variables, those not
-       			associated with a specific domain from within	
-			routine.  These should be assigned elsewhere, as
-			we could have multiple domains
-**************************************************************/
+/**********************************************************/
+/** 
+ * @brief      gets input data that are necessary for a YSO
+ * 	comprising a region that resembles a KWD wind and a region outside
+ * 	this that contins a speherical wind
+ *
+ * @param [in] int  ndom   The domain number
+ * @return     Always returns 0
+ *
+ * Basically this routine just reads the inputs from the two separate
+ * 	wind models, since this is a combination of the two.
+ *
+ * ###Notes###
+ *
+ * The model has a spherical wind on the interior.  The windcones
+ * 	are set to include the region from the polar axis to the outside
+ * 	edge of the wind.  (Note that when filling out the grid regions
+ * 	outside the wind may have non-zero values of quantities, such
+ * 	as density.  This allows for interpolation to occur. But there
+ * 	will not be (should not be) any scattering or whatever in this
+ * 	region since that wind cones define the regions where photons
+ * 	are scattered.  
+ * 
+ *
+ **********************************************************/
 
 int
 get_yso_wind_params (ndom)
@@ -120,30 +100,23 @@ one after the other*/
 
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-	double yso_velocity(x,v) calculates the v in cartesian coordinates
-	of a yso wind from a position x in cartesian coordinates.  
-Arguments:		
-	double x[]		the position where for the which one desires the velocity
-Returns:
-	double v[]		the calculated velocity in cartesina coordinates
-	
-	The amplitude of the velocity is returned 
-	
-Description:	
-		
-Notes:
-
-History:
-	04jun	ksl	The routine simple chooses between the way to calculate
-                        velocity gradients and uses the original routines
-	04aug	ksl	52 -- Modified underlying routines so that the velocity
-			return is in cartesian coordinates.
- 
-**************************************************************/
+/**********************************************************/
+/** 
+ * @brief      double (x,v) calculates the v in cartesian coordinates
+ * 	of a yso wind from a position x in cartesian coordinates.
+ *
+ * @param [in] int  ndom     The domain number 
+ * @param [in] double  x[]   the position where for the which one desires the velocity
+ * @param [out] double  v[]   The velocity in cartesian coordinates
+ * @return     the amplitude of the velocity                                    
+ * 	
+ * 	
+ *
+ *
+ * ###Notes###
+ *
+ *
+ **********************************************************/
 
 double
 yso_velocity (ndom, x, v)
@@ -172,27 +145,21 @@ the disk.  If it does not, then we calculate the velocity for a stellar wind */
 
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
-	double yso_rho(x) calculates the density of an kn_wind at a position x
-Arguments:		
-	double x[]	the position where for the which one desires the density
-Returns:
-	The density at x is returned in gram/cm**3
-	
-Description:	
-		
-Notes:
 
-History:
- 	04jun	ksl	Began work, using kn_rho as starting point.  The routine simple
-                        chooses between the way to calculate velocity gradients and 
-			uses the original routines
-
- 
-**************************************************************/
+/**********************************************************/
+/** 
+ * @brief      double (x) calculates the density of an kn_wind at a position x
+ *
+ * @param [in] int  ndom   The current domain number
+ * @param [in] double  x[]   the position where for the which one desires the density
+ * @return     The density at x is returned in gram/cm**3
+ *
+ *
+ * ###Notes###
+ *
+ *
+ **********************************************************/
 
 double
 yso_rho (ndom, x)

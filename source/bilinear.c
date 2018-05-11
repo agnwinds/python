@@ -1,4 +1,16 @@
 
+/***********************************************************/
+/** @file  bilinear.c
+ * @author ksl
+ * @date   January, 2018
+ *
+ * @brief  As the name indicates the routines solve for 
+ * the fractional position of a 2d vector in a 2d cell with
+ * 4 corners.
+ *
+ * There is also a quadratic equation solver
+ ***********************************************************/
+
 #include <stdio.h>
 #include <strings.h>
 #include <math.h>
@@ -10,106 +22,89 @@
 
 
 
+/**********************************************************/
+/** 
+ * @brief      calculates the fractional position in the coordinate
+ *  	grid of a 2d vector x.
+ *
+ * @param [in] double  x[]   The 2d position within the cell
+ * @param [in] double  x00[] The 2d position of the lower-left edge of cell  
+ * @param [in] double  x01[] The 2d position of the upper-left edge of the cell
+ * @param [in] double  x10[] The 2d position of the lower-right edge of the cell
+ * @param [in] double  x11[] The 2d position of the upper-right edge of the cell
+ * @param [out] double *  f  The fractional position in the "x" direction
+ * @param [out] double *  g  The fractional postion in the "z" direction
+ * @return     
+ *     The routine itself returns 0 if the postion is inside the cell, and 
+ *     -1 otherwise.
+ *
+ * @details
+ * The input 2d input vectors are assumed to have the relationship
+ *   shown in real space, that is x00 and x01 are more or less along
+ *   the z axis, while x00 and x10 are more or less along the +x acis
+ * 
+ * * x01 ....... x11
+ * * .            .
+ * * .            .
+ * * x00 ....... x10
+ *
+ * ### Notes ###
+ *
+ * Basically
+ *         
+ * X= (1-g) [ (1-f) X00 + f X10 ] * g [ (1-f)*X01+ f* X11 ]
+ * 
+ * where the capitalized values of X,etc denote vectors, and
+ * f and g are the fractional weightings.  
+ * 
+ * X = (1-g) A + g B 
+ * 
+ * It is easy to solve for g in terms of f
+ * 
+ * g = (X-A)/(B-A)
+ * 
+ * where A = [ (1-f) X00 + f X10 ] and B =  [ (1-f)*X01+ f* X11 ]
+ * 
+ * But this gives you two expressions for g depending on whether you
+ * consider the 0 or 1 component of the vector, and therefore you
+ * can solve for f.  More specifically, 
+ * 
+ * g= [(X-XOO) + f (XOO-X10)] / [(X01-X10)+f (X11+X00-X01-X10)]
+ * 
+ * or 
+ * 
+ * g = (Q + f R) / (S+f T) 
+ * 
+ * where Q, R, S, and T are defined from the equation above.
+ * 
+ * So expanding in terms of the component veciots what we have is
+ * 
+ * (Q[0]+f R[0]) (S[2]+f T[2]) = (Q[2]+f R[2]) (S[0]+f T[0])
+ * 
+ * which can now be put in the form of a xquadratic
+ * 
+ * a f**2 + b f +c = 0
+ * 
+ * where 
+ * 
+ * * a = r[0]*t[2] - r[2]*t[0]
+ * * b=  r[0]*s[2] + q[0]*t[2] - ( r[2]*s[0] + q[2]*t[0] )
+ * * c = q[0]*s[2] - q[2]*s[0]
+ * 
+ * 
+ * A problem with this approach is that does not work in the case 
+ * where the coordinates are the x axis positions of X01 and X01
+ * are the same and the X10 and X11 are the same.  This is because
+ * the denominator becomes 0 in the equation for g.  This 
+ * particular case is important because it is the case we are
+ * trying to solve for.
+ * 
+ * In this case we need to solve for f by itself. Similarly there 
+ * is a degnereate case when
+ *               (x00[2] == x10[2] && x01[2] == x11[2])
+ *
+ **********************************************************/
 
-/**************************************************************************
-                    Space Telescope Science Institute
-
-
-  Synopsis: bilin calculates the fractional position in the coordinate
- 	grid of a 2d vector x.  
-
-  Description:	
-
-
-  The input 2d input vectors are assumed to have the relationship
-  shown in real space, that is x00 and x01 are more or less along
-  the z axis, while x00 and x10 are more or less along the +x acis
-
-    x01 ....... x11
-    .            .
-    .            .
-    x00 ....... x10
-
-
-
-  Arguments:  
-     double x[] 			The position within the cell
-     					for which one desires
-					the fractional position 
-					in the grid
-
-     double x00[], x01[], x10[], x11[]  The corners of the cell
-
-
-  Returns:
-     double *f, *g;                     The fractional position
-     					along the "x" and "z" direction of 
-					the cell respectively
-    The routine itself returns 0 if the postion is inside the cell, and 
-    -1 otherwise.
-
-  Notes:
-
-  Basically
-        X= (1-g) [ (1-f) X00 + f X10 ] * g [ (1-f)*X01+ f* X11 ]
-
-	where the capitalized values of X,etc denote vectors, and
-	f and g are the fractional weithings.  
-
-	X = (1-g) A + g B 
-
-	It is easy to solve for g in terms of f
-
-	g = (X-A)/(B-A)
-
-	where A = [ (1-f) X00 + f X10 ] and B =  [ (1-f)*X01+ f* X11 ]
-
-	But this gives you two expressions for g depending on whether you
-	consider the 0 or 1 component of the vector, and therefore you
-	can solve for f.  More specifically, 
-
-	g= [(X-XOO) + f (XOO-X10)] / [(X01-X10)+f (X11+X00-X01-X10)]
-
-	or 
-
-	g = (Q + f R) / (S+f T) 
-
-	where Q, R, S, and T are defined from the equation above.
-
-	So expanding in terms of the component veciots what we have is
-
-	(Q[0]+f R[0]) (S[2]+f T[2]) = (Q[2]+f R[2]) (S[0]+f T[0])
-
-	which can now be put in the form of a xquadratic
-
-	a f**2 + b f +c = 0
-
-	where 
-
-	a = r[0]*t[2] - r[2]*t[0]
-	b=  r[0]*s[2] + q[0]*t[2] - ( r[2]*s[0] + q[2]*t[0] )
-	c = q[0]*s[2] - q[2]*s[0]
-
-
-	A problem with this approach is that does not work in the case 
-	where the coordinates are the x axis positions of X01 and X01
-	are the same and the X10 and X11 are the same.  This is because
-	the denominator becomes 0 in the equation for g.  This 
-	particular case is important because it is the case we are
-	trying to solve for.
-
-	In this case we need to solve for f by itself. Similarly there 
-	is a degnereate case when
-              (x00[2] == x10[2] && x01[2] == x11[2])
-
-
- 
-
-  History:
-	05jul	ksl	56d -- coded as part of effort to create CYLVAR
-			coordiantes within python
-
- ************************************************************************/
 int
 bilin (x, x00, x01, x10, x11, f, g)
      double x[], x00[], x01[], x10[], x11[];
@@ -158,7 +153,6 @@ bilin (x, x00, x01, x10, x11, f, g)
     b = r[0] * s[2] + q[0] * t[2] - (r[2] * s[0] + q[2] * t[0]);
     c = q[0] * s[2] - q[2] * s[0];
 
-//      printf ("abc %f %f %f\n", a, b, c);
 
     if (c == 0)
     {
@@ -205,7 +199,6 @@ bilin (x, x00, x01, x10, x11, f, g)
 
   if (*f < 0. || *f > 1. || *g < 0 || *g > 1.)
   {
-//      Error ("Bilin: location not within cell %8.3f %8.3f\n", *f, *g);
     return (-1);
   }
 
@@ -214,24 +207,34 @@ bilin (x, x00, x01, x10, x11, f, g)
 }
 
 
-/* 
- 
-   This solves a simple xquadratic (or if a is zero linear equation).  The return is set up
-   to make it easy to identify the smallest positive root if one exists.  The routine returns
-   a negative number if both roots are negative or imaginary. 
-   More specifically 
-	 -1 -> both roots are imaginary
-         -2 -> both roots are negative or 0
-          0 -> the first root is the smallest positive  root 
-          1 -> the second root is the smallest positive root
-History
-	05jul	ksl	56d -- Heretofore roots of 0 were on no interest, but now that 
-			xquadratic is called by bilin, we would like to know about values
-			of zero, specifically.  Since the simplest thing to do was to
-			check both roots in this case, I added a little code to make
-			sure root was defined in all cases.
 
-*/
+
+/**********************************************************/
+/** 
+ * @brief      solves a quadratic of the form 0=ax**2+bx+c
+ *
+ * @param [in out] double  a   
+ * @param [in out] double  b   
+ * @param [in out] double  c   
+ * @param [in out] double  r[] roots of the quadratic equation   
+ * @return    
+ * * -1 -> both roots are imaginary
+ * * -2 -> both roots are negative or 0
+ * *  0 -> the first root is the smallest positive  root 
+ * *  1 -> the second root is the smallest positive root
+ *
+ * @details
+ * This solves a simple xquadratic (or if a is zero linear equation).  The return is set up
+ * to make it easy to identify the smallest positive root if one exists.  The routine returns
+ * a negative number if both roots are negative or imaginary. 
+ *
+ * ### Notes ###
+ *
+ * @bug xquadratic looks line for line identical to another routine quadratic which can be
+ * found in phot_util.c.  Both versions of the code seem to be called.  One of them
+ * should be removed.
+ *
+ **********************************************************/
 
 int
 xquadratic (a, b, c, r)
@@ -249,7 +252,8 @@ xquadratic (a, b, c, r)
       return (-1);              /* The roots are extremely imaginary, since both a a b were 0 */
     }
 
-    r[0] = r[1] = (-c / b);     // Then it was a linear equation. Setting both roots to the same thing could be a problem ksl
+    r[0] = r[1] = (-c / b);     
+
     if (r[0] < 0.0)
       return (-2);              /* Generally speaking we are not interested in
                                    negative distances */
@@ -258,6 +262,7 @@ xquadratic (a, b, c, r)
   }
 
   qq = 4. * a * c / (b * b);
+
   if ((q = 1.0 - qq) < 0.0)
   {
     r[0] = r[1] = -99.;
@@ -270,7 +275,6 @@ xquadratic (a, b, c, r)
   }
   else
   {
-
 
     q = sqrt (q);
     z = 0.5 * b / a;

@@ -1,20 +1,22 @@
 
-/***********************************************************
-                                       Space Telescope Science Institute
+/***********************************************************/
+/** @file  atomic.c
+ * @author ksl
+ * @date   March, 2018
+ *
+ * @brief  Routines to calculate rates and x-sections making
+ * use of the atomic data
+ *
+ * ### Notes ###
+ *
+ * These routines are intended to be Python-independent so that
+ * the can be used with other programs.  As a result python.h should
+ * not be included.  
+ *
+ * Note that other routines should be added here to make the atomic
+ * data routines more indepenent of Python.
+ ***********************************************************/
 
-Synopsis:  This file contains routines that make use of atomic data to
-	calculate basic atomic rates.  (THESE ROUTINES SHOULD NOT DEPEND
-	ON A HAVING A WIND ARRAY!!!!
-Arguments:
-
-
-Returns:
- 
-Description:	 
-	
-        02jun   ksl     Created from existing routines in python.
-
-**************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,28 +25,25 @@ Description:
 
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis: 
-	double sigma_phot(x_ptr,freq)	calculates the photionization crossection due to the transition 
-	associated with x_ptr at frequency freq
-Arguments:
-
-Returns:
-	
-Description:	 
-	sigma_phot uses Verner et al.'s interpolation formulae for the photoionization crossection
-	to calculate the bound free (or photoionization) optical depth.  The data must
-	have been into the photoionization structures xphot with get_atomic_data and
-	the densities of individual ions must have been calculated previously.
-
-Notes:
-
-History:
-	98jul	ksl	Coded (actually moved from a subroutine called kappa_ds)
-
-**************************************************************/
+/**********************************************************/
+/** 
+ * @brief      double (x_ptr,freq)	calculates the photionization crossection due to the transition 
+ * 	associated with x_ptr at frequency freq
+ *
+ * @param [in out] struct photoionization *  x_ptr   structure containing the x-section information
+ * @param [in out] double  freq   frequency at which the x-section should be calculated
+ * @return     xsection for this ion at the given frequency
+ *
+ * @details
+ * sigma_phot uses Verner et al.'s interpolation formulae for the photoionization crossection
+ * 	to calculate the bound free (or photoionization) optical depth.  
+ *
+ * ### Notes ###
+ * 	The data must
+ * 	have been into the photoionization structures xphot with get_atomic_data 
+ *
+ **********************************************************/
 
 double
 sigma_phot (x_ptr, freq)
@@ -78,17 +77,27 @@ sigma_phot (x_ptr, freq)
 
 
 
-/* 
- *    a21 alculates and returns the Einstein A coefficient 
- *       History:
- *          98aug        ksl     Coded and debugged
- *             99jan        ksl Modified so would shortcircuit calculation if 
- *                called multiple times for same a
- *                 */
+/**********************************************************/
+/** 
+ * @brief      Calculate the Einstein A coefficient for a transition
+ *
+ * @param [in out] struct lines *  line_ptr   Ptr containing data describing the line
+ * @return     The Einsten (a21) value
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ * The routine checks whether we are asking for the same a21 as
+ * previously, and if so returns it without redoing the calculation.
+ *
+ **********************************************************/
+
 #define A21_CONSTANT 7.429297e-22       // 8 * PI * PI * E * E / (MELEC * C * C * C)
 
 struct lines *a21_line_ptr;
 double a21_a;
+
 
 double
 a21 (line_ptr)

@@ -1,5 +1,7 @@
 #ifdef MPI_ON
 #include "mpi.h"
+
+
 #endif
 
 int np_mpi_global;              /// Global variable which holds the number of MPI processes
@@ -18,6 +20,9 @@ int verbosity;                  /* verbosity level. 0 low, 10 is high */
 /* In python_43 the assignment of the WindPtr size has been moved from a fixed
 value determined by values in python.h to a values which are adjustable from
 within python */
+
+
+
 
 
 /* With domains NDIM and MDIM need to be removed but NDIM2 is the total number of cells in wmain, and there
@@ -114,7 +119,7 @@ int NPHOT;                      /* The number of photon bundles created.  define
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10
-#define LINELENGTH 	160
+#define LINELENGTH 	256
 
 /* This structure contains the information needed for each separate region of space, e.g the
  * wind and the disk
@@ -224,7 +229,7 @@ typedef struct domain
   /* Generic parameters for the wind */
   double wind_mdot, stellar_wind_mdot;  /* Mass loss rate in disk and stellar wind */
   double rmin, rmax;            /*Spherical extent of the wind */
-  double zmax;                  /* Vertical extent of the wind, often the same as rmas */
+  double zmin,zmax;                  /* Vertical extent of the wind, often the same as rmas */
   double wind_rho_min, wind_rho_max;    /*Min/Max rho for wind in disk plane */
   double wind_thetamin, wind_thetamax;  /*Angles defining inner and outer cones of wind, measured from disk plane */
   double mdot_norm;             /*A normalization factor used in SV wind, and Knigge wind */
@@ -270,16 +275,28 @@ DomainPtr zdom;                 //This is the array pointer that contains the do
 int current_domain;             // This integer is used by py_wind only
 
 
-/* the geometry structure contains information that applies to all domains or alternatimve
- a single domain.  Information that is domain specific should be placed directly in the domain
- structure.  ksl
+/* the geometry structure contains information that applies to all domains, including
+ * the basic system geometry, descriptions of the radition sources, and truly 
+ * global information including how ionization calculations are caried out. 
+ *
+ * Information that is domain specific should be placed directly in the domain
+ * structure.  ksl
  */
 
 #define SYSTEM_TYPE_STAR   0
 #define SYSTEM_TYPE_BINARY 1
 #define SYSTEM_TYPE_AGN    2
 #define	SYSTEM_TYPE_PREVIOUS   	   3
-#define	SYSTEM_TYPE_ONE_D  	   4
+
+/* RUN_TYPE differs from SYSTEM_TYPE in that
+  it has implications on how the program is run
+  wherease SYSTEM_TYPE refers (mainly) to the type
+  of sytem, with the exception 
+*/
+
+#define RUN_TYPE_NEW       0   
+#define RUN_TYPE_RESTART   1
+#define RUN_TYPE_PREVIOUS  3
 
 #define TRUE  1
 #define FALSE 0
@@ -291,9 +308,9 @@ struct geometry
   int system_type;              /* See allowed types above. system_type should only be used for setp */
   int binary;                   /* Indicates whether or not the system is a binary. TRUE or FALSE */
 
-  int ndomain;                  /*The number of domains in a model */
+  int ndomain;                  /* The number of domains in a model */
   int ndim2;                    /* The total number of windcells in all domains */
-  int nplasma, nmacro;          /*The total number of cells in the plasma and macro structures in all domains */
+  int nplasma, nmacro;          /* The total number of cells in the plasma and macro structures in all domains */
 
   /* variables which store the domain numbers of the wind, disk atmosphere.
      Other components should be added here.  Right now we need a wind_domain 
@@ -312,14 +329,16 @@ struct geometry
   int hydro_domain_number;      // Created for the special case of runs with Zeus
 
 
-  /* 67 - ksl This section added to allow for restarting the program, and adds parameters used
+  /* This section allows for restarting the program, and adds parameters used
    * in the calculation */
 
   int wcycle, pcycle;           /* The number of completed ionization and spectrum cycles */
   int wcycles, pcycles;         /* The number of ionization and spectrum cycles desired */
 
-  /* 1509 - ksl - Moved parameters which describe the spectra to be extracted from main into the
-   * geometry structure */
+  /* This section stores information whihc specifies the spectra to be extracted.  Some of the parameters
+   * are used only in advanced modes.  
+   */
+
 #define NSPEC   20
   int nangles;
   double angle[NSPEC], phase[NSPEC];
@@ -371,7 +390,7 @@ struct geometry
                                    one that has been read in and stored. */
   double disk_mdot;             /* mdot of  DISK */
   double diskrad, diskrad_sq;
-  double disk_z0, disk_z1;      /* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 */
+  double disk_z0, disk_z1;      /* For vertically extended disk, z=disk_z0*(r/diskrad)**disk_z1 *diskrad */
   double lum_disk_init, lum_disk_back;  /* The intrinsic luminosity of the disk, the back scattered luminosity */
   int run_type;                 /*1508 - New variable that describes whether this is a continuation of a previous run 
                                    Added in order to separate the question of whether we are continuing an old run fro
@@ -440,7 +459,7 @@ struct geometry
   /* Define the choices for calculating the FB, see, e.g. integ_fb */
 
 #define FB_FULL         0   /* Calculate fb emissivity including energy associated with the threshold*/
-#define FB_REDUCED      1   /* Calcuate the fb emissivity without the threshold energy */
+#define FB_REDUCED      1   /* Calculqate the fb emissivity without the threshold energy */
 #define FB_RATE         2   /* Calulate the fb recombinarion rate  */
   
   
@@ -548,13 +567,14 @@ struct geometry
   double n_ioniz, cool_tot_ioniz;
 
 // The next set of parameters describe the input datafiles that are read
-  char atomic_filename[132];    /* 54e -- The masterfile for the atomic data */
-  char fixed_con_file[132];     /* 54e -- For fixed concentrations, the file specifying concentrations */
+  char atomic_filename[132];    /* The masterfile for the atomic data */
+  char fixed_con_file[132];     /* For fixed concentrations, the file specifying concentrations */
 
   //Added by SWM for tracking C-IV/H-A hotspots
   int nres_halpha;
 
-  //Added by SWM for reverberation mapping
+  /* Variables used for revereration mapping */
+
   double fraction_converged, reverb_fraction_converged;
   int reverb_filter_lines, *reverb_filter_line;
   enum reverb_disk_enum
@@ -570,11 +590,12 @@ struct geometry
   int *reverb_dump_cell;
   int reverb_lines, *reverb_line;       //SWM - Number of lines to track, and array of line 'nres' values
 
-  int spec_mod;                 //A flag to say that we do hav spectral models
+  int spec_mod;                 //A flag to say that we do hav spectral models  ??? What does this mean???
 }
 geo;
 
 
+/* xdisk is a structure that is used to store information about the disk in a system */
 #define NRINGS	301             /* The actual number of rings completely defined
                                    is NRINGS-1 ... or from 0 to NRINGS-2.  This is
                                    because you need an outer radius...but the rest
@@ -587,14 +608,15 @@ struct xdisk
   double g[NRINGS];             /* The gravity at the middle of the annulus */
   double v[NRINGS];             /* The velocity at the middle of the annulus */
   double heat[NRINGS];          /* The total energy flux of photons hitting each annulus */
-  double ave_freq[NRINGS];      /* The flux weighted average of frequency of photons hiiting each annulus */
+  double ave_freq[NRINGS];      /* The flux weighted average of frequency of photons hitting each annulus */
   double w[NRINGS];             /* The radiative weight of the photons that hit the disk */
   double t_hit[NRINGS];         /* The effective T of photons hitting the disk */
   int nphot[NRINGS];            /*The number of photons created in each annulus */
   int nhit[NRINGS];             /*The number of photons which hit each annulus */
 }
 disk, qdisk;                    /* disk defines zones in the disk which in a specified frequency band emit equal amounts
-                                   of radiation. qdisk stores the amount of heating of the disk as a result of
+                                   of radiation. disk gets reinitialized whenever the frequency interval of interest
+                                   is changed.  qdisk stores the amount of heating of the disk as a result of
                                    illumination by the star or wind. It's boundaries are fixed throughout a cycle */
 
 #define NBLMODEL 100
@@ -609,6 +631,7 @@ blmod;
 
 
 /*
+ * The next structure is associated with reverberation mappping.
     SWN 6-2-15
     Wind paths is defined per cell and contains a binned array holding the spectrum of paths. Layers are
     For each frequency:
@@ -628,6 +651,7 @@ typedef struct wind_paths
   double d_flux, d_path;        //Total flux, average path
   int i_num;                    //Number of photons hitting this cell
 } wind_paths_dummy, *Wind_Paths_Ptr;
+
 /* 	This structure defines the wind.  The structure w is allocated in the main
 	routine.  The total size of the structure will be NDIM x MDIM, and the two
 	dimenssions do not need to be the same.  The order of the
@@ -670,12 +694,12 @@ typedef struct wind
   int nwind;                    /*A self-reference to this cell in the wind structure */
   int nplasma;                  /*A cross refrence to the corresponding cell in the plasma structure */
   double x[3];                  /*position of inner vertex of cell */
-  double xcen[3];               /*position of the "center" of a cell (Added by ksl for 52a--04Aug) */
+  double xcen[3];               /*position of the "center" of a cell */
   double r, rcen;               /*radial location of cell (Used for spherical, spherical polar
-                                   coordinates. (Added by ksl for 52a --04Aug) */
+                                   coordinates. */
   double theta, thetacen;       /*Angle of coordinate from z axis in degrees  */
   double dtheta, dr;            /* widths of bins, used in hydro import mode */
-  struct cone wcone;            /*56d -- cone structure that defines the bottom edge of the cell in 
+  struct cone wcone;            /* cone structure that defines the bottom edge of the cell in 
                                    CYLVAR coordinates */
   double v[3];                  /*velocity at inner vertex of cell.  For 2d coordinate systems this
                                    is defined in the xz plane */
@@ -698,7 +722,7 @@ wind_dummy, *WindPtr;
 
 WindPtr wmain;
 
-/* 57+ - 06jun -- plasma is a new structure that contains information about the properties of the
+/* Plasma is a structure that contains information about the properties of the
 plasma in regions of the geometry that are actually included n the wind */
 
 /* 70 - 1108 - Define wavelengths in which to record gross spectrum in a cell, see also xave_freq and xj in plasma structure */
@@ -797,7 +821,6 @@ typedef struct plasma
 	                                   by this ion via recombination. 78 - changed to dynamic allocation */
 	  
   double *cool_dr_ion;
-  //OLD double j, ave_freq, lum;      /*Respectively mean intensity, intensity_averaged frequency, 
   double j, ave_freq;      /*Respectively mean intensity, intensity_averaged frequency, 
                                    luminosity and absorbed luminosity of shell */
   double xj[NXBANDS], xave_freq[NXBANDS];       /* 1108 NSH frequency limited versions of j and ave_freq */
@@ -991,7 +1014,7 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define IONMODE_ML93 3          // Lucy Mazzali
 //OLD #define IONMODE_LTE_SIM 4 // LTE with SIM correction
 #define IONMODE_PAIRWISE_ML93 6 // pairwise version of Lucy Mazzali
-#define IONMODE_PAIRWISE_SPECTRALMODEL 7        // pariwise modeled J_nu approach
+#define IONMODE_PAIRWISE_SPECTRALMODEL 7        // pairwise modeled J_nu approach
 #define IONMODE_MATRIX_BB 8     // matrix solver BB model
 #define IONMODE_MATRIX_SPECTRALMODEL 9  // matrix solver spectral model
 
@@ -1000,9 +1023,9 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define NEBULARMODE_TE 1        // LTE using t_e
 #define NEBULARMODE_ML93 2      // ML93 using correction
 #define NEBULARMODE_NLTE_SIM 3  // Non_LTE with SS modification (Probably could be removed)
-#define NEBULARMODE_LTE_GROUND 4        // A test mode which foces all levels to the GS (Probably could be removed)
-#define NEBULARMODE_PAIRWISE_ML93 6     // pairwise ML93
-#define NEBULARMODE_PAIRWISE_SPECTRALMODEL 7    // pairwise spectral models
+#define NEBULARMODE_LTE_GROUND 4        // A test mode which forces all levels to the GS (Probably could be removed)
+#define NEBULARMODE_PAIRWISE_ML93 6     // pairwise ML93 (diffuse BB)
+#define NEBULARMODE_PAIRWISE_SPECTRALMODEL 7    // pairwise spectral models (power law or expoentials)
 #define NEBULARMODE_MATRIX_BB 8 // matrix solver BB model
 #define NEBULARMODE_MATRIX_SPECTRALMODEL 9      // matrix solver spectral model
 
@@ -1134,9 +1157,11 @@ typedef struct photon
   int top_bot;                  /* 0 ->select photons regardless of location 
                                    >0     -> select only photons whose "last" position is above the disk
                                    <0    -> select only photons whose last position is below the disk */
-  double x[3], r;               /* The position and radius of a special region from which to extract spectra  */
-  double f[NWAVE];
-  double lf[NWAVE];             /* a second array to hole the extracted spectrum in log units */
+  double x[3], r;               /* The position and radius of a special region from which to extract spectra. 
+                                x is taken to be the center of the region and r is taken to be the radius of
+                               the region.   */
+  double f[NWAVE];              /* The spectrum in linear (wavelength or frequency) units */
+  double lf[NWAVE];             /* The specturm in log (wavelength or frequency)  units  */
   double lfreq[NWAVE];          /* We need to hold what freqeuncy intervals our logarithmic spectrum has been taken over */
 
   double f_wind[NWAVE];         /* The spectrum of photons created in the wind or scattered in the wind. Created for 
@@ -1160,31 +1185,14 @@ SpecPtr xxspec;
 int py_wind_min, py_wind_max, py_wind_delta, py_wind_project;
 double *aaa;                    // A pointer to an array used by py_wind
 
-/* This is the structure needed for a cumulative distribution function. The CDFs are
+/* This is the structure for storing cumulative distribution functions. The CDFs are
 generated from a function which is usually only proportional to the probability density
-function.  It is sometimes useful, e.g. in calculating the reweighting function to
-have access to the proper normalization.  Since the one needs the normalization to
-properly create the CDF, this was added for python_43.2  */
+function or from an array.  It is sometimes useful, e.g. in calculating the reweighting function to
+have access to the proper normalization.  
 
-//#define NPDF 200
 
-//typedef struct Pdf
-//{
-//  double x[NPDF + 1];           /* Positions for which the probability density
-//                                   is calculated */
-//  double y[NPDF + 1];           /* The value of the CDF at x */
-//  double d[NPDF + 1];           /* 57i -- the rate of change of the probability
-//                                   density at x */
-//  double limit1, limit2;        /* Limits (running from 0 to 1) that define a portion
-//                                   of the CDF to sample */
-//  double x1, x2;                /* limits if they exist on what is returned */
-//  double norm;                  //The scaling factor which would renormalize the pdf
-//  int npdf;                     /* Size of this pdf */
-//}
-// *PdfPtr, pdf_dummy;
- 
- 
- /* NSH 17/7 - Structure renamed to reflect the fact that this is a CDF, also made dynamically allocated */
+*/
+
  
 #define NCDF 30000 //The default size for these arrays
 #define FUNC_CDF  200 //The size for CDFs made from functional form CDFs
@@ -1214,7 +1222,7 @@ properly create the CDF, this was added for python_43.2  */
 
 
 /* Variable used to allow something to be printed out the first few times
-   an even occurs */
+   an event occurs */
 int itest, jtest;
 
 char hubeny_list[132];          //Location of listing of files representing hubeny atmospheres
@@ -1222,20 +1230,16 @@ char hubeny_list[132];          //Location of listing of files representing hube
 
 
 
-// Allow for a diagnostic file 
-
-FILE *epltptr;                  //TEST
-// diag_on_off is deprecated see #111, #120
-//int diag_on_off;              // on is non-zero  //TEST
 
 
 /* These variables are stored or used by the routines for anisotropic scattering */
 /* Allow for the transfer of tau info to scattering routine */
 
 
-struct Cdf cdf_randwind_store[100];
-CdfPtr cdf_randwind;
-struct photon phot_randwind;
+//180414-ksl-moved to anisowind.c which is the only place they were called.
+//OLD struct Cdf cdf_randwind_store[100];
+//OLD CdfPtr cdf_randwind;
+//OLD struct photon phot_randwind;
 
 /* N.B. cdf_randwind and phot_randwind are used in the routine anisowind for 
 as part of effort to incorporate anisotropic scattering in to python.  
@@ -1336,11 +1340,12 @@ struct advanced_modes
 {
   /* these are all 0=off, 1=yes */
   int iadvanced;                // this is controlled by the -d flag, global mode control.
+  int extra_diagnostics;        // when set various extra files will be written out depending what one wants to check
   int save_cell_stats;          // want to save photons statistics by cell
-  int ispy;                     // want to use the ispy function
   int keep_ioncycle_windsaves;  // want to save wind file each ionization cycle
   int make_tables;              // create tables showing various parameters for each cycle
   int track_resonant_scatters;  // want to track resonant scatters
+  int save_photons;             // want to track photons (in photon2d)
   int save_extract_photons;     // we want to save details on extracted photons
   int adjust_grid;              // the user wants to adjust the grid scale
   int diag_on_off;              // extra diagnostics
@@ -1394,3 +1399,24 @@ files;
    whether it has already calculated the matom emissivities or not. */
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
+
+
+
+/* DIAGNOSTIC for understanding problems imported models
+ *
+ */
+
+
+#define BOUND_NONE   0
+#define BOUND_INNER_CONE  1
+#define BOUND_OUTER_CONE  2
+#define BOUND_RMAX 3
+#define BOUND_RMIN 4
+#define BOUND_ZMIN 5
+#define BOUND_ZMAX 6
+#define BOUND_INNER_RHO 7
+#define BOUND_OUTER_RHO 8
+
+int xxxbound;
+
+ 

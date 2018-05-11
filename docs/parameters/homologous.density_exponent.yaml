@@ -1,8 +1,9 @@
 name: homologous.density_exponent
 description: |
-  Multi-line description, must keep indentation.
+  The power law exponent which defines the decline in density of
+  a homologous flow as a function of radious.
 type: Double
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: greater than 0 for a density that declines with radius
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  parameter: A basic paameter needed to define a homlogous flow  
 file: homologous.c

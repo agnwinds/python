@@ -66,6 +66,7 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
   char filename[LINELENGTH];
   double x;
   int nplasma;
+  double nh;
 
 
 
@@ -89,13 +90,14 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
   {
     aaa[n] = 0;
     nplasma = w[n].nplasma;
-    if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+    if (w[n].vol > 0.0 )
     {
       if (iswitch == 0)
       {
         sprintf (name, "Element %d (%s) ion %d fractions\n", element, ele[nelem].name, istate);
         aaa[n] = plasmamain[nplasma].density[nion];
-        aaa[n] /= ((plasmamain[nplasma].density[0] + plasmamain[nplasma].density[1]) * ele[nelem].abun);
+        nh = rho2nh * plasmamain[nplasma].rho;
+        aaa[n] /= (nh * ele[nelem].abun);
       }
       else if (iswitch == 1)
       {
@@ -131,7 +133,7 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
     for (n = 0; n < NDIM2; n++)
     {
       nplasma = w[n].nplasma;
-      if (w[n].vol > 0.0 && plasmamain[nplasma].ne > 1.0)
+      if (w[n].vol > 0.0 )
       {
         if (iswitch == 0)
           x /= ((plasmamain[nplasma].density[0] + plasmamain[nplasma].density[1]) * ele[nelem].abun);
@@ -308,38 +310,30 @@ line_summary (w, rootname, ochoice)
   iline = 0;
   lambda=0;
   i_matom_search = 0;
-  rdint ("line (0=C-IV, 1=Hα, 2=Hβ, 3=Matom", &iline);
+  rdint ("line (0=C-IV, 1=Ha, 2=Hb, 3=Matom", &iline);
   switch (iline)
   {
-  case 0:
-    element = 6;
-    istate = 4;
-    lambda = 1548.1949e-8;
-    break;
-  case 1:
-    element = 1;
-    istate = 1;
-    lambda = 6562.7097e-8;
-    break;
-  case 2:
-    element = 1;
-    istate = 1;
-    lambda = 4861.363e-8;
-    break;
-  case 3:                      //Generic matom
-    i_matom_search = 1;
-    element = 1;
-    istate = 1;
-    levu = 2;
-    levl = 1;
-    rdint ("Element", &element);
-    rdint ("Ion", &istate);
-    rdint ("Upper level", &levu);
-    rdint ("Lower level", &levl);
-    break;
-  default:
-    Error ("line_summary: Not a valid line.");
-    exit (0);
+    case 0: //Carbon-IV
+      element = 6; istate = 4; lambda = 1548.1949e-8;
+      break;
+    case 1: //Hydrogen Alpha
+      element = 1; istate = 1; lambda = 6562.7097e-8; levu=3; levl=2;
+      break;
+    case 2: //Hydrogen Beta
+      element = 1; istate = 1; lambda = 4861.363e-8; levu=4; levl=2;
+      break;
+    case 3: //Generic matom
+    	i_matom_search=1;
+    	element = 1; istate = 1; levu=2; levl=1;
+      rdint ("Element", &element);   
+      rdint ("Ion", &istate);
+      rdint ("Upper level", &levu);
+      rdint ("Lower level", &levl);
+      break;
+    default:
+      Error("line_summary: Not a valid line.");
+      exit(0);
+
   }
 
 /* Convert wavelength to energy and frequency */
@@ -347,44 +341,66 @@ line_summary (w, rootname, ochoice)
   energy = HC / lambda;
 
 /* Find the ion */
-  nion = 0;
-  while (nion < nions && !(ion[nion].z == element && ion[nion].istate == istate))
-    nion++;
-  if (nion == nions)
-  {
-    Log ("Error--element %d ion %d not found in define_wind\n", element, istate);
-    return (-1);
-  }
-  nelem = 0;
-  while (nelem < nelements && ele[nelem].z != element)
-    nelem++;
-  if (nelem == nelements)
-  {
-    Log ("line_summary: Could not find element %d", element);
-    return (-1);
-  }
-  nline = 0;
-  freq_search = C / lambda;
+	if(i_matom_search)
+	{
+		printf("Searching for matom line...\n");
+		while(nline<nlines && !(lin_ptr[nline]->z == element && lin_ptr[nline]->istate == istate 
+					&& lin_ptr[nline]->levu == levu && lin_ptr[nline]->levl == levl))
+		{
+			nline++;
+		}
+		if (nline == nlines)
+		{
+		  Error ("line_summary: Could not find line in linelist\n");
+		  exit (0);
+		}
+		nelem = 0;
+		while (nelem < nelements && ele[nelem].z != element)
+		  nelem++;
+		if(nelem == nelements)
+		{
+		  Log("line_summary: Could not find element %d",element);
+		  return(-1);
+		}
+		nion = 0;
+		while (nion < nions && !(ion[nion].z == element && ion[nion].istate == istate))
+		  nion++;
+		if (nion == nions)
+		{
+		  Log ("Error--element %d ion %d not found in define_wind\n", element, istate);
+		  return (-1);
+		}
+	}
+	else
+	{
+		nion = 0;
+		while (nion < nions && !(ion[nion].z == element && ion[nion].istate == istate))
+		  nion++;
+		if (nion == nions)
+		{
+		  Log ("Error--element %d ion %d not found in define_wind\n", element, istate);
+		  return (-1);
+		}
+		nelem = 0;
+		while (nelem < nelements && ele[nelem].z != element)
+		  nelem++;
+		if(nelem == nelements)
+		{
+		  Log("line_summary: Could not find element %d",element);
+		  return(-1);
+		}
+		nline = 0;
+		freq_search = C / lambda;
 
-/* Find the line */
-  if (i_matom_search)
-  {
-    while (nline < nlines && !(lin_ptr[nline]->z == element && lin_ptr[nline]->istate == istate
-                               && lin_ptr[nline]->levu == levu && lin_ptr[nline]->levl == levl))
-    {
-      nline++;
-    }
-  }
-  else
-  {
-    while (fabs (1. - lin_ptr[nline]->freq / freq_search) > 0.0001 && nline < nlines)
-      nline++;
-  }
-  if (nline == nlines)
-  {
-    Error ("line_summary: Could not find line in linelist\n");
-    exit (0);
-  }
+		while (fabs (1. - lin_ptr[nline]->freq / freq_search) > 0.0001 && nline < nlines)
+		  nline++;
+		if (nline == nlines)
+		{
+		  Error ("line_summary: Could not find line in linelist\n");
+		  exit (0);
+		}
+	}
+
 
   rdint ("line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob, 4=off, diagnostic)", &geo.line_mode);
   if (geo.line_mode == 0)
@@ -404,7 +420,15 @@ line_summary (w, rootname, ochoice)
   }
 
   strcpy (name, "");
-  sprintf (name, "Luminosity %d (%s) ion %d fractions\n", element, ele[nelem].name, istate);
+  if(lin_ptr[nline]->macro_info == 1)
+  {
+  	sprintf (name, "%d Luminosity %d (%s) ion %d fractions\n", nline, element, ele[nelem].name, istate);
+	}
+	else
+	{
+		sprintf (name, "%d Luminosity %d (%s) ion %d matom %d-%d fractions\n", nline, element, ele[nelem].name, istate, 
+																																	lin_ptr[nline]->levu, lin_ptr[nline]->levl);
+	}
 
   tot = 0.0;
   for (n = 0; n < NDIM2; n++)
@@ -530,7 +554,6 @@ modify_te (w, rootname, ochoice)
     aaa[n] = 0;
     if (w[n].vol > 0.0 && (x = plasmamain[nplasma].heat_tot) > 1.0)
     {
-      //OLD aaa[n] = t_e = calc_te (&plasmamain[nplasma], TMIN, 1.2 * plasmamain[nplasma].t_r);
       aaa[n] = t_e = calc_te (&plasmamain[nplasma], MIN_TEMP, 1.2 * plasmamain[nplasma].t_r);
     }
   }

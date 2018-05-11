@@ -1,3 +1,16 @@
+
+/***********************************************************/
+/** @file   setup_domains.c
+ * @author ksl
+ * @date   January, 2018
+ * @brief  Get the parameters needed to describe winds
+ *
+ * File containing several routines that collectively
+ * define the components to a wind in python. Each component
+ * of the wind is said to be a domain, and the information
+ * for each domain is stored in the elements of zdom
+ ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,28 +20,28 @@
 #include "python.h"
 
 
-/***********************************************************
-             University of Southampton
 
-Synopsis: 
-  get_grid_params reads information on the coordinate system
-  and grid dimensions and sets the corresponding variables
-  in the geo structure
-   
-Arguments:    
+/**********************************************************/
+/** 
+ * @brief       Get inputs that describe a particular component of the wind
+ *
+ * @param [in] ndom  The number (begining with 0) of this particular domain
+ * @return  0 
+ *
+ * Sets up the one domain, which includes defining wind type, e.g whether
+ * it is a shell, or a biconical flow, or an imported model, as well
+ * as the type of coordinate system and its simensions.
+ *
+ * If the wind is to be imported from a file, it is imported in this
+ * routine.
+ *
+ * ###Notes###
+ * 1801 -   Refactored into this file in 1801.  Updates in the
+ *          fall of 17 were made to allow for importing models.
+ *          Note that cyl_var coordinates are not currently 
+ *          working
+***********************************************************/
 
-Returns:
- 
- 
-Description:  
-
-Notes:
-
-History:
-  1502  JM  Moved here from main()
-  1508	ksl	Updated for domains
-
-**************************************************************/
 
 int
 get_domain_params (ndom)
@@ -63,7 +76,7 @@ get_domain_params (ndom)
 
       /* Define the coordinate system for the grid and allocate memory for the wind structure */
       rdint
-	("Coord.system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)",
+	("Wind.coord_system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)",
 	 &input_int);
       switch (input_int)
 	{
@@ -109,7 +122,7 @@ get_domain_params (ndom)
 
     }
 
-/* 130405 ksl - Check that NDIM_MAX is greater than NDIM and MDIM.  */
+/* Check that NDIM_MAX is greater than NDIM and MDIM.  */
 
   if ((zdom[ndom].ndim > NDIM_MAX) || (zdom[ndom].mdim > NDIM_MAX))
     {
@@ -123,7 +136,7 @@ get_domain_params (ndom)
   /* If we are in advanced then allow the user to modify scale lengths */
   if (modes.iadvanced)
     {
-      rdint ("@adjust_grid(0=no,1=yes)", &modes.adjust_grid);
+      rdint ("@Diag.adjust_grid(0=no,1=yes)", &modes.adjust_grid);
 
       if (modes.adjust_grid)
 	{
@@ -141,26 +154,26 @@ get_domain_params (ndom)
 }
 
 
-/***********************************************************
-             University of Southampton
 
-Synopsis: 
-  get_wind_params calls the relevant subroutine to get wind parameters
-  according to the wind type specified 
-   
-Arguments:		
 
-Returns:
- 
- 
-Description:	
+/**********************************************************/
+/**   
+ * @brief       Get detailed particular component of the wind
+ *
+ * @param [in] ndom  The number (begining with 0) of this particular domain
+ * @return  0 
+ *
+ * Continues the setup of a single domain begun in get_domain_params.    
+ *
+ * Much of this routine is a steering routine that calls other
+ * subroutines depending on the type of wind, e.g sv, for this
+ * particular wind domain.
+ *
+ *
+ * ###Notes###
+ * 1801 -   Refactored into this file in 1801.  
 
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-
-**************************************************************/
+***********************************************************/
 
 int
 get_wind_params (ndom)
@@ -170,9 +183,6 @@ get_wind_params (ndom)
   // it is not obvious that is happenning
 
   zdom[ndom].rmax = 1e12;
-  /*  ksl - this line is not used anywhre and so has been commented out. Currently
-   *  we initialize all of the plasma temperatures to geo.twind_init  */
-  //  zdom[ndom].twind_init = 1e5;   
 
   if (geo.system_type == SYSTEM_TYPE_AGN)
     {
@@ -267,41 +277,42 @@ get_wind_params (ndom)
      XXX allows any domain to be allowed a filling factor but this should be modified when
      we know what we are doing with inputs for multiple domains. Could create confusion */
 
-  rddoub ("filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
+  rddoub ("Wind.filling_factor(1=smooth,<1=clumped)", &zdom[ndom].fill);
 
   return (0);
 }
 
 
 
-/***********************************************************
-             University of Southampton
 
-Synopsis: 
-  get_line_transfer_mode reads in the variable geo.line_mode
-  and sets the variables geo.line_mode, geo.scatter_mode,
-  geo.rt_mode and geo.macro_simple accordingly
-   
-Arguments:		
+/**********************************************************/
+/** 
+ * @brief       Get the line transfer mode for the wind
+ *
+ * @param [in] None
+ * @return  0 
+ *
+ * This rontinues simply gets the line tranfer mode for
+ * all componensts of the wind.  After logging this
+ * information the routine also reads in the atomic 
+ * data.
+ *
+ *
+ * ###Notes###
+ * 1801 -   Refactored into this file in 1801.  It is
+ *          not obvioous this is the best place for this
+ *          routine since it refers to all components
+ *          of the wind.
 
-Returns:
- 
- 
-Description:	
+***********************************************************/
 
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-
-**************************************************************/
 
 
 int
 get_line_transfer_mode ()
 {
   rdint
-    ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,6=macro_atoms,7=macro_atoms+aniso.scattering)",
+    ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,4=anisotryopic,5=thermal_trapping,6=macro_atoms,7=macro_atoms+aniso.scattering)",
      &geo.line_mode);
 
 /* ksl XXX  This approach is inherently dangerous and should be fixed.  We read in the line mode but then
@@ -397,7 +408,7 @@ get_line_transfer_mode ()
   if (modes.iadvanced)
     {
 
-      rdint ("@write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
+      rdint ("@Diag.write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
       if (write_atomicdata)
 	Log ("You have opted to save a summary of the atomic data\n");
     }
@@ -405,4 +416,85 @@ get_line_transfer_mode ()
   get_atomic_data (geo.atomic_filename);
   return (0);
 }
+
+
+
+
+/**********************************************************/
+/** 
+ * @brief      sets up the windcones for each domain
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ * 
+ * This routine takes input variables, the minimim and maximum
+ * radius of the wind at the disk, and the flow angles bounding
+ * the wind, and calculates the variables used to define the cones
+ * that bound each wind domain involving biconical flows.
+ *
+ * ### Notes ###
+ *
+ * The routine cycles through all of the existing domains, and
+ * uses variables which have been read in or entered previously.
+ *
+ * The input variables that are used are typicall, wind_rho_min, wind_rho_max
+ * and wind_thetamin and max.  They are defined in routines like,
+ * get_sv_parameters.
+ *
+ * The angles thetamin and
+ * thetamax are all defined from the z axis, so that an angle of 0
+ * is a flow that is perpindicular to to the disk and one that is
+ * close to 90 degrees will be parallel to the plane of the disk
+ *
+ * The routine files a structure of type cone, that contain, an element
+ * z,  the place where the windcone intercepts the z axis, and an element
+ * dzdr is the slope of the cone
+ *
+ * Wind cones are defined azimuthally around the z axis.
+ *
+ * For models that are not biconical flows, the windcones are set 
+ * to include the entire domain.
+ * 
+ *
+ **********************************************************/
+
+int
+setup_windcone ()
+{
+  int ndom;
+
+  for (ndom = 0; ndom < geo.ndomain; ndom++)
+    {
+
+      if (zdom[ndom].wind_thetamin > 0.0)
+	{
+	  zdom[ndom].windcone[0].dzdr = 1. / tan (zdom[ndom].wind_thetamin);
+	  zdom[ndom].windcone[0].z =
+	    (-zdom[ndom].wind_rho_min / tan (zdom[ndom].wind_thetamin));
+	}
+      else
+	{
+	  zdom[ndom].windcone[0].dzdr = VERY_BIG;
+	  zdom[ndom].windcone[0].z = -VERY_BIG;;
+	}
+
+
+      if (zdom[ndom].wind_thetamax > 0.0)
+	{
+	  zdom[ndom].windcone[1].dzdr = 1. / tan (zdom[ndom].wind_thetamax);
+	  zdom[ndom].windcone[1].z =
+	    (-zdom[ndom].wind_rho_max / tan (zdom[ndom].wind_thetamax));
+	}
+      else
+	{
+	  zdom[ndom].windcone[1].dzdr = VERY_BIG;
+	  zdom[ndom].windcone[1].z = -VERY_BIG;;
+	}
+    }
+  return (0);
+}
+
+
+
 

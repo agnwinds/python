@@ -3665,18 +3665,19 @@ get_los_dvds (w, rootname, ochoice)
   return (0);
 }
 
+
 /**********************************************************/
-/** @name   grid_summary
+/** 
  * @brief Prints grid boundaries to file
  *
- * @param [in] one            Pointer to cell of interest
- * @param [in] line_ptr_emit  Pointer to line of interest
- * @return     Probability of line emission
+ * @param [in] w              Pointer to wind array
+ * @param [in] rootname       Root name of simulation
+ * @param [in] ochoice        Whether or not to write out 
+ * @return     0
  *
- * Given a cell and a line, calculates the probabiltiy that
- * that cell will emit in that line.
+ * Outputs the boundaries for the grids for each domain
  *
- * @notes
+ * ###Notes###
  * 6/15 - Written by SWM
 ***********************************************************/
 int

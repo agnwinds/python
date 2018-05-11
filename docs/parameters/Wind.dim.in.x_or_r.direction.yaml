@@ -1,9 +1,16 @@
 name: Wind.dim.in.x_or_r.direction
 description: |
-  Multi-line description, must keep indentation.
+  Winds are calulated on spherical, cylindrical, or polar grids.
+  This input variable gives the size of the grid in the x or r
+  direction.  Because some grid cells are used as a buffer, the
+  actual wind cells are contained in a slightly smaller grid than
+  the number given.
+
+  Note that in some situations there may be more than one wind
+  component, known technically as a domain.  In that case the user
+  will be queried for this value mulitple times, one for each domain
 type: Int
-unit: None
-values: Condition e.g. >0 or list e.g. [1, 2, 5]
+values: Greater than 0
 parent:
-  parameter: Condition e.g. >0 or list e.g. [1, 2, 5]
+  Number.of.wind.components: Greater than 0
 file: setup_domains.c

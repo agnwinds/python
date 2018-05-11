@@ -1,3 +1,13 @@
+/***********************************************************/
+/** @file  setup_reverb.c
+ * @author swm
+ * @date   January, 2018
+ *
+ * @brief  Routines for reading in the settings for reverb
+ *
+ * Contains the function for reading in reverberation mapping
+ * and visualisation settings.
+ ***********************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,23 +17,65 @@
 #include "python.h"
 
 
-
-
-/***********************************************************
-             University of Southampton
-Synopsis:
-  get_meta_params reads in data pertaining to simulation meta-
-  properties like reverberation mapping settings and variance
-  reduction techniques.
-
-Arguments:
-Returns:
-
-Description:
-Notes:
-History:
-  1504  SWM   Added
-**************************************************************/
+/**********************************************************/
+/**
+ * @brief      Gets parameters from input file for reverb
+ * and visualisation settings.
+ *
+ * @return    0
+ *
+ * @details
+ * Reads in reverberation mapping and basic visualisation for
+ * reverberation mapping settings from file. These settings
+ * are fully-documented in the Sphinx docs, and briefly here:
+ *
+ * ### reverb.type ###
+ * Sets whether or not to do reverb mapping, and if so how to
+ * assign photon starting paths for non-CO photons.
+ * 0. None
+ * 1. 'Photon', starting paths set by distance to the CO.
+ * 2. 'Wind', photons generated in the wind assigned starting
+ *    paths from the distribution of paths heating the wind
+ *    cell they were spawned in.
+ * 3. 'Matom', as wind but photons generated in a line assigned
+ *    starting paths from the distribution of paths of photons
+ *    that de-excited into that line. For lines in matom_lines.
+ *
+ * ### reverb.matom_lines, reverb.matom_line ###
+ * The number of macro-atom lines to track (above). Internal
+ * line number! TODO: Convert to elem:ion:lvlu:lvll format.
+ *
+ * ### reverb.disk_type ###
+ * How the starting paths of photons from the disk are assigned.
+ * 0. Set by distance to the CO.
+ * 1. Set to 0. Not recommended.
+ * 2. Ignored. Disk photons do not contribute to 'wind' and
+ *    'matom' distributions.
+ *
+ * ### reverb.path_bins ###
+ * How many bins to store wind & matom path distributions in.
+ * Typically 1000.
+ *
+ * ### reverb.visualisation ###
+ * 0. No visualisation
+ * 1. Output a .vtk file showing the mean paths in each cell,
+ *    for visualising in something like VisIt or Paraview.
+ * 2. Output a series of files dumping the path distributions
+ *    for cells set by reverb.dump_cells.
+ * 3. Output both.
+ *
+ * ### reverb.dump_cells, reverb.dump_cell_x, reverb.dump_cell_z ###
+ * The number of cells to dump the path distributions for, and the
+ * x/z coordinate pairs for each cell.
+ *
+ * ### reverb.filter_lines, reverb.filter_line ###
+ * Whether or not to filter the output list of photons. If -1,
+ * excludes all continuum photons. If >0, provide that many
+ * line numbers.
+ *
+ * ### Notes ###
+ * 6/5/18 - Documented by SWM
+ **********************************************************/
 int
 get_meta_params (void)
 {
@@ -79,7 +131,7 @@ get_meta_params (void)
   if (geo.reverb == REV_WIND || geo.reverb == REV_MATOM)
     {				//If this requires further parameters, set defaults
       geo.reverb_lines = 0;
-      geo.reverb_path_bins = 100;
+      geo.reverb_path_bins = 1000;
       geo.reverb_angle_bins = 100;
       geo.reverb_dump_cells = 0;
       geo.reverb_vis = REV_VIS_NONE;
@@ -224,5 +276,3 @@ get_meta_params (void)
     }
   return (0);
 }
-
-

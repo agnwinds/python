@@ -1,3 +1,12 @@
+
+/***********************************************************/
+/** @file  parse.c
+ * @author ksl
+ * @date   February, 2018
+ *
+ * @brief  Routines associated with parsing the command line
+ *
+ ***********************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,36 +15,32 @@
 #include "atomic.h"
 #include "python.h"
 
-/***********************************************************
-             University of Southampton
 
-Synopsis: 
-  parse_command_line parses the command line and communicates stuff
-  to the loggin routines (e.g. verbosity).
-   
-Arguments:   
-  argc            command line arguments 
 
-Returns:
 
-  restart_start   1 if restarting
- 
-Description:  
-
-Notes:
-
-	The switches should be described in the introduction to
-	python.c, instead of here
-
-History:
-  1502  JM  Moved here from main()
-  1610	ksl	Added a new switch -dry-run which is functionally
-  		equivalent to -i. Also dealt with the possibility
-		that all of the command line would be consumed in
-		switches with no parameter file specified.
-
-**************************************************************/
-
+/**********************************************************/
+/** 
+ * @brief      parses the command line options
+ *
+ * @param [in]  int  argc   the number of command line arguments
+ * @param [in]  char *  argv[]   The command line arguments
+ * @return      restart_stat   1 if restarting a previous model
+ *
+ * Python has a fairly rich set of command line options, which
+ * are parsed by this routine
+ *
+ * The routine also creates the diag folder, which is where most
+ * of the log files are written 
+ *
+ * ###Notes###
+ *
+ * The general purpose of each of the command line options
+ * should be fairly obvious from reading the code.
+ *
+ * If changes to the command line interface are made they should
+ * be described in the routine help 
+ *
+ **********************************************************/
 
 int
 parse_command_line (argc, argv)
@@ -80,8 +85,10 @@ parse_command_line (argc, argv)
 		  Error ("python: Expected time after -t switch\n");
 		  exit (0);
 		}
+          set_max_time(files.root,time_max);  
 	      i++;
 	      j = i;
+	      Log ("Program will stop after time %f\n", time_max);
 
 	    }
 	  else if (strcmp (argv[i], "-v") == 0)
@@ -94,6 +101,7 @@ parse_command_line (argc, argv)
 	      Log_set_verbosity (verbosity);
 	      i++;
 	      j = i;
+          Log("Verbosity level set to %d\n",verbosity);
 
 	    }
 	  else if (strcmp (argv[i], "-e") == 0)
@@ -106,29 +114,32 @@ parse_command_line (argc, argv)
 	      Log_quit_after_n_errors (max_errors);
 	      i++;
 	      j = i;
+          Log("Setting the maximum number of errors of a type before quitting to %d\n",max_errors);
 
 	    }
 	  else if (strcmp (argv[i], "-d") == 0)
 	    {
 	      modes.iadvanced = 1;
+          Log("Enabling advanced/diagnositic inputs (@ commands)\n");
 	      j = i;
 	    }
 	  else if (strcmp (argv[i], "-f") == 0)
 	    {
 	      modes.fixed_temp = 1;
+          Log("Invoking fixed temperature mode\n");
 	      j = i;
 	    }
 
-	  /* JM 1503 -- Sometimes it is useful to vary the random number seed. Set a mode for that */
 	  else if (strcmp (argv[i], "--rseed") == 0)
 	    {
 	      modes.rand_seed_usetime = 1;
 	      j = i;
+          Log("Using a random seed in random number generator\n");
 	    }
 	  else if (strcmp (argv[i], "-z") == 0)
 	    {
 	      modes.zeus_connect = 1;
-	      Log ("setting zeus_connect to %i\n", modes.zeus_connect);
+	      Log ("Setting zeus_connect to %i\n", modes.zeus_connect);
 	      j = i;
 	    }
 	  else if (strcmp (argv[i], "-i") == 0)
@@ -194,28 +205,25 @@ parse_command_line (argc, argv)
 }
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
-	print out some basic help on how to run the program
-Arguments:		
 
-Returns:
- 
-Description:	
-		
-Notes:
-
-The easiest way to create the message, at least initially, is simply to to type
-out what you want to appear on the screen and then as \n\ to all of the lines, including
-the ones with nothing in them
-
-History:
-	081217	ksl	67c - Added so that ksl could remember all of the options
-	09feb	ksl	68b - Added info on -v switch
-
-**************************************************************/
+/**********************************************************/
+/** 
+ * @brief      print out some basic help concering command line options for the program
+ *
+ * @return     0 in all cases
+ *
+ * This simply prints out a hardwired multi-line string to the command line.
+ *
+ * ###Notes###
+ *
+ * An improved version of this routine would simply read and print and external 
+ * file.
+ *
+ * If one chooses to add to what is printed out then one needs to be careful 
+ * concerning the ends of lines.
+ *
+ **********************************************************/
 
 int
 help ()
@@ -255,7 +263,7 @@ If one simply types py or pyZZ where ZZ is the version number, one is queried fo
 	of the parameter file. \n\
 \n\
 \n\
-";                              // End of string to provide one with help
+";  // End of string to provide one with help
 
   printf ("%s\n", some_help);
 

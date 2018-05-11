@@ -1,8 +1,13 @@
-/* photo_gen_matom.c contains functions for calculating emissivities and generating photons
-    during the spectral cycles. The actual functions which do the jumps inside an activated 
-   macro-atom are in matom.c. This is partly done to prevent overly long files (JM1504)
-*/
-
+/***********************************************************/
+/** @file  new_photo_gen_matom.c
+ * @author ksl, ss, jm
+ * @date   January, 2018
+ *
+ * @brief functions for calculating emissivities and generating photons from macro-atoms and k-packets.
+ *   during the spectral cycles. The actual functions which do the jumps inside an activated 
+ *  macro-atom are in matom.c. This is partly done to prevent overly long files (JM1504)
+ *
+ ***********************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,40 +18,21 @@
 #include <gsl/gsl_block.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
-//#include <gsl/gsl_blas.h>
 #include "my_linalg.h"
 
-/************************************************************
-                                    Imperial College London
-Synopsis:
-
-       get_kpkt_f returns the specific luminosity in the band needed for the computation of the
-       spectrum. It gets the total energy radiated by the process k-packet -> r-packet in the
-       required wavelength range.
-
-
-Arguments:   
-       WindPtr w                   the ptr to the structure defining the wind
-
-                                  
-           
-
-Returns:   The energy radiated by the process k-packet -> r-packet in the wind in the 
-           wavelength range required for the specrum calculation.
-
-
-
-Description:
-
-
-Notes:  
-        
-         
-History:
-          June 04 SS - coding began
-	06may	ksl	57+ -- Recoded to use plasma array
-
-************************************************************/
+/**********************************************************/
+/** 
+ * @brief      returns the specific luminosity in the band needed for the computation of the
+ *        spectrum. It gets the total energy radiated by the process k-packet -> r-packet in the
+ *        required wavelength range.
+ *
+ * @return double lum  The energy radiated by the process k-packet -> r-packet in the wind in the 
+ *            wavelength range required for the specrum calculation.
+ *
+ * ### Notes ###
+ * Literally just loops through the kpkt_emiss entries in plasmamain.
+ *
+ **********************************************************/
 
 double
 get_kpkt_f ()
@@ -67,41 +53,28 @@ get_kpkt_f ()
 
 /* All done. */
 
-/************************************************************
-                                    Imperial College London
-Synopsis:
-
-       get_matom_f returns the specific luminosity in the band needed for the computation of the
-       spectrum. It gets the total energy radiated by the deactivation of macro atoms in the
-       required wavelength range.
-
-
-Arguments:   
-       mode  variable which controls whether or not we need to compute the
-             emissivities (CALCULATE_MATOM_EMISSIVITIES) or use stored ones
-             because we are restarting a spectral cycle (USE_STORED_MATOM_EMISSIVITIES)
-             see #define statements in python.h and code in xdefine_phot().
-
-                                              
-
-Returns:   The energy radiated by the deactivation of macro atoms in the wind in the 
-           wavelength range required for the specrum calculation.
-
-
-
-Description:
-
-
-Notes:  
-        
-         
-History:
-          June 04 SS - coding began
-          Sep  04 SS - significant modification to improve the treatment of macro
-                       atoms in spectral synthesis steps. 
-	06may	ksl	57+ -- Recoded to use plasma structure
-
-************************************************************/
+/**********************************************************/
+/** 
+ * @brief      returns the specific band-limited luminosity in macro-atoms
+ *
+ * @param [in] int  mode   vvariable which controls whether or not we need to compute the
+ *            emissivities (CALCULATE_MATOM_EMISSIVITIES) or use stored ones
+ *            because we are restarting a spectral cycle (USE_STORED_MATOM_EMISSIVITIES)
+ *            see #define statements in python.h and code in xdefine_phot().
+ * @return double lum  The energy radiated by the deactivation of macro atoms in the wind in the 
+ *            wavelength range required for the specrum calculation.
+ *
+ * @details
+ * this routine calculates the luminosity in the band needed for the computation of the
+ * spectrum. It gets the total energy radiated by the deactivation of macro atoms in the
+ * required wavelength range. This can be a slow process, as there is no priori way 
+ * (at least with our method) to work out where a photon is going to come out when a 
+ * macro-atom is generated
+ *
+ * ### Notes ###
+ * Consult Matthews thesis. 
+ *
+ **********************************************************/
 
 double
 get_matom_f (mode)
@@ -482,48 +455,24 @@ get_matom_f (mode)
 /* All done. */
 
 
+/**********************************************************/
+/** 
+ * @brief      produces photon packets to account for creating of r-packets
+ *      by k-packets in the spectrum calculation. It should only be used once the total 
+ *      energy emitted in this way in the wavelength range in question is well known
+ *      (calculated in the ionization cycles).
+ *
+ * @param [in out] PhotPtr  p   the ptr to the structire for the photons
+ * @param [in] double  weight   the photon weight
+ * @param [in] int  photstart   ???
+ * @param [in] int  nphot   the number of the first photon to be generated and
+ * @return int nphot  When it finishes it should have generated nphot photons from k-packet elliminations.
+ *
+ * @details
+ * This routine is closely related to photo_gen_wind from which much of the code has been copied.
+ *
+ **********************************************************/
 
-/************************************************************
-                                    Imperial College London
-Synopsis:
-
-     photo_gen_kpkt produces photon packets to account for creating of r-packets
-     by k-packets in the spectrum calculation. It should only be used once the total 
-     energy emitted in this way in the wavelength range in question is well known
-     (calculated in the ionization cycles).
-
-
-Arguments:   
-       WindPtr w                   the ptr to the structure defining the wind
-       PhotPtr p;                  the ptr to the structire for the photons
-       double weight;              the photon weight
-       int photstart, nphot;       the number of the first photon to be generated and
-                                   the total number of photons to be generated by this
-                                   routine
-
-                                           
-
-Returns:   
-      When it finishes it should have generated nphot photons from k-packet elliminations.
-
-
-Description:
-      This routine is closely related to photo_gen_wind from which much of the code has been copied.
-
-Notes:  
-        
-         
-History:
-          June 04 SS - coding began
-	  04aug	ksl	Modified so that uses coordinate system
-	  		independent routine get_random_location
-			to set location of generated kpkt
-          Sep  04 SS - minor bug fixed
-	06may	ksl	57+ -- Updated to use plasma structure. 
-			and to elimate passing entrie wind structure
-	15aug	ksl	Added domain support
-
-************************************************************/
 int
 photo_gen_kpkt (p, weight, photstart, nphot)
      PhotPtr p;
@@ -553,7 +502,8 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   {
     /* locate the wind_cell in which the photon bundle originates. */
 
-    xlum = (rand () + 0.5) / (MAXRAND) * geo.f_kpkt;
+//    xlum = (rand () + 0.5) / (MAXRAND) * geo.f_kpkt; DONE
+    xlum = random_number(0.0,1.0) * geo.f_kpkt;
 
     xlumsum = 0;
     icell = 0;
@@ -670,46 +620,27 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   /* All done. */
 }
 
-/************************************************************
-                                    Imperial College London
-Synopsis:
+/**********************************************************/
+/** 
+ * @brief      produces photon packets to account for creation of r-packets
+ *      by deactivation of macro atoms in the spectrum calculation. It should only be used 
+ *      once the total energy emitted in this way in the wavelength range in question is well known
+ *      (calculated in the ionization cycles).
+ *
+ * @param [in out] PhotPtr  p   the ptr to the structire for the photons
+ * @param [in] double  weight   the photon weight
+ * @param [in] int  photstart   ???
+ * @param [in] int  nphot   the number of the first photon to be generated and
+ * @return int nphot When it finishes it should have generated nphot photons from macro atom deactivations.
+ *
+ * @details
+ * This routine is closely related to photo_gen_kpkt from which much of the code has been copied.
+ *
+ * ### Notes ###
+ * Consult Matthews thesis. 
+ *
+ **********************************************************/
 
-     photo_gen_matom produces photon packets to account for creation of r-packets
-     by deactivation of macro atoms in the spectrum calculation. It should only be used 
-     once the total energy emitted in this way in the wavelength range in question is well known
-     (calculated in the ionization cycles).
-
-
-Arguments:   
-       PhotPtr p;                  the ptr to the structire for the photons
-       double weight;              the photon weight
-       int photstart, nphot;       the number of the first photon to be generated and
-                                   the total number of photons to be generated by this
-                                   routine
-
-                                           
-
-Returns:   
-      When it finishes it should have generated nphot photons from macro atom deactivations.
-
-
-Description:
-      This routine is closely related to photo_gen_kpkt from which much of the code has been copied.
-
-Notes:  
-        
-         
-History:
-          June 04 SS - coding began
-          Aug  04 SS - modified as for gen_kpkt above by KSL
-          Sep  04 SS - minor bug fixed
-	06may	ksl	57+ -- Initial adaptation to plasma structure
-	0812	ksl	67c -- Changed call to photo_gen_matom to
-			eliminate WindPtr w, since we have access
-			to this through wmain.
-	15aug	ksl	Added domain support
-
-************************************************************/
 int
 photo_gen_matom (p, weight, photstart, nphot)
      PhotPtr p;
@@ -741,8 +672,8 @@ photo_gen_matom (p, weight, photstart, nphot)
   {
     /* locate the wind_cell in which the photon bundle originates. And also decide which of the macro
        atom levels will be sampled (identify that level as "upper"). */
-
-    xlum = (rand () + 0.5) / (MAXRAND) * geo.f_matom;
+    xlum = random_number(0.0,1.0) * geo.f_matom;
+	
 
     xlumsum = 0;
     icell = 0;

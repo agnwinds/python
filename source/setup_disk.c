@@ -1,3 +1,15 @@
+
+/***********************************************************/
+/** @file   setup_disk.c
+ * @author ksl
+ * @date   January, 2018
+ *
+ * @brief  Read parameters that define a disk
+ *
+ * File containing reverberation mapping functions.
+ ***********************************************************/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +28,6 @@ Synopsis:
 Arguments:		
 
 Returns:
-  disk_illum - this is used by python.c and so needs to be returned
  
 Description:	
 
@@ -32,6 +43,23 @@ History:
 
 **************************************************************/
 
+/**********************************************************/
+/**    
+ * @brief       get the parameters need to define a disk  
+ *
+ * @param [in] None                     
+ * @return    
+ *
+ * Read the parameters, such as the type of disk, the 
+ * temperature profile, that define a disk
+ * 
+ * The parameters fill variables defined in the geo
+ * data structure.
+ *
+ * ###Notes###
+ * 1712 - Refactored into a separate routine by ksl
+***********************************************************/
+
 
 double
 get_disk_params ()
@@ -41,23 +69,21 @@ get_disk_params ()
   rdint
     ("Disk.type(0=no.disk,1=standard.flat.disk,2=vertically.extended.disk)",
      &geo.disk_type);
-  if (geo.disk_type != DISK_NONE)
-    {
-      rdint ("Disk.radiation(y=1)", &geo.disk_radiation);
-    }
-  else
-    {
-      geo.disk_radiation = 0;
-    }
-  get_spectype (geo.disk_radiation,
-		"Disk.rad_type(0=bb,1=models)_to_make_wind",
-		&geo.disk_ion_spectype);
-
 
   if (geo.disk_type == DISK_NONE)
     {
+      geo.disk_radiation = 0;
+      geo.diskrad = 0;
       return (0);
     }
+
+
+  rdint ("Disk.radiation(y=1)", &geo.disk_radiation);
+  get_spectype (geo.disk_radiation,
+		"Disk.rad_type_to_make_wind(0=bb,1=models)",
+		&geo.disk_ion_spectype);
+
+
   rdint ("Disk.temperature.profile(0=Shakura-Sunyaev;1=readin,2=yso)",
 	 &geo.disk_tprofile);
   if (geo.disk_tprofile == DISK_TPROFILE_STANDARD)
@@ -102,4 +128,3 @@ get_disk_params ()
     }
   return (0);
 }
-

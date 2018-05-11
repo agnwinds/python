@@ -5,7 +5,7 @@ description: |
 type: Enum (Int)
 values:
   0: |
-    *Correlated*
+    **Correlated**
 
     This mode assumes that disk emission is correlated with the
     central source. Photons generated in the disk start with a delay equal to
@@ -14,7 +14,7 @@ values:
     unscattered photons from the central source.
 
   1: |
-    *Uncorrelated*
+    **Uncorrelated**
 
     This mode generates photons with a delay of 0 wherever in the
     disk they come from. This mode is of slightly questionable use and should be
@@ -22,7 +22,7 @@ values:
     similar to type 0 as most of the UV photons are generated close-in to the CO.
 
   2: |
-    *Ignored*
+    **Ignored**
 
     This mode assumes that disk photons do *not* correlate
     with the central source (i.e. disk surface  ionisation state and emissivity is

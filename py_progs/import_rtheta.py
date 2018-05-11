@@ -5,20 +5,25 @@
 
 Synopsis:  
 
-Read the master file produced by windwave2table for a
+Read the master file produced by windsave2table for a
 rtheta (polar-coordinate mode model and produce 
 a file to be read by import in python
 
 
 Command line usage (if any):
 
-    usage: import_1d.py rootname
+    usage: import_rtheta.py rootname
 
     e.g rtheta to read a the master.txt table
 
     rtheta.0.master.txt
 
 Description:  
+
+    This routine allows one to create examples of files
+    that can be imported into Python.  It is intended
+    to be useful for creating examples, and for regression
+    testing
 
 Primary routines:
 
@@ -113,8 +118,9 @@ def read_table(filename='foo.txt',format=''):
 
 def doit(root='rtheta',outputfile=''):
     '''
-    Read a master.txt file and produce a file
-    which can be read in to python
+    Read a master.txt file produced by windsave2table for
+    an rtheda coordinate model and produce a file
+    which can be imported into  python
     
 
     Description:

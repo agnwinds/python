@@ -1,4 +1,14 @@
 
+/***********************************************************/
+/** @file  extract.c
+ * @author ksl
+ * @date   April, 2018
+ *
+ * @brief  Maing routines for extracting photons during the 
+ * spectral generation phase.
+ *
+ ***********************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -6,68 +16,134 @@
 #include "atomic.h"
 #include "python.h"
 
-/***********************************************************
-                                       Space Telescope Science Institute
+//OLD /***********************************************************
+//OLD                                        Space Telescope Science Institute
+//OLD 
+//OLD  Synopsis:
+//OLD 
+//OLD int extract(w,p,itype) is the supervisory routine which helps normally
+//OLD 	builds detailed spectra as the photons are transit the wind.
+//OLD 
+//OLD Arguments:		
+//OLD 	PhotPtr p;	The initial photon
+//OLD 	WindPtr w;
+//OLD 	int itype	
+//PTYPE_STAR->the photon came for the star 
+//OLD 			PTYPE_BL->the photon came from the boundary layer
+//OLD 			PTYPE_DISK->the photon being redirected arose in the disk,
+//OLD 			PTYPE_WIND->the photon being redirected arose in the wind,
+//OLD Returns:
+//OLD  
+//OLD  
+//OLD Description:	
+//OLD 
+//OLD extract is called when a photon begins it's flight and every time that photon
+//OLD scatters, unless the user has exercised the "live or die" option, in
+//OLD which case it is not called.  extract calls extract_one for each spectrum
+//OLD it wants to build, where the actual incrementing of the spectrum is done.
+//OLD 
+//OLD An option allows one to construct spectra which have undergone a certain
+//OLD number of scatters.  The parameters for this option all come in through
+//OLD python.h.  
+//OLD 	If s[n].nscat>999; then one obtains the entire spectrum
+//OLD 	if s[n].nscat is a positive number, then the spectrum is composed just 
+//OLD 		of photons with that number of scatters
+//OLD 	if s[n].nscat is a negative number, then the spectrum contains all photons
+//OLD 		with >=  the absolute value of s[n].nscat
+//OLD Another option allows one to construct spectra from photons which have
+//OLD 	scattered above or below the plane of the disk.  As for the number of
+//OLD 	scatters this option comes through python.h, in this case from s[n].top_bot
+//OLD 	s[n].top_bot=0 -> accept all photons
+//OLD 	                  >0  -> accept photons last above the disk
+//OLD 	                  <0  -> accept photons below the disk
+//OLD Notes:
+//OLD 
+//OLD History:
+//OLD  	97march ksl	Coded and debugged as part of Python effort.  
+//OLD  	97aug28	ksl	Added the option which allows one to construct spectra with a
+//OLD 			specific number of scatters.
+//OLD 	97sep1	ksl	Added the option which allows one to construct spectra which
+//OLD 			originate from a specific position above or below the disk
+//OLD 	02jan	ksl	Fixed problems with itypes. (Photons which were wind photons
+//OLD 			for the purpose of extract were not being properly labelled
+//OLD 			as such, and this meant they were not doppler shifted properly.
+//OLD 			This produced photons that were further from resonance in the
+//OLD 			local frame and made the wind more transmissive, especially
+//OLD 			in the blue wing of the line.  It suggests
+//OLD 			that a lot of the absorption in extract is fairly local and
+//OLD 			that the blue wing structure could be fairly sensitive to how
+//OLD 			the doppler shift is carried out.)
+//OLD 	09feb	ksl	68b - Added hooks to track energy deposition of extracted photons
+//OLD 			in the wind 
+//OLD 	15aug	ksl	Modifications to allow multiple domains.
+//OLD 
+//OLD **************************************************************/
 
- Synopsis:
 
-int extract(w,p,itype) is the supervisory routine which helps normally
-	builds detailed spectra as the photons are transit the wind.
 
-Arguments:		
-	PhotPtr p;	The initial photon
-	WindPtr w;
-	int itype	PTYPE_STAR->the photon came for the star 
-			PTYPE_BL->the photon came from the boundary layer
-			PTYPE_DISK->the photon being redirected arose in the disk,
-			PTYPE_WIND->the photon being redirected arose in the wind,
-Returns:
- 
- 
-Description:	
-
-extract is called when a photon begins it's flight and every time that photon
-scatters, unless the user has exercised the "live or die" option, in
-which case it is not called.  extract calls extract_one for each spectrum
-it wants to build, where the actual incrementing of the spectrum is done.
-
-An option allows one to construct spectra which have undergone a certain
-number of scatters.  The parameters for this option all come in through
-python.h.  
-	If s[n].nscat>999; then one obtains the entire spectrum
-	if s[n].nscat is a positive number, then the spectrum is composed just 
-		of photons with that number of scatters
-	if s[n].nscat is a negative number, then the spectrum contains all photons
-		with >=  the absolute value of s[n].nscat
-Another option allows one to construct spectra from photons which have
-	scattered above or below the plane of the disk.  As for the number of
-	scatters this option comes through python.h, in this case from s[n].top_bot
-	s[n].top_bot=0 -> accept all photons
-	                  >0  -> accept photons last above the disk
-	                  <0  -> accept photons below the disk
-Notes:
-
-History:
- 	97march ksl	Coded and debugged as part of Python effort.  
- 	97aug28	ksl	Added the option which allows one to construct spectra with a
-			specific number of scatters.
-	97sep1	ksl	Added the option which allows one to construct spectra which
-			originate from a specific position above or below the disk
-	02jan	ksl	Fixed problems with itypes. (Photons which were wind photons
-			for the purpose of extract were not being properly labelled
-			as such, and this meant they were not doppler shifted properly.
-			This produced photons that were further from resonance in the
-			local frame and made the wind more transmissive, especially
-			in the blue wing of the line.  It suggests
-			that a lot of the absorption in extract is fairly local and
-			that the blue wing structure could be fairly sensitive to how
-			the doppler shift is carried out.)
-	09feb	ksl	68b - Added hooks to track energy deposition of extracted photons
-			in the wind 
-	15aug	ksl	Modifications to allow multiple domains.
-
-**************************************************************/
-
+/**********************************************************/
+/** 
+ * @brief      A supervisory routine called to 
+ * 	builds detailed spectra in the normal (extract) mode.
+ *
+ * @param [in out] WindPtr  w   The entire wind
+ * @param [in out] PhotPtr  p   The photon to extract
+ * @param [in out] int  itype   An integer representing the type of photon 
+ * for the purpose of being extracted.
+ * @return     Always returns 0
+ *
+ * @details
+ * extract is called when a photon begins it's flight and every time that photon
+ * scatters, unless the user has exercised the "live or die" option, in
+ * which case it is not called.  
+ *
+ * extract carries out several preperatory steps for the extraction
+ * and for each spectrum one wants to build, it calls extract_one,
+ * where the actual incrementing of the spectrum is done.
+ *
+ * itype takes on the following values:
+ * * PTYPE_STAR->the photon came for the star 
+ * * PTYPE_BL->the photon came from the boundary layer
+ * * PTYPE_DISK->the photon being redirected arose in the disk,
+ * * PTYPE_WIND->the photon being redirected arose in the wind,
+ * 
+ * extract uses the types to prepare the photon for extraction, including
+ * doppler shifting the photon if is of PTYPE_WIND or PTYPE_STAR 
+ * 
+ * Usually, Python constructs a spectrum of all photons, but there are
+ * advanced options which allone to restict the spectrum created to
+ * those produced with a certain number of scatters or from photons 
+ * that arise from the above or below the disk.  extract enforces
+ * those choices before calling extract_one.
+ * The parameters for this option all come in through
+ * python.h, and are contained in the spectrum structure. 
+ *
+ * The basic choices, some of which can be used in tandom are as follows:
+ *
+ * *	If s[n].nscat>999; then one obtains the entire spectrum
+ * *	if s[n].nscat is a positive number, then the spectrum is composed just 
+ * 		of photons with that number of scatters
+ * *	if s[n].nscat is a negative number, then the spectrum contains all photons
+ * 		with >=  the absolute value of s[n].nscat
+ * * 	s[n].top_bot=0 -> accept all photons
+ * * 	s[n].top_bot    >0  -> accept photons last above the disk
+ * * 	s[n].top_bot    <0  -> accept photons below the disk
+ * *    One can also select photons that are to be extracted from a particular
+ * spherical region.
+ * ### Notes ###
+ * 
+ * @bug This routine as well as extract_one have options for tracking the photon
+ * history.  The routines are in diag.c It is not clear that they have been used 
+ * in a long time and so it may be worthwhile to remove them. Furthermore,
+ * we have established a new mechanism save_phot for essentially this same
+ * task.  This really should be consolidated. 
+ *
+ * @bug This is also commented in the text, but there is a rather bizarre separation
+ * for where the photon frequency is updated and where the weight is update. The former is
+ * done in extract, while the latter is done in extract_one.  This is not an error precisely
+ * but makes the code more confusing than it needs to be.
+ *
+ **********************************************************/
 
 int
 extract (w, p, itype)
@@ -92,7 +168,8 @@ extract (w, p, itype)
   {
     /* If statement allows one to choose whether to construct the spectrum
        from all photons or just from photons that have scattered a specific number
-       of times or in specific regions of the wind. */
+       of times or in specific regions of the wind. A region is specified by a position
+       and a radius. */
 
     yep = 1;                    // Start by assuming it is a good photon for extraction
 
@@ -119,8 +196,6 @@ extract (w, p, itype)
       else
         yep = 0;
     }
-
-
 
     if (yep)                    //Then we want to extract this photon
     {
@@ -160,10 +235,7 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 
       if (modes.save_extract_photons && 1545.0 < 2.997925e18 / pp.freq && 2.997925e18 / pp.freq < 1565.0)
       {
-        fprintf (epltptr,
-                 "%3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %7.2f %7.2f \n",
-                 n, p->x[0], p->x[1], p->x[2], v[0], v[1], v[2],
-                 p->lmn[0], p->lmn[1], p->lmn[2], pp.lmn[0], pp.lmn[1], pp.lmn[2], 2.997925e18 / p->freq, 2.997925e18 / pp.freq);
+          save_extract_photons(n,p,&pp,v);
       }
 
 /* 68b - 0902 - ksl - turn phot_history on for the middle spectrum.  Note that we have to wait
@@ -188,55 +260,42 @@ one is odd. We do frequency here but weighting is carried out in  extract */
   return (0);
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-
-extract_one(w,pp,itype,nspec)
-
-Arguments:		
-	PhotPtr p;
-	WindPtr w;
-	int itype		0->the photon came from the star 
-				1->the photon came from the boundary layer
-				2->the photon being redirected arose in the disk,
-				3->the photon being redirected arose in the wind,
-	int nspec		the spectrum which will be incremented
-Returns:
- 
- 	The photon status after translation
- 
-Description:	
-
-extract_one is analogous to the detailed portion of transphot except here the
-basic point is to calculate the optical depth through the plasma in a certain
-direction, and to increment the appropriate spectrum.  There are a few differences
-though because here we also check whether the photon hits the secondary star.
-		
-Notes:
-
-The logic behind the weighting of the photons is described in Christian Knigge's thesis in
-section 2.3.4.  According to equation 2.19
-	Pc/Pw=12 cos(theta)*(1+b cos(theta)/(3+2b) where b=1.5 corresponds to the
-Eddington approximation.
-
-In python, and in extract and transphot in particular, tau generally refers to the tau associated
-with scattering processes, and the weight contains the effect of dimunition of the energy of
-the photon bundle due to pure absorption processes.  So, in extract, we add pp->w * exp(-tau)
-to the spectrum.
-
-History:
- 	97march ksl	Coded and debugged as part of Python effort.  
- 	97july	ksl	Included the possibility that the photon was absorbed by the secondary.
- 	97sep28	ksl	Modified weightings of extracted photons to be those in Knigge's thesis for
-			Eddington approximation
-	02jan2	ksl	Adapted extract to use photon types
-	16jun22 NSH Added lines to produce a logarithmically binned spectrum
-
-**************************************************************/
 
 
+
+
+/**********************************************************/
+/** 
+ * @brief      (w,pp,itype,nspec)
+ *
+ * @param [in] WindPtr  w   The entire wind
+ * @param [in] PhotPtr  pp  The photon to be extracted
+ * @param [in] int  itype   The type of photon (star, disk, wind, etc)
+ * @param [in] int  nspec   the spectrum which will be incremented
+ * @return     The photon status after translation
+ *
+ * @details
+ * extract_one is analogous to the detailed portion of transphot except here the
+ * basic point is to calculate the optical depth through the plasma in a certain
+ * direction, and to increment the appropriate spectrum.  
+ *
+ * Unlike trans_phot, this routine also checks to see if 
+ * whether the photon hits the secondary star, if one exists.
+ *
+ * ### Notes ###
+ * The logic behind the weighting of the photons is described in Christian Knigge's thesis in
+ * section 2.3.4.  According to equation 2.19
+ * 	Pc/Pw=12 cos(theta)*(1+b cos(theta)/(3+2b) where b=1.5 corresponds to the
+ * Eddington approximation.
+ * 
+ * In Python, and in extract and transphot in particular, tau generally refers to the tau associated
+ * with scattering processes, and the weight contains the effect of dimunition of the energy of
+ * the photon bundle due to pure absorption processes.  So, in extract, we add pp->w * exp(-tau)
+ * to the spectrum.
+ *
+ * Note that both linearly and logarithmically spaced spectra are produced.
+ *
+ **********************************************************/
 
 int
 extract_one (w, pp, itype, nspec)
@@ -264,7 +323,7 @@ extract_one (w, pp, itype, nspec)
   tau = 0;
   icell = 0;
 
-/* Preserve the original position of the photon so one can use this to determine whether the
+/* Preserve the starting position of the photon so one can use this to determine whether the
  * photon encountered the disk or star as it tried to exist the wind.
  */
 
@@ -325,7 +384,7 @@ the same resonance again */
 
   if (tau > TAU_MAX)
     istat = P_ABSORB;           /* Check to see if tau already too large */
-  else if (geo.binary == TRUE)  /* Changed 69 to allow for additional system types */
+  else if (geo.binary == TRUE)  
     istat = hit_secondary (pp); /* Check to see if it hit secondary */
 
 
@@ -393,8 +452,6 @@ the same resonance again */
       lfreqmax = log10 (xxspec[nspec].freqmax);
       ldfreq = (lfreqmax - lfreqmin) / NWAVE;
 
-
-
       /* find out where we are in log space */
       k1 = (log10 (pp->freq) - log10 (xxspec[nspec].freqmin)) / ldfreq;
       if (k1 < 0)
@@ -425,9 +482,9 @@ the same resonance again */
       }
 
 
-      // SWM - Records total distance travelled by extract photon
+      /* Records the total distance travelled by extracted photon if in reverberation mode*/
       if (geo.reverb != REV_NONE)
-      {                         //If we are in reverb mode
+      {                        
         if (pstart.nscat > 0 || pstart.origin > 9 || (pstart.nres > -1 && pstart.nres < nlines))
         {                       //If this photon has scattered, been reprocessed, or originated in the wind it's important
           pstart.w = pp->w * exp (-(tau));      //Adjust weight to weight reduced by extraction

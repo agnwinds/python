@@ -1,14 +1,24 @@
 
+/***********************************************************/
+/** @file  variable_temperature.c
+ * @author nsh,ksl
+ * @date   May, 2018
+ *
+ * @brief 
+ * This file was created to contain all of the routines associated
+ * with calculating ionization using the so-called pair-wise 
+ * dilute bb and pairwise power law models.  Collectively these are
+ * sometimes referred to as variable temperature models.  Both
+ * involve
+ * attempt to calculate ionic abundances using a
+ * temperature fixed for each pair of ions to make the uncorrected
+ * abundance ratio roughly equal to 1. There are then correction
+ * factors applied, either based upon a piece_wise power law model of
+ * the true radiation field, or as a dilute blackbody.
+ *
+ ***********************************************************/
 
-/* This file was created to contain all of the routines associated
-	with the attempt to calculate ionic abundances using a
-	temperature fixed for each pair of ions to make the uncorrected
-	abundance ration roughly equal to 1. There are then correction
-	factors applied, either based upon a power law model of
-	the true radiation field, or as a dilute blackbody.
 
-	12Feb	nsh	Began coding 
- */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,62 +37,99 @@ int niterate;                   // Make this a variable that all the subroutines
 
 
 
-/***********************************************************
-                                       Southampton University
-
-  Synopsis:   
-
-int
-variable_temperature (xplasama, mode)  modifies the densities of ions, levels, and
-	partition functions of ions within a cell of the wind based upon the mode, 
-	and other data contained within the WindPtr itself, such as t_r, t_e, w, 
-	based on the "mode".  
-
-        Unlike nebular_concentrations, this code works on pairs of ions at a time, 
-	and uses a temperature calculated to be suitable for that particular pair
-	to have a ratio of abundances about equal to 1.
-  
-  Arguments:		
-     PlasmaPtr ww;
-     int mode;			// 6=correct using a dilute blackbody
-     				   7=correct using a broken power law spectrum
-
-
-  Returns:
- 	variable temperature alters portions of the wind ptr.  Exactly how things 
-	are changed depends on the mode.
- 
- 	variable_temperature returns 0 if it converged to an answer, -1 otherwise.  On an
- 	abnormal return the density array and ne are left unchanged.
- 	
-  Description:	
-
-
- 
-  Notes:
-
-  Section 5.3 of Nick's thesis explains the undelying ratinale for the so-called 
-  variable temperature models.  The name of the routine is misleading since 
-  there correctios are made for both a dilute power law and for a dilute bb. 
-
-
-
-  History:
-	2012Feb	nsh	Coded and debugged as part of QSO effort. 
-        1212Dec nsh	Recoded so that the densities are computed in a 
-			temporary array, and only 
-			committted to the real density structure once 
-			we are sure the code converges.
-	2013Sep nsh	ground state fudge computed at the start, and 
-			stored in an array rather
-			than contiunually recomputing it - sometimes it is expensive.
-	
-
-**************************************************************/
+//OLD /***********************************************************
+//OLD                                        Southampton University
+//OLD 
+//OLD   Synopsis:   
+//OLD 
+//OLD int
+//OLD variable_temperature (xplasama, mode)  modifies the densities of ions, levels, and
+//OLD 	partition functions of ions within a cell of the wind based upon the mode, 
+//OLD 	and other data contained within the WindPtr itself, such as t_r, t_e, w, 
+//OLD 	based on the "mode".  
+//OLD 
+//OLD         Unlike nebular_concentrations, this code works on pairs of ions at a time, 
+//OLD 	and uses a temperature calculated to be suitable for that particular pair
+//OLD 	to have a ratio of abundances about equal to 1.
+//OLD   
+//OLD   Arguments:		
+//OLD      PlasmaPtr ww;
+//OLD      int mode;			// 6=correct using a dilute blackbody
+//OLD      				   7=correct using a broken power law spectrum
+//OLD 
+//OLD 
+//OLD   Returns:
+//OLD  	variable temperature alters portions of the wind ptr.  Exactly how things 
+//OLD 	are changed depends on the mode.
+//OLD  
+//OLD  	variable_temperature returns 0 if it converged to an answer, -1 otherwise.  On an
+//OLD  	abnormal return the density array and ne are left unchanged.
+//OLD  	
+//OLD   Description:	
+//OLD 
+//OLD 
+//OLD  
+//OLD   Notes:
+//OLD 
+//OLD   Section 5.3 of Nick's thesis explains the undelying ratinale for the so-called 
+//OLD   variable temperature models.  The name of the routine is misleading since 
+//OLD   there correctios are made for both a dilute power law and for a dilute bb. 
+//OLD 
+//OLD 
+//OLD 
+//OLD   History:
+//OLD 	2012Feb	nsh	Coded and debugged as part of QSO effort. 
+//OLD         1212Dec nsh	Recoded so that the densities are computed in a 
+//OLD 			temporary array, and only 
+//OLD 			committted to the real density structure once 
+//OLD 			we are sure the code converges.
+//OLD 	2013Sep nsh	ground state fudge computed at the start, and 
+//OLD 			stored in an array rather
+//OLD 			than contiunually recomputing it - sometimes it is expensive.
+//OLD 	
+//OLD 
+//OLD **************************************************************/
 
 
 
 double xxxne, xip;
+
+
+/**********************************************************/
+/** 
+ * @brief      modifies the densities of ions, levels, and
+ * partition functions of ions within a cell of the wind based upon the mode, 
+ * and other data contained within the WindPtr itself, such as t_r, t_e, w, 
+ * based on the "mode".  
+ * 
+ * @param [in,out] PlasmaPtr  xplasma   A Plasma cell
+ * @param [in] int  mode   A chooice of NEBULARMODE_PAIRWISE_ML93 (6) which uses
+ * a dilute blackbody to represent the spectrum or 
+ * NEBULARMODE_PAIRWISE_SPECTRALMODEL (7) which uses a crude spectrum constructed
+ * of power law or exponetial segments.
+ * @return     returns 0 if the routine converged to an answer, -1 otherwise.  
+ * On an
+ * abnormal return the density array and ne are left unchanged.
+ *
+ * variable temperature alters portions of the wind ptr.  Exactly how things 
+ * are changed depends on the mode.
+ *  
+ *
+ * @details
+ *
+ * ### Notes ###
+ * Section 5.3 of Nick's thesis explains the undelying ratinale for the so-called 
+ * variable temperature models.  The name of the routine is misleading since 
+ * there correctios are made for both a dilute power law and for a dilute bb.
+ *
+ * Unlike nebular_concentrations, this code works on pairs of ions at a time, 
+ * and uses a temperature calculated to be suitable for that particular pair
+ * to have a ratio of abundances about equal to 1.
+ *
+ * @bug There are various questions associated with this routine about whether
+ * what is being done associated with partition funcitons is correct.
+ *
+ **********************************************************/
 
 int
 variable_temperature (xplasma, mode)
@@ -216,7 +263,10 @@ variable_temperature (xplasma, mode)
         t_e_part_correct = xplasma->partition[nion - 1] / xplasma->partition[nion];
         partition_functions_2 (xplasma, nion, t_e, 0);  /* Our only real guess here is that the 
                                                            electron temperature might give a good 
-                                                           estimate of the partition function */
+                                                           estimate of the partition function 
+                                                           XXXX - ksl - Why is it that we set the weight to 0 here rather than to 1 as
+                                                           above.  Is this the reason we have to recalculate all of the partition
+                                                           function at the bottom of the routine*/
 
         t_e_part_correct *= (xplasma->partition[nion] / xplasma->partition[nion - 1]);
 
@@ -228,7 +278,7 @@ variable_temperature (xplasma, mode)
         recomb_fudge = sqrt (t_e / xtemp);
 
         /* Correct the SAHA equation abundance pair using an actual radiation field modelled as a dilute black body */
-        if (mode == 6)
+        if (mode == NEBULARMODE_PAIRWISE_ML93)
         {
 
           if (t_r / xtemp < 0.2)
@@ -250,7 +300,7 @@ variable_temperature (xplasma, mode)
 
         /* correct the SAHA equation abundance pair using an actual radiation field modelled as a broken power law */
 
-        else if (mode == 7)
+        else if (mode == NEBULARMODE_PAIRWISE_SPECTRALMODEL)
         {
           pi_fudge = pi_correct (xtemp, nion, xplasma, mode);
 
@@ -373,51 +423,28 @@ variable_temperature (xplasma, mode)
 
 
 
-
-/***********************************************************
-                                       Southampton University
-
-  Synopsis:   
-	pi_correct(xtemp,nion,xplasma,mode) calculates the photoionization rate
- 	correction factor for the number density of two adjacent levels calculated
-	at any temperature. LM is a special case of this where the temperatures
-	are the same. Prior to Aug14, this was two routines bb_correct_2 and 
-	pl_correct_2. Removing the calculations of the PI rates to a seperate
-	routine have allowed the two routines to be combined into 1.
- 
-  Arguments:		
-
-	double xtemp		the temperature at which the saha abundances were calculated
-	int nion;		number of the upper ion in the pair for which the correction factor is
-				being calculated.
-	PlasmaStr xplasma	The cell currnently under test - this supplied the code with
-				the parameters of the radiation field in the cell
-	int mode		This is the ionization mode - 6 means we model the specific intensity
-				as a dilute blackbody, 7 means it is modelled as a set of power laws
-				or exponentials
-
-  Returns:
- 	j			the correction factor
- 
- 
- 	
- Description:	
-
-
- 
-  Notes:
-
-
-
-  History:
- 
-	12feb	NSH	Coded as part of the quasar project
-	13sep	NSH	Changed to always use the topbase style of data - verner data is now tabulated.
-  	14aug	NSH	Code to calculate the PI rate coefficient removed to new subroutine calc_pi_rate
-			as part of the effort to inroduce matrix ionization calculation. This meant that
-			the two old routines have ben combined into 1.
-
-**************************************************************/
+/**********************************************************/
+/** 
+ * @brief      calculates the photoionization rate
+ *  correction factor for the number density of two adjacent ions   
+ *
+ * @param [in] double  xtemp   the temperature at which the saha abundances were calculated
+ * @param [in] int  nion   number of the upper ion in the pair for which the correction factor is
+ * @param [in] PlasmaPtr  xplasma   The cell currnently under test - this supplied the code with
+ * @param [in] int  mode   This is the ionization mode, which should be either IONMODE_PAIRWISE_ML93 (6) or IONMODE_PAIRWISE_SPECTRALMODEL (7) 
+ * @return   the photoionization rate correction factor
+ *
+ * @details
+ *
+ * In IONMODE_PAIRWISE_ML93, the correction factor is calculated assuming a dilute BB function.  In 
+ * IONMODE_PAIRWISE_SPECTRALMODEL the factor is calculated using a piecewise power law or exponentila function.
+ *
+ * ### Notes ###
+ * LM is a special case of this where the temperatures
+ * are the same. 
+ *
+ *
+ **********************************************************/
 int bb_correct_err = 0;
 
 double
@@ -434,21 +461,20 @@ pi_correct (xtemp, nion, xplasma, mode)
 
 
   numerator = denominator = 0.0;
-  ion_lower = nion - 1;         /*the call uses nion, which is the upper ion in the pair */
-  /*This line is required because calc_pi_rate is called with the ion
-     which is being ionized */
+  /*nion is the upper (recombining) ion in the pair, but calc_pi_rate uses the lower (ionizing) ion  */
+  ion_lower = nion - 1;         
 
 
 
-  if (niterate == 0)            /*first time of iterating this cycle, so calculate the numerator. This rate only depends on the model of J, which doesnt change during the iteration cycle */
+  if (niterate == 0)            /*first time of iterating this cycle, so calculate the numerator. This rate only depends on the model of J, which doesn't change during the iteration cycle */
   {
-    if (mode == 6)
+    if (mode == IONMODE_PAIRWISE_ML93)
     {
-      numerator = calc_pi_rate (ion_lower, xplasma, 2, 1);      /*Call calc_pi_rate with mode 2, which returns the PI rate coeficient */
+      numerator = calc_pi_rate (ion_lower, xplasma, 2, 1);    /*Call calc_pi_rate with mode 2 (dilute BB), which returns the PI rate coeficient */
     }
-    else if (mode == 7)         /*The mean intensity is modelled as a series of power laws and/or exponentials */
+    else if (mode == IONMODE_PAIRWISE_SPECTRALMODEL)         /*Call calc_pi using a seriews a series of power laws and/or exponentials to represent the spectrum */
     {
-      numerator = calc_pi_rate (ion_lower, xplasma, 1, 1);      /*NSH 0814 - the PI rate is now calculated by an external subroutine. Mode 1 means calulate using a PL/exp model of the mean intensity */
+      numerator = calc_pi_rate (ion_lower, xplasma, 1, 1);      
     }
     xplasma->PWnumer[ion_lower] = numerator;    /* Store the calculated numerator for this cell - it wont change during one ionization cycle */
   }                             //End of if statement to decide if this is the first iteration
@@ -456,20 +482,31 @@ pi_correct (xtemp, nion, xplasma, mode)
   {
     numerator = xplasma->PWnumer[ion_lower];    // We are on the second iteration, so use the stored value
   }
-  if (numerator == 0.0)         /*There is no PI for this ion */
+
+  /*If the numeratior is 0, there is no PI for this ion, and so there 
+   * is no need to waste time evaluationg the denominatory */
+  if (numerator == 0.0)         
   {
-    return (0.0);               //There is no need to waste time evaluating the denominator
+    return (0.0);               
   }
 
 
   if (pow (((xtemp - xplasma->PWdtemp[ion_lower]) / xplasma->PWdtemp[ion_lower]), 2) > 1e-6)    //If our guess temperature hasnt changed much, use denominator from last time
   {
-    t_r_store = xplasma->t_r;   /*calc_pi_rate uses the value of t_r and w in the plasma structure to compute the rate coefficient, so we need to store the actual value of t_r and w so we can substititute our guess temperature and w=1 (to get LTE) */
+    /*calc_pi_rate uses the value of t_r and w in the plasma structure to compute the rate coefficient, 
+     * so we need to store the actual value of t_r and w so we can substititute our guess temperature 
+     * and w=1 (to get LTE) */
+
+    t_r_store = xplasma->t_r;   
     w_store = xplasma->w;
     xplasma->t_r = xtemp;
     xplasma->w = 1.0;
-    denominator = calc_pi_rate (ion_lower, xplasma, 2, 1);      /*Now we can call calc_pi_rate, which will now calulate an LTE rate coefficient at our guess temperature */
-    xplasma->t_r = t_r_store;   /*Put things back the way they were */
+
+    /*Now we can call calc_pi_rate, which will now calulate an LTE rate coefficient at our guess temperature */
+    denominator = calc_pi_rate (ion_lower, xplasma, 2, 1);      
+
+    /*Put things back the way they were */
+    xplasma->t_r = t_r_store;   
     xplasma->w = w_store;
     xplasma->PWdenom[ion_lower] = denominator;  /*Store the LTE rate coefficient for next time */
     xplasma->PWdtemp[ion_lower] = xtemp;        /*And also the temperature at which it was calculated */
@@ -488,18 +525,29 @@ pi_correct (xtemp, nion, xplasma, mode)
 }
 
 
-/* temp_func is the function minimised by zbrent to find a temperature
-   when the ion ratios are one (so the logarithm will be 0), 
-   to avoid numerical problems. It is the natural log of the saha equation
-   with the ne taken to the RHS. The correction 
-   factors are applied after and depend on the temperature we find.
 
-   note xxxne is a global variable which is declared above and 
-   assigned in the main variable_temperature routine. 
 
-   Originally coded by NSH
-   1504 JM  replaced constant with SAHA for clarity (same value).
-*/
+/**********************************************************/
+/** 
+ * @brief      the function minimised by zbrent to find a temperature
+ * when the ion ratios are one (so the logarithm will be 0), 
+ * to avoid numerical problems. 
+ *
+ *
+ * @param [in] double  solv_temp   The temperature where the ???
+ * @return    The result of the temp_func calculation
+ *
+ * @details
+ * It is the natural log of the saha equation
+ * with the ne taken to the RHS. The correction 
+ * factors are applied after and depend on the temperature we find.
+ *
+ *
+ * ### Notes ###
+ *  xxxne and xip are global variables which is declared above and 
+ *  assigned in the main variable_temperature routine. 
+ *
+ **********************************************************/
 
 double
 temp_func (solv_temp)

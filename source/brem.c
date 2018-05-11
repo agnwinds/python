@@ -1,4 +1,20 @@
 
+/***********************************************************/
+/** @file  brem.c
+ * @author nsh
+ * @date   October, 2015
+ *
+ * @brief  Functions to allow a Bremstrahlung type input spectrum
+ *
+ * This was added as part of the Rad-hydro effort and is itended
+ * to allow a spectrum to match the assumed spectrum in the Blondin
+ * heating and cooling rates. Note that this spectrum is very
+ * similar in some ways to a blackbody spectrum - essentially
+ * a power law turning into a high frequency exponential dropoff
+ * and so there is a great deal of similarity with routines in
+ * bb.c There is scope here for simplification.
+ ***********************************************************/
+
 #include <stdio.h>
 #include <strings.h>
 #include <math.h>
@@ -10,25 +26,21 @@
 #include "log.h"
 
 
-double constant;
-double T_b;
-
-
-
-double
-emittance_brem (freqmin, freqmax, lum, t)
-     double freqmin, freqmax, lum, t;
-{
-  double emit;
-
-
-  emit = qromb (integ_brem, freqmin, freqmax, 1e-4);
-
-  return (emit);
-}
-
-
-
+/**********************************************************/
+/** 
+ * @brief      The integrand used in qromb to compute the luminosity of a bremstrahlung source 
+ *
+ * @param [in] double  freq		The frequency at which to compute the bremstrahlung luminosity
+ * @return     					The luminosity at frwquency freq
+ *
+ * @details
+ * Since geo.const_agn is a luminosity, this function returns a luminosity
+ * with units ergs/s
+ *
+ * ### Notes ###
+ * 10/15 - Written by NSH
+ *
+ **********************************************************/
 
 double
 integ_brem (freq)
@@ -39,6 +51,25 @@ integ_brem (freq)
   return (answer);
 }
 
+
+
+/**********************************************************/
+/** 
+ * @brief      The integrand for integrating a dimensionless bremstrahlung spectrum
+ *
+ * @param [in] double  alpha	h*freq/k_b/T - 
+ * @return     					luminosity of bremstrahlung function at alpha
+ *
+ * @details
+ * This produces a dimensinless bremstrahlung spectrum so that one
+ * can break fast changing parts of the spectrum (i.e. the exponential
+ * drop off) into chunks to ensure we get a properly defnined spectrum
+ * of randomly generated photons.
+ *
+ * ### Notes ###
+ * 10/15 - Written by NSH
+ *
+ **********************************************************/
 
 double
 brem_d (alpha)
@@ -51,25 +82,40 @@ brem_d (alpha)
 
 
 
-
+/*These parameters are to set up breaks in the spectrum. The low frequency approximation
+ is just a power law, and the high freuqnecy aspproximation is just an exponential. One
+ can invert simple functions for these ends to ontasin a random photon frequency. In between
+ one needs to explicitly integrate the function */
 
 #define BREM_ALPHAMIN 0.01      // Region below which we will use a low frequency approximation
 #define BREM_ALPHAMAX 2.        // Region above which we will use a high frequency approximation
-#define BREM_ALPHABIG 100.      //  Region over which can maximmally integrate the Planck function
-#define NMAX 		1000
+#define BREM_ALPHABIG 100.      //  Region over which can maximmally integrate the bremstrahlung function
 
-int ninit_brem = 0;
 
-double old_brem_t = 0;
-double old_brem_freqmin = 0;
-double old_brem_freqmax = 0;
-double brem_alphamin, brem_alphamax;
+/* These variables are used to store details of a previously made cdf. If we are getting 
+ random frequency photons fron a bremstrahlung spectrum, we will not want to re-create the cdf
+ every time we need a new photon - which could be millions of times - so we only remake the cdf
+ if the temperature of the spectrum has changed (unlikely) or the frequency bands have
+ changed (this will happen as we move thruogh the photon generation bands) */
+
+int ninit_brem = 0;				//This is a flag to say wether a cdf has already been made
+double old_brem_t = 0;			//This is the temperature last used to make a cdf
+double old_brem_freqmin = 0;	//This is the lower frequency last used to make a cdf
+double old_brem_freqmax = 0;	//This is the lower frequency last used to make a cdf
+
+
+/* These variables are used in the code, but are made global so they persist and can be re-used 
+ they are only refedined if the frequency limits, or the temperature has changed */
+
+double brem_alphamin, brem_alphamax;   //The input frequency range in dimensionless values
 double cdf_brem_lo, cdf_brem_hi, cdf_brem_tot;  // The precise boundaries in the the bb cdf 
 double cdf_brem_ylo, cdf_brem_yhi;      // The places in the CDF defined by freqmin & freqmax
 double brem_lo_freq_alphamin, brem_lo_freq_alphamax, brem_hi_freq_alphamin, brem_hi_freq_alphamax;      //  the limits to use for the low and high frequency values
 
-// bb_set is the array that cdf_gen_from_func uses to esablish the 
-// specific points in the cdf of the dimensionless bb function.
+/* brem_set is the array that cdf_gen_from_func uses to esablish the 
+ specific points in the cdf of the dimensionless bremstrahlung function.
+ The intention is get a smoooth spectrum. These used to be called 'jumps'*/
+
 double brem_set[] = {
   0.05, 0.1, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45,
   0.9, 1.9
@@ -77,8 +123,30 @@ double brem_set[] = {
 
 
 
-int error_brem_hi = 0;
-int error_brem_lo = 0;
+
+
+/**********************************************************/
+/** 
+ * @brief      Obtain a random frequency photon from a bremstrahlung spectrum
+ *
+ * @param [in] double  freqmin   Minimum frequency to be generated
+ * @param [in] double  freqmax   Maximum frequency to be generated
+ * @return     					A random photon frequency between freqmin andf freqmax
+ *
+ * @details
+ * This subroutine is used solely to generate random photon frequencies
+ * from a bremstrahlung type spectrum. The temperature of the spectrum (defining
+ * the high frequency exponential dropoff exp(-hnu/kT)) and the spectrasl index 
+ * of the low frequency part of the spectrum are defined in the geo structure.
+ * This code is heavily based upon planck and shares a great deal of code 
+ * with it. There is a clear possibility of generalising the code to make some
+ * kind of generalised power law plus exponential dropoff spectrum.
+ *  
+ *
+ * ### Notes ###
+ * 10/15 - Written by NSH
+ *
+ **********************************************************/
 
 double
 get_rand_brem (freqmin, freqmax)
@@ -89,8 +157,9 @@ get_rand_brem (freqmin, freqmax)
 
 
 
-  /*First time through create the array containing the proper boundaries for the integral of the brem function,
-     Note calling cdf_gen_from func also defines ylo and yhi */
+  /*The first time of calling this function we produce a CDF which runs from BREM_ALPHAMIN to BREM_ALPHAMAX
+  the dmiensinless frequency range over which we cannot use the power law or exponential approximations.
+  This only needs to be done one, ans so a flag is set once the CDF has been made */
 
   if (ninit_brem == 0)
   {                             /* First time through p_alpha must be initialized */
@@ -101,84 +170,77 @@ get_rand_brem (freqmin, freqmax)
 
     /* We need the integral of the brem function outside of the regions of interest as well */
 
-    cdf_brem_tot = (pow (BREM_ALPHAMIN / 100.0, 0.8)) / 0.8 + qromb (brem_d, BREM_ALPHAMIN / 100.0, BREM_ALPHABIG, 1e-8);
-    cdf_brem_lo = (pow (BREM_ALPHAMIN / 100.0, 0.8)) / 0.8 + qromb (brem_d, BREM_ALPHAMIN / 100.0, BREM_ALPHAMIN, 1e-8) / cdf_brem_tot; //position in the full cdf of low frequcny boundary
-    cdf_brem_hi = 1. - qromb (brem_d, BREM_ALPHAMAX, BREM_ALPHABIG, 1e-8) / cdf_brem_tot;       //postion in fhe full hi frequcny boundary
+    cdf_brem_tot = qromb (brem_d, 0.0, BREM_ALPHABIG, 1e-8);
+    cdf_brem_lo = qromb (brem_d, 0, BREM_ALPHAMIN, 1e-8) / cdf_brem_tot;       //position in the full cdf of low frequcny boundary
+    cdf_brem_hi = 1. - qromb (brem_d, BREM_ALPHAMAX, BREM_ALPHABIG, 1e-8) / cdf_brem_tot;   //postion in fhe full hi frequcny boundary
+	
+	
 
-//      pdf_to_file (&pdf_bb, "pdf.out");
-    ninit_brem++;
+    ninit_brem++; //Set the flag to tell the code we have made the CDF.
 
   }
 
-/* If temperatures or frequencies have changed since the last call to planck
-redefine various limitsi, including the region of the cdf  to be used
-
-Note - ksl - 1211 - It is not obvious why all of these parameters need to be
-reset.  A careful review of them is warranted.
+/* We need to define limits - this is only needed to be done once per frequency band. There is some 
+  integrations needed, so we check to see if they have changed before doing a load of work.
 */
 
   if (geo.brem_temp != old_brem_t || freqmin != old_brem_freqmin || freqmax != old_brem_freqmax)
   {
-    brem_alphamin = H * freqmin / (BOLTZMANN * geo.brem_temp);
+	  
+/* set alphamin and alphamax - the dimensionless versions of the frequency range	*/  
+    brem_alphamin = H * freqmin / (BOLTZMANN * geo.brem_temp); 
     brem_alphamax = H * freqmax / (BOLTZMANN * geo.brem_temp);
 
-    old_brem_t = geo.brem_temp;
+/* set the parameters for which these calculations have been done, so we dont redo them */
+    old_brem_t = geo.brem_temp;  
     old_brem_freqmin = freqmin;
     old_brem_freqmax = freqmax;
-
+	
+	
+/* we now compute the location in the cdf where these limits occur. We will be using a random number from 0 to 1 to 
+	select a frequency, so we need to know where 0 and 1 occur! */
     cdf_brem_ylo = cdf_brem_yhi = 1.0;
-    if (brem_alphamin < BREM_ALPHABIG)  //There is *some* emission - 
+    if (brem_alphamin < BREM_ALPHABIG)  //There is *some* emission 
     {
-      if (brem_alphamin > BREM_ALPHAMIN / 100.) //the requested range spills into the part where we must do some qromb
-      {
-        cdf_brem_ylo =
-          ((pow (BREM_ALPHAMIN / 100.0, 0.8)) / 0.8 + qromb (brem_d, BREM_ALPHAMIN / 100.0, brem_alphamin, 1e-8)) / cdf_brem_tot;
-      }
-      else
-      {
-        cdf_brem_ylo = ((pow (BREM_ALPHAMIN / 100.0, 0.8)) / 0.8) / cdf_brem_tot;       //position in the full cdf of current low frequcny boundary          
-      }
+        cdf_brem_ylo = qromb (brem_d, 0.0 , brem_alphamin, 1e-8) / cdf_brem_tot;  //The position in full CDF of the upper frequency bound      
       if (cdf_brem_ylo > 1.0)
         cdf_brem_ylo = 1.0;
-    }
+  }
     if (brem_alphamax < BREM_ALPHABIG)
     {
-      if (brem_alphamax > BREM_ALPHAMIN / 100.)
-      {
-        cdf_brem_yhi = ((pow (BREM_ALPHAMIN / 100.0, 0.8)) / 0.8 + qromb (brem_d, BREM_ALPHAMIN / 100.0, brem_alphamax, 1e-8)) / cdf_brem_tot;  //position in the full cdf of currnt hi frequcny boundary
-      }
-      else
-      {
-        cdf_brem_yhi = ((pow (BREM_ALPHAMIN / 100.0, 0.8)) / 0.8) / cdf_brem_tot;
-      }
-      if (cdf_brem_yhi > 1.0)
+        cdf_brem_yhi = qromb (brem_d, 0.0 , brem_alphamax, 1e-8) / cdf_brem_tot;  //position in the full cdf of currnt hi frequcny boundary
+            if (cdf_brem_yhi > 1.0)
         cdf_brem_yhi = 1.0;
-    }
+  }
 
-
-/* These variables are not always used */
-    brem_lo_freq_alphamin = brem_alphamin;      // Never used if 
+  
+  
+  
+    brem_lo_freq_alphamin = brem_alphamin;     
     brem_lo_freq_alphamax = brem_alphamax;
-    if (brem_lo_freq_alphamax > BREM_ALPHAMIN)
-      brem_lo_freq_alphamax = BREM_ALPHAMIN;
+    if (brem_lo_freq_alphamax > BREM_ALPHAMIN) //If the upper frequency bound is in or past the region of the CDF where we need to use the full brem sprecrum
+      brem_lo_freq_alphamax = BREM_ALPHAMIN;  //Set an upper bound to the range where we can use the power law approximation
 
     brem_hi_freq_alphamax = brem_alphamax;
     brem_hi_freq_alphamin = brem_alphamin;
-    if (brem_hi_freq_alphamin < BREM_ALPHAMAX)
-      brem_hi_freq_alphamin = BREM_ALPHAMAX;
+    if (brem_hi_freq_alphamin < BREM_ALPHAMAX)//If the lower frequency bound is in or below the region of the CDF where we need to use the full brem sprecrum
+      brem_hi_freq_alphamin = BREM_ALPHAMAX; //Set a lower bound to the range where we can use the exponential approximation
 
+/* This test is baciscally asking if there is any part of the frequency range that falls in the 
+	range whwere we need to use the proper bremstrahlung spectrum */
 
     if (brem_alphamin < BREM_ALPHAMAX && brem_alphamax > BREM_ALPHAMIN)
     {
-      cdf_limit (&cdf_brem, brem_alphamin, brem_alphamax);
+      cdf_limit (&cdf_brem, brem_alphamin, brem_alphamax); //We limit the cdf because we might not need the full extent
     }
 
   }
-  /* End of section redefining limits */
 
-  y = rand () / (MAXRAND);
+/* End of section (re)defining limits */
 
-  y = cdf_brem_ylo * (1. - y) + cdf_brem_yhi * y;       // y is now in an allowd place in the cdf
+  y = random_number(0.0,1.0); //Get a random number beween 0 and 1.
+
+  y = cdf_brem_ylo * (1. - y) + cdf_brem_yhi * y;       // y is now in an allowed place in the cdf
 
 /* There are 3 cases to worry about
 	The case where everything is in the low frequency limit
@@ -187,20 +249,20 @@ reset.  A careful review of them is warranted.
 	in the normal regime
 */
 
-  if (y <= cdf_brem_lo || brem_alphamax < BREM_ALPHAMIN)
+  if (y <= cdf_brem_lo || brem_alphamax < BREM_ALPHAMIN) //We will be selecting a frequency using the lower frequency (PL) approximation
   {
     alpha = get_rand_pow (brem_lo_freq_alphamin, brem_lo_freq_alphamax, geo.brem_alpha);
   }
   else if (y >= cdf_brem_hi || brem_alphamin > BREM_ALPHAMAX)
   {
-    alpha = get_rand_exp (brem_hi_freq_alphamin, brem_hi_freq_alphamax);
+    alpha = get_rand_exp (brem_hi_freq_alphamin, brem_hi_freq_alphamax); //We will be selecting a frequency using the high frequency (exp) approximation
   }
   else
   {
-    alpha = cdf_get_rand_limit (&cdf_brem);
+    alpha = cdf_get_rand_limit (&cdf_brem); //We will be using the full CDF approach because we are in the regime where PL and exp are inappropriate
   }
 
-  freq = BOLTZMANN * geo.brem_temp / H * alpha;
+  freq = BOLTZMANN * geo.brem_temp / H * alpha;  //Get a frequency back from the dimenionless alpha parameter
   if (freq < freqmin || freqmax < freq)
   {
     Error ("get_rand_brem: freq %g out of range %g %g\n", freq, freqmin, freqmax);

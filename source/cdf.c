@@ -1,188 +1,42 @@
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
- 
- 	These are a series of routines which are designed to generate a random sampling
- 	of a probability distribution using cumulative distribution functions.
- 	
- 	The main routines are
- 	
-		cdf_gen_from_func	(&cdf,&func,xmin,xmax,njumps,jump)		
-			Generate a cumulative distrubution function (cdf) from a function
- 	          
-		cdf_gen_from_array(&cdf,x,y,n_xy,xmin,xmax,njumps,jump)		
-			Generate a cumulative distribution function (cdf) from an
- 			array of values
-
-		cdf_get_rand(&cdf)				
-			Generate a single sample from a cdf defined by either of the first
- 			two routines 	
- 	
- 	Sometimes it is expensive computationally to recalculate the distribution function
- 	every time you change the limits.   An example of this is the distribution function
- 	for a bb where the distribution function is quite smooth (and can be represented in a 
- 	dimensionless manner) but calculating the function and the distribution function
- 	can be expensive.  The following two routines allow one to sample a part of a
- 	pdf.  Note that pdf_gen-from_func or pdf_gen_from_array should have been
- 	called previously!
- 
-		cdf_limit(&pdf,xmin,xmax)  sets limit1 and limit2 so that one can generate
- 			distributions from a limited range within a previously created cdf.
-
-		cdf_get_rand_limit(&pdf) will samples the cdf but limits the range of
-			the return to lie between xmin and xmax from pdf_limit.
-
-	
-	There are some internal routines
-
-		gen_array_from_func (func, xmin, xmax, pdfsteps) generates a cdf from a function
-			on values linearly spaced between xmin and xmax.  pdfsteps gies the
-			number of points.
-
- 	There is also a simple diagnostic routine
-		cdf_check(&cdf)
-
-	which returns a nonzero number if certain checks of the cdf fail
-	and a routine  
-
-		cdf_to_file(&cdf,filename)				
- 		  	to write a cdf structure to a file
-
-
-								
-Arguments for cdf_gen_from_func
-	CdfPtr cdf;		A ptr to a cdf structure (see below)
-	double (*func)()	The probablility density function to be integrated 
-				to create the pdf
-	double xmin,xmax;	The range over which the function is to be 
-				integrated
-	double jump[];		Specifix values of x, perhaps a Lyman edge, to be
-				included in the pdf_structure.  These must be in
-				ascending order but do not have to lie between xmin
-				and xmax
-	int njumps;		The size of jumps[]
-
-Arguments for cdf_gen_from_array are same as above except
- 	
-	double x[],y[]		The one dimensional arrays containg the places x where the probability 
-				density function density has been evaluated.  The array need not 
-				be uniformly spaced. y is the value of the pdf at the point x 
-	int n_xy		The size of x[] and y[]
-
-Arguments for pdf_get_rand
-	CdfPtr cdf		cdf (See below)	is a structure which contains the cumulative
-				distribution function.
-
-Arguments for cdf_limit
-	double xmin,xmax	Here xmin and xmax will cause cdf[].limit1 and cdf[].limit2 to be set
-				in such a way that when you call pdf_get_rand_limit the distribution
-				will be sampled only between xmin and xmax.  Watch out though
-				because if xmin and xmax lie outside of the original value of xmin
-				and xmax then the distribution will not extend this far.							
-Arguments for pdf_to_file
-	PdfPtr cdf
-	char filename[]		If you can't figure this out, you are in deep trouble!
-				
-Returns:
-	All of the routines return 0 on successful completion, except cdf_get_rand which returns
-	a random value between xmin and xmax.  Multiple calls to cdf_get_rand should regenerate
-	the probability density function.
-	
-	If there is an error the routines usually send an error message to the screen and logfile
-	and cause the program to stop!  Occasionally the program will send a nonzero return to
-	indicate an error.
- 
-Description:
-
-	The purpose of these routines is first to generate a cumulative distribution function
-	and then allow one to sample that distribution function.  The procedure is either
-	to call pdf_gen_from_func if you have a function whose probability distribution you
-	want (as might be the case if you were generating bremsstrahlung photons and you knew
-	the formula)  or cdf_gen_from_array (as might be the case if you were trying to
-	generate Monte Carlo spectra from precalculated Kurucz models).
-	
-	The result of calling either of these routines will be to populate a structure of
-	the form Cdf
-		cdf->x[]  will contain NPDF values of x between xmin and xmax.  The values will be
-			spaced so that it is almost but not quite true that if you generate a uniform
-			number n between 0 and NPDF you could just read off the value pdf[n].x and
-			that by doing this multiple times you could regenerate the distribution function
-		cdf->y[]  will contain values between 0 and 1 and is the integral of the cumulative
-			distribution function from xmin to pdf[].x
-			
-	Once a cdf has been generated, one samples the cdf by calls to cdf_get_rand which 
-	creates a random number between 0 and 1, finds the elements in cdf which surround
-	the random number and interpolates to return a value x. 
-	
-	It is possible to force specific values of x to appear in the pdf.  This is desirable
-	if there are edges where the probability density changes rapidly, as for example
-	at the Lyman edge in a stellar spectrum.  By using jumps properly you can assure
-	that edges will be sharp in the regenerated distribution (since otherwse cdf_get_rand
-	will linearly interpolate between two points on the opposite sides of the edge).
-
-Notes:
-	Must be compiled with log.c since it makes use of the "python" logging routines for
-	errors.
-
-	It would probably be desirable to modify this so that the size of the parallel 
-	arrays being generated could be determined from inside the program.  In that case
-	NPDF would have to become the maximum size. - NSH stis was tried in Jul 2017 - turns
-	out to be very hard!
-
-
-	Error??: For Kurucz models, The probability distribution beyond the He edge  
-	is often very peaked at the long wavelength end and rapidly changing.  In this 
-	instance, some bizarre results can be obtained because NPDF is not enough to 
-	properly populate the pdf.  One could increase NPDF, but this would slow 
-	everything down.  This is an another argument that the whole routine pdf_gen_from_array
-	neeeds to be rewritten to avoid using NPDF altogether.  One way to do this
-	would be simply to use the values of x and y in creating an inital pdf.  There
-	is however a question of resampling. - NSH Jul 2017 - this has been addressed
-	by removing the sampling aspect. Turns out with the faster machines we dont
-	need to be so careful about making it easy to find the right point in a CDF.
-	
-
-History:
-	97aug	ksl 	Initial versions of these and similar routines coded as part of python project.
-	98mar	ksl	Recoded all of the pdf routines so that jumps were incorporated and so
-			that they all use the pdf structure. 
-	98mar25	ksl	Fixed a problem with gen_from_func which occured when there were
-			discontinues changes in the pdf which resulted in multiple values of
-			the pdf being associated with the same probability.  Also, fixed I had
-			not done proper accounting when there were specific values at which
-			I want the pdf recorded. 
-	98jul27	ksl	Fixed a problem with renormalization inf pdf_gen_from_func for the case when
-			one wanted the pdf at specific values.  Discovered, and have fixed a problem
-			in pdf_gen_from_array and pdf_gen_from_func associated with requireing the
-			pdf at specific values.  Note: while I have tested this for pdf_gen_from func
-			I have not really tested it for pdf_gen_from_array and this needs to be done.!!
-			Added a routine pdf_check which looks for errors in a pdf_array.
-	98jul27 ksl	Added check to assure that if one does put in points at specific values
-                        that the probability density was not zero over this interval which would
-                        produce two y values that are exactly the same.	
-	00dec30	ksl	Fixed small error to change order of truth calculation in a while statement that
-			was causing the program to fail on Proga's alpha
-	06sep	ksl	57i -- Previously, one assumed the probability density was effectively
-			uniform between the places where the cumulative distribution function
-			was calculated.  Now we attempt to make a correction for this.
-	06oct	ksl	58 -- After a lot of testing, I decided to baseline the version
-			of pdf that makes a first order correction for non-uniformity of
-			the probability distribution within intervals where the cdf is
-			calculated.  The version here corresponds to 57ib.  I still don't understand
-			some of the timing issues associated with this, as there are circumstances
-			where this more excact calculation seems to take less time to exeucute
-			in python than the old version.  The old version should still be in the
-			directory (and is called pdf_uniform.c)
-	10oct	ksl	Changed the way in wich pdf_gen_from function works so it will change the
-			the number of points that are used in the array pdf_array in situations
-			where the binning is too course.  In the process, eliminated pdf_init.  
-			It was only called by one routine.  
-	17Jul   nsh Modified to make everything refer to CDFs as they should be, also changed
-			cdf_gen_from_array to work on a supplied array - no jumps.
-
- 
-**************************************************************/
+/***********************************************************/
+/** @file  cdf.c
+ * @author ksl,nsh
+ * @date   March, 2018
+ *
+ * @brief  Routines to create a cumulatimve distribution (CDF) from a function or array, and then to
+ * sample that cdf in a fleximble manner.
+ *
+ * @details
+ *
+ * CDFs can be generated either from a function using cdf_gen_from_func or from an array using
+ * cdf gen_from_array.  The function or the array that is input are used as the proability densities
+ * for the cdfs.  The cdfs are stored in a Cdf structure (See python.h)  
+ *
+ * The procedure is either
+ * to call cdf_gen_from_func if you have a function whose probability distribution you
+ * want (as might be the case if you were generating bremsstrahlung photons and you knew
+ * the formula)  or cdf_gen_from_array (as might be the case if you were trying to
+ * generate Monte Carlo spectra from precalculated Kurucz models).
+ *
+ * Once the cdfs are generated one can sample the full distribution distritution function
+ * with cdf_get_rand, or one can sample a part of the distribution by setting the
+ * part that one wants with cdf_limit and then sampling the distribution with cdf_get_rand_limit
+ *
+ * There are a number of helper functions that are internal to the generation of the cdfs,
+ * and verification that the cdfs are readonable.
+ *
+ * ###Notes###
+ *
+ * In generating the CDFs, one must be careful of places where the pdf is discontinuous, or more
+ * generally changing in a way that will not be well represented via linear interpolations.  When
+ * generating a CDF from a function it is possible to specify positions where one wishes to have
+ * points, e.g on either side of a discontinuity.  When generating a CDF from a function, the 
+ * discontinuities should be well sampled in the array that is provided.
+ *
+ * @bug For reasons, which are currently unclear there are differences in the number of points
+ * maintained in the cdfs for different generation methods.
+ *
+ ***********************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -192,47 +46,40 @@ History:
 #include "models.h"
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_interp.h>
-
-
-/*  The structure is defined in python.h.  Here for reference only */
-//#define NPDF 200
-
-//typedef struct Pdf {
-//      double x[NPDF+1];
-//      double y[NPDF+1];
-//      double d(NPDF + 1];      
-//      double limit1,limit2;
-//      double norm;           //The scaling factor which would renormalize the pdf
-//      int npdf    
-//} *PdfPtr,pdf_dummy;
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 
 #define PDFSTEPS 10000		// This is the initial value of PDFSTEPS
 int pdf_steps_current;		// This is the value of pdfsteps at this point in time
-int init_pdf = 0;
-double *pdf_array;
+int init_pdf = 0;			// Flag to say whether structures to hold a cdf have been initialised
+double *pdf_array;			//Pointer to pdf_array - made external because it is used in varous routines
 
-/* Generate a pdf structure from a function.  
 
-Description:
+/**********************************************************/
+/** 
+ * @brief      Generate a cumulative distrubution function (cdf) from a function
 
-This routine stores values of the function in  cdf_array
+ * @param [in out] CdfPtr  cdf    	A ptr to a cdf structure 
+ * @param [in] double *func  		The probablility density function to be integrated  to create the pdf
+ * @param [in] double xmin,xmax		The range over which the function is to be integrated
+ * @param [in] int njumps			The number of points at which we want to force a break in the cdf
+ * @param [in] double jump			an array of points in the x-corrdinates at which we want to force points
+ * @return     0 on successful completion,
+ * 	
+ * @details
+ * This routine allows one to generate a CDF from a function. It is used
+ * to make photons from blackbody and bremstrahlung sources and
+ * also to sample things like cosine functions for directions of generated photons.
+ *
+ *
+ * ### Notes ###
+ *
+ * The jumps are used to force points in the CDF at certain values of X. 
+ * 
+ *
+ **********************************************************/
 
-	02feb	ksl	Modified to handle a problem in which the
-			pdf was not monotonic because of the 
-			interaction between jumps and desired
-			values of the pdf.  This is probably more
-			like pdf_gen_from_array.  At this point
-			it is not entirely clear to me that 
-			pdf_gen_from function should not simple
-			call pdf_gen_from array...but that is
-			not currently the case 
-	10oct	ksl	Modified (and reorganized) in an attempt to calculate a 
-			finer grid of points in pdf_array, in situations
-			where array was so course that we did not
-			adequately sample the CDF.
-
-*/
 int
 cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
      CdfPtr cdf;
@@ -250,13 +97,28 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
   double gen_array_from_func (), delta;
 
   njump_min = njump_max = 0;
-  /* Check the input data before proceeding */
+
+  /* Check the input data before proceeding
+
+  First check to see that xmin is actually less than xmax 
+
+  Then  check that, if there are jumps, they are in order 
+
+  Next find the indices into the jump array that contains jumps in between xmin and xmax 
+
+  At this point njump_min will point to the first jump which is betewen xmin and
+  xmax or it will equal to njumps in which case there were no jumps which were greater
+  than xmin.
+
+  Similarly njump_max will be the point to the first jump above xmax or if there are
+  no jumps above xmax, then it will be njumps. 
+  */
+
   if (xmax <= xmin)
     {
       Error ("pdf_gen_from_func: xmin %g <= xmax %g\n", xmin, xmax);
       exit (0);
     }
-
   if (njumps > 0)
     {
       for (j = 1; j < njumps; j++)
@@ -269,19 +131,13 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
 	      exit (0);
 	    }
 	}
-
       njump_min = 0;
       while (njump_min < njumps && jump[njump_min] <= xmin)
 	njump_min++;
       njump_max = 0;
       while (njump_max < njumps && jump[njump_max] < xmax)
 	njump_max++;
-      /* So at this point njump_min will point to the first jump which is betewen xmin and
-         xmax or it will equal to njumps in which case there were no jumps which were greater
-         than xmin.
-
-         Similarly njump_max will be the point to the first jump above xmax or if there are
-         no jumps above xmax, then it will be njumps. */
+	  
 
       njumps = njump_max - njump_min;
     }
@@ -289,7 +145,7 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
   /* OK, all the input data seems OK */
 
   /* Construct what is effectively is the definite integral from xmin to x. Note
-     however that currently pdf_array[0] corresponds awkwardly to the integral
+     however that currently cdf_array[0] corresponds awkwardly to the integral
      from xmin to xstep.  
 
      There code increases the size of the array if the steps appear so large that they
@@ -307,7 +163,7 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
   while (n < 3)
     {
       delta = gen_array_from_func (func, xmin, xmax, pdfsteps);
-      if (delta < 0.1 / FUNC_CDF)
+      if (delta < 0.1 / FUNC_CDF) //FUNC_CDF is set in python.h - it is the number of steps we want in the final CDF
 	break;
       pdfsteps *= 10;
       n = n + 1;
@@ -316,31 +172,38 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
 
   xstep = (xmax - xmin) / pdfsteps;
 
-/* So at this point pdf_array contains an unnormalized version of the CDF for the function */
+/* At this point cdf_array (an external variable) contains a finely discretised normalized version of 
+  the CDF for the function it contains pdfsteps points, with a seperation in the x variable of xstep.
+  we now 'downsample' the pdf to an array with FUNC_CDF points. We ensure that we have points at locations given 
+  by the jumps. The resaon for doing this is to limit the size of the final CDF - it will be used a great
+  many times, and the original reason for a small array is to speed up searching in the cdf_get_rand bit.
+  */
 
+
+  /* Set the first points in the cdf */
 
   cdf->x[0] = xmin;
   cdf->y[0] = 0;
 
-  n = 0;			//This is the position in pdf_array
-  mm = 1;			//This is the index to a desired value of y, with no jumps
+  n = 0;			//This is the position in pdf_array - we start at 0
+  mm = 1;			//This is the index to a desired value of y at the end of the CDF we want it to equal 1!
   j = njump_min;		//This refers to the jumps
-  for (m = 1; m < FUNC_CDF; m++)
+  for (m = 1; m < FUNC_CDF; m++)  //Loop over the number of required points in the downsampled CDF
     {
-      y = (float) mm / (FUNC_CDF - njumps);	// Desired value of y ignoring jumps
+      y = (float) mm / (FUNC_CDF - njumps);	// Desired value of y for the next point in the down sampled CDF
 
-      while (pdf_array[n] < y && n < pdfsteps)	// Work one's way through pdf_array
+      while (pdf_array[n] < y && n < pdfsteps)	// Work one's way through pdf_array, until we hit the next required value of y
 	{
-	  if (j < njump_max && jump[j] <= xmin + (n + 1) * xstep)
+	  if (j < njump_max && jump[j] <= xmin + (n + 1) * xstep) //We have passed a jump before hitting our next required value of y - we want to make a point here
 	    {
-	      cdf->x[m] = xmin + (n + 1) * xstep;	//Not exactly jump but close
-	      cdf->y[m] = pdf_array[n];
+	      cdf->x[m] = xmin + (n + 1) * xstep;	//Not exactly jump but close- - we set the next x point in the CDF to the X point we just passed
+	      cdf->y[m] = pdf_array[n];             //And we set the y point in the CDF to the corresponding Y point
 	      j++;		//increment the jump number
 	      m++;		//increment the pdf structure number
 	    }
-	  n++;
+	  n++;  //This is the index increment for the pdf_array we are going thruogh 
 	}
-
+	// The while has triggered - we have passed out next required value of y - so we make a point in the new down sampled CDF
       /* So at this point pdf_array[n-1] < x and pdf_array[n]>x */
       cdf->x[m] = xmin + (n + 1) * xstep;
       cdf->y[m] = pdf_array[n];
@@ -348,11 +211,11 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
       /* So pdf->y will contain numbers from 0 to 1 */
     }
 
-  cdf->x[FUNC_CDF] = xmax;
-  cdf->y[FUNC_CDF] = 1.0;
+  cdf->x[FUNC_CDF] = xmax;  //Set the last x point in the downsampled CDF
+  cdf->y[FUNC_CDF] = 1.0;   //And the last y point must equal 1.
   cdf->norm = 1.;		/* pdf_gen_from array produces a properly nomalized cdf and so the
 				   normalization is 1.  110629 ksl */
-  cdf->ncdf = FUNC_CDF;
+  cdf->ncdf = FUNC_CDF;  //The number of points is 
 
 /* Calculate the gradients */
   if (calc_cdf_gradient (cdf))
@@ -361,7 +224,7 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
     }				// 57ib 
 
 
-  /* Check the pdf */
+  /* Check the cdf */
   if ((icheck = cdf_check (cdf)) != 0)
     {
       Error ("cdf_gen_from_function: error %d on cdf_check\n", icheck);
@@ -371,38 +234,31 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
 }
 
 
-/* 
-
-gen_array_from_func
-
-
-This is a routine which is called by cdf_gen_from_func which simply calculates the cumulative
-distribution of the function in equally spaced steps between xmin and xmax.  The CDF is properly
-normalized.
-
-
-pdfsteps is the number of steps that are calculated.  The routine returns the largest change
-in the cdf between any two points in the grid.
-
-Notes:
-
-10oct - ksl -This is rather brute force.  An alternative would have been to have increased the density of points
-only in the region where it was needed.  This could be done by looking at the regions where the
-sampling was poor in the initial calculation and addeding new points in in a new calculations.  But
-this would require one to pass both the values of the CDF and the positions where the values were
-taken.  This would be  not be hard but would require more extensive modifications to pdf_gen_from func than 
-currently.  
-
-11jun	ksl	The name of this function is rather misleading reflecting its history.  At one point
-		it simple generated the value of the function at the various points in the grid.  That
-		is no longer the case, and has led to confusion.  
-
-History
-
-10oct	ksl(python_69)	Coded to enable one to adaptively increase the density of points
-11jun	ksl(69d)	This routine creates a properly normalized CDF.
-
-*/
+/**********************************************************/
+/** 
+ * @brief      generates a cdf from a function
+ *
+ * @param [in] double *func The probablility density function to be integrated  to create the pdf
+ * @param [in] double xmin,xmax;	The range over which the function is to be integrated
+ * @param [in] int pdfsteps;	number of steps that are calculated
+ * @return     delta - the largest change in the cdf between any two points in the grid.
+ *
+ * @details
+ * This is a routine which is called by cdf_gen_from_func which simply calculates the cumulative
+ * distribution of the function in equally spaced steps between xmin and xmax.  The CDF is properly
+ * normalized.
+ *
+ * ### Notes ###
+ *
+ * 10oct - ksl -This is rather brute force.  An alternative would have been to have increased the density of points
+ * only in the region where it was needed.  This could be done by looking at the regions where the
+ * sampling was poor in the initial calculation and addeding new points in in a new calculations.  But
+ * this would require one to pass both the values of the CDF and the positions where the values were
+ * taken.  This would be  not be hard but would require more extensive modifications to pdf_gen_from func than 
+ * currently.  
+ * 
+ *
+ **********************************************************/
 
 double
 gen_array_from_func (func, xmin, xmax, pdfsteps)
@@ -417,7 +273,7 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
   int idiag;
   double delta;
 
-  xstep = (xmax - xmin) / pdfsteps;
+  xstep = (xmax - xmin) / pdfsteps;  //The size of the step in the x variable
   idiag = 0;
 
   /* First, allocate an array for internal use, if that
@@ -440,18 +296,20 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
     }
 
 
-  for (n = 0; n < pdfsteps; n++)
+  for (n = 0; n < pdfsteps; n++) //Loop over the required number of steps in the cdf
     {
-      x = xmin + (n + 0.5) * xstep;
-      if ((z = (*func) (x)) < 0 || z > VERY_BIG || sane_check (z))
+      x = xmin + (n + 0.5) * xstep;  /*The next value of x - it is midway between points on the required cdf because we 
+		  will be adding the new z value onto the cumlative total, we assume the function is best approximated over the
+		  whole rage from x[n] to x[n+1] by using the value of the function between the two */
+      if ((z = (*func) (x)) < 0 || z > VERY_BIG || sane_check (z))  //check the function return is sensible
 	{
 	  Error ("pdf_gen_from_func: probability density %g < 0 at %g\n", z,
 		 x);
 	}
-      if (n == 0)
+      if (n == 0) //We are at the start of the cdf
 	pdf_array[0] = z;
       else
-	pdf_array[n] = pdf_array[n - 1] + z;
+	pdf_array[n] = pdf_array[n - 1] + z;  //increment the cdf by the value of the function at the modpoint between points
       /* Check to see if the integral seems too large */
       if (pdf_array[n] > 1.0e100 && idiag == 0)
 	{
@@ -469,7 +327,7 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
   /* Thus, pdf_array is proportional to  the definite integral from xmin to x 
      (where x=xmin+(n+1)*xstep) */
 
-  sum = pdf_array[pdfsteps - 1];
+  sum = pdf_array[pdfsteps - 1]; //The total integral is just the last point
 
   if (sane_check (sum))
     {
@@ -486,7 +344,9 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
 	  x = pdf_array[n] - pdf_array[n - 1];
 	  if (x > delta)
 	    {
-	      delta = x;
+	      delta = x; /*This is the difference in cumlative probability between 
+		  adjacent points - it is a measure of the discretisation. If it is too 
+		large then we may want to use a finer grid to get a smoother cdf. */
 	    }
 	}
 
@@ -496,58 +356,42 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
   return (delta);
 }
 
-// End of function
-
-
-/*  
-cdf_gen_from_array
-
-The one dimensional arrays containg the places x where the probability
-density y has been evaluated.  The array need not be uniformly spaced.  
-The assumption made is that y is the probability at the point x and that 
-one can linearly interpolate between points 
-
-Notes:
-
-
-	06sep -- There are differences between this and cdf_gen_from_func
-	that look historical -- ksl
-
-
-History:
-	98jul	ck	Added check to see if pdf, really cdf, is all zeros
-	98jul27 ksl	Changed the logic in the way the pdf array is created.  
-			The old method was not correct.  
-	02jul	ksl	Rewrote much of routine to try to handle situations in
-			which the array implied a distribution which was very skewed 
-			toward either end. Specifically, I eliminated the old approach
-			that did a pseudo integration along the lines of the one
-			in pdf_gen_from_func. The new approach should also speed the
-			routine up significantly, and eliminate some of the other
-			errors which have plagued earlier versions, e.g. non-monotonic
-			pdfs and values just out of bounds.  (See the comments in
-			python_43/pdf.c)
-	04mar	ksl	A familiar problem of the pdf being out of order appeared 
-			in pdf_gen_from_array when I increased the number of 
-			elements in the pdf array.  I found an error in the way q 
-			for jumps was calculated and added checks (and a shuffle)
-			for situations where the cdf was out of order.
-	090122	ksl	Increase size of PDF_ARRAY to reflect the fact that we are
-			tending towards models with more points in them and updated 
-			the error message associated with allowing too few points
-			so that problems with this would be easier to update in
-			future.
-	1405	JM -- Increased PDF array for use with disk14 models
-	1707	NSH -- Removed code for jumps - we now just supply a suitable unscaled pdf, 
-			The code expects data between xmin and xmax - it scan cope with 
-			leading ro training zeros, but does require at least two non zero
-			points, otherwise it cannt make a CDF.
-*/
 
 #define PDF_ARRAY  28000
 
 double pdf_x[PDF_ARRAY], pdf_y[PDF_ARRAY], pdf_z[PDF_ARRAY];
 int pdf_n;
+
+
+
+/**********************************************************/
+/** 
+ * @brief      Generate a cumulative distribution function (cdf) from an array of values
+ *
+ * @param [in] cdf			Pointer to the cdf that will be populated here
+ * @param [in] x			Locations of points in supplied data - usually wavelength or freuency
+ * @param [in] y			Data - e.g. cross section or emissivity
+ * @param [in] n_xy			Number of data points
+ * @param [in] xmin			Lower limit to required cdf
+ * @param [in] xmin			Upper limit to required cdf
+ * @return 		echeck		the reutrn value from cdf_check
+ *
+ * @details
+ * Takes two arrays of some values of a function y at locations
+ * x and turns it into a cumlative density function to allow 
+ * random values to be obtained from the function. There is no 
+ * resampling.
+ *
+ * ###Notes###
+ *
+ * cdf_gen_from_array does not have the concept of jumps. All of
+ * this needs to be taken care of by the routine that generates
+ * the array.
+ * 
+ * In constructing the cdf the routine collapses regions of the
+ * pdf that have zero probability of occuring
+ *
+ **********************************************************/
 
 int
 cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
@@ -564,7 +408,8 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 
 /* Perform various checks on the inputs */
 
-  if (n_xy > NCDF)
+
+  if (n_xy > NCDF) //If the supplied data array is larger than the output array - fixed as NCDF
     {
       Error
 	("cdf_gen_from_array: supplied data %i is larger than default aray size %i - increase NCDF\n",
@@ -573,55 +418,42 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
     }
 
 
-  if (xmax < xmin)
+  if (xmax < xmin) //This must be a mistake, the limits are reversed
     {
       Error ("cdf_gen_from_array: xmin %g <= xmax %g\n", xmin, xmax);
       exit (0);
     }
 
-  allzero = 0;
+	/*We are now going to crawl down the input array, checking for mistakes.
+	Firstly we want to see if all the array values are equal to zero. 
+    */
 
-  for (n = 1; n < n_xy; n++)
+
+  allzero = 0; 
+
+  for (n = 1; n < n_xy; n++)  //Go over all elements
     {
-      if (x[n] <= x[n - 1])
+      if (x[n] <= x[n - 1]) //One x-point is less than the one above - this will cause problems later
 	{
 	  Error
 	    ("cdf_gen_from_array: input x not in ascending order at element %5d/%5d  %11.6e %11.6e\n",
 	     n, n_xy, x[n - 1], x[n]);
 	  exit (0);
 	}
-      if (y[n] < 0)
+      if (y[n] < 0)   //A negative point!
 	{
 	  Error
 	    ("cdf_gen_from_array: probability density %g < 0 at element %d\n",
 	     y[n], n);
 	  exit (0);
 	}
-      else if (y[n] > 0)
+      else if (y[n] > 0)  //At least one point is positive
 	{
-	  allzero = 1;
+	  allzero = 1; //So they are not all zero.
 	}
     }
 
 
-
-
-
-
-
-  /* ksl - exiting if xmin and xmax do not conform to the limits of the array should not be a reqquirement
-   */
-
-//OLD  if (x[0] != xmin || x[n_xy - 1] != xmax)
-//OLD    {
-//OLD      Error
-//OLD	("cdf_gen_from_array: input array does not run exactly from xmin to xmax %e != %e or %e != %e\n",
-//OLD	 x[0], xmin, x[n_xy - 1], xmax);
-//OLD      for (n = 0; n < n_xy; n++)
-//OLD	printf ("%i %i %e %e %e %e\n", n_xy, n, xmin, xmax, x[n], y[n]);
-//OLD      exit (0);
-
-//OLD    }
 
   /* ksl - Our requrements are as follows.  We want the cdf to have boundaries given by xmin and xmax, unless
    * the array does not encompass this, in which case we will only include what the array contains.  We also
@@ -629,36 +461,62 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
    */
 
 
+	/*Firstly, find the point in the input array that matches the required start point
+	we step up thruogh the input data until we reach a point where the x-point is greater
+	than xmin, or we reach the end of the array */
+
   nmin=0;
-  while (x[nmin]<xmin && nmin<n_xy) {
+  while (x[nmin]<xmin && nmin<n_xy) 
+  {
       nmin++;
   }
+  
+  /*This next deals with what happens if we ran off the end of the array in the last loop */
 
   if (nmin==n_xy)
   {
-      Error("cdf_gen_from_array: xmin greater tahn all array values\n");
+      Error("cdf_gen_from_array: xmin greater than all array values\n");
       exit(0);
   }
 
-  // if xmin is equal to ove of the values in the x array then nmin will point to that value, but otherwise it 
-  // will be slightly larger and we will need to fix this
-  // if nmin=0 then it is also possible that the xmin was below the array
+  /* if xmin is equal to one of the values in the x array then nmin will point to that value, but otherwise it 
+      will be slightly larger and we will need to fix this*/
+
+  // if nmin=0 then it is also possible that the xmin was below the array XXXXX we should deal with this case then!
+  
+  
+  /* The next loop finds the location of the uppermost required x-value in the supplied array */
+  
   nmax=nmin;
   while (x[nmax]<xmax && nmax<n_xy) {
       nmax++;
   }
 
-  /* In general, nmax should be one past the last element */
+
+  /* In general, nmax should be one past the last required element */
+  
+  /*now deal with a few pathological cases */
 
   if (nmax==nmin)
   {
       Error("cdf_gen_from_array: nmin and mnax are identical which is not desirable\n");
       exit(0);
   }
+  
+  if (nmax==n_xy) /*We have run past the end of the array in finding the uppermost xvalue
+	  this will cause issues later, so we need to work out what a sensible value for nmax
+	  should be*/
+  {
+	  if (x[nmax-1]<=xmax) /* hopefully the last X value is less than or equal to xmax */ 
+	  {
+	  nmax--;
+  	  }
+  }
 
 
   /* Now we want to deal with situations where xmin and xmax are between elements. For now
-   * we do not worry about interpolating*/
+   * we do not worry about interpolating XXXXX this needs fixing up - if we are going to
+  interpolate, we should do it- in pathological cases this can go very wrong*/
 
   if (nmin>0 && x[nmin]>xmin){
       nmin--;
@@ -682,29 +540,11 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 
      Start first */
 
-//OLD  n = 0;
-//OLD  nmin = -1;
-//OLD  while (y[n] == 0.0)
-//OLD    {
-//OLD      nmin = n;
-//OLD      n++;
-//OLD    }
-
-//OLD  nmin++;
 
 
 
   //Now at the end
 
-//OLD  n = n_xy - 1;
-//OLD  nmax = n_xy;
-//OLD  while (y[n] == 0.0)
-//OLD    {
-//OLD      nmax = n;
-//OLD      n--;
-//OLD    }
-
-//OLD  nmax--;
 
 // ksl I don;t believe the first two cases can happen at this point
   if (nmax == nmin)
@@ -712,6 +552,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
       Error ("cdf_gen_from_array - only one point in supplied PDF\n");
       exit (0);
     }
+	 
 
   if (xmax < x[0] || xmin > x[n_xy - 1] || allzero == 0)
     {				// These are special (probably nonsensical) cases
@@ -736,26 +577,22 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
       // The following lines perform an integration via the trapezoid rule - each point contains
       // the integral up to that poont, so it starts at 0 and ends at the total
 
-      cdf_n = (nmax - nmin);
-
-      cdf->x[0] = x[nmin];
-      cdf->y[0] = 0.0;
-      for (n = 1; n < cdf_n + 1; n++)
+      cdf_n = (nmax - nmin); //The number of points in the integration
+      cdf->x[0] = x[nmin];  //The initial x - point in the cdf 
+      cdf->y[0] = 0.0;      //The initial y value of the cdf - must be zero at the start
+      for (n = 1; n < cdf_n + 1; n++)  //Loop over all the CDF
 	{
-	  cdf->x[n] = x[nmin + n];
+	  cdf->x[n] = x[nmin + n];  //The next point in the cdf is just the next point in the input array - no regridding
 	  cdf->y[n] =
 	    cdf->y[n - 1] + 0.5 * (y[nmin + n - 1] +
 				   y[nmin + n]) * (x[nmin + n] - x[nmin + n -
-								   1]);
+								   1]);   //Just the average value of y over the interval.
 	}
 
-      cdf->y[cdf_n]=cdf->y[n-1]+y[nmin+cdf_n]*(x[nmax]-x[nmax-1]);
+      cdf->y[cdf_n]=cdf->y[n-1]+y[nmin+cdf_n]*(x[nmax]-x[nmax-1]);  //This interpolates to get the last point in the CDF
 
-      // sum = cdf->y[cdf_n - 1];	//the total integrated pdf
       sum = cdf->y[cdf_n];	//the total integrated pdf
-
-      // for (n = 1; n < cdf_n; n++)
-      for (n = 1; n <= cdf_n; n++)
+      for (n = 1; n <= cdf_n; n++) //Loop over the CDF and divide each poont by the max (final) point
 	{
 	  cdf->y[n] /= sum;	//this is now a cdf - we go from 0 to 1.
 	}
@@ -773,42 +610,37 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
     {
       Error ("cdf_gen_from_array: Error returned from calc_cdf_gradient\n");
     }				// 57ib 
+  /* XXX Why is this needed, it would seem suffiecient to write evrything to a file */
+
   if ((echeck = cdf_check (cdf)) != 0)
     {
       Error ("cdf_gen_from_array: error %d on cdf_check\n", echeck);
       for (n = 0; n < n_xy; n++)
-	printf ("pdf_n=%i %e %e\n", pdf_n, x[n], y[n]);
+	Log ("pdf_n=%i %e %e\n", pdf_n, x[n], y[n]);
       for (n = 0; n < cdf->ncdf + 1; n++)
-	printf ("cdf_n=%i %e %e\n", n, cdf->x[n], cdf->y[n]);
+	Log("cdf_n=%i %e %e\n", n, cdf->x[n], cdf->y[n]);
 
 
       exit (0);
     }
 
-  cdf_to_file(cdf,"foo.diag");
+  cdf_to_file(cdf,"foo.diag"); //output the CDF to a file
   return (echeck);
 
 }
 
-
-
-
-
-/* 
-cdf_get_rand
-
-
-Our searching routine assumes we can predict roughly where in the
-structure the right values will be 
-
-History:
-
-	06sep	ksl	57i -- Modified to account for the fact
-			that the probability density is not 
-			uniform between intervals.
-    17jun   ksl Modified for variable sizes of distribution function	
-	17jul	nsh Modified to use gsl routine to find the right point in the CDF.
-*/
+/**********************************************************/
+/** 
+ * @brief      Generate a single sample from a cdf  
+ *
+ * @param [in] CdfPtr  cdf   a structure which contains the cumulative distribution function.
+ * @return   x  a random value fronm the cdf between xmin and xmax
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
 double
 cdf_get_rand (cdf)
@@ -820,18 +652,11 @@ cdf_get_rand (cdf)
   double a, b, c, s[2];
   int xquadratic ();
 /* Find the interval within which x lies */
-  r = rand () / MAXRAND;	/* r must be slightly less than 1 */
-//  i = r * cdf->ncdf;          /* so i initially lies between 0 and the size of the pdf array -1 */
-//  while (cdf->y[i + 1] < r && i < cdf->ncdf - 1)
-//    i++;
-//  while (cdf->y[i] > r && i > 0)
-//    i--;
+  r=random_number(0.0,1.0); //This *exludes* 0.0 and 1.0.
+  i = gsl_interp_bsearch (cdf->y, r, 0, cdf->ncdf); //find the interval in the CDF where this number lies
 
-  i = gsl_interp_bsearch (cdf->y, r, 0, cdf->ncdf);
-
-
-/* Now calculate a place within that interval */
-  q = rand () / MAXRAND;
+/* Now calculate a place within that interval - we use the gradient of the CDF to get a more accurate value between the CDF points */
+  q=random_number(0.0,1.0);  
   a = 0.5 * (cdf->d[i + 1] - cdf->d[i]);
   b = cdf->d[i];
   c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
@@ -858,22 +683,47 @@ cdf_get_rand (cdf)
 
 
 
-/* 
-We have defined the cdf in such a way that one can generate a random number 0 and
-1, find the place in the y array that corresponds to this and map back onto the 
-x values (which is what is returned. We now want to limit the range of the returned
-x values, but we need to know in terms of the original array where thiese values
-are and the generate a random number between some minimum (>0) and maximum (<1) whichi
-will allow one to find the x that corresponds. The point of this routine is to
-find that minimum and maximum value. Having done this one can call pdf_get_rand_limit
 
 
-Error Some of this is not quite right.  It's intended to let us generate limits in
-the CDF but we need x too
-
-	06sep	ksl	57i -- Added the xlimits to the cdf
-    17jun ksl Modified for variable sizes of distribution function
-*/
+/**********************************************************/
+/** 
+ * @brief      sets limit1 and limit2 so that one can generate distributions 
+ * from a limited range within a previously created cdf.
+ *
+ * @param [in] CdfPtr  cdf   A ptr to a cdf structure 
+ * @param [in] double  xmin   The minimum value to return   
+ * @param [in] double  xmax   The maximum value to return
+ * @return     Always returns 0 
+ *
+ * @details
+ *
+ * We have defined the cdf in such a way that one can generate a random number 0 and
+ * 1, find the place in the y array that corresponds to this and map back onto the 
+ * x values (which is what is returned. We now want to limit the range of the returned
+ * x values, but we need to know in terms of the original array where these values
+ * are and the generate a random number between some minimum (>0) and maximum (<1) whichi
+ * will allow one to find the x that corresponds. The point of this routine is to
+ * find that minimum and maximum value. Having done this one can call cdf_get_rand_limit
+ *
+ * ### Notes ###
+ * Sometimes it is expensive computationally to recalculate the distribution function
+ * every time you change the limits.   An example of this is the distribution function
+ * for a bb where the distribution function is quite smooth (and can be represented in a 
+ * dimensionless manner) but calculating the function and the distribution function
+ * can be expensive.  This routine together with cdf_gen_rand_limit allow one to sample a part of a
+ * cdf.  Note that cdf_gen-from_func or cdf_gen_from_array should have been
+ * called previously!
+ * 
+ * xmin and xmax will cause cdf[].limit1 and cdf[].limit2 to be set
+ * in such a way that when you call pdf_get_rand_limit the distribution
+ * will be sampled only between xmin and xmax. 
+ *
+ * If these routine is called improperly, e.g if 
+ * xmin and xmax lie outside of the original value of xmin
+ * and xmax then the distribution will not extend this far,
+ * and the progrem will exit.	
+ *
+ **********************************************************/
 
 int
 cdf_limit (cdf, xmin, xmax)
@@ -891,7 +741,6 @@ cdf_limit (cdf, xmin, xmax)
     {
       Error ("cdf_limit: xmin %g > cdf->x[cdf->ncdf] %g\n", xmin,
 	     cdf->x[cdf->ncdf]);
-//      exit (0);
     }
   if (xmax <= cdf->x[0])
     {
@@ -940,16 +789,25 @@ cdf_limit (cdf, xmin, xmax)
   return (0);
 }
 
-/*
-cdf_get_rand_limit (cdf)
 
-History
-	06sep	ksl	57h -- Modified to account for the fact
-			that the probability density is not 
-			uniform between intervals.
-    17jul   ksl Modified for variable lengths of pdfs
+/**********************************************************/
+/** 
+ * @brief      get a random number for a cdf inside limits set by cdf_limit.
+ *
+ * @param [in out] CdfPtr  cdf   A ptr to a cdf structure 
+ * @return     A random number drawn from the Cdf, but within inside limits which have been set previously
+ *
+ * @details
+ * 
+ * The basic idea here is that we have created a cdf that covers a broad range of, for example, frequncy
+ * space.  At this point we want photons that only cover some portion of the broad range. 
+ * Instead of creating a new cdf that just covers a desired frequency space, we only sample a portion of
+ * the broad range as defined by cdf_limit (for this particular cdf)
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
-*/
 double
 cdf_get_rand_limit (cdf)
      CdfPtr cdf;
@@ -959,7 +817,8 @@ cdf_get_rand_limit (cdf)
   double q;
   double a, b, c, s[2];
   int xquadratic ();
-  r = rand () / MAXRAND;	/* r must be slightly less than 1 */
+  r=random_number(0.0,1.0); //
+  
   r = r * cdf->limit2 + (1. - r) * cdf->limit1;
   i = r * cdf->ncdf;
   while (cdf->y[i + 1] < r && i < cdf->ncdf - 1)
@@ -968,7 +827,7 @@ cdf_get_rand_limit (cdf)
     i--;
   while (TRUE)
     {
-      q = rand () / MAXRAND;
+	  q=random_number(0.0,1.0);
       a = 0.5 * (cdf->d[i + 1] - cdf->d[i]);
       b = cdf->d[i];
       c = (-0.5) * (cdf->d[i + 1] + cdf->d[i]) * q;
@@ -993,15 +852,20 @@ cdf_get_rand_limit (cdf)
   return (x);
 }
 
-/* 
 
-Write the full structure of the cumulattive distribution function to
-a file
-
-110628	ksl	Added lines to write out all of the information contained
-		in the pdf structure in an attempt to debug an error in
-		anisowind
-*/
+/**********************************************************/
+/** 
+ * @brief      Write the full structure of the cumulattive distribution function to a file
+ *
+ * @param [in] CdfPtr  cdf   A ptr to a cdf structure 
+ * @param [in] char  filename[]   The name of the file to which the cdf should be written
+ * @return     Always returns 0
+ *
+ * @details
+ * This is a diagnostic routine
+ *
+ * ### Notes ###
+ **********************************************************/
 
 int
 cdf_to_file (cdf, filename)
@@ -1027,22 +891,20 @@ cdf_to_file (cdf, filename)
   return (0);
 }
 
-/* This is a simple routine to check some basics of the
-   cumulative distribution function.
-
-   History:
-   98oct        ksl     Error returns improved so they can be interpreted.
-   Also the requirement for a monotonic distribution
-   function has been relaxed, in the sense that two
-   successive values in x and y can be the same.  This was
-   allowed because there was a case in which I had
-   required values of the pdf at specific points but
-   in the actual event, the partial distribution function
-   between these two points was everywhere zero and hence
-   the cumulative distribution function had two y values
-   the same.  This can cause an error in pdf_get_rand
-   in principle.
- */
+/**********************************************************/
+/** 
+ * @brief      a simple routine to check some basics of the cumulative distribution function.
+ * 	
+ *
+ * @param [in out] CdfPtr  cdf   A ptr to a cdf structure 
+ * @return     0 if eveything is OK, a positive number otherwise
+ *
+ * @details
+ * This is a diagnostic designed to see whether a cdf is reasonable
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
 int
 cdf_check (cdf)
@@ -1060,7 +922,7 @@ cdf_check (cdf)
 	("cdf_check: cumulative distribution function should start at 0 not %e\n",
 	 y);
       hcheck = 1;
-      printf ("%e %e %e %e\n", cdf->x[0], cdf->y[0], cdf->x[1], cdf->y[1]);
+      Log ("%e %e %e %e\n", cdf->x[0], cdf->y[0], cdf->x[1], cdf->y[1]);
     }
   if (cdf->y[cdf->ncdf] != 1.0)
     {
@@ -1136,44 +998,35 @@ cdf_check (cdf)
 }
 
 
-/***********************************************************
-                Space Telescope Science Institute
-                                                                                             
-Synopsis:
-	calc_cdf_gradient(cdf)
-                                                                                             
-Arguments:
-                                                                                             
-Returns:
-                                                                                             
-Description:
 
-	Calculate the gradient of a cdf at each point
-	allow one to calculate a first order correction
-	to a uniform distibution between the points
-	where the gradient has been calculated.
-                                            
-	XXX NSH - the way that the ends are dealt with is bot
-		great - we should really try to come up with an
-		extrapolation rather than just fill in the same gradients
-		for the second and penultimate cells into the 
-		forst and last cells.
-											 											
-Notes:
 
-	d is calculated by differencing the cdf.  Thus
-	this routine should work both for cdf's calculated
-	from functions and from arrays
-                                                                                             
-History:
-	06sep	ksl	57i -- Initiated to try an improve
-			the calculation of the distribuion
-			within a pdf interval.
-	06nov	ksl	58b: Fixed problem occuring when there
-			were two points in cdf with same x
-	17jul	nsh modified name to better relfect what it does
-                                                                                             
-**************************************************************/
+/**********************************************************/
+/** 
+ * @brief      Calculate gradients for a cdf to be used to better approzimte
+ * a cdf calculated at tivn points
+ *
+ * @param [in] CdfPtr  cdf   A ptr to a cdf structure 
+ * @return     Normally returns 0; a positive return indicates a problem
+ *
+ * @details
+ * Calculate the gradient of a cdf at each point in the cdf array in oder
+ * to	allow one to calculate a first order correction
+ * to a uniform distibution between the points
+ * where the gradient has been calculated.
+ *                                             
+ * ### Notes ###
+ * The gradients are calculated by differencing the cdf.  Thus
+ * 	this routine should work both for cdf's calculated
+ * 	from functions and from arrays
+ *
+ * 	@bug XXX NSH - the way that the ends are dealt with is not
+ * 		great - we should really try to come up with an
+ * 		extrapolation rather than just fill in the same gradients
+ * 		for the second and penultimate cells into the 
+ * 		first and last cells.
+ *
+ *
+ **********************************************************/
 
 int
 calc_cdf_gradient (cdf)
@@ -1215,16 +1068,41 @@ calc_cdf_gradient (cdf)
   cdf->d[0] = cdf->d[1];
 
 
-  //XXX NSH - this routine does not treat the ends of the array very well - it just asumes the same gradient - we could do better...
 
-//NSH - a couple of other ways of doing this - linear interpolation from the previous points, or just the gradient of the current interval - none works great.    
-
-//        cdf->d[0]=cdf->d[1]-((cdf->d[2]-cdf->d[1])/(cdf->x[2]-cdf->x[1]))*(cdf->x[1]-cdf->x[0]);
-//      cdf->d[0]=(cdf->y[1] - cdf->y[0])/(cdf->x[1] - cdf->x[0]);
   cdf->d[cdf->ncdf] = cdf->d[cdf->ncdf - 1];
   return (istat);
 }
 
+
+
+/**********************************************************/
+/** 
+ * @brief      Given two paralel arrays, x and y, this routine reorders the array
+ * in ascending order of x
+ *
+ * @param [in out] double *  x   The array that is sorted
+ * @param [in out] double *  y   The parallel array that is sorted in order of x
+ * @param [in out] int  n_xy   The length of the two arrays
+ * @return     The length of the input array
+ *
+ * @details
+ * 
+ * This routine is a routine that is intended to fix a potential
+ * problem with an input pdf, which one is intending to convert into
+ * a cdf. The cdf genearion routines assume that an input routine is in ascending
+ * order of the x variable, often a freqency.  The y variable is usually an unnormalized
+ * pdf. This routine checks that the 
+ * x variables is indeed in ascending order and if not reorders the two arrays.
+ *
+ * ### Notes ###
+ *
+ * The routine makes an assumption  about what one wants if the x array contains
+ * two x values that are identical.  It assumes one wants to the value with the lower
+ * corresponding pdf value to be first in the output arrays (as is genearlly
+ * the case whn one has a sharp jump for a photoionization x-section.  This will
+ * generate a at the upper edge of a square wave.
+ *
+ **********************************************************/
 
 int
 cdf_array_fixup (x, y, n_xy)

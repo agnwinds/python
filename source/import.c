@@ -1,3 +1,25 @@
+
+/***********************************************************/
+/** @file  import.c
+ * @author ksl
+ * @date   May, 2018
+ *
+ * @brief   general purpose routines reading in model
+ * grids
+ *
+ * 
+ * The routines contained here are basically steering
+ * routines. The real works is done in import_spherical,
+ * etc
+ *
+ * For importing models, we first read in the data from a file.
+ * We assume all of the data, positions, velocities and importanly
+ * densities are given at the grid points of the imported model.
+ *
+ * We then map these models into the structures that Python uses.
+ * Most of the mapping is one-to-one, but Python wants the densities
+ * to be a the cell centers and not at the corners.
+ ***********************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -5,30 +27,6 @@
 #include "atomic.h"
 #include "python.h"
 
-/***********************************************************
-    Space Telescope Science Institute
-
-Synopsis:
-    These are general purpose routines reading in model
-    grids
-
-Arguments:		
-
-Returns:
- 
-Description:	
-
-Notes:
-
-    The routines contained here are basically steering
-    routines. The real works is done in import_spherical,
-    etc
-
-
-
-History:
-	17nov   ksl Began coding                           
-**************************************************************/
 
 
 # define LINELEN 512
@@ -37,13 +35,32 @@ History:
 /* Read in a model of in various coordiante systems, using the coord_type
  * to specify the type of model */
 
+
+/**********************************************************/
+/** 
+ * @brief      Import a gridded model
+ *
+ * @param [in] int  ndom   The domain for the model
+ * @return   Always returns 0  
+ *
+ * @details
+ *
+ * This is a steering routine.  It reads the name of the file
+ * to import and depending on the pre-established coordiante
+ * system calls one of several coordiante system specific 
+ * routines to actually read in the model
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
 int
 import_wind (ndom)
      int ndom;
 {
   char filename[LINELEN];
 
-  rdstr ("File.with.model2read", filename);
+  rdstr ("Wind.model2import", filename);
 
   if (zdom[ndom].coord_type == SPHERICAL)
     {
@@ -71,6 +88,25 @@ import_wind (ndom)
 /* Create the coordinate grids depending on the coord_type 
  *
  * */
+
+
+/**********************************************************/
+/** 
+ * @brief      Make the Python grid 
+ *
+ * @param [in] WindPtr  w  The entire wind structure
+ * @param [in] int  ndom   The domain for the imported model
+ * @return     Always returns 0
+ *
+ * @details
+ * This is merely a steering routine for calling one
+ * of the coordinate-system specific routines for creating
+ * a grid from one of the imported models
+ *
+ * ### Notes ###
+ * The fact that w is called by this routine is for constency.
+ *
+ **********************************************************/
 
 int
 import_make_grid (w, ndom)
@@ -107,6 +143,25 @@ import_make_grid (w, ndom)
  */
 
 
+
+/**********************************************************/
+/** 
+ * @brief      Get the velocity at a position for an imported model
+ *
+ * @param [in] int  ndom   The domain in which the velocity is to be determined
+ * @param [in] double *  x   The position where the velocity is to be determined
+ * @param [out] double *  v   The velocity in cartesian coordiantes
+ * @return     The speed       
+ *
+ * @details
+ * The routine simply calls one of several coordinate-system specific routines
+ * for obtaining the velocity of the wind when an imported model is involved.
+ *
+ * ### Notes ###
+ * The routine is used to set up velocities in wmain
+ *
+ **********************************************************/
+
 double
 import_velocity (ndom, x, v)
      int ndom;
@@ -136,6 +191,22 @@ import_velocity (ndom, x, v)
 }
 
 
+
+/**********************************************************/
+/** 
+ * @brief      get parameters associated with an imported wind model
+ *
+ * @param [in] int  ndom   The domain associated with an imported model
+ * @return   Always returns 0  
+ *
+ * @details
+ * At present this routine is simply a place holder and simply returns
+ * to the call in setup_domains.  
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
 int
 get_import_wind_params (ndom)
      int ndom;
@@ -147,13 +218,26 @@ get_import_wind_params (ndom)
 
 
 
-/* Fill in plasma ptrs with densities.   
+/**********************************************************/
+/** 
+ * @brief      Get the density at an arbitray position in an imported 
+ * model
  *
- * For this we generally assume that the densities read in are 
- * given at the midpoints of the grid
- * 
- * */
-
+ * @param [in] int  ndom   The domain assosciated with an imported model
+ * @param [in] double *  x   The position where we desire rho
+ * @return     rho              
+ *
+ * @details
+ * The routine simply calls coordinate system specific routines to get the
+ * density for imported models
+ *
+ * ### Notes ###
+ * The routine is used to map densities from an imported model 
+ * where we assume that the density is given at the grid points.
+ * In Python, we want map the grid points to the edges of wind cells,
+ * but we expect the densities to be given at the centers of the cells.
+ *
+ **********************************************************/
 
 double
 import_rho (ndom, x)

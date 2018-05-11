@@ -106,7 +106,7 @@ matrix_ion_populations (xplasma, mode)
 
   /* Dielectronic recombination and direct ionization coefficients depend only on electron temperature, calculate them now -
      they will not change */
-
+  
   compute_dr_coeffs (t_e);
   compute_di_coeffs (t_e);
 
@@ -245,15 +245,15 @@ matrix_ion_populations (xplasma, mode)
     /* This next line produces an array of the correct size to hold the rate matrix */
 
     a_data = (double *) calloc (sizeof (double), nrows * nrows);
-
-    /* We now copy our rate matrix into the prepared matrix */
-    for (mm = 0; mm < nrows; mm++)
-    {
-      for (nn = 0; nn < nrows; nn++)
-      {
-        a_data[mm * nrows + nn] = rate_matrix[mm][nn];
-      }
-    }
+      /* We now copy our rate matrix into the prepared matrix */
+      for (mm = 0; mm < nrows; mm++)
+	{
+	  for (nn = 0; nn < nrows; nn++)
+	    {
+//						printf ("%30.25e ",rate_matrix[mm][nn]);
+	      a_data[mm * nrows + nn] = rate_matrix[mm][nn];
+	    }
+	}
 
     /* Replaced inline array allocaation with calloc, which will work with older version of c compilers calloc also sets the
        elements to zero, which is required */
@@ -278,10 +278,18 @@ matrix_ion_populations (xplasma, mode)
       Error ("matrix_ion_populations: some matrix rows failing relative error check\n");
     else if (ierr == 3)
       Error ("matrix_ion_populations: some matrix rows failing absolute error check\n");
+		else if (ierr == 4)
+			Error ("matrix_ion_populations: Unsolvable matrix! Determinant is zero. Defaulting to no change.\n");
 
     /* free memory */
     free (a_data);
     free (b_data);
+
+		if(ierr == 4)
+		{
+			free(populations);
+			return(-1);
+		}
 
     /* Calculate level populations for macro-atoms */
     if (geo.macro_ioniz_mode == 1)
@@ -378,12 +386,12 @@ matrix_ion_populations (xplasma, mode)
       Error ("matrix_ion_populations: ion %i has population %8.4e in cell %i\n", nn, xplasma->density[nn], xplasma->nplasma);
   }
 
+  xplasma->ne= get_ne (xplasma->density);
 
   partition_functions (xplasma, NEBULARMODE_LTE_GROUND);     /* WARNING fudge XXX NSH 11/5/14 - this is as a test. We really need a better implementation
                                            of partition functions and levels for a power law illuminating spectrum. We found that
                                            if we didnt make this call, we would end up with undefined levels - which did really
                                            crazy things */
-
 
 
   return (0);
@@ -702,11 +710,13 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   p = gsl_permutation_alloc (nrows);    // NEWKSL
 
   gsl_linalg_LU_decomp (&m.matrix, p, &s);
-
+  
   det = gsl_linalg_LU_det (&m.matrix, s);       // get the determinant to report to user
 
-  if (det == 0)
+  if (det == 0){
     Error ("Rate Matrix Determinant is %8.4e for cell %i\n", det, nplasma);
+		return(4);
+  }
 
   gsl_linalg_LU_solve (&m.matrix, p, &b.vector, populations);
 
@@ -757,7 +767,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   /* copy the populations to a normal array */
   for (mm = 0; mm < nrows; mm++)
     x[mm] = gsl_vector_get (populations, mm);
-
+ 
   /* free memory */
   gsl_vector_free (test_vector);
   gsl_matrix_free (test_matrix);

@@ -1,40 +1,45 @@
 
+/***********************************************************/
+/** @file  reposition.c
+ * @author ksl
+ * @date   May, 2018
+ *
+ * @brief  Reposition a photon so it goes across a cell boundary
+ *
+ * @bug This is too short a routine to be in a separate file.  It
+ * should be incorporated into trans_phot or extract which conatin the
+ * calling routines.
+ ***********************************************************/
+
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
 #include "atomic.h"
-
 #include "python.h"
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:   
-	reposition(w,p) attempts to assure that a photon is not scattered 
-	a second time inappropriately by the same transition
-  
- Arguments:		
-
-	
- Returns:
-  
-Description:	
-
-Notes:
-
-
-History:
- 	02	ksl	Created to handle problem which was discovered
-			in python_40
-	15aug	ksl	Modiefied for domains, and eliminated paosing 
-			the WindPtr as it is not used.
-			
- 
-**************************************************************/
-
-
+/**********************************************************/
+/** 
+ * @brief      p) attempts to assure that a photon is not scattered 
+ * 	a second time inappropriately by the same transition
+ *
+ * @param [in,out] PhotPtr  p   A photons
+ * @return    Normally returns 0, but returns a negative number
+ * if p is not in the wind in the domain it is supposed to be in
+ *
+ * @details
+ * For resonant scatters, the routine moves the photon by 
+ * a distance DFUDGE.  For non-resonant scattering the routine 
+ * simple returns
+ *
+ * ### Notes ###
+ * @bug This seems like an error.  We have calculated cell specific
+ * values of dfudge, but this routine used the global DFUDGE to
+ * move the photon though a cell wall.
+ *
+ **********************************************************/
 
 int
 reposition (p)

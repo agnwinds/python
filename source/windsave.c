@@ -1,54 +1,26 @@
-/* Coordinate system independent, except for wind_complete, which is fixed 03aug */
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-	wind_save(w,filename)
-	wind_read(filename)
-	spec_save(filename)
-	spec_read(filename)
-
-Arguments:		
-
-
-
-Returns:
- 
-Description:	
-	
-	The first two routines in this file write and read the wind structure.  		
-	The second two routines do the same thing for the spectrum structure
-	(Note that these are used for restarts; there are separate ascii_writing 
-	routines for writing the spectra out for plotting.)
-
-Notes:
-
-
-History:
- 	98mar	ksl 	Replaced old ascii routine with binary read and write
- 	98mar20	ksl	Fixed problem in createing wind_midx and wind_midz
-	02apr	ksl	Changed windread so that it would dynamically allocate
-			the WindPtr array after reading geo.  In the process
-			changed the call to windread since one cannot assign
-			w inside the routine and have that assigment be durable
-			outside of the subroutine.  Instead we set wmain.
-	06may	ksl	Added read & write statement for plasma structure
-	08mar	ksl	60 - Added read & write statements for macro structure
-	08may	ksl	60a - Fixed write statement for macro structure so not
-			written when no macro atoms
-	08dec	ksl	67c - Added routines to read and write the 
-			spec structure as part of the general effort
-			to allow python to restart. Modified the call to
-			wind_save to eliminate superfluous passing of
-			the wind ptr.
-	14jul	nsh	78a - Added code to allow dynamically allocated arrays
-			in the plasma structure to be read in and written out.
-	15aug	ksl	Modified to write domain stucture
-	15oct	ksl	Modified to write disk and qdisk structures which is
-			needed to properly handle restarts
- 
-**************************************************************/
+/***********************************************************/
+/** @file  windsave.c
+ * @author ksl
+ * @date   March, 2018
+ *
+ * @brief  Routines to save and read in the structues the constitute
+ * a model and and spectra which have been genrerated
+ *
+ * 
+ * The first two routines in this file write and read the wind structure.  		
+ * The second two routines do the same thing for the spectrum structure
+ * 
+ * ### Notes ###
+ *
+ * The files here are all written out as binary files.  They are
+ * used for restars, and also by routines like py_wind and windsave2talbe
+ * which inspect what is happening in the wind.
+ *
+ * There are separate ascii_writing 
+ * routines for writing the spectra out for plotting.)
+ * 
+ ***********************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,6 +29,25 @@ History:
 #include "atomic.h"
 #include "python.h"
 
+
+
+/**********************************************************/
+/** 
+ * @brief      Save all of the strutures associated with the 
+ * wind to a file
+ *
+ * @param [in] char  filename[]   The name of the file to write to
+ * @return     The number of successful writes
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ * For the most part, adding a variable to the structures geo,
+ * or plasma, does not require changes to this routine, unless
+ * new variable length arrays are involved.
+ *
+ **********************************************************/
 
 int
 wind_save (filename)
@@ -75,26 +66,13 @@ wind_save (filename)
   sprintf (line, "Version %s\n", VERSION);
   n = fwrite (line, sizeof (line), 1, fptr);
   n += fwrite (&geo, sizeof (geo), 1, fptr);
-  // for(m = 0; m < geo.reverb_lines; m++)
-  // {
-  //   n += fwrite( &geo.reverb_line[m], sizeof(int), 1, fptr);
-  // }
-  // for(m = 0; m < geo.reverb_filter_lines; m++)
-  // {
-  //   n += fwrite( &geo.reverb_filter_line[m], sizeof(int), 1, fptr);
-  // }
-  // for(m = 0; m < geo.reverb_dump_cells; m++)
-  // {
-  //   n += fwrite( &geo.reverb_dump_x[m], sizeof(int), 1, fptr);
-  //   n += fwrite( &geo.reverb_dump_z[m], sizeof(int), 1, fptr);
-  // }
   n += fwrite (zdom, sizeof (domain_dummy), geo.ndomain, fptr);
   n += fwrite (wmain, sizeof (wind_dummy), NDIM2, fptr);
   n += fwrite (&disk, sizeof (disk), 1, fptr);
   n += fwrite (&qdisk, sizeof (disk), 1, fptr);
   n += fwrite (plasmamain, sizeof (plasma_dummy), NPLASMA, fptr);
 
-/* NSH 1407 - The following loop writes out the variable length arrays
+/* Write out the variable length arrays
 in the plasma structure */
 
   for (m = 0; m < NPLASMA; m++)
@@ -175,6 +153,32 @@ in the plasma structure */
 	15oct	ksl	Updated to read disk and qdisk stuctures
 */
 
+
+/**********************************************************/
+/** 
+ * @brief      Read back the windsavefile 
+ *
+ * @param [in] char  filename[]   The full name of the windsave file
+ * @return     The number of successful reads, or -1 if the file cannot 
+ * be opened
+ *
+ * @details
+ * 
+ * The routine reads in both the windsave file and the
+ * associated atomic data files for a model
+ *
+ *
+ * ### Notes ###
+ *
+ * @bug This routine calls wind_complete, but it is not entirely
+ * clear why, as the values calculated there are already in the
+ * domain structure, so this seems redundant.  However there is
+ * an issue #41 which has to do with reading in windcones that
+ * affects this. 
+ * 
+ *
+ **********************************************************/
+
 int
 wind_read (filename)
      char filename[];
@@ -193,25 +197,9 @@ wind_read (filename)
   sscanf (line, "%*s %s", version);
   Log ("Reading Windfile %s created with python version %s with python version %s\n", filename, version, VERSION);
 
-  n += fread (&geo, sizeof (geo), 1, fptr);
-  // geo.reverb_line = calloc(geo.reverb_lines, sizeof(int));
-  // for (m = 0; m < geo.reverb_lines; m++)
-  // {
-  //   n += fread (&geo.reverb_line[m], sizeof(int), 1, fptr);
-  // }
-  // geo.reverb_filter_line = calloc(geo.reverb_filter_lines, sizeof(int));
-  //  for (m = 0; m < geo.reverb_filter_lines; m++)
-  // {
-  //   n += fread (&geo.reverb_filter_line[m], sizeof(int), 1, fptr);
-  // }
-  // geo.reverb_dump_x = calloc(geo.reverb_dump_cells, sizeof(int));
-  // geo.reverb_dump_z = calloc(geo.reverb_dump_cells, sizeof(int));
-  // for (m = 0; m < geo.reverb_dump_cells; m++)
-  // {
-  //   n += fread (&geo.reverb_dump_x[m], sizeof(int), 1, fptr);
-  //   n += fread (&geo.reverb_dump_z[m], sizeof(int), 1, fptr);
-  // }
+  /* Now read in the geo structure */
 
+  n += fread (&geo, sizeof (geo), 1, fptr);
 
 
   /* Read the atomic data file.  This is necessary to do here in order to establish the 
@@ -247,6 +235,8 @@ wind_read (filename)
   calloc_dyn_plasma (NPLASMA);
 
 
+  /* Read in the dynamically allocated plasma arrays */
+
   for (m = 0; m < NPLASMA; m++)
   {
 
@@ -276,7 +266,7 @@ wind_read (filename)
   }
 
 
-  /*Allocate space for macro-atoms */
+  /*Allocate space for macro-atoms and read in the data */
 
   if (geo.nmacro > 0)
   {
@@ -319,21 +309,35 @@ wind_read (filename)
 }
 
 
-/* This routine now just calls routines that create 1 dimensional arrays used in
- * various interpolations.  It is separate from coordinate_generation, because these
- * arrays are not part of wind_save, and hence must be regenerated in py_wind.
+
+
+/**********************************************************/
+/** 
+ * @brief      A driver routine that calls coordinate-system specific routines
+ * that complete the descirption of the wind
  *
- * It might make more sense just to save the interpolation arrays and then one might
- * be able to reduce the total number of subroutines, by absorbint the calculations
- * done by wind_complete into another subroutine.
+ * @param [in] WindPtr w  The entire wind
+ * @return     Always returns 0
  *
- * History:
- * 	04aug	ksl	Routine rewritten just to be a driver 
- */
+ * @details
+ *
+ * For the most point, the various routines that are called
+ * just recalculate some of the various arrays used for 
+ * finding the boundaries of an individual cell.
+ *
+ * ### Notes ###
+ *
+ * The need to call this routine whenever a windsave file is read
+ * in could be obviated if all of the variable length arrays
+ * in domains were actually written out.  But since these
+ * variables are easy to calculate again, it is done here.
+ * 
+ *
+ **********************************************************/
 
 int
 wind_complete (w)
-     WindPtr w;
+    WindPtr w;
 {
   int ndom;
 
@@ -369,6 +373,22 @@ wind_complete (w)
   return (0);
 }
 
+
+/**********************************************************/
+/** 
+ * @brief      Save all the spectra to a binary file
+ *
+ * @param [in] char  filename[]   The file to write to 
+ * @return     The number of successful writes
+ *
+ * @details
+ *
+ * ### Notes ###
+ * 
+ * The program exits if one cannot write the file
+ *
+ **********************************************************/
+
 int
 spec_save (filename)
      char filename[];
@@ -392,6 +412,28 @@ spec_save (filename)
   return (n);
 }
 
+
+
+/**********************************************************/
+/** 
+ * @brief      Read the binary file containing all the spectra
+ *
+ * @param [in] char  filename[]   The name of the file
+ * @return     The number of spectra that were read in
+ *
+ * @details
+ *
+ * The routine allocates space for the spectra and reads
+ * then in.
+ *
+ * ### Notes ###
+ *
+ * The first line of the file contains the Python version
+ * and the number of spectra to be read in
+ * 
+ * The program exits if the file does not exist
+ *
+ **********************************************************/
 
 int
 spec_read (filename)
