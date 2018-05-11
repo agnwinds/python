@@ -1,23 +1,17 @@
 
+/***********************************************************/
+/** @file  saha.c
+ * @author ksl
+ * @date   May, 2018
+ *
+ * @brief  Routines to (re)calculate the ion densities
+ *
+ * The driving routine for calculating the ion desnsities is here, 
+ * as well as the routines for carrying out many of the older ionization
+ * schemes, but more modern matrix based approaches re elsewhere.
+ ***********************************************************/
 
-/* This file contains various ways in which to calculate the
-   ionization of a plasma.  The guiding difference between
-   whether to put routines here or in ionization.c appears to
-   be that here one takes the conditions, radiative weight as
-   given and calculate the densities of each ionic species, while
-   ionization.c is involved in trying to match heating and cooling.
 
-	00Jan02	ksl	Removed some of the routines which allowed
-   			special calculation of H and He 
-	01dec	ksl	Major modifications to all routines.  (a) update
-			calls to concentrations and nebular_concentrations
-			so WindPtrs are passed.
-	02jun	ksl	Modified calls yet again.  This time the goal
-			is to have all the modes etc interpreted in
-			nebular concentrations, so one can actually tell what 
-			is happening in nebular concentrations, and to
-			avoid doing any real work in nebular concentrations.
- */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,97 +22,35 @@
 #include "atomic.h"
 #include "python.h"
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
-  Synopsis:   
-
-int
-nebular_concentrations (xplasama, mode)  modifies the densities of ions, levels, and
-	partition functions of ions within a cell of the wind based upon the mode, 
-	and other data contained within the WindPtr itself, such as t_r, t_e, w, 
-	based on the "mode".  
-
-        This version of the code is a first, quick and dirty, attempt to include the
-        fraction of recombinations going into the ground state as a correction factor
-        following Mazzali and Lucy (CK).  In other words, ionization equilibrium here
-        is calculated from equation 11 of Mazzali & Lucy.
-  
-  Arguments:		
-     PlasmaPtr ww;
-     int mode;			// 0=saha using tr, 1=saha using te, 2= Lucy & Mazzali
 
 
-  Returns:
- 	nebular concentrations alters portions of the wind ptr.  Exactly how things 
-	are changed depends on the mode.
- 
- 	nebular_concentrations returns 0 if it converged to an answer, -1 otherwise.  On an
- 	abnormal return the density array and ne are left unchanged.
- 	
-  Description:	
-
-	As of 01dec (python39), nebular concentrations serves as the steering routine
-	for all ionization calculations.  This change was made to push down all of the
-	various choices about calculation of ionization to a single routine, so that
-	no longer needs to include case statements or logic for how to handle the various
-	choices elsewhre.  The Lucy & Mazzali calculation is still carried out within
-	nebular concentrations although that is historical at present.
-
-	It remains true that for the Lucy and Mazalli calculation, concentrations is
-	called initially, a choice which today seems bizarre...since the LM calculation
-	can be carried equally well straight away.
-	
-	My pre-01dec notes said:
-
-	This is a first attempt to fudge the ionization equation in the wind to account 
-	for the fact that one is not sitting in a BB radiation field.  The routine assumes one
-	has already put the concentrations of of the ions under LTE conditions for a temperature
-	t_r into density.  It uses the same dumb procedure as for "concentrations."  
-
- 
-  Notes:
-	It's probably OK but it would be worthwhile worrying whether I have introduced 
-	any problems by setting the floor to any species and ne of DENSITY_MIN	
-
-	Mode is not consistent across all of the parts of python, so don't assume that
-	mode here is geo.ionization_mode...for example.
-
-
-  History:
-	1997	ksl	Coded and debugged as part of Python effort. 
-	97aug27	ksl	Eliminated the goto statement in the main iteration loop and
- 			added numerous comments.
-	97oct2	ck	Implemented Mazzali & Lucy eqn 11.
-	98may	ksl	Moved ne calculation to separate subroutine
-	98may	ksl	Moved actual calculation for Mazzali & Lucy to a separate routine for
- 			each element
-	01dec	ksl	Changed the way in which nebular concentrations was called, so that all
-			the variables are taken from the windptr except for the mode. In addition
-			nebular_concentrations was made the sole call from other parts of python, and
-			so for example saha should never be called elsewhere.  This last step wasw
-			to encapsulate the determination of abundances (given known conditions.)
-	02jun	ksl	Moved Lucy-Mazzali calculation to a separate routine.  Now nebular
-			concentrations is simply a driving routine
-	06may	ksl	57+ -- Modified to use plasma structure.  There are no volumes involved
-			so use plasma stucture in call to routines.
-	080808	ksl	60b -- Removed mode 4 which attempted to carry out detailed balance
-			for H and He and ussd LM for other elements.  (This was carried out
-			in the routine dlucy) This is wholly replaced by the macro atom approach.  
-	11	ksl	Main changes here made by Nick to incorporate the power law approximation
-			to ionization for AGN
-    12Feb   nsh	More changes made to allow for two new modes - for multiple saha equaions.
-			mode 6 corrects using a dilute blackbody and should be almost the same as the
-            LM method
-			mode 7 corrects using a power law spectrum, and show end up supplanting mode 5.
-
-
-**************************************************************/
+/**********************************************************/
+/** @name      nebular_concentrations
+ * @brief      
+ * modifies the densities of ions, levels, and
+ * partition functions of ions within a cell of the wind based upon the mode, 
+ * and other data contained within the WindPtr itself, such as t_r, t_e, w, 
+ * based on the "mode".  
+ * 
+ *
+ * @param [in,out] PlasmaPtr  xplasma   A single plasma cell      
+ * @param [in] int  mode   A mode which describes which of the various ionization schemes to use
+ * @return   A status message (returned from the individual routines that calculate the ionization. 
+ * 0 generally signifies success.
+ *
+ *
+ * @details
+ * nebular concentrations serves as the steering routine
+ * for all ionization calculations. 
+ * 
+ *
+ * ###Notes####
+ **********************************************************/
 
 int
 nebular_concentrations (xplasma, mode)
      PlasmaPtr xplasma;
-     int mode;			// 0=saha using tr, 1=saha using te, 2= Lucy & Mazzali
+     int mode;			
 {
   double get_ne ();
   int lucy_mazzali1 ();
@@ -214,78 +146,6 @@ nebular_concentrations (xplasma, mode)
 }
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:   
-int
-concentrations (xplasma, mode)
-     PlasmaPtr xplasma;
-     int mode;			//   0=saha using tr, 1=saha using te
-  	determines the concentrations of individual ions assuming a form of the 
-	Saha equantion.  The atomic data required must have been read in with the 
-	routine "get_atomic_data".  Most of the actual information to calculate
-	the concentrations is already contained in ww
-  
- Arguments:		
-
-     PlasmaPtr xplasma;
-     int mode;			//   0=saha using tr, 1=saha using te
-
- Returns:
-	concentrations returns 0 if it converged; -1 if it did not converge.  If it does
-	not converge, both density and *ne are likely to be garbage.
-
-	Other results...e.g. the densities.. are stored in ww.
- 
- Description:	
- 	
-	The Saha eqn. is  (e.g. Motz, p 110, eqn 4.14
-
-  	 N_r+1 N_e / N_r =  (2*pi*m*kT)**1.5/h**3 2 Z_r+1(T)/Z_r * exp (-X/kT)
-   
-	where N_r+1 is the number density of the r+1 ionization state
-	and   Z_r+1 is the partition function of that state.  
-
-	The program works by perfoming a crude iteration on ne.  It could undoubtedly 
-	be improved, if one wanted better accuracy or higher speed.
-
-
- 
- Notes:
-	
-	So that one doesn't get zero-divides in other programs, e.g. nebular_concentrations, 
-	a floor is set on the density of any ion or the electron density.
-
-
-
- History:
- 	1997      ksl	Coded and debugged as part of Python effort.  All of the partition functions
- 				have been set to 1.
- 	97aug27 ksl	Eliminated the goto statement in the iteration of the Saha equation and
- 				added numberous comments.
- 	97aug27 ksl      Updated code to include an estimate of the partition function based on
- 				the ground state multiplities.  Add an error return if the function failed
- 				to return.
- 	98may	ksl	Moved ne calculation to separate subroutine
- 	98may	ksl	Moved saha calculation for an individual element to a separate routine
-	00mar	ksl	Fixed error in initial estimate of ne so that it is correct at high temperatures
-			Basically the problem was due to the fact that at high enough temperatures
-			a subtraction was being performed which could lead to an initial value of
-			0 for ne from which the code never recovered.  Note--I believe there still
-			may be a small problem with this section of the code because it does not
-			take account of the partition function in the initial estimate.  On the
-			other hand the effect of this error should be minor.
-	01jul	ksl	Added a real partition function to routine
-	01dec	ksl	Changed variables used to call saha, and made a subroutine of nebular
-			concentrations (python_39)
-	02jul	ksl	Included the electron multiplicity in the SAHA constant.
-      
-        04Apr   SS      Added a call to macro_pops so that macro atom ionization fractions are used
-                        in place of others.
-	06may	ksl	57+ -- Switched to plasma structue wind no volumes
-	07mar	ksl	Convert warnings to errors to stop many writes 
-**************************************************************/
 
 
 
@@ -295,6 +155,48 @@ concentrations (xplasma, mode)
 //#define THETAMAX       1e4
 //#define MIN_TEMP         100. NSH 0712 - moved into python.h because this is used in severalpaces
 
+
+
+/**********************************************************/
+/** @name      concentrations
+ * @brief      A routine to calculate concentrations in a plasma cell using the Saha 
+ * equation with various assumptions about what to use for the temperature
+ * 	Saha equantion.  
+ *
+ * @param [in,out] PlasmaPtr  xplasma   A singll plasma cell
+ * @param [in] int  mode   A swich whith defines what to use for the temperature
+ * @return     concentrations returns 0 if it converged; -1 if it did not converge.  If it does
+ * 	not converge, both density and *ne are likely to be garbage.
+ *
+ * 	The densities are updated in xplasma
+ *
+ * 	The modes are as follows:
+ * 	* NEBULAR_TR -- use the radiation temperature
+ * 	* NEBULaR_TE -- use the electron temperature
+ * 	* NEBULAR_ML93 - From Mazzli & Lucy 1993, use the geometric mean of the electron and radiaion temperature
+ * 
+ *
+ * @details
+ *
+ * This routine iterates to find the densities of individual ions using the Saha 
+ * equation.
+ *
+ *
+ * The Saha eqn. is  (e.g. Motz, p 110, eqn 4.14
+ * 
+ * *  N_r+1 N_e / N_r =  (2*pi*m*kT)**1.5/h**3 2 Z_r+1(T)/Z_r * exp (-X/kT)
+ *    
+ * 	where N_r+1 is the number density of the r+1 ionization state
+ * 	and   Z_r+1 is the partition function of that state.  
+ * 
+ *he program works by perfoming a crude iteration on ne.  It could undoubtedly 
+ *be improved, if one wanted better accuracy or higher speed.
+ *
+ * ### Notes ###
+ * So that one doesn't get zero-divides in other programs, e.g. nebular_concentrations, 
+ *a floor is set on the density of any ion or the electron density.
+ *
+ **********************************************************/
 
 int
 concentrations (xplasma, mode)
@@ -425,46 +327,32 @@ concentrations (xplasma, mode)
 
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
-  Synopsis:   
-
-   	Calculate the saha densities for all of the ions in a single
-   	cell (given ne). 
-  
-  Arguments:
-	xplasma, ne, t
-	the plasma cell to populate, the electron density and the temperature	
-
-
-  Returns:
- 	
-  Description:	
-
- 
-  Notes:
-
-  	080808 - In the new version of this routine, all of the partition
-  	functions are assumed to have been calculated before entering
-  	the routine.
-	
-	Note that this routine populates the actual xplasma structure
-   	with saha abundances.
-
-	This routine assumes ne is known.  Iteration to calculate ne
-	takes place in concentrations.
-
-
-  History:
-   98may        ksl     Abstracted from concentrations
-   01jul	ksl	Added partition functions more properly
-   080808	ksl	Modified so that calls parallel those of other 
-   			functions, that is so that this uses
-			the plasma array
-
-
-**************************************************************/
+/**********************************************************/
+/** @name      saha
+ * @brief      Calculate the  densities for all of the ions in a single
+ *    	cell given ne and t.
+ *
+ * @param [in,out] PlasmaPtr  xplasma   The cell
+ * @param [in] double  ne   A trial value for ne
+ * @param [in] double  t   A value of the temperature
+ * @return     Always returns 0
+ *
+ * The calculate abundances are stored in xplasma
+ *
+ * @details
+ * This routine simply uses the Saha equantion to calculate the densities
+ * of all of the ions.  It assumes that ne is known, and so in general
+ * if one calcualted ne from the concentrations, one would not get the
+ * input value.  Iteration to calculate ne takes place in concentrations.
+ *
+ * ### Notes ###
+ * All of the partition
+ * functions are assumed to have been calculated before entering
+ * the routine.
+ * 	
+ *
+ **********************************************************/
 
 int
 saha (xplasma, ne, t)
@@ -527,7 +415,6 @@ saha (xplasma, ne, t)
 								   partition
 								   [nion -
 								    1]);
-//        if (b > big && nh < 1e5) this is a line to only modify things if the density is high enough to matter
 	      if (b > big)
 		b = big;	//limit step so there is no chance of overflow
 
@@ -572,50 +459,35 @@ saha (xplasma, ne, t)
 
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
-  Synopsis:   
-	lucy() applied the Lucy Mazzali correction factors to the saha abundances
-	contained in xplasma. It thus assumes that saha() has been called before it, 
-	in the concentrations routine.
-
-	Note that lucy also applied the macro_pops routine, and required that the 
-	ne convergence criteria is rigorous enough that the macro atom level populations
-	converge on the correct values.
-
-  Arguments:
-	xplasma, the plasma pointer for the cell in question		
-
-  Returns:
-	iterates on ne to return the corrected lucy mazzali abundances and an improved
-	ne value.
- 	
-  Description:	
-
- 
-  Notes:
-
-	Concentrations should have been called before this routine is executed.
-
-	Procedurally, the routine is analogous to concentrations()
-
-  History:
-
-	02jun	ksl	Made separate routine, removing it from nebular concentrations
-    04Apr   SS  If statement added to stop this routine from changing macro atom
-	            populations.
-    04May   SS  "If" statement modified for compatibility with the "macro_simple" option
-	            (i.e. all ions treated as simple).
-	07mar	ksl	Convert warnings to errors to stop many repeads
-
-
-
-**************************************************************/
-
 
 #define MIN_FUDGE  1.e-10
 #define MAX_FUDGE  10.
+
+
+/**********************************************************/
+/** @name      lucy
+ * @brief      Calculates ion abundances allowing for the Lucy Mazzali correction factors to the saha abundances
+ * 	contained in xplasma. It thus assumes that saha() has been called before it, 
+ * 	in the concentrations routine.
+ * 
+ *
+ * @param [in,out] PlasmaPtr  xplasma   A single plasma cell
+ * @return   Always retuns 0
+ *
+ *
+ * @details
+ * This routine solves for ne (and the concentrations) using the Lucy Mazzli correction factors.  
+ *
+ * ### Notes ###
+ * The routine needs the Saha abundances before the correction factors can be found.  As a result,
+ * the sequence is to call parttion functions, concentrations and then this routine.
+ * 
+ * Procedurally, the routine is analogous to concentrations()
+ *
+ * Note that  also applied the macro_pops routine, and required that the 
+ * ne convergence criteria is rigorous enough that the macro atom level populations
+ * converge on the correct values.
+ **********************************************************/
 
 int
 lucy (xplasma)
@@ -726,51 +598,37 @@ lucy (xplasma)
 
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
-  Synopsis:   
-	lucy_mazzali1(nh,t_r,t_e,www,nelem,ne,density,xne,newden) calculates ion
-	densities of a single element (defined by nelem) according to a modified on
-	the spot aprroximation, in this case equation 11 of Mazzali and Lucy which
-	attempts to consider ionzations from excieted and ground state levels.
- 
-  Arguments:		
-
-	double nh,ne		number density of H atoms and the electron density
-	double t_r,t_e		temperature of the radiation field and the electrons in degrees
-	double density[]	densities of individual ions under pure Saha conditions
-	double www		dilution factor for the radiation field
-	int nelem;		the element number for which the calculation is carried out
-
-  Returns:
- 	double newden[]		the modified concentrations of the individual ions. Array 
- 				elements of density correspond to those ions in the structure ions.
- 
- 	nebular_concentrations returns 0 if it converged to an answer, -1 otherwise.  On an
- 	abnormal return the density array and ne are left unchanged.
- 	
- Description:	
-
-	This is a first attempt to fudge the ionization equation in the wind to account 
-	for the fact that one is not sitting in a BB radiation field.  The routine assumes one
-	has already put the concentrations of of the ions under LTE conditions for a temperature
-	t_r into density.  It uses the same dumb procedure as for "concentrations."  
-
- 
-  Notes:
-	It's probably OK but it would be worthwhile worrying whether I have introduced 
-	any problems by setting the floor to any species and ne of DENSITY_MIN	
-
-
-  History:
- 
-	98may	ksl	Coded as a a separate routine for each element
-	07mar	ksl	Convert warnings to errors to stop many repeads
-	12july 	nsh	Modified to use external code to compute zeta.
-
-**************************************************************/
-
+/**********************************************************/
+/** @name      lucy_mazzali1
+ * @brief      calculates ion
+ * densities of a single element (defined by nelem) according to a modified on
+ * the spot approximation, in this case equation 11 of Mazzali and Lucy which
+ * attempts to consider ionizations from excieted and ground state levels.
+ *
+ * @param [in] double  nh   Number density of H
+ * @param [in] double  t_r   The radiation temeperture
+ * @param [in] double  t_e   The electorn temperature                                        
+ * @param [in] double  www   dilution factor for the radiation field
+ * @param [in] int  nelem   the element number for which the calculation is carried out
+ * @param [in] double  ne   electron density
+ * @param [in] double  density[]   densities of individual ions under pure Saha conditions
+ * @param [in out] double  xne   ???
+ * @param [out] double  newden[]   Array containing the modified densities
+ * @return  0 if it converged to an answer, -1 otherwise.  On an
+ *  	abnormal return the density array and ne are left unchanged.
+ *
+ * @details
+ * This is a first attempt to fudge the ionization equation in the wind to account 
+ * for the fact that one is not sitting in a BB radiation field.  The routine assumes one
+ * has already put the concentrations of of the ions under LTE conditions for a temperature
+ * t_r into density.  It uses the same dumb procedure as for "concentrations."
+ *
+ * ### Notes ###
+ * It's probably OK but it would be worthwhile worrying whether I have introduced 
+ * any problems by setting the floor to any species and ne of DENSITY_MIN
+ *
+ **********************************************************/
 
 int
 lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
@@ -892,54 +750,6 @@ lucy_mazzali1 (nh, t_r, t_e, www, nelem, ne, density, xne, newden)
   return (0);
 }
 
-/***********************************************************
-                       Space Telescope Science Institute
-
- Synopsis:   
-  	fix_concentrations(xplasma,mode) sets the concentrations of individual ions
-  	assuming hard coded ionization fractions that are read from a file
-  
- Arguments:		
-
-
- Returns:
-	
-Description:	
-
-	The first time the routine is called it reads the file specified by
-	geo.con_file which populates the force_con array.
-
-	On subsequent calls the values of one of an xplasma element are 
-	modified.
-
-	The format of the file is fairly obvious
-
-	Element.z   Ion   ion_fraction
-
-	6            4       1
-
-	would set the CIV fraction to 1.  
-	
-	Note there is nothing forcing the totals to be anything sensible.
-
-
- 	
-
-Notes:
-	To change the ions that you want to fix, simply update con_force,
-	AND MAKE SURE NFORCE IS SET TO THE NUMBER OF IONS
-
-History:
- 	97sep13	ksl	Adapted from concentrations
- 	98may	ksl	Moved ne calculation to separate subroutine
-	01mar	ksl	Moved specification of fixed concentrations to a file
-	04dec	ksl	54e -- previously a specific file fixed.dat was
-			read.  With this change, the concentration file
-			name is read as part of the inputs
-	080802	ksl	60b -- Made fix_concentrations calls resemble
-			those of other routines of the same type
-
-**************************************************************/
 
 int fix_con_start = 0;
 struct force_con
@@ -949,6 +759,45 @@ struct force_con
 }
 con_force[1000];
 int nforce;
+
+
+/**********************************************************/
+/** @name      fix_concentrations
+ * @brief      sets the concentrations of individual ions
+ *  assuming hard coded ionization fractions that are read from a file
+ *
+ * @param [in,out] PlasmaPtr  xplasma   A plasma cell
+ * @param [in] int  mode   UNUSED
+ * @return     Always returns 0
+ *
+ * @details
+ * The first time the routine is called it reads the file specified by
+ * geo.con_file which populates the force_con array.
+ * 
+ * On subsequent calls the values of one of an xplasma element are 
+ * modified.
+ * 
+ * The format of the file is fairly obvious
+ * 
+ * Element.z   Ion   ion_fraction
+ * 
+ * 6            4       1
+ * 
+ * would set the CIV fraction to 1.  
+ * 	
+ * Note there is nothing forcing the totals to be anything sensible.
+ *
+ * ### Notes ###
+ * o change the ions that you want to fix, simply update con_force,
+ * AND MAKE SURE NFORCE IS SET TO THE NUMBER OF IONS
+ *
+ * @bug It is not obvious that this is really what we want.  This routine was
+ * written when we only were concerned about scattering and does not really
+ * take into account emission (for which one needs n_e.  One possiblity is to
+ * calculated ion abundances for H and He properly, in which case we would need
+ * the mode variable.
+ *
+ **********************************************************/
 
 int
 fix_concentrations (xplasma, mode)
@@ -1033,31 +882,24 @@ fix_concentrations (xplasma, mode)
 
 
 
-
-/***********************************************************
-                                       Space Telescope Science Institute
-
-  Synopsis:   
-	get_ne simple calculates the electron density given the 
-	densities of each ion.
-  
-  Arguments:		
-
-
-  Returns:
- 	
-  Description:	
-
- 
-  Notes:
-
-  	This makes use of the fact that the densities are stored
-	in ion order.
-
-  History:
-
-
-**************************************************************/
+/**********************************************************/
+/** @name      get_ne
+ * @brief      calculates the electron density given the 
+ * 	densities of each ion.
+ *
+ * @param [in] double  density[]   A trial set of densities for ions
+ * @return   An electron density
+ *
+ * @details
+ * The routine is used in situations where we have a trial set 
+ * of densities for a cell, but do not want to populate the 
+ * plasma structure with them (yet).
+ *
+ * ### Notes ###
+ * This makes use of the fact that the densities are stored
+ * 	in ion order.
+ *
+ **********************************************************/
 
 double
 get_ne (density)
