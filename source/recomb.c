@@ -63,7 +63,7 @@ int fbfr;			// fb_choice (see above)
 
 
 /**********************************************************/
-/** @name      fb_topbase_partial
+/** 
  * @brief      returns the partial (for a specific ion) emissivity or 
  * recombination rate for ions described in terms of Topbase photoionization x-sections.
  *
@@ -199,7 +199,7 @@ fb_topbase_partial (freq)
 
 
 /**********************************************************/
-/** @name      integ_fb
+/** 
  * @brief      calculates the integrated emissivity of the plasma, or the number of 
  * recombinations per second of a particular ion within defined frequency bands.
  *
@@ -379,7 +379,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
 
 
 /**********************************************************/
-/** @name      total_fb
+/** 
  * @brief      returns the energy lost from the plasma due to fb emission in a
  * 	single wind cell at a temperature t between the frequncy limits f1 and f2.  
  * 	The energy lost is just the kinetic energy lost from the plasma 
@@ -488,7 +488,7 @@ total_fb (one, t, f1, f2, fb_choice, mode)
 
 
 /**********************************************************/
-/** @name      one_fb
+/** 
  * @brief      generates one free bound photon with specific frequency limits
  *
  * @param [in] WindPtr  one   The wind cell in which the photon is being
@@ -704,7 +704,7 @@ use that instead if possible --  57h */
 
 
 /**********************************************************/
-/** @name      num_recomb
+/** 
  * @brief      calculates the total number of recombinations 
  * for all of the ions in a cell
  *
@@ -797,7 +797,7 @@ num_recomb (xplasma, t_e, mode)
 
 
 /**********************************************************/
-/** @name      fb
+/** 
  * @brief      calculates partial the free_bound emissivity or recombination rate 
  * of the plasma at a specific frequency
  *
@@ -920,7 +920,7 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
 
 
 /**********************************************************/
-/** @name      init_freebound
+/** 
  * @brief      initializes the structure fb_struc as well as some
  * associated arrays and variables (found in python.h) that describe
  * recombination rates and band-limited luminosities.
@@ -1106,7 +1106,7 @@ on the assumption that the fb information will be reused.
 
 
 /**********************************************************/
-/** @name      get_nrecomb
+/** 
  * @brief      Return the recombination coefficient
  *
  * @param [in out] double  t   The temperature
@@ -1145,7 +1145,7 @@ get_nrecomb (t, nion, mode)
 
 
 /**********************************************************/
-/** @name      get_fb
+/** 
  * @brief      Interpolate from a set of stored emissivities
  *
  * @param [in] double  t   The temperure of interest
@@ -1210,7 +1210,7 @@ get_fb (t, nion, narray, fb_choice, mode)
 
 
 /**********************************************************/
-/** @name      xinteg_fb
+/** 
  * @brief      calculates the integrated emissivity of 
  *   an ion in the plasma.
  *
@@ -1331,7 +1331,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
 
 /**********************************************************/
-/** @name      xinteg_inner_fb
+/** 
  * @brief      calculates the integrated fb emissivity of inner
  *   shell transitions in an ion at a given temperature
  *
@@ -1442,7 +1442,7 @@ xinteg_inner_fb (t, f1, f2, nion, fb_choice)
 
 
 /**********************************************************/
-/** @name      total_rrate
+/** 
  * @brief      get the total rediative recombination rate
  *
  * @param [in] int  nion   The ion number of interest
@@ -1538,7 +1538,7 @@ total_rrate (nion, T)
 
 
 /**********************************************************/
-/** @name      gs_rrate
+/** 
  * @brief      get the recombination rate to the ground state for an
  * ion at a particular temperature
  *
@@ -1670,7 +1670,7 @@ gs_rrate (nion, T)
 
 
 /**********************************************************/
-/** @name      sort_and_compress
+/** 
  * @brief      sort an array into numerical order elimination duplicates
  *
  * @param [in] double *  array_in   The input array
@@ -1730,7 +1730,7 @@ sort_and_compress (array_in, array_out, npts)
 
 
 /**********************************************************/
-/** @name      compare_doubles
+/** 
  * @brief      A routine used by qsort in sort_and_compress
  *
  * @param [in] const void *  a   A double precision number

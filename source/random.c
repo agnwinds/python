@@ -166,7 +166,7 @@ vcos (x)
 
 
 /**********************************************************/
-/** @name 	init_rand
+/** 
  * @brief	Sets up a random number generator 
  *
  * @param [in] seed			The seed to set up the generator
@@ -194,7 +194,7 @@ int
 
 
 /**********************************************************/
-/** @name 	random_number
+/** 
  * @brief	Gets a random number from the generator set up in init_rand
  *
  * @param [in] min			The minimum value to be generated 

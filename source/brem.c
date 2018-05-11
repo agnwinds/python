@@ -27,7 +27,7 @@
 
 
 /**********************************************************/
-/** @name      integ_brem
+/** 
  * @brief      The integrand used in qromb to compute the luminosity of a bremstrahlung source 
  *
  * @param [in] double  freq		The frequency at which to compute the bremstrahlung luminosity
@@ -54,7 +54,7 @@ integ_brem (freq)
 
 
 /**********************************************************/
-/** @name      brem_d
+/** 
  * @brief      The integrand for integrating a dimensionless bremstrahlung spectrum
  *
  * @param [in] double  alpha	h*freq/k_b/T - 
@@ -126,7 +126,7 @@ double brem_set[] = {
 
 
 /**********************************************************/
-/** @name      get_rand_brem
+/** 
  * @brief      Obtain a random frequency photon from a bremstrahlung spectrum
  *
  * @param [in] double  freqmin   Minimum frequency to be generated

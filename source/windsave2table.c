@@ -64,7 +64,7 @@
 
 
 /**********************************************************/
-/** @name      main
+/** 
  * @brief      windsave2table writes key variables in a windsave file 
  * to an astropy table calculated Python.  This is the  main routine.
  *

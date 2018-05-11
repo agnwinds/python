@@ -82,7 +82,7 @@
 
 
 /**********************************************************/
-/** @name      extract
+/** 
  * @brief      A supervisory routine called to 
  * 	builds detailed spectra in the normal (extract) mode.
  *
@@ -265,7 +265,7 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 
 
 /**********************************************************/
-/** @name      extract_one
+/** 
  * @brief      (w,pp,itype,nspec)
  *
  * @param [in] WindPtr  w   The entire wind

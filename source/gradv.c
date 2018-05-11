@@ -19,7 +19,7 @@
 
 
 /**********************************************************/
-/** @name      dvwind_ds
+/** 
  * @brief      find the gradient velocity vector v, dv_ds for a photon
  * at a certain postion travelling in a certain direction
  *
@@ -159,7 +159,7 @@ dvwind_ds (p)
 
 
 /**********************************************************/
-/** @name      dvds_ave
+/** 
  * @brief      Calculate the direction averaged (and maximum) 
  * dv_ds in each grid cell of the wind
  *

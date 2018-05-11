@@ -26,7 +26,7 @@
 double *reverb_path_bin;
 
 /**********************************************************/
-/** @name 	wind_paths_constructor
+/** 
  * @brief	Allocates the arrays for a path histogram
  *
  * @param [in,out] wind		Pointer to parent wind cell
@@ -67,7 +67,7 @@ wind_paths_constructor (WindPtr wind)
 }
 
 /**********************************************************/
-/** @name 	reverb_init
+/** 
  * @brief	Initialises everything for reverb mapping
  *
  * @param [in,out] wind		Top-level wind cell array
@@ -161,7 +161,7 @@ reverb_init (WindPtr wind)
 }
 
 /**********************************************************/
-/** @name 	wind_paths_init
+/** 
  * @brief	Initialises wind path structures
  *
  * @param [in,out] wind		Top-level wind cell array
@@ -193,7 +193,7 @@ wind_paths_init (WindPtr wind)
 }
 
 /****************************************************************/
-/** @name		line_paths_add_phot
+/** 
  * @brief		Following a line emission, increments cell paths
  * 
  * @param [in, out] wind 		Wind cell to register photon in.
@@ -256,7 +256,7 @@ line_paths_add_phot (WindPtr wind, PhotPtr pp, int *nres)
 }
 
 /****************************************************************/
-/** @name		wind_paths_add_phot
+/** 
  * @brief		Registers a photon passage with a wind cell.
  * 
  * @param [in, out] wind 	Wind cell to register photon in.
@@ -307,7 +307,7 @@ wind_paths_add_phot (WindPtr wind, PhotPtr pp)
 }
 
 /**********************************************************/
-/** @name 	simple_paths_generate_photon
+/** 
  * @brief	Generates path for a 'wind' photon in photon mode
  *
  * @param [in,out] pp 	Photon to set path of
@@ -328,7 +328,7 @@ simple_paths_gen_phot (PhotPtr pp)
 }
 
 /**********************************************************/
-/** @name 	draw_from_path_histogram
+/** 
  * @brief	Draws a random path from a path histogram
  *
  * @param [in] PathPtr	Path histogram pointer
@@ -370,7 +370,7 @@ r_draw_from_path_histogram (Wind_Paths_Ptr PathPtr)
 
 
 /**********************************************************/
-/** @name 	wind_paths_generate_photon
+/** 
  * @brief	Generates path for a wind photon
  *
  * @param [in] wind		Wind cell to spawn in
@@ -409,7 +409,7 @@ wind_paths_gen_phot (WindPtr wind, PhotPtr pp)
 }
 
 /**********************************************************/
-/** @name 	line_paths_generate_photon
+/** 
  * @brief	Generates path for a macro-atom line photon
  *
  * @param [in] wind			Wind cell to spawn in
@@ -477,7 +477,7 @@ line_paths_gen_phot (WindPtr wind, PhotPtr pp, int nres)
 
 
 /****************************************************************/
-/** @name 	wind_paths_evaluate_single
+/** 
  * @brief	Evaluates individual wind cell paths
  *
  * @param [in,out] wind		Wind cell to evaluate
@@ -515,7 +515,7 @@ wind_paths_evaluate_single (Wind_Paths_Ptr paths)
 
 
 /****************************************************************/
-/** @name 	wind_paths_evaluate
+/** 
  * @brief	Evaluates wind path details for a cycle
  *
  * @param [in,out] wind	Wind to evaluate
@@ -565,7 +565,7 @@ wind_paths_evaluate (WindPtr wind, int i_rank)
 
 
 /****************************************************************/
-/** @name 	wind_paths_dump
+/** 
  * @brief	Dumps wind path arrays for a wind cell
  *
  * @param [in] wind		Wind cell to dump
@@ -623,7 +623,7 @@ wind_paths_dump (WindPtr wind, int rank_global)
 
 
 /****************************************************************/
-/** @name 	wind_paths_output_dump
+/** 
  * @brief	Iterates through the wind, dumping cells of interest
  *
  * @param [in] wind		Wind array to dump from
@@ -661,7 +661,7 @@ wind_paths_output_dump (WindPtr wind, int i_rank)
 
 
 /****************************************************************/
-/** @name		wind_paths_point_index
+/** 
  * @brief		Given trz index in wind, returns vtk data index.
  * 
  * @param [in] i 	Theta index of cell.
@@ -686,7 +686,7 @@ wind_paths_point_index (int i, int j, int k, int i_top, DomainPtr dom)
 }
 
 /****************************************************************/
-/** @name		wind_paths_sphere_point_index
+/** 
  * @brief		Given rtt index in wind, returns vtk data index.
  * 
  * @param [in] i 	Theta index of cell.
@@ -711,7 +711,7 @@ wind_paths_sphere_point_index (int i, int j, int k)
 
 
 /****************************************************************/
-/** @name		wind_paths_output_vtk
+/** 
  * @brief		Outputs wind path information to vtk.
  * 
  * @param [in] wind 		Pointer to wind array.

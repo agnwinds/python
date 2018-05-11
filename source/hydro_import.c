@@ -132,7 +132,7 @@ History:
 
 
 /**********************************************************/
-/** @name 	get_hydro_wind_params
+/** 
  * @brief	Sets up geometry ready to accept a hydro-dynamic model
  *
  * @param [in] ndom			The number of the domain which will be populated by the geometry
@@ -197,7 +197,7 @@ get_hydro_wind_params (ndom)
 
 
 /**********************************************************/
-/** @name 	get_hydro
+/** 
  * @brief	Reads in and decodes a hydro-dynamic model
  *
  * @param [in] ndom			The number of the domain which will be populated by the geometry
@@ -399,7 +399,7 @@ History:
 
 
 /**********************************************************/
-/** @name 	hydro_velocity
+/** 
  * @brief	Interpolates on supplied data file to get velocity at all vertices
  *
  * @param [in] ndom			The number of the domain which will be populated by the geometry
@@ -508,7 +508,7 @@ hydro_velocity (ndom,x, v)
 
 
 /**********************************************************/
-/** @name 	hydro_rho
+/** 
  * @brief	Interpolates on supplied data file to get cell densities
  *
  * @param [in] x			The x location we need a density for
@@ -589,7 +589,7 @@ History:
 **************************************************************/
 
 /**********************************************************/
-/** @name 	hydro_temp
+/** 
  * @brief	Interpolates on supplied data file to get cell tempertaures
  *
  * @param [in] x			The x location we need a temperature for
@@ -681,7 +681,7 @@ History:
 
 
 /**********************************************************/
-/** @name 	rtheta_make_hydro_grid
+/** 
  * @brief	Defines an r-theta grid to accept a hydro model
  * 
  * @param [in] w			The wind pointer
@@ -801,7 +801,7 @@ History:
 **************************************************************/
 
 /**********************************************************/
-/** @name 	rtheta_hydro_volumes
+/** 
  * @brief	Computes volumes for cells in an r-theta hydro model
  * 
  * @param [in] ndom			The number of the domain which will be populated by the geometry
@@ -896,7 +896,7 @@ History:
 **************************************************************/
 
 
-/** @name 	hydro_frac
+/** 
  * @brief	Helper routine to interpolate on a grid
  * 
  * @param [in] coord			The coordinate we want a value for
@@ -992,7 +992,7 @@ History:
 **************************************************************/
 
 
-/** @name 	hydro_interp_value
+/** 
  * @brief	Helper routine to interpolate on a grid
  * 
  * @param [in] array			the array of input data
@@ -1067,7 +1067,7 @@ History:
 **************************************************************/
 
 
-/** @name 	hydro_restart
+/** 
  * @brief	Allows a previous windsave to be used in a new hydro simulation
  * 
  * @param [in] ndom			The number of the domain which will be populated by the geometry

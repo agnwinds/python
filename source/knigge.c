@@ -37,7 +37,7 @@ double kn_lambda;               //kn_lambda required for the intgration
 
 
 /**********************************************************/
-/** @name      get_knigge_wind_params
+/** 
  * @brief      get the input data that is necessary to define KWD-type model    
  * 	description of the wind
  *
@@ -178,7 +178,7 @@ in units of WD radii */
 
 
 /**********************************************************/
-/** @name      kn_velocity
+/** 
  * @brief      Calculate the v at a postion in a KWD wind 
  *
  * @param [in] int  ndom   the domain for the KN wind
@@ -330,7 +330,7 @@ test programs.
 
 
 /**********************************************************/
-/** @name      kn_rho
+/** 
  * @brief      double (x) calculates the density of an kn_wind at a position x
  *
  * @param [in] int  ndom   The domain where kn params are stored
@@ -398,7 +398,7 @@ kn_rho (ndom, x)
 
 
 /**********************************************************/
-/** @name      kn_vzero
+/** 
  * @brief      Calculate the sound speed (launch speed) of the wind at r
  *
  * @param [in] double  r   The position (radius) for caculating the sound speed
@@ -437,7 +437,7 @@ kn_vzero (r)
 
 
 /**********************************************************/
-/** @name      kn_wind_mdot_integral
+/** 
  * @brief      the integrand of KWD model 
  * 	for mdot as a function of radius
  *
@@ -479,7 +479,7 @@ kn_wind_mdot_integral (r)
 
 
 /**********************************************************/
-/** @name      kn_rho_zero
+/** 
  * @brief      Calculate rho at the base of the wind
  *
  * @param [in] int  ndom   The domain number

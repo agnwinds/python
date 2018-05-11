@@ -71,7 +71,7 @@ int error_bb_lo = 0;
 
 
 /**********************************************************/
-/** @name      planck
+/** 
  * @brief      returns the frequency for a photon which follows a Placnk distribution
  * within defined frequncy limits
  *
@@ -243,7 +243,7 @@ planck (t, freqmin, freqmax)
 
 
 /**********************************************************/
-/** @name      get_rand_pow
+/** 
  * @brief      obtains a random number between x1 and x2 
  *  	for a power law densiity distribution with index alpha
  *
@@ -298,7 +298,7 @@ get_rand_pow (x1, x2, alpha)
 
 
 /**********************************************************/
-/** @name      get_rand_exp
+/** 
  * @brief      obtain a random number between alpha_min 
  * and alpha_max from an distribution of the form e**-alpha
  *
@@ -360,7 +360,7 @@ double integ_planck[NMAX + 1];	//The dimensionless planck function integrated fr
 int i_integ_planck_d = 0;	//A flag to say whether we have initialised integ_planck
 
 /**********************************************************/
-/** @name      integ_planck_d
+/** 
  * @brief      Obtains the integral of the dimensionless blackbody function
  *    between alphamin and alphamax
  *
@@ -470,7 +470,7 @@ integ_planck_d (alphamin, alphamax)
 
 
 /**********************************************************/
-/** @name      init_integ_planck_d
+/** 
  * @brief      calulates integrals of the dimensionless bb function from
  * 0 to alpha and the stores the reusults in an array used by integ_plank_d
  *
@@ -515,7 +515,7 @@ init_integ_planck_d ()
 
 
 /**********************************************************/
-/** @name      planck_d
+/** 
  * @brief      The value of the dimensioless BB function at alpha
  *
  * @param [in] double  alpha 
@@ -547,7 +547,7 @@ planck_d (alpha)
 
 
 /**********************************************************/
-/** @name      emittance_bb
+/** 
  * @brief      Calculate the emittance of a bb between freqmin and freqmax
  *
  * @param [in] double  freqmin   The minimum frequency
@@ -601,7 +601,7 @@ emittance_bb (freqmin, freqmax, t)
 
 
 /**********************************************************/
-/** @name      check_fmax
+/** 
  * @brief      decides whether a maximum frequency requested for an integral is sensible.
  * If it is too far off the end of the planck function, qromb will malfunction. We
  * just have to set it to a frequency where the BB function is tiny, say where hnu/kT =100.

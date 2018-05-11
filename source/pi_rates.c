@@ -29,7 +29,7 @@ double xexp_temp, xexp_w;
 
 
 /**********************************************************/
-/** @name      calc_pi_rate
+/** 
  * @brief      int calculates the photoionization rate coefficient for an ion in a given cell
  *
  * @param [in] int  nion   The ion being ionized (or the index to an inner shell cross section)
@@ -228,7 +228,7 @@ calc_pi_rate (nion, xplasma, mode, type)
 
 
 /**********************************************************/
-/** @name      tb_planck1
+/** 
  * @brief      The integrand for working out the PI rate in a BB radiation field 
  *
  * @param [in] double  freq   the frequency 
@@ -259,7 +259,7 @@ tb_planck1 (freq)
 
 
 /**********************************************************/
-/** @name      tb_logpow1
+/** 
  * @brief      The integrand for working out the PI rate in a radiation field modelled by a power law 
  *
  * @param [in] double  freq   the frequency 
@@ -287,7 +287,7 @@ tb_logpow1 (freq)
 
 
 /**********************************************************/
-/** @name      tb_exp1
+/** 
  * @brief      The integrand for working out the PI rate in a radiation field modelled by an exponential 
  *
  * @param [in] double  freq   the frequency 

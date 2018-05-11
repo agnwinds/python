@@ -97,7 +97,7 @@ double tau_randwind = -1000.;
 
 
 /**********************************************************/
-/** @name      randwind
+/** 
  * @brief      calculate a new direction
  * for the photon which is being scattered in the wind
  * in the SCATTER_MODE_ANISOTROPIC scattering mode.
@@ -255,7 +255,7 @@ the cartesian frame */
 
 
 /**********************************************************/
-/** @name      vrandwind
+/** 
  * @brief      the function that is used to generate the cdf for anisotropic scattering.  
  *
  * @param [out] double  x   The direction cosine with respect to the direction 
@@ -324,7 +324,7 @@ double reweightwind_zmax;
 
 
 /**********************************************************/
-/** @name      reweightwind
+/** 
  * @brief      calculates the weight of a photon in the wind that
  * is forced to scatter along a specific line of sight. 
  *
@@ -435,7 +435,7 @@ what we do here */
 
 
 /**********************************************************/
-/** @name      make_cdf_randwind
+/** 
  * @brief      Generate the cumulative distribution functions
  * needed for selecting a direction for a scattered photon, and 
  * then select the cdf needed ro a particulat tau
@@ -575,7 +575,7 @@ make_cdf_randwind (tau)
 
 
 /**********************************************************/
-/** @name      randwind_thermal_trapping
+/** 
  * @brief      is the routine which chooses
  *   a new anisotropic direction in geo.scatter_mode = SCATTER_MODE_THERMAL
  *

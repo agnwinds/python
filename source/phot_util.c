@@ -27,7 +27,7 @@ size_t sizeofphot;
 
 
 /**********************************************************/
-/** @name      stuff_phot
+/** 
  * @brief      Simply copy one photon bundle into another
  *
  * @param [in] PhotPtr  pin   The photon bundle to be copied
@@ -79,7 +79,7 @@ stuff_phot (pin, pout)
 
 
 /**********************************************************/
-/** @name      move_phot
+/** 
  * @brief      move a photon by a distance ds
  *
  * @param [in out] PhotPtr  pp   A photon bundle
@@ -113,7 +113,7 @@ move_phot (pp, ds)
 
 
 /**********************************************************/
-/** @name      comp_phot
+/** 
  * @brief      Compares two photons to determine whether they have
  *  	the identical position and direction.
  *
@@ -172,7 +172,7 @@ comp_phot (p1, p2)
 //OLD  ************************************************************************/
 
 /**********************************************************/
-/** @name      phot_hist
+/** 
  * @brief      Record the history of a single photon 
  *   bundle, in terms of a series of photon structures that are
  *   populated as the photon goes through the grid
@@ -257,7 +257,7 @@ phot_hist (p, iswitch)
 
 
 /**********************************************************/
-/** @name      phot_history_summarize
+/** 
  * @brief      The next routine is designed to update a portion of the PlasmaPtr to reflect where
  *  	photons along the line of sight to the observer were absorbed in the wind
  *
@@ -382,7 +382,7 @@ phot_history_summarize ()
 
 
 /**********************************************************/
-/** @name      ds_to_cone
+/** 
  * @brief      (cc, p) This is a new version of  introduced in order to 
  *    allow cylvar coordinates  Eventually it is intended to replace ds_to_windcone 
  *    completely, or at least the guts of ds_to_windcone.
@@ -508,7 +508,7 @@ ds_to_cone (cc, p)
 //OLD  ************************************************************************/
 
 /**********************************************************/
-/** @name      ds_to_sphere
+/** 
  * @brief      Calculate the pathlenth along a line of sight defined by
  * 	a photon p to a sphere centered on the origin.  
  *
@@ -577,7 +577,7 @@ both roots were imaginary */
 
 
 /**********************************************************/
-/** @name      ds_to_sphere2
+/** 
  * @brief      Find the positive distance to
  *    	a sphere centered at x with radius r
  *
@@ -662,7 +662,7 @@ ds_to_sphere2 (x, r, p)
 //OLD  ************************************************************************/
 
 /**********************************************************/
-/** @name      quadratic
+/** 
  * @brief      This solves a simple  quadratic (or if a is zero linear) equation.  
  *
  * @param [in] double  a   The constant which multiples x**2 in the quadratic equation
@@ -770,7 +770,7 @@ quadratic (a, b, c, r)
 
 
 /**********************************************************/
-/** @name      ds_to_plane
+/** 
  * @brief      calculates the distance of a photon must travel to hit the plane.
  *
  * @param [in out] struct plane *  pl   A structure which descibes a plane in terms of a position and vector normal to the surface
@@ -838,7 +838,7 @@ ds_to_plane (pl, p)
 
 
 /**********************************************************/
-/** @name      ds_to_closest_approach
+/** 
  * @brief      This routine calculates the distance a photon has to be moved to
  * 	reach the point of closest approach to a point described by x and also
  * 	calculates the distance of closest approach (i.e. the impact parameter).
@@ -917,7 +917,7 @@ ds_to_closest_approach (x, p, impact_parameter)
 
 
 /**********************************************************/
-/** @name      ds_to_cylinder
+/** 
  * @brief      calculate the distance a photon must travel to encouter a cylinder
  *   that is centered on the z axis.
  *

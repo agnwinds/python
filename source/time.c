@@ -26,7 +26,7 @@ double t_init = 0.0;
 
 
 /**********************************************************/
-/** @name      timer
+/** 
  * @brief      Return the time in seconds since the timer was initiated
  *
  * @return     The time since t_init
@@ -67,7 +67,7 @@ timer ()
 
 
 /**********************************************************/
-/** @name      get_time
+/** 
  * @brief      Get the current time as an ascii string
  *
  * @param [out] char  curtime[]   The current time and datae

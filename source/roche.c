@@ -66,7 +66,7 @@ struct photon p_roche;
 
 
 /**********************************************************/
-/** @name      binary_basics
+/** 
  * @brief      From the masses and period, setup the information one needs to calculate the position of the Roche lobe of the secondary
  *    to calculate whether a photon intersects the surface of the star
  *
@@ -161,7 +161,7 @@ binary_basics ()
 
 
 /**********************************************************/
-/** @name      ds_to_roche_2
+/** 
  * @brief      Calculate the distance to the Roche surface for a photon
  *
  * @param [in] PhotPtr  p  The photon whose path one wishes to track
@@ -240,7 +240,7 @@ ds_to_roche_2 (p)
 
 
 /**********************************************************/
-/** @name      hit_secondary
+/** 
  * @brief      Find out whether a photon will hit the secondary, but don't actually calculate the
  * point where it hits 
  *
@@ -284,7 +284,7 @@ hit_secondary (p)
 
 
 /**********************************************************/
-/** @name      pillbox
+/** 
  * @brief       Find out whether the photon hits the pillbox which surrounds the Roche surface of the secondary.
  *
  * @param [in] PhotPtr  p   The photon whose trajectory we wish to examine
@@ -440,7 +440,7 @@ double phi_gm1, phi_gm2, phi_3, phi_4;
 
 
 /**********************************************************/
-/** @name      phi
+/** 
  * @brief      Calculate the Roche potential at position indicated by the photon p_roche and the length s 
  *
  * @param [in] double  s   The distance from the current position of the photon to the point where one wishes to calculate the Roche potentail
@@ -500,7 +500,7 @@ phi (s)
 
 
 /**********************************************************/
-/** @name      dphi_ds
+/** 
  * @brief      Calculate the gradient of the Roche potential as the photon travels
  *
  * @param [in] double  s   The distance the photon has traveled from its initial position
@@ -532,7 +532,7 @@ dphi_ds (s)
 
 
 /**********************************************************/
-/** @name      d2phi_ds2
+/** 
  * @brief      Calculate the second derivative of the Roche potential of the secondary
  *
  * @param [in] double  s   The distance the phtoon has traveled from its inital postiion
@@ -564,7 +564,7 @@ d2phi_ds2 (s)
 
 
 /**********************************************************/
-/** @name      roche_width
+/** 
  * @brief      Calculate the width of the Roche potentiil at a position x along the x axis
  *
  * @param [in out] double  x   The distance the phtoon has traveled from its initial position  
@@ -614,7 +614,7 @@ roche_width (x)
 
 
 /**********************************************************/
-/** @name      roche2_width_max
+/** 
  * @brief      Find the half width of the secondary Roche lobe
  *
  * @return     The half width is returned
@@ -652,7 +652,7 @@ roche2_width_max ()
 
 
 /**********************************************************/
-/** @name      roche
+/** 
  * @brief      Calculate the value of the Roche potential and its derivative along a particular lien of sight
  *
  * @param [in] double  s   The distance s
@@ -684,7 +684,7 @@ roche (s, value, derivative)
 
 
 /**********************************************************/
-/** @name      roche_deriv
+/** 
  * @brief      Calculate the first and second derivative of the roche potential along a specific line of sight
  *
  * @param [in] double  s  The distance from the initial photon position at which derivatives are to be calcualted

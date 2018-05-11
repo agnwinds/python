@@ -26,7 +26,7 @@
 
 
 /**********************************************************/
-/** @name      wind_update
+/** 
  * @brief      updates the parameters in the wind that are 
  * 	affected by radiation, including ion densities.
  *
@@ -994,7 +994,7 @@ WindPtr (w);
 
 
 /**********************************************************/
-/** @name      wind_rad_init
+/** 
  * @brief      zeros those portions of the wind which contain the radiation properties 
  * 	of the wind, i.e those portions which should be set to zeroed when the structure of the 
  * 	wind has been changed or when you simply want to start off a calculation in a known state
@@ -1153,7 +1153,7 @@ wind_rad_init ()
 
 
 /**********************************************************/
-/** @name      wind_ip
+/** 
  * @brief      calculates a version of the ionization parameter using Ferland's definition, but one that also assumes that the
  * wind is optically thin everywhere, and that all photons arise for the central source.
  *

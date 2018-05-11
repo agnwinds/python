@@ -55,7 +55,7 @@ long n_lost_to_dfudge = 0;
 
 
 /**********************************************************/
-/** @name      trans_phot
+/** 
  * @brief      int (w,p,iextract) oversees the propagation of a "flight" of photons
  *
  * @param [in] WindPtr  w   The entire wind domain
@@ -260,7 +260,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
 
 /**********************************************************/
-/** @name      trans_phot_single
+/** 
  * @brief      Transport a single photon photon through the wind.
  *
  * @param [in] WindPtr  w   The entire wind

@@ -57,7 +57,7 @@ double *pdf_array;			//Pointer to pdf_array - made external because it is used i
 
 
 /**********************************************************/
-/** @name      cdf_gen_from_func
+/** 
  * @brief      Generate a cumulative distrubution function (cdf) from a function
 
  * @param [in out] CdfPtr  cdf    	A ptr to a cdf structure 
@@ -235,7 +235,7 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
 
 
 /**********************************************************/
-/** @name      gen_array_from_func
+/** 
  * @brief      generates a cdf from a function
  *
  * @param [in] double *func The probablility density function to be integrated  to create the pdf
@@ -365,7 +365,7 @@ int pdf_n;
 
 
 /**********************************************************/
-/** @name      cdf_gen_from_array
+/** 
  * @brief      Generate a cumulative distribution function (cdf) from an array of values
  *
  * @param [in] cdf			Pointer to the cdf that will be populated here
@@ -630,7 +630,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 }
 
 /**********************************************************/
-/** @name      cdf_get_rand
+/** 
  * @brief      Generate a single sample from a cdf  
  *
  * @param [in] CdfPtr  cdf   a structure which contains the cumulative distribution function.
@@ -686,7 +686,7 @@ cdf_get_rand (cdf)
 
 
 /**********************************************************/
-/** @name      cdf_limit
+/** 
  * @brief      sets limit1 and limit2 so that one can generate distributions 
  * from a limited range within a previously created cdf.
  *
@@ -791,7 +791,7 @@ cdf_limit (cdf, xmin, xmax)
 
 
 /**********************************************************/
-/** @name      cdf_get_rand_limit
+/** 
  * @brief      get a random number for a cdf inside limits set by cdf_limit.
  *
  * @param [in out] CdfPtr  cdf   A ptr to a cdf structure 
@@ -854,7 +854,7 @@ cdf_get_rand_limit (cdf)
 
 
 /**********************************************************/
-/** @name      cdf_to_file
+/** 
  * @brief      Write the full structure of the cumulattive distribution function to a file
  *
  * @param [in] CdfPtr  cdf   A ptr to a cdf structure 
@@ -892,7 +892,7 @@ cdf_to_file (cdf, filename)
 }
 
 /**********************************************************/
-/** @name      cdf_check
+/** 
  * @brief      a simple routine to check some basics of the cumulative distribution function.
  * 	
  *
@@ -1001,7 +1001,7 @@ cdf_check (cdf)
 
 
 /**********************************************************/
-/** @name      calc_cdf_gradient
+/** 
  * @brief      Calculate gradients for a cdf to be used to better approzimte
  * a cdf calculated at tivn points
  *
@@ -1076,7 +1076,7 @@ calc_cdf_gradient (cdf)
 
 
 /**********************************************************/
-/** @name      cdf_array_fixup
+/** 
  * @brief      Given two paralel arrays, x and y, this routine reorders the array
  * in ascending order of x
  *

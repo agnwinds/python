@@ -22,7 +22,7 @@
 #include "log.h"
 
 /**********************************************************/
-/** @name      agn_init
+/** 
  * @brief      Calculates the total luminosity of an AGN type source
  *
  * @param [in] double  r   radius of emitting object
@@ -108,7 +108,7 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
 /* This routine returns the specific luminosity, that is the luminosity within the frequency interval */
 
 /**********************************************************/
-/** @name      emittance_pow
+/** 
  * @brief      The luminosity of a power law over a frerquency range
  *
  * @param [in] double  freqmin   lower frequency bound
@@ -195,7 +195,7 @@ emittance_pow (freqmin, freqmax, alpha)
 
 
 /**********************************************************/
-/** @name      emittance_bpow
+/** 
  * @brief      Works out the luminosity of a broken power law
  * 
  * @param [in out] double  freqmin   min frequency that we are generating photons over
@@ -346,7 +346,7 @@ emittance_bpow (freqmin, freqmax, lum, alpha)
 
 
 /**********************************************************/
-/** @name      photo_gen_agn
+/** 
  * @brief      Generate a photon from an AGN object
  *
  * @param [in out] PhotPtr  p   pointer to the photon array

@@ -78,7 +78,7 @@
 
 
 /**********************************************************/
-/** @name      partition_functions
+/** 
  * @brief      calculates the partition functions
  * 	for a single cell in the grid (and then calls a routine that
  * 	calculates the level populations
@@ -261,7 +261,7 @@ partition_functions (xplasma, mode)
 
 
 /**********************************************************/
-/** @name      partition_functions_2
+/** 
  * @brief      calculates the partition functions
  * 	for a pair of ions at a given temperature. 
  *

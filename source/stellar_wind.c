@@ -21,7 +21,7 @@
 
 
 /**********************************************************/
-/** @name      get_stellar_wind_params
+/** 
  * @brief      gets input data which is necessary for a Castor and Larmors'
  * 	(1979) description of an O star wind, 
  *
@@ -100,7 +100,7 @@ get_stellar_wind_params (ndom)
 
 
 /**********************************************************/
-/** @name      stellar_velocity
+/** 
  * @brief      Calbulate the wind velocity at a position
  *
  * @param [in] int  ndom   The domain number
@@ -163,7 +163,7 @@ stellar_velocity (ndom, x, v)
 
 
 /**********************************************************/
-/** @name      stellar_rho
+/** 
  * @brief      Calculate the density of an stellar_wind at a position x
  *
  * @param [in] int  ndom   The domain number

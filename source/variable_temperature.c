@@ -96,7 +96,7 @@ double xxxne, xip;
 
 
 /**********************************************************/
-/** @name      variable_temperature
+/** 
  * @brief      modifies the densities of ions, levels, and
  * partition functions of ions within a cell of the wind based upon the mode, 
  * and other data contained within the WindPtr itself, such as t_r, t_e, w, 
@@ -424,7 +424,7 @@ variable_temperature (xplasma, mode)
 
 
 /**********************************************************/
-/** @name      pi_correct
+/** 
  * @brief      calculates the photoionization rate
  *  correction factor for the number density of two adjacent ions   
  *
@@ -528,7 +528,7 @@ pi_correct (xtemp, nion, xplasma, mode)
 
 
 /**********************************************************/
-/** @name      temp_func
+/** 
  * @brief      the function minimised by zbrent to find a temperature
  * when the ion ratios are one (so the logarithm will be 0), 
  * to avoid numerical problems. 

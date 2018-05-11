@@ -85,7 +85,7 @@
 
 
 /**********************************************************/
-/** @name      compute_dr_coeffs
+/** 
  * @brief      returns the volumetric dielectronic rate
  *  	coefficients for a given temperature.
  *
@@ -176,7 +176,7 @@ compute_dr_coeffs (temp)
 
 
 /**********************************************************/
-/** @name      total_dr
+/** 
  * @brief      calculates the total luminosity from DR.
  *
  * @param [in] WindPtr  one   Pointer to the wind cell currently under analysis

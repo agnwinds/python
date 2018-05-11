@@ -33,7 +33,7 @@
 
 
 /**********************************************************/
-/** @name      fraction
+/** 
  * @brief Perform linear/logarithmic interpolation of an array    
  *
  * @param [in] double  value   The value used for interpoaltion
@@ -153,7 +153,7 @@ to reflect the behavior of the search routine in where_in_grid. */
 
 
 /**********************************************************/
-/** @name      linterp
+/** 
  * @brief      Perform a linear interpolation on two parallel arrays, the fist
  * of which contains a set of values to be interpolated and the second of
  * which has the function at those values
@@ -223,7 +223,7 @@ linterp (x, xarray, yarray, xdim, y, mode)
 
 
 /**********************************************************/
-/** @name      coord_fraction
+/** 
  * @brief      calculate the fractional 
  * 	contributions in interpolations of values of quantities,
  * 	such as electron density, by various cells in the 
@@ -402,7 +402,7 @@ coord_fraction (ndom, ichoice, x, ii, frac, nelem)
 
 
 /**********************************************************/
-/** @name      where_in_2dcell
+/** 
  * @brief      calculates the fractional
  * 	location of a position in any 2d grid.
  *
@@ -508,7 +508,7 @@ where_in_2dcell (ichoice, x, n, fx, fz)
 
 
 /**********************************************************/
-/** @name      wind_n_to_ij
+/** 
  * @brief      Translate a cell number in the wind to the two-d grid 
  * position in a specific domain
  *
@@ -555,7 +555,7 @@ wind_n_to_ij (ndom, n, i, j)
 
 
 /**********************************************************/
-/** @name      wind_ij_to_n
+/** 
  * @brief      Translate from the 2d element for an individual domain to the wind
  * element number
  *
@@ -589,7 +589,7 @@ wind_ij_to_n (ndom, i, j, n)
 
 
 /**********************************************************/
-/** @name      wind_x_to_n
+/** 
  * @brief      Determine the wind domain element number from a postion
  *
  * @param [in] double  x[]   A three vector describing a position

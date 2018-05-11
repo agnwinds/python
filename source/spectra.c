@@ -95,7 +95,7 @@
 //OLD **************************************************************/
 
 /**********************************************************/
-/** @name      spectrum_init
+/** 
  * @brief      allocates space for and initializes the spectrum arrays, storing 
  * the criteria that are later used to create each spectrum.
  *
@@ -393,7 +393,7 @@ disk. The minus sign in the terms associated with phase are to make this happen.
 
 
 /**********************************************************/
-/** @name      spectrum_create
+/** 
  * @brief      Increments the spectrum arrays
  *  	after each flight of photons is processed (during ionization
  *  	cycles and for detailed spectra in the Live or Die option).
@@ -787,7 +787,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 
 
 /**********************************************************/
-/** @name      spectrum_summary
+/** 
  * @brief      (writes out the spectrum to a file
  *
  * @param [in] char  filename[]   The name of the file to write
@@ -990,7 +990,7 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
 
 
 /**********************************************************/
-/** @name      spectrum_restart_renormalise
+/** 
  * @brief      renormalizes the detailed spectra in case 
  * of a restart
  *

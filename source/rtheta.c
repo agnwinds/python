@@ -21,7 +21,7 @@
 
 
 /**********************************************************/
-/** @name      rtheta_ds_in_cell
+/** 
  * @brief      calculates the distance to the far
  *         boundary of the cell in which the photon bundle resides.
  *
@@ -99,7 +99,7 @@ rtheta_ds_in_cell (ndom,p)
 
 
 /**********************************************************/
-/** @name      rtheta_make_grid
+/** 
  * @brief      Set up an rtheta grid                
  *
  * @param [in] WindPtr  w   The structure which defines entire wind 
@@ -228,7 +228,7 @@ rtheta_make_grid (w, ndom)
 
 
 /**********************************************************/
-/** @name      rtheta_make_cones
+/** 
  * @brief      defines the wind cones that are needed to calculate ds in a cell
  *
  * @param [in out] int  ndom   The domain to populate with the cone structures
@@ -285,7 +285,7 @@ rtheta_make_cones (ndom, w)
 
 
 /**********************************************************/
-/** @name      rtheta_wind_complete
+/** 
  * @brief      Complete the creation of an rtheta wind comain by populating certain arrays used for interpolation
  *
  * @param [in] int  ndom   The domain containing this wind component
@@ -401,7 +401,7 @@ rtheta_wind_complete (ndom, w)
 
 
 /**********************************************************/
-/** @name      rtheta_volumes
+/** 
  * @brief      rtheta_volume(w) calculates the wind volume of a cell in rtheta coordinate sysem
  * 	allowing for the fact that some cells may not be in the active wind region
  *
@@ -606,7 +606,7 @@ rtheta_volumes (ndom, w)
 
 
 /**********************************************************/
-/** @name      rtheta_where_in_grid
+/** 
  * @brief      locates the grid position of the vector,
  * 	when one is using rtheta coordinates.
  *
@@ -694,7 +694,7 @@ rtheta_where_in_grid (ndom, x)
 
 
 /**********************************************************/
-/** @name      rtheta_get_random_location
+/** 
  * @brief      
  *
  * <NOTE: The [in out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
@@ -809,7 +809,7 @@ rtheta_get_random_location (n, x)
 
 
 /**********************************************************/
-/** @name      rtheta_extend_density
+/** 
  * @brief      extends the density to
  * 	regions just outside the wind regiions so that
  * 	extrapolations of density can be made there
@@ -889,7 +889,7 @@ rtheta_extend_density (ndom, w)
 
 
 /**********************************************************/
-/** @name      rtheta_is_cell_in_wind
+/** 
  * @brief      Check whether a cell in an rtheta coordiante system 
  * is in the wind
  *

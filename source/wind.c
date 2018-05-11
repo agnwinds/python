@@ -43,7 +43,7 @@
 
 
 /**********************************************************/
-/** @name      where_in_wind
+/** 
  * @brief      determines whether a position x is in a wind region.
  *
  * @param [in] double  x[]    a position
@@ -207,7 +207,7 @@ usually analytic expressions
 
 
 /**********************************************************/
-/** @name      model_velocity
+/** 
  * @brief      Calculate the wind velocity at a specific point in space from the original 
  * usually analytic expressions
  *
@@ -290,7 +290,7 @@ model_velocity (ndom, x, v)
 
 
 /**********************************************************/
-/** @name      model_vgrad
+/** 
  * @brief      calculate  the velocity gradient at positions in the flow based on
  * the analytic wind models and imported models.  
  *
@@ -358,7 +358,7 @@ model_vgrad (ndom, x, v_grad)
 
 
 /**********************************************************/
-/** @name      model_rho
+/** 
  * @brief      calculate the density of the wind in from the flow based on the
  * analytic wind models.
  *
@@ -432,7 +432,7 @@ model_rho (ndom, x)
 
 
 /**********************************************************/
-/** @name      wind_check
+/** 
  * @brief      Simple checks of the wind structure for reasonability
  *
  * @param [in out] WindPtr  www   The entire wind

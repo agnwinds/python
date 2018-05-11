@@ -59,7 +59,7 @@
 
 
 /**********************************************************/
-/** @name      spherical_ds_in_cell
+/** 
  * @brief      calculates the distance to the far
  *         boundary of the cell in which the photon bundle resides.
  *
@@ -118,7 +118,7 @@ spherical_ds_in_cell (ndom,p)
 
 
 /**********************************************************/
-/** @name      spherical_make_grid
+/** 
  * @brief      defines the cells in a spherical grid
  *
  * @param [in] WindPtr  w   The structure which defines the wind in Python
@@ -198,7 +198,7 @@ spherical_make_grid (w, ndom)
 
 
 /**********************************************************/
-/** @name      spherical_wind_complete
+/** 
  * @brief      Initialize some arrays in a domain for a spherical system that are used in
  * various interpolation routines
  *
@@ -243,7 +243,7 @@ spherical_wind_complete (ndom,w)
 
 
 /**********************************************************/
-/** @name      spherical_volumes
+/** 
  * @brief      spherical_volume(w) calculates the wind volume of cell
  * 	allowing for the fact that some cells are partially in the wind
  *
@@ -360,7 +360,7 @@ spherical_volumes (ndom, w)
 
 
 /**********************************************************/
-/** @name      spherical_where_in_grid
+/** 
  * @brief      locates the element in wmain corrosponding to a position
  * 	when one is using spherical coordinates.
  *
@@ -424,7 +424,7 @@ spherical_where_in_grid (ndom, x)
 
 
 /**********************************************************/
-/** @name      spherical_get_random_location
+/** 
  * @brief      
  *
  * @param [in] int  n   -- Cell in which random position is to be generated
@@ -485,7 +485,7 @@ spherical_get_random_location (n, x)
 
 
 /**********************************************************/
-/** @name      spherical_extend_density
+/** 
  * @brief      extends the density to
  * regions just outside the wind regiions so that
  * extrapolations of density can be made there
@@ -561,7 +561,7 @@ spherical_extend_density (ndom, w)
 
 
 /**********************************************************/
-/** @name      shell_make_grid
+/** 
  * @brief      defines the cells in a thin shell, a special case of a spherical wind. 
  *
  * @param [in out] WindPtr  w   The structure which defines the wind in Python

@@ -23,7 +23,7 @@
 
 
 /**********************************************************/
-/** @name      cylind_ds_in_cell
+/** 
  * @brief      calculate the distance to the far
  * boundary of the cell in which the photon bundle when dealing
  * with a cylindrical domain
@@ -135,7 +135,7 @@ cylind_ds_in_cell (ndom, p)
 
 
 /**********************************************************/
-/** @name      cylind_make_grid
+/** 
  * @brief      defines the cells in a cylindrical grid
  *
  * @param [in] int  ndom   The domain number of interest
@@ -270,7 +270,7 @@ cylind_make_grid (ndom, w)
 
 
 /**********************************************************/
-/** @name      cylind_wind_complete
+/** 
  * @brief      Create arrays that are used for interpolating
  * quantities, such as density and velocity 
  *
@@ -335,7 +335,7 @@ cylind_wind_complete (ndom, w)
 
 
 /**********************************************************/
-/** @name      cylind_volumes
+/** 
  * @brief      Calculates the wind volume for cells in a cylindrical domain
  * 	allowing for the fact that some cells are not necessarily entirely in
  * 	the wind
@@ -490,7 +490,7 @@ cylind_volumes (ndom, w)
 
 
 /**********************************************************/
-/** @name      cylind_where_in_grid
+/** 
  * @brief      locates the grid position of the vector,
  * 	when one is using cylindrical coordinates.
  *
@@ -558,7 +558,7 @@ cylind_where_in_grid (ndom, x)
 
 
 /**********************************************************/
-/** @name      cylind_get_random_location
+/** 
  * @brief      Generate a position at a random location within a specific
  * cell of a domain with cylindrical coordinates
  *
@@ -639,7 +639,7 @@ cylind_get_random_location (n, x)
 
 
 /**********************************************************/
-/** @name      cylind_extend_density
+/** 
  * @brief      extends the density to
  * 	regions just outside the wind regiions so that
  * 	extrapolations of density can be made there
@@ -741,7 +741,7 @@ History:
 
 
 /**********************************************************/
-/** @name      cylind_is_cell_in_wind
+/** 
  * @brief      Check whether this cell is in the wind or not
  *
  * @param [in] int  n   The number of an element in the wind structure

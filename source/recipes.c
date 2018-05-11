@@ -32,7 +32,7 @@
 
 
 /**********************************************************/
-/** @name      qromb                
+/**                 
  * @brief      Integrate a function between a and b 
  *
  *
@@ -196,7 +196,7 @@ polint (xa, ya, n, x, y, dy)
 
 
 /**********************************************************/
-/** @name      zbrent               
+/**                
  * @brief      A routine that finds the rooot of  a function f 
  *
  *
@@ -342,7 +342,7 @@ free_vector (a, i, j)
 
 
 /**********************************************************/
-/** @name      rtsafe               
+/**                
  * @brief      A routine that mimimizes a function f 
  *
  *
@@ -434,7 +434,7 @@ rtsafe (void (*funcd) (double, double *, double *), double x1, double x2,
 
 
 /**********************************************************/
-/** @name      golden               
+/**                
  * @brief      A routine that mimimizes a function f 
  *
  *

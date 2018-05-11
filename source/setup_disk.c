@@ -44,7 +44,7 @@ History:
 **************************************************************/
 
 /**********************************************************/
-/** @name       get_disk_params   
+/**    
  * @brief       get the parameters need to define a disk  
  *
  * @param [in] None                     

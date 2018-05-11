@@ -27,7 +27,7 @@
 
 
 /**********************************************************/
-/** @name      do_windsave2table
+/** 
  * @brief      The main routine associated with windsave2table, this routine calls
  * various other routines which write individual files    
  *
@@ -121,7 +121,7 @@ do_windsave2table(root)
 
 
 /**********************************************************/
-/** @name      create_master_table
+/** 
  * @brief      writes a specific  variables of a windsaave
  * which are intended to be of general interest to 
  * file which has the format of an astropy table
@@ -420,7 +420,7 @@ create_master_table (ndom, rootname)
 
 
 /**********************************************************/
-/** @name      create_heat_table
+/** 
  * @brief      writes a selected variables related to heating and cooling
  * processes to an ascii file which can be read as an astropy table
  * 
@@ -652,7 +652,7 @@ create_heat_table (ndom, rootname)
 
 
 /**********************************************************/
-/** @name      create_ion_table
+/** 
  * @brief      makes an astropy table containing the relative abundances
  *  of a given element as a function of the position in the grid
  *
@@ -847,7 +847,7 @@ create_ion_table (ndom, rootname, iz)
 
 
 /**********************************************************/
-/** @name      get_ion
+/** 
  * @brief      Get get density, etc for one particular ion
  *
  * @param [in out] int  ndom   the domain number
@@ -966,7 +966,7 @@ double
 
 
 /**********************************************************/
-/** @name      get_one
+/** 
  * @brief      Get a simple variable from the PlasmaPtr array
  *
  * @param [in out] int  ndom   The domain in question

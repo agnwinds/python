@@ -19,7 +19,7 @@
 
 
 /**********************************************************/
-/** @name      init_log_and_windsave
+/** 
  * @brief      init_files
  *
  * @param [in] int  restart_stat   A flag indicating whether 
@@ -92,7 +92,7 @@ init_log_and_windsave (restart_stat)
 
 
 /**********************************************************/
-/** @name      setup_created_files
+/** 
  * @brief      Use the root name of the .pf file to create
  * names for the various output files written by Python
  *

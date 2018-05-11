@@ -39,7 +39,7 @@
 #include "python.h"
 
 /**********************************************************/
-/** @name      translate
+/** 
  * @brief      a steering routine that either calls _in_space or _in_wind  depending upon the
  * 	current location of the photon.
  *
@@ -117,7 +117,7 @@ translate (w, pp, tau_scat, tau, nres)
 
 
 /**********************************************************/
-/** @name      translate_in_space
+/** 
  * @brief      translates the photon from its current position to the 
  * 	edge of the wind.
  *
@@ -328,7 +328,7 @@ photon hit the star in its passage from pold to the current position */
 
 
 /**********************************************************/
-/** @name      ds_to_wind
+/** 
  * @brief      calculates the photon pathlength to the edge of the wind.
  *
  * @param [in out] PhotPtr  pp   A photon
@@ -515,7 +515,7 @@ ds_to_wind (pp, ndom_current)
 
 
 /**********************************************************/
-/** @name      translate_in_wind
+/** 
  * @brief      translates the photon within a single cell in the wind.
  *
  * @param [in] WindPtr  w   The entire wind
@@ -719,7 +719,7 @@ The choice of SMAX_FRAC can affect execution time.*/
 
 
 /**********************************************************/
-/** @name      ds_in_cell
+/** 
  * @brief      calculates the distance photon can travel within the cell
  * 	that it is currently in.
  *
@@ -799,7 +799,7 @@ return and record an error */
 
 
 /**********************************************************/
-/** @name      walls
+/** 
  * @brief      determines whether the photon has encountered the star of disk or
  * reached the edges of the grid and returns the appropriate
  * tatus.

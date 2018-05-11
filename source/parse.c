@@ -19,7 +19,7 @@
 
 
 /**********************************************************/
-/** @name      parse_command_line
+/** 
  * @brief      parses the command line options
  *
  * @param [in]  int  argc   the number of command line arguments
@@ -208,7 +208,7 @@ parse_command_line (argc, argv)
 
 
 /**********************************************************/
-/** @name      help
+/** 
  * @brief      print out some basic help concering command line options for the program
  *
  * @return     0 in all cases

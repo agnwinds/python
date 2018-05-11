@@ -32,7 +32,7 @@
 
 
 /**********************************************************/
-/** @name      calculate_ionization
+/** 
  * @brief      run the ionization cycles for a 
  * python model
  *
@@ -349,7 +349,7 @@ calculate_ionization (restart_stat)
 
 
 /**********************************************************/
-/** @name      make_spectra
+/** 
  * @brief      generates the detailed spectra
  *
  * @param [in out] int  restart_stat   0 if the is run is beginning from

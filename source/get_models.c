@@ -60,7 +60,7 @@
 
 
 /**********************************************************/
-/** @name      get_models
+/** 
  * @brief     This routine reads in a set of models for use in generation of spectra,  
  *     e.g. a set of Kurucz stellar atmospheres which can
  *     used to simulate a disk, given a run of temperature and gravity
@@ -272,7 +272,7 @@ get_models (modellist, npars, spectype)
 
 
 /**********************************************************/
-/** @name      get_one_model
+/** 
  * @brief      reads a single model file from disk and puts the result into the structure
  *    onemod
  *
@@ -330,7 +330,7 @@ get_one_model (filename, onemod)
 
 
 /**********************************************************/
-/** @name      model
+/** 
  * @brief      interpolates between s and places the results in 
  *   	comp[spectype].xmod
  *

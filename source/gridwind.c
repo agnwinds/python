@@ -56,7 +56,7 @@
 
 
 /**********************************************************/
-/** @name      create_maps
+/** 
  * @brief      Create a map between wind and plasma cells
  *
  * @param [in] int  ichoice   An option which if non-zero indicates
@@ -138,7 +138,7 @@ create_maps (ichoice)
 
 
 /**********************************************************/
-/** @name      calloc_wind
+/** 
  * @brief      Allocate space for the wind domain
  *
  * @param [in] nelem   The number of elements in the wind domain to allocate
@@ -187,7 +187,7 @@ calloc_wind (nelem)
 
 
 /**********************************************************/
-/** @name      calloc_plasma
+/** 
  * @brief      Allocate memory for plasmamain, which contains temperature, densities, etc.
  * for cells which are in the wind
  *
@@ -263,7 +263,7 @@ calloc_plasma (nelem)
 
 
 /**********************************************************/
-/** @name      check_plasma
+/** 
  * @brief      Check that one is not trying to get information from
  * the dummy Plasma element that is associated with wind elements that
  * are not really in the wind
@@ -305,7 +305,7 @@ check_plasma (xplasma, message)
 
 
 /**********************************************************/
-/** @name      calloc_macro
+/** 
  * @brief      Allocate memory to store information for macro atoms for
  * each Plasma element
  *
@@ -367,7 +367,7 @@ calloc_macro (nelem)
 
 
 /**********************************************************/
-/** @name      calloc_estimators
+/** 
  * @brief      Dynamically allocate various arrays in macromain
  *
  * @param [in] int  nelem   The number of elements in macromain
@@ -547,7 +547,7 @@ calloc_estimators (nelem)
 
 
 /**********************************************************/
-/** @name      calloc_dyn_plasma
+/** 
  * @brief      This subroutine allocates space for dynamic arrays in the plasma 
  * 	structure
  *

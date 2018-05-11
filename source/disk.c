@@ -19,7 +19,7 @@
 
 
 /**********************************************************/
-/** @name      tdisk
+/** 
  * @brief      Calculate the reference temperarure for a standard Shakura-Sunyaeev disk
  *
  * @param [in] double  m   mass of the central object
@@ -51,7 +51,7 @@ tdisk (m, mdot, r)
 
 
 /**********************************************************/
-/** @name      teff
+/** 
  * @brief      Calculate the temperature of the disk at a normalised distance x
  *
  * @param [in] double  t   reference temperature of the disk in degrees
@@ -165,7 +165,7 @@ teff (t, x)
 
 
 /**********************************************************/
-/** @name      gdisk
+/** 
  * @brief      Calculate a reference gravity for the disk
  *
  * @param [in] double  mass   Mass of the central object
@@ -199,7 +199,7 @@ gdisk (mass, mdot, rmin)
 
 
 /**********************************************************/
-/** @name      geff
+/** 
  * @brief      Calculate the effective gravity at a specfic position in the disk
  *
  * @param [in] double  g0  reference gravity in cm s**-2
@@ -232,7 +232,7 @@ double north[] = { 0.0, 0.0, 1.0 };
 
 
 /**********************************************************/
-/** @name      vdisk
+/** 
  * @brief      Calculate the speed and velocity v at which material given
  *    specific position in the disk
  *
@@ -283,7 +283,7 @@ vdisk (x, v)
 
 
 /**********************************************************/
-/** @name      zdisk
+/** 
  * @brief      Calculate the height of the disk at a certain radius
  *
  * @param [in] double  r   a radial position in the disk.
@@ -324,7 +324,7 @@ struct plane diskplane, disktop, diskbottom;
 
 
 /**********************************************************/
-/** @name      ds_to_disk
+/** 
  * @brief      Calculates the distance that a photon
  *  	would need to travel from its current position to hit disk.
  *
@@ -607,7 +607,7 @@ ds_to_disk (p, allow_negative)
 
 
 /**********************************************************/
-/** @name      disk_deriv
+/** 
  * @brief      Calculate the change in disk height as s function of s
  *
  * @param [in] double  s  A distance along the path of a photon
@@ -659,7 +659,7 @@ disk_deriv (s, value, derivative)
 
 
 /**********************************************************/
-/** @name      qdisk_init
+/** 
  * @brief      Initialize a structure (qdisk) for recording information about photons/energy impinging
  * 	on the disk, which is stored in a disk structure called qdisk.
  *
@@ -699,7 +699,7 @@ qdisk_init ()
 
 
 /**********************************************************/
-/** @name      qdisk_save
+/** 
  * @brief      Save the information in the qdisk structure to a file
  *
  * @param [in] char *  diskfile   Name of the file whihc is writteen
@@ -768,7 +768,7 @@ qdisk_save (diskfile, ztot)
 
 
 /**********************************************************/
-/** @name      read_non_standard_disk_profile
+/** 
  * @brief      Read the temperature profile from a file
  *
  * @param [in out] char *  tprofile   Name of the input file

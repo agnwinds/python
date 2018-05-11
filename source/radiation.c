@@ -122,7 +122,7 @@ int iicount = 0;
 
 
 /**********************************************************/
-/** @name      radiation
+/** 
  * @brief      updates the  field parameters in the wind and reduces 
  * the weight of the photon as a result of the effects of  free free, bound-free and 
  * Compton scattering. The routine  
@@ -612,7 +612,7 @@ radiation (p, ds)
 
 
 /**********************************************************/
-/** @name      kappa_ff
+/** 
  * @brief      calculates the free-free opacity allowing for stimulated emission
  *
  * @param [in] PlasmaPtr  xplasma   The plasma cell where the free-free optacity is to be calculated
@@ -705,7 +705,7 @@ kappa_ff (xplasma, freq)
 
 
 /**********************************************************/
-/** @name      sigma_phot
+/** 
  * @brief      calculates the
  * 	photionization crossection due to a Topbase level associated with
  * 	x_ptr at frequency freq
@@ -791,7 +791,7 @@ sigma_phot (x_ptr, freq)
 
 
 /**********************************************************/
-/** @name      sigma_phot_verner
+/** 
  * @brief      double (x_ptr,freq)	calculates the photionization crossection due to the transition 
  *  	associated with x_ptr at frequency freq (when the data is in the form of the Verner x-sections
  *
@@ -868,7 +868,7 @@ sigma_phot_verner (x_ptr, freq)
 
 
 /**********************************************************/
-/** @name      den_config
+/** 
  * @brief      returns the precalculated density
  * 	of a particular "nlte" level.	
  *
@@ -955,7 +955,7 @@ in the ground state */
 
 
 /**********************************************************/
-/** @name      pop_kappa_ff_array
+/** 
  * @brief      populates the multiplicative 	
  * constant, including a gaunt factor, to be  used in the 
  * calculating free free  emission (and absorption). 
@@ -1055,7 +1055,7 @@ pop_kappa_ff_array ()
 
 
 /**********************************************************/
-/** @name      update_banded_estimators
+/** 
  * @brief      updates the estimators required for determining crude
  * spectra in each Plasma cell
  *
@@ -1225,7 +1225,7 @@ update_banded_estimators (xplasma, p, ds, w_ave)
 
 
 /**********************************************************/
-/** @name      mean_intensity
+/** 
  * @brief      returns a value for the mean intensity
  *
  * @param [in] PlasmaPtr  xplasma   PlasmaPtr for the cell - supplies spectral model

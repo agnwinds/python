@@ -32,7 +32,7 @@
 
 
 /**********************************************************/
-/** @name      init_geo
+/** 
  * @brief      initializes the geo structure to something that is semi-reasonable
  *
  * @return     Always returns 0
@@ -150,7 +150,7 @@ init_geo ()
 
 
 /**********************************************************/
-/** @name      get_spectype
+/** 
  * @brief      Generalized routine to get the spectrum type for a radiation source
  * and if necessary read a set of precalculated spectra
  *
@@ -250,7 +250,7 @@ get_spectype (yesno, question, spectype)
 
 
 /**********************************************************/
-/** @name      init_advanced_modes
+/** 
  * @brief      simply initialises the set of 
  * advanced modes stored in the modes structure to a 
  * default value. 
@@ -307,7 +307,7 @@ init_advanced_modes ()
 
 
 /**********************************************************/
-/** @name      init_observers
+/** 
  * @brief      get inputs that describe the detailed spectra that
  * one intends to extract.
  *
@@ -477,7 +477,7 @@ init_observers ()
 
 
 /**********************************************************/
-/** @name      init_photons
+/** 
  * @brief      gets information about the number of 
  * 	cycles and how many photons there should be per cycle.
  *
@@ -554,7 +554,7 @@ init_photons ()
 
 
 /**********************************************************/
-/** @name      init_ionization
+/** 
  * @brief      Select the ionization and line transfer modes, along
  * with various other parameters about ionization
  *
@@ -662,7 +662,7 @@ init_ionization ()
 
 
 /**********************************************************/
-/** @name      setup_dfudge
+/** 
  * @brief      Sets a global "push_through_distance" designed
  * to prevent photons from being trapped at boundaries
  *

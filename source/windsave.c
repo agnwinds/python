@@ -32,7 +32,7 @@
 
 
 /**********************************************************/
-/** @name      wind_save
+/** 
  * @brief      Save all of the strutures associated with the 
  * wind to a file
  *
@@ -155,7 +155,7 @@ in the plasma structure */
 
 
 /**********************************************************/
-/** @name      wind_read
+/** 
  * @brief      Read back the windsavefile 
  *
  * @param [in] char  filename[]   The full name of the windsave file
@@ -312,7 +312,7 @@ wind_read (filename)
 
 
 /**********************************************************/
-/** @name      wind_complete
+/** 
  * @brief      A driver routine that calls coordinate-system specific routines
  * that complete the descirption of the wind
  *
@@ -375,7 +375,7 @@ wind_complete (w)
 
 
 /**********************************************************/
-/** @name      spec_save
+/** 
  * @brief      Save all the spectra to a binary file
  *
  * @param [in] char  filename[]   The file to write to 
@@ -415,7 +415,7 @@ spec_save (filename)
 
 
 /**********************************************************/
-/** @name      spec_read
+/** 
  * @brief      Read the binary file containing all the spectra
  *
  * @param [in] char  filename[]   The name of the file

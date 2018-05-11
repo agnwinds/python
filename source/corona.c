@@ -21,7 +21,7 @@
 
 
 /**********************************************************/
-/** @name      get_corona_params
+/** 
  * @brief      gets input data which is necessary to describe a corona above
  * 	the surface of the disk.
  *
@@ -137,7 +137,7 @@ get_corona_params (ndom)
 
 
 /**********************************************************/
-/** @name      corona_velocity
+/** 
  * @brief      double (x,v) calulates the v the wind at a position r
  * 	x
  *
@@ -192,7 +192,7 @@ corona_velocity (ndom, x, v)
 
 
 /**********************************************************/
-/** @name      corona_rho
+/** 
  * @brief      double (x) calculates the density of a corona at a position x
  *
  * @param [in] int  ndom   The domain where the corona is described

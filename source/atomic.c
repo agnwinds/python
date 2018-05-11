@@ -27,7 +27,7 @@
 
 
 /**********************************************************/
-/** @name      sigma_phot
+/** 
  * @brief      double (x_ptr,freq)	calculates the photionization crossection due to the transition 
  * 	associated with x_ptr at frequency freq
  *
@@ -78,7 +78,7 @@ sigma_phot (x_ptr, freq)
 
 
 /**********************************************************/
-/** @name      a21
+/** 
  * @brief      Calculate the Einstein A coefficient for a transition
  *
  * @param [in out] struct lines *  line_ptr   Ptr containing data describing the line

@@ -24,7 +24,7 @@
 
 
 /**********************************************************/
-/** @name      get_yso_wind_params
+/** 
  * @brief      gets input data that are necessary for a YSO
  * 	comprising a region that resembles a KWD wind and a region outside
  * 	this that contins a speherical wind
@@ -101,7 +101,7 @@ one after the other*/
 
 
 /**********************************************************/
-/** @name      yso_velocity
+/** 
  * @brief      double (x,v) calculates the v in cartesian coordinates
  * 	of a yso wind from a position x in cartesian coordinates.
  *
@@ -148,7 +148,7 @@ the disk.  If it does not, then we calculate the velocity for a stellar wind */
 
 
 /**********************************************************/
-/** @name      yso_rho
+/** 
  * @brief      double (x) calculates the density of an kn_wind at a position x
  *
  * @param [in] int  ndom   The current domain number
