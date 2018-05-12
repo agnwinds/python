@@ -1,46 +1,70 @@
+/***********************************************************/
+/** @file  py_wind_ion.c
+ * @author ksl
+ * @date   May, 2018
+ *
+ * @brief   This file contains various subroutines of py_wind.  
+ * It is not part of python!
+ *
+ * 
+ ***********************************************************/
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
- 
- 	This file contains various subroutines of py_wind.  It is not part of python!
- 	
-	ion_summary (w, element, istate, iswitch, rootname, ochoice) calculates and 
-	displays information for a specific element and ionization state.  The information
-	displayed depends upon the value of iswitch  
+/**********************************************************/
+/** @name      import_wind
+ * @brief      Import a gridded model
+ *
+ * @param [in] int  ndom   The domain for the model
+ * @return   Always returns 0  
+ *
+ * @details
+ *
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+//OLD /***********************************************************
+//OLD                                        Space Telescope Science Institute
+//OLD 
+//OLD  Synopsis:
+//OLD  
+//OLD  	This file contains various subroutines of py_wind.  It is not part of python!
+//OLD  	
+//OLD 	ion_summary (w, element, istate, iswitch, rootname, ochoice) calculates and 
+//OLD 	displays information for a specific element and ionization state.  The information
+//OLD 	displayed depends upon the value of iswitch  
 	
 
-Arguments:		
-	WindPtr w;
-	int element,istate;
-	char filename[]			Output file name, if "none" then nothing is written;
-	int iswitch                     0 = ion fraction
-					1 = ion density
-					2 = number of scatters 
-     	char rootname[];                rootname of the output file
-     	int ochoice;			The screen display is always the actual value. If ochoice
-					is non-zere an output file is written.
-
-Returns:
- 
-Description:	
-	
-		
-Notes:
-
-History:
- 	97jun	ksl	Coding on py_wind began.
-	01sep	ksl	Added switch to ion summary so that ion density rather than ion fraction could
-			be printed out.  iswitch==0 --> fraction, otherwise density
-	01dec	ksl	Updated for new calling structure for two_level_atom & scattering_fraction.
-	04nov	ksl	Updated for multiple coordinate systems, i.e to use the routine display. 
-			Note that many of these summaries seem quite dated, and I have really not 
-			checked what they are supposed to do.
-	05apr	ksl	Eliminated MDIM references
-	090125	ksl	Added capability to display the number of scatters of an ion taking
-			place in a cell.
-**************************************************************/
+//OLD Arguments:		
+//OLD 	WindPtr w;
+//OLD 	int element,istate;
+//OLD 	char filename[]			Output file name, if "none" then nothing is written;
+//OLD 	int iswitch                     0 = ion fraction
+//OLD 					1 = ion density
+//OLD 					2 = number of scatters 
+//OLD      	char rootname[];                rootname of the output file
+//OLD      	int ochoice;			The screen display is always the actual value. If ochoice
+//OLD 					is non-zere an output file is written.
+//OLD 
+//OLD Returns:
+//OLD  
+//OLD Description:	
+//OLD 	
+//OLD 		
+//OLD Notes:
+//OLD 
+//OLD History:
+//OLD  	97jun	ksl	Coding on py_wind began.
+//OLD 	01sep	ksl	Added switch to ion summary so that ion density rather than ion fraction could
+//OLD 			be printed out.  iswitch==0 --> fraction, otherwise density
+//OLD 	01dec	ksl	Updated for new calling structure for two_level_atom & scattering_fraction.
+//OLD 	04nov	ksl	Updated for multiple coordinate systems, i.e to use the routine display. 
+//OLD 			Note that many of these summaries seem quite dated, and I have really not 
+//OLD 			checked what they are supposed to do.
+//OLD 	05apr	ksl	Eliminated MDIM references
+//OLD 	090125	ksl	Added capability to display the number of scatters of an ion taking
+//OLD 			place in a cell.
+//OLD **************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,6 +75,36 @@ History:
 #include "python.h"
 
 
+
+/**********************************************************/
+/** @name      ion_summary
+ * @brief      Print informaition about a specific ion
+ *
+ * @param [in] WindPtr W   The entire wind          
+ * @param [in] int element An elemeent
+ * @param [in] int istate A particular ion          
+ * @param [in] int iswitch  A intenger indicating what specifically
+ * to display about the ion
+ * @param [in] char rootname []   The rootname of the windsave file
+ * @param [in] int ochoice A parameter indcating whether results should
+ * be written to a file          
+ * @return   Always returns 0  
+ *
+ * @details
+ *	calculates and 
+ *	displays information for a specific element and ionization state.  The information
+ *	displayed depends upon the value of iswitch  
+ *
+ * The choices for iswitch are:
+ *  * 0 ion fractions
+ *  * 1 ion denisities
+ *  * 2 number of scatters involving this ion 
+ *  * 3 the scatterd flux for this ion
+ *
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 int
 ion_summary (w, element, istate, iswitch, rootname, ochoice)
      WindPtr w;
@@ -70,7 +124,6 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
 
 
 
-/* Find the CIV ion */
   nion = 0;
   while (nion < nions && !(ion[nion].z == element && ion[nion].istate == istate))
     nion++;
@@ -190,6 +243,30 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
   return (0);
 }
 
+
+/**********************************************************/
+/** @name      tau_ave_summary
+ * @brief      Calculates tau_ave for a particular transition 
+ * of an element and ion assuming one is in resonance
+ *
+ * @param [in] WindPtr W   The entire wind          
+ * @param [in] int element An elemeent
+ * @param [in] double freq  Frequency of the line of interest
+ * @param [in] int istate A particular ion          
+ * @param [in] char rootname []   The rootname of the windsave file
+ * @param [in] int ochoice A parameter indcating whether results should
+ * be written to a file          
+ * @return   Always returns 0  
+ *
+ * @details
+ *
+ *
+ * ### Notes ###
+ *
+ * IMPORTANT - This routine does not search for the atomic data associated
+ * with line, It assumes a nominal value.
+ *
+ **********************************************************/
 int
 tau_ave_summary (w, element, istate, freq, rootname, ochoice)
      WindPtr w;
@@ -265,29 +342,32 @@ tau_ave_summary (w, element, istate, freq, rootname, ochoice)
 }
 
 
-/***********************************************************
-               Space Telescope Science Institute
 
- Synopsis:
-   line_summary returns luminosity of a given line 
-
-Arguments:    
-  WindPtr w       The structure which defines the wind in Python
-  char rootname[] The root of the input file      
-  int ochoice     Output file type
-
-Returns:
-  File rootname.line[ELEM][ION].dat
- 
-Description:
-  For a given line from a preset selection, outputs luminosity.
-  Can cope with matom/non-matom lines.
-
-Notes:
-
-History:
-  31062016  SWM modified to add H-alpha, matoms
-**************************************************************/
+/**********************************************************/
+/** @name      line_summary
+ * @brief      Calculate the luminoisty for a specific line
+ *
+ * @param [in] WindPtr W   The entire wind          
+ * @param [in] char rootname []   The rootname of the windsave file
+ * @param [in] int ochoice A parameter indcating whether results should
+ * be written to a file          
+ * @return   Always returns 0  
+ *
+ * @details
+ *  For a given line from a preset selection, outputs luminosity.
+ *  Can cope with matom/non-matom lines.
+ *
+ *
+ * File rootname.line[ELEM][ION].dat
+ *
+ *
+ * ### Notes ###
+ *
+ *
+ * History:
+ *  31062016  SWM modified to add H-alpha, matoms
+ *
+ **********************************************************/
 int
 line_summary (w, rootname, ochoice)
      WindPtr w;
@@ -499,6 +579,25 @@ line_summary (w, rootname, ochoice)
   return (0);
 }
 
+
+/**********************************************************/
+/** @name      total_emission_summary
+ * @brief      Get the total emission of the cells
+ *
+ * @param [in] WindPtrYW   The entire wind          
+ * @param [in] char rootname []   The rootname of the windsave file
+ * @param [in] int ochoice A parameter indcating whether results should
+ * be written to a file          
+ * @return   Always returns 0  
+ *
+ * @details
+ *
+ * Calls total_emission
+ *
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 int
 total_emission_summary (w, rootname, ochoice)
      WindPtr w;
@@ -536,6 +635,24 @@ total_emission_summary (w, rootname, ochoice)
   return (0);
 }
 
+
+/**********************************************************/
+/** @name      modify_te   
+ * @brief      Find the electron temperature where heating matches
+ * the cooling
+ *
+ * @param [in] WindPtr   The entire wind          
+ * @param [in] char rootname []   The rootname of the windsave file
+ * @param [in] int ochoice A parameter indcating whether results should
+ * be written to a file          
+ * @return   Always returns 0  
+ *
+ * @details
+ *
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 int
 modify_te (w, rootname, ochoice)
      WindPtr w;
@@ -572,6 +689,26 @@ modify_te (w, rootname, ochoice)
 
 
 
+/**********************************************************/
+/** @name      partial_measure_summary
+ * @brief      Write out the emission measure for a specific
+ * ionization state of an element
+ *
+ * @param [in] WindPtr W   The entire wind          
+ * @param [in] int element The z for an element     
+ * @param [in] int istate  The ion state of an element
+ * @param [in] char rootname []   The rootname of the windsave file
+ * @param [in] int ochoice A parameter indcating whether results should
+ * be written to a file          
+ * @return   Always returns 0  
+ *
+ * @details
+ *
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
 int
 partial_measure_summary (w, element, istate, rootname, ochoice)
      WindPtr w;
@@ -589,7 +726,6 @@ partial_measure_summary (w, element, istate, rootname, ochoice)
 
 
 
-/* Find the CIV ion */
   total = 0;
   nion = 0;
   while (nion < nions && !(ion[nion].z == element && ion[nion].istate == istate))
@@ -645,6 +781,24 @@ partial_measure_summary (w, element, istate, rootname, ochoice)
   return (0);
 }
 
+
+/**********************************************************/
+/** @name      collision_summary
+ * @brief      Write out the collision strengths (and related information)
+ * for all of the lines 
+ *
+ * @param [in] WindPtr W   The entire wind          
+ * @param [in] char rootname []   The rootname of the windsave file
+ * @param [in] int ochoice A parameter indcating whether results should
+ * be written to a file          
+ * @return   Always returns 0  
+ *
+ * @details
+ *
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
 int collision_summary (w, rootname, ochoice)
      WindPtr w;
