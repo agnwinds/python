@@ -161,7 +161,7 @@ extract (w, p, itype)
   int ndom;
 
 
-  /* 68b -09021 - ksl - The next line selects the middle inclination angle for recording the absorbed enery */
+  /* The next line selects the middle inclination angle for recording the absorbed energy */
   phot_history_spectrum = 0.5 * (MSPEC + nspectra);
 
   for (n = MSPEC; n < nspectra; n++)
