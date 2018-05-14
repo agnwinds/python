@@ -1,3 +1,15 @@
+
+/***********************************************************/
+/** @file  import_cylindrical.c
+ * @author ksl
+ * @date   May, 2018
+ *
+ * @brief  Routines to read in an arbitrary wind model in
+ * cylindrical coordinates.
+ *
+ * These routines have been tested with models for FU Ori
+ * produced by Lee Hartmann
+ ***********************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -5,26 +17,6 @@
 #include "atomic.h"
 #include "python.h"
 
-/***********************************************************
-    Space Telescope Science Institute
-
-Synopsis:
-    These are general purpose routines for readin in model
-    grids
-
-Arguments:		
-
-Returns:
- 
-Description:	
-
-Notes:
-
-
-
-History:
-	17nov   ksl Began coding                           
-**************************************************************/
 
 
 # define LINELEN 512
@@ -48,47 +40,40 @@ struct
 } xx_cyl;
 
 
-/***********************************************************
-    Space Telescope Science Institute
-
-Synopsis:
-    Read the an arbitray wind model in cylindrical
-    coordinates
 
 
-Arguments:		
-
-Returns:
- 
-Description:	
-
-Notes:
-
-    The basic data we need to read in are
-
-    i, j, r z  v_x v_y v_z rho (and optionally T)
-
-    where v_x,_v_y,v_z are the velocities in the x,z plane
-    and where
-
-    i is the column number  (Thus i corresponds to ndim)
-    j is the row number     (and z coresponds to mdim)
-
-    We assume that all of the variables are centered, that is
-    we are not assuming that we are giving rho at the center of
-    a cell, but that r and v_r are at the edges of a cell. 
-    This is someghing that would presumable be easy to change
-
-    Note that we assume that the data are being read in in the
-    same order as printed out by windsave2table, that is that
-    the first "column" is read in, and then the second "column".
-
-
-
-
-History:
-	17nov   ksl Began coding                           
-**************************************************************/
+/**********************************************************/
+/** @name      import_cylindrical
+ * @brief      Read the an arbitray wind model in cylindrical
+ *     coordinates
+ *
+ * @param [in] int  ndom   The domain number for the imported model
+ * @param [in] char *  filename   The file containing the model to import
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * ### Notes ###
+ * The basic data we need to read in are
+ * 
+ * * i, j, r z  v_x v_y v_z rho (and optionally T)
+ * 
+ * where v_x,_v_y,v_z are the velocities in the x,z plane
+ * and where
+ * 
+ * * i is the column number  (Thus i corresponds to ndim)
+ * * j is the row number     (and z coresponds to mdim)
+ * 
+ * We assume that all of the variables are centered, that is
+ * we are not assuming that we are giving rho at the center of
+ * a cell, but that r and v_r are at the edges of a cell. 
+ * This is someghing that would presumable be easy to change
+ * 
+ * Note that we assume that the data are being read in in the
+ * same order as printed out by windsave2table, that is that
+ * the first "column" is read in, and then the second "column".
+ *
+ **********************************************************/
 
 int
 import_cylindrical (ndom, filename)
@@ -183,8 +168,6 @@ import_cylindrical (ndom, filename)
       xx_cyl.wind_midz[n] = 0.5 * (xx_cyl.wind_z[n] + xx_cyl.wind_z[n + 1]);
     }
 
-//OLD  delta=(xx_cyl.wind_z[jz-1]-xx_cyl.wind_z[jz-2]);
-//OLD  xx_cyl.wind_midz[jz]=xx_cyl.wind_z[jz-1]+0.5*delta;
 
   delta = (xx_cyl.wind_z[n - 1] - xx_cyl.wind_z[n - 2]);
   xx_cyl.wind_midz[n] = xx_cyl.wind_z[n - 1] + 0.5 * delta;
@@ -196,8 +179,6 @@ import_cylindrical (ndom, filename)
       xx_cyl.wind_midx[n] = 0.5 * (xx_cyl.wind_x[n] + xx_cyl.wind_x[n + 1]);
     }
 
-//OLD  delta=(xx_cyl.wind_x[n-1]-xx_cyl.wind_x[n-2]);
-//OLD  xx_cyl.wind_midx[jx]=xx_cyl.wind_x[jx-1]+0.5*delta;
 
 
   delta = (xx_cyl.wind_x[n - 1] - xx_cyl.wind_x[n - 2]);
@@ -224,6 +205,28 @@ import_cylindrical (ndom, filename)
    and we assume that r refers to the inside edge of the cell.
 
  * */
+
+
+/**********************************************************/
+/** @name      cylindrical_make_grid_import
+ * @brief      ??? SYNOPSIS ???
+ *
+ * @param [in,out] WindPtr  w   The entire wind
+ * @param [in] int  ndom   The domain number
+ * @return   Always returns 0  
+ *
+ * @details
+ * This routine initializes the portions of the wind structure 
+ * using the imported model, specirically those portions having
+ * to do with positions.
+ *
+ * The routine creates a pillbox around the grid to be used
+ * for defining the region which the wind (maximally) occupies.
+ *
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
 int
 cylindrical_make_grid_import (w, ndom)
@@ -378,6 +381,28 @@ cylindrical_make_grid_import (w, ndom)
  * */
 
 
+
+/**********************************************************/
+/** @name      velocity_cylindrical
+ * @brief      The velocity at any positiion in an imported cylindrical
+ * model
+ *
+ * @param [in] int  ndom   The domain of the imported model
+ * @param [in] double *  x   A position
+ * @param [in out] double *  v   The velocity at x
+ * @return     The speed at x  
+ *
+ * @details
+ * This routine interpolates on the values read in for the
+ * inported model to give one a velocity
+ *
+ * ### Notes ###
+ * In practice this routine is only used to initallize v in 
+ * wind structure.  This is consistent with the way velocities
+ * are treated throughout Python.
+ *
+ **********************************************************/
+
 double
 velocity_cylindrical (ndom, x, v)
      int ndom;
@@ -424,6 +449,27 @@ velocity_cylindrical (ndom, x, v)
  *  and we assume that rho that was imported is the center of the 
  *  plasma cell, so there is no need to interpolate.
  */
+
+
+/**********************************************************/
+/** @name      rho_cylindrical
+ * @brief      Get the density for an imported cylyndrical model at x
+ *
+ * @param [in out] int  ndom   The domain for the imported model
+ * @param [in out] double *  x   A position
+ * @return     The density in cgs units is returned
+ *
+ * @details
+ * This routine intepolates data from the imported model to
+ * find rho at a position x
+ *
+ * ### Notes ###
+ * This routine is really only used to intialize rho in the
+ * Plasma structure.  In reality, once the Plasma sturcute is
+ * initialized we always interpolate within the plasma structure
+ * and do not access the original data.
+ *
+ **********************************************************/
 
 double
 rho_cylindrical (ndom, x)

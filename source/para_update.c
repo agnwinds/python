@@ -1,6 +1,6 @@
 
 /***********************************************************/
-/** @file  new_para_update.c
+/** @file  para_update.c
  * @author ksl, jm
  * @date   January, 2018
  *

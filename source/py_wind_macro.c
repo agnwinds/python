@@ -1,39 +1,15 @@
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-	py_wind is a program which can be used to display various parameters of a wind
-	as calculated by python.  This file contains subroutines intended to
-	display information about macro atoms
-	used
-
-Arguments:		
-
-
-Returns:
- 
-Description:	
-		
-Notes:
-	There two things that one would like to do: Display everything in a single
-	cell and display a quantity in each cell.
-
-  Note that level 3 here has index 2- we refer to levels by nconfig, so 0 
-  is the first level.
-
-History:
- 	97jun	ksl	Coding on py_wind began.
-	08mar	ksl	60 - Began this effort
-	08jul	ss	61 - Modifications made to get more information
-			about departure coeff
-	08aug	ksl	62 - Brought back in line with concurrent changes
-			which ksl had made to some of the
-			routines, e.g do_partitions and saha
-  1312 JM  Coded some new routines to report more information on level emissivities
-	
-
-**************************************************************/
+/***********************************************************/
+/** @file  new_py_wind_macro.c
+ * @author ksl
+ * @date   January, 2018
+ *
+ * @brief  py_wind is a program which can be used to display various parameters of a wind
+ * as calculated by python.  This file contains subroutines intended to
+ * display information about macro atoms
+ * used
+ *
+ ***********************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,24 +19,22 @@ History:
 #include "python.h"
 
 
-/**************************************************************************
+/**********************************************************/
+/** @name      xadiabatic_cooling_summary
+ * @brief      prints the adiabatic cooling in each cell,
+ *   and the total adiabatic cooling.
+ *
+ * @param [in] WindPtr  w   
+ * @param [in] char  rootname[]   
+ * @param [in] int  ochoice   
+ * @return  0 
+ *
+ * @details
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
-  Synopsis:  
-
-  xadiabatic_cooling_summary prints the adiabatic cooling in each cell,
-  and the total adiabatic cooling. 
-  
-  Description:  
-
-  Arguments:  
-
-  Returns:
-
-  Notes:
-
-  History:
-
- ************************************************************************/
 int
 xadiabatic_cooling_summary (w, rootname, ochoice)
      WindPtr w;
@@ -101,27 +75,18 @@ xadiabatic_cooling_summary (w, rootname, ochoice)
 
 }
 
-
-
-
-/**************************************************************************
-
-  Synopsis:  
-
-  macro_summary is a routine intended to allow one to 
-  display information about macro atoms. It is the top level routine
-  for macro information and requires further input from the user.
-  
-  Description:  
-
-  Arguments:  
-
-  Returns:
-
-  Notes:
-
-  History:
- ************************************************************************/
+/**********************************************************/
+/** @name      macro_summary
+ * @brief      is a routine intended to allow one to 
+ *   display information about macro atoms. It is the top level routine
+ *   for macro information and requires further input from the user.
+ *
+ * @param [in] WindPtr  w   
+ * @param [in] char  rootname[]   
+ * @param [in] int  ochoice   
+ * @return 
+ *
+ **********************************************************/
 
 int
 macro_summary (w, rootname, ochoice)
@@ -248,25 +213,16 @@ emissivities (2) P_escapes (3) Detailed Pops (4) taus (5) estimators (6)", &choo
   return (0);
 }
 
-
-/**************************************************************************
-
-  Synopsis:  
-
-  macro_summary is a routine intended to allow one to 
-  display information about macro atoms. It is the top level routine
-  for macro information and requires further input from the user.
-  
-  Description:  
-
-  Arguments:  
-
-  Returns:
-
-  Notes:
-
-  History:
- ************************************************************************/
+/**********************************************************/
+/** @name      ion_overview
+ * @brief      macro_summary is a routine intended to allow one to 
+ *   display information about macro atoms. It is the top level routine
+ *   for macro information and requires further input from the user.
+ *
+ * @param [in] int  icell   
+ * @return 0
+ *
+ **********************************************************/
 
 int
 ion_overview (icell)
@@ -287,24 +243,18 @@ ion_overview (icell)
   return (p->macro_info);
 }
 
-/**************************************************************************
 
-  Synopsis:  
-
-  macro_summary is a routine intended to allow one to 
-  display information about macro atoms. It is the top level routine
-  for macro information and requires further input from the user.
-  
-  Description:  
-
-  Arguments:  
-
-  Returns:
-
-  Notes:
-
-  History:
- ************************************************************************/
+/**********************************************************/
+/** @name      config_overview
+ * @brief      macro_summary is a routine intended to allow one to 
+ *   display information about macro atoms. It is the top level routine
+ *   for macro information and requires further input from the user.
+ *
+ * @param [in] int  n  
+ * @param [in] int  icell
+ * @return 0
+ *
+ **********************************************************/
 
 int
 config_overview (n, icell)
@@ -426,27 +376,17 @@ config_overview (n, icell)
 }
 
 
-
-/**************************************************************************
-
-  Synopsis:  
-
-  depcoef_overview is a routine which prints information about departure 
-  coefficients and level populations in a cell. There is probably a crossover
-  between this and level_popsoverview
-  
-  Description:  
-
-  Arguments:  
-
-  Returns:
-
-  Notes:
-
-  History:
-        080812  ksl 62 - Updated to reflect new versions of programs to do 
-        partition functions and calculate saha densities
- ************************************************************************/
+/**********************************************************/
+/** @name      depcoef_overview
+ * @brief      is a routine which prints information about departure 
+ *   coefficients and level populations in a cell. There is probably a crossover
+ *   between this and level_popsoverview
+ *
+ * @param [in] int  icell   
+ * @return 0
+ *
+ *
+ **********************************************************/
 
 int
 depcoef_overview (icell)
@@ -502,26 +442,17 @@ depcoef_overview (icell)
   return (0);
 }
 
-
-/**************************************************************************
-
-  Synopsis:  
-
-  Routine to copy the necessary parts of a plasma structure for computing 
-  a set of level populations. x1 points to the cell from which data is copied 
-  and x2 points to the cell to which data is copied.
-  
-  Description:  
-
-  Arguments:  
-
-  Returns:
-
-  Notes:
-
-  History:
- ************************************************************************/
-
+/**********************************************************/
+/** @name      copy_plasma
+ * @brief      Routine to copy the necessary parts of a plasma structure for computing 
+ *   a set of level populations. x1 points to the cell from which data is copied 
+ *   and x2 points to the cell to which data is copied.
+ *
+ * @param [in] PlasmaPtr  x1   
+ * @param [in] PlasmaPtr  x2   
+ * @return 0
+ *
+ **********************************************************/
 
 int
 copy_plasma (x1, x2)
@@ -561,6 +492,17 @@ copy_plasma (x1, x2)
   return (0);
 }
 
+
+/**********************************************************/
+/** @name      dealloc_copied_plasma
+ * @brief     deallocate copied plasma arrays, helper routine
+ *
+ * @param [in] PlasmaPtr  xcopy 
+ * @return 00
+ *
+ *
+ **********************************************************/
+
 int
 dealloc_copied_plasma (xcopy)
      PlasmaPtr xcopy;
@@ -570,26 +512,24 @@ dealloc_copied_plasma (xcopy)
   return (0);
 }
 
-
-/**************************************************************************
-
-  Synopsis:  
-
-  depcoef_overview_specific gives populations of nconfig in each cell
-  
-  Description:  
-
-  Arguments: 
-    version 0 gives number densities, 1 gives departure coefficients 
-
-  Returns:
-
-  Notes:
-
-  History:
-        080812  ksl 62 - Updated to reflect new versions of programs to do 
-        partition functions and calculate saha densities
- ************************************************************************/
+/**********************************************************/
+/** @name      depcoef_overview_specific
+ * @brief      gives populations of nconfig in each cell
+ *
+ * @param [in] int  version   0 gives number densities
+ * @param [in] int  nconfig   
+ * @param [in] WindPtr  w   
+ * @param [in] char  rootname[]   
+ * @param [in] int  ochoice   
+ * @return 0
+ *
+ * @details
+ * ??? DESCRIPTION ???
+ *
+ * ### Notes ###
+ * ??? NOTES ???
+ *
+ **********************************************************/
 
 int
 depcoef_overview_specific (version, nconfig, w, rootname, ochoice)
@@ -679,30 +619,20 @@ depcoef_overview_specific (version, nconfig, w, rootname, ochoice)
 }
 
 
+/**********************************************************/
+/** @name      level_popsoverview
+ * @brief      is a routine which prints information about departure 
+ *   coefficients and level populations in a cell. There is probably a crossover
+ *   between this and depcoef_overview
+ *
+ * @param [in] int  nplasma   
+ * @param [in] WindPtr  w   
+ * @param [in] char  rootname[]   
+ * @param [in] int  ochoice   
+ * @return 0
 
-
-
-
-/**************************************************************************
-
-  Synopsis:  
-
-  level_popsoverview is a routine which prints information about departure 
-  coefficients and level populations in a cell. There is probably a crossover
-  between this and depcoef_overview 
-  
-  Description:  
-
-  Arguments:  
-
-  Returns:
-
-  Notes:
-
-  History:
-      1312  JM  Coded
- ************************************************************************/
-
+ *
+ **********************************************************/
 
 int
 level_popsoverview (nplasma, w, rootname, ochoice)
@@ -773,31 +703,20 @@ level_popsoverview (nplasma, w, rootname, ochoice)
   return (0);
 }
 
-
-
-
-/**************************************************************************
-
-  Synopsis:  
-
-  Routine to print level emissivities in each cell.
-  The emissivity is the quantity
-  A21 * n2 * beta_sobolev * nu_21 * H * volume
-  And thus has units of ergs/s
-  
-  Description:  
-
-  Arguments:  
-
-  Returns:
-
-  Notes:
-
-  History:
-      1312  JM  Coded to track 
-                e.g. H-alpha emission through wind
- ************************************************************************/
-
+/**********************************************************/
+/** @name      level_emissoverview
+ * @brief      Routine to print level emissivities in each cell.
+ *   The emissivity is the quantity
+ *   A21 * n2 * beta_sobolev * nu_21 * H * volume
+ *   And thus has units of ergs/s
+ *
+ * @param [in] int  nlev   
+ * @param [in] WindPtr  w   
+ * @param [in] char  rootname[]   
+ * @param [in] int  ochoice   
+ * @return 0
+ *
+ **********************************************************/
 
 int
 level_emissoverview (nlev, w, rootname, ochoice)
@@ -866,28 +785,18 @@ level_emissoverview (nlev, w, rootname, ochoice)
 }
 
 
-
-
-/**************************************************************************
-
-  Synopsis:  
-
-  Routine to print escape probabilities for a given 
-  Balmer line in each cell.
-
-  Description:  
-
-  Arguments:  
-
-  Returns:
-
-  Notes:
-
-  History:
-      1312  JM  Coded
- ************************************************************************/
-
-
+/**********************************************************/
+/** @name      level_escapeoverview
+ * @brief      Routine to print escape probabilities for a given 
+ *   Balmer line in each cell.
+ *
+ * @param [in] int  nlev   
+ * @param [in] WindPtr  w   
+ * @param [in] char  rootname[]   
+ * @param [in] int  ochoice   
+ * @return 0
+ *
+ **********************************************************/
 
 int
 level_escapeoverview (nlev, w, rootname, ochoice)
@@ -968,28 +877,18 @@ level_escapeoverview (nlev, w, rootname, ochoice)
 }
 
 
-
-
-/**************************************************************************
-
-  Synopsis:  
-
-  Routine to print taus for a given 
-  Balmer line in each cell.
-
-  Description:  
-
-  Arguments:  
-
-  Returns:
-
-  Notes:
-
-  History:
-      1312  JM  Coded
- ************************************************************************/
-
-
+/**********************************************************/
+/** @name      level_tauoverview
+ * @brief      Routine to print taus for a given 
+ *   Balmer line in each cell.
+ *
+ * @param [in] int  nlev   
+ * @param [in] WindPtr  w   
+ * @param [in] char  rootname[]   
+ * @param [in] int  ochoice   
+ * @return 0
+ *
+ **********************************************************/
 
 int
 level_tauoverview (nlev, w, rootname, ochoice)

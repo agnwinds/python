@@ -1,5 +1,5 @@
 /***********************************************************/
-/** @file  new_photo_gen_matom.c
+/** @file  photo_gen_matom.c
  * @author ksl, ss, jm
  * @date   January, 2018
  *

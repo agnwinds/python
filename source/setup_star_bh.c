@@ -1,3 +1,13 @@
+
+/***********************************************************/
+/** @file  setup_star_bh.c
+ * @author ksl
+ * @date   May, 2018
+ *
+ * @brief  Files that get input parameters for a star and 
+ * for an agn and  * boundray layer
+ *
+ ***********************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,26 +17,28 @@
 #include "python.h"
 
 
-/***********************************************************
-             University of Southampton
-
-Synopsis:
-  get_stellar_params sets rstar, mstar, tstar as well
-  as secondary parameters based on user inputs
-
-Arguments:
-
-Returns:
-
-
-Description:
-
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-
-**************************************************************/
+/**********************************************************/
+/** @name      get_stellar_params
+ * @brief      sets rstar, mstar, tstar as well
+ *   as secondary parameters based on user inputs
+ *
+ * @return     The system returns the luminosity of
+ * the central object using the temperature and radius
+ *
+ * @details
+ * This obtains the inputs for the Central Object, whether
+ * we are dealing with an ordianry star of an AGN)  If the
+ * system is a binary system, the parameters of the secondary
+ * are also obtained.
+ *
+ * ### Notes ###
+ * @bug This routine is not completely self consistent, in the
+ * sense that for an AGN we cannot estimate a luminosity. This
+ * reflects the fact that we have not completely setlled on how
+ * to homogenize inputs for diffent system types.  It's not 
+ * clear that we need to retun anything.
+ *
+ **********************************************************/
 
 double
 get_stellar_params ()
@@ -99,26 +111,35 @@ get_stellar_params ()
 
 
 
-/***********************************************************
-             University of Southampton
 
-Synopsis:
-  get_bl_and_agn_params sets up the boundary layer and agn power law parameters
-  based on user input and system type
 
-Arguments:
-  lstar     double
-            star luminosity as calculated by get_stellar_params
-Returns:
-
-Description:
-
-Notes:
-
-History:
-	1502  JM 	Moved here from main()
-
-**************************************************************/
+/**********************************************************/
+/** @name      get_bl_and_agn_params
+ * @brief      sets up the boundary layer and agn power law parameters
+ *   based on user input and system type
+ *
+ * @param [in] double  lstar   A luminosity used to intialize the luminosity
+ * of the agn in the event that there is no disk
+ * @return    Always returns 0
+ *
+ * @details
+ * The routine reads a number of parameters that have to do
+ * with defining the boundary layer or and AGN.  
+ *
+ *
+ * ### Notes ###
+ * @bug Our long term goal is to make our inputs for radiation
+ * sources more generic, but there is still more work to do on
+ * this routine.  The problems are really to first define what
+ * we want.  Implementation should be straighforwad if we 
+ * can figure out what we want. A first step might be to 
+ * break this into two routines, one for a BL and one for an
+ * AGN.  Note that the AGN also is used for a BH binary.
+ * This routine was clipped out of python at one pooint
+ * so it is not surprising it does not make logical sense to 
+ * have grouped these itimes together
+ *
+ **********************************************************/
 
 int
 get_bl_and_agn_params (lstar)
@@ -144,7 +165,6 @@ get_bl_and_agn_params (lstar)
 
 
   get_spectype (geo.bl_radiation,
-		//"Rad_type_for_bl(0=bb,1=models,3=pow)_to_make_wind",
 		"Boundary_layer.rad_type_to_make_wind(0=bb,1=models,3=pow)",
 		&geo.bl_ion_spectype);
   get_spectype (geo.agn_radiation,
