@@ -7,9 +7,9 @@
 
 
 /* A couple of external things for use in the routines for computing gamma's below. */
-struct topbase_phot *cont_ext_ptr2;     //continuum pointer passed externally
-double temp_ext2;               //temperature passed externally
-double temp_ext_rad;            //radiation temperature passed externally 
+struct topbase_phot *cont_ext_ptr2;     /// continuum pointer passed externally
+double temp_ext2;               /// temperature passed externally
+double temp_ext_rad;            /// radiation temperature passed externally
 
 /************************************************************
                                     Imperial College London
@@ -27,7 +27,7 @@ Arguments:
        double ds                   the path length
 
 Returns:
-       
+
 
 Description:
 
@@ -77,7 +77,7 @@ bf_estimators_increment (one, p, ds)
 
   freq_av = p->freq;
   // the continuum neglect variation of frequency along path and
-  // take as a single "average" value.  
+  // take as a single "average" value.
 
   if (p->freq > xplasma->max_freq)      // check if photon frequency exceeds maximum frequency
     xplasma->max_freq = p->freq;
@@ -120,11 +120,11 @@ bf_estimators_increment (one, p, ds)
     else if (ion[phot_top[n].nion].phot_info == 0)      //vfky
     {
       density = xplasma->density[phot_top[n].nion];
-      llvl = 0;                 // shouldn't ever be used 
+      llvl = 0;                 // shouldn't ever be used
     }
 
 
-    /* JM130729 Bugfix 31: This if loop causes the else statement for simple ions to be 
+    /* JM130729 Bugfix 31: This if loop causes the else statement for simple ions to be
      * entered in macro atom mode- it appeared to be introduced sometime between 58 and 68.
      *
      * if (kap_bf[nn] > 0.0 && (freq_av > ft) && phot_top[n].macro_info == 1
@@ -182,7 +182,7 @@ bf_estimators_increment (one, p, ds)
 
         xplasma->kpkt_abs += yy - abs_cont;
 
-        /* the following is just a check that flags packets that appear to travel a 
+        /* the following is just a check that flags packets that appear to travel a
            suspiciously large optical depth in the continuum */
         if ((yy / weight_of_packet) > 50)
         {
@@ -223,7 +223,7 @@ bf_estimators_increment (one, p, ds)
 
   y = weight_of_packet * kappa_ff (xplasma, freq_av) * ds;
 
-  xplasma->heat_ff += heat_contribution = y;    // record ff hea        
+  xplasma->heat_ff += heat_contribution = y;    // record ff hea
 
 
   /* Now for contribution to heating due to compton processes. (JM, Sep 013) */
@@ -298,7 +298,7 @@ Returns:
 	0 on success
         1 if the line was a "simple" line.  The routine should not have
 	  been called if that was the case.
-       
+
 
 Description:
 
@@ -314,14 +314,14 @@ History:
           Mar 04  SS   Coding began.
 	04apr	ksl	Modified to check if line was a macro-line
 			Fixed error calls to refer to routine and not
-			filename.  
+			filename.
           May 04  SS  modifications to allow macro_simple option
           May 04  SS  modifications to cope with input line list that is not ordered
                       (use of where_in_list)
           Sep 04  SS  modified to record rate of energy absorbed by macro atom levels
                       ans k-packets
 	06may	ksl	57+ -- Modifications to accommodate plasma structue
-          
+
 ************************************************************/
 
 
@@ -417,10 +417,10 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
 /************************************************************
                                     Imperial College London
 Synopsis:
-	mc_estimator_normalise (n) is the routine to normalise the 
+	mc_estimator_normalise (n) is the routine to normalise the
 	bb and bf estimators. It is performed as part of the wind update stage
 	of Python. The estimators should only be changed during the ionisation
-	cycles - after that they should be fixed. 
+	cycles - after that they should be fixed.
 
 Arguments:
 
@@ -428,7 +428,7 @@ Arguments:
        n            the cell for which the normalisation is to be done
 
 Returns:
-       
+
 
 Description:
 
@@ -445,7 +445,7 @@ Notes: This routine normalises the bb and bf mc estimators needed
        is for now.
 
        ksl -- This routine loops over nlte_levels, which in principle
-       could include non-macro ions, but that should not matter 
+       could include non-macro ions, but that should not matter
        since nbfu_jumps will be zero for these.
 
 History:
@@ -454,7 +454,7 @@ History:
           Jun 04  SS   Added compution of collisional bf heating rate (3 body recombination)
 	06may	ksl	57+ -- Changes to allow for plaama structure. Eliminate passage
 			of entire wind array
-          
+
 ************************************************************/
 
 int
@@ -484,9 +484,9 @@ mc_estimator_normalise (n)
      To normalise this we need to put in:
      1 / h  (Planck constant)
      1 / Volume
-     1 / Time 
-     I think that the weights are chosen such that Time = 1. 
-     So the normalisation of gamma and gamma_e is easy. 
+     1 / Time
+     I think that the weights are chosen such that Time = 1.
+     So the normalisation of gamma and gamma_e is easy.
    */
 
 
@@ -508,7 +508,7 @@ mc_estimator_normalise (n)
       mplasma->gamma_e[config[i].bfu_indx_first + j] = 0.0;     //re-initialise for next iteration
 
       /* For the stimulated recombination parts we need the the
-         ratio of statistical weights too. 
+         ratio of statistical weights too.
          For free electron statistical weight = 2 is included in
          stimfac above. */
 
@@ -526,7 +526,7 @@ mc_estimator_normalise (n)
          is given by a black body. */
 
       /* For now place the limit at 7.5e12 which is 400000AA */
-      /* Try also doing it for very high energy ones - greater than 50eV: 1.2e16 since up there the statistics of the estimators are very poor at the moment. 
+      /* Try also doing it for very high energy ones - greater than 50eV: 1.2e16 since up there the statistics of the estimators are very poor at the moment.
          Ideally we don't want to have this so should probably switch this back sometime (SS August 05) !!!BUG */
 
       if (phot_top[config[i].bfu_jump[j]].freq[0] < 7.5e12 || phot_top[config[i].bfu_jump[j]].freq[0] > 5e18)
@@ -629,7 +629,7 @@ Arguments:
        f2            upper frequency
 
 Returns:
-       
+
 
 Description:
 
@@ -646,13 +646,13 @@ History:
                        collisional ionization.
 	04Jul	ksl	Modified calls to alpha_sp to reflect
 			fact that alpha_sp has been generalized
-			to cover the energy averaged and 
+			to cover the energy averaged and
 			spontaneous case.
 	06may	ksl	57+ -- Modified to use plasma structure
 			Uses volume so did not delete Wind structure
 			but if we put volume in both places could do this
 
-          
+
 ************************************************************/
 
 double
@@ -687,7 +687,7 @@ total_fb_matoms (xplasma, t_e, f1, f2)
         cont_ptr = &phot_top[config[i].bfu_jump[j]];
         density = den_config (xplasma, cont_ptr->uplev);
 
-        /* the cooling contribution for each transition is given by 
+        /* the cooling contribution for each transition is given by
            density * ne * [(alpha_sp_e - alpha_sp) + (alpha_st_e - alpha_st)]
            we call alpha_sp() with modes 1 and 0 to get the different
            versions of the sp. recombination rate coefficient.
@@ -720,9 +720,9 @@ total_fb_matoms (xplasma, t_e, f1, f2)
 
 /************************************************************
                                     Imperial College London
-Synopsis:    
+Synopsis:
        total_bb_cooling computes the total cooling in bb transitions
-       (due to collisions) for both macro atoms and simple ions. 
+       (due to collisions) for both macro atoms and simple ions.
        It is used by the heating/cooling calculation to get the temperature.
 
 
@@ -733,13 +733,13 @@ Arguments:
 
 
 Returns:
-       
+
 
 Description:
 
 
 Notes: This returns the total cooling rate for bb collisions.
-       
+
 
 History:
           Apr 04  SS   Coding began.
@@ -747,8 +747,8 @@ History:
           May 04  SS   Macro_simple option added (for all ions to be "simple")
 	06may	ksl	57+ -- Adapted to plasma structure.  Calls probably need to modified
 			Uses volume
- 
-          
+
+
 ************************************************************/
 
 double
@@ -804,10 +804,10 @@ total_bb_cooling (xplasma, t_e)
 
 /************************************************************
                                     Imperial College London
-Synopsis:    
+Synopsis:
        macro_bb_heating computes the total heating due to bb transitions
        (due to collisions) for macro atoms. The heating in simple ions
-       is taken care of elsewhere. 
+       is taken care of elsewhere.
        It is used by the heating/cooling calculation to get the temperature.
 
 
@@ -818,13 +818,13 @@ Arguments:
 
 
 Returns:
-       
+
 
 Description:
 
 
 Notes: This returns the heating rate for bb collisions in macro atoms.
-       
+
 
 History:
           Apr 04  SS   Coding began.
@@ -832,7 +832,7 @@ History:
           May 04  SS   Macro_simple option added (for all ions to be "simple")
 	06may	ksl	57+ -- Modified for plasma structue.  Note that volume is used
   1411  JM  changed to use filled volume
-          
+
 ************************************************************/
 
 double
@@ -868,10 +868,10 @@ macro_bb_heating (xplasma, t_e)
 
 /************************************************************
                                     Imperial College London
-Synopsis:    
+Synopsis:
        macro_bf_heating computes the total heating due to bf transitions
        for macro atoms. The heating in simple ions
-       is taken care of elsewhere. 
+       is taken care of elsewhere.
        It is used by the heating/cooling calculation to get the temperature.
 
 
@@ -882,22 +882,22 @@ Arguments:
 
 
 Returns:
-       
+
 
 Description:
 
 
 Notes: This returns the heating rate for bf transitions in macro atoms.
-       
+
 
 History:
-         Jun 04 - SS coding began: previously the computation of the 
+         Jun 04 - SS coding began: previously the computation of the
                      bf heating was done in the normalisation of the estimators
                      but with the inclusion of three body recombination it makes
                      more sense to put it all in one subroutine.
 	06may	ksl	57+ -- Modified for plama structue
   1411  JM  changed to use filled volume
-          
+
 ************************************************************/
 
 double
@@ -947,8 +947,8 @@ macro_bf_heating (xplasma, t_e)
                                     Imperial College London
 Synopsis:
 	bb_simple_heat records the heating contribution from lines of
-        simple elements. It is called whenever a packet comes into 
-        resonance with the line and records the heating contribution 
+        simple elements. It is called whenever a packet comes into
+        resonance with the line and records the heating contribution
         from that line and packet
 
 Arguments:
@@ -958,15 +958,15 @@ Arguments:
        double tau_sobolev          optical depth of line
        double dvds                 velocity gradient
        int nn                      the label for the line in question
-     
+
 Returns:
 	0 on success
-       
+
 
 Description:
 
 
-Notes: 
+Notes:
 
 
 History:
@@ -999,9 +999,9 @@ bb_simple_heat (xplasma, p, tau_sobolev, dvds, nn)
   double d1, d2;                //densities of lower and upper level
   double b12 ();
 
-  /* The heating contribution is modelled on the macro atom bb estimator 
+  /* The heating contribution is modelled on the macro atom bb estimator
      calculations for the radiative excitation rate. This (energy) excitation
-     rate is multiplied by the destruction probability to get the heating. 
+     rate is multiplied by the destruction probability to get the heating.
      The destruction probability is obtained following the discussion in KSL's notes
      on Python. */
 
@@ -1070,7 +1070,7 @@ check_stimulated_recomb (xplasma)
 
 
 /**************************************************
-  get_dilute_estimators computes the bound free and 
+  get_dilute_estimators computes the bound free and
   bound bound estimators for a cell from a dilute blackbody.
   This is the default if macro_pops fails to find a solution
   for an ion.
@@ -1228,8 +1228,8 @@ gamma_e_integrand (freq)
 
 /*****************************************************************************/
 
-/******************************************* 
-get_alpha_st - to get the stimulated recombination estimator 
+/*******************************************
+get_alpha_st - to get the stimulated recombination estimator
 
 	06may	ksl	57+ -- Modified for new structure
 			Changed call to eliminate WindPtr altogether
@@ -1253,7 +1253,7 @@ get_alpha_st (cont_ptr, xplasma)
   flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
   alpha_st_value = qromb (alpha_st_integrand, fthresh, flast, 1e-4);
 
-  /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
+  /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply
      through by the appropriate constant. */
   if (cont_ptr->macro_info == 1 && geo.macro_simple == 0)
   {
@@ -1278,7 +1278,7 @@ get_alpha_st (cont_ptr, xplasma)
 
 double
 alpha_st_integrand (freq)
-     double freq;               //frequency 
+     double freq;               //frequency
 {
   double fthresh;
   double x;
@@ -1301,8 +1301,8 @@ alpha_st_integrand (freq)
 }
 
 /*****************************************************************************/
-/******************************************* 
-get_alpha_st_e - to get the stimulated recombination estimator 
+/*******************************************
+get_alpha_st_e - to get the stimulated recombination estimator
 
 	06may	ksl	57+ -- Modified for new plasma structure.  In this
 			case I eleimanted Wind altogether
@@ -1326,7 +1326,7 @@ get_alpha_st_e (cont_ptr, xplasma)
   flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
   alpha_st_e_value = qromb (alpha_st_e_integrand, fthresh, flast, 1e-4);
 
-  /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
+  /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply
      through by the appropriate constant. */
   if (cont_ptr->macro_info == 1 && geo.macro_simple == 0)
   {
@@ -1351,7 +1351,7 @@ get_alpha_st_e (cont_ptr, xplasma)
 
 double
 alpha_st_e_integrand (freq)
-     double freq;               //frequency 
+     double freq;               //frequency
 {
   double fthresh;
   double x;

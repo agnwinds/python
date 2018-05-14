@@ -19,7 +19,7 @@
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      find the gradient velocity vector v, dv_ds for a photon
  * at a certain postion travelling in a certain direction
  *
@@ -33,9 +33,9 @@
  * For spherical coordinates the routine calculates the gradient
  * on the fly, that is moves the photon a bit and calculates dvds
  *
- * For 2d systems, the velocity gradient is calculated using 
+ * For 2d systems, the velocity gradient is calculated using
  * the velocity gradient tensors, which contain the velocity
- * gradient in the xz plane. 
+ * gradient in the xz plane.
  *
  * It's not clear how much faster the method used for 2d systems
  * actually is, and one might want to consider the on-the-
@@ -62,10 +62,10 @@ dvwind_ds (p)
 
 
   /* We want the change in velocity along the line of sight, but we
-     need to be careful because of the fact that we have elected to 
+     need to be careful because of the fact that we have elected to
      combine the upper and lower hemispheres in the wind array.  Since
      we are only concerned with the the scalar dv_ds, the safest thing
-     to do is to create a new photon that is only in the upper hemisphere 
+     to do is to create a new photon that is only in the upper hemisphere
      02jan ksl */
 
   stuff_phot (p, &pp);
@@ -75,11 +75,11 @@ dvwind_ds (p)
       pp.lmn[2] = -pp.lmn[2];
     }
 
-  /* JM 1411 -- ideally, we want to do an interpolation on v_grad here. However, 
+  /* JM 1411 -- ideally, we want to do an interpolation on v_grad here. However,
      the interpolation was incorrect in spherical coordinates (see issue #118).
      For the moment, I've adopted an on the fly method for spherical coordinates.
-     This should be improved by figuring out out how the velocity gradient 
-     tensor ought to be rotated in order to give the right answer for spherical 
+     This should be improved by figuring out out how the velocity gradient
+     tensor ought to be rotated in order to give the right answer for spherical
      coordinates */
 
   if (zdom[ndom].coord_type == SPHERICAL)
@@ -127,8 +127,8 @@ dvwind_ds (p)
 	}
 
       /* v_grad is in cylindrical cordinates, or more precisely intended
-         to be azimuthally symmetric.  One could either 
-         (a) rotate  v_grad to be correct at the position of the photon or 
+         to be azimuthally symmetric.  One could either
+         (a) rotate  v_grad to be correct at the position of the photon or
          (b) rotate the direction of photon travel so that is is correct
          (assuming azimuthal symmetery) in the xz plane.
 
@@ -156,11 +156,11 @@ dvwind_ds (p)
 
 
 
-
+#define N_DVDS_AVE	10000
 
 /**********************************************************/
-/** 
- * @brief      Calculate the direction averaged (and maximum) 
+/**
+ * @brief      Calculate the direction averaged (and maximum)
  * dv_ds in each grid cell of the wind
  *
  * @return     Always returns 0
@@ -182,11 +182,10 @@ dvwind_ds (p)
  *  * dvds_max - the maximum value of dvds
  *  * lmn - the direction of the maximum value
  *
- * There is an advanced mode which prints this information to 
+ * There is an advanced mode which prints this information to
  * file.
  **********************************************************/
 
-#define N_DVDS_AVE	10000
 
 int
 dvds_ave ()

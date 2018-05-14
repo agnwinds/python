@@ -513,13 +513,12 @@ ds_to_wind (pp, ndom_current)
 }
 
 
-/* The variable below was added because there were cases where the number
+/** Added because there were cases where the number
  * of photons passing through a cell with a neglible volume was becoming
  * too large and stopping the program.  This is a bandaide since if this
  * is occurring a lot we should be doing a better job at calculating the
  * volume
  */
-
 int neglible_vol_count = 0;
 int translate_in_wind_failure = 0;
 

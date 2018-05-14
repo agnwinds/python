@@ -11,13 +11,13 @@
  * The two main routines are emittance_bb or planck.  The rest of the routines
  * are helper routines that should not normally be called directly.
  *
- * The first call to either of these routines (surely emittance_bb) results in a call to integ_planck_d, 
- * which in turn calls integ_planck_init.  This initialization routine in turn populates the 
+ * The first call to either of these routines (surely emittance_bb) results in a call to integ_planck_d,
+ * which in turn calls integ_planck_init.  This initialization routine in turn populates the
  * array integ_planck , which contains the integral of the bb function in an array.
- * bb_emittance continues to access the array integ_plank through integ_planck_d every 
+ * bb_emittance continues to access the array integ_plank through integ_planck_d every
  * future time is is called.
 
- * planck does the same thing albeit more indirectly. It sets up a cdf each time new frequency 
+ * planck does the same thing albeit more indirectly. It sets up a cdf each time new frequency
  * limits are placed on it.  planck therefore really uses the
  * cdf.
  *
@@ -47,18 +47,18 @@ double old_t = 0;
 double old_freqmin = 0;
 double old_freqmax = 0;
 double alphamin, alphamax;
-double cdf_bb_lo, cdf_bb_hi, cdf_bb_tot;	// The precise boundaries in the the bb cdf 
+double cdf_bb_lo, cdf_bb_hi, cdf_bb_tot;	// The precise boundaries in the the bb cdf
 double cdf_bb_ylo, cdf_bb_yhi;	// The places in the CDF defined by freqmin & freqmax
 double lo_freq_alphamin, lo_freq_alphamax, hi_freq_alphamin, hi_freq_alphamax;	//  the limits to use for the low and high frequency values
 
-/* 
- * bb_set is thae array that cdf_gen_from_func uses to establish the 
+/**********************************************************/
+/**
+ * Array that cdf_gen_from_func uses to establish the
  * specific points in the cdf of the dimensionless bb function.
  *
- * These are what we call 'jumps' and are used by cdf_gen_from_func to 
- *ensure important parts of the CDF have points 
-*/
-
+ * These are what we call 'jumps' and are used by cdf_gen_from_func to
+ * ensure important parts of the CDF have points
+ **********************************************************/
 double bb_set[] = {
 
   10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0,
@@ -71,19 +71,19 @@ int error_bb_lo = 0;
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      returns the frequency for a photon which follows a Placnk distribution
  * within defined frequncy limits
  *
  * @param [in] double  t   The temperature of the bb
  * @param [in] double  freqmin   The minimum frequency for the photon
  * @param [in] double  freqmax   The maximum frequency for the photon
- * @return     The frequency drawn randomly from a BB function with 
+ * @return     The frequency drawn randomly from a BB function with
  *      temperature T
  *
  * @details
  *
- * The frequency is pseudo random in the following limited sense.  The photons are 
+ * The frequency is pseudo random in the following limited sense.  The photons are
  * returned are weighted so that the energy distribution of a  function is approximately
  * reproduced. Within an energy bin the photon frequency is uniform.
  *
@@ -91,13 +91,13 @@ int error_bb_lo = 0;
  *
  * The first time one enters the program, a cdf for a diminensionless
  * BB function is createda.  The cdf is created for values between ALPHAMIN and
- * ALPHAMAX where ALPHA=h nu/kT. The number of points in the cdf is determined by NMAX   
+ * ALPHAMAX where ALPHA=h nu/kT. The number of points in the cdf is determined by NMAX
  *
  * On subseqent entries, when the temperature
  * or frequency limits are changed, we use standard routines to limit
  * what portion of the dimensionless cdf to use.
- * 
- * If the freuency range and temperature for a photon falls outside of ALPHAMIN 
+ *
+ * If the freuency range and temperature for a photon falls outside of ALPHAMIN
  * and ALPHAMAX special routines are used to sample the distribution there.
  * so that the spectrum falls off as a power law at low frequencies and an
  * exponential at high frequencies.
@@ -117,7 +117,7 @@ planck (t, freqmin, freqmax)
   int cdf_limit ();
 
 
-  /*First time through create the array containing the proper boundaries for the integral 
+  /*First time through create the array containing the proper boundaries for the integral
    * of the BB function, Note calling cdf_gen_from func also defines ylo and yhi */
 
   if (ninit_planck == 0)
@@ -128,7 +128,7 @@ planck (t, freqmin, freqmax)
 	{
 	  Error ("Planck: on return from cdf_gen_from_func %d\n", echeck);
 	}
-      /* We need the integral of the bb function outside of the regions of interest as well 
+      /* We need the integral of the bb function outside of the regions of interest as well
        *
        * cdf_bb_lo is the position in the full cdf of the low frequcny boundary
        * cdf_bb_hi is position in the full cdf of the hi frequcny boundary
@@ -167,7 +167,7 @@ planck (t, freqmin, freqmax)
 	  if (cdf_bb_ylo > 1.0)
 	    cdf_bb_ylo = 1.0;
 	}
-      if (alphamax < ALPHABIG)	//again, check to see that the integral will be sensible 
+      if (alphamax < ALPHABIG)	//again, check to see that the integral will be sensible
 	{
 	  cdf_bb_yhi = qromb (planck_d, 0, alphamax, 1e-8) / cdf_bb_tot;	//position in the full cdf of currnet hi frequency boundary
 	  if (cdf_bb_yhi > 1.0)
@@ -190,7 +190,7 @@ planck (t, freqmin, freqmax)
 
 /* Check whether the limits for alpha min and max are within the 'normal' bb range and if so
 * set the portion of the full cdf to use.
-* 
+*
 * Note that alphamin is always less than alphamax.
 */
 
@@ -203,13 +203,9 @@ planck (t, freqmin, freqmax)
   /* End of section redefining limits */
 
 
-
-
   y = random_number (0.0, 1.0);	//We get a random number between 0 and 1 (excl)
 
   y = cdf_bb_ylo * (1. - y) + cdf_bb_yhi * y;	// y is now in an allowed place in the cdf
-
-
 
 
 /* There are 3 cases to worry about
@@ -243,8 +239,8 @@ planck (t, freqmin, freqmax)
 
 
 /**********************************************************/
-/** 
- * @brief      obtains a random number between x1 and x2 
+/**
+ * @brief      obtains a random number between x1 and x2
  *  	for a power law densiity distribution with index alpha
  *
  * @param [in, out] double  x1   the minimum allowed value to return
@@ -253,7 +249,7 @@ planck (t, freqmin, freqmax)
  * @return     A single value taken from a power law distribution
  *
  * @details
- * 
+ *
  *
  * ### Notes ###
  *
@@ -298,8 +294,8 @@ get_rand_pow (x1, x2, alpha)
 
 
 /**********************************************************/
-/** 
- * @brief      obtain a random number between alpha_min 
+/**
+ * @brief      obtain a random number between alpha_min
  * and alpha_max from an distribution of the form e**-alpha
  *
  * @param [in] double  alpha_min   The lower limit for the random number
@@ -312,17 +308,17 @@ get_rand_pow (x1, x2, alpha)
  *
  * The cdf for an exponential distribution can be easily
  * shown to be given by solving this equation for alpha
- * 
+ *
  * r*(exp(-alpha_min)-exp(-alpha_max))=(exp(-alpha_min)-exp(alpha))
- * 
+ *
  * but you can recast this and solve for delta_alpha
- * 
+ *
  * exp(-delta_alpha)=(1-R)+R*exp(-(alpha_max-alpha_min))
- * 
- * This has the advantage that it depends only on the 
+ *
+ * This has the advantage that it depends only on the
  * difference of alpha_max and alpha_min and not their
- * actual values, and as long as the exp of a very 
- * large number turns out to be zero and not 
+ * actual values, and as long as the exp of a very
+ * large number turns out to be zero and not
  * not a number, it shuld not generate NANs
  *
  **********************************************************/
@@ -355,18 +351,19 @@ get_rand_exp (alpha_min, alpha_max)
 }
 
 
-
-double integ_planck[NMAX + 1];	//The dimensionless planck function integrated from ALPHAMIN to a range of values of alpha
-int i_integ_planck_d = 0;	//A flag to say whether we have initialised integ_planck
+/** The dimensionless planck function integrated from ALPHAMIN to a range of values of alpha */
+double integ_planck[NMAX + 1]
+/** A flag to say whether we have initialised integ_planck */
+int i_integ_planck_d = 0;
 
 /**********************************************************/
-/** 
+/**
  * @brief      Obtains the integral of the dimensionless blackbody function
  *    between alphamin and alphamax
  *
  * @param [in] double  alphamin   The minimum value of alpha (h nu/ kT) considered
  * @param [in] double  alphamax   The maximum value of alpha to be considered
- * @return     The value of the integral 
+ * @return     The value of the integral
  *
  * @details
  *
@@ -376,11 +373,11 @@ int i_integ_planck_d = 0;	//A flag to say whether we have initialised integ_plan
  * to alphamax and alphamin, the routine returns the integral between alphamax
  * and alphamin
  *
- * 
+ *
  *
  * ### Notes ###
  *
- * The first time the function is called the integ_planck[] is filled.  
+ * The first time the function is called the integ_planck[] is filled.
  *
  *
  * integ_plank[n]  contains the integral of the
@@ -428,10 +425,10 @@ integ_planck_d (alphamin, alphamax)
     {
       n = x;			//n is the array element
       x -= n;			//x is now the fractional distance between array elements
-      z1 = integ_planck[n] * (1. - x) + integ_planck[n + 1] * x;	//Interpolate 
+      z1 = integ_planck[n] * (1. - x) + integ_planck[n + 1] * x;	//Interpolate
     }
 
-  /* Now find the array elements associated with alphamax 
+  /* Now find the array elements associated with alphamax
    *
    * If the array element associated with alphamax is negative, the highest frequencey
    * is below the bottom of the tabulated values so return 0, which is essentially
@@ -470,7 +467,7 @@ integ_planck_d (alphamin, alphamax)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      calulates integrals of the dimensionless bb function from
  * 0 to alpha and the stores the reusults in an array used by integ_plank_d
  *
@@ -479,17 +476,17 @@ integ_planck_d (alphamin, alphamax)
  * @details
  *
  * This is a helper routine which is only called once from integ_planck in order to initialize
- * the array integ_planck.  
+ * the array integ_planck.
  *
  * It calculates the integral of the dimensionless bb function between
- * 0 and alpha for a series of alpha values values between ALPHAMIN and 
+ * 0 and alpha for a series of alpha values values between ALPHAMIN and
  * ALPHAMAX.
  *
  * ### Notes ###
  *
  * ALPHAMIN and ALPHAMAX are  hardcoded
- * which are hardcorded. 
- * 
+ * which are hardcorded.
+ *
  * The actual integration is done with the numerical recipes routine "qromb"
  *
  **********************************************************/
@@ -515,15 +512,15 @@ init_integ_planck_d ()
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      The value of the dimensioless BB function at alpha
  *
- * @param [in] double  alpha 
+ * @param [in] double  alpha
  * @return   The value of the dimensionless BB function at x
  *
  * @details
  *
- * The BB emittence is given by 
+ * The BB emittence is given by
  *
  * F_nu= 2*PI* (kT/h**3)*planck_d(h*freq/ k T)
  *
@@ -547,7 +544,7 @@ planck_d (alpha)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      Calculate the emittance of a bb between freqmin and freqmax
  *
  * @param [in] double  freqmin   The minimum frequency
@@ -601,7 +598,7 @@ emittance_bb (freqmin, freqmax, t)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      decides whether a maximum frequency requested for an integral is sensible.
  * If it is too far off the end of the planck function, qromb will malfunction. We
  * just have to set it to a frequency where the BB function is tiny, say where hnu/kT =100.
@@ -610,7 +607,7 @@ emittance_bb (freqmin, freqmax, t)
  * @param [in] double  fmax   The maximum frequency (NOT USED)
  * @param [in] double  temp   The temperature
  * @return   A frequency which is the maximum value for which one should try to evaluate the
- * BB function  
+ * BB function
  *
  * @details
  * We use alphabig to define the place in the BB spectrum where we want to give up
@@ -637,7 +634,7 @@ check_fmax (fmin, fmax, temp)
 {
   double bblim;
 
-  /*Calculate the frequency at which the exponent in the 
+  /*Calculate the frequency at which the exponent in the
      planck law will be -100. This will give a *very* small b(nu). */
 
   bblim = ALPHABIG * (temp / H_OVER_K);

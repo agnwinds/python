@@ -9,15 +9,15 @@
  *
  * @details
  *    	There are two main routines
- *    
+ *
  *    		get_models (modellist, npars, spectype)
- *    
+ *
  *    	which reads a list of models
- *    
+ *
  *    	and
  *
  *    		model (spectype, par)
- *    
+ *
  *    	which given a set of parameters will interpolate between modles
  *    	given the set of models one wants to interpolate betwee, which
  *    	is determined by spectype, and the set of parameters (par) that
@@ -25,7 +25,7 @@
  *
  *  ### Notes ###
  *
- *  A detailed understanding of these routines requires an understandig 
+ *  A detailed understanding of these routines requires an understandig
  *  of the associated data structures which are in models.h
  *
  *  The individual models are contained in a stucture called Models
@@ -39,7 +39,7 @@
  *  sources, e.g the disk.  It stores a spectrum/cdf of that spectrum
  *  in ModSum, which can be used to genreate photons for that spectrum.
  *
- *     
+ *
  ***********************************************************/
 
 
@@ -58,25 +58,26 @@
 
 /* Get all the models of one type and regrid them onto the wavelength grid of the data */
 
+int get_models_init = 0;	/// Needed so can initialize nmods_tot the first time this routine is called
 
 /**********************************************************/
-/** 
- * @brief     This routine reads in a set of models for use in generation of spectra,  
+/**
+ * @brief     This routine reads in a set of models for use in generation of spectra,
  *     e.g. a set of Kurucz stellar atmospheres which can
  *     used to simulate a disk, given a run of temperature and gravity
  *
  * @param [in] char  modellist[]   filename containing location and associated parameters of models
  * @param [in] int  npars   Number of parameters which vary for these models
  * @param [out] int * spectype   spectype an integer that is incremented each time a new set of models is read in
- * @return     *spectype is also returned	 
- * 
+ * @return     *spectype is also returned
+ *
  *
  * @details
  *
  * These are a generic set of routines to read a grid or grids
  * 	of models, e.g. a set of Kurucz stellar atmospheres which can
  * 	used to simulate a disk, given a run of temperature and gravity
- * 	
+ *
  * 	The grid can be any reasonable number of dimension
  *
  * ### Notes ###
@@ -86,45 +87,43 @@
  * modellist is a file that cantains a list of models, and the parameters that
  * are associated with each model. (There can be mulitple parameters associated
  * with each file. Typically these are temperature, and gravity, but these routines
- * are generic, and so one could image that the the spectra are organized quite differently   
+ * are generic, and so one could image that the the spectra are organized quite differently
  *
  * Each model, that is read in contains a list of wavelengths and a flux, that should
  * be proportional to flambda.
  *
  * There are some assumptions that are made in terms of the order in the modellist file.
  * Specifically"
- * 
- * 
+ *
+ *
  * 	For 1d models we assume the models are read in increasing order of
- * 	the parameter of interest.  
- * 
+ * 	the parameter of interest.
+ *
  * 	2 or more parameter models can be read in any order.  Bilinear interpolation
  * 	is done for the 2 parameter models (as long as the grid is fully filled).
  *
  *
- * 	To deal with cases in which the grid is not fully filled, we follow 
+ * 	To deal with cases in which the grid is not fully filled, we follow
  * 	the same approach as for get_hub, i.e. for parameters t and g (i.e.
  * 	the first parameter being t, and the second g., we first search the grid
- * 	for all models with t just below (above) the desired value.  We then 
+ * 	for all models with t just below (above) the desired value.  We then
  * 	interpolate on g for the model just below, and on g for the model just
- * 	above, and finally interpolate between these two.  
- * 	The algorithm for interpolating between models 
- * 
- * 
+ * 	above, and finally interpolate between these two.
+ * 	The algorithm for interpolating between models
+ *
+ *
  * 	Note that each time a new set of models is read in, the spectype is
  * 	incremented.
- * 
- * 
+ *
+ *
  *
  **********************************************************/
-
-int get_models_init = 0;	// needed so can initialize nmods_tot the first time this routine is called
 
 int
 get_models (modellist, npars, spectype)
      char modellist[];		// filename containing location and associated parameters of models
      int npars;			// Number of parameters which vary for these models
-     int *spectype;		//  The returned spectrum type 
+     int *spectype;		//  The returned spectrum type
 
 
 {
@@ -145,7 +144,7 @@ get_models (modellist, npars, spectype)
       get_models_init = 1;
     }
 
-  /* Now check if this set of models has been read in previously.  If so return the 
+  /* Now check if this set of models has been read in previously.  If so return the
    * spectype when this was read.
    */
 
@@ -254,7 +253,7 @@ get_models (modellist, npars, spectype)
     }
 
   /* The next 3 lines set a normalization that is used by kslfit.  They are mostly
-   * not relevant to python, where comp[ncomp[.min[0] refers to a normalization for 
+   * not relevant to python, where comp[ncomp[.min[0] refers to a normalization for
    * a model.  I've kept this initialization for now */
   comp[ncomps].min[0] = 0;
   comp[ncomps].max[0] = 1000;
@@ -265,14 +264,14 @@ get_models (modellist, npars, spectype)
       comp[ncomps].max[m] = xmax[m];
     }
 
-  *spectype = ncomps;		// Set the spectype 
+  *spectype = ncomps;		// Set the spectype
   ncomps++;
   return (*spectype);
 }
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      reads a single model file from disk and puts the result into the structure
  *    onemod
  *
@@ -327,14 +326,15 @@ get_one_model (filename, onemod)
   return (n);
 }
 
-
+int nmodel_error = 0;
+int nmodel_terror = 0;
 
 /**********************************************************/
-/** 
- * @brief      interpolates between s and places the results in 
+/**
+ * @brief      interpolates between s and places the results in
  *   	comp[spectype].xmod
  *
- * @param [in] int  spectype   A number which refers to a specific collecton of models, which were read in  
+ * @param [in] int  spectype   A number which refers to a specific collecton of models, which were read in
  * @param [in] double  par[]   An array that contains the parameters for the models we want to interpoalted, e.g [T, grav]
  * @return     Returns nwaves in the the spectrum if a new spectrum was calculated
  * 	0 if it was the old spectrum.
@@ -364,7 +364,7 @@ get_one_model (filename, onemod)
  * approach is also dangerous.
  *
  * Lastly, if the first parameter is out of range, it assumes that the first parameter was a
- * temperature, and it modifies the spectrum by the ratio of a BB speccturm for the desired 
+ * temperature, and it modifies the spectrum by the ratio of a BB speccturm for the desired
  * spectrum to the temperature of the max/min temperature in the grid.  So for example, suppose the
  * models which were read in were for Kuruce models, which run out a temperature of about 50,000k
  * and you wnat the spectrum of a star which is 100,000K. Then the routine will deliver a spectrum
@@ -374,10 +374,6 @@ get_one_model (filename, onemod)
  *
  *
  **********************************************************/
-
-int nmodel_error = 0;
-int nmodel_terror = 0;
-
 int
 model (spectype, par)
      int spectype;
@@ -454,7 +450,7 @@ exact model previously */
 		}
 	    }
 	}
-      /*   So at this point we know what xmin[j] and xmax[j] and we 
+      /*   So at this point we know what xmin[j] and xmax[j] and we
          need to prune good_models
        */
       for (n = comp[spectype].modstart; n < comp[spectype].modstop; n++)
@@ -488,7 +484,7 @@ excluded from furthur consideration */
     }
 
   /* At this point, we should have all the input models we want to include in the
-     final output weighting, as well as the relative weighting of the models.  
+     final output weighting, as well as the relative weighting of the models.
    */
 
   wtot = 0;
@@ -537,7 +533,7 @@ excluded from furthur consideration */
 
   nwaves = comp[spectype].nwaves;
 
-// Now create the spectrum 
+// Now create the spectrum
   for (j = 0; j < nwaves; j++)
     {
       flux[j] = 0;
@@ -557,9 +553,9 @@ excluded from furthur consideration */
 
 
 
-/* Next section is new to deal with models with Temperatures less than in grid 
+/* Next section is new to deal with models with Temperatures less than in grid
 
-if our temperature is higher or lower than that in the grid then we want to scale it by 
+if our temperature is higher or lower than that in the grid then we want to scale it by
 
 scaling factor = B_nu ( T ) / B_nu (Tmax) = (exp(hnu / kTmax) - 1) / (exp(hnu / kT) - 1)
 
@@ -576,7 +572,7 @@ even, and so for those cases we want to make sure to calculate the ratio of qs d
 	  lambda = comp[spectype].xmod.w[j] * 1.e-8;	// Convert lamda to cgs
 
 
-	  /* tscale is temperature to use in the BB function by which we need to scale the flux. 
+	  /* tscale is temperature to use in the BB function by which we need to scale the flux.
 	     tscale can be larger or smaller than our actual temperature */
 	  if (par[0] < comp[spectype].min[0])
 	    tscale = comp[spectype].min[0];	// lowest temperature model
@@ -587,7 +583,7 @@ even, and so for those cases we want to make sure to calculate the ratio of qs d
 
 	  /* calculate h*nu/kT for both temperatures */
 
-	  q1 = H_OVER_K * C / (lambda * par[0]);	//  h*nu/kT for model desired 
+	  q1 = H_OVER_K * C / (lambda * par[0]);	//  h*nu/kT for model desired
 
 	  q2 = H_OVER_K * C / (lambda * tscale);	//  h*nu/kT for model that exists
 

@@ -22,12 +22,12 @@
 
 /**********************************************************/
 /** @name      wind_luminosity
- * @brief      calculate the luminosity of the entire 
+ * @brief      calculate the luminosity of the entire
  * wind between freqencies f1 and f2
  *
  * @param [in out] double  f1   The minimum frequency for the calculation
  * @param [in out] double  f2   The maximum frequency
- * @return     The luminosity of the entire wind 
+ * @return     The luminosity of the entire wind
  *
  * @details
  * The routine simply calls total_emission for each wind cell with
@@ -86,7 +86,7 @@ wind_luminosity (f1, f2)
  * @param [in] WindPtr  one   The wind cell of interest
  * @param [in] double  f1   The minimum frequency for the calculation
  * @param [in] double  f2   The maximum frequency for the calculation
- * @return     
+ * @return
  * It returns the total luminosity, but also stores the luminosity due
  * to various types of emssion, e.g ff, fb, lines, compton into the
  * Plasms cells
@@ -96,11 +96,11 @@ wind_luminosity (f1, f2)
  * ### Notes ###
  * Total emission gives the total enery loss due to photons.  It does
  * not include other cooling sources, e. g. adiabatic expansion.
- * 
+ *
  * It returns the total luminosity, but also stores the luminosity due
  * to various types of emssion, e.g ff, fb, lines, compton into the
  * Plasms cell assocatied with the wind cell.
- * 
+ *
  * Comment:  Compton cooling is not included here.
  *
  *
@@ -124,7 +124,7 @@ total_emission (one, f1, f2)
 
   if (f2 < f1)
     {
-      xplasma->lum_tot = xplasma->lum_lines = xplasma->lum_ff = xplasma->lum_rr = 0;	
+      xplasma->lum_tot = xplasma->lum_lines = xplasma->lum_ff = xplasma->lum_rr = 0;
     }
   else
     {
@@ -177,7 +177,7 @@ total_emission (one, f1, f2)
 
 /**********************************************************/
 /** @name      photo_gen_wind
- * @brief      generates 
+ * @brief      generates
  * 	photons within the wind between two freqencies and stores them in the photon array
  *
  * @param [out] PhotPtr  p   The entire photon stucture
@@ -186,11 +186,11 @@ total_emission (one, f1, f2)
  * @param [in] double  freqmax   The maximum frequency
  * @param [in] int  photstart   The place in the photon stucture where the first photon will be stored
  * @param [in] int  nphot   The number of photon bundles to generate
- * @return     Normally returns the number of photons created.  
+ * @return     Normally returns the number of photons created.
  *
  * When the routine is completed new  photons will exist from p[istart]
  * to p[istart+return value].
- * 	
+ *
  * @details
  *
  * The routine first generates a random number which is used to determine
@@ -245,7 +245,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
          we make sure that xlum is not == 0 or to geo.f_wind. */
 
       xlum = random_number(0.0,1.0) * geo.f_wind;
-	  
+
 
       xlumsum = 0;
       icell = 0;
@@ -303,7 +303,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
     {
 
       photstart = photstop;	//initially set to photstart, afterwards we start the photon number from the end of the last cell
-      photstop = photstart + ptype[n][0] + ptype[n][1] + ptype[n][2];	//This is the number of photons in this cell    
+      photstop = photstart + ptype[n][0] + ptype[n][1] + ptype[n][2];	//This is the number of photons in this cell
 
       icell = plasmamain[n].nwind;
       ndom = wmain[icell].ndom;
@@ -355,14 +355,14 @@ was a resonant scatter but we want isotropic scattering anyway.  */
 	      randvec (p[np].lmn, 1.0);	/* The photon is emitted isotropically */
 	    }
 	  else if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
-	    {			// It was a line photon and we want anisotropic scattering 
+	    {			// It was a line photon and we want anisotropic scattering
 
 /* -1. forces a full reinitialization of the pdf for anisotropic scattering  */
 
 	      randwind (&p[np], p[np].lmn, wmain[icell].lmn);
 	    }
 	  else if (geo.scatter_mode == SCATTER_MODE_THERMAL)
-	    {			// It was a line photon and we want anisotropic scattering 
+	    {			// It was a line photon and we want anisotropic scattering
 	      randwind_thermal_trapping (&p[np], &nnscat);
 	    }
 	  p[np].nnscat = nnscat;
@@ -399,11 +399,11 @@ was a resonant scatter but we want isotropic scattering anyway.  */
 
 /**********************************************************/
 /** @name      one_line
- * @brief      gets the frequency of a 
+ * @brief      gets the frequency of a
  * single collisionally excited line photon in a particular cell
  * of the wind.
  *
- * @param [in] WindPtr  one   The wind cell 
+ * @param [in] WindPtr  one   The wind cell
  * @param [out] int *  nres   The number associated with the transition
  * @return     The frequency of the transition
  *
@@ -439,7 +439,7 @@ one_line (one, nres)
     }
 
   xlum = xplasma->lum_lines * random_number(0.0,1.0);
-  
+
   xlumsum = 0;
   m = nline_min;
   while (xlumsum < xlum && m < nline_max)
@@ -456,15 +456,17 @@ one_line (one, nres)
 
 
 
-/* Next section deals with bremsstrahlung radiation */
-
+/** Next section deals with bremsstrahlung radiation
+ * 4*PI* 8/3* sqrt(2*PI/3)*e**6/m**2/c**3 sqrt(m/kT) or
+ * 4*PI times the normal constant to dL_nu/dnu */
+#define BREMS_CONSTANT 6.85e-38
 
 /**********************************************************/
 /** @name      total_free
  * @brief      calculates the band-limited ff luminosity of a cell.
  *
  * @param [in] WindPtr  one   A wind cell
- * @param [in] double  t_e   The electron temperature to use 
+ * @param [in] double  t_e   The electron temperature to use
  * @param [in] double  f1   The minimum frequency
  * @param [in] double  f2   The maximum frequency
  * @return     The free-free luminosity between f1 and f2
@@ -473,17 +475,14 @@ one_line (one, nres)
  *
  * ### Notes ###
  * The program uses an integral formula rather than integrating on
- * the fly which is not ideal but saves time 
+ * the fly which is not ideal but saves time
  *
  * The gaunt factor used depends on whether data for this is read in
  * from the atomic data files.  If it is, then the gaunt factor determined
- * using data from Sutherland (1998).  If not, the gaunt factor is set 
+ * using data from Sutherland (1998).  If not, the gaunt factor is set
  * to 1.
  *
  **********************************************************/
-
-#define BREMS_CONSTANT 6.85e-38	/*4*PI* 8/3* sqrt(2*PI/3)*e**6/m**2/c**3 sqrt(m/kT) or
-				   4*PI times the normal constant to dL_nu/dnu */
 
 double
 total_free (one, t_e, f1, f2)
@@ -527,7 +526,7 @@ total_free (one, t_e, f1, f2)
     }
   else
     {
-      sum = 0.0;		
+      sum = 0.0;
       for (nion = 0; nion < nions; nion++)
 	{
 	  if (ion[nion].istate != 1)	//The neutral ion does not contribute
@@ -548,7 +547,7 @@ total_free (one, t_e, f1, f2)
       x = BREMS_CONSTANT * xplasma->ne * (sum) / H_OVER_K;
     }
 
-  /* JM 1604 -- The reason why this is proportional to t_e**1/2, 
+  /* JM 1604 -- The reason why this is proportional to t_e**1/2,
      rather than t_e**(-1/2) as in equation 40 of LK02 is because
      one gets an extra factor of (k*t_e/h) when one does the integral */
   x *= sqrt (t_e) * xplasma->vol;
@@ -576,7 +575,7 @@ total_free (one, t_e, f1, f2)
  * @bug f_nu is set to 0 for t_e less than 100K.  It's not clear
  * that this limit is applied to other functions anymore.  Was this
  * missed?  Not also that the code having to do with the gaunt factor
- * is duplicated from another routine.  Should a gaunt_ff routine 
+ * is duplicated from another routine.  Should a gaunt_ff routine
  * be created for both?
  *
  **********************************************************/
@@ -645,7 +644,7 @@ ff (one, t_e, freq)
 
 /**********************************************************/
 /** @name      one_ff
- * @brief      randomly generate the frequency of a 
+ * @brief      randomly generate the frequency of a
  * 	ff photon within the frequency interval f1 and f2
  *
  * @param [in] WindPtr  one   A specific wind cell
@@ -668,7 +667,7 @@ ff (one, t_e, freq)
  *
  **********************************************************/
 
-double ff_x[ARRAY_PDF], ff_y[ARRAY_PDF];	//We initialise the arrays that will contain the unscaled PDF 
+double ff_x[ARRAY_PDF], ff_y[ARRAY_PDF];	//We initialise the arrays that will contain the unscaled PDF
 double one_ff_f1, one_ff_f2, one_ff_te;	/* Old values */
 
 double
@@ -727,9 +726,9 @@ one_ff (one, f1, f2)
 /**********************************************************/
 /** @name      gaunt_ff
  * @brief      computes the frequency averaged gaunt factor for ff emissionat
- * 		scaled temperature from Sutherland (1988). 
+ * 		scaled temperature from Sutherland (1988).
  *
- * @param [in] double  gsquared   The variable on which 
+ * @param [in] double  gsquared   The variable on which
  * Sutherland's ff gaunt factors are interpolated.
  * @return     An estimate of the Gaunt factor (for a particular ion)
  *
@@ -740,8 +739,8 @@ one_ff (one, f1, f2)
  * ### Notes ###
  * The reference for this is Sutherland, R.~S. 1998, MNRAS, 300, 321
  *
- * gsquared is the scaled inverse temperature experienced by an ion, 
- * Z**2/kT(Ry).  
+ * gsquared is the scaled inverse temperature experienced by an ion,
+ * Z**2/kT(Ry).
  *
  **********************************************************/
 

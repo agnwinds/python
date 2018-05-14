@@ -12,7 +12,7 @@
 /* Ratio of hnu / kT beyond which we don't bother calculating 
    see #197 */
 #define ALPHABIG_DIRECT_ION 100.
-/* direct_ion contains the routines relating to direct (collisional) ionization and 
+/* direct_ion contains the routines relating to direct (collisional) ionization and
 threebody recombination */
 
 /************************************************************
@@ -23,17 +23,17 @@ Synopsis:
 
 Arguments:
 
-       double t_e       electron temperature        
-      
+       double t_e       electron temperature
+
 Returns:
   0 on success
-       
+
 Description:
 
-Notes: 
+Notes:
 
 History:
-  
+
 ************************************************************/
 
 int
@@ -67,16 +67,16 @@ Synopsis:
 
 Arguments:
 
-       double t_e       electron temperature        
-      
+       double t_e       electron temperature
+
 Returns:
   0 on success
-       
+
 
 Description:
 
 
-Notes: 
+Notes:
 
 
 History:
@@ -109,7 +109,7 @@ compute_qrecomb_coeffs (T)
         /* we need to know about the bound-free jump, so we need the details
            from the ground state cross-section for for the ion below this one */
 
-        ntmin = ion[n - 1].ntop_ground; /* We only ever use the ground state cont_ptr. 
+        ntmin = ion[n - 1].ntop_ground; /* We only ever use the ground state cont_ptr.
                                            This is for topbase */
         nvmin = ion[n - 1].nxphot;
 
@@ -151,14 +151,14 @@ Synopsis:
 Arguments:
 
        WindPtr one      pointer to cell
-       double t_e       electron temperature        
-      
+       double t_e       electron temperature
+
 Returns:
   The total di cooling
-       
+
 Description:
 
-Notes: 
+Notes:
 
 History:
 ************************************************************/
@@ -195,7 +195,7 @@ total_di (one, t_e)
 
       x += xplasma->vol * xplasma->ne * xplasma->density[n] * di_coeffs[n] * dere_di_rate[ion[n].nxderedi].xi * EV2ERGS;
 
-      //printf ("n=%i V=%e ne=%e rho=%e coeff=%e xi=%e cooling=%e\n",n, V , 
+      //printf ("n=%i V=%e ne=%e rho=%e coeff=%e xi=%e cooling=%e\n",n, V ,
       //xplasma->ne , xplasma->density[n] , di_coeffs[n] ,
       //dere_di_rate[ion[n].nxderedi].xi*EV2ERGS,x);
     }
@@ -379,13 +379,13 @@ q_recomb_dere (cont_ptr, electron_temperature)
     root_etemp = sqrt (electron_temperature);
     coeff = 2.07e-16 / (root_etemp * root_etemp * root_etemp);
 
-    /* the original way of getting mutilplicity doesn't work for non-matoms, 
+    /* the original way of getting mutilplicity doesn't work for non-matoms,
        because uplevel isn't identified */
     //coeff *= config[cont_ptr->nlev].g / config[cont_ptr->uplev].g;
 
-    /* JM/NSH XXX -- This is the multiplicity of the ground states. 
-       Should be of order 1 so it may be better to just leave it out, 
-       since the collisional ionization cross section is doubtless 
+    /* JM/NSH XXX -- This is the multiplicity of the ground states.
+       Should be of order 1 so it may be better to just leave it out,
+       since the collisional ionization cross section is doubtless
        averaged over upper states... */
     coeff *= ion[nion].g / ion[nion + 1].g;
 
