@@ -352,9 +352,9 @@ get_rand_exp (alpha_min, alpha_max)
 
 
 /** The dimensionless planck function integrated from ALPHAMIN to a range of values of alpha */
-double integ_planck[NMAX + 1]
+double integ_planck[NMAX + 1];
 
-/** A flag to say whether we have initialised integ_planck */
+/// A flag to say whether we have initialised integ_planck
 int i_integ_planck_d = 0;
 
 /**********************************************************/
