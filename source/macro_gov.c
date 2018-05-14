@@ -1,8 +1,14 @@
-/* macro_gov.c is a file which contains the functions which govern macro-atoms and obtain
-   their level populations. The actual functions which do the jumps inside an activated 
-   macro-atom are in matom.c. This is partly done to prevent overly long files (JM1504)
-*/
 
+/***********************************************************/
+/** @file  macro_gov.c
+ * @author ksl
+ * @date   January, 2018
+ *
+ * @brief  is a file which contains the functions which govern macro-atoms and obtain
+ *  their level populations. The actual functions which do the jumps inside an activated 
+ *  macro-atom are in matom.c. This is partly done to prevent overly long files (JM1504)
+ *
+ ***********************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,62 +22,36 @@
 //#include <gsl/gsl_blas.h>
 #include "my_linalg.h"
 
-/************************************************************
-                                    Imperial College London
-Synopsis:
-
-       macro_gov is a new routine that will sit at a higher level in the code than either matom or kpkt
-       and will govern the passage of packets between these routines. At the moment, since matom and kpkt 
-       call each other it call all get rather confusing and loads of nested subroutine calls ensue. 
-       macro_gov removes this by calling matom and kpkt which on return tell macro_gov to either return
-       an r-packet to resonate or make another call to either kpkt or matom as appropriate.
-
-
-
-Arguments:   
-       WindPtr w                   the ptr to the structure defining the wind
-       PhotPtr p                   the packet at the point of activation
-       int nres                    the process which activates the Macro Atom
-       int matom_or_kpkt           to tell us if we should initially excite a
-                                   Macro Atom or create a k-packet. For Macro Atom
-                                   it is set to 1 for a k-packet it is set to 2.
-       int which_out               set to 1 if return is via macro atom and 2 if via kpkt
-
-           
-
-Returns:   Will return an r-packet after (possibly) several calls to matom and kpkt
-
-       int nres                    the process by which re-emission occurs
-       PhotPtr p                   the packet following re-emission
-
-
-
-Description:
-
-
-Notes:   I've written this to be as general as possible so that if we want to improve the treatment of simple
-         ions it should not need to be re-written.
-
-         During the spectrum calculation the emission of r-packets within the spectral region of interest
-         is done using emissivities obtained during the ionization cycles. Therefore whenever an r-packet
-         is converted into a k-packet or an excited macro atom that ends the need to follow the packet any
-         further. To deal with this, this routine sets the weights of such packets to zero. Upon return to 
-         trans_phot these packets will then be thrown away.
-
-         
-History:
-          SS   June 04 - coding began
-          SS   June 04 - modified to kill photons that interact with macro atoms or
-                         become k-packets during the specrum calculation part of the code.
-          SS   June 04 - returns 1 if last interaction was with full macro atom. 0 otherwise.
-          SS   Sep  04 - added return of "which_out"
-	  ksl	0803	Added lines which modify p->origin to reflect the fact
-	  		that a photn has been processed by an interaction with a
-			macro atom.  Basically, what I have done is simply to 
-			add 10 to the origin.  This was done to account for the fact
-			that its hard to constrain the frequence range of a photon
-			processed by a macro atom
-************************************************************/
+/**********************************************************/
+/** @name      macro_gov
+ * @brief      is a routine that will sit at a higher level in the code than either matom or kpkt
+ *        	   and will govern the passage of packets between these routines. At the moment, since matom and kpkt 
+ *             call each other it call all get rather confusing and loads of nested subroutine calls ensue. 
+ *             removes this by calling matom and kpkt which on return tell  to either return
+ *             an r-packet to resonate or make another call to either kpkt or matom as appropriate.
+ *
+ * @param [in]  PhotPtr  p   the packet at the point of activation
+ * @param [out] int *  nres   the process which activates the Macro Atom
+ * @param [out] int  matom_or_kpkt   to tell us if we should initially excite a
+ * @param [out] int *  which_out   set to 1 if return is via macro atom and 2 if via kpkt
+ * @return      Will return an r-packet after (possibly) several calls to matom and kpkt
+ * 
+ *        int nres                    the process by which re-emission occurs
+ *        PhotPtr p                   the packet following re-emission
+ *
+ * @details
+ *
+ * ### Notes ###
+ * 			I've written this to be as general as possible so that if we want to improve the treatment of simple
+ *          ions it should not need to be re-written.
+ * 
+ *          During the spectrum calculation the emission of r-packets within the spectral region of interest
+ *          is done using emissivities obtained during the ionization cycles. Therefore whenever an r-packet
+ *          is converted into a k-packet or an excited macro atom that ends the need to follow the packet any
+ *          further. To deal with this, this routine sets the weights of such packets to zero. Upon return to 
+ *          trans_phot these packets will then be thrown away.
+ *
+ **********************************************************/
 
 int
 macro_gov (p, nres, matom_or_kpkt, which_out)
@@ -209,53 +189,33 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 }
 
 
-
-
-
-
-  /************************************************************
-                                    Imperial College London
-Synopsis:
-
-       macro_pops uses the Monte Carlo estimators to compute a set
-       of level populations for levels of macro atoms.
-
-
-Arguments: one -> pointer to the wind 
-           xne -> current value for electron density in this shell
-
-Returns:   Should compute the fractional level populations for 
-          macro atoms and store them in "levden" array. The ion fractions
-          are also computed and stored in w[n].density[nion]
-
-
-Description:
-
-
-Notes:  
-         This routine uses a matrix inversion method to get the level populations.
-         For now the matrix solver used is the LU decomposition method provided
-         by the Gnu Scientific Library (GSL, which is free). This requires the
-         include files that I've added to the top of this file and access to the
-         GSL "library" file (I've added the library into the Makefile too). I found
-         GSL to be very easy to install but if there are problems in the future we
-         may need to switch to another matrix solver. (SS, Apr 04)
-         
-
-History:
-          Apr 04  SS   Coding began.
-          May 04  SS   Checking/testing began. Corrected some problems with the
-                       array indexing in the last part of the calculation.
-          June04  SS   Adding collisional ionization/recombination rate.
-	  Aug 05  SS   Modified to include fast collisional transition between
-	               ground states and levels that should be metastable
-                       - some treatment of metastables is needed for 
-                       doing CNO macro atoms.
-	06may	ksl	57+ -- Modified to reflect plasma structue
-    1404 	jm  77a -- Added test to check that populations are solution to rate matrix equation in macro_pops
-                       + more robust erro reporting in general. See pull request #75.
-    1404  	jm  77a -- Now only clean for population inversions if levels have a radiative transition between them #76
-************************************************************/
+/**********************************************************/
+/** @name      macro_pops
+ * @brief      uses the Monte Carlo estimators to compute a set
+ *        of level populations for levels of macro atoms.
+ *
+ * @param [in out] PlasmaPtr  xplasma   ???
+ * @param [in out] double  xne   -> current value for electron density in this shell
+ * @return     Should compute the fractional level populations for 
+ *           macro atoms and store them in "levden" array. The ion fractions
+ *           are also computed and stored in w[n].density[nion]
+ *
+ * @details
+ *
+ * ### Notes ###
+ * This routine uses a matrix inversion method to get the level populations.
+ * For now the matrix solver used is the LU decomposition method provided
+ * by the Gnu Scientific Library (GSL, which is free). This requires the
+ * include files that I've added to the top of this file and access to the
+ * GSL "library" file (I've added the library into the Makefile too). I found
+ * GSL to be very easy to install but if there are problems in the future we
+ * may need to switch to another matrix solver. (SS, Apr 04)
+ * 
+ * We also clean for population inversion in this routine.
+ *
+ * The details are in Matthews' thesis. 
+ *
+ **********************************************************/
 
 int
 macro_pops (xplasma, xne)
