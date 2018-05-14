@@ -1,6 +1,6 @@
 /***********************************************************/
 /** @file  photo_gen_matom.c
- * @Author ksl, ss, jm
+ * @author ksl, ss, jm
  * @date   January, 2018
  *
  * @brief functions for calculating emissivities and generating photons from macro-atoms and k-packets.

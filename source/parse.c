@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  parse.c
- * @Author ksl
+ * @author ksl
  * @date   February, 2018
  *
  * @brief  Routines associated with parsing the command line

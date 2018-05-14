@@ -1,6 +1,6 @@
 /***********************************************************/
 /** @file  setup.c
- * @Author ksl
+ * @author ksl
  * @date   March, 2018
  *
  * @brief  Various intialization routines, including a number

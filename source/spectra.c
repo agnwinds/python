@@ -1,6 +1,17 @@
 
-/* The subroutines in this file handle allocating, incrementing, and writing out the
-   spectrum arrays for Python */
+
+/***********************************************************/
+/** @file  spectra.c
+ * @author ksl
+ * @date   May, 2018
+ *
+ * @brief  
+ *
+ * The subroutines in this file handle allocating, incrementing, and writing out the
+ * spectrum arrays for Python 
+ *
+***********************************************************/
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,78 +22,132 @@
 
 #include "python.h"
 
-/***********************************************************
-                                       Space Telescope Science Institute
+//OLD /***********************************************************
+//OLD                                        Space Telescope Science Institute
+//OLD 
+//OLD  Synopsis:
+//OLD 
+//OLD 	int spectrum_init(f1,f2,nangle,angle,phase,scat_select,top_bot_select,select_extract) 
+//OLD 	allocates space for and initializes the spectrum arrays
+//OLD 
+//OLD Arguments:		
+//OLD 	double f1,f2;			the minimimum and maximum frequency in the spectrum
+//OLD 	int nangle;			the number of different angles and phases for which 
+//OLD 					spectra must be created
+//OLD 	double angle[],phase[];		the corresponding inclination angles and orbital phases
+//OLD 	int scat_select[]		a code which allows limit the photons which will be summed
+//OLD 					to specific numbers of scatters
+//OLD 					>999 -> select everything
+//OLD 					0 < scat_select < MAXSCAT -> select only those photons 
+//OLD 					which have scattered nscat times, 
+//OLD 					scat_select<0 -> select those phtons with more than |nscat| 
+//OLD 					scatters
+//OLD 					This parallels the angle array
+//OLD 	int top_bot_select		a code which allows one to limit whether all photons or just those
+//OLD 					photons above or below the disk are selected
+//OLD 						0 -> all
+//OLD 						>0 -> only those above the disk
+//OLD 						<0-> only those below the disk 
+//OLD  	int select_extract		0 for Live or Die option, extract option otherwise
+//OLD  	
+//OLD Returns:
+//OLD  
+//OLD Description:	
+//OLD 	The first time spectrum_init  is called (i.e. if ispec_start=0), it allocates memory 
+//OLD 	for the various spectrum arrays.  (This is done one time, so one needs to allocate 
+//OLD 	space for all the arrays even though they are not all used in the ionization step).  
+//OLD 	The total number of spectra created is nangle+MSPEC.
+//OLD 	
+//OLD 	Each time spectrum_init is called it rezeros all the spectrum information and 
+//OLD 	calculates the other information associated with each spectrum, such as the
+//OLD 	angle cosines and the names of each spectrum.
+//OLD 		
+//OLD Notes:
+//OLD 	angle[],phase[] and scat_select[] only apply to the spectra extracted at 
+//OLD 	specific angles.  angle[0], phase[0], and scat_select[0] all affect spec[3]
+//OLD 
+//OLD ?? I have a suspicion that these wavelengths are off by half a bin in one direction or the other ???
+//OLD 
+//OLD 	Warning - Do not put anything in this routine that does anything but initialize
+//OLD 	or reinitialize the spectrum structure s. This is important because this routine
+//OLD 	is not accessed if one is continuing an old calculation of the detailed spectrum.
+//OLD 	It is still use on a restart where the detailed spectral cycles have not begun
+//OLD 	because in that case the spectra are not saved.
+//OLD 
+//OLD History:
+//OLD  	97jan   ksl	Coded and debugged as part of Python effort. 
+//OLD  	97jul	ksl	Updated to allow extraction of photons at specific phases
+//OLD  	97aug	ksl	Updated to allow spectra to be created which sum only a
+//OLD  			specific number of scatters.  (Basically this just involved
+//OLD  			populating s[].nscat.  Currently it has no effect on live or
+//OLD  			die option. 
+//OLD  	97sep21	ksl	Provided for renormalization of spectrum through s[n].renorm.
+//OLD  			This should only affect which affect Live or die option.  
+//OLD 	99dec29	ksl	Began modifications intended to allow the creation of additional
+//OLD 			spectra from the varioous sources of photons, the star, the disk
+//OLD 			and the wind.  Replaced the old fixed number 3 with MSPEC.  Also
+//OLD 			elimininated some checks which should no longer be needed.
+//OLD 	05apr	ksl	55d -- Eliminated initialization of shell, since no longer used
+//OLD 	13feb	nsh	74b5 -- Included lines to initialize the log spectrum
+//OLD 	1409	ksl	Added another spectrum, the spectrum of generated photons. This
+//OLD 			is the first spectrum in the structure
+//OLD 
+//OLD **************************************************************/
 
- Synopsis:
-
-	int spectrum_init(f1,f2,nangle,angle,phase,scat_select,top_bot_select,select_extract) 
-	allocates space for and initializes the spectrum arrays
-
-Arguments:		
-	double f1,f2;			the minimimum and maximum frequency in the spectrum
-	int nangle;			the number of different angles and phases for which 
-					spectra must be created
-	double angle[],phase[];		the corresponding inclination angles and orbital phases
-	int scat_select[]		a code which allows limit the photons which will be summed
-					to specific numbers of scatters
-					>999 -> select everything
-					0 < scat_select < MAXSCAT -> select only those photons 
-					which have scattered nscat times, 
-					scat_select<0 -> select those phtons with more than |nscat| 
-					scatters
-					This parallels the angle array
-	int top_bot_select		a code which allows one to limit whether all photons or just those
-					photons above or below the disk are selected
-						0 -> all
-						>0 -> only those above the disk
-						<0-> only those below the disk 
- 	int select_extract		0 for Live or Die option, extract option otherwise
- 	
-Returns:
- 
-Description:	
-	The first time spectrum_init  is called (i.e. if ispec_start=0), it allocates memory 
-	for the various spectrum arrays.  (This is done one time, so one needs to allocate 
-	space for all the arrays even though they are not all used in the ionization step).  
-	The total number of spectra created is nangle+MSPEC.
-	
-	Each time spectrum_init is called it rezeros all the spectrum information and 
-	calculates the other information associated with each spectrum, such as the
-	angle cosines and the names of each spectrum.
-		
-Notes:
-	angle[],phase[] and scat_select[] only apply to the spectra extracted at 
-	specific angles.  angle[0], phase[0], and scat_select[0] all affect spec[3]
-
-?? I have a suspicion that these wavelengths are off by half a bin in one direction or the other ???
-
-	Warning - Do not put anything in this routine that does anything but initialize
-	or reinitialize the spectrum structure s. This is important because this routine
-	is not accessed if one is continuing an old calculation of the detailed spectrum.
-	It is still use on a restart where the detailed spectral cycles have not begun
-	because in that case the spectra are not saved.
-
-History:
- 	97jan   ksl	Coded and debugged as part of Python effort. 
- 	97jul	ksl	Updated to allow extraction of photons at specific phases
- 	97aug	ksl	Updated to allow spectra to be created which sum only a
- 			specific number of scatters.  (Basically this just involved
- 			populating s[].nscat.  Currently it has no effect on live or
- 			die option. 
- 	97sep21	ksl	Provided for renormalization of spectrum through s[n].renorm.
- 			This should only affect which affect Live or die option.  
-	99dec29	ksl	Began modifications intended to allow the creation of additional
-			spectra from the varioous sources of photons, the star, the disk
-			and the wind.  Replaced the old fixed number 3 with MSPEC.  Also
-			elimininated some checks which should no longer be needed.
-	05apr	ksl	55d -- Eliminated initialization of shell, since no longer used
-	13feb	nsh	74b5 -- Included lines to initialize the log spectrum
-	1409	ksl	Added another spectrum, the spectrum of generated photons. This
-			is the first spectrum in the structure
-
-**************************************************************/
-
+/**********************************************************/
+/** @name      spectrum_init
+ * @brief      allocates space for and initializes the spectrum arrays, storing 
+ * the criteria that are later used to create each spectrum.
+ *
+ * @param [in] double  f1   The minimum frequency for the spectra to be created
+ * @param [in] double  f2   The maximum frequency in the spectra
+ * @param [in] int  nangle   The number of different inclination angles (or more properly the number of spectra) to be created
+ * @param [in] double  angle[]   The inclination angles associated with each spectrum                      
+ * @param [in] double  phase[]   The orbital phase associated with each spectrum           
+ * @param [in] int  scat_select[]   A parameter for each spectrum which allows one to construct spectra with specifid numbers of scatters
+ * @param [in] int  top_bot_select[]   A code which allows one to select photons only from below or above the disk
+ * @param [in] int  select_extract   0 for Live or Die option, non-zero fo a normal extraction
+ * @param [in] double  rho_select[]   Rho coordinates for extracting only photons in a particualr region
+ * @param [in] double  z_select[]   Z cooordiante for selecting only photons that scattreed or were created in a praticular region
+ * @param [in] double  az_select[]  Aximuthal angle for selecting only photons in a particular region
+ * @param [in] double  r_select[]   Radius of the region from which to select photons
+ * @return     Always returns 0
+ *
+ * @details
+ * The first time spectrum_init  is called (i.e. if ispec_start=0), it allocates memory 
+ * for the various spectrum arrays.  (This is done one time, so one needs to allocate 
+ * space for all the arrays even though they are not all used in the ionization step).  
+ * The total number of spectra created is nangle+MSPEC.
+ * 	
+ * On subsequent calls to  spectrum_init, it rezeros all the spectrum information and 
+ * calculates the other information associated with each spectrum, such as the
+ * angle cosines and the names of each spectrum.
+ *
+ * ### Notes ###
+ * angle[],phase[] and scat_select[] only apply to the spectra extracted at 
+ * specific angles.  angle[0], phase[0], and scat_select[0] all affect spec[3]
+ *
+ * scat_select allows one to select spectra with a specific number of scattere or range og
+ * scatters.  If nscat > 999 select all.  This is the normal case. The rest are used
+ * largely for diagnostic purposes.  If 0 <nscat < MAXScat selected only photons which
+ * have scattered nscat times.  If nscat is negattive, then all photons with more than |nscat| re 
+ * included.
+ *
+ * If top_bot_select is 0, then all photons are counted in the spectrum; if > 0, then only
+ * photons above the disk plane are selected, if <0 only those from below the disk plane are selected.
+ *
+ * rho_select,z_select,az_select,r_select define a region of space and can be used
+ * to create spectra only from photons that scattered or were created in these particular
+ * regions.  It is normally only used for diagnostic reasons
+ * 
+ * 
+ * Warning - Do not put anything in this routine that does anything but initialize
+ * or reinitialize the spectrum structure s. This is important because this routine
+ * is not accessed if one is continuing an old calculation of the detailed spectrum.
+ * It is still use on a restart where the detailed spectral cycles have not begun
+ * because in that case the spectra are not saved.
+ *
+ **********************************************************/
 int i_spec_start = 0;
 
 int
@@ -214,9 +279,6 @@ disk. The minus sign in the terms associated with phase are to make this happen.
       xxspec[n].renorm = 1.;
     /* Completed initialization of variables for live or die */
 
-/* 68g - Changed the format of the string describing the spectrum so that it was shorted
- * and so that the phase was always given.  ksl 091125
- */
     strcpy (dummy, "");
     sprintf (dummy, "P%04.2f", phase[n - MSPEC]);
     strcat (xxspec[n].name, dummy);
@@ -264,70 +326,102 @@ disk. The minus sign in the terms associated with phase are to make this happen.
   return (0);
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
+//OLD /***********************************************************
+//OLD                                        Space Telescope Science Institute
+//OLD 
+//OLD  Synopsis:
+//OLD 
+//OLD  int spectrum_create(p,f1,f2,nangle,select_extract) increments the spectrum arrays
+//OLD  	after each flight of photons is processed.
+//OLD   
+//OLD Arguments:		
+//OLD 	PhotPtr p;
+//OLD 	double f1,f2;			the minimimum and maximum frequency in the spectrum
+//OLD 	int nangle;				the number of different angles and phases for which 
+//OLD 							spectra must be created
+//OLD 	int select_extract;		The integer stating whether the Live or Die option has 
+//OLD 						been chosen. (0==Live or Die)
+//OLD Returns:
+//OLD   
+//OLD Description:	
+//OLD 
+//OLD 	This routine increments the total spectrum arrays based on what has happened to each 
+//OLD 	photon.  In the Live or Die option, the spectra at specific angles are also created here.
+//OLD  
+//OLD 	The routine is called after each batch of photons has been transported through the wind and 
+//OLD 	prints some intermediate results to assure the user that the program is still running.  
+//OLD 
+//OLD Notes:
+//OLD 
+//OLD 	Summing up of the spectra in the "extract" option is done in extract.c
+//OLD 	
+//OLD 	!! To create spectra in the live or die option which are selected 
+//OLD 	on the number of scatters individual photons undergo, there are 
+//OLD 	some additional changes required to this routine.  These changes 
+//OLD 	should parallel those now in extract under the normal option.  97aug29
+//OLD 	
+//OLD History:
+//OLD  	97jan	ksl	Coded and debugged as part of Python effort.
+//OLD  	97nov23 ksl	Modified to use new error and logging routines  
+//OLD 	02jan	ksl	Added live or die capability to extract specific 
+//OLD 			scatters and above and below plane
+//OLD 	02jul	ksl	Reduced printing of error messages when frequency
+//OLD 			seemed out of bounds since due to Doppler shifts
+//OLD 			at the time of photon creation, the frequencies
+//OLD 			can exceed the range of the formal limits somewhat.
+//OLD 	05apr	ksl	Removed code which summed up the points where
+//OLD 			the last scattering occurred, as not sufficiently
+//OLD 			important to retain given the desire to deal with
+//OLD 			both 1-d and 2-d grids simulataneouly.  
+//OLD 	08mar	ksl	Fixed up spectrum types to account for tracking
+//OLD 			of photons which had been scattered by the wind
+//OLD 	1212	ksl	Changed the way dealt with photons which had
+//OLD 			frequencies which were too low or too high
+//OLD 			to record the numbers and to give an error
+//OLD 			only if the numbers seemed large
+//OLD 	1409	ksl	Added code that includes a new spectrum.  The
+//OLD 			spectrum of generated photons which escape the
+//OLD 			system.  This spectrum is constructed with 
+//OLD 			the original weights of the photons.  Photons
+//OLD 			which hit a hard boudary and destroyed are
+//OLD 			not recorded.
+//OLD 	1604	ksl	Modifications to create a new set of spectra
+//OLD 			for photons that were created in the wind or
+//OLD 			modified by scatterin there
+//OLD 
+//OLD **************************************************************/
 
- Synopsis:
 
- int spectrum_create(p,f1,f2,nangle,select_extract) increments the spectrum arrays
- 	after each flight of photons is processed.
-  
-Arguments:		
-	PhotPtr p;
-	double f1,f2;			the minimimum and maximum frequency in the spectrum
-	int nangle;				the number of different angles and phases for which 
-							spectra must be created
-	int select_extract;		The integer stating whether the Live or Die option has 
-						been chosen. (0==Live or Die)
-Returns:
-  
-Description:	
-
-	This routine increments the total spectrum arrays based on what has happened to each 
-	photon.  In the Live or Die option, the spectra at specific angles are also created here.
- 
-	The routine is called after each batch of photons has been transported through the wind and 
-	prints some intermediate results to assure the user that the program is still running.  
-
-Notes:
-
-	Summing up of the spectra in the "extract" option is done in extract.c
-	
-	!! To create spectra in the live or die option which are selected 
-	on the number of scatters individual photons undergo, there are 
-	some additional changes required to this routine.  These changes 
-	should parallel those now in extract under the normal option.  97aug29
-	
-History:
- 	97jan	ksl	Coded and debugged as part of Python effort.
- 	97nov23 ksl	Modified to use new error and logging routines  
-	02jan	ksl	Added live or die capability to extract specific 
-			scatters and above and below plane
-	02jul	ksl	Reduced printing of error messages when frequency
-			seemed out of bounds since due to Doppler shifts
-			at the time of photon creation, the frequencies
-			can exceed the range of the formal limits somewhat.
-	05apr	ksl	Removed code which summed up the points where
-			the last scattering occurred, as not sufficiently
-			important to retain given the desire to deal with
-			both 1-d and 2-d grids simulataneouly.  
-	08mar	ksl	Fixed up spectrum types to account for tracking
-			of photons which had been scattered by the wind
-	1212	ksl	Changed the way dealt with photons which had
-			frequencies which were too low or too high
-			to record the numbers and to give an error
-			only if the numbers seemed large
-	1409	ksl	Added code that includes a new spectrum.  The
-			spectrum of generated photons which escape the
-			system.  This spectrum is constructed with 
-			the original weights of the photons.  Photons
-			which hit a hard boudary and destroyed are
-			not recorded.
-	1604	ksl	Modifications to create a new set of spectra
-			for photons that were created in the wind or
-			modified by scatterin there
-
-**************************************************************/
+/**********************************************************/
+/** @name      spectrum_create
+ * @brief      Increments the spectrum arrays
+ *  	after each flight of photons is processed (during ionization
+ *  	cycles and for detailed spectra in the Live or Die option).
+ *
+ * @param [in out] PhotPtr  p   A flight of photons
+ * @param [in out] double  f1   The minimum frequncy in the spectrum
+ * @param [in out] double  f2   The maximum frequency in the spectrum
+ * @param [in out] int  nangle  The number of different angles and phases for which to create detailed spectra
+ * @param [in out] int  select_extract   The integer stating whether the Live or Die option has
+ * @return     Alwasy returns 0
+ *
+ * @details
+ * This routine increments the total spectrum arrays based on what has happened to each 
+ * photon during ionization cycles.  In the Live or Die option, the spectra at specific angles 
+ * are also created here when detailed spectra are created.
+ *  
+ * The routine is called after each batch of photons has been transported through the wind and 
+ * prints some intermediate results to assure the user that the program is still running.
+ *
+ * ### Notes ###
+ * Summing up of the spectra in the "extract" option is done in extract.c
+ * 	
+ * @bug	To create spectra in the live or die option which are selected 
+ * 	on the number of scatters individual photons undergo, there are 
+ * 	some additional changes required to this routine.  These changes 
+ * 	should parallel those now in extract under the normal option.  97aug29
+ *
+ **********************************************************/
 
 int
 spectrum_create (p, f1, f2, nangle, select_extract)
@@ -631,69 +725,107 @@ spectrum_create (p, f1, f2, nangle, select_extract)
 
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
+//OLD /***********************************************************
+//OLD                                        Space Telescope Science Institute
+//OLD 
+//OLD  Synopsis:
+//OLD    
+//OLD 	spectrum_summary(filename,mode,nspecmin,nspecmax,select_spectype,renorm,loglin)  
+//OLD 		writes out the spectrum to a file 
+//OLD 
+//OLD Arguments:		
+//OLD 
+//OLD 	char filename[]         The name of the file to write
+//OLD 	char mode[];            The mode in which the file should be opened, usually 'w', but
+//OLD                             it could be 'a'
+//OLD 	int nspecmin,nspecmax	These two numbers define the spectra you want to write.    
+//OLD 	int select_spectype     The type of spectral file you want to create, 
+//OLD 					        SPECTYPE_RAW = raw, SPECTYPE_FLAMBA= flambda,SPECTYPE_FNU=fnu 
+//OLD     double renorm           This is renormalization which incrementally decreases to
+//OLD 				            one as the detailed spectral calculation goes forward.  It
+//OLD 				            was added to allow one to print out the spectrum at the
+//OLD 				            end of each cycle, rather than the end of the entire
+//OLD 				            calculation.
+//OLD 	char loglin[]		    Are we outputting a log or a linear spectrum
+//OLD 				
+//OLD 
+//OLD Returns:
+//OLD   
+//OLD Description:	
+//OLD 
+//OLD 	This simple routine simply writes the spectra to a file in an easily interpretable
+//OLD 	ascii format. Normally one would write all of the spectra in one go, but  one can use 
+//OLD 	spectrum summary to write various spectra to various files by using the variables
+//OLD 	nspecmin and nspecmax.. 
+//OLD 	
+//OLD 	Normally s[0],s[1],and s[2] will be the escaping, scattered, and absorbed spectrum.  
+//OLD 	The rest will be those which have been "extracted".   
+//OLD 	
+//OLD 	It can be called multiple times. In Python, it is currently called twice, once at the
+//OLD 	end of the ionization stage and once when computation of the detailed spectra are
+//OLD 	completed.
+//OLD 			
+//OLD Notes:
+//OLD 
+//OLD     170617 - XXX - it is not obvious that the mode is needed, now the file format is
+//OLD             switched to something resembling an astropy table. Conider deleting the
+//OLD             mode.  ksl
+//OLD 
+//OLD History:
+//OLD  	97jan      ksl	Coded and debugged as part of Python effort.
+//OLD  	97sep13	ksl	Removed some extra code which had to do with opening the files.
+//OLD  	97sep21	ksl	Modified normalization of spectrum s[n].renorm which affects 
+//OLD  				Live or die option.  
+//OLD 	02apr	ksl	Added renorm option so that the spectrum will have the
+//OLD 			same overall "flux" when each incremental spectrum is printed
+//OLD 			out.
+//OLD 	10nov   nsh	Added another switch if we are outputting a log or a lin spectrum
+//OLD 
+//OLD **************************************************************/
 
- Synopsis:
-   
-	spectrum_summary(filename,mode,nspecmin,nspecmax,select_spectype,renorm,loglin)  
-		writes out the spectrum to a file 
-
-Arguments:		
-
-	char filename[]         The name of the file to write
-	char mode[];            The mode in which the file should be opened, usually 'w', but
-                            it could be 'a'
-	int nspecmin,nspecmax	These two numbers define the spectra you want to write.    
-	int select_spectype     The type of spectral file you want to create, 
-					        SPECTYPE_RAW = raw, SPECTYPE_FLAMBA= flambda,SPECTYPE_FNU=fnu 
-    double renorm           This is renormalization which incrementally decreases to
-				            one as the detailed spectral calculation goes forward.  It
-				            was added to allow one to print out the spectrum at the
-				            end of each cycle, rather than the end of the entire
-				            calculation.
-	char loglin[]		    Are we outputting a log or a linear spectrum
-				
-
-Returns:
-  
-Description:	
-
-	This simple routine simply writes the spectra to a file in an easily interpretable
-	ascii format. Normally one would write all of the spectra in one go, but  one can use 
-	spectrum summary to write various spectra to various files by using the variables
-	nspecmin and nspecmax.. 
-	
-	Normally s[0],s[1],and s[2] will be the escaping, scattered, and absorbed spectrum.  
-	The rest will be those which have been "extracted".   
-	
-	It can be called multiple times. In Python, it is currently called twice, once at the
-	end of the ionization stage and once when computation of the detailed spectra are
-	completed.
-			
-Notes:
-
-    170617 - XXX - it is not obvious that the mode is needed, now the file format is
-            switched to something resembling an astropy table. Conider deleting the
-            mode.  ksl
-
-History:
- 	97jan      ksl	Coded and debugged as part of Python effort.
- 	97sep13	ksl	Removed some extra code which had to do with opening the files.
- 	97sep21	ksl	Modified normalization of spectrum s[n].renorm which affects 
- 				Live or die option.  
-	02apr	ksl	Added renorm option so that the spectrum will have the
-			same overall "flux" when each incremental spectrum is printed
-			out.
-	10nov   nsh	Added another switch if we are outputting a log or a lin spectrum
-
-**************************************************************/
 
 
+
+/**********************************************************/
+/** @name      spectrum_summary
+ * @brief      (writes out the spectrum to a file
+ *
+ * @param [in] char  filename[]   The name of the file to write
+ * @param [in] int  nspecmin   The number of the first spectrum to write
+ * @param [in] int  nspecmax   The number of the last spectrum to wtie               .
+ * @param [in] int  select_spectype   The type of spectral file you want to create
+ * @param [in out] double  renorm   This is renormalization which incrementally decreases to
+ * one as the detailed spectral calculation goes forward.  It
+ * was added to allow one to print out the spectrum at the
+ * end of each cycle, rather than the end of the entire
+ * calculation.
+ * @param [in] int loglin 0 to print the spectrum out in linear units, 1 in log units
+ * @param [in] int iwind If false (0), print out the normal spectrum; if true (1), print
+ * out only photons that were scattered or created in the wind.
+ * 
+ * @return     Always returns 0, unless there is a major problem in which case the program
+ * exits
+ *
+ * @details
+ * This simple routine simply writes the spectra to a file in an easily interpretable
+ * ascii format. Normally one would write all of the spectra in one go, but  one can use 
+ * spectrum summary to write various spectra to various files by using the variables
+ * nspecmin and nspecmax.. 
+ * 	
+ * Normally s[0],s[1],and s[2] will be the escaping, scattered, and absorbed spectrum.  
+ * The rest will be those which have been "extracted".   
+ * 	
+ * It can be called multiple times. In Python, it is currently called twice, once at the
+ * end of the ionization stage and once when computation of the detailed spectra are
+ * completed.
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
 int
-spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm, loglin, iwind)
-     char filename[], mode[];
+spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin, iwind)
+     char filename[];
      int loglin;                // switch to tell the code if we are outputting a log or a lin
      int nspecmin, nspecmax;
      int select_spectype;
@@ -797,7 +929,7 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm, l
         {                       /*generated spectrum */
           x /= (dfreq);         //With log spectra implemented, we should divide by nu, so log and lin spectra agree
         }
-        fprintf (fptr, " %8.3g", x * renorm);
+        fprintf (fptr, " %10.5g", x * renorm);
       }
 
 
@@ -836,7 +968,7 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm, l
         {                       /*generated spectrum */
           x /= (dfreq);
         }
-        fprintf (fptr, " %8.3g", x * renorm);
+        fprintf (fptr, " %10.5g", x * renorm);
       }
 
 
@@ -855,33 +987,33 @@ spectrum_summary (filename, mode, nspecmin, nspecmax, select_spectype, renorm, l
 
 
 
-/***********************************************************
-                                       University of Southampton
 
- Synopsis:
-   
-	spectrum_spectrum_restart_renormalise() renormalises the spectra
 
-Arguments:		
-				
-Returns:
-  
-Description:	
-	This simple routine renormalises the spectra when one restarts
-	a run which already has some spectral cycles run.
-
-	This is done by multiplying all the spectra we have read in by a 
-	factor
-
-	renorm_factor = (cycles in old pf file) / (cycles in new pf file)
-			
-Notes:
-	see Issue #134
-
-History:
- 	15jan JM	Coded
-
-**************************************************************/
+/**********************************************************/
+/** @name      spectrum_restart_renormalise
+ * @brief      renormalizes the detailed spectra in case 
+ * of a restart
+ *
+ * @param [in] int  nangle   The number of discrete angles 
+ * @return     Always returns 0
+ *
+ * @details
+ *
+ * This routine deals with a very special case when one is
+ * restarting a previous run, and adding spectral cycles to
+ * obtain a detailed spectrum with higher statistics.
+ *
+ * In the previous run, the spectral will have been normalized
+ * so that one gets the correct flux for the simulation.  We
+ * are now computing additional spectral cycles, so we have
+ * to reduce the fluxes for the spectral cycles that are read
+ * in, so we can continue.
+ * 	renorm_factor = (cycles in old pf file) / (cycles in new pf file)
+ *
+ * ### Notes ###
+ * see Issue #134
+ *
+ **********************************************************/
 
 int
 spectrum_restart_renormalise (nangle)

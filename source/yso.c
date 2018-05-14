@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  yso.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  Simulate a young stellar object

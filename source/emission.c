@@ -1,34 +1,13 @@
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
-	Subroutines in this file all have to do with radiation from the wind
-Arguments:		
-
-
-Returns:
- 
-Description:	
-	
-
-Notes:
-
-	Comment: Some but not all of the calls to routines were changed here
-	when the Plasma structure was introduced.  A general cleanup would
-	make this consistent.  ksl 110805
-
-History:
- 	97jun	ksl	Coding on py_wind began.
- 	98feb	ksl	Coding of these subroutines began.
- 	98apr25	ksl	Added checks in several routines to fix problems when the maximum freq
- 				was less than the minimum frequency
-	01oct	ksl	Recombination related routines removed to recomb.c while
-			topbase modifications made.
-	01nov	ksl	Implement pdf functionality for line luminosity spped up
-        11Aug   nsh     Changes to total_emission and wind_luminosity to allow compton heating to be computed
-	11Oct	nsh	Compton heating removed from total_emission, DR cooling added to wind_luminosity
- 
-**************************************************************/
+/***********************************************************/
+/** @file  emission.c
+ * @author ksl
+ * @date   May, 2018
+ *
+ * @brief  Subroutines having to do with radiation from the wind,
+ * including those that generate photons for the wind
+ *
+ ***********************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,55 +15,45 @@ History:
 
 #include "atomic.h"
 #include "python.h"
-//#include "recipes.h"
 
 
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
-Synopsis:  wind_luminosity (f1, f2) calculate the luminosity of the entire 
-wind between freqencies f1 and f2 
-
-Arguments:		
-
-
-Returns:
- 
-Description:	
-	
-
-Notes:
-
-History:
-	06may	ksl	57+ -- Changed to accommodate plasma structure.  
-			Note that the call for wind_luminostiy has changed
-			to remove the pointer call.  Ultimately rewrite
-			using plasma structure alone.
-	11aug	nsh	70 Modifications made to incorporate compton cooling
-    11sep   nsh     70 Modifications in incorporate DR cooling (very approximate at the moment)
-	12sep	nsh	73 Added a counter for adiabatic luminosity (!)
- 	13jul	nsh	76 Split up adiabatic luminosity into heating and cooling.
-    17jun	nsh 81d - removed non photon producing processes - now in wind_cooling
- 
-**************************************************************/
+/**********************************************************/
+/** @name      wind_luminosity
+ * @brief      calculate the luminosity of the entire 
+ * wind between freqencies f1 and f2
+ *
+ * @param [in out] double  f1   The minimum frequency for the calculation
+ * @param [in out] double  f2   The maximum frequency
+ * @return     The luminosity of the entire wind 
+ *
+ * @details
+ * The routine simply calls total_emission for each wind cell with
+ * a positive volume in the wind
+ *
+ * The routine also populates several luminosity related variables in
+ * geo, which give the luminosity for separate processes, e.g free-free
+ * and free_ound emission.
+ *
+ * ### Notes ###
+ * @bug The do loop might be simpler if made over the plasma cells
+ * instead of the wind, but one should be careful of the dummy cell
+ *
+ **********************************************************/
 
 double
 wind_luminosity (f1, f2)
      double f1, f2;		/* freqmin and freqmax */
 {
   double lum, lum_lines, lum_rr, lum_ff;
-  //cool_comp, cool_dr, cool_di, lum_adiab, heat_adiab;       //1108 NSH Added a new variable for compton cooling 1408 NSH and for DI cooling
-  //1109 NSH Added a new variable for dielectronic cooling
-  //1307 NSH Added a new variable to split out negtive adiabatic cooling (i.e. heating).
   int n;
   double x;
   int nplasma;
 
 
   lum = lum_lines = lum_rr = lum_ff = 0.0;
-  //cool_comp = cool_dr = cool_di = lum_adiab = heat_adiab = 0;  //1108 NSH Zero the new counter 1109 including DR counter 1408 and the DI counter
   for (n = 0; n < NDIM2; n++)
     {
 
@@ -95,102 +64,47 @@ wind_luminosity (f1, f2)
 	  lum_lines += plasmamain[nplasma].lum_lines;
 	  lum_rr += plasmamain[nplasma].lum_rr;
 	  lum_ff += plasmamain[nplasma].lum_ff;
-//      cool_comp += plasmamain[nplasma].cool_comp; //1108 NSH Increment the new counter by the compton luminosity for that cell.
-//      cool_dr += plasmamain[nplasma].cool_dr;     //1109 NSH Increment the new counter by the DR luminosity for the cell.
-//      cool_di += plasmamain[nplasma].cool_di;     //1408 NSH Increment the new counter by the DI luminosity for the cell.
-
-//      if (geo.adiabatic)        //130722 NSH - slight change to allow for adiabatic heating effect - now logged in a new global variable for reporting.
-//      {
-
-//        if (plasmamain[nplasma].cool_adiabatic >= 0.0)
-//        {
-//          lum_adiab += plasmamain[nplasma].cool_adiabatic;
-//        }
-//        else
-//        {
-//          heat_adiab += plasmamain[nplasma].cool_adiabatic;
-//        }
-//      }
-
-//      else
-//      {
-//        lum_adiab = 0.0;
-//      }
-
-
-//      if (x < 0)
-//        Error ("wind_luminosity: total emission %8.4e is < 0!\n", x);
-
-//      if (recipes_error != 0)
-//        Error ("wind_luminosity: Received recipes error on cell %d\n", n);
 	}
     }
 
-/* Deciding which of these to fill is tricky because geo contains
-   values for geo.lum_wind and geo.f_wind separately.  Could be cleaner.
-   ksl 98mar6 */
 
-  //geo.lum_wind=lum;
   geo.lum_lines = lum_lines;
   geo.lum_rr = lum_rr;
   geo.lum_ff = lum_ff;
-//  geo.cool_comp = cool_comp;      //1108 NSH The total compton luminosity of the wind is stored in the geo structure
-//  geo.cool_dr = cool_dr;          //1109 NSH the total DR luminosity of the wind is stored in the geo structure
-//  geo.cool_di = cool_di;          //1408 NSH the total DI luminosity of the wind is stored in the geo structure
-//  geo.cool_adiabatic = lum_adiab;
-//  geo.heat_adiabatic = heat_adiab;
 
   return (lum);
 }
 
 
 
-/***********************************************************
-             Space Telescope Science Institute
-
-Synopsis:  total_emission (one, f1, f2) Calculate the total emission of a single cell 
-
-Arguments:		
 
 
-Returns:
- 
-Description:	
-	
-
-Notes:
-	Total emission gives the total enery loss due to photons.  It does
-	not include other coooling sources, e. g. adiabatic expansion.
-
-	It returns the total luminosity, but also stores the luminosity due
-	to various types of emssion, e.g ff, fb, lines, compton into the
-	Plasms cells
-
-	Comment: The call to this routine was changed when PlasmaPtrs
-	were introduced, but it appears that the various routines 
-	that were called were not changed.
-
-History:
-	97	ksl	Coded
-	98oct	ksl     Removed temperature limits within total_emission in
-			and attempt to concentrate the frequency limits elsewhere.
-	01nov	ksl	Removed superflous code
-	01nov	ksl	Changed call so t_e passed through wind structure.  Other
-			routines should be changed ALSO, BUT NOT NOW
-	04Mar   SS      Modified to divert if Macro Atoms being used.
-	04Apr   SS      Modified to include a collisional cooling term
-	                - this is getting very messy and confusing - I think
-                        I should probably put together a completely separte
-			set of routines for doing the heating and cooling in the
-			macro atom cases. (SS) since this is now not really a
-			total emission but total cooling.
-	05may	ksl	57+ -- To use plasma structure for most things.  If vol
-			is added to plasma then one can change the call
-	11aug	nsh	70 changes made to allow compton heating to be calculated.
- 
- 
-**************************************************************/
-
+/**********************************************************/
+/** @name      total_emission
+ * @brief      Calculate the band-limited total emission of a single cell
+ *
+ * @param [in] WindPtr  one   The wind cell of interest
+ * @param [in] double  f1   The minimum frequency for the calculation
+ * @param [in] double  f2   The maximum frequency for the calculation
+ * @return     
+ * It returns the total luminosity, but also stores the luminosity due
+ * to various types of emssion, e.g ff, fb, lines, compton into the
+ * Plasms cells
+ *
+ * @details
+ *
+ * ### Notes ###
+ * Total emission gives the total enery loss due to photons.  It does
+ * not include other cooling sources, e. g. adiabatic expansion.
+ * 
+ * It returns the total luminosity, but also stores the luminosity due
+ * to various types of emssion, e.g ff, fb, lines, compton into the
+ * Plasms cell assocatied with the wind cell.
+ * 
+ * Comment:  Compton cooling is not included here.
+ *
+ *
+ **********************************************************/
 
 double
 total_emission (one, f1, f2)
@@ -210,21 +124,25 @@ total_emission (one, f1, f2)
 
   if (f2 < f1)
     {
-      xplasma->lum_tot = xplasma->lum_lines = xplasma->lum_ff = xplasma->lum_rr = 0;	//NSH 1108 Zero the new cool_comp variable NSH 1101 - removed
+      xplasma->lum_tot = xplasma->lum_lines = xplasma->lum_ff = xplasma->lum_rr = 0;	
     }
   else
     {
       if (geo.rt_mode == RT_MODE_MACRO)	//Switch for macro atoms (SS)
 	{
 	  xplasma->lum_rr = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL);	//outer shellrecombinations
-	  //The first term here is the fb cooling due to macro ions and the second gives
-	  //the fb cooling due to simple ions.
-	  //total_fb has been modified to exclude recombinations treated using macro atoms.
+
+      /*
+	   *The first term here is the fb cooling due to macro ions and the second gives
+	   *the fb cooling due to simple ions.
+	   *total_fb has been modified to exclude recombinations treated using macro atoms.
+      */
 	  xplasma->lum_tot = xplasma->cool_rr;
-	  //Note: This the fb_matom call makes no use of f1 or f2. They are passed for
-	  //now in case they should be used in the future. But they could
-	  //also be removed.
-	  // (SS)
+      /* Note: This the fb_matom call makes no use of f1 or f2. They are passed for
+	   * now in case they should be used in the future. But they could
+	   * also be removed.
+	   * (SS)
+      */
 	  xplasma->lum_lines = total_bb_cooling (xplasma, t_e);
 	  xplasma->lum_tot += xplasma->lum_lines;
 	  /* total_bb_cooling gives the total cooling rate due to bb transisions whether they
@@ -255,44 +173,41 @@ total_emission (one, f1, f2)
 }
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
-Synopsis: photo_gen_wind(p,w,weight,freqmin,freqmax,istart) generates 
-	photons within the wind and stores them in the photon array
 
-Arguments:		
-	WindPtr w;
-	PhotPtr p;
-	double weight;				weight of each photon
-	double freqmin,freqmax;          frequency interval within which photons are created
-	int istart;					photon number in which first photon is placed
-
-Returns:
-	Normally returns the number of photons created.  So photons will exist from p[istart]
-	to p[istart+return value].
-	
-	If photo_gen_wind tries to create more photons than exist in the photon structure the
-	program will stop (rather than continue incorrectly or start blasting away memory.)
- 
-Description:	
-	Calls photo_gen_wind_one for each cell.
-
-Notes:
-
-History:
- 	98feb	ksl	Coding began
- 	98may16	ksl	Added line to keep track of the number of recombinations
- 	98dec21	ksl	Added the variable inwind and clarified loop which finds a position in
- 				the wind in the grid cell
-	99oct19	ksl	Fixed error in loop above.
-	06may	ksl	57+ -- Began to modify to use plasma, but this is a
-			stopgap for now since should not need to be addressing
-			wind array.  Changed call to remove wind since entire
-			grid was tramsmitted.
-	15aug	ksl	Added domain support
- 
-**************************************************************/
+/**********************************************************/
+/** @name      photo_gen_wind
+ * @brief      generates 
+ * 	photons within the wind between two freqencies and stores them in the photon array
+ *
+ * @param [out] PhotPtr  p   The entire photon stucture
+ * @param [in] double  weight   weight of each photon to be generated
+ * @param [in] double  freqmin   The minimum frequency
+ * @param [in] double  freqmax   The maximum frequency
+ * @param [in] int  photstart   The place in the photon stucture where the first photon will be stored
+ * @param [in] int  nphot   The number of photon bundles to generate
+ * @return     Normally returns the number of photons created.  
+ *
+ * When the routine is completed new  photons will exist from p[istart]
+ * to p[istart+return value].
+ * 	
+ * @details
+ *
+ * The routine first generates a random number which is used to determine
+ * in which wind cell  should be generated, and then  determines the
+ * type of photon to generate.  Once this is doen the routine cycles thourhg
+ * the PlasmaCells generatating all of the photons for each cell at once.
+ *
+ *
+ * ### Notes ###
+ * This logic was adopted for speed related reasons.
+ *
+ * If photo_gen_wind tries to create more photons than exist in the photon structure the
+ * program will stop (rather than continue incorrectly or start blasting away memory.)
+ *
+ * @bug This is another example where the iteration might be made over plasma cells
+ * instead of looking for wind cells with positive volume
+ **********************************************************/
 
 int
 photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
@@ -329,7 +244,6 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
          geo.f_wind refers to the specific flux between freqmin and freqmax.  Note that
          we make sure that xlum is not == 0 or to geo.f_wind. */
 
-//      xlum = (rand () + 0.5) / (MAXRAND) * geo.f_wind; //DONE
       xlum = random_number(0.0,1.0) * geo.f_wind;
 	  
 
@@ -338,7 +252,6 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       while (xlumsum < xlum)
 	{
 
-// XXX One ought to be able to inclrment over the plasma structure in the next section
 
 	  if (wmain[icell].vol > 0.0)
 	    {
@@ -362,7 +275,6 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
        * each photon type to be made in each cell */
 
       lum = plasmamain[nplasma].lum_tot;
-//      xlum = lum * (rand () + 0.5) / (MAXRAND); //DONE
       xlum = lum * random_number(0.0,1.0);
       xlumsum = 0;
 
@@ -479,36 +391,29 @@ was a resonant scatter but we want isotropic scattering anyway.  */
     }
 
 
-
-
   return (nphot);		/* Return the number of photons generated */
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
-Synopsis: one_line (one, nres) gets the frequency of a 
-single collisionally excited line photon in a particular cell
-of the wind.
 
-Arguments:		
 
-Returns:
- 
-Description:	
-
-Notes:
-
-History:
-	01nov	ksl	Modified to use line pdfs
-	02jan	ksl	Modified to return number of resonance line from linptr
-	06may	ksl	57+ -- Modified to partially account for plasma structue
-			but a further change will be needed when move volume to
-			plasma
-    17nov   ksl Cleaned up
- 
-**************************************************************/
-
+/**********************************************************/
+/** @name      one_line
+ * @brief      gets the frequency of a 
+ * single collisionally excited line photon in a particular cell
+ * of the wind.
+ *
+ * @param [in] WindPtr  one   The wind cell 
+ * @param [out] int *  nres   The number associated with the transition
+ * @return     The frequency of the transition
+ *
+ * @details
+ * The routine geneerates a random number and uses this to select
+ * the transition that was excited
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
 double
 one_line (one, nres)
@@ -516,9 +421,7 @@ one_line (one, nres)
      int *nres;
 {
   double xlum, xlumsum;
-//OLD  int m, n;
   int m;
-//OLD  int lnmin, lnmax;
   int nplasma;
   PlasmaPtr xplasma;
   nplasma = one->nplasma;
@@ -535,7 +438,6 @@ one_line (one, nres)
       return (0);
     }
 
-//  xlum = xplasma->lum_lines * (rand () / (MAXRAND - 0.5)); //DONE
   xlum = xplasma->lum_lines * random_number(0.0,1.0);
   
   xlumsum = 0;
@@ -554,76 +456,34 @@ one_line (one, nres)
 
 
 
-//OLD // Using the pre-calculated line luminosity pdf's locate the portion of the lin_ptr array 
-//OLD // from which the photon will will be drawn
-
-//OLD   n = 1;
-//OLD   while (xlum > xplasma->pdf_y[n] && n < LPDF)
-//OLD     n++;
-//OLD   lnmin = xplasma->pdf_x[n - 1];
-//OLD   lnmax = xplasma->pdf_x[n];
-//OLD   xlumsum = xplasma->pdf_y[n - 1];
-
-//OLD /* At this point we know from the line pdf roughly where the line will be located in
-//OLD frequency space but we need to recalculate the line luminosities within this frequency
-//OLD space because the line luminosities contained in the line ptr arrays are not current */
-
-//OLD   if ((xlumsum + lum_lines (one, lnmin, lnmax)) < xlum)
-//OLD     {
-//OLD       Error ("one_line: lumin from lum_lines insufficient\n");
-//OLD     }
-
-
-//OLD   m = lnmin;
-//OLD   while (xlumsum <= xlum)
-//OLD     {
-//OLD       xlumsum += lin_ptr[m]->pow;
-//OLD       m++;
-//OLD     }
-
-//OLD   *nres = m - 1;
-
-//OLD   return (lin_ptr[m - 1]->freq);
-//OLD }
-
 /* Next section deals with bremsstrahlung radiation */
+
+
+/**********************************************************/
+/** @name      total_free
+ * @brief      calculates the band-limited ff luminosity of a cell.
+ *
+ * @param [in] WindPtr  one   A wind cell
+ * @param [in] double  t_e   The electron temperature to use 
+ * @param [in] double  f1   The minimum frequency
+ * @param [in] double  f2   The maximum frequency
+ * @return     The free-free luminosity between f1 and f2
+ *
+ * @details
+ *
+ * ### Notes ###
+ * The program uses an integral formula rather than integrating on
+ * the fly which is not ideal but saves time 
+ *
+ * The gaunt factor used depends on whether data for this is read in
+ * from the atomic data files.  If it is, then the gaunt factor determined
+ * using data from Sutherland (1998).  If not, the gaunt factor is set 
+ * to 1.
+ *
+ **********************************************************/
+
 #define BREMS_CONSTANT 6.85e-38	/*4*PI* 8/3* sqrt(2*PI/3)*e**6/m**2/c**3 sqrt(m/kT) or
 				   4*PI times the normal constant to dL_nu/dnu */
-
-
-/***********************************************************
-                                       Space Telescope Science Institute
-
-Synopsis:  total_free calculates the ff luminosity of a cell.
-
-Arguments:		
-
-Returns:
- 
-Description:	
-
-Notes:
-
-History:
- 
-**************************************************************/
-
-/* 
-
-Note: program uses an integral formula rather than integrating on
-   the fly which is not ideal but saves time 
-
- 	04Apr	SS 	added if statement for case when running hydrogen only. 
-	06may	ksl	57+ -- Modified to partially account for plasma structue
-			but a further change will be needed when move volume to
-			plasma
-	07jul	ksl	58f - This routine requires a WindPtr because we still need the
-			volume and that is still part of WindPtr
-        12sep	nsh	73g - increased the number of ions we will use to all of them!!
-	12sep	nsh	73g - incorporated sutherlands data for gaunt factor
-	12dec	nsh	74b - put in code to cope with the case where gaunt factor data is not read in
-        13jul	nsh	76  - fixed major bugs in this code relating to bug number 29!
-*/
 
 double
 total_free (one, t_e, f1, f2)
@@ -639,19 +499,12 @@ total_free (one, t_e, f1, f2)
   PlasmaPtr xplasma;
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
-  /* 170526 - Eliminated the temperature limit on calculating t_e at low temperatures */
-  //if (t_e < 100.)
-  //  return (0.0);
   if (f2 < f1)
     {
       return (0.0);
     }
 
-//  gaunt=1.0; /*NSH 120920 - this is a placeholder, we need to calculate the gaunt factor at some point */
 
-//  if (nelements > 1)
-//    {
-/*NSH 120924 - this summation works out the z^2 times number density term for all ions the gaunt factor is calculated for each ion */
 
 
   if (gaunt_n_gsqrd == 0)	//Maintain old behaviour
@@ -674,7 +527,7 @@ total_free (one, t_e, f1, f2)
     }
   else
     {
-      sum = 0.0;		/*NSH 120920 - zero the summation over all ions */
+      sum = 0.0;		
       for (nion = 0; nion < nions; nion++)
 	{
 	  if (ion[nion].istate != 1)	//The neutral ion does not contribute
@@ -706,34 +559,27 @@ total_free (one, t_e, f1, f2)
 
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
-Synopsis: 
-
-Arguments:		
-
-Returns:
- 
-Description:	
-
-Notes:
-
-History:
- 
-**************************************************************/
-/* Calculate the free-free emissivity in a cell.  Just consider H2+He3 EDIT NSH - now do all ions - its fast so why not?
-
-SS Apr 04: added an "if" statement to deal with case where there's only H. 
-	06may	ksl	57+ -- Modified to partially account for plasma structue
-			but a further change will be needed when move volume to
-			plasma
-        12sep	nsh	73g - increased the number of ions we will use to all of them!!
-	12sep	nsh	73g - incorporated sutherlands data for gaunt factor
-	12dec	nsh	74b - put code in to allow for the case where gaunt data is not available.
-        13jul	nsh	76  - fixed major bugs in this code relating to bug number 29!
-	
-*/
+/**********************************************************/
+/** @name      ff
+ * @brief      calculate f_nu for ff emisssion
+ *
+ * @param [in out] WindPtr  one   A wind cell
+ * @param [in out] double  t_e   The temperature of the plasma
+ * @param [in out] double  freq   The frequency at which f_nu is to be calculated
+ * @return     f_nu for the specific freqency, temperature requested and densities
+ * contained in the cell indicated
+ *
+ * @details
+ *
+ * ### Notes ###
+ * @bug f_nu is set to 0 for t_e less than 100K.  It's not clear
+ * that this limit is applied to other functions anymore.  Was this
+ * missed?  Not also that the code having to do with the gaunt factor
+ * is duplicated from another routine.  Should a gaunt_ff routine 
+ * be created for both?
+ *
+ **********************************************************/
 
 double
 ff (one, t_e, freq)
@@ -795,34 +641,36 @@ ff (one, t_e, freq)
 }
 
 
-/***********************************************************
-                Space Telescope Science Institute
 
-Synopsis: one_ff(one, f1, f2)  determines the frequency of a 
-	ff photon within the frequency interval f1 and f2
 
-Arguments:		
+/**********************************************************/
+/** @name      one_ff
+ * @brief      randomly generate the frequency of a 
+ * 	ff photon within the frequency interval f1 and f2
+ *
+ * @param [in] WindPtr  one   A specific wind cell
+ * @param [in] double  f1   The minimum frequency
+ * @param [in] double  f2   The maximum frequency
+ * @return     A randomly geneted frequncy for a ff photon given
+ * the conditions specified
+ *
+ * @details
+ *
+ * ### Notes ###
+ * one is the windcell where the photon will be created.  It is needed
+ * only for the temperature.  The code would be simplified
+ * if simply the temperature were transmitted.
+ *
+ * The routine creeates a cdf given the conditions specified and then
+ * samples this.  When the routine is re-entered it checks if the
+ * conditions are the same as previously.  Given this it is desirable
+ * to generate all of the photons in a single cell in one go.
+ *
+ **********************************************************/
 
-Returns:
- 
-Description:	
-
-Notes:
-	one is the windcell where the photon will be created.  It is needed
-	only for the temperature.  ?? The code would be simplified
-	if simply the temperature were transmitted.
-
-History:
-   98           ksl     coded as part of python effort
-   98oct        ksl     Removed the internal frequency limits to assure 
-			that total ff and one_ff were using
-   			the same limits
- 
-**************************************************************/
-
-//struct Cdf cdf_ff;
 double ff_x[ARRAY_PDF], ff_y[ARRAY_PDF];	//We initialise the arrays that will contain the unscaled PDF 
 double one_ff_f1, one_ff_f2, one_ff_te;	/* Old values */
+
 double
 one_ff (one, f1, f2)
      WindPtr one;		/* a single cell */
@@ -876,31 +724,30 @@ one_ff (one, f1, f2)
 
 
 
-/***********************************************************
-                Southampton university
-
-Synopsis: gaunt_ff computes the frequency averaged gaunt factor at
-		scaled temperature. It interpolates between the tabulated
-		factors
-
-Arguments:		
-
-Returns:
- 
-Description:	
-
-Notes:
-
-
-History:
-   12           nsh     coded 
- 
-**************************************************************/
-
+/**********************************************************/
+/** @name      gaunt_ff
+ * @brief      computes the frequency averaged gaunt factor for ff emissionat
+ * 		scaled temperature from Sutherland (1988). 
+ *
+ * @param [in] double  gsquared   The variable on which 
+ * Sutherland's ff gaunt factors are interpolated.
+ * @return     An estimate of the Gaunt factor (for a particular ion)
+ *
+ * @details
+ * It interpolates simply interpolates between the tabulated
+ * factors from Table 3 of Sutherland.
+ *
+ * ### Notes ###
+ * The reference for this is Sutherland, R.~S. 1998, MNRAS, 300, 321
+ *
+ * gsquared is the scaled inverse temperature experienced by an ion, 
+ * Z**2/kT(Ry).  
+ *
+ **********************************************************/
 
 double
 gaunt_ff (gsquared)
-     double gsquared;		/* the gamma squared varaiable */
+     double gsquared;		/* the gamma squared variable */
 {
   int i, index;
   double gaunt;
@@ -912,7 +759,6 @@ gaunt_ff (gsquared)
   if (log_g2 < gaunt_total[0].log_gsqrd
       || log_g2 > gaunt_total[gaunt_n_gsqrd - 1].log_gsqrd)
     {
-//              Error ("gaunt ff - request gsqrd outside range - returning gaunt factor =1\n"); /*Removed this as an error - it happens a lot, and is probably not important! */
       return (1.0);
     }
   for (i = 0; i < gaunt_n_gsqrd; i++)	/*first find the pair of parameter arrays that bracket our temperature */

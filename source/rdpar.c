@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  rdpar.c
- * @Author ksl
+ * @author ksl
  * @date   February, 2018
  *
  * @brief  A general purpose interface for obtaining input data from the command line 

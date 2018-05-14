@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  windsave2table.c
- * @Author ksl
+ * @author ksl
  * @date   April, 2018
  *
  * @brief  A standalone routine for writing a standard set of data

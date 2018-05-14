@@ -1160,8 +1160,8 @@ typedef struct photon
   double x[3], r;               /* The position and radius of a special region from which to extract spectra. 
                                 x is taken to be the center of the region and r is taken to be the radius of
                                the region.   */
-  double f[NWAVE];
-  double lf[NWAVE];             /* a second array to hole the extracted spectrum in log units */
+  double f[NWAVE];              /* The spectrum in linear (wavelength or frequency) units */
+  double lf[NWAVE];             /* The specturm in log (wavelength or frequency)  units  */
   double lfreq[NWAVE];          /* We need to hold what freqeuncy intervals our logarithmic spectrum has been taken over */
 
   double f_wind[NWAVE];         /* The spectrum of photons created in the wind or scattered in the wind. Created for 

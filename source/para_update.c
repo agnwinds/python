@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  para_update.c
- * @Author ksl, jm
+ * @author ksl, jm
  * @date   January, 2018
  *
  * @brief  routines for communicating MC estimators and spectra between MPI threads.

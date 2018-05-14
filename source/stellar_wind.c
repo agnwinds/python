@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  stellar_wind.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  Routines needed to define a spherical wind with a Castor and Larmors velocity law

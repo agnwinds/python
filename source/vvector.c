@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  vvector.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  *

@@ -1,6 +1,6 @@
 /***********************************************************/
 /** @file  setup_files.c
- * @Author ksl
+ * @author ksl
  * @date   March, 2018
  *
  * @brief  A series of routines mostly associated with opening

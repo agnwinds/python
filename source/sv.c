@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  sv.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  The collection of routines needed to define a Shlossman-Vitello wind 

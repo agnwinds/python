@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  density.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  Contains a rroutine to find the density of an ion at a position

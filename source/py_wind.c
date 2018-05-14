@@ -1,122 +1,71 @@
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-	py_wind is a program which can be used to display various parameters of a wind
-		as calculated by python.  This is the main routine.
-
-Arguments:		
-
-	py_wind [-h] [-s] [-p parameter_file] [root]
-
-	where
-		-h 	prints out a short help file and exits (see help routine below)
-		-s	causes certain parameters in the windsave file to be printed out 
-			as individual ascii files after which the program exits
-	 	-d	In cases where a windsavefile was made for each ionization 
-			cycle, this prints out ascii files for "certain" parameters
-			for each of the ionization cycles, as well as the ascii files
-			for the final ionization cycle (if windsave files for each
-			ionization cycle were not created then -s and -d are 
-			equivalent).
-		-p parameter file
-			Instead of reading the choices from the command line read them
-			from a parameter file
-		root	optional root name of wind_save file.  If this is not given,
-			the user is queried for this
-
-
-Returns:
- 
-Description:	
-	
-	Py_wind simply reads and then displays portions of the wind file created by python.  
-	It can select various parameters from the wind and it can write them to files so that
-	the variables can be plotted. 
-       
-	The normal mode of running py_wind is to run it interactively.  As you run it interactively
-	the variables you select are displayed ont the screen.  The variables that you display
-	can also be written to files (depending on the answer to the question Make_files) 
-
-	The commands that were executed in the interactive will be stored in py_wind.pf (if you end 
-	with a "q", and not an EOF response to the choice question)  EOF terminates the program 
-	at that point before the command file is written to py_wind.pf
-	
-	The py_wind.pf file is useful if you want to run the exact same set of commands on another 
-	windfile. You should rename py_wind.pf to something_else.pf and run py_wind on that 
-	data set using the -p something_else.pf option
-
-	The command_line switches -d and -s are intended to produce a standard set of output files sufficient
-	for many purposes.  
-
-	
-Notes:
-
-	The files that are produced  can contain either the original gridding which was used by python, in which 
-	case the file prefix will be "x.", or "z", in which case it will be regridded to a 
-	linear array.  This option is intended so one can create a contour plot more easily.
-
-
-History:
- 	97jun	ksl	Coding on py_wind began.
- 	97sep13	ksl	Modified slightly to reflect the fact that EOF exits program through rdpar
- 	97oct2	ksl	Modified so that t_e and t_r can be printed separately
- 	98feb	ksl	Modified to add the amount of energy and momentum flux absorbed per cell
- 				as output possibilities. Also in py_ion added the ability to print out the
- 				luminosity in CIV if the wind was assumed to be a thin plasma.
-	98jul	ck	Modified so the number of ionzations and recombinations can be checked
-			against one another
-	98oct	ksl	Modified abs_sum and lum_suim so that the various processes which go
-				into heating and cooling the plasma can be displayed individually.
-	99nov	ksl	Added an additional option to create a fixed set of output files. 
-	00mar	ksl	Updated main routine and write_array subroutine to allow one to choose
-			whether to relinearize the grid or to leave it in as it was in the windfile
-			Added output files for velocity.
-	01sep	ksl	Updated ion_summary so that either concentrations or ion fractions could be
-			examined.
-	02apr	ksl	Fixed so could read wind_save files with various sizes 
-	02jun	ksl	Fixed and so could read diagnostic outputs when one had printed out 
-			results at each iteration of the ionization cycle
-	04nov	ksl     Made major modification to eliminate duplicative code, by adding new
-			task display.  Also introduced variable py_wind_project to switch
-			between raw mode (regardless of coord system), and a mode which projects
-			on to a yz plane the system of coordinates.
-	04nov	ksl	Added a choice to explore what is the situation at a specific position
-			in the grid.  This was added to see how different coordinate systems
-			compared.
-	05jan	ksl	54f -- Modified			
-	05apr	ksl	56 -- Eliminated MDIM from the routines in this file.  
-			MDIM is isolated to routines like display.  Added swithches to
-			change choices regarding what, if anything is printed to a 
-			file.
-	05jul	ksl	56d -- Moved all of the subroutines to a separate routine py_wind_sub.c
-			This is intended to facilitate the create of templates by Makefile.
-	06jul	ksl	57g -- Made modifications to reflect the change in the way structures
-			had been defined.
-	090117	ksl	68a -- Added command line functionality so could run more easily
-			in a non interactive mode
-	090125	ksl	Changed functionality of I and i switches to allow for printing
-			out information about the number of scatters, etc, by an ion
-			in the wind.  This reflects a desire to be able to understand
-			better where in the wind ions are "active" in creating the
-			spectrum.
-	111002	ksl	Added rho to one of the options
-	111125	ksl	Modified the way the choice options are displayed, and put the various
-			choices into a subroutine.  The goal here is to make py_wind easier
-			to run from the command line.  The output files also been modifed
-			so that we see which cells are in the wind and so the cell numbers are
-			printed out.
-	111125	ksl	Incorporated a crude capability to use a parameter file that takes
-			a series of commands and prints out the files associated with them.
-	111227	ksl	Added the capability to read a new wind file while the program
-			is running
-	160217	ksl	Began modification of the py_wind to account for multiple domains.  The
-			philosophy is to assign a current_domain to examine, and to modify 
-			output file names to include the domain number.  The current domain
-			is transmitted through and external variable current_domain in python.h
-
-**************************************************************/
+/***********************************************************/
+/** @file  py_wind.c
+ * @author ksl
+ * @date   May, 2018
+ *
+ * @brief  py_wind is a program which can be used to display various parameters of a wind
+as calculated by python.  This is the main routine.
+ *
+ *
+ * Arguments:
+ * 
+ * py_wind [-h] [-s] [-p parameter_file] [root]
+ * 
+ * where
+ * * -h 	prints out a short help file and exits (see help routine below)
+ * * -s	causes certain parameters in the windsave file to be printed out
+ * as individual ascii files after which the program exits
+ * * -d	In cases where a windsavefile was made for each ionization
+ * cycle, this prints out ascii files for "certain" parameters
+ * for each of the ionization cycles, as well as the ascii files
+ * for the final ionization cycle (if windsave files for each
+ * ionization cycle were not created then -s and -d are
+ * equivalent).
+ * * -p parameter file
+ * Instead of reading the choices from the command line read them
+ * from a parameter file
+ * root	optional root name of wind_save file.  If this is not given,
+ * the user is queried for this
+ *
+ *
+ * Description:
+ * 
+ * Py_wind simply reads and then displays portions of the wind file created by python.
+ * It can select various parameters from the wind and it can write them to files so that
+ * the variables can be plotted.
+ * 
+ * The normal mode of running py_wind is to run it interactively.  As you run it interactively
+ * the variables you select are displayed ont the screen.  The variables that you display
+ * can also be written to files (depending on the answer to the question Make_files)
+ * 
+ * The commands that were executed in the interactive will be stored in py_wind.pf (if you end
+ * with a "q", and not an EOF response to the choice question)  EOF terminates the program
+ * at that point before the command file is written to py_wind.pf
+ * 
+ * The py_wind.pf file is useful if you want to run the exact same set of commands on another
+ * windfile. You should rename py_wind.pf to something_else.pf and run py_wind on that
+ * data set using the -p something_else.pf option
+ * 
+ * The command_line switches -d and -s are intended to produce a standard set of output files sufficient
+ * for many purposes.
+ * 
+ * ###Notes####
+ * 
+ * The files that are produced  can contain either the original gridding which was used by python, in which
+ * case the file prefix will be "x.", or "z", in which case it will be regridded to a
+ * linear array.  This option is intended so one can create a contour plot more easily.
+ *
+ * The structure of py_wind is intended to make it easy to add additional variables to print to the
+ * scen or a file.  Basically to add a new option, one needs to update the list of possibilities,
+ * add a new choice statement in one_choice, and then write the routine that grabs a new variable (or
+ * calculates a value from several), and add this to either py_wind_subs or py_wind_macro_subs.
+ *
+ * Because this was intended as a diagnositic routine, some of the more esoteric choices may seem
+ * a bit odd today.
+ *
+ * IMPORTANT: py_wind has not been adapted to handle multiple domains.  Use windsave2table instead.
+ ***********************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -146,6 +95,47 @@ char *choice_options = "\n\
    z=Zoom,u=unZoom,Z=switch to/from raw and yz projected modes, F=Create files, A=Change file write defaults\n\
    #=Wind grid    N=new.windfile q=quit (preferred over EOF) &=Coll Strengths Q=switch domain\n";
 
+
+/**********************************************************/
+/** @name      main
+ * @brief      py_wind is a program which can be used to display various parameters of a wind
+ * 		as calculated by python.  This is the  main routine
+ *
+ * @param [in] int  argc   The number of command line arguments
+ * @param [in] char *  argv[]   The command line arguments
+ * @return     Always returns 0
+ *
+ * @details
+ * Py_wind simply reads and then displays portions of the wind file created by python.
+ * 	It can select various parameters from the wind and it can write them to files so that
+ * 	the variables can be plotted.
+ * 
+ * 	The normal mode of running py_wind is to run it interactively.  As you run it interactively
+ * 	the variables you select are displayed ont the screen.  The variables that you display
+ * 	can also be written to files (depending on the answer to the question Make_files)
+ * 
+ * 	The commands that were executed in the interactive will be stored in py_wind.pf (if you end
+ * 	with a "q", and not an EOF response to the choice question)  EOF terminates the program
+ * 	at that point before the command file is written to py_wind.pf
+ * 
+ * 	The py_wind.pf file is useful if you want to run the exact same set of commands on another
+ * 	windfile. You should rename py_wind.pf to something_else.pf and run py_wind on that
+ * 	data set using the -p something_else.pf option
+ * 
+ * 	The command_line switches -d and -s are intended to produce a standard set of output files sufficient
+ * 	for many purposes.
+ *
+ * 	The main routine gets the input data, and repeately presents the user with a set of choices (in interactive
+ * 	mode) until the users dicides she has had enough.  The case statements that are used to select what to do based 
+ * 	on user inputs are (now) contained in the subroutine one_choice
+ *
+ * ### Notes ###
+ * The files that are produced  can contain either the original gridding which was used by python, in which
+ * case the file prefix will be "x.", or "z", in which case it will be regridded to a
+ * linear array.  This option is intended so one can create a contour plot more easily.
+ *
+ **********************************************************/
+
 int
 main (argc, argv)
      int argc;
@@ -165,7 +155,7 @@ main (argc, argv)
   int interactive;
 
 
-  // py_wind uses rdpar, but only in an interactive mode. As a result 
+  // py_wind uses rdpar, but only in an interactive mode. As a result
   // there is no associated .pf file
 
   interactive = 1;              /* Default to the standard operating mofe for py_wind */
@@ -173,6 +163,10 @@ main (argc, argv)
 
   /* Next command stops Debug statements printing out in py_wind */
   Log_set_verbosity (3);
+
+  /* Parse the command line.  It is Important that py_wind_help
+   * below is updated if this changes
+   */
 
   if (argc == 1)
   {
@@ -234,7 +228,7 @@ main (argc, argv)
 
   /* Initialize other variables here */
 
-  py_wind_project = 1;          // The default is to try to project onto a yz plane 
+  py_wind_project = 1;          // The default is to try to project onto a yz plane
 
 /* Read in the wind file */
 
@@ -279,9 +273,9 @@ I did not change this now.  Though it could be done.  02apr ksl */
   }
   else if (interactive == -1)
   {
-    /* In cases, where the windsave file was written out for 
-     * eaach ionization cycle Write the sumary ascii files 
-     * for each of the ionization cycles as 
+    /* In cases, where the windsave file was written out for
+     * eaach ionization cycle Write the sumary ascii files
+     * for each of the ionization cycles as
      * as well as the final cycle */
     zoom (1);                   /* This affects the logfile */
     ochoice = 1;
@@ -323,7 +317,7 @@ I did not change this now.  Though it could be done.  02apr ksl */
 
 
 
-/* 111126 - Consolodated choice statements into a string that is an external variable 
+/* 111126 - Consolodated choice statements into a string that is an external variable
  * so that it can be printed out whenever necessary.
  */
 
@@ -360,29 +354,28 @@ I did not change this now.  Though it could be done.  02apr ksl */
 }
 
 
-/***********************************************************
-                        Space Telescope Science Institute
-
-Synopsis:
-
-Arguments:		
 
 
-
-Returns:
- 
-Description:	
-
-
-		
-Notes:
-
-History:
-	111125	ksl	In an attempt to make it easier to operate py_wind
-			from the command line the huge choice loop has been
-			moved into a separate routine
-
-**************************************************************/
+/**********************************************************/
+/** @name      one_choice
+ * @brief      Process a request to display one variable
+ *
+ * @param [in] char  choice   A character indicating the
+ * variable to be displayed
+ * @param [in] char *  root   The rootname of the windsave file
+ * @param [in] int  ochoice   An integer indicating whether the data
+ * are only to be displayed, only to be written to a file, or both.
+ * @return     Always returns 0
+ *
+ * @details
+ * The routine simply contains a large case statement for
+ * interpreting what to do based on the variable choice
+ *
+ * ### Notes ###
+ *
+ * In some cases, additional imputs are required.
+ *
+ **********************************************************/
 
 int
 one_choice (choice, root, ochoice)
@@ -414,9 +407,6 @@ one_choice (choice, root, ochoice)
     break;
   case 'B':
     plasma_cell (wmain, root, ochoice);
-    break;
-  case 'c':                    /*Line emission */
-    line_summary (wmain, root, ochoice);
     break;
   case 'C':                    /*the ratio cooling to heating */
     coolheat_summary (wmain, root, ochoice);
@@ -647,39 +637,30 @@ one_choice (choice, root, ochoice)
   return (0);
 }
 
-//  goto a;
-
-//}
 
 
 
-/***********************************************************
-                        Space Telescope Science Institute
-
-Synopsis:
-	py_wind_help simply prints out help to the screen
-	and exits
-
-Arguments:		
-
-
-
-Returns:
- 
-Description:	
-
-
-		
-Notes:
-	Unfortunately unlike python the program language
-	c is not self documenting
-
-History:
-	111125	ksl	Modified so routine also prints out
-			the string that contains all the choices
-
-**************************************************************/
-
+/**********************************************************/
+/** @name      py_wind_help
+ * @brief      print out some helpful information to the screen
+ * 	and exits
+ *
+ * @return     N/A since the program exits once the help is 
+ * written
+ *
+ * @details
+ * This routine simply writes information to the screen.
+ * It should be updated whenever the program changes in
+ * a major way.
+ *
+ * It is called if py_wind is invoked with -h, or if there
+ * if it is given a switch that it does not understand.
+ *
+ * ### Notes ###
+ * Unfortunately unlike python the program language
+ * c is not self documenting
+ *
+ **********************************************************/
 
 int
 py_wind_help ()
@@ -700,7 +681,7 @@ This program reads a wind save file created by python and examine the wind struc
 			after which the program exits \n\
 		-d	searches for the diagnostic wind save files and prints information \n\
 			to ascii files \n\
-		-p	Gets information a parameter file \n\
+		-p	Gets information from a parameter file \n\
 		root	optional root name of wind_save file.  If this is not given, \n\
 			the user is queried for this \n\
 \n\

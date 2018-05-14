@@ -1,6 +1,6 @@
 /***********************************************************/
 /** @file  matom.c
- * @Author SWM
+ * @author SWM
  * @date   February, 2004
  * @brief  Macro-atom functions
  *

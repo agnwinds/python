@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  new_phot_util.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  

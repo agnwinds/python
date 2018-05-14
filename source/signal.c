@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  signal.c
- * @Author ksl
+ * @author ksl
  * @date   March, 2018
  *
  * @brief  Routines indicating  how  many ionization or spectal

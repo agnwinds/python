@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  xlog.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  These are a series of routines designed to store comments and errors

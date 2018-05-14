@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  atomic.c
- * @Author ksl
+ * @author ksl
  * @date   March, 2018
  *
  * @brief  Routines to calculate rates and x-sections making

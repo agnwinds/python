@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  get_atomicdata.c
- * @Author ksl
+ * @author ksl
  * @date   March, 2018
  *
  * @brief  Read in all of the atomic data for use with Python
@@ -146,7 +146,7 @@
 //OLD                   cardona 2010
 //OLD                   than once
 //OLD   12jul   nsh     73 - added structures and routines to read in badnell style total recombination rate data
-//OLD         12sept    nsh     73 - added structures and routines to read in gaunt factor data from sutherland 1997
+//OLD         12sept    nsh     73 - added structures and routines to read in gaunt factor data from Sutherland 1998
 //OLD   14nov   JM  -- removed DEBUG usage, replaced with Debug statements, see #111, #120.
 //OLD   14nov   nsh     78b - added DERE direct ionizaion data, and changed al recomb data to refer to state being left
 //OLD                  Also used write_atomicdata to control if summary is written to file.
@@ -563,7 +563,7 @@ get_atomic_data (masterfile)
 
 
 
-/* The following lines initialise the sutherland gaunt factors */
+/* The following lines initialise the Sutherland gaunt factors */
   gaunt_n_gsqrd = 0;		//The number of sets of scaled temperatures we have data for
   for (n = 0; n < MAX_GAUNT_N_GSQRD; n++)
     {
@@ -703,7 +703,7 @@ structure does not have this property! */
 		choice = 's';
 	      else if (strncmp (word, "BAD_GS_RR", 9) == 0)	/*Its a badnell resolved ground state RR file */
 		choice = 'G';
-	      else if (strncmp (word, "FF_GAUNT", 8) == 0)	/*Its a data file giving the temperature averaged gaunt factors from Sutherland (1997) */
+	      else if (strncmp (word, "FF_GAUNT", 8) == 0)	/*Its a data file giving the temperature averaged gaunt factors from Sutherland (1998) */
 		choice = 'g';
 	      else if (strncmp (word, "Kelecyield", 10) == 0)	/*Electron yield from inner shell ionization fro Kaastra and Mewe */
 		choice = 'K';
@@ -2625,7 +2625,7 @@ would like to have simple lines for macro-ions */
 /**
  * @section gaunt factor
  * The following are lines to read in temperature averaged free-free gaunt factors 
- * from the data of Sutherland (1997). The atomic file is basically unchanged
+ * from the data of Sutherland (1998). The atomic file is basically unchanged
  * from the data on the website, just with the top few lines commented out, 
  * and a label prepended to each line 
  * The data is a spline fit to the gaunt factor as a function of g - the reduced 

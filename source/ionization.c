@@ -1,51 +1,13 @@
 
+/***********************************************************/
+/** @file  ionization.c
+ * @author ksl
+ * @date   May, 2018
+ *
+ * @brief  Routines used to calculate and update ion densities
+ *
+ ***********************************************************/
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
- 	ionization routines for the wind one cell at a time
-	
- Arguments:		
-	WindPtr w;
-
-Returns:
- 
-Description:	
-	The intent is that the routine ion_abundances is the steering routine for
-	all calculations of the abundances
-	
-Notes:
-
-History:
-	98jul	ksl	Incorporated Christians mods with my comments 
-	98nov	ksl	Created the steering routine ion_abundances
-	00jan	ksl	Homogenized calls so that ionization_mod_on_the_spot
-			and ionization_mod_on_the_spot_exact do not call the
-			entire wind structure.  NOTE THAT THESE LAST ROUTINES
-			HAVE NOT BEEN SERIOUSLY RECHECKED, SINCE THEY ARE NOT
-			MUCH USED.
-	00jan	ksl	Moved ionization_mod_on_the_spot and ionization_mod_on_the_spot_exact
-			to "Legacy code" Legacy1.c
-	01oct	ksl	Add calls to levels for calculation of level populations.  The
-			calls are currently hardwired.
-	08aug	ksl	60b	Evidently ksl modified the calls to ion_abundances
-				previously, but leaving w as the variable was
-				confusing.  Fixed this
-	080808	ksl	62  - Removed option 4 for a partial detailed balance
-			which seems totally obsolete at this point as
-			we have not followed this up.  This was part of
-			the cleanup of the ionizaton balance routines
-			Also removed option 5, as this was not supported
-			later in the program
-	11nov	ksl	71 - Moved the so-called Sim power law approximation
-			to its own routine to restore this routine to its intent 
-			to be a steering routine and not something with a lot
-			of code particular to one calculation
-    12feb   nsh	71c - added options for mode 6 and 7, the two new ioinzation
-			codes that compute saha abundances for pairs of ions, based on a
-			good temperature for that pair, then corrects. 
-**************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,6 +18,22 @@ History:
 
 
 
+/**********************************************************/
+/** @name      ion_abundances
+ * @brief      ionization routines for the wind one cell at a time
+ *
+ * @param [in,out] PlasmaPtr  xplasma   The cell in which the ioniztion is to be calculated
+ * @param [in] int  mode   A parameter descibing how to calculate the ioniztion
+ * @return     The routine returns status messages dereived from the individual routines
+ * used to calculate the abundances.
+ *
+ * @details
+ * The intent is that the routine ion_abundances is the steering routine for
+ * all calculations of the abundances
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
 int
 ion_abundances (xplasma, mode)
@@ -173,45 +151,35 @@ to match heating and cooling in the wind element! */
 }
 
 
-/***********************************************************
-              Space Telescope Science Institute
 
- Synopsis: convergence checks to see whether a single cell
-	is or is not converging
-	
- Arguments:		
-	WindPtr w;
+/**********************************************************/
+/** @name      convergence
+ * @brief      checks to see whether a single cell
+ * 	is or is not converging
+ *
+ * @param [in out] PlasmaPtr  xplasma   The cell of interest
+ * @return    A number which describes the degree to which 
+ * the cell is converging
+ *
+ * @details
+ * The routine attempts to determine whether a cell is
+ * on the track to a final solution by checking whether 
+ * the electron and radiation temperatures are getting 
+ * smaller with cycle and whetehr the difference between
+ * heating and cooling is drroping.
+ * 
+ * The routine returns a number between 0 and 3, 
+ * depending on the number of convergence checks that
+ * are passed.  If all convergence tests are pssed
+ * then the number returned will be 0
+ * 
+ * The routine also adjust the gain which controls how
+ * far the electron temperture can change in a cycle.
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
-Returns:
- 
-Description:	
-
-	The routine attempts to determine whether a cell is
-	on the track to a final solution by checking whether 
-	the electron and radiation temperatures are getting 
-	smaller with cycle and whetehr the difference between
-	heating and cooling is drroping.
-
-	The routine returns a number between 0 and 3, 
-	depending on the number of convergence checks that
-	are passed.  If all convergence tests are pssed
-	then the number returned will be 0
-
-	The routine also adjust the gain which controls how
-	far the electron temperture can change in a cycle.
-
-	
-Notes:
-
-History:
-	06may	ksl	57+: Began modifications to reflect new
-			structure definition.  Note that it
-			is likelely that this entire routine
-			will ultimatetely be replaced because
-			everything here should only be in the wind
-        11sep  nsh     70f: Added lines to track which of the convergence criteria
-			in each cell was being met
-**************************************************************/
 int
 convergence (xplasma)
      PlasmaPtr xplasma;
@@ -289,32 +257,23 @@ convergence (xplasma)
 
 
 
+/**********************************************************/
+/** @name      check_convergence
+ * @brief      The routien summarizes the how well the wind converging
+ * to a solution as a whole
+ *
+ * @return     Always returns 0
+ *
+ * @details
+ * Basically the routine just looks at the numbers of cells which haave passed/failed
+ * the various convergence tests and writes this to the log file
+ *
+ * ### Notes ###
+ * @bug It would make sense to write this information to a separate file so that
+ * plots of the rate of convergence could be easily made.
+ *
+ **********************************************************/
 
-
-/***********************************************************
-              Space Telescope Science Institute
-
- Synopsis:
-   check_convergence -- Do a global check on how well the wind is converging
-	
- Arguments:		
-	WindPtr w;
-
-Returns:
- 
-Description:	
-	
-Notes:
-Notes--Eventually should absorb some of the calculations in wind_updates
-
-History:
-	05apr	ksl	55d -- Trivially eliminated MDIM from this
-			in effort to make coordinate system independent.
-			Whether something is in the wind or not is
-			now totally determeined by the volume.
-        06may	ksl	57+ -- Now using plasma structure
-        11sep   nsh     70e added in lines to write out the split of temperature and luminosity convergence
-**************************************************************/
 int
 check_convergence ()
 {
@@ -325,14 +284,14 @@ check_convergence ()
   double xconverge, xconverging;
 
   nconverge = nconverging = ntot = 0;
-  ntr = nte = nhc = nmax = 0;	//NSH 70i zero the counters
+  ntr = nte = nhc = nmax = 0;	
 
   for (n = 0; n < NPLASMA; n++)
     {
       ntot++;
       if (plasmamain[n].converge_whole == 0)
 	nconverge++;
-      if (plasmamain[n].trcheck == 0)	//NSH 70g - count up the three individual convergence criteria
+      if (plasmamain[n].trcheck == 0)	
 	ntr++;
       if (plasmamain[n].techeck == 0)
 	nte++;
@@ -351,51 +310,49 @@ check_convergence ()
   Log
     ("!!Check_converging: %4d (%.3f) converged and %4d (%.3f) converging of %d cells\n",
      nconverge, xconverge, nconverging, xconverging, ntot);
-  Log ("!!Check_convergence_breakdown: t_r %4d t_e(real) %4d t_e(maxed) %4d hc(real) %4d\n", ntr, nte, nmax, nhc);	//NSH 70g split of what is converging
+  Log ("!!Check_convergence_breakdown: t_r %4d t_e(real) %4d t_e(maxed) %4d hc(real) %4d\n", ntr, nte, nmax, nhc);
   Log
     ("Summary  convergence %4d %.3f  %4d  %.3f  %d  #  n_converged fraction_converged  converging fraction_converging total cells\n",
      nconverge, xconverge, nconverging, xconverging, ntot);
-  Log_flush ();			/*NSH June 13 Added call to flush logfile */
+  Log_flush ();			
   return (0);
 }
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-	one_shot calculates new densities of ions in a single element of the wind
-	according to equation 11 of Lucy & Mazzali, after having found the
-	temperature which matches heating and cooling for the previous
-	densities
-	
- Arguments:		
-	PlasmaPtr xplasma;
-
-Returns:
- 
-Description:
-	
-Notes:
-	This routine attempts to match heating and cooling in the wind element!
-	To do this it calls calc_te.  Based on the returned value of te, the
-	routine then calculates the concentrations in the on-the-spot approximation.
-
-	IT SEEMS LIKELY some code could be eliminated by simply having this routine
-	call the on-the-spot routine directly.
-
-History:
-	98	ksl	Coded as part of python effort
-	02jul	ksl	Added mode variable so could try detailed balance
-	06may	ksl	57+ -- Switched to use plasma structue
-    15aug   nsh 79 -- added a mode to leave t_e fixed
-
-**************************************************************/
 
 
 
 PlasmaPtr xxxplasma;
 
 
+/**********************************************************/
+/** @name      one_shot
+ * @brief      calculates new densities of ions in a single element of the wind
+ * 	after (usually) having found the
+ * 	temperature which matches heating and cooling for the previous
+ * 	densities
+ *
+ * @param [in,out] PlasmaPtr  xplasma   The plasma cell of interest
+ * @param [in] int  mode   A switch describing what approximation to use in determinging the
+ * densities
+ * @return     Always returns 0
+ *
+ * @details
+ * This routine attempts to match heating and cooling in the wind element!
+ * To do this it calls calc_te.  Based on the returned value of te, the
+ * routine then calculates densities for various ions in the cell.  The densities
+ * in xplasma are updated.             
+ *
+ * ### Notes ###
+ * 
+ *
+ * Special exceptions are made for Zeus; it is not clear why this is necessary
+ *
+ * @bug There are some numbered switches included here.  This is because these values
+ * are not allowed anymore. But this needs to be cleaned up.  Deactivated modes should
+ * be captured when the parameters are read in, not at this point. An else statement 
+ * should provide a sufficent check for any unknown mode.
+ *
+ **********************************************************/
 
 int
 one_shot (xplasma, mode)
@@ -414,11 +371,11 @@ one_shot (xplasma, mode)
 
   if (modes.zeus_connect == 1 || modes.fixed_temp == 1)
     {
-      te_new = te_old;		//We dont want to change the temperature
+      te_new = te_old;		//We don't want to change the temperature
       xxxplasma = xplasma;
       zero_emit (te_old);	//But we do still want to compute all heating and cooling rates
     }
-  else				//Do things to old way - look for a new temperature
+  else				//Do things to normal way - look for a new temperature
     {
       te_new = calc_te (xplasma, 0.7 * te_old, 1.3 * te_old);	//compute the new t_e - no limits on where it can go
       xplasma->t_e = (1 - gain) * te_old + gain * te_new;	/*Allow the temperature to move by a fraction gain towards 
@@ -442,7 +399,7 @@ meaning in nebular concentrations.
 */
 
   if (mode == IONMODE_ML93)
-    mode = NEBULARMODE_ML93;
+    mode = NEBULARMODE_ML93; // This is weird, why not continue
   else if (mode <= 1 || mode == 5 || mode > 9)	
     {
       /* There is no mode 5 at present  - SIM + two new modes in Feb 2012  + mode 5 now removed */
@@ -480,54 +437,35 @@ meaning in nebular concentrations.
 }
 
 
-/* 
- 
-   Synopsis
 
-   calc_te determines and returns the electron temperature in the wind such that the energy emitted
-   by the wind is equal to energy emitted (asssuming it is in the interval bracketed by
-   tmin and tmax.)
 
-   Argumnets
 
-   xplasma  a pointer to a single PlasmaPtr (often a dummy)
-   tmin     the minimum allowed temperature
-   tmax     the mqximimu allowed temperature
-
-   Description:
-
-   Notes:
-
-   calc_te does not modify any abundances.  It simply takes the current value of the heating in the
-   cell and attempts to find the value of the electron temperature which will result in cooling which
-   matches the heating.
-
-   This approach is not entirely self consistent because if te is actually different then the
-   abundances will be different and the heating will change as well.
-
-   This routine is a kluge because it does not really deal with what happens if the cooling curve 
-   has maxima and minima.
-
-   xxxplasma is just a way to tranmit information to zero_emit
-
-   History:
-
-   98dec    ksl Updated calls so that tmin and tmax were communicated externally,
-			    rather than hardwired
-   01dec	ksl	Reversed 98dec decision as a result of massive changes for python38
-   01dec	ksl	Assured that ww->t_e is updated here
-   01dec	ksl	Added capability to modify the desired goal of calc_te from the full
-			    heating to something intermediate between the current value and the
-			    ultimate goal
-   01dec	ksl	Rewrote to assure that boundaries will be bracketed properly and if
-			not calc_te will handle
-   04June   SS  Modified so that changes in the heating rate due to changes in the
-                temperature are included for macro atoms.
-	06may	ksl	Modified for plasma structue
-	17jun	nsh	cooling calculations all gathered together into cooling which is in
-				cooling.c
- */
-
+/**********************************************************/
+/** @name      calc_te
+ * @brief      
+ * calc_te determines and returns the electron temperature in the wind such that the energy emitted
+ * by the wind is equal to energy emitted (asssuming it is in the interval bracketed by
+ * tmin and tmax.)
+ *
+ * @param [in out] PlasmaPtr  xplasma   A plasma cell in the wind
+ * @param [in out] double  tmin   A bracketing minimum temperature
+ * @param [in out] double  tmax   A bracketing mxximum temperature
+ * @return     The temperature where heating and cooling match
+ *
+ * @details
+ * The routine iterates to find the temperature in a cell, where heating and cooling are matched.
+ *
+ * calc_te does not modify any abundances.  It simply takes the current value of the heating in the
+ * cell and attempts to find the value of the electron temperature which will result in cooling which
+ * matches the heating.
+ *
+ *
+ * ### Notes ###
+ * Ion densities are NOT updated in this process.
+ *
+ * xxxplasma is just a way to tranmit information to zero_emit
+ *
+ **********************************************************/
 
 double
 calc_te (xplasma, tmin, tmax)
@@ -538,7 +476,7 @@ calc_te (xplasma, tmin, tmax)
   int macro_pops ();
 
 
-  /* 110916 - ksl - Note that we assign a plasma pointer here to a fixed structure because
+  /* we assign a plasma pointer here to a fixed structure because
    * we need to call zbrent and we cannot pass the xplasma ptr directly
    */
 
@@ -595,6 +533,26 @@ calc_te (xplasma, tmin, tmax)
 
 /* This is just a function which has a zero when total energy loss is equal to total energy gain */
 
+
+/**********************************************************/
+/** @name      zero_emit
+ * @brief      Compute the cooling for a cell given a temperature t, and compare it
+ * to the heating seen in the cell in the previous ionization cycle
+ *
+ * @param [in] double  t   A trial temperature
+ * @return     The difference between the recorded heating and the cooling
+ *
+ * @details
+ * This routine is used to estiamate a new temperature for a cell given the
+ * heating of the cell in the previous ionization cycle.
+ *
+ * ### Notes ###
+ * The abundances of ions in the cell are not modified.  Results are stored
+ * in the cell of interest.  This routine is used in connection with a zero
+ * finding routine
+ *
+ **********************************************************/
+
 double
 zero_emit (t)
      double t;
@@ -609,7 +567,6 @@ zero_emit (t)
 
 
   /* Correct heat_tot for the change in temperature. SS June 04. */
-  //macro_pops (xxxplasma, xxxplasma->ne);
   xxxplasma->heat_tot -= xxxplasma->heat_lines_macro;
   xxxplasma->heat_lines -= xxxplasma->heat_lines_macro;
   xxxplasma->heat_lines_macro = macro_bb_heating (xxxplasma, t);
@@ -622,58 +579,11 @@ zero_emit (t)
   xxxplasma->heat_tot += xxxplasma->heat_photo_macro;
   xxxplasma->heat_photo += xxxplasma->heat_photo_macro;
 
-  /*81d - nsh - all cooling calculations moved into seperate routine.*/
-
-//OLD  /* 70d - ksl - Added next line so that adiabatic cooling reflects the temperature we
-//OLD   * are testing.  Adiabatic cooling is proportional to temperature
-//OLD   */
-
-//OLD  if (geo.adiabatic)
-//OLD    {
-//OLD      if (wmain[xxxplasma->nwind].div_v >= 0.0)
-//OLD	{
-//OLD	  /* This is the case where we have adiabatic cooling - we want to retain the old behaviour, 
-//OLD	     so we use the 'test' temperature to compute it. If div_v is less than zero, we don't do
-//OLD	     anything here, and so the existing value of adiabatic cooling is used - this was computed 
-//OLD	     in wind_updates2d before the call to ion_abundances. */
-//OLD	  xxxplasma->cool_adiabatic =
-//OLD	    adiabatic_cooling (&wmain[xxxplasma->nwind], t);
-//OLD	}
-//OLD    }
-
-//OLD  else
-//OLD    {
-//OLD      xxxplasma->cool_adiabatic = 0.0;
-//OLD    }
-
-
-  /*81c - nsh - we now treat DR cooling as a recombinational process - still unsure as to how to treat emission, so at the moment
-     it remains here */
-
-//OLD  xxxplasma->cool_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, 2);
-
-//OLD  /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
-
-//OLD  xxxplasma->cool_di = total_di (&wmain[xxxplasma->nwind], t);
-
-//OLD  /* 70g compton cooling calculated here to avoid generating photons */
-
-//OLD  xxxplasma->cool_comp = total_comp (&wmain[xxxplasma->nwind], t);
-
-//OLD  xxxplasma->cool_tot =
-//OLD    xxxplasma->cool_adiabatic + xxxplasma->cool_dr + xxxplasma->cool_di +
-//OLD    xxxplasma->cool_comp + total_emission (&wmain[xxxplasma->nwind], 0.,
-//OLD					  VERY_BIG);
 
   cooling(xxxplasma,t);
 
   difference = xxxplasma->heat_tot - xxxplasma->cool_tot;
   
-  // Test for just ff
-  //difference = xxxplasma->heat_ff - xxxplasma->lum_ff;
-
-
-
 
 
   return (difference);

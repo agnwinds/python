@@ -1,6 +1,6 @@
 /***********************************************************/
 /** @file  time.c
- * @Author ksl
+ * @author ksl
  * @date   January, 2018
  *
  * @brief  A few simple routines relating to estimate

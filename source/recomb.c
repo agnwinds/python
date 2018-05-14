@@ -1,7 +1,7 @@
 
 /***********************************************************/
 /** @file  recomb.c
- * @Author ksl,nsh
+ * @author ksl,nsh
  * @date   January, 2018
  *
  * @brief  The routines in this file all have to do with 

@@ -1,30 +1,16 @@
 
-/**************************************************************************
-                    Space Telescope Science Institute
+/***********************************************************/
+/** @file  py_wind_write.c
+ * @author ksl
+ * @date   May, 2018
+ *
+ * @brief  
+ * These are subroutines used by py_wind to write ascii
+ * files of various variables for use with smongo or normal display
+ * software.
+ *
+ ***********************************************************/
 
-
-  Synopsis:
-
-  Description:	These are subroutines used by py_wind to write ascii
-	files of various variables for use with smongo or normal display
-	software.
-
-  Arguments:		
-
-  Returns:
-
-  Notes:
-
-  History:
-	01aug	ksl	Replaced ndim with xdim so that ndim could be used
-			in python.h
-	05apr	ksl	56 -- eliminated fitswriting capability as part of
-			a general reorganization of py_wind to accommodate
-			mulitple files and for use with tecplot.  56d is
-			the last version with fits capability
-	
-
- ************************************************************************/
 
 #include        <math.h>
 #include        <stdio.h>
@@ -38,44 +24,67 @@
 
 
 
-/**************************************************************************
-                    Space Telescope Science Institute
-
-
-  Synopsis:  write_array writes out the arrays in a way which can be read easily
-   into a routine which can do contouring or to make a fits file 
-
-
-
-  Description:
-
-  Arguments:		
-  	choice		0-> don't write array 
-			1--> write without interpolation
-			2-> interpolate to linear array
-
-  Returns:
-
-  Notes:
-
-  History:
-	02feb	ksl	Fixed to allow different values of NDIM and MDIM.  This
-			is tricky, but I believe that ain is defined such that
-			the second axis is in the z direction so that the proper
-			dimension is ain {NDIM] [MDIM]
-	05apr	ksl	56 -- Completely rewritten to enable a variety of 
-			coordinate systems and to produce tecplot type 
-			output files.
-	1111	ksl	71 -- Modified format of files to ease ability
-			to plot the data in a variety of formats
-	1111	ksl	71 - Tecplot dependencies removed
-
-	
-
- ************************************************************************/
+//OLD /**************************************************************************
+//OLD                     Space Telescope Science Institute
+//OLD 
+//OLD 
+//OLD   Synopsis:  write_array writes out the arrays in a way which can be read easily
+//OLD    into a routine which can do contouring or to make a fits file 
+//OLD 
+//OLD 
+//OLD 
+//OLD   Description:
+//OLD 
+//OLD   Arguments:		
+//OLD   	choice		0-> don't write array 
+//OLD 			1--> write without interpolation
+//OLD 			2-> interpolate to linear array
+//OLD 
+//OLD   Returns:
+//OLD 
+//OLD   Notes:
+//OLD 
+//OLD   History:
+//OLD 	02feb	ksl	Fixed to allow different values of NDIM and MDIM.  This
+//OLD 			is tricky, but I believe that ain is defined such that
+//OLD 			the second axis is in the z direction so that the proper
+//OLD 			dimension is ain {NDIM] [MDIM]
+//OLD 	05apr	ksl	56 -- Completely rewritten to enable a variety of 
+//OLD 			coordinate systems and to produce tecplot type 
+//OLD 			output files.
+//OLD 	1111	ksl	71 -- Modified format of files to ease ability
+//OLD 			to plot the data in a variety of formats
+//OLD 	1111	ksl	71 - Tecplot dependencies removed
+//OLD 
+//OLD 	
+//OLD 
+//OLD  ************************************************************************/
 #define ODIM 256
 int init_write_array = 1;
 float aout[ODIM][ODIM];
+
+
+/**********************************************************/
+/** @name      write_array
+ * @brief      writes out the arrays in a way which can be read easily
+ *    into a routine which can do contouring 
+ *
+ * @param [in] char  filename[]   The name of the output file
+ * @param [in] int  choice   0-> don't write array, 1 -> write without intepolation, 2-> write with interpolation
+ * @return     Always returns 0
+ *
+ * @details
+ * This is a general purpose routine used by py_wind to write 
+ * ascii data files.  If a file is written, it can be written
+ * at the positions of of the windsave grid, or interpolated
+ * onto a linear coordinate grid.  The latter was intended
+ * to make it easier to make an "image" of the output file.  
+ *
+ * ### Notes ###
+ * The output files are written in a format that should be
+ * readable with the astropy ascii tables routines.
+ *
+ **********************************************************/
 
 int
 write_array (filename, choice)
@@ -241,53 +250,91 @@ are linear, and x otherwise.  This is not particularly transparent ?? ksl */
 }
 
 
-/**************************************************************************
-                    Space Telescope Science Institute
+//OLD /**************************************************************************
+//OLD                     Space Telescope Science Institute
+//OLD 
+//OLD 
+//OLD   Synopsis:
+//OLD 
+//OLD   Description:
+//OLD 	This is a generalized display routine, intended to allow various
+//OLD  	simplifications of py_wind
+//OLD 
+//OLD   Arguments:		
+//OLD 
+//OLD   Returns:
+//OLD 
+//OLD   Notes:
+//OLD 
+//OLD 	For cylindrical coordinates, one goes up in z, and over in x. To cylindrical coordinates
+//OLD 	we want to display so that each colum represents a constant line on the axis
+//OLD 	w[mdim][ndim].  So for a system with mdim=20 and ndim=25.  There are 25 elements
+//OLD 	in the z axis and 20 elements in the xaxis
+//OLD 
+//OLD 	Therefore a row, constant z, is displayed by by incrementing by 20 or mdim
+//OLD 
+//OLD 	For rtheta coordinates, one goes around in theta, up in r.  The fasted moving
+//OLD 	coordinate is r (when thinking of 1-d versions of the array.  Unless we
+//OLD 	are going to write a separate routine, the simplest thing to do
+//OLD 	is to make each column represent a constant r
+//OLD 
+//OLD 	w[mdim][ndim]  So, in spherical polar coorcinates, a system with mdim 20 has
+//OLD 	20 angles, and 25 radii.  
+//OLD 
+//OLD 	So for spherical polar, constant r is displayed by incrementing by 1.  As a result
+//OLD 	it is unclear that one can easily use the same routine for the two situations
+//OLD 	since you seem to be incrementing the opposite axes, since in the one case one 
+//OLD 	wants MDIM rows and other case one wants NDIM rows.  
+//OLD 
+//OLD 	It would be possible if you plot theta lines in each row, but what this means
+//OLD 	is that the first row is closest to the z axis
+//OLD 
+//OLD 
+//OLD   History:
+//OLD   	111125	ksl	Put standard headers before routine prior to updating slightly
+//OLD 	
+//OLD 
+//OLD  ************************************************************************/
 
 
-  Synopsis:
-
-  Description:
-	This is a generalized display routine, intended to allow various
- 	simplifications of py_wind
-
-  Arguments:		
-
-  Returns:
-
-  Notes:
-
-	For cylindrical coordinates, one goes up in z, and over in x. To cylindrical coordinates
-	we want to display so that each colum represents a constant line on the axis
-	w[mdim][ndim].  So for a system with mdim=20 and ndim=25.  There are 25 elements
-	in the z axis and 20 elements in the xaxis
-
-	Therefore a row, constant z, is displayed by by incrementing by 20 or mdim
-
-	For rtheta coordinates, one goes around in theta, up in r.  The fasted moving
-	coordinate is r (when thinking of 1-d versions of the array.  Unless we
-	are going to write a separate routine, the simplest thing to do
-	is to make each column represent a constant r
-
-	w[mdim][ndim]  So, in spherical polar coorcinates, a system with mdim 20 has
-	20 angles, and 25 radii.  
-
-	So for spherical polar, constant r is displayed by incrementing by 1.  As a result
-	it is unclear that one can easily use the same routine for the two situations
-	since you seem to be incrementing the opposite axes, since in the one case one 
-	wants MDIM rows and other case one wants NDIM rows.  
-
-	It would be possible if you plot theta lines in each row, but what this means
-	is that the first row is closest to the z axis
 
 
-  History:
-  	111125	ksl	Put standard headers before routine prior to updating slightly
-	
-
- ************************************************************************/
-
-
+/**********************************************************/
+/** @name      display
+ * @brief      Print results to the screen
+ *
+ * @param [in] char  name[]   The name associated with the array to be printed
+ * @return     Always returns 0
+ *
+ * @details
+ * This is a generalized display routine, intended to allow various
+ *  	simplifications of py_wind
+ *
+ * ### Notes ###
+ * For cylindrical coordinates, one goes up in z, and over in x. To cylindrical coordinates
+ * 	we want to display so that each colum represents a constant line on the axis
+ * 	w[mdim][ndim].  So for a system with mdim=20 and ndim=25.  There are 25 elements
+ * 	in the z axis and 20 elements in the xaxis
+ * 
+ * 	Therefore a row, constant z, is displayed by by incrementing by 20 or mdim
+ * 
+ * 	For rtheta coordinates, one goes around in theta, up in r.  The fasted moving
+ * 	coordinate is r (when thinking of 1-d versions of the array.  Unless we
+ * 	are going to write a separate routine, the simplest thing to do
+ * 	is to make each column represent a constant r
+ * 
+ * 	w[mdim][ndim]  So, in spherical polar coorcinates, a system with mdim 20 has
+ * 	20 angles, and 25 radii.  
+ * 
+ * 	So for spherical polar, constant r is displayed by incrementing by 1.  As a result
+ * 	it is unclear that one can easily use the same routine for the two situations
+ * 	since you seem to be incrementing the opposite axes, since in the one case one 
+ * 	wants MDIM rows and other case one wants NDIM rows.  
+ * 
+ * 	It would be possible if you plot theta lines in each row, but what this means
+ * 	is that the first row is closest to the z axis
+ *
+ **********************************************************/
 
 int
 display (name)
