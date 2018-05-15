@@ -44,7 +44,7 @@ struct
 
 /**********************************************************/
 /** @name      import_cylindrical
- * @brief      Read the an arbitray wind model in cylindrical
+ * @brief      Read the an arbitrary wind model in cylindrical
  *     coordinates
  *
  * @param [in] int  ndom   The domain number for the imported model
@@ -52,6 +52,8 @@ struct
  * @return     Always returns 0
  *
  * @details
+ *
+ * This routine just reads in the data and stores it in arrays
  *
  * ### Notes ###
  * The basic data we need to read in are
@@ -199,26 +201,22 @@ import_cylindrical (ndom, filename)
 }
 
 
-/* The next section contains routines to make the grids for imported models.
-
-   We make some assumptions here.  We assume that every cell is in the wind.
-   and we assume that r refers to the inside edge of the cell.
-
- * */
 
 
 /**********************************************************/
 /** @name      cylindrical_make_grid_import
- * @brief      ??? SYNOPSIS ???
+ * @brief       Use the imported data to initialize various
+ * portions of the Wind and Domain structures
  *
- * @param [in,out] WindPtr  w   The entire wind
+ *
+ * @param [in] WindPtr  w   The entire wind
  * @param [in] int  ndom   The domain number
  * @return   Always returns 0  
  *
  * @details
  * This routine initializes the portions of the wind structure 
- * using the imported model, specirically those portions having
- * to do with positions.
+ * using the imported model, specifically those portions having
+ * to do with positions, and velocities.
  *
  * The routine creates a pillbox around the grid to be used
  * for defining the region which the wind (maximally) occupies.
@@ -389,12 +387,12 @@ cylindrical_make_grid_import (w, ndom)
  *
  * @param [in] int  ndom   The domain of the imported model
  * @param [in] double *  x   A position
- * @param [in out] double *  v   The velocity at x
+ * @param [out] double *  v   The velocity at x
  * @return     The speed at x  
  *
  * @details
  * This routine interpolates on the values read in for the
- * inported model to give one a velocity
+ * imported model to give one a velocity
  *
  * ### Notes ###
  * In practice this routine is only used to initallize v in 
@@ -436,36 +434,22 @@ velocity_cylindrical (ndom, x, v)
 
 
 
-
-/* Fill in plasma ptrs with densities.   
- *
- * For this we assume that the densities read in are 
- * given at the * midpoints of the grid
- *
- * 
- * */
-
-/*  This routine should only be called to set up the plasma cells,
- *  and we assume that rho that was imported is the center of the 
- *  plasma cell, so there is no need to interpolate.
- */
-
-
 /**********************************************************/
 /** @name      rho_cylindrical
- * @brief      Get the density for an imported cylyndrical model at x
+ * @brief      Get the density for an imported cylindrical model at x
  *
- * @param [in out] int  ndom   The domain for the imported model
- * @param [in out] double *  x   A position
+ * @param [in] int  ndom   The domain for the imported model
+ * @param [in] double *  x   A position
  * @return     The density in cgs units is returned
  *
  * @details
- * This routine intepolates data from the imported model to
- * find rho at a position x
+ * This routine finds rho from the imported model 
+ * at a position x.  The routine does not interpolate rho, but
+ * simply locates the cell associated with x
  *
  * ### Notes ###
  * This routine is really only used to intialize rho in the
- * Plasma structure.  In reality, once the Plasma sturcute is
+ * Plasma structure.  In reality, once the Plasma structure is
  * initialized we always interpolate within the plasma structure
  * and do not access the original data.
  *

@@ -331,7 +331,7 @@ get_one_model (filename, onemod)
 
 /**********************************************************/
 /** @name      model
- * @brief      interpolates between s and places the results in 
+ * @brief      interpolates between spectra in a grid  placing the results in 
  *   	comp[spectype].xmod
  *
  * @param [in] int  spectype   A number which refers to a specific collecton of models, which were read in  
@@ -343,6 +343,10 @@ get_one_model (filename, onemod)
  * This is an intepolation routine.  Having previously read in a set of models which are associated
  * with a set of parameter, e.g T and g, we want the spectrum at some t and g, which is not necessaily
  * in the grid.   This routien does the interpolation and stores the result  in comp[spectype].mod
+ *
+ * The routine is generic as long as the requested parameters are within the grid of models, 
+ * but the routine makes the assumption that the first parameter is a temperature if the
+ * value of the first parameter outside the range of that parameter.  
  *
  *
  * ### Notes ###
@@ -395,7 +399,6 @@ model (spectype, par)
   int nwaves;
   double flux[NWAVES];
   double q1, q2, lambda, tscale, xxx;	// Used for rescaleing according to a bb
-//OLD  FILE *qptr;
 
 
 
@@ -606,28 +609,26 @@ even, and so for those cases we want to make sure to calculate the ratio of qs d
 
 	  /* multiply flux by scaling factor */
 	  flux[j] *= xxx;
+	}
 
 	  /* nmodel_terror counts number of models where this is true. */
 	  if (nmodel_terror < 20)
 	    {
 	      Error
-		("model: Taking corrective action because parameter %f outside bound %f -> scaling factor %f \n",
-		 par[0], tscale, xxx);
+		("model: Rescaling spectra because parameter %f outside bound %f of spectra in grid\n",
+		 par[0], tscale);
 
 	      nmodel_terror++;
 	    }
-	}
     }
 
 
 
   /* End of section to reweight the spectra. we can now copy fluxes to structure */
-//OLD  qptr = fopen ("MODEL.txt", "w");
 
   for (j = 0; j < nwaves; j++)
     {
       comp[spectype].xmod.f[j] = flux[j];
-//OLD      fprintf (qptr, "%f %e\n", comp[spectype].xmod.w[j], flux[j]);
     }
   for (j = 0; j < comp[spectype].npars; j++)
     {
