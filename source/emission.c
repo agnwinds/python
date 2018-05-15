@@ -21,7 +21,7 @@
 
 
 /**********************************************************/
-/** @name      wind_luminosity
+/**
  * @brief      calculate the luminosity of the entire
  * wind between freqencies f1 and f2
  *
@@ -80,7 +80,7 @@ wind_luminosity (f1, f2)
 
 
 /**********************************************************/
-/** @name      total_emission
+/**
  * @brief      Calculate the band-limited total emission of a single cell
  *
  * @param [in] WindPtr  one   The wind cell of interest
@@ -176,7 +176,7 @@ total_emission (one, f1, f2)
 
 
 /**********************************************************/
-/** @name      photo_gen_wind
+/**
  * @brief      generates
  * 	photons within the wind between two freqencies and stores them in the photon array
  *
@@ -398,7 +398,7 @@ was a resonant scatter but we want isotropic scattering anyway.  */
 
 
 /**********************************************************/
-/** @name      one_line
+/**
  * @brief      gets the frequency of a
  * single collisionally excited line photon in a particular cell
  * of the wind.
@@ -456,13 +456,16 @@ one_line (one, nres)
 
 
 
+/**********************************************************/
 /** Next section deals with bremsstrahlung radiation
  * 4*PI* 8/3* sqrt(2*PI/3)*e**6/m**2/c**3 sqrt(m/kT) or
- * 4*PI times the normal constant to dL_nu/dnu */
+ * 4*PI times the normal constant to dL_nu/dnu
+ **********************************************************/
 #define BREMS_CONSTANT 6.85e-38
 
+
 /**********************************************************/
-/** @name      total_free
+/**
  * @brief      calculates the band-limited ff luminosity of a cell.
  *
  * @param [in] WindPtr  one   A wind cell
@@ -560,7 +563,7 @@ total_free (one, t_e, f1, f2)
 
 
 /**********************************************************/
-/** @name      ff
+/**
  * @brief      calculate f_nu for ff emisssion
  *
  * @param [in out] WindPtr  one   A wind cell
@@ -641,9 +644,15 @@ ff (one, t_e, freq)
 
 
 
+/// We initialise the arrays that will contain the unscaled PDF
+double ff_x[ARRAY_PDF], ff_y[ARRAY_PDF];
+
+/// Old values
+double one_ff_f1, one_ff_f2, one_ff_te;
+
 
 /**********************************************************/
-/** @name      one_ff
+/**
  * @brief      randomly generate the frequency of a
  * 	ff photon within the frequency interval f1 and f2
  *
@@ -666,9 +675,6 @@ ff (one, t_e, freq)
  * to generate all of the photons in a single cell in one go.
  *
  **********************************************************/
-
-double ff_x[ARRAY_PDF], ff_y[ARRAY_PDF];	//We initialise the arrays that will contain the unscaled PDF
-double one_ff_f1, one_ff_f2, one_ff_te;	/* Old values */
 
 double
 one_ff (one, f1, f2)
@@ -724,7 +730,7 @@ one_ff (one, f1, f2)
 
 
 /**********************************************************/
-/** @name      gaunt_ff
+/**
  * @brief      computes the frequency averaged gaunt factor for ff emissionat
  * 		scaled temperature from Sutherland (1988).
  *

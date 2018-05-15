@@ -87,9 +87,9 @@ brem_d (alpha)
  can invert simple functions for these ends to ontasin a random photon frequency. In between
  one needs to explicitly integrate the function */
 
-#define BREM_ALPHAMIN 0.01      /// Region below which we will use a low frequency approximation
-#define BREM_ALPHAMAX 2.        /// Region above which we will use a high frequency approximation
-#define BREM_ALPHABIG 100.      ///  Region over which can maximmally integrate the bremstrahlung function
+#define BREM_ALPHAMIN 0.01      // Region below which we will use a low frequency approximation
+#define BREM_ALPHAMAX 2.        // Region above which we will use a high frequency approximation
+#define BREM_ALPHABIG 100.      //  Region over which can maximmally integrate the bremstrahlung function
 
 
 /* These variables are used to store details of a previously made cdf. If we are getting
@@ -98,23 +98,25 @@ brem_d (alpha)
  if the temperature of the spectrum has changed (unlikely) or the frequency bands have
  changed (this will happen as we move thruogh the photon generation bands) */
 
-int ninit_brem = 0;				/// This is a flag to say wether a cdf has already been made
-double old_brem_t = 0;			/// This is the temperature last used to make a cdf
-double old_brem_freqmin = 0;	/// This is the lower frequency last used to make a cdf
-double old_brem_freqmax = 0;	/// This is the lower frequency last used to make a cdf
+int ninit_brem = 0;				// This is a flag to say wether a cdf has already been made
+double old_brem_t = 0;			// This is the temperature last used to make a cdf
+double old_brem_freqmin = 0;	// This is the lower frequency last used to make a cdf
+double old_brem_freqmax = 0;	// This is the lower frequency last used to make a cdf
 
 
 /* These variables are used in the code, but are made global so they persist and can be re-used
  they are only refedined if the frequency limits, or the temperature has changed */
 
-double brem_alphamin, brem_alphamax;   /// The input frequency range in dimensionless values
-double cdf_brem_lo, cdf_brem_hi, cdf_brem_tot;  /// The precise boundaries in the the bb cdf
-double cdf_brem_ylo, cdf_brem_yhi;      /// The places in the CDF defined by freqmin & freqmax
+double brem_alphamin, brem_alphamax;   // The input frequency range in dimensionless values
+double cdf_brem_lo, cdf_brem_hi, cdf_brem_tot;  // The precise boundaries in the the bb cdf
+double cdf_brem_ylo, cdf_brem_yhi;      // The places in the CDF defined by freqmin & freqmax
 double brem_lo_freq_alphamin, brem_lo_freq_alphamax, brem_hi_freq_alphamin, brem_hi_freq_alphamax;      //  the limits to use for the low and high frequency values
 
+/**********************************************************/
 /** brem_set is the array that cdf_gen_from_func uses to esablish the
- specific points in the cdf of the dimensionless bremstrahlung function.
- The intention is get a smoooth spectrum. These used to be called 'jumps'*/
+ * specific points in the cdf of the dimensionless bremstrahlung function.
+ * The intention is get a smoooth spectrum. These used to be called 'jumps'
+ **********************************************************/
 double brem_set[] = {
   0.05, 0.1, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45,
   0.9, 1.9

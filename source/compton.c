@@ -19,7 +19,7 @@
 PlasmaPtr xplasma;              /// Pointer to current plasma cell
 
 /**********************************************************/
-/** @name      kappa_comp
+/** 
  * @brief      computes the effective compton opacity in the cell.
  *
  * @param [in] PlasmaPtr  xplasma   - pointer to the current plasma cell
@@ -66,7 +66,7 @@ kappa_comp (xplasma, freq)
 
 
 /**********************************************************/
-/** @name      kappa_ind_comp
+/** 
  * @brief      Computes the effective opacity in the cell due to *induced* compton heating.
  *
  * @param [in] PlasmaPtr  xplasma   - pointer to the current plasma cell
@@ -125,7 +125,7 @@ kappa_ind_comp (xplasma, freq)
 
 
 /**********************************************************/
-/** @name      total_comp
+/** 
  * @brief      computes the cooling in the cell due to inverse compton scattering.
  *
  * @param [in] WindPtr  one   - pointer to the current wind cell
@@ -207,7 +207,7 @@ total_comp (one, t_e)
 
 
 /**********************************************************/
-/** @name      klein_nishina
+/** 
  * @brief      computes the Klein Nishina cross section for a photon of frequency nu.
  *
  * @param [in] double  nu   - photon frequency
@@ -259,7 +259,7 @@ double sigma_max;   //The cross section for the maxmimum energy loss
 double x1;          //The ratio of photon eneergy to electron energy
 
 /**********************************************************/
-/** @name      compton_dir
+/** 
  * @brief      computes a random direction for a photon undergoing compton scattering.
  *
  * @param [in] PhotPtr  p   - the photon currently being scattered
@@ -348,7 +348,7 @@ compton_dir (p, xplasma)
 
 
 /**********************************************************/
-/** @name      compton_func
+/** 
  * @brief      Function used to find the fractional energy change for a given cross-section in the compton scattering limit.
  *
  * @param [in out] double  f   The fractional energy change of a photon undergoing scattering
@@ -379,7 +379,7 @@ compton_func (f)
 }
 
 /**********************************************************/
-/** @name      sigma_compton_partial
+/** 
  * @brief      is the Klein Nishina cross section as a function of the fractional energy change
  *
  * @param [in] double  f   - the fractional energy change
@@ -414,7 +414,7 @@ sigma_compton_partial (f, x)
 }
 
 /**********************************************************/
-/** @name      alpha
+/** 
  * @brief      The 'heating' cross section correction to Thompson
  *
  * @param [in] double  nu   - frequency
@@ -447,7 +447,7 @@ alpha (nu)
 
 
 /**********************************************************/
-/** @name      beta
+/** 
  * @brief      The 'cooling' cross section correction to Thompson
  *
  * @param [in] double  nu   - frequency
@@ -483,7 +483,7 @@ beta (nu)
 
 
 /**********************************************************/
-/** @name      comp_cool_integrand
+/** 
  * @brief      The integrand in the integral to obtain the total cooling rate due to inverse compton scattering.
  *
  * @param [in] double  nu   - frequency

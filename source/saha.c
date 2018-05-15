@@ -25,7 +25,7 @@
 
 
 /**********************************************************/
-/** @name      nebular_concentrations
+/** 
  * @brief      
  * modifies the densities of ions, levels, and
  * partition functions of ions within a cell of the wind based upon the mode, 
@@ -158,7 +158,7 @@ nebular_concentrations (xplasma, mode)
 
 
 /**********************************************************/
-/** @name      concentrations
+/** 
  * @brief      A routine to calculate concentrations in a plasma cell using the Saha 
  * equation with various assumptions about what to use for the temperature
  * 	Saha equantion.  
@@ -329,7 +329,7 @@ concentrations (xplasma, mode)
 
 
 /**********************************************************/
-/** @name      saha
+/** 
  * @brief      Calculate the  densities for all of the ions in a single
  *    	cell given ne and t.
  *
@@ -465,7 +465,7 @@ saha (xplasma, ne, t)
 
 
 /**********************************************************/
-/** @name      lucy
+/** 
  * @brief      Calculates ion abundances allowing for the Lucy Mazzali correction factors to the saha abundances
  * 	contained in xplasma. It thus assumes that saha() has been called before it, 
  * 	in the concentrations routine.
@@ -600,7 +600,7 @@ lucy (xplasma)
 
 
 /**********************************************************/
-/** @name      lucy_mazzali1
+/** 
  * @brief      calculates ion
  * densities of a single element (defined by nelem) according to a modified on
  * the spot approximation, in this case equation 11 of Mazzali and Lucy which
@@ -762,7 +762,7 @@ int nforce;
 
 
 /**********************************************************/
-/** @name      fix_concentrations
+/** 
  * @brief      sets the concentrations of individual ions
  *  assuming hard coded ionization fractions that are read from a file
  *
@@ -883,7 +883,7 @@ fix_concentrations (xplasma, mode)
 
 
 /**********************************************************/
-/** @name      get_ne
+/** 
  * @brief      calculates the electron density given the 
  * 	densities of each ion.
  *

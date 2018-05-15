@@ -23,11 +23,11 @@
 
 
 
-
+int num_updates = 0;
 
 /**********************************************************/
-/** 
- * @brief      updates the parameters in the wind that are 
+/**
+ * @brief      updates the parameters in the wind that are
  * 	affected by radiation, including ion densities.
  *
  * @param [in] WindPtr  The entire wind
@@ -40,7 +40,7 @@
  *
  * ### Notes ###
  * At the time wind_update is called the various quantities that are accumulated
- * during the photon transfer part of the cycle has been accumulated  
+ * during the photon transfer part of the cycle has been accumulated
  * and shared between the threads.  Here certain plasma cells are assigned to
  * each thread so that the ionization structure can be updated, and each thread
  * is responsible for calculaing the updates for a certain set of cells.  At
@@ -48,8 +48,8 @@
  *
  * The real need for prallelising the routine is the work done in ion_abundances
  *
- * Once this is done, various checks are made to determined what happened as a 
- * function of the updates, various variables in geo are updated,  and for 
+ * Once this is done, various checks are made to determined what happened as a
+ * function of the updates, various variables in geo are updated,  and for
  * a hydro model the results are written to a file
  *
  * This routine is nearly 1000 lines long and might beneifit from breaking
@@ -58,8 +58,6 @@
  *
  *
  **********************************************************/
-int num_updates = 0;
-
 int
 wind_update (w)
 WindPtr (w);
@@ -103,8 +101,8 @@ WindPtr (w);
   double dt_e_temp, dt_r_temp;
 
 
-  /* the commbuffer needs to be larger enough to pack all variables in MPI_Pack and MPI_Unpack routines NSH 1407 - the 
-     NIONS changed to nions for the 12 arrays in plasma that are now dynamically allocated 
+  /* the commbuffer needs to be larger enough to pack all variables in MPI_Pack and MPI_Unpack routines NSH 1407 - the
+     NIONS changed to nions for the 12 arrays in plasma that are now dynamically allocated
   NSH 1703 changed NLTE_LEVELS to nlte_levels  and NTOP_PHOT to nphot_tot since they are dynamically allocated now */
   size_of_commbuffer =
 //OLD    8 * (13 * nions + nlte_levels + 2 * nphot_total + 12 * NXBANDS + 2 * LPDF + NAUGER + 113) * (floor (NPLASMA / np_mpi_global) + 1);
@@ -122,7 +120,7 @@ WindPtr (w);
   t_r_ave_old = t_r_ave = t_e_ave_old = t_e_ave = 0.0;
 
 
-  /* For MPI parallelisation, the following loop will be distributed over mutiple tasks. 
+  /* For MPI parallelisation, the following loop will be distributed over mutiple tasks.
      Note that the mynmim and mynmax variables are still used even without MPI on */
   my_nmin = 0;
   my_nmax = NPLASMA;
@@ -153,7 +151,7 @@ WindPtr (w);
     t_e_ave_old += plasmamain[n].t_e;
   }
 
-  /* we now know how many cells this thread has to process - note this will be 
+  /* we now know how many cells this thread has to process - note this will be
      0-NPLASMA in serial mode */
 
   for (n = my_nmin; n < my_nmax; n++)
@@ -165,10 +163,10 @@ WindPtr (w);
 
 
 
-    /* Start with a call to the routine which normalises all the macro atom 
+    /* Start with a call to the routine which normalises all the macro atom
        monte carlo radiation field estimators. It's best to do this first since
        some of the estimators include temperature terms (stimulated correction
-       terms) which were included during the monte carlo simulation so we want 
+       terms) which were included during the monte carlo simulation so we want
        to be sure that the SAME temperatures are used here. (SS - Mar 2004). */
 
     if (geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == 0)      //test for macro atoms
@@ -198,7 +196,7 @@ WindPtr (w);
         Error ("wind_update:sane_check %d ave_freq %e j %e ntot %d\n", n, wtest, plasmamain[n].j, plasmamain[n].ntot);
       }
 
-      plasmamain[n].j /= (4. * PI * volume);    
+      plasmamain[n].j /= (4. * PI * volume);
       plasmamain[n].j_direct /= (4. * PI * volume);
       plasmamain[n].j_scatt /= (4. * PI * volume);
 
@@ -256,9 +254,9 @@ WindPtr (w);
 
     nh = plasmamain[n].rho * rho2nh;
 
-/* 1110 NSH Normalise IP, which at this point should be 
- * the number of photons in a cell by dividing by volume 
- * and number density of hydrogen in the cell 
+/* 1110 NSH Normalise IP, which at this point should be
+ * the number of photons in a cell by dividing by volume
+ * and number density of hydrogen in the cell
  * */
 
     plasmamain[n].ip /= (C * volume * nh);
@@ -270,14 +268,14 @@ WindPtr (w);
     plasmamain[n].xi *= 4. * PI;
     plasmamain[n].xi /= (volume * nh);
 
-    /* If geo.adiabatic is true, then alculate the adiabatic cooling using the current, i.e 
-     * previous value of t_e.  Note that this may not be  best way to determien the cooling. 
+    /* If geo.adiabatic is true, then alculate the adiabatic cooling using the current, i.e
+     * previous value of t_e.  Note that this may not be  best way to determien the cooling.
      * Changes made here should also be reflected in wind2d.c.  At present, adiabatic colling
      * is not included in updates to the temperature, even if the adiabatic cooling is calculated
-     * here. 04nov -- ksl 
-     * 05apr -- ksl -- The index being used was incorrect.  This has been fixed now 
-     * 11sep -- nsh -- The index for the wind (&w) for adiabatic cooling was incorrect - 
-     * was being called with the plasma cell rather than the approriate wind cell - fixed 
+     * here. 04nov -- ksl
+     * 05apr -- ksl -- The index being used was incorrect.  This has been fixed now
+     * 11sep -- nsh -- The index for the wind (&w) for adiabatic cooling was incorrect -
+     * was being called with the plasma cell rather than the approriate wind cell - fixed
      * old: adiabatic_cooling (&w[n], plasmamain[n].t_e);
      */
 
@@ -617,7 +615,7 @@ WindPtr (w);
 
   /* Now we need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
      In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
-     cell that is just inside (or outside) the wind. 
+     cell that is just inside (or outside) the wind.
 
      SS asked whether we should also be extending the wind for other parameters, especially ne.  At present we do not interpolate
      on ne so this is not necessary.  If we did do that it would be required.
@@ -661,12 +659,12 @@ WindPtr (w);
   }
 
   /* Check the balance between the absorbed and the emitted flux */
-  
+
   //NSH 0717 - first we need to ensure the cooling and luminosities reflect the current temperature
-  
+
   cool_sum = wind_cooling (0.0, VERY_BIG);       /*We call wind_cooling here to obtain an up to date set of cooling rates */
   lum_sum = wind_luminosity (0.0, VERY_BIG);       /*and we also call wind_luminosity to get the luminosities */
-  
+
 
   xsum = psum = ausum = lsum = fsum = csum = icsum = apsum = aausum = abstot = 0; //1108 NSH zero the new csum counter for compton heating
 
@@ -703,7 +701,7 @@ WindPtr (w);
 
     /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
        cycles in the windsavefile even if the spectral cycles are run */
-	
+
     plasmamain[nplasma].cool_tot_ioniz = plasmamain[nplasma].cool_tot;
     plasmamain[nplasma].lum_ff_ioniz = plasmamain[nplasma].lum_ff;
     plasmamain[nplasma].cool_rr_ioniz = plasmamain[nplasma].cool_rr;
@@ -792,8 +790,8 @@ WindPtr (w);
     ("!!wind_update: Wind heating     %8.2e  (photo %8.2e ff %8.2e compton %8.2e auger %8.2e induced_compton %8.2e lines %8.2e adiabatic %8.2e)\n",
      xsum + geo.heat_adiabatic, psum, fsum, csum, ausum, icsum, lsum, geo.heat_adiabatic);
 
-  /* 1108 NSH added commands to report compton cooling 1110 removed, 
-   * As was the case above, there are two almost identical lines.  Wind_cooling includes processes that do not produce photons, 
+  /* 1108 NSH added commands to report compton cooling 1110 removed,
+   * As was the case above, there are two almost identical lines.  Wind_cooling includes processes that do not produce photons,
    * not-only adiabatic cooling, but also goe.cool_comp, geo_cool_dr and geo.cool_di */
   Log
     ("!!wind_update: Wind luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n",
@@ -866,14 +864,14 @@ WindPtr (w);
            plasmamain[nstart].pl_alpha[i], plasmamain[nstart].pl_log_w[i], plasmamain[nstart].exp_temp[i], plasmamain[nstart].exp_w[i]);
       }
       /* Get some line diagnostics */
-	  
+
 	  lum_h_line = 0.0;
 	  lum_he_line = 0.0;
 	  lum_c_line = 0.0;
 	  lum_n_line = 0.0;
 	  lum_o_line = 0.0;
 	  lum_fe_line  = 0.0;
-	  
+
       for (i = 0; i < nlines; i++)
       {
         if (lin_ptr[i]->z == 1)
@@ -929,7 +927,7 @@ WindPtr (w);
           c_dr  = c_dr + plasmamain[nstart].cool_dr_ion[nn];
           c_rec = c_rec + plasmamain[nstart].cool_rr_ion[nn];
           c_lum = c_lum + plasmamain[nstart].lum_rr_ion[nn];
-		  
+
         }
         if (ion[nn].z == 7)
         {
@@ -946,7 +944,7 @@ WindPtr (w);
         if (ion[nn].z == 26)
         {
           fe_dr  = fe_dr + plasmamain[nstart].cool_dr_ion[nn];
-          fe_rec = fe_rec + plasmamain[nstart].cool_rr_ion[nn];          
+          fe_rec = fe_rec + plasmamain[nstart].cool_rr_ion[nn];
 		  fe_lum = fe_lum + plasmamain[nstart].lum_rr_ion[nn];
         }
 		if (ion[nn].z > 2)
@@ -994,9 +992,9 @@ WindPtr (w);
 
 
 /**********************************************************/
-/** 
- * @brief      zeros those portions of the wind which contain the radiation properties 
- * 	of the wind, i.e those portions which should be set to zeroed when the structure of the 
+/**
+ * @brief      zeros those portions of the wind which contain the radiation properties
+ * 	of the wind, i.e those portions which should be set to zeroed when the structure of the
  * 	wind has been changed or when you simply want to start off a calculation in a known state
  *
  * @return    Always returns 0
@@ -1031,7 +1029,7 @@ wind_rad_init ()
     plasmamain[n].ntot_star = plasmamain[n].ntot_bl = plasmamain[n].ntot_wind = 0;
     plasmamain[n].heat_tot = plasmamain[n].heat_ff = plasmamain[n].heat_photo = plasmamain[n].heat_lines = 0.0;
     plasmamain[n].abs_tot = plasmamain[n].abs_auger = plasmamain[n].abs_photo =  0.0;
-	
+
     plasmamain[n].heat_z = 0.0;
     plasmamain[n].max_freq = 0.0;       //NSH 120814 Zero the counter which works out the maximum frequency seen in a cell and hence the maximum applicable frequency of the power law estimators.
     plasmamain[n].cool_tot = plasmamain[n].lum_tot = plasmamain[n].lum_lines = plasmamain[n].lum_ff = 0.0;
@@ -1075,7 +1073,7 @@ wind_rad_init ()
 
     /* 57h -- 0608 -- These sections actually involve enough calculations that
        they are noticeable in term sof the overall speed.  One would if possible
-       like to avoid this section, since it requires the creation of macromain, 
+       like to avoid this section, since it requires the creation of macromain,
        even though macromain is not used -- ksl */
 
 
@@ -1116,7 +1114,7 @@ wind_rad_init ()
     {
       /* 57h -- recomb_simple is only required for we are using a macro atom approach, and only non-zero when
          this particular phot_tob xsection is treated as a simple x-section. Stuart, is this correct?? I've added
-         checks so that macro_info is only 0 (false) or true (1), and so the logic of the next section can be 
+         checks so that macro_info is only 0 (false) or true (1), and so the logic of the next section can be
          simplified.  0608-ksl */
       if (geo.macro_simple || phot_top[i].macro_info)
       {
@@ -1153,7 +1151,7 @@ wind_rad_init ()
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      calculates a version of the ionization parameter using Ferland's definition, but one that also assumes that the
  * wind is optically thin everywhere, and that all photons arise for the central source.
  *

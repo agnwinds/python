@@ -1,6 +1,6 @@
 
 /***********************************************************/
-/** @file  new_gradv.c
+/** @file  gradv.c
  * @author ksl
  * @date   January, 2018
  *

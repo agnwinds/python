@@ -21,7 +21,7 @@
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      calculates the distance to the far
  *         boundary of the cell in which the photon bundle resides.
  *
@@ -99,21 +99,21 @@ rtheta_ds_in_cell (ndom,p)
 
 
 /**********************************************************/
-/** 
- * @brief      Set up an rtheta grid                
+/**
+ * @brief      Set up an rtheta grid
  *
- * @param [in] WindPtr  w   The structure which defines entire wind 
+ * @param [in] WindPtr  w   The structure which defines entire wind
  * @param [in] int  ndom   The current domain
  * @return     Always returns 0
  *
  * @details
  *
- * 
+ *
  * 	For spherical polar, components we have defined the grid so that
  * 	i corresponds to a radial distance, and j corresponds to an angle,
  * 	e.g r theta.  increasing i corresponds to increasing distance,
  * 	and increasing theta corresponds to increasing angle measured from
- * 	the z axis. (This it should be fairly easy to implement true 
+ * 	the z axis. (This it should be fairly easy to implement true
  * 	spherical coordinates in the future.
  *
  * 	There are two basic options:
@@ -228,7 +228,7 @@ rtheta_make_grid (w, ndom)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      defines the wind cones that are needed to calculate ds in a cell
  *
  * @param [in, out] int  ndom   The domain to populate with the cone structures
@@ -237,11 +237,11 @@ rtheta_make_grid (w, ndom)
  *
  * @details
  *
- * This subroutine defines cones that define the edges (in the theta directio) 
+ * This subroutine defines cones that define the edges (in the theta directio)
  * of wind cells.
  *
  * ### Notes ###
- * 
+ *
  * Comment:  It is not entirely clear why we don't use fixed arrays for the cones
  * in the domains. The data volume is small, and this would simplify windsave
  * and windread.
@@ -272,7 +272,7 @@ rtheta_make_cones (ndom, w)
   for (n = 0; n < mdim; n++)
     {
       zdom[ndom].cones_rtheta[n].z = 0.0;
-      zdom[ndom].cones_rtheta[n].dzdr = 1. / tan (w[n].theta / RADIAN);	
+      zdom[ndom].cones_rtheta[n].dzdr = 1. / tan (w[n].theta / RADIAN);
     }
 
 
@@ -285,7 +285,7 @@ rtheta_make_cones (ndom, w)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      Complete the creation of an rtheta wind comain by populating certain arrays used for interpolation
  *
  * @param [in] int  ndom   The domain containing this wind component
@@ -297,12 +297,12 @@ rtheta_make_cones (ndom, w)
  * ### Notes ###
  *
  * This routine sets up a few arrays in domains that have rtheta
- * coordiantes.  These arrays are used to determine where in 
+ * coordiantes.  These arrays are used to determine where in
  * a cell one is, and how far it is to the edge of the cell
- * for photon bundles.  
+ * for photon bundles.
  *
  * The routine is called when the domain is set up, and called
- * again whenever the windsave file is read in.  
+ * again whenever the windsave file is read in.
  *
  **********************************************************/
 
@@ -342,13 +342,13 @@ rtheta_wind_complete (ndom, w)
     2. * zdom[ndom].wind_x[ndim - 1] - zdom[ndom].wind_midx[ndim - 2];
   zdom[ndom].wind_midz[mdim - 1] =
     2. * zdom[ndom].wind_z[mdim - 1] - zdom[ndom].wind_midz[mdim - 2];
-  
-  
-  /* Finally, in order to complete the r-theta wind we need to make a set of wind-cones. This is 
+
+
+  /* Finally, in order to complete the r-theta wind we need to make a set of wind-cones. This is
   to allow use to use the cones routines to work out if photonds leave a cell in the theta direction */
 
   	rtheta_make_cones (ndom, w);
-  
+
 
   return (0);
 }
@@ -356,27 +356,27 @@ rtheta_wind_complete (ndom, w)
 
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
 //OLD  	rtheta_volume(w) calculates the wind volume of a cylindrical cell
-//OLD 	allowing for the fact that some cells 
-//OLD 
-//OLD  Arguments:		
+//OLD 	allowing for the fact that some cells
+//OLD
+//OLD  Arguments:
 //OLD 	WindPtr w;    the entire wind
 //OLD  Returns:
-//OLD 
+//OLD
 //OLD  Description:
-//OLD 	This is a brute-froce integration of the volume 
-//OLD 
-//OLD 	ksl--04aug--some of the machinations regarding what to to at the 
+//OLD 	This is a brute-froce integration of the volume
+//OLD
+//OLD 	ksl--04aug--some of the machinations regarding what to to at the
 //OLD 	edge of the wind seem bizarre, like a substiture for figuring out
 //OLD 	what one actually should be doing.  However, volume > 0 is used
 //OLD 	for making certain choices in the existing code, and so one does
 //OLD 	need to be careful.  The existing code does not accurately calcuate
 //OLD 	the volume in the sense that it does not weight accroding to rho!
-//OLD 		
+//OLD
 //OLD  Notes:
-//OLD 	Where_in grid does not tell you whether the photon is in the wind or not. 
+//OLD 	Where_in grid does not tell you whether the photon is in the wind or not.
 //OLD  History:
 //OLD  	04aug	ksl	52a -- Moved from wind2d
 //OLD 	05apr   ksl     55d -- Modified to include the determination of whether
@@ -392,8 +392,8 @@ rtheta_wind_complete (ndom, w)
 //OLD 	11aug	ksl	70b -- Added possibility of finding the volumes
 //OLD 			in multiple components. See python.h for discussion
 //OLD 			of the relationship betwedn PART and LLL
-//OLD 
-//OLD  
+//OLD
+//OLD
 //OLD **************************************************************/
 #define RESOLUTION   1000
 
@@ -401,7 +401,7 @@ rtheta_wind_complete (ndom, w)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      rtheta_volume(w) calculates the wind volume of a cell in rtheta coordinate sysem
  * 	allowing for the fact that some cells may not be in the active wind region
  *
@@ -410,8 +410,8 @@ rtheta_wind_complete (ndom, w)
  * @return     Always returns 0
  *
  * @details
- * 
- * 	ksl--04aug--some of the machinations regarding what to to at the 
+ *
+ * 	ksl--04aug--some of the machinations regarding what to to at the
  * 	edge of the wind seem bizarre, like a substiture for figuring out
  * 	what one actually should be doing.  However, volume > 0 is used
  * 	for making certain choices in the existing code, and so one does
@@ -421,7 +421,7 @@ rtheta_wind_complete (ndom, w)
  * ### Notes ###
  *
  *
- * This is a brute-force integration of the volume 
+ * This is a brute-force integration of the volume
  *
  * In calculating volumes we allow for the fact that a cell
  * exists above and below the plane of the disk
@@ -569,12 +569,12 @@ rtheta_volumes (ndom, w)
 
 //OLD /***********************************************************
 //OLD                      Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
 //OLD  	rtheta_where_in_grid locates the grid position of the vector,
-//OLD 	when one is using rtheta coordinates. 
-//OLD 
-//OLD  Arguments:		
+//OLD 	when one is using rtheta coordinates.
+//OLD
+//OLD  Arguments:
 //OLD 	double x[];
 //OLD  Returns:
 //OLD  	where_in_grid normally  returns the cell number associated with
@@ -582,31 +582,31 @@ rtheta_volumes (ndom, w)
 //OLD  		integer < NDIM*MDIM.
 //OLD  	x is inside the grid        -1
 //OLD 	x is outside the grid       -2
-//OLD  Description:	
-//OLD 	
-//OLD 		
+//OLD  Description:
+//OLD
+//OLD
 //OLD  Notes:
-//OLD 	Where_in grid does not tell you whether the x is in the wind or not. 
-//OLD 
+//OLD 	Where_in grid does not tell you whether the x is in the wind or not.
+//OLD
 //OLD 	What one means by inside or outside the grid may well be different
 //OLD 	for different coordinate systems.
-//OLD 
-//OLD 
-//OLD 
+//OLD
+//OLD
+//OLD
 //OLD  History:
 //OLD 	04aug	ksl	52a -- Adapted from the same routine for cylindrical
 //OLD 			systems.
 //OLD    	13sep	nsh	76b -- Changed calls to fraction to take account of
 //OLD 			new modes.
-//OLD 	15aug	ksl	Added domains.  
-//OLD  
+//OLD 	15aug	ksl	Added domains.
+//OLD
 //OLD **************************************************************/
 
 
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      locates the grid position of the vector,
  * 	when one is using rtheta coordinates.
  *
@@ -614,14 +614,14 @@ rtheta_volumes (ndom, w)
  * @param [in, out] double  x[]   A three-vector defining a position
  * @return     Returns the cell number associated with
  *  		a position. If x is inside the grid, the routine
- *  		returns -1, if outside -2 
+ *  		returns -1, if outside -2
  *
  * @details
  * ??? DESCRIPTION ???
  *
  * ### Notes ###
- * Where_in grid does not tell you whether the x is in the wind or not. 
- * 
+ * Where_in grid does not tell you whether the x is in the wind or not.
+ *
  * 	What one means by inside or outside the grid may well be different
  * 	for different coordinate systems.
  *
@@ -668,36 +668,35 @@ rtheta_where_in_grid (ndom, x)
 
 //OLD /***********************************************************
 //OLD                      Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
 //OLD  	rtheta_get_random_location
-//OLD 
-//OLD  Arguments:		
+//OLD
+//OLD  Arguments:
 //OLD  	int n -- Cell in which random poition is to be generated
 //OLD  Returns:
 //OLD  	double x -- the position
-//OLD  Description:	
-//OLD 	
-//OLD 		
+//OLD  Description:
+//OLD
+//OLD
 //OLD  Notes:
-//OLD 
-//OLD 
-//OLD 
+//OLD
+//OLD
+//OLD
 //OLD  History:
 //OLD 	04aug	ksl	52a -- Moved from where_in_wind as incorporated
 //OLD 			multiple coordinate systems
-//OLD 	11aug	ksl	70b - Modifications to incoporate multiple 
+//OLD 	11aug	ksl	70b - Modifications to incoporate multiple
 //OLD 			components
 //OLD 	15aug	ksl	Allow for mulitple domains
-//OLD  
+//OLD
 //OLD **************************************************************/
 
 
 /**********************************************************/
-/** 
- * @brief      
+/**
+ * @brief
  *
- * <NOTE: The [in, out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
  * @param [in, out] int  n   -- Cell in which random poition is to be generated
  * @param [in, out] double  x[]   ???
  * @return     double x -- the position
@@ -758,7 +757,7 @@ rtheta_get_random_location (n, x)
 
 //  zz = rand () / MAXRAND - 0.5;	//positions above are all at +z distances DONE
   zz = random_number(-1.0,1.0);	//positions above are all at +z distances
-  
+
 
   if (zz < 0)
     x[2] *= -1;			/* The photon is in the bottom half of the wind */
@@ -771,25 +770,25 @@ rtheta_get_random_location (n, x)
 
 //OLD /***********************************************************
 //OLD                      Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
 //OLD  	rtheta_extend_density  extends the density to
 //OLD 	regions just outside the wind regiions so that
 //OLD 	extrapolations of density can be made there
-//OLD 
-//OLD  Arguments:		
+//OLD
+//OLD  Arguments:
 //OLD  Returns:
-//OLD  Description:	
-//OLD 	
-//OLD 		
+//OLD  Description:
+//OLD
+//OLD
 //OLD  Notes:
 //OLD       Now we need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
 //OLD      In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
-//OLD      cell that is just inside (or outside) the wind. 
-//OLD 
+//OLD      cell that is just inside (or outside) the wind.
+//OLD
 //OLD      SS asked whether we should also be extending the wind for other parameters, especially ne.  At present we do not interpolate
 //OLD      on ne so this is not necessary.  If we did do that it would be required.
-//OLD 
+//OLD
 //OLD      In cylindrical coordinates, the fast dimension is z; grid positions increase up in z, and then out in r.
 //OLD      In spperical polar coordinates, the fast dimension is theta; the grid increases in theta (measured)
 //OLD      from the z axis), and then in r.
@@ -797,24 +796,23 @@ rtheta_get_random_location (n, x)
 //OLD      *
 //OLD      06may      ksl     57+ -- Trying simply to use mappings to extend the grid in density space.  The
 //OLD      danger is that we will do other things, e.g update some of the wrong parameters.
-//OLD 
-//OLD 
-//OLD 
-//OLD 
+//OLD
+//OLD
+//OLD
+//OLD
 //OLD  History:
-//OLD 	05apr	ksl	56 -- Moved functionality from wind updates   
-//OLD  
+//OLD 	05apr	ksl	56 -- Moved functionality from wind updates
+//OLD
 //OLD **************************************************************/
 
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      extends the density to
  * 	regions just outside the wind regiions so that
  * 	extrapolations of density can be made there
  *
- * <NOTE: The [in, out] tag describes if the value of a parameter is used or altered. If it is used but not altered, delete 'OUT'. If the original value is not used and it is written to, delete 'IN'.>
  * @param [in, out] int  ndom   ???
  * @param [in, out] WindPtr  w   ???
  * @return     ??? RETURNS ???
@@ -825,11 +823,11 @@ rtheta_get_random_location (n, x)
  * ### Notes ###
  * Now we need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
  *      In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
- *      cell that is just inside (or outside) the wind. 
- * 
+ *      cell that is just inside (or outside) the wind.
+ *
  *      SS asked whether we should also be extending the wind for other parameters, especially ne.  At present we do not interpolate
  *      on ne so this is not necessary.  If we did do that it would be required.
- * 
+ *
  *      In cylindrical coordinates, the fast dimension is z; grid positions increase up in z, and then out in r.
  *      In spperical polar coordinates, the fast dimension is theta; the grid increases in theta (measured)
  *      from the z axis), and then in r.
@@ -889,17 +887,17 @@ rtheta_extend_density (ndom, w)
 
 
 /**********************************************************/
-/** 
- * @brief      Check whether a cell in an rtheta coordiante system 
+/**
+ * @brief      Check whether a cell in an rtheta coordiante system
  * is in the wind
  *
- * @param [in] int  n   The a cell number 
- * @return     An integer indicate whether the cell is in the wind, pratially in the 
+ * @param [in] int  n   The a cell number
+ * @return     An integer indicate whether the cell is in the wind, pratially in the
  * wind, or not in the wind at all.
  *
  * @details
- * This routine performes is a robust check of whether a cell is 
- * in the wind or not.  
+ * This routine performes is a robust check of whether a cell is
+ * in the wind or not.
  *
  * ### Notes ###
  *

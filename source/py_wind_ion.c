@@ -11,7 +11,7 @@
 
 
 /**********************************************************/
-/** @name      import_wind
+/** 
  * @brief      Import a gridded model
  *
  * @param [in] int  ndom   The domain for the model
@@ -77,7 +77,7 @@
 
 
 /**********************************************************/
-/** @name      ion_summary
+/** 
  * @brief      Print informaition about a specific ion
  *
  * @param [in] WindPtr W   The entire wind          
@@ -245,7 +245,7 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
 
 
 /**********************************************************/
-/** @name      tau_ave_summary
+/** 
  * @brief      Calculates tau_ave for a particular transition 
  * of an element and ion assuming one is in resonance
  *
@@ -344,7 +344,7 @@ tau_ave_summary (w, element, istate, freq, rootname, ochoice)
 
 
 /**********************************************************/
-/** @name      line_summary
+/** 
  * @brief      Calculate the luminoisty for a specific line
  *
  * @param [in] WindPtr W   The entire wind          
@@ -581,7 +581,7 @@ line_summary (w, rootname, ochoice)
 
 
 /**********************************************************/
-/** @name      total_emission_summary
+/** 
  * @brief      Get the total emission of the cells
  *
  * @param [in] WindPtrYW   The entire wind          
@@ -637,7 +637,7 @@ total_emission_summary (w, rootname, ochoice)
 
 
 /**********************************************************/
-/** @name      modify_te   
+/**    
  * @brief      Find the electron temperature where heating matches
  * the cooling
  *
@@ -690,7 +690,7 @@ modify_te (w, rootname, ochoice)
 
 
 /**********************************************************/
-/** @name      partial_measure_summary
+/** 
  * @brief      Write out the emission measure for a specific
  * ionization state of an element
  *
@@ -783,7 +783,7 @@ partial_measure_summary (w, element, istate, rootname, ochoice)
 
 
 /**********************************************************/
-/** @name      collision_summary
+/** 
  * @brief      Write out the collision strengths (and related information)
  * for all of the lines 
  *

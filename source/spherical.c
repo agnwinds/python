@@ -19,7 +19,7 @@
 
 /* Notes on spherical coordinates
 
-   In spherical coordinates, we set NDIM = to whatever and MDIM = 1.  
+   In spherical coordinates, we set NDIM = to whatever and MDIM = 1.
 
    Some of the variables in the Wind_ptr array, like the divergence
    have to be calculated at a certain place.  Logically, one would
@@ -28,38 +28,38 @@
    was because I want the code to run for normal bipolar winds.  But
    this can be an issue for anisotropic scattering!!  It should not
    affect items like the divergence, but it certainly affects the
-   gradients. 
+   gradients.
 
 */
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
 //OLD 	spherical_ds_in_cell calculates the distance to the far
-//OLD         boundary of the cell in which the photon bundle resides.  	
-//OLD   
-//OLD  Arguments:		
+//OLD         boundary of the cell in which the photon bundle resides.
+//OLD
+//OLD  Arguments:
 //OLD  	p	Photon pointer
-//OLD 
-//OLD 	
+//OLD
+//OLD
 //OLD  Returns:
 //OLD  	Distance to the far boundary of the cell in which the photon
 //OLD 	currently resides.  Negative numbers (and zero) should be
 //OLD 	regarded as errors.
-//OLD   
-//OLD Description:	
-//OLD 
+//OLD
+//OLD Description:
+//OLD
 //OLD Notes:
-//OLD 
+//OLD
 //OLD History:
 //OLD  	05apr	ksl	55d: Adapted from rtheta.c
 //OLD 	15aug	ksl	Domains incorporated
-//OLD  
+//OLD
 //OLD **************************************************************/
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      calculates the distance to the far
  *         boundary of the cell in which the photon bundle resides.
  *
@@ -72,7 +72,7 @@
  * @details
  *
  * The routine simply determines which grid cell the photon is
- * in and then solves two quadradic equations for the distance 
+ * in and then solves two quadradic equations for the distance
  * to the inner and outer boundary of the cell.  The routine
  * returns the smallest positive distance.
  *
@@ -118,7 +118,7 @@ spherical_ds_in_cell (ndom,p)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      defines the cells in a spherical grid
  *
  * @param [in] WindPtr  w   The structure which defines the wind in Python
@@ -129,11 +129,11 @@ spherical_ds_in_cell (ndom,p)
  *
  * The routine defines the boundaries of cells for a spherical
  * grid in the appropriate parts of the wind domain
- * In spherical coordinates w runs from 0 to n.  
+ * In spherical coordinates w runs from 0 to n.
  *
  * ### Notes ###
- * 
- * The centers of the grid cells are defined in the xz plane at a 45 
+ *
+ * The centers of the grid cells are defined in the xz plane at a 45
  * degree angle.  This was done so that one would be in a plausible
  * region of a biconical wind.
  *
@@ -177,7 +177,7 @@ spherical_make_grid (w, ndom)
 
       /* Now calculate the positions of these points in the xz plane.
          There is a choice about how one does this.  Here we  have elected
-         to calculate this at a 45 degree angle.  in the hopes this will 
+         to calculate this at a 45 degree angle.  in the hopes this will
          be a reasonable portion of the wind in a biconical flow.
        */
 
@@ -198,7 +198,7 @@ spherical_make_grid (w, ndom)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      Initialize some arrays in a domain for a spherical system that are used in
  * various interpolation routines
  *
@@ -208,7 +208,7 @@ spherical_make_grid (w, ndom)
  *
  * @details
  *
- * This simple little routine just populates one dimensional 
+ * This simple little routine just populates one dimensional
  * arrays that are used for interpolation.
  *
  * ### Notes ###
@@ -218,7 +218,7 @@ spherical_make_grid (w, ndom)
 int
 spherical_wind_complete (ndom,w)
      int ndom;
-	WindPtr w;    
+	WindPtr w;
 {
   int i;
   int ndim, nstart;
@@ -242,19 +242,21 @@ spherical_wind_complete (ndom,w)
 
 
 
+#define RESOLUTION   100
+
 /**********************************************************/
-/** 
+/**
  * @brief      spherical_volume(w) calculates the wind volume of cell
  * 	allowing for the fact that some cells are partially in the wind
  *
  * @param [in] int  ndom   the domain number
  * @param [in] WindPtr  w   the entire wind
- * @return     Always returns 0  
+ * @return     Always returns 0
  *
  * @details
  *
  * The routine performs a simple 2d numerical
- * integration to find out what fraction of 
+ * integration to find out what fraction of
  * a shell is in the wind of a specfic domain
  * and uses this to calculate the volume that
  * is in the wind.
@@ -265,8 +267,6 @@ spherical_wind_complete (ndom,w)
  *
  *
  **********************************************************/
-
-#define RESOLUTION   100
 
 int
 spherical_volumes (ndom, w)
@@ -328,7 +328,7 @@ spherical_volumes (ndom, w)
             x[2] = r * cos (theta);;
             if (where_in_wind (x, &ndomain) == W_ALL_INWIND)
             {
-              num += r * r * sin (theta);      
+              num += r * r * sin (theta);
               jj++;
             }
           }
@@ -360,14 +360,14 @@ spherical_volumes (ndom, w)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      locates the element in wmain corrosponding to a position
  * 	when one is using spherical coordinates.
  *
  * @param [in] int  ndom   The domain number
  * @param [in] double  x[]   The postion
  * @return     the number of wind element associated with
- *  		a position.  
+ *  		a position.
  *
  * If the position is in the grid this will be a positive number.  If
  * s is inside the grid -1 will be returned, if x is outsice the domain
@@ -376,11 +376,11 @@ spherical_volumes (ndom, w)
  * @details
  *
  * ### Notes ###
- *  speherical_where_in grid does not tell you whether the x is in the wind or not. 
- * 
+ *  speherical_where_in grid does not tell you whether the x is in the wind or not.
+ *
  * 	What one means by inside or outside the grid may well be different
  * 	for different coordinate systems.
- * 
+ *
  * 	This routine is not normally used directly.  Instead it is called via
  * 	where_in_grid which determines the specific where_in_grid
  * 	routine to call, depending on the coordinate system.
@@ -414,7 +414,7 @@ spherical_where_in_grid (ndom, x)
 
   fraction (r, zdom[ndom].wind_x, ndim, &n, &f, 0);
 
-  /* n is the position with this domain, so zdom[ndom].nstart is added get 
+  /* n is the position with this domain, so zdom[ndom].nstart is added get
    * to wmain
    */
 
@@ -424,8 +424,8 @@ spherical_where_in_grid (ndom, x)
 
 
 /**********************************************************/
-/** 
- * @brief      
+/**
+ * @brief
  *
  * @param [in] int  n   -- Cell in which random position is to be generated
  * @param [out] double  x[]   A random position in the cell
@@ -433,14 +433,14 @@ spherical_where_in_grid (ndom, x)
  *
  * @details
  *
- * The routine generates random positions within a spherical 
+ * The routine generates random positions within a spherical
  * cell and returns when it finds a position that is in the
  * wind region.
  *
  * ### Notes ###
- * 
+ *
  * Comment: This routine has no protection against the possibility
- * that the cell is not at least partially in the wind.  
+ * that the cell is not at least partially in the wind.
  *
  **********************************************************/
 
@@ -466,7 +466,7 @@ spherical_get_random_location (n, x)
   while (inwind != W_ALL_INWIND)
   {
     r = (rmin * rmin * rmin) + (rmax * rmax * rmax - rmin * rmin * rmin) * random_number(0.0,1.0);
-	
+
     r = pow (r, (1. / 3.));
     theta = acos (random_number(-1.0,1.0));
 
@@ -485,24 +485,24 @@ spherical_get_random_location (n, x)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      extends the density to
  * regions just outside the wind regiions so that
  * extrapolations of density can be made there
  *
  * @param [in] int  ndom   The domain of interest
  * @param [in] WindPtr  w   The enetire wind
- * @return   Always returns 0  
+ * @return   Always returns 0
  *
  * @details
- * 
+ *
  * In order for density to be continuous within the grid,
  * and to enable linear interpolation everwhere, we need
  * to define a density in the guard cells inside and outside
- * the wind region.  
+ * the wind region.
  *
  * This routine accomplishes this by assignining an element
- * in the plasma structure to the guard cells.  
+ * in the plasma structure to the guard cells.
  *
  * ### Notes ###
  *
@@ -523,10 +523,10 @@ spherical_extend_density (ndom, w)
 
   ndim = zdom[ndom].ndim;
   nstart = zdom[ndom].nstart;
-  /* 
+  /*
      Now we need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
      In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
-     cell that is just inside (or outside) the wind. 
+     cell that is just inside (or outside) the wind.
    */
 
   for (j = 0; j < ndim - 1; j++)
@@ -561,8 +561,8 @@ spherical_extend_density (ndom, w)
 
 
 /**********************************************************/
-/** 
- * @brief      defines the cells in a thin shell, a special case of a spherical wind. 
+/**
+ * @brief      defines the cells in a thin shell, a special case of a spherical wind.
  *
  * @param [in, out] WindPtr  w   The structure which defines the wind in Python
  * @param [in, out] int  ndom   The domain number
@@ -570,12 +570,12 @@ spherical_extend_density (ndom, w)
  *
  * @details
  *
- * The shell wind has 3 elements, one inside the shell, one outside, and 
+ * The shell wind has 3 elements, one inside the shell, one outside, and
  * one outside and one shell exactly fitting the shell.
  *
  *
  * ### Notes ###
- * 
+ *
  * The shell wind is intended for diagnostic purposes
  *
  *

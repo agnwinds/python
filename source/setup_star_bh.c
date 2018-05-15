@@ -18,7 +18,7 @@
 
 
 /**********************************************************/
-/** @name      get_stellar_params
+/** 
  * @brief      sets rstar, mstar, tstar as well
  *   as secondary parameters based on user inputs
  *
@@ -114,7 +114,7 @@ get_stellar_params ()
 
 
 /**********************************************************/
-/** @name      get_bl_and_agn_params
+/** 
  * @brief      sets up the boundary layer and agn power law parameters
  *   based on user input and system type
  *

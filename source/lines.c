@@ -6,7 +6,7 @@
  *
  * @brief  Subroutines assocaited with with resonance line radiation
  *
- * 
+ *
  ***********************************************************/
 
 
@@ -22,10 +22,10 @@
 
 
 /**********************************************************/
-/** @name      total_line_emission
- * @brief      
+/**
+ * @brief
  * Calculate the total line emission from a wind cell
- * 	
+ *
  *
  * @param [in] WindPtr  one   A specific cell in the wind
  * @param [in] double  f1   A minimum frequncy
@@ -34,12 +34,12 @@
  *
  * @details
  * Using t_e and the densities of ions in a cell the routine
- * simply calculates the total amount of line emission in 
+ * simply calculates the total amount of line emission in
  * the cell
  *
  * ### Notes ###
  *
- * The routine simply use f1 and f2 to define the 
+ * The routine simply use f1 and f2 to define the
  * range of lines to calculate the luminosity for and then
  * calls lum_lines
  *
@@ -65,7 +65,7 @@ total_line_emission (one, f1, f2)
 
   /* Update nline_min and nline_max in atomic.h which define which
    * lines lie in the frequency range f1-f2 in the frepeuncy ordered
-   * version of the lines 
+   * version of the lines
    */
 
   limit_lines (f1, f2);
@@ -80,8 +80,8 @@ total_line_emission (one, f1, f2)
 
 
 /**********************************************************/
-/** @name      lum_lines
- * @brief      Calculate the line lumiosity of lines between 
+/**
+ * @brief      Calculate the line lumiosity of lines between
  * nmin and nmax of the frequency ordered list of lines
  *
  * @param [in] WindPtr  one   A wind cell
@@ -95,7 +95,7 @@ total_line_emission (one, f1, f2)
  * total line luminosity.
  *
  * ### Notes ###
- * The individual line luminosities are stored in lin_ptr[n]->pow 
+ * The individual line luminosities are stored in lin_ptr[n]->pow
  *
  **********************************************************/
 
@@ -131,7 +131,7 @@ lum_lines (one, nmin, nmax)
 	  z = exp (-H_OVER_K * lin_ptr[n]->freq / t_e);
 
 
-//Next lines required if want to use escape probabilities               
+//Next lines required if want to use escape probabilities
 
 	  q = 1. - scattering_fraction (lin_ptr[n], xplasma);
 
@@ -139,7 +139,7 @@ lum_lines (one, nmin, nmax)
 
 	  x *= foo3 = H * lin_ptr[n]->freq * xplasma->vol;
 	  if (geo.line_mode == 3)
-	    x *= foo4 = p_escape (lin_ptr[n], xplasma);	// Include effects of line trapping 
+	    x *= foo4 = p_escape (lin_ptr[n], xplasma);	// Include effects of line trapping
 	  else
 	    {
 	      foo4 = 0.0;	// Added to prevent compilation warning
@@ -170,14 +170,14 @@ lum_lines (one, nmin, nmax)
 
 
 
-/* 
+/*
 
    q21 calculates and returns the collisional de-excitation coefficient q21
 
    Notes:  This uses a simple approximation for the effective_collision_strength omega.
    ?? I am not sure where this came from at present and am indeed no sure that
    omega is omega(2->1) as it should be.  This should be carefully checked.??
-   This has no been improved, and wherever possible we use tabulated collision 
+   This has no been improved, and wherever possible we use tabulated collision
    stength data from Chianti (after Burgess and Tully 1992)
 
    c21=n_e * q21
@@ -195,8 +195,15 @@ lum_lines (one, nmin, nmax)
  */
 
 
+/// (8*PI)/(sqrt(3) *nu_1Rydberg
+#define ECS_CONSTANT 4.773691e16
+
+struct lines *q21_line_ptr;
+double q21_a, q21_t_old;
+
+
 /**********************************************************/
-/** @name      q21
+/**
  * @brief      calculates and returns the collisional de-excitation coefficient q21
  *
  * @param [in] struct lines *  line_ptr   A single line
@@ -208,13 +215,10 @@ lum_lines (one, nmin, nmax)
  * approximation if we do not.
  *
  * ### Notes ###
- * the relevant paper to consult here is Van Regemorter 1962. We use an effective gaunt 
+ * the relevant paper to consult here is Van Regemorter 1962. We use an effective gaunt
  * factor to calculate collision strengths. There is one regime in which kt < hnu. For that
- * consult equation 4.20 and 4.21 of Hazy. 
+ * consult equation 4.20 and 4.21 of Hazy.
 ************************************************************/
-#define ECS_CONSTANT 4.773691e16	//(8*PI)/(sqrt(3) *nu_1Rydberg
-struct lines *q21_line_ptr;
-double q21_a, q21_t_old;
 
 double
 q21 (line_ptr, t)
@@ -232,7 +236,7 @@ q21 (line_ptr, t)
 
       u0 = (BOLTZMANN * t) / (H * line_ptr->freq);
 
-      if (line_ptr->istate == 1 && u0 < 2)	// neutrals at low energy. Used 2 to give continuous function. 
+      if (line_ptr->istate == 1 && u0 < 2)	// neutrals at low energy. Used 2 to give continuous function.
 	gaunt = u0 / 10.0;
       else			// low energy electrons, positive ions
 	gaunt = 0.2;
@@ -263,7 +267,7 @@ q21 (line_ptr, t)
 
 
 /**********************************************************/
-/** @name      q12
+/**
  * @brief      Calculate the collisional excitation coefficient for a line
  *
  * @param [in] struct lines *  line_ptr   The line of interest
@@ -295,11 +299,11 @@ q12 (line_ptr, t)
 }
 
 
-/* 
-   a21 alculates and returns the Einstein A coefficient 
+/*
+   a21 alculates and returns the Einstein A coefficient
    History:
    98aug        ksl     Coded and debugged
-   99jan        ksl Modified so would shortcircuit calculation if 
+   99jan        ksl Modified so would shortcircuit calculation if
    called multiple times for same a
  */
 #define A21_CONSTANT 7.429297e-22	// 8 * PI * PI * E * E / (MELEC * C * C * C)
@@ -309,7 +313,7 @@ double a21_a;
 
 
 /**********************************************************/
-/** @name      a21
+/**
  * @brief      Calculate the Einstein A coefficient for aline
  *
  * @param [in out] struct lines *  line_ptr   The structure that describes a single line
@@ -342,18 +346,18 @@ a21 (line_ptr)
 }
 
 
-/* 
+/*
    two_level_atom(line_ptr,ne,te,w,tr,dd,d1,d2) calculates the ratio
    n2/n1 and gives the individual densities for the states of a two level
-   atom.  
+   atom.
 
    Description:
    In the two level approximation,
 
-   n2 / n1 = ( c12 + g2/g1 c*c / (2 h nu * nu * nu )  * A21 J12) / 
-   (c21 + A21 + c*c / (2 h nu * nu * nu )  * A21 J21)  
+   n2 / n1 = ( c12 + g2/g1 c*c / (2 h nu * nu * nu )  * A21 J12) /
+   (c21 + A21 + c*c / (2 h nu * nu * nu )  * A21 J21)
 
-   In the on-the-spot approx. we assume,. 
+   In the on-the-spot approx. we assume,.
 
    J21= W  (2 h nu * nu * nu )  / (exp (h nu / k T(rad)) -1)
 
@@ -363,16 +367,16 @@ a21 (line_ptr)
 	98Aug	ksl	Coded and debugged
 	99jan	ksl	Tried to improve speed by assuring that it does not
 			calculate exactly the same atom twice in a row
-	00nov	ksl	Adopted a very simple radiated domininated model for 
-			transitions from excited state to excited state. 
+	00nov	ksl	Adopted a very simple radiated domininated model for
+			transitions from excited state to excited state.
 			This is essentially a modified LTE approach.  Currently
 			at least there is no collisional correction for either
 			level, although it would be easy to add for the excited
 			level.  The difficulty here is that one does not readily
-			have all of the level information at hand.  
+			have all of the level information at hand.
 	01dec	ksl	Modified calling scheme and added partionion functions
 	06may	ksl	57+ -- Modified to use plasma structue
-	07mar	ksl	58c -- Tried to address problems associated with our 
+	07mar	ksl	58c -- Tried to address problems associated with our
 			inconsistent treatment of level populations for two
 			level atoms, This is at best a bandaide.
 	14jul	nsh	78 -- changed to allow the use of a computed model for
@@ -381,10 +385,14 @@ a21 (line_ptr)
  */
 
 
+ struct lines *old_line_ptr;
+ double old_ne, old_te, old_w, old_tr, old_dd;
+ double old_d1, old_d2, old_n2_over_n1;
+
 /**********************************************************/
-/** @name      two_level_atom
- * @brief      calculates the ratio n2/n1 and gives the individual 
- * densities for the states of a two level atom.  
+/**
+ * @brief      calculates the ratio n2/n1 and gives the individual
+ * densities for the states of a two level atom.
  *
  * @param [in] struct lines *  line_ptr   The line of interest
  * @param [in] PlasmaPtr  xplasma   The plasma cell of interest
@@ -395,10 +403,10 @@ a21 (line_ptr)
  * @details
  * In the two level approximation,
  *
- * n2 / n1 = ( c12 + g2/g1 c*c / (2 h nu * nu * nu )  * A21 J12) / 
- * (c21 + A21 + c*c / (2 h nu * nu * nu )  * A21 J21)  
+ * n2 / n1 = ( c12 + g2/g1 c*c / (2 h nu * nu * nu )  * A21 J12) /
+ * (c21 + A21 + c*c / (2 h nu * nu * nu )  * A21 J21)
  *
- * In the on-the-spot approx. we assume,. 
+ * In the on-the-spot approx. we assume,.
  *
  * J21= W  (2 h nu * nu * nu )  / (exp (h nu / k T(rad)) -1)
  *
@@ -409,9 +417,6 @@ a21 (line_ptr)
  * The program will exit if this happens
  *
  **********************************************************/
-struct lines *old_line_ptr;
-double old_ne, old_te, old_w, old_tr, old_dd;
-double old_d1, old_d2, old_n2_over_n1;
 
 
 double
@@ -472,7 +477,7 @@ two_level_atom (line_ptr, xplasma, d1, d2)
 	{			// Then the lower level is the ground state
 
 /* For a ground state connected transition we correct for the partition
-function in calculating the density of the lower level, and then we 
+function in calculating the density of the lower level, and then we
 make an on-the-spot approximation for the upper level.  The only reason
 this is a "improvement" over the numbers available from the partition
 function directly is the allowance for collisions, and also for the
@@ -492,13 +497,13 @@ in the configuration structure. 01dec ksl */
 	  z = (C * C) / (2. * H * freq * freq * freq);	//This is the factor which relates the A coefficient to the b coefficient
 
 
-	  /* we call mean intensity with mode 1 - this means we are happy to use the 
-	     dilute blackbody approximation even if we havent run enough spectral cycles 
+	  /* we call mean intensity with mode 1 - this means we are happy to use the
+	     dilute blackbody approximation even if we havent run enough spectral cycles
 	     to have a model for J */
 	  J = mean_intensity (xplasma, freq, 1);
 
-	  /* this equation is equivalent to equation 4.29 in NSH's thesis with the 
-	     einstein b coefficients replaced by a multiplied by suitable conversion 
+	  /* this equation is equivalent to equation 4.29 in NSH's thesis with the
+	     einstein b coefficients replaced by a multiplied by suitable conversion
 	     factors from the einstein relations. */
 	  n2_over_n1 =
 	    (c12 + g2_over_g1 * a * z * J) / (c21 + a * (1. + (J * z)));
@@ -513,11 +518,11 @@ in the configuration structure. 01dec ksl */
       else
 	{			// The transition has both levels above the ground state
 
-/* 
+/*
  * In the event that both levels are above the ground state, we assume
  * that the upper level population is given by an on-the-spot approximation.
  * We make the same assumption for the lower level, unless the lower level
- * is matastable in which case we set the weight to 1 and force equlibrium 
+ * is matastable in which case we set the weight to 1 and force equlibrium
 */
 
 	  gg = ion[line_ptr->nion].g;
@@ -525,7 +530,7 @@ in the configuration structure. 01dec ksl */
 	  n2_over_ng = line_ptr->gu / gg * z;
 
 /* For lower level, use an on the spot approximation if the lower level has a short radiative lifetive;
-Othewise, assert that the lower level is metastable and set the radiative weight to 1 
+Othewise, assert that the lower level is metastable and set the radiative weight to 1
 ERROR -- At present I don't believe what one should do with metastable lower levels is
 ERROR -- worked out, either in the program... where are we getting radiative rates
 ERROR -- or conceptually
@@ -561,10 +566,10 @@ ERROR -- or conceptually
 
 
 /**********************************************************/
-/** @name      line_nsigma
- * @brief      
+/**
+ * @brief
  * Calculate the total line absorption x-section for a specific transition
- * allowing for stimulated emission 
+ * allowing for stimulated emission
  *
  * @param [in] struct lines *  line_ptr   The line of interest
  * @param [int] PlasmaPtr  xplasma   The plasma cell of interest
@@ -598,16 +603,16 @@ line_nsigma (line_ptr, xplasma)
 
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
-//OLD scattering fraction(line_ptr,ne,te,dd,dvds,w,tr) calculate the fraction of excited 
+//OLD
+//OLD scattering fraction(line_ptr,ne,te,dd,dvds,w,tr) calculate the fraction of excited
 //OLD state atoms which correspond to scattered photons, i.e. the portion which are
 //OLD excited by radiation and return to the ground state via spontaneous emission.
-//OLD 
+//OLD
 //OLD Description:
-//OLD 
+//OLD
 //OLD In the radiative transfer equation for lines, we separate the fraction of photons
-//OLD which are "absorbed" and the fraction which are "scattered".  
-//OLD 
+//OLD which are "absorbed" and the fraction which are "scattered".
+//OLD
 //OLD If line_mode==0, the atomosphere is a completely absorbing and no photons
 //OLD           will be scattered.  In this mode, assuming the wind is a source
 //OLD           of emission, the emissivity will be the Einstein A coefficient
@@ -615,14 +620,14 @@ line_nsigma (line_ptr, xplasma)
 //OLD           interchange of energy between the photons and the electrons
 //OLD           as a result of radiation transfer
 //OLD If line_mode==2, then a simple single scattering approximation is applied in which
-//OLD           case the scattered flux is just  A21/(C21+A21*(1-exp(-h nu/k T_e). 
+//OLD           case the scattered flux is just  A21/(C21+A21*(1-exp(-h nu/k T_e).
 //OLD If line_mode==3, then radiation trapping is included as well.  The basic idea
 //OLD           is to calculate the average number of scatters in a single
 //OLD           interaction and there is heat lost in each of these scatters.
-//OLD Notes: 
+//OLD Notes:
 //OLD   It may be more efficient to combine several of these routines in view
 //OLD   of the fact that the exp is calculated several times
-//OLD 
+//OLD
 //OLD History:
 //OLD   98      ksl     Coded
 //OLD   98aug   ksl     Rewritten to allow for stimulated decays in a
@@ -630,28 +635,28 @@ line_nsigma (line_ptr, xplasma)
 //OLD                   radiative trapping section.  It was clearly not
 //OLD                   correct previously! But is it correct now???
 //OLD   98nov   ksl     Corrected scattering fraction to agree with Python notes.
-//OLD                   It was not correct previously 
+//OLD                   It was not correct previously
 //OLD   06may   ksl     57+ -- Modified to use plasma structure
 //OLD ************************************************/
 
 
 
 /**********************************************************/
-/** @name      scattering_fraction
- * @brief      calculate the fraction of excited 
+/**
+ * @brief      calculate the fraction of excited
 state atoms which correspond to scattered photons, i.e. the portion which are
 excited by radiation and return to the ground state via spontaneous emission.
  *
  * @param [in] struct lines *  line_ptr   The line of interest
  * @param [in] PlasmaPtr  xplasma   The cell of interest
- * @return     The fraction of excitations which result in a scattering 
+ * @return     The fraction of excitations which result in a scattering
  * event
  *
  * @details
  * In the radiative transfer equation for lines, we separate the fraction of photons
  * which are "absorbed" and the fraction which are "scattered".   The results
  * depend on the line mode
- * 
+ *
  * * If line_mode==0, the atomosphere is a completely absorbing and no photons
  * 		will be scattered.  In this mode, assuming the wind is a source
  * 		of emission, the emissivity will be the Einstein A coefficient
@@ -659,7 +664,7 @@ excited by radiation and return to the ground state via spontaneous emission.
  * 		interchange of energy between the photons and the electrons
  * 		as a result of radiation transfer
  * * If line_mode==2, then a simple single scattering approximation is applied in which
- * 		case the scattered flux is just  A21/(C21+A21*(1-exp(-h nu/k T_e). 
+ * 		case the scattered flux is just  A21/(C21+A21*(1-exp(-h nu/k T_e).
  * * If line_mode==3, then radiation trapping is included as well.  The basic idea
  * 		is to calculate the average number of scatters in a single
  * 		interaction and there is heat lost in each of these scatters.
@@ -708,7 +713,7 @@ scattering_fraction (line_ptr, xplasma)
     return (1 - q);		//single scattering atmosphere
 
   else if (geo.line_mode == 3)
-    {				// atmosphere with  line trapping 
+    {				// atmosphere with  line trapping
 
       escape = p_escape (line_ptr, xplasma);
       //The following is exact
@@ -737,15 +742,19 @@ scattering_fraction (line_ptr, xplasma)
 
    History:
    98dec        ksl     Coded
-   99jan        ksl     Added code so that it shortcircuits if 
+   99jan        ksl     Added code so that it shortcircuits if
    asked to claculate the same escape probability
 
 	06may	ksl	57+ -- Modify for plasma structue
   1411 JM -- changed to use the sobolev function to calculate tau.
  */
 
+ struct lines *pe_line_ptr;
+ double pe_ne, pe_te, pe_dd, pe_dvds, pe_w, pe_tr;
+ double pe_escape;
+
 /**********************************************************/
-/** @name      p_escape
+/**
  * @brief      Estimate the esccapte probability for a line
  * in a plasma cell
  *
@@ -759,10 +768,6 @@ scattering_fraction (line_ptr, xplasma)
  * ### Notes ###
  *
  **********************************************************/
-struct lines *pe_line_ptr;
-double pe_ne, pe_te, pe_dd, pe_dvds, pe_w, pe_tr;
-double pe_escape;
-
 
 double
 p_escape (line_ptr, xplasma)
@@ -797,7 +802,7 @@ p_escape (line_ptr, xplasma)
       || pe_dvds != dvds || pe_w != w || pe_tr != tr)
     {
 
-      /* JM 1411 -- we used to have duplicated code here, but 
+      /* JM 1411 -- we used to have duplicated code here, but
          now we call the sobolev function itself */
       tau = sobolev (one, one->x, dd, line_ptr, dvds);
 
@@ -824,8 +829,8 @@ p_escape (line_ptr, xplasma)
 
 
 /**********************************************************/
-/** @name      p_escape_from_tau
- * @brief      Given an optical depth estimate the escape 
+/**
+ * @brief      Given an optical depth estimate the escape
  * probility
  *
  * @param [in] double  tau   An optical depth
@@ -838,9 +843,9 @@ p_escape (line_ptr, xplasma)
  *   (1. - exp (-tau)) / tau;
  *
  *   Except for high and low tau where it returns 1/tau and
- *   1.0 respectively. This is used by p_escape above, which 
- *   calculates the sobolev escape probability, and 
- *   also by the anisotropic scattering routines. 
+ *   1.0 respectively. This is used by p_escape above, which
+ *   calculates the sobolev escape probability, and
+ *   also by the anisotropic scattering routines.
  *
  *
  * ### Notes ###
@@ -872,17 +877,17 @@ p_escape_from_tau (tau)
 
 
 /**********************************************************/
-/** @name      line_heat
- * @brief      
- * calculates the amount of line heating that during a resonance. 
+/**
+ * @brief
+ * calculates the amount of line heating that during a resonance.
  *
- * @param [in out] PlasmaPtr  xplasma   The plasma cell where the resonance 
+ * @param [in out] PlasmaPtr  xplasma   The plasma cell where the resonance
  * occurs
  * @param [in,out] PhotPtr  pp   The photon bundle associated with the event
  * @param [in] int  nres   The number of the resonance
  * @return   Alway returns 0  f
  *
- * xplasma->heat_lines and heat_total are updated.  The weight of photon 
+ * xplasma->heat_lines and heat_total are updated.  The weight of photon
  * is decreased by the amount of its energy that goes into heating
  *
  * @details
@@ -891,7 +896,7 @@ p_escape_from_tau (tau)
  * the energy of the photon bundle.
  *
  * ### Notes ###
- * It is called by trans_phot in python 
+ * It is called by trans_phot in python
  *
  **********************************************************/
 
@@ -927,8 +932,8 @@ line_heat (xplasma, pp, nres)
 
 
 /**********************************************************/
-/** @name      upsilon
- * @brief      calculates the thermally averaged collision strength thermally excited line emission. 
+/**
+ * @brief      calculates the thermally averaged collision strength thermally excited line emission.
  *
  * @param [in out] int  n_coll   the index of the collision strength record we are working with
  * @param [in out] double  u0  - kT_e/hnu - where nu is the transition frequency for the line of interest and T_e is the electron temperature
@@ -937,7 +942,7 @@ line_heat (xplasma, pp, nres)
  * @details
  *
  * ### Notes ###
- * It uses data extracted from Chianti stored in coll_stren. 
+ * It uses data extracted from Chianti stored in coll_stren.
  * The paper to consult is Burgess and Tully A&A 254,436 (1992).
  * u0 is the ratio of Boltzmans constant times the electron temperature in the cell
  * divided by Plancks constant times the frequency of the line under analysis.
@@ -975,7 +980,7 @@ upsilon (n_coll, u0)
     }
 
 
-  /* we now compute y from the interpolation formulae 
+  /* we now compute y from the interpolation formulae
      y is the reduced upsilon from Burgess & Tully 1992. */
   linterp (x, coll_stren[n_coll].sct, coll_stren[n_coll].scups,
 	   coll_stren[n_coll].n_points, &y, 0);

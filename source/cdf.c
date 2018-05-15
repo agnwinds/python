@@ -49,11 +49,17 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
+/// This is the initial value of PDFSTEPS
+#define PDFSTEPS 10000
 
-#define PDFSTEPS 10000		/// This is the initial value of PDFSTEPS
-int pdf_steps_current;		/// This is the value of pdfsteps at this point in time
-int init_pdf = 0;			/// Flag to say whether structures to hold a cdf have been initialised
-double *pdf_array;			/// Pointer to pdf_array - made external because it is used in varous routines
+/// This is the value of pdfsteps at this point in time		
+int pdf_steps_current;
+
+/// Flag to say whether structures to hold a cdf have been initialised
+int init_pdf = 0;
+
+/// Pointer to pdf_array - made external because it is used in varous routines
+double *pdf_array;
 
 
 /**********************************************************/

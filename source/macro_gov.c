@@ -5,7 +5,7 @@
  * @date   January, 2018
  *
  * @brief  is a file which contains the functions which govern macro-atoms and obtain
- *  their level populations. The actual functions which do the jumps inside an activated 
+ *  their level populations. The actual functions which do the jumps inside an activated
  *  macro-atom are in matom.c. This is partly done to prevent overly long files (JM1504)
  *
  ***********************************************************/
@@ -23,10 +23,10 @@
 #include "my_linalg.h"
 
 /**********************************************************/
-/** @name      macro_gov
+/**
  * @brief      is a routine that will sit at a higher level in the code than either matom or kpkt
- *        	   and will govern the passage of packets between these routines. At the moment, since matom and kpkt 
- *             call each other it call all get rather confusing and loads of nested subroutine calls ensue. 
+ *        	   and will govern the passage of packets between these routines. At the moment, since matom and kpkt
+ *             call each other it call all get rather confusing and loads of nested subroutine calls ensue.
  *             removes this by calling matom and kpkt which on return tell  to either return
  *             an r-packet to resonate or make another call to either kpkt or matom as appropriate.
  *
@@ -35,7 +35,7 @@
  * @param [out] int  matom_or_kpkt   to tell us if we should initially excite a
  * @param [out] int *  which_out   set to 1 if return is via macro atom and 2 if via kpkt
  * @return      Will return an r-packet after (possibly) several calls to matom and kpkt
- * 
+ *
  *        int nres                    the process by which re-emission occurs
  *        PhotPtr p                   the packet following re-emission
  *
@@ -44,11 +44,11 @@
  * ### Notes ###
  * 			I've written this to be as general as possible so that if we want to improve the treatment of simple
  *          ions it should not need to be re-written.
- * 
+ *
  *          During the spectrum calculation the emission of r-packets within the spectral region of interest
  *          is done using emissivities obtained during the ionization cycles. Therefore whenever an r-packet
  *          is converted into a k-packet or an excited macro atom that ends the need to follow the packet any
- *          further. To deal with this, this routine sets the weights of such packets to zero. Upon return to 
+ *          further. To deal with this, this routine sets the weights of such packets to zero. Upon return to
  *          trans_phot these packets will then be thrown away.
  *
  **********************************************************/
@@ -61,7 +61,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
      int *which_out;
 
 {
-  int escape;                   //this tells us when the r-packet is escaping 
+  int escape;                   //this tells us when the r-packet is escaping
 
   escape = 0;                   //start with it not being ready to escape as an r-packet
 
@@ -87,8 +87,8 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 
           if (escape == 1)
           {
-            /* It is going to escape as a r-packet that was created by de-activation of a macro atom. 
-               Therefore, if the frequency is suitable it should be recorded as a macro atom emission event for use in the 
+            /* It is going to escape as a r-packet that was created by de-activation of a macro atom.
+               Therefore, if the frequency is suitable it should be recorded as a macro atom emission event for use in the
                computation of the k-packet emissivity needed for the final spectrum calculation. */
             *which_out = 1;
             /* 0803 - ksl - 60 - Added code to modify the photon origin to indicate the packet has been processed
@@ -120,8 +120,8 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 
           if (escape == 1)
           {
-            /* It is going to escape as a r-packet that was created by de-activation of a macro atom. 
-               Therefore, if the frequency is suitable it should be recorded as a macro atom emission event for use in the 
+            /* It is going to escape as a r-packet that was created by de-activation of a macro atom.
+               Therefore, if the frequency is suitable it should be recorded as a macro atom emission event for use in the
                computation of the k-packet emissivity needed for the final spectrum calculation. */
             *which_out = 1;
 
@@ -146,7 +146,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       }
 
       matom_or_kpkt = 2;        //if it did not escape then it must have had a
-      //de-activation by collision processes -> need a k-packet 
+      //de-activation by collision processes -> need a k-packet
     }
     else if (matom_or_kpkt == 2)        //deal with a k-packet
     {
@@ -162,8 +162,8 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 
       }
 
-      matom_or_kpkt = 1;        //if it did not escape then the k-packet must have been 
-      //destroyed by collisionally exciting a macro atom - 
+      matom_or_kpkt = 1;        //if it did not escape then the k-packet must have been
+      //destroyed by collisionally exciting a macro atom -
       //excite a macro atom next
     }
     else
@@ -185,18 +185,18 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
 
   return (0);
 
-  //All done. 
+  //All done.
 }
 
 
 /**********************************************************/
-/** @name      macro_pops
+/**
  * @brief      uses the Monte Carlo estimators to compute a set
  *        of level populations for levels of macro atoms.
  *
  * @param [in out] PlasmaPtr  xplasma   ???
  * @param [in out] double  xne   -> current value for electron density in this shell
- * @return     Should compute the fractional level populations for 
+ * @return     Should compute the fractional level populations for
  *           macro atoms and store them in "levden" array. The ion fractions
  *           are also computed and stored in w[n].density[nion]
  *
@@ -210,10 +210,10 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
  * GSL "library" file (I've added the library into the Makefile too). I found
  * GSL to be very easy to install but if there are problems in the future we
  * may need to switch to another matrix solver. (SS, Apr 04)
- * 
+ *
  * We also clean for population inversion in this routine.
  *
- * The details are in Matthews' thesis. 
+ * The details are in Matthews' thesis.
  *
  **********************************************************/
 
@@ -268,8 +268,8 @@ macro_pops (xplasma, xne)
 
     /* See if this element uses a macro atom treatment or is a simple element.
        For now I'm assuming that either all ions of a given element are
-       treated using the macro atom method, or else none are (mixing and 
-       matching is probably a bad idea because of the way in which bf 
+       treated using the macro atom method, or else none are (mixing and
+       matching is probably a bad idea because of the way in which bf
        processes couple different ionisation stages). */
 
     /* The check is against the first ion of the element. */
@@ -282,8 +282,8 @@ macro_pops (xplasma, xne)
       {
 
         /* Having established that the ion requires a macro atom treatment we
-           are going to construct a matrix of rates between the levels and 
-           invert that matrix to get the level populations. The first thing we need 
+           are going to construct a matrix of rates between the levels and
+           invert that matrix to get the level populations. The first thing we need
            to do is work out how many levels we are dealing with in total. This is
            easily done by summing up the number of levels of each ion. */
 
@@ -293,7 +293,7 @@ macro_pops (xplasma, xne)
         {
           for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
           {
-            /* I want to be able to easily go from knowing the index of a level in the 
+            /* I want to be able to easily go from knowing the index of a level in the
                configurations structure to its position in the rates matrix. So I'm making
                two arrays here that allow the mapping between these indices to be done easily.
              */
@@ -314,9 +314,9 @@ macro_pops (xplasma, xne)
           /* The next loop judges whether or not a level is to be fixed in population relative to ground
              star. The input radiative lifetime is used to judge this at the moment. If the lifetime was set
              to be long (essentially infite) then a very fast collisional transition is put in to dominate
-             all other rates into and out of this level. 
+             all other rates into and out of this level.
 
-             Whether this is really the best thing to do I don't know, but it's an improvement over ignoring 
+             Whether this is really the best thing to do I don't know, but it's an improvement over ignoring
              this issue altogether! SS Aug 05 */
 
           for (index_fast_col = index_lvl; index_fast_col < ion[index_ion].first_nlte_level + ion[index_ion].nlte - 1; index_fast_col++)
@@ -509,7 +509,7 @@ macro_pops (xplasma, xne)
 
           /********************************************************************************/
         /* The block that follows (down to next line of ***s) is to do the
-           matrix inversion. It uses LU decomposition - the code for doing this is 
+           matrix inversion. It uses LU decomposition - the code for doing this is
            taken from the GSL manual with very few modifications. */
         /* here we solve the matrix equation M x = b, where x is our vector containing
            level populations as a fraction w.r.t the whole element */
@@ -527,7 +527,7 @@ macro_pops (xplasma, xne)
         }
 
 
-        /* Replaced inline array allocaation with calloc, which will work with older version of c compilers 
+        /* Replaced inline array allocaation with calloc, which will work with older version of c compilers
            calloc also sets the elements to zero, which is required */
 
         b_data = (double *) calloc (sizeof (rate), n_macro_lvl);
@@ -557,7 +557,7 @@ macro_pops (xplasma, xne)
         for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
         {
           for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
-          {                     /* Start loop with lowest level of the ion. For each level in turn check to see if there's a population 
+          {                     /* Start loop with lowest level of the ion. For each level in turn check to see if there's a population
                                    inversion i.e. is  upper_pop > lower_pop * g_upper / g_lower. If it is then replace upper_pop with
                                    lower_pop * g_upper / g_lower. We loop over all levels higher than the currently chosen lower level. */
 
@@ -567,7 +567,7 @@ macro_pops (xplasma, xne)
               /* this if statement means we only clean if there's a radiative jump between the levels */
               if (radiative_flag[index_lvl][nn])
               {
-                inversion_test = populations[conf_to_matrix[index_lvl]] * config[nn].g / config[index_lvl].g * 0.999999;        //include a correction factor 
+                inversion_test = populations[conf_to_matrix[index_lvl]] * config[nn].g / config[index_lvl].g * 0.999999;        //include a correction factor
 
                 if (populations[conf_to_matrix[nn]] > inversion_test)
                 {
@@ -600,7 +600,7 @@ macro_pops (xplasma, xne)
             nn++;
           }
 
-          /* Write the level populations to the 
+          /* Write the level populations to the
              levden array. These are fractional level populations within an ion. */
 
           for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
@@ -633,7 +633,7 @@ macro_pops (xplasma, xne)
 
         }
 
-        /* if the variable insane has been set to 1 then that means we had either a negative or 
+        /* if the variable insane has been set to 1 then that means we had either a negative or
            non-finite level population somewhere. If that is the case, then set all the estimators
            to dilute blackbodies instead and go through the solution again */
         if (insane)

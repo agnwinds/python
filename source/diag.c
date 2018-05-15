@@ -73,7 +73,7 @@
 
 
 /**********************************************************/
-/** @name      get_standard_care_factors
+/**
  * @brief      get inputs that provides more control over how the program is
  *   run
  *
@@ -134,7 +134,7 @@ get_standard_care_factors ()
 
 
 /**********************************************************/
-/** @name      get_extra_diagnostics
+/**
  * @brief      Allows the user to specify what extra diagnositcs
  * to write out
  *
@@ -189,13 +189,17 @@ get_extra_diagnostics ()
 
 
 int eplinit = 0;
-int pstatinit = 0; /// To say if we have checked to see if we need to log photons
-FILE *epltptr;		 /// Extra diagnostics file
+
+/// To say if we have checked to see if we need to log photons
+int pstatinit = 0;
+
+/// Extra diagnostics file
+FILE *epltptr;
 
 
 
 /**********************************************************/
-/** @name      init_extra_diagnostics
+/**
  * @brief      opon a file for writing out
  *  extra diagnostics.  In some cases reads a file
  *  that specifies in which cells ones wants diagnostics
@@ -272,7 +276,7 @@ init_extra_diagnostics ()
 
 
 /**********************************************************/
-/** @name      save_photon_stats
+/**
  * @brief      prints photon statistics to a file
  *
  * @param [in] WindPtr  one   WindPtr for the cell
@@ -320,7 +324,7 @@ save_photon_stats (one, p, ds, w_ave)
 
 
 /**********************************************************/
-/** @name      save_extract_photons
+/**
  * @brief      saves informations about phtoons in
  *     a particulare wavelength gange
  *
@@ -359,7 +363,7 @@ int save_photon_number = 0;
 
 
 /**********************************************************/
-/** @name      save_photons
+/**
  * @brief      save_photon
  *
  * @param [in] PhotPtr  p   Photon pointer
@@ -396,7 +400,7 @@ save_photons (p, comment)
 
 
 /**********************************************************/
-/** @name      track_scatters
+/**
  * @brief
  *
  * @param [in] PhotPtr  p   Photon pointer

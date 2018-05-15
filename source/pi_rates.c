@@ -1,6 +1,6 @@
 
 /***********************************************************/
-/** @file  new_pi_rates.c
+/** @file  pi_rates.c
  * @author nsh
  * @date   Aug, 2014
  *
@@ -29,7 +29,7 @@ double xexp_temp, xexp_w;
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      int calculates the photoionization rate coefficient for an ion in a given cell
  *
  * @param [in] int  nion   The ion being ionized (or the index to an inner shell cross section)
@@ -39,7 +39,7 @@ double xexp_temp, xexp_w;
  * @return     The photioinization rate coefficient for the ion.
  *
  * @details
- *  calc_pi_rate  calculates the photoionization rate coefficient for ion	
+ *  calc_pi_rate  calculates the photoionization rate coefficient for ion
  * 	nion, based upon the mean intensity stored in cell xplasma
  * 	The mode tells the subroutine wether we are modelling the
  * 	mean intensity as a dilute blackbody (mode2) or as a series
@@ -97,7 +97,7 @@ calc_pi_rate (nion, xplasma, mode, type)
       xtop = &phot_top[ntmin];
     }
     else if (ion[nion].phot_info == 0)  // verner
-    {                           
+    {
       xtop = &phot_top[nvmin];    //If we don't have a topbase or hybrid cross section we fall back to VFKY
     }
     else
@@ -161,7 +161,7 @@ calc_pi_rate (nion, xplasma, mode, type)
             pi_rate += qromb (tb_exp1, fthresh, fmax, exp_qromb);
           }
         }
-        else if (f1 < fthresh && fthresh < f2 && f2 < fmax)     //case 2 
+        else if (f1 < fthresh && fthresh < f2 && f2 < fmax)     //case 2
         {
           if (xplasma->spec_mod_type[j] == SPEC_MOD_PL)
           {
@@ -228,10 +228,10 @@ calc_pi_rate (nion, xplasma, mode, type)
 
 
 /**********************************************************/
-/** 
- * @brief      The integrand for working out the PI rate in a BB radiation field 
+/**
+ * @brief      The integrand for working out the PI rate in a BB radiation field
  *
- * @param [in] double  freq   the frequency 
+ * @param [in] double  freq   the frequency
  * @return     value of sigma B_nu/nu at nu
  *
  * @details
@@ -239,7 +239,7 @@ calc_pi_rate (nion, xplasma, mode, type)
  *    ionisation cross section is significant. This is the function for ions with a topbase cross section NSH
  *
  * ### Notes ###
- * 
+ *
  **********************************************************/
 
 double
@@ -252,21 +252,21 @@ tb_planck1 (freq)
   answer *= (1 / (bbe - 1));
 //      answer*=weight;
   answer *= sigma_phot (xtop, freq);
-  answer /= freq; 
+  answer /= freq;
 
   return (answer);
 }
 
 
 /**********************************************************/
-/** 
- * @brief      The integrand for working out the PI rate in a radiation field modelled by a power law 
+/**
+ * @brief      The integrand for working out the PI rate in a radiation field modelled by a power law
  *
- * @param [in] double  freq   the frequency 
+ * @param [in] double  freq   the frequency
  * @return     value of sigma J_nu/nu at nu
  *
  * @details
- * This is the integrand for computing the PI rate coefficient when j_nu is described by a power 
+ * This is the integrand for computing the PI rate coefficient when j_nu is described by a power
  * law. The returned value is J_nu x cross section / nu. The power law is computed in log space to
  * allow a larger range of possible values.
  *
@@ -287,10 +287,10 @@ tb_logpow1 (freq)
 
 
 /**********************************************************/
-/** 
- * @brief      The integrand for working out the PI rate in a radiation field modelled by an exponential 
+/**
+ * @brief      The integrand for working out the PI rate in a radiation field modelled by an exponential
  *
- * @param [in] double  freq   the frequency 
+ * @param [in] double  freq   the frequency
  * @return     value of sigma J_nu/nu at nu
  *
  * @details

@@ -1,8 +1,6 @@
 
-
-
 /***********************************************************/
-/** @file  recipes.c 
+/** @file  recipes.c
  * @author ksl
  * @date   May, 2018
  *
@@ -32,8 +30,8 @@
 
 
 /**********************************************************/
-/**                 
- * @brief      Integrate a function between a and b 
+/**
+ * @brief      Integrate a function between a and b
  *
  *
  * @param [in] func  The function which one wishes a root for
@@ -47,18 +45,18 @@
  *
  * ### Notes ###
  * JMAX limits the total number number of times the
- * trapezoidal rule can be called, and K determines the order of polint 
+ * trapezoidal rule can be called, and K determines the order of polint
  *
- * 
+ *
  * This routine has been modified from that that appears
  * in Numberical recipes so that the tolerance could be specified.
- * Additioanlly, the convergence criterion for exiting the 
+ * Additioanlly, the convergence criterion for exiting the
  * exiting trapzd loop
  * to include = sign.  This change was in the ansi version
  * of qromb routine, and was needed to integrate functions
  * which were in some cases zero throughout the range. Not
- * only did this seem to eliminate a number of error 
- * returns, it sped up some portions of the program.	
+ * only did this seem to eliminate a number of error
+ * returns, it sped up some portions of the program.
  *
  *
  **********************************************************/
@@ -141,12 +139,12 @@ trapzd (func, a, b, n)
 }
 
 
-/******************************************* 
+/*******************************************
  * Given arrays xa[] and y[a] defined from elements 1 to n and
    given x, polint returns a value y and an error estimate dy.  If
    P(x) is an polynomial of degree n-1, the results will be exact. Note
-   that polint will return a value outside the specified range without 
-   bothering to warn you 
+   that polint will return a value outside the specified range without
+   bothering to warn you
 **************************************************/
 
 void
@@ -195,15 +193,18 @@ polint (xa, ya, n, x, y, dy)
 
 
 
+#define ITMAX 100
+#define EPS 3.0e-8
+
 /**********************************************************/
-/**                
- * @brief      A routine that finds the rooot of  a function f 
+/**
+ * @brief      A routine that finds the rooot of  a function f
  *
  *
  * @param [in] *funcd  The function which one wishes a root for
  * @param [in] x1  one end of the interval
  * @param [in] x2  the other end of the interval
- * @param [in] tol   A tolerence for the root 
+ * @param [in] tol   A tolerence for the root
  * @return   The root of the function f                           .
  *
  * @details
@@ -214,9 +215,6 @@ polint (xa, ya, n, x, y, dy)
  *
  **********************************************************/
 
-
-#define ITMAX 100
-#define EPS 3.0e-8
 
 double
 zbrent (func, x1, x2, tol)
@@ -318,10 +316,10 @@ zbrent (func, x1, x2, tol)
 
 /******************************
  * The next two routines were written by ksl.  They were not part of
-   the recipes programs which I had but I think they are what was intended 
+   the recipes programs which I had but I think they are what was intended
 ********************************/
 
-double 
+double
 * vector (i, j)
      int i, j;
 {
@@ -341,9 +339,12 @@ free_vector (a, i, j)
 
 
 
+#include <math.h>
+#define MAXIT 100
+
 /**********************************************************/
-/**                
- * @brief      A routine that mimimizes a function f 
+/**
+ * @brief      A routine that mimimizes a function f
  *
  *
  * @param [in] *funcd
@@ -360,10 +361,6 @@ free_vector (a, i, j)
  * ### Notes ###
  *
  **********************************************************/
-
-
-#include <math.h>
-#define MAXIT 100
 
 double
 rtsafe (void (*funcd) (double, double *, double *), double x1, double x2,
@@ -433,9 +430,15 @@ rtsafe (void (*funcd) (double, double *, double *), double x1, double x2,
 
 
 
+#undef MAXIT
+
+#define R 0.61803399
+#define CC (1.0-R)
+#define SHFT(a,b,c,d) (a)=(b);(b)=(c);(c)=(d);
+
 /**********************************************************/
-/**                
- * @brief      A routine that mimimizes a function f 
+/**
+ * @brief      A routine that mimimizes a function f
  *
  *
  * @param [in] ax
@@ -449,19 +452,12 @@ rtsafe (void (*funcd) (double, double *, double *), double x1, double x2,
  * @details
  * This is a Numerical Recipes routine.  Fiven a funYtion f,
  * and bracketing triplet of abscissas a,b,c, such that it is known
- * that f(b) < f(a) and f(b)<f(c), golden returns the minimum value 
- * of the function, and the value xmin where the minimum occurs 
+ * that f(b) < f(a) and f(b)<f(c), golden returns the minimum value
+ * of the function, and the value xmin where the minimum occurs
  *
  * ### Notes ###
  *
  **********************************************************/
-
-
-#undef MAXIT
-
-#define R 0.61803399
-#define CC (1.0-R)
-#define SHFT(a,b,c,d) (a)=(b);(b)=(c);(c)=(d);
 
 double
 golden (ax, bx, cx, f, tol, xmin)

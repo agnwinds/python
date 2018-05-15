@@ -244,7 +244,7 @@
 
 
 /**********************************************************/
-/** @name      main
+/** 
  * @brief     The main routine for Python, which supervises the ingest of data defining a model, the initializtion
  * of the model, and actual run of the model, and writing the data to the disk 
  * 	

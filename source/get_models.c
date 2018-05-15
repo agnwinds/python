@@ -58,7 +58,8 @@
 
 /* Get all the models of one type and regrid them onto the wavelength grid of the data */
 
-int get_models_init = 0;	/// Needed so can initialize nmods_tot the first time this routine is called
+/// Needed so can initialize nmods_tot the first time this routine is called
+int get_models_init = 0;
 
 /**********************************************************/
 /**
