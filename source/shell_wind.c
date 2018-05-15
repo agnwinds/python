@@ -1,7 +1,21 @@
 
+/***********************************************************/
+/** @file  shell_wind.c
+ * @author ksl,nsh
+ * @date   May, 2018
+ *
+ * @brief  
+ * Routines needed for a single shell wind model
+ *
+ * These routines were developed (by NSH) primarily for diagnostic purposes, e.g for calculating ionization models for
+ * comparison with Cloudy.  The routines are in many ways similar to stellar wind model routines, but after a discussion
+ * in 2015 (See issue #172), we decided to keep it.
+ ***********************************************************/
+
 
 /* 
-   This file was created in Feb 2011.    The purpose is to have a model where we have a single shell of material. 
+   This file was created in Feb 2011.    
+   The purpose is to have a model where we have a single shell of material. 
    This is different from the stellar wind because we do not want the inner surface of the wind to touch the star. 
    This requires tight control of the grid and makes for a very prescriptive model.  We also need a special grid, 
    which is also stored in this file.
@@ -16,31 +30,25 @@
 #include "atomic.h"
 #include "python.h"
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-	Routines to produce a thin shell of material at a given radius. 
 
 
-Arguments:		
 
-Returns:
- 
-Description:	
-	
-
-Notes:
-	
-
-
-History:
- 	11feb	nsh	Coded as part of the effort to put power laws into python. It allows detailed testing.
-	12jan	nsh	Shell wind rewritten to use existing C+L wind model.
-	15sept	ksl	Adapted to work with domains
- 		
-**************************************************************/
-
+/**********************************************************/
+/** @name      get_shell_wind_params
+ * @brief      Get the inputs needed to specigy the shell_wind modelen radius.
+ *
+ * @param [in] int  ndom   The domain for the shell
+ * @return     Alwyas returns 0
+ *
+ * @details
+ * This routine gets the inputs needed for the shell_wind model and
+ * translates them into those needed for the equvalent stellar wind
+ * model. Several arrays specific to the shell_wind model are also
+ * intialized.
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
 
 int
 get_shell_wind_params (ndom)
