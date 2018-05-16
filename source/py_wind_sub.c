@@ -1965,24 +1965,25 @@ IP_summary (w, rootname, ochoice)
   char filename[LINELENGTH];
   int nplasma;
 
-  for (n = 0; n < NDIM2; n++)
-  {
-    aaa[n] = 0;
-    if (w[n].vol > 0.0)
-    {
-      nplasma = w[n].nplasma;
-      aaa[n] = ((plasmamain[nplasma].ferland_ip));
-    }
-  }
-  display ("Ionization parameter (Ferland)");
+//OLD Ferland IP has been deleted 180516
+//OLD  for (n = 0; n < NDIM2; n++)
+//OLD  {
+//OLD    aaa[n] = 0;
+//OLD    if (w[n].vol > 0.0)
+//OLD    {
+//OLD      nplasma = w[n].nplasma;
+//OLD      aaa[n] = ((plasmamain[nplasma].ferland_ip));
+//OLD    }
+//OLD  }
+//OLD  display ("Ionization parameter (Ferland)");
 
-  if (ochoice)
-  {
-    strcpy (filename, rootname);
-    strcat (filename, ".f_IP");
-    write_array (filename, ochoice);
-
-  }
+//OLD  if (ochoice)
+//OLD  {
+//OLD    strcpy (filename, rootname);
+//OLD    strcat (filename, ".f_IP");
+//OLD    write_array (filename, ochoice);
+//OLD
+//OLD  }
 
   for (n = 0; n < NDIM2; n++)
   {
