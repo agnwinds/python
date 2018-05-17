@@ -94,7 +94,7 @@
  * * NEBULARMODE_TE 1        LTE using t_e
  * * NEBULARMODE_ML93 2      ML93 using a nebular approximation correction to LTE
  * * NEBULARMODE_NLTE_SIM 3  // Non_LTE with SS modification (Probably could be removed)
- * * NEBULARMODE_LTE_GROUND 4        // A test mode which forces all levels to the GS (Probably could be removed)
+ * * NEBULARMODE_LTE_GROUND 4        // A mode which forces all levels to the GS - this is used when we are modelling J_nu.
  *
  *
  * ### Notes ###
@@ -143,8 +143,9 @@ partition_functions (xplasma, mode)
     t = xplasma->t_e;
     weight = 1;
   }
-  else if (mode == NEBULARMODE_LTE_GROUND)      /*NSH 120912 This is a test mode, used to set partition functions 
-                                                  to ground state only. This is achieved by setting W to 0. At this point, 
+  else if (mode == NEBULARMODE_LTE_GROUND)      /*This is used to set partition functions  to ground state only, used when
+	  											we have a J_nu model rather than using dilute blackbodies.
+	  											This is achieved by setting W to 0. At this point, 
                                                   the temperature is a moot point, so lest go with t_e, since this is only 
                                                   going to be called if we are doing a power law calculation */
   {

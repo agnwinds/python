@@ -1,3 +1,22 @@
+
+/***********************************************************/
+/** @file  import_spherical.c
+ * @author ksl
+ * @date   May, 2018
+ *
+ * @brief 
+ * General purpose routines for reading in an arbitray wind model
+ * in spherical coordinates
+ *
+ * The basic data we need to read in are
+
+ * i r v_r rho (and optionally T)
+
+ * We assume that all of the variables are centered, that is
+ * we are not assuming that we are giving rho at the center of
+ * a cell, but that r and v_r are at the edges of a cell. 
+ * This is someghing that would presumable be easy to change
+ ***********************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -5,26 +24,6 @@
 #include "atomic.h"
 #include "python.h"
 
-/***********************************************************
-    Space Telescope Science Institute
-
-Synopsis:
-    These are general purpose routines for readin in model
-    grids
-
-Arguments:		
-
-Returns:
- 
-Description:	
-
-Notes:
-
-
-
-History:
-	17nov   ksl Began coding                           
-**************************************************************/
 
 
 # define LINELEN 512
@@ -40,36 +39,36 @@ struct
 } xx_1d;
 
 
-
-/***********************************************************
-    Space Telescope Science Institute
-
-Synopsis:
-    Read the an arbitray wind model intended to mimic a stellar
-    wind or shell.
-
-
-Arguments:		
-
-Returns:
- 
-Description:	
-
-Notes:
-
-    The basic data we need to read in are
-
-    i r v_r rho (and optionally T)
-
-    We assume that all of the variables are centered, that is
-    we are not assuming that we are giving rho at the center of
-    a cell, but that r and v_r are at the edges of a cell. 
-    This is someghing that would presumable be easy to change
-
-
-History:
-	17nov   ksl Began coding                           
-**************************************************************/
+/**********************************************************/
+/** @name      import_1d
+ * @brief      Read the an arbitray wind model intended to mimic a stellar
+ * wind or shell.
+ *
+ * @param [in out] int  ndom   The domain number for the imported model
+ * @param [in out] char *  filename   The file containing the model to import
+ * @return     Always returns 0
+ *
+ * @details
+ * This routine just reads in the data and stores it in arrays
+ *
+ * ### Notes ###
+ * The basic data we need to read in are
+ * 
+ *     i r v_r rho (and optionally T)
+ *
+ *  where 
+ *
+ *  * i is the element (increaing outwards
+ *  * r is the radial coordiante
+ *  * v_r is the velocity in the radial direction
+ *  * rho is the density in cgs unites
+ * 
+ * We assume that all of the variables are centered, that is
+ * we are not assuming that we are giving rho at the center of
+ * a cell, but that r and v_r are at the edges of a cell. 
+ * This is someghing that would presumable be easy to change
+ *
+ **********************************************************/
 
 int
 import_1d (ndom, filename)
@@ -140,6 +139,26 @@ import_1d (ndom, filename)
 
  * */
 
+
+/**********************************************************/
+/** @name      spherical_make_grid_import
+ * @brief      Use the imported data to initialize various
+ * portions of the Wind and Domain structures
+ *
+ *
+ * @param [out] WindPtr  w   The entire wind
+ * @param [in] int  ndom   The domain for the imported model
+ * @return     Always returns 0
+ *
+ * @details
+ * This routine initializes the portions of the wind structure 
+ * using the imported model, specifically those portions having
+ * to do with positions.
+ *
+ * ### Notes ###
+ *
+ **********************************************************/
+
 int
 spherical_make_grid_import (w, ndom)
      WindPtr w;
@@ -148,8 +167,6 @@ spherical_make_grid_import (w, ndom)
 
   int j, n;
 
-//  zdom[ndom].ndim2=zdom[ndom].ndim = xx_1d.ndim;	// ADD Buffer
-//  zdom[ndom].mdim = 1;
   zdom[ndom].wind_rho_min = zdom[ndom].rho_min = 0;
   zdom[ndom].rmin = xx_1d.r[0];
   zdom[ndom].wind_rho_max = zdom[ndom].zmax = zdom[ndom].rho_max =
@@ -163,7 +180,6 @@ spherical_make_grid_import (w, ndom)
       /* Put the radial velocity in v[0] */
       w[n].v[0]=xx_1d.v[j];
     }
-
 
       /* Need to define the midpoints of the grid */
 
@@ -193,9 +209,34 @@ spherical_make_grid_import (w, ndom)
  * One could follow the zeus_hydro approach of getting those velocities from the original grid.  
  * but for consistency with the 2d case we get it by interpolating on values in the cells
  *
- * Note that v_r is stored in v_0
  *
  */
+
+
+/**********************************************************/
+/** @name      velocity_1d
+ * @brief      The velocity at any positiion in an imported spherical 
+ * model
+ *
+ *
+ * @param [in] int  ndom   The domain of the imported model
+ * @param [in] double *  x   A postion (3d)
+ * @param [out] double *  v   The velocity at x
+ * @return     The speeed at x
+ *
+ * @details
+ * This routine interpolates on the values read in for the
+ * imported model to give one a velocity
+ *
+ *
+ * ### Notes ###
+ * Note that v_r is stored in v_0
+ *
+ * Not also that In practice this routine is only used to initallize v in 
+ * wind structure.  This is consistent with the way velocities
+ * are treated throughout Python
+ *
+ **********************************************************/
 
 double
 velocity_1d (ndom, x, v)
@@ -206,8 +247,6 @@ velocity_1d (ndom, x, v)
   double r;
   int nelem,nn, nnn[4];
   double frac[4];
-  //
-//OLD  int icell;
   r = length (x);
 
   
@@ -218,7 +257,6 @@ velocity_1d (ndom, x, v)
       speed+=wmain[zdom[ndom].nstart + nnn[nn]].v[0] * frac[nn];
   }
 
-//OLD  icell = linterp (r, xx_1d.r, xx_1d.v, xx_1d.ndim, &speed, 0);
 
   v[0] = x[0] / r * speed;
   v[1] = x[1] / r * speed;
@@ -226,14 +264,31 @@ velocity_1d (ndom, x, v)
   return (speed);
 }
 
-/* Fill in plasma ptrs with densities.   
- *
- * For this we assume that the densities read in are 
- * given at the * midpoints of the grid
- *
- * 
- * */
 
+
+
+/**********************************************************/
+/** @name      rho_1d
+ * @brief      Get the density for an imported spherical model at x
+ *
+ * @param [in] int  ndom   The domain for the imported model
+ * @param [in] double *  x   A position (3d)
+ * @return     The density in cgs units is returned
+ *
+ * @details
+ * This routine finds rho from the imported model 
+ * at a position x.  The routine does not interpolate rho, but
+ * simply locates the cell associated with x
+ *
+ *
+ * ### Notes ###
+ * This routine is really only used to intialize rho in the
+ * Plasma structure.  In reality, once the Plasma structure is
+ * initialized we always interpolate within the plasma structure
+ * and do not access the original data.
+ *
+ *
+ **********************************************************/
 
 double
 rho_1d (ndom, x)

@@ -424,6 +424,7 @@ line_summary (w, rootname, ochoice)
 	if(i_matom_search)
 	{
 		printf("Searching for matom line...\n");
+        nline=0;
 		while(nline<nlines && !(lin_ptr[nline]->z == element && lin_ptr[nline]->istate == istate 
 					&& lin_ptr[nline]->levu == levu && lin_ptr[nline]->levl == levl))
 		{

@@ -162,7 +162,7 @@ calculate_ionization (restart_stat)
 
     photon_checks (p, freqmin, freqmax, "Check before transport");
 
-    wind_ip ();
+//OLD Removed Ferland IP    wind_ip ();
 
 
     zz = 0.0;
