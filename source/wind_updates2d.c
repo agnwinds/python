@@ -436,8 +436,8 @@ WindPtr (w);
         MPI_Pack (plasmamain[n].exp_w, NXBANDS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].fmin_mod, NXBANDS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].fmax_mod, NXBANDS, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n].sim_ip, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
-        MPI_Pack (&plasmamain[n].ferland_ip, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+//OLD        MPI_Pack (&plasmamain[n].sim_ip, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+//OLD        MPI_Pack (&plasmamain[n].ferland_ip, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].ip, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].ip_direct, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].ip_scatt, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -576,8 +576,8 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].exp_w, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].fmin_mod, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].fmax_mod, NXBANDS, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].sim_ip, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].ferland_ip, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+//OLD        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].sim_ip, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+//OLD        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].ferland_ip, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].ip, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].ip_direct, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].ip_scatt, 1, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -1153,42 +1153,42 @@ wind_rad_init ()
 
 
 
-/**********************************************************/
-/** @name      wind_ip
- * @brief      calculates a version of the ionization parameter using Ferland's definition, but one that also assumes that the
- * wind is optically thin everywhere, and that all photons arise for the central source.
- *
- * @return     Always retrusn 0
- *
- * @details
- *
- * ### Notes ###
- * @bug It is likely that this routine should simply be deleted. According to Nick it was
- * just an experiment.  There is a git issue for this.
- *
- **********************************************************/
+//OLD /**********************************************************/
+//OLD /** @name      wind_ip
+//OLD  * @brief      calculates a version of the ionization parameter using Ferland's definition, but one that also assumes that the
+//OLD  * wind is optically thin everywhere, and that all photons arise for the central source.
+//OLD  *
+//OLD  * @return     Always retrusn 0
+//OLD  *
+//OLD  * @details
+//OLD  *
+//OLD  * ### Notes ###
+//OLD  * @bug It is likely that this routine should simply be deleted. According to Nick it was
+//OLD  * just an experiment.  There is a git issue for this.
+//OLD  *
+//OLD  **********************************************************/
 
-int
-wind_ip ()
-{
-  int n;
-  float r;
-  for (n = 0; n < NPLASMA; n++)
-  {
-    r = sqrt ((wmain[plasmamain[n].nwind].xcen[0] *
-               wmain[plasmamain[n].nwind].xcen[0] +
-               wmain[plasmamain[n].nwind].xcen[1] *
-               wmain[plasmamain[n].nwind].xcen[1] + wmain[plasmamain[n].nwind].xcen[2] * wmain[plasmamain[n].nwind].xcen[2]));
-
-    plasmamain[n].ferland_ip = geo.n_ioniz / (4 * PI * C * plasmamain[n].rho * rho2nh * (r * r));
-
-    r = sqrt ((wmain[plasmamain[n].nwind].x[0] *
-               wmain[plasmamain[n].nwind].x[0] +
-               wmain[plasmamain[n].nwind].x[1] *
-               wmain[plasmamain[n].nwind].x[1] + wmain[plasmamain[n].nwind].x[2] * wmain[plasmamain[n].nwind].x[2]));
-
-    plasmamain[n].ferland_ip = geo.n_ioniz / (4 * PI * C * plasmamain[n].rho * rho2nh * (r * r));
-
-  }
-  return (0);
-}
+//OLD int
+//OLD wind_ip ()
+//OLD {
+//OLD   int n;
+//OLD   float r;
+//OLD   for (n = 0; n < NPLASMA; n++)
+//OLD   {
+//OLD     r = sqrt ((wmain[plasmamain[n].nwind].xcen[0] *
+//OLD                wmain[plasmamain[n].nwind].xcen[0] +
+//OLD                wmain[plasmamain[n].nwind].xcen[1] *
+//OLD                wmain[plasmamain[n].nwind].xcen[1] + wmain[plasmamain[n].nwind].xcen[2] * wmain[plasmamain[n].nwind].xcen[2]));
+//OLD 
+//OLD    plasmamain[n].ferland_ip = geo.n_ioniz / (4 * PI * C * plasmamain[n].rho * rho2nh * (r * r));
+//OLD 
+//OLD     r = sqrt ((wmain[plasmamain[n].nwind].x[0] *
+//OLD                wmain[plasmamain[n].nwind].x[0] +
+//OLD                wmain[plasmamain[n].nwind].x[1] *
+//OLD                wmain[plasmamain[n].nwind].x[1] + wmain[plasmamain[n].nwind].x[2] * wmain[plasmamain[n].nwind].x[2]));
+//OLD 
+//OLD     plasmamain[n].ferland_ip = geo.n_ioniz / (4 * PI * C * plasmamain[n].rho * rho2nh * (r * r));
+//OLD 
+//OLD   }
+//OLD   return (0);
+//OLD }
