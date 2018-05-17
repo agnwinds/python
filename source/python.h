@@ -878,7 +878,7 @@ typedef struct plasma
 
 
 
-  double gamma_inshl[NAUGER];   /*MC estimator that will record the inner shell ionization rate - very similar to macro atom-style estimators */
+//  double gamma_inshl[NAUGER];   /*MC estimator that will record the inner shell ionization rate - very similar to macro atom-style estimators */
   /* 1108 Increase sim estimators to cover all of the bands */
   /* 1208 Add parameters for an exponential representation, and a switch to say which we prefer. */
   enum spec_mod_type_enum
