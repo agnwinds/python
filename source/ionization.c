@@ -140,10 +140,10 @@ to match heating and cooling in the wind element! */
      ions so that the ionization balance of the other ions is not
      affected in an important way. */
 
-  if (geo.auger_ionization == 1)
-    {
-      auger_ionization (xplasma);
-    }
+//  if (geo.auger_ionization == 1)
+//    {
+//      auger_ionization (xplasma);
+//    }
 
 
   return (ireturn);
