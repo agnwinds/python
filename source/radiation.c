@@ -173,7 +173,7 @@ radiation (p, ds)
   double w_ave, w_in, w_out;
   double den_config ();
   int nconf;
-  double weight_of_packet, y;
+//  double weight_of_packet, y;  //to do with augerion calcs, now deprecated
   double v_inner[3], v_outer[3], v1, v2;
   double freq_inner, freq_outer;
   double freq_min, freq_max;
@@ -562,19 +562,20 @@ radiation (p, ds)
   }
 
   /* Now for contribution to inner shell ionization estimators (SS, Dec 08) */
-  for (n = 0; n < nauger; n++)
-  {
-    ft = augerion[n].freq_t;
-    if (p->freq > ft)
-    {
+  /*. Commented out by NSH 2018 */
+//  for (n = 0; n < nauger; n++)
+//  {
+//    ft = augerion[n].freq_t;
+//    if (p->freq > ft)
+//    {
 
-      weight_of_packet = w_ave;
-      x = sigma_phot_verner (&augerion[n], freq);       //this is the cross section
-      y = weight_of_packet * x * ds;
+//      weight_of_packet = w_ave;
+//      x = sigma_phot_verner (&augerion[n], freq);       //this is the cross section
+//      y = weight_of_packet * x * ds;
 
-      xplasma->gamma_inshl[n] += y / (freq * H * xplasma->vol);
-    }
-  }
+//      xplasma->gamma_inshl[n] += y / (freq * H * xplasma->vol);
+//    }
+//  }
 
 
 

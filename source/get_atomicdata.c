@@ -224,7 +224,8 @@ get_atomic_data (masterfile)
      char masterfile[];
 {
 
-  FILE *fopen (), *fptr, *mptr, *vptr;
+  FILE *fopen (), *fptr, *mptr;
+  //*vptr;
   char *fgets (), aline[LINELENGTH];
 
   char file[LINELENGTH];
@@ -270,10 +271,12 @@ get_atomic_data (masterfile)
   int ntop_phot_simple, ntop_phot_macro;
   int bb_max, bf_max;
   int lev_type;
-  int nn, nl, dumnn, dumnl, dumz, dumistate, n_verner, ion_index,
-    target_index;
-  double yield, dumE_th, dumE_0, dumya, dumyw, dumSigma, dumP, arad, etarad;
-  double adi, t0di, bdi, t1di;
+  int nn;
+  double yield;
+//  int nn, nl, dumnn, dumnl, dumz, dumistate, n_verner, ion_index,
+//    target_index;
+//  double yield, dumE_th, dumE_0, dumya, dumyw, dumSigma, dumP, arad, etarad;
+//  double adi, t0di, bdi, t1di;
   double gstemp[BAD_GS_RR_PARAMS];	//Temporary storage for badnell resolved GS RR rates
   double temp[LINELENGTH];	//Temporary storage for data read in off a line this is enogh if every character on the
   char gsflag, drflag;		//Flags to say what part of data is being read in for DR and RR
@@ -687,8 +690,8 @@ structure does not have this property! */
 		choice = 'f';	/*ground state fractions */
 	      else if (strncmp (word, "Xcol", 4) == 0)
 		choice = 'x';	/*It's a collision strength line */
-	      else if (strncmp (word, "InPhot", 6) == 0)
-		choice = 'A';	/*It's an inner shell ionization for Auger effect */
+//	      else if (strncmp (word, "InPhot", 6) == 0)
+//		choice = 'A';	/*It's an inner shell ionization for Auger effect */
 	      else if (strncmp (word, "InnerVYS", 8) == 0)
 		choice = 'I';	/*Its a set of inner shell photoionization cross sections */
 	      else if (strncmp (word, "DR_BADNL", 8) == 0)	/* It's a badnell type dielectronic recombination file */
@@ -1805,6 +1808,7 @@ described as macro-levels. */
  * @section Auger
  * @bug Needs description - this is a type of data that is no longer used 
  */
+/*		  
 		case 'A':
 		  if (sscanf (aline,
 			      "%*s %d %d %d %d %le %le %le %le %le %le %le",
@@ -1836,7 +1840,7 @@ described as macro-levels. */
 			      && (dumistate == (dumz - istate + 1))
 			      && (dumnn == nn) && (dumnl == nl))
 			    {
-			      /* Now need to check that this ion is really in the data set and find which it is */
+			      // Now need to check that this ion is really in the data set and find which it is 
 			      ion_index = -1;
 			      for (n = 0; n < nions; n++)
 				{
@@ -1866,10 +1870,10 @@ described as macro-levels. */
 				      nauger++;
 				    }
 
-				  /*We also want the index for the
+				  //We also want the index for the
 				     targe ion (i.e. the one that is
 				     two ionization stages up from the
-				     one found above */
+				     one found above 
 				  if (ion[n].z == z
 				      && ion[n].istate == istate + 2)
 				    {
@@ -1914,7 +1918,7 @@ described as macro-levels. */
 			 nauger);
 		    }
 		  break;
-
+*/
 
 
 /**
