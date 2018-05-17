@@ -1,6 +1,6 @@
 
 /***********************************************************/
-/** @file  new_direct_ion.c
+/** @file  direct_ion.c
  * @author ksl
  * @date   January, 2018
  *
