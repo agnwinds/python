@@ -4,7 +4,7 @@
  * @author ksl,nsh
  * @date   May, 2018
  *
- * @brief  
+ * @brief
  * Routines needed for a single shell wind model
  *
  * These routines were developed (by NSH) primarily for diagnostic purposes, e.g for calculating ionization models for
@@ -13,11 +13,11 @@
  ***********************************************************/
 
 
-/* 
-   This file was created in Feb 2011.    
-   The purpose is to have a model where we have a single shell of material. 
-   This is different from the stellar wind because we do not want the inner surface of the wind to touch the star. 
-   This requires tight control of the grid and makes for a very prescriptive model.  We also need a special grid, 
+/*
+   This file was created in Feb 2011.
+   The purpose is to have a model where we have a single shell of material.
+   This is different from the stellar wind because we do not want the inner surface of the wind to touch the star.
+   This requires tight control of the grid and makes for a very prescriptive model.  We also need a special grid,
    which is also stored in this file.
 
  */
@@ -34,7 +34,7 @@
 
 
 /**********************************************************/
-/** @name      get_shell_wind_params
+/**
  * @brief      Get the inputs needed to specigy the shell_wind modelen radius.
  *
  * @param [in] int  ndom   The domain for the shell
@@ -106,7 +106,7 @@ get_shell_wind_params (ndom)
   zdom[ndom].cl_rmin = shell_rmin = zdom[ndom].rmin;
 
 
-/*120130 NSH the next two lines have been modified to mean that the wind will end up as a CL wind, 
+/*120130 NSH the next two lines have been modified to mean that the wind will end up as a CL wind,
  * but the v_0 and v_infinity will be calulated here from these two variables, which are now local */
 
   rddoub ("shell.wind_v_at_rmin(cm)", &shell_vmin);     /* Velocity at base of the wind */
