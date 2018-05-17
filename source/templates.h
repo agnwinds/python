@@ -448,11 +448,11 @@ double temp_func(double solv_temp);
 int matom_emiss_report(void);
 /* direct_ion.c */
 int compute_di_coeffs(double T);
-int compute_qrecomb_coeffs(double T);
-double total_di(WindPtr one, double t_e);
 double q_ioniz_dere(int nion, double t_e);
-double q_ioniz(struct topbase_phot *cont_ptr, double electron_temperature);
+double total_di(WindPtr one, double t_e);
+int compute_qrecomb_coeffs(double T);
 double q_recomb_dere(struct topbase_phot *cont_ptr, double electron_temperature);
+double q_ioniz(struct topbase_phot *cont_ptr, double electron_temperature);
 double q_recomb(struct topbase_phot *cont_ptr, double electron_temperature);
 /* pi_rates.c */
 double calc_pi_rate(int nion, PlasmaPtr xplasma, int mode, int type);
@@ -461,7 +461,7 @@ double tb_logpow1(double freq);
 double tb_exp1(double freq);
 /* matrix_ion.c */
 int matrix_ion_populations(PlasmaPtr xplasma, int mode);
-int populate_ion_rate_matrix(PlasmaPtr xplasma, double rate_matrix[nions][nions], double pi_rates[nions], double inner_rates[n_inner_tot], double rr_rates[nions], double b_temp[nions], double xne, int xelem[nions]);
+int populate_ion_rate_matrix(double rate_matrix[nions][nions], double pi_rates[nions], double inner_rates[n_inner_tot], double rr_rates[nions], double b_temp[nions], double xne);
 int solve_matrix(double *a_data, double *b_data, int nrows, double *x, int nplasma);
 /* para_update.c */
 int communicate_estimators_para(void);
@@ -552,9 +552,6 @@ int make_spectra(int restart_stat);
 double integ_brem(double freq);
 double brem_d(double alpha);
 double get_rand_brem(double freqmin, double freqmax);
-/* search_light.c */
-int search_light_init(void);
-int photo_gen_search_light(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
 /* synonyms.c */
 int check_synonyms(char new_question[], char old_question[]);
 /* setup_reverb.c */
