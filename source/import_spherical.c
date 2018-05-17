@@ -4,7 +4,7 @@
  * @author ksl
  * @date   May, 2018
  *
- * @brief 
+ * @brief
  * General purpose routines for reading in an arbitray wind model
  * in spherical coordinates
  *
@@ -14,7 +14,7 @@
 
  * We assume that all of the variables are centered, that is
  * we are not assuming that we are giving rho at the center of
- * a cell, but that r and v_r are at the edges of a cell. 
+ * a cell, but that r and v_r are at the edges of a cell.
  * This is someghing that would presumable be easy to change
  ***********************************************************/
 #include <stdio.h>
@@ -40,7 +40,7 @@ struct
 
 
 /**********************************************************/
-/** @name      import_1d
+/**
  * @brief      Read the an arbitray wind model intended to mimic a stellar
  * wind or shell.
  *
@@ -53,19 +53,19 @@ struct
  *
  * ### Notes ###
  * The basic data we need to read in are
- * 
+ *
  *     i r v_r rho (and optionally T)
  *
- *  where 
+ *  where
  *
  *  * i is the element (increaing outwards
  *  * r is the radial coordiante
  *  * v_r is the velocity in the radial direction
  *  * rho is the density in cgs unites
- * 
+ *
  * We assume that all of the variables are centered, that is
  * we are not assuming that we are giving rho at the center of
- * a cell, but that r and v_r are at the edges of a cell. 
+ * a cell, but that r and v_r are at the edges of a cell.
  * This is someghing that would presumable be easy to change
  *
  **********************************************************/
@@ -141,7 +141,7 @@ import_1d (ndom, filename)
 
 
 /**********************************************************/
-/** @name      spherical_make_grid_import
+/**
  * @brief      Use the imported data to initialize various
  * portions of the Wind and Domain structures
  *
@@ -151,7 +151,7 @@ import_1d (ndom, filename)
  * @return     Always returns 0
  *
  * @details
- * This routine initializes the portions of the wind structure 
+ * This routine initializes the portions of the wind structure
  * using the imported model, specifically those portions having
  * to do with positions.
  *
@@ -204,9 +204,9 @@ spherical_make_grid_import (w, ndom)
 }
 
 
-/* The next section calculates velocites.  
+/* The next section calculates velocites.
  *
- * One could follow the zeus_hydro approach of getting those velocities from the original grid.  
+ * One could follow the zeus_hydro approach of getting those velocities from the original grid.
  * but for consistency with the 2d case we get it by interpolating on values in the cells
  *
  *
@@ -214,8 +214,8 @@ spherical_make_grid_import (w, ndom)
 
 
 /**********************************************************/
-/** @name      velocity_1d
- * @brief      The velocity at any positiion in an imported spherical 
+/**
+ * @brief      The velocity at any positiion in an imported spherical
  * model
  *
  *
@@ -232,7 +232,7 @@ spherical_make_grid_import (w, ndom)
  * ### Notes ###
  * Note that v_r is stored in v_0
  *
- * Not also that In practice this routine is only used to initallize v in 
+ * Not also that In practice this routine is only used to initallize v in
  * wind structure.  This is consistent with the way velocities
  * are treated throughout Python
  *
@@ -249,7 +249,7 @@ velocity_1d (ndom, x, v)
   double frac[4];
   r = length (x);
 
-  
+
   coord_fraction (ndom, 0, x, nnn, frac, &nelem);
   speed=0;
   for (nn = 0; nn < nelem; nn++)
@@ -268,7 +268,7 @@ velocity_1d (ndom, x, v)
 
 
 /**********************************************************/
-/** @name      rho_1d
+/**
  * @brief      Get the density for an imported spherical model at x
  *
  * @param [in] int  ndom   The domain for the imported model
@@ -276,7 +276,7 @@ velocity_1d (ndom, x, v)
  * @return     The density in cgs units is returned
  *
  * @details
- * This routine finds rho from the imported model 
+ * This routine finds rho from the imported model
  * at a position x.  The routine does not interpolate rho, but
  * simply locates the cell associated with x
  *
@@ -318,4 +318,3 @@ rho_1d (ndom, x)
   Log ("rho %e \n", rho);
   return (rho);
 }
-

@@ -69,7 +69,7 @@ compute_di_coeffs (T)
 }
 
 /**********************************************************/
-/** @name      q_ioniz_dere
+/**
  * @brief      Returns the collisional ionization rate coefficient for a given ion/temperature
  *
  * @param [in] int  nion   Index into ion structure for current ion under analysis
@@ -162,7 +162,7 @@ q_ioniz_dere (nion, t_e)
 }
 
 /**********************************************************/
-/** @name      total_di
+/**
  * @brief      computes the total cooling due collisional ionization
  *
  * @param [in] WindPtr  one   pointer to cell
@@ -293,7 +293,7 @@ compute_qrecomb_coeffs (T)
 
 
 /**********************************************************/
-/** @name      q_recomb_dere
+/**
  * @brief      Returns the collisional recombination co-efficient
  *
  * @param [in] struct topbase_phot a pointer to the topbdae style PI cross section
@@ -374,7 +374,7 @@ q_recomb_dere (cont_ptr, electron_temperature)
 
 
 /**********************************************************/
-/** @name      q_ioniz
+/**
  * @brief      returns the collisional ionization rate co-efficient
  *
  * @param [in] struct topbase_phot  - pointer to a Topbase style cross section - u
@@ -437,7 +437,7 @@ q_ioniz (cont_ptr, electron_temperature)
 
 
 /**********************************************************/
-/** @name      q_recomb
+/**
  * @brief      Returns a collisional recombination rate co-efficient
  *
  * @param [in out] struct topbase_phot - pointer to a topbase style PI cross section

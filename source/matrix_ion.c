@@ -27,7 +27,7 @@
 
 
 /**********************************************************/
-/** @name      matrix_ion_populations
+/**
  * @brief      A matrix solver for the ionization state in a cell
  *
  * @param [in out] PlasmaPtr  xplasma   The plasma cell we are working on
@@ -391,7 +391,7 @@ matrix_ion_populations (xplasma, mode)
 
 
 /**********************************************************/
-/** @name      populate_ion_rate_matrix
+/**
  * @brief      populates a rate_matrix
  *
  * @param [out] double  rate_matrix[nions][nions] - the rate matrix that will be filled by this array
@@ -605,7 +605,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
 
 
 /**********************************************************/
-/** @name      solve_matrix
+/**
  * @brief      solves the matrix equation A x = b for the vector x.
  *
  * @param [in] double a_data - the square rate matric

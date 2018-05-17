@@ -457,12 +457,7 @@ velocity_cylindrical (ndom, x, v)
 
 /**********************************************************/
 /**
- * @brief      Get the density for an imported cylyndrical model at x
-=======
-/**********************************************************/
-/** @name      rho_cylindrical
  * @brief      Get the density for an imported cylindrical model at x
->>>>>>> upstream/dev
  *
  * @param [in] int  ndom   The domain for the imported model
  * @param [in] double *  x   A position
