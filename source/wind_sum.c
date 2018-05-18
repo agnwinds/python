@@ -25,7 +25,7 @@
 
 
 /**********************************************************/
-/** @name      xtemp_rad
+/** 
  * @brief      Prints out t_r and t_e and the total number of photons
  * in a subsample of the the grid that fits on a typical output terminal
  *

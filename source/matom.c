@@ -19,7 +19,7 @@
 #include "my_linalg.h"
 
 /**********************************************************/
-/** @name matom
+/** 
  * @brief The core of the implementation of Macro Atoms in python
  *
  * @param [in]     WindPtr w   the ptr to the structure defining the wind
@@ -508,7 +508,7 @@ matom (p, nres, escape)
 
 
 /************************************
-** @name b12 
+**  
 * @brief the b12 Einstein coefficient.
 *
 * @param struct lines line_ptr line pointer to calculate
@@ -557,7 +557,7 @@ int temp_choice;                        //choice of type of calcualation for alp
 
 
 /**********************************************************/
-/** @name  alpha_sp 
+/**  
  *  @brief the matom estimator for the spontaneous recombination rate.
  * 
  * The rate is given by 
@@ -617,7 +617,7 @@ alpha_sp (cont_ptr, xplasma, ichoice)
 
 
 /**********************************************************/
-/** @name  alpha_sp_integrand
+/** 
  *  @brief This returns the integrand for alpha_sp at a chosen frequency - 
 ***********************************************************/
 
@@ -650,7 +650,7 @@ alpha_sp_integrand (freq)
 
 
 /**********************************************************/
-/** @name kpkt
+/** 
  * @brief deals with the elimination of k-packets.
  *
  * Whenever a k-packet is created it is
@@ -1122,7 +1122,7 @@ kpkt (p, nres, escape)
 
 
 /************************************************************
- ** @name fake_matom_bb
+ ** 
  * @brief routine for dealing with bound-bound "simple ions" within the hybrid macro-atom framework
  *
  *
@@ -1234,7 +1234,7 @@ fake_matom_bb (p, nres, escape)
 
 
 /************************************************************
- ** @name fake_matom_bf
+ ** 
  *  @brief routine for dealing with bound-free "simple ions" within the hybrid macro-atom framework
  *
  * fake_matom_bf is the macro atom routine that deals with photoionisation 
@@ -1303,7 +1303,7 @@ fake_matom_bf (p, nres, escape)
 
 
 /**********************************************************/
-/** @name emit_matom
+/** 
  * @brief a scaled down version of matom which deals with deactivation only for spectral cycles.
  *
  * @param [in]     WindPtr w   the ptr to the structure defining the wind
@@ -1480,7 +1480,7 @@ emit_matom (w, p, nres, upper)
 
 
 /**********************************************************/
-/** @name   matom_emit_in_line_prob
+/** 
  * @brief Prob. of cell emitting in a given line
  *
  * @param [in] one            Pointer to cell of interest

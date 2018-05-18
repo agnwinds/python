@@ -73,7 +73,7 @@ xband;
 
 
 /**********************************************************/
-/** @name      bands_init
+/** 
  * @brief      This is the routine that initializes the bands.    
  *
  * Python uses a form of stratified sampling in an attempt to assure
@@ -575,12 +575,12 @@ bands_init (imode, band)
 
 
 /**********************************************************/
-/** @name      freqs_init
+/** 
  * @brief      This is the routine where the frequency
  * 	boundaries for course spectra are established
  *
- * @param [in out] double  freqmin   The minimum frequency
- * @param [in out] double  freqmax   The maximum frequency
+ * @param [in, out] double  freqmin   The minimum frequency
+ * @param [in, out] double  freqmax   The maximum frequency
  * @return     Always returns 0
  *
  * @details

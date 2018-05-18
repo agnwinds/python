@@ -122,7 +122,6 @@ def write_header(function):
         list (string): The header to be written to file
     """
     header = module_string_start.format(
-        function['name'],
         function['synopsis'].replace('\n', '\n * ')
     )
 
@@ -345,11 +344,11 @@ file_string = '''
 
 module_string_start = '''
 /**********************************************************/
-/** @name      {}
+/**
  * @brief      {}
  *
 '''
-module_string_param = ''' * @param [in out] {}  {}   {}
+module_string_param = ''' * @param [in, out] {}  {}   {}
 '''
 module_string_end = ''' * @return     {}
  *

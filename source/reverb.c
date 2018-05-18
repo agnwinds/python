@@ -20,7 +20,7 @@ int *delay_dump_spec;
 PhotPtr delay_dump_bank;
 
 /**********************************************************/
-/** @name 	delay_to_observer
+/** 
  * @brief	Calculates the delay to the observer plane
  *
  * @param [in] pp			Pointer to test photon
@@ -47,7 +47,7 @@ delay_to_observer (PhotPtr pp)
 }
 
 /**********************************************************/
-/** @name 	delay_dump_prep
+/** 
  * @brief	Prepares delay dump output file
  *
  * @param [in] filename		File root for run
@@ -119,7 +119,7 @@ delay_dump_prep (int restart_stat)
 }
 
 /**********************************************************/
-/** @name 	delay_dump_finish
+/** 
  * @brief	Finishes dumping tracked photons to file
  *
  * @return 					0
@@ -143,7 +143,7 @@ delay_dump_finish (void)
 }
 
 /**********************************************************/
-/** @name 	delay_dump_combine
+/** 
  * @brief	Prepares delay dump output file
  *
  * @param [in] i_ranks		Number of parallel processes
@@ -192,7 +192,7 @@ delay_dump_combine (int i_ranks)
 }
 
 /**********************************************************/
-/** @name 	delay_dump
+/** 
  * @brief	Dumps tracked photons to file
  *
  * @param [in] np			Pointer to photon array tp dump
@@ -264,7 +264,7 @@ delay_dump (PhotPtr p, int np)
 }
 
 /**********************************************************/
-/** @name 	delay_dump_single
+/** 
  * @brief	Preps a single photon to be dumped
  *
  * @param [in] pp			Pointer to extracted photon

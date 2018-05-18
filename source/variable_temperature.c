@@ -4,9 +4,9 @@
  * @author nsh,ksl
  * @date   May, 2018
  *
- * @brief 
+ * @brief
  * This file was created to contain all of the routines associated
- * with calculating ionization using the so-called pair-wise 
+ * with calculating ionization using the so-called pair-wise
  * dilute bb and pairwise power law models.  Collectively these are
  * sometimes referred to as variable temperature models.  Both
  * involve
@@ -30,64 +30,63 @@
 #include "python.h"
 
 
-
-int niterate;                   // Make this a variable that all the subroutines cn see, 
-                                // so we can decide if we need to recompute the numerators
-
+/** Make this a variable that all the subroutines cn see,
+ * so we can decide if we need to recompute the numerators */
+int niterate;
 
 
 
 //OLD /***********************************************************
 //OLD                                        Southampton University
-//OLD 
-//OLD   Synopsis:   
-//OLD 
+//OLD
+//OLD   Synopsis:
+//OLD
 //OLD int
 //OLD variable_temperature (xplasama, mode)  modifies the densities of ions, levels, and
-//OLD 	partition functions of ions within a cell of the wind based upon the mode, 
-//OLD 	and other data contained within the WindPtr itself, such as t_r, t_e, w, 
-//OLD 	based on the "mode".  
-//OLD 
-//OLD         Unlike nebular_concentrations, this code works on pairs of ions at a time, 
+//OLD 	partition functions of ions within a cell of the wind based upon the mode,
+//OLD 	and other data contained within the WindPtr itself, such as t_r, t_e, w,
+//OLD 	based on the "mode".
+//OLD
+//OLD         Unlike nebular_concentrations, this code works on pairs of ions at a time,
 //OLD 	and uses a temperature calculated to be suitable for that particular pair
 //OLD 	to have a ratio of abundances about equal to 1.
-//OLD   
-//OLD   Arguments:		
+//OLD
+//OLD   Arguments:
 //OLD      PlasmaPtr ww;
 //OLD      int mode;			// 6=correct using a dilute blackbody
 //OLD      				   7=correct using a broken power law spectrum
-//OLD 
-//OLD 
+//OLD
+//OLD
 //OLD   Returns:
-//OLD  	variable temperature alters portions of the wind ptr.  Exactly how things 
+//OLD  	variable temperature alters portions of the wind ptr.  Exactly how things
 //OLD 	are changed depends on the mode.
-//OLD  
+//OLD
 //OLD  	variable_temperature returns 0 if it converged to an answer, -1 otherwise.  On an
 //OLD  	abnormal return the density array and ne are left unchanged.
-//OLD  	
-//OLD   Description:	
-//OLD 
-//OLD 
-//OLD  
+//OLD
+//OLD   Description:
+//OLD
+//OLD
+//OLD
 //OLD   Notes:
-//OLD 
-//OLD   Section 5.3 of Nick's thesis explains the undelying ratinale for the so-called 
-//OLD   variable temperature models.  The name of the routine is misleading since 
-//OLD   there correctios are made for both a dilute power law and for a dilute bb. 
-//OLD 
-//OLD 
-//OLD 
+//OLD
+//OLD   Section 5.3 of Nick's thesis explains the undelying ratinale for the so-called
+//OLD   variable temperature models.  The name of the routine is misleading since
+//OLD   there correctios are made for both a dilute power law and for a dilute bb.
+//OLD
+//OLD
+//OLD
 //OLD   History:
-//OLD 	2012Feb	nsh	Coded and debugged as part of QSO effort. 
-//OLD         1212Dec nsh	Recoded so that the densities are computed in a 
-//OLD 			temporary array, and only 
-//OLD 			committted to the real density structure once 
+//OLD 	2012Feb	nsh	Coded and debugged as part of QSO effort.
+//OLD         1212Dec nsh	Recoded so that the densities are computed in a
+//OLD 			temporary array, and only
+//OLD 			committted to the real density structure once
 //OLD 			we are sure the code converges.
-//OLD 	2013Sep nsh	ground state fudge computed at the start, and 
+//OLD 	2013Sep nsh	ground state fudge computed at the start, and
 //OLD 			stored in an array rather
 //OLD 			than contiunually recomputing it - sometimes it is expensive.
-//OLD 	
-//OLD 
+//OLD
+//OLD
 //OLD **************************************************************/
 
 
@@ -96,33 +95,33 @@ double xxxne, xip;
 
 
 /**********************************************************/
-/** @name      variable_temperature
+/**
  * @brief      modifies the densities of ions, levels, and
- * partition functions of ions within a cell of the wind based upon the mode, 
- * and other data contained within the WindPtr itself, such as t_r, t_e, w, 
- * based on the "mode".  
- * 
+ * partition functions of ions within a cell of the wind based upon the mode,
+ * and other data contained within the WindPtr itself, such as t_r, t_e, w,
+ * based on the "mode".
+ *
  * @param [in,out] PlasmaPtr  xplasma   A Plasma cell
  * @param [in] int  mode   A chooice of NEBULARMODE_PAIRWISE_ML93 (6) which uses
- * a dilute blackbody to represent the spectrum or 
+ * a dilute blackbody to represent the spectrum or
  * NEBULARMODE_PAIRWISE_SPECTRALMODEL (7) which uses a crude spectrum constructed
  * of power law or exponetial segments.
- * @return     returns 0 if the routine converged to an answer, -1 otherwise.  
+ * @return     returns 0 if the routine converged to an answer, -1 otherwise.
  * On an
  * abnormal return the density array and ne are left unchanged.
  *
- * variable temperature alters portions of the wind ptr.  Exactly how things 
+ * variable temperature alters portions of the wind ptr.  Exactly how things
  * are changed depends on the mode.
- *  
+ *
  *
  * @details
  *
  * ### Notes ###
- * Section 5.3 of Nick's thesis explains the undelying ratinale for the so-called 
- * variable temperature models.  The name of the routine is misleading since 
+ * Section 5.3 of Nick's thesis explains the undelying ratinale for the so-called
+ * variable temperature models.  The name of the routine is misleading since
  * there correctios are made for both a dilute power law and for a dilute bb.
  *
- * Unlike nebular_concentrations, this code works on pairs of ions at a time, 
+ * Unlike nebular_concentrations, this code works on pairs of ions at a time,
  * and uses a temperature calculated to be suitable for that particular pair
  * to have a ratio of abundances about equal to 1.
  *
@@ -148,7 +147,7 @@ variable_temperature (xplasma, mode)
   double t_e_part_correct;
   double sum, big;
   double pi_fudge, recomb_fudge, tot_fudge;     /*Two of the correction factors for photoionization rate, and recombination rate */
-  double gs_fudge[NIONS];       /*It can be expensive to calculate this, and it only depends on t_e - which is fixed for a run. So 
+  double gs_fudge[NIONS];       /*It can be expensive to calculate this, and it only depends on t_e - which is fixed for a run. So
                                    //                 calculate it once, and store it in a temporary array */
 
   nh = xplasma->rho * rho2nh;   //LTE
@@ -164,7 +163,7 @@ variable_temperature (xplasma, mode)
     newden[nion] = xplasma->density[nion];
 
     /* Here we populate the recombination to ground state correction factor used in the LM and Sim ionization
-     * equations.  Mode 2 imples we are include the dielectronic correction. There is no recombination fudge for 
+     * equations.  Mode 2 imples we are include the dielectronic correction. There is no recombination fudge for
      * the neutral ion */
 
     if (ion[nion].istate != 1)
@@ -179,10 +178,10 @@ variable_temperature (xplasma, mode)
      assumes ion[0] is H1.  Note that x below is the fractional
      ionization of H and should vary from 0 to 1
 
-     Note that in a pure H plasma, the left hand side of the Saha 
+     Note that in a pure H plasma, the left hand side of the Saha
      equation can be written as (x*x*nh*nh)/((1-x)*nh)  and can
      then be converted into a quadratic.  That is what is done
-     below.  
+     below.
 
      Since this is an initial estimate, g factors are ignored
      *
@@ -201,7 +200,7 @@ variable_temperature (xplasma, mode)
     xne = xxne = xxxne = x * nh;
   }
   else
-    xne = xxne = xxxne = nh;    /*xxne is just a store so the error can report the starting value of ne. 
+    xne = xxne = xxxne = nh;    /*xxne is just a store so the error can report the starting value of ne.
                                    xxxne is the shared variable so the temperature solver routine can access it */
 
   if (xne < 1.e-6)
@@ -219,8 +218,8 @@ variable_temperature (xplasma, mode)
     {
 
       first = ele[nelem].firstion;      /*first and last identify the position in the array */
-      last = first + ele[nelem].nions;  /*  So for H which has 2 ions, H1 and H2, first will 
-                                           generally be 0 and last will be 2 so the for loop 
+      last = first + ele[nelem].nions;  /*  So for H which has 2 ions, H1 and H2, first will
+                                           generally be 0 and last will be 2 so the for loop
                                            below will just be done once for nion = 1 */
 
       if (first < 0 || first >= nions || last < 0 || last > nions)
@@ -231,14 +230,14 @@ variable_temperature (xplasma, mode)
 
 
       /* and now we loop over all the ions of this element */
-      sum = newden[first] = 1.0;        /* set the density of the first ion of this element to 1.0 
+      sum = newden[first] = 1.0;        /* set the density of the first ion of this element to 1.0
                                            -this is (always??) the neutral ion */
 
       big = pow (10., 250. / (last - first));   /*make sure that we will not overflow the last ion */
 
 
-      for (nion = first + 1; nion < last; nion++)       /*nion is the upper ion of the pair, 
-                                                           last is one above the actual last ion, 
+      for (nion = first + 1; nion < last; nion++)       /*nion is the upper ion of the pair,
+                                                           last is one above the actual last ion,
                                                            so the last ion to be considered is last-1 */
       {
 
@@ -253,7 +252,7 @@ variable_temperature (xplasma, mode)
         partition_functions_2 (xplasma, nion, xtemp, 1);        //weight of 1 give us the LTE populations.
 
 
-        /* and now we need the saha equation linking the two states at our chosen temp 
+        /* and now we need the saha equation linking the two states at our chosen temp
            NB the partition function of the electron is included in the SAHA factor */
 
         xsaha = SAHA * pow (xtemp, 1.5);
@@ -261,9 +260,9 @@ variable_temperature (xplasma, mode)
 
 
         t_e_part_correct = xplasma->partition[nion - 1] / xplasma->partition[nion];
-        partition_functions_2 (xplasma, nion, t_e, 0);  /* Our only real guess here is that the 
-                                                           electron temperature might give a good 
-                                                           estimate of the partition function 
+        partition_functions_2 (xplasma, nion, t_e, 0);  /* Our only real guess here is that the
+                                                           electron temperature might give a good
+                                                           estimate of the partition function
                                                            XXXX - ksl - Why is it that we set the weight to 0 here rather than to 1 as
                                                            above.  Is this the reason we have to recalculate all of the partition
                                                            function at the bottom of the routine*/
@@ -271,7 +270,7 @@ variable_temperature (xplasma, mode)
         t_e_part_correct *= (xplasma->partition[nion] / xplasma->partition[nion - 1]);
 
 
-        /* we now correct b to take account of the temperature and photon field 
+        /* we now correct b to take account of the temperature and photon field
            t_r and www give the actual radiation field in the cell, xtemp is the temp we used
            t_e is the actual electron temperature of the cell */
 
@@ -282,8 +281,8 @@ variable_temperature (xplasma, mode)
         {
 
           if (t_r / xtemp < 0.2)
-            /* If the true radiation temperature is much lower than the temperature at which 
-               the ion is expected to exist, we wont see it, so save time and dont bother 
+            /* If the true radiation temperature is much lower than the temperature at which
+               the ion is expected to exist, we wont see it, so save time and dont bother
                calculating correction factors */
           {
             tot_fudge = 0.0;
@@ -356,7 +355,7 @@ variable_temperature (xplasma, mode)
       for (nion = 0; nion < nions; nion++)
       {
 
-        /* if the ion is being treated by macro_pops then use the populations just computed 
+        /* if the ion is being treated by macro_pops then use the populations just computed
            JM1309 -- this was missing prior to python 76c */
         if ((ion[nion].macro_info == 1) && (geo.macro_simple == 0) && (geo.macro_ioniz_mode == 1))
         {
@@ -410,11 +409,11 @@ variable_temperature (xplasma, mode)
 
 
 
-  partition_functions (xplasma, NEBULARMODE_LTE_GROUND);     
-  
-  /* XXX WARNING fudge NSH 11/5/14 - this is as a test. 
+  partition_functions (xplasma, NEBULARMODE_LTE_GROUND);
+
+  /* XXX WARNING fudge NSH 11/5/14 - this is as a test.
  We really need a better implementation of partition functions and levels
- for a power law illuminating spectrum. We found that if we didnt make this call, 
+ for a power law illuminating spectrum. We found that if we didnt make this call,
  we would end up with undefined levels - which did really crazy things */
 
   return (0);
@@ -422,30 +421,30 @@ variable_temperature (xplasma, mode)
 
 
 
+int bb_correct_err = 0;
 
 /**********************************************************/
-/** @name      pi_correct
+/**
  * @brief      calculates the photoionization rate
- *  correction factor for the number density of two adjacent ions   
+ *  correction factor for the number density of two adjacent ions
  *
  * @param [in] double  xtemp   the temperature at which the saha abundances were calculated
  * @param [in] int  nion   number of the upper ion in the pair for which the correction factor is
  * @param [in] PlasmaPtr  xplasma   The cell currnently under test - this supplied the code with
- * @param [in] int  mode   This is the ionization mode, which should be either IONMODE_PAIRWISE_ML93 (6) or IONMODE_PAIRWISE_SPECTRALMODEL (7) 
+ * @param [in] int  mode   This is the ionization mode, which should be either IONMODE_PAIRWISE_ML93 (6) or IONMODE_PAIRWISE_SPECTRALMODEL (7)
  * @return   the photoionization rate correction factor
  *
  * @details
  *
- * In IONMODE_PAIRWISE_ML93, the correction factor is calculated assuming a dilute BB function.  In 
+ * In IONMODE_PAIRWISE_ML93, the correction factor is calculated assuming a dilute BB function.  In
  * IONMODE_PAIRWISE_SPECTRALMODEL the factor is calculated using a piecewise power law or exponentila function.
  *
  * ### Notes ###
  * LM is a special case of this where the temperatures
- * are the same. 
+ * are the same.
  *
  *
  **********************************************************/
-int bb_correct_err = 0;
 
 double
 pi_correct (xtemp, nion, xplasma, mode)
@@ -462,7 +461,7 @@ pi_correct (xtemp, nion, xplasma, mode)
 
   numerator = denominator = 0.0;
   /*nion is the upper (recombining) ion in the pair, but calc_pi_rate uses the lower (ionizing) ion  */
-  ion_lower = nion - 1;         
+  ion_lower = nion - 1;
 
 
 
@@ -474,7 +473,7 @@ pi_correct (xtemp, nion, xplasma, mode)
     }
     else if (mode == IONMODE_PAIRWISE_SPECTRALMODEL)         /*Call calc_pi using a seriews a series of power laws and/or exponentials to represent the spectrum */
     {
-      numerator = calc_pi_rate (ion_lower, xplasma, 1, 1);      
+      numerator = calc_pi_rate (ion_lower, xplasma, 1, 1);
     }
     xplasma->PWnumer[ion_lower] = numerator;    /* Store the calculated numerator for this cell - it wont change during one ionization cycle */
   }                             //End of if statement to decide if this is the first iteration
@@ -483,30 +482,30 @@ pi_correct (xtemp, nion, xplasma, mode)
     numerator = xplasma->PWnumer[ion_lower];    // We are on the second iteration, so use the stored value
   }
 
-  /*If the numeratior is 0, there is no PI for this ion, and so there 
+  /*If the numeratior is 0, there is no PI for this ion, and so there
    * is no need to waste time evaluationg the denominatory */
-  if (numerator == 0.0)         
+  if (numerator == 0.0)
   {
-    return (0.0);               
+    return (0.0);
   }
 
 
   if (pow (((xtemp - xplasma->PWdtemp[ion_lower]) / xplasma->PWdtemp[ion_lower]), 2) > 1e-6)    //If our guess temperature hasnt changed much, use denominator from last time
   {
-    /*calc_pi_rate uses the value of t_r and w in the plasma structure to compute the rate coefficient, 
-     * so we need to store the actual value of t_r and w so we can substititute our guess temperature 
+    /*calc_pi_rate uses the value of t_r and w in the plasma structure to compute the rate coefficient,
+     * so we need to store the actual value of t_r and w so we can substititute our guess temperature
      * and w=1 (to get LTE) */
 
-    t_r_store = xplasma->t_r;   
+    t_r_store = xplasma->t_r;
     w_store = xplasma->w;
     xplasma->t_r = xtemp;
     xplasma->w = 1.0;
 
     /*Now we can call calc_pi_rate, which will now calulate an LTE rate coefficient at our guess temperature */
-    denominator = calc_pi_rate (ion_lower, xplasma, 2, 1);      
+    denominator = calc_pi_rate (ion_lower, xplasma, 2, 1);
 
     /*Put things back the way they were */
-    xplasma->t_r = t_r_store;   
+    xplasma->t_r = t_r_store;
     xplasma->w = w_store;
     xplasma->PWdenom[ion_lower] = denominator;  /*Store the LTE rate coefficient for next time */
     xplasma->PWdtemp[ion_lower] = xtemp;        /*And also the temperature at which it was calculated */
@@ -528,10 +527,10 @@ pi_correct (xtemp, nion, xplasma, mode)
 
 
 /**********************************************************/
-/** @name      temp_func
+/**
  * @brief      the function minimised by zbrent to find a temperature
- * when the ion ratios are one (so the logarithm will be 0), 
- * to avoid numerical problems. 
+ * when the ion ratios are one (so the logarithm will be 0),
+ * to avoid numerical problems.
  *
  *
  * @param [in] double  solv_temp   The temperature where the ???
@@ -539,13 +538,13 @@ pi_correct (xtemp, nion, xplasma, mode)
  *
  * @details
  * It is the natural log of the saha equation
- * with the ne taken to the RHS. The correction 
+ * with the ne taken to the RHS. The correction
  * factors are applied after and depend on the temperature we find.
  *
  *
  * ### Notes ###
- *  xxxne and xip are global variables which is declared above and 
- *  assigned in the main variable_temperature routine. 
+ *  xxxne and xip are global variables which is declared above and
+ *  assigned in the main variable_temperature routine.
  *
  **********************************************************/
 

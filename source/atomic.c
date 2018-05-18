@@ -11,7 +11,7 @@
  *
  * These routines are intended to be Python-independent so that
  * the can be used with other programs.  As a result python.h should
- * not be included.  
+ * not be included.
  *
  * Note that other routines should be added here to make the atomic
  * data routines more indepenent of Python.
@@ -27,21 +27,21 @@
 
 
 /**********************************************************/
-/** @name      sigma_phot
- * @brief      double (x_ptr,freq)	calculates the photionization crossection due to the transition 
+/**
+ * @brief      double (x_ptr,freq)	calculates the photionization crossection due to the transition
  * 	associated with x_ptr at frequency freq
  *
- * @param [in out] struct photoionization *  x_ptr   structure containing the x-section information
- * @param [in out] double  freq   frequency at which the x-section should be calculated
+ * @param [in, out] struct photoionization *  x_ptr   structure containing the x-section information
+ * @param [in, out] double  freq   frequency at which the x-section should be calculated
  * @return     xsection for this ion at the given frequency
  *
  * @details
  * sigma_phot uses Verner et al.'s interpolation formulae for the photoionization crossection
- * 	to calculate the bound free (or photoionization) optical depth.  
+ * 	to calculate the bound free (or photoionization) optical depth.
  *
  * ### Notes ###
  * 	The data must
- * 	have been into the photoionization structures xphot with get_atomic_data 
+ * 	have been into the photoionization structures xphot with get_atomic_data
  *
  **********************************************************/
 
@@ -77,11 +77,18 @@ sigma_phot (x_ptr, freq)
 
 
 
+
+
+#define A21_CONSTANT 7.429297e-22       // 8 * PI * PI * E * E / (MELEC * C * C * C)
+
+struct lines *a21_line_ptr;
+double a21_a;
+
 /**********************************************************/
-/** @name      a21
+/**
  * @brief      Calculate the Einstein A coefficient for a transition
  *
- * @param [in out] struct lines *  line_ptr   Ptr containing data describing the line
+ * @param [in, out] struct lines *  line_ptr   Ptr containing data describing the line
  * @return     The Einsten (a21) value
  *
  * @details
@@ -92,13 +99,6 @@ sigma_phot (x_ptr, freq)
  * previously, and if so returns it without redoing the calculation.
  *
  **********************************************************/
-
-#define A21_CONSTANT 7.429297e-22       // 8 * PI * PI * E * E / (MELEC * C * C * C)
-
-struct lines *a21_line_ptr;
-double a21_a;
-
-
 double
 a21 (line_ptr)
      struct lines *line_ptr;

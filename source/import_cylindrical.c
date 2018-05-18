@@ -22,9 +22,9 @@
 # define LINELEN 512
 # define NCELLS  512
 
-/* The structure that holds the inputs and any subsidiary variables
+/** The structure that holds the inputs and any subsidiary variables
  *
- * Note that i is the row number nd j is the column number*/
+ * Note that i is the row number nd j is the column number */
 struct
 {
   int ndim, mdim, ncell;
@@ -43,12 +43,12 @@ struct
 
 
 /**********************************************************/
-/** @name      import_cylindrical
- * @brief      Read the an arbitrary wind model in cylindrical
+/**
+ * @brief      Read the an arbitray wind model in cylindrical
  *     coordinates
  *
- * @param [in] int  ndom   The domain number for the imported model
- * @param [in] char *  filename   The file containing the model to import
+ * @param [in] ndom   The domain number for the imported model
+ * @param [in] filename   The file containing the model to import
  * @return     Always returns 0
  *
  * @details
@@ -57,20 +57,20 @@ struct
  *
  * ### Notes ###
  * The basic data we need to read in are
- * 
+ *
  * * i, j, r z  v_x v_y v_z rho (and optionally T)
- * 
+ *
  * where v_x,_v_y,v_z are the velocities in the x,z plane
  * and where
- * 
+ *
  * * i is the column number  (Thus i corresponds to ndim)
  * * j is the row number     (and z coresponds to mdim)
- * 
+ *
  * We assume that all of the variables are centered, that is
  * we are not assuming that we are giving rho at the center of
- * a cell, but that r and v_r are at the edges of a cell. 
+ * a cell, but that r and v_r are at the edges of a cell.
  * This is someghing that would presumable be easy to change
- * 
+ *
  * Note that we assume that the data are being read in in the
  * same order as printed out by windsave2table, that is that
  * the first "column" is read in, and then the second "column".
@@ -188,7 +188,7 @@ import_cylindrical (ndom, filename)
 
 
   /* Although the initialization of most of zdom should be postponed
-   * one has to give zdom the dimensions of the array; otherwise 
+   * one has to give zdom the dimensions of the array; otherwise
    * the wrong number of elements in wmains wind will be allocated
    */
 
@@ -204,17 +204,17 @@ import_cylindrical (ndom, filename)
 
 
 /**********************************************************/
-/** @name      cylindrical_make_grid_import
+/**
  * @brief       Use the imported data to initialize various
  * portions of the Wind and Domain structures
  *
  *
- * @param [in] WindPtr  w   The entire wind
- * @param [in] int  ndom   The domain number
- * @return   Always returns 0  
+ * @param [in] w   The entire wind
+ * @param [in] ndom   The domain number
+ * @return   Always returns 0
  *
  * @details
- * This routine initializes the portions of the wind structure 
+ * This routine initializes the portions of the wind structure
  * using the imported model, specifically those portions having
  * to do with positions, and velocities.
  *
@@ -239,9 +239,9 @@ cylindrical_make_grid_import (w, ndom)
   Log ("XX Dimensions of read in model: %d %d\n", zdom[ndom].ndim,
        zdom[ndom].mdim);
 
-/*  This is an attempt to make the grid directly.  
+/*  This is an attempt to make the grid directly.
  *
- *  Note also that none of this will work unless a complete grid is read 
+ *  Note also that none of this will work unless a complete grid is read
  *  in
  *  */
   for (n = 0; n < xx_cyl.ncell; n++)
@@ -281,11 +281,11 @@ cylindrical_make_grid_import (w, ndom)
     }
 
 
-  /* Now set up wind boundaries so they are harmless.  
+  /* Now set up wind boundaries so they are harmless.
    * Note that given that we have already filled out
    * the WindPtr it seems like we could do this
    * without needing the internal structure
-   * I am attempting this in the rtheta model in 
+   * I am attempting this in the rtheta model in
    * this fashion - ksl  */
 
 
@@ -370,10 +370,10 @@ cylindrical_make_grid_import (w, ndom)
 
 
 /* velocity for cylindrical coordinates only interpolates.  One has to
- * interpoalte for vgrad. 
+ * interpoalte for vgrad.
  *
  * This routine is dangerous because of the way it works, if one tries
- * to update wmain[].v. This is because it actually uses values in 
+ * to update wmain[].v. This is because it actually uses values in
  * wmain[v].  Ideally one would try to avoid maing such calls, but
  * ksl has not found a good way to do this.
  * */
@@ -381,21 +381,21 @@ cylindrical_make_grid_import (w, ndom)
 
 
 /**********************************************************/
-/** @name      velocity_cylindrical
+/**
  * @brief      The velocity at any positiion in an imported cylindrical
  * model
  *
- * @param [in] int  ndom   The domain of the imported model
- * @param [in] double *  x   A position
- * @param [out] double *  v   The velocity at x
- * @return     The speed at x  
+ * @param [in] ndom   The domain of the imported model
+ * @param [in] x   A position
+ * @param [out] v   The velocity at x
+ * @return     The speed at x
  *
  * @details
  * This routine interpolates on the values read in for the
  * imported model to give one a velocity
  *
  * ### Notes ###
- * In practice this routine is only used to initallize v in 
+ * In practice this routine is only used to initallize v in
  * wind structure.  This is consistent with the way velocities
  * are treated throughout Python.
  *
@@ -435,15 +435,15 @@ velocity_cylindrical (ndom, x, v)
 
 
 /**********************************************************/
-/** @name      rho_cylindrical
+/**
  * @brief      Get the density for an imported cylindrical model at x
  *
- * @param [in] int  ndom   The domain for the imported model
- * @param [in] double *  x   A position
+ * @param [in] ndom   The domain for the imported model
+ * @param [in] x   A position
  * @return     The density in cgs units is returned
  *
  * @details
- * This routine finds rho from the imported model 
+ * This routine finds rho from the imported model
  * at a position x.  The routine does not interpolate rho, but
  * simply locates the cell associated with x
  *

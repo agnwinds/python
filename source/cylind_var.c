@@ -6,18 +6,18 @@
  *
  * @brief   Generic routines for handling a modified version of
  * cylindrical coordinate systems to better model vertically
- * extened disks 
+ * extened disks
  *
  *
  * The overall idea for a vertically extended disk is as follows:
  *
  * We will create a cylindicral coordinate system in which the rho coordinates
  * are established just as for a cylindrical system.  Howver, the boundaries of
- * the cell in the z direction will vary with radius from the star.  The 
+ * the cell in the z direction will vary with radius from the star.  The
  * vertices of the cells will be defined so that they have fixed offsets from
  * the disk surface.  The "top" and "bottom" edges are not parallel to the xy
- * plane, but mimic the disk surface.  
- * 
+ * plane, but mimic the disk surface.
+ *
  * Ultimately the disk surface will be defined so that it matches the edges of
  * cells when a photon is in the wind.  Outise id will be defined by zdisk
  * as previously.
@@ -36,54 +36,54 @@
 
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
 //OLD 	cylin_ds_in_cell calculates the distance to the far
-//OLD         boundary of the cell in which the photon bundle resides.  	
-//OLD   
-//OLD  Arguments:		
+//OLD         boundary of the cell in which the photon bundle resides.
+//OLD
+//OLD  Arguments:
 //OLD  	p	Photon pointer
-//OLD 
-//OLD 	
+//OLD
+//OLD
 //OLD  Returns:
 //OLD  	Distance to the far boundary of the cell in which the photon
 //OLD 	currently resides.  Negative numbers (and zero) should be
 //OLD 	regarded as errors.
-//OLD   
-//OLD Description:	
-//OLD 
+//OLD
+//OLD Description:
+//OLD
 //OLD Notes:
-//OLD 
-//OLD 
+//OLD
+//OLD
 //OLD History:
-//OLD 	05may	ksl	56a -- began modifications starting with same 
+//OLD 	05may	ksl	56a -- began modifications starting with same
 //OLD 			routine in cylindrical
 //OLD 	05jun	ksl	56d -- modified so that search for top and
 //OLD 			bottom of each cell is determined using
 //OLD 			the cones that define each cell.
 //OLD 	15aug	ksl	Updates to use with domains
-//OLD  
+//OLD
 //OLD **************************************************************/
 
 
 
 
 /**********************************************************/
-/** @name      cylvar_ds_in_cell
+/**
  * @brief      cylin_ds_in_cell calculates the distance to the far
  * boundary of the cell in which the photon bundle resides.
  *
  * @param [in] int  ndom   The number of the domain of interest
  * @param [in] PhotPtr  p   Photon pointer
  * @return     Distance to the far boundary of the cell in which the photon
- * 	currently resides.  
+ * 	currently resides.
  *
  * 	Negative numbers (and zero) should be
  * 	regarded as errors.
  *
  * @details
  * This routine solves the quadratic equations that allow one
- * to determine the distance a photon can travel within a 
+ * to determine the distance a photon can travel within a
  * cell before hitting the edge of the cell.
  *
  * ### Notes ###
@@ -163,39 +163,39 @@ cylvar_ds_in_cell (ndom,p)
 
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
-//OLD 	cylvar_make_grid defines the cells in a cylindrical grid              
+//OLD 	cylvar_make_grid defines the cells in a cylindrical grid
 //OLD 	when the disk is vertically extended.
-//OLD 
-//OLD Arguments:		
+//OLD
+//OLD Arguments:
 //OLD 	WindPtr w;	The structure which defines the wind in Python
-//OLD  
+//OLD
 //OLD Returns:
-//OLD  
+//OLD
 //OLD Description:
 //OLD 	The cylvar coordinate system basically adds and off determined
 //OLD 	by zdisk(r) to each z position in the grid.  Beyond geo.diskrad
 //OLD 	the coordinate system stays fixed in the z direction (on the
 //OLD 	assumption that the forumula for the disk is not valid there.)
-//OLD 
+//OLD
 //OLD 	The coordinate system is adjusted so the last element in the
 //OLD 	veritical direction of the grid is always the same.
-//OLD 
-//OLD 
+//OLD
+//OLD
 //OLD History:
-//OLD 	05may	ksl	56a -- began modifications starting with same 
+//OLD 	05may	ksl	56a -- began modifications starting with same
 //OLD 			routine in cylindrical
 //OLD 	05jun	ksl	56d -- Conversion for this routine appears
 //OLD 			complete.
-//OLD 
+//OLD
 //OLD **************************************************************/
 
 
 
 /**********************************************************/
-/** @name      cylvar_make_grid
- * @brief      defines the cells in a cylindrical grid              
+/**
+ * @brief      defines the cells in a cylindrical grid
  * 	when the disk is vertically extended.
  *
  * @param [in out] WindPtr  w   The structure which defines the wind in Python
@@ -207,7 +207,7 @@ cylvar_ds_in_cell (ndom,p)
  * by zdisk(r) to each z position in the grid.  Beyond geo.diskrad
  * the coordinate system stays fixed in the z direction (on the
  * assumption that the forumula for the disk is not valid there.)
- * 
+ *
  * The coordinate system is adjusted so the last element in the
  * veritical direction of the grid is always the same.
  *
@@ -330,40 +330,40 @@ cylvar_make_grid (w, ndom)
 
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
-//OLD 	cylvar_wind_complete_grid completes the definition of some of 
+//OLD 	cylvar_wind_complete_grid completes the definition of some of
 //OLD 	the positonal variables in the wind, and creates some subidiary
 //OLD 	arrays.
-//OLD 
-//OLD Arguments:		
+//OLD
+//OLD Arguments:
 //OLD 	WindPtr w;	The structure which defines the wind in Python
-//OLD  
+//OLD
 //OLD Returns:
-//OLD  
+//OLD
 //OLD Description:
 //OLD 	This routine defines the windcone structures for this coordinate
 //OLD 	system and creates some arrays that are intended to aide
 //OLD 	in determining what cell one is in.  The routine is specific
-//OLD 	to cylvar coordinate system.  
-//OLD 
-//OLD 
+//OLD 	to cylvar coordinate system.
+//OLD
+//OLD
 //OLD Notes: In principle, one would like to fix problem that the cones
 //OLD 	are only defined out to MDIM-1 and NDIM-1, as this has the
 //OLD 	potential of wasting space.  However, volumes have the same problem
 //OLD History:
-//OLD 	05may	ksl	56a -- began modifications starting with same 
+//OLD 	05may	ksl	56a -- began modifications starting with same
 //OLD 			routine in cylindrical
 //OLD 	06jun	ksl	56d -- Completed models for cylvar
 //OLD 	15aug	ksl	Adaptatations for domains
-//OLD 
+//OLD
 //OLD **************************************************************/
 
 
 
 /**********************************************************/
-/** @name      cylvar_wind_complete
- * @brief      Completes the definition of some of 
+/**
+ * @brief      Completes the definition of some of
  * 	the positonal variables in the wind, and creates some subidiary
  * 	arrays.
  *
@@ -421,7 +421,7 @@ cylvar_wind_complete (ndom, w)
     }
   }
   /* Finally define some one-d vectors that make it easier to locate a photon in the wind given that we
-     have adoped a "rectangular" grid of points.   
+     have adoped a "rectangular" grid of points.
 
      For cylvar coordinates, we can use the standard formulation in the x direction, but not in
      the z direction
@@ -450,33 +450,33 @@ cylvar_wind_complete (ndom, w)
 
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
 //OLD  	cylvar_volume(w) calculates the wind volume of a cylindrical cell
-//OLD 	allowing for the fact that some cells 
-//OLD 
-//OLD  Arguments:		
+//OLD 	allowing for the fact that some cells
+//OLD
+//OLD  Arguments:
 //OLD  	int ndom      the domain poiinter
 //OLD 	WindPtr w;    the entire wind
 //OLD  Returns:
-//OLD 
+//OLD
 //OLD  Description:
-//OLD 
+//OLD
 //OLD  	This is a brute_force integration of the volume.  The technique
 //OLD 	is completely general.  It does not depend on the shape of the
 //OLD 	cell, and could be used for most of the coodinate systems.
-//OLD 	       
+//OLD
 //OLD  Notes:
-//OLD 	Where_in grid does not tell you whether the photon is in the wind or not. 
+//OLD 	Where_in grid does not tell you whether the photon is in the wind or not.
 //OLD  History:
-//OLD 	05may	ksl	56a -- began modifications starting with same 
+//OLD 	05may	ksl	56a -- began modifications starting with same
 //OLD 			routine in cylindrical
 //OLD 	05jul	ksl	56d -- Made the modifications needed.
 //OLD 	06nov	kls	58b: Minor modifications to use W_ALL_INWIND, etc.
 //OLD 			instead of hardcoded values
 //OLD 	11aug	ksl	70b - Added ability to get volumes for multiple
 //OLD 			components
-//OLD  
+//OLD
 //OLD **************************************************************/
 
 #define RESOLUTION   1000
@@ -484,13 +484,13 @@ cylvar_wind_complete (ndom, w)
 
 
 /**********************************************************/
-/** @name      cylvar_volumes
+/**
  * @brief      w) calculates the wind volume of a cylindrical cell
  * 	allowing for the fact that some cells
  *
  * @param [in] int  ndom   the domain poiinter
  * @param [in,out] WindPtr  w   the entire wind
- * @return   Always returns 0  
+ * @return   Always returns 0
  *
  * @details
  * This is a brute_force integration of the volume.  The technique
@@ -618,43 +618,43 @@ cylvar_volumes (ndom, w)
 
 //OLD /***********************************************************
 //OLD                      Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
 //OLD  	cylvar_where_in_grid locates the grid position of the vector,
 //OLD 	when one is using cylindrical coordinates, with the z
-//OLD 	positions varying. 
-//OLD 
-//OLD  Arguments:		
+//OLD 	positions varying.
+//OLD
+//OLD  Arguments:
 //OLD 	double x[];
 //OLD 	int ichoice	0 locates the grid cell using the normal cell boundaries
 //OLD 			1 is for the cell centers
-//OLD 
+//OLD
 //OLD  Returns:
 //OLD  	where_in_grid normally  returns the cell number associated with
 //OLD  		a position.  If the position is in the grid this will be a positive
 //OLD  		integer < NDIM*MDIM.
 //OLD  	x is inside the grid        -1
 //OLD 	x is outside the grid       -2
-//OLD 
+//OLD
 //OLD 	fx,fz are the fractional positions
-//OLD  Description:	
-//OLD 
+//OLD  Description:
+//OLD
 //OLD  	cylvar_where_in_grid returns the grid cell, and (because
-//OLD 	it has to be calculated) the fractional position).  
-//OLD 	
-//OLD 		
+//OLD 	it has to be calculated) the fractional position).
+//OLD
+//OLD
 //OLD  Notes:
-//OLD 	Where_in grid does not tell you whether the x is in the wind or not. 
-//OLD 
+//OLD 	Where_in grid does not tell you whether the x is in the wind or not.
+//OLD
 //OLD 	What one means by inside or outside the grid may well be different
 //OLD 	for different coordinate systems.
-//OLD 
+//OLD
 //OLD 	The basic approach is to calculate the rho postion which should tell
 //OLD 	you which "column" of the wind you are in, and then to calculate the
-//OLD 	specific cell in the column.  
-//OLD 
+//OLD 	specific cell in the column.
+//OLD
 //OLD  History:
-//OLD 	05may	ksl	56a -- began modifications starting with same 
+//OLD 	05may	ksl	56a -- began modifications starting with same
 //OLD 			routine in cylindrical
 //OLD 	05jul	ksl	56d -- Actual modifications for cylvar added.
 //OLD 			This routine caused a lot of trouble, especially
@@ -663,7 +663,7 @@ cylvar_volumes (ndom, w)
 //OLD 	13sep	nsh	76b -- Modified calls to fraction to take account
 //OLD 			of new modes
 //OLD 	15aug	ksl	Modified for domains
-//OLD  
+//OLD
 //OLD **************************************************************/
 
 
@@ -672,36 +672,36 @@ int ierr_cylvar_where_in_grid = 0;
 
 
 /**********************************************************/
-/** @name      cylvar_where_in_grid
+/**
  * @brief      locates the grid position of the vector,
  * when one is using modified cylindrical coordinates, with the z
  * heights varying.
  *
  * @param [in] int  ndom   The domain number
  * @param [in] double  x[]   A position
- * @param [in] int  ichoice   0 locates the grid cell using the normal cell boundaries, 
+ * @param [in] int  ichoice   0 locates the grid cell using the normal cell boundaries,
  * whereas a non-zero value will use the midpoints of the cells to calculate fractions
  * @param [in out] double *  fx   The fractional distance in the rho direction of the position in the cel
  * @param [in out] double *  fz   The fractional distance in the z direction of the position in the cel
  * @return     where_in_grid normally  returns the cell number associated with
- *  		a position.  
+ *  		a position.
  *
  * If the position is in the grid this will be a positive
  * integer < The number of cells int he domain
  * * x is inside the grid        -1
  * * x is outside the grid       -2
- * 
+ *
  *
  * @details
  * cylvar_where_in_grid returns the grid cell, and (because
  * it has to be calculated) the fractional position).
  *
  * ### Notes ###
- * Where_in grid does not tell you whether the x is in the wind or not. 
- * 
+ * Where_in grid does not tell you whether the x is in the wind or not.
+ *
  * What one means by inside or outside the grid may well be different
  * for different coordinate systems.
- * 
+ *
  * The basic approach is to calculate the rho position which should tell
  * you which "column" of the wind you are in, and then to calculate the
  * specific cell in the column.
@@ -733,7 +733,7 @@ cylvar_where_in_grid (ndom, x, ichoice, fx, fz)
   if (z[2] == 0)
     z[2] = 1.e4;                //Force z to be positive  02feb ksl
 
-  /* Attempt to find the approximate locations. Recall that ichoce == 0 
+  /* Attempt to find the approximate locations. Recall that ichoce == 0
    * corresponds to the cells while ichoice == 1 cooresponds to the mid-points
    * of the cells. */
 
@@ -761,7 +761,7 @@ cylvar_where_in_grid (ndom, x, ichoice, fx, fz)
     return (-2);                /* x is outside grid */
   }
 
-  /* 
+  /*
      Now check if is in this cell. If the actual j is larger than the trial j, then
      bilin returns a value of 0 the grid point is in the cell, -1 otherwise
      For cylvar coordinates g tells one whether to go up or down in the grid
@@ -842,34 +842,34 @@ cylvar_where_in_grid (ndom, x, ichoice, fx, fz)
 
 //OLD /***********************************************************
 //OLD                      Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
-//OLD 
+//OLD
 //OLD  	cylvar_get_random_location
-//OLD 
-//OLD  Arguments:		
+//OLD
+//OLD  Arguments:
 //OLD  	int n -- Cell in which random position is to be generated
 //OLD  Returns:
 //OLD  	double x -- the position
-//OLD  Description:	
-//OLD 	
-//OLD 		
+//OLD  Description:
+//OLD
+//OLD
 //OLD  Notes:
 //OLD  	The encapsulation steps should probably put into a separate
 //OLD 	routine since this is used several times
-//OLD 
+//OLD
 //OLD  History:
-//OLD 	05may	ksl	56a -- began modifications starting with same 
+//OLD 	05may	ksl	56a -- began modifications starting with same
 //OLD 			routine in cylindrical
 //OLD 	05jul	ksl	56d -- Updated to work for cylvar coords
 //OLD 	11aug	ksl	70b - Updated to include more than one
 //OLD 			component
-//OLD  
+//OLD
 //OLD **************************************************************/
 
 
 /**********************************************************/
-/** @name      cylvar_get_random_location
+/**
  * @brief      Generate a position at a random location within a specific
  * cell of a domain with modified-cylindrical coordinates
  *
@@ -975,42 +975,42 @@ cylvar_get_random_location (n, x)
 
 //OLD /***********************************************************
 //OLD                      Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
 //OLD  	cylvar_extend_density  extends the density to
 //OLD 	regions just outside the wind regiions so that
 //OLD 	extrapolations of density can be made there
-//OLD 
-//OLD  Arguments:		
+//OLD
+//OLD  Arguments:
 //OLD  Returns:
-//OLD  Description:	
-//OLD 
+//OLD  Description:
+//OLD
 //OLD      We need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
 //OLD      In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
-//OLD      cell that is just inside (or outside) the wind. 
-//OLD 
+//OLD      cell that is just inside (or outside) the wind.
+//OLD
 //OLD      In cylindrical coordinates, the fast dimension is z; grid positions increase up in z, and then out in r.
 //OLD      In spperical polar coordinates, the fast dimension is theta; the grid increases in theta (measured)
 //OLD      from the z axis), and then in r.
-//OLD 
-//OLD 		
+//OLD
+//OLD
 //OLD  Notes:
-//OLD 
-//OLD 	Instead of copying every thing is accomplished using pointers.	
-//OLD 
+//OLD
+//OLD 	Instead of copying every thing is accomplished using pointers.
+//OLD
 //OLD  History:
-//OLD 	05may	ksl	56a -- began modifications starting with same 
+//OLD 	05may	ksl	56a -- began modifications starting with same
 //OLD 			routine in cylindrical
 //OLD 	05jul	ksl	56d -- Actually nothing was done to this
 //OLD 			routine. It should be OK as is.
 //OLD 	06may	ksl	57+ -- Updated to extend by changing the mapping into the plasma structure.
-//OLD  
+//OLD
 //OLD **************************************************************/
 
 
 
 /**********************************************************/
-/** @name      cylvar_extend_density
+/**
  * @brief      extends the density to
  * regions just outside the wind regiions so that
  * extrapolations of density can be made there
@@ -1025,8 +1025,8 @@ cylvar_get_random_location (n, x)
  * @details
  * We need to updated the densities immediately outside the wind so that the density interpolation in resonate will work.
  * In this case all we have done is to copy the densities from the cell which is just in the wind (as one goes outward) to the
- * cell that is just inside (or outside) the wind. 
- * 
+ * cell that is just inside (or outside) the wind.
+ *
  * In cylindrical coordinates, the fast dimension is z; grid positions increase up in z, and then out in r.
  * In spperical polar coordinates, the fast dimension is theta; the grid increases in theta (measured)
  * from the z axis), and then in r.
@@ -1055,7 +1055,7 @@ cylvar_extend_density (ndom, w)
       wind_ij_to_n (ndom, i, j, &n);
       if (w[n].vol == 0)
 
-      {                         //Then this grid point is not in the wind 
+      {                         //Then this grid point is not in the wind
 
         wind_ij_to_n (ndom, i + 1, j, &m);
 
@@ -1086,35 +1086,35 @@ cylvar_extend_density (ndom, w)
 
 //OLD /***********************************************************
 //OLD            Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD Synopsis:  cylvar_coord_fraction() calculates the fractional
 //OLD 	position of a position in the 2d grid in a coordinate
-//OLD 	sytem independent way.  
-//OLD 
-//OLD 
-//OLD 
-//OLD Description:	 
+//OLD 	sytem independent way.
+//OLD
+//OLD
+//OLD
+//OLD Description:
 //OLD 	ichoice=0 --> interpolate on vertices
 //OLD 	ichoice=1 --> interpolate on centers
-//OLD 
+//OLD
 //OLD 	x --> the 3-vector position for which you want
 //OLD 		the fractinal position
 //OLD Returns:
 //OLD 	ii[] --> an array that contains the 1-d element
-//OLD 		numbers that must be summed  
+//OLD 		numbers that must be summed
 //OLD 	frac[] --> the array that contains the fractional
-//OLD 		contribution of the corresponding 
+//OLD 		contribution of the corresponding
 //OLD 		element
 //OLD 	nelem --> the number of elements that must be
 //OLD 		summed, nominally 2 for a spherical grid
 //OLD 		and 4 for a two dimensional grid.  (For
 //OLD 		a 3 d grid it would be 6, but we have not
 //OLD 		implemented this.
-//OLD 
+//OLD
 //OLD 	 1 if  inside the grid
 //OLD 	-2 if outside the grid
 //OLD 	-1 if inside the grid
-//OLD 
+//OLD
 //OLD Notes:
 //OLD 	There are numerous times when one wants the value
 //OLD 	of an interpoalted  variable in the wind.  There
@@ -1123,16 +1123,16 @@ cylvar_extend_density (ndom, w)
 //OLD 	contributions of elements in the array to that
 //OLD 	position.  Then one must sum up the actual variable
 //OLD 	else where
-//OLD 
+//OLD
 //OLD 	If positions are outside the grid, coord_fraction
 //OLD 	attempts to give you the value at the edge of teh
 //OLD 	grid.
-//OLD 
-//OLD 	It's possible that coord_fraction could be used 
+//OLD
+//OLD 	It's possible that coord_fraction could be used
 //OLD 	to interpolate beyond the edge of the grid where
 //OLD 	a variable is defined, although this is not done
 //OLD 	at present!
-//OLD 
+//OLD
 //OLD History:
 //OLD 	04aug	ksl	52a -- Coded as a generic routine
 //OLD 			to get the location in the grid
@@ -1152,42 +1152,42 @@ cylvar_extend_density (ndom, w)
 //OLD 			SHOULD BE REWRITTEN SO THIS IS THE CASE
 //OLD 			FOR ALL COORDINATE SYSTEMS.
 //OLD 	15aug	ksl	Modifications to allow for domains
-//OLD 		       	
-//OLD 
+//OLD
+//OLD
 //OLD **************************************************************/
 
 
 
 
 /**********************************************************/
-/** @name      cylvar_coord_fraction
+/**
  * @brief      calculate the fractional
  * position of a position in the 2d grid in a coordinate
  * for modified cylindrical coordiantes
  *
- * @param [in] int  ndom   The domain number 
+ * @param [in] int  ndom   The domain number
  * @param [in] int  ichoice   if 0, interpolate on veritices; if 1
  * interpolate on the centers of the cells.
  * @param [in] double  x[]   A position
  * @param [out] int  ii[]   The cell numbers bounding the positions
  * @param [out] double  frac[]   the array that contains the fractional
- * contribution of the corresponding 
+ * contribution of the corresponding
  * element
- * @param [out] int *  nelem   The number of cells involved in 
+ * @param [out] int *  nelem   The number of cells involved in
  * interpolation
- * @return   Always returns 1   
+ * @return   Always returns 1
  *
  * ii[] --> an array that contains the 1-d element
- * 		numbers that must be summed  
+ * 		numbers that must be summed
  * 	nelem --> the number of elements that must be
  * 		summed, nominally 2 for a spherical grid
  * 		and 4 for a two dimensional grid.  (For
  * 		a 3 d grid it would be 6, but we have not
  * 		implemented this.
- * 
+ *
  *
  * @details
- * 
+ *
  *
  * ### Notes ###
  * There are numerous times when one wants the value
@@ -1197,12 +1197,12 @@ cylvar_extend_density (ndom, w)
  * contributions of elements in the array to that
  * position.  Then one must sum up the actual variable
  * else where
- * 
+ *
  * If positions are outside the grid, coord_fraction
  * attempts to give you the value at the edge of teh
  * grid.
- * 
- * It's possible that coord_fraction could be used 
+ *
+ * It's possible that coord_fraction could be used
  * to interpolate beyond the edge of the grid where
  * a variable is defined, although this is not done
  * at present!

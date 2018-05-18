@@ -39,7 +39,7 @@
 
 
 /**********************************************************/
-/** @name      get_homologous_params
+/** 
  * @brief      gets input data which is necessary for a homologous expansion law
  *    		v(r)= r / t0
  *
@@ -117,12 +117,12 @@ get_homologous_params (ndom)
 
 
 /**********************************************************/
-/** @name      homologous_velocity
+/** 
  * @brief      Calulate the velocity the wind at a position 
  *
- * @param [in out] int  ndom   The domain number
- * @param [in out] double  x[]   the position (in cartesian coordinates)                   
- * @param [in out] double  v[]   the calculated velocity (in cartesian coordinates)
+ * @param [in, out] int  ndom   The domain number
+ * @param [in, out] double  x[]   the position (in cartesian coordinates)                   
+ * @param [in, out] double  v[]   the calculated velocity (in cartesian coordinates)
  * @return     The amplitude of the velocity is returned
  * 	
  *
@@ -176,7 +176,7 @@ homologous_velocity (ndom, x, v)
 
 
 /**********************************************************/
-/** @name      homologous_rho
+/** 
  * @brief      Calculate the density of a homologous flow at a position
  *
  * @param [in] int  ndom   The domain number

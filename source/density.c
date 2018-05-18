@@ -22,7 +22,7 @@
 
 
 /**********************************************************/
-/** @name      get_ion_density
+/** 
  * @brief      finds the density of a specific ion designated by nion at a position 
  *
  * @param [in] int  ndom   The domain number where the density is to be obtained

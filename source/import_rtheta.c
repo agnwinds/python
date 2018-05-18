@@ -4,7 +4,7 @@
  * @author ksl
  * @date   May, 2018
  *
- * @brief  
+ * @brief
  * These are general routines to read in a model that
  * is in polar or rtheta coordinates
  * grids
@@ -13,13 +13,13 @@
  * velocities could be entered.  One possibility
  * which is the way the zeus_python models work
  * is for the velocity to be given in spherical
- * polar coordinates.  
+ * polar coordinates.
 
  * However, internally, python uses xyz coordianes
  * for velocites (as measured in the xz plane),
  * and that is the model followed, here.  This also
  * makes these routines similar to those used
- * in imported cylindrical models.  
+ * in imported cylindrical models.
 
  * This means that if the user provides a model
  * where velocities are in spherical polar coordinates
@@ -65,42 +65,42 @@ struct
 
 //OLD /***********************************************************
 //OLD     Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD Synopsis:
 //OLD     Read the an arbitray wind model in polar coordinates
-//OLD 
-//OLD 
-//OLD Arguments:		
-//OLD 
+//OLD
+//OLD
+//OLD Arguments:
+//OLD
 //OLD Returns:
-//OLD  
-//OLD Description:	
-//OLD 
+//OLD
+//OLD Description:
+//OLD
 //OLD Notes:
-//OLD 
+//OLD
 //OLD     The basic data we need to read in are
-//OLD 
+//OLD
 //OLD //OLD    r theta v_r v_theta v_phi  rho (and optionally T)
 //OLD     r theta v_x v_y v_z  rho (and optionally T)
-//OLD 
+//OLD
 //OLD     We assume that all of the variables are centered, that is
 //OLD     we are not assuming that we are giving rho at the center of
-//OLD     a cell, but that r and v_r are at the edges of a cell. 
+//OLD     a cell, but that r and v_r are at the edges of a cell.
 //OLD     This is someghing that would presumable be easy to change
-//OLD 
-//OLD 
+//OLD
+//OLD
 //OLD History:
-//OLD 	17nov   ksl Began coding                           
+//OLD 	17nov   ksl Began coding
 //OLD **************************************************************/
 
 
 /**********************************************************/
-/** @name      import_rtheta
+/**
  * @brief      Read the an arbitray wind model in polar coordinates
  *
  * @param [in] int  ndom   The domain for the imported model
  * @param [in] char *  filename   The file containing the model to import
- * @return   Always returns 0  
+ * @return   Always returns 0
  *
  * @details
  * This routine reads the data into a set of arrays.  It's
@@ -108,20 +108,20 @@ struct
  *
  * ### Notes ###
  * The basic data we need to read in are
- * 
+ *
  * r theta v_x v_y v_z  rho (and optionally T)
  *
- * where 
+ * where
  *
  * * r is the radial coordianate
  * * theta is the angular coordinate measured from the z axis
- * * v_x, v_y, and v_z is the velocity in cartesian coordinates 
+ * * v_x, v_y, and v_z is the velocity in cartesian coordinates
  * as mearued in the x,z plane
  * * rho is the density in cgs units
- * 
+ *
  * We assume that all of the variables are centered, that is
  * we are not assuming that we are giving rho at the center of
- * a cell, but that r and v_r are at the edges of a cell. 
+ * a cell, but that r and v_r are at the edges of a cell.
  * This is somehing that would presumable be easy to change
  *
  **********************************************************/
@@ -233,7 +233,7 @@ import_rtheta (ndom, filename)
 
 
 /**********************************************************/
-/** @name      rtheta_make_grid_import
+/**
  * @brief      Use the imported data to initialize various
  * portions of the Wind and Domain structures
  *
@@ -242,12 +242,12 @@ import_rtheta (ndom, filename)
  * @return     Always returns 0
  *
  * @details
- * This routine initializes the portions of the wind structure 
+ * This routine initializes the portions of the wind structure
  * using the imported model, specirically those portions having
  * to do with positions, and velocities.
  *
  * ### Notes ###
- * The routine also initials wind_x and wind_z in the domain 
+ * The routine also initials wind_x and wind_z in the domain
  * structure, ans sets up wind_cones and other boundaries
  * intended to bound the wind.
  *
@@ -297,8 +297,8 @@ rtheta_make_grid_import (w, ndom)
       /* JM 1711 -- copy across the inwind variable to the wind pointer */
       w[nn].inwind = xx_rtheta.inwind[n];
 
-      /* JM 1711 -- you're either in, or you're out. No part in wind cells allowed! 
-       *          there is a question here about which choice (of not in wind or all in 
+      /* JM 1711 -- you're either in, or you're out. No part in wind cells allowed!
+       *          there is a question here about which choice (of not in wind or all in
        *                   wind) is most appropriate */
       if (w[nn].inwind == W_PART_INWIND)
 	w[nn].inwind = W_NOT_INWIND;
@@ -381,19 +381,19 @@ rtheta_make_grid_import (w, ndom)
  * used for setting up the grid
  *
  * The code here is identical to that in velocity_cylindrical, which suggests
- * that it could be used for any regular 2d grid 
+ * that it could be used for any regular 2d grid
  */
 
 
 /**********************************************************/
-/** @name      velocity_rtheta
+/**
  * @brief      The velcity at any position in an imported
  * rtheat model
  *
  * @param [in] int  ndom   The domain for the imported model
  * @param [in] double *  x   A position (3 vector)
  * @param [out] double *  v   The calcuated velocity
- * @return     The speed at x  
+ * @return     The speed at x
  *
  * @details
  * This routine interpolates on the values read in for the
@@ -401,7 +401,7 @@ rtheta_make_grid_import (w, ndom)
  *
  *
  * ### Notes ###
- *  In practice this routine is only used to initallize v in 
+ *  In practice this routine is only used to initallize v in
  *  wind structure.  This is consistent with the way velocities
  *  are treated throughout Python.
  *
@@ -445,7 +445,7 @@ velocity_rtheta (ndom, x, v)
 
 
 /**********************************************************/
-/** @name      rho_rtheta
+/**
  * @brief      Get the density for an imported rtheta model at x
  *
  * @param [in] int  ndom   The domain for the imported model
@@ -453,7 +453,7 @@ velocity_rtheta (ndom, x, v)
  * @return     The density in cgs units is returned
  *
  * @details
- * This routine finds rho from the imported model 
+ * This routine finds rho from the imported model
  * at a position x.  The routine does not interpolate rho, but
  * simply locates the cell associated with x
  *

@@ -1,6 +1,6 @@
 
 /***********************************************************/
-/** @file  new_wind2d.c
+/** @file  wind2d.c
  * @author ksl
  * @date   May, 2018
  *
@@ -21,7 +21,7 @@
 
 
 /**********************************************************/
-/** @name      define_wind
+/**
  * @brief      initializes the structures which characterize the wind, including
  * wmain and plasmamain.
  *
@@ -559,7 +559,7 @@ int wig_n;
 double wig_x, wig_y, wig_z;
 
 /**********************************************************/
-/** @name      where_in_grid
+/**
  * @brief      locates the element in wmain associated with a postion
  *
  * @param [in] int  ndom   The domain number for the search
@@ -700,7 +700,7 @@ int ierr_vwind = 0;
 
 
 /**********************************************************/
-/** @name      vwind_xyz
+/**
  * @brief      finds the velocity vector v for the wind in cartesian
  * 	coordinates at the position of the photon p.
  *
@@ -813,7 +813,7 @@ vwind_xyz (ndom, p, v)
 
 
 /**********************************************************/
-/** @name      wind_div_v
+/**
  * @brief      calculates the divergence of the velocity at the center of all the grid cells.
  *
  * @param [in,out] WindPtr  w   The entire wind domain
@@ -919,11 +919,11 @@ wind_div_v (w)
 
 
 /**********************************************************/
-/** @name      rho
+/**
  * @brief      find the density of the wind at x
  *
- * @param [in out] WindPtr  w   The entire wind
- * @param [in out] double  x[]   A position
+ * @param [in, out] WindPtr  w   The entire wind
+ * @param [in, out] double  x[]   A position
  * @return
  * The density at x, if the postion is in the active region of the wind.
  * If the postion is not in the active region of one of the domains, then
@@ -984,7 +984,7 @@ rho (w, x)
 
 
 /**********************************************************/
-/** @name      mdot_wind
+/**
  * @brief      The routine calculates and then logs the mass loss rate in two ways
  *
  * @param [in] WindPtr  w   The entire wind domain
@@ -1078,7 +1078,7 @@ mdot_wind (w, z, rmax)
 
 
 /**********************************************************/
-/** @name      get_random_location
+/**
  * @brief      is simply will produce a postion at a random place in
  * 	a cell n
  *
@@ -1132,7 +1132,7 @@ get_random_location (n, x)
 
 
 /**********************************************************/
-/** @name      zero_scatters
+/**
  * @brief      zero out the portion of plasmamain that records
  * the number of scatters in each cell
  *
@@ -1220,7 +1220,7 @@ zero_scatters ()
 
 
 /**********************************************************/
-/** @name      check_corners_inwind
+/**
  * @brief      The routine basically just calls where_in_wind for each of the 4 corners
  * 	of the cell.
  *
@@ -1281,7 +1281,7 @@ check_corners_inwind (n)
 
 
 /**********************************************************/
-/** @name      check_grid
+/**
  * @brief check whether some quantities in a grid cell are
  * changing so rapidly in the grid cell that one might
  * wish to have smaller grid cells

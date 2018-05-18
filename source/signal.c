@@ -46,7 +46,7 @@
 
 
 /**********************************************************/
-/** @name      xsignal
+/** 
  * @brief      xsignal generates a single line message to a file names root.sig
  *
  * @param [in] char *  root   root name of the file to wirte to
@@ -144,10 +144,10 @@ xsignal (char *root, char *format, ...)
 
 
 /**********************************************************/
-/** @name      xsignal_rm
+/** 
  * @brief      Remove the old signal file so that one can begin again
  *
- * @param [in out] char *  root   Root name of the .sig file
+ * @param [in, out] char *  root   Root name of the .sig file
  * @return     Always returns 0
  *
  * @details
@@ -204,11 +204,11 @@ double max_time = -1.0;
 
 
 /**********************************************************/
-/** @name      set_max_time
+/** 
  * @brief      Set the maximum time the program should run
  *
- * @param [in out] char *  root   Root name of the .sig file where the max time is recorded
- * @param [in out] double  t   The maximum time one wants to proposal to run
+ * @param [in, out] char *  root   Root name of the .sig file where the max time is recorded
+ * @param [in, out] double  t   The maximum time one wants to proposal to run
  * @return     Always returns 0
  *
  * @details
@@ -232,7 +232,7 @@ set_max_time (char *root, double t)
 
 
 /**********************************************************/
-/** @name      check_time
+/** 
  * @brief      check whether the elapsed time is greater than the max_time
  *   and terminate the program if that is the case.
  *

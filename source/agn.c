@@ -22,7 +22,7 @@
 #include "log.h"
 
 /**********************************************************/
-/** @name      agn_init
+/** 
  * @brief      Calculates the total luminosity of an AGN type source
  *
  * @param [in] double  r   radius of emitting object
@@ -108,7 +108,7 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
 /* This routine returns the specific luminosity, that is the luminosity within the frequency interval */
 
 /**********************************************************/
-/** @name      emittance_pow
+/** 
  * @brief      The luminosity of a power law over a frerquency range
  *
  * @param [in] double  freqmin   lower frequency bound
@@ -195,13 +195,13 @@ emittance_pow (freqmin, freqmax, alpha)
 
 
 /**********************************************************/
-/** @name      emittance_bpow
+/** 
  * @brief      Works out the luminosity of a broken power law
  * 
- * @param [in out] double  freqmin   min frequency that we are generating photons over
- * @param [in out] double  freqmax   max frequency that we are generating photons over
- * @param [in out] double  lum   2-10kev luminosity
- * @param [in out] double  alpha   is the 2-10kev slope.
+ * @param [in, out] double  freqmin   min frequency that we are generating photons over
+ * @param [in, out] double  freqmax   max frequency that we are generating photons over
+ * @param [in, out] double  lum   2-10kev luminosity
+ * @param [in, out] double  alpha   is the 2-10kev slope.
  * @return    emit  The luminosity of the whole power law.
  *
  * @details
@@ -346,18 +346,18 @@ emittance_bpow (freqmin, freqmax, lum, alpha)
 
 
 /**********************************************************/
-/** @name      photo_gen_agn
+/** 
  * @brief      Generate a photon from an AGN object
  *
- * @param [in out] PhotPtr  p   pointer to the photon array
- * @param [in out] double  r   radius of the central source
- * @param [in out] double  alpha   spectral index of the PL sourece - also used to communicate temperature if a BB or model is used.
- * @param [in out] double  weight   the weight of each photon to be made
- * @param [in out] double  f1   lower frequency bound
- * @param [in out] double  f2   upper frequency nound
- * @param [in out] int  spectype   the type of SED
- * @param [in out] int  istart   the number of the first photon to be made - index into the p array
- * @param [in out] int  nphot   the number of photons to be made
+ * @param [in, out] PhotPtr  p   pointer to the photon array
+ * @param [in, out] double  r   radius of the central source
+ * @param [in, out] double  alpha   spectral index of the PL sourece - also used to communicate temperature if a BB or model is used.
+ * @param [in, out] double  weight   the weight of each photon to be made
+ * @param [in, out] double  f1   lower frequency bound
+ * @param [in, out] double  f2   upper frequency nound
+ * @param [in, out] int  spectype   the type of SED
+ * @param [in, out] int  istart   the number of the first photon to be made - index into the p array
+ * @param [in, out] int  nphot   the number of photons to be made
  * @return     0 (if successful or unscuccessful)
  *
  * @details

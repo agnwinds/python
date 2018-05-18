@@ -11,6 +11,9 @@ Radiative transfer and ionisation code
 --------------------------------------
 TODO: Describe python, link to papers as `Link name <http://www.python.org/>`_.
 
+============
+Blah blah blah
+=======
 Input files
 -----------
 *python* uses a unique ``.pf`` input file format. An input file consists of a system type,

@@ -8,7 +8,7 @@
  *
  * The routines here are all that are needed to define a KWD-type
  * wind within Python.  Inputs are gathered, and the any values
- * such as the nomalization needed to convert a global to a local 
+ * such as the nomalization needed to convert a global to a local
  * mass loss rate.  Functions are provided to calculated the density
  * and velocity of the wind at any point.
  *
@@ -31,14 +31,14 @@
 #include "python.h"
 
 
-/* This is a variable required to do the integration of local mdot in KWD */
-double kn_lambda;               //kn_lambda required for the intgration
+/// This is a variable required to do the integration of local mdot in KWD
+double kn_lambda;
 
 
 
 /**********************************************************/
-/** @name      get_knigge_wind_params
- * @brief      get the input data that is necessary to define KWD-type model    
+/**
+ * @brief      get the input data that is necessary to define KWD-type model
  * 	description of the wind
  *
  * @param [in] int  ndom   The domain number
@@ -76,10 +76,10 @@ get_knigge_wind_params (ndom)
   zdom[ndom].kn_alpha = 1.5;    /* Accleration scale exponent for wind */
   zdom[ndom].kn_v_infinity = 3; /* Final speed of wind in units of escape velocity */
   zdom[ndom].kn_lambda = 0.0;   /* Mass loss rate exponent */
-  zdom[ndom].kn_dratio = dmin = 0.5 * sqrt (geo.diskrad / geo.rstar);   /* Center of collimation in units of the WD 
-                                                                           radius. The value set here is for the minimum collimation, see KWD95.  The coefficient 0.5 is 
+  zdom[ndom].kn_dratio = dmin = 0.5 * sqrt (geo.diskrad / geo.rstar);   /* Center of collimation in units of the WD
+                                                                           radius. The value set here is for the minimum collimation, see KWD95.  The coefficient 0.5 is
                                                                            approximate */
-  zdom[ndom].kn_v_zero = 1.0;   /* Parameter which 
+  zdom[ndom].kn_v_zero = 1.0;   /* Parameter which
                                    can use to muliply the initial velocity of wind so that it
                                    is greater or less than the sound speed. This is not part of the standard KWD model*/
   zdom[ndom].wind_rho_min = 1;  /* Innner and outer edges of the wind in stellar radii. These
@@ -89,8 +89,8 @@ get_knigge_wind_params (ndom)
 
 
 /* There is confusion in various papers concerning whether to use d or d/dmin.  In KWD95, d/dmin was
-used but in later papers, e.g KD97 d in WD radii was used.   is more natural and is used here.   
-but one should remember that this differs from KWD95.  
+used but in later papers, e.g KD97 d in WD radii was used.   is more natural and is used here.
+but one should remember that this differs from KWD95.
 
 To repeat, kn_dratio is the distance to the focus point in stellar radii!
 
@@ -119,12 +119,12 @@ To repeat, kn_dratio is the distance to the focus point in stellar radii!
   zdom[ndom].wind_rho_max *= geo.rstar;
   zdom[ndom].wind_thetamin = atan (1. / zdom[ndom].kn_dratio);
 
-/* Somewhat paradoxically diskrad is in cm, while dn_ratio which is really d in KWD95 is 
+/* Somewhat paradoxically diskrad is in cm, while dn_ratio which is really d in KWD95 is
 in units of WD radii */
 
   zdom[ndom].wind_thetamax = atan (geo.diskrad / (zdom[ndom].kn_dratio * geo.rstar));
 
-  /* Next lines added by SS Sep 04. Changed the wind shape so that the boundary touches the outer 
+  /* Next lines added by SS Sep 04. Changed the wind shape so that the boundary touches the outer
      corner of the disk rather than the intersection of the disk edge with the xy-plane. */
 
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
@@ -134,12 +134,12 @@ in units of WD radii */
 
 
   zdom[ndom].rmin = zdom[ndom].wind_rho_min;
-  
-  /* The change in the boundary of the wind (as corner of disk -- see above) 
+
+  /* The change in the boundary of the wind (as corner of disk -- see above)
      means that wind_rho_max nees to be redefined so that it is used correctly
      to compute the boundary of the wind elsewhere. */
 
-  // XXX Next lines supercede definitions above and look wrong 
+  // XXX Next lines supercede definitions above and look wrong
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
   {
     zdom[ndom].wind_rho_max = geo.diskrad - (zdisk (geo.diskrad) * tan (zdom[ndom].wind_thetamax));
@@ -178,15 +178,15 @@ in units of WD radii */
 
 
 /**********************************************************/
-/** @name      kn_velocity
- * @brief      Calculate the v at a postion in a KWD wind 
+/**
+ * @brief      Calculate the v at a postion in a KWD wind
  *
  * @param [in] int  ndom   the domain for the KN wind
- * @param [in] double  x[]   a position in cartesiatn coordiantes 
+ * @param [in] double  x[]   a position in cartesiatn coordiantes
  * @param [out] double  v[]   the calculated velocity at that position in cartesian coordinates
  * @return     The amplitude of the velocity is returned
- * 	
- * This implements equations 17 & 18 of KWD95.  
+ *
+ * This implements equations 17 & 18 of KWD95.
  *
  *
  *
@@ -194,16 +194,16 @@ in units of WD radii */
  *
  * For a contant poloidal velocity along a stream line, kn_alpha should
  * be set to 0
- * 
+ *
  * There is a largely hidden option that allows one to incoporated a SV velocity
  * law into a KWD model.  This is accomplished by settting 	v_inf<0. The code should
- * be examined for details. 
+ * be examined for details.
  *
  * At the inner edge of the accretion disk the temperature of the disk
  * goes to zero, and so in principle the thermal velocity goes to zero.
  * The kfudge below keeps this from happening. What did Christian actually
- * do here?? 
- * 
+ * do here??
+ *
  *
  **********************************************************/
 
@@ -260,7 +260,7 @@ kn_velocity (ndom, x, v)
   }
 
 
-/* The if statement, below  limits the poloidal component of the velocity to be no more than 
+/* The if statement, below  limits the poloidal component of the velocity to be no more than
 the poloidal velocity at the inner edge of the wind. It is there for continuity reasons */
 
   if (rzero < geo.rstar)
@@ -307,14 +307,14 @@ velocity law if kn_v_infinity is less than 0 */
   if (x[2] < 0)
     v[2] *= (-1);
 
-/* 
+/*
 
 At this point we have calculated the velocity in the xz plane, which
-is identical to the statement that we have calculated it in cylindrical coordinates.  
-We now project back to xyz coordinates if necessary.  
+is identical to the statement that we have calculated it in cylindrical coordinates.
+We now project back to xyz coordinates if necessary.
 
-In practice, the current version of python currently should never need to carry out  
-this projection.  However, it is needed, if we were to move to full 3d calculation and for certain 
+In practice, the current version of python currently should never need to carry out
+this projection.  However, it is needed, if we were to move to full 3d calculation and for certain
 test programs.
 
 */
@@ -330,7 +330,7 @@ test programs.
 
 
 /**********************************************************/
-/** @name      kn_rho
+/**
  * @brief      double (x) calculates the density of an kn_wind at a position x
  *
  * @param [in] int  ndom   The domain where kn params are stored
@@ -398,11 +398,11 @@ kn_rho (ndom, x)
 
 
 /**********************************************************/
-/** @name      kn_vzero
+/**
  * @brief      Calculate the sound speed (launch speed) of the wind at r
  *
  * @param [in] double  r   The position (radius) for caculating the sound speed
- * @return     The sound speed 
+ * @return     The sound speed
  *
  * For KWD, the launch speed is the sound velocity
  *
@@ -410,7 +410,7 @@ kn_rho (ndom, x)
  *
  * Prior to calling this routine the properties of the disk must have been entered
  *
- * This routine assumes a standard Shakura-Sunyaev disk.  
+ * This routine assumes a standard Shakura-Sunyaev disk.
  *
  * In our implementation of the KWD model, the velocity at the footpoint
  * can be a mulitiple of the sound speed, but that correction is applied in kn_velocity
@@ -437,14 +437,14 @@ kn_vzero (r)
 
 
 /**********************************************************/
-/** @name      kn_wind_mdot_integral
- * @brief      the integrand of KWD model 
+/**
+ * @brief      the integrand of KWD model
  * 	for mdot as a function of radius
  *
  * @param [in] double  r   A position (radius) in the disk
  * @return     The value of the integrand
  *
- * The mass loss rate is proportional to T(r)**(4*kn_lambda) 
+ * The mass loss rate is proportional to T(r)**(4*kn_lambda)
  * as can be seen from KWD95 equation 10.  This functikon
  * has to be integrated over radius to normalize the local
  * mdot to the integrated value.
@@ -453,7 +453,7 @@ kn_vzero (r)
  *
  * The integration is carrid out in  get_knigge_wind_params
  *
- * There is an extra factor of 2 because the wind emerges 
+ * There is an extra factor of 2 because the wind emerges
  *        from both sides of the disk
  *
  **********************************************************/
@@ -479,7 +479,7 @@ kn_wind_mdot_integral (r)
 
 
 /**********************************************************/
-/** @name      kn_rho_zero
+/**
  * @brief      Calculate rho at the base of the wind
  *
  * @param [in] int  ndom   The domain number

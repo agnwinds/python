@@ -1,6 +1,6 @@
 
 /***********************************************************/
-/** @file  new_windsave2table_sub.c
+/** @file  windsave2table_sub.c
  * @author ksl
  * @date   April, 2018
  *
@@ -27,21 +27,21 @@
 
 
 /**********************************************************/
-/** @name      do_windsave2table
+/**
  * @brief      The main routine associated with windsave2table, this routine calls
- * various other routines which write individual files    
+ * various other routines which write individual files
  *
- * @param [in] char *  root   The rootname of the windsave file 
+ * @param [in] char *  root   The rootname of the windsave file
  * @return     Always returns 0
  *
  * @details
  *
- * 
+ *
  *
  * ### Notes ###
  *
  * The routine cycles through the various domains and calles subroutines
- * that write the individual files for each domain.  
+ * that write the individual files for each domain.
  *
  *
  *
@@ -80,57 +80,57 @@ do_windsave2table(root)
 
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD Synopsis:
-//OLD 
+//OLD
 //OLD 	create_master_table writes a selected variables of in the windsaave
 //OLD 	file to an astropy table
-//OLD 
+//OLD
 //OLD 	It is intended to be easily modifible.
-//OLD 
-//OLD Arguments:		
-//OLD 
+//OLD
+//OLD Arguments:
+//OLD
 //OLD 	rootname of the file that will be written out
-//OLD 
-//OLD 
+//OLD
+//OLD
 //OLD Returns:
-//OLD  
-//OLD Description:	
-//OLD 
-//OLD 	The routine reads data directly from wmain, and then calls 
+//OLD
+//OLD Description:
+//OLD
+//OLD 	The routine reads data directly from wmain, and then calls
 //OLD 	get_one or get_ion multiple times to read info from the Plasma
-//OLD 	structure.  
-//OLD 	
+//OLD 	structure.
+//OLD
 //OLD 	It then writes the data to an  astropy file
 //OLD Notes:
-//OLD 
+//OLD
 //OLD 	To add a variable one just needs to define the column_name
 //OLD 	and send the appropriate call to either get_one or get_ion.
-//OLD 
+//OLD
 //OLD 	There is some duplicated code in the routine that pertains
 //OLD 	to whether one is dealing with a spherecial or a 2d coordinate
 //OLD 	system.  It should be possible to delete this
-//OLD 
-//OLD 
-//OLD 
+//OLD
+//OLD
+//OLD
 //OLD History:
 //OLD 	150428	ksl	Adpated from routines in py_wind.c
 //OLD 	150501	ksl	Cleaned this routine up, and added a few more variables
-//OLD 
+//OLD
 //OLD **************************************************************/
 
 
 /**********************************************************/
-/** @name      create_master_table
+/**
  * @brief      writes a specific  variables of a windsaave
- * which are intended to be of general interest to 
+ * which are intended to be of general interest to
  * file which has the format of an astropy table
- * 
+ *
  * 	It is intended to be easily modifible.
  *
  * @param [in] int  ndom   A domain number
  * @param [in] char  rootname   The rootname of the master file
- * @return   Always returns 0  
+ * @return   Always returns 0
  *
  * @details
  *
@@ -138,17 +138,17 @@ do_windsave2table(root)
  * cell in the wind, such as the electron density, the density,
  * the ionization parameter, and the radiative and electron temperature
  *
- * The routine takes data directly from wmain, and then calls 
+ * The routine takes data directly from wmain, and then calls
  * get_one or get_ion multiple times to fet info from the Plasma
- * structure.  
- * 	
+ * structure.
+ *
  * It then writes the data to an ascii file which can be read as
  * an  astropy table
  *
  * ### Notes ###
  * To add a variable one just needs to define the column_name
  * and send the appropriate call to either get_one or get_ion.
- * 
+ *
  * There is some duplicated code in the routine that pertains
  * to whether one is dealing with a spherecial or a 2d coordinate
  * system.  It should be possible to delete this
@@ -325,7 +325,7 @@ create_master_table (ndom, rootname)
       fprintf (fptr, "%s\n", one_line);
     }
   }
-  
+
   else if (zdom[ndom].coord_type == RTHETA )
   {
 
@@ -351,7 +351,7 @@ create_master_table (ndom, rootname)
       wind_n_to_ij (ndom, nstart + i, &ii, &jj);
       sprintf (start,
                "%8.2e %8.2e %8.2e %9.2e %8.2e %8.2e %8.2e %8.2e %4d %4d %6d %8.0f %8.2e %8.2e %8.2e ",
-               wmain[nstart+i].r, wmain[nstart+i].theta,wmain[nstart + i].rcen, wmain[nstart + i].thetacen, 
+               wmain[nstart+i].r, wmain[nstart+i].theta,wmain[nstart + i].rcen, wmain[nstart + i].thetacen,
                wmain[nstart+i].x[0], wmain[nstart+i].x[2],wmain[nstart + i].xcen[0], wmain[nstart + i].xcen[2], ii,
                jj, wmain[nstart + i].inwind, converge[i], wmain[nstart + i].v[0], wmain[nstart + i].v[1], wmain[nstart + i].v[2]);
       strcpy (one_line, start);
@@ -369,7 +369,7 @@ create_master_table (ndom, rootname)
   else {
       printf("Error: Cannot print out files for coordinate system type %d\n",zdom[ndom].coord_type);
   }
-  
+
 
   return (0);
 }
@@ -379,63 +379,63 @@ create_master_table (ndom, rootname)
 
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD Synopsis:
-//OLD 
+//OLD
 //OLD 	create_heat_table writes a selected variables of in the windsave
 //OLD 	file to an astropy table
-//OLD 
+//OLD
 //OLD 	It is intended to be easily modifible.
-//OLD 
-//OLD Arguments:		
-//OLD 
+//OLD
+//OLD Arguments:
+//OLD
 //OLD 	rootname of the file that will be written out
-//OLD 
-//OLD 
+//OLD
+//OLD
 //OLD Returns:
-//OLD  
-//OLD Description:	
-//OLD 
-//OLD 	The routine reads data directly from wmain, and then calls 
+//OLD
+//OLD Description:
+//OLD
+//OLD 	The routine reads data directly from wmain, and then calls
 //OLD 	get_one or get_ion multiple times to read info from the Plasma
-//OLD 	structure.  
-//OLD 	
+//OLD 	structure.
+//OLD
 //OLD 	It then writes the data to an  astropy file
 //OLD Notes:
-//OLD 
+//OLD
 //OLD 	To add a variable one just needs to define the column_name
 //OLD 	and send the appropriate call to either get_one or get_ion.
-//OLD 
+//OLD
 //OLD 	There is some duplicated code in the routine that pertains
 //OLD 	to whether one is dealing with a spherecial or a 2d coordinate
 //OLD 	system.  It should be possible to delete this
-//OLD 
-//OLD 
-//OLD 
+//OLD
+//OLD
+//OLD
 //OLD History:
 //OLD 	150428	ksl	Adpated from routines in py_wind.c
 //OLD 	150501	ksl	Cleaned this routine up, and added a few more variables
-//OLD 
+//OLD
 //OLD **************************************************************/
 
 
 /**********************************************************/
-/** @name      create_heat_table
+/**
  * @brief      writes a selected variables related to heating and cooling
  * processes to an ascii file which can be read as an astropy table
- * 
+ *
  *
  * @param [in] int  ndom   The domain of interest
- * @param [in out] char  rootname[]   The rootname of the windsave file 
+ * @param [in, out] char  rootname[]   The rootname of the windsave file
  * @return     Always returns 0
  *
  * @details
  *
  * ### Notes ###
- * 
+ *
  * To add a variable one just needs to define the column_name
  * and send the appropriate call to either get_one or get_ion.
- * 
+ *
  *
  **********************************************************/
 
@@ -620,39 +620,39 @@ create_heat_table (ndom, rootname)
 
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
-//OLD 
+//OLD
 //OLD  create_ion_table makes an astropy table containing the relative abundances
 //OLD  of a given element as a function of the position in the grid
-//OLD 
-//OLD Arguments:		
-//OLD 
+//OLD
+//OLD Arguments:
+//OLD
 //OLD 	ndom		The domain number
 //OLD 	rootname	rootname for the output table
 //OLD 	iz		element
-//OLD 
-//OLD 
-//OLD 
+//OLD
+//OLD
+//OLD
 //OLD Returns:
-//OLD 
+//OLD
 //OLD 	0 on completion
-//OLD  
-//OLD Description:	
-//OLD 	
-//OLD 	
+//OLD
+//OLD Description:
+//OLD
+//OLD
 //OLD Notes:
-//OLD 
-//OLD 
-//OLD 
+//OLD
+//OLD
+//OLD
 //OLD History:
 //OLD 	150428	ksl	Adpated from routines in py_wind.c
-//OLD 
+//OLD
 //OLD **************************************************************/
 
 
 /**********************************************************/
-/** @name      create_ion_table
+/**
  * @brief      makes an astropy table containing the relative abundances
  *  of a given element as a function of the position in the grid
  *
@@ -674,7 +674,7 @@ int
 create_ion_table (ndom, rootname, iz)
      int ndom;
      char rootname[];
-     int iz;                    // Where z is the element 
+     int iz;                    // Where z is the element
 {
   char filename[132];
   double *get_one ();
@@ -813,47 +813,47 @@ create_ion_table (ndom, rootname, iz)
 
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD Synopsis:
-//OLD 
+//OLD
 //OLD 	Get get density, etc for one particular ion
-//OLD 
-//OLD Arguments:		
-//OLD 
+//OLD
+//OLD Arguments:
+//OLD
 //OLD 	ndom	the domain number
 //OLD 	element	the element number
 //OLD 	istate	the ionization state
 //OLD 	iswitch a swithc controlling exactly what is returned for that ion
-//OLD 
-//OLD 
+//OLD
+//OLD
 //OLD Returns:
-//OLD 
+//OLD
 //OLD 	Normally returns an array with values associated with what is requested
 //OLD    	This will return an array with all zeros if there is no such ion
-//OLD  
-//OLD Description:	
-//OLD 	
-//OLD 
-//OLD 	
+//OLD
+//OLD Description:
+//OLD
+//OLD
+//OLD
 //OLD Notes:
-//OLD 
+//OLD
 //OLD 	Although a header lines is created, nothing appears to be done with this
 //OLD 	It's up to the calling routine to control the name.  At present it
 //OLD 	is not obvious this is happening.
 //OLD History:
 //OLD 	150428	ksl	Adpated from routines in py_wind.c
-//OLD 
+//OLD
 //OLD **************************************************************/
 
 
 /**********************************************************/
-/** @name      get_ion
+/**
  * @brief      Get get density, etc for one particular ion
  *
- * @param [in out] int  ndom   the domain number
- * @param [in out] int  element   the element number
- * @param [in out] int  istate   the ionization state
- * @param [in out] int  iswitch   a switch controlling exactly what is returned for that ion
+ * @param [in, out] int  ndom   the domain number
+ * @param [in, out] int  element   the element number
+ * @param [in, out] int  istate   the ionization state
+ * @param [in, out] int  iswitch   a switch controlling exactly what is returned for that ion
  * @return     Normally returns an array with values associated with what is requested
  *    	This will return an array with all zeros if there is no such ion
  *
@@ -863,7 +863,7 @@ create_ion_table (ndom, rootname, iz)
  *
  **********************************************************/
 
-double 
+double
 *get_ion (ndom, element, istate, iswitch)
      int ndom, element, istate, iswitch;
 {
@@ -940,37 +940,37 @@ double
 }
 
 //OLD /**************************************************************************
-//OLD 
-//OLD 
-//OLD   Synopsis:  
+//OLD
+//OLD
+//OLD   Synopsis:
 //OLD 	Get a simple variable from the PlasmaPtr array
-//OLD 
-//OLD   Description:	
-//OLD 
-//OLD   Arguments:  
-//OLD 
+//OLD
+//OLD   Description:
+//OLD
+//OLD   Arguments:
+//OLD
 //OLD   Returns:
-//OLD 
+//OLD
 //OLD   	The values in the plasma pointer for this variable. A double
 //OLD 	will be returned even if the PlasmaPtr varible is an integer
-//OLD 
+//OLD
 //OLD   Notes:
 //OLD   	Getting any simple variable from the plama structure should
 //OLD 	follow this template.
-//OLD 
+//OLD
 //OLD   History:
 //OLD   	150429 ksl Adapted from te_summary in py_wind
 //OLD 	1508	ksl	Updated for domains
-//OLD 
+//OLD
 //OLD  ************************************************************************/
 
 
 /**********************************************************/
-/** @name      get_one
+/**
  * @brief      Get a simple variable from the PlasmaPtr array
  *
- * @param [in out] int  ndom   The domain in question
- * @param [in out] char  variable_name[]   The name of the variable
+ * @param [in, out] int  ndom   The domain in question
+ * @param [in, out] char  variable_name[]   The name of the variable
  * @return     The values in the plasma pointer for this variable. A double
  * 	will be returned even if the PlasmaPtr varible is an integer
  *
@@ -980,7 +980,7 @@ double
  * A simple variable is a variable that is just a number, not an array
  *
  * The routine performes a simple tranlation of the character name
- * to a variable in the PlasmaPtr.  
+ * to a variable in the PlasmaPtr.
  *
  * ### Notes ###
  * Only selected variables are returned, but new variables are easy
@@ -988,7 +988,7 @@ double
  *
  **********************************************************/
 
-double 
+double
 *get_one (ndom, variable_name)
      int ndom;
      char variable_name[];

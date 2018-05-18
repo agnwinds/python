@@ -23,7 +23,7 @@
 
 
 /**********************************************************/
-/** @name      bilin
+/** 
  * @brief      calculates the fractional position in the coordinate
  *  	grid of a 2d vector x.
  *
@@ -210,13 +210,13 @@ bilin (x, x00, x01, x10, x11, f, g)
 
 
 /**********************************************************/
-/** @name      xquadratic
+/** 
  * @brief      solves a quadratic of the form 0=ax**2+bx+c
  *
- * @param [in out] double  a   
- * @param [in out] double  b   
- * @param [in out] double  c   
- * @param [in out] double  r[] roots of the quadratic equation   
+ * @param [in, out] double  a   
+ * @param [in, out] double  b   
+ * @param [in, out] double  c   
+ * @param [in, out] double  r[] roots of the quadratic equation   
  * @return    
  * * -1 -> both roots are imaginary
  * * -2 -> both roots are negative or 0

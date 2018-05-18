@@ -22,7 +22,7 @@
 
 
 /**********************************************************/
-/** @name       get_domain_params
+/** 
  * @brief       Get inputs that describe a particular component of the wind
  *
  * @param [in] ndom  The number (begining with 0) of this particular domain
@@ -157,7 +157,7 @@ get_domain_params (ndom)
 
 
 /**********************************************************/
-/** @name       get_wind_paraams  
+/**   
  * @brief       Get detailed particular component of the wind
  *
  * @param [in] ndom  The number (begining with 0) of this particular domain
@@ -286,7 +286,7 @@ get_wind_params (ndom)
 
 
 /**********************************************************/
-/** @name       get_line_transfer_mode
+/** 
  * @brief       Get the line transfer mode for the wind
  *
  * @param [in] None
@@ -421,7 +421,7 @@ get_line_transfer_mode ()
 
 
 /**********************************************************/
-/** @name      setup_windcone
+/** 
  * @brief      sets up the windcones for each domain
  *
  * @return     Always returns 0

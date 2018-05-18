@@ -4,7 +4,7 @@
  * @author ksl
  * @date   March, 2018
  *
- * @brief  Routines to implement anisotropic scattering in 
+ * @brief  Routines to implement anisotropic scattering in
  * the wind
  *
  *
@@ -12,10 +12,10 @@
  * direction when a photon scatters in thie wind.  These
  * include 
  *
- * * SCATTER_MODE_ISOTROPIC -isotropic scattering (randvec), 
- * * SCATTER_MODE_ANISOTROPIC - anisotropic scattering 
- * (randwind) and 
- * * SCATTER_MODE_THERMAL - thermally-broadened anisotropic scattering 
+ * * SCATTER_MODE_ISOTROPIC -isotropic scattering (randvec),
+ * * SCATTER_MODE_ANISOTROPIC - anisotropic scattering
+ * (randwind) and
+ * * SCATTER_MODE_THERMAL - thermally-broadened anisotropic scattering
  * (randwind_thermal_trapping).
  *
  ***********************************************************/
@@ -34,29 +34,29 @@ struct photon phot_randwind;
 
 
 
-/* 
+/*
 randwind (xyz, lmn, north) is a routine to calculate a new direction
 for the photon for specific presciptions regarding the anisotropy
 of scattering.  To use a different prescription the only thing that
 should have to be modified is vrandwind.
 
-Here 
+Here
 
  xyz is the position of the photon in cartesion coordinates
- north is the 
- the direction of maxium velocity gradient in 
+ north is the
+ the direction of maxium velocity gradient in
 	cylindrical coordinates
 
-and 
- lmn is the new direction of the photon in cartesian coordinates 
+and
+ lmn is the new direction of the photon in cartesian coordinates
 	which is returned is returned.
 
 02feb	ksl	Modified jumps in randwind so evenly spaced.
 02feb	ksl	Mad major modifications to the way in which
-		the direction was projected back to the 
+		the direction was projected back to the
 		cartesian frame, and also to the generation
 		of the photon direction in the azimuthal
-		direction.  The routine was seriously 
+		direction.  The routine was seriously
 		screwed up.
 02may	ksl	Made modifications to generalize anisowind
 		and to incorporate changes associated
@@ -71,7 +71,7 @@ and
 		on the order in which the routines are called,
 		i.e. you must call randwind before vrandwind,
 		since randwind initializes some variables that
-		one needs in vrandwind.  
+		one needs in vrandwind.
 02may	ksl	Changed calls to avoid having to pass tau_min
 		to the routine.  Hopefully this will help
 		eliminate questions of what has been calculated
@@ -81,7 +81,7 @@ and
 		when calculating pdf_rand.  ?? It might be more
 		computationally efficient to switch to isotropic
 		in this case ??
-15aug	ksl	Minor changes for multiple 
+15aug	ksl	Minor changes for multiple
 17jun	nsh - changed references from PDFs to CDFs - because
 		this is what they actually are!
 */
@@ -97,7 +97,7 @@ double tau_randwind = -1000.;
 
 
 /**********************************************************/
-/** @name      randwind
+/**
  * @brief      calculate a new direction
  * for the photon which is being scattered in the wind
  * in the SCATTER_MODE_ANISOTROPIC scattering mode.
@@ -109,34 +109,34 @@ double tau_randwind = -1000.;
  *
  * @details
  * This routine is called whenever one wants to generate a new
- * direction in  the SCATTER_MODE_ANISOTROPIC scattering mode.  
+ * direction in  the SCATTER_MODE_ANISOTROPIC scattering mode.
  *
- * 
- * Given the photon position and the resonance, 
+ *
+ * Given the photon position and the resonance,
  * the routine * first calcuates the optical
  * depth in the direction of the maximum dv_ds for that
- * cell.  
+ * cell.
  *
  * The routine then calls, make_cdf_randwind to create a
  * comulative distribution function for scattering of as
  * a function of the angle from the direction of minimum
  * optical depth.
  *
- * Using this cdf, it randomly selects a direction for 
+ * Using this cdf, it randomly selects a direction for
  * the photon.
  *
- * These calculations are all carried out as if the 
+ * These calculations are all carried out as if the
  * photon were in the x-z plane, because that is where
  * the velocity gradient is defined.  As a result
  * one then has to trasform the new photon direction
- * back to the location of the photon 
+ * back to the location of the photon
  *
  * ### Notes ###
  * To use a different prescription the only thing that
  * should have to be modified is vrandwind.
  *
  * It might have been more logical to have transformed
- * the direction of the maximum velcocity gradient 
+ * the direction of the maximum velcocity gradient
  * to the position of the photon.
  *
  *
@@ -165,7 +165,7 @@ randwind (p, lmn, north)
     return (-1);
   }
 
-/* Get the position of the photon in the appropriate domain, and calculate 
+/* Get the position of the photon in the appropriate domain, and calculate
  * the optical depth in the direction of the maximum velocity gradient,
  * which will be the direction of minimum optical depth */
 
@@ -181,7 +181,7 @@ randwind (p, lmn, north)
    */
 
   if (tau > TAU_TOP)
-    tau = TAU_TOP;               
+    tau = TAU_TOP;
   if (tau < TAU_BOT)
     tau = TAU_BOT;
 
@@ -207,14 +207,14 @@ randwind (p, lmn, north)
   /* Now get the azimuthal direction for the scattered photon */
 
   phi = 2. * PI * random_number(0.0,1.0);
-  
+
   xlmn[1] = q * cos (phi);
   xlmn[2] = q * sin (phi);
 
 
-/* So at this point we have the direction cosines of the photon in a 
+/* So at this point we have the direction cosines of the photon in a
    coordinate system in which "north" is along the FIRST axis. "north"
-   as presented is a vector relative to the basis vectors for the cylindrical 
+   as presented is a vector relative to the basis vectors for the cylindrical
    coordinate system.  So
    we need to express "north" in cartesian coordinates.
 */
@@ -255,17 +255,17 @@ the cartesian frame */
 
 
 /**********************************************************/
-/** @name      vrandwind
- * @brief      the function that is used to generate the cdf for anisotropic scattering.  
+/**
+ * @brief      the function that is used to generate the cdf for anisotropic scattering.
  *
- * @param [out] double  x   The direction cosine with respect to the direction 
+ * @param [out] double  x   The direction cosine with respect to the direction
  * of tau_min
  *
  * @return     A number proportional to the probability that a photon will
  * scatter in a direction with a particular direction cosine
  *
  * @details
- * The routine calculates 
+ * The routine calculates
  * a function that is proportional to the probability
  * density.  dP/dcos(theta) for the photon.
  *
@@ -301,8 +301,8 @@ vrandwind (x)
 
 
    The next line would generate a completely isotropic distribution
-   z=0.1;  
-  
+   z=0.1;
+
       Completely isotropic
 */
   if (sane_check (z))
@@ -324,11 +324,11 @@ double reweightwind_zmax;
 
 
 /**********************************************************/
-/** @name      reweightwind
+/**
  * @brief      calculates the weight of a photon in the wind that
- * is forced to scatter along a specific line of sight. 
+ * is forced to scatter along a specific line of sight.
  *
- * @param [in out] PhotPtr  p   The photon being scattered
+ * @param [in, out] PhotPtr  p   The photon being scattered
  * @return     The number corresponding to the reweighting is returned.  The
  * revised weight is also stored in p
  *
@@ -342,7 +342,7 @@ double reweightwind_zmax;
  * This routine is called when extracting photons along a specific
  * line of sight.
  *
- * wmain.dv_ds, and wmain.lmn are maximum value of dvds, and 
+ * wmain.dv_ds, and wmain.lmn are maximum value of dvds, and
  * the direction in a cell (that is
  * in the positive xz plane)
  *
@@ -362,11 +362,11 @@ reweightwind (p)
 
   vsub (p->x, phot_randwind.x, delta);
 
-/* Idea here is that if photon has moved from position where it was you must recalc. 
+/* Idea here is that if photon has moved from position where it was you must recalc.
  * Since typically we extract photons in a range of inclinations, this routine
  * is called multiple times for the same photon when it scatters.  The if statement
  * here is intended to capture this, and only to recalculate the cdf if the photon
- * has moved from where it was previously.  
+ * has moved from where it was previously.
  *
  */
 
@@ -403,7 +403,7 @@ what we do here */
 
 
 //
-/** 
+/**
  * @bug This is a note related to an XXX comoment which read as follows:
  * Factor of 2 needed because the interval is from -1 to 1
  * XXX It's definitely needed to make a uniform distribution work
@@ -435,20 +435,20 @@ what we do here */
 
 
 /**********************************************************/
-/** @name      make_cdf_randwind
+/**
  * @brief      Generate the cumulative distribution functions
- * needed for selecting a direction for a scattered photon, and 
+ * needed for selecting a direction for a scattered photon, and
  * then select the cdf needed ro a particulat tau
  *
  *
  * @param [in] double  tau   The optical depth in the direction
- * of the maximum velocity gradient associated with 
+ * of the maximum velocity gradient associated with
  * the scattering event
  *
  * @return     Always returns 0
  *
  * @details
- * The first time this routine is entered it generates a 
+ * The first time this routine is entered it generates a
  * set of cdfs correspoding to various values of tau which
  * are logrithmically spaced between 0.01 and 10.  These
  * cddfs are stored in an array of cdf structures
@@ -467,8 +467,8 @@ what we do here */
  * of cdfs the first time the routine is called that are
  * spaced in a sensible fashion so that one does not have
  * to regenerate the cdfs everytime one wants to calulate
- * the probability a photon will be scattered in certain 
- * direction.  
+ * the probability a photon will be scattered in certain
+ * direction.
  *
  * On subsequent calls the routine simply chooses which
  * of the cdfs to use by setting cdf_randwind to one of
@@ -541,41 +541,41 @@ make_cdf_randwind (tau)
 
 
 //OLD /***************************************************************
-//OLD                       
+//OLD
 //OLD                       University of Southampton
-//OLD 
-//OLD Synopsis:   
+//OLD
+//OLD Synopsis:
 //OLD   randwind_thermal_trapping is the routine which chooses
 //OLD   a new anisotropic direction in geo.scatter_mode = SCATTER_MODE_THEMAL
-//OLD   
-//OLD Arguments:   
-//OLD 
-//OLD   
+//OLD
+//OLD Arguments:
+//OLD
+//OLD
 //OLD Returns:
 //OLD   0 for success. Also modifies the photon ptr p
 //OLD   to reflect new direction (p->lmn), and nnscat, which
 //OLD   should be copied to the phoiton structure after calling
 //OLD   this routine.
-//OLD   
-//OLD Description:  
+//OLD
+//OLD Description:
 //OLD   This routine uses a rejection method to choose a direction
-//OLD   so that the probability distribution of directions generated 
+//OLD   so that the probability distribution of directions generated
 //OLD   reflects the probability of escape along each direction in accordance
-//OLD   with the sobolev optical depth. 
-//OLD 
+//OLD   with the sobolev optical depth.
+//OLD
 //OLD Notes:
-//OLD   
+//OLD
 //OLD History:
-//OLD   1406  Moved code here from photo_gen_matom and scatter to avoid 
+//OLD   1406  Moved code here from photo_gen_matom and scatter to avoid
 //OLD         duplication
-//OLD 
-//OLD 
+//OLD
+//OLD
 //OLD ****************************************************************/
 
 
 
 /**********************************************************/
-/** @name      randwind_thermal_trapping
+/**
  * @brief      is the routine which chooses
  *   a new anisotropic direction in geo.scatter_mode = SCATTER_MODE_THERMAL
  *
@@ -590,7 +590,7 @@ make_cdf_randwind (tau)
  *
  * @details
  * This routine uses a rejection method to choose a direction
- * so that the probability distribution of directions generated 
+ * so that the probability distribution of directions generated
  * reflects the probability of escape along each direction in accordance
  * with the sobolev optical depth.
  *
@@ -602,7 +602,7 @@ make_cdf_randwind (tau)
  * sobolev optical depths are used.  The temperature in the
  * cell does not come into the calculation.
  *
- * Unlike randwind, this routine does not explicitly need to to 
+ * Unlike randwind, this routine does not explicitly need to to
  * make a transformation from the xz plane to the location of the
  * photon.  This is because dvds is calculated directly using dwind_ds
  *
@@ -621,7 +621,7 @@ randwind_thermal_trapping (p, nnscat)
   /* find the wind pointer for the photon */
   one = &wmain[p->grid];
 
-  /* we want to normalise our rejection method by the escape 
+  /* we want to normalise our rejection method by the escape
      probability along the vector of maximum velocity gradient.
      First find the sobolev optical depth along that vector */
   tau_norm = sobolev (one, p->x, -1.0, lin_ptr[p->nres], one->dvds_max);
@@ -638,24 +638,24 @@ randwind_thermal_trapping (p, nnscat)
   z = 0.0;
 
   /* JM 1406 -- we increment nnscat here, and it is recorded in the photon
-     structure. This is done because we actuall have to multiply the photon weight 
+     structure. This is done because we actuall have to multiply the photon weight
      by 1/mean escape probability- which is nnscat. this is done in trans_phot.c
-     before extract is called. 
+     before extract is called.
    */
   *nnscat = *nnscat - 1;
 
   /* rejection method loop, which chooses direction and also calculated nnscat */
   while (ztest > z)
   {
-    *nnscat = *nnscat + 1;       
+    *nnscat = *nnscat + 1;
     randvec (z_prime, 1.0);     /* Get a new direction for the photon (isotropic */
     stuff_v (z_prime, p->lmn);  // copy to photon pointer
 
 
-    /* generate random number, normalised by p_norm with a 1.2 for 20% 
+    /* generate random number, normalised by p_norm with a 1.2 for 20%
        safety net (as dvds_max is worked out with a sample of directions) */
     ztest = random_number(0.0,1.0) * p_norm;
-	
+
     dvds = dvwind_ds (p);
     tau = sobolev (one, p->x, -1.0, lin_ptr[p->nres], dvds);
 

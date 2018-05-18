@@ -8,17 +8,17 @@
  *    to calculate whether a photon intersects the surface of the star
  *
  *
- * The important routines are 
- * 
+ * The important routines are
+ *
  *    - binary_basics  which uses the masses of the primary and the secondary to calculate
  *    the position of various Lagrange points, etc, and the size of a pillbox
  *    which encloses the Roche lobe of the secondary.  It must be called before
  *    the other routines can be used!
- * 
- *    - ds_to_roche2   calculates the distance a photon defined by p_roche has to travel 
+ *
+ *    - ds_to_roche2   calculates the distance a photon defined by p_roche has to travel
  *    before it will encounter the secondary.  If it misses, ds_to_roche2
  *    returns VERY_BIG.
- * 
+ *
  *    - hit_secondary   determines whether a photon defined by p_roche will hit the secondary
  *    or not.  If it misses, hit_secondary returns 0, if it hits, the return is
  *    P_SEC (or hit secondary as contained in python.h).
@@ -26,22 +26,22 @@
  * ###Notes###
  *
  * The secondary is located along the x, i.e. 0, axis
- * 
+ *
  *    To utilize the routines you must stuff the photon of interest into the external photon "p_roche".
  *    This is necessary because the program makes use of two Numerical Recipes Routines rtsafe
  *    and golden to find zeroes and minima respectively.  Note that it is possible (likely) that these are
  *    not the very best choices of Numerical Recipes routines to use.  In particular it is possible that
  *    BRENT could replace both routines.
- * 
+ *
  *    The routines adopt the same approach as in Keith Horne's routines dealing with the Roche
- *    geometry, that is a pillbox is defined around the secondary.  The radius of the pillbox is 
+ *    geometry, that is a pillbox is defined around the secondary.  The radius of the pillbox is
  *    determined by the maximum size of the secondary perpendicular to the line of sight between
  *    the two stars.  One end of the pillbox is defined by the L1 point.  The other end of the pillbox
  *    is defined by the backside of the secondary.  One first tests to find out whether a photon
  *    intersects the pillbox, and then one checks more carefully to see whether the photon actually
  *    hits the secondary (using the intersections with the pillbox to define the limits of the careful
  *    search.
- * 
+ *
  *    Note: ds_to_roche2 is not actually used by Python.  It would be used if one wanted to calculate
  *    the heating of the secondary.
  *
@@ -54,19 +54,19 @@
 #include "atomic.h"
 #include "python.h"
 
-
 /* Given the mass of the primary and secondary and the period calculate some other basic parameters
-   for the binary system, including the L1 point. */
+ for the binary system, including the L1 point. */
 
-/* p_roche provides a way to pass a photon structure to roche() and roche_derive which
-   are in turn used by the Numerical Recipes Routine rtsafe to find the zero either to dphi_ds
-   or to phi along the path lenght of the photon */
-
+/**********************************************************/
+/** p_roche provides a way to pass a photon structure to roche() and roche_derive which
+ * are in turn used by the Numerical Recipes Routine rtsafe to find the zero either to dphi_ds
+ * or to phi along the path lenght of the photon
+ **********************************************************/
 struct photon p_roche;
 
 
 /**********************************************************/
-/** @name      binary_basics
+/**
  * @brief      From the masses and period, setup the information one needs to calculate the position of the Roche lobe of the secondary
  *    to calculate whether a photon intersects the surface of the star
  *
@@ -161,11 +161,11 @@ binary_basics ()
 
 
 /**********************************************************/
-/** @name      ds_to_roche_2
+/**
  * @brief      Calculate the distance to the Roche surface for a photon
  *
  * @param [in] PhotPtr  p  The photon whose path one wishes to track
- * @return     the distance to the roche surface of the secondary for photon p, or VERY_BIG 
+ * @return     the distance to the roche surface of the secondary for photon p, or VERY_BIG
  *  if the photon does not intercept the surface
  *
  * Instead of simply determining whether the photon hits the Roche surface, this routine determine
@@ -240,9 +240,9 @@ ds_to_roche_2 (p)
 
 
 /**********************************************************/
-/** @name      hit_secondary
+/**
  * @brief      Find out whether a photon will hit the secondary, but don't actually calculate the
- * point where it hits 
+ * point where it hits
  *
  * @param [in] PhotPtr  p   A photon, for which we have a possiton and adirection of travel
  * @return     0 if the photon would miss the secondary, P_SEC otherwise
@@ -252,7 +252,7 @@ ds_to_roche_2 (p)
  * ###Notes###
  *
  * The routine first checks if the photon encounters a pill_box that surrouds the secondary.  Photons
- * that do not encounter this pill box do not hit the secondar.  If  the photon enters the pill box, then 
+ * that do not encounter this pill box do not hit the secondar.  If  the photon enters the pill box, then
  * the routine determines whether the photon hits the roche surface of the secondary, by finding the minimum
  * value of the Rooche potential. If this is greater than 0, then the photon has missed the secondary. If less
  * thn zero then it has hit the secondary.
@@ -284,13 +284,13 @@ hit_secondary (p)
 
 
 /**********************************************************/
-/** @name      pillbox
+/**
  * @brief       Find out whether the photon hits the pillbox which surrounds the Roche surface of the secondary.
  *
  * @param [in] PhotPtr  p   The photon whose trajectory we wish to examine
  * @param [out] double *  smin   If the photon, hits the pillbox, this is how far the photon must travel to enter the pillbox
  * @param [out] double *  smax   If the photon, hits the pillbox, this is how far the photon must travel to exit the pillbox
- * @return     
+ * @return
  * pillbox returns VERY_BIG if the photon p has not intersected the pillbox.  It appears to return the distance
  * to the pillbox if the photon p hits the pillbox.  smin and smax contain the entrance and exit distances.  It
  * is not obvious that smin < smax.
@@ -345,14 +345,14 @@ and determine where they are.  This calculation is carried out in the if section
     b = 2. * (p->x[1] * p->lmn[1] + p->x[2] * p->lmn[2]);
     c = p->x[1] * p->x[1] + p->x[2] * p->x[2] - geo.r2_width * geo.r2_width;
 
-/* After "quadratic", root contains the distances the photon pp would need to travel to 
-hit the edges of the cylinder. i is an index to the smallest positive root, if one exists.  
+/* After "quadratic", root contains the distances the photon pp would need to travel to
+hit the edges of the cylinder. i is an index to the smallest positive root, if one exists.
 If both of the roots are negative or imaginary then i will be negative, and we know
 that the ray did not hit the cylinder while travelling in the positive direction.  In
 that case return  VERY_BIG
 
-Note that the fact that the ray does hit the cylinder going in the positive direction 
-does not necessarily mean that it hits the pillbox.  
+Note that the fact that the ray does hit the cylinder going in the positive direction
+does not necessarily mean that it hits the pillbox.
 */
 
     if ((i = quadratic (a, b, c, root)) < 0)
@@ -405,7 +405,7 @@ distances are valid only if the photon is in the pillbox already */
     n++;
   }
 
-/* Finally sort it all out.  If n == 0, or if both s[0] and s[2] are negative 
+/* Finally sort it all out.  If n == 0, or if both s[0] and s[2] are negative
 then the photon did not hit the pillbox ksl 02jan */
 
   if ((n == 0) || (ss[0] < 0 && ss[1] < 0))
@@ -440,8 +440,8 @@ double phi_gm1, phi_gm2, phi_3, phi_4;
 
 
 /**********************************************************/
-/** @name      phi
- * @brief      Calculate the Roche potential at position indicated by the photon p_roche and the length s 
+/**
+ * @brief      Calculate the Roche potential at position indicated by the photon p_roche and the length s
  *
  * @param [in] double  s   The distance from the current position of the photon to the point where one wishes to calculate the Roche potentail
  * @return     The Roche potential at the postiong given by the photon moved by a distance s
@@ -500,7 +500,7 @@ phi (s)
 
 
 /**********************************************************/
-/** @name      dphi_ds
+/**
  * @brief      Calculate the gradient of the Roche potential as the photon travels
  *
  * @param [in] double  s   The distance the photon has traveled from its initial position
@@ -532,7 +532,7 @@ dphi_ds (s)
 
 
 /**********************************************************/
-/** @name      d2phi_ds2
+/**
  * @brief      Calculate the second derivative of the Roche potential of the secondary
  *
  * @param [in] double  s   The distance the phtoon has traveled from its inital postiion
@@ -564,19 +564,19 @@ d2phi_ds2 (s)
 
 
 /**********************************************************/
-/** @name      roche_width
+/**
  * @brief      Calculate the width of the Roche potentiil at a position x along the x axis
  *
- * @param [in out] double  x   The distance the phtoon has traveled from its initial position  
+ * @param [in, out] double  x   The distance the phtoon has traveled from its initial position
  *
- * @return     the width             
+ * @return     the width
  *
- * Calculate the half width of the Roche lobe at the position x along the 
- *   x axis in the plane of the orbit.  
+ * Calculate the half width of the Roche lobe at the position x along the
+ *   x axis in the plane of the orbit.
  *
  * ###Notes###
  *   There is no real guarantee that this would
- *   work if you were outside L2 or L3. 
+ *   work if you were outside L2 or L3.
  *
  *
  *
@@ -614,13 +614,13 @@ roche_width (x)
 
 
 /**********************************************************/
-/** @name      roche2_width_max
+/**
  * @brief      Find the half width of the secondary Roche lobe
  *
  * @return     The half width is returned
  *
  * Find the maximum half width of the Roche lobe of the secondary.   This routine
- *   uses the NR routine golden to find the point in x where the Roche lobe is maximized.  
+ *   uses the NR routine golden to find the point in x where the Roche lobe is maximized.
  *
  * ###Notes###
  *
@@ -652,20 +652,20 @@ roche2_width_max ()
 
 
 /**********************************************************/
-/** @name      roche
+/**
  * @brief      Calculate the value of the Roche potential and its derivative along a particular lien of sight
  *
  * @param [in] double  s   The distance s
  * @param [out] double *  value   The value of the Roche potenial at a distance s along the path of the photon
- * @param [out] double *  derivative   The derivative of the roche potential as the photon tavels 
- * @return     N/A              
+ * @param [out] double *  derivative   The derivative of the roche potential as the photon tavels
+ * @return     N/A
  *
  *
  * This is the function used by the Recipes routine rtsafe to locate specific
  *   surfaces of the Roche potential.  Here *value is phi and *derivative is
  *   the slope of phi at s along the vector defined by p_roche.  The value of
  *   phi has to be set in advance through geo.phi and would normally be that of
- *   the Roche lobe 
+ *   the Roche lobe
  *
  * ###Notes###
  *
@@ -684,7 +684,7 @@ roche (s, value, derivative)
 
 
 /**********************************************************/
-/** @name      roche_deriv
+/**
  * @brief      Calculate the first and second derivative of the roche potential along a specific line of sight
  *
  * @param [in] double  s  The distance from the initial photon position at which derivatives are to be calcualted
@@ -694,8 +694,8 @@ roche (s, value, derivative)
  *
  * This is the function used by the Recipes routine rtsafe to lacate extrema of
  *  the Roche potential.  Thus it can be used to find the L1 point, for example.  Here
- *  *value is the derivative of phi at s along the vector defined by p_roche, and 
- *  *derivative is the second derivative 
+ *  *value is the derivative of phi at s along the vector defined by p_roche, and
+ *  *derivative is the second derivative
  *
  *
  * ###Notes###

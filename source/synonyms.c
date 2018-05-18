@@ -147,7 +147,7 @@ int number_of_names = 79;
 
 
 /**********************************************************/
-/** @name      check_synonyms
+/** 
  * @brief      This is a routine which is intended to help with program updates that
  *   change the name of a keyword in a parameter file.  It is called from
  *   rdpar.string_process_from_file

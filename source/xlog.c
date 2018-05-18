@@ -119,7 +119,7 @@ int log_verbosity = 5;          // A parameter which can be used to suppress wha
 
 
 /**********************************************************/
-/** @name      Log_init
+/** 
  * @brief      Open a log file 
  * 		
  * @param [in] char *  filename   The name of the file where logging will occur
@@ -158,7 +158,7 @@ Log_init (filename)
 
 
 /**********************************************************/
-/** @name      Log_append
+/** 
  * @brief      Opens an existing log file so that diagnostic message can be added to it.
  *
  * @param [in] char *  filename   Name of the existing file to reopen
@@ -202,7 +202,7 @@ Log_append (filename)
 
 
 /**********************************************************/
-/** @name      Log_close
+/** 
  * @brief      Close a log file 
  *
  * @return     Always returns 0
@@ -229,7 +229,7 @@ Log_close ()
 
 
 /**********************************************************/
-/** @name      Log_set_verbosity
+/** 
  * @brief      Control the range of messages which are logged to the command line
  *
  * @param [in] int  vlevel   An integer which controls what level of loggng goes to the screen
@@ -254,7 +254,7 @@ Log_set_verbosity (vlevel)
 
 
 /**********************************************************/
-/** @name      Log_print_max
+/** 
  * @brief      Limit the number of times an error is printed out
  *
  * @param [in] int  print_max   a number which specifies the number of times an error message is logged
@@ -279,7 +279,7 @@ Log_print_max (print_max)
 
 
 /**********************************************************/
-/** @name      Log_quit_after_n_errors
+/** 
  * @brief      Set the number of errors of a specific type which will cause the program to exit
  *
  * @param [in] int  n   the maximum number of errors
@@ -306,7 +306,7 @@ Log_quit_after_n_errors (n)
 
 
 /**********************************************************/
-/** @name      Log
+/** 
  * @brief      Print/write an informational message
  *
  * @param [in] char *  format   The format string for the message
@@ -345,7 +345,7 @@ Log (char *format, ...)
 
 
 /**********************************************************/
-/** @name      Log_silent
+/** 
  * @brief      Write a message to the diagnostic file
  *
  * @param [in] char *  format   The format string for the message
@@ -381,7 +381,7 @@ Log_silent (char *format, ...)
 
 
 /**********************************************************/
-/** @name      Error
+/** 
  * @brief      Print/write out an error message
  *
  * @param [in] char *  format   The format string for the message
@@ -425,7 +425,7 @@ Error (char *format, ...)
 
 
 /**********************************************************/
-/** @name      Error_silent
+/** 
  * @brief      Write an error message to the diag file
  *
  * @param [in] char *  format   The format string for the message
@@ -467,7 +467,7 @@ Error_silent (char *format, ...)
 
 
 /**********************************************************/
-/** @name      Shout
+/** 
  * @brief      Write an error message to the screen and to a file
  *
  * @param [in] char *  format   The format string for the message
@@ -508,7 +508,7 @@ Shout (char *format, ...)
 
 
 /**********************************************************/
-/** @name      sane_check
+/** 
  * @brief      Check that a variable is valid double precision number
  *
  * @param [in] double  x   the variable to check
@@ -540,10 +540,10 @@ sane_check (x)
 
 
 /**********************************************************/
-/** @name      error_count
+/** 
  * @brief      track the number of errors of each type
  *
- * @param [in out] char *  format   A format statement for an error message
+ * @param [in, out] char *  format   A format statement for an error message
  * @return     The number of errors wwith associated with a certain format
  *
  * When an error message is received, the format statement is used to identify the
@@ -609,7 +609,7 @@ error_count (char *format)
 
 
 /**********************************************************/
-/** @name      error_summary
+/** 
  * @brief      Summparise the errors that have occurred 
  *
  * @param [in] char *  message   A message that can accompany the error summary
@@ -646,7 +646,7 @@ error_summary (message)
 
 
 /**********************************************************/
-/** @name      Log_flush
+/** 
  * @brief      Flush the diagnostic file to assure that one has an up-to-date version of the log file
  *
  * @return     Always returns 0
@@ -675,7 +675,7 @@ Log_flush ()
 
 
 /**********************************************************/
-/** @name      Log_set_mpi_rank
+/** 
  * @brief      Store the rank of this particular thread
  *
  * @param [in] int  rank   The rank of this thread
@@ -707,7 +707,7 @@ Log_set_mpi_rank (rank, n_mpi)
 
 
 /**********************************************************/
-/** @name      Log_parallel
+/** 
  * @brief      In addition to writing to the diag file, print a message to the screen from all threads
  *
  * @param [in] char *  format   The format string for the message
@@ -749,7 +749,7 @@ Log_parallel (char *format, ...)
 
 
 /**********************************************************/
-/** @name      Debug
+/** 
  * @brief      Print/write to a file a special message for debugging
  *
  * @param [in] char *  format   The format string for the message

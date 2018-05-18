@@ -21,12 +21,12 @@
 
 
 /**********************************************************/
-/** @name      cooling
+/**
  * @brief      calculate the total cooling of a cell at a temperature t
  *
  * @param [in,out] PlasmaPtr  xxxplasma   A cell in the wind
  * @param [in] double  t   The temperature where cooling is calculated
- * @return     The total amount of cooling in a plasma cell, 
+ * @return     The total amount of cooling in a plasma cell,
  *
  * @details
  * The routine calculates cooling of a wind cell, storing the results
@@ -39,7 +39,6 @@
  * it difficult to understand whether something is being counted twice.
  *
  **********************************************************/
-
 double
 cooling (xxxplasma, t)
      PlasmaPtr xxxplasma;
@@ -47,15 +46,15 @@ cooling (xxxplasma, t)
 {
 
 	xxxplasma->t_e = t;
-	
+
 
   if (geo.adiabatic)
     {
       if (wmain[xxxplasma->nwind].div_v >= 0.0)
 	{
-	  /* This is the case where we have adiabatic cooling - we want to retain the old behaviour, 
+	  /* This is the case where we have adiabatic cooling - we want to retain the old behaviour,
 	     so we use the 'test' temperature to compute it. If div_v is less than zero, we don't do
-	     anything here, and so the existing value of adiabatic cooling is used - this was computed 
+	     anything here, and so the existing value of adiabatic cooling is used - this was computed
 	     in wind_updates2d before the call to ion_abundances. */
 	  xxxplasma->cool_adiabatic =
 	    adiabatic_cooling (&wmain[xxxplasma->nwind], t);
@@ -70,8 +69,8 @@ cooling (xxxplasma, t)
 
   /*81c - nsh - we now treat DR cooling as a recombinational process - still unsure as to how to treat emission, so at the moment
      it remains here */
-	
-  xxxplasma->cool_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, INNER_SHELL);  
+
+  xxxplasma->cool_dr = total_fb (&wmain[xxxplasma->nwind], t, 0, VERY_BIG, FB_REDUCED, INNER_SHELL);
 
   /* 78b - nsh adding this line in next to calculate direct ionization cooling without generating photons */
 
@@ -96,44 +95,44 @@ cooling (xxxplasma, t)
 
 //OLD /***********************************************************
 //OLD              Space Telescope Science Institute
-//OLD 
-//OLD Synopsis:  xtotal_emission (one, f1, f2) Calculate the total cooling of a single cell 
+//OLD
+//OLD Synopsis:  xtotal_emission (one, f1, f2) Calculate the total cooling of a single cell
 //OLD 			due to free free - line and recombination processes.
-//OLD 
-//OLD Arguments:		
-//OLD 
-//OLD 
+//OLD
+//OLD Arguments:
+//OLD
+//OLD
 //OLD Returns:
-//OLD  
-//OLD Description:	
-//OLD 	
-//OLD 
+//OLD
+//OLD Description:
+//OLD
+//OLD
 //OLD Notes:
 //OLD 	xtotal_emission gives the total enery loss due to photons.  It does
 //OLD 	not include other coooling sources, e. g. adiabatic expansion.
-//OLD 
+//OLD
 //OLD 	It returns the total cooling, but also stores the luminosity due
 //OLD 	to various types of emssion, e.g ff and  lines into the
 //OLD 	Plasms cells. The fb cooling calculated here is *not* equal to
 //OLD 	the fb lumniosity and so this value is stored in cool_rr.
-//OLD 
+//OLD
 //OLD 	Comment: The call to this routine was changed when PlasmaPtrs
-//OLD 	were introduced, but it appears that the various routines 
+//OLD 	were introduced, but it appears that the various routines
 //OLD 	that were called were not changed.
-//OLD 
+//OLD
 //OLD History:
 //OLD 	2017 - copied from total_emission and modified for use in calculatingh
 //OLD 			cooling alone.
-//OLD  
-//OLD  
+//OLD
+//OLD
 //OLD **************************************************************/
 
 
 
 /**********************************************************/
-/** @name      xtotal_emission
- * @brief      calculate the cooling of a single cell 
- * 			due to free free, bound - boound and recombination 
+/**
+ * @brief      calculate the cooling of a single cell
+ * 			due to free free, bound - boound and recombination
  * 			processes.
  *
  * @param [in out] WindPtr  one   A singel wind cell
@@ -146,14 +145,14 @@ cooling (xxxplasma, t)
  * 	not include other coooling sources, e. g. adiabatic expansion.
  *
  * ### Notes ###
- * 
+ *
  * It returns the total cooling, but also stores the luminosity due
  * to various types of emssion, e.g ff and  lines into the
  * Plasms cells. The fb cooling calculated here is *not* equal to
  * the fb lumniosity and so this value is stored in cool_rr.
- * 
+ *
  * @bug The call to this routine was changed when PlasmaPtrs
- * were introduced, but it appears that the various routines 
+ * were introduced, but it appears that the various routines
  * that were called were not changed. This needs to be fixed for
  * consistency
  *
@@ -208,7 +207,7 @@ xtotal_emission (one, f1, f2)
       cooling = xplasma->lum_lines = total_line_emission (one, f1, f2);
 	  /* The free free cooling is equal to the free free emission */
       cooling += xplasma->lum_ff = total_free (one, t_e, f1, f2);
-	  /*The free bound cooling is equal to the recomb rate x the electron energy - the boinding energy - this is computed 
+	  /*The free bound cooling is equal to the recomb rate x the electron energy - the boinding energy - this is computed
 	  with the FB_REDUCED switch */
       cooling += xplasma->cool_rr = total_fb (one, t_e, f1, f2, FB_REDUCED, OUTER_SHELL);     //outer shell recombinations
 
@@ -228,19 +227,19 @@ xtotal_emission (one, f1, f2)
 
 
 /**********************************************************/
-/** @name      adiabatic_cooling
- * @brief      determines the amount of 
+/**
+ * @brief      determines the amount of
  * 	adiabatic cooling in a cell, in units of luminosity.
  *
  * @param [in] WindPtr  one   pointer to wind cell
  * @param [in] double  t   electron temperature
- * @return The adiabiatic cooling (or heating) of a cell 
+ * @return The adiabiatic cooling (or heating) of a cell
  *
  * @details
  * Adiabatic cooling is the amount of PdV work done by
- * a fluid element, per unit time dt. Thus it is equal to P dV/dt.  
+ * a fluid element, per unit time dt. Thus it is equal to P dV/dt.
  * dV/dt is given by * the volume * div v.  As is evident from
- * this what we call adiabatic cooling can heat the wind if div 
+ * this what we call adiabatic cooling can heat the wind if div
  * v is negative.
  *
  * ### Notes ###
@@ -250,12 +249,12 @@ xtotal_emission (one, f1, f2)
  * pressure is not considered.
  *
  * The routine does not populate xplasma->cool_adiabatic.
- * 
+ *
  * Note also that this function should only be called
  * if geo.adiabatic == 1, in which case it populates
  * xplasma->cool_adiabatic. This is used in heating and cooling
- * balance. We also use it as a potential destruction choice for 
- * kpkts in which case the kpkt is thrown away by setting its istat 
+ * balance. We also use it as a potential destruction choice for
+ * kpkts in which case the kpkt is thrown away by setting its istat
  * to P_ADIABATIC.
  *
  * @bug The statements here about not calling this routine are
@@ -297,8 +296,8 @@ adiabatic_cooling (one, t)
 
 
 /**********************************************************/
-/** @name      wind_cooling
- * @brief      calculate the cooling rate of the entire 
+/**
+ * @brief      calculate the cooling rate of the entire
  * wind between freqencies f1 and f2 (including non-radiative processes
  *
  * @param [in] double  f1   The minimum frequency
@@ -309,8 +308,8 @@ adiabatic_cooling (one, t)
  * for the various properties are also populated.
  *
  * @details
- * This routine cycles through all of the wind cells and 
- * calculates the cooling rate in each cell.  
+ * This routine cycles through all of the wind cells and
+ * calculates the cooling rate in each cell.
  *
  * ### Notes ###
  * This is not the same as the luminosty of the wind, because it
@@ -321,7 +320,7 @@ adiabatic_cooling (one, t)
  * dielectronic recombination, direct ionization
  *
  * Adiabatic cooling is summed separately for cells where the
- * adiabatic cooling is positive (tends to cool the wind) and 
+ * adiabatic cooling is positive (tends to cool the wind) and
  * negative (tends to heat the wind..
  *
  **********************************************************/
@@ -346,7 +345,7 @@ wind_cooling (f1, f2)
     {
       nplasma = wmain[n].nplasma;
       cool += x = cooling (&plasmamain[nplasma],plasmamain[nplasma].t_e);  //1708 - changed this call - now computes cooling rather than luminosity - also we popultate a local
-	  //array called cool, rather than the xplasma array - this was overrwting the xplasma array with incorrect data. 
+	  //array called cool, rather than the xplasma array - this was overrwting the xplasma array with incorrect data.
       lum_lines += plasmamain[nplasma].lum_lines;
       cool_rr += plasmamain[nplasma].cool_rr;
       lum_ff += plasmamain[nplasma].lum_ff;
@@ -393,8 +392,7 @@ wind_cooling (f1, f2)
   geo.cool_di = cool_di;          //1408 NSH the total DI luminosity of the wind is stored in the geo structure
   geo.cool_adiabatic = cool_adiab;
   geo.heat_adiabatic = heat_adiab;
-  
+
 
   return (cool);
 }
-

@@ -21,7 +21,7 @@
 #include "my_linalg.h"
 
 /**********************************************************/
-/** @name      get_kpkt_f
+/** 
  * @brief      returns the specific luminosity in the band needed for the computation of the
  *        spectrum. It gets the total energy radiated by the process k-packet -> r-packet in the
  *        required wavelength range.
@@ -54,7 +54,7 @@ get_kpkt_f ()
 /* All done. */
 
 /**********************************************************/
-/** @name      get_matom_f
+/** 
  * @brief      returns the specific band-limited luminosity in macro-atoms
  *
  * @param [in] int  mode   vvariable which controls whether or not we need to compute the
@@ -456,13 +456,13 @@ get_matom_f (mode)
 
 
 /**********************************************************/
-/** @name      photo_gen_kpkt
+/** 
  * @brief      produces photon packets to account for creating of r-packets
  *      by k-packets in the spectrum calculation. It should only be used once the total 
  *      energy emitted in this way in the wavelength range in question is well known
  *      (calculated in the ionization cycles).
  *
- * @param [in out] PhotPtr  p   the ptr to the structire for the photons
+ * @param [in, out] PhotPtr  p   the ptr to the structire for the photons
  * @param [in] double  weight   the photon weight
  * @param [in] int  photstart   ???
  * @param [in] int  nphot   the number of the first photon to be generated and
@@ -621,13 +621,13 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 }
 
 /**********************************************************/
-/** @name      photo_gen_matom
+/** 
  * @brief      produces photon packets to account for creation of r-packets
  *      by deactivation of macro atoms in the spectrum calculation. It should only be used 
  *      once the total energy emitted in this way in the wavelength range in question is well known
  *      (calculated in the ionization cycles).
  *
- * @param [in out] PhotPtr  p   the ptr to the structire for the photons
+ * @param [in, out] PhotPtr  p   the ptr to the structire for the photons
  * @param [in] double  weight   the photon weight
  * @param [in] int  photstart   ???
  * @param [in] int  nphot   the number of the first photon to be generated and

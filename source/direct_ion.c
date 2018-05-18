@@ -1,13 +1,13 @@
 
 /***********************************************************/
-/** @file  new_direct_ion.c
+/** @file  direct_ion.c
  * @author ksl
  * @date   January, 2018
  *
- * @brief  direct_ion contains the routines relating to direct (collisional) ionization and 
+ * @brief  direct_ion contains the routines relating to direct (collisional) ionization and
  * threebody recombination
  *
- * 
+ *
  ***********************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,13 +20,13 @@
 
 #include <gsl/gsl_sf_expint.h>  //We need this gsl library to evaluate the first exponential integral
 
-/* Ratio of hnu / kT beyond which we don't bother calculating 
+/* Ratio of hnu / kT beyond which we don't bother calculating
    see #197 */
 #define ALPHABIG_DIRECT_ION 100.
 
 
 /**********************************************************/
-/** @name      compute_di_coeffs
+/**
  * @brief      computes the rates due to direct (collisional)
  *   ionization from Dere data.
  *
@@ -34,7 +34,7 @@
  * @return     0 on success
  *
  * @details
- * This routine controls the calculation of the direct ionization 
+ * This routine controls the calculation of the direct ionization
  * coefficients for each ionic species at a temperature T. They are
  * stored in a global array di_coeffs - usually for use in calculating
  * the ionization balance. The actual calculations are done in a
@@ -69,7 +69,7 @@ compute_di_coeffs (T)
 }
 
 /**********************************************************/
-/** @name      q_ioniz_dere
+/**
  * @brief      Returns the collisional ionization rate coefficient for a given ion/temperature
  *
  * @param [in] int  nion   Index into ion structure for current ion under analysis
@@ -77,9 +77,9 @@ compute_di_coeffs (T)
  * @return     the collisional ionization rate coefficient
  *
  * @details
- * This uses data from Dere 07 to calculate a collisional ionization rate coefficient. 
+ * This uses data from Dere 07 to calculate a collisional ionization rate coefficient.
  * Data is provided as spline fits over a range of temperatures and so an interpolation is
- * required to arrive at the correct data for a given temperature. There is also an 
+ * required to arrive at the correct data for a given temperature. There is also an
  * exponential integral which is done using a gsl routine.
  *
  * ### Notes ###
@@ -114,7 +114,7 @@ q_ioniz_dere (nion, t_e)
     Log_silent ("compute_di_coeffs: Requested temp %e is below limit of data for ion %i(Tmin= %e)\n",
                 scaled_t, nion, dere_di_rate[nrec].temps[0]);
     imax = 1;
-    imin = 0;  //We will try to extrapolate 
+    imin = 0;  //We will try to extrapolate
   }
 
   else if (scaled_t >= dere_di_rate[nrec].temps[dere_di_rate[nrec].nspline - 1])        //we are above the range of GS data
@@ -162,7 +162,7 @@ q_ioniz_dere (nion, t_e)
 }
 
 /**********************************************************/
-/** @name      total_di
+/**
  * @brief      computes the total cooling due collisional ionization
  *
  * @param [in] WindPtr  one   pointer to cell
@@ -170,7 +170,7 @@ q_ioniz_dere (nion, t_e)
  * @return     The total di cooling
  *
  * @details
- * This routine computes the total cooling rate in a cell due to collisional 
+ * This routine computes the total cooling rate in a cell due to collisional
  * ionization. This is just the rate, times the ionization thereshold of the
  * state being recombined into.
  *
@@ -219,7 +219,7 @@ total_di (one, t_e)
 
 
 /**********************************************************/
-/** @name      compute_qrecomb_coeffs
+/**
  * @brief      computes the rate coefficient for three body recombination from Dere data.
  *
  * @param [in] double  T   Temperature in K
@@ -228,9 +228,9 @@ total_di (one, t_e)
  * @details
  * This routine calculates the three body recombination rate coefficient for all
  * ions in a cell at temperature T. The resulting rate coefficients are stored
- * in a global array for use by the calling routine - normally matrix_ion as 
- * part of the search for an ionization balance. 
- * It works by essentially applying the Milne relation to collisional ionization 
+ * in a global array for use by the calling routine - normally matrix_ion as
+ * part of the search for an ionization balance.
+ * It works by essentially applying the Milne relation to collisional ionization
  * data.
  * This is a driver routine, the hard work is done in a seperate routine (q_recomb_dere)
  *
@@ -260,7 +260,7 @@ compute_qrecomb_coeffs (T)
         /* we need to know about the bound-free jump, so we need the details
            from the ground state cross-section for for the ion below this one */
 
-        ntmin = ion[n - 1].ntop_ground; /* We only ever use the ground state cont_ptr. 
+        ntmin = ion[n - 1].ntop_ground; /* We only ever use the ground state cont_ptr.
                                            This is for topbase */
         nvmin = ion[n - 1].nxphot;    //VFKY
 
@@ -293,11 +293,11 @@ compute_qrecomb_coeffs (T)
 
 
 /**********************************************************/
-/** @name      q_recomb_dere
+/**
  * @brief      Returns the collisional recombination co-efficient
  *
  * @param [in] struct topbase_phot a pointer to the topbdae style PI cross section
- * @param [in] double  electron_temperature   
+ * @param [in] double  electron_temperature
  * @return     ??? RETURNS ???
  *
  * @details
@@ -336,9 +336,9 @@ q_recomb_dere (cont_ptr, electron_temperature)
     root_etemp = sqrt (electron_temperature);
     coeff = 2.07e-16 / (root_etemp * root_etemp * root_etemp);
 
-    /* We now multiply by the ratio of the multiplicity of the ground states. 
+    /* We now multiply by the ratio of the multiplicity of the ground states.
       Dere's data comes from a vast range of sources, some PI cross sections
-	  include excited states, others dont. We will make the approximation 
+	  include excited states, others dont. We will make the approximation
 	  of using juast the ground state multiplicities. If there is an error
 	  introduced here it will be small */
     coeff *= ion[nion].g / ion[nion + 1].g;
@@ -363,7 +363,7 @@ q_recomb_dere (cont_ptr, electron_temperature)
 
 
 /**********************************************************/
-/** @name      q_ioniz
+/**
  * @brief      returns the collisional ionization rate co-efficient
  *
  * @param [in] struct topbase_phot  - pointer to a Topbase style cross section - u
@@ -426,7 +426,7 @@ q_ioniz (cont_ptr, electron_temperature)
 
 
 /**********************************************************/
-/** @name      q_recomb
+/**
  * @brief      Returns a collisional recombination rate co-efficient
  *
  * @param [in out] struct topbase_phot - pointer to a topbase style PI cross section
@@ -441,7 +441,7 @@ q_ioniz (cont_ptr, electron_temperature)
  * ### Notes ###
  * This routine is very similar to compute_qrecomb_coeffs apart from
  * the fact that this routine only computes one recomb coefficient
- * and applies an approximate calculation where dere data is 
+ * and applies an approximate calculation where dere data is
  * missing. It is used in macroatom calculations.
  *
  **********************************************************/

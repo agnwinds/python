@@ -21,7 +21,7 @@
 
 
 /**********************************************************/
-/** @name      reposition
+/** 
  * @brief      p) attempts to assure that a photon is not scattered 
  * 	a second time inappropriately by the same transition
  *

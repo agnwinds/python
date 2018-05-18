@@ -22,44 +22,44 @@
 
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
-//OLD 
-//OLD double one_continuum(spectype,t,g,freqmin,freqmax) gets a photon frequency 
-//OLD from a continuum grid 
-//OLD 
+//OLD
+//OLD double one_continuum(spectype,t,g,freqmin,freqmax) gets a photon frequency
+//OLD from a continuum grid
+//OLD
 //OLD Arguments:
-//OLD 
+//OLD
 //OLD   spectype                                An index to the continum grid which one wants
 //OLD                                           to use for obtaining a photon
-//OLD   double t,g,                             Two parameters defining the model for which 
-//OLD                                           a photon is requried, often temperature and 
+//OLD   double t,g,                             Two parameters defining the model for which
+//OLD                                           a photon is requried, often temperature and
 //OLD                                           gravity, though this is not required
 //OLD   freqmin,freqmax;                        minimum and maximum frequency of interest
-//OLD 
-//OLD 
+//OLD
+//OLD
 //OLD Returns:
-//OLD 
-//OLD  
-//OLD Description:      
-//OLD   
-//OLD 
+//OLD
+//OLD
+//OLD Description:
+//OLD
+//OLD
 //OLD Notes:
 //OLD   In versions of python prior to python_52, different routines
 //OLD   were used to read kurucz models and hubeny models.  This was
 //OLD   historical, since the routines ksl had to read the kurucz models
 //OLD   read binary files (from a time when compputers were very slow).
-//OLD 
+//OLD
 //OLD   The new routines are much more general, and are based on routines
 //OLD   ksl had written for his fitting program kslfit.  The underlying
 //OLD   routines can interpolate between grids of more than two dimensions
 //OLD   although here we assume that all of the continuum grids are two
-//OLD   dimensional.  
-//OLD 
+//OLD   dimensional.
+//OLD
 //OLD History:
 //OLD   04aug   ksl     created from hub.c usied in all versions
-//OLD                   of python prior to python_52.  
-//OLD  
+//OLD                   of python prior to python_52.
+//OLD
 //OLD **************************************************************/
 
 double old_t, old_g, old_freqmin, old_freqmax;
@@ -67,7 +67,7 @@ double jump[] = { 913.8 };
 
 
 /**********************************************************/
-/** @name      one_continuum
+/**
  * @brief      get a photon frequency from a grid of stored spectra
  * from a continuum grid
  *
@@ -75,12 +75,12 @@ double jump[] = { 913.8 };
  * @param [in] double  t   The associated temperature (or first variable) defining the grid
  * @param [in] double  g   The associted gravity (or second variable)
  * @param [in] double  freqmin   The minimum frequency desiered for a photon
- * @param [in] double  freqmax   The maximum frequecny for a photon            
+ * @param [in] double  freqmax   The maximum frequecny for a photon
  * @return   A frequency for a photon
  *
  * @details
  * This is a routine that is used to select a function from a grid of spectra
- * stored in the model structure.  For the purpose of this routine, the 
+ * stored in the model structure.  For the purpose of this routine, the
  * model grid is assumed to be based on two variables t (temperature) and
  * gravity (g).  This reflects the fact that most of the grids used in Python
  * to date (e.g Kurucz models) are these kinds of grids.  The routine linearly
@@ -94,10 +94,10 @@ double jump[] = { 913.8 };
  * ### Notes ###
  *
  * @bug  The model structure is general in the sense that it was intended
- * for situation with any number of variables.  
+ * for situation with any number of variables.
  * However what is written here
  * is specific to the case of two variables. This is a problem, as we have
- * found in trying to use this in other situations.  A more general routine is needed. 
+ * found in trying to use this in other situations.  A more general routine is needed.
  * The first step in doing this is to replace much of the code here with
  * a call to the routine model (spectype, par) in models.c
  *
@@ -170,8 +170,8 @@ one_continuum (spectype, t, g, freqmin, freqmax)
 	  nwave++;
 	}
 
-      /* There are two pathological cases to deal with, when we only have one non zero point, 
-         we need to make an extra point just up/down from the penultimate/second point so we 
+      /* There are two pathological cases to deal with, when we only have one non zero point,
+         we need to make an extra point just up/down from the penultimate/second point so we
          can make a sensible CDF. */
 
       if (f_local[nwave - 2] == 0.0)	//We have a zero just inside the end
@@ -219,8 +219,8 @@ one_continuum (spectype, t, g, freqmin, freqmax)
 
 
 /**********************************************************/
-/** @name      emittance_continuum
- * @brief      get the surface flux for Hubeny/Kurucz like 
+/** 
+ * @brief      get the surface flux for Hubeny/Kurucz like
  * stellar models
  *
  * @param [in] int  spectype   an integer identifying the set of models to use
@@ -228,7 +228,7 @@ one_continuum (spectype, t, g, freqmin, freqmax)
  * @param [int] double  freqmax   The maximum frequency
  * @param [in] double  t   A temperature
  * @param [in] double  g   A gravity
- * @return     The surface flux for a star-like spectrum read from a grid 
+ * @return     The surface flux for a star-like spectrum read from a grid
  *
  * @details
  * The routine gets the band-limited flux per unit area for Hubeny or Kurucz models
@@ -241,13 +241,13 @@ one_continuum (spectype, t, g, freqmin, freqmax)
  * factor of 4 pi is the conversion from Eddington flux to phhysical flux
  *
  * For an explanation see Hubeny & Mihalas - Theory of Stellar Atmospheres,
- * equation 3.70 (or Mihalas, Stellar Atmospheres 2nd ed, eq (1-27).  
+ * equation 3.70 (or Mihalas, Stellar Atmospheres 2nd ed, eq (1-27).
  *
  * Note that the observed flux at a distance is given by
  *
  * f/H = 4pi * R**2/d**2
  *
- * and 
+ * and
  *
  * L=f*4pi*R**2 = 16 pi**2 R**2 H
  *

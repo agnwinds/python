@@ -68,11 +68,11 @@ History:
 
 
 /**********************************************************/
-/** @name      dot
+/** 
  * @brief      The dot product of two vectors
  * 		
- * @param [in out] double  a[]   the first vector
- * @param [in out] double  b[]   the second vector 
+ * @param [in, out] double  a[]   the first vector
+ * @param [in, out] double  b[]   the second vector 
  * @return     The resulting dot product
  *
  *
@@ -99,10 +99,10 @@ dot (a, b)
 
 
 /**********************************************************/
-/** @name      length
+/** 
  * @brief      The length of a 3 vector
  *
- * @param [in out] double  a[]   a vector
+ * @param [in, out] double  a[]   a vector
  * @return     The leencth of the vector
  *
  *
@@ -130,10 +130,10 @@ length (a)
 
 
 /**********************************************************/
-/** @name      renorm
+/** 
  * @brief      renormalize a vector to a length
  *
- * @param [in out] double  a[]  the vector
+ * @param [in, out] double  a[]  the vector
  * @param [in] double  scalar   the desired length
  * @return     Always returns 0 
  *
@@ -166,7 +166,7 @@ renorm (a, scalar)
 
 
 /**********************************************************/
-/** @name      cross
+/** 
  * @brief      the cross product of two 3 vectors
  *
  * @param [in] double  a[]   the first vector
@@ -195,7 +195,7 @@ cross (a, b, c)
 
 
 /**********************************************************/
-/** @name      vmove
+/** 
  * @brief      move a 3 vector a certain distance in a given direction
  *
  * @param [in] double  u[]   the starting position
@@ -225,7 +225,7 @@ vmove (u, lmn, s, result)
 
 
 /**********************************************************/
-/** @name      vsub
+/** 
  * @brief      Subtract two 3 vectors from one another
  *
  * @param [in] double  u[]   The initial 3 vector (or position)
@@ -252,7 +252,7 @@ vsub (u, v, result)
 
 
 /**********************************************************/
-/** @name      vadd
+/** 
  * @brief      Add two 3 vectors 
  *
  * @param [in] double  u[]   The first vector 
@@ -279,7 +279,7 @@ vadd (u, v, result)
 
 
 /**********************************************************/
-/** @name      stuff_v
+/** 
  * @brief      Simple stuff one 3 vector into another one
  *
  * @param [in] double  vin[]   The vector to be copied
@@ -307,7 +307,7 @@ stuff_v (vin, vout)
 
 
 /**********************************************************/
-/** @name      dot_tensor_vec
+/** 
  * @brief      Dot product of a 2d tensor and a vector to produce
  * a vector
  *
@@ -342,13 +342,13 @@ dot_tensor_vec (tensor, vin, vout)
 
 
 /**********************************************************/
-/** @name      project_from_xyz_cyl
+/** 
  * @brief       Project a vector b in xyz coords from position a in xyz coords
  * into cylindrical coordinates
  *
- * @param [in out] double  a[]   The position of the vector in cartesiona coords
- * @param [in out] double  b[]   The vector (also in cartesiona coordinates)
- * @param [in out] double  result[]   The result in cylindrical coordinates
+ * @param [in, out] double  a[]   The position of the vector in cartesiona coords
+ * @param [in, out] double  b[]   The vector (also in cartesiona coordinates)
+ * @param [in, out] double  result[]   The result in cylindrical coordinates
  * @return     Always returns 0    
  *
  * Start with two vectors a and b in cartesiona coordinates, where a is a position
@@ -391,7 +391,7 @@ project_from_xyz_cyl (a, b, result)
 
 
 /**********************************************************/
-/** @name      project_from_cyl_xyz
+/** 
  * @brief      Transform a vector in cylindrical coordinates at a position in xyz coordinates and convert the vector to
  * cartesian coordinates
  *
@@ -444,7 +444,7 @@ project_from_cyl_xyz (a, b, result)
 
 
 /**********************************************************/
-/** @name      create_basis
+/** 
  * @brief      created an orthonomal basis from two vectors
  *
  * @param [in] double  u[]   the first of two vectors requiried to created a basis
@@ -512,7 +512,7 @@ create_basis (u, v, basis_new)
 
 
 /**********************************************************/
-/** @name      project_from
+/** 
  * @brief      Project a a vector in the locally rotated frame onto the unrotated fram
  *
  * @param [in] struct basis *  basis_from   basis which goes from the rotated to unrotated frame
@@ -547,7 +547,7 @@ project_from (basis_from, v_in, v_out)
 
 
 /**********************************************************/
-/** @name      project_to
+/** 
  * @brief       projects a vector in the unrotated frame onto the rotated frame
  *
  * @param [in] struct basis *  basis_from  basis which goes from the rotated to unrotated frame
@@ -584,7 +584,7 @@ project_to (basis_from, v_in, v_out)
 
 
 /**********************************************************/
-/** @name      reorient
+/** 
  * @brief      Project a vector in one rotated frame to another rotated frame
  *
  * @param [in] struct basis *  basis_from   The basis which goes from the rotated to the unrotated frame

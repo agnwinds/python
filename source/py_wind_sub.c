@@ -3668,7 +3668,7 @@ get_los_dvds (w, rootname, ochoice)
 
 
 /**********************************************************/
-/** @name   grid_summary
+/** 
  * @brief Prints grid boundaries to file
  *
  * @param [in] w              Pointer to wind array

@@ -65,7 +65,7 @@ float aout[ODIM][ODIM];
 
 
 /**********************************************************/
-/** @name      write_array
+/** 
  * @brief      writes out the arrays in a way which can be read easily
  *    into a routine which can do contouring 
  *
@@ -300,7 +300,7 @@ are linear, and x otherwise.  This is not particularly transparent ?? ksl */
 
 
 /**********************************************************/
-/** @name      display
+/** 
  * @brief      Print results to the screen
  *
  * @param [in] char  name[]   The name associated with the array to be printed

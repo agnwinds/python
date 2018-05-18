@@ -82,13 +82,13 @@
 
 
 /**********************************************************/
-/** @name      extract
+/** 
  * @brief      A supervisory routine called to 
  * 	builds detailed spectra in the normal (extract) mode.
  *
- * @param [in out] WindPtr  w   The entire wind
- * @param [in out] PhotPtr  p   The photon to extract
- * @param [in out] int  itype   An integer representing the type of photon 
+ * @param [in, out] WindPtr  w   The entire wind
+ * @param [in, out] PhotPtr  p   The photon to extract
+ * @param [in, out] int  itype   An integer representing the type of photon 
  * for the purpose of being extracted.
  * @return     Always returns 0
  *
@@ -265,7 +265,7 @@ one is odd. We do frequency here but weighting is carried out in  extract */
 
 
 /**********************************************************/
-/** @name      extract_one
+/** 
  * @brief      (w,pp,itype,nspec)
  *
  * @param [in] WindPtr  w   The entire wind

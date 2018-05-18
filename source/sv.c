@@ -20,7 +20,7 @@ int sv_zero_r_ndom;
 
 
 /**********************************************************/
-/** @name      get_sv_wind_params
+/** 
  * @brief      gets input data which is necessary for a Shlossman & Vitello 
  * 	description of the wind
  *
@@ -110,13 +110,13 @@ get_sv_wind_params (ndom)
 
 
 /**********************************************************/
-/** @name      sv_velocity
+/** 
  * @brief      Calulate the v of a Schlossman Vitello wind at a position
  * 	x
  *
  * @param [in] double  x[]   the position for which one desires the velocity
  * @param [out] double  v[]  the calcualted velocity at that postion
- * @param [in out] int  ndom the domain number 
+ * @param [in, out] int  ndom the domain number 
  * @return     The amplitude of the velocity is returned
  * 	
  *
@@ -218,7 +218,7 @@ sv_velocity (x, v, ndom)
 
 
 /**********************************************************/
-/** @name      sv_rho
+/** 
  * @brief      Calculate the density of an sv_wind at a position x
  *
  * @param [in] int  ndom   The domain number
@@ -299,7 +299,7 @@ sv_rho (ndom, x)
 
 
 /**********************************************************/
-/** @name      sv_find_wind_rzero
+/** 
  * @brief      Locates the radial position in the disk from which the 
  * 	stream line arises.
  *
@@ -383,7 +383,7 @@ double zero_p[3];
 
 
 /**********************************************************/
-/** @name      sv_zero_init
+/** 
  * @brief      A setup routine for finding the footpoint of a stream line in a SV model
  *
  *
@@ -414,7 +414,7 @@ sv_zero_init (p)
 
 
 /**********************************************************/
-/** @name      sv_zero_r
+/** 
  * @brief      Routine used by zbrent to find a footpoint of a streamline in an SV model
  *
  * @param [in] double  r   A position along the surface of the disk
@@ -456,7 +456,7 @@ sv_zero_r (r)
 
 
 /**********************************************************/
-/** @name      sv_theta_wind
+/** 
  * @brief      double (r) finds the angle at which the wind emerges from at a specific
  * 	radius r on surface of the disk
  *
@@ -501,7 +501,7 @@ sv_theta_wind (ndom, r)
 
 
 /**********************************************************/
-/** @name      sv_wind_mdot_integral
+/** 
  * @brief      The integrand required to calculate the normalization factor between the global mass loss rate and the mass loss per unit area at a particular place on the disk
  *
  * @param [in] double  r   A position (radius) on the disk

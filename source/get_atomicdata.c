@@ -161,7 +161,7 @@
 
 
 /**********************************************************/
-/** @name      get_atomic_data
+/** 
  * @brief      generalized subroutine for reading atomic data
  *  	into a set of structures defined in "atomic.h"
  *
@@ -3317,7 +3317,7 @@ or zero so that simple checks of true and false can be used for them */
 
 
 /**********************************************************/
-/** @name      index_lines
+/** 
  * @brief      sort the lines into frequency order
  *
  * @return     Always returns 0
@@ -3374,7 +3374,7 @@ index_lines ()
 
 
 /**********************************************************/
-/** @name      index_phot_top
+/** 
  * @brief      Index the topbase photoionzation crossections by frequency
  *
  *
@@ -3431,7 +3431,7 @@ index_phot_top ()
 
 
 /**********************************************************/
-/** @name      index_inner_cross
+/** 
  * @brief      Index inner shell xsections in frequency order
  *
  * @return     Alwasy returns 0
@@ -3488,7 +3488,7 @@ index_inner_cross ()
 
 
 /**********************************************************/
-/** @name      index_collisions
+/** 
  * @brief      sorts the collisional lines into frequency order
  *
  *
@@ -3549,7 +3549,7 @@ index_collisions ()
 
 
 /**********************************************************/
-/** @name      indexx
+/** 
  * @brief      Numerical recipes routine used by various routines to sort the atomic data
  *
  * @param [in] int  n   The dimension of the array that needs sorting
@@ -3668,13 +3668,13 @@ indexx (n, arrin, indx)
 
 
 /**********************************************************/
-/** @name      limit_lines
+/** 
  * @brief      (freqmin,freqmax)  sets the the current values of line_min and line_max in atomic.h
  * 	which can be used to limit the lines searched for resonances to a specific
  * 	frequency range.
  *
- * @param [in out] double  freqmin   The minimum frequency we are interested in
- * @param [in out] double  freqmax   The maximum frequency we are interested in
+ * @param [in, out] double  freqmin   The minimum frequency we are interested in
+ * @param [in, out] double  freqmax   The maximum frequency we are interested in
  * @return     the number of lines that are potentially in resonance.
  *
  *
@@ -3761,7 +3761,7 @@ limit_lines (freqmin, freqmax)
 
 
 /**********************************************************/
-/** @name      check_xsections
+/** 
  * @brief      Perform sanity checks on xsection data
  *
  * @return     Alway returns 0; errors are written to the log file

@@ -24,7 +24,7 @@
 
 
 /**********************************************************/
-/** @name      compute_zeta
+/** 
  * @brief      calculates the correction term used in in the L+M and 
  * Sim equations as a modfication to the Saha equation
  *

@@ -12,11 +12,11 @@
  * we have over time moved much of this out of main into
  * subroutines, and we have generally tried to collect
  * related portion of the initialization into different setup
- * routines, such as setup_disk or setup_files. 
+ * routines, such as setup_disk or setup_files.
  *
- * This file contains a collection of these setup routines, 
+ * This file contains a collection of these setup routines,
  * that either stand-alone or have not been moved into their
- * own files.  
+ * own files.
  ***********************************************************/
 
 
@@ -32,27 +32,27 @@
 
 
 /**********************************************************/
-/** @name      init_geo
+/**
  * @brief      initializes the geo structure to something that is semi-reasonable
  *
  * @return     Always returns 0
  *
  * @details
  * Initial values for all of the variables that are not part of the individual
- * wind descriptions that are actully read(!) into the program should be 
+ * wind descriptions that are actully read(!) into the program should be
  * created here.  The derived values are not needed.
  *
  * ### Notes ###
  *
- * In general, cgs units are the working units for Python.  Thus all 
+ * In general, cgs units are the working units for Python.  Thus all
  * intialization should be converted to these units.
- * 
+ *
  * @bug Currently init_geo is set up for CVs and Stars and not AGN.  We now
- * read in the system type as the first variable. The intent was to 
+ * read in the system type as the first variable. The intent was to
  * allow one to use the system type to particularize how geo (aqnd
  * other variables) were intialized. But this has yet to be carreid
  * out.
- * 
+ *
  *
  **********************************************************/
 
@@ -87,7 +87,7 @@ init_geo ()
   zdom[1].log_linear = 0;	/* Set intervals to be logarithmic */
 
 
-  geo.disk_z0 = geo.disk_z1 = 0.0;	
+  geo.disk_z0 = geo.disk_z1 = 0.0;
   geo.adiabatic = 1;		// Default is now set so that adiabatic cooling is included in the wind
   geo.auger_ionization = 1;	//Default is on.
 
@@ -97,7 +97,7 @@ init_geo ()
   geo.star_ion_spectype = geo.star_spectype
     = geo.disk_ion_spectype = geo.disk_spectype = geo.bl_ion_spectype =
     geo.bl_spectype = SPECTYPE_BB;
-  geo.agn_ion_spectype = SPECTYPE_POW;	
+  geo.agn_ion_spectype = SPECTYPE_POW;
 
 
   geo.rmax = 1e11;
@@ -131,7 +131,7 @@ init_geo ()
   strcpy (geo.atomic_filename, "data/standard78");
   strcpy (geo.fixed_con_file, "none");
 
-  // Note that geo.model_list is initialized through get_spectype 
+  // Note that geo.model_list is initialized through get_spectype
 
   /* Initialize a few other variables in python.h */
   x_axis[0] = 1.0;
@@ -147,28 +147,31 @@ init_geo ()
   return (0);
 }
 
+/// This is to assure that we read model lists in the same order everytime
+char get_spectype_oldname[LINELENGTH] = "data/kurucz91.ls";
+int get_spectype_count = 0;
 
 
 /**********************************************************/
-/** @name      get_spectype
+/**
  * @brief      Generalized routine to get the spectrum type for a radiation source
  * and if necessary read a set of precalculated spectra
  *
  * @param [in] int  yesno  An integer used to decide whether to ask for a spectrum type
- * @param [in out] char *  question  The query for a spectrum type for this component
- * @param [in out] int *  spectype   The type of spectrum to assign
- * @return    the spectype, a number that says what type of spectrum (bb, power law, etc) 
+ * @param [in, out] char *  question  The query for a spectrum type for this component
+ * @param [in, out] int *  spectype   The type of spectrum to assign
+ * @return    the spectype, a number that says what type of spectrum (bb, power law, etc)
  * to generate for this source
  *
  * @details
- * 
+ *
  * If yesno is non-zero, the user will be asked for the type of spectrum
  * for a radation source.  If yesno is 0, we presume that this radiation souce (a star
  * a disk or the wind itself) is not to radiate in the calculation, and the spectrum
  * type is set to SPECTYPE_NONE.
  *
- * If one wants to geneate spectra from a seriels of models (such as synthetic spectra 
- * caluclated for stars), this routine calls routines to read the models. 
+ * If one wants to geneate spectra from a seriels of models (such as synthetic spectra
+ * caluclated for stars), this routine calls routines to read the models.
  *
  * ### Notes ###
  *
@@ -179,9 +182,6 @@ init_geo ()
  *
  *
  **********************************************************/
-
-char get_spectype_oldname[LINELENGTH] = "data/kurucz91.ls";	/*This is to assure that we read model lists in the same order everytime */
-int get_spectype_count = 0;
 
 int
 get_spectype (yesno, question, spectype)
@@ -233,7 +233,7 @@ get_spectype (yesno, question, spectype)
 	    }
 	  rdstr ("Input_spectra.model_file", model_list);
 	  get_models (model_list, 2, spectype);
-	  strcpy (geo.model_list[get_spectype_count], model_list);	// Copy it to geo 
+	  strcpy (geo.model_list[get_spectype_count], model_list);	// Copy it to geo
 	  strcpy (get_spectype_oldname, model_list);	// Also copy it back to the old name
 	  get_spectype_count++;
 	}
@@ -250,12 +250,12 @@ get_spectype (yesno, question, spectype)
 
 
 /**********************************************************/
-/** @name      init_advanced_modes
- * @brief      simply initialises the set of 
- * advanced modes stored in the modes structure to a 
- * default value. 
+/**
+ * @brief      simply initialises the set of
+ * advanced modes stored in the modes structure to a
+ * default value.
  *
- * @return   Allways returns 0   
+ * @return   Allways returns 0
  *
  *
  * @details
@@ -265,16 +265,16 @@ get_spectype (yesno, question, spectype)
  *
  * Most of the modes are initialized to 0, which means that
  * activites that could be uddertaken for this mode, will
- * not be.  
+ * not be.
  *
  * Advanced modes are turned off by default, unless the
  * -d flag is invoked at runtime.  If it is invoked,
  * one will be asked whether to turn-on an advanced mode.
  *
  * In most cases, the advanced modes cause extra diagnostic
- * information to be saved. 
+ * information to be saved.
  *
- * see #111 and #120 for recent work 
+ * see #111 and #120 for recent work
  *
  **********************************************************/
 
@@ -295,8 +295,8 @@ init_advanced_modes ()
   modes.fixed_temp = 0;		// do not attempt to change temperature - used for testing
   modes.zeus_connect = 0;	// connect with zeus
 
-  //note write_atomicdata  is defined in atomic.h, rather than the modes structure 
-  write_atomicdata = 0;		// print out summary of atomic data 
+  //note write_atomicdata  is defined in atomic.h, rather than the modes structure
+  write_atomicdata = 0;		// print out summary of atomic data
 
 
   modes.keep_photoabs = 1;	// keep photoabsorption in final spectrum
@@ -307,11 +307,11 @@ init_advanced_modes ()
 
 
 /**********************************************************/
-/** @name      init_observers
+/**
  * @brief      get inputs that describe the detailed spectra that
  * one intends to extract.
  *
- * @return   Always returns 0   
+ * @return   Always returns 0
  *
  * @details
  *
@@ -409,7 +409,7 @@ init_observers ()
 
 /* In advanced mode, select spectra with certain numbers of scatteringsi, and or other
  * characteristics
- */  
+ */
 
   if (modes.iadvanced)
     {
@@ -477,8 +477,8 @@ init_observers ()
 
 
 /**********************************************************/
-/** @name      init_photons
- * @brief      gets information about the number of 
+/**
+ * @brief      gets information about the number of
  * 	cycles and how many photons there should be per cycle.
  *
  * @return     Generally returns 0
@@ -499,7 +499,7 @@ init_photons ()
   PhotPtr p;
   double x;
 
-  /* Although photons_per_cycle is really an integer, 
+  /* Although photons_per_cycle is really an integer,
      read in as a double so it is easier for input */
 
   x = 100000;
@@ -554,11 +554,11 @@ init_photons ()
 
 
 /**********************************************************/
-/** @name      init_ionization
+/**
  * @brief      Select the ionization and line transfer modes, along
  * with various other parameters about ionization
  *
- * @return   Always returns 0  
+ * @return   Always returns 0
  *
  * @details
  * The routine queries for a variety of parameters which describe
@@ -566,10 +566,10 @@ init_photons ()
  * whether surfaces reflect
  *
  * ### Notes ###
- * 
- * The routine is not particular well named, and it is not 
+ *
+ * The routine is not particular well named, and it is not
  * immediately obvious that all of the parmenters that are queried
- * for here are related.  
+ * for here are related.
  *
  **********************************************************/
 
@@ -606,7 +606,7 @@ init_ionization ()
   geo.partition_mode = -1;	//?? Stuart, is there a reason not to move this earlier so it does not affect restart
 
 
-  /* get_line_transfer_mode reads in the Line_transfer question from the user, 
+  /* get_line_transfer_mode reads in the Line_transfer question from the user,
      then alters the variables geo.line_mode, geo.scatter_mode, geo.rt_mode and geo.macro_simple */
 
   // XXX - Note clear that get_line_transfer_mode should be a separate routine; perhaps incoroporate here
@@ -662,7 +662,7 @@ init_ionization ()
 
 
 /**********************************************************/
-/** @name      setup_dfudge
+/**
  * @brief      Sets a global "push_through_distance" designed
  * to prevent photons from being trapped at boundaries
  *
@@ -678,19 +678,19 @@ init_ionization ()
  * ### Notes ###
  *
  * setup_dfudge is used to modify the variable DFUDGE which
- * can be found in python.h.  
+ * can be found in python.h.
  *
  * Originally, DFUDGE was the only number used to push through
  * boundariies, but today DFUDGE is used sparingly, if at all,
  * as push tryough distances within wind cells are defined
- * differently for each cell.  
+ * differently for each cell.
  *
  * There are two competing factors in defining DFUDGE.  It
  * should be short enough so that the push through distane
  * goes only a small way into s cell.  It should be large
  * enough though that round-off errors do not prevent one
- * from actually getting into a cell.  
- * 
+ * from actually getting into a cell.
+ *
  * @bug This routine does not really belong in this file. It
  * should be moved.
  **********************************************************/
@@ -720,4 +720,3 @@ setup_dfudge ()
 
   return (dfudge);
 }
-

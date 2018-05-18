@@ -69,7 +69,7 @@
 
 
 /**********************************************************/
-/** @name      levels
+/** 
  * @brief      Calculates the fractional occupation numbers of
  * 	the various  of atomic configurations assuming LTE or various
  * 	alternatives to LTE

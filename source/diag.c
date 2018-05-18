@@ -4,57 +4,57 @@
  * @author ksl
  * @date   May, 2018
  *
- * @brief  
- * consolidates an approach to providing extra diagnositcs 
+ * @brief
+ * consolidates an approach to providing extra diagnositcs
  * for debugging python, Some of the diagnostics allow one to change
  * defaults in python while others allow traking of and contains initialization routines
  * that control which diagnosics are a
  *
  * The first few functions are associated with gather information about what
  * one wants to track
- * 
+ *
  * The basic idea for the extra diagnositics routines are as follows:
- * 
+ *
  * There is one file to which all of the diagnostics are written.
  * Which diagnositica are written depends on how varaious of the modes
  * variables are set.
- * 
+ *
  * All of the various diagnostic routines should be line oriented and begin
  * with a unique identifier to allow easy parsing of the outputs.
- * 
- * 
- * To add a new diagnostic one should 
- * 
- *  * (0) check that one of the existing diagnostics is insuffient for your needs 
- *  * (1) add a routine here that writes to the diagnostic file.  
+ *
+ *
+ * To add a new diagnostic one should
+ *
+ *  * (0) check that one of the existing diagnostics is insuffient for your needs
+ *  * (1) add a routine here that writes to the diagnostic file.
  *  * (2) add a rdpar statement in get_extra_diagnostics
- *  * (3) Assure that your new routine has the appropriate doxygne description, 
- *  * (4) Add a yaml file for the new rdpare statemnt), and 
+ *  * (3) Assure that your new routine has the appropriate doxygne description,
+ *  * (4) Add a yaml file for the new rdpare statemnt), and
  *  * (5) call the routine with the approriate condidtions from wherever you wish.
- * 
+ *
  * As written, you must put your routine here.  This is done on purpose
  * so that we will not proliferate extra diagnostics around the various
  * subroutines.
- * 
- * 
- * ### Notes ### 
- * 
+ *
+ *
+ * ### Notes ###
+ *
  * The unified approach makes most sense when one wants similar information
  * spread out over several routines.  There will be places where one
- * wishes to print out detailed information within a certain routine.  
- * A current example is print_dvds_info, which is totally contained within 
+ * wishes to print out detailed information within a certain routine.
+ * A current example is print_dvds_info, which is totally contained within
  * gradv.c
  *
  * This approached was adopted, based onthe discution isssue #338
  * A detailed look at the subroutines indicates that this, especially the
- * part having to do with writing to a single diagnostic file is a work 
+ * part having to do with writing to a single diagnostic file is a work
  * in progress.
  *
  * Right now there are a numer of very similar routines, some of
  * which might be combined.
  *
- * 
- * 
+ *
+ *
  ***********************************************************/
 
 
@@ -73,14 +73,14 @@
 
 
 /**********************************************************/
-/** @name      get_standard_care_factors
+/**
  * @brief      get inputs that provides more control over how the program is
- *   run 
+ *   run
  *
  * @return     Always returns 0
  *
  * @details
- * In advanced mode, this routine provides ways to change 
+ * In advanced mode, this routine provides ways to change
  * several somewhat unrelated parameters in the routines
  *
  * The parameters are
@@ -92,15 +92,15 @@
  * @bug It is not obvious that much recent thought has been
  * given to the choices that are here.  The fractional distance
  * that a photon travel is intended to make sure the velocity
- * along the line of sight can be approximated linearly.  If 
+ * along the line of sight can be approximated linearly.  If
  * a photon travels too far in an azimuthal direction the sense
  * of the velocity can change and this prevensts this
- * 
+ *
  * The lowest ion density contributing to photoionization is used
  * to determine what ions one has to calculate the photoionzation
  * xsection for.  The lower this density; the more that have to be
  * calculated, and as a result the slower the program.
- * 
+ *
  * Keeping photoionizaion during final spectrum allows one to
  * check the contribution of photoabsorption.
  *
@@ -134,7 +134,7 @@ get_standard_care_factors ()
 
 
 /**********************************************************/
-/** @name      get_extra_diagnostics
+/**
  * @brief      Allows the user to specify what extra diagnositcs
  * to write out
  *
@@ -189,14 +189,18 @@ get_extra_diagnostics ()
 
 
 int eplinit = 0;
-int pstatinit = 0;		/*To say if we have checked to see if we need to log photons */
-FILE *epltptr;			/* Extra diagnostics file */
+
+/// To say if we have checked to see if we need to log photons
+int pstatinit = 0;
+
+/// Extra diagnostics file
+FILE *epltptr;
 
 
 
 /**********************************************************/
-/** @name      init_extra_diagnostics
- * @brief      opon a file for writing out 
+/**
+ * @brief      opon a file for writing out
  *  extra diagnostics.  In some cases reads a file
  *  that specifies in which cells ones wants diagnostics
  *
@@ -209,7 +213,7 @@ FILE *epltptr;			/* Extra diagnostics file */
  *
  * ### Notes ###
  * see #111 and #120
- * 
+ *
  * The diagnostic filenames are  hardwired
  *
  * @bug Ultimately we would like to write the extra diagnositcs to
@@ -272,13 +276,13 @@ init_extra_diagnostics ()
 
 
 /**********************************************************/
-/** @name      save_photon_stats
+/**
  * @brief      prints photon statistics to a file
  *
  * @param [in] WindPtr  one   WindPtr for the cell
  * @param [in] PhotPtr  p   Photon pointer (for one photon)
  * @param [in] double  ds   ds travelled
- * @param [in] double  w_ave   The avereage weight of the pohton as it travelled 
+ * @param [in] double  w_ave   The avereage weight of the pohton as it travelled
  * @return     Always returns 0
  *
  * @details
@@ -320,7 +324,7 @@ save_photon_stats (one, p, ds, w_ave)
 
 
 /**********************************************************/
-/** @name      save_extract_photons
+/**
  * @brief      saves informations about phtoons in
  *     a particulare wavelength gange
  *
@@ -359,17 +363,17 @@ int save_photon_number = 0;
 
 
 /**********************************************************/
-/** @name      save_photons
+/**
  * @brief      save_photon
  *
  * @param [in] PhotPtr  p   Photon pointer
- * @param [in] char  comment[]   A comment indicating why/at what point the photon information 
+ * @param [in] char  comment[]   A comment indicating why/at what point the photon information
  * needed to be recorded.
  * @return     Always returns 0
  *
  * @details
  * This is a diagnostic that allows one to print out information about
- * a photon at any time.  
+ * a photon at any time.
  *
  * ### Notes ###
  * It was written as part of the effort to
@@ -396,8 +400,8 @@ save_photons (p, comment)
 
 
 /**********************************************************/
-/** @name      track_scatters
- * @brief      
+/**
+ * @brief
  *
  * @param [in] PhotPtr  p   Photon pointer
  * @param [in] int  nplasma   the cell in which the photon resides

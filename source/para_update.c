@@ -15,7 +15,7 @@
 #include "python.h"
 
 /**********************************************************/
-/** @name      communicate_estimators_para
+/** 
  * @brief      communicates the MC estimators between tasks
  *
  * @details
@@ -267,7 +267,7 @@ communicate_estimators_para ()
 
 
 /**********************************************************/
-/** @name      gather_spectra_para
+/** 
  * @brief sum up the synthetic spectra between threads.   
  * 
  * @param [in] int  nspecs number of spectra to compute 
@@ -334,7 +334,7 @@ gather_spectra_para (nspec_helper, nspecs)
 
 
 /**********************************************************/
-/** @name      communicate_matom_estimators_para
+/** 
  * @brief      
  *
  * @details averages the macro-atom estimators between tasks using MPI_Reduce. 

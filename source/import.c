@@ -37,7 +37,7 @@
 
 
 /**********************************************************/
-/** @name      import_wind
+/** 
  * @brief      Import a gridded model
  *
  * @param [in] int  ndom   The domain for the model
@@ -91,7 +91,7 @@ import_wind (ndom)
 
 
 /**********************************************************/
-/** @name      import_make_grid
+/** 
  * @brief      Make the Python grid 
  *
  * @param [in] WindPtr  w  The entire wind structure
@@ -145,7 +145,7 @@ import_make_grid (w, ndom)
 
 
 /**********************************************************/
-/** @name      import_velocity
+/** 
  * @brief      Get the velocity at a position for an imported model
  *
  * @param [in] int  ndom   The domain in which the velocity is to be determined
@@ -193,7 +193,7 @@ import_velocity (ndom, x, v)
 
 
 /**********************************************************/
-/** @name      get_import_wind_params
+/** 
  * @brief      get parameters associated with an imported wind model
  *
  * @param [in] int  ndom   The domain associated with an imported model
@@ -219,7 +219,7 @@ get_import_wind_params (ndom)
 
 
 /**********************************************************/
-/** @name      import_rho
+/** 
  * @brief      Get the density at an arbitray position in an imported 
  * model
  *
