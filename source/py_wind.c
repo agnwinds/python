@@ -90,7 +90,7 @@ char *choice_options = "\n\
    r=t_r, t=t_e,  w=rad_weight,  s=vol,     l=lum,     C=cooling/heating,  b=adiabatic cooling\n\
    a=abs,         L=line lum,    g=photo,   h=recomb,  k=tau H,     m=F_rad, x=total, y=mod_te,\n\
    o=overview,    e=everything,  P=Partial emission meas,  I=Ionisation parameter\n\
-   W=wind_region, D=dvds_ave,    X=position summary, M=macro atom info, G=inner shell\n\
+   W=wind_region, D=dvds_ave,    X=position summary, M=macro atom info\n\
    d=convergence status  E=convergence_all_info   B=PlasmaPtr  J=Radiation density\n\
    H=All Heating and Cooling mechanisms in one shot  O=Spectral model parameters S=Spectral models\n\
    z=Zoom,u=unZoom,Z=switch to/from raw and yz projected modes, F=Create files, A=Change file write defaults\n\
@@ -433,9 +433,9 @@ one_choice (choice, root, ochoice)
   case 'g':                    /*n photo */
     photo_summary (wmain, root, ochoice);
     break;
-  case 'G':                    /* inner shell summary */
-    inner_shell_summary (wmain, root, ochoice);
-    break;
+//  case 'G':    Removed relevant data from python so option removed May 18         /* inner shell summary */
+//    inner_shell_summary (wmain, root, ochoice);
+//    break;
   case 'h':                    /*n photo */
     Log ("Don't get discouraged.  This takes a little while!");
     recomb_summary (wmain, root, ochoice);
