@@ -47,8 +47,8 @@ struct
  * @brief      Read the an arbitray wind model in cylindrical
  *     coordinates
  *
- * @param [in] int  ndom   The domain number for the imported model
- * @param [in] char *  filename   The file containing the model to import
+ * @param [in] ndom   The domain number for the imported model
+ * @param [in] filename   The file containing the model to import
  * @return     Always returns 0
  *
  * @details
@@ -209,8 +209,8 @@ import_cylindrical (ndom, filename)
  * portions of the Wind and Domain structures
  *
  *
- * @param [in] WindPtr  w   The entire wind
- * @param [in] int  ndom   The domain number
+ * @param [in] w   The entire wind
+ * @param [in] ndom   The domain number
  * @return   Always returns 0
  *
  * @details
@@ -385,15 +385,10 @@ cylindrical_make_grid_import (w, ndom)
  * @brief      The velocity at any positiion in an imported cylindrical
  * model
  *
- * @param [in] int  ndom   The domain of the imported model
- * @param [in] double *  x   A position
-<<<<<<< HEAD
- * @param [in out] double *  v   The velocity at x
+ * @param [in] ndom   The domain of the imported model
+ * @param [in] x   A position
+ * @param [out] v   The velocity at x
  * @return     The speed at x
-=======
- * @param [out] double *  v   The velocity at x
- * @return     The speed at x
->>>>>>> upstream/dev
  *
  * @details
  * This routine interpolates on the values read in for the
@@ -439,28 +434,12 @@ velocity_cylindrical (ndom, x, v)
 
 
 
-<<<<<<< HEAD
-
-/* Fill in plasma ptrs with densities.
- *
- * For this we assume that the densities read in are
- * given at the * midpoints of the grid
- *
- *
- * */
-
-/*  This routine should only be called to set up the plasma cells,
- *  and we assume that rho that was imported is the center of the
- *  plasma cell, so there is no need to interpolate.
- */
-
-
 /**********************************************************/
 /**
  * @brief      Get the density for an imported cylindrical model at x
  *
- * @param [in] int  ndom   The domain for the imported model
- * @param [in] double *  x   A position
+ * @param [in] ndom   The domain for the imported model
+ * @param [in] x   A position
  * @return     The density in cgs units is returned
  *
  * @details

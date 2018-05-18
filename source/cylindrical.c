@@ -28,27 +28,16 @@
  * boundary of the cell in which the photon bundle when dealing
  * with a cylindrical domain
  *
-<<<<<<< HEAD
- * @param [in, out] int  ndom   The number of the domain of interest
- * @param [in, out] PhotPtr  p   Photon pointer
+ * @param [in] ndom   The number of the domain of interest
+ * @param [in] p   Photon pointer
  * @return     distance to the far boundary of the cell
-=======
- * @param [in] int  ndom   The number of the domain of interest
- * @param [in] PhotPtr  p   Photon pointer
- * @return     distance to the far boundary of the cell 
->>>>>>> upstream/dev
  *
  * Negative numbers (and zero) should be
  * regarded as errors.
  *
  * @details
-<<<<<<< HEAD
  *
- * This routine solves the quadratic equaitons that allow one
-=======
- * 
  * This routine solves the quadratic equations that allow one
->>>>>>> upstream/dev
  * to determine the distance a photon can travel within a cylindrical
  * cell before hitting the edge of the cell.
  *
@@ -291,7 +280,7 @@ cylind_make_grid (ndom, w)
  *
  *
  * @details
- * This simple little routine just populates two one dimensional arrays 
+ * This simple little routine just populates two one dimensional arrays
  * that are used for interpolation.
  *
  * ### Notes ###
@@ -353,13 +342,8 @@ cylind_wind_complete (ndom, w)
  * 	allowing for the fact that some cells are not necessarily entirely in
  * 	the wind
  *
-<<<<<<< HEAD
- * @param [in, out] int  ndom   The domain of interest
- * @param [in, out] WindPtr  w   the entire wind
-=======
- * @param [in] int  ndom   The domain of interest
- * @param [in,out] WindPtr  w   the entire wind
->>>>>>> upstream/dev
+ * @param [in] ndom   The domain of interest
+ * @param [in,out] w   the entire wind
  * @return     Always returns 0
  *
  * @details
@@ -510,18 +494,11 @@ cylind_volumes (ndom, w)
  * @brief      locates the grid position of the vector,
  * 	when one is using cylindrical coordinates.
  *
- * @param [in] int  ndom   The domain number
-<<<<<<< HEAD
- * @param [in, out] double  x[]   A postion
- * @return     the element number in wmain associated with
- *  a position.  If the position is in the grid this will be a positive
- *  integer
-=======
- * @param [in] double  x[]   A position
+ * @param [in] ndom   The domain number
+ * @param [in] x[]   A position
  * @return     the element number in wmain associated with
  * a position.  If the position is in the grid this will be a positive
- * integer 
->>>>>>> upstream/dev
+ * integer
  *
  * if the number is -1 then the position is inside (has rho less than
  * rhomin) the grid.  If -2, then it is outside the grid.
@@ -530,15 +507,8 @@ cylind_volumes (ndom, w)
  *
  * ### Notes ###
  *
-<<<<<<< HEAD
- *  The routine does not tell you whether the x is in the wind or not,
- *  just that it is in the region covered by the grid.
- *
-=======
  * The routine does not tell you whether the x is in the wind or not,
- * just that it is in the region covered by the grid. 
- * 
->>>>>>> upstream/dev
+ * just that it is in the region covered by the grid.
  *
  **********************************************************/
 
