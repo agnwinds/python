@@ -1920,7 +1920,7 @@ dvds_summary (w, rootname, ochoice)
 }
 
 /* A summary of inner shell ionization */
-
+/* NSH - this code removed May 18 
 int
 inner_shell_summary (w, rootname, ochoice)
      WindPtr w;
@@ -1951,7 +1951,7 @@ inner_shell_summary (w, rootname, ochoice)
   return (0);
 
 }
-
+*/
 
 /* A summary of the Ionization parameter - might not always be present */
 
