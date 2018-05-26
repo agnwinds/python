@@ -29,7 +29,7 @@
  * is not random.
  *
  * The extract option is used
- * normaly during the spectral extraction cycles.  
+ * normally during the spectral extraction cycles.  
  * However, as an advanced option one can use the live or die
  * to construct the detailed spectrum.  One would not normally 
  * want to do this, as many photons are "wasted" since they 
@@ -314,6 +314,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
   double x_dfudge_check[3];
   int ndom;
   double normal[3];
+  double ds1,ds2;
 
   /* Initialize parameters that are needed for the flight of the photon through the wind */
 
@@ -372,8 +373,15 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       if (geo.absorb_reflect==BACK_RAD_SCATTER){
           /* If we got here, the a new photon direction needs to be defined that will cause the photon 
            * to continue in the wind.  Since this is effectively a scattering event we also have to
-           * extract a photon to consturct the detailed spectrum 
+           * extract a photon to construct the detailed spectrum.  The vector normal was determined
+           * by walls 
            */
+          if (where_in_wind(pp.x,&ndom)==W_IN_STAR){
+              move_phot(&pp,-DFUDGE);
+              if (where_in_wind(pp.x,&ndom)==W_IN_STAR){
+                  Error("trans_phot_single: Still in star on backscatter\n");
+              }
+          }
           randvcos(pp.lmn,normal);
           stuff_phot (&pp, p);
           tau_scat = -log (1. - random_number(0.0,1.0));
@@ -410,8 +418,18 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
       if (geo.absorb_reflect==BACK_RAD_SCATTER){
           /* If we got here, the a new photon direction needs to be defined that will cause the photon 
            * to continue in the wind.  Since this is effectively a scattering event we also have to
-           * extract a photon to consturct the detailed spectrum 
+           * extract a photon to construct the detailed spectrum.  The vector normal was determined
+           * by walls
            */
+          if (where_in_wind(pp.x,&ndom)==W_IN_DISK){
+              ds1=ds_to_disk(&pp,0);
+              ds2=ds_to_disk(&pp,1);
+              Log("TEST: ds  %.2e   %.2e  DFUDGE %.2e\n",ds1,ds2,DFUDGE);
+              move_phot(&pp,-DFUDGE);
+              if (where_in_wind(pp.x,&ndom)==W_IN_DISK){
+                  Error("trans_phot_single: Still in disk on backscatter\n");
+              }
+          }
           randvcos(pp.lmn,normal);
           stuff_phot (&pp, p);
           tau_scat = -log (1. - random_number(0.0,1.0));

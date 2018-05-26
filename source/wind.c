@@ -49,7 +49,7 @@
  * @param [in] double  x[]    a position
  * @param [out] int *  ndomain   the wind domain that the position lies in, if it does
  * @return   W_ALL_INWIND if the position is in a wind, W_IN_DISK if inside a vertically
- * extended disk, W_NOT_INWIND otherwise 
+ * extended disk, W_IN_STAR if inside the star, W_NOT_INWIND otherwise 
  * 
  *
  * @details
@@ -72,6 +72,10 @@
  * he photon is between the two wind cones and/or inside minimum or maximum radius of the wind.     
  * 
  *
+ * The routine first checks to see if the photon is inside the disk or the star. This can
+ * happen because transphot pushes into a boundary by a small difference so that the
+ * routine walls operates properly
+ *
  **********************************************************/
 
 int
@@ -86,7 +90,15 @@ where_in_wind (x, ndomain)
 
 
   /* First check for items, like the disk that are not domain
-   * related, like the disk */
+   * related, like the disk.  We check for the star first
+   * because the way we have defined the vertically extended
+   * disk the height does not go to zero at rstar */
+
+  if (length(x)<geo.rstar) {
+      *ndomain = -1;
+      return(W_IN_STAR);
+  }
+
 
   z = fabs (x[2]);		/* Necessary to get correct answer above
 				   and below plane */
@@ -102,7 +114,6 @@ where_in_wind (x, ndomain)
 	  return (W_IN_DISK);
 	}
     }
-
 
   /* Now check whether position is a wind region of any of the domains.
    * This is done in reverse order on the assumption that our domains

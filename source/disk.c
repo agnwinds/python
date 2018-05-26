@@ -83,7 +83,7 @@ double
 teff (t, x)
      double t, x;
 {
-  double q=0;
+  double q = 0;
   double theat, r;
   double pow ();
   double disk_heating_factor;
@@ -404,12 +404,11 @@ ds_to_disk (p, allow_negative)
       diskbottom.x[2] = (-geo.diskrad * geo.disk_z0);
       diskbottom.lmn[0] = diskbottom.lmn[1] = 0.0;
       diskbottom.lmn[2] = 1.0;
-
-      ds_to_disk_init++;	// Only initialize once
-
+      ds_to_disk_init++;	// Only initialize once 
     }
 
-  /* Now calculate the place where the photon hits the diskplane */
+  /* Now calculate the place where the photon hits the disk plane */
+
 
   s_test = s_plane = ds_to_plane (&diskplane, p);
   stuff_phot (p, &phit);
@@ -422,14 +421,15 @@ ds_to_disk (p, allow_negative)
   if (geo.disk_type == DISK_FLAT)
     {
       if (r > geo.diskrad)
-	return (VERY_BIG);
-      else if (allow_negative)
+	{
+	  return (VERY_BIG);
+	}
+      else if (s_plane > 0 || allow_negative)
 	{
 	  return (s_plane);
 	}
-      else if (s_plane > 0)
+      else
 	{
-	  return (s_plane);
 	  return (VERY_BIG);
 	}
     }
@@ -468,6 +468,11 @@ ds_to_disk (p, allow_negative)
 	}
     }
 
+  /* So at this point, the distance to the top plane is
+   * known, and stored in s_top and if this hits within
+   * geo.diskrad stored in either s, or s_negative
+   */
+
 
 
   s_test = s_bottom = ds_to_plane (&diskbottom, p);
@@ -487,11 +492,22 @@ ds_to_disk (p, allow_negative)
 	}
     }
 
+  /* So at this point, the distance to the bottom plane is
+   * known, and stored in s_bottom  and if this hits within
+   * geo.diskrad stored in either s, or s_negative (if these
+   * distances are smaller than they were in absolute value
+   *
+   * Now we check whether the photon its the sphere
+   */
+
   s_test = s_sphere = ds_to_sphere (geo.diskrad, p);
   stuff_phot (p, &phit);
   move_phot (&phit, s_test);
 
-  /* At this point phit is on the sphere but our check here is whether its on the diks or not
+  /* At this point phit is on the sphere but but we need to 
+   * check whether it is hitting the outide edge of the disk
+   * so we check where exactly it hit.  If it hist the 
+   * edge we once again look to reduce the distances
    */
 
   if (fabs (phit.x[2]) < geo.disk_z0 * geo.diskrad)
@@ -551,7 +567,7 @@ ds_to_disk (p, allow_negative)
    * we want.  smax should be no more than the distance to the
    * disk_plane (assuming we have a photon headed toward the plane)
    *
-   * Note that the next little section is inted to select between the
+   * Note that the next little section is intended to select between the
    * top and bottom face of the disk
    */
 

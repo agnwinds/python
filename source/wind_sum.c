@@ -49,6 +49,9 @@
  * when coodinates systems other than cylindrical are
  * used.
  *
+ * 180526 - ksl - Fixed #384
+ *
+ *
  **********************************************************/
 
 int
@@ -102,7 +105,8 @@ xtemp_rad (w)
 	  for (i = py_wind_min; i < py_wind_max; i += 1)
 	    {
 	      n = nstart + i;
-	      Log ("%8.2e ", plasmamain[n].t_r);
+	      nplasma = w[n].nplasma;
+	      Log ("%8.2e ", plasmamain[nplasma].t_r);
 	      if (j % 10 == 0)
 		{
 		  Log ("\n");
@@ -116,7 +120,8 @@ xtemp_rad (w)
 	  for (i = py_wind_min; i < py_wind_max; i += 1)
 	    {
 	      n = nstart + i;
-	      Log ("%8.2e ", plasmamain[n].t_e);
+	      nplasma = w[n].nplasma;
+	      Log ("%8.2e ", plasmamain[nplasma].t_e);
 	      if (j % 10 == 0)
 		{
 		  Log ("\n");
@@ -130,9 +135,10 @@ xtemp_rad (w)
 	  for (i = py_wind_min; i < py_wind_max; i += 1)
 	    {
 	      n = nstart + i;
-	      if (plasmamain[n].vol > 0.0)
+	      nplasma = w[n].nplasma;
+	      if (plasmamain[nplasma].vol > 0.0)
 		{
-		  ntot = plasmamain[n].ntot;
+		  ntot = plasmamain[nplasma].ntot;
 		}
 	      else
 		ntot = 0;

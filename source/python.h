@@ -713,7 +713,7 @@ typedef struct wind
   double dfudge;                /* A number which defines a push through distance for this cell, which replaces the
                                    global variable DFUDGE in many instances */
   enum inwind_enum
-  { W_IN_DISK = -5, W_IGNORE = -2, W_NOT_INWIND = -1,
+  { W_IN_DISK = -5, W_IN_STAR = -4, W_IGNORE = -2, W_NOT_INWIND = -1,
     W_ALL_INWIND = 0, W_PART_INWIND = 1, W_NOT_ASSIGNED = -999
   } inwind;
   Wind_Paths_Ptr paths, *line_paths;    // SWM 6-2-15 Path data struct for each cell

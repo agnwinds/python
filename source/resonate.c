@@ -42,11 +42,13 @@ double cds_v2_old, cds_dvds2_old;
  * @param [in,out] double *  tau   Initially the current optical depth for
  * the photon; finally the optical depth at the distance the photon can be
  * moved.
- * @param [out] int *  nres   the number of the resonance if there was one, -1 if there was no resonant scatter
+ * @param [out] int *  nres   the number of the resonance, -1 if it was electron 
+ * scatttering, -2 if it was ff, -99 if the
+ * distance is not limited by some kind of scatter.
  * @param [in] double  smax   the maximum distance the photon can
  * travel in the cell
- * @param [out] int *  istat   A flag indidicating whether the
- * photon should scatter if it traels the distance estimated, 0 if no, TAU_SCAT if yes.
+ * @param [out] int *  istat   A flag indicating whether the
+ * photon should scatter if it travels the distance estimated, 0 if no, TAU_SCAT if yes.
  * @return     The distance the photon can travel
  *
  * calculated_ds calculates the distance the photon can travel subject to a
@@ -69,6 +71,11 @@ double cds_v2_old, cds_dvds2_old;
  * coordinate gridding, such as the maximum distance the photon
  * can travel before hitting the edge of the
  * shell should be calculated outside of this routine.
+ *
+ * 180519 - ksl - I modified the behavior ot this routine so that nres
+ * indicates that a scattering event is not limiting the maximum
+ * distance.  nres is now -99 if there was no scatter, instead of
+ * -1
  *
  *
  **********************************************************/
@@ -113,7 +120,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   ds_current = 0;
   init_dvds = 0;
   dvds1 = dvds2 = 0.0;		// To avoid a -03 compile warning
-  *nres = -1;
+  *nres = -99;
   *istat = P_INWIND;
 
   if (ttau < 0.0)
@@ -245,7 +252,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
  */
 
 
-      freq_av = freq_inner;	//(freq_inner + freq_outer) * 0.5;  //need to do better than this perhaps but okay for star - comoving frequency (SS)
+      freq_av = freq_inner;	//(freq_inner + freq_outer) * 0.5;  
 
 
       kap_bf_tot = kappa_bf (xplasma, freq_av, 0);
@@ -434,7 +441,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 
 /* If the photon reaches this point it was not scattered by resonances.
- * ds_current is either 0 if there were no resonances or the postion of the
+ * ds_current is either 0 if there were no resonances or the position of the
  * "last" resonance if there were resonances.  But we need to check one
  * last time to see if it was scattered by continuum process.
  * Note: ksl -- It is generally a bad policy to have a bunch of repeated code
@@ -477,17 +484,22 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 
 /**********************************************************/
 /**
- * @brief      determine what continuum
+ * @brief      determine what the continuum
  * process was that caused the scatter and returns this to
  * the main routine.
  *
  * @param [in] double  kap_cont   The continuum opacity
  * @param [in] double  kap_es   The electron scattering opacity
  * @param [in] double  kap_ff   The free free opacity
- * @param [in] PlasmaPtr  xplasma   The plasma cell where everyting is being
+ * @param [in] PlasmaPtr  xplasma   The plasma cell where everything is being
  * calculated
  * @return     The process that cause the photon to stop/scatter at a particular
  * point
+ *
+ *  * -1 implies electron scattering
+ *  * -2 implies free-free
+ *  * 0 or greater implies a specific photionization process was responsible (and 
+ *  also that the program was operating in macro-atom mode.
  *
  * @details
  * This routine is called to determine which of several continuum proceseses
@@ -503,6 +515,11 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
  * routine a random number is generated and this is used to determine
  * which of the processes was responsible.  Data for the opacity due to
  * photonionization is passed remotely via the PlasmaPtr.
+ *
+ * In a program running in the two level approxiamtion, electron scattering
+ * and ff emsision are treated as scattering processes, but photionionization
+ * is not.  In macro-atom mode, photoionization is treated as a scattering 
+ * process.
  *
  **********************************************************/
 
@@ -532,17 +549,21 @@ select_continuum_scattering_process (kap_cont, kap_es, kap_ff, xplasma)
   /* Now check for bf. */
   else
     {
-/* use a running sum to find which photoionisation process it was */
-/*
-If a non-macro-atom run is being done this part should never be reached.
-Just do a check that all is well - this can be removed eventually (SS)
+/* It must be a bound free porcess that caused this photon to "scatter".
+ *
+ * BF is only treated as a scattering process when we are in macro mode
+ * so the code first checks that we are in marco mode.  If we are not,
+ * it exits, because this should never ocurr.  If we are in macro-mode
+ * then we determine which photo-ionization process was responsible.
 */
       if (geo.rt_mode == RT_MODE_2LEVEL)
 	{
 	  Error
-	    ("calculate_ds: Not using macro atoms but trying to excite one? Aboort.\n");
+	    ("select_continum_scattering_process: Not using macro atoms but trying to excite one? Abort.\n");
 	  exit (0);
 	}
+
+
       run_tot = kap_es + kap_ff;
       ncont = 0;
       while (run_tot < threshold)
@@ -551,7 +572,7 @@ Just do a check that all is well - this can be removed eventually (SS)
 	  ncont++;
 	}
       /* When it gets here know that excitation is in photoionisation labelled by ncont */
-      nres = NLINES + 1 + xplasma->kbf_use[ncont - 1];	//modified SS Nov 04
+      nres = NLINES + 1 + xplasma->kbf_use[ncont - 1];
     }
   return (nres);
 }

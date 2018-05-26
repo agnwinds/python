@@ -203,7 +203,8 @@ translate_in_space (pp)
 		}
 	    }
 
-	  /* So at this point we have either gotten out of the domain or we have found a cell that
+	  /* So at this point we have either gotten out of the domain 
+       * or we have found a cell that
 	   * is actually in the wind or we encoutered the error above
 	   */
 
@@ -216,17 +217,28 @@ translate_in_space (pp)
 
     }
 
-/* ?? The way in which a photon is identified as hitting the star seems
-a bit convoluted.  Despite the fact that it is already identified here
-as being a photon that hits the star, another determination of this
-fact is made inside walls, which uses the position of the photon to see
-this. One could ask a slightly different question in walls...e.g. has the
-photon hit the star in its passage from pold to the current position */
+/* 
+ * Check that we have not hit the star or the disk as part of
+ * the earlier calculation.  This should not normally happen
+ * but it may in the case where the wind_cones are insufficient
+ * to define the boundaries.  An example of this is the case
+ * of the vertically extended disk.  Not that when this is the limiting
+ * factor, the final position will be inside the star or disk.  This
+ * is necessary, because we later use walls to find the exact posion
+ * of the photon and walls needs the new photon position to be on the
+ * other side of the boundary. 
+ */
 
   if ((x = ds_to_sphere (geo.rstar, pp)) < ds)
     {
       x = ds;
       pp->istat = P_HIT_STAR;	/* Signifying that photon is hitting star */
+    }
+
+  if ((x = ds_to_disk (pp,0)) < ds)
+    {
+      x = ds;
+      pp->istat = P_HIT_DISK;	/* Signifying that photon is hitting disk */
     }
   move_phot (pp, ds + DFUDGE);
 
@@ -658,10 +670,21 @@ The choice of SMAX_FRAC can affect execution time.*/
 
   ds_current = calculate_ds (w, p, tau_scat, tau, nres, smax, &istat);
 
-  if (p->nres < 0)
-    xplasma->nscat_es++;
-  if (p->nres > 0)
-    xplasma->nscat_res++;
+/**
+ * @bug  The next few lines are commented out because they are not correct as discussed
+ * in issue #383.  There are numerous isses with the lines as written, including the
+ * fact that p->nres is not updated by ds_current, and is unclear when the plasma variables
+ * nscat_es and nscat_res.  If these two variables are needed, the updating should be done
+ * when photons are actually scattered, e.g in scatter in resonate.c.  For now, the next lines
+ * have simply been commented out reflecting that what is being accumulated here is pretty
+ * meaningless.  It is possilbe that the variables can simply be deleted, as they are not in
+ * my experience much used.  180519 ksl
+ */
+
+//DELETE?  if (p->nres < 0)
+//DELETE?    xplasma->nscat_es++;
+//DELETE?  if (p->nres > 0)
+//DELETE?    xplasma->nscat_res++;
 
 
 /* OK now we increment the radiation field in the cell, translate the photon and wrap
@@ -909,6 +932,11 @@ walls (p, pold, normal)
 	    }
 	  stuff_phot (pold, p);
 	  move_phot (p, s - DFUDGE);
+
+      rho = sqrt (p->x[0] * p->x[0] + p->x[1] * p->x[1]);
+      if ((rho) < geo.diskrad && fabs (p->x[2]) <= (z = zdisk (rho))) {
+          Error("Bloody Hell. We are still inside the disk\n");
+      }
 
 	  /* Finally, we must calculate the normal to the disk at this point */
 
