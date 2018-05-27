@@ -462,10 +462,10 @@ get_matom_f (mode)
  *      energy emitted in this way in the wavelength range in question is well known
  *      (calculated in the ionization cycles).
  *
- * @param [in, out] PhotPtr  p   the ptr to the structire for the photons
+ * @param [in, out] PhotPtr  p   the ptr to the entire structure for the photons
  * @param [in] double  weight   the photon weight
- * @param [in] int  photstart   ???
- * @param [in] int  nphot   the number of the first photon to be generated and
+ * @param [in] int  photstart   The first element of the photon stucure to be populated
+ * @param [in] int  nphot   the number of photons to be generated
  * @return int nphot  When it finishes it should have generated nphot photons from k-packet elliminations.
  *
  * @details
@@ -629,8 +629,8 @@ photo_gen_kpkt (p, weight, photstart, nphot)
  *
  * @param [in, out] PhotPtr  p   the ptr to the structire for the photons
  * @param [in] double  weight   the photon weight
- * @param [in] int  photstart   ???
- * @param [in] int  nphot   the number of the first photon to be generated and
+ * @param [in] int  photstart   The position in the photon structure of the first photon to generate
+ * @param [in] int  nphot   the number of the photons to be generated 
  * @return int nphot When it finishes it should have generated nphot photons from macro atom deactivations.
  *
  * @details
