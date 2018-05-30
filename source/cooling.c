@@ -293,7 +293,58 @@ adiabatic_cooling (one, t)
 }
 
 
+/**********************************************************/
+/**
+ * @brief      determines the amount of
+ * 	shock related heating n a cell, in units of luminosity.
+ *
+ * @param [in] WindPtr  one   pointer to wind cell
+ * @return The amount os shock-heating in a cell according
+ * to a specific formula
+ *
+ * @details
+ *
+ * Calculates the shock-related heating according to
+ * a simple formula provided by Lee Hartman.  The
+ * formula is supposed to represent
+ *
+ *
+ * H = C * (r/rstar)**-2 (exp (-r/rstar) -1)
+ *
+ * where c is given by
+ *
+ *
+ * eta * mdot_wind *v_inf**2/rstar**-3
+ *
+ *
+ *
+ * ### Notes ###
+ *
+ * This is implemented for the FU Ori project and may not be
+ * appropriate in other situations
+ *
+ * This is implemented analagously to adiabatic dooling
+ *
+ **********************************************************/
 
+
+double shock_heating(one)
+    WindPtr one;
+{
+    // int nplasma;
+    double x,r;
+  // PlasmaPtr xplasma;
+
+  // nplasma = one->nplasma;
+  // xplasma = &plasmamain[nplasma];
+
+  r=length(one->xcen)/geo.rstar;
+
+  x=geo.shock_factor*(exp(-r)-1.)/(r*r);
+
+
+    return (x);
+}
 
 /**********************************************************/
 /**

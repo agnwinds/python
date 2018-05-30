@@ -561,21 +561,6 @@ radiation (p, ds)
     }
   }
 
-  /* Now for contribution to inner shell ionization estimators (SS, Dec 08) */
-  /*. Commented out by NSH 2018 */
-//  for (n = 0; n < nauger; n++)
-//  {
-//    ft = augerion[n].freq_t;
-//    if (p->freq > ft)
-//    {
-
-//      weight_of_packet = w_ave;
-//      x = sigma_phot_verner (&augerion[n], freq);       //this is the cross section
-//      y = weight_of_packet * x * ds;
-
-//      xplasma->gamma_inshl[n] += y / (freq * H * xplasma->vol);
-//    }
-//  }
 
 
 

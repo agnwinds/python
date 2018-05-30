@@ -8,8 +8,7 @@ int np_mpi_global;              /// Global variable which holds the number of MP
 
 int rank_global;
 
-// DEBUG is deprecated, see #111, #120
-//#define DEBUG                                 0       /* 0 means do not debug */
+
 int verbosity;                  /* verbosity level. 0 low, 10 is high */
 
 /* the functions contained in log., rdpar.c and lineio.c are
@@ -492,6 +491,13 @@ struct geometry
   int adiabatic;                /*0-> Do not include adiabatic heating in calculating the cooling of the wind
                                    1-> Use adiabatic heating in calculating the cooling of the wind
                                  */
+  int nonthermal;               /* 0 --> No extra heating due to shocks
+                                   1 --> Extra heating due to shocks (etc)  (Added for FU Ori)
+                                */
+
+  double shock_factor;          /* A scaling factor used for including an extra heating term (for FU Ori stars
+                                 */
+
   int auger_ionization;         /*0 -> Do not include innershell photoionization /Auger effects; 1-> include them */
 
 /* Initial values for defining wind structure for a planar geometry.  These are currently only used by balance and this
@@ -522,6 +528,7 @@ struct geometry
   double cool_dr;                /*1109 NSH The luminosity of the wind due to dielectronic recombination */
   double cool_adiabatic;         /*1209 NSH The cooling of the wind due to adiabatic expansion */
   double heat_adiabatic;        /*1307 NSH The heating of the wind due to adiabatic heating - split out from cool_adiabatic to get an accurate idea of whether it is important */
+
   double f_tot, f_star, f_disk, f_bl, f_agn, f_wind;    /* The integrated specific L between a freq min and max which are
                                                            used to establish the fraction of photons of various types */
 
@@ -858,12 +865,11 @@ typedef struct plasma
   double lum_tot_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
 
+  double heat_shock;            /*1805 ksl - An extra heating term added to allow for shock heating of the plasma (Implementef for FU Ori Project*/
+
   double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to computecompton cooling-  only needs computing once per cycle */
 
   double dmo_dt[3];             /*Radiative force of wind */
-//OLD  int npdf;                     /* The number of points actually used in the luminosity pdf */
-//OLD  int pdf_x[LPDF];              /* The line numbers of *line_ptr which form the boundaries the luminosity pdf */
-//OLD  double pdf_y[LPDF];           /* Where the pdf is stored -- values between 0 and 1 */
   double gain;                  /* The gain being used in interations of the structure */
   double converge_t_r, converge_t_e, converge_hc;       /* Three measures of whether the program believes the grid is converged.
                                                            The first wo  are the fraction changes in t_r, t_e between this and the last cycle. The third
@@ -878,7 +884,6 @@ typedef struct plasma
 
 
 
-//  double gamma_inshl[NAUGER];   /*MC estimator that will record the inner shell ionization rate - very similar to macro atom-style estimators */
   /* 1108 Increase sim estimators to cover all of the bands */
   /* 1208 Add parameters for an exponential representation, and a switch to say which we prefer. */
   enum spec_mod_type_enum
@@ -894,8 +899,6 @@ typedef struct plasma
 
   double exp_temp[NXBANDS];     /*NSH 120817 - The effective temperature of an exponential representation of the radiation field in a cell */
   double exp_w[NXBANDS];        /*NSH 120817 - The prefector of an exponential representation of the radiation field in a cell */
-//OLD  double sim_ip;                /*Ionisation parameter for the cell as defined in Sim etal 2010 */
-//OLD  double ferland_ip;            /* IP calculaterd from equation 5.4 in hazy1 - assuming allphotons come from 0,0,0 and the wind is transparent */
   double ip;                    /*NSH 111004 Ionization parameter calculated as number of photons over the lyman limit entering a cell, divided by the number density of hydrogen for the cell */
   double xi;                    /*NSH 151109 Ionization parameter as defined by Tartar et al 1969 and described in Hazy. Its the ionizing flux over the number of hydrogen atoms */
 } plasma_dummy, *PlasmaPtr;

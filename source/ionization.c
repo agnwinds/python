@@ -214,17 +214,6 @@ convergence (xplasma)
       xplasma->techeck = techeck = xplasma->hccheck = hccheck = 2;	//we mark it as overlimit
     }
 
-//110919 nsh modified line below to include the adiabatic cooling in the check that heating equals cooling
-//111004 nsh further modification to include DR and compton cooling, now moved out of lum_tot
-
-  /* Check whether the heating and colling balance to within epsilon and if so set hccheck to 1 */
-  /* 130722 added a fabs to the bottom, since it is now conceivable that this could be negative if
-     cool_adiabatic is large and negative - and hence heating */
-
-/* NSH 130711 - also changed to have fabs on top and bottom, since heating can now be negative!) */
-
-/* NSH 130725 - moved the hc check to be within the if statement about overtemp - we cannot expect hc to converge if we are hitting the maximum temperature */
-  /* whole_check is the sum of the temperature checks and the heating check */
 
   xplasma->converge_whole = whole_check = trcheck + techeck + hccheck;
 

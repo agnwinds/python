@@ -282,7 +282,7 @@ int
 init_advanced_modes ()
 {
   modes.iadvanced = 0;		// this is controlled by the -d flag, global mode control.
-  modes.extra_diagnostics=0; //  when set, want to save some extra diagnostic info
+  modes.extra_diagnostics = 0;	//  when set, want to save some extra diagnostic info
   modes.save_cell_stats = 0;	// want to save photons statistics by cell
   modes.keep_ioncycle_windsaves = 0;	// want to save wind file each ionization cycle
   modes.track_resonant_scatters = 0;	// want to track resonant scatters
@@ -414,7 +414,8 @@ init_observers ()
   if (modes.iadvanced)
     {
       strcpy (yesno, "n");
-      rdstr ("@Spectrum.select_specific_no_of_scatters_in_spectra(y/n)", yesno);
+      rdstr ("@Spectrum.select_specific_no_of_scatters_in_spectra(y/n)",
+	     yesno);
       if (yesno[0] == 'y')
 	{
 	  Log
@@ -613,28 +614,56 @@ init_ionization ()
   get_line_transfer_mode ();
 
 
-
-
-  thermal_opt = 0;		/* NSH 131213 Set the option to zero - the default. The lines allow allow the
-				   user to turn off mechanisms that affect the thermal balance. Adiabatic is the only one implemented
-				   to start off with. */
-
   rdint
     ("Surface.reflection.or.absorption(0=no.rerad,1=high.albedo,2=thermalized.rerad)",
      &geo.absorb_reflect);
 
-  rdint ("Thermal_balance_options(0=everything.on,1=no.adiabatic)",
-	 &thermal_opt);
 
-  if (thermal_opt == 1)
+  /* Setup options associated with non radiative process that can affect the thermal balance.  At present
+   * these are adiabatic heating and an extra heating term explicitly implemented for FU Ori stars.  The
+   * default is set to 2.  Adiabatic heating only
+   */
+
+
+  thermal_opt = 2;
+
+  rdint
+    ("Thermal_balance_options(0=adiabatic_only,1=all_off,2=nonthermal_only,3=all_on)",
+     &thermal_opt);
+
+  if (thermal_opt == 0)
     {
-      geo.adiabatic = 0;
+      geo.adiabatic = 1;
+      geo.nonthermal = 0;
     }
 
-  else if (thermal_opt > 1 || thermal_opt < 0)
+  else if (thermal_opt == 1)
+    {
+      geo.adiabatic = 0;
+      geo.nonthermal = 0;
+    }
+  else if (thermal_opt == 2)
+    {
+      geo.adiabatic = 0;
+      geo.nonthermal = 1;
+    }
+
+  else if (thermal_opt == 3)
+    {
+      geo.adiabatic = 1;
+      geo.nonthermal = 1;
+    }
+  else
+
     {
       Error ("Unknown thermal balance mode %d\n", thermal_opt);
       exit (0);
+    }
+
+  if (geo.nonthermal)
+    {
+      rddoub ("Thermal_balance_options.shock_heating_scaling",
+	      &geo.shock_factor);
     }
 
 
