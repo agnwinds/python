@@ -441,6 +441,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
   double nlow, nhigh;
   int k_orig, k1_orig;
   int iwind;                    // Variable defining whether this is a wind photon
+  int maxscat;
 
   freqmin = f1;
   freqmax = f2;
@@ -673,22 +674,34 @@ spectrum_create (p, f1, f2, nangle, select_extract)
     Log ("spectrum_create: Fraction of photons lost:  %4.2f wi/ freq. low, %4.2f w/freq hi\n", nlow / nphot, nhigh / nphot);
   }
 
+  /* Find the maximum number of scatters to shorten the numbers of lines written
+   * to record sctteres
+   */
+
+  maxscat=0;
+  for (i = 0; i <= MAXSCAT; i++)
+  {
+      if (nscat[i]>0) {
+          maxscat=i;
+      }
+  }
+
 
   Log ("\nNo. of photons which have scattered n times\n");
-  for (i = 0; i <= MAXSCAT; i++)
+  for (i = 0; i <= maxscat; i++)
   {
     Log ("%6d", nscat[i]);
     if ((i % 10) == 9)
       Log ("\n");
   }
-  Log ("\nNumber of photons resonantly scattering n times\n");
-  for (i = 0; i <= MAXSCAT; i++)
+  Log ("\n\nNumber of photons resonantly scattering n times\n");
+  for (i = 0; i <= maxscat; i++)
   {
     Log ("%6d", nres[i]);
     if ((i % 10) == 9)
       Log ("\n");
   }
-  Log ("\nNo of photons and their fates\n!!PhotFate: ");
+  Log ("\n\nNo of photons and their fates\n!!PhotFate: ");
   for (i = 0; i < NSTAT; i++)
   {
     Log ("%6d", nstat[i]);

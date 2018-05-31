@@ -520,11 +520,14 @@ create_heat_table (ndom, rootname)
   c[17] = get_one (ndom, "cool_rr");
   strcpy (column_name[17], "cool_rr");
 
-  c[18] = get_one (ndom, "heat_shock");
-  strcpy (column_name[17], "heat_shock");
+  c[18] = get_one (ndom, "cool_adiab");
+  strcpy (column_name[18], "cool_adiab");
+
+  c[19] = get_one (ndom, "heat_shock");
+  strcpy (column_name[19], "heat_shock");
 
   /* This should be the maxium number above +1 */
-  ncols = 19;
+  ncols = 20;
 
 
   converge = get_one (ndom, "converge");
@@ -1124,6 +1127,10 @@ double
       else if (strcmp (variable_name, "heat_shock") == 0)
       {
         x[n] = plasmamain[nplasma].heat_shock;
+      }
+      else if (strcmp (variable_name, "cool_adiab") == 0)
+      {
+        x[n] = plasmamain[nplasma].cool_adiabatic;
       }
 
 

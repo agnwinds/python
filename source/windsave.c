@@ -132,9 +132,9 @@ in the plasma structure */
 
   fclose (fptr);
 
-  Log
-    ("wind_write sizes: NPLASMA %d size_Jbar_est %d size_gamma_est %d size_alpha_est %d nlevels_macro %d\n",
-     NPLASMA, size_Jbar_est, size_gamma_est, size_alpha_est, nlevels_macro);
+  //Log
+  //  ("wind_write sizes: NPLASMA %d size_Jbar_est %d size_gamma_est %d size_alpha_est %d nlevels_macro %d\n",
+  //   NPLASMA, size_Jbar_est, size_gamma_est, size_alpha_est, nlevels_macro);
 
   return (n);
 
