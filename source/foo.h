@@ -244,7 +244,7 @@ double cooling(PlasmaPtr xxxplasma, double t);
 double xtotal_emission(WindPtr one, double f1, double f2);
 double adiabatic_cooling(WindPtr one, double t);
 double shock_heating(WindPtr one);
-double wind_cooling(double f1, double f2);
+double wind_cooling(void);
 /* recomb.c */
 double fb_topbase_partial(double freq);
 double integ_fb(double t, double f1, double f2, int nion, int fb_choice, int mode);

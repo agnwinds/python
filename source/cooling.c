@@ -351,12 +351,10 @@ double shock_heating(one)
  * @brief      calculate the cooling rate of the entire
  * wind between freqencies f1 and f2 (including non-radiative processes
  *
- * @param [in] double  f1   The minimum frequency
- * @param [in] double  f2   The maximum frequency
  * @return     The total cooling rate of the wind
  *
  * Various parameters in geo having to do with the total cooling
- * for the various properties are also populated.
+ * for the for specific processes are also populated.
  *
  * @details
  * This routine cycles through all of the wind cells and
@@ -377,12 +375,9 @@ double shock_heating(one)
  **********************************************************/
 
 double
-wind_cooling (f1, f2)
-     double f1, f2;             /* freqmin and freqmax */
+wind_cooling ()
 {
-  double cool, lum_lines, cool_rr, lum_ff, cool_comp, cool_dr, cool_di, cool_adiab, heat_adiab;       //1108 NSH Added a new variable for compton cooling 1408 NSH and for DI cooling
-  //1109 NSH Added a new variable for dielectronic cooling
-  //1307 NSH Added a new variable to split out negtive adiabatic cooling (i.e. heating).
+  double cool, lum_lines, cool_rr, lum_ff, cool_comp, cool_dr, cool_di, cool_adiab, heat_adiab;       
   int n;
   double x;
   int nplasma;
@@ -395,8 +390,7 @@ wind_cooling (f1, f2)
     if (wmain[n].vol > 0.0)
     {
       nplasma = wmain[n].nplasma;
-      cool += x = cooling (&plasmamain[nplasma],plasmamain[nplasma].t_e);  //1708 - changed this call - now computes cooling rather than luminosity - also we popultate a local
-	  //array called cool, rather than the xplasma array - this was overrwting the xplasma array with incorrect data.
+      cool += x = cooling (&plasmamain[nplasma],plasmamain[nplasma].t_e); 
       lum_lines += plasmamain[nplasma].lum_lines;
       cool_rr += plasmamain[nplasma].cool_rr;
       lum_ff += plasmamain[nplasma].lum_ff;
