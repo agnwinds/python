@@ -520,8 +520,11 @@ create_heat_table (ndom, rootname)
   c[17] = get_one (ndom, "cool_rr");
   strcpy (column_name[17], "cool_rr");
 
+  c[18] = get_one (ndom, "heat_shock");
+  strcpy (column_name[17], "heat_shock");
+
   /* This should be the maxium number above +1 */
-  ncols = 18;
+  ncols = 19;
 
 
   converge = get_one (ndom, "converge");
@@ -969,8 +972,8 @@ double
 /**
  * @brief      Get a simple variable from the PlasmaPtr array
  *
- * @param [in, out] int  ndom   The domain in question
- * @param [in, out] char  variable_name[]   The name of the variable
+ * @param [in] int  ndom   The domain in question
+ * @param [in] char  variable_name[]   The name of the variable
  * @return     The values in the plasma pointer for this variable. A double
  * 	will be returned even if the PlasmaPtr varible is an integer
  *
@@ -1117,6 +1120,10 @@ double
       else if (strcmp (variable_name, "nioniz") == 0)
       {
         x[n] = plasmamain[nplasma].nioniz;
+      }
+      else if (strcmp (variable_name, "heat_shock") == 0)
+      {
+        x[n] = plasmamain[nplasma].heat_shock;
       }
 
 

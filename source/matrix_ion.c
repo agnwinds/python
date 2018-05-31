@@ -6,7 +6,6 @@
  *
  * @brief  Contains routines which compute the ionization state using a matrix inversion technique
  *
- * ???
  ***********************************************************/
 
 
@@ -30,9 +29,12 @@
 /**
  * @brief      A matrix solver for the ionization state in a cell
  *
- * @param [in out] PlasmaPtr  xplasma   The plasma cell we are working on
- * @param [in out] int  mode   What type of model to use for J_nu - 1=fitted model 2=blackbody
+ * @param [in,out] PlasmaPtr  xplasma   The plasma cell we are working on
+ * @param [in] int  mode   What type of model to use for J_nu - 1=fitted model 2=blackbody
  * @return     0 if successful
+ *
+ * The abundances contained in xplasma are updated witht he results of
+ * the calculation.
  *
  * @details
  * modes:
@@ -49,7 +51,10 @@
  * x is a vector containing the relative ion populations. We invert A to get x=bA^-1
  *
  * ### Notes ###
- * Uses a relative abundance scheme - reduces large number issues
+ * Uses a relative abundance scheme, in order to reduce large number issues
+ *
+ * Various parameters for the calculation, and in particular the t_e are passed
+ * via the PlasmaPtr
  *
  **********************************************************/
 
@@ -89,7 +94,7 @@ matrix_ion_populations (xplasma, mode)
     elem_dens[mm] = 0.0;
   }
 
-  /* Now we poulate the elemental abundace array */
+  /* Now we populate the elemental abundance array */
   for (mm = 0; mm < nions; mm++)
   {
     elem_dens[ion[mm].z] = elem_dens[ion[mm].z] + xplasma->density[mm];
@@ -130,7 +135,6 @@ matrix_ion_populations (xplasma, mode)
       }
       else
       {
-        // If reached this point the program does not understand what type of spectral model to apply
         Error ("matrix_ion_populations: Unknown mode %d\n", mode);
         exit (0);
       }

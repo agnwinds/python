@@ -436,9 +436,9 @@ meaning in nebular concentrations.
  * by the wind is equal to energy emitted (asssuming it is in the interval bracketed by
  * tmin and tmax.)
  *
- * @param [in out] PlasmaPtr  xplasma   A plasma cell in the wind
- * @param [in out] double  tmin   A bracketing minimum temperature
- * @param [in out] double  tmax   A bracketing mxximum temperature
+ * @param [in] PlasmaPtr  xplasma   A plasma cell in the wind
+ * @param [in] double  tmin   A bracketing minimum temperature
+ * @param [in] double  tmax   A bracketing mxximum temperature
  * @return     The temperature where heating and cooling match
  *
  * @details
@@ -494,22 +494,31 @@ calc_te (xplasma, tmin, tmax)
     {
       xplasma->t_e = tmax;
     }
-  /* With the new temperature in place for the cell, get the correct value of heat_tot.
-     SS June  04 */
 
-  /* ksl - XXX I basically don't undestand what is going on here.  If we start using
-   * macro atoms a lot we need to understand them better ??? -
-   * Look at zero emit as well 091611 */
+  /* At this point we know the temperaature that balance heating and cooling
+   * within the constraints set by tmin and tmax.
+   */
+
+
+  /* Update heat_tot and heat_lines for macro_bb_heating at the new temperature. 
+   * We subtract the current value and then compute at the new temperature and
+   * add this back */
 
   xplasma->heat_tot -= xplasma->heat_lines_macro;
   xplasma->heat_lines -= xplasma->heat_lines_macro;
+
   xplasma->heat_lines_macro = macro_bb_heating (xplasma, xplasma->t_e);
+
   xplasma->heat_tot += xplasma->heat_lines_macro;
   xplasma->heat_lines += xplasma->heat_lines_macro;
 
+  /* Similaryly for macro_atom_bf_heating */
+
   xplasma->heat_tot -= xplasma->heat_photo_macro;
   xplasma->heat_photo -= xplasma->heat_photo_macro;
+
   xplasma->heat_photo_macro = macro_bf_heating (xplasma, xplasma->t_e);
+
   xplasma->heat_tot += xplasma->heat_photo_macro;
   xplasma->heat_photo += xplasma->heat_photo_macro;
 
@@ -520,8 +529,6 @@ calc_te (xplasma, tmin, tmax)
 
 
 
-/* This is just a function which has a zero when total energy loss is equal to total energy gain */
-
 
 /**********************************************************/
 /** 
@@ -529,16 +536,26 @@ calc_te (xplasma, tmin, tmax)
  * to the heating seen in the cell in the previous ionization cycle
  *
  * @param [in] double  t   A trial temperature
- * @return     The difference between the recorded heating and the cooling
+ * @return     The difference between the recorded heating and the cooling calculated
+ * at a specifc temperature.  
  *
  * @details
  * This routine is used to estiamate a new temperature for a cell given the
- * heating of the cell in the previous ionization cycle.
+ * heating of the cell in the previous ionization cycle.  When 0 the heating
+ * and cooling are matched.
+ *
+ * For the non-macro atom case heating is calculated as photons go through
+ * the wind and is not altered by a change in temperature, however for macro
+ * atoms a change in temperature affects the amount of heating as well as the 
+ * cooling
+ *
  *
  * ### Notes ###
  * The abundances of ions in the cell are not modified.  Results are stored
  * in the cell of interest.  This routine is used in connection with a zero
  * finding routine
+ *
+ * 1806 - ksl - The equation now includes a term for non-radiave heating (heat_shock)
  *
  **********************************************************/
 
@@ -558,20 +575,26 @@ zero_emit (t)
   /* Correct heat_tot for the change in temperature. SS June 04. */
   xxxplasma->heat_tot -= xxxplasma->heat_lines_macro;
   xxxplasma->heat_lines -= xxxplasma->heat_lines_macro;
+
   xxxplasma->heat_lines_macro = macro_bb_heating (xxxplasma, t);
+
   xxxplasma->heat_tot += xxxplasma->heat_lines_macro;
   xxxplasma->heat_lines += xxxplasma->heat_lines_macro;
 
   xxxplasma->heat_tot -= xxxplasma->heat_photo_macro;
   xxxplasma->heat_photo -= xxxplasma->heat_photo_macro;
+
   xxxplasma->heat_photo_macro = macro_bf_heating (xxxplasma, t);
+
   xxxplasma->heat_tot += xxxplasma->heat_photo_macro;
   xxxplasma->heat_photo += xxxplasma->heat_photo_macro;
+
+  /* Finished macro atom corrections */
 
 
   cooling(xxxplasma,t);
 
-  difference = xxxplasma->heat_tot - xxxplasma->cool_tot;
+  difference = xxxplasma->heat_tot + xxxplasma->heat_shock - xxxplasma->cool_tot;
 
 
 

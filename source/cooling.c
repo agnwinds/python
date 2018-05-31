@@ -300,12 +300,12 @@ adiabatic_cooling (one, t)
  *
  * @param [in] WindPtr  one   pointer to wind cell
  * @return The amount os shock-heating in a cell according
- * to a specific formula
+ * to a specific formula.  
  *
  * @details
  *
  * Calculates the shock-related heating according to
- * a simple formula provided by Lee Hartman.  The
+ * a simple formula provided by Lee Hartmann.  The
  * formula is supposed to represent
  *
  *
@@ -321,7 +321,10 @@ adiabatic_cooling (one, t)
  * ### Notes ###
  *
  * This is implemented for the FU Ori project and may not be
- * appropriate in other situations
+ * appropriate in other situations.
+ *
+ * The heating is mulitiplied by the volume of the plasma in
+ * the cell, and so the units are ergs/s.  
  *
  * This is implemented analagously to adiabatic dooling
  *
@@ -331,16 +334,18 @@ adiabatic_cooling (one, t)
 double shock_heating(one)
     WindPtr one;
 {
-    // int nplasma;
+    int nplasma;
     double x,r;
-  // PlasmaPtr xplasma;
+  PlasmaPtr xplasma;
 
-  // nplasma = one->nplasma;
-  // xplasma = &plasmamain[nplasma];
+  nplasma = one->nplasma;
+  xplasma = &plasmamain[nplasma];
 
   r=length(one->xcen)/geo.rstar;
 
-  x=geo.shock_factor*(exp(-r)-1.)/(r*r);
+  x=geo.shock_factor*(exp(-(r-1.)))/(r*r);
+
+  x*=xplasma->vol;
 
 
     return (x);
