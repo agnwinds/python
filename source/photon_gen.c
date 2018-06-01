@@ -358,6 +358,11 @@ iwind = -1 	Don't generate any wind photons at all
 
     matom_emiss_report ();      // function which logs the macro atom level emissivites
   }
+  else if (geo.nonthermal)
+  {
+    /* calculate the non-radiative kpkt luminosity throughout the wind */
+    geo.f_kpkt = get_kpkt_heating_f ();  
+  }
 
 
   geo.f_tot = geo.f_star + geo.f_disk + geo.f_bl + geo.f_wind + geo.f_kpkt + geo.f_matom + geo.f_agn;
@@ -376,6 +381,9 @@ iwind = -1 	Don't generate any wind photons at all
     ("!! xdefine_phot: star  tstar  %8.2e   %8.2e   lum_star %8.2e %8.2e  %8.2e \n", geo.tstar, geo.tstar_init, geo.lum_star, geo.lum_star_init, geo.lum_star_back);
   Log
     ("!! xdefine_phot: disk                               lum_disk %8.2e %8.2e  %8.2e \n", geo.lum_disk, geo.lum_disk_init, geo.lum_disk_back);
+
+  if (geo.nonthermal)
+    Log ("!! xdefine_phot: kpkt luminosity due to non-radiative heating:  %8.2e \n", geo.f_kpkt);
 
 
 
@@ -456,10 +464,12 @@ xmake_phot (p, f1, f2, ioniz_or_final, iwind, weight, iphot_start, nphotons)
   {
     nagn = geo.f_agn / geo.f_tot * nphotons;    /* Ensure that nphot photons are created */
   }
-  if (geo.matom_radiation)
+  if (geo.matom_radiation || geo.nonthermal)
   {
     nkpkt = geo.f_kpkt / geo.f_tot * nphotons;
-    nmatom = geo.f_matom / geo.f_tot * nphotons;
+    
+    if (geo.matom_radiation)
+      nmatom = geo.f_matom / geo.f_tot * nphotons;
   }
 
 
@@ -580,14 +590,14 @@ stellar photons */
 
   /* Now do macro atoms and k-packets. SS June 04 */
 
-  if (geo.matom_radiation)
+  if (geo.matom_radiation || geo.nonthermal)
   {
     nphot = nkpkt;
     if (nphot > 0)
     {
-      if (ioniz_or_final == 0)
+      if (ioniz_or_final == 0 && (geo.nonthermal ==  0))
       {
-        Error ("xmake_phot: generating photons by k-packets when performing ionization cycle. Abort.\n");
+        Error ("xmake_phot: generating photons by k-packets when performing ionization cycle without shock heating. Abort.\n");
         exit (0);               //The code shouldn't be doing this - something has gone wrong somewhere. (SS June 04)
       }
       else

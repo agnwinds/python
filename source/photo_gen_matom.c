@@ -51,7 +51,41 @@ get_kpkt_f ()
   return (lum);
 }
 
-/* All done. */
+/**********************************************************/
+/** 
+ * @brief returns the specific luminosity in kpkts from nonthermal ("shock")
+ *        heating. This is used to generate kpkts in the ionization cycles.
+ *        This also populates the cell-by-cell kpkt luminosities in the 
+ *        variable plasmamain[n].kpkt_emiss.
+ *
+ * @return double lum  
+ *         The energy created by non-radiative heating throughout the 
+ *         computational domain. 
+ *
+ **********************************************************/
+
+double
+get_kpkt_heating_f ()
+{
+  int n, nwind;
+  double lum, shock_kpkt_luminosity;
+  WindPtr one;
+
+  lum = 0.0;
+
+  for (n = 0; n < NPLASMA; n++)
+  {
+    nwind = plasmamain[n].nwind;
+    one = &wmain[nwind];
+    shock_kpkt_luminosity = shock_heating(one);
+    plasmamain[n].kpkt_emiss = shock_kpkt_luminosity;
+    lum += shock_kpkt_luminosity;
+  }
+
+  return (lum);
+}
+
+
 
 /**********************************************************/
 /** 
@@ -493,8 +527,6 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   int nplasma;
   int ndom;
 
-
-
   photstop = photstart + nphot;
   Log ("photo_gen_kpkt creates nphot %5d photons from %5d to %5d \n", nphot, photstart, photstop);
 
@@ -502,7 +534,6 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   {
     /* locate the wind_cell in which the photon bundle originates. */
 
-//    xlum = (rand () + 0.5) / (MAXRAND) * geo.f_kpkt; DONE
     xlum = random_number(0.0,1.0) * geo.f_kpkt;
 
     xlumsum = 0;

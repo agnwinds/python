@@ -326,7 +326,7 @@ adiabatic_cooling (one, t)
  * The heating is mulitiplied by the volume of the plasma in
  * the cell, and so the units are ergs/s.  
  *
- * This is implemented analagously to adiabatic dooling
+ * This is implemented analagously to adiabatic cooling
  *
  **********************************************************/
 
@@ -334,21 +334,20 @@ adiabatic_cooling (one, t)
 double shock_heating(one)
     WindPtr one;
 {
-    int nplasma;
-    double x,r;
+  int nplasma;
+  double x,r;
   PlasmaPtr xplasma;
 
   nplasma = one->nplasma;
   xplasma = &plasmamain[nplasma];
 
-  r=length(one->xcen)/geo.rstar;
+  r = length(one->xcen)/geo.rstar;
 
-  x=geo.shock_factor*(exp(-(r-1.)))/(r*r);
+  x = geo.shock_factor*(exp(-(r-1.)))/(r*r);
 
-  x*=xplasma->vol;
+  x *= xplasma->vol;
 
-
-    return (x);
+  return (x);
 }
 
 /**********************************************************/
