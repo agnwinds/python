@@ -1357,7 +1357,7 @@ photon_checks (p, freqmin, freqmax, comment)
       exit (0);
     }
   }
-  Log ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
+  // Log ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
 
   if (nnn == 0)
     Debug ("photon_checks: All photons passed checks successfully\n");
