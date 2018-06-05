@@ -18,53 +18,6 @@
 
 
 
-//OLD /**************************************************************************
-//OLD                     Space Telescope Science Institute
-//OLD 
-//OLD 
-//OLD   Synopsis:  
-//OLD 
-//OLD   This is a routine which is intended to help with program updates that
-//OLD   change the name of a keyword in a parameter file.  It is called from
-//OLD   rdpar.string_process_from_file
-//OLD 
-//OLD   Description:	
-//OLD 
-//OLD   The routine simply matches the string in new_question to a string in
-//OLD   the array new_names, below.  If it finds a match, the old_name is 
-//OLD   returned in old_question.
-//OLD 
-//OLD 
-//OLD 
-//OLD   Arguments:  	
-//OLD 
-//OLD 
-//OLD   Returns:
-//OLD 
-//OLD   	0 if there was no match
-//OLD 	1 if there was a match of a name in the parameter file to
-//OLD 	  one of the new_names, and in old_question the name of
-//OLD 	  the old_value
-//OLD 
-//OLD   Notes:
-//OLD 
-//OLD   To add another variable to the list, just record the new_name and the
-//OLD   old_name in the arrays below, and increase the number of names by 1
-//OLD 
-//OLD   Do not include the material that is in paren, that is for
-//OLD 
-//OLD   xxx(many_choices) -->  xxxx
-//OLD 
-//OLD   The routine is completely hardwired as wrtten though clearly this 
-//OLD   could be changed.
-//OLD   	
-//OLD 
-//OLD 
-//OLD   History:
-//OLD 	16sept	ksl	Coded as part of an effort to make python more 
-//OLD 			robust to changes in parameter file names
-//OLD 
-//OLD  ************************************************************************/
 
 #include <stdio.h>
 #include <strings.h>
@@ -102,7 +55,7 @@ char *old_names[] =
     "@adjust_grid",
     "filling_factor","Coord.system","@write_atomicdata","Fixed.concentrations.filename",
     "@Extra.diagnostics","File.with.model2read","Number.of.wind.components","Old_windfile",
-    "Model_file","agn_power_law_index",
+    "Model_file","agn_power_law_index", "hydro_file","Hydro_thetamax",
     NULL
 
 };
@@ -135,13 +88,13 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
     "@Diag.adjust_grid",
     "Wind.filling_factor","Wind.coord_system","@Diag.write_atomicdata", "Wind.fixed_concntrations_file",
     "@Diag.extra","Wind.model2import","Wind.number_of_components","Wind.old_windfile",
-    "Input_spectra.model_file","AGN.power_law_index",
+    "Input_spectra.model_file","AGN.power_law_index", "Hydro.file","Hydro.thetamax",
     NULL
 };
 
 
 
-int number_of_names = 79;
+int number_of_names = 81;
 
 #define MIN(a,b) ((a)<b ? a:b)
 

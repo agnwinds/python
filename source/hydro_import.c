@@ -242,7 +242,7 @@ get_hydro (ndom)
       hydro_theta_cent[k] = 0;
     }
 
-  rdstr ("hydro_file", datafile);
+  rdstr ("Hydro.file", datafile);
   if ((fptr = fopen (datafile, "r")) == NULL)
     {
       Error ("Could not open %s\n", datafile);
@@ -253,7 +253,7 @@ get_hydro (ndom)
   hydro_thetamax = 89.9;
 
 
-  rddoub ("Hydro_thetamax(degrees:negative_means_no_maximum)",
+  rddoub ("Hydro.thetamax(degrees:negative_means_no_maximum)",
 	  &hydro_thetamax);
 
   //If we have set the maximum angle to a negaive value, we mean that we dont want to restrict.
