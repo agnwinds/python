@@ -102,7 +102,7 @@ double xxxne, xip;
  * based on the "mode".
  *
  * @param [in,out] PlasmaPtr  xplasma   A Plasma cell
- * @param [in] int  mode   A chooice of NEBULARMODE_PAIRWISE_ML93 (6) which uses
+ * @param [in] int  mode   A choice of NEBULARMODE_PAIRWISE_ML93 (6) which uses
  * a dilute blackbody to represent the spectrum or
  * NEBULARMODE_PAIRWISE_SPECTRALMODEL (7) which uses a crude spectrum constructed
  * of power law or exponetial segments.
@@ -110,7 +110,8 @@ double xxxne, xip;
  * On an
  * abnormal return the density array and ne are left unchanged.
  *
- * variable temperature alters portions of the wind ptr.  Exactly how things
+ * variable temperature alters portions of the variables associated with the Plasma cellr.  
+ * Exactly how things
  * are changed depends on the mode.
  *
  *
@@ -133,16 +134,15 @@ double xxxne, xip;
 int
 variable_temperature (xplasma, mode)
      PlasmaPtr xplasma;
-     int mode;                  //   6=correct using dilute blackbody, 7=power law
+     int mode;                  
 {
   int nion;
   double xnew, xsaha;
   double theta, x;
   double get_ne ();
   double t_e, t_r, xtemp, nh, xne, xxne;
-  //OLD www not used double t_e, t_r, xtemp, nh, xne, xxne, www;
   double a, b;
-  double newden[NIONS];         //NSH 121217 - recoded so density is computed in a temperary array
+  double newden[NIONS];         //A temporaray array for recording the denisites                    
   int nelem, first, last;
   double t_e_part_correct;
   double sum, big;
@@ -150,10 +150,9 @@ variable_temperature (xplasma, mode)
   double gs_fudge[NIONS];       /*It can be expensive to calculate this, and it only depends on t_e - which is fixed for a run. So
                                    //                 calculate it once, and store it in a temporary array */
 
-  nh = xplasma->rho * rho2nh;   //LTE
+  nh = xplasma->rho * rho2nh;   
   t_e = xplasma->t_e;
   t_r = xplasma->t_r;
-  //OLD www not used ksl 160705: www = xplasma->w;
 
 
   /* Copy the current densities into the temporary array */
@@ -406,9 +405,6 @@ variable_temperature (xplasma, mode)
   }
 
 
-
-
-
   partition_functions (xplasma, NEBULARMODE_LTE_GROUND);
 
   /* XXX WARNING fudge NSH 11/5/14 - this is as a test.
@@ -543,8 +539,8 @@ pi_correct (xtemp, nion, xplasma, mode)
  *
  *
  * ### Notes ###
- *  xxxne and xip are global variables which is declared above and
- *  assigned in the main variable_temperature routine.
+ * xxxne and xip are global variables which is declared above and
+ * assigned in the main variable_temperature routine.
  *
  **********************************************************/
 
