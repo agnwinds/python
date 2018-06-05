@@ -1,4 +1,4 @@
-name: shell.wind_mdot
+name: Shell.wind_mdot
 description: |
   The mass loss thruogh a diagnostic shell type wind. One normally sets
   this experimentally in order to get a required hydrogen density in

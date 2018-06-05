@@ -1,4 +1,4 @@
-name: shell.wind.acceleration_exponent
+name: Shell.wind.acceleration_exponent
 description: |
   Exponent beta for the Caster and Lamers description of a stellar wind
   v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta for a shell wind.
