@@ -96,6 +96,65 @@ distributions for wind cells.
 
 ----------------------------------------
 
+reverb.filter_lines
+-------------------
+Whether or not to filter any lines out of the output file. This is used to keep output
+file sizes down, and avoid them overwhelming the user.
+
+**Type:** Int
+
+**Values:**
+
+0. **No filtering**
+   
+   Include *all* photons that contribute to the spectra in the output
+   file. Not recommended as it leads to gargantuan file sizes.
+
+N. **Filter lines**
+   
+   Include N reverb.filter_line entries, each specifying one
+   line to keep in the output file. If reverb.matom_lines is >0, all macro-atom
+   lines of interest are automatically included in the filter list.
+
+-1. **Filter continuum**
+   
+   Include all photons whose last interaction was scatter
+   or emission in a line. Recommended setting for exploratory runs where you'd
+   like to identify which lines are the easiest to process.
+
+
+**Parent(s):**
+  reverb.type_: Greater than 0
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
+reverb.filter_line
+^^^^^^^^^^^^^^^^^^
+Line number of one line to include in the output .delay_dump file. This is
+the python internal line number. It can be found using either the macro-atom
+mode (which prints out the line number once it's found one) or by doing an
+exploratory run with reverb.filter_lines = -1, then looking through the delay
+dump file for photons of the right wavelength to see what their line is. This
+should almost certainly be changed to be specified using a species and
+wavelength!
+
+**Type:** Int
+
+**Value:** Any valid line index
+
+**Parent(s):**
+  reverb.filter_lines_: Greater than 0
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
 reverb.visualisation
 --------------------
 Which type of visualisation to output, if any. Reverb modes that keep arrays
@@ -254,65 +313,6 @@ bin boundaries show up in the TF.
 
 **Parent(s):**
   reverb.type_: 2, 3
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
-reverb.filter_lines
--------------------
-Whether or not to filter any lines out of the output file. This is used to keep output
-file sizes down, and avoid them overwhelming the user.
-
-**Type:** Int
-
-**Values:**
-
-0. **No filtering**
-   
-   Include *all* photons that contribute to the spectra in the output
-   file. Not recommended as it leads to gargantuan file sizes.
-
-N. **Filter lines**
-   
-   Include N reverb.filter_line entries, each specifying one
-   line to keep in the output file. If reverb.matom_lines is >0, all macro-atom
-   lines of interest are automatically included in the filter list.
-
--1. **Filter continuum**
-   
-   Include all photons whose last interaction was scatter
-   or emission in a line. Recommended setting for exploratory runs where you'd
-   like to identify which lines are the easiest to process.
-
-
-**Parent(s):**
-  reverb.type_: Greater than 0
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
-reverb.filter_line
-^^^^^^^^^^^^^^^^^^
-Line number of one line to include in the output .delay_dump file. This is
-the python internal line number. It can be found using either the macro-atom
-mode (which prints out the line number once it's found one) or by doing an
-exploratory run with reverb.filter_lines = -1, then looking through the delay
-dump file for photons of the right wavelength to see what their line is. This
-should almost certainly be changed to be specified using a species and
-wavelength!
-
-**Type:** Int
-
-**Value:** Any valid line index
-
-**Parent(s):**
-  reverb.filter_lines_: Greater than 0
 
 
 **File:** setup_reverb.c

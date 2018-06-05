@@ -1,4 +1,4 @@
-name: corona.vel_frac
+name: Corona.vel_frac
 description: |
   For the coronal model, the azimuthal velocity is
   given by the velocity of the underlying disk.  One

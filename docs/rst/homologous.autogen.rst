@@ -3,23 +3,6 @@
 homologous
 ==========
 
-homologous.vbase
-================
-Multi-line description, must keep indentation.
-
-**Type:** Double
-
-**Unit:** cm
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** homologous.c
-
-
 homologous.radmin
 =================
 The starting point of for madel of a homoloous flow, a model in
@@ -33,22 +16,6 @@ which the velocity at any radius is proportional to the radius
 
 **Parent(s):**
   parameter_: A required parameter for defining a homologous flow
-
-
-**File:** homologous.c
-
-
-homologous.density_exponent
-===========================
-The power law exponent which defines the decline in density of
-a homologous flow as a function of radious.
-
-**Type:** Double
-
-**Value:** greater than 0 for a density that declines with radius
-
-**Parent(s):**
-  parameter_: A basic paameter needed to define a homlogous flow
 
 
 **File:** homologous.c
@@ -69,6 +36,39 @@ the trend in density.
 
 **Parent(s):**
   parameter_: One of the basic parameters for defining a hologous flow in Python
+
+
+**File:** homologous.c
+
+
+homologous.vbase
+================
+Multi-line description, must keep indentation.
+
+**Type:** Double
+
+**Unit:** cm
+
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** homologous.c
+
+
+homologous.density_exponent
+===========================
+The power law exponent which defines the decline in density of
+a homologous flow as a function of radious.
+
+**Type:** Double
+
+**Value:** greater than 0 for a density that declines with radius
+
+**Parent(s):**
+  parameter_: A basic paameter needed to define a homlogous flow
 
 
 **File:** homologous.c

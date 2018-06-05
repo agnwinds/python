@@ -3,21 +3,17 @@
 Boundary_layer
 ==============
 
-Boundary_layer.luminosity
-=========================
-The luminosity of the boundary layer          
+Boundary_layer.radiation
+========================
+Says whether the boundary layer will radiate 0=no, 1=yes
 
-**Type:** Double
-
-**Unit:** ergs/s
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Type:** Boolean (1/0)
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  parameter_: None
 
 
-**File:** setup.c
+**File:** setup_star_bh.c
 
 
 Boundary_layer.temp
@@ -61,17 +57,21 @@ as a blackbody, from a model, or as a power law.
 **File:** setup.c
 
 
-Boundary_layer.radiation
-========================
-Says whether the boundary layer will radiate 0=no, 1=yes
+Boundary_layer.luminosity
+=========================
+The luminosity of the boundary layer          
 
-**Type:** Boolean (1/0)
+**Type:** Double
+
+**Unit:** ergs/s
+
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: None
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
-**File:** setup_star_bh.c
+**File:** setup.c
 
 
 Boundary_layer.rad_type_in_final_spectrum

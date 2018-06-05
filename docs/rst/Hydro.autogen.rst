@@ -3,19 +3,6 @@
 Hydro
 =====
 
-Hydro.file
-==========
-Relative path to a hydrodynamic snapshot file to be imported.
-
-**Type:** String
-
-**Parent(s):**
-  parameter_: None
-
-
-**File:** hydro_import.c
-
-
 Hydro.thetamax
 ==============
 The maximum theta value to be read in from a hydrodynamic snapshot.
@@ -33,6 +20,19 @@ X. use up to that angle (typically less than 90)
 
 -1. use all data
 
+
+**Parent(s):**
+  parameter_: None
+
+
+**File:** hydro_import.c
+
+
+Hydro.file
+==========
+Relative path to a hydrodynamic snapshot file to be imported.
+
+**Type:** String
 
 **Parent(s):**
   parameter_: None
