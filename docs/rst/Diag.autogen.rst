@@ -3,49 +3,29 @@
 Diag
 ====
 
-Diag.adjust_grid
-================
-Choose whether or not you would like to adjust the scale length
-for the logarithmic grid. Advanced command. 
+Diag.write_atomicdata
+=====================
+Choose whether to write the atomic data that is being used to 
+an output file.
 
 **Type:** Boolean (1/0)
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  parameter_: Asked whenever advanced commands are enaabled
 
 
 **File:** setup_domains.c
 
 
-Diag.extra
-==========
-Decide whether or not to use extra diagnostics in advanced mode.
-If set to 1, this triggers a many extra questions that allow one to investigate 
-things such as photon cell statistics, the velocity gradients in cells and 
-the resonant scatters in the wind
+Diag.make_ioncycle_tables
+=========================
+Multi-line description, must keep indentation.
 
-**Type:** Boolean (1/0)
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** python.c
-
-
-Diag.fractional_distance_photon_may_travel
-==========================================
-The distance photon may travel in a cell is limited to prevent a photon
-from moving such a long path that the velocity may change non-linearly.
-This problem arises primarily when the photon is travelling azimuthally
-in the grid.  This changes the default for the fraction of the maximum
-distance in a cell.
-
-**Type:** Double
+**Type:** Int
 
 **Unit:** None
 
-**Value:** 0 to 1
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
@@ -54,18 +34,20 @@ distance in a cell.
 **File:** diag.c
 
 
-Diag.ispymode
-=============
-creates a file root.ispy which contains information about cell
-statistics for a given set of cells. Very similar to 
-save_cell_statistics. 
+Diag.lowest_ion_density_for_photoabs
+====================================
+For efficiencty reasons, Python does not try to calculate photoabsorption
+for an ion with an extremly low density.  This advance parameter changes
+this density limit
 
-**Type:** Int
+**Type:** Double
 
 **Unit:** None
 
+**Value:** greater than 0
+
 **Parent(s):**
-  parameter_: Extra_diagnostics
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** diag.c
@@ -106,40 +88,18 @@ default is)
 **File:** diag.c
 
 
-Diag.lowest_ion_density_for_photoabs
-====================================
-For efficiencty reasons, Python does not try to calculate photoabsorption
-for an ion with an extremly low density.  This advance parameter changes
-this density limit
+Diag.adjust_grid
+================
+Choose whether or not you would like to adjust the scale length
+for the logarithmic grid. Advanced command. 
 
-**Type:** Double
-
-**Unit:** None
-
-**Value:** greater than 0
+**Type:** Boolean (1/0)
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
-**File:** diag.c
-
-
-Diag.make_ioncycle_tables
-=========================
-Multi-line description, must keep indentation.
-
-**Type:** Int
-
-**Unit:** None
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** diag.c
+**File:** setup_domains.c
 
 
 Diag.print_dvds_info
@@ -230,17 +190,40 @@ in a cell that a photon can travel
 **File:** diag.c
 
 
-Diag.write_atomicdata
-=====================
-Choose whether to write the atomic data that is being used to 
-an output file.
+Diag.extra
+==========
+Decide whether or not to use extra diagnostics in advanced mode.
+If set to 1, this triggers a many extra questions that allow one to investigate 
+things such as photon cell statistics, the velocity gradients in cells and 
+the resonant scatters in the wind
 
 **Type:** Boolean (1/0)
 
 **Parent(s):**
-  parameter_: Asked whenever advanced commands are enaabled
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
-**File:** setup_domains.c
+**File:** python.c
+
+
+Diag.fractional_distance_photon_may_travel
+==========================================
+The distance photon may travel in a cell is limited to prevent a photon
+from moving such a long path that the velocity may change non-linearly.
+This problem arises primarily when the photon is travelling azimuthally
+in the grid.  This changes the default for the fraction of the maximum
+distance in a cell.
+
+**Type:** Double
+
+**Unit:** None
+
+**Value:** 0 to 1
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** diag.c
 
 

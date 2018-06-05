@@ -49,6 +49,128 @@ our 'tfpy' Python (no relation) library.
 
 ----------------------------------------
 
+reverb.path_bins
+----------------
+Number of bins for photon paths. Reverb modes that record the distribution of
+path lengths in every wind cell bin them in this number of bins. Bins are
+logarithmically spaced between the minimum scale in the system (the smallest
+'minimum radius' in any domain) and the 10 * the maximum scale in the system
+(10 * the 'maximum radius' in any domain). Default value is 1000, going much
+higher does not lead to qualitative differences in TF, going lower makes the
+bin boundaries show up in the TF.
+
+**Type:** Int
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  reverb.type_: 2, 3
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
+reverb.visualisation
+--------------------
+Which type of visualisation to output, if any. Reverb modes that keep arrays
+of photon paths per cell can output them either as averages in a 3d model, or
+as a selection of flat text files with full bin-by-bin breakdowns. Useful for
+diagnostics.
+
+**Type:** Enum (Int)
+
+**Values:**
+
+0. None
+
+1. **Mesh visualisation**
+   
+   Outputs mean incident path per cell, photon count per cell, and mean
+   observed delay to '.vtk' format, readable using a range of programs including
+   (my preferred option) VisIt, available at https://visit.llnl.gov/.
+
+2. **Dump cells**
+   
+   Outputs distributions of paths for continuum heating and each line to a range of 'dump cells'
+   specified by X & Z position using the reverb.dump_cells/reverb.dump_cell options.
+
+3. **Both**
+
+
+**Parent(s):**
+  reverb.type_: 2, 3
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
+reverb.dump_cells
+^^^^^^^^^^^^^^^^^
+Number of cells to dump. When dumping the path distribution info for a range
+of cells, this specifies the number of lines of reverb.dump_cell that will be
+provided.
+
+**Type:** Int
+
+**Value:** 0 or N
+
+**Parent(s):**
+  reverb.visualisation_: 2, 3
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
+**reverb.dump_cell**
+""""""""""""""""""""
+Position for a cell, listed as a pair of R:Z coordinates. Will accept any
+position that falls within a grid, will error out on ones that don't. This can
+be slightly awkward and you may want to run a quick test then use py_wind to
+idenfity where wind locations are.
+
+**Type:** Float:Float
+
+
+**Unit:** cm:cm
+
+
+**Value:** >0:>0
+
+
+**Parent(s):**
+  reverb.dump_cells_: Greater than 0
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
+reverb.angle_bins
+^^^^^^^^^^^^^^^^^
+Used when generating 3d .vtk output files for visualisation. Sets the number
+of angle bins used in the output. Aesthetic only; bigger makes prettier meshes
+with larger filesizes.
+
+**Type:** Int
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  reverb.visualisation_: 1, 3
+
+
+**File:** setup_reverb.c
+
+
+----------------------------------------
+
 reverb.disk_type
 ----------------
 Setting for how photons generated in the disk are treated when generating path
@@ -191,128 +313,6 @@ line is specified as Element:Ion:Upper level:Lower level.
 
 **Parent(s):**
   reverb.matom_lines_: Greater than 0
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
-reverb.path_bins
-----------------
-Number of bins for photon paths. Reverb modes that record the distribution of
-path lengths in every wind cell bin them in this number of bins. Bins are
-logarithmically spaced between the minimum scale in the system (the smallest
-'minimum radius' in any domain) and the 10 * the maximum scale in the system
-(10 * the 'maximum radius' in any domain). Default value is 1000, going much
-higher does not lead to qualitative differences in TF, going lower makes the
-bin boundaries show up in the TF.
-
-**Type:** Int
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  reverb.type_: 2, 3
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
-reverb.visualisation
---------------------
-Which type of visualisation to output, if any. Reverb modes that keep arrays
-of photon paths per cell can output them either as averages in a 3d model, or
-as a selection of flat text files with full bin-by-bin breakdowns. Useful for
-diagnostics.
-
-**Type:** Enum (Int)
-
-**Values:**
-
-0. None
-
-1. **Mesh visualisation**
-   
-   Outputs mean incident path per cell, photon count per cell, and mean
-   observed delay to '.vtk' format, readable using a range of programs including
-   (my preferred option) VisIt, available at https://visit.llnl.gov/.
-
-2. **Dump cells**
-   
-   Outputs distributions of paths for continuum heating and each line to a range of 'dump cells'
-   specified by X & Z position using the reverb.dump_cells/reverb.dump_cell options.
-
-3. **Both**
-
-
-**Parent(s):**
-  reverb.type_: 2, 3
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
-reverb.angle_bins
-^^^^^^^^^^^^^^^^^
-Used when generating 3d .vtk output files for visualisation. Sets the number
-of angle bins used in the output. Aesthetic only; bigger makes prettier meshes
-with larger filesizes.
-
-**Type:** Int
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  reverb.visualisation_: 1, 3
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
-reverb.dump_cells
-^^^^^^^^^^^^^^^^^
-Number of cells to dump. When dumping the path distribution info for a range
-of cells, this specifies the number of lines of reverb.dump_cell that will be
-provided.
-
-**Type:** Int
-
-**Value:** 0 or N
-
-**Parent(s):**
-  reverb.visualisation_: 2, 3
-
-
-**File:** setup_reverb.c
-
-
-----------------------------------------
-
-**reverb.dump_cell**
-""""""""""""""""""""
-Position for a cell, listed as a pair of R:Z coordinates. Will accept any
-position that falls within a grid, will error out on ones that don't. This can
-be slightly awkward and you may want to run a quick test then use py_wind to
-idenfity where wind locations are.
-
-**Type:** Float:Float
-
-
-**Unit:** cm:cm
-
-
-**Value:** >0:>0
-
-
-**Parent(s):**
-  reverb.dump_cells_: Greater than 0
 
 
 **File:** setup_reverb.c

@@ -3,21 +3,18 @@
 homologous
 ==========
 
-homologous.boundary_mdot
-========================
-The mass loss rate at the base of the wind in a homlogous flow model, a flow
-in which the velocity is proporional to the radius.  In general, mdot will
-decline with radius, depending on the exponent of the power law that describes
-the trend in density.
+homologous.vbase
+================
+Multi-line description, must keep indentation.
 
 **Type:** Double
 
-**Unit:** Msol/yr
+**Unit:** cm
 
-**Value:** greater than 0
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: One of the basic parameters for defining a hologous flow in Python
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** homologous.c
@@ -57,18 +54,21 @@ which the velocity at any radius is proportional to the radius
 **File:** homologous.c
 
 
-homologous.vbase
-================
-Multi-line description, must keep indentation.
+homologous.boundary_mdot
+========================
+The mass loss rate at the base of the wind in a homlogous flow model, a flow
+in which the velocity is proporional to the radius.  In general, mdot will
+decline with radius, depending on the exponent of the power law that describes
+the trend in density.
 
 **Type:** Double
 
-**Unit:** cm
+**Unit:** Msol/yr
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** greater than 0
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  parameter_: One of the basic parameters for defining a hologous flow in Python
 
 
 **File:** homologous.c

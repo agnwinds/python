@@ -18,22 +18,22 @@ set Wind_ionization to 2 (fixed). This file has format
 **File:** setup2.c
 
 
-wind.mdot
-=========
-The mass lost rate of the wind in several of the kinematic
-wind models, e.g SV or KWD.
+wind.t.init
+===========
+This parameter sets the initial temperature of the wind.  (It currently
+refers to all domains).
 
 **Type:** Double
 
-**Unit:** Msol/year
+**Unit:** None
 
 **Value:** Greater than 0
 
 **Parent(s):**
-  wind_type_: Various of the kinematic mdoes for the wind
+  parameter_: This question is asked whenever there is a wind, that is to say essentially always
 
 
-**File:** sv.c, knigge.c
+**File:** setup_domains.c
 
 
 wind.radmax
@@ -55,21 +55,21 @@ this is a global parameter and refers to al of the wind domains
 **File:** setup_domains.c
 
 
-wind.t.init
-===========
-This parameter sets the initial temperature of the wind.  (It currently
-refers to all domains).
+wind.mdot
+=========
+The mass lost rate of the wind in several of the kinematic
+wind models, e.g SV or KWD.
 
 **Type:** Double
 
-**Unit:** None
+**Unit:** Msol/year
 
 **Value:** Greater than 0
 
 **Parent(s):**
-  parameter_: This question is asked whenever there is a wind, that is to say essentially always
+  wind_type_: Various of the kinematic mdoes for the wind
 
 
-**File:** setup_domains.c
+**File:** sv.c, knigge.c
 
 

@@ -3,23 +3,6 @@
 Central_object
 ==============
 
-Central_object.mass
-===================
-Mass of the central object
-
-**Type:** Double
-
-**Unit:** Solar masses
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  parameter_: None
-
-
-**File:** setup.c
-
-
 Central_object.rad_type_in_final_spectrum
 =========================================
 The type of spectral models used to simulate radiation from the central object, where bb inplies
@@ -60,6 +43,23 @@ have been read in separately.
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** setup.c
+
+
+Central_object.mass
+===================
+Mass of the central object
+
+**Type:** Double
+
+**Unit:** Solar masses
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  parameter_: None
 
 
 **File:** setup.c

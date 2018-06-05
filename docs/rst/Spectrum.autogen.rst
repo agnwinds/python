@@ -3,20 +3,39 @@
 Spectrum
 ========
 
-Spectrum.angle
-==============
-The inclination angle with respect to the polar axis for
-obtaining a spectrum.  This question will be repeated once
-for each desired incliniation
+Spectrum.select_rho
+===================
+Advanced command which defines a spherical  region of
+space from which photons are to be extracted in constructing a detailed
+spectrum.  The region is defined by a cylindrical distance, and z height
+and an aximuth, and a radius r.  This parameter defines the rho coordiante
+of the region.
 
 **Type:** Double
 
-**Unit:** Degrees
+**Unit:** cm
 
-**Value:** Normally betwween 0 and 99 degrees
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
-  parameter_: Spectrum.no_observers
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** setup2.c
+
+
+Spectrum.wavemax
+================
+The maximum waveleenght of the detailed spectra that are to be produced
+
+**Type:** Double
+
+**Unit:** Angstroms
+
+**Value:** Greater than 0 and greater than Spectrum.wavemin
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup2.c
@@ -36,6 +55,45 @@ and anything else rsults in the standard extract method being used.
 
 **Parent(s):**
   parameter_: Called anytime detialed spectra are two be created.
+
+
+**File:** setup2.c
+
+
+Spectrum.select_r
+=================
+Part of a set of parameters which define a spherical region of space from which 
+photons are to be extracted. select_r defines the radius of the spherical region
+
+**Type:** Double
+
+**Unit:** cm
+
+**Value:** greater than 0
+
+**Parent(s):**
+  parameter_: Required when one asks to to extract photons from a spherical region in the wind
+
+
+**File:** setup2.c
+
+
+Spectrum.select_z
+=================
+Advanced command which defines a spherical  region of
+space from which photons are to be extracted in constructing a detailed
+spectrum.  The region is defined by a cylindrical distance, and z height
+and an aximuth, and a radius r.  This parameter defines the z coordiante
+of the region.
+
+**Type:** Double
+
+**Unit:** cm
+
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup2.c
@@ -63,34 +121,12 @@ primary
 **File:** setup2.c
 
 
-Spectrum.select_azimuth
-=======================
-Advance command which along with several other parameters
-specifies a spherical region of space in cylindrical coordinates.
-This parameter desribes the azimuth of the region.  When
-this general option is used, a detailed spectrum is constructed
-just from photons that originate or scatter int he region
-
-**Type:** Double
-
-**Unit:** Degrees
-
-**Value:** Normally a number between 0, and 360 or -180 to 180
-
-**Parent(s):**
-  parameter_: Required when extracting photons by position.
-
-
-**File:** setup2.c
-
-
-Spectrum.select_photons_by_position
-===================================
-Advanced command associated with adding conditions for 
-the detailed spectra that are extracted.  This command simply
-asks whether one would like to select photons by position.  If
-so one will be asked to define a spheical region in interms of
-its cylindrical coordinates.
+Spectrum.select_specific_no_of_scatters_in_spectra
+==================================================
+Advanced command which allows one to place additional
+constraints on the detailed spectra which are extract.  
+This includes selectiong photons from above or below the
+disk, only photons which have scttered, etc.  
 
 **Type:** Boolean (Y/N)
 
@@ -101,37 +137,15 @@ its cylindrical coordinates.
 **File:** setup2.c
 
 
-Spectrum.select_r
-=================
-Part of a set of parameters which define a spherical region of space from which 
-photons are to be extracted. select_r defines the radius of the spherical region
+Spectrum.wavemin
+================
+The minimum wavelength of the final spectra in Angstroms
 
 **Type:** Double
 
-**Unit:** cm
+**Unit:** Angstroms
 
-**Value:** greater than 0
-
-**Parent(s):**
-  parameter_: Required when one asks to to extract photons from a spherical region in the wind
-
-
-**File:** setup2.c
-
-
-Spectrum.select_rho
-===================
-Advanced command which defines a spherical  region of
-space from which photons are to be extracted in constructing a detailed
-spectrum.  The region is defined by a cylindrical distance, and z height
-and an aximuth, and a radius r.  This parameter defines the rho coordiante
-of the region.
-
-**Type:** Double
-
-**Unit:** cm
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** Greater than 0
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
@@ -155,43 +169,6 @@ n is < 0 then photons with n or greater scattters will be extracted.
 
 **Parent(s):**
   Select_no_of_scatters_in_spectra_: If 'y' then ask how many scatters
-
-
-**File:** setup2.c
-
-
-Spectrum.select_specific_no_of_scatters_in_spectra
-==================================================
-Advanced command which allows one to place additional
-constraints on the detailed spectra which are extract.  
-This includes selectiong photons from above or below the
-disk, only photons which have scttered, etc.  
-
-**Type:** Boolean (Y/N)
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup2.c
-
-
-Spectrum.select_z
-=================
-Advanced command which defines a spherical  region of
-space from which photons are to be extracted in constructing a detailed
-spectrum.  The region is defined by a cylindrical distance, and z height
-and an aximuth, and a radius r.  This parameter defines the z coordiante
-of the region.
-
-**Type:** Double
-
-**Unit:** cm
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup2.c
@@ -221,15 +198,15 @@ other. basic
 **File:** setup2.c
 
 
-Spectrum.wavemax
-================
-The maximum waveleenght of the detailed spectra that are to be produced
+Spectrum.select_photons_by_position
+===================================
+Advanced command associated with adding conditions for 
+the detailed spectra that are extracted.  This command simply
+asks whether one would like to select photons by position.  If
+so one will be asked to define a spheical region in interms of
+its cylindrical coordinates.
 
-**Type:** Double
-
-**Unit:** Angstroms
-
-**Value:** Greater than 0 and greater than Spectrum.wavemin
+**Type:** Boolean (Y/N)
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
@@ -238,18 +215,41 @@ The maximum waveleenght of the detailed spectra that are to be produced
 **File:** setup2.c
 
 
-Spectrum.wavemin
-================
-The minimum wavelength of the final spectra in Angstroms
+Spectrum.angle
+==============
+The inclination angle with respect to the polar axis for
+obtaining a spectrum.  This question will be repeated once
+for each desired incliniation
 
 **Type:** Double
 
-**Unit:** Angstroms
+**Unit:** Degrees
 
-**Value:** Greater than 0
+**Value:** Normally betwween 0 and 99 degrees
 
 **Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+  parameter_: Spectrum.no_observers
+
+
+**File:** setup2.c
+
+
+Spectrum.select_azimuth
+=======================
+Advance command which along with several other parameters
+specifies a spherical region of space in cylindrical coordinates.
+This parameter desribes the azimuth of the region.  When
+this general option is used, a detailed spectrum is constructed
+just from photons that originate or scatter int he region
+
+**Type:** Double
+
+**Unit:** Degrees
+
+**Value:** Normally a number between 0, and 360 or -180 to 180
+
+**Parent(s):**
+  parameter_: Required when extracting photons by position.
 
 
 **File:** setup2.c

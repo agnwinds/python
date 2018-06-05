@@ -3,23 +3,6 @@
 Boundary_layer
 ==============
 
-Boundary_layer.luminosity
-=========================
-The luminosity of the boundary layer          
-
-**Type:** Double
-
-**Unit:** ergs/s
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup.c
-
-
 Boundary_layer.rad_type_in_final_spectrum
 =========================================
 Multi-line description, must keep indentation.
@@ -40,29 +23,6 @@ Multi-line description, must keep indentation.
 
 
 **File:** python.c
-
-
-Boundary_layer.rad_type_to_make_wind
-====================================
-When the system contains a boundary layer, the spectrum of the boundary layer can be simulated
-as a blackbody, from a model, or as a power law.
-
-**Type:** Enum (Int)
-
-**Values:**
-
-0. bb
-
-1. models
-
-3. pow
-
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup.c
 
 
 Boundary_layer.radiation
@@ -88,6 +48,46 @@ is meaningful in generating the spectrum
 **Unit:** Degrees Kelvin
 
 **Value:** Greater than 0
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** setup.c
+
+
+Boundary_layer.luminosity
+=========================
+The luminosity of the boundary layer          
+
+**Type:** Double
+
+**Unit:** ergs/s
+
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** setup.c
+
+
+Boundary_layer.rad_type_to_make_wind
+====================================
+When the system contains a boundary layer, the spectrum of the boundary layer can be simulated
+as a blackbody, from a model, or as a power law.
+
+**Type:** Enum (Int)
+
+**Values:**
+
+0. bb
+
+1. models
+
+3. pow
+
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]

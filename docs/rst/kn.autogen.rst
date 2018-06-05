@@ -3,6 +3,25 @@
 kn
 ==
 
+kn.v_infinity
+=============
+The velocity at large distances of a steller wind described by the KWD model, 
+in units of escape velocity. Described in terms of Castor & Lamers equation,
+v(r) = v_0 + (v_inf - v_0) * (1 - R_s/r) ** beta.
+
+**Type:** Double
+
+**Unit:** Escape velocity
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  parameter_: None
+
+
+**File:** knigge.c
+
+
 kn.acceleration_exponent
 ========================
 Sets the length scale over which the accleration to v_inf is accomplished. 
@@ -39,15 +58,33 @@ KWD model.
 **File:** knigge.c
 
 
-kn.d
-====
-The ratio d/d_min is used to describe the degree of geometric collimation of 
-the disk wind in the KWD model. However, d (the distance to the focal point in
-central object radii) is used as this provides a more natural parameter.
+kn.rmin
+=======
+The radius at which the disk wind begins, in units of central object radii. 
+This has to be less than rmax.
 
 **Type:** Double
 
 **Unit:** co.radius
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  parameter_: None
+
+
+**File:** knigge.c
+
+
+kn.v_zero
+=========
+Multiple of the local sound speed at the base of the wind, this results in 
+the initial velocity of the wind being able to be greater or less than the
+local sound speed.
+
+**Type:** Double
+
+**Unit:** None
 
 **Value:** Greater than 0
 
@@ -96,52 +133,15 @@ radii. This has to be greater than rmin.
 **File:** knigge.c
 
 
-kn.rmin
-=======
-The radius at which the disk wind begins, in units of central object radii. 
-This has to be less than rmax.
+kn.d
+====
+The ratio d/d_min is used to describe the degree of geometric collimation of 
+the disk wind in the KWD model. However, d (the distance to the focal point in
+central object radii) is used as this provides a more natural parameter.
 
 **Type:** Double
 
 **Unit:** co.radius
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  parameter_: None
-
-
-**File:** knigge.c
-
-
-kn.v_infinity
-=============
-The velocity at large distances of a steller wind described by the KWD model, 
-in units of escape velocity. Described in terms of Castor & Lamers equation,
-v(r) = v_0 + (v_inf - v_0) * (1 - R_s/r) ** beta.
-
-**Type:** Double
-
-**Unit:** Escape velocity
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  parameter_: None
-
-
-**File:** knigge.c
-
-
-kn.v_zero
-=========
-Multiple of the local sound speed at the base of the wind, this results in 
-the initial velocity of the wind being able to be greater or less than the
-local sound speed.
-
-**Type:** Double
-
-**Unit:** None
 
 **Value:** Greater than 0
 

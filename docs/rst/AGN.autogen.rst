@@ -3,59 +3,6 @@
 AGN
 ===
 
-AGN.blackbody_temp
-==================
-The temperature of a blackbody SED to be used for the central AGN source
-
-**Type:** Double
-
-**Unit:** K
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  parameter_: None
-
-
-**File:** setup_star_bh.c
-
-
-AGN.bremsstrahlung_alpha
-========================
-The frequency exponent alpha in bremstrahlung SED of the form
-L_nu=nu**alpha exp(-hnu/kT)
-
-**Type:** Double
-
-**Unit:** None
-
-**Value:** Any - sign is not asssumed so use negative if you want negative
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup_star_bh.c
-
-
-AGN.bremsstrahlung_temp
-=======================
-The temperature T in bremstrahlung SED of the form
-L_nu=nu**alpha exp(-hnu/kT)
-
-**Type:** Double
-
-**Unit:** K
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  parameter_: None
-
-
-**File:** setup_star_bh.c
-
-
 AGN.geometry_for_pl_source
 ==========================
 Choose the geometry for the power law source.
@@ -101,20 +48,19 @@ Multi-line description, must keep indentation.
 **File:** setup_star_bh.c
 
 
-AGN.power_law_cutoff
-====================
-An advanced option - this is a low frequency cutoff for an 
-AGN power law spectrum. It prevents the powerlaw being 
-applied to low frequencies and giving an odd SED.
+AGN.bremsstrahlung_alpha
+========================
+The frequency exponent alpha in bremstrahlung SED of the form
+L_nu=nu**alpha exp(-hnu/kT)
 
 **Type:** Double
 
-**Unit:** Hz
+**Unit:** None
 
-**Value:** Greater than 0
+**Value:** Any - sign is not asssumed so use negative if you want negative
 
 **Parent(s):**
-  parameter_: None
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
 **File:** setup_star_bh.c
@@ -130,6 +76,60 @@ central source of the form L_nu=K nu**alpha
 **Unit:** None
 
 **Value:** Any - but sign is not assumed, so for negative index use a negative value
+
+**Parent(s):**
+  parameter_: None
+
+
+**File:** setup_star_bh.c
+
+
+AGN.blackbody_temp
+==================
+The temperature of a blackbody SED to be used for the central AGN source
+
+**Type:** Double
+
+**Unit:** K
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  parameter_: None
+
+
+**File:** setup_star_bh.c
+
+
+AGN.bremsstrahlung_temp
+=======================
+The temperature T in bremstrahlung SED of the form
+L_nu=nu**alpha exp(-hnu/kT)
+
+**Type:** Double
+
+**Unit:** K
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  parameter_: None
+
+
+**File:** setup_star_bh.c
+
+
+AGN.power_law_cutoff
+====================
+An advanced option - this is a low frequency cutoff for an 
+AGN power law spectrum. It prevents the powerlaw being 
+applied to low frequencies and giving an odd SED.
+
+**Type:** Double
+
+**Unit:** Hz
+
+**Value:** Greater than 0
 
 **Parent(s):**
   parameter_: None
