@@ -26,6 +26,7 @@ struct topbase_phot *cont_ext_ptr2; //continuum pointer passed externally
 double temp_ext2;                   //temperature passed externally
 double temp_ext_rad;                //radiation temperature passed externally 
 
+#define ALPHA_SP_CONSTANT 5.79618e-36 //
 
 /**********************************************************/
 /**
@@ -1133,8 +1134,6 @@ gamma_e_integrand (freq)
 }
 
 
-#define ALPHA_SP_CONSTANT 5.79618e-36
-
 
 /**********************************************************/
 /**
@@ -1222,8 +1221,6 @@ alpha_st_integrand (freq)
 
 
 
-
-#define ALPHA_SP_CONSTANT 5.79618e-36
 
 /**********************************************************/
 /**
