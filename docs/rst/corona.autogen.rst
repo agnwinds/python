@@ -3,16 +3,16 @@
 corona
 ======
 
-corona.base_den
-===============
-The coronal model is defined in terms of a base density
-and a scale height
+corona.zmax
+===========
+The corona is a box-shaped region which sits immediately
+above the disk.  zmax defines the height of the box.
 
 **Type:** Double
 
-**Unit:** number/cm**3
+**Unit:** cm
 
-**Value:** Greater than 0
+**Value:** Greater than that the radius of the central object
 
 **Parent(s):**
   Wind.type_: Selected as one of the choces for this variable
@@ -39,16 +39,16 @@ above the disk.  radmin defines the inner edge of the box.
 **File:** corona.c
 
 
-corona.zmax
-===========
-The corona is a box-shaped region which sits immediately
-above the disk.  zmax defines the height of the box.
+corona.scale_height
+===================
+The coronal model is defined in terms of a base density
+and a scale height
 
 **Type:** Double
 
 **Unit:** cm
 
-**Value:** Greater than that the radius of the central object
+**Value:** Greater than 0
 
 **Parent(s):**
   Wind.type_: Selected as one of the choces for this variable
@@ -57,16 +57,16 @@ above the disk.  zmax defines the height of the box.
 **File:** corona.c
 
 
-corona.radmax
-=============
-The corona is a box-shaped region which sits immediately
-above the disk.  radmax defines the outer edge of the box.
+corona.base_den
+===============
+The coronal model is defined in terms of a base density
+and a scale height
 
 **Type:** Double
 
-**Unit:** cm
+**Unit:** number/cm**3
 
-**Value:** Greater than the radius of the central object
+**Value:** Greater than 0
 
 **Parent(s):**
   Wind.type_: Selected as one of the choces for this variable
@@ -97,16 +97,16 @@ toward the central object).
 **File:** corona.c
 
 
-corona.scale_height
-===================
-The coronal model is defined in terms of a base density
-and a scale height
+corona.radmax
+=============
+The corona is a box-shaped region which sits immediately
+above the disk.  radmax defines the outer edge of the box.
 
 **Type:** Double
 
 **Unit:** cm
 
-**Value:** Greater than 0
+**Value:** Greater than the radius of the central object
 
 **Parent(s):**
   Wind.type_: Selected as one of the choces for this variable

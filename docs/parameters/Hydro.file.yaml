@@ -1,4 +1,4 @@
-name: hydro_file
+name: Hydro.file
 description: |
   Relative path to a hydrodynamic snapshot file to be imported.
 type: String

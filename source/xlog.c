@@ -610,7 +610,7 @@ error_count (char *format)
 
 /**********************************************************/
 /** 
- * @brief      Summparise the errors that have occurred 
+ * @brief      Summarize the errors that have occurred 
  *
  * @param [in] char *  message   A message that can accompany the error summary
  * @return     Always returns 0

@@ -1,9 +1,22 @@
 
-==============
-Hydro_thetamax
-==============
+=====
+Hydro
+=====
 
-Hydro_thetamax
+Hydro.file
+==========
+Relative path to a hydrodynamic snapshot file to be imported.
+
+**Type:** String
+
+**Parent(s):**
+  parameter_: None
+
+
+**File:** hydro_import.c
+
+
+Hydro.thetamax
 ==============
 The maximum theta value to be read in from a hydrodynamic snapshot.
 This is typically used to excise a dense disk from the midplane of

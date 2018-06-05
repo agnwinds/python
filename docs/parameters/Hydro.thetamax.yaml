@@ -1,4 +1,4 @@
-name: Hydro_thetamax
+name: Hydro.thetamax
 description: |
   The maximum theta value to be read in from a hydrodynamic snapshot.
   This is typically used to excise a dense disk from the midplane of
