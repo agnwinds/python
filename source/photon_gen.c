@@ -358,7 +358,7 @@ iwind = -1 	Don't generate any wind photons at all
 
     matom_emiss_report ();      // function which logs the macro atom level emissivites
   }
-  else if (geo.nonthermal)
+  else if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO)
   {
     /* calculate the non-radiative kpkt luminosity throughout the wind */
     geo.f_kpkt = get_kpkt_heating_f ();  
@@ -590,7 +590,7 @@ stellar photons */
 
   /* Now do macro atoms and k-packets. SS June 04 */
 
-  if (geo.matom_radiation || geo.nonthermal)
+  if (geo.matom_radiation || (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO))
   {
     nphot = nkpkt;
     if (nphot > 0)
