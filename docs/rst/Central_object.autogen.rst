@@ -3,20 +3,6 @@
 Central_object
 ==============
 
-Central_object.radiation
-========================
-A booliean variable stating whether of not the central object should radiate from its
-survace as a star would. 
-
-**Type:** Boolean (1/0)
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup.c
-
-
 Central_object.radius
 =====================
 Radius of the central object in the system, e.g the white dwarf or black hole
@@ -34,21 +20,42 @@ Radius of the central object in the system, e.g the white dwarf or black hole
 **File:** setup.c
 
 
-Central_object.temp
-===================
-Multi-line description, must keep indentation.
+Central_object.rad_type_in_final_spectrum
+=========================================
+The type of spectral models used to simulate radiation from the central object, where bb inplies
+bb radiation, models implies spectra from models that are read in, and uniform means a flat spectrum
+regardless of parameters like temperature.
 
-**Type:** rddoub
+**Type:** Enum (Int)
 
-**Unit:** None
+**Values:**
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+0. bb
+
+1. models
+
+2. uniform
+
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
-**File:** setup_star_bh.c
+**File:** python.c
+
+
+Central_object.radiation
+========================
+A booliean variable stating whether of not the central object should radiate from its
+survace as a star would. 
+
+**Type:** Boolean (1/0)
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** setup.c
 
 
 Central_object.rad_type_for_star_to_make_wind
@@ -89,27 +96,20 @@ Mass of the central object
 **File:** setup.c
 
 
-Central_object.rad_type_in_final_spectrum
-=========================================
-The type of spectral models used to simulate radiation from the central object, where bb inplies
-bb radiation, models implies spectra from models that are read in, and uniform means a flat spectrum
-regardless of parameters like temperature.
+Central_object.temp
+===================
+Multi-line description, must keep indentation.
 
-**Type:** Enum (Int)
+**Type:** rddoub
 
-**Values:**
+**Unit:** None
 
-0. bb
-
-1. models
-
-2. uniform
-
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 
-**File:** python.c
+**File:** setup_star_bh.c
 
 

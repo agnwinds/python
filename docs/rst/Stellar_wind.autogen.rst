@@ -55,24 +55,6 @@ v(r)=v_o + (v_inf - v_o) (1+R_s/r)**beta
 **File:** stellar_wind.c
 
 
-Stellar_wind.radmin
-===================
-Inner edge in cm for a stellar wind, normally the
-radius of the star.
-
-**Type:** Double
-
-**Unit:** cm
-
-**Value:** Greater than or equal to radius of the central object
-
-**Parent(s):**
-  parameter_: Required when the wind_type is set to 1, a stellar wind
-
-
-**File:** stellar_wind.c
-
-
 Stellar_wind.mdot
 =================
 Mass loss rate for a wind modelled in terms of the
@@ -83,6 +65,24 @@ Caster and Lamemers prescription for a stellar wind.
 **Unit:** M_sol/year
 
 **Value:** Greater than 0
+
+**Parent(s):**
+  parameter_: Required when the wind_type is set to 1, a stellar wind
+
+
+**File:** stellar_wind.c
+
+
+Stellar_wind.radmin
+===================
+Inner edge in cm for a stellar wind, normally the
+radius of the star.
+
+**Type:** Double
+
+**Unit:** cm
+
+**Value:** Greater than or equal to radius of the central object
 
 **Parent(s):**
   parameter_: Required when the wind_type is set to 1, a stellar wind

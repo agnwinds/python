@@ -3,16 +3,15 @@
 AGN
 ===
 
-AGN.power_law_index
-===================
-The exponent alpha in a power las SED applied to an AGN
-central source of the form L_nu=K nu**alpha
+AGN.blackbody_temp
+==================
+The temperature of a blackbody SED to be used for the central AGN source
 
 **Type:** Double
 
-**Unit:** None
+**Unit:** K
 
-**Value:** Any - but sign is not assumed, so for negative index use a negative value
+**Value:** Greater than 0
 
 **Parent(s):**
   parameter_: None
@@ -38,33 +37,16 @@ Multi-line description, must keep indentation.
 **File:** setup_star_bh.c
 
 
-AGN.bremsstrahlung_temp
-=======================
-The temperature T in bremstrahlung SED of the form
-L_nu=nu**alpha exp(-hnu/kT)
+AGN.power_law_index
+===================
+The exponent alpha in a power las SED applied to an AGN
+central source of the form L_nu=K nu**alpha
 
 **Type:** Double
 
-**Unit:** K
+**Unit:** None
 
-**Value:** Greater than 0
-
-**Parent(s):**
-  parameter_: None
-
-
-**File:** setup_star_bh.c
-
-
-AGN.blackbody_temp
-==================
-The temperature of a blackbody SED to be used for the central AGN source
-
-**Type:** Double
-
-**Unit:** K
-
-**Value:** Greater than 0
+**Value:** Any - but sign is not assumed, so for negative index use a negative value
 
 **Parent(s):**
   parameter_: None
@@ -128,6 +110,24 @@ applied to low frequencies and giving an odd SED.
 **Type:** Double
 
 **Unit:** Hz
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  parameter_: None
+
+
+**File:** setup_star_bh.c
+
+
+AGN.bremsstrahlung_temp
+=======================
+The temperature T in bremstrahlung SED of the form
+L_nu=nu**alpha exp(-hnu/kT)
+
+**Type:** Double
+
+**Unit:** K
 
 **Value:** Greater than 0
 

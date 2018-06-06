@@ -56,6 +56,8 @@ char *old_names[] =
     "filling_factor","Coord.system","@write_atomicdata","Fixed.concentrations.filename",
     "@Extra.diagnostics","File.with.model2read","Number.of.wind.components","Old_windfile",
     "Model_file","agn_power_law_index", "hydro_file","Hydro_thetamax",
+    "kn.acceleration_exponent", "kn.acceleration_length", "kn.d", "kn.mdot_r_exponent",
+    "kn.rmax", "kn.rmin", "kn.v_infinity", "kn.v_zero",
     NULL
 
 };
@@ -73,7 +75,7 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
     "Central_object.rad_type_in_final_spectrum",
     "Disk.rad_type_in_final_spectrum","Boundary_layer.rad_type_in_final_spectrum",
     "Boundary_layer.radiation","Boundary_layer.rad_type_to_make_wind","Boundary_layer.temp",
-    "Boundary_layer.luminosity","homologous.boundary_mdot","Binary.mass_sec",
+    "Boundary_layer.luminosity","Homologous.boundary_mdot","Binary.mass_sec",
     "Binary.period","shell.wind_mdot","Photon_sampling.approach","Photon_sampling.nbands",
     "Photon_sampling.low_energy_limit","Photon_sampling.high_energy_limit","Photon_sampling.band_boundary",
     "Photon_sampling.band_min_frac",
@@ -89,12 +91,14 @@ char *new_names[] = { "Central.object.mass", "Central.object.radius",
     "Wind.filling_factor","Wind.coord_system","@Diag.write_atomicdata", "Wind.fixed_concntrations_file",
     "@Diag.extra","Wind.model2import","Wind.number_of_components","Wind.old_windfile",
     "Input_spectra.model_file","AGN.power_law_index", "Hydro.file","Hydro.thetamax",
+    "KWD.acceleration_exponent", "KWD.acceleration_length", "KWD.d", "KWD.mdot_r_exponent",
+    "KWD.rmax", "KWD.rmin", "KWD.v_infinity", "KWD.v_zero",
     NULL
 };
 
 
 
-int number_of_names = 81;
+int number_of_names = 89;
 
 #define MIN(a,b) ((a)<b ? a:b)
 

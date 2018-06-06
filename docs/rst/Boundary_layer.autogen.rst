@@ -3,29 +3,15 @@
 Boundary_layer
 ==============
 
-Boundary_layer.radiation
-========================
-Says whether the boundary layer will radiate 0=no, 1=yes
-
-**Type:** Boolean (1/0)
-
-**Parent(s):**
-  parameter_: None
-
-
-**File:** setup_star_bh.c
-
-
-Boundary_layer.temp
-===================
-The temperature of the boundary layer in situations where temperature
-is meaningful in generating the spectrum
+Boundary_layer.luminosity
+=========================
+The luminosity of the boundary layer          
 
 **Type:** Double
 
-**Unit:** Degrees Kelvin
+**Unit:** ergs/s
 
-**Value:** Greater than 0
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
@@ -57,15 +43,29 @@ as a blackbody, from a model, or as a power law.
 **File:** setup.c
 
 
-Boundary_layer.luminosity
-=========================
-The luminosity of the boundary layer          
+Boundary_layer.radiation
+========================
+Says whether the boundary layer will radiate 0=no, 1=yes
+
+**Type:** Boolean (1/0)
+
+**Parent(s):**
+  parameter_: None
+
+
+**File:** setup_star_bh.c
+
+
+Boundary_layer.temp
+===================
+The temperature of the boundary layer in situations where temperature
+is meaningful in generating the spectrum
 
 **Type:** Double
 
-**Unit:** ergs/s
+**Unit:** Degrees Kelvin
 
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+**Value:** Greater than 0
 
 **Parent(s):**
   parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]

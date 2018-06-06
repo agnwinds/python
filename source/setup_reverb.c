@@ -86,7 +86,7 @@ get_meta_params (void)
   rdpar_comment("Parameters for Reverberation Modeling (if needed)");
 
   meta_param = 0;		// initialize to no reverberation tracking
-  rdint ("reverb.type(0=off,1=photon,2=wind,3=matom)", &meta_param);
+  rdint ("Reverb.type(0=off,1=photon,2=wind,3=matom)", &meta_param);
   switch (meta_param)
     {				//Read in reverb tyoe, if any
     case 0:
@@ -109,7 +109,7 @@ get_meta_params (void)
   // ========== DEAL WITH DISK SETTINGS ==========
   if (geo.disk_type > 0 && geo.reverb != REV_NONE)
     {
-      rdint ("reverb.disk_type(0=correlated_with_co,1=uncorrelated,2=ignore_disk_photons)", &meta_param);
+      rdint ("Reverb.disk_type(0=correlated_with_co,1=uncorrelated,2=ignore_disk_photons)", &meta_param);
       switch (meta_param)
 	{			//Read in reverb tyoe, if any
 	case 0:
@@ -122,7 +122,7 @@ get_meta_params (void)
 	  geo.reverb_disk = REV_DISK_IGNORE;
 	  break;
 	default:
-	  Error ("reverb.disk_type: Invalid reverb disk mode.\n \
+	  Error ("Reverb.disk_type: Invalid reverb disk mode.\n \
         Valid modes are 0=Correlated with central source, 1=Uncorrelated, 2=Ignore.\n");
 	}
     }
@@ -135,8 +135,8 @@ get_meta_params (void)
       geo.reverb_angle_bins = 100;
       geo.reverb_dump_cells = 0;
       geo.reverb_vis = REV_VIS_NONE;
-      rdint ("reverb.path_bins", &geo.reverb_path_bins);
-      rdint ("reverb.visualisation(0=none,1=.vtk,2=cell_dump,3=both)", &meta_param);
+      rdint ("Reverb.path_bins", &geo.reverb_path_bins);
+      rdint ("Reverb.visualisation(0=none,1=.vtk,2=cell_dump,3=both)", &meta_param);
       switch (meta_param)
 	{			//Select whether to produce 3d visualisation file and/or dump flat csvs of spread in cells
 	case 0:
@@ -152,16 +152,16 @@ get_meta_params (void)
 	  geo.reverb_vis = REV_VIS_BOTH;
 	  break;
 	default:
-	  Error ("reverb.visualisation: Invalid mode.\n \
+	  Error ("Reverb.visualisation: Invalid mode.\n \
         Valid modes are 0=None, 1=VTK, 2=Cell dump, 3=Both.\n");
 	}
 
       if (geo.reverb_vis == REV_VIS_VTK || geo.reverb_vis == REV_VIS_BOTH)
 	//If we're producing a 3d visualisation, select bins. This is just for aesthetics
-	rdint ("reverb.angle_bins(for_vtk)", &geo.reverb_angle_bins);
+	rdint ("Reverb.angle_bins(for_vtk)", &geo.reverb_angle_bins);
       if (geo.reverb_vis == REV_VIS_DUMP || geo.reverb_vis == REV_VIS_BOTH)
 	{			//If we;re dumping path arrays, read in the number of cells to dump them for
-	  rdint ("reverb.dump_cells(number)", &geo.reverb_dump_cells);
+	  rdint ("Reverb.dump_cells(number)", &geo.reverb_dump_cells);
 	  geo.reverb_dump_cell_x =
 	    (double *) calloc (geo.reverb_dump_cells, sizeof (double));
 	  geo.reverb_dump_cell_z =
@@ -170,12 +170,12 @@ get_meta_params (void)
 	    (int *) calloc (geo.reverb_dump_cells, sizeof (int));
 	  for (k = 0; k < geo.reverb_dump_cells; k++)
 	    {			//For each we expect, read a paired cell coord as "[i]:[j]". May need to use py_wind to find indexes.
-	      rdline ("reverb.dump_cell(x:z_position)", trackline);
+	      rdline ("Reverb.dump_cell(x:z_position)", trackline);
 	      if (sscanf
 		  (trackline, "%lf:%lf", &geo.reverb_dump_cell_x[k],
 		   &geo.reverb_dump_cell_z[k]) == EOF)
 		{		//If this line is malformed, warn the user
-		  Error ("reverb.dump_cell: Invalid position line '%s'\n \
+		  Error ("Reverb.dump_cell: Invalid position line '%s'\n \
             Expected format '[x]:[z]'\n", trackline);
 		  exit (0);
 		}
@@ -194,22 +194,22 @@ get_meta_params (void)
 	}
 
       //Read in the number of lines to be tracked and allocate space for them
-      rdint ("reverb.matom_lines(number)", &geo.reverb_lines);
+      rdint ("Reverb.matom_lines(number)", &geo.reverb_lines);
       geo.reverb_line = (int *) calloc (geo.reverb_lines, sizeof (int));
       if (geo.reverb_lines < 1)
 	{			//If this is <1, then warn the user and quit
-	  Error ("reverb.matom_lines: \
+	  Error ("Reverb.matom_lines: \
       Must specify 1 or more lines to watch in macro-atom mode.\n");
 	  exit (0);
 	}
 
       for (i = 0; i < geo.reverb_lines; i++)
 	{			//Finally, for each line we expect, read it in
-	  rdline ("reverb.matom_line(line_index)", trackline);
+	  rdline ("Reverb.matom_line(line_index)", trackline);
 	  if (sscanf (trackline, "%d:%d:%d:%d", &z, &istate, &levu, &levl) ==
 	      EOF)
 	    {			//If this line is malformed, warn the user
-	      Error ("reverb.matom_line: Malformed line '%s'\n \
+	      Error ("Reverb.matom_line: Malformed line '%s'\n \
           Expected format '[z]:[istate]:[upper level]:[lower level]'\n", trackline);
 	      exit (0);
 	    }
@@ -241,13 +241,13 @@ get_meta_params (void)
       //Should we filter any lines out?
       //If -1, blacklist continuum, if >0 specify lines as above and whitelist
       //Automatically include matom_lines
-      rdint ("reverb.filter_lines(0=off,-1=continuum,>0=count)", &geo.reverb_filter_lines);
+      rdint ("Reverb.filter_lines(0=off,-1=continuum,>0=count)", &geo.reverb_filter_lines);
       if (geo.reverb_filter_lines > 0)
 	{			//If we're given a whitelist, allocate temp storage (up to 256 lines!)
 	  int temp[256], bFound;
 	  for (i = 0; i < geo.reverb_filter_lines; i++)
 	    {			//For each provided line, read in
-	      rdint ("reverb.filter_line(line_index)", &temp[i]);
+	      rdint ("Reverb.filter_line(line_index)", &temp[i]);
 	    }
 	  if (geo.reverb == REV_MATOM)
 	    {			//If we're in matom mode, check if those lines have already been included
