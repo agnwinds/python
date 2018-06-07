@@ -93,10 +93,10 @@ get_shell_wind_params (ndom)
   shell_vmin = zdom[ndom].cl_v_zero = 200e5;
   shell_vmax = zdom[ndom].cl_v_infinity = 3000e5;
 
-  rddoub ("shell.wind_mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
+  rddoub ("Shell.wind_mdot(msol/yr)", &zdom[ndom].stellar_wind_mdot);
   zdom[ndom].stellar_wind_mdot *= MSOL / YR;
 
-  rddoub ("shell.wind.radmin(cm)", &zdom[ndom].rmin);   /*Radius where wind begins */
+  rddoub ("Shell.wind.radmin(cm)", &zdom[ndom].rmin);   /*Radius where wind begins */
   if (zdom[ndom].rmin < geo.rstar)
   {
     Error ("get_shell_wind_params: It is unreasonable to have the wind start inside the star!\n");
@@ -109,11 +109,11 @@ get_shell_wind_params (ndom)
 /*120130 NSH the next two lines have been modified to mean that the wind will end up as a CL wind,
  * but the v_0 and v_infinity will be calulated here from these two variables, which are now local */
 
-  rddoub ("shell.wind_v_at_rmin(cm)", &shell_vmin);     /* Velocity at base of the wind */
-  rddoub ("shell.wind.v_at_rmax(cm)", &shell_vmax);     /* Final speed of wind in units of escape velocity */
+  rddoub ("Shell.wind_v_at_rmin(cm)", &shell_vmin);     /* Velocity at base of the wind */
+  rddoub ("Shell.wind.v_at_rmax(cm)", &shell_vmax);     /* Final speed of wind in units of escape velocity */
 
 
-  rddoub ("shell.wind.acceleration_exponent", &zdom[ndom].cl_beta);     /* Accleration scale exponent for a CL wind */
+  rddoub ("Shell.wind.acceleration_exponent", &zdom[ndom].cl_beta);     /* Accleration scale exponent for a CL wind */
   Log ("Geo rmax = %f\n", zdom[ndom].rmax);
 
   shell_rmax = zdom[ndom].rmax;

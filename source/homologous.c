@@ -71,7 +71,7 @@ get_homologous_params (ndom)
   one_dom->cl_beta = 7.0;
 
   one_dom->stellar_wind_mdot /= MSOL / YR;
-  rddoub ("homologous.boundary_mdot(msol/yr)", &one_dom->stellar_wind_mdot);
+  rddoub ("Homologous.boundary_mdot(msol/yr)", &one_dom->stellar_wind_mdot);
   one_dom->stellar_wind_mdot *= MSOL / YR;
 
 /* XXXX ksl 1802 - The maximum radius of the wind here seems to be defined externally
@@ -80,7 +80,7 @@ get_homologous_params (ndom)
  */
 
 
-  rddoub ("homologous.radmin(cm)", &one_dom->rmin);     /*Radius where wind begins */
+  rddoub ("Homologous.radmin(cm)", &one_dom->rmin);     /*Radius where wind begins */
   if (one_dom->rmin < geo.rstar)
   {
     Error ("get_homologous_params: It is unreasonable to have the wind start inside the star!\n");
@@ -89,8 +89,8 @@ get_homologous_params (ndom)
   }
   one_dom->cl_rmin = one_dom->rmin;
 
-  rddoub ("homologous.vbase(cm)", &one_dom->cl_v_zero); /* Velocity at base of the wind */
-  rddoub ("homologous.density_exponent", &one_dom->cl_beta);    /* Density law exponent */
+  rddoub ("Homologous.vbase(cm)", &one_dom->cl_v_zero); /* Velocity at base of the wind */
+  rddoub ("Homologous.density_exponent", &one_dom->cl_beta);    /* Density law exponent */
 
 
   /* Assign the generic parameters for the wind the generic parameters of the wind */
