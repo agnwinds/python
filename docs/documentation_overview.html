@@ -17,19 +17,84 @@
         first model</li>
       <li>A <a href="html/index.html">ReadTheDocs</a> repository which
         gives information about all of the input parameters</li>
+      <ul>
+        <li>This is part of the Python distribution.&nbsp; All of the
+          files are tracked in git</li>
+        <li>This documentation needs to be updated when parameters have
+          been changed, or if the yaml files have been updated.</li>
+        <li>Instructions on how to do the updates are<a
+            href="html/rst/meta.html"> here.</a><br>
+        </li>
+        <li>It requires a software package known as <a
+            href="http://www.sphinx-doc.org/en/master/">sphinx</a></li>
+      </ul>
       <li>A <a href="pydocs/doc_py_progs.html">pydocs repository </a>which
+
 
         provides information about the python scripts contained in
         $PYTHON/py_progs</li>
-      <li>A <a href="doxygen/html/index.html">Doxygen repositiory, </a>which
-        provides information about the source code.<br>
-      </li>
+      <ul>
+        <li>These files are also tracked by git.&nbsp; <br>
+        </li>
+        <li>The documentation should be updated if new python routines
+          are added to py_progs, or if modifications to the _doc_
+          strings are made in existing programs</li>
+        <li>To regenerate them, use the routine write_docs.py which is
+          in py_progs.&nbsp; <br>
+        </li>
+        <li>The program should be run from the docs/pydocs
+          directory.&nbsp; <br>
+        </li>
+        <li>../../py_progs/write_docs.py ../../py_progs</li>
+        <li>No special sofwate is required<br>
+        </li>
+      </ul>
+      <li>A <a href="doxygen/html/index.html">Doxygen repository, </a>which
+
+        provides information about the source code.</li>
+      <ul>
+        <li>Unlike the other documentation, the Doxygen information is
+          not part of the repository.&nbsp;&nbsp; Therefore if you want
+          this, one will have to run software to generate the
+          documeantions<br>
+        </li>
+        <li>To do this, one must go to the docs/doxygen directory and
+          run</li>
+        <li>doxygen python_docs.config</li>
+        <li>Of course the assumes that you have doxygen <br>
+        </li>
+        <ul>
+          <li>The Doxygen home page is <a
+              href="http://www.stack.nl/%7Edimitri/doxygen/">here</a>.&nbsp;
+            <br>
+          </li>
+          <li>To get the graphs, you also need to have the dot tool from
+            <a href="http://www.graphviz.org/">Graphviz</a> installed as
+            well.&nbsp; <br>
+          </li>
+        </ul>
+      </ul>
     </ul>
     <p><br>
-      We are working on a reference guide and we are working on adding
-      Doxygen comments for the code.&nbsp; <br>
+      Comments:<br>
     </p>
-    <p>ksl - 180214 <br>
+    <ul>
+      <li>The S/W discussed above is readily available on various
+        package distributions, e.g <a href="https://brew.sh/">Homebrew</a>
+        or <a href="http://www.finkproject.org/">Fink</a> or <a
+          href="https://www.macports.org/">MacPorts</a><br>
+        for Macs.&nbsp; Presumably, various linux package managers
+        contain as well. &nbsp; <br>
+      </li>
+      <li>Alternatively, one can go to&nbsp; the home pages and download
+        and install using the instruction provided.<br>
+      </li>
+    </ul>
+    <ul>
+    </ul>
+    <p><br>
+      <br>
+      <br>
     </p>
   </body>
 </html>
