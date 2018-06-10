@@ -354,7 +354,6 @@ struct geometry
 
   double rmin, rmax, rmax_sq;   /* The maximum distance to which a photon should be followed */
 
-
 /* Basic paremeters of the system, as opposed to elements of the wind or winds */
 
   double mstar, rstar, rstar_sq, tstar, gstar;  /* Basic parameters for the star (often a WD) in the system */
@@ -506,21 +505,11 @@ struct geometry
   double pl_t_r, pl_t_e, pl_w;
   double pl_nh;
 
+  /* Variables having to do with heating and cooling*/
+
   double lum_tot, lum_star, lum_disk, lum_bl, lum_wind; /* The total luminosities of the disk, star, bl, & wind 
                                                            are actually not used in a fundamental way in the program */
   double lum_agn;               /*The total luminosity of the AGN or point source at the center */
-  int pl_geometry;              /* geometry of X-ray point source */
-#define PL_GEOMETRY_SPHERE 0
-#define PL_GEOMETRY_LAMP_POST 1
-  double lamp_post_height;      /* height of X-ray point source if lamp post */
-
-/* The next four variables added by nsh Apr 2012 to allow broken power law to match the cloudy table command */
-  double agn_cltab_low;         //break at which the low frequency power law ends
-  double agn_cltab_hi;          //break at which the high frequency power law cuts in
-  double agn_cltab_low_alpha;   //photon index for the low frequency end
-  double agn_cltab_hi_alpha;    //photon index for the high frequency end       
-
-
   double lum_ff, lum_rr, lum_lines;     /* The luminosity of the wind as a result of ff, fb, and line radiation */
   double cool_rr;				/*1706 NSH - the cooling rate due to radiative recombination - not the same as the luminosity */
   double cool_comp;              /*1108 NSH The luminosity of the wind as a result of compton cooling */
@@ -528,6 +517,7 @@ struct geometry
   double cool_dr;                /*1109 NSH The luminosity of the wind due to dielectronic recombination */
   double cool_adiabatic;         /*1209 NSH The cooling of the wind due to adiabatic expansion */
   double heat_adiabatic;        /*1307 NSH The heating of the wind due to adiabatic heating - split out from cool_adiabatic to get an accurate idea of whether it is important */
+  double heat_shock; /*1806 - ksl - The amount of extra heating going into the wind due to shock heating. Added for FU Ori project */
 
   double f_tot, f_star, f_disk, f_bl, f_agn, f_wind;    /* The integrated specific L between a freq min and max which are
                                                            used to establish the fraction of photons of various types */
@@ -545,7 +535,13 @@ struct geometry
   double f_matom, f_kpkt;       /*Added by SS Jun 2004 - to be used in computations of detailed spectra - the
                                    energy emitted in the band via k-packets and macro atoms respectively. */
 
-// The next set of parameters relate to the secondary
+//70i - nsh 111007 - put cool_tot_ioniz and n_ioniz into the geo structure. This will allow a simple estimate of ionisation parameter to be computed;
+
+  double n_ioniz, cool_tot_ioniz;
+
+/* The next set of parameters relate to the secondary
+ */
+
   double m_sec, q;              /* Mass of the secondary, mass ratio of system */
   double period;                /* Period of the systems in seconds */
   double a, l1, l2, phi;        /* Separation of primary and secondary, distance of l1 from primary,phi at l1 */
@@ -555,7 +551,9 @@ struct geometry
   double t_bl;                  /*temperature of the boundary layer */
   double weight;                /*weight factor for photons/defined in define_phot */
 
-// The next set of parameters relate to the central source of an AGN
+/* The next set of parameters relate to the central source of an AGN
+ */
+
   double brem_temp;             /*The temperature of a bremsstrahlung source */
   double brem_alpha;            /*The exponent of the nu term for a bremstrahlung source */
 
@@ -569,9 +567,16 @@ struct geometry
   double d_agn;                 /* the distance to the agn - only used in balance to calculate the ioinsation fraction */
 
 
-//70i - nsh 111007 - put cool_tot_ioniz and n_ioniz into the geo structure. This will allow a simple estimate of ionisation parameter to be computed;
+  int pl_geometry;              /* geometry of X-ray point source */
+#define PL_GEOMETRY_SPHERE 0
+#define PL_GEOMETRY_LAMP_POST 1
+  double lamp_post_height;      /* height of X-ray point source if lamp post */
 
-  double n_ioniz, cool_tot_ioniz;
+/* The next four variables added by nsh Apr 2012 to allow broken power law to match the cloudy table command */
+  double agn_cltab_low;         //break at which the low frequency power law ends
+  double agn_cltab_hi;          //break at which the high frequency power law cuts in
+  double agn_cltab_low_alpha;   //photon index for the low frequency end
+  double agn_cltab_hi_alpha;    //photon index for the high frequency end       
 
 // The next set of parameters describe the input datafiles that are read
   char atomic_filename[132];    /* The masterfile for the atomic data */
@@ -580,7 +585,7 @@ struct geometry
   //Added by SWM for tracking C-IV/H-A hotspots
   int nres_halpha;
 
-  /* Variables used for revereration mapping */
+  /* Variables used for reverberation mapping */
 
   double fraction_converged, reverb_fraction_converged;
   int reverb_filter_lines, *reverb_filter_line;
