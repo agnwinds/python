@@ -382,8 +382,10 @@ iwind = -1 	Don't generate any wind photons at all
   Log
     ("!! xdefine_phot: disk                               lum_disk %8.2e %8.2e  %8.2e \n", geo.lum_disk, geo.lum_disk_init, geo.lum_disk_back);
 
-  if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO)
-    Log ("!! xdefine_phot: kpkt luminosity due to non-radiative heating:  %8.2e \n", geo.f_kpkt);
+  if (geo.nonthermal)
+    Log ("!! xdefine_phot: total & kpkt luminosity due to non-radiative heating:  %8.2e %8.2e \n", geo.heat_shock, geo.f_kpkt);
+  if (geo.adiabatic)
+    Log ("!! xdefine_phot: heating & cooling  due to adiabatic processes:         %8.2e %8.2e \n", geo.heat_adiabatic, geo.cool_adiabatic);
 
 
 
@@ -1357,7 +1359,7 @@ photon_checks (p, freqmin, freqmax, comment)
       exit (0);
     }
   }
-  Log ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
+  // Log ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
 
   if (nnn == 0)
     Debug ("photon_checks: All photons passed checks successfully\n");

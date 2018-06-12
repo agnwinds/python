@@ -71,18 +71,18 @@ get_corona_params (ndom)
   zdom[ndom].corona_base_density = 1.e13;
   zdom[ndom].corona_scale_height = 1.e9;
 
-  rddoub ("corona.radmin(cm)", &zdom[ndom].corona_rmin);        /*Radius where corona begins */
+  rddoub ("Corona.radmin(cm)", &zdom[ndom].corona_rmin);        /*Radius where corona begins */
   if (zdom[ndom].corona_rmin < geo.rstar)
   {
     Error ("get_corona_params: It is unreasonable to have the corona start inside the star!\n");
     Log ("Setting geo.corona_rmin to geo.rstar\n");
     zdom[ndom].corona_rmin = geo.rstar;
   }
-  rddoub ("corona.radmax(cm)", &zdom[ndom].corona_rmax);        /*Radius where corona ends */
-  rddoub ("corona.zmax(cm)", &zdom[ndom].corona_zmax);  /*Veritical heighe where corona ends */
-  rddoub ("corona.base_den(cgs)", &zdom[ndom].corona_base_density);     /*Density at the base of the corona */
-  rddoub ("corona.scale_height(cm)", &zdom[ndom].corona_scale_height);  /*Scale height of corona */
-  rddoub ("corona.vel_frac", &zdom[ndom].corona_vel_frac);      /*fractional radial velocity of corona */
+  rddoub ("Corona.radmax(cm)", &zdom[ndom].corona_rmax);        /*Radius where corona ends */
+  rddoub ("Corona.zmax(cm)", &zdom[ndom].corona_zmax);  /*Veritical heighe where corona ends */
+  rddoub ("Corona.base_den(cgs)", &zdom[ndom].corona_base_density);     /*Density at the base of the corona */
+  rddoub ("Corona.scale_height(cm)", &zdom[ndom].corona_scale_height);  /*Scale height of corona */
+  rddoub ("Corona.vel_frac", &zdom[ndom].corona_vel_frac);      /*fractional radial velocity of corona */
 
   zdom[ndom].rmin = zdom[ndom].corona_rmin;
   /* rmax here is the defines a radius beyond which this region does not exist, if the vertical height is large

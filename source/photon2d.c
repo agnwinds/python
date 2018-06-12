@@ -144,7 +144,7 @@ int
 translate_in_space (pp)
      PhotPtr pp;
 {
-  double ds, delta, x, s, smax;
+  double ds, delta, s, smax;
   int ndom, ndom_next;
   struct photon ptest;
   int ifail;
@@ -216,18 +216,7 @@ translate_in_space (pp)
 
     }
 
-/* ?? The way in which a photon is identified as hitting the star seems
-a bit convoluted.  Despite the fact that it is already identified here
-as being a photon that hits the star, another determination of this
-fact is made inside walls, which uses the position of the photon to see
-this. One could ask a slightly different question in walls...e.g. has the
-photon hit the star in its passage from pold to the current position */
 
-  if ((x = ds_to_sphere (geo.rstar, pp)) < ds)
-    {
-      x = ds;
-      pp->istat = P_HIT_STAR;	/* Signifying that photon is hitting star */
-    }
   move_phot (pp, ds + DFUDGE);
 
 

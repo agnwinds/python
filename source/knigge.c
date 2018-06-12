@@ -96,24 +96,24 @@ To repeat, kn_dratio is the distance to the focus point in stellar radii!
 
 */
 
-  rddoub ("kn.d(in_units_of_rstar)", &zdom[ndom].kn_dratio);
+  rddoub ("KWD.d(in_units_of_rstar)", &zdom[ndom].kn_dratio);
 
   Log_silent ("dmin = %f so the ratio d/dmin here is %f  (%.2e %.2e) \n", dmin, zdom[ndom].kn_dratio / dmin, geo.diskrad, geo.rstar);
 
 
-  rddoub ("kn.mdot_r_exponent", &zdom[ndom].kn_lambda); /* Mass loss rate exponent */
-  rddoub ("kn.v_infinity(in_units_of_vescape)", &zdom[ndom].kn_v_infinity);     /* Final speed of wind in units of escape velocity */
+  rddoub ("KWD.mdot_r_exponent", &zdom[ndom].kn_lambda); /* Mass loss rate exponent */
+  rddoub ("KWD.v_infinity(in_units_of_vescape)", &zdom[ndom].kn_v_infinity);     /* Final speed of wind in units of escape velocity */
   if (zdom[ndom].kn_v_infinity < 0)
   {
     Log ("Since kn_v_infinity is less than zero, will use SV prescription for velocity law.\n Velocity at base remains the sound speed\n");
   }
 
-  rddoub ("kn.acceleration_length(cm)", &zdom[ndom].kn_r_scale);        /*Accleration length scale for wind */
-  rddoub ("kn.acceleration_exponent", &zdom[ndom].kn_alpha);    /* Accleration scale exponent */
-  rddoub ("kn.v_zero(multiple_of_sound_speed_at_base)", &zdom[ndom].kn_v_zero);
+  rddoub ("KWD.acceleration_length(cm)", &zdom[ndom].kn_r_scale);        /*Accleration length scale for wind */
+  rddoub ("KWD.acceleration_exponent", &zdom[ndom].kn_alpha);    /* Accleration scale exponent */
+  rddoub ("KWD.v_zero(multiple_of_sound_speed_at_base)", &zdom[ndom].kn_v_zero);
 
-  rddoub ("kn.rmin(in_units_of_rstar)", &zdom[ndom].wind_rho_min);
-  rddoub ("kn.rmax(in_units_of_rstar)", &zdom[ndom].wind_rho_max);
+  rddoub ("KWD.rmin(in_units_of_rstar)", &zdom[ndom].wind_rho_min);
+  rddoub ("KWD.rmax(in_units_of_rstar)", &zdom[ndom].wind_rho_max);
 
   zdom[ndom].wind_rho_min *= geo.rstar;
   zdom[ndom].wind_rho_max *= geo.rstar;

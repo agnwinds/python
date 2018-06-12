@@ -206,7 +206,8 @@ calc_pi_rate (nion, xplasma, mode, type)
   {
     fmaxtemp = xtop->freq[xtop->np - 1]; //Set the maximum frequency temporarily to the maximum cross section frequency
     fmax = check_fmax (fthresh, fmaxtemp, xplasma->t_r);  /*Check that the requested maximum frequency is sensible - if it is way
-		 off the end of the wien tail then the integration can fail - reset if necessary.*/
+		// off the end of the wien tail then the integration can fail - reset if necessary.*/
+    //printf("fthresh is %8.4e, fmax is %8.4e\n", fthresh, fmax);
     if (fthresh > fmax)  //The threshold for PI is above the maximum frequency of the radiation
     {
       pi_rate = 0.0;

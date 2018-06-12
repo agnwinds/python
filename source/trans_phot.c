@@ -375,6 +375,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
            * extract a photon to consturct the detailed spectrum 
            */
           randvcos(pp.lmn,normal);
+          move_phot(&pp,DFUDGE);
           stuff_phot (&pp, p);
           tau_scat = -log (1. - random_number(0.0,1.0));
           istat = pp.istat = P_INWIND;      /* Set the status back to P_INWIND so the photon will continue */ 

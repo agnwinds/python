@@ -54,7 +54,7 @@ to match heating and cooling in the wind element! */
 	    ("ionization_abundances: nebular_concentrations failed to converge\n");
 	  Error
 	    ("ionization_abundances: j %8.2e t_e %8.2e t_r %8.2e w %8.2e\n",
-	     xplasma->j, xplasma->t_e, xplasma->w);
+	     xplasma->j, xplasma->t_e, xplasma->t_r, xplasma->w);
 	}
     }
   else if (mode == IONMODE_LTE_TR)
@@ -406,7 +406,7 @@ meaning in nebular concentrations.
 	    ("ionization_on_the_spot: nebular_concentrations failed to converge\n");
 	  Error
 	    ("ionization_on_the_spot: j %8.2e t_e %8.2e t_r %8.2e w %8.2e nphot %i\n",
-	     xplasma->j, xplasma->t_e, xplasma->w, xplasma->ntot);
+	     xplasma->j, xplasma->t_e, xplasma->t_r, xplasma->w, xplasma->ntot);
 	}
       if (xplasma->ne < 0 || VERY_BIG < xplasma->ne)
 	{

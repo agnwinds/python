@@ -141,6 +141,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <ctype.h>
 #include "log.h"
 #define LINELEN		256
 #define	OLD		100
@@ -192,7 +193,7 @@ input[MAX_RECORDS];
 /** 
  * @brief      Open a parameter file for reading
  *
- * @param [in, out] char  filename[]   string giving the name of the parameter file
+ * @param [in] char  filename[]   string giving the name of the parameter file
  * @return     A status indicating whether one is 
  * reading an existing parameter file or proceegin interactivley
  *
@@ -258,7 +259,7 @@ opar (filename)
  * @brief      open another parameter file and append information from that parameter 
  * file to a previous one
  *
- * @param [in, out] char  filename[]   name of the file
+ * @param [in] char  filename[]   name of the file
  * @return     A status indicating whether the file was read
  *
  * This routines reads an auxiliary .pf file and appends data to the primary one,
@@ -396,7 +397,7 @@ rdpar_init ()
 /**********************************************************/
 /** 
  * @brief      process a line of input regardless of whether 
- * it comess from a file or the command line
+ * it comes from a file or the command line
  *
  * is the routine called by all of the individual
  * 	routines, like rdpar for processing a line of input whether
@@ -518,17 +519,20 @@ string_process_from_command_line (question, dummy)
  * 	successfully processed
  *
  *  When a parameter file is opened the data in the parameter file
- *  are readin into a structure called input.   This routine 
+ *  are read into a structure called input.   This routine 
  *  locates the appropriate line in the input structure 
- *  and returns the value theer as a string 
+ *  and returns the value as a string 
  *
  * ###Notes###
  *
- *  When a keyword is missing the routine first checks to see if 
+ *  When a keyword is missing the routine checks if there would be
+ *  a match if both strings are converted to lower case  (This change
+ *  was made to facilitate standardization of keywords).  If that
+ *  does not work it checks to see if 
  *  the keyword corresponds to an name that was changed by calling
  *  the routine synonyms.
  *
- *  If not it invokes the interactive version
+ *  If no match if foundl the rotine invokes the interactive version
  * 	of rdpar, but it does not force all future inputs to come from
  * 	the command line version, as was the case for version of rdpar
  * 	prior to 16sept.
@@ -548,6 +552,8 @@ string_process_from_file (question, dummy)
   char *ccc, *index (), *fgets ();
   int nwords, wordlength;
   char old_question[LINELEN];
+  char xfirstword[LINELEN],xquestion[LINELEN];
+  int i;
 
   for (rdpar_cursor = 0; rdpar_cursor < rdpar_ntot; rdpar_cursor++)
     {
@@ -588,6 +594,8 @@ string_process_from_file (question, dummy)
 	  break;		// We have matched the keywords
 	}
 
+
+
       /* Check for synonyms - That is look for keywords in the file we are reading 
        * that have been replaced by a new keyword
        */
@@ -597,6 +605,22 @@ string_process_from_file (question, dummy)
 	{
 	  break;
 	}
+
+      strncpy(xquestion,question,wordlength);
+      strncpy(xfirstword,firstword,wordlength);
+      for (i=0;i<wordlength;i++){
+          xquestion[i]=tolower(xquestion[i]);
+          xfirstword[i]=tolower(xfirstword[i]);
+      }
+
+
+      if (strncmp (xquestion, xfirstword, wordlength) == 0)
+	{
+	  break;		// We have matched the keywords
+	}
+
+
+
 
       // Print a warning if the lines do not match
       if (verbose > 1 && rd_rank == 0)

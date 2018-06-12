@@ -62,8 +62,8 @@ get_sv_wind_params (ndom)
 
   windmin = zdom[ndom].sv_rmin / geo.rstar;
   windmax = zdom[ndom].sv_rmax / geo.rstar;
-  rddoub ("sv.diskmin(units_of_rstar)", &windmin);
-  rddoub ("sv.diskmax(units_of_rstar)", &windmax);
+  rddoub ("SV.diskmin(units_of_rstar)", &windmin);
+  rddoub ("SV.diskmax(units_of_rstar)", &windmax);
 
 
   zdom[ndom].sv_rmin = windmin * geo.rstar;
@@ -71,16 +71,16 @@ get_sv_wind_params (ndom)
 
   theta_min = zdom[ndom].sv_thetamin * RADIAN;
   theta_max = zdom[ndom].sv_thetamax * RADIAN;
-  rddoub ("sv.thetamin(deg)", &theta_min);
-  rddoub ("sv.thetamax(deg)", &theta_max);
+  rddoub ("SV.thetamin(deg)", &theta_min);
+  rddoub ("SV.thetamax(deg)", &theta_max);
   zdom[ndom].sv_thetamin = theta_min / RADIAN;
   zdom[ndom].sv_thetamax = theta_max / RADIAN;
 
-  rddoub ("sv.mdot_r_exponent", &zdom[ndom].sv_lambda); /* Mass loss rate exponent */
-  rddoub ("sv.v_infinity(in_units_of_vescape", &zdom[ndom].sv_v_infinity);      /* Final speed of wind in units of escape velocity */
+  rddoub ("SV.mdot_r_exponent", &zdom[ndom].sv_lambda); /* Mass loss rate exponent */
+  rddoub ("SV.v_infinity(in_units_of_vescape", &zdom[ndom].sv_v_infinity);      /* Final speed of wind in units of escape velocity */
 
-  rddoub ("sv.acceleration_length(cm)", &zdom[ndom].sv_r_scale);        /*Accleration length scale for wind */
-  rddoub ("sv.acceleration_exponent", &zdom[ndom].sv_alpha);    /* Accleration scale exponent */
+  rddoub ("SV.acceleration_length(cm)", &zdom[ndom].sv_r_scale);        /*Accleration length scale for wind */
+  rddoub ("SV.acceleration_exponent", &zdom[ndom].sv_alpha);    /* Accleration scale exponent */
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
 
