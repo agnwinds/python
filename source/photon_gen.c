@@ -85,14 +85,15 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
   double ftot;
   int n;
   int iphot_start;
-
+  double kpkt_fraction;
 
   if (freq_sampling == 0)
   {                             /* Original approach, uniform sampling of entire wavelength interval,
                                    still used for detailed spectrum calculation */
+
     if (f1 != f1_old || f2 != f2_old || iwind != iwind_old)
     {                           // The reinitialization is required
-      xdefine_phot (f1, f2, ioniz_or_final, iwind);
+      xdefine_phot (f1, f2, ioniz_or_final, iwind, 1.0);
     }
     /* The weight of each photon is designed so that all of the photons add up to the
        luminosity of the photosphere.  This implies that photons must be generated in such
@@ -118,6 +119,17 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
 /* Now generate the photons */
 
     iphot_start = 0;
+
+    /* if we are making kpkts then split them evenly throughout the bands */
+    if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO) 
+      {
+        kpkt_fraction = 1.0 / xband.nbands;
+      }
+    else 
+      {
+        kpkt_fraction = 0.0;
+      }
+
     for (n = 0; n < xband.nbands; n++)
     {
 
@@ -126,7 +138,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
         /*Reinitialization is required here always because we are changing
          * the frequencies around all the time */
 
-        xdefine_phot (xband.f1[n], xband.f2[n], ioniz_or_final, iwind);
+        xdefine_phot (xband.f1[n], xband.f2[n], ioniz_or_final, iwind, kpkt_fraction);
 
         /* The weight of each photon is designed so that all of the photons add up to the
            luminosity of the photosphere.  This implies that photons must be generated in such
@@ -202,7 +214,7 @@ populate_bands (f1, f2, ioniz_or_final, iwind, band)
   {
     if (band->f1[n] < band->f2[n])
     {
-      xdefine_phot (band->f1[n], band->f2[n], ioniz_or_final, iwind);
+      xdefine_phot (band->f1[n], band->f2[n], ioniz_or_final, iwind, 0.0);
       ftot += band->flux[n] = geo.f_tot;
     }
     else
@@ -264,6 +276,7 @@ one photon for each band.*/
  * 1-> it is for the final spectrum calculation
  * @param [in] int  iwind   if 0, include wind photons; if 1 include wind photons and force a recalcuation of
  * ion denisities, if -1, ignore the possibility of wind photons
+ * @param [in] double kpkt_fraction fraction of kpkts to put into this band (1/nbands)
  * @return     Always returns 0
  *
  * @details
@@ -276,17 +289,18 @@ one photon for each band.*/
  *
  *
  * ### Notes ###
- * Note: This routine is something of a kluge.  Information is passed back to the calling
+ * @bug This routine is something of a kluge.  Information is passed back to the calling
  * routine through the geo structure, rather than a more obvious method.  The routine was
  * created when a banded approach was defined, but the whole section might be more obvious.
  *
  **********************************************************/
 
 int
-xdefine_phot (f1, f2, ioniz_or_final, iwind)
+xdefine_phot (f1, f2, ioniz_or_final, iwind, kpkt_fraction)
      double f1, f2;
      int ioniz_or_final;
      int iwind;
+     double kpkt_fraction;
 
 {
 
@@ -358,10 +372,10 @@ iwind = -1 	Don't generate any wind photons at all
 
     matom_emiss_report ();      // function which logs the macro atom level emissivites
   }
-  else if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO)
+  else if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO && kpkt_fraction > 0)
   {
     /* calculate the non-radiative kpkt luminosity throughout the wind */
-    geo.f_kpkt = get_kpkt_heating_f ();  
+    geo.f_kpkt = get_kpkt_heating_f () * kpkt_fraction;  
   }
 
 
@@ -388,7 +402,7 @@ iwind = -1 	Don't generate any wind photons at all
     Log ("!! xdefine_phot: heating & cooling  due to adiabatic processes:         %8.2e %8.2e \n", geo.heat_adiabatic, geo.cool_adiabatic);
 
 
-/*Store the 3 variables that have to remain the same to avoid reinitialization  */
+  /* Store the 3 variables that have to remain the same to avoid reinitialization */
 
   f1_old = f1;
   f2_old = f2;

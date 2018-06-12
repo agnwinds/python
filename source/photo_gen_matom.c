@@ -526,9 +526,21 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   double dvwind_ds (), sobolev ();
   int nplasma;
   int ndom;
+  double fmin, fmax;
 
   photstop = photstart + nphot;
   Log ("photo_gen_kpkt creates nphot %5d photons from %5d to %5d \n", nphot, photstart, photstop);
+
+  if (geo.ioniz_or_extract)
+  {
+    fmin = EPSILON;
+    fmax = VERY_BIG;
+  }
+  else
+  {
+    fmin = em_rnge.fmin;
+    fmax = em_rnge.fmax;
+  }
 
   for (n = photstart; n < photstop; n++)
   {
@@ -560,7 +572,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
     test = pp.freq;
 
-    while (test > em_rnge.fmax || test < em_rnge.fmin)
+    while (test > fmax || test < fmin)
     {
       kpkt (&pp, &nres, &esc_ptr);
       if (esc_ptr == 0)
