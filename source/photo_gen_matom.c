@@ -533,11 +533,13 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
   if (geo.ioniz_or_extract)
   {
-    fmin = EPSILON;
-    fmax = VERY_BIG;
+    /* we are in the ionization cycles, so use all bands */
+    fmin = xband.f1[0];
+    fmax = xband.f2[xband.nbands - 1];
   }
   else
   {
+    /* we are in the spectral cycles, so use all the required frequency range */
     fmin = em_rnge.fmin;
     fmax = em_rnge.fmax;
   }
