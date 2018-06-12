@@ -382,7 +382,7 @@ iwind = -1 	Don't generate any wind photons at all
   Log
     ("!! xdefine_phot: disk                               lum_disk %8.2e %8.2e  %8.2e \n", geo.lum_disk, geo.lum_disk_init, geo.lum_disk_back);
 
-  if (geo.nonthermal)
+  if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO)
     Log ("!! xdefine_phot: kpkt luminosity due to non-radiative heating:  %8.2e \n", geo.f_kpkt);
 
 
