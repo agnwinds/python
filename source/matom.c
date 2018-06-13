@@ -23,9 +23,9 @@
  * @brief The core of the implementation of Macro Atoms in python
  *
  * @param [in]     WindPtr w   the ptr to the structure defining the wind
- * @param [inout]  PhotPtr p   the packet at the point of activation and deactivation
- * @param [inout]  int nres    the process which activates and deactivates the Macro Atom
- * @param [inout]  int escape  to tell us whether the matom de-activation
+ * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
+ * @param [in,out]  int nres    the process which activates and deactivates the Macro Atom
+ * @param [in,out]  int escape  to tell us whether the matom de-activation
  *                             is via an r-packet (1) or a k-packet (0)
  * @return 0
  *
@@ -413,7 +413,6 @@ matom (p, nres, escape)
 
   run_tot = 0;
   n = 0;
-//  threshold = ((rand () + 0.5) / MAXRAND); //DONE
   threshold = random_number(0.0,1.0);
   
   threshold = threshold * penorm_known[uplvl];  //normalise to total emission prob.
@@ -430,7 +429,6 @@ matom (p, nres, escape)
        or collisional (k-packet). Get a random number and then use the ratio of the collisional
        emission probability to the (already known) collisional+radiative probability to decide whether
        collisional or radiative deactivation occurs. */
-//    choice = ((rand () + 0.5) / MAXRAND);       // the random number //DONE
     choice = random_number(0.0,1.0);
 	
 
@@ -473,7 +471,6 @@ matom (p, nres, escape)
     rad_rate = mplasma->recomb_sp[config[uplvl].bfd_indx_first + n - nbbd];     //again using recomb_sp rather than alpha_sp (SS July 04)
     coll_rate = q_recomb (cont_ptr, t_e) * ne;
 
-//    choice = ((rand () + 0.5) / MAXRAND);       // the random number//DONE
     choice = random_number(0.0,1.0);
 	
 
@@ -482,7 +479,6 @@ matom (p, nres, escape)
       *escape = 1;
       *nres = config[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
       /* continuua are indicated by nres > NLINES */
-//      p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e / H_OVER_K); //DONE
       p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. -  random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
 	  
       /* Co-moving frequency - changed to rest frequency by doppler */
@@ -659,9 +655,9 @@ alpha_sp_integrand (freq)
  * way as at the end of matom
  *
  * @param [in]     WindPtr w   the ptr to the structure defining the wind
- * @param [inout]  PhotPtr p   the packet at the point of activation and deactivation
- * @param [inout]  int nres    the process which activates and deactivates the Macro Atom
- * @param [inout]  int escape  to tell us whether the matom de-activation
+ * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
+ * @param [in,out]  int nres    the process which activates and deactivates the Macro Atom
+ * @param [in,out]  int escape  to tell us whether the matom de-activation
  *                             is via an r-packet (1) or a k-packet (0)
  * @return 0
  *
@@ -786,7 +782,7 @@ kpkt (p, nres, escape)
 
 
       /* Note that the electron density is not included here -- all cooling rates scale
-         with the electron density so I've factored it out. */
+         with the electron density. */
       if (cooling_bf[i] < 0)
       {
         Error ("kpkt: bf cooling rate negative. Density was %g\n", upper_density);
@@ -953,7 +949,6 @@ kpkt (p, nres, escape)
   /* The cooling rates for the recombination and collisional processes are now known. 
      Choose which process destroys the k-packet with a random number. */
 
-//  destruction_choice = ((rand () + 0.5) / MAXRAND) * mplasma->cooling_normalisation; //DONE
   destruction_choice = random_number(0.0,1.0) * mplasma->cooling_normalisation;
 
   if (destruction_choice < mplasma->cooling_bftot)
@@ -983,7 +978,6 @@ kpkt (p, nres, escape)
 
         /* Now (as in matom) choose a frequency for the new packet. */
 
-//        p->freq = phot_top[i].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e / H_OVER_K); //DONE
         p->freq = phot_top[i].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
 		
         /* Co-moving frequency - changed to rest frequency by doppler */
@@ -1289,7 +1283,6 @@ fake_matom_bf (p, nres, escape)
 
   *escape = 1;                  //always an r-packet here
 
-//  p->freq = phot_top[*nres - NLINES - 1].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e / H_OVER_K); DONE
   p->freq = phot_top[*nres - NLINES - 1].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
   
 
@@ -1308,8 +1301,8 @@ fake_matom_bf (p, nres, escape)
  *
  * @param [in]     WindPtr w   the ptr to the structure defining the wind
  * @param [in]     int upper   the upper level that we deactivate from
- * @param [inout]  PhotPtr p   the packet at the point of activation and deactivation
- * @param [inout]  int nres    the process by which deactivation occurs
+ * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
+ * @param [in,out]  int nres    the process by which deactivation occurs
  * @return 0
  *
  * emit_matom is a scaled down version of matom which deals with the emission due
@@ -1432,7 +1425,6 @@ emit_matom (w, p, nres, upper)
      now select what happens next. Start by choosing the random threshold value at which the
      event will occur. */
 
-//  threshold = ((rand () + 0.5) / MAXRAND); DONE
   threshold = random_number(0.0,1.0);
   
 
@@ -1457,7 +1449,6 @@ emit_matom (w, p, nres, upper)
   {                             /* bf downwards jump */
     *nres = config[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
     /* continuua are indicated by nres > NLINES */
-//    p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * t_e / H_OVER_K); DONE
     p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - random_number(0.0,1.0)) * t_e / H_OVER_K);
 	
     /* Co-moving frequency - changed to rest frequency by doppler */

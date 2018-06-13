@@ -162,7 +162,6 @@ calculate_ionization (restart_stat)
 
     photon_checks (p, freqmin, freqmax, "Check before transport");
 
-//OLD Removed Ferland IP    wind_ip ();
 
 
     zz = 0.0;
@@ -445,7 +444,7 @@ make_spectra (restart_stat)
 
   }
 
-  /* the next condition should really when one has nothing more to do */
+  /* the next condition should only occur when one has nothing more to do */
 
   else if (geo.pcycle >= geo.pcycles)
     xsignal (files.root, "%-20s No spectrum   needed: pcycles(%d)==pcycles(%d)\n", "COMMENT", geo.pcycle, geo.pcycles);
