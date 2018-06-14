@@ -676,7 +676,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
 
    if (lndet == 0){
-	       Error ("Rate Matrix Determinant is %8.4e for cell %i\n", det, nplasma);
+	       Error ("Rate Matrix ln(Determinant) is %8.4e for cell %i\n", lndet, nplasma);
 	return(4);
 
   }
