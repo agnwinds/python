@@ -121,7 +121,7 @@ matrix_ion_populations (xplasma, mode)
     xion[mm] = mm;              // xion is an array we use to track which ion is in which row of the matrix
     if (ion[mm].istate != 1)    // We can recombine since we are not in the first ionization stage
     {
-      rr_rates[mm] = total_rrate (mm, xplasma->t_e);    // radiative recombination rates
+      rr_rates[mm] = total_rrate (mm, xplasma->t_e);    // radiative recombination rates	  
     }
     if (ion[mm].istate != ion[mm].z + 1)        // we can photoionize, since we are not in the z+1th ionization state (bare)
     {
@@ -270,8 +270,10 @@ matrix_ion_populations (xplasma, mode)
       Error ("matrix_ion_populations: some matrix rows failing relative error check\n");
     else if (ierr == 3)
       Error ("matrix_ion_populations: some matrix rows failing absolute error check\n");
-		else if (ierr == 4)
-			Error ("matrix_ion_populations: Unsolvable matrix! Determinant is zero. Defaulting to no change.\n");
+	else if (ierr == 4)
+		Error ("matrix_ion_populations: Unsolvable matrix! Determinant is zero. Defaulting to no change.\n");
+		
+
 
     /* free memory */
     free (a_data);
@@ -428,7 +430,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
      double b_temp[nions];
 
 {
-  int nn, mm;
+  int nn, mm,zcount;
   int n_elec, d_elec, ion_out;  //The number of electrons left in a current ion
 
 
@@ -565,6 +567,8 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
       }
     }
   }
+  
+
 
 
 
@@ -579,7 +583,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
      densities which the solver computes are just the actual number densities for each ion. This does mean that different rows
      are orders of magnitude different, so one can imagine numerical issues. However each element is essentially solved for
      seperately.. Something to watch */
-
+  zcount=0;
   for (nn = 0; nn < nions; nn++)
   {
     if (ion[nn].istate == 1)
@@ -640,7 +644,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
      permutations. We dont use it anywhere, but in principle it can be used to refine the
      solution via gsl_linalg_LU_refine */
   double test_val;
-  double det;
+  double lndet;
 
   gsl_permutation *p;
   gsl_matrix_view m;
@@ -671,12 +675,16 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
   gsl_linalg_LU_decomp (&m.matrix, p, &s);
 
-  det = gsl_linalg_LU_det (&m.matrix, s);       // get the determinant to report to user
+//  det = gsl_linalg_LU_det (&m.matrix, s);       // get the determinant to report to user
+  lndet = gsl_linalg_LU_lndet (&m.matrix);
 
-  if (det == 0){
-    Error ("Rate Matrix Determinant is %8.4e for cell %i\n", det, nplasma);
-		return(4);
+
+   if (lndet == 0){
+	       Error ("Rate Matrix ln(Determinant) is %8.4e for cell %i\n", lndet, nplasma);
+	return(4);
+
   }
+
 
   gsl_linalg_LU_solve (&m.matrix, p, &b.vector, populations);
 
@@ -694,7 +702,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
   if (ierr != 0)
   {
-    Error ("solve_matrix: bad return when testing matrix solution to rate equations.\n");
+    Error ("solve_matrix: bad return when testing matrix solution to rate equations.\n");	
   }
 
   /* now cycle through and check the solution to y = m * populations really is (1, 0, 0 ... 0) */
