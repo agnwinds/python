@@ -319,7 +319,7 @@ int matom(PhotPtr p, int *nres, int *escape);
 double b12(struct lines *line_ptr);
 double alpha_sp(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
 double alpha_sp_integrand(double freq);
-int kpkt(PhotPtr p, int *nres, int *escape);
+int kpkt(PhotPtr p, int *nres, int *escape, int mode);
 int fake_matom_bb(PhotPtr p, int *nres, int *escape);
 int fake_matom_bf(PhotPtr p, int *nres, int *escape);
 int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper);

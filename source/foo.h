@@ -28,7 +28,7 @@ int walls(PhotPtr p, PhotPtr pold, double *normal);
 /* photon_gen.c */
 int define_phot(PhotPtr p, double f1, double f2, long nphot_tot, int ioniz_or_final, int iwind, int freq_sampling);
 double populate_bands(double f1, double f2, int ioniz_or_final, int iwind, struct xbands *band);
-int xdefine_phot(double f1, double f2, int ioniz_or_final, int iwind);
+int xdefine_phot(double f1, double f2, int ioniz_or_final, int iwind, double kpkt_fraction);
 int xmake_phot(PhotPtr p, double f1, double f2, int ioniz_or_final, int iwind, double weight, int iphot_start, int nphotons);
 int star_init(double freqmin, double freqmax, int ioniz_or_final, double *f);
 int photo_gen_star(PhotPtr p, double r, double t, double weight, double f1, double f2, int spectype, int istart, int nphot);
@@ -319,7 +319,7 @@ int matom(PhotPtr p, int *nres, int *escape);
 double b12(struct lines *line_ptr);
 double alpha_sp(struct topbase_phot *cont_ptr, PlasmaPtr xplasma, int ichoice);
 double alpha_sp_integrand(double freq);
-int kpkt(PhotPtr p, int *nres, int *escape);
+int kpkt(PhotPtr p, int *nres, int *escape, int mode);
 int fake_matom_bb(PhotPtr p, int *nres, int *escape);
 int fake_matom_bf(PhotPtr p, int *nres, int *escape);
 int emit_matom(WindPtr w, PhotPtr p, int *nres, int upper);
@@ -477,6 +477,7 @@ int setup_windcone(void);
 double get_disk_params(void);
 /* photo_gen_matom.c */
 double get_kpkt_f(void);
+double get_kpkt_heating_f(void);
 double get_matom_f(int mode);
 int photo_gen_kpkt(PhotPtr p, double weight, int photstart, int nphot);
 int photo_gen_matom(PhotPtr p, double weight, int photstart, int nphot);

@@ -574,7 +574,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
     while (test > fmax || test < fmin)
     {
-      kpkt (&pp, &nres, &esc_ptr);
+      kpkt (&pp, &nres, &esc_ptr,0); // 0 means force the routine to return a photon 
       if (esc_ptr == 0)
       {
         test = 0.0;

@@ -1314,12 +1314,12 @@ photon_checks (p, freqmin, freqmax, comment)
      double freqmin, freqmax;
 {
   int nnn, nn;
-  int nlabel;
+//OLD  int nlabel;
 
   geo.n_ioniz = 0;
   geo.cool_tot_ioniz = 0.0;
   nnn = 0;
-  nlabel = 0;
+//OLD  nlabel = 0;
 
 
   /* Next two lines are to allow for fact that photons generated in
@@ -1345,37 +1345,40 @@ photon_checks (p, freqmin, freqmax, comment)
     }
     if (sane_check (p[nn].freq) != 0 || sane_check (p[nn].w))
     {
-      if (nlabel == 0)
-      {
-        Error ("photon_checks: nphot  origin  freq     freqmin    freqmax\n");
-        nlabel++;
-      }
+//OLD      if (nlabel == 0)
+//OLD      {
+//OLD        Error ("photon_checks: nphot  origin  freq     freqmin    freqmax\n");
+//OLD        nlabel++;
+//OLD      }
       Error
-        ("photon_checks:sane_check %6d %5d %10.4e %10.4e %10.4e %5d w %10.4e \n", nn, p[nn].origin, p[nn].freq, freqmin, freqmax, p[nn].w);
+        ("photon_checks:sane_check nphot %6d orig %5d freq %10.4e fmin %10.4e fmax %10.4e w %10.4e \n", nn, p[nn].origin, p[nn].freq, freqmin, freqmax, p[nn].w);
       p[nn].freq = freqmax;
       nnn++;
     }
     if (p[nn].origin < 10 && (p[nn].freq < freqmin || freqmax < p[nn].freq))
     {
-      if (nlabel == 0)
-      {
-        Error ("photon_checks: nphot  origin  freq     freqmin    freqmax\n");
-        nlabel++;
-      }
-      Error ("photon_checks: %6d %5d %10.4e %10.4e %10.4e freq out of range\n", nn, p[nn].origin, p[nn].freq, freqmin, freqmax);
+//OLD      if (nlabel == 0)
+//OLD      {
+//OLD        Error ("photon_checks: nphot  origin  freq     freqmin    freqmax\n");
+//OLD        nlabel++;
+//OLD      }
+      Error ("photon_checks: nphot %6d origin %5d freq %10.4e fmin %10.4e fmax %10.4e freq out of range\n", nn, p[nn].origin, p[nn].freq, freqmin, freqmax);
       p[nn].freq = freqmax;
       nnn++;
     }
-    if (nnn > 100)
-    {
-      Error ("photon_checks: Exiting because too many bad photons generated\n");
-      exit (0);
-    }
+//OLD    if (nnn > 100)
+//OLD    {
+//OLD      Error ("photon_checks: Exiting because too many bad photons generated\n");
+//OLD      exit (0);
+//OLD    }
   }
-  // Log ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
 
   if (nnn == 0)
     Debug ("photon_checks: All photons passed checks successfully\n");
+  else {
+      Error("photon_checks: %s\n", comment);
+      Error("photon_checks: %d photons of %d (or %.2f per cent) failed photon checks\n",nnn,NPHOT,(float) nnn/NPHOT);
+  }
 
   return (0);
 }

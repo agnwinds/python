@@ -659,6 +659,8 @@ alpha_sp_integrand (freq)
  * @param [in,out]  int nres    the process which activates and deactivates the Macro Atom
  * @param [in,out]  int escape  to tell us whether the matom de-activation
  *                             is via an r-packet (1) or a k-packet (0)
+ * @param [in] int mode         switch which allows photon to be deactivated by a non-radiative
+ * term.  (non_zero is true)
  * @return 0
  *
  * ###Notes###
@@ -675,15 +677,18 @@ alpha_sp_integrand (freq)
  *          July04  SS   Modified to use recomb_sp(_e) rather than alpha_sp(_e) to speed up.
  *	06may	ksl	57+ -- Modified to use new plasma array.  Eliminated passing
  *			entire w array
- *	131030	JM 		-- Added adiabatic cooling as possible kpkt destruction choice
+ *	131030	JM 		-- Added adiabatic cooling as possible kpkt destruction choice 
+ *	
+ *	* 180616  Updated so that one could force kpkt to deactivate via radiation
 ************************************************************/
 #define ALPHA_FF 100.     // maximum h nu / kT to create the free free CDF 
 
 int
-kpkt (p, nres, escape)
+kpkt (p, nres, escape,mode)
      PhotPtr p;
      int *nres;
      int *escape;
+     int mode;
 {
 
   int i;
@@ -929,7 +934,13 @@ kpkt (p, nres, escape)
     }
 
 
+    /* When we generate photons in the wind, from photon_gen we need to prevent deactivation by non-radiative cooling
+     * terms.  If mode is True we include adiabatic cooling
+     */
+
+    if (mode) {
     cooling_normalisation += cooling_adiabatic;
+    }
 
 
 
