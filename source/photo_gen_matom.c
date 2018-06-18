@@ -65,7 +65,8 @@ get_kpkt_f ()
  **********************************************************/
 
 double
-get_kpkt_heating_f ()
+get_kpkt_heating_f (fraction)
+  double fraction;
 {
   int n, nwind;
   double lum, shock_kpkt_luminosity;
@@ -77,7 +78,7 @@ get_kpkt_heating_f ()
   {
     nwind = plasmamain[n].nwind;
     one = &wmain[nwind];
-    shock_kpkt_luminosity = shock_heating(one);
+    shock_kpkt_luminosity = fraction * shock_heating(one);
     plasmamain[n].kpkt_emiss = shock_kpkt_luminosity;
     lum += shock_kpkt_luminosity;
   }

@@ -477,7 +477,7 @@ int setup_windcone(void);
 double get_disk_params(void);
 /* photo_gen_matom.c */
 double get_kpkt_f(void);
-double get_kpkt_heating_f(void);
+double get_kpkt_heating_f(double fraction);
 double get_matom_f(int mode);
 int photo_gen_kpkt(PhotPtr p, double weight, int photstart, int nphot);
 int photo_gen_matom(PhotPtr p, double weight, int photstart, int nphot);

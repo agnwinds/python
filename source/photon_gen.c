@@ -375,7 +375,7 @@ iwind = -1 	Don't generate any wind photons at all
   else if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO && kpkt_fraction > 0)
   {
     /* calculate the non-radiative kpkt luminosity throughout the wind */
-    geo.f_kpkt = get_kpkt_heating_f () * kpkt_fraction;  
+    geo.f_kpkt = get_kpkt_heating_f (kpkt_fraction);  
   }
 
 
