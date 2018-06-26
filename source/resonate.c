@@ -366,8 +366,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 			  if (lin_ptr[nn]->macro_info == 1
 			      && geo.macro_simple == 0)
 			    {
-/* The line is part of a macro atom so increment the estimator if desired
- * (SS July 04). */
+/* The line is part of a macro atom so increment the estimator if desired */
 			      if (geo.ioniz_or_extract == 1)
 				{
 				  bb_estimators_increment (two, p,
@@ -376,6 +375,10 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 				}
 			    }
               else if (two->vol==0) {
+                  /* See issue #389 - Sometimes DFUDGE pushes a photon into a cell with no volume.  Note that this
+                   * should be very rare, so if this error occurs in significant numbers the problem should be
+                   * investigated further.  ksl -180626
+                   */
                   Error("calculate_ds: Macro atom problem when photon moved into cell with no volume\n");
               }
 			  else
