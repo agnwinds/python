@@ -501,17 +501,6 @@ main (argc, argv)
 	      exit (0);
 	    }
 
-	  /* With the macro atom approach we won't want to generate photon 
-	     bundles in the wind so switch it off here. (SS) */
-
-	  if (geo.rt_mode == RT_MODE_MACRO)
-	    {
-	      Log
-		("python: Using Macro Atom method so switching off wind radiation.\n");
-	      geo.wind_radiation = 0;
-	    }
-
-
 	  /* Describe the wind. This routine reads in geo.rmax and geo.twind
 	     and then gets params by calling e.g. get_sv_wind_params() */
 
@@ -520,6 +509,9 @@ main (argc, argv)
 	    ("Parameters descibing the various winds or coronae in the system");
 
 	  rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+      /* JM 1806 -- note that wind radiation will get "turned off" in indivisible packet/macro-atom 
+         mode when geo.rt_mode == RT_MODE_MACRO. This is done in get_line_transfer_mode () in 
+         setup_domains.c, see issue #390 */
 
 	  if (geo.run_type == RUN_TYPE_NEW)
 	    {
