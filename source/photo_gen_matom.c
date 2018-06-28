@@ -490,12 +490,11 @@ get_matom_f (mode)
 /* All done. */
 
 
+
 /**********************************************************/
 /** 
- * @brief      produces photon packets to account for creating of r-packets
- *      by k-packets in the spectrum calculation. It should only be used once the total 
- *      energy emitted in this way in the wavelength range in question is well known
- *      (calculated in the ionization cycles).
+ * @brief produces photon packets to account for creating of r-packets by k-packets. 
+
  *
  * @param [in, out] PhotPtr  p   the ptr to the entire structure for the photons
  * @param [in] double  weight   the photon weight
@@ -503,8 +502,10 @@ get_matom_f (mode)
  * @param [in] int  nphot   the number of photons to be generated
  * @return int nphot  When it finishes it should have generated nphot photons from k-packet elliminations.
  *
- * @details
- * This routine is closely related to photo_gen_wind from which much of the code has been copied.
+ * @details produces photon packets to account for creating of r-packets by k-packets in the spectrum calculation. 
+ * It should only be used once the total energy emitted in this way in the wavelength range in question is well known
+ * (calculated in the ionization cycles). This routine is closely related to photo_gen_wind from which much of the code 
+ * has been copied.
  *
  **********************************************************/
 
@@ -525,8 +526,8 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   double test;
   int nnscat;
   double dvwind_ds (), sobolev ();
-  int nplasma;
-  int ndom;
+  int nplasma, ndom;
+  int kpkt_mode;
   double fmin, fmax;
 
   photstop = photstart + nphot;
@@ -534,15 +535,18 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
   if (geo.ioniz_or_extract)
   {
-    /* we are in the ionization cycles, so use all bands */
+    /* we are in the ionization cycles, so use all frequencies. kpkt_mode should allow all processes */
     fmin = xband.f1[0];
     fmax = xband.f2[xband.nbands - 1];
+    kpkt_mode = KPKT_MODE_ALL;
   }
   else
   {
     /* we are in the spectral cycles, so use all the required frequency range */
     fmin = em_rnge.fmin;
     fmax = em_rnge.fmax;
+    /* we only want k->r processes */
+    kpkt_mode = KPKT_MODE_CONTINUUM;
   }
 
   for (n = photstart; n < photstop; n++)
@@ -577,7 +581,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
     while (test > fmax || test < fmin)
     {
-      kpkt (&pp, &nres, &esc_ptr,0); // 0 means force the routine to return a photon 
+      kpkt (&pp, &nres, &esc_ptr, kpkt_mode); 
       if (esc_ptr == 0)
       {
         test = 0.0;

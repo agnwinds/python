@@ -684,7 +684,7 @@ alpha_sp_integrand (freq)
 #define ALPHA_FF 100.     // maximum h nu / kT to create the free free CDF 
 
 int
-kpkt (p, nres, escape,mode)
+kpkt (p, nres, escape, mode)
      PhotPtr p;
      int *nres;
      int *escape;
@@ -853,7 +853,6 @@ kpkt (p, nres, escape,mode)
            the photon actually escapes - we don't to waste time by exciting a two-level macro atom only so that
            it makes another k-packet for us! (SS May 04) */
 
-
         cooling_bb[i] *= rad_rate / (rad_rate + (coll_rate * xplasma->ne));
         mplasma->cooling_bb[i] = cooling_bb[i];
       }
@@ -915,7 +914,10 @@ kpkt (p, nres, escape,mode)
 
     /* note the units here- we divide the total luminosity of the cell by volume and ne to give cooling rate */
 
-    cooling_adiabatic = xplasma->cool_adiabatic / xplasma->vol / xplasma->ne;    // JM 1411 - changed to use filled volume
+    if (mode == KPKT_MODE_ALL)
+      cooling_adiabatic = xplasma->cool_adiabatic / xplasma->vol / xplasma->ne;    // JM 1411 - changed to use filled volume
+    else
+      cooling_adiabatic = 0.0;
 
     if (geo.adiabatic == 0 && cooling_adiabatic > 0.0)
     {
@@ -933,16 +935,12 @@ kpkt (p, nres, escape,mode)
       cooling_adiabatic = 0.0;
     }
 
-
     /* When we generate photons in the wind, from photon_gen we need to prevent deactivation by non-radiative cooling
      * terms.  If mode is True we include adiabatic cooling
+     * this is now dealt with by setting cooling_adiabatic to 0 
      */
 
-    if (mode) {
     cooling_normalisation += cooling_adiabatic;
-    }
-
-
 
     mplasma->cooling_bbtot = cooling_bbtot;
     mplasma->cooling_bftot = cooling_bftot;
@@ -950,7 +948,6 @@ kpkt (p, nres, escape,mode)
     mplasma->cooling_adiabatic = cooling_adiabatic;
     mplasma->cooling_normalisation = cooling_normalisation;
     mplasma->kpkt_rates_known = 1;
-
   }
 
 
