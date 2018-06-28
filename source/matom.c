@@ -914,10 +914,8 @@ kpkt (p, nres, escape, mode)
 
     /* note the units here- we divide the total luminosity of the cell by volume and ne to give cooling rate */
 
-    if (mode == KPKT_MODE_ALL)
-      cooling_adiabatic = xplasma->cool_adiabatic / xplasma->vol / xplasma->ne;    // JM 1411 - changed to use filled volume
-    else
-      cooling_adiabatic = 0.0;
+
+    cooling_adiabatic = xplasma->cool_adiabatic / xplasma->vol / xplasma->ne;    // JM 1411 - changed to use filled volume
 
     if (geo.adiabatic == 0 && cooling_adiabatic > 0.0)
     {
@@ -942,22 +940,35 @@ kpkt (p, nres, escape, mode)
 
     cooling_normalisation += cooling_adiabatic;
 
+
+
+
     mplasma->cooling_bbtot = cooling_bbtot;
     mplasma->cooling_bftot = cooling_bftot;
     mplasma->cooling_bf_coltot = cooling_bf_coltot;
     mplasma->cooling_adiabatic = cooling_adiabatic;
     mplasma->cooling_normalisation = cooling_normalisation;
     mplasma->kpkt_rates_known = 1;
+
   }
 
-
-
+  /* only include adiabatic cooling if we're in the right mode */
+  if (mode == KPKT_MODE_ALL)
+  {
+    cooling_adiabatic = mplasma->cooling_adiabatic;
+    cooling_normalisation = mplasma->cooling_normalisation;    
+  }
+  else
+  {
+    cooling_adiabatic = 0.0;
+    cooling_normalisation = mplasma->cooling_normalisation - mplasma->cooling_adiabatic;    
+  }
 
 
   /* The cooling rates for the recombination and collisional processes are now known. 
      Choose which process destroys the k-packet with a random number. */
 
-  destruction_choice = random_number(0.0,1.0) * mplasma->cooling_normalisation;
+  destruction_choice = random_number(0.0,1.0) * cooling_normalisation;
 
   if (destruction_choice < mplasma->cooling_bftot)
   {                             //destruction by bf
@@ -1057,10 +1068,10 @@ kpkt (p, nres, escape, mode)
 
 
   /* JM 1310 -- added loop to check if destruction occurs via adiabatic cooling */
-  else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff + mplasma->cooling_adiabatic))
+  else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff + cooling_adiabatic))
   {
 
-    if (geo.adiabatic == 0)
+    if (geo.adiabatic == 0 || mode != KPKT_MODE_ALL)
     {
       Error ("Destroying kpkt by adiabatic cooling even though it is turned off.");
     }
@@ -1078,7 +1089,7 @@ kpkt (p, nres, escape, mode)
   {
     /* We want destruction by collisional ionization in a macro atom. */
     destruction_choice =
-      destruction_choice - mplasma->cooling_bftot - mplasma->cooling_bbtot - mplasma->cooling_ff - mplasma->cooling_adiabatic;
+      destruction_choice - mplasma->cooling_bftot - mplasma->cooling_bbtot - mplasma->cooling_ff - cooling_adiabatic;
 
     for (i = 0; i < nphot_total; i++)
     {

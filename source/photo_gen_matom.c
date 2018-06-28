@@ -629,10 +629,6 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
     p[n].nnscat = nnscat;
 
-
-
-
-
     /* The next two lines correct the frequency to first order, but do not result in
        forward scattering of the distribution */
 
