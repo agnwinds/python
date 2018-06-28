@@ -519,7 +519,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   int icell;
   double xlum, xlumsum;
   struct photon pp;
-  int nres, esc_ptr;
+  int nres, esc_ptr, which_out;
   int n;
   double v[3];
   double dot ();
@@ -582,16 +582,19 @@ photo_gen_kpkt (p, weight, photstart, nphot)
     while (test > fmax || test < fmin)
     {
       kpkt (&pp, &nres, &esc_ptr, kpkt_mode); 
-      if (esc_ptr == 0)
+      if (esc_ptr == 0 && kpkt_mode == KPKT_MODE_CONTINUUM)
       {
         test = 0.0;
       }
       else
       {
+        if (esc_ptr == 0)
+        {
+          macro_gov(&pp, &nres, 1, &which_out);
+        }
         test = pp.freq;
       }
     }
-
 
     p[n].freq = pp.freq;
     p[n].nres = nres;
