@@ -400,6 +400,17 @@ get_line_transfer_mode ()
       exit (0);
     }
 
+  /* With the macro atom approach we won't want to generate photon 
+       bundles in the wind so switch it off here. (SS) */
+    if (geo.rt_mode == RT_MODE_MACRO)
+      {
+        Log
+    ("python: Using Macro Atom method so switching off wind radiation.\n");
+        geo.wind_radiation = 0;
+      }
+
+
+  /* read in the atomic data */
   rdstr ("Atomic_data", geo.atomic_filename);
 
   /* read a variable which controls whether to save a summary of atomic data

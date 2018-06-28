@@ -195,7 +195,11 @@ get_spectype (yesno, question, spectype)
 
   if (yesno)
     {
-      // XXX This is rather odd. Why are these steps needed? Why don't we fix the question here.  ksl
+      /* XXX The next few lines convert the value of spectype to values that correspond to what is requested
+       * in the rdpar statement, and then once we have the answer they are converted back to values that the
+       * program uses internally.  Presumably this was done for historical reasons, having to do with running
+       * old .pf files, but it is quite awkward, and we need to fix this kind of thing.  ksl
+       */
 
       // First convert the spectype to the way the questionis supposed to be answered
       if (*spectype == SPECTYPE_BB || *spectype == SPECTYPE_NONE)

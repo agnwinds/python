@@ -172,7 +172,7 @@ spherical_make_grid (w, ndom)
         dlogr = (log10 (zdom[ndom].rmax / zdom[ndom].rmin)) / (ndim - 3);
         w[n].r = zdom[ndom].rmin * pow (10., dlogr * (j - 1));
         w[n].rcen = 0.5 * zdom[ndom].rmin * (pow (10., dlogr * (j)) + pow (10., dlogr * (j - 1)));
-        Log ("New W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
+        Log_silent ("New W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
       }
 
       /* Now calculate the positions of these points in the xz plane.
