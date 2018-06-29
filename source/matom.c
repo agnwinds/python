@@ -952,17 +952,36 @@ kpkt (p, nres, escape, mode)
 
   }
 
-  /* only include adiabatic cooling if we're in the right mode */
+
+  /* only include adiabatic cooling if we're in the right mode. First set a default 
+     where adiabatic cooling is zero. This will be true if the mode isn't KPKT_MODE_ALL,
+     and also if we are in KPKT_NET_HEAT_MODE and shock heating beats adiabatic cooling. 
+     */
+  /* first subtract off the "true" adiabatic cooling */
+  cooling_normalisation = mplasma->cooling_normalisation - mplasma->cooling_adiabatic;
+  cooling_adiabatic = 0.0; // this variable decides the probability of destruction and is altered below.
+
   if (mode == KPKT_MODE_ALL)
   {
-    cooling_adiabatic = mplasma->cooling_adiabatic;
-    cooling_normalisation = mplasma->cooling_normalisation;    
+    /* if we are in KPKT_NET_HEAT_MODE and cooling beats shock heating then include
+       the net cooling channel */
+    if (KPKT_NET_HEAT_MODE && geo.nonthermal) {
+      if (xplasma->cool_adiabatic > xplasma->heat_shock) {
+        cooling_adiabatic = (xplasma->cool_adiabatic - xplasma->heat_shock) / xplasma->vol / xplasma->ne;
+      }
+    }
+    else 
+    {
+      /* this is the only situation where we genuinely want the destruction channel
+         to be exactly equal to the adiabatic cooling */
+      cooling_adiabatic = mplasma->cooling_adiabatic;
+    }
   }
-  else
-  {
-    cooling_adiabatic = 0.0;
-    cooling_normalisation = mplasma->cooling_normalisation - mplasma->cooling_adiabatic;    
-  }
+  /* add whatever the relevant adiabatic cooling value is back on to the normalisation. */
+  cooling_normalisation = mplasma->cooling_normalisation + cooling_adiabatic;
+
+
+
 
 
   /* The cooling rates for the recombination and collisional processes are now known. 
@@ -1073,7 +1092,7 @@ kpkt (p, nres, escape, mode)
 
     if (geo.adiabatic == 0 || mode != KPKT_MODE_ALL)
     {
-      Error ("Destroying kpkt by adiabatic cooling even though it is turned off.");
+      Error ("Destroying kpkt by adiabatic cooling even though it is turned off.\n");
     }
     *escape = 1;                // we want to escape but set photon weight to zero
     *nres = -2;

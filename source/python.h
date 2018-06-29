@@ -1413,6 +1413,8 @@ files;
 #define KPKT_MODE_CONTINUUM  0  /* only account for k->r processes */
 #define KPKT_MODE_ALL        1  /* account for all cooling processes */  
 
+/* non-radiative heat flow mode */
+#define KPKT_NET_HEAT_MODE 0 
 
 
 /* DIAGNOSTIC for understanding problems with imported models

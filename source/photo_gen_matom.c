@@ -78,9 +78,24 @@ get_kpkt_heating_f (fraction)
   {
     nwind = plasmamain[n].nwind;
     one = &wmain[nwind];
-    shock_kpkt_luminosity = fraction * shock_heating(one);
-    plasmamain[n].kpkt_emiss = shock_kpkt_luminosity;
-    lum += shock_kpkt_luminosity;
+
+    /* what we do depends on how the "net heating mode" is defined */
+    if (KPKT_NET_HEAT_MODE)
+      shock_kpkt_luminosity = fraction * (shock_heating(one) - plasmamain[n].cool_adiabatic);
+    else
+      shock_kpkt_luminosity = fraction * shock_heating(one);
+
+    if (shock_kpkt_luminosity > 0)
+    {
+      if (geo.ioniz_or_extract)
+        plasmamain[n].kpkt_emiss = shock_kpkt_luminosity;
+      else
+        plasmamain[n].kpkt_abs += shock_kpkt_luminosity;
+
+      lum += shock_kpkt_luminosity;
+    }
+    else 
+      plasmamain[n].kpkt_emiss = 0.0;
   }
 
   return (lum);
@@ -145,7 +160,8 @@ get_matom_f (mode)
     commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
 #endif
 
-
+    /* add the non-radiative k-packet heating to the kpkt_abs quantity */
+    get_kpkt_heating_f (1.0);
 
     which_out = 0;
     n_tries = 5000000;
@@ -590,6 +606,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
       {
         if (esc_ptr == 0)
         {
+          Log("Exciting macro-atom from photo_gen_kpkt\n");
           macro_gov(&pp, &nres, 1, &which_out);
         }
         test = pp.freq;
@@ -598,6 +615,9 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
     p[n].freq = pp.freq;
     p[n].nres = nres;
+
+    //if (nres == -2 && kpkt_mode == KPKT_MODE_ALL)
+    //  printf("Made adiabatic photon. number %d freq %8.4e\n", nres, );
 
     /* The photon frequency is now known. */
 
