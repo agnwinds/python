@@ -80,15 +80,12 @@ matrix_ion_populations (xplasma, mode)
   double pi_rates[nions];      //photoionization rate coefficients
   double rr_rates[nions];      //radiative recombination rate coefficients
   double inner_rates[n_inner_tot];      //This array contains the rates for each of the inner shells. Where they go to requires the electron yield array
-  double calc_flags[nions];
 
   /* Copy some quantities from the cell into local variables */
 
   nh = xplasma->rho * rho2nh;   // The number density of hydrogen ions - computed from density
   t_e = xplasma->t_e;           // The electron temperature in the cell - used for collisional processes
 
-  double elim_te = 100.0 * (t_e * BOLTZMANN);
-  double elim_tr = 100.0 * (xplasma->t_r * BOLTZMANN);
 
   /* We now calculate the total abundances for each element to allow us to use fractional abundances */
 
@@ -102,10 +99,6 @@ matrix_ion_populations (xplasma, mode)
   for (mm = 0; mm < nions; mm++)
   {
     elem_dens[ion[mm].z] = elem_dens[ion[mm].z] + xplasma->density[mm];
-    if (ion[mm].ip >= elim_te && ion[mm].ip >= elim_tr)
-      calc_flags[mm] = 0;
-    else
-      calc_flags[mm] = 1;
   }
 
   /* Dielectronic recombination, collisional ionization coefficients and three body recombination
@@ -221,7 +214,7 @@ matrix_ion_populations (xplasma, mode)
   {
 
 
-    populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, xne, calc_flags);
+    populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, xne);
 
 
     /* The array is now fully populated, and we can begin the process of solving it */
@@ -429,14 +422,13 @@ matrix_ion_populations (xplasma, mode)
  **********************************************************/
 
 int
-populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, xne, calc_flags)
+populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, xne)
      double rate_matrix[nions][nions];
      double pi_rates[nions];
      double inner_rates[n_inner_tot];
      double rr_rates[nions];
      double xne;
      double b_temp[nions];
-     double calc_flags[nions];
 
 {
   int nn, mm,zcount;
@@ -477,7 +469,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
     for (nn = 0; nn < nions; nn++)
     {
 
-      if (mm == nn + 1 && ion[nn].istate != ion[nn].z + 1 && ion[mm].z == ion[nn].z && calc_flags[mm])
+      if (mm == nn + 1 && ion[nn].istate != ion[nn].z + 1 && ion[mm].z == ion[nn].z)
       {
         rate_matrix[mm][nn] += pi_rates[nn];
       }
@@ -488,7 +480,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
 
   for (mm = 0; mm < nions; mm++)
   {
-    if (ion[mm].istate != ion[mm].z + 1 && ion[mm].dere_di_flag > 0 && calc_flags[mm])    // we have electrons and a DI rate
+    if (ion[mm].istate != ion[mm].z + 1 && ion[mm].dere_di_flag > 0)    // we have electrons and a DI rate
     {
       rate_matrix[mm][mm] -= (xne * di_coeffs[mm]);
     }
@@ -500,7 +492,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
   {
     for (nn = 0; nn < nions; nn++)
     {
-      if (mm == nn + 1 && ion[nn].istate != ion[nn].z + 1 && ion[mm].z == ion[nn].z && ion[nn].dere_di_flag > 0 && calc_flags[mm])
+      if (mm == nn + 1 && ion[nn].istate != ion[nn].z + 1 && ion[mm].z == ion[nn].z && ion[nn].dere_di_flag > 0)
       {
         rate_matrix[mm][nn] += (xne * di_coeffs[nn]);
       }
@@ -512,7 +504,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
 
   for (mm = 0; mm < nions; mm++)
   {
-    if (ion[mm].istate != 1 && calc_flags[mm])    // we have space for electrons
+    if (ion[mm].istate != 1)    // we have space for electrons
     {
       rate_matrix[mm][mm] -= xne * (rr_rates[mm] + xne * qrecomb_coeffs[mm]);
     }
@@ -525,7 +517,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
   {
     for (nn = 0; nn < nions; nn++)
     {
-      if (mm == nn - 1 && ion[nn].istate != 1 && ion[mm].z == ion[nn].z && calc_flags[mm])
+      if (mm == nn - 1 && ion[nn].istate != 1 && ion[mm].z == ion[nn].z)
       {
         rate_matrix[mm][nn] += xne * (rr_rates[nn] + xne * qrecomb_coeffs[nn]);
       }
@@ -536,7 +528,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
 
   for (mm = 0; mm < nions; mm++)
   {
-    if (ion[mm].istate != 1 && ion[mm].drflag > 0 && calc_flags[mm])     // we have space for electrons
+    if (ion[mm].istate != 1 && ion[mm].drflag > 0)     // we have space for electrons
     {
       rate_matrix[mm][mm] -= (xne * dr_coeffs[mm]);
     }
@@ -551,7 +543,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
   {
     for (nn = 0; nn < nions; nn++)
     {
-      if (mm == nn - 1 && ion[nn].istate != 1 && ion[mm].z == ion[nn].z && ion[mm].drflag > 0 && calc_flags[mm])
+      if (mm == nn - 1 && ion[nn].istate != 1 && ion[mm].z == ion[nn].z && ion[mm].drflag > 0)
       {
         rate_matrix[mm][nn] += (xne * dr_coeffs[nn]);
       }
@@ -566,18 +558,15 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
     {
       ion_out = inner_cross[mm].nion;   //this is the ion which is being depopulated
 
-      if (calc_flags[ion_out])
+      rate_matrix[ion_out][ion_out] -= inner_rates[mm]; //This is the depopulation
+      n_elec = ion[ion_out].z - ion[ion_out].istate + 1;
+      if (n_elec > 11)
+        n_elec = 11;
+      for (d_elec = 1; d_elec < n_elec; d_elec++)       //We do a loop over the number of remaining electrons
       {
-        rate_matrix[ion_out][ion_out] -= inner_rates[mm]; //This is the depopulation
-        n_elec = ion[ion_out].z - ion[ion_out].istate + 1;
-        if (n_elec > 11)
-          n_elec = 11;
-        for (d_elec = 1; d_elec < n_elec; d_elec++)       //We do a loop over the number of remaining electrons
-        {
-          nn = ion_out + d_elec;  //We will be populating a state d_elec stages higher
-          rate_matrix[nn][ion_out] += inner_rates[mm] * inner_elec_yield[inner_cross[mm].n_elec_yield].prob[d_elec - 1];
-        }
-      }
+        nn = ion_out + d_elec;  //We will be populating a state d_elec stages higher
+        rate_matrix[nn][ion_out] += inner_rates[mm] * inner_elec_yield[inner_cross[mm].n_elec_yield].prob[d_elec - 1];
+      }  
     }
   }
   
@@ -605,7 +594,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
 
       for (mm = 0; mm < nions; mm++)
       {
-        if (ion[mm].z == ion[nn].z && calc_flags[mm])
+        if (ion[mm].z == ion[nn].z)
         {
           rate_matrix[nn][mm] = 1.0;
         }
