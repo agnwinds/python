@@ -616,9 +616,6 @@ photo_gen_kpkt (p, weight, photstart, nphot)
     p[n].freq = pp.freq;
     p[n].nres = nres;
 
-    //if (nres == -2 && kpkt_mode == KPKT_MODE_ALL)
-    //  printf("Made adiabatic photon. number %d freq %8.4e\n", nres, );
-
     /* The photon frequency is now known. */
 
     /* Determine the position of the photon in the moving frame */

@@ -978,7 +978,7 @@ kpkt (p, nres, escape, mode)
     }
   }
   /* add whatever the relevant adiabatic cooling value is back on to the normalisation. */
-  cooling_normalisation = mplasma->cooling_normalisation + cooling_adiabatic;
+  cooling_normalisation += cooling_adiabatic;
 
 
 
