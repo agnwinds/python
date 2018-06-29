@@ -803,7 +803,7 @@ WindPtr (w);
      geo.cool_rr, geo.lum_ff, geo.cool_comp, geo.cool_dr, geo.cool_di, geo.lum_lines, geo.cool_adiabatic);
 
 
-  /* Print out some diagnositics of the changes in the wind update */
+  /* Print out some diagnostics of the changes in the wind update */
 
   if (modes.zeus_connect == 1 || modes.fixed_temp == 1) //There is no point in computing temperature changes, because we have fixed them!
   {

@@ -469,7 +469,7 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
 		("trans_phot: Trying to scatter a photon in a cell with no wind volume\n");
 	      Error ("trans_phot: %d grid %3d x %8.2e %8.2e %8.2e\n", pp.np, pp.grid,
 		     pp.x[0], pp.x[1], pp.x[2]);
-	      Log ("istat %d\n", pp.istat);
+	      Error("trans_phot: istat %d\n", pp.istat);
 	      Error ("trans_phot: This photon is effectively lost!\n");
 	      istat = pp.istat = p->istat = P_ERROR;
 	      stuff_phot (&pp, p);
