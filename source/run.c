@@ -54,6 +54,8 @@ calculate_ionization (restart_stat)
 {
   int n, nn;
   double zz, zzz, zze, ztot, zz_adiab;
+  double zz_abs, zz_scat, zz_star, zz_disk;
+  double zz_err, zz_else;
   int nn_adiab;
   WindPtr w;
   PhotPtr p;
@@ -162,7 +164,6 @@ calculate_ionization (restart_stat)
 
     photon_checks (p, freqmin, freqmax, "Check before transport");
 
-//OLD Removed Ferland IP    wind_ip ();
 
 
     zz = 0.0;
@@ -172,7 +173,7 @@ calculate_ionization (restart_stat)
     }
 
     Log ("!!python: Total photon luminosity before transphot %18.12e\n", zz);
-    Log_flush ();               /* NSH June 13 Added call to flush logfile */
+    Log_flush ();              
     ztot += zz;                 /* Total luminosity in all cycles, used for calculating disk heating */
 
     /* kbf_need determines how many & which bf processes one needs to considere.  It was introduced
@@ -191,26 +192,53 @@ calculate_ionization (restart_stat)
     trans_phot (w, p, 0);
 
     /*Determine how much energy was absorbed in the wind */
-    zze = zzz = zz_adiab = 0.0;
+    zze = zzz = zz_adiab = zz_abs=zz_scat=zz_star=zz_disk=zz_err=zz_else=0.0;
     nn_adiab = 0;
     for (nn = 0; nn < NPHOT; nn++)
     {
       zzz += p[nn].w;
       if (p[nn].istat == P_ESCAPE)
         zze += p[nn].w;
-      if (p[nn].istat == P_ADIABATIC)
+      else if (p[nn].istat == P_ADIABATIC)
       {
         zz_adiab += p[nn].w;
         nn_adiab++;
       }
+      else if (p[nn].istat == P_ABSORB)
+      {
+        zz_abs += p[nn].w;
+      }
+      else if (p[nn].istat == P_TOO_MANY_SCATTERS)
+      {
+        zz_scat += p[nn].w;
+      }
+      else if (p[nn].istat == P_HIT_STAR)
+      {
+        zz_star += p[nn].w;
+      }
+      else if (p[nn].istat == P_HIT_DISK)
+      {
+        zz_disk += p[nn].w;
+      }
+      else if (p[nn].istat == P_ERROR)
+      {
+        zz_err += p[nn].w;
+      }
+      else 
+      {
+        zz_else += p[nn].w;
+      }
     }
 
-    Log ("!!python: Total photon luminosity after transphot %18.12e (diff %18.12e). Radiated luminosity %18.12e\n", zzz, zzz - zz, zze);
+    Log ("!!python: Total photon luminosity after transphot  %18.12e (absorbed/lost  %18.12e). Radiated luminosity %18.12e\n", zzz, zzz - zz, zze);
     if (geo.rt_mode == RT_MODE_MACRO)
-      Log ("Luminosity taken up by adiabatic kpkt destruction %18.12e number of packets %d\n", zz_adiab, nn_adiab);
-
-
-
+      Log ("!!python: luminosity lost by adiabatic kpkt destruction %18.12e number of packets %d\n", zz_adiab, nn_adiab);
+      Log ("!!python: luminosity lost by being completely absorbed  %18.12e \n", zz_abs);
+      Log ("!!python: luminosity lost by too many scatters          %18.12e \n", zz_scat);
+      Log ("!!python: luminosity lost by hitting the star           %18.12e \n", zz_star);
+      Log ("!!python: luminosity lost by hitting the disk           %18.12e \n", zz_disk);
+      Log ("!!python: luminosity lost by errors                     %18.12e \n", zz_err);
+      Log ("!!python: luminosity lost by the unknown                %18.12e \n", zz_else);
 
 
     photon_checks (p, freqmin, freqmax, "Check after transport");
