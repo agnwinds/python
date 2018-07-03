@@ -67,7 +67,7 @@ WindPtr (w);
 
   /*1108 NSH csum added to sum compton heating 1204 NSH icsum added to sum induced compton heating */
   double wtest, xsum, psum, fsum, lsum, csum, icsum, ausum;
-  double cool_sum,lum_sum; //1706 - the total cooling and luminosity of the wind
+  double cool_sum,lum_sum, rad_sum; //1706 - the total cooling and luminosity of the wind
   double apsum,aausum,abstot; //Absorbed photon energy from PI and auger
   double c_rec, n_rec, o_rec, fe_rec;   //1701- NSH more outputs to show cooling from a few other elements
   double c_lum, n_lum, o_lum, fe_lum;   //1708- NSH and luminosities as well
@@ -796,6 +796,13 @@ WindPtr (w);
   Log
     ("!!wind_update: Wind luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n",
      lum_sum, geo.lum_rr, geo.lum_ff, geo.lum_lines);
+	 
+	 
+     rad_sum = wind_luminosity (xband.f1[0], xband.f2[xband.nbands-1]);       /*and we also call wind_luminosity to get the luminosities */
+	 
+    Log
+       ("!!wind_update: Rad  luminosity  %8.2e (recomb %8.2e ff %8.2e lines %8.2e) after update\n",
+         rad_sum, geo.lum_rr, geo.lum_ff, geo.lum_lines);
 
   Log
     ("!!wind_update: Wind cooling     %8.2e (recomb %8.2e ff %8.2e compton %8.2e DR %8.2e DI %8.2e lines %8.2e adiabatic %8.2e) after update\n",
