@@ -606,7 +606,6 @@ photo_gen_kpkt (p, weight, photstart, nphot)
       {
         if (esc_ptr == 0)
         {
-          Log("Exciting macro-atom from photo_gen_kpkt\n");
           macro_gov(&pp, &nres, 1, &which_out);
         }
         test = pp.freq;
