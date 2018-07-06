@@ -177,7 +177,7 @@ bands_init (imode, band)
     /* Mode 0 is sets a single band based on the temperature given */
     band->nbands = 1;
     band->f1[0] = BOLTZMANN * t / H * 0.05;
-    band->f2[0] = BOLTZMANN * t / H * 100.;
+    band->f2[0] = BOLTZMANN * t / H * 20.;
     band->min_fraction[0] = 1.0;
   }
   else if (mode == 1)
