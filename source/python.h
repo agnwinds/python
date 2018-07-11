@@ -470,10 +470,11 @@ struct geometry
 
   /* The frequency bands used when calculating parameters like a power law slope in limited regions. */
 
-#define  NXBANDS 20             /* the maximum number of bands that can be defined */
+#define  NXBANDS 20             /* the maximum number of bands (frequency intervals that can be defined for
+storing coarse spectra for each plasma cell*/
 
-  int nxfreq;                   /* the number of bands actually used */
-  double xfreq[NXBANDS + 1];    /* the band limits  */
+  int nxfreq;                   /* the number of frequency intervals actually used */
+  double xfreq[NXBANDS + 1];    /* the frequency boundaries for the coarse spectra  */
 
 
   /* The next set pf variables assign a SPECTYPE (see above) for
