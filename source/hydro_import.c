@@ -1,10 +1,17 @@
 /***********************************************************/
 /** @file   hydro_import.c
  * @author KSL/NSH
- * @date   Dec, 1999
+ * @date   January 2018  
  * @brief  Routines to import hydro-dynamic snapshots.
  *
- * Routines to import hydro-dynamic snapshots
+ * These routines are designed to read the velocity and densities
+ * of produced by Zeus  into the appropriate structures and
+ * allow one to calculate the density at any point in the gridded space.
+ *
+ * Thesse routines were originally written by ksl to work with
+ * models which Daniel Progra provided by they were extensively modified
+ * by Nick for his work with Zeus
+ *
  ***********************************************************/
 
 
@@ -41,44 +48,6 @@ HydroPtr hydro_ptr;
 
 
 
-/**************************************************************************
-                    Space Telescope Science Institute
-
-
-  Synopsis:  These routines are designed to read in files produced by
-  zeus for the x-ray binary project.
-  models onto sv
-
-  Description:  These routines are designed to read the velocity and densities
-  of produced by zeus  into the appropriate structures and
-  allow one to calculate the density at any point in the gridded space.
-  
-
-  Arguments:    
-
-  Returns:
-
-  Notes:
-  Daniel's models data are the results of calculations with Zeus.  The
-  grid is in polar (r,theta) coordinates with theta = pi/2 corresponding
-  to the disk, and 0 to the pole.  Recall that python uses cylintrical
-  corrdinates with the z=0 being the disk plane.
-
-  History:
-  99dec ksl Began work
-  00jan ksl Modified to read larger models and to make it slightly
-      more general in terms of the input files.  Also added
-      some checking on grid sizes, and set rho to zero outside
-      the range of the model, and velocity at the edge of
-      the model.
-  04jun ksl Moved get_hydro_wind_params from python.c to this file
-  13mar nsh Reopened development prior to trip to LV to work with DP.
-  15aug ksl Began updates to accommodate domains
-
-  
-
- ************************************************************************/
-
 
 #include  <stdio.h>
 #include  <stdlib.h>
@@ -94,41 +63,6 @@ HydroPtr hydro_ptr;
 
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
-
- Synopsis:
-  get_hydro_wind_params gets input data for Daniel Proga's wind models
-Arguments:    
-
-Returns:
- 
-Description:  
-Notes:
-History:
-  99dec ksl Began work
-
-  13mar nsh Reopened work on this file to coincide with 
-      NSH working with Proga for a week.
-    nsh First edit - DP says that the second value
-      in the two grid files relate to the position
-      where the data is defined.
-    nsh Second edit - put in a new variable, hydro_hydro_thetamax.
-      This defines an angle above which one disregards data.
-      This was needed because Daniels data includes a flared
-      accretion disk, so if you simply read in all the data
-      you end up with a very dense blancket over the top of our
-      disk, which causes all kinds of problems. At present,
-      all that happens is that all angle data above the 
-      supplied angle is replaced with the data for that last 
-      angle. This should be a very small wedge of data.
-  13may nsh Now read in the inteernal energy - this allows the
-      computation of temperature for a cell, this makes sense
-      as a first guess of temperature 
-  15sept  ksl Made modifications to allow for domains, but Nick will
-      need to debug this
-  
-**************************************************************/
 
 
 /**********************************************************/
@@ -140,11 +74,10 @@ History:
  *
  * Sets up the geometry - max and min - for the hydro-dynamic
  * snapshot. It uses limits read in from the file to fill in 
- * things more usually read in from the command line.
+ * parameters more usually read in from a .pf file        
  *
  *
  * ###Notes###
- * 12/99	-	Written by KSL
 ***********************************************************/
 
 
@@ -210,7 +143,6 @@ get_hydro_wind_params (ndom)
  *
  *
  * ###Notes###
- * 12/99	-	Written by KSL
 ***********************************************************/
 
 
@@ -376,26 +308,7 @@ get_hydro (ndom)
 
 
 
-/***********************************************************
-                                       Space Telescope Science Institute
 
- Synopsis:
-  hydro_velocity calculates the wind velocity at any position x
-  in cartesian coordinates
-Arguments:    
-
-Returns:
- 
-Description:  
-Notes:
-History:
-  99dec ksl Began work
-  04dec ksl 52a -- Mod to prevent divide by zero when 
-      r=0.0, and NaN when xxx>1.0;
-**************************************************************/
-
-// ksl - Added ndom here for symmetry with other modles.  
-// The hydro models do not understand domains XXX
 
 
 /**********************************************************/
@@ -408,14 +321,12 @@ History:
  * @return 					The speed - relating the velocity we have computed
  *
  * The velocities in a zeus hydro-grid are defined on the middle of cell 
- * edges, wgheras in python we require them at the verticies. This routine
+ * edges, wheras in python we require them at the verticies. This routine
  * interpolates on rhe supplied grid to make the python grid.
  *
  *
  * ###Notes###
- * 12/99	-	Written by KSL
- * 12/04	-	Mod to prevent divide by zero when r=0.0, and NaN when xxx>1.0;
- * 04/13	-	Heavily modified by NSH
+ *  
 ***********************************************************/
 
 
@@ -566,31 +477,11 @@ hydro_rho (x)
 }
 
 
-/***********************************************************
-                                       University of Nevada Las Vegas
-
- Synopsis:
-  hydro_temp calculates the wind temperature at any position x
-  in cartesian coordiantes
-Arguments:    
-
-Returns:
- 
-Description:  
-  This code is an exact copy of hydro_rho - except it
-  maps the temperature, calculated from internal energy,
-  from the hydro grid onto a cartesian grid
-Notes:
-History:
-  13apr nsh Began work
-  15oct   nsh - temperature is now computed by a helper script,
-        also now common code removed to subroutines
-  
-**************************************************************/
 
 /**********************************************************/
 /** 
- * @brief	Interpolates on supplied data file to get cell tempertaures
+ * @brief	calculates the wind temperature at any position x in cartesian
+ * coordiantes
  *
  * @param [in] x			The x location we need a temperature for
  * @return 	temp			The temperature at the requested loc ation
@@ -643,11 +534,6 @@ hydro_temp (x)
   temp = hydro_interp_value (temp_input, im, ii, jm, jj, f1, f2);
 
 
-  /* NSH 16/2/29 - removed lower limit - set this in the hydro translation software or hydro model */
-
-//  if (temp < 1e4)             //Set a lower limit.
-//    temp = 1e4;
-
 
   return (temp);
 }
@@ -655,34 +541,12 @@ hydro_temp (x)
 
 
 
-/***********************************************************
-                                       Southampton
-
- Synopsis:
-  rtheta_make_zeus_grid defines the cells in a rtheta grid based upon the coordinates that can be read in from a zeus (the hydrocode used by Proga for some simulations)            
-
-Arguments:    
-  WindPtr w;  The structure which defines the wind in Python
- 
-Returns:
- 
-Description:
-
-  
-  This is an attempt to match a zeus grid directly onto an rtheta grid.
-
-
-History:
-  13jun nsh 76 -- Coded and debugged.
-
-
-**************************************************************/
 
 
 
 /**********************************************************/
 /** 
- * @brief	Defines an r-theta grid to accept a hydro model
+ * @brief	Defines an r-theta grid to accept a Zeus hydro model
  * 
  * @param [in] w			The wind pointer
  * @param [in] ndom			The number of the domain which will be populated by the geometry
@@ -693,7 +557,6 @@ History:
  * (the hydrocode used by Proga for some simulations)            
  *
  * ###Notes###
- * 06/13	-	NSH - Coded and debugged.
 ***********************************************************/
 
 
@@ -776,29 +639,6 @@ rtheta_make_hydro_grid (w, ndom)
 
 }
 
-/***********************************************************
-                                       Southampton
-
- Synopsis:
-  rtheta_zeus_volumes replaces rtheta_volumes for a zeus model. We know wether cells are in the wimnd
-  so all we need to do is work out the volumes.
-Arguments:    
-  WindPtr w;  The structure which defines the wind in Python
- 
-Returns:
- 
-Description:
-
-  
-  This is an attempt to match a zeus grid directly onto an rtheta grid.
-
-
-History:
-  13jun nsh 76 -- Coded and debugged.
-  15aug ksl Updated for domains
-
-
-**************************************************************/
 
 /**********************************************************/
 /** 
@@ -814,8 +654,6 @@ History:
  *          
  *
  * ###Notes###
- * 06/13	-	NSH - Coded and debugged.
- * 08/15	-	KSL - Updated for domains
 ***********************************************************/
 
 
@@ -867,33 +705,6 @@ rtheta_hydro_volumes (ndom, w)
 }
 
 
-/***********************************************************
-                                       Southampton
-
- Synopsis:
-  hydro_frac replaces many lines of identical code, all of which
-  interpolate on the input grid to get value for the python grid.
-  This code find out the fraction along a coord array where the centre
-  or edge of the python grid cell lies on the hydro grid
-Arguments:    
-    double coord;
-    double coord_array[];
-    int imax;
-    int *cell1,*cell2;
-    double *frac;
-Returns:
- 
-Description:
-
-XXX - ksl - It is very unclear why this routine is necessary
-coor_frac should be able to do this in one go.
-
-
-History:
-  15sept  nsh 76 -- Coded and debugged.
-
-
-**************************************************************/
 
 
 /** 
@@ -912,16 +723,16 @@ History:
  * interpolate on the input grid to get value for the python grid.
  * This code find out the fraction along a coord array where the centre
  * or edge of the python grid cell lies on the hydro grid
- * XXX - ksl - It is very unclear why this routine is necessary
- * coor_frac should be able to do this in one go.
  *          
  *
  * ###Notes###
- * 09/15	-	NSH - Coded and debugged.
- * 08/15	-	KSL - Updated for domains
+ * 
+ * ### Programming Comment ###
+ *
+ * ksl - It is very unclear why this routine is necessary
+ * coord_frac should be able to do this in one go.  If this is
+ * routine is necessary then one should clarify why that is the case
 ***********************************************************/
-
-
 
 
 int
@@ -965,31 +776,6 @@ hydro_frac (coord, coord_array, imax, cell1, cell2, frac)
   return (0);
 }
 
-/***********************************************************
-                                       Southampton
-
- Synopsis:
-  hydro_interp_value replaces many lines of identical code, all of which
-  interpolate on the input grid to get value for the python grid.
-Arguments:    
-    double array[]; - the arrayof input data
-    int im,ii; //the two cells surrounding the cell in the first dim (r)
-    int jm,jj; //the two cells surrounding the cell in the second dim (theta)
-    double f1,f2;  //the fraction between the two values in first and second dim
-Returns:
- 
-Description:
-
-XXX - ksl - It is not obvious why this was really needed, assuming that
-the model has been proper installed in the WindStruct.  Possibly it
-has to do with where values are centered.  
-
-
-History:
-  15sept  nsh 76 -- Coded and debugged.
-
-
-**************************************************************/
 
 
 /** 
@@ -1011,7 +797,11 @@ History:
  *          
  *
  * ###Notes###
- * 09/15	-	NSH - Coded and debugged.
+ *
+ * ### Programming Comment ###
+ * ksl - It is very unclear why this routine is necessary
+ * coord_frac should be able to do this in one go.  If this is
+ * routine is necessary then one should clarify why that is the case
 ***********************************************************/
 
 
@@ -1041,30 +831,6 @@ hydro_interp_value (array, im, ii, jm, jj, f1, f2)
 
 
 
-/***********************************************************
-                                       Southampton
-
- Synopsis:
-	hydro_restart is a subrotine which permits a previous wind save 
-		file to be used in a hydro simulation. The density and temperature
-		for each cell are those from the hydro simulation. The ion fractions
-		are taken from the windsave file
-Arguments:		
-	none 
- 
-Returns:
- 
-Description:
-
-	
-	This sets up a restarted hydro model
-
-
-History:
-	16feb	nsh	80 -- Coded and debugged.
-
-
-**************************************************************/
 
 
 /** 
@@ -1074,14 +840,13 @@ History:
  * @return 					0 if successful
 
  *
- * hydro_restart is a subrotine which permits a previous wind save 
+ * hydro_restart is a subroutine which permits a previous wind save 
  * file to be used in a hydro simulation. The density and temperature
  * for each cell are those from the hydro simulation. The ion fractions
  * are taken from the windsave file
  *          
  *
  * ###Notes###
- * 02/16	-	NSH - Coded and debugged.
 ***********************************************************/
 
 
@@ -1123,7 +888,7 @@ hydro_restart (ndom)
     }
 
   /* JM XXX PLACEHOLDER -- unsure how we loop over the plasma cells just in one domain 
-   * ksl This is an error clearly XXX */
+   * ksl This is an error clearly in the case of multiple domains XXX */
   for (n = 0; n < NPLASMA; n++)
     {
       nwind = plasmamain[n].nwind;

@@ -772,10 +772,11 @@ structure does not have this property! */
  *
  * Note that keyword parsing is done only on the first 3 letters, so Ion and IonV are equivlalent
  *
- * The routine still supports an earlier format which comisists of the first 6 "words" in which case
+ * The routine still supports an earlier format which consists of the first 6 "words" in which case
  * default values are assigned to for the maximum number of LTE/simple and nLTE/macro atom configurations.
  *
- * @bug Exactly what is meant by LTE here needs clarification.
+ * @bug Exactly what is meant by LTE here needs clarification.  Is there code here that should 
+ * be removed because we do not need the "earlier" format?
  *
  */
 
@@ -1807,6 +1808,7 @@ described as macro-levels. */
 /**
  * @section Auger
  * @bug Needs description - this is a type of data that is no longer used 
+ * Can we remove this from Python.  Now issue #396
  */
 /*		  
 		case 'A':
@@ -2185,6 +2187,7 @@ would like to have simple lines for macro-ions */
 
 /** @section Ground state fractions
  * @bug This needs a description - it is very old - CK's ground state recombination tables used to compute the zeta term.		  
+ * Now issue #396
  */
 		case 'f':
 		  if (sscanf

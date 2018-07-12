@@ -995,10 +995,12 @@ rho (w, x)
  *
  * ### Notes ###
  *
- * @bug  This routine has errors.  It is only correct if there is
- * a single domain.  In particular rho(w,x) gives the correct answer
- * for rho regardless of domains, but nodom is set to 0 for  vind(ndom,&p,v).
- * This should be fixed.
+ * ### Programming Comment ###
+ * This routine has errors.  It is only correct if there is
+ * a single domain (although it does provide a warning to this effect.
+ * In particular rho(w,x) gives the correct answer
+ * for rho regardless of domains, but ndom is set to 0 for vind(ndom,&p,v).
+ * This should be fixed.  This is now #395
  *
  **********************************************************/
 #define NSTEPS 100

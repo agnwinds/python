@@ -8,9 +8,10 @@
  * the ionization of the plasma and also to extract detailed 
  * spectra after the inputs have been collected.
  *
- * @bug The name of this file is not really acurate.  The routines
+ * ### Programming Comment ###
+ * The name of this file is not really acurate.  The routines
  * here do drive the major portions of the calculation but they
- * ar still run from python.c.  It might be better to move even
+ * are still run from python.c.  It might be better to move even
  * more of the running of the code to here.  Alternatively, one
  * might make python.c simpler, so that developers could see
  * the structure better, but moving the input section

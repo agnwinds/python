@@ -791,11 +791,13 @@ int nforce;
  * o change the ions that you want to fix, simply update con_force,
  * AND MAKE SURE NFORCE IS SET TO THE NUMBER OF IONS
  *
- * @bug It is not obvious that this is really what we want for fixed ionization.  This routine was
+ * ### Programming Comment ### 
+ *
+ * It is not obvious that this is really what we want for fixed ionization.  This routine was
  * written when we only were concerned about scattering and does not really
  * take into account emission (for which one needs n_e.  One possiblity is to
  * calculated ion abundances for H and He properly, in which case we would need
- * the mode variable.
+ * the mode variable.  This is issue #291.
  *
  **********************************************************/
 

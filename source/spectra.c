@@ -555,7 +555,11 @@ spectrum_create (p, f1, f2, nangle, select_extract)
       xxspec[1].nphot[i]++;
       spectype = p[nphot].origin;
 
-      if (spectype >= 10)       /* This looks to be an undocumented correction for macroatoms XXX */
+      /* When a photon that originated for example in the BL which has a type of PTYPE_BL is scattered in the wind by 
+       * a macro atom it's type is increased by 10.  When we want to construct a spectrum for photons originating
+       * from the boundary layer we need to subtract 10 from the type.    See python.h 
+       */
+      if (spectype >= 10)      
         spectype -= 10;
 
       if (spectype == PTYPE_STAR || spectype == PTYPE_BL || spectype == PTYPE_AGN)      // Then it came from the bl or the star

@@ -117,10 +117,6 @@ xband;
  * 	that are being set up lie within f1 and f2.  Others do
  * 	not.  This seems like an error.
  *
- * 	@bug At some point some of the banding needs to be tested
- * 	systematically.  We have tended to find a setup that we
- * 	like and just use it.
- *
  **********************************************************/
 
 int

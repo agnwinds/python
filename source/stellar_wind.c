@@ -32,12 +32,9 @@
  * ###Notes###
  *
  * Although it seems natural to assume that the wind starts at the photosphere, this
- * 	is not required (and in Mauche and Raymond's spherical model for a CV wind they set
- * 	the inner radius of the wind at several WD radii.  That possibility is allowed for
+ * is not required (and in Mauche and Raymond's spherical model for a CV wind they set
+ * the inner radius of the wind at several WD radii.  That possibility is allowed for
  *
- * 	@bug There was an old note here indicating that the ksl was unsure(04j) whether 
- * 	as if the code as written really implements the possibility of a wind that starts
- * 	at a radius larger than the star.  This should be checked
  * 	
  *
  **********************************************************/
