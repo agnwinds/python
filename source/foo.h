@@ -57,7 +57,7 @@ int spectrum_restart_renormalise(int nangle);
 int define_wind(void);
 int where_in_grid(int ndom, double x[]);
 int vwind_xyz(int ndom, PhotPtr p, double v[]);
-int wind_div_v(WindPtr w);
+int wind_div_v(void);
 double rho(WindPtr w, double x[]);
 int mdot_wind(WindPtr w, double z, double rmax);
 int get_random_location(int n, double x[]);
@@ -134,7 +134,6 @@ int setup_created_files(void);
 /* wind_updates2d.c */
 int wind_update(WindPtr (w));
 int wind_rad_init(void);
-int wind_ip(void);
 /* windsave.c */
 int wind_save(char filename[]);
 int wind_read(char filename[]);
@@ -405,8 +404,6 @@ int xsignal(char *root, char *format, ...);
 int xsignal_rm(char *root);
 int set_max_time(char *root, double t);
 int check_time(char *root);
-/* auger_ionization.c */
-int auger_ionization(PlasmaPtr xplasma);
 /* agn.c */
 double agn_init(double r, double lum, double alpha, double freqmin, double freqmax, int ioniz_or_final, double *f);
 double emittance_pow(double freqmin, double freqmax, double alpha);
@@ -582,7 +579,6 @@ int coolheat_summary(WindPtr w, char rootname[], int ochoice);
 int complete_file_summary(WindPtr w, char root[], int ochoice);
 int wind_reg_summary(WindPtr w, char rootname[], int ochoice);
 int dvds_summary(WindPtr w, char rootname[], int ochoice);
-int inner_shell_summary(WindPtr w, char rootname[], int ochoice);
 int IP_summary(WindPtr w, char rootname[], int ochoice);
 int alpha_summary(WindPtr w, char rootname[], int ochoice);
 int J_summary(WindPtr w, char rootname[], int ochoice);
