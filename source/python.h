@@ -1077,9 +1077,15 @@ typedef struct photon
         PTYPE_WIND_MATOM = 13,
         PTYPE_AGN_MATOM = 14
       } origin, origin_orig;        /* Where this photon originated.  If the photon has
-                                       scattered it's "origin" may be changed to "wind". */
+                                       scattered its "origin" may be changed to "wind". */
       /* note that we add 10 to origin when processed by a macro-atom
-         which means we need these values in the enum list */
+         which means we need these values in the enum list.  In making spectra in spectrum_create
+         10 is subtracted from the types.  If ever this logic is changed one must the be careful
+       that it is fixed in create_spectra as well.  
+       
+       Comment - ksl - 180712 - The logic for all of this is obscure to me, since we keep track of the
+       photons origin separately.  At some point one might want to revisit the necessity for this
+       */
       int np;                       /*NSH 13/4/11 - an internal pointer to the photon number so 
                                        so we can write out details of where the photon goes */
       double path;                  /* SWM - Photon path length */
