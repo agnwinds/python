@@ -86,6 +86,7 @@ matrix_ion_populations (xplasma, mode)
   nh = xplasma->rho * rho2nh;   // The number density of hydrogen ions - computed from density
   t_e = xplasma->t_e;           // The electron temperature in the cell - used for collisional processes
 
+
   /* We now calculate the total abundances for each element to allow us to use fractional abundances */
 
   /* Belt and braces, we zero our array */
@@ -527,7 +528,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
 
   for (mm = 0; mm < nions; mm++)
   {
-    if (ion[mm].istate != 1 && ion[mm].drflag > 0)      // we have space for electrons
+    if (ion[mm].istate != 1 && ion[mm].drflag > 0)     // we have space for electrons
     {
       rate_matrix[mm][mm] -= (xne * dr_coeffs[mm]);
     }
@@ -556,6 +557,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
     if (inner_cross[mm].n_elec_yield != -1)     //we only want to treat ionization where we have info about the yield
     {
       ion_out = inner_cross[mm].nion;   //this is the ion which is being depopulated
+
       rate_matrix[ion_out][ion_out] -= inner_rates[mm]; //This is the depopulation
       n_elec = ion[ion_out].z - ion[ion_out].istate + 1;
       if (n_elec > 11)
@@ -564,7 +566,7 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
       {
         nn = ion_out + d_elec;  //We will be populating a state d_elec stages higher
         rate_matrix[nn][ion_out] += inner_rates[mm] * inner_elec_yield[inner_cross[mm].n_elec_yield].prob[d_elec - 1];
-      }
+      }  
     }
   }
   

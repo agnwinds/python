@@ -65,7 +65,8 @@ get_kpkt_f ()
  **********************************************************/
 
 double
-get_kpkt_heating_f ()
+get_kpkt_heating_f (fraction)
+  double fraction;
 {
   int n, nwind;
   double lum, shock_kpkt_luminosity;
@@ -77,9 +78,24 @@ get_kpkt_heating_f ()
   {
     nwind = plasmamain[n].nwind;
     one = &wmain[nwind];
-    shock_kpkt_luminosity = shock_heating(one);
-    plasmamain[n].kpkt_emiss = shock_kpkt_luminosity;
-    lum += shock_kpkt_luminosity;
+
+    /* what we do depends on how the "net heating mode" is defined */
+    if (KPKT_NET_HEAT_MODE)
+      shock_kpkt_luminosity = fraction * (shock_heating(one) - plasmamain[n].cool_adiabatic);
+    else
+      shock_kpkt_luminosity = fraction * shock_heating(one);
+
+    if (shock_kpkt_luminosity > 0)
+    {
+      if (geo.ioniz_or_extract)
+        plasmamain[n].kpkt_emiss = shock_kpkt_luminosity;
+      else
+        plasmamain[n].kpkt_abs += shock_kpkt_luminosity;
+
+      lum += shock_kpkt_luminosity;
+    }
+    else 
+      plasmamain[n].kpkt_emiss = 0.0;
   }
 
   return (lum);
@@ -144,7 +160,8 @@ get_matom_f (mode)
     commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
 #endif
 
-
+    /* add the non-radiative k-packet heating to the kpkt_abs quantity */
+    get_kpkt_heating_f (1.0);
 
     which_out = 0;
     n_tries = 5000000;
@@ -489,12 +506,11 @@ get_matom_f (mode)
 /* All done. */
 
 
+
 /**********************************************************/
 /** 
- * @brief      produces photon packets to account for creating of r-packets
- *      by k-packets in the spectrum calculation. It should only be used once the total 
- *      energy emitted in this way in the wavelength range in question is well known
- *      (calculated in the ionization cycles).
+ * @brief produces photon packets to account for creating of r-packets by k-packets. 
+
  *
  * @param [in, out] PhotPtr  p   the ptr to the entire structure for the photons
  * @param [in] double  weight   the photon weight
@@ -502,8 +518,10 @@ get_matom_f (mode)
  * @param [in] int  nphot   the number of photons to be generated
  * @return int nphot  When it finishes it should have generated nphot photons from k-packet elliminations.
  *
- * @details
- * This routine is closely related to photo_gen_wind from which much of the code has been copied.
+ * @details produces photon packets to account for creating of r-packets by k-packets in the spectrum calculation. 
+ * It should only be used once the total energy emitted in this way in the wavelength range in question is well known
+ * (calculated in the ionization cycles). This routine is closely related to photo_gen_wind from which much of the code 
+ * has been copied.
  *
  **********************************************************/
 
@@ -517,15 +535,15 @@ photo_gen_kpkt (p, weight, photstart, nphot)
   int icell;
   double xlum, xlumsum;
   struct photon pp;
-  int nres, esc_ptr;
+  int nres, esc_ptr, which_out;
   int n;
   double v[3];
   double dot ();
   double test;
   int nnscat;
   double dvwind_ds (), sobolev ();
-  int nplasma;
-  int ndom;
+  int nplasma, ndom;
+  int kpkt_mode;
   double fmin, fmax;
 
   photstop = photstart + nphot;
@@ -533,13 +551,18 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
   if (geo.ioniz_or_extract)
   {
-    fmin = EPSILON;
-    fmax = VERY_BIG;
+    /* we are in the ionization cycles, so use all frequencies. kpkt_mode should allow all processes */
+    fmin = xband.f1[0];
+    fmax = xband.f2[xband.nbands - 1];
+    kpkt_mode = KPKT_MODE_ALL;
   }
   else
   {
+    /* we are in the spectral cycles, so use all the required frequency range */
     fmin = em_rnge.fmin;
     fmax = em_rnge.fmax;
+    /* we only want k->r processes */
+    kpkt_mode = KPKT_MODE_CONTINUUM;
   }
 
   for (n = photstart; n < photstop; n++)
@@ -574,17 +597,20 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
     while (test > fmax || test < fmin)
     {
-      kpkt (&pp, &nres, &esc_ptr,0); // 0 means force the routine to return a photon 
-      if (esc_ptr == 0)
+      kpkt (&pp, &nres, &esc_ptr, kpkt_mode); 
+      if (esc_ptr == 0 && kpkt_mode == KPKT_MODE_CONTINUUM)
       {
         test = 0.0;
       }
       else
       {
+        if (esc_ptr == 0)
+        {
+          macro_gov(&pp, &nres, 1, &which_out);
+        }
         test = pp.freq;
       }
     }
-
 
     p[n].freq = pp.freq;
     p[n].nres = nres;
@@ -621,10 +647,6 @@ photo_gen_kpkt (p, weight, photstart, nphot)
     }
 
     p[n].nnscat = nnscat;
-
-
-
-
 
     /* The next two lines correct the frequency to first order, but do not result in
        forward scattering of the distribution */

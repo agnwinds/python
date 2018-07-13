@@ -120,7 +120,6 @@ nebular_concentrations (xplasma, mode)
       /* Use rate matrices based on pairiwise bb approxmaitions
        * to the spectra
        */
-
       m = matrix_ion_populations (xplasma, mode);
     }
 

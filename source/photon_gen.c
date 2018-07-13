@@ -206,15 +206,18 @@ populate_bands (f1, f2, ioniz_or_final, iwind, band)
 {
   double ftot, frac_used, z;
   int n, nphot, most;
+  double kpkt_fraction;
 
-/* Get all of the band limited luminosities */
+  /* Get all of the band limited luminosities */
   ftot = 0.0;
+
+  kpkt_fraction = 1.0 / band->nbands;
 
   for (n = 0; n < band->nbands; n++)    // Now get the band limited luminosities
   {
     if (band->f1[n] < band->f2[n])
     {
-      xdefine_phot (band->f1[n], band->f2[n], ioniz_or_final, iwind, 0.0);
+      xdefine_phot (band->f1[n], band->f2[n], ioniz_or_final, iwind, kpkt_fraction);
       ftot += band->flux[n] = geo.f_tot;
     }
     else
@@ -372,10 +375,10 @@ iwind = -1 	Don't generate any wind photons at all
 
     matom_emiss_report ();      // function which logs the macro atom level emissivites
   }
-  else if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO && kpkt_fraction > 0)
+  else if (geo.nonthermal && geo.rt_mode == RT_MODE_MACRO)
   {
     /* calculate the non-radiative kpkt luminosity throughout the wind */
-    geo.f_kpkt = get_kpkt_heating_f () * kpkt_fraction;  
+    geo.f_kpkt = get_kpkt_heating_f (kpkt_fraction);  
   }
 
 

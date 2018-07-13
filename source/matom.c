@@ -684,7 +684,7 @@ alpha_sp_integrand (freq)
 #define ALPHA_FF 100.     // maximum h nu / kT to create the free free CDF 
 
 int
-kpkt (p, nres, escape,mode)
+kpkt (p, nres, escape, mode)
      PhotPtr p;
      int *nres;
      int *escape;
@@ -853,7 +853,6 @@ kpkt (p, nres, escape,mode)
            the photon actually escapes - we don't to waste time by exciting a two-level macro atom only so that
            it makes another k-packet for us! (SS May 04) */
 
-
         cooling_bb[i] *= rad_rate / (rad_rate + (coll_rate * xplasma->ne));
         mplasma->cooling_bb[i] = cooling_bb[i];
       }
@@ -915,6 +914,7 @@ kpkt (p, nres, escape,mode)
 
     /* note the units here- we divide the total luminosity of the cell by volume and ne to give cooling rate */
 
+
     cooling_adiabatic = xplasma->cool_adiabatic / xplasma->vol / xplasma->ne;    // JM 1411 - changed to use filled volume
 
     if (geo.adiabatic == 0 && cooling_adiabatic > 0.0)
@@ -933,14 +933,13 @@ kpkt (p, nres, escape,mode)
       cooling_adiabatic = 0.0;
     }
 
-
     /* When we generate photons in the wind, from photon_gen we need to prevent deactivation by non-radiative cooling
      * terms.  If mode is True we include adiabatic cooling
+     * this is now dealt with by setting cooling_adiabatic to 0 
      */
 
-    if (mode) {
     cooling_normalisation += cooling_adiabatic;
-    }
+
 
 
 
@@ -954,13 +953,41 @@ kpkt (p, nres, escape,mode)
   }
 
 
+  /* only include adiabatic cooling if we're in the right mode. First set a default 
+     where adiabatic cooling is zero. This will be true if the mode isn't KPKT_MODE_ALL,
+     and also if we are in KPKT_NET_HEAT_MODE and shock heating beats adiabatic cooling. 
+     */
+  /* first subtract off the "true" adiabatic cooling */
+  cooling_normalisation = mplasma->cooling_normalisation - mplasma->cooling_adiabatic;
+  cooling_adiabatic = 0.0; // this variable decides the probability of destruction and is altered below.
+
+  if (mode == KPKT_MODE_ALL)
+  {
+    /* if we are in KPKT_NET_HEAT_MODE and cooling beats shock heating then include
+       the net cooling channel */
+    if (KPKT_NET_HEAT_MODE && geo.nonthermal) {
+      if (xplasma->cool_adiabatic > xplasma->heat_shock) {
+        cooling_adiabatic = (xplasma->cool_adiabatic - xplasma->heat_shock) / xplasma->vol / xplasma->ne;
+      }
+    }
+    else 
+    {
+      /* this is the only situation where we genuinely want the destruction channel
+         to be exactly equal to the adiabatic cooling */
+      cooling_adiabatic = mplasma->cooling_adiabatic;
+    }
+  }
+  /* add whatever the relevant adiabatic cooling value is back on to the normalisation. */
+  cooling_normalisation += cooling_adiabatic;
+
+
 
 
 
   /* The cooling rates for the recombination and collisional processes are now known. 
      Choose which process destroys the k-packet with a random number. */
 
-  destruction_choice = random_number(0.0,1.0) * mplasma->cooling_normalisation;
+  destruction_choice = random_number(0.0,1.0) * cooling_normalisation;
 
   if (destruction_choice < mplasma->cooling_bftot)
   {                             //destruction by bf
@@ -1060,12 +1087,12 @@ kpkt (p, nres, escape,mode)
 
 
   /* JM 1310 -- added loop to check if destruction occurs via adiabatic cooling */
-  else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff + mplasma->cooling_adiabatic))
+  else if (destruction_choice < (mplasma->cooling_bftot + mplasma->cooling_bbtot + mplasma->cooling_ff + cooling_adiabatic))
   {
 
-    if (geo.adiabatic == 0)
+    if (geo.adiabatic == 0 || mode != KPKT_MODE_ALL)
     {
-      Error ("Destroying kpkt by adiabatic cooling even though it is turned off.");
+      Error ("Destroying kpkt by adiabatic cooling even though it is turned off.\n");
     }
     *escape = 1;                // we want to escape but set photon weight to zero
     *nres = -2;
@@ -1081,7 +1108,7 @@ kpkt (p, nres, escape,mode)
   {
     /* We want destruction by collisional ionization in a macro atom. */
     destruction_choice =
-      destruction_choice - mplasma->cooling_bftot - mplasma->cooling_bbtot - mplasma->cooling_ff - mplasma->cooling_adiabatic;
+      destruction_choice - mplasma->cooling_bftot - mplasma->cooling_bbtot - mplasma->cooling_ff - cooling_adiabatic;
 
     for (i = 0; i < nphot_total; i++)
     {

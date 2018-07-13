@@ -109,6 +109,7 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
   for (nphot = 0; nphot < NPHOT; nphot++)
     {
+	    CURRENT_PHOT = nphot;  /* A diagnostic to make it easier to determine what photon is causing a problem */
 
       /* This is just a watchdog method to tell the user the program is still running */
 

@@ -90,6 +90,7 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 
 
 int NPHOT;                      /* The number of photon bundles created.  defined in python.c */
+int CURRENT_PHOT;               /* A diagnostic so that one can always determine what the current photon number being run is */
 
 #define NWAVE  			       10000    //Increasing from 4000 to 10000 (SS June 04)
 #define MAXSCAT 			500
@@ -1408,10 +1409,15 @@ files;
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
 
+/* modes for kpkt calculations */
+#define KPKT_MODE_CONTINUUM  0  /* only account for k->r processes */
+#define KPKT_MODE_ALL        1  /* account for all cooling processes */  
+
+/* non-radiative heat flow mode */
+#define KPKT_NET_HEAT_MODE 0
 
 
-/* DIAGNOSTIC for understanding problems imported models
- *
+/* DIAGNOSTIC for understanding problems with imported models
  */
 
 
