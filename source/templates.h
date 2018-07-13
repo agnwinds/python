@@ -560,6 +560,7 @@ int zoom(int direction);
 int overview(WindPtr w, char rootname[]);
 int position_summary(WindPtr w);
 int abs_summary(WindPtr w, char rootname[], int ochoice);
+int shock_heating_summary(WindPtr w, char rootname[], int ochoice);
 int adiabatic_cooling_summary(WindPtr w, char rootname[], int ochoice);
 int lum_summary(WindPtr w, char rootname[], int ochoice);
 int photo_summary(WindPtr w, char rootname[], int ochoice);

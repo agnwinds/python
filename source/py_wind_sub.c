@@ -408,7 +408,7 @@ shock_heating_summary (w, rootname, ochoice)
   double tot;
   double shock_heating ();
   char filename[LINELENGTH];
-  double t_e;
+//OLD  double t_e;
 
 
 
