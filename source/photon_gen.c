@@ -847,30 +847,41 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   double t, tref, teff (), tdisk ();
   double log_g, gref, geff (), gdisk ();
   double dr, r;
+  double logdr,logrmin,logrmax,logr;
   double f, ltot;
+  double rmax_temp;
   double q1;
-  int nrings;
+  int nrings,i,icheck;
   int spectype;
   double emit, emittance_bb (), emittance_continuum ();
 
   /* Calculate the reference temperature and luminosity of the disk */
   tref = tdisk (m, mdot, rmin);
+  
+  
   gref = gdisk (m, mdot, rmin);
+  
 
   /* Now compute the apparent luminosity of the disk.  This is not actually used
      to determine how annulae are set up.  It is just used to populate geo.ltot.
      It can change if photons hitting the disk are allowed to raise the temperature
    */
 
-  ltot = 0;
-  dr = (rmax - rmin) / STEPS;
-  for (r = rmin; r < rmax; r += dr)
-  {
-    t = teff (tref, (r + 0.5 * dr) / rmin);
-    ltot += t * t * t * t * (2. * r + dr);
-  }
-  geo.lum_disk_init=ltot *= 2. * STEFAN_BOLTZMANN * PI * dr;
+  logrmax=log(rmax);
+  logrmin=log(rmin);
+  logdr=(logrmax-logrmin)/STEPS;
 
+
+  ltot = 0;
+
+ for (logr=logrmin;logr<logrmax;logr+=logdr)
+ {
+    r=exp(logr);
+    dr=exp(logr+logdr)-r;
+    t = teff (tref, (r + 0.5 * dr) / rmin);
+    ltot += t * t * t * t * (2. * r + dr) *dr;
+  }
+  geo.lum_disk_init=ltot *= 2. * STEFAN_BOLTZMANN * PI;
 
 
   /* Now establish the type of spectrum to create */
@@ -886,11 +897,17 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
    The extra factor of two arises because the disk radiates from both of its sides.
    */
 
-  q1 = 2. * PI * dr;
+  q1 = 2. * PI;
 
   (*ftot) = 0;
-  for (r = rmin; r < rmax; r += dr)
+  icheck=0;
+  
+
+  i=0;
+  for (logr=logrmin;logr<logrmax;logr+=logdr)
   {
+    r=exp(logr);
+    dr=exp(logr+logdr)-r;
     t = teff (tref, (r + 0.5 * dr) / rmin);
     log_g = log10 (geff (gref, (r + 0.5 * dr) / rmin));
 
@@ -901,12 +918,19 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     else
     {
       emit = emittance_bb (freqmin, freqmax, t);
+	  
     }
+	if (emit>0 && icheck==0) icheck=1; //We have passed an annulus with emission.
+	if (emit==0.0 && icheck==1) logrmax=log(r); //This will drop us out of the loop - we will have a truncated disk
+	
+    (*ftot) += emit * (2. * r + dr) * dr;
 
-    (*ftot) += emit * (2. * r + dr);
+	i++;
   }
 
   (*ftot) *= q1;
+  
+  // logdr=(logrmax-logrmin)/STEPS;
 
 
   /* If *ftot is 0 in this energy range then all the photons come elsewhere, e. g. the star or BL  */
@@ -925,8 +949,13 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   disk.v[0] = sqrt (G * geo.mstar / rmin);
   nrings = 1;
   f = 0;
-  for (r = rmin; r < rmax; r += dr)
+  
+  logdr=(logrmax-logrmin)/STEPS; //Regrid, using the possible new value of rmax
+  i=0;
+  for (logr=logrmin;logr<logrmax;logr+=logdr)
   {
+    r=exp(logr);
+    dr=exp(logr+logdr)-r;
     t = teff (tref, (r + 0.5 * dr) / rmin);
     log_g = log10 (geff (gref, (r + 0.5 * dr) / rmin));
 
@@ -939,24 +968,25 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
       emit = emittance_bb (freqmin, freqmax, t);
     }
 
-    f += q1 * emit * (2. * r + dr);
+    f += q1 * emit * (2. * r + dr) * dr;
+    	
     /* EPSILON to assure that roundoffs don't affect result of if statement */
     if (f / (*ftot) * (NRINGS - 1) >= nrings)
     {
-      if (r <= disk.r[nrings - 1])
+      if (r <= disk.r[nrings - 1])  //If the radius we have reached is smaller than or equal to the last assigned radius - we make a tiny annulus
       {
         r = disk.r[nrings - 1] * (1. + 1.e-10);
       }
-
       disk.r[nrings] = r;
       disk.v[nrings] = sqrt (G * geo.mstar / r);
       nrings++;
       if (nrings >= NRINGS)
       {
-        Error_silent ("disk_init: Got to ftot %e at r %e < rmax %e. OK if freqs are high\n", f, r, rmax);
+        Error_silent ("disk_init: Got to ftot %e at r %e < rmax %e. OK if freqs are high\n", f, r, rmax);		
         break;
       }
     }
+	i++;
   }
   if (nrings < NRINGS - 1)
   {
@@ -965,15 +995,15 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   }
 
 
-  disk.r[NRINGS - 1] = rmax;
-  disk.v[NRINGS - 1] = sqrt (G * geo.mstar / rmax);
+//  disk.r[NRINGS - 1] = rmax;  //We do not want to automatically set the outer edge of the disk to rmax, we may well have got to ftot earlier - indeed we normally do.
+  disk.v[NRINGS - 1] = sqrt (G * geo.mstar / disk.r[NRINGS - 1]);
 
 
   /* Now calculate the temperature and gravity of the annulae */
 
   for (nrings = 0; nrings < NRINGS - 1; nrings++)
   {
-    r = 0.5 * (disk.r[nrings + 1] + disk.r[nrings]);
+    r = 0.5 * (disk.r[nrings + 1] + disk.r[nrings]);	
     disk.t[nrings] = teff (tref, r / rmin);
     disk.g[nrings] = geff (gref, r / rmin);
   }
@@ -1152,6 +1182,8 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     p[i].freq /= (1. - dot (v, p[i].lmn) / C);
 
   }
+  
+
   return (0);
 }
 

@@ -597,7 +597,7 @@ geo;
 
 
 /* xdisk is a structure that is used to store information about the disk in a system */
-#define NRINGS	301             /* The actual number of rings completely defined
+#define NRINGS	3001             /* The actual number of rings completely defined
                                    is NRINGS-1 ... or from 0 to NRINGS-2.  This is
                                    because you need an outer radius...but the rest
                                    of this element is not filled in. */
