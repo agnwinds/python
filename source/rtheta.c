@@ -467,7 +467,18 @@ rtheta_volumes (ndom, w)
 							cos (thetamax));
 
 
-	  if (w[n].inwind == W_NOT_ASSIGNED)
+	  if (w[n].inwind == W_NOT_INWIND)
+	    {
+	      w[n].vol = 0.0;
+	    }
+
+	  else if (w[n].inwind == W_ALL_INWIND)
+	    {
+	      w[n].vol = cell_volume;
+	    }
+
+
+      else if (w[n].inwind == W_NOT_ASSIGNED)
 	    {
 	      if (zdom[ndom].wind_type == IMPORT)
 		{
@@ -541,23 +552,23 @@ rtheta_volumes (ndom, w)
 
 
 	    }
-	  /* JM/ksl 1711 -- the following two if statements are for if the inwind values are
-	     already assigned, for example by an imported model */
-	  /* need to zero volumes for cells not in the wind */
-	  /* XXX - the logic is pretty awkward.  It seems as if we already knew a cell was in or ou
-	   * of the wind, then we should put these at the top rather than at the bottom of the
-	   * loop, here and in cylindrical_volummes
-	   */
-
-	  else if (w[n].inwind == W_NOT_INWIND)
-	    {
-	      w[n].vol = 0.0;
-	    }
-
-	  else if (w[n].inwind == W_ALL_INWIND)
-	    {
-	      w[n].vol = cell_volume;
-	    }
+//OLD	  /* JM/ksl 1711 -- the following two if statements are for if the inwind values are
+//OLD	     already assigned, for example by an imported model */
+//OLD	  /* need to zero volumes for cells not in the wind */
+//OLD	  /* XXX - the logic is pretty awkward.  It seems as if we already knew a cell was in or ou
+//OLD	   * of the wind, then we should put these at the top rather than at the bottom of the
+//OLD	   * loop, here and in cylindrical_volummes
+//OLD	   */
+//OLD
+//OLD	  else if (w[n].inwind == W_NOT_INWIND)
+//OLD	    {
+//OLD	      w[n].vol = 0.0;
+//OLD	    }
+//OLD
+//OLD	  else if (w[n].inwind == W_ALL_INWIND)
+//OLD	    {
+//OLD	      w[n].vol = cell_volume;
+//OLD	    }
 
 	}
     }
