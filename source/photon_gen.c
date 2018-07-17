@@ -871,6 +871,21 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   logrmin=log(rmin);
   logdr=(logrmax-logrmin)/STEPS;
 
+  for (nrings = 0; nrings < NRINGS; nrings++) //Initialise the structure
+  {
+    disk.nphot[nrings] = 0;
+    disk.nphot[nrings] = 0;
+	disk.r[nrings] = 0;
+	disk.t[nrings] = 0;	
+    disk.nhit[nrings] = 0;
+    disk.heat[nrings] = 0;
+    disk.ave_freq[nrings] = 0;
+    disk.w[nrings] = 0;
+    disk.t_hit[nrings] = 0;
+  }
+
+
+
 
   ltot = 0;
 
@@ -903,7 +918,6 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   icheck=0;
   
 
-  i=0;
   for (logr=logrmin;logr<logrmax;logr+=logdr)
   {
     r=exp(logr);
@@ -920,17 +934,11 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
       emit = emittance_bb (freqmin, freqmax, t);
 	  
     }
-	if (emit>0 && icheck==0) icheck=1; //We have passed an annulus with emission.
-	if (emit==0.0 && icheck==1) logrmax=log(r); //This will drop us out of the loop - we will have a truncated disk
-	
     (*ftot) += emit * (2. * r + dr) * dr;
-
-	i++;
   }
 
   (*ftot) *= q1;
   
-  // logdr=(logrmax-logrmin)/STEPS;
 
 
   /* If *ftot is 0 in this energy range then all the photons come elsewhere, e. g. the star or BL  */
@@ -950,7 +958,6 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   nrings = 1;
   f = 0;
   
-  logdr=(logrmax-logrmin)/STEPS; //Regrid, using the possible new value of rmax
   i=0;
   for (logr=logrmin;logr<logrmax;logr+=logdr)
   {
@@ -969,7 +976,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     }
 
     f += q1 * emit * (2. * r + dr) * dr;
-    	
+	i++;
     /* EPSILON to assure that roundoffs don't affect result of if statement */
     if (f / (*ftot) * (NRINGS - 1) >= nrings)
     {
@@ -982,11 +989,10 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
       nrings++;
       if (nrings >= NRINGS)
       {
-        Error_silent ("disk_init: Got to ftot %e at r %e < rmax %e. OK if freqs are high\n", f, r, rmax);		
+//        Error_silent ("disk_init: Got to ftot %e at r %e < rmax %e. OK if freqs are high\n", f, r, rmax);		Not *really* an error, the error below deals with a *real* problem.		
         break;
       }
     }
-	i++;
   }
   if (nrings < NRINGS - 1)
   {
@@ -994,8 +1000,8 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     exit (0);
   }
 
-
-//  disk.r[NRINGS - 1] = rmax;  //We do not want to automatically set the outer edge of the disk to rmax, we may well have got to ftot earlier - indeed we normally do.
+ 
+  disk.r[NRINGS - 1] = exp(logrmax); 
   disk.v[NRINGS - 1] = sqrt (G * geo.mstar / disk.r[NRINGS - 1]);
 
 
@@ -1016,7 +1022,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     disk.heat[nrings] = 0;
     disk.ave_freq[nrings] = 0;
     disk.w[nrings] = 0;
-    disk.t_hit[nrings] = 0;
+    disk.t_hit[nrings] = 0;	
   }
 
   geo.lum_disk = ltot;
