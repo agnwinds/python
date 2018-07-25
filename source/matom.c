@@ -25,7 +25,7 @@
  * @param [in]     WindPtr w   the ptr to the structure defining the wind
  * @param [in,out]  PhotPtr p   the packet at the point of activation and deactivation
  * @param [in,out]  int nres    the process which activates and deactivates the Macro Atom
- * @param [in,out]  int escape  to tell us whether the matom de-activation
+ * @param [out]  int escape  flag to tell us whether the matom de-activation
  *                             is via an r-packet (1) or a k-packet (0)
  * @return 0
  *
@@ -57,7 +57,7 @@
  *       B. Changed the logic of the major do loop so that the break is moved
  *       higher in the do loop.  Stuart, the intent is to make the
  *       code more readable, and to reduce the level of nesting. 
- *       C. Corrected an errror that on upward bb transitions seemed to leave
+ *       C. Corrected an error that on upward bb transitions seemed to leave
  *       the macro-atom in the same state as previously.
  *       D. Shamelessly modified some of the comments to make it more
  *       straightforward for me to understand.
@@ -80,10 +80,10 @@
  *           July04   SS   Modifying so that this routine does not call alpha_sp but rather uses 
  *                         pre-computed (stored values) for the spontaneous recombination coefficient.
  *                         This is an effort to speed up the code.
- *   06may ksl 57+ -- Adapted for use with plsama structure.  Changed call to
+ *   06may ksl 57+ -- Adapted for use with plasma structure.  Changed call to
  *       eliminate passing entire w array
  *   06jun ksl 57g -- Split macro variables into a separate structure. The structue
- *       which is createdin gridwind, is only created if there are macroatoms.
+ *       which is created in gridwind, is only created if there are macroatoms.
  *   06jul ksl 57h -- In the process of speeding up the program in the simple 
  *       non-macro atom case, I tried to make sure that matom and the 
  *       derivative routiens were not called at all.  Note that at present
@@ -331,7 +331,6 @@ matom (p, nres, escape)
        now select what happens next. Start by choosing the random threshold value at which the
        event will occur. */
 
-//    threshold = ((rand () + 0.5) / MAXRAND); DONE
     threshold = random_number(0.0,1.0);
 
     if ((pjnorm_known[uplvl] + penorm_known[uplvl]) <= 0.0)
@@ -351,7 +350,6 @@ matom (p, nres, escape)
     run_tot = 0;
 
     n = 0;
-//    threshold = ((rand () + 0.5) / MAXRAND); //DONE
     threshold = random_number(0.0,1.0);
 	
     threshold = threshold * pjnorm_known[uplvl_old];
@@ -403,7 +401,7 @@ matom (p, nres, escape)
 
   if (njumps == MAXJUMPS)
   {
-    Error ("Matom: jumped %d times with no emission. Abort.\n", MAXJUMPS);
+    Error ("matom: jumped %d times with no emission. Abort.\n", MAXJUMPS);
     exit (0);
   }
 

@@ -105,7 +105,7 @@ bf_estimators_increment (one, p, ds)
   /* check that j and ave freq give sensible numbers */
   if (sane_check (xplasma->j) || sane_check (xplasma->ave_freq))
   {
-    Error ("radiation:sane_check Problem with j %g or ave_freq %g\n", xplasma->j, xplasma->ave_freq);
+    Error ("bf_estimators_increment:sane_check Problem with j %g or ave_freq %g\n", xplasma->j, xplasma->ave_freq);
   }
 
 
