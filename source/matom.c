@@ -1004,6 +1004,18 @@ kpkt (p, nres, escape)
         /* Now (as in matom) choose a frequency for the new packet. */
 
         p->freq = phot_top[i].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
+
+        /* if the cross-section corresponds to a simple ion (macro_info == 0)
+           or if we are treating all ions as simple, then adopt the total emissivity
+           approach to choosing photon weights - this means we 
+           multipy down the photon weight by a factor nu/(nu-nu_0)
+           and we force a kpkt to be created */
+#if BF_SIMPLE_EMISSIVITY_APPROACH
+        if (phot_top[i].macro_info == 0 || geo.macro_simple == 1) 
+        {
+          p->w *= p->freq / (p->freq - phot_top[i].freq[0]);
+        }
+#endif
 		
         /* Co-moving frequency - changed to rest frequency by doppler */
         /* Currently this assumed hydrogenic shape cross-section - Improve */
@@ -1041,6 +1053,8 @@ kpkt (p, nres, escape)
              get here we want a line emission, not just an excited macro atom. (SS May 04) */
           *escape = 1;          //No need for re-exciting a macro atom.
           p->freq = line[i].freq;
+
+
         }
         /* When it gets here the packet is back to an
            r-packet and the emission mechanism is identified by nres
