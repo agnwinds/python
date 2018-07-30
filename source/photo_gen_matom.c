@@ -540,6 +540,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
     while (test > em_rnge.fmax || test < em_rnge.fmin)
     {
+      pp.w = p[n].w;
       kpkt (&pp, &nres, &esc_ptr);
       if (esc_ptr == 0)
       {
@@ -554,6 +555,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
     p[n].freq = pp.freq;
     p[n].nres = nres;
+    p[n].w = pp.w;
 
     /* The photon frequency is now known. */
 
