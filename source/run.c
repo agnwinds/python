@@ -522,6 +522,9 @@ make_spectra (restart_stat)
     nphot_to_define = (long) NPHOT *(long) geo.pcycles;
     define_phot (p, freqmin, freqmax, nphot_to_define, 1, iwind, 0);
 
+    /* TODAY */
+    save_photons(p,"CREATE");
+
     for (icheck = 0; icheck < NPHOT; icheck++)
     {
       if (sane_check (p[icheck].freq))
