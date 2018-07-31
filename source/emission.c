@@ -348,7 +348,10 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 	     to allow for isotropic BF continuum emission
 	   */
 	  nnscat = 1;
-	  if (p[np].nres < 0 || geo.scatter_mode != SCATTER_MODE_ANISOTROPIC)
+	  /*if (p[np].nres < 0 || geo.scatter_mode != SCATTER_MODE_ANISOTROPIC)*/
+	  /*Log("Testing JM bug fix\n");*/
+	  /*Log("n %d, p.nres %d , NLINES %d",np, p[np].nres, NLINES);*/
+	  if (p[np].nres < 0 || p[np].nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
 	    {
 /*  It was either an electron scatter so the  distribution is isotropic, or it
 was a resonant scatter but we want isotropic scattering anyway.  */
