@@ -134,8 +134,9 @@ int setup_created_files(void);
 /* wind_updates2d.c */
 int wind_update(WindPtr (w));
 int wind_rad_init(void);
+int report_bf_simple_ionpool(void);
 /* windsave.c */
-int wind_save(char filename[]);
+int wind_save(char []);
 int wind_read(char filename[]);
 int wind_complete(WindPtr w);
 int spec_save(char filename[]);

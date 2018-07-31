@@ -848,6 +848,11 @@ typedef struct plasma
   double lum_tot_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
 
+  /* JM 1807 -- these routines are for the BF_SIMPLE_EMISSIVITY_APPROACH
+     they allow one to inspect the net flow of energy into and from the simple ion 
+     ionization pool */
+  double bf_simple_ionpool_in, bf_simple_ionpool_out;
+
   double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to computecompton cooling-  only needs computing once per cycle */
 
   double dmo_dt[3];             /*Radiative force of wind */

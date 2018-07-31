@@ -723,7 +723,7 @@ kpkt (p, nres, escape)
   double electron_temperature;
   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
   double lower_density, upper_density;
-  double cooling_ff;
+  double cooling_ff, upweight_factor;
   WindPtr one;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
@@ -1013,7 +1013,11 @@ kpkt (p, nres, escape)
 #if BF_SIMPLE_EMISSIVITY_APPROACH
         if (phot_top[i].macro_info == 0 || geo.macro_simple == 1) 
         {
-          p->w *= p->freq / (p->freq - phot_top[i].freq[0]);
+          upweight_factor = p->freq / (p->freq - phot_top[i].freq[0]);
+          p->w *= upweight_factor;
+
+          /* record the amount of energy being extracted from the simple ion ionization pool */
+          xplasma->bf_simple_ionpool_out += p->w - (p->w / upweight_factor);
         }
 #endif
 		
