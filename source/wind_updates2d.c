@@ -106,7 +106,7 @@ WindPtr (w);
   NSH 1703 changed NLTE_LEVELS to nlte_levels  and NTOP_PHOT to nphot_tot since they are dynamically allocated now */
   size_of_commbuffer =
 //OLD    8 * (13 * nions + nlte_levels + 2 * nphot_total + 12 * NXBANDS + 2 * LPDF + NAUGER + 113) * (floor (NPLASMA / np_mpi_global) + 1);
-    8 * (13 * nions + nlte_levels + 2 * nphot_total + 12 * NXBANDS + 113) * (floor (NPLASMA / np_mpi_global) + 1);
+    8 * (13 * nions + nlte_levels + 2 * nphot_total + 12 * NXBANDS + 115) * (floor (NPLASMA / np_mpi_global) + 1);
   commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
 
   /* JM 1409 -- Initialise parallel only variables */
@@ -440,6 +440,8 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].ip_direct, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].ip_scatt, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].xi, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n].bf_simple_ionpool_in, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+        MPI_Pack (&plasmamain[n].bf_simple_ionpool_out, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&dt_e, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&dt_r, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&nmax_e, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -580,7 +582,8 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].ip_direct, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].ip_scatt, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].xi, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &dt_e_temp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].bf_simple_ionpool_in, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].bf_simple_ionpool_out, 1, MPI_DOUBLE, MPI_COMM_WORLD);        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &dt_e_temp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &dt_r_temp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &nmax_e_temp, 1, MPI_INT, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &nmax_r_temp, 1, MPI_INT, MPI_COMM_WORLD);
@@ -688,7 +691,7 @@ WindPtr (w);
     if (sane_check (plasmamain[nplasma].heat_comp))
       Error ("wind_update:sane_check w(%d).heat_comp is %e\n", nplasma, plasmamain[nplasma].heat_comp);
 
-	abstot += plasmamain[nplasma].abs_tot;
+	  abstot += plasmamain[nplasma].abs_tot;
     xsum += plasmamain[nplasma].heat_tot;
     psum += plasmamain[nplasma].heat_photo;
     ausum += plasmamain[nplasma].heat_auger;
@@ -696,8 +699,8 @@ WindPtr (w);
     lsum += plasmamain[nplasma].heat_lines;
     csum += plasmamain[nplasma].heat_comp;      //1108 NSH Increment the compton heating counter
     icsum += plasmamain[nplasma].heat_ind_comp; //1205 NSH Increment the induced compton heating counter
-	apsum += plasmamain[nplasma].abs_photo;
-	aausum += plasmamain[nplasma].abs_auger;
+	  apsum += plasmamain[nplasma].abs_photo;
+	  aausum += plasmamain[nplasma].abs_auger;
 
     /* JM130621- bugfix for windsave bug- needed so that we have the luminosities from ionization
        cycles in the windsavefile even if the spectral cycles are run */
@@ -813,6 +816,13 @@ WindPtr (w);
      cool_sum,
      geo.cool_rr, geo.lum_ff, geo.cool_comp, geo.cool_dr, geo.cool_di, geo.lum_lines, geo.cool_adiabatic);
 
+#if BF_SIMPLE_EMISSIVITY_APPROACH
+  /* JM 1807 -- if we have "indivisible packet" mode on but are using the 
+     BF_SIMPLE_EMISSIVITY_APPROACH then we report the flows into and out of the ion pool */
+  if (geo.rt_mode == RT_MODE_MACRO)
+    report_bf_simple_ionpool();
+#endif
+  
 
   /* Print out some diagnostics of the changes in the wind update */
 
@@ -1058,6 +1068,11 @@ wind_rad_init ()
     plasmamain[n].heat_ind_comp = 0.0;  //1108 NSH Zero the induced compton heating for the cell
     plasmamain[n].heat_auger = 0.0;     //1108 NSH Zero the auger heating for the cell
 
+    /* zero the counters that record the flow into and out of the 
+       ionization pool in indivisible packet mode */
+    plasmamain[n].bf_simple_ionpool_out = 0.0;  
+    plasmamain[n].bf_simple_ionpool_in = 0.0;   
+
     if (nlevels_macro > 1 && geo.macro_simple == 0)
       macromain[n].kpkt_rates_known = -1;
 
@@ -1160,6 +1175,38 @@ wind_rad_init ()
     /* End of added material. */
   }
 
+
+  return (0);
+}
+
+/**********************************************************/
+/**
+ * @brief This summarises the flows into and out of the ionization pool for
+ *        simple ions in RT_MODE_MACRO
+ *
+ * @return    Always returns 0
+ *
+ **********************************************************/
+int report_bf_simple_ionpool()
+{
+  int n;
+  double total_in = 0.0;
+  double total_out = 0.0;
+  
+  for (n = 0; n < NPLASMA; n++)
+  {
+    total_in += plasmamain[n].bf_simple_ionpool_in; 
+    total_out += plasmamain[n].bf_simple_ionpool_out;
+
+    if (plasmamain[n].bf_simple_ionpool_out > plasmamain[n].bf_simple_ionpool_in)
+    {
+      Error("The net flow out of simple ion pool (%8.4e) > than the net flow in (%8.4e) in cell %d\n",
+            plasmamain[n].bf_simple_ionpool_out, plasmamain[n].bf_simple_ionpool_in, n);
+    }
+  }
+
+  Log("!! report_bf_simple_ionpool: Total flow into: %8.4e and out of: %8.4e bf_simple ion pool\n",
+            total_in, total_out);
 
   return (0);
 }

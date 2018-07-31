@@ -1173,6 +1173,9 @@ scatter (p, nres, nnscat)
            and we force a kpkt to be created */
 #if BF_SIMPLE_EMISSIVITY_APPROACH
         p->w *= prob_kpkt;
+
+        /* record the amount of energy going into the simple ion ionization pool */
+        xplasma->bf_simple_ionpool_in += (p->w / prob_kpkt) - p->w;
 		    macro_gov (p, nres, 2, &which_out);	//routine to deal with kpkt
 #else 
         if (prob_kpkt > kpkt_choice)
