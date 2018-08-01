@@ -682,10 +682,10 @@ trans_phot_single (WindPtr w, PhotPtr p, int iextract)
    * outer boundary of the calculation you would want pp.  So one should keep both lines below, and comment
    * out the one you do not want. */
 
-  if (modes.save_photons)
-    {
-      // save_photons (p, "Final");  // Where the last position of the photon in the wind
-      save_photons (&pp, "Final"); //The position of the photon where it exits the calculation
-    }
+//OLD  if (modes.save_photons)
+//OLD    {
+//OLD      // save_photons (p, "Final");  // Where the last position of the photon in the wind
+//OLD      save_photons (&pp, "Final"); //The position of the photon where it exits the calculation
+//OLD    }
   return (0);
 }

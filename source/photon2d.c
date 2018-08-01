@@ -89,18 +89,18 @@ translate (w, pp, tau_scat, tau, nres)
   if (where_in_wind (pp->x, &ndomain) < 0)
     {
       istat = translate_in_space (pp);
-      if (modes.save_photons)
-	{
-	  save_photons (pp, "Space");
-	}
+//OLD      if (modes.save_photons)
+//OLD	{
+//OLD  save_photons (pp, "Space");
+//OLD	}
     }
   else if ((pp->grid = where_in_grid (ndomain, pp->x)) >= 0)
     {
       istat = translate_in_wind (w, pp, tau_scat, tau, nres);
-      if (modes.save_photons)
-	{
-	  save_photons (pp, "Wind");
-	}
+//OLD      if (modes.save_photons)
+//OLD	{
+//OLD	  save_photons (pp, "Wind");
+//OLD	}
     }
   else
     {
@@ -161,17 +161,17 @@ translate_in_space (pp)
       move_phot (&ptest, ds + DFUDGE);	/* So now ptest is at the edge of the wind as defined by the boundary
 					   From here on we should be in the grid  */
 
-      /* XXX this is a test.  We check at the start whether we are in the grid */
+//OLD      /* XXX this is a test.  We check at the start whether we are in the grid */
 
       if ((ifail = where_in_grid (ndom, ptest.x)) < 0)
 	{
-	  if (modes.save_photons)
-	    {
-	      save_photons (pp, "NotInGrid_translate_in_space1");
-	    }
+//OLD	  if (modes.save_photons)
+//OLD	    {
+//OLD	      save_photons (pp, "NotInGrid_translate_in_space1");
+//OLD	    }
 	}
 
-      /* XXX this ends the test */
+//OLD      /* XXX this ends the test */
 
 
 
@@ -195,10 +195,10 @@ translate_in_space (pp)
 		}
 	      else
 		{
-		  if (modes.save_photons)
-		    {
-		      save_photons (pp, "NotInGrid_translate_in_space2");
-		    }
+//OLD		  if (modes.save_photons)
+//OLD	    {
+//OLD		      save_photons (pp, "NotInGrid_translate_in_space2");
+//OLD		    }
 		  break;
 		}
 	    }
@@ -567,10 +567,10 @@ return and record an error */
     {
       if (translate_in_wind_failure < 1000)
 	{
-	  if (modes.save_photons)
-	    {
-	      save_photons (p, "NotInGrid_translate_in_wind");
-	    }
+//OLD	  if (modes.save_photons)
+//OLD	    {
+//OLD	      save_photons (p, "NotInGrid_translate_in_wind");
+//OLD	    }
 	}
       return (n);		/* Photon was not in grid */
     }
@@ -741,10 +741,10 @@ return and record an error */
 
   if ((p->grid = n = where_in_grid (ndom, p->x)) < 0)
     {
-      if (modes.save_photons)
-	{
-	  save_photons (p, "NotInGrid_ds_in_cell");
-	}
+//OLD      if (modes.save_photons)
+//OLD	{
+//OLD	  save_photons (p, "NotInGrid_ds_in_cell");
+//OLD	}
       return (n);
     }
 
