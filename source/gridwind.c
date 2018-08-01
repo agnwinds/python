@@ -244,6 +244,25 @@ calloc_plasma (nelem)
 	 1.e-6 * (nelem + 1) * sizeof (photon_store_dummy));
     }
 
+  /* Repeat above for matom storage photon frequencies -- 82h */
+  if (matomphotstoremain != NULL)
+  {
+    free (matomphotstoremain);
+  }
+  matomphotstoremain = (MatomPhotStorePtr) calloc (sizeof (matom_photon_store_dummy), (nelem + 1));
+
+  if (matomphotstoremain == NULL)
+  {
+    Error ("There is a problem in allocating memory for the matomphotonstore structure\n");
+    exit (0);
+  }
+  else
+  {
+    Log
+      ("Allocated %10d bytes for each of %5d elements of matomphotonstore totaling %10.1f Mb \n",
+       sizeof (matom_photon_store_dummy), (nelem + 1), 1.e-6 * (nelem + 1) * sizeof (matom_photon_store_dummy));
+  }
+
   return (0);
 }
 
