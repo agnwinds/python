@@ -495,8 +495,9 @@ matom (p, nres, escape)
       *escape = 1;
       *nres = config[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
       /* continuua are indicated by nres > NLINES */
-//      p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e / H_OVER_K); //DONE
-      p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. -  random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
+
+      //p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. -  random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
+      p->freq = matom_select_bf_freq(one, config[uplvl].bfd_jump[n - nbbd]);
 
       
       /* Co-moving frequency - changed to rest frequency by doppler */
@@ -1003,7 +1004,8 @@ kpkt (p, nres, escape)
 
         /* Now (as in matom) choose a frequency for the new packet. */
 
-        p->freq = phot_top[i].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
+        //p->freq = phot_top[i].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
+	p->freq = matom_select_bf_freq(one, i);
 
         /* if the cross-section corresponds to a simple ion (macro_info == 0)
            or if we are treating all ions as simple, then adopt the total emissivity
@@ -1327,7 +1329,8 @@ fake_matom_bf (p, nres, escape)
   *escape = 1;                  //always an r-packet here
 
 //  p->freq = phot_top[*nres - NLINES - 1].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e / H_OVER_K); DONE
-  p->freq = phot_top[*nres - NLINES - 1].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
+  //p->freq = phot_top[*nres - NLINES - 1].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
+  p->freq = matom_select_bf_freq(one, *nres - NLINES - 1);
   
 
   /* Currently this assumes hydrogenic shape cross-section - Improve */
@@ -1494,8 +1497,9 @@ emit_matom (w, p, nres, upper)
   {                             /* bf downwards jump */
     *nres = config[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
     /* continuua are indicated by nres > NLINES */
-//    p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * t_e / H_OVER_K); DONE
-    p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - random_number(0.0,1.0)) * t_e / H_OVER_K);    
+    //p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - random_number(0.0,1.0)) * t_e / H_OVER_K);
+     p->freq = matom_select_bf_freq(one, config[uplvl].bfd_jump[n - nbbd]);
+    
 	
     /* Co-moving frequency - changed to rest frequency by doppler */
     /*Currently this assumed hydrogenic shape cross-section - Improve */

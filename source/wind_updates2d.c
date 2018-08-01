@@ -1143,15 +1143,15 @@ wind_rad_init ()
       }
     }
 
+
     for (i = 0; i < ntop_phot; i++)
     {
       /* 57h -- recomb_simple is only required for we are using a macro atom approach, and only non-zero when
          this particular phot_tob xsection is treated as a simple x-section. Stuart, is this correct?? I've added
          checks so that macro_info is only 0 (false) or true (1), and so the logic of the next section can be
          simplified.  0608-ksl */
-      if (geo.macro_simple || phot_top[i].macro_info)
+      if (geo.macro_simple==0 && phot_top[i].macro_info==1)
       {
-
         plasmamain[n].recomb_simple[i] = 0.0;
       }
       else

@@ -261,6 +261,7 @@ double total_rrate(int nion, double T);
 double gs_rrate(int nion, double T);
 int sort_and_compress(double *array_in, double *array_out, int npts);
 int compare_doubles(const void *a, const void *b);
+double matom_select_bf_freq (WindPtr one, int nconf);
 /* diag.c */
 int get_standard_care_factors(void);
 int get_extra_diagnostics(void);
