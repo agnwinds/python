@@ -1410,6 +1410,9 @@ files;
    Altered mode for bound-free in "simple-macro mode" */
 #define BF_SIMPLE_EMISSIVITY_APPROACH 1
 
+/* Variable introducted to cut off macroatom / estimator integrals when exponential function reaches extreme values. Effectivevly a max limit imposed on x = hnu/kT terms */
+#define ALPHA_MATOM_NUMAX_LIMIT 30 /* maximum value for h nu / k T to be considered in integrals */
+
 
 /* DIAGNOSTIC for understanding problems imported models
  *
