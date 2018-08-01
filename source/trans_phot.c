@@ -48,8 +48,6 @@
 #include "python.h"
 
 
-FILE *pltptr;
-int plinit = 0;
 long n_lost_to_dfudge = 0;
 
 
@@ -93,13 +91,6 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
 
 
-  /* 1802 XXX ksl - This needs to be incoropratred into diag.c */
-
-  if (modes.track_resonant_scatters && plinit == 0)
-    {
-      pltptr = fopen ("python.xyz", "w");
-      plinit = 1;
-    }
 
 
 
