@@ -923,6 +923,16 @@ typedef struct photon_store
 
 PhotStorePtr photstoremain;
 
+/* A second photon store: this is very similar to photon_store above but for use in generating macro atom bf photons from cfds*/
+typedef struct matom_photon_store
+{
+  int n;                        /* This is the photon number that was last used */
+  double t, nconf, freq[NSTORE];
+
+} matom_photon_store_dummy, *MatomPhotStorePtr;
+
+MatomPhotStorePtr matomphotstoremain;
+#define MATOM_BF_PDF 1000    //number of points to use in a macro atom bf PDF
 
 typedef struct macro
 {
@@ -1413,9 +1423,6 @@ files;
    whether it has already calculated the matom emissivities or not. */
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
-
-/* Variable introducted to cut off macroatom / estimator integrals when exponential function reaches extreme values. Effectivevly a max limit imposed on x = hnu/kT terms */
-#define ALPHA_MATOM_NUMAX_LIMIT 30 /* maximum value for h nu / k T to be considered in integrals */
 
 /* this variable controls whether to use the 
    Altered mode for bound-free in "simple-macro mode" */
