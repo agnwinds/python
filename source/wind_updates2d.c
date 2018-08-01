@@ -1073,7 +1073,7 @@ wind_rad_init ()
     plasmamain[n].bf_simple_ionpool_out = 0.0;  
     plasmamain[n].bf_simple_ionpool_in = 0.0;   
 
-    if (nlevels_macro > 1 && geo.macro_simple == 0)
+    if (geo.rt_mode == RT_MODE_MACRO)
       macromain[n].kpkt_rates_known = -1;
 
 /* 1108 NSH Loop to zero the frequency banded radiation estimators */
