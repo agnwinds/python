@@ -1054,7 +1054,10 @@ typedef struct photon
       } istat;                      /*status of photon. */
 
       int nscat;                    /*number of scatterings */
-      int nres;                     /*The line number in lin_ptr of last scatter or wind line creation. Continuum if > nlines. */
+      int nres;                     /*For line scattering, indicates the actual transition; 
+                                      for continuum scattering, meaning 
+                                      depends on matom vs non-matin. See headers of emission.c 
+                                      or matom.c for details. */
       int nnscat;                   /* Used for the thermal trapping model of
                                        anisotropic scattering to carry the number of
                                        scattering to "extract" when needed for wind

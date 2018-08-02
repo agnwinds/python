@@ -40,7 +40,21 @@
  * ### Notes ###
  * @bug The do loop might be simpler if made over the plasma cells
  * instead of the wind, but one should be careful of the dummy cell
- *
+ * 
+ * 
+ * CK20180801: 
+ * 
+ *           in non-macro atom mode, the only continuum process treates as scattering is 
+ *           electron scattering, and this is assigned nres = -1. The only valid values 
+ *           of nres in non-macro-atom mode are therefore nres = -1 and 0 <= nres <= nlines-1
+ *           (with the lattter range covering the lines).
+ * 
+ *           in macro atom mode, nres = -1 indicates electron scattering, 
+ *           nres = -2 indicates ff, and nres > NLINES indicates bound-free. 
+ * 	     [nres == NLINES is never used. Note also that NLINES is the *max* number of lines, whereas nlines
+ *	     is the *actual* number of lines. So, actually, it's not just nres = NLINES that's never used, but 
+ *	     the entire range of nlines <= nres <= NLINES]
+ * 
  **********************************************************/
 
 double
@@ -342,13 +356,28 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 	  p[np].grid = icell;
 	  /*
 	     Determine the direction of the photon
-	     ?? Need to allow for anisotropic emission here
-	     JM 1406 -- XXX I think there's a mistake here. I believe this should be
-	     if (p[n].nres < 0 || p[n].nres > NLINES || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
-	     to allow for isotropic BF continuum emission
-	   */
+	     Need to allow for anisotropic emission here
+
+	     CK20180801: in non-macro-atom mode, the only continuum process that is treated
+	     as a scatter is electron scattering; but in any case, all continuum processes in non-macro-atom
+	     mode correspond to nres < 0.
+
+	     in macro-atom mode, bf and ff continuum processes are also treated as scattering processes, 
+	     and then they, too, are treated isotropically. however, in macro atom mode, nres = -1 specifically
+	     indicates electron scattering, nres = -2 specifically indicates ff, and nres > NLINES indicates
+	     bound-free. 
+	     [nres == NLINES is never used. Note also that NLINES is the *max* number of lines, whereas nlines
+	     is the *actual* number of lines. So, actually, it's not just nres = NLINES that's never used, but 
+	     the entire range of nlines <= nres <= NLINES]
+
+	     in both macro-atom and non-macro-atom modes, 
+	     line processes are treated isotropically only if geo.scatter_mode == SCATTER_MODE_ISOTROPIC;
+	     note that, confusingly, geo.scatter_mode == SCATTER_MODE_ANISOTROPIC is *not*
+	     the only anisotropic mode -- SCATTER_MODE_THERMAL is *also* anisotropic.
+	     
+	  */
 	  nnscat = 1;
-	  if (p[np].nres < 0 || geo.scatter_mode != SCATTER_MODE_ANISOTROPIC)
+	  if (p[np].nres < 0 || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
 	    {
 /*  It was either an electron scatter so the  distribution is isotropic, or it
 was a resonant scatter but we want isotropic scattering anyway.  */
