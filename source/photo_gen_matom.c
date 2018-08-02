@@ -125,10 +125,12 @@ get_matom_f (mode)
       for (m = 0; m < nlevels_macro; m++)
       {
         norm += macromain[n].matom_abs[m];
+        macromain[n].matom_emiss[m] = 0.0;
         if (sane_check (macromain[n].matom_abs[m]))
           Error ("matom_abs is %8.4e in matom %i level %i\n", macromain[n].matom_abs[m], n, m);
       }
       norm += plasmamain[n].kpkt_abs;
+      plasmamain[n].kpkt_emiss = 0.0;
       if (sane_check (plasmamain[n].kpkt_abs))
         Error ("kpkt_abs is %8.4e in matom %i\n", plasmamain[n].kpkt_abs, n);
     }
