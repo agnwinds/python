@@ -443,7 +443,6 @@ struct geometry
 /* Note that the scatter_mode is actually a subsidiary variable of the line_mode.  Chooising a line_mode
  * results in the selection of a scatter_mode */
 #define SCATTER_MODE_ISOTROPIC    0
-#define SCATTER_MODE_ANISOTROPIC  1
 #define SCATTER_MODE_THERMAL      2
 
   int scatter_mode;             /*The way in which scattering for resonance lines is treated 

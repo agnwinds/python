@@ -1232,13 +1232,6 @@ scatter (p, nres, nnscat)
       randvec (z_prime, 1.0);	/* Get a new direction for the photon */
       stuff_v (z_prime, p->lmn);
     }
-
-  else if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
-    {
-      randwind (p, z_prime, wmain[n].lmn);
-      stuff_v (z_prime, p->lmn);
-
-    }
   else
     {				//It was a line photon and we want to use the thermal trapping model to choose the output direction
 

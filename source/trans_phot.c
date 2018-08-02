@@ -117,37 +117,6 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
       Error ("trans_phot:sane_check photon %d has weight %e\n", nphot, p[nphot].w);
     }
 
-    /* Next block added by SS Jan 05 - for anisotropic scattering with extract we want to be sure that everything is
-       initialised (by scatter?) before calling extract for macro atom photons. Insert this call to scatter which should do
-       this. */
-
-    if (geo.rt_mode == RT_MODE_MACRO && geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
-    {
-      if (p[nphot].origin == PTYPE_WIND)
-      {
-        if (p[nphot].nres > -1 && p[nphot].nres < NLINES)
-        {
-          geo.rt_mode = RT_MODE_2LEVEL;
-          /* 74a_ksl Check to see when a photon weight is becoming unreal */
-          if (sane_check (p[nphot].w))
-          {
-            Error ("trans_phot:sane_check photon %d has weight %e before scatter\n", nphot, p[nphot].w);
-          }
-          if ((nerr = scatter (&p[nphot], &p[nphot].nres, &nnscat)) != 0)
-          {
-            Error ("trans_phot: Bad return from scatter %d at point 1", nerr);
-          }
-          /* 74a_ksl Check to see when a photon weight is becoming unreal */
-          if (sane_check (p[nphot].w))
-          {
-            Error ("trans_phot:sane_check photon %d has weight %e aftger scatter\n", nphot, p[nphot].w);
-          }
-          geo.rt_mode = RT_MODE_MACRO;
-        }
-      }
-    }
-
-
       stuff_phot (&p[nphot], &pp);
       absorb_reflect = geo.absorb_reflect;
 
