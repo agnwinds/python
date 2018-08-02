@@ -377,18 +377,12 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 	     
 	  */
 	  nnscat = 1;
+
 	  if (p[np].nres < 0 || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
 	    {
 /*  It was either an electron scatter so the  distribution is isotropic, or it
 was a resonant scatter but we want isotropic scattering anyway.  */
 	      randvec (p[np].lmn, 1.0);	/* The photon is emitted isotropically */
-	    }
-	  else if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
-	    {			// It was a line photon and we want anisotropic scattering
-
-/* -1. forces a full reinitialization of the pdf for anisotropic scattering  */
-
-	      randwind (&p[np], p[np].lmn, wmain[icell].lmn);
 	    }
 	  else if (geo.scatter_mode == SCATTER_MODE_THERMAL)
 	    {			// It was a line photon and we want anisotropic scattering

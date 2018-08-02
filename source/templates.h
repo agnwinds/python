@@ -389,7 +389,7 @@ int cylvar_coord_fraction(int ndom, int ichoice, double x[], int ii[], double fr
 int bilin(double x[], double x00[], double x01[], double x10[], double x11[], double *f, double *g);
 int xquadratic(double a, double b, double c, double r[]);
 /* gridwind.c */
-int create_maps(int ichoice);
+int create_maps(void);
 int calloc_wind(int nelem);
 int calloc_plasma(int nelem);
 int check_plasma(PlasmaPtr xplasma, char message[]);
@@ -472,6 +472,7 @@ int get_domain_params(int ndom);
 int get_wind_params(int ndom);
 int get_line_transfer_mode(void);
 int setup_windcone(void);
+int line_transfer_help_message(void);
 /* setup_disk.c */
 double get_disk_params(void);
 /* photo_gen_matom.c */
