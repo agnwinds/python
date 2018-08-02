@@ -342,7 +342,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 	    }
 	  else
 	    {
-	      p[np].freq = one_line (&wmain[icell], &p[n].nres);	/*And fill all the rest of the luminosity up with line photons */
+	      p[np].freq = one_line (&wmain[icell], &p[np].nres);	/*And fill all the rest of the luminosity up with line photons */
 	      if (p[np].freq == 0)
 		{
 		  Error
@@ -398,7 +398,7 @@ was a resonant scatter but we want isotropic scattering anyway.  */
 	  /* The next two lines correct the frequency to first order, but do not result in
 	     forward scattering of the distribution */
 	  vwind_xyz (ndom, &p[np], v);
-	  p[np].freq *= (1. + dot (v, p[np].lmn) / C);
+//DEBUG	  p[np].freq *= (1. + dot (v, p[np].lmn) / C);
 	  p[np].istat = 0;
 	  p[np].tau = p[np].nscat = p[np].nrscat = 0;
 	  p[np].origin = PTYPE_WIND;	// A wind photon
