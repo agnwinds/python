@@ -3680,6 +3680,9 @@ indexx (n, arrin, indx)
  * @param [in, out] double  freqmax   The maximum frequency we are interested in
  * @return     the number of lines that are potentially in resonance.
  *
+ * limit_lines sets the external variables nline_min and nline_max for use with
+ * other routines
+ *
  *
  *
  * If limit_lines
