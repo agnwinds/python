@@ -89,18 +89,10 @@ translate (w, pp, tau_scat, tau, nres)
   if (where_in_wind (pp->x, &ndomain) < 0)
     {
       istat = translate_in_space (pp);
-//OLD      if (modes.save_photons)
-//OLD	{
-//OLD  save_photons (pp, "Space");
-//OLD	}
     }
   else if ((pp->grid = where_in_grid (ndomain, pp->x)) >= 0)
     {
       istat = translate_in_wind (w, pp, tau_scat, tau, nres);
-//OLD      if (modes.save_photons)
-//OLD	{
-//OLD	  save_photons (pp, "Wind");
-//OLD	}
     }
   else
     {
@@ -161,21 +153,16 @@ translate_in_space (pp)
       move_phot (&ptest, ds + DFUDGE);	/* So now ptest is at the edge of the wind as defined by the boundary
 					   From here on we should be in the grid  */
 
-//OLD      /* XXX this is a test.  We check at the start whether we are in the grid */
 
       if ((ifail = where_in_grid (ndom, ptest.x)) < 0)
 	{
-//OLD	  if (modes.save_photons)
-//OLD	    {
-//OLD	      save_photons (pp, "NotInGrid_translate_in_space1");
-//OLD	    }
 	}
 
-//OLD      /* XXX this ends the test */
 
 
 
-      /* XXX - Note there is a possiblity that we reach the other side of the grid without actually encoutering a
+      /* Note there is a possiblity that we reach the other side 
+       * of the grid without actually encoutering a
        * wind cell
        */
 
@@ -195,10 +182,6 @@ translate_in_space (pp)
 		}
 	      else
 		{
-//OLD		  if (modes.save_photons)
-//OLD	    {
-//OLD		      save_photons (pp, "NotInGrid_translate_in_space2");
-//OLD		    }
 		  break;
 		}
 	    }
@@ -222,96 +205,6 @@ translate_in_space (pp)
 
   return (pp->istat);
 }
-
-//OLD /***********************************************************
-//OLD                                        Space Telescope Science Institute
-//OLD
-//OLD Synopsis:
-//OLD
-//OLD   double ds_to_wind(pp,ndom)  calculates the photon pathlength to the edge of the wind.
-//OLD
-//OLD Arguments:
-//OLD   PhotPtr pp;.
-//OLD
-//OLD
-//OLD Returns:
-//OLD
-//OLD   The distance to the nearest boundary of the wind and the domain for which
-//OLD   the boudary applies.
-//OLD
-//OLD
-//OLD Description:
-//OLD
-//OLD   Python defines the boundaries of the wind in term of the intersection
-//OLD   of a biconical flow (defined by an inner and outer windcone) and
-//OLD   an inner and outer radius centered on the star.  If the user is interested
-//OLD   in a biconical flow, he/she will most likely set the radii so that they
-//OLD   do not truncate the wind.  Similarly, by choosing parameters for the windcones
-//OLD   properly, one can assure that one has a completely spherical flow.  However,
-//OLD   the user may also perversely set the parameters to that both the conical
-//OLD   flow boundaries and the min and maximum radius come into play.
-//OLD
-//OLD    Usually, one would
-//OLD   define the two types of The two types of boundaries are
-//OLD   usually defined so that one includes the other and so the cones apply when one is
-//OLD   dealing with a CV type wind, while the inner and outer radius applies for a spherical
-//OLD   model.  However this routine does not require this to be the case, since it just
-//OLD   calculates where the edges are.
-//OLD
-//OLD   In any event, if you are inside the wind already ds_to_wind calculates the distance to the edge of the wind.
-//OLD   If you are outside, It will also be to the nearest edge.
-//OLD
-//OLD   The routine distinguishes between  two basic cases.  Either the photon is already in the wind
-//OLD   in which case one looks for the nearest boundary, or the photon is not currently
-//OLD   in the wind and you have to translate it until it reaches the the boundary (or
-//OLD   VERY_BIG)
-//OLD Notes:
-//OLD   There is no guarantee that you will still be in the region defined by the grid.
-//OLD
-//OLD   1802 -ksl - At present this routine for imported models this routine only deals with
-//OLD   cylindrical models.  Additionally for imported models we skip all of the
-//OLD   uwd of wind_cones.  This is inefficient, and needs to be corrected for
-//OLD   rtheta and spherical models which can easily be handled using wind cones.
-//OLD
-//OLD History:
-//OLD   1997    ksl     Coded and debugged as part of Python effort.
-//OLD   98dec   ksl     Updated to add an inner and outer radial boundary.
-//OLD   99oct   ksl     The existing version of this code appears to contain
-//OLD                   an attempt to deal with what looks to be a roundoff
-//OLD                   problem when the intersection point is at large radii
-//OLD                   but at a radii less than VERY_BIG.  I have made the
-//OLD                   fudge bigger in an attempt to push through the boundary
-//OLD                   and logged the error.  There ought to be a better fix
-//OLD                   involving not letting the photon get too far from
-//OLD                   the WD but I am worried about interactions between
-//OLD                   this routine and other portions of the code. ???
-//OLD
-//OLD         I have been trying to understand the behavior of ds_to_wind which
-//OLD         calculates the distance to the edge of the wind (from outside the
-//OLD         wind.  There were two problems I believe neither of which is solved
-//OLD         to my satisfaction.  The first, simpler, problem is that at very
-//OLD         large distances adding DFUDGE to ds does not "punch through" since
-//OLD         DFUDGE is so small relative to DS that it is lost in roundoff errors.
-//OLD         The second problem is that ds_to_wind includes calculates the distance
-//OLD         to the outer radius of the wind, but that where_in_wind says that
-//OLD         the photon is still in the wind at the outer boundary.  where_in_wind
-//OLD         does not have a separate return value to say that the photon is still
-//OLD         in the wind_cone but beyond the outer boundary.  What to do needs
-//OLD         researching because a photon can be eclipsed even if it is beyond
-//OLD         the outer boundary.  AT present ds_to_wind is set up so that it
-//OLD         it keeps calculating ds_to_wind until it punches thourh this outer
-//OLD         sphere.  I have simplified the logic for this from the previous program
-//OLD         but exactly what should be done needs to be determined! ????
-//OLD
-//OLD   05jul   ksl     Changed call from ds_to_cone to ds_to_cone as
-//OLD                   added cylvar coord system.  Otherwise routine is
-//OLD                   currently unchanged.
-//OLD   15aug   ksl     Modifications for domains.  The asumption we make
-//OLD                   is that the photon is not in any of the wind
-//OLD                   regions at this point, and that we are looking
-//OLD                   for the closest wind boundary.
-//OLD
-//OLD **************************************************************/
 
 
 

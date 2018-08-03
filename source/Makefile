@@ -141,8 +141,6 @@ LDFLAGS= -L$(LIB) -lm -lgsl -lgslcblas
 VERSION = 82h
 
 
-CHOICE=1             // Compress plasma as much as possible
-# CHOICE=0           //  Keep relation between plasma and wind identical
 
 startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information
