@@ -22,11 +22,11 @@
 
 
 /**********************************************************/
-/** 
+/**
  * @brief       Get inputs that describe a particular component of the wind
  *
  * @param [in] ndom  The number (begining with 0) of this particular domain
- * @return  0 
+ * @return  0
  *
  * Sets up the one domain, which includes defining wind type, e.g whether
  * it is a shell, or a biconical flow, or an imported model, as well
@@ -38,7 +38,7 @@
  * ###Notes###
  * 1801 -   Refactored into this file in 1801.  Updates in the
  *          fall of 17 were made to allow for importing models.
- *          Note that cyl_var coordinates are not currently 
+ *          Note that cyl_var coordinates are not currently
  *          working
 ***********************************************************/
 
@@ -157,13 +157,13 @@ get_domain_params (ndom)
 
 
 /**********************************************************/
-/**   
+/**
  * @brief       Get detailed particular component of the wind
  *
  * @param [in] ndom  The number (begining with 0) of this particular domain
- * @return  0 
+ * @return  0
  *
- * Continues the setup of a single domain begun in get_domain_params.    
+ * Continues the setup of a single domain begun in get_domain_params.
  *
  * Much of this routine is a steering routine that calls other
  * subroutines depending on the type of wind, e.g sv, for this
@@ -171,15 +171,21 @@ get_domain_params (ndom)
  *
  *
  * ###Notes###
- * 1801 -   Refactored into this file in 1801.  
-
+ * 1801 -   Refactored into this file in 1801.
+ *
+ * ### Programming Notes ###
+ *
+ * EP: On line 198 and 199, the maximum radius and init temp for the wind are
+ * read in from a .pf. A possible enhancement would be to place this into the
+ * individual get parameter functions for each wind type.
+ *
 ***********************************************************/
 
 int
 get_wind_params (ndom)
      int ndom;
 {
-  // XXX These need to be initalized sensibly and 
+  // XXX These need to be initalized sensibly and
   // it is not obvious that is happenning
 
   zdom[ndom].rmax = 1e12;
@@ -189,16 +195,13 @@ get_wind_params (ndom)
       zdom[ndom].rmax = 50. * geo.r_agn;
     }
 
-
-  /* XXX - This should be part of the individual get_wind_parameters, not here */
-
   rddoub ("wind.radmax(cm)", &zdom[ndom].rmax);
   rddoub ("wind.t.init", &geo.twind_init);
 
-  /* ksl XXX - There is something of a philosophical problem that needs to be worked
+  /* ksl - There is something of a philosophical problem that needs to be worked
    * out with geo.rmax and zdom[ndom].rmax for the general case of winds.  Suppose
-   * we wish to create, say a spherical outflow with two domains one going from 
-   * r1 to r2 and the other going from r2 to r3.  Then we want to keep geo.rmax which is 
+   * we wish to create, say a spherical outflow with two domains one going from
+   * r1 to r2 and the other going from r2 to r3.  Then we want to keep geo.rmax which is
    * intended to be the distance beyond which photons are moving through free space separate
    * from the values in the wind zones.  Right now we are setting the outer limit of each
    * wind to be geo.rmax regardless, in routines like get_stellar_wind_params and get_sv_wind
@@ -208,7 +211,7 @@ get_wind_params (ndom)
    * need to ask the question about rmax, but others where it is necessary
    */
 
-  /* Next lines are to assure that we have the largest possible value of the 
+  /* Next lines are to assure that we have the largest possible value of the
    * sphere surrounding the system
    * JM 1710 -- if this is the first domain, then initialise geo.rmax see #305
    */
@@ -223,7 +226,7 @@ get_wind_params (ndom)
 
      Note: When one adds a new model, the only things that should be read in and modified
      are parameters in geo.  This is in order to preserve the ability to continue a calculation
-     with the same basic wind geometry, without reading in all of the input parameters.  
+     with the same basic wind geometry, without reading in all of the input parameters.
    */
 
   if (zdom[ndom].wind_type == STAR)
@@ -269,7 +272,7 @@ get_wind_params (ndom)
     }
 
   /* Get the filling factor of the wind */
-  // XXX  This may  not in the right place to set the filling factor.  
+  // XXX  This may  not in the right place to set the filling factor.
 
   zdom[ndom].fill = 1.;
 
@@ -286,15 +289,15 @@ get_wind_params (ndom)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief       Get the line transfer mode for the wind
  *
  * @param [in] None
- * @return  0 
+ * @return  0
  *
  * This rontinues simply gets the line tranfer mode for
  * all componensts of the wind.  After logging this
- * information the routine also reads in the atomic 
+ * information the routine also reads in the atomic
  * data.
  *
  *
@@ -316,12 +319,12 @@ get_line_transfer_mode ()
      &geo.line_mode);
 
 /* ksl XXX  This approach is inherently dangerous and should be fixed.  We read in the line mode but then
- * change the number to accommodate a line mode and the way scattering is treated.  We should define 
+ * change the number to accommodate a line mode and the way scattering is treated.  We should define
  * a new variable which we keep as is, and use it to define geo.line_mode and geo.scatter_mode. */
 
   /* JM 1406 -- geo.rt_mode and geo.macro_simple control different things. geo.rt_mode controls the radiative
-     transfer and whether or not you are going to use the indivisible packet constraint, so you can have all simple 
-     ions, all macro-atoms or a mix of the two. geo.macro_simple just means one can turn off the full macro atom 
+     transfer and whether or not you are going to use the indivisible packet constraint, so you can have all simple
+     ions, all macro-atoms or a mix of the two. geo.macro_simple just means one can turn off the full macro atom
      treatment and treat everything as 2-level simple ions inside the macro atom formalism */
 
   /* For now handle scattering as part of a hidden line transfermode ?? */
@@ -358,7 +361,7 @@ get_line_transfer_mode ()
 	("Line_transfer mode:  Simple, thermal trapping, Single scattering \n");
       geo.scatter_mode = SCATTER_MODE_THERMAL;	// Thermal trapping model
       geo.line_mode = 3;	// Single scattering model is best for this mode
-      geo.rt_mode = RT_MODE_2LEVEL;	// Not macro atom (SS) 
+      geo.rt_mode = RT_MODE_2LEVEL;	// Not macro atom (SS)
     }
   else if (geo.line_mode == 6)
     {
@@ -391,8 +394,8 @@ get_line_transfer_mode ()
 	("Line_transfer mode:  simple macro atoms, anisotropic  scattering  \n");
       geo.scatter_mode = SCATTER_MODE_ANISOTROPIC;	// anisotropic scatter mode 1
       geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = RT_MODE_MACRO;	// Identify macro atom treatment 
-      geo.macro_simple = 0;	// We don't want the all simple case 
+      geo.rt_mode = RT_MODE_MACRO;	// Identify macro atom treatment
+      geo.macro_simple = 0;	// We don't want the all simple case
     }
   else
     {
@@ -400,7 +403,7 @@ get_line_transfer_mode ()
       exit (0);
     }
 
-  /* With the macro atom approach we won't want to generate photon 
+  /* With the macro atom approach we won't want to generate photon
        bundles in the wind so switch it off here. (SS) */
     if (geo.rt_mode == RT_MODE_MACRO)
       {
@@ -432,13 +435,13 @@ get_line_transfer_mode ()
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      sets up the windcones for each domain
  *
  * @return     Always returns 0
  *
  * @details
- * 
+ *
  * This routine takes input variables, the minimim and maximum
  * radius of the wind at the disk, and the flow angles bounding
  * the wind, and calculates the variables used to define the cones
@@ -464,9 +467,9 @@ get_line_transfer_mode ()
  *
  * Wind cones are defined azimuthally around the z axis.
  *
- * For models that are not biconical flows, the windcones are set 
+ * For models that are not biconical flows, the windcones are set
  * to include the entire domain.
- * 
+ *
  *
  **********************************************************/
 
