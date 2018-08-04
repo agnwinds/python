@@ -555,7 +555,8 @@ rtheta_volumes (ndom, w)
 //OLD	  /* JM/ksl 1711 -- the following two if statements are for if the inwind values are
 //OLD	     already assigned, for example by an imported model */
 //OLD	  /* need to zero volumes for cells not in the wind */
-//OLD	  /* XXX - the logic is pretty awkward.  It seems as if we already knew a cell was in or ou
+//OLD
+//OLD     /* the logic is pretty awkward.  It seems as if we already knew a cell was in or ou
 //OLD	   * of the wind, then we should put these at the top rather than at the bottom of the
 //OLD	   * loop, here and in cylindrical_volummes
 //OLD	   */

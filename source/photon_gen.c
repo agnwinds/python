@@ -110,7 +110,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
                                    bands.  This is used for the for ionization calculation where one wants to assure
                                    that you have "enough" photons at high energy */
 
-    ftot = populate_bands (f1, f2, ioniz_or_final, iwind, &xband);
+    ftot = populate_bands(ioniz_or_final, iwind, &xband);
 
     for (n = 0; n < NPHOT; n++)
       p[n].path = -1.0;         /* SWM - Zero photon paths */
@@ -179,14 +179,11 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
  * Much of the actual work is carried out in xdefine_phot.
  *
  * ### Notes ###
- * @bug f1 and f2 do not appear to be used and should be removed from
- * the call.
  *
  **********************************************************/
 
 double
-populate_bands (f1, f2, ioniz_or_final, iwind, band)
-     double f1, f2;
+populate_bands(ioniz_or_final, iwind, band)
      int ioniz_or_final;
      int iwind;
      struct xbands *band;
@@ -856,10 +853,10 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
 
   /* Calculate the reference temperature and luminosity of the disk */
   tref = tdisk (m, mdot, rmin);
-  
-  
+
+
   gref = gdisk (m, mdot, rmin);
-  
+
 
   /* Now compute the apparent luminosity of the disk.  This is not actually used
      to determine how annulae are set up.  It is just used to populate geo.ltot.
@@ -875,7 +872,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     disk.nphot[nrings] = 0;
     disk.nphot[nrings] = 0;
 	disk.r[nrings] = 0;
-	disk.t[nrings] = 0;	
+	disk.t[nrings] = 0;
     disk.nhit[nrings] = 0;
     disk.heat[nrings] = 0;
     disk.ave_freq[nrings] = 0;
@@ -915,7 +912,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
 
   (*ftot) = 0;
   icheck=0;
-  
+
 
   for (logr=logrmin;logr<logrmax;logr+=logdr)
   {
@@ -931,13 +928,13 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     else
     {
       emit = emittance_bb (freqmin, freqmax, t);
-	  
+
     }
     (*ftot) += emit * (2. * r + dr) * dr;
   }
 
   (*ftot) *= q1;
-  
+
 
 
   /* If *ftot is 0 in this energy range then all the photons come elsewhere, e. g. the star or BL  */
@@ -956,7 +953,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   disk.v[0] = sqrt (G * geo.mstar / rmin);
   nrings = 1;
   f = 0;
-  
+
   i=0;
   for (logr=logrmin;logr<logrmax;logr+=logdr)
   {
@@ -988,7 +985,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
       nrings++;
       if (nrings >= NRINGS)
       {
-//        Error_silent ("disk_init: Got to ftot %e at r %e < rmax %e. OK if freqs are high\n", f, r, rmax);		Not *really* an error, the error below deals with a *real* problem.		
+//        Error_silent ("disk_init: Got to ftot %e at r %e < rmax %e. OK if freqs are high\n", f, r, rmax);		Not *really* an error, the error below deals with a *real* problem.
         break;
       }
     }
@@ -999,8 +996,8 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     exit (0);
   }
 
- 
-  disk.r[NRINGS - 1] = exp(logrmax); 
+
+  disk.r[NRINGS - 1] = exp(logrmax);
   disk.v[NRINGS - 1] = sqrt (G * geo.mstar / disk.r[NRINGS - 1]);
 
 
@@ -1008,7 +1005,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
 
   for (nrings = 0; nrings < NRINGS - 1; nrings++)
   {
-    r = 0.5 * (disk.r[nrings + 1] + disk.r[nrings]);	
+    r = 0.5 * (disk.r[nrings + 1] + disk.r[nrings]);
     disk.t[nrings] = teff (tref, r / rmin);
     disk.g[nrings] = geff (gref, r / rmin);
   }
@@ -1021,7 +1018,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     disk.heat[nrings] = 0;
     disk.ave_freq[nrings] = 0;
     disk.w[nrings] = 0;
-    disk.t_hit[nrings] = 0;	
+    disk.t_hit[nrings] = 0;
   }
 
   geo.lum_disk = ltot;
@@ -1187,7 +1184,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     p[i].freq /= (1. - dot (v, p[i].lmn) / C);
 
   }
-  
+
 
   return (0);
 }
@@ -1298,7 +1295,7 @@ bl_init (lum_bl, t_bl, freqmin, freqmax, ioniz_or_final, f)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief
  * Perform some simple checks on the photon distribution just produced.
  *

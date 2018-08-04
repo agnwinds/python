@@ -621,16 +621,17 @@ emittance_bb (freqmin, freqmax, t)
  * which will return tiny numbers for planck, and make qromb return
  * nonsense.
  *
- * The routine is called from py_rates
+ * The routine is called from function calc_pi_rate
  *
- * @bug This routine calls several variables that it does not use.  It is also unclear that
- * it is needed.
+ * EP: Previously the function had arguments fmin, fmax and temp. However, it was
+ * suggested that arguments which are not used should be removed in an attempt
+ * to clean up the code.
  *
  **********************************************************/
 
 double
-check_fmax (fmin, fmax, temp)
-     double fmin, fmax, temp;
+check_fmax(fmax, temp)
+    double fmax, temp;
 {
   double bblim;
 
