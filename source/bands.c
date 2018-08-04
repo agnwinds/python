@@ -78,12 +78,17 @@ xband;
 
 /**********************************************************/
 /** 
- * @brief      This is the routine that initializes the bands.    
+ * @brief      This is the routine that initializes the frequency bands    
+ * used to ensure that photons are created in sufficient numbers across
+ * a large range of frequency during ionization cycles.
  *
  * Python uses a form of stratified sampling in an attempt to assure
  * that there are photon bundles at (high, generally) frequencies
+ * in sufficient nummbers for accurate ionization equilibria to be
+ * calculated.
  * 
- * This is the routine that initializes the bands.    There are
+ * This is the routine that initializes the bands, and the fraction of photons
+ * to be generated in each band.    There are
  * a number of possiblilities for setting up the bands
  *
  * @param [in] int  imode   A switch used for determining how the bands are to be populated
@@ -91,7 +96,7 @@ xband;
  * @return     The routine itself simply returns 0 on success
  *
  * The outputs are passed to other routines through the pointer
- * 	to xbands.  
+ * to xbands.  
  *
  * @details
  *
@@ -103,20 +108,31 @@ xband;
  * tuned to be relevent to CVs and other
  * systems where a hot disk (T_eff of about
  * 100,000 K is assumed
- * * 3	Bands tuned for yso
- * * 4	Query the user to specify an arbitrary
+ * *3 Bands tuned for yso
+ * *4 Query the user to specify an arbitrary
  * set of bands
- * * 5  Hardwired very wide bands for testing
- * *6 	Bands set up by nsh to test cloudy
- * *7	Bands hardwired for AGN paper1 by nsh
- * *8   Define bands in logarithmic intervals
+ * *5 Hardwired very wide bands for testing
+ * *6 Bands set up by nsh to test cloudy
+ * *7 Bands hardwired for AGN paper1 by nsh
+ * *8  Define bands in logarithmic intervals
  *
  *
  * ### Notes ###
- * 10nov - ksl - XXX Some of the choices have checks to see whether the bands
- * 	that are being set up lie within f1 and f2.  Others do
- * 	not.  This seems like an error.
  *
+ * Various choices for banding have been developed over time, often in
+ * the process of working on different types of simulations.  In general,
+ * it is up to the user (by pure thought or by experimentation) to find
+ * a set of frequency ranges and photon fractions in each band so that a 
+ * calculation can be carried out efficiently.  Choosing the wrong banding
+ * will make the program slow to converge/noisy because one does not have
+ * enough photons in the necessary intervals, and in extreme situations 
+ * to get the ionization structure wrong.  Evidently, option 4 allows 
+ * the user the most flexibility.
+ *
+ * This routine also calls the routine freqs_init which initializes the
+ * boundaries for recording coarse versions of the spectra in each
+ * cell. This process is also sometimes referred to (confusingly) as
+ * banding.  At present this is more or less hardwired.
  **********************************************************/
 
 int
@@ -532,7 +548,8 @@ bands_init (imode, band)
          band->f1[nband] * H / (BOLTZMANN * tmax), band->f2[nband] * H / (BOLTZMANN * tmax), band->min_fraction[nband]);
   }
 
-  /* Finally called the routine freqs_init which initializes the the spectral bands that are used to establish the coarse
+  /* Finally call the routine freqs_init which initializes the spectral bands 
+   * that are used to establish the coarse
    * spectra in each cell for ionization calculations
    */
 

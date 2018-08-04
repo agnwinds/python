@@ -846,7 +846,6 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   double dr, r;
   double logdr,logrmin,logrmax,logr;
   double f, ltot;
-  double rmax_temp;
   double q1;
   int nrings,i,icheck;
   int spectype;

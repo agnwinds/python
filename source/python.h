@@ -443,7 +443,6 @@ struct geometry
 /* Note that the scatter_mode is actually a subsidiary variable of the line_mode.  Chooising a line_mode
  * results in the selection of a scatter_mode */
 #define SCATTER_MODE_ISOTROPIC    0
-#define SCATTER_MODE_ANISOTROPIC  1
 #define SCATTER_MODE_THERMAL      2
 
   int scatter_mode;             /*The way in which scattering for resonance lines is treated 
@@ -1054,7 +1053,10 @@ typedef struct photon
       } istat;                      /*status of photon. */
 
       int nscat;                    /*number of scatterings */
-      int nres;                     /*The line number in lin_ptr of last scatter or wind line creation. Continuum if > nlines. */
+      int nres;                     /*For line scattering, indicates the actual transition; 
+                                      for continuum scattering, meaning 
+                                      depends on matom vs non-matin. See headers of emission.c 
+                                      or matom.c for details. */
       int nnscat;                   /* Used for the thermal trapping model of
                                        anisotropic scattering to carry the number of
                                        scattering to "extract" when needed for wind
