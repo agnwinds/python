@@ -86,30 +86,28 @@ create_maps ()
 {
   int i, j;
   j = 0;
+
   /*The normal situation where there are fewer wind elements than plasma elements  */
   for (i = 0; i < NDIM2; i++)
+  {
+    wmain[i].nwind = i;
+    if (wmain[i].vol > 0)
     {
-      wmain[i].nwind = i;
-      if (wmain[i].vol > 0)
-	{
-	  wmain[i].nplasma = j;
-	  plasmamain[j].nplasma = j;
-	  plasmamain[j].nwind = i;
-	  j++;
-	}
-      else
-	{
-	  wmain[i].nplasma = NPLASMA;
-	}
+      wmain[i].nplasma = j;
+      plasmamain[j].nplasma = j;
+      plasmamain[j].nwind = i;
+      j++;
     }
+    else
+    {
+      wmain[i].nplasma = NPLASMA;
+    }
+  }
   if (j != NPLASMA)
-    {
-      Error
-	("create_maps: Problems with matching cells -- Expected %d Got %d\n",
-	 NPLASMA, j);
-      exit (0);
-    }
-
+  {
+    Error ("create_maps: Problems with matching cells -- Expected %d Got %d\n", NPLASMA, j);
+    exit (0);
+  }
 
   plasmamain[NPLASMA].nplasma = NPLASMA;
   plasmamain[NPLASMA].nwind = -1;
