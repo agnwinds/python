@@ -522,7 +522,7 @@ int line_transfer_help_message()
   some_help = "\
 \n\
 Available line transfer modes and descriptions are: \n\
-\n\ 
+\n\
   0 Pure Absorption\n\
   1 Pure Scattering\n\
   2 Single Scattering\n\
@@ -532,12 +532,12 @@ Available line transfer modes and descriptions are: \n\
   7 Indivisible energy packets / macro-atoms, anisotropic scattering\n\
   8 Indivisible energy packets, force all simple-atoms, anisotropic scattering\n\
   9 Indivisible energy packets, force all simple-atoms, anisotropic scattering\n\
-\n\ 
+\n\
   Standard mode is 5 for runs involving weight reduction and no macro-atoms\n\
   Standard macro-atom mode is 7\n\
 \n\
-See this web address for more information: https://github.com/agnwinds/python/wiki/Line-Transfer-and-Scattering\n\ 
-\n\ 
+See this web address for more information: https://github.com/agnwinds/python/wiki/Line-Transfer-and-Scattering\n\
+\n\
 \n\
 ";  // End of string to provide one with help
 

@@ -888,7 +888,7 @@ hydro_restart (ndom)
     }
 
   /* JM XXX PLACEHOLDER -- unsure how we loop over the plasma cells just in one domain 
-   * ksl This is an error clearly in the case of multiple domains XXX */
+   * ksl This is an error clearly in the case of multiple domains.  Note that this issue #392, which should also be closed when this is resolved.  XXX */
   for (n = 0; n < NPLASMA; n++)
     {
       nwind = plasmamain[n].nwind;

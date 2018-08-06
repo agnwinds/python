@@ -84,14 +84,8 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 {
   int nphot;
   struct photon pp, pextract;
-  int nnscat;
   int absorb_reflect;		/* this is a variable used to store geo.absorb_reflect during exxtract */
-  int nerr;
   double p_norm, tau_norm;
-
-
-
-
 
 
   Log ("\n");
