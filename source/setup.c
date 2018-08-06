@@ -503,11 +503,11 @@ init_photons ()
   PhotPtr p;
   double x;
 
-  /* Although photons_per_cycle is really an integer,
+  /* Although Photons_per_cycle is really an integer,
      read in as a double so it is easier for input */
 
   x = 100000;
-  rddoub ("photons_per_cycle", &x);
+  rddoub ("Photons_per_cycle", &x);
   NPHOT = x;			// NPHOT is photons/cycle
 
 #ifdef MPI_ON
@@ -518,7 +518,7 @@ init_photons ()
 
   rdint ("Ionization_cycles", &geo.wcycles);
 
-  rdint ("spectrum_cycles", &geo.pcycles);
+  rdint ("Spectrum_cycles", &geo.pcycles);
 
 
   if (geo.wcycles == 0 && geo.pcycles == 0)

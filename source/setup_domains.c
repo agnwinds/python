@@ -192,8 +192,8 @@ get_wind_params (ndom)
 
   /* XXX - This should be part of the individual get_wind_parameters, not here */
 
-  rddoub ("wind.radmax(cm)", &zdom[ndom].rmax);
-  rddoub ("wind.t.init", &geo.twind_init);
+  rddoub ("Wind.radmax(cm)", &zdom[ndom].rmax);
+  rddoub ("Wind.t.init", &geo.twind_init);
 
   /* ksl XXX - There is something of a philosophical problem that needs to be worked
    * out with geo.rmax and zdom[ndom].rmax for the general case of winds.  Suppose

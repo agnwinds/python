@@ -543,9 +543,9 @@ main (argc, argv)
  */
 
   /* All operating modes */
+  rdpar_comment("Parameters associated with photon number, cycles,ionization and radiative transfer options");
+
   init_photons ();
-
-
 
   /* Define how ionization is going to be calculated */
 
