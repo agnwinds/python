@@ -501,8 +501,8 @@ main (argc, argv)
 	      exit (0);
 	    }
 
-	  /* Describe the wind. This routine reads in geo.rmax and geo.twind
-	     and then gets params by calling e.g. get_sv_wind_params() */
+	  /* Describe the wind (or more correctly the various domains).
+       */
 
 
 	  rdpar_comment

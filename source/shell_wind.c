@@ -100,7 +100,7 @@ get_shell_wind_params (ndom)
   if (zdom[ndom].rmin < geo.rstar)
   {
     Error ("get_shell_wind_params: It is unreasonable to have the wind start inside the star!\n");
-    Log ("Setting geo.rmin to geo.rstar\n");
+    Log ("Setting zdom[ndom].rmin to geo.rstar\n");
     zdom[ndom].rmin = geo.rstar;
   }
   zdom[ndom].cl_rmin = shell_rmin = zdom[ndom].rmin;
@@ -127,9 +127,6 @@ get_shell_wind_params (ndom)
 
   /* Assign the generic parameters for the wind the generic parameters of the wind */
 
-  geo.rmin = zdom[ndom].rmin;
-  /* JM 1710 -- this is set by the quesiton wind.radmax */
-  //zdom[ndom].rmax = geo.rmax;
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 90. / RADIAN;
 

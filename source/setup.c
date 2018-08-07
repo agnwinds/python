@@ -100,8 +100,6 @@ init_geo ()
   geo.agn_ion_spectype = SPECTYPE_POW;
 
 
-  geo.rmax = 1e11;
-  geo.rmax_sq = geo.rmax * geo.rmax;
   geo.rstar = 7e8;
   geo.rstar_sq = geo.rstar * geo.rstar;
   geo.mstar = 0.8 * MSOL;
@@ -686,7 +684,7 @@ init_ionization ()
  *
  * Originally, DFUDGE was the only number used to push through
  * boundariies, but today DFUDGE is used sparingly, if at all,
- * as push tryough distances within wind cells are defined
+ * as push through distances within wind cells are defined
  * differently for each cell.
  *
  * There are two competing factors in defining DFUDGE.  It
@@ -695,8 +693,6 @@ init_ionization ()
  * enough though that round-off errors do not prevent one
  * from actually getting into a cell.
  *
- * @bug This routine does not really belong in this file. It
- * should be moved.
  **********************************************************/
 
 double
@@ -704,12 +700,23 @@ setup_dfudge ()
 {
   double dfudge;
   double delta;
+  double rmin;
+  int ndom;
 
-  delta = geo.rmax - geo.rmin;
+  rmin=VERY_BIG;
+  for (ndom=0;ndom<geo.ndomain;ndom++){
+      if (rmin>zdom[ndom].rmin){
+          rmin=zdom[ndom].rmin;
+      }
+  }
+
+
+
+  delta = geo.rmax - rmin;
 
   if (delta < 1.e8)
     {
-      dfudge = (geo.rmax - geo.rmin) / 1000.0;
+      dfudge = (geo.rmax - rmin) / 1000.0;
     }
   else if (delta < 1e15)
     {

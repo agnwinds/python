@@ -190,23 +190,20 @@ get_wind_params (ndom)
     }
 
 
-  /* XXX - This should be part of the individual get_wind_parameters, not here */
+
+  /* XXX - This should be part of the individual get_wind_parameters, not here 
+   * Note that one cannot simply move the next statemnts to below the specify the various wind
+   * of domains, for reasons that are unclear.  If you do this sn_1d will fail.*/
 
   rddoub ("Wind.radmax(cm)", &zdom[ndom].rmax);
+
+  if (zdom[ndom].rmax <= zdom[ndom].rmin) {
+      Error("get_wind_parameters: rmax (%10.4e) less than or equal to rmin %10.4e in domain %d\n",zdom[ndom].rmax,zdom[ndom].rmin,ndom);
+      exit(0);
+  }
+
   rddoub ("Wind.t.init", &geo.twind_init);
 
-  /* ksl XXX - There is something of a philosophical problem that needs to be worked
-   * out with geo.rmax and zdom[ndom].rmax for the general case of winds.  Suppose
-   * we wish to create, say a spherical outflow with two domains one going from 
-   * r1 to r2 and the other going from r2 to r3.  Then we want to keep geo.rmax which is 
-   * intended to be the distance beyond which photons are moving through free space separate
-   * from the values in the wind zones.  Right now we are setting the outer limit of each
-   * wind to be geo.rmax regardless, in routines like get_stellar_wind_params and get_sv_wind
-   * This is not what we want.  What should happen is that for each componetn where it is
-   * relevant we should ask for the outer edge of the domain and then at the end we should determine
-   * what geo.rmax should be set to.  There are some cases, e.g. get_hydro_wind where one should not
-   * need to ask the question about rmax, but others where it is necessary
-   */
 
   /* Next lines are to assure that we have the largest possible value of the 
    * sphere surrounding the system
@@ -264,7 +261,7 @@ get_wind_params (ndom)
     }
   else
     {
-      Error ("python: Unknown wind type %d\n", zdom[ndom].wind_type);
+      Error ("get_wind_parameters: Unknown wind type %d\n", zdom[ndom].wind_type);
       exit (0);
     }
 
