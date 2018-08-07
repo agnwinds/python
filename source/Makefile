@@ -138,18 +138,13 @@ endif
 LDFLAGS= -L$(LIB) -lm -lgsl -lgslcblas 
 
 #Note that version should be a single string without spaces. 
-VERSION = 82g
-
-
-CHOICE=1             // Compress plasma as much as possible
-# CHOICE=0           //  Keep relation between plasma and wind identical
+VERSION = 82h
 
 startup:
 	@echo $(COMPILER_PRINT_STRING)			# prints out compiler information
 	@echo 'YOU ARE COMPILING FOR' $(PRINT_VAR)	# tells user if compiling for optimized or debug
 	@echo 'MPI_FLAG=' $(MPI_FLAG)
 	echo "#define VERSION " \"$(VERSION)\" > version.h
-	echo "#define CHOICE"   $(CHOICE) >> version.h
 	echo "#define GIT_COMMIT_HASH" \"$(GIT_COMMIT_HASH)\" >> version.h
 	echo "#define GIT_DIFF_STATUS" $(GIT_DIFF_STATUS)\ >> version.h
 

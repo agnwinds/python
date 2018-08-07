@@ -125,10 +125,12 @@ get_matom_f (mode)
       for (m = 0; m < nlevels_macro; m++)
       {
         norm += macromain[n].matom_abs[m];
+        macromain[n].matom_emiss[m] = 0.0;
         if (sane_check (macromain[n].matom_abs[m]))
           Error ("matom_abs is %8.4e in matom %i level %i\n", macromain[n].matom_abs[m], n, m);
       }
       norm += plasmamain[n].kpkt_abs;
+      plasmamain[n].kpkt_emiss = 0.0;
       if (sane_check (plasmamain[n].kpkt_abs))
         Error ("kpkt_abs is %8.4e in matom %i\n", plasmamain[n].kpkt_abs, n);
     }
@@ -563,14 +565,6 @@ photo_gen_kpkt (p, weight, photstart, nphot)
          was a resonant scatter but we want isotropic scattering anyway.  */
       randvec (p[n].lmn, 1.0);  /* The photon is emitted isotropically */
     }
-    else if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
-    {                           // It was a line photon and we want anisotropic scattering
-
-      // -1. forces a full reinitialization of the pdf for anisotropic scattering
-
-      randwind (&p[n], p[n].lmn, wmain[icell].lmn);
-
-    }
     else if (geo.scatter_mode == SCATTER_MODE_THERMAL)
     {                           //It was a line photon and we want the thermal trapping anisotropic model
 
@@ -758,14 +752,6 @@ photo_gen_matom (p, weight, photstart, nphot)
       /*  It was either an electron scatter so the  distribution is isotropic, or it
          was a resonant scatter but we want isotropic scattering anyway.  */
       randvec (p[n].lmn, 1.0);  /* The photon is emitted isotropically */
-    }
-    else if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
-    {                           // It was a line photon and we want anisotropic scattering
-
-      // -1. forces a full reinitialization of the pdf for anisotropic scattering
-
-      randwind (&p[n], p[n].lmn, wmain[icell].lmn);
-
     }
     else if (geo.scatter_mode == SCATTER_MODE_THERMAL)
     {                           //It was a line photon and we want the thermal trapping anisotropic model

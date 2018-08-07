@@ -138,7 +138,8 @@ total_emission (one, f1, f2)
 
   if (f2 < f1)
     {
-      xplasma->lum_tot = xplasma->lum_lines = xplasma->lum_ff = xplasma->lum_rr = 0;
+      xplasma->lum_tot = xplasma->lum_lines = xplasma->lum_ff =
+	xplasma->lum_rr = 0;
     }
   else
     {
@@ -146,17 +147,17 @@ total_emission (one, f1, f2)
 	{
 	  xplasma->lum_rr = total_fb_matoms (xplasma, t_e, f1, f2) + total_fb (one, t_e, f1, f2, FB_FULL, OUTER_SHELL);	//outer shellrecombinations
 
-      /*
+	  /*
 	   *The first term here is the fb cooling due to macro ions and the second gives
 	   *the fb cooling due to simple ions.
 	   *total_fb has been modified to exclude recombinations treated using macro atoms.
-      */
+	   */
 	  xplasma->lum_tot = xplasma->cool_rr;
-      /* Note: This the fb_matom call makes no use of f1 or f2. They are passed for
+	  /* Note: This the fb_matom call makes no use of f1 or f2. They are passed for
 	   * now in case they should be used in the future. But they could
 	   * also be removed.
 	   * (SS)
-      */
+	   */
 	  xplasma->lum_lines = total_bb_cooling (xplasma, t_e);
 	  xplasma->lum_tot += xplasma->lum_lines;
 	  /* total_bb_cooling gives the total cooling rate due to bb transisions whether they
@@ -234,7 +235,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
   int photstop;
   double xlum, xlumsum, lum;
   double v[3];
-  int icell;
+  int icell, icell_old;
   int nplasma;
   int nnscat;
   int ndom;
@@ -245,6 +246,9 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
       for (nn = 0; nn < 3; nn++)
 	ptype[n][nn] = 0;
     }
+
+  /* Limit the lines to consider */
+  limit_lines (freqmin, freqmax);
 
 
   photstop = photstart + nphot;
@@ -258,7 +262,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
          geo.f_wind refers to the specific flux between freqmin and freqmax.  Note that
          we make sure that xlum is not == 0 or to geo.f_wind. */
 
-      xlum = random_number(0.0,1.0) * geo.f_wind;
+      xlum = random_number (0.0, 1.0) * geo.f_wind;
 
 
       xlumsum = 0;
@@ -289,7 +293,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
        * each photon type to be made in each cell */
 
       lum = plasmamain[nplasma].lum_tot;
-      xlum = lum * random_number(0.0,1.0);
+      xlum = lum * random_number (0.0, 1.0);
       xlumsum = 0;
 
       p[n].nres = -1;
@@ -313,6 +317,7 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 
   photstop = photstart;
 
+  icell_old = (-1);
   for (n = 0; n < NPLASMA; n++)
     {
 
@@ -342,7 +347,15 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 	    }
 	  else
 	    {
-	      p[np].freq = one_line (&wmain[icell], &p[n].nres);	/*And fill all the rest of the luminosity up with line photons */
+
+	      if (icell != icell_old)
+		{
+		  lum_lines (&wmain[icell], nline_min, nline_max);	/* fill the lin_ptr->pow array. This must be done because it is not stored
+									   for all cells.  The if statement is intended to prevent recalculating the power if more than
+                                       one line photon is generated from this cell in this cycle. */
+		  icell_old = icell;
+		}
+	      p[np].freq = one_line (&wmain[icell], &p[np].nres);	/*And fill all the rest of the luminosity up with line photons */
 	      if (p[np].freq == 0)
 		{
 		  Error
@@ -374,21 +387,15 @@ photo_gen_wind (p, weight, freqmin, freqmax, photstart, nphot)
 	     line processes are treated isotropically only if geo.scatter_mode == SCATTER_MODE_ISOTROPIC;
 	     note that, confusingly, geo.scatter_mode == SCATTER_MODE_ANISOTROPIC is *not*
 	     the only anisotropic mode -- SCATTER_MODE_THERMAL is *also* anisotropic.
-	     
-	  */
+
+	   */
 	  nnscat = 1;
+
 	  if (p[np].nres < 0 || geo.scatter_mode == SCATTER_MODE_ISOTROPIC)
 	    {
 /*  It was either an electron scatter so the  distribution is isotropic, or it
 was a resonant scatter but we want isotropic scattering anyway.  */
 	      randvec (p[np].lmn, 1.0);	/* The photon is emitted isotropically */
-	    }
-	  else if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
-	    {			// It was a line photon and we want anisotropic scattering
-
-/* -1. forces a full reinitialization of the pdf for anisotropic scattering  */
-
-	      randwind (&p[np], p[np].lmn, wmain[icell].lmn);
 	    }
 	  else if (geo.scatter_mode == SCATTER_MODE_THERMAL)
 	    {			// It was a line photon and we want anisotropic scattering
@@ -467,7 +474,7 @@ one_line (one, nres)
       return (0);
     }
 
-  xlum = xplasma->lum_lines * random_number(0.0,1.0);
+  xlum = xplasma->lum_lines * random_number (0.0, 1.0);
 
   xlumsum = 0;
   m = nline_min;

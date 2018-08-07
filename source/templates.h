@@ -6,7 +6,7 @@ double integ_planck_d(double alphamin, double alphamax);
 int init_integ_planck_d(void);
 double planck_d(double alpha);
 double emittance_bb(double freqmin, double freqmax, double t);
-double check_fmax(double fmin, double fmax, double temp);
+double check_fmax(double fmax, double temp);
 /* get_atomicdata.c */
 int get_atomic_data(char masterfile[]);
 int index_lines(void);
@@ -27,7 +27,7 @@ double ds_in_cell(int ndom, PhotPtr p);
 int walls(PhotPtr p, PhotPtr pold, double *normal);
 /* photon_gen.c */
 int define_phot(PhotPtr p, double f1, double f2, long nphot_tot, int ioniz_or_final, int iwind, int freq_sampling);
-double populate_bands(double f1, double f2, int ioniz_or_final, int iwind, struct xbands *band);
+double populate_bands(int ioniz_or_final, int iwind, struct xbands *band);
 int xdefine_phot(double f1, double f2, int ioniz_or_final, int iwind);
 int xmake_phot(PhotPtr p, double f1, double f2, int ioniz_or_final, int iwind, double weight, int iphot_start, int nphotons);
 int star_init(double freqmin, double freqmax, int ioniz_or_final, double *f);
@@ -389,7 +389,7 @@ int cylvar_coord_fraction(int ndom, int ichoice, double x[], int ii[], double fr
 int bilin(double x[], double x00[], double x01[], double x10[], double x11[], double *f, double *g);
 int xquadratic(double a, double b, double c, double r[]);
 /* gridwind.c */
-int create_maps(int ichoice);
+int create_maps(void);
 int calloc_wind(int nelem);
 int calloc_plasma(int nelem);
 int check_plasma(PlasmaPtr xplasma, char message[]);
@@ -472,6 +472,7 @@ int get_domain_params(int ndom);
 int get_wind_params(int ndom);
 int get_line_transfer_mode(void);
 int setup_windcone(void);
+int line_transfer_help_message(void);
 /* setup_disk.c */
 double get_disk_params(void);
 /* photo_gen_matom.c */

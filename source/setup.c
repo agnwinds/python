@@ -503,11 +503,11 @@ init_photons ()
   PhotPtr p;
   double x;
 
-  /* Although photons_per_cycle is really an integer,
+  /* Although Photons_per_cycle is really an integer,
      read in as a double so it is easier for input */
 
   x = 100000;
-  rddoub ("photons_per_cycle", &x);
+  rddoub ("Photons_per_cycle", &x);
   NPHOT = x;			// NPHOT is photons/cycle
 
 #ifdef MPI_ON
@@ -518,7 +518,7 @@ init_photons ()
 
   rdint ("Ionization_cycles", &geo.wcycles);
 
-  rdint ("spectrum_cycles", &geo.pcycles);
+  rdint ("Spectrum_cycles", &geo.pcycles);
 
 
   if (geo.wcycles == 0 && geo.pcycles == 0)
@@ -594,7 +594,7 @@ init_ionization ()
     {
       rdstr ("wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
     }
-  if (geo.ioniz_mode == 5 || geo.ioniz_mode > 9)
+  if (geo.ioniz_mode < 0 || geo.ioniz_mode == 5 || geo.ioniz_mode > 9)
     {
       Log ("The allowed ionization modes are 0, 1, 2, 3, 4, 6, 7, 8 and 9\n");
       Error ("Unknown ionization mode %d\n", geo.ioniz_mode);

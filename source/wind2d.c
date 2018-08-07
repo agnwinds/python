@@ -272,19 +272,13 @@ define_wind ()
     }
 
 
-  /* Now create the second structure, the one that is sized only to contain cells in the wind */
 
-  /* CHOICE is defined in the Makefile. XXX Really unclear that this option is needed.  Consider removing  ksl */
-  if (CHOICE == 0)
-    {
-      NPLASMA = NDIM2;
-    }
-
-  /* Allocate space for the plasma arrays */
+  /* Allocate space for the plasma array.  To save space, this structure is sized 
+   * to contain only those cells which are in the wind. */
 
   calloc_plasma (NPLASMA);
-  calloc_dyn_plasma (NPLASMA);	/*78a NSH 1407 - allocate space for dynamically sized arrays */
-  create_maps (CHOICE);		/* Populate the maps from plasmamain & wmain */
+  calloc_dyn_plasma (NPLASMA);	
+  create_maps ();		/* Populate the maps between plasmamain & wmain */
 
   /* JM 1502 -- we want the macro structure to be allocated in geo.rt_mode = RT_MODE_MACRO. see #138  */
 

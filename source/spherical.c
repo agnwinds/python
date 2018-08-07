@@ -162,8 +162,8 @@ spherical_make_grid (w, ndom)
       if (zdom[ndom].log_linear == 1)
       {                         // linear intervals
 
-        dr = (zdom[ndom].rmax - geo.rstar) / (ndim - 3);
-        w[n].r = geo.rstar + j * dr;
+        dr = (zdom[ndom].rmax - zdom[ndom].rmin) / (ndim - 3);
+        w[n].r = zdom[ndom].rmin + j * dr;
         w[n].rcen = w[n].r + 0.5 * dr;
       }
       else
@@ -592,10 +592,12 @@ shell_make_grid (w, ndom)
   ndim = zdom[ndom].ndim;
 
 
-  w[0].r = zdom[ndom].rmin - (zdom[ndom].rmax - zdom[ndom].rmin);
+//OLD  w[0].r = zdom[ndom].rmin - (zdom[ndom].rmax - zdom[ndom].rmin);
+  w[0].r = 0.95*zdom[ndom].rmin ;
   w[1].r = zdom[ndom].rmin;
   w[2].r = zdom[ndom].rmax;
-  w[3].r = zdom[ndom].rmax + (zdom[ndom].rmax - zdom[ndom].rmin);
+  w[3].r = 1.05*zdom[ndom].rmax; 
+//OLD  w[3].r = zdom[ndom].rmax + (zdom[ndom].rmax - zdom[ndom].rmin);
 
 
 

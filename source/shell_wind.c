@@ -145,7 +145,8 @@ get_shell_wind_params (ndom)
     zdom[ndom].zlog_scale = 0.3 * geo.rstar;
   }
 
-  /* Since this is a diagnostic routine, we will write out some information to check it is doing what we think) */
+  /* Since this is a diagnostic routine, we write out some additional information to the log file.  Note that
+   * much of this could be done as post-procssing step, and so it is possible that these messages are superflous. */
 
   Log ("shell rmin=%f shell rmax=%f\n", shell_rmin, shell_rmax);
   dr = (shell_rmax - shell_rmin) / 100.0000;
@@ -160,7 +161,7 @@ get_shell_wind_params (ndom)
     postemp[1] = 0.0;
     speedtemp = stellar_velocity (ndom, postemp, vtemp);
     rhotemp[i] = stellar_rho (ndom, postemp) * rho2nh;
-    Log ("ring=%i,x=%e,r=%10.30e,speed=%10.20e,density=%10.20e\n", i, r[i] / pow (2.0, 0.5), r[i], speedtemp, rhotemp[i]);
+    Log_silent ("SHELL  ring=%i,x=%11.4e,r=%11.4e,speed=%11.4e,density=%11.4e\n", i, r[i] / pow (2.0, 0.5), r[i], speedtemp, rhotemp[i]);
   }
 
   cdensity = 0.0;
@@ -168,7 +169,7 @@ get_shell_wind_params (ndom)
   {
     cdensity += ((rhotemp[i] + rhotemp[i + 1]) / 2.) * dr;
   }
-  Log ("Column density of hydrogen=%e\n", cdensity);
+  Log ("Column density of hydrogen=%11.4e\n", cdensity);
 
 
   return (0);
