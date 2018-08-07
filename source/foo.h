@@ -292,10 +292,6 @@ int dvds_ave(void);
 /* reposition.c */
 int reposition(PhotPtr p);
 /* anisowind.c */
-int randwind(PhotPtr p, double lmn[3], double north[3]);
-double vrandwind(double x);
-double reweightwind(PhotPtr p);
-int make_cdf_randwind(double tau);
 int randwind_thermal_trapping(PhotPtr p, int *nnscat);
 /* util.c */
 int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
@@ -375,7 +371,6 @@ int spherical_volumes(int ndom, WindPtr w);
 int spherical_where_in_grid(int ndom, double x[]);
 int spherical_get_random_location(int n, double x[]);
 int spherical_extend_density(int ndom, WindPtr w);
-int shell_make_grid(WindPtr w, int ndom);
 /* cylind_var.c */
 double cylvar_ds_in_cell(int ndom, PhotPtr p);
 int cylvar_make_grid(WindPtr w, int ndom);
@@ -411,6 +406,7 @@ double emittance_bpow(double freqmin, double freqmax, double lum, double alpha);
 int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
 /* shell_wind.c */
 int get_shell_wind_params(int ndom);
+int shell_make_grid(WindPtr w, int ndom);
 /* compton.c */
 double kappa_comp(PlasmaPtr xplasma, double freq);
 double kappa_ind_comp(PlasmaPtr xplasma, double freq);
@@ -472,6 +468,7 @@ int get_domain_params(int ndom);
 int get_wind_params(int ndom);
 int get_line_transfer_mode(void);
 int setup_windcone(void);
+int line_transfer_help_message(void);
 /* setup_disk.c */
 double get_disk_params(void);
 /* photo_gen_matom.c */

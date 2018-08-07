@@ -171,3 +171,77 @@ get_shell_wind_params (ndom)
 
   return (0);
 }
+
+
+
+
+/**********************************************************/
+/**
+ * @brief      defines the cells in a thin shell, a special case of a spherical wind.
+ *
+ * @param [in, out] WindPtr  w   The structure which defines the wind in Python
+ * @param [in, out] int  ndom   The domain number
+ * @return     Always retunrs 0
+ *
+ * @details
+ *
+ * The shell wind has 3 elements, one inside the shell, one outside, and
+ * one outside and one shell exactly fitting the shell.
+ *
+ *
+ * ### Notes ###
+ *
+ * The shell wind is intended for diagnostic purposes
+ *
+ *
+ **********************************************************/
+
+int
+shell_make_grid (w, ndom)
+     WindPtr w;
+     int ndom;
+{
+  int n;
+  int ndim;
+  int nstart;
+
+  ndim = zdom[ndom].ndim;
+  nstart=zdom[ndom].nstart;
+
+
+//OLD  w[0].r = zdom[ndom].rmin - (zdom[ndom].rmax - zdom[ndom].rmin);
+  w[nstart+0].r = 0.95*zdom[ndom].rmin ;
+  w[nstart+1].r = zdom[ndom].rmin;
+  w[nstart+2].r = zdom[ndom].rmax;
+  w[nstart+3].r = 1.05*zdom[ndom].rmax; 
+//OLD  w[3].r = zdom[ndom].rmax + (zdom[ndom].rmax - zdom[ndom].rmin);
+
+
+
+  w[nstart+0].rcen = (w[nstart+0].r + w[nstart+1].r) / 2;
+  w[nstart+1].rcen = (w[nstart+1].r + w[nstart+2].r) / 2;
+  w[nstart+2].rcen = (w[nstart+2].r + w[nstart+3].r) / 2;
+  w[nstart+3].rcen = w[nstart+2].rcen + (zdom[ndom].rmax - zdom[ndom].rmin);
+
+  /* Now calculate the positions of these points in the xz plane.
+     There is a choice about how one does this.   I have elected
+     to assume that we want to calculate this at a 45 degree angle.
+     in the hopes this will be a reasonable portion of the wind in
+     a biconical flow.
+   */
+  for (n = 0; n < ndim; n++)
+  {
+    Log ("Shell_wind: cell %i:  inner edge = %2.20e, centre = %2.20e\n", n, w[n].r, w[n].rcen);
+    w[nstart+n].x[1] = w[nstart+n].xcen[1] = 0.0;
+
+    //NSH Slight change here, using 1/root2 give more accurate results than sin45.
+
+
+    w[nstart+n].x[0] = w[nstart+n].x[2] = w[nstart+n].r / pow (2.0, 0.5);
+    w[nstart+n].xcen[0] = w[nstart+n].xcen[2] = w[nstart+n].rcen / pow (2.0, 0.5);
+  }
+
+
+  return (0);
+
+}
