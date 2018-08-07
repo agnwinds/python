@@ -231,7 +231,7 @@ shell_make_grid (w, ndom)
    */
   for (n = 0; n < ndim; n++)
   {
-    Log ("Shell_wind: cell %i:  inner edge = %2.20e, centre = %2.20e\n", n, w[n].r, w[n].rcen);
+    Log ("Shell_wind: cell %i:  inner edge = %2.20e, centre = %2.20e\n", n, w[nstart+n].r, w[nstart+n].rcen);
     w[nstart+n].x[1] = w[nstart+n].xcen[1] = 0.0;
 
     //NSH Slight change here, using 1/root2 give more accurate results than sin45.

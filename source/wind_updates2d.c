@@ -80,7 +80,7 @@ WindPtr (w);
   double t_r_old, t_e_old, dt_r, dt_e;
   double t_r_ave_old, t_r_ave, t_e_ave_old, t_e_ave;
   int iave, nmax_r, nmax_e;
-  int nplasma, nstart;
+  int nplasma, nshell;
   int nwind;
   int first, last, m;
   double tot, agn_ip;
@@ -854,21 +854,27 @@ WindPtr (w);
 
 /* This next block is to allow the output of data relating to the abundances of ions when python is being tested
  * with thin shell mode.We will only want this to run if the wind mode is 9, for test or thin shell mode.
+ *
+ * Note that this section is very dependent on the peculiar structure of the single shell model, which has only
+ * one element (namely element 2) in the wind.  nshell below correspond to that particular plasma shell. Recognizing
+ * this was a key element to solving bug #412.
  */
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
 
     if (zdom[ndom].wind_type == SHELL)
     {
-      nstart = zdom[ndom].nstart;
-      n = plasmamain[nstart].nwind;
+
+        /* nshell is the plasma cell that correspond to the second wind cell for the shell_wind model */
+      nshell = wmain[zdom[ndom].nstart+1].nplasma;
+      n = plasmamain[nshell].nwind;
       for (i = 0; i < geo.nxfreq; i++)
       {                         /*loop over number of bands */
         Log
           ("Band %i f1 %e f2 %e model %i pl_alpha %f pl_log_w %e exp_t %e exp_w %e\n",
            i, geo.xfreq[i], geo.xfreq[i + 1],
-           plasmamain[nstart].spec_mod_type[i],
-           plasmamain[nstart].pl_alpha[i], plasmamain[nstart].pl_log_w[i], plasmamain[nstart].exp_temp[i], plasmamain[nstart].exp_w[i]);
+           plasmamain[nshell].spec_mod_type[i],
+           plasmamain[nshell].pl_alpha[i], plasmamain[nshell].pl_log_w[i], plasmamain[nshell].exp_temp[i], plasmamain[nshell].exp_w[i]);
       }
       /* Get some line diagnostics */
 
@@ -896,14 +902,14 @@ WindPtr (w);
       }
       agn_ip = geo.const_agn * (((pow (50000 / HEV, geo.alpha_agn + 1.0)) - pow (100 / HEV, geo.alpha_agn + 1.0)) / (geo.alpha_agn + 1.0));
       agn_ip /= (w[n].r * w[n].r);
-      agn_ip /= plasmamain[nstart].rho * rho2nh;
+      agn_ip /= plasmamain[nshell].rho * rho2nh;
       /* Report luminosities, IP and other diagnositic quantities */
       Log
         ("OUTPUT Lum_agn= %e T_e= %e N_h= %e N_e= %e alpha= %f IP(sim_2010)= %e Measured_IP(cloudy)= %e Measured_Xi= %e distance= %e volume= %e mean_ds=%e\n",
-         geo.lum_agn, plasmamain[nstart].t_e,
-         plasmamain[nstart].rho * rho2nh, plasmamain[nstart].ne,
-         geo.alpha_agn, agn_ip, plasmamain[nstart].ip,
-         plasmamain[nstart].xi, w[n].r, w[n].vol, plasmamain[nstart].mean_ds / plasmamain[nstart].n_ds);
+         geo.lum_agn, plasmamain[nshell].t_e,
+         plasmamain[nshell].rho * rho2nh, plasmamain[nshell].ne,
+         geo.alpha_agn, agn_ip, plasmamain[nshell].ip,
+         plasmamain[nshell].xi, w[n].r, w[n].vol, plasmamain[nshell].mean_ds / plasmamain[nshell].n_ds);
 
       /* 1108 NSH Added commands to report compton heating */
       Log
@@ -931,48 +937,48 @@ WindPtr (w);
       {
         if (ion[nn].z == 6)
         {
-          c_dr  = c_dr + plasmamain[nstart].cool_dr_ion[nn];
-          c_rec = c_rec + plasmamain[nstart].cool_rr_ion[nn];
-          c_lum = c_lum + plasmamain[nstart].lum_rr_ion[nn];
+          c_dr  = c_dr + plasmamain[nshell].cool_dr_ion[nn];
+          c_rec = c_rec + plasmamain[nshell].cool_rr_ion[nn];
+          c_lum = c_lum + plasmamain[nshell].lum_rr_ion[nn];
 
         }
         if (ion[nn].z == 7)
         {
-          n_dr  = n_dr + plasmamain[nstart].cool_dr_ion[nn];
-          n_rec = n_rec + plasmamain[nstart].cool_rr_ion[nn];
-          n_lum = n_lum + plasmamain[nstart].lum_rr_ion[nn];
+          n_dr  = n_dr + plasmamain[nshell].cool_dr_ion[nn];
+          n_rec = n_rec + plasmamain[nshell].cool_rr_ion[nn];
+          n_lum = n_lum + plasmamain[nshell].lum_rr_ion[nn];
         }
         if (ion[nn].z == 8)
         {
-          o_dr  = o_dr + plasmamain[nstart].cool_dr_ion[nn];
-          o_rec = o_rec + plasmamain[nstart].cool_rr_ion[nn];
-          o_lum = o_lum + plasmamain[nstart].lum_rr_ion[nn];
+          o_dr  = o_dr + plasmamain[nshell].cool_dr_ion[nn];
+          o_rec = o_rec + plasmamain[nshell].cool_rr_ion[nn];
+          o_lum = o_lum + plasmamain[nshell].lum_rr_ion[nn];
         }
         if (ion[nn].z == 26)
         {
-          fe_dr  = fe_dr + plasmamain[nstart].cool_dr_ion[nn];
-          fe_rec = fe_rec + plasmamain[nstart].cool_rr_ion[nn];
-		  fe_lum = fe_lum + plasmamain[nstart].lum_rr_ion[nn];
+          fe_dr  = fe_dr + plasmamain[nshell].cool_dr_ion[nn];
+          fe_rec = fe_rec + plasmamain[nshell].cool_rr_ion[nn];
+		  fe_lum = fe_lum + plasmamain[nshell].lum_rr_ion[nn];
         }
 		if (ion[nn].z > 2)
-			cool_dr_metals=cool_dr_metals+plasmamain[nstart].cool_dr_ion[nn];
+			cool_dr_metals=cool_dr_metals+plasmamain[nshell].cool_dr_ion[nn];
       }
 
 	  Log ("OUTPUT Wind_line_cooling(ergs-1cm-3)  H %8.2e He %8.2e C %8.2e N %8.2e O %8.2e Fe %8.2e Metals %8.2e\n", lum_h_line/w[n].vol,
 	  lum_he_line/w[n].vol,lum_c_line/w[n].vol,lum_n_line/w[n].vol,lum_o_line/w[n].vol,lum_fe_line/w[n].vol);
       Log ("OUTPUT Wind_recomb_cooling(ergs-1cm-3)  H %8.2e He %8.2e C %8.2e N %8.2e O %8.2e Fe %8.2e Metals %8.2e\n",
-           plasmamain[nstart].cool_rr_ion[0] / w[n].vol, (plasmamain[nstart].cool_rr_ion[2] + plasmamain[nstart].cool_rr_ion[3]) / w[n].vol,
-           c_rec / w[n].vol, n_rec / w[n].vol, o_rec / w[n].vol, fe_rec / w[n].vol, plasmamain[nstart].cool_rr_metals / w[n].vol);
+           plasmamain[nshell].cool_rr_ion[0] / w[n].vol, (plasmamain[nshell].cool_rr_ion[2] + plasmamain[nshell].cool_rr_ion[3]) / w[n].vol,
+           c_rec / w[n].vol, n_rec / w[n].vol, o_rec / w[n].vol, fe_rec / w[n].vol, plasmamain[nshell].cool_rr_metals / w[n].vol);
 	  Log ("OUTPUT Wind_recomb_lum(ergs-1cm-3)  H %8.2e He %8.2e C %8.2e N %8.2e O %8.2e Fe %8.2e Metals %8.2e\n",
-	            plasmamain[nstart].lum_rr_ion[0] / w[n].vol, (plasmamain[nstart].lum_rr_ion[2] + plasmamain[nstart].lum_rr_ion[3]) / w[n].vol,
-	            c_lum / w[n].vol, n_lum / w[n].vol, o_lum / w[n].vol, fe_lum / w[n].vol, plasmamain[nstart].lum_rr_metals / w[n].vol);
+	            plasmamain[nshell].lum_rr_ion[0] / w[n].vol, (plasmamain[nshell].lum_rr_ion[2] + plasmamain[nshell].lum_rr_ion[3]) / w[n].vol,
+	            c_lum / w[n].vol, n_lum / w[n].vol, o_lum / w[n].vol, fe_lum / w[n].vol, plasmamain[nshell].lum_rr_metals / w[n].vol);
 		Log ("OUTPUT Wind_dr_cooling(ergs-1cm-3)  H %8.2e He %8.2e C %8.2e N %8.2e O %8.2e Fe %8.2e Metals %8.2e\n",
-		  	            plasmamain[nstart].cool_dr_ion[0] / w[n].vol, (plasmamain[nstart].cool_dr_ion[2] + plasmamain[nstart].cool_dr_ion[3]) / w[n].vol,
+		  	            plasmamain[nshell].cool_dr_ion[0] / w[n].vol, (plasmamain[nshell].cool_dr_ion[2] + plasmamain[nshell].cool_dr_ion[3]) / w[n].vol,
 		  	            c_dr / w[n].vol, n_dr / w[n].vol, o_dr / w[n].vol, fe_dr / w[n].vol, cool_dr_metals / w[n].vol);
       /* 1110 NSH Added this line to report all cooling mechanisms, including those that do not generate photons. */
       Log
         ("OUTPUT Balance      Cooling=%8.2e Heating=%8.2e Lum=%8.2e T_e=%e after update\n",
-         cool_sum, xsum, lum_sum, plasmamain[nstart].t_e);
+         cool_sum, xsum, lum_sum, plasmamain[nshell].t_e);
 
       for (n = 0; n < nelements; n++)
       {
@@ -981,10 +987,10 @@ WindPtr (w);
         Log ("OUTPUT %-5s ", ele[n].name);
         tot = 0;
         for (m = first; m < last; m++)
-          tot += plasmamain[nstart].density[m];
+          tot += plasmamain[nshell].density[m];
         for (m = first; m < last; m++)
         {
-          Log (" %8.2e", plasmamain[nstart].density[m] / tot);
+          Log (" %8.2e", plasmamain[nshell].density[m] / tot);
         }
         Log ("\n");
       }

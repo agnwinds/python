@@ -732,7 +732,7 @@ main (argc, argv)
   Log ("There are %d domains\n", geo.ndomain);
   for (n = 0; n < geo.ndomain; n++)
     {
-      Log ("%20s type: %d  ndim: %d mdim: %d ndim2: %d\n", zdom[n].name,
+      Log ("%20s type: %3d  ndim: %3d mdim: %3d ndim2: %4d\n", zdom[n].name,
 	   zdom[n].wind_type, zdom[n].ndim, zdom[n].mdim, zdom[n].ndim2);
     }
 
