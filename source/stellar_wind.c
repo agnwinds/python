@@ -62,7 +62,7 @@ get_stellar_wind_params (ndom)
   if (zdom[ndom].rmin < geo.rstar)
   {
     Error ("get_stellar_wind_params: It is unreasonable to have the wind start inside the star!\n");
-    Log ("Setting geo.rmin to geo.rstar\n");
+    Log ("Setting zdom[ndom].rmin to geo.rstar\n");
     zdom[ndom].rmin = geo.rstar;
   }
   zdom[ndom].cl_rmin = zdom[ndom].rmin;
@@ -72,7 +72,6 @@ get_stellar_wind_params (ndom)
   rddoub ("Stellar_wind.acceleration_exponent", &zdom[ndom].cl_beta);   /* Accleration scale exponent */
 
   /* Assign the generic parameters for the wind the generic parameters of the wind */
-  geo.rmin = zdom[ndom].rmin;    
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 90. / RADIAN;
 

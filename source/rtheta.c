@@ -152,7 +152,7 @@ rtheta_make_grid (w, ndom)
   ndim = zdom[ndom].ndim;
   mdim = zdom[ndom].mdim;
 
-  /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
+  /* In order to interpolate the velocity (and other) vectors out to zdom[ndom].rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
      to propagate. */
 

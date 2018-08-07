@@ -18,7 +18,7 @@
  * winds, and some of the variables use those that are associated with stellar
  * winds.  With domains, it would be clearer to give them there own variable
  * names.  Note that the maximum radius is not, as it should be defined here, but
- * rather relies on geo.rmax.  This should be fixed.
+ * rather relies on zdmo[ndom].rmax.  This should be fixed.
  * 
  * @bug XXXX ksl 1802 - The maximum radius of the wind here seems to be defined externally
  * and it is not clear that this is what one wants in a situation with multiple domains
@@ -84,7 +84,7 @@ get_homologous_params (ndom)
   if (one_dom->rmin < geo.rstar)
   {
     Error ("get_homologous_params: It is unreasonable to have the wind start inside the star!\n");
-    Log ("Setting geo.rmin to geo.rstar\n");
+    Log ("Setting one_dom->rmin to geo.rstar\n");
     one_dom->rmin = geo.rstar;
   }
   one_dom->cl_rmin = one_dom->rmin;

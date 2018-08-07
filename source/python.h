@@ -354,7 +354,7 @@ struct geometry
  * outside these regions are assumed to have hit something or be freely moving through space.
  */
 
-  double rmin, rmax, rmax_sq;   /* The maximum distance to which a photon should be followed */
+  double rmax, rmax_sq;   /* The maximum distance to which a photon should be followed */
 
 
 /* Basic paremeters of the system, as opposed to elements of the wind or winds */

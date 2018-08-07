@@ -95,12 +95,10 @@ get_hydro_wind_params (ndom)
   geo.hydro_domain_number = ndom;
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
-  geo.rmin = zdom[ndom].rmin = hydro_r_edge[0];
+  zdom[ndom].rmin = hydro_r_edge[0];
 
-  geo.rmax = zdom[ndom].rmax = hydro_r_edge[ihydro_r] + 2.0 * (hydro_r_cent[ihydro_r] - hydro_r_edge[ihydro_r]);	//Set the outer edge of the wind to the outer edge of the final defined cell
-  Log ("rmax=%e\n", geo.rmax);
-  geo.rmax_sq = geo.rmax * geo.rmax;
-  Log ("rmax_sq=%e\n", geo.rmax);
+  zdom[ndom].rmax = hydro_r_edge[ihydro_r] + 2.0 * (hydro_r_cent[ihydro_r] - hydro_r_edge[ihydro_r]);	//Set the outer edge of the wind to the outer edge of the final defined cell
+  Log ("rmax=%e\n", zdom[ndom].rmax);
   zdom[ndom].wind_rho_min = 0.0;	//Set wind_rmin 0.0, otherwise wind cones dont work properly 
   Log ("rho_min=%e\n", zdom[ndom].wind_rho_min);
   zdom[ndom].wind_rho_max = zdom[ndom].rmax;	//This is the outer edge of the
@@ -111,10 +109,10 @@ get_hydro_wind_params (ndom)
   zdom[ndom].wind_thetamin = hydro_theta_edge[0];
   Log ("theta_min=%e\n", zdom[ndom].wind_thetamin);
   Log ("theta_max=%e\n", zdom[ndom].wind_thetamax);
-  Log ("geo.rmin=%e\n", zdom[ndom].rmin);
-  Log ("geo.rmax=%e\n", zdom[ndom].rmax);
-  Log ("geo.wind_rhomin=%e\n", zdom[ndom].wind_rho_min);
-  Log ("geo.wind_rhomax=%e\n", zdom[ndom].wind_rho_max);
+  Log ("rmin=%e\n", zdom[ndom].rmin);
+  Log ("rmax=%e\n", zdom[ndom].rmax);
+  Log ("wind_rhomin=%e\n", zdom[ndom].wind_rho_min);
+  Log ("wind_rhomax=%e\n", zdom[ndom].wind_rho_max);
 
 
 
@@ -588,8 +586,8 @@ rtheta_make_hydro_grid (w, ndom)
 	    }
 	  else if (i - 1 > ihydro_r)	// We are at the radial limit of the data, this last cell will be a ghost cell of our own
 	    {
-	      w[n].r = geo.rmax;	// so we set the outer cell to be the edge of the wind
-	      w[n].rcen = geo.rmax;	// And it has zero volume
+	      w[n].r = zdom[ndom].rmax;	// so we set the outer cell to be the edge of the wind
+	      w[n].rcen = zdom[ndom].rmax;	// And it has zero volume
 	      w[n].inwind = W_NOT_INWIND;
 	    }
 	  else
