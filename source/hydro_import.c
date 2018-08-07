@@ -843,7 +843,8 @@ hydro_interp_value (array, im, ii, jm, jj, f1, f2)
  * hydro_restart is a subroutine which permits a previous wind save 
  * file to be used in a hydro simulation. The density and temperature
  * for each cell are those from the hydro simulation. The ion fractions
- * are taken from the windsave file
+ * are taken from the windsave file. The routine therefore changes *most*
+ * things in the wind - only the ion fractions remain
  *          
  *
  * ###Notes###
@@ -862,9 +863,7 @@ hydro_restart (ndom)
   double x[3];
   double old_density;
   int nstart, nstop, ndim2;
-  WindPtr w;
 
-  w = wmain;
   zdom[ndom].wind_type = 3;	//Temporarily set the wind type to hydro, so we can use the normal routines
 
   /* XXX ksl Some of what is here is quite odd. If this is really a restart one should not have
@@ -883,16 +882,18 @@ hydro_restart (ndom)
        * made in the program to allow more that one coordinate system in python 
        */
 
-      model_velocity (ndom, w[n].x, w[n].v);
-      model_vgrad (ndom, w[n].x, w[n].v_grad);
+      model_velocity (ndom, wmain[n].x, wmain[n].v);
+      model_vgrad (ndom, wmain[n].x, wmain[n].v_grad);
     }
 
-  /* JM XXX PLACEHOLDER -- unsure how we loop over the plasma cells just in one domain 
-   * ksl This is an error clearly in the case of multiple domains XXX */
-  for (n = 0; n < NPLASMA; n++)
+
+	for (nwind = zdom[ndom].nstart; nwind < zdom[ndom].nstop; nwind++)
     {
-      nwind = plasmamain[n].nwind;
-      stuff_v (w[nwind].xcen, x);
+	  if (wmain[nwind].vol > 0.0)
+	  {
+	  n=wmain[nwind].nplasma;
+//      nwind = plasmamain[n].nwind;
+      stuff_v (wmain[nwind].xcen, x);
       old_density = plasmamain[n].rho;
       plasmamain[n].rho = model_rho (ndom, x) / zdom[ndom].fill;
       plasmamain[n].t_r = plasmamain[n].t_e = hydro_temp (x);
@@ -904,23 +905,17 @@ hydro_restart (ndom)
 	}
 
       plasmamain[n].ne = get_ne (plasmamain[n].density);	//get the new electron density
-      partition_functions (&plasmamain[n], NEBULARMODE_LTE_GROUND);	//ensure the partition functions and level densities are correct XXX ksl why this mode
+      partition_functions (&plasmamain[n], NEBULARMODE_LTE_GROUND);	//set the level populations to ground state - this is because at the moment we dont know how to work out levels for cases that dont have a dilute BB radiation field. We need to set them to something however. Could do better in the future.
 
     }
+}
 
-  /* XXX what is going on here. this looks to be outside the grid altgogether */
-  plasmamain[n].ne = get_ne (plasmamain[n].density);	//we also need to update the electron density
-  partition_functions (&plasmamain[n], NEBULARMODE_LTE_GROUND);	/* WARNING fudge NSH 11/5/14 - this is as a test. We really need a better implementation
-								   of partition functions and levels for a power law illuminating spectrum. We found that
-								   if we didnt make this call, we would end up with undefined levels - which did really
-								   crazy things.  NEBULARMODE_LTE_GROUND puts everythin into the ground state.  Note
-                                  from ksl - It is a bit unclear what is happening here.  I thought that levels were established
-                                 just before photons were going throught the grid, and so partition_functions should be called later */
+
 
 
   /* Recreate the wind cones because these are not part of the windsave file */
 
-  rtheta_make_cones (ndom, w);
+  rtheta_make_cones (ndom, wmain);
 
   return (0);
 
