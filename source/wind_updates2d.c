@@ -756,22 +756,26 @@ WindPtr (w);
 
   if (modes.zeus_connect == 1 && geo.hydro_domain_number > -1)  //If we are running in zeus connect mode, we output heating and cooling rates.
   {
-    for (nplasma = 0; nplasma < NPLASMA; nplasma++)
+  	for (nwind = zdom[geo.hydro_domain_number].nstart; nwind < zdom[geo.hydro_domain_number].nstop; nwind++)	  
     {
-      wind_n_to_ij (geo.hydro_domain_number, plasmamain[nplasma].nwind, &i, &j);
-      i = i - 1;                //There is a radial 'ghost zone' in python, we need to make our i,j agree with zeus
-      vol = w[plasmamain[nplasma].nwind].vol;
-      fprintf (fptr, "%d %d %e %e %e ", i, j, w[plasmamain[nplasma].nwind].rcen, w[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);  //output geometric things
-      fprintf (fptr, "%e %e %e ", plasmamain[nplasma].t_e, plasmamain[nplasma].xi, plasmamain[nplasma].ne);     //output temp, xi and ne to ease plotting of heating rates
-      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_photo + plasmamain[nplasma].heat_auger) / vol);   //Xray heating - or photoionization
-      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_comp) / vol);     //Compton heating
-      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_lines) / vol);    //Line heating 28/10/15 - not currently used in zeus
-      fprintf (fptr, "%e ", (plasmamain[nplasma].heat_ff) / vol);       //FF heating 28/10/15 - not currently used in zeus
-      fprintf (fptr, "%e ", (plasmamain[nplasma].cool_comp) / vol);      //Compton cooling
-      fprintf (fptr, "%e ", (plasmamain[nplasma].lum_lines + plasmamain[nplasma].cool_rr + plasmamain[nplasma].cool_dr) / vol);   //Line cooling must include all recombination cooling
-      fprintf (fptr, "%e ", (plasmamain[nplasma].lum_ff) / vol);        //ff cooling
-      fprintf (fptr, "%e ", plasmamain[nplasma].rho);   //density
-      fprintf (fptr, "%e\n", plasmamain[nplasma].rho * rho2nh); //hydrogen number density
+  	  if (wmain[nwind].vol > 0.0)
+	  {
+        nplasma=wmain[nwind].nplasma;        
+        wind_n_to_ij (geo.hydro_domain_number, plasmamain[nplasma].nwind, &i, &j);
+        i = i - 1;                //There is a radial 'ghost zone' in python, we need to make our i,j agree with zeus
+        vol = w[plasmamain[nplasma].nwind].vol;
+        fprintf (fptr, "%d %d %e %e %e ", i, j, w[plasmamain[nplasma].nwind].rcen, w[plasmamain[nplasma].nwind].thetacen / RADIAN, vol);  //output geometric things
+        fprintf (fptr, "%e %e %e ", plasmamain[nplasma].t_e, plasmamain[nplasma].xi, plasmamain[nplasma].ne);     //output temp, xi and ne to ease plotting of heating rates
+        fprintf (fptr, "%e ", (plasmamain[nplasma].heat_photo + plasmamain[nplasma].heat_auger) / vol);   //Xray heating - or photoionization
+        fprintf (fptr, "%e ", (plasmamain[nplasma].heat_comp) / vol);     //Compton heating
+        fprintf (fptr, "%e ", (plasmamain[nplasma].heat_lines) / vol);    //Line heating 28/10/15 - not currently used in zeus
+        fprintf (fptr, "%e ", (plasmamain[nplasma].heat_ff) / vol);       //FF heating 28/10/15 - not currently used in zeus
+        fprintf (fptr, "%e ", (plasmamain[nplasma].cool_comp) / vol);      //Compton cooling
+        fprintf (fptr, "%e ", (plasmamain[nplasma].lum_lines + plasmamain[nplasma].cool_rr + plasmamain[nplasma].cool_dr) / vol);   //Line cooling must include all recombination cooling
+        fprintf (fptr, "%e ", (plasmamain[nplasma].lum_ff) / vol);        //ff cooling
+        fprintf (fptr, "%e ", plasmamain[nplasma].rho);   //density
+        fprintf (fptr, "%e\n", plasmamain[nplasma].rho * rho2nh); //hydrogen number density
+      }  
     }
     fclose (fptr);
   }
