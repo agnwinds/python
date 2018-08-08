@@ -96,8 +96,13 @@ get_hydro_wind_params (ndom)
 
 /* Assign the generic parameters for the wind the generic parameters of the wind */
   zdom[ndom].rmin = hydro_r_edge[0];
+  
+  geo.rmax = zdom[ndom].rmax = hydro_r_edge[ihydro_r] + 2.0 * (hydro_r_cent[ihydro_r] - hydro_r_edge[ihydro_r]);	//Set the outer edge of the wind to the outer edge of the final defined cell
+   Log ("rmax=%e\n", geo.rmax);
+   geo.rmax_sq = geo.rmax * geo.rmax;
+   Log ("rmax_sq=%e\n", geo.rmax);
 
-  zdom[ndom].rmax = hydro_r_edge[ihydro_r] + 2.0 * (hydro_r_cent[ihydro_r] - hydro_r_edge[ihydro_r]);	//Set the outer edge of the wind to the outer edge of the final defined cell
+
   Log ("rmax=%e\n", zdom[ndom].rmax);
   zdom[ndom].wind_rho_min = 0.0;	//Set wind_rmin 0.0, otherwise wind cones dont work properly 
   Log ("rho_min=%e\n", zdom[ndom].wind_rho_min);
@@ -726,10 +731,11 @@ rtheta_hydro_volumes (ndom, w)
  * ###Notes###
  * 
  * ### Programming Comment ###
- *
- * ksl - It is very unclear why this routine is necessary
- * coord_frac should be able to do this in one go.  If this is
- * routine is necessary then one should clarify why that is the case
+ * This is rather similar to the routine coord_frac, but that
+ * loops over all the values in a domain. Here, because of the
+ * way wind parameters are set up on a cell by cell basis, in 
+ * order to keep things the same between hydro and other wind
+ * models we have routines that are called for a single cell.
 ***********************************************************/
 
 
@@ -789,17 +795,13 @@ hydro_frac (coord, coord_array, imax, cell1, cell2, frac)
  * hydro_interp_value replaces many lines of identical code, all of which
  * interpolate on the input grid to get value for the python grid.
  * This returns the actuak value of an interpolated array
- * XXX - ksl - It is not obvious why this was really needed, assuming that
- * the model has been proper installed in the WindStruct.  Possibly it
- * has to do with where values are centered.  
  *          
  *
  * ###Notes###
  *
  * ### Programming Comment ###
- * ksl - It is very unclear why this routine is necessary
- * coord_frac should be able to do this in one go.  If this is
- * routine is necessary then one should clarify why that is the case
+ * This called after hydro_interp_frac and the programming 
+ * comment for that routine applies here too.
 ***********************************************************/
 
 
@@ -863,23 +865,13 @@ hydro_restart (ndom)
   int nstart, nstop, ndim2;
 
   zdom[ndom].wind_type = 3;	//Temporarily set the wind type to hydro, so we can use the normal routines
-
-  /* XXX ksl Some of what is here is quite odd. If this is really a restart one should not have
-   * to recreate wmain.  The only thing you should need to do in the zeus case is to modify existing
-   * values such as the densities. 
-   */
-
-  /* note that we will have passed the wind domain number as default */
+  /* note that we will have passed the hydro domain number as default */
   nstart = zdom[ndom].nstart;
   nstop = zdom[ndom].nstop;
   ndim2 = zdom[ndom].ndim2;
 
   for (n = nstart; n < nstop; n++)
     {
-      /* 04aug -- ksl -52 -- The next couple of lines are part of the changes
-       * made in the program to allow more that one coordinate system in python 
-       */
-
       model_velocity (ndom, wmain[n].x, wmain[n].v);
       model_vgrad (ndom, wmain[n].x, wmain[n].v_grad);
     }
@@ -890,7 +882,6 @@ hydro_restart (ndom)
 	  if (wmain[nwind].vol > 0.0)
 	  {
 	  n=wmain[nwind].nplasma;
-//      nwind = plasmamain[n].nwind;
       stuff_v (wmain[nwind].xcen, x);
       old_density = plasmamain[n].rho;
       plasmamain[n].rho = model_rho (ndom, x) / zdom[ndom].fill;
@@ -907,14 +898,7 @@ hydro_restart (ndom)
 
     }
 }
-
-
-
-
   /* Recreate the wind cones because these are not part of the windsave file */
-
   rtheta_make_cones (ndom, wmain);
-
   return (0);
-
 }
