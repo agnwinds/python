@@ -35,9 +35,13 @@
  * spectrum in each interval.  
  *
  * The routines init_bands in this file sets up the bands to for creating
- * photons based on various user inputs; it then calls freqs_init that sets up the frequency boundaries
- * for recoding the spectra.
+ * photons based on various user inputs; it then calls freqs_init that 
+ * sets up the frequency boundaries
+ * for recording the spectra.
  *
+ * The two tasks are only loosely related, and in fact while there
+ * is a lot of flexibility in for stratified sampling, the spectra
+ * in the cells are recorded largely on the basis of the system type.
  *
  *
  ***********************************************************/
@@ -74,20 +78,25 @@ xband;
 
 /**********************************************************/
 /** 
- * @brief      This is the routine that initializes the bands.    
+ * @brief      This is the routine that initializes the frequency bands    
+ * used to ensure that photons are created in sufficient numbers across
+ * a large range of frequency during ionization cycles.
  *
  * Python uses a form of stratified sampling in an attempt to assure
  * that there are photon bundles at (high, generally) frequencies
+ * in sufficient nummbers for accurate ionization equilibria to be
+ * calculated.
  * 
- * This is the routine that initializes the bands.    There are
+ * This is the routine that initializes the bands, and the fraction of photons
+ * to be generated in each band.    There are
  * a number of possiblilities for setting up the bands
  *
  * @param [in] int  imode   A switch used for determining how the bands are to be populated
- * @param [ out] struct xbands *  band   The structure that is populated with the band information 
+ * @param [out] struct xbands *  band   The structure that is populated with the band information 
  * @return     The routine itself simply returns 0 on success
  *
  * The outputs are passed to other routines through the pointer
- * 	to xbands.  
+ * to xbands.  
  *
  * @details
  *
@@ -99,24 +108,31 @@ xband;
  * tuned to be relevent to CVs and other
  * systems where a hot disk (T_eff of about
  * 100,000 K is assumed
- * * 3	Bands tuned for yso
- * * 4	Query the user to specify an arbitrary
+ * *3 Bands tuned for yso
+ * *4 Query the user to specify an arbitrary
  * set of bands
- * * 5  Hardwired very wide bands for testing
- * *6 	Bands set up by nsh to test cloudy
- * *7	Bands hardwired for AGN paper1 by nsh
- * *8   Define bands in logarithmic intervals
+ * *5 Hardwired very wide bands for testing
+ * *6 Bands set up by nsh to test cloudy
+ * *7 Bands hardwired for AGN paper1 by nsh
+ * *8  Define bands in logarithmic intervals
  *
  *
  * ### Notes ###
- * 10nov - ksl - XXX Some of the choices have checks to see whether the bands
- * 	that are being set up lie within f1 and f2.  Others do
- * 	not.  This seems like an error.
  *
- * 	@bug At some point some of the banding needs to be tested
- * 	systematically.  We have tended to find a setup that we
- * 	like and just use it.
+ * Various choices for banding have been developed over time, often in
+ * the process of working on different types of simulations.  In general,
+ * it is up to the user (by pure thought or by experimentation) to find
+ * a set of frequency ranges and photon fractions in each band so that a 
+ * calculation can be carried out efficiently.  Choosing the wrong banding
+ * will make the program slow to converge/noisy because one does not have
+ * enough photons in the necessary intervals, and in extreme situations 
+ * to get the ionization structure wrong.  Evidently, option 4 allows 
+ * the user the most flexibility.
  *
+ * This routine also calls the routine freqs_init which initializes the
+ * boundaries for recording coarse versions of the spectra in each
+ * cell. This process is also sometimes referred to (confusingly) as
+ * banding.  At present this is more or less hardwired.
  **********************************************************/
 
 int
@@ -155,7 +171,8 @@ bands_init (imode, band)
   }
   else
     Log ("Maximum frequency %8.2e determined by T %8.2e\n", freqmax, tmax);
-  geo.tmax = tmax;              /*NSH 120817 NSH made this a global variable so it is available to the code to make informed guesses as to the possible location of any BB driven exponential dropoff in the spectrum */
+  geo.tmax = tmax;              /*this a global variable so it is available to the code to make informed guesses as to the possible 
+                                  location of any BB driven exponential dropoff in the spectrum */
   t = tmax;
   f1 = freqmin;
   f2 = freqmax;
@@ -278,7 +295,8 @@ bands_init (imode, band)
 
 
   }
-  else if (mode == 5)           /* Set up to compare with cloudy power law table command note that this also sets up the weight and photon index for the PL, to ensure a continuous distribution */
+  else if (mode == 5)           /* Set up to compare with cloudy power law table command note 
+                                   that this also sets up the weight and photon index for the PL, to ensure a continuous distribution */
   {
     if (geo.agn_ion_spectype != SPECTYPE_CL_TAB)
     {
@@ -530,7 +548,8 @@ bands_init (imode, band)
          band->f1[nband] * H / (BOLTZMANN * tmax), band->f2[nband] * H / (BOLTZMANN * tmax), band->min_fraction[nband]);
   }
 
-  /* Finally called the routine freqs_init which initializes the the spectral bands that are used to establish the coarse
+  /* Finally call the routine freqs_init which initializes the spectral bands 
+   * that are used to establish the coarse
    * spectra in each cell for ionization calculations
    */
 
@@ -539,57 +558,32 @@ bands_init (imode, band)
 }
 
 
-//OLD /***********************************************************
-//OLD                 Space Telescope Science Institute
-//OLD 
-//OLD Synopsis:
-//OLD 
-//OLD 	This is the routine where the frequency
-//OLD 	boundaries for course spectra are established
-//OLD 
-//OLD 
-//OLD 
-//OLD 
-//OLD Arguments:
-//OLD 
-//OLD Returns:
-//OLD 
-//OLD 
-//OLD 
-//OLD Description:
-//OLD 
-//OLD 
-//OLD Notes:
-//OLD 	1112 - At present everything is hardwired
-//OLD 
-//OLD 
-//OLD 
-//OLD History:
-//OLD 	1112	ksl	Moved from main routine here
-//OLD 	111227	ksl	Smalle modifications to reflect my moving the main
-//OLD 			variables into the geo.structure so that they
-//OLD 			could be read by py_oind
-//OLD 	111227	ksl	First attempt to limit the frequency intervals to
-//OLD 			regions where photons are being generated
-//OLD **************************************************************/
 
 
 /**********************************************************/
 /** 
  * @brief      This is the routine where the frequency
- * 	boundaries for course spectra are established
+ * 	binning for coarse spectra in each plasma cell is established
  *
- * @param [in, out] double  freqmin   The minimum frequency
- * @param [in, out] double  freqmax   The maximum frequency
- * @return     Always returns 0
+ * @param [in] double  freqmin   The minimum frequency
+ * @param [in] double  freqmax   The maximum frequency
+ * @return     Always returns 0.  
+ *
+ * The frequncy intervals are stored
+ * in geo.xfreq.  The total number of frequencies is geo.nxfreq
  *
  * @details
  * 
- * In addition to setting bands which define the photons that are generated
- * one must define bands that approximated the spectra in a cell.  One
- * cannot store all of the photons and their weights.  This routine creates
- * boundaries for storring the spectra.
+ * In order to approximate the radiation field in each plasma cell, one
+ * needs to record a coarse spectrum.  There is no point in creaating 
+ * a detailed spectrum since this will (usually) not be justivied by the
+ * photon statistics and in any event wouuld require to much memory. Memory
+ * restrictions also mean we cannot simple record the effects of individual
+ * photons.  
  *
+ * So that one can sensibly record a coarse spectum, one needs to define
+ * the frequency boundaries for the course spectra.  That is the purpose
+ * of this routine.
  *
  * ### Notes ###
  *
@@ -597,10 +591,12 @@ bands_init (imode, band)
  * are carred out, one for AGN/X-ray bianries, and one for
  * stellar systems
  *
- * freqmin and freqmax are used inorder to limit the total range of
+ * freqmin and freqmax are used in order to limit the total range of
  * the spectral bands.
  *
- * The results are stored in geo.xfreq
+ * Although some the description of this routine refer to banding
+ * this routine does have anything to do with the stratified sampling
+ * used to create photons.  
  *
  **********************************************************/
 
@@ -676,7 +672,7 @@ freqs_init (freqmin, freqmax)
     }
   }
 
-  Log ("freqs_init: Of %d starting intervals, %d will have photons\n", nxfreq, ngood);
+  Log_silent ("freqs_init: Of %d starting intervals, %d will have photons\n", nxfreq, ngood);
 
   n = 0;
   for (i = 0; i < nxfreq; i++)
@@ -699,17 +695,16 @@ freqs_init (freqmin, freqmax)
     geo.xfreq[0] = freqmin;
   }
 
-  Log ("freqs_init: test %e %e\n", freqmax, geo.xfreq[geo.nxfreq]);
   if (freqmax < geo.xfreq[geo.nxfreq])
   {
     geo.xfreq[geo.nxfreq] = freqmax;
   }
 
 
-  Log ("freqs_init: There were %d final intervals\n", geo.nxfreq);
+  Log_silent ("freqs_init: There were %d final intervals\n", geo.nxfreq);
   for (n = 0; n < geo.nxfreq; n++)
   {
-    Log ("freqs_init: %8.2f (%8.2e)    %8.2f (%8.2e)  \n", geo.xfreq[n] * HEV, geo.xfreq[n], geo.xfreq[n + 1] * HEV, geo.xfreq[n + 1]);
+    Log_silent ("freqs_init: %8.2f (%8.2e)    %8.2f (%8.2e)  \n", geo.xfreq[n] * HEV, geo.xfreq[n], geo.xfreq[n + 1] * HEV, geo.xfreq[n + 1]);
   }
 
 

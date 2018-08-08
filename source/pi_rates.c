@@ -61,8 +61,8 @@ double xexp_temp, xexp_w;
 
 double
 calc_pi_rate (nion, xplasma, mode, type)
-     PlasmaPtr xplasma;
      int nion;
+     PlasmaPtr xplasma;
      int mode;
      int type;
 {
@@ -205,9 +205,9 @@ calc_pi_rate (nion, xplasma, mode, type)
   else if (mode == 2)           //blackbody mode
   {
     fmaxtemp = xtop->freq[xtop->np - 1]; //Set the maximum frequency temporarily to the maximum cross section frequency
-    fmax = check_fmax (fthresh, fmaxtemp, xplasma->t_r);  /*Check that the requested maximum frequency is sensible - if it is way
-		// off the end of the wien tail then the integration can fail - reset if necessary.*/
-    //printf("fthresh is %8.4e, fmax is %8.4e\n", fthresh, fmax);
+    fmax = check_fmax(fmaxtemp, xplasma->t_r);  /*Check that the requested maximum frequency is sensible - if it is way
+		 off the end of the wien tail then the integration can fail - reset if necessary.*/
+
     if (fthresh > fmax)  //The threshold for PI is above the maximum frequency of the radiation
     {
       pi_rate = 0.0;

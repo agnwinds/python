@@ -111,7 +111,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
                                    bands.  This is used for the for ionization calculation where one wants to assure
                                    that you have "enough" photons at high energy */
 
-    ftot = populate_bands (f1, f2, ioniz_or_final, iwind, &xband);
+    ftot = populate_bands(ioniz_or_final, iwind, &xband);
 
     for (n = 0; n < NPHOT; n++)
       p[n].path = -1.0;         /* SWM - Zero photon paths */
@@ -191,14 +191,11 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
  * Much of the actual work is carried out in xdefine_phot.
  *
  * ### Notes ###
- * @bug f1 and f2 do not appear to be used and should be removed from
- * the call.
  *
  **********************************************************/
 
 double
-populate_bands (f1, f2, ioniz_or_final, iwind, band)
-     double f1, f2;
+populate_bands(ioniz_or_final, iwind, band)
      int ioniz_or_final;
      int iwind;
      struct xbands *band;
@@ -383,17 +380,18 @@ iwind = -1 	Don't generate any wind photons at all
 
 
   geo.f_tot = geo.f_star + geo.f_disk + geo.f_bl + geo.f_wind + geo.f_kpkt + geo.f_matom + geo.f_agn;
+  geo.lum_tot= geo.lum_star+ geo.lum_disk+ geo.lum_bl+ geo.lum_agn+ geo.lum_wind;
 
   Log
     ("!! xdefine_phot: lum_tot %8.2e lum_star %8.2e lum_disk %8.2e lum_bl %8.2e lum_agn %8.2e lum_wind %8.2e\n",
      geo.lum_tot, geo.lum_star, geo.lum_disk, geo.lum_bl, geo.lum_agn, geo.lum_wind);
 
   Log
-    ("!! xdefine_phot: f_tot %8.2e  f_star %8.2e   f_disk %8.2e   f_bl %8.2e   f_agn %8.2e f_wind %8.2e   f_matom %8.2e   f_kpkt %8.2e \n",
+    ("!! xdefine_phot:   f_tot %8.2e   f_star %8.2e   f_disk %8.2e   f_bl %8.2e   f_agn %8.2e   f_wind %8.2e   f_matom %8.2e   f_kpkt %8.2e \n",
      geo.f_tot, geo.f_star, geo.f_disk, geo.f_bl, geo.f_agn, geo.f_wind, geo.f_matom, geo.f_kpkt);
 
   Log
-    ("!! xdefine_phot: wind  ff %8.2e       fb %8.2e   lines %8.2e  for freq %8.2e %8.2e\n", geo.lum_ff, geo.lum_rr, geo.lum_lines, f1, f2);
+    ("!! xdefine_phot: wind ff %8.2e       fb %8.2e   lines  %8.2e  for freq %8.2e %8.2e\n", geo.lum_ff, geo.lum_rr, geo.lum_lines, f1, f2);
   Log
     ("!! xdefine_phot: star  tstar  %8.2e   %8.2e   lum_star %8.2e %8.2e  %8.2e \n", geo.tstar, geo.tstar_init, geo.lum_star, geo.lum_star_init, geo.lum_star_back);
   Log
@@ -874,30 +872,55 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   double t, tref, teff (), tdisk ();
   double log_g, gref, geff (), gdisk ();
   double dr, r;
+  double logdr,logrmin,logrmax,logr;
   double f, ltot;
   double q1;
-  int nrings;
+  int nrings,i,icheck;
   int spectype;
   double emit, emittance_bb (), emittance_continuum ();
 
   /* Calculate the reference temperature and luminosity of the disk */
   tref = tdisk (m, mdot, rmin);
+
+
   gref = gdisk (m, mdot, rmin);
+
 
   /* Now compute the apparent luminosity of the disk.  This is not actually used
      to determine how annulae are set up.  It is just used to populate geo.ltot.
      It can change if photons hitting the disk are allowed to raise the temperature
    */
 
-  ltot = 0;
-  dr = (rmax - rmin) / STEPS;
-  for (r = rmin; r < rmax; r += dr)
-  {
-    t = teff (tref, (r + 0.5 * dr) / rmin);
-    ltot += t * t * t * t * (2. * r + dr);
-  }
-  geo.lum_disk_init=ltot *= 2. * STEFAN_BOLTZMANN * PI * dr;
+  logrmax=log(rmax);
+  logrmin=log(rmin);
+  logdr=(logrmax-logrmin)/STEPS;
 
+  for (nrings = 0; nrings < NRINGS; nrings++) //Initialise the structure
+  {
+    disk.nphot[nrings] = 0;
+    disk.nphot[nrings] = 0;
+	disk.r[nrings] = 0;
+	disk.t[nrings] = 0;
+    disk.nhit[nrings] = 0;
+    disk.heat[nrings] = 0;
+    disk.ave_freq[nrings] = 0;
+    disk.w[nrings] = 0;
+    disk.t_hit[nrings] = 0;
+  }
+
+
+
+
+  ltot = 0;
+
+ for (logr=logrmin;logr<logrmax;logr+=logdr)
+ {
+    r=exp(logr);
+    dr=exp(logr+logdr)-r;
+    t = teff (tref, (r + 0.5 * dr) / rmin);
+    ltot += t * t * t * t * (2. * r + dr) *dr;
+  }
+  geo.lum_disk_init=ltot *= 2. * STEFAN_BOLTZMANN * PI;
 
 
   /* Now establish the type of spectrum to create */
@@ -913,11 +936,16 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
    The extra factor of two arises because the disk radiates from both of its sides.
    */
 
-  q1 = 2. * PI * dr;
+  q1 = 2. * PI;
 
   (*ftot) = 0;
-  for (r = rmin; r < rmax; r += dr)
+  icheck=0;
+
+
+  for (logr=logrmin;logr<logrmax;logr+=logdr)
   {
+    r=exp(logr);
+    dr=exp(logr+logdr)-r;
     t = teff (tref, (r + 0.5 * dr) / rmin);
     log_g = log10 (geff (gref, (r + 0.5 * dr) / rmin));
 
@@ -928,12 +956,13 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
     else
     {
       emit = emittance_bb (freqmin, freqmax, t);
-    }
 
-    (*ftot) += emit * (2. * r + dr);
+    }
+    (*ftot) += emit * (2. * r + dr) * dr;
   }
 
   (*ftot) *= q1;
+
 
 
   /* If *ftot is 0 in this energy range then all the photons come elsewhere, e. g. the star or BL  */
@@ -952,8 +981,12 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   disk.v[0] = sqrt (G * geo.mstar / rmin);
   nrings = 1;
   f = 0;
-  for (r = rmin; r < rmax; r += dr)
+
+  i=0;
+  for (logr=logrmin;logr<logrmax;logr+=logdr)
   {
+    r=exp(logr);
+    dr=exp(logr+logdr)-r;
     t = teff (tref, (r + 0.5 * dr) / rmin);
     log_g = log10 (geff (gref, (r + 0.5 * dr) / rmin));
 
@@ -966,21 +999,21 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
       emit = emittance_bb (freqmin, freqmax, t);
     }
 
-    f += q1 * emit * (2. * r + dr);
+    f += q1 * emit * (2. * r + dr) * dr;
+	i++;
     /* EPSILON to assure that roundoffs don't affect result of if statement */
     if (f / (*ftot) * (NRINGS - 1) >= nrings)
     {
-      if (r <= disk.r[nrings - 1])
+      if (r <= disk.r[nrings - 1])  //If the radius we have reached is smaller than or equal to the last assigned radius - we make a tiny annulus
       {
         r = disk.r[nrings - 1] * (1. + 1.e-10);
       }
-
       disk.r[nrings] = r;
       disk.v[nrings] = sqrt (G * geo.mstar / r);
       nrings++;
       if (nrings >= NRINGS)
       {
-        Error_silent ("disk_init: Got to ftot %e at r %e < rmax %e. OK if freqs are high\n", f, r, rmax);
+//        Error_silent ("disk_init: Got to ftot %e at r %e < rmax %e. OK if freqs are high\n", f, r, rmax);		Not *really* an error, the error below deals with a *real* problem.
         break;
       }
     }
@@ -992,8 +1025,8 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   }
 
 
-  disk.r[NRINGS - 1] = rmax;
-  disk.v[NRINGS - 1] = sqrt (G * geo.mstar / rmax);
+  disk.r[NRINGS - 1] = exp(logrmax);
+  disk.v[NRINGS - 1] = sqrt (G * geo.mstar / disk.r[NRINGS - 1]);
 
 
   /* Now calculate the temperature and gravity of the annulae */
@@ -1179,6 +1212,8 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     p[i].freq /= (1. - dot (v, p[i].lmn) / C);
 
   }
+
+
   return (0);
 }
 
@@ -1288,7 +1323,7 @@ bl_init (lum_bl, t_bl, freqmin, freqmax, ioniz_or_final, f)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief
  * Perform some simple checks on the photon distribution just produced.
  *

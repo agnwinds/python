@@ -333,6 +333,7 @@ save_photon_stats (one, p, ds, w_ave)
  * @param [in] PhotPtr  pp   The phtoon after being doppler shiftd
  * @param [in] double *  v   The velocity vector at the possibon of p/pp
  * @return     Always returns 0
+phase(0=inferior_conjunction)                   0.5
  *
  * @details
  * This diagnostic routine was proably written to address a concern
@@ -387,13 +388,13 @@ save_photons (p, comment)
      char comment[];
 {
   save_photon_number += 1;
-  if (save_photon_number > 100000)
-    return (0);
+//OLD  if (save_photon_number > 1000000)
+//OLD    return (0);
 
   fprintf (epltptr,
-	   "PHOTON %3d %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %3d %3d %s \n",
-	   p->np, p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
-	   p->lmn[2], p->grid, p->istat, comment);
+	   "PHOTON %3d %3d %10.4e %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e %3d %3d %3d %3d %s \n",
+	   geo.wcycle, p->np, p->freq,p->x[0], p->x[1], p->x[2], p->lmn[0], p->lmn[1],
+	   p->lmn[2], p->grid, p->istat, p->origin, p->nres, comment);
 
   return (0);
 }

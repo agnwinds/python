@@ -6,9 +6,11 @@
  *
  * @brief  Reposition a photon so it goes across a cell boundary
  *
- * @bug This is too short a routine to be in a separate file.  It
- * should be incorporated into trans_phot or extract which conatin the
- * calling routines.
+ * ### Programming Notes ###
+ *
+ * This is a very short function and may not justify being in its own file. The
+ * (only) function reposition could be moved into extract.c or trans_phot.c.
+ *
  ***********************************************************/
 
 
@@ -21,8 +23,8 @@
 
 
 /**********************************************************/
-/** 
- * @brief      p) attempts to assure that a photon is not scattered 
+/**
+ * @brief      p) attempts to assure that a photon is not scattered
  * 	a second time inappropriately by the same transition
  *
  * @param [in,out] PhotPtr  p   A photons
@@ -30,30 +32,21 @@
  * if p is not in the wind in the domain it is supposed to be in
  *
  * @details
- * For resonant scatters, the routine moves the photon by 
- * a distance DFUDGE.  For non-resonant scattering the routine 
- * simple returns
+ * For resonant scatters, the routine moves the photon by
+ * a distance dfudge. For non-resonant scattering the routine
+ * simply returns.
  *
  * ### Notes ###
- * @bug This seems like an error.  We have calculated cell specific
- * values of dfudge, but this routine used the global DFUDGE to
- * move the photon though a cell wall.
  *
  **********************************************************/
 
 int
 reposition (p)
      PhotPtr p;
-
 {
-
   int n;
 
-
-  if (p->nres < 0)
-  {                             // Do nothing for non-resonant scatters
-    return (0);
-  }
+  if (p->nres < 0) return (0);  /* Do nothing for non-resonant scatters */
 
   if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
   {
@@ -61,9 +54,11 @@ reposition (p)
     return (n);                 /* Photon was not in wind */
   }
 
+  /*
+   * EP 0818: the cell specific dfudge is now used as previously the global
+   * value of DFUDGE was being used
+   */
+  move_phot (p, wmain[p->grid].dfudge);
 
-  move_phot (p, DFUDGE);
   return (0);
-
-
 }

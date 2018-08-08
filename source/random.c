@@ -138,9 +138,10 @@ randvcos (lmn, north)
   double vcos (), cdf_get_rand ();
   double phi;
 
-  /* XXX - It seems unlikely that jumps are necessary with the current verisonof 
-   * pdf_gen_gen_from_func, which does not resample the orginal grid.  But this
-   * should be checked.  171012 ksl 
+  /*** 
+   * ### Programming Comment ###
+   * pdf_gen_from_func still uses jumps, so this is OK, but it may not be
+   * necessary as PDFSTEPS has been increased to 10000 in cdf.c  180715 ksl.
    */
 
   if (init_vcos == 0)

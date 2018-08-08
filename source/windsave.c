@@ -165,17 +165,16 @@ in the plasma structure */
  * @details
  * 
  * The routine reads in both the windsave file and the
- * associated atomic data files for a model
+ * associated atomic data files for a model. It also reads the
+ * disk and qdisk structures.
  *
  *
  * ### Notes ###
  *
- * @bug This routine calls wind_complete, but it is not entirely
- * clear why, as the values calculated there are already in the
- * domain structure, so this seems redundant.  However there is
- * an issue #41 which has to do with reading in windcones that
- * affects this. 
- * 
+ * ### Programming Comment ### 
+ * This routine calls wind_complete. This looks superfluous, since 
+ * wind_complete and its subsidiary routines but it
+ * also appears harmless.  ksl 
  *
  **********************************************************/
 

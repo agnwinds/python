@@ -59,7 +59,8 @@ def read_spectrum(filename):
     if not '.spec' in filename: 
         if not '.log_spec_tot' in filename:
             if not '.spec_tot' in filename:
-                filename = filename + '.spec' # assume user wants the spectrum file if no suffix
+                if not ".log_spec" in filename:
+                    filename = filename + '.spec' # assume user wants the spectrum file if no suffix
 
     if has_astropy:
         spectrum = ascii.read(filename)

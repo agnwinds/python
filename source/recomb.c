@@ -400,7 +400,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
  * @param [in] int  fb_choice   A switch controlling whether emissivites or rates are
  * returned
  * @param [in] int  mode   A switch denoting whether normal recombination (OUTER_SHELL) or inner shell recombination (INNER_SHELL)
- * @return     The routine calculates an emissivity for nommal recombination or a cooling rate for normal or dielectronic recombination
+ * @return     The routine calculates an emissivity for normal recombination or a cooling rate for normal or dielectronic recombination
  *
  * If OUTER_SHELL is chosen then the options are
  *
@@ -420,7 +420,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
  *
  * Note that FB_REDUCED is not an option for this routine
  *
- * @bug What is preventing us from calculating a dielectronic emission rate?
+ * Question: What is preventing us from calculating a dielectronic emission rate?
  *
  **********************************************************/
 

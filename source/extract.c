@@ -354,18 +354,9 @@ some other process.
 If geo.scatter_mode==SCATTER_MODE_ISOTROPIC then there is no need 
 to reweight.  This is the isotropic assumption.  Otherwise, one
 needs to reweight
-
-NB--It is important that reweightwind be called after scatter, as there
-are variables which are set in scatter and in aniosowind that are
-used by reweightwind.  02may ksl
 */
 
-    if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
-    {                          
-      reweightwind (pp);
-    }
-
-    else if (geo.scatter_mode == SCATTER_MODE_THERMAL)     
+    if (geo.scatter_mode == SCATTER_MODE_THERMAL)     
     {
 
       dvds = dvwind_ds (pp);
@@ -376,7 +367,7 @@ used by reweightwind.  02may ksl
       tau = 0.0;
     }
 
-/* But in any event we have to reposition wind photons so thath they don't go through
+/* But in any event we have to reposition wind photons so that they don't go through
 the same resonance again */
 
     reposition (pp);            // Only reposition the photon if it was a wind photon

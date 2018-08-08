@@ -336,11 +336,6 @@ PlasmaPtr xxxplasma;
  *
  * Special exceptions are made for Zeus; it is not clear why this is necessary
  *
- * @bug There are some numbered switches included here.  This is because these values
- * are not allowed anymore. But this needs to be cleaned up.  Deactivated modes should
- * be captured when the parameters are read in, not at this point. An else statement
- * should provide a sufficent check for any unknown mode.
- *
  **********************************************************/
 
 int
@@ -531,7 +526,7 @@ calc_te (xplasma, tmin, tmax)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      Compute the cooling for a cell given a temperature t, and compare it
  * to the heating seen in the cell in the previous ionization cycle
  *

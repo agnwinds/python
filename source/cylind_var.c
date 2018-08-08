@@ -232,7 +232,7 @@ cylvar_make_grid (w, ndom)
   zdom[ndom].zmax = 0.0;
 
 
-  /* In order to interpolate the velocity (and other) vectors out to geo.rmax, we need
+  /* In order to interpolate the velocity (and other) vectors out to zdom[ndom].rmax, we need
      to define the wind at least one grid cell outside the region in which we want photons
      to propagate.  This is the reason we divide by NDIM-2 here, rather than NDIM-1 */
 

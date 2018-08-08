@@ -10,25 +10,25 @@
  ***********************************************************/
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
-//OLD 
+//OLD
 //OLD  Synopsis:
 //OLD 	Python is a program designed to simulate the transfer of radiation in a wind.  It uses the
-//OLD 	Sobolev approximation.  It models a wind as a biconical flow.     
-//OLD 	
-//OLD 	This is the "main" routine for Python.  It's basic purpose is to gather the input variables 
+//OLD 	Sobolev approximation.  It models a wind as a biconical flow.
+//OLD
+//OLD 	This is the "main" routine for Python.  It's basic purpose is to gather the input variables
 //OLD 	and to control the flow of the program
-//OLD  
-//OLD Arguments:		
-//OLD 
+//OLD
+//OLD Arguments:
+//OLD
 //OLD 	Usage:  py [-h] [-r] [-d] [-f] [-t time_max] xxx  or simply py
-//OLD 
+//OLD
 //OLD 	where xxx is the rootname or full name of a parameter file, e. g. test.pf
-//OLD 
+//OLD
 //OLD 	and the switches have the following meanings
-//OLD 
+//OLD
 //OLD 	-h 	to get this help message
 //OLD 	-r 	restart a run of the program reading the file xxx.windsave
-//OLD 
+//OLD
 //OLD 	-t time_max	limit the total time to approximately time_max seconds.  Note that the program checks
 //OLD 		for this limit somewhat infrequently, usually at the ends of cycles, because it
 //OLD 		is attempting to save the program outputs so that the program can be restarted with
@@ -51,37 +51,37 @@
 //OLD     --version	print out python version, commit hash and if there were files with uncommitted
 //OLD 	    	changes
 //OLD       --rseed	set the random number seed to be time based, rather than fixed.
-//OLD 
-//OLD 	
+//OLD
+//OLD
 //OLD 	if one simply types py or pyZZ where ZZ is the version number one is queried for a name
 //OLD 	of the parameter file.
-//OLD 
+//OLD
 //OLD 	NOTE - If this is modified, please also modify the help message in help() below
 //OLD Returns:
-//OLD  
-//OLD Description:	
+//OLD
+//OLD Description:
 //OLD 	Python is far too complicated to describe.  Basically it simulates the radiative transfer
 //OLD 	of photons through the wind of a cataclysmic variable or a star.  The kinematic formulation for
-//OLD 	the CV wind is due to Schlossman and Vitello while that of the star is due to Castor & Larmors. 
-//OLD 	
+//OLD 	the CV wind is due to Schlossman and Vitello while that of the star is due to Castor & Larmors.
+//OLD
 //OLD 	 Radiation from an optically thick disk, the WD star, a boundary layer and the wind itself
 //OLD 	 may be included
-//OLD 	
+//OLD
 //OLD 	There are 3 basic portions to the program which are easy to see in the main program.
-//OLD 	
+//OLD
 //OLD 	1. A data gathering stage
-//OLD 	
+//OLD
 //OLD 	2. A calculation of the state of ionization of the wind.
-//OLD 	
+//OLD
 //OLD 	3. A calculation of a detailed spectrum in which the ionization is held fixed.
-//OLD 	
-//OLD 		
+//OLD
+//OLD
 //OLD Notes:
 //OLD 	The program has been designed and tested both on Suns and MacIntoshes (with Symentec's
-//OLD 	C compiler).  Some of its peculiarities are due to memory limitations and relatively small 
+//OLD 	C compiler).  Some of its peculiarities are due to memory limitations and relatively small
 //OLD 	stack sizes on the Mac.  When compiling, check to see that the global varible MAC is
 //OLD 	set properly in python.h.
-//OLD 
+//OLD
 //OLD History:
 //OLD  	97jan   ksl	Coding on python began.
 //OLD  	97jul	ksl	Added capability model the spectrum as a function of orbital phase.
@@ -89,7 +89,7 @@
 //OLD  	97aug	ksl	Added capability to extract spectra with a specific number of scatters
 //OLD  	97nov	ksl	Changed error and diagnostic logging
 //OLD  	98july	ksl	Added radiation from the wind itself
-//OLD  	98nov	ksl	Added spherical winds and greatly modified I/O  
+//OLD  	98nov	ksl	Added spherical winds and greatly modified I/O
 //OLD 	99jan	ksl	Added ability to enter parameter file (w/out) root on command line
 //OLD 	99jul	ksl	Begin eliminating MAC dependencies
 //OLD 	00sep	ksl	Began work on adding a new coronal possibility
@@ -104,7 +104,7 @@
 //OLD 			because it does change a good bit of geo, since all of the
 //OLD 			input data is read in.  In principle, his can create an inconsistency
 //OLD 			between some of the info in geo and some in the wind array.
-//OLD 			But it keeps the wind the same, which is what was desired.  
+//OLD 			But it keeps the wind the same, which is what was desired.
 //OLD 	01dec	ksl	Added a general capability to python(40) so that during the
 //OLD 			the ionization cycle photons do not necessarily have identical
 //OLD 			weights.
@@ -124,10 +124,10 @@
 //OLD         04Mar   SS      Minor changes to set switch for macro atom method.
 //OLD                         geo.line_mode=6 switches geo.rt_mode=2 (macro method)
 //OLD                         and then geo.ine_mode back to =3. (SS)
-//OLD         04Apr   SS      Minor change to set a switch for geo.line_mode=7 
+//OLD         04Apr   SS      Minor change to set a switch for geo.line_mode=7
 //OLD                         which is the same as 6 but with anisotropic scattering
 //OLD         04May   SS      geo.line_mode=8 added: this mode is the same as mode 6
-//OLD                         BUT will treat all ions as simple - it is for 
+//OLD                         BUT will treat all ions as simple - it is for
 //OLD                         test purposes only.
 //OLD 	04Jun	ksl	Added new disk + wind model for ysos.  In process, moved
 //OLD 			the variables describing the wind mdots to subroutines
@@ -141,7 +141,7 @@
 //OLD 	04dec	ksl	54a -- Minor mod to calculation of fraction of luminosity that hits
 //OLD 			disk so that correct values are printed out in situation where there
 //OLD 			are multiple subcycles.
-//OLD 	04dec	ksl	54e -- Minor mod to record master atomic file in geo, and, for the 
+//OLD 	04dec	ksl	54e -- Minor mod to record master atomic file in geo, and, for the
 //OLD 			case of fixed concentration to store the file where the concentrations
 //OLD 			are contaned.
 //OLD 	05apr	ksl	56 -- Added new variable geo.binary_system to avoid binary system
@@ -154,7 +154,7 @@
 //OLD 	05jul	ksl	56d -- Completed basic work to allow vertically extended disk
 //OLD 	06may	ksl	57g -- Began work on modifying structures to lower memory requirments
 //OLD 			At empty wind cells have mostly been eliminated, and macroatoms
-//OLD 			have been split off into a separate structure so this is not 
+//OLD 			have been split off into a separate structure so this is not
 //OLD 			used.
 //OLD 	06jul	ksl	57h -- Have contined work to speed program up as much as possible
 //OLD 			by giving more control over the parameters that govern the speed
@@ -162,15 +162,15 @@
 //OLD 	06oct	ksl	58 -- This version is a cleaned up version of py57ib, which differs
 //OLD 			from 57h primarily in bb.c and pdf.c.   In addition, this version
 //OLD 			makes it possible to use the SV velocity law in what is otherwise
-//OLD 			a KWD description of the wind.  
-//OLD 	06nov	ksl	58c -- This version requires and updated version of kpar, that 
-//OLD 			keeps track of all the errors.  
+//OLD 			a KWD description of the wind.
+//OLD 	06nov	ksl	58c -- This version requires and updated version of kpar, that
+//OLD 			keeps track of all the errors.
 //OLD 	07aug	ksl	58f -- Modified the way in which the program handles a situation
 //OLD 			in which one attempts to run with a non-existent .pf file.
 //OLD 	08may	ksl	60a -- Significant modifications were made to the main routine
 //OLD 			to make sure we could restart models.  Unfortunaaely rhe point
 //OLD 			at which the user was asked for the atomic data needed to be changed,
-//OLD 			so earlier .pf files will need to be modified.  
+//OLD 			so earlier .pf files will need to be modified.
 //OLD 	080808	ksl	62 -- Cleaned up wind ionization options
 //OLD 	081110	ksl	67 -- Revised a number of portions of the main python.c routine
 //OLD 			to enable restarts.  There are still inconsistencies in the
@@ -185,15 +185,15 @@
 //OLD 			MSPEC still has meaning as the number of spectra of various types
 //OLD 			that are construced without going through types.
 //OLD 	1108	ksl/nsh Adding code to keep track of gross spectra in a cell though xbands,
-//OLD 			xj and xave_freq.  Just set up the frequence limits here.	
+//OLD 			xj and xave_freq.  Just set up the frequence limits here.
 //OLD 	1112	ksl	Moved everything associated with frequency bands into bands_init
 //OLD 	1212	nsh	changed the way DFUDGE is defined.
-//OLD         1302	jm	74b5 introduced double precision variable for photon number for calling 
+//OLD         1302	jm	74b5 introduced double precision variable for photon number for calling
 //OLD 			define_phot. Fixes Bug JM130302 in photon weights. It has been suggested
-//OLD 			that we should make NPHOT a long integer- at the moment I have not done 
-//OLD 			this and simply comverted to double before calling define_phot (otherwise 
+//OLD 			that we should make NPHOT a long integer- at the moment I have not done
+//OLD 			this and simply comverted to double before calling define_phot (otherwise
 //OLD 			I believe rdint would have to be redone for long integers).
-//OLD 	1304	ksl	75 rewrote the fix above to use a long, instead of double.  
+//OLD 	1304	ksl	75 rewrote the fix above to use a long, instead of double.
 //OLD 			This has plenty of range.  Notge that there is no need to make NPHOT
 //OLD 			a long, as suggested above.  We do not expect it to exceed 2e9,
 //OLD 			although some kind of error check might be reasonble.
@@ -202,7 +202,7 @@
 //OLD 	1307	jm	SS Parallelized Python in June 2013, for release 76a. I have now introduced
 //OLD 			slightly altered reporting to allow more succinct reporting in parallel mode.
 //OLD 	1307	ksl	Removed the Thierry & Hubeny O-star models as an option from the code.
-//OLD 			This was never tested, and never really used.  Knox no longer even has the 
+//OLD 			This was never tested, and never really used.  Knox no longer even has the
 //OLD 			models.  Note that Stuart is replacing this with a homologous expansion
 //OLD 			model
 //OLD 	1308	nsh	Added a call to generate rtheta wind cones - issue #41
@@ -221,9 +221,9 @@
 //OLD 	1508	ksl	Instroduction of the concept of domains to handle the disk and wind as separate
 //OLD 			domains
 //OLD     1711    ksl Removed the Elvis wind option
-//OLD  	
+//OLD
 //OLD  	Look in Readme.c for more text concerning the early history of the program.
-//OLD 
+//OLD
 //OLD **************************************************************/
 
 
@@ -244,10 +244,10 @@
 
 
 /**********************************************************/
-/** 
+/**
  * @brief     The main routine for Python, which supervises the ingest of data defining a model, the initializtion
- * of the model, and actual run of the model, and writing the data to the disk 
- * 	
+ * of the model, and actual run of the model, and writing the data to the disk
+ *
  *
  * @param [in] int  argc   The number of command line arguments
  * @param [in] char *  argv[]   The command line arguments
@@ -270,7 +270,7 @@
  *
  *  Additionally, there is logic associated with the fact that different types of models require different data.  An AGN for example does
  *  not have (the possibility of) a secondary star.  Most of the inputs from Python come from a parameter file, but Python also has a robust
- *  set of command line switches (See parse_command_line).  
+ *  set of command line switches (See parse_command_line).
  *
  *  Once all the inputs are obtained, the main routine calles routines to allocate data structures needed  to hold the model and to complete
  *  the intialization of both the data structues and various other variables.
@@ -301,9 +301,9 @@ main (argc, argv)
 
   int my_rank;			// these two variables are used regardless of parallel mode
   int np_mpi;			// rank and number of processes, 0 and 1 in non-parallel
-  
 
-  
+
+
 
 
 #ifdef MPI_ON
@@ -320,9 +320,9 @@ main (argc, argv)
   Log_set_mpi_rank (my_rank, np_mpi);	// communicates my_rank to kpar
 
 
-  opar_stat = 0;		/* Initialize opar_stat to indicate that if we do not open a rdpar file, 
+  opar_stat = 0;		/* Initialize opar_stat to indicate that if we do not open a rdpar file,
 				   the assumption is that we are reading from the command line */
-  restart_stat = 0;		/* Assume initially that these is a new run from scratch, and not 
+  restart_stat = 0;		/* Assume initially that these is a new run from scratch, and not
 				   a restart */
   time_max = 13.8e9 * 3.2e7;	/* The maximum time the program will run without stopping.  This
 				   is initially set to the lifetime of the universe */
@@ -344,7 +344,7 @@ main (argc, argv)
 
   restart_stat = parse_command_line (argc, argv);
 
-  /* If the restart flag has been set, we check to see if a windsave file exists.  If it doues we will 
+  /* If the restart flag has been set, we check to see if a windsave file exists.  If it doues we will
      we will restart from that point.  If the windsave file does not exist we will start from scratch */
 
   init_log_and_windsave (restart_stat);
@@ -389,7 +389,7 @@ main (argc, argv)
      of the system */
 
 
-  if (restart_stat == 1)	/* We want to continue a run. This is generally used 
+  if (restart_stat == 1)	/* We want to continue a run. This is generally used
 				   because we had to limit to runtime of python or we decided
 				   we needed more ionization or spectral cycles */
     {
@@ -420,7 +420,7 @@ main (argc, argv)
 
       /* First,  establish the overall system type.  XXX System type should be a physical system,
        * to make things easier for the user.  So really want system types to be something like
-       * CV, YSO, AGN so that defaults can be set. 
+       * CV, YSO, AGN so that defaults can be set.
        */
 
       geo.system_type = SYSTEM_TYPE_STAR;
@@ -432,9 +432,9 @@ main (argc, argv)
       if (geo.system_type == SYSTEM_TYPE_PREVIOUS)
 	{
 
-	  /* This option is for the confusing case where we want to start with a previous wind 
-	     model,(presumably because that run produced a wind close to the one we are looking for, 
-	     but we are going to change some parameters that do not affect the wind geometry,  
+	  /* This option is for the confusing case where we want to start with a previous wind
+	     model,(presumably because that run produced a wind close to the one we are looking for,
+	     but we are going to change some parameters that do not affect the wind geometry,
 	     We will write use new filenames for the results, so all of the previous work is still saved,
 	   */
 
@@ -465,7 +465,7 @@ main (argc, argv)
 
       if (geo.run_type == RUN_TYPE_NEW || geo.run_type == RUN_TYPE_PREVIOUS)
 	{
-	  /* This option is the most common one, where we are starting to define a completely new system.  
+	  /* This option is the most common one, where we are starting to define a completely new system.
 	   */
 
 
@@ -484,7 +484,7 @@ main (argc, argv)
 	  get_disk_params ();
 
 
-	  /* describe the boundary layer / agn components to the spectrum if they exist. 
+	  /* describe the boundary layer / agn components to the spectrum if they exist.
 	     So that initial condiditions for the bl and agn are initialized sensibly this has
 	     to come after the disk is defined.
 	   */
@@ -501,16 +501,16 @@ main (argc, argv)
 	      exit (0);
 	    }
 
-	  /* Describe the wind. This routine reads in geo.rmax and geo.twind
-	     and then gets params by calling e.g. get_sv_wind_params() */
+	  /* Describe the wind (or more correctly the various domains).
+       */
 
 
 	  rdpar_comment
 	    ("Parameters descibing the various winds or coronae in the system");
 
 	  rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
-      /* JM 1806 -- note that wind radiation will get "turned off" in indivisible packet/macro-atom 
-         mode when geo.rt_mode == RT_MODE_MACRO. This is done in get_line_transfer_mode () in 
+      /* JM 1806 -- note that wind radiation will get "turned off" in indivisible packet/macro-atom
+         mode when geo.rt_mode == RT_MODE_MACRO. This is done in get_line_transfer_mode () in
          setup_domains.c, see issue #390 */
 
 	  if (geo.run_type == RUN_TYPE_NEW)
@@ -537,52 +537,47 @@ main (argc, argv)
 
 
 /* Get the remainder of the input data.  Note that the next few lines are read from the input file whether or not the windsave file was read in,
-   because these are things one would like to be able to change even if we have read in an old windsave file.  init_photons reads in 
+   because these are things one would like to be able to change even if we have read in an old windsave file.  init_photons reads in
    the numbers of ionization and spectral cycles and then instatiates PhotPtr.  It is possilbe that this should be moved to else where in
    the flow of reading in data.
  */
 
-  /* XXX- All operating modes */
+  /* All operating modes */
+  rdpar_comment("Parameters associated with photon number, cycles,ionization and radiative transfer options");
+
   init_photons ();
-
-
 
   /* Define how ionization is going to be calculated */
 
-  /* XXX- All operating modes */
+  /* All operating modes */
   init_ionization ();
 
 
 
 
-  /* Note: ksl - At this point, SYSTEM_TYPE_PREVIOUS refers both to a restart and to a situation where 
+  /* Note: ksl - At this point, SYSTEM_TYPE_PREVIOUS refers both to a restart and to a situation where
    * one is starting from an early wind file as implemented this is quite restrictive about what one
    * can change in the previous case.   */
 
   if (geo.run_type == RUN_TYPE_NEW)	// Start of block to define a model for the first time
     {
 
-
       /* Describe the wind, by calling get_wind_params one or more times
-         and then gets params by calling e.g. get_sv_wind_params() 
-         XXX - There is currently an issue that geo.ramax is scked for
-         multiple times. */
+         and then gets params by calling e.g. get_sv_wind_params() */
 
-
-      for (n = 0; n < geo.ndomain; n++)
-	{
-	  rdpar_comment ("Parameters for Domain %d", n);
-	  get_wind_params (n);
-	}
+    for (n = 0; n < geo.ndomain; n++)
+      {
+	    rdpar_comment ("Parameters for Domain %d", n);
+	    get_wind_params (n);
+      }
 
     }				// End of block to define a model for the first time
-
   else if (modes.zeus_connect == 1)	/* We are in rad-hydro mode, we want the new density and temperature */
     {
       /* Hydro takes the wind domain number as an argument in the current domains setup */
       Log
 	("We are going to read in the density and temperature from a zeus file\n");
-      get_hydro (geo.hydro_domain_number);	//This line just populates the hydro structures  
+      get_hydro (geo.hydro_domain_number);	//This line just populates the hydro structures
     }
 
 
@@ -643,7 +638,7 @@ main (argc, argv)
   geo.select_spectype = 1;
 
 /* Completed initialization of this section.  Note that get_spectype uses the source of the
- * ratiation and then value given to return a spectrum type. The output is not the same 
+ * ratiation and then value given to return a spectrum type. The output is not the same
  * number as one inputs. It' s not obvious that this is a good idea. */
 
   if (geo.pcycles > 0)
@@ -674,7 +669,7 @@ main (argc, argv)
   get_standard_care_factors ();
   get_meta_params ();
 
-/* Establish limits on the frequency intervals to be used by the ionization cycles and 
+/* Establish limits on the frequency intervals to be used by the ionization cycles and
  * the fraquency bands for stratified sampling. These bands are alos used as the spectral
  * intervals for creating crude spectra in each of the cells
  *
@@ -730,36 +725,36 @@ main (argc, argv)
   /* INPUTS ARE FINALLY COMPLETE */
 
   /* Print out some diagnositic infomration about the domains */
-	
-	
+
+
 
 
   Log ("There are %d domains\n", geo.ndomain);
   for (n = 0; n < geo.ndomain; n++)
     {
-      Log ("%20s type: %d  ndim: %d mdim: %d ndim2: %d\n", zdom[n].name,
+      Log ("%20s type: %3d  ndim: %3d mdim: %3d ndim2: %4d\n", zdom[n].name,
 	   zdom[n].wind_type, zdom[n].ndim, zdom[n].mdim, zdom[n].ndim2);
     }
-	
-	
+
+
 
 
   /* DFUDGE is a distance that assures we can "push through" boundaries.  setup_dfudge
-     sets the push through distance depending on the size of the system. 
+     sets the push through distance depending on the size of the system.
    */
 
   DFUDGE = setup_dfudge ();
 
   /* Now define the wind cones generically. modifies the global windcone structure */
   setup_windcone ();
-  
-  
+
+
 
 
    /* initialize the random number generator */
    /* By default, the random number generator start with fixed seeds (differnt
     * for each processor, but this can be changed using a command line
-    * switch.  
+    * switch.
     *
     * An exception is when we are in zeus mode, where it would be inappropriate
     * to use the same phtons in ezch cycle.  There we initiate the seeds unsing
@@ -769,7 +764,7 @@ main (argc, argv)
      {
        n = (unsigned int) clock () * (rank_global + 1);
  	  init_rand(n);
-	  
+
      }
    else
    {
@@ -784,8 +779,8 @@ main (argc, argv)
     {
       define_wind ();
     }
-	
-	
+
+
 
   if (modes.zeus_connect == 1)	//We have restarted, but are in zeus connect mode, so we want to update density, temp and velocities
     {
@@ -806,7 +801,7 @@ main (argc, argv)
     }
 
 
-  
+
 
   /* Start with photon history off */
   phot_hist_on = 0;
@@ -864,7 +859,7 @@ main (argc, argv)
   freqmin = C / (geo.swavemax * 1.e-8);
 
   /* Perform the initilizations required to handle macro-atoms during the detailed
-     calculation of the spectrum.  
+     calculation of the spectrum.
 
      Next lines turns off macro atom estimators and other portions of the code that are
      unnecessary during spectrum cycles.  */
@@ -876,7 +871,7 @@ main (argc, argv)
 
   if (!modes.keep_photoabs)
     {
-      DENSITY_PHOT_MIN = -1.0;	// Do not calculated photoabsorption in detailed spectrum 
+      DENSITY_PHOT_MIN = -1.0;	// Do not calculated photoabsorption in detailed spectrum
     }
 
   /*Switch on k-packet/macro atom emissivities  SS June 04 */

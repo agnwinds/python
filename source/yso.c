@@ -10,8 +10,6 @@
  * a KWD wind in some places and a stellar wind elsewhere.  The model is for
  * a stellar wind within the inner windcone.
  *
- * 	XXX The yso implemetentation works but could be reimplemented
- * 	with domains.
  * 
  ***********************************************************/
 

@@ -45,6 +45,19 @@
  * go_to level in an array when one is calculating the emission probabilities. This would
  * make it easier to add new processes, I suspect. 
  * 
+ * CK20180801: 
+ * 
+ *           in non-macro atom mode, the only continuum process treates as scattering is 
+ *           electron scattering, and this is assigned nres = -1. The only valid values 
+ *           of nres in non-macro-atom mode are therefore nres = -1 and 0 <= nres <= nlines-1
+ *           (with the lattter range covering the lines).
+ * 
+ *           in macro atom mode, nres = -1 indicates electron scattering, 
+ *           nres = -2 indicates ff, and nres > NLINES indicates bound-free. 
+ * 	     [nres == NLINES is never used. Note also that NLINES is the *max* number of lines, whereas nlines
+ *	     is the *actual* number of lines. So, actually, it's not just nres = NLINES that's never used, but 
+ *	     the entire range of nlines <= nres <= NLINES]
+ * 
  * It would be possible to convert the for loop to a while statement.  This would avoid the
  * break statement in the middle.  
  * 

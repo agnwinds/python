@@ -139,7 +139,7 @@ in units of WD radii */
      means that wind_rho_max nees to be redefined so that it is used correctly
      to compute the boundary of the wind elsewhere. */
 
-  // XXX Next lines supercede definitions above and look wrong
+  // XXX Next lines for a vertically extended disk supercede definitions above and look wrong
   if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
   {
     zdom[ndom].wind_rho_max = geo.diskrad - (zdisk (geo.diskrad) * tan (zdom[ndom].wind_thetamax));
