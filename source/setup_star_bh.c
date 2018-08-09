@@ -171,7 +171,7 @@ get_bl_and_agn_params (lstar)
 		"Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind",
 		&geo.agn_ion_spectype);
 
-  /* 130621 - ksl - This is a kluge to add a power law to stellar systems.  What id done
+  /* 130621 - ksl - This is a kluge to add a power law to stellar systems.  What is done
      is to remove the bl emission, which we always assume to some kind of temperature
      driven source, and replace it with a power law source
 

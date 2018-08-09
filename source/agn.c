@@ -26,7 +26,7 @@
  * @brief      Calculates the total luminosity of an AGN type source
  *
  * @param [in] double  r   radius of emitting object
- * @param [in] double  lum   the luminosity of the AGN (2-10keV) - XXX I'm not sure this is used apart from 
+ * @param [in] double  lum   the luminosity of the AGN (2-10keV) - only used as a dummy parameter for generating models 
  * @param [in] double  alpha   the spectral index of the PL source - also sometimes used for a temperature if a BB source is required
  * @param [in] double  freqmin   minimum frequency to integrate over
  * @param [in] double  freqmax   maximum frequency
@@ -42,9 +42,11 @@
  * 
  *
  * ### Notes ###
- * There seem to be some inconsistencies here - lum (the 2-10keV luminosity of the
- * PL source) is supplied but it doesnt seem to be used apart from in the emittance_continuum
- * which is nonsense - this requires a temperature and a local gravity
+ * There are some inconsistencies here - lum (the 2-10keV luminosity of the
+ * PL source) is supplied but it isn't used apart from in the emittance_continuum
+ * where it is used as a dummy - this code requires a temperature and a local gravity
+ * but here we use lum and alpha as variables to access some kind of model SED that
+ * doesnt use temperature and gravity - clearly needs to be fixed.
  * Another inconsistency is that the bremstrahlung code uses values for T and alpha that
  * are stored in the geo structure, whilst the power law uses data supplied in the code.
  *
@@ -67,9 +69,9 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
     spectype = geo.agn_ion_spectype;    /*type for ionization calculation */
   if (spectype >= 0)
   {
-    /* Assume that if we simulate the continuum for an AGN that emit is the luminosity in a specific range */
-	  /* XXX I'm not sure this call is correct - it would be for a set of models, which are gridded in t and log g - but we 
-	  supply lum and alpha */
+    /* XXX This calls models, but the normal stellar atmpspheres models are not really suitable for 
+	  an AGN. So when this mode is used, we summply dummy variables in lum and alpha to generate
+	  a model SED. Urgent to fix. */
     emit = emittance_continuum (spectype, freqmin, freqmax, lum, alpha); 
     *f = emit;
   }
@@ -92,7 +94,7 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
   else if (spectype == SPECTYPE_CL_TAB) //A specical broken power law mode made to match cloudy - mainly for testing purposes
   {
     /* Emittance_pow actually returns the specific luminosity directly */
-    emit = emittance_bpow (freqmin, freqmax, lum, alpha);
+    emit = emittance_bpow (freqmin, freqmax, alpha);
     *f = emit;
   }
   else if (spectype == SPECTYPE_BREM) //Bremstrahlung - uses T and alpha which are stored in geo. 
@@ -169,31 +171,6 @@ emittance_pow (freqmin, freqmax, alpha)
 }
 
 
-
-
-//OLD /**************************************************************************
-//OLD                     Southampton University
-//OLD 
-//OLD 
-//OLD   Synopsis:  emittance_bpow computes the emittance of a broken power law coded to try to replicate the cloudy table type power law. There are three sections - a central bit, which should cover the 2-10kev portion of the spectrum, a low frequency tail and a high frequency tail . 
-//OLD 
-//OLD   Description:	
-//OLD 
-//OLD   Arguments:  freqmin and freqmax are the min and max frequencies that we are generating photons over, lum is the 2-10kev luminosity and alpha is the 2-10kev slope.
-//OLD 
-//OLD 
-//OLD   Returns:   The emittance of the whole power law.
-//OLD 
-//OLD   Notes:
-//OLD 
-//OLD 
-//OLD   History:
-//OLD 10oct	nsh	oded as part of initial effort to include a power law component
-//OLD 		to AGN
-//OLD 
-//OLD  ************************************************************************/
-
-
 /**********************************************************/
 /** 
  * @brief      Works out the luminosity of a broken power law
@@ -211,21 +188,18 @@ emittance_pow (freqmin, freqmax, alpha)
  *
  *
  * ### Notes ###
- * ??? NOTES ???
+ * 
  *
  **********************************************************/
 
 double
-emittance_bpow (freqmin, freqmax, lum, alpha)
-     double freqmin, freqmax, lum, alpha;
+emittance_bpow (freqmin, freqmax, alpha)
+     double freqmin, freqmax, alpha;
 {
   double constant_low, constant_hi, emit;
   double e1, e2, e3;
   double atemp, ctemp, f1, f2;
-  double pl_low, pl_hi;
-  /* these are the frequencies over which the power law is defined - currently set to the
-     equivalent of 2 to 10 keV */
-
+  double pl_low, pl_hi; //The low and high frequency breaks in the power law spectrum
 
 #define   XFREQMIN  4.84e17
 #define   XFREQMAX  2.42e18
@@ -240,7 +214,7 @@ emittance_bpow (freqmin, freqmax, lum, alpha)
   pl_hi = geo.agn_cltab_hi / HEV;
 
 
-  constant_low = xband.pl_const[0];     //we have already worked out the constants
+  constant_low = xband.pl_const[0];     //we have already worked out the constants in bands.c
   constant_hi = xband.pl_const[xband.nbands - 1];
 
 
@@ -338,13 +312,6 @@ emittance_bpow (freqmin, freqmax, lum, alpha)
 
 
 
-
-
-
-
-
-
-
 /**********************************************************/
 /** 
  * @brief      Generate a photon from an AGN object
@@ -395,7 +362,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
     Error ("photo_gen_agn: iend %d > NPHOT %d\n", iend, NPHOT);
     exit (0);
   }
-  if (f2 < f1) //ASnother consistency check - it is not sensible to have the upper frequency lower than the lower frequency
+  if (f2 < f1) //Another consistency check - it is not sensible to have the upper frequency lower than the lower frequency
   {
     Error ("photo_gen_agn: Cannot generate photons if freqmax %g < freqmin %g\n", f2, f1);
   }
@@ -476,9 +443,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
       /* Added by SS August 2004 for finite disk. */
       if (geo.disk_type == DISK_VERTICALLY_EXTENDED)
       {
-        /* JM XXX -- is this bit right? it seems to be that zdisk should use the x coordinate rather than
-           magnitude of vector (r).*/
-        while (fabs (p[i].x[2]) < zdisk (r)) //We just need to make sure that the photon isn't submerged in the extneded disk
+        while (fabs (p[i].x[2]) < zdisk (p[i].x[0])) //We just need to make sure that the photon isn't submerged in the extneded disk
         {
           randvec (p[i].x, r);
         }
@@ -490,8 +455,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
           exit (0);
         }
       }
-      /* this last bit is the direction, might need a change XXX NSH why? A bit of an obscure note...*/
-      randvcos (p[i].lmn, p[i].x);
+      randvcos (p[i].lmn, p[i].x); //Random direction centred on the previously randmised vector
     }
 
 
