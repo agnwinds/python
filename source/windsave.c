@@ -101,6 +101,7 @@ in the plasma structure */
 
     n += fwrite (plasmamain[m].levden, sizeof (double), nlte_levels, fptr);
     n += fwrite (plasmamain[m].recomb_simple, sizeof (double), nphot_total, fptr);
+    n += fwrite (plasmamain[m].recomb_simple_upweight, sizeof (double), nphot_total, fptr);
     n += fwrite (plasmamain[m].kbf_use, sizeof (double), nphot_total, fptr);
   }
 
@@ -261,6 +262,7 @@ wind_read (filename)
 
     n += fread (plasmamain[m].levden, sizeof (double), nlte_levels, fptr);
     n += fread (plasmamain[m].recomb_simple, sizeof (double), nphot_total, fptr);
+    n += fread (plasmamain[m].recomb_simple_upweight, sizeof (double), nphot_total, fptr);
     n += fread (plasmamain[m].kbf_use, sizeof (double), nphot_total, fptr);
   }
 

@@ -739,6 +739,15 @@ calloc_dyn_plasma (nelem)
 	  exit (0);
 	}
 
+      if ((plasmamain[n].recomb_simple_upweight =
+	   calloc (sizeof (double), nphot_total)) == NULL)
+	{
+	  Error
+	    ("calloc_dyn_plasma: Error in allocating memory for recomb_simple_upweight\n");
+	  exit (0);
+	}
+
+      
       if ((plasmamain[n].kbf_use =
 	   calloc (sizeof (double), nphot_total)) == NULL)
 	{

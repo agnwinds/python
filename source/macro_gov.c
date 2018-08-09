@@ -143,19 +143,10 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
         /* This is a bf continuum but we don't want the full macro atom treatment. */
       {
 #if BF_SIMPLE_EMISSIVITY_APPROACH
-        /* This doesn't matter but it breaks us out of this loop */
-        if (geo.matom_radiation == 1)
-        {
-          p->w = 0.0;
-          escape = 1;
-        }   
-        else 
-        {  
+	   Error("Macro_go: Error - trying to access fake_matom_bf in alternate bf treatment.\n");
+	   exit (0);
 #endif
           fake_matom_bf (p, nres, &escape);
-#if BF_SIMPLE_EMISSIVITY_APPROACH
-        }
-#endif
       }
 
       matom_or_kpkt = 2;        //if it did not escape then it must have had a
