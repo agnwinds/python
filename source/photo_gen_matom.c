@@ -137,7 +137,8 @@ get_matom_f (mode)
 
 
 
-    Log ("Calculating macro atom emissivities- this might take a while...\n");
+    Log ("Calculating macro-atom and k-packet emissivities- this might take a while...\n");
+    Log ("Number of macro-atom levels: %d\n", nlevels_macro);
 
     /* For MPI parallelisation, the following loop will be distributed over multiple tasks. 
        Note that the mynmim and mynmax variables are still used even without MPI on */
@@ -283,6 +284,9 @@ get_matom_f (mode)
                 ppp.nres = nres;
                 ppp.grid = plasmamain[n].nwind;
                 ppp.w = 0;
+                /* this needs to be initialised because we set to istat to P_ADIABATIC
+                   for adiabatic destruction */
+                ppp.istat = P_INWIND; 
 
                 macro_gov (&ppp, &nres, 1, &which_out);
 
@@ -300,6 +304,9 @@ get_matom_f (mode)
                 ppp.nres = nres;
                 ppp.grid = plasmamain[n].nwind;
                 ppp.w = 0;
+                /* this needs to be initialised because we set to istat to P_ADIABATIC
+                   for adiabatic destruction */
+                ppp.istat = P_INWIND;
 
                 macro_gov (&ppp, &nres, 2, &which_out);
 
@@ -307,7 +314,7 @@ get_matom_f (mode)
               }
 
 
-              if (ppp.freq > em_rnge.fmin && ppp.freq < em_rnge.fmax)
+              if (ppp.freq > em_rnge.fmin && ppp.freq < em_rnge.fmax && ppp.istat != P_ADIABATIC)
               {
                 if (which_out == 1)
                 {
