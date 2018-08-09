@@ -362,7 +362,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
     Error ("photo_gen_agn: iend %d > NPHOT %d\n", iend, NPHOT);
     exit (0);
   }
-  if (f2 < f1) //ASnother consistency check - it is not sensible to have the upper frequency lower than the lower frequency
+  if (f2 < f1) //Another consistency check - it is not sensible to have the upper frequency lower than the lower frequency
   {
     Error ("photo_gen_agn: Cannot generate photons if freqmax %g < freqmin %g\n", f2, f1);
   }
