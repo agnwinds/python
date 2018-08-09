@@ -333,6 +333,7 @@ WindPtr (w);
         MPI_Pack (&plasmamain[n].kappa_ff_factor, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].nscat_es, 1, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].recomb_simple, nphot_total, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
+	MPI_Pack (plasmamain[n].recomb_simple_upweight, nphot_total, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].kpkt_emiss, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (&plasmamain[n].kpkt_abs, 1, MPI_DOUBLE, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
         MPI_Pack (plasmamain[n].kbf_use, nphot_total, MPI_INT, commbuffer, size_of_commbuffer, &position, MPI_COMM_WORLD);
@@ -471,6 +472,7 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].kappa_ff_factor, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].nscat_es, 1, MPI_INT, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].recomb_simple, nphot_total, MPI_DOUBLE, MPI_COMM_WORLD);
+	MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].recomb_simple_upweight, nphot_total, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].kpkt_emiss, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].kpkt_abs, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, plasmamain[n].kbf_use, nphot_total, MPI_INT, MPI_COMM_WORLD);
@@ -1033,6 +1035,7 @@ wind_rad_init ()
 {
   int n, i;
   int njump;
+  double alpha_store;
 
 
   for (n = 0; n < NPLASMA; n++)
@@ -1145,10 +1148,12 @@ wind_rad_init ()
       if (geo.macro_simple==0 && phot_top[i].macro_info==1)
       {
         plasmamain[n].recomb_simple[i] = 0.0;
+	plasmamain[n].recomb_simple_upweight[i] = 1.0;
       }
       else
       {                         //we want a macro approach, but not for this ion so need recomb_simple
-        plasmamain[n].recomb_simple[i] = alpha_sp (&phot_top[i], &plasmamain[n], 2);
+        plasmamain[n].recomb_simple[i] = alpha_store = alpha_sp (&phot_top[i], &plasmamain[n], 2);
+	plasmamain[n].recomb_simple_upweight[i] = alpha_sp (&phot_top[i], &plasmamain[n], 1) / alpha_store;
       }
     }
 

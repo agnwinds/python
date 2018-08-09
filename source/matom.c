@@ -1005,7 +1005,7 @@ kpkt (p, nres, escape)
         /* Now (as in matom) choose a frequency for the new packet. */
 
         //p->freq = phot_top[i].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
-	      p->freq = matom_select_bf_freq(one, i);
+	 p->freq = matom_select_bf_freq(one, i);
 
         /* if the cross-section corresponds to a simple ion (macro_info == 0)
            or if we are treating all ions as simple, then adopt the total emissivity
@@ -1015,7 +1015,7 @@ kpkt (p, nres, escape)
 #if BF_SIMPLE_EMISSIVITY_APPROACH
         if (phot_top[i].macro_info == 0 || geo.macro_simple == 1) 
         {
-          upweight_factor = p->freq / (p->freq - phot_top[i].freq[0]);
+          upweight_factor = xplasma->recomb_simple_upweight[i]; 
           p->w *= upweight_factor;
 
           /* record the amount of energy being extracted from the simple ion ionization pool */
