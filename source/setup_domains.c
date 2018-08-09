@@ -179,42 +179,6 @@ int
 get_wind_params (ndom)
      int ndom;
 {
-  // XXX These need to be initalized sensibly and 
-  // it is not obvious that is happenning
-
-  zdom[ndom].rmax = 1e12;
-
-  if (geo.system_type == SYSTEM_TYPE_AGN)
-    {
-      zdom[ndom].rmax = 50. * geo.r_agn;
-    }
-
-
-
-  /* XXX - This should be part of the individual get_wind_parameters, not here 
-   * Note that one cannot simply move the next statemnts to below the specify the various wind
-   * of domains, for reasons that are unclear.  If you do this sn_1d will fail.*/
-
-  rddoub ("Wind.radmax(cm)", &zdom[ndom].rmax);
-
-  if (zdom[ndom].rmax <= zdom[ndom].rmin) {
-      Error("get_wind_parameters: rmax (%10.4e) less than or equal to rmin %10.4e in domain %d\n",zdom[ndom].rmax,zdom[ndom].rmin,ndom);
-      exit(0);
-  }
-
-  rddoub ("Wind.t.init", &geo.twind_init);
-
-
-  /* Next lines are to assure that we have the largest possible value of the 
-   * sphere surrounding the system
-   * JM 1710 -- if this is the first domain, then initialise geo.rmax see #305
-   */
-  if ((ndom == 0) || (zdom[ndom].rmax > geo.rmax))
-    {
-      geo.rmax = zdom[ndom].rmax;
-    }
-  geo.rmax_sq = geo.rmax * geo.rmax;
-
 
   /* Now get parameters that are specific to a given wind model
 
@@ -264,6 +228,42 @@ get_wind_params (ndom)
       Error ("get_wind_parameters: Unknown wind type %d\n", zdom[ndom].wind_type);
       exit (0);
     }
+
+  // XXX These need to be initalized sensibly and 
+  // it is not obvious that is happenning
+
+  zdom[ndom].rmax = 1e12;
+
+  if (geo.system_type == SYSTEM_TYPE_AGN)
+    {
+      zdom[ndom].rmax = 50. * geo.r_agn;
+    }
+
+
+
+  /* XXX - This should be part of the individual get_wind_parameters, not here 
+   * Note that one cannot simply move the next statemnts to below the specify the various wind
+   * of domains, for reasons that are unclear.  If you do this sn_1d will fail.*/
+
+  rddoub ("Wind.radmax(cm)", &zdom[ndom].rmax);
+
+  if (zdom[ndom].rmax <= zdom[ndom].rmin) {
+      Error("get_wind_parameters: rmax (%10.4e) less than or equal to rmin %10.4e in domain %d\n",zdom[ndom].rmax,zdom[ndom].rmin,ndom);
+      exit(0);
+  }
+
+  rddoub ("Wind.t.init", &geo.twind_init);
+
+
+  /* Next lines are to assure that we have the largest possible value of the 
+   * sphere surrounding the system
+   * JM 1710 -- if this is the first domain, then initialise geo.rmax see #305
+   */
+  if ((ndom == 0) || (zdom[ndom].rmax > geo.rmax))
+    {
+      geo.rmax = zdom[ndom].rmax;
+    }
+  geo.rmax_sq = geo.rmax * geo.rmax;
 
   /* Get the filling factor of the wind */
   // XXX  This may  not in the right place to set the filling factor.  
