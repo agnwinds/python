@@ -418,9 +418,9 @@ main (argc, argv)
   else if (restart_stat == 0)	/* We are starting a new run, which is the normal mode of operation */
     {
 
-      /* First,  establish the overall system type.  XXX System type should be a physical system,
+      /* First,  establish the overall system type.  System type should be a physical system,
        * to make things easier for the user.  So really want system types to be something like
-       * CV, YSO, AGN so that defaults can be set.
+       * CV, YSO, AGN so that defaults can be set.  This is now issue #420
        */
 
       geo.system_type = SYSTEM_TYPE_STAR;

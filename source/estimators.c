@@ -1017,6 +1017,12 @@ get_gamma (cont_ptr, xplasma)
   cont_ext_ptr2 = cont_ptr;     //external cont pointer
   fthresh = cont_ptr->freq[0];  //first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
+  if ((H_OVER_K * (flast-fthresh) / temp_ext2) > ALPHA_MATOM_NUMAX_LIMIT)
+    {
+      //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
+      flast = fthresh + temp_ext2 * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
+    }
+
 
   gamma_value = qromb (gamma_integrand, fthresh, flast, 1e-4);
 
@@ -1090,6 +1096,12 @@ get_gamma_e (cont_ptr, xplasma)
   cont_ext_ptr2 = cont_ptr;     //external cont pointer
   fthresh = cont_ptr->freq[0];  //first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
+  if ((H_OVER_K * (flast-fthresh) / temp_ext2) > ALPHA_MATOM_NUMAX_LIMIT)
+    {
+      //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
+      flast = fthresh + temp_ext2 * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
+    }
+
 
   gamma_e_value = qromb (gamma_e_integrand, fthresh, flast, 1e-4);
 
@@ -1164,7 +1176,16 @@ get_alpha_st (cont_ptr, xplasma)
   cont_ext_ptr2 = cont_ptr;     //"
   fthresh = cont_ptr->freq[0];  //first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
+
+  if ((H_OVER_K * (flast-fthresh) / temp_ext2) > ALPHA_MATOM_NUMAX_LIMIT)
+    {
+      //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
+      flast = fthresh + temp_ext2 * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
+    }
+
+  
   alpha_st_value = qromb (alpha_st_integrand, fthresh, flast, 1e-4);
+
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
      through by the appropriate constant. */
@@ -1251,6 +1272,14 @@ get_alpha_st_e (cont_ptr, xplasma)
   cont_ext_ptr2 = cont_ptr;     //"
   fthresh = cont_ptr->freq[0];  //first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
+
+  if ((H_OVER_K * (flast-fthresh) / temp_ext2) > ALPHA_MATOM_NUMAX_LIMIT)
+    {
+      //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
+      flast = fthresh + temp_ext2 * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
+    }
+
+  
   alpha_st_e_value = qromb (alpha_st_e_integrand, fthresh, flast, 1e-4);
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
