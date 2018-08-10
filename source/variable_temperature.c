@@ -259,12 +259,8 @@ variable_temperature (xplasma, mode)
 
 
         t_e_part_correct = xplasma->partition[nion - 1] / xplasma->partition[nion];
-        partition_functions_2 (xplasma, nion, t_e, 0);  /* Our only real guess here is that the
-                                                           electron temperature might give a good
-                                                           estimate of the partition function
-                                                           XXXX - ksl - Why is it that we set the weight to 0 here rather than to 1 as
-                                                           above.  Is this the reason we have to recalculate all of the partition
-                                                           function at the bottom of the routine*/
+        partition_functions_2 (xplasma, nion, t_e, 0);  /* Get the partition functions assuming all ions
+															are in the ground state (hanve the zero)*/
 
         t_e_part_correct *= (xplasma->partition[nion] / xplasma->partition[nion - 1]);
 
@@ -407,8 +403,8 @@ variable_temperature (xplasma, mode)
 
   partition_functions (xplasma, NEBULARMODE_LTE_GROUND);
 
-  /* XXX WARNING fudge NSH 11/5/14 - this is as a test.
- We really need a better implementation of partition functions and levels
+  /* This sets all ions to the ground state.
+  We really need a better implementation of partition functions and levels
  for a power law illuminating spectrum. We found that if we didnt make this call,
  we would end up with undefined levels - which did really crazy things */
 
