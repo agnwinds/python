@@ -74,6 +74,7 @@ import os
 import shutil
 import py_error
 import balmer_decrement 
+import regression_check
 
 
 
@@ -294,7 +295,7 @@ def doit(version='py',pf_dir='',out_dir='',np=3,outputfile='Summary.txt'):
 
     # Return to the place where the code was made from
     os.chdir(cwd)
-    return
+    return out_dir
 	
 def run_cmds(commands,root_names,outputfile):
     f=open(outputfile,'a')
@@ -452,7 +453,11 @@ def steer(argv):
         return
 
     for one in words:
-        doit(version=one,pf_dir=pf_dir,out_dir=out_dir,np=np,outputfile='Summary.txt')
+        q=doit(version=one,pf_dir=pf_dir,out_dir=out_dir,np=np,outputfile='Summary.txt')
+
+    # Now run regression checks between this run and the last time the routine was run
+
+    regression_check.doit(q)
 
 
 
