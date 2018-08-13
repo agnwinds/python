@@ -927,7 +927,6 @@ typedef struct photon_store
 PhotStorePtr photstoremain;
 
 
-
 typedef struct macro
 {
   double *jbar;
@@ -1418,9 +1417,14 @@ files;
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
 
+
 /* modes for kpkt calculations */
 #define KPKT_MODE_CONTINUUM  0  /* only account for k->r processes */
 #define KPKT_MODE_ALL        1  /* account for all cooling processes */  
+
+/* Variable introducted to cut off macroatom / estimator integrals when exponential function reaches extreme values. Effectivevly a max limit imposed on x = hnu/kT terms */
+#define ALPHA_MATOM_NUMAX_LIMIT 30 /* maximum value for h nu / k T to be considered in integrals */
+
 
 /* non-radiative heat flow mode */
 #define KPKT_NET_HEAT_MODE 0

@@ -403,7 +403,7 @@ int check_time(char *root);
 /* agn.c */
 double agn_init(double r, double lum, double alpha, double freqmin, double freqmax, int ioniz_or_final, double *f);
 double emittance_pow(double freqmin, double freqmax, double alpha);
-double emittance_bpow(double freqmin, double freqmax, double lum, double alpha);
+double emittance_bpow(double freqmin, double freqmax, double alpha);
 int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
 /* shell_wind.c */
 int get_shell_wind_params(int ndom);
