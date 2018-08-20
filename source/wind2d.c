@@ -390,15 +390,11 @@ be optional which variables beyond here are moved to structures othere than Wind
 	     plasmamain[n].w);
 	}
 
-      /* Initialize arrays for scatters and the pairwise ionization denominator and temperature
+      /* Initialize arrays for scatters 
        */
 
       for (j = 0; j < nions; j++)
 	{
-	  plasmamain[n].PWdenom[j] = 0.0;
-	  plasmamain[n].PWnumer[j] = 0.0;
-	  plasmamain[n].PWdtemp[j] = 0.0;
-	  plasmamain[n].PWntemp[j] = 0.0;
 	  plasmamain[n].scatters[j] = 0;
 	  plasmamain[n].xscatters[j] = 0;
 	}

@@ -94,26 +94,6 @@ nebular_concentrations (xplasma, mode)
       m = lucy (xplasma);	// Main routine for running LucyMazzali
 
     }
-
-  else if (mode == NEBULARMODE_PAIRWISE_ML93)
-    {
-      /* Pairwise calculation of abundances, using a 
-         temperature computed to ensure a reasonable
-         ratio between the two, and then corrected for
-         a dilute blackbody radiation field. */
-      m = variable_temperature (xplasma, mode);
-    }
-
-  else if (mode == NEBULARMODE_PAIRWISE_SPECTRALMODEL)
-    {
-      /* Pairwise calculation of abundances, using a 
-         temperature computed to ensure a reasonable
-         ratio between the two, and then corrected for
-         a radiation field modelled by a power law */
-      m = variable_temperature (xplasma, mode);
-    }
-
-
   else if (mode == NEBULARMODE_MATRIX_BB)
     {
 

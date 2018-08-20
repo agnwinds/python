@@ -621,30 +621,6 @@ calloc_dyn_plasma (nelem)
 	    ("calloc_dyn_plasma: Error in allocating memory for partition\n");
 	  exit (0);
 	}
-      if ((plasmamain[n].PWdenom = calloc (sizeof (double), nions)) == NULL)
-	{
-	  Error
-	    ("calloc_dyn_plasma: Error in allocating memory for PWdenom\n");
-	  exit (0);
-	}
-      if ((plasmamain[n].PWdtemp = calloc (sizeof (double), nions)) == NULL)
-	{
-	  Error
-	    ("calloc_dyn_plasma: Error in allocating memory for PWtemp\n");
-	  exit (0);
-	}
-      if ((plasmamain[n].PWnumer = calloc (sizeof (double), nions)) == NULL)
-	{
-	  Error
-	    ("calloc_dyn_plasma: Error in allocating memory for PWnumer\n");
-	  exit (0);
-	}
-      if ((plasmamain[n].PWntemp = calloc (sizeof (double), nions)) == NULL)
-	{
-	  Error
-	    ("calloc_dyn_plasma: Error in allocating memory for PWntemp\n");
-	  exit (0);
-	}
       if ((plasmamain[n].ioniz = calloc (sizeof (double), nions)) == NULL)
 	{
 	  Error ("calloc_dyn_plasma: Error in allocating memory for ioniz\n");

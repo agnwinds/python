@@ -585,16 +585,16 @@ init_ionization ()
   // pertains to how the radiatiate tranfer is carreid out
 
   rdint
-    ("Wind_ionization(0=on.the.spot,1=LTE(tr),2=fixed,3=recalc_bb,4=LTE(t_e),6=pairwise_bb,7=pairwise_pow,8=matrix_bb,9=matrix_pow)",
+    ("Wind_ionization(0=on.the.spot,1=LTE(tr),2=fixed,3=recalc_bb,4=LTE(t_e),8=matrix_bb,9=matrix_pow)",
      &geo.ioniz_mode);
 
   if (geo.ioniz_mode == IONMODE_FIXED)
     {
       rdstr ("wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
     }
-  if (geo.ioniz_mode < 0 || geo.ioniz_mode == 5 || geo.ioniz_mode > 9)
+  if (geo.ioniz_mode < 0 || geo.ioniz_mode == 5 || geo.ioniz_mode == 6 || geo.ioniz_mode == 7 || geo.ioniz_mode > 9)
     {
-      Log ("The allowed ionization modes are 0, 1, 2, 3, 4, 6, 7, 8 and 9\n");
+      Log ("The allowed ionization modes are 0, 1, 2, 3, 4, 8 and 9\n");
       Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
       exit (0);
     }
