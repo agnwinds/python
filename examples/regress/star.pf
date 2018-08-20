@@ -8,7 +8,7 @@ Atomic_data   data/standard78
 photons_per_cycle	100000
 Ionization_cycles	20
 spectrum_cycles	20
-Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb,6=pairwise_bb,7=pairwise_pow)	3
+Wind_ionization(0=on.the.spot,1=LTE,2=fixed,3=recalc_bb)	3
 Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,6=macro_atoms,7=macro_atoms+aniso.scattering)	3
 Thermal_balance_options(0=everything.on,1=no.adiabatic)                    0
 Star_radiation(y=1)	1

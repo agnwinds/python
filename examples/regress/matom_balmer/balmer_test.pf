@@ -23,7 +23,7 @@ Atomic_data                                data/h20
 photons_per_cycle                          10000
 Ionization_cycles                          20
 spectrum_cycles                            1
-Wind_ionization(0=on.the.spot,1=LTE(tr),2=fixed,3=recalc_bb,4=LTE(t_e),6=pairwise_bb,7=pairwise_pow,8=matrix_bb,9=matrix_pow)   3
+Wind_ionization(0=on.the.spot,1=LTE(tr),2=fixed,3=recalc_bb,4=LTE(t_e),8=matrix_bb,9=matrix_pow)   3
 Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,6=macro_atoms,7=macro_atoms+aniso.scattering)   7
 Surface.reflection.or.absorption(0=no.rerad,1=high.albedo,2=thermalized.rerad)                    0
 Thermal_balance_options(0=everything.on,1=no.adiabatic)   1

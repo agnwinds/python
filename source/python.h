@@ -747,17 +747,6 @@ typedef struct plasma
   double *partition;            /*The partition function for each  ion. 78 - changed to dynamic allocation */
   double *levden;               /*The number density (occupation number?) of a specific level */
 
-  double *PWdenom;              /*The denominator in the pairwise ionization solver. Sicne this is computed at a temperature 
-                                   chosen from basic ioinzation proerties to be good for this ion, it should not change
-                                   very much from cycle to cycle - hence we shold be able to speed up the code by storing 
-                                   it and refering to it if the temperature has not changed much. 78 - changed to dynamic allocation */
-  double *PWdtemp;              /*The temperature at which the pairwise denominator was calculated last. 78 - changed to dynamic allocation */
-  double *PWnumer;              /* The numberator in the pairwise approach. When we are chasing the true density
-                                   by carying n_e - this value will not change, so we canspeed things up a lot
-                                   by not recomputing it!. 78 - changed to dynamic allocation */
-  double *PWntemp;              /* The temperature at which the stored pairwise numerator was last computed at. This
-                                   is used in the BB version of the pairwise correction factor. 78 - changed to dynamic allocation */
-
   double kappa_ff_factor;       /* Multiplicative factor for calculating the FF heating for                                      a photon. */
 
 
@@ -1013,8 +1002,8 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define IONMODE_FIXED 2         // Hardwired concentrations
 #define IONMODE_ML93 3          // Lucy Mazzali
 //OLD #define IONMODE_LTE_SIM 4 // LTE with SIM correction
-#define IONMODE_PAIRWISE_ML93 6 // pairwise version of Lucy Mazzali
-#define IONMODE_PAIRWISE_SPECTRALMODEL 7        // pairwise modeled J_nu approach
+//OLD #define IONMODE_PAIRWISE_ML93 6 // pairwise version of Lucy Mazzali
+//OLD #define IONMODE_PAIRWISE_SPECTRALMODEL 7        // pairwise modeled J_nu approach
 #define IONMODE_MATRIX_BB 8     // matrix solver BB model
 #define IONMODE_MATRIX_SPECTRALMODEL 9  // matrix solver spectral model
 
