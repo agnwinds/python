@@ -411,6 +411,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   int n;
   double sum;
   int echeck;
+  
 
 /* Perform various checks on the inputs */
 
@@ -439,7 +440,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 
   for (n = 1; n < n_xy; n++)  //Go over all elements
     {
-      if (x[n] <= x[n - 1]) //One x-point is less than the one above - this will cause problems later
+      if (x[n] <= x[n - 1]) //One x-point is less than the one above - this would cause problems later
 	{
 	  Error
 	    ("cdf_gen_from_array: input x not in ascending order at element %5d/%5d  %11.6e %11.6e\n",
@@ -468,14 +469,19 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 
 
 	/*Firstly, find the point in the input array that matches the required start point
-	we step up thruogh the input data until we reach a point where the x-point is greater
+	we step up through the input data until we reach a point where the x-point is greater
 	than xmin, or we reach the end of the array */
 
+
+
   nmin=0;
-  while (x[nmin]<xmin && nmin<n_xy)
+  while (x[nmin]<=xmin && nmin<n_xy)
   {
       nmin++;
   }
+  
+  /*After this loop, nmin will point to an x array element larger than xmin. So, to
+  interpolate we interpolate between elements xmin-1 and xmin */
 
   /*This next deals with what happens if we ran off the end of the array in the last loop */
 
@@ -488,8 +494,6 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   /* if xmin is equal to one of the values in the x array then nmin will point to that value, but otherwise it
       will be slightly larger and we will need to fix this*/
 
-  // if nmin=0 then it is also possible that the xmin was below the array XXXXX we should deal with this case then!
-
 
   /* The next loop finds the location of the uppermost required x-value in the supplied array */
 
@@ -499,63 +503,65 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   }
 
 
-  /* In general, nmax should be one past the last required element */
+  /* In general, nmax should be one past the last required element so we will interpolate
+  between nmax-1 and nmax*/
 
   /*now deal with a few pathological cases */
 
   if (nmax==nmin)
   {
-      Error("cdf_gen_from_array: nmin and mnax are identical which is not desirable\n");
+      Error("cdf_gen_from_array: nmin and nmax are identical which is not desirable\n");
       exit(0);
   }
+  
+  if (nmin==0 && xmin<x[0])  /*We are requesting a CDF that starts below where we have data
+	  essentially we can assume that the CDF is zero between our originally requested xmin, 
+	  so we change xmin to the lowest point for which we have information */
+  {
+	  xmin=x[0]; //nmin is already set to zero
+  }
 
-  if (nmax==n_xy) /*We have run past the end of the array in finding the uppermost xvalue
-	  this will cause issues later, so we need to work out what a sensible value for nmax
-	  should be*/
+  if (nmax>n_xy-1) /*This is a problem - we have run off the end of the array into places 
+	  where there is no data. If the last array element is within the range we want, then we
+	  can recover by resetting xmax to the last array with data, and setting nmax to n_xy-1 */
   {
 	  if (x[nmax-1]<=xmax) /* hopefully the last X value is less than or equal to xmax */
 	  {
-	  nmax--;
+	  nmax=n_xy-1; //point to the last point in the array of daya
+	  xmax=x[n_xy-1]; //reset the maximum value of x to that 	  
   	  }
   }
 
 
-  /* Now we want to deal with situations where xmin and xmax are between elements. For now
-   * we do not worry about interpolating XXXXX this needs fixing up - if we are going to
-  interpolate, we should do it- in pathological cases this can go very wrong*/
-
-  if (nmin>0 && x[nmin]>xmin){
-      nmin--;
+  
+  /* We now need to deal with the possibility that xmin and xmax are between elements.
+  we do this by slightly moving the relvant points in the x/y arrays to make points
+  that are exactly at the required values of x. We use linear interpolation.*/
+    
+	  
+  if (nmin>0 && x[nmin]>xmin) /*test to check we can sensibly interpolate */
+  {  
+      nmin--;	//We will be resetting the lower bracketing point 
+      linterp(xmin,x,y,n_xy,&y[nmin],0);
       x[nmin]=xmin;
   }
 
-  if (x[nmax-1]>xmax) {
-      x[nmax-1]=xmax;
+  if (x[nmax]>xmax) /*If we are off the end of the data, we cannot interpolate - 
+	  this should really have already been caught tho... */
+  {
+	  linterp(xmax,x,y,n_xy,&y[nmax],0);
+      x[nmax]=xmax;
   }
+  
+  
+  
 
-  /* So at this point we want the array running from nmin to nmax-1 */
+  /* So at this point we want the array running from nmin to nmax */
 
-
-
-
-
-  /* The next two checks look to see if there is a part of the CDF that is all zeros as the start or end of the distribution
-   *
-   * ksl - It was not obvious why we car if part of the array is 0, and it could just as well happen in the middle of the array as at the ends
-   * for now I am commented all of this out
-
-     Start first */
-
-
-
-
-  //Now at the end
-
-
-// ksl I don;t believe the first two cases can happen at this point
+// We have changed nmax and nmin, so just check once more to ensure we havent messed up
   if (nmax == nmin)
     {
-      Error ("cdf_gen_from_array - only one point in supplied PDF\n");
+      Error ("cdf_gen_from_array - modified nmax=nmin followin interpolation at ends\n");
       exit (0);
     }
 
@@ -594,16 +600,13 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
 				   y[nmin + n]) * (x[nmin + n] - x[nmin + n -
 								   1]);   //Just the average value of y over the interval.
 	}
-
-      cdf->y[cdf_n]=cdf->y[n-1]+y[nmin+cdf_n]*(x[nmax]-x[nmax-1]);  //This interpolates to get the last point in the CDF
-
       sum = cdf->y[cdf_n];	//the total integrated pdf
-      for (n = 1; n <= cdf_n; n++) //Loop over the CDF and divide each poont by the max (final) point
+      for (n = 1; n <= cdf_n; n++) //Loop over the CDF and divide each point by the max (final) point
 	{
-	  cdf->y[n] /= sum;	//this is now a cdf - we go from 0 to 1.
+	  cdf->y[n] /= sum;	//this is now a cdf - we go from 0 to 1.	
 	}
-
-      cdf->ncdf = cdf_n;
+      /*These next few lines are belt and braces - to ensure the last point is in the right place - it should already be */
+      cdf->ncdf = cdf_n;  
       cdf->x[cdf->ncdf] = x[nmax];
       cdf->y[cdf->ncdf] = 1.0;
       cdf->norm = sum;
@@ -616,21 +619,14 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
     {
       Error ("cdf_gen_from_array: Error returned from calc_cdf_gradient\n");
     }				// 57ib
-  /* XXX Why is this needed, it would seem suffiecient to write evrything to a file */
 
   if ((echeck = cdf_check (cdf)) != 0)
     {
-      Error ("cdf_gen_from_array: error %d on cdf_check\n", echeck);
-      for (n = 0; n < n_xy; n++)
-	Log ("pdf_n=%i %e %e\n", pdf_n, x[n], y[n]);
-      for (n = 0; n < cdf->ncdf + 1; n++)
-	Log("cdf_n=%i %e %e\n", n, cdf->x[n], cdf->y[n]);
-
-
+      Error ("cdf_gen_from_array: error %d on cdf_check - check CDF_err.diag\n", echeck);
+	  cdf_to_file(cdf,"CDF_err.diag"); //output the CDF to a file
       exit (0);
     }
-
-  cdf_to_file(cdf,"foo.diag"); //output the CDF to a file
+//  cdf_to_file(cdf,"foo.diag"); //output the CDF to a file
   return (echeck);
 
 }
@@ -1008,15 +1004,15 @@ cdf_check (cdf)
 
 /**********************************************************/
 /**
- * @brief      Calculate gradients for a cdf to be used to better approzimte
- * a cdf calculated at tivn points
+ * @brief      Calculate gradients for a cdf to be used to better approximate
+ * a cdf calculated at n points
  *
  * @param [in] CdfPtr  cdf   A ptr to a cdf structure
  * @return     Normally returns 0; a positive return indicates a problem
  *
  * @details
- * Calculate the gradient of a cdf at each point in the cdf array in oder
- * to	allow one to calculate a first order correction
+ * Calculate the gradient of a cdf at each point in the cdf array in order
+ * to allow one to calculate a first order correction
  * to a uniform distibution between the points
  * where the gradient has been calculated.
  *
@@ -1024,12 +1020,11 @@ cdf_check (cdf)
  * The gradients are calculated by differencing the cdf.  Thus
  * 	this routine should work both for cdf's calculated
  * 	from functions and from arrays
- *
- * 	@bug XXX NSH - the way that the ends are dealt with is not
- * 		great - we should really try to come up with an
- * 		extrapolation rather than just fill in the same gradients
- * 		for the second and penultimate cells into the
- * 		first and last cells.
+ * 	the way that the ends are dealt with is not
+ * 	great - we should really try to come up with an
+ * 	extrapolation rather than just fill in the same gradients
+ * 	for the second and penultimate cells into the
+ * 	first and last cells.
  *
  *
  **********************************************************/
@@ -1076,6 +1071,12 @@ calc_cdf_gradient (cdf)
 
 
   cdf->d[cdf->ncdf] = cdf->d[cdf->ncdf - 1];
+  
+  
+  for (n = 1; n < cdf->ncdf; n++)
+  
+  
+  
   return (istat);
 }
 
