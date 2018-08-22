@@ -243,9 +243,9 @@ get_wind_params (ndom)
    *
    * sv, knigge, 
    *
-   * Others currently have it defined within get params
+   * Others currently have it defined within get_whatever_params
    *
-   * stellar, homologous, shell
+   * stellar, homologous, shell, corona
    */
 
   if (zdom[ndom].rmax==0){
