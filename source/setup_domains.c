@@ -231,15 +231,26 @@ get_wind_params (ndom)
       exit (0);
     }
 
-  // XXX These need to be initalized sensibly and 
-  // it is not obvious that is happenning
+  /* For many models, zdom[ndom].rmax is defined within the get_parameter file, e.g
+   * for stellar wind, but for others zdom[ndom].rmax can be set independently of
+   * the details of the model for thesse, we clean up at the end. Ultimately
+   * we may want to push all of this into ghe various get_..._params routines
+   * but for now we just check if zdom[ndom].rmax has been set already and if not
+   * we ask a generic quesiton here.  Because we ultimately may want to change this
+   * we throw an error at this point
+   *
+   * These are models known not to have zdom[ndom].rmax defined as part of the model
+   *
+   * sv, knigge, 
+   *
+   * Others currently have it defined within get params
+   *
+   * stellar, homologous, shell
+   */
 
   if (zdom[ndom].rmax==0){
 	  Error("get_wind_params: zdom[ndom].rmax 0 for wind type %d\n",zdom[ndom].wind_type);
 
-  /* XXX - This should be part of the individual get_wind_parameters, not here 
-   * Note that one cannot simply move the next statemnts to below the specify the various wind
-   * of domains, for reasons that are unclear.  If you do this sn_1d will fail.*/
 
   zdom[ndom].rmax = 1e12;
 

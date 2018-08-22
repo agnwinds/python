@@ -65,6 +65,8 @@ get_stellar_wind_params (ndom)
     Log ("Setting zdom[ndom].rmin to geo.rstar\n");
     zdom[ndom].rmin = geo.rstar;
   }
+  zdom[ndom].rmax=10*zdom[ndom].rmin;
+  rddoub ("Stellar_wind.radmax(cm)", &zdom[ndom].rmax); /*Radius where wind ends */
   zdom[ndom].cl_rmin = zdom[ndom].rmin;
   rddoub ("Stellar_wind.vbase(cm)", &zdom[ndom].cl_v_zero);     /* Velocity at base of the wind */
   rddoub ("Stellar_wind.v_infinity(cm)", &zdom[ndom].cl_v_infinity);    /* Final speed of wind in units of escape velocity */

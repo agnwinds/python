@@ -105,6 +105,8 @@ get_shell_wind_params (ndom)
   }
   zdom[ndom].cl_rmin = shell_rmin = zdom[ndom].rmin;
 
+  zdom[ndom].rmax=1.1*zdom[ndom].rmin;
+  rddoub ("Shell.wind.radmax(cm)", &zdom[ndom].rmax);   /*Radius where wind begins */
 
 /*120130 NSH the next two lines have been modified to mean that the wind will end up as a CL wind,
  * but the v_0 and v_infinity will be calulated here from these two variables, which are now local */
