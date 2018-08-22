@@ -67,18 +67,13 @@ get_homologous_params (ndom)
 
   one_dom->stellar_wind_mdot = 100.;
   one_dom->rmin = geo.rstar;
-  one_dom->rmax = 1.23552e17;
+  one_dom->rmax =  2.2464e15;
   one_dom->cl_v_zero = 200e5;
   one_dom->cl_beta = 7.0;
 
   one_dom->stellar_wind_mdot /= MSOL / YR;
   rddoub ("Homologous.boundary_mdot(msol/yr)", &one_dom->stellar_wind_mdot);
   one_dom->stellar_wind_mdot *= MSOL / YR;
-
-/* XXXX ksl 1802 - The maximum radius of the wind here seems to be defined externally
- * and it is not clear that this is what one wants in a situation with multiple domains
- * Conisder adding an maximu radius as an imput variable
- */
 
 
   rddoub ("Homologous.radmin(cm)", &one_dom->rmin);     /*Radius where wind begins */
