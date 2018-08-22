@@ -67,6 +67,7 @@ get_homologous_params (ndom)
 
   one_dom->stellar_wind_mdot = 100.;
   one_dom->rmin = geo.rstar;
+  one_dom->rmax = 1.23552e17;
   one_dom->cl_v_zero = 200e5;
   one_dom->cl_beta = 7.0;
 
@@ -82,6 +83,7 @@ get_homologous_params (ndom)
 
   rddoub ("Homologous.radmin(cm)", &one_dom->rmin);     /*Radius where wind begins */
   rddoub ("Homologous.radmax(cm)", &one_dom->rmax);     /*Radius where wind ends*/
+
   if (one_dom->rmin < geo.rstar)
   {
     Error ("get_homologous_params: It is unreasonable to have the wind start inside the star!\n");
