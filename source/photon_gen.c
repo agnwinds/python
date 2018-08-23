@@ -25,6 +25,8 @@ double f1_old = 0;
 double f2_old = 0;
 int iwind_old = 0;
 
+#define PRINT_OFF 0
+#define PRINT_ON  1
 
 /**********************************************************/
 /**
@@ -92,7 +94,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
                                    still used for detailed spectrum calculation */
     if (f1 != f1_old || f2 != f2_old || iwind != iwind_old)
     {                           // The reinitialization is required
-      xdefine_phot (f1, f2, ioniz_or_final, iwind);
+      xdefine_phot (f1, f2, ioniz_or_final, iwind, PRINT_ON);
     }
     /* The weight of each photon is designed so that all of the photons add up to the
        luminosity of the photosphere.  This implies that photons must be generated in such
@@ -123,10 +125,12 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
 
       if (xband.nphot[n] > 0)
       {
-        /*Reinitialization is required here always because we are changing
+        /* Reinitialization is required here always because we are changing
          * the frequencies around all the time */
 
-        xdefine_phot (xband.f1[n], xband.f2[n], ioniz_or_final, iwind);
+        Log("Defining photons for band %d...", n);
+
+        xdefine_phot (xband.f1[n], xband.f2[n], ioniz_or_final, iwind, PRINT_ON);
 
         /* The weight of each photon is designed so that all of the photons add up to the
            luminosity of the photosphere.  This implies that photons must be generated in such
@@ -199,7 +203,7 @@ populate_bands(ioniz_or_final, iwind, band)
   {
     if (band->f1[n] < band->f2[n])
     {
-      xdefine_phot (band->f1[n], band->f2[n], ioniz_or_final, iwind);
+      xdefine_phot (band->f1[n], band->f2[n], ioniz_or_final, iwind, PRINT_OFF);
       ftot += band->flux[n] = geo.f_tot;
     }
     else
@@ -280,10 +284,11 @@ one photon for each band.*/
  **********************************************************/
 
 int
-xdefine_phot (f1, f2, ioniz_or_final, iwind)
+xdefine_phot (f1, f2, ioniz_or_final, iwind, print_mode)
      double f1, f2;
      int ioniz_or_final;
      int iwind;
+     int print_mode;
 
 {
 
@@ -358,23 +363,28 @@ iwind = -1 	Don't generate any wind photons at all
 
 
   geo.f_tot = geo.f_star + geo.f_disk + geo.f_bl + geo.f_wind + geo.f_kpkt + geo.f_matom + geo.f_agn;
-  geo.lum_tot= geo.lum_star+ geo.lum_disk+ geo.lum_bl+ geo.lum_agn+ geo.lum_wind;
+  geo.lum_tot = geo.lum_star+ geo.lum_disk+ geo.lum_bl+ geo.lum_agn+ geo.lum_wind;
+  
+  if (print_mode == PRINT_ON) 
+  {
+    Log
+      ("!! xdefine_phot: lum_tot %8.2e lum_star %8.2e lum_disk %8.2e lum_bl %8.2e lum_agn %8.2e lum_wind %8.2e\n",
+       geo.lum_tot, geo.lum_star, geo.lum_disk, geo.lum_bl, geo.lum_agn, geo.lum_wind);
 
-  Log
-    ("!! xdefine_phot: lum_tot %8.2e lum_star %8.2e lum_disk %8.2e lum_bl %8.2e lum_agn %8.2e lum_wind %8.2e\n",
-     geo.lum_tot, geo.lum_star, geo.lum_disk, geo.lum_bl, geo.lum_agn, geo.lum_wind);
+    Log
+      ("!! xdefine_phot:   f_tot %8.2e   f_star %8.2e   f_disk %8.2e   f_bl %8.2e   f_agn %8.2e   f_wind %8.2e   f_matom %8.2e   f_kpkt %8.2e \n",
+       geo.f_tot, geo.f_star, geo.f_disk, geo.f_bl, geo.f_agn, geo.f_wind, geo.f_matom, geo.f_kpkt);
 
-  Log
-    ("!! xdefine_phot:   f_tot %8.2e   f_star %8.2e   f_disk %8.2e   f_bl %8.2e   f_agn %8.2e   f_wind %8.2e   f_matom %8.2e   f_kpkt %8.2e \n",
-     geo.f_tot, geo.f_star, geo.f_disk, geo.f_bl, geo.f_agn, geo.f_wind, geo.f_matom, geo.f_kpkt);
-
-  Log
-    ("!! xdefine_phot: wind ff %8.2e       fb %8.2e   lines  %8.2e  for freq %8.2e %8.2e\n", geo.lum_ff, geo.lum_rr, geo.lum_lines, f1, f2);
-  Log
-    ("!! xdefine_phot: star  tstar  %8.2e   %8.2e   lum_star %8.2e %8.2e  %8.2e \n", geo.tstar, geo.tstar_init, geo.lum_star, geo.lum_star_init, geo.lum_star_back);
-  Log
-    ("!! xdefine_phot: disk                               lum_disk %8.2e %8.2e  %8.2e \n", geo.lum_disk, geo.lum_disk_init, geo.lum_disk_back);
-
+    Log
+      ("!! xdefine_phot: wind ff %8.2e       fb %8.2e   lines  %8.2e  for freq %8.2e %8.2e\n", 
+        geo.lum_ff, geo.lum_rr, geo.lum_lines, f1, f2);
+    Log
+      ("!! xdefine_phot: star  tstar  %8.2e   %8.2e   lum_star %8.2e %8.2e  %8.2e \n", 
+        geo.tstar, geo.tstar_init, geo.lum_star, geo.lum_star_init, geo.lum_star_back);
+    Log
+      ("!! xdefine_phot: disk                               lum_disk %8.2e %8.2e  %8.2e \n", 
+        geo.lum_disk, geo.lum_disk_init, geo.lum_disk_back);
+  }
 
 
 /*Store the 3 variables that have to remain the same to avoid reinitialization  */

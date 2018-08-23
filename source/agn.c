@@ -69,9 +69,9 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
     spectype = geo.agn_ion_spectype;    /*type for ionization calculation */
   if (spectype >= 0)
   {
-    /* XXX This calls models, but the normal stellar atmpspheres models are not really suitable for 
+    /* This calls models, but the normal stellar atmpspheres models are not really suitable for 
 	  an AGN. So when this mode is used, we summply dummy variables in lum and alpha to generate
-	  a model SED. Urgent to fix. */
+	  a model SED. Urgent to fix, discussed in issue #301 */
     emit = emittance_continuum (spectype, freqmin, freqmax, lum, alpha); 
     *f = emit;
   }

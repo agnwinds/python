@@ -88,10 +88,10 @@ to match heating and cooling in the wind element! */
 /* Convergence check */
       convergence (xplasma);
     }
-  else if (mode == IONMODE_PAIRWISE_ML93 || mode == IONMODE_MATRIX_BB)
+  else if (mode == IONMODE_MATRIX_BB)
     {
-      /* Feb 2012 new for mode 6. New abundances have been computed using pairwise Saha equation
-         approach. We can now attempt to balance heating and cooling with the new abundance in the
+      /* New abundances have been computed using matrix scheme with dilute blackbody model for J_nu
+         We can now attempt to balance heating and cooling with the new abundance in the
          same way as mode 3. */
 
 /* Shift values to old */
@@ -106,8 +106,7 @@ to match heating and cooling in the wind element! */
 /* Convergence check */
       convergence (xplasma);
     }
-  else if (mode == IONMODE_PAIRWISE_SPECTRALMODEL
-	   || mode == IONMODE_MATRIX_SPECTRALMODEL)
+  else if (IONMODE_MATRIX_SPECTRALMODEL)
     {
 
 /*  spectral_estimators does the work of getting banded W and alpha. Then oneshot gets called. */
