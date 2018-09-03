@@ -20,9 +20,6 @@
  * names.  Note that the maximum radius is not, as it should be defined here, but
  * rather relies on zdmo[ndom].rmax.  This should be fixed.
  * 
- * @bug XXXX ksl 1802 - The maximum radius of the wind here seems to be defined externally
- * and it is not clear that this is what one wants in a situation with multiple domains
- * Conisder adding an maximu radius as an imput variable.  Note that this may have been fixed
  ***********************************************************/
 
 
