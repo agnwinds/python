@@ -33,7 +33,7 @@ Thermal_balance_options(0=everything.on,1=no.adiabatic)   1
 ### Parameters for Domain 0
 Shell.wind_mdot(msol/yr)                   1e-20
 Shell.wind.radmin(cm)                      1e10
-Shell.wind.radmax(cm)                       1.1e+10
+Shell.wind.radmax(cm)                      1.00001e10
 Shell.wind_v_at_rmin(cm)                   1
 Shell.wind.v_at_rmax(cm)                   2
 Shell.wind.acceleration_exponent           1
