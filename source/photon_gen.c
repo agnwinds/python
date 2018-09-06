@@ -128,7 +128,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
         /* Reinitialization is required here always because we are changing
          * the frequencies around all the time */
 
-        Log("Defining photons for band %d...", n);
+        Log("Defining photons for band %d...\n", n);
 
         xdefine_phot (xband.f1[n], xband.f2[n], ioniz_or_final, iwind, PRINT_ON);
 
@@ -1392,7 +1392,7 @@ photon_checks (p, freqmin, freqmax, comment)
       exit (0);
     }
   }
-  Log ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
+//OLD  Log ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
 
   if (nnn == 0)
     Debug ("photon_checks: All photons passed checks successfully\n");

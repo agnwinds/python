@@ -354,7 +354,7 @@ cpar (filename)
   if (rename ("tmp.rdpar", filename) != 0 && verbose)
     printf ("Could not rename %s to %s", "tmp.rdpar\n", filename);
 
-  printf ("A new .pf file %s has been written\n", filename);
+//OLD  printf ("A new .pf file %s has been written\n", filename);
   return (NORMAL);
 }
 

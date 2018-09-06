@@ -396,7 +396,7 @@ calloc_estimators (nelem)
 
   for (n = 0; n < nlevels_macro; n++)
     {
-      Log
+      Log_silent
 	("calloc_estimators: level %d has n_bbu_jump %d  n_bbd_jump %d n_bfu_jump %d n_bfd_jump %d\n",
 	 n, config[n].n_bbu_jump, config[n].n_bbd_jump, config[n].n_bfu_jump,
 	 config[n].n_bfd_jump);

@@ -127,7 +127,7 @@ in the plasma structure */
 
   fclose (fptr);
 
-  Log
+  Log_silent
     ("wind_write sizes: NPLASMA %d size_Jbar_est %d size_gamma_est %d size_alpha_est %d nlevels_macro %d\n",
      NPLASMA, size_Jbar_est, size_gamma_est, size_alpha_est, nlevels_macro);
 
@@ -332,7 +332,7 @@ wind_complete (w)
 
   /* JM Loop over number of domains */
 
-  printf ("geo.ndomain %d\n", geo.ndomain);
+  //OLD printf ("geo.ndomain %d\n", geo.ndomain);
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
