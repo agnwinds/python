@@ -268,7 +268,8 @@ get_wind_params (ndom)
       exit(0);
   }
 
-  rddoub ("Wind.t.init", &geo.twind_init);
+//OLD  rddoub ("Wind.t.init", &geo.twind_init);
+  rddoub ("Wind.t.init", &zdom[ndom].twind);
 
 
   /* Next lines are to assure that we have the largest possible value of the 

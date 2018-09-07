@@ -235,7 +235,7 @@ typedef struct domain
   double wind_thetamin, wind_thetamax;  /*Angles defining inner and outer cones of wind, measured from disk plane */
   double mdot_norm;             /*A normalization factor used in SV wind, and Knigge wind */
 
-//  double twind;                 // ksl 1508 -- added in case domains have different initial temperatures
+  double twind;                 // Initial temperature for a domain
 
   /* Parameters defining Shlossman & Vitello Wind */
   double sv_lambda;             /* power law exponent describing from  what portion of disk wind is radiated */
@@ -363,7 +363,7 @@ struct geometry
   double tstar_init;                    /* The temperature of the star, before backscattering is taken into account*/
   double lum_star_init, lum_star_back;  /* The luminosity of the star as determined by tstar_init */
 
-  double twind_init;                 /* initial temperature of wind.  As written applies to all domains */
+//OLD  double twind_init;                 /* initial temperature of wind.  As written applies to all domains */
   double tmax;                  /*NSH 120817 the maximum temperature of any element of the model 
                                    - used to help estimate things for an exponential representation of the spectrum in a cell */
 
