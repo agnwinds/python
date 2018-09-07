@@ -75,6 +75,7 @@ get_stellar_params ()
 		    &geo.star_ion_spectype);
 
       if (geo.star_radiation)
+          geo.tstar_init=40000;
 	rddoub ("Central_object.temp", &geo.tstar_init);
     }
   else
