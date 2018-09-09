@@ -291,6 +291,7 @@ main (argc, argv)
 
   double freqmin, freqmax;
   int n;
+  char answer[LINELENGTH];
 
 
   FILE *fopen ();
@@ -426,8 +427,11 @@ main (argc, argv)
       geo.system_type = SYSTEM_TYPE_STAR;
       geo.run_type=RUN_TYPE_NEW;
 
-      rdint ("System_type(0=star,1=binary,2=agn,3=previous)",
-	     &geo.system_type);
+      strcpy(answer,"star");
+      geo.system_type=rdchoice("System_type(0=star,1=binary,2=agn,3=previous)","1,2,3",answer);
+
+//OLD      rdint ("System_type(0=star,1=binary,2=agn,3=previous)",
+//OLD	     &geo.system_type);
 
       if (geo.system_type == SYSTEM_TYPE_PREVIOUS)
 	{
