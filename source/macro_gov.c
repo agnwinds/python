@@ -235,6 +235,7 @@ macro_pops (xplasma, xne)
   int index_bbu, index_bbd, index_bfu, index_bfd;
   int lower, upper;
   double this_ion_density, level_population;
+  double levden_temp, ionden_temp;
   double inversion_test;
   double q_ioniz (), q_recomb ();
   double *a_data, *b_data;
@@ -600,19 +601,24 @@ macro_pops (xplasma, xne)
             nn++;
           }
 
-          /* Write the level populations to the
-             levden array. These are fractional level populations within an ion. */
+          /* Check the sanity of these populations and if they are ok, 
+             write them to the levden array. These are fractional level 
+             populations within an ion. */
 
           for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
           {
 
-            xplasma->levden[config[index_lvl].nden] = populations[conf_to_matrix[index_lvl]] / this_ion_density;
+            levden_temp = populations[conf_to_matrix[index_lvl]] / this_ion_density;
 
-            if (xplasma->levden[config[index_lvl].nden] < 0.0 || sane_check (xplasma->levden[config[index_lvl].nden]))
+            if (levden_temp < 0.0 || sane_check (levden_temp))
             {
               Error ("macro_pops: level %i has frac. pop. %8.4e in cell %i\n",
                      index_lvl, xplasma->levden[config[index_lvl].nden], xplasma->nplasma);
               insane = 1;
+            }
+            else
+            {
+              xplasma->levden[config[index_lvl].nden] = levden_temp;
             }
 
 
@@ -620,12 +626,16 @@ macro_pops (xplasma, xne)
 
           }
 
-          xplasma->density[index_ion] = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
+          ionden_temp = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
 
-          if (sane_check (xplasma->density[index_ion]) || xplasma->density[index_ion] < 0.0)
+          if (sane_check (ionden_temp) || ionden_temp < 0.0)
           {
             Error ("macro_pops: ion %i has frac. pop. %8.4e in cell %i\n", index_ion, xplasma->density[index_ion], xplasma->nplasma);
             insane = 1;
+          }
+          else 
+          {
+            xplasma->density[index_ion] = ionden_temp;
           }
 
 
