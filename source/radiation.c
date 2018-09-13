@@ -158,7 +158,7 @@ radiation (p, ds)
   WindPtr one;
   PlasmaPtr xplasma;
 
-  double freq;
+  double freq,freq_store;
   double kappa_tot, frac_tot, frac_ff;
   double frac_z, frac_comp;     /* frac_comp - the heating in the cell due to compton heating */
   double frac_ind_comp;         /* frac_ind_comp - the heating due to induced compton heating */
@@ -493,8 +493,8 @@ radiation (p, ds)
 
 
 
-  if (p->freq > xplasma->max_freq)      // check if photon frequency exceeds maximum frequency
-    xplasma->max_freq = p->freq;
+  if (freq > xplasma->max_freq)      // check if photon frequency exceeds maximum frequency - use doppler shifted frequency
+    xplasma->max_freq = freq;  // set maximum frequency sen in the cell to the mean doppler shifted freq - see bug #391
 
   if (modes.save_cell_stats && ncstat > 0)
   {
@@ -504,8 +504,13 @@ radiation (p, ds)
 
   /* JM 1402 -- the banded versions of j, ave_freq etc. are now updated in update_banded_estimators,
      which also updates the ionization parameters and scattered and direct contributions */
-
-  update_banded_estimators (xplasma, p, ds, w_ave);
+  
+  
+  //Floowing bug #391, we now wish to use the mean, doppler shifted freqiency in the cell.
+  freq_store=p->freq; //Store the packets 'intrinsic' frequency
+  p->freq=freq;  //Temporarily set the photon frequency to the mean doppler shifter frequency
+  update_banded_estimators (xplasma, p, ds, w_ave); //Update estimators
+  p->freq=freq_store; //Set the photon frequency back
 
 
   if (sane_check (xplasma->j) || sane_check (xplasma->ave_freq))
@@ -1273,9 +1278,9 @@ mean_intensity (xplasma, freq, mode)
   J = 0.0;                      // Avoid 03 error
 
 
-  if (geo.ioniz_mode == 5 || geo.ioniz_mode == IONMODE_PAIRWISE_SPECTRALMODEL || geo.ioniz_mode == IONMODE_MATRIX_SPECTRALMODEL)        /*If we are using power law ionization, use PL estimators */
+  if (geo.ioniz_mode == 5 || geo.ioniz_mode == IONMODE_MATRIX_SPECTRALMODEL)        /*If we are using power law ionization, use PL estimators */
   {
-    if (geo.spec_mod > 0)       /* do we have a spextral model yet */
+    if (geo.spec_mod > 0)       /* do we have a spectral model yet */
     {
       for (i = 0; i < geo.nxfreq; i++)
       {

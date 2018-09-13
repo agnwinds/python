@@ -51,7 +51,7 @@ double cds_v2_old, cds_dvds2_old;
  * photon should scatter if it travels the distance estimated, 0 if no, TAU_SCAT if yes.
  * @return     The distance the photon can travel
  *
- * calculated_ds calculates the distance the photon can travel subject to a
+ * calculate_ds finds the distance the photon can travel subject to a
  * number of conditions, which include reach a distance where tau is the
  * distance where a scatter can occur, or a maximum distance set to ensure
  * we do not cross into another cell, or indeed to go so far that one is
@@ -65,7 +65,7 @@ double cds_v2_old, cds_dvds2_old;
  * @details
  *
  * ### Notes ###
- * Calculate_ds does not modify the p or phot in any way!!
+ * Calculate_ds does not modify the p in any way!!
  *
  * Any paramaters that depend explicitly on the
  * coordinate gridding, such as the maximum distance the photon
@@ -115,12 +115,11 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   xplasma = &plasmamain[nplasma];
   ndom = one->ndom;
 
-
   ttau = *tau;
   ds_current = 0;
   init_dvds = 0;
-  dvds1 = dvds2 = 0.0;		// To avoid a -03 compile warning
-  *nres = -99;
+  dvds1 = dvds2 = 0.0;	
+  *nres = -1;
   *istat = P_INWIND;
 
   if (ttau < 0.0)
@@ -144,10 +143,10 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
       v1 = cds_v2_old;
     }
 
-  /* Create phot and phot_now
+  /* Initialize two photon structures phot and p_now for internal work
    * "phot"  will be a photon vector at the far edge of the cell, while p
-   * remains the photon vector at its current positon, p_now  located
-   * at the midpoint between these tow postions
+   * remains the photon at its current positon. p_now  is located
+   * at the midpoint between these tow positions.
    */
 
   stuff_phot (p, &phot);
@@ -158,7 +157,7 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
   /* Check to see that the velocity is monotonic across the cell
    * by calculating the velocity at the midpoint of the path
    *
-   * If it is, then reduce smax
+   * If it is not monitocinc, then reduce smax
    */
   vc = C;
   while (vc > VCHECK && smax > DFUDGE)
@@ -370,13 +369,11 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 			  two =
 			    &w[where_in_grid
 			       (wmain[p_now.grid].ndom, p_now.x)];
-			  xplasma2 = &plasmamain[two->nplasma];
 
 			  if (lin_ptr[nn]->macro_info == 1
 			      && geo.macro_simple == 0)
 			    {
-/* The line is part of a macro atom so increment the estimator if desired
- * (SS July 04). */
+/* The line is part of a macro atom so increment the estimator if desired */
 			      if (geo.ioniz_or_extract == 1)
 				{
 				  bb_estimators_increment (two, p,
@@ -384,9 +381,17 @@ calculate_ds (w, p, tau_scat, tau, nres, smax, istat)
 							   nn);
 				}
 			    }
+              else if (two->vol==0) {
+                  /* See issue #389 - Sometimes DFUDGE pushes a photon into a cell with no volume.  Note that this
+                   * should be very rare, so if this error occurs in significant numbers the problem should be
+                   * investigated further.  ksl -180626
+                   */
+                  Error("calculate_ds: Macro atom problem when photon moved into cell with no volume\n");
+              }
 			  else
 			    {
 /* The line is from a simple ion. Record the heating contribution and move on. */
+			  xplasma2 = &plasmamain[two->nplasma];
 
 			      bb_simple_heat (xplasma2, p, tau_sobolev, dvds,
 					      nn);
@@ -1247,13 +1252,6 @@ scatter (p, nres, nnscat)
          or it was a line photon but we want isotropic scattering anyway.  */
       randvec (z_prime, 1.0);	/* Get a new direction for the photon */
       stuff_v (z_prime, p->lmn);
-    }
-
-  else if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
-    {
-      randwind (p, z_prime, wmain[n].lmn);
-      stuff_v (z_prime, p->lmn);
-
     }
   else
     {				//It was a line photon and we want to use the thermal trapping model to choose the output direction

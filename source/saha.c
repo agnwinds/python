@@ -94,26 +94,6 @@ nebular_concentrations (xplasma, mode)
       m = lucy (xplasma);	// Main routine for running LucyMazzali
 
     }
-
-  else if (mode == NEBULARMODE_PAIRWISE_ML93)
-    {
-      /* Pairwise calculation of abundances, using a 
-         temperature computed to ensure a reasonable
-         ratio between the two, and then corrected for
-         a dilute blackbody radiation field. */
-      m = variable_temperature (xplasma, mode);
-    }
-
-  else if (mode == NEBULARMODE_PAIRWISE_SPECTRALMODEL)
-    {
-      /* Pairwise calculation of abundances, using a 
-         temperature computed to ensure a reasonable
-         ratio between the two, and then corrected for
-         a radiation field modelled by a power law */
-      m = variable_temperature (xplasma, mode);
-    }
-
-
   else if (mode == NEBULARMODE_MATRIX_BB)
     {
 
@@ -791,11 +771,13 @@ int nforce;
  * o change the ions that you want to fix, simply update con_force,
  * AND MAKE SURE NFORCE IS SET TO THE NUMBER OF IONS
  *
- * @bug It is not obvious that this is really what we want.  This routine was
+ * ### Programming Comment ### 
+ *
+ * It is not obvious that this is really what we want for fixed ionization.  This routine was
  * written when we only were concerned about scattering and does not really
  * take into account emission (for which one needs n_e.  One possiblity is to
  * calculated ion abundances for H and He properly, in which case we would need
- * the mode variable.
+ * the mode variable.  This is issue #291.
  *
  **********************************************************/
 

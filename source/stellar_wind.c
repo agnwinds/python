@@ -32,12 +32,9 @@
  * ###Notes###
  *
  * Although it seems natural to assume that the wind starts at the photosphere, this
- * 	is not required (and in Mauche and Raymond's spherical model for a CV wind they set
- * 	the inner radius of the wind at several WD radii.  That possibility is allowed for
+ * is not required (and in Mauche and Raymond's spherical model for a CV wind they set
+ * the inner radius of the wind at several WD radii.  That possibility is allowed for
  *
- * 	@bug There was an old note here indicating that the ksl was unsure(04j) whether 
- * 	as if the code as written really implements the possibility of a wind that starts
- * 	at a radius larger than the star.  This should be checked
  * 	
  *
  **********************************************************/
@@ -65,9 +62,11 @@ get_stellar_wind_params (ndom)
   if (zdom[ndom].rmin < geo.rstar)
   {
     Error ("get_stellar_wind_params: It is unreasonable to have the wind start inside the star!\n");
-    Log ("Setting geo.rmin to geo.rstar\n");
+    Log ("Setting zdom[ndom].rmin to geo.rstar\n");
     zdom[ndom].rmin = geo.rstar;
   }
+  zdom[ndom].rmax=10*zdom[ndom].rmin;
+  rddoub ("Stellar_wind.radmax(cm)", &zdom[ndom].rmax); /*Radius where wind ends */
   zdom[ndom].cl_rmin = zdom[ndom].rmin;
   rddoub ("Stellar_wind.vbase(cm)", &zdom[ndom].cl_v_zero);     /* Velocity at base of the wind */
   rddoub ("Stellar_wind.v_infinity(cm)", &zdom[ndom].cl_v_infinity);    /* Final speed of wind in units of escape velocity */
@@ -75,7 +74,6 @@ get_stellar_wind_params (ndom)
   rddoub ("Stellar_wind.acceleration_exponent", &zdom[ndom].cl_beta);   /* Accleration scale exponent */
 
   /* Assign the generic parameters for the wind the generic parameters of the wind */
-  geo.rmin = zdom[ndom].rmin;    
   zdom[ndom].wind_thetamin = 0.0;
   zdom[ndom].wind_thetamax = 90. / RADIAN;
 

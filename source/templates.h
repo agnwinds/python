@@ -6,7 +6,7 @@ double integ_planck_d(double alphamin, double alphamax);
 int init_integ_planck_d(void);
 double planck_d(double alpha);
 double emittance_bb(double freqmin, double freqmax, double t);
-double check_fmax(double fmin, double fmax, double temp);
+double check_fmax(double fmax, double temp);
 /* get_atomicdata.c */
 int get_atomic_data(char masterfile[]);
 int index_lines(void);
@@ -27,8 +27,8 @@ double ds_in_cell(int ndom, PhotPtr p);
 int walls(PhotPtr p, PhotPtr pold, double *normal);
 /* photon_gen.c */
 int define_phot(PhotPtr p, double f1, double f2, long nphot_tot, int ioniz_or_final, int iwind, int freq_sampling);
-double populate_bands(double f1, double f2, int ioniz_or_final, int iwind, struct xbands *band);
-int xdefine_phot(double f1, double f2, int ioniz_or_final, int iwind);
+double populate_bands(int ioniz_or_final, int iwind, struct xbands *band);
+int xdefine_phot(double f1, double f2, int ioniz_or_final, int iwind, int print_mode);
 int xmake_phot(PhotPtr p, double f1, double f2, int ioniz_or_final, int iwind, double weight, int iphot_start, int nphotons);
 int star_init(double freqmin, double freqmax, int ioniz_or_final, double *f);
 int photo_gen_star(PhotPtr p, double r, double t, double weight, double f1, double f2, int spectype, int istart, int nphot);
@@ -57,7 +57,7 @@ int spectrum_restart_renormalise(int nangle);
 int define_wind(void);
 int where_in_grid(int ndom, double x[]);
 int vwind_xyz(int ndom, PhotPtr p, double v[]);
-int wind_div_v(WindPtr w);
+int wind_div_v(void);
 double rho(WindPtr w, double x[]);
 int mdot_wind(WindPtr w, double z, double rmax);
 int get_random_location(int n, double x[]);
@@ -134,7 +134,6 @@ int setup_created_files(void);
 /* wind_updates2d.c */
 int wind_update(WindPtr (w));
 int wind_rad_init(void);
-int wind_ip(void);
 /* windsave.c */
 int wind_save(char filename[]);
 int wind_read(char filename[]);
@@ -293,10 +292,6 @@ int dvds_ave(void);
 /* reposition.c */
 int reposition(PhotPtr p);
 /* anisowind.c */
-int randwind(PhotPtr p, double lmn[3], double north[3]);
-double vrandwind(double x);
-double reweightwind(PhotPtr p);
-int make_cdf_randwind(double tau);
 int randwind_thermal_trapping(PhotPtr p, int *nnscat);
 /* util.c */
 int fraction(double value, double array[], int npts, int *ival, double *f, int mode);
@@ -376,7 +371,6 @@ int spherical_volumes(int ndom, WindPtr w);
 int spherical_where_in_grid(int ndom, double x[]);
 int spherical_get_random_location(int n, double x[]);
 int spherical_extend_density(int ndom, WindPtr w);
-int shell_make_grid(WindPtr w, int ndom);
 /* cylind_var.c */
 double cylvar_ds_in_cell(int ndom, PhotPtr p);
 int cylvar_make_grid(WindPtr w, int ndom);
@@ -390,7 +384,7 @@ int cylvar_coord_fraction(int ndom, int ichoice, double x[], int ii[], double fr
 int bilin(double x[], double x00[], double x01[], double x10[], double x11[], double *f, double *g);
 int xquadratic(double a, double b, double c, double r[]);
 /* gridwind.c */
-int create_maps(int ichoice);
+int create_maps(void);
 int calloc_wind(int nelem);
 int calloc_plasma(int nelem);
 int check_plasma(PlasmaPtr xplasma, char message[]);
@@ -405,15 +399,14 @@ int xsignal(char *root, char *format, ...);
 int xsignal_rm(char *root);
 int set_max_time(char *root, double t);
 int check_time(char *root);
-/* auger_ionization.c */
-int auger_ionization(PlasmaPtr xplasma);
 /* agn.c */
 double agn_init(double r, double lum, double alpha, double freqmin, double freqmax, int ioniz_or_final, double *f);
 double emittance_pow(double freqmin, double freqmax, double alpha);
-double emittance_bpow(double freqmin, double freqmax, double lum, double alpha);
+double emittance_bpow(double freqmin, double freqmax, double alpha);
 int photo_gen_agn(PhotPtr p, double r, double alpha, double weight, double f1, double f2, int spectype, int istart, int nphot);
 /* shell_wind.c */
 int get_shell_wind_params(int ndom);
+int shell_make_grid(WindPtr w, int ndom);
 /* compton.c */
 double kappa_comp(PlasmaPtr xplasma, double freq);
 double kappa_ind_comp(PlasmaPtr xplasma, double freq);
@@ -475,6 +468,7 @@ int get_domain_params(int ndom);
 int get_wind_params(int ndom);
 int get_line_transfer_mode(void);
 int setup_windcone(void);
+int line_transfer_help_message(void);
 /* setup_disk.c */
 double get_disk_params(void);
 /* photo_gen_matom.c */
@@ -582,7 +576,6 @@ int coolheat_summary(WindPtr w, char rootname[], int ochoice);
 int complete_file_summary(WindPtr w, char root[], int ochoice);
 int wind_reg_summary(WindPtr w, char rootname[], int ochoice);
 int dvds_summary(WindPtr w, char rootname[], int ochoice);
-int inner_shell_summary(WindPtr w, char rootname[], int ochoice);
 int IP_summary(WindPtr w, char rootname[], int ochoice);
 int alpha_summary(WindPtr w, char rootname[], int ochoice);
 int J_summary(WindPtr w, char rootname[], int ochoice);

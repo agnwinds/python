@@ -91,6 +91,7 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 
 
 int NPHOT;                      /* The number of photon bundles created.  defined in python.c */
+int CURRENT_PHOT;               /* A diagnostic so that one can always determine what the current photon number being run is */
 
 #define NWAVE  			       10000    //Increasing from 4000 to 10000 (SS June 04)
 #define MAXSCAT 			500
@@ -234,7 +235,7 @@ typedef struct domain
   double wind_thetamin, wind_thetamax;  /*Angles defining inner and outer cones of wind, measured from disk plane */
   double mdot_norm;             /*A normalization factor used in SV wind, and Knigge wind */
 
-//  double twind;                 // ksl 1508 -- added in case domains have different initial temperatures
+  double twind;                 // Initial temperature for a domain
 
   /* Parameters defining Shlossman & Vitello Wind */
   double sv_lambda;             /* power law exponent describing from  what portion of disk wind is radiated */
@@ -353,7 +354,7 @@ struct geometry
  * outside these regions are assumed to have hit something or be freely moving through space.
  */
 
-  double rmin, rmax, rmax_sq;   /* The maximum distance to which a photon should be followed */
+  double rmax, rmax_sq;   /* The maximum distance to which a photon should be followed */
 
 
 /* Basic paremeters of the system, as opposed to elements of the wind or winds */
@@ -362,7 +363,7 @@ struct geometry
   double tstar_init;                    /* The temperature of the star, before backscattering is taken into account*/
   double lum_star_init, lum_star_back;  /* The luminosity of the star as determined by tstar_init */
 
-  double twind_init;                 /* initial temperature of wind.  As written applies to all domains */
+//OLD  double twind_init;                 /* initial temperature of wind.  As written applies to all domains */
   double tmax;                  /*NSH 120817 the maximum temperature of any element of the model 
                                    - used to help estimate things for an exponential representation of the spectrum in a cell */
 
@@ -442,7 +443,6 @@ struct geometry
 /* Note that the scatter_mode is actually a subsidiary variable of the line_mode.  Chooising a line_mode
  * results in the selection of a scatter_mode */
 #define SCATTER_MODE_ISOTROPIC    0
-#define SCATTER_MODE_ANISOTROPIC  1
 #define SCATTER_MODE_THERMAL      2
 
   int scatter_mode;             /*The way in which scattering for resonance lines is treated 
@@ -469,10 +469,11 @@ struct geometry
 
   /* The frequency bands used when calculating parameters like a power law slope in limited regions. */
 
-#define  NXBANDS 20             /* the maximum number of bands that can be defined */
+#define  NXBANDS 20             /* the maximum number of bands (frequency intervals that can be defined for
+storing coarse spectra for each plasma cell*/
 
-  int nxfreq;                   /* the number of bands actually used */
-  double xfreq[NXBANDS + 1];    /* the band limits  */
+  int nxfreq;                   /* the number of frequency intervals actually used */
+  double xfreq[NXBANDS + 1];    /* the frequency boundaries for the coarse spectra  */
 
 
   /* The next set pf variables assign a SPECTYPE (see above) for
@@ -596,7 +597,7 @@ geo;
 
 
 /* xdisk is a structure that is used to store information about the disk in a system */
-#define NRINGS	301             /* The actual number of rings completely defined
+#define NRINGS	3001             /* The actual number of rings completely defined
                                    is NRINGS-1 ... or from 0 to NRINGS-2.  This is
                                    because you need an outer radius...but the rest
                                    of this element is not filled in. */
@@ -745,17 +746,6 @@ typedef struct plasma
                                    to the ion order obtained by get_atomic_data. 78 - changed to dynamic allocation */
   double *partition;            /*The partition function for each  ion. 78 - changed to dynamic allocation */
   double *levden;               /*The number density (occupation number?) of a specific level */
-
-  double *PWdenom;              /*The denominator in the pairwise ionization solver. Sicne this is computed at a temperature 
-                                   chosen from basic ioinzation proerties to be good for this ion, it should not change
-                                   very much from cycle to cycle - hence we shold be able to speed up the code by storing 
-                                   it and refering to it if the temperature has not changed much. 78 - changed to dynamic allocation */
-  double *PWdtemp;              /*The temperature at which the pairwise denominator was calculated last. 78 - changed to dynamic allocation */
-  double *PWnumer;              /* The numberator in the pairwise approach. When we are chasing the true density
-                                   by carying n_e - this value will not change, so we canspeed things up a lot
-                                   by not recomputing it!. 78 - changed to dynamic allocation */
-  double *PWntemp;              /* The temperature at which the stored pairwise numerator was last computed at. This
-                                   is used in the BB version of the pairwise correction factor. 78 - changed to dynamic allocation */
 
   double kappa_ff_factor;       /* Multiplicative factor for calculating the FF heating for                                      a photon. */
 
@@ -918,7 +908,6 @@ typedef struct photon_store
 PhotStorePtr photstoremain;
 
 
-
 typedef struct macro
 {
   double *jbar;
@@ -1013,8 +1002,8 @@ int size_Jbar_est, size_gamma_est, size_alpha_est;
 #define IONMODE_FIXED 2         // Hardwired concentrations
 #define IONMODE_ML93 3          // Lucy Mazzali
 //OLD #define IONMODE_LTE_SIM 4 // LTE with SIM correction
-#define IONMODE_PAIRWISE_ML93 6 // pairwise version of Lucy Mazzali
-#define IONMODE_PAIRWISE_SPECTRALMODEL 7        // pairwise modeled J_nu approach
+//OLD #define IONMODE_PAIRWISE_ML93 6 // pairwise version of Lucy Mazzali
+//OLD #define IONMODE_PAIRWISE_SPECTRALMODEL 7        // pairwise modeled J_nu approach
 #define IONMODE_MATRIX_BB 8     // matrix solver BB model
 #define IONMODE_MATRIX_SPECTRALMODEL 9  // matrix solver spectral model
 
@@ -1052,7 +1041,10 @@ typedef struct photon
       } istat;                      /*status of photon. */
 
       int nscat;                    /*number of scatterings */
-      int nres;                     /*The line number in lin_ptr of last scatter or wind line creation. Continuum if > nlines. */
+      int nres;                     /*For line scattering, indicates the actual transition; 
+                                      for continuum scattering, meaning 
+                                      depends on matom vs non-matin. See headers of emission.c 
+                                      or matom.c for details. */
       int nnscat;                   /* Used for the thermal trapping model of
                                        anisotropic scattering to carry the number of
                                        scattering to "extract" when needed for wind
@@ -1075,9 +1067,15 @@ typedef struct photon
         PTYPE_WIND_MATOM = 13,
         PTYPE_AGN_MATOM = 14
       } origin, origin_orig;        /* Where this photon originated.  If the photon has
-                                       scattered it's "origin" may be changed to "wind". */
+                                       scattered its "origin" may be changed to "wind". */
       /* note that we add 10 to origin when processed by a macro-atom
-         which means we need these values in the enum list */
+         which means we need these values in the enum list.  In making spectra in spectrum_create
+         10 is subtracted from the types.  If ever this logic is changed one must the be careful
+       that it is fixed in create_spectra as well.  
+       
+       Comment - ksl - 180712 - The logic for all of this is obscure to me, since we keep track of the
+       photons origin separately.  At some point one might want to revisit the necessity for this
+       */
       int np;                       /*NSH 13/4/11 - an internal pointer to the photon number so 
                                        so we can write out details of where the photon goes */
       double path;                  /* SWM - Photon path length */
@@ -1400,6 +1398,8 @@ files;
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
 
+/* Variable introducted to cut off macroatom / estimator integrals when exponential function reaches extreme values. Effectivevly a max limit imposed on x = hnu/kT terms */
+#define ALPHA_MATOM_NUMAX_LIMIT 30 /* maximum value for h nu / k T to be considered in integrals */
 
 
 /* DIAGNOSTIC for understanding problems imported models

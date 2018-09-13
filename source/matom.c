@@ -45,6 +45,19 @@
  * go_to level in an array when one is calculating the emission probabilities. This would
  * make it easier to add new processes, I suspect. 
  * 
+ * CK20180801: 
+ * 
+ *           in non-macro atom mode, the only continuum process treates as scattering is 
+ *           electron scattering, and this is assigned nres = -1. The only valid values 
+ *           of nres in non-macro-atom mode are therefore nres = -1 and 0 <= nres <= nlines-1
+ *           (with the lattter range covering the lines).
+ * 
+ *           in macro atom mode, nres = -1 indicates electron scattering, 
+ *           nres = -2 indicates ff, and nres > NLINES indicates bound-free. 
+ * 	     [nres == NLINES is never used. Note also that NLINES is the *max* number of lines, whereas nlines
+ *	     is the *actual* number of lines. So, actually, it's not just nres = NLINES that's never used, but 
+ *	     the entire range of nlines <= nres <= NLINES]
+ * 
  * It would be possible to convert the for loop to a while statement.  This would avoid the
  * break statement in the middle.  
  * 
@@ -484,7 +497,8 @@ matom (p, nres, escape)
       /* continuua are indicated by nres > NLINES */
 //      p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e / H_OVER_K); //DONE
       p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. -  random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
-	  
+
+      
       /* Co-moving frequency - changed to rest frequency by doppler */
       /*Currently this assumed hydrogenic shape cross-section - Improve */
     }
@@ -596,6 +610,11 @@ alpha_sp (cont_ptr, xplasma, ichoice)
   cont_ext_ptr = cont_ptr;      //"
   fthresh = cont_ptr->freq[0];  //first frequency in list
   flast = cont_ptr->freq[cont_ptr->np - 1];     //last frequency in list
+  if ((H_OVER_K * (flast-fthresh) / temp_ext) > ALPHA_MATOM_NUMAX_LIMIT)
+    {
+      //flast is currently very far into the exponential tail: so reduce flast to limit value of h nu / k T.
+      flast = fthresh + temp_ext * ALPHA_MATOM_NUMAX_LIMIT / H_OVER_K;
+    }
   alpha_sp_value = qromb (alpha_sp_integrand, fthresh, flast, 1e-4);
 
   /* The lines above evaluate the integral in alpha_sp. Now we just want to multiply 
@@ -639,6 +658,7 @@ alpha_sp_integrand (freq)
   x = sigma_phot (cont_ext_ptr, freq);  //this is the cross-section
   integrand = x * freq * freq * exp (H_OVER_K * (fthresh - freq) / tt);
 
+  
   if (temp_choice == 1)
     return (integrand * freq / fthresh);        //energy weighed case
   if (temp_choice == 2)
@@ -983,11 +1003,10 @@ kpkt (p, nres, escape)
 
         /* Now (as in matom) choose a frequency for the new packet. */
 
-//        p->freq = phot_top[i].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e / H_OVER_K); //DONE
         p->freq = phot_top[i].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
 		
         /* Co-moving frequency - changed to rest frequency by doppler */
-        /*Currently this assumed hydrogenic shape cross-section - Improve */
+        /* Currently this assumed hydrogenic shape cross-section - Improve */
 
         /* k-packet is now eliminated. All done. */
         return (0);
@@ -1458,7 +1477,7 @@ emit_matom (w, p, nres, upper)
     *nres = config[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
     /* continuua are indicated by nres > NLINES */
 //    p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * t_e / H_OVER_K); DONE
-    p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - random_number(0.0,1.0)) * t_e / H_OVER_K);
+    p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - random_number(0.0,1.0)) * t_e / H_OVER_K);    
 	
     /* Co-moving frequency - changed to rest frequency by doppler */
     /*Currently this assumed hydrogenic shape cross-section - Improve */
@@ -1575,3 +1594,4 @@ matom_emit_in_line_prob (WindPtr one, struct lines *line_ptr_emit)
   //Return probability that the matom in this cell de-excites into this line
   return (eprbs_line / penorm);
 }
+

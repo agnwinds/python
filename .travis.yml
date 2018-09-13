@@ -64,7 +64,7 @@ script:
     - make clean
     - cd ../examples/travis/
     - Setup_Py_Dir
-    - py -f balmer_test
+    - py -f -v 1 balmer_test
     - python3 ../../py_progs/balmer_decrement.py balmer_test
     - py -i cv_macro_benchmark
     - py -i cv_standard

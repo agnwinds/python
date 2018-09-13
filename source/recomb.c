@@ -400,7 +400,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
  * @param [in] int  fb_choice   A switch controlling whether emissivites or rates are
  * returned
  * @param [in] int  mode   A switch denoting whether normal recombination (OUTER_SHELL) or inner shell recombination (INNER_SHELL)
- * @return     The routine calculates an emissivity for nommal recombination or a cooling rate for normal or dielectronic recombination
+ * @return     The routine calculates an emissivity for normal recombination or a cooling rate for normal or dielectronic recombination
  *
  * If OUTER_SHELL is chosen then the options are
  *
@@ -420,7 +420,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
  *
  * Note that FB_REDUCED is not an option for this routine
  *
- * @bug What is preventing us from calculating a dielectronic emission rate?
+ * Question: What is preventing us from calculating a dielectronic emission rate?
  *
  **********************************************************/
 
@@ -803,29 +803,34 @@ num_recomb (xplasma, t_e, mode)
 
 /**********************************************************/
 /**
- * @brief      calculates partial the free_bound emissivity or recombination rate
- * of the plasma at a specific frequency
+ * @brief      calculates either the free_bound emissivity at a specific frequency or 
+ * depending on inputs, the recombination rate 
  *
  * @param [in] PlasmaPtr  xplasma   A plasma cell
- * @param [in] double  t   A temperature
- * @param [in] double  freq   A freqency
+ * @param [in] double  t   The temperature at which to calculate the emisivity
+ * @param [in] double  freq   The frequency at which to calculate the emissivity
  * @param [in] int  ion_choice   Either the total or the emissivity for a specific ion
  * @param [in] int  fb_choice   determines whether what is returned is the emissivity a specific frecuency 0
  * @return     The returns depend on fb_choice
  *
+ * If ion_choice is a number less than the number of ions then the value returned for that specific
+ * ion.  However if ion_choice is set to the number of ions or greater, the the value returned is 
+ * for the sum of all the ions.  
+ *
+ *
  * The choices are:
  * * FB_FULL         Calculate fb emissivity including energy associated with the threshold
  * * FB_REDUCED      Calculate the fb emissivity without the threshold energy
- * * FB_RATE         Calulate the fb recombinarion rate
+ * * FB_RATE         Calulate the fb recombination rate
  *
  * @details
  *
- * if ion_choice is a number less than the number of ions then values are returned for a specific
- * ion.  However if ion_choice is set to the number of ions or greater the results for all of tha ions
- * are summed.
- *
  * ### Notes ###
- * @bug It is not obvious that all of the choices hre make sense
+ *
+ * This routine calls subroutines that have variablew which are are transmitted
+ * externally, e.g fbt,fbfr, rather than though calls.  The reason for this is some
+ * of the routines are also used as integrands where only one variable can be transimitted
+ * directly.  
  *
  * This routine does not have choices associated with inner shell recombination.
  *

@@ -80,11 +80,6 @@ in the plasma structure */
     n += fwrite (plasmamain[m].density, sizeof (double), nions, fptr);
     n += fwrite (plasmamain[m].partition, sizeof (double), nions, fptr);
 
-    n += fwrite (plasmamain[m].PWdenom, sizeof (double), nions, fptr);
-    n += fwrite (plasmamain[m].PWdtemp, sizeof (double), nions, fptr);
-    n += fwrite (plasmamain[m].PWnumer, sizeof (double), nions, fptr);
-    n += fwrite (plasmamain[m].PWntemp, sizeof (double), nions, fptr);
-
     n += fwrite (plasmamain[m].ioniz, sizeof (double), nions, fptr);
     n += fwrite (plasmamain[m].recomb, sizeof (double), nions, fptr);
     n += fwrite (plasmamain[m].inner_recomb, sizeof (double), nions, fptr);
@@ -132,7 +127,7 @@ in the plasma structure */
 
   fclose (fptr);
 
-  Log
+  Log_silent
     ("wind_write sizes: NPLASMA %d size_Jbar_est %d size_gamma_est %d size_alpha_est %d nlevels_macro %d\n",
      NPLASMA, size_Jbar_est, size_gamma_est, size_alpha_est, nlevels_macro);
 
@@ -165,17 +160,16 @@ in the plasma structure */
  * @details
  * 
  * The routine reads in both the windsave file and the
- * associated atomic data files for a model
+ * associated atomic data files for a model. It also reads the
+ * disk and qdisk structures.
  *
  *
  * ### Notes ###
  *
- * @bug This routine calls wind_complete, but it is not entirely
- * clear why, as the values calculated there are already in the
- * domain structure, so this seems redundant.  However there is
- * an issue #41 which has to do with reading in windcones that
- * affects this. 
- * 
+ * ### Programming Comment ### 
+ * This routine calls wind_complete. This looks superfluous, since 
+ * wind_complete and its subsidiary routines but it
+ * also appears harmless.  ksl 
  *
  **********************************************************/
 
@@ -242,11 +236,6 @@ wind_read (filename)
 
     n += fread (plasmamain[m].density, sizeof (double), nions, fptr);
     n += fread (plasmamain[m].partition, sizeof (double), nions, fptr);
-
-    n += fread (plasmamain[m].PWdenom, sizeof (double), nions, fptr);
-    n += fread (plasmamain[m].PWdtemp, sizeof (double), nions, fptr);
-    n += fread (plasmamain[m].PWnumer, sizeof (double), nions, fptr);
-    n += fread (plasmamain[m].PWntemp, sizeof (double), nions, fptr);
 
     n += fread (plasmamain[m].ioniz, sizeof (double), nions, fptr);
     n += fread (plasmamain[m].recomb, sizeof (double), nions, fptr);
@@ -343,7 +332,7 @@ wind_complete (w)
 
   /* JM Loop over number of domains */
 
-  printf ("geo.ndomain %d\n", geo.ndomain);
+  //OLD printf ("geo.ndomain %d\n", geo.ndomain);
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {

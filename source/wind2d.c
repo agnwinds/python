@@ -272,19 +272,13 @@ define_wind ()
     }
 
 
-  /* Now create the second structure, the one that is sized only to contain cells in the wind */
 
-  /* CHOICE is defined in the Makefile. XXX Really unclear that this option is needed.  Consider removing  ksl */
-  if (CHOICE == 0)
-    {
-      NPLASMA = NDIM2;
-    }
-
-  /* Allocate space for the plasma arrays */
+  /* Allocate space for the plasma array.  To save space, this structure is sized 
+   * to contain only those cells which are in the wind. */
 
   calloc_plasma (NPLASMA);
-  calloc_dyn_plasma (NPLASMA);	/*78a NSH 1407 - allocate space for dynamically sized arrays */
-  create_maps (CHOICE);		/* Populate the maps from plasmamain & wmain */
+  calloc_dyn_plasma (NPLASMA);	
+  create_maps ();		/* Populate the maps between plasmamain & wmain */
 
   /* JM 1502 -- we want the macro structure to be allocated in geo.rt_mode = RT_MODE_MACRO. see #138  */
 
@@ -343,7 +337,8 @@ be optional which variables beyond here are moved to structures othere than Wind
 	}
       else
 	{
-	  plasmamain[n].t_r = geo.twind_init;
+//OLD	  plasmamain[n].t_r = geo.twind_init;
+	  plasmamain[n].t_r = zdom[ndom].twind;
 	}
 
 
@@ -396,15 +391,11 @@ be optional which variables beyond here are moved to structures othere than Wind
 	     plasmamain[n].w);
 	}
 
-      /* Initialize arrays for scatters and the pairwise ionization denominator and temperature
+      /* Initialize arrays for scatters 
        */
 
       for (j = 0; j < nions; j++)
 	{
-	  plasmamain[n].PWdenom[j] = 0.0;
-	  plasmamain[n].PWnumer[j] = 0.0;
-	  plasmamain[n].PWdtemp[j] = 0.0;
-	  plasmamain[n].PWntemp[j] = 0.0;
 	  plasmamain[n].scatters[j] = 0;
 	  plasmamain[n].xscatters[j] = 0;
 	}
@@ -412,7 +403,7 @@ be optional which variables beyond here are moved to structures othere than Wind
 
 
 /* Calculate the the divergence of the wind at the center of each grid cell */
-  wind_div_v (w);
+  wind_div_v ();
 
 /* Now calculate the adiabatic cooling.  Note: adiabatic cooling is not used in
  * the program at present.  There are issues concerning how to incorporate it
@@ -835,16 +826,12 @@ vwind_xyz (ndom, p, v)
  * need to be "rotated" differently in different coordinate
  * systems
  *
- * @bug This routine mixes wmain (which is passed externally) and w
- * which is passed by calling it.  While this does not generate an
- * error it should be cleaned up, proably to use only wmain
  *
  **********************************************************/
 int wind_div_err = (-3);
 
 int
-wind_div_v (w)
-     WindPtr w;
+wind_div_v ()
 {
   int icell;
   double x_zero[3], v2[3], v1[3];
@@ -858,7 +845,7 @@ wind_div_v (w)
     {
       /* Find the center of the cell */
 
-      stuff_v (w[icell].xcen, x_zero);	/*Gget the centre of the current cell in the loop */
+      stuff_v (wmain[icell].xcen, x_zero);	/*Gget the centre of the current cell in the loop */
       ndom = wmain[icell].ndom;
 
       delta = 0.01 * x_zero[2];	//delta is the distance across which we measure e.g. dv_x/dx
@@ -901,13 +888,13 @@ wind_div_v (w)
 
 
       /* we have now evaluated the divergence, so can store in the wind pointer */
-      w[icell].div_v = div;
+      wmain[icell].div_v = div;
 
-      if (div < 0 && (wind_div_err < 0 || w[icell].inwind == W_ALL_INWIND))
+      if (div < 0 && (wind_div_err < 0 || wmain[icell].inwind == W_ALL_INWIND))
 	{
 	  Error
 	    ("wind_div_v: div v %e negative in cell %d Domain %d. Major problem if inwind (%d) == 0\n",
-	     div, icell, w[icell].ndom, w[icell].inwind);
+	     div, icell, wmain[icell].ndom, wmain[icell].inwind);
 	  wind_div_err++;
 	}
     }
@@ -999,10 +986,12 @@ rho (w, x)
  *
  * ### Notes ###
  *
- * @bug  This routine has errors.  It is only correct if there is
- * a single domain.  In particular rho(w,x) gives the correct answer
- * for rho regardless of domains, but nodom is set to 0 for  vind(ndom,&p,v).
- * This should be fixed.
+ * ### Programming Comment ###
+ * This routine has errors.  It is only correct if there is
+ * a single domain (although it does provide a warning to this effect.
+ * In particular rho(w,x) gives the correct answer
+ * for rho regardless of domains, but ndom is set to 0 for vind(ndom,&p,v).
+ * This should be fixed.  This is now #395
  *
  **********************************************************/
 #define NSTEPS 100

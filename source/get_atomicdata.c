@@ -161,7 +161,7 @@
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      generalized subroutine for reading atomic data
  *  	into a set of structures defined in "atomic.h"
  *
@@ -772,10 +772,11 @@ structure does not have this property! */
  *
  * Note that keyword parsing is done only on the first 3 letters, so Ion and IonV are equivlalent
  *
- * The routine still supports an earlier format which comisists of the first 6 "words" in which case
+ * The routine still supports an earlier format which consists of the first 6 "words" in which case
  * default values are assigned to for the maximum number of LTE/simple and nLTE/macro atom configurations.
  *
- * @bug Exactly what is meant by LTE here needs clarification.
+ * @bug Exactly what is meant by LTE here needs clarification.  Is there code here that should
+ * be removed because we do not need the "earlier" format?
  *
  */
 
@@ -1806,9 +1807,8 @@ described as macro-levels. */
 		     Auger effect */
 /**
  * @section Auger
- * @bug Needs description - this is a type of data that is no longer used 
  */
-/*		  
+/*
 		case 'A':
 		  if (sscanf (aline,
 			      "%*s %d %d %d %d %le %le %le %le %le %le %le",
@@ -1840,7 +1840,7 @@ described as macro-levels. */
 			      && (dumistate == (dumz - istate + 1))
 			      && (dumnn == nn) && (dumnl == nl))
 			    {
-			      // Now need to check that this ion is really in the data set and find which it is 
+			      // Now need to check that this ion is really in the data set and find which it is
 			      ion_index = -1;
 			      for (n = 0; n < nions; n++)
 				{
@@ -1873,7 +1873,7 @@ described as macro-levels. */
 				  //We also want the index for the
 				     targe ion (i.e. the one that is
 				     two ionization stages up from the
-				     one found above 
+				     one found above
 				  if (ion[n].z == z
 				      && ion[n].istate == istate + 2)
 				    {
@@ -2184,7 +2184,6 @@ would like to have simple lines for macro-ions */
 		  break;
 
 /** @section Ground state fractions
- * @bug This needs a description - it is very old - CK's ground state recombination tables used to compute the zeta term.		  
  */
 		case 'f':
 		  if (sscanf
@@ -2224,7 +2223,7 @@ would like to have simple lines for macro-ions */
 
 // Collision strengths --- Not currently used
 /** @section Collision strengths
- *  @ bug This needs a description
+ *  @bug This needs a description
  */
 		case 'x':	/*The line contains collision strength information--Gaetz & Salpeter */
 		  if (sscanf
@@ -2266,14 +2265,14 @@ would like to have simple lines for macro-ions */
  * degrees in the fit - one sums over a set of parameters.
  *
  * A typical ion data would look like this
- * 		
- *	  
+ *
+ *
  @verbatim
- * DR_BADNL E 2 2 4.5560e+05 5.5520e+05 8.9820e+05 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00 
- * DR_BADNL C 2 2 5.9660e-04 1.6130e-04 -2.2230e-05 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00 
+ * DR_BADNL E 2 2 4.5560e+05 5.5520e+05 8.9820e+05 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00
+ * DR_BADNL C 2 2 5.9660e-04 1.6130e-04 -2.2230e-05 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00
  @endverbatim
- * 
- * where there are two lines for a given ion - this is for helium (z=2) 2 (istate=2)		
+ *
+ * where there are two lines for a given ion - this is for helium (z=2) 2 (istate=2)
  *
  */
 
@@ -2335,15 +2334,15 @@ would like to have simple lines for macro-ions */
  * This section reads in type 2 dielectronic recombination rates.
  * The data comes from Chianti, and there are two types of dielectronic data.
  * This is type 2 - which has a fit decribed by Shull & van Steenberg (1982)
- * There are four fitting parameters. 
+ * There are four fitting parameters.
  * A typical ion data would look like this
- * 		
- *	  
+ *
+ *
  @verbatim
- * DR_SHULL 17 2 2.6510e-03 2.9300e-02 2.4120e+05 4.9410e+05 
+ * DR_SHULL 17 2 2.6510e-03 2.9300e-02 2.4120e+05 4.9410e+05
  @endverbatim
- * 
- * where there are two lines for a given ion - this is for z=17 (istate=2)		
+ *
+ * where there are two lines for a given ion - this is for z=17 (istate=2)
  *
  */
 
@@ -2464,17 +2463,17 @@ would like to have simple lines for macro-ions */
  * a two parameter fit by Aldrovandi & Pequignot (1973)
  * They have data like
  * @verbatim
- * RR_SHULL 22 2 1.0965e-11 6.9901e-01 
- * RR_SHULL 22 3 1.8600e-11 7.2800e-01 
+ * RR_SHULL 22 2 1.0965e-11 6.9901e-01
+ * RR_SHULL 22 3 1.8600e-11 7.2800e-01
  * @endverbatim
- * 
- * For erroneous historical reasons they are referred to as SHULL 
- * 
+ *
+ * For erroneous historical reasons they are referred to as SHULL
+ *
  */
-		  
-		  
-		  
-	
+
+
+
+
 		case 's':
 		  nparam = sscanf (aline, "%*s %d %d %le %le ", &z, &ne, &btrr[0], &btrr[1]);	//split and assign the line
 		  nparam -= 2;	//take 4 off the nparam to give the number of actual parameters
@@ -2538,7 +2537,7 @@ would like to have simple lines for macro-ions */
  * BAD_GS_RR T 1 0 1.00E+01 2.00E+01 5.00E+01 1.00E+02 2.00E+02 5.00E+02 1.00E+03 2.00E+03 5.00E+03 1.00E+04 2.00E+04 5.00E+04 1.00E+05 2.00E+05 5.00E+05 1.00E+06 2.00E+06 5.00E+06 1.00E+07
  * BAD_GS_RR R 1 0 5.21E-12 3.68E-12 2.33E-12 1.65E-12 1.16E-12 7.35E-13 5.18E-13 3.65E-13 2.28E-13 1.58E-13 1.08E-13 6.21E-14 3.88E-14 2.28E-14 1.01E-14 5.05E-15 2.36E-15 7.90E-16 3.27E-16
  * @endverbatim
- 
+
  */
 
 		case 'G':
@@ -2628,11 +2627,11 @@ would like to have simple lines for macro-ions */
 
 /**
  * @section gaunt factor
- * The following are lines to read in temperature averaged free-free gaunt factors 
+ * The following are lines to read in temperature averaged free-free gaunt factors
  * from the data of Sutherland (1998). The atomic file is basically unchanged
- * from the data on the website, just with the top few lines commented out, 
- * and a label prepended to each line 
- * The data is a spline fit to the gaunt factor as a function of g - the reduced 
+ * from the data on the website, just with the top few lines commented out,
+ * and a label prepended to each line
+ * The data is a spline fit to the gaunt factor as a function of g - the reduced
  * temperature.
  * @verbatim
  * # log(g^2) <gff(g^2)>       s1           s2            s3
@@ -2642,7 +2641,7 @@ would like to have simple lines for macro-ions */
  * FF_GAUNT -3.60 1.120891E+00  2.185680E-02  1.269696E-02  4.970250E-03
  * FF_GAUNT -3.40 1.125810E+00  2.753201E-02  1.567911E-02  6.429140E-03
 * @endverbatim
-		  
+
  */
 		case 'g':
 		  nparam = sscanf (aline, "%*s %le %le %le %le %le", &gsqrdtemp, &gfftemp, &s1temp, &s2temp, &s3temp);	//split and assign the line
@@ -2736,7 +2735,7 @@ would like to have simple lines for macro-ions */
  * Kelecyield 4 1 1 0 1.1500e+02 9.280e+01 0.000e+00 1.000e+04 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00
  * Kelecyield 5 1 1 0 1.9200e+02 1.639e+02 6.000e+00 9.994e+03 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00 0.000e+00
  * @endverbatim
-		  
+
 */
 
 		case 'K':
@@ -2853,17 +2852,17 @@ would like to have simple lines for macro-ions */
  *		  from a line, but most is thrown away. Currently the code below matches based on z, state, upper and
  *		  lower level numbers and oscillator strength
  * Each line is defned with a set of three lines
- * first line is CSTREN - this contains line data to try and match 
+ * first line is CSTREN - this contains line data to try and match
  * Second two lines are collision strength data from Burgess and Tully 1992A&A...254..436B
  * These are generally 5 pojnt but up to 20 point spline fits of the T vs upsilon data. Typical lines are below
- * @verbatim		  
+ * @verbatim
 CSTREN Line  1  1 1215.673584  0.139000   2   2     0.000000    10.200121    0    1       1      3   7.500e-01   2.772e-01   1.478e+00    5    1   1.700e+00
 SCT   0.000e+00   2.500e-01   5.000e-01   7.500e-01   1.000e+00
-SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00		  
+SCUPS    1.132e-01   2.708e-01   5.017e-01   8.519e-01   1.478e+00
  * @endverbatim
-		  
-		  
-		  
+
+
+
  *		  */
 
 		case 'C':
@@ -3317,7 +3316,7 @@ or zero so that simple checks of true and false can be used for them */
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      sort the lines into frequency order
  *
  * @return     Always returns 0
@@ -3374,7 +3373,7 @@ index_lines ()
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      Index the topbase photoionzation crossections by frequency
  *
  *
@@ -3431,7 +3430,7 @@ index_phot_top ()
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      Index inner shell xsections in frequency order
  *
  * @return     Alwasy returns 0
@@ -3488,7 +3487,7 @@ index_inner_cross ()
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      sorts the collisional lines into frequency order
  *
  *
@@ -3549,7 +3548,7 @@ index_collisions ()
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      Numerical recipes routine used by various routines to sort the atomic data
  *
  * @param [in] int  n   The dimension of the array that needs sorting
@@ -3668,7 +3667,7 @@ indexx (n, arrin, indx)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      (freqmin,freqmax)  sets the the current values of line_min and line_max in atomic.h
  * 	which can be used to limit the lines searched for resonances to a specific
  * 	frequency range.
@@ -3676,6 +3675,9 @@ indexx (n, arrin, indx)
  * @param [in, out] double  freqmin   The minimum frequency we are interested in
  * @param [in, out] double  freqmax   The maximum frequency we are interested in
  * @return     the number of lines that are potentially in resonance.
+ *
+ * limit_lines sets the external variables nline_min and nline_max for use with
+ * other routines
  *
  *
  *
@@ -3761,7 +3763,7 @@ limit_lines (freqmin, freqmax)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      Perform sanity checks on xsection data
  *
  * @return     Alway returns 0; errors are written to the log file

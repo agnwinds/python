@@ -100,15 +100,13 @@ init_geo ()
   geo.agn_ion_spectype = SPECTYPE_POW;
 
 
-  geo.rmax = 1e11;
-  geo.rmax_sq = geo.rmax * geo.rmax;
   geo.rstar = 7e8;
   geo.rstar_sq = geo.rstar * geo.rstar;
   geo.mstar = 0.8 * MSOL;
   geo.m_sec = 0.4 * MSOL;
   geo.period = 3.2 * 3600;
   geo.tstar = 40000;
-  geo.twind_init = 40000;
+//OLD  geo.twind_init = 40000;
 
   geo.ioniz_mode = IONMODE_ML93;	/* default is on the spot and find the best t */
   geo.line_mode = 3;		/* default is escape probabilites */
@@ -195,7 +193,11 @@ get_spectype (yesno, question, spectype)
 
   if (yesno)
     {
-      // XXX This is rather odd. Why are these steps needed? Why don't we fix the question here.  ksl
+      /* XXX The next few lines convert the value of spectype to values that correspond to what is requested
+       * in the rdpar statement, and then once we have the answer they are converted back to values that the
+       * program uses internally.  Presumably this was done for historical reasons, having to do with running
+       * old .pf files, but it is quite awkward, and we need to fix this kind of thing.  ksl
+       */
 
       // First convert the spectype to the way the questionis supposed to be answered
       if (*spectype == SPECTYPE_BB || *spectype == SPECTYPE_NONE)
@@ -499,11 +501,11 @@ init_photons ()
   PhotPtr p;
   double x;
 
-  /* Although photons_per_cycle is really an integer,
+  /* Although Photons_per_cycle is really an integer,
      read in as a double so it is easier for input */
 
   x = 100000;
-  rddoub ("photons_per_cycle", &x);
+  rddoub ("Photons_per_cycle", &x);
   NPHOT = x;			// NPHOT is photons/cycle
 
 #ifdef MPI_ON
@@ -514,7 +516,7 @@ init_photons ()
 
   rdint ("Ionization_cycles", &geo.wcycles);
 
-  rdint ("spectrum_cycles", &geo.pcycles);
+  rdint ("Spectrum_cycles", &geo.pcycles);
 
 
   if (geo.wcycles == 0 && geo.pcycles == 0)
@@ -583,16 +585,16 @@ init_ionization ()
   // pertains to how the radiatiate tranfer is carreid out
 
   rdint
-    ("Wind_ionization(0=on.the.spot,1=LTE(tr),2=fixed,3=recalc_bb,4=LTE(t_e),6=pairwise_bb,7=pairwise_pow,8=matrix_bb,9=matrix_pow)",
+    ("Wind_ionization(0=on.the.spot,1=LTE(tr),2=fixed,3=recalc_bb,4=LTE(t_e),8=matrix_bb,9=matrix_pow)",
      &geo.ioniz_mode);
 
   if (geo.ioniz_mode == IONMODE_FIXED)
     {
       rdstr ("wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
     }
-  if (geo.ioniz_mode == 5 || geo.ioniz_mode > 9)
+  if (geo.ioniz_mode < 0 || geo.ioniz_mode == 5 || geo.ioniz_mode == 6 || geo.ioniz_mode == 7 || geo.ioniz_mode > 9)
     {
-      Log ("The allowed ionization modes are 0, 1, 2, 3, 4, 6, 7, 8 and 9\n");
+      Log ("The allowed ionization modes are 0, 1, 2, 3, 4, 8 and 9\n");
       Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
       exit (0);
     }
@@ -682,7 +684,7 @@ init_ionization ()
  *
  * Originally, DFUDGE was the only number used to push through
  * boundariies, but today DFUDGE is used sparingly, if at all,
- * as push tryough distances within wind cells are defined
+ * as push through distances within wind cells are defined
  * differently for each cell.
  *
  * There are two competing factors in defining DFUDGE.  It
@@ -691,8 +693,6 @@ init_ionization ()
  * enough though that round-off errors do not prevent one
  * from actually getting into a cell.
  *
- * @bug This routine does not really belong in this file. It
- * should be moved.
  **********************************************************/
 
 double
@@ -700,12 +700,23 @@ setup_dfudge ()
 {
   double dfudge;
   double delta;
+  double rmin;
+  int ndom;
 
-  delta = geo.rmax - geo.rmin;
+  rmin=VERY_BIG;
+  for (ndom=0;ndom<geo.ndomain;ndom++){
+      if (rmin>zdom[ndom].rmin){
+          rmin=zdom[ndom].rmin;
+      }
+  }
+
+
+
+  delta = geo.rmax - rmin;
 
   if (delta < 1.e8)
     {
-      dfudge = (geo.rmax - geo.rmin) / 1000.0;
+      dfudge = (geo.rmax - rmin) / 1000.0;
     }
   else if (delta < 1e15)
     {

@@ -88,10 +88,10 @@ to match heating and cooling in the wind element! */
 /* Convergence check */
       convergence (xplasma);
     }
-  else if (mode == IONMODE_PAIRWISE_ML93 || mode == IONMODE_MATRIX_BB)
+  else if (mode == IONMODE_MATRIX_BB)
     {
-      /* Feb 2012 new for mode 6. New abundances have been computed using pairwise Saha equation
-         approach. We can now attempt to balance heating and cooling with the new abundance in the
+      /* New abundances have been computed using matrix scheme with dilute blackbody model for J_nu
+         We can now attempt to balance heating and cooling with the new abundance in the
          same way as mode 3. */
 
 /* Shift values to old */
@@ -106,8 +106,7 @@ to match heating and cooling in the wind element! */
 /* Convergence check */
       convergence (xplasma);
     }
-  else if (mode == IONMODE_PAIRWISE_SPECTRALMODEL
-	   || mode == IONMODE_MATRIX_SPECTRALMODEL)
+  else if (IONMODE_MATRIX_SPECTRALMODEL)
     {
 
 /*  spectral_estimators does the work of getting banded W and alpha. Then oneshot gets called. */
@@ -347,11 +346,6 @@ PlasmaPtr xxxplasma;
  *
  * Special exceptions are made for Zeus; it is not clear why this is necessary
  *
- * @bug There are some numbered switches included here.  This is because these values
- * are not allowed anymore. But this needs to be cleaned up.  Deactivated modes should
- * be captured when the parameters are read in, not at this point. An else statement
- * should provide a sufficent check for any unknown mode.
- *
  **********************************************************/
 
 int
@@ -535,7 +529,7 @@ calc_te (xplasma, tmin, tmax)
 
 
 /**********************************************************/
-/** 
+/**
  * @brief      Compute the cooling for a cell given a temperature t, and compare it
  * to the heating seen in the cell in the previous ionization cycle
  *

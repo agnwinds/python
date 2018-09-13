@@ -3,13 +3,13 @@
 Central_object
 ==============
 
-Central_object.mass
-===================
-Mass of the central object
+Central_object.radius
+=====================
+Radius of the central object in the system, e.g the white dwarf or black hole
 
 **Type:** Double
 
-**Unit:** Solar masses
+**Unit:** cm
 
 **Value:** Greater than 0
 
@@ -44,6 +44,20 @@ regardless of parameters like temperature.
 **File:** python.c
 
 
+Central_object.radiation
+========================
+A booliean variable stating whether of not the central object should radiate from its
+survace as a star would. 
+
+**Type:** Boolean (1/0)
+
+**Parent(s):**
+  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+
+**File:** setup.c
+
+
 Central_object.rad_type_for_star_to_make_wind
 =============================================
 The way in which radiation from the central object will be simulated, either as a bb or from models which
@@ -65,27 +79,13 @@ have been read in separately.
 **File:** setup.c
 
 
-Central_object.radiation
-========================
-A booliean variable stating whether of not the central object should radiate from its
-survace as a star would. 
-
-**Type:** Boolean (1/0)
-
-**Parent(s):**
-  parameter_: Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-
-**File:** setup.c
-
-
-Central_object.radius
-=====================
-Radius of the central object in the system, e.g the white dwarf or black hole
+Central_object.mass
+===================
+Mass of the central object
 
 **Type:** Double
 
-**Unit:** cm
+**Unit:** Solar masses
 
 **Value:** Greater than 0
 

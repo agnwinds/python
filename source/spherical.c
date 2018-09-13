@@ -162,8 +162,8 @@ spherical_make_grid (w, ndom)
       if (zdom[ndom].log_linear == 1)
       {                         // linear intervals
 
-        dr = (zdom[ndom].rmax - geo.rstar) / (ndim - 3);
-        w[n].r = geo.rstar + j * dr;
+        dr = (zdom[ndom].rmax - zdom[ndom].rmin) / (ndim - 3);
+        w[n].r = zdom[ndom].rmin + j * dr;
         w[n].rcen = w[n].r + 0.5 * dr;
       }
       else
@@ -172,7 +172,7 @@ spherical_make_grid (w, ndom)
         dlogr = (log10 (zdom[ndom].rmax / zdom[ndom].rmin)) / (ndim - 3);
         w[n].r = zdom[ndom].rmin * pow (10., dlogr * (j - 1));
         w[n].rcen = 0.5 * zdom[ndom].rmin * (pow (10., dlogr * (j)) + pow (10., dlogr * (j - 1)));
-        Log ("New W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
+        Log_silent ("New W.r = %e, w.rcen = %e\n", w[n].r, w[n].rcen);
       }
 
       /* Now calculate the positions of these points in the xz plane.
@@ -559,70 +559,3 @@ spherical_extend_density (ndom, w)
 
 
 
-
-/**********************************************************/
-/**
- * @brief      defines the cells in a thin shell, a special case of a spherical wind.
- *
- * @param [in, out] WindPtr  w   The structure which defines the wind in Python
- * @param [in, out] int  ndom   The domain number
- * @return     Always retunrs 0
- *
- * @details
- *
- * The shell wind has 3 elements, one inside the shell, one outside, and
- * one outside and one shell exactly fitting the shell.
- *
- *
- * ### Notes ###
- *
- * The shell wind is intended for diagnostic purposes
- *
- *
- **********************************************************/
-
-int
-shell_make_grid (w, ndom)
-     WindPtr w;
-     int ndom;
-{
-  int n;
-  int ndim;
-
-  ndim = zdom[ndom].ndim;
-
-
-  w[0].r = zdom[ndom].rmin - (zdom[ndom].rmax - zdom[ndom].rmin);
-  w[1].r = zdom[ndom].rmin;
-  w[2].r = zdom[ndom].rmax;
-  w[3].r = zdom[ndom].rmax + (zdom[ndom].rmax - zdom[ndom].rmin);
-
-
-
-  w[0].rcen = (w[0].r + w[1].r) / 2;
-  w[1].rcen = (w[1].r + w[2].r) / 2;
-  w[2].rcen = (w[2].r + w[3].r) / 2;
-  w[3].rcen = w[2].rcen + (zdom[ndom].rmax - zdom[ndom].rmin);
-
-  /* Now calculate the positions of these points in the xz plane.
-     There is a choice about how one does this.   I have elected
-     to assume that we want to calculate this at a 45 degree angle.
-     in the hopes this will be a reasonable portion of the wind in
-     a biconical flow.
-   */
-  for (n = 0; n < ndim; n++)
-  {
-    Log ("Shell_wind: cell %i:  inner edge = %2.20e, centre = %2.20e\n", n, w[n].r, w[n].rcen);
-    w[n].x[1] = w[n].xcen[1] = 0.0;
-
-    //NSH Slight change here, using 1/root2 give more accurate results than sin45.
-
-
-    w[n].x[0] = w[n].x[2] = w[n].r / pow (2.0, 0.5);
-    w[n].xcen[0] = w[n].xcen[2] = w[n].rcen / pow (2.0, 0.5);
-  }
-
-
-  return (0);
-
-}

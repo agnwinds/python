@@ -125,17 +125,20 @@ get_matom_f (mode)
       for (m = 0; m < nlevels_macro; m++)
       {
         norm += macromain[n].matom_abs[m];
+        macromain[n].matom_emiss[m] = 0.0;
         if (sane_check (macromain[n].matom_abs[m]))
           Error ("matom_abs is %8.4e in matom %i level %i\n", macromain[n].matom_abs[m], n, m);
       }
       norm += plasmamain[n].kpkt_abs;
+      plasmamain[n].kpkt_emiss = 0.0;
       if (sane_check (plasmamain[n].kpkt_abs))
         Error ("kpkt_abs is %8.4e in matom %i\n", plasmamain[n].kpkt_abs, n);
     }
 
 
 
-    Log ("Calculating macro atom emissivities- this might take a while...\n");
+    Log ("Calculating macro-atom and k-packet emissivities- this might take a while...\n");
+    Log ("Number of macro-atom levels: %d\n", nlevels_macro);
 
     /* For MPI parallelisation, the following loop will be distributed over multiple tasks. 
        Note that the mynmim and mynmax variables are still used even without MPI on */
@@ -281,6 +284,9 @@ get_matom_f (mode)
                 ppp.nres = nres;
                 ppp.grid = plasmamain[n].nwind;
                 ppp.w = 0;
+                /* this needs to be initialised because we set to istat to P_ADIABATIC
+                   for adiabatic destruction */
+                ppp.istat = P_INWIND; 
 
                 macro_gov (&ppp, &nres, 1, &which_out);
 
@@ -298,6 +304,9 @@ get_matom_f (mode)
                 ppp.nres = nres;
                 ppp.grid = plasmamain[n].nwind;
                 ppp.w = 0;
+                /* this needs to be initialised because we set to istat to P_ADIABATIC
+                   for adiabatic destruction */
+                ppp.istat = P_INWIND;
 
                 macro_gov (&ppp, &nres, 2, &which_out);
 
@@ -305,7 +314,7 @@ get_matom_f (mode)
               }
 
 
-              if (ppp.freq > em_rnge.fmin && ppp.freq < em_rnge.fmax)
+              if (ppp.freq > em_rnge.fmin && ppp.freq < em_rnge.fmax && ppp.istat != P_ADIABATIC)
               {
                 if (which_out == 1)
                 {
@@ -462,10 +471,10 @@ get_matom_f (mode)
  *      energy emitted in this way in the wavelength range in question is well known
  *      (calculated in the ionization cycles).
  *
- * @param [in, out] PhotPtr  p   the ptr to the structire for the photons
+ * @param [in, out] PhotPtr  p   the ptr to the entire structure for the photons
  * @param [in] double  weight   the photon weight
- * @param [in] int  photstart   ???
- * @param [in] int  nphot   the number of the first photon to be generated and
+ * @param [in] int  photstart   The first element of the photon stucure to be populated
+ * @param [in] int  nphot   the number of photons to be generated
  * @return int nphot  When it finishes it should have generated nphot photons from k-packet elliminations.
  *
  * @details
@@ -563,14 +572,6 @@ photo_gen_kpkt (p, weight, photstart, nphot)
          was a resonant scatter but we want isotropic scattering anyway.  */
       randvec (p[n].lmn, 1.0);  /* The photon is emitted isotropically */
     }
-    else if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
-    {                           // It was a line photon and we want anisotropic scattering
-
-      // -1. forces a full reinitialization of the pdf for anisotropic scattering
-
-      randwind (&p[n], p[n].lmn, wmain[icell].lmn);
-
-    }
     else if (geo.scatter_mode == SCATTER_MODE_THERMAL)
     {                           //It was a line photon and we want the thermal trapping anisotropic model
 
@@ -629,8 +630,8 @@ photo_gen_kpkt (p, weight, photstart, nphot)
  *
  * @param [in, out] PhotPtr  p   the ptr to the structire for the photons
  * @param [in] double  weight   the photon weight
- * @param [in] int  photstart   ???
- * @param [in] int  nphot   the number of the first photon to be generated and
+ * @param [in] int  photstart   The position in the photon structure of the first photon to generate
+ * @param [in] int  nphot   the number of the photons to be generated 
  * @return int nphot When it finishes it should have generated nphot photons from macro atom deactivations.
  *
  * @details
@@ -758,14 +759,6 @@ photo_gen_matom (p, weight, photstart, nphot)
       /*  It was either an electron scatter so the  distribution is isotropic, or it
          was a resonant scatter but we want isotropic scattering anyway.  */
       randvec (p[n].lmn, 1.0);  /* The photon is emitted isotropically */
-    }
-    else if (geo.scatter_mode == SCATTER_MODE_ANISOTROPIC)
-    {                           // It was a line photon and we want anisotropic scattering
-
-      // -1. forces a full reinitialization of the pdf for anisotropic scattering
-
-      randwind (&p[n], p[n].lmn, wmain[icell].lmn);
-
     }
     else if (geo.scatter_mode == SCATTER_MODE_THERMAL)
     {                           //It was a line photon and we want the thermal trapping anisotropic model

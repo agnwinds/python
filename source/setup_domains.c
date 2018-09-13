@@ -179,45 +179,6 @@ int
 get_wind_params (ndom)
      int ndom;
 {
-  // XXX These need to be initalized sensibly and 
-  // it is not obvious that is happenning
-
-  zdom[ndom].rmax = 1e12;
-
-  if (geo.system_type == SYSTEM_TYPE_AGN)
-    {
-      zdom[ndom].rmax = 50. * geo.r_agn;
-    }
-
-
-  /* XXX - This should be part of the individual get_wind_parameters, not here */
-
-  rddoub ("wind.radmax(cm)", &zdom[ndom].rmax);
-  rddoub ("wind.t.init", &geo.twind_init);
-
-  /* ksl XXX - There is something of a philosophical problem that needs to be worked
-   * out with geo.rmax and zdom[ndom].rmax for the general case of winds.  Suppose
-   * we wish to create, say a spherical outflow with two domains one going from 
-   * r1 to r2 and the other going from r2 to r3.  Then we want to keep geo.rmax which is 
-   * intended to be the distance beyond which photons are moving through free space separate
-   * from the values in the wind zones.  Right now we are setting the outer limit of each
-   * wind to be geo.rmax regardless, in routines like get_stellar_wind_params and get_sv_wind
-   * This is not what we want.  What should happen is that for each componetn where it is
-   * relevant we should ask for the outer edge of the domain and then at the end we should determine
-   * what geo.rmax should be set to.  There are some cases, e.g. get_hydro_wind where one should not
-   * need to ask the question about rmax, but others where it is necessary
-   */
-
-  /* Next lines are to assure that we have the largest possible value of the 
-   * sphere surrounding the system
-   * JM 1710 -- if this is the first domain, then initialise geo.rmax see #305
-   */
-  if ((ndom == 0) || (zdom[ndom].rmax > geo.rmax))
-    {
-      geo.rmax = zdom[ndom].rmax;
-    }
-  geo.rmax_sq = geo.rmax * geo.rmax;
-
 
   /* Now get parameters that are specific to a given wind model
 
@@ -225,6 +186,8 @@ get_wind_params (ndom)
      are parameters in geo.  This is in order to preserve the ability to continue a calculation
      with the same basic wind geometry, without reading in all of the input parameters.  
    */
+
+	zdom[ndom].rmax=0;
 
   if (zdom[ndom].wind_type == STAR)
     {
@@ -264,9 +227,60 @@ get_wind_params (ndom)
     }
   else
     {
-      Error ("python: Unknown wind type %d\n", zdom[ndom].wind_type);
+      Error ("get_wind_parameters: Unknown wind type %d\n", zdom[ndom].wind_type);
       exit (0);
     }
+
+  /* For many models, zdom[ndom].rmax is defined within the get_parameter file, e.g
+   * for stellar wind, but for others zdom[ndom].rmax can be set independently of
+   * the details of the model for thesse, we clean up at the end. Ultimately
+   * we may want to push all of this into ghe various get_..._params routines
+   * but for now we just check if zdom[ndom].rmax has been set already and if not
+   * we ask a generic quesiton here.  Because we ultimately may want to change this
+   * we throw an error at this point
+   *
+   * These are models known not to have zdom[ndom].rmax defined as part of the model
+   *
+   * sv, knigge, 
+   *
+   * Others currently have it defined within get_whatever_params
+   *
+   * stellar, homologous, shell, corona
+   */
+
+  if (zdom[ndom].rmax==0){
+	  Error("get_wind_params: zdom[ndom].rmax 0 for wind type %d\n",zdom[ndom].wind_type);
+
+
+  zdom[ndom].rmax = 1e12;
+
+  if (geo.system_type == SYSTEM_TYPE_AGN)
+    {
+      zdom[ndom].rmax = 50. * geo.r_agn;
+    }
+
+
+  rddoub ("Wind.radmax(cm)", &zdom[ndom].rmax);
+  }
+
+  if (zdom[ndom].rmax <= zdom[ndom].rmin) {
+      Error("get_wind_parameters: rmax (%10.4e) less than or equal to rmin %10.4e in domain %d\n",zdom[ndom].rmax,zdom[ndom].rmin,ndom);
+      exit(0);
+  }
+
+//OLD  rddoub ("Wind.t.init", &geo.twind_init);
+  rddoub ("Wind.t.init", &zdom[ndom].twind);
+
+
+  /* Next lines are to assure that we have the largest possible value of the 
+   * sphere surrounding the system
+   * JM 1710 -- if this is the first domain, then initialise geo.rmax see #305
+   */
+  if ((ndom == 0) || (zdom[ndom].rmax > geo.rmax))
+    {
+      geo.rmax = zdom[ndom].rmax;
+    }
+  geo.rmax_sq = geo.rmax * geo.rmax;
 
   /* Get the filling factor of the wind */
   // XXX  This may  not in the right place to set the filling factor.  
@@ -311,95 +325,107 @@ get_wind_params (ndom)
 int
 get_line_transfer_mode ()
 {
+  int user_line_mode = 0;
   rdint
     ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,4=anisotryopic,5=thermal_trapping,6=macro_atoms,7=macro_atoms+aniso.scattering)",
-     &geo.line_mode);
-
-/* ksl XXX  This approach is inherently dangerous and should be fixed.  We read in the line mode but then
- * change the number to accommodate a line mode and the way scattering is treated.  We should define 
- * a new variable which we keep as is, and use it to define geo.line_mode and geo.scatter_mode. */
+     &user_line_mode);
 
   /* JM 1406 -- geo.rt_mode and geo.macro_simple control different things. geo.rt_mode controls the radiative
      transfer and whether or not you are going to use the indivisible packet constraint, so you can have all simple 
      ions, all macro-atoms or a mix of the two. geo.macro_simple just means one can turn off the full macro atom 
      treatment and treat everything as 2-level simple ions inside the macro atom formalism */
 
-  /* For now handle scattering as part of a hidden line transfermode ?? */
+  /* Set the default scattering and RT mode */
   geo.scatter_mode = SCATTER_MODE_ISOTROPIC;	// isotropic
-  geo.rt_mode = RT_MODE_2LEVEL;	// Not macro atom (SS)
-  if (geo.line_mode == 0)
+  geo.rt_mode = RT_MODE_2LEVEL;	              // Not macro atom (SS)
+
+  if (user_line_mode == 0)
     {
       Log ("Line_transfer mode:  Simple, pure absorption\n");
+      geo.line_mode = user_line_mode;
     }
-  else if (geo.line_mode == 1)
+  else if (user_line_mode == 1)
     {
       Log ("Line_transfer mode:  Simple, pure scattering\n");
+      geo.line_mode = user_line_mode;
     }
-  else if (geo.line_mode == 2)
+  else if (user_line_mode == 2)
     {
       Log ("Line_transfer mode:  Simple, single scattering\n");
+      geo.line_mode = user_line_mode;
     }
-  else if (geo.line_mode == 3)
+  else if (user_line_mode == 3)
     {
       Log
 	("Line_transfer mode:  Simple, isotropic scattering, escape probabilities\n");
+     geo.line_mode = user_line_mode;
     }
-  else if (geo.line_mode == 4)
+  else if (user_line_mode == 4)
     {
-      Log
-	("Line_transfer mode:  Simple, anisotropic scattering, escape probabilities\n");
-      geo.scatter_mode = SCATTER_MODE_ANISOTROPIC;	// Turn on anisotropic scattering
-      geo.line_mode = 3;	// Drop back to escape probabilities
-      geo.rt_mode = RT_MODE_2LEVEL;	// Not macro atom (SS)
+      Error("get_line_transfer_mode: Line transfer mode %d is deprecated\n", user_line_mode);
+      line_transfer_help_message();
+      exit(0);
     }
-  else if (geo.line_mode == 5)
+  else if (user_line_mode == 5)
     {
       Log
 	("Line_transfer mode:  Simple, thermal trapping, Single scattering \n");
       geo.scatter_mode = SCATTER_MODE_THERMAL;	// Thermal trapping model
-      geo.line_mode = 3;	// Single scattering model is best for this mode
+      geo.line_mode = 3;	
       geo.rt_mode = RT_MODE_2LEVEL;	// Not macro atom (SS) 
     }
-  else if (geo.line_mode == 6)
+  else if (user_line_mode == 6)
     {
       Log ("Line_transfer mode:  macro atoms, isotropic scattering  \n");
       geo.scatter_mode = SCATTER_MODE_ISOTROPIC;	// isotropic
-      geo.line_mode = 3;	// Single scattering
+      geo.line_mode = 3;	
       geo.rt_mode = RT_MODE_MACRO;	// Identify macro atom treatment (SS)
       geo.macro_simple = 0;	// We don't want the all simple case (SS)
     }
-  else if (geo.line_mode == 7)
+  else if (user_line_mode == 7)
     {
       Log ("Line_transfer mode:  macro atoms, anisotropic  scattering  \n");
       geo.scatter_mode = SCATTER_MODE_THERMAL;	// thermal trapping
-      geo.line_mode = 3;	// Single scattering
+      geo.line_mode = 3;	
       geo.rt_mode = RT_MODE_MACRO;	// Identify macro atom treatment (SS)
       geo.macro_simple = 0;	// We don't want the all simple case (SS)
     }
-  else if (geo.line_mode == 8)
+  else if (user_line_mode == 8)
     {
       Log
-	("Line_transfer mode:  simple macro atoms, isotropic  scattering  \n");
+	("Line_transfer mode: simple macro atoms, isotropic  scattering  \n");
       geo.scatter_mode = SCATTER_MODE_ISOTROPIC;	// isotropic
-      geo.line_mode = 3;	// Single scattering
+      geo.line_mode = 3;	
       geo.rt_mode = RT_MODE_MACRO;	// Identify macro atom treatment i.e. indivisible packets
       geo.macro_simple = 1;	// This is for test runs with all simple ions (SS)
     }
-  else if (geo.line_mode == 9)	// JM 1406 -- new mode, as mode 7, but scatter mode is 1
+  else if (user_line_mode == 9)
     {
       Log
-	("Line_transfer mode:  simple macro atoms, anisotropic  scattering  \n");
-      geo.scatter_mode = SCATTER_MODE_ANISOTROPIC;	// anisotropic scatter mode 1
-      geo.line_mode = 3;	// Single scattering
-      geo.rt_mode = RT_MODE_MACRO;	// Identify macro atom treatment 
-      geo.macro_simple = 0;	// We don't want the all simple case 
+  ("Line_transfer mode: simple macro atoms, anisotropic  scattering  \n");
+      geo.scatter_mode = SCATTER_MODE_THERMAL;  // thermal trapping
+      geo.line_mode = 3;  
+      geo.rt_mode = RT_MODE_MACRO;  // Identify macro atom treatment i.e. indivisible packets
+      geo.macro_simple = 1; // This is for test runs with all simple ions (SS)
     }
   else
     {
-      Error ("Unknown line_transfer mode\n");
+      Error ("Unknown line_transfer mode %d\n");
+      line_transfer_help_message();
       exit (0);
     }
 
+  /* With the macro atom approach we won't want to generate photon 
+       bundles in the wind so switch it off here. (SS) */
+    if (geo.rt_mode == RT_MODE_MACRO)
+      {
+        Log
+    ("python: Using Macro Atom method so switching off wind radiation.\n");
+        geo.wind_radiation = 0;
+      }
+
+
+  /* read in the atomic data */
   rdstr ("Atomic_data", geo.atomic_filename);
 
   /* read a variable which controls whether to save a summary of atomic data
@@ -496,5 +522,42 @@ setup_windcone ()
 }
 
 
+/**********************************************************/
+/** 
+ * @brief      print out a help message about line transfer modes
+ *
+ * @return     Always returns 0
+ **********************************************************/
+
+int line_transfer_help_message()
+{
+  char *some_help;
+
+  some_help = "\
+\n\
+Available line transfer modes and descriptions are: \n\
+\n\
+  0 Pure Absorption\n\
+  1 Pure Scattering\n\
+  2 Single Scattering\n\
+  3 Escape Probabilities, isotropic scattering\n\
+  5 Escape Probabilities, anisotropic scattering\n\
+  6 Indivisible energy packets / macro-atoms, isotropic scattering\n\
+  7 Indivisible energy packets / macro-atoms, anisotropic scattering\n\
+  8 Indivisible energy packets, force all simple-atoms, anisotropic scattering\n\
+  9 Indivisible energy packets, force all simple-atoms, anisotropic scattering\n\
+\n\
+  Standard mode is 5 for runs involving weight reduction and no macro-atoms\n\
+  Standard macro-atom mode is 7\n\
+\n\
+See this web address for more information: https://github.com/agnwinds/python/wiki/Line-Transfer-and-Scattering\n\
+\n\
+\n\
+";  // End of string to provide one with help
+
+  Log ("%s\n", some_help);
+
+  return (0);
+}
 
 
