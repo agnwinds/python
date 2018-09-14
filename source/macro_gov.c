@@ -142,7 +142,11 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       else if (*nres > NLINES && (phot_top[*nres - NLINES - 1].macro_info == 0 || geo.macro_simple == 1))
         /* This is a bf continuum but we don't want the full macro atom treatment. */
       {
-        fake_matom_bf (p, nres, &escape);
+#if BF_SIMPLE_EMISSIVITY_APPROACH
+	   Error("Macro_go: Error - trying to access fake_matom_bf in alternate bf treatment.\n");
+	   exit (0);
+#endif
+          fake_matom_bf (p, nres, &escape);
       }
 
       matom_or_kpkt = 2;        //if it did not escape then it must have had a
