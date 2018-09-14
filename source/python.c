@@ -428,7 +428,7 @@ main (argc, argv)
       geo.run_type=RUN_TYPE_NEW;
 
       strcpy(answer,"star");
-      geo.system_type=rdchoice("System_type(0=star,1=binary,2=agn,3=previous)","1,2,3",answer);
+      geo.system_type=rdchoice("System_type(star,binary,agn,previous)","0,1,2,3",answer);
 
 //OLD      rdint ("System_type(0=star,1=binary,2=agn,3=previous)",
 //OLD	     &geo.system_type);
@@ -512,7 +512,10 @@ main (argc, argv)
 	  rdpar_comment
 	    ("Parameters descibing the various winds or coronae in the system");
 
-	  rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
+      strcpy(answer,"yes");
+      geo.wind_radiation=rdchoice("Wind_radiation(yes,no)","1,0",answer);
+
+//OLD	  rdint ("Wind_radiation(y=1)", &geo.wind_radiation);
       /* JM 1806 -- note that wind radiation will get "turned off" in indivisible packet/macro-atom
          mode when geo.rt_mode == RT_MODE_MACRO. This is done in get_line_transfer_mode () in
          setup_domains.c, see issue #390 */
@@ -692,7 +695,9 @@ main (argc, argv)
   if (modes.iadvanced)
     {
       /* Do we require extra diagnostics or not */
-      rdint ("@Diag.extra(0=no,1=yes) ", &modes.diag_on_off);
+        strcpy(answer,"no");
+        modes.diag_on_off=rdchoice("@Diag.extra(yes,no)","1,0",answer);
+//OLD      rdint ("@Diag.extra(0=no,1=yes) ", &modes.diag_on_off);
       if (modes.diag_on_off)
 	{
 	  get_extra_diagnostics ();
