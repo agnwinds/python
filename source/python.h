@@ -751,6 +751,7 @@ typedef struct plasma
 
 
   double *recomb_simple;        /* "alpha_e - alpha" (in Leon's notation) for b-f processes in simple atoms. */
+  double *recomb_simple_upweight; /* multiplicative factor to account for ration of total to "cooling" energy for b-f processes in simple atoms. */
 
 /* Begining of macro information */
   double kpkt_emiss;            /*This is the specific emissivity due to the conversion k-packet -> r-packet in the cell
@@ -848,6 +849,11 @@ typedef struct plasma
   double lum_tot_ioniz;         /* The specfic radiative luminosity in frequencies defined by freqmin
                                    and freqmax.  This will depend on the last call to total_emission */
 
+  /* JM 1807 -- these routines are for the BF_SIMPLE_EMISSIVITY_APPROACH
+     they allow one to inspect the net flow of energy into and from the simple ion 
+     ionization pool */
+  double bf_simple_ionpool_in, bf_simple_ionpool_out;
+
   double comp_nujnu;            /* 1701 NSH The integral of alpha(nu)nuj(nu) used to computecompton cooling-  only needs computing once per cycle */
 
   double dmo_dt[3];             /*Radiative force of wind */
@@ -907,6 +913,16 @@ typedef struct photon_store
 
 PhotStorePtr photstoremain;
 
+/* A second photon store: this is very similar to photon_store above but for use in generating macro atom bf photons from cfds*/
+typedef struct matom_photon_store
+{
+  int n;                        /* This is the photon number that was last used */
+  double t, nconf, freq[NSTORE];
+
+} matom_photon_store_dummy, *MatomPhotStorePtr;
+
+MatomPhotStorePtr matomphotstoremain;
+#define MATOM_BF_PDF 1000    //number of points to use in a macro atom bf PDF
 
 typedef struct macro
 {
@@ -1397,6 +1413,10 @@ files;
    whether it has already calculated the matom emissivities or not. */
 #define CALCULATE_MATOM_EMISSIVITIES 0
 #define USE_STORED_MATOM_EMISSIVITIES 1
+
+/* this variable controls whether to use the 
+   Altered mode for bound-free in "simple-macro mode" */
+#define BF_SIMPLE_EMISSIVITY_APPROACH 1
 
 /* Variable introducted to cut off macroatom / estimator integrals when exponential function reaches extreme values. Effectivevly a max limit imposed on x = hnu/kT terms */
 #define ALPHA_MATOM_NUMAX_LIMIT 30 /* maximum value for h nu / k T to be considered in integrals */
