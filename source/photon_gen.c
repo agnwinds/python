@@ -1317,13 +1317,23 @@ bl_init (lum_bl, t_bl, freqmin, freqmax, ioniz_or_final, f)
  *
  * @details
  * The routine checks photons to see if they are "reasonable".  The checks mostly have to
- * do with the frequency of the photons.  The program will exit is too many photons fail the
- * checks
+ * do with the frequency of the photons.   
+ *
+ * The program will exit is too many photons fail the
+ * checks. The number of photons that are permitted to "fail" depends on the
+ * total number of photons in a flight of photons
  *
  * ### Notes ###
- * @bug The routine also a few numbers that summarize some aspects of the the distribution.
- * Some of these have to do with the Ferland definition of IP, which we are discussing
- * deleting
+ *
+ * In checking for the reasonableness of the frequencies, their is a
+ * fairly generous allowance for doppler shifts in the wind.
+ *
+ * The frequency limits are not enforced on photons that have excited
+ * macro-atoms.
+ *
+ * The routine also determines the calculates some features of the
+ * photon distribution, specifically having to do with the ionizing
+ * photons.  It is not entirely clear why this is where this is done
  *
  **********************************************************/
 
@@ -1335,11 +1345,16 @@ photon_checks (p, freqmin, freqmax, comment)
 {
   int nnn, nn;
   int nlabel;
+  int max_errors;
 
   geo.n_ioniz = 0;
   geo.cool_tot_ioniz = 0.0;
   nnn = 0;
   nlabel = 0;
+  max_errors=100;
+  if (max_errors<1e-5*NPHOT) {
+      max_errors=1e-5*NPHOT;
+  }
 
 
   /* Next two lines are to allow for fact that photons generated in
@@ -1357,7 +1372,7 @@ photon_checks (p, freqmin, freqmax, comment)
   freqmin *= (0.6);
   for (nn = 0; nn < NPHOT; nn++)
   {
-    p[nn].np = nn;              /*  NSH 13/4/11 This is a line to populate the new internal photon pointer */
+    p[nn].np = nn;              
     if (H * p[nn].freq > ion[0].ip)
     {
       geo.cool_tot_ioniz += p[nn].w;
@@ -1367,11 +1382,10 @@ photon_checks (p, freqmin, freqmax, comment)
     {
       if (nlabel == 0)
       {
-        Error ("photon_checks: nphot  origin  freq     freqmin    freqmax\n");
+        Error ("photon_checks:   nphot  origin  freq     freqmin    freqmax\n");
         nlabel++;
       }
-      Error
-        ("photon_checks:sane_check %6d %5d %10.4e %10.4e %10.4e %5d w %10.4e \n", nn, p[nn].origin, p[nn].freq, freqmin, freqmax, p[nn].w);
+      Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq out of range\n", nn, p[nn].origin, p[nn].nres,p[nn].freq, freqmin, freqmax);
       p[nn].freq = freqmax;
       nnn++;
     }
@@ -1379,23 +1393,27 @@ photon_checks (p, freqmin, freqmax, comment)
     {
       if (nlabel == 0)
       {
-        Error ("photon_checks: nphot  origin  freq     freqmin    freqmax\n");
+        Error ("photon_checks:   nphot  origin  nres  freq     freqmin    freqmax\n");
         nlabel++;
       }
-      Error ("photon_checks: %6d %5d %10.4e %10.4e %10.4e freq out of range\n", nn, p[nn].origin, p[nn].freq, freqmin, freqmax);
+      Error ("photon_checks: %id %5d %5d %10.4e %10.4e %10.4e freq out of range\n", nn, p[nn].origin, p[nn].nres,p[nn].freq, freqmin, freqmax);
       p[nn].freq = freqmax;
       nnn++;
     }
-    if (nnn > 100)
-    {
-      Error ("photon_checks: Exiting because too many bad photons generated\n");
-      exit (0);
-    }
   }
-//OLD  Log ("NSH Geo.n_ioniz=%e\n", geo.n_ioniz);
 
   if (nnn == 0)
     Debug ("photon_checks: All photons passed checks successfully\n");
+  else {
+      Log("photon_checks: %d of %d or %e per cent of photons failed checks\n",nn,NPHOT,nn*100./NPHOT);
+  }
+
+    if (nnn > max_errors)
+    {
+      error_summary("Exiting because too many bad photons generated");
+//Avoide the exit      exit (0);
+    }
+
 
   return (0);
 }

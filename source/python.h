@@ -1043,7 +1043,7 @@ typedef struct photon
       int nscat;                    /*number of scatterings */
       int nres;                     /*For line scattering, indicates the actual transition; 
                                       for continuum scattering, meaning 
-                                      depends on matom vs non-matin. See headers of emission.c 
+                                      depends on matom vs non-matom. See headers of emission.c 
                                       or matom.c for details. */
       int nnscat;                   /* Used for the thermal trapping model of
                                        anisotropic scattering to carry the number of
