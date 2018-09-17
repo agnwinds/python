@@ -1073,7 +1073,6 @@ calc_cdf_gradient (cdf)
   cdf->d[cdf->ncdf] = cdf->d[cdf->ncdf - 1];
   
   
-  for (n = 1; n < cdf->ncdf; n++)
   
   
   
