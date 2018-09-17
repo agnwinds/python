@@ -495,8 +495,9 @@ matom (p, nres, escape)
       *escape = 1;
       *nres = config[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
       /* continuua are indicated by nres > NLINES */
-//      p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e / H_OVER_K); //DONE
-      p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. -  random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
+
+      //p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. -  random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
+      p->freq = matom_select_bf_freq(one, config[uplvl].bfd_jump[n - nbbd]);
 
       
       /* Co-moving frequency - changed to rest frequency by doppler */
@@ -723,7 +724,7 @@ kpkt (p, nres, escape)
   double electron_temperature;
   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
   double lower_density, upper_density;
-  double cooling_ff;
+  double cooling_ff, upweight_factor;
   WindPtr one;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
@@ -1003,7 +1004,24 @@ kpkt (p, nres, escape)
 
         /* Now (as in matom) choose a frequency for the new packet. */
 
-        p->freq = phot_top[i].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
+        //p->freq = phot_top[i].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
+	 p->freq = matom_select_bf_freq(one, i);
+
+        /* if the cross-section corresponds to a simple ion (macro_info == 0)
+           or if we are treating all ions as simple, then adopt the total emissivity
+           approach to choosing photon weights - this means we 
+           multipy down the photon weight by a factor nu/(nu-nu_0)
+           and we force a kpkt to be created */
+#if BF_SIMPLE_EMISSIVITY_APPROACH
+        if (phot_top[i].macro_info == 0 || geo.macro_simple == 1) 
+        {
+          upweight_factor = xplasma->recomb_simple_upweight[i]; 
+          p->w *= upweight_factor;
+
+          /* record the amount of energy being extracted from the simple ion ionization pool */
+          xplasma->bf_simple_ionpool_out += p->w - (p->w / upweight_factor);
+        }
+#endif
 		
         /* Co-moving frequency - changed to rest frequency by doppler */
         /* Currently this assumed hydrogenic shape cross-section - Improve */
@@ -1041,6 +1059,8 @@ kpkt (p, nres, escape)
              get here we want a line emission, not just an excited macro atom. (SS May 04) */
           *escape = 1;          //No need for re-exciting a macro atom.
           p->freq = line[i].freq;
+
+
         }
         /* When it gets here the packet is back to an
            r-packet and the emission mechanism is identified by nres
@@ -1309,7 +1329,8 @@ fake_matom_bf (p, nres, escape)
   *escape = 1;                  //always an r-packet here
 
 //  p->freq = phot_top[*nres - NLINES - 1].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * xplasma->t_e / H_OVER_K); DONE
-  p->freq = phot_top[*nres - NLINES - 1].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
+  //p->freq = phot_top[*nres - NLINES - 1].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
+  p->freq = matom_select_bf_freq(one, *nres - NLINES - 1);
   
 
   /* Currently this assumes hydrogenic shape cross-section - Improve */
@@ -1476,8 +1497,9 @@ emit_matom (w, p, nres, upper)
   {                             /* bf downwards jump */
     *nres = config[uplvl].bfd_jump[n - nbbd] + NLINES + 1;
     /* continuua are indicated by nres > NLINES */
-//    p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - (rand () + 0.5) / MAXRAND) * t_e / H_OVER_K); DONE
-    p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - random_number(0.0,1.0)) * t_e / H_OVER_K);    
+    //p->freq = phot_top[config[uplvl].bfd_jump[n - nbbd]].freq[0] - (log (1. - random_number(0.0,1.0)) * t_e / H_OVER_K);
+     p->freq = matom_select_bf_freq(one, config[uplvl].bfd_jump[n - nbbd]);
+    
 	
     /* Co-moving frequency - changed to rest frequency by doppler */
     /*Currently this assumed hydrogenic shape cross-section - Improve */

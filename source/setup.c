@@ -106,7 +106,7 @@ init_geo ()
   geo.m_sec = 0.4 * MSOL;
   geo.period = 3.2 * 3600;
   geo.tstar = 40000;
-  geo.twind_init = 40000;
+//OLD  geo.twind_init = 40000;
 
   geo.ioniz_mode = IONMODE_ML93;	/* default is on the spot and find the best t */
   geo.line_mode = 3;		/* default is escape probabilites */

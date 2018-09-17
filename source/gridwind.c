@@ -244,6 +244,25 @@ calloc_plasma (nelem)
 	 1.e-6 * (nelem + 1) * sizeof (photon_store_dummy));
     }
 
+  /* Repeat above for matom storage photon frequencies -- 82h */
+  if (matomphotstoremain != NULL)
+  {
+    free (matomphotstoremain);
+  }
+  matomphotstoremain = (MatomPhotStorePtr) calloc (sizeof (matom_photon_store_dummy), (nelem + 1));
+
+  if (matomphotstoremain == NULL)
+  {
+    Error ("There is a problem in allocating memory for the matomphotonstore structure\n");
+    exit (0);
+  }
+  else
+  {
+    Log
+      ("Allocated %10d bytes for each of %5d elements of matomphotonstore totaling %10.1f Mb \n",
+       sizeof (matom_photon_store_dummy), (nelem + 1), 1.e-6 * (nelem + 1) * sizeof (matom_photon_store_dummy));
+  }
+
   return (0);
 }
 
@@ -396,7 +415,7 @@ calloc_estimators (nelem)
 
   for (n = 0; n < nlevels_macro; n++)
     {
-      Log
+      Log_silent
 	("calloc_estimators: level %d has n_bbu_jump %d  n_bbd_jump %d n_bfu_jump %d n_bfd_jump %d\n",
 	 n, config[n].n_bbu_jump, config[n].n_bbd_jump, config[n].n_bfu_jump,
 	 config[n].n_bfd_jump);
@@ -696,6 +715,15 @@ calloc_dyn_plasma (nelem)
 	  exit (0);
 	}
 
+      if ((plasmamain[n].recomb_simple_upweight =
+	   calloc (sizeof (double), nphot_total)) == NULL)
+	{
+	  Error
+	    ("calloc_dyn_plasma: Error in allocating memory for recomb_simple_upweight\n");
+	  exit (0);
+	}
+
+      
       if ((plasmamain[n].kbf_use =
 	   calloc (sizeof (double), nphot_total)) == NULL)
 	{

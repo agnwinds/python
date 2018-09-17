@@ -1167,16 +1167,27 @@ scatter (p, nres, nnscat)
 
 	      kpkt_choice = random_number (0.0, 1.0);	//random number for kpkt choice
 
+        /* what happens next depends on whether we want to use the 
+           altered mode for bound-free in "simple-macro mode". If we do,
+           then the photon weight gets multiplied down by a factor (nu-nu_0)/nu
+           and we force a kpkt to be created */
+#if BF_SIMPLE_EMISSIVITY_APPROACH
+        p->w *= prob_kpkt;
 
-	      if (prob_kpkt > kpkt_choice)
-		{
-		  macro_gov (p, nres, 2, &which_out);	//routine to deal with kpkt
-		}
-	      else
-		{
-		  macro_gov (p, nres, 1, &which_out);	//routine to deal with fake macro atom bf excitation
+        /* record the amount of energy going into the simple ion ionization pool */
+        xplasma->bf_simple_ionpool_in += (p->w / prob_kpkt) - p->w;
+		    macro_gov (p, nres, 2, &which_out);	//routine to deal with kpkt
+#else 
+        if (prob_kpkt > kpkt_choice)
+    {
+      macro_gov (p, nres, 2, &which_out); //routine to deal with kpkt
+    }
+        else
+    {
+      macro_gov (p, nres, 1, &which_out); //routine to deal with fake macro atom bf excitation
+    }
+#endif
 
-		}
 	    }
 	  else
 	    {

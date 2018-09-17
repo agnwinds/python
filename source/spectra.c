@@ -302,6 +302,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
   double nlow, nhigh;
   int k_orig, k1_orig;
   int iwind;                    // Variable defining whether this is a wind photon
+  int max_scat,max_res;
 
   freqmin = f1;
   freqmax = f2;
@@ -310,6 +311,7 @@ spectrum_create (p, f1, f2, nangle, select_extract)
   nlow = 0.0;                   // variable to store the number of photons that have frequencies which are too low
   nhigh = 0.0;                  // variable to store the number of photons that have frequencies which are too high
   delta = 0.0;                  // fractional frequency error allowod
+
 
 /* Lines to set up a logarithmic spectrum */
 
@@ -539,15 +541,31 @@ spectrum_create (p, f1, f2, nangle, select_extract)
   }
 
 
-  Log ("\nNo. of photons which have scattered n times\n");
-  for (i = 0; i <= MAXSCAT; i++)
+
+  max_scat=max_res=0;
+
+  for (i=1;i<MAXSCAT;i++)
+  {
+	  if(nscat[i]>0)
+	  {
+		  max_scat=i;
+	  }
+	  if(nres[i]>max_res)
+	  {
+		  max_res=i;
+	  }
+  }
+
+  Log ("\nNo. of photons which have scattered n times.     The max number of scatters seen was %d\n",max_scat);
+  for (i = 0; i <= max_scat; i++)
   {
     Log ("%6d", nscat[i]);
     if ((i % 10) == 9)
       Log ("\n");
   }
-  Log ("\nNumber of photons resonantly scattering n times\n");
-  for (i = 0; i <= MAXSCAT; i++)
+
+  Log ("\nNumber of photons resonantly scattering n times.  The max number of scatters seen was %d\n",max_res);
+  for (i = 0; i <= max_res; i++)
   {
     Log ("%6d", nres[i]);
     if ((i % 10) == 9)

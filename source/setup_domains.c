@@ -179,42 +179,6 @@ int
 get_wind_params (ndom)
      int ndom;
 {
-  // XXX These need to be initalized sensibly and 
-  // it is not obvious that is happenning
-
-  zdom[ndom].rmax = 1e12;
-
-  if (geo.system_type == SYSTEM_TYPE_AGN)
-    {
-      zdom[ndom].rmax = 50. * geo.r_agn;
-    }
-
-
-
-  /* XXX - This should be part of the individual get_wind_parameters, not here 
-   * Note that one cannot simply move the next statemnts to below the specify the various wind
-   * of domains, for reasons that are unclear.  If you do this sn_1d will fail.*/
-
-  rddoub ("Wind.radmax(cm)", &zdom[ndom].rmax);
-
-  if (zdom[ndom].rmax <= zdom[ndom].rmin) {
-      Error("get_wind_parameters: rmax (%10.4e) less than or equal to rmin %10.4e in domain %d\n",zdom[ndom].rmax,zdom[ndom].rmin,ndom);
-      exit(0);
-  }
-
-  rddoub ("Wind.t.init", &geo.twind_init);
-
-
-  /* Next lines are to assure that we have the largest possible value of the 
-   * sphere surrounding the system
-   * JM 1710 -- if this is the first domain, then initialise geo.rmax see #305
-   */
-  if ((ndom == 0) || (zdom[ndom].rmax > geo.rmax))
-    {
-      geo.rmax = zdom[ndom].rmax;
-    }
-  geo.rmax_sq = geo.rmax * geo.rmax;
-
 
   /* Now get parameters that are specific to a given wind model
 
@@ -222,6 +186,8 @@ get_wind_params (ndom)
      are parameters in geo.  This is in order to preserve the ability to continue a calculation
      with the same basic wind geometry, without reading in all of the input parameters.  
    */
+
+	zdom[ndom].rmax=0;
 
   if (zdom[ndom].wind_type == STAR)
     {
@@ -264,6 +230,57 @@ get_wind_params (ndom)
       Error ("get_wind_parameters: Unknown wind type %d\n", zdom[ndom].wind_type);
       exit (0);
     }
+
+  /* For many models, zdom[ndom].rmax is defined within the get_parameter file, e.g
+   * for stellar wind, but for others zdom[ndom].rmax can be set independently of
+   * the details of the model for thesse, we clean up at the end. Ultimately
+   * we may want to push all of this into ghe various get_..._params routines
+   * but for now we just check if zdom[ndom].rmax has been set already and if not
+   * we ask a generic quesiton here.  Because we ultimately may want to change this
+   * we throw an error at this point
+   *
+   * These are models known not to have zdom[ndom].rmax defined as part of the model
+   *
+   * sv, knigge, 
+   *
+   * Others currently have it defined within get_whatever_params
+   *
+   * stellar, homologous, shell, corona
+   */
+
+  if (zdom[ndom].rmax==0){
+	  Error("get_wind_params: zdom[ndom].rmax 0 for wind type %d\n",zdom[ndom].wind_type);
+
+
+  zdom[ndom].rmax = 1e12;
+
+  if (geo.system_type == SYSTEM_TYPE_AGN)
+    {
+      zdom[ndom].rmax = 50. * geo.r_agn;
+    }
+
+
+  rddoub ("Wind.radmax(cm)", &zdom[ndom].rmax);
+  }
+
+  if (zdom[ndom].rmax <= zdom[ndom].rmin) {
+      Error("get_wind_parameters: rmax (%10.4e) less than or equal to rmin %10.4e in domain %d\n",zdom[ndom].rmax,zdom[ndom].rmin,ndom);
+      exit(0);
+  }
+
+//OLD  rddoub ("Wind.t.init", &geo.twind_init);
+  rddoub ("Wind.t.init", &zdom[ndom].twind);
+
+
+  /* Next lines are to assure that we have the largest possible value of the 
+   * sphere surrounding the system
+   * JM 1710 -- if this is the first domain, then initialise geo.rmax see #305
+   */
+  if ((ndom == 0) || (zdom[ndom].rmax > geo.rmax))
+    {
+      geo.rmax = zdom[ndom].rmax;
+    }
+  geo.rmax_sq = geo.rmax * geo.rmax;
 
   /* Get the filling factor of the wind */
   // XXX  This may  not in the right place to set the filling factor.  

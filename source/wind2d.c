@@ -337,7 +337,8 @@ be optional which variables beyond here are moved to structures othere than Wind
 	}
       else
 	{
-	  plasmamain[n].t_r = geo.twind_init;
+//OLD	  plasmamain[n].t_r = geo.twind_init;
+	  plasmamain[n].t_r = zdom[ndom].twind;
 	}
 
 

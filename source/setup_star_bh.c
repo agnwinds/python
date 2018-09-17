@@ -43,6 +43,7 @@
 double
 get_stellar_params ()
 {
+    char answer[LINELENGTH];
 
     rdpar_comment ("Parameters for the Central Object");
 
@@ -68,13 +69,16 @@ get_stellar_params ()
   geo.rstar_sq = geo.rstar * geo.rstar;
   if (geo.system_type != SYSTEM_TYPE_AGN)
     {
-      rdint ("Central_object.radiation(y=1)", &geo.star_radiation);
+        strcpy(answer,"yes");
+        geo.star_radiation=rdchoice("Central_object.radiation(yes,no)","1,0",answer);
+//OLD      rdint ("Central_object.radiation(y=1)", &geo.star_radiation);
       get_spectype (geo.star_radiation,
 		    //"Rad_type_for_star(0=bb,1=models)_to_make_wind",
 		    "Central_object.rad_type_to_make_wind(0=bb,1=models)",
 		    &geo.star_ion_spectype);
 
       if (geo.star_radiation)
+          geo.tstar_init=40000;
 	rddoub ("Central_object.temp", &geo.tstar_init);
     }
   else

@@ -86,7 +86,12 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
   struct photon pp, pextract;
   int absorb_reflect;		/* this is a variable used to store geo.absorb_reflect during exxtract */
   double p_norm, tau_norm;
+  int nreport;
 
+  nreport=100000;
+  if (nreport<NPHOT/100) {
+     nreport=NPHOT/100;
+     } 
 
   Log ("\n");
 
@@ -94,13 +99,16 @@ trans_phot (WindPtr w, PhotPtr p, int iextract)
 
   for (nphot = 0; nphot < NPHOT; nphot++)
     {
-	    CURRENT_PHOT=nphot;  /* A diagnostic to make it easier to determine what photon is causing a problem */
+	CURRENT_PHOT=nphot;  /* A diagnostic to make it easier to determine what photon is causing a problem */
 
       /* This is just a watchdog method to tell the user the program is still running */
 
-      if (nphot % 50000 == 0)
-	Log ("Photon %7d of %7d or %6.3f per cent \n", nphot, NPHOT,
+//OLD      if (nphot % 100000 == 0)
+      if (nphot % nreport == 0)
+      {
+	Log ("Cycle %d/%d: Photon %10d of %10d or %6.1f per cent \n", geo.wcycle,geo.pcycle,nphot, NPHOT,
 	     nphot * 100. / NPHOT);
+      }
 
       Log_flush ();
 

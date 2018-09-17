@@ -155,8 +155,14 @@ bands_init (imode, band)
 
   tmax = 30000.;  /* This sets a floor on freqmax */
 
-  if (geo.twind_init > tmax)
-    tmax = geo.twind_init;
+  for (ii=0;ii<geo.ndomain;ii++){
+      if (zdom[ii].twind>tmax){
+          tmax=zdom[ii].twind;
+      }
+  }
+
+//OLD  if (geo.twind_init > tmax)
+//OLD    tmax = geo.twind_init;
   if (geo.tstar > tmax)
     tmax = geo.tstar;
   if (geo.t_bl > tmax && geo.lum_bl > 0.0)

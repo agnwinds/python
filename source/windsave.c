@@ -96,6 +96,7 @@ in the plasma structure */
 
     n += fwrite (plasmamain[m].levden, sizeof (double), nlte_levels, fptr);
     n += fwrite (plasmamain[m].recomb_simple, sizeof (double), nphot_total, fptr);
+    n += fwrite (plasmamain[m].recomb_simple_upweight, sizeof (double), nphot_total, fptr);
     n += fwrite (plasmamain[m].kbf_use, sizeof (double), nphot_total, fptr);
   }
 
@@ -127,7 +128,7 @@ in the plasma structure */
 
   fclose (fptr);
 
-  Log
+  Log_silent
     ("wind_write sizes: NPLASMA %d size_Jbar_est %d size_gamma_est %d size_alpha_est %d nlevels_macro %d\n",
      NPLASMA, size_Jbar_est, size_gamma_est, size_alpha_est, nlevels_macro);
 
@@ -251,6 +252,7 @@ wind_read (filename)
 
     n += fread (plasmamain[m].levden, sizeof (double), nlte_levels, fptr);
     n += fread (plasmamain[m].recomb_simple, sizeof (double), nphot_total, fptr);
+    n += fread (plasmamain[m].recomb_simple_upweight, sizeof (double), nphot_total, fptr);
     n += fread (plasmamain[m].kbf_use, sizeof (double), nphot_total, fptr);
   }
 
@@ -332,7 +334,7 @@ wind_complete (w)
 
   /* JM Loop over number of domains */
 
-  printf ("geo.ndomain %d\n", geo.ndomain);
+  //OLD printf ("geo.ndomain %d\n", geo.ndomain);
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {

@@ -97,13 +97,17 @@ get_hydro_wind_params (ndom)
 /* Assign the generic parameters for the wind the generic parameters of the wind */
   zdom[ndom].rmin = hydro_r_edge[0];
   
-  geo.rmax = zdom[ndom].rmax = hydro_r_edge[ihydro_r] + 2.0 * (hydro_r_cent[ihydro_r] - hydro_r_edge[ihydro_r]);	//Set the outer edge of the wind to the outer edge of the final defined cell
+  
+//OLD  geo.rmax = zdom[ndom].rmax = hydro_r_edge[ihydro_r] + 2.0 * (hydro_r_cent[ihydro_r] - hydro_r_edge[ihydro_r]);	//Set the outer edge of the wind to the outer edge of the final defined cell
+  
+/* ksl - One should not be defining geo.rmax on a domain basis.  It is calculated from the maximum valuse os zdom[].rmax for all of the domains */
+  zdom[ndom].rmax = hydro_r_edge[ihydro_r] + 2.0 * (hydro_r_cent[ihydro_r] - hydro_r_edge[ihydro_r]);	//Set the outer edge of the wind to the outer edge of the final defined cell
 
 
 
-   Log ("rmax=%e\n", geo.rmax);
-   geo.rmax_sq = geo.rmax * geo.rmax;
-   Log ("rmax_sq=%e\n", geo.rmax);
+//OLD   Log ("rmax=%e\n", geo.rmax);
+//OLD - this is defined else where   geo.rmax_sq = geo.rmax * geo.rmax;
+//OLD   Log ("rmax_sq=%e\n", geo.rmax);
 
 
   Log ("rmax=%e\n", zdom[ndom].rmax);
