@@ -1380,25 +1380,25 @@ mo_summary (w, rootname, ochoice)
 
     if (ochoice)
     {
-        if ichoice == 0)
+        if (ichoice == 0)
         {
             strcpy (filename, rootname);
             strcat (filename, ".f_rad_mod");
             write_array (filename, ochoice);
         }
-        else if ichoice == 1)
+        else if (ichoice == 1)
         {
             strcpy (filename, rootname);
             strcat (filename, ".f_rad_x");
             write_array (filename, ochoice);
         }
-        else if ichoice == 2)
+        else if (ichoice == 2)
         {
             strcpy (filename, rootname);
             strcat (filename, ".f_rad_y");
             write_array (filename, ochoice);
         }
-        else if ichoice == 3)
+        else if (ichoice == 3)
         {
             strcpy (filename, rootname);
             strcat (filename, ".f_rad_z");
