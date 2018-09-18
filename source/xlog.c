@@ -638,6 +638,7 @@ error_summary (message)
     Log ("%9d -- %s", errorlog[n].n, errorlog[n].description);
   }
 
+  Log_flush();
   return (0);
 }
 
