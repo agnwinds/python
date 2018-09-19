@@ -66,6 +66,9 @@ calculate_ionization (restart_stat)
   double freqmin, freqmax;
   long nphot_to_define;
   int iwind;
+  
+  int n_phot_steps, phot_next_cycle, phot_cycle_gap;
+  
 #ifdef MPI_ON
   int ioniz_spec_helpers;
 #endif
@@ -111,7 +114,18 @@ calculate_ionization (restart_stat)
       reverb_init (wmain);
       delay_dump_prep (restart_stat);
     }
-
+    
+  /*
+   * EP: if the photon increment speed up is being used, figure out at which
+   * cycle NPHOT will be increased.
+   */
+  if (PHOT_STEP_SW == TRUE)
+  {
+    n_phot_steps = (int) log10 ((double) NPHOT_MAX / NPHOT_MIN) + 1;
+    phot_next_cycle = phot_cycle_gap = geo.wcycles / n_phot_steps;
+    Log ("NPHOT will increase %i time(s) every %i cycles\n", n_phot_steps - 1,
+         phot_cycle_gap);
+  }
 
   while (geo.wcycle < geo.wcycles)
     {				/* This allows you to build up photons in bunches */
@@ -145,12 +159,65 @@ calculate_ionization (restart_stat)
 	iwind = 1;		/* Create wind photons and force a reinitialization of wind parms */
 
 
+	    /*
+	     * EP: If the photon increment is being used, increase the photon count
+	     * and update the variable to the next cycle number to increment at. The
+	     * else if state is to ensure that if NPHOT_MAX hasn't been reached, then
+	     * the final cycle should have NPHOT_MAX photons.
+	     */
+	    if (PHOT_STEP_SW == TRUE && geo.wcycle == phot_next_cycle
+          && NPHOT < NPHOT_MAX)
+      {
+        NPHOT *= 10;
+  
+        #ifdef MPI_ON
+          NPHOT /= np_mpi_global;
+        #endif
+        
+        /*
+         * EP: both p and photmain realloc'd otherwise photmain would end
+         * up not pointing at anything and cause a segfault in make_spectra()
+         */
+        p = photmain = (PhotPtr) realloc (photmain, sizeof (p_dummy) * NPHOT);
+        
+        if (!p)
+        {
+          Error ("Could not reallocate memory for %i photons for photmain\n",
+                 NPHOT);
+          exit (-1);
+        }
+      
+        phot_next_cycle += phot_cycle_gap;
+        
+        if (phot_next_cycle < geo.wcycles)
+          Log ("NPHOT to be incremented again on cycle %i\n", phot_next_cycle);
+      }
+      else if (PHOT_STEP_SW == TRUE && geo.wcycle == geo.wcycles - 1
+               && NPHOT < NPHOT_MAX)
+      {
+        NPHOT = NPHOT_MAX;
+  
+        #ifdef MPI_ON
+          NPHOT /= np_mpi_global;
+        #endif
+  
+        p = photmain = (PhotPtr) realloc (photmain, sizeof (p_dummy) * NPHOT);
+  
+        if (!p)
+        {
+          Error ("Could not reallocate memory for %i photons for photmain\n",
+                 NPHOT);
+          exit (-1);
+        }
+      }
+    
+      Log ("%i photons to be transported for cycle %i\n", NPHOT, geo.wcycle);
+	  
       /* Create the photons that need to be transported through the wind
        *
        * NPHOT is the number of photon bundles which will equal the luminosity; 
        * 0 => for ionization calculation 
        */
-
 
       nphot_to_define = (long) NPHOT;
 
@@ -402,7 +469,7 @@ calculate_ionization (restart_stat)
     {
       wind_paths_evaluate (w, rank_global);
     }
-
+    
   return (0);
 }
 

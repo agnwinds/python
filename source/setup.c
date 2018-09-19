@@ -499,14 +499,34 @@ PhotPtr
 init_photons ()
 {
   PhotPtr p;
-  double x;
+  int use_log_step = FALSE;
+  double nphot = 1e5, min_nphot = 1e5, max_nphot = 1e7;
 
   /* Although Photons_per_cycle is really an integer,
-     read in as a double so it is easier for input */
+     read in as a double so it is easier for input
+     (in scientific notation) */
 
-  x = 100000;
-  rddoub ("Photons_per_cycle", &x);
-  NPHOT = x;			// NPHOT is photons/cycle
+  rdint ("Use_log_photon_step(0=no,1=yes)", &use_log_step);
+  PHOT_STEP_SW = use_log_step;
+  
+  if (PHOT_STEP_SW == TRUE)
+  {
+    rddoub ("Min_photons_per_cycle", &min_nphot);
+    rddoub ("Max_photons_per_cycle", &max_nphot);
+    NPHOT = NPHOT_MIN = (int) min_nphot;  // NPHOT is photons/cycle
+    NPHOT_MAX =  (int) max_nphot;   // cast int to avoid issues with the value
+  }                                 // of max_nphot not fitting into NPHOT_MAX
+  else if (PHOT_STEP_SW == FALSE)
+  {
+    rddoub ("Photons_per_cycle", &nphot);
+    NPHOT = (int) nphot;
+  }
+  else
+  {
+    Error ("Invalid choice %i for Use_log_photon_step(0=no,1=yes)\n",
+           PHOT_STEP_SW);
+    exit (-1);
+  }
 
 #ifdef MPI_ON
   Log ("Photons per cycle per MPI task will be %d\n", NPHOT / np_mpi_global);
