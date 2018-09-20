@@ -382,8 +382,9 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
   }
   else
   {
-    Error ("bb_estimators_increment: trying to add negative contribution to jbar. Abort. \n");
-    exit (0);
+    Error ("bb_estimators_increment: trying to add negative contribution to jbar. %e. See #436\n",y);
+    return(0);
+//OLD    exit (0);
   }
 
   /* Record contribution to energy absorbed by macro atoms. */
