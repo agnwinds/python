@@ -3,74 +3,6 @@
 Reverb
 ======
 
-Reverb.visualisation
-====================
-Which type of visualisation to output, if any. Reverb modes that keep arrays
-of photon paths per cell can output them either as averages in a 3d model, or
-as a selection of flat text files with full bin-by-bin breakdowns. Useful for
-diagnostics.
-
-**Type:** Enum (Int)
-
-**Values:**
-
-0. None
-
-1. **Mesh visualisation**
-   
-   Outputs mean incident path per cell, photon count per cell, and mean
-   observed delay to '.vtk' format, readable using a range of programs including
-   (my preferred option) VisIt, available at https://visit.llnl.gov/.
-
-2. **Dump cells**
-   
-   Outputs distributions of paths for continuum heating and each line to a range of 'dump cells'
-   specified by X & Z position using the reverb.dump_cells/reverb.dump_cell options.
-
-3. **Both**
-
-
-**Parent(s):**
-  reverb.type_: 2, 3
-
-
-**File:** setup_reverb.c
-
-
-Reverb.filter_lines
-===================
-Whether or not to filter any lines out of the output file. This is used to keep output
-file sizes down, and avoid them overwhelming the user.
-
-**Type:** Int
-
-**Values:**
-
-0. **No filtering**
-   
-   Include *all* photons that contribute to the spectra in the output
-   file. Not recommended as it leads to gargantuan file sizes.
-
-N. **Filter lines**
-   
-   Include N reverb.filter_line entries, each specifying one
-   line to keep in the output file. If reverb.matom_lines is >0, all macro-atom
-   lines of interest are automatically included in the filter list.
-
--1. **Filter continuum**
-   
-   Include all photons whose last interaction was scatter
-   or emission in a line. Recommended setting for exploratory runs where you'd
-   like to identify which lines are the easiest to process.
-
-
-**Parent(s):**
-  reverb.type_: Greater than 0
-
-
-**File:** setup_reverb.c
-
-
 Reverb.angle_bins
 =================
 Used when generating 3d .vtk output files for visualisation. Sets the number
@@ -83,49 +15,6 @@ with larger filesizes.
 
 **Parent(s):**
   reverb.visualisation_: 1, 3
-
-
-**File:** setup_reverb.c
-
-
-Reverb.matom_line
-=================
-Specifies a line associated with a given macro-atom transition. The species
-and transition involved are specified. The internal line associated with this
-transition will be printed to standard-out for use when processing outputs. A
-line is specified as Element:Ion:Upper level:Lower level.
-
-**Type:** Int:Int:Int:Int
-
-
-**Value:** >0:>0:>1:>0
-
-
-**Parent(s):**
-  reverb.matom_lines_: Greater than 0
-
-
-**File:** setup_reverb.c
-
-
-Reverb.dump_cell
-================
-Position for a cell, listed as a pair of R:Z coordinates. Will accept any
-position that falls within a grid, will error out on ones that don't. This can
-be slightly awkward and you may want to run a quick test then use py_wind to
-idenfity where wind locations are.
-
-**Type:** Float:Float
-
-
-**Unit:** cm:cm
-
-
-**Value:** >0:>0
-
-
-**Parent(s):**
-  reverb.dump_cells_: Greater than 0
 
 
 **File:** setup_reverb.c
@@ -176,6 +65,29 @@ distributions for wind cells.
 **File:** setup_reverb.c
 
 
+Reverb.dump_cell
+================
+Position for a cell, listed as a pair of R:Z coordinates. Will accept any
+position that falls within a grid, will error out on ones that don't. This can
+be slightly awkward and you may want to run a quick test then use py_wind to
+idenfity where wind locations are.
+
+**Type:** Float:Float
+
+
+**Unit:** cm:cm
+
+
+**Value:** >0:>0
+
+
+**Parent(s):**
+  reverb.dump_cells_: Greater than 0
+
+
+**File:** setup_reverb.c
+
+
 Reverb.dump_cells
 =================
 Number of cells to dump. When dumping the path distribution info for a range
@@ -188,6 +100,100 @@ provided.
 
 **Parent(s):**
   reverb.visualisation_: 2, 3
+
+
+**File:** setup_reverb.c
+
+
+Reverb.filter_line
+==================
+Line number of one line to include in the output .delay_dump file. This is
+the python internal line number. It can be found using either the macro-atom
+mode (which prints out the line number once it's found one) or by doing an
+exploratory run with reverb.filter_lines = -1, then looking through the delay
+dump file for photons of the right wavelength to see what their line is. This
+should almost certainly be changed to be specified using a species and
+wavelength!
+
+**Type:** Int
+
+**Value:** Any valid line index
+
+**Parent(s):**
+  reverb.filter_lines_: Greater than 0
+
+
+**File:** setup_reverb.c
+
+
+Reverb.filter_lines
+===================
+Whether or not to filter any lines out of the output file. This is used to keep output
+file sizes down, and avoid them overwhelming the user.
+
+**Type:** Int
+
+**Values:**
+
+0. **No filtering**
+   
+   Include *all* photons that contribute to the spectra in the output
+   file. Not recommended as it leads to gargantuan file sizes.
+
+-1. **Filter continuum**
+   
+   Include all photons whose last interaction was scatter
+   or emission in a line. Recommended setting for exploratory runs where you'd
+   like to identify which lines are the easiest to process.
+
+N. **Filter lines**
+   
+   Include N reverb.filter_line entries, each specifying one
+   line to keep in the output file. If reverb.matom_lines is >0, all macro-atom
+   lines of interest are automatically included in the filter list.
+
+
+**Parent(s):**
+  reverb.type_: Greater than 0
+
+
+**File:** setup_reverb.c
+
+
+Reverb.matom_line
+=================
+Specifies a line associated with a given macro-atom transition. The species
+and transition involved are specified. The internal line associated with this
+transition will be printed to standard-out for use when processing outputs. A
+line is specified as Element:Ion:Upper level:Lower level.
+
+**Type:** Int:Int:Int:Int
+
+
+**Value:** >0:>0:>1:>0
+
+
+**Parent(s):**
+  reverb.matom_lines_: Greater than 0
+
+
+**File:** setup_reverb.c
+
+
+Reverb.matom_lines
+==================
+Number of macro-atom lines to track paths for individually. This many
+reverb.matom_line entries are required, and the line associated with each has
+the path of photons deexciting into it recorded in its own array. Note: This
+doesn't give rise to any noticable differences to the pure wind mode in most
+simulations.
+
+**Type:** Int
+
+**Value:** 0 or N
+
+**Parent(s):**
+  reverb.type_: 3
 
 
 **File:** setup_reverb.c
@@ -209,25 +215,6 @@ bin boundaries show up in the TF.
 
 **Parent(s):**
   reverb.type_: 2, 3
-
-
-**File:** setup_reverb.c
-
-
-Reverb.matom_lines
-==================
-Number of macro-atom lines to track paths for individually. This many
-reverb.matom_line entries are required, and the line associated with each has
-the path of photons deexciting into it recorded in its own array. Note: This
-doesn't give rise to any noticable differences to the pure wind mode in most
-simulations.
-
-**Type:** Int
-
-**Value:** 0 or N
-
-**Parent(s):**
-  reverb.type_: 3
 
 
 **File:** setup_reverb.c
@@ -277,22 +264,35 @@ our 'tfpy' Python (no relation) library.
 **File:** setup_reverb.c
 
 
-Reverb.filter_line
-==================
-Line number of one line to include in the output .delay_dump file. This is
-the python internal line number. It can be found using either the macro-atom
-mode (which prints out the line number once it's found one) or by doing an
-exploratory run with reverb.filter_lines = -1, then looking through the delay
-dump file for photons of the right wavelength to see what their line is. This
-should almost certainly be changed to be specified using a species and
-wavelength!
+Reverb.visualisation
+====================
+Which type of visualisation to output, if any. Reverb modes that keep arrays
+of photon paths per cell can output them either as averages in a 3d model, or
+as a selection of flat text files with full bin-by-bin breakdowns. Useful for
+diagnostics.
 
-**Type:** Int
+**Type:** Enum (Int)
 
-**Value:** Any valid line index
+**Values:**
+
+0. None
+
+1. **Mesh visualisation**
+   
+   Outputs mean incident path per cell, photon count per cell, and mean
+   observed delay to '.vtk' format, readable using a range of programs including
+   (my preferred option) VisIt, available at https://visit.llnl.gov/.
+
+2. **Dump cells**
+   
+   Outputs distributions of paths for continuum heating and each line to a range of 'dump cells'
+   specified by X & Z position using the reverb.dump_cells/reverb.dump_cell options.
+
+3. **Both**
+
 
 **Parent(s):**
-  reverb.filter_lines_: Greater than 0
+  reverb.type_: 2, 3
 
 
 **File:** setup_reverb.c

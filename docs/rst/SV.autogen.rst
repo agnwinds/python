@@ -22,15 +22,36 @@ See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
 **File:** sv.c
 
 
-SV.mdot_r_exponent
-==================
-The exponent for the mass loss rate as defined in the Shlosman Vitelo model,
-See lambda in equation (4) Shlosman & Vitelo,ApJ,1993,409,372.
-A value of 0 sets a uniform mass loss rate.
+SV.acceleration_length
+======================
+The size of the acceleration length scale for a disk wind described by the
+Shlosman Vitelo model. See equation (2) Shlosman & Vitelo ApJ (1993),409,372 
 
 **Type:** Double
 
-**Value:** Greater than=0
+**Unit:** cm
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  wind_type_: 0
+
+
+**File:** sv.c
+
+
+SV.diskmax
+==========
+The outermost radius from which the wind rises in a Shlossman-Vitello type disk wind.
+This radius is measured along the radial disk (r) direction i.e. zero describes the centre of the central object
+(white dwarf)
+See figure 1 of Shlosman & Vitello 1993, ApJ 409,372.
+
+**Type:** Double
+
+**Unit:** cm
+
+**Value:** Greater than or equal to sv.diskmin (inner radius disk wind)
 
 **Parent(s):**
   wind_type_: 0
@@ -59,18 +80,34 @@ See figure 1 of Shlosman & Vitello 1993, ApJ 409,372.
 **File:** sv.c
 
 
-SV.diskmax
-==========
-The outermost radius from which the wind rises in a Shlossman-Vitello type disk wind.
-This radius is measured along the radial disk (r) direction i.e. zero describes the centre of the central object
-(white dwarf)
-See figure 1 of Shlosman & Vitello 1993, ApJ 409,372.
+SV.mdot_r_exponent
+==================
+The exponent for the mass loss rate as defined in the Shlosman Vitelo model,
+See lambda in equation (4) Shlosman & Vitelo,ApJ,1993,409,372.
+A value of 0 sets a uniform mass loss rate.
 
 **Type:** Double
 
-**Unit:** cm
+**Value:** Greater than=0
 
-**Value:** Greater than or equal to sv.diskmin (inner radius disk wind)
+**Parent(s):**
+  wind_type_: 0
+
+
+**File:** sv.c
+
+
+SV.thetamax
+===========
+The angle at which the wind rises from the outermost launching radius in a Shlossman-Vitello type disk wind.
+This angle is measured with respect to the vertical (z) direction i.e. zero describes a vertical wind.
+See figure 1 of Shlossman & Vitello 1993, ApJ 409,372.
+
+**Type:** Double
+
+**Unit:** Degrees
+
+**Value:** Greater than sv.thetamin
 
 **Parent(s):**
   wind_type_: 0
@@ -107,43 +144,6 @@ See equation (2) Shlosman & Vitello 1993, ApJ 409, 372.
 **Type:** Double
 
 **Unit:** Escape velocity
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  wind_type_: 0
-
-
-**File:** sv.c
-
-
-SV.thetamax
-===========
-The angle at which the wind rises from the outermost launching radius in a Shlossman-Vitello type disk wind.
-This angle is measured with respect to the vertical (z) direction i.e. zero describes a vertical wind.
-See figure 1 of Shlossman & Vitello 1993, ApJ 409,372.
-
-**Type:** Double
-
-**Unit:** Degrees
-
-**Value:** Greater than sv.thetamin
-
-**Parent(s):**
-  wind_type_: 0
-
-
-**File:** sv.c
-
-
-SV.acceleration_length
-======================
-The size of the acceleration length scale for a disk wind described by the
-Shlosman Vitelo model. See equation (2) Shlosman & Vitelo ApJ (1993),409,372 
-
-**Type:** Double
-
-**Unit:** cm
 
 **Value:** Greater than 0
 

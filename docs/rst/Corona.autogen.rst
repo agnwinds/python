@@ -3,24 +3,6 @@
 Corona
 ======
 
-Corona.scale_height
-===================
-The coronal model is defined in terms of a base density
-and a scale height
-
-**Type:** Double
-
-**Unit:** cm
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  Wind.type_: Selected as one of the choces for this variable
-
-
-**File:** corona.c
-
-
 Corona.base_den
 ===============
 The coronal model is defined in terms of a base density
@@ -57,6 +39,42 @@ above the disk.  radmax defines the outer edge of the box.
 **File:** corona.c
 
 
+Corona.radmin
+=============
+The corona is a box-shaped region which sits immediately
+above the disk.  radmin defines the inner edge of the box.
+
+**Type:** Double
+
+**Unit:** cm
+
+**Value:** Greater than that the radius of the central object
+
+**Parent(s):**
+  Wind.type_: Selected as one of the choces for this variable
+
+
+**File:** corona.c
+
+
+Corona.scale_height
+===================
+The coronal model is defined in terms of a base density
+and a scale height
+
+**Type:** Double
+
+**Unit:** cm
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  Wind.type_: Selected as one of the choces for this variable
+
+
+**File:** corona.c
+
+
 Corona.vel_frac
 ===============
 For the coronal model, the azimuthal velocity is
@@ -71,24 +89,6 @@ toward the central object).
 **Unit:** None
 
 **Value:** Any, 0 implies no radial velocity.
-
-**Parent(s):**
-  Wind.type_: Selected as one of the choces for this variable
-
-
-**File:** corona.c
-
-
-Corona.radmin
-=============
-The corona is a box-shaped region which sits immediately
-above the disk.  radmin defines the inner edge of the box.
-
-**Type:** Double
-
-**Unit:** cm
-
-**Value:** Greater than that the radius of the central object
 
 **Parent(s):**
   Wind.type_: Selected as one of the choces for this variable

@@ -3,45 +3,13 @@
 Disk
 ====
 
-Disk.type
+Disk.mdot
 =========
-Parameter defining whether there is a disk in the system
-
-**Type:** Enum (Int)
-
-**Values:**
-
-0. no.disk
-
-1. standard.flat.disk
-
-2. vertically.extended.disk
-
-
-**Parent(s):**
-  parameter_: This question is always asked
-
-
-**File:** setup_disk.c
-
-
-----------------------------------------
-
-Disk.z1
--------
-For a vertically extended the disk, the height of the disk is
-set to be Disk.rad_mask*(r/Disk.rad_max)**Disk.z1 where Disk.z1
-is the power law index
+The mass transfer rate in the disk when considering a standard Shakura-disk.
 
 **Type:** rddoub
 
-**Unit:** None
-
-**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
-
-**Parent(s):**
-  Disk.type_: This question is ascked whenever the Disk.type is vertically extended
-
+**Unit:** msol/yr
 
 **File:** setup_disk.c
 
@@ -66,25 +34,6 @@ models which are read in and sampled.
 
 
 **File:** python.c
-
-
-Disk.radmax
-===========
-The outer edge of the disk.  Photons inside this radius are
-absorbed or re-radiated.  Photons which are outside this radius
-pass through the disk plane.
-
-**Type:** rddoub
-
-**Unit:** cm
-
-**Value:** Greater than 0
-
-**Parent(s):**
-  disk.type_: disktype must be 1 or 2, standard or vertically extended disk
-
-
-**File:** setup_disk.c
 
 
 Disk.radiation
@@ -141,13 +90,64 @@ contains the desired profile.
 **File:** setup_disk.c
 
 
-Disk.mdot
-=========
-The mass transfer rate in the disk when considering a standard Shakura-disk.
+Disk.radmax
+===========
+The outer edge of the disk.  Photons inside this radius are
+absorbed or re-radiated.  Photons which are outside this radius
+pass through the disk plane.
 
 **Type:** rddoub
 
-**Unit:** msol/yr
+**Unit:** cm
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  disk.type_: disktype must be 1 or 2, standard or vertically extended disk
+
+
+**File:** setup_disk.c
+
+
+Disk.type
+=========
+Parameter defining whether there is a disk in the system
+
+**Type:** Enum (Int)
+
+**Values:**
+
+0. no.disk
+
+1. standard.flat.disk
+
+2. vertically.extended.disk
+
+
+**Parent(s):**
+  parameter_: This question is always asked
+
+
+**File:** setup_disk.c
+
+
+----------------------------------------
+
+Disk.z1
+-------
+For a vertically extended the disk, the height of the disk is
+set to be Disk.rad_mask*(r/Disk.rad_max)**Disk.z1 where Disk.z1
+is the power law index
+
+**Type:** rddoub
+
+**Unit:** None
+
+**Value:** Condition e.g. greater than 0 or list e.g. [1, 2, 5]
+
+**Parent(s):**
+  Disk.type_: This question is ascked whenever the Disk.type is vertically extended
+
 
 **File:** setup_disk.c
 

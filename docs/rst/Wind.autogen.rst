@@ -3,23 +3,19 @@
 wind
 ====
 
-wind.radmax
-===========
-The maximum radial distance to follow photons in a wind.  Beyond
-this point photons do not interact with the wind at all. Note that
-this is a global parameter and refers to al of the wind domains
+wind.fixed_concentrations_file
+==============================
+The filename for the fixed ion concentrations if you have
+set Wind_ionization to 2 (fixed). This file has format
+[atomic_number  ionizationstage   ion fraction]. 
 
-**Type:** Double
-
-**Unit:** cm
-
-**Value:** Greater than 0
+**Type:** String
 
 **Parent(s):**
-  parameter_: Whenver there is a wind one will be asked to provide this parameter.
+  parameter_: Whenever the wind ionization choice is fixed
 
 
-**File:** setup_domains.c
+**File:** setup2.c
 
 
 wind.mdot
@@ -40,6 +36,25 @@ wind models, e.g SV or KWD.
 **File:** sv.c, knigge.c
 
 
+wind.radmax
+===========
+The maximum radial distance to follow photons in a wind.  Beyond
+this point photons do not interact with the wind at all. Note that
+this is a global parameter and refers to al of the wind domains
+
+**Type:** Double
+
+**Unit:** cm
+
+**Value:** Greater than 0
+
+**Parent(s):**
+  parameter_: Whenver there is a wind one will be asked to provide this parameter.
+
+
+**File:** setup_domains.c
+
+
 wind.t.init
 ===========
 This parameter sets the initial temperature of the wind.  (It currently
@@ -56,20 +71,5 @@ refers to all domains).
 
 
 **File:** setup_domains.c
-
-
-wind.fixed_concentrations_file
-==============================
-The filename for the fixed ion concentrations if you have
-set Wind_ionization to 2 (fixed). This file has format
-[atomic_number  ionizationstage   ion fraction]. 
-
-**Type:** String
-
-**Parent(s):**
-  parameter_: Whenever the wind ionization choice is fixed
-
-
-**File:** setup2.c
 
 
