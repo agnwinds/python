@@ -994,7 +994,7 @@ scatter (p, nres, nnscat)
   int i, n;
   double p_init[3], p_final[3], dp[3], dp_cyl[3];
   WindPtr one;
-  double prob_kpkt, kpkt_choice;
+  double prob_kpkt, kpkt_choice, freq_comoving;
   double gamma_twiddle, gamma_twiddle_e, stim_fact;
   int m, llvl, ulvl;
   double v_dop;
@@ -1003,9 +1003,13 @@ scatter (p, nres, nnscat)
   int ndom;
 
 
+  /* get wind+plasma ptrs and domain number */
+  one = &wmain[p->grid];
+  xplasma = &plasmamain[one->nplasma];
+  ndom = wmain[p->grid].ndom;
 
   stuff_phot (p, &pold);
-  n = where_in_grid (wmain[pold.grid].ndom, pold.x);	// Find out where we are
+  n = where_in_grid (ndom, pold.x);	// Find out where we are
 
   if (n < 0)
     {
@@ -1013,8 +1017,10 @@ scatter (p, nres, nnscat)
       return (-1);
     }
 
-  one = &wmain[p->grid];
-  xplasma = &plasmamain[one->nplasma];
+  vwind_xyz (ndom, p, v); //get the local velocity at the location of the photon
+  v_dop = dot (p->lmn, v);  //get the dot product of the photon direction with the wind, to get the doppler velocity
+  freq_comoving = p->freq * (1. - v_dop / C); //This is the photon frequency in the comoving frame
+
 
   /* On entering this subroutine we know that a photon packet has been
      absorbed. nres tells us which process absorbed it. There are currently
@@ -1157,10 +1163,16 @@ scatter (p, nres, nnscat)
 	         that goes into the electron rather than being stored as ionisation energy: this
 	         fraction gives the selection probability for the packet. It's given by the
 	         (photon frequency / edge frequency - 1) (SS) */
+        
+	      prob_kpkt = 1. - (phot_top[*nres - NLINES - 1].freq[0] / freq_comoving);
 
-
-	      prob_kpkt =
-		1. - (phot_top[*nres - NLINES - 1].freq[0] / p->freq);
+        if (prob_kpkt < 0)
+        {
+          Error("scatter: kpkt probability (%8.4e) < 0, zeroing\n", prob_kpkt);
+          Log("scatter: photon comoving frequency: %8.4e, edge frequency %8.4e\n",
+               phot_top[*nres - NLINES - 1].freq[0], freq_comoving);
+          prob_kpkt = 0.0;
+        }
 
 
 	      /* Now choose whether or not to make a k-packet. */
@@ -1221,14 +1233,9 @@ scatter (p, nres, nnscat)
      For macro atoms the code above decides that emission will occur in the line - we now just need
      to use the thermal trapping model to choose the direction. */
 
-  /* JM 1509 -- moved this here so we have ndom for compton direction code */
-  ndom = wmain[p->grid].ndom;
-
   if (*nres == -1)		//Its an electron scatter, so we will call compton to get a direction
     {
-      vwind_xyz (ndom, p, v);	//get the local velocity at the location of the photon
-      v_dop = dot (p->lmn, v);	//get the dot product of the photon direction with the wind, to get the doppler velocity
-      p->freq = p->freq * (1. - v_dop / C);	//This is the photon frequency in the electron rest frame
+      p->freq = freq_comoving;	//This is the photon frequency in the electron rest frame calculated earlier in the routine
       compton_dir (p, xplasma);	//Get a new direction using the KN formula
       v_dop = dot (p->lmn, v);	//Find the dot product of the new velocity with the wind
       p->freq = p->freq / (1. - v_dop / C);	//Transform back to the observers frame

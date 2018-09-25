@@ -501,7 +501,6 @@ matom (p, nres, escape)
 
       
       /* Co-moving frequency - changed to rest frequency by doppler */
-      /*Currently this assumed hydrogenic shape cross-section - Improve */
     }
     else
     {                           //collisional deactivation
@@ -1005,7 +1004,7 @@ kpkt (p, nres, escape)
         /* Now (as in matom) choose a frequency for the new packet. */
 
         //p->freq = phot_top[i].freq[0] - (log (1. - random_number(0.0,1.0)) * xplasma->t_e / H_OVER_K);
-	 p->freq = matom_select_bf_freq(one, i);
+	      p->freq = matom_select_bf_freq(one, i);
 
         /* if the cross-section corresponds to a simple ion (macro_info == 0)
            or if we are treating all ions as simple, then adopt the total emissivity
