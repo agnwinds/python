@@ -616,8 +616,8 @@ macro_pops (xplasma, xne)
 
             if (levden_temp < 0.0 || sane_check (levden_temp))
             {
-              Error ("macro_pops: level %i has frac. pop. %8.4e in cell %i\n",
-                     index_lvl, xplasma->levden[config[index_lvl].nden], xplasma->nplasma);
+              Error ("macro_pops: level %i has calculated frac. pop. %8.4e in cell %i\n",
+                     index_lvl, levden_temp, xplasma->nplasma);
               insane = 1;
             }
             else
@@ -634,7 +634,8 @@ macro_pops (xplasma, xne)
 
           if (sane_check (ionden_temp) || ionden_temp < 0.0)
           {
-            Error ("macro_pops: ion %i has frac. pop. %8.4e in cell %i\n", index_ion, xplasma->density[index_ion], xplasma->nplasma);
+            Error ("macro_pops: ion %i has calculated frac. pop. %8.4e in cell %i\n", 
+                    index_ion, ionden_temp, xplasma->nplasma);
             insane = 1;
           }
           else 
