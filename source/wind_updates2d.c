@@ -101,12 +101,13 @@ WindPtr (w);
   double dt_e_temp, dt_r_temp;
 
 
-  /* the commbuffer needs to be larger enough to pack all variables in MPI_Pack and MPI_Unpack routines NSH 1407 - the
-     NIONS changed to nions for the 12 arrays in plasma that are now dynamically allocated
-  NSH 1703 changed NLTE_LEVELS to nlte_levels  and NTOP_PHOT to nphot_tot since they are dynamically allocated now */
+  /* The commbuffer needs to be larger enough to pack all variables in MPI_Pack and MPI_Unpack routines 
+   * The cmombuffer is currently sized to be the minimum requred.  Therefore when variables are added, the
+   * size must must be increased.
+   */
+
   size_of_commbuffer =
-//OLD    8 * (13 * nions + nlte_levels + 2 * nphot_total + 12 * NXBANDS + 2 * LPDF + NAUGER + 113) * (floor (NPLASMA / np_mpi_global) + 1);
-    8 * (9 * nions + nlte_levels + 2 * nphot_total + 12 * NXBANDS + 115) * (floor (NPLASMA / np_mpi_global) + 1);
+    8 * (9 * nions + nlte_levels + 3 * nphot_total + 12 * NXBANDS + 115) * (floor (NPLASMA / np_mpi_global) + 1);
   commbuffer = (char *) malloc (size_of_commbuffer * sizeof (char));
 
   /* JM 1409 -- Initialise parallel only variables */
@@ -577,7 +578,8 @@ WindPtr (w);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].ip_scatt, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].xi, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].bf_simple_ionpool_in, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].bf_simple_ionpool_out, 1, MPI_DOUBLE, MPI_COMM_WORLD);        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &dt_e_temp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &plasmamain[n].bf_simple_ionpool_out, 1, MPI_DOUBLE, MPI_COMM_WORLD);        
+        MPI_Unpack (commbuffer, size_of_commbuffer, &position, &dt_e_temp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &dt_r_temp, 1, MPI_DOUBLE, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &nmax_e_temp, 1, MPI_INT, MPI_COMM_WORLD);
         MPI_Unpack (commbuffer, size_of_commbuffer, &position, &nmax_r_temp, 1, MPI_INT, MPI_COMM_WORLD);
