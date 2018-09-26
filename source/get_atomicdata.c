@@ -786,12 +786,13 @@ structure does not have this property! */
 		       sscanf (aline, "%*s %*s %d %d %le %le %d %d", &z,
 			       &istate, &gg, &p, &nmax, &nlte)) == 6)
 		    {
-		    }		// It's a new style ion line specifying levels to treat in nlte
-		  else if (nwords == 4)
-		    {		//It's an old style ion line
-		      nlte = 0;
-		      nmax = 10;
-		    }
+		    }		
+//OLD          // It's a new style ion line specifying levels to treat in nlte
+//OLD		  else if (nwords == 4)
+//OLD		    {		//It's an old style ion line
+//OLD		      nlte = 0;
+//OLD	      nmax = 10;
+//OLD	    }
 		  else
 		    {
 		      Error
@@ -1030,6 +1031,16 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
 			 file, lineno);
 		      break;
 		    }
+
+          /* Check that for a non-lte (macro atom) that the configuration level is not greater than was allowed for in the
+           * ion line
+           */
+    
+          if(lev_type==1 && ilv > ion[n].n_lte_max) {
+              Error("get_atomic_data: macro level %d ge %d for z %d  istate %d\n", ilv,ion[n].n_lte_max,ion[n].z,ion[n].istate);
+              //exit(0);
+              break;
+          }
 
 /*  So now we know that this level can be associated with an ion
 
