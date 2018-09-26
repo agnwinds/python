@@ -195,34 +195,32 @@ convergence (xplasma)
    */
 
   if ((xplasma->converge_t_r =
-       fabs (xplasma->t_r_old - xplasma->t_r) / (xplasma->t_r_old +
-						 xplasma->t_r)) > epsilon)
+      fabs (xplasma->t_r_old - xplasma->t_r) / (xplasma->t_r_old + xplasma->t_r)) > epsilon)
     xplasma->trcheck = trcheck = 1;
+  
+  /* Check whether the heating and colling balance to within epsilon and if so set hccheck to 1
+   * - 110919 nsh modified line below to include the adiabatic cooling in the check that heating equals cooling
+   * - 111004 nsh further modification to include DR and compton cooling, now moved out of lum_tot
+   * - 130722 added a fabs to the bottom, since it is now conceivable that this could be negative if
+   *   cool_adiabatic is large and negative - and hence heating
+   * - NSH 130711 - also changed to have fabs on top and bottom, since heating can now be negative!)
+   * - NSH 130725 - moved the hc check to be within the if statement about overtemp - we cannot expect hc to
+   *   converge if we are hitting the maximum temperature
+   */
+  
   if (xplasma->t_e < TMAX)
-    {
-      if ((xplasma->converge_t_e =
-	   fabs (xplasma->t_e_old - xplasma->t_e) / (xplasma->t_e_old +
-						     xplasma->t_e)) > epsilon)
-	xplasma->techeck = techeck = 1;
-      if ((xplasma->converge_hc =
-	   fabs (xplasma->heat_tot - xplasma->cool_tot) / fabs (xplasma->heat_tot + xplasma->cool_tot)) > epsilon)
-	xplasma->hccheck = hccheck = 1;
-    }
-  else				//If the cell has reached the maximum temperature
-    {
-      xplasma->techeck = techeck = xplasma->hccheck = hccheck = 2;	//we mark it as overlimit
-    }
-
-//110919 nsh modified line below to include the adiabatic cooling in the check that heating equals cooling
-//111004 nsh further modification to include DR and compton cooling, now moved out of lum_tot
-
-  /* Check whether the heating and colling balance to within epsilon and if so set hccheck to 1 */
-  /* 130722 added a fabs to the bottom, since it is now conceivable that this could be negative if
-     cool_adiabatic is large and negative - and hence heating */
-
-/* NSH 130711 - also changed to have fabs on top and bottom, since heating can now be negative!) */
-
-/* NSH 130725 - moved the hc check to be within the if statement about overtemp - we cannot expect hc to converge if we are hitting the maximum temperature */
+  {
+    if ((xplasma->converge_t_e = fabs (xplasma->t_e_old - xplasma->t_e)
+        / (xplasma->t_e_old + xplasma->t_e)) > epsilon)
+	    xplasma->techeck = techeck = 1;
+    
+    if ((xplasma->converge_hc = fabs (xplasma->heat_tot - xplasma->cool_tot)
+         / fabs (xplasma->heat_tot + xplasma->cool_tot)) > epsilon)
+	    xplasma->hccheck = hccheck = 1;
+  }
+  else				//If the cell has reached the maximum temperature we mark it as over-limit
+    xplasma->techeck = techeck = xplasma->hccheck = hccheck = 2;
+    
   /* whole_check is the sum of the temperature checks and the heating check */
 
   xplasma->converge_whole = whole_check = trcheck + techeck + hccheck;
@@ -235,21 +233,28 @@ convergence (xplasma)
 
   if (xplasma->dt_e_old * xplasma->dt_e < 0
       && fabs (xplasma->dt_e) > fabs (xplasma->dt_e_old))
-    converging = 1;
-  xplasma->converging = converging;
-
+    xplasma->converging = converging = 1;
+  
+  /*
+   * EP: Switching magic numbers which control how gain changes to variables
+   */
+  double min_gain = 0.1, max_gain = 0.8;
+  double gain_damp = 0.7, gain_amp = 1.1;
+  
+  gain_amp = 1.5;
+  
   if (converging == 1)
-    {				// Not converging
-      xplasma->gain *= 0.7;
-      if (xplasma->gain < 0.1)
-	xplasma->gain = 0.1;
-    }
-  else
-    {
-      xplasma->gain *= 1.1;
-      if (xplasma->gain > 0.8)
-	xplasma->gain = 0.8;
-    }
+  {
+    xplasma->gain *= gain_damp;
+    if (xplasma->gain < min_gain)
+      xplasma->gain = min_gain;
+  }
+  else // Not converging
+  {
+    xplasma->gain *= gain_amp;
+    if (xplasma->gain > max_gain)
+      xplasma->gain = max_gain;
+  }
 
   return (whole_check);
 }

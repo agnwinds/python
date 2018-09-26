@@ -372,7 +372,7 @@ calculate_ionization (restart_stat)
 	("!!python: Number of ionizing photons %g lum of ionizing photons %g\n",
 	 geo.n_ioniz, geo.cool_tot_ioniz);
 
-/* This step should be MPI_parallelised too */
+/* This step should be MPI_parallelised too - EP: It looks like this is, infact, parallelised */
 
       wind_update (w);
 

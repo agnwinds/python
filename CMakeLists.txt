@@ -6,6 +6,8 @@ find_package(GSL REQUIRED)
 
 include_directories(source)
 
+# add_definitions(-D MPI_ON)
+
 add_executable(python
         source/bb.c
         source/get_atomicdata.c
