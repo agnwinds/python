@@ -638,7 +638,7 @@ error_summary (message)
     Log ("%9d -- %s", errorlog[n].n, errorlog[n].description);
   }
 
-  Log_flush();
+  Log_flush ();
   return (0);
 }
 
@@ -735,7 +735,7 @@ Log_parallel (char *format, ...)
     return (0);
 
   va_start (ap, format);
-  va_copy (ap2, ap);            
+  va_copy (ap2, ap);
 
   if (my_rank == 0)
     result = vprintf (format, ap);
@@ -783,8 +783,8 @@ Debug (char *format, ...)
     Log_init ("logfile");
 
   va_start (ap, format);
-  va_copy (ap2, ap);            
-  if (my_rank == 0)             
+  va_copy (ap2, ap);
+  if (my_rank == 0)
     vprintf ("Debug: ", ap);
   result = vprintf (format, ap);
   fprintf (diagptr, "Debug: ");

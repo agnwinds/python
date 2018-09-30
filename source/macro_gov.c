@@ -143,10 +143,10 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
         /* This is a bf continuum but we don't want the full macro atom treatment. */
       {
 #if BF_SIMPLE_EMISSIVITY_APPROACH
-	   Error("Macro_go: Error - trying to access fake_matom_bf in alternate bf treatment.\n");
-	   exit (0);
+        Error ("Macro_go: Error - trying to access fake_matom_bf in alternate bf treatment.\n");
+        exit (0);
 #endif
-          fake_matom_bf (p, nres, &escape);
+        fake_matom_bf (p, nres, &escape);
       }
 
       matom_or_kpkt = 2;        //if it did not escape then it must have had a
@@ -616,8 +616,7 @@ macro_pops (xplasma, xne)
 
             if (levden_temp < 0.0 || sane_check (levden_temp))
             {
-              Error ("macro_pops: level %i has calculated frac. pop. %8.4e in cell %i\n",
-                     index_lvl, levden_temp, xplasma->nplasma);
+              Error ("macro_pops: level %i has calculated frac. pop. %8.4e in cell %i\n", index_lvl, levden_temp, xplasma->nplasma);
               insane = 1;
             }
             else
@@ -634,11 +633,10 @@ macro_pops (xplasma, xne)
 
           if (sane_check (ionden_temp) || ionden_temp < 0.0)
           {
-            Error ("macro_pops: ion %i has calculated frac. pop. %8.4e in cell %i\n", 
-                    index_ion, ionden_temp, xplasma->nplasma);
+            Error ("macro_pops: ion %i has calculated frac. pop. %8.4e in cell %i\n", index_ion, ionden_temp, xplasma->nplasma);
             insane = 1;
           }
-          else 
+          else
           {
             xplasma->density[index_ion] = ionden_temp;
           }
