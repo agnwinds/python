@@ -85,30 +85,30 @@ GIT_DIFF_STATUS := $(shell expr `git status --porcelain 2>/dev/null| grep "^ M" 
 GIT_COMMIT_HASH := $(shell expr `git rev-parse HEAD`)
 
 # Test if indent is installed. We use a different version on mac and linux.
-OS_TYPE := $(shell uname -s)
-ifeq ($(OS_TYPE), Darwin)
-	INDENT_PATH := $(shell which gnuindent)
-	INDENT_VERSION = $(shell gnuindent -version)
-else
-	INDENT_PATH := $(shell which indent)
-	INDENT_VERSION := $(shell indent -version)
-endif
+# OS_TYPE := $(shell uname -s)
+# ifeq ($(OS_TYPE), Darwin)
+# 	INDENT_PATH := $(shell which gnuindent)
+# 	INDENT_VERSION = $(shell gnuindent -version)
+# else
+# 	INDENT_PATH := $(shell which indent)
+# 	INDENT_VERSION := $(shell indent -version)
+# endif
 
-ifeq (, $(INDENT_PATH))
-	#If indent is not installed, error
-	INDENT_STRING = Gnuindent not installed so not indenting code
-	INDENT_CMD = 
-else
-	ifeq (GNU,$(firstword $(INDENT_VERSION)))
-		INDENT_STRING = Indenting code with $(INDENT_VERSION)
-		# this command runs indent with GNU styling
-		INDENT_CMD = $(INDENT_PATH) -gnu -l140 -bli0 -nut *.c *.h
-	else
-		# if it is not GNU indent then do not run
-		INDENT_STRING = $(INDENT_PATH) is not the GNU version
-		INDENT_CMD = 
-	endif
-endif
+# ifeq (, $(INDENT_PATH))
+# 	#If indent is not installed, error
+# 	INDENT_STRING = Gnuindent not installed so not indenting code
+# 	INDENT_CMD = 
+# else
+# 	ifeq (GNU,$(firstword $(INDENT_VERSION)))
+# 		INDENT_STRING = Indenting code with $(INDENT_VERSION)
+# 		# this command runs indent with GNU styling
+# 		INDENT_CMD = $(INDENT_PATH) -gnu -l140 -bli0 -nut *.c *.h
+# 	else
+# 		# if it is not GNU indent then do not run
+# 		INDENT_STRING = $(INDENT_PATH) is not the GNU version
+# 		INDENT_CMD = 
+# 	endif
+# endif
 
 
 INCLUDE = ../include
@@ -148,9 +148,9 @@ startup:
 	echo "#define GIT_COMMIT_HASH" \"$(GIT_COMMIT_HASH)\" >> version.h
 	echo "#define GIT_DIFF_STATUS" $(GIT_DIFF_STATUS)\ >> version.h
 
-indent:
-	@echo $(INDENT_STRING)
-	$(INDENT_CMD)
+# indent:
+# 	@echo $(INDENT_STRING)
+# 	$(INDENT_CMD)
 
 
 foo: foo.o signal.o time.o
@@ -264,8 +264,12 @@ windsave2table: $(table_objects)
 	cp $@ $(BIN)
 	mv $@ $(BIN)/windsave2table$(VERSION)
 
+run_indent:
+	../py_progs/run_indent.py -all
+
+
 # The next line runs recompiles all of the routines after first cleaning the directory
-all: clean windsave2table python py_wind
+all: clean run_indent python windsave2table py_wind
 
 
 FILE = get_atomicdata.o atomic.o

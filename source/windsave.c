@@ -328,7 +328,7 @@ wind_read (filename)
 
 int
 wind_complete (w)
-    WindPtr w;
+     WindPtr w;
 {
   int ndom;
 
