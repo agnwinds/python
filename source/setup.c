@@ -543,11 +543,6 @@ init_photons ()
     Log ("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
     exit (0);                   //There is really nothing to do!
   }
-    {
-      Log
-	("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
-      exit (0);			//There is really nothing to do!
-    }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */
 

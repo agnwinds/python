@@ -188,7 +188,7 @@ convergence (xplasma)
   epsilon = 0.05;
 
   /* Check the fractional change in tempperatature and if is less than
-   * epsiolong increment trcheck and techeck
+   * epsilon increment trcheck and techeck
    */
 
   if ((xplasma->converge_t_r =  // Radiation temperature
@@ -228,7 +228,7 @@ convergence (xplasma)
    * amount by which the temperature can change in this cycle
    */
 
-  if (xplasma->dt_e_old * xplasma->dt_e < 0 && fabs (xplasma->dt_e) > fabs (xplasma->dt_e_old))
+  if (xplasma->dt_e_old * xplasma->dt_e < 0 && fabs (xplasma->dt_e) > fabs (xplasma->dt_e_old)
       && fabs (xplasma->dt_e) > fabs (xplasma->dt_e_old))  // Converging
   {
     xplasma->converging = 1;
