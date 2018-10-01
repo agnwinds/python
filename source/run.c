@@ -67,7 +67,8 @@ calculate_ionization (restart_stat)
   long nphot_to_define;
   int iwind;
   
-  int n_phot_steps, phot_next_cycle, phot_cycle_gap;
+  int n_phot_steps = 0, phot_next_cycle = geo.wcycles;
+  int phot_cycle_gap = geo.wcycles;
   
 #ifdef MPI_ON
   int ioniz_spec_helpers;
@@ -190,7 +191,7 @@ calculate_ionization (restart_stat)
         phot_next_cycle += phot_cycle_gap;
         
         if (phot_next_cycle < geo.wcycles)
-          Log ("NPHOT to be incremented again on cycle %i\n", phot_next_cycle);
+          Log ("NPHOT will increase on cycle %i\n", phot_next_cycle);
       }
       else if (PHOT_STEP_SW == TRUE && geo.wcycle == geo.wcycles - 1
                && NPHOT < NPHOT_MAX)
@@ -211,7 +212,8 @@ calculate_ionization (restart_stat)
         }
       }
     
-      Log ("%i photons to be transported for cycle %i\n", NPHOT, geo.wcycle);
+      Log ("NPHOT: %1.2e photons will be transported for CYCLE %i\n",
+           (double) NPHOT, geo.wcycle);
 	  
       /* Create the photons that need to be transported through the wind
        *

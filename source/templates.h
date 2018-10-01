@@ -462,6 +462,7 @@ int solve_matrix(double *a_data, double *b_data, int nrows, double *x, int nplas
 int communicate_estimators_para(void);
 int gather_spectra_para(int nspec_helper, int nspecs);
 int communicate_matom_estimators_para(void);
+void Exit (int error_code);
 /* setup_star_bh.c */
 double get_stellar_params(void);
 int get_bl_and_agn_params(double lstar);

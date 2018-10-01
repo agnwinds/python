@@ -162,18 +162,18 @@ to match heating and cooling in the wind element! */
  *
  * @details
  * The routine attempts to determine whether a cell is
- * on the track to a final solution by checking whether
+ * on the track towards a final solution by checking whether
  * the electron and radiation temperatures are getting
- * smaller with cycle and whetehr the difference between
- * heating and cooling is drroping.
+ * smaller with each cycle and whether the difference between
+ * heating and cooling is decreasing.
  *
  * The routine returns a number between 0 and 3,
  * depending on the number of convergence checks that
- * are passed.  If all convergence tests are pssed
- * then the number returned will be 0
+ * are passed.  If all convergence tests are passed
+ * then the number returned will be 0.
  *
- * The routine also adjust the gain which controls how
- * far the electron temperture can change in a cycle.
+ * The routine also adjusts the gain which controls how
+ * much the electron temperature can change in a cycle.
  *
  * ### Notes ###
  *
@@ -183,10 +183,11 @@ int
 convergence (xplasma)
      PlasmaPtr xplasma;
 {
-  int trcheck, techeck, hccheck, whole_check, converging;
+  int trcheck, techeck, hccheck, whole_check;
+  double min_gain = 0.1, gain_damp = 0.7, max_gain, gain_amp, cyc_frac;
   double epsilon;
 
-  trcheck = techeck = hccheck = converging = 0;
+  trcheck = techeck = hccheck = 0;
   xplasma->trcheck = xplasma->techeck = xplasma->hccheck = 0;	//NSH 70g - zero the global variables
   epsilon = 0.05;
 
@@ -194,7 +195,7 @@ convergence (xplasma)
    * epsiolong increment trcheck and techeck
    */
 
-  if ((xplasma->converge_t_r =
+  if ((xplasma->converge_t_r =  // Radiation temperature
       fabs (xplasma->t_r_old - xplasma->t_r) / (xplasma->t_r_old + xplasma->t_r)) > epsilon)
     xplasma->trcheck = trcheck = 1;
   
@@ -208,7 +209,7 @@ convergence (xplasma)
    *   converge if we are hitting the maximum temperature
    */
   
-  if (xplasma->t_e < TMAX)
+  if (xplasma->t_e < TMAX)  // Electron temperature and heat/cooling
   {
     if ((xplasma->converge_t_e = fabs (xplasma->t_e_old - xplasma->t_e)
         / (xplasma->t_e_old + xplasma->t_e)) > epsilon)
@@ -218,7 +219,7 @@ convergence (xplasma)
          / fabs (xplasma->heat_tot + xplasma->cool_tot)) > epsilon)
 	    xplasma->hccheck = hccheck = 1;
   }
-  else				//If the cell has reached the maximum temperature we mark it as over-limit
+  else  // If the cell has reached the maximum temperature we mark it as over-limit
     xplasma->techeck = techeck = xplasma->hccheck = hccheck = 2;
     
   /* whole_check is the sum of the temperature checks and the heating check */
@@ -232,30 +233,41 @@ convergence (xplasma)
    */
 
   if (xplasma->dt_e_old * xplasma->dt_e < 0
-      && fabs (xplasma->dt_e) > fabs (xplasma->dt_e_old))
-    xplasma->converging = converging = 1;
-  
-  /*
-   * EP: Switching magic numbers which control how gain changes to variables
-   */
-  double min_gain = 0.1, max_gain = 0.8;
-  double gain_damp = 0.7, gain_amp = 1.1;
-  
-  gain_amp = 1.5;
-  
-  if (converging == 1)
+      && fabs (xplasma->dt_e) > fabs (xplasma->dt_e_old))  // Converging
   {
+    xplasma->converging = 1;
+    
     xplasma->gain *= gain_damp;
     if (xplasma->gain < min_gain)
       xplasma->gain = min_gain;
   }
-  else // Not converging
+  else  // Not converging
   {
+    /*
+     * EP: allow the gain to increase more for the first cyc_frac * cycles to
+     * allow the plasma to change temperature more rapidly -- right now this
+     * is controlled by some magic numbers and should probably be fine tuned
+     * to find the best numbers to use
+     */
+    
+    cyc_frac = 0.5;
+
+    if (geo.wcycle <= floor (cyc_frac * geo.wcycles))
+    {
+      gain_amp = 1.5;
+      max_gain = 1.0;
+    }
+    else
+    {
+      gain_amp = 1.1;
+      max_gain = 0.8;
+    }
+    
     xplasma->gain *= gain_amp;
     if (xplasma->gain > max_gain)
       xplasma->gain = max_gain;
   }
-
+  
   return (whole_check);
 }
 
@@ -263,7 +275,7 @@ convergence (xplasma)
 
 /**********************************************************/
 /**
- * @brief      The routien summarizes the how well the wind converging
+ * @brief      The routine summarizes the how well the wind converging
  * to a solution as a whole
  *
  * @return     Always returns 0
