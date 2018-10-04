@@ -619,15 +619,23 @@ macro_pops (xplasma, xne)
               Error ("macro_pops: level %i has calculated frac. pop. %8.4e in cell %i\n", index_lvl, levden_temp, xplasma->nplasma);
               insane = 1;
             }
+	    /*
             else
             {
               xplasma->levden[config[index_lvl].nden] = levden_temp;
             }
-
+	    */
 
             mm++;
-
           }
+          if (insane == 0)
+	    {
+	      for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
+		{
+		  xplasma->levden[config[index_lvl].nden] = populations[conf_to_matrix[index_lvl]] / this_ion_density;
+		}
+	    }
+
 
           ionden_temp = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
 
