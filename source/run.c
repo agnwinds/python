@@ -164,7 +164,7 @@ calculate_ionization (restart_stat)
           && NPHOT < NPHOT_MAX)
       {
         #ifdef MPI_ON
-	        NPHOT *= np_mpi_global;sane
+	        NPHOT *= np_mpi_global;
         #endif
 	      	
         NPHOT *= 10;
