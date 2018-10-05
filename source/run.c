@@ -159,9 +159,14 @@ calculate_ionization (restart_stat)
 	     * else if state is to ensure that if NPHOT_MAX hasn't been reached, then
 	     * the final cycle should have NPHOT_MAX photons.
 	     */
+	    
 	    if (PHOT_STEP_SW == TRUE && geo.wcycle == phot_next_cycle
           && NPHOT < NPHOT_MAX)
       {
+        #ifdef MPI_ON
+	        NPHOT *= np_mpi_global;sane
+        #endif
+	      	
         NPHOT *= 10;
   
         #ifdef MPI_ON
@@ -172,6 +177,7 @@ calculate_ionization (restart_stat)
          * EP: both p and photmain realloc'd otherwise photmain would end
          * up not pointing at anything and cause a segfault in make_spectra()
          */
+        
         p = photmain = (PhotPtr) realloc (photmain, sizeof (p_dummy) * NPHOT);
         
         if (!p)
@@ -184,27 +190,10 @@ calculate_ionization (restart_stat)
         phot_next_cycle += phot_cycle_gap;
         
         if (phot_next_cycle < geo.wcycles)
-          Log ("NPHOT will increase on cycle %i\n", phot_next_cycle);
+          Log ("NPHOT will next increase to %e on cycle %i\n",
+                  (double) NPHOT * 10, phot_next_cycle);
       }
-      else if (PHOT_STEP_SW == TRUE && geo.wcycle == geo.wcycles - 1
-               && NPHOT < NPHOT_MAX)
-      {
-        NPHOT = NPHOT_MAX;
-  
-        #ifdef MPI_ON
-          NPHOT /= np_mpi_global;
-        #endif
-  
-        p = photmain = (PhotPtr) realloc (photmain, sizeof (p_dummy) * NPHOT);
-  
-        if (!p)
-        {
-          Error ("Could not reallocate memory for %i photons for photmain\n",
-                 NPHOT);
-          exit (-1);
-        }
-      }
-    
+
       Log ("NPHOT: %1.2e photons will be transported for CYCLE %i\n",
            (double) NPHOT, geo.wcycle);
 	  
@@ -268,7 +257,9 @@ calculate_ionization (restart_stat)
     {
       zzz += p[nn].w;
       if (p[nn].istat == P_ESCAPE)
+      {
         zze += p[nn].w;
+      }
       else if (p[nn].istat == P_ADIABATIC)
       {
         zz_adiab += p[nn].w;
