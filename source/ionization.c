@@ -187,8 +187,8 @@ convergence (xplasma)
   xplasma->trcheck = xplasma->techeck = xplasma->hccheck = 0;   //NSH 70g - zero the global variables
   epsilon = 0.05;
 
-  /* Check the fractional change in tempperatature and if is less than
-   * epsilon increment trcheck and techeck
+  /* Check the fractional change in temperature and if is less than
+   * epsilon, increment trcheck and techeck
    */
 
   if ((xplasma->converge_t_r =  // Radiation temperature
@@ -225,11 +225,13 @@ convergence (xplasma)
   /* Converging is a situation where the change in electron
    * temperature is dropping with time and the cell is oscillating
    * around a temperature.  If that is the case, we drop the
-   * amount by which the temperature can change in this cycle
+   * amount by which the temperature can change in this cycle. Else if the cell
+   * is not converging, we increase the amount by which the temperature can
+   * change in this cycle.
    */
 
-  if (xplasma->dt_e_old * xplasma->dt_e < 0 && fabs (xplasma->dt_e) > fabs (xplasma->dt_e_old)
-      && fabs (xplasma->dt_e) > fabs (xplasma->dt_e_old))  // Converging
+  if (xplasma->dt_e_old * xplasma->dt_e < 0
+    && fabs (xplasma->dt_e) > fabs (xplasma->dt_e_old))  // The cell is converging
   {
     xplasma->converging = 1;
     
@@ -237,13 +239,13 @@ convergence (xplasma)
     if (xplasma->gain < min_gain)
       xplasma->gain = min_gain;
   }
-  else  // Not converging
+  else  // The cell is not converging
   {
     /*
      * EP: allow the gain to increase more for the first cyc_frac * cycles to
      * allow the plasma to change temperature more rapidly -- right now this
      * is controlled by some magic numbers and should probably be fine tuned
-     * to find the best numbers to use
+     * to find the best numbers
      */
     
     cyc_frac = 0.5;
@@ -251,7 +253,7 @@ convergence (xplasma)
     if (geo.wcycle <= floor (cyc_frac * geo.wcycles))
     {
       gain_amp = 1.5;
-      max_gain = 1.0;
+      max_gain = 0.999;
     }
     else
     {

@@ -289,6 +289,6 @@ add_executable(windsave2table
         source/windsave2table_sub.c
         )
 
-target_link_libraries(python GSL::gsl GSL::gslcblas)
-target_link_libraries(py_wind GSL::gsl GSL::gslcblas)
-target_link_libraries(windsave2table GSL::gsl GSL::gslcblas)
+target_link_libraries(python GSL::gsl GSL::gslcblas m)
+target_link_libraries(py_wind GSL::gsl GSL::gslcblas m)
+target_link_libraries(windsave2table GSL::gsl GSL::gslcblas m)
