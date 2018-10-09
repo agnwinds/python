@@ -1124,6 +1124,13 @@ string2int (word, string_choices, string_values)
   int ivalue, matched;
 
 
+
+  for (i = 0; i < strlen (word); i++)
+  {
+    word[i] = tolower (word[i]);
+  }
+
+
   for (i = 0; i < strlen (string_choices); i++)
   {
     choices[i] = tolower (string_choices[i]);
@@ -1278,7 +1285,7 @@ rdchoice (question, answers, answer)
 
     if (ianswer == -99)
     {
-      Error ("rdchoice: Could not match %s input to one of answers: %s\nTry again\n", string_answer, dummy);
+      printf ("Error: rdchoice: Could not match %s input to one of answers: %s\nTry again\n", string_answer, dummy);
       query = REISSUE;
 
     }
