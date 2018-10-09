@@ -13,6 +13,7 @@
  *  The basic routines are as follows:
  *  	- rdstr(question,answer)	gets a single contiguous string 
  *  	- rdchar(question,answer)	gets a single character
+ *  	- rdchoice(question,answer) gets one of a number of allowed string answers
  *  	- rdint(question,answer)	gets a single integer
  *  	- rdflo(question,answer)	gets a single precision floating point number
  *  	- rddoub(question,answer)	gets a double precision floating point number
@@ -180,6 +181,7 @@ rdpar_record[MAX_RECORDS];
 
 int rdpar_cursor = 0;
 int rdpar_ntot = 0;             // total number of raw input lines
+int rdpar_choice = 0;           // 0 if this is not rdchoice; 1 if so
 struct rdpar_raw
 {
   char line[LINELEN];           // Raw input line 
@@ -499,7 +501,10 @@ string_process_from_command_line (question, dummy)
   {                             //Use the value input from the command line
 
     strcpy (dummy, tdummy);
-    fprintf (rdout_ptr, "%-30s %20s", question, dummy);
+    if (rdpar_choice == 0)
+    {
+      fprintf (rdout_ptr, "%-30s %20s", question, dummy);
+    }
     rdpar_store_record (question, dummy);
     return (NORMAL);
   }
@@ -655,13 +660,19 @@ string_process_from_file (question, dummy)
     if (strcmp (dummy, "\n") == 0)
     {                           /* Store the provided value since \n */
       rdpar_store_record (question, secondword);
-      fprintf (rdout_ptr, "%-40s   %s\n", question, secondword);
+      if (rdpar_choice == 0)
+      {
+        fprintf (rdout_ptr, "%-40s   %s\n", question, secondword);
+      }
     }
     else
     {                           /* Store the value received via the command line */
 
       rdpar_store_record (question, dummy);
-      fprintf (rdout_ptr, "%-40s   %s\n", question, dummy);
+      if (rdpar_choice == 0)
+      {
+        fprintf (rdout_ptr, "%-40s   %s\n", question, dummy);
+      }
     }
 
     return (NORMAL);
@@ -669,7 +680,10 @@ string_process_from_file (question, dummy)
   else                          // This handles the situation where the variable is actually read from the rdpar file
     strcpy (dummy, secondword);
   rdpar_store_record (question, secondword);
-  fprintf (rdout_ptr, "%-40s   %s\n", question, secondword);
+  if (rdpar_choice == 0)
+  {
+    fprintf (rdout_ptr, "%-40s   %s\n", question, secondword);
+  }
   return (NORMAL);
 }
 
@@ -1081,6 +1095,7 @@ rdline (question, answer)
  * @param [in] char  *word  The input string that we want to match                       
  * @param [in] char  *string_choices A comma separated string containing the possible choices
  * @param [in] char  *string_values    A comma separated string containing integers that correspond to the input strign
+ * @param [out] char  *string_answer   The complete string version of the answer                                        
  * @return    The integer represents the choice indicated by the input string.           
  *
  * ###Notes###
@@ -1110,10 +1125,11 @@ rdline (question, answer)
 
 #define MAX_CHOICES 8
 int
-string2int (word, string_choices, string_values)
+string2int (word, string_choices, string_values, string_answer)
      char *word;
      char *string_choices;
      char *string_values;
+     char *string_answer;
 {
   int i;
   int nchoices, ncommas, vcommas;
@@ -1121,7 +1137,7 @@ string2int (word, string_choices, string_values)
   int xv[MAX_CHOICES];
   char choices[LINELEN];
   char values[LINELEN];
-  int ivalue, matched;
+  int ivalue, matched, ibest;
 
 
 
@@ -1178,8 +1194,16 @@ string2int (word, string_choices, string_values)
     if (strncmp (word, xs[i], strlen (word)) == 0)
     {
       ivalue = xv[i];
+      ibest = i;
       matched += 1;
     }
+  }
+
+  strcpy (string_answer, "none");
+  if (ibest >= 0)
+  {
+    printf ("XX %s\n", xs[ibest]);
+    strcpy (string_answer, xs[ibest]);
   }
 
   return (ivalue);
@@ -1242,7 +1266,9 @@ rdchoice (question, answers, answer)
   int n, nstart, nstop;
   int ianswer;
   int query;
+  char full_answer[LINELEN];
 
+  rdpar_choice = 1;
   strcpy (string_answer, answer);
 
   query = REISSUE;
@@ -1256,7 +1282,12 @@ rdchoice (question, answers, answer)
     {
       strcpy (answer, string_answer);
       printf ("OK\n");
-      Error ("rdchoice: Deprecated use of rdchoice, please replace answer to %s with its string equivalent %s \n", question, string_answer);
+      rdpar_comment ("Deprecated use of rdchoice. NO ERROR CHECKS! Replace answer to %s with its string equivalent %s \n",
+                     question, string_answer);
+      fprintf (rdout_ptr, "%-30s %20s\n", question, string_answer);
+      Error ("rdchoice: Deprecated use of rdchoice. NO ERROR CHECKS! Replace answer to %s with its string equivalent %s \n",
+             question, string_answer);
+      rdpar_choice = 0;
       return (ianswer);
     }
 
@@ -1281,7 +1312,8 @@ rdchoice (question, answers, answer)
     dummy[strlen (dummy) - 1] = ' ';
 
 
-    ianswer = string2int (string_answer, dummy, answers);
+    ianswer = string2int (string_answer, dummy, answers, full_answer);
+    printf ("XXX the answer was %s\n", full_answer);
 
     if (ianswer == -99)
     {
@@ -1291,7 +1323,9 @@ rdchoice (question, answers, answer)
     }
   }
 
+  fprintf (rdout_ptr, "%-30s %20s\n", question, full_answer);
   strcpy (answer, string_answer);
+  rdpar_choice = 0;
   return (ianswer);
 
 
