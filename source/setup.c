@@ -567,22 +567,16 @@ int
 init_ionization ()
 {
   int thermal_opt;
+  char answer[LINELENGTH];
 
 
-  // XXX  I is unclear to me why all of this dwon to the next XXX is not moved to a single subroutine.  It all
-  // pertains to how the radiatiate tranfer is carreid out
 
-  rdint ("Wind_ionization(0=on.the.spot,1=LTE(tr),2=fixed,3=recalc_bb,4=LTE(t_e),8=matrix_bb,9=matrix_pow)", &geo.ioniz_mode);
+  strcpy (answer, "matrix_bb");
+  geo.ioniz_mode = rdchoice ("Wind_ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)", "0,3,1,4,2,8,9", answer);
 
   if (geo.ioniz_mode == IONMODE_FIXED)
   {
     rdstr ("wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
-  }
-  if (geo.ioniz_mode < 0 || geo.ioniz_mode == 5 || geo.ioniz_mode == 6 || geo.ioniz_mode == 7 || geo.ioniz_mode > 9)
-  {
-    Log ("The allowed ionization modes are 0, 1, 2, 3, 4, 8 and 9\n");
-    Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
-    exit (0);
   }
 
 
@@ -595,12 +589,10 @@ init_ionization ()
 
 
   /* get_line_transfer_mode reads in the Line_transfer question from the user,
-     then alters the variables geo.line_mode, geo.scatter_mode, geo.rt_mode and geo.macro_simple */
+     then alters the variables geo.line_mode, geo.scatter_mode, geo.rt_mode and geo.macro_simple.
+     This is fairly involved and so is a separate routine  */
 
-  // XXX - Note clear that get_line_transfer_mode should be a separate routine; perhaps incoroporate here
   get_line_transfer_mode ();
-
-
 
 
   thermal_opt = 0;              /* NSH 131213 Set the option to zero - the default. The lines allow allow the
