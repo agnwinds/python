@@ -491,23 +491,23 @@ init_photons ()
 {
   PhotPtr p;
   int use_log_step = FALSE;
-  
+
   /* Although Photons_per_cycle is really an integer,
      read in as a double so it is easier for input
      (in scientific notation) */
-  
+
   double nphot = 1e5, min_nphot = 1e5, max_nphot = 1e7;
-  
+
   rdint ("Use_log_photon_step(0=no,1=yes)", &use_log_step);
   PHOT_STEP_SW = use_log_step;
-  
+
   if (PHOT_STEP_SW == TRUE)
   {
     rddoub ("Min_photons_per_cycle", &min_nphot);
     rddoub ("Max_photons_per_cycle", &max_nphot);
-    NPHOT = NPHOT_MIN = (int) min_nphot;  // NPHOT is photons/cycle
-    NPHOT_MAX =  (int) max_nphot;         // cast int to avoid issues with the value
-  }                                       // of max_nphot not fitting into NPHOT_MAX
+    NPHOT = NPHOT_MIN = (int) min_nphot;        // NPHOT is photons/cycle
+    NPHOT_MAX = (int) max_nphot;        // cast int to avoid issues with the value
+  }                             // of max_nphot not fitting into NPHOT_MAX
   else if (PHOT_STEP_SW == FALSE)
   {
     rddoub ("Photons_per_cycle", &nphot);
@@ -515,15 +515,13 @@ init_photons ()
   }
   else
   {
-    Error ("Invalid choice %i for Use_log_photon_step(0=no,1=yes)\n",
-           PHOT_STEP_SW);
-    Exit (-1);
+    Error ("Invalid choice %i for Use_log_photon_step(0=no,1=yes)\n", PHOT_STEP_SW);
+    Exit (1);
   }
 
-  if (NPHOT <= 0)  // Check that NPHOT is a sensible number
+  if (NPHOT <= 0)               // Check that NPHOT is a sensible number
   {
-    Error ("%1.2e is invalid choice for NPHOT; NPHOT > 0 required.",
-           (double) NPHOT);
+    Error ("%1.2e is invalid choice for NPHOT; NPHOT > 0 required.", (double) NPHOT);
     Exit (-1);
   }
 

@@ -80,6 +80,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <math.h>
+#include <mpi.h>
 #include "log.h"
 
 #define LINELENGTH 256
@@ -791,4 +792,45 @@ Debug (char *format, ...)
   result = vfprintf (diagptr, format, ap2);
   va_end (ap);
   return (result);
+}
+
+/**********************************************************/
+/**
+ *  @brief Wrapper function to exit MPI/Python properly.
+ *
+ *  @param[in] int error_code. An integer classifying the error. Note that this
+ *  number should be a positive non-zero integer.
+ *
+ *  @details
+ *  When MPI is in use, using the standard C library exit function can be somewhat
+ *  dangerous, as it can result in one process exiting and the rest of the processes
+ *  continuing. This results in a deadlock and without any safety mechanism can
+ *  result in an MPI run never finishing. Hence, in multiprocessor mode, one should
+ *  use use MPI_Abort (which isn't a very graceful) to ensure that a if a process
+ *  does need to exit, then all processes will exit and a deadlock will not occur.
+ *
+ *  Before exiting, an error summary is printed to screen and and log is flushed
+ *  to ensure everything is up to date to help with diagnosis.
+ *
+ *  ### Programming Notes ###
+ *
+ *  Maybe this function belongs elsewhere.
+ *
+ **********************************************************/
+
+void
+Exit (int error_code)
+{
+  error_summary ("Error summary prior to exit");
+  Log_flush ();
+
+#ifdef MPI_ON
+  Log ("--------------------------------------------------------------------------\n");
+  Log ("MPI Exit: MPI is now exiting all Python processes with error code %i\n", error_code);
+  MPI_Abort (MPI_COMM_WORLD, error_code);
+#else
+  Log ("--------------------------------------------------------------------------\n");
+  Log ("Exit: Python is now exiting with error code %i\n", error_code);
+  exit (error_code);
+#endif
 }

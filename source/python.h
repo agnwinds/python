@@ -95,7 +95,7 @@ int NPHOT_MAX;                  /* The maximum number of photon bundles created 
 int NPHOT;                      /* The number of photon bundles created, defined in setup.c */
 int CURRENT_PHOT;               /* A diagnostic so that one can always determine what the current photon number being run is */
 
-#define NWAVE  			  10000    //Increasing from 4000 to 10000 (SS June 04)
+#define NWAVE  			  10000 //Increasing from 4000 to 10000 (SS June 04)
 #define MAXSCAT 			500
 
 /* Define the structures */

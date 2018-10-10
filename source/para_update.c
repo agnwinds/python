@@ -559,38 +559,3 @@ communicate_matom_estimators_para ()
 
   return (0);
 }
-
-/**********************************************************/
-/**
- *  @brief Wrapper function to exit MPI/Python properly.
- *
- *  @param[in] int error_code. An integer classifying the error.
- *
- *  @details
- *  When MPI is in use, using the standard C library exit function can be somewhat
- *  dangerous, as it can result in one process exiting and the rest of the processes
- *  continuing. This results in a deadlock and without any safety mechanism can
- *  result in an MPI run never finishing. Hence, in multiprocessor mode, one should
- *  use either use MPI_Abort (which isn't a very graceful) to ensure that a
- *  deadlock does not occur.
- *
- *  ### Programming Notes ###
- *
- *  Maybe this function belongs elsewhere.
- *
- **********************************************************/
- 
-void
-Exit (int error_code)
-{
-  #ifdef MPI_ON
-    Log ("-----------------------------------------------------------\n");
-    Log ("MPI Exit: MPI is exiting all processes with error code %i\n",
-         error_code);
-    MPI_Abort (MPI_COMM_WORLD, error_code);
-  #else
-    Log ("--------------------------------------------\n");
-    Log ("Exit: Python is exiting with error code %i\n", error_code);
-    exit (error_code);
-  #endif
-}
