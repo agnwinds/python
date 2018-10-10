@@ -43,10 +43,20 @@
 int
 get_line_transfer_mode ()
 {
+  char answer[LINELENGTH];
+
   int user_line_mode = 0;
-  rdint
-    ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,4=anisotryopic,5=thermal_trapping,6=macro_atoms,7=macro_atoms+aniso.scattering)",
-     &user_line_mode);
+
+  /* 181010-ksl-There a several line transfer modes which are diagnostic in nature which cannot be reached by rdchoice easily, except as numbers.  
+   * We need a better way to deal with these. */
+
+  strcpy (answer, "thermal_trapping");
+  user_line_mode =
+    rdchoice ("Line_transfer(pure_abs,pure_scat,sing_scat,escape_prob,thermal_trapping,macro_atoms,macro_atoms_thermal_trapping)",
+              "0,1,2,3,5,6,7", answer);
+//OLD  rdint
+//OLD    ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,5=thermal_trapping,6=macro_atoms,7=macro_atoms+aniso.scattering)",
+//OLD     &user_line_mode);
 
   /* JM 1406 -- geo.rt_mode and geo.macro_simple control different things. geo.rt_mode controls the radiative
      transfer and whether or not you are going to use the indivisible packet constraint, so you can have all simple 
@@ -57,19 +67,20 @@ get_line_transfer_mode ()
   geo.scatter_mode = SCATTER_MODE_ISOTROPIC;    // isotropic
   geo.rt_mode = RT_MODE_2LEVEL; // Not macro atom (SS)
 
+
   if (user_line_mode == 0)
   {
-    Log ("Line_transfer mode:  Simple, pure absorption\n");
+    Log ("Line_transfer mode:  Simple, pure absorption, no scattering\n");
     geo.line_mode = user_line_mode;
   }
   else if (user_line_mode == 1)
   {
-    Log ("Line_transfer mode:  Simple, pure scattering\n");
+    Log ("Line_transfer mode:  Simple, pure scattering, no absoprtion\n");
     geo.line_mode = user_line_mode;
   }
   else if (user_line_mode == 2)
   {
-    Log ("Line_transfer mode:  Simple, single scattering\n");
+    Log ("Line_transfer mode:  Simple, single scattering, with absorption, but without escape probality treatment\n");
     geo.line_mode = user_line_mode;
   }
   else if (user_line_mode == 3)
@@ -77,12 +88,12 @@ get_line_transfer_mode ()
     Log ("Line_transfer mode:  Simple, isotropic scattering, escape probabilities\n");
     geo.line_mode = user_line_mode;
   }
-  else if (user_line_mode == 4)
-  {
-    Error ("get_line_transfer_mode: Line transfer mode %d is deprecated\n", user_line_mode);
-    line_transfer_help_message ();
-    exit (0);
-  }
+//OLD  else if (user_line_mode == 4)
+//OLD  {
+//OLD    Error ("get_line_transfer_mode: Line transfer mode %d is deprecated\n", user_line_mode);
+//OLD    line_transfer_help_message ();
+//OLD    exit (0);
+//OLD  }
   else if (user_line_mode == 5)
   {
     Log ("Line_transfer mode:  Simple, thermal trapping, Single scattering \n");

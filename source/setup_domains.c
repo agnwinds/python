@@ -131,7 +131,9 @@ get_domain_params (ndom)
   /* If we are in advanced then allow the user to modify scale lengths */
   if (modes.iadvanced)
   {
-    rdint ("@Diag.adjust_grid(0=no,1=yes)", &modes.adjust_grid);
+    strcpy (answer, "no");
+    modes.adjust_grid = rdchoice ("@Diag.adjust_grid(yes,no)", "1,0", answer);
+//OLD    rdint ("@Diag.adjust_grid(0=no,1=yes)", &modes.adjust_grid);
 
     if (modes.adjust_grid)
     {

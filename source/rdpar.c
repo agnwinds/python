@@ -1123,7 +1123,7 @@ rdline (question, answer)
  **********************************************************/
 
 
-#define MAX_CHOICES 8
+#define MAX_CHOICES 10
 int
 string2int (word, string_choices, string_values, string_answer)
      char *word;
@@ -1184,8 +1184,9 @@ string2int (word, string_choices, string_values, string_answer)
 
 
 
-  nchoices = sscanf (choices, "%s %s %s %s %s %s %s %s", xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7]);
-  nchoices = sscanf (values, "%d %d %d %d %d %d %d %d", &xv[0], &xv[1], &xv[2], &xv[3], &xv[4], &xv[5], &xv[6], &xv[7]);
+  nchoices = sscanf (choices, "%s %s %s %s %s %s %s %s %s %s", xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7], xs[8], xs[9]);
+  nchoices =
+    sscanf (values, "%d %d %d %d %d %d %d %d %d %d", &xv[0], &xv[1], &xv[2], &xv[3], &xv[4], &xv[5], &xv[6], &xv[7], &xv[8], &xv[9]);
 
   matched = 0;
   ivalue = -99;
@@ -1281,12 +1282,12 @@ rdchoice (question, answers, answer)
     if (sscanf (string_answer, "%d", &ianswer))
     {
       strcpy (answer, string_answer);
-      printf ("OK\n");
-      rdpar_comment ("Deprecated use of rdchoice. NO ERROR CHECKS! Replace answer to %s with its string equivalent %s \n",
-                     question, string_answer);
+      //OLD printf ("OK\n");
+      rdpar_comment ("Deprecated use of rdchoice. NO ERROR CHECKS! For %s replace answer %s in %s with its string equivalent",
+                     question, string_answer, answers);
       fprintf (rdout_ptr, "%-30s %20s\n", question, string_answer);
-      Error ("rdchoice: Deprecated use of rdchoice. NO ERROR CHECKS! Replace answer to %s with its string equivalent %s \n",
-             question, string_answer);
+      Error ("rdchoice: Deprecated use of rdchoice. NO ERROR CHECKS! For %s replace answer %s in %s with its string equivalent \n",
+             question, string_answer, answers);
       rdpar_choice = 0;
       return (ianswer);
     }

@@ -277,8 +277,8 @@ get_bl_and_agn_params (lstar)
     if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
       rddoub ("@AGN.power_law_cutoff", &geo.pl_low_cutoff);
 
-    strcpy(answer,"sphere");
-    geo.pl_geometry=rdchoice("AGN.geometry_for_pl_source(sphere,lamp_post)","0,1",answer);
+    strcpy (answer, "sphere");
+    geo.pl_geometry = rdchoice ("AGN.geometry_for_pl_source(sphere,lamp_post)", "0,1", answer);
 
     //OLD rdint ("AGN.geometry_for_pl_source(0=sphere,1=lamp_post)", &geo.pl_geometry);
 

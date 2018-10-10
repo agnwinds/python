@@ -396,8 +396,8 @@ init_observers ()
     Log ("No phase information needed as system type %i is not a binary\n", geo.system_type);
 
 
-  strcpy(answer,"extract");
-  geo.select_extract=rdchoice("Spectrum.live_or_die(live.or.die,extract)","0,1",answer);
+  strcpy (answer, "extract");
+  geo.select_extract = rdchoice ("Spectrum.live_or_die(live.or.die,extract)", "0,1", answer);
   //OLD rdint ("Spectrum.live_or_die(0=live.or.die,extract=anything_else)", &geo.select_extract);
   if (geo.select_extract != 0)
   {
@@ -413,13 +413,13 @@ init_observers ()
 
   if (modes.iadvanced)
   {
-    strcpy(answer,"no");
-    ichoice=rdchoice("@Spectrum.select_specific_no_of_scatters_in_spectra(yes,no)",",1,0",answer);
+    strcpy (answer, "no");
+    ichoice = rdchoice ("@Spectrum.select_specific_no_of_scatters_in_spectra(yes,no)", ",1,0", answer);
 
     //OLD strcpy (yesno, "n");
     //OLD rdstr ("@Spectrum.select_specific_no_of_scatters_in_spectra(y/n)", yesno);
     //OLD if (yesno[0] == 'y')
-        if(ichoice)
+    if (ichoice)
 
     {
       Log ("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
@@ -428,19 +428,19 @@ init_observers ()
         rdint ("@Spectrum.select_scatters", &geo.scat_select[n]);
       }
     }
-        strcpy(answer,"no");
-        ichoice=rdchoice("@Spectrum.select_photons_by_position(yes,no)","1,0",answer);
+    strcpy (answer, "no");
+    ichoice = rdchoice ("@Spectrum.select_photons_by_position(yes,no)", "1,0", answer);
     //OLD strcpy (yesno, "n");
     //OLD rdstr ("@Spectrum.select_photons_by_position(y/n)", yesno);
     //OLD if (yesno[0] == 'y')
-        if(ichoice)
+    if (ichoice)
     {
       //OLD Log ("OK 0->all; -1 -> below; 1 -> above the disk, 2 -> specific location in wind\n");
       for (n = 0; n < geo.nangles; n++)
       {
-          strcpy(answer,"all");
-          geo.top_bot_select[n]=rdchoice("@Spectrum.select_location(all,below_disk,above_disk,spherical_region)","0,-1,1,2",answer);
-          
+        strcpy (answer, "all");
+        geo.top_bot_select[n] = rdchoice ("@Spectrum.select_location(all,below_disk,above_disk,spherical_region)", "0,-1,1,2", answer);
+
 
         //OLD rdint ("@Spectrum.select_location", &geo.top_bot_select[n]);
         if (geo.top_bot_select[n] == 2)
@@ -462,8 +462,8 @@ init_observers ()
    * to a distance of 100 pc. The internal units are basically a luminosity
    * within a wavelength/frequency interval. */
 
-  strcpy(answer,"flambda");
-  geo.select_spectype=rdchoice("Spectrum.type(flambda,fnu,basic","1,2,3",answer);
+  strcpy (answer, "flambda");
+  geo.select_spectype = rdchoice ("Spectrum.type(flambda,fnu,basic", "1,2,3", answer);
   //OLD rdint ("Spectrum.type(flambda(1),fnu(2),basic(other)", &geo.select_spectype);
 
   if (geo.select_spectype == 1)
@@ -616,8 +616,8 @@ init_ionization ()
                                    user to turn off mechanisms that affect the thermal balance. Adiabatic is the only one implemented
                                    to start off with. */
 
-  strcpy(answer,"reflect");
-  geo.absorb_reflect=rdchoice("Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)","1,0,2",answer);
+  strcpy (answer, "reflect");
+  geo.absorb_reflect = rdchoice ("Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)", "1,0,2", answer);
   //OLD rdint ("Surface.reflection.or.absorption(0=no.rerad,1=high.albedo,2=thermalized.rerad)", &geo.absorb_reflect);
 
   // XXX Next line needs to be re-written to use rdchooce when FU ORi branch is merged
