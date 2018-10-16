@@ -76,7 +76,7 @@ get_domain_params (ndom)
 
   /* Define the coordinate system for the grid and allocate memory for the wind structure */
   strcpy (answer, "cylindrical");
-  zdom[ndom].coord_type = rdchoice ("Wind.coord_system(spherical,cylindrical,spherical_polar,cyl_var", "0,1,2,3", answer);
+  zdom[ndom].coord_type = rdchoice ("Wind.coord_system(spherical,cylindrical,spherical_polar,cyl_var)", "0,1,2,3", answer);
 //OLD  rdint ("Wind.coord_system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)", &input_int);
 //OLD  switch (input_int)
 //OLD  {
