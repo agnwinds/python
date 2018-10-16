@@ -654,7 +654,7 @@ main (argc, argv)
                   //"Rad_type_for_bl(0=bb,1=models,2=uniform)_in_final_spectrum",
                   "Boundary_layer.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.bl_spectype);
     geo.agn_spectype = 3;
-    get_spectype (geo.agn_radiation, "Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_in_final_spectrum", &geo.agn_spectype);
+    get_spectype (geo.agn_radiation, "Rad_type_for_agn(3=power_law,4=cloudy_table,5=bremsstrahlung)_in_final_spectrum", &geo.agn_spectype);
     init_observers ();
   }
 
