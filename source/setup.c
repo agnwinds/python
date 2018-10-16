@@ -463,7 +463,7 @@ init_observers ()
    * within a wavelength/frequency interval. */
 
   strcpy (answer, "flambda");
-  geo.select_spectype = rdchoice ("Spectrum.type(flambda,fnu,basic", "1,2,3", answer);
+  geo.select_spectype = rdchoice ("Spectrum.type(flambda,fnu,basic)", "1,2,3", answer);
   //OLD rdint ("Spectrum.type(flambda(1),fnu(2),basic(other)", &geo.select_spectype);
 
   if (geo.select_spectype == 1)
