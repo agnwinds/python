@@ -96,7 +96,7 @@ get_domain_params (ndom)
 //OLD    Error ("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
 //OLD          0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
 //OLD  }
-  printf ("BLAH\n");
+
 
   if (zdom[ndom].wind_type == IMPORT)
   {
