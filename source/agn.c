@@ -21,6 +21,8 @@
 
 #include "log.h"
 
+  
+
 /**********************************************************/
 /** 
  * @brief      Calculates the total luminosity of an AGN type source
@@ -59,7 +61,8 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
 {
 
   double t;
-  double emit;
+  double scaling; //The scaling factor to get from a model to get the correct 2-10keV luminosity
+  double emit,emit_2_10;
   int spectype;
 
 
@@ -72,10 +75,18 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
     /* This calls models, but the normal stellar atmpspheres models are not really suitable for 
        an AGN. So when this mode is used, we summply dummy variables in lum and alpha to generate
        a model SED. Urgent to fix, discussed in issue #301 */
-    emit = emittance_continuum (spectype, freqmin, freqmax, lum, alpha);
-    *f = emit;
+	  
+	  
+	  /* First we compute the emittance from 2-10keV to compare with the luminosity */
+	emit_2_10=  emittance_continuum (spectype, 4.84e17, 2.42e18, 0.0, 0.0);
+	scaling=lum/emit_2_10;
+	  
+	  
+    emit = emittance_continuum (spectype, freqmin, freqmax, 0.0, 0.0);
+	printf ("BLAH - %e and %e of %e %e\n",freqmin,freqmax,emit,emit*scaling);
+    *f = emit*scaling;
   }
-  else if (spectype == SPECTYPE_POW)    //Power law - uses constant computed elsewhere and spectrl index
+  else if (spectype == SPECTYPE_POW)    //Power law - uses constant computed elsewhere and spectral index
   {
     /* Emittance_pow actucally returns the specific luminosity directly */
     emit = emittance_pow (freqmin, freqmax, alpha);
@@ -423,7 +434,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
     }
     else
     {
-      p[i].freq = one_continuum (spectype, t, geo.gstar, freqmin, freqmax);     //A continuum (model) photon
+      p[i].freq = one_continuum (spectype, 0.0, 0.0, freqmin, freqmax);     //A continuum (model) photon
     }
 
     if (p[i].freq < freqmin || freqmax < p[i].freq)     //A check to see that we havent made a photon out of range.

@@ -119,6 +119,11 @@ one_continuum (spectype, t, g, freqmin, freqmax)
   /* Check if the parameters are the same as the stored ones, otherwise initialise */
   if (old_t != t || old_g != g || old_freqmin != freqmin || old_freqmax != freqmax)
   {                             /* Then we must initialize */
+	  if (comp[spectype].nmods==1)
+	  {
+		  comp[spectype].xmod = mods[0];
+	  }
+	  else
     if (t != comp[spectype].xmod.par[0] || g != comp[spectype].xmod.par[1])
     {
       par[0] = t;
@@ -259,10 +264,20 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
 
   lambdamin = C / (freqmax * ANGSTROM);
   lambdamax = C / (freqmin * ANGSTROM);
+  
+  if (comp[spectype].nmods==1)
+  {
+	  comp[spectype].xmod = mods[0];
+  }
+  else
+  {
   par[0] = t;
   par[1] = g;
   model (spectype, par);
+  }
   nwav = comp[spectype].nwaves;
+  
+  
 
   if (lambdamax > comp[spectype].xmod.w[nwav - 1] || lambdamin < comp[spectype].xmod.w[0])
   {
@@ -273,7 +288,7 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
   }
   x = 0;
   for (n = 0; n < nwav; n++)
-  {
+  { 	  
     w = comp[spectype].xmod.w[n];
     if (n == 0)
     {
@@ -292,6 +307,10 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
       x += comp[spectype].xmod.f[n] * dlambda;
     }
   }
+  
+  
+  
+  
   x *= 4. * PI;
   return (x);
 }
