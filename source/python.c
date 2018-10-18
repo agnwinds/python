@@ -238,6 +238,7 @@
 
 
 #include "python.h"
+#include "models.h"
 #define NSPEC	20
 
 
@@ -655,6 +656,12 @@ main (argc, argv)
                   "Boundary_layer.rad_type_in_final_spectrum(0=bb,1=models,2=uniform)", &geo.bl_spectype);
     geo.agn_spectype = 3;
     get_spectype (geo.agn_radiation, "Rad_type_for_agn(3=power_law,4=cloudy_table,5=bremsstrahlung)_in_final_spectrum", &geo.agn_spectype);
+    if (geo.agn_radiation && geo.agn_spectype >= 0 && comp[geo.agn_spectype].nmods != 1)
+    {
+      Error ("python: When using models with an AGN, there should be exactly 1 model, we have %i for spectrum cycles\n",
+             comp[geo.agn_ion_spectype].nmods);
+      exit (0);
+    }
     init_observers ();
   }
 
