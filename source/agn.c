@@ -88,7 +88,6 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
 
 
     emit = emittance_continuum (spectype, freqmin, freqmax, 0.0, 0.0);
-    printf ("BLAH - %e and %e of %e %e\n", freqmin, freqmax, emit, emit * scaling);
     *f = emit * scaling;
   }
   else if (spectype == SPECTYPE_POW)    //Power law - uses constant computed elsewhere and spectral index
