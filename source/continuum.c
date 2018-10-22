@@ -122,7 +122,7 @@ one_continuum (spectype, t, g, freqmin, freqmax)
   {                             /* Then we must initialize */
     if (comp[spectype].nmods == 1)      //If we only have one model (as is the case of an AGN model SED then dont interpolate
     {
-      comp[spectype].xmod = mods[0];
+      comp[spectype].xmod = mods[comp[spectype].modstart];
       old_t = t;                //These are dummies, but should prevent unwanted regeneration of the array
       old_g = g;
     }
@@ -274,7 +274,7 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
 
   if (comp[spectype].nmods == 1)        //We only have one model - there is no way of interpolating
   {
-    comp[spectype].xmod = mods[0];      //Set the model to the only one we have
+    comp[spectype].xmod = mods[comp[spectype].modstart];        //Set the model to the only one we have
   }
   else
   {
@@ -283,7 +283,6 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
     model (spectype, par);      //Interpolate on the grid to get the model we are going to use
   }
   nwav = comp[spectype].nwaves; //The number of points in the model
-
 
 
   if (lambdamax > comp[spectype].xmod.w[nwav - 1] || lambdamin < comp[spectype].xmod.w[0])
@@ -319,7 +318,7 @@ emittance_continuum (spectype, freqmin, freqmax, t, g)
      }
      }
    */
-
+  integ_spectype = spectype;
   x = qromb (model_int, lambdamin, lambdamax, 1e-4);
 
   x *= 4. * PI;

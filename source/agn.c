@@ -62,7 +62,6 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
   double emit, emit_2_10;
   int spectype;
 
-
   if (ioniz_or_final == 1)
     spectype = geo.agn_spectype;        /* type for final spectrum */
   else
@@ -70,8 +69,8 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
   if (spectype >= 0)
   {
     /* This calls models - we *should* have only one model in this case, so we call the emittance
-       continuum with dummy variables instead of T and g (the trailing 0.0s).
-       /* First we compute the emittance from 2-10keV to compare with the required 2-10keV luminosity */
+       continuum with dummy variables instead of T and g (the trailing 0.0s). */
+    /* First we compute the emittance from 2-10keV to compare with the required 2-10keV luminosity */
     emit_2_10 = emittance_continuum (spectype, 4.84e17, 2.42e18, 0.0, 0.0);
     if (emit_2_10 <= 0.0)
     {

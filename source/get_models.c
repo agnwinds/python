@@ -237,7 +237,6 @@ get_models (modellist, npars, spectype)
   {
     comp[ncomps].xmod.w[n] = mods[comp[ncomps].modstart].w[n];
   }
-
   if (comp[ncomps].nmods == 0)
   {
     Error ("get_models: No models from %s were read. Please check list of models!\n", comp[ncomps].name);
@@ -256,7 +255,9 @@ get_models (modellist, npars, spectype)
     comp[ncomps].max[m] = xmax[m];
   }
 
+
   *spectype = ncomps;           // Set the spectype
+
   ncomps++;
   return (*spectype);
 }

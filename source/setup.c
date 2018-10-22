@@ -234,6 +234,7 @@ get_spectype (yesno, question, spectype)
       }
       rdstr ("Input_spectra.model_file", model_list);
       get_models (model_list, 2, spectype);
+
       strcpy (geo.model_list[get_spectype_count], model_list);  // Copy it to geo
       strcpy (get_spectype_oldname, model_list);        // Also copy it back to the old name
       get_spectype_count++;

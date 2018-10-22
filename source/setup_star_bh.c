@@ -77,6 +77,7 @@ get_stellar_params ()
                   //"Rad_type_for_star(0=bb,1=models)_to_make_wind",
                   "Central_object.rad_type_to_make_wind(0=bb,1=models)", &geo.star_ion_spectype);
 
+
     if (geo.star_radiation)
       geo.tstar_init = 40000;
     rddoub ("Central_object.temp", &geo.tstar_init);
@@ -166,7 +167,7 @@ get_bl_and_agn_params (lstar)
   else
   {
     strcpy (answer, "no");
-    geo.bl_radiation = rdchoice ("Boundary_layer.radiation(yes,no", "1,0", answer);
+    geo.bl_radiation = rdchoice ("Boundary_layer.radiation(yes,no)", "1,0", answer);
     //OLD rdint ("Boundary_layer.radiation(y=1)", &geo.bl_radiation);
     geo.agn_radiation = 0;      // So far at least, our star systems don't have a BH
   }
@@ -175,6 +176,7 @@ get_bl_and_agn_params (lstar)
   get_spectype (geo.bl_radiation, "Boundary_layer.rad_type_to_make_wind(0=bb,1=models,3=pow)", &geo.bl_ion_spectype);
   get_spectype (geo.agn_radiation,
                 "Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind", &geo.agn_ion_spectype);
+
   if (geo.agn_radiation && geo.agn_ion_spectype >= 0 && comp[geo.agn_ion_spectype].nmods != 1)
   {
     Error ("get_bl_and_agn_params: When using models with an AGN, there should be exactly 1 model, we have %i for ion cycles\n",
