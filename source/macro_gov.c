@@ -649,10 +649,21 @@ macro_pops (xplasma, xne)
 
             xplasma->density[index_ion] = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
 
+            /* JM Nov 18 -- to maintain consistency with the higher level routines, 
+               only allow density to drop to DENSITY_MIN */
+            if (xplasma->density[index_ion] < DENSITY_MIN)
+            {
+              xplasma->density[index_ion] = DENSITY_MIN;
+            }
+
             /* Check the sanity and positivity of the level populations */
             for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
             {
-              xplasma->levden[config[index_lvl].nden] = populations[conf_to_matrix[index_lvl]] / this_ion_density;
+              /* JM Nov 18 -- if statement to prevent nan in fractional populations */
+              if (this_ion_density == 0.0)
+                xplasma->levden[config[index_lvl].nden] = 0.0;
+              else
+                xplasma->levden[config[index_lvl].nden] = populations[conf_to_matrix[index_lvl]] / this_ion_density;
             }  
           }
         }
