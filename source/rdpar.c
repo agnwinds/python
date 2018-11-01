@@ -1140,17 +1140,17 @@ string2int (word, string_choices, string_values, string_answer)
   int ivalue, matched, ibest;
 
 
-  printf ("In string2int %s\n",word);
-  printf ("In string2int %s\n",string_choices);
-  printf ("In string2int %s length %lu\n",string_values,strlen (string_values));
-  printf ("In string2int %s\n",string_answer);
-  
- /*Blank out the arrays we will be using here */ 
-  
-  for (i=0;i<LINELEN;i++)
+  printf ("In string2int %s\n", word);
+  printf ("In string2int %s\n", string_choices);
+  printf ("In string2int %s length %lu\n", string_values, strlen (string_values));
+  printf ("In string2int %s\n", string_answer);
+
+  /*Blank out the arrays we will be using here */
+
+  for (i = 0; i < LINELEN; i++)
   {
-	  choices[i]=' ';
-	  values[i]=' ';
+    choices[i] = ' ';
+    values[i] = ' ';
   }
 
 
@@ -1170,8 +1170,8 @@ string2int (word, string_choices, string_values, string_answer)
   {
     values[i] = tolower (string_values[i]);
   }
-  
-  
+
+
 
 
 
@@ -1183,7 +1183,7 @@ string2int (word, string_choices, string_values, string_answer)
     {
       choices[i] = ' ';
       ncommas++;
-    }	
+    }
   }
 
 
@@ -1328,10 +1328,10 @@ rdchoice (question, answers, answer)
     strcpy (dummy, &question[nstart + 1]);
     dummy[strlen (dummy) - 1] = ' ';
 
-	printf ("going to string2int %s\n",string_answer);
-	printf ("going to string2int %s\n",dummy);
-	printf ("going to string2int %s\n",answers);
-	printf ("going to string2int %s\n",full_answer);
+    printf ("going to string2int %s\n", string_answer);
+    printf ("going to string2int %s\n", dummy);
+    printf ("going to string2int %s\n", answers);
+    printf ("going to string2int %s\n", full_answer);
 
 
     ianswer = string2int (string_answer, dummy, answers, full_answer);
