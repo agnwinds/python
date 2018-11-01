@@ -415,7 +415,7 @@ init_observers ()
   if (modes.iadvanced)
   {
     strcpy (answer, "no");
-    ichoice = rdchoice ("@Spectrum.select_specific_no_of_scatters_in_spectra(yes,no)", ",1,0", answer);
+    ichoice = rdchoice ("@Spectrum.select_specific_no_of_scatters_in_spectra(y,n)", ",1,0", answer);
 
     //OLD strcpy (yesno, "n");
     //OLD rdstr ("@Spectrum.select_specific_no_of_scatters_in_spectra(y/n)", yesno);
@@ -430,7 +430,7 @@ init_observers ()
       }
     }
     strcpy (answer, "no");
-    ichoice = rdchoice ("@Spectrum.select_photons_by_position(yes,no)", "1,0", answer);
+    ichoice = rdchoice ("@Spectrum.select_photons_by_position(y,n)", "1,0", answer);
     //OLD strcpy (yesno, "n");
     //OLD rdstr ("@Spectrum.select_photons_by_position(y/n)", yesno);
     //OLD if (yesno[0] == 'y')

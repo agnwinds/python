@@ -1109,7 +1109,7 @@ rdline (question, answer)
  * * string_cohoices "raw,medium,well"
  * * string_values  "1,8,16"
  *
- * As indicated above the two strings have to be in some sense paraglle.
+ * As indicated above the two strings have to be in some sense parallel.
  *
  * We want to match *word to one of these values.  
  *
@@ -1141,6 +1141,15 @@ string2int (word, string_choices, string_values, string_answer)
 
 
 
+  /*Blank out the arrays we will be using here */
+
+  for (i = 0; i < LINELEN; i++)
+  {
+    choices[i] = ' ';
+    values[i] = ' ';
+  }
+
+
   for (i = 0; i < strlen (word); i++)
   {
     word[i] = tolower (word[i]);
@@ -1152,6 +1161,7 @@ string2int (word, string_choices, string_values, string_answer)
     choices[i] = tolower (string_choices[i]);
   }
 
+
   for (i = 0; i < strlen (string_values); i++)
   {
     values[i] = tolower (string_values[i]);
@@ -1159,28 +1169,27 @@ string2int (word, string_choices, string_values, string_answer)
 
 
   ncommas = 0;
-  for (i = 0; i < strlen (choices); i++)
+  for (i = 0; i < strlen (string_choices); i++)
   {
     if (choices[i] == ',')
     {
-
       choices[i] = ' ';
       ncommas++;
-
     }
   }
 
+
+
   vcommas = 0;
-  for (i = 0; i < strlen (values); i++)
+  for (i = 0; i < strlen (string_values); i++)
   {
     if (values[i] == ',')
     {
-
       values[i] = ' ';
       vcommas++;
-
     }
   }
+
 
 
 
@@ -1190,22 +1199,26 @@ string2int (word, string_choices, string_values, string_answer)
 
   matched = 0;
   ivalue = -99;
+  ibest=-1; //Set this to a sensible initial value
   for (i = 0; i < nchoices; i++)
   {
-    if (strncmp (word, xs[i], strlen (word)) == 0)
+    if (strncmp (word, xs[i], strlen (xs[i])) == 0)
     {
       ivalue = xv[i];
       ibest = i;
       matched += 1;
     }
   }
-
+  
+  
+  
   strcpy (string_answer, "none");
   if (ibest >= 0)
   {
     printf ("XX %s\n", xs[ibest]);
     strcpy (string_answer, xs[ibest]);
   }
+  
 
   return (ivalue);
 
@@ -1311,8 +1324,6 @@ rdchoice (question, answers, answer)
     strncpy (dummy, &question[nstart + 1], nstop - nstart - 1);
     strcpy (dummy, &question[nstart + 1]);
     dummy[strlen (dummy) - 1] = ' ';
-
-
     ianswer = string2int (string_answer, dummy, answers, full_answer);
     printf ("XXX the answer was %s\n", full_answer);
 
