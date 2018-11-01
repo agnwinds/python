@@ -1109,7 +1109,7 @@ rdline (question, answer)
  * * string_cohoices "raw,medium,well"
  * * string_values  "1,8,16"
  *
- * As indicated above the two strings have to be in some sense paraglle.
+ * As indicated above the two strings have to be in some sense parallel.
  *
  * We want to match *word to one of these values.  
  *
@@ -1140,6 +1140,20 @@ string2int (word, string_choices, string_values, string_answer)
   int ivalue, matched, ibest;
 
 
+  printf ("In string2int %s\n",word);
+  printf ("In string2int %s\n",string_choices);
+  printf ("In string2int %s length %lu\n",string_values,strlen (string_values));
+  printf ("In string2int %s\n",string_answer);
+  
+ /*Blank out the arrays we will be using here */ 
+  
+  for (i=0;i<LINELEN;i++)
+  {
+	  choices[i]=' ';
+	  values[i]=' ';
+  }
+
+
 
   for (i = 0; i < strlen (word); i++)
   {
@@ -1156,31 +1170,34 @@ string2int (word, string_choices, string_values, string_answer)
   {
     values[i] = tolower (string_values[i]);
   }
+  
+  
+
+
 
 
   ncommas = 0;
-  for (i = 0; i < strlen (choices); i++)
+  for (i = 0; i < strlen (string_choices); i++)
   {
     if (choices[i] == ',')
     {
-
       choices[i] = ' ';
       ncommas++;
-
-    }
+    }	
   }
 
+
+
   vcommas = 0;
-  for (i = 0; i < strlen (values); i++)
+  for (i = 0; i < strlen (string_values); i++)
   {
     if (values[i] == ',')
     {
-
       values[i] = ' ';
       vcommas++;
-
     }
   }
+
 
 
 
@@ -1192,14 +1209,13 @@ string2int (word, string_choices, string_values, string_answer)
   ivalue = -99;
   for (i = 0; i < nchoices; i++)
   {
-    if (strncmp (word, xs[i], strlen (word)) == 0)
+    if (strncmp (word, xs[i], strlen (xs[i])) == 0)
     {
       ivalue = xv[i];
       ibest = i;
       matched += 1;
     }
   }
-
   strcpy (string_answer, "none");
   if (ibest >= 0)
   {
@@ -1311,6 +1327,11 @@ rdchoice (question, answers, answer)
     strncpy (dummy, &question[nstart + 1], nstop - nstart - 1);
     strcpy (dummy, &question[nstart + 1]);
     dummy[strlen (dummy) - 1] = ' ';
+
+	printf ("going to string2int %s\n",string_answer);
+	printf ("going to string2int %s\n",dummy);
+	printf ("going to string2int %s\n",answers);
+	printf ("going to string2int %s\n",full_answer);
 
 
     ianswer = string2int (string_answer, dummy, answers, full_answer);
