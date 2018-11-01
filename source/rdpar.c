@@ -1153,12 +1153,13 @@ string2int (word, string_choices, string_values, string_answer)
     values[i] = ' ';
   }
 
-
+  printf ("1\n");
 
   for (i = 0; i < strlen (word); i++)
   {
     word[i] = tolower (word[i]);
   }
+  printf ("2\n");
 
 
   for (i = 0; i < strlen (string_choices); i++)
@@ -1166,11 +1167,14 @@ string2int (word, string_choices, string_values, string_answer)
     choices[i] = tolower (string_choices[i]);
   }
 
+  printf ("3\n");
+
   for (i = 0; i < strlen (string_values); i++)
   {
     values[i] = tolower (string_values[i]);
   }
 
+  printf ("4\n");
 
 
 
@@ -1186,6 +1190,7 @@ string2int (word, string_choices, string_values, string_answer)
     }
   }
 
+  printf ("5\n");
 
 
   vcommas = 0;
@@ -1199,6 +1204,7 @@ string2int (word, string_choices, string_values, string_answer)
   }
 
 
+  printf ("6\n");
 
 
   nchoices = sscanf (choices, "%s %s %s %s %s %s %s %s %s %s", xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7], xs[8], xs[9]);
@@ -1207,6 +1213,7 @@ string2int (word, string_choices, string_values, string_answer)
 
   matched = 0;
   ivalue = -99;
+  ibest=-1; //Set this to a sensible initial value
   for (i = 0; i < nchoices; i++)
   {
     if (strncmp (word, xs[i], strlen (xs[i])) == 0)
@@ -1216,12 +1223,18 @@ string2int (word, string_choices, string_values, string_answer)
       matched += 1;
     }
   }
+  
+  printf ("ibest=%d\n",ibest);
+  
+  
   strcpy (string_answer, "none");
   if (ibest >= 0)
   {
     printf ("XX %s\n", xs[ibest]);
     strcpy (string_answer, xs[ibest]);
   }
+  
+  printf ("ivalue=%i\n",ivalue);
 
   return (ivalue);
 
@@ -1327,13 +1340,6 @@ rdchoice (question, answers, answer)
     strncpy (dummy, &question[nstart + 1], nstop - nstart - 1);
     strcpy (dummy, &question[nstart + 1]);
     dummy[strlen (dummy) - 1] = ' ';
-
-    printf ("going to string2int %s\n", string_answer);
-    printf ("going to string2int %s\n", dummy);
-    printf ("going to string2int %s\n", answers);
-    printf ("going to string2int %s\n", full_answer);
-
-
     ianswer = string2int (string_answer, dummy, answers, full_answer);
     printf ("XXX the answer was %s\n", full_answer);
 
