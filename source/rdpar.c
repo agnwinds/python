@@ -1109,7 +1109,7 @@ rdline (question, answer)
  * * string_cohoices "raw,medium,well"
  * * string_values  "1,8,16"
  *
- * As indicated above the two strings have to be in some sense paraglle.
+ * As indicated above the two strings have to be in some sense parallel.
  *
  * We want to match *word to one of these values.  
  *
@@ -1140,11 +1140,26 @@ string2int (word, string_choices, string_values, string_answer)
   int ivalue, matched, ibest;
 
 
+  printf ("In string2int %s\n", word);
+  printf ("In string2int %s\n", string_choices);
+  printf ("In string2int %s length %lu\n", string_values, strlen (string_values));
+  printf ("In string2int %s\n", string_answer);
+
+  /*Blank out the arrays we will be using here */
+
+  for (i = 0; i < LINELEN; i++)
+  {
+    choices[i] = ' ';
+    values[i] = ' ';
+  }
+
+  printf ("1\n");
 
   for (i = 0; i < strlen (word); i++)
   {
     word[i] = tolower (word[i]);
   }
+  printf ("2\n");
 
 
   for (i = 0; i < strlen (string_choices); i++)
@@ -1152,36 +1167,44 @@ string2int (word, string_choices, string_values, string_answer)
     choices[i] = tolower (string_choices[i]);
   }
 
+  printf ("3\n");
+
   for (i = 0; i < strlen (string_values); i++)
   {
     values[i] = tolower (string_values[i]);
   }
 
+  printf ("4\n");
+
+
+
+
 
   ncommas = 0;
-  for (i = 0; i < strlen (choices); i++)
+  for (i = 0; i < strlen (string_choices); i++)
   {
     if (choices[i] == ',')
     {
-
       choices[i] = ' ';
       ncommas++;
-
     }
   }
 
+  printf ("5\n");
+
+
   vcommas = 0;
-  for (i = 0; i < strlen (values); i++)
+  for (i = 0; i < strlen (string_values); i++)
   {
     if (values[i] == ',')
     {
-
       values[i] = ' ';
       vcommas++;
-
     }
   }
 
+
+  printf ("6\n");
 
 
   nchoices = sscanf (choices, "%s %s %s %s %s %s %s %s %s %s", xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7], xs[8], xs[9]);
@@ -1190,22 +1213,28 @@ string2int (word, string_choices, string_values, string_answer)
 
   matched = 0;
   ivalue = -99;
+  ibest=-1; //Set this to a sensible initial value
   for (i = 0; i < nchoices; i++)
   {
-    if (strncmp (word, xs[i], strlen (word)) == 0)
+    if (strncmp (word, xs[i], strlen (xs[i])) == 0)
     {
       ivalue = xv[i];
       ibest = i;
       matched += 1;
     }
   }
-
+  
+  printf ("ibest=%d\n",ibest);
+  
+  
   strcpy (string_answer, "none");
   if (ibest >= 0)
   {
     printf ("XX %s\n", xs[ibest]);
     strcpy (string_answer, xs[ibest]);
   }
+  
+  printf ("ivalue=%i\n",ivalue);
 
   return (ivalue);
 
@@ -1311,8 +1340,6 @@ rdchoice (question, answers, answer)
     strncpy (dummy, &question[nstart + 1], nstop - nstart - 1);
     strcpy (dummy, &question[nstart + 1]);
     dummy[strlen (dummy) - 1] = ' ';
-
-
     ianswer = string2int (string_answer, dummy, answers, full_answer);
     printf ("XXX the answer was %s\n", full_answer);
 
