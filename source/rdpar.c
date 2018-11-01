@@ -1140,10 +1140,6 @@ string2int (word, string_choices, string_values, string_answer)
   int ivalue, matched, ibest;
 
 
-  printf ("In string2int %s\n", word);
-  printf ("In string2int %s\n", string_choices);
-  printf ("In string2int %s length %lu\n", string_values, strlen (string_values));
-  printf ("In string2int %s\n", string_answer);
 
   /*Blank out the arrays we will be using here */
 
@@ -1153,13 +1149,11 @@ string2int (word, string_choices, string_values, string_answer)
     values[i] = ' ';
   }
 
-  printf ("1\n");
 
   for (i = 0; i < strlen (word); i++)
   {
     word[i] = tolower (word[i]);
   }
-  printf ("2\n");
 
 
   for (i = 0; i < strlen (string_choices); i++)
@@ -1167,17 +1161,11 @@ string2int (word, string_choices, string_values, string_answer)
     choices[i] = tolower (string_choices[i]);
   }
 
-  printf ("3\n");
 
   for (i = 0; i < strlen (string_values); i++)
   {
     values[i] = tolower (string_values[i]);
   }
-
-  printf ("4\n");
-
-
-
 
 
   ncommas = 0;
@@ -1190,7 +1178,6 @@ string2int (word, string_choices, string_values, string_answer)
     }
   }
 
-  printf ("5\n");
 
 
   vcommas = 0;
@@ -1204,7 +1191,6 @@ string2int (word, string_choices, string_values, string_answer)
   }
 
 
-  printf ("6\n");
 
 
   nchoices = sscanf (choices, "%s %s %s %s %s %s %s %s %s %s", xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7], xs[8], xs[9]);
@@ -1224,7 +1210,6 @@ string2int (word, string_choices, string_values, string_answer)
     }
   }
   
-  printf ("ibest=%d\n",ibest);
   
   
   strcpy (string_answer, "none");
@@ -1234,7 +1219,6 @@ string2int (word, string_choices, string_values, string_answer)
     strcpy (string_answer, xs[ibest]);
   }
   
-  printf ("ivalue=%i\n",ivalue);
 
   return (ivalue);
 
