@@ -149,6 +149,7 @@ get_bl_and_agn_params (lstar)
 {
   double xbl;
   double temp_const_agn;
+  char answer[LINELENGTH];
 
   rdpar_comment ("Parameters for BL or AGN");
 
@@ -156,12 +157,16 @@ get_bl_and_agn_params (lstar)
   {
     geo.star_radiation = 0;     // 70b - AGN do not have a star at the center */
     geo.bl_radiation = 0;
-    geo.agn_radiation = 1;
-    rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
+    //OLD geo.agn_radiation = 1;
+    strcpy (answer, "yes");
+    geo.agn_radiation = rdchoice ("QSO_BH_radiation(yes,no)", "1,0", answer);
+    //OLD rdint ("QSO_BH_radiation(y=1)", &geo.agn_radiation);
   }
   else
   {
-    rdint ("Boundary_layer.radiation(y=1)", &geo.bl_radiation);
+    strcpy (answer, "no");
+    geo.bl_radiation = rdchoice ("Boundary_layer.radiation(yes,no", "1,0", answer);
+    //OLD rdint ("Boundary_layer.radiation(y=1)", &geo.bl_radiation);
     geo.agn_radiation = 0;      // So far at least, our star systems don't have a BH
   }
 
@@ -272,7 +277,10 @@ get_bl_and_agn_params (lstar)
     if (modes.iadvanced && (geo.agn_ion_spectype == SPECTYPE_POW))
       rddoub ("@AGN.power_law_cutoff", &geo.pl_low_cutoff);
 
-    rdint ("AGN.geometry_for_pl_source(0=sphere,1=lamp_post)", &geo.pl_geometry);
+    strcpy (answer, "sphere");
+    geo.pl_geometry = rdchoice ("AGN.geometry_for_pl_source(sphere,lamp_post)", "0,1", answer);
+
+    //OLD rdint ("AGN.geometry_for_pl_source(0=sphere,1=lamp_post)", &geo.pl_geometry);
 
     if (geo.pl_geometry == PL_GEOMETRY_LAMP_POST)
     {

@@ -48,6 +48,7 @@ get_domain_params (ndom)
      int ndom;
 {
   int input_int;
+  char answer[LINELENGTH];
 
   if (ndom >= geo.ndomain)
   {
@@ -56,13 +57,15 @@ get_domain_params (ndom)
   }
 
 
-  rdint ("Wind_type(0=SV,1=Star,3=Hydro,4=corona,5=knigge,6=homologous,7=yso,9=shell,10=imported)", &zdom[ndom].wind_type);
+  strcpy (answer, "SV");
+  zdom[ndom].wind_type = rdchoice ("Wind_type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)", "0,1,3,4,5,6,7,9,10", answer);
+//OLD  rdint ("Wind_type(0=SV,1=Star,3=Hydro,4=corona,5=knigge,6=homologous,7=yso,9=shell,10=imported)", &zdom[ndom].wind_type);
 
-  if (zdom[ndom].wind_type == 2)
-  {
-    Error ("Wind_type 2, which was used to read in a previous model is no longer allowed! Use System_type instead!\n");
-    exit (0);
-  }
+//OLD  if (zdom[ndom].wind_type == 2)
+//OLD  {
+//OLD    Error ("Wind_type 2, which was used to read in a previous model is no longer allowed! Use System_type instead!\n");
+//OLD    exit (0);
+//OLD  }
 
 
   strcat (zdom[ndom].name, "Wind");
@@ -72,25 +75,27 @@ get_domain_params (ndom)
 
 
   /* Define the coordinate system for the grid and allocate memory for the wind structure */
-  rdint ("Wind.coord_system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)", &input_int);
-  switch (input_int)
-  {
-  case 0:
-    zdom[ndom].coord_type = SPHERICAL;
-    break;
-  case 1:
-    zdom[ndom].coord_type = CYLIND;
-    break;
-  case 2:
-    zdom[ndom].coord_type = RTHETA;
-    break;
-  case 3:
-    zdom[ndom].coord_type = CYLVAR;
-    break;
-  default:
-    Error ("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
-          0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
-  }
+  strcpy (answer, "cylindrical");
+  zdom[ndom].coord_type = rdchoice ("Wind.coord_system(spherical,cylindrical,spherical_polar,cyl_var)", "0,1,2,3", answer);
+//OLD  rdint ("Wind.coord_system(0=spherical,1=cylindrical,2=spherical_polar,3=cyl_var)", &input_int);
+//OLD  switch (input_int)
+//OLD  {
+//OLD  case 0:
+//OLD    zdom[ndom].coord_type = SPHERICAL;
+//OLD    break;
+//OLD  case 1:
+//OLD    zdom[ndom].coord_type = CYLIND;
+//OLD    break;
+//OLD  case 2:
+//OLD    zdom[ndom].coord_type = RTHETA;
+//OLD    break;
+//OLD  case 3:
+//OLD    zdom[ndom].coord_type = CYLVAR;
+//OLD    break;
+//OLD  default:
+//OLD    Error ("Invalid parameter supplied for 'Coord_system'. Valid coordinate types are: \n\
+//OLD          0 = Spherical, 1 = Cylindrical, 2 = Spherical polar, 3 = Cylindrical (varying Z)");
+//OLD  }
 
 
   if (zdom[ndom].wind_type == IMPORT)
@@ -126,7 +131,9 @@ get_domain_params (ndom)
   /* If we are in advanced then allow the user to modify scale lengths */
   if (modes.iadvanced)
   {
-    rdint ("@Diag.adjust_grid(0=no,1=yes)", &modes.adjust_grid);
+    strcpy (answer, "no");
+    modes.adjust_grid = rdchoice ("@Diag.adjust_grid(yes,no)", "1,0", answer);
+//OLD    rdint ("@Diag.adjust_grid(0=no,1=yes)", &modes.adjust_grid);
 
     if (modes.adjust_grid)
     {
@@ -293,148 +300,6 @@ get_wind_params (ndom)
 
 /**********************************************************/
 /** 
- * @brief       Get the line transfer mode for the wind
- *
- * @param [in] None
- * @return  0 
- *
- * This rontinues simply gets the line tranfer mode for
- * all componensts of the wind.  After logging this
- * information the routine also reads in the atomic 
- * data.
- *
- *
- * ###Notes###
- * 1801 -   Refactored into this file in 1801.  It is
- *          not obvioous this is the best place for this
- *          routine since it refers to all components
- *          of the wind.
-
-***********************************************************/
-
-
-
-int
-get_line_transfer_mode ()
-{
-  int user_line_mode = 0;
-  rdint
-    ("Line_transfer(0=pure.abs,1=pure.scat,2=sing.scat,3=escape.prob,4=anisotryopic,5=thermal_trapping,6=macro_atoms,7=macro_atoms+aniso.scattering)",
-     &user_line_mode);
-
-  /* JM 1406 -- geo.rt_mode and geo.macro_simple control different things. geo.rt_mode controls the radiative
-     transfer and whether or not you are going to use the indivisible packet constraint, so you can have all simple 
-     ions, all macro-atoms or a mix of the two. geo.macro_simple just means one can turn off the full macro atom 
-     treatment and treat everything as 2-level simple ions inside the macro atom formalism */
-
-  /* Set the default scattering and RT mode */
-  geo.scatter_mode = SCATTER_MODE_ISOTROPIC;    // isotropic
-  geo.rt_mode = RT_MODE_2LEVEL; // Not macro atom (SS)
-
-  if (user_line_mode == 0)
-  {
-    Log ("Line_transfer mode:  Simple, pure absorption\n");
-    geo.line_mode = user_line_mode;
-  }
-  else if (user_line_mode == 1)
-  {
-    Log ("Line_transfer mode:  Simple, pure scattering\n");
-    geo.line_mode = user_line_mode;
-  }
-  else if (user_line_mode == 2)
-  {
-    Log ("Line_transfer mode:  Simple, single scattering\n");
-    geo.line_mode = user_line_mode;
-  }
-  else if (user_line_mode == 3)
-  {
-    Log ("Line_transfer mode:  Simple, isotropic scattering, escape probabilities\n");
-    geo.line_mode = user_line_mode;
-  }
-  else if (user_line_mode == 4)
-  {
-    Error ("get_line_transfer_mode: Line transfer mode %d is deprecated\n", user_line_mode);
-    line_transfer_help_message ();
-    exit (0);
-  }
-  else if (user_line_mode == 5)
-  {
-    Log ("Line_transfer mode:  Simple, thermal trapping, Single scattering \n");
-    geo.scatter_mode = SCATTER_MODE_THERMAL;    // Thermal trapping model
-    geo.line_mode = 3;
-    geo.rt_mode = RT_MODE_2LEVEL;       // Not macro atom (SS) 
-  }
-  else if (user_line_mode == 6)
-  {
-    Log ("Line_transfer mode:  macro atoms, isotropic scattering  \n");
-    geo.scatter_mode = SCATTER_MODE_ISOTROPIC;  // isotropic
-    geo.line_mode = 3;
-    geo.rt_mode = RT_MODE_MACRO;        // Identify macro atom treatment (SS)
-    geo.macro_simple = 0;       // We don't want the all simple case (SS)
-  }
-  else if (user_line_mode == 7)
-  {
-    Log ("Line_transfer mode:  macro atoms, anisotropic  scattering  \n");
-    geo.scatter_mode = SCATTER_MODE_THERMAL;    // thermal trapping
-    geo.line_mode = 3;
-    geo.rt_mode = RT_MODE_MACRO;        // Identify macro atom treatment (SS)
-    geo.macro_simple = 0;       // We don't want the all simple case (SS)
-  }
-  else if (user_line_mode == 8)
-  {
-    Log ("Line_transfer mode: simple macro atoms, isotropic  scattering  \n");
-    geo.scatter_mode = SCATTER_MODE_ISOTROPIC;  // isotropic
-    geo.line_mode = 3;
-    geo.rt_mode = RT_MODE_MACRO;        // Identify macro atom treatment i.e. indivisible packets
-    geo.macro_simple = 1;       // This is for test runs with all simple ions (SS)
-  }
-  else if (user_line_mode == 9)
-  {
-    Log ("Line_transfer mode: simple macro atoms, anisotropic  scattering  \n");
-    geo.scatter_mode = SCATTER_MODE_THERMAL;    // thermal trapping
-    geo.line_mode = 3;
-    geo.rt_mode = RT_MODE_MACRO;        // Identify macro atom treatment i.e. indivisible packets
-    geo.macro_simple = 1;       // This is for test runs with all simple ions (SS)
-  }
-  else
-  {
-    Error ("Unknown line_transfer mode %d\n");
-    line_transfer_help_message ();
-    exit (0);
-  }
-
-  /* With the macro atom approach we won't want to generate photon 
-     bundles in the wind so switch it off here. (SS) */
-  if (geo.rt_mode == RT_MODE_MACRO)
-  {
-    Log ("python: Using Macro Atom method so switching off wind radiation.\n");
-    geo.wind_radiation = 0;
-  }
-
-
-  /* read in the atomic data */
-  rdstr ("Atomic_data", geo.atomic_filename);
-
-  /* read a variable which controls whether to save a summary of atomic data
-     this is defined in atomic.h, rather than the modes structure */
-
-  if (modes.iadvanced)
-  {
-
-    rdint ("@Diag.write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
-    if (write_atomicdata)
-      Log ("You have opted to save a summary of the atomic data\n");
-  }
-
-  get_atomic_data (geo.atomic_filename);
-  return (0);
-}
-
-
-
-
-/**********************************************************/
-/** 
  * @brief      sets up the windcones for each domain
  *
  * @return     Always returns 0
@@ -503,45 +368,5 @@ setup_windcone ()
       zdom[ndom].windcone[1].z = -VERY_BIG;;
     }
   }
-  return (0);
-}
-
-
-/**********************************************************/
-/** 
- * @brief      print out a help message about line transfer modes
- *
- * @return     Always returns 0
- **********************************************************/
-
-int
-line_transfer_help_message ()
-{
-  char *some_help;
-
-  some_help = "\
-\n\
-Available line transfer modes and descriptions are: \n\
-\n\
-  0 Pure Absorption\n\
-  1 Pure Scattering\n\
-  2 Single Scattering\n\
-  3 Escape Probabilities, isotropic scattering\n\
-  5 Escape Probabilities, anisotropic scattering\n\
-  6 Indivisible energy packets / macro-atoms, isotropic scattering\n\
-  7 Indivisible energy packets / macro-atoms, anisotropic scattering\n\
-  8 Indivisible energy packets, force all simple-atoms, anisotropic scattering\n\
-  9 Indivisible energy packets, force all simple-atoms, anisotropic scattering\n\
-\n\
-  Standard mode is 5 for runs involving weight reduction and no macro-atoms\n\
-  Standard macro-atom mode is 7\n\
-\n\
-See this web address for more information: https://github.com/agnwinds/python/wiki/Line-Transfer-and-Scattering\n\
-\n\
-\n\
-";                              // End of string to provide one with help
-
-  Log ("%s\n", some_help);
-
   return (0);
 }

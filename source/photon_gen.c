@@ -1336,6 +1336,11 @@ bl_init (lum_bl, t_bl, freqmin, freqmax, ioniz_or_final, f)
  * photon distribution, specifically having to do with the ionizing
  * photons.  It is not entirely clear why this is where this is done
  *
+ * 181009 - ksl - Previously, this routine caused Python to exit 
+ * if phtoon_checks produced more than a small number of errors. I
+ * have removed this exterme measure but that toes not mean that
+ * photon checks should be igrnored.
+ *
  **********************************************************/
 
 int
@@ -1346,17 +1351,17 @@ photon_checks (p, freqmin, freqmax, comment)
 {
   int nnn, nn;
   int nlabel;
-  int max_errors;
+//OLD  int max_errors;
 
   geo.n_ioniz = 0;
   geo.cool_tot_ioniz = 0.0;
   nnn = 0;
   nlabel = 0;
-  max_errors = 100;
-  if (max_errors < 1e-5 * NPHOT)
-  {
-    max_errors = 1e-5 * NPHOT;
-  }
+//OLD  max_errors = 100;
+//OLD  if (max_errors < 1e-5 * NPHOT)
+//OLD  {
+//OLD    max_errors = 1e-5 * NPHOT;
+//OLD  }
 
 
   /* Next two lines are to allow for fact that photons generated in
@@ -1413,11 +1418,11 @@ photon_checks (p, freqmin, freqmax, comment)
     Log ("photon_checks: %d of %d or %e per cent of photons failed checks\n", nn, NPHOT, nn * 100. / NPHOT);
   }
 
-  if (nnn > max_errors)
-  {
-    error_summary ("Exiting because too many bad photons generated");
-//Avoide the exit      exit (0);
-  }
+//OLD  if (nnn > max_errors)
+//OLD  {
+//OLD    error_summary ("Exiting because too many bad photons generated");
+//OLD Avoide the exit      exit (0);
+//OLD  }
 
 
   return (0);

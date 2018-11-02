@@ -238,10 +238,12 @@ def doit(run1='py_180809',run2='',outputfile='check.txt'):
         print('COMPARING %s' % one['name'])
 
         ext='.out.pf'
-        x1=one['root1']+ext
-        x2=one['root2']+ext
+        # x1=one['root1']+ext
+        # x2=one['root2']+ext
 
         try:
+            x1=one['root1']+ext
+            x2=one['root2']+ext
             result=diff_two_files(x1,x2)
             # print('There were differences in %5d lines in %s' % (len(result)//2,ext))
             out.write('There were differences in %5d lines in %s\n' % (len(result)//2,ext))
@@ -250,13 +252,17 @@ def doit(run1='py_180809',run2='',outputfile='check.txt'):
             pf_count.append(len(result)//2)
         except ValueError:
             pf_count.append(-99)
+        except TypeError:
+            pf_count.append(-99)
 
 
         ext='.log_spec_tot'
-        x1=one['root1']+ext
-        x2=one['root2']+ext
+        # x1=one['root1']+ext
+        # x2=one['root2']+ext
 
         try:
+            x1=one['root1']+ext
+            x2=one['root2']+ext
             result=diff_two_files(x1,x2)
             # print('There were differences in %5d lines in %s' % (len(result)//2,ext))
             out.write('There were differences in %5d lines in %s\n' % (len(result)//2,ext))
@@ -264,15 +270,19 @@ def doit(run1='py_180809',run2='',outputfile='check.txt'):
             if len(result)<50:
                 out.write(''.join(result))
         except ValueError:
-            log_spec_tot.count.append(-99)
+            log_spec_tot_count.append(-99)
+        except TypeError:
+            log_spec_tot_count.append(-99)
 
 
 
         ext='.spec'
-        x1=one['root1']+ext
-        x2=one['root2']+ext
+        # x1=one['root1']+ext
+        # x2=one['root2']+ext
 
         try:
+            x1=one['root1']+ext
+            x2=one['root2']+ext
             result=diff_two_files(x1,x2)
             # print('There were differences in %5d lines in %s' % (len(result)//2,ext))
             out.write('There were differences in %5d lines in %s\n' % (len(result)//2,ext))
@@ -280,6 +290,8 @@ def doit(run1='py_180809',run2='',outputfile='check.txt'):
             if len(result)<50:
                 out.write(''.join(result))
         except ValueError:
+            spec_count.append(-99)
+        except TypeError:
             spec_count.append(-99)
 
 
@@ -308,7 +320,7 @@ def get_other_directory(run1):
     dirs=[]
     modtime=[]
     for one in x:
-        if os.path.isdir(one) and one!='run1':
+        if os.path.isdir(one) and one!=run1:
             dirs.append(one)
             modtime.append(os.path.getmtime(one))
 

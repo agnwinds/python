@@ -636,7 +636,7 @@ main (argc, argv)
   geo.select_spectype = 1;
 
 /* Completed initialization of this section.  Note that get_spectype uses the source of the
- * ratiation and then value given to return a spectrum type. The output is not the same
+ * radiation and then value given to return a spectrum type. The output is not the same
  * number as one inputs. It' s not obvious that this is a good idea. */
 
   if (geo.pcycles > 0)
