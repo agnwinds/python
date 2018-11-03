@@ -1199,7 +1199,7 @@ string2int (word, string_choices, string_values, string_answer)
 
   matched = 0;
   ivalue = -99;
-  ibest=-1; //Set this to a sensible initial value
+  ibest = -1;                   //Set this to a sensible initial value
   for (i = 0; i < nchoices; i++)
   {
     if (strncmp (word, xs[i], strlen (xs[i])) == 0)
@@ -1209,16 +1209,16 @@ string2int (word, string_choices, string_values, string_answer)
       matched += 1;
     }
   }
-  
-  
-  
+
+
+
   strcpy (string_answer, "none");
   if (ibest >= 0)
   {
     printf ("XX %s\n", xs[ibest]);
     strcpy (string_answer, xs[ibest]);
   }
-  
+
 
   return (ivalue);
 
