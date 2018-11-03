@@ -1197,12 +1197,15 @@ string2int (word, string_choices, string_values, string_answer)
   nchoices =
     sscanf (values, "%d %d %d %d %d %d %d %d %d %d", &xv[0], &xv[1], &xv[2], &xv[3], &xv[4], &xv[5], &xv[6], &xv[7], &xv[8], &xv[9]);
 
+  /* Perform a minimum match on the anser */
+
   matched = 0;
   ivalue = -99;
   ibest = -1;                   //Set this to a sensible initial value
   for (i = 0; i < nchoices; i++)
   {
-    if (strncmp (word, xs[i], strlen (xs[i])) == 0)
+//OLD    if (strncmp (word, xs[i], strlen (xs[i])) == 0)
+    if (strncmp (word, xs[i], strlen (word)) == 0)
     {
       ivalue = xv[i];
       ibest = i;
@@ -1210,18 +1213,27 @@ string2int (word, string_choices, string_values, string_answer)
     }
   }
 
-
-
   strcpy (string_answer, "none");
+
+  /* Check for more than one match to answer */
+
+  if (matched > 1)
+  {
+    printf ("XX multiple matches\n");
+    ivalue = -999;
+    return (ivalue);
+  }
+
+
+
   if (ibest >= 0)
   {
-    printf ("XX %s\n", xs[ibest]);
+    printf ("XX %s %d\n", xs[ibest], ivalue);
     strcpy (string_answer, xs[ibest]);
   }
 
 
   return (ivalue);
-
 }
 
 
@@ -1254,19 +1266,21 @@ string2int (word, string_choices, string_values, string_answer)
  *
  * ###Programming Comment###
  *
- * For backward compatibility, if the user enters an integer rather than a string.  The integer is returned.  
- * This is dangerous.  It implies that none of the choices should start with a number.
+ * For backward compatibility, if the user enters an integer rather than a string.  The integer is returned. No
+ * error checking is done to see that the integer is one of the allowed choices.   A comment is written to the
+ * whatever.out.pf file to indicate that one should change integers to strings as ultimately we plan to remove 
+ * the code that provides backward compatibility.
  *
- * Very important:  answer is changed and c is very picky about when a string can be updated.  One cannot
- * change a string that has simply been set to a vale,  e. g.
+ * Very important:  in rdchoice, the string answer is changed. c is very picky about when a string can be updated.  One cannot
+ * change a string that has simply been set to a fixed value,  e. g.
  *
  * char whatever="whatever"
  *
- * This is fixed in memory.  Instead, one nees to crate an array with a certain length, e.g
+ * This is fixed in memory.  Instead, one nees to create an array with a certain length, e.g
  *
  * char answer[LINELENGTH];
  *
- * and use strcpy or some other routine to initialize it.
+ * and use strcpy or some other routine to initialize it.  Then one can call rdchoice.
  **********************************************************/
 
 int
@@ -1281,18 +1295,15 @@ rdchoice (question, answers, answer)
   int ianswer;
   int query;
   char full_answer[LINELEN];
-
   rdpar_choice = 1;
   strcpy (string_answer, answer);
-
   query = REISSUE;
-
   while (query == REISSUE)
   {
     query = rdstr (question, string_answer);
-
-    /* First check to see if we have returned an integer */
-    if (sscanf (string_answer, "%d", &ianswer))
+    /* First check to see if we have returned an integer.  The fact taht we attempt to find a string
+     * after the integer is to make it possible for a string answer to be something like "2dcoords" */
+    if (sscanf (string_answer, "%d%s", &ianswer, dummy) == 1)
     {
       strcpy (answer, string_answer);
       //OLD printf ("OK\n");
@@ -1326,12 +1337,15 @@ rdchoice (question, answers, answer)
     dummy[strlen (dummy) - 1] = ' ';
     ianswer = string2int (string_answer, dummy, answers, full_answer);
     printf ("XXX the answer was %s\n", full_answer);
-
     if (ianswer == -99)
     {
-      printf ("Error: rdchoice: Could not match %s input to one of answers: %s\nTry again\n", string_answer, dummy);
+      Error ("rdchoice: Could not match %s input to one of answers: %s\nTry again\n", string_answer, dummy);
       query = REISSUE;
-
+    }
+    if (ianswer == -999)
+    {
+      Error ("rdchoice: Multiple matches of  %s input to answers: %s\nTry again\n", string_answer, dummy);
+      query = REISSUE;
     }
   }
 
@@ -1339,8 +1353,6 @@ rdchoice (question, answers, answer)
   strcpy (answer, string_answer);
   rdpar_choice = 0;
   return (ianswer);
-
-
 }
 
 /* This is the end of the various routines which parse different kinds of inputs */
@@ -1379,9 +1391,7 @@ get_root (root, total)
   int j;
   char *pf;
   int position;
-
   /* Check whether total is an empty string */
-
   j = strcspn (total, "\n");
   if (j == 0)
   {
@@ -1407,8 +1417,6 @@ get_root (root, total)
 
   strncpy (root, total, j);
   root[j] = '\0';
-
-
   return (0);
 }
 
