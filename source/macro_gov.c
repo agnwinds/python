@@ -593,7 +593,7 @@ macro_pops (xplasma, xne)
         nn = 0;
         mm = 0;
         for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
-        {	
+        {
           this_ion_density = 0.0;
           for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
           {
@@ -617,8 +617,8 @@ macro_pops (xplasma, xne)
           {
             if (populations[conf_to_matrix[index_lvl]] < 0.0 || sane_check (populations[conf_to_matrix[index_lvl]]))
             {
-              Error ("macro_pops: level %i has calculated pop. %8.4e in cell %i\n", 
-              	      index_lvl, populations[conf_to_matrix[index_lvl]], xplasma->nplasma);
+              Error ("macro_pops: level %i has calculated pop. %8.4e in cell %i\n",
+                     index_lvl, populations[conf_to_matrix[index_lvl]], xplasma->nplasma);
               insane = 1;
             }
             mm++;
@@ -636,12 +636,13 @@ macro_pops (xplasma, xne)
         /* if we didn't set insane to 1 then we have a realistic set of populations, so set sane_populations to 1 to break
            the while loop, and copy the populations into the arrays */
         else
-        {	
+        {
           sane_populations = 1;
           for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
-          {	
+          {
             this_ion_density = 0.0;
-            for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
+            for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte;
+                 index_lvl++)
             {
               this_ion_density += populations[conf_to_matrix[index_lvl]];
               nn++;
@@ -657,14 +658,15 @@ macro_pops (xplasma, xne)
             }
 
             /* Check the sanity and positivity of the level populations */
-            for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
+            for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte;
+                 index_lvl++)
             {
               /* JM Nov 18 -- if statement to prevent nan in fractional populations */
               if (this_ion_density == 0.0)
                 xplasma->levden[config[index_lvl].nden] = 0.0;
               else
                 xplasma->levden[config[index_lvl].nden] = populations[conf_to_matrix[index_lvl]] / this_ion_density;
-            }  
+            }
           }
         }
 
