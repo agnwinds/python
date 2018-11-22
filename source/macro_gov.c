@@ -662,8 +662,8 @@ macro_pops (xplasma, xne)
                  index_lvl++)
             {
               /* JM Nov 18 -- if statement to prevent nan in fractional populations */
-              if (this_ion_density == 0.0)
-                xplasma->levden[config[index_lvl].nden] = 0.0;
+              if (this_ion_density <= DENSITY_MIN || populations[conf_to_matrix[index_lvl]] <= DENSITY_MIN)
+                xplasma->levden[config[index_lvl].nden] = DENSITY_MIN;
               else
                 xplasma->levden[config[index_lvl].nden] = populations[conf_to_matrix[index_lvl]] / this_ion_density;
             }
