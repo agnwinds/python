@@ -211,7 +211,6 @@
  * other than Python, e.g for another routine intended to calculate the ionization state of
  * a plasma in colissional equlibrium
  *
- *
  * To this end, the routines populate stuctures in atomic.h, which are not part of python.h.  It's imporant
  * that future modificatiosn to get_atomic_data maintain this indepence..
  *
@@ -252,7 +251,7 @@ get_atomic_data (masterfile)
   double the_ground_frac[20];
   char choice;
   int lineno;                   /* the line number in the file beginning with 1 */
-  int index_collisions (), index_lines (), index_phot_top (), index_inner_cross (), index_phot_verner (), check_xsections ();
+  int index_lines (), index_phot_top (), index_inner_cross (), index_phot_verner (), check_xsections ();
   int nwords;
   int nlte, nmax;
   int mflag;                    //flag to identify reading data for macro atoms
@@ -598,7 +597,6 @@ get_atomic_data (masterfile)
   nlines = nlines_simple = nlines_macro = 0;
   lineno = 0;
   nxphot = 0;
-  nxcol = 0;
 /*mflag is set initially to 1, in order to establish that
 macro-lines need to be read in before any "simple" lines.  This
 is so that we can assure that the first lines in the line array
@@ -676,10 +674,6 @@ structure does not have this property! */
           choice = 'r';
         else if (strncmp (word, "Frac", 4) == 0)
           choice = 'f';         /*ground state fractions */
-        else if (strncmp (word, "Xcol", 4) == 0)
-          choice = 'x';         /*It's a collision strength line */
-//            else if (strncmp (word, "InPhot", 6) == 0)
-//              choice = 'A';   /*It's an inner shell ionization for Auger effect */
         else if (strncmp (word, "InnerVYS", 8) == 0)
           choice = 'I';         /*Its a set of inner shell photoionization cross sections */
         else if (strncmp (word, "DR_BADNL", 8) == 0)    /* It's a badnell type dielectronic recombination file */
@@ -2090,37 +2084,6 @@ would like to have simple lines for macro-ions */
           break;
 
 
-// Collision strengths --- Not currently used
-/** @section Collision strengths
- *  @bug This needs a description
- */
-        case 'x':              /*The line contains collision strength information--Gaetz & Salpeter */
-          if (sscanf (aline, "%*s %*s %d %d %le %le %le %le %le", &z, &istate, &exx, &lambda, &alpha, &beta, &tm) != 7)
-          {
-            Error ("get_atomic_data: file %s line %d: Collision strengths incorrectly formatted\n", file, lineno);
-            Error ("Get_atomic_data: %s\n", aline);
-            exit (0);
-          }
-          for (n = 0; n < nions; n++)
-          {
-            if (ion[n].z == z && ion[n].istate == istate)
-            {                   /* Then there is a match */
-              xcol[nxcol].nion = n;
-              xcol[nxcol].z = z;
-              xcol[nxcol].istate = istate;
-              xcol[nxcol].ex = exx * EV2ERGS;
-              xcol[nxcol].freq = C / (lambda * 1.e-8);
-              xcol[nxcol].alpha = alpha;
-              xcol[nxcol].beta = beta;
-              xcol[nxcol].tm = pow (10., tm);
-              nxcol++;
-            }
-          }
-
-          break;
-
-
-
 
 /** @section Dielectronic Recombination - type 1
  * This section reads in dielectronic recombination rates.
@@ -3035,17 +2998,6 @@ or zero so that simple checks of true and false can be used for them */
       fprintf (fptr, "%3d %3d %6.3f %6.3f\n", ground_frac[n].z, ground_frac[n].istate, ground_frac[n].frac[0], ground_frac[n].frac[19]);
     }
 
-    /* Write the collisions strengths to the file */
-
-    fprintf (fptr, "Collision strengths: There were %d collision strengths\n", nxcol);
-
-    for (n = 0; n < nxcol; n++)
-    {
-      fprintf (fptr,
-               "nion %d z,i %d %d freq %8.2e alpha %8.2e beta %8.2e tmax %8.2e\n",
-               xcol[n].nion, xcol[n].z, xcol[n].istate, xcol[n].freq, xcol[n].alpha, xcol[n].beta, xcol[n].tm);
-    }
-
     fclose (fptr);
   }                             // end of if statement based on modes.write_atomicdata
 
@@ -3057,10 +3009,6 @@ or zero so that simple checks of true and false can be used for them */
 
   /* Index the lines */
   index_lines ();
-
-  /* Index the collisions */
-  index_collisions ();
-
 
 /* Index the topbase photoionization structure by threshold freqeuncy */
   if (ntop_phot + nxphot > 0)
@@ -3242,67 +3190,6 @@ index_inner_cross ()
 
   return (0);
 
-}
-
-
-
-
-
-/**********************************************************/
-/**
- * @brief      sorts the collisional lines into frequency order
- *
- *
- * @return     Always returns 0
- *
- * @details
- *
- * ### Notes ###
- *
- * The results are stored in xcol_ptr
- *
- **********************************************************/
-
-int
-index_collisions ()
-{
-  float *freqs, foo;
-  int *index, ioo;
-  int n;
-  void indexx ();
-
-  /* Allocate memory for some modestly large arrays */
-  freqs = calloc (sizeof (foo), NTRANS + 2);
-  index = calloc (sizeof (ioo), NTRANS + 2);
-
-  freqs[0] = 0;
-  for (n = 0; n < nxcol; n++)
-    freqs[n + 1] = xcol[n].freq;        /* So filled matrix
-                                           elements run from 1 to ntrans */
-
-  if (nxcol > 0)                //if statement added (SS, feb 04)
-  {
-    indexx (nxcol, freqs, index);       /* Note that this math recipes routine
-                                           expects arrays to run from 1 to nlines inclusive */
-  }
-
-
-  /* The for loop indices are complicated by the numerical recipes routine,
-     which is a simple translation of a fortran routine.
-     Specifically, index array elements 1 to nlines are now filled,
-     and the numbers run from 1 to nlines, but the
-     pointer array is only filled from elements 0 to nlines -1 */
-
-  for (n = 0; n < nxcol; n++)
-  {
-    xcol_ptr[n] = &xcol[index[n + 1] - 1];
-  }
-
-  /* Free the memory for the arrays */
-  free (freqs);
-  free (index);
-
-  return (0);
 }
 
 

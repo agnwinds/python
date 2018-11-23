@@ -287,32 +287,6 @@ typedef struct coll_stren
 
 Coll_stren coll_stren[NLINES];  //Set up the structure - we could in principle have as many of these as we have lines
 
-/*structure containing photoionization data */
-
-// /* Photoionization crossections from Verner, Ferland, Korista & Yakovlev */
-// typedef struct photoionization
-// {
-//   int nion;                  /* index to the appropriate ion in the structure ions, so for example, ion would
-//                                 normally be 0 for neutral H, 1 for H+, 1 for He, 2 for He+ etc */
-//   int z, istate;
-//   double freq_t;             /*frequency of threshold derived from ionization potential */
-//   double freq_max;           /* maximum frequency for which fit formula apllies */
-//   double freq0;                      /* fit parameter */
-//   double sigma;                      /*cross section at freq0 */
-//   double ya, p, yw, y0, y1;  /* Fit prarameters */
-//   double f_last, sigma_last; /*last freq, last x-section */
-
-// } Photoionization, *PhotoionizationPtr;
-
-// Photoionization xphot[NIONS];
-// PhotoionizationPtr xphot_ptr[NIONS]; /* Pointers to xphot in threshold frequency order --57h -- ksl */
-// PhotoionizationPtr xphot_ptr1[NIONS];        /* Pointers to xphot in ion order --57h -- ksl */
-
-
-
-
-
-
 
 
 
@@ -430,45 +404,6 @@ struct ground_fracs
                                    fractions must have been computed elsewhere */
 }
 ground_frac[NIONS];
-
-
-/* Data needed for collisionally excited lines in a thin plasma.   The
-   data is taken in atomic.dat from Gaetz and Salpeter.  Note that .tm
-   is converted to degrees (from log degrees) in atomic.c */
-
-#define NTRANS 200
-int nxcol;                      /*number of transition for collisional excitation */
-struct collision_strength
-{
-  int nion;                     /*The index into the ion array */
-  int z, istate;
-  double freq;                  /* frequency of the line */
-  double ex;                    /* excitation energy of line (converted from eV 2 ergs in get_atomic) */
-  double alpha;
-  double beta;
-  double tm;                    /* Temp max, expanded from log in get_atomic */
-  double pow;                   /*power associated with this line */
-}
-xcol[NTRANS], *xcol_ptr[NTRANS];        /* xcol[] is the actual structure array that contains all the data, *xcol_ptr
-                                           is an array which contains a frequency ordered set of ptrs to line */
-
-int nxcol_min, nxcol_max, nxcol_delt;   /*For calculating a frequency range within which collisions should
-                                           be included, see the routine limit_collisions */
-
-
-//091103 ksl deleted coolstruct as not really necessary and in order to reduce the overall size of the MacroPtr array
-// This structure has been put in the overall MacroPtr as individual elements so that icould get it there
-//OLD 091103 struct coolstruct
-//OLD 091103 {
-//OLD 091103   double cooling_bf[NTOP_PHOT];
-//OLD 091103   double cooling_bf_col[NTOP_PHOT];        
-//OLD 091103   double cooling_bb[NLINES];
-//OLD 091103   double cooling_normalisation;
-//OLD 091103   double cooling_bbtot, cooling_bftot, cooling_bf_coltot;
-//OLD 091103   double cooling_ff;
-//OLD 091103 };
-
-//OLD 140720 typedef struct coolstruct COOLSTR;
 
 
 //081115 nsh New structure and variables to hold the dielectronic recombination rate data
