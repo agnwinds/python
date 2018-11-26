@@ -117,7 +117,7 @@ nebular_concentrations (xplasma, mode)
   else
   {
     Error ("nebular_concentrations: Unknown mode %d\n", mode);
-    exit (0);
+    Exit (0);
 
   }
 
@@ -209,7 +209,7 @@ concentrations (xplasma, mode)
   else
   {
     Error ("Concentrations: Unknown mode %d\n", mode);
-    exit (0);
+    Exit (0);
   }
 
   nh = xplasma->rho * rho2nh;   //LTE
@@ -364,7 +364,7 @@ saha (xplasma, ne, t)
     if (first < 0 || first >= nions || last < 0 || last > nions)
     {
       Error ("saha: Confusion for element %d with first ion %d and last ion %d\n", nelem, first, last);
-      exit (0);
+      Exit (0);
     }
 
 /*    These lines were put in to make sim work properly, ideally there should be a switch so 
@@ -784,7 +784,7 @@ fix_concentrations (xplasma, mode)
     if ((cptr = fopen (geo.fixed_con_file, "r")) == NULL)
     {
       Error ("fix_concentrations: Could not open %s to read concentrations\n", geo.fixed_con_file);
-      exit (0);
+      Exit (0);
     }
 
     nforce = 0;

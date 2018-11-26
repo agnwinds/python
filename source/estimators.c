@@ -161,7 +161,7 @@ bf_estimators_increment (one, p, ds)
         if (m > config[llvl].n_bfu_jump - 1)
         {
           Error ("bf_estimators_increment: could not identify bf transition. Abort. \n");
-          exit (0);
+          Exit (0);
         }
 
         // Now calculate the contributions and add them on.
@@ -357,7 +357,7 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
   if (n == nmax)
   {
     Error ("bb_estimators_increment: could not identify bb transition. Abort. \n");
-    exit (0);
+    Exit (0);
   }
 
 
@@ -384,7 +384,7 @@ bb_estimators_increment (one, p, tau_sobolev, dvds, nn)
   {
     Error ("bb_estimators_increment: trying to add negative contribution to jbar. %e. See #436\n", y);
     return (0);
-//OLD    exit (0);
+//OLD    Exit (0);
   }
 
   /* Record contribution to energy absorbed by macro atoms. */
@@ -539,7 +539,7 @@ mc_estimator_normalise (n)
           ("estimators: den_config (xplasma, i) %g  den_config (xplasma, line[config[i].bbu_jump[j]].nconfigu) %g \n",
            den_config (xplasma, i), den_config (xplasma, line[config[i].bbu_jump[j]].nconfigu));
         stimfac = 0.0;
-        //exit (0);
+        //Exit (0);
       }
 
       //get the line frequency

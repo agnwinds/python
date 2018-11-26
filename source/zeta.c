@@ -139,7 +139,7 @@ compute_zeta (temp, nion, mode)
   else
   {
     Error ("Compute zeta: Unkown mode %i \n", mode);
-    exit (0);
+    Exit (0);
   }
 
 

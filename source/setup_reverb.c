@@ -172,7 +172,7 @@ get_meta_params (void)
         {                       //If this line is malformed, warn the user
           Error ("Reverb.dump_cell: Invalid position line '%s'\n \
             Expected format '[x]:[z]'\n", trackline);
-          exit (0);
+          Exit (0);
         }
       }
     }
@@ -185,7 +185,7 @@ get_meta_params (void)
     {                           //But we're not actually working in matom mode...
       Error ("reverb.type: Invalid reverb mode.\n \
       Macro-atom mode selected but macro-atom scattering not on.\n");
-      exit (0);
+      Exit (0);
     }
 
     //Read in the number of lines to be tracked and allocate space for them
@@ -195,7 +195,7 @@ get_meta_params (void)
     {                           //If this is <1, then warn the user and quit
       Error ("Reverb.matom_lines: \
       Must specify 1 or more lines to watch in macro-atom mode.\n");
-      exit (0);
+      Exit (0);
     }
 
     for (i = 0; i < geo.reverb_lines; i++)
@@ -205,7 +205,7 @@ get_meta_params (void)
       {                         //If this line is malformed, warn the user
         Error ("Reverb.matom_line: Malformed line '%s'\n \
           Expected format '[z]:[istate]:[upper level]:[lower level]'\n", trackline);
-        exit (0);
+        Exit (0);
       }
       else
       {                         //Otherwise, sift through the line list to find what this transition corresponds to

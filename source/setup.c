@@ -375,7 +375,7 @@ init_observers ()
   if (geo.nangles < 1 || geo.nangles > NSPEC)
   {
     Error ("no_observers %d should not be > %d or <0\n", geo.nangles, NSPEC);
-    exit (0);
+    Exit (0);
   }
 
 
@@ -530,7 +530,7 @@ init_photons ()
   if (geo.wcycles == 0 && geo.pcycles == 0)
   {
     Log ("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
-    exit (0);                   //There is really nothing to do!
+    Exit (0);                   //There is really nothing to do!
   }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */
@@ -540,7 +540,7 @@ init_photons ()
   if (p == NULL)
   {
     Error ("init_photons: There is a problem in allocating memory for the photon structure\n");
-    exit (0);
+    Exit (0);
   }
   else
   {
@@ -631,7 +631,7 @@ init_ionization ()
   else if (thermal_opt > 1 || thermal_opt < 0)
   {
     Error ("Unknown thermal balance mode %d\n", thermal_opt);
-    exit (0);
+    Exit (0);
   }
 
 

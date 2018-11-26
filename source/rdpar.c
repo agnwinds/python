@@ -387,7 +387,7 @@ rdpar_init ()
   if ((rdout_ptr = fopen ("tmp.rdpar", "w")) == NULL)
   {
     printf ("Error: rdpar_init: Problem opening tmp.rdpar\n");
-    exit (0);
+    Exit (0);
   }
   rdpar_stat = 1;
   strcpy (current_filename, "tmp.rdpar.out");
@@ -480,7 +480,7 @@ string_process_from_command_line (question, dummy)
   if (fgets (tdummy, LINELEN, stdin) == NULL)
   {
     printf ("Exiting since rdpar got EOF in interactive mode\n");
-    exit (0);
+    Exit (0);
   }
   else if (tdummy[0] == '\n')
   {                             //Use the current value

@@ -360,7 +360,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
   if ((iend = istart + nphot) > NPHOT)  //Consistency check - if it fails then we are being asked to make more photons than expected
   {
     Error ("photo_gen_agn: iend %d > NPHOT %d\n", iend, NPHOT);
-    exit (0);
+    Exit (0);
   }
   if (f2 < f1)                  //Another consistency check - it is not sensible to have the upper frequency lower than the lower frequency
   {
@@ -452,7 +452,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
         if (fabs (p[i].x[2]) < zdisk (r))
         {
           Error ("Photon_agn: agn photon %d in disk %g %g %g %g %g\n", i, p[i].x[0], p[i].x[1], p[i].x[2], zdisk (r), r);
-          exit (0);
+          Exit (0);
         }
       }
       randvcos (p[i].lmn, p[i].x);      //Random direction centred on the previously randmised vector

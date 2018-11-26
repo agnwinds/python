@@ -89,7 +89,7 @@ calc_pi_rate (nion, xplasma, mode, type)
     else
     {
       Error ("calc_pi_rate: %d is unacceptable value of nion\n", nion);
-      exit (0);
+      Exit (0);
       return (1.0);
     }
     if (ion[nion].phot_info > 0)        //topbase or hybrid VFKY (GS)+TB excited
@@ -104,7 +104,7 @@ calc_pi_rate (nion, xplasma, mode, type)
     {
       Error ("calc_pi_rate: No photoionization xsection for ion %d (element %d, ion state %d)\n", nion, ion[nion].z, ion[nion].istate);
       /* We have a really serious problem - we have no business including an ion for which we have no photoionization data.... */
-      exit (0);
+      Exit (0);
     }
   }
   else if (type == 2)           //We are computing an inner shell rate - nion refers to an actual cross section.
@@ -119,7 +119,7 @@ calc_pi_rate (nion, xplasma, mode, type)
         ("calc_pi_rate: No inner shell xsection for record %d (element %d, ion state %d)\n",
          nion, inner_cross[nion].z, inner_cross[nion].istate);
       /* We have a really serious problem - we have no business including an ion for which we have no photoionization data.... */
-      exit (0);
+      Exit (0);
     }
   }
   else

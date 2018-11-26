@@ -724,7 +724,7 @@ one_ff (one, f1, f2)
       Error
         ("one_ff: cdf_gen_from_array error %d : f1 %g f2 %g te %g ne %g nh %g vol %g\n",
          echeck, f1, f2, xplasma->t_e, xplasma->ne, xplasma->density[1], one->vol);
-      exit (0);
+      Exit (0);
     }
     one_ff_te = xplasma->t_e;
     one_ff_f1 = f1;

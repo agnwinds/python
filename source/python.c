@@ -396,7 +396,7 @@ main (argc, argv)
     if (wind_read (files.old_windsave) < 0)
     {
       Error ("python: Unable to open %s\n", files.old_windsave);        //program will exit if unable to read the file
-      exit (0);
+      Exit (0);
     }
     w = wmain;
 
@@ -449,7 +449,7 @@ main (argc, argv)
       if (wind_read (files.old_windsave) < 0)
       {
         Error ("python: Unable to open %s\n", files.old_windsave);      //program will exit if unable to read the file
-        exit (0);
+        Exit (0);
       }
 
       geo.run_type = RUN_TYPE_PREVIOUS; // after wind_read one will have a different wind_type otherwise
@@ -495,7 +495,7 @@ main (argc, argv)
       if (!geo.star_radiation && !geo.disk_radiation && !geo.bl_radiation && !geo.bl_radiation && !geo.agn_radiation)
       {
         Error ("python: No radiation sources so nothing to do but quit!\n");
-        exit (0);
+        Exit (0);
       }
 
       /* Describe the wind (or more correctly the various domains).
@@ -713,7 +713,7 @@ main (argc, argv)
   if (modes.quit_after_inputs)
   {
     Log ("This was was run with the -i or --dry-run flag set, so quitting now inputs have been gathered.\n");
-    exit (0);
+    Exit (0);
   }
 
   /* INPUTS ARE FINALLY COMPLETE */

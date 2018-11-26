@@ -188,7 +188,7 @@ get_hydro (ndom)
   if ((fptr = fopen (datafile, "r")) == NULL)
   {
     Error ("Could not open %s\n", datafile);
-    exit (0);
+    Exit (0);
   }
 
 
@@ -228,7 +228,7 @@ get_hydro (ndom)
         if (itest != 11)        //We have an line which does not match what we expect, so quit
         {
           Error ("hydro.c data file improperly formatted\n");
-          exit (0);
+          Exit (0);
         }
         // read read the r and theta coordinates into arrays
         hydro_r_edge[i] = r_edge;
@@ -290,7 +290,7 @@ get_hydro (ndom)
   if (hydro_r_edge[0] < geo.rstar)
   {
     Error ("Major problem, innermost edge of hydro radial grid begins inside geo.rstar\n");
-    exit (0);
+    Exit (0);
   }
 
   ihydro_r = irmax;

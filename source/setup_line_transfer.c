@@ -92,7 +92,7 @@ get_line_transfer_mode ()
 //OLD  {
 //OLD    Error ("get_line_transfer_mode: Line transfer mode %d is deprecated\n", user_line_mode);
 //OLD    line_transfer_help_message ();
-//OLD    exit (0);
+//OLD    Exit (0);
 //OLD  }
   else if (user_line_mode == 5)
   {
@@ -137,7 +137,7 @@ get_line_transfer_mode ()
   {
     Error ("Unknown line_transfer mode %d\n");
     line_transfer_help_message ();
-    exit (0);
+    Exit (0);
   }
 
   /* With the macro atom approach we won't want to generate photon 

@@ -596,7 +596,7 @@ stellar photons */
       if (ioniz_or_final == 0)
       {
         Error ("xmake_phot: generating photons by k-packets when performing ionization cycle. Abort.\n");
-        exit (0);               //The code shouldn't be doing this - something has gone wrong somewhere. (SS June 04)
+        Exit (0);               //The code shouldn't be doing this - something has gone wrong somewhere. (SS June 04)
       }
       else
       {
@@ -611,7 +611,7 @@ stellar photons */
       if (ioniz_or_final == 0)
       {
         Error ("xmake_phot: generating photons by macro atoms when performing ionization cycle. Abort.\n");
-        exit (0);               //The code shouldn't be doing this - something has gone wrong somewhere. (SS June 04)
+        Exit (0);               //The code shouldn't be doing this - something has gone wrong somewhere. (SS June 04)
       }
       else
       {
@@ -741,7 +741,7 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
   if ((iend = istart + nphot) > NPHOT)
   {
     Error ("photo_gen_star: iend %d > NPHOT %d\n", iend, NPHOT);
-    exit (0);
+    Exit (0);
   }
   if (f2 < f1)
   {
@@ -794,7 +794,7 @@ photo_gen_star (p, r, t, weight, f1, f2, spectype, istart, nphot)
       if (fabs (p[i].x[2]) < zdisk (r))
       {
         Error ("Photon_gen: stellar photon %d in disk %g %g %g %g %g\n", i, p[i].x[0], p[i].x[1], p[i].x[2], zdisk (r), r);
-        exit (0);
+        Exit (0);
       }
     }
 
@@ -1004,7 +1004,7 @@ disk_init (rmin, rmax, m, mdot, freqmin, freqmax, ioniz_or_final, ftot)
   if (nrings < NRINGS - 1)
   {
     Error ("error: disk_init: Integration on setting r boundaries got %d nrings instead of %d\n", nrings, NRINGS - 1);
-    exit (0);
+    Exit (0);
   }
 
 
@@ -1077,12 +1077,12 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
   if ((iend = istart + nphot) > NPHOT)
   {
     Error ("photo_gen_disk: iend %d > NPHOT %d\n", iend, NPHOT);
-    exit (0);
+    Exit (0);
   }
   if (f2 < f1)
   {
     Error ("photo_gen_disk: Can't do anything if f2 %g < f1 %g\n", f2, f1);
-    exit (0);
+    Exit (0);
   }
   Log_silent ("photo_gen_disk creates nphot %5d photons from %5d to %5d \n", nphot, istart, iend);
   freqmin = f1;
@@ -1110,7 +1110,7 @@ photo_gen_disk (p, weight, f1, f2, spectype, istart, nphot)
     if ((nring < 0) || (nring > NRINGS - 2))
     {
       Error ("photon_gen: photon launch out of bounds. nring = %d\n", nring);
-      exit (0);
+      Exit (0);
     }
 
     disk.nphot[nring]++;
@@ -1421,7 +1421,7 @@ photon_checks (p, freqmin, freqmax, comment)
 //OLD  if (nnn > max_errors)
 //OLD  {
 //OLD    error_summary ("Exiting because too many bad photons generated");
-//OLD Avoide the exit      exit (0);
+//OLD Avoide the exit      Exit (0);
 //OLD  }
 
 

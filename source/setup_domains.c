@@ -53,7 +53,7 @@ get_domain_params (ndom)
   if (ndom >= geo.ndomain)
   {
     Error ("Trying to get grid params for a non-existent domain!\n");
-    exit (0);
+    Exit (0);
   }
 
 
@@ -64,7 +64,7 @@ get_domain_params (ndom)
 //OLD  if (zdom[ndom].wind_type == 2)
 //OLD  {
 //OLD    Error ("Wind_type 2, which was used to read in a previous model is no longer allowed! Use System_type instead!\n");
-//OLD    exit (0);
+//OLD    Exit (0);
 //OLD  }
 
 
@@ -111,7 +111,7 @@ get_domain_params (ndom)
       if (zdom[ndom].mdim < 4)
       {
         Error ("python: domain mdim must be at least 4 to allow for boundaries\n");
-        exit (0);
+        Exit (0);
       }
     }
     else
@@ -124,7 +124,7 @@ get_domain_params (ndom)
   if ((zdom[ndom].ndim > NDIM_MAX) || (zdom[ndom].mdim > NDIM_MAX))
   {
     Error ("NDIM_MAX %d is less than NDIM %d or MDIM %d. Fix in python.h and recompile\n", NDIM_MAX, zdom[ndom].ndim, zdom[ndom].mdim);
-    exit (0);
+    Exit (0);
   }
 
 
@@ -225,7 +225,7 @@ get_wind_params (ndom)
   else
   {
     Error ("get_wind_parameters: Unknown wind type %d\n", zdom[ndom].wind_type);
-    exit (0);
+    Exit (0);
   }
 
   /* For many models, zdom[ndom].rmax is defined within the get_parameter file, e.g
@@ -264,7 +264,7 @@ get_wind_params (ndom)
   if (zdom[ndom].rmax <= zdom[ndom].rmin)
   {
     Error ("get_wind_parameters: rmax (%10.4e) less than or equal to rmin %10.4e in domain %d\n", zdom[ndom].rmax, zdom[ndom].rmin, ndom);
-    exit (0);
+    Exit (0);
   }
 
 //OLD  rddoub ("Wind.t.init", &geo.twind_init);
