@@ -825,7 +825,9 @@ Debug (char *format, ...)
  *
  **********************************************************/
 
-#include <mpi.h>
+#ifdef MPI_ON
+  #include <mpi.h>
+#endif
 
 void
 Exit (int error_code)
