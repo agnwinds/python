@@ -87,7 +87,7 @@ import_1d (ndom, filename)
   if ((fptr = fopen (filename, "r")) == NULL)
   {
     Error ("import_1d: No such file\n");
-    exit (0);
+    Exit (0);
   }
 
 

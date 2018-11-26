@@ -141,7 +141,7 @@ main (argc, argv)
   if (wind_read (windsavefile) < 0)
   {
     Error ("py_wind: Could not open %s", windsavefile);
-    exit (0);
+    Exit (0);
   }
 
 

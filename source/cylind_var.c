@@ -415,7 +415,7 @@ cylvar_wind_complete (ndom, w)
       else
       {
         Error ("cylvar_wind_complete: drho == 0\n");
-        exit (0);
+        Exit (0);
       }
       w[n].wcone.z = w[n].x[2] - dz / drho * w[n].x[0]; //new definition
     }

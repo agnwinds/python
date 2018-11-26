@@ -193,7 +193,7 @@ bilin (x, x00, x01, x10, x11, f, g)
     else
     {
       Error ("bilin: Denominator zero\n");
-      exit (0);
+      Exit (0);
     }
   }
 

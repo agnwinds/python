@@ -232,12 +232,12 @@ bands_init (imode, band)
     if (f1 > band->f2[0])
     {
       Error ("bands_init: f1 (%e) > 13.599/HEV)\n", f1);
-      exit (0);
+      Exit (0);
     }
     if (f2 < band->f2[2])
     {
       Error ("bands_init: f2 (%e) < 54.418/HEV)\n", f2);
-      exit (0);
+      Exit (0);
     }
 
   }
@@ -256,12 +256,12 @@ bands_init (imode, band)
     if (f1 > band->f2[0])
     {
       Error ("bands_init: f1 (%e) > 13.599/HEV)\n", f1);
-      exit (0);
+      Exit (0);
     }
     if (f2 < band->f2[2])
     {
       Error ("bands_init: f2 (%e) < 54.418/HEV)\n", f2);
-      exit (0);
+      Exit (0);
     }
 
   }
@@ -313,7 +313,7 @@ bands_init (imode, band)
     if (geo.agn_ion_spectype != SPECTYPE_CL_TAB)
     {
       Error ("Trying to use a broken power law banding without setting spectype to broken power law - must set spectype to 4\n");
-      exit (0);
+      Exit (0);
     }
     rddoub ("Photon_sampling.low_energy_limit(eV)", &xx);
 
@@ -546,7 +546,7 @@ bands_init (imode, band)
   else
   {
     Error ("bands_init: Unknown mode %d\n", mode);
-    exit (0);
+    Exit (0);
   }
 
 

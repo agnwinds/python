@@ -91,7 +91,7 @@ import_cylindrical (ndom, filename)
   if ((fptr = fopen (filename, "r")) == NULL)
   {
     Error ("import_cylindrical: No such file\n");
-    exit (0);
+    Exit (0);
   }
 
 

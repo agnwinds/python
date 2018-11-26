@@ -588,7 +588,7 @@ where_in_grid (ndom, x)
     else
     {
       Error ("where_in_grid: Unknown coord_type %d for domain %d\n", zdom[ndom].coord_type, ndom);
-      exit (0);
+      Exit (0);
     }
 
 
@@ -1085,7 +1085,7 @@ get_random_location (n, x)
   else
   {
     Error ("get_random_location: Don't know this coord_type %d\n", zdom[ndom].coord_type);
-    exit (0);
+    Exit (0);
   }
 
   return (0);

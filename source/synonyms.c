@@ -169,7 +169,7 @@ check_synonyms (new_question, old_question)
     {
       Log ("%3d %40s %40s\n", i, old_names[i], new_names[i]);
     }
-    exit (0);
+    Exit (0);
   }
 
 

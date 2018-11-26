@@ -291,7 +291,7 @@ get_bl_and_agn_params (lstar)
     else if (geo.pl_geometry != PL_GEOMETRY_SPHERE)     // only two options at the moment
     {
       Error ("Did not understand power law geometry %i. Fatal.\n", geo.pl_geometry);
-      exit (0);
+      Exit (0);
     }
 
 

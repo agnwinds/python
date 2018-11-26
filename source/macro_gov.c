@@ -144,7 +144,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       {
 #if BF_SIMPLE_EMISSIVITY_APPROACH
         Error ("Macro_go: Error - trying to access fake_matom_bf in alternate bf treatment.\n");
-        exit (0);
+        Exit (0);
 #endif
         fake_matom_bf (p, nres, &escape);
       }
@@ -173,7 +173,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
     else
     {
       Error ("macro_gov: Unknown choice for next action. Abort.\n");
-      exit (0);
+      Exit (0);
     }
   }
 

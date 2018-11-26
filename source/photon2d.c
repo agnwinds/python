@@ -377,7 +377,7 @@ ds_to_wind (pp, ndom_current)
     else if (zdom[ndom].wind_type == IMPORT)
     {
       Error ("ds_to_wind:Do not know how to deal with this coordinate type\n");
-      exit (0);
+      Exit (0);
 
     }
 
@@ -657,7 +657,7 @@ return and record an error */
   else
   {
     Error ("ds_in_cell: Don't know how to find ds_in_cell in this coord system %d\n", zdom[ndom].coord_type);
-    exit (0);
+    Exit (0);
   }
 
   return (smax);

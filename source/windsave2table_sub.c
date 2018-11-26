@@ -934,7 +934,7 @@ get_ion (ndom, element, istate, iswitch)
       else
       {
         Error ("xion_summary : Unknown switch %d \n", iswitch);
-        exit (0);
+        Exit (0);
       }
     }
   }

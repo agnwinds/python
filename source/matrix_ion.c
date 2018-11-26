@@ -132,7 +132,7 @@ matrix_ion_populations (xplasma, mode)
       {
         // If reached this point the program does not understand what type of spectral model to apply
         Error ("matrix_ion_populations: Unknown mode %d\n", mode);
-        exit (0);
+        Exit (0);
       }
     }
 

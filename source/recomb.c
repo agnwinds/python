@@ -292,7 +292,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
       return (fnu);
     }
     Error ("integ_fb: Unknown fb_choice(%d)\n", fb_choice);
-    exit (0);
+    Exit (0);
   }
 
   else if (mode == INNER_SHELL) // inner shell
@@ -336,11 +336,11 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
       return (fnu);
     }
     Error ("integ_fb: Unknown fb_choice(%d)\n", fb_choice);
-    exit (0);
+    Exit (0);
   }
 
   Error ("integ_fb: Unknown mode(%d)\n", mode);
-  exit (0);
+  Exit (0);
 
 }
 
@@ -544,7 +544,7 @@ one_fb (one, f1, f2)
   if (f2 < f1)
   {
     Error ("one_fb: f2 %g < f1 %g Something is rotten  t %g\n", f2, f1, xplasma->t_e);
-    exit (0);
+    Exit (0);
   }
 
 /* Check if an apprpriate photon frequency has already been generated, and
@@ -649,7 +649,7 @@ use that instead if possible --  57h */
     if (nnn > NCDF)
     {
       Error ("one _fb: Overflow of working array\n");
-      exit (0);
+      Exit (0);
     }
 
 
@@ -661,7 +661,7 @@ use that instead if possible --  57h */
       Error ("one_fb after error: f1 %g f2 %g te %g ne %g nh %g vol %g\n",
              f1, f2, xplasma->t_e, xplasma->ne, xplasma->density[1], one->vol);
       Error ("Giving up\n");
-      exit (0);
+      Exit (0);
     }
     one_fb_te = xplasma->t_e;
     one_fb_f1 = f1;
@@ -851,7 +851,7 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
   else
   {
     Error ("fb: This choice %d for ion_choice is not supported\n", ion_choice);
-    exit (0);
+    Exit (0);
   }
 
 
@@ -974,7 +974,7 @@ init_freebound (t1, t2, f1, f2)
     if (t2 < t1)
     {
       Error ("init_freebound: t2(%g)<t1(%g)\n", t2, t1);
-      exit (0);
+      Exit (0);
     }
 
     ltmin = log10 (t1);
@@ -1001,7 +1001,7 @@ init_freebound (t1, t2, f1, f2)
   else if (fabs (fb_t[0] - t1) > 10. || fabs (fb_t[NTEMPS - 1] - t2) > 1000.)
   {
     Error ("init_freebound: Cannot initialize to new temps without resetting nfb");
-    exit (0);
+    Exit (0);
 
   }
 
@@ -1121,7 +1121,7 @@ get_nrecomb (t, nion, mode)
   else
   {
     Error ("Get_nrecomb - unkonwn mode %i", mode);
-    exit (0);
+    Exit (0);
   }
   return (x);
 }
@@ -1176,7 +1176,7 @@ get_fb (t, nion, narray, fb_choice, mode)
     else
     {
       Error ("Get_fb - unexpected mode %i", mode);
-      exit (0);
+      Exit (0);
     }
   }
   else if (mode == INNER_SHELL)
@@ -1185,7 +1185,7 @@ get_fb (t, nion, narray, fb_choice, mode)
   else
   {
     Error ("Get_fb - unkonwn mode %i", mode);
-    exit (0);
+    Exit (0);
   }
   return (x);
 }
@@ -1259,7 +1259,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
   else                          // Get the total emissivity
   {
     Error ("integ_fb: %d is unacceptable value of nion\n", nion);
-    exit (0);
+    Exit (0);
   }
 
   // Put information where it can be used by the integrating function
@@ -1499,7 +1499,7 @@ total_rrate (nion, T)
     else
     {
       Error ("total_rrate: unknown parameter type for ion %i\n", nion);
-      exit (0);
+      Exit (0);
     }
   }
   else                          /* We dont have coefficients, so use the Milne relation. Note
@@ -1814,7 +1814,7 @@ matom_select_bf_freq (WindPtr one, int nconf)
   if (MATOM_BF_PDF > NCDF)
   {
     Error ("matom_select_bf_freq: Overflow of working array\n");
-    exit (0);
+    Exit (0);
   }
 
 
@@ -1825,7 +1825,7 @@ matom_select_bf_freq (WindPtr one, int nconf)
   {
     Error ("matom_select_bf_freq: f1 %g f2 %g te %g \n", f1, f2, xplasma->t_e);
     Error ("Giving up\n");
-    exit (0);
+    Exit (0);
   }
 
 

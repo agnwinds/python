@@ -208,13 +208,13 @@ cylind_make_grid (ndom, w)
         if (dlogr <= 0)
         {
           Error ("cylindrical: dlogr %g is less than 0.  This is certainly wrong! Aborting\n", dlogr);
-          exit (0);
+          Exit (0);
         }
 
         if (dlogz <= 0)
         {
           Error ("cylindrical: dlogz %g is less than 0.  This is certainly wrong! Aborting\n", dlogz);
-          exit (0);
+          Exit (0);
         }
 
         if (i == 0)
@@ -383,7 +383,7 @@ cylind_volumes (ndom, w)
         if (one_dom->wind_type == IMPORT)
         {
           Error ("Shouldn't be redefining inwind in cylind_volumes with imported model.\n");
-          exit (0);
+          Exit (0);
         }
 
         n_inwind = cylind_is_cell_in_wind (n);

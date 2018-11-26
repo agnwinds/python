@@ -114,7 +114,7 @@ spectrum_init (f1, f2, nangle, angle, phase, scat_select, top_bot_select, select
     if (xxspec == NULL)
     {
       Error ("spectrum_init: Could not allocate memory for %d spectra with %d wavelengths\n", nspec, NWAVE);
-      exit (0);
+      Exit (0);
     }
 
     nspectra = nspec;           /* Note that nspectra is a global variable */
@@ -245,7 +245,7 @@ disk. The minus sign in the terms associated with phase are to make this happen.
       else
       {
         Error ("spectrum_init: Unknown option %d\n", xxspec[n].top_bot);
-        exit (0);
+        Exit (0);
 
       }
       strcat (xxspec[n].name, dummy);
@@ -684,14 +684,14 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
   if ((fptr = fopen (filename, "w")) == NULL)
   {
     Error ("spectrum_summary: Unable to open %s for writing\n", filename);
-    exit (0);
+    Exit (0);
   }
 
   /* Check that nspecmin and nspecmax are reasonable */
   if (nspecmin < 0 || nspecmax < 0 || nspecmin > nspecmax)
   {
     Error ("spectrum_summary: nspecmin %d or nspecmax %d not reasonable \n", nspecmin, nspecmax);
-    exit (0);
+    Exit (0);
   }
 
   /* Construct and write a header string  for the output file */
@@ -716,7 +716,7 @@ spectrum_summary (filename, nspecmin, nspecmax, select_spectype, renorm, loglin,
   else
   {
     Error ("spectrum_summary: Unknown select_spectype %d\n", select_spectype);
-    exit (0);
+    Exit (0);
   }
 
 

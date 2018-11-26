@@ -77,7 +77,7 @@ import_wind (ndom)
   else
   {
     Error ("import_wind: Do not know how to import a model of coor_type %d\n", zdom[ndom].coord_type);
-    exit (0);
+    Exit (0);
   }
   return (0);
 }
@@ -126,7 +126,7 @@ import_make_grid (w, ndom)
   else
   {
     Error ("import_wind: Do not know how to import a model of coor_type %d\n", zdom[ndom].coord_type);
-    exit (0);
+    Exit (0);
   }
   return (0);
 }
@@ -179,7 +179,7 @@ import_velocity (ndom, x, v)
   else
   {
     Error ("import_velocity: Do not know how to create velocities from model of coor_type %d\n", zdom[ndom].coord_type);
-    exit (0);
+    Exit (0);
   }
   return (speed);
 }
@@ -254,7 +254,7 @@ import_rho (ndom, x)
   else
   {
     Error ("import_rho:  Do not know how to create velocities from model of coor_type %d\n", zdom[ndom].coord_type);
-    exit (0);
+    Exit (0);
   }
   return (rho);
 }

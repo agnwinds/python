@@ -106,7 +106,7 @@ create_maps ()
   if (j != NPLASMA)
   {
     Error ("create_maps: Problems with matching cells -- Expected %d Got %d\n", NPLASMA, j);
-    exit (0);
+    Exit (0);
   }
 
   plasmamain[NPLASMA].nplasma = NPLASMA;
@@ -150,7 +150,7 @@ calloc_wind (nelem)
   if (wmain == NULL)
   {
     Error ("There is a problem in allocating memory for the wind structure\n");
-    exit (0);
+    Exit (0);
   }
   else
   {
@@ -210,7 +210,7 @@ calloc_plasma (nelem)
   if (plasmamain == NULL)
   {
     Error ("There is a problem in allocating memory for the plasma structure\n");
-    exit (0);
+    Exit (0);
   }
   else
   {
@@ -229,7 +229,7 @@ calloc_plasma (nelem)
   if (photstoremain == NULL)
   {
     Error ("There is a problem in allocating memory for the photonstore structure\n");
-    exit (0);
+    Exit (0);
   }
   else
   {
@@ -248,7 +248,7 @@ calloc_plasma (nelem)
   if (matomphotstoremain == NULL)
   {
     Error ("There is a problem in allocating memory for the matomphotonstore structure\n");
-    exit (0);
+    Exit (0);
   }
   else
   {
@@ -347,7 +347,7 @@ calloc_macro (nelem)
   if (macromain == NULL)
   {
     Error ("calloc_macro: There is a problem in allocating memory for the macro structure\n");
-    exit (0);
+    Exit (0);
   }
   else if (nlevels_macro > 0 || geo.nmacro > 0)
   {
@@ -427,103 +427,103 @@ calloc_estimators (nelem)
     if ((macromain[n].jbar = calloc (sizeof (double), size_Jbar_est)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].jbar_old = calloc (sizeof (double), size_Jbar_est)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].gamma = calloc (sizeof (double), size_gamma_est)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].gamma_old = calloc (sizeof (double), size_gamma_est)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].gamma_e = calloc (sizeof (double), size_gamma_est)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].gamma_e_old = calloc (sizeof (double), size_gamma_est)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].alpha_st = calloc (sizeof (double), size_gamma_est)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].alpha_st_old = calloc (sizeof (double), size_gamma_est)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].alpha_st_e = calloc (sizeof (double), size_gamma_est)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].alpha_st_e_old = calloc (sizeof (double), size_gamma_est)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].recomb_sp = calloc (sizeof (double), size_alpha_est)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].recomb_sp_e = calloc (sizeof (double), size_alpha_est)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].matom_emiss = calloc (sizeof (double), nlevels_macro)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].matom_abs = calloc (sizeof (double), nlevels_macro)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].cooling_bf = calloc (sizeof (double), nphot_total)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].cooling_bf_col = calloc (sizeof (double), nphot_total)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((macromain[n].cooling_bb = calloc (sizeof (double), nlines)) == NULL)
     {
       Error ("calloc_estimators: Error in allocating memory for MA estimators\n");
-      exit (0);
+      Exit (0);
     }
   }
 
@@ -582,83 +582,83 @@ calloc_dyn_plasma (nelem)
     if ((plasmamain[n].density = calloc (sizeof (double), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for density\n");
-      exit (0);
+      Exit (0);
     }
     if ((plasmamain[n].partition = calloc (sizeof (double), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for partition\n");
-      exit (0);
+      Exit (0);
     }
     if ((plasmamain[n].ioniz = calloc (sizeof (double), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for ioniz\n");
-      exit (0);
+      Exit (0);
     }
     if ((plasmamain[n].recomb = calloc (sizeof (double), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for recomb\n");
-      exit (0);
+      Exit (0);
     }
     if ((plasmamain[n].scatters = calloc (sizeof (int), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for scatters\n");
-      exit (0);
+      Exit (0);
     }
     if ((plasmamain[n].xscatters = calloc (sizeof (double), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for xscatters\n");
-      exit (0);
+      Exit (0);
     }
     if ((plasmamain[n].heat_ion = calloc (sizeof (double), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for heat_ion\n");
-      exit (0);
+      Exit (0);
     }
     if ((plasmamain[n].cool_rr_ion = calloc (sizeof (double), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for cool_rr_ion\n");
-      exit (0);
+      Exit (0);
     }
     if ((plasmamain[n].lum_rr_ion = calloc (sizeof (double), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for lum_rr_ion\n");
-      exit (0);
+      Exit (0);
     }
     if ((plasmamain[n].inner_recomb = calloc (sizeof (double), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for inner_recomb\n");
-      exit (0);
+      Exit (0);
     }
     if ((plasmamain[n].cool_dr_ion = calloc (sizeof (double), nions)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for lum_inner_recomb\n");
-      exit (0);
+      Exit (0);
     }
 
 
     if ((plasmamain[n].levden = calloc (sizeof (double), nlte_levels)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for levden\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((plasmamain[n].recomb_simple = calloc (sizeof (double), nphot_total)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for recomb_simple\n");
-      exit (0);
+      Exit (0);
     }
 
     if ((plasmamain[n].recomb_simple_upweight = calloc (sizeof (double), nphot_total)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for recomb_simple_upweight\n");
-      exit (0);
+      Exit (0);
     }
 
 
     if ((plasmamain[n].kbf_use = calloc (sizeof (double), nphot_total)) == NULL)
     {
       Error ("calloc_dyn_plasma: Error in allocating memory for kbf_use\n");
-      exit (0);
+      Exit (0);
     }
   }
 

@@ -126,7 +126,7 @@ to match heating and cooling in the wind element! */
   else
   {
     Error ("ion_abundances: Could not calculate abundances for mode %d\n", mode);
-    exit (0);
+    Exit (0);
   }
 
   /* If we want the Auger effect deal with it now. Initially, this is
@@ -389,7 +389,7 @@ meaning in nebular concentrations.
     /* There is no mode 5 at present  - SIM + two new modes in Feb 2012  + mode 5 now removed */
 
     Error ("one_shot: Sorry, Charlie, don't know how to process mode %d\n", mode);
-    exit (0);
+    Exit (0);
   }
 
   if (xplasma->t_r > 10.)
@@ -407,7 +407,7 @@ meaning in nebular concentrations.
   else
   {
     Error ("ionization_on_the_spot: t_r exceptionally small %g\n", xplasma->t_r);
-    exit (0);
+    Exit (0);
   }
 
 
