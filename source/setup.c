@@ -331,7 +331,8 @@ int
 init_observers ()
 {
   int n;
-  char yesno[20];
+  int ichoice;
+  char answer[LINELENGTH];
 
 
   geo.nangles = 4;
@@ -374,7 +375,7 @@ init_observers ()
   if (geo.nangles < 1 || geo.nangles > NSPEC)
   {
     Error ("no_observers %d should not be > %d or <0\n", geo.nangles, NSPEC);
-    exit (0);
+    Exit (0);
   }
 
 
@@ -395,7 +396,9 @@ init_observers ()
     Log ("No phase information needed as system type %i is not a binary\n", geo.system_type);
 
 
-  rdint ("Spectrum.live_or_die(0=live.or.die,extract=anything_else)", &geo.select_extract);
+  strcpy (answer, "extract");
+  geo.select_extract = rdchoice ("Spectrum.live_or_die(live.or.die,extract)", "0,1", answer);
+  //OLD rdint ("Spectrum.live_or_die(0=live.or.die,extract=anything_else)", &geo.select_extract);
   if (geo.select_extract != 0)
   {
     geo.select_extract = 1;
@@ -410,9 +413,14 @@ init_observers ()
 
   if (modes.iadvanced)
   {
-    strcpy (yesno, "n");
-    rdstr ("@Spectrum.select_specific_no_of_scatters_in_spectra(y/n)", yesno);
-    if (yesno[0] == 'y')
+    strcpy (answer, "no");
+    ichoice = rdchoice ("@Spectrum.select_specific_no_of_scatters_in_spectra(y,n)", ",1,0", answer);
+
+    //OLD strcpy (yesno, "n");
+    //OLD rdstr ("@Spectrum.select_specific_no_of_scatters_in_spectra(y/n)", yesno);
+    //OLD if (yesno[0] == 'y')
+    if (ichoice)
+
     {
       Log ("OK n>MAXSCAT->all; 0<=n<MAXSCAT -> n scatters; n<0 -> >= |n| scatters\n");
       for (n = 0; n < geo.nangles; n++)
@@ -420,14 +428,21 @@ init_observers ()
         rdint ("@Spectrum.select_scatters", &geo.scat_select[n]);
       }
     }
-    strcpy (yesno, "n");
-    rdstr ("@Spectrum.select_photons_by_position(y/n)", yesno);
-    if (yesno[0] == 'y')
+    strcpy (answer, "no");
+    ichoice = rdchoice ("@Spectrum.select_photons_by_position(y,n)", "1,0", answer);
+    //OLD strcpy (yesno, "n");
+    //OLD rdstr ("@Spectrum.select_photons_by_position(y/n)", yesno);
+    //OLD if (yesno[0] == 'y')
+    if (ichoice)
     {
-      Log ("OK 0->all; -1 -> below; 1 -> above the disk, 2 -> specific location in wind\n");
+      //OLD Log ("OK 0->all; -1 -> below; 1 -> above the disk, 2 -> specific location in wind\n");
       for (n = 0; n < geo.nangles; n++)
       {
-        rdint ("@Spectrum.select_location", &geo.top_bot_select[n]);
+        strcpy (answer, "all");
+        geo.top_bot_select[n] = rdchoice ("@Spectrum.select_location(all,below_disk,above_disk,spherical_region)", "0,-1,1,2", answer);
+
+
+        //OLD rdint ("@Spectrum.select_location", &geo.top_bot_select[n]);
         if (geo.top_bot_select[n] == 2)
         {
           Log ("Warning: Make sure that position will be in wind, or no joy will be obtained\n");
@@ -447,7 +462,9 @@ init_observers ()
    * to a distance of 100 pc. The internal units are basically a luminosity
    * within a wavelength/frequency interval. */
 
-  rdint ("Spectrum.type(flambda(1),fnu(2),basic(other)", &geo.select_spectype);
+  strcpy (answer, "flambda");
+  geo.select_spectype = rdchoice ("Spectrum.type(flambda,fnu,basic)", "1,2,3", answer);
+  //OLD rdint ("Spectrum.type(flambda(1),fnu(2),basic(other)", &geo.select_spectype);
 
   if (geo.select_spectype == 1)
   {
@@ -539,7 +556,7 @@ init_photons ()
   if (geo.wcycles == 0 && geo.pcycles == 0)
   {
     Log ("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
-    exit (0);                   //There is really nothing to do!
+    Exit (0);                   //There is really nothing to do!
   }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */
@@ -549,7 +566,7 @@ init_photons ()
   if (p == NULL)
   {
     Error ("init_photons: There is a problem in allocating memory for the photon structure\n");
-    exit (0);
+    Exit (0);
   }
   else
   {
@@ -593,22 +610,16 @@ int
 init_ionization ()
 {
   int thermal_opt;
+  char answer[LINELENGTH];
 
 
-  // XXX  I is unclear to me why all of this dwon to the next XXX is not moved to a single subroutine.  It all
-  // pertains to how the radiatiate tranfer is carreid out
 
-  rdint ("Wind_ionization(0=on.the.spot,1=LTE(tr),2=fixed,3=recalc_bb,4=LTE(t_e),8=matrix_bb,9=matrix_pow)", &geo.ioniz_mode);
+  strcpy (answer, "matrix_bb");
+  geo.ioniz_mode = rdchoice ("Wind_ionization(on.the.spot,ML93,LTE_tr,LTE_te,fixed,matrix_bb,matrix_pow)", "0,3,1,4,2,8,9", answer);
 
   if (geo.ioniz_mode == IONMODE_FIXED)
   {
     rdstr ("wind.fixed_concentrations_file", &geo.fixed_con_file[0]);
-  }
-  if (geo.ioniz_mode < 0 || geo.ioniz_mode == 5 || geo.ioniz_mode == 6 || geo.ioniz_mode == 7 || geo.ioniz_mode > 9)
-  {
-    Log ("The allowed ionization modes are 0, 1, 2, 3, 4, 8 and 9\n");
-    Error ("Unknown ionization mode %d\n", geo.ioniz_mode);
-    exit (0);
   }
 
 
@@ -621,20 +632,21 @@ init_ionization ()
 
 
   /* get_line_transfer_mode reads in the Line_transfer question from the user,
-     then alters the variables geo.line_mode, geo.scatter_mode, geo.rt_mode and geo.macro_simple */
+     then alters the variables geo.line_mode, geo.scatter_mode, geo.rt_mode and geo.macro_simple.
+     This is fairly involved and so is a separate routine  */
 
-  // XXX - Note clear that get_line_transfer_mode should be a separate routine; perhaps incoroporate here
   get_line_transfer_mode ();
-
-
 
 
   thermal_opt = 0;              /* NSH 131213 Set the option to zero - the default. The lines allow allow the
                                    user to turn off mechanisms that affect the thermal balance. Adiabatic is the only one implemented
                                    to start off with. */
 
-  rdint ("Surface.reflection.or.absorption(0=no.rerad,1=high.albedo,2=thermalized.rerad)", &geo.absorb_reflect);
+  strcpy (answer, "reflect");
+  geo.absorb_reflect = rdchoice ("Surface.reflection.or.absorption(reflect,absorb,thermalized.rerad)", "1,0,2", answer);
+  //OLD rdint ("Surface.reflection.or.absorption(0=no.rerad,1=high.albedo,2=thermalized.rerad)", &geo.absorb_reflect);
 
+  // XXX Next line needs to be re-written to use rdchooce when FU ORi branch is merged
   rdint ("Thermal_balance_options(0=everything.on,1=no.adiabatic)", &thermal_opt);
 
   if (thermal_opt == 1)
@@ -645,7 +657,7 @@ init_ionization ()
   else if (thermal_opt > 1 || thermal_opt < 0)
   {
     Error ("Unknown thermal balance mode %d\n", thermal_opt);
-    exit (0);
+    Exit (0);
   }
 
 

@@ -436,7 +436,7 @@ two_level_atom (line_ptr, xplasma, d1, d2)
   if (line_ptr->macro_info == 1 && geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == 0)
   {
     Error ("Calling two_level_atom for macro atom line. Abort.\n");
-    exit (0);
+    Exit (0);
   }
 
 /* Move variables used in the calculation from the xplasma structure into subroutine variables */
@@ -716,7 +716,7 @@ scattering_fraction (line_ptr, xplasma)
   {                             // Unknown treatment of line radiation
 
     Error ("scattering_fraction: Cannot handle %d line_mode\n", geo.line_mode);
-    exit (0);
+    Exit (0);
   }
 
 }
@@ -955,7 +955,7 @@ upsilon (n_coll, u0)
   else
   {
     Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
-    exit (0);
+    Exit (0);
   }
 
 
@@ -984,7 +984,7 @@ upsilon (n_coll, u0)
   else
   {
     Error ("upsilon - coll_stren %i has no type %g\n", coll_stren[n_coll].type);
-    exit (0);
+    Exit (0);
   }
   return (upsilon);
 }

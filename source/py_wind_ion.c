@@ -170,7 +170,7 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
       else
       {
         Error ("ion_summary : Unknown switch %d \n", iswitch);
-        exit (0);
+        Exit (0);
       }
     }
   }
@@ -206,7 +206,7 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
         else
         {
           Error ("ion_summary : Unknown switch %d \n", iswitch);
-          exit (0);
+          Exit (0);
         }
 
 
@@ -229,7 +229,7 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
     else
     {
       Error ("ion_summary : Unknown switch %d \n", iswitch);
-      exit (0);
+      Exit (0);
     }
 
     strcat (choice, ele[nelem].name);
@@ -425,7 +425,7 @@ line_summary (w, rootname, ochoice)
     break;
   default:
     Error ("line_summary: Not a valid line.");
-    exit (0);
+    Exit (0);
 
   }
 
@@ -446,7 +446,7 @@ line_summary (w, rootname, ochoice)
     if (nline == nlines)
     {
       Error ("line_summary: Could not find line in linelist\n");
-      exit (0);
+      Exit (0);
     }
     nelem = 0;
     while (nelem < nelements && ele[nelem].z != element)
@@ -491,7 +491,7 @@ line_summary (w, rootname, ochoice)
     if (nline == nlines)
     {
       Error ("line_summary: Could not find line in linelist\n");
-      exit (0);
+      Exit (0);
     }
   }
 

@@ -138,7 +138,7 @@ to reflect the behavior of the search routine in where_in_grid. */
   else
   {
     Error ("Fraction - unknown mode %i\n", mode);
-    exit (0);
+    Exit (0);
   }
 
   *ival = imin;
@@ -211,7 +211,7 @@ linterp (x, xarray, yarray, xdim, y, mode)
   else
   {
     Error ("linterp - unknown mode %i\n", mode);
-    exit (0);
+    Exit (0);
   }
 
   return (nelem);
@@ -339,7 +339,7 @@ coord_fraction (ndom, ichoice, x, ii, frac, nelem)
   else
   {
     Error ("coord_fraction: Unknown coordinate type %d for doman\n", zdom[ndom].coord_type, ndom);
-    exit (0);
+    Exit (0);
   }
 
   if (zdom[ndom].coord_type == SPHERICAL)

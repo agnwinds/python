@@ -278,7 +278,7 @@ get_matom_f (mode)
                 if (nres > NLINES + nphot_total)
                 {
                   Error ("Problem in get_matom_f (1). Abort. \n");
-                  exit (0);
+                  Exit (0);
                 }
 
                 ppp.nres = nres;
@@ -321,7 +321,7 @@ get_matom_f (mode)
                   if (nres < 0)
                   {
                     Error ("Negative out from matom?? Abort.\n");
-                    exit (0);
+                    Exit (0);
                   }
 
                   /* It was a macro atom de-activation. */
@@ -342,7 +342,7 @@ get_matom_f (mode)
                 else
                 {
                   Error ("Packet didn't emerge from matom or kpkt??? Abort. \n");
-                  exit (0);
+                  Exit (0);
                 }
               }
             }

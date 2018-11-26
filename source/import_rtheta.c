@@ -142,7 +142,7 @@ import_rtheta (ndom, filename)
   if ((fptr = fopen (filename, "r")) == NULL)
   {
     Error ("import_rtheta: No such file\n");
-    exit (0);
+    Exit (0);
   }
 
 

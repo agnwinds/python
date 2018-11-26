@@ -140,7 +140,7 @@ levels (xplasma, mode)
   else
   {
     Error ("levels: Could not calculate levels for mode %d\n", mode);
-    exit (0);
+    Exit (0);
   }
 
   /* Next calculation should be almost identical to that contained in

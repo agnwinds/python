@@ -164,7 +164,7 @@ get_models (modellist, npars, spectype)
   if ((mptr = fopen (modellist, "r")) == NULL)
   {
     Error ("get_models:Could not open file %s containing list of models \n", modellist);
-    exit (0);
+    Exit (0);
   }
 
 /* Now initialize the model summary structure */
@@ -198,7 +198,7 @@ get_models (modellist, npars, spectype)
       if (nxpar < npars)
       {
         Error ("get_models: nxpar (%d) < npars (%d) in line %s\n", nxpar, npars, dummy);
-        exit (0);
+        Exit (0);
       }
       for (m = 0; m < npars; m++)
       {
@@ -215,7 +215,7 @@ get_models (modellist, npars, spectype)
       if (nw > 0 && nwaves != nw)
       {
         Error ("get_models: file %s has %d wavelengths, others have %d\n", mods[n].name, nwaves, nw);
-        exit (0);
+        Exit (0);
       }
 
       if ((n % 100) == 0)
@@ -227,7 +227,7 @@ get_models (modellist, npars, spectype)
   if (n == NMODS)
   {
     Error ("get_models: Reached maximum number of models %d. Please increase NMODS in .h file \n", n);
-    exit (0);
+    Exit (0);
   }
 /* Now complete the initialization of the modsum structure */
   comp[ncomps].modstop = nmods_tot = n;
@@ -241,7 +241,7 @@ get_models (modellist, npars, spectype)
   if (comp[ncomps].nmods == 0)
   {
     Error ("get_models: No models from %s were read. Please check list of models!\n", comp[ncomps].name);
-    exit (0);
+    Exit (0);
   }
 
   /* The next 3 lines set a normalization that is used by kslfit.  They are mostly
@@ -290,7 +290,7 @@ get_one_model (filename, onemod)
   if ((ptr = fopen (filename, "r")) == NULL)
   {
     Error ("Could not open filename %s\n", filename);
-    exit (0);
+    Exit (0);
   }
   n = 0;
   while (n < NWAVES && (fgets (dummy, LINELEN, ptr)) != NULL)
@@ -494,7 +494,7 @@ excluded from furthur consideration */
   if (wtot == 0)
   {
     Error ("model: Wtot must be greater than 0 or something is badly wrong\n");
-    exit (0);
+    Exit (0);
   }
   for (n = comp[spectype].modstart; n < comp[spectype].modstop; n++)
   {
@@ -507,7 +507,7 @@ excluded from furthur consideration */
   if (ngood == 0)
   {
     Error ("model: No models from %s survived pruning\n", comp[spectype].name);
-    exit (0);
+    Exit (0);
   }
   else if (ngood == 1 && nmodel_error < 20)
   {

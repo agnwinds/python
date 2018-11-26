@@ -212,7 +212,7 @@ WindPtr (w);
       {
         Error ("wind_update:sane_check %d trad %8.2e w %8.2g\n", n, trad, plasmamain[n].w);
         Error ("wind_update: ave_freq %8.2e j %8.2e\n", plasmamain[n].ave_freq, plasmamain[n].j);
-        exit (0);
+        Exit (0);
       }
     }
     else
@@ -639,7 +639,7 @@ WindPtr (w);
     else
     {
       Error ("Wind_update2d: Unknown coordinate type %d for domain %d \n", zdom[ndom].coord_type, ndom);
-      exit (0);
+      Exit (0);
     }
   }
 

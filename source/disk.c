@@ -789,7 +789,7 @@ read_non_standard_disk_profile (tprofile)
   if ((fptr = fopen (tprofile, "r")) == NULL)
   {
     Error ("Could not open filename %s\n", tprofile);
-    exit (0);
+    Exit (0);
   }
 
   fscanf (fptr, "%d\n", &dumint);

@@ -16,7 +16,7 @@ int rdint (char question[], int *answer);
 int rdflo (char question[], float *answer);
 int rddoub (char question[], double *answer);
 int rdline (char question[], char answer[]);
-int string2int (char *word, char *string_choices, char *string_values);
+int string2int (char *word, char *string_choices, char *string_values, char *string_answer);
 int rdchoice (char question[], char answers[], char *answer);
 int get_root (char root[], char total[]);
 int rdpar_set_mpi_rank (int rank);

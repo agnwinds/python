@@ -274,7 +274,7 @@ model_velocity (ndom, x, v)
   else
   {
     Error ("wind: Unknown windtype %d for doman %d\n", zdom[ndom].wind_type, ndom);
-    exit (0);
+    Exit (0);
   }
 
   return (speed);
@@ -416,7 +416,7 @@ model_rho (ndom, x)
   else
   {
     Error ("wind2d: Unknown windtype %d for domain %d\n", zdom[ndom].wind_type, ndom);
-    exit (0);
+    Exit (0);
   }
 
   return (rho);

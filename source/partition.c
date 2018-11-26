@@ -156,7 +156,7 @@ partition_functions (xplasma, mode)
   else
   {
     Error ("partition_functions: Unknown mode %d\n", mode);
-    exit (0);
+    Exit (0);
   }
 
   /* Calculate the partition function for each ion in turn */

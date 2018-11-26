@@ -532,7 +532,7 @@ Just do a check that all is well - this can be removed eventually (SS)
     if (geo.rt_mode == RT_MODE_2LEVEL)
     {
       Error ("calculate_ds: Not using macro atoms but trying to excite one? Aboort.\n");
-      exit (0);
+      Exit (0);
     }
     run_tot = kap_es + kap_ff;
     ncont = 0;
@@ -829,7 +829,7 @@ calls to two_level atom
 
     if (tau > 1.e-3)
     {
-      exit (0);
+      Exit (0);
     }
 
     else
@@ -908,7 +908,7 @@ doppler (pin, pout, v, nres)
     if (geo.rt_mode == RT_MODE_2LEVEL)
     {
       Error ("doppler: Not using macro atoms but trying to deexcite one? Abort.\n");
-      exit (0);
+      Exit (0);
     }
     pout->freq = pout->freq / (1. - dot (v, pout->lmn) / C);
   }
@@ -919,7 +919,7 @@ doppler (pin, pout, v, nres)
   else
   {
     Error ("doppler: nres %d > NLINES + nphot_total %d\n", nres, NLINES + nphot_total);
-    exit (0);
+    Exit (0);
   }
 
   return (0);
@@ -1083,7 +1083,7 @@ scatter (p, nres, nnscat)
         if (m > config[llvl].n_bfu_jump - 1)
         {
           Error ("scatter (resonate.c): could not identify bf transition. Abort. \n");
-          exit (0);
+          Exit (0);
         }
 
         /* Need to compute the factor needed for the stimulated term. */
@@ -1112,7 +1112,7 @@ scatter (p, nres, nnscat)
         else
         {
           Error ("scatter (resonate.c): a gamma_twiddle is negative. Abort.\n");
-          exit (0);
+          Exit (0);
         }
 
         /* Having got here we have calculated the probability of a k-packet
@@ -1178,7 +1178,7 @@ scatter (p, nres, nnscat)
         /* Our best-laid schemes have gang agley. It should never get here unless the input has been
            messed up in some way. (SS) */
         Error ("scatter (resonate.c): continuum scatter - seems to be neither macro nor simple. Abort.\n");
-        exit (0);
+        Exit (0);
       }
     }
     else if (*nres == -2)

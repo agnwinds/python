@@ -12,7 +12,6 @@ int get_atomic_data (char masterfile[]);
 int index_lines (void);
 int index_phot_top (void);
 int index_inner_cross (void);
-int index_collisions (void);
 void indexx (int n, float arrin[], int indx[]);
 int limit_lines (double freqmin, double freqmax);
 int check_xsections (void);
@@ -137,7 +136,7 @@ int wind_update (WindPtr (w));
 int wind_rad_init (void);
 int report_bf_simple_ionpool (void);
 /* windsave.c */
-int wind_save (char[]);
+int wind_save (char filename[]);
 int wind_read (char filename[]);
 int wind_complete (WindPtr w);
 int spec_save (char filename[]);
@@ -436,10 +435,6 @@ double exp_temp_func (double exp_temp);
 double exp_mean (double exp_temp, double numin, double numax);
 double exp_w (double j, double exp_temp, double numin, double numax);
 double exp_stddev (double exp_temp, double numin, double numax);
-/* variable_temperature.c */
-int variable_temperature (PlasmaPtr xplasma, int mode);
-double pi_correct (double xtemp, int nion, PlasmaPtr xplasma, int mode);
-double temp_func (double solv_temp);
 /* matom_diag.c */
 int matom_emiss_report (void);
 /* direct_ion.c */
@@ -470,9 +465,7 @@ int get_bl_and_agn_params (double lstar);
 /* setup_domains.c */
 int get_domain_params (int ndom);
 int get_wind_params (int ndom);
-int get_line_transfer_mode (void);
 int setup_windcone (void);
-int line_transfer_help_message (void);
 /* setup_disk.c */
 double get_disk_params (void);
 /* photo_gen_matom.c */
@@ -554,6 +547,9 @@ double get_rand_brem (double freqmin, double freqmax);
 int check_synonyms (char new_question[], char old_question[]);
 /* setup_reverb.c */
 int get_meta_params (void);
+/* setup_line_transfer.c */
+int get_line_transfer_mode (void);
+int line_transfer_help_message (void);
 /* py_wind_sub.c */
 int zoom (int direction);
 int overview (WindPtr w, char rootname[]);

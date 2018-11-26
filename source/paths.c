@@ -46,7 +46,7 @@ wind_paths_constructor (WindPtr wind)
   if (paths == NULL)
   {
     Error ("wind_paths_constructor: Could not allocate memory for cell %d\n", wind->nwind);
-    exit (0);
+    Exit (0);
   }
 
   paths->ad_path_flux = (double *) calloc (sizeof (double), geo.reverb_path_bins);
@@ -61,7 +61,7 @@ wind_paths_constructor (WindPtr wind)
   if (paths->ad_path_flux == NULL || paths->ai_path_num_wind == NULL)
   {
     Error ("wind_paths_constructor: Could not allocate memory for cell %d bins\n", wind->nwind);
-    exit (0);
+    Exit (0);
   }
   return (paths);
 }
@@ -740,7 +740,7 @@ wind_paths_output_vtk (WindPtr wind, int ndom)
   if ((fptr = fopen (c_file, "w")) == NULL)
   {                             //If this file can't be opened, error out
     Error ("wind_paths_output_vtk: Unable to open %s for writing\n", c_file);
-    exit (0);
+    Exit (0);
   }
   Log ("Outputting wind path information to file '%s'.\n", c_file);
 

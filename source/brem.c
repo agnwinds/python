@@ -99,6 +99,7 @@ brem_d (alpha)
  changed (this will happen as we move thruogh the photon generation bands) */
 
 int ninit_brem = 0;             // This is a flag to say wether a cdf has already been made
+double old_brem_alpha_tiny = 0;
 double old_brem_t = 0;          // This is the temperature last used to make a cdf
 double old_brem_freqmin = 0;    // This is the lower frequency last used to make a cdf
 double old_brem_freqmax = 0;    // This is the lower frequency last used to make a cdf
@@ -153,16 +154,19 @@ double
 get_rand_brem (freqmin, freqmax)
      double freqmin, freqmax;
 {
-  double freq, alpha, y;
+  double freq, alpha, y, brem_alpha_tiny;
   int echeck;
 
+  brem_alpha_tiny = H * xband.f1[0] / BOLTZMANN / geo.brem_temp;
 
+  if (brem_alpha_tiny > BREM_ALPHAMIN)
+    brem_alpha_tiny = BREM_ALPHAMIN / 10.;
 
   /*The first time of calling this function we produce a CDF which runs from BREM_ALPHAMIN to BREM_ALPHAMAX
      the dmiensinless frequency range over which we cannot use the power law or exponential approximations.
      This only needs to be done one, ans so a flag is set once the CDF has been made */
 
-  if (ninit_brem == 0)
+  if (ninit_brem == 0 || brem_alpha_tiny != old_brem_alpha_tiny)
   {                             /* First time through p_alpha must be initialized */
     if ((echeck = cdf_gen_from_func (&cdf_brem, &brem_d, BREM_ALPHAMIN, BREM_ALPHAMAX, 10, brem_set)) != 0)
     {
@@ -171,13 +175,14 @@ get_rand_brem (freqmin, freqmax)
 
     /* We need the integral of the brem function outside of the regions of interest as well */
 
-    cdf_brem_tot = qromb (brem_d, 0.0, BREM_ALPHABIG, 1e-8);
-    cdf_brem_lo = qromb (brem_d, 0, BREM_ALPHAMIN, 1e-8) / cdf_brem_tot;        //position in the full cdf of low frequcny boundary
+    cdf_brem_tot = qromb (brem_d, brem_alpha_tiny, BREM_ALPHABIG, 1e-8);
+    cdf_brem_lo = qromb (brem_d, brem_alpha_tiny, BREM_ALPHAMIN, 1e-8) / cdf_brem_tot;  //position in the full cdf of low frequcny boundary
     cdf_brem_hi = 1. - qromb (brem_d, BREM_ALPHAMAX, BREM_ALPHABIG, 1e-8) / cdf_brem_tot;       //postion in fhe full hi frequcny boundary
 
 
 
     ninit_brem++;               //Set the flag to tell the code we have made the CDF.
+    old_brem_alpha_tiny = brem_alpha_tiny;
 
   }
 
@@ -203,13 +208,13 @@ get_rand_brem (freqmin, freqmax)
     cdf_brem_ylo = cdf_brem_yhi = 1.0;
     if (brem_alphamin < BREM_ALPHABIG)  //There is *some* emission
     {
-      cdf_brem_ylo = qromb (brem_d, 0.0, brem_alphamin, 1e-8) / cdf_brem_tot;   //The position in full CDF of the upper frequency bound
+      cdf_brem_ylo = qromb (brem_d, brem_alpha_tiny, brem_alphamin, 1e-8) / cdf_brem_tot;       //The position in full CDF of the upper frequency bound
       if (cdf_brem_ylo > 1.0)
         cdf_brem_ylo = 1.0;
     }
     if (brem_alphamax < BREM_ALPHABIG)
     {
-      cdf_brem_yhi = qromb (brem_d, 0.0, brem_alphamax, 1e-8) / cdf_brem_tot;   //position in the full cdf of currnt hi frequcny boundary
+      cdf_brem_yhi = qromb (brem_d, brem_alpha_tiny, brem_alphamax, 1e-8) / cdf_brem_tot;       //position in the full cdf of currnt hi frequcny boundary
       if (cdf_brem_yhi > 1.0)
         cdf_brem_yhi = 1.0;
     }

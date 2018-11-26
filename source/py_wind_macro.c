@@ -472,12 +472,12 @@ copy_plasma (x1, x2)
   if ((x2->density = calloc (sizeof (double), nions)) == NULL)
   {
     Error ("calloc_dyn_plasma: Error in allocating memory for density\n");
-    exit (0);
+    Exit (0);
   }
   if ((x2->partition = calloc (sizeof (double), nions)) == NULL)
   {
     Error ("calloc_dyn_plasma: Error in allocating memory for partition\n");
-    exit (0);
+    Exit (0);
   }
   for (i = 0; i < nions; i++)
   {
@@ -833,7 +833,7 @@ level_escapeoverview (nlev, w, rootname, ochoice)
   if (nline == nlines)
   {
     Error ("level_escapeoverview: Could not find line in linelist\n");
-    exit (0);
+    Exit (0);
   }
 
   nline--;
@@ -926,7 +926,7 @@ level_tauoverview (nlev, w, rootname, ochoice)
   if (nline == nlines)
   {
     Error ("level_tauoverview: Could not find line in linelist\n");
-    exit (0);
+    Exit (0);
   }
 
   nline--;

@@ -261,7 +261,7 @@ rtheta_make_cones (ndom, w)
   if (zdom[ndom].cones_rtheta == NULL)
   {
     Error ("rtheta_make_gid: There is a problem in allocating memory for the cones structure\n");
-    exit (0);
+    Exit (0);
 
   }
 
@@ -475,7 +475,7 @@ rtheta_volumes (ndom, w)
         if (zdom[ndom].wind_type == IMPORT)
         {
           Error ("rtheta_volumes: Shouldn't be redefining inwind in cylind_volumes with imported model.\n");
-          exit (0);
+          Exit (0);
         }
 
 

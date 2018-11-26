@@ -83,7 +83,7 @@ parse_command_line (argc, argv)
         if (sscanf (argv[i + 1], "%lf", &time_max) != 1)
         {
           Error ("python: Expected time after -t switch\n");
-          exit (0);
+          Exit (0);
         }
         set_max_time (files.root, time_max);
         i++;
@@ -96,7 +96,7 @@ parse_command_line (argc, argv)
         if (sscanf (argv[i + 1], "%d", &verbosity) != 1)
         {
           Error ("python: Expected verbosity after -v switch\n");
-          exit (0);
+          Exit (0);
         }
         Log_set_verbosity (verbosity);
         i++;
@@ -109,7 +109,7 @@ parse_command_line (argc, argv)
         if (sscanf (argv[i + 1], "%d", &max_errors) != 1)
         {
           Error ("python: Expected max errors after -e switch\n");
-          exit (0);
+          Exit (0);
         }
         Log_quit_after_n_errors (max_errors);
         i++;
@@ -162,7 +162,7 @@ parse_command_line (argc, argv)
         int git_diff_status = GIT_DIFF_STATUS;
         if (git_diff_status > 0)
           Log ("This version was compiled with %i files with uncommitted changes.\n", git_diff_status);
-        exit (0);
+        Exit (0);
       }
 
       else if (strncmp (argv[i], "-", 1) == 0)
@@ -177,7 +177,7 @@ parse_command_line (argc, argv)
     if (j + 1 == argc)
     {
       Error ("All of the command line has been consumed without specifying a parameter file name, so exiting\n");
-      exit (0);
+      Exit (0);
     }
 
 
@@ -264,5 +264,5 @@ If one simply types py or pyZZ where ZZ is the version number, one is queried fo
 
   printf ("%s\n", some_help);
 
-  exit (0);
+  Exit (0);
 }

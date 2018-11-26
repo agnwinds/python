@@ -13,6 +13,7 @@
  *  The basic routines are as follows:
  *  	- rdstr(question,answer)	gets a single contiguous string 
  *  	- rdchar(question,answer)	gets a single character
+ *  	- rdchoice(question,answer) gets one of a number of allowed string answers
  *  	- rdint(question,answer)	gets a single integer
  *  	- rdflo(question,answer)	gets a single precision floating point number
  *  	- rddoub(question,answer)	gets a double precision floating point number
@@ -180,6 +181,7 @@ rdpar_record[MAX_RECORDS];
 
 int rdpar_cursor = 0;
 int rdpar_ntot = 0;             // total number of raw input lines
+int rdpar_choice = 0;           // 0 if this is not rdchoice; 1 if so
 struct rdpar_raw
 {
   char line[LINELEN];           // Raw input line 
@@ -385,7 +387,7 @@ rdpar_init ()
   if ((rdout_ptr = fopen ("tmp.rdpar", "w")) == NULL)
   {
     printf ("Error: rdpar_init: Problem opening tmp.rdpar\n");
-    exit (0);
+    Exit (0);
   }
   rdpar_stat = 1;
   strcpy (current_filename, "tmp.rdpar.out");
@@ -478,7 +480,7 @@ string_process_from_command_line (question, dummy)
   if (fgets (tdummy, LINELEN, stdin) == NULL)
   {
     printf ("Exiting since rdpar got EOF in interactive mode\n");
-    exit (0);
+    Exit (0);
   }
   else if (tdummy[0] == '\n')
   {                             //Use the current value
@@ -499,7 +501,10 @@ string_process_from_command_line (question, dummy)
   {                             //Use the value input from the command line
 
     strcpy (dummy, tdummy);
-    fprintf (rdout_ptr, "%-30s %20s", question, dummy);
+    if (rdpar_choice == 0)
+    {
+      fprintf (rdout_ptr, "%-30s %20s", question, dummy);
+    }
     rdpar_store_record (question, dummy);
     return (NORMAL);
   }
@@ -655,13 +660,19 @@ string_process_from_file (question, dummy)
     if (strcmp (dummy, "\n") == 0)
     {                           /* Store the provided value since \n */
       rdpar_store_record (question, secondword);
-      fprintf (rdout_ptr, "%-40s   %s\n", question, secondword);
+      if (rdpar_choice == 0)
+      {
+        fprintf (rdout_ptr, "%-40s   %s\n", question, secondword);
+      }
     }
     else
     {                           /* Store the value received via the command line */
 
       rdpar_store_record (question, dummy);
-      fprintf (rdout_ptr, "%-40s   %s\n", question, dummy);
+      if (rdpar_choice == 0)
+      {
+        fprintf (rdout_ptr, "%-40s   %s\n", question, dummy);
+      }
     }
 
     return (NORMAL);
@@ -669,7 +680,10 @@ string_process_from_file (question, dummy)
   else                          // This handles the situation where the variable is actually read from the rdpar file
     strcpy (dummy, secondword);
   rdpar_store_record (question, secondword);
-  fprintf (rdout_ptr, "%-40s   %s\n", question, secondword);
+  if (rdpar_choice == 0)
+  {
+    fprintf (rdout_ptr, "%-40s   %s\n", question, secondword);
+  }
   return (NORMAL);
 }
 
@@ -1081,6 +1095,7 @@ rdline (question, answer)
  * @param [in] char  *word  The input string that we want to match                       
  * @param [in] char  *string_choices A comma separated string containing the possible choices
  * @param [in] char  *string_values    A comma separated string containing integers that correspond to the input strign
+ * @param [out] char  *string_answer   The complete string version of the answer                                        
  * @return    The integer represents the choice indicated by the input string.           
  *
  * ###Notes###
@@ -1094,7 +1109,7 @@ rdline (question, answer)
  * * string_cohoices "raw,medium,well"
  * * string_values  "1,8,16"
  *
- * As indicated above the two strings have to be in some sense paraglle.
+ * As indicated above the two strings have to be in some sense parallel.
  *
  * We want to match *word to one of these values.  
  *
@@ -1108,12 +1123,13 @@ rdline (question, answer)
  **********************************************************/
 
 
-#define MAX_CHOICES 8
+#define MAX_CHOICES 10
 int
-string2int (word, string_choices, string_values)
+string2int (word, string_choices, string_values, string_answer)
      char *word;
      char *string_choices;
      char *string_values;
+     char *string_answer;
 {
   int i;
   int nchoices, ncommas, vcommas;
@@ -1121,13 +1137,30 @@ string2int (word, string_choices, string_values)
   int xv[MAX_CHOICES];
   char choices[LINELEN];
   char values[LINELEN];
-  int ivalue, matched;
+  int ivalue, matched, ibest;
+
+
+
+  /*Blank out the arrays we will be using here */
+
+  for (i = 0; i < LINELEN; i++)
+  {
+    choices[i] = ' ';
+    values[i] = ' ';
+  }
+
+
+  for (i = 0; i < strlen (word); i++)
+  {
+    word[i] = tolower (word[i]);
+  }
 
 
   for (i = 0; i < strlen (string_choices); i++)
   {
     choices[i] = tolower (string_choices[i]);
   }
+
 
   for (i = 0; i < strlen (string_values); i++)
   {
@@ -1136,47 +1169,71 @@ string2int (word, string_choices, string_values)
 
 
   ncommas = 0;
-  for (i = 0; i < strlen (choices); i++)
+  for (i = 0; i < strlen (string_choices); i++)
   {
     if (choices[i] == ',')
     {
-
       choices[i] = ' ';
       ncommas++;
-
     }
   }
 
+
+
   vcommas = 0;
-  for (i = 0; i < strlen (values); i++)
+  for (i = 0; i < strlen (string_values); i++)
   {
     if (values[i] == ',')
     {
-
       values[i] = ' ';
       vcommas++;
-
     }
   }
 
 
 
-  nchoices = sscanf (choices, "%s %s %s %s %s %s %s %s", xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7]);
-  nchoices = sscanf (values, "%d %d %d %d %d %d %d %d", &xv[0], &xv[1], &xv[2], &xv[3], &xv[4], &xv[5], &xv[6], &xv[7]);
+
+  nchoices = sscanf (choices, "%s %s %s %s %s %s %s %s %s %s", xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7], xs[8], xs[9]);
+  nchoices =
+    sscanf (values, "%d %d %d %d %d %d %d %d %d %d", &xv[0], &xv[1], &xv[2], &xv[3], &xv[4], &xv[5], &xv[6], &xv[7], &xv[8], &xv[9]);
+
+  /* Perform a minimum match on the anser */
 
   matched = 0;
   ivalue = -99;
+  ibest = -1;                   //Set this to a sensible initial value
   for (i = 0; i < nchoices; i++)
   {
+//OLD    if (strncmp (word, xs[i], strlen (xs[i])) == 0)
     if (strncmp (word, xs[i], strlen (word)) == 0)
     {
       ivalue = xv[i];
+      ibest = i;
       matched += 1;
     }
   }
 
-  return (ivalue);
+  strcpy (string_answer, "none");
 
+  /* Check for more than one match to answer */
+
+  if (matched > 1)
+  {
+    printf ("XX multiple matches\n");
+    ivalue = -999;
+    return (ivalue);
+  }
+
+
+
+  if (ibest >= 0)
+  {
+    printf ("XX %s %d\n", xs[ibest], ivalue);
+    strcpy (string_answer, xs[ibest]);
+  }
+
+
+  return (ivalue);
 }
 
 
@@ -1209,19 +1266,21 @@ string2int (word, string_choices, string_values)
  *
  * ###Programming Comment###
  *
- * For backward compatibility, if the user enters an integer rather than a string.  The integer is returned.  
- * This is dangerous.  It implies that none of the choices should start with a number.
+ * For backward compatibility, if the user enters an integer rather than a string.  The integer is returned. No
+ * error checking is done to see that the integer is one of the allowed choices.   A comment is written to the
+ * whatever.out.pf file to indicate that one should change integers to strings as ultimately we plan to remove 
+ * the code that provides backward compatibility.
  *
- * Very important:  answer is changed and c is very picky about when a string can be updated.  One cannot
- * change a string that has simply been set to a vale,  e. g.
+ * Very important:  in rdchoice, the string answer is changed. c is very picky about when a string can be updated.  One cannot
+ * change a string that has simply been set to a fixed value,  e. g.
  *
  * char whatever="whatever"
  *
- * This is fixed in memory.  Instead, one nees to crate an array with a certain length, e.g
+ * This is fixed in memory.  Instead, one nees to create an array with a certain length, e.g
  *
  * char answer[LINELENGTH];
  *
- * and use strcpy or some other routine to initialize it.
+ * and use strcpy or some other routine to initialize it.  Then one can call rdchoice.
  **********************************************************/
 
 int
@@ -1235,21 +1294,25 @@ rdchoice (question, answers, answer)
   int n, nstart, nstop;
   int ianswer;
   int query;
-
+  char full_answer[LINELEN];
+  rdpar_choice = 1;
   strcpy (string_answer, answer);
-
   query = REISSUE;
-
   while (query == REISSUE)
   {
     query = rdstr (question, string_answer);
-
-    /* First check to see if we have returned an integer */
-    if (sscanf (string_answer, "%d", &ianswer))
+    /* First check to see if we have returned an integer.  The fact taht we attempt to find a string
+     * after the integer is to make it possible for a string answer to be something like "2dcoords" */
+    if (sscanf (string_answer, "%d%s", &ianswer, dummy) == 1)
     {
       strcpy (answer, string_answer);
-      printf ("OK\n");
-      Error ("rdchoice: Deprecated use of rdchoice, please replace answer to %s with its string equivalent %s \n", question, string_answer);
+      //OLD printf ("OK\n");
+      rdpar_comment ("Deprecated use of rdchoice. NO ERROR CHECKS! For %s replace answer %s in %s with its string equivalent",
+                     question, string_answer, answers);
+      fprintf (rdout_ptr, "%-30s %20s\n", question, string_answer);
+      Error ("rdchoice: Deprecated use of rdchoice. NO ERROR CHECKS! For %s replace answer %s in %s with its string equivalent \n",
+             question, string_answer, answers);
+      rdpar_choice = 0;
       return (ianswer);
     }
 
@@ -1272,22 +1335,24 @@ rdchoice (question, answers, answer)
     strncpy (dummy, &question[nstart + 1], nstop - nstart - 1);
     strcpy (dummy, &question[nstart + 1]);
     dummy[strlen (dummy) - 1] = ' ';
-
-
-    ianswer = string2int (string_answer, dummy, answers);
-
+    ianswer = string2int (string_answer, dummy, answers, full_answer);
+    printf ("XXX the answer was %s\n", full_answer);
     if (ianswer == -99)
     {
       Error ("rdchoice: Could not match %s input to one of answers: %s\nTry again\n", string_answer, dummy);
       query = REISSUE;
-
+    }
+    if (ianswer == -999)
+    {
+      Error ("rdchoice: Multiple matches of  %s input to answers: %s\nTry again\n", string_answer, dummy);
+      query = REISSUE;
     }
   }
 
+  fprintf (rdout_ptr, "%-30s %20s\n", question, full_answer);
   strcpy (answer, string_answer);
+  rdpar_choice = 0;
   return (ianswer);
-
-
 }
 
 /* This is the end of the various routines which parse different kinds of inputs */
@@ -1326,9 +1391,7 @@ get_root (root, total)
   int j;
   char *pf;
   int position;
-
   /* Check whether total is an empty string */
-
   j = strcspn (total, "\n");
   if (j == 0)
   {
@@ -1354,8 +1417,6 @@ get_root (root, total)
 
   strncpy (root, total, j);
   root[j] = '\0';
-
-
   return (0);
 }
 

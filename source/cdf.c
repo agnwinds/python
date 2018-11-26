@@ -123,7 +123,7 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
   if (xmax <= xmin)
   {
     Error ("pdf_gen_from_func: xmin %g <= xmax %g\n", xmin, xmax);
-    exit (0);
+    Exit (0);
   }
   if (njumps > 0)
   {
@@ -132,7 +132,7 @@ cdf_gen_from_func (cdf, func, xmin, xmax, njumps, jump)
       if (jump[j] <= jump[j - 1])
       {
         Error ("pdf_gen_from_func: jump[%d]=%g <=jump[%d]=%g out of order\n", j, jump[j], j - 1, jump[j - 1]);
-        exit (0);
+        Exit (0);
       }
     }
     njump_min = 0;
@@ -293,7 +293,7 @@ gen_array_from_func (func, xmin, xmax, pdfsteps)
     if ((pdf_array = calloc (sizeof (x), pdfsteps)) == NULL)
     {
       Error ("pdf: Could not allocate space for pdf_array\n");
-      exit (0);
+      Exit (0);
     }
     init_pdf = 1;
     pdf_steps_current = pdfsteps;
@@ -414,14 +414,14 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   if (n_xy > NCDF)              //If the supplied data array is larger than the output array - fixed as NCDF
   {
     Error ("cdf_gen_from_array: supplied data %i is larger than default aray size %i - increase NCDF\n", n_xy, NCDF);
-    exit (0);
+    Exit (0);
   }
 
 
   if (xmax < xmin)              //This must be a mistake, the limits are reversed
   {
     Error ("cdf_gen_from_array: xmin %g <= xmax %g\n", xmin, xmax);
-    exit (0);
+    Exit (0);
   }
 
   /*We are now going to crawl down the input array, checking for mistakes.
@@ -436,12 +436,12 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
     if (x[n] <= x[n - 1])       //One x-point is less than the one above - this would cause problems later
     {
       Error ("cdf_gen_from_array: input x not in ascending order at element %5d/%5d  %11.6e %11.6e\n", n, n_xy, x[n - 1], x[n]);
-      exit (0);
+      Exit (0);
     }
     if (y[n] < 0)               //A negative point!
     {
       Error ("cdf_gen_from_array: probability density %g < 0 at element %d\n", y[n], n);
-      exit (0);
+      Exit (0);
     }
     else if (y[n] > 0)          //At least one point is positive
     {
@@ -477,7 +477,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   if (nmin == n_xy)
   {
     Error ("cdf_gen_from_array: xmin greater than all array values\n");
-    exit (0);
+    Exit (0);
   }
 
   /* if xmin is equal to one of the values in the x array then nmin will point to that value, but otherwise it
@@ -501,7 +501,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   if (nmax == nmin)
   {
     Error ("cdf_gen_from_array: nmin and nmax are identical which is not desirable\n");
-    exit (0);
+    Exit (0);
   }
 
   if (nmin == 0 && xmin < x[0]) /*We are requesting a CDF that starts below where we have data
@@ -552,7 +552,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   if (nmax == nmin)
   {
     Error ("cdf_gen_from_array - modified nmax=nmin followin interpolation at ends\n");
-    exit (0);
+    Exit (0);
   }
 
 
@@ -609,7 +609,7 @@ cdf_gen_from_array (cdf, x, y, n_xy, xmin, xmax)
   {
     Error ("cdf_gen_from_array: error %d on cdf_check - check CDF_err.diag\n", echeck);
     cdf_to_file (cdf, "CDF_err.diag");  //output the CDF to a file
-    exit (0);
+    Exit (0);
   }
 //  cdf_to_file(cdf,"foo.diag"); //output the CDF to a file
   return (echeck);
@@ -722,7 +722,7 @@ cdf_limit (cdf, xmin, xmax)
   if (cdf->y[cdf->ncdf] != 1.0)
   {
     Error ("cdf_limit: cdf not defined!)");
-    exit (0);
+    Exit (0);
   }
   if (xmin >= cdf->x[cdf->ncdf])
   {
@@ -731,7 +731,7 @@ cdf_limit (cdf, xmin, xmax)
   if (xmax <= cdf->x[0])
   {
     Error ("cdf_limit: xmax %g < cdf->x[0] %g\n", xmax, cdf->x[0]);
-    exit (0);
+    Exit (0);
   }
 
 /* Set the limits for the minimum */

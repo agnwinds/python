@@ -247,7 +247,7 @@ I did not change this now.  Though it could be done.  02apr ksl */
   if (wind_read (windsavefile) < 0)
   {
     Error ("py_wind: Could not open %s", windsavefile);
-    exit (0);
+    Exit (0);
   }
 
 /* aaa is used to store variable for writing to files for the purpose of plotting*/
@@ -270,7 +270,7 @@ I did not change this now.  Though it could be done.  02apr ksl */
     zoom (1);                   /* This affects the logfile */
     ochoice = 1;
     complete_file_summary (wmain, root, ochoice);
-    exit (0);
+    Exit (0);
   }
   else if (interactive == -1)
   {
@@ -296,7 +296,7 @@ I did not change this now.  Though it could be done.  02apr ksl */
       sprintf (windsavefile, "python%02d.wind_save", i);
       i++;
     }
-    exit (0);
+    Exit (0);
   }
 
 
@@ -630,7 +630,7 @@ one_choice (choice, root, ochoice)
   case 'q':                    /* quit */
     /* Write out a parameterfile that gives all of the commands used in this run */
     cpar ("py_wind.pf");
-    exit (0);
+    Exit (0);
     break;
 
   }
@@ -692,5 +692,5 @@ This program reads a wind save file created by python and examine the wind struc
 
   printf ("Choices are indicated below\n%s\n", choice_options);
 
-  exit (0);
+  Exit (0);
 }
