@@ -1,13 +1,27 @@
-project(python C)
+#
+# Python CMakeLists
+# -----------------
+#
+# A CMakeLists which should be good enough to run Python in an IDE which uses
+# a CMake building system. Assumes that version.h is already present, hence you
+# will need to build Python first using the provided Makefile for this to work
+# correctly in an IDE.
+#
+# TODO: make building via CMake possible -- i.e. version.h, GSL etc
+#
+
 cmake_minimum_required(VERSION 3.10)
-set(CMAKE_C_STANDARD 11)
+project(python C)
 
-find_package(GSL REQUIRED)
-
-include_directories(source)
-
+# Set the C standard, compiler and compiler options
+set(CMAKE_C_STANDARD 90)
+set(CMAKE_C_COMPILER mpicc)
 add_definitions(-D MPI_ON)
 
+# Include the source
+include_directories(source)
+
+# Define the executables
 add_executable(python
         source/bb.c
         source/get_atomicdata.c
@@ -289,6 +303,8 @@ add_executable(windsave2table
         source/windsave2table_sub.c
         )
 
+# Include external libs
+find_package(GSL REQUIRED)
 target_link_libraries(python GSL::gsl GSL::gslcblas)
 target_link_libraries(py_wind GSL::gsl GSL::gslcblas)
 target_link_libraries(windsave2table GSL::gsl GSL::gslcblas)
