@@ -165,7 +165,7 @@ get_bl_and_agn_params (lstar)
   else
   {
     strcpy (answer, "no");
-    geo.bl_radiation = rdchoice ("Boundary_layer.radiation(yes,no", "1,0", answer);
+    geo.bl_radiation = rdchoice ("Boundary_layer.radiation(yes,no)", "1,0", answer);
     //OLD rdint ("Boundary_layer.radiation(y=1)", &geo.bl_radiation);
     geo.agn_radiation = 0;      // So far at least, our star systems don't have a BH
   }

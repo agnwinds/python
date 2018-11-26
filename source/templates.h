@@ -12,7 +12,6 @@ int get_atomic_data (char masterfile[]);
 int index_lines (void);
 int index_phot_top (void);
 int index_inner_cross (void);
-int index_collisions (void);
 void indexx (int n, float arrin[], int indx[]);
 int limit_lines (double freqmin, double freqmax);
 int check_xsections (void);
