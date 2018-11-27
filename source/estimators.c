@@ -524,7 +524,7 @@ mc_estimator_normalise (n)
     {
 
       /* The correction for stimulated emission is (1 - n_lower * g_upper / n_upper / g_lower) */
-      lower_density =  den_config (xplasma, i);
+      lower_density = den_config (xplasma, i);
       upper_density = den_config (xplasma, line[config[i].bbu_jump[j]].nconfigu);
       stimfac = upper_density / lower_density;
       stimfac = stimfac * config[i].g / config[line[config[i].bbu_jump[j]].nconfigu].g;
