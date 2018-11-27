@@ -126,7 +126,7 @@ matom (p, nres, escape)
   double t_e, ne;
   double bb_cont, choice, bf_cont;
   WindPtr one;
-  double rad_rate, coll_rate;
+  double rad_rate, coll_rate, lower_density, density_ratio;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
   double jprbs_known[NLEVELS_MACRO][2 * (NBBJUMPS + NBFJUMPS)], eprbs_known[NLEVELS_MACRO][2 * (NBBJUMPS + NBFJUMPS)];
@@ -149,6 +149,9 @@ matom (p, nres, escape)
 
   t_e = xplasma->t_e;           //electron temperature 
   ne = xplasma->ne;             //electron number density
+
+  /* these are used later for stimulated recomb */
+  lower_density = density_ratio = 0.0;
 
 
   /* The first step is to identify the configuration that has been excited. */
@@ -317,8 +320,17 @@ matom (p, nres, escape)
         /* For bf ionization the jump probability is just gamma * energy
            gamma is the photoionisation rate. Stimulated recombination also included. */
         cont_ptr = &phot_top[config[uplvl].bfu_jump[n]];        //pointer to continuum
+        
+        /* first let us take care of the situation where the lower level is zero or close to zero */
+        lower_density = den_config (xplasma, cont_ptr->nlev);
+        if (lower_density >= DENSITY_PHOT_MIN) 
+        {
+          density_ratio = den_config (xplasma, cont_ptr->uplev) / lower_density;
+        }
+        else
+          density_ratio = 0.0;
 
-        jprbs_known[uplvl][m] = jprbs[m] = (mplasma->gamma_old[config[uplvl].bfu_indx_first + n] - (mplasma->alpha_st_old[config[uplvl].bfu_indx_first + n] * xplasma->ne * den_config (xplasma, cont_ptr->uplev) / den_config (xplasma, cont_ptr->nlev)) + (q_ioniz (cont_ptr, t_e) * ne)) * config[uplvl].ex; //energy of lower state
+        jprbs_known[uplvl][m] = jprbs[m] = (mplasma->gamma_old[config[uplvl].bfu_indx_first + n] - (mplasma->alpha_st_old[config[uplvl].bfu_indx_first + n] * xplasma->ne * density_ratio) + (q_ioniz (cont_ptr, t_e) * ne)) * config[uplvl].ex; //energy of lower state
 
         /* this error condition can happen in unconverged hot cells where T_R >> T_E.
            for the moment we set to 0 and hope spontaneous recombiantion takes care of things */
