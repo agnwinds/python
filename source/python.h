@@ -89,7 +89,7 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 #define DANG_LIVE_OR_DIE   2.0  /* If constructing photons from a live or die run of the code, the
                                    angle over which photons will be accepted must be defined */
 
-int PHOT_STEP_SW;               /* The switch for turning on the photon increase algorithm */
+int ENABLE_PHOT_STEP;           /* The switch for turning on the photon increase algorithm */
 int NPHOT_MIN;                  /* The minimum number of photon bundles created per  */
 int NPHOT_MAX;                  /* The maximum number of photon bundles created per cycle */
 int NPHOT;                      /* The number of photon bundles created, defined in setup.c */

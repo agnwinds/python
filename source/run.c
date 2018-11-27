@@ -67,8 +67,8 @@ calculate_ionization (restart_stat)
   long nphot_to_define;
   int iwind;
 
-  int n_phot_steps = 0, phot_next_cycle = geo.wcycles;
-  int phot_cycle_gap = geo.wcycles;
+  int nphot_steps = 0, nphot_next_cycle = geo.wcycles;
+  int nphot_cycle_gap = geo.wcycles;
 
 #ifdef MPI_ON
   int ioniz_spec_helpers;
@@ -118,11 +118,12 @@ calculate_ionization (restart_stat)
    * EP: if the photon increment speed up is being used, figure out at which
    * cycle NPHOT will be increased.
    */
-  if (PHOT_STEP_SW == TRUE)
+
+  if (ENABLE_PHOT_STEP == TRUE)
   {
-    n_phot_steps = (int) log10 ((double) NPHOT_MAX / NPHOT_MIN) + 1;
-    phot_next_cycle = phot_cycle_gap = geo.wcycles / n_phot_steps;
-    Log ("NPHOT will increase %i time(s) every %i cycles\n", n_phot_steps - 1, phot_cycle_gap);
+    nphot_steps = (int) log10 ((double) NPHOT_MAX / NPHOT_MIN) + 1;
+    nphot_next_cycle = nphot_cycle_gap = geo.wcycles / nphot_steps;
+    Log ("NPHOT will increase %i times every %i cycles\n", nphot_steps - 1, nphot_cycle_gap);
   }
 
   while (geo.wcycle < geo.wcycles)
@@ -153,41 +154,39 @@ calculate_ionization (restart_stat)
 
 
     /*
-     * EP: If the photon increment is being used, increase the photon count
-     * and update the variable to the next cycle number to increment at. The
-     * else if state is to ensure that if NPHOT_MAX hasn't been reached, then
-     * the final cycle should have NPHOT_MAX photons.
+     * EP: If photon incrementing is enabled, figure out the number of photons
+     * to use. When in multiprocessor mode, there is a bit of messing about with
+     * multiplying and division to ensure that NPHOT is set correctly across
+     * all processes for an arbitrary number of MPI processes
      */
 
-    if (PHOT_STEP_SW == TRUE && geo.wcycle == phot_next_cycle && NPHOT < NPHOT_MAX)
+    if (ENABLE_PHOT_STEP == TRUE && geo.wcycle == nphot_next_cycle && NPHOT < NPHOT_MAX)
     {
 #ifdef MPI_ON
       NPHOT *= np_mpi_global;
 #endif
-
       NPHOT *= 10;
-
 #ifdef MPI_ON
       NPHOT /= np_mpi_global;
 #endif
 
       /*
        * EP: both p and photmain realloc'd otherwise photmain would end
-       * up not pointing at anything and cause a segfault in make_spectra()
+       * up not pointing to anything and segfault in make_spectra()
        */
 
       p = photmain = (PhotPtr) realloc (photmain, sizeof (p_dummy) * NPHOT);
 
       if (!p)
       {
-        Error ("Could not reallocate memory for %i photons for photmain\n", NPHOT);
-        exit (-1);
+        Error ("Could not reallocate memory for %i photons for p and photmain\n", NPHOT);
+        Exit (2);
       }
 
-      phot_next_cycle += phot_cycle_gap;
+      nphot_next_cycle += nphot_cycle_gap;
 
-      if (phot_next_cycle < geo.wcycles)
-        Log ("NPHOT will next increase to %e on cycle %i\n", (double) NPHOT * 10, phot_next_cycle);
+      if (NPHOT * 10 <= NPHOT_MAX)
+        Log ("NPHOT will next increase to %e on cycle %i\n", (double) NPHOT * 10, nphot_next_cycle);
     }
 
     Log ("NPHOT: %1.2e photons will be transported for CYCLE %i\n", (double) NPHOT, geo.wcycle);

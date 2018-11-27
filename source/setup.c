@@ -507,7 +507,7 @@ PhotPtr
 init_photons ()
 {
   PhotPtr p;
-  int use_log_step = FALSE;
+  char rdchoice_ans[LINELENGTH];
 
   /* Although Photons_per_cycle is really an integer,
      read in as a double so it is easier for input
@@ -515,48 +515,46 @@ init_photons ()
 
   double nphot = 1e5, min_nphot = 1e5, max_nphot = 1e7;
 
-  rdint ("Use_log_photon_step(0=no,1=yes)", &use_log_step);
-  PHOT_STEP_SW = use_log_step;
+  strcpy (rdchoice_ans, "yes");
+  ENABLE_PHOT_STEP = rdchoice ("Use_log_photon_step(no,yes)", "0,1", rdchoice_ans);
 
-  if (PHOT_STEP_SW == TRUE)
+  if (ENABLE_PHOT_STEP == TRUE)
   {
     rddoub ("Min_photons_per_cycle", &min_nphot);
     rddoub ("Max_photons_per_cycle", &max_nphot);
     NPHOT = NPHOT_MIN = (int) min_nphot;        // NPHOT is photons/cycle
-    NPHOT_MAX = (int) max_nphot;        // cast int to avoid issues with the value
-  }                             // of max_nphot not fitting into NPHOT_MAX
-  else if (PHOT_STEP_SW == FALSE)
+    NPHOT_MAX = (int) max_nphot;
+  }
+  else if (ENABLE_PHOT_STEP == FALSE)
   {
     rddoub ("Photons_per_cycle", &nphot);
     NPHOT = (int) nphot;
   }
   else
   {
-    Error ("Invalid choice %i for Use_log_photon_step(0=no,1=yes)\n", PHOT_STEP_SW);
+    Error ("(%s:%i): Invalid choice %i for Use_log_photon_step(no,yes)\n", __FILE__, __LINE__, ENABLE_PHOT_STEP);
+    Log ("(%s:%i): Valid choices are no=%i yes=%i\n", __FILE__, __LINE__, FALSE, TRUE);
     Exit (1);
   }
 
   if (NPHOT <= 0)               // Check that NPHOT is a sensible number
   {
     Error ("%1.2e is invalid choice for NPHOT; NPHOT > 0 required.", (double) NPHOT);
-    Exit (-1);
+    Exit (1);
   }
 
 #ifdef MPI_ON
   Log ("Photons per cycle per MPI task will be %d\n", NPHOT / np_mpi_global);
-
   NPHOT /= np_mpi_global;
 #endif
 
   rdint ("Ionization_cycles", &geo.wcycles);
-
   rdint ("Spectrum_cycles", &geo.pcycles);
-
 
   if (geo.wcycles == 0 && geo.pcycles == 0)
   {
     Log ("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
-    Exit (0);                   //There is really nothing to do!
+    Exit (1);                   //There is really nothing to do!
   }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */
@@ -577,7 +575,6 @@ init_photons ()
     if ((NPHOT * sizeof (p_dummy)) > 1e9)
       Error ("Over 1 GIGABYTE of photon structure allocated. Could cause serious problems.\n");
   }
-
 
   return (p);
 }
