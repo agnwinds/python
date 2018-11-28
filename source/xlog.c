@@ -826,7 +826,7 @@ Debug (char *format, ...)
  **********************************************************/
 
 #ifdef MPI_ON
-  #include <mpi.h>
+#include <mpi.h>
 #endif
 
 void
