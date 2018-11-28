@@ -222,7 +222,7 @@ parse_command_line (argc, argv)
  *
  **********************************************************/
 
-int
+void
 help ()
 {
   char *some_help;

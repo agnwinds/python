@@ -717,8 +717,8 @@ scattering_fraction (line_ptr, xplasma)
 
     Error ("scattering_fraction: Cannot handle %d line_mode\n", geo.line_mode);
     Exit (0);
+    return (0);
   }
-
 }
 
 
@@ -944,6 +944,7 @@ upsilon (n_coll, u0)
 
   /* first we compute x. This is the "reduced temperature" from
      Burgess & Tully 1992. */
+  x = 0.0;
   if (coll_stren[n_coll].type == 1 || coll_stren[n_coll].type == 4)
   {
     x = 1. - (log (coll_stren[n_coll].scaling_param) / log (u0 + coll_stren[n_coll].scaling_param));
@@ -965,6 +966,7 @@ upsilon (n_coll, u0)
 
   /*  now we extract upsilon from y  - there are four different parametrisations */
 
+  upsilon = 0.0;
   if (coll_stren[n_coll].type == 1)
   {
     upsilon = y * (log (u0 + exp (1)));

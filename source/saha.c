@@ -118,7 +118,7 @@ nebular_concentrations (xplasma, mode)
   {
     Error ("nebular_concentrations: Unknown mode %d\n", mode);
     Exit (0);
-
+    return (0);
   }
 
 
@@ -210,6 +210,7 @@ concentrations (xplasma, mode)
   {
     Error ("Concentrations: Unknown mode %d\n", mode);
     Exit (0);
+    return (0);
   }
 
   nh = xplasma->rho * rho2nh;   //LTE

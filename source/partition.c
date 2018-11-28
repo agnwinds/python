@@ -118,7 +118,7 @@ partition_functions (xplasma, mode)
   int m_ground;                 /* added by SS Jan 05 */
   double z, kt;
 
-
+  t = weight = 0.0;
   if (mode == NEBULARMODE_TR)
   {
     //LTE using t_r
