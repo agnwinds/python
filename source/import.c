@@ -163,7 +163,7 @@ import_velocity (ndom, x, v)
      int ndom;
      double *x, *v;
 {
-  double speed;
+  double speed = 0.0;
   if (zdom[ndom].coord_type == SPHERICAL)
   {
     speed = velocity_1d (ndom, x, v);
@@ -238,7 +238,7 @@ import_rho (ndom, x)
      int ndom;
      double *x;
 {
-  double rho;
+  double rho = 0.0;
   if (zdom[ndom].coord_type == SPHERICAL)
   {
     rho = rho_1d (ndom, x);

@@ -148,7 +148,7 @@ get_line_transfer_mode ()
     geo.wind_radiation = 0;
   }
 
-  if (geo.run_type == 0)
+  if (geo.run_type == RUN_TYPE_NEW)
   {
 
 
