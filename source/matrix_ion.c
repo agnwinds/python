@@ -624,7 +624,6 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
  * algorithms used for this are from the gsl library
  *
  * ### Notes ###
- * ??? NOTES ???
  *
  **********************************************************/
 
@@ -647,11 +646,18 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   gsl_vector_view b;
   gsl_vector *test_vector, *populations;
   gsl_matrix *test_matrix;
+  gsl_error_handler_t *handler;
+
+  /* Turn off gsl error hanling so that the code does not abort on error */
+
+  handler=gsl_set_error_handler_off();
 
   ierr = 0;
   test_val = 0.0;
 
-  /* create gsl matrix/vector views of the arrays of rates */
+  /* create gsl matrix/vector views of the arrays of rates. 
+   * This is the structure that gsl uses do define an array.
+   * It contains not only the data but the dimensions, etc.*/
   m = gsl_matrix_view_array (a_data, nrows, nrows);
 
   /* these are used for testing the solution below */
@@ -661,18 +667,46 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   gsl_matrix_memcpy (test_matrix, &m.matrix);   // create copy for testing
 
 
+  /* gsl_vector_view_array creates the structure that gsl uses to define a vector
+   * It contains the data and the dimension, and other information about where
+   * the vector is stored in memory etc.
+   */
   b = gsl_vector_view_array (b_data, nrows);
 
   /* the populations vector will be a gsl vector which stores populations */
   populations = gsl_vector_alloc (nrows);
 
 
-  p = gsl_permutation_alloc (nrows);    // NEWKSL
+  /* permuations are special structures that contain integers 0 to nrows-1, which can
+   * be manipulated */
 
-  gsl_linalg_LU_decomp (&m.matrix, p, &s);
+  p = gsl_permutation_alloc (nrows);    
 
-//  det = gsl_linalg_LU_det (&m.matrix, s);       // get the determinant to report to user
-  lndet = gsl_linalg_LU_lndet (&m.matrix);
+
+  lndet = gsl_linalg_LU_lndet (&m.matrix);  // get the determinant to report to user
+
+
+  if (lndet == 0)
+  {
+    Error ("Rate Matrix ln(Determinant) is %8.4e for cell %i at point X, possible OK\n", lndet, nplasma);
+
+  }
+
+  /* This routine decomposes m into its LU Components.  It stores the L part in m and the
+   * U part in s and p is modified.
+   */
+
+  ierr= gsl_linalg_LU_decomp (&m.matrix, p, &s);
+
+  if (ierr)
+  {
+    Error ("Rate Matrix gsl_linalg_LU_decomp failure %d for cell %i at point A\n", ierr, nplasma);
+    Exit(0);
+
+  }
+
+
+  lndet = gsl_linalg_LU_lndet (&m.matrix);  // get the determinant to report to user
 
 
   if (lndet == 0)
@@ -683,7 +717,14 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   }
 
 
-  gsl_linalg_LU_solve (&m.matrix, p, &b.vector, populations);
+  ierr = gsl_linalg_LU_solve (&m.matrix, p, &b.vector, populations);
+
+  if (ierr)
+  {
+    Error ("Rate Matrix gsl_linalg_LU_solve failure %d for cell %i at point B\n", ierr, nplasma);
+    Exit(0);
+
+  }
 
   gsl_permutation_free (p);
 
@@ -737,6 +778,8 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   gsl_vector_free (test_vector);
   gsl_matrix_free (test_matrix);
   gsl_vector_free (populations);
+
+  gsl_set_error_handler(handler);
 
   return (ierr);
 }
