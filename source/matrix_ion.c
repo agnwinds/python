@@ -640,6 +640,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
      solution via gsl_linalg_LU_refine */
   double test_val;
   double lndet;
+  FILE *dptr;
 
   gsl_permutation *p;
   gsl_matrix_view m;
@@ -700,7 +701,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
   if (ierr)
   {
-    Error ("Rate Matrix gsl_linalg_LU_decomp failure %d for cell %i at point A\n", ierr, nplasma);
+    Error ("Rate Matrix gsl_linalg_LU_decomp failure %d for cell %i \n", ierr, nplasma);
     Exit(0);
 
   }
@@ -721,7 +722,12 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
   if (ierr)
   {
-    Error ("Rate Matrix gsl_linalg_LU_solve failure %d for cell %i at point B\n", ierr, nplasma);
+    Error ("Rate Matrix gsl_linalg_LU_solve failure %d for cell %i \n", ierr, nplasma);
+    dptr=fopen("lower.txt","w");
+    gsl_matrix_fprintf(dptr,&m.matrix,"%.2e");
+    fclose(dptr);
+
+
     Exit(0);
 
   }
