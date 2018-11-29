@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 #include "atomic.h"
 #include "python.h"
 
@@ -710,7 +711,8 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   lndet = gsl_linalg_LU_lndet (&m.matrix);  // get the determinant to report to user
 
 
-  if (lndet == 0)
+  if (lndet < log(DBL_MIN*1e4))
+//  if (lndet == 0)
   {
     Error ("Rate Matrix ln(Determinant) is %8.4e for cell %i\n", lndet, nplasma);
     return (4);
