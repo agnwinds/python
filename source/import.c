@@ -163,7 +163,8 @@ import_velocity (ndom, x, v)
      int ndom;
      double *x, *v;
 {
-  double speed;
+  double speed = 0.0;
+
   if (zdom[ndom].coord_type == SPHERICAL)
   {
     speed = velocity_1d (ndom, x, v);
@@ -181,6 +182,7 @@ import_velocity (ndom, x, v)
     Error ("import_velocity: Do not know how to create velocities from model of coor_type %d\n", zdom[ndom].coord_type);
     Exit (0);
   }
+
   return (speed);
 }
 
@@ -238,7 +240,8 @@ import_rho (ndom, x)
      int ndom;
      double *x;
 {
-  double rho;
+  double rho = 0.0;
+
   if (zdom[ndom].coord_type == SPHERICAL)
   {
     rho = rho_1d (ndom, x);
@@ -256,5 +259,6 @@ import_rho (ndom, x)
     Error ("import_rho:  Do not know how to create velocities from model of coor_type %d\n", zdom[ndom].coord_type);
     Exit (0);
   }
+
   return (rho);
 }

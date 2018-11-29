@@ -1101,6 +1101,7 @@ scatter (p, nres, nnscat)
            gamma_twiddles are negative then something has gone wrong.
          */
 
+        prob_kpkt = 0.0;        // initialise value
         if (gamma_twiddle > 0 && gamma_twiddle_e > 0)
         {
           prob_kpkt = 1. - gamma_twiddle / gamma_twiddle_e;

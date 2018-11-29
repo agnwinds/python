@@ -979,6 +979,7 @@ the program working in both cases, and certainly mixed cases  04apr ksl  */
             Error ("get_atomic_data: file %s line %d: Level line incorrectly formatted\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
             Exit (0);
+            return (0);
           }
 // Now check that the ion for this level is already known.  If not break out
           n = 0;
@@ -1157,6 +1158,7 @@ is already incremented
             Error ("get_atomic_data: file %s line %d: Level line incorrectly formatted\n", file, lineno);
             Error ("Get_atomic_data: %s\n", aline);
             Exit (0);
+            return (0);
           }
 /* Check whether the ion for this level is known.  If not, skip the level */
 

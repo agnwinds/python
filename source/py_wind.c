@@ -663,7 +663,7 @@ one_choice (choice, root, ochoice)
  *
  **********************************************************/
 
-int
+void
 py_wind_help ()
 {
 
