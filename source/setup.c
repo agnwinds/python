@@ -546,6 +546,8 @@ init_photons ()
 #ifdef MPI_ON
   Log ("Photons per cycle per MPI task will be %d\n", NPHOT / np_mpi_global);
   NPHOT /= np_mpi_global;
+  NPHOT_MIN /= np_mpi_global;
+  NPHOT_MAX /= np_mpi_global;
 #endif
 
   rdint ("Ionization_cycles", &geo.wcycles);
