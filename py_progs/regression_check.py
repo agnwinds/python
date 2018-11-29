@@ -57,6 +57,7 @@ import os
 from glob import glob
 
 import difflib  # To compare text files
+import regression_plot # To make plots
 
 
 def diff_two_files(file1,file2):
@@ -304,6 +305,10 @@ def doit(run1='py_180809',run2='',outputfile='check.txt'):
 
 
     print(combined)
+
+    print('\n Make plots of the spectra which will be stored in Xcompare\n')
+    regression_plot.do_all(run1,run2)
+    print('Plotting completed')
 
 
 

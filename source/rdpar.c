@@ -509,6 +509,8 @@ string_process_from_command_line (question, dummy)
     rdpar_store_record (question, dummy);
     return (NORMAL);
   }
+
+  return (REISSUE);
 }
 
 
