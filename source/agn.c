@@ -54,8 +54,9 @@
 
 double
 agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
-     double r, lum, alpha, freqmin, freqmax, *f;
+     double r, lum, alpha, freqmin, freqmax;
      int ioniz_or_final;
+     double *f;
 {
 
   double t;

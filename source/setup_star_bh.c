@@ -192,7 +192,7 @@ get_bl_and_agn_params (lstar)
   }
   else
   {
-    Log ("Not Trying to make a start with a power law boundary layer %d\n", geo.bl_ion_spectype);
+    Log ("Not trying to make a start with a power law boundary layer %d\n", geo.bl_ion_spectype);
   }
 
 
@@ -231,10 +231,11 @@ get_bl_and_agn_params (lstar)
     /* if we have a "blackbody agn" the luminosity is set by Stefan Boltzmann law
        once the AGN blackbody temp is read in, otherwise set by user */
     if (geo.agn_ion_spectype != SPECTYPE_BB)
+    {
       rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
+      Log ("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
+    }
 
-
-    Log ("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
     if (geo.agn_ion_spectype == SPECTYPE_POW || geo.agn_ion_spectype == SPECTYPE_CL_TAB)
     {
       geo.alpha_agn = (-1.5);
@@ -268,6 +269,7 @@ get_bl_and_agn_params (lstar)
       /* note that alpha_agn holds the temperature in the case of "blackbody agn" */
       rddoub ("AGN.blackbody_temp(K)", &geo.alpha_agn);
       geo.lum_agn = 4 * PI * geo.r_agn * geo.r_agn * STEFAN_BOLTZMANN * pow (geo.alpha_agn, 4.);
+      Log ("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
     }
 
     /* JM 1502 -- lines to add a low frequency power law cutoff. accessible
