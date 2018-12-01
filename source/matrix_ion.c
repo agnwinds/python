@@ -685,14 +685,14 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   p = gsl_permutation_alloc (nrows);
 
 
-  lndet = gsl_linalg_LU_lndet (&m.matrix);      // get the determinant to report to user
+//WRONG  lndet = gsl_linalg_LU_lndet (&m.matrix);      // get the determinant to report to user
 
 
-  if (lndet < log (DBL_MIN * 1e4))
-  {
-    Error ("Solve_matrix: rate matrix ln(Determinant) is %8.4e for cell %i, possibly OK\n", lndet, nplasma);
-
-  }
+//WRONG  if (lndet < log (DBL_MIN * 1e4))
+//WRONG  {
+//WRONG    Error ("Solve_matrix: rate matrix ln(Determinant) is %8.4e for cell %i, possibly OK\n", lndet, nplasma);
+//WRONG
+//WRONG  }
 
   /* This routine decomposes m into its LU Components.  It stores the L part in m and the
    * U part in s and p is modified.
@@ -708,42 +708,34 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   }
 
 
-  lndet = gsl_linalg_LU_lndet (&m.matrix);      // get the determinant to report to user
+//OLD  lndet = gsl_linalg_LU_lndet (&m.matrix);      // get the determinant to report to user
 
 
-  if (lndet < log (DBL_MIN * 1e4))
-  {
-    Error ("Solve_matrix: LU ln(Determinant) is %8.4e for cell %i\n", lndet, nplasma);
-
-    // Perform zero check
-    double u;
-    for (mm = 0; mm < nrows; mm++)
-    {
-      u = gsl_matrix_get (&m.matrix, mm, mm);
-      if (u == 0)
-      {
-        Error ("Rate Matrix is singular for cell %i with %i photons (%i ionizing) \n", nplasma, plasmamain[nplasma].ntot,
-               plasmamain[nplasma].nioniz);
-//        return (4);
-      }
-    }
-
-    return (4);
-
-  }
+//OLD   if (lndet < log (DBL_MIN * 1e4))
+//OLD   {
+//OLD     Error ("Solve_matrix: LU ln(Determinant) is %8.4e for cell %i\n", lndet, nplasma);
+//OLD 
+//OLD     }
+//OLD 
+//OLD     return (4);
+//OLD 
+//OLD   }
 
 
   ierr = gsl_linalg_LU_solve (&m.matrix, p, &b.vector, populations);
 
   if (ierr)
   {
-    Error ("Solve_matrix: gsl_linalg_LU_solve failure %d for cell %i \n", ierr, nplasma);
+    lndet = gsl_linalg_LU_lndet (&m.matrix);    // get the determinant to report to user
+    Error ("Solve_matrix: gsl_linalg_LU_solve failure (%d %.3e) for cell %i \n", ierr, lndet, nplasma);
     dptr = fopen ("lower.txt", "w");
     gsl_matrix_fprintf (dptr, &m.matrix, "%.2e");
     fclose (dptr);
 
+    return (4);
 
-    Exit (0);
+
+//OLd    Exit (0);
 
   }
 
