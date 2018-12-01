@@ -652,7 +652,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
   /* Turn off gsl error hanling so that the code does not abort on error */
 
-  handler=gsl_set_error_handler_off();
+  handler = gsl_set_error_handler_off ();
 
   ierr = 0;
   test_val = 0.0;
@@ -682,15 +682,15 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   /* permuations are special structures that contain integers 0 to nrows-1, which can
    * be manipulated */
 
-  p = gsl_permutation_alloc (nrows);    
+  p = gsl_permutation_alloc (nrows);
 
 
-  lndet = gsl_linalg_LU_lndet (&m.matrix);  // get the determinant to report to user
+  lndet = gsl_linalg_LU_lndet (&m.matrix);      // get the determinant to report to user
 
 
-  if (lndet == 0)
+  if (lndet < log (DBL_MIN * 1e4))
   {
-    Error ("Rate Matrix ln(Determinant) is %8.4e for cell %i at point X, possible OK\n", lndet, nplasma);
+    Error ("Solve_matrix: rate matrix ln(Determinant) is %8.4e for cell %i, possibly OK\n", lndet, nplasma);
 
   }
 
@@ -698,23 +698,36 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
    * U part in s and p is modified.
    */
 
-  ierr= gsl_linalg_LU_decomp (&m.matrix, p, &s);
+  ierr = gsl_linalg_LU_decomp (&m.matrix, p, &s);
 
   if (ierr)
   {
-    Error ("Rate Matrix gsl_linalg_LU_decomp failure %d for cell %i \n", ierr, nplasma);
-    Exit(0);
+    Error ("Solve_matrix: gsl_linalg_LU_decomp failure %d for cell %i \n", ierr, nplasma);
+    Exit (0);
 
   }
 
 
-  lndet = gsl_linalg_LU_lndet (&m.matrix);  // get the determinant to report to user
+  lndet = gsl_linalg_LU_lndet (&m.matrix);      // get the determinant to report to user
 
 
-  if (lndet < log(DBL_MIN*1e4))
-//  if (lndet == 0)
+  if (lndet < log (DBL_MIN * 1e4))
   {
-    Error ("Rate Matrix ln(Determinant) is %8.4e for cell %i\n", lndet, nplasma);
+    Error ("Solve_matrix: LU ln(Determinant) is %8.4e for cell %i\n", lndet, nplasma);
+
+    // Perform zero check
+    double u;
+    for (mm = 0; mm < nrows; mm++)
+    {
+      u = gsl_matrix_get (&m.matrix, mm, mm);
+      if (u == 0)
+      {
+        Error ("Rate Matrix is singular for cell %i with %i photons (%i ionizing) \n", nplasma, plasmamain[nplasma].ntot,
+               plasmamain[nplasma].nioniz);
+//        return (4);
+      }
+    }
+
     return (4);
 
   }
@@ -724,13 +737,13 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
   if (ierr)
   {
-    Error ("Rate Matrix gsl_linalg_LU_solve failure %d for cell %i \n", ierr, nplasma);
-    dptr=fopen("lower.txt","w");
-    gsl_matrix_fprintf(dptr,&m.matrix,"%.2e");
-    fclose(dptr);
+    Error ("Solve_matrix: gsl_linalg_LU_solve failure %d for cell %i \n", ierr, nplasma);
+    dptr = fopen ("lower.txt", "w");
+    gsl_matrix_fprintf (dptr, &m.matrix, "%.2e");
+    fclose (dptr);
 
 
-    Exit(0);
+    Exit (0);
 
   }
 
@@ -748,7 +761,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
   if (ierr != 0)
   {
-    Error ("solve_matrix: bad return when testing matrix solution to rate equations.\n");
+    Error ("Solve_matrix: bad return when testing matrix solution to rate equations.\n");
   }
 
   /* now cycle through and check the solution to y = m * populations really is (1, 0, 0 ... 0) */
@@ -766,14 +779,14 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
     {
       if (fabs ((test_val - b_data[mm]) / test_val) > EPSILON)
       {
-        Error ("solve_matrix: test solution fails relative error for row %i %e != %e\n", mm, test_val, b_data[mm]);
+        Error ("Solve_matrix: test solution fails relative error for row %i %e != %e\n", mm, test_val, b_data[mm]);
         ierr = 2;
       }
     }
     else if (fabs (test_val - b_data[mm]) > EPSILON)    // if b_data is 0, check absolute error
 
     {
-      Error ("solve_matrix: test solution fails absolute error for row %i %e != %e\n", mm, test_val, b_data[mm]);
+      Error ("Solve_matrix: test solution fails absolute error for row %i %e != %e\n", mm, test_val, b_data[mm]);
       ierr = 3;
     }
   }
@@ -787,7 +800,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   gsl_matrix_free (test_matrix);
   gsl_vector_free (populations);
 
-  gsl_set_error_handler(handler);
+  gsl_set_error_handler (handler);
 
   return (ierr);
 }
