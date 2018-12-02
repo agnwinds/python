@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 #include "atomic.h"
 #include "python.h"
 
@@ -624,7 +625,6 @@ populate_ion_rate_matrix (rate_matrix, pi_rates, inner_rates, rr_rates, b_temp, 
  * algorithms used for this are from the gsl library
  *
  * ### Notes ###
- * ??? NOTES ???
  *
  **********************************************************/
 
@@ -641,17 +641,25 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
      solution via gsl_linalg_LU_refine */
   double test_val;
   double lndet;
+//OLD  FILE *dptr;
 
   gsl_permutation *p;
   gsl_matrix_view m;
   gsl_vector_view b;
   gsl_vector *test_vector, *populations;
   gsl_matrix *test_matrix;
+  gsl_error_handler_t *handler;
+
+  /* Turn off gsl error hanling so that the code does not abort on error */
+
+  handler = gsl_set_error_handler_off ();
 
   ierr = 0;
   test_val = 0.0;
 
-  /* create gsl matrix/vector views of the arrays of rates */
+  /* create gsl matrix/vector views of the arrays of rates. 
+   * This is the structure that gsl uses do define an array.
+   * It contains not only the data but the dimensions, etc.*/
   m = gsl_matrix_view_array (a_data, nrows, nrows);
 
   /* these are used for testing the solution below */
@@ -661,29 +669,68 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   gsl_matrix_memcpy (test_matrix, &m.matrix);   // create copy for testing
 
 
+  /* gsl_vector_view_array creates the structure that gsl uses to define a vector
+   * It contains the data and the dimension, and other information about where
+   * the vector is stored in memory etc.
+   */
   b = gsl_vector_view_array (b_data, nrows);
 
   /* the populations vector will be a gsl vector which stores populations */
   populations = gsl_vector_alloc (nrows);
 
 
-  p = gsl_permutation_alloc (nrows);    // NEWKSL
+  /* permuations are special structures that contain integers 0 to nrows-1, which can
+   * be manipulated */
 
-  gsl_linalg_LU_decomp (&m.matrix, p, &s);
-
-//  det = gsl_linalg_LU_det (&m.matrix, s);       // get the determinant to report to user
-  lndet = gsl_linalg_LU_lndet (&m.matrix);
+  p = gsl_permutation_alloc (nrows);
 
 
-  if (lndet == 0)
+
+  /* This routine decomposes m into its LU Components.  It stores the L part in m and the
+   * U part in s and p is modified.
+   */
+
+  ierr = gsl_linalg_LU_decomp (&m.matrix, p, &s);
+
+  if (ierr)
   {
-    Error ("Rate Matrix ln(Determinant) is %8.4e for cell %i\n", lndet, nplasma);
-    return (4);
+    Error ("Solve_matrix: gsl_linalg_LU_decomp failure %d for cell %i \n", ierr, nplasma);
+    Exit (0);
 
   }
 
 
-  gsl_linalg_LU_solve (&m.matrix, p, &b.vector, populations);
+//OLD  The next lines are a more conservative way to check for a possible falure 
+//OLD  and should be deleted if problems with this do not crop up
+//OLD  lndet = gsl_linalg_LU_lndet (&m.matrix);      // get the determinant to report to user
+
+
+//OLD   if (lndet < log (DBL_MIN * 1e4))
+//OLD   {
+//OLD     Error ("Solve_matrix: LU ln(Determinant) is %8.4e for cell %i\n", lndet, nplasma);
+//OLD 
+//OLD     }
+//OLD 
+//OLD     return (4);
+//OLD 
+//OLD   }
+
+
+  ierr = gsl_linalg_LU_solve (&m.matrix, p, &b.vector, populations);
+
+  if (ierr)
+  {
+    lndet = gsl_linalg_LU_lndet (&m.matrix);    // get the determinant to report to user
+    Error ("Solve_matrix: gsl_linalg_LU_solve failure (%d %.3e) for cell %i \n", ierr, lndet, nplasma);
+//OLD    dptr = fopen ("lower.txt", "w");
+//OLD    gsl_matrix_fprintf (dptr, &m.matrix, "%.2e");
+//OLD    fclose (dptr);
+
+    return (4);
+
+
+
+  }
 
   gsl_permutation_free (p);
 
@@ -699,7 +746,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
 
   if (ierr != 0)
   {
-    Error ("solve_matrix: bad return when testing matrix solution to rate equations.\n");
+    Error ("Solve_matrix: bad return when testing matrix solution to rate equations.\n");
   }
 
   /* now cycle through and check the solution to y = m * populations really is (1, 0, 0 ... 0) */
@@ -717,14 +764,14 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
     {
       if (fabs ((test_val - b_data[mm]) / test_val) > EPSILON)
       {
-        Error ("solve_matrix: test solution fails relative error for row %i %e != %e\n", mm, test_val, b_data[mm]);
+        Error ("Solve_matrix: test solution fails relative error for row %i %e != %e\n", mm, test_val, b_data[mm]);
         ierr = 2;
       }
     }
     else if (fabs (test_val - b_data[mm]) > EPSILON)    // if b_data is 0, check absolute error
 
     {
-      Error ("solve_matrix: test solution fails absolute error for row %i %e != %e\n", mm, test_val, b_data[mm]);
+      Error ("Solve_matrix: test solution fails absolute error for row %i %e != %e\n", mm, test_val, b_data[mm]);
       ierr = 3;
     }
   }
@@ -737,6 +784,8 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   gsl_vector_free (test_vector);
   gsl_matrix_free (test_matrix);
   gsl_vector_free (populations);
+
+  gsl_set_error_handler (handler);
 
   return (ierr);
 }

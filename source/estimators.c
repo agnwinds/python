@@ -432,7 +432,7 @@ mc_estimator_normalise (n)
   double volume;
   int i, j;
   double stimfac, line_freq, stat_weight_ratio;
-  double heat_contribution;
+  double heat_contribution, lower_density, upper_density;
   WindPtr one;
   PlasmaPtr xplasma;
   MacroPtr mplasma;
@@ -524,14 +524,15 @@ mc_estimator_normalise (n)
     {
 
       /* The correction for stimulated emission is (1 - n_lower * g_upper / n_upper / g_lower) */
-
-      stimfac = den_config (xplasma, line[config[i].bbu_jump[j]].nconfigu) / den_config (xplasma, i);
+      lower_density = den_config (xplasma, i);
+      upper_density = den_config (xplasma, line[config[i].bbu_jump[j]].nconfigu);
+      stimfac = upper_density / lower_density;
       stimfac = stimfac * config[i].g / config[line[config[i].bbu_jump[j]].nconfigu].g;
       if (stimfac < 1.0 && stimfac >= 0.0)
       {
         stimfac = 1. - stimfac; //all's well
       }
-      else
+      else if (upper_density > DENSITY_PHOT_MIN && lower_density > DENSITY_PHOT_MIN)
       {
         Error ("mc_estimator_normalise: bb stimulated correction factor is out of bound. Abort.\n");
         Error ("stimfac %g, i %d, line[config[i].bbu_jump[j]].nconfigu %d\n", stimfac, i, line[config[i].bbu_jump[j]].nconfigu);
@@ -540,6 +541,10 @@ mc_estimator_normalise (n)
            den_config (xplasma, i), den_config (xplasma, line[config[i].bbu_jump[j]].nconfigu));
         stimfac = 0.0;
         //Exit (0);
+      }
+      else
+      {
+        stimfac = 0.0;
       }
 
       //get the line frequency
