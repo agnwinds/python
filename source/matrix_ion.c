@@ -641,7 +641,7 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
      solution via gsl_linalg_LU_refine */
   double test_val;
   double lndet;
-  FILE *dptr;
+//OLD  FILE *dptr;
 
   gsl_permutation *p;
   gsl_matrix_view m;
@@ -685,14 +685,6 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   p = gsl_permutation_alloc (nrows);
 
 
-//WRONG  lndet = gsl_linalg_LU_lndet (&m.matrix);      // get the determinant to report to user
-
-
-//WRONG  if (lndet < log (DBL_MIN * 1e4))
-//WRONG  {
-//WRONG    Error ("Solve_matrix: rate matrix ln(Determinant) is %8.4e for cell %i, possibly OK\n", lndet, nplasma);
-//WRONG
-//WRONG  }
 
   /* This routine decomposes m into its LU Components.  It stores the L part in m and the
    * U part in s and p is modified.
@@ -708,6 +700,8 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   }
 
 
+//OLD  The next lines are a more conservative way to check for a possible falure 
+//OLD  and should be deleted if problems with this do not crop up
 //OLD  lndet = gsl_linalg_LU_lndet (&m.matrix);      // get the determinant to report to user
 
 
@@ -728,14 +722,13 @@ solve_matrix (a_data, b_data, nrows, x, nplasma)
   {
     lndet = gsl_linalg_LU_lndet (&m.matrix);    // get the determinant to report to user
     Error ("Solve_matrix: gsl_linalg_LU_solve failure (%d %.3e) for cell %i \n", ierr, lndet, nplasma);
-    dptr = fopen ("lower.txt", "w");
-    gsl_matrix_fprintf (dptr, &m.matrix, "%.2e");
-    fclose (dptr);
+//OLD    dptr = fopen ("lower.txt", "w");
+//OLD    gsl_matrix_fprintf (dptr, &m.matrix, "%.2e");
+//OLD    fclose (dptr);
 
     return (4);
 
 
-//OLd    Exit (0);
 
   }
 
