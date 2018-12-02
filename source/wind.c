@@ -233,7 +233,7 @@ model_velocity (ndom, x, v)
      double x[], v[];
      int ndom;
 {
-  double speed;
+  double speed = 0;
 
   if (zdom[ndom].wind_type == SV)
   {
@@ -375,7 +375,7 @@ model_rho (ndom, x)
      int ndom;
      double x[];
 {
-  double rho;
+  double rho = 0;
 
   if (zdom[ndom].wind_type == SV)
   {

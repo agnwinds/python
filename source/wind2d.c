@@ -589,6 +589,7 @@ where_in_grid (ndom, x)
     {
       Error ("where_in_grid: Unknown coord_type %d for domain %d\n", zdom[ndom].coord_type, ndom);
       Exit (0);
+      return (0);
     }
 
 

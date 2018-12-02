@@ -341,7 +341,7 @@ integ_fb (t, f1, f2, nion, fb_choice, mode)
 
   Error ("integ_fb: Unknown mode(%d)\n", mode);
   Exit (0);
-
+  return (0);
 }
 
 
@@ -836,8 +836,7 @@ fb (xplasma, t, freq, ion_choice, fb_choice)
   int nmin, nmax;               // These are the photo-ionization xsections that are used
   int nion, nion_min, nion_max;
 
-
-
+  nion_min = nion_max = 0;
   if (ion_choice < nions)       //Get emissivity for this specific ion_number
   {
     nion_min = ion_choice;
@@ -1240,6 +1239,7 @@ xinteg_fb (t, f1, f2, nion, fb_choice)
 
   dnu = 0.0;                    //Avoid compilation errors.
 
+  nmin = nmax = 0;
   if (-1 < nion && nion < nions)        //Get emissivity for this specific ion_number
   {
     if (ion[nion].phot_info > 0)        // topbase or hybrid

@@ -153,7 +153,7 @@ matom (p, nres, escape)
 
   /* The first step is to identify the configuration that has been excited. */
 
-
+  uplvl = 0;
   if (*nres < NLINES)           //this means that it was a line excitation CHECK
   {
     uplvl = lin_ptr[*nres]->nconfigu;

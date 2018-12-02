@@ -38,7 +38,7 @@ double bl_init (double lum_bl, double t_bl, double freqmin, double freqmax, int 
 int photon_checks (PhotPtr p, double freqmin, double freqmax, char *comment);
 /* parse.c */
 int parse_command_line (int argc, char *argv[]);
-int help (void);
+void help (void);
 /* saha.c */
 int nebular_concentrations (PlasmaPtr xplasma, int mode);
 int concentrations (PlasmaPtr xplasma, int mode);
@@ -623,7 +623,7 @@ int level_tauoverview (int nlev, WindPtr w, char rootname[], int ochoice);
 /* py_wind.c */
 int main (int argc, char *argv[]);
 int one_choice (int choice, char *root, int ochoice);
-int py_wind_help (void);
+void py_wind_help (void);
 /* windsave2table.c */
 int main (int argc, char *argv[]);
 /* windsave2table_sub.c */

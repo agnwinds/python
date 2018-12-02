@@ -658,6 +658,7 @@ return and record an error */
   {
     Error ("ds_in_cell: Don't know how to find ds_in_cell in this coord system %d\n", zdom[ndom].coord_type);
     Exit (0);
+    return (0);
   }
 
   return (smax);
