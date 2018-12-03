@@ -694,5 +694,5 @@ This program reads a wind save file created by python and examine the wind struc
 
   Exit (0);
 
-  return (0);
+  return;
 }
