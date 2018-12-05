@@ -121,6 +121,12 @@ calculate_ionization (restart_stat)
 
   if (ENABLE_PHOT_STEP == TRUE)
   {
+    if (restart_stat)
+    {
+      Error ("Restarting with log_photon_step=yes is not supported yet\n");
+      Exit (1);
+    }
+
     nphot_steps = (int) log10 ((double) NPHOT_MAX / NPHOT_MIN) + 1;
     nphot_next_cycle = nphot_cycle_gap = geo.wcycles / nphot_steps;
     Log ("NPHOT will increase %i times every %i cycles\n", nphot_steps - 1, nphot_cycle_gap);
@@ -152,16 +158,17 @@ calculate_ionization (restart_stat)
     else
       iwind = 1;                /* Create wind photons and force a reinitialization of wind parms */
 
-
-    /*
-     * EP: If photon incrementing is enabled, figure out the number of photons
-     * to use. When in multiprocessor mode, there is a bit of messing about with
-     * multiplying and division to ensure that NPHOT is set correctly across
-     * all processes for an arbitrary number of MPI processes
-     */
-
-    if (ENABLE_PHOT_STEP == TRUE && geo.wcycle == nphot_next_cycle && NPHOT < NPHOT_MAX)
+    if (ENABLE_PHOT_STEP == TRUE && geo.wcycle == nphot_next_cycle)
     {
+      /*
+       * EP: If photon incrementing is enabled, figure out the number of photons
+       * to use. When in multiprocessor mode, there is a bit of messing about with
+       * multiplying and division to ensure that NPHOT is set correctly across
+       * all processes for an arbitrary number of MPI processes. Previously,
+       * NPHOT would be increased incorrectly by a value of 10 / np_mpi_global
+       * leading to less photons than we wanted
+       */
+
 #ifdef MPI_ON
       NPHOT *= np_mpi_global;
 #endif
@@ -169,6 +176,15 @@ calculate_ionization (restart_stat)
 #ifdef MPI_ON
       NPHOT /= np_mpi_global;
 #endif
+
+      /*
+       * EP: we don't want NPHOT to become larger than NPHOT_MAX, which can
+       * happen with some values of ionisation cycles and values of NPHOT_MIN
+       * and NPHOT_MAX
+       */
+
+      if (NPHOT > NPHOT_MAX)
+        NPHOT = NPHOT_MAX;
 
       /*
        * EP: both p and photmain realloc'd otherwise photmain would end
