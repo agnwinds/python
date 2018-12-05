@@ -729,7 +729,7 @@ kbf_need (fmin, fmax)
 
 /**********************************************************/
 /**
- * @brief      double (p,w,l,dvds)  calculates tau associated with a resonance, given the
+ * @brief      calculates tau in the sobolev approxmation for a resonance, given the
  * conditions in the wind and the direction of the photon.
  *
  * It does not modify any of the variables that are passed to it, including for example
@@ -777,9 +777,9 @@ sobolev (one, x, den_ion, lptr, dvds)
 
   if ((dvds = fabs (dvds)) == 0.0)      // This forces dvds to be positive -- a good thing!
   {
-    d1 = d2 = 0.;               // Elimiante warning when complied with clang
+    d1 = d2 = 0.;               // Eliminate warning when complied with clang
     tau = VERY_BIG;
-    Error ("Sobolev: Surprise tau = VERY_BIG\n");
+    Error ("Sobolev: Surprise tau = VERY_BIG as dvds is 0\n");
   }
 
   else if (lptr->macro_info == 1 && geo.rt_mode == RT_MODE_MACRO && geo.macro_simple == 0)
@@ -811,13 +811,32 @@ calls to two_level atom
     xplasma->density[nion] = d_hold;    // Restore w
   }
 
+/* At this point d1 and d2 are known for all of the various ways sobolev can be called, and whether
+ * macro atoms are involved or not
+ */
+
+  /* Check whether both d1 and d2 are below a minium value where we expect tau to be zero and where 
+   * we can be subject to the effects of roundoff errors in terms of the determination of densities.
+   * If densities are this low we expect the sobolev optical depth to be extremely small in any event
+   */
+
+  if (d1 < DENSITY_PHOT_MIN && d2 < DENSITY_PHOT_MIN)
+  {
+    return (0);
+  }
 
 
   xden_ion = (d1 - lptr->gl / lptr->gu * d2);
 
   if (xden_ion < 0)
   {
-    Error ("sobolev: den_ion has negative density %g %g %g %g %g %g\n", d1, d2, lptr->gl, lptr->gu, lptr->freq, lptr->f);
+    Error ("sobolev: VERY BAD den_ion has negative density %g %g %g %g %g %g\n", d1, d2, lptr->gl, lptr->gu, lptr->freq, lptr->f);
+
+    /* With the changesabove to limit the denisties the above error should not be happening, and if this does occur then 
+     * we should determine why.  When we become convinced this problem has been dealt with effectively we can simplify this
+     * code and just quit if the error occurs
+     * ksl 181127
+     */
 
     /*SS July 08: With macro atoms, the population solver can default to d2 = gu/gl * d1 which should
        give exactly zero here but can be negative, numerically.

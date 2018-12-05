@@ -239,7 +239,7 @@ macro_pops (xplasma, xne)
   int index_bbu, index_bbd, index_bfu, index_bfd;
   int lower, upper;
   double this_ion_density, level_population;
-  double levden_temp, ionden_temp;
+  double ionden_temp;
   double inversion_test;
   double q_ioniz (), q_recomb ();
   double *a_data, *b_data;

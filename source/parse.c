@@ -177,7 +177,7 @@ parse_command_line (argc, argv)
 
     if (j + 1 == argc)
     {
-      Error ("All of the command line has been consumed without specifying a parameter file name, so exiting\n");
+      Error ("All of the command line has been consumed without specifying a parameter file name, so Exiting\n");
       Exit (0);
     }
 
@@ -232,38 +232,42 @@ help ()
 \n\
 This program simulates radiative transfer in a (biconical) CV, YSO, quasar or (spherical) stellar wind \n\
 \n\
-	Usage:  py [-h] [-r] [-t time_max] xxx  or simply py \n\
+Usage:  py [-h] [-r] [-t time_max] [-v n] [--dry-run] [-i] [--version] [--rseed]  xxx  or simply py \n\
 \n\
-	where xxx is the rootname or full name of a parameter file, e. g. test.pf \n\
+where xxx is the rootname or full name of a parameter file, e. g. test.pf \n\
 \n\
-	and the switches have the following meanings \n\
+and the switches have the following meanings \n\
 \n\
-	-h 	to ge this help message \n\
-	-r 	restart a run of the progarm reading the file xxx.windsave \n\
-	-e change the maximum number of errors before quit- don't do this unless you understand\
-	the consequences! \n\
+ -h             Print this help message and stop \n\
+ -r             Restart a run of the progarm reading the file xxx.windsave \n\
+ -t time_max    Limit the total time to approximately time_max seconds.  Note that the program checks \n\
+                for this limit somewhat infrequently, usually at the ends of cycles, because it \n\
+                is attempting to save the program outputs so that the program can be restarted with \n\
+                -r if that is desired. \n\
+ -v n           Increase or decrease the amount of print out.  The default is 4.  Larger numbers increase  \n\
+                the amount printed; smaller numbers decrease it.   \n\
+ --dry-run      Create a new .pf file and stop \n\
+ -i             Same as --dry-run \n\
+ --version      Print out python version, commit hash and if there were files with uncommitted \n\
+                changes and stop \n\
+ --rseed        Set the random number seed to be time-based, rather than fixed. \n\
 \n\
-	-t time_max	limit the total time to approximately time_max seconds.  Note that the program checks \n\
-		for this limit somewhat infrequently, usually at the ends of cycles, because it \n\
-		is attempting to save the program outputs so that the program can be restarted with \n\
-		-r if that is desired. \n\
-\n\
-	-v n	controls the amount of print out.  The default is 4.  Larger numbers increase  \n\
-		the amount printed; smaller numbers decrease it.   \n\
-   --dry-run	Create a new .pf file and stop \n\
-   --version	print out python version, commit hash and if there were files with uncommitted \n\
-                changes \n\
-      --rseed   set the random number seed to be time based, rather than fixed. \n\
-\n\
-(Certain other switches exist but these are largely diagnostic, or for special cases) \n\
+Other switches exist but these are not intended for the general user.\n\
+These are largely diagnostic or for special cases. These include\n\
+ -d            Enable advanced/diagnostic inputs (normally for debugging purposes) \n\
+               Python will then query the user for information about what to do with a series of \n\
+               inputs beginning with @ \n\
+ -e            Change the maximum number of errors before the progam will quit\n\
+ -f            Invoke a fixed temperature mode, used for runs with Zeus \n\
+ -z            Invoke a special mode for that causes Python to start with a run from Zeus\n\
 \n\
 If one simply types py or pyZZ where ZZ is the version number, one is queried for a name \n\
-	of the parameter file. \n\
+of the parameter file and inputs will be requested from the command line. \n\
 \n\
 \n\
 ";                              // End of string to provide one with help
 
   printf ("%s\n", some_help);
 
-  Exit (0);
+  Exit (0);                     // Note that here we simply do want to exit, not use Exit
 }

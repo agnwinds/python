@@ -15,6 +15,7 @@
 
 #include "atomic.h"
 #include "python.h"
+#include "models.h"
 
 
 /**********************************************************/
@@ -75,6 +76,7 @@ get_stellar_params ()
     get_spectype (geo.star_radiation,
                   //"Rad_type_for_star(0=bb,1=models)_to_make_wind",
                   "Central_object.rad_type_to_make_wind(0=bb,1=models)", &geo.star_ion_spectype);
+
 
     if (geo.star_radiation)
       geo.tstar_init = 40000;
@@ -174,6 +176,15 @@ get_bl_and_agn_params (lstar)
   get_spectype (geo.bl_radiation, "Boundary_layer.rad_type_to_make_wind(0=bb,1=models,3=pow)", &geo.bl_ion_spectype);
   get_spectype (geo.agn_radiation,
                 "Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind", &geo.agn_ion_spectype);
+
+  if (geo.agn_radiation && geo.agn_ion_spectype >= 0 && comp[geo.agn_ion_spectype].nmods != 1)
+  {
+    Error ("get_bl_and_agn_params: When using models with an AGN, there should be exactly 1 model, we have %i for ion cycles\n",
+           comp[geo.agn_ion_spectype].nmods);
+    exit (0);
+  }
+
+
 
   /* 130621 - ksl - This is a kluge to add a power law to stellar systems.  What is done
      is to remove the bl emission, which we always assume to some kind of temperature
