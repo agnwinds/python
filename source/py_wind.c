@@ -152,6 +152,7 @@ main (argc, argv)
   char windradfile[LINELENGTH], windsavefile[LINELENGTH];
   char parameter_file[LINELENGTH];
   char photfile[LINELENGTH];
+  char *fgets_result;
   double freq;
   int interactive;
 
@@ -172,7 +173,7 @@ main (argc, argv)
   if (argc == 1)
   {
     printf ("Root for wind file :");
-    fgets (input, LINELENGTH, stdin);
+    fgets_result = fgets (input, LINELENGTH, stdin);
     get_root (root, input);
   }
   else
@@ -247,7 +248,7 @@ I did not change this now.  Though it could be done.  02apr ksl */
   if (wind_read (windsavefile) < 0)
   {
     Error ("py_wind: Could not open %s", windsavefile);
-    Exit (0);
+    exit (0);
   }
 
 /* aaa is used to store variable for writing to files for the purpose of plotting*/
@@ -270,7 +271,7 @@ I did not change this now.  Though it could be done.  02apr ksl */
     zoom (1);                   /* This affects the logfile */
     ochoice = 1;
     complete_file_summary (wmain, root, ochoice);
-    Exit (0);
+    exit (0);
   }
   else if (interactive == -1)
   {
@@ -296,7 +297,7 @@ I did not change this now.  Though it could be done.  02apr ksl */
       sprintf (windsavefile, "python%02d.wind_save", i);
       i++;
     }
-    Exit (0);
+    exit (0);
   }
 
 
@@ -630,7 +631,7 @@ one_choice (choice, root, ochoice)
   case 'q':                    /* quit */
     /* Write out a parameterfile that gives all of the commands used in this run */
     cpar ("py_wind.pf");
-    Exit (0);
+    exit (0);
     break;
 
   }
@@ -692,7 +693,5 @@ This program reads a wind save file created by python and examine the wind struc
 
   printf ("Choices are indicated below\n%s\n", choice_options);
 
-  Exit (0);
-
-  return;
+  exit (0);
 }

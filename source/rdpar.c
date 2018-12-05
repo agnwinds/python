@@ -556,7 +556,7 @@ string_process_from_file (question, dummy)
 {
 
   char firstword[LINELEN], secondword[LINELEN];
-  char *line;
+  char *line, *fgets_return;
   char *ccc, *index (), *fgets ();
   int nwords, wordlength;
   char old_question[LINELEN];
@@ -658,7 +658,7 @@ string_process_from_file (question, dummy)
 
     strcpy (secondword, dummy);
 
-    fgets (dummy, LINELEN, stdin);
+    fgets_return = fgets (dummy, LINELEN, stdin);
 
     if (strcmp (dummy, "\n") == 0)
     {                           /* Store the provided value since \n */
@@ -1231,7 +1231,7 @@ string2int (word, string_choices, string_values, string_answer)
 
   if (ibest >= 0)
   {
-    printf ("XX %s %d\n", xs[ibest], ivalue);
+    // OLD printf ("XX %s %d\n", xs[ibest], ivalue);
     strcpy (string_answer, xs[ibest]);
   }
 
@@ -1339,7 +1339,7 @@ rdchoice (question, answers, answer)
     strcpy (dummy, &question[nstart + 1]);
     dummy[strlen (dummy) - 1] = ' ';
     ianswer = string2int (string_answer, dummy, answers, full_answer);
-    printf ("XXX the answer was %s\n", full_answer);
+    // OLD printf ("XXX the answer was %s\n", full_answer);
     if (ianswer == -99)
     {
       Error ("rdchoice: Could not match %s input to one of answers: %s\nTry again\n", string_answer, dummy);

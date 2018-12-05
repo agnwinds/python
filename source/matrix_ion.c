@@ -247,8 +247,8 @@ matrix_ion_populations (xplasma, mode)
     /* Replaced inline array allocaation with calloc, which will work with older version of c compilers calloc also sets the
        elements to zero, which is required */
 
-    b_data = (double *) calloc (sizeof (double), nrows);
-    populations = (double *) calloc (sizeof (double), nrows);
+    b_data = (double *) calloc (nrows, sizeof (double));
+    populations = (double *) calloc (nrows, sizeof (double));
 
     /* This b_data column matrix is the total number density for each element, placed into the row which relates to the neutral
        ion. This matches the row in the rate matrix which is just 1 1 1 1 for all stages. NB, we could have chosen any line for

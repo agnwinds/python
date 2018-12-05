@@ -782,7 +782,7 @@ read_non_standard_disk_profile (tprofile)
 {
 
   FILE *fopen (), *fptr;
-  int n;
+  int n, result;
   float dumflt1, dumflt2;
   int dumint;
 
@@ -792,11 +792,11 @@ read_non_standard_disk_profile (tprofile)
     Exit (0);
   }
 
-  fscanf (fptr, "%d\n", &dumint);
+  result = fscanf (fptr, "%d\n", &dumint);
   blmod.n_blpts = dumint;
   for (n = 0; n < blmod.n_blpts; n++)
   {
-    fscanf (fptr, "%g %g", &dumflt1, &dumflt2);
+    result = fscanf (fptr, "%g %g", &dumflt1, &dumflt2);
     blmod.r[n] = dumflt1 * 1.e11;
     blmod.t[n] = dumflt2 * 1.e3;
   }
