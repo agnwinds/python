@@ -3377,7 +3377,7 @@ complete_ion_summary (w, rootname, ochoice)
 {
   char cell[5];
   PlasmaPtr xplasma;
-  FILE *fptr, *fopen ();
+  FILE *fptr = NULL, *fopen ();
   char filename[LINELENGTH];
 
 

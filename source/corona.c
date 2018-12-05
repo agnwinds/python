@@ -214,6 +214,7 @@ corona_velocity (ndom, x, v)
 
 double
 corona_rho (ndom, x)
+     int ndom;
      double x[];
 {
   double rho;

@@ -647,6 +647,7 @@ cylind_get_random_location (n, x)
 
 int
 cylind_extend_density (ndom, w)
+     int ndom;
      WindPtr w;
 {
 

@@ -97,7 +97,7 @@ main (argc, argv)
 {
 
 
-
+  char *fgets_return;
   char root[LINELENGTH], input[LINELENGTH];
   char outputfile[LINELENGTH];
   char windsavefile[LINELENGTH];
@@ -115,7 +115,7 @@ main (argc, argv)
   if (argc == 1)
   {
     printf ("Root for wind file :");
-    fgets (input, LINELENGTH, stdin);
+    fgets_return = fgets (input, LINELENGTH, stdin);
     get_root (root, input);
   }
   else
@@ -141,7 +141,7 @@ main (argc, argv)
   if (wind_read (windsavefile) < 0)
   {
     Error ("py_wind: Could not open %s", windsavefile);
-    Exit (0);
+    exit (0);
   }
 
 

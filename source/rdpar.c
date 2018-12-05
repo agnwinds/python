@@ -556,7 +556,7 @@ string_process_from_file (question, dummy)
 {
 
   char firstword[LINELEN], secondword[LINELEN];
-  char *line;
+  char *line, *fgets_return;
   char *ccc, *index (), *fgets ();
   int nwords, wordlength;
   char old_question[LINELEN];
@@ -658,7 +658,7 @@ string_process_from_file (question, dummy)
 
     strcpy (secondword, dummy);
 
-    fgets (dummy, LINELEN, stdin);
+    fgets_return = fgets (dummy, LINELEN, stdin);
 
     if (strcmp (dummy, "\n") == 0)
     {                           /* Store the provided value since \n */

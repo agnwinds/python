@@ -52,13 +52,14 @@ parse_command_line (argc, argv)
   char dummy[LINELENGTH];
   int mkdir ();
   double time_max;
+  char *fgets_result;
 
   restart_stat = 0;
 
   if (argc == 1)
   {
     printf ("Parameter file name (e.g. my_model.pf, or just my_model):");
-    fgets (dummy, LINELENGTH, stdin);
+    fgets_result = fgets (dummy, LINELENGTH, stdin);
     get_root (files.root, dummy);
     strcpy (files.diag, files.root);
     strcat (files.diag, ".diag");
