@@ -155,7 +155,7 @@ where_in_wind (x, ndomain)
 
     /* At this point global constraints (however poorly defned) have 
      * been applied to an arbitrary imported model, but we must still check 
-     * whether this particulary point is in the grid and whether that point is
+     * whether this particular point is in the grid and whether that point is
      * in the wind or not.  We follow the usual practice of allowing the grid to
      * define whether it is in the grid or not..  
      */

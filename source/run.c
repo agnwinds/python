@@ -70,6 +70,20 @@ calculate_ionization (restart_stat)
   int ioniz_spec_helpers;
 #endif
 
+  /* Save the the windfile before the first ionization cycle in order to
+   * allow investigation of issues that may have arisen at the very beginning
+   */
+
+#ifdef MPI_ON
+  if (rank_global == 0)
+  {
+#endif
+    wind_save (files.windsave); // This is only needed to update pcycle
+#ifdef MPI_ON
+  }
+#endif
+
+
 
   p = photmain;
   w = wmain;
@@ -109,6 +123,7 @@ calculate_ionization (restart_stat)
     reverb_init (wmain);
     delay_dump_prep (restart_stat);
   }
+
 
 
   while (geo.wcycle < geo.wcycles)

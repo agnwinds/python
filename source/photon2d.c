@@ -271,45 +271,12 @@ ds_to_wind (pp, ndom_current)
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
-    if (zdom[ndom].wind_type != IMPORT)
-    {
-      /* Check if the photon hits the inner or outer radius of the wind */
-      if ((x = ds_to_sphere (zdom[ndom].rmax, &ptest)) < ds)
-      {
-        ds = x;
-        *ndom_current = ndom;
-        xxxbound = BOUND_RMIN;
-      }
-
-      if ((x = ds_to_sphere (zdom[ndom].rmin, &ptest)) < ds)
-      {
-        ds = x;
-        *ndom_current = ndom;
-        xxxbound = BOUND_RMAX;
-      }
-
-      /* Check if the photon hits the inner or outer windcone */
-
-      if ((x = ds_to_cone (&zdom[ndom].windcone[0], &ptest)) < ds)
-      {
-        ds = x;
-        *ndom_current = ndom;
-        xxxbound = BOUND_INNER_CONE;
-      }
-      if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
-      {
-        ds = x;
-        *ndom_current = ndom;
-        xxxbound = BOUND_OUTER_CONE;
-      }
-    }
-
     /* For this rectangular region we check whether we are in side the grid,
      * which should effectively.  For * an imported region file we may not be
      * inside the wind, since some cells may be empty
      */
 
-    else if (zdom[ndom].wind_type == CORONA || (zdom[ndom].wind_type == IMPORT && zdom[ndom].coord_type == CYLIND))
+    if (zdom[ndom].wind_type == CORONA || (zdom[ndom].wind_type == IMPORT && zdom[ndom].coord_type == CYLIND))
     {
 
 
@@ -340,6 +307,45 @@ ds_to_wind (pp, ndom_current)
           *ndom_current = ndom;
           xxxbound = BOUND_ZMAX;
         }
+
+
+        else
+        {
+          /* This option is for the normal case of models which are defined
+           * by windcone, e.g KWD, SV
+           */
+
+          /* Check if the photon hits the inner or outer radius of the wind */
+          if ((x = ds_to_sphere (zdom[ndom].rmax, &ptest)) < ds)
+          {
+            ds = x;
+            *ndom_current = ndom;
+            xxxbound = BOUND_RMIN;
+          }
+
+          if ((x = ds_to_sphere (zdom[ndom].rmin, &ptest)) < ds)
+          {
+            ds = x;
+            *ndom_current = ndom;
+            xxxbound = BOUND_RMAX;
+          }
+
+          /* Check if the photon hits the inner or outer windcone */
+
+          if ((x = ds_to_cone (&zdom[ndom].windcone[0], &ptest)) < ds)
+          {
+            ds = x;
+            *ndom_current = ndom;
+            xxxbound = BOUND_INNER_CONE;
+          }
+          if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
+          {
+            ds = x;
+            *ndom_current = ndom;
+            xxxbound = BOUND_OUTER_CONE;
+          }
+        }
+
       }
 
       x = ds_to_cylinder (zdom[ndom].wind_rho_min, &ptest);
@@ -372,12 +378,6 @@ ds_to_wind (pp, ndom_current)
           xxxbound = BOUND_OUTER_RHO;
         }
       }
-
-    }
-    else if (zdom[ndom].wind_type == IMPORT)
-    {
-      Error ("ds_to_wind:Do not know how to deal with this coordinate type\n");
-      Exit (0);
 
     }
 
@@ -451,13 +451,12 @@ return and record an error */
 
   if ((p->grid = n = where_in_grid (wmain[p->grid].ndom, p->x)) < 0)
   {
-    if (translate_in_wind_failure < 1000)
-    {
-//OLD     if (modes.save_photons)
+//OLD    if (translate_in_wind_failure < 1000)
+//OLD    {
 //OLD       {
 //OLD         save_photons (p, "NotInGrid_translate_in_wind");
 //OLD       }
-    }
+//OLD    }
     return (n);                 /* Photon was not in grid */
   }
 
