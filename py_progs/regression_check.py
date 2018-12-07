@@ -225,7 +225,11 @@ def doit(run1='py_180809',run2='',outputfile='check.txt'):
     table1=Table([name1,root1],names=['name','root1'])
     table2=Table([name2,root2],names=['name','root2'])
 
-    combined=join(table1,table2,join_type='left',keys=['name'])
+    try:
+        combined=join(table1,table2,join_type='left',keys=['name'])
+    except ValueError:
+        print('Error: regression_check: run1 %s len %d run2 %s len %d\n' % (run1,len(table1),run2,len(table2)))
+        return
 
     # print(combined)
 

@@ -111,7 +111,11 @@ def sum_errors(root='1d_sn'):
         errors[i]=errors[i].strip()
         words=errors[i].split(' -- ')
         error_names.append(words[1])
-        error_counts.append(int(words[0]))
+        try:
+            error_counts.append(int(words[0]))
+        except ValueError:
+            print('Error:sum_errors: %s in root %s' % (errors[i],root))
+            error_counts.append(-999)
         i+=1
 
     # print(errors)
