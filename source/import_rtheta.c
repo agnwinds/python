@@ -302,7 +302,7 @@ rtheta_make_grid_import (w, ndom)
      * to make sure the rest of the code knows that this cell is to be ignored in
      * this case. Adapted from the code in import_cylindrical */
     if (w[nn].inwind == W_NOT_INWIND || w[nn].inwind == W_PART_INWIND)
-              w[nn].inwind = W_IGNORE;
+      w[nn].inwind = W_IGNORE;
   }
 
   /* Now add information used in zdom */
