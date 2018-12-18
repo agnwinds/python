@@ -309,77 +309,77 @@ ds_to_wind (pp, ndom_current)
         }
 
 
-        else
-        {
-          /* This option is for the normal case of models which are defined
-           * by windcone, e.g KWD, SV
-           */
-
-          /* Check if the photon hits the inner or outer radius of the wind */
-          if ((x = ds_to_sphere (zdom[ndom].rmax, &ptest)) < ds)
-          {
-            ds = x;
-            *ndom_current = ndom;
-            xxxbound = BOUND_RMIN;
-          }
-
-          if ((x = ds_to_sphere (zdom[ndom].rmin, &ptest)) < ds)
-          {
-            ds = x;
-            *ndom_current = ndom;
-            xxxbound = BOUND_RMAX;
-          }
-
-          /* Check if the photon hits the inner or outer windcone */
-
-          if ((x = ds_to_cone (&zdom[ndom].windcone[0], &ptest)) < ds)
-          {
-            ds = x;
-            *ndom_current = ndom;
-            xxxbound = BOUND_INNER_CONE;
-          }
-          if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
-          {
-            ds = x;
-            *ndom_current = ndom;
-            xxxbound = BOUND_OUTER_CONE;
-          }
-        }
-
       }
-
-      x = ds_to_cylinder (zdom[ndom].wind_rho_min, &ptest);
-      if (x > 0 && x < ds)
+      else
       {
-        stuff_phot (pp, &qtest);
-        move_phot (&qtest, x);
-        z = fabs (qtest.x[2]);
-        if (zdom[ndom].zmin <= z && z <= zdom[ndom].zmax)
+        /* This option is for the normal case of models which are defined
+         * by windcone, e.g KWD, SV
+         */
 
+        /* Check if the photon hits the inner or outer radius of the wind */
+        if ((x = ds_to_sphere (zdom[ndom].rmax, &ptest)) < ds)
         {
-
           ds = x;
           *ndom_current = ndom;
-          xxxbound = BOUND_INNER_RHO;
+          xxxbound = BOUND_RMIN;
         }
-      }
 
-      x = ds_to_cylinder (zdom[ndom].wind_rho_max, &ptest);
-      if (x > 0 && x < ds)
-      {
-        stuff_phot (pp, &qtest);
-        move_phot (&qtest, x);
-        z = fabs (qtest.x[2]);
-        if (zdom[ndom].zmin <= z && z <= zdom[ndom].zmax)
+        if ((x = ds_to_sphere (zdom[ndom].rmin, &ptest)) < ds)
         {
-
           ds = x;
           *ndom_current = ndom;
-          xxxbound = BOUND_OUTER_RHO;
+          xxxbound = BOUND_RMAX;
+        }
+
+        /* Check if the photon hits the inner or outer windcone */
+
+        if ((x = ds_to_cone (&zdom[ndom].windcone[0], &ptest)) < ds)
+        {
+          ds = x;
+          *ndom_current = ndom;
+          xxxbound = BOUND_INNER_CONE;
+        }
+        if ((x = ds_to_cone (&zdom[ndom].windcone[1], &ptest)) < ds)
+        {
+          ds = x;
+          *ndom_current = ndom;
+          xxxbound = BOUND_OUTER_CONE;
         }
       }
 
     }
+
+    x = ds_to_cylinder (zdom[ndom].wind_rho_min, &ptest);
+    if (x > 0 && x < ds)
+    {
+      stuff_phot (pp, &qtest);
+      move_phot (&qtest, x);
+      z = fabs (qtest.x[2]);
+      if (zdom[ndom].zmin <= z && z <= zdom[ndom].zmax)
+
+      {
+
+        ds = x;
+        *ndom_current = ndom;
+        xxxbound = BOUND_INNER_RHO;
+      }
+    }
+
+    x = ds_to_cylinder (zdom[ndom].wind_rho_max, &ptest);
+    if (x > 0 && x < ds)
+    {
+      stuff_phot (pp, &qtest);
+      move_phot (&qtest, x);
+      z = fabs (qtest.x[2]);
+      if (zdom[ndom].zmin <= z && z <= zdom[ndom].zmax)
+      {
+
+        ds = x;
+        *ndom_current = ndom;
+        xxxbound = BOUND_OUTER_RHO;
+      }
+    }
+
 
   }
 
