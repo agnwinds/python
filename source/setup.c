@@ -507,7 +507,6 @@ PhotPtr
 init_photons ()
 {
   PhotPtr p;
-  char rdchoice_ans[LINELENGTH];
 
   /* Although Photons_per_cycle is really an integer,
      read in as a double so it is easier for input
@@ -515,39 +514,40 @@ init_photons ()
 
   double nphot = 1e5, min_nphot = 1e5, max_nphot = 1e7;
 
-  strcpy (rdchoice_ans, "yes");
-  ENABLE_PHOT_STEP = rdchoice ("Use_log_photon_step(no,yes)", "0,1", rdchoice_ans);
-
-  if (ENABLE_PHOT_STEP == TRUE)
-  {
-    rddoub ("Min_photons_per_cycle", &min_nphot);
-    rddoub ("Max_photons_per_cycle", &max_nphot);
-    NPHOT = NPHOT_MIN = (int) min_nphot;        // NPHOT is photons/cycle
-    NPHOT_MAX = (int) max_nphot;
-  }
-  else if (ENABLE_PHOT_STEP == FALSE)
-  {
-    rddoub ("Photons_per_cycle", &nphot);
-    NPHOT = (int) nphot;
-  }
-  else
-  {
-    Error ("(%s:%i): Invalid choice %i for Use_log_photon_step(no,yes)\n", __FILE__, __LINE__, ENABLE_PHOT_STEP);
-    Log ("(%s:%i): Valid choices are no=%i yes=%i\n", __FILE__, __LINE__, FALSE, TRUE);
-    Exit (1);
-  }
-
-  if (NPHOT <= 0)               // Check that NPHOT is a sensible number
+  rddoub ("Photons_per_cycle", &nphot); // NPHOT is photons/cycle
+  if ((NPHOT = (int) nphot) <= 0)       // Check that NPHOT is a sensible number
   {
     Error ("%1.2e is invalid choice for NPHOT; NPHOT > 0 required.", (double) NPHOT);
     Exit (1);
   }
 
+  if (modes.photon_speedup)
+  {
+    Log ("Photon logarithmic stepping algorithm enabled\n");
+    if (!PHOT_STEPS)
+    {
+      rddoub ("Min_photons_per_cycle", &min_nphot);
+      rddoub ("Max_photons_per_cycle", &max_nphot);
+    }
+    else
+      min_nphot /= pow (10, PHOT_STEPS);
+
+    NPHOT_MAX = NPHOT;
+    NPHOT = NPHOT_MIN = (int) min_nphot;
+    Log ("NPHOT_MIN %e\n", (double) NPHOT_MIN);
+    Log ("NPHOT_MAX %e\n", (double) NPHOT_MAX);
+  }
+
 #ifdef MPI_ON
   Log ("Photons per cycle per MPI task will be %d\n", NPHOT / np_mpi_global);
   NPHOT /= np_mpi_global;
-  NPHOT_MIN /= np_mpi_global;
-  NPHOT_MAX /= np_mpi_global;
+  if (modes.photon_speedup)
+  {
+    NPHOT_MIN /= np_mpi_global;
+    NPHOT_MAX /= np_mpi_global;
+    Log ("MPI NPHOT_MIN = %e\n", (double) NPHOT_MIN);
+    Log ("MPI NPHOT_MAX = %e\n", (double) NPHOT_MAX);
+  }
 #endif
 
   rdint ("Ionization_cycles", &geo.wcycles);

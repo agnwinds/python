@@ -119,15 +119,9 @@ calculate_ionization (restart_stat)
    * cycle NPHOT will be increased.
    */
 
-  if (ENABLE_PHOT_STEP == TRUE)
+  if (modes.photon_speedup)
   {
-    if (restart_stat)
-    {
-      Error ("Restarting with log_photon_step=yes is not supported yet\n");
-      Exit (1);
-    }
-
-    nphot_steps = (int) log10 ((double) NPHOT_MAX / NPHOT_MIN) + 1;
+    nphot_steps = PHOT_STEPS + 1;
     nphot_next_cycle = nphot_cycle_gap = geo.wcycles / nphot_steps;
     Log ("NPHOT will increase %i times every %i cycles\n", nphot_steps - 1, nphot_cycle_gap);
   }
@@ -158,7 +152,7 @@ calculate_ionization (restart_stat)
     else
       iwind = 1;                /* Create wind photons and force a reinitialization of wind parms */
 
-    if (ENABLE_PHOT_STEP == TRUE && geo.wcycle == nphot_next_cycle)
+    if (modes.photon_speedup && geo.wcycle == nphot_next_cycle)
     {
       /*
        * EP: If photon incrementing is enabled, figure out the number of photons
@@ -196,7 +190,7 @@ calculate_ionization (restart_stat)
       if (!p)
       {
         Error ("Could not reallocate memory for %i photons for p and photmain\n", NPHOT);
-        Exit (2);
+        Exit (0);
       }
 
       nphot_next_cycle += nphot_cycle_gap;

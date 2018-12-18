@@ -89,7 +89,7 @@ double DENSITY_PHOT_MIN;        /* This constant is a minimum density for the pu
 #define DANG_LIVE_OR_DIE   2.0  /* If constructing photons from a live or die run of the code, the
                                    angle over which photons will be accepted must be defined */
 
-int ENABLE_PHOT_STEP;           /* The switch for turning on the photon increase algorithm */
+int PHOT_STEPS;                 /* The switch for turning on the photon increase algorithm */
 int NPHOT_MIN;                  /* The minimum number of photon bundles created per  */
 int NPHOT_MAX;                  /* The maximum number of photon bundles created per cycle */
 int NPHOT;                      /* The number of photon bundles created, defined in setup.c */
@@ -1372,6 +1372,7 @@ struct advanced_modes
   int fixed_temp;               // do not alter temperature from that set in the parameter file
   int zeus_connect;             // We are connecting to zeus, do not seek new temp and output a heating and cooling file
   int rand_seed_usetime;        // default random number seed is fixed, not based on time
+  int photon_speedup;
 }
 modes;
 
