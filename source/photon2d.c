@@ -271,7 +271,7 @@ ds_to_wind (pp, ndom_current)
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
-    if (zdom[ndom].wind_type != IMPORT)
+    if (zdom[ndom].wind_type != IMPORT && zdom[ndom].wind_type != CORONA)
     {
       /* Check if the photon hits the inner or outer radius of the wind */
       if ((x = ds_to_sphere (zdom[ndom].rmax, &ptest)) < ds)
@@ -374,9 +374,9 @@ ds_to_wind (pp, ndom_current)
       }
 
     }
-    else if (zdom[ndom].wind_type == IMPORT)
+    else
     {
-      Error ("ds_to_wind:Do not know how to deal with this coordinate type\n");
+      Error ("ds_to_wind:Do not know how to deal with this combination of coordinate type %d and wind_type %d\n",zdom[ndom].coord_type,zdom[ndom].wind_type);
       Exit (0);
 
     }
