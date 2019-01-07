@@ -198,12 +198,16 @@ spherical_make_grid_import (w, ndom)
     w[n].xcen[0] = w[n].xcen[2] = w[n].rcen * sin (PI / 4.);
   }
 
+  /* Since we assume all of the cells are in the wind in a spherical wind
+   * we can use the standard routine to finish everything off
+   */
+
   spherical_wind_complete (ndom, w);
   return (0);
 }
 
 
-/* The next section calculates velocites.
+/* The next section calculates velocities.
  *
  * One could follow the zeus_hydro approach of getting those velocities from the original grid.
  * but for consistency with the 2d case we get it by interpolating on values in the cells
@@ -219,7 +223,7 @@ spherical_make_grid_import (w, ndom)
  *
  *
  * @param [in] int  ndom   The domain of the imported model
- * @param [in] double *  x   A postion (3d)
+ * @param [in] double *  x   A position (3d)
  * @param [out] double *  v   The velocity at x
  * @return     The speeed at x
  *

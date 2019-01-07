@@ -148,22 +148,27 @@ get_line_transfer_mode ()
     geo.wind_radiation = 0;
   }
 
-
-  /* read in the atomic data */
-  rdstr ("Atomic_data", geo.atomic_filename);
-
-  /* read a variable which controls whether to save a summary of atomic data
-     this is defined in atomic.h, rather than the modes structure */
-
-  if (modes.iadvanced)
+  if (geo.run_type == RUN_TYPE_NEW)
   {
 
-    rdint ("@Diag.write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
-    if (write_atomicdata)
-      Log ("You have opted to save a summary of the atomic data\n");
+
+    /* read in the atomic data */
+    rdstr ("Atomic_data", geo.atomic_filename);
+
+    /* read a variable which controls whether to save a summary of atomic data
+       this is defined in atomic.h, rather than the modes structure */
+
+    if (modes.iadvanced)
+    {
+
+      rdint ("@Diag.write_atomicdata(0=no,anything_else=yes)", &write_atomicdata);
+      if (write_atomicdata)
+        Log ("You have opted to save a summary of the atomic data\n");
+    }
+
+    get_atomic_data (geo.atomic_filename);
   }
 
-  get_atomic_data (geo.atomic_filename);
   return (0);
 }
 

@@ -21,12 +21,14 @@
 
 #include "log.h"
 
+
+
 /**********************************************************/
 /** 
  * @brief      Calculates the total luminosity of an AGN type source
  *
  * @param [in] double  r   radius of emitting object
- * @param [in] double  lum   the luminosity of the AGN (2-10keV) - only used as a dummy parameter for generating models 
+ * @param [in] double  lum   the luminosity of the AGN (2-10keV) - used in the continuum model case 
  * @param [in] double  alpha   the spectral index of the PL source - also sometimes used for a temperature if a BB source is required
  * @param [in] double  freqmin   minimum frequency to integrate over
  * @param [in] double  freqmax   maximum frequency
@@ -42,26 +44,24 @@
  * 
  *
  * ### Notes ###
- * There are some inconsistencies here - lum (the 2-10keV luminosity of the
- * PL source) is supplied but it isn't used apart from in the emittance_continuum
- * where it is used as a dummy - this code requires a temperature and a local gravity
- * but here we use lum and alpha as variables to access some kind of model SED that
- * doesnt use temperature and gravity - clearly needs to be fixed.
- * Another inconsistency is that the bremstrahlung code uses values for T and alpha that
+ * The 2-10keV luminosity of the PL source) is only used in the emittance_continuum
+ * whwere it is used to scale the model luminosity to obtain the required value.
+ * A slight inconsistency is that the bremstrahlung code uses values for T and alpha that
  * are stored in the geo structure, whilst the power law uses data supplied in the code.
  *
  **********************************************************/
 
 double
 agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
-     double r, lum, alpha, freqmin, freqmax, *f;
+     double r, lum, alpha, freqmin, freqmax;
      int ioniz_or_final;
+     double *f;
 {
 
   double t;
-  double emit;
+  double scaling;               //The scaling factor to get from a model to get the correct 2-10keV luminosity
+  double emit, emit_2_10;
   int spectype;
-
 
   if (ioniz_or_final == 1)
     spectype = geo.agn_spectype;        /* type for final spectrum */
@@ -69,13 +69,22 @@ agn_init (r, lum, alpha, freqmin, freqmax, ioniz_or_final, f)
     spectype = geo.agn_ion_spectype;    /*type for ionization calculation */
   if (spectype >= 0)
   {
-    /* This calls models, but the normal stellar atmpspheres models are not really suitable for 
-       an AGN. So when this mode is used, we summply dummy variables in lum and alpha to generate
-       a model SED. Urgent to fix, discussed in issue #301 */
-    emit = emittance_continuum (spectype, freqmin, freqmax, lum, alpha);
-    *f = emit;
+    /* This calls models - we *should* have only one model in this case, so we call the emittance
+       continuum with dummy variables instead of T and g (the trailing 0.0s). */
+    /* First we compute the emittance from 2-10keV to compare with the required 2-10keV luminosity */
+    emit_2_10 = emittance_continuum (spectype, 4.84e17, 2.42e18, 0.0, 0.0);
+    if (emit_2_10 <= 0.0)
+    {
+      Error ("agn_init: Supplied model SED has no power in 2-10keV band - cannot continue\n");
+      exit (0);
+    }
+    scaling = lum / emit_2_10;  //This gives us a scaling factor which can be applied to whatever band we are dealing with
+
+
+    emit = emittance_continuum (spectype, freqmin, freqmax, 0.0, 0.0);  //Compute emittance (luminosity) for the actual band
+    *f = emit * scaling;        //And scale it
   }
-  else if (spectype == SPECTYPE_POW)    //Power law - uses constant computed elsewhere and spectrl index
+  else if (spectype == SPECTYPE_POW)    //Power law - uses constant computed elsewhere and spectral index
   {
     /* Emittance_pow actucally returns the specific luminosity directly */
     emit = emittance_pow (freqmin, freqmax, alpha);
@@ -423,7 +432,7 @@ photo_gen_agn (p, r, alpha, weight, f1, f2, spectype, istart, nphot)
     }
     else
     {
-      p[i].freq = one_continuum (spectype, t, geo.gstar, freqmin, freqmax);     //A continuum (model) photon
+      p[i].freq = one_continuum (spectype, -1., -1., freqmin, freqmax); //A continuum (model) photon - we use t=g=-1 to flag that this is not a normal model
     }
 
     if (p[i].freq < freqmin || freqmax < p[i].freq)     //A check to see that we havent made a photon out of range.

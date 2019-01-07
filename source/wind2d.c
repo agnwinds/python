@@ -252,12 +252,12 @@ define_wind ()
     }
     else if (zdom[ndom].coord_type == SPHERICAL)
     {
-      Log ("Not checking corners_in_wind for SPHERICAL coordinates used in domain %d\n", ndom);
+      Log ("wind2d: Not checking corners_in_wind for SPHERICAL coordinates used in domain %d\n", ndom);
     }
     else if (zdom[ndom].wind_type == IMPORT)
     {
       /* JM 1711 -- we don't want to check corners in the case of an imported model */
-      Log ("Not checking corners_in_wind for imported model, domain %d\n", ndom);
+      Log ("wind2d: Not checking corners_in_wind for imported model, domain %d\n", ndom);
     }
   }
 

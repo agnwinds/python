@@ -376,13 +376,11 @@ cylind_volumes (ndom, w)
       //leading factor of 2 added to allow for volume above and below plane (SSMay04)
       cell_volume = 2 * PI * (rmax * rmax - rmin * rmin) * (zmax - zmin);
 
-      // XXX Why is it necessary to do the check indicated by the if statement.
-      /* JM 1711 -- only try to assign the cell if it has not already been assigned */
       if (w[n].inwind == W_NOT_ASSIGNED)
       {
         if (one_dom->wind_type == IMPORT)
         {
-          Error ("Shouldn't be redefining inwind in cylind_volumes with imported model.\n");
+          Error ("cylind_volumes: Shouldn't be redefining inwind in cylind_volumes with imported model.\n");
           Exit (0);
         }
 
@@ -647,6 +645,7 @@ cylind_get_random_location (n, x)
 
 int
 cylind_extend_density (ndom, w)
+     int ndom;
      WindPtr w;
 {
 

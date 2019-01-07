@@ -15,6 +15,7 @@
 
 #include "atomic.h"
 #include "python.h"
+#include "models.h"
 
 
 /**********************************************************/
@@ -75,6 +76,7 @@ get_stellar_params ()
     get_spectype (geo.star_radiation,
                   //"Rad_type_for_star(0=bb,1=models)_to_make_wind",
                   "Central_object.rad_type_to_make_wind(0=bb,1=models)", &geo.star_ion_spectype);
+
 
     if (geo.star_radiation)
       geo.tstar_init = 40000;
@@ -175,6 +177,15 @@ get_bl_and_agn_params (lstar)
   get_spectype (geo.agn_radiation,
                 "Rad_type_for_agn(0=bb,1=models,3=power_law,4=cloudy_table,5=bremsstrahlung)_to_make_wind", &geo.agn_ion_spectype);
 
+  if (geo.agn_radiation && geo.agn_ion_spectype >= 0 && comp[geo.agn_ion_spectype].nmods != 1)
+  {
+    Error ("get_bl_and_agn_params: When using models with an AGN, there should be exactly 1 model, we have %i for ion cycles\n",
+           comp[geo.agn_ion_spectype].nmods);
+    exit (0);
+  }
+
+
+
   /* 130621 - ksl - This is a kluge to add a power law to stellar systems.  What is done
      is to remove the bl emission, which we always assume to some kind of temperature
      driven source, and replace it with a power law source
@@ -192,7 +203,7 @@ get_bl_and_agn_params (lstar)
   }
   else
   {
-    Log ("Not Trying to make a start with a power law boundary layer %d\n", geo.bl_ion_spectype);
+    Log ("Not trying to make a start with a power law boundary layer %d\n", geo.bl_ion_spectype);
   }
 
 
@@ -231,10 +242,11 @@ get_bl_and_agn_params (lstar)
     /* if we have a "blackbody agn" the luminosity is set by Stefan Boltzmann law
        once the AGN blackbody temp is read in, otherwise set by user */
     if (geo.agn_ion_spectype != SPECTYPE_BB)
+    {
       rddoub ("lum_agn(ergs/s)", &geo.lum_agn);
+      Log ("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
+    }
 
-
-    Log ("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
     if (geo.agn_ion_spectype == SPECTYPE_POW || geo.agn_ion_spectype == SPECTYPE_CL_TAB)
     {
       geo.alpha_agn = (-1.5);
@@ -268,6 +280,7 @@ get_bl_and_agn_params (lstar)
       /* note that alpha_agn holds the temperature in the case of "blackbody agn" */
       rddoub ("AGN.blackbody_temp(K)", &geo.alpha_agn);
       geo.lum_agn = 4 * PI * geo.r_agn * geo.r_agn * STEFAN_BOLTZMANN * pow (geo.alpha_agn, 4.);
+      Log ("OK, the agn lum will be about %.2e the disk lum\n", geo.lum_agn / xbl);
     }
 
     /* JM 1502 -- lines to add a low frequency power law cutoff. accessible

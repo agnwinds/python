@@ -93,7 +93,7 @@ struct
 
 /**********************************************************/
 /**
- * @brief      Read the an arbitray wind model in polar coordinates
+ * @brief      Read the an arbitrary wind model in polar coordinates
  *
  * @param [in] int  ndom   The domain for the imported model
  * @param [in] char *  filename   The file containing the model to import
@@ -106,7 +106,7 @@ struct
  * ### Notes ###
  * The basic data we need to read in are
  *
- * r theta v_x v_y v_z  rho (and optionally T)
+ * icell, jcell, r theta inwind v_x v_y v_z  rho (and optionally T)
  *
  * where
  *
@@ -115,6 +115,8 @@ struct
  * * v_x, v_y, and v_z is the velocity in cartesian coordinates
  * as mearued in the x,z plane
  * * rho is the density in cgs units
+ * * inwind defines whether or not a particular cell is actually
+ * in the wind
  *
  * We assume that all of the variables are centered, that is
  * we are not assuming that we are giving rho at the center of
@@ -290,11 +292,17 @@ rtheta_make_grid_import (w, ndom)
     /* JM 1711 -- copy across the inwind variable to the wind pointer */
     w[nn].inwind = xx_rtheta.inwind[n];
 
-    /* JM 1711 -- you're either in, or you're out. No part in wind cells allowed!
-     *          there is a question here about which choice (of not in wind or all in
-     *                   wind) is most appropriate */
-    if (w[nn].inwind == W_PART_INWIND)
-      w[nn].inwind = W_NOT_INWIND;
+//0LD    /* JM 1711 -- you're either in, or you're out. No part in wind cells allowed!
+//0LD     *          there is a question here about which choice (of not in wind or all in
+//0LD     *                   wind) is most appropriate */
+//0LD    if (w[nn].inwind == W_PART_INWIND)
+//0LD      w[nn].inwind = W_NOT_INWIND;
+
+    /* 1812 - ksl - For imported models, one is either in the wind or not. But we need
+     * to make sure the rest of the code knows that this cell is to be ignored in
+     * this case. Adapted from the code in import_cylindrical */
+    if (w[nn].inwind == W_NOT_INWIND || w[nn].inwind == W_PART_INWIND)
+      w[nn].inwind = W_IGNORE;
   }
 
   /* Now add information used in zdom */

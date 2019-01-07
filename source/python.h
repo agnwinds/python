@@ -213,12 +213,13 @@ typedef struct domain
   /* The next few structures define the boundaries of an emission region */
   struct cone windcone[2];      /* The cones that define the boundary of winds like SV or kwd */
   struct plane windplane[2];    /* Planes which define the top and bottom of a layer */
-  double rho_min, rho_max;      /* These are used for the inneer and outer boundary of a pillbox */
+  double rho_min, rho_max;      /* These are used for the inner and outer boundary of a pillbox */
 
   double wind_x[NDIM_MAX], wind_z[NDIM_MAX];    /* These define the edges of the cells in the x and z directions */
   double wind_midx[NDIM_MAX], wind_midz[NDIM_MAX];      /* These define the midpoints of the cells in the x and z directions */
 
-  ConePtr cones_rtheta;         /*A ptr to the cones that define the theta directions in rtheta coods */
+  ConePtr cones_rtheta;         /*A ptr to the cones that define boundaries of cells in the theta direction 
+                                   when rtheta coords  are being used */
 /* Next two lines are for cyl_var coordinates.  They are used in locating the appropriate 
  * locating the appropriate cell, for example by cylvar_where_in_grid
  */
@@ -232,7 +233,7 @@ typedef struct domain
   /* Generic parameters for the wind */
   double wind_mdot, stellar_wind_mdot;  /* Mass loss rate in disk and stellar wind */
   double rmin, rmax;            /*Spherical extent of the wind */
-  double zmin, zmax;            /* Vertical extent of the wind, often the same as rmas */
+  double zmin, zmax;            /* Vertical extent of the wind, often the same as rmax */
   double wind_rho_min, wind_rho_max;    /*Min/Max rho for wind in disk plane */
   double wind_thetamin, wind_thetamax;  /*Angles defining inner and outer cones of wind, measured from disk plane */
   double mdot_norm;             /*A normalization factor used in SV wind, and Knigge wind */

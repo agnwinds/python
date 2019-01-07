@@ -20,6 +20,7 @@
 #include "models.h"
 
 
+
 //OLD /***********************************************************
 //OLD                                        Space Telescope Science Institute
 //OLD
@@ -119,7 +120,13 @@ one_continuum (spectype, t, g, freqmin, freqmax)
   /* Check if the parameters are the same as the stored ones, otherwise initialise */
   if (old_t != t || old_g != g || old_freqmin != freqmin || old_freqmax != freqmax)
   {                             /* Then we must initialize */
-    if (t != comp[spectype].xmod.par[0] || g != comp[spectype].xmod.par[1])
+    if (comp[spectype].nmods == 1)      //If we only have one model (as is the case of an AGN model SED then dont interpolate
+    {
+      comp[spectype].xmod = mods[comp[spectype].modstart];
+      old_t = t;                //These are dummies, but should prevent unwanted regeneration of the array
+      old_g = g;
+    }
+    else if (t != comp[spectype].xmod.par[0] || g != comp[spectype].xmod.par[1])
     {
       par[0] = t;
       par[1] = g;
@@ -223,7 +230,10 @@ one_continuum (spectype, t, g, freqmin, freqmax)
  *
  * @details
  * The routine gets the band-limited flux per unit area for Hubeny or Kurucz models
- * which are both in units of the Eddingting flux (H)
+ * which are both in units of the Eddington flux (H).
+ * To allow the same code to work with a much simpler model SED, where there is only
+ * one model - there is a switch to disable interpolation. 
+ * The total flux is calculated using Romberg integration
  *
  * ### Notes ###
  *
@@ -245,53 +255,114 @@ one_continuum (spectype, t, g, freqmin, freqmax)
  *
  **********************************************************/
 
+int integ_spectype;             //External variable pointing to the model for our Romburg interpolation.
 
 double
 emittance_continuum (spectype, freqmin, freqmax, t, g)
      int spectype;
      double freqmin, freqmax, t, g;
 {
-  int nwav, n;
-  double w, x, lambdamin, lambdamax;
-  double dlambda;
+  int nwav;
+  double x, lambdamin, lambdamax;
+
+//  double dlambda;
   double par[2];
   int model ();
 
   lambdamin = C / (freqmax * ANGSTROM);
   lambdamax = C / (freqmin * ANGSTROM);
-  par[0] = t;
-  par[1] = g;
-  model (spectype, par);
-  nwav = comp[spectype].nwaves;
+
+  if (comp[spectype].nmods == 1)        //We only have one model - there is no way of interpolating
+  {
+    comp[spectype].xmod = mods[comp[spectype].modstart];        //Set the model to the only one we have
+  }
+  else
+  {
+    par[0] = t;
+    par[1] = g;
+    model (spectype, par);      //Interpolate on the grid to get the model we are going to use
+  }
+  nwav = comp[spectype].nwaves; //The number of points in the model
+
 
   if (lambdamax > comp[spectype].xmod.w[nwav - 1] || lambdamin < comp[spectype].xmod.w[0])
   {
+    printf ("freqmin %e freqmax %e\n", freqmin, freqmax);
+    printf ("emin %e emax %e\n", HEV * freqmin, HEV * freqmax);
 
     Error ("emittance_continum: Requested wavelengths extend beyond models wavelengths for list %s\n", comp[spectype].name);
     Error ("lambda %f %f  model %f %f\n", lambdamin, lambdamax, comp[spectype].xmod.w[0], comp[spectype].xmod.w[nwav - 1]);
 
   }
-  x = 0;
-  for (n = 0; n < nwav; n++)
-  {
-    w = comp[spectype].xmod.w[n];
-    if (n == 0)
-    {
-      dlambda = comp[spectype].xmod.w[1] - comp[spectype].xmod.w[0];
-    }
-    else if (n == nwav - 1)
-    {
-      dlambda = comp[spectype].xmod.w[n] - comp[spectype].xmod.w[n - 1];
-    }
-    else
-    {
-      dlambda = 0.5 * (comp[spectype].xmod.w[n + 1] - comp[spectype].xmod.w[n - 1]);
-    }
-    if (lambdamin < w && w < lambdamax)
-    {
-      x += comp[spectype].xmod.f[n] * dlambda;
-    }
-  }
+
+  //The following lines are the original integration scheme - this is very wrong if only a bit of a model is in a band. 
+  //Using Qromb is more transparent..
+  /*
+     x = 0;
+     for (n = 0; n < nwav; n++)
+     {
+     w = comp[spectype].xmod.w[n];
+     if (n == 0)
+     {
+     dlambda = comp[spectype].xmod.w[1] - comp[spectype].xmod.w[0];
+     }
+     else if (n == nwav - 1)
+     {
+     dlambda = comp[spectype].xmod.w[n] - comp[spectype].xmod.w[n - 1];
+     }
+     else
+     {
+     dlambda = 0.5 * (comp[spectype].xmod.w[n + 1] - comp[spectype].xmod.w[n - 1]);
+     }
+     if (lambdamin < w && w < lambdamax)
+     {
+     x += comp[spectype].xmod.f[n] * dlambda;
+     }
+     }
+   */
+  integ_spectype = spectype;
+  x = qromb (model_int, lambdamin, lambdamax, 1e-4);
+
   x *= 4. * PI;
+
   return (x);
+}
+
+
+
+/**********************************************************/
+/** 
+ * @brief      Compute f_lambda from a model for a given wavelength
+ *
+ * @param [in] double  ;ambda - the wavelength of interest
+ * @return     The flux for a model for a given wavelength
+ *
+ * @details
+ * This is the integrand for the Romburg integration to obtain
+ * the surface flux of a star from a continuum model. It is simply
+ * a case of interpolating on the model, or returning zero if we
+ * request a wavelength outside the model.
+ *
+ * ### Notes ###
+ *
+ * The number of the model we are using is set as an external variable.
+ *
+ *
+ **********************************************************/
+
+
+double
+model_int (lambda)
+     double lambda;
+{
+  double answer;                //The interpolated answer
+  if (lambda < comp[integ_spectype].xmod.w[0])  //Our wavelength is below where we have a model
+    answer = 0.0;               //retuen zero
+  else if (lambda > comp[integ_spectype].xmod.w[comp[integ_spectype].nwaves - 1])       //Our wavelength is above where we have a model
+    answer = 0.0;               //return zero
+  else
+  {
+    linterp (lambda, comp[integ_spectype].xmod.w, comp[integ_spectype].xmod.f, comp[integ_spectype].nwaves, &answer, 1);        //Interpolate (in log space)
+  }
+  return (answer);
 }

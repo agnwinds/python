@@ -1,4 +1,3 @@
-
 /***********************************************************/
 /** @file  import_cylindrical.c
  * @author ksl
@@ -13,15 +12,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
 #include "atomic.h"
 #include "python.h"
-
-
-
 #define LINELEN 512
 #define NCELLS  512
-
 /** The structure that holds the inputs and any subsidiary variables
  *
  * Note that i is the row number nd j is the column number */
@@ -41,7 +35,7 @@ struct
 
 /**********************************************************/
 /**
- * @brief      Read the an arbitray wind model in cylindrical
+ * @brief      Read the an arbitrary wind model in cylindrical
  *     coordinates
  *
  * @param [in] ndom   The domain number for the imported model
@@ -55,13 +49,14 @@ struct
  * ### Notes ###
  * The basic data we need to read in are
  *
- * * i, j, r z  v_x v_y v_z rho (and optionally T)
+ * * i, j, inwind, r z  v_x v_y v_z rho (and optionally T)
  *
  * where v_x,_v_y,v_z are the velocities in the x,z plane
  * and where
  *
  * * i is the column number  (Thus i corresponds to ndim)
  * * j is the row number     (and z coresponds to mdim)
+ * * inwind indicates whether this cell is in the wind
  *
  * We assume that all of the variables are centered, that is
  * we are not assuming that we are giving rho at the center of
@@ -376,7 +371,7 @@ cylindrical_make_grid_import (w, ndom)
 
 /**********************************************************/
 /**
- * @brief      The velocity at any positiion in an imported cylindrical
+ * @brief      The velocity at any position in an imported cylindrical
  * model
  *
  * @param [in] ndom   The domain of the imported model

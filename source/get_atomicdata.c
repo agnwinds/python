@@ -247,7 +247,7 @@ get_atomic_data (masterfile)
   int levl, levu;
   int in, il;                   //The levels used in inner shell data
   double q;
-  double freq, f, exx, lambda, alpha, beta, tm, et, p;
+  double freq, f, exx, et, p;
   double the_ground_frac[20];
   char choice;
   int lineno;                   /* the line number in the file beginning with 1 */

@@ -1093,9 +1093,9 @@ on the assumption that the fb information will be reused.
 /**
  * @brief      Return the recombination coefficient
  *
- * @param [in, out] double  t   The temperature
- * @param [in, out] int  nion   The ion of interest
- * @param [in, out] int  mode   A switch to choose normal (OUTER_SHELL) or inner shell (INNER_SHELL) recombiantion
+ * @param [in] double  t   The temperature
+ * @param [in] int  nion   The ion of interest
+ * @param [in] int  mode   A switch to choose normal (OUTER_SHELL) or inner shell (INNER_SHELL) recombination
  * @return     The recombination coefficient
  *
  * @details
@@ -1112,14 +1112,14 @@ get_nrecomb (t, nion, mode)
      int mode;
 {
   int linterp ();
-  double x;
+  double x = -99.;
   if (mode == OUTER_SHELL)
     linterp (t, fb_t, xnrecomb[nion], NTEMPS, &x, 0);   //Interpolate in linear space
   else if (mode == INNER_SHELL)
     linterp (t, fb_t, xninnerrecomb[nion], NTEMPS, &x, 0);      //Interpolate in linear space
   else
   {
-    Error ("Get_nrecomb - unkonwn mode %i", mode);
+    Error ("Get_nrecomb: Unkonwn mode/type %i of recombination coefficient", mode);
     Exit (0);
   }
   return (x);
@@ -1136,8 +1136,10 @@ get_nrecomb (t, nion, mode)
  * @param [in] int  nion   The ion of interest
  * @param [in] int  narray   The number of the array calculated for a particular frequency range
  * @param [in] int  fb_choice   A switch used only in the case of normal recombination
- * @param [in] int  mode   A switch which indicates whether one is interested in normal (OUTER_SHELL) or innershell (INNER_SHELL)  recombination
- * @return     The program generally returns an emissivity or a cooling rate, and the choices are determined by the
+ * @param [in] int  mode   A switch which indicates whether one is interested 
+ * in normal (OUTER_SHELL) or innershell (INNER_SHELL)  recombination
+ * @return     The program generally returns an emissivity or a cooling rate, 
+ * and the choices are determined by the
  * combination of fb_choice and mode
  *
  * if the mode is set for normal recombiantion, then the possiblities are:
@@ -1148,8 +1150,10 @@ get_nrecomb (t, nion, mode)
  *
  *
  * @details
- * In an effort to save time, information needed to calculate free-bound emissivities and cooling are calculated when
- * a freqency interval is defined, and this routine is used to retrieve these values.  The fb structures are populated by init_freebound
+ * In an effort to save time, information needed to calculate free-bound 
+ * emissivities and cooling are calculated when
+ * a freqency interval is defined, and this routine is used to retrieve 
+ * these values.  The fb structures are populated by init_freebound
  *
  *
  * ### Notes ###
@@ -1165,7 +1169,7 @@ get_fb (t, nion, narray, fb_choice, mode)
      int mode;
 {
   int linterp ();
-  double x;
+  double x = -99.;
   if (mode == OUTER_SHELL)
   {
     if (fb_choice == FB_REDUCED)

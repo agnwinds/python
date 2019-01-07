@@ -170,7 +170,7 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
       else
       {
         Error ("ion_summary : Unknown switch %d \n", iswitch);
-        Exit (0);
+        exit (0);
       }
     }
   }
@@ -206,7 +206,7 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
         else
         {
           Error ("ion_summary : Unknown switch %d \n", iswitch);
-          Exit (0);
+          exit (0);
         }
 
 
@@ -229,7 +229,7 @@ ion_summary (w, element, istate, iswitch, rootname, ochoice)
     else
     {
       Error ("ion_summary : Unknown switch %d \n", iswitch);
-      Exit (0);
+      exit (0);
     }
 
     strcat (choice, ele[nelem].name);
@@ -425,7 +425,7 @@ line_summary (w, rootname, ochoice)
     break;
   default:
     Error ("line_summary: Not a valid line.");
-    Exit (0);
+    exit (0);
 
   }
 
@@ -446,7 +446,7 @@ line_summary (w, rootname, ochoice)
     if (nline == nlines)
     {
       Error ("line_summary: Could not find line in linelist\n");
-      Exit (0);
+      exit (0);
     }
     nelem = 0;
     while (nelem < nelements && ele[nelem].z != element)
@@ -491,7 +491,7 @@ line_summary (w, rootname, ochoice)
     if (nline == nlines)
     {
       Error ("line_summary: Could not find line in linelist\n");
-      Exit (0);
+      exit (0);
     }
   }
 
@@ -616,6 +616,7 @@ int
 total_emission_summary (w, rootname, ochoice)
      WindPtr w;
      char rootname[];
+     int ochoice;
 {
   double tot;
   int n;
@@ -671,6 +672,7 @@ int
 modify_te (w, rootname, ochoice)
      WindPtr w;
      char rootname[];
+     int ochoice;
 {
   int n;
   double x;
@@ -823,7 +825,7 @@ collision_summary (w, rootname, ochoice)
   int nline, int_te;
   double t_e, qup, qdown, A, wavelength;
   char filename[LINELENGTH], suffix[LINELENGTH];
-  FILE *fopen (), *fptr;
+  FILE *fopen (), *fptr = NULL;
 
   t_e = 10000.0;
 
