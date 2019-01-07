@@ -149,19 +149,16 @@ parse_command_line (argc, argv)
       }
       else if (strcmp (argv[i], "-p") == 0)
       {
+        Log ("Logarithmic photon stepping enabled\n");
         modes.photon_speedup = 1;
 
         if (i + 1 >= argc || sscanf (argv[i + 1], "%i", &PHOT_STEPS) != 1)
         {
-          Error ("Expected integer number of steps after -p\n");
-          exit (0);
+          PHOT_STEPS = 0;
+          i++;
         }
         i++;
         j = i;
-
-        Log ("-- Use with caution! --\n");
-        Log ("Logarithmic photon stepping enabled\n");
-        Log ("-- Use with caution! --\n");
       }
       else if (strcmp (argv[i], "--dry-run") == 0)
       {
