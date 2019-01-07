@@ -66,6 +66,10 @@ calculate_ionization (restart_stat)
   double freqmin, freqmax;
   long nphot_to_define;
   int iwind;
+
+  int nphot_steps = 0, nphot_next_cycle = geo.wcycles;
+  int nphot_cycle_gap = geo.wcycles;
+
 #ifdef MPI_ON
   int ioniz_spec_helpers;
 #endif
@@ -124,6 +128,17 @@ calculate_ionization (restart_stat)
     delay_dump_prep (restart_stat);
   }
 
+  /*
+   * EP: if the photon increment speed up is being used, figure out at which
+   * cycle NPHOT will be increased.
+   */
+
+  if (modes.photon_speedup)
+  {
+    nphot_steps = PHOT_STEPS + 1;
+    nphot_next_cycle = nphot_cycle_gap = geo.wcycles / nphot_steps;
+    Log ("NPHOT will increase %i times every %i cycles\n", nphot_steps - 1, nphot_cycle_gap);
+  }
 
 
   while (geo.wcycle < geo.wcycles)
@@ -152,13 +167,60 @@ calculate_ionization (restart_stat)
     else
       iwind = 1;                /* Create wind photons and force a reinitialization of wind parms */
 
+    if (modes.photon_speedup && geo.wcycle == nphot_next_cycle)
+    {
+      /*
+       * EP: If photon incrementing is enabled, figure out the number of photons
+       * to use. When in multiprocessor mode, there is a bit of messing about with
+       * multiplying and division to ensure that NPHOT is set correctly across
+       * all processes for an arbitrary number of MPI processes. Previously,
+       * NPHOT would be increased incorrectly by a value of 10 / np_mpi_global
+       * leading to less photons than we wanted
+       */
+
+#ifdef MPI_ON
+      NPHOT *= np_mpi_global;
+#endif
+      NPHOT *= 10;
+#ifdef MPI_ON
+      NPHOT /= np_mpi_global;
+#endif
+
+      /*
+       * EP: we don't want NPHOT to become larger than NPHOT_MAX, which can
+       * happen with some values of ionisation cycles and values of NPHOT_MIN
+       * and NPHOT_MAX
+       */
+
+      if (NPHOT > NPHOT_MAX)
+        NPHOT = NPHOT_MAX;
+
+      /*
+       * EP: both p and photmain realloc'd otherwise photmain would end
+       * up not pointing to anything and segfault in make_spectra()
+       */
+
+      p = photmain = (PhotPtr) realloc (photmain, sizeof (p_dummy) * NPHOT);
+
+      if (!p)
+      {
+        Error ("Could not reallocate memory for %i photons for p and photmain\n", NPHOT);
+        Exit (0);
+      }
+
+      nphot_next_cycle += nphot_cycle_gap;
+
+      if (NPHOT * 10 <= NPHOT_MAX)
+        Log ("NPHOT will next increase to %e on cycle %i\n", (double) NPHOT * 10, nphot_next_cycle);
+    }
+
+    Log ("NPHOT: %1.2e photons will be transported for CYCLE %i\n", (double) NPHOT, geo.wcycle);
 
     /* Create the photons that need to be transported through the wind
      *
      * NPHOT is the number of photon bundles which will equal the luminosity; 
      * 0 => for ionization calculation 
      */
-
 
     nphot_to_define = (long) NPHOT;
 
@@ -214,7 +276,9 @@ calculate_ionization (restart_stat)
     {
       zzz += p[nn].w;
       if (p[nn].istat == P_ESCAPE)
+      {
         zze += p[nn].w;
+      }
       else if (p[nn].istat == P_ADIABATIC)
       {
         zz_adiab += p[nn].w;
@@ -295,7 +359,7 @@ calculate_ionization (restart_stat)
 
     Log ("!!python: Number of ionizing photons %g lum of ionizing photons %g\n", geo.n_ioniz, geo.cool_tot_ioniz);
 
-/* This step should be MPI_parallelised too */
+/* This step should be MPI_parallelised too - EP: It looks like this is, infact, parallelised */
 
     wind_update (w);
 

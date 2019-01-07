@@ -508,30 +508,56 @@ PhotPtr
 init_photons ()
 {
   PhotPtr p;
-  double x;
 
   /* Although Photons_per_cycle is really an integer,
-     read in as a double so it is easier for input */
+     read in as a double so it is easier for input
+     (in scientific notation) */
 
-  x = 100000;
-  rddoub ("Photons_per_cycle", &x);
-  NPHOT = x;                    // NPHOT is photons/cycle
+  double nphot = 1e5, min_nphot = 1e5, max_nphot = 1e7;
+
+  rddoub ("Photons_per_cycle", &nphot); // NPHOT is photons/cycle
+  if ((NPHOT = (int) nphot) <= 0)
+  {
+    Error ("%1.2e is invalid choice for NPHOT; NPHOT > 0 required.", (double) NPHOT);
+    Exit (1);
+  }
+
+  if (modes.photon_speedup)
+  {
+    Log ("Photon logarithmic stepping algorithm enabled\n");
+    if (!PHOT_STEPS)
+    {
+      rddoub ("Min_photons_per_cycle", &min_nphot);
+      rddoub ("Max_photons_per_cycle", &max_nphot);
+    }
+    else
+      min_nphot /= pow (10, PHOT_STEPS);
+
+    NPHOT_MAX = NPHOT;
+    NPHOT = NPHOT_MIN = (int) min_nphot;
+    Log ("NPHOT_MIN %e\n", (double) NPHOT_MIN);
+    Log ("NPHOT_MAX %e\n", (double) NPHOT_MAX);
+  }
 
 #ifdef MPI_ON
   Log ("Photons per cycle per MPI task will be %d\n", NPHOT / np_mpi_global);
-
   NPHOT /= np_mpi_global;
+  if (modes.photon_speedup)
+  {
+    NPHOT_MIN /= np_mpi_global;
+    NPHOT_MAX /= np_mpi_global;
+    Log ("MPI NPHOT_MIN = %e\n", (double) NPHOT_MIN);
+    Log ("MPI NPHOT_MAX = %e\n", (double) NPHOT_MAX);
+  }
 #endif
 
   rdint ("Ionization_cycles", &geo.wcycles);
-
   rdint ("Spectrum_cycles", &geo.pcycles);
-
 
   if (geo.wcycles == 0 && geo.pcycles == 0)
   {
     Log ("Both ionization and spectral cycles are set to 0; There is nothing to do so exiting\n");
-    Exit (0);                   //There is really nothing to do!
+    Exit (1);                   //There is really nothing to do!
   }
 
   /* Allocate the memory for the photon structure now that NPHOT is established */
@@ -552,7 +578,6 @@ init_photons ()
     if ((NPHOT * sizeof (p_dummy)) > 1e9)
       Error ("Over 1 GIGABYTE of photon structure allocated. Could cause serious problems.\n");
   }
-
 
   return (p);
 }
