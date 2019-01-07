@@ -516,7 +516,7 @@ init_photons ()
   double nphot = 1e5, min_nphot = 1e5, max_nphot = 1e7;
 
   rddoub ("Photons_per_cycle", &nphot); // NPHOT is photons/cycle
-  if ((NPHOT = (int) nphot) <= 0)       // Check that NPHOT is a sensible number
+  if ((NPHOT = (int) nphot) <= 0)
   {
     Error ("%1.2e is invalid choice for NPHOT; NPHOT > 0 required.", (double) NPHOT);
     Exit (1);
