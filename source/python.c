@@ -344,6 +344,8 @@ main (argc, argv)
 
   /* Parse the command line. Get the root. create files.diagfolder + diagfiles */
 
+  strict = 0;
+
   restart_stat = parse_command_line (argc, argv);
 
   /* If the restart flag has been set, we check to see if a windsave file exists.  If it doues we will
@@ -720,7 +722,14 @@ main (argc, argv)
   if (modes.quit_after_inputs)
   {
     Log ("This was was run with the -i or --dry-run flag set, so quitting now inputs have been gathered.\n");
-    Exit (0);
+    exit (0);
+  }
+
+
+  if (strict)
+  {
+    Log ("Some of the input have not been updated for the current version of Python.  Please correct and rerun\n");
+    exit (0);
   }
 
   /* INPUTS ARE FINALLY COMPLETE */
