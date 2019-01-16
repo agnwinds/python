@@ -24,8 +24,7 @@ Boundary_layer.radiation(yes,no)                   no
 Wind_radiation(yes,no)                          yes
 Wind.number_of_components                  1
 Wind_type(SV,star,hydro,corona,kwd,homologous,yso,shell,imported)                   sv
-
-Wind.coord_system(spherical,cylindrical,polar,cyl_var)                  polar
+Wind.coord_system(spherical,cylindrical,polar,cyl_var)                polar
 Wind.dim.in.x_or_r.direction               30
 Wind.dim.in.z_or_theta.direction           30
 
@@ -78,7 +77,8 @@ Spectrum.live_or_die(live.or.die,extract)              extract
 Spectrum.type(flambda,fnu,basic)              flambda
 
 ### Parameters for Reverberation Modeling (if needed)
-Reverb.type(0=off,1=photon,2=wind,3=matom)   0
+
+Reverb.type(none,photon,wind,matom)                none  
 
 ### Other parameters
 Photon_sampling.approach(T_star,cv,yso,AGN,min_max_freq,user_bands,cloudy_test,wide,logarithmic)                   cv
