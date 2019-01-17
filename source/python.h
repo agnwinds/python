@@ -118,6 +118,7 @@ int CURRENT_PHOT;               /* A diagnostic so that one can always determine
 #define SPECTYPE_CL_TAB  -5
 #define SPECTYPE_BREM    -6
 #define SPECTYPE_NONE	 -3
+#define SPECTYPE_MODEL	 -99  // This is just used briefly, before a model number is assigned
 
 /* Number of model_lists that one can have, should be the same as NCOMPS in models.h */
 #define NCOMPS 	10
@@ -1440,3 +1441,26 @@ files;
 #define BOUND_OUTER_RHO 8
 
 int xxxbound;
+
+
+/* Structures associated with rdchoice.  This 
+ * shtructure is required only in cases where one 
+ * wants to use rdchoice multiple times with different
+ * options.  But it can, or course be used for 
+ * any such call.  It allows one to assoicated
+ * a input word with an output value, using the routine
+ * get_choices.  There needs to be one structure
+ * for each input variable.  At present, this is only
+ * used for the selection of spec_types
+ */
+
+
+
+typedef struct  rdpar_choices {
+    char choices[10][LINELENGTH];
+   int  vals[10];
+   int  n;
+} dummy_choices, *ChoicePtr; 
+
+struct rdpar_choices zz_spec;
+

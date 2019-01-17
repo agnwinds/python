@@ -85,12 +85,12 @@ get_meta_params (void)
   char answer[LINELENGTH];
 
   rdpar_comment ("Parameters for Reverberation Modeling (if needed)");
-  
+
   //OLD meta_param = 0;               // initialize to no reverberation tracking
   //OLD rdint ("Reverb.type(0=off,1=photon,2=wind,3=matom)", &meta_param);
 
-  strcpy(answer,"off");
-  meta_param=rdchoice("Reverb.type(none,photon,wind,matom)","0,1,2,3",answer);
+  strcpy (answer, "off");
+  meta_param = rdchoice ("Reverb.type(none,photon,wind,matom)", "0,1,2,3", answer);
 
   switch (meta_param)
   {                             //Read in reverb tyoe, if any
