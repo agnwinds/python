@@ -152,6 +152,7 @@ main (argc, argv)
   char windradfile[LINELENGTH], windsavefile[LINELENGTH];
   char parameter_file[LINELENGTH];
   char photfile[LINELENGTH];
+  char *fgets_result;
   double freq;
   int interactive;
 
@@ -172,7 +173,7 @@ main (argc, argv)
   if (argc == 1)
   {
     printf ("Root for wind file :");
-    fgets (input, LINELENGTH, stdin);
+    fgets_result = fgets (input, LINELENGTH, stdin);
     get_root (root, input);
   }
   else
@@ -624,7 +625,7 @@ one_choice (choice, root, ochoice)
     grid_summary (wmain, root, ochoice);        //
     break;
   case '&':
-    collision_summary (wmain, root, ochoice);        //
+    collision_summary (wmain, root, ochoice);   //
     break;
   case '*':
     shock_heating_summary (wmain, root, ochoice);       
@@ -666,7 +667,7 @@ one_choice (choice, root, ochoice)
  *
  **********************************************************/
 
-int
+void
 py_wind_help ()
 {
 

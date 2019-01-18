@@ -329,7 +329,7 @@ get_matom_f (mode)
                 if (nres > NLINES + nphot_total)
                 {
                   Error ("Problem in get_matom_f (1). Abort. \n");
-                  exit (0);
+                  Exit (0);
                 }
 
                 ppp.nres = nres;
@@ -337,7 +337,7 @@ get_matom_f (mode)
                 ppp.w = 0;
                 /* this needs to be initialised because we set to istat to P_ADIABATIC
                    for adiabatic destruction */
-                ppp.istat = P_INWIND; 
+                ppp.istat = P_INWIND;
 
                 macro_gov (&ppp, &nres, 1, &which_out);
 
@@ -372,7 +372,7 @@ get_matom_f (mode)
                   if (nres < 0)
                   {
                     Error ("Negative out from matom?? Abort.\n");
-                    exit (0);
+                    Exit (0);
                   }
 
                   /* It was a macro atom de-activation. */
@@ -393,7 +393,7 @@ get_matom_f (mode)
                 else
                 {
                   Error ("Packet didn't emerge from matom or kpkt??? Abort. \n");
-                  exit (0);
+                  Exit (0);
                 }
               }
             }
@@ -623,6 +623,7 @@ photo_gen_kpkt (p, weight, photstart, nphot)
 
     p[n].freq = pp.freq;
     p[n].nres = nres;
+    p[n].w = pp.w;
 
     /* The photon frequency is now known. */
 
@@ -738,8 +739,8 @@ photo_gen_matom (p, weight, photstart, nphot)
   {
     /* locate the wind_cell in which the photon bundle originates. And also decide which of the macro
        atom levels will be sampled (identify that level as "upper"). */
-    xlum = random_number(0.0,1.0) * geo.f_matom;
-	
+    xlum = random_number (0.0, 1.0) * geo.f_matom;
+
 
     xlumsum = 0;
     icell = 0;

@@ -105,7 +105,7 @@ xsignal (char *root, char *format, ...)
     if ((sptr = fopen (filename, "a")) == NULL)
     {
       Error ("xsignal: Could not even open signal file %s\n", filename);
-      exit (0);
+      Exit (0);
     }
 
     /* Now generate the message */
@@ -180,9 +180,9 @@ xsignal_rm (char *root)
     /* first check if the file exists */
 
     if ((tmp_ptr = fopen (filename, "r")) == NULL)
-          {
-              return(0);
-          }
+    {
+      return (0);
+    }
 
 
     strcpy (command, "rm ");
@@ -265,7 +265,7 @@ check_time (char *root)
   {
     error_summary ("Time allowed has expired expired\n");
     xsignal (root, "COMMENT max_time %.1f exceeded\n", max_time);
-    exit (0);
+    Exit (0);
   };
 
   return (0);

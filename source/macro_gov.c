@@ -141,6 +141,10 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
       else if (*nres > NLINES && (phot_top[*nres - NLINES - 1].macro_info == 0 || geo.macro_simple == 1))
         /* This is a bf continuum but we don't want the full macro atom treatment. */
       {
+#if BF_SIMPLE_EMISSIVITY_APPROACH
+        Error ("Macro_go: Error - trying to access fake_matom_bf in alternate bf treatment.\n");
+        Exit (0);
+#endif
         fake_matom_bf (p, nres, &escape);
       }
 
@@ -168,7 +172,7 @@ macro_gov (p, nres, matom_or_kpkt, which_out)
     else
     {
       Error ("macro_gov: Unknown choice for next action. Abort.\n");
-      exit (0);
+      Exit (0);
     }
   }
 
@@ -234,6 +238,7 @@ macro_pops (xplasma, xne)
   int index_bbu, index_bbd, index_bfu, index_bfd;
   int lower, upper;
   double this_ion_density, level_population;
+  double ionden_temp;
   double inversion_test;
   double q_ioniz (), q_recomb ();
   double *a_data, *b_data;
@@ -584,8 +589,6 @@ macro_pops (xplasma, xne)
            populations and write them to one->density[nion]. The level populations
            are to be put in "levden". */
         insane = 0;
-
-
         nn = 0;
         mm = 0;
         for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
@@ -599,37 +602,26 @@ macro_pops (xplasma, xne)
             nn++;
           }
 
-          /* Write the level populations to the
-             levden array. These are fractional level populations within an ion. */
+          /* Check the sanity and positivity of the ion densities */
+          ionden_temp = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
 
-          for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
+          if (sane_check (ionden_temp) || ionden_temp < 0.0)
           {
-
-            xplasma->levden[config[index_lvl].nden] = populations[conf_to_matrix[index_lvl]] / this_ion_density;
-
-            if (xplasma->levden[config[index_lvl].nden] < 0.0 || sane_check (xplasma->levden[config[index_lvl].nden]))
-            {
-              Error ("macro_pops: level %i has frac. pop. %8.4e in cell %i\n",
-                     index_lvl, xplasma->levden[config[index_lvl].nden], xplasma->nplasma);
-              insane = 1;
-            }
-
-
-            mm++;
-
-          }
-
-          xplasma->density[index_ion] = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
-
-          if (sane_check (xplasma->density[index_ion]) || xplasma->density[index_ion] < 0.0)
-          {
-            Error ("macro_pops: ion %i has frac. pop. %8.4e in cell %i\n", index_ion, xplasma->density[index_ion], xplasma->nplasma);
+            Error ("macro_pops: ion %i has calculated frac. pop. %8.4e in cell %i\n", index_ion, ionden_temp, xplasma->nplasma);
             insane = 1;
           }
 
-
-
-
+          /* Check the sanity and positivity of the level populations */
+          for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte; index_lvl++)
+          {
+            if (populations[conf_to_matrix[index_lvl]] < 0.0 || sane_check (populations[conf_to_matrix[index_lvl]]))
+            {
+              Error ("macro_pops: level %i has calculated pop. %8.4e in cell %i\n",
+                     index_lvl, populations[conf_to_matrix[index_lvl]], xplasma->nplasma);
+              insane = 1;
+            }
+            mm++;
+          }
         }
 
         /* if the variable insane has been set to 1 then that means we had either a negative or
@@ -641,9 +633,41 @@ macro_pops (xplasma, xne)
           get_dilute_estimators (xplasma);
         }
         /* if we didn't set insane to 1 then we have a realistic set of populations, so set sane_populations to 1 to break
-           the while loop */
+           the while loop, and copy the populations into the arrays */
         else
+        {
           sane_populations = 1;
+          for (index_ion = ele[index_element].firstion; index_ion < (ele[index_element].firstion + ele[index_element].nions); index_ion++)
+          {
+            this_ion_density = 0.0;
+            for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte;
+                 index_lvl++)
+            {
+              this_ion_density += populations[conf_to_matrix[index_lvl]];
+              nn++;
+            }
+
+            xplasma->density[index_ion] = this_ion_density * ele[index_element].abun * xplasma->rho * rho2nh;
+
+            /* JM Nov 18 -- to maintain consistency with the higher level routines, 
+               only allow density to drop to DENSITY_MIN */
+            if (xplasma->density[index_ion] < DENSITY_MIN)
+            {
+              xplasma->density[index_ion] = DENSITY_MIN;
+            }
+
+            /* Check the sanity and positivity of the level populations */
+            for (index_lvl = ion[index_ion].first_nlte_level; index_lvl < ion[index_ion].first_nlte_level + ion[index_ion].nlte;
+                 index_lvl++)
+            {
+              /* JM Nov 18 -- if statement to prevent nan in fractional populations */
+              if (this_ion_density <= DENSITY_MIN || populations[conf_to_matrix[index_lvl]] <= DENSITY_MIN)
+                xplasma->levden[config[index_lvl].nden] = DENSITY_MIN;
+              else
+                xplasma->levden[config[index_lvl].nden] = populations[conf_to_matrix[index_lvl]] / this_ion_density;
+            }
+          }
+        }
 
       }                         // end of while sane loop
 

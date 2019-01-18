@@ -60,7 +60,7 @@ wind_save (filename)
   if ((fptr = fopen (filename, "w")) == NULL)
   {
     Error ("wind_save: Unable to open %s\n", filename);
-    exit (0);
+    Exit (0);
   }
 
   sprintf (line, "Version %s\n", VERSION);
@@ -80,11 +80,6 @@ in the plasma structure */
     n += fwrite (plasmamain[m].density, sizeof (double), nions, fptr);
     n += fwrite (plasmamain[m].partition, sizeof (double), nions, fptr);
 
-    n += fwrite (plasmamain[m].PWdenom, sizeof (double), nions, fptr);
-    n += fwrite (plasmamain[m].PWdtemp, sizeof (double), nions, fptr);
-    n += fwrite (plasmamain[m].PWnumer, sizeof (double), nions, fptr);
-    n += fwrite (plasmamain[m].PWntemp, sizeof (double), nions, fptr);
-
     n += fwrite (plasmamain[m].ioniz, sizeof (double), nions, fptr);
     n += fwrite (plasmamain[m].recomb, sizeof (double), nions, fptr);
     n += fwrite (plasmamain[m].inner_recomb, sizeof (double), nions, fptr);
@@ -101,6 +96,7 @@ in the plasma structure */
 
     n += fwrite (plasmamain[m].levden, sizeof (double), nlte_levels, fptr);
     n += fwrite (plasmamain[m].recomb_simple, sizeof (double), nphot_total, fptr);
+    n += fwrite (plasmamain[m].recomb_simple_upweight, sizeof (double), nphot_total, fptr);
     n += fwrite (plasmamain[m].kbf_use, sizeof (double), nphot_total, fptr);
   }
 
@@ -132,9 +128,9 @@ in the plasma structure */
 
   fclose (fptr);
 
-  //Log
-  //  ("wind_write sizes: NPLASMA %d size_Jbar_est %d size_gamma_est %d size_alpha_est %d nlevels_macro %d\n",
-  //   NPLASMA, size_Jbar_est, size_gamma_est, size_alpha_est, nlevels_macro);
+  Log_silent
+    ("wind_write sizes: NPLASMA %d size_Jbar_est %d size_gamma_est %d size_alpha_est %d nlevels_macro %d\n",
+     NPLASMA, size_Jbar_est, size_gamma_est, size_alpha_est, nlevels_macro);
 
   return (n);
 
@@ -242,11 +238,6 @@ wind_read (filename)
     n += fread (plasmamain[m].density, sizeof (double), nions, fptr);
     n += fread (plasmamain[m].partition, sizeof (double), nions, fptr);
 
-    n += fread (plasmamain[m].PWdenom, sizeof (double), nions, fptr);
-    n += fread (plasmamain[m].PWdtemp, sizeof (double), nions, fptr);
-    n += fread (plasmamain[m].PWnumer, sizeof (double), nions, fptr);
-    n += fread (plasmamain[m].PWntemp, sizeof (double), nions, fptr);
-
     n += fread (plasmamain[m].ioniz, sizeof (double), nions, fptr);
     n += fread (plasmamain[m].recomb, sizeof (double), nions, fptr);
     n += fread (plasmamain[m].inner_recomb, sizeof (double), nions, fptr);
@@ -261,6 +252,7 @@ wind_read (filename)
 
     n += fread (plasmamain[m].levden, sizeof (double), nlte_levels, fptr);
     n += fread (plasmamain[m].recomb_simple, sizeof (double), nphot_total, fptr);
+    n += fread (plasmamain[m].recomb_simple_upweight, sizeof (double), nphot_total, fptr);
     n += fread (plasmamain[m].kbf_use, sizeof (double), nphot_total, fptr);
   }
 
@@ -336,13 +328,13 @@ wind_read (filename)
 
 int
 wind_complete (w)
-    WindPtr w;
+     WindPtr w;
 {
   int ndom;
 
   /* JM Loop over number of domains */
 
-  printf ("geo.ndomain %d\n", geo.ndomain);
+  //OLD printf ("geo.ndomain %d\n", geo.ndomain);
 
   for (ndom = 0; ndom < geo.ndomain; ndom++)
   {
@@ -365,7 +357,7 @@ wind_complete (w)
     else
     {
       Error ("wind_complete: Don't know how to complete coord_type %d\n", zdom[ndom].coord_type);
-      exit (0);
+      Exit (0);
     }
 
   }
@@ -400,7 +392,7 @@ spec_save (filename)
   if ((fptr = fopen (filename, "w")) == NULL)
   {
     Error ("spec_save: Unable to open %s\n", filename);
-    exit (0);
+    Exit (0);
   }
 
   sprintf (line, "Version %s  nspectra %d\n", VERSION, nspectra);
@@ -447,7 +439,7 @@ spec_read (filename)
   if ((fptr = fopen (filename, "r")) == NULL)
   {
     Error ("spec_read: Unable to open %s\n", filename);
-    exit (0);
+    Exit (0);
   }
 
   n = fread (line, sizeof (line), 1, fptr);
@@ -462,7 +454,7 @@ spec_read (filename)
   if (xxspec == NULL)
   {
     Error ("spectrum_init: Could not allocate memory for %d spectra with %d wavelengths\n", nspectra, NWAVE);
-    exit (0);
+    Exit (0);
   }
 
 /* Now read the rest of the file */
