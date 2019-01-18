@@ -95,7 +95,7 @@ define_phot (p, f1, f2, nphot_tot, ioniz_or_final, iwind, freq_sampling)
 
     if (f1 != f1_old || f2 != f2_old || iwind != iwind_old)
     {                           // The reinitialization is required
-      xdefine_phot (f1, f2, ioniz_or_final, iwind, PRINT_ON);
+      xdefine_phot (f1, f2, ioniz_or_final, iwind, PRINT_ON, 1.0);
     }
     /* The weight of each photon is designed so that all of the photons add up to the
        luminosity of the photosphere.  This implies that photons must be generated in such
